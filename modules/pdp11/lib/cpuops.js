@@ -831,7 +831,7 @@ PDP11.opBPL = function(opCode)
  */
 PDP11.opBPT = function(opCode)
 {
-    this.trap(PDP11.TRAP.BPT, 0, PDP11.REASON.TRAP);
+    this.trap(PDP11.TRAP.BPT, 0, PDP11.REASON.OPCODE);
     this.nStepCycles -= (4 + 1);
 };
 
@@ -1105,7 +1105,7 @@ PDP11.opDIV = function(opCode)
  */
 PDP11.opEMT = function(opCode)
 {
-    this.trap(PDP11.TRAP.EMT, 0, PDP11.REASON.TRAP);
+    this.trap(PDP11.TRAP.EMT, 0, PDP11.REASON.OPCODE);
     this.nStepCycles -= (22 + 3);
 };
 
@@ -1119,7 +1119,7 @@ PDP11.opHALT = function(opCode)
 {
     if (this.regPSW & PDP11.PSW.CMODE) {
         this.regErr |= PDP11.CPUERR.BADHALT;
-        this.trap(PDP11.TRAP.BUS_ERROR, 0, PDP11.REASON.HALT);
+        this.trap(PDP11.TRAP.BUS, 0, PDP11.REASON.HALT);
     } else {
         if (this.panel) {
             this.panel.setData(this.regsGen[0], true);
@@ -1178,7 +1178,7 @@ PDP11.opINCB = function(opCode)
  */
 PDP11.opIOT = function(opCode)
 {
-    this.trap(PDP11.TRAP.IOT, 0, PDP11.REASON.TRAP);
+    this.trap(PDP11.TRAP.IOT, 0, PDP11.REASON.OPCODE);
     this.nStepCycles -= (22 + 3);
 };
 
@@ -1298,7 +1298,7 @@ PDP11.opMFPT = function(opCode)
     /*
      * TODO: Review
      */
-    this.trap(PDP11.TRAP.RESERVED, 0, PDP11.REASON.TRAP);
+    this.trap(PDP11.TRAP.RESERVED, 0, PDP11.REASON.OPCODE);
 };
 
 PDP11.MOV_CYCLES = [
@@ -1671,7 +1671,7 @@ PDP11.opSPL = function(opCode)
     }
     if (!(this.regPSW & PDP11.PSW.CMODE)) {
         this.regPSW = (this.regPSW & ~(PDP11.PSW.UNUSED | PDP11.PSW.PRI)) | ((opCode & 0x7) << PDP11.PSW.SHIFT.PRI);
-        this.opFlags |= PDP11.OPFLAG.INTQ_CHK;
+        this.opFlags |= PDP11.OPFLAG.INTQ_DELAY;
     }
     this.nStepCycles -= (4 + 1);
 };
@@ -1720,7 +1720,7 @@ PDP11.opSXT = function(opCode)
  */
 PDP11.opTRAP = function(opCode)
 {
-    this.trap(PDP11.TRAP.TRAP, 0, PDP11.REASON.TRAP);
+    this.trap(PDP11.TRAP.TRAP, 0, PDP11.REASON.OPCODE);
     this.nStepCycles -= (4 + 1);
 };
 
@@ -1830,7 +1830,7 @@ PDP11.opUndefined = function(opCode)
     if (DEBUGGER && this.dbg) {
         if (this.dbg.undefinedInstruction(opCode)) return;
     }
-    this.trap(PDP11.TRAP.RESERVED, 0, PDP11.REASON.TRAP);
+    this.trap(PDP11.TRAP.RESERVED, 0, PDP11.REASON.OPCODE);
 };
 
 /**

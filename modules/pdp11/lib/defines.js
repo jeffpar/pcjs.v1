@@ -82,7 +82,7 @@ var TYPEDARRAYS = (typeof ArrayBuffer !== 'undefined');
  * MEMFAULT forces the Memory interfaces to signal a CPU fault when a word is accessed using an odd (unaligned) address.
  *
  * Since PDPjs inherited its Bus component from PCx86, it included support for both aligned and unaligned word accesses
- * by default.  However, the PDP-11 adds a wrinkle: when an odd address is used to access a memory word, a BUS_ERROR trap
+ * by default.  However, the PDP-11 adds a wrinkle: when an odd address is used to access a memory word, a BUS trap
  * must be generated.  Note that odd IOPAGE word accesses are fine; this only affects the Memory component.
  *
  * When the MMU is enabled, these checks may also be performed at a higher level, eliminating the need for them at the
@@ -197,13 +197,13 @@ var PDP11 = {
      * Internal operation state flags
      */
     OPFLAG: {
-        INTQ_CHK:   0x01,       // set INTQ on next check (set by SPL and assorted traps)
+        INTQ_DELAY: 0x01,       // set INTQ on next check (set by SPL and traps)
         INTQ:       0x02,       // call checkInterrupts()
         INTQ_MASK:  0x03,
         WAIT:       0x04,       // WAIT operation in progress
         TRAP:       0x08,       // set if last operation was a trap (see trapLast for the vector, and trapReason for the reason)
         TRAP_TF:    0x10,       // aka PDP11.PSW.TF
-        TRAP_SP:    0x20,       // set for a deferred BUS_ERROR trap (due to a "yellow" stack overflow condition)
+        TRAP_SP:    0x20,       // set for a deferred BUS trap (due to a "yellow" stack overflow condition)
         TRAP_MMU:   0x40,
         TRAP_MASK:  0x70,
         NO_FLAGS:   0x80,       // set whenever the PSW is written directly, requiring all updateXXXFlags() functions to leave flags unchanged
@@ -251,7 +251,7 @@ var PDP11 = {
      */
     TRAP: {
         UNDEFINED:  0x00,       // 000  (reserved)
-        BUS_ERROR:  0x04,       // 004  illegal instruction, unaligned address, invalid memory, stack limit, microbreak
+        BUS:        0x04,       // 004  unaligned address, non-existent memory, illegal instruction, etc
         RESERVED:   0x08,       // 010  reserved instructions
         BPT:        0x0C,       // 014  BPT: breakpoint trap (trace)
         IOT:        0x10,       // 020  IOT: input/output trap
@@ -262,27 +262,31 @@ var PDP11 = {
         MMU:        0xA8        // 250  MMU: aborts and traps
     },
     /*
-     * PDP-11 trap reasons (largely for diagnostic purposes only)
+     * PDP-11 trap reasons; the reason may also be a non-negative address indicating a BUS memory error
+     * (unaligned address or non-existent memory).  Any reason >= RED (which includes BUS memory errors) generate
+     * immediate (thrown) traps; the rest generate synchronous traps.
      */
     REASON: {
-        UNKNOWN:     0,
-        TRAP:       -1,
-        HALT:       -2,
-        INTERRUPT:  -3,
-        TRACE:      -4,
-        STACK:      -5,
-        ILLEGAL:    -6,
-        ERROR:      -7,
+        ABORT:      -1,         // immediate MMU fault
+        ILLEGAL:    -2,         // immediate invalid opcode (BUS)
+        RED:        -3,         // immediate stack overflow fault (BUS)
+        YELLOW:     -4,         // deferred stack overflow fault (BUS)
+        FAULT:      -5,         // deferred MMU fault
+        TRACE:      -6,         // deferred TF fault (BPT)
+        HALT:       -7,         // illegal HALT (BUS)
+        OPCODE:     -8,         // opcode-generated trap (eg, BPT, EMT, IOT, TRAP, or RESERVED opcode)
+        INTERRUPT:  -9,         // device-generated trap (vector is device-specific)
     },
     REASONS: [
-        "UNKNOWN",
-        "TRAP",
-        "HALT",
-        "INTERRUPT",
-        "TRACE",
-        "STACK",
+        "ABORT",
         "ILLEGAL",
-        "ERROR"
+        "RED",
+        "YELLOW",
+        "FAULT",
+        "TRACE",
+        "HALT",
+        "OPCODE",
+        "INTERRUPT"
     ],
     /*
      * Internal memory access flags

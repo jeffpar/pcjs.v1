@@ -690,6 +690,11 @@ SerialPortPDP11.prototype.writeXBUF = function(data, addr)
     if (data) {
         this.transmitByte(data);
         this.xcsr &= ~PDP11.DL11.XCSR.READY;
+        /*
+         * NOTE: When debugging issues involving the SerialPort, such as debugging code between a pair of
+         * transmitted bytes, you can pass 0 instead of getBaudTimeout() to setTimer() to minimize the amount
+         * of time spent waiting for XCSR.READY to be set again.
+         */
         this.cpu.setTimer(this.timerTransmitInterrupt, this.getBaudTimeout(this.nBaudTransmit));
     }
 };

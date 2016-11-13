@@ -590,9 +590,9 @@ CPUStatePDP11.prototype.getOpcode = function()
     this.lastAI = 0;
     this.lastPC = pc;
     /*
-     * If PC is misaligned, a BUS_ERROR trap will be generated, and because it will generate an
+     * If PC is unaligned, a BUS trap will be generated, and because it will generate an
      * exception, the next line (the equivalent of advancePC(2)) will not be executed, ensuring that
-     * original misaligned PC will be pushed onto the stack by trap().
+     * original unaligned PC will be pushed onto the stack by trap().
      */
     var op = this.readWord(pc);
     this.regsGen[PDP11.REG.PC] = (pc + 2) & 0xffff;
@@ -819,10 +819,10 @@ CPUStatePDP11.prototype.checkInterrupts = function()
             fInterrupt = true;
         }
     }
-    else if (this.opFlags & PDP11.OPFLAG.INTQ_CHK) {
+    else if (this.opFlags & PDP11.OPFLAG.INTQ_DELAY) {
         /*
-         * We know that INTQ (bit 1) is clear, so since INTQ_CHK (bit 0) is set, incrementing opFlags
-         * will transform INTQ_CHK into INTQ, without affecting any other (higher) bits.
+         * We know that INTQ (bit 1) is clear, so since INTQ_DELAY (bit 0) is set, incrementing opFlags
+         * will transform INTQ_DELAY into INTQ, without affecting any other (higher) bits.
          */
         this.opFlags++;
     }
@@ -899,11 +899,11 @@ CPUStatePDP11.prototype.dispatchInterrupt = function(vector, priority)
 CPUStatePDP11.prototype.checkTraps = function()
 {
     if (this.opFlags & PDP11.OPFLAG.TRAP_MMU) {
-        this.trap(PDP11.TRAP.MMU, PDP11.OPFLAG.TRAP_MMU, PDP11.REASON.TRAP);
+        this.trap(PDP11.TRAP.MMU, PDP11.OPFLAG.TRAP_MMU, PDP11.REASON.FAULT);
         return true;
     }
     if (this.opFlags & PDP11.OPFLAG.TRAP_SP) {
-        this.trap(PDP11.TRAP.BUS_ERROR, PDP11.OPFLAG.TRAP_SP, PDP11.REASON.STACK);
+        this.trap(PDP11.TRAP.BUS, PDP11.OPFLAG.TRAP_SP, PDP11.REASON.YELLOW);
         return true;
     }
     if (this.opFlags & PDP11.OPFLAG.TRAP_TF) {
@@ -1263,6 +1263,7 @@ CPUStatePDP11.prototype.trap = function(vector, flag, reason)
          */
         this.regErr |= PDP11.CPUERR.RED;
         this.regsGen[6] = 4;
+        reason = PDP11.REASON.RED;
     }
 
     this.lastPC = vector;
@@ -1310,22 +1311,22 @@ CPUStatePDP11.prototype.trap = function(vector, flag, reason)
      *
      * where, after "TRAP 000" has executed, a hardware interrupt will be acknowledged, and instead of
      * executing the IOT, we'll execute the HALT and fail the test.  We avoid that by relying on the same
-     * trick that the SPL instruction uses: setting INTQ_CHK instead of INTQ, which effectively delays
+     * trick that the SPL instruction uses: setting INTQ_DELAY instead of INTQ, which effectively delays
      * INTQ detection for one instruction, which is just long enough to allow the diagnostic to pass.
      */
     this.opFlags &= ~(flag | PDP11.OPFLAG.TRAP_TF | PDP11.OPFLAG.INTQ);
-    this.opFlags |= PDP11.OPFLAG.INTQ_CHK;
+    this.opFlags |= PDP11.OPFLAG.INTQ_DELAY | PDP11.OPFLAG.TRAP;
 
     this.trapPSW = -1;                                  // reset flag that we have a trap within a trap
 
     /*
-     * These next properties are purely an aid for the Debugger; see getTrapStatus()
+     * These next properties (in conjunction with setting PDP11.OPFLAG.TRAP) are purely an aid for the Debugger;
+     * see getTrapStatus().
      */
-    this.opFlags |= PDP11.OPFLAG.TRAP;
     this.trapVector = vector;
     this.trapReason = reason;
 
-    if (reason != PDP11.REASON.INTERRUPT) throw vector;
+    if (reason >= PDP11.REASON.RED) throw vector;
 };
 
 /**
@@ -1491,72 +1492,77 @@ CPUStatePDP11.prototype.mapVirtualToPhysical = function(virtualAddress, accessFl
     var errorMask = 0;
     switch (pdr & 0x7) {
     case 1:                         // read-only with trap
-        errorMask = 0x1000;         // MMU trap
+        errorMask = PDP11.MMR0.TRAP_MMU;
         /* falls through */
     case 2:                         // read-only
         pdr |= 0x80;                // Set A bit
         if (accessFlags & PDP11.ACCESS.WRITE) {
-            errorMask = 0x2000;     // read-only abort
+            errorMask = PDP11.MMR0.ABORT_RO;
         }
         break;
     case 4:                         // read-write with read-write trap
-        errorMask = 0x1000;         // MMU trap
+        errorMask = PDP11.MMR0.TRAP_MMU;
         /* falls through */
     case 5:                         // read-write with write trap
         if (accessFlags & PDP11.ACCESS.WRITE) {
-            errorMask = 0x1000;     // MMU trap
+            errorMask = PDP11.MMR0.TRAP_MMU;
         }
         /* falls through */
     case 6:                         // read-write: set A & W bits
         pdr |= ((accessFlags & PDP11.ACCESS.WRITE) ? 0xc0 : 0x80);
         break;
     default:
-        errorMask = 0x8000;         // non-resident abort
+        errorMask = PDP11.MMR0.ABORT_NR;
         break;
     }
 
-    if ((pdr & 0x7f08) !== 0x7f00) { // skip checking most common case (hopefully)
+    if ((pdr & 0x7f08) != 0x7f00) { // skip checking most common case (hopefully)
         if (pdr & 0x8) {            // expand downwards
             if (pdr & 0x7f00) {
                 if ((virtualAddress & 0x1fc0) < ((pdr >> 2) & 0x1fc0)) {
-                    errorMask |= 0x4000; // page length error abort
+                    errorMask |= PDP11.MMR0.ABORT_PL;
                 }
             }
         } else {                    // expand upwards
             if ((virtualAddress & 0x1fc0) > ((pdr >> 2) & 0x1fc0)) {
-                errorMask |= 0x4000; // page length error abort
+                errorMask |= PDP11.MMR0.ABORT_PL;
             }
         }
     }
 
-    // aborts and traps: log FIRST trap and MOST RECENT abort
+    /*
+     * Aborts and traps: log FIRST trap and MOST RECENT abort
+     */
 
     this.mmuPDR[this.mmuMode][page] = pdr;
-    if ((physicalAddress !== 0x3fff7a) || this.mmuMode) {// MMR0 is 017777572
+    if (physicalAddress != ((BusPDP11.IOPAGE_22BIT | PDP11.UNIBUS.MMR0) & this.mmuMask) || this.mmuMode) {
         this.mmuLastMode = this.mmuMode;
         this.mmuLastPage = page;
     }
 
-    var fTrap = false;
+    var fAbort = false;
     if (errorMask) {
-        if (errorMask & 0xe000) {
+        if (errorMask & PDP11.MMR0.ABORT) {
             if (this.trapPSW >= 0) errorMask |= 0x80;   // Instruction complete
-            if (!(this.regMMR0 & 0xe000)) {
+            if (!(this.regMMR0 & PDP11.MMR0.ABORT)) {
                 this.regMMR0 |= errorMask | (this.mmuLastMode << 5) | (this.mmuLastPage << 1);
             }
-            fTrap = true;
+            fAbort = true;
         }
-        if (!(this.regMMR0 & 0xf000)) {
-            //if (physicalAddress < 017772200 || physicalAddress > 017777677) {
-            if (physicalAddress < 0x3ff480 || physicalAddress > 0x3fffbf) {
-                this.regMMR0 |= 0x1000;                 // MMU trap flag
-                if (this.regMMR0 & 0x0200) {
+        if (!(this.regMMR0 & (PDP11.MMR0.ABORT | PDP11.MMR0.TRAP_MMU))) {
+            /*
+             * TODO: Review the code below, because the address range seems over-inclusive.
+             */
+            if (physicalAddress < ((BusPDP11.IOPAGE_22BIT | PDP11.UNIBUS.SIPDR0) & this.mmuMask) ||
+                physicalAddress > ((BusPDP11.IOPAGE_22BIT | PDP11.UNIBUS.UDPAR7 | 0x1) & this.mmuMask)) {
+                this.regMMR0 |= PDP11.MMR0.TRAP_MMU;
+                if (this.regMMR0 & PDP11.MMR0.MMU_TRAPS) {
                     this.opFlags |= PDP11.OPFLAG.TRAP_MMU;
                 }
             }
         }
-        if (fTrap) {                                    // don't trap until the end, because it throws an exception
-            this.trap(PDP11.TRAP.MMU, 0, PDP11.REASON.ERROR);
+        if (fAbort) {                                   // don't abort until the end, because it throws an exception
+            this.trap(PDP11.TRAP.MMU, 0, PDP11.REASON.ABORT);
         }
     }
     return physicalAddress;
@@ -1641,7 +1647,7 @@ CPUStatePDP11.prototype.checkStackLimit = function(mode, addr)
             if (this.model >= PDP11.MODEL_1145 && (addr <= this.regSL - 32 /* || mode == 1 && addr >= 0xFFFE */)) {
                 this.regErr |= PDP11.CPUERR.RED;
                 this.regsGen[6] = 4;
-                this.trap(PDP11.TRAP.BUS_ERROR, 0, PDP11.REASON.STACK);
+                this.trap(PDP11.TRAP.BUS, 0, PDP11.REASON.RED);
             } else {
                 /*
                  * On older machines (eg, the PDP-11/20), the instruction is always allowed to complete,
@@ -1708,11 +1714,11 @@ CPUStatePDP11.prototype.getAddrByMode = function(mode, reg, accessFlags)
      *
      * NOTE: Most instruction code paths never call getAddrByMode() when the mode is zero;
      * JMP and JSR instructions are exceptions, but that's OK, because those are documented as
-     * ILLEGAL instructions which produce a BUS_ERROR trap (as opposed to UNDEFINED instructions
+     * ILLEGAL instructions which produce a BUS trap (as opposed to UNDEFINED instructions
      * that cause a RESERVED trap).
      */
     case 0:
-        this.trap(PDP11.TRAP.BUS_ERROR, 0, PDP11.REASON.ILLEGAL);
+        this.trap(PDP11.TRAP.BUS, 0, PDP11.REASON.ILLEGAL);
         return 0;
 
     /*
@@ -2208,6 +2214,7 @@ CPUStatePDP11.prototype.updateDstWord = function(opCode, data, fnOp)
 
     /*
      * TODO: If callers are careful about masking data, then we don't need to mask it here or in bus.setWord().
+     * We've eliminated the 0xffff data mask here, but bus.setWord() is still masking.
      */
     this.assert(data < 0 && data >= -8 || !(data & ~0xffff));
 
@@ -2273,14 +2280,15 @@ CPUStatePDP11.prototype.writeDstWord = function(opCode, data)
 
     /*
      * TODO: If callers are careful about masking data, then we don't need to mask it here or in bus.setWord().
+     * We've eliminated the 0xffff data mask here, but bus.setWord() is still masking.
      */
     this.assert(data < 0 && data >= -8 || !(data & ~0xffff));
 
     if (!mode) {
-        this.regsGen[reg] = data < 0? this.regsGen[-data-1] : (data & 0xffff);
+        this.regsGen[reg] = (data = (data < 0? this.regsGen[-data-1] : data));
     } else {
         var addr = this.getAddr(mode, reg, PDP11.ACCESS.WRITE_WORD);
-        this.bus.setWord(addr, data < 0? this.regsGen[-data-1] : data);
+        this.bus.setWord(addr, (data = (data < 0? this.regsGen[-data-1] : data)));
     }
     return data;
 };

@@ -1220,7 +1220,7 @@ if (DEBUGGER) {
         if (this.sMessagePrev && sMessage == this.sMessagePrev) return;
         this.sMessagePrev = sMessage;
 
-        if ((this.bitsMessage & MessagesPDP11.HALT) && this.cpu && this.cpu.isRunning()) {
+        if ((this.bitsMessage & MessagesPDP11.HALT) && this.cpu && this.cpu.isRunning() || this.isBusy(true)) {
             this.stopCPU();
             sMessage += " (cpu halted)";
         }
@@ -2984,10 +2984,10 @@ if (DEBUGGER) {
              *
              * Besides, it's nice for "db" and "dw" to generate the same Bus activity that typical byte and word reads do.
              */
-            var i, n;
+            var i = nBytesPerLine;
             var data = 0, shift = 0;
-            for (i = nBytesPerLine; i > 0 && nBytes > 0; i -= n, nBytes -= n) {
-                n = 1;
+            while (i > 0 && nBytes > 0) {
+                var n = 1;
                 var v = size == 1? this.getByte(dbgAddr, n) : this.getWord(dbgAddr, (n = 2));
                 data |= (v << (shift << 3));
                 shift += n;
@@ -3001,7 +3001,12 @@ if (DEBUGGER) {
                     }
                     data = shift = 0;
                 }
-                sChars += (v >= 32 && v < 128? String.fromCharCode(v) : '.');
+                i -= n; nBytes -= n;
+                while (n--) {
+                    var c = v & 0xff;
+                    sChars += (c >= 32 && c < 128? String.fromCharCode(c) : '.');
+                    v >>= 8;
+                }
             }
             if (sDump) sDump += "\n";
             if (fJSON) {
