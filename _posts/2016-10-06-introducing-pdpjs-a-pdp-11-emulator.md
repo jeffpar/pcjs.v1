@@ -22,10 +22,9 @@ PDP-11/70.  From there, I'll work backwards to support other PDP-11 models, such
 beginning of the PDP-11 line: the PDP-11/20.
 
 I'm starting with the top-of-the-line PDP-11/70 largely because the core of the emulator is being adapted from the
-JavaScript [PDP 11/70 Emulator (v1.3)](http://skn.noip.me/pdp11/pdp11.html) written by
-[Paul Nankervis](mailto:paulnank@hotmail.com), who has generously given permission to use his code in PCjs.
-Since his emulator is a fully functional 11/70, it made sense to start there and work backwards, neutering features
-as needed.
+JavaScript [PDP-11/70 Emulator (v1.3)](http://skn.noip.me/pdp11/pdp11.html) written by
+Paul Nankervis, who has generously given permission to use his code in PCjs.  Since his emulator is a fully functional
+11/70, it made sense to start there and work backwards, factoring out features as needed.
 
 The code has already undergone a lot of refactoring. Opcodes are now decoded by function tables rather than a single
 switch statement, and every opcode is implemented with a discrete function.  Other refactoring includes flag management,

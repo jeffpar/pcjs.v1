@@ -57,9 +57,9 @@ And that's the extent of my testing, so if you try anything else and it doesn't 
 Better yet, fork the [PCjs Project](https://github.com/jeffpar/pcjs), debug the problem yourself, test a fix,
 and then send me a pull request.  :-)
 
-Finally, another shout-out to [Paul Nankervis](mailto:paulnank@hotmail.com), who not only generously gave permission
-to use code from his JavaScript [PDP 11/70 Emulator (v1.4)](http://skn.noip.me/pdp11/pdp11.html), but has also patiently
-answered my many questions.
+Finally, another shout-out to Paul Nankervis, who not only generously gave permission
+to use code from his JavaScript [PDP-11/70 Emulator (v1.4)](http://skn.noip.me/pdp11/pdp11.html), but has also patiently
+answered all my questions.
 
 I'm [@jeffpar](http://twitter.com/jeffpar) and I approve this blog post.
 
