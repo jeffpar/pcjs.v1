@@ -17,20 +17,23 @@ into RAM using the machine's "Load" button instead of "Attach", allowing you to 
 loading the [Bootstrap Loader](/apps/pdp11/boot/bootstrap/) in order to load the [Absolute Loader](/apps/pdp11/tapes/absloader/)
 in order to load the desired tape.
 
-![MAINDEC-11-D0AA-PB (MAR/70): TEST 1 - BRANCH](MAINDEC-11-D0AA-PB.jpg)
-![MAINDEC-11-D0BA-PB (MAR/70): TEST 2 - CON BRANCH](MAINDEC-11-D0BA-PB.jpg)
-![MAINDEC-11-D0CA-PB (MAR/70): TEST 3 - UNARY](MAINDEC-11-D0CA-PB.jpg)
-![MAINDEC-11-D0DA-PB (MAR/70): TEST 4 - UNARY + BINARY](MAINDEC-11-D0DA-PB.jpg)
-![MAINDEC-11-D0EA-PB (MAR/70): TEST 5 - ROTATE SHIFT](MAINDEC-11-D0EA-PB.jpg)
-![MAINDEC-11-D0FA-PB (MAR/70): TEST 6 - COMPARE](MAINDEC-11-D0FA-PB.jpg)
-![MAINDEC-11-D0GA-PB (MAR/70): TEST 7 - COMPARE NOT](MAINDEC-11-D0GA-PB.jpg)
-![MAINDEC-11-D0HA-PB (MAR/70): TEST 8 - MOVE](MAINDEC-11-D0HA-PB.jpg)
-![MAINDEC-11-D0IA-PB (MAR/70): TEST 9 - BIS, BIC + BIT](MAINDEC-11-D0IA-PB.jpg)
-![MAINDEC-11-D0JA-PB (MAR/70): TEST 10 - ADD](MAINDEC-11-D0JA-PB.jpg)
-![MAINDEC-11-D0KA-PB (MAR/70): TEST 11 - SUBTRACT](MAINDEC-11-D0KA-PB.jpg)
-![MAINDEC-11-D0LA-PB (MAR/70): TEST 12 - JUMP](MAINDEC-11-D0LA-PB.jpg)
-![MAINDEC-11-D0MA-PB (FEB/70): TEST 13 - JSR, RTS, RTI](MAINDEC-11-D0MA-PB.jpg)
-![MAINDEC-11-D0NA-PB (APR/70): TEST 14 - TRAP TEST](MAINDEC-11-D0NA-PB.jpg)
+[![MAINDEC-11-D0AA-PB (MAR/70): TEST 1 - BRANCH](MAINDEC-11-D0AA-PB.jpg)](#tests-1-12)
+[![MAINDEC-11-D0BA-PB (MAR/70): TEST 2 - CON BRANCH](MAINDEC-11-D0BA-PB.jpg)](#tests-1-12)
+[![MAINDEC-11-D0CA-PB (MAR/70): TEST 3 - UNARY](MAINDEC-11-D0CA-PB.jpg)](#tests-1-12)
+[![MAINDEC-11-D0DA-PB (MAR/70): TEST 4 - UNARY + BINARY](MAINDEC-11-D0DA-PB.jpg)](#tests-1-12)
+[![MAINDEC-11-D0EA-PB (MAR/70): TEST 5 - ROTATE SHIFT](MAINDEC-11-D0EA-PB.jpg)](#tests-1-12)
+[![MAINDEC-11-D0FA-PB (MAR/70): TEST 6 - COMPARE](MAINDEC-11-D0FA-PB.jpg)](#tests-1-12)
+[![MAINDEC-11-D0GA-PB (MAR/70): TEST 7 - COMPARE NOT](MAINDEC-11-D0GA-PB.jpg)](#tests-1-12)
+[![MAINDEC-11-D0HA-PB (MAR/70): TEST 8 - MOVE](MAINDEC-11-D0HA-PB.jpg)](#tests-1-12)
+[![MAINDEC-11-D0IA-PB (MAR/70): TEST 9 - BIS, BIC + BIT](MAINDEC-11-D0IA-PB.jpg)](#tests-1-12)
+[![MAINDEC-11-D0JA-PB (MAR/70): TEST 10 - ADD](MAINDEC-11-D0JA-PB.jpg)](#tests-1-12)
+[![MAINDEC-11-D0KA-PB (MAR/70): TEST 11 - SUBTRACT](MAINDEC-11-D0KA-PB.jpg)](#tests-1-12)
+[![MAINDEC-11-D0LA-PB (MAR/70): TEST 12 - JUMP](MAINDEC-11-D0LA-PB.jpg)](#tests-1-12)
+[![MAINDEC-11-D0MA-PB (FEB/70): TEST 13 - JSR, RTS, RTI](MAINDEC-11-D0MA-PB.jpg)](#test-13)
+[![MAINDEC-11-D0NA-PB (APR/70): TEST 14A - TRAP TEST](MAINDEC-11-D0NA-PB.jpg)](#test-14)
+[![MAINDEC-11-D0NB-PB (FEB/71): TEST 14B - TRAP TEST](MAINDEC-11-D0NB-PB.jpg)](#test-14)
+[![MAINDEC-11-D0NC-PB (FEB/72): TEST 14C - TRAP TEST](MAINDEC-11-D0NC-PB.jpg)](#test-14)
+[![MAINDEC-11-D0OA-PB (MAR/70): TEST 15 - CPU EXERCISER](MAINDEC-11-D0OA-PB.jpg)](#test-15)
 
 Instructions for Running Diagnostics
 ------------------------------------
@@ -170,6 +173,54 @@ it expects the MUL instruction to trap.
 	SWITCH REGISTER OPTIONS - No
 	
 	This program should not be used to test 11/40 and 11/45's.
+
+### Test 15
+
+	MAINDEC-11-D0OA (NEW NUMBER - DZQKA)
+	
+	T15 Instruction Exerciser
+	
+	ABSTRACT
+	
+	This program is designed to be a comprehensive check of all 11 family
+	processor instructions.  The program executed each instruction in all
+	address modes and includes tests for traps and the teletype interrupt
+	sequence.  The program relocates the test code throughout memory 0-28K.
+	
+	REQUIREMENTS
+	
+	          PDP-11 family central processor
+	          Optional - KL11-L (line clock)
+	
+	STORAGE - Program uses all the first 4K of memory (excluding that area
+	          of memory reserved for the loaders.)
+	
+	LOADING - Absolute Loader
+	
+	EXECUTION TIME - For 4K - 1 min, for 28K - 5 min.
+	 
+	STARTING PROCEDURE - 200
+	
+	PRINTOUTS - Yes
+	
+	SWITCH REGISTER OPTIONS - Yes
+	
+	SW15 =   .... HALT ON ERROR
+	SW14 =   .... LOOP SUBTEST
+	SW13 =   .... INHIBIT ERROR PRINTOUT
+	SW12 =   .... INHIBIT TRACE TRAPPING
+	SW11 =   .... INHIBIT SUBTEST ITERATION
+	SW10 =   .... RING BELL ON ERROR
+	SW 8 =   .... LOAD PDP-11/45 MICRO BREAK REGISTER
+	SW 7-0 = .... WHEN SET LOADS THE MICRO BREAK REGISTER WITH THE VALUE
+	              SET INTO SW7-0 AT THE BEGINNING OF EACH SUBTEST
+	
+	                          NOTE
+	                          
+	              WHEN ALL SWITCHES ARE DOWN NO TYPEOUTS
+	              WILL OCCUR AT THE END OF A PASS (errors
+	              will be typed). SETTING SW7 WILL CAUSE
+	              END OF PASS MESSAGE TO BE TYPED.
 
 Newer Paper Tape Software (mid-1970s)
 -------------------------------------

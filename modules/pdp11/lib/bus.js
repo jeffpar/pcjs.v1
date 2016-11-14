@@ -283,7 +283,7 @@ BusPDP11.IOController = {
         }
         bus.fault(addr, PDP11.CPUERR.TIMEOUT, PDP11.ACCESS.READ_BYTE);
         b = 0xff;
-        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(afn[BusPDP11.IOHANDLER.MSG_CATEGORY])) {
+        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS)) {
             this.dbg.printMessage("warning: unconverted read access to byte @" + this.dbg.toStrBase(addr) + ": " + this.dbg.toStrBase(b), true, !bus.nDisableFaults);
         }
         return b;
@@ -360,6 +360,7 @@ BusPDP11.IOController = {
                      * then presumably the handler is prepared for it (certainly, writeROMByte() is).
                      */
                     afn[BusPDP11.IOHANDLER.WRITE_BYTE](b, addrMasked);
+                    fWrite = true;
                 }
             }
         }
@@ -370,7 +371,7 @@ BusPDP11.IOController = {
             return;
         }
         bus.fault(addr, PDP11.CPUERR.TIMEOUT, PDP11.ACCESS.WRITE_BYTE);
-        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(afn[BusPDP11.IOHANDLER.MSG_CATEGORY])) {
+        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS)) {
             this.dbg.printMessage("warning: unconverted write access to byte @" + this.dbg.toStrBase(addr) + ": " + this.dbg.toStrBase(b), true, !bus.nDisableFaults);
         }
     },
@@ -410,7 +411,7 @@ BusPDP11.IOController = {
         }
         bus.fault(addr, PDP11.CPUERR.TIMEOUT, PDP11.ACCESS.READ_WORD);
         w = 0xffff;
-        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(afn[BusPDP11.IOHANDLER.MSG_CATEGORY])) {
+        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS)) {
             this.dbg.printMessage("warning: unconverted read access to word @" + this.dbg.toStrBase(addr) + ": " + this.dbg.toStrBase(w), true, !bus.nDisableFaults);
         }
         return w;
@@ -453,7 +454,7 @@ BusPDP11.IOController = {
             return;
         }
         bus.fault(addr, PDP11.CPUERR.TIMEOUT, PDP11.ACCESS.WRITE_WORD);
-        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(afn[BusPDP11.IOHANDLER.MSG_CATEGORY])) {
+        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS)) {
             this.dbg.printMessage("warning: unconverted write access to word @" + this.dbg.toStrBase(addr) + ": " + this.dbg.toStrBase(w), true, !bus.nDisableFaults);
         }
     }

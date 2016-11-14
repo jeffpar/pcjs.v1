@@ -288,12 +288,13 @@ MarkOut.prototype.getBuildOptions = function()
  * generateID(sText)
  *
  * Generate an ID from the given text, by basically converting it to lower case, converting anything
- * that's not a letter or a digit to a hyphen (-), and stripping all leading and trailing hyphens from
+ * that's not a letter or a digit to a dash (-), and stripping all leading and trailing dashes from
  * the result.  Furthermore, if the generated ID is not unique (among the set of ALL generated IDs),
  * then no ID is produced.
  *
  * UPDATE: Revised the algorithm to be more Jekyll-like (ie, REMOVING anything not a letter or digit or
- * space, then removing any leading or trailing spaces, and then replacing any remaining spaces with a hyphen).
+ * space or dash, then removing any leading or trailing spaces, and then replacing any remaining spaces
+ * with a dash).
  *
  * @this {MarkOut}
  * @param {string} sText
@@ -301,7 +302,7 @@ MarkOut.prototype.getBuildOptions = function()
  */
 MarkOut.prototype.generateID = function(sText)
 {
-    var sID = sText.replace(/[^A-Z0-9 ]+/gi, '').replace(/^ +| +$/g, '').replace(/ +/g, '-').toLowerCase();
+    var sID = sText.replace(/[^A-Z0-9 -]+/gi, '').replace(/^ +| +$/g, '').replace(/ +/g, '-').toLowerCase();
     if (this.aIDs.indexOf(sID) < 0) {
         this.aIDs.push(sID);
         return sID;
@@ -535,7 +536,7 @@ MarkOut.prototype.convertMD = function(sIndent)
     }
 
     /*
-     * Convert all lone series of three or more hyphens/underscores/asterisks into horizontal rules.
+     * Convert all lone series of three or more dashes/underscores/asterisks into horizontal rules.
      */
     sMD = sMD.replace(/(^|\n\n+)(-\s*-\s*-+|_\s*_\s*_+|\*\s*\*\s*\*+)\s*(\n\n+|$)+/g, "$1<hr/>$3");
 
