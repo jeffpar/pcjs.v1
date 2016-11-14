@@ -11,7 +11,7 @@ PDP-11 Boot Monitor
 -------------------
 
 [BOOTMON.mac](BOOTMON.mac) is a custom boot monitor/loader based on [boot.mac](http://skn.noip.me/pdp11/boot.mac) written by
-[Paul Nankervis](mailto:paulnank@hotmail.com).  It is used with all our PDP-11 test machines.
+Paul Nankervis.  It is used with all our PDP-11 test machines.
 
 [BOOTMON.mac](BOOTMON.mac) was cross-assembled with [MACRO11](https://github.com/shattered/macro11) to produce
 [BOOTMON.txt](BOOTMON.txt), which was then processed by [FileDump](/modules/filedump/) to produce

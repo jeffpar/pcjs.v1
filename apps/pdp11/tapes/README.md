@@ -20,8 +20,13 @@ This was the real-world process.  Fortunately, PDPjs machines include features t
 For starters, any "Absolute Format" tape (which should include all the tapes listed below) can be loaded directly
 into RAM using the machine's "Load" button instead of "Attach".  In most cases, this eliminates the first two steps.
 
-DEC Paper Tape Software (circa 1970)
-------------------------------------
+Paper Tape Diagnostics
+----------------------
+
+We have archived an assortment of [DEC Paper Tape Diagnostics](diags/).
+
+Paper Tape Software (circa 1970)
+--------------------------------
 
 As documented in the [PDP-11/20 Handbook (1971)](http://archive.pcjs.org/pubs/dec/pdp11/1120/PDP1120_Handbook_1971.pdf),
 p. 155, "PAPER TAPE SOFTWARE", the following software was available on paper tape:
@@ -43,37 +48,7 @@ that described all of the above software in greater detail, and it included some
 - LINK-11S LINKER
 
 Thanks to the [iamvirtual.ca](http://iamvirtual.ca/PDP-11/PTS-11/PTS-11.htm) website, most of the above programs are
-available as paper tape image files, with the exception of PAL-11S and LINK-11S:
-
-- [ED-11-V004A SA=12430 RA=3746](ed11/DEC-11-E1PA-PB.json)
-- [PAL-11A (4K)-V002A SA=1410 RA=1410](pal11a/DEC-11-ASPA-PB.json)
-- [PAL-11A (8K)-V002A SA=1410 RA=1410](pal11a/DEC-11-ASXA-PB.json)
-- [ODT-11](odt11/DEC-11-O1PA-PA.json)
-- [ODT-11 SA=13060](odt11/DEC-11-O1PA-PB.json)
-- [ODT-11X](odt11x/DEC-11-O2PA-PA.json)
-- [ODT-11X-V004A SA=12220 RA=12220](odt11x/DEC-11-O2PA-PB.json)
-- [IOX TAPE 1 OF 2](iox/DEC-11-YIPA-PA1.json)
-- [IOX TAPE 2 OF 2](iox/DEC-11-YIPA-PA2.json)
-- [IOX-V004A LOAD ADDRESS=15100](iox/DEC-11-YIPA-PB.json)
-- [FPP-11 V005A TAPE 1 OF 11](fpp11/DEC-11-YQPB-PA1.json)
-- [FPP-11 V005A TAPE 2 OF 11](fpp11/DEC-11-YQPB-PA2.json)
-- [FPP-11 V005A TAPE 3 OF 11](fpp11/DEC-11-YQPB-PA3.json)
-- [FPP-11 V005A TAPE 4 OF 11](fpp11/DEC-11-YQPB-PA4.json)
-- [FPP-11 V005A TAPE 5 OF 11](fpp11/DEC-11-YQPB-PA5.json)
-- [FPP-11 V005A TAPE 6 OF 11](fpp11/DEC-11-YQPB-PA6.json)
-- [FPP-11 V005A TAPE 7 OF 11](fpp11/DEC-11-YQPB-PA7.json)
-- [FPP-11 V005A TAPE 8 OF 11](fpp11/DEC-11-YQPB-PA8.json)
-- [FPP-11 V005A TAPE 9 OF 11](fpp11/DEC-11-YQPB-PA9.json)
-- [FPP-11 V005A TAPE 10 OF 11](fpp11/DEC-11-YQPB-PA10.json)
-- [FPP-11 V005A TAPE 11 OF 11](fpp11/DEC-11-YQPB-PA11.json)
-- [DUMPTT-V001A SA=XX7440 RA=XX7440](dumptt/DEC-11-Y1PA-PO.json)
-- [DUMPTT-V001A SA=LOAD ADDRESS RA=LOAD ADDRESS](dumptt/DEC-11-Y1PA-PB.json)
-- [DUMPAB-V001A SA=LOAD ADDRESS RA=LOAD ADDRESS](dumpab/DEC-11-Y2PA-PB.json)
-- [DEC-11-AJPB-PB BASIC-11 v007A SA=16104 RA=0](basic/DEC-11-AJPB-PB.json)
+available as paper tape image files and are included in our "Default" [PC11 High-Speed Paper Tape Reader/Punch](/devices/pdp11/pc11/)
+configuration.
 
 Some additional information on DEC's Paper Tape Software is available at [retrotechnology.com](http://retrotechnology.com/pdp11/11_20_PTS.html).
-
-Diagnostic Paper Tape Images
-----------------------------
-
-We have also archived a collection of [Diagnostic Paper Tape Images](diags/).

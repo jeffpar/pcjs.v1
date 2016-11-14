@@ -158,7 +158,7 @@ var PDP11 = {
         MASK:       0x3
     },
     /*
-     * Processor Status flag definitions (stored in regPSW)
+     * Processor Status Word definitions (stored in regPSW)
      */
     PSW: {
         CF:         0x0001,     // bit  0     (000001)  Carry Flag
@@ -186,6 +186,49 @@ var PDP11 = {
         }
     },
     /*
+     * PDP-11 trap vectors
+     */
+    TRAP: {
+        UNDEFINED:  0x00,       // 000  (reserved)
+        BUS:        0x04,       // 004  unaligned address, non-existent memory, illegal instruction, etc
+        RESERVED:   0x08,       // 010  reserved instructions
+        BPT:        0x0C,       // 014  BPT: breakpoint trap (trace)
+        IOT:        0x10,       // 020  IOT: input/output trap
+        PF:         0x14,       // 024  power fail
+        EMT:        0x18,       // 030  EMT: emulator trap
+        TRAP:       0x1C,       // 034  TRAP instruction
+        PIRQ:       0xA0,       // 240  PIRQ: program interrupt request
+        MMU:        0xA8        // 250  MMU: aborts and traps
+    },
+    /*
+     * PDP-11 trap reasons; the reason may also be a non-negative address indicating a BUS memory error
+     * (unaligned address or non-existent memory).  Any reason >= RED (which includes BUS memory errors) generate
+     * immediate (thrown) traps, as they are considered ABORTs; the rest generate synchronous traps.
+     */
+    REASON: {
+        ABORT:      -1,         // immediate MMU fault
+        ILLEGAL:    -2,         // immediate invalid opcode (BUS)
+        RED:        -3,         // immediate stack overflow fault (BUS)
+        YELLOW:     -4,         // deferred stack overflow fault (BUS)
+        FAULT:      -5,         // deferred MMU fault
+        TRACE:      -6,         // deferred TF fault (BPT)
+        HALT:       -7,         // illegal HALT (BUS)
+        OPCODE:     -8,         // opcode-generated trap (eg, BPT, EMT, IOT, TRAP, or RESERVED opcode)
+        INTERRUPT:  -9,         // device-generated trap (vector is device-specific)
+    },
+    REASONS: [
+        "UNKNOWN",
+        "ABORT",
+        "ILLEGAL",
+        "RED",
+        "YELLOW",
+        "FAULT",
+        "TRACE",
+        "HALT",
+        "OPCODE",
+        "INTERRUPT"
+    ],
+    /*
      * Assorted common opcodes
      */
     OPCODE: {
@@ -202,7 +245,7 @@ var PDP11 = {
         INTQ_MASK:  0x03,
         WAIT:       0x04,       // WAIT operation in progress
         TRAP:       0x08,       // set if last operation was a trap (see trapLast for the vector, and trapReason for the reason)
-        TRAP_TF:    0x10,       // aka PDP11.PSW.TF
+        TRAP_TF:    0x10,       // aka PDP11.PSW.TF (WARNING: do not change this bit, or you will likely break opRTI())
         TRAP_SP:    0x20,       // set for a deferred BUS trap (due to a "yellow" stack overflow condition)
         TRAP_MMU:   0x40,
         TRAP_MASK:  0x70,
@@ -246,48 +289,6 @@ var PDP11 = {
         SP:         6,
         PC:         7,
     },
-    /*
-     * PDP-11 trap vectors
-     */
-    TRAP: {
-        UNDEFINED:  0x00,       // 000  (reserved)
-        BUS:        0x04,       // 004  unaligned address, non-existent memory, illegal instruction, etc
-        RESERVED:   0x08,       // 010  reserved instructions
-        BPT:        0x0C,       // 014  BPT: breakpoint trap (trace)
-        IOT:        0x10,       // 020  IOT: input/output trap
-        PF:         0x14,       // 024  power fail
-        EMT:        0x18,       // 030  EMT: emulator trap
-        TRAP:       0x1C,       // 034  TRAP instruction
-        PIRQ:       0xA0,       // 240  PIRQ: program interrupt request
-        MMU:        0xA8        // 250  MMU: aborts and traps
-    },
-    /*
-     * PDP-11 trap reasons; the reason may also be a non-negative address indicating a BUS memory error
-     * (unaligned address or non-existent memory).  Any reason >= RED (which includes BUS memory errors) generate
-     * immediate (thrown) traps; the rest generate synchronous traps.
-     */
-    REASON: {
-        ABORT:      -1,         // immediate MMU fault
-        ILLEGAL:    -2,         // immediate invalid opcode (BUS)
-        RED:        -3,         // immediate stack overflow fault (BUS)
-        YELLOW:     -4,         // deferred stack overflow fault (BUS)
-        FAULT:      -5,         // deferred MMU fault
-        TRACE:      -6,         // deferred TF fault (BPT)
-        HALT:       -7,         // illegal HALT (BUS)
-        OPCODE:     -8,         // opcode-generated trap (eg, BPT, EMT, IOT, TRAP, or RESERVED opcode)
-        INTERRUPT:  -9,         // device-generated trap (vector is device-specific)
-    },
-    REASONS: [
-        "ABORT",
-        "ILLEGAL",
-        "RED",
-        "YELLOW",
-        "FAULT",
-        "TRACE",
-        "HALT",
-        "OPCODE",
-        "INTERRUPT"
-    ],
     /*
      * Internal memory access flags
      */
@@ -458,7 +459,7 @@ var PDP11 = {
         XCSR:       0o177564,   //                                  Display Terminal: Transmitter Status Register
         XBUF:       0o177566,   //                                  Display Terminal: Transmitter Data Buffer Register
 
-        CNSW:       0o177570,   //                                  Console (Front Panel) Switch Register
+        CNSW:       0o177570,   //                                  Console (Front Panel) Switch/Display Register
 
         MMR0:       0o177572,   // 777572   17777572
         MMR1:       0o177574,   // 777574   17777574

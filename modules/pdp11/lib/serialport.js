@@ -543,6 +543,11 @@ SerialPortPDP11.prototype.transmitByte = function(b)
         }
     }
 
+    /*
+     * TODO: Why do DEC diagnostics like to output bytes with bit 7 set?
+     */
+    b &= 0x7F;
+
     if (this.controlIOBuffer) {
         if (b == 0x0D) {
             this.iLogicalCol = 0;
@@ -657,10 +662,19 @@ SerialPortPDP11.prototype.readXCSR = function(addr)
 SerialPortPDP11.prototype.writeXCSR = function(data, addr)
 {
     /*
-     * If the device is READY, and TIE is being set, then request an interrupt.
+     * If the device is READY, and TIE is being set, then request a hardware interrupt.
+     *
+     * Conversely, if TIE is being cleared, remove the request; this satisfies a test in MAINDEC TEST 15,
+     * which appears to clear, set, and clear the Transmitter Interrupt Enable (TIE) bit in rapid succession,
+     * with the expectation that NO interrupt will be generated.  However, this fix also requires a
+     * complementary change in setTrigger(), to request hardware interrupts with INTQ_DELAY rather than INTQ.
      */
-    if ((this.xcsr & PDP11.DL11.XCSR.READY) && (data & PDP11.DL11.XCSR.TIE)) {
-        this.cpu.setTrigger(this.triggerTransmitInterrupt);
+    if (this.xcsr & PDP11.DL11.XCSR.READY) {
+        if (data & PDP11.DL11.XCSR.TIE) {
+            this.cpu.setTrigger(this.triggerTransmitInterrupt);
+        } else {
+            this.cpu.removeTrigger(this.triggerTransmitInterrupt);
+        }
     }
     this.xcsr = (this.xcsr & ~PDP11.DL11.XCSR.WMASK) | (data & PDP11.DL11.XCSR.WMASK);
 };
