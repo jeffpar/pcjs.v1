@@ -51,7 +51,25 @@ with this bug.
 PDPjs resolved the bug by using a special (negative) value to indicate a register source operand, which is then converted
 to the register's current value after both operands have been decoded.  Test 14 now passes.
 
-Next up: Test 15!
+Next up: [Test 15](/apps/pdp11/tapes/diags/#test-15), which uncovered a couple more problems:
+
+- The DLL transmitter must *not* generate an interrupt if it is immediately *disabled* after being *enabled*
+- The (old) RTI instruction needs to manage the Trace flag like the (new) RTT instruction if the machine is a PDP-11/20
+
+Test 15 was written for the earliest PDP-11 models, which didn't have the RTT instruction, so when an RTI instruction
+enabled the Trace flag, action on the flag was deferred until after the next instruction.  Newer models moved that deferred
+behavior to the RTT instruction, and changed RTI to act on the Trace flag immediately.
+
+This seems like a regrettable decision.  It would have been far better for the new instruction to have the new behavior,
+and to leave the original RTI instruction alone, for maximum backward compatibility.  DEC engineers probably regretted not
+having separate RTI and RTT instructions from the beginning, and they probably concluded that very little system software
+would be affected by changing RTI.
+
+Unfortunately, these diagnostics are one of the casualties of that decision, meaning that this diagnostic will *not* run
+successfully on an 11/70.  And [Test 15](/apps/pdp11/tapes/diags/#test-15) is not alone in that regard.
+[Test 14](/apps/pdp11/tapes/diags/#test-14) also will not run properly on an 11/70; there again, the problem could have been
+avoided if DEC had decided to designate an opcode as *permanently* RESERVED, and then used that for all future RESERVED
+instruction tests, instead of using opcodes that would become new instructions later (eg, MUL).
 
 ---
 
