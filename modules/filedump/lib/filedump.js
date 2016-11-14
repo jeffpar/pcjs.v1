@@ -55,7 +55,6 @@ var DumpAPI = require("../../shared/lib/dumpapi");
  */
 function FileDump(sFormat, fComments, fDecimal, offDump, nWidthDump, sServerRoot)
 {
-    this.addrLoad = null;
     this.fDebug = false;
     this.sFormat = (sFormat || DumpAPI.FORMAT.JSON);
     this.fJSONNative = (this.sFormat == DumpAPI.FORMAT.JSON && !fComments);
@@ -68,6 +67,8 @@ function FileDump(sFormat, fComments, fDecimal, offDump, nWidthDump, sServerRoot
     this.fLocal = !sServerRoot;
     this.sServerRoot = sServerRoot || process.cwd();
     this.buf = null;
+    this.addrLoad = null;
+    this.addrExec = null;
     /*
      * TODO: Decide what to do with this usage info; we can't use it as a default, because setting this.json
      * causes outputFile() to ignore this.buf indiscriminately (ie, it breaks non-JSON output modes).
@@ -99,7 +100,8 @@ FileDump.asBadExts = [
  * Usage
  * ---
  *      filedump --file=({path}|{URL}) [--merge=({path}|{url})] [--format=(json|data|hex|octal|bytes|words|rom)]
- *                  [--comments] [--decimal] [--offset={number}] [--width={number}] [--output={path}] [--overwrite]
+ *                  [--comments] [--decimal] [--offset={number}] [--width={number}] [--load={number}] [--exec={number}]
+ *                  [--output={path}] [--overwrite]
  *
  * Arguments
  * ---
@@ -173,6 +175,10 @@ FileDump.CLI = function()
             for (sMergeFile in argv['merge']) asMergeFiles.push(sMergeFile);
         }
     }
+
+    file.addrLoad = str.parseInt(argv['load']);
+    file.addrExec = str.parseInt(argv['exec']);
+
     var cMergesPending = asMergeFiles.length;
     var iStart = 0, nSkip = cMergesPending;
     file.loadFile(sFile, iStart++, nSkip, function(err) {
@@ -482,15 +488,15 @@ FileDump.prototype.dumpBuffer = function(sKey, buf, len, cbItem, offDump, nWidth
     nWidthDump = nWidthDump || this.nWidthDump;
 
     var sDump = "";
-    if (this.addrLoad != null) {
-        /*
-         * TODO: We need command-line overrides (eg, --load and --exec) to allow the user to specify the
-         * correct load (and exec) addresses.  For now, we're simply inferring that the first address parsed
-         * in parseListing() is both the load and exec address.
-         */
-        var sAddr = str.toHexWord(this.addrLoad) + (nBase == 8? "/*" + str.toOct(this.addrLoad, 6) + "*/" : "");
-        sDump += this.dumpLine(2, '"load":' + sAddr + ',"exec":' + sAddr + ',');
+
+    var addrs = {'load': this.addrLoad, 'exec': this.addrExec};
+    for (var prop in addrs) {
+        var addr = addrs[prop];
+        if (addr != null) {
+            sDump += this.dumpLine(2, '"' + prop + '":' + str.toHexWord(addr) + (nBase == 8? "/*" + str.toOct(addr, 6) + "*/" : "") + ',');
+        }
     }
+
     sDump += this.dumpLine(2, (sKey? '"' + sKey + '":' : "") + this.sJSONWhitespace + chOpen);
 
     var sLine = "";

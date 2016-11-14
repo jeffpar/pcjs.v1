@@ -666,7 +666,7 @@ SerialPortPDP11.prototype.writeXCSR = function(data, addr)
      *
      * Conversely, if TIE is being cleared, remove the request; this satisfies a test in MAINDEC TEST 15,
      * which appears to clear, set, and clear the Transmitter Interrupt Enable (TIE) bit in rapid succession,
-     * with the expectation that NO interrupt will be generated.  However, this fix also required a
+     * with the expectation that NO interrupt will be generated.  However, this fix also requires a
      * complementary change in setTrigger(), to request hardware interrupts with INTQ_DELAY rather than INTQ.
      */
     if (this.xcsr & PDP11.DL11.XCSR.READY) {
@@ -675,9 +675,6 @@ SerialPortPDP11.prototype.writeXCSR = function(data, addr)
         } else {
             this.cpu.removeTrigger(this.triggerTransmitInterrupt);
         }
-    }
-    if ((this.xcsr & PDP11.DL11.XCSR.READY) && (data & PDP11.DL11.XCSR.TIE)) {
-        this.cpu.setTrigger(this.triggerTransmitInterrupt);
     }
     this.xcsr = (this.xcsr & ~PDP11.DL11.XCSR.WMASK) | (data & PDP11.DL11.XCSR.WMASK);
 };
