@@ -10,7 +10,7 @@ Diagnostic Paper Tape Images
 Thanks to the [iamvirtual.ca](http://iamvirtual.ca/collection/systems/mediadoc/mediadoc.html#papertape)
 website, we have archived the PDP-11 diagnostics shown below.  The tapes have been added to the
 [Default PC11 Configuration](/devices/pdp11/pc11/), so that you can easily load them into any machine with a
-[PC11](/modules/pdp11/lib/pc11.js), such as this [PDP-11/20](/devices/pdp11/machine/1120/panel/debugger/).
+[PC11](/modules/pdp11/lib/pc11.js), such as this [PDP-11/20 with Front Panel and Debugger](/devices/pdp11/machine/1120/panel/debugger/).
 
 As noted for other [DEC PDP-11 Tape Images](/apps/pdp11/tapes/), these "Absolute Format" tapes can be loaded directly
 into RAM using the machine's "Load" button instead of "Attach", allowing you to bypass the usual three-step process of
@@ -175,6 +175,9 @@ it expects the MUL instruction to trap.
 	This program should not be used to test 11/40 and 11/45's.
 
 ### Test 15
+
+Before loading and running this test on the [PDP-11/20 with Front Panel and Debugger](/devices/pdp11/machine/1120/panel/debugger/),
+it's recommended that you also toggle SW-15, as described below, so that the test will HALT on any failure.
 
 	MAINDEC-11-D0OA (NEW NUMBER - DZQKA)
 	

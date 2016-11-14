@@ -543,6 +543,11 @@ SerialPortPDP11.prototype.transmitByte = function(b)
         }
     }
 
+    /*
+     * TODO: Why do DEC diagnostics like to output bytes with bit 7 set?
+     */
+    b &= 0x7F;
+
     if (this.controlIOBuffer) {
         if (b == 0x0D) {
             this.iLogicalCol = 0;
