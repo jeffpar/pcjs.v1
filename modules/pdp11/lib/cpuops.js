@@ -1507,7 +1507,12 @@ PDP11.opRTI = function(opCode)
 {
     this.trapReturn();
     /*
-     * Unlike RTT, RTI enables immediate trace
+     * Unlike RTT, RTI permits an immediate trace, which we resolve by propagating PSW.TF to OPFLAG.TRAP_TF
+     * (which, as written, requires that both flags have the same bit value; see defines.js).
+     *
+     * NOTE: This trace behavior is NEW for machines that have both RTI and RTT.  Early models didn't have RTT; ie,
+     * the old RTI instruction behaved exactly like the new RTT instruction.  This is why the 11/20 jump table below
+     * for RTI calls opRTT() instead of opRTI().
      */
     this.opFlags |= (this.regPSW & PDP11.PSW.TF);
     this.nStepCycles -= (10 + 3);
@@ -1528,7 +1533,7 @@ PDP11.opRTS = function(opCode)
     var src = this.popWord();
     var reg = opCode & PDP11.OPREG.MASK;
     /*
-     * When the popular "RTS PC" form is used, we might as well eliminate the useless setting of PC to
+     * When the popular "RTS PC" form is used, we might as well eliminate the useless setting of PC
      */
     if (reg == PDP11.REG.PC) {
         this.setPC(src);
@@ -2057,7 +2062,7 @@ PDP11.aOp00Xn_1120 = [
 PDP11.aOp000X_1120 = [
     PDP11.opHALT,               // 0x0000   000000          11/20+  1.8
     PDP11.opWAIT,               // 0x0001   000001          11/20+  1.8
-    PDP11.opRTI,                // 0x0002   000002          11/20+  4.8
+    PDP11.opRTT,                // 0x0002   000002          11/20+  4.8 (this is really RTI, but on the 11/20, it behaves like RTT)
     PDP11.opBPT,                // 0x0003
     PDP11.opIOT,                // 0x0004   000004          11/20+  9.3
     PDP11.opRESET,              // 0x0005   000005          11/20+  20ms

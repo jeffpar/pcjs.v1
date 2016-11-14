@@ -394,7 +394,13 @@ CPUStatePDP11.prototype.setMMR3 = function(newMMR3)
 CPUStatePDP11.prototype.setReset = function(addr, fReset)
 {
     this.addrReset = addr;
+
+    /*
+     * If we're going to slam this new address straight into PC, then it seems wise to reset the PSW as well.
+     */
     this.setPC(addr);
+    this.setPSW(0);
+
     if (!fReset && this.dbg) {
         /*
          * TODO: Review the decision to always stop the CPU if the Debugger is loaded.  Note that
@@ -2343,7 +2349,7 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
      * nDebugCheck is 1 if we want the Debugger's checkInstruction() to check every instruction,
      * -1 if we want it to check just the first instruction, and 0 if there's no need for any checks.
      */
-    var nDebugCheck = (DEBUGGER && this.dbg && this.dbg.checksEnabled())? 1 : (this.flags.starting? -1 : 0);
+    var nDebugCheck = (DEBUGGER && this.dbg)? (this.dbg.checksEnabled()? 1 : (this.flags.starting? -1 : 0)) : 0;
 
     /*
      * nDebugState is needed only when nDebugCheck is non-zero; it is -1 if this is a single-step, 0 if
@@ -2367,7 +2373,7 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
 
     do {
         if (DEBUGGER && nDebugCheck) {
-            if (this.dbg && this.dbg.checkInstruction(this.getPC(), nDebugState)) {
+            if (this.dbg.checkInstruction(this.getPC(), nDebugState)) {
                 this.stopCPU();
                 break;
             }
@@ -2376,6 +2382,7 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
         }
 
         if (this.opFlags) {
+
             /*
              * If we're in the INTQ or WAIT state, check for any pending interrupts.
              *
@@ -2386,6 +2393,10 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
              */
             if ((this.opFlags & (PDP11.OPFLAG.INTQ_MASK | PDP11.OPFLAG.WAIT)) /* && nDebugState >= 0 */) {
                 if (this.checkInterrupts()) {
+                    if (DEBUGGER && nDebugCheck && this.dbg.checkInstruction(this.getPC(), nDebugState)) {
+                        this.stopCPU();
+                        break;
+                    }
                     /*
                      * Since an interrupt was just dispatched, altering the normal flow of time and changing
                      * the future as we knew it, let's break out immediately if we're single-stepping, so that
@@ -2396,6 +2407,7 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                     if (nDebugState < 0) break;
                 }
             }
+
             /*
              * Next, check for any pending traps (which, as noted above, must be done after checkInterrupts()).
              *
@@ -2405,6 +2417,10 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
              */
             if (this.opFlags & PDP11.OPFLAG.TRAP_MASK) {
                 if (this.checkTraps()) {
+                    if (DEBUGGER && nDebugCheck && this.dbg.checkInstruction(this.getPC(), nDebugState)) {
+                        this.stopCPU();
+                        break;
+                    }
                     if (nDebugState < 0) break;
                 }
             }
