@@ -745,7 +745,7 @@ CPUStatePDP11.prototype.removeTrigger = function(trigger)
             triggerPrev = triggerNext;
         }
     }
-    // We could also set trigger.next to null now, but strictly speaking, that shouldn't be necessary
+    // We could also set trigger.next to null now, but strictly speaking, that shouldn't be necessary.
 };
 
 /**
@@ -757,16 +757,12 @@ CPUStatePDP11.prototype.removeTrigger = function(trigger)
  */
 CPUStatePDP11.prototype.setTrigger = function(trigger)
 {
-    /*
-     * We COULD dispatch interrupts immediately, but there are compatibility reasons for ONLY doing so
-     * inside the stepCPU() loop; see that function for details.
-     *
-     *      if (this.dispatchInterrupt(trigger.vector, trigger.priority)) {
-     *          return true;
-     *      }
-     */
     this.insertTrigger(trigger);
-    this.opFlags |= PDP11.OPFLAG.INTQ;
+    /*
+     * See the writeXCSR() function for an explanation of why signalling an INTQ hardware interrupt condition
+     * should be done using INTQ_DELAY rather than setting INTQ directly.
+     */
+    this.opFlags |= PDP11.OPFLAG.INTQ_DELAY;
     return false;
 };
 
