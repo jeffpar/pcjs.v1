@@ -28,3 +28,5 @@ FPP-11 (Paper Tape)
 [![DEC-11-YQPB-PA10](DEC-11-YQPB-PA10.jpg)](DEC-11-YQPB-PA10.json)
 
 [![DEC-11-YQPB-PA11](DEC-11-YQPB-PA11.jpg)](DEC-11-YQPB-PA11.json)
+
+**TODO**: Add more information about **FPP-11**.

@@ -226,6 +226,17 @@ CPUStatePDP11.prototype.initRegs = function()
 };
 
 /**
+ * resetCPU()
+ *
+ * @this {CPUStatePDP11}
+ */
+CPUStatePDP11.prototype.resetCPU = function()
+{
+    this.bus.reset();
+    this.resetRegs();
+};
+
+/**
  * resetRegs()
  *
  * @this {CPUStatePDP11}
@@ -395,9 +406,7 @@ CPUStatePDP11.prototype.setReset = function(addr, fReset)
 {
     this.addrReset = addr;
 
-    /*
-     * If we're going to slam this new address straight into PC, then it seems wise to reset the PSW as well.
-     */
+    this.resetCPU();
     this.setPC(addr);
     this.setPSW(0);
 
