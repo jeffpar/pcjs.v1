@@ -43,8 +43,11 @@
 			<tape id="diags.tape11" name="MD-11 TEST 11 - SUBTRACT" path="/apps/pdp11/tapes/diags/MAINDEC-11-D0KA-PB.json"/>
 			<tape id="diags.tape12" name="MD-11 TEST 12 - JUMP" path="/apps/pdp11/tapes/diags/MAINDEC-11-D0LA-PB.json"/>
 			<tape id="diags.tape13" name="MD-11 TEST 13 - JSR, RTS, RTI" path="/apps/pdp11/tapes/diags/MAINDEC-11-D0MA-PB.json"/>
-			<tape id="diags.tape14" name="MD-11 TEST 14 - TRAP TEST" path="/apps/pdp11/tapes/diags/MAINDEC-11-D0NA-PB.json"/>
-			<tape id="tray02.tape04" name="11/70 CPU EXERCISER" path="/apps/pdp11/tapes/diags/MAINDEC-11-DEQKC-B1-PB.json"/>
+			<tape id="diags.tape14a" name="MD-11 TEST 14A - TRAP TEST" path="/apps/pdp11/tapes/diags/MAINDEC-11-D0NA-PB.json"/>
+			<tape id="diags.tape14b" name="MD-11 TEST 14B - TRAP TEST" path="/apps/pdp11/tapes/diags/MAINDEC-11-D0NB-PB.json"/>
+			<tape id="diags.tape14c" name="MD-11 TEST 14C - TRAP TEST" path="/apps/pdp11/tapes/diags/MAINDEC-11-D0NC-PB.json"/>
+			<tape id="diags.tape15" name="MD-11 TEST 15 - CPU EXERCISER" path="/apps/pdp11/tapes/diags/MAINDEC-11-D0OA-PB.json"/>
+			<tape id="tray02.tape04" name="MD-11 11/70 CPU EXERCISER" path="/apps/pdp11/tapes/diags/MAINDEC-11-DEQKC-B1-PB.json"/>
 		</control>
 		<control type="button" binding="attachTape">Attach</control>
 		<control type="button" binding="loadTape">Load</control>

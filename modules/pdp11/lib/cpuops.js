@@ -1122,7 +1122,34 @@ PDP11.opHALT = function(opCode)
         this.trap(PDP11.TRAP.BUS, 0, PDP11.REASON.HALT);
     } else {
         if (this.panel) {
-            this.panel.setData(this.regsGen[0], true);
+            /*
+             * The PDP-11/20 Handbook (1971) says that HALT does the following:
+             *
+             *      Causes the processor operation to cease. The console is given control of the bus.
+             *      The console data lights display the contents of RO; the console address lights display
+             *      the address after the halt instruction. Transfers on the UNIBUS are terminated immediately.
+             *      The PC points to the next instruction to be executed. Pressing the continue key on the
+             *      console causes processor operation to resume. No INIT signal is given.
+             *
+             * However, the PDP-11/70 Handbook (1979) suggests some slight differences:
+             *
+             *      Causes the processor operation to cease. The console is given control of the processor.
+             *      The data lights display the contents of the PC (which is the address of the HALT instruction
+             *      plus 2). Transfers on the UNIBUS are terminated immediately. Pressing the continue key on
+             *      the console causes processor operation to resume.
+             *
+             * Given that the 11/70 doesn't saying anything about displaying R0 on a HALT, and also given that
+             * the 11/70 CPU EXERCISER diagnostic writes a value to the Console Switch/Display Register immediately
+             * before HALT'ing, I'm going to assume that updating the data display with R0 is unique to the 11/20.
+             *
+             * Also, I'm a little suspicious of the 11/70 comment that the "data lights display the contents of
+             * the PC," since previous models display the PC on the ADDRESS lights, not the DATA lights.  And as
+             * I already explained, doing anything to the data lights at this point would undo what the 11/70
+             * diagnostics do.
+             */
+            if (this.model == PDP11.MODEL_1120) {
+                this.panel.setData(this.regsGen[0], true);
+            }
         }
         if (!this.dbg) {
             /*
@@ -1443,8 +1470,7 @@ PDP11.opNOP = function(opCode)
 PDP11.opRESET = function(opCode)
 {
     if (!(this.regPSW & PDP11.PSW.CMODE)) {
-        this.bus.reset();
-        this.resetRegs();
+        this.resetCPU();
     }
     this.nStepCycles -= 667;            // TODO: Review (but it's definitely a big number)
 };
@@ -1507,7 +1533,12 @@ PDP11.opRTI = function(opCode)
 {
     this.trapReturn();
     /*
-     * Unlike RTT, RTI enables immediate trace
+     * Unlike RTT, RTI permits an immediate trace, which we resolve by propagating PSW.TF to OPFLAG.TRAP_TF
+     * (which, as written below, requires that both flags have the same bit value; see defines.js).
+     *
+     * NOTE: This RTI trace behavior is NEW for machines that have both RTI and RTT.  Early models didn't have RTT,
+     * so the old RTI behaved exactly like the new RTT.  Which is why the 11/20 jump table below calls opRTT() instead
+     * of opRTI() for RTI.
      */
     this.opFlags |= (this.regPSW & PDP11.PSW.TF);
     this.nStepCycles -= (10 + 3);
@@ -1528,7 +1559,7 @@ PDP11.opRTS = function(opCode)
     var src = this.popWord();
     var reg = opCode & PDP11.OPREG.MASK;
     /*
-     * When the popular "RTS PC" form is used, we might as well eliminate the useless setting of PC to
+     * When the popular "RTS PC" form is used, we might as well eliminate the useless setting of PC...
      */
     if (reg == PDP11.REG.PC) {
         this.setPC(src);
@@ -2057,7 +2088,7 @@ PDP11.aOp00Xn_1120 = [
 PDP11.aOp000X_1120 = [
     PDP11.opHALT,               // 0x0000   000000          11/20+  1.8
     PDP11.opWAIT,               // 0x0001   000001          11/20+  1.8
-    PDP11.opRTI,                // 0x0002   000002          11/20+  4.8
+    PDP11.opRTT,                // 0x0002   000002          11/20+  4.8 (this is really RTI, but on the 11/20, it behaves like RTT)
     PDP11.opBPT,                // 0x0003
     PDP11.opIOT,                // 0x0004   000004          11/20+  9.3
     PDP11.opRESET,              // 0x0005   000005          11/20+  20ms

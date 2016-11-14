@@ -176,23 +176,23 @@ PanelPDP11.LED = {
 };
 
 /**
- * getSW()
+ * getSR()
  *
  * @this {PanelPDP11}
- * @return {number}
+ * @return {number} (current SWITCH register)
  */
-PanelPDP11.prototype.getSW = function()
+PanelPDP11.prototype.getSR = function()
 {
     return this.regSwitches;
 };
 
 /**
- * setSW(value)
+ * setSR(value)
  *
  * @this {PanelPDP11}
- * @param {number} value
+ * @param {number} value (new SWITCH register)
  */
-PanelPDP11.prototype.setSW = function(value)
+PanelPDP11.prototype.setSR = function(value)
 {
     this.setSwitches(value);
 };

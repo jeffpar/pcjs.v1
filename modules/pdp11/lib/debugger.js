@@ -266,7 +266,7 @@ if (DEBUGGER) {
      * Register numbers 0-7 are reserved for cpu.regsGen, 8-15 are reserved for cpu.regsAlt, and 16-19 for cpu.regsStack.
      */
     DebuggerPDP11.REG_PSW       = 20;
-    DebuggerPDP11.REG_SW        = 21;
+    DebuggerPDP11.REG_SR        = 21;           // SWITCH register; see Panel's getSR() and setSR()
 
     /*
      * Operand type masks; anything that's not covered by OP_SRC or OP_DST must be a OP_OTHER value.
@@ -1127,7 +1127,7 @@ if (DEBUGGER) {
         case "PC":
             iReg = 7;
             break;
-        case "SW":
+        case "SR":
             iReg = 21;
             break;
         default:
@@ -1156,7 +1156,7 @@ if (DEBUGGER) {
      * getRegValue(iReg)
      *
      * Register numbers 0-7 are reserved for cpu.regsGen, 8-15 are reserved for cpu.regsAlt,
-     * 16-19 for cpu.regsAltStack, 20 for regPSW, and 21 for regSW.
+     * 16-19 for cpu.regsAltStack, 20 for regPSW, and 21 for SR (SWITCH register).
      *
      * @this {DebuggerPDP11}
      * @param {number} iReg
@@ -1178,8 +1178,8 @@ if (DEBUGGER) {
             else if (iReg == DebuggerPDP11.REG_PSW) {
                 value = this.cpu.getPSW();
             }
-            else if (iReg == DebuggerPDP11.REG_SW && this.panel && this.panel.hasSwitches()) {
-                value = this.panel.getSW();
+            else if (iReg == DebuggerPDP11.REG_SR && this.panel && this.panel.hasSwitches()) {
+                value = this.panel.getSR();
             }
         }
         return value;
@@ -2392,8 +2392,8 @@ if (DEBUGGER) {
         else if (iReg == DebuggerPDP11.REG_PSW) {
             sReg = "PS=" + this.toStrBase(cpu.getPSW());
         }
-        else if (iReg == DebuggerPDP11.REG_SW && this.panel && this.panel.hasSwitches()) {
-            sReg = "SW=" + this.toStrBase(this.panel.getSW(), 3);
+        else if (iReg == DebuggerPDP11.REG_SR && this.panel && this.panel.hasSwitches()) {
+            sReg = "SR=" + this.toStrBase(this.panel.getSR(), 3);
         }
         if (sReg) sReg += ' ';
         return sReg;
@@ -2419,7 +2419,7 @@ if (DEBUGGER) {
         }
         sDump += '\n';
         sDump += this.getRegOutput(PDP11.REG.SP) + this.getRegOutput(PDP11.REG.PC);
-        sDump += this.getRegOutput(DebuggerPDP11.REG_PSW) + this.getRegOutput(DebuggerPDP11.REG_SW);
+        sDump += this.getRegOutput(DebuggerPDP11.REG_PSW) + this.getRegOutput(DebuggerPDP11.REG_SR);
         sDump += this.getFlagOutput('T') + this.getFlagOutput('N') + this.getFlagOutput('Z') + this.getFlagOutput('V') + this.getFlagOutput('C');
         return sDump;
     };
@@ -3435,9 +3435,9 @@ if (DEBUGGER) {
             case "C":
                 if (w) cpu.setCF(); else cpu.clearCF();
                 break;
-            case "SW":
+            case "SR":
                 if (this.panel && this.panel.hasSwitches()) {
-                    this.panel.setSW(w);
+                    this.panel.setSR(w);
                     break;
                 }
                 /* falls through */

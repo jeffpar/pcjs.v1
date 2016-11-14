@@ -565,7 +565,7 @@ str.aASCIICodes = {
  // 0x0A:   "LF",       // (CTRL_J) Line Feed (New Line)
     0x0B:   "VT",       // (CTRL_K) Vertical Tab
     0x0C:   "FF",       // (CTRL_L) Form Feed (New Page)
-    0x0D:   "CR",       // (CTRL_M) Carriage Return
+//  0x0D:   "CR",       // (CTRL_M) Carriage Return
     0x0E:   "SO",       // (CTRL_N) Shift Out
     0x0F:   "SI",       // (CTRL_O) Shift In
     0x10:   "DLE",      // (CTRL_P) Data Link Escape
