@@ -54,7 +54,7 @@ if (NODE) {
  *      file: name of ROM data file
  *
  * NOTE: The ROM data will not be copied into place until the Bus is ready (see initBus()) AND
- * the ROM data file has finished loading (see doneLoad()).
+ * the ROM data file has finished loading (see finishLoad()).
  *
  * Also, while the size parameter may seem redundant, I consider it useful to confirm that the ROM
  * you received is the ROM you expected.
@@ -103,8 +103,8 @@ function ROMPDP11(parmsROM)
             sFileURL = web.getHost() + DumpAPI.ENDPOINT + '?' + DumpAPI.QUERY.FILE + '=' + this.sFilePath + '&' + DumpAPI.QUERY.FORMAT + '=' + DumpAPI.FORMAT.BYTES + '&' + DumpAPI.QUERY.DECIMAL + '=true';
         }
         var rom = this;
-        web.getResource(sFileURL, null, true, function(sURL, sResponse, nErrorCode) {
-            rom.doneLoad(sURL, sResponse, nErrorCode);
+        web.getResource(sFileURL, null, true, function doneLoad(sURL, sResponse, nErrorCode) {
+            rom.finishLoad(sURL, sResponse, nErrorCode);
         });
     }
 }
@@ -183,14 +183,14 @@ ROMPDP11.prototype.powerDown = function(fSave, fShutdown)
 };
 
 /**
- * doneLoad(sURL, sData, nErrorCode)
+ * finishLoad(sURL, sData, nErrorCode)
  *
  * @this {ROMPDP11}
  * @param {string} sURL
  * @param {string} sData
  * @param {number} nErrorCode (response from server if anything other than 200)
  */
-ROMPDP11.prototype.doneLoad = function(sURL, sData, nErrorCode)
+ROMPDP11.prototype.finishLoad = function(sURL, sData, nErrorCode)
 {
     if (nErrorCode) {
         this.notice("Unable to load ROM resource (error " + nErrorCode + ": " + sURL + ")");
@@ -212,8 +212,8 @@ ROMPDP11.prototype.doneLoad = function(sURL, sData, nErrorCode)
 /**
  * initROM()
  *
- * This function is called by both initBus() and doneLoad(), but it cannot copy the initial data into place
- * until after initBus() has received the Bus component AND doneLoad() has received the data.  When both those
+ * This function is called by both initBus() and finishLoad(), but it cannot copy the initial data into place
+ * until after initBus() has received the Bus component AND finishLoad() has received the data.  When both those
  * criteria are satisfied, the component becomes "ready".
  *
  * @this {ROMPDP11}
