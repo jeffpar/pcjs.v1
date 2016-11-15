@@ -222,7 +222,7 @@ CPUStatePDP11.prototype.initRegs = function()
     this.dstMode = this.dstReg = this.dstAddr = 0;
 
     this.trapPSW = -1;
-    this.resetRegs();
+    this.resetMMU();
 };
 
 /**
@@ -233,15 +233,15 @@ CPUStatePDP11.prototype.initRegs = function()
 CPUStatePDP11.prototype.resetCPU = function()
 {
     this.bus.reset();
-    this.resetRegs();
+    this.resetMMU();
 };
 
 /**
- * resetRegs()
+ * resetMMU()
  *
  * @this {CPUStatePDP11}
  */
-CPUStatePDP11.prototype.resetRegs = function()
+CPUStatePDP11.prototype.resetMMU = function()
 {
     this.regSL = 0xff;          // 177774
     this.regErr = 0;            // 177766

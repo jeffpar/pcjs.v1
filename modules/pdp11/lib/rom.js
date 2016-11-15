@@ -65,7 +65,7 @@ if (NODE) {
  */
 function ROMPDP11(parmsROM)
 {
-    Component.call(this, "ROM", parmsROM, ROMPDP11);
+    Component.call(this, "ROM", parmsROM, ROMPDP11, MessagesPDP11.ROM);
 
     this.abInit = null;
     this.aSymbols = null;
@@ -289,11 +289,16 @@ ROMPDP11.prototype.addROM = function(addr)
          * of the IOPAGE address space, by installing I/O handlers for the entire range that return the corresponding
          * bytes of the current ROM image on reads, and ignore any writes (which I'm only assuming is how a typical
          * ROM "device" deals with writes; if we remove the write handler, then writes will fault).
+         *
+         * TODO: It would be more efficient if we parsed ROM data as words rather than bytes, and then installed
+         * only word handlers instead of only byte handlers.  It was done this way purely for historical reasons (ie,
+         * because that's how other PCjs machines parse their ROMs).  For now, all this means is that executing code
+         * out of ROM will be slower than out of RAM -- although that's often true in the real world as well.
          */
         var IOTable = {
             [addr]: [ROMPDP11.prototype.readROMByte, ROMPDP11.prototype.writeROMByte, null, null, null, this.sizeROM >> 1]
         };
-        if (this.bus.addIOTable(this, IOTable, MessagesPDP11.ROM, this.idComponent)) {
+        if (this.bus.addIOTable(this, IOTable)) {
             this.fRetainROM = true;
             return true;
         }

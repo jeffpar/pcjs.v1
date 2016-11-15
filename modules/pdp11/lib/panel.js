@@ -33,13 +33,14 @@
 "use strict";
 
 if (NODE) {
-    var str          = require("../../shared/lib/strlib");
-    var usr          = require("../../shared/lib/usrlib");
-    var web          = require("../../shared/lib/weblib");
-    var Component    = require("../../shared/lib/component");
-    var PDP11        = require("./defines");
-    var BusPDP11     = require("./bus");
-    var MemoryPDP11  = require("./memory");
+    var str           = require("../../shared/lib/strlib");
+    var usr           = require("../../shared/lib/usrlib");
+    var web           = require("../../shared/lib/weblib");
+    var Component     = require("../../shared/lib/component");
+    var PDP11         = require("./defines");
+    var BusPDP11      = require("./bus");
+    var MemoryPDP11   = require("./memory");
+    var MessagesPDP11 = require("./messages");
 }
 
 /**
@@ -53,7 +54,7 @@ if (NODE) {
  */
 function PanelPDP11(parmsPanel)
 {
-    Component.call(this, "Panel", parmsPanel, PanelPDP11);
+    Component.call(this, "Panel", parmsPanel, PanelPDP11, MessagesPDP11.PANEL);
 
     /*
      * If there are any live registers, LEDs, etc, to display, this will provide a count.
@@ -573,8 +574,7 @@ PanelPDP11.prototype.processStart = function(value, index)
          * is depressed, "the computer system will be cleared."  I take it to mean that it performs
          * the equivalent of a RESET instruction.
          */
-        this.bus.reset();
-        this.cpu.resetRegs();
+        this.cpu.resetCPU();
         /*
          * The PDP-11/70 Handbook goes on to say: "If the system needs to be initialized but execution
          * is not wanted, the START switch should be depressed while the HALT/ENABLE switch is in the HALT

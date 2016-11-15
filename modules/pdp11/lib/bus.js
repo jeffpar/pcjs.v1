@@ -1272,7 +1272,7 @@ BusPDP11.prototype.getMemorySize = function(type)
 };
 
 /**
- * addIOHandlers(start, end, fnReadByte, fnWriteByte, fnReadWord, fnWriteWord, sName)
+ * addIOHandlers(start, end, fnReadByte, fnWriteByte, fnReadWord, fnWriteWord, msgCategory, sName)
  *
  * Add I/O notification handlers to the master list (aIOHandlers).  The start and end addresses are typically
  * relative to the starting IOPAGE address, but they can also be absolute; we simply mask all addresses with
@@ -1281,7 +1281,9 @@ BusPDP11.prototype.getMemorySize = function(type)
  * CAVEATS: If a conflict is reported, a partial set of handlers may still have been added.  There is no mechanism
  * for removing handlers, since this is considered an initialization function.  And finally, when a range of addresses
  * is used, each successive address is advanced by 2, so if you really want to add a handler for a "+1" (usually odd)
- * address, then you must add it individually.
+ * address, then you must add it individually.  Failure to do is not necessarily fatal, because the IOController's
+ * fallback behavior for an odd address is to call the byte handler for the preceding even address, but the byte
+ * handler must be prepared for that (the handlers installed by ROM component's addROM() function are a good example).
  *
  * @this {BusPDP11}
  * @param {number} start address
@@ -1309,18 +1311,16 @@ BusPDP11.prototype.addIOHandlers = function(start, end, fnReadByte, fnWriteByte,
 };
 
 /**
- * addIOTable(component, table, msgCategory, sName)
+ * addIOTable(component, table)
  *
  * Add I/O notification handlers from the specified table (a batch version of addIOHandlers).
  *
  * @this {BusPDP11}
  * @param {Component} component
  * @param {Object} table
- * @param {number} [msgCategory] (default is BUS)
- * @param {string} [sName]
  * @return {boolean} (true if entire range successfully registered, false if any conflicts)
  */
-BusPDP11.prototype.addIOTable = function(component, table, msgCategory, sName)
+BusPDP11.prototype.addIOTable = function(component, table)
 {
     for (var port in table) {
         var addr = +port;
@@ -1336,7 +1336,6 @@ BusPDP11.prototype.addIOTable = function(component, table, msgCategory, sName)
         var fnWriteByte = afn[1]? afn[1].bind(component) : null;
         var fnReadWord = afn[2]? afn[2].bind(component) : null;
         var fnWriteWord = afn[3]? afn[3].bind(component) : null;
-        var nRegs = afn[5] || 1;
 
         /*
          * As discussed in the IOController comments above, when handlers are being registered for these
@@ -1360,9 +1359,11 @@ BusPDP11.prototype.addIOTable = function(component, table, msgCategory, sName)
         }
 
         var sReg = afn[4];
+        var nRegs = afn[5] || 1;
+
         for (var iReg = 0; iReg < nRegs; iReg++, addr += 2) {
             if (sReg && nRegs > 1) sReg = afn[4] + iReg;
-            if (!this.addIOHandlers(addr, addr, fnReadByte, fnWriteByte, fnReadWord, fnWriteWord, msgCategory || MessagesPDP11.BUS, sReg || sName)) {
+            if (!this.addIOHandlers(addr, addr, fnReadByte, fnWriteByte, fnReadWord, fnWriteWord, component.bitsMessage || MessagesPDP11.BUS, sReg || component.idComponent)) {
                 return false;
             }
         }

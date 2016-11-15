@@ -282,7 +282,7 @@ RL11.prototype.initBus = function(cmp, bus, cpu, dbg)
 
     this.triggerInterrupt = this.cpu.addTrigger(PDP11.RL11.VEC, PDP11.RL11.PRI);
 
-    bus.addIOTable(this, RL11.UNIBUS_IOTABLE, MessagesPDP11.DISK);
+    bus.addIOTable(this, RL11.UNIBUS_IOTABLE);
     bus.addResetHandler(this.reset.bind(this));
 
     this.addDisk("None", RL11.SOURCE.NONE, true);
