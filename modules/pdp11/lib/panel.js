@@ -60,8 +60,8 @@ function PanelPDP11(parmsPanel)
      * TODO: Add some UI for fDisplayLiveRegs (either an XML property, or a UI checkbox, or both).
      */
     this.cLiveRegs = 0;
-    this.nPeriodicCount = 0;
-    this.nPeriodicLimit = 60;
+    this.nDisplayCount = 0;
+    this.nDisplayLimit = 60;
     this.fDisplayLiveRegs = true;
 
     /*
@@ -968,7 +968,7 @@ PanelPDP11.prototype.setData = function(value, fActive)
  * Called by the Computer component at intervals to update registers, LEDs, etc.
  *
  * @this {PanelPDP11}
- * @param {number} [nUpdate] (< 0 for forced, > 0 for periodic, undefined otherwise)
+ * @param {number} [nUpdate] (< 0 for forced, > 0 for periodic, 0 otherwise)
  */
 PanelPDP11.prototype.updateDisplay = function(nUpdate)
 {
@@ -985,7 +985,7 @@ PanelPDP11.prototype.updateDisplay = function(nUpdate)
              * LEDs are considered cheap, register displays are not.  So we'll skip the latter if this
              * is a periodic update AND our periodic update counter hasn't reached the periodic update limit.
              */
-            if (!(nUpdate > 0 && (this.nPeriodicCount += nUpdate) < this.nPeriodicLimit)) {
+            if (nUpdate <= 0 || (this.nDisplayCount += nUpdate) >= this.nDisplayLimit) {
                 for (var i = 0; i < this.cpu.regsGen.length; i++) {
                     this.displayValue('R'+i, this.cpu.regsGen[i]);
                 }
@@ -995,7 +995,7 @@ PanelPDP11.prototype.updateDisplay = function(nUpdate)
                 this.displayValue("ZF", (regPSW & PDP11.PSW.ZF)? 1 : 0, 1);
                 this.displayValue("VF", (regPSW & PDP11.PSW.VF)? 1 : 0, 1);
                 this.displayValue("CF", (regPSW & PDP11.PSW.CF)? 1 : 0, 1);
-                this.nPeriodicCount = 0;
+                this.nDisplayCount = 0;
             }
 
             /*

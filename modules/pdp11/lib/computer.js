@@ -1067,8 +1067,8 @@ ComputerPDP11.prototype.updateDisplays = function(nUpdate)
      * nUpdate will also be -1 whenever the Debugger has modified the state of the machine, implying that we're
      * not sure what, if anything, actually changed.
      */
-    if (this.cpu) this.cpu.updateDisplay(nUpdate);
-    if (this.panel) this.panel.updateDisplay(nUpdate);
+    if (this.cpu) this.cpu.updateDisplay(nUpdate || 0);
+    if (this.panel) this.panel.updateDisplay(nUpdate || 0);
 };
 
 /**
