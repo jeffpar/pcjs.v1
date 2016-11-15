@@ -873,7 +873,8 @@ DevicePDP11.prototype.readSIZE = function(addr)
     /*
      * TODO: getMemorySize() returns an aggregate total, so if there are multiple discontiguous
      * chunks of RAM, this could return the wrong result; another interface, getHighestAddress(),
-     * might be required.
+     * might be required.  Then again, perhaps multiple discontiguous chunks of RAM are not permitted
+     * in PDP-11 machines.
      */
     return addr == PDP11.UNIBUS.LSIZE? ((this.bus.getMemorySize(MemoryPDP11.TYPE.RAM) >> 6) - 1) : 0;
 };

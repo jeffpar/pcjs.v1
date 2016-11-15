@@ -263,6 +263,19 @@ CPUStatePDP11.prototype.resetMMU = function()
 };
 
 /**
+ * getMMUState()
+ *
+ * Returns bit 0 set if 22-bit, bit 1 set if 18-bit, or bit 2 set if 16-bit; used by the Panel component.
+ *
+ * @this {CPUStatePDP11}
+ * @return {number}
+ */
+CPUStatePDP11.prototype.getMMUState = function()
+{
+    return this.mmuEnable? ((this.regMMR3 & PDP11.MMR3.MMU_22BIT)? 1 : 2) : 4;
+};
+
+/**
  * setMemoryAccess()
  *
  * Define handlers and DSPACE setting appropriate for the current MMU mode, in order to eliminate

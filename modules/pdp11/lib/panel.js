@@ -1007,13 +1007,13 @@ PanelPDP11.prototype.updateDisplay = function(nUpdate)
             this.updateAddr(nUpdate > 0 && fRunning && !fWaiting? this.cpu.getPC() : this.regAddr);
             this.updateData(this.regDisplay);
 
+            var bits = this.cpu.getMMUState();
             /*
-             * Set bit to 1 (22-bit), 2 (18-bit), or 4 (16-bit)
+             * Bit 0 set if 22-bit, bit 1 set if 18-bit, bit 2 set if 16-bit
              */
-            var bit = this.cpu.mmuEnable? ((this.cpu.regMMR3 & PDP11.MMR3.MMU_22BIT)? 1 : 2) : 4;
-            this.updateLED(PanelPDP11.LED.B22, bit & 1);
-            this.updateLED(PanelPDP11.LED.B18, bit & 2);
-            this.updateLED(PanelPDP11.LED.B16, bit & 4);
+            this.updateLED(PanelPDP11.LED.B22, bits & 1);
+            this.updateLED(PanelPDP11.LED.B18, bits & 2);
+            this.updateLED(PanelPDP11.LED.B16, bits & 4);
         }
     }
 };
