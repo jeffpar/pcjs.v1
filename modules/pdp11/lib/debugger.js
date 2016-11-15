@@ -322,7 +322,7 @@ if (DEBUGGER) {
             0x7200: [DebuggerPDP11.OPS.DIV,     DebuggerPDP11.OP_DST,         DebuggerPDP11.OP_SRCREG],     // 071RSS
             0x7400: [DebuggerPDP11.OPS.ASH,     DebuggerPDP11.OP_DST,         DebuggerPDP11.OP_SRCREG],     // 072RSS
             0x7600: [DebuggerPDP11.OPS.ASHC,    DebuggerPDP11.OP_DST,         DebuggerPDP11.OP_SRCREG],     // 073RSS
-            0x7800: [DebuggerPDP11.OPS.XOR,     DebuggerPDP11.OP_SRCREG,      DebuggerPDP11.OP_DST],        // 074RSS
+            0x7800: [DebuggerPDP11.OPS.XOR,     DebuggerPDP11.OP_SRCREG,      DebuggerPDP11.OP_DST],        // 074RDD
             0x7E00: [DebuggerPDP11.OPS.SOB,     DebuggerPDP11.OP_SRCREG,      DebuggerPDP11.OP_DSTOFF]      // 077Rnn
         },
         0xFF00: {

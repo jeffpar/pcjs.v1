@@ -1739,7 +1739,7 @@ PDP11.opSWAB = function(opCode)
  */
 PDP11.opSXT = function(opCode)
 {
-    this.updateNZVFlags(this.writeDstWord(opCode, this.getNF? 0xffff : 0));
+    this.updateNZVFlags(this.writeDstWord(opCode, this.getNF()? 0xffff : 0));
     this.nStepCycles -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
 };
 
@@ -1846,7 +1846,8 @@ PDP11.opWAIT = function(opCode)
  */
 PDP11.opXOR = function(opCode)
 {
-    this.updateDstWord(opCode, this.readSrcWord(opCode), PDP11.fnXOR);
+    var reg = (opCode >> PDP11.SRCMODE.SHIFT) & PDP11.OPREG.MASK;
+    this.updateDstWord(opCode, this.regsGen[reg], PDP11.fnXOR);
     this.nStepCycles -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
 };
 
