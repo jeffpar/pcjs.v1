@@ -655,7 +655,7 @@ PanelPDP11.prototype.processContinue = function(value, index)
             var dbg = this.dbg;
             if (dbg && !dbg.isBusy(true)) {
                 dbg.setBusy(true);
-                dbg.stepCPU(0);
+                dbg.stepCPU(0, null);
                 dbg.setBusy(false);
             }
             else {

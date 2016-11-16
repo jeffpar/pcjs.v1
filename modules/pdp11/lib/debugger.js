@@ -559,7 +559,7 @@ if (DEBUGGER) {
                     var fCompleted = false;
                     if (!dbg.isBusy(true)) {
                         dbg.setBusy(true);
-                        fCompleted = dbg.stepCPU(fRepeat? 1 : 0);
+                        fCompleted = dbg.stepCPU(fRepeat? 1 : 0, null);
                         dbg.setBusy(false);
                     }
                     return fCompleted;
@@ -1317,13 +1317,17 @@ if (DEBUGGER) {
      *
      * @this {DebuggerPDP11}
      * @param {number} nCycles (0 for one instruction without checking breakpoints)
-     * @param {boolean} [fRegs] is true to display registers after step (default is false)
+     * @param {boolean|null} [fRegs] is true to display registers after step (default is false; use null for previous setting)
      * @param {boolean} [fUpdateDisplays] is false to disable Computer display updates (default is true)
      * @return {boolean}
      */
     DebuggerPDP11.prototype.stepCPU = function(nCycles, fRegs, fUpdateDisplays)
     {
         if (!this.checkCPU()) return false;
+
+        if (fRegs === null) {
+            fRegs = (!this.sTraceCmdPrev || this.sTraceCmdPrev == "tr");
+        }
 
         this.nCycles = 0;
 
@@ -2773,12 +2777,12 @@ if (DEBUGGER) {
     {
         if (sAddr == '?') {
             this.println("breakpoint commands:");
-            this.println("\tbp [a]\tset exec breakpoint at addr [a]");
-            this.println("\tbr [a]\tset read breakpoint at addr [a]");
-            this.println("\tbw [a]\tset write breakpoint at addr [a]");
-            this.println("\tbc [a]\tclear breakpoint at addr [a]");
+            this.println("\tbp [#]\tset exec breakpoint at addr #");
+            this.println("\tbr [#]\tset read breakpoint at addr #");
+            this.println("\tbw [#]\tset write breakpoint at addr #");
+            this.println("\tbc [#]\tclear breakpoint at addr #");
             this.println("\tbl\tlist all breakpoints");
-            this.println("\tbn [n]\tbreak after [n] instruction(s)");
+            this.println("\tbn [#]\tbreak after # instruction(s)");
             return;
         }
 
@@ -3681,6 +3685,15 @@ if (DEBUGGER) {
      */
     DebuggerPDP11.prototype.doTrace = function(sCmd, sCount)
     {
+        if (sCount == '?') {
+            this.println("trace commands:");
+            this.println("\tt  [#]\ttrace # instructions");
+            this.println("\ttr [#]\ttrace # instructions with register updates");
+            this.println("\ttc [#]\ttrace # cycles");
+            this.println("note: bn [#] to break after # instructions is much faster");
+            return;
+        }
+
         var dbg = this;
         var fRegs = (sCmd != "t");
         var nCount = this.parseValue(sCount, null, true) || 1;
@@ -3689,6 +3702,7 @@ if (DEBUGGER) {
             nCycles = nCount;
             nCount = 1;
         }
+        this.sTraceCmdPrev = sCmd;
         web.onCountRepeat(
             nCount,
             function onCountStep() {

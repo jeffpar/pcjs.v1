@@ -254,8 +254,8 @@ CPUStatePDP11.prototype.resetMMU = function()
     this.mmuLastMode = 0;
     this.mmuMask = 0x3ffff;
 
-    this.lastAI = 0;            // last auto-incs and/or auto-decs; this gets propagated to MMR1
-    this.lastPC = 0;            // last PC at the time of getOpcode(); this get propagated to MMR2
+    this.lastAI = 0;            // last auto-incs and/or auto-decs; this is propagated to MMR1 as appropriate
+    this.lastPC = 0;            // last PC at the time of getOpcode(); this is propagated to MMR2 as appropriate
 
     this.resetTriggers();
 
@@ -327,6 +327,15 @@ CPUStatePDP11.prototype.setMMR0 = function(newMMR0)
 {
     newMMR0 &= 0xf381;
     if (this.regMMR0 != newMMR0) {
+        /*
+         * If updates to MMR1 and MMR2 are being shut off (ie, MMR0.ABORT bits are transitioning from clear to set),
+         * then do one final sync with their real-time counterparts (lastAI and lastPC).
+         */
+        if (!(this.regMMR0 & PDP11.MMR0.ABORT) && (newMMR0 & PDP11.MMR0.ABORT)) {
+            this.assert(!(this.lastAI & ~0xffff));
+            this.regMMR1 = this.lastAI & 0xffff;
+            this.regMMR2 = this.lastPC;
+        }
         this.regMMR0 = newMMR0;
         this.mmuLastMode = (newMMR0 >> 5) & 3;
         this.mmuLastPage = (newMMR0 >> 1) & 0xf;
@@ -352,7 +361,12 @@ CPUStatePDP11.prototype.setMMR0 = function(newMMR0)
  */
 CPUStatePDP11.prototype.getMMR1 = function()
 {
+    /*
+     * If updates to MMR1 have not been shut off (ie, MMR0.ABORT bits are clear),
+     * then we are always allowed to sync MMR1 with it real-time counterpart (lastAI).
+     */
     if (!(this.regMMR0 & PDP11.MMR0.ABORT)) {
+        this.assert(!(this.lastAI & ~0xffff));
         this.regMMR1 = this.lastAI & 0xffff;
     }
     var result = this.regMMR1;
@@ -370,6 +384,10 @@ CPUStatePDP11.prototype.getMMR1 = function()
  */
 CPUStatePDP11.prototype.getMMR2 = function()
 {
+    /*
+     * If updates to MMR2 have not been shut off (ie, MMR0.ABORT bits are clear),
+     * then we are always allowed to sync MMR2 with it real-time counterpart (lastPC).
+     */
     if (!(this.regMMR0 & PDP11.MMR0.ABORT)) {
         this.regMMR2 = this.lastPC;
     }

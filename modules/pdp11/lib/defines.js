@@ -364,11 +364,11 @@ var PDP11 = {
      * is enabled, the top 5 bits of an address select one of the 31 mapping registers, and the bottom 13 bits
      * are then added to the contents of the selected mapping register.
      *
-     * ES6 ALERT: By using octal constants, this is the first place I'm dipping my toe into ECMAScript 6 waters.
-     * If you're loading this raw source code into your browser, then by now (2016) you're almost certainly using
-     * an ES6-aware browser.  Everyone else should be using code compiled by Google's Closure Compiler, which
-     * we configure to produce code that's backward-compatible with ES5 (for example, octal constants are
-     * converted to decimal values).
+     * ES6 ALERT: By using octal constants, I'm finally dipping my toe into ES6 (aka ECMAScript 2015) waters.
+     * You'll even see a few binary constants below, too.  If you're loading this raw source code into your browser,
+     * then by now (2016) you're almost certainly using an ES6-aware browser.  Production sites should be using code
+     * compiled by Google's Closure Compiler, which we configure to produce code that's backward-compatible with ES5
+     * (for example, all binary, octal, and hex constants are converted to decimal values).
      *
      * For more details: https://github.com/google/closure-compiler/wiki/ECMAScript6
      */
@@ -498,22 +498,22 @@ var PDP11 = {
         UDPAR6:     0o177674,   //                                  User D Page Address Register 6
         UDPAR7:     0o177676,   //                                  User D Page Address Register 7
 
-        R0SET0:     0o177700,
-        R1SET0:     0o177701,
-        R2SET0:     0o177702,
-        R3SET0:     0o177703,
-        R4SET0:     0o177704,
-        R5SET0:     0o177705,
-        R6KERNEL:   0o177706,
-        R7KERNEL:   0o177707,
-        R0SET1:     0o177710,
-        R1SET1:     0o177711,
-        R2SET1:     0o177712,
-        R3SET1:     0o177713,
-        R4SET1:     0o177714,
-        R5SET1:     0o177715,
-        R6SUPER:    0o177716,
-        R6USER:     0o177717,
+        R0SET0:     0o177700,   //
+        R1SET0:     0o177701,   //
+        R2SET0:     0o177702,   //
+        R3SET0:     0o177703,   //
+        R4SET0:     0o177704,   //
+        R5SET0:     0o177705,   //
+        R6KERNEL:   0o177706,   //
+        R7KERNEL:   0o177707,   //
+        R0SET1:     0o177710,   //
+        R1SET1:     0o177711,   //
+        R2SET1:     0o177712,   //
+        R3SET1:     0o177713,   //
+        R4SET1:     0o177714,   //
+        R5SET1:     0o177715,   //
+        R6SUPER:    0o177716,   //
+        R6USER:     0o177717,   //
 
         /*
          * This next group of registers is largely ignored; all accesses are routed to regsControl[],
