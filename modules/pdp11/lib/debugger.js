@@ -583,7 +583,7 @@ if (DEBUGGER) {
     {
         if (this.controlDebug) {
             /*
-             * This seems to be recommended work-around to prevent the browser from scrolling the focused element
+             * This is the recommended work-around to prevent the browser from scrolling the focused element
              * into view.  The CPU is not a visual component, so when the CPU wants to set focus, the primary intent
              * is to ensure that keyboard input is fielded properly.
              */

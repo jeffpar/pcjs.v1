@@ -239,6 +239,15 @@ SerialPortPDP11.prototype.setBinding = function(sType, sBinding, control, sValue
             return true;
         };
 
+        control.onpaste = function onKeyPress(event) {
+            if (event.stopPropagation) event.stopPropagation();
+            if (event.preventDefault) event.preventDefault();
+            var clipboardData = event.clipboardData || window.clipboardData;
+            if (clipboardData) {
+                serial.receiveData(clipboardData.getData('Text'));
+            }
+        };
+
         /*
          * Now that we've added an onkeypress handler that calls preventDefault() for ALL keys, the control
          * itself no longer needs the "readonly" attribute; we primarily need to remove it for iOS browsers,

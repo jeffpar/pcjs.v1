@@ -180,12 +180,12 @@ CPUStatePDP11.prototype.initRegs = function()
     this.regsAlt = [            // Alternate R0 - R5
         0, 0, 0, 0, 0, 0
     ];
-    this.regsAltStack = [       // Alternate R6 stack pointers (KERNEL, SUPER, illegal, USER)
+    this.regsAltStack = [       // Alternate R6 stack pointers (KERNEL, SUPER, UNUSED, USER)
         0, 0, 0, 0
     ];
     this.mmuMode = 0;           // current memory management mode (see PDP11.MODE.KERNEL | SUPER | UNUSED | USER)
     this.mmuLastPage = 0;
-    this.mmuLastVirtual = 0;
+ // this.mmuLastVirtual = 0;
 	this.mapMMR3 = [4,2,0,1];   // map from mode to MMR3 I/D bit
     this.mmuPDR = [             // memory management PDR registers by mode
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],   // kernel 0
@@ -254,8 +254,7 @@ CPUStatePDP11.prototype.resetMMU = function()
     this.mmuLastMode = 0;
     this.mmuMask = 0x3ffff;
 
-    this.lastAI = 0;            // last auto-incs and/or auto-decs; this is propagated to MMR1 as appropriate
-    this.lastPC = 0;            // last PC at the time of getOpcode(); this is propagated to MMR2 as appropriate
+    this.lastOp = 0;            // stores the PC and any auto-incs or auto-decs from the last opcode; used to update MMR1 and MMR2
 
     this.resetTriggers();
 
@@ -290,12 +289,14 @@ CPUStatePDP11.prototype.setMemoryAccess = function()
 {
     if (this.mmuEnable) {
         this.addrDSpace = PDP11.ACCESS.DSPACE;
+        this.addrIOPage = (this.regMMR3 & PDP11.MMR3.MMU_22BIT)? BusPDP11.IOPAGE_22BIT : BusPDP11.IOPAGE_18BIT;
         this.getAddr = this.getVirtualAddrByMode;
         this.readWord = this.readWordFromVirtual;
         this.writeWord = this.writeWordToVirtual;
         this.bus.setIOPageRange((this.regMMR3 & PDP11.MMR3.MMU_22BIT)? 22 : 18);
     } else {
         this.addrDSpace = 0;
+        this.addrIOPage = BusPDP11.IOPAGE_16BIT;
         this.getAddr = this.getPhysicalAddrByMode;
         this.readWord = this.readWordFromPhysical;
         this.writeWord = this.writeWordToPhysical;
@@ -306,6 +307,8 @@ CPUStatePDP11.prototype.setMemoryAccess = function()
 /**
  * getMMR0()
  *
+ * NOTE: It's OK to bypass this function if you're only interested in bits that always stored directly in MMR0.
+ *
  * 15 | 14 | 13 | 12 | 11 | 10 | 9 | 8 | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 MMR0
  * nonr leng read trap unus unus ena mnt cmp  -mode- i/d  --page--   enable
  *
@@ -314,7 +317,11 @@ CPUStatePDP11.prototype.setMemoryAccess = function()
  */
 CPUStatePDP11.prototype.getMMR0 = function()
 {
-    return (this.regMMR0 & 0xf381) | (this.mmuLastMode << 5) | (this.mmuLastPage << 1);
+    /*
+     * Technically, we never allow the UNUSED bits to be set, so there's no point going out of our way
+     * to clear them, but it doesn't hurt to include them in the mask.
+     */
+    return (this.regMMR0 & ~(PDP11.MMR0.UNUSED | PDP11.MMR0.PAGE | PDP11.MMR0.MODE)) | (this.mmuLastMode << 5) | (this.mmuLastPage << 1);
 };
 
 /**
@@ -325,17 +332,22 @@ CPUStatePDP11.prototype.getMMR0 = function()
  */
 CPUStatePDP11.prototype.setMMR0 = function(newMMR0)
 {
-    newMMR0 &= 0xf381;
+    newMMR0 &= ~PDP11.MMR0.UNUSED;
+
     if (this.regMMR0 != newMMR0) {
-        /*
-         * If updates to MMR1 and MMR2 are being shut off (ie, MMR0.ABORT bits are transitioning from clear to set),
-         * then do one final sync with their real-time counterparts (lastAI and lastPC).
-         */
-        if (!(this.regMMR0 & PDP11.MMR0.ABORT) && (newMMR0 & PDP11.MMR0.ABORT)) {
-            this.assert(!(this.lastAI & ~0xffff));
-            this.regMMR1 = this.lastAI & 0xffff;
-            this.regMMR2 = this.lastPC;
+        if (newMMR0 & PDP11.MMR0.ABORT) {
+            /*
+             * If updates to MMR0[1-7], MMR1, and MMR2 are being shut off (ie, MMR0.ABORT bits are transitioning
+             * from clear to set), then do one final sync with their real-time counterparts in lastOp.
+             */
+            if (!(this.regMMR0 & PDP11.MMR0.ABORT)) {
+                this.regMMR1 = (this.lastOp >> 16) & 0xffff;
+                this.regMMR2 = this.lastOp & 0xffff;
+            }
         }
+        /*
+         * NOTE: We are not protecting the read-only state of the COMPLETED bit here; that's handled by writeMMR0().
+         */
         this.regMMR0 = newMMR0;
         this.mmuLastMode = (newMMR0 >> 5) & 3;
         this.mmuLastPage = (newMMR0 >> 1) & 0xf;
@@ -363,11 +375,10 @@ CPUStatePDP11.prototype.getMMR1 = function()
 {
     /*
      * If updates to MMR1 have not been shut off (ie, MMR0.ABORT bits are clear),
-     * then we are always allowed to sync MMR1 with it real-time counterpart (lastAI).
+     * then we are allowed to sync MMR1 with its real-time counterpart in lastOp.
      */
     if (!(this.regMMR0 & PDP11.MMR0.ABORT)) {
-        this.assert(!(this.lastAI & ~0xffff));
-        this.regMMR1 = this.lastAI & 0xffff;
+        this.regMMR1 = (this.lastOp >> 16) & 0xffff;
     }
     var result = this.regMMR1;
     if (result & 0xff00) {
@@ -386,10 +397,10 @@ CPUStatePDP11.prototype.getMMR2 = function()
 {
     /*
      * If updates to MMR2 have not been shut off (ie, MMR0.ABORT bits are clear),
-     * then we are always allowed to sync MMR2 with it real-time counterpart (lastPC).
+     * then we are allowed to sync MMR2 with its real-time counterpart in lastOp.
      */
     if (!(this.regMMR0 & PDP11.MMR0.ABORT)) {
-        this.regMMR2 = this.lastPC;
+        this.regMMR2 = this.lastOp & 0xffff;
     }
     return this.regMMR2;
 };
@@ -633,8 +644,7 @@ CPUStatePDP11.prototype.setNF = function()
 CPUStatePDP11.prototype.getOpcode = function()
 {
     var pc = this.regsGen[PDP11.REG.PC];
-    this.lastAI = 0;
-    this.lastPC = pc;
+    this.lastOp = pc;
     /*
      * If PC is unaligned, a BUS trap will be generated, and because it will generate an
      * exception, the next line (the equivalent of advancePC(2)) will not be executed, ensuring that
@@ -682,7 +692,7 @@ CPUStatePDP11.prototype.getPC = function()
  */
 CPUStatePDP11.prototype.getLastPC = function()
 {
-    return this.lastPC;
+    return this.lastOp & 0xffff;
 };
 
 /**
@@ -1308,8 +1318,7 @@ CPUStatePDP11.prototype.trap = function(vector, flag, reason)
         reason = PDP11.REASON.RED;
     }
 
-    this.lastPC = vector;
-    this.lastAI = 0;
+    this.lastOp = vector;
 
     /*
      * Read from kernel D space
@@ -1521,40 +1530,44 @@ CPUStatePDP11.prototype.mapVirtualToPhysical = function(virtualAddress, accessFl
      * This can happen when the DSTMODE (MAINT) bit of MMR0 is set but *not* the ENABLED bit.
      */
     if (!(accessFlags & this.mmuEnable)) {
-        return virtualAddress;
+        physicalAddress = virtualAddress & 0xffff;
+     // this.mmuLastVirtual = physicalAddress;
+        if (physicalAddress >= BusPDP11.IOPAGE_16BIT) {
+            physicalAddress |= this.addrIOPage;
+        }
+        return physicalAddress;
     }
-
-    this.mmuLastVirtual = virtualAddress;
 
     page = virtualAddress >> 13;
     if (!(this.regMMR3 & this.mapMMR3[this.mmuMode])) page &= 7;
     pdr = this.mmuPDR[this.mmuMode][page];
     physicalAddress = ((this.mmuPAR[this.mmuMode][page] << 6) + (virtualAddress & 0x1fff)) & this.mmuMask;
+ // this.mmuLastVirtual = virtualAddress;
 
-    var errorMask = 0;
+    var newMMR0 = 0;
     switch (pdr & 0x7) {
     case 1:                         // read-only with trap
-        errorMask = PDP11.MMR0.TRAP_MMU;
+        newMMR0 = PDP11.MMR0.TRAP_MMU;
         /* falls through */
     case 2:                         // read-only
         pdr |= 0x80;                // Set A bit
         if (accessFlags & PDP11.ACCESS.WRITE) {
-            errorMask = PDP11.MMR0.ABORT_RO;
+            newMMR0 = PDP11.MMR0.ABORT_RO;
         }
         break;
     case 4:                         // read-write with read-write trap
-        errorMask = PDP11.MMR0.TRAP_MMU;
+        newMMR0 = PDP11.MMR0.TRAP_MMU;
         /* falls through */
     case 5:                         // read-write with write trap
         if (accessFlags & PDP11.ACCESS.WRITE) {
-            errorMask = PDP11.MMR0.TRAP_MMU;
+            newMMR0 = PDP11.MMR0.TRAP_MMU;
         }
         /* falls through */
     case 6:                         // read-write: set A & W bits
         pdr |= ((accessFlags & PDP11.ACCESS.WRITE) ? 0xc0 : 0x80);
         break;
     default:
-        errorMask = PDP11.MMR0.ABORT_NR;
+        newMMR0 = PDP11.MMR0.ABORT_NR;
         break;
     }
 
@@ -1562,12 +1575,12 @@ CPUStatePDP11.prototype.mapVirtualToPhysical = function(virtualAddress, accessFl
         if (pdr & 0x8) {            // expand downwards
             if (pdr & 0x7f00) {
                 if ((virtualAddress & 0x1fc0) < ((pdr >> 2) & 0x1fc0)) {
-                    errorMask |= PDP11.MMR0.ABORT_PL;
+                    newMMR0 |= PDP11.MMR0.ABORT_PL;
                 }
             }
         } else {                    // expand upwards
             if ((virtualAddress & 0x1fc0) > ((pdr >> 2) & 0x1fc0)) {
-                errorMask |= PDP11.MMR0.ABORT_PL;
+                newMMR0 |= PDP11.MMR0.ABORT_PL;
             }
         }
     }
@@ -1583,11 +1596,15 @@ CPUStatePDP11.prototype.mapVirtualToPhysical = function(virtualAddress, accessFl
     }
 
     var fAbort = false;
-    if (errorMask) {
-        if (errorMask & PDP11.MMR0.ABORT) {
-            if (this.trapPSW >= 0) errorMask |= 0x80;   // Instruction complete
+    if (newMMR0) {
+        if (newMMR0 & PDP11.MMR0.ABORT) {
+            if (this.trapPSW >= 0) {
+                newMMR0 |= PDP11.MMR0.COMPLETED;
+            }
             if (!(this.regMMR0 & PDP11.MMR0.ABORT)) {
-                this.regMMR0 |= errorMask | (this.mmuLastMode << 5) | (this.mmuLastPage << 1);
+                newMMR0 |= (this.mmuLastMode << 5) | (this.mmuLastPage << 1);
+                this.assert(!(newMMR0 & ~PDP11.MMR0.UPDATE));
+                this.setMMR0((this.regMMR0 & ~PDP11.MMR0.UPDATE) | newMMR0);
             }
             fAbort = true;
         }
@@ -1658,7 +1675,7 @@ CPUStatePDP11.prototype.pushWord = function(data)
 {
     var virtualAddress = (this.regsGen[6] - 2) & 0xffff;
     this.regsGen[6] = virtualAddress;           // BSD needs SP updated before any fault :-(
-    this.lastAI = (this.lastAI << 8) | 0xf6;
+    this.lastOp = (this.lastOp & 0xffff) | ((this.lastOp & ~0xffff) << 8) | (0x00f6 << 16);
     this.checkStackLimit(0, virtualAddress);
     this.writeWord(virtualAddress, data);
 };
@@ -1843,7 +1860,7 @@ CPUStatePDP11.prototype.getAddrByMode = function(mode, reg, accessFlags)
     }
 
     this.regsGen[reg] = (this.regsGen[reg] + step) & 0xffff;
-    this.lastAI = (this.lastAI << 8) | ((step << 3) & 0xf8) | reg;
+    this.lastOp = (this.lastOp & 0xffff) | ((this.lastOp & ~0xffff) << 8) | ((((step << 3) & 0xf8) | reg) << 16);
 
     /*
      * NOTE: We had to eliminate the test for "(accessFlags & PDP11.ACCESS.WRITE)", because DEC's
@@ -2068,7 +2085,7 @@ CPUStatePDP11.prototype.readWordFromPrevSpace = function(opCode, accessFlags)
  */
 CPUStatePDP11.prototype.writeWordToPrevSpace = function(opCode, accessFlags, data)
 {
-    this.lastAI = 0x0016;
+    this.lastOp = (this.lastOp & 0xffff) | (0x0016 << 16);
     var reg = this.dstReg = opCode & PDP11.OPREG.MASK;
     var mode = this.dstMode = (opCode & PDP11.OPMODE.MASK) >> PDP11.OPMODE.SHIFT;
     if (!mode) {

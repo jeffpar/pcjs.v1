@@ -219,7 +219,7 @@ DevicePDP11.prototype.readMMR0 = function(addr)
  */
 DevicePDP11.prototype.writeMMR0 = function(data, addr)
 {
-    this.cpu.setMMR0(data);
+    this.cpu.setMMR0((data & ~PDP11.MMR0.COMPLETED) | (this.cpu.regMMR0 & PDP11.MMR0.COMPLETED));
 };
 
 /**
