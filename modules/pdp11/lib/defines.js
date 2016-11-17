@@ -351,6 +351,24 @@ var PDP11 = {
         MMU_22BIT:  0x0010,
         UNIBUS_MAP: 0x0020      // UNIBUS map relocation enabled
     },
+    PDR: {
+        ACF: {
+            NR:     0x0,        // non-resident, abort all accesses
+            RO1:    0x1,        // read-only, abort on write attempt, memory management trap on read (11/70 only)
+            RO:     0x2,        // read-only, abort on write attempt
+            U1:     0x3,        // unused, abort all accesses--reserved for future use
+            RW1:    0x4,        // read/write, memory management trap upon completion of a read or write
+            RW2:    0x5,        // read/write, memory management trap upon completion of a write (11/70 only)
+            RW:     0x6,        // read/write, no system trap/abort action
+            U2:     0x7         // unused, abort all accesses--reserved for future use
+        },
+        ED:         0x0080,     // expansion direction (if set, the page expands downward from block number 127)
+        UNUSED:     0x0030,
+        MODIFIED:   0x0040,     // page has been written (bit cleared when either PDR or PAR is written)
+        ACCESSED:   0x0080,     // page has been accessed (bit cleared when either PDR or PAR is written) (11/70 only)
+        PLF:        0x7F00,     // page length field
+        BC:         0x8000      // bypass cache (11/44 only)
+    },
     /*
      * Assorted special (UNIBUS) addresses
      *

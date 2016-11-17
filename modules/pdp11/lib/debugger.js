@@ -1207,26 +1207,22 @@ if (DEBUGGER) {
                     value = cpu.regSL;
                     break;
                 case DebuggerPDP11.REG_MMR0:
-                    value = panel.getMMR0();
+                    value = cpu.getMMR0();
                     break;
                 case DebuggerPDP11.REG_MMR1:
-                    value = panel.getMMR1();
+                    value = cpu.getMMR1();
                     break;
                 case DebuggerPDP11.REG_MMR2:
-                    value = panel.getMMR2();
+                    value = cpu.getMMR2();
                     break;
                 case DebuggerPDP11.REG_MMR3:
-                    value = panel.getMMR3();
+                    value = cpu.getMMR3();
                     break;
                 case DebuggerPDP11.REG_AR:
-                    if (panel) {
-                        value = panel.getAR();
-                    }
+                    if (panel) value = panel.getAR();
                     break;
                 case DebuggerPDP11.REG_DR:
-                    if (panel) {
-                        value = panel.getDR();
-                    }
+                    if (panel) value = panel.getDR();
                     break;
                 case DebuggerPDP11.REG_SR:
                     if (panel && panel.hasSwitches()) {

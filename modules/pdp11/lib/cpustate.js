@@ -318,11 +318,11 @@ CPUStatePDP11.prototype.setMemoryAccess = function()
  */
 CPUStatePDP11.prototype.getMMR0 = function()
 {
-    /*
-     * Technically, we never allow the UNUSED bits to be set, so there's no point going out of our way
-     * to clear them, but it doesn't hurt to include them in the mask.
-     */
-    return (this.regMMR0 & ~(PDP11.MMR0.UNUSED | PDP11.MMR0.PAGE | PDP11.MMR0.MODE)) | (this.mmuLastMode << 5) | (this.mmuLastPage << 1);
+    var data = this.regMMR0;
+    if (!(data & PDP11.MMR0.ABORT)) {
+        data = (data & ~(PDP11.MMR0.UNUSED | PDP11.MMR0.PAGE | PDP11.MMR0.MODE)) | (this.mmuLastMode << 5) | (this.mmuLastPage << 1);
+    }
+    return data;
 };
 
 /**
@@ -1279,19 +1279,6 @@ CPUStatePDP11.prototype.updateSubFlags = function(result, src, dst)
 };
 
 /**
- * panic(reason)
- *
- * TODO: Something.
- *
- * @this {CPUStatePDP11}
- * @param {number} reason
- */
-CPUStatePDP11.prototype.panic = function(reason)
-{
-    console.log("panic(" + reason + ")");
-};
-
-/**
  * trap(vector, flag, reason)
  *
  * trap() handles all the trap/abort functions.  It reads the trap vector from kernel
@@ -1433,7 +1420,7 @@ CPUStatePDP11.prototype.getTrapStatus = function()
 /**
  * mapUnibus(addr)
  *
- * If bits 18-21 of addr are all set (which is implied by addr >= BusPDP11.IOPAGE_UNIBUS aka 0x3C0000),
+ * If bits 18-21 of addr are all set (which is implied by addr >= BusPDP11.UNIBUS_22BIT aka 0x3C0000),
  * then we have a 22-bit address pointing to the top 256Kb range, so if the UNIBUS relocation map is enabled,
  * we must pass the lower 18 bits of that address through the map.
  *
@@ -1470,8 +1457,19 @@ CPUStatePDP11.prototype.mapUnibus = function(addr)
     var idx = (addr >> 13) & 0x1f;
     if (idx < 31) {
         if (this.regMMR3 & PDP11.MMR3.UNIBUS_MAP) {
+            /*
+             * The UNIBUS map relocation is enabled
+             */
             addr = (this.unibusMap[idx] + (addr & 0x1ffe)) & 0x3ffffe;
-            if (addr >= BusPDP11.IOPAGE_UNIBUS && addr < BusPDP11.IOPAGE_22BIT) this.panic(898);
+            this.assert(addr < BusPDP11.UNIBUS_22BIT || addr >= BusPDP11.IOPAGE_22BIT);
+        } else {
+            /*
+             * Since UNIBUS map relocation is NOT enabled, then as explained above:
+             *
+             *      If the UNIBUS map relocation is not enabled, an incoming 18-bit UNIBUS address has 4 leading zeroes added for
+             *      referencing a 22-bit physical address. The lower 18 bits are the same. No relocation is performed.
+             */
+            addr &= ~BusPDP11.UNIBUS_22BIT;
         }
     }
     return addr;
@@ -1607,7 +1605,6 @@ CPUStatePDP11.prototype.mapVirtualToPhysical = function(virtualAddress, accessFl
         this.mmuLastPage = page;
     }
 
-    var fAbort = false;
     if (newMMR0) {
         if (newMMR0 & PDP11.MMR0.ABORT) {
             if (this.trapPSW >= 0) {
@@ -1618,11 +1615,11 @@ CPUStatePDP11.prototype.mapVirtualToPhysical = function(virtualAddress, accessFl
                 this.assert(!(newMMR0 & ~PDP11.MMR0.UPDATE));
                 this.setMMR0((this.regMMR0 & ~PDP11.MMR0.UPDATE) | newMMR0);
                 /*
-                 * I've decided to NOT set fAbort if MMR0 already indicates an ABORT condition,
+                 * I've decided to NOT abort if MMR0 already indicates an ABORT condition,
                  * because otherwise we run the risk of infinitely looping; eg, we call trap(), which
                  * calls mapVirtualToPhysical() on the trap vector, which faults again, etc.
                  */
-                fAbort = true;
+                this.trap(PDP11.TRAP.MMU, 0, PDP11.REASON.ABORT);
             }
         }
         if (!(this.regMMR0 & (PDP11.MMR0.ABORT | PDP11.MMR0.TRAP_MMU))) {
@@ -1636,9 +1633,6 @@ CPUStatePDP11.prototype.mapVirtualToPhysical = function(virtualAddress, accessFl
                     this.opFlags |= PDP11.OPFLAG.TRAP_MMU;
                 }
             }
-        }
-        if (fAbort) {                                   // don't abort until the end, because it throws an exception
-            this.trap(PDP11.TRAP.MMU, 0, PDP11.REASON.ABORT);
         }
     }
     return physicalAddress;

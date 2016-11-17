@@ -130,7 +130,60 @@ DevicePDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
     bus.addIOTable(this, DevicePDP11.UNIBUS_IOTABLE);
     bus.addResetHandler(this.reset.bind(this));
 
+    if (DEBUGGER && dbg) {
+        dbg.messageDump(MessagesPDP11.MMU, function onDumpMMU(asArgs) {
+            device.dumpMMU(asArgs);
+        });
+    }
     this.setReady();
+};
+
+/**
+ * dumpMMU(asArgs)
+ *
+ * @this {DevicePDP11}
+ * @param {Array.<string>} asArgs
+ */
+DevicePDP11.prototype.dumpMMU = function(asArgs)
+{
+    if (DEBUGGER) {
+        var cpu = this.cpu;
+        this.dumpRegs("KIPDR", cpu.mmuPDR[0], 0, asArgs[0]);
+        this.dumpRegs("KDPDR", cpu.mmuPDR[0], 8, asArgs[0]);
+        this.dumpRegs("KIPAR", cpu.mmuPAR[0], 0, asArgs[0]);
+        this.dumpRegs("KDPAR", cpu.mmuPAR[0], 8, asArgs[0], true);
+        this.dumpRegs("SIPDR", cpu.mmuPDR[1], 0, asArgs[0]);
+        this.dumpRegs("SDPDR", cpu.mmuPDR[1], 8, asArgs[0]);
+        this.dumpRegs("SIPAR", cpu.mmuPAR[1], 0, asArgs[0]);
+        this.dumpRegs("SDPAR", cpu.mmuPAR[1], 8, asArgs[0], true);
+        this.dumpRegs("UIPDR", cpu.mmuPDR[3], 0, asArgs[0]);
+        this.dumpRegs("UDPDR", cpu.mmuPDR[3], 8, asArgs[0]);
+        this.dumpRegs("UIPAR", cpu.mmuPAR[3], 0, asArgs[0]);
+        this.dumpRegs("UDPAR", cpu.mmuPAR[3], 8, asArgs[0], true);
+    }
+};
+
+/**
+ * dumpRegs(sName, aRegs, offset, sFilter, fBreak)
+ *
+ * @this {DevicePDP11}
+ * @param {string} sName
+ * @param {Array.<number>} aRegs
+ * @param {number} offset
+ * @param {string} sFilter
+ * @param {boolean} [fBreak]
+ */
+DevicePDP11.prototype.dumpRegs = function(sName, aRegs, offset, sFilter, fBreak)
+{
+    if (DEBUGGER) {
+        var dbg = this.dbg;
+        if (sFilter && sName.indexOf(sFilter.toUpperCase()) < 0) return;
+        var sDump = sName + ":";
+        for (var i = 0; i < 8; i++) {
+            sDump += ' ' + dbg.toStrBase(aRegs[offset + i]);
+        }
+        dbg.println(sDump + (fBreak? '\n' : ''));
+    }
 };
 
 /**
@@ -435,7 +488,10 @@ DevicePDP11.prototype.readKIPDR = function(addr)
 DevicePDP11.prototype.writeKIPDR = function(data, addr)
 {
     var reg = (addr >> 1) & 7;
-    this.cpu.mmuPDR[0][reg] = data & 0xff0f;
+    this.cpu.mmuPDR[0][reg] = data &= 0xff0f;
+    if (this.messageEnabled(MessagesPDP11.MMU)) {
+        this.printMessage("writeKIPDR[" + reg + "]: " + str.toOct(data), true);
+    }
 };
 
 /**
@@ -962,20 +1018,23 @@ DevicePDP11.prototype.readMB = function(addr)
  */
 DevicePDP11.prototype.writeMB = function(data, addr)
 {
-    if (!(addr & 0x1)) data &= 0xff;    // Required for KB11-CM without MFPT instruction
+    if (!(addr & 0x1)) {
+        data &= 0xff;           // required for KB11-CM without MFPT instruction
+    }
     this.cpu.regMB = data;
 };
 
 /**
- * readPIR(addr)
+ * readPIR(addr, fPreWrite)
  *
  * @this {DevicePDP11}
  * @param {number} addr (eg, PDP11.UNIBUS.PIR or 177772)
+ * @param {boolean} [fPreWrite]
  * @return {number}
  */
-DevicePDP11.prototype.readPIR = function(addr)
+DevicePDP11.prototype.readPIR = function(addr, fPreWrite)
 {
-    if (!addr) return 0;        // the caller is preparing to write the low or high byte; these are the bits to return for the other byte
+    if (fPreWrite) return 0;
     return this.cpu.getPIR();
 };
 
@@ -992,15 +1051,16 @@ DevicePDP11.prototype.writePIR = function(data, addr)
 };
 
 /**
- * readSL(addr)
+ * readSL(addr, fPreWrite)
  *
  * @this {DevicePDP11}
  * @param {number} addr (eg, PDP11.UNIBUS.SL or 177774)
+ * @param {boolean} [fPreWrite]
  * @return {number}
  */
-DevicePDP11.prototype.readSL = function(addr)
+DevicePDP11.prototype.readSL = function(addr, fPreWrite)
 {
-    if (!addr) return 0;        // the caller is preparing to write the low or high byte; these are the bits to return for the other byte
+    if (fPreWrite) return 0;
     return this.cpu.getSL();
 };
 
