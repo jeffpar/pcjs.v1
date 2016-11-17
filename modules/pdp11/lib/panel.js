@@ -177,6 +177,50 @@ PanelPDP11.LED = {
 };
 
 /**
+ * getAR()
+ *
+ * @this {PanelPDP11}
+ * @return {number} (current ADDRESS register)
+ */
+PanelPDP11.prototype.getAR = function()
+{
+    return this.regAddr;
+};
+
+/**
+ * setAR(value)
+ *
+ * @this {PanelPDP11}
+ * @param {number} value (new ADDRESS register)
+ */
+PanelPDP11.prototype.setAR = function(value)
+{
+    this.updateAddr(this.regAddr = value);
+};
+
+/**
+ * getDR()
+ *
+ * @this {PanelPDP11}
+ * @return {number} (current DISPLAY register)
+ */
+PanelPDP11.prototype.getDR = function()
+{
+    return this.regDisplay;
+};
+
+/**
+ * setDR(value)
+ *
+ * @this {PanelPDP11}
+ * @param {number} value (new DISPLAY register)
+ */
+PanelPDP11.prototype.setDR = function(value)
+{
+    this.updateData(this.regDisplay = value);
+};
+
+/**
  * getSR()
  *
  * @this {PanelPDP11}
@@ -1004,7 +1048,7 @@ PanelPDP11.prototype.updateDisplay = function(nUpdate)
              * TODO: There is currently no mechanism for selecting regData over regDisplay;
              * we are acting as if the DATASEL switch setting is locked to "DISPLAY REGISTER".
              */
-            this.updateAddr(nUpdate > 0 && fRunning && !fWaiting? this.cpu.getPC() : this.regAddr);
+            this.updateAddr(nUpdate > 0 && fRunning && !fWaiting? this.cpu.getLastAddr() : this.regAddr);
             this.updateData(this.regDisplay);
 
             var bits = this.cpu.getMMUState();

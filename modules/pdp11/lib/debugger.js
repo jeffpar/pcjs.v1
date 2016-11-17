@@ -266,7 +266,32 @@ if (DEBUGGER) {
      * Register numbers 0-7 are reserved for cpu.regsGen, 8-15 are reserved for cpu.regsAlt, and 16-19 for cpu.regsStack.
      */
     DebuggerPDP11.REG_PSW       = 20;
-    DebuggerPDP11.REG_SR        = 21;           // SWITCH register; see Panel's getSR() and setSR()
+    DebuggerPDP11.REG_PIR       = 21;
+    DebuggerPDP11.REG_ERR       = 22;
+    DebuggerPDP11.REG_SL        = 23;
+    DebuggerPDP11.REG_MMR0      = 24;
+    DebuggerPDP11.REG_MMR1      = 25;
+    DebuggerPDP11.REG_MMR2      = 26;
+    DebuggerPDP11.REG_MMR3      = 27;
+    DebuggerPDP11.REG_AR        = 28;           // ADDRESS register; see Panel's getAR() and setAR()
+    DebuggerPDP11.REG_DR        = 29;           // DISPLAY/DATA register; see Panel's getDR() and setDR()
+    DebuggerPDP11.REG_SR        = 30;           // SWITCH register; see Panel's getSR() and setSR()
+
+    DebuggerPDP11.REGS = {
+        "SP":   6,
+        "PC":   7,
+        "PS":   DebuggerPDP11.REG_PSW,
+        "IR":   DebuggerPDP11.REG_PIR,
+        "ER":   DebuggerPDP11.REG_ERR,
+        "SL":   DebuggerPDP11.REG_SL,
+        "MMR0": DebuggerPDP11.REG_MMR0,
+        "MMR1": DebuggerPDP11.REG_MMR1,
+        "MMR2": DebuggerPDP11.REG_MMR2,
+        "MMR3": DebuggerPDP11.REG_MMR3,
+        "AR":   DebuggerPDP11.REG_AR,
+        "DR":   DebuggerPDP11.REG_DR,
+        "SR":   DebuggerPDP11.REG_SR
+    };
 
     /*
      * Operand type masks; anything that's not covered by OP_SRC or OP_DST must be a OP_OTHER value.
@@ -1118,24 +1143,14 @@ if (DEBUGGER) {
      */
     DebuggerPDP11.prototype.getRegIndex = function(sReg, off)
     {
-        var iReg = -1;
         sReg = sReg.toUpperCase();
-        switch(sReg) {
-        case "SP":
-            iReg = 6;
-            break;
-        case "PC":
-            iReg = 7;
-            break;
-        case "SR":
-            iReg = 21;
-            break;
-        default:
+        var iReg = DebuggerPDP11.REGS[sReg];
+        if (iReg == null) {
+            iReg = -1;
             if (sReg.charAt(0) == "R") {
                 iReg = +sReg.charAt(1);
                 if (iReg < 0 || iReg > 7) iReg = -1;
             }
-            break;
         }
         return iReg;
     };
@@ -1156,7 +1171,7 @@ if (DEBUGGER) {
      * getRegValue(iReg)
      *
      * Register numbers 0-7 are reserved for cpu.regsGen, 8-15 are reserved for cpu.regsAlt,
-     * 16-19 for cpu.regsAltStack, 20 for regPSW, and 21 for SR (SWITCH register).
+     * 16-19 for cpu.regsAltStack, 20 for regPSW, etc.
      *
      * @this {DebuggerPDP11}
      * @param {number} iReg
@@ -1175,11 +1190,50 @@ if (DEBUGGER) {
             else if (iReg < 20) {
                 value = this.cpu.regsAltStack[iReg-16];
             }
-            else if (iReg == DebuggerPDP11.REG_PSW) {
-                value = this.cpu.getPSW();
-            }
-            else if (iReg == DebuggerPDP11.REG_SR && this.panel && this.panel.hasSwitches()) {
-                value = this.panel.getSR();
+            else {
+                var cpu = this.cpu;
+                var panel = this.panel;
+                switch(iReg) {
+                case DebuggerPDP11.REG_PSW:
+                    value = this.cpu.getPSW();
+                    break;
+                case DebuggerPDP11.REG_PIR:
+                    value = cpu.regPIR;
+                    break;
+                case DebuggerPDP11.REG_ERR:
+                    value = cpu.regErr;
+                    break;
+                case DebuggerPDP11.REG_SL:
+                    value = cpu.regSL;
+                    break;
+                case DebuggerPDP11.REG_MMR0:
+                    value = panel.getMMR0();
+                    break;
+                case DebuggerPDP11.REG_MMR1:
+                    value = panel.getMMR1();
+                    break;
+                case DebuggerPDP11.REG_MMR2:
+                    value = panel.getMMR2();
+                    break;
+                case DebuggerPDP11.REG_MMR3:
+                    value = panel.getMMR3();
+                    break;
+                case DebuggerPDP11.REG_AR:
+                    if (panel) {
+                        value = panel.getAR();
+                    }
+                    break;
+                case DebuggerPDP11.REG_DR:
+                    if (panel) {
+                        value = panel.getDR();
+                    }
+                    break;
+                case DebuggerPDP11.REG_SR:
+                    if (panel && panel.hasSwitches()) {
+                        value = panel.getSR();
+                    }
+                    break;
+                }
             }
         }
         return value;
@@ -1371,6 +1425,7 @@ if (DEBUGGER) {
          * is calling us in a loop, in which case it will perform its own updateDisplays() when it's done.
          */
         if (fUpdateDisplays !== false) {
+            if (this.panel && this.panel.stop) this.panel.stop();
             this.cmp.updateDisplays(-1);
         }
 
@@ -2393,28 +2448,86 @@ if (DEBUGGER) {
         else if (iReg >= 16 && iReg < 20) {
             sReg = "S" + (iReg - 16) + '=' + this.toStrBase(cpu.regsAltStack[iReg - 16]);
         }
-        else if (iReg == DebuggerPDP11.REG_PSW) {
-            sReg = "PS=" + this.toStrBase(cpu.getPSW());
-        }
-        else if (iReg == DebuggerPDP11.REG_SR && this.panel && this.panel.hasSwitches()) {
-            sReg = "SR=" + this.toStrBase(this.panel.getSR(), 3);
+        else {
+            switch(iReg) {
+            case DebuggerPDP11.REG_PSW:
+                sReg = "PS=" + this.toStrBase(cpu.getPSW());
+                break;
+            case DebuggerPDP11.REG_PIR:
+                sReg = "IR=" + this.toStrBase(cpu.regPIR);
+                break;
+            case DebuggerPDP11.REG_ERR:
+                sReg = "ER=" + this.toStrBase(cpu.regErr);
+                break;
+            case DebuggerPDP11.REG_SL:
+                sReg = "SL=" + this.toStrBase(cpu.regSL);
+                break;
+            case DebuggerPDP11.REG_MMR0:
+                sReg = "MMR0=" + this.toStrBase(cpu.getMMR0());
+                break;
+            case DebuggerPDP11.REG_MMR1:
+                sReg = "MMR1=" + this.toStrBase(cpu.getMMR1());
+                break;
+            case DebuggerPDP11.REG_MMR2:
+                sReg = "MMR2=" + this.toStrBase(cpu.getMMR2());
+                break;
+            case DebuggerPDP11.REG_MMR3:
+                sReg = "MMR3=" + this.toStrBase(cpu.getMMR3());
+                break;
+            case DebuggerPDP11.REG_AR:
+                if (this.panel) {
+                    sReg = "AR=" + this.toStrBase(this.panel.getAR(), 3);
+                }
+                break;
+            case DebuggerPDP11.REG_DR:
+                if (this.panel) {
+                    sReg = "DR=" + this.toStrBase(this.panel.getDR());
+                }
+                break;
+            case DebuggerPDP11.REG_SR:
+                if (this.panel && this.panel.hasSwitches()) {
+                    sReg = "SR=" + this.toStrBase(this.panel.getSR(), 3);
+                }
+                break;
+            }
         }
         if (sReg) sReg += ' ';
         return sReg;
     };
 
     /**
-     * getRegDump()
+     * getMiscDump()
      *
      * Sample register dump:
      *
-     *      R0=xxxx R1=xxxx R2=xxxx R3=xxxx R4=xxxx R5=xxxx
-     *      SP=xxxx PC=xxxx PS=xxxx T0 N0 Z0 V0 C0
+     *      MMR0=xxxxxx MMR1=xxxxxx MMR2=xxxxxx MMR3=xxxxxx ER=xxxxxx
      *
      * @this {DebuggerPDP11}
      * @return {string}
      */
-    DebuggerPDP11.prototype.getRegDump = function()
+    DebuggerPDP11.prototype.getMiscDump = function()
+    {
+        var sDump = "";
+        sDump += this.getRegOutput(DebuggerPDP11.REG_MMR0) + this.getRegOutput(DebuggerPDP11.REG_MMR1);
+        sDump += this.getRegOutput(DebuggerPDP11.REG_MMR2) + this.getRegOutput(DebuggerPDP11.REG_MMR3) + this.getRegOutput(DebuggerPDP11.REG_ERR);
+        sDump += '\n';
+        sDump += this.getRegOutput(DebuggerPDP11.REG_SR) + this.getRegOutput(DebuggerPDP11.REG_AR) + this.getRegOutput(DebuggerPDP11.REG_DR);
+        return sDump;
+    };
+
+    /**
+     * getRegDump(fMisc)
+     *
+     * Sample register dump:
+     *
+     *      R0=xxxxxx R1=xxxxxx R2=xxxxxx R3=xxxxxx R4=xxxxxx R5=xxxxxx
+     *      SP=xxxxxx PC=xxxxxx PS=xxxxxx IR=xxxxxx SL=xxxxxx T0 N0 Z0 V0 C0
+     *
+     * @this {DebuggerPDP11}
+     * @param {boolean} [fMisc] (true to include misc registers)
+     * @return {string}
+     */
+    DebuggerPDP11.prototype.getRegDump = function(fMisc)
     {
         var i;
         var sDump = "";
@@ -2423,8 +2536,9 @@ if (DEBUGGER) {
         }
         sDump += '\n';
         sDump += this.getRegOutput(PDP11.REG.SP) + this.getRegOutput(PDP11.REG.PC);
-        sDump += this.getRegOutput(DebuggerPDP11.REG_PSW) + this.getRegOutput(DebuggerPDP11.REG_SR);
+        sDump += this.getRegOutput(DebuggerPDP11.REG_PSW) + this.getRegOutput(DebuggerPDP11.REG_PIR) + this.getRegOutput(DebuggerPDP11.REG_SL);
         sDump += this.getFlagOutput('T') + this.getFlagOutput('N') + this.getFlagOutput('Z') + this.getFlagOutput('V') + this.getFlagOutput('C');
+        if (fMisc) sDump += '\n' + this.getMiscDump();
         return sDump;
     };
 
@@ -3390,77 +3504,115 @@ if (DEBUGGER) {
         if (asArgs && asArgs[1] == '?') {
             this.println("register commands:");
             this.println("\tr\tdump registers");
+            this.println("\trm\tdump misc registers");
             this.println("\trx [#]\tset flag or register x to [#]");
             return;
         }
 
+        var fMisc = false;
         var cpu = this.cpu;
         if (fInstruction == null) fInstruction = true;
 
         if (asArgs != null && asArgs.length > 1) {
             var sReg = asArgs[1];
-            var sValue = null;
-            var i = sReg.indexOf('=');
-            if (i > 0) {
-                sValue = sReg.substr(i + 1);
-                sReg = sReg.substr(0, i);
-            }
-            else if (asArgs.length > 2) {
-                sValue = asArgs[2];
+
+            if (sReg == 'm') {
+                fMisc = true;
             }
             else {
-                this.println("missing value for " + asArgs[1]);
-                return;
-            }
-
-            var w = this.parseExpression(sValue);
-            if (w === undefined) return;
-
-            var sRegMatch = sReg.toUpperCase();
-            switch (sRegMatch) {
-            case "SP":
-            case "R6":
-                cpu.setSP(w);
-                break;
-            case "PC":
-            case "R7":
-                cpu.setPC(w);
-                this.dbgAddrNextCode = this.newAddr(cpu.getPC());
-                break;
-            case "N":
-                if (w) cpu.setNF(); else cpu.clearNF();
-                break;
-            case "Z":
-                if (w) cpu.setZF(); else cpu.clearZF();
-                break;
-            case "V":
-                if (w) cpu.setVF(); else cpu.clearVF();
-                break;
-            case "C":
-                if (w) cpu.setCF(); else cpu.clearCF();
-                break;
-            case "SR":
-                if (this.panel && this.panel.hasSwitches()) {
-                    this.panel.setSR(w);
-                    break;
+                var sValue = null;
+                var i = sReg.indexOf('=');
+                if (i > 0) {
+                    sValue = sReg.substr(i + 1);
+                    sReg = sReg.substr(0, i);
                 }
-                /* falls through */
-            default:
-                if (sRegMatch.charAt(0) == 'R') {
-                    var iReg = +sRegMatch.charAt(1);
-                    if (iReg >= 0 && iReg < 6) {
-                        cpu.regsGen[iReg] = w & 0xffff;
+                else if (asArgs.length > 2) {
+                    sValue = asArgs[2];
+                }
+                else {
+                    this.println("missing value for " + asArgs[1]);
+                    return;
+                }
+
+                var w = this.parseExpression(sValue);
+                if (w === undefined) return;
+
+                var sRegMatch = sReg.toUpperCase();
+                switch (sRegMatch) {
+                case "SP":
+                case "R6":
+                    cpu.setSP(w);
+                    break;
+                case "PC":
+                case "R7":
+                    cpu.setPC(w);
+                    this.dbgAddrNextCode = this.newAddr(cpu.getPC());
+                    break;
+                case "N":
+                    if (w) cpu.setNF(); else cpu.clearNF();
+                    break;
+                case "Z":
+                    if (w) cpu.setZF(); else cpu.clearZF();
+                    break;
+                case "V":
+                    if (w) cpu.setVF(); else cpu.clearVF();
+                    break;
+                case "C":
+                    if (w) cpu.setCF(); else cpu.clearCF();
+                    break;
+                case "PS":
+                    cpu.setPSW(w);
+                    break;
+                case "IR":
+                    cpu.setPIR(w);
+                    break;
+                case "ER":
+                    cpu.regErr = w;
+                    fMisc = true;
+                    break;
+                case "SL":
+                    cpu.setSL(w);
+                    break;
+                case "MMR0":
+                    cpu.setMMR0(w);
+                    fMisc = true;
+                    break;
+                case "MMR3":
+                    cpu.setMMR3(w);
+                    fMisc = true;
+                    break;
+                case "AR":
+                    if (this.panel) this.panel.setAR(w);
+                    fMisc = true;
+                    break;
+                case "DR":
+                    if (this.panel) this.panel.setDR(w);
+                    fMisc = true;
+                    break;
+                case "SR":
+                    if (this.panel && this.panel.hasSwitches()) {
+                        this.panel.setSR(w);
+                        fMisc = true;
                         break;
                     }
+                    /* falls through */
+                default:
+                    if (sRegMatch.charAt(0) == 'R') {
+                        var iReg = +sRegMatch.charAt(1);
+                        if (iReg >= 0 && iReg < 6) {
+                            cpu.regsGen[iReg] = w & 0xffff;
+                            break;
+                        }
+                    }
+                    this.println("unknown register: " + sReg);
+                    return;
                 }
-                this.println("unknown register: " + sReg);
-                return;
+                this.cmp.updateDisplays();
+                this.println("updated registers:");
             }
-            this.cmp.updateDisplays();
-            this.println("updated registers:");
         }
 
-        this.println(this.getRegDump());
+        this.println(this.getRegDump(fMisc));
 
         if (fInstruction) {
             this.dbgAddrNextCode = this.newAddr(cpu.getPC());
@@ -3716,7 +3868,7 @@ if (DEBUGGER) {
                  * a final updateDisplays().
                  */
                 if (dbg.panel && dbg.panel.stop) dbg.panel.stop();
-                dbg.cmp.updateDisplays();
+                dbg.cmp.updateDisplays(-1);
                 dbg.setBusy(false);
             }
         );

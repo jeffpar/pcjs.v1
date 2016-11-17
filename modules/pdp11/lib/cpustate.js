@@ -243,17 +243,18 @@ CPUStatePDP11.prototype.resetCPU = function()
  */
 CPUStatePDP11.prototype.resetMMU = function()
 {
-    this.regSL = 0xff;          // 177774
-    this.regErr = 0;            // 177766
-    this.regPIR = 0;            // 177772
     this.regMMR0 = 0;           // 177572
     this.regMMR1 = 0;           // 177574
     this.regMMR2 = 0;           // 177576
     this.regMMR3 = 0;           // 172516
+    this.regErr = 0;            // 177766
+    this.regPIR = 0;            // 177772
+    this.regSL = 0xff;          // 177774
     this.mmuEnable = 0;         // MMU enabled for PDP11.ACCESS.READ or PDP11.ACCESS.WRITE
     this.mmuLastMode = 0;
     this.mmuMask = 0x3ffff;
 
+    this.lastAddr = 0;          // this is queried by the Panel when it's not using its own ADDRESS register
     this.lastOp = 0;            // stores the PC and any auto-incs or auto-decs from the last opcode; used to update MMR1 and MMR2
 
     this.resetTriggers();
@@ -682,6 +683,17 @@ CPUStatePDP11.prototype.advancePC = function(off)
 CPUStatePDP11.prototype.getPC = function()
 {
     return this.regsGen[PDP11.REG.PC];
+};
+
+/**
+ * getLastAddr()
+ *
+ * @this {CPUStatePDP11}
+ * @return {number}
+ */
+CPUStatePDP11.prototype.getLastAddr = function()
+{
+    return this.lastAddr;
 };
 
 /**
@@ -1605,8 +1617,13 @@ CPUStatePDP11.prototype.mapVirtualToPhysical = function(virtualAddress, accessFl
                 newMMR0 |= (this.mmuLastMode << 5) | (this.mmuLastPage << 1);
                 this.assert(!(newMMR0 & ~PDP11.MMR0.UPDATE));
                 this.setMMR0((this.regMMR0 & ~PDP11.MMR0.UPDATE) | newMMR0);
+                /*
+                 * I've decided to NOT set fAbort if MMR0 already indicates an ABORT condition,
+                 * because otherwise we run the risk of infinitely looping; eg, we call trap(), which
+                 * calls mapVirtualToPhysical() on the trap vector, which faults again, etc.
+                 */
+                fAbort = true;
             }
-            fAbort = true;
         }
         if (!(this.regMMR0 & (PDP11.MMR0.ABORT | PDP11.MMR0.TRAP_MMU))) {
             /*
@@ -1999,7 +2016,7 @@ CPUStatePDP11.prototype.getVirtualAddrByMode = function(mode, reg, accessFlags)
  */
 CPUStatePDP11.prototype.readWordFromPhysical = function(physicalAddress)
 {
-    return this.bus.getWord(physicalAddress);
+    return this.bus.getWord(this.lastAddr = physicalAddress);
 };
 
 /**
@@ -2013,7 +2030,7 @@ CPUStatePDP11.prototype.readWordFromPhysical = function(physicalAddress)
  */
 CPUStatePDP11.prototype.readWordFromVirtual = function(virtualAddress)
 {
-    return this.bus.getWord(this.mapVirtualToPhysical(virtualAddress, PDP11.ACCESS.READ_WORD));
+    return this.bus.getWord(this.lastAddr = this.mapVirtualToPhysical(virtualAddress, PDP11.ACCESS.READ_WORD));
 };
 
 /**
@@ -2027,7 +2044,7 @@ CPUStatePDP11.prototype.readWordFromVirtual = function(virtualAddress)
  */
 CPUStatePDP11.prototype.writeWordToPhysical = function(physicalAddress, data)
 {
-    this.bus.setWord(physicalAddress, data & 0xffff);
+    this.bus.setWord(this.lastAddr = physicalAddress, data & 0xffff);
 };
 
 /**
@@ -2041,7 +2058,7 @@ CPUStatePDP11.prototype.writeWordToPhysical = function(physicalAddress, data)
  */
 CPUStatePDP11.prototype.writeWordToVirtual = function(virtualAddress, data)
 {
-    this.bus.setWord(this.mapVirtualToPhysical(virtualAddress, PDP11.ACCESS.WRITE_WORD), data);
+    this.bus.setWord(this.lastAddr = this.mapVirtualToPhysical(virtualAddress, PDP11.ACCESS.WRITE_WORD), data);
 };
 
 /**
