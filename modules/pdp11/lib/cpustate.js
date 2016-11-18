@@ -1566,6 +1566,23 @@ CPUStatePDP11.prototype.mapVirtualToPhysical = function(virtualAddress, accessFl
 
     if (this.nDisableTraps) return physicalAddress;
 
+    /*
+     * This next bit is the weirdness that Paul mentions in the function description above:
+     *
+     *      As an aside it turns out that it is the memory management unit that does odd address and
+     *      non-existent memory trapping: who knew? :-) I thought these would have been handled at access time.
+     *
+     * I haven't imported the non-existent memory checks he performed (yet); I would like to see the problems
+     * in action first.
+     *
+     * As for the ODDADDR error that's supposed to generate a BUS error rather than an MMU error, this happens
+     * in TEST #122 ("KT BEND") in the "EKBEE1" diagnostic (PC 076456).
+     */
+    if ((physicalAddress & 0x1) && !(accessFlags & PDP11.ACCESS.BYTE)) {
+        this.regErr |= PDP11.CPUERR.ODDADDR;
+        this.trap(PDP11.TRAP.BUS, 0, physicalAddress);
+    }
+
     var newMMR0 = 0;
     switch (pdr & PDP11.PDR.ACF.MASK) {
 
