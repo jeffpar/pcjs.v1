@@ -330,21 +330,21 @@ var PDP11 = {
     MMR0: {                     // 177572
         ENABLED:    0x0001,     // 000001 address relocation enabled
         PAGE_NUM:   0x000E,     // 000016 page number of last fault
-        PAGE_D:     0x0010,     // 000020 last fault occurred in D space
+        PAGE_D:     0x0010,     // 000020 last fault occurred in D space (11/44 and 11/70 only)
         PAGE:       0x001E,     // 000176 (all of the PAGE bits)
         MODE:       0x0060,     // 000140 processor mode as of last fault
-        COMPLETED:  0x0080,     // 000200 last instruction completed (R/O)
+        COMPLETED:  0x0080,     // 000200 last instruction completed (R/O) (11/70 only)
         DSTMODE:    0x0100,     // 000400 only destination mode references will be relocated (aka MAINT bit)
-        MMU_TRAPS:  0x0200,     // 001000 enable MMU traps
+        MMU_TRAPS:  0x0200,     // 001000 enable MMU traps (11/70 only)
         UNUSED:     0x0C00,     // 006000
-        TRAP_MMU:   0x1000,     // 010000 trap: MMU
+        TRAP_MMU:   0x1000,     // 010000 trap: MMU (11/70 only)
         ABORT_RO:   0x2000,     // 020000 abort: read-only
         ABORT_PL:   0x4000,     // 040000 abort: page length
         ABORT_NR:   0x8000,     // 100000 abort: non-resident
         ABORT:      0xE000,     // 160000 (all of the ABORT bits)
-        UPDATE:     0xF0FE      // Includes all of: ABORT, TRAP, COMPLETED, MODE, and PAGE bits
+        UPDATE:     0xE0FE      // Includes all of: ABORT, COMPLETED, MODE, and PAGE bits
     },
-    MMR1: {                     // 177574: general purpose auto-inc/auto-dec register
+    MMR1: {                     // 177574: general purpose auto-inc/auto-dec register (11/44 and 11/70 only)
         REG1_NUM:   0x0007,     //
         REG1_DELTA: 0x00F8,     //
         REG2_NUM:   0x0700,     //
@@ -352,7 +352,7 @@ var PDP11 = {
     },
     MMR2: {                     // 177576: virtual program counter register
     },
-    MMR3: {                     // 172516: mapping register
+    MMR3: {                     // 172516: mapping register (11/44 and 11/70 only)
         USER_D:     0x0001,
         SUPER_D:    0x0002,
         KERNEL_D:   0x0004,

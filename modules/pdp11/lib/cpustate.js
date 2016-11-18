@@ -1577,7 +1577,7 @@ CPUStatePDP11.prototype.mapVirtualToPhysical = function(virtualAddress, accessFl
         /* falls through */
 
     case PDP11.PDR.ACF.RW:      // 0x6: read/write, no system trap/abort action
-        pdr |= ((accessFlags & PDP11.ACCESS.WRITE) ? 0xc0 : 0x80);
+        pdr |= ((accessFlags & PDP11.ACCESS.WRITE) ? (PDP11.PDR.ACCESSED | PDP11.PDR.MODIFIED) : PDP11.PDR.ACCESSED);
         break;
 
     default:                    // 0x0 (non-resident, abort all accesses) or 0x3 or 0x7 (unused, abort all accesses)

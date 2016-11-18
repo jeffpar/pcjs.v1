@@ -1270,9 +1270,10 @@ if (DEBUGGER) {
         if (this.sMessagePrev && sMessage == this.sMessagePrev) return;
         this.sMessagePrev = sMessage;
 
-        if ((this.bitsMessage & MessagesPDP11.HALT) && this.cpu && this.cpu.isRunning() || this.isBusy(true)) {
+        var fRunning = false;
+        if ((this.bitsMessage & MessagesPDP11.HALT) && this.cpu && (fRunning = this.cpu.isRunning()) || this.isBusy(true)) {
             this.stopCPU();
-            sMessage += " (cpu halted)";
+            if (fRunning) sMessage += " (cpu halted)";
         }
 
         this.println(sMessage); // + " (" + this.cpu.getCycles() + " cycles)"

@@ -1356,7 +1356,7 @@ BusPDP11.prototype.addIOTable = function(component, table)
 
         for (var iReg = 0; iReg < nRegs; iReg++, addr += 2) {
             if (sReg && nRegs > 1) sReg = afn[4] + iReg;
-            if (!this.addIOHandlers(addr, addr, fnReadByte, fnWriteByte, fnReadWord, fnWriteWord, component.bitsMessage || MessagesPDP11.BUS, sReg || component.idComponent)) {
+            if (!this.addIOHandlers(addr, addr, fnReadByte, fnWriteByte, fnReadWord, fnWriteWord, afn[7] || component.bitsMessage || MessagesPDP11.BUS, sReg || component.idComponent)) {
                 return false;
             }
         }
