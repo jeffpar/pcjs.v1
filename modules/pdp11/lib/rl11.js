@@ -282,7 +282,7 @@ RL11.prototype.initBus = function(cmp, bus, cpu, dbg)
 
     this.triggerInterrupt = this.cpu.addTrigger(PDP11.RL11.VEC, PDP11.RL11.PRI);
 
-    bus.addIOTable(this, RL11.UNIBUS_IOTABLE, MessagesPDP11.DISK);
+    bus.addIOTable(this, RL11.UNIBUS_IOTABLE);
     bus.addResetHandler(this.reset.bind(this));
 
     this.addDisk("None", RL11.SOURCE.NONE, true);
@@ -549,7 +549,7 @@ RL11.prototype.loadDrive = function(iDrive, sDiskName, sDiskPath, fAutoMount, fi
             }
             drive.fLocal = !!file;
             var disk = new DiskPDP11(this, drive, DiskAPI.MODE.PRELOAD);
-            if (disk.load(sDiskName, sDiskPath, file, this.doneLoadDrive)) {
+            if (disk.load(sDiskName, sDiskPath, file, this.finishLoadDrive)) {
                 nResult++;
             }
         }
@@ -558,7 +558,7 @@ RL11.prototype.loadDrive = function(iDrive, sDiskName, sDiskPath, fAutoMount, fi
 };
 
 /**
- * doneLoadDrive(drive, disk, sDiskName, sDiskPath, fAutoMount)
+ * finishLoadDrive(drive, disk, sDiskName, sDiskPath, fAutoMount)
  *
  * The disk parameter is set if the disk was successfully loaded, null if not.
  *
@@ -569,7 +569,7 @@ RL11.prototype.loadDrive = function(iDrive, sDiskName, sDiskPath, fAutoMount, fi
  * @param {string} sDiskPath
  * @param {boolean} [fAutoMount]
  */
-RL11.prototype.doneLoadDrive = function onLoadDrive(drive, disk, sDiskName, sDiskPath, fAutoMount)
+RL11.prototype.finishLoadDrive = function onLoadDrive(drive, disk, sDiskName, sDiskPath, fAutoMount)
 {
     var aDiskInfo;
 

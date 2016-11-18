@@ -551,6 +551,10 @@ str.trim = function(s)
 /*
  * Any codes commented out in the following table are deemed "printable"
  */
+str.ASCII = {
+    LF:     0x0A,
+    CR:     0x0D
+};
 str.aASCIICodes = {
     0x00:   "NUL",
     0x01:   "SOH",      // (CTRL_A) Start of Heading

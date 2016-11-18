@@ -1,6 +1,6 @@
 ---
 layout: page
-title: PDP-11/70 with Front Panel
+title: PDP-11/70 with 256Kb and Front Panel
 permalink: /devices/pdp11/machine/1170/panel/
 machines:
   - id: test1170

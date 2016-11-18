@@ -54,7 +54,7 @@ if (NODE) {
  *      file: name of ROM data file
  *
  * NOTE: The ROM data will not be copied into place until the Bus is ready (see initBus()) AND
- * the ROM data file has finished loading (see doneLoad()).
+ * the ROM data file has finished loading (see finishLoad()).
  *
  * Also, while the size parameter may seem redundant, I consider it useful to confirm that the ROM
  * you received is the ROM you expected.
@@ -65,7 +65,7 @@ if (NODE) {
  */
 function ROMPDP11(parmsROM)
 {
-    Component.call(this, "ROM", parmsROM, ROMPDP11);
+    Component.call(this, "ROM", parmsROM, ROMPDP11, MessagesPDP11.ROM);
 
     this.abInit = null;
     this.aSymbols = null;
@@ -103,8 +103,8 @@ function ROMPDP11(parmsROM)
             sFileURL = web.getHost() + DumpAPI.ENDPOINT + '?' + DumpAPI.QUERY.FILE + '=' + this.sFilePath + '&' + DumpAPI.QUERY.FORMAT + '=' + DumpAPI.FORMAT.BYTES + '&' + DumpAPI.QUERY.DECIMAL + '=true';
         }
         var rom = this;
-        web.getResource(sFileURL, null, true, function(sURL, sResponse, nErrorCode) {
-            rom.doneLoad(sURL, sResponse, nErrorCode);
+        web.getResource(sFileURL, null, true, function doneLoad(sURL, sResponse, nErrorCode) {
+            rom.finishLoad(sURL, sResponse, nErrorCode);
         });
     }
 }
@@ -183,14 +183,14 @@ ROMPDP11.prototype.powerDown = function(fSave, fShutdown)
 };
 
 /**
- * doneLoad(sURL, sData, nErrorCode)
+ * finishLoad(sURL, sData, nErrorCode)
  *
  * @this {ROMPDP11}
  * @param {string} sURL
  * @param {string} sData
  * @param {number} nErrorCode (response from server if anything other than 200)
  */
-ROMPDP11.prototype.doneLoad = function(sURL, sData, nErrorCode)
+ROMPDP11.prototype.finishLoad = function(sURL, sData, nErrorCode)
 {
     if (nErrorCode) {
         this.notice("Unable to load ROM resource (error " + nErrorCode + ": " + sURL + ")");
@@ -212,8 +212,8 @@ ROMPDP11.prototype.doneLoad = function(sURL, sData, nErrorCode)
 /**
  * initROM()
  *
- * This function is called by both initBus() and doneLoad(), but it cannot copy the initial data into place
- * until after initBus() has received the Bus component AND doneLoad() has received the data.  When both those
+ * This function is called by both initBus() and finishLoad(), but it cannot copy the initial data into place
+ * until after initBus() has received the Bus component AND finishLoad() has received the data.  When both those
  * criteria are satisfied, the component becomes "ready".
  *
  * @this {ROMPDP11}
@@ -289,11 +289,16 @@ ROMPDP11.prototype.addROM = function(addr)
          * of the IOPAGE address space, by installing I/O handlers for the entire range that return the corresponding
          * bytes of the current ROM image on reads, and ignore any writes (which I'm only assuming is how a typical
          * ROM "device" deals with writes; if we remove the write handler, then writes will fault).
+         *
+         * TODO: It would be more efficient if we parsed ROM data as words rather than bytes, and then installed
+         * only word handlers instead of only byte handlers.  It was done this way purely for historical reasons (ie,
+         * because that's how other PCjs machines parse their ROMs).  For now, all this means is that executing code
+         * out of ROM will be slower than out of RAM -- although that's often true in the real world as well.
          */
         var IOTable = {
             [addr]: [ROMPDP11.prototype.readROMByte, ROMPDP11.prototype.writeROMByte, null, null, null, this.sizeROM >> 1]
         };
-        if (this.bus.addIOTable(this, IOTable, MessagesPDP11.ROM, this.idComponent)) {
+        if (this.bus.addIOTable(this, IOTable)) {
             this.fRetainROM = true;
             return true;
         }

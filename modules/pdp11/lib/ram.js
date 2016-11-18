@@ -92,8 +92,8 @@ function RAMPDP11(parmsRAM)
             sFileURL = web.getHost() + DumpAPI.ENDPOINT + '?' + DumpAPI.QUERY.FILE + '=' + this.sFilePath + '&' + DumpAPI.QUERY.FORMAT + '=' + DumpAPI.FORMAT.BYTES + '&' + DumpAPI.QUERY.DECIMAL + '=true';
         }
         var ram = this;
-        web.getResource(sFileURL, null, true, function(sURL, sResponse, nErrorCode) {
-            ram.doneLoad(sURL, sResponse, nErrorCode);
+        web.getResource(sFileURL, null, true, function doneLoad(sURL, sResponse, nErrorCode) {
+            ram.finishLoad(sURL, sResponse, nErrorCode);
         });
     }
 }
@@ -166,14 +166,14 @@ RAMPDP11.prototype.powerDown = function(fSave, fShutdown)
 };
 
 /**
- * doneLoad(sURL, sData, nErrorCode)
+ * finishLoad(sURL, sData, nErrorCode)
  *
  * @this {RAMPDP11}
  * @param {string} sURL
  * @param {string} sData
  * @param {number} nErrorCode (response from server if anything other than 200)
  */
-RAMPDP11.prototype.doneLoad = function(sURL, sData, nErrorCode)
+RAMPDP11.prototype.finishLoad = function(sURL, sData, nErrorCode)
 {
     if (nErrorCode) {
         this.notice("Unable to load RAM resource (error " + nErrorCode + ": " + sURL + ")");
@@ -197,8 +197,8 @@ RAMPDP11.prototype.doneLoad = function(sURL, sData, nErrorCode)
 /**
  * initRAM()
  *
- * This function is called by both initBus() and doneLoad(), but it cannot copy the initial data into place
- * until after initBus() has received the Bus component AND doneLoad() has received the data.  When both those
+ * This function is called by both initBus() and finishLoad(), but it cannot copy the initial data into place
+ * until after initBus() has received the Bus component AND finishLoad() has received the data.  When both those
  * criteria are satisfied, the component becomes "ready".
  *
  * @this {RAMPDP11}

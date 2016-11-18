@@ -4,7 +4,7 @@
 	<name pos="center">PDP-11/70 Boot Monitor</name>
 	<computer id="computer" busWidth="22"/>
 	<cpu id="cpu" model="1170" cycles="6666667" autoStart="true"/>
-	<ram id="ram" addr="0x00000" size="0x3E000" file="/apps/pdp11/boot/monitor/BOOTMON.json"/>
+	<ram id="ram" addr="0x00000" size="0x40000" file="/apps/pdp11/boot/monitor/BOOTMON.json"/>
 	<device id="default" type="default"/>
 	<serial id="dl11" adapter="0" binding="print"/>
 	<panel ref="/devices/pdp11/panel/test/terminal.xml"/>

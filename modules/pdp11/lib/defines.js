@@ -234,6 +234,14 @@ var PDP11 = {
     OPCODE: {
         HALT:       0x0000,
         WAIT:       0x0001,
+        BPT:        0x0003,
+        IOT:        0x0004,
+        JSR_OP:     0x0800,
+        JSR_MASK:   0xFE00,
+        EMT_OP:     0x8800,
+        EMT_MASK:   0xFF00,
+        TRAP_OP:    0x8900,
+        TRAP_MASK:  0xFF00,
         INVALID:    0xFFFF      // far from the only invalid opcode, just a KNOWN invalid opcode
     },
     /*
@@ -311,43 +319,64 @@ var PDP11 = {
         BYTE:       0xff,        // write byte normally
         SBYTE:      0xffff       // sign-extend byte to word
     },
-    CPUERR: {
-        RED:        0x0004,     // red zone stack limit
-        YELLOW:     0x0008,     // yellow zone stack limit
-        TIMEOUT:    0x0010,     // UNIBUS timeout error
-        NOMEMORY:   0x0020,     // non-existent memory error
-        ODDADDR:    0x0040,     // odd word address error (as in non-even, not strange)
-        BADHALT:    0x0080      // HALT attempted in USER or SUPER modes
+    CPUERR: {                   // 177766
+        RED:        0x0004,     // 000004 red zone stack limit
+        YELLOW:     0x0008,     // 000010 yellow zone stack limit
+        TIMEOUT:    0x0010,     // 000020 UNIBUS timeout error
+        NOMEMORY:   0x0020,     // 000040 non-existent memory error
+        ODDADDR:    0x0040,     // 000100 odd word address error (as in non-even, not strange)
+        BADHALT:    0x0080      // 000200 HALT attempted in USER or SUPER modes
     },
-    MMR0: {
-        ENABLED:    0x0001,     // address relocation enabled
-        PAGE_NUM:   0x000E,     // page number of last fault
-        PAGE_D:     0x0010,     // last fault occurred in D space
-        PAGE_MODE:  0x0060,     // processor mode as of last fault
-        COMPLETED:  0x0080,     // last instruction completed
-        DSTMODE:    0x0100,     // only destination mode references will be relocated (aka MAINT bit)
-        MMU_TRAPS:  0x0200,     // enable MMU traps
-        UNUSED:     0x0C00,
-        TRAP_MMU:   0x1000,     // trap: MMU
-        ABORT_RO:   0x2000,     // abort: read-only
-        ABORT_PL:   0x4000,     // abort: page length
-        ABORT_NR:   0x8000,     // abort: non-resident
-        ABORT:      0xE000
+    MMR0: {                     // 177572
+        ENABLED:    0x0001,     // 000001 address relocation enabled
+        PAGE_NUM:   0x000E,     // 000016 page number of last fault
+        PAGE_D:     0x0010,     // 000020 last fault occurred in D space (11/44 and 11/70 only)
+        PAGE:       0x001E,     // 000176 (all of the PAGE bits)
+        MODE:       0x0060,     // 000140 processor mode as of last fault
+        COMPLETED:  0x0080,     // 000200 last instruction completed (R/O) (11/70 only)
+        DSTMODE:    0x0100,     // 000400 only destination mode references will be relocated (aka MAINT bit)
+        MMU_TRAPS:  0x0200,     // 001000 enable MMU traps (11/70 only)
+        UNUSED:     0x0C00,     // 006000
+        TRAP_MMU:   0x1000,     // 010000 trap: MMU (11/70 only)
+        ABORT_RO:   0x2000,     // 020000 abort: read-only
+        ABORT_PL:   0x4000,     // 040000 abort: page length
+        ABORT_NR:   0x8000,     // 100000 abort: non-resident
+        ABORT:      0xE000,     // 160000 (all of the ABORT bits)
+        UPDATE:     0xF0FE      // Includes all of: ABORT, TRAP, COMPLETED, MODE, and PAGE bits
     },
-    MMR1: {                     // general purpose auto-inc/auto-dec register
-        REG1_NUM:   0x0007,
-        REG1_DELTA: 0x00F8,
-        REG2_NUM:   0x0700,
-        REG2_DELTA: 0xF800
+    MMR1: {                     // 177574: general purpose auto-inc/auto-dec register (11/44 and 11/70 only)
+        REG1_NUM:   0x0007,     //
+        REG1_DELTA: 0x00F8,     //
+        REG2_NUM:   0x0700,     //
+        REG2_DELTA: 0xF800      //
     },
-    MMR2: {                     // virtual program counter register
+    MMR2: {                     // 177576: virtual program counter register
     },
-    MMR3: {                     // mapping register
+    MMR3: {                     // 172516: mapping register (11/44 and 11/70 only)
         USER_D:     0x0001,
         SUPER_D:    0x0002,
         KERNEL_D:   0x0004,
         MMU_22BIT:  0x0010,
         UNIBUS_MAP: 0x0020      // UNIBUS map relocation enabled
+    },
+    PDR: {
+        ACF: {
+            NR:     0x0,        // non-resident, abort all accesses
+            RO1:    0x1,        // read-only, abort on write attempt, memory management trap on read (11/70 only)
+            RO:     0x2,        // read-only, abort on write attempt
+            U1:     0x3,        // unused, abort all accesses--reserved for future use
+            RW1:    0x4,        // read/write, memory management trap upon completion of a read or write
+            RW2:    0x5,        // read/write, memory management trap upon completion of a write (11/70 only)
+            RW:     0x6,        // read/write, no system trap/abort action
+            U2:     0x7,        // unused, abort all accesses--reserved for future use
+            MASK:   0x7
+        },
+        ED:         0x0008,     // expansion direction (if set, the page expands downward from block number 127)
+        UNUSED:     0x0030,
+        MODIFIED:   0x0040,     // page has been written (bit cleared when either PDR or PAR is written)
+        ACCESSED:   0x0080,     // page has been accessed (bit cleared when either PDR or PAR is written) (11/70 only)
+        PLF:        0x7F00,     // page length field
+        BC:         0x8000      // bypass cache (11/44 only)
     },
     /*
      * Assorted special (UNIBUS) addresses
@@ -364,11 +393,11 @@ var PDP11 = {
      * is enabled, the top 5 bits of an address select one of the 31 mapping registers, and the bottom 13 bits
      * are then added to the contents of the selected mapping register.
      *
-     * ES6 ALERT: By using octal constants, this is the first place I'm dipping my toe into ECMAScript 6 waters.
-     * If you're loading this raw source code into your browser, then by now (2016) you're almost certainly using
-     * an ES6-aware browser.  Everyone else should be using code compiled by Google's Closure Compiler, which
-     * we configure to produce code that's backward-compatible with ES5 (for example, octal constants are
-     * converted to decimal values).
+     * ES6 ALERT: By using octal constants, I'm finally dipping my toe into ES6 (aka ECMAScript 2015) waters.
+     * You'll even see a few binary constants below, too.  If you're loading this raw source code into your browser,
+     * then by now (2016) you're almost certainly using an ES6-aware browser.  Production sites should be using code
+     * compiled by Google's Closure Compiler, which we configure to produce code that's backward-compatible with ES5
+     * (for example, all binary, octal, and hex constants are converted to decimal values).
      *
      * For more details: https://github.com/google/closure-compiler/wiki/ECMAScript6
      */
@@ -498,22 +527,22 @@ var PDP11 = {
         UDPAR6:     0o177674,   //                                  User D Page Address Register 6
         UDPAR7:     0o177676,   //                                  User D Page Address Register 7
 
-        R0SET0:     0o177700,
-        R1SET0:     0o177701,
-        R2SET0:     0o177702,
-        R3SET0:     0o177703,
-        R4SET0:     0o177704,
-        R5SET0:     0o177705,
-        R6KERNEL:   0o177706,
-        R7KERNEL:   0o177707,
-        R0SET1:     0o177710,
-        R1SET1:     0o177711,
-        R2SET1:     0o177712,
-        R3SET1:     0o177713,
-        R4SET1:     0o177714,
-        R5SET1:     0o177715,
-        R6SUPER:    0o177716,
-        R6USER:     0o177717,
+        R0SET0:     0o177700,   //
+        R1SET0:     0o177701,   //
+        R2SET0:     0o177702,   //
+        R3SET0:     0o177703,   //
+        R4SET0:     0o177704,   //
+        R5SET0:     0o177705,   //
+        R6KERNEL:   0o177706,   //
+        R7KERNEL:   0o177707,   //
+        R0SET1:     0o177710,   //
+        R1SET1:     0o177711,   //
+        R2SET1:     0o177712,   //
+        R3SET1:     0o177713,   //
+        R4SET1:     0o177714,   //
+        R5SET1:     0o177715,   //
+        R6SUPER:    0o177716,   //
+        R6USER:     0o177717,   //
 
         /*
          * This next group of registers is largely ignored; all accesses are routed to regsControl[],

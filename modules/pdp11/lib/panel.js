@@ -33,13 +33,14 @@
 "use strict";
 
 if (NODE) {
-    var str          = require("../../shared/lib/strlib");
-    var usr          = require("../../shared/lib/usrlib");
-    var web          = require("../../shared/lib/weblib");
-    var Component    = require("../../shared/lib/component");
-    var PDP11        = require("./defines");
-    var BusPDP11     = require("./bus");
-    var MemoryPDP11  = require("./memory");
+    var str           = require("../../shared/lib/strlib");
+    var usr           = require("../../shared/lib/usrlib");
+    var web           = require("../../shared/lib/weblib");
+    var Component     = require("../../shared/lib/component");
+    var PDP11         = require("./defines");
+    var BusPDP11      = require("./bus");
+    var MemoryPDP11   = require("./memory");
+    var MessagesPDP11 = require("./messages");
 }
 
 /**
@@ -53,15 +54,15 @@ if (NODE) {
  */
 function PanelPDP11(parmsPanel)
 {
-    Component.call(this, "Panel", parmsPanel, PanelPDP11);
+    Component.call(this, "Panel", parmsPanel, PanelPDP11, MessagesPDP11.PANEL);
 
     /*
      * If there are any live registers, LEDs, etc, to display, this will provide a count.
      * TODO: Add some UI for fDisplayLiveRegs (either an XML property, or a UI checkbox, or both).
      */
     this.cLiveRegs = 0;
-    this.nPeriodicCount = 0;
-    this.nPeriodicLimit = 60;
+    this.nDisplayCount = 0;
+    this.nDisplayLimit = 60;
     this.fDisplayLiveRegs = true;
 
     /*
@@ -173,6 +174,50 @@ PanelPDP11.LED = {
     B16:    'B16',
     B18:    'B18',
     B22:    'B22'
+};
+
+/**
+ * getAR()
+ *
+ * @this {PanelPDP11}
+ * @return {number} (current ADDRESS register)
+ */
+PanelPDP11.prototype.getAR = function()
+{
+    return this.regAddr;
+};
+
+/**
+ * setAR(value)
+ *
+ * @this {PanelPDP11}
+ * @param {number} value (new ADDRESS register)
+ */
+PanelPDP11.prototype.setAR = function(value)
+{
+    this.updateAddr(this.regAddr = value);
+};
+
+/**
+ * getDR()
+ *
+ * @this {PanelPDP11}
+ * @return {number} (current DISPLAY register)
+ */
+PanelPDP11.prototype.getDR = function()
+{
+    return this.regDisplay;
+};
+
+/**
+ * setDR(value)
+ *
+ * @this {PanelPDP11}
+ * @param {number} value (new DISPLAY register)
+ */
+PanelPDP11.prototype.setDR = function(value)
+{
+    this.updateData(this.regDisplay = value);
 };
 
 /**
@@ -573,8 +618,7 @@ PanelPDP11.prototype.processStart = function(value, index)
          * is depressed, "the computer system will be cleared."  I take it to mean that it performs
          * the equivalent of a RESET instruction.
          */
-        this.bus.reset();
-        this.cpu.resetRegs();
+        this.cpu.resetCPU();
         /*
          * The PDP-11/70 Handbook goes on to say: "If the system needs to be initialized but execution
          * is not wanted, the START switch should be depressed while the HALT/ENABLE switch is in the HALT
@@ -655,7 +699,7 @@ PanelPDP11.prototype.processContinue = function(value, index)
             var dbg = this.dbg;
             if (dbg && !dbg.isBusy(true)) {
                 dbg.setBusy(true);
-                dbg.stepCPU(0);
+                dbg.stepCPU(0, null);
                 dbg.setBusy(false);
             }
             else {
@@ -968,7 +1012,7 @@ PanelPDP11.prototype.setData = function(value, fActive)
  * Called by the Computer component at intervals to update registers, LEDs, etc.
  *
  * @this {PanelPDP11}
- * @param {number} [nUpdate] (< 0 for forced, > 0 for periodic, undefined otherwise)
+ * @param {number} [nUpdate] (< 0 for forced, > 0 for periodic, 0 otherwise)
  */
 PanelPDP11.prototype.updateDisplay = function(nUpdate)
 {
@@ -985,7 +1029,7 @@ PanelPDP11.prototype.updateDisplay = function(nUpdate)
              * LEDs are considered cheap, register displays are not.  So we'll skip the latter if this
              * is a periodic update AND our periodic update counter hasn't reached the periodic update limit.
              */
-            if (!(nUpdate > 0 && (this.nPeriodicCount += nUpdate) < this.nPeriodicLimit)) {
+            if (nUpdate <= 0 || (this.nDisplayCount += nUpdate) >= this.nDisplayLimit) {
                 for (var i = 0; i < this.cpu.regsGen.length; i++) {
                     this.displayValue('R'+i, this.cpu.regsGen[i]);
                 }
@@ -995,7 +1039,7 @@ PanelPDP11.prototype.updateDisplay = function(nUpdate)
                 this.displayValue("ZF", (regPSW & PDP11.PSW.ZF)? 1 : 0, 1);
                 this.displayValue("VF", (regPSW & PDP11.PSW.VF)? 1 : 0, 1);
                 this.displayValue("CF", (regPSW & PDP11.PSW.CF)? 1 : 0, 1);
-                this.nPeriodicCount = 0;
+                this.nDisplayCount = 0;
             }
 
             /*
@@ -1004,34 +1048,35 @@ PanelPDP11.prototype.updateDisplay = function(nUpdate)
              * TODO: There is currently no mechanism for selecting regData over regDisplay;
              * we are acting as if the DATASEL switch setting is locked to "DISPLAY REGISTER".
              */
-            this.updateAddr(nUpdate > 0 && fRunning && !fWaiting? this.cpu.getPC() : this.regAddr);
+            this.updateAddr(nUpdate > 0 && fRunning && !fWaiting? this.cpu.getLastAddr() : this.regAddr);
             this.updateData(this.regDisplay);
 
+            var bits = this.cpu.getMMUState();
             /*
-             * Set bit to 1 (22-bit), 2 (18-bit), or 4 (16-bit)
+             * Bit 0 set if 22-bit, bit 1 set if 18-bit, bit 2 set if 16-bit
              */
-            var bit = this.cpu.mmuEnable? ((this.cpu.regMMR3 & PDP11.MMR3.MMU_22BIT)? 1 : 2) : 4;
-            this.updateLED(PanelPDP11.LED.B22, bit & 1);
-            this.updateLED(PanelPDP11.LED.B18, bit & 2);
-            this.updateLED(PanelPDP11.LED.B16, bit & 4);
+            this.updateLED(PanelPDP11.LED.B22, bits & 1);
+            this.updateLED(PanelPDP11.LED.B18, bits & 2);
+            this.updateLED(PanelPDP11.LED.B16, bits & 4);
         }
     }
 };
 
 /**
- * readCNSW(addr)
+ * readCNSW(addr, fPreWrite)
  *
- * If addr is set, then this a normal read, so we should return the SWITCH register (ie, regSwitches).
+ * If fPreWrite, this is a read-before-write, so we must return the DISPLAY register (ie, regDisplay);
+ * otherwise, this a normal read, so we should return the SWITCH register (ie, regSwitches).
  *
- * if addr is NOT set, then this is a read-before-write, so we must return the DISPLAY register (ie, regDisplay).
  *
  * @this {PanelPDP11}
  * @param {number} addr (eg, PDP11.UNIBUS.CNSW or 177570)
+ * @param {boolean} [fPreWrite]
  * @return {number}
  */
-PanelPDP11.prototype.readCNSW = function(addr)
+PanelPDP11.prototype.readCNSW = function(addr, fPreWrite)
 {
-    return (addr? this.regSwitches : this.regDisplay) & 0xffff;
+    return (fPreWrite? this.regDisplay : this.regSwitches) & 0xffff;
 };
 
 /**

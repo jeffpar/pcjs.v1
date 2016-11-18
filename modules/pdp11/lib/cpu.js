@@ -105,6 +105,8 @@ function CPUPDP11(parmsCPU, nCyclesDefault)
 
     var nMultiplier = parmsCPU['multiplier'] || 1;
 
+    this.nDisplayCount = 0;
+    this.nDisplayLimit = 30;
     this.nCyclesPerSecond = nCycles;
 
     /*
@@ -525,12 +527,17 @@ CPUPDP11.prototype.updateDisplays = function(nUpdate)
  * However, this should be called via the Computer's updateDisplays() interface, not directly.
  *
  * @this {CPUPDP11}
- * @param {number} [nUpdate] (1 for periodic, -1 for forced, 0 or undefined otherwise)
+ * @param {number} [nUpdate] (1 for periodic, -1 for forced, 0 otherwise)
  */
 CPUPDP11.prototype.updateDisplay = function(nUpdate)
 {
     var controlSpeed = this.bindings["speed"];
-    if (controlSpeed) controlSpeed.textContent = this.getSpeedCurrent();
+    if (controlSpeed) {
+        if (nUpdate <= 0 || (this.nDisplayCount += nUpdate) >= this.nDisplayLimit) {
+            controlSpeed.textContent = this.getSpeedCurrent();
+            this.nDisplayCount = 0;
+        }
+    }
 };
 
 /**
@@ -684,7 +691,7 @@ CPUPDP11.prototype.getSpeedCurrent = function()
     /*
      * TODO: Has toFixed() been "fixed" in all browsers (eg, IE) to return a rounded value now?
      */
-    return ((this.flags.running && this.mhz)? (this.mhz.toFixed(2) + "Mhz") : "Stopped");
+    return ((this.flags.running)? (this.mhz.toFixed(2) + "Mhz") : "Stopped");
 };
 
 /**
