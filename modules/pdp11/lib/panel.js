@@ -1063,19 +1063,20 @@ PanelPDP11.prototype.updateDisplay = function(nUpdate)
 };
 
 /**
- * readCNSW(addr)
+ * readCNSW(addr, fPreWrite)
  *
- * If addr is set, then this a normal read, so we should return the SWITCH register (ie, regSwitches).
+ * If fPreWrite, this is a read-before-write, so we must return the DISPLAY register (ie, regDisplay);
+ * otherwise, this a normal read, so we should return the SWITCH register (ie, regSwitches).
  *
- * if addr is NOT set, then this is a read-before-write, so we must return the DISPLAY register (ie, regDisplay).
  *
  * @this {PanelPDP11}
  * @param {number} addr (eg, PDP11.UNIBUS.CNSW or 177570)
+ * @param {boolean} [fPreWrite]
  * @return {number}
  */
-PanelPDP11.prototype.readCNSW = function(addr)
+PanelPDP11.prototype.readCNSW = function(addr, fPreWrite)
 {
-    return (addr? this.regSwitches : this.regDisplay) & 0xffff;
+    return (fPreWrite? this.regDisplay : this.regSwitches) & 0xffff;
 };
 
 /**

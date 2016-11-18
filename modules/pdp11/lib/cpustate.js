@@ -1552,6 +1552,8 @@ CPUStatePDP11.prototype.mapVirtualToPhysical = function(virtualAddress, accessFl
     pdr = this.mmuPDR[this.mmuMode][page];
     physicalAddress = ((this.mmuPAR[this.mmuMode][page] << 6) + (virtualAddress & 0x1fff)) & this.mmuMask;
 
+    if (this.nDisableTraps) return physicalAddress;
+
     var newMMR0 = 0;
     switch (pdr & PDP11.PDR.ACF.MASK) {
 
@@ -1620,16 +1622,16 @@ CPUStatePDP11.prototype.mapVirtualToPhysical = function(virtualAddress, accessFl
                 newMMR0 |= PDP11.MMR0.COMPLETED;
             }
             if (!(this.regMMR0 & PDP11.MMR0.ABORT)) {
-                newMMR0 |= (this.mmuLastMode << 5) | (this.mmuLastPage << 1);
+                newMMR0 |= (this.regMMR0 & PDP11.MMR0.TRAP_MMU) | (this.mmuLastMode << 5) | (this.mmuLastPage << 1);
                 this.assert(!(newMMR0 & ~PDP11.MMR0.UPDATE));
-                this.setMMR0((this.regMMR0 & ~PDP11.MMR0.UPDATE) | newMMR0);
-                /*
-                 * I've decided to NOT abort if MMR0 already indicates an ABORT condition,
-                 * because otherwise we run the risk of infinitely looping; eg, we call trap(), which
-                 * calls mapVirtualToPhysical() on the trap vector, which faults again, etc.
-                 */
-                this.trap(PDP11.TRAP.MMU, PDP11.OPFLAG.TRAP_MMU, PDP11.REASON.ABORT);
+                this.setMMR0((this.regMMR0 & ~PDP11.MMR0.UPDATE) | (newMMR0 & PDP11.MMR0.UPDATE));
             }
+            /*
+             * TODO: In unusual circumstances, if regMMR0 already indicated an ABORT condition above,
+             * we run the risk of infinitely looping; eg, we call trap(), which calls mapVirtualToPhysical()
+             * on the trap vector, which faults again, etc.  We should add some safeguards against that.
+             */
+            this.trap(PDP11.TRAP.MMU, PDP11.OPFLAG.TRAP_MMU, PDP11.REASON.ABORT);
         }
         if (!(this.regMMR0 & (PDP11.MMR0.ABORT | PDP11.MMR0.TRAP_MMU))) {
             /*

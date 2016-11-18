@@ -342,7 +342,7 @@ var PDP11 = {
         ABORT_PL:   0x4000,     // 040000 abort: page length
         ABORT_NR:   0x8000,     // 100000 abort: non-resident
         ABORT:      0xE000,     // 160000 (all of the ABORT bits)
-        UPDATE:     0xE0FE      // Includes all of: ABORT, COMPLETED, MODE, and PAGE bits
+        UPDATE:     0xF0FE      // Includes all of: ABORT, TRAP, COMPLETED, MODE, and PAGE bits
     },
     MMR1: {                     // 177574: general purpose auto-inc/auto-dec register (11/44 and 11/70 only)
         REG1_NUM:   0x0007,     //
