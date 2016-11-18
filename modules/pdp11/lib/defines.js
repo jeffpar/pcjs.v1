@@ -360,9 +360,10 @@ var PDP11 = {
             RW1:    0x4,        // read/write, memory management trap upon completion of a read or write
             RW2:    0x5,        // read/write, memory management trap upon completion of a write (11/70 only)
             RW:     0x6,        // read/write, no system trap/abort action
-            U2:     0x7         // unused, abort all accesses--reserved for future use
+            U2:     0x7,        // unused, abort all accesses--reserved for future use
+            MASK:   0x7
         },
-        ED:         0x0080,     // expansion direction (if set, the page expands downward from block number 127)
+        ED:         0x0008,     // expansion direction (if set, the page expands downward from block number 127)
         UNUSED:     0x0030,
         MODIFIED:   0x0040,     // page has been written (bit cleared when either PDR or PAR is written)
         ACCESSED:   0x0080,     // page has been accessed (bit cleared when either PDR or PAR is written) (11/70 only)

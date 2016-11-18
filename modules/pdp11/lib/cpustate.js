@@ -169,9 +169,10 @@ CPUStatePDP11.prototype.initRegs = function()
     /*
      * TODO: Verify the initial state of all PDP-11 flags and registers (are they well-documented?)
      */
+    var f = 0xffff;
     this.flagC = 0x10000;       // PSW C bit
     this.flagV  = 0x8000;       // PSW V bit
-    this.flagZ  = 0xffff;       // ~ PSW Z bit      (TODO: Why do we clear instead of set Z, like other flags?)
+    this.flagZ  = f;            // ~ PSW Z bit      (TODO: Why do we clear instead of set Z, like other flags?)
     this.flagN  = 0x8000;       // PSW N bit
     this.regPSW = 0x000f;       // PSW other bits   (TODO: What's the point of setting the flag bits here, too?)
     this.regsGen = [            // General R0 - R7
@@ -185,19 +186,18 @@ CPUStatePDP11.prototype.initRegs = function()
     ];
     this.mmuMode = 0;           // current memory management mode (see PDP11.MODE.KERNEL | SUPER | UNUSED | USER)
     this.mmuLastPage = 0;
- // this.mmuLastVirtual = 0;
 	this.mapMMR3 = [4,2,0,1];   // map from mode to MMR3 I/D bit
     this.mmuPDR = [             // memory management PDR registers by mode
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],   // kernel 0
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],   // super 1
-        [0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff], // mode 2 with illegal PDRs
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]    // user 3
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],   // KERNEL (8 KIPDR regs followed by 8 KDPDR regs)
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],   // SUPER  (8 SIPDR regs followed by 8 SDPDR regs)
+        [f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f],   // mode 2 (not used)
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]    // USER   (8 UIPDR regs followed by 8 UDPDR regs)
     ];
     this.mmuPAR = [             // memory management PAR registers by mode
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],   // kernel 0
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],   // super 1
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],   // KERNEL (8 KIPAR regs followed by 8 KDPAR regs)
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],   // SUPER  (8 SIPDR regs followed by 8 SDPDR regs)
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],   // mode 2 (not used)
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]    // user 3
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]    // USER   (8 UIPDR regs followed by 8 UDPDR regs)
     ];
     this.unibusMap = [          // 32 unibus map registers
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
@@ -1541,7 +1541,6 @@ CPUStatePDP11.prototype.mapVirtualToPhysical = function(virtualAddress, accessFl
      */
     if (!(accessFlags & this.mmuEnable)) {
         physicalAddress = virtualAddress & 0xffff;
-     // this.mmuLastVirtual = physicalAddress;
         if (physicalAddress >= BusPDP11.IOPAGE_16BIT) {
             physicalAddress |= this.addrIOPage;
         }
@@ -1552,44 +1551,54 @@ CPUStatePDP11.prototype.mapVirtualToPhysical = function(virtualAddress, accessFl
     if (!(this.regMMR3 & this.mapMMR3[this.mmuMode])) page &= 7;
     pdr = this.mmuPDR[this.mmuMode][page];
     physicalAddress = ((this.mmuPAR[this.mmuMode][page] << 6) + (virtualAddress & 0x1fff)) & this.mmuMask;
- // this.mmuLastVirtual = virtualAddress;
 
     var newMMR0 = 0;
-    switch (pdr & 0x7) {
-    case 1:                         // read-only with trap
+    switch (pdr & PDP11.PDR.ACF.MASK) {
+
+    case PDP11.PDR.ACF.RO1:     // 0x1: read-only, abort on write attempt, memory management trap on read (11/70 only)
         newMMR0 = PDP11.MMR0.TRAP_MMU;
         /* falls through */
-    case 2:                         // read-only
-        pdr |= 0x80;                // Set A bit
+
+    case PDP11.PDR.ACF.RO:      // 0x2: read-only, abort on write attempt
+        pdr |= PDP11.PDR.ACCESSED;
         if (accessFlags & PDP11.ACCESS.WRITE) {
             newMMR0 = PDP11.MMR0.ABORT_RO;
         }
         break;
-    case 4:                         // read-write with read-write trap
+
+    case PDP11.PDR.ACF.RW1:     // 0x4: read/write, memory management trap upon completion of a read or write
         newMMR0 = PDP11.MMR0.TRAP_MMU;
         /* falls through */
-    case 5:                         // read-write with write trap
+
+    case PDP11.PDR.ACF.RW2:     // 0x5: read/write, memory management trap upon completion of a write (11/70 only)
         if (accessFlags & PDP11.ACCESS.WRITE) {
             newMMR0 = PDP11.MMR0.TRAP_MMU;
         }
         /* falls through */
-    case 6:                         // read-write: set A & W bits
+
+    case PDP11.PDR.ACF.RW:      // 0x6: read/write, no system trap/abort action
         pdr |= ((accessFlags & PDP11.ACCESS.WRITE) ? 0xc0 : 0x80);
         break;
-    default:
+
+    default:                    // 0x0 (non-resident, abort all accesses) or 0x3 or 0x7 (unused, abort all accesses)
         newMMR0 = PDP11.MMR0.ABORT_NR;
         break;
     }
 
-    if ((pdr & 0x7f08) != 0x7f00) { // skip checking most common case (hopefully)
-        if (pdr & 0x8) {            // expand downwards
-            if (pdr & 0x7f00) {
-                if ((virtualAddress & 0x1fc0) < ((pdr >> 2) & 0x1fc0)) {
+    if ((pdr & (PDP11.PDR.PLF | PDP11.PDR.ED)) != PDP11.PDR.PLF) {      // skip checking most common case (hopefully)
+        /*
+         * The Page Descriptor Register (PDR) Page Length Field (PLF) is a 7-bit block number, where a block
+         * is 64 bytes.  Since the bit 0 of the block number is located at bit 8 of the PDR, we shift the PDR
+         * right 2 bits and then clear the bottom 6 bits by masking it with 0x1FC0.
+         */
+        if (pdr & PDP11.PDR.ED) {
+            if (pdr & PDP11.PDR.PLF) {
+                if ((virtualAddress & 0x1FC0) < ((pdr >> 2) & 0x1FC0)) {
                     newMMR0 |= PDP11.MMR0.ABORT_PL;
                 }
             }
-        } else {                    // expand upwards
-            if ((virtualAddress & 0x1fc0) > ((pdr >> 2) & 0x1fc0)) {
+        } else {
+            if ((virtualAddress & 0x1FC0) > ((pdr >> 2) & 0x1FC0)) {
                 newMMR0 |= PDP11.MMR0.ABORT_PL;
             }
         }
@@ -1619,7 +1628,7 @@ CPUStatePDP11.prototype.mapVirtualToPhysical = function(virtualAddress, accessFl
                  * because otherwise we run the risk of infinitely looping; eg, we call trap(), which
                  * calls mapVirtualToPhysical() on the trap vector, which faults again, etc.
                  */
-                this.trap(PDP11.TRAP.MMU, 0, PDP11.REASON.ABORT);
+                this.trap(PDP11.TRAP.MMU, PDP11.OPFLAG.TRAP_MMU, PDP11.REASON.ABORT);
             }
         }
         if (!(this.regMMR0 & (PDP11.MMR0.ABORT | PDP11.MMR0.TRAP_MMU))) {
