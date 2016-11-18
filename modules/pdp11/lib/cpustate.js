@@ -1317,7 +1317,19 @@ CPUStatePDP11.prototype.trap = function(vector, flag, reason)
         reason = PDP11.REASON.RED;
     }
 
-    this.lastOp = vector;
+    /*
+     * NOTE: Pre-setting the auto-dec values for MMR1 to 0xF6F6 is a work-around for an "EKBEE1"
+     * diagnostic (PC 056710), which tests what happens when a misaligned read triggers a BUS trap,
+     * and that trap then triggers an MMU trap during the first pushWord() below.
+     *
+     * One would think it would be fine to zero those bits by setting lastOp to vector alone,
+     * and then letting each of the pushWord() calls below shift their own 0xF6 auto-dec value into
+     * lastOp.  When the first pushWord() triggers an MMU trap, we obviously won't get to the second
+     * pushWord(), yet the diagnostic expects TWO auto-decs to be recorded.  I'm puzzled why the
+     * hardware apparently indicates TWO auto-decs, if SP wasn't actually decremented twice, but who
+     * am I to judge.
+     */
+    this.lastOp = vector | 0xf6f60000;
 
     /*
      * Read from kernel D space
