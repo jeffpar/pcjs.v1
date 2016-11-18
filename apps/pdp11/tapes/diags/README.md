@@ -41,7 +41,7 @@ Instructions for Running Diagnostics
 ### Tests 1-12
 
 Instructions for running "TEST 1 - BRANCH" through "TEST 12 - JUMP" come from the
-[MAINDEC USER REFERENCE MANUAL, OCTOBER 1973](http://archive.pcjs.org/pubs/dec/pdp11/diags/MAINDEC_User_Reference_Manual_Oct73.pdf),
+[MAINDEC USER REFERENCE MANUAL, OCTOBER 1973](http://archive.pcjs.org/pubs/dec/pdp11/diags/MAINDEC-11-DZQAB-B-D_User_Reference_Manual_Oct73.pdf),
 p. 19:
 
 	MAINDEC-11-D0AA to D0LA (NEW NUMBER - DZKAA to DZKAL)
