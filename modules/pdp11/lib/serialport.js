@@ -239,6 +239,19 @@ SerialPortPDP11.prototype.setBinding = function(sType, sBinding, control, sValue
             return true;
         };
 
+        control.onpaste = function onKeyPress(event) {
+            if (event.stopPropagation) event.stopPropagation();
+            if (event.preventDefault) event.preventDefault();
+            var clipboardData = event.clipboardData || window.clipboardData;
+            if (clipboardData) {
+                /*
+                 * NOTE: Multiple lines of pasted text will (at least on macOS) contain LFs instead of CRs;
+                 * this is dealt with in receiveData() whenever it receives a string of characters.
+                 */
+                serial.receiveData(clipboardData.getData('Text'));
+            }
+        };
+
         /*
          * Now that we've added an onkeypress handler that calls preventDefault() for ALL keys, the control
          * itself no longer needs the "readonly" attribute; we primarily need to remove it for iOS browsers,
@@ -513,8 +526,20 @@ SerialPortPDP11.prototype.receiveData = function(data)
         this.abReceive.push(data);
     }
     else if (typeof data == "string") {
+        var b = 0, bPrev;
         for (var i = 0; i < data.length; i++) {
-            this.abReceive.push(data.charCodeAt(i));
+            bPrev = b;
+            b = data.charCodeAt(i);
+            /*
+             * NOTE: Multiple lines of pasted text will (at least on macOS) contain LFs instead of CRs;
+             * we convert them to CRs below.  Windows may do something different, but in the worst case,
+             * even if we receive CR/LF pairs, this code should keep the CRs and lose the LFs.
+             */
+            if (b == str.ASCII.LF) {
+                if (bPrev == str.ASCII.CR) continue;
+                b = str.ASCII.CR;
+            }
+            this.abReceive.push(b);
         }
     }
     else {

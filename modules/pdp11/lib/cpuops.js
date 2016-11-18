@@ -1471,6 +1471,42 @@ PDP11.opRESET = function(opCode)
 {
     if (!(this.regPSW & PDP11.PSW.CMODE)) {
         this.resetCPU();
+
+        if (this.panel) {
+            /*
+             * The PDP-11/70 XXDP test "EKBBF0" reports the following, with PANEL messages on ("m panel on"):
+             *
+             *      CNSW.writeWord(177570,000101) @033502
+             *      CNSW.readWord(177570): 000000 @032114
+             *      LOOK AT THE CONSOLE LIGHTS
+             *      THE DATA LIGHTS SHOULD READ 166667
+             *      THE ADDRESS LIGHTS SHOULD READ  CNSW.readWord(177570): 000000 @032150
+             *      032236
+             *      CHANGE SWITCH 7 TO CONTINUE
+             *      CNSW.readWord(177570): 000000 @032236
+             *      stopped (31518011 instructions, 358048873 cycles, 58644 ms, 6105465 hz)
+             *      R0=166667 R1=002362 R2=000000 R3=000000 R4=000000 R5=026642
+             *      SP=001074 PC=032236 PS=000344 SR=00000000 T0 N0 Z1 V0 C0
+             *      032236: 032737 000200 177570   BIT   #200,@#177570
+             *      >> tr
+             *      CNSW.readWord(177570): 000000 @032236 (cpu halted)
+             *      R0=166667 R1=002362 R2=000000 R3=000000 R4=000000 R5=026642
+             *      SP=001074 PC=032244 PS=000344 SR=00000000 T0 N0 Z1 V0 C0
+             *      032244: 001773                 BEQ   032234                 ;cycles=0
+             *      >> tr
+             *      R0=166667 R1=002362 R2=000000 R3=000000 R4=000000 R5=026642
+             *      SP=001074 PC=032234 PS=000344 SR=00000000 T0 N0 Z1 V0 C0
+             *      032234: 000005                 RESET                        ;cycles=5
+             *
+             * It's a little hard to see why the DATA lights should read 166667, since the PANEL messages indicate
+             * that the last CNSW.writeWord(177570) was for 000101, not 166667.  So I'm guessing that the RESET
+             * instruction is supposed to propagate R0 to the console's DISPLAY register.
+             *
+             * This is similar to what we do for the HALT instruction on the PDP-11/20.  None of these Console features
+             * seem to be very well documented (assuming they exist).
+             */
+            this.panel.setData(this.regsGen[0], true);
+        }
     }
     this.nStepCycles -= 667;            // TODO: Review (but it's definitely a big number)
 };
@@ -1739,7 +1775,7 @@ PDP11.opSWAB = function(opCode)
  */
 PDP11.opSXT = function(opCode)
 {
-    this.updateNZVFlags(this.writeDstWord(opCode, this.getNF? 0xffff : 0));
+    this.updateNZVFlags(this.writeDstWord(opCode, this.getNF()? 0xffff : 0));
     this.nStepCycles -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
 };
 
@@ -1846,7 +1882,8 @@ PDP11.opWAIT = function(opCode)
  */
 PDP11.opXOR = function(opCode)
 {
-    this.updateDstWord(opCode, this.readSrcWord(opCode), PDP11.fnXOR);
+    var reg = (opCode >> PDP11.SRCMODE.SHIFT) & PDP11.OPREG.MASK;
+    this.updateDstWord(opCode, this.regsGen[reg], PDP11.fnXOR);
     this.nStepCycles -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
 };
 

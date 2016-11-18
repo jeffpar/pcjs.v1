@@ -489,8 +489,8 @@ PC11.prototype.load = function(sTapeName, sTapePath, nTapeTarget, file)
 
     if (file) {
         var reader = new FileReader();
-        reader.onload = function() {
-            pc11.doneRead(sTapeName, sTapePath, nTapeTarget, reader.result);
+        reader.onload = function doneRead() {
+            pc11.finishRead(sTapeName, sTapePath, nTapeTarget, reader.result);
         };
         reader.readAsArrayBuffer(file);
         return true;
@@ -515,13 +515,13 @@ PC11.prototype.load = function(sTapeName, sTapePath, nTapeTarget, file)
         }
     }
 
-    return !!web.getResource(sTapeURL, null, true, function(sURL, sResponse, nErrorCode) {
-        pc11.doneLoad(sTapeName, sTapePath, nTapeTarget, sResponse, sURL, nErrorCode);
+    return !!web.getResource(sTapeURL, null, true, function doneLoad(sURL, sResponse, nErrorCode) {
+        pc11.finishLoad(sTapeName, sTapePath, nTapeTarget, sResponse, sURL, nErrorCode);
     });
 };
 
 /**
- * doneLoad(sTapeName, sTapePath, sTapeData, nTapeTarget, sURL, nErrorCode)
+ * finishLoad(sTapeName, sTapePath, sTapeData, nTapeTarget, sURL, nErrorCode)
  *
  * @this {PC11}
  * @param {string} sTapeName
@@ -531,7 +531,7 @@ PC11.prototype.load = function(sTapeName, sTapePath, nTapeTarget, file)
  * @param {string} sURL
  * @param {number} nErrorCode (response from server if anything other than 200)
  */
-PC11.prototype.doneLoad = function(sTapeName, sTapePath, nTapeTarget, sTapeData, sURL, nErrorCode)
+PC11.prototype.finishLoad = function(sTapeName, sTapePath, nTapeTarget, sTapeData, sURL, nErrorCode)
 {
     var fPrintOnly = (nErrorCode < 0 && this.cmp && !this.cmp.flags.powered);
 
@@ -547,7 +547,7 @@ PC11.prototype.doneLoad = function(sTapeName, sTapePath, nTapeTarget, sTapeData,
     }
     else {
         if (DEBUG && this.messageEnabled()) {
-            this.printMessage('doneLoad("' + sTapePath + '")');
+            this.printMessage('finishLoad("' + sTapePath + '")');
         }
         Component.addMachineResource(this.idMachine, sURL, sTapeData);
         var resource = web.parseMemoryResource(sURL, sTapeData);
@@ -564,7 +564,7 @@ PC11.prototype.doneLoad = function(sTapeName, sTapePath, nTapeTarget, sTapeData,
 };
 
 /**
- * doneRead(sTapeName, sTapePath, nTapeTarget, buffer)
+ * finishRead(sTapeName, sTapePath, nTapeTarget, buffer)
  *
  * @this {PC11}
  * @param {string} sTapeName
@@ -572,7 +572,7 @@ PC11.prototype.doneLoad = function(sTapeName, sTapePath, nTapeTarget, sTapeData,
  * @param {number} nTapeTarget
  * @param {?} buffer (we KNOW this is an ArrayBuffer, but we can't seem to convince the Closure Compiler)
  */
-PC11.prototype.doneRead = function(sTapeName, sTapePath, nTapeTarget, buffer)
+PC11.prototype.finishRead = function(sTapeName, sTapePath, nTapeTarget, buffer)
 {
     if (buffer) {
         var aBytes = new Uint8Array(buffer, 0, buffer.byteLength);

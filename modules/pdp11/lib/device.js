@@ -130,7 +130,60 @@ DevicePDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
     bus.addIOTable(this, DevicePDP11.UNIBUS_IOTABLE);
     bus.addResetHandler(this.reset.bind(this));
 
+    if (DEBUGGER && dbg) {
+        dbg.messageDump(MessagesPDP11.MMU, function onDumpMMU(asArgs) {
+            device.dumpMMU(asArgs);
+        });
+    }
     this.setReady();
+};
+
+/**
+ * dumpMMU(asArgs)
+ *
+ * @this {DevicePDP11}
+ * @param {Array.<string>} asArgs
+ */
+DevicePDP11.prototype.dumpMMU = function(asArgs)
+{
+    if (DEBUGGER) {
+        var cpu = this.cpu;
+        this.dumpRegs("KIPDR", cpu.mmuPDR[0], 0, asArgs[0]);
+        this.dumpRegs("KDPDR", cpu.mmuPDR[0], 8, asArgs[0]);
+        this.dumpRegs("KIPAR", cpu.mmuPAR[0], 0, asArgs[0]);
+        this.dumpRegs("KDPAR", cpu.mmuPAR[0], 8, asArgs[0], true);
+        this.dumpRegs("SIPDR", cpu.mmuPDR[1], 0, asArgs[0]);
+        this.dumpRegs("SDPDR", cpu.mmuPDR[1], 8, asArgs[0]);
+        this.dumpRegs("SIPAR", cpu.mmuPAR[1], 0, asArgs[0]);
+        this.dumpRegs("SDPAR", cpu.mmuPAR[1], 8, asArgs[0], true);
+        this.dumpRegs("UIPDR", cpu.mmuPDR[3], 0, asArgs[0]);
+        this.dumpRegs("UDPDR", cpu.mmuPDR[3], 8, asArgs[0]);
+        this.dumpRegs("UIPAR", cpu.mmuPAR[3], 0, asArgs[0]);
+        this.dumpRegs("UDPAR", cpu.mmuPAR[3], 8, asArgs[0], true);
+    }
+};
+
+/**
+ * dumpRegs(sName, aRegs, offset, sFilter, fBreak)
+ *
+ * @this {DevicePDP11}
+ * @param {string} sName
+ * @param {Array.<number>} aRegs
+ * @param {number} offset
+ * @param {string} sFilter
+ * @param {boolean} [fBreak]
+ */
+DevicePDP11.prototype.dumpRegs = function(sName, aRegs, offset, sFilter, fBreak)
+{
+    if (DEBUGGER) {
+        var dbg = this.dbg;
+        if (sFilter && sName.indexOf(sFilter.toUpperCase()) < 0) return;
+        var sDump = sName + ":";
+        for (var i = 0; i < 8; i++) {
+            sDump += ' ' + dbg.toStrBase(aRegs[offset + i]);
+        }
+        dbg.println(sDump + (fBreak? '\n' : ''));
+    }
 };
 
 /**
@@ -219,7 +272,7 @@ DevicePDP11.prototype.readMMR0 = function(addr)
  */
 DevicePDP11.prototype.writeMMR0 = function(data, addr)
 {
-    this.cpu.setMMR0(data);
+    this.cpu.setMMR0((data & ~PDP11.MMR0.COMPLETED) | (this.cpu.regMMR0 & PDP11.MMR0.COMPLETED));
 };
 
 /**
@@ -435,7 +488,10 @@ DevicePDP11.prototype.readKIPDR = function(addr)
 DevicePDP11.prototype.writeKIPDR = function(data, addr)
 {
     var reg = (addr >> 1) & 7;
-    this.cpu.mmuPDR[0][reg] = data & 0xff0f;
+    this.cpu.mmuPDR[0][reg] = data &= 0xff0f;
+    if (this.messageEnabled(MessagesPDP11.MMU)) {
+        this.printMessage("writeKIPDR[" + reg + "]: " + str.toOct(data), true);
+    }
 };
 
 /**
@@ -873,7 +929,8 @@ DevicePDP11.prototype.readSIZE = function(addr)
     /*
      * TODO: getMemorySize() returns an aggregate total, so if there are multiple discontiguous
      * chunks of RAM, this could return the wrong result; another interface, getHighestAddress(),
-     * might be required.
+     * might be required.  Then again, perhaps multiple discontiguous chunks of RAM are not permitted
+     * in PDP-11 machines.
      */
     return addr == PDP11.UNIBUS.LSIZE? ((this.bus.getMemorySize(MemoryPDP11.TYPE.RAM) >> 6) - 1) : 0;
 };
@@ -961,20 +1018,23 @@ DevicePDP11.prototype.readMB = function(addr)
  */
 DevicePDP11.prototype.writeMB = function(data, addr)
 {
-    if (!(addr & 0x1)) data &= 0xff;    // Required for KB11-CM without MFPT instruction
+    if (!(addr & 0x1)) {
+        data &= 0xff;           // required for KB11-CM without MFPT instruction
+    }
     this.cpu.regMB = data;
 };
 
 /**
- * readPIR(addr)
+ * readPIR(addr, fPreWrite)
  *
  * @this {DevicePDP11}
  * @param {number} addr (eg, PDP11.UNIBUS.PIR or 177772)
+ * @param {boolean} [fPreWrite]
  * @return {number}
  */
-DevicePDP11.prototype.readPIR = function(addr)
+DevicePDP11.prototype.readPIR = function(addr, fPreWrite)
 {
-    if (!addr) return 0;        // the caller is preparing to write the low or high byte; these are the bits to return for the other byte
+    if (fPreWrite) return 0;
     return this.cpu.getPIR();
 };
 
@@ -991,15 +1051,16 @@ DevicePDP11.prototype.writePIR = function(data, addr)
 };
 
 /**
- * readSL(addr)
+ * readSL(addr, fPreWrite)
  *
  * @this {DevicePDP11}
  * @param {number} addr (eg, PDP11.UNIBUS.SL or 177774)
+ * @param {boolean} [fPreWrite]
  * @return {number}
  */
-DevicePDP11.prototype.readSL = function(addr)
+DevicePDP11.prototype.readSL = function(addr, fPreWrite)
 {
-    if (!addr) return 0;        // the caller is preparing to write the low or high byte; these are the bits to return for the other byte
+    if (fPreWrite) return 0;
     return this.cpu.getSL();
 };
 
@@ -1069,23 +1130,23 @@ DevicePDP11.prototype.writeIgnored = function(data, addr)
  */
 DevicePDP11.UNIBUS_IOTABLE = {
     [PDP11.UNIBUS.UNIMAP]:  /* 170200 */    [null, null, DevicePDP11.prototype.readUNIMAP,  DevicePDP11.prototype.writeUNIMAP,  "UNIMAP",   64, PDP11.MODEL_1170],
-    [PDP11.UNIBUS.SIPDR0]:  /* 172200 */    [null, null, DevicePDP11.prototype.readSIPDR,   DevicePDP11.prototype.writeSIPDR,   "SIPDR",    8,  PDP11.MODEL_1145],
-    [PDP11.UNIBUS.SDPDR0]:  /* 172220 */    [null, null, DevicePDP11.prototype.readSDPDR,   DevicePDP11.prototype.writeSDPDR,   "SDPDR",    8,  PDP11.MODEL_1145],
-    [PDP11.UNIBUS.SIPAR0]:  /* 172240 */    [null, null, DevicePDP11.prototype.readSIPAR,   DevicePDP11.prototype.writeSIPAR,   "SIPAR",    8,  PDP11.MODEL_1145],
-    [PDP11.UNIBUS.SDPAR0]:  /* 172260 */    [null, null, DevicePDP11.prototype.readSDPAR,   DevicePDP11.prototype.writeSDPAR,   "SDPAR",    8,  PDP11.MODEL_1145],
-    [PDP11.UNIBUS.KIPDR0]:  /* 172300 */    [null, null, DevicePDP11.prototype.readKIPDR,   DevicePDP11.prototype.writeKIPDR,   "KIPDR",    8,  PDP11.MODEL_1145],
-    [PDP11.UNIBUS.KDPDR0]:  /* 172320 */    [null, null, DevicePDP11.prototype.readKDPDR,   DevicePDP11.prototype.writeKDPDR,   "KDPDR",    8,  PDP11.MODEL_1145],
-    [PDP11.UNIBUS.KIPAR0]:  /* 172340 */    [null, null, DevicePDP11.prototype.readKIPAR,   DevicePDP11.prototype.writeKIPAR,   "KIPAR",    8,  PDP11.MODEL_1145],
-    [PDP11.UNIBUS.KDPAR0]:  /* 172360 */    [null, null, DevicePDP11.prototype.readKDPAR,   DevicePDP11.prototype.writeKDPAR,   "KDPAR",    8,  PDP11.MODEL_1145],
-    [PDP11.UNIBUS.MMR3]:    /* 172516 */    [null, null, DevicePDP11.prototype.readMMR3,    DevicePDP11.prototype.writeMMR3,    "MMR3",     1,  PDP11.MODEL_1145],
+    [PDP11.UNIBUS.SIPDR0]:  /* 172200 */    [null, null, DevicePDP11.prototype.readSIPDR,   DevicePDP11.prototype.writeSIPDR,   "SIPDR",    8,  PDP11.MODEL_1145, MessagesPDP11.MMU],
+    [PDP11.UNIBUS.SDPDR0]:  /* 172220 */    [null, null, DevicePDP11.prototype.readSDPDR,   DevicePDP11.prototype.writeSDPDR,   "SDPDR",    8,  PDP11.MODEL_1145, MessagesPDP11.MMU],
+    [PDP11.UNIBUS.SIPAR0]:  /* 172240 */    [null, null, DevicePDP11.prototype.readSIPAR,   DevicePDP11.prototype.writeSIPAR,   "SIPAR",    8,  PDP11.MODEL_1145, MessagesPDP11.MMU],
+    [PDP11.UNIBUS.SDPAR0]:  /* 172260 */    [null, null, DevicePDP11.prototype.readSDPAR,   DevicePDP11.prototype.writeSDPAR,   "SDPAR",    8,  PDP11.MODEL_1145, MessagesPDP11.MMU],
+    [PDP11.UNIBUS.KIPDR0]:  /* 172300 */    [null, null, DevicePDP11.prototype.readKIPDR,   DevicePDP11.prototype.writeKIPDR,   "KIPDR",    8,  PDP11.MODEL_1145, MessagesPDP11.MMU],
+    [PDP11.UNIBUS.KDPDR0]:  /* 172320 */    [null, null, DevicePDP11.prototype.readKDPDR,   DevicePDP11.prototype.writeKDPDR,   "KDPDR",    8,  PDP11.MODEL_1145, MessagesPDP11.MMU],
+    [PDP11.UNIBUS.KIPAR0]:  /* 172340 */    [null, null, DevicePDP11.prototype.readKIPAR,   DevicePDP11.prototype.writeKIPAR,   "KIPAR",    8,  PDP11.MODEL_1145, MessagesPDP11.MMU],
+    [PDP11.UNIBUS.KDPAR0]:  /* 172360 */    [null, null, DevicePDP11.prototype.readKDPAR,   DevicePDP11.prototype.writeKDPAR,   "KDPAR",    8,  PDP11.MODEL_1145, MessagesPDP11.MMU],
+    [PDP11.UNIBUS.MMR3]:    /* 172516 */    [null, null, DevicePDP11.prototype.readMMR3,    DevicePDP11.prototype.writeMMR3,    "MMR3",     1,  PDP11.MODEL_1145, MessagesPDP11.MMU],
     [PDP11.UNIBUS.LKS]:     /* 177546 */    [null, null, DevicePDP11.prototype.readLKS,     DevicePDP11.prototype.writeLKS,     "LKS"],
-    [PDP11.UNIBUS.MMR0]:    /* 177572 */    [null, null, DevicePDP11.prototype.readMMR0,    DevicePDP11.prototype.writeMMR0,    "MMR0",     1,  PDP11.MODEL_1145],
-    [PDP11.UNIBUS.MMR1]:    /* 177574 */    [null, null, DevicePDP11.prototype.readMMR1,    DevicePDP11.prototype.writeIgnored, "MMR1",     1,  PDP11.MODEL_1145],
-    [PDP11.UNIBUS.MMR2]:    /* 177576 */    [null, null, DevicePDP11.prototype.readMMR2,    DevicePDP11.prototype.writeIgnored, "MMR2",     1,  PDP11.MODEL_1145],
-    [PDP11.UNIBUS.UIPDR0]:  /* 177600 */    [null, null, DevicePDP11.prototype.readUIPDR,   DevicePDP11.prototype.writeUIPDR,   "UIPDR",    8,  PDP11.MODEL_1145],
-    [PDP11.UNIBUS.UDPDR0]:  /* 177620 */    [null, null, DevicePDP11.prototype.readUDPDR,   DevicePDP11.prototype.writeUDPDR,   "UDPDR",    8,  PDP11.MODEL_1145],
-    [PDP11.UNIBUS.UIPAR0]:  /* 177640 */    [null, null, DevicePDP11.prototype.readUIPAR,   DevicePDP11.prototype.writeUIPAR,   "UIPAR",    8,  PDP11.MODEL_1145],
-    [PDP11.UNIBUS.UDPAR0]:  /* 177660 */    [null, null, DevicePDP11.prototype.readUDPAR,   DevicePDP11.prototype.writeUDPAR,   "UDPAR",    8,  PDP11.MODEL_1145],
+    [PDP11.UNIBUS.MMR0]:    /* 177572 */    [null, null, DevicePDP11.prototype.readMMR0,    DevicePDP11.prototype.writeMMR0,    "MMR0",     1,  PDP11.MODEL_1145, MessagesPDP11.MMU],
+    [PDP11.UNIBUS.MMR1]:    /* 177574 */    [null, null, DevicePDP11.prototype.readMMR1,    DevicePDP11.prototype.writeIgnored, "MMR1",     1,  PDP11.MODEL_1145, MessagesPDP11.MMU],
+    [PDP11.UNIBUS.MMR2]:    /* 177576 */    [null, null, DevicePDP11.prototype.readMMR2,    DevicePDP11.prototype.writeIgnored, "MMR2",     1,  PDP11.MODEL_1145, MessagesPDP11.MMU],
+    [PDP11.UNIBUS.UIPDR0]:  /* 177600 */    [null, null, DevicePDP11.prototype.readUIPDR,   DevicePDP11.prototype.writeUIPDR,   "UIPDR",    8,  PDP11.MODEL_1145, MessagesPDP11.MMU],
+    [PDP11.UNIBUS.UDPDR0]:  /* 177620 */    [null, null, DevicePDP11.prototype.readUDPDR,   DevicePDP11.prototype.writeUDPDR,   "UDPDR",    8,  PDP11.MODEL_1145, MessagesPDP11.MMU],
+    [PDP11.UNIBUS.UIPAR0]:  /* 177640 */    [null, null, DevicePDP11.prototype.readUIPAR,   DevicePDP11.prototype.writeUIPAR,   "UIPAR",    8,  PDP11.MODEL_1145, MessagesPDP11.MMU],
+    [PDP11.UNIBUS.UDPAR0]:  /* 177660 */    [null, null, DevicePDP11.prototype.readUDPAR,   DevicePDP11.prototype.writeUDPAR,   "UDPAR",    8,  PDP11.MODEL_1145, MessagesPDP11.MMU],
     [PDP11.UNIBUS.R0SET0]:  /* 177700 */    [null, null, DevicePDP11.prototype.readRSET0,   DevicePDP11.prototype.writeRSET0,   "R0SET0"],
     [PDP11.UNIBUS.R1SET0]:  /* 177701 */    [null, null, DevicePDP11.prototype.readRSET0,   DevicePDP11.prototype.writeRSET0,   "R1SET0"],
     [PDP11.UNIBUS.R2SET0]:  /* 177702 */    [null, null, DevicePDP11.prototype.readRSET0,   DevicePDP11.prototype.writeRSET0,   "R2SET0"],
