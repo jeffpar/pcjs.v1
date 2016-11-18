@@ -234,6 +234,14 @@ var PDP11 = {
     OPCODE: {
         HALT:       0x0000,
         WAIT:       0x0001,
+        BPT:        0x0003,
+        IOT:        0x0004,
+        JSR_OP:     0x0800,
+        JSR_MASK:   0xFE00,
+        EMT_OP:     0x8800,
+        EMT_MASK:   0xFF00,
+        TRAP_OP:    0x8900,
+        TRAP_MASK:  0xFF00,
         INVALID:    0xFFFF      // far from the only invalid opcode, just a KNOWN invalid opcode
     },
     /*

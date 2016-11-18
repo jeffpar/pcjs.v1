@@ -7086,12 +7086,12 @@ if (DEBUGGER) {
     DebuggerX86.prototype.doStep = function(sCmd)
     {
         var fCallStep = true;
-        var fRegs = (sCmd == "pr"? 1 : 0);
+        var nRegs = (sCmd == "pr"? 1 : 0);
         /*
          * Set up the value for this.nStep (ie, 1 or 2) depending on whether the user wants
          * a subsequent register dump ("pr") or not ("p").
          */
-        var nStep = 1 + fRegs;
+        var nStep = 1 + nRegs;
         if (!this.nStep) {
             var fPrefix;
             var fRepeat = false;
@@ -7186,7 +7186,7 @@ if (DEBUGGER) {
                  * stopped for reasons unrelated to the temporary breakpoint, but that's OK.
                  */
             } else {
-                this.doTrace(fRegs? "tr" : "t");
+                this.doTrace(nRegs? "tr" : "t");
             }
         } else {
             this.println("step in progress");

@@ -1638,9 +1638,9 @@ if (DEBUGGER) {
                     if (this.checksEnabled()) {
                         sStopped += this.cInstructions + " instructions, ";
                         /*
-                         * $ops displays progress by calculating cOpcodes - cOpcodesStart, so before
-                         * zeroing cOpcodes, we should subtract cOpcodes from cOpcodesStart (since we're
-                         * effectively subtracting cOpcodes from cOpcodes as well).
+                         * $ops displays progress by calculating cInstructions - cInstructionsStart, so before
+                         * zeroing cInstructions, we should subtract cInstructions from cInstructionsStart (since
+                         * we're effectively subtracting cInstructions from cInstructions as well).
                          */
                         this.cInstructionsStart -= this.cInstructions;
                         this.cInstructions = 0;
@@ -2202,16 +2202,16 @@ if (DEBUGGER) {
             sOperands += (sOperand || "???");
         }
 
-        var sOpcodes = "";
+        var sOpCodes = "";
         var sLine = this.toStrAddr(dbgAddrOp) + ":";
         if (dbgAddrOp.addr !== PDP11.ADDR_INVALID && dbgAddr.addr !== PDP11.ADDR_INVALID) {
             do {
-                sOpcodes += ' ' + this.toStrBase(this.getWord(dbgAddrOp, 2));
+                sOpCodes += ' ' + this.toStrBase(this.getWord(dbgAddrOp, 2));
                 if (dbgAddrOp.addr == null) break;
             } while (dbgAddrOp.addr != dbgAddr.addr);
         }
 
-        sLine += str.pad(sOpcodes, 24);
+        sLine += str.pad(sOpCodes, 24);
         sLine += str.pad(sOpName, 5);
         if (sOperands) sLine += ' ' + sOperands;
 
@@ -3664,36 +3664,47 @@ if (DEBUGGER) {
     };
 
     /**
-     * doStep(sCmd)
+     * doStep(sCmd, sOption)
      *
      * @this {DebuggerPDP11}
      * @param {string} [sCmd] "p" or "pr"
+     * @param {string} [sOption]
      */
-    DebuggerPDP11.prototype.doStep = function(sCmd)
+    DebuggerPDP11.prototype.doStep = function(sCmd, sOption)
     {
+        if (sOption == '?') {
+            this.println("step commands:");
+            this.println("\tp\tstep over instruction");
+            this.println("\tpr\tstep over instruction with register update");
+            return;
+        }
+
         var fCallStep = true;
-        var fRegs = (sCmd == "pr"? 1 : 0);
+        var nRegs = (sCmd == "pr"? 1 : 0);
         /*
          * Set up the value for this.nStep (ie, 1 or 2) depending on whether the user wants
          * a subsequent register dump ("pr") or not ("p").
          */
-        var nStep = 1 + fRegs;
+        var nStep = 1 + nRegs;
+
         if (!this.nStep) {
             var dbgAddr = this.newAddr(this.cpu.getPC());
-            var bOpcode = this.getByte(dbgAddr);
+            var opCode = this.getWord(dbgAddr);
 
-            /*
-            switch (bOpcode) {
-            case PDP11.OPCODE.CALL:
+            if (opCode == PDP11.OPCODE.BPT || opCode == PDP11.OPCODE.IOT ||
+                (opCode & PDP11.OPCODE.EMT_MASK) == PDP11.OPCODE.EMT_OP ||
+                (opCode & PDP11.OPCODE.TRAP_MASK) == PDP11.OPCODE.TRAP_OP) {
                 if (fCallStep) {
                     this.nStep = nStep;
-                    this.incAddr(dbgAddr, 3);
+                    this.incAddr(dbgAddr, 2);
                 }
-                break;
-            default:
-                break;
+            } else if ((opCode & PDP11.OPCODE.JSR_MASK) == PDP11.OPCODE.JSR_OP) {
+                var s = this.getInstruction(dbgAddr);
+                this.assert(s.indexOf("JSR") >= 0);
+                if (fCallStep) {
+                    this.nStep = nStep;
+                }
             }
-            */
 
             if (this.nStep) {
                 this.setTempBreakpoint(dbgAddr);
@@ -3707,7 +3718,7 @@ if (DEBUGGER) {
                  * stopped for reasons unrelated to the temporary breakpoint, but that's OK.
                  */
             } else {
-                this.doTrace(fRegs? "tr" : "t");
+                this.doTrace(nRegs? "tr" : "t");
             }
         } else {
             this.println("step in progress");
@@ -3838,7 +3849,7 @@ if (DEBUGGER) {
             this.println("\tt  [#]\ttrace # instructions");
             this.println("\ttr [#]\ttrace # instructions with register updates");
             this.println("\ttc [#]\ttrace # cycles");
-            this.println("note: bn [#] to break after # instructions is much faster");
+            this.println("note: bn [#] breaks after # instructions without updates");
             return;
         }
 
@@ -4070,7 +4081,7 @@ if (DEBUGGER) {
                         this.doPrint(sCmd.substr(5));
                         break;
                     }
-                    this.doStep(asArgs[0]);
+                    this.doStep(asArgs[0], asArgs[1]);
                     break;
                 case 'r':
                     if (sCmd == "reset") {
