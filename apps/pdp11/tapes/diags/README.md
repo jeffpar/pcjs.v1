@@ -234,4 +234,115 @@ so for now, I'm just going to pick out selected tapes and archive them here.
 
 From [bitsavers.org](http://bitsavers.trailing-edge.com/bits/DEC/pdp11/papertapeimages/20040101/), Tray 02:
 
-* Tape 04: [MAINDEC-11-DEQKC-B1-PB 06/12/78; 11/70 cpu instruction; exerciser; (c)1975,76](MAINDEC-11-DEQKC-B1-PB.json)
+* Tape 04: [MAINDEC-11-DEQKC-B1-PB 06/12/78; 11/70 cpu instruction exerciser; (c)1975,76](#md-11-1170-cpu-exerciser)
+
+MD-11 11/70 CPU EXERCISER
+-------------------------
+
+When started in a PDP-11/70 machine with no disk drives attached (or only RL01/RL02 drives), this diagnostic
+displays the following startup text:
+
+	MAINDEC-11-DEQKC-B...PDP 11/70 CPU EXERCISOR
+	OPT.CP=145406
+	OPERATIONAL SWITCH SETTINGS
+	SWITCH                  USE
+	  15            HALT ON ERROR
+	  14            LOOP ON TEST
+	  13            INHIBIT ERROR TYPEOUTS
+	  12            INHIBIT UBE
+	  11            INHIBIT ITTERATIONS
+	  10            BELL ON ERROR
+	   9            LOOP ON ERROR
+	   8            INHIBIT RELOCATION VIA I/O DEVICE
+	   7            INHIBIT TYPEOUT OF THIS TEXT AND SYS SIZE
+	   6            INHIBIT RELOCATION
+	   5            INHIBIT ROUND ROBIN RELOCATION
+	   4            INHIBIT RANDOM DISK ADDRESS
+	   3            INHIBIT MBT
+	   2            THESE THREE SWITCHES
+	   1            ARE ENCODED TO SELECT RELOCATION
+	   0            ON THE FOLLOWING DEVICES:
+	        0...RP11/RP03
+	        1...RK11/RK05
+	        2...NOT USED
+	        3...NOT USED
+	        4...RH70/RP04
+	        5...RH70/RS04 OR RS03
+	        6...NOT USED
+	        7...NOT USED
+	THE FOLLOWING DEVICES AND DRIVES WILL BE USED FOR RELOCATION:
+	DEVICE  DRIVES
+	TYPE A CHARACTER TO CONTINUE
+
+The first time I tried this test, there were a number of failures.  Here's one example:
+
+	000:00:00
+	ERRORPC PHYSC PC    PSW   MAINT   TEST NO SUB-PASS CNT
+	022024  00022024  000340  000000  000041  000000  000000
+
+I disassembled the code responsible for that failure:
+
+	021632: 052737 000340 177776   BIS   #340,@#177776
+	021640: 010746                 MOV   PC,-(SP)
+	021642: 062716 000152          ADD   #152,@SP
+	021646: 011637 000004          MOV   @SP,@#4
+	021652: 012737 000340 000006   MOV   #340,@#6
+	021660: 013727 000014 001472   MOV   @#14,#1472
+	021666: 062716 000100          ADD   #100,@SP
+	021672: 012637 000014          MOV   (SP)+,@#14
+	021676: 012737 000340 000016   MOV   #340,@#16
+	021704: 012703 000376          MOV   #376,R3
+	021710: 010313                 MOV   R3,@R3
+	021712: 010306                 MOV   R3,SP
+	021714: 032767 140000 000234   BIT   #140000,022156
+	021722: 001015                 BNE   021756
+	021724: 005716                 TST   @SP
+	021726: 021666 177776          CMP   @SP,177776(SP)
+	021732: 012656                 MOV   (SP)+,@-(SP)
+	021734: 057636 000000          BIS   @000000(SP),@(SP)+
+	021740: 054676 000000          BIS   -(SP),@000000(SP)
+	021744: 005006                 CLR   SP
+	021746: 013766 020000 020000   MOV   @#20000,20000(SP)
+	021754: 000425                 BR    022030
+	021756: 156737 000175 177777   BISB  022157,@#177777
+	021764: 012706 000376          MOV   #376,SP
+	021770: 016646 177776          MOV   177776(SP),-(SP)
+	021774: 051616                 BIS   @SP,@SP
+	021776: 061666 177776          ADD   @SP,177776(SP)
+	022002: 105037 177777          CLRB  @#177777
+	022006: 012706 000700          MOV   #700,SP
+	022012: 000451                 BR    022136
+	022014: 012600                 MOV   (SP)+,R0
+	022016: 012602                 MOV   (SP)+,R2
+	022020: 012706 000700          MOV   #700,SP
+	022024: 104000                 EMT   000
+
+I wasn't able to locate a source code listing for this particular (1978) version of the 11/70 CPU Instruction Exerciser,
+but I did find another useful document,
+[11/40 and 11/45 INSTRUCTION EXERCISER (Sep, 1974)](http://archive.pcjs.org/pubs/dec/pdp11/diags/MAINDEC-11-DCQKC-D-D_1140_1145_INSTRUCTION_EXERCISER_Sep74.pdf),
+where I discovered a matching test sequence on p. 86.
+
+Here's an excerpt:
+
+	; THE BELOW INSTRUCTIONS SHOULD NOT CAUSE AN OVERFLOW TRAP
+	        TST     (SP)            ; BECAUSE TST IS A NON MODIFYING INST
+	        CMP     (SP),-2(SP)     ; SO IS COMPARE
+	        MOV     (SP)+,@-(SP)    ; BECAUSE OF ADDRESS MODE 5
+	        BIS     @(SP),@(SP)+    ; BECAUSE OF ADDRESS MODE 3
+	        BIS     -(SP),@(SP)     ; BECAUSE OF ADDRESS MODE 7
+	        CLR     SP
+	        MOV     @#20000,20000(SP)
+	        BR      3$              ; BRANCH OVER NON KERNEL MODE TESTS
+
+In my case, after executing:
+
+    021734: 057636 000000          BIS   @000000(SP),@(SP)+     ;cycles=17
+
+the code trapped to vector 4:
+
+    trapped to 004 (YELLOW)
+    R0=000000 R1=154112 R2=155754 R3=000376 R4=160316 R5=153412
+    SP=000372 PC=022014 PS=000340 IR=000000 SL=000377 T0 N0 Z0 V0 C0
+    022014: 012600                 MOV   (SP)+,R0               ;cycles=0
+
+where it then dropped into an `EMT` instruction and reported an error.
