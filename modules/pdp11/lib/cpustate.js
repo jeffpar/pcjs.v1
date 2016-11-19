@@ -125,8 +125,10 @@ CPUStatePDP11.prototype.initProcessor = function()
 {
     if (this.model == PDP11.MODEL_1120) {
         this.decode = PDP11.op1120.bind(this);
+        this.checkStackLimit = this.checkStackLimitOld;
     } else {
         this.decode = PDP11.op1145.bind(this);
+        this.checkStackLimit = this.checkStackLimitNew;
     }
 
     this.initRegs();
@@ -247,7 +249,7 @@ CPUStatePDP11.prototype.resetMMU = function()
     this.regMMR1 = 0;           // 177574
     this.regMMR2 = 0;           // 177576
     this.regMMR3 = 0;           // 172516
-    this.regErr = 0;            // 177766
+    this.regErr = 0;            // 177766       TODO: Do we ever need to clear this, because it appears to accumulate errors...
     this.regPIR = 0;            // 177772
     this.regSL = 0xff;          // 177774
     this.mmuEnable = 0;         // MMU enabled for PDP11.ACCESS.READ or PDP11.ACCESS.WRITE
@@ -1488,12 +1490,12 @@ CPUStatePDP11.prototype.mapUnibus = function(addr)
 };
 
 /**
- * mapVirtualToPhysical(virtualAddress, accessFlags)
+ * mapVirtualToPhysical(virtualAddress, access)
  *
  * mapVirtualToPhysical() does memory management. It converts a 17-bit I/D virtual address to a
  * 22-bit physical address.  A real PDP 11/70 memory management unit can be enabled separately
  * for read and write for diagnostic purposes.  This is handled here by having an enable mask
- * (mmuEnable) which is tested against the operation access mask (accessFlags).  If there is no
+ * (mmuEnable) which is tested against the operation access mask (access).  If there is no
  * match, then the virtual address is simply mapped as a 16 bit physical address with the upper
  * page going to the IO address space.  Significant access mask values used are PDP11.ACCESS.READ
  * and PDP11.ACCESS.WRITE.
@@ -1539,19 +1541,19 @@ CPUStatePDP11.prototype.mapUnibus = function(addr)
  *
  * @this {CPUStatePDP11}
  * @param {number} virtualAddress
- * @param {number} accessFlags
+ * @param {number} access
  * @return {number}
  */
-CPUStatePDP11.prototype.mapVirtualToPhysical = function(virtualAddress, accessFlags)
+CPUStatePDP11.prototype.mapVirtualToPhysical = function(virtualAddress, access)
 {
     var page, pdr, physicalAddress;
 
-    this.assert(!(virtualAddress & ~0x1ffff) && accessFlags);
+    this.assert(!(virtualAddress & ~0x1ffff) && access);
 
     /*
      * This can happen when the DSTMODE (MAINT) bit of MMR0 is set but *not* the ENABLED bit.
      */
-    if (!(accessFlags & this.mmuEnable)) {
+    if (!(access & this.mmuEnable)) {
         physicalAddress = virtualAddress & 0xffff;
         if (physicalAddress >= BusPDP11.IOPAGE_16BIT) {
             physicalAddress |= this.addrIOPage;
@@ -1578,7 +1580,7 @@ CPUStatePDP11.prototype.mapVirtualToPhysical = function(virtualAddress, accessFl
      * As for the ODDADDR error that's supposed to generate a BUS error rather than an MMU error, this happens
      * in TEST #122 ("KT BEND") in the "EKBEE1" diagnostic (PC 076456).
      */
-    if ((physicalAddress & 0x1) && !(accessFlags & PDP11.ACCESS.BYTE)) {
+    if ((physicalAddress & 0x1) && !(access & PDP11.ACCESS.BYTE)) {
         this.regErr |= PDP11.CPUERR.ODDADDR;
         this.trap(PDP11.TRAP.BUS, 0, physicalAddress);
     }
@@ -1592,7 +1594,7 @@ CPUStatePDP11.prototype.mapVirtualToPhysical = function(virtualAddress, accessFl
 
     case PDP11.PDR.ACF.RO:      // 0x2: read-only, abort on write attempt
         pdr |= PDP11.PDR.ACCESSED;
-        if (accessFlags & PDP11.ACCESS.WRITE) {
+        if (access & PDP11.ACCESS.WRITE) {
             newMMR0 = PDP11.MMR0.ABORT_RO;
         }
         break;
@@ -1602,13 +1604,13 @@ CPUStatePDP11.prototype.mapVirtualToPhysical = function(virtualAddress, accessFl
         /* falls through */
 
     case PDP11.PDR.ACF.RW2:     // 0x5: read/write, memory management trap upon completion of a write (11/70 only)
-        if (accessFlags & PDP11.ACCESS.WRITE) {
+        if (access & PDP11.ACCESS.WRITE) {
             newMMR0 = PDP11.MMR0.TRAP_MMU;
         }
         /* falls through */
 
     case PDP11.PDR.ACF.RW:      // 0x6: read/write, no system trap/abort action
-        pdr |= ((accessFlags & PDP11.ACCESS.WRITE) ? (PDP11.PDR.ACCESSED | PDP11.PDR.MODIFIED) : PDP11.PDR.ACCESSED);
+        pdr |= ((access & PDP11.ACCESS.WRITE) ? (PDP11.PDR.ACCESSED | PDP11.PDR.MODIFIED) : PDP11.PDR.ACCESSED);
         break;
 
     default:                    // 0x0 (non-resident, abort all accesses) or 0x3 or 0x7 (unused, abort all accesses)
@@ -1727,51 +1729,12 @@ CPUStatePDP11.prototype.pushWord = function(data)
     var virtualAddress = (this.regsGen[6] - 2) & 0xffff;
     this.regsGen[6] = virtualAddress;           // BSD needs SP updated before any fault :-(
     this.lastOp = (this.lastOp & 0xffff) | ((this.lastOp & ~0xffff) << 8) | (0x00f6 << 16);
-    this.checkStackLimit(0, virtualAddress);
+    this.checkStackLimit(PDP11.ACCESS.PUSH_WORD, -2, virtualAddress);
     this.writeWord(virtualAddress, data);
 };
 
 /**
- * checkStackLimit(mode, addr)
- *
- * The special "mode 0" case used by pushWord() ignores addr <= 4, because pushWord() is used by trap(),
- * and if the trap() was generated by a RED error (below) or generated a RED error itself, then we need to
- * avoid triggering another (nested) RED error.
- *
- * TODO: pushWord() is not used exclusively by trap(); it's also used by a few instructions, like opJSR(),
- * so we might need to do some additional factoring of this function's logic.
- *
- * @this {CPUStatePDP11}
- * @param {number} mode (ie, the addressing mode, or 0 if pushWord() is checking)
- * @param {number} addr
- */
-CPUStatePDP11.prototype.checkStackLimit = function(mode, addr)
-{
-    if (!this.mmuMode) {
-        /*
-         * NOTE: I've removed the tests below for addr >= 0xFFFE, which were ported from the original code,
-         * because while it's definitely a bad physical stack address, I'm not sure it rises to the level of
-         * a trap, and this code is already expensive enough as it is.
-         */
-        if (addr <= this.regSL && (mode || addr > 4) /* || mode && addr >= 0xFFFE */) {
-            if (this.model >= PDP11.MODEL_1145 && (addr <= this.regSL - 32 /* || mode == 1 && addr >= 0xFFFE */)) {
-                this.regErr |= PDP11.CPUERR.RED;
-                this.regsGen[6] = 4;
-                this.trap(PDP11.TRAP.BUS, 0, PDP11.REASON.RED);
-            } else {
-                /*
-                 * On older machines (eg, the PDP-11/20), the instruction is always allowed to complete,
-                 * so the trap must always be issued in this fashion.
-                 */
-                this.regErr |= PDP11.CPUERR.YELLOW;
-                this.opFlags |= PDP11.OPFLAG.TRAP_SP;
-            }
-        }
-    }
-};
-
-/**
- * getAddrByMode(mode, reg, accessFlags)
+ * getAddrByMode(mode, reg, access)
  *
  * getAddrByMode() maps a six bit operand to a 17 bit I/D virtual address space.
  *
@@ -1806,13 +1769,13 @@ CPUStatePDP11.prototype.checkStackLimit = function(mode, addr)
  * @this {CPUStatePDP11}
  * @param {number} mode
  * @param {number} reg
- * @param {number} accessFlags
+ * @param {number} access
  * @return {number}
  */
-CPUStatePDP11.prototype.getAddrByMode = function(mode, reg, accessFlags)
+CPUStatePDP11.prototype.getAddrByMode = function(mode, reg, access)
 {
     var virtualAddress, step;
-    var addrDSpace = (accessFlags & PDP11.ACCESS.VIRT)? 0 : this.addrDSpace;
+    var addrDSpace = (access & PDP11.ACCESS.VIRT)? 0 : this.addrDSpace;
 
     /*
      * Modes that need to auto-increment or auto-decrement will break, in order to perform
@@ -1835,9 +1798,7 @@ CPUStatePDP11.prototype.getAddrByMode = function(mode, reg, accessFlags)
      * Mode 1: (R)
      */
     case 1:
-        if (reg == 6 && (accessFlags & PDP11.ACCESS.WRITE)) {
-            this.checkStackLimit(mode, this.regsGen[6]);
-        }
+        if (reg == 6) this.checkStackLimit(access, 0, this.regsGen[6]);
         this.nStepCycles -= (2 + 1);
         return (reg == 7? this.regsGen[reg] : (this.regsGen[reg] | addrDSpace));
 
@@ -1847,11 +1808,10 @@ CPUStatePDP11.prototype.getAddrByMode = function(mode, reg, accessFlags)
     case 2:
         step = 2;
         virtualAddress = this.regsGen[reg];
+        if (reg == 6) this.checkStackLimit(access, step, virtualAddress);
         if (reg != 7) {
             virtualAddress |= addrDSpace;
-            if (reg < 6 && (accessFlags & PDP11.ACCESS.BYTE)) {
-                step = 1;
-            }
+            if (reg < 6 && (access & PDP11.ACCESS.BYTE)) step = 1;
         }
         this.nStepCycles -= (2 + 1);
         break;
@@ -1873,8 +1833,9 @@ CPUStatePDP11.prototype.getAddrByMode = function(mode, reg, accessFlags)
      */
     case 4:
         step = -2;
-        if (reg < 6 && (accessFlags & PDP11.ACCESS.BYTE)) step = -1;
+        if (reg < 6 && (access & PDP11.ACCESS.BYTE)) step = -1;
         virtualAddress = (this.regsGen[reg] + step) & 0xffff;
+        if (reg == 6) this.checkStackLimit(access, step, virtualAddress);
         if (reg != 7) virtualAddress |= addrDSpace;
         this.nStepCycles -= (3 + 1);
         break;
@@ -1895,9 +1856,10 @@ CPUStatePDP11.prototype.getAddrByMode = function(mode, reg, accessFlags)
      */
     case 6:
         virtualAddress = this.readWord(this.advancePC(2));
-        virtualAddress = ((virtualAddress + this.regsGen[reg]) & 0xffff) | addrDSpace;
+        virtualAddress = (virtualAddress + this.regsGen[reg]) & 0xffff;
+        if (reg == 6) this.checkStackLimit(access, 0, virtualAddress);
         this.nStepCycles -= (4 + 2);
-        return virtualAddress;
+        return virtualAddress | addrDSpace;
 
     /*
      * Mode 7: @d(R)
@@ -1905,22 +1867,80 @@ CPUStatePDP11.prototype.getAddrByMode = function(mode, reg, accessFlags)
     case 7:
         virtualAddress = this.readWord(this.advancePC(2));
         virtualAddress = (virtualAddress + this.regsGen[reg]) & 0xffff;
-        virtualAddress = this.readWord(virtualAddress | this.addrDSpace) | addrDSpace;
+        virtualAddress = this.readWord(virtualAddress | this.addrDSpace);
         this.nStepCycles -= (7 + 3);
-        return virtualAddress;
+        return virtualAddress | addrDSpace;
     }
 
     this.regsGen[reg] = (this.regsGen[reg] + step) & 0xffff;
     this.lastOp = (this.lastOp & 0xffff) | ((this.lastOp & ~0xffff) << 8) | ((((step << 3) & 0xf8) | reg) << 16);
 
-    /*
-     * NOTE: We had to eliminate the test for "(accessFlags & PDP11.ACCESS.WRITE)", because DEC's
-     * "TRAP TEST" expects "TST -(SP)" to trap when SP is 150.
-     */
-    if (reg == 6 && step < 0) {
-        this.checkStackLimit(mode, this.regsGen[6]);
-    }
     return virtualAddress;
+};
+
+/**
+ * checkStackLimitOld(access, step, addr)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} access
+ * @param {number} step
+ * @param {number} addr
+ */
+CPUStatePDP11.prototype.checkStackLimitOld = function(access, step, addr)
+{
+    /*
+     * NOTE: DEC's "TRAP TEST" (MAINDEC-11-D0NA-PB) expects "TST -(SP)" to trap when SP is 150,
+     * so we ignore the access parameter.  Also, strangely, it does NOT expect this instruction
+     * to trap:
+     *
+     *      R0=006302 R1=000000 R2=000000 R3=000000 R4=000000 R5=000776
+     *      SP=000000 PC=006346 PS=000344 IR=000000 SL=000377 T0 N0 Z1 V0 C0
+     *      006346: 112667 171426          MOVB  (SP)+,000000
+     *
+     * so if the step parameter is positive, we let it go.
+     */
+    if (!this.mmuMode && step <= 0 && addr <= this.regSL) {
+        /*
+         * On older machines (eg, the PDP-11/20), there is no "YELLOW" and "RED" distinction, and the
+         * instruction is always allowed to complete, so the trap must always be issued in this fashion.
+         */
+        this.opFlags |= PDP11.OPFLAG.TRAP_SP;
+    }
+};
+
+/**
+ * checkStackLimitNew(access, step, addr)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} access
+ * @param {number} step
+ * @param {number} addr
+ */
+CPUStatePDP11.prototype.checkStackLimitNew = function(access, step, addr)
+{
+    if (!this.mmuMode) {
+        /*
+         * NOTE: The 11/70 CPU Instruction Exerciser does NOT expect reads to trigger a stack overflow, so we
+         * check the access parameter.
+         *
+         * The special PUSH_WORD case used by pushWord() ignores addr <= 4, because pushWord() is used by trap(),
+         * and if the trap() was generated by a RED error (below) or generated a RED error itself, then we need to
+         * avoid triggering another (nested) RED error.
+         */
+        if (!(access & PDP11.ACCESS.WRITE) || access == PDP11.ACCESS.PUSH_WORD && addr <= 4) {
+            return;
+        }
+        if (addr <= this.regSL) {
+            if (addr <= this.regSL - 32) {
+                this.regErr |= PDP11.CPUERR.RED;
+                this.regsGen[6] = 4;
+                this.trap(PDP11.TRAP.BUS, 0, PDP11.REASON.RED);
+            } else {
+                this.regErr |= PDP11.CPUERR.YELLOW;
+                this.opFlags |= PDP11.OPFLAG.TRAP_SP;
+            }
+        }
+    }
 };
 
 /**
@@ -2008,35 +2028,35 @@ CPUStatePDP11.prototype.setWordDirect = function(addr, data)
 };
 
 /**
- * getPhysicalAddrByMode(mode, reg, accessFlags)
+ * getPhysicalAddrByMode(mode, reg, access)
  *
  * This is a handler set up by setMemoryAccess().  All calls should go through getAddr().
  *
  * @this {CPUStatePDP11}
  * @param {number} mode
  * @param {number} reg
- * @param {number} accessFlags
+ * @param {number} access
  * @return {number}
  */
-CPUStatePDP11.prototype.getPhysicalAddrByMode = function(mode, reg, accessFlags)
+CPUStatePDP11.prototype.getPhysicalAddrByMode = function(mode, reg, access)
 {
-    return this.getAddrByMode(mode, reg, accessFlags);
+    return this.getAddrByMode(mode, reg, access);
 };
 
 /**
- * getVirtualAddrByMode(mode, reg, accessFlags)
+ * getVirtualAddrByMode(mode, reg, access)
  *
  * This is a handler set up by setMemoryAccess().  All calls should go through getAddr().
  *
  * @this {CPUStatePDP11}
  * @param {number} mode
  * @param {number} reg
- * @param {number} accessFlags
+ * @param {number} access
  * @return {number}
  */
-CPUStatePDP11.prototype.getVirtualAddrByMode = function(mode, reg, accessFlags)
+CPUStatePDP11.prototype.getVirtualAddrByMode = function(mode, reg, access)
 {
-    return this.mapVirtualToPhysical(this.getAddrByMode(mode, reg, accessFlags), accessFlags);
+    return this.mapVirtualToPhysical(this.getAddrByMode(mode, reg, access), access);
 };
 
 /**
@@ -2096,14 +2116,14 @@ CPUStatePDP11.prototype.writeWordToVirtual = function(virtualAddress, data)
 };
 
 /**
- * readWordFromPrevSpace(opCode, accessFlags)
+ * readWordFromPrevSpace(opCode, access)
  *
  * @this {CPUStatePDP11}
  * @param {number} opCode
- * @param {number} accessFlags (really just PDP11.ACCESS.DSPACE or PDP11.ACCESS.ISPACE)
+ * @param {number} access (really just PDP11.ACCESS.DSPACE or PDP11.ACCESS.ISPACE)
  * @return {number}
  */
-CPUStatePDP11.prototype.readWordFromPrevSpace = function(opCode, accessFlags)
+CPUStatePDP11.prototype.readWordFromPrevSpace = function(opCode, access)
 {
     var data;
     var reg = this.dstReg = opCode & PDP11.OPREG.MASK;
@@ -2116,25 +2136,25 @@ CPUStatePDP11.prototype.readWordFromPrevSpace = function(opCode, accessFlags)
         }
     } else {
         var addr = this.getAddrByMode(mode, reg, PDP11.ACCESS.READ_WORD);
-        if (!(accessFlags & PDP11.ACCESS.DSPACE)) {
+        if (!(access & PDP11.ACCESS.DSPACE)) {
             if ((this.regPSW & 0xf000) !== 0xf000) addr &= 0xffff;
         }
         this.mmuMode = (this.regPSW >> 12) & 3;
-        data = this.readWord(addr | (accessFlags & this.addrDSpace));
+        data = this.readWord(addr | (access & this.addrDSpace));
         this.mmuMode = (this.regPSW >> 14) & 3;
     }
     return data;
 };
 
 /**
- * writeWordToPrevSpace(opCode, accessFlags, data)
+ * writeWordToPrevSpace(opCode, access, data)
  *
  * @this {CPUStatePDP11}
  * @param {number} opCode
- * @param {number} accessFlags (really just PDP11.ACCESS.DSPACE or PDP11.ACCESS.ISPACE)
+ * @param {number} access (really just PDP11.ACCESS.DSPACE or PDP11.ACCESS.ISPACE)
  * @param {number} data
  */
-CPUStatePDP11.prototype.writeWordToPrevSpace = function(opCode, accessFlags, data)
+CPUStatePDP11.prototype.writeWordToPrevSpace = function(opCode, access, data)
 {
     this.lastOp = (this.lastOp & 0xffff) | (0x0016 << 16);
     var reg = this.dstReg = opCode & PDP11.OPREG.MASK;
@@ -2147,7 +2167,7 @@ CPUStatePDP11.prototype.writeWordToPrevSpace = function(opCode, accessFlags, dat
         }
     } else {
         var addr = this.getAddrByMode(mode, reg, PDP11.ACCESS.WRITE_WORD);
-        if (!(accessFlags & PDP11.ACCESS.DSPACE)) addr &= 0xffff;
+        if (!(access & PDP11.ACCESS.DSPACE)) addr &= 0xffff;
         /*
          * TODO: Consider replacing the following code with writeWord(), by adding optional mmuMode
          * parameters for each of the discrete mapVirtualToPhysical() and bus.setWord() operations, because
@@ -2155,7 +2175,7 @@ CPUStatePDP11.prototype.writeWordToPrevSpace = function(opCode, accessFlags, dat
          * setMemoryAccess() handlers.
          */
         this.mmuMode = (this.regPSW >> 12) & 3;
-        addr = this.mapVirtualToPhysical(addr | (accessFlags & PDP11.ACCESS.DSPACE), PDP11.ACCESS.WRITE);
+        addr = this.mapVirtualToPhysical(addr | (access & PDP11.ACCESS.DSPACE), PDP11.ACCESS.WRITE);
         this.mmuMode = (this.regPSW >> 14) & 3;
         this.bus.setWord(addr, data);
     }

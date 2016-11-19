@@ -35,8 +35,8 @@ in order to load the desired tape.
 [![MAINDEC-11-D0NC-PB (FEB/72): TEST 14C - TRAP TEST](MAINDEC-11-D0NC-PB.jpg)](#test-14)
 [![MAINDEC-11-D0OA-PB (MAR/70): TEST 15 - CPU EXERCISER](MAINDEC-11-D0OA-PB.jpg)](#test-15)
 
-Instructions for Running Diagnostics
-------------------------------------
+Running Paper Tape Diagnostics
+------------------------------
 
 ### Tests 1-12
 
