@@ -211,7 +211,7 @@ BusPDP11.IOHANDLER = {
  *
  * Those fallbacks may not always be appropriate; for example, byte writes to some device registers
  * must be zero-extended to update the entire word.  For those cases, the fallback's "preliminary" read
- * is issued with a zero address so that the handler can distinguish a normal read from one of these
+ * is issued with a fPreWrite flag so that the handler can distinguish a normal read from one of these
  * preliminary reads (aka read-before-write), and return an appropriate value for the update (eg, zero).
  *
  * If none of these fallback behaviors are appropriate, the device has a simple recourse: register
