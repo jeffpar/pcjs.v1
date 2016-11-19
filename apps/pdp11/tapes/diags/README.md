@@ -17,6 +17,8 @@ into RAM using the machine's "Load" button instead of "Attach", allowing you to 
 loading the [Bootstrap Loader](/apps/pdp11/boot/bootstrap/) in order to load the [Absolute Loader](/apps/pdp11/tapes/absloader/)
 in order to load the desired tape.
 
+Additional (non-paper tape) diagnostics are available on the [XXDP+ Diagnostics](/disks/dec/rl02k/xxdp/) disk.
+
 [![MAINDEC-11-D0AA-PB (MAR/70): TEST 1 - BRANCH](MAINDEC-11-D0AA-PB.jpg)](#tests-1-12)
 [![MAINDEC-11-D0BA-PB (MAR/70): TEST 2 - CON BRANCH](MAINDEC-11-D0BA-PB.jpg)](#tests-1-12)
 [![MAINDEC-11-D0CA-PB (MAR/70): TEST 3 - UNARY](MAINDEC-11-D0CA-PB.jpg)](#tests-1-12)
