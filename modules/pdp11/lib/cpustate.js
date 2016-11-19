@@ -1574,11 +1574,22 @@ CPUStatePDP11.prototype.mapVirtualToPhysical = function(virtualAddress, access)
      *      As an aside it turns out that it is the memory management unit that does odd address and
      *      non-existent memory trapping: who knew? :-) I thought these would have been handled at access time.
      *
-     * I haven't imported the non-existent memory checks he performed (yet); I would like to see the problems
-     * in action first.
+     * TEST #122 ("KT BEND") in the "EKBEE1" diagnostic (PC 076060) triggers an ODDADDR error using this
+     * instruction:
      *
-     * As for the ODDADDR error that's supposed to generate a BUS error rather than an MMU error, this happens
-     * in TEST #122 ("KT BEND") in the "EKBEE1" diagnostic (PC 076456).
+     *      076356: 005037 140001          CLR   @#140001
+     *
+     * and it expects that instruction to generate a BUS error rather than an MMU error, so we deal with that
+     * next.  However, the test also claims to check for an NEXM (non-existent memory) error, using this
+     * instruction:
+     *
+     *      076170: 005037 140100          CLR   @#140100
+     *
+     * but that error never materializes, so I've NOT included any NEXM checks yet.  I assume that any such
+     * checks would be limited to whatever's recorded in the Memory Size registers (177760), because actually
+     * checking every physical address at this stage -- even in a real MMU -- seems prohibitively expensive.
+     *
+     * TODO: Investigate why the test's NEXM error doesn't occur.
      */
     if ((physicalAddress & 0x1) && !(access & PDP11.ACCESS.BYTE)) {
         this.regErr |= PDP11.CPUERR.ODDADDR;

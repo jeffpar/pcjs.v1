@@ -7,17 +7,19 @@ permalink: /disks/dec/rl02k/xxdp/ekbee1/
 EKBEE1: 11/70 MEMORY MANAGEMENT DIAGNOSTIC
 ------------------------------------------
 
-From the [PDP-11 Diagnostic Handbook (1988)](http://archive.pcjs.org/pubs/dec/pdp11/diags/PDP11_DiagnosticHandbook_1988.pdf),
+From the
+[PDP-11 Diagnostic Handbook (1988)](http://archive.pcjs.org/pubs/dec/pdp11/diags/PDP11_DiagnosticHandbook_1988.pdf),
 p. 1-10:
 
 	11/70 MEMORY MANAGEMENT TEST
 
 	ABSTRACT:
 
-		This program was designed using a "BOTTOM UP" approach starting with the smallest segment of MEMORY MANAGEMMENT
-		logic and building up to cover all the logic.  The program begins by testing some of the internal CPU data and
-		address path and address detection logic, then works outward through the MEM. MANAGEMENT registers.  It is assumed
-		that both the CPU and the CACHE have been tested, or are known to be good.
+		This program was designed using a "BOTTOM UP" approach starting with the smallest segment of MEMORY
+		MANAGEMENT logic and building up to cover all the logic.  The program begins by testing some of the
+		internal CPU data and address path and address detection logic, then works outward through the MEM.
+		MANAGEMENT registers.  It is assumed that both the CPU and the CACHE have been tested, or are known
+		to be good.
 
 	OPERATING PROCEDURES:
 			Set the switch register by <CONTROL P>
@@ -65,4 +67,5 @@ the PDF (p. 199 of the source code listing):
     ;*      NEXM TRAP.  IF THIS IS A KB11-E/EM THEN THIS FEATURE IS TESTED.
     ;****************************************************************
 
-
+As noted in the *mapVirtualToPhysical()* function in [cpustate.js](/modules/pdp11/lib/cpustate.js), this test
+begins at PC 076060.
