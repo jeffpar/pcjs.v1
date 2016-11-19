@@ -241,8 +241,8 @@ From [bitsavers.org](http://bitsavers.trailing-edge.com/bits/DEC/pdp11/papertape
 MD-11 11/70 CPU EXERCISER
 -------------------------
 
-When started in a PDP-11/70 machine with no disk drives attached (or only RL01/RL02 drives), this diagnostic
-displays the following startup information:
+When started in a [PDP-11/70](/devices/pdp11/machine/1170/panel/debugger/cpuexer/) with no disk drives attached,
+this diagnostic displays the following startup information:
 
 	MAINDEC-11-DEQKC-B...PDP 11/70 CPU EXERCISOR
 	OPT.CP=145406

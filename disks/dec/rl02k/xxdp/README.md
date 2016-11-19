@@ -10,7 +10,7 @@ XXDP+ Diagnostics Disk
 The XXDP+ Diagnostics disk described below contains a wealth of PDP-11 tests.  Tests that PDPjs has exercised
 include:
 
-- [EKBEE1: 11/70 MEMORY MANAGEMENT DIAGNOSTIC](ekbee1/)
+- [EKBEE1: 11/70 MEMORY MANAGEMENT DIAGNOSTIC](ekbee1/) ([Demo](/devices/pdp11/machine/1170/panel/debugger/xxdp/))
 
 Running XXDP+ Diagnostics
 -------------------------

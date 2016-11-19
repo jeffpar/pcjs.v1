@@ -69,3 +69,5 @@ the PDF (p. 199 of the source code listing):
 
 As noted in the *mapVirtualToPhysical()* function in [cpustate.js](/modules/pdp11/lib/cpustate.js), this test
 begins at PC 076060.
+
+This diagnostic should run in any [PDP-11/70](/devices/pdp11/machine/1170/) ([Demo](/devices/pdp11/machine/1170/panel/debugger/xxdp/)).
