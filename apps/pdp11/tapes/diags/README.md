@@ -242,7 +242,7 @@ MD-11 11/70 CPU EXERCISER
 -------------------------
 
 When started in a PDP-11/70 machine with no disk drives attached (or only RL01/RL02 drives), this diagnostic
-displays the following startup text:
+displays the following startup information:
 
 	MAINDEC-11-DEQKC-B...PDP 11/70 CPU EXERCISOR
 	OPT.CP=145406
@@ -336,15 +336,16 @@ Here's an excerpt:
 	        MOV     @#20000,20000(SP)
 	        BR      3$              ; BRANCH OVER NON KERNEL MODE TESTS
 
-In my case, after executing:
+This test uncovered a number of stack overflow-related issues that PDPjs needed to resolve,
+including the fact that none of the "deferred" addressing modes (3, 5, or 7) apparently trigger a
+stack overflow; eg:
 
-    021734: 057636 000000          BIS   @000000(SP),@(SP)+     ;cycles=17
+	R0=000000 R1=154112 R2=155754 R3=000376 R4=160316 R5=153412
+	SP=000376 PC=021734 PS=000340 IR=000000 SL=000377 T0 N0 Z0 V0 C0
+    021734: 057636 000000          BIS   @000000(SP),@(SP)+
 
-the code trapped to vector 4:
+whereas mode 6 *does*; eg:
 
-    trapped to 004 (YELLOW)
-    R0=000000 R1=154112 R2=155754 R3=000376 R4=160316 R5=153412
-    SP=000372 PC=022014 PS=000340 IR=000000 SL=000377 T0 N0 Z0 V0 C0
-    022014: 012600                 MOV   (SP)+,R0               ;cycles=0
-
-where it then dropped into an `EMT` instruction and reported an error.
+	R0=001437 R1=154112 R2=000040 R3=000376 R4=160316 R5=153412 
+	SP=000376 PC=022074 PS=000340 IR=000000 SL=000377 T0 N0 Z0 V0 C0 
+	022074: 050666 177776          BIS   SP,177776(SP)
