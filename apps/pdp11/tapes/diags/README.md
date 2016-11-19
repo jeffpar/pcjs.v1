@@ -349,3 +349,14 @@ whereas mode 6 *does*; eg:
 	R0=001437 R1=154112 R2=000040 R3=000376 R4=160316 R5=153412 
 	SP=000376 PC=022074 PS=000340 IR=000000 SL=000377 T0 N0 Z0 V0 C0 
 	022074: 050666 177776          BIS   SP,177776(SP)
+
+I have to assume that the idiosyncrasies of stack overflow checking changed over time, because [Test 14](#test-14),
+which predates the 11/45 and 11/70, expects this instruction:
+
+	TST     -(SP)
+
+to trap when SP is 150.  That contradicts this newer test (ie, that TST should not cause an overflow
+trap "BECAUSE TST IS A NON MODIFYING INST").  For this and other reasons, PDPjs now installs different
+checkStackLimit() handlers based on the CPU model.
+
+
