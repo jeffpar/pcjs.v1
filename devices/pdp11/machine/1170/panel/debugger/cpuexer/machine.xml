@@ -8,6 +8,6 @@
 	<device id="default" type="default"/>
 	<serial id="dl11" adapter="0" binding="print" upperCase="true"/>
 	<panel ref="/devices/pdp11/panel/1170/debugger/front.xml"/>
-	<debugger id="debugger" base="8" messages="" commands="bp 023534"/>
+	<debugger id="debugger" base="8" messages="" commands=""/>
 	<device ref="/devices/pdp11/pc11/default.xml"/>
 </machine>

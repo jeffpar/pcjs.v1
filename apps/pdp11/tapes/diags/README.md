@@ -140,6 +140,22 @@ instruction, and the test will halt.
 Note that, as the instructions indicate, this test will fail on a PDP-11/45 or newer machine, because
 it expects the MUL instruction to trap.
 
+This test is also noteworthy because it uncovered a bug involving instructions like this:
+
+	MOV     R0,(R0)+
+
+Imagine that R0 contains 1000.  PDPjs (as well as several other emulators I tested) would write the value 1000
+to address 1000 after auto-incrementing R0 to 1002.
+
+Unfortunately, that’s wrong. Apparently, the PDP-11 performs both source and destination address calculations
+before reading and writing the source and destination values.  So, in the above example, the value 1002 must be
+written to address 1000.
+
+I should add that not all emulators get this wrong: [SimH](https://github.com/simh/simh), the gold standard of
+PDP-11 emulators, handles it correctly.  However, it's unclear how much confidence one should place in SimH,
+because as I discovered later when running the [11/70 CPU EXERCISER](#md-11-1170-cpu-exerciser) diagnostic,
+SimH is not infallible.
+
 	MAINDEC-11-D0NA (NEW NUMBER - DAKAA)
 	
 	T14 TRAPS
@@ -394,14 +410,20 @@ So at this point:
 
 the XOR instruction was using 23504 for the *src* operand instead of 23506.
 
-Interestingly, this test PASSES in SIMH, even though it *also* incorrectly uses 23504 for XOR's *src* operand.
-Why?  Because when SIMH gets to this instruction:
+Interestingly, this test PASSES in SimH, even though it *also* incorrectly uses 23504 for XOR's *src* operand.
+Why?  Because when SimH gets to this instruction:
 
 	023506: 010767 000030          MOV   PC,023542              ;FORM PC AS USED IN XOR ABOVE
 
 it incorrectly stores 023510 instead of 023512 into memory, and both mistakes end up canceling each other out.
 
-In fact, I'm less impressed with the accuracy of [SIMH's](https://github.com/simh/simh) PDP-11 emulation
+In fact, I'm less impressed with the accuracy of [SimH's](https://github.com/simh/simh) PDP-11 emulation
 than I used to be, because in the process of getting to this particular test within the "11/70 CPU EXERCISER"
 (MAINDEC-11-DEQKC-B1-PB) diagnostic, there were numerous other failures as well (eg, TEST 41 and TEST 45).
-However, SIMH is not my baby, so delving into those failures is an exercise for another day.
+However, SimH is not my baby, so delving into those failures is an exercise for another day.
+
+DISCLAIMER: Until I can run this test on real PDP-11 hardware, I have to acknowledge another possible
+explanation for the above failure: that SimH is *correct*, and that unlike all other registers, the value
+of the PC register is always used immediately, rather than after both *src* and *dst* have been decoded.
+But that strikes me as a strange architectural inconsistency, and given SimH's other "11/70 CPU EXERCISER"
+test failures, I'm going to stick with my original assumption -- for now.
