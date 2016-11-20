@@ -1775,7 +1775,11 @@ CPUStatePDP11.prototype.pushWord = function(data, fRed)
  * --------------------
  * On the PDP-11/20, stack overflow traps occur when an address below 400 is referenced
  * by SP in either mode 4 (auto-decrement) or 5 (auto-decrement deferred).  The instruction
- * is allowed to complete before the trap is issued.
+ * is allowed to complete before the trap is issued.  NOTE: This information comes
+ * directly from the PDP-11/20 Handbook (1971), but the 11/20 diagnostics apparently only
+ * test mode 4, not mode 5, because when I removed stack limit checks for mode 5 on the
+ * 11/70, none of the 11/20 tests complained.  So, I still need some independent confirmation
+ * as to whether ANY models check for stack overflow on mode 5 (auto-decrement deferred).
  *
  * On the PDP-11/70, the stack limit register (177774) allows a variable boundary for the
  * kernel stack.
