@@ -5,7 +5,7 @@ date: 2016-11-13 13:00:00
 permalink: /blog/2016/11/13/
 ---
 
-Last week, I ran PDPjs through a series of early DEC PDP-11 diagnostic tests on paper tape.
+Last week, I ran PDPjs through a series of early DEC [PDP-11 Paper Tape Diagnostics](/apps/pdp11/tapes/diags/).
 These tests were originally released in 1970 and are documented in such DEC publications as the
 [MAINDEC USER REFERENCE MANUAL](http://archive.pcjs.org/pubs/dec/pdp11/diags/MAINDEC_User_Reference_Manual_Oct73.pdf)
 (October 1973).
@@ -70,6 +70,10 @@ successfully on an 11/70.  And [Test 15](/apps/pdp11/tapes/diags/#test-15) is no
 [Test 14](/apps/pdp11/tapes/diags/#test-14) also will not run properly on an 11/70; there again, the problem could have been
 avoided if DEC had decided to designate an opcode as *permanently* RESERVED, and then used that for all future RESERVED
 instruction tests, instead of using opcodes that would become new instructions later (eg, MUL).
+
+The most recent paper tape diagnostic I've run is the [11/70 CPU EXERCISER](/apps/pdp11/tapes/diags/#md-11-1170-cpu-exerciser),
+and after several more bug fixes, PDPjs passes that test now, too.  That's something not even
+[SimH](https://github.com/simh/simh) is currently able to do.
 
 ---
 
