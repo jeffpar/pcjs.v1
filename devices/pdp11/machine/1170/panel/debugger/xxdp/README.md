@@ -12,6 +12,9 @@ machines:
         path: http://archive.pcjs.org/disks/dec/rl02k/RL02K-XXDP.json
 ---
 
+This machine is ready to boot the [XXDP+ Diagnostics](/disks/dec/rl02k/xxdp/) ("BOOT RL0") and run the
+[EKBEE1](/disks/dec/rl02k/xxdp/ekbee1/) diagnostic ("R EKBEE1").
+
 {% include machine.html id="test1170" %}
 
 Other interesting things to know about this machine:

@@ -52,7 +52,7 @@ if (NODE) {
  */
 function RL11(parms)
 {
-    Component.call(this, "RL11", parms, RL11, MessagesPDP11.DISK);
+    Component.call(this, "RL11", parms, RL11, MessagesPDP11.RL11);
 
     /*
      * We record any 'autoMount' object now, but we no longer parse it until initBus(),
@@ -963,6 +963,8 @@ RL11.prototype.processCommand = function()
     }
 };
 
+
+
 /**
  * endReadWrite(err, iCylinder, iHead, iSector, nWords, addr)
  *
@@ -1027,7 +1029,7 @@ RL11.prototype.readData = function(drive, iCylinder, iHead, iSector, nWords, add
             err = PDP11.RL11.ERRC.HNF;
             break;
         }
-        var data = this.bus.setWord(addr, b0 | (b1 << 8));
+        var data = this.bus.setWordDirect(addr, b0 | (b1 << 8));
         if (this.bus.checkFault()) {
             err = PDP11.RL11.ERRC.NXM;
             break;
@@ -1075,7 +1077,7 @@ RL11.prototype.writeData = function(drive, iCylinder, iHead, iSector, nWords, ad
     }
 
     while (nWords--) {
-        var data = this.bus.getWord(addr);
+        var data = this.bus.getWordDirect(addr);
         if (this.bus.checkFault()) {
             err = PDP11.RL11.ERRC.NXM;
             break;

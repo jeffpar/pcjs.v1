@@ -1,13 +1,13 @@
 ---
 layout: page
-title: DEC PDP-11 Tape Images
+title: DEC PDP-11 Paper Tape Images
 permalink: /apps/pdp11/tapes/
 ---
 
-DEC PDP-11 Tape Images
-----------------------
+DEC PDP-11 Paper Tape Images
+----------------------------
 
-To load any of the DEC PDP-11 tapes listed below, you will need to use a [PDPjs Machine](/devices/pdp11/machine/)
+To load any of the DEC PDP-11 paper tapes listed below, you will need to use a [PDPjs Machine](/devices/pdp11/machine/)
 with a [PC11 High-Speed Paper Tape Reader/Punch](/devices/pdp11/pc11/), such as this
 [PDP-11/20](/devices/pdp11/machine/1120/basic/debugger), and then follow this three-step process:
 
