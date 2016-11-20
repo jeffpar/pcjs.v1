@@ -181,6 +181,9 @@ it expects the MUL instruction to trap.
 Before loading and running this test on the [PDP-11/20 with Front Panel and Debugger](/devices/pdp11/machine/1120/panel/debugger/),
 it's recommended that you also toggle SW-15, as described below, so that the test will HALT on any failure.
 
+Also, this test, like [Test 14](#test-14), fails on a PDP-11/45 or newer machine.  In this case, it's because DEC
+changed the behavior of the RTI instruction on newer models.
+
 	MAINDEC-11-D0OA (NEW NUMBER - DZQKA)
 	
 	T15 Instruction Exerciser
@@ -358,5 +361,3 @@ which predates the 11/45 and 11/70, expects this instruction:
 to trap when SP is 150.  That contradicts this newer test (ie, that TST should not cause an overflow
 trap "BECAUSE TST IS A NON MODIFYING INST").  For this and other reasons, PDPjs now installs different
 checkStackLimit() handlers based on the CPU model.
-
-

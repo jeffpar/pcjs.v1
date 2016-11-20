@@ -307,7 +307,6 @@ var PDP11 = {
         WRITE:      0x04,
         UPDATE:     0x06,
         VIRT:       0x08,       // getVirtualByMode() leaves bit 17 clear if this is set (otherwise the caller would have to clear it again)
-        PUSH:       0x10,
         ISPACE:     0x00000,
         DSPACE:     0x10000     // getVirtualByMode() sets bit 17 in any 16-bit virtual address that refers to D space (as opposed to I space)
     },
@@ -748,7 +747,6 @@ PDP11.ACCESS.WRITE_WORD  = PDP11.ACCESS.WORD | PDP11.ACCESS.WRITE;      // forme
 PDP11.ACCESS.WRITE_BYTE  = PDP11.ACCESS.BYTE | PDP11.ACCESS.WRITE;      // formerly WRITE_MODE (4) | BYTE_MODE (1)
 PDP11.ACCESS.UPDATE_WORD = PDP11.ACCESS.WORD | PDP11.ACCESS.UPDATE;     // formerly MODIFY_WORD (2 | 4)
 PDP11.ACCESS.UPDATE_BYTE = PDP11.ACCESS.BYTE | PDP11.ACCESS.UPDATE;     // formerly MODIFY_BYTE (1 | 2 | 4)
-PDP11.ACCESS.PUSH_WORD   = PDP11.ACCESS.WORD | PDP11.ACCESS.WRITE | PDP11.ACCESS.PUSH;
 
 /*
  * PSW arithmetic flags are NOT stored directly into the PSW register; they are maintained across separate
