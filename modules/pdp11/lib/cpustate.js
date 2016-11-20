@@ -1777,9 +1777,12 @@ CPUStatePDP11.prototype.pushWord = function(data, fRed)
  * by SP in either mode 4 (auto-decrement) or 5 (auto-decrement deferred).  The instruction
  * is allowed to complete before the trap is issued.  NOTE: This information comes
  * directly from the PDP-11/20 Handbook (1971), but the 11/20 diagnostics apparently only
- * test mode 4, not mode 5, because when I removed stack limit checks for mode 5 on the
- * 11/70, none of the 11/20 tests complained.  So, I still need some independent confirmation
- * as to whether ANY models check for stack overflow on mode 5 (auto-decrement deferred).
+ * test mode 4, not mode 5, because when I later removed stack limit checks for mode 5 on
+ * the 11/70, none of the 11/20 tests complained.
+ *
+ * TODO: Find some independent confirmation as to whether ANY PDP-11 models check for
+ * stack overflow on mode 5 (auto-decrement deferred); if they do, then further tweaks to
+ * checkStackLimit functions may be required.
  *
  * On the PDP-11/70, the stack limit register (177774) allows a variable boundary for the
  * kernel stack.
