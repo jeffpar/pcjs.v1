@@ -1352,9 +1352,10 @@ CPUStatePDP11.prototype.trap = function(vector, flag, reason)
     this.setPC(newPC);
 
     /*
-     * DEC's "TRAP TEST" triggers a RESERVED trap with an invalid opcode and the stack deliberately
-     * set too low, and expects the stack overflow trap to be "sprung" immediately afterward, so we
-     * only want to "lose interest" in the TRAP flag(s) that were set on entry, not ALL of them.
+     * DEC's "TRAP TEST" (MAINDEC-11-D0NA-PB) triggers a RESERVED trap with an invalid opcode and the
+     * stack deliberately set too low, and expects the stack overflow trap to be "sprung" immediately
+     * afterward, so we only want to "lose interest" in the TRAP flag(s) that were set on entry, not ALL
+     * of them.
      *
      *      this.opFlags &= ~PDP11.OPFLAG.TRAP_MASK;    // lose interest in traps after an abort
      *
@@ -2227,7 +2228,7 @@ CPUStatePDP11.prototype.readSrcByte = function(opCode)
  * been decoded and any pre-decrement or post-increment operations affecting the SRC register have
  * been completed.
  *
- * Here's an example from DEC's "TRAP TEST":
+ * Here's an example from DEC's "TRAP TEST" (MAINDEC-11-D0NA-PB):
  *
  *      007200: 012700 006340          MOV   #6340,R0
  *      007204: 010020                 MOV   R0,(R0)+

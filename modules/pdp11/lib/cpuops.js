@@ -1243,15 +1243,15 @@ PDP11.JSR_CYCLES = [
 PDP11.opJSR = function(opCode)
 {
     /*
-     * Since JMP and JSR opcodes have their own unique timings for the various dst modes, we must snapshot
-     * nStepCycles before decoding the mode, and then use that to update nStepCycles.
+     * Since JMP and JSR opcodes have their own unique timings for the various dst modes, we must
+     * snapshot nStepCycles before decoding the mode, and then use that to update nStepCycles.
      */
     this.nSnapCycles = this.nStepCycles;
-    /*
-     * TODO: Determine whether or not the SRCMODE operand (regsGen[reg]) should be snapped BEFORE or AFTER we
-     * decode the DSTMODE operand.  Doing it AFTER seems a bit risky.
-     */
     var addr = this.readDstAddr(opCode);
+    /*
+     * As per the WARNING in readSrcWord(), reading the SRC register AFTER decoding the DST operand
+     * is entirely appropriate.
+     */
     var reg = (opCode >> PDP11.SRCMODE.SHIFT) & PDP11.OPREG.MASK;
     this.pushWord(this.regsGen[reg]);
     this.regsGen[reg] = this.getPC();
@@ -1883,7 +1883,11 @@ PDP11.opWAIT = function(opCode)
 PDP11.opXOR = function(opCode)
 {
     var reg = (opCode >> PDP11.SRCMODE.SHIFT) & PDP11.OPREG.MASK;
-    this.updateDstWord(opCode, this.regsGen[reg], PDP11.fnXOR);
+    /*
+     * As per the WARNING in readSrcWord(), we must supply a register number rather than a register value,
+     * which will then be evaluated by updateDstWord() after both the SRC and DST operands have been decoded.
+     */
+    this.updateDstWord(opCode, -reg-1 /* this.regsGen[reg] */, PDP11.fnXOR);
     this.nStepCycles -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
 };
 

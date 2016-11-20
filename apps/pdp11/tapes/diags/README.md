@@ -361,3 +361,47 @@ which predates the 11/45 and 11/70, expects this instruction:
 to trap when SP is 150.  That contradicts this newer test (ie, that TST should not cause an overflow
 trap "BECAUSE TST IS A NON MODIFYING INST").  For this and other reasons, PDPjs now installs different
 checkStackLimit() handlers based on the CPU model.
+
+---
+
+Here's the next test that PDPjs failed.  Again, I found the same sequence of instructions in the 11/40 and 11/45
+version of the diagnostic, at PC 023360 rather than 023450, so I have annotated the code below with DEC's comments:
+
+	023450: 012704 000001          MOV   #1,R4                  ;SET R4
+	023454: 006767 000060          SXT   023540                 ;PRESET DATA=0
+	023460: 074467 000054          XOR   R4,023540
+	023464: 100423                 BMI   023534
+	023466: 006304                 ASL   R4                     ;SHIFT R4
+	023470: 102373                 BVC   023460                 ;UNTIL V SETS (R4=100000)
+	023472: 100020                 BPL   023534                 ;BRANCH IF 'N' IS CLEAR
+	023474: 074467 000040          XOR   R4,023540              ;XOR6A=177777
+	023500: 100015                 BPL   023534
+	023502: 074767 000032          XOR   PC,023540              ;XOR PC WITH XOR6A (177777)
+	023506: 010767 000030          MOV   PC,023542              ;FORM PC AS USED IN XOR ABOVE
+	023512: 162767 000004 000022   SUB   #4,023542
+	023520: 005167 000016          COM   023542
+	023524: 026767 000012 000006   CMP   023542,023540          ;XOR6A SHOULD = COMPLEMENT OF PC
+	023532: 001401                 BEQ   023536
+	023534: 104000                 EMT   000                    ;ERROR: XOR TESTS ABOVE FAILED [They use HLT instead of EMT here]
+
+In my case, the failure was caused by the XOR instruction: it hadn't been updated along with the rest of the
+PDPjs instructions to defer evaluating register operands until BOTH *src* and *dst* operands have been decoded.
+So at this point:
+
+	R0=154343 R1=154112 R2=023422 R3=154501 R4=100000 R5=155066
+	SP=000700 PC=023502 PS=000010 IR=000000 SL=000377 T0 N1 Z0 V0 C0
+	023502: 074767 000032          XOR   PC,023540              ;XOR PC WITH XOR6A (177777)
+
+the XOR instruction was using 23504 for the *src* operand instead of 23506.
+
+Interestingly, this test PASSES in SIMH, even though it *also* incorrectly uses 23504 for XOR's *src* operand.
+Why?  Because when SIMH gets to this instruction:
+
+	023506: 010767 000030          MOV   PC,023542              ;FORM PC AS USED IN XOR ABOVE
+
+it incorrectly stores 023510 instead of 023512 into memory, and both mistakes end up canceling each other out.
+
+In fact, I'm less impressed with the accuracy of [SIMH's](https://github.com/simh/simh) PDP-11 emulation
+than I used to be, because in the process of getting to this particular test within the "11/70 CPU EXERCISER"
+(MAINDEC-11-DEQKC-B1-PB) diagnostic, there were numerous other failures as well (eg, TEST 41 and TEST 45).
+However, SIMH is not my baby, so delving into those failures is an exercise for another day.
