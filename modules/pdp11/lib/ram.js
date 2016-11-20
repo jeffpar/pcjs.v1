@@ -308,11 +308,11 @@ RAMPDP11.prototype.loadImage = function(aBytes, addrLoad, addrExec, addrInit, fR
             }
             var offBlock = off;
             if (w != 0x0001) {
-                if (MAXDEBUG) this.println("invalid signature (" + str.toHexWord(w) + ") at offset " + str.toHexWord(offBlock));
+                this.printMessage("invalid signature (" + str.toHexWord(w) + ") at offset " + str.toHexWord(offBlock), MessagesPDP11.PAPER);
                 break;
             }
             if (off + 6 >= aBytes.length) {
-                if (MAXDEBUG) this.println("invalid block at offset " + str.toHexWord(offBlock));
+                this.printMessage("invalid block at offset " + str.toHexWord(offBlock), MessagesPDP11.PAPER);
                 break;
             }
             off += 2;
@@ -326,12 +326,12 @@ RAMPDP11.prototype.loadImage = function(aBytes, addrLoad, addrExec, addrInit, fR
                 len--;
             }
             if (len != 0 || off >= aBytes.length) {
-                if (MAXDEBUG) this.println("insufficient data for block at offset " + str.toHexWord(offBlock));
+                this.printMessage("insufficient data for block at offset " + str.toHexWord(offBlock), MessagesPDP11.PAPER);
                 break;
             }
             checksum += aBytes[off++] & 0xff;
             if (checksum & 0xff) {
-                if (MAXDEBUG) this.println("invalid checksum (" + str.toHexByte(checksum) + ") for block at offset " + str.toHexWord(offBlock));
+                this.printMessage("invalid checksum (" + str.toHexByte(checksum) + ") for block at offset " + str.toHexWord(offBlock), MessagesPDP11.PAPER);
                 break;
             }
             if (!cbData) {
