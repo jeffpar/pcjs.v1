@@ -7,19 +7,19 @@
 		<item ref="/apps/c1p/6502/jeffpar/life/LIFE.json">6502 Game of Life (JP)</item>
 		<item ref="/apps/c1p/6502/tests/bcd/bcd.json">6502 BCD Tests</item>
 		<item ref="/apps/c1p/6502/tests/vflag/vflag.json">6502 VFLAG Tests</item>
-		<item ref="/apps/c1p/BASIC/jeffpar/CHECKERS.BAS">CHECKERS (JP)</item>
-		<item ref="/apps/c1p/BASIC/jeffpar/HANGWOMAN.BAS">HANGWOMAN (JP)</item>
-		<item ref="/apps/c1p/BASIC/jeffpar/LIFE.BAS">LIFE (JP)</item>
-		<item ref="/apps/c1p/BASIC/jeffpar/OTHELLO.BAS">OTHELLO (JP)</item>
-		<item ref="/apps/c1p/BASIC/jeffpar/SOFORECAST.BAS">SOFORECAST (JP)</item>
-		<item ref="/apps/c1p/BASIC/jeffpar/TUBELIST.BAS">TUBELIST (JP)</item>
-		<item ref="/apps/c1p/BASIC/OSI/MATH.BAS">BASIC MATH</item>
-		<item ref="/apps/c1p/BASIC/OSI/CHECKING.BAS">CHECKING</item>
-		<item ref="/apps/c1p/BASIC/OSI/COUNTER.BAS">COUNTER</item>
-		<item ref="/apps/c1p/BASIC/OSI/POKER.BAS">POKER</item>
-		<item ref="/apps/c1p/BASIC/OSI/PRESIDENTS.BAS">PRESIDENTS</item>
-		<item ref="/apps/c1p/BASIC/OSI/STARWARS.BAS">STAR WARS</item>
-		<item ref="/apps/c1p/BASIC/OSI/TRIGTUTOR.BAS">TRIG TUTOR</item>
+		<item ref="/apps/c1p/BASIC/jeffpar/checkers/CHECKERS.BAS">CHECKERS (JP)</item>
+		<item ref="/apps/c1p/BASIC/jeffpar/hangwoman/HANGWOMAN.BAS">HANGWOMAN (JP)</item>
+		<item ref="/apps/c1p/BASIC/jeffpar/life/LIFE.BAS">LIFE (JP)</item>
+		<item ref="/apps/c1p/BASIC/jeffpar/othello/OTHELLO.BAS">OTHELLO (JP)</item>
+		<item ref="/apps/c1p/BASIC/jeffpar/soforecast/SOFORECAST.BAS">SOFORECAST (JP)</item>
+		<item ref="/apps/c1p/BASIC/jeffpar/tubelist/TUBELIST.BAS">TUBELIST (JP)</item>
+		<item ref="/apps/c1p/BASIC/OSI/math/MATH.BAS">BASIC MATH</item>
+		<item ref="/apps/c1p/BASIC/OSI/checking/CHECKING.BAS">CHECKING</item>
+		<item ref="/apps/c1p/BASIC/OSI/counter/COUNTER.BAS">COUNTER</item>
+		<item ref="/apps/c1p/BASIC/OSI/poker/POKER.BAS">POKER</item>
+		<item ref="/apps/c1p/BASIC/OSI/presidents/PRESIDENTS.BAS">PRESIDENTS</item>
+		<item ref="/apps/c1p/BASIC/OSI/starwars/STARWARS.BAS">STAR WARS</item>
+		<item ref="/apps/c1p/BASIC/OSI/trigtutor/TRIGTUTOR.BAS">TRIG TUTOR</item>
 		<item ref="/sites/www.osiweb.org/programs/basic/OsiBas/spacewar.bas">SPACEWAR</item>
 	</control>
 	<control type="button" binding="loadSerial">Load</control>
