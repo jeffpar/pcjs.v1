@@ -34,21 +34,19 @@ And finally, the most interesting bug uncovered by Test 14 involved instructions
 
 	MOV     R0,(R0)+
 
-Imagine that R0 contains 1000.  PDPjs (as well as several other emulators I tested) would write the value 1000 to address
-1000 after auto-incrementing R0 to 1002.
+Imagine that R0 contains 1000.  PDPjs would write the value 1000 to address 1000 after auto-incrementing R0 to
+1002.
 
-Unfortunately, that's wrong.  Apparently, the PDP-11 performs both source and destination address calculations *before*
-reading and writing the source and destination values.  So, in the above example, the value 1002 must be written to address 1000.
-
-I should add that not all emulators get this wrong: [SimH](https://github.com/simh/simh), the gold standard of PDP-11
-emulators, handles it correctly.
+Unfortunately, that's wrong -- for the PDP-11/20 anyway.  Apparently, unlike later (micro-coded) models, the
+PDP-11/20 performs both source and destination address calculations *before* reading and writing the source and
+destination values.  So, in the above example, the value 1002 must be written to address 1000.
 
 Don't confuse this behavior with the order in which the source and destination operands are processed (source operands
 are always decoded first, destination operands next), or with the fact that the auto-increment mode is actually a *post*-
 increment mode, whereas auto-decrement is a *pre*-decrement mode.  Those things are also true, but they have nothing to do
-with this bug.
+with this behavior.
 
-PDPjs resolved the bug by using a special (negative) value to indicate a register source operand, which is then converted
+PDPjs resolved this by using a special (negative) value to indicate a register source operand, which is then converted
 to the register's current value after both operands have been decoded.  Test 14 now passes.
 
 Next up: [Test 15](/apps/pdp11/tapes/diags/#test-15), which uncovered a couple more problems:

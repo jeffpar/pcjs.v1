@@ -123,9 +123,21 @@ var Trigger;
  */
 CPUStatePDP11.prototype.initProcessor = function()
 {
+    /*
+     * offRegSrc is a bias added to the register index calculated in readSrcWord() and readSrcByte(),
+     * and by default has no effect on the register index, UNLESS this is a PDP-11/20, in which case the
+     * bias is changed to 8 and we return one of the negative values you see above.  Those negative values
+     * act as signals to writeDstWord() and writeDstByte(), effectively delaying evaluation of the register
+     * until then.
+     */
+    this.offRegSrc = 0;
+    this.maskRegSrcByte = 0xff;
+
     if (this.model == PDP11.MODEL_1120) {
         this.decode = PDP11.op1120.bind(this);
         this.checkStackLimit = this.checkStackLimit1120;
+        this.offRegSrc = 8;
+        this.maskRegSrcByte = -1;
     } else {
         this.decode = PDP11.op1145.bind(this);
         this.checkStackLimit = this.checkStackLimit1145;
@@ -177,10 +189,12 @@ CPUStatePDP11.prototype.initRegs = function()
     this.flagZ  = f;            // ~ PSW Z bit      (TODO: Why do we clear instead of set Z, like other flags?)
     this.flagN  = 0x8000;       // PSW N bit
     this.regPSW = 0x000f;       // PSW other bits   (TODO: What's the point of setting the flag bits here, too?)
-    this.regsGen = [            // General R0 - R7
-        0, 0, 0, 0, 0, 0, 0, this.addrReset
+    this.regsGen = [            // General R0-R7
+        0, 0, 0, 0, 0, 0, 0, this.addrReset,
+        -1, -2, -3, -4, -5, -6, -7, -8
     ];
-    this.regsAlt = [            // Alternate R0 - R5
+
+    this.regsAlt = [            // Alternate R0-R5
         0, 0, 0, 0, 0, 0
     ];
     this.regsAltStack = [       // Alternate R6 stack pointers (KERNEL, SUPER, UNUSED, USER)
@@ -2197,10 +2211,10 @@ CPUStatePDP11.prototype.writeWordToPrevSpace = function(opCode, access, data)
 /**
  * readSrcByte(opCode)
  *
- * WARNING: If the SRC operand is a register, we return a negative register number rather than the
- * register value, because the final value of the register must be resolved AFTER the DST operand has
- * been decoded and any pre-decrement or post-increment operations affecting the SRC register have
- * been completed.  See readSrcWord() for more details.
+ * WARNING: If the SRC operand is a register, offRegSrc ensures we return a negative register number
+ * rather than the register value, because on the PDP-11/20, the final value of the register must be
+ * resolved AFTER the DST operand has been decoded and any pre-decrement or post-increment operations
+ * affecting the SRC register have been completed.  See readSrcWord() for more details.
  *
  * @this {CPUStatePDP11}
  * @param {number} opCode
@@ -2213,7 +2227,7 @@ CPUStatePDP11.prototype.readSrcByte = function(opCode)
     var reg = this.srcReg = opCode & PDP11.OPREG.MASK;
     var mode = this.srcMode = (opCode & PDP11.OPMODE.MASK) >> PDP11.OPMODE.SHIFT;
     if (!mode) {
-        result = -reg-1;
+        result = this.regsGen[reg + this.offRegSrc] & this.maskRegSrcByte;
     } else {
         result = this.readByteFromPhysical(this.getAddr(mode, reg, PDP11.ACCESS.READ_BYTE));
     }
@@ -2223,10 +2237,10 @@ CPUStatePDP11.prototype.readSrcByte = function(opCode)
 /**
  * readSrcWord(opCode)
  *
- * WARNING: If the SRC operand is a register, we return a negative register number rather than the
- * register value, because the final value of the register must be resolved AFTER the DST operand has
- * been decoded and any pre-decrement or post-increment operations affecting the SRC register have
- * been completed.
+ * WARNING: If the SRC operand is a register, offRegSrc ensures we return a negative register number
+ * rather than the register value, because on the PDP-11/20, the final value of the register must be
+ * resolved AFTER the DST operand has been decoded and any pre-decrement or post-increment operations
+ * affecting the SRC register have been completed.
  *
  * Here's an example from DEC's "TRAP TEST" (MAINDEC-11-D0NA-PB):
  *
@@ -2255,7 +2269,7 @@ CPUStatePDP11.prototype.readSrcWord = function(opCode)
     var reg = this.srcReg = opCode & PDP11.OPREG.MASK;
     var mode = this.srcMode = (opCode & PDP11.OPMODE.MASK) >> PDP11.OPMODE.SHIFT;
     if (!mode) {
-        result = -reg-1;
+        result = this.regsGen[reg + this.offRegSrc];
     } else {
         result = this.bus.getWord(this.getAddr(mode, reg, PDP11.ACCESS.READ_WORD));
     }
