@@ -65,7 +65,7 @@ the PDF (p. 199 of the source code listing):
     ;*
     ;*      NOTE: ON A KB11-E OR KB11-EM THE KT ABORT SHOULD BE HONORED OVER A
     ;*      NEXM TRAP.  IF THIS IS A KB11-E/EM THEN THIS FEATURE IS TESTED.
-    ;****************************************************************
+    ;;***************************************************************
 
 As noted in the *mapVirtualToPhysical()* function in [cpustate.js](/modules/pdp11/lib/cpustate.js), this test
 begins at PC 076060.
