@@ -1270,7 +1270,7 @@ if (DEBUGGER) {
         if (this.sMessagePrev && sMessage == this.sMessagePrev) return;
         this.sMessagePrev = sMessage;
 
-        var fRunning = false;
+        var fRunning;
         if ((this.bitsMessage & MessagesPDP11.HALT) && this.cpu && (fRunning = this.cpu.isRunning()) || this.isBusy(true)) {
             this.stopCPU();
             if (fRunning) sMessage += " (cpu halted)";
@@ -3000,10 +3000,11 @@ if (DEBUGGER) {
             }
             sDumpers += ",state,symbols";
             this.println("dump memory commands:");
-            this.println("\tdb [a] [#]    dump # bytes at address a");
-            this.println("\tdw [a] [#]    dump # words at address a");
-            this.println("\tdd [a] [#]    dump # dwords at address a");
-            this.println("\tdh [#] [#]    dump # instructions from history");
+            this.println("\tdb [a] [n]    dump n bytes at address a");
+            this.println("\tdw [a] [n]    dump n words at address a");
+            this.println("\tdd [a] [n]    dump n dwords at address a");
+            this.println("\tds [a] [n]    dump n words at address a as JSON");
+            this.println("\tdh [p] [n]    dump n instructions from history position p");
             if (sDumpers.length) this.println("dump extension commands:\n\t" + sDumpers);
             return;
         }

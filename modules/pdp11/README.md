@@ -9,12 +9,9 @@ PDP-11 Machine Emulation Module (PDPjs)
 
 Overview
 ---
-PDPjs, our PDP-11 machine emulation module, is adapted from
+PDPjs, our [PDP-11 Machine](/devices/pdp11/machine/) emulation module, is adapted from
 the [PDP-11/70 Emulator (v1.4)](http://skn.noip.me/pdp11/pdp11.html) written by
 Paul Nankervis.
-
-See the list of available [PDP-11 Machines](/devices/pdp11/machine/), which includes a
-[PDP-11/70 with Front Panel](/devices/pdp11/machine/1170/panel/debugger/) and [PDP-11/70 with VT100 Terminal](/devices/pdp11/machine/1170/vt100/debugger/).
 
 PDPjs is currently comprised of the following non-shared components, as listed in
 [package.json](../../package.json) (see the *pdp11Files* property):

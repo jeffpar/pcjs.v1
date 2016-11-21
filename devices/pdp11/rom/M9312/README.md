@@ -38,7 +38,7 @@ DEC P/N [23-616F1](23-616F1.txt), "11/60,70 Diagnostic/Console", albeit with a f
 	...
 	165406  012737  165714  000114  mov #N12,@#114      ; 165714 changed to 000714
 
-The unmodified [23-616F1](23-616F1.json) ROM is loaded at address 165000 (0xEA00) in this
+The unmodified [23-616F1](23-616F1.txt) [ROM](23-616F1.json) is loaded at address 165000 (0xEA00) in this
 [PDP-11/70](/devices/pdp11/machine/1170/panel/debugger/), using the following configuration:
 
 	<rom id="m9312" addr="0xEA00" size="0x200" file="/devices/pdp11/rom/M9312/23-616F1.json"/>

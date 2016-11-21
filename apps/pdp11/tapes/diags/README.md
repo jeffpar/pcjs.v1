@@ -8,7 +8,7 @@ Paper Tape Diagnostics
 ----------------------
 
 Thanks to the [iamvirtual.ca](http://iamvirtual.ca/collection/systems/mediadoc/mediadoc.html#papertape)
-website, we have archived the PDP-11 diagnostics shown below.  The tapes have been added to the
+website, we have been able to archive the PDP-11 diagnostics shown below.  The tapes have been added to the
 [Default PC11 Configuration](/devices/pdp11/pc11/), so that you can easily load them into any machine with a
 [PC11](/modules/pdp11/lib/pc11.js), such as this [PDP-11/20 with Front Panel and Debugger](/devices/pdp11/machine/1120/panel/debugger/).
 
