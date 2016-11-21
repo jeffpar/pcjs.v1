@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <serial id="serialPort" pos="left" padLeft="8px">
 	<control type="list" binding="listSerial">
-		<item ref="/apps/c1p/BASIC/OSI/MATH.BAS">BASIC MATH</item>
-		<item ref="/apps/c1p/BASIC/OSI/CHECKING.BAS">CHECKING</item>
-		<item ref="/apps/c1p/BASIC/OSI/COUNTER.BAS">COUNTER</item>
-		<item ref="/apps/c1p/BASIC/OSI/POKER.BAS">POKER</item>
-		<item ref="/apps/c1p/BASIC/OSI/PRESIDENTS.BAS">PRESIDENTS</item>
-		<item ref="/apps/c1p/BASIC/OSI/STARWARS.BAS">STAR WARS</item>
-		<item ref="/apps/c1p/BASIC/OSI/TRIGTUTOR.BAS">TRIG TUTOR</item>
+		<item ref="/apps/c1p/BASIC/OSI/math/MATH.BAS">BASIC MATH</item>
+		<item ref="/apps/c1p/BASIC/OSI/checking/CHECKING.BAS">CHECKING</item>
+		<item ref="/apps/c1p/BASIC/OSI/counter/COUNTER.BAS">COUNTER</item>
+		<item ref="/apps/c1p/BASIC/OSI/poker/POKER.BAS">POKER</item>
+		<item ref="/apps/c1p/BASIC/OSI/presidents/PRESIDENTS.BAS">PRESIDENTS</item>
+		<item ref="/apps/c1p/BASIC/OSI/starwars/STARWARS.BAS">STAR WARS</item>
+		<item ref="/apps/c1p/BASIC/OSI/trigtutor/TRIGTUTOR.BAS">TRIG TUTOR</item>
 	</control>
 	<control type="button" binding="loadSerial">Load</control>
 	<control type="file" binding="mountSerial" style="padding-left:16px"/>
