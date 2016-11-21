@@ -144,17 +144,12 @@ This test is also noteworthy because it uncovered a bug involving instructions l
 
 	MOV     R0,(R0)+
 
-Imagine that R0 contains 1000.  PDPjs (as well as several other emulators I tested) would write the value 1000
-to address 1000 after auto-incrementing R0 to 1002.
+Imagine that R0 contains 1000.  PDPjs would write the value 1000 to address 1000 after auto-incrementing R0 to
+1002.
 
-Unfortunately, that’s wrong. Apparently, the PDP-11 performs both source and destination address calculations
-before reading and writing the source and destination values.  So, in the above example, the value 1002 must be
-written to address 1000.
-
-I should add that not all emulators get this wrong: [SimH](https://github.com/simh/simh), the gold standard of
-PDP-11 emulators, handles it correctly.  However, it's unclear how much confidence one should place in SimH,
-because as I discovered later when running the [11/70 CPU EXERCISER](#md-11-1170-cpu-exerciser) diagnostic,
-SimH is not infallible.
+Unfortunately, that's wrong -- for the PDP-11/20 anyway.  Apparently, unlike later (micro-coded) models, the
+PDP-11/20 performs both source and destination address calculations *before* reading and writing the source and
+destination values.  So, in the above example, the value 1002 must be written to address 1000.
 
 	MAINDEC-11-D0NA (NEW NUMBER - DAKAA)
 	
@@ -381,7 +376,7 @@ checkStackLimit() handlers based on the CPU model.
 ---
 
 Here's the next test that PDPjs failed.  Again, I found the same sequence of instructions in the 11/40 and 11/45
-version of the diagnostic, at PC 023360 rather than 023450, so I have annotated the code below with DEC's comments:
+version of the diagnostic, at PC 023360 rather than 023450, so I've annotated the code below with DEC's comments:
 
 	023450: 012704 000001          MOV   #1,R4                  ;SET R4
 	023454: 006767 000060          SXT   023540                 ;PRESET DATA=0
@@ -400,30 +395,5 @@ version of the diagnostic, at PC 023360 rather than 023450, so I have annotated 
 	023532: 001401                 BEQ   023536
 	023534: 104000                 EMT   000                    ;ERROR: XOR TESTS ABOVE FAILED [They use HLT instead of EMT here]
 
-In my case, the failure was caused by the XOR instruction: it hadn't been updated along with the rest of the
-PDPjs instructions to defer evaluating register operands until BOTH *src* and *dst* operands have been decoded.
-So at this point:
-
-	R0=154343 R1=154112 R2=023422 R3=154501 R4=100000 R5=155066
-	SP=000700 PC=023502 PS=000010 IR=000000 SL=000377 T0 N1 Z0 V0 C0
-	023502: 074767 000032          XOR   PC,023540              ;XOR PC WITH XOR6A (177777)
-
-the XOR instruction was using 23504 for the *src* operand instead of 23506.
-
-Interestingly, this test PASSES in SimH, even though it *also* incorrectly uses 23504 for XOR's *src* operand.
-Why?  Because when SimH gets to this instruction:
-
-	023506: 010767 000030          MOV   PC,023542              ;FORM PC AS USED IN XOR ABOVE
-
-it incorrectly stores 023510 instead of 023512 into memory, and both mistakes end up canceling each other out.
-
-In fact, I'm less impressed with the accuracy of [SimH's](https://github.com/simh/simh) PDP-11 emulation
-than I used to be, because in the process of getting to this particular test within the "11/70 CPU EXERCISER"
-(MAINDEC-11-DEQKC-B1-PB) diagnostic, there were numerous other failures as well (eg, TEST 41 and TEST 45).
-However, SimH is not my baby, so delving into those failures is an exercise for another day.
-
-DISCLAIMER: Until I can run this test on real PDP-11 hardware, I have to acknowledge another possible
-explanation for the above failure: that SimH is *correct*, and that unlike all other registers, the value
-of the PC register is always used immediately, rather than after both *src* and *dst* have been decoded.
-But that strikes me as a strange architectural inconsistency, and given SimH's other "11/70 CPU EXERCISER"
-test failures, I'm going to stick with my original assumption -- for now.
+In my case, the failure was caused by the XOR instruction.  When I fixed the PDP-11/20 issue uncovered by
+[Test 14](#test-14), I had neglected to update XOR, which has some unique operand decoding logic.

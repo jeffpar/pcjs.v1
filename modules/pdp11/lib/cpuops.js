@@ -1883,11 +1883,7 @@ PDP11.opWAIT = function(opCode)
 PDP11.opXOR = function(opCode)
 {
     var reg = (opCode >> PDP11.SRCMODE.SHIFT) & PDP11.OPREG.MASK;
-    /*
-     * As per the WARNING in readSrcWord(), we must supply a register number rather than a register value,
-     * which will then be evaluated by updateDstWord() after both the SRC and DST operands have been decoded.
-     */
-    this.updateDstWord(opCode, -reg-1 /* this.regsGen[reg] */, PDP11.fnXOR);
+    this.updateDstWord(opCode, this.regsGen[reg + this.offRegSrc], PDP11.fnXOR);
     this.nStepCycles -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
 };
 
