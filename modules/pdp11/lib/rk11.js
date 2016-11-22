@@ -805,13 +805,13 @@ RK11.prototype.initController = function(data)
 {
     var i = 0;
     if (!data) data = [];
-    this.dsr = data[i++] || 0x09C0;
+    this.dsr = data[i++] || (PDP11.RK11.RKDS.RK05 | PDP11.RK11.RKDS.SOK | PDP11.RK11.RKDS.DRDY | PDP11.RK11.RKDS.RRDY);
     this.err = data[i++] || 0;
-    this.csr = data[i++] || 0x80;
+    this.csr = data[i++] || (PDP11.RK11.RKCS.CRDY);
     this.wcr = data[i++] || 0;
     this.bar = data[i++] || 0;
     this.dar = data[i++] || 0;
-    this.dbr = data[i] || 0;
+    this.dbr = data[i] || 0;    // TODO: Determine if there's anything we should be doing to the RKDB register
 
     var fSuccess = true;
     for (var iDrive = 0; iDrive < this.aDrives.length; iDrive++) {
