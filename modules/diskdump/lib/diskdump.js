@@ -716,7 +716,7 @@ DiskDump.API = function(aParms)
 {
     var sDisk = aParms[DumpAPI.QUERY.DISK];
     var sFormat = aParms[DumpAPI.QUERY.FORMAT] || DumpAPI.FORMAT.JSON;
-    var fComments = (aParms[DumpAPI.QUERY.COMMENTS]? true : false);
+    var fComments = (!!aParms[DumpAPI.QUERY.COMMENTS]);
 
     if (sDisk) {
         var disk = new DiskDump(sDisk, null, sFormat, fComments);
@@ -823,7 +823,7 @@ DiskDump.outputDisk = function(err, disk, sDiskPath, sOutputFile, fOverwrite, sM
                  * We'll dump JSON to the console, but not a raw disk buffer; we could add an option to
                  * "stringify" buffers, but if that's what the caller wants, they should use "--format=json".
                  */
-                if (typeof data == "string") {
+                if (typeof data === "string") {
                     DiskDump.logConsole(data);
                 } else {
                     DiskDump.logConsole("specify --output={file} to save " + cbDisk + "-byte disk image");

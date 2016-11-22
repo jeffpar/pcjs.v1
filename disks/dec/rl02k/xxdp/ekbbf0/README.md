@@ -43,3 +43,23 @@ p. 1-7:
 	    SW02 = 1 test selector (with switch 8)
 	    SW01 = 1 test selector (with switch 8)
 	    SW00 = 1 skip operator intervention testing
+
+At the moment, PDPjs is failing a couple of tests within this diagnostic:
+
+	.R EKBBF0
+	EKBBF0.BIC
+
+	CEKBBF0 11/70 CPU #2
+	A
+	SCCE STACK OVERFLOW NOT GOING HIGH OR
+	NOT GETTING TO TMCD E31 OR E31 BAD
+	ERRORPC TEST NUMBER
+	020646  000040
+
+
+	CPU UNDER TEST FOUND TO BE A KB11-B/C OR KB11-CM
+
+	TMCA E67(8) NOT GETTING TO E76(13) OR E76 IS BAD
+	ERRORPC TEST NUMBER
+	026030  000063
+

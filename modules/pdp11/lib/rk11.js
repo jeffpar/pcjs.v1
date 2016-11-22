@@ -58,7 +58,7 @@ function RK11(parms)
      * We record any 'autoMount' object now, but we no longer parse it until initBus(),
      * because the Computer's getMachineParm() service may have an override for us.
      */
-    this.configMount = parms['autoMount'] || null;
+    this.configMount = parms['autoMount'] || {};
     this.cAutoMount = 0;
 
     /*
@@ -256,20 +256,30 @@ RK11.prototype.initBus = function(cmp, bus, cpu, dbg)
     this.cpu = cpu;
     this.dbg = dbg;
 
-    this.configMount = this.cmp.getMachineParm('autoMount') || this.configMount;
-
-    if (this.configMount) {
-        if (typeof this.configMount == "string") {
+    var configMount = this.cmp.getMachineParm('autoMount');
+    if (configMount) {
+        if (typeof configMount == "string") {
             try {
                 /*
                  * The most likely source of any exception will be right here, where we're parsing
                  * this JSON-encoded data.
                  */
-                this.configMount = eval("(" + this.configMount + ")");
+                configMount = eval("(" + configMount + ")");
             } catch (e) {
-                Component.error("RK11 auto-mount error: " + e.message + " (" + this.configMount + ")");
-                this.configMount = null;
+                Component.error(this.type + " auto-mount error: " + e.message + " (" + configMount + ")");
+                configMount = null;
             }
+        }
+    }
+
+    /*
+     * Add only drives from the machine-wide autoMount configuration that match drives managed by this component.
+     *
+     */
+    if (configMount) {
+        for (var sDrive in configMount) {
+            if (sDrive.substr(0, 2) != this.type.substr(0, 2)) continue;
+            this.configMount[sDrive] = configMount[sDrive];
         }
     }
 
@@ -442,22 +452,20 @@ RK11.prototype.saveController = function()
 RK11.prototype.autoMount = function(fRemount)
 {
     if (!fRemount) this.cAutoMount = 0;
-    if (this.configMount) {
-        for (var sDrive in this.configMount) {
-            var configDrive = this.configMount[sDrive];
-            var sDiskPath = configDrive['path'] || "";
-            var sDiskName = configDrive['name'] || this.findDisk(sDiskPath);
-            if (sDiskPath && sDiskName) {
-                var iDrive = this.getDriveNumber(sDrive);
-                if (iDrive >= 0 && iDrive < this.aDrives.length) {
-                    if (!this.loadDrive(iDrive, sDiskName, sDiskPath, true) && fRemount) {
-                        this.setReady(false);
-                    }
-                    continue;
+    for (var sDrive in this.configMount) {
+        var configDrive = this.configMount[sDrive];
+        var sDiskPath = configDrive['path'] || "";
+        var sDiskName = configDrive['name'] || this.findDisk(sDiskPath);
+        if (sDiskPath && sDiskName) {
+            var iDrive = this.getDriveNumber(sDrive);
+            if (iDrive >= 0 && iDrive < this.aDrives.length) {
+                if (!this.loadDrive(iDrive, sDiskName, sDiskPath, true) && fRemount) {
+                    this.setReady(false);
                 }
+                continue;
             }
-            this.notice("Incorrect auto-mount settings for drive " + sDrive + " (" + JSON.stringify(configDrive) + ")");
         }
+        this.notice("Incorrect auto-mount settings for drive " + sDrive + " (" + JSON.stringify(configDrive) + ")");
     }
     return !!this.cAutoMount;
 };

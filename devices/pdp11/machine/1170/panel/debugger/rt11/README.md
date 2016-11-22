@@ -9,6 +9,8 @@ machines:
     debugger: true
     autoStart: true
     autoMount:
+      RK0:
+        path: http://archive.pcjs.org/disks/dec/rk03/RK03-RT11-V40.json
       RL0:
         path: http://archive.pcjs.org/disks/dec/rl02k/RL02K-XXDP.json
 ---
