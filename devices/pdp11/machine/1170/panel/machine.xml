@@ -10,5 +10,6 @@
 	<serial id="dl11" adapter="0" binding="print" upperCase="true"/>
 	<panel ref="/devices/pdp11/panel/1170/front.xml"/>
 	<device ref="/devices/pdp11/pc11/default.xml"/>
+	<device ref="/devices/pdp11/rk11/default.xml"/>
 	<device ref="/devices/pdp11/rl11/default.xml"/>
 </machine>

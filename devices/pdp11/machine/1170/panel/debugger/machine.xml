@@ -11,5 +11,6 @@
 	<panel ref="/devices/pdp11/panel/1170/debugger/front.xml"/>
 	<debugger id="debugger" base="8" messages="" commands=""/>
 	<device ref="/devices/pdp11/pc11/default.xml"/>
+	<device ref="/devices/pdp11/rk11/default.xml"/>
 	<device ref="/devices/pdp11/rl11/default.xml"/>
 </machine>

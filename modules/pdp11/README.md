@@ -31,6 +31,7 @@ PDPjs is currently comprised of the following non-shared components, as listed i
 * [serialport.js](/modules/pdp11/lib/serialport.js)
 * [pc11.js](/modules/pdp11/lib/pc11.js)
 * [disk.js](/modules/pdp11/lib/disk.js)
+* [rk11.js](/modules/pdp11/lib/rk11.js)
 * [rl11.js](/modules/pdp11/lib/rl11.js)
 * [debugger.js](/modules/pdp11/lib/debugger.js)
 * [computer.js](/modules/pdp11/lib/computer.js)

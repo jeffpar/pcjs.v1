@@ -200,6 +200,7 @@
     "./modules/pdp11/lib/serialport.js",
     "./modules/pdp11/lib/pc11.js",
     "./modules/pdp11/lib/disk.js",
+    "./modules/pdp11/lib/rk11.js",
     "./modules/pdp11/lib/rl11.js",
     "./modules/shared/lib/debugger.js",
     "./modules/pdp11/lib/debugger.js",

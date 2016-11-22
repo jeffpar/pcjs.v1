@@ -45,7 +45,8 @@ var MessagesPDP11 = {
     KEYBOARD:   0x00010000,
     KEYS:       0x00020000,
     PAPER:      0x00100000,
-    DISK:       0x00400000,
+    DISK:       0x00200000,
+    RK11:       0x00400000,
     RL11:       0x00800000,
     SERIAL:     0x01000000,
     SPEAKER:    0x02000000,
@@ -84,6 +85,7 @@ MessagesPDP11.CATEGORIES = {
     "key":      MessagesPDP11.KEYS,     // using "key" instead of "keys", since the latter is a method on JavasScript objects
     "paper":    MessagesPDP11.PAPER,
     "disk":     MessagesPDP11.DISK,
+    "rk11":     MessagesPDP11.RK11,
     "rl11":     MessagesPDP11.RL11,
     "serial":   MessagesPDP11.SERIAL,
     "speaker":  MessagesPDP11.SPEAKER,

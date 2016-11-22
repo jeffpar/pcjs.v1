@@ -1,5 +1,5 @@
 /**
- * @fileoverview Implements the RL11 Disk Controller (for RL01 and RL02 Disks)
+ * @fileoverview Implements the RK11 Disk Controller (for RK03 Disks)
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © Jeff Parsons 2012-2016
  *
@@ -40,9 +40,9 @@ if (NODE) {
 }
 
 /**
- * RL11(parms)
+ * RK11(parms)
  *
- * The RL11 component has the following component-specific (parms) properties:
+ * The RK11 component has the following component-specific (parms) properties:
  *
  *      autoMount: one or more JSON-encoded objects, each containing 'name' and 'path' properties
  *
@@ -50,9 +50,9 @@ if (NODE) {
  * @extends Component
  * @param {Object} parms
  */
-function RL11(parms)
+function RK11(parms)
 {
-    Component.call(this, "RL11", parms, RL11, MessagesPDP11.RL11);
+    Component.call(this, "RK11", parms, RK11, MessagesPDP11.RK11);
 
     /*
      * We record any 'autoMount' object now, but we no longer parse it until initBus(),
@@ -62,20 +62,20 @@ function RL11(parms)
     this.cAutoMount = 0;
 
     /*
-     * The RL11 has two Drive Select bits, representing up to four drives.
+     * The RK11 has three Drive Select bits, representing up to eight drives.
      */
-    this.nDrives = 4;
+    this.nDrives = 8;
     this.aDrives = new Array(this.nDrives);
 
     this.fLocalDisks = (!web.isMobile() && window && 'FileReader' in window);
 }
 
-Component.subclass(RL11);
+Component.subclass(RK11);
 
 /*
  * There's nothing super special about these values, except that NONE should be falsey and the others should not.
  */
-RL11.SOURCE = {
+RK11.SOURCE = {
     NONE:   "",
     LOCAL:  "?",
     REMOTE: "??"
@@ -84,16 +84,16 @@ RL11.SOURCE = {
 /**
  * setBinding(sType, sBinding, control, sValue)
  *
- * @this {RL11}
+ * @this {RK11}
  * @param {string|null} sType is the type of the HTML control (eg, "button", "list", "text", etc)
  * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "listDisks")
  * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
  * @param {string} [sValue] optional data value
  * @return {boolean} true if binding was successful, false if unrecognized binding request
  */
-RL11.prototype.setBinding = function(sType, sBinding, control, sValue)
+RK11.prototype.setBinding = function(sType, sBinding, control, sValue)
 {
-    var rl11 = this;
+    var rk11 = this;
 
     switch (sBinding) {
 
@@ -101,7 +101,7 @@ RL11.prototype.setBinding = function(sType, sBinding, control, sValue)
         this.bindings[sBinding] = control;
 
         control.onchange = function onChangeListDisks(event) {
-            var controlDesc = rl11.bindings["descDisk"];
+            var controlDesc = rk11.bindings["descDisk"];
             var controlOption = control.options[control.selectedIndex];
             if (controlDesc && controlOption) {
                 var dataValue = {};
@@ -110,7 +110,7 @@ RL11.prototype.setBinding = function(sType, sBinding, control, sValue)
                     try {
                         dataValue = eval("(" + sValue + ")");
                     } catch (e) {
-                        Component.error("RL11 option error: " + e.message);
+                        Component.error("RK11 option error: " + e.message);
                     }
                 }
                 var sHTML = dataValue['desc'];
@@ -132,7 +132,7 @@ RL11.prototype.setBinding = function(sType, sBinding, control, sValue)
          */
         control.onchange = function onChangeListDrives(event) {
             var iDrive = str.parseInt(control.value, 10);
-            if (iDrive != null) rl11.displayDisk(iDrive);
+            if (iDrive != null) rk11.displayDisk(iDrive);
         };
         return true;
 
@@ -140,11 +140,11 @@ RL11.prototype.setBinding = function(sType, sBinding, control, sValue)
         this.bindings[sBinding] = control;
 
         control.onclick = function onClickLoadDrive(event) {
-            var controlDisks = rl11.bindings["listDisks"];
+            var controlDisks = rk11.bindings["listDisks"];
             if (controlDisks) {
                 var sDiskName = controlDisks.options[controlDisks.selectedIndex].text;
                 var sDiskPath = controlDisks.value;
-                rl11.loadSelectedDrive(sDiskName, sDiskPath);
+                rk11.loadSelectedDrive(sDiskName, sDiskPath);
             }
         };
         return true;
@@ -171,24 +171,24 @@ RL11.prototype.setBinding = function(sType, sBinding, control, sValue)
         this.bindings[sBinding] = control;
 
         control.onclick = function onClickSaveDrive(event) {
-            var controlDrives = rl11.bindings["listDrives"];
-            if (controlDrives && controlDrives.options && rl11.aDrives) {
+            var controlDrives = rk11.bindings["listDrives"];
+            if (controlDrives && controlDrives.options && rk11.aDrives) {
                 var iDriveSelected = str.parseInt(controlDrives.value, 10) || 0;
-                var drive = rl11.aDrives[iDriveSelected];
+                var drive = rk11.aDrives[iDriveSelected];
                 if (drive) {
                     /*
                      * Note the similarity (and hence factoring opportunity) between this code and the HDC's "saveHD*" binding.
                      */
                     var disk = drive.disk;
                     if (disk) {
-                        if (DEBUG) rl11.println("saving disk " + disk.sDiskPath + "...");
+                        if (DEBUG) rk11.println("saving disk " + disk.sDiskPath + "...");
                         var sAlert = web.downloadFile(disk.encodeAsBase64(), "octet-stream", true, disk.sDiskFile.replace(".json", ".img"));
                         web.alertUser(sAlert);
                     } else {
-                        rl11.notice("No disk loaded in drive.");
+                        rk11.notice("No disk loaded in drive.");
                     }
                 } else {
-                    rl11.notice("No disk drive selected.");
+                    rk11.notice("No disk drive selected.");
                 }
             }
         };
@@ -225,7 +225,7 @@ RL11.prototype.setBinding = function(sType, sBinding, control, sValue)
             if (file) {
                 var sDiskPath = file.name;
                 var sDiskName = str.getBaseName(sDiskPath, true);
-                rl11.loadSelectedDrive(sDiskName, sDiskPath, file);
+                rk11.loadSelectedDrive(sDiskName, sDiskPath, file);
             }
             /*
              * Prevent reloading of web page after form submission
@@ -243,13 +243,13 @@ RL11.prototype.setBinding = function(sType, sBinding, control, sValue)
 /**
  * initBus(cmp, bus, cpu, dbg)
  *
- * @this {RL11}
+ * @this {RK11}
  * @param {ComputerPDP11} cmp
  * @param {BusPDP11} bus
  * @param {CPUStatePDP11} cpu
  * @param {DebuggerPDP11} dbg
  */
-RL11.prototype.initBus = function(cmp, bus, cpu, dbg)
+RK11.prototype.initBus = function(cmp, bus, cpu, dbg)
 {
     this.cmp = cmp;
     this.bus = bus;
@@ -267,7 +267,7 @@ RL11.prototype.initBus = function(cmp, bus, cpu, dbg)
                  */
                 this.configMount = eval("(" + this.configMount + ")");
             } catch (e) {
-                Component.error("RL11 auto-mount error: " + e.message + " (" + this.configMount + ")");
+                Component.error("RK11 auto-mount error: " + e.message + " (" + this.configMount + ")");
                 this.configMount = null;
             }
         }
@@ -280,14 +280,14 @@ RL11.prototype.initBus = function(cmp, bus, cpu, dbg)
      */
     this.initController();
 
-    this.triggerInterrupt = this.cpu.addTrigger(PDP11.RL11.VEC, PDP11.RL11.PRI);
+    this.triggerInterrupt = this.cpu.addTrigger(PDP11.RK11.VEC, PDP11.RK11.PRI);
 
-    bus.addIOTable(this, RL11.UNIBUS_IOTABLE);
+    bus.addIOTable(this, RK11.UNIBUS_IOTABLE);
     bus.addResetHandler(this.reset.bind(this));
 
-    this.addDisk("None", RL11.SOURCE.NONE, true);
-    if (this.fLocalDisks) this.addDisk("Local Disk", RL11.SOURCE.LOCAL);
-    this.addDisk("Remote Disk", RL11.SOURCE.REMOTE);
+    this.addDisk("None", RK11.SOURCE.NONE, true);
+    if (this.fLocalDisks) this.addDisk("Local Disk", RK11.SOURCE.LOCAL);
+    this.addDisk("Remote Disk", RK11.SOURCE.REMOTE);
 
     if (!this.autoMount()) this.setReady();
 };
@@ -295,23 +295,23 @@ RL11.prototype.initBus = function(cmp, bus, cpu, dbg)
 /**
  * getDriveName(iDrive)
  *
- * @this {RL11}
+ * @this {RK11}
  * @param {number} iDrive
  * @return {string}
  */
-RL11.prototype.getDriveName = function(iDrive)
+RK11.prototype.getDriveName = function(iDrive)
 {
-    return "RL" + iDrive;
+    return "RK" + iDrive;
 };
 
 /**
  * getDriveNumber(sDrive)
  *
- * @this {RL11}
+ * @this {RK11}
  * @param {string} sDrive
  * @return {number} (0-3, or -1 if error)
  */
-RL11.prototype.getDriveNumber = function(sDrive)
+RK11.prototype.getDriveNumber = function(sDrive)
 {
     var iDrive = -1;
     if (sDrive) {
@@ -324,12 +324,12 @@ RL11.prototype.getDriveNumber = function(sDrive)
 /**
  * powerUp(data, fRepower)
  *
- * @this {RL11}
+ * @this {RK11}
  * @param {Object|null} data
  * @param {boolean} [fRepower]
  * @return {boolean} true if successful, false if failure
  */
-RL11.prototype.powerUp = function(data, fRepower)
+RK11.prototype.powerUp = function(data, fRepower)
 {
     if (!fRepower) {
         if (!data || !this.restore) {
@@ -372,12 +372,12 @@ RL11.prototype.powerUp = function(data, fRepower)
 /**
  * powerDown(fSave, fShutdown)
  *
- * @this {RL11}
+ * @this {RK11}
  * @param {boolean} [fSave]
  * @param {boolean} [fShutdown]
  * @return {Object|boolean} component state if fSave; otherwise, true if successful, false if failure
  */
-RL11.prototype.powerDown = function(fSave, fShutdown)
+RK11.prototype.powerDown = function(fSave, fShutdown)
 {
     return fSave? this.save() : true;
 };
@@ -385,9 +385,9 @@ RL11.prototype.powerDown = function(fSave, fShutdown)
 /**
  * reset()
  *
- * @this {RL11}
+ * @this {RK11}
  */
-RL11.prototype.reset = function()
+RK11.prototype.reset = function()
 {
     this.initController();
 };
@@ -395,12 +395,12 @@ RL11.prototype.reset = function()
 /**
  * save()
  *
- * This implements save support for the RL11 component.
+ * This implements save support for the RK11 component.
  *
- * @this {RL11}
+ * @this {RK11}
  * @return {Object}
  */
-RL11.prototype.save = function()
+RK11.prototype.save = function()
 {
     var state = new State(this);
     // state.set(0, this.saveController());
@@ -410,13 +410,13 @@ RL11.prototype.save = function()
 /**
  * restore(data)
  *
- * This implements restore support for the RL11 component.
+ * This implements restore support for the RK11 component.
  *
- * @this {RL11}
+ * @this {RK11}
  * @param {Object} data
  * @return {boolean} true if successful, false if failure
  */
-RL11.prototype.restore = function(data)
+RK11.prototype.restore = function(data)
 {
     return this.initController(data[0]);
 };
@@ -424,10 +424,10 @@ RL11.prototype.restore = function(data)
 /**
  * saveController()
  *
- * @this {RL11}
+ * @this {RK11}
  * @return {Array}
  */
-RL11.prototype.saveController = function()
+RK11.prototype.saveController = function()
 {
     return [];
 };
@@ -435,11 +435,11 @@ RL11.prototype.saveController = function()
 /**
  * autoMount(fRemount)
  *
- * @this {RL11}
+ * @this {RK11}
  * @param {boolean} [fRemount] is true if we're remounting all auto-mounted disks
  * @return {boolean} true if one or more disk images are being auto-mounted, false if none
  */
-RL11.prototype.autoMount = function(fRemount)
+RK11.prototype.autoMount = function(fRemount)
 {
     if (!fRemount) this.cAutoMount = 0;
     if (this.configMount) {
@@ -465,12 +465,12 @@ RL11.prototype.autoMount = function(fRemount)
 /**
  * loadSelectedDrive(sDiskName, sDiskPath, file)
  *
- * @this {RL11}
+ * @this {RK11}
  * @param {string} sDiskName
  * @param {string} sDiskPath
  * @param {File} [file] is set if there's an associated File object
  */
-RL11.prototype.loadSelectedDrive = function(sDiskName, sDiskPath, file)
+RK11.prototype.loadSelectedDrive = function(sDiskName, sDiskPath, file)
 {
     var controlDrives = this.bindings["listDrives"];
     var iDrive = controlDrives && str.parseInt(controlDrives.value, 10);
@@ -485,13 +485,13 @@ RL11.prototype.loadSelectedDrive = function(sDiskName, sDiskPath, file)
         return;
     }
 
-    if (sDiskPath == RL11.SOURCE.LOCAL) {
+    if (sDiskPath == RK11.SOURCE.LOCAL) {
         this.notice('Use "Choose File" and "Mount" to select and load a local disk.');
         return;
     }
 
     /*
-     * If the special RL11.SOURCE.REMOTE path is selected, then we want to prompt the user for a URL.
+     * If the special RK11.SOURCE.REMOTE path is selected, then we want to prompt the user for a URL.
      * Oh, and make sure we pass an empty string as the 2nd parameter to prompt(), so that IE won't display
      * "undefined" -- because after all, undefined and "undefined" are EXACTLY the same thing, right?
      *
@@ -499,12 +499,12 @@ RL11.prototype.loadSelectedDrive = function(sDiskName, sDiskPath, file)
      * I should do, like dynamically updating "listDisks" to include new entries, and adding new entries
      * to the save/restore data.
      */
-    if (sDiskPath == RL11.SOURCE.REMOTE) {
+    if (sDiskPath == RK11.SOURCE.REMOTE) {
         sDiskPath = window.prompt("Enter the URL of a remote disk image.", "") || "";
         if (!sDiskPath) return;
         sDiskName = str.getBaseName(sDiskPath);
         this.status("Attempting to load " + sDiskPath + " as \"" + sDiskName + "\"");
-        this.sDiskSource = RL11.SOURCE.REMOTE;
+        this.sDiskSource = RK11.SOURCE.REMOTE;
     }
     else {
         this.sDiskSource = sDiskPath;
@@ -518,7 +518,7 @@ RL11.prototype.loadSelectedDrive = function(sDiskName, sDiskPath, file)
  *
  * NOTE: If sDiskPath is already loaded, nothing needs to be done.
  *
- * @this {RL11}
+ * @this {RK11}
  * @param {number} iDrive
  * @param {string} sDiskName
  * @param {string} sDiskPath
@@ -526,7 +526,7 @@ RL11.prototype.loadSelectedDrive = function(sDiskName, sDiskPath, file)
  * @param {File} [file] is set if there's an associated File object
  * @return {number} 1 if disk loaded, 0 if queued up (or busy), -1 if already loaded
  */
-RL11.prototype.loadDrive = function(iDrive, sDiskName, sDiskPath, fAutoMount, file)
+RK11.prototype.loadDrive = function(iDrive, sDiskName, sDiskPath, fAutoMount, file)
 {
     var nResult = -1;
     var drive = this.aDrives[iDrive];
@@ -537,7 +537,7 @@ RL11.prototype.loadDrive = function(iDrive, sDiskName, sDiskPath, fAutoMount, fi
         this.unloadDrive(iDrive, true);
 
         if (drive.fBusy) {
-            this.notice("RL11 busy");
+            this.notice("RK11 busy");
         }
         else {
             // this.status("disk queued: " + sDiskName);
@@ -562,14 +562,14 @@ RL11.prototype.loadDrive = function(iDrive, sDiskName, sDiskPath, fAutoMount, fi
  *
  * The disk parameter is set if the disk was successfully loaded, null if not.
  *
- * @this {RL11}
+ * @this {RK11}
  * @param {Object} drive
  * @param {DiskPDP11} disk
  * @param {string} sDiskName
  * @param {string} sDiskPath
  * @param {boolean} [fAutoMount]
  */
-RL11.prototype.finishLoadDrive = function onLoadDrive(drive, disk, sDiskName, sDiskPath, fAutoMount)
+RK11.prototype.finishLoadDrive = function onLoadDrive(drive, disk, sDiskName, sDiskPath, fAutoMount)
 {
     var aDiskInfo;
 
@@ -650,12 +650,12 @@ RL11.prototype.finishLoadDrive = function onLoadDrive(drive, disk, sDiskName, sD
 /**
  * addDisk(sName, sPath, fTop)
  *
- * @this {RL11}
+ * @this {RK11}
  * @param {string} sName
  * @param {string} sPath
  * @param {boolean} [fTop] (default is bottom)
  */
-RL11.prototype.addDisk = function(sName, sPath, fTop)
+RK11.prototype.addDisk = function(sName, sPath, fTop)
 {
     var controlDisks = this.bindings["listDisks"];
     if (controlDisks && controlDisks.options) {
@@ -679,11 +679,11 @@ RL11.prototype.addDisk = function(sName, sPath, fTop)
  * This is used to deal with mount requests (eg, autoMount) that supply a path without a name;
  * if we can find the path in the "listDisks" control, then we return the associated disk name.
  *
- * @this {RL11}
+ * @this {RK11}
  * @param {string} sPath
  * @return {string|null}
  */
-RL11.prototype.findDisk = function(sPath)
+RK11.prototype.findDisk = function(sPath)
 {
     var controlDisks = this.bindings["listDisks"];
     if (controlDisks && controlDisks.options) {
@@ -698,11 +698,11 @@ RL11.prototype.findDisk = function(sPath)
 /**
  * displayDisk(iDrive, fUpdateDrive)
  *
- * @this {RL11}
+ * @this {RK11}
  * @param {number} iDrive (unvalidated)
  * @param {boolean} [fUpdateDrive] is true to update the drive list to match the specified drive (eg, the auto-mount case)
  */
-RL11.prototype.displayDisk = function(iDrive, fUpdateDrive)
+RK11.prototype.displayDisk = function(iDrive, fUpdateDrive)
 {
     /*
      * First things first: validate iDrive.
@@ -720,7 +720,7 @@ RL11.prototype.displayDisk = function(iDrive, fUpdateDrive)
              */
             var i;
             var iDriveSelected = str.parseInt(controlDrives.value, 10);
-            var sTargetPath = (drive.fLocal? RL11.SOURCE.LOCAL : drive.sDiskPath);
+            var sTargetPath = (drive.fLocal? RK11.SOURCE.LOCAL : drive.sDiskPath);
             if (!isNaN(iDriveSelected) && iDriveSelected == iDrive) {
                 for (i = 0; i < controlDisks.options.length; i++) {
                     if (controlDisks.options[i].value == sTargetPath) {
@@ -749,11 +749,11 @@ RL11.prototype.displayDisk = function(iDrive, fUpdateDrive)
 /**
  * unloadDrive(iDrive, fLoading)
  *
- * @this {RL11}
+ * @this {RK11}
  * @param {number} iDrive
  * @param {boolean} [fLoading]
  */
-RL11.prototype.unloadDrive = function(iDrive, fLoading)
+RK11.prototype.unloadDrive = function(iDrive, fLoading)
 {
     var drive = this.aDrives[iDrive];
 
@@ -773,7 +773,7 @@ RL11.prototype.unloadDrive = function(iDrive, fLoading)
 
         if (!fLoading) {
             this.notice("Drive " + this.getDriveName(iDrive) + " unloaded", fLoading);
-            this.sDiskSource = RL11.SOURCE.NONE;
+            this.sDiskSource = RK11.SOURCE.NONE;
             this.displayDisk(iDrive);
         }
     }
@@ -782,10 +782,10 @@ RL11.prototype.unloadDrive = function(iDrive, fLoading)
 /**
  * unloadAllDrives(fDiscard)
  *
- * @this {RL11}
+ * @this {RK11}
  * @param {boolean} fDiscard to discard all disk history before unloading
  */
-RL11.prototype.unloadAllDrives = function(fDiscard)
+RK11.prototype.unloadAllDrives = function(fDiscard)
 {
     // if (fDiscard) this.aDiskHistory = [];
 
@@ -797,20 +797,21 @@ RL11.prototype.unloadAllDrives = function(fDiscard)
 /**
  * initController(data)
  *
- * @this {RL11}
+ * @this {RK11}
  * @param {Array} [data]
  * @return {boolean} true if successful, false if failure
  */
-RL11.prototype.initController = function(data)
+RK11.prototype.initController = function(data)
 {
     var i = 0;
     if (!data) data = [];
-    this.csr = data[i++] || 0;
+    this.dsr = data[i++] || 0x09C0;
+    this.err = data[i++] || 0;
+    this.csr = data[i++] || 0x80;
+    this.wcr = data[i++] || 0;
     this.bar = data[i++] || 0;
     this.dar = data[i++] || 0;
-    this.darInternal = data[i++] || 0;
-    this.mpr = data[i++] || 0;
-    this.ber = data[i] || 0;
+    this.dbr = data[i] || 0;
 
     var fSuccess = true;
     for (var iDrive = 0; iDrive < this.aDrives.length; iDrive++) {
@@ -832,13 +833,13 @@ RL11.prototype.initController = function(data)
  * between the drive objects created by disk controllers.  This will clean up overall drive management and allow
  * us to factor out some common Drive methods.
  *
- * @this {RL11}
+ * @this {RK11}
  * @param {Object} drive
  * @param {number} iDrive
  * @param {Array|undefined} [data]
  * @return {boolean} true if successful, false if failure
  */
-RL11.prototype.initDrive = function(drive, iDrive, data)
+RK11.prototype.initDrive = function(drive, iDrive, data)
 {
     var i = 0;
     var fSuccess = true;
@@ -847,10 +848,10 @@ RL11.prototype.initDrive = function(drive, iDrive, data)
     drive.fBusy = drive.fLocal = false;
 
     drive.name = this.idComponent;
-    drive.nCylinders = 512;
+    drive.nCylinders = 203;
     drive.nHeads = 2;
-    drive.nSectors = 40;
-    drive.cbSector = 256;
+    drive.nSectors = 12;
+    drive.cbSector = 512;
     drive.fRemovable = true;
 
     /*
@@ -872,10 +873,7 @@ RL11.prototype.initDrive = function(drive, iDrive, data)
         drive.sDiskPath = "";               // ensure this is initialized to a default that displayDisk() can deal with
     }
 
-    /*
-     * Default drive status bits returned via the controller's Get Status command via the RLMP register
-     */
-    drive.status = PDP11.RL11.RLMP.GS_ST.LOCKON | PDP11.RL11.RLMP.GS_BH | PDP11.RL11.RLMP.GS_HO | (drive.nCylinders == 512? PDP11.RL11.RLMP.GS_DT : 0);
+    drive.status = PDP11.RK11.RKDS.RK05 | PDP11.RK11.RKDS.SOK | PDP11.RK11.RKDS.DRDY | PDP11.RK11.RKDS.RRDY;
 
     return fSuccess;
 };
@@ -883,71 +881,48 @@ RL11.prototype.initDrive = function(drive, iDrive, data)
 /**
  * processCommand()
  *
- * @this {RL11}
+ * @this {RK11}
  */
-RL11.prototype.processCommand = function()
+RK11.prototype.processCommand = function()
 {
     var fnReadWrite;
     var fInterrupt = true;
-    var iDrive = (this.csr & PDP11.RL11.RLCS.DS) >> PDP11.RL11.RLCS.SHIFT.DS;
+    var iDrive = (this.dar & PDP11.RK11.RKDA.DS) >> PDP11.RK11.RKDA.SHIFT.DS;
     var drive = this.aDrives[iDrive];
     var iCylinder, iHead, iSector, nWords, addr;
 
-    /*
-     * The typical pattern of DRDY and CRDY:
-     *
-     *  1) Normally both set
-     *  2) CRDY is cleared to process a command
-     *  3) DRDY is cleared to command is in process
-     */
-    this.csr &= ~PDP11.RL11.RLCS.DRDY;
+    this.csr &= ~PDP11.RK11.RKCS.CRDY;
 
-    switch(this.csr & PDP11.RL11.RLCS.FUNC) {
+    switch(this.csr & PDP11.RK11.RKCS.FUNC) {
 
-    case PDP11.RL11.FUNC.NOP:
-    case PDP11.RL11.FUNC.WCHK:
-    case PDP11.RL11.FUNC.RDNC:
+    case PDP11.RK11.FUNC.CRESET:
+        this.dsr = drive.status;
+        this.err = 0;
+        this.csr = PDP11.RK11.RKCS.CRDY;
+        this.dar = 0;
         break;
 
-    case PDP11.RL11.FUNC.STATUS:
-        if (this.dar & PDP11.RL11.RLDA.GS_RST) {
-            this.csr &= 0x3F;                                   // TODO: Review
-        }
-        this.mpr = drive.status | (this.darInternal & PDP11.RL11.RLDA.RW_HS);    // bit 6: Head Select, bit 7: Drive Type (1=RL02)
-        break;
-
-    case PDP11.RL11.FUNC.SEEK:
-        if ((this.dar & PDP11.RL11.RLDA.GS_CMD) == PDP11.RL11.RLDA.SEEK_CMD) {
-            var darCA = (this.dar & PDP11.RL11.RLDA.RW_CA);
-            var darHS = (this.dar & PDP11.RL11.RLDA.SEEK_HS) << 2;
-            if (this.dar & PDP11.RL11.RLDA.SEEK_DIR) {
-                this.darInternal += darCA;
-            } else {
-                this.darInternal -= darCA;
-            }
-            this.dar = this.darInternal = (this.darInternal & PDP11.RL11.RLDA.RW_CA) | darHS;
-        }
-        break;
-
-    case PDP11.RL11.FUNC.RHDR:
-        this.mpr = this.darInternal;
-        break;
-
-    case PDP11.RL11.FUNC.RDATA:
+    case PDP11.RK11.FUNC.READ:
         fnReadWrite = this.readData;
         /* falls through */
 
-    case PDP11.RL11.FUNC.WDATA:
+    case PDP11.RK11.FUNC.WRITE:
         if (!fnReadWrite) fnReadWrite = this.writeData;
-        iCylinder = this.dar >> PDP11.RL11.RLDA.SHIFT.RW_CA;
-        iHead = (this.dar & PDP11.RL11.RLDA.RW_HS)? 1 : 0;
-        iSector = this.dar & PDP11.RL11.RLDA.RW_SA;
-        if (iCylinder >= drive.nCylinders || iSector >= drive.nSectors) {
-            this.csr |= PDP11.RL11.ERRC.HNF | PDP11.RL11.RLCS.ERR;
+        iCylinder = (this.dar & PDP11.RK11.RKDA.CA) >> PDP11.RK11.RKDA.SHIFT.CA;
+        iHead = (this.dar & PDP11.RK11.RKDA.HS) >> PDP11.RK11.RKDA.SHIFT.HS;
+        iSector = this.dar & PDP11.RK11.RKDA.SA;
+        if (iCylinder >= drive.nCylinders) {
+            this.err |= PDP11.RK11.RKER.DRE | PDP11.RK11.RKER.NXC;
+            this.csr |= PDP11.RK11.RKCS.HE | PDP11.RK11.RKCS.ERR;
             break;
         }
-        addr = (((this.ber & PDP11.RL11.RLBE.MASK)) << 16) | this.bar;   // 22 bit mode
-        nWords = (0x10000 - this.mpr) & 0xffff;
+        if (iSector >= drive.nSectors) {
+            this.err |= PDP11.RK11.RKER.DRE | PDP11.RK11.RKER.NXS;
+            this.csr |= PDP11.RK11.RKCS.HE | PDP11.RK11.RKCS.ERR;
+            break;
+        }
+        addr = (((this.csr & PDP11.RK11.RKCS.MEX)) << (16 - PDP11.RK11.RKCS.SHIFT.MEX)) | this.bar;
+        nWords = (0x10000 - this.wcr) & 0xffff;
         fInterrupt = fnReadWrite.call(this, drive, iCylinder, iHead, iSector, nWords, addr, this.endReadWrite.bind(this));
         break;
 
@@ -955,9 +930,15 @@ RL11.prototype.processCommand = function()
         break;
     }
 
+    /*
+     * TODO: Determine what's up with the "dar % 9"....
+     */
+    this.dsr = drive.status | (iDrive << PDP11.RK11.RKDS.SHIFT.ID) | ((this.dar % 9) & PDP11.RK11.RKDS.SC);
+
     if (fInterrupt) {
-        this.csr |= PDP11.RL11.RLCS.DRDY | PDP11.RL11.RLCS.CRDY;
-        if (this.csr & PDP11.RL11.RLCS.IE) {
+        this.csr &= ~PDP11.RK11.RKCS.GO;
+        this.csr |= PDP11.RK11.RKCS.CRDY;
+        if (this.csr & PDP11.RK11.RKCS.IE) {
             this.cpu.setTrigger(this.triggerInterrupt);
         }
     }
@@ -968,7 +949,7 @@ RL11.prototype.processCommand = function()
 /**
  * endReadWrite(err, iCylinder, iHead, iSector, nWords, addr)
  *
- * @this {RL11}
+ * @this {RK11}
  * @param {number} err
  * @param {number} iCylinder
  * @param {number} iHead
@@ -977,16 +958,14 @@ RL11.prototype.processCommand = function()
  * @param {number} addr
  * @return {boolean}
  */
-RL11.prototype.endReadWrite = function(err, iCylinder, iHead, iSector, nWords, addr)
+RK11.prototype.endReadWrite = function(err, iCylinder, iHead, iSector, nWords, addr)
 {
     this.bar = addr & 0xffff;
-    this.csr = (this.csr & ~PDP11.RL11.RLCS.BAE) | ((addr >> (16 - PDP11.RL11.RLCS.SHIFT.BAE)) & PDP11.RL11.RLCS.BAE);
-    this.ber = (addr >> 16) & PDP11.RL11.RLBE.MASK;         // 22 bit mode
-    this.dar = (iCylinder << PDP11.RL11.RLDA.SHIFT.RW_CA) | (iHead? PDP11.RL11.RLDA.RW_HS : 0) | (iSector & PDP11.RL11.RLDA.RW_SA);
-    this.darInternal = this.dar;
-    this.mpr = (0x10000 - nWords) & 0xffff;
+    this.csr = (this.csr & ~PDP11.RK11.RKCS.MEX) | ((addr >> (16 - PDP11.RK11.RKCS.SHIFT.MEX)) & PDP11.RK11.RKCS.MEX);
+    this.wcr = (0x10000 - nWords) & 0xffff;
     if (err) {
-        this.csr |= err | PDP11.RL11.RLCS.ERR;
+        this.err |= err | PDP11.RK11.RKER.DRE;
+        this.csr |= PDP11.RK11.RKCS.HE | PDP11.RK11.RKCS.ERR;
     }
     return true;
 };
@@ -994,7 +973,7 @@ RL11.prototype.endReadWrite = function(err, iCylinder, iHead, iSector, nWords, a
 /**
  * readData(drive, iCylinder, iHead, iSector, nWords, addr, done)
  *
- * @this {RL11}
+ * @this {RK11}
  * @param {Object} drive
  * @param {number} iCylinder
  * @param {number} iHead
@@ -1004,14 +983,14 @@ RL11.prototype.endReadWrite = function(err, iCylinder, iHead, iSector, nWords, a
  * @param {function(...)} done
  * @return {boolean} true if complete, false if queued
  */
-RL11.prototype.readData = function(drive, iCylinder, iHead, iSector, nWords, addr, done)
+RK11.prototype.readData = function(drive, iCylinder, iHead, iSector, nWords, addr, done)
 {
     var err = 0;
     var disk = drive.disk;
     var sector = null, ibSector;
 
     if (!disk) {
-        err = PDP11.RL11.ERRC.HNF;      // TODO: Review
+        err = PDP11.RK11.RKER.NXD;
         nWords = 0;
     }
 
@@ -1019,19 +998,19 @@ RL11.prototype.readData = function(drive, iCylinder, iHead, iSector, nWords, add
         if (!sector) {
             sector = drive.disk.seek(iCylinder, iHead, iSector + 1);
             if (!sector) {
-                err = PDP11.RL11.ERRC.HNF;
+                err = PDP11.RK11.RKER.SKE;
                 break;
             }
             ibSector = 0;
         }
         var b0, b1;
         if ((b0 = drive.disk.read(sector, ibSector++)) < 0 || (b1 = drive.disk.read(sector, ibSector++)) < 0) {
-            err = PDP11.RL11.ERRC.HNF;
+            err = PDP11.RK11.RKER.NXS;
             break;
         }
         var data = this.bus.setWordDirect(addr, b0 | (b1 << 8));
         if (this.bus.checkFault()) {
-            err = PDP11.RL11.ERRC.NXM;
+            err = PDP11.RK11.RKER.NXM;
             break;
         }
         addr += 2;
@@ -1042,7 +1021,7 @@ RL11.prototype.readData = function(drive, iCylinder, iHead, iSector, nWords, add
                 if (++iHead >= disk.nHeads) {
                     iHead = 0;
                     if (++iCylinder >= disk.nCylinders) {
-                        err = PDP11.RL11.ERRC.HNF;
+                        err = PDP11.RK11.RKER.NXC;
                         break;
                     }
                 }
@@ -1055,7 +1034,7 @@ RL11.prototype.readData = function(drive, iCylinder, iHead, iSector, nWords, add
 /**
  * writeData(drive, iCylinder, iHead, iSector, nWords, addr, done)
  *
- * @this {RL11}
+ * @this {RK11}
  * @param {Object} drive
  * @param {number} iCylinder
  * @param {number} iHead
@@ -1065,34 +1044,34 @@ RL11.prototype.readData = function(drive, iCylinder, iHead, iSector, nWords, add
  * @param {function(...)} done
  * @return {boolean} true if complete, false if queued
  */
-RL11.prototype.writeData = function(drive, iCylinder, iHead, iSector, nWords, addr, done)
+RK11.prototype.writeData = function(drive, iCylinder, iHead, iSector, nWords, addr, done)
 {
     var err = 0;
     var disk = drive.disk;
     var sector = null, ibSector;
 
     if (!disk) {
-        err = PDP11.RL11.ERRC.HNF;      // TODO: Review
+        err = PDP11.RK11.RKER.NXD;
         nWords = 0;
     }
 
     while (nWords--) {
         var data = this.bus.getWordDirect(addr);
         if (this.bus.checkFault()) {
-            err = PDP11.RL11.ERRC.NXM;
+            err = PDP11.RK11.RKER.NXM;
             break;
         }
         addr += 2;
         if (!sector) {
             sector = drive.disk.seek(iCylinder, iHead, iSector + 1, true);
             if (!sector) {
-                err = PDP11.RL11.ERRC.HNF;
+                err = PDP11.RK11.RKER.SKE;
                 break;
             }
             ibSector = 0;
         }
         if (!drive.disk.write(sector, ibSector++, data & 0xff) || !drive.disk.write(sector, ibSector++, data >> 8)) {
-            err = PDP11.RL11.ERRC.HNF;
+            err = PDP11.RK11.RKER.NXS;
             break;
         }
         if (ibSector >= disk.cbSector) {
@@ -1102,7 +1081,7 @@ RL11.prototype.writeData = function(drive, iCylinder, iHead, iSector, nWords, ad
                 if (++iHead >= disk.nHeads) {
                     iHead = 0;
                     if (++iCylinder >= disk.nCylinders) {
-                        err = PDP11.RL11.ERRC.HNF;
+                        err = PDP11.RK11.RKER.NXC;
                         break;
                     }
                 }
@@ -1113,138 +1092,190 @@ RL11.prototype.writeData = function(drive, iCylinder, iHead, iSector, nWords, ad
 };
 
 /**
- * readRLCS(addr)
+ * readRKDS(addr)
  *
- * @this {RL11}
- * @param {number} addr (eg, PDP11.UNIBUS.RLCS or 174400)
+ * @this {RK11}
+ * @param {number} addr (eg, PDP11.UNIBUS.RKDS or 177400)
  * @return {number}
  */
-RL11.prototype.readRLCS = function(addr)
+RK11.prototype.readRKDS = function(addr)
 {
-    return this.csr & PDP11.RL11.RLCS.RMASK;
+    return this.dsr;
 };
 
 /**
- * writeRLCS(data, addr)
+ * writeRKDS(data, addr)
  *
- * @this {RL11}
+ * @this {RK11}
  * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.RLCS or 174400)
+ * @param {number} addr (eg, PDP11.UNIBUS.RKDS or 177400)
  */
-RL11.prototype.writeRLCS = function(data, addr)
+RK11.prototype.writeRKDS = function(data, addr)
 {
-    this.csr = (this.csr & ~PDP11.RL11.RLCS.WMASK) | (data & PDP11.RL11.RLCS.WMASK);
-
-    this.bae = (this.bae & ~0x3) | ((data & PDP11.RL11.RLCS.BAE) >> 4);
-
-    if (!(this.csr & PDP11.RL11.RLCS.CRDY)) this.processCommand();
+    /*
+     * This is a read-only register
+     */
 };
 
 /**
- * readRLBA(addr)
+ * readRKER(addr)
  *
- * @this {RL11}
- * @param {number} addr (eg, PDP11.UNIBUS.RLBA or 174402)
+ * @this {RK11}
+ * @param {number} addr (eg, PDP11.UNIBUS.RKER or 177402)
  * @return {number}
  */
-RL11.prototype.readRLBA = function(addr)
+RK11.prototype.readRKER = function(addr)
+{
+    return this.err;
+};
+
+/**
+ * writeRKER(data, addr)
+ *
+ * @this {RK11}
+ * @param {number} data
+ * @param {number} addr (eg, PDP11.UNIBUS.RKER or 177402)
+ */
+RK11.prototype.writeRKER = function(data, addr)
+{
+    /*
+     * This is a read-only register
+     */
+};
+
+/**
+ * readRKCS(addr)
+ *
+ * @this {RK11}
+ * @param {number} addr (eg, PDP11.UNIBUS.RKCS or 177404)
+ * @return {number}
+ */
+RK11.prototype.readRKCS = function(addr)
+{
+    return this.csr & PDP11.RK11.RKCS.RMASK;
+};
+
+/**
+ * writeRKCS(data, addr)
+ *
+ * @this {RK11}
+ * @param {number} data
+ * @param {number} addr (eg, PDP11.UNIBUS.RKCS or 177404)
+ */
+RK11.prototype.writeRKCS = function(data, addr)
+{
+    this.csr = (this.csr & ~PDP11.RK11.RKCS.WMASK) | (data & PDP11.RK11.RKCS.WMASK);
+
+    if (this.csr & PDP11.RK11.RKCS.GO) this.processCommand();
+};
+
+/**
+ * readRKWC(addr)
+ *
+ * @this {RK11}
+ * @param {number} addr (eg, PDP11.UNIBUS.RKWC or 177406)
+ * @return {number}
+ */
+RK11.prototype.readRKWC = function(addr)
+{
+    return this.wcr;
+};
+
+/**
+ * writeRKWC(data, addr)
+ *
+ * @this {RK11}
+ * @param {number} data
+ * @param {number} addr (eg, PDP11.UNIBUS.RKWC or 177406)
+ */
+RK11.prototype.writeRKWC = function(data, addr)
+{
+    this.wcr = data;
+};
+
+/**
+ * readRKBA(addr)
+ *
+ * @this {RK11}
+ * @param {number} addr (eg, PDP11.UNIBUS.RKBA or 177410)
+ * @return {number}
+ */
+RK11.prototype.readRKBA = function(addr)
 {
     return this.bar;
 };
 
 /**
- * writeRLBA(data, addr)
+ * writeRKBA(data, addr)
  *
- * @this {RL11}
+ * @this {RK11}
  * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.RLBA or 174402)
+ * @param {number} addr (eg, PDP11.UNIBUS.RKBA or 177410)
  */
-RL11.prototype.writeRLBA = function(data, addr)
+RK11.prototype.writeRKBA = function(data, addr)
 {
-    this.bar = data & PDP11.RL11.RLBA.WMASK;
+    this.bar = data;
 };
 
 /**
- * readRLDA(addr)
+ * readRKDA(addr)
  *
- * @this {RL11}
- * @param {number} addr (eg, PDP11.UNIBUS.RLDA or 174404)
+ * @this {RK11}
+ * @param {number} addr (eg, PDP11.UNIBUS.RKDA or 177412)
  * @return {number}
  */
-RL11.prototype.readRLDA = function(addr)
+RK11.prototype.readRKDA = function(addr)
 {
     return this.dar;
 };
 
 /**
- * writeRLDA(data, addr)
+ * writeRKDA(data, addr)
  *
- * @this {RL11}
+ * @this {RK11}
  * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.RLDA or 174404)
+ * @param {number} addr (eg, PDP11.UNIBUS.RKDA or 177412)
  */
-RL11.prototype.writeRLDA = function(data, addr)
+RK11.prototype.writeRKDA = function(data, addr)
 {
     this.dar = data;
 };
 
 /**
- * readRLMP(addr)
+ * readRKDB(addr)
  *
- * @this {RL11}
- * @param {number} addr (eg, PDP11.UNIBUS.RLMP or 174406)
+ * @this {RK11}
+ * @param {number} addr (eg, PDP11.UNIBUS.RKDB or 177416)
  * @return {number}
  */
-RL11.prototype.readRLMP = function(addr)
+RK11.prototype.readRKDB = function(addr)
 {
-    return this.mpr;
+    return this.dbr;
 };
 
 /**
- * writeRLMP(data, addr)
+ * writeRKDB(data, addr)
  *
- * @this {RL11}
+ * @this {RK11}
  * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.RLMP or 174406)
+ * @param {number} addr (eg, PDP11.UNIBUS.RKDB or 177416)
  */
-RL11.prototype.writeRLMP = function(data, addr)
+RK11.prototype.writeRKDB = function(data, addr)
 {
-    this.mpr = data;
-};
-
-/**
- * readRLBE(addr)
- *
- * @this {RL11}
- * @param {number} addr (eg, PDP11.UNIBUS.RLBE or 174410)
- * @return {number}
- */
-RL11.prototype.readRLBE = function(addr)
-{
-    return this.ber;
-};
-
-/**
- * writeRLBE(data, addr)
- *
- * @this {RL11}
- * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.RLBE or 174410)
- */
-RL11.prototype.writeRLBE = function(data, addr)
-{
-    this.ber = data & PDP11.RL11.RLBE.MASK;
+    this.dbr = data;
 };
 
 /*
  * ES6 ALERT: As you can see below, I've finally started using computed property names.
  */
-RL11.UNIBUS_IOTABLE = {
-    [PDP11.UNIBUS.RLCS]:     /* 174400 */    [null, null, RL11.prototype.readRLCS,  RL11.prototype.writeRLCS,   "RLCS"],
-    [PDP11.UNIBUS.RLBA]:     /* 174402 */    [null, null, RL11.prototype.readRLBA,  RL11.prototype.writeRLBA,   "RLBA"],
-    [PDP11.UNIBUS.RLDA]:     /* 174404 */    [null, null, RL11.prototype.readRLDA,  RL11.prototype.writeRLDA,   "RLDA"],
-    [PDP11.UNIBUS.RLMP]:     /* 174406 */    [null, null, RL11.prototype.readRLMP,  RL11.prototype.writeRLMP,   "RLMP"],
-    [PDP11.UNIBUS.RLBE]:     /* 174410 */    [null, null, RL11.prototype.readRLBE,  RL11.prototype.writeRLBE,   "RLBE"]
+RK11.UNIBUS_IOTABLE = {
+    [PDP11.UNIBUS.RKDS]:     /* 177400 */    [null, null, RK11.prototype.readRKDS,  RK11.prototype.writeRKDS,   "RKDS"],
+    [PDP11.UNIBUS.RKER]:     /* 177402 */    [null, null, RK11.prototype.readRKER,  RK11.prototype.writeRKER,   "RKER"],
+    [PDP11.UNIBUS.RKCS]:     /* 177404 */    [null, null, RK11.prototype.readRKCS,  RK11.prototype.writeRKCS,   "RKCS"],
+    [PDP11.UNIBUS.RKWC]:     /* 177406 */    [null, null, RK11.prototype.readRKWC,  RK11.prototype.writeRKWC,   "RKWC"],
+    [PDP11.UNIBUS.RKBA]:     /* 177410 */    [null, null, RK11.prototype.readRKBA,  RK11.prototype.writeRKBA,   "RKBA"],
+    [PDP11.UNIBUS.RKDA]:     /* 177412 */    [null, null, RK11.prototype.readRKDA,  RK11.prototype.writeRKDA,   "RKDA"],
+    [PDP11.UNIBUS.RKDB]:     /* 177416 */    [null, null, RK11.prototype.readRKDB,  RK11.prototype.writeRKDB,   "RKDB"]
 };
 
-if (NODE) module.exports = RL11;
+if (NODE) module.exports = RK11;

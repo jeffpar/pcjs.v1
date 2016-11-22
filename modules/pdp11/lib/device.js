@@ -1167,6 +1167,10 @@ DevicePDP11.init = function()
             device = new RL11(parmsDevice);
             Component.bindComponentControls(device, eDevice, PDP11.APPCLASS);
             break;
+        case 'rk11':
+            device = new RK11(parmsDevice);
+            Component.bindComponentControls(device, eDevice, PDP11.APPCLASS);
+            break;
         }
     }
 };

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<device id="rl11" type="rl11" autoMountExample='{RL0:{path:"http://archive.pcjs.org/disks/dec/rl02k/RL02K-XXDP.json"}}' pos="left" width="35%" padLeft="8px" padBottom="8px">
+<device id="rk11" type="rk11" autoMountExample='{RK0:{path:"http://archive.pcjs.org/disks/dec/rk03/RK03-XXDP.json"}}' pos="left" width="35%" padLeft="8px" padBottom="8px">
 	<name>Disk Drive Controls</name>
 	<control type="container">
 		<control type="list" binding="listDrives"/>
 		<control type="list" binding="listDisks">
-			<disk id="disk01" name="XXDP+ Diagnostics" path="http://archive.pcjs.org/disks/dec/rl02k/RL02K-XXDP.json"/>
+			<disk id="disk01" name="XXDP+ Diagnostics" path="http://archive.pcjs.org/disks/dec/rk03/RK03-XXDP.json"/>
 		</control>
 		<control type="button" binding="loadDrive">Load</control>
 		<control type="description" binding="descDisk" padRight="8px"/>
