@@ -280,7 +280,7 @@ PC11.prototype.initBus = function(cmp, bus, cpu, dbg)
         }
     }
 
-    this.triggerReaderInterrupt = this.cpu.addTrigger(PDP11.PC11.RVEC, PDP11.PC11.PRI);
+    this.triggerReaderInterrupt = this.cpu.addTrigger(PDP11.PC11.RVEC, PDP11.PC11.PRI, MessagesPDP11.PC11);
 
     this.timerReaderAdvance = this.cpu.addTimer(function readyReader() {
         pc11.advanceReader();

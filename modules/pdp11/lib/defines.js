@@ -492,10 +492,10 @@ var PDP11 = {
         PPS:        0o177554,   //                                  PC11 Punch Status Register
         PPB:        0o177556,   //                                  PC11 Punch Buffer Register
 
-        RCSR:       0o177560,   //                                  Display Terminal: Receiver Status Register
-        RBUF:       0o177562,   //                                  Display Terminal: Receiver Data Buffer Register
-        XCSR:       0o177564,   //                                  Display Terminal: Transmitter Status Register
-        XBUF:       0o177566,   //                                  Display Terminal: Transmitter Data Buffer Register
+        RCSR:       0o177560,   //                                  DL11 Display Terminal: Receiver Status Register
+        RBUF:       0o177562,   //                                  DL11 Display Terminal: Receiver Data Buffer Register
+        XCSR:       0o177564,   //                                  DL11 Display Terminal: Transmitter Status Register
+        XBUF:       0o177566,   //                                  DL11 Display Terminal: Transmitter Data Buffer Register
 
         CNSW:       0o177570,   //                                  Console (Front Panel) Switch/Display Register
 

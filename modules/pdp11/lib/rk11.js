@@ -290,7 +290,7 @@ RK11.prototype.initBus = function(cmp, bus, cpu, dbg)
      */
     this.initController();
 
-    this.triggerInterrupt = this.cpu.addTrigger(PDP11.RK11.VEC, PDP11.RK11.PRI);
+    this.triggerInterrupt = this.cpu.addTrigger(PDP11.RK11.VEC, PDP11.RK11.PRI, MessagesPDP11.RK11);
 
     bus.addIOTable(this, RK11.UNIBUS_IOTABLE);
     bus.addResetHandler(this.reset.bind(this));
@@ -931,6 +931,10 @@ RK11.prototype.processCommand = function()
         }
         addr = (((this.csr & PDP11.RK11.RKCS.MEX)) << (16 - PDP11.RK11.RKCS.SHIFT.MEX)) | this.bar;
         nWords = (0x10000 - this.wcr) & 0xffff;
+        if (DEBUG && this.messageEnabled(MessagesPDP11.READ)) {
+            var pos = ((((iCylinder << 1) + iHead) * drive.nSectors) + iSector) * 256;
+            this.printMessage((fnReadWrite == this.readData? "readData" : "writeData") + "(pos=" + pos + ",addr=" + str.toOct(addr) + ",bytes=" + (nWords * 2) + ")", true, true);
+        }
         fInterrupt = fnReadWrite.call(this, drive, iCylinder, iHead, iSector, nWords, addr, this.endReadWrite.bind(this));
         break;
 
@@ -951,8 +955,6 @@ RK11.prototype.processCommand = function()
         }
     }
 };
-
-
 
 /**
  * endReadWrite(err, iCylinder, iHead, iSector, nWords, addr)
@@ -1002,6 +1004,7 @@ RK11.prototype.readData = function(drive, iCylinder, iHead, iSector, nWords, add
         nWords = 0;
     }
 
+    var sWords = "";
     while (nWords--) {
         if (!sector) {
             sector = drive.disk.seek(iCylinder, iHead, iSector + 1);
@@ -1011,12 +1014,16 @@ RK11.prototype.readData = function(drive, iCylinder, iHead, iSector, nWords, add
             }
             ibSector = 0;
         }
-        var b0, b1;
+        var b0, b1, data;
         if ((b0 = drive.disk.read(sector, ibSector++)) < 0 || (b1 = drive.disk.read(sector, ibSector++)) < 0) {
             err = PDP11.RK11.RKER.NXS;
             break;
         }
-        var data = this.bus.setWordDirect(addr, b0 | (b1 << 8));
+        this.bus.setWordDirect(addr, data = b0 | (b1 << 8));
+        if (DEBUG && this.messageEnabled(MessagesPDP11.READ) && sWords.length < 56) {
+            sWords += str.toOct(data) + ' ';
+            if (sWords.length >= 56) this.printMessage(sWords + '\n', true);
+        }
         if (this.bus.checkFault()) {
             err = PDP11.RK11.RKER.NXM;
             break;
