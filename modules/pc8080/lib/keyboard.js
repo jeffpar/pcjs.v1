@@ -148,9 +148,20 @@ Keyboard8080.VT100 = {
 };
 
 /*
- * Table to map host key codes to VT100 key addresses (ie, unique 7-bit values representing key positions on the VT100)
+ * Table mapping host key codes to VT100 key addresses (7-bit values representing key positions on the VT100)
+ *
+ * NOTE: The VT100 keyboard has both BACKSPACE and DELETE keys, whereas modern keyboards generally only
+ * have DELETE.  And sadly, when you press DELETE, your modern keyboard and/or modern browser is reporting
+ * it as keyCode 8: the code for BACKSPACE, aka CTRL-H.  You have to press a modified DELETE key to get
+ * the actual DELETE keyCode of 127.
+ *
+ * We resolve this below by mapping KEYCODE.BS (8) to VT100 keyCode DELETE (0x03) and KEYCODE.DEL (127)
+ * to VT100 keyCode BACKSPACE (0x33).  So, DELETE is BACKSPACE and BACKSPACE is DELETE.  Fortunately, this
+ * confusion is all internal, because your physical key is (or should be) labeled DELETE, so the fact that
+ * the browser is converting it to BACKSPACE and that we're converting BACKSPACE back into DELETE is
+ * something most people don't need to worry their heads about.
  */
-Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.DEL]     =   0x03;
+Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.BS]      =   0x03;
 Keyboard8080.VT100.KEYMAP[Keys.ASCII.P]         =   0x05;
 Keyboard8080.VT100.KEYMAP[Keys.ASCII.O]         =   0x06;
 Keyboard8080.VT100.KEYMAP[Keys.ASCII.Y]         =   0x07;
@@ -179,7 +190,7 @@ Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.ESC]     =   0x2A;
 Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.UP]      =   0x30;
 Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.F3]      =   0x31;   // aka PF3
 Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.F1]      =   0x32;   // aka PF1
-Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.BS]      =   0x33;
+Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.DEL]     =   0x33;
 Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.EQUALS]  =   0x34;
 Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.ZERO]    =   0x35;
 Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.EIGHT]   =   0x36;
