@@ -12,7 +12,7 @@ PDP-11 Device Configurations
 * [Control Panels](panel/)
 * Serial Interface for Display Terminals [(DL11)](dl11/)
 * High-Speed Paper Tape Reader/Punch [(PC11)](pc11/)
-* Disk Controllers ([RL11](rl11/))
+* Disk Controllers ([RK11](rk11/), [RL11](rl11/))
 * [ROM Images](rom/)
 
 Sample machines include a

@@ -277,7 +277,7 @@ BusPDP11.IOController = {
             }
         }
         if (b >= 0) {
-            if (DEBUGGER && this.dbg && this.dbg.messageEnabled(afn[BusPDP11.IOHANDLER.MSG_CATEGORY])) {
+            if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS | afn[BusPDP11.IOHANDLER.MSG_CATEGORY])) {
                 this.dbg.printMessage(afn[BusPDP11.IOHANDLER.NAME] + ".readByte(" + this.dbg.toStrBase(addr) + "): " + this.dbg.toStrBase(b), true, !bus.nDisableFaults);
             }
             return b;
@@ -358,7 +358,7 @@ BusPDP11.IOController = {
             }
         }
         if (fWrite) {
-            if (DEBUGGER && this.dbg && this.dbg.messageEnabled(afn[BusPDP11.IOHANDLER.MSG_CATEGORY])) {
+            if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS | afn[BusPDP11.IOHANDLER.MSG_CATEGORY])) {
                 this.dbg.printMessage(afn[BusPDP11.IOHANDLER.NAME] + ".writeByte(" + this.dbg.toStrBase(addr) + "," + this.dbg.toStrBase(b) + ")", true, !bus.nDisableFaults);
             }
             return;
@@ -397,7 +397,7 @@ BusPDP11.IOController = {
             }
         }
         if (w >= 0) {
-            if (DEBUGGER && this.dbg && this.dbg.messageEnabled(afn[BusPDP11.IOHANDLER.MSG_CATEGORY])) {
+            if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS | afn[BusPDP11.IOHANDLER.MSG_CATEGORY])) {
                 this.dbg.printMessage(afn[BusPDP11.IOHANDLER.NAME] + ".readWord(" + this.dbg.toStrBase(addr) + "): " + this.dbg.toStrBase(w), true, !bus.nDisableFaults);
             }
             return w;
@@ -441,7 +441,7 @@ BusPDP11.IOController = {
             }
         }
         if (fWrite) {
-            if (DEBUGGER && this.dbg && this.dbg.messageEnabled(afn[BusPDP11.IOHANDLER.MSG_CATEGORY])) {
+            if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS | afn[BusPDP11.IOHANDLER.MSG_CATEGORY])) {
                 this.dbg.printMessage(afn[BusPDP11.IOHANDLER.NAME] + ".writeWord(" + this.dbg.toStrBase(addr) + "," + this.dbg.toStrBase(w) + ")", true, !bus.nDisableFaults);
             }
             return;
@@ -1265,7 +1265,7 @@ BusPDP11.prototype.getMemorySize = function(type)
 };
 
 /**
- * addIOHandlers(start, end, fnReadByte, fnWriteByte, fnReadWord, fnWriteWord, msgCategory, sName)
+ * addIOHandlers(start, end, fnReadByte, fnWriteByte, fnReadWord, fnWriteWord, message, sName)
  *
  * Add I/O notification handlers to the master list (aIOHandlers).  The start and end addresses are typically
  * relative to the starting IOPAGE address, but they can also be absolute; we simply mask all addresses with
@@ -1285,11 +1285,11 @@ BusPDP11.prototype.getMemorySize = function(type)
  * @param {function(number,number)|null|undefined} fnWriteByte
  * @param {function(number)|null|undefined} fnReadWord
  * @param {function(number,number)|null|undefined} fnWriteWord
- * @param {number} [msgCategory]
+ * @param {number} [message]
  * @param {string} [sName]
  * @return {boolean} (true if entire range successfully registered, false if any conflicts)
  */
-BusPDP11.prototype.addIOHandlers = function(start, end, fnReadByte, fnWriteByte, fnReadWord, fnWriteWord, msgCategory, sName)
+BusPDP11.prototype.addIOHandlers = function(start, end, fnReadByte, fnWriteByte, fnReadWord, fnWriteWord, message, sName)
 {
     for (var addr = start; addr <= end; addr += 2) {
         var off = addr & BusPDP11.IOPAGE_MASK;
@@ -1297,7 +1297,7 @@ BusPDP11.prototype.addIOHandlers = function(start, end, fnReadByte, fnWriteByte,
             Component.warning("I/O address already registered: " + str.toHexLong(addr));
             return false;
         }
-        this.aIOHandlers[off] = [fnReadByte, fnWriteByte, fnReadWord, fnWriteWord, sName || "unknown", msgCategory, false];
+        this.aIOHandlers[off] = [fnReadByte, fnWriteByte, fnReadWord, fnWriteWord, sName || "unknown", message || MessagesPDP11.BUS, false];
         if (MAXDEBUG) this.log("addIOHandlers(" + str.toHexLong(addr) + ")");
     }
     return true;
@@ -1356,7 +1356,7 @@ BusPDP11.prototype.addIOTable = function(component, table)
 
         for (var iReg = 0; iReg < nRegs; iReg++, addr += 2) {
             if (sReg && nRegs > 1) sReg = afn[4] + iReg;
-            if (!this.addIOHandlers(addr, addr, fnReadByte, fnWriteByte, fnReadWord, fnWriteWord, afn[7] || component.bitsMessage || MessagesPDP11.BUS, sReg || component.idComponent)) {
+            if (!this.addIOHandlers(addr, addr, fnReadByte, fnWriteByte, fnReadWord, fnWriteWord, afn[7] || component.bitsMessage, sReg || component.idComponent)) {
                 return false;
             }
         }

@@ -28,7 +28,7 @@ p. 1-10:
 			(R = read and type console switch settings / CON = R)
 			(Z = switch console terminal back to program)
 
-	.R EKBEEI
+	.R EKBEE1
 
 	SWITCH SETTINGS
 		SW15 = 1 halt on error
@@ -38,7 +38,7 @@ p. 1-10:
 		SW11 = 1 inhibit iterations
 		SW10 = 1 ring bell on error
 		SW09 = 1 loop on error
-		SW08 = 1 loop on test in SWR < 06:00>
+		SW08 = 1 loop on test in SWR <06:00>
 		SW07 = 1 inhibit multiple error typeouts
 		SW06 = 1 selects subtest
 		...

@@ -476,6 +476,15 @@ var PDP11 = {
         RLMP:       0o174406,   //                                  RL11 Multi-Purpose Register
         RLBE:       0o174410,   //                                  RL11 Bus (Address) Extension Register (RLV12 controller only)
 
+        RKDS:       0o177400,   //                                  RK11 Drive Status Register
+        RKER:       0o177402,   //                                  RK11 Error Register
+        RKCS:       0o177404,   //                                  RK11 Control Status Register
+        RKWC:       0o177406,   //                                  RK11 Word Count Register
+        RKBA:       0o177410,   //                                  RK11 Bus Address Register
+        RKDA:       0o177412,   //                                  RK11 Disk Address Register
+                                //                                  NOTE: 177414 is unused
+        RKDB:       0o177416,   //                                  RK11 Data Buffer Register
+
         LKS:        0o177546,   //                                  KW11-L Clock Status
 
         PRS:        0o177550,   //                                  PC11 (and PR11) Reader Status Register
@@ -483,10 +492,10 @@ var PDP11 = {
         PPS:        0o177554,   //                                  PC11 Punch Status Register
         PPB:        0o177556,   //                                  PC11 Punch Buffer Register
 
-        RCSR:       0o177560,   //                                  Display Terminal: Receiver Status Register
-        RBUF:       0o177562,   //                                  Display Terminal: Receiver Data Buffer Register
-        XCSR:       0o177564,   //                                  Display Terminal: Transmitter Status Register
-        XBUF:       0o177566,   //                                  Display Terminal: Transmitter Data Buffer Register
+        RCSR:       0o177560,   //                                  DL11 Display Terminal: Receiver Status Register
+        RBUF:       0o177562,   //                                  DL11 Display Terminal: Receiver Data Buffer Register
+        XCSR:       0o177564,   //                                  DL11 Display Terminal: Transmitter Status Register
+        XBUF:       0o177566,   //                                  DL11 Display Terminal: Transmitter Data Buffer Register
 
         CNSW:       0o177570,   //                                  Console (Front Panel) Switch/Display Register
 
@@ -644,6 +653,84 @@ var PDP11 = {
             BAUD:   600
         },
     },
+    RK11: {                     // RK11 Disk Controller
+        PRI:        5,
+        VEC:        0o220,
+        RKDS: {                 // 177400: Drive Status Register
+            SC:     0x000F,     // Sector Counter
+            SCESA:  0x0010,     // Sector Counter Equals Sector Address
+            WPS:    0x0020,     // Write Protected Status (set if write-protected)
+            RRDY:   0x0040,     // Read/Write/Seek Ready
+            DRDY:   0x0080,     // Drive Ready
+            SOK:    0x0100,     // Sector Counter OK
+            SIN:    0x0200,     // Seek Incomplete
+            DRU:    0x0400,     // Drive Unsafe
+            RK05:   0x0800,     // RK05 is the selected disk drive (always set)
+            DPL:    0x1000,     // Drive Power Low
+            ID:     0xE000,     // Drive ID (logical drive number of an interrupting drive)
+            SHIFT: {
+                ID:     13
+            }
+        },
+        RKER: {                 // 177402: Error Register
+            WCE:    0x0001,     // Write Check Error
+            CSE:    0x0002,     // Checksum Error
+            UNUSED: 0x001C,     // unused (returns zero)
+            NXS:    0x0020,     // Non-Existent Sector
+            NXC:    0x0040,     // Non-Existent Cylinder
+            NXD:    0x0080,     // Non-Existent Disk
+            TE:     0x0100,     // Timing Error
+            DLT:    0x0200,     // Date Late
+            NXM:    0x0400,     // Non-Existent Memory
+            PGE:    0x0800,     // Programming Error
+            SKE:    0x1000,     // Seek Error
+            WLO:    0x2000,     // Write Lock-Out Violation
+            OVR:    0x4000,     // Overrun
+            DRE:    0x8000      // Drive Error
+        },
+        RKCS: {                 // 177404: Control Status Register
+            GO:     0x0001,     // Go (W/O)
+            FUNC:   0x000E,     // Function Code (F2,F1,F0) (R/W)
+            MEX:    0x0030,     // Memory Extension (R/W)
+            IE:     0x0040,     // Interrupt Enable (R/W)
+            CRDY:   0x0080,     // Controller Ready (R/O)
+            SSE:    0x0100,     // Stop on Soft Error (R/W)
+            EXB:    0x0200,     // Extra Bit (R/W)
+            FMT:    0x0400,     // Format (R/W)
+            IBA:    0x0800,     // Inhibit RKBA Increment (R/W)
+            SCP:    0x2000,     // Search Complete (R/O)
+            HE:     0x4000,     // Hard Error (R/O)
+            ERR:    0x8000,     // Composite Error (R/O) (set when any RKER bit is set)
+            UNUSED: 0x1200,     // unused
+            RMASK:  0xEFFE,     // bits readable
+            WMASK:  0x0F7F,     // bits writable
+            SHIFT: {
+                FUNC:   1,
+                MEX:    4
+            }
+        },
+        RKDA: {                 // 177412: Disk Address Register
+            SA:     0x000F,     // Sector Address
+            HS:     0x0010,     // Head Select (aka SUR: clear for upper disk head, set for lower)
+            CA:     0x1FE0,     // Cylinder Address (aka CYL ADDR)
+            DS:     0xE000,     // Drive Select (aka DR SEL)
+            SHIFT: {
+                HS:     4,
+                CA:     5,
+                DS:     13
+            }
+        },
+        FUNC: {                 // NOTE: These function codes are pre-shifted to read/write directly from/to RKCS.FUNC
+            CRESET: 0b0000,     // Controller Reset
+            WRITE:  0b0010,     // Write
+            READ:   0b0100,     // Read
+            WCHK:   0b0110,     // Write Check
+            SEEK:   0b1000,     // Seek
+            RCHK:   0b1010,     // Read Check
+            DRESET: 0b1100,     // Drive Reset
+            WLOCK:  0b1110      // Write Lock
+        }
+    },
     RL11: {                     // RL11 Disk Controller
         PRI:        5,
         VEC:        0o160,
@@ -663,6 +750,7 @@ var PDP11 = {
             WMASK:  0x03FE,     // bits writable
             SHIFT: {
                 FUNC:   1,
+                BAE:    4,
                 DS:     8
             }
         },

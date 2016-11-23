@@ -111,6 +111,7 @@ Component.subclass(CPUStatePDP11, CPUPDP11);
  * @typedef {{
  *  vector: number,
  *  priority: number,
+ *  message: number,
  *  next: (Trigger|null)
  * }} Trigger
  */
@@ -767,16 +768,17 @@ CPUStatePDP11.prototype.setSP = function(addr)
 };
 
 /**
- * addTrigger(vector, priority)
+ * addTrigger(vector, priority, message)
  *
  * @this {CPUStatePDP11}
  * @param {number} vector
  * @param {number} priority
+ * @param {number} [message]
  * @return {Trigger}
  */
-CPUStatePDP11.prototype.addTrigger = function(vector, priority)
+CPUStatePDP11.prototype.addTrigger = function(vector, priority, message)
 {
-    var trigger = {vector: vector, priority: priority, next: null};
+    var trigger = {vector: vector, priority: priority, message: message || 0, next: null};
     if (DEBUG) this.aTriggers.push(trigger);
     return trigger;
 };
@@ -842,12 +844,32 @@ CPUStatePDP11.prototype.removeTrigger = function(trigger)
 CPUStatePDP11.prototype.setTrigger = function(trigger)
 {
     this.insertTrigger(trigger);
+
     /*
      * See the writeXCSR() function for an explanation of why signalling an INTQ hardware interrupt condition
      * should be done using INTQ_DELAY rather than setting INTQ directly.
      */
     this.opFlags |= PDP11.OPFLAG.INTQ_DELAY;
+
+    if (trigger.message && this.messageEnabled(trigger.message | MessagesPDP11.INT)) {
+        this.printMessage("setInterrupt(vector=" + str.toOct(trigger.vector) + ",priority=" + trigger.priority + ")", true, true);
+    }
     return false;
+};
+
+/**
+ * clearTrigger(trigger)
+ *
+ * @this {CPUStatePDP11}
+ * @param {Trigger} trigger
+ */
+CPUStatePDP11.prototype.clearTrigger = function(trigger)
+{
+    this.removeTrigger(trigger);
+
+    if (trigger.message && this.messageEnabled(trigger.message | MessagesPDP11.INT)) {
+        this.printMessage("clearInterrupt(vector=" + str.toOct(trigger.vector) + ",priority=" + trigger.priority + ")", true, true);
+    }
 };
 
 /**

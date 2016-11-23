@@ -1,6 +1,6 @@
 {
   "name": "pcjs",
-  "version": "1.30.3",
+  "version": "1.30.4",
   "description": "Node-enabled version of PCjs",
   "license": "GPL-3.0",
   "engine": "node ^6.7.0",
@@ -200,6 +200,7 @@
     "./modules/pdp11/lib/serialport.js",
     "./modules/pdp11/lib/pc11.js",
     "./modules/pdp11/lib/disk.js",
+    "./modules/pdp11/lib/rk11.js",
     "./modules/pdp11/lib/rl11.js",
     "./modules/shared/lib/debugger.js",
     "./modules/pdp11/lib/debugger.js",

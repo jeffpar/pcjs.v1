@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.30.3/manifest.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.30.4/manifest.xsl"?>
 <manifest type="software">
 	<title>WordStar 3.30</title>
 	<disk id="disk01" size="163840" chs="40:1:8" img="archive/D1_INST.IMG" href="/disks/pcx86/apps/micropro/wordstar/3.30/WS330-DISK1-INST.json" md5="575fb69854700aa0e80768346d3b53dd" md5json="4218599d958f843abc02f589b58cee8e">
