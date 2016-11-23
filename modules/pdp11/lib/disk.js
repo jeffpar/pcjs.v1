@@ -73,7 +73,7 @@ if (NODE) {
  *
  * @constructor
  * @extends Component
- * @param {RL11} controller
+ * @param {RK11|RL11} controller
  * @param {Object} drive
  * @param {string} mode
  */

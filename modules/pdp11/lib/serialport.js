@@ -36,6 +36,7 @@ if (NODE) {
     var str           = require("../../shared/lib/strlib");
     var web           = require("../../shared/lib/weblib");
     var Component     = require("../../shared/lib/component");
+    var Keys          = require("../../shared/lib/keys");
     var State         = require("../../shared/lib/state");
     var PDP11         = require("./defines");
     var MessagesPDP11 = require("./messages");
@@ -195,26 +196,24 @@ SerialPortPDP11.prototype.setBinding = function(sType, sBinding, control, sValue
         this.bindings[sBinding] = this.controlIOBuffer = control;
 
         /*
-         * By establishing an onkeypress handler here, we make it possible for DOS commands like
-         * "CTTY COM1" to more or less work (use "CTTY CON" to restore control to the DOS console).
+         * An onkeydown handler is required for certain keys that browsers tend to consume themselves;
+         * for example, BACKSPACE is often defined as going back to the previous web page, and certain
+         * CTRL keys are often used for browser shortcuts (usually on Windows-based browsers).
          */
         control.onkeydown = function onKeyDown(event) {
-            /*
-             * This is required in addition to onkeypress, because it's the only way to prevent
-             * BACKSPACE (keyCode 8) from being interpreted by the browser as a "Back" operation;
-             * moreover, not all browsers generate an onkeypress notification for BACKSPACE.
-             *
-             * A related problem exists for Ctrl-key combinations in most Windows-based browsers
-             * (eg, IE, Edge, Chrome for Windows, etc), because keys like Ctrl-C and Ctrl-S have
-             * special meanings (eg, Copy, Save).  To the extent the browser will allow it, we
-             * attempt to disable that default behavior when this control receives an onkeydown
-             * event for one of those keys (probably the only event the browser generates for them).
-             */
             event = event || window.event;
+            var fProcess = false;
             var keyCode = event.keyCode;
-            if (keyCode === 0x08 || event.ctrlKey && keyCode >= 0x41 && keyCode <= 0x5A) {
+            if (keyCode == Keys.KEYCODE.BS) {
+                fProcess = true;
+                keyCode = Keys.ASCII.DEL;
+            }
+            else if (event.ctrlKey && keyCode >= Keys.ASCII.A && keyCode <= Keys.ASCII.Z) {
+                fProcess = true;
+                keyCode -= (Keys.ASCII.A - Keys.ASCII.CTRL_A);
+            }
+            if (fProcess) {
                 if (event.preventDefault) event.preventDefault();
-                if (keyCode > 0x40) keyCode -= 0x40;
                 serial.receiveData(keyCode);
             }
             return true;
@@ -285,7 +284,7 @@ SerialPortPDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
 
     var serial = this;
 
-    this.triggerReceiveInterrupt = this.cpu.addTrigger(PDP11.DL11.RVEC, PDP11.DL11.PRI);
+    this.triggerReceiveInterrupt = this.cpu.addTrigger(PDP11.DL11.RVEC, PDP11.DL11.PRI, MessagesPDP11.DL11);
 
     this.timerReceiveInterrupt = this.cpu.addTimer(function readyReceiver() {
         if (!(serial.rcsr & PDP11.DL11.RCSR.RD)) {
@@ -315,7 +314,7 @@ SerialPortPDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
         }
     });
 
-    this.triggerTransmitInterrupt = this.cpu.addTrigger(PDP11.DL11.XVEC, PDP11.DL11.PRI);
+    this.triggerTransmitInterrupt = this.cpu.addTrigger(PDP11.DL11.XVEC, PDP11.DL11.PRI, MessagesPDP11.DL11);
 
     this.timerTransmitInterrupt = this.cpu.addTimer(function readyTransmitter() {
         serial.xcsr |= PDP11.DL11.XCSR.READY;
@@ -584,7 +583,15 @@ SerialPortPDP11.prototype.transmitByte = function(b)
              */
             if (this.iLogicalCol > 0) this.iLogicalCol--;
         }
-        else {
+        else if (b) {
+            /*
+             * RT-11 outputs lots of NULL characters, at least after a "D 56=5015" (0x0A0D) command has
+             * been issued, hence the "if (b)" check above.
+             *
+             * TODO: Also consider a check for Keys.ASCII.CTRL_C, because by default, RT-11 outputs "raw"
+             * CTRL_C characters, which we capture below and render as <ETX>.  RT-11 does this for other keys
+             * as well, such as CTRL_K (<VT>) and CTRL_L (<FF>).
+             */
             var s = str.toASCIICode(b); // formerly: String.fromCharCode(b);
             var nChars = s.length;      // formerly: (b >= 0x20? 1 : 0);
             if (b < 0x20 && nChars == 1) nChars = 0;
@@ -698,7 +705,7 @@ SerialPortPDP11.prototype.writeXCSR = function(data, addr)
         if (data & PDP11.DL11.XCSR.TIE) {
             this.cpu.setTrigger(this.triggerTransmitInterrupt);
         } else {
-            this.cpu.removeTrigger(this.triggerTransmitInterrupt);
+            this.cpu.clearTrigger(this.triggerTransmitInterrupt);
         }
     }
     this.xcsr = (this.xcsr & ~PDP11.DL11.XCSR.WMASK) | (data & PDP11.DL11.XCSR.WMASK);
@@ -726,16 +733,14 @@ SerialPortPDP11.prototype.readXBUF = function(addr)
 SerialPortPDP11.prototype.writeXBUF = function(data, addr)
 {
     data &= PDP11.DL11.XBUF.DATA;
-    if (data) {
-        this.transmitByte(data);
-        this.xcsr &= ~PDP11.DL11.XCSR.READY;
-        /*
-         * NOTE: When debugging issues involving the SerialPort, such as debugging code between a pair of
-         * transmitted bytes, you can pass 0 instead of getBaudTimeout() to setTimer() to minimize the amount
-         * of time spent waiting for XCSR.READY to be set again.
-         */
-        this.cpu.setTimer(this.timerTransmitInterrupt, this.getBaudTimeout(this.nBaudTransmit));
-    }
+    this.transmitByte(data);
+    this.xcsr &= ~PDP11.DL11.XCSR.READY;
+    /*
+     * NOTE: When debugging issues involving the SerialPort, such as debugging code between a pair of
+     * transmitted bytes, you can pass 0 instead of getBaudTimeout() to setTimer() to minimize the amount
+     * of time spent waiting for XCSR.READY to be set again.
+     */
+    this.cpu.setTimer(this.timerTransmitInterrupt, this.getBaudTimeout(this.nBaudTransmit));
 };
 
 /*

@@ -15,10 +15,9 @@ with a [PC11 High-Speed Paper Tape Reader/Punch](/devices/pdp11/pc11/), such as 
 - Attach the [Absolute Loader](absloader/) tape image, and load it with the Bootstrap Loader
 - Attach one of the "Absolute Format" tape images below, and load it with the Absolute Loader 
 
-This was the real-world process.  Fortunately, PDPjs machines include features that simplify the process.
-
-For starters, any "Absolute Format" tape (which should include all the tapes listed below) can be loaded directly
-into RAM using the machine's "Load" button instead of "Attach".  In most cases, this eliminates the first two steps.
+This mirrors the three-step "real world" process of loading paper tape software.  Moreover, any "Absolute
+Format" tape (which should include all the tapes listed below) can be loaded directly into RAM using the
+machine's "Load" button instead of "Attach".  In most cases, that eliminates the first two steps.
 
 Paper Tape Diagnostics
 ----------------------

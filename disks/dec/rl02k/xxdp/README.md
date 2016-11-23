@@ -1,27 +1,21 @@
 ---
 layout: page
-title: "XXDP+ Diagnostics Disk"
+title: "RL02K XXDP+ Diagnostics Disk"
 permalink: /disks/dec/rl02k/xxdp/
 ---
 
-XXDP+ Diagnostics Disk
-----------------------
+RL02K XXDP+ Diagnostics Disk
+----------------------------
 
-The XXDP+ Diagnostics disk described below contains a wealth of PDP-11 tests.  Tests that PDPjs has exercised
-include:
+### Boot
 
-- [EKBEE1: 11/70 MEMORY MANAGEMENT DIAGNOSTIC](ekbee1/) ([Demo](/devices/pdp11/machine/1170/panel/debugger/xxdp/))
-
-Running XXDP+ Diagnostics
--------------------------
-
-To boot the "XXDP+ Diagnostics" disk, start a [PDP-11/70](devices/pdp11/machine/1170/panel/debugger/) with an
-[RL11 Disk Controller](/devices/pdp11/rl11/), select the "XXDP+ Diagnostics" disk from the "Disk Drive Controls",
-click "Load", and wait for the message:
+To boot the RL02K "XXDP+ Diagnostics" disk, start a [PDP-11/70](/devices/pdp11/machine/1170/panel/debugger/) with an
+[RL11 Disk Controller](/devices/pdp11/rl11/), select the "XXDP+ Diagnostics" disk from the list of disks
+available for drive "RL0", click **Load**, and wait for the message:
 
 	Mounted disk "XXDP+ Diagnostics" in drive RL0
 
-Then start the machine (click "Run") and make sure the following prompt has been displayed:
+Then start the machine (click **Run**) and make sure the following prompt has been displayed:
 
 	PDP-11 MONITOR V1.0
 
@@ -39,6 +33,18 @@ At the prompt, type "BOOT RL0".  The following text should appear:
 	THIS IS XXDP+.  TYPE "H" OR "H/L" FOR HELP.
 
 	.
+
+NOTE: Any RL11 disk drive (RL0-RL3) can be used.  RL0 was selected for demonstration purposes.
+
+PDPjs has been tested with the following diagnostics:
+
+- [EKBAD0: 11/70 CPU DIAGNOSTIC (PART 1)](ekbad0/)
+- [EKBBF0: 11/70 CPU DIAGNOSTIC (PART 2)](ekbbf0/)
+- [EKBEE1: 11/70 MEMORY MANAGEMENT DIAGNOSTIC](ekbee1/)
+
+If you want to run these or any other diagnostic, try this [PDP-11/70 Test Machine](/devices/pdp11/machine/1170/panel/debugger/xxdp/).
+
+### Help
 
 The "H" (HELP) command displays the following information:
 
@@ -234,6 +240,8 @@ The "H" (HELP) command displays the following information:
 	          ---------------------
 	          EX - exit edit mode
 	<FF>
+
+### Directory
 
 The "D" (DIRECTORY) command displays the following information:
 

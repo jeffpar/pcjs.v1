@@ -90,7 +90,7 @@ DevicePDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
         device.interruptKW11();
     });
 
-    this.kw11.trigger = cpu.addTrigger(PDP11.KW11.VEC, PDP11.KW11.PRI);
+    this.kw11.trigger = cpu.addTrigger(PDP11.KW11.VEC, PDP11.KW11.PRI, MessagesPDP11.KW11);
 
     bus.addIOTable(this, DevicePDP11.UNIBUS_IOTABLE);
     bus.addResetHandler(this.reset.bind(this));
@@ -1165,6 +1165,10 @@ DevicePDP11.init = function()
             break;
         case 'rl11':
             device = new RL11(parmsDevice);
+            Component.bindComponentControls(device, eDevice, PDP11.APPCLASS);
+            break;
+        case 'rk11':
+            device = new RK11(parmsDevice);
             Component.bindComponentControls(device, eDevice, PDP11.APPCLASS);
             break;
         }

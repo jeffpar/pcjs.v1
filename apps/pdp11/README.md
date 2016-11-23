@@ -7,11 +7,13 @@ permalink: /apps/pdp11/
 PDP-11 Software
 ---------------
 
-We have archived the following selected PDP-11 software:
+PCjs has archived the following selected PDP-11 software:
 
 - [Boot Software](boot/)
 - [DEC PDP-11 Paper Tapes](tapes/), including [Paper Tape Diagnostics](tapes/diags/)
 
-Additional DEC diagnostics are also available on disk, such as:
+[DEC Disk Images](/disks/dec/) have also been archived, including:
 
-- [XXDP+ Diagnostics](/disks/dec/rl02k/xxdp/)
+- [RT-11 v4.0 (RK03)](/disks/dec/rk03/rt11v4/)
+- [XXDP+ Diagnostics (RK03)](/disks/dec/rk03/xxdp/)
+- [XXDP+ Diagnostics (RL02K)](/disks/dec/rl02k/xxdp/)

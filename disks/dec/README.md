@@ -9,6 +9,7 @@ DEC Disk Images
 
 The DEC disk images we have archived are organized by type: 
 
+* [RK03](rk03/)
 * RL01K
 * [RL02K](rl02k/)
 
