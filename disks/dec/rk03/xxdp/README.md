@@ -9,7 +9,7 @@ RK03 XXDP+ Diagnostics Disk
 
 ### Boot
 
-To boot the RK03 "XXDP+ Diagnostics" disk, start a [PDP-11/70](devices/pdp11/machine/1170/panel/debugger/) with an
+To boot the RK03 "XXDP+ Diagnostics" disk, start a [PDP-11/70](/devices/pdp11/machine/1170/panel/debugger/) with an
 [RK11 Disk Controller](/devices/pdp11/rk11/), select the "XXDP+ Diagnostics" disk from the list of disks
 available for drive "RK0", click **Load**, and wait for the message:
 

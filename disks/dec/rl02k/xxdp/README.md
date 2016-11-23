@@ -9,7 +9,7 @@ RL02K XXDP+ Diagnostics Disk
 
 ### Boot
 
-To boot the RL02K "XXDP+ Diagnostics" disk, start a [PDP-11/70](devices/pdp11/machine/1170/panel/debugger/) with an
+To boot the RL02K "XXDP+ Diagnostics" disk, start a [PDP-11/70](/devices/pdp11/machine/1170/panel/debugger/) with an
 [RL11 Disk Controller](/devices/pdp11/rl11/), select the "XXDP+ Diagnostics" disk from the list of disks
 available for drive "RL0", click **Load**, and wait for the message:
 

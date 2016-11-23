@@ -14,5 +14,6 @@ PCjs has archived the following selected PDP-11 software:
 
 [DEC Disk Images](/disks/dec/) have also been archived, including:
 
+- [RT-11 v4.0 (RK03)](/disks/dec/rk03/rt11v4/)
 - [XXDP+ Diagnostics (RK03)](/disks/dec/rk03/xxdp/)
 - [XXDP+ Diagnostics (RL02K)](/disks/dec/rl02k/xxdp/)
