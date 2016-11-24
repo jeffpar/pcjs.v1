@@ -1980,8 +1980,23 @@ CPUStatePDP11.prototype.checkStackLimit1145 = function(access, step, addr)
         /*
          * NOTE: The 11/70 CPU Instruction Exerciser does NOT expect reads to trigger a stack overflow,
          * so we check the access parameter.
+         *
+         * Moreover, TEST 40 of diagnostic EKBBF0 executes this instruction:
+         *
+         *      R0=177777 R1=032435 R2=152110 R3=000024 R4=153352 R5=001164
+         *      SP=177776 PC=020632 PS=000350 IR=000000 SL=000377 T0 N1 Z0 V0 C0
+         *      020632: 005016                 CLR   @SP                    ;cycles=7
+         *
+         * expecting a RED stack overflow trap.  Yes, using *any* addresses in the IOPAGE for the stack isn't
+         * a good idea, but who said it was illegal?  For now, we're going to restrict overflows to the highest
+         * address tested by the diagnostic (0xFFFE, aka the PSW), by making that address negative.
          */
+        if (addr >= 0xFFFE) addr |= ~0xFFFF;
         if ((access & PDP11.ACCESS.WRITE) && addr <= this.regSL) {
+            /*
+             * regSL can never fall below 0xFF, so this subtraction can never go negative, so this comparison
+             * is always safe.
+             */
             if (addr <= this.regSL - 32) {
                 this.trap(PDP11.TRAP.BUS, 0, PDP11.REASON.RED);
             } else {
