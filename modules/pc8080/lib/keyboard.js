@@ -33,6 +33,7 @@ if (NODE) {
     var web         = require("../../shared/lib/weblib");
     var Component   = require("../../shared/lib/component");
     var Keys        = require("../../shared/lib/keys");
+    var State       = require("../../shared/lib/state");
     var PC8080      = require("./defines");
     var ChipSet8080 = require("./chipset");
     var Messages8080= require("./messages");
@@ -68,7 +69,7 @@ function Keyboard8080(parmsKbd)
 
 Component.subclass(Keyboard8080);
 
-Keyboard8080.MINPRESSTIME = 100;            // 100ms
+Keyboard8080.MINPRESSTIME = 50;            // minimum milliseconds to wait before auto-releasing keys
 
 /**
  * Alternate keyCode mappings to support popular "WASD"-style directional-key mappings.
@@ -101,7 +102,107 @@ Keyboard8080.SI1978 = {
 
 Keyboard8080.VT100 = {
     MODEL:          100.0,
-    KEYMAP: {},
+    KEYMAP: {
+        /*
+         * Map of host key codes to VT100 key addresses (7-bit values representing key positions on the VT100).
+         *
+         * NOTE: The VT100 keyboard has both BACKSPACE and DELETE keys, whereas modern keyboards generally only
+         * have DELETE.  And sadly, when you press DELETE, your modern keyboard and/or modern browser is reporting
+         * it as keyCode 8: the code for BACKSPACE, aka CTRL-H.  You have to press a modified DELETE key to get
+         * the actual DELETE keyCode of 127.
+         *
+         * We resolve this below by mapping KEYCODE.BS (8) to VT100 keyCode DELETE (0x03) and KEYCODE.DEL (127)
+         * to VT100 keyCode BACKSPACE (0x33).  So, DELETE is BACKSPACE and BACKSPACE is DELETE.  Fortunately, this
+         * confusion is all internal, because your physical key is (or should be) labeled DELETE, so the fact that
+         * the browser is converting it to BACKSPACE and that we're converting BACKSPACE back into DELETE is
+         * something most people don't need to worry their heads about.
+         *
+         * ES6 ALERT: As you can see below, I've finally started using computed property names.
+         */
+        [Keys.KEYCODE.BS]:      0x03,
+        [Keys.ASCII.P]:         0x05,
+        [Keys.ASCII.O]:         0x06,
+        [Keys.ASCII.Y]:         0x07,
+        [Keys.ASCII.T]:         0x08,
+        [Keys.ASCII.W]:         0x09,
+        [Keys.ASCII.Q]:         0x0A,
+        [Keys.KEYCODE.RIGHT]:   0x10,
+        [Keys.KEYCODE.RBRACK]:  0x14,
+        [Keys.KEYCODE.LBRACK]:  0x15,
+        [Keys.ASCII.I]:         0x16,
+        [Keys.ASCII.U]:         0x17,
+        [Keys.ASCII.R]:         0x18,
+        [Keys.ASCII.E]:         0x19,
+        [Keys.KEYCODE.ONE]:     0x1A,
+        [Keys.KEYCODE.LEFT]:    0x20,
+        [Keys.KEYCODE.DOWN]:    0x22,
+        [Keys.KEYCODE.F6]:      0x23,   // aka BREAK
+        [Keys.KEYCODE.PAUSE]:   0x23,   // aka BREAK
+        [Keys.KEYCODE.BQUOTE]:  0x24,
+        [Keys.KEYCODE.DASH]:    0x25,
+        [Keys.KEYCODE.NINE]:    0x26,
+        [Keys.KEYCODE.SEVEN]:   0x27,
+        [Keys.KEYCODE.FOUR]:    0x28,
+        [Keys.KEYCODE.THREE]:   0x29,
+        [Keys.KEYCODE.ESC]:     0x2A,
+        [Keys.KEYCODE.UP]:      0x30,
+        [Keys.KEYCODE.F3]:      0x31,   // aka PF3
+        [Keys.KEYCODE.F1]:      0x32,   // aka PF1
+        [Keys.KEYCODE.DEL]:     0x33,
+        [Keys.KEYCODE.EQUALS]:  0x34,
+        [Keys.KEYCODE.ZERO]:    0x35,
+        [Keys.KEYCODE.EIGHT]:   0x36,
+        [Keys.KEYCODE.SIX]:     0x37,
+        [Keys.KEYCODE.FIVE]:    0x38,
+        [Keys.KEYCODE.TWO]:     0x39,
+        [Keys.KEYCODE.TAB]:     0x3A,
+        [Keys.KEYCODE.NUM_7]:   0x40,
+        [Keys.KEYCODE.F4]:      0x41,   // aka PF4
+        [Keys.KEYCODE.F2]:      0x42,   // aka PF2
+        [Keys.KEYCODE.NUM_0]:   0x43,
+        [Keys.KEYCODE.F7]:      0x44,   // aka LINE FEED
+        [Keys.KEYCODE.BSLASH]:  0x45,
+        [Keys.ASCII.L]:         0x46,
+        [Keys.ASCII.K]:         0x47,
+        [Keys.ASCII.G]:         0x48,
+        [Keys.ASCII.F]:         0x49,
+        [Keys.ASCII.A]:         0x4A,
+        [Keys.KEYCODE.NUM_8]:   0x50,
+        [Keys.KEYCODE.NUM_CR]:  0x51,
+        [Keys.KEYCODE.NUM_2]:   0x52,
+        [Keys.KEYCODE.NUM_1]:   0x53,
+        [Keys.KEYCODE.QUOTE]:   0x55,
+        [Keys.KEYCODE.SEMI]:    0x56,
+        [Keys.ASCII.J]:         0x57,
+        [Keys.ASCII.H]:         0x58,
+        [Keys.ASCII.D]:         0x59,
+        [Keys.ASCII.S]:         0x5A,
+        [Keys.KEYCODE.NUM_DEL]: 0x60,   // keypad period
+        [Keys.KEYCODE.F5]:      0x61,   // aka KEYPAD COMMA
+        [Keys.KEYCODE.NUM_5]:   0x62,
+        [Keys.KEYCODE.NUM_4]:   0x63,
+        [Keys.KEYCODE.CR]:      0x64,   // TODO: Figure out why the Technical Manual lists CR at both 0x04 and 0x64
+        [Keys.KEYCODE.PERIOD]:  0x65,
+        [Keys.KEYCODE.COMMA]:   0x66,
+        [Keys.ASCII.N]:         0x67,
+        [Keys.ASCII.B]:         0x68,
+        [Keys.ASCII.X]:         0x69,
+        [Keys.KEYCODE.F8]:      0x6A,   // aka NO SCROLL
+        [Keys.KEYCODE.NUM_9]:   0x70,
+        [Keys.KEYCODE.NUM_3]:   0x71,
+        [Keys.KEYCODE.NUM_6]:   0x72,
+        [Keys.KEYCODE.NUM_SUB]: 0x73,   // aka KEYPAD MINUS
+        [Keys.KEYCODE.SLASH]:   0x75,
+        [Keys.ASCII.M]:         0x76,
+        [Keys.ASCII[' ']]:      0x77,
+        [Keys.ASCII.V]:         0x78,
+        [Keys.ASCII.C]:         0x79,
+        [Keys.ASCII.Z]:         0x7A,
+        [Keys.KEYCODE.F9]:      0x7B,   // aka SET-UP
+        [Keys.KEYCODE.CTRL]:    0x7C,
+        [Keys.KEYCODE.SHIFT]:   0x7D,   // either shift key (doesn't matter)
+        [Keys.KEYCODE.CAPS_LOCK]: 0x7E
+    },
     ALTCODES: {},
     LEDCODES: {},
     SOFTCODES: {
@@ -146,104 +247,6 @@ Keyboard8080.VT100 = {
     },
     KEYLAST:        0x7F            // special end-of-scan key address (all valid key addresses are < KEYLAST)
 };
-
-/*
- * Table mapping host key codes to VT100 key addresses (7-bit values representing key positions on the VT100)
- *
- * NOTE: The VT100 keyboard has both BACKSPACE and DELETE keys, whereas modern keyboards generally only
- * have DELETE.  And sadly, when you press DELETE, your modern keyboard and/or modern browser is reporting
- * it as keyCode 8: the code for BACKSPACE, aka CTRL-H.  You have to press a modified DELETE key to get
- * the actual DELETE keyCode of 127.
- *
- * We resolve this below by mapping KEYCODE.BS (8) to VT100 keyCode DELETE (0x03) and KEYCODE.DEL (127)
- * to VT100 keyCode BACKSPACE (0x33).  So, DELETE is BACKSPACE and BACKSPACE is DELETE.  Fortunately, this
- * confusion is all internal, because your physical key is (or should be) labeled DELETE, so the fact that
- * the browser is converting it to BACKSPACE and that we're converting BACKSPACE back into DELETE is
- * something most people don't need to worry their heads about.
- */
-Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.BS]      =   0x03;
-Keyboard8080.VT100.KEYMAP[Keys.ASCII.P]         =   0x05;
-Keyboard8080.VT100.KEYMAP[Keys.ASCII.O]         =   0x06;
-Keyboard8080.VT100.KEYMAP[Keys.ASCII.Y]         =   0x07;
-Keyboard8080.VT100.KEYMAP[Keys.ASCII.T]         =   0x08;
-Keyboard8080.VT100.KEYMAP[Keys.ASCII.W]         =   0x09;
-Keyboard8080.VT100.KEYMAP[Keys.ASCII.Q]         =   0x0A;
-Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.RIGHT]   =   0x10;
-Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.RBRACK]  =   0x14;
-Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.LBRACK]  =   0x15;
-Keyboard8080.VT100.KEYMAP[Keys.ASCII.I]         =   0x16;
-Keyboard8080.VT100.KEYMAP[Keys.ASCII.U]         =   0x17;
-Keyboard8080.VT100.KEYMAP[Keys.ASCII.R]         =   0x18;
-Keyboard8080.VT100.KEYMAP[Keys.ASCII.E]         =   0x19;
-Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.ONE]     =   0x1A;
-Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.LEFT]    =   0x20;
-Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.DOWN]    =   0x22;
-Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.F6]      =   0x23;   // aka BREAK
-Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.PAUSE]   =   0x23;   // aka BREAK
-Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.BQUOTE]  =   0x24;
-Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.DASH]    =   0x25;
-Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.NINE]    =   0x26;
-Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.SEVEN]   =   0x27;
-Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.FOUR]    =   0x28;
-Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.THREE]   =   0x29;
-Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.ESC]     =   0x2A;
-Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.UP]      =   0x30;
-Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.F3]      =   0x31;   // aka PF3
-Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.F1]      =   0x32;   // aka PF1
-Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.DEL]     =   0x33;
-Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.EQUALS]  =   0x34;
-Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.ZERO]    =   0x35;
-Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.EIGHT]   =   0x36;
-Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.SIX]     =   0x37;
-Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.FIVE]    =   0x38;
-Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.TWO]     =   0x39;
-Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.TAB]     =   0x3A;
-Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.NUM_7]   =   0x40;
-Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.F4]      =   0x41;   // aka PF4
-Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.F2]      =   0x42;   // aka PF2
-Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.NUM_0]   =   0x43;
-Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.F7]      =   0x44;   // aka LINE FEED
-Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.BSLASH]  =   0x45;
-Keyboard8080.VT100.KEYMAP[Keys.ASCII.L]         =   0x46;
-Keyboard8080.VT100.KEYMAP[Keys.ASCII.K]         =   0x47;
-Keyboard8080.VT100.KEYMAP[Keys.ASCII.G]         =   0x48;
-Keyboard8080.VT100.KEYMAP[Keys.ASCII.F]         =   0x49;
-Keyboard8080.VT100.KEYMAP[Keys.ASCII.A]         =   0x4A;
-Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.NUM_8]   =   0x50;
-Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.NUM_CR]  =   0x51;
-Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.NUM_2]   =   0x52;
-Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.NUM_1]   =   0x53;
-Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.QUOTE]   =   0x55;
-Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.SEMI]    =   0x56;
-Keyboard8080.VT100.KEYMAP[Keys.ASCII.J]         =   0x57;
-Keyboard8080.VT100.KEYMAP[Keys.ASCII.H]         =   0x58;
-Keyboard8080.VT100.KEYMAP[Keys.ASCII.D]         =   0x59;
-Keyboard8080.VT100.KEYMAP[Keys.ASCII.S]         =   0x5A;
-Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.NUM_DEL] =   0x60;   // keypad period
-Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.F5]      =   0x61;   // aka KEYPAD COMMA
-Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.NUM_5]   =   0x62;
-Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.NUM_4]   =   0x63;
-Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.CR]      =   0x64;   // TODO: Figure out why the Technical Manual lists CR at both 0x04 and 0x64
-Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.PERIOD]  =   0x65;
-Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.COMMA]   =   0x66;
-Keyboard8080.VT100.KEYMAP[Keys.ASCII.N]         =   0x67;
-Keyboard8080.VT100.KEYMAP[Keys.ASCII.B]         =   0x68;
-Keyboard8080.VT100.KEYMAP[Keys.ASCII.X]         =   0x69;
-Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.F8]      =   0x6A;   // aka NO SCROLL
-Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.NUM_9]   =   0x70;
-Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.NUM_3]   =   0x71;
-Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.NUM_6]   =   0x72;
-Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.NUM_SUB] =   0x73;   // aka KEYPAD MINUS
-Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.SLASH]   =   0x75;
-Keyboard8080.VT100.KEYMAP[Keys.ASCII.M]         =   0x76;
-Keyboard8080.VT100.KEYMAP[Keys.ASCII[' ']]      =   0x77;
-Keyboard8080.VT100.KEYMAP[Keys.ASCII.V]         =   0x78;
-Keyboard8080.VT100.KEYMAP[Keys.ASCII.C]         =   0x79;
-Keyboard8080.VT100.KEYMAP[Keys.ASCII.Z]         =   0x7A;
-Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.F9]      =   0x7B;   // aka SET-UP
-Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.CTRL]    =   0x7C;
-Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.SHIFT]   =   0x7D;   // either shift key (doesn't matter)
-Keyboard8080.VT100.KEYMAP[Keys.KEYCODE.CAPS_LOCK] = 0x7E;
 
 Keyboard8080.VT100.LEDCODES = {
     'l4':       Keyboard8080.VT100.STATUS.LED4,
@@ -381,7 +384,14 @@ Keyboard8080.prototype.initBus = function(cmp, bus, cpu, dbg)
     this.cmp = cmp;
     this.cpu = cpu;
     this.dbg = dbg;     // NOTE: The "dbg" property must be set for the message functions to work
+
+    var kbd = this;
+    this.timerReleaseKeys = this.cpu.addTimer(function() {
+        kbd.checkSoftKeysToRelease();
+    });
+
     this.chipset = /** @type {ChipSet8080} */ (cmp.getMachineComponent("ChipSet"));
+
     bus.addPortInputTable(this, this.config.portsInput);
     bus.addPortOutputTable(this, this.config.portsOutput);
 };
@@ -710,8 +720,13 @@ Keyboard8080.prototype.checkSoftKeysToRelease = function()
         i++;
     }
     if (msDelayMin >= 0) {
-        var kbd = this;
-        setTimeout(function() { kbd.checkSoftKeysToRelease(); }, msDelayMin);
+        /*
+         * Replaced the klunky browser setTimeout() call with our own timer service.
+         *
+         *      var kbd = this;
+         *      setTimeout(function() { kbd.checkSoftKeysToRelease(); }, msDelayMin);
+         */
+        this.cpu.setTimer(this.timerReleaseKeys, msDelayMin);
     }
 };
 
