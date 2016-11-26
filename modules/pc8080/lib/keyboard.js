@@ -353,6 +353,9 @@ Keyboard8080.prototype.setBinding = function(sHTMLType, sBinding, control, sValu
             control.onkeypress = function onKeyPress(event) {
                 return kbd.onKeyPress(event);
             };
+            control.onpaste = function onKeyPaste(event) {
+                return kbd.onPaste(event);
+            };
             return true;
 
         default:
@@ -422,6 +425,8 @@ Keyboard8080.prototype.initBus = function(cmp, bus, cpu, dbg)
     });
 
     this.chipset = /** @type {ChipSet8080} */ (cmp.getMachineComponent("ChipSet"));
+
+    this.serial = /** @type {SerialPort8080} */ (cmp.getMachineComponent("SerialPort"));
 
     bus.addPortInputTable(this, this.config.portsInput);
     bus.addPortOutputTable(this, this.config.portsOutput);
@@ -612,11 +617,17 @@ Keyboard8080.prototype.checkModifierKeys = function(softCode, fDown, fRight)
 {
     var bit = 0;
     switch(softCode) {
+    case Keys.KEYCODE.SHIFT:
+        bit = fRight? Keyboard8080.STATE.RSHIFT : Keyboard8080.STATE.SHIFT;
+        break;
     case Keys.KEYCODE.CTRL:
         bit = fRight? Keyboard8080.STATE.RCTRL : Keyboard8080.STATE.CTRL;
         break;
-    case Keys.KEYCODE.SHIFT:
-        bit = fRight? Keyboard8080.STATE.RSHIFT : Keyboard8080.STATE.SHIFT;
+    case Keys.KEYCODE.ALT:
+        bit = fRight? Keyboard8080.STATE.RALT : Keyboard8080.STATE.ALT;
+        break;
+    case Keys.KEYCODE.CMD:
+        bit = fRight? Keyboard8080.STATE.RCMD : Keyboard8080.STATE.CMD;
         break;
     case Keys.KEYCODE.CAPS_LOCK:
         bit = Keyboard8080.STATE.CAPS_LOCK;
@@ -674,19 +685,22 @@ Keyboard8080.prototype.onKeyDown = function(event, fDown)
          * for a new pair of services to eventually be implemented: simulateKeysDown() and simulateKeysUp().
          */
         this.checkModifierKeys(softCode, fDown, event.location == Keys.LOCATION.RIGHT);
-        fPass = this.onSoftKeyDown(softCode, fDown);
-        /*
-         * As onKeyPress() explains, the only key presses we're interested in are letters, which provide
-         * an important clue regarding the CAPS-LOCK state.  For all other keys, we call preventDefault(),
-         * which "suppresses" the keyPress event.
-         */
-        if (softCode < Keys.ASCII.A || softCode > Keys.ASCII.Z) {
-            event.preventDefault();
+
+        if (!event.metaKey) {
+            fPass = this.onSoftKeyDown(softCode, fDown);
+            /*
+             * As onKeyPress() explains, the only key presses we're interested in are letters, which provide
+             * an important clue regarding the CAPS-LOCK state.  For all other keys, we call preventDefault(),
+             * which "suppresses" the keyPress event.
+             */
+            if (!(softCode >= Keys.ASCII.A && softCode <= Keys.ASCII.Z)) {
+                event.preventDefault();
+            }
         }
     }
 
     if (!COMPILED && this.messageEnabled(Messages8080.KEYS)) {
-        this.printMessage("onKey" + (fDown? "Down" : "Up") + "(" + keyCode + "): softCode=" + softCode + ", pass=" + (fPass? "true" : "false"), true);
+        this.printMessage("onKey" + (fDown? "Down" : "Up") + "(" + keyCode + "): softCode=" + softCode + ", pass=" + fPass, true);
     }
 
     return fPass;
@@ -716,6 +730,39 @@ Keyboard8080.prototype.onKeyPress = function(event)
             this.bitsState &= ~Keyboard8080.STATE.CAPS_LOCK;
             this.onSoftKeyDown(Keys.KEYCODE.CAPS_LOCK, false);
             this.updateLEDs();
+        }
+    }
+    return true;
+};
+
+/**
+ * onPaste(event)
+ *
+ * @this {Keyboard8080}
+ * @param {Object} event
+ * @return {boolean} true to pass the event along, false to consume it
+ */
+Keyboard8080.prototype.onPaste = function(event) {
+    /*
+     * TODO: In a perfect world, we would have implemented simulateKeysDown() and simulateKeysUp(),
+     * which would transform any given text into the appropriate keystrokes.  But for now, we're going
+     * to leapfrog all that and try invoking the SerialPort's sendData() function, which if available,
+     * is nothing more than a call into a connected machine's receiveData() function.
+     *
+     * Besides, paste functionality doesn't seem to be consistently implemented across all browsers
+     * (partly out of security concerns, apparently) so it may not make sense to expend much more
+     * effort on this right now.  If you want to paste a lot of text into a machine, you're better off
+     * pasting into a machine that's been configured to use a textarea as part of its Control Panel.
+     * A visible textarea seems to have less issues than the hidden textarea overlaid on top of our
+     * Video display.
+     */
+    if (this.serial && this.serial.sendData) {
+        if (event.stopPropagation) event.stopPropagation();
+        if (event.preventDefault) event.preventDefault();
+        var clipboardData = event.clipboardData || window.clipboardData;
+        if (clipboardData) {
+            this.serial.transmitData(clipboardData.getData('Text'));
+            return false;
         }
     }
     return true;
