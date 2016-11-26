@@ -934,8 +934,8 @@ CPUStatePDP11.prototype.checkInterrupts = function()
     }
     else if (this.opFlags & PDP11.OPFLAG.IRQ_DELAY) {
         /*
-         * We know that IRQ (bit 1) is clear, so since IRQ_DELAY (bit 0) is set, incrementing opFlags
-         * will transform IRQ_DELAY into IRQ, without affecting any other (higher) bits.
+         * We know that IRQ (bit 2) is clear, so since IRQ_DELAY (bit 0) is set, incrementing opFlags
+         * will eventually transform IRQ_DELAY into IRQ, without affecting any other (higher) bits.
          */
         this.opFlags++;
     }
@@ -1098,20 +1098,12 @@ CPUStatePDP11.prototype.setPSW = function(newPSW)
     this.regPSW = newPSW;
 
     /*
-     * Trigger a call to checkInterrupts(), just in case.
-     *
-     * TODO: I think this is overdone; if you set a breakpoint on checkInterrupts(), you'll see that a significant
-     * percentage of calls do nothing.  For example, you'll usually see a spurious checkInterrupts() immediately after
-     * an interrupt has been dispatched, because it's dispatched via trap(), and trap() calls setPSW().
-     *
-     * I mean, sure, it's POSSIBLE that the new PSW loaded by trap() actually set a lower priority, allowing a lower
-     * priority interrupt to immediately be acknowledged.  But perhaps we should be a bit more rigorous here.
-     *
-     * For example, we could avoid setting IRQ unless 1) there's actually an active IRQ (ie, irqNext
-     * is not null) or 2) an optional fCheckInterrupts flag is passed to us, because the caller has some knowledge
-     * that priority could be changing.  Just throwing out some ideas....
+     * Trigger a call to checkInterrupts(), just in case.  If there's an active IRQ, then setting
+     * OPFLAG.IRQ is a no-brainer, but even if not, we set IRQ_DELAY in case the priority was lowered
+     * enough to permit a programmed interrupt (via regPIR).
      */
-    this.opFlags |= PDP11.OPFLAG.IRQ;
+    this.opFlags &= ~PDP11.OPFLAG.IRQ;
+    this.opFlags |= (this.irqNext? PDP11.OPFLAG.IRQ : PDP11.OPFLAG.IRQ_DELAY);
 };
 
 /**
@@ -1161,10 +1153,7 @@ CPUStatePDP11.prototype.setPIR = function(newPIR)
         do {
             newPIR += PDP11.PIR.PIA_INC;
         } while (bits >>= 1);
-        /*
-         * TODO: Which should we set: IRQ or IRQ_DELAY?
-         */
-        this.opFlags |= PDP11.OPFLAG.IRQ;
+        this.opFlags |= PDP11.OPFLAG.IRQ_DELAY;
     }
     this.regPIR = newPIR;
 };
@@ -1431,13 +1420,13 @@ CPUStatePDP11.prototype.trap = function(vector, flag, reason)
      * trick that the SPL instruction uses: setting IRQ_DELAY instead of IRQ, which effectively delays
      * IRQ detection for one instruction, which is just long enough to allow the diagnostic to pass.
      */
-    this.opFlags &= ~(flag | PDP11.OPFLAG.TRAP_TF | PDP11.OPFLAG.IRQ);
-    this.opFlags |= PDP11.OPFLAG.IRQ_DELAY | PDP11.OPFLAG.TRAP;
+    this.opFlags &= ~(flag | PDP11.OPFLAG.TRAP_TF | PDP11.OPFLAG.IRQ_MASK);
+    this.opFlags |= PDP11.OPFLAG.IRQ_DELAY | PDP11.OPFLAG.TRAP_LAST;
 
     this.trapPSW = -1;                                  // reset flag that we have a trap within a trap
 
     /*
-     * These next properties (in conjunction with setting PDP11.OPFLAG.TRAP) are purely an aid for the Debugger;
+     * These next properties (in conjunction with setting PDP11.OPFLAG.TRAP_LAST) are purely an aid for the Debugger;
      * see getTrapStatus().
      */
     this.trapVector = vector;
@@ -1481,7 +1470,7 @@ CPUStatePDP11.prototype.trapReturn = function()
  */
 CPUStatePDP11.prototype.getTrapStatus = function()
 {
-    return (this.opFlags & PDP11.OPFLAG.TRAP)? (this.trapVector | this.trapReason << 8) : 0;
+    return (this.opFlags & PDP11.OPFLAG.TRAP_LAST)? (this.trapVector | this.trapReason << 8) : 0;
 };
 
 /**

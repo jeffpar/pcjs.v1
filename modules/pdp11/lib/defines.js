@@ -261,17 +261,17 @@ var PDP11 = {
      * Internal operation state flags
      */
     OPFLAG: {
-        IRQ_DELAY:  0x01,       // set IRQ on next check (set by SPL and traps)
-        IRQ:        0x02,       // call checkInterrupts()
-        IRQ_MASK:   0x03,
-        WAIT:       0x04,       // WAIT operation in progress
-        TRAP:       0x08,       // set if last operation was a trap (see trapLast for the vector, and trapReason for the reason)
-        TRAP_TF:    0x10,       // aka PDP11.PSW.TF (WARNING: do not change this bit, or you will likely break opRTI())
-        TRAP_SP:    0x20,       // set for a deferred BUS trap (due to a "yellow" stack overflow condition)
-        TRAP_MMU:   0x40,
-        TRAP_MASK:  0x70,
-        NO_FLAGS:   0x80,       // set whenever the PSW is written directly, requiring all updateXXXFlags() functions to leave flags unchanged
-        PRESERVE:   0x07        // OPFLAG bits to preserve prior to the next instruction
+        IRQ_DELAY:  0x0001,     // incremented until it becomes IRQ (set by SPL and traps)
+        IRQ:        0x0002,     // time to call checkInterrupts()
+        IRQ_MASK:   0x0003,
+        WAIT:       0x0008,     // WAIT operation in progress
+        PRESERVE:   0x000F,     // OPFLAG bits to preserve prior to the next instruction
+        TRAP_TF:    0x0010,     // aka PDP11.PSW.TF (WARNING: do not change this bit, or you will likely break opRTI())
+        TRAP_SP:    0x0020,     // set for a deferred BUS trap (due to a "yellow" stack overflow condition)
+        TRAP_MMU:   0x0040,
+        TRAP_MASK:  0x0070,
+        TRAP_LAST:  0x0080,     // set if last operation was a trap (see trapLast for the vector, and trapReason for the reason)
+        NO_FLAGS:   0x0100      // set whenever the PSW is written directly, requiring all updateXXXFlags() functions to leave flags unchanged
     },
     /*
      * Opcode reg (opcode bits 2-0)

@@ -1739,6 +1739,7 @@ PDP11.opSPL = function(opCode)
     if (!(this.regPSW & PDP11.PSW.CMODE)) {
         this.regPSW = (this.regPSW & ~(PDP11.PSW.UNUSED | PDP11.PSW.PRI)) | ((opCode & 0x7) << PDP11.PSW.SHIFT.PRI);
         this.opFlags |= PDP11.OPFLAG.IRQ_DELAY;
+        this.opFlags &= ~PDP11.OPFLAG.IRQ;
     }
     this.nStepCycles -= (4 + 1);
 };
