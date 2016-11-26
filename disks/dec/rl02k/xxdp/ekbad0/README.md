@@ -12,22 +12,22 @@ From the
 p. 1-6:
 
 	11/70 CPU DIAGNOSTIC PART 1
-
+	
 	ABSTRACT:
-
-		This diagnostic is the first part of the 11/70 CPU, it designed to detect and
-		report logic faults in the CPU. Any fault detected in this program causes the
-		program to "HALT". After this, run the second part of the CPU test, EKBBF0.
-
+	
+	    This diagnostic is the first part of the 11/70 CPU, it designed to detect and
+	    report logic faults in the CPU. Any fault detected in this program causes the
+	    program to "HALT". After this, run the second part of the CPU test, EKBBF0.
+	
 	OPERATING PROCEDURES:
 	        Set the switch register by <CONTROL P> (RD console)
 	    CON = xxxxxxWZ
 	        (W = deposit xxxxxx into console switch register)
-			(R = read and type console switch settings)
-			(Z = switch console terminal back to program)
-
+	        (R = read and type console switch settings)
+	        (Z = switch console terminal back to program)
+	
 	    .R EKBAD0
-
+	
 	SWITCH SETTINGS
 	    SW15 = 1 halt on error
 	    SW14 = 1 loop on test
@@ -51,4 +51,3 @@ on [bitsavers.org](http://bitsavers.trailing-edge.com/pdf/dec/pdp11/microfiche/f
 	PRODUCT NAME: CEKBAD0 11/70 CPU #1
 	DATE CREATED: MAY, 1980
 	MAINTAINER:   DIAGNOSTIC ENGINEERING
-
