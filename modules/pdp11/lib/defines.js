@@ -158,7 +158,7 @@ var PDP11 = {
         MASK:       0x3
     },
     /*
-     * Processor Status Word definitions (stored in regPSW)
+     * Processor Status Word (stored in regPSW) at 177776
      */
     PSW: {
         CF:         0x0001,     // bit  0     (000001)  Carry Flag
@@ -183,6 +183,19 @@ var PDP11 = {
             PRI:    5,
             PMODE:  12,
             CMODE:  14
+        }
+    },
+    /*
+     * Program Interrupt Register (stored in regPIR) at 177772
+     *
+     * The PIA bits at 5-7 are designed to align with PRI bits 5-7 in the PSW.
+     */
+    PIR: {
+        BITS:       0xFE00,     // bits 9-15 correspond to interrupt requests 1-7
+        PIA:        0x00EE,     // the PIA bits contain two copies of the corresponding interrupt request priority
+        PIA_INC:    0x0022,     // both sets of PIA bits can be incremented with this constant
+        SHIFT: {
+            BITS:   9
         }
     },
     /*
@@ -248,9 +261,9 @@ var PDP11 = {
      * Internal operation state flags
      */
     OPFLAG: {
-        INTQ_DELAY: 0x01,       // set INTQ on next check (set by SPL and traps)
-        INTQ:       0x02,       // call checkInterrupts()
-        INTQ_MASK:  0x03,
+        IRQ_DELAY:  0x01,       // set IRQ on next check (set by SPL and traps)
+        IRQ:        0x02,       // call checkInterrupts()
+        IRQ_MASK:   0x03,
         WAIT:       0x04,       // WAIT operation in progress
         TRAP:       0x08,       // set if last operation was a trap (see trapLast for the vector, and trapReason for the reason)
         TRAP_TF:    0x10,       // aka PDP11.PSW.TF (WARNING: do not change this bit, or you will likely break opRTI())
@@ -492,10 +505,10 @@ var PDP11 = {
         PPS:        0o177554,   //                                  PC11 Punch Status Register
         PPB:        0o177556,   //                                  PC11 Punch Buffer Register
 
-        RCSR:       0o177560,   //                                  DL11 Display Terminal: Receiver Status Register
-        RBUF:       0o177562,   //                                  DL11 Display Terminal: Receiver Data Buffer Register
-        XCSR:       0o177564,   //                                  DL11 Display Terminal: Transmitter Status Register
-        XBUF:       0o177566,   //                                  DL11 Display Terminal: Transmitter Data Buffer Register
+        RCSR:       0o177560,   //                                  DL11 Receiver Status Register
+        RBUF:       0o177562,   //                                  DL11 Receiver Data Buffer Register
+        XCSR:       0o177564,   //                                  DL11 Transmitter Status Register
+        XBUF:       0o177566,   //                                  DL11 Transmitter Data Buffer Register
 
         CNSW:       0o177570,   //                                  Console (Front Panel) Switch/Display Register
 
@@ -578,9 +591,9 @@ var PDP11 = {
     },
     DL11: {                     // Serial Line Interface (program compatible with the KL11 for control of console teleprinters)
         PRI:        4,
-        RVEC:       0o60,
-        XVEC:       0o64,
-        RCSR: {                 // 177560
+        RVEC:       0o060,
+        XVEC:       0o064,
+        RCSR: {                 // 177560: DL11 Receiver Status Register
             RE:     0x0001,     // Reader Enable (W/O)
             DTR:    0x0002,     // Data Terminal Ready (R/W)
             RTS:    0x0004,     // Request To Send (R/W)
@@ -598,14 +611,14 @@ var PDP11 = {
             WMASK:  0x006F,     // bits writable
             BAUD:   9600
         },
-        RBUF: {                 // 177562
+        RBUF: {                 // 177562: DL11 Receiver Data Buffer Register
             DATA:   0x00ff,     // Received Data (R/O)
             PARITY: 0x1000,     // Received Data Parity (R/O)
             FE:     0x2000,     // Framing Error (R/O)
             OE:     0x4000,     // Overrun Error (R/O)
             ERROR:  0x8000      // Error (R/O)
         },
-        XCSR: {                 // 177564
+        XCSR: {                 // 177564: DL11 Transmitter Status Register
             BREAK:  0x0001,     // BREAK (R/W)
             MAINT:  0x0004,     // Maintenance (R/W)
             TIE:    0x0040,     // Transmitter Interrupt Enable (R/W)
@@ -614,7 +627,7 @@ var PDP11 = {
             WMASK:  0x0045,
             BAUD:   9600
         },
-        XBUF: {                 // 177566
+        XBUF: {                 // 177566: DL11 Transmitter Data Buffer Register
             DATA:   0x00FF      // Transmitted Data (W/O)       TODO: Determine why pdp11.js effectively defined this as 0x7F
         }
     },
@@ -622,7 +635,7 @@ var PDP11 = {
         PRI:        6,
         VEC:        0o100,
         DELAY:      0,
-        LKS: {
+        LKS: {                  // 177546: KW11-L Clock Status
             IE:     0x0040,     // Interrupt Enable
             MON:    0x0080,     // Monitor
             MASK:   0x00C0      // these are the only bits that can read or written
@@ -630,9 +643,9 @@ var PDP11 = {
     },
     PC11: {                     // High Speed Reader & Punch (PR11 is a Reader-only unit)
         PRI:        4,          // NOTE: reader has precedence over punch
-        RVEC:       0o70,       // reader vector
-        PVEC:       0o74,       // punch vector
-        PRS: {
+        RVEC:       0o070,      // reader vector
+        PVEC:       0o074,      // punch vector
+        PRS: {                  // 177550: PC11 (and PR11) Reader Status Register
             RE:     0x0001,     // Reader Enable (W/O)
             RIE:    0x0040,     // Reader Interrupt Enable (allows the DONE and ERROR bits to trigger an interrupt)
             DONE:   0x0080,     // Done (R/O)
@@ -643,15 +656,20 @@ var PDP11 = {
             WMASK:  0x0041,     // bits writable
             BAUD:   3600
         },
-        PRB: {
+        PRB: {                  // 177552: PC11 (and PR11) Reader Buffer Register
             MASK:   0x00FF      // Data
         },
-        PPS: {
+        PPS: {                  // 177554: PC11 Punch Status Register
             /*
              * TODO: Flesh this out if/when we add Paper Tape Punch support
              */
             BAUD:   600
         },
+        PPB: {                  // 177556: PC11 Punch Buffer Register
+            /*
+             * TODO: Flesh this out if/when we add Paper Tape Punch support
+             */
+        }
     },
     RK11: {                     // RK11 Disk Controller
         PRI:        5,
@@ -826,6 +844,15 @@ var PDP11 = {
             RDATA:  0b1100,     // Read Data
             RDNC:   0b1110      // Read Data without Header Check
         }
+    },
+    VECTORS: {
+        0o060:  "DL11.RCSR",
+        0o064:  "DL11.XCSR",
+        0o070:  "PC11.PRS",
+        0o074:  "PC11.PPS",
+        0o100:  "KW11",
+        0o160:  "RL11",
+        0o220:  "RK11"
     }
 };
 

@@ -290,7 +290,7 @@ RK11.prototype.initBus = function(cmp, bus, cpu, dbg)
      */
     this.initController();
 
-    this.triggerInterrupt = this.cpu.addTrigger(PDP11.RK11.VEC, PDP11.RK11.PRI, MessagesPDP11.RK11);
+    this.irq = this.cpu.addIRQ(PDP11.RK11.VEC, PDP11.RK11.PRI, MessagesPDP11.RK11);
 
     bus.addIOTable(this, RK11.UNIBUS_IOTABLE);
     bus.addResetHandler(this.reset.bind(this));
@@ -950,9 +950,7 @@ RK11.prototype.processCommand = function()
     if (fInterrupt) {
         this.csr &= ~PDP11.RK11.RKCS.GO;
         this.csr |= PDP11.RK11.RKCS.CRDY;
-        if (this.csr & PDP11.RK11.RKCS.IE) {
-            this.cpu.setTrigger(this.triggerInterrupt);
-        }
+        if (this.csr & PDP11.RK11.RKCS.IE) this.cpu.setIRQ(this.irq);
     }
 };
 

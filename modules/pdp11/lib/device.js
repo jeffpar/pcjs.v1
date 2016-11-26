@@ -90,7 +90,7 @@ DevicePDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
         device.interruptKW11();
     });
 
-    this.kw11.trigger = cpu.addTrigger(PDP11.KW11.VEC, PDP11.KW11.PRI, MessagesPDP11.KW11);
+    this.kw11.irq = cpu.addIRQ(PDP11.KW11.VEC, PDP11.KW11.PRI, MessagesPDP11.KW11);
 
     bus.addIOTable(this, DevicePDP11.UNIBUS_IOTABLE);
     bus.addResetHandler(this.reset.bind(this));
@@ -176,7 +176,7 @@ DevicePDP11.prototype.interruptKW11 = function()
 {
     this.kw11.lks |= PDP11.KW11.LKS.MON;
     if (this.kw11.lks & PDP11.KW11.LKS.IE) {
-        this.cpu.setTrigger(this.kw11.trigger);
+        this.cpu.setIRQ(this.kw11.irq);
     }
     if (this.cmp) this.cmp.updateDisplays(1);
     this.cpu.setTimer(this.kw11.timer, 1000/60);
