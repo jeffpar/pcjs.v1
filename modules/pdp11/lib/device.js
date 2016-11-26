@@ -214,6 +214,7 @@ DevicePDP11.prototype.writeLKS = function(data, addr)
      * I think that was wrong, and that all a write should do is mask off all the other (non-writable) bits.
      */
     this.kw11.lks = data & PDP11.KW11.LKS.MASK;
+    if (!(this.kw11.lks & PDP11.KW11.LKS.IE)) this.cpu.clearIRQ(this.kw11.irq);
 };
 
 /**

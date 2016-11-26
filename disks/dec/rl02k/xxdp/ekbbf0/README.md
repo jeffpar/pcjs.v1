@@ -259,3 +259,6 @@ After setting and hitting a breakpoint at 031532, we can step through the instru
 
 Vector 100 is for the KW11 Line Clock -- an interrupt that the test was apparently not expecting.  It
 was instead looking for an interrupt from the DL11 "teleprinter" device.
+
+This failure was resolved by fixing the KW11 logic to clear any pending Line Clock interrupt whenever the
+KW11 Interrupt Enable bit was cleared.

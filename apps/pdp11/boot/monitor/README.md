@@ -24,12 +24,16 @@ The **BOOTMON.mac** source code is shown below.
 	; REBASE HIGHER LINK/BOT:140000
 	; WANT PERFORMANCE COUNTER - CLOCK TICKS TO DO SOMETHING?
 
-	PSW             =       177776
-	DL11XCSR        =       177564
-	DL11VEC         =       64
-
 	KW11LKS         =       177546
 	KW11VEC         =       100
+
+	DL11RCSR        =       177560
+	DL11RBUF        =       177562
+	DL11XCSR        =       177564
+	DL11XBUF        =       177566
+	DL11VEC         =       64
+
+	PSW             =       177776
 
 	        .ASECT
 	        .=140000
@@ -67,7 +71,7 @@ The **BOOTMON.mac** source code is shown below.
 	ONECHR:
 	        TSTB    @#DL11XCSR
 	        BPL     ONECHR
-	        MOVB    R0,@#177566
+	        MOVB    R0,@#DL11XBUF
 	        RTS     PC
 
 	PRTPTR: .WORD 0
@@ -84,10 +88,10 @@ The **BOOTMON.mac** source code is shown below.
 	PRTAST:
 	        TSTB    @PRTPTR
 	        BEQ     2$
-	        MOVB    @PRTPTR,@#177566
+	        MOVB    @PRTPTR,@#DL11XBUF
 	        INC     PRTPTR
 	        RTI
-	2$:     CLRB    @#177564
+	2$:     CLRB    @#DL11XCSR
 	        RTI
 
 	BUFFER: .WORD   0                       ; INPUT BUFFER POINTER
@@ -98,12 +102,13 @@ The **BOOTMON.mac** source code is shown below.
 	        CLR     LENGTH
 	        MOV     #INPAST,@#60
 	        MOV     #200,@#62
-	        BISB    #100,@#177560
+	        BISB    #100,@#DL11RCSR
 	        RTS     PC
 
 	INPAST:
 	        MOV     R0,-(SP)
-	        MOVB    @#177562,R0
+	        MOVB    @#DL11RBUF,R0
+	        BIC     #340,@#PSW              ; HACK TO PERMIT XBUF INTERRUPTS WHILE RBUF INTERRUPT HANDLER STILL RUNNING
 	        CMPB    R0,#15
 	        BEQ     7$                      ; CARRIAGE RETURN
 	        CMPB    R0,#127.
@@ -153,7 +158,7 @@ The **BOOTMON.mac** source code is shown below.
 	        MOV     R4,-(SP)
 	        MOV     #EOL,R0
 	        JSR     PC,PRINT
-	1$:     BITB    #100,@#177564
+	1$:     BITB    #100,@#DL11XCSR
 	        BNE     1$
 	        CLR     R4
 	        MOV     #CMDLST,R3              ; CMD LIST
