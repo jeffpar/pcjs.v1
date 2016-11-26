@@ -919,10 +919,10 @@ CPUPDP11.prototype.calcRemainingTime = function()
  *
  * Why not use JavaScript's setTimeout() instead?  Good question.  For a good answer, see setTimer() below.
  *
- * TODO: Consider making the addTimer() and setTimer() interfaces more like the addTrigger() and setTrigger()
+ * TODO: Consider making the addTimer() and setTimer() interfaces more like the addIRQ() and setIRQ()
  * interfaces (which return the underlying object instead of an array index) and maintaining a separate list
- * of active timers, in order of highest to lowest cycle countdown values, as this could speed up getBurstCycles()
- * and updateTimers() functions ever so slightly.
+ * of active timers, in order of highest to lowest cycle countdown values, as this could speed up
+ * getBurstCycles() and updateTimers() functions ever so slightly.
  *
  * @this {CPUPDP11}
  * @param {function()} callBack

@@ -1262,13 +1262,13 @@ if (DEBUGGER) {
             sMessage += " @" + this.toStrAddr(this.newAddr(this.cpu.getLastPC()));
         }
 
+        if (this.sMessagePrev && sMessage == this.sMessagePrev) return;
+        this.sMessagePrev = sMessage;
+
         if (this.bitsMessage & MessagesPDP11.BUFFER) {
             this.aMessageBuffer.push(sMessage);
             return;
         }
-
-        if (this.sMessagePrev && sMessage == this.sMessagePrev) return;
-        this.sMessagePrev = sMessage;
 
         var fRunning;
         if ((this.bitsMessage & MessagesPDP11.HALT) && this.cpu && (fRunning = this.cpu.isRunning()) || this.isBusy(true)) {
@@ -3378,8 +3378,9 @@ if (DEBUGGER) {
                     this.bitsMessage &= ~bitsMessage;
                     fCriteria = false;
                     if (bitsMessage == MessagesPDP11.BUFFER) {
-                        for (var i = 0; i < this.aMessageBuffer.length; i++) {
-                            this.println(this.aMessageBuffer[i]);
+                        var i = this.aMessageBuffer.length >= 1000? this.aMessageBuffer.length - 1000 : 0;
+                        while (i < this.aMessageBuffer.length) {
+                            this.println(this.aMessageBuffer[i++]);
                         }
                         this.aMessageBuffer = [];
                     }
