@@ -96,15 +96,15 @@ Component.subclass(CPUStatePDP11, CPUPDP11);
  * CPU offers timer services that will "fire" a callback after a specified delay, which are much more efficient than
  * requiring the CPU to dive into an interrupt queue and decrement delay counts on every instruction.
  *
- * Second, devices that generate interrupts will allocate a trigger object during initialization; we will no longer
- * be creating and destroying interrupt event objects and inserting/deleting them in a constantly changing queue.  Each
- * trigger contains properties that never change (eg, the vector and priority), along with a "next" pointer that's
- * only used when the trigger is active.
+ * Second, devices that generate interrupts will allocate an IRQ object during initialization; we will no longer
+ * be creating and destroying interrupt event objects and inserting/deleting them in a constantly changing queue.
+ * Each IRQ contains properties that never change (eg, the vector and priority), along with a "next" pointer that's
+ * only used when the IRQ is active.
  *
- * When a device decides it's time to interrupt (either at the end of some I/O operation or when a timer has "fired"),
- * it will simply "pull the trigger", which basically means that its trigger will be linked onto a list of active
- * triggers, and in priority order, so that when the CPU is ready to acknowledge interrupts, it need only check the
- * top of the active trigger list.
+ * When a device decides it's time to interrupt (either at the end of some I/O operation or when a timer has fired),
+ * it will simply set the IRQ, which basically means that the IRQ will be linked onto a list of active IRQs, in
+ * priority order, so that when the CPU is ready to acknowledge interrupts, it need only check the top of the active
+ * IRQ list.
  */
 
 /**
@@ -112,10 +112,10 @@ Component.subclass(CPUStatePDP11, CPUPDP11);
  *  vector: number,
  *  priority: number,
  *  message: number,
- *  next: (Trigger|null)
- * }} Trigger
+ *  next: (IRQ|null)
+ * }} IRQ
  */
-var Trigger;
+var IRQ;
 
 /**
  * initProcessor()
@@ -148,12 +148,12 @@ CPUStatePDP11.prototype.initProcessor = function()
 
     this.nDisableTraps = 0;
 
-    /** @type {Trigger|null} */
-    this.triggerNext = null;            // the head of the active triggers list, in priority order
+    /** @type {IRQ|null} */
+    this.irqNext = null;                // the head of the active IRQ list, in priority order
 
     if (DEBUG) {
-        /** @type {Array.<Trigger>} */
-        this.aTriggers = [];            // list of all triggers, active or not (just for debugging)
+        /** @type {Array.<IRQ>} */
+        this.aIRQs = [];                // list of all IRQs, active or not (just for debugging)
     }
 
     this.flags.complete = false;
@@ -274,7 +274,7 @@ CPUStatePDP11.prototype.resetMMU = function()
     this.lastAddr = 0;          // this is queried by the Panel when it's not using its own ADDRESS register
     this.lastOp = 0;            // stores the PC and any auto-incs or auto-decs from the last opcode; used to update MMR1 and MMR2
 
-    this.resetTriggers();
+    this.resetIRQs();
 
     if (this.bus) this.setMemoryAccess();
 };
@@ -768,130 +768,138 @@ CPUStatePDP11.prototype.setSP = function(addr)
 };
 
 /**
- * addTrigger(vector, priority, message)
+ * addIRQ(vector, priority, message)
  *
  * @this {CPUStatePDP11}
  * @param {number} vector
  * @param {number} priority
  * @param {number} [message]
- * @return {Trigger}
+ * @return {IRQ}
  */
-CPUStatePDP11.prototype.addTrigger = function(vector, priority, message)
+CPUStatePDP11.prototype.addIRQ = function(vector, priority, message)
 {
-    var trigger = {vector: vector, priority: priority, message: message || 0, next: null};
-    if (DEBUG) this.aTriggers.push(trigger);
-    return trigger;
+    var irq = {vector: vector, priority: priority, message: message || 0, next: null};
+    if (DEBUG) {
+        irq.name = PDP11.VECTORS[vector];
+        this.aIRQs.push(irq);
+    }
+    return irq;
 };
 
 /**
- * insertTrigger(trigger)
+ * insertIRQ(irq)
  *
  * @this {CPUStatePDP11}
- * @param {Trigger} trigger
+ * @param {IRQ} irq
  */
-CPUStatePDP11.prototype.insertTrigger = function(trigger)
+CPUStatePDP11.prototype.insertIRQ = function(irq)
 {
-    if (trigger != this.triggerNext) {
-        var triggerPrev = this.triggerNext;
-        if (!triggerPrev || triggerPrev.priority <= trigger.priority) {
-            trigger.next = triggerPrev;
-            this.triggerNext = trigger;
+    if (irq != this.irqNext) {
+        var irqPrev = this.irqNext;
+        if (!irqPrev || irqPrev.priority <= irq.priority) {
+            irq.next = irqPrev;
+            this.irqNext = irq;
         } else {
             do {
-                var triggerNext = triggerPrev.next;
-                if (!triggerNext || triggerNext.priority <= trigger.priority) {
-                    trigger.next = triggerNext;
-                    triggerPrev.next = trigger;
+                var irqNext = irqPrev.next;
+                if (!irqNext || irqNext.priority <= irq.priority) {
+                    irq.next = irqNext;
+                    irqPrev.next = irq;
                     break;
                 }
-                triggerPrev = triggerNext;
-            } while (triggerPrev);
+                irqPrev = irqNext;
+            } while (irqPrev);
         }
     }
+    /*
+     * See the writeXCSR() function for an explanation of why signalling an IRQ hardware interrupt
+     * should be done using IRQ_DELAY rather than setting IRQ directly.
+     */
+    this.opFlags |= PDP11.OPFLAG.IRQ_DELAY;
 };
 
 /**
- * removeTrigger(trigger)
+ * removeIRQ(irq)
  *
  * @this {CPUStatePDP11}
- * @param {Trigger} trigger
+ * @param {IRQ} irq
  */
-CPUStatePDP11.prototype.removeTrigger = function(trigger)
+CPUStatePDP11.prototype.removeIRQ = function(irq)
 {
-    var triggerPrev = this.triggerNext;
-    if (triggerPrev == trigger) {
-        this.triggerNext = trigger.next;
+    var irqPrev = this.irqNext;
+    if (irqPrev == irq) {
+        this.irqNext = irq.next;
     } else {
-        while (triggerPrev) {
-            var triggerNext = triggerPrev.next;
-            if (triggerNext == trigger) {
-                triggerPrev.next = triggerNext.next;
+        while (irqPrev) {
+            var irqNext = irqPrev.next;
+            if (irqNext == irq) {
+                irqPrev.next = irqNext.next;
                 break;
             }
-            triggerPrev = triggerNext;
+            irqPrev = irqNext;
         }
     }
-    // We could also set trigger.next to null now, but strictly speaking, that shouldn't be necessary.
-};
-
-/**
- * setTrigger(trigger)
- *
- * @this {CPUStatePDP11}
- * @param {Trigger} trigger
- * @return {boolean} (true if interrupt dispatched, false if not)
- */
-CPUStatePDP11.prototype.setTrigger = function(trigger)
-{
-    this.insertTrigger(trigger);
-
     /*
-     * See the writeXCSR() function for an explanation of why signalling an INTQ hardware interrupt condition
-     * should be done using INTQ_DELAY rather than setting INTQ directly.
+     * We could also set irq.next to null now, but strictly speaking, that shouldn't be necessary.
+     *
+     * Last but not least, if there's still an IRQ on the active IRQ list, we need to make sure IRQ_DELAY
+     * is still set.
      */
-    this.opFlags |= PDP11.OPFLAG.INTQ_DELAY;
-
-    if (trigger.message && this.messageEnabled(trigger.message | MessagesPDP11.INT)) {
-        this.printMessage("setInterrupt(vector=" + str.toOct(trigger.vector) + ",priority=" + trigger.priority + ")", true, true);
+    if (this.irqNext) {
+        this.opFlags |= PDP11.OPFLAG.IRQ_DELAY;
     }
-    return false;
 };
 
 /**
- * clearTrigger(trigger)
+ * setIRQ(irq)
  *
  * @this {CPUStatePDP11}
- * @param {Trigger} trigger
+ * @param {IRQ} irq
  */
-CPUStatePDP11.prototype.clearTrigger = function(trigger)
+CPUStatePDP11.prototype.setIRQ = function(irq)
 {
-    this.removeTrigger(trigger);
+    this.insertIRQ(irq);
 
-    if (trigger.message && this.messageEnabled(trigger.message | MessagesPDP11.INT)) {
-        this.printMessage("clearInterrupt(vector=" + str.toOct(trigger.vector) + ",priority=" + trigger.priority + ")", true, true);
+    if (irq.message && this.messageEnabled(irq.message | MessagesPDP11.INT)) {
+        this.printMessage("setIRQ(vector=" + str.toOct(irq.vector) + ",priority=" + irq.priority + ")", true, true);
     }
 };
 
 /**
- * checkTriggers(priority)
+ * clearIRQ(irq)
+ *
+ * @this {CPUStatePDP11}
+ * @param {IRQ} irq
+ */
+CPUStatePDP11.prototype.clearIRQ = function(irq)
+{
+    this.removeIRQ(irq);
+
+    if (irq.message && this.messageEnabled(irq.message | MessagesPDP11.INT)) {
+        this.printMessage("clearIRQ(vector=" + str.toOct(irq.vector) + ",priority=" + irq.priority + ")", true, true);
+    }
+};
+
+/**
+ * checkIRQs(priority)
  *
  * @this {CPUStatePDP11}
  * @param {number} priority
- * @return {Trigger|null}
+ * @return {IRQ|null}
  */
-CPUStatePDP11.prototype.checkTriggers = function(priority)
+CPUStatePDP11.prototype.checkIRQs = function(priority)
 {
-    return (this.triggerNext && this.triggerNext.priority > priority)? this.triggerNext : null;
+    return (this.irqNext && this.irqNext.priority > priority)? this.irqNext : null;
 };
 
 /**
- * resetTriggers(priority)
+ * resetIRQs(priority)
  *
  * @this {CPUStatePDP11}
  */
-CPUStatePDP11.prototype.resetTriggers = function()
+CPUStatePDP11.prototype.resetIRQs = function()
 {
-    this.triggerNext = null;
+    this.irqNext = null;
 };
 
 /**
@@ -904,27 +912,30 @@ CPUStatePDP11.prototype.checkInterrupts = function()
 {
     var fInterrupt = false;
 
-    if (this.opFlags & PDP11.OPFLAG.INTQ) {
-        this.opFlags &= ~PDP11.OPFLAG.INTQ;
+    if (this.opFlags & PDP11.OPFLAG.IRQ) {
 
         var vector = PDP11.TRAP.PIRQ;
         var priority = (this.regPIR & PDP11.PSW.PRI) >> PDP11.PSW.SHIFT.PRI;
 
-        var trigger = this.checkTriggers(priority);
-        if (trigger) {
-            vector = trigger.vector;
-            priority = trigger.priority;
+        var irq = this.checkIRQs(priority);
+        if (irq) {
+            vector = irq.vector;
+            priority = irq.priority;
         }
 
         if (this.dispatchInterrupt(vector, priority)) {
-            if (trigger) this.removeTrigger(trigger);
+            if (irq) this.removeIRQ(irq);
             fInterrupt = true;
         }
+
+        if (!this.irqNext && !this.regPIR) {
+            this.opFlags &= ~PDP11.OPFLAG.IRQ;
+        }
     }
-    else if (this.opFlags & PDP11.OPFLAG.INTQ_DELAY) {
+    else if (this.opFlags & PDP11.OPFLAG.IRQ_DELAY) {
         /*
-         * We know that INTQ (bit 1) is clear, so since INTQ_DELAY (bit 0) is set, incrementing opFlags
-         * will transform INTQ_DELAY into INTQ, without affecting any other (higher) bits.
+         * We know that IRQ (bit 2) is clear, so since IRQ_DELAY (bit 0) is set, incrementing opFlags
+         * will eventually transform IRQ_DELAY into IRQ, without affecting any other (higher) bits.
          */
         this.opFlags++;
     }
@@ -1087,20 +1098,12 @@ CPUStatePDP11.prototype.setPSW = function(newPSW)
     this.regPSW = newPSW;
 
     /*
-     * Trigger (no pun intended) a call to checkInterrupts(), just in case.
-     *
-     * TODO: I think this is overdone; if you set a breakpoint on checkInterrupts(), you'll see that a significant
-     * percentage of calls do nothing.  For example, you'll usually see a spurious checkInterrupts() immediately after
-     * an interrupt has been dispatched, because it's dispatched via trap(), and trap() calls setPSW().
-     *
-     * I mean, sure, it's POSSIBLE that the new PSW loaded by trap() actually set a lower priority, allowing a lower
-     * priority interrupt to immediately be acknowledged.  But perhaps we should be a bit more rigorous here.
-     *
-     * For example, we could avoid setting INTQ unless 1) there's actually an active interrupt trigger (ie, triggerNext
-     * is not null) or 2) an optional fCheckInterrupts flag is passed to us, because the caller has some knowledge
-     * that priority could be changing.  Just throwing out some ideas....
+     * Trigger a call to checkInterrupts(), just in case.  If there's an active IRQ, then setting
+     * OPFLAG.IRQ is a no-brainer, but even if not, we set IRQ_DELAY in case the priority was lowered
+     * enough to permit a programmed interrupt (via regPIR).
      */
-    this.opFlags |= PDP11.OPFLAG.INTQ;
+    this.opFlags &= ~PDP11.OPFLAG.IRQ;
+    this.opFlags |= (this.irqNext? PDP11.OPFLAG.IRQ : PDP11.OPFLAG.IRQ_DELAY);
 };
 
 /**
@@ -1144,15 +1147,15 @@ CPUStatePDP11.prototype.getPIR = function()
  */
 CPUStatePDP11.prototype.setPIR = function(newPIR)
 {
-    newPIR &= 0xfe00;
+    newPIR &= PDP11.PIR.BITS;
     if (newPIR) {
-        var i = newPIR >> 9;
+        var bits = newPIR >> PDP11.PIR.SHIFT.BITS;
         do {
-            newPIR += 0x22;
-        } while (i >>= 1);
+            newPIR += PDP11.PIR.PIA_INC;
+        } while (bits >>= 1);
+        this.opFlags |= PDP11.OPFLAG.IRQ_DELAY;
     }
     this.regPIR = newPIR;
-    this.opFlags |= PDP11.OPFLAG.INTQ;
 };
 
 /**
@@ -1397,7 +1400,7 @@ CPUStatePDP11.prototype.trap = function(vector, flag, reason)
      *
      * Well, OK, we're also supposed to "lose interest" in the TF flag, too; otherwise, DEC tests fail.
      *
-     * Finally, setPSW() likes to always set INTQ, to force a check of hardware interrupts prior to
+     * Finally, setPSW() likes to always set IRQ, to force a check of hardware interrupts prior to
      * the next instruction, just in case the PSW priority was lowered.  However, there are "TRAP TEST"
      * tests like this one:
      *
@@ -1414,16 +1417,16 @@ CPUStatePDP11.prototype.trap = function(vector, flag, reason)
      *
      * where, after "TRAP 000" has executed, a hardware interrupt will be acknowledged, and instead of
      * executing the IOT, we'll execute the HALT and fail the test.  We avoid that by relying on the same
-     * trick that the SPL instruction uses: setting INTQ_DELAY instead of INTQ, which effectively delays
-     * INTQ detection for one instruction, which is just long enough to allow the diagnostic to pass.
+     * trick that the SPL instruction uses: setting IRQ_DELAY instead of IRQ, which effectively delays
+     * IRQ detection for one instruction, which is just long enough to allow the diagnostic to pass.
      */
-    this.opFlags &= ~(flag | PDP11.OPFLAG.TRAP_TF | PDP11.OPFLAG.INTQ);
-    this.opFlags |= PDP11.OPFLAG.INTQ_DELAY | PDP11.OPFLAG.TRAP;
+    this.opFlags &= ~(flag | PDP11.OPFLAG.TRAP_TF | PDP11.OPFLAG.IRQ_MASK);
+    this.opFlags |= PDP11.OPFLAG.IRQ_DELAY | PDP11.OPFLAG.TRAP_LAST;
 
     this.trapPSW = -1;                                  // reset flag that we have a trap within a trap
 
     /*
-     * These next properties (in conjunction with setting PDP11.OPFLAG.TRAP) are purely an aid for the Debugger;
+     * These next properties (in conjunction with setting PDP11.OPFLAG.TRAP_LAST) are purely an aid for the Debugger;
      * see getTrapStatus().
      */
     this.trapVector = vector;
@@ -1467,7 +1470,7 @@ CPUStatePDP11.prototype.trapReturn = function()
  */
 CPUStatePDP11.prototype.getTrapStatus = function()
 {
-    return (this.opFlags & PDP11.OPFLAG.TRAP)? (this.trapVector | this.trapReason << 8) : 0;
+    return (this.opFlags & PDP11.OPFLAG.TRAP_LAST)? (this.trapVector | this.trapReason << 8) : 0;
 };
 
 /**
@@ -1980,8 +1983,23 @@ CPUStatePDP11.prototype.checkStackLimit1145 = function(access, step, addr)
         /*
          * NOTE: The 11/70 CPU Instruction Exerciser does NOT expect reads to trigger a stack overflow,
          * so we check the access parameter.
+         *
+         * Moreover, TEST 40 of diagnostic EKBBF0 executes this instruction:
+         *
+         *      R0=177777 R1=032435 R2=152110 R3=000024 R4=153352 R5=001164
+         *      SP=177776 PC=020632 PS=000350 IR=000000 SL=000377 T0 N1 Z0 V0 C0
+         *      020632: 005016                 CLR   @SP                    ;cycles=7
+         *
+         * expecting a RED stack overflow trap.  Yes, using *any* addresses in the IOPAGE for the stack isn't
+         * a good idea, but who said it was illegal?  For now, we're going to restrict overflows to the highest
+         * address tested by the diagnostic (0xFFFE, aka the PSW), by making that address negative.
          */
+        if (addr >= 0xFFFE) addr |= ~0xFFFF;
         if ((access & PDP11.ACCESS.WRITE) && addr <= this.regSL) {
+            /*
+             * regSL can never fall below 0xFF, so this subtraction can never go negative, so this comparison
+             * is always safe.
+             */
             if (addr <= this.regSL - 32) {
                 this.trap(PDP11.TRAP.BUS, 0, PDP11.REASON.RED);
             } else {
@@ -2557,18 +2575,16 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
             if (!nDebugState) nDebugState++;
             nDebugCheck++;
         }
-
         if (this.opFlags) {
-
             /*
-             * If we're in the INTQ or WAIT state, check for any pending interrupts.
+             * If we're in the IRQ or WAIT state, check for any pending interrupts.
              *
              * NOTE: It's no coincidence that we're checking this BEFORE any pending traps, because in rare
              * cases (including some presented by those pesky "TRAP TEST" diagnostics), the process of dispatching
              * an interrupt can trigger a TRAP_SP stack overflow condition, which must be dealt with BEFORE we
              * execute the first instruction of the interrupt handler.
              */
-            if ((this.opFlags & (PDP11.OPFLAG.INTQ_MASK | PDP11.OPFLAG.WAIT)) /* && nDebugState >= 0 */) {
+            if ((this.opFlags & (PDP11.OPFLAG.IRQ_MASK | PDP11.OPFLAG.WAIT)) /* && nDebugState >= 0 */) {
                 if (this.checkInterrupts()) {
                     if (DEBUGGER && nDebugCheck && this.dbg.checkInstruction(this.getPC(), nDebugState)) {
                         this.stopCPU();
@@ -2584,7 +2600,6 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                     if (nDebugState < 0) break;
                 }
             }
-
             /*
              * Next, check for any pending traps (which, as noted above, must be done after checkInterrupts()).
              *
@@ -2601,8 +2616,9 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
                     if (nDebugState < 0) break;
                 }
             }
+        } else {
+            this.assert(!this.irqNext && !this.regPIR);
         }
-
         /*
          * Snapshot the TF bit in opFlags, while clearing all other opFlags (except those in PRESERVE);
          * we'll check the TRAP_TF bit in opFlags when we come back around for another opcode.

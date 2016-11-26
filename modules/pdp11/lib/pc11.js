@@ -280,9 +280,9 @@ PC11.prototype.initBus = function(cmp, bus, cpu, dbg)
         }
     }
 
-    this.triggerReaderInterrupt = this.cpu.addTrigger(PDP11.PC11.RVEC, PDP11.PC11.PRI, MessagesPDP11.PC11);
+    this.irqReader = this.cpu.addIRQ(PDP11.PC11.RVEC, PDP11.PC11.PRI, MessagesPDP11.PC11);
 
-    this.timerReaderAdvance = this.cpu.addTimer(function readyReader() {
+    this.timerReader = this.cpu.addTimer(function readyReader() {
         pc11.advanceReader();
     });
 
@@ -820,7 +820,7 @@ PC11.prototype.advanceReader = function()
                 this.prs |= PDP11.PC11.PRS.DONE;
                 this.prs &= ~PDP11.PC11.PRS.BUSY;
                 if (this.prs & PDP11.PC11.PRS.RIE) {
-                    this.cpu.setTrigger(this.triggerReaderInterrupt);
+                    this.cpu.setIRQ(this.irqReader);
                 }
             }
         }
@@ -864,7 +864,7 @@ PC11.prototype.writePRS = function(data, addr)
         if (this.prs & PDP11.PC11.PRS.ERROR) {
             data &= ~PDP11.PC11.PRS.RE;
             if (this.prs & PDP11.PC11.PRS.RIE) {
-                this.cpu.setTrigger(this.triggerReaderInterrupt);
+                this.cpu.setIRQ(this.irqReader);
             }
         } else {
             this.prs &= ~PDP11.PC11.PRS.DONE;
@@ -875,7 +875,7 @@ PC11.prototype.writePRS = function(data, addr)
              * that's the rate we'll choose as well (ie, 1000ms / 300).  As an aside, the original "low speed"
              * version of the reader ran at 10 CPS.
              */
-            this.cpu.setTimer(this.timerReaderAdvance, this.getBaudTimeout(this.nBaudReceive));
+            this.cpu.setTimer(this.timerReader, this.getBaudTimeout(this.nBaudReceive));
         }
     }
     this.prs = (this.prs & ~PDP11.PC11.PRS.WMASK) | (data & PDP11.PC11.PRS.WMASK);

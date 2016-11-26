@@ -751,7 +751,7 @@ SerialPort8080.prototype.transmitByte = function(b)
 };
 
 /**
- * transmitData()
+ * transmitData(sData)
  *
  * Helper for clocking transmitted data at the expected XMIT_RATE.
  *
@@ -759,10 +759,16 @@ SerialPort8080.prototype.transmitByte = function(b)
  * set XMIT_READY (and XMIT_EMPTY), which signals the firmware that another byte can be transmitted.
  *
  * @this {SerialPort8080}
+ * @param {string} [sData]
+ * @return {boolean} true if successful, false if not
  */
-SerialPort8080.prototype.transmitData = function()
+SerialPort8080.prototype.transmitData = function(sData)
 {
     this.bStatus |= (SerialPort8080.UART8251.STATUS.XMIT_READY | SerialPort8080.UART8251.STATUS.XMIT_EMPTY);
+    if (sData) {
+        return this.sendData? this.sendData.call(this.connection, sData) : false;
+    }
+    return true;
 };
 
 /**

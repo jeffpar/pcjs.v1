@@ -331,22 +331,23 @@ Keyboard.SCANCODE = {
 Keyboard.STATE = {
     RSHIFT:         0x0001,
     SHIFT:          0x0002,
+    SHIFTS:         0x0003,
     RCTRL:          0x0004,             // 101-key keyboard only
     CTRL:           0x0008,
-    CTRLS:          0x000c,
+    CTRLS:          0x000C,
     RALT:           0x0010,             // 101-key keyboard only
     ALT:            0x0020,
     ALTS:           0x0030,
     RCMD:           0x0040,             // 101-key keyboard only
     CMD:            0x0080,             // 101-key keyboard only
-    CMDS:           0x00c0,
+    CMDS:           0x00C0,
     ALL_RIGHT:      0x0055,             // RSHIFT | RCTRL | RALT | RCMD
-    ALL_SHIFT:      0x00ff,             // SHIFT | RSHIFT | CTRL | RCTRL | ALT | RALT | CMD | RCMD
+    ALL_SHIFT:      0x00FF,             // SHIFT | RSHIFT | CTRL | RCTRL | ALT | RALT | CMD | RCMD
     INSERT:         0x0100,             // TODO: Placeholder (we currently have no notion of any "insert" states)
     CAPS_LOCK:      0x0200,
     NUM_LOCK:       0x0400,
     SCROLL_LOCK:    0x0800,
-    ALL_LOCKS:      0x0e00              // CAPS_LOCK | NUM_LOCK | SCROLL_LOCK
+    ALL_LOCKS:      0x0E00              // CAPS_LOCK | NUM_LOCK | SCROLL_LOCK
 };
 
 /**

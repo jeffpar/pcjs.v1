@@ -42,3 +42,13 @@ p. 1-6:
 	    SW05 = 1 skip bus request 5 test
 	    SW04 = 1 skip bus request 4 test
 	    SW00 = 1 skip operator intervention testing
+
+The closest we have to a source code listing of the EKBAD0 diagnostic comes from some
+[scanned microfiche](http://archive.pcjs.org/pubs/dec/pdp11/diags/AH-7963D-MC_CEKBAD0_1170_CPU_1_May80.pdf)
+on [bitsavers.org](http://bitsavers.trailing-edge.com/pdf/dec/pdp11/microfiche/ftp.j-hoppe.de/bw/gh/) for:
+
+	PRODUCT CODE: AC-7962D-MC
+	PRODUCT NAME: CEKBAD0 11/70 CPU #1
+	DATE CREATED: MAY, 1980
+	MAINTAINER:   DIAGNOSTIC ENGINEERING
+

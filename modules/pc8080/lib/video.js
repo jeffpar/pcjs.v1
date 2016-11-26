@@ -215,7 +215,7 @@ function Video8080(parmsVideo, canvas, context, textarea, container)
                 if ('on' + sEvent in document) {
                     var onFullScreenChange = function() {
                         var fFullScreen = (document['fullscreenElement'] || document['msFullscreenElement'] || document['mozFullScreenElement'] || document['webkitFullscreenElement']);
-                        video.notifyFullScreen(fFullScreen? true : false);
+                        video.notifyFullScreen(!!fFullScreen);
                     };
                     document.addEventListener(sEvent, onFullScreenChange, false);
                     break;

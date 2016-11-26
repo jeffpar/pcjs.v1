@@ -284,42 +284,29 @@ SerialPortPDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
 
     var serial = this;
 
-    this.triggerReceiveInterrupt = this.cpu.addTrigger(PDP11.DL11.RVEC, PDP11.DL11.PRI, MessagesPDP11.DL11);
+    this.irqReceiver = this.cpu.addIRQ(PDP11.DL11.RVEC, PDP11.DL11.PRI, MessagesPDP11.DL11);
 
     this.timerReceiveInterrupt = this.cpu.addTimer(function readyReceiver() {
-        if (!(serial.rcsr & PDP11.DL11.RCSR.RD)) {
-            if (serial.abReceive.length) {
-                /*
-                 * Here, as elsewhere (eg, the PC11 component), even if I trusted all incoming data
-                 * to be byte values (which I don't), there's also the risk that it could be signed data
-                 * (eg, -128 to 127, instead of 0 to 255).  Both risks are good reasons to always mask
-                 * the data assigned to RBUF with 0xff.
-                 */
-                serial.rbuf = serial.abReceive.shift() & 0xff;
-                if (serial.fUpperCase) {
-                    /*
-                     * Automatically transform lower-case ASCII codes to upper-case; fUpperCase should
-                     * only be set when a terminal or some sort of pseudo-display is being used and we don't
-                     * trust it to have its CAPS-LOCK setting correct.
-                     */
-                    if (serial.rbuf >= 0x61 && serial.rbuf < 0x7A) {
-                        serial.rbuf -= 0x20;
-                    }
-                }
+        var b = serial.receiveByte();
+        if (b >= 0) {
+            serial.rbuf = b;
+            if (!(serial.rcsr & PDP11.DL11.RCSR.RD)) {
                 serial.rcsr |= PDP11.DL11.RCSR.RD;
-                if (serial.rcsr & PDP11.DL11.RCSR.RIE) {
-                    serial.cpu.setTrigger(serial.triggerReceiveInterrupt);
-                }
+            } else {
+                serial.rbuf |= PDP11.DL11.RBUF.OE | PDP11.DL11.RBUF.ERROR;
+            }
+            if (serial.rcsr & PDP11.DL11.RCSR.RIE) {
+                cpu.setIRQ(serial.irqReceiver);
             }
         }
     });
 
-    this.triggerTransmitInterrupt = this.cpu.addTrigger(PDP11.DL11.XVEC, PDP11.DL11.PRI, MessagesPDP11.DL11);
+    this.irqTransmitter = this.cpu.addIRQ(PDP11.DL11.XVEC, PDP11.DL11.PRI, MessagesPDP11.DL11);
 
     this.timerTransmitInterrupt = this.cpu.addTimer(function readyTransmitter() {
         serial.xcsr |= PDP11.DL11.XCSR.READY;
         if (serial.xcsr & PDP11.DL11.XCSR.TIE) {
-            serial.cpu.setTrigger(serial.triggerTransmitInterrupt);
+            cpu.setIRQ(serial.irqTransmitter);
         }
     });
 
@@ -544,8 +531,41 @@ SerialPortPDP11.prototype.receiveData = function(data)
     else {
         this.abReceive = this.abReceive.concat(data);
     }
+
     this.cpu.setTimer(this.timerReceiveInterrupt, this.getBaudTimeout(this.nBaudReceive));
+
     return true;                // for now, return true regardless, since we're buffering everything anyway
+};
+
+/**
+ * receiveByte()
+ *
+ * @this {SerialPortPDP11}
+ * @return {number} (0x00-0xff if byte available, -1 if not)
+ */
+SerialPortPDP11.prototype.receiveByte = function()
+{
+    var b = -1;
+    if (this.abReceive.length) {
+        /*
+         * Here, as elsewhere (eg, the PC11 component), even if I trusted all incoming data
+         * to be byte values (which I don't), there's also the risk that it could be signed data
+         * (eg, -128 to 127, instead of 0 to 255).  Both risks are good reasons to always mask
+         * the data assigned to RBUF with 0xff.
+         */
+        b = this.abReceive.shift() & 0xff;
+        this.printMessage("receiveByte(" + str.toHexByte(b) + ")");
+        if (this.fUpperCase) {
+            /*
+             * Automatically transform lower-case ASCII codes to upper-case; fUpperCase should
+             * only be set when a terminal or some sort of pseudo-display is being used and we don't
+             * trust it to have its CAPS-LOCK setting correct.
+             */
+            if (b >= 0x61 && b < 0x7A) b -= 0x20;
+        }
+        this.cpu.setTimer(this.timerReceiveInterrupt, this.getBaudTimeout(this.nBaudReceive));
+    }
+    return b;
 };
 
 /**
@@ -618,6 +638,13 @@ SerialPortPDP11.prototype.transmitByte = function(b)
         fTransmitted = true;
     }
 
+    /*
+     * NOTE: When debugging issues involving the SerialPort, such as debugging code between a pair of
+     * transmitted bytes, you can pass 0 instead of getBaudTimeout() to setTimer() to minimize the amount
+     * of time spent waiting for XCSR.READY to be set again.
+     */
+    this.cpu.setTimer(this.timerTransmitInterrupt, this.getBaudTimeout(this.nBaudTransmit));
+
     return fTransmitted;
 };
 
@@ -655,9 +682,6 @@ SerialPortPDP11.prototype.writeRCSR = function(data, addr)
 SerialPortPDP11.prototype.readRBUF = function(addr)
 {
     this.rcsr &= ~PDP11.DL11.RCSR.RD;
-    if (this.abReceive.length > 0) {
-        this.cpu.setTimer(this.timerReceiveInterrupt, this.getBaudTimeout(this.nBaudReceive));
-    }
     return this.rbuf;
 };
 
@@ -696,16 +720,17 @@ SerialPortPDP11.prototype.writeXCSR = function(data, addr)
     /*
      * If the device is READY, and TIE is being set, then request a hardware interrupt.
      *
-     * Conversely, if TIE is being cleared, remove the request; this satisfies a test in MAINDEC TEST 15,
-     * which appears to clear, set, and clear the Transmitter Interrupt Enable (TIE) bit in rapid succession,
-     * with the expectation that NO interrupt will be generated.  However, this fix also requires a
-     * complementary change in setTrigger(), to request hardware interrupts with INTQ_DELAY rather than INTQ.
+     * Conversely, if TIE is being cleared, remove the request; this resolves a problem within
+     * MAINDEC TEST 15, where the Transmitter Interrupt Enable (TIE) bit is cleared, set, and cleared
+     * in rapid succession, with the expectation that NO interrupt will be generated.  Note that
+     * this fix also requires a complementary change in setIRQ(), to request hardware interrupts with
+     * IRQ_DELAY rather than IRQ.
      */
     if (this.xcsr & PDP11.DL11.XCSR.READY) {
         if (data & PDP11.DL11.XCSR.TIE) {
-            this.cpu.setTrigger(this.triggerTransmitInterrupt);
+            this.cpu.setIRQ(this.irqTransmitter);
         } else {
-            this.cpu.clearTrigger(this.triggerTransmitInterrupt);
+            this.cpu.clearIRQ(this.irqTransmitter);
         }
     }
     this.xcsr = (this.xcsr & ~PDP11.DL11.XCSR.WMASK) | (data & PDP11.DL11.XCSR.WMASK);
@@ -732,15 +757,8 @@ SerialPortPDP11.prototype.readXBUF = function(addr)
  */
 SerialPortPDP11.prototype.writeXBUF = function(data, addr)
 {
-    data &= PDP11.DL11.XBUF.DATA;
-    this.transmitByte(data);
+    this.transmitByte(data & PDP11.DL11.XBUF.DATA);
     this.xcsr &= ~PDP11.DL11.XCSR.READY;
-    /*
-     * NOTE: When debugging issues involving the SerialPort, such as debugging code between a pair of
-     * transmitted bytes, you can pass 0 instead of getBaudTimeout() to setTimer() to minimize the amount
-     * of time spent waiting for XCSR.READY to be set again.
-     */
-    this.cpu.setTimer(this.timerTransmitInterrupt, this.getBaudTimeout(this.nBaudTransmit));
 };
 
 /*
