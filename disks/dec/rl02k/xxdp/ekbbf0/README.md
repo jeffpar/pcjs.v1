@@ -104,7 +104,7 @@ on [bitsavers.org](http://bitsavers.trailing-edge.com/pdf/dec/pdp11/microfiche/f
 	DATE CREATED: MAY, 1980
 	MAINTAINER:   DIAGNOSTIC ENGINEERING
 
-The source code listing for TEST 40 appears to match the code above:
+The source code listing for TEST 40 matches the code above, and begins at the same address (020402):
 
 	;;***************************************************************
 	;*TEST 40       RED ZONE TRAP
@@ -176,3 +176,86 @@ PDPjs was failing to trigger a RED stack violation on this instruction:
 so execution fell into `ERROR 241`.  This was resolved by updating the *checkStackLimit1145()* function
 in [cpustate.js](/modules/pdp11/lib/cpustate.js) to include stack addresses >= 177776 in the RED stack
 overflow range test.
+
+The next test that PDPjs failed was TEST 63, which also matches the source code listing in the above microfiche,
+and begins at the same address (031532):
+
+	;;***************************************************************
+	;*TEST 63       WAIT
+	;*
+	;*      THIS TEST ENSURES THAT THE WAIT INSTRUCTION WORKS PROPERLY.
+	;*      IT FIRST EXECUTES WITH A LEVEL 4 INTERRUPT.
+	;*      THEN THE T BIT IS ENABLED TO ENSURE THAT THE INTERRUPT
+	;*      OCCURS AND NOT THE T BIT TRAP.
+	;;***************************************************************
+	TST63:  SCOPE
+			MOV     #TST64,NEXTTST  ;SAVE ADDRESS OF NEXT TEST
+			MOV     #^D1990,$ICNT   ;ADJUST ITTERATION COUNT
+			MOV     #10$,$LPADR     ;SETUP LOOP ADR
+	10$:    MOV     #2$,@#TPVEC     ;SETUP TELEPRINTER VECTOR
+			MOV     #1$,$LPERR      ;SETUP ERROR LOOP
+	1$:     MOV     #STACK,SP       ;INITIALIZE THE SP
+			SPL     3
+			MOV     #BIT6,@$TPS     ;SET PRINTER INTERRUPT FLAG
+			MOV     #15,@$TPB       ;SEND CHARACTER
+			WAIT                    ;EXECUTE INSTRUCTION UNDER TEST
+	;FAILURE
+			CLR     @$TPS           ;CLEAR INTERR ENABLE BIT
+			ERROR   377             ;WAIT INSTRUCTION DID NOT
+			BR      5$              ;WAIT FOR INTERRUPT
+
+After setting and hitting a breakpoint at 031532, we can step through the instructions in this test:
+
+	bp 031532 hit
+	stopped (37666352 instructions, 181205851 cycles, 27294 ms, 6639036 hz)
+	R0=000000 R1=000102 R2=000000 R3=000000 R4=000000 R5=026642
+	SP=001074 PC=031532 PS=010340 IR=000000 SL=000377 T0 N0 Z0 V0 C0
+	031532: 012767 032024 147530   MOV   #32024,001270
+	>> tr
+	R0=000000 R1=000102 R2=000000 R3=000000 R4=000000 R5=026642 
+	SP=001074 PC=031540 PS=010340 IR=000000 SL=000377 T0 N0 Z0 V0 C0 
+	031540: 012767 003706 147336   MOV   #3706,001104           ;cycles=16
+	>> tr
+	R0=000000 R1=000102 R2=000000 R3=000000 R4=000000 R5=026642 
+	SP=001074 PC=031546 PS=010340 IR=000000 SL=000377 T0 N0 Z0 V0 C0 
+	031546: 012767 031554 147332   MOV   #31554,001106          ;cycles=16
+	>> tr
+	R0=000000 R1=000102 R2=000000 R3=000000 R4=000000 R5=026642 
+	SP=001074 PC=031554 PS=010340 IR=000000 SL=000377 T0 N0 Z0 V0 C0 
+	031554: 012737 031624 000064   MOV   #31624,@#64            ;cycles=16
+	>> tr
+	R0=000000 R1=000102 R2=000000 R3=000000 R4=000000 R5=026642 
+	SP=001074 PC=031562 PS=010340 IR=000000 SL=000377 T0 N0 Z0 V0 C0 
+	031562: 012767 031570 147320   MOV   #31570,001110          ;cycles=16
+	>> tr
+	R0=000000 R1=000102 R2=000000 R3=000000 R4=000000 R5=026642 
+	SP=001074 PC=031570 PS=010340 IR=000000 SL=000377 T0 N0 Z0 V0 C0 
+	031570: 012706 001100          MOV   #1100,SP               ;cycles=16
+	>> tr
+	R0=000000 R1=000102 R2=000000 R3=000000 R4=000000 R5=026642 
+	SP=001100 PC=031574 PS=010340 IR=000000 SL=000377 T0 N0 Z0 V0 C0 
+	031574: 000233                 SPL   003                    ;cycles=7
+	>> tr
+	R0=000000 R1=000102 R2=000000 R3=000000 R4=000000 R5=026642 
+	SP=001100 PC=031576 PS=010140 IR=000000 SL=000377 T0 N0 Z0 V0 C0 
+	031576: 012777 000100 147336   MOV   #100,@001142           ;cycles=5
+	>> tr
+	R0=000000 R1=000102 R2=000000 R3=000000 R4=000000 R5=026642 
+	SP=001100 PC=031604 PS=010140 IR=000000 SL=000377 T0 N0 Z0 V0 C0 
+	031604: 012777 000015 147332   MOV   #15,@001144            ;cycles=20
+	>> tr
+	trapped to 100 (INTERRUPT)
+	R0=000000 R1=000102 R2=000000 R3=000000 R4=000000 R5=026642 
+	SP=001074 PC=026020 PS=000340 IR=000000 SL=000377 T0 N0 Z0 V0 C0 
+	026020: 005077 153212          CLR   @001236                ;cycles=0
+	>> tr
+	R0=000000 R1=000102 R2=000000 R3=000000 R4=000000 R5=026642
+	SP=001074 PC=026024 PS=000344 IR=000000 SL=000377 T0 N0 Z1 V0 C0
+	026024: 005037 177772          CLR   @#177772               ;cycles=19
+	>> tr
+	R0=000000 R1=000102 R2=000000 R3=000000 R4=000000 R5=026642
+	SP=001074 PC=026030 PS=000344 IR=000000 SL=000377 T0 N0 Z1 V0 C0
+	026030: 104324                 EMT   324                    ;cycles=16
+
+Vector 100 is for the KW11 Line Clock -- an interrupt that the test was apparently not expecting.  It
+was instead looking for an interrupt from the DL11 "teleprinter" device.

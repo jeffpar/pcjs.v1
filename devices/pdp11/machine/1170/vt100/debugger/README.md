@@ -10,7 +10,8 @@ machines:
     connection: dl11->vt100.serialPort
   - id: vt100
     type: pc8080
-    config: /devices/pc8080/machine/vt100/machine.xml
+    debugger: true
+    config: /devices/pc8080/machine/vt100/debugger/machine.xml
     connection: serialPort->test1170.dl11
 ---
 

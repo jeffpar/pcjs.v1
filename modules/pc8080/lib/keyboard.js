@@ -69,7 +69,34 @@ function Keyboard8080(parmsKbd)
 
 Component.subclass(Keyboard8080);
 
-Keyboard8080.MINPRESSTIME = 50;            // minimum milliseconds to wait before auto-releasing keys
+/*
+ * Now that we want to keep track of the physical (and simulated) state of modifier keys, I've
+ * grabbed a copy of the same bit definitions used by /modules/pcx86/lib/keyboard.js, since it's
+ * only important that we have a set of unique values; what the values are isn't critical.
+ */
+Keyboard8080.STATE = {
+    RSHIFT:         0x0001,
+    SHIFT:          0x0002,
+    SHIFTS:         0x0003,
+    RCTRL:          0x0004,             // 101-key keyboard only
+    CTRL:           0x0008,
+    CTRLS:          0x000C,
+    RALT:           0x0010,             // 101-key keyboard only
+    ALT:            0x0020,
+    ALTS:           0x0030,
+    RCMD:           0x0040,             // 101-key keyboard only
+    CMD:            0x0080,             // 101-key keyboard only
+    CMDS:           0x00C0,
+    ALL_RIGHT:      0x0055,             // RSHIFT | RCTRL | RALT | RCMD
+    ALL_SHIFT:      0x00FF,             // SHIFT | RSHIFT | CTRL | RCTRL | ALT | RALT | CMD | RCMD
+    INSERT:         0x0100,             // TODO: Placeholder (we currently have no notion of any "insert" states)
+    CAPS_LOCK:      0x0200,
+    NUM_LOCK:       0x0400,
+    SCROLL_LOCK:    0x0800,
+    ALL_LOCKS:      0x0E00              // CAPS_LOCK | NUM_LOCK | SCROLL_LOCK
+};
+
+Keyboard8080.MINPRESSTIME = 50;         // minimum milliseconds to wait before auto-releasing keys
 
 /**
  * Alternate keyCode mappings to support popular "WASD"-style directional-key mappings.
@@ -255,7 +282,8 @@ Keyboard8080.VT100.LEDCODES = {
     'l1':       Keyboard8080.VT100.STATUS.LED1,
     'locked':   Keyboard8080.VT100.STATUS.LOCKED,
     'local':    Keyboard8080.VT100.STATUS.LOCAL,
-    'online':  ~Keyboard8080.VT100.STATUS.LOCAL
+    'online':  ~Keyboard8080.VT100.STATUS.LOCAL,
+    'caps-lock':Keyboard8080.STATE.CAPS_LOCK
 };
 
 /*
@@ -321,6 +349,9 @@ Keyboard8080.prototype.setBinding = function(sHTMLType, sBinding, control, sValu
             };
             control.onkeyup = function onKeyUp(event) {
                 return kbd.onKeyDown(event, false);
+            };
+            control.onkeypress = function onKeyPress(event) {
+                return kbd.onKeyPress(event);
             };
             return true;
 
@@ -458,6 +489,13 @@ Keyboard8080.prototype.reset = function()
      */
     this.aKeysActive = [];
 
+    /*
+     * The current (assumed) physical (and simulated) states of the various shift/lock keys.
+     *
+     * TODO: Determine how (or whether) we can query the browser's initial shift/lock key states.
+     */
+    this.bitsState = 0;
+
     if (this.config.INIT && !this.restore(this.config.INIT)) {
         this.notice("reset error");
     }
@@ -515,39 +553,80 @@ Keyboard8080.prototype.restore = function(data)
 };
 
 /**
- * setLED(control, f)
+ * setLED(control, f, color)
+ *
+ * TODO: Add support for user-definable LED colors
  *
  * @this {Keyboard8080}
  * @param {Object} control is an HTML control DOM object
- * @param {boolean} f is true if the LED represented by control should be "on", false if "off"
+ * @param {boolean|number} f is true if the LED represented by control should be "on", false if "off"
+ * @param {number} color (ie, 0xff0000 for RED, or 0x00ff00 for GREEN)
  */
-Keyboard8080.prototype.setLED = function(control, f)
+Keyboard8080.prototype.setLED = function(control, f, color)
 {
-    /*
-     * TODO: Add support for user-definable LED colors
-     */
-    control.style.backgroundColor = (f? "#ff0000" : "#000000");
+    control.style.backgroundColor = (f? ('#' + str.toHex(color, 6)) : "#000000");
 };
 
 /**
  * updateLEDs(bLEDs)
  *
  * @this {Keyboard8080}
- * @param {number} bLEDs
+ * @param {number} [bLEDs]
  */
 Keyboard8080.prototype.updateLEDs = function(bLEDs)
 {
-    this.bLEDs = bLEDs;
+    var id, control;
+    if (bLEDs != null) {
+        this.bLEDs = bLEDs;
+    } else {
+        bLEDs = this.bLEDs;
+    }
     for (var sBinding in this.config.LEDCODES) {
-        var id = "led-" + sBinding;
-        var control = this.bindings[id];
+        id = "led-" + sBinding;
+        control = this.bindings[id];
         if (control) {
             var bitLED = this.config.LEDCODES[sBinding];
             var fOn = !!(bLEDs & bitLED);
             if (bitLED & (bitLED-1)) {
                 fOn = !(bLEDs & ~bitLED);
             }
-            this.setLED(control, fOn);
+            this.setLED(control, fOn, 0xff0000);
+        }
+    }
+    id = "led-caps-lock";
+    control = this.bindings[id];
+    if (control) {
+        this.setLED(control, (this.bitsState & Keyboard8080.STATE.CAPS_LOCK), 0x00ff00);
+    }
+};
+
+/**
+ * checkModifierKeys(softCode, fDown, fRight)
+ *
+ * @this {Keyboard8080}
+ * @param {number|string} softCode (ie, either a keycode or string ID)
+ * @param {boolean} fDown (true if key going down, false if key going up)
+ * @param {boolean} fRight (true if key is on the right, false if not or unknown or n/a)
+ */
+Keyboard8080.prototype.checkModifierKeys = function(softCode, fDown, fRight)
+{
+    var bit = 0;
+    switch(softCode) {
+    case Keys.KEYCODE.CTRL:
+        bit = fRight? Keyboard8080.STATE.RCTRL : Keyboard8080.STATE.CTRL;
+        break;
+    case Keys.KEYCODE.SHIFT:
+        bit = fRight? Keyboard8080.STATE.RSHIFT : Keyboard8080.STATE.SHIFT;
+        break;
+    case Keys.KEYCODE.CAPS_LOCK:
+        bit = Keyboard8080.STATE.CAPS_LOCK;
+        break;
+    }
+    if (bit) {
+        if (fDown) {
+            this.bitsState |= bit;
+        } else {
+            this.bitsState &= ~bit;
         }
     }
 };
@@ -555,7 +634,7 @@ Keyboard8080.prototype.updateLEDs = function(bLEDs)
 /**
  * getSoftCode(keyCode)
  *
- * Returns a number if the keyCode exists in the KEYMAP, or a string if the keyCode has a soft-code string.
+ * Returns a number if the keyCode exists in the KEYMAP, or a string if the keyCode has a string ID.
  *
  * @this {Keyboard8080}
  * @return {string|number|null}
@@ -589,8 +668,21 @@ Keyboard8080.prototype.onKeyDown = function(event, fDown)
     var softCode = this.getSoftCode(keyCode);
 
     if (softCode) {
+        /*
+         * We now keep track of any physical keyboard modifier keys that also exist on the simulated
+         * keyboard; in the case of the VT100, that means CTRL and SHIFT.  This will make it possible
+         * for a new pair of services to eventually be implemented: simulateKeysDown() and simulateKeysUp().
+         */
+        this.checkModifierKeys(softCode, fDown, event.location == Keys.LOCATION.RIGHT);
         fPass = this.onSoftKeyDown(softCode, fDown);
-        event.preventDefault();
+        /*
+         * As onKeyPress() explains, the only key presses we're interested in are letters, which provide
+         * an important clue regarding the CAPS-LOCK state.  For all other keys, we call preventDefault(),
+         * which "suppresses" the keyPress event.
+         */
+        if (softCode < Keys.ASCII.A || softCode > Keys.ASCII.Z) {
+            event.preventDefault();
+        }
     }
 
     if (!COMPILED && this.messageEnabled(Messages8080.KEYS)) {
@@ -598,6 +690,35 @@ Keyboard8080.prototype.onKeyDown = function(event, fDown)
     }
 
     return fPass;
+};
+
+/**
+ * onKeyPress(event)
+ *
+ * For now, our only interest in keyPress events is letters, as a means of detecting the CAPS-LOCK state.
+ *
+ * @this {Keyboard8080}
+ * @param {Object} event
+ * @return {boolean} true to pass the event along, false to consume it
+ */
+Keyboard8080.prototype.onKeyPress = function(event)
+{
+    var keyCode = event.keyCode;
+    if (keyCode >= Keys.ASCII.A && keyCode <= Keys.ASCII.Z) {
+        if (!(this.bitsState & (Keyboard8080.STATE.SHIFTS | Keyboard8080.STATE.CAPS_LOCK))) {
+            this.bitsState |= Keyboard8080.STATE.CAPS_LOCK;
+            this.onSoftKeyDown(Keys.KEYCODE.CAPS_LOCK, true);
+            this.updateLEDs();
+        }
+    }
+    else if (keyCode >= Keys.ASCII.a && keyCode <= Keys.ASCII.z) {
+        if (this.bitsState & Keyboard8080.STATE.CAPS_LOCK) {
+            this.bitsState &= ~Keyboard8080.STATE.CAPS_LOCK;
+            this.onSoftKeyDown(Keys.KEYCODE.CAPS_LOCK, false);
+            this.updateLEDs();
+        }
+    }
+    return true;
 };
 
 /**
@@ -609,35 +730,36 @@ Keyboard8080.prototype.onKeyDown = function(event, fDown)
  */
 Keyboard8080.prototype.indexOfSoftKey = function(softCode)
 {
-    var i;
-    for (i = 0; i < this.aKeysActive.length; i++) {
+    for (var i = 0; i < this.aKeysActive.length; i++) {
         if (this.aKeysActive[i].softCode == softCode) return i;
     }
     return -1;
 };
 
 /**
- * onSoftKeyDown(softCode, fDown)
+ * onSoftKeyDown(softCode, fDown, fAutoRelease)
  *
  * @this {Keyboard8080}
  * @param {number|string} softCode
  * @param {boolean} fDown is true for a down event, false for up
+ * @param {boolean} [fAutoRelease] is true only if we know we want the key to auto-release
  * @return {boolean} true to pass the event along, false to consume it
  */
-Keyboard8080.prototype.onSoftKeyDown = function(softCode, fDown)
+Keyboard8080.prototype.onSoftKeyDown = function(softCode, fDown, fAutoRelease)
 {
     var i = this.indexOfSoftKey(softCode);
     if (fDown) {
         // this.println(softCode + " down");
+        fAutoRelease = fAutoRelease || false;
         if (i < 0) {
             this.aKeysActive.push({
                 softCode: softCode,
                 msDown: Date.now(),
-                fAutoRelease: false
+                fAutoRelease: fAutoRelease
             });
         } else {
             this.aKeysActive[i].msDown = Date.now();
-            this.aKeysActive[i].fAutoRelease = false;
+            this.aKeysActive[i].fAutoRelease = fAutoRelease;
         }
     } else if (i >= 0) {
         // this.println(softCode + " up");

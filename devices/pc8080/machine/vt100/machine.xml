@@ -19,6 +19,7 @@
 				<control type="rled" label="L2" binding="l2" padLeft="8px"/>
 				<control type="rled" label="L3" binding="l3" padLeft="8px"/>
 				<control type="rled" label="L4" binding="l4" padLeft="8px"/>
+				<control type="led" label="CAPS" binding="caps-lock" padLeft="8px"/>
 				<control type="button" binding="fullScreen" padLeft="8px;line-height:1em">Full Screen</control>
 			</control>
 		</menu>
