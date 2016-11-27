@@ -358,7 +358,7 @@ SerialPort8080.prototype.setBinding = function(sHTMLType, sBinding, control, sVa
              *
              * Note that I've judiciously avoided using terms "escape notation" or "escape sequence" to talk about
              * these sequences, because ESC is one of the additional characters I want to support, and using the word
-             * "escape" in both contexts is WAY confusing.
+             * "escape" in both contexts is WAY too confusing.
              */
             sValue = sValue.replace(/\\e/g, String.fromCharCode(0x1b));
 
