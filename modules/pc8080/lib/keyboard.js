@@ -93,7 +93,8 @@ Keyboard8080.STATE = {
     CAPS_LOCK:      0x0200,
     NUM_LOCK:       0x0400,
     SCROLL_LOCK:    0x0800,
-    ALL_LOCKS:      0x0E00              // CAPS_LOCK | NUM_LOCK | SCROLL_LOCK
+    ALL_LOCKS:      0x0E00,             // CAPS_LOCK | NUM_LOCK | SCROLL_LOCK
+    REMAPPED:       0x1000
 };
 
 Keyboard8080.MINPRESSTIME = 50;         // minimum milliseconds to wait before auto-releasing keys
@@ -187,7 +188,7 @@ Keyboard8080.VT100 = {
         [Keys.KEYCODE.F4]:      0x41,   // aka PF4
         [Keys.KEYCODE.F2]:      0x42,   // aka PF2
         [Keys.KEYCODE.NUM_0]:   0x43,
-        [Keys.KEYCODE.F7]:      0x44,   // aka LINE FEED
+        [Keys.KEYCODE.F7]:      0x44,   // aka LINE-FEED
         [Keys.KEYCODE.BSLASH]:  0x45,
         [Keys.ASCII.L]:         0x46,
         [Keys.ASCII.K]:         0x47,
@@ -214,7 +215,7 @@ Keyboard8080.VT100 = {
         [Keys.ASCII.N]:         0x67,
         [Keys.ASCII.B]:         0x68,
         [Keys.ASCII.X]:         0x69,
-        [Keys.KEYCODE.F8]:      0x6A,   // aka NO SCROLL
+        [Keys.KEYCODE.F8]:      0x6A,   // aka NO-SCROLL
         [Keys.KEYCODE.NUM_9]:   0x70,
         [Keys.KEYCODE.NUM_3]:   0x71,
         [Keys.KEYCODE.NUM_6]:   0x72,
@@ -233,7 +234,11 @@ Keyboard8080.VT100 = {
     ALTCODES: {},
     LEDCODES: {},
     SOFTCODES: {
-        'setup':    Keys.KEYCODE.F9
+        'num-comma':    Keys.KEYCODE.F5,        // since modern keypads don't typically have a comma...
+        'break':        Keys.KEYCODE.F6,
+        'line-feed':    Keys.KEYCODE.F7,
+        'no-scroll':    Keys.KEYCODE.F8,
+        'setup':        Keys.KEYCODE.F9
     },
     /*
      * Reading port 0x82 returns a key address from the VT100 keyboard's UART data output.
@@ -606,17 +611,17 @@ Keyboard8080.prototype.updateLEDs = function(bLEDs)
 };
 
 /**
- * checkModifierKeys(softCode, fDown, fRight)
+ * checkModifierKeys(keyCode, fDown, fRight)
  *
  * @this {Keyboard8080}
- * @param {number|string} softCode (ie, either a keycode or string ID)
+ * @param {number} keyCode (ie, either a keycode or string ID)
  * @param {boolean} fDown (true if key going down, false if key going up)
  * @param {boolean} fRight (true if key is on the right, false if not or unknown or n/a)
  */
-Keyboard8080.prototype.checkModifierKeys = function(softCode, fDown, fRight)
+Keyboard8080.prototype.checkModifierKeys = function(keyCode, fDown, fRight)
 {
     var bit = 0;
-    switch(softCode) {
+    switch(keyCode) {
     case Keys.KEYCODE.SHIFT:
         bit = fRight? Keyboard8080.STATE.RSHIFT : Keyboard8080.STATE.SHIFT;
         break;
@@ -676,22 +681,63 @@ Keyboard8080.prototype.onKeyDown = function(event, fDown)
 {
     var fPass = true;
     var keyCode = event.keyCode;
-    var softCode = this.getSoftCode(keyCode);
 
+    /*
+     * We now keep track of physical keyboard modifier keys.  This makes it possible for new services
+     * to eventually be implemented (simulateKeysDown() and simulateKeysUp()), to map special ALT-key
+     * combinations to VT100 keys, etc.
+     */
+    this.checkModifierKeys(keyCode, fDown, event.location == Keys.LOCATION.RIGHT);
+
+    var softCode = this.getSoftCode(keyCode);
     if (softCode) {
         /*
-         * We now keep track of any physical keyboard modifier keys that also exist on the simulated
-         * keyboard; in the case of the VT100, that means CTRL and SHIFT.  This will make it possible
-         * for a new pair of services to eventually be implemented: simulateKeysDown() and simulateKeysUp().
+         * Key combinations involving the "meta" key (ie, the Windows or Command key) are meaningless to
+         * the VT100, so we ignore them.  The "meta" key itself is already effectively ignored, because it's
+         * not acknowledged by getSoftCode(), but we also don't want any of the keys combined with "meta"
+         * slipping through either.
          */
-        this.checkModifierKeys(softCode, fDown, event.location == Keys.LOCATION.RIGHT);
-
         if (!event.metaKey) {
+            /*
+             * The LINE-FEED key is an important key on the VT100, and while we DO map a host function key
+             * to it (F7), I like the idea of making ALT-ENTER an alias for LINE-FEED as well.  Ditto for
+             * making ALT-DELETE an alias for BACKSPACE (and no, I don't mean ALT-BACKSPACE as an alias for
+             * DELETE; see my earlier discussion involving BACKSPACE and DELETE).
+             *
+             * Of course, as experienced VT100 users know, it's always possible to type CTRL-J for LINE-FEED
+             * and CTRL-H for BACKSPACE, too.  But not all our users are that experienced.
+             *
+             * I was also tempted to use CTRL-ENTER or SHIFT-ENTER, but those are composable VT100 key
+             * sequences, so it's best not to muck with those.
+             *
+             * Finally, this hack is complicated by the fact that if the ALT key is released first, we run
+             * the risk of the remapped key being stuck "down".  Hence the new REMAPPED bit, which should
+             * remain set (as a "proxy" for the ALT bit) as long as a remapped key is down.
+             */
+            var fRemapped = false;
+            if (this.bitsState & (Keyboard8080.STATE.ALTS | Keyboard8080.STATE.REMAPPED)) {
+                if (softCode == Keys.KEYCODE.CR) {
+                    softCode = Keys.KEYCODE.F7;
+                    fRemapped = true;
+                }
+                else if (softCode == Keys.KEYCODE.BS) {
+                    softCode = Keys.KEYCODE.DEL;
+                    fRemapped = true;
+                }
+                if (fRemapped) {
+                    if (fDown) {
+                        this.bitsState |= Keyboard8080.STATE.REMAPPED;
+                    } else {
+                        this.bitsState &= ~Keyboard8080.STATE.REMAPPED;
+                    }
+                }
+            }
             fPass = this.onSoftKeyDown(softCode, fDown);
             /*
              * As onKeyPress() explains, the only key presses we're interested in are letters, which provide
              * an important clue regarding the CAPS-LOCK state.  For all other keys, we call preventDefault(),
-             * which "suppresses" the keyPress event.
+             * which normally "suppresses" the keyPress event, as well as other unwanted browser behaviors
+             * (eg, the SPACE key, which browsers interpret as a desire to scroll the entire web page down).
              */
             if (!(softCode >= Keys.ASCII.A && softCode <= Keys.ASCII.Z)) {
                 event.preventDefault();
