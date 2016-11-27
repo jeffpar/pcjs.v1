@@ -50,7 +50,7 @@ Refer to [Help](/disks/dec/rl02k/xxdp/#help) from the RL02K version.
 The "D" (DIRECTORY) command displays the following information:
 
 	ENTRY# FILNAM.EXT        DATE          LENGTH  START
-
+	
 	    1  HDDKB0.SYS       2-JAN-70          2    000112
 	    2  HMDKB1.SYS       2-JAN-70         17    000113
 	    3  HDDKB1.SYS       2-JAN-70          2    000114

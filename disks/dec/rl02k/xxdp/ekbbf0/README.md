@@ -12,21 +12,21 @@ From the
 p. 1-7:
 
 	11/70 CPU DIAGNOSTIC PART 2
-
+	
 	ABSTRACT:
-
-		This diagnostic is the second part of the 11/70 CPU, it tests advanced
-		instructions and miscellaneous logic.
-
+	
+	    This diagnostic is the second part of the 11/70 CPU, it tests advanced
+	    instructions and miscellaneous logic.
+	
 	OPERATING PROCEDURES:
 	        Set the switch register by <CONTROL P> (RD console)
 	    CON = xxxxxxWZ
 	        (W = deposit xxxxxx into console switch register)
-			(R = read and type console switch settings)
-			(Z = switch console terminal back to program)
-
+	        (R = read and type console switch settings)
+	        (Z = switch console terminal back to program)
+	
 	    .R EKBBF0
-
+	
 	SWITCH SETTINGS
 	    SW15 = 1 halt on error
 	    SW14 = 1 loop on test
@@ -144,28 +144,28 @@ The source code listing for TEST 40 matches the code above, and begins at the sa
 	        ERROR   235             ;RED ZONE REFERENCE FAILED TO TRAP
 	        BR      8$
 	3$:     MOV     #STACK,SP       ;RESET THE SP
-			MOV     #CPUSPUR,@#ERRVEC   ;RESTORE LOCATION 4
+	        MOV     #CPUSPUR,@#ERRVEC   ;RESTORE LOCATION 4
 	        ERROR   237             ;BEN 13 FAILED TO PUP.00
 	        BR      8$
 	1$:     CMP     @#0,#6$         ;DID BEN 13 FAIL?
-			BEQ     7$              ;BRANCH IF NO
-			MOV     #STACK,SP       ;RESET THE SP
-			MOV     #CPUSPUR,@#ERRVEC   ;RESTORE ERRVEC
-			ERROR   240             ;BEN 13 FAILED TO BRK.80
-			BR      8$
+	        BEQ     7$              ;BRANCH IF NO
+	        MOV     #STACK,SP       ;RESET THE SP
+	        MOV     #CPUSPUR,@#ERRVEC   ;RESTORE ERRVEC
+	        ERROR   240             ;BEN 13 FAILED TO BRK.80
+	        BR      8$
 	7$:     CMP     #-1,@#336       ;;DID YEL ZONE OCCUR?
-			BNE     8$              ;BRANCH IF NO
-			CLR     @#336           ;SETUP FOR LOOPING
-			ERROR   251             ;YEL ZONE IN RED REGION
+	        BNE     8$              ;BRANCH IF NO
+	        CLR     @#336           ;SETUP FOR LOOPING
+	        ERROR   251             ;YEL ZONE IN RED REGION
 	;
 	;TEST TO ENSURE PSW REFERENCE VIA THE SP CAUSES A RED ZONE TRAP
 	8$:     MOV     #63$,$LPERR     ;SETUP ERROR LOOP
 	63$:    MOV     #4$,@#ERRVEC    ;SETUP ERRVEC
-			MOV     #PSW,SP         ;PUT ADDRESS OF PSW IN SP
-			CLR     (SP)            ;EXECUTE THE TRAP CAUSING INSTRUCTION
-			MOV     #1076,SP        ;RESET THE SP
-			MOV     #CPUSPUR,@#ERRVEC   ;RESTORE ERRVEC
-			ERROR   241             ;NO RED ZONE ON STACK OVERFLOW
+	        MOV     #PSW,SP         ;PUT ADDRESS OF PSW IN SP
+	        CLR     (SP)            ;EXECUTE THE TRAP CAUSING INSTRUCTION
+	        MOV     #1076,SP        ;RESET THE SP
+	        MOV     #CPUSPUR,@#ERRVEC   ;RESTORE ERRVEC
+	        ERROR   241             ;NO RED ZONE ON STACK OVERFLOW
 
 PDPjs was failing to trigger a RED stack violation on this instruction:
 
@@ -189,20 +189,20 @@ and begins at the same address (031532):
 	;*      OCCURS AND NOT THE T BIT TRAP.
 	;;***************************************************************
 	TST63:  SCOPE
-			MOV     #TST64,NEXTTST  ;SAVE ADDRESS OF NEXT TEST
-			MOV     #^D1990,$ICNT   ;ADJUST ITTERATION COUNT
-			MOV     #10$,$LPADR     ;SETUP LOOP ADR
+	        MOV     #TST64,NEXTTST  ;SAVE ADDRESS OF NEXT TEST
+	        MOV     #^D1990,$ICNT   ;ADJUST ITTERATION COUNT
+	        MOV     #10$,$LPADR     ;SETUP LOOP ADR
 	10$:    MOV     #2$,@#TPVEC     ;SETUP TELEPRINTER VECTOR
-			MOV     #1$,$LPERR      ;SETUP ERROR LOOP
+	        MOV     #1$,$LPERR      ;SETUP ERROR LOOP
 	1$:     MOV     #STACK,SP       ;INITIALIZE THE SP
-			SPL     3
-			MOV     #BIT6,@$TPS     ;SET PRINTER INTERRUPT FLAG
-			MOV     #15,@$TPB       ;SEND CHARACTER
-			WAIT                    ;EXECUTE INSTRUCTION UNDER TEST
+	        SPL     3
+	        MOV     #BIT6,@$TPS     ;SET PRINTER INTERRUPT FLAG
+	        MOV     #15,@$TPB       ;SEND CHARACTER
+	        WAIT                    ;EXECUTE INSTRUCTION UNDER TEST
 	;FAILURE
-			CLR     @$TPS           ;CLEAR INTERR ENABLE BIT
-			ERROR   377             ;WAIT INSTRUCTION DID NOT
-			BR      5$              ;WAIT FOR INTERRUPT
+	        CLR     @$TPS           ;CLEAR INTERR ENABLE BIT
+	        ERROR   377             ;WAIT INSTRUCTION DID NOT
+	        BR      5$              ;WAIT FOR INTERRUPT
 
 After setting and hitting a breakpoint at 031532, we can step through the instructions in this test:
 
