@@ -6,7 +6,7 @@
 	<cpu id="cpu" model="1170" cycles="6666667"/>
 	<ram id="ram" addr="0x00000" size="0x40000" file="/apps/pdp11/tapes/diags/MAINDEC-11-DEQKC-B1-PB.json"/>
 	<device id="default" type="default"/>
-	<serial id="dl11" adapter="0" binding="print" upperCase="true"/>
+	<serial id="dl11" adapter="0" binding="print"/>
 	<panel ref="/devices/pdp11/panel/1170/debugger/front.xml"/>
 	<debugger id="debugger" base="8" messages="" commands=""/>
 	<device ref="/devices/pdp11/pc11/default.xml"/>
