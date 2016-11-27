@@ -11,4 +11,4 @@ RL01K disks are single-platter cartridges with 256 tracks per side, 40 sectors p
 256 bytes, for a total capacity of 5Mb (5,242,880 bytes).  They are used in RL01 disk drives in conjunction
 with an [RL11 Disk Controller](/devices/pdp11/rl11/).
 
-* [RSTS/E v7.0](rstsev70/) [[Source](http://skn.noip.me/pdp11/): RL2.DSK]
+* [RSTS/E v7.0](rstsv70/) [[Source](http://skn.noip.me/pdp11/): RL2.DSK]

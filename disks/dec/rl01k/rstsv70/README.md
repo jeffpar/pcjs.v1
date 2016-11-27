@@ -1,7 +1,7 @@
 ---
 layout: page
 title: "RL01K RSTS/E v7.0 Disk"
-permalink: /disks/dec/rl01k/rstsev70/
+permalink: /disks/dec/rl01k/rstsv70/
 ---
 
 RL01K RSTS/E v7.0 Disk

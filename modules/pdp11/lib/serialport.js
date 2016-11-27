@@ -199,34 +199,58 @@ SerialPortPDP11.prototype.setBinding = function(sType, sBinding, control, sValue
          * An onkeydown handler is required for certain keys that browsers tend to consume themselves;
          * for example, BACKSPACE is often defined as going back to the previous web page, and certain
          * CTRL keys are often used for browser shortcuts (usually on Windows-based browsers).
+         *
+         * NOTE: We don't bother with a keyUp handler, because for the most part, we're only intercepting
+         * keys that require special treatment; in general, we're content with keyPress events.
          */
         control.onkeydown = function onKeyDown(event) {
             event = event || window.event;
-            var fProcess = false;
+            var bASCII = 0;
             var keyCode = event.keyCode;
+            /*
+             * Perform the same remapping of BACKSPACE and DELETE that our VT100 emulation performs,
+             * for PCjs-wide consistency; see the KEYMAP table in /modules/pc8080/lib/keyboard.js for
+             * the rationale.  Ditto for ALT-DELETE; see onKeyDown() in /modules/pc8080/lib/keyboard.js
+             * for details.
+             *
+             * NOTE: keyDown (and keyUp) events supply us with KEYCODE values, which are NOT the same as
+             * ASCII values, which is why we are comparing with KEYCODE values but assigning ASCII values,
+             * because receiveData() requires ASCII values.
+             */
             if (keyCode == Keys.KEYCODE.BS) {
-                fProcess = true;
-                keyCode = Keys.ASCII.DEL;
+                bASCII = event.altKey? Keys.ASCII.CTRL_H : Keys.ASCII.DEL;
+            }
+            else if (keyCode == Keys.KEYCODE.DEL) {
+                bASCII = Keys.ASCII.CTRL_H;
             }
             else if (event.ctrlKey && keyCode >= Keys.ASCII.A && keyCode <= Keys.ASCII.Z) {
-                fProcess = true;
-                keyCode -= (Keys.ASCII.A - Keys.ASCII.CTRL_A);
+                bASCII = keyCode - (Keys.ASCII.A - Keys.ASCII.CTRL_A);
             }
-            if (fProcess) {
+            if (bASCII) {
                 if (event.preventDefault) event.preventDefault();
-                serial.receiveData(keyCode);
+                serial.receiveData(bASCII);
             }
             return true;
         };
 
         control.onkeypress = function onKeyPress(event) {
             /*
-             * Browser-independent keyCode extraction; refer to onKeyPress() and the other key event
-             * handlers in keyboard.js.
+             * NOTE: Unlike keyDown events, keyPress events generally supply us with ASCII values,
+             * despite the fact that, as above, they come to us via the keyCode property.  Yes, it's
+             * brilliant (or rather, the opposite of brilliant), but that's life.
              */
             event = event || window.event;
-            var keyCode = event.which || event.keyCode;
-            serial.receiveData(keyCode);
+            var bASCII = event.which || event.keyCode;
+            /*
+             * Perform the same remapping of ALT-ENTER (to LINE-FEED) that our VT100 emulation performs,
+             * for PCjs-wide consistency; see onKeyDown() in /modules/pc8080/lib/keyboard.js for details.
+             */
+            if (event.altKey) {
+                if (bASCII == Keys.ASCII.CTRL_M) {
+                    bASCII = Keys.ASCII.CTRL_J;
+                }
+            }
+            serial.receiveData(bASCII);
             /*
              * Since we're going to remove the "readonly" attribute from the <textarea> control
              * (so that the soft keyboard activates on iOS), instead of calling preventDefault() for
@@ -512,20 +536,20 @@ SerialPortPDP11.prototype.receiveData = function(data)
         this.abReceive.push(data);
     }
     else if (typeof data == "string") {
-        var b = 0, bPrev;
+        var bASCII = 0, bASCIIPrev;
         for (var i = 0; i < data.length; i++) {
-            bPrev = b;
-            b = data.charCodeAt(i);
+            bASCIIPrev = bASCII;
+            bASCII = data.charCodeAt(i);
             /*
              * NOTE: Multiple lines of pasted text will (at least on macOS) contain LFs instead of CRs;
              * we convert them to CRs below.  Windows may do something different, but in the worst case,
              * even if we receive CR/LF pairs, this code should keep the CRs and lose the LFs.
              */
-            if (b == str.ASCII.LF) {
-                if (bPrev == str.ASCII.CR) continue;
-                b = str.ASCII.CR;
+            if (bASCII == str.ASCII.LF) {
+                if (bASCIIPrev == str.ASCII.CR) continue;
+                bASCII = str.ASCII.CR;
             }
-            this.abReceive.push(b);
+            this.abReceive.push(bASCII);
         }
     }
     else {
