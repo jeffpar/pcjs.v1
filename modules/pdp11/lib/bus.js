@@ -76,14 +76,6 @@ function BusPDP11(parmsBus, cpu, dbg)
     this.nBusWidth = parmsBus['busWidth'] || 16;
 
     /*
-     * This controls the location of the IOPAGE (ie, at the top of 16-bit, 18-bit, or 22-bit address range).
-     * It is managed by setIOPageRange().  reset() establishes the default (16).
-     */
-    this.nIOPageRange = 0;                  // zero means no IOPAGE access (yet)
-    this.aIOPrevBlocks = [];                // this saves any previous blocks we had to replace with IOPAGE blocks
-    this.aIOPageBlocks = null;              // this saves the memory blocks allocated for IOPAGE, so we can reuse them
-
-    /*
      * Compute all BusPDP11 memory block parameters now, based on the width of the bus.
      *
      * Note that all PCjs machines divide their address space into blocks, using a block size appropriate for
@@ -102,9 +94,6 @@ function BusPDP11(parmsBus, cpu, dbg)
     this.nBlockTotal = (this.addrTotal / this.nBlockSize) | 0;
     this.nBlockMask = this.nBlockTotal - 1;
     this.assert(this.nBlockMask <= BusPDP11.BlockInfo.num.mask);
-
-    this.iBlockIOPageDefault = ((this.addrTotal - BusPDP11.IOPAGE_LENGTH) & this.nBusMask) >>> this.nBlockShift;
-    this.iBlockIOPageActive = this.iBlockIOPageDefault;
 
     /*
      * aIOHandlers is an array (ie, a hash) of I/O notification handlers, indexed by address, where each
@@ -460,16 +449,34 @@ BusPDP11.IOController = {
  *
  * Allocate enough (empty) Memory blocks to span the entire physical address space.
  *
+ * Note that we now maintain two parallel arrays of these Memory blocks: aBusBlocks is for use by
+ * devices (or any component using the "direct" interfaces), while aMemBlocks is for use by the CPU.
+ *
+ * Whereas the Bus memory map is fixed at init time, the CPU's memory map will vary depending on MMU
+ * settings.  The CPU will call setIOPageRange() as needed to update the range of addressible memory,
+ * which in turn will determine where the IOPAGE can be accessed.
+ *
  * @this {BusPDP11}
  */
 BusPDP11.prototype.initMemory = function()
 {
     var block = new MemoryPDP11(this);
     block.copyBreakpoints(this.dbg);
+
+    this.aBusBlocks = new Array(this.nBlockTotal);
     this.aMemBlocks = new Array(this.nBlockTotal);
     for (var iBlock = 0; iBlock < this.nBlockTotal; iBlock++) {
-        this.aMemBlocks[iBlock] = block;
+        this.aBusBlocks[iBlock] = this.aMemBlocks[iBlock] = block;
     }
+
+    var addrIOPage = this.addrTotal - BusPDP11.IOPAGE_LENGTH;
+    this.addMemory(addrIOPage, BusPDP11.IOPAGE_LENGTH, MemoryPDP11.TYPE.CONTROLLER, this);
+
+    this.iBlockIOPageBus = (addrIOPage & this.nBusMask) >>> this.nBlockShift;
+    this.iBlockIOPageMem = this.iBlockIOPageBus;
+
+    this.nIOPageRange = 0;
+    this.nMemMask = this.nBusMask;
 };
 
 /**
@@ -478,35 +485,24 @@ BusPDP11.prototype.initMemory = function()
  * We can define the IOPAGE address range with a single number, because the size of the IOPAGE is fixed at 8Kb.
  * The bottom of the range is (2 ^ nRange) - IOPAGE_LENGTH, and the top is (2 ^ nRange) - 1.
  *
- * Note that we defer our initial call to this function as long as possible (ie, at the end of reset()) so that
- * other components have first shot at adding their own memory blocks (if any), because addMemory() only allows
- * installing memory on top of empty memory blocks.
- *
  * @this {BusPDP11}
  * @param {number} nRange (16, 18 or 22; 0 removes the IOPAGE altogether)
  */
 BusPDP11.prototype.setIOPageRange = function(nRange)
 {
     if (nRange != this.nIOPageRange) {
-        var addr;
-        if (this.nIOPageRange) {
-            addr = (1 << this.nIOPageRange) - BusPDP11.IOPAGE_LENGTH;
-            this.setMemoryBlocks(addr, BusPDP11.IOPAGE_LENGTH, this.aIOPrevBlocks);
-            this.nIOPageRange = 0;
+        for (var iBlock = 0; iBlock < this.nBlockTotal; iBlock++) {
+            this.aMemBlocks[iBlock] = this.aBusBlocks[iBlock];
         }
+        this.nIOPageRange = 0;
+        this.nMemMask = this.nBusMask;
         if (nRange) {
             this.nIOPageRange = nRange;
-            addr = (1 << nRange);
-            this.nBusMask = (addr - 1);
+            var addr = (1 << nRange);
+            this.nMemMask = (addr - 1);
             addr -= BusPDP11.IOPAGE_LENGTH;
-            this.iBlockIOPageActive = (addr & this.nBusMask) >>> this.nBlockShift;
-            this.aIOPrevBlocks = this.getMemoryBlocks(addr, BusPDP11.IOPAGE_LENGTH);
-            if (this.aIOPageBlocks) {
-                this.setMemoryBlocks(addr, BusPDP11.IOPAGE_LENGTH, this.aIOPageBlocks);
-            } else {
-                this.addMemory(addr, BusPDP11.IOPAGE_LENGTH, MemoryPDP11.TYPE.CONTROLLER, this);
-                this.aIOPageBlocks = this.getMemoryBlocks(addr, BusPDP11.IOPAGE_LENGTH);
-            }
+            this.iBlockIOPageMem = (addr & this.nMemMask) >>> this.nBlockShift;
+            this.aMemBlocks[this.iBlockIOPageMem] = this.aBusBlocks[this.iBlockIOPageBus];
         }
     }
 };
@@ -626,9 +622,9 @@ BusPDP11.prototype.addMemory = function(addr, size, type, controller)
     var sizeLeft = size;
     var iBlock = addrNext >>> this.nBlockShift;
 
-    while (sizeLeft > 0 && iBlock < this.aMemBlocks.length) {
+    while (sizeLeft > 0 && iBlock < this.aBusBlocks.length) {
 
-        var block = this.aMemBlocks[iBlock];
+        var block = this.aBusBlocks[iBlock];
         var addrBlock = iBlock * this.nBlockSize;
         var sizeBlock = this.nBlockSize - (addrNext - addrBlock);
         if (sizeBlock > sizeLeft) sizeBlock = sizeLeft;
@@ -666,7 +662,7 @@ BusPDP11.prototype.addMemory = function(addr, size, type, controller)
 
         var blockNew = new MemoryPDP11(this, addrNext, sizeBlock, this.nBlockSize, type, controller);
         blockNew.copyBreakpoints(this.dbg, block);
-        this.aMemBlocks[iBlock++] = blockNew;
+        this.aBusBlocks[iBlock++] = blockNew;
 
         addrNext = addrBlock + this.nBlockSize;
         sizeLeft -= sizeBlock;
@@ -695,10 +691,10 @@ BusPDP11.prototype.cleanMemory = function(addr, size)
 {
     var fClean = true;
     var iBlock = addr >>> this.nBlockShift;
-    while (size > 0 && iBlock < this.aMemBlocks.length) {
-        if (this.aMemBlocks[iBlock].fDirty) {
-            this.aMemBlocks[iBlock].fDirty = fClean = false;
-            this.aMemBlocks[iBlock].fDirtyEver = true;
+    while (size > 0 && iBlock < this.aBusBlocks.length) {
+        if (this.aBusBlocks[iBlock].fDirty) {
+            this.aBusBlocks[iBlock].fDirty = fClean = false;
+            this.aBusBlocks[iBlock].fDirtyEver = true;
         }
         size -= this.nBlockSize;
         iBlock++;
@@ -718,15 +714,8 @@ BusPDP11.prototype.zeroMemory = function(addr, size, pattern)
 {
     var off = addr & this.nBlockLimit;
     var iBlock = addr >>> this.nBlockShift;
-    while (size > 0 && iBlock < this.aMemBlocks.length) {
-        var block = this.aMemBlocks[iBlock];
-        if (block.controller) {
-            if (this.aIOPageBlocks && this.aIOPageBlocks.length == this.aIOPrevBlocks.length) {
-                var i = this.aIOPageBlocks.indexOf(block);
-                if (i >= 0) block = this.aIOPrevBlocks[i];
-            }
-        }
-        if (block) block.zero(off, size, pattern);
+    while (size > 0 && iBlock < this.aBusBlocks.length) {
+        this.aBusBlocks[iBlock].zero(off, size, pattern);
         size -= this.nBlockSize;
         iBlock++;
         off = 0;
@@ -792,7 +781,7 @@ BusPDP11.prototype.scanMemory = function(info, addr, size)
     info.cbTotal = 0;
     info.cBlocks = 0;
     while (iBlock <= iBlockMax) {
-        var block = this.aMemBlocks[iBlock];
+        var block = this.aBusBlocks[iBlock];
         info.cbTotal += block.size;
         if (block.size) {
             info.aBlocks.push(usr.initBitFields(BusPDP11.BlockInfo, iBlock, 0, 0, block.type));
@@ -820,10 +809,10 @@ BusPDP11.prototype.removeMemory = function(addr, size)
     if (!(addr & this.nBlockLimit) && size && !(size & this.nBlockLimit)) {
         var iBlock = addr >>> this.nBlockShift;
         while (size > 0) {
-            var blockOld = this.aMemBlocks[iBlock];
+            var blockOld = this.aBusBlocks[iBlock];
             var blockNew = new MemoryPDP11(this, addr);
             blockNew.copyBreakpoints(this.dbg, blockOld);
-            this.aMemBlocks[iBlock++] = blockNew;
+            this.aBusBlocks[iBlock++] = blockNew;
             addr = iBlock * this.nBlockSize;
             size -= this.nBlockSize;
         }
@@ -844,8 +833,8 @@ BusPDP11.prototype.getMemoryBlocks = function(addr, size)
 {
     var aBlocks = [];
     var iBlock = addr >>> this.nBlockShift;
-    while (size > 0 && iBlock < this.aMemBlocks.length) {
-        aBlocks.push(this.aMemBlocks[iBlock++]);
+    while (size > 0 && iBlock < this.aBusBlocks.length) {
+        aBlocks.push(this.aBusBlocks[iBlock++]);
         size -= this.nBlockSize;
     }
     return aBlocks;
@@ -870,7 +859,7 @@ BusPDP11.prototype.setMemoryAccess = function(addr, size, afn, fQuiet)
     if (!(addr & this.nBlockLimit) && size && !(size & this.nBlockLimit)) {
         var iBlock = addr >>> this.nBlockShift;
         while (size > 0) {
-            var block = this.aMemBlocks[iBlock];
+            var block = this.aBusBlocks[iBlock];
             if (!block.controller) {
                 return this.reportError(BusPDP11.ERROR.NO_CONTROLLER, addr, size, fQuiet);
             }
@@ -902,7 +891,7 @@ BusPDP11.prototype.setMemoryBlocks = function(addr, size, aBlocks, type)
 {
     var i = 0;
     var iBlock = addr >>> this.nBlockShift;
-    while (size > 0 && iBlock < this.aMemBlocks.length) {
+    while (size > 0 && iBlock < this.aBusBlocks.length) {
         var block = aBlocks[i++];
         this.assert(block);
         if (!block) break;
@@ -911,7 +900,7 @@ BusPDP11.prototype.setMemoryBlocks = function(addr, size, aBlocks, type)
             blockNew.clone(block, type, this.dbg);
             block = blockNew;
         }
-        this.aMemBlocks[iBlock++] = block;
+        this.aBusBlocks[iBlock++] = block;
         size -= this.nBlockSize;
     }
 };
@@ -926,15 +915,11 @@ BusPDP11.prototype.setMemoryBlocks = function(addr, size, aBlocks, type)
 BusPDP11.prototype.getByte = function(addr)
 {
     if (addr >= BusPDP11.UNIBUS_22BIT) addr = this.cpu.mapUnibus(addr);
-    return this.aMemBlocks[(addr & this.nBusMask) >>> this.nBlockShift].readByte(addr & this.nBlockLimit, addr);
+    return this.aMemBlocks[(addr & this.nMemMask) >>> this.nBlockShift].readByte(addr & this.nBlockLimit, addr);
 };
 
 /**
  * getBlockDirect(addr)
- *
- * This checks for block requests matching the active IOPAGE block and redirects to the original block;
- * conversely, if the request is for the default IOPAGE block, then the request is redirected to the active
- * IOPAGE block.
  *
  * @this {BusPDP11}
  * @param {number} addr is a physical address
@@ -942,14 +927,7 @@ BusPDP11.prototype.getByte = function(addr)
  */
 BusPDP11.prototype.getBlockDirect = function(addr)
 {
-    var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
-    var block = this.aMemBlocks[iBlock];
-    if (iBlock == this.iBlockIOPageActive && this.aIOPrevBlocks.length) {
-        block = this.aIOPrevBlocks[0];
-    } else if (iBlock == this.iBlockIOPageDefault) {
-        block = this.aMemBlocks[this.iBlockIOPageActive];
-    }
-    return block;
+    return this.aBusBlocks[(addr & this.nBusMask) >>> this.nBlockShift];
 };
 
 /**
@@ -982,7 +960,7 @@ BusPDP11.prototype.getWord = function(addr)
 {
     if (addr >= BusPDP11.UNIBUS_22BIT) addr = this.cpu.mapUnibus(addr);
     var off = addr & this.nBlockLimit;
-    var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
+    var iBlock = (addr & this.nMemMask) >>> this.nBlockShift;
     if (!PDP11.WORDBUS && off == this.nBlockLimit) {
         return this.aMemBlocks[iBlock++].readByte(off, addr) | (this.aMemBlocks[iBlock & this.nBlockMask].readByte(0, addr + 1) << 8);
     }
@@ -1025,7 +1003,7 @@ BusPDP11.prototype.getWordDirect = function(addr)
 BusPDP11.prototype.setByte = function(addr, b)
 {
     if (addr >= BusPDP11.UNIBUS_22BIT) addr = this.cpu.mapUnibus(addr);
-    this.aMemBlocks[(addr & this.nBusMask) >>> this.nBlockShift].writeByte(addr & this.nBlockLimit, b & 0xff, addr);
+    this.aMemBlocks[(addr & this.nMemMask) >>> this.nBlockShift].writeByte(addr & this.nBlockLimit, b & 0xff, addr);
 };
 
 /**
@@ -1058,7 +1036,7 @@ BusPDP11.prototype.setWord = function(addr, w)
 {
     if (addr >= BusPDP11.UNIBUS_22BIT) addr = this.cpu.mapUnibus(addr);
     var off = addr & this.nBlockLimit;
-    var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
+    var iBlock = (addr & this.nMemMask) >>> this.nBlockShift;
     if (!PDP11.WORDBUS && off == this.nBlockLimit) {
         this.aMemBlocks[iBlock++].writeByte(off, w & 0xff, addr);
         this.aMemBlocks[iBlock & this.nBlockMask].writeByte(0, (w >> 8) & 0xff, addr + 1);
@@ -1104,7 +1082,7 @@ BusPDP11.prototype.addMemBreak = function(addr, fWrite)
 {
     if (DEBUGGER) {
         var iBlock = addr >>> this.nBlockShift;
-        this.aMemBlocks[iBlock].addBreakpoint(addr & this.nBlockLimit, fWrite);
+        this.aBusBlocks[iBlock].addBreakpoint(addr & this.nBlockLimit, fWrite);
     }
 };
 
@@ -1119,7 +1097,7 @@ BusPDP11.prototype.removeMemBreak = function(addr, fWrite)
 {
     if (DEBUGGER) {
         var iBlock = addr >>> this.nBlockShift;
-        this.aMemBlocks[iBlock].removeBreakpoint(addr & this.nBlockLimit, fWrite);
+        this.aBusBlocks[iBlock].removeBreakpoint(addr & this.nBlockLimit, fWrite);
     }
 };
 
@@ -1158,7 +1136,7 @@ BusPDP11.prototype.saveMemory = function(fAll)
     var a = [];
 
     for (var iBlock = 0; iBlock < this.nBlockTotal; iBlock++) {
-        var block = this.aMemBlocks[iBlock];
+        var block = this.aBusBlocks[iBlock];
         /*
          * We have to check both fDirty and fDirtyEver, because we may have called cleanMemory() on some of
          * the memory blocks (eg, video memory), and while cleanMemory() will clear a dirty block's fDirty flag,
@@ -1199,7 +1177,7 @@ BusPDP11.prototype.restoreMemory = function(a)
         if (adw && adw.length < this.nBlockLen) {
             adw = State.decompress(adw, this.nBlockLen);
         }
-        var block = this.aMemBlocks[iBlock];
+        var block = this.aBusBlocks[iBlock];
         if (!block || !block.restore(adw)) {
             /*
              * Either the block to restore hasn't been allocated, indicating a change in the machine

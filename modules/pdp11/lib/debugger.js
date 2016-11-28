@@ -960,7 +960,7 @@ if (DEBUGGER) {
      */
     DebuggerPDP11.prototype.dumpBus = function(asArgs)
     {
-        this.dumpBlocks(this.bus.aMemBlocks, asArgs[0]);
+        this.dumpBlocks(this.bus.aBusBlocks, asArgs[0]);
     };
 
     /**
