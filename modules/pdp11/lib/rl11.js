@@ -956,6 +956,10 @@ RL11.prototype.processCommand = function()
         }
         addr = (((this.ber & PDP11.RL11.RLBE.MASK)) << 16) | this.bar;   // 22 bit mode
         nWords = (0x10000 - this.mpr) & 0xffff;
+        if (DEBUG && this.messageEnabled(MessagesPDP11.READ)) {
+            var pos = ((((iCylinder << 1) + iHead) * drive.nSectors) + iSector) * 128;
+            this.printMessage((fnReadWrite == this.readData? "readData" : "writeData") + "(pos=" + pos + ",addr=" + str.toOct(addr) + ",bytes=" + (nWords * 2) + ")", true, true);
+        }
         fInterrupt = fnReadWrite.call(this, drive, iCylinder, iHead, iSector, nWords, addr, this.endReadWrite.bind(this));
         break;
 
@@ -1140,9 +1144,7 @@ RL11.prototype.readRLCS = function(addr)
 RL11.prototype.writeRLCS = function(data, addr)
 {
     this.csr = (this.csr & ~PDP11.RL11.RLCS.WMASK) | (data & PDP11.RL11.RLCS.WMASK);
-
-    this.bae = (this.bae & ~0x3) | ((data & PDP11.RL11.RLCS.BAE) >> 4);
-
+    this.ber = (this.ber & 0x3C) | ((data & PDP11.RL11.RLCS.BAE) >> PDP11.RL11.RLCS.SHIFT.BAE);
     if (!(this.csr & PDP11.RL11.RLCS.CRDY)) this.processCommand();
 };
 
@@ -1233,6 +1235,12 @@ RL11.prototype.readRLBE = function(addr)
 /**
  * writeRLBE(data, addr)
  *
+ * Curiously, we see RSTS/E v7.0 writing RLBE bits that aren't documented:
+ *
+ *      R0=000000 R1=000000 R2=174410 R3=000000 R4=102076 R5=045166
+ *      SP=052662 PC=067624 PS=034344 IR=000000 SL=000377 T0 N0 Z1 V0 C0
+ *      067624: 012712 000300          MOV   #300,@R2
+ *
  * @this {RL11}
  * @param {number} data
  * @param {number} addr (eg, PDP11.UNIBUS.RLBE or 174410)
@@ -1240,6 +1248,7 @@ RL11.prototype.readRLBE = function(addr)
 RL11.prototype.writeRLBE = function(data, addr)
 {
     this.ber = data & PDP11.RL11.RLBE.MASK;
+    this.csr = (this.csr & ~PDP11.RL11.RLCS.BAE) | ((this.ber & 0x3) << PDP11.RL11.RLCS.SHIFT.BAE);
 };
 
 /*

@@ -271,12 +271,15 @@ CPUStatePDP11.prototype.resetMMU = function()
     this.mmuLastMode = 0;
     this.mmuMask = 0x3ffff;
 
-    this.lastAddr = 0;          // this is queried by the Panel when it's not using its own ADDRESS register
-    this.lastOp = 0;            // stores the PC and any auto-incs or auto-decs from the last opcode; used to update MMR1 and MMR2
+    this.addrLast = 0;          // this is queried by the Panel when it's not using its own ADDRESS register
+    this.opLast = 0;            // stores the PC and any auto-incs or auto-decs from the last opcode; used to update MMR1 and MMR2
 
     this.resetIRQs();
 
-    if (this.bus) this.setMemoryAccess();
+    if (this.bus) {
+        this.setMemoryAccess();
+        this.addrInvalid = this.bus.getMemorySize(MemoryPDP11.TYPE.RAM);
+    }
 };
 
 /**
@@ -356,11 +359,11 @@ CPUStatePDP11.prototype.setMMR0 = function(newMMR0)
         if (newMMR0 & PDP11.MMR0.ABORT) {
             /*
              * If updates to MMR0[1-7], MMR1, and MMR2 are being shut off (ie, MMR0.ABORT bits are transitioning
-             * from clear to set), then do one final sync with their real-time counterparts in lastOp.
+             * from clear to set), then do one final sync with their real-time counterparts in opLast.
              */
             if (!(this.regMMR0 & PDP11.MMR0.ABORT)) {
-                this.regMMR1 = (this.lastOp >> 16) & 0xffff;
-                this.regMMR2 = this.lastOp & 0xffff;
+                this.regMMR1 = (this.opLast >> 16) & 0xffff;
+                this.regMMR2 = this.opLast & 0xffff;
             }
         }
         /*
@@ -393,10 +396,10 @@ CPUStatePDP11.prototype.getMMR1 = function()
 {
     /*
      * If updates to MMR1 have not been shut off (ie, MMR0.ABORT bits are clear),
-     * then we are allowed to sync MMR1 with its real-time counterpart in lastOp.
+     * then we are allowed to sync MMR1 with its real-time counterpart in opLast.
      */
     if (!(this.regMMR0 & PDP11.MMR0.ABORT)) {
-        this.regMMR1 = (this.lastOp >> 16) & 0xffff;
+        this.regMMR1 = (this.opLast >> 16) & 0xffff;
     }
     var result = this.regMMR1;
     if (result & 0xff00) {
@@ -415,10 +418,10 @@ CPUStatePDP11.prototype.getMMR2 = function()
 {
     /*
      * If updates to MMR2 have not been shut off (ie, MMR0.ABORT bits are clear),
-     * then we are allowed to sync MMR2 with its real-time counterpart in lastOp.
+     * then we are allowed to sync MMR2 with its real-time counterpart in opLast.
      */
     if (!(this.regMMR0 & PDP11.MMR0.ABORT)) {
-        this.regMMR2 = this.lastOp & 0xffff;
+        this.regMMR2 = this.opLast & 0xffff;
     }
     return this.regMMR2;
 };
@@ -662,7 +665,7 @@ CPUStatePDP11.prototype.setNF = function()
 CPUStatePDP11.prototype.getOpcode = function()
 {
     var pc = this.regsGen[PDP11.REG.PC];
-    this.lastOp = pc;
+    this.opLast = pc;
     /*
      * If PC is unaligned, a BUS trap will be generated, and because it will generate an
      * exception, the next line (the equivalent of advancePC(2)) will not be executed, ensuring that
@@ -710,7 +713,7 @@ CPUStatePDP11.prototype.getPC = function()
  */
 CPUStatePDP11.prototype.getLastAddr = function()
 {
-    return this.lastAddr;
+    return this.addrLast;
 };
 
 /**
@@ -721,7 +724,7 @@ CPUStatePDP11.prototype.getLastAddr = function()
  */
 CPUStatePDP11.prototype.getLastPC = function()
 {
-    return this.lastOp & 0xffff;
+    return this.opLast & 0xffff;
 };
 
 /**
@@ -1365,14 +1368,14 @@ CPUStatePDP11.prototype.trap = function(vector, flag, reason)
      * diagnostic (PC 056710), which tests what happens when a misaligned read triggers a BUS trap,
      * and that trap then triggers an MMU trap during the first pushWord() below.
      *
-     * One would think it would be fine to zero those bits by setting lastOp to vector alone,
+     * One would think it would be fine to zero those bits by setting opLast to vector alone,
      * and then letting each of the pushWord() calls below shift their own 0xF6 auto-dec value into
-     * lastOp.  When the first pushWord() triggers an MMU trap, we obviously won't get to the second
+     * opLast.  When the first pushWord() triggers an MMU trap, we obviously won't get to the second
      * pushWord(), yet the diagnostic expects TWO auto-decs to be recorded.  I'm puzzled why the
      * hardware apparently indicates TWO auto-decs, if SP wasn't actually decremented twice, but who
      * am I to judge.
      */
-    this.lastOp = vector | 0xf6f60000;
+    this.opLast = vector | 0xf6f60000;
 
     /*
      * Read from kernel D space
@@ -1476,7 +1479,7 @@ CPUStatePDP11.prototype.getTrapStatus = function()
 /**
  * mapUnibus(addr)
  *
- * If bits 18-21 of addr are all set (which is implied by addr >= BusPDP11.UNIBUS_22BIT aka 0x3C0000),
+ * If bits 18-21 of addr are all set (which callers check using addr >= BusPDP11.UNIBUS_22BIT aka 0x3C0000),
  * then we have a 22-bit address pointing to the top 256Kb range, so if the UNIBUS relocation map is enabled,
  * we must pass the lower 18 bits of that address through the map.
  *
@@ -1532,7 +1535,7 @@ CPUStatePDP11.prototype.mapUnibus = function(addr)
 };
 
 /**
- * mapVirtualToPhysical(virtualAddress, access)
+ * mapVirtualToPhysical(addrVirtual, access)
  *
  * mapVirtualToPhysical() does memory management. It converts a 17-bit I/D virtual address to a
  * 22-bit physical address.  A real PDP 11/70 memory management unit can be enabled separately
@@ -1582,60 +1585,55 @@ CPUStatePDP11.prototype.mapUnibus = function(addr)
  * physical address to the next 8Kb page.
  *
  * @this {CPUStatePDP11}
- * @param {number} virtualAddress
+ * @param {number} addrVirtual
  * @param {number} access
  * @return {number}
  */
-CPUStatePDP11.prototype.mapVirtualToPhysical = function(virtualAddress, access)
+CPUStatePDP11.prototype.mapVirtualToPhysical = function(addrVirtual, access)
 {
-    var page, pdr, physicalAddress;
-
-    this.assert(!(virtualAddress & ~0x1ffff) && access);
+    var page, pdr, addr;
 
     /*
      * This can happen when the DSTMODE (MAINT) bit of MMR0 is set but *not* the ENABLED bit.
      */
     if (!(access & this.mmuEnable)) {
-        physicalAddress = virtualAddress & 0xffff;
-        if (physicalAddress >= BusPDP11.IOPAGE_16BIT) {
-            physicalAddress |= this.addrIOPage;
+        addr = addrVirtual & 0xffff;
+        if (addr >= BusPDP11.IOPAGE_16BIT) {
+            addr |= this.addrIOPage;
         }
-        return physicalAddress;
+        return addr;
     }
 
-    page = virtualAddress >> 13;
+    page = addrVirtual >> 13;
     if (!(this.regMMR3 & this.mapMMR3[this.mmuMode])) page &= 7;
     pdr = this.mmuPDR[this.mmuMode][page];
-    physicalAddress = ((this.mmuPAR[this.mmuMode][page] << 6) + (virtualAddress & 0x1fff)) & this.mmuMask;
+    addr = ((this.mmuPAR[this.mmuMode][page] << 6) + (addrVirtual & 0x1fff)) & this.mmuMask;
 
-    if (this.nDisableTraps) return physicalAddress;
+    if (addr >= BusPDP11.UNIBUS_22BIT) {
+        addr = this.mapUnibus(addr);
+    }
+
+    if (this.nDisableTraps) return addr;
 
     /*
-     * This next bit is the weirdness that Paul mentions in the function description above:
-     *
-     *      As an aside it turns out that it is the memory management unit that does odd address and
-     *      non-existent memory trapping: who knew? :-) I thought these would have been handled at access time.
-     *
-     * TEST #122 ("KT BEND") in the "EKBEE1" diagnostic (PC 076060) triggers an ODDADDR error using this
-     * instruction:
-     *
-     *      076356: 005037 140001          CLR   @#140001
-     *
-     * and it expects that instruction to generate a BUS error rather than an MMU error, so we deal with that
-     * next.  However, the test also claims to check for an NEXM (non-existent memory) error, using this
-     * instruction:
+     * TEST #122 ("KT BEND") in the "EKBEE1" diagnostic (PC 076060) triggers a NOMEMORY error
+     * using this instruction:
      *
      *      076170: 005037 140100          CLR   @#140100
      *
-     * but that error never materializes, so I've NOT included any NEXM checks yet.  I assume that any such
-     * checks would be limited to whatever's recorded in the Memory Size registers (177760), because actually
-     * checking every physical address at this stage -- even in a real MMU -- seems prohibitively expensive.
+     * It also triggers an ODDADDR error using this instruction:
      *
-     * TODO: Investigate why the test's NEXM error doesn't occur.
+     *      076356: 005037 140001          CLR   @#140001
+     *
+     * These tests exercise the MMU checks that Paul mentions in the function description above.
      */
-    if ((physicalAddress & 0x1) && !(access & PDP11.ACCESS.BYTE)) {
+    if (addr >= this.addrInvalid && addr < this.addrIOPage) {
+        this.regErr |= PDP11.CPUERR.NOMEMORY;
+        this.trap(PDP11.TRAP.BUS, 0, addr);
+    }
+    else if ((addr & 0x1) && !(access & PDP11.ACCESS.BYTE)) {
         this.regErr |= PDP11.CPUERR.ODDADDR;
-        this.trap(PDP11.TRAP.BUS, 0, physicalAddress);
+        this.trap(PDP11.TRAP.BUS, 0, addr);
     }
 
     var newMMR0 = 0;
@@ -1679,12 +1677,12 @@ CPUStatePDP11.prototype.mapVirtualToPhysical = function(virtualAddress, access)
          */
         if (pdr & PDP11.PDR.ED) {
             if (pdr & PDP11.PDR.PLF) {
-                if ((virtualAddress & 0x1FC0) < ((pdr >> 2) & 0x1FC0)) {
+                if ((addrVirtual & 0x1FC0) < ((pdr >> 2) & 0x1FC0)) {
                     newMMR0 |= PDP11.MMR0.ABORT_PL;
                 }
             }
         } else {
-            if ((virtualAddress & 0x1FC0) > ((pdr >> 2) & 0x1FC0)) {
+            if ((addrVirtual & 0x1FC0) > ((pdr >> 2) & 0x1FC0)) {
                 newMMR0 |= PDP11.MMR0.ABORT_PL;
             }
         }
@@ -1695,7 +1693,7 @@ CPUStatePDP11.prototype.mapVirtualToPhysical = function(virtualAddress, access)
      */
 
     this.mmuPDR[this.mmuMode][page] = pdr;
-    if (physicalAddress != ((BusPDP11.IOPAGE_22BIT | PDP11.UNIBUS.MMR0) & this.mmuMask) || this.mmuMode) {
+    if (addr != ((BusPDP11.IOPAGE_22BIT | PDP11.UNIBUS.MMR0) & this.mmuMask) || this.mmuMode) {
         this.mmuLastMode = this.mmuMode;
         this.mmuLastPage = page;
     }
@@ -1721,8 +1719,8 @@ CPUStatePDP11.prototype.mapVirtualToPhysical = function(virtualAddress, access)
             /*
              * TODO: Review the code below, because the address range seems over-inclusive.
              */
-            if (physicalAddress < ((BusPDP11.IOPAGE_22BIT | PDP11.UNIBUS.SIPDR0) & this.mmuMask) ||
-                physicalAddress > ((BusPDP11.IOPAGE_22BIT | PDP11.UNIBUS.UDPAR7 | 0x1) & this.mmuMask)) {
+            if (addr < ((BusPDP11.IOPAGE_22BIT | PDP11.UNIBUS.SIPDR0) & this.mmuMask) ||
+                addr > ((BusPDP11.IOPAGE_22BIT | PDP11.UNIBUS.UDPAR7 | 0x1) & this.mmuMask)) {
                 this.regMMR0 |= PDP11.MMR0.TRAP_MMU;
                 if (this.regMMR0 & PDP11.MMR0.MMU_TRAPS) {
                     this.opFlags |= PDP11.OPFLAG.TRAP_MMU;
@@ -1730,32 +1728,32 @@ CPUStatePDP11.prototype.mapVirtualToPhysical = function(virtualAddress, access)
             }
         }
     }
-    return physicalAddress;
+    return addr;
 };
 
 /**
- * readByteFromPhysical(physicalAddress)
+ * readByteFromPhysical(addr)
  *
  * @this {CPUStatePDP11}
- * @param {number} physicalAddress
+ * @param {number} addr
  * @return {number}
  */
-CPUStatePDP11.prototype.readByteFromPhysical = function(physicalAddress)
+CPUStatePDP11.prototype.readByteFromPhysical = function(addr)
 {
-    return this.bus.getByte(physicalAddress);
+    return this.bus.getByte(addr);
 };
 
 /**
- * writeByteToPhysical(physicalAddress, data)
+ * writeByteToPhysical(addr, data)
  *
  * @this {CPUStatePDP11}
- * @param {number} physicalAddress
+ * @param {number} addr
  * @param {number} data
  */
-CPUStatePDP11.prototype.writeByteToPhysical = function(physicalAddress, data)
+CPUStatePDP11.prototype.writeByteToPhysical = function(addr, data)
 {
-    if (physicalAddress & 1) this.nStepCycles--;
-    this.bus.setByte(physicalAddress, data);
+    if (addr & 1) this.nStepCycles--;
+    this.bus.setByte(addr, data);
 };
 
 /**
@@ -1780,11 +1778,11 @@ CPUStatePDP11.prototype.popWord = function()
  */
 CPUStatePDP11.prototype.pushWord = function(data, fRed)
 {
-    var virtualAddress = (this.regsGen[6] - 2) & 0xffff;
-    this.regsGen[6] = virtualAddress;           // BSD needs SP updated before any fault :-(
-    this.lastOp = (this.lastOp & 0xffff) | ((this.lastOp & ~0xffff) << 8) | (0x00f6 << 16);
-    if (!fRed) this.checkStackLimit(PDP11.ACCESS.WRITE_WORD, -2, virtualAddress);
-    this.writeWord(virtualAddress, data);
+    var addrVirtual = (this.regsGen[6] - 2) & 0xffff;
+    this.regsGen[6] = addrVirtual;              // BSD needs SP updated before any fault :-(
+    this.opLast = (this.opLast & 0xffff) | ((this.opLast & ~0xffff) << 8) | (0x00f6 << 16);
+    if (!fRed) this.checkStackLimit(PDP11.ACCESS.WRITE_WORD, -2, addrVirtual);
+    this.writeWord(addrVirtual, data);
 };
 
 /**
@@ -1835,7 +1833,7 @@ CPUStatePDP11.prototype.pushWord = function(data, fRed)
  */
 CPUStatePDP11.prototype.getAddrByMode = function(mode, reg, access)
 {
-    var virtualAddress, step;
+    var addrVirtual, step;
     var addrDSpace = (access & PDP11.ACCESS.VIRT)? 0 : this.addrDSpace;
 
     /*
@@ -1868,10 +1866,10 @@ CPUStatePDP11.prototype.getAddrByMode = function(mode, reg, access)
      */
     case 2:
         step = 2;
-        virtualAddress = this.regsGen[reg];
-        if (reg == 6) this.checkStackLimit(access, step, virtualAddress);
+        addrVirtual = this.regsGen[reg];
+        if (reg == 6) this.checkStackLimit(access, step, addrVirtual);
         if (reg != 7) {
-            virtualAddress |= addrDSpace;
+            addrVirtual |= addrDSpace;
             if (reg < 6 && (access & PDP11.ACCESS.BYTE)) step = 1;
         }
         this.nStepCycles -= (2 + 1);
@@ -1882,10 +1880,10 @@ CPUStatePDP11.prototype.getAddrByMode = function(mode, reg, access)
      */
     case 3:
         step = 2;
-        virtualAddress = this.regsGen[reg];
-        if (reg != 7) virtualAddress |= addrDSpace;
-        virtualAddress = this.readWord(virtualAddress);
-        virtualAddress |= addrDSpace;
+        addrVirtual = this.regsGen[reg];
+        if (reg != 7) addrVirtual |= addrDSpace;
+        addrVirtual = this.readWord(addrVirtual);
+        addrVirtual |= addrDSpace;
         this.nStepCycles -= (5 + 2);
         break;
 
@@ -1895,9 +1893,9 @@ CPUStatePDP11.prototype.getAddrByMode = function(mode, reg, access)
     case 4:
         step = -2;
         if (reg < 6 && (access & PDP11.ACCESS.BYTE)) step = -1;
-        virtualAddress = (this.regsGen[reg] + step) & 0xffff;
-        if (reg == 6) this.checkStackLimit(access, step, virtualAddress);
-        if (reg != 7) virtualAddress |= addrDSpace;
+        addrVirtual = (this.regsGen[reg] + step) & 0xffff;
+        if (reg == 6) this.checkStackLimit(access, step, addrVirtual);
+        if (reg != 7) addrVirtual |= addrDSpace;
         this.nStepCycles -= (3 + 1);
         break;
 
@@ -1906,9 +1904,9 @@ CPUStatePDP11.prototype.getAddrByMode = function(mode, reg, access)
      */
     case 5:
         step = -2;
-        virtualAddress = (this.regsGen[reg] - 2) & 0xffff;
-        if (reg != 7) virtualAddress |= addrDSpace;
-        virtualAddress = this.readWord(virtualAddress) | addrDSpace;
+        addrVirtual = (this.regsGen[reg] - 2) & 0xffff;
+        if (reg != 7) addrVirtual |= addrDSpace;
+        addrVirtual = this.readWord(addrVirtual) | addrDSpace;
         this.nStepCycles -= (6 + 2);
         break;
 
@@ -1916,27 +1914,27 @@ CPUStatePDP11.prototype.getAddrByMode = function(mode, reg, access)
      * Mode 6: d(R)
      */
     case 6:
-        virtualAddress = this.readWord(this.advancePC(2));
-        virtualAddress = (virtualAddress + this.regsGen[reg]) & 0xffff;
-        if (reg == 6) this.checkStackLimit(access, 0, virtualAddress);
+        addrVirtual = this.readWord(this.advancePC(2));
+        addrVirtual = (addrVirtual + this.regsGen[reg]) & 0xffff;
+        if (reg == 6) this.checkStackLimit(access, 0, addrVirtual);
         this.nStepCycles -= (4 + 2);
-        return virtualAddress | addrDSpace;
+        return addrVirtual | addrDSpace;
 
     /*
      * Mode 7: @d(R)
      */
     case 7:
-        virtualAddress = this.readWord(this.advancePC(2));
-        virtualAddress = (virtualAddress + this.regsGen[reg]) & 0xffff;
-        virtualAddress = this.readWord(virtualAddress | this.addrDSpace);
+        addrVirtual = this.readWord(this.advancePC(2));
+        addrVirtual = (addrVirtual + this.regsGen[reg]) & 0xffff;
+        addrVirtual = this.readWord(addrVirtual | this.addrDSpace);
         this.nStepCycles -= (7 + 3);
-        return virtualAddress | addrDSpace;
+        return addrVirtual | addrDSpace;
     }
 
     this.regsGen[reg] = (this.regsGen[reg] + step) & 0xffff;
-    this.lastOp = (this.lastOp & 0xffff) | ((this.lastOp & ~0xffff) << 8) | ((((step << 3) & 0xf8) | reg) << 16);
+    this.opLast = (this.opLast & 0xffff) | ((this.opLast & ~0xffff) << 8) | ((((step << 3) & 0xf8) | reg) << 16);
 
-    return virtualAddress;
+    return addrVirtual;
 };
 
 /**
@@ -2127,59 +2125,59 @@ CPUStatePDP11.prototype.getVirtualAddrByMode = function(mode, reg, access)
 };
 
 /**
- * readWordFromPhysical(physicalAddress)
+ * readWordFromPhysical(addr)
  *
  * This is a handler set up by setMemoryAccess().  All calls should go through readWord().
  *
  * @this {CPUStatePDP11}
- * @param {number} physicalAddress
+ * @param {number} addr
  * @return {number}
  */
-CPUStatePDP11.prototype.readWordFromPhysical = function(physicalAddress)
+CPUStatePDP11.prototype.readWordFromPhysical = function(addr)
 {
-    return this.bus.getWord(this.lastAddr = physicalAddress);
+    return this.bus.getWord(this.addrLast = addr);
 };
 
 /**
- * readWordFromVirtual(virtualAddress)
+ * readWordFromVirtual(addrVirtual)
  *
  * This is a handler set up by setMemoryAccess().  All calls should go through readWord().
  *
  * @this {CPUStatePDP11}
- * @param {number} virtualAddress (input address is 17 bit (I&D))
+ * @param {number} addrVirtual (input address is 17 bit (I&D))
  * @return {number}
  */
-CPUStatePDP11.prototype.readWordFromVirtual = function(virtualAddress)
+CPUStatePDP11.prototype.readWordFromVirtual = function(addrVirtual)
 {
-    return this.bus.getWord(this.lastAddr = this.mapVirtualToPhysical(virtualAddress, PDP11.ACCESS.READ_WORD));
+    return this.bus.getWord(this.addrLast = this.mapVirtualToPhysical(addrVirtual, PDP11.ACCESS.READ_WORD));
 };
 
 /**
- * writeWordToPhysical(physicalAddress, data)
+ * writeWordToPhysical(addr, data)
  *
  * This is a handler set up by setMemoryAccess().  All calls should go through writeWord().
  *
  * @this {CPUStatePDP11}
- * @param {number} physicalAddress
+ * @param {number} addr
  * @param {number} data
  */
-CPUStatePDP11.prototype.writeWordToPhysical = function(physicalAddress, data)
+CPUStatePDP11.prototype.writeWordToPhysical = function(addr, data)
 {
-    this.bus.setWord(this.lastAddr = physicalAddress, data & 0xffff);
+    this.bus.setWord(this.addrLast = addr, data & 0xffff);
 };
 
 /**
- * writeWordToVirtual(virtualAddress, data)
+ * writeWordToVirtual(addrVirtual, data)
  *
  * This is a handler set up by setMemoryAccess().  All calls should go through writeWord().
  *
  * @this {CPUStatePDP11}
- * @param {number} virtualAddress (input address is 17 bit (I&D))
+ * @param {number} addrVirtual (input address is 17 bit (I&D))
  * @param {number} data
  */
-CPUStatePDP11.prototype.writeWordToVirtual = function(virtualAddress, data)
+CPUStatePDP11.prototype.writeWordToVirtual = function(addrVirtual, data)
 {
-    this.bus.setWord(this.lastAddr = this.mapVirtualToPhysical(virtualAddress, PDP11.ACCESS.WRITE_WORD), data);
+    this.bus.setWord(this.addrLast = this.mapVirtualToPhysical(addrVirtual, PDP11.ACCESS.WRITE_WORD), data);
 };
 
 /**
@@ -2223,7 +2221,7 @@ CPUStatePDP11.prototype.readWordFromPrevSpace = function(opCode, access)
  */
 CPUStatePDP11.prototype.writeWordToPrevSpace = function(opCode, access, data)
 {
-    this.lastOp = (this.lastOp & 0xffff) | (0x0016 << 16);
+    this.opLast = (this.opLast & 0xffff) | (0x0016 << 16);
     var reg = this.dstReg = opCode & PDP11.OPREG.MASK;
     var mode = this.dstMode = (opCode & PDP11.OPMODE.MASK) >> PDP11.OPMODE.SHIFT;
     if (!mode) {

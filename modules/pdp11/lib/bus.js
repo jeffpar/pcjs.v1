@@ -103,6 +103,9 @@ function BusPDP11(parmsBus, cpu, dbg)
     this.nBlockMask = this.nBlockTotal - 1;
     this.assert(this.nBlockMask <= BusPDP11.BlockInfo.num.mask);
 
+    this.iBlockIOPageDefault = ((this.addrTotal - BusPDP11.IOPAGE_LENGTH) & this.nBusMask) >>> this.nBlockShift;
+    this.iBlockIOPageActive = this.iBlockIOPageDefault;
+
     /*
      * aIOHandlers is an array (ie, a hash) of I/O notification handlers, indexed by address, where each
      * entry contains an array:
@@ -171,7 +174,6 @@ BusPDP11.IOPAGE_LENGTH  =   0x2000;                             // ie, 8Kb
 BusPDP11.IOPAGE_MASK    = BusPDP11.IOPAGE_LENGTH - 1;
 
 BusPDP11.UNIBUS_22BIT   = 0x3C0000; /*017000000*/
-BusPDP11.MAX_MEMORY     = BusPDP11.UNIBUS_22BIT - 16384;        // Maximum memory address (need less memory for BSD 2.9 boot)
 
 BusPDP11.ERROR = {
     RANGE_INUSE:        1,
@@ -497,6 +499,7 @@ BusPDP11.prototype.setIOPageRange = function(nRange)
             addr = (1 << nRange);
             this.nBusMask = (addr - 1);
             addr -= BusPDP11.IOPAGE_LENGTH;
+            this.iBlockIOPageActive = (addr & this.nBusMask) >>> this.nBlockShift;
             this.aIOPrevBlocks = this.getMemoryBlocks(addr, BusPDP11.IOPAGE_LENGTH);
             if (this.aIOPageBlocks) {
                 this.setMemoryBlocks(addr, BusPDP11.IOPAGE_LENGTH, this.aIOPageBlocks);
@@ -922,15 +925,31 @@ BusPDP11.prototype.setMemoryBlocks = function(addr, size, aBlocks, type)
  */
 BusPDP11.prototype.getByte = function(addr)
 {
-    /*
-     * If bits 18-21 of addr are all set (which is implied by addr >= BusPDP11.UNIBUS_22BIT aka 0x3C0000),
-     * then we have a 22-bit address pointing to the top 256Kb range, so we must pass the address through the
-     * UNIBUS relocation map.
-     */
-    if (addr >= BusPDP11.UNIBUS_22BIT) {
-        addr = this.cpu.mapUnibus(addr);
-    }
+    if (addr >= BusPDP11.UNIBUS_22BIT) addr = this.cpu.mapUnibus(addr);
     return this.aMemBlocks[(addr & this.nBusMask) >>> this.nBlockShift].readByte(addr & this.nBlockLimit, addr);
+};
+
+/**
+ * getBlockDirect(addr)
+ *
+ * This checks for block requests matching the active IOPAGE block and redirects to the original block;
+ * conversely, if the request is for the default IOPAGE block, then the request is redirected to the active
+ * IOPAGE block.
+ *
+ * @this {BusPDP11}
+ * @param {number} addr is a physical address
+ * @return {MemoryPDP11}
+ */
+BusPDP11.prototype.getBlockDirect = function(addr)
+{
+    var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
+    var block = this.aMemBlocks[iBlock];
+    if (iBlock == this.iBlockIOPageActive && this.aIOPrevBlocks.length) {
+        block = this.aIOPrevBlocks[0];
+    } else if (iBlock == this.iBlockIOPageDefault) {
+        block = this.aMemBlocks[this.iBlockIOPageActive];
+    }
+    return block;
 };
 
 /**
@@ -944,17 +963,10 @@ BusPDP11.prototype.getByte = function(addr)
  */
 BusPDP11.prototype.getByteDirect = function(addr)
 {
-    /*
-     * If bits 18-21 of addr are all set (which is implied by addr >= BusPDP11.UNIBUS_22BIT aka 0x3C0000),
-     * then we have a 22-bit address pointing to the top 256Kb range, so we must pass the address through the
-     * UNIBUS relocation map.
-     */
-    if (addr >= BusPDP11.UNIBUS_22BIT) {
-        addr = this.cpu.mapUnibus(addr);
-    }
     this.fFault = false;
     this.nDisableFaults++;
-    var b = this.aMemBlocks[(addr & this.nBusMask) >>> this.nBlockShift].readByteDirect(addr & this.nBlockLimit, addr);
+    if (addr >= BusPDP11.UNIBUS_22BIT) addr = this.cpu.mapUnibus(addr);
+    var b = this.getBlockDirect(addr).readByteDirect(addr & this.nBlockLimit, addr);
     this.nDisableFaults--;
     return b;
 };
@@ -968,14 +980,7 @@ BusPDP11.prototype.getByteDirect = function(addr)
  */
 BusPDP11.prototype.getWord = function(addr)
 {
-    /*
-     * If bits 18-21 of addr are all set (which is implied by addr >= BusPDP11.UNIBUS_22BIT aka 0x3C0000),
-     * then we have a 22-bit address pointing to the top 256Kb range, so we must pass the address through the
-     * UNIBUS relocation map.
-     */
-    if (addr >= BusPDP11.UNIBUS_22BIT) {
-        addr = this.cpu.mapUnibus(addr);
-    }
+    if (addr >= BusPDP11.UNIBUS_22BIT) addr = this.cpu.mapUnibus(addr);
     var off = addr & this.nBlockLimit;
     var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
     if (!PDP11.WORDBUS && off == this.nBlockLimit) {
@@ -995,23 +1000,16 @@ BusPDP11.prototype.getWord = function(addr)
  */
 BusPDP11.prototype.getWordDirect = function(addr)
 {
-    /*
-     * If bits 18-21 of addr are all set (which is implied by addr >= BusPDP11.UNIBUS_22BIT aka 0x3C0000),
-     * then we have a 22-bit address pointing to the top 256Kb range, so we must pass the address through the
-     * UNIBUS relocation map.
-     */
-    if (addr >= BusPDP11.UNIBUS_22BIT) {
-        addr = this.cpu.mapUnibus(addr);
-    }
     var w;
-    var off = addr & this.nBlockLimit;
-    var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
     this.fFault = false;
     this.nDisableFaults++;
+    if (addr >= BusPDP11.UNIBUS_22BIT) addr = this.cpu.mapUnibus(addr);
+    var off = addr & this.nBlockLimit;
+    var block = this.getBlockDirect(addr);
     if (!PDP11.WORDBUS && off == this.nBlockLimit) {
-        w = this.aMemBlocks[iBlock++].readByteDirect(off, addr) | (this.aMemBlocks[iBlock & this.nBlockMask].readByteDirect(0, addr + 1) << 8);
+        w = block.readByteDirect(off, addr) | (this.getBlockDirect(addr + 1).readByteDirect(0, addr + 1) << 8);
     } else {
-        w = this.aMemBlocks[iBlock].readWordDirect(off, addr);
+        w = block.readWordDirect(off, addr);
     }
     this.nDisableFaults--;
     return w;
@@ -1026,14 +1024,7 @@ BusPDP11.prototype.getWordDirect = function(addr)
  */
 BusPDP11.prototype.setByte = function(addr, b)
 {
-    /*
-     * If bits 18-21 of addr are all set (which is implied by addr >= BusPDP11.UNIBUS_22BIT aka 0x3C0000),
-     * then we have a 22-bit address pointing to the top 256Kb range, so we must pass the address through the
-     * UNIBUS relocation map.
-     */
-    if (addr >= BusPDP11.UNIBUS_22BIT) {
-        addr = this.cpu.mapUnibus(addr);
-    }
+    if (addr >= BusPDP11.UNIBUS_22BIT) addr = this.cpu.mapUnibus(addr);
     this.aMemBlocks[(addr & this.nBusMask) >>> this.nBlockShift].writeByte(addr & this.nBlockLimit, b & 0xff, addr);
 };
 
@@ -1049,17 +1040,10 @@ BusPDP11.prototype.setByte = function(addr, b)
  */
 BusPDP11.prototype.setByteDirect = function(addr, b)
 {
-    /*
-     * If bits 18-21 of addr are all set (which is implied by addr >= BusPDP11.UNIBUS_22BIT aka 0x3C0000),
-     * then we have a 22-bit address pointing to the top 256Kb range, so we must pass the address through the
-     * UNIBUS relocation map.
-     */
-    if (addr >= BusPDP11.UNIBUS_22BIT) {
-        addr = this.cpu.mapUnibus(addr);
-    }
     this.fFault = false;
     this.nDisableFaults++;
-    this.aMemBlocks[(addr & this.nBusMask) >>> this.nBlockShift].writeByteDirect(addr & this.nBlockLimit, b & 0xff, addr);
+    if (addr >= BusPDP11.UNIBUS_22BIT) addr = this.cpu.mapUnibus(addr);
+    this.getBlockDirect(addr).writeByteDirect(addr & this.nBlockLimit, b & 0xff, addr);
     this.nDisableFaults--;
 };
 
@@ -1072,14 +1056,7 @@ BusPDP11.prototype.setByteDirect = function(addr, b)
  */
 BusPDP11.prototype.setWord = function(addr, w)
 {
-    /*
-     * If bits 18-21 of addr are all set (which is implied by addr >= BusPDP11.UNIBUS_22BIT aka 0x3C0000),
-     * then we have a 22-bit address pointing to the top 256Kb range, so we must pass the address through the
-     * UNIBUS relocation map.
-     */
-    if (addr >= BusPDP11.UNIBUS_22BIT) {
-        addr = this.cpu.mapUnibus(addr);
-    }
+    if (addr >= BusPDP11.UNIBUS_22BIT) addr = this.cpu.mapUnibus(addr);
     var off = addr & this.nBlockLimit;
     var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
     if (!PDP11.WORDBUS && off == this.nBlockLimit) {
@@ -1102,23 +1079,16 @@ BusPDP11.prototype.setWord = function(addr, w)
  */
 BusPDP11.prototype.setWordDirect = function(addr, w)
 {
-    /*
-     * If bits 18-21 of addr are all set (which is implied by addr >= BusPDP11.UNIBUS_22BIT aka 0x3C0000),
-     * then we have a 22-bit address pointing to the top 256Kb range, so we must pass the address through the
-     * UNIBUS relocation map.
-     */
-    if (addr >= BusPDP11.UNIBUS_22BIT) {
-        addr = this.cpu.mapUnibus(addr);
-    }
-    var off = addr & this.nBlockLimit;
-    var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
     this.fFault = false;
     this.nDisableFaults++;
+    if (addr >= BusPDP11.UNIBUS_22BIT) addr = this.cpu.mapUnibus(addr);
+    var off = addr & this.nBlockLimit;
+    var block = this.getBlockDirect(addr);
     if (!PDP11.WORDBUS && off == this.nBlockLimit) {
-        this.aMemBlocks[iBlock++].writeByteDirect(off, w & 0xff, addr);
-        this.aMemBlocks[iBlock & this.nBlockMask].writeByteDirect(0, (w >> 8) & 0xff, addr + 1);
+        block.writeByteDirect(off, w & 0xff, addr);
+        this.getBlockDirect(addr + 1).writeByteDirect(0, (w >> 8) & 0xff, addr + 1);
     } else {
-        this.aMemBlocks[iBlock].writeWordDirect(off, w & 0xffff, addr);
+        block.writeWordDirect(off, w & 0xffff, addr);
     }
     this.nDisableFaults--;
 };
@@ -1246,8 +1216,8 @@ BusPDP11.prototype.restoreMemory = function(a)
 /**
  * getMemorySize(type)
  *
- * NOTE: The original pdp11.js defined MAX_MEMORY as IOBASE_UNIBUS - 16384, where IOBASE_UNIBUS
- * is 4Mb less 256Kb, and then it subtracted another 16Kb so that BSD 2.9 could boot.
+ * NOTE: The original pdp11.js defined a constant named MAX_MEMORY equal to UNIBUS_22BIT - 16384,
+ * where UNIBUS_22BIT is 4Mb less 256Kb, from which it then subtracted another 16Kb "for BSD 2.9 boot."
  *
  * @this {BusPDP11}
  * @param {number} type is one of the MemoryPDP11.TYPE constants (only RAM is currently supported)
