@@ -349,7 +349,7 @@ RAMPDP11.prototype.loadImage = function(aBytes, addrLoad, addrExec, addrInit, fR
             } else {
                 this.printMessage("loading " + str.toHexWord(cbData) + " bytes at " + str.toHexWord(addr) + "-" + str.toHexWord(addr + cbData - 1), MessagesPDP11.PAPER);
                 while (cbData--) {
-                    this.cpu.setByteDirect(addr++, aBytes[offData++] & 0xff);
+                    this.bus.setByteDirect(addr++, aBytes[offData++] & 0xff);
                 }
             }
             fLoaded = true;
@@ -359,7 +359,7 @@ RAMPDP11.prototype.loadImage = function(aBytes, addrLoad, addrExec, addrInit, fR
         if (addrLoad == null) addrLoad = addrInit;
         if (addrLoad != null) {
             for (var i = 0; i < aBytes.length; i++) {
-                this.cpu.setByteDirect(addrLoad + i, aBytes[i]);
+                this.bus.setByteDirect(addrLoad + i, aBytes[i]);
             }
             fLoaded = true;
         }

@@ -301,7 +301,7 @@ DevicePDP11.prototype.writeMMR3 = function(data, addr)
 DevicePDP11.prototype.readUNIMAP = function(addr)
 {
     var word = (addr >> 1) & 0x3f, reg = word >> 1;
-    var data = this.cpu.unibusMap[reg];
+    var data = this.cpu.regsUniMap[reg];
     return (word & 1)? (data >> 16) : (data & 0xffff);
 };
 
@@ -318,9 +318,9 @@ DevicePDP11.prototype.writeUNIMAP = function(data, addr)
 {
     var word = (addr >> 1) & 0x3f, reg = word >> 1;
     if (word & 1) {
-        this.cpu.unibusMap[reg] = (this.cpu.unibusMap[reg] & 0xffff) | ((data & 0x003f) << 16);
+        this.cpu.regsUniMap[reg] = (this.cpu.regsUniMap[reg] & 0xffff) | ((data & 0x003f) << 16);
     } else {
-        this.cpu.unibusMap[reg] = (this.cpu.unibusMap[reg] & ~0xffff) | (data & 0xfffe);
+        this.cpu.regsUniMap[reg] = (this.cpu.regsUniMap[reg] & ~0xffff) | (data & 0xfffe);
     }
 };
 
@@ -454,10 +454,7 @@ DevicePDP11.prototype.readKIPDR = function(addr)
 DevicePDP11.prototype.writeKIPDR = function(data, addr)
 {
     var reg = (addr >> 1) & 7;
-    this.cpu.mmuPDR[0][reg] = data &= 0xff0f;
-    if (this.messageEnabled(MessagesPDP11.MMU)) {
-        this.printMessage("writeKIPDR[" + reg + "]: " + str.toOct(data), true);
-    }
+    this.cpu.mmuPDR[0][reg] = data & 0xff0f;
 };
 
 /**
@@ -892,13 +889,7 @@ DevicePDP11.prototype.writeCTRL = function(data, addr)
  */
 DevicePDP11.prototype.readSIZE = function(addr)
 {
-    /*
-     * TODO: getMemorySize() returns an aggregate total, so if there are multiple discontiguous
-     * chunks of RAM, this could return the wrong result; another interface, getHighestAddress(),
-     * might be required.  Then again, perhaps multiple discontiguous chunks of RAM are not permitted
-     * in PDP-11 machines.
-     */
-    return addr == PDP11.UNIBUS.LSIZE? ((this.bus.getMemorySize(MemoryPDP11.TYPE.RAM) >> 6) - 1) : 0;
+    return addr == PDP11.UNIBUS.LSIZE? ((this.bus.getMemoryLimit(MemoryPDP11.TYPE.RAM) >> 6) - 1) : 0;
 };
 
 /**

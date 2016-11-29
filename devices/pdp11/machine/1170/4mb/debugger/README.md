@@ -8,8 +8,8 @@ machines:
     debugger: true
     autoStart: true
     autoMount:
-      RL0:
-        path: http://archive.pcjs.org/disks/dec/rl02k/RL02K-XXDP.json
+      RL2:
+        path: http://archive.pcjs.org/disks/dec/rl01k/RL01K-RSTS-V70.json
 ---
 
 {% include machine.html id="test1170" %}

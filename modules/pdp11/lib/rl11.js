@@ -918,10 +918,10 @@ RL11.prototype.processCommand = function()
         break;
 
     case PDP11.RL11.FUNC.STATUS:
-        if (this.dar & PDP11.RL11.RLDA.GS_RST) {
-            this.csr &= 0x3F;                                   // TODO: Review
+        if (this.mpr & PDP11.RL11.RLMP.GS_BH) {
+            this.csr &= (PDP11.RL11.RLCS.DRDY | PDP11.RL11.RLCS.FUNC | PDP11.RL11.RLCS.BAE);    // TODO: Review
         }
-        this.mpr = drive.status | (this.darInternal & PDP11.RL11.RLDA.RW_HS);    // bit 6: Head Select, bit 7: Drive Type (1=RL02)
+        this.mpr = drive.status | (this.darInternal & PDP11.RL11.RLDA.RW_HS);   // bit 6: Head Select, bit 7: Drive Type (1=RL02)
         break;
 
     case PDP11.RL11.FUNC.SEEK:
@@ -956,11 +956,11 @@ RL11.prototype.processCommand = function()
         }
         addr = (((this.ber & PDP11.RL11.RLBE.MASK)) << 16) | this.bar;   // 22 bit mode
         nWords = (0x10000 - this.mpr) & 0xffff;
+        var pos = ((((iCylinder << 1) + iHead) * drive.nSectors) + iSector) * 128;
         if (DEBUG && this.messageEnabled(MessagesPDP11.READ)) {
-            var pos = ((((iCylinder << 1) + iHead) * drive.nSectors) + iSector) * 128;
             this.printMessage((fnReadWrite == this.readData? "readData" : "writeData") + "(pos=" + pos + ",addr=" + str.toOct(addr) + ",bytes=" + (nWords * 2) + ")", true, true);
         }
-        fInterrupt = fnReadWrite.call(this, drive, iCylinder, iHead, iSector, nWords, addr, this.endReadWrite.bind(this));
+        fInterrupt = fnReadWrite.call(this, drive, pos, iCylinder, iHead, iSector, nWords, addr, this.endReadWrite.bind(this));
         break;
 
     default:
@@ -972,8 +972,6 @@ RL11.prototype.processCommand = function()
         if (this.csr & PDP11.RL11.RLCS.IE) this.cpu.setIRQ(this.irq);
     }
 };
-
-
 
 /**
  * endReadWrite(err, iCylinder, iHead, iSector, nWords, addr)
@@ -1002,10 +1000,11 @@ RL11.prototype.endReadWrite = function(err, iCylinder, iHead, iSector, nWords, a
 };
 
 /**
- * readData(drive, iCylinder, iHead, iSector, nWords, addr, done)
+ * readData(drive, pos, iCylinder, iHead, iSector, nWords, addr, done)
  *
  * @this {RL11}
  * @param {Object} drive
+ * @param {number} pos
  * @param {number} iCylinder
  * @param {number} iHead
  * @param {number} iSector
@@ -1014,9 +1013,10 @@ RL11.prototype.endReadWrite = function(err, iCylinder, iHead, iSector, nWords, a
  * @param {function(...)} done
  * @return {boolean} true if complete, false if queued
  */
-RL11.prototype.readData = function(drive, iCylinder, iHead, iSector, nWords, addr, done)
+RL11.prototype.readData = function(drive, pos, iCylinder, iHead, iSector, nWords, addr, done)
 {
     var err = 0;
+    var checksum = 0;
     var disk = drive.disk;
     var sector = null, ibSector;
 
@@ -1025,6 +1025,7 @@ RL11.prototype.readData = function(drive, iCylinder, iHead, iSector, nWords, add
         nWords = 0;
     }
 
+    var sWords = "", fDump = (addr == 0);
     while (nWords--) {
         if (!sector) {
             sector = drive.disk.seek(iCylinder, iHead, iSector + 1);
@@ -1034,17 +1035,25 @@ RL11.prototype.readData = function(drive, iCylinder, iHead, iSector, nWords, add
             }
             ibSector = 0;
         }
-        var b0, b1;
+        var b0, b1, data;
         if ((b0 = drive.disk.read(sector, ibSector++)) < 0 || (b1 = drive.disk.read(sector, ibSector++)) < 0) {
             err = PDP11.RL11.ERRC.HNF;
             break;
         }
-        var data = this.bus.setWordDirect(addr, b0 | (b1 << 8));
+        this.bus.setWordDirect(this.cpu.mapUnibus(addr), data = b0 | (b1 << 8));
+        if (DEBUG && fDump && this.messageEnabled(MessagesPDP11.READ)) {
+            sWords += str.toOct(data) + ' ';
+            if (sWords.length >= 56) {
+                this.println(sWords);
+                sWords = "";
+            }
+        }
         if (this.bus.checkFault()) {
             err = PDP11.RL11.ERRC.NXM;
             break;
         }
         addr += 2;
+        checksum += data;
         if (ibSector >= disk.cbSector) {
             sector = null;
             if (++iSector >= disk.nSectors) {
@@ -1059,14 +1068,23 @@ RL11.prototype.readData = function(drive, iCylinder, iHead, iSector, nWords, add
             }
         }
     }
+
+    if (DEBUG && this.messageEnabled(MessagesPDP11.READ)) {
+        this.printMessage("checksum: " + (checksum|0), true);
+        if (pos == 732160) {
+            this.cpu.stopCPU();
+        }
+    }
+
     return done(err, iCylinder, iHead, iSector, nWords, addr);
 };
 
 /**
- * writeData(drive, iCylinder, iHead, iSector, nWords, addr, done)
+ * writeData(drive, pos, iCylinder, iHead, iSector, nWords, addr, done)
  *
  * @this {RL11}
  * @param {Object} drive
+ * @param {number} pos
  * @param {number} iCylinder
  * @param {number} iHead
  * @param {number} iSector
@@ -1075,9 +1093,10 @@ RL11.prototype.readData = function(drive, iCylinder, iHead, iSector, nWords, add
  * @param {function(...)} done
  * @return {boolean} true if complete, false if queued
  */
-RL11.prototype.writeData = function(drive, iCylinder, iHead, iSector, nWords, addr, done)
+RL11.prototype.writeData = function(drive, pos, iCylinder, iHead, iSector, nWords, addr, done)
 {
     var err = 0;
+    var checksum = 0;
     var disk = drive.disk;
     var sector = null, ibSector;
 
@@ -1086,13 +1105,22 @@ RL11.prototype.writeData = function(drive, iCylinder, iHead, iSector, nWords, ad
         nWords = 0;
     }
 
+    var sWords = "", fDump = (pos = 946944);
     while (nWords--) {
-        var data = this.bus.getWordDirect(addr);
+        var data = this.bus.getWordDirect(this.cpu.mapUnibus(addr));
         if (this.bus.checkFault()) {
             err = PDP11.RL11.ERRC.NXM;
             break;
         }
+        if (DEBUG && fDump && this.messageEnabled(MessagesPDP11.READ)) {
+            sWords += str.toOct(data) + ' ';
+            if (sWords.length >= 56) {
+                this.println(sWords);
+                sWords = "";
+            }
+        }
         addr += 2;
+        checksum += data;
         if (!sector) {
             sector = drive.disk.seek(iCylinder, iHead, iSector + 1, true);
             if (!sector) {
@@ -1119,6 +1147,11 @@ RL11.prototype.writeData = function(drive, iCylinder, iHead, iSector, nWords, ad
             }
         }
     }
+
+    if (DEBUG && this.messageEnabled(MessagesPDP11.READ)) {
+        this.printMessage("checksum: " + (checksum|0), true);
+    }
+
     return done(err, iCylinder, iHead, iSector, nWords, addr);
 };
 

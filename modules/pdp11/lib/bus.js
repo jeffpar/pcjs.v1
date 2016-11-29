@@ -127,7 +127,6 @@ function BusPDP11(parmsBus, cpu, dbg)
     this.fIOBreakAll = false;
     this.nDisableFaults = 0;
     this.fFault = false;
-    this.cbRAM = 0;
 
     /*
      * Array of RESET notification handlers registered by Device components.
@@ -669,9 +668,6 @@ BusPDP11.prototype.addMemory = function(addr, size, type, controller)
     }
 
     if (sizeLeft <= 0) {
-        if (type == MemoryPDP11.TYPE.RAM) {
-            this.cbRAM += size;
-        }
         this.status((size >> 10) + "Kb " + MemoryPDP11.TYPE_NAMES[type] + " at " + str.toOct(addr));
         return true;
     }
@@ -914,7 +910,6 @@ BusPDP11.prototype.setMemoryBlocks = function(addr, size, aBlocks, type)
  */
 BusPDP11.prototype.getByte = function(addr)
 {
-    if (addr >= BusPDP11.UNIBUS_22BIT) addr = this.cpu.mapUnibus(addr);
     return this.aMemBlocks[(addr & this.nMemMask) >>> this.nBlockShift].readByte(addr & this.nBlockLimit, addr);
 };
 
@@ -933,7 +928,7 @@ BusPDP11.prototype.getBlockDirect = function(addr)
 /**
  * getByteDirect(addr)
  *
- * This is useful for the Debugger and other components that want to access physical memory without side-effects.
+ * This is used for device I/O and Debugger physical memory requests, not the CPU.
  *
  * @this {BusPDP11}
  * @param {number} addr is a physical address
@@ -943,7 +938,6 @@ BusPDP11.prototype.getByteDirect = function(addr)
 {
     this.fFault = false;
     this.nDisableFaults++;
-    if (addr >= BusPDP11.UNIBUS_22BIT) addr = this.cpu.mapUnibus(addr);
     var b = this.getBlockDirect(addr).readByteDirect(addr & this.nBlockLimit, addr);
     this.nDisableFaults--;
     return b;
@@ -958,7 +952,6 @@ BusPDP11.prototype.getByteDirect = function(addr)
  */
 BusPDP11.prototype.getWord = function(addr)
 {
-    if (addr >= BusPDP11.UNIBUS_22BIT) addr = this.cpu.mapUnibus(addr);
     var off = addr & this.nBlockLimit;
     var iBlock = (addr & this.nMemMask) >>> this.nBlockShift;
     if (!PDP11.WORDBUS && off == this.nBlockLimit) {
@@ -970,7 +963,7 @@ BusPDP11.prototype.getWord = function(addr)
 /**
  * getWordDirect(addr)
  *
- * This is useful for the Debugger and other components that want to bypass getWord() breakpoint detection.
+ * This is used for device I/O and Debugger physical memory requests, not the CPU.
  *
  * @this {BusPDP11}
  * @param {number} addr is a physical address
@@ -981,7 +974,6 @@ BusPDP11.prototype.getWordDirect = function(addr)
     var w;
     this.fFault = false;
     this.nDisableFaults++;
-    if (addr >= BusPDP11.UNIBUS_22BIT) addr = this.cpu.mapUnibus(addr);
     var off = addr & this.nBlockLimit;
     var block = this.getBlockDirect(addr);
     if (!PDP11.WORDBUS && off == this.nBlockLimit) {
@@ -1002,15 +994,13 @@ BusPDP11.prototype.getWordDirect = function(addr)
  */
 BusPDP11.prototype.setByte = function(addr, b)
 {
-    if (addr >= BusPDP11.UNIBUS_22BIT) addr = this.cpu.mapUnibus(addr);
     this.aMemBlocks[(addr & this.nMemMask) >>> this.nBlockShift].writeByte(addr & this.nBlockLimit, b & 0xff, addr);
 };
 
 /**
  * setByteDirect(addr, b)
  *
- * This is useful for the Debugger and other components that want to bypass breakpoint detection AND read-only
- * memory protection (for example, this is an interface the ROM component could use to initialize ROM contents).
+ * This is used for device I/O and Debugger physical memory requests, not the CPU.
  *
  * @this {BusPDP11}
  * @param {number} addr is a physical address
@@ -1020,7 +1010,6 @@ BusPDP11.prototype.setByteDirect = function(addr, b)
 {
     this.fFault = false;
     this.nDisableFaults++;
-    if (addr >= BusPDP11.UNIBUS_22BIT) addr = this.cpu.mapUnibus(addr);
     this.getBlockDirect(addr).writeByteDirect(addr & this.nBlockLimit, b & 0xff, addr);
     this.nDisableFaults--;
 };
@@ -1034,7 +1023,6 @@ BusPDP11.prototype.setByteDirect = function(addr, b)
  */
 BusPDP11.prototype.setWord = function(addr, w)
 {
-    if (addr >= BusPDP11.UNIBUS_22BIT) addr = this.cpu.mapUnibus(addr);
     var off = addr & this.nBlockLimit;
     var iBlock = (addr & this.nMemMask) >>> this.nBlockShift;
     if (!PDP11.WORDBUS && off == this.nBlockLimit) {
@@ -1048,8 +1036,7 @@ BusPDP11.prototype.setWord = function(addr, w)
 /**
  * setWordDirect(addr, w)
  *
- * This is useful for the Debugger and other components that want to bypass breakpoint detection AND read-only
- * memory protection (for example, this is an interface the ROM component could use to initialize ROM contents).
+ * This is used for device I/O and Debugger physical memory requests, not the CPU.
  *
  * @this {BusPDP11}
  * @param {number} addr is a physical address
@@ -1059,7 +1046,6 @@ BusPDP11.prototype.setWordDirect = function(addr, w)
 {
     this.fFault = false;
     this.nDisableFaults++;
-    if (addr >= BusPDP11.UNIBUS_22BIT) addr = this.cpu.mapUnibus(addr);
     var off = addr & this.nBlockLimit;
     var block = this.getBlockDirect(addr);
     if (!PDP11.WORDBUS && off == this.nBlockLimit) {
@@ -1192,24 +1178,22 @@ BusPDP11.prototype.restoreMemory = function(a)
 };
 
 /**
- * getMemorySize(type)
- *
- * NOTE: The original pdp11.js defined a constant named MAX_MEMORY equal to UNIBUS_22BIT - 16384,
- * where UNIBUS_22BIT is 4Mb less 256Kb, from which it then subtracted another 16Kb "for BSD 2.9 boot."
+ * getMemoryLimit(type)
  *
  * @this {BusPDP11}
- * @param {number} type is one of the MemoryPDP11.TYPE constants (only RAM is currently supported)
- * @return {number} (size of initial allocation, in bytes)
+ * @param {number} type is one of the MemoryPDP11.TYPE constants
+ * @return {number} (the limiting address of the specified memory type, zero if none)
  */
-BusPDP11.prototype.getMemorySize = function(type)
+BusPDP11.prototype.getMemoryLimit = function(type)
 {
-    var cb = 0;
-    switch(type) {
-    case MemoryPDP11.TYPE.RAM:
-        cb = this.cbRAM;
-        break;
+    var addr = 0;
+    for (var iBlock = 0; iBlock < this.aBusBlocks.length; iBlock++) {
+        var block = this.aBusBlocks[iBlock];
+        if (block.type == type) {
+            addr = block.addr + block.used;
+        }
     }
-    return cb;
+    return addr;
 };
 
 /**

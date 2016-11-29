@@ -216,7 +216,7 @@ CPUStatePDP11.prototype.initRegs = function()
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],   // mode 2 (not used)
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]    // USER   (8 UIPDR regs followed by 8 UDPDR regs)
     ];
-    this.unibusMap = [          // 32 unibus map registers
+    this.regsUniMap = [         // 32 UNIBUS map registers
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     ];
     this.regsControl = [        // various control registers (177740-177756) we don't really care about
@@ -278,7 +278,7 @@ CPUStatePDP11.prototype.resetMMU = function()
 
     if (this.bus) {
         this.setMemoryAccess();
-        this.addrInvalid = this.bus.getMemorySize(MemoryPDP11.TYPE.RAM);
+        this.addrInvalid = this.bus.getMemoryLimit(MemoryPDP11.TYPE.RAM);
     }
 };
 
@@ -1394,6 +1394,13 @@ CPUStatePDP11.prototype.trap = function(vector, flag, reason)
     this.setPC(newPC);
 
     /*
+     * TODO: Determine the appropriate number of cycles for traps; all I've done for now is move the
+     * cycle charge from opTrap() to here, and reduced the amount the other opcode handlers that call
+     * trap() charge by a corresponding amount (5).
+     */
+    this.nStepCycles -= (4 + 1);
+
+    /*
      * DEC's "TRAP TEST" (MAINDEC-11-D0NA-PB) triggers a RESERVED trap with an invalid opcode and the
      * stack deliberately set too low, and expects the stack overflow trap to be "sprung" immediately
      * afterward, so we only want to "lose interest" in the TRAP flag(s) that were set on entry, not ALL
@@ -1513,22 +1520,28 @@ CPUStatePDP11.prototype.getTrapStatus = function()
  */
 CPUStatePDP11.prototype.mapUnibus = function(addr)
 {
-    var idx = (addr >> 13) & 0x1f;
-    if (idx < 31) {
-        if (this.regMMR3 & PDP11.MMR3.UNIBUS_MAP) {
-            /*
-             * The UNIBUS map relocation is enabled
-             */
-            addr = (this.unibusMap[idx] + (addr & 0x1ffe)) & 0x3ffffe;
-            this.assert(addr < BusPDP11.UNIBUS_22BIT || addr >= BusPDP11.IOPAGE_22BIT);
-        } else {
-            /*
-             * Since UNIBUS map relocation is NOT enabled, then as explained above:
-             *
-             *      If the UNIBUS map relocation is not enabled, an incoming 18-bit UNIBUS address has 4 leading zeroes added for
-             *      referencing a 22-bit physical address. The lower 18 bits are the same. No relocation is performed.
-             */
-            addr &= ~BusPDP11.UNIBUS_22BIT;
+    /*
+     * NOTE: Most callers check the first condition themselves (addr >= BusPDP11.UNIBUS_22BIT) to avoid
+     * making unnecessary function calls.
+     */
+    if (addr >= BusPDP11.UNIBUS_22BIT) {
+        var idx = (addr >> 13) & 0x1f;
+        if (idx < 31) {
+            if (this.regMMR3 & PDP11.MMR3.UNIBUS_MAP) {
+                /*
+                 * The UNIBUS map relocation is enabled
+                 */
+                addr = (this.regsUniMap[idx] + (addr & 0x1ffe)) & 0x3ffffe;
+                this.assert(addr < BusPDP11.UNIBUS_22BIT || addr >= BusPDP11.IOPAGE_22BIT);
+            } else {
+                /*
+                 * Since UNIBUS map relocation is NOT enabled, then as explained above:
+                 *
+                 *      If the UNIBUS map relocation is not enabled, an incoming 18-bit UNIBUS address has 4 leading zeroes added for
+                 *      referencing a 22-bit physical address. The lower 18 bits are the same. No relocation is performed.
+                 */
+                addr &= ~BusPDP11.UNIBUS_22BIT;
+            }
         }
     }
     return addr;
@@ -1559,7 +1572,7 @@ CPUStatePDP11.prototype.mapUnibus = function(addr)
  * A PDP-11/70 is different from other PDP-11s in that the highest 18 bit space (017000000 & above)
  * maps directly to UNIBUS space - including low memory. This doesn't appear to be particularly
  * useful as it restricts maximum system memory - although it does appear to allow software
- * testing of the unibus map.  This feature also appears to confuse some OSes which test consecutive
+ * testing of the UNIBUS map.  This feature also appears to confuse some OSes which test consecutive
  * memory locations to find maximum memory -- and on a full memory system find themselves accessing
  * low memory again at high addresses.
  *
@@ -1594,13 +1607,11 @@ CPUStatePDP11.prototype.mapVirtualToPhysical = function(addrVirtual, access)
     var page, pdr, addr;
 
     /*
-     * This can happen when the DSTMODE (MAINT) bit of MMR0 is set but *not* the ENABLED bit.
+     * This can happen when the DSTMODE (MAINT) bit of MMR0 is set but not the ENABLED bit.
      */
     if (!(access & this.mmuEnable)) {
         addr = addrVirtual & 0xffff;
-        if (addr >= BusPDP11.IOPAGE_16BIT) {
-            addr |= this.addrIOPage;
-        }
+        if (addr >= BusPDP11.IOPAGE_16BIT) addr |= this.addrIOPage;
         return addr;
     }
 
@@ -1609,9 +1620,7 @@ CPUStatePDP11.prototype.mapVirtualToPhysical = function(addrVirtual, access)
     pdr = this.mmuPDR[this.mmuMode][page];
     addr = ((this.mmuPAR[this.mmuMode][page] << 6) + (addrVirtual & 0x1fff)) & this.mmuMask;
 
-    if (addr >= BusPDP11.UNIBUS_22BIT) {
-        addr = this.mapUnibus(addr);
-    }
+    if (addr >= BusPDP11.UNIBUS_22BIT) addr = this.mapUnibus(addr);
 
     if (this.nDisableTraps) return addr;
 
@@ -2009,20 +2018,16 @@ CPUStatePDP11.prototype.checkStackLimit1145 = function(access, step, addr)
 };
 
 /**
- * getByteDirect(addr)
+ * getByteSafe(addr)
  *
- * This interface is expressly for the Debugger, to access virtual memory without faulting;
- * note that if the MMU is not enabled, this is effectively the same as using the Bus interface.
+ * This interface is expressly for the Debugger, to access virtual memory without faulting.
  *
  * @this {CPUStatePDP11}
  * @param {number} addr
  * @return {number}
  */
-CPUStatePDP11.prototype.getByteDirect = function(addr)
+CPUStatePDP11.prototype.getByteSafe = function(addr)
 {
-    if (!this.mmuEnable) {
-        return this.bus.getByteDirect(addr);
-    }
     this.nDisableTraps++;
     var b = this.readByteFromPhysical(this.mapVirtualToPhysical(addr, PDP11.ACCESS.READ_BYTE));
     this.nDisableTraps--;
@@ -2030,20 +2035,16 @@ CPUStatePDP11.prototype.getByteDirect = function(addr)
 };
 
 /**
- * getWordDirect(addr)
+ * getWordSafe(addr)
  *
- * This interface is expressly for the Debugger, to access virtual memory without faulting;
- * note that if the MMU is not enabled, this is effectively the same as using the Bus interface.
+ * This interface is expressly for the Debugger, to access virtual memory without faulting.
  *
  * @this {CPUStatePDP11}
  * @param {number} addr
  * @return {number}
  */
-CPUStatePDP11.prototype.getWordDirect = function(addr)
+CPUStatePDP11.prototype.getWordSafe = function(addr)
 {
-    if (!this.mmuEnable) {
-        return this.bus.getWordDirect(addr);
-    }
     this.nDisableTraps++;
     var w = this.readWordFromPhysical(this.mapVirtualToPhysical(addr, PDP11.ACCESS.READ_WORD));
     this.nDisableTraps--;
@@ -2051,42 +2052,32 @@ CPUStatePDP11.prototype.getWordDirect = function(addr)
 };
 
 /**
- * setByteDirect(addr, data)
+ * setByteSafe(addr, data)
  *
- * This interface is expressly for the Debugger, to access virtual memory without faulting;
- * note that if the MMU is not enabled, this is effectively the same as using the Bus interface.
+ * This interface is expressly for the Debugger, to access virtual memory without faulting.
  *
  * @this {CPUStatePDP11}
  * @param {number} addr
  * @param {number} data
  */
-CPUStatePDP11.prototype.setByteDirect = function(addr, data)
+CPUStatePDP11.prototype.setByteSafe = function(addr, data)
 {
-    if (!this.mmuEnable) {
-        this.bus.setByteDirect(addr, data);
-        return;
-    }
     this.nDisableTraps++;
     this.writeByteToPhysical(this.mapVirtualToPhysical(addr, PDP11.ACCESS.WRITE_BYTE), data);
     this.nDisableTraps--;
 };
 
 /**
- * setWordDirect(addr, data)
+ * setWordSafe(addr, data)
  *
- * This interface is expressly for the Debugger, to access virtual memory without faulting;
- * note that if the MMU is not enabled, this is effectively the same as using the Bus interface.
+ * This interface is expressly for the Debugger, to access virtual memory without faulting.
  *
  * @this {CPUStatePDP11}
  * @param {number} addr
  * @param {number} data
  */
-CPUStatePDP11.prototype.setWordDirect = function(addr, data)
+CPUStatePDP11.prototype.setWordSafe = function(addr, data)
 {
-    if (!this.mmuEnable) {
-        this.bus.setWordDirect(addr, data);
-        return;
-    }
     this.nDisableTraps++;
     this.writeWordToPhysical(this.mapVirtualToPhysical(addr, PDP11.ACCESS.WRITE_WORD), data);
     this.nDisableTraps--;
@@ -2105,7 +2096,9 @@ CPUStatePDP11.prototype.setWordDirect = function(addr, data)
  */
 CPUStatePDP11.prototype.getPhysicalAddrByMode = function(mode, reg, access)
 {
-    return this.getAddrByMode(mode, reg, access);
+    var addr = this.getAddrByMode(mode, reg, access);
+    if (addr >= BusPDP11.UNIBUS_22BIT) addr = this.mapUnibus(addr);
+    return addr;
 };
 
 /**
@@ -2135,6 +2128,7 @@ CPUStatePDP11.prototype.getVirtualAddrByMode = function(mode, reg, access)
  */
 CPUStatePDP11.prototype.readWordFromPhysical = function(addr)
 {
+    if (addr >= BusPDP11.UNIBUS_22BIT) addr = this.mapUnibus(addr);
     return this.bus.getWord(this.addrLast = addr);
 };
 
@@ -2163,6 +2157,7 @@ CPUStatePDP11.prototype.readWordFromVirtual = function(addrVirtual)
  */
 CPUStatePDP11.prototype.writeWordToPhysical = function(addr, data)
 {
+    if (addr >= BusPDP11.UNIBUS_22BIT) addr = this.mapUnibus(addr);
     this.bus.setWord(this.addrLast = addr, data & 0xffff);
 };
 

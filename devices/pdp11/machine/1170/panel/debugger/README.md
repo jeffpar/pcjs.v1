@@ -21,8 +21,8 @@ As DEC notes in the [PDP-11/70 Maintenance Service Guide](http://archive.pcjs.or
 Chapter 4: "There are several useful toggle-ins that are probably not very well known."  Excerpts are provided below.  If you're
 not sure how to "toggle in" code using a Front Panel, check out [Front Panel Basics](/devices/pdp11/panel/1170/#front-panel-basics).
 
-However, since the above machine also includes the PDPjs Debugger, you'll find that it's much easier to use the Debugger commands
-described below to load and execute these "toggle-ins". 
+However, since the above machine also includes the PDPjs Debugger, you'll find that it's much easier to use the
+Debugger commands described below to load and execute these "toggle-ins". 
 
 ### Memory Management
 
@@ -82,7 +82,10 @@ which should produce these results:
 	stopped (3 instructions, 32 cycles, 9 ms, 3556 hz)
 	R0=000000 R1=000000 R2=000000 R3=000000 R4=000000 R5=000000 
 	SP=000000 PC=000214 PS=000001 SW=00000000 T0 N0 Z0 V0 C1 
-	000214: 000000                 HALT 
+	000214: 000000                 HALT
+
+and dumping the contents of virtual address 300 should display 070707:
+
 	>> d 300 l1
 	000300  070707  
 
@@ -130,7 +133,7 @@ which should produce these results:
 	>> e 500 125252
 	changing 000500 from 000000 to 125252
 	>> d 17000500 l1
-	00017000500  125252  
+	00017000500:  125252  
 	>> e 17000700 070707
 	changing 00017000700 from 000000 to 070707
 	>> e 17770202 000000
@@ -140,16 +143,19 @@ which should produce these results:
 	>> e 17772516 40
 	changing 00017772516 from 000000 to 000040
 	>> d 17000500 l1
-	00017000500  070707  
+	00017000500:  070707  
 
-If you also want to see all the hardware register activity, use the Debugger's "m bus on" command to turn Bus messages on:
+If you also want to see all the hardware register activity, use the Debugger's "m bus on; m device on" command
+to turn Bus+Device messages on:
 
 	>> m bus on
 	messages on:  bus
+	>> m device on
+	messages on:  device
 	>> e 500 125252
 	changing 000500 to 125252
 	>> d 17000500 l1
-	00017000500  125252  
+	00017000500:  125252  
 	>> e 17000700 070707
 	changing 00017000700 to 070707
 	>> e 17770202 000000
@@ -160,9 +166,8 @@ If you also want to see all the hardware register activity, use the Debugger's "
 	UNIMAP0.writeWord(00017770200,000200)
 	>> e 17772516 40
 	changing 00017772516 to 000040
-	MMR3.writeWord(00017772516,000040)
 	>> d 17000500 l1
-	00017000500  070707  
+	00017000500:  070707  
 
 ### Memory Clear Program
 
@@ -219,10 +224,12 @@ The above "toggle-in" can be entered with the PDPjs Debugger as follows:
 	e 17772260 000200 021311 003402 005000 000766 005312 000000;
 	r pc 172240
 
-which should produce the following results when Bus messages are turned on ("m bus on"):
+which should produce the following results when Bus+MMU messages are turned on ("m bus on; m mmu on"):
 
 	>> m bus on
 	messages on:  bus
+	>> m mmu on
+	messages on:  mmu
 	>> e 17772300 077406
 	changing 00017772300 to 077406
 	KIPDR0.writeWord(00017772300,077406)
@@ -301,9 +308,9 @@ which should produce the following results when Bus messages are turned on ("m b
 	SIPAR1.readWord(172242): 000020
 	172240: 012714 000020          MOV   #20,@R4
 
-All the "Supervisor I Page Address Register" (SIPAR) and "Supervisor D Page Address Register" (SDPAR) reads and writes
-merely reflect where the above code is being loaded and executed from; those registers are essentially being used as scratch
-RAM.
+All the "Supervisor I Page Address Register" (SIPAR) and "Supervisor D Page Address Register" (SDPAR) reads
+and writes merely reflect where the above code is being loaded and executed from; those registers are essentially
+being used as scratch RAM.
 
 As the **Maintenance Service Guide** goes on to say:
 
@@ -315,13 +322,13 @@ As the **Maintenance Service Guide** goes on to say:
 	Note: When loading the program you must be in console physical [i.e., the ADDRESS select switch
 	must be set to "CONS PHY", which is the default setting of the PDPjs Front Panel].
 
-Before running the above code, you should turn Bus messages off (ie, "m bus off"); otherwise, the quantity of messages will
-slow execution to a crawl.
+Before running the above code, you should turn messages off (eg, "m bus off"); otherwise, the quantity of
+messages will slow execution to a crawl.
 
-If you want to set an execution breakpoint in the above code, make sure you use the appropriate virtual (16-bit) address.
-For example, to break on this instruction:
+If you want to set an execution breakpoint in the above code, make sure you use the appropriate virtual (16-bit)
+address.  For example, to break on this instruction:
 
 	17772256        062711      ADD #200,(R1)   ; Step Page
 
-use the command "bp 172256", because while the code *is* physically located at 17772256, it is being executed at virtual
-address 172256, and execution breakpoints operate on virtual addresses.
+use the command "bp 172256", because while the code *is* physically located at 17772256, it is being executed at
+virtual address 172256, and execution breakpoints operate on virtual addresses.

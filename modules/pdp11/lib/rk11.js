@@ -1017,10 +1017,13 @@ RK11.prototype.readData = function(drive, iCylinder, iHead, iSector, nWords, add
             err = PDP11.RK11.RKER.NXS;
             break;
         }
-        this.bus.setWordDirect(addr, data = b0 | (b1 << 8));
-        if (DEBUG && this.messageEnabled(MessagesPDP11.READ) && sWords.length < 56) {
+        this.bus.setWordDirect(this.cpu.mapUnibus(addr), data = b0 | (b1 << 8));
+        if (DEBUG && this.messageEnabled(MessagesPDP11.READ)) {
             sWords += str.toOct(data) + ' ';
-            if (sWords.length >= 56) this.printMessage(sWords + '\n', true);
+            if (sWords.length >= 56) {
+                this.printMessage(sWords + '\n', true);
+                sWords = "";
+            }
         }
         if (this.bus.checkFault()) {
             err = PDP11.RK11.RKER.NXM;
@@ -1069,7 +1072,7 @@ RK11.prototype.writeData = function(drive, iCylinder, iHead, iSector, nWords, ad
     }
 
     while (nWords--) {
-        var data = this.bus.getWordDirect(addr);
+        var data = this.bus.getWordDirect(this.cpu.mapUnibus(addr));
         if (this.bus.checkFault()) {
             err = PDP11.RK11.RKER.NXM;
             break;

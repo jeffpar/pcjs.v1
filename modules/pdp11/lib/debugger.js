@@ -659,7 +659,7 @@ if (DEBUGGER) {
         var b = 0xff;
         var addr = this.getAddr(dbgAddr, false, 1);
         if (addr !== PDP11.ADDR_INVALID) {
-            b = dbgAddr.fPhysical? this.bus.getByteDirect(addr) : this.cpu.getByteDirect(addr);
+            b = (dbgAddr.fPhysical || addr > 0xffff)? this.bus.getByteDirect(this.cpu.mapUnibus(addr)) : this.cpu.getByteSafe(addr);
             if (inc) this.incAddr(dbgAddr, inc);
         }
         return b;
@@ -678,7 +678,7 @@ if (DEBUGGER) {
         var w = 0xffff;
         var addr = this.getAddr(dbgAddr, false, 2);
         if (addr !== PDP11.ADDR_INVALID) {
-            w = dbgAddr.fPhysical? this.bus.getWordDirect(addr) : this.cpu.getWordDirect(addr);
+            w = (dbgAddr.fPhysical || addr > 0xffff)? this.bus.getWordDirect(this.cpu.mapUnibus(addr)) : this.cpu.getWordSafe(addr);
             if (inc) this.incAddr(dbgAddr, inc);
         }
         return w;
@@ -696,10 +696,10 @@ if (DEBUGGER) {
     {
         var addr = this.getAddr(dbgAddr, true, 1);
         if (addr !== PDP11.ADDR_INVALID) {
-            if (dbgAddr.fPhysical) {
-                this.bus.setByteDirect(addr, b);
+            if (dbgAddr.fPhysical || addr > 0xffff) {
+                this.bus.setByteDirect(this.cpu.mapUnibus(addr), b);
             } else {
-                this.cpu.setByteDirect(addr, b);
+                this.cpu.setByteSafe(addr, b);
             }
             if (inc) this.incAddr(dbgAddr, inc);
             this.cmp.updateDisplays(-1);
@@ -718,10 +718,10 @@ if (DEBUGGER) {
     {
         var addr = this.getAddr(dbgAddr, true, 2);
         if (addr !== PDP11.ADDR_INVALID) {
-            if (dbgAddr.fPhysical) {
-                this.bus.setWordDirect(addr, w);
+            if (dbgAddr.fPhysical || addr > 0xffff) {
+                this.bus.setWordDirect(this.cpu.mapUnibus(addr), w);
             } else {
-                this.cpu.setWordDirect(addr, w);
+                this.cpu.setWordSafe(addr, w);
             }
             if (inc) this.incAddr(dbgAddr, inc);
             this.cmp.updateDisplays(-1);
@@ -1706,7 +1706,7 @@ if (DEBUGGER) {
          * for that here by skipping over the HALT if/when the machine starts up again.
          */
         if (!nState) {
-            opCode = this.cpu.getWordDirect(addr);
+            opCode = this.cpu.getWordSafe(addr);
             if (opCode == PDP11.OPCODE.HALT) {
                 addr = this.cpu.advancePC(2);
             }
@@ -1733,7 +1733,7 @@ if (DEBUGGER) {
         if (nState >= 0 && this.aInstructionHistory.length) {
             this.cInstructions++;
             if (opCode < 0) {
-                opCode = this.cpu.getWordDirect(addr);
+                opCode = this.cpu.getWordSafe(addr);
             }
             if ((opCode & 0xffff) != PDP11.OPCODE.INVALID) {
                 var dbgAddr = this.aInstructionHistory[this.iInstructionHistory];
@@ -3118,7 +3118,7 @@ if (DEBUGGER) {
                     data = shift = 0;
                 }
                 i -= n; nBytes -= n;
-                while (n--) {
+                while (size == 1 && n--) {
                     var c = v & 0xff;
                     sChars += (c >= 32 && c < 128? String.fromCharCode(c) : '.');
                     v >>= 8;
@@ -3128,7 +3128,7 @@ if (DEBUGGER) {
             if (fJSON) {
                 sDump += sData + ",";
             } else {
-                sDump += sAddr + "  " + sData + ((i == 0)? (' ' + sChars) : "");
+                sDump += sAddr + ":  " + sData + ((i == 0)? (' ' + sChars) : "");
             }
         }
 
@@ -3859,12 +3859,22 @@ if (DEBUGGER) {
         var dbg = this;
         var fRegs = (sCmd != "t");
         var nCount = this.parseValue(sCount, null, true) || 1;
-        var nCycles = (nCount == 1? 0 : 1);
+
+        /*
+         * We used to set nCycles to 1 when a count > 1 was specified, because nCycles set
+         * to 0 used to mean "execute the next instruction without checking for interrupts".
+         * Well, this machine's stepCPU() doesn't do that; it ALWAYS checks for interrupts,
+         * so we should leave nCycles set to 0, so that if an interrupt is dispatched, we will
+         * get to see the first instruction of the interrupt handler.
+         */
+        var nCycles = 0;    // (nCount == 1? 0 : 1);
+
         if (sCmd == "tc") {
             nCycles = nCount;
             nCount = 1;
         }
         this.sTraceCmdPrev = sCmd;
+
         web.onCountRepeat(
             nCount,
             function onCountStep() {
