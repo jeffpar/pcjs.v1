@@ -817,12 +817,12 @@ RL11.prototype.initController = function(data)
 {
     var i = 0;
     if (!data) data = [];
-    this.csr = data[i++] || 0;
-    this.bar = data[i++] || 0;
-    this.dar = data[i++] || 0;
-    this.darInternal = data[i++] || 0;
-    this.mpr = data[i++] || 0;
-    this.ber = data[i] || 0;
+    this.regRLCS = data[i++] || 0;
+    this.regRLBA = data[i++] || 0;
+    this.regRLDA = data[i++] || 0;
+    this.tmpRLDA = data[i++] || 0;
+    this.regRLMP = data[i++] || 0;
+    this.regRLBE = data[i] || 0;
 
     var fSuccess = true;
     for (var iDrive = 0; iDrive < this.aDrives.length; iDrive++) {
@@ -903,7 +903,7 @@ RL11.prototype.processCommand = function()
 {
     var fnReadWrite;
     var fInterrupt = true;
-    var iDrive = (this.csr & PDP11.RL11.RLCS.DS) >> PDP11.RL11.RLCS.SHIFT.DS;
+    var iDrive = (this.regRLCS & PDP11.RL11.RLCS.DS) >> PDP11.RL11.RLCS.SHIFT.DS;
     var drive = this.aDrives[iDrive];
     var disk = drive.disk;
     var iCylinder, iHead, iSector, nWords, addr;
@@ -915,9 +915,9 @@ RL11.prototype.processCommand = function()
      *  2) CRDY is cleared to process a command
      *  3) DRDY is cleared to command is in process
      */
-    this.csr &= ~PDP11.RL11.RLCS.DRDY;
+    this.regRLCS &= ~PDP11.RL11.RLCS.DRDY;
 
-    switch(this.csr & PDP11.RL11.RLCS.FUNC) {
+    switch(this.regRLCS & PDP11.RL11.RLCS.FUNC) {
 
     case PDP11.RL11.FUNC.NOP:
     case PDP11.RL11.FUNC.WCHK:
@@ -925,32 +925,32 @@ RL11.prototype.processCommand = function()
         break;
 
     case PDP11.RL11.FUNC.STATUS:
-        if (this.mpr & PDP11.RL11.RLMP.GS_BH) {
-            this.csr &= (PDP11.RL11.RLCS.DRDY | PDP11.RL11.RLCS.FUNC | PDP11.RL11.RLCS.BAE);    // TODO: Review
+        if (this.regRLMP & PDP11.RL11.RLMP.GS_BH) {
+            this.regRLCS &= (PDP11.RL11.RLCS.DRDY | PDP11.RL11.RLCS.FUNC | PDP11.RL11.RLCS.BAE);    // TODO: Review
         }
         /*
          * The bit indicating whether or not the disk contains 256 or 512 cylinders is critical;
          * for example, the first RSTS/E disk image we tried was an RL01K, which has only 256 cylinders,
          * and the operating system would crash mysteriously if we didn't report the correct geometry.
          */
-        this.mpr = drive.status | (this.darInternal & PDP11.RL11.RLDA.RW_HS) | (disk && disk.nCylinders == 512? PDP11.RL11.RLMP.GS_DT : 0);
+        this.regRLMP = drive.status | (this.tmpRLDA & PDP11.RL11.RLDA.RW_HS) | (disk && disk.nCylinders == 512? PDP11.RL11.RLMP.GS_DT : 0);
         break;
 
     case PDP11.RL11.FUNC.SEEK:
-        if ((this.dar & PDP11.RL11.RLDA.GS_CMD) == PDP11.RL11.RLDA.SEEK_CMD) {
-            var darCA = (this.dar & PDP11.RL11.RLDA.RW_CA);
-            var darHS = (this.dar & PDP11.RL11.RLDA.SEEK_HS) << 2;
-            if (this.dar & PDP11.RL11.RLDA.SEEK_DIR) {
-                this.darInternal += darCA;
+        if ((this.regRLDA & PDP11.RL11.RLDA.GS_CMD) == PDP11.RL11.RLDA.SEEK_CMD) {
+            var darCA = (this.regRLDA & PDP11.RL11.RLDA.RW_CA);
+            var darHS = (this.regRLDA & PDP11.RL11.RLDA.SEEK_HS) << 2;
+            if (this.regRLDA & PDP11.RL11.RLDA.SEEK_DIR) {
+                this.tmpRLDA += darCA;
             } else {
-                this.darInternal -= darCA;
+                this.tmpRLDA -= darCA;
             }
-            this.dar = this.darInternal = (this.darInternal & PDP11.RL11.RLDA.RW_CA) | darHS;
+            this.regRLDA = this.tmpRLDA = (this.tmpRLDA & PDP11.RL11.RLDA.RW_CA) | darHS;
         }
         break;
 
     case PDP11.RL11.FUNC.RHDR:
-        this.mpr = this.darInternal;
+        this.regRLMP = this.tmpRLDA;
         break;
 
     case PDP11.RL11.FUNC.RDATA:
@@ -959,15 +959,15 @@ RL11.prototype.processCommand = function()
 
     case PDP11.RL11.FUNC.WDATA:
         if (!fnReadWrite) fnReadWrite = this.writeData;
-        iCylinder = this.dar >> PDP11.RL11.RLDA.SHIFT.RW_CA;
-        iHead = (this.dar & PDP11.RL11.RLDA.RW_HS)? 1 : 0;
-        iSector = this.dar & PDP11.RL11.RLDA.RW_SA;
+        iCylinder = this.regRLDA >> PDP11.RL11.RLDA.SHIFT.RW_CA;
+        iHead = (this.regRLDA & PDP11.RL11.RLDA.RW_HS)? 1 : 0;
+        iSector = this.regRLDA & PDP11.RL11.RLDA.RW_SA;
         if (!disk || iCylinder >= disk.nCylinders || iSector >= disk.nSectors) {
-            this.csr |= PDP11.RL11.ERRC.HNF | PDP11.RL11.RLCS.ERR;
+            this.regRLCS |= PDP11.RL11.ERRC.HNF | PDP11.RL11.RLCS.ERR;
             break;
         }
-        addr = (((this.ber & PDP11.RL11.RLBE.MASK)) << 16) | this.bar;   // 22 bit mode
-        nWords = (0x10000 - this.mpr) & 0xffff;
+        addr = (((this.regRLBE & PDP11.RL11.RLBE.MASK)) << 16) | this.regRLBA;   // 22 bit mode
+        nWords = (0x10000 - this.regRLMP) & 0xffff;
         var pos = ((((iCylinder << 1) + iHead) * drive.nSectors) + iSector) * 128;
         if (DEBUG && (this.messageEnabled(MessagesPDP11.READ) || this.messageEnabled(MessagesPDP11.WRITE))) {
             console.log((fnReadWrite == this.readData? "readData" : "writeData") + "(pos=" + pos + ",addr=" + str.toOct(addr) + ",bytes=" + (nWords * 2) + ")");
@@ -980,8 +980,8 @@ RL11.prototype.processCommand = function()
     }
 
     if (fInterrupt) {
-        this.csr |= PDP11.RL11.RLCS.DRDY | PDP11.RL11.RLCS.CRDY;
-        if (this.csr & PDP11.RL11.RLCS.IE) this.cpu.setIRQ(this.irq);
+        this.regRLCS |= PDP11.RL11.RLCS.DRDY | PDP11.RL11.RLCS.CRDY;
+        if (this.regRLCS & PDP11.RL11.RLCS.IE) this.cpu.setIRQ(this.irq);
     }
 };
 
@@ -999,14 +999,14 @@ RL11.prototype.processCommand = function()
  */
 RL11.prototype.endReadWrite = function(err, iCylinder, iHead, iSector, nWords, addr)
 {
-    this.bar = addr & 0xffff;
-    this.csr = (this.csr & ~PDP11.RL11.RLCS.BAE) | ((addr >> (16 - PDP11.RL11.RLCS.SHIFT.BAE)) & PDP11.RL11.RLCS.BAE);
-    this.ber = (addr >> 16) & PDP11.RL11.RLBE.MASK;         // 22 bit mode
-    this.dar = (iCylinder << PDP11.RL11.RLDA.SHIFT.RW_CA) | (iHead? PDP11.RL11.RLDA.RW_HS : 0) | (iSector & PDP11.RL11.RLDA.RW_SA);
-    this.darInternal = this.dar;
-    this.mpr = (0x10000 - nWords) & 0xffff;
+    this.regRLBA = addr & 0xffff;
+    this.regRLCS = (this.regRLCS & ~PDP11.RL11.RLCS.BAE) | ((addr >> (16 - PDP11.RL11.RLCS.SHIFT.BAE)) & PDP11.RL11.RLCS.BAE);
+    this.regRLBE = (addr >> 16) & PDP11.RL11.RLBE.MASK;         // 22 bit mode
+    this.regRLDA = (iCylinder << PDP11.RL11.RLDA.SHIFT.RW_CA) | (iHead? PDP11.RL11.RLDA.RW_HS : 0) | (iSector & PDP11.RL11.RLDA.RW_SA);
+    this.tmpRLDA = this.regRLDA;
+    this.regRLMP = (0x10000 - nWords) & 0xffff;
     if (err) {
-        this.csr |= err | PDP11.RL11.RLCS.ERR;
+        this.regRLCS |= err | PDP11.RL11.RLCS.ERR;
     }
     return true;
 };
@@ -1185,7 +1185,7 @@ RL11.prototype.writeData = function(drive, iCylinder, iHead, iSector, nWords, ad
  */
 RL11.prototype.readRLCS = function(addr)
 {
-    return this.csr & PDP11.RL11.RLCS.RMASK;
+    return this.regRLCS & PDP11.RL11.RLCS.RMASK;
 };
 
 /**
@@ -1197,9 +1197,9 @@ RL11.prototype.readRLCS = function(addr)
  */
 RL11.prototype.writeRLCS = function(data, addr)
 {
-    this.csr = (this.csr & ~PDP11.RL11.RLCS.WMASK) | (data & PDP11.RL11.RLCS.WMASK);
-    this.ber = (this.ber & 0x3C) | ((data & PDP11.RL11.RLCS.BAE) >> PDP11.RL11.RLCS.SHIFT.BAE);
-    if (!(this.csr & PDP11.RL11.RLCS.CRDY)) this.processCommand();
+    this.regRLCS = (this.regRLCS & ~PDP11.RL11.RLCS.WMASK) | (data & PDP11.RL11.RLCS.WMASK);
+    this.regRLBE = (this.regRLBE & 0x3C) | ((data & PDP11.RL11.RLCS.BAE) >> PDP11.RL11.RLCS.SHIFT.BAE);
+    if (!(this.regRLCS & PDP11.RL11.RLCS.CRDY)) this.processCommand();
 };
 
 /**
@@ -1211,7 +1211,7 @@ RL11.prototype.writeRLCS = function(data, addr)
  */
 RL11.prototype.readRLBA = function(addr)
 {
-    return this.bar;
+    return this.regRLBA;
 };
 
 /**
@@ -1223,7 +1223,7 @@ RL11.prototype.readRLBA = function(addr)
  */
 RL11.prototype.writeRLBA = function(data, addr)
 {
-    this.bar = data & PDP11.RL11.RLBA.WMASK;
+    this.regRLBA = data & PDP11.RL11.RLBA.WMASK;
 };
 
 /**
@@ -1235,7 +1235,7 @@ RL11.prototype.writeRLBA = function(data, addr)
  */
 RL11.prototype.readRLDA = function(addr)
 {
-    return this.dar;
+    return this.regRLDA;
 };
 
 /**
@@ -1247,7 +1247,7 @@ RL11.prototype.readRLDA = function(addr)
  */
 RL11.prototype.writeRLDA = function(data, addr)
 {
-    this.dar = data;
+    this.regRLDA = data;
 };
 
 /**
@@ -1259,7 +1259,7 @@ RL11.prototype.writeRLDA = function(data, addr)
  */
 RL11.prototype.readRLMP = function(addr)
 {
-    return this.mpr;
+    return this.regRLMP;
 };
 
 /**
@@ -1271,7 +1271,7 @@ RL11.prototype.readRLMP = function(addr)
  */
 RL11.prototype.writeRLMP = function(data, addr)
 {
-    this.mpr = data;
+    this.regRLMP = data;
 };
 
 /**
@@ -1283,7 +1283,7 @@ RL11.prototype.writeRLMP = function(data, addr)
  */
 RL11.prototype.readRLBE = function(addr)
 {
-    return this.ber;
+    return this.regRLBE;
 };
 
 /**
@@ -1301,8 +1301,8 @@ RL11.prototype.readRLBE = function(addr)
  */
 RL11.prototype.writeRLBE = function(data, addr)
 {
-    this.ber = data & PDP11.RL11.RLBE.MASK;
-    this.csr = (this.csr & ~PDP11.RL11.RLCS.BAE) | ((this.ber & 0x3) << PDP11.RL11.RLCS.SHIFT.BAE);
+    this.regRLBE = data & PDP11.RL11.RLBE.MASK;
+    this.regRLCS = (this.regRLCS & ~PDP11.RL11.RLCS.BAE) | ((this.regRLBE & 0x3) << PDP11.RL11.RLCS.SHIFT.BAE);
 };
 
 /*
