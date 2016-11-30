@@ -57,6 +57,11 @@ if (NODE) {
  * NOTE: We make a note of the specified size, but no memory is initially allocated for the RAM until the
  * Computer component calls powerUp().
  *
+ * TODO: I seem to recall a PDP-11 diagnostic that failed if total RAM wasn't a multiple of 16Kb; our Bus
+ * component defaults to a block size that matches BusPDP11.IOPAGE_LENGTH (ie, 8Kb), and we even allow partial
+ * block allocations, so internally, we don't have that requirement, but for better compatibility, perhaps we
+ * should display a non-fatal warning if addr or size don't fall on 16Kb boundaries.
+ *
  * @constructor
  * @extends Component
  * @param {Object} parmsRAM
@@ -344,7 +349,7 @@ RAMPDP11.prototype.loadImage = function(aBytes, addrLoad, addrExec, addrInit, fR
             } else {
                 this.printMessage("loading " + str.toHexWord(cbData) + " bytes at " + str.toHexWord(addr) + "-" + str.toHexWord(addr + cbData - 1), MessagesPDP11.PAPER);
                 while (cbData--) {
-                    this.cpu.setByteDirect(addr++, aBytes[offData++] & 0xff);
+                    this.bus.setByteDirect(addr++, aBytes[offData++] & 0xff);
                 }
             }
             fLoaded = true;
@@ -354,7 +359,7 @@ RAMPDP11.prototype.loadImage = function(aBytes, addrLoad, addrExec, addrInit, fR
         if (addrLoad == null) addrLoad = addrInit;
         if (addrLoad != null) {
             for (var i = 0; i < aBytes.length; i++) {
-                this.cpu.setByteDirect(addrLoad + i, aBytes[i]);
+                this.bus.setByteDirect(addrLoad + i, aBytes[i]);
             }
             fLoaded = true;
         }

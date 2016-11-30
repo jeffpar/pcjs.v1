@@ -760,12 +760,15 @@ PanelPDP11.prototype.processDeposit = function(value, index)
         if (this.fDeposit) this.advanceAddr();
         var w = this.updateData(this.regSwitches);
         if (this.nAddrSel == PanelPDP11.ADDRSEL.CONS_PHY) {
+            /*
+             * TODO: Determine if this needs to take the UNIBUS map into consideration.
+             */
             this.bus.setWordDirect(this.regAddr, w);
         } else {
             /*
              * TODO: This code is obviously incomplete, since it doesn't take into account the precise ADDRSEL mode.
              */
-            this.cpu.setWordDirect(this.regAddr, w);
+            this.cpu.setWordSafe(this.regAddr, w);
         }
     }
 };
@@ -783,12 +786,15 @@ PanelPDP11.prototype.processExamine = function(value, index)
         var w;
         if (this.fExamine) this.advanceAddr();
         if (this.nAddrSel == PanelPDP11.ADDRSEL.CONS_PHY) {
+            /*
+             * TODO: Determine if this needs to take the UNIBUS map into consideration.
+             */
             w = this.bus.getWordDirect(this.regAddr);
         } else {
             /*
              * TODO: This code is obviously incomplete, since it doesn't take into account the precise ADDRSEL mode.
              */
-            w = this.cpu.getWordDirect(this.regAddr);
+            w = this.cpu.getWordSafe(this.regAddr);
         }
         this.updateData(w);
     }

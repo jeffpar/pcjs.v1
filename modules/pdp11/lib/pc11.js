@@ -75,8 +75,8 @@ function PC11(parms)
     this.cAutoMount = 0;
     this.nBaudReceive = parms['baudReceive'] || PDP11.PC11.PRS.BAUD;
 
-    this.prs = 0;               // PRS register
-    this.prb = 0;               // PRB register
+    this.regPRS = 0;            // PRS register
+    this.regPRB = 0;            // PRB register
     this.iTapeData = 0;         // buffer index
     this.aTapeData = [];        // buffer for the PRB register
     this.sTapeSource = PC11.SOURCE.NONE;
@@ -339,8 +339,8 @@ PC11.prototype.powerDown = function(fSave, fShutdown)
  */
 PC11.prototype.reset = function()
 {
-    this.prs &= ~PDP11.PC11.PRS.CLEAR;
-    this.prb = 0;
+    this.regPRS &= ~PDP11.PC11.PRS.CLEAR;
+    this.regPRB = 0;
 };
 
 /**
@@ -806,8 +806,8 @@ PC11.prototype.getBaudTimeout = function(nBaud)
  */
 PC11.prototype.advanceReader = function()
 {
-    if ((this.prs & (PDP11.PC11.PRS.RE | PDP11.PC11.PRS.ERROR)) == PDP11.PC11.PRS.RE) {
-        if (!(this.prs & PDP11.PC11.PRS.DONE)) {
+    if ((this.regPRS & (PDP11.PC11.PRS.RE | PDP11.PC11.PRS.ERROR)) == PDP11.PC11.PRS.RE) {
+        if (!(this.regPRS & PDP11.PC11.PRS.DONE)) {
             if (this.iTapeData < this.aTapeData.length) {
                 /*
                  * Here, as elsewhere (eg, the DL11 component), even if I trusted all incoming data
@@ -815,11 +815,11 @@ PC11.prototype.advanceReader = function()
                  * (eg, -128 to 127, instead of 0 to 255).  Both risks are good reasons to always mask
                  * the data assigned to PRB with 0xff.
                  */
-                this.prb = this.aTapeData[this.iTapeData++] & 0xff;
+                this.regPRB = this.aTapeData[this.iTapeData++] & 0xff;
                 this.displayProgress(this.iTapeData / this.aTapeData.length * 100);
-                this.prs |= PDP11.PC11.PRS.DONE;
-                this.prs &= ~PDP11.PC11.PRS.BUSY;
-                if (this.prs & PDP11.PC11.PRS.RIE) {
+                this.regPRS |= PDP11.PC11.PRS.DONE;
+                this.regPRS &= ~PDP11.PC11.PRS.BUSY;
+                if (this.regPRS & PDP11.PC11.PRS.RIE) {
                     this.cpu.setIRQ(this.irqReader);
                 }
             }
@@ -841,7 +841,7 @@ PC11.prototype.advanceReader = function()
  */
 PC11.prototype.readPRS = function(addr)
 {
-    return this.prs & PDP11.PC11.PRS.RMASK;     // RMASK honors the "write-only" nature of the RE bit by returning zero on reads
+    return this.regPRS & PDP11.PC11.PRS.RMASK;     // RMASK honors the "write-only" nature of the RE bit by returning zero on reads
 };
 
 /**
@@ -861,15 +861,15 @@ PC11.prototype.writePRS = function(data, addr)
          *      sets Busy, and clears the Reader Buffer (PRB). Operation of this bit is disabled if Error = 1;
          *      attempting to set it when Error = 1 will cause an immediate interrupt if Interrupt Enable = 1.
          */
-        if (this.prs & PDP11.PC11.PRS.ERROR) {
+        if (this.regPRS & PDP11.PC11.PRS.ERROR) {
             data &= ~PDP11.PC11.PRS.RE;
-            if (this.prs & PDP11.PC11.PRS.RIE) {
+            if (this.regPRS & PDP11.PC11.PRS.RIE) {
                 this.cpu.setIRQ(this.irqReader);
             }
         } else {
-            this.prs &= ~PDP11.PC11.PRS.DONE;
-            this.prs |= PDP11.PC11.PRS.BUSY;
-            this.prb = 0;
+            this.regPRS &= ~PDP11.PC11.PRS.DONE;
+            this.regPRS |= PDP11.PC11.PRS.BUSY;
+            this.regPRB = 0;
             /*
              * The PC11, by virtue of its "high speed", is supposed to deliver characters at 300 CPS, so
              * that's the rate we'll choose as well (ie, 1000ms / 300).  As an aside, the original "low speed"
@@ -878,7 +878,7 @@ PC11.prototype.writePRS = function(data, addr)
             this.cpu.setTimer(this.timerReader, this.getBaudTimeout(this.nBaudReceive));
         }
     }
-    this.prs = (this.prs & ~PDP11.PC11.PRS.WMASK) | (data & PDP11.PC11.PRS.WMASK);
+    this.regPRS = (this.regPRS & ~PDP11.PC11.PRS.WMASK) | (data & PDP11.PC11.PRS.WMASK);
 };
 
 /**
@@ -894,9 +894,9 @@ PC11.prototype.readPRB = function(addr)
      * I'm guessing that the DONE and BUSY bits always remain more-or-less inverses of each other.  They definitely
      * start out that way when writePRS() sets the reader enable (RE) bit, and so that's how we treat them elsewhere, too.
      */
-    this.prs &= ~PDP11.PC11.PRS.DONE;
-    this.prs |= PDP11.PC11.PRS.BUSY;
-    return this.prb;
+    this.regPRS &= ~PDP11.PC11.PRS.DONE;
+    this.regPRS |= PDP11.PC11.PRS.BUSY;
+    return this.regPRB;
 };
 
 /**
