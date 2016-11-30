@@ -661,8 +661,26 @@ MarkOut.prototype.convertMDBlocks = function(sMD, sIndent)
      * Explode the given Markdown sequence into blocks based purely on double-linefeed sequences.
      */
     var asBlocks = sMD.split("\n\n");
-    for (var iBlock = 0; iBlock < asBlocks.length; iBlock++) {
-        sHTML += this.convertMDBlock(asBlocks[iBlock], sIndent);
+
+    /*
+     * Also, for any block that begins with triple-backtick but doesn't end with one, try to find the matching
+     * end block, and then merge them all into a single block.  TODO: This is a hack; fenced blocks need to be
+     * processed earlier, not in convertMDBlock(), but this is OK for now.
+     */
+    var iBlock = 0;
+    while (iBlock < asBlocks.length) {
+        var fCodeBlock = false;
+        var sBlock = asBlocks[iBlock++];
+        if (sBlock.substr(0,3) == "```") {
+            fCodeBlock = true;
+            var sBlockEnd = sBlock;
+            while (sBlockEnd.slice(-3) != "```" && iBlock < asBlocks.length) {
+                sBlockEnd = asBlocks[iBlock++];
+                sBlock += "\n\n" + sBlockEnd;
+            }
+        }
+        sHTML += this.convertMDBlock(sBlock, sIndent);
+        if (fCodeBlock) sHTML += this.convertMDBlock("", sIndent);
     }
     return sHTML;
 };

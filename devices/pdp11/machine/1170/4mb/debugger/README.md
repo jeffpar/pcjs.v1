@@ -8,7 +8,7 @@ machines:
     debugger: true
     autoStart: true
     autoMount:
-      RL2:
+      RL0:
         path: http://archive.pcjs.org/disks/dec/rl01k/RL01K-RSTS-V70.json
 ---
 

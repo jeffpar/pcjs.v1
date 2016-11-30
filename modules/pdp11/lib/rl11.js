@@ -283,7 +283,6 @@ RL11.prototype.initBus = function(cmp, bus, cpu, dbg)
 
     /*
      * Add only drives from the machine-wide autoMount configuration that match drives managed by this component.
-     *
      */
     if (configMount) {
         for (var sDrive in configMount) {
@@ -588,16 +587,14 @@ RL11.prototype.loadDrive = function(iDrive, sDiskName, sDiskPath, fAutoMount, fi
  */
 RL11.prototype.finishLoadDrive = function onLoadDrive(drive, disk, sDiskName, sDiskPath, fAutoMount)
 {
-    var aDiskInfo;
-
     drive.fBusy = false;
 
     if (disk) {
         /*
-         * We shouldn't mount the disk unless we're sure the drive is able to handle it.
+         * TODO: While this is a perfectly reasonable thing to do, one wonders if the Disk object shouldn't
+         * have done this itself, since we passed our Drive object to it (it already knows the drive's limits).
          */
-        aDiskInfo = disk.info();
-        if (disk && aDiskInfo[0] > drive.nCylinders || aDiskInfo[1] > drive.nHeads /* || aDiskInfo[2] > drive.nSectors */) {
+        if (disk.nCylinders > drive.nCylinders || disk.nHeads > drive.nHeads /* || disk.nSectors > drive.nSectors */) {
             this.notice("Disk \"" + sDiskName + "\" too large for drive " + this.getDriveName(drive.iDrive));
             disk = null;
         }
@@ -620,7 +617,6 @@ RL11.prototype.finishLoadDrive = function onLoadDrive(drive, disk, sDiskName, sD
          * of a local disk image, it will map all such disks to "Local Disk", and any attempt to "Mount" such
          * a disk, will essentially result in a "Disk not found" error.
          */
-
         // this.addDiskHistory(sDiskName, sDiskPath, disk);
 
         /*
@@ -637,7 +633,6 @@ RL11.prototype.finishLoadDrive = function onLoadDrive(drive, disk, sDiskName, sD
          *
          * Successful unmounts are a different story, however; those *do* trigger a change. See unloadDrive().
          */
-
         // this.regInput |= FDC.REG_INPUT.DISK_CHANGE;
 
         /*
@@ -861,9 +856,13 @@ RL11.prototype.initDrive = function(drive, iDrive, data)
     var fSuccess = true;
 
     drive.iDrive = iDrive;
+    drive.name = this.idComponent;
     drive.fBusy = drive.fLocal = false;
 
-    drive.name = this.idComponent;
+    /*
+     * NOTE: We initialize the following drive properties to their MAXIMUMs; disks may have
+     * these or SMALLER values (subject to the limits of what the controller supports, of course).
+     */
     drive.nCylinders = 512;
     drive.nHeads = 2;
     drive.nSectors = 40;
@@ -885,14 +884,12 @@ RL11.prototype.initDrive = function(drive, iDrive, data)
     drive.ibSector = 0;
     drive.sector = null;
 
-    if (!drive.disk) {
-        drive.sDiskPath = "";               // ensure this is initialized to a default that displayDisk() can deal with
-    }
+    if (!drive.disk) drive.sDiskPath = "";  // ensure this is initialized to a default that displayDisk() can deal with
 
     /*
      * Default drive status bits returned via the controller's Get Status command via the RLMP register
      */
-    drive.status = PDP11.RL11.RLMP.GS_ST.LOCKON | PDP11.RL11.RLMP.GS_BH | PDP11.RL11.RLMP.GS_HO | (drive.nCylinders == 512? PDP11.RL11.RLMP.GS_DT : 0);
+    drive.status = PDP11.RL11.RLMP.GS_ST.LOCKON | PDP11.RL11.RLMP.GS_BH | PDP11.RL11.RLMP.GS_HO;
 
     return fSuccess;
 };
@@ -908,6 +905,7 @@ RL11.prototype.processCommand = function()
     var fInterrupt = true;
     var iDrive = (this.csr & PDP11.RL11.RLCS.DS) >> PDP11.RL11.RLCS.SHIFT.DS;
     var drive = this.aDrives[iDrive];
+    var disk = drive.disk;
     var iCylinder, iHead, iSector, nWords, addr;
 
     /*
@@ -930,7 +928,12 @@ RL11.prototype.processCommand = function()
         if (this.mpr & PDP11.RL11.RLMP.GS_BH) {
             this.csr &= (PDP11.RL11.RLCS.DRDY | PDP11.RL11.RLCS.FUNC | PDP11.RL11.RLCS.BAE);    // TODO: Review
         }
-        this.mpr = drive.status | (this.darInternal & PDP11.RL11.RLDA.RW_HS);   // bit 6: Head Select, bit 7: Drive Type (1=RL02)
+        /*
+         * The bit indicating whether or not the disk contains 256 or 512 cylinders is critical;
+         * for example, the first RSTS/E disk image we tried was an RL01K, which has only 256 cylinders,
+         * and the operating system would crash mysteriously if we didn't report the correct geometry.
+         */
+        this.mpr = drive.status | (this.darInternal & PDP11.RL11.RLDA.RW_HS) | (disk && disk.nCylinders == 512? PDP11.RL11.RLMP.GS_DT : 0);
         break;
 
     case PDP11.RL11.FUNC.SEEK:
@@ -959,7 +962,7 @@ RL11.prototype.processCommand = function()
         iCylinder = this.dar >> PDP11.RL11.RLDA.SHIFT.RW_CA;
         iHead = (this.dar & PDP11.RL11.RLDA.RW_HS)? 1 : 0;
         iSector = this.dar & PDP11.RL11.RLDA.RW_SA;
-        if (iCylinder >= drive.nCylinders || iSector >= drive.nSectors) {
+        if (!disk || iCylinder >= disk.nCylinders || iSector >= disk.nSectors) {
             this.csr |= PDP11.RL11.ERRC.HNF | PDP11.RL11.RLCS.ERR;
             break;
         }
@@ -1036,7 +1039,7 @@ RL11.prototype.readData = function(drive, iCylinder, iHead, iSector, nWords, add
     var sWords = "";
     while (nWords--) {
         if (!sector) {
-            sector = drive.disk.seek(iCylinder, iHead, iSector + 1);
+            sector = disk.seek(iCylinder, iHead, iSector + 1);
             if (!sector) {
                 err = PDP11.RL11.ERRC.HNF;
                 break;
@@ -1044,7 +1047,7 @@ RL11.prototype.readData = function(drive, iCylinder, iHead, iSector, nWords, add
             ibSector = 0;
         }
         var b0, b1, data;
-        if ((b0 = drive.disk.read(sector, ibSector++)) < 0 || (b1 = drive.disk.read(sector, ibSector++)) < 0) {
+        if ((b0 = disk.read(sector, ibSector++)) < 0 || (b1 = disk.read(sector, ibSector++)) < 0) {
             err = PDP11.RL11.ERRC.HNF;
             break;
         }
@@ -1140,14 +1143,14 @@ RL11.prototype.writeData = function(drive, iCylinder, iHead, iSector, nWords, ad
         addr += 2;
         checksum += data;
         if (!sector) {
-            sector = drive.disk.seek(iCylinder, iHead, iSector + 1, true);
+            sector = disk.seek(iCylinder, iHead, iSector + 1, true);
             if (!sector) {
                 err = PDP11.RL11.ERRC.HNF;
                 break;
             }
             ibSector = 0;
         }
-        if (!drive.disk.write(sector, ibSector++, data & 0xff) || !drive.disk.write(sector, ibSector++, data >> 8)) {
+        if (!disk.write(sector, ibSector++, data & 0xff) || !disk.write(sector, ibSector++, data >> 8)) {
             err = PDP11.RL11.ERRC.HNF;
             break;
         }

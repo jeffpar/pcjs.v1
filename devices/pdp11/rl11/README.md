@@ -23,21 +23,25 @@ following RL11 Device XML file:
 
 which is typically referenced by a Machine XML file as:
 
-	<device ref="/devices/pdp11/rl11/default.xml"/>
-		
+```xml
+<device ref="/devices/pdp11/rl11/default.xml"/>
+```
+	
 Device XML files not only configure a device, but also list all the resource the device will use, and define UI elements
 used to control the device, such as choosing which disks should be "auto-mounted" by the RL11 device.  For example:
 
-	<?xml version="1.0" encoding="UTF-8"?>
-	<device id="rl11" type="rl11" autoMount='{RL0:{path:"http://archive.pcjs.org/disks/dec/rl02k/RL02K-XXDP.json"}}' pos="left" width="35%" padLeft="8px" padBottom="8px">
-		<name>Disk Drive Controls</name>
-		<control type="container">
-			<control type="list" binding="listDrives"/>
-			<control type="list" binding="listDisks">
-				<disk id="disk01" name="XXDP+ Diagnostics" path="http://archive.pcjs.org/disks/dec/rl02k/RL02K-XXDP.json"/>
-			</control>
-			<control type="button" binding="loadDrive">Load</control>
-			<control type="description" binding="descDisk" padRight="8px"/>
-			<control type="file" binding="mountDisk"/>
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<device id="rl11" type="rl11" autoMount='{RL0:{path:"http://archive.pcjs.org/disks/dec/rl02k/RL02K-XXDP.json"}}' pos="left" width="35%" padLeft="8px" padBottom="8px">
+	<name>Disk Drive Controls</name>
+	<control type="container">
+		<control type="list" binding="listDrives"/>
+		<control type="list" binding="listDisks">
+			<disk id="disk01" name="XXDP+ Diagnostics" path="http://archive.pcjs.org/disks/dec/rl02k/RL02K-XXDP.json"/>
 		</control>
-	</device>
+		<control type="button" binding="loadDrive">Load</control>
+		<control type="description" binding="descDisk" padRight="8px"/>
+		<control type="file" binding="mountDisk"/>
+	</control>
+</device>
+```
