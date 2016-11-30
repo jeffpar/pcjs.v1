@@ -313,13 +313,13 @@ SerialPortPDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
     this.timerReceiveInterrupt = this.cpu.addTimer(function readyReceiver() {
         var b = serial.receiveByte();
         if (b >= 0) {
-            serial.rbuf = b;
-            if (!(serial.rcsr & PDP11.DL11.RCSR.RD)) {
-                serial.rcsr |= PDP11.DL11.RCSR.RD;
+            serial.regRBUF = b;
+            if (!(serial.regRCSR & PDP11.DL11.RCSR.RD)) {
+                serial.regRCSR |= PDP11.DL11.RCSR.RD;
             } else {
-                serial.rbuf |= PDP11.DL11.RBUF.OE | PDP11.DL11.RBUF.ERROR;
+                serial.regRBUF |= PDP11.DL11.RBUF.OE | PDP11.DL11.RBUF.ERROR;
             }
-            if (serial.rcsr & PDP11.DL11.RCSR.RIE) {
+            if (serial.regRCSR & PDP11.DL11.RCSR.RIE) {
                 cpu.setIRQ(serial.irqReceiver);
             }
         }
@@ -328,8 +328,8 @@ SerialPortPDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
     this.irqTransmitter = this.cpu.addIRQ(PDP11.DL11.XVEC, PDP11.DL11.PRI, MessagesPDP11.DL11);
 
     this.timerTransmitInterrupt = this.cpu.addTimer(function readyTransmitter() {
-        serial.xcsr |= PDP11.DL11.XCSR.READY;
-        if (serial.xcsr & PDP11.DL11.XCSR.TIE) {
+        serial.regXCSR |= PDP11.DL11.XCSR.READY;
+        if (serial.regXCSR & PDP11.DL11.XCSR.TIE) {
             cpu.setIRQ(serial.irqTransmitter);
         }
     });
@@ -482,9 +482,9 @@ SerialPortPDP11.prototype.restore = function(data)
  */
 SerialPortPDP11.prototype.initState = function(data)
 {
-    this.rbuf = 0;
-    this.rcsr = 0;
-    this.xcsr = PDP11.DL11.XCSR.READY;
+    this.regRBUF = 0;
+    this.regRCSR = 0;
+    this.regXCSR = PDP11.DL11.XCSR.READY;
     this.abReceive = [];
     return true;
 };
@@ -681,7 +681,7 @@ SerialPortPDP11.prototype.transmitByte = function(b)
  */
 SerialPortPDP11.prototype.readRCSR = function(addr)
 {
-    return this.rcsr & PDP11.DL11.RCSR.RMASK;
+    return this.regRCSR & PDP11.DL11.RCSR.RMASK;
 };
 
 /**
@@ -693,7 +693,7 @@ SerialPortPDP11.prototype.readRCSR = function(addr)
  */
 SerialPortPDP11.prototype.writeRCSR = function(data, addr)
 {
-    this.rcsr = (this.rcsr & ~PDP11.DL11.RCSR.WMASK) | (data & PDP11.DL11.RCSR.WMASK);
+    this.regRCSR = (this.regRCSR & ~PDP11.DL11.RCSR.WMASK) | (data & PDP11.DL11.RCSR.WMASK);
 };
 
 /**
@@ -705,8 +705,8 @@ SerialPortPDP11.prototype.writeRCSR = function(data, addr)
  */
 SerialPortPDP11.prototype.readRBUF = function(addr)
 {
-    this.rcsr &= ~PDP11.DL11.RCSR.RD;
-    return this.rbuf;
+    this.regRCSR &= ~PDP11.DL11.RCSR.RD;
+    return this.regRBUF;
 };
 
 /**
@@ -729,7 +729,7 @@ SerialPortPDP11.prototype.writeRBUF = function(data, addr)
  */
 SerialPortPDP11.prototype.readXCSR = function(addr)
 {
-    return this.xcsr;
+    return this.regXCSR;
 };
 
 /**
@@ -750,14 +750,14 @@ SerialPortPDP11.prototype.writeXCSR = function(data, addr)
      * this fix also requires a complementary change in setIRQ(), to request hardware interrupts with
      * IRQ_DELAY rather than IRQ.
      */
-    if (this.xcsr & PDP11.DL11.XCSR.READY) {
+    if (this.regXCSR & PDP11.DL11.XCSR.READY) {
         if (data & PDP11.DL11.XCSR.TIE) {
             this.cpu.setIRQ(this.irqTransmitter);
         } else {
             this.cpu.clearIRQ(this.irqTransmitter);
         }
     }
-    this.xcsr = (this.xcsr & ~PDP11.DL11.XCSR.WMASK) | (data & PDP11.DL11.XCSR.WMASK);
+    this.regXCSR = (this.regXCSR & ~PDP11.DL11.XCSR.WMASK) | (data & PDP11.DL11.XCSR.WMASK);
 };
 
 /**
@@ -782,7 +782,7 @@ SerialPortPDP11.prototype.readXBUF = function(addr)
 SerialPortPDP11.prototype.writeXBUF = function(data, addr)
 {
     this.transmitByte(data & PDP11.DL11.XBUF.DATA);
-    this.xcsr &= ~PDP11.DL11.XCSR.READY;
+    this.regXCSR &= ~PDP11.DL11.XCSR.READY;
 };
 
 /*
