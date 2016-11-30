@@ -657,6 +657,9 @@ DiskPDP11.prototype.initSector = function(sector, iCylinder, iHead, iSector, cbS
 /**
  * info()
  *
+ * TODO: Decide whether deprecate this in favor of accessing the nCylinders, nHeads, nSectors, and cbSector
+ * properties of the Disk object directly.
+ *
  * @this {DiskPDP11}
  * @return {Array} containing: [nCylinders, nHeads, nSectorsPerTrack, nBytesPerSector]
  */

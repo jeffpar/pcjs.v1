@@ -832,7 +832,6 @@ PDP11.opBPL = function(opCode)
 PDP11.opBPT = function(opCode)
 {
     this.trap(PDP11.TRAP.BPT, 0, PDP11.REASON.OPCODE);
-    this.nStepCycles -= (4 + 1);
 };
 
 /**
@@ -1106,7 +1105,7 @@ PDP11.opDIV = function(opCode)
 PDP11.opEMT = function(opCode)
 {
     this.trap(PDP11.TRAP.EMT, 0, PDP11.REASON.OPCODE);
-    this.nStepCycles -= (22 + 3);
+    this.nStepCycles -= (22 + 3 - 5);
 };
 
 /**
@@ -1206,7 +1205,7 @@ PDP11.opINCB = function(opCode)
 PDP11.opIOT = function(opCode)
 {
     this.trap(PDP11.TRAP.IOT, 0, PDP11.REASON.OPCODE);
-    this.nStepCycles -= (22 + 3);
+    this.nStepCycles -= (22 + 3 - 5);
 };
 
 PDP11.JMP_CYCLES = [
@@ -1789,7 +1788,6 @@ PDP11.opSXT = function(opCode)
 PDP11.opTRAP = function(opCode)
 {
     this.trap(PDP11.TRAP.TRAP, 0, PDP11.REASON.OPCODE);
-    this.nStepCycles -= (4 + 1);
 };
 
 /**

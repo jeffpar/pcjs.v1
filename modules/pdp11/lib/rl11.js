@@ -46,6 +46,15 @@ if (NODE) {
  *
  *      autoMount: one or more JSON-encoded objects, each containing 'name' and 'path' properties
  *
+ * The RL11 Disk Controller controls up to four RL01 or RL02 disk drives, which in turn read/write RL01K or
+ * RL02K disk cartridges.  See [RL11 Disk Controller Configuration Files](/devices/pdp11/rl11/).
+ *
+ * RL01K disks are single-platter cartridges with 256 tracks per side, 40 sectors per track, and a sector size
+ * of 256 bytes, for a total capacity of 5Mb (5,242,880 bytes).  See [RL01K Disk Images](/disks/dec/rl01k/).
+ *
+ * RL02K disks are single-platter cartridges with 512 tracks per side, 40 sectors per track, and a sector size
+ * of 256 bytes, for a total capacity of 10Mb (10,485,760 bytes).  See [RL02K Disk Images](/disks/dec/rl02k/).
+ *
  * @constructor
  * @extends Component
  * @param {Object} parms
@@ -274,7 +283,6 @@ RL11.prototype.initBus = function(cmp, bus, cpu, dbg)
 
     /*
      * Add only drives from the machine-wide autoMount configuration that match drives managed by this component.
-     *
      */
     if (configMount) {
         for (var sDrive in configMount) {
@@ -579,16 +587,14 @@ RL11.prototype.loadDrive = function(iDrive, sDiskName, sDiskPath, fAutoMount, fi
  */
 RL11.prototype.finishLoadDrive = function onLoadDrive(drive, disk, sDiskName, sDiskPath, fAutoMount)
 {
-    var aDiskInfo;
-
     drive.fBusy = false;
 
     if (disk) {
         /*
-         * We shouldn't mount the disk unless we're sure the drive is able to handle it.
+         * TODO: While this is a perfectly reasonable thing to do, one wonders if the Disk object shouldn't
+         * have done this itself, since we passed our Drive object to it (it already knows the drive's limits).
          */
-        aDiskInfo = disk.info();
-        if (disk && aDiskInfo[0] > drive.nCylinders || aDiskInfo[1] > drive.nHeads /* || aDiskInfo[2] > drive.nSectors */) {
+        if (disk.nCylinders > drive.nCylinders || disk.nHeads > drive.nHeads /* || disk.nSectors > drive.nSectors */) {
             this.notice("Disk \"" + sDiskName + "\" too large for drive " + this.getDriveName(drive.iDrive));
             disk = null;
         }
@@ -611,7 +617,6 @@ RL11.prototype.finishLoadDrive = function onLoadDrive(drive, disk, sDiskName, sD
          * of a local disk image, it will map all such disks to "Local Disk", and any attempt to "Mount" such
          * a disk, will essentially result in a "Disk not found" error.
          */
-
         // this.addDiskHistory(sDiskName, sDiskPath, disk);
 
         /*
@@ -628,7 +633,6 @@ RL11.prototype.finishLoadDrive = function onLoadDrive(drive, disk, sDiskName, sD
          *
          * Successful unmounts are a different story, however; those *do* trigger a change. See unloadDrive().
          */
-
         // this.regInput |= FDC.REG_INPUT.DISK_CHANGE;
 
         /*
@@ -813,12 +817,12 @@ RL11.prototype.initController = function(data)
 {
     var i = 0;
     if (!data) data = [];
-    this.csr = data[i++] || 0;
-    this.bar = data[i++] || 0;
-    this.dar = data[i++] || 0;
-    this.darInternal = data[i++] || 0;
-    this.mpr = data[i++] || 0;
-    this.ber = data[i] || 0;
+    this.regRLCS = data[i++] || 0;
+    this.regRLBA = data[i++] || 0;
+    this.regRLDA = data[i++] || 0;
+    this.tmpRLDA = data[i++] || 0;
+    this.regRLMP = data[i++] || 0;
+    this.regRLBE = data[i] || 0;
 
     var fSuccess = true;
     for (var iDrive = 0; iDrive < this.aDrives.length; iDrive++) {
@@ -852,9 +856,13 @@ RL11.prototype.initDrive = function(drive, iDrive, data)
     var fSuccess = true;
 
     drive.iDrive = iDrive;
+    drive.name = this.idComponent;
     drive.fBusy = drive.fLocal = false;
 
-    drive.name = this.idComponent;
+    /*
+     * NOTE: We initialize the following drive properties to their MAXIMUMs; disks may have
+     * these or SMALLER values (subject to the limits of what the controller supports, of course).
+     */
     drive.nCylinders = 512;
     drive.nHeads = 2;
     drive.nSectors = 40;
@@ -876,14 +884,12 @@ RL11.prototype.initDrive = function(drive, iDrive, data)
     drive.ibSector = 0;
     drive.sector = null;
 
-    if (!drive.disk) {
-        drive.sDiskPath = "";               // ensure this is initialized to a default that displayDisk() can deal with
-    }
+    if (!drive.disk) drive.sDiskPath = "";  // ensure this is initialized to a default that displayDisk() can deal with
 
     /*
      * Default drive status bits returned via the controller's Get Status command via the RLMP register
      */
-    drive.status = PDP11.RL11.RLMP.GS_ST.LOCKON | PDP11.RL11.RLMP.GS_BH | PDP11.RL11.RLMP.GS_HO | (drive.nCylinders == 512? PDP11.RL11.RLMP.GS_DT : 0);
+    drive.status = PDP11.RL11.RLMP.GS_ST.LOCKON | PDP11.RL11.RLMP.GS_BH | PDP11.RL11.RLMP.GS_HO;
 
     return fSuccess;
 };
@@ -897,8 +903,9 @@ RL11.prototype.processCommand = function()
 {
     var fnReadWrite;
     var fInterrupt = true;
-    var iDrive = (this.csr & PDP11.RL11.RLCS.DS) >> PDP11.RL11.RLCS.SHIFT.DS;
+    var iDrive = (this.regRLCS & PDP11.RL11.RLCS.DS) >> PDP11.RL11.RLCS.SHIFT.DS;
     var drive = this.aDrives[iDrive];
+    var disk = drive.disk;
     var iCylinder, iHead, iSector, nWords, addr;
 
     /*
@@ -908,9 +915,9 @@ RL11.prototype.processCommand = function()
      *  2) CRDY is cleared to process a command
      *  3) DRDY is cleared to command is in process
      */
-    this.csr &= ~PDP11.RL11.RLCS.DRDY;
+    this.regRLCS &= ~PDP11.RL11.RLCS.DRDY;
 
-    switch(this.csr & PDP11.RL11.RLCS.FUNC) {
+    switch(this.regRLCS & PDP11.RL11.RLCS.FUNC) {
 
     case PDP11.RL11.FUNC.NOP:
     case PDP11.RL11.FUNC.WCHK:
@@ -918,27 +925,32 @@ RL11.prototype.processCommand = function()
         break;
 
     case PDP11.RL11.FUNC.STATUS:
-        if (this.dar & PDP11.RL11.RLDA.GS_RST) {
-            this.csr &= 0x3F;                                   // TODO: Review
+        if (this.regRLMP & PDP11.RL11.RLMP.GS_BH) {
+            this.regRLCS &= (PDP11.RL11.RLCS.DRDY | PDP11.RL11.RLCS.FUNC | PDP11.RL11.RLCS.BAE);    // TODO: Review
         }
-        this.mpr = drive.status | (this.darInternal & PDP11.RL11.RLDA.RW_HS);    // bit 6: Head Select, bit 7: Drive Type (1=RL02)
+        /*
+         * The bit indicating whether or not the disk contains 256 or 512 cylinders is critical;
+         * for example, the first RSTS/E disk image we tried was an RL01K, which has only 256 cylinders,
+         * and the operating system would crash mysteriously if we didn't report the correct geometry.
+         */
+        this.regRLMP = drive.status | (this.tmpRLDA & PDP11.RL11.RLDA.RW_HS) | (disk && disk.nCylinders == 512? PDP11.RL11.RLMP.GS_DT : 0);
         break;
 
     case PDP11.RL11.FUNC.SEEK:
-        if ((this.dar & PDP11.RL11.RLDA.GS_CMD) == PDP11.RL11.RLDA.SEEK_CMD) {
-            var darCA = (this.dar & PDP11.RL11.RLDA.RW_CA);
-            var darHS = (this.dar & PDP11.RL11.RLDA.SEEK_HS) << 2;
-            if (this.dar & PDP11.RL11.RLDA.SEEK_DIR) {
-                this.darInternal += darCA;
+        if ((this.regRLDA & PDP11.RL11.RLDA.GS_CMD) == PDP11.RL11.RLDA.SEEK_CMD) {
+            var darCA = (this.regRLDA & PDP11.RL11.RLDA.RW_CA);
+            var darHS = (this.regRLDA & PDP11.RL11.RLDA.SEEK_HS) << 2;
+            if (this.regRLDA & PDP11.RL11.RLDA.SEEK_DIR) {
+                this.tmpRLDA += darCA;
             } else {
-                this.darInternal -= darCA;
+                this.tmpRLDA -= darCA;
             }
-            this.dar = this.darInternal = (this.darInternal & PDP11.RL11.RLDA.RW_CA) | darHS;
+            this.regRLDA = this.tmpRLDA = (this.tmpRLDA & PDP11.RL11.RLDA.RW_CA) | darHS;
         }
         break;
 
     case PDP11.RL11.FUNC.RHDR:
-        this.mpr = this.darInternal;
+        this.regRLMP = this.tmpRLDA;
         break;
 
     case PDP11.RL11.FUNC.RDATA:
@@ -947,15 +959,19 @@ RL11.prototype.processCommand = function()
 
     case PDP11.RL11.FUNC.WDATA:
         if (!fnReadWrite) fnReadWrite = this.writeData;
-        iCylinder = this.dar >> PDP11.RL11.RLDA.SHIFT.RW_CA;
-        iHead = (this.dar & PDP11.RL11.RLDA.RW_HS)? 1 : 0;
-        iSector = this.dar & PDP11.RL11.RLDA.RW_SA;
-        if (iCylinder >= drive.nCylinders || iSector >= drive.nSectors) {
-            this.csr |= PDP11.RL11.ERRC.HNF | PDP11.RL11.RLCS.ERR;
+        iCylinder = this.regRLDA >> PDP11.RL11.RLDA.SHIFT.RW_CA;
+        iHead = (this.regRLDA & PDP11.RL11.RLDA.RW_HS)? 1 : 0;
+        iSector = this.regRLDA & PDP11.RL11.RLDA.RW_SA;
+        if (!disk || iCylinder >= disk.nCylinders || iSector >= disk.nSectors) {
+            this.regRLCS |= PDP11.RL11.ERRC.HNF | PDP11.RL11.RLCS.ERR;
             break;
         }
-        addr = (((this.ber & PDP11.RL11.RLBE.MASK)) << 16) | this.bar;   // 22 bit mode
-        nWords = (0x10000 - this.mpr) & 0xffff;
+        addr = (((this.regRLBE & PDP11.RL11.RLBE.MASK)) << 16) | this.regRLBA;   // 22 bit mode
+        nWords = (0x10000 - this.regRLMP) & 0xffff;
+        var pos = ((((iCylinder << 1) + iHead) * drive.nSectors) + iSector) * 128;
+        if (DEBUG && (this.messageEnabled(MessagesPDP11.READ) || this.messageEnabled(MessagesPDP11.WRITE))) {
+            console.log((fnReadWrite == this.readData? "readData" : "writeData") + "(pos=" + pos + ",addr=" + str.toOct(addr) + ",bytes=" + (nWords * 2) + ")");
+        }
         fInterrupt = fnReadWrite.call(this, drive, iCylinder, iHead, iSector, nWords, addr, this.endReadWrite.bind(this));
         break;
 
@@ -964,12 +980,10 @@ RL11.prototype.processCommand = function()
     }
 
     if (fInterrupt) {
-        this.csr |= PDP11.RL11.RLCS.DRDY | PDP11.RL11.RLCS.CRDY;
-        if (this.csr & PDP11.RL11.RLCS.IE) this.cpu.setIRQ(this.irq);
+        this.regRLCS |= PDP11.RL11.RLCS.DRDY | PDP11.RL11.RLCS.CRDY;
+        if (this.regRLCS & PDP11.RL11.RLCS.IE) this.cpu.setIRQ(this.irq);
     }
 };
-
-
 
 /**
  * endReadWrite(err, iCylinder, iHead, iSector, nWords, addr)
@@ -985,14 +999,14 @@ RL11.prototype.processCommand = function()
  */
 RL11.prototype.endReadWrite = function(err, iCylinder, iHead, iSector, nWords, addr)
 {
-    this.bar = addr & 0xffff;
-    this.csr = (this.csr & ~PDP11.RL11.RLCS.BAE) | ((addr >> (16 - PDP11.RL11.RLCS.SHIFT.BAE)) & PDP11.RL11.RLCS.BAE);
-    this.ber = (addr >> 16) & PDP11.RL11.RLBE.MASK;         // 22 bit mode
-    this.dar = (iCylinder << PDP11.RL11.RLDA.SHIFT.RW_CA) | (iHead? PDP11.RL11.RLDA.RW_HS : 0) | (iSector & PDP11.RL11.RLDA.RW_SA);
-    this.darInternal = this.dar;
-    this.mpr = (0x10000 - nWords) & 0xffff;
+    this.regRLBA = addr & 0xffff;
+    this.regRLCS = (this.regRLCS & ~PDP11.RL11.RLCS.BAE) | ((addr >> (16 - PDP11.RL11.RLCS.SHIFT.BAE)) & PDP11.RL11.RLCS.BAE);
+    this.regRLBE = (addr >> 16) & PDP11.RL11.RLBE.MASK;         // 22 bit mode
+    this.regRLDA = (iCylinder << PDP11.RL11.RLDA.SHIFT.RW_CA) | (iHead? PDP11.RL11.RLDA.RW_HS : 0) | (iSector & PDP11.RL11.RLDA.RW_SA);
+    this.tmpRLDA = this.regRLDA;
+    this.regRLMP = (0x10000 - nWords) & 0xffff;
     if (err) {
-        this.csr |= err | PDP11.RL11.RLCS.ERR;
+        this.regRLCS |= err | PDP11.RL11.RLCS.ERR;
     }
     return true;
 };
@@ -1013,6 +1027,7 @@ RL11.prototype.endReadWrite = function(err, iCylinder, iHead, iSector, nWords, a
 RL11.prototype.readData = function(drive, iCylinder, iHead, iSector, nWords, addr, done)
 {
     var err = 0;
+    var checksum = 0;
     var disk = drive.disk;
     var sector = null, ibSector;
 
@@ -1021,26 +1036,42 @@ RL11.prototype.readData = function(drive, iCylinder, iHead, iSector, nWords, add
         nWords = 0;
     }
 
+    var sWords = "";
     while (nWords--) {
         if (!sector) {
-            sector = drive.disk.seek(iCylinder, iHead, iSector + 1);
+            sector = disk.seek(iCylinder, iHead, iSector + 1);
             if (!sector) {
                 err = PDP11.RL11.ERRC.HNF;
                 break;
             }
             ibSector = 0;
         }
-        var b0, b1;
-        if ((b0 = drive.disk.read(sector, ibSector++)) < 0 || (b1 = drive.disk.read(sector, ibSector++)) < 0) {
+        var b0, b1, data;
+        if ((b0 = disk.read(sector, ibSector++)) < 0 || (b1 = disk.read(sector, ibSector++)) < 0) {
             err = PDP11.RL11.ERRC.HNF;
             break;
         }
-        var data = this.bus.setWordDirect(addr, b0 | (b1 << 8));
+        /*
+         * Apparently (unlike the RK and RP controllers), this controller treats all 22-bit addresses as
+         * being in the UNIBUS address space (ie, the top 256Kb), which means we must call mapUnibus() on
+         * the address REGARDLESS whether it is actually >= BusPDP11.UNIBUS_22BIT.  TODO: This is inherited
+         * code, so let's review the documentation on this.
+         */
+        this.bus.setWordDirect(this.cpu.mapUnibus(addr), data = b0 | (b1 << 8));
+        if (DEBUG && this.messageEnabled(MessagesPDP11.READ)) {
+            if (!sWords) sWords = str.toOct(addr) + ": ";
+            sWords += str.toOct(data) + ' ';
+            if (sWords.length >= 64) {
+                console.log(sWords);
+                sWords = "";
+            }
+        }
         if (this.bus.checkFault()) {
             err = PDP11.RL11.ERRC.NXM;
             break;
         }
         addr += 2;
+        checksum += data;
         if (ibSector >= disk.cbSector) {
             sector = null;
             if (++iSector >= disk.nSectors) {
@@ -1055,6 +1086,11 @@ RL11.prototype.readData = function(drive, iCylinder, iHead, iSector, nWords, add
             }
         }
     }
+
+    if (DEBUG && this.messageEnabled(MessagesPDP11.READ)) {
+        console.log("checksum: " + (checksum|0));
+    }
+
     return done(err, iCylinder, iHead, iSector, nWords, addr);
 };
 
@@ -1074,6 +1110,7 @@ RL11.prototype.readData = function(drive, iCylinder, iHead, iSector, nWords, add
 RL11.prototype.writeData = function(drive, iCylinder, iHead, iSector, nWords, addr, done)
 {
     var err = 0;
+    var checksum = 0;
     var disk = drive.disk;
     var sector = null, ibSector;
 
@@ -1082,22 +1119,38 @@ RL11.prototype.writeData = function(drive, iCylinder, iHead, iSector, nWords, ad
         nWords = 0;
     }
 
+    var sWords = "";
     while (nWords--) {
-        var data = this.bus.getWordDirect(addr);
+        /*
+         * Apparently (unlike the RK and RP controllers), this controller treats all 22-bit addresses as
+         * being in the UNIBUS address space (ie, the top 256Kb), which means we must call mapUnibus() on
+         * the address REGARDLESS whether it is actually >= BusPDP11.UNIBUS_22BIT.  TODO: This is inherited
+         * code, so let's review the documentation on this.
+         */
+        var data = this.bus.getWordDirect(this.cpu.mapUnibus(addr));
         if (this.bus.checkFault()) {
             err = PDP11.RL11.ERRC.NXM;
             break;
         }
+        if (DEBUG && this.messageEnabled(MessagesPDP11.WRITE)) {
+            if (!sWords) sWords = str.toOct(addr) + ": ";
+            sWords += str.toOct(data) + ' ';
+            if (sWords.length >= 64) {
+                console.log(sWords);
+                sWords = "";
+            }
+        }
         addr += 2;
+        checksum += data;
         if (!sector) {
-            sector = drive.disk.seek(iCylinder, iHead, iSector + 1, true);
+            sector = disk.seek(iCylinder, iHead, iSector + 1, true);
             if (!sector) {
                 err = PDP11.RL11.ERRC.HNF;
                 break;
             }
             ibSector = 0;
         }
-        if (!drive.disk.write(sector, ibSector++, data & 0xff) || !drive.disk.write(sector, ibSector++, data >> 8)) {
+        if (!disk.write(sector, ibSector++, data & 0xff) || !disk.write(sector, ibSector++, data >> 8)) {
             err = PDP11.RL11.ERRC.HNF;
             break;
         }
@@ -1115,6 +1168,11 @@ RL11.prototype.writeData = function(drive, iCylinder, iHead, iSector, nWords, ad
             }
         }
     }
+
+    if (DEBUG && this.messageEnabled(MessagesPDP11.WRITE)) {
+        console.log("checksum: " + (checksum|0));
+    }
+
     return done(err, iCylinder, iHead, iSector, nWords, addr);
 };
 
@@ -1127,7 +1185,7 @@ RL11.prototype.writeData = function(drive, iCylinder, iHead, iSector, nWords, ad
  */
 RL11.prototype.readRLCS = function(addr)
 {
-    return this.csr & PDP11.RL11.RLCS.RMASK;
+    return this.regRLCS & PDP11.RL11.RLCS.RMASK;
 };
 
 /**
@@ -1139,11 +1197,9 @@ RL11.prototype.readRLCS = function(addr)
  */
 RL11.prototype.writeRLCS = function(data, addr)
 {
-    this.csr = (this.csr & ~PDP11.RL11.RLCS.WMASK) | (data & PDP11.RL11.RLCS.WMASK);
-
-    this.bae = (this.bae & ~0x3) | ((data & PDP11.RL11.RLCS.BAE) >> 4);
-
-    if (!(this.csr & PDP11.RL11.RLCS.CRDY)) this.processCommand();
+    this.regRLCS = (this.regRLCS & ~PDP11.RL11.RLCS.WMASK) | (data & PDP11.RL11.RLCS.WMASK);
+    this.regRLBE = (this.regRLBE & 0x3C) | ((data & PDP11.RL11.RLCS.BAE) >> PDP11.RL11.RLCS.SHIFT.BAE);
+    if (!(this.regRLCS & PDP11.RL11.RLCS.CRDY)) this.processCommand();
 };
 
 /**
@@ -1155,7 +1211,7 @@ RL11.prototype.writeRLCS = function(data, addr)
  */
 RL11.prototype.readRLBA = function(addr)
 {
-    return this.bar;
+    return this.regRLBA;
 };
 
 /**
@@ -1167,7 +1223,7 @@ RL11.prototype.readRLBA = function(addr)
  */
 RL11.prototype.writeRLBA = function(data, addr)
 {
-    this.bar = data & PDP11.RL11.RLBA.WMASK;
+    this.regRLBA = data & PDP11.RL11.RLBA.WMASK;
 };
 
 /**
@@ -1179,7 +1235,7 @@ RL11.prototype.writeRLBA = function(data, addr)
  */
 RL11.prototype.readRLDA = function(addr)
 {
-    return this.dar;
+    return this.regRLDA;
 };
 
 /**
@@ -1191,7 +1247,7 @@ RL11.prototype.readRLDA = function(addr)
  */
 RL11.prototype.writeRLDA = function(data, addr)
 {
-    this.dar = data;
+    this.regRLDA = data;
 };
 
 /**
@@ -1203,7 +1259,7 @@ RL11.prototype.writeRLDA = function(data, addr)
  */
 RL11.prototype.readRLMP = function(addr)
 {
-    return this.mpr;
+    return this.regRLMP;
 };
 
 /**
@@ -1215,7 +1271,7 @@ RL11.prototype.readRLMP = function(addr)
  */
 RL11.prototype.writeRLMP = function(data, addr)
 {
-    this.mpr = data;
+    this.regRLMP = data;
 };
 
 /**
@@ -1227,11 +1283,17 @@ RL11.prototype.writeRLMP = function(data, addr)
  */
 RL11.prototype.readRLBE = function(addr)
 {
-    return this.ber;
+    return this.regRLBE;
 };
 
 /**
  * writeRLBE(data, addr)
+ *
+ * Curiously, we see RSTS/E v7.0 writing RLBE bits that aren't documented:
+ *
+ *      R0=000000 R1=000000 R2=174410 R3=000000 R4=102076 R5=045166
+ *      SP=052662 PC=067624 PS=034344 IR=000000 SL=000377 T0 N0 Z1 V0 C0
+ *      067624: 012712 000300          MOV   #300,@R2
  *
  * @this {RL11}
  * @param {number} data
@@ -1239,7 +1301,8 @@ RL11.prototype.readRLBE = function(addr)
  */
 RL11.prototype.writeRLBE = function(data, addr)
 {
-    this.ber = data & PDP11.RL11.RLBE.MASK;
+    this.regRLBE = data & PDP11.RL11.RLBE.MASK;
+    this.regRLCS = (this.regRLCS & ~PDP11.RL11.RLCS.BAE) | ((this.regRLBE & 0x3) << PDP11.RL11.RLCS.SHIFT.BAE);
 };
 
 /*
