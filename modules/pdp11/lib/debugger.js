@@ -42,6 +42,7 @@ if (DEBUGGER) {
         var Keys          = require("../../shared/lib/keys");
         var State         = require("../../shared/lib/state");
         var PDP11         = require("./defines");
+        var BusPDP11      = require("./bus");
         var CPUPDP11      = require("./cpu");
         var MemoryPDP11   = require("./memory");
         var MessagesPDP11 = require("./messages");
@@ -645,6 +646,18 @@ if (DEBUGGER) {
     };
 
     /**
+     * mapUnibus(addr)
+     *
+     * @this {DebuggerPDP11}
+     * @param {number} addr
+     * @return {number}
+     */
+    DebuggerPDP11.prototype.mapUnibus = function(addr)
+    {
+        return (addr >= BusPDP11.UNIBUS_22BIT)? this.cpu.mapUnibus(addr) : addr;
+    };
+
+    /**
      * getByte(dbgAddr, inc)
      *
      * We must route all our memory requests through the CPU now, in case paging is enabled.
@@ -659,7 +672,7 @@ if (DEBUGGER) {
         var b = 0xff;
         var addr = this.getAddr(dbgAddr, false, 1);
         if (addr !== PDP11.ADDR_INVALID) {
-            b = (dbgAddr.fPhysical || addr > 0xffff)? this.bus.getByteDirect(this.cpu.mapUnibus(addr)) : this.cpu.getByteSafe(addr);
+            b = (dbgAddr.fPhysical || addr > 0xffff)? this.bus.getByteDirect(this.mapUnibus(addr)) : this.cpu.getByteSafe(addr);
             if (inc) this.incAddr(dbgAddr, inc);
         }
         return b;
@@ -678,7 +691,7 @@ if (DEBUGGER) {
         var w = 0xffff;
         var addr = this.getAddr(dbgAddr, false, 2);
         if (addr !== PDP11.ADDR_INVALID) {
-            w = (dbgAddr.fPhysical || addr > 0xffff)? this.bus.getWordDirect(this.cpu.mapUnibus(addr)) : this.cpu.getWordSafe(addr);
+            w = (dbgAddr.fPhysical || addr > 0xffff)? this.bus.getWordDirect(this.mapUnibus(addr)) : this.cpu.getWordSafe(addr);
             if (inc) this.incAddr(dbgAddr, inc);
         }
         return w;
@@ -697,7 +710,7 @@ if (DEBUGGER) {
         var addr = this.getAddr(dbgAddr, true, 1);
         if (addr !== PDP11.ADDR_INVALID) {
             if (dbgAddr.fPhysical || addr > 0xffff) {
-                this.bus.setByteDirect(this.cpu.mapUnibus(addr), b);
+                this.bus.setByteDirect(this.mapUnibus(addr), b);
             } else {
                 this.cpu.setByteSafe(addr, b);
             }
@@ -719,7 +732,7 @@ if (DEBUGGER) {
         var addr = this.getAddr(dbgAddr, true, 2);
         if (addr !== PDP11.ADDR_INVALID) {
             if (dbgAddr.fPhysical || addr > 0xffff) {
-                this.bus.setWordDirect(this.cpu.mapUnibus(addr), w);
+                this.bus.setWordDirect(this.mapUnibus(addr), w);
             } else {
                 this.cpu.setWordSafe(addr, w);
             }

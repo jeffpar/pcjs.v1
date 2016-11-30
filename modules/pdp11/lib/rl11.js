@@ -958,7 +958,7 @@ RL11.prototype.processCommand = function()
         nWords = (0x10000 - this.mpr) & 0xffff;
         var pos = ((((iCylinder << 1) + iHead) * drive.nSectors) + iSector) * 128;
         if (DEBUG && this.messageEnabled(MessagesPDP11.READ)) {
-            this.printMessage((fnReadWrite == this.readData? "readData" : "writeData") + "(pos=" + pos + ",addr=" + str.toOct(addr) + ",bytes=" + (nWords * 2) + ")", true, true);
+            console.log((fnReadWrite == this.readData? "readData" : "writeData") + "(pos=" + pos + ",addr=" + str.toOct(addr) + ",bytes=" + (nWords * 2) + ")");
         }
         fInterrupt = fnReadWrite.call(this, drive, pos, iCylinder, iHead, iSector, nWords, addr, this.endReadWrite.bind(this));
         break;
@@ -1025,7 +1025,7 @@ RL11.prototype.readData = function(drive, pos, iCylinder, iHead, iSector, nWords
         nWords = 0;
     }
 
-    var sWords = "", fDump = (addr == 0);
+    var sWords = "";
     while (nWords--) {
         if (!sector) {
             sector = drive.disk.seek(iCylinder, iHead, iSector + 1);
@@ -1041,10 +1041,11 @@ RL11.prototype.readData = function(drive, pos, iCylinder, iHead, iSector, nWords
             break;
         }
         this.bus.setWordDirect(this.cpu.mapUnibus(addr), data = b0 | (b1 << 8));
-        if (DEBUG && fDump && this.messageEnabled(MessagesPDP11.READ)) {
+        if (MAXDEBUG && this.messageEnabled(MessagesPDP11.READ)) {
+            if (!sWords) sWords = str.toOct(addr) + ": ";
             sWords += str.toOct(data) + ' ';
-            if (sWords.length >= 56) {
-                this.println(sWords);
+            if (sWords.length >= 64) {
+                console.log(sWords);
                 sWords = "";
             }
         }
@@ -1070,10 +1071,7 @@ RL11.prototype.readData = function(drive, pos, iCylinder, iHead, iSector, nWords
     }
 
     if (DEBUG && this.messageEnabled(MessagesPDP11.READ)) {
-        this.printMessage("checksum: " + (checksum|0), true);
-        if (pos == 732160) {
-            this.cpu.stopCPU();
-        }
+        console.log("checksum: " + (checksum|0));
     }
 
     return done(err, iCylinder, iHead, iSector, nWords, addr);
@@ -1105,17 +1103,18 @@ RL11.prototype.writeData = function(drive, pos, iCylinder, iHead, iSector, nWord
         nWords = 0;
     }
 
-    var sWords = "", fDump = (pos = 946944);
+    var sWords = "";
     while (nWords--) {
         var data = this.bus.getWordDirect(this.cpu.mapUnibus(addr));
         if (this.bus.checkFault()) {
             err = PDP11.RL11.ERRC.NXM;
             break;
         }
-        if (DEBUG && fDump && this.messageEnabled(MessagesPDP11.READ)) {
+        if (MAXDEBUG && this.messageEnabled(MessagesPDP11.READ)) {
+            if (!sWords) sWords = str.toOct(addr) + ": ";
             sWords += str.toOct(data) + ' ';
-            if (sWords.length >= 56) {
-                this.println(sWords);
+            if (sWords.length >= 64) {
+                console.log(sWords);
                 sWords = "";
             }
         }
@@ -1149,7 +1148,7 @@ RL11.prototype.writeData = function(drive, pos, iCylinder, iHead, iSector, nWord
     }
 
     if (DEBUG && this.messageEnabled(MessagesPDP11.READ)) {
-        this.printMessage("checksum: " + (checksum|0), true);
+        console.log("checksum: " + (checksum|0));
     }
 
     return done(err, iCylinder, iHead, iSector, nWords, addr);

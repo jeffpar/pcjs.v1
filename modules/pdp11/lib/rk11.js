@@ -933,7 +933,7 @@ RK11.prototype.processCommand = function()
         nWords = (0x10000 - this.wcr) & 0xffff;
         if (DEBUG && this.messageEnabled(MessagesPDP11.READ)) {
             var pos = ((((iCylinder << 1) + iHead) * drive.nSectors) + iSector) * 256;
-            this.printMessage((fnReadWrite == this.readData? "readData" : "writeData") + "(pos=" + pos + ",addr=" + str.toOct(addr) + ",bytes=" + (nWords * 2) + ")", true, true);
+            console.log((fnReadWrite == this.readData? "readData" : "writeData") + "(pos=" + pos + ",addr=" + str.toOct(addr) + ",bytes=" + (nWords * 2) + ")", true, true);
         }
         fInterrupt = fnReadWrite.call(this, drive, iCylinder, iHead, iSector, nWords, addr, this.endReadWrite.bind(this));
         break;
@@ -1017,11 +1017,12 @@ RK11.prototype.readData = function(drive, iCylinder, iHead, iSector, nWords, add
             err = PDP11.RK11.RKER.NXS;
             break;
         }
-        this.bus.setWordDirect(this.cpu.mapUnibus(addr), data = b0 | (b1 << 8));
+        this.bus.setWordDirect(addr, data = b0 | (b1 << 8));
         if (DEBUG && this.messageEnabled(MessagesPDP11.READ)) {
+            if (!sWords) sWords = str.toOct(addr) + ": ";
             sWords += str.toOct(data) + ' ';
-            if (sWords.length >= 56) {
-                this.printMessage(sWords + '\n', true);
+            if (sWords.length >= 64) {
+                console.log(sWords);
                 sWords = "";
             }
         }
@@ -1072,7 +1073,7 @@ RK11.prototype.writeData = function(drive, iCylinder, iHead, iSector, nWords, ad
     }
 
     while (nWords--) {
-        var data = this.bus.getWordDirect(this.cpu.mapUnibus(addr));
+        var data = this.bus.getWordDirect(addr);
         if (this.bus.checkFault()) {
             err = PDP11.RK11.RKER.NXM;
             break;

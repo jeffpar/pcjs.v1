@@ -1520,28 +1520,22 @@ CPUStatePDP11.prototype.getTrapStatus = function()
  */
 CPUStatePDP11.prototype.mapUnibus = function(addr)
 {
-    /*
-     * NOTE: Most callers check the first condition themselves (addr >= BusPDP11.UNIBUS_22BIT) to avoid
-     * making unnecessary function calls.
-     */
-    if (addr >= BusPDP11.UNIBUS_22BIT) {
-        var idx = (addr >> 13) & 0x1f;
-        if (idx < 31) {
-            if (this.regMMR3 & PDP11.MMR3.UNIBUS_MAP) {
-                /*
-                 * The UNIBUS map relocation is enabled
-                 */
-                addr = (this.regsUniMap[idx] + (addr & 0x1ffe)) & 0x3ffffe;
-                this.assert(addr < BusPDP11.UNIBUS_22BIT || addr >= BusPDP11.IOPAGE_22BIT);
-            } else {
-                /*
-                 * Since UNIBUS map relocation is NOT enabled, then as explained above:
-                 *
-                 *      If the UNIBUS map relocation is not enabled, an incoming 18-bit UNIBUS address has 4 leading zeroes added for
-                 *      referencing a 22-bit physical address. The lower 18 bits are the same. No relocation is performed.
-                 */
-                addr &= ~BusPDP11.UNIBUS_22BIT;
-            }
+    var idx = (addr >> 13) & 0x1f;
+    if (idx < 31) {
+        if (this.regMMR3 & PDP11.MMR3.UNIBUS_MAP) {
+            /*
+             * The UNIBUS map relocation is enabled
+             */
+            addr = (this.regsUniMap[idx] + (addr & 0x1ffe)) & 0x3ffffe;
+            this.assert(addr < BusPDP11.UNIBUS_22BIT || addr >= BusPDP11.IOPAGE_22BIT);
+        } else {
+            /*
+             * Since UNIBUS map relocation is NOT enabled, then as explained above:
+             *
+             *      If the UNIBUS map relocation is not enabled, an incoming 18-bit UNIBUS address has 4 leading zeroes added for
+             *      referencing a 22-bit physical address. The lower 18 bits are the same. No relocation is performed.
+             */
+            addr &= ~BusPDP11.UNIBUS_22BIT;
         }
     }
     return addr;
