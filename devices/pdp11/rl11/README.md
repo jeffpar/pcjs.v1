@@ -7,16 +7,17 @@ permalink: /devices/pdp11/rl11/
 RL11 Disk Controller
 --------------------
 
-The RL11 Disk Controller controls up to four RL01 or RL02 disk drives, which in turn read/write RL01K or
-[RL02K](/disks/dec/rl02k/) disk cartridges.
+The RL11 Disk Controller controls up to four RL01 or RL02 disk drives, which in turn read/write
+[RL01K](/disks/dec/rl01k/) or [RL02K](/disks/dec/rl02k/) disk cartridges.
 
 Machines containing the [RL11 Component](/modules/pdp11/lib/pc11.js) include:
 
 - [PDP-11/70 Boot Monitor](/devices/pdp11/machine/1170/monitor/) (with [Debugger](/devices/pdp11/machine/1170/monitor/debugger/))
 - [PDP-11/70 with Front Panel](/devices/pdp11/machine/1170/panel/) (with [Debugger](/devices/pdp11/machine/1170/panel/debugger/))
 
-PCjs has archived a selection of [RL02K Disk Images](/disks/dec/rl02k/) from [Paul Nankervis](http://skn.noip.me/pdp11/)
-for use by those machines, which are listed in the following RL11 Device XML file:
+PCjs has archived a selection of [RL01K](/disks/dec/rl01k/) and [RL02K](/disks/dec/rl02k/) disk images
+from [Paul Nankervis](http://skn.noip.me/pdp11/) for use by those machines, which are also listed in the
+following RL11 Device XML file:
 
 - [Default](/devices/pdp11/rl11/default.xml)
 

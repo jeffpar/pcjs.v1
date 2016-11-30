@@ -46,6 +46,15 @@ if (NODE) {
  *
  *      autoMount: one or more JSON-encoded objects, each containing 'name' and 'path' properties
  *
+ * The RL11 Disk Controller controls up to four RL01 or RL02 disk drives, which in turn read/write RL01K or
+ * RL02K disk cartridges.  See [RL11 Disk Controller Configuration Files](/devices/pdp11/rl11/).
+ *
+ * RL01K disks are single-platter cartridges with 256 tracks per side, 40 sectors per track, and a sector size
+ * of 256 bytes, for a total capacity of 5Mb (5,242,880 bytes).  See [RL01K Disk Images](/disks/dec/rl01k/).
+ *
+ * RL02K disks are single-platter cartridges with 512 tracks per side, 40 sectors per track, and a sector size
+ * of 256 bytes, for a total capacity of 10Mb (10,485,760 bytes).  See [RL02K Disk Images](/disks/dec/rl02k/).
+ *
  * @constructor
  * @extends Component
  * @param {Object} parms
@@ -957,10 +966,10 @@ RL11.prototype.processCommand = function()
         addr = (((this.ber & PDP11.RL11.RLBE.MASK)) << 16) | this.bar;   // 22 bit mode
         nWords = (0x10000 - this.mpr) & 0xffff;
         var pos = ((((iCylinder << 1) + iHead) * drive.nSectors) + iSector) * 128;
-        if (DEBUG && this.messageEnabled(MessagesPDP11.READ)) {
+        if (DEBUG && (this.messageEnabled(MessagesPDP11.READ) || this.messageEnabled(MessagesPDP11.WRITE))) {
             console.log((fnReadWrite == this.readData? "readData" : "writeData") + "(pos=" + pos + ",addr=" + str.toOct(addr) + ",bytes=" + (nWords * 2) + ")");
         }
-        fInterrupt = fnReadWrite.call(this, drive, pos, iCylinder, iHead, iSector, nWords, addr, this.endReadWrite.bind(this));
+        fInterrupt = fnReadWrite.call(this, drive, iCylinder, iHead, iSector, nWords, addr, this.endReadWrite.bind(this));
         break;
 
     default:
@@ -1000,11 +1009,10 @@ RL11.prototype.endReadWrite = function(err, iCylinder, iHead, iSector, nWords, a
 };
 
 /**
- * readData(drive, pos, iCylinder, iHead, iSector, nWords, addr, done)
+ * readData(drive, iCylinder, iHead, iSector, nWords, addr, done)
  *
  * @this {RL11}
  * @param {Object} drive
- * @param {number} pos
  * @param {number} iCylinder
  * @param {number} iHead
  * @param {number} iSector
@@ -1013,7 +1021,7 @@ RL11.prototype.endReadWrite = function(err, iCylinder, iHead, iSector, nWords, a
  * @param {function(...)} done
  * @return {boolean} true if complete, false if queued
  */
-RL11.prototype.readData = function(drive, pos, iCylinder, iHead, iSector, nWords, addr, done)
+RL11.prototype.readData = function(drive, iCylinder, iHead, iSector, nWords, addr, done)
 {
     var err = 0;
     var checksum = 0;
@@ -1040,8 +1048,14 @@ RL11.prototype.readData = function(drive, pos, iCylinder, iHead, iSector, nWords
             err = PDP11.RL11.ERRC.HNF;
             break;
         }
+        /*
+         * Apparently (unlike the RK and RP controllers), this controller treats all 22-bit addresses as
+         * being in the UNIBUS address space (ie, the top 256Kb), which means we must call mapUnibus() on
+         * the address REGARDLESS whether it is actually >= BusPDP11.UNIBUS_22BIT.  TODO: This is inherited
+         * code, so let's review the documentation on this.
+         */
         this.bus.setWordDirect(this.cpu.mapUnibus(addr), data = b0 | (b1 << 8));
-        if (MAXDEBUG && this.messageEnabled(MessagesPDP11.READ)) {
+        if (DEBUG && this.messageEnabled(MessagesPDP11.READ)) {
             if (!sWords) sWords = str.toOct(addr) + ": ";
             sWords += str.toOct(data) + ' ';
             if (sWords.length >= 64) {
@@ -1078,11 +1092,10 @@ RL11.prototype.readData = function(drive, pos, iCylinder, iHead, iSector, nWords
 };
 
 /**
- * writeData(drive, pos, iCylinder, iHead, iSector, nWords, addr, done)
+ * writeData(drive, iCylinder, iHead, iSector, nWords, addr, done)
  *
  * @this {RL11}
  * @param {Object} drive
- * @param {number} pos
  * @param {number} iCylinder
  * @param {number} iHead
  * @param {number} iSector
@@ -1091,7 +1104,7 @@ RL11.prototype.readData = function(drive, pos, iCylinder, iHead, iSector, nWords
  * @param {function(...)} done
  * @return {boolean} true if complete, false if queued
  */
-RL11.prototype.writeData = function(drive, pos, iCylinder, iHead, iSector, nWords, addr, done)
+RL11.prototype.writeData = function(drive, iCylinder, iHead, iSector, nWords, addr, done)
 {
     var err = 0;
     var checksum = 0;
@@ -1105,12 +1118,18 @@ RL11.prototype.writeData = function(drive, pos, iCylinder, iHead, iSector, nWord
 
     var sWords = "";
     while (nWords--) {
+        /*
+         * Apparently (unlike the RK and RP controllers), this controller treats all 22-bit addresses as
+         * being in the UNIBUS address space (ie, the top 256Kb), which means we must call mapUnibus() on
+         * the address REGARDLESS whether it is actually >= BusPDP11.UNIBUS_22BIT.  TODO: This is inherited
+         * code, so let's review the documentation on this.
+         */
         var data = this.bus.getWordDirect(this.cpu.mapUnibus(addr));
         if (this.bus.checkFault()) {
             err = PDP11.RL11.ERRC.NXM;
             break;
         }
-        if (MAXDEBUG && this.messageEnabled(MessagesPDP11.READ)) {
+        if (DEBUG && this.messageEnabled(MessagesPDP11.WRITE)) {
             if (!sWords) sWords = str.toOct(addr) + ": ";
             sWords += str.toOct(data) + ' ';
             if (sWords.length >= 64) {
@@ -1147,7 +1166,7 @@ RL11.prototype.writeData = function(drive, pos, iCylinder, iHead, iSector, nWord
         }
     }
 
-    if (DEBUG && this.messageEnabled(MessagesPDP11.READ)) {
+    if (DEBUG && this.messageEnabled(MessagesPDP11.WRITE)) {
         console.log("checksum: " + (checksum|0));
     }
 

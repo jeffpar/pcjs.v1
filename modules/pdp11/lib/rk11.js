@@ -46,6 +46,13 @@ if (NODE) {
  *
  *      autoMount: one or more JSON-encoded objects, each containing 'name' and 'path' properties
  *
+ * The RK11 Disk Controller controls up to eight RK05 disk drives, which in turn read/write RK03-KA
+ * disk cartridges.  See [RK11 Disk Controller Configuration Files](/devices/pdp11/rk11/).
+ *
+ * RK03 (or more precisely, RK03-KA) disks are single-platter cartridges with 203 tracks per side,
+ * 12 sectors per track, and a sector size of 256 words (512 bytes), for a total capacity of 2.38Mb
+ * (2,494,464 bytes).  See [RK03-KA Disk Images](/disks/dec/rk03/).
+ *
  * @constructor
  * @extends Component
  * @param {Object} parms
@@ -931,9 +938,9 @@ RK11.prototype.processCommand = function()
         }
         addr = (((this.csr & PDP11.RK11.RKCS.MEX)) << (16 - PDP11.RK11.RKCS.SHIFT.MEX)) | this.bar;
         nWords = (0x10000 - this.wcr) & 0xffff;
-        if (DEBUG && this.messageEnabled(MessagesPDP11.READ)) {
+        if (DEBUG && (this.messageEnabled(MessagesPDP11.READ) || this.messageEnabled(MessagesPDP11.WRITE))) {
             var pos = ((((iCylinder << 1) + iHead) * drive.nSectors) + iSector) * 256;
-            console.log((fnReadWrite == this.readData? "readData" : "writeData") + "(pos=" + pos + ",addr=" + str.toOct(addr) + ",bytes=" + (nWords * 2) + ")", true, true);
+            console.log((fnReadWrite == this.readData? "readData" : "writeData") + "(pos=" + pos + ",addr=" + str.toOct(addr) + ",bytes=" + (nWords * 2) + ")");
         }
         fInterrupt = fnReadWrite.call(this, drive, iCylinder, iHead, iSector, nWords, addr, this.endReadWrite.bind(this));
         break;
