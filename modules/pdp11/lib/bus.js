@@ -1236,20 +1236,21 @@ BusPDP11.prototype.addIOHandlers = function(start, end, fnReadByte, fnWriteByte,
 };
 
 /**
- * addIOTable(component, table)
+ * addIOTable(component, table, offReg)
  *
  * Add I/O notification handlers from the specified table (a batch version of addIOHandlers).
  *
  * @this {BusPDP11}
  * @param {Component} component
  * @param {Object} table
+ * @param {number} [offReg] (optional offset to add to all register addresses)
  * @return {boolean} (true if entire range successfully registered, false if any conflicts)
  */
-BusPDP11.prototype.addIOTable = function(component, table)
+BusPDP11.prototype.addIOTable = function(component, table, offReg)
 {
-    for (var port in table) {
-        var addr = +port;
-        var afn = table[port];
+    for (var reg in table) {
+        var addr = +reg + (offReg || 0);
+        var afn = table[reg];
 
         /*
          * Don't install (ie, ignore) handlers for I/O addresses that are defined with a model number

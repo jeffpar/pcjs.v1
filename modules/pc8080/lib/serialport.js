@@ -112,6 +112,8 @@ function SerialPort8080(parmsSerial) {
     this.fAutoXOFF = true;
     this.fAutoStop = false;
 
+    this.fNullModem = true;
+
     Component.call(this, "SerialPort", parmsSerial, SerialPort8080, Messages8080.SERIAL);
 
     var sBinding = parmsSerial['binding'];
@@ -128,14 +130,15 @@ function SerialPort8080(parmsSerial) {
      * No connection until initConnection() is called.
      */
     this.sDataReceived = "";
-    this.connection = this.sendData = null;
+    this.connection = this.sendData = this.updateStatus = null;
 
     /*
-     * Export all functions required by initConnection(); currently, this is the bare minimum (no flow control yet).
+     * Export all functions required by initConnection().
      */
     this['exports'] = {
         'connect': this.initConnection,
-        'receiveData': this.receiveData
+        'receiveData': this.receiveData,
+        'receiveStatus': this.receiveStatus
     };
 }
 
@@ -474,6 +477,7 @@ SerialPort8080.prototype.initBus = function(cmp, bus, cpu, dbg)
  * If the target component is found, then verify that it has exported functions with the following names:
  *
  *      receiveData(data): called when we have data to transmit; aliased internally to sendData(data)
+ *      receiveStatus(pins): called when our control signals have changed; aliased internally to updateStatus(pins)
  *
  * For now, we're not going to worry about communication in the other direction, because when the target component
  * performs its own initConnection(), it will find our receiveData() function, at which point communication in both
@@ -502,6 +506,7 @@ SerialPort8080.prototype.initConnection = function()
                         var fnConnect = exports['connect'];
                         if (fnConnect) fnConnect.call(this.connection);
                         this.sendData = exports['receiveData'];
+                        this.updateStatus = exports['receiveStatus'];
                         if (this.sendData) {
                             this.status(this.idMachine + '.' + sSourceID + " connected to " + sTargetID);
                             return;
@@ -714,6 +719,22 @@ SerialPort8080.prototype.receiveData = function(data)
 };
 
 /**
+ * receiveStatus(pins)
+ *
+ * NOTE: Prior to the addition of this interface, the DSR bit was initialized set and remained set for the life
+ * of the machine.  It is entirely appropriate that this is the only way the bit can be changed, because it represents
+ * an external control signal.
+ *
+ * @this {SerialPort8080}
+ * @param {number} pins
+ */
+SerialPort8080.prototype.receiveStatus = function(pins)
+{
+    this.bStatus &= ~SerialPort8080.UART8251.STATUS.DSR;
+    if (pins & RS232.DSR.MASK) this.bStatus |= SerialPort8080.UART8251.STATUS.DSR;
+};
+
+/**
  * transmitByte(b)
  *
  * @this {SerialPort8080}
@@ -865,6 +886,23 @@ SerialPort8080.prototype.outControl = function(port, bOut, addrFrom)
         this.bMode = bOut;
         this.fReady = true;
     } else {
+        /*
+         * Whenever DTR or RTS changes, we also want to notify any connected machine, via updateStatus().
+         */
+        if (this.updateStatus) {
+            var delta = (bOut ^ this.bCommand);
+            if (delta & (SerialPort8080.UART8251.COMMAND.RTS | SerialPort8080.UART8251.COMMAND.DTR)) {
+                var pins = 0;
+                if (this.fNullModem) {
+                    pins |= (bOut & SerialPort8080.UART8251.COMMAND.RTS)? RS232.CTS.MASK : 0;
+                    pins |= (bOut & SerialPort8080.UART8251.COMMAND.DTR)? (RS232.DSR.MASK | RS232.CD.MASK): 0;
+                } else {
+                    pins |= (bOut & SerialPort8080.UART8251.COMMAND.RTS)? RS232.RTS.MASK : 0;
+                    pins |= (bOut & SerialPort8080.UART8251.COMMAND.DTR)? RS232.DTR.MASK : 0;
+                }
+                this.updateStatus(pins);
+            }
+        }
         this.bCommand = bOut;
         if (this.bCommand & SerialPort8080.UART8251.COMMAND.INTERNAL_RESET) {
             this.fReady = false;

@@ -489,6 +489,8 @@ var PDP11 = {
         RLMP:       0o174406,   //                                  RL11 Multi-Purpose Register
         RLBE:       0o174410,   //                                  RL11 Bus (Address) Extension Register (RLV12 controller only)
 
+        DL11:       0o176500,   //                                  DL11 Additional Register Range (ends at 0o176676)
+
         RKDS:       0o177400,   //                                  RK11 Drive Status Register
         RKER:       0o177402,   //                                  RK11 Error Register
         RKCS:       0o177404,   //                                  RK11 Control Status Register
@@ -609,6 +611,7 @@ var PDP11 = {
             DSC:    0x8000,     // Dataset Status Change (R/O)
             RMASK:  0xFFFE,     // bits readable (TODO: All I know for sure is that bit 0 is NOT readable; see readRCSR())
             WMASK:  0x006F,     // bits writable
+            RS232:  0x0006,     // bits affecting RS-232 status updates
             BAUD:   9600
         },
         RBUF: {                 // 177562: DL11 Receiver Data Buffer Register
@@ -846,10 +849,10 @@ var PDP11 = {
         }
     },
     VECTORS: {
-        0o060:  "DL11.RCSR",
-        0o064:  "DL11.XCSR",
-        0o070:  "PC11.PRS",
-        0o074:  "PC11.PPS",
+        0o060:  "DL11R",
+        0o064:  "DL11X",
+        0o070:  "PC11R",
+        0o074:  "PC11X",
         0o100:  "KW11",
         0o160:  "RL11",
         0o220:  "RK11"

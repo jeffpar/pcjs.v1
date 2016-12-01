@@ -80,6 +80,7 @@ function SerialPortPDP11(parmsSerial) {
     this.nBaudReceive = parmsSerial['baudReceive'] || PDP11.DL11.RCSR.BAUD;
     this.nBaudTransmit = parmsSerial['baudTransmit'] || PDP11.DL11.XCSR.BAUD;
     this.fUpperCase = parmsSerial['upperCase'];
+    this.fNullModem = true;
 
     /**
      * consoleOutput becomes a string that records serial port output if the 'binding' property is set to the
@@ -134,14 +135,15 @@ function SerialPortPDP11(parmsSerial) {
      * No connection until initConnection() is called.
      */
     this.sDataReceived = "";
-    this.connection = this.sendData = null;
+    this.connection = this.sendData = this.updateStatus = null;
 
     /*
-     * Export all functions required by initConnection(); currently, this is the bare minimum (no flow control yet).
+     * Export all functions required by initConnection().
      */
     this['exports'] = {
         'connect': this.initConnection,
-        'receiveData': this.receiveData
+        'receiveData': this.receiveData,
+        'receiveStatus': this.receiveStatus
     };
 }
 
@@ -308,7 +310,7 @@ SerialPortPDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
 
     var serial = this;
 
-    this.irqReceiver = this.cpu.addIRQ(PDP11.DL11.RVEC, PDP11.DL11.PRI, MessagesPDP11.DL11);
+    this.irqReceiver = this.cpu.addIRQ(this.iAdapter? -1 : PDP11.DL11.RVEC, PDP11.DL11.PRI, MessagesPDP11.DL11);
 
     this.timerReceiveInterrupt = this.cpu.addTimer(function readyReceiver() {
         var b = serial.receiveByte();
@@ -325,7 +327,7 @@ SerialPortPDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
         }
     });
 
-    this.irqTransmitter = this.cpu.addIRQ(PDP11.DL11.XVEC, PDP11.DL11.PRI, MessagesPDP11.DL11);
+    this.irqTransmitter = this.cpu.addIRQ(this.iAdapter? -1 : PDP11.DL11.XVEC, PDP11.DL11.PRI, MessagesPDP11.DL11);
 
     this.timerTransmitInterrupt = this.cpu.addTimer(function readyTransmitter() {
         serial.regXCSR |= PDP11.DL11.XCSR.READY;
@@ -334,7 +336,7 @@ SerialPortPDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
         }
     });
 
-    bus.addIOTable(this, SerialPortPDP11.UNIBUS_IOTABLE);
+    bus.addIOTable(this, SerialPortPDP11.UNIBUS_IOTABLE, this.iAdapter? ((PDP11.UNIBUS.DL11 + (this.iAdapter - 1) * 8) - PDP11.UNIBUS.RCSR) : 0);
     bus.addResetHandler(this.reset.bind(this));
 
     this.setReady();
@@ -349,6 +351,7 @@ SerialPortPDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
  * If the target component is found, then verify that it has exported functions with the following names:
  *
  *      receiveData(data): called when we have data to transmit; aliased internally to sendData(data)
+ *      receiveStatus(pins): called when our control signals have changed; aliased internally to updateStatus(pins)
  *
  * For now, we're not going to worry about communication in the other direction, because when the target component
  * performs its own initConnection(), it will find our receiveData() function, at which point communication in both
@@ -377,6 +380,7 @@ SerialPortPDP11.prototype.initConnection = function()
                         var fnConnect = exports['connect'];
                         if (fnConnect) fnConnect.call(this.connection);
                         this.sendData = exports['receiveData'];
+                        this.updateStatus = exports['receiveStatus'];
                         if (this.sendData) {
                             this.status(this.idMachine + '.' + sSourceID + " connected to " + sTargetID);
                             return;
@@ -483,7 +487,7 @@ SerialPortPDP11.prototype.restore = function(data)
 SerialPortPDP11.prototype.initState = function(data)
 {
     this.regRBUF = 0;
-    this.regRCSR = 0;
+    this.regRCSR = PDP11.DL11.RCSR.CTS;     // TODO: I didn't use to set this initially; is this wise?
     this.regXCSR = PDP11.DL11.XCSR.READY;
     this.abReceive = [];
     return true;
@@ -593,6 +597,30 @@ SerialPortPDP11.prototype.receiveByte = function()
 };
 
 /**
+ * receiveStatus(pins)
+ *
+ * @this {SerialPortPDP11}
+ * @param {number} pins
+ */
+SerialPortPDP11.prototype.receiveStatus = function(pins)
+{
+    var oldRCSR = this.regRCSR;
+    this.regRCSR &= ~(PDP11.DL11.RCSR.CTS | PDP11.DL11.RCSR.CD);
+    if (pins & RS232.CTS.MASK) {
+        this.regRCSR |= PDP11.DL11.RCSR.CTS;
+    }
+    if (pins & RS232.CD.MASK) {
+        this.regRCSR |= PDP11.DL11.RCSR.CD;
+    }
+    if (oldRCSR != this.regRCSR) {
+        this.regRCSR |= PDP11.DL11.RCSR.DSC;
+        if (this.regRCSR & PDP11.DL11.RCSR.DIE) {
+            this.cpu.setIRQ(this.irqReceiver);
+        }
+    }
+};
+
+/**
  * transmitByte(b)
  *
  * @this {SerialPortPDP11}
@@ -681,7 +709,9 @@ SerialPortPDP11.prototype.transmitByte = function(b)
  */
 SerialPortPDP11.prototype.readRCSR = function(addr)
 {
-    return this.regRCSR & PDP11.DL11.RCSR.RMASK;
+    var data = this.regRCSR & PDP11.DL11.RCSR.RMASK;
+    this.regRCSR &= ~PDP11.DL11.RCSR.DSC;
+    return data;
 };
 
 /**
@@ -693,6 +723,23 @@ SerialPortPDP11.prototype.readRCSR = function(addr)
  */
 SerialPortPDP11.prototype.writeRCSR = function(data, addr)
 {
+    /*
+     * Whenever DTR or RTS changes, we also want to notify any connected machine, via updateStatus().
+     */
+    if (this.updateStatus) {
+        var delta = (data ^ this.regRCSR);
+        if (delta & PDP11.DL11.RCSR.RS232) {
+            var pins = 0;
+            if (this.fNullModem) {
+                pins |= (data & PDP11.DL11.RCSR.RTS)? RS232.CTS.MASK : 0;
+                pins |= (data & PDP11.DL11.RCSR.DTR)? (RS232.DSR.MASK | RS232.CD.MASK): 0;
+            } else {
+                pins |= (data & PDP11.DL11.RCSR.RTS)? RS232.RTS.MASK : 0;
+                pins |= (data & PDP11.DL11.RCSR.DTR)? RS232.DTR.MASK : 0;
+            }
+            this.updateStatus(pins);
+        }
+    }
     this.regRCSR = (this.regRCSR & ~PDP11.DL11.RCSR.WMASK) | (data & PDP11.DL11.RCSR.WMASK);
 };
 

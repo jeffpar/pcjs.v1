@@ -149,14 +149,33 @@ CPUStatePDP11.prototype.initProcessor = function()
     this.nDisableTraps = 0;
 
     /** @type {IRQ|null} */
-    this.irqNext = null;                // the head of the active IRQ list, in priority order
+    this.irqNext = null;        // the head of the active IRQ list, in priority order
 
-    if (DEBUG) {
-        /** @type {Array.<IRQ>} */
-        this.aIRQs = [];                // list of all IRQs, active or not (just for debugging)
-    }
+    /** @type {Array.<IRQ>} */
+    this.aIRQs = [];            // list of all IRQs, active or not (to be used for auto-configuration)
 
     this.flags.complete = false;
+};
+
+/**
+ * finish()
+ *
+ * TODO: This function simply ensures that we don't leave any IRQs installed with unresolved floating
+ * (negative) vectors; properly assigning vectors according to device type (ie, auto-configuration) is an
+ * exercise left for another day.
+ *
+ * @this {CPUStatePDP11}
+ */
+CPUStatePDP11.prototype.finish = function()
+{
+    var vectorFloating = 0o300;
+    for (var i = 0; i < this.aIRQs.length; i++) {
+        var irq = this.aIRQs[i];
+        if (irq.vector < 0) {
+            irq.vector = vectorFloating;
+            vectorFloating += 4;
+        }
+    }
 };
 
 /**
@@ -170,7 +189,7 @@ CPUStatePDP11.prototype.reset = function()
     if (this.flags.running) this.stopCPU();
     this.initRegs();
     this.resetCycles();
-    this.clearError();                  // clear any fatal error/exception that setError() may have flagged
+    this.clearError();          // clear any fatal error/exception that setError() may have flagged
     this.parent.reset.call(this);
 };
 
@@ -264,7 +283,7 @@ CPUStatePDP11.prototype.resetMMU = function()
     this.regMMR1 = 0;           // 177574
     this.regMMR2 = 0;           // 177576
     this.regMMR3 = 0;           // 172516
-    this.regErr = 0;            // 177766       TODO: Do we ever need to clear this, because it appears to accumulate errors...
+    this.regErr = 0;            // 177766       TODO: Do we ever need to automatically clear this, or is it manually cleared?
     this.regPIR = 0;            // 177772
     this.regSL = 0xff;          // 177774
     this.mmuEnable = 0;         // MMU enabled for PDP11.ACCESS.READ or PDP11.ACCESS.WRITE
@@ -774,7 +793,7 @@ CPUStatePDP11.prototype.setSP = function(addr)
  * addIRQ(vector, priority, message)
  *
  * @this {CPUStatePDP11}
- * @param {number} vector
+ * @param {number} vector (-1 for floating vector)
  * @param {number} priority
  * @param {number} [message]
  * @return {IRQ}
@@ -782,10 +801,8 @@ CPUStatePDP11.prototype.setSP = function(addr)
 CPUStatePDP11.prototype.addIRQ = function(vector, priority, message)
 {
     var irq = {vector: vector, priority: priority, message: message || 0, next: null};
-    if (DEBUG) {
-        irq.name = PDP11.VECTORS[vector];
-        this.aIRQs.push(irq);
-    }
+    irq.name = PDP11.VECTORS[vector];
+    this.aIRQs.push(irq);
     return irq;
 };
 

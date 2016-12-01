@@ -207,6 +207,17 @@ CPUPDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
 };
 
 /**
+ * finish()
+ *
+ * Stub for final initialization call (overridden by the CPUStatePDP11 component).
+ *
+ * @this {CPUPDP11}
+ */
+CPUPDP11.prototype.finish = function()
+{
+};
+
+/**
  * reset()
  *
  * Stub for reset notification (overridden by the CPUStatePDP11 component).
@@ -255,6 +266,7 @@ CPUPDP11.prototype.restore = function(data)
 CPUPDP11.prototype.powerUp = function(data, fRepower)
 {
     if (!fRepower) {
+        this.finish();
         if (!data || !this.restore) {
             this.reset();
         } else {
