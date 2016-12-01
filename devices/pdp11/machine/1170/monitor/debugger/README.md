@@ -1,6 +1,6 @@
 ---
 layout: page
-title: PDP-11/70 Boot Monitor with Debugger
+title: PDP-11/70 with 256Kb, Boot Monitor, and Debugger
 permalink: /devices/pdp11/machine/1170/monitor/debugger/
 machines:
   - id: test1170
