@@ -29,6 +29,6 @@
 		<control type="button" binding="setup" padLeft="8px" padBottom="8px">SET-UP</control>
 	</keyboard>
 	<serial id="serialPort" adapter="0" binding="print">
-		<control type="button" binding="test" value="HELLO WORLD!\n\\e[D\\e[D\\e[D\\e[D\\e[D\\e[D\\e[D\\e[D\\e[D\\e[D\\e[D" padLeft="8px">TEST RECEIVER</control>
+		<control type="button" binding="test" value="HELLO WORLD!\r\n" padLeft="8px">TEST RECEIVER</control>
 	</serial>
 </machine>
