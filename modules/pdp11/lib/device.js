@@ -1065,7 +1065,6 @@ DevicePDP11.prototype.writePSW = function(data, addr)
      */
     var maskDisallowed = PDP11.PSW.UNUSED;
     this.cpu.setPSW((data & ~maskDisallowed) | (this.cpu.getPSW() & maskDisallowed));
-    this.cpu.opFlags |= PDP11.OPFLAG.NO_FLAGS;
 };
 
 /**

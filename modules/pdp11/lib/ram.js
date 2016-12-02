@@ -215,6 +215,8 @@ RAMPDP11.prototype.initRAM = function()
     if (!this.fAllocated && this.sizeRAM) {
         if (this.bus.addMemory(this.addrRAM, this.sizeRAM, MemoryPDP11.TYPE.RAM)) {
             this.fAllocated = true;
+        } else {
+            this.sizeRAM = 0;           // don't bother trying again (it just results in redundant error messages)
         }
     }
     if (!this.isReady()) {

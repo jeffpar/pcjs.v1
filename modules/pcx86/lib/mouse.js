@@ -245,7 +245,7 @@ Mouse.prototype.powerUp = function(data, fRepower)
             var componentAdapter = null;
             while ((componentAdapter = this.cmp.getMachineComponent(this.sAdapterType, componentAdapter))) {
                 if (componentAdapter.attachMouse) {
-                    this.componentAdapter = componentAdapter.attachMouse(this.idAdapter, this);
+                    this.componentAdapter = componentAdapter.attachMouse(this.idAdapter, this, this.receiveStatus);
                     if (this.componentAdapter) {
                         /*
                          * It's possible that the SerialPort we've just attached to might want to bring us "up to speed"
@@ -351,7 +351,14 @@ Mouse.prototype.initState = function(data)
     this.yDelta = data[i++];
     this.fButton1 = data[i++];      // FYI, we consider button1 to be the LEFT button
     this.fButton2 = data[i++];      // FYI, we consider button2 to be the RIGHT button
-    this.bMCR = data[i];
+    this.pins = data[i];
+    /*
+     * Convert old UART "MCR" data to new RS-232 "pins" data, in case we're loading an old state;
+     * detection and conversion relies on the fact that the MCR bits don't overlap with any RS-232 bits.
+     */
+    if (this.pins & (SerialPort.MCR.DTR | SerialPort.MCR.RTS)) {
+        this.pins = ((this.pins & SerialPort.MCR.DTR)? RS232.DTR.MASK : 0) | ((this.pins & SerialPort.MCR.RTS)? RS232.RTS.MASK : 0);
+    }
     return true;
 };
 
@@ -372,7 +379,7 @@ Mouse.prototype.saveState = function()
     data[i++] = this.yDelta;
     data[i++] = this.fButton1;
     data[i++] = this.fButton2;
-    data[i] = this.bMCR;
+    data[i] = this.pins;
     return data;
 };
 
@@ -626,7 +633,7 @@ Mouse.prototype.sendPacket = function(sDiag, xDiag, yDiag)
 };
 
 /**
- * notifyMCR(bMCR)
+ * receiveStatus(pins)
  *
  * The SerialPort notifies us whenever SerialPort.MCR.DTR or SerialPort.MCR.RTS changes.
  *
@@ -641,20 +648,20 @@ Mouse.prototype.sendPacket = function(sDiag, xDiag, yDiag)
  * for sending the identification byte.  Right or wrong, this gets the ball rolling for Windows v1.01.
  *
  * @this {Mouse}
- * @param {number} bMCR
+ * @param {number} pins
  */
-Mouse.prototype.notifyMCR = function(bMCR)
+Mouse.prototype.receiveStatus = function(pins)
 {
-    var fActive = ((bMCR & (SerialPort.MCR.DTR | SerialPort.MCR.RTS)) == (SerialPort.MCR.DTR | SerialPort.MCR.RTS));
+    var fActive = ((pins & (RS232.DTR.MASK | RS232.RTS.MASK)) == (RS232.DTR.MASK | RS232.RTS.MASK));
     if (fActive) {
         if (!this.fActive) {
             var fIdentify = false;
-            if (!(this.bMCR & SerialPort.MCR.RTS)) {
+            if (!(this.pins & RS232.RTS.MASK)) {
                 this.reset();
                 this.printMessage("serial mouse reset");
                 fIdentify = true;
             }
-            if (!(this.bMCR & SerialPort.MCR.DTR)) {
+            if (!(this.pins & RS232.DTR.MASK)) {
                 this.printMessage("serial mouse ID requested");
                 fIdentify = true;
             }
@@ -704,7 +711,7 @@ Mouse.prototype.notifyMCR = function(bMCR)
             this.setActive(fActive);
         }
     }
-    this.bMCR = bMCR;
+    this.pins = pins;
 };
 
 /**

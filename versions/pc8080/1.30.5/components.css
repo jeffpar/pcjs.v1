@@ -52,7 +52,7 @@
 }
 .pcjs-progress {
     height: 20px;
-    width: 300px;
+    width: 200px;
     margin-top: 8px;
     border: 1px solid black;
     position: relative;
@@ -66,7 +66,7 @@
 }
 .pcjs-progress-text {
     height: 20px;
-    width: 300px;
+    width: 200px;
     font-size: small;
     line-height: 20px;
     text-align: center;
@@ -224,7 +224,7 @@
     text-decoration: none;
 }
 
-@media screen and (max-width: 900px) {
+@media screen and (max-width: 800px) {
     .pcjs-textarea {
         width: 100% !important;
     }
@@ -240,5 +240,15 @@
         margin-left: 8px !important;
         padding-left: 0 !important;
         padding-right: 0 !important;
+    }
+}
+
+@media screen and (min-width: 1400px) {
+    .machine-left, .machine-right {
+        max-width: 45%;
+        float: left;
+    }
+    .machine-right + * {
+        clear: both;
     }
 }

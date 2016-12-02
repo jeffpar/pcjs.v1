@@ -149,14 +149,33 @@ CPUStatePDP11.prototype.initProcessor = function()
     this.nDisableTraps = 0;
 
     /** @type {IRQ|null} */
-    this.irqNext = null;                // the head of the active IRQ list, in priority order
+    this.irqNext = null;        // the head of the active IRQ list, in priority order
 
-    if (DEBUG) {
-        /** @type {Array.<IRQ>} */
-        this.aIRQs = [];                // list of all IRQs, active or not (just for debugging)
-    }
+    /** @type {Array.<IRQ>} */
+    this.aIRQs = [];            // list of all IRQs, active or not (to be used for auto-configuration)
 
     this.flags.complete = false;
+};
+
+/**
+ * finish()
+ *
+ * TODO: This function simply ensures that we don't leave any IRQs installed with unresolved floating
+ * (negative) vectors; properly assigning vectors according to device type (ie, auto-configuration) is an
+ * exercise left for another day.
+ *
+ * @this {CPUStatePDP11}
+ */
+CPUStatePDP11.prototype.finish = function()
+{
+    var vectorFloating = 0o300;
+    for (var i = 0; i < this.aIRQs.length; i++) {
+        var irq = this.aIRQs[i];
+        if (irq.vector < 0) {
+            irq.vector = vectorFloating;
+            vectorFloating += 4;
+        }
+    }
 };
 
 /**
@@ -170,7 +189,7 @@ CPUStatePDP11.prototype.reset = function()
     if (this.flags.running) this.stopCPU();
     this.initRegs();
     this.resetCycles();
-    this.clearError();                  // clear any fatal error/exception that setError() may have flagged
+    this.clearError();          // clear any fatal error/exception that setError() may have flagged
     this.parent.reset.call(this);
 };
 
@@ -264,7 +283,7 @@ CPUStatePDP11.prototype.resetMMU = function()
     this.regMMR1 = 0;           // 177574
     this.regMMR2 = 0;           // 177576
     this.regMMR3 = 0;           // 172516
-    this.regErr = 0;            // 177766       TODO: Do we ever need to clear this, because it appears to accumulate errors...
+    this.regErr = 0;            // 177766       TODO: Do we ever need to automatically clear this, or is it manually cleared?
     this.regPIR = 0;            // 177772
     this.regSL = 0xff;          // 177774
     this.mmuEnable = 0;         // MMU enabled for PDP11.ACCESS.READ or PDP11.ACCESS.WRITE
@@ -774,7 +793,7 @@ CPUStatePDP11.prototype.setSP = function(addr)
  * addIRQ(vector, priority, message)
  *
  * @this {CPUStatePDP11}
- * @param {number} vector
+ * @param {number} vector (-1 for floating vector)
  * @param {number} priority
  * @param {number} [message]
  * @return {IRQ}
@@ -782,10 +801,8 @@ CPUStatePDP11.prototype.setSP = function(addr)
 CPUStatePDP11.prototype.addIRQ = function(vector, priority, message)
 {
     var irq = {vector: vector, priority: priority, message: message || 0, next: null};
-    if (DEBUG) {
-        irq.name = PDP11.VECTORS[vector];
-        this.aIRQs.push(irq);
-    }
+    irq.name = PDP11.VECTORS[vector];
+    this.aIRQs.push(irq);
     return irq;
 };
 
@@ -1171,10 +1188,8 @@ CPUStatePDP11.prototype.setPIR = function(newPIR)
  */
 CPUStatePDP11.prototype.updateNZVFlags = function(result)
 {
-    if (!(this.opFlags & PDP11.OPFLAG.NO_FLAGS)) {
-        this.flagN = this.flagZ = result;
-        this.flagV = 0;
-    }
+    this.flagN = this.flagZ = result;
+    this.flagV = 0;
 };
 
 /**
@@ -1187,10 +1202,8 @@ CPUStatePDP11.prototype.updateNZVFlags = function(result)
  */
 CPUStatePDP11.prototype.updateNZVCFlags = function(result)
 {
-    if (!(this.opFlags & PDP11.OPFLAG.NO_FLAGS)) {
-        this.flagN = this.flagZ = result;
-        this.flagV = this.flagC = 0;
-    }
+    this.flagN = this.flagZ = result;
+    this.flagV = this.flagC = 0;
 };
 
 /**
@@ -1204,10 +1217,8 @@ CPUStatePDP11.prototype.updateNZVCFlags = function(result)
  */
 CPUStatePDP11.prototype.updateAllFlags = function(result, overflow)
 {
-    if (!(this.opFlags & PDP11.OPFLAG.NO_FLAGS)) {
-        this.flagN = this.flagZ = this.flagC = result;
-        this.flagV = overflow || 0;
-    }
+    this.flagN = this.flagZ = this.flagC = result;
+    this.flagV = overflow || 0;
 };
 
 /**
@@ -1220,10 +1231,8 @@ CPUStatePDP11.prototype.updateAllFlags = function(result, overflow)
  */
 CPUStatePDP11.prototype.updateAddFlags = function(result, src, dst)
 {
-    if (!(this.opFlags & PDP11.OPFLAG.NO_FLAGS)) {
-        this.flagN = this.flagZ = this.flagC = result;
-        this.flagV = (src ^ result) & (dst ^ result);
-    }
+    this.flagN = this.flagZ = this.flagC = result;
+    this.flagV = (src ^ result) & (dst ^ result);
 };
 
 /**
@@ -1237,11 +1246,11 @@ CPUStatePDP11.prototype.updateAddFlags = function(result, src, dst)
  */
 CPUStatePDP11.prototype.updateDecFlags = function(result, dst)
 {
-    if (!(this.opFlags & PDP11.OPFLAG.NO_FLAGS)) {
-        this.flagN = this.flagZ = result;
-        // Because src is always 1 (with a zero sign bit), it can be optimized out of this calculation
-        this.flagV = (/* src ^ */ dst) & (dst ^ result);
-    }
+    this.flagN = this.flagZ = result;
+    /*
+     * Because src is always 1 (with a zero sign bit), it can be optimized out of this calculation.
+     */
+    this.flagV = (/* src ^ */ dst) & (dst ^ result);
 };
 
 /**
@@ -1255,11 +1264,11 @@ CPUStatePDP11.prototype.updateDecFlags = function(result, dst)
  */
 CPUStatePDP11.prototype.updateIncFlags = function(result, dst)
 {
-    if (!(this.opFlags & PDP11.OPFLAG.NO_FLAGS)) {
-        this.flagN = this.flagZ = result;
-        // Because src is always 1 (with a zero sign bit), it can be optimized out of this calculation
-        this.flagV = (/* src ^ */ result) & (dst ^ result);
-    }
+    this.flagN = this.flagZ = result;
+    /*
+     * Because src is always 1 (with a zero sign bit), it can be optimized out of this calculation.
+     */
+    this.flagV = (/* src ^ */ result) & (dst ^ result);
 };
 
 /**
@@ -1270,23 +1279,10 @@ CPUStatePDP11.prototype.updateIncFlags = function(result, dst)
  */
 CPUStatePDP11.prototype.updateMulFlags = function(result)
 {
-    /*
-     * NOTE: Technically, the MUL instruction doesn't need to worry about NO_FLAGS, because that instruction
-     * doesn't write to the bus, and therefore can't modify the PSW directly.  But it doesn't hurt to be consistent.
-     *
-     * TODO: Conduct a review of all opcode handlers, because one possible alternative to all this NO_FLAGS nonsense
-     * would be to pass the appropriate flag update function to the writeDstByte()/writeDstWord() functions, and
-     * have them update the flags BEFORE the write occurs, thus allowing any subsequent write to the PSW to be honored.
-     *
-     * That already happens automatically with the updateDstByte()/updateDstWord() functions, since generally the
-     * specified modify function also updates the flags BEFORE the write occurs.
-     */
-    if (!(this.opFlags & PDP11.OPFLAG.NO_FLAGS)) {
-        this.flagN = result >> 16;
-        this.flagZ = this.flagN | result;
-        this.flagV = 0;
-        this.flagC = (result < -32768 || result > 32767)? 0x10000 : 0;
-    }
+    this.flagN = result >> 16;
+    this.flagZ = this.flagN | result;
+    this.flagV = 0;
+    this.flagC = (result < -32768 || result > 32767)? 0x10000 : 0;
 };
 
 /**
@@ -1297,10 +1293,8 @@ CPUStatePDP11.prototype.updateMulFlags = function(result)
  */
 CPUStatePDP11.prototype.updateShiftFlags = function(result)
 {
-    if (!(this.opFlags & PDP11.OPFLAG.NO_FLAGS)) {
-        this.flagN = this.flagZ = this.flagC = result;
-        this.flagV = this.flagN ^ (this.flagC >> 1);
-    }
+    this.flagN = this.flagZ = this.flagC = result;
+    this.flagV = this.flagN ^ (this.flagC >> 1);
 };
 
 /**
@@ -1316,10 +1310,8 @@ CPUStatePDP11.prototype.updateShiftFlags = function(result)
  */
 CPUStatePDP11.prototype.updateSubFlags = function(result, src, dst)
 {
-    if (!(this.opFlags & PDP11.OPFLAG.NO_FLAGS)) {
-        this.flagN = this.flagZ = this.flagC = result;
-        this.flagV = (src ^ dst) & (dst ^ result);
-    }
+    this.flagN = this.flagZ = this.flagC = result;
+    this.flagV = (src ^ dst) & (dst ^ result);
 };
 
 /**
@@ -1351,47 +1343,50 @@ CPUStatePDP11.prototype.trap = function(vector, flag, reason)
         reason = PDP11.REASON.RED;      // double-fault (nested trap) forces a RED condition
     }
 
-    var fRed = false;
     if (reason == PDP11.REASON.RED) {
-        vector = 4;
+        if (this.opFlags & PDP11.OPFLAG.TRAP_RED) {
+            reason = PDP11.REASON.PANIC;
+        }
+        this.opFlags |= PDP11.OPFLAG.TRAP_RED;
         /*
          * The next two lines used to be deferred until after the setPSW() below, but
          * I'm not seeing any dependencies on these registers, so I'm consolidating the code.
          */
         this.regErr |= PDP11.CPUERR.RED;
-        this.regsGen[6] = 4;
-        fRed = true;
+        this.regsGen[6] = vector = 4;
     }
 
-    /*
-     * NOTE: Pre-setting the auto-dec values for MMR1 to 0xF6F6 is a work-around for an "EKBEE1"
-     * diagnostic (PC 056710), which tests what happens when a misaligned read triggers a BUS trap,
-     * and that trap then triggers an MMU trap during the first pushWord() below.
-     *
-     * One would think it would be fine to zero those bits by setting opLast to vector alone,
-     * and then letting each of the pushWord() calls below shift their own 0xF6 auto-dec value into
-     * opLast.  When the first pushWord() triggers an MMU trap, we obviously won't get to the second
-     * pushWord(), yet the diagnostic expects TWO auto-decs to be recorded.  I'm puzzled why the
-     * hardware apparently indicates TWO auto-decs, if SP wasn't actually decremented twice, but who
-     * am I to judge.
-     */
-    this.opLast = vector | 0xf6f60000;
+    if (reason != PDP11.REASON.PANIC) {
+        /*
+         * NOTE: Pre-setting the auto-dec values for MMR1 to 0xF6F6 is a work-around for an "EKBEE1"
+         * diagnostic (PC 056710), which tests what happens when a misaligned read triggers a BUS trap,
+         * and that trap then triggers an MMU trap during the first pushWord() below.
+         *
+         * One would think it would be fine to zero those bits by setting opLast to vector alone,
+         * and then letting each of the pushWord() calls below shift their own 0xF6 auto-dec value into
+         * opLast.  When the first pushWord() triggers an MMU trap, we obviously won't get to the second
+         * pushWord(), yet the diagnostic expects TWO auto-decs to be recorded.  I'm puzzled why the
+         * hardware apparently indicates TWO auto-decs, if SP wasn't actually decremented twice, but who
+         * am I to judge.
+         */
+        this.opLast = vector | 0xf6f60000;
 
-    /*
-     * Read from kernel D space
-     */
-    this.mmuMode = 0;
-    var newPC = this.readWord(vector | this.addrDSpace);
-    var newPSW = this.readWord(((vector + 2) & 0xffff) | this.addrDSpace);
+        /*
+         * Read from kernel D space
+         */
+        this.mmuMode = 0;
+        var newPC = this.readWord(vector | this.addrDSpace);
+        var newPSW = this.readWord(((vector + 2) & 0xffff) | this.addrDSpace);
 
-    /*
-     * Set new PSW with previous mode
-     */
-    this.setPSW((newPSW & ~PDP11.PSW.PMODE) | ((this.trapPSW >> 2) & PDP11.PSW.PMODE));
+        /*
+         * Set new PSW with previous mode
+         */
+        this.setPSW((newPSW & ~PDP11.PSW.PMODE) | ((this.trapPSW >> 2) & PDP11.PSW.PMODE));
 
-    this.pushWord(this.trapPSW, fRed);
-    this.pushWord(this.regsGen[7], fRed);
-    this.setPC(newPC);
+        this.pushWord(this.trapPSW);
+        this.pushWord(this.regsGen[7]);
+        this.setPC(newPC);
+    }
 
     /*
      * TODO: Determine the appropriate number of cycles for traps; all I've done for now is move the
@@ -1442,6 +1437,9 @@ CPUStatePDP11.prototype.trap = function(vector, flag, reason)
     this.trapVector = vector;
     this.trapReason = reason;
 
+    if (reason == PDP11.REASON.PANIC) {
+        this.stopCPU();
+    }
     if (reason >= PDP11.REASON.RED) throw vector;
 };
 
@@ -1773,18 +1771,17 @@ CPUStatePDP11.prototype.popWord = function()
 };
 
 /**
- * pushWord(data, fRed)
+ * pushWord(data)
  *
  * @this {CPUStatePDP11}
  * @param {number} data
- * @param {boolean} [fRed]
  */
-CPUStatePDP11.prototype.pushWord = function(data, fRed)
+CPUStatePDP11.prototype.pushWord = function(data)
 {
     var addrVirtual = (this.regsGen[6] - 2) & 0xffff;
     this.regsGen[6] = addrVirtual;              // BSD needs SP updated before any fault :-(
     this.opLast = (this.opLast & 0xffff) | ((this.opLast & ~0xffff) << 8) | (0x00f6 << 16);
-    if (!fRed) this.checkStackLimit(PDP11.ACCESS.WRITE_WORD, -2, addrVirtual);
+    if (!(this.opFlags & PDP11.OPFLAG.TRAP_RED)) this.checkStackLimit(PDP11.ACCESS.WRITE_WORD, -2, addrVirtual);
     this.writeWord(addrVirtual, data);
 };
 
@@ -2152,7 +2149,8 @@ CPUStatePDP11.prototype.readWordFromVirtual = function(addrVirtual)
 CPUStatePDP11.prototype.writeWordToPhysical = function(addr, data)
 {
     if (addr >= BusPDP11.UNIBUS_22BIT) addr = this.mapUnibus(addr);
-    this.bus.setWord(this.addrLast = addr, data & 0xffff);
+    this.assert(!(data & ~0xffff));
+    this.bus.setWord(this.addrLast = addr, data);
 };
 
 /**
@@ -2397,10 +2395,6 @@ CPUStatePDP11.prototype.updateDstWord = function(opCode, data, fnOp)
     var reg = this.dstReg = opCode & PDP11.OPREG.MASK;
     var mode = this.dstMode = (opCode & PDP11.OPMODE.MASK) >> PDP11.OPMODE.SHIFT;
 
-    /*
-     * TODO: If callers are careful about masking data, then we don't need to mask it here or in bus.setWord().
-     * We've eliminated the 0xffff data mask here, but bus.setWord() is still masking.
-     */
     this.assert(data < 0 && data >= -8 || !(data & ~0xffff));
 
     if (!mode) {
@@ -2412,7 +2406,7 @@ CPUStatePDP11.prototype.updateDstWord = function(opCode, data, fnOp)
 };
 
 /**
- * writeDstByte(opCode, data, writeFlags)
+ * writeDstByte(opCode, data, writeFlags, fnFlags)
  *
  * Used whenever the DST operand (as described by opCode) does NOT need to be read before writing.
  *
@@ -2420,9 +2414,9 @@ CPUStatePDP11.prototype.updateDstWord = function(opCode, data, fnOp)
  * @param {number} opCode
  * @param {number} data
  * @param {number} writeFlags (WRITE.BYTE aka 0xff, or WRITE.SBYTE aka 0xffff)
- * @return {number}
+ * @param {function(number)} fnFlags
  */
-CPUStatePDP11.prototype.writeDstByte = function(opCode, data, writeFlags)
+CPUStatePDP11.prototype.writeDstByte = function(opCode, data, writeFlags, fnFlags)
 {
     this.assert(writeFlags);
     var reg = this.dstReg = opCode & PDP11.OPREG.MASK;
@@ -2441,41 +2435,39 @@ CPUStatePDP11.prototype.writeDstByte = function(opCode, data, writeFlags)
             data = (data < 0? (this.regsGen[-data-1] & 0xff): data);
             this.regsGen[reg] = (this.regsGen[reg] & ~writeFlags) | (((data << 24) >> 24) & writeFlags);
         }
+        fnFlags.call(this, data << 8);
     } else {
         var addr = this.getAddr(mode, reg, PDP11.ACCESS.WRITE_BYTE);
-        this.writeByteToPhysical(addr, (data = data < 0? (this.regsGen[-data-1] & 0xff): data));
+        fnFlags.call(this, (data = data < 0? (this.regsGen[-data-1] & 0xff) : data) << 8);
+        this.writeByteToPhysical(addr, data);
     }
-    return data;
 };
 
 /**
- * writeDstWord(opCode, data)
+ * writeDstWord(opCode, data, fnFlags)
  *
  * Used whenever the DST operand (as described by opCode) does NOT need to be read before writing.
  *
  * @this {CPUStatePDP11}
  * @param {number} opCode
  * @param {number} data
- * @return {number}
+ * @param {function(number)} fnFlags
  */
-CPUStatePDP11.prototype.writeDstWord = function(opCode, data)
+CPUStatePDP11.prototype.writeDstWord = function(opCode, data, fnFlags)
 {
     var reg = this.dstReg = opCode & PDP11.OPREG.MASK;
     var mode = this.dstMode = (opCode & PDP11.OPMODE.MASK) >> PDP11.OPMODE.SHIFT;
 
-    /*
-     * TODO: If callers are careful about masking data, then we don't need to mask it here or in bus.setWord().
-     * We've eliminated the 0xffff data mask here, but bus.setWord() is still masking.
-     */
     this.assert(data < 0 && data >= -8 || !(data & ~0xffff));
 
     if (!mode) {
-        this.regsGen[reg] = (data = (data < 0? this.regsGen[-data-1] : data));
+        this.regsGen[reg] = (data = data < 0? this.regsGen[-data-1] : data);
+        fnFlags.call(this, data);
     } else {
         var addr = this.getAddr(mode, reg, PDP11.ACCESS.WRITE_WORD);
-        this.bus.setWord(addr, (data = (data < 0? this.regsGen[-data-1] : data)));
+        fnFlags.call(this, (data = data < 0? this.regsGen[-data-1] : data));
+        this.bus.setWord(addr, data);
     }
-    return data;
 };
 
 /**
@@ -2606,6 +2598,7 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
         } else {
             this.assert(!this.irqNext && !this.regPIR);
         }
+
         /*
          * Snapshot the TF bit in opFlags, while clearing all other opFlags (except those in PRESERVE);
          * we'll check the TRAP_TF bit in opFlags when we come back around for another opcode.
