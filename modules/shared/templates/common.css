@@ -73,7 +73,7 @@ pre a, code a {
     font-size: 15px;
 }
 .machine {
-    margin: 15px;
+  /*margin: 15px;*/
     overflow: hidden;
 }
 .c1pjs {
