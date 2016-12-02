@@ -1368,47 +1368,50 @@ CPUStatePDP11.prototype.trap = function(vector, flag, reason)
         reason = PDP11.REASON.RED;      // double-fault (nested trap) forces a RED condition
     }
 
-    var fRed = false;
     if (reason == PDP11.REASON.RED) {
-        vector = 4;
+        if (this.opFlags & PDP11.OPFLAG.TRAP_RED) {
+            reason = PDP11.REASON.PANIC;
+        }
+        this.opFlags |= PDP11.OPFLAG.TRAP_RED;
         /*
          * The next two lines used to be deferred until after the setPSW() below, but
          * I'm not seeing any dependencies on these registers, so I'm consolidating the code.
          */
         this.regErr |= PDP11.CPUERR.RED;
-        this.regsGen[6] = 4;
-        fRed = true;
+        this.regsGen[6] = vector = 4;
     }
 
-    /*
-     * NOTE: Pre-setting the auto-dec values for MMR1 to 0xF6F6 is a work-around for an "EKBEE1"
-     * diagnostic (PC 056710), which tests what happens when a misaligned read triggers a BUS trap,
-     * and that trap then triggers an MMU trap during the first pushWord() below.
-     *
-     * One would think it would be fine to zero those bits by setting opLast to vector alone,
-     * and then letting each of the pushWord() calls below shift their own 0xF6 auto-dec value into
-     * opLast.  When the first pushWord() triggers an MMU trap, we obviously won't get to the second
-     * pushWord(), yet the diagnostic expects TWO auto-decs to be recorded.  I'm puzzled why the
-     * hardware apparently indicates TWO auto-decs, if SP wasn't actually decremented twice, but who
-     * am I to judge.
-     */
-    this.opLast = vector | 0xf6f60000;
+    if (reason != PDP11.REASON.PANIC) {
+        /*
+         * NOTE: Pre-setting the auto-dec values for MMR1 to 0xF6F6 is a work-around for an "EKBEE1"
+         * diagnostic (PC 056710), which tests what happens when a misaligned read triggers a BUS trap,
+         * and that trap then triggers an MMU trap during the first pushWord() below.
+         *
+         * One would think it would be fine to zero those bits by setting opLast to vector alone,
+         * and then letting each of the pushWord() calls below shift their own 0xF6 auto-dec value into
+         * opLast.  When the first pushWord() triggers an MMU trap, we obviously won't get to the second
+         * pushWord(), yet the diagnostic expects TWO auto-decs to be recorded.  I'm puzzled why the
+         * hardware apparently indicates TWO auto-decs, if SP wasn't actually decremented twice, but who
+         * am I to judge.
+         */
+        this.opLast = vector | 0xf6f60000;
 
-    /*
-     * Read from kernel D space
-     */
-    this.mmuMode = 0;
-    var newPC = this.readWord(vector | this.addrDSpace);
-    var newPSW = this.readWord(((vector + 2) & 0xffff) | this.addrDSpace);
+        /*
+         * Read from kernel D space
+         */
+        this.mmuMode = 0;
+        var newPC = this.readWord(vector | this.addrDSpace);
+        var newPSW = this.readWord(((vector + 2) & 0xffff) | this.addrDSpace);
 
-    /*
-     * Set new PSW with previous mode
-     */
-    this.setPSW((newPSW & ~PDP11.PSW.PMODE) | ((this.trapPSW >> 2) & PDP11.PSW.PMODE));
+        /*
+         * Set new PSW with previous mode
+         */
+        this.setPSW((newPSW & ~PDP11.PSW.PMODE) | ((this.trapPSW >> 2) & PDP11.PSW.PMODE));
 
-    this.pushWord(this.trapPSW, fRed);
-    this.pushWord(this.regsGen[7], fRed);
-    this.setPC(newPC);
+        this.pushWord(this.trapPSW);
+        this.pushWord(this.regsGen[7]);
+        this.setPC(newPC);
+    }
 
     /*
      * TODO: Determine the appropriate number of cycles for traps; all I've done for now is move the
@@ -1459,6 +1462,9 @@ CPUStatePDP11.prototype.trap = function(vector, flag, reason)
     this.trapVector = vector;
     this.trapReason = reason;
 
+    if (reason == PDP11.REASON.PANIC) {
+        this.stopCPU();
+    }
     if (reason >= PDP11.REASON.RED) throw vector;
 };
 
@@ -1790,18 +1796,17 @@ CPUStatePDP11.prototype.popWord = function()
 };
 
 /**
- * pushWord(data, fRed)
+ * pushWord(data)
  *
  * @this {CPUStatePDP11}
  * @param {number} data
- * @param {boolean} [fRed]
  */
-CPUStatePDP11.prototype.pushWord = function(data, fRed)
+CPUStatePDP11.prototype.pushWord = function(data)
 {
     var addrVirtual = (this.regsGen[6] - 2) & 0xffff;
     this.regsGen[6] = addrVirtual;              // BSD needs SP updated before any fault :-(
     this.opLast = (this.opLast & 0xffff) | ((this.opLast & ~0xffff) << 8) | (0x00f6 << 16);
-    if (!fRed) this.checkStackLimit(PDP11.ACCESS.WRITE_WORD, -2, addrVirtual);
+    if (!(this.opFlags & PDP11.OPFLAG.TRAP_RED)) this.checkStackLimit(PDP11.ACCESS.WRITE_WORD, -2, addrVirtual);
     this.writeWord(addrVirtual, data);
 };
 
@@ -2623,6 +2628,7 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
         } else {
             this.assert(!this.irqNext && !this.regPIR);
         }
+
         /*
          * Snapshot the TF bit in opFlags, while clearing all other opFlags (except those in PRESERVE);
          * we'll check the TRAP_TF bit in opFlags when we come back around for another opcode.

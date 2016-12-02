@@ -219,18 +219,20 @@ var PDP11 = {
      * immediate (thrown) traps, as they are considered ABORTs; the rest generate synchronous traps.
      */
     REASON: {
-        ABORT:      -1,         // immediate MMU fault
-        ILLEGAL:    -2,         // immediate invalid opcode (BUS)
-        RED:        -3,         // immediate stack overflow fault (BUS)
-        YELLOW:     -4,         // deferred stack overflow fault (BUS)
-        FAULT:      -5,         // deferred MMU fault
-        TRACE:      -6,         // deferred TF fault (BPT)
-        HALT:       -7,         // illegal HALT (BUS)
-        OPCODE:     -8,         // opcode-generated trap (eg, BPT, EMT, IOT, TRAP, or RESERVED opcode)
-        INTERRUPT:  -9,         // device-generated trap (vector is device-specific)
+        PANIC:      -1,         // immediate halt (internal error)
+        ABORT:      -2,         // immediate MMU fault
+        ILLEGAL:    -3,         // immediate invalid opcode (BUS)
+        RED:        -4,         // immediate stack overflow fault (BUS)
+        YELLOW:     -5,         // deferred stack overflow fault (BUS)
+        FAULT:      -6,         // deferred MMU fault
+        TRACE:      -7,         // deferred TF fault (BPT)
+        HALT:       -8,         // illegal HALT (BUS)
+        OPCODE:     -9,         // opcode-generated trap (eg, BPT, EMT, IOT, TRAP, or RESERVED opcode)
+        INTERRUPT:  -10,        // device-generated trap (vector is device-specific)
     },
     REASONS: [
         "UNKNOWN",
+        "PANIC",
         "ABORT",
         "ILLEGAL",
         "RED",
@@ -271,7 +273,8 @@ var PDP11 = {
         TRAP_MMU:   0x0040,
         TRAP_MASK:  0x0070,
         TRAP_LAST:  0x0080,     // set if last operation was a trap (see trapLast for the vector, and trapReason for the reason)
-        NO_FLAGS:   0x0100      // set whenever the PSW is written directly, requiring all updateXXXFlags() functions to leave flags unchanged
+        TRAP_RED:   0x0100,     // set whenever a RED trap occurs, used to catch double RED traps (time to PANIC)
+        NO_FLAGS:   0x0200      // set whenever the PSW is written directly, requiring all updateXXXFlags() functions to leave flags unchanged
     },
     /*
      * Opcode reg (opcode bits 2-0)
