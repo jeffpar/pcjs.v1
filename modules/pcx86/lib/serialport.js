@@ -122,6 +122,9 @@ function SerialPort(parmsSerial) {
     this.charBOL = parmsSerial['charBOL'];
     this.iLogicalCol = 0;
 
+    this.bMSRInit = SerialPort.MSR.CTS | SerialPort.MSR.DSR;
+    this.fNullModem = true;
+
     Component.call(this, "SerialPort", parmsSerial, SerialPort, Messages.SERIAL);
 
     var sBinding = parmsSerial['binding'];
@@ -138,14 +141,15 @@ function SerialPort(parmsSerial) {
      * No connection until initConnection() is called.
      */
     this.sDataReceived = "";
-    this.connection = this.sendData = null;
+    this.connection = this.sendData = this.updateStatus = null;
 
     /*
-     * Export all functions required by initConnection(); currently, this is the bare minimum (no flow control yet).
+     * Export all functions required by initConnection().
      */
     this['exports'] = {
         'connect': this.initConnection,
-        'receiveData': this.receiveData
+        'receiveData': this.receiveData,
+        'receiveStatus': this.receiveStatus
     };
 }
 
@@ -339,34 +343,25 @@ SerialPort.MSR.RLSD         = 0x80;     // complement of the RLSD (Received Line
 SerialPort.SCR = {REG: 7};
 
 /**
- * attachMouse(id, mouse)
+ * attachMouse(id, mouse, fnUpdate)
  *
  * @this {SerialPort}
  * @param {string} id
- * @param {Mouse} mouse component
- * @return {Component} this or null, based on whether or not the specified ID matches
+ * @param {Mouse} mouse
+ * @param {function(number)} fnUpdate
+ * @return {Component|null}
  */
-SerialPort.prototype.attachMouse = function(id, mouse)
+SerialPort.prototype.attachMouse = function(id, mouse, fnUpdate)
 {
-    if (id == this.idComponent) {
-        this.mouse = mouse;
-        return this;
+    var component = null;
+    if (id == this.idComponent && !this.connection) {
+        this.connection = mouse;
+        this.updateStatus = fnUpdate;
+        this.fNullModem = false;
+        component = this;
     }
-    return null;
+    return component;
 };
-
-/**
- * syncMouse()
- *
- * NOTE: This is probably obsolete, but the Mouse component still might discover a need for it.  See Mouse.powerUp().
- *
- * @this {SerialPort}
- *
-SerialPort.prototype.syncMouse = function()
- {
-    if (this.mouse) this.mouse.notifyMCR(this.bMCR);
-};
- */
 
 /**
  * setBinding(sHTMLType, sBinding, control, sValue)
@@ -471,7 +466,7 @@ SerialPort.prototype.initBus = function(cmp, bus, cpu, dbg)
 };
 
 /**
- * initConnection()
+ * initConnection(fNullModem)
  *
  * If a machine 'connection' parameter exists of the form "{sourcePort}->{targetMachine}.{targetPort}",
  * and "{sourcePort}" matches our idComponent, then look for a component with id "{targetMachine}.{targetPort}".
@@ -479,6 +474,7 @@ SerialPort.prototype.initBus = function(cmp, bus, cpu, dbg)
  * If the target component is found, then verify that it has exported functions with the following names:
  *
  *      receiveData(data): called when we have data to transmit; aliased internally to sendData(data)
+ *      receiveStatus(pins): called when our control signals have changed; aliased internally to updateStatus(pins)
  *
  * For now, we're not going to worry about communication in the other direction, because when the target component
  * performs its own initConnection(), it will find our receiveData() function, at which point communication in both
@@ -489,8 +485,9 @@ SerialPort.prototype.initBus = function(cmp, bus, cpu, dbg)
  * if we've already initialized, no harm done.
  *
  * @this {SerialPort}
+ * @param {boolean} [fNullModem] (caller's null-modem setting, to ensure our settings are in agreement)
  */
-SerialPort.prototype.initConnection = function()
+SerialPort.prototype.initConnection = function(fNullModem)
 {
     if (!this.connection) {
         var sConnection = this.cmp.getMachineParm("connection");
@@ -505,9 +502,11 @@ SerialPort.prototype.initConnection = function()
                     var exports = this.connection['exports'];
                     if (exports) {
                         var fnConnect = exports['connect'];
-                        if (fnConnect) fnConnect.call(this.connection);
+                        if (fnConnect) fnConnect.call(this.connection, this.fNullModem);
                         this.sendData = exports['receiveData'];
                         if (this.sendData) {
+                            this.fNullModem = fNullModem;
+                            this.updateStatus = exports['receiveStatus'];
                             this.status(this.idMachine + '.' + sSourceID + " connected to " + sTargetID);
                             return;
                         }
@@ -540,7 +539,7 @@ SerialPort.prototype.powerUp = function(data, fRepower)
          * may be not fully resolved until the target machine performs its own initConnection(), which will
          * in turn invoke our initConnection() again.
          */
-        this.initConnection();
+        this.initConnection(this.fNullModem);
 
         if (!data || !this.restore) {
             this.reset();
@@ -628,7 +627,7 @@ SerialPort.prototype.initState = function(data)
             0,                                          // LCR
             0,                                          // MCR
             SerialPort.LSR.THRE | SerialPort.LSR.TSRE,  // LSR
-            SerialPort.MSR.CTS | SerialPort.MSR.DSR,    // MSR (instead of the normal 0 default, we indicate a state of readiness -- to be revisited)
+            this.bMSRInit,                              // MSR
             []
         ];
     }
@@ -697,6 +696,29 @@ SerialPort.prototype.receiveData = function(data)
 };
 
 /**
+ * receiveStatus(pins)
+ *
+ * NOTE: Prior to the addition of this interface, the CTS and DSR bits were initialized set and remained set for the life
+ * of the machine.  It is entirely appropriate that this is the only way those bits can be changed, because they represent
+ * external control signals.
+ *
+ * @this {SerialPort}
+ * @param {number} pins
+ */
+SerialPort.prototype.receiveStatus = function(pins)
+{
+    var bMSROld = this.bMSR;
+    this.bMSR &= ~(SerialPort.MSR.CTS | SerialPort.MSR.DSR);
+    if (pins & RS232.CTS.MASK) {
+        this.bMSR |= SerialPort.MSR.CTS | SerialPort.MSR.DCTS;
+    }
+    if (pins & RS232.DSR.MASK) {
+        this.bMSR |= SerialPort.MSR.DSR | SerialPort.MSR.DDSR;
+    }
+    if (bMSROld != this.bMSR) this.updateIRR();
+};
+
+/**
  * advanceRBR()
  *
  * @this {SerialPort}
@@ -714,7 +736,7 @@ SerialPort.prototype.advanceRBR = function()
  * inRBR(port, addrFrom)
  *
  * @this {SerialPort}
- * @param {number} port (0x3F8 or 0x2F8)
+ * @param {number} port (eg, 0x3F8 or 0x2F8)
  * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  * @return {number} simulated port value
  */
@@ -731,7 +753,7 @@ SerialPort.prototype.inRBR = function(port, addrFrom)
  * inIER(port, addrFrom)
  *
  * @this {SerialPort}
- * @param {number} port (0x3F9 or 0x2F9)
+ * @param {number} port (eg, 0x3F9 or 0x2F9)
  * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  * @return {number} simulated port value
  */
@@ -746,7 +768,7 @@ SerialPort.prototype.inIER = function(port, addrFrom)
  * inIIR(port, addrFrom)
  *
  * @this {SerialPort}
- * @param {number} port (0x3FA or 0x2FA)
+ * @param {number} port (eg, 0x3FA or 0x2FA)
  * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  * @return {number} simulated port value
  */
@@ -761,7 +783,7 @@ SerialPort.prototype.inIIR = function(port, addrFrom)
  * inLCR(port, addrFrom)
  *
  * @this {SerialPort}
- * @param {number} port (0x3FB or 0x2FB)
+ * @param {number} port (eg, 0x3FB or 0x2FB)
  * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  * @return {number} simulated port value
  */
@@ -776,7 +798,7 @@ SerialPort.prototype.inLCR = function(port, addrFrom)
  * inMCR(port, addrFrom)
  *
  * @this {SerialPort}
- * @param {number} port (0x3FC or 0x2FC)
+ * @param {number} port (eg, 0x3FC or 0x2FC)
  * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  * @return {number} simulated port value
  */
@@ -791,7 +813,7 @@ SerialPort.prototype.inMCR = function(port, addrFrom)
  * inLSR(port, addrFrom)
  *
  * @this {SerialPort}
- * @param {number} port (0x3FD or 0x2FD)
+ * @param {number} port (eg, 0x3FD or 0x2FD)
  * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  * @return {number} simulated port value
  */
@@ -806,13 +828,14 @@ SerialPort.prototype.inLSR = function(port, addrFrom)
  * inMSR(port, addrFrom)
  *
  * @this {SerialPort}
- * @param {number} port (0x3FE or 0x2FE)
+ * @param {number} port (eg, 0x3FE or 0x2FE)
  * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  * @return {number} simulated port value
  */
 SerialPort.prototype.inMSR = function(port, addrFrom)
 {
     var b = this.bMSR;
+    this.bMSR &= ~(SerialPort.MSR.DCTS | SerialPort.MSR.DDSR);
     this.printMessageIO(port, null, addrFrom, "MSR", b);
     return b;
 };
@@ -821,7 +844,7 @@ SerialPort.prototype.inMSR = function(port, addrFrom)
  * outTHR(port, bOut, addrFrom)
  *
  * @this {SerialPort}
- * @param {number} port (0x3F8 or 0x2F8)
+ * @param {number} port (eg, 0x3F8 or 0x2F8)
  * @param {number} bOut
  * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
  */
@@ -846,7 +869,7 @@ SerialPort.prototype.outTHR = function(port, bOut, addrFrom)
  * outIER(port, bOut, addrFrom)
  *
  * @this {SerialPort}
- * @param {number} port (0x3F9 or 0x2F9)
+ * @param {number} port (eg, 0x3F9 or 0x2F9)
  * @param {number} bOut
  * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
  */
@@ -864,7 +887,7 @@ SerialPort.prototype.outIER = function(port, bOut, addrFrom)
  * outLCR(port, bOut, addrFrom)
  *
  * @this {SerialPort}
- * @param {number} port (0x3FB or 0x2FB)
+ * @param {number} port (eg, 0x3FB or 0x2FB)
  * @param {number} bOut
  * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
  */
@@ -878,17 +901,30 @@ SerialPort.prototype.outLCR = function(port, bOut, addrFrom)
  * outMCR(port, bOut, addrFrom)
  *
  * @this {SerialPort}
- * @param {number} port (0x3FC or 0x2FC)
+ * @param {number} port (eg, 0x3FC or 0x2FC)
  * @param {number} bOut
  * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
  */
 SerialPort.prototype.outMCR = function(port, bOut, addrFrom)
 {
-    var bPrev = this.bMCR;
+    var delta = (bOut ^ this.bMCR);
     this.printMessageIO(port, bOut, addrFrom, "MCR");
     this.bMCR = bOut;
-    if (this.mouse && (bPrev ^ bOut) & (SerialPort.MCR.DTR | SerialPort.MCR.RTS)) {
-        this.mouse.notifyMCR(this.bMCR);
+    /*
+     * Whenever DTR or RTS changes, we also need to notify any connected machine or mouse, via updateStatus().
+     */
+    if (delta & (SerialPort.MCR.DTR | SerialPort.MCR.RTS)) {
+        if (this.updateStatus) {
+            var pins = 0;
+            if (this.fNullModem) {
+                pins |= (bOut & SerialPort.MCR.RTS)? RS232.CTS.MASK : 0;
+                pins |= (bOut & SerialPort.MCR.DTR)? (RS232.DSR.MASK | RS232.CD.MASK): 0;
+            } else {
+                pins |= (bOut & SerialPort.MCR.RTS)? RS232.RTS.MASK : 0;
+                pins |= (bOut & SerialPort.MCR.DTR)? RS232.DTR.MASK : 0;
+            }
+            this.updateStatus.call(this.connection, pins);
+        }
     }
 };
 
@@ -902,6 +938,9 @@ SerialPort.prototype.updateIRR = function()
     var bIIR = -1;
     if ((this.bLSR & SerialPort.LSR.DR) && (this.bIER & SerialPort.IER.RBR_AVAIL)) {
         bIIR = SerialPort.IIR.INT_RBR;
+    }
+    else if ((this.bMSR & (SerialPort.MSR.DCTS | SerialPort.MSR.DDSR)) && (this.bIER & SerialPort.IER.MSR_DELTA)) {
+        bIIR = SerialPort.IIR.INT_MSR;
     }
     if (bIIR >= 0) {
         this.bIIR &= ~(SerialPort.IIR.NO_INT | SerialPort.IIR.INT_BITS);

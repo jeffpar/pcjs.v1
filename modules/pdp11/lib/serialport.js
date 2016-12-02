@@ -80,7 +80,6 @@ function SerialPortPDP11(parmsSerial) {
     this.nBaudReceive = parmsSerial['baudReceive'] || PDP11.DL11.RCSR.BAUD;
     this.nBaudTransmit = parmsSerial['baudTransmit'] || PDP11.DL11.XCSR.BAUD;
     this.fUpperCase = parmsSerial['upperCase'];
-    this.fNullModem = true;
 
     /**
      * consoleOutput becomes a string that records serial port output if the 'binding' property is set to the
@@ -118,6 +117,7 @@ function SerialPortPDP11(parmsSerial) {
     this.tabSize = parmsSerial['tabSize'];
     this.charBOL = parmsSerial['charBOL'];
     this.iLogicalCol = 0;
+    this.fNullModem = true;
 
     Component.call(this, "SerialPort", parmsSerial, SerialPortPDP11, MessagesPDP11.SERIAL);
 
@@ -343,7 +343,7 @@ SerialPortPDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
 };
 
 /**
- * initConnection()
+ * initConnection(fNullModem)
  *
  * If a machine 'connection' parameter exists of the form "{sourcePort}->{targetMachine}.{targetPort}",
  * and "{sourcePort}" matches our idComponent, then look for a component with id "{targetMachine}.{targetPort}".
@@ -362,8 +362,9 @@ SerialPortPDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
  * if we've already initialized, no harm done.
  *
  * @this {SerialPortPDP11}
+ * @param {boolean} [fNullModem] (caller's null-modem setting, to ensure our settings are in agreement)
  */
-SerialPortPDP11.prototype.initConnection = function()
+SerialPortPDP11.prototype.initConnection = function(fNullModem)
 {
     if (!this.connection) {
         var sConnection = this.cmp.getMachineParm("connection");
@@ -378,10 +379,11 @@ SerialPortPDP11.prototype.initConnection = function()
                     var exports = this.connection['exports'];
                     if (exports) {
                         var fnConnect = exports['connect'];
-                        if (fnConnect) fnConnect.call(this.connection);
+                        if (fnConnect) fnConnect.call(this.connection, this.fNullModem);
                         this.sendData = exports['receiveData'];
-                        this.updateStatus = exports['receiveStatus'];
                         if (this.sendData) {
+                            this.fNullModem = fNullModem;
+                            this.updateStatus = exports['receiveStatus'];
                             this.status(this.idMachine + '.' + sSourceID + " connected to " + sTargetID);
                             return;
                         }
@@ -414,7 +416,7 @@ SerialPortPDP11.prototype.powerUp = function(data, fRepower)
          * may be not fully resolved until the target machine performs its own initConnection(), which will
          * in turn invoke our initConnection() again.
          */
-        this.initConnection();
+        this.initConnection(this.fNullModem);
 
         if (!data || !this.restore) {
             this.reset();
@@ -723,11 +725,12 @@ SerialPortPDP11.prototype.readRCSR = function(addr)
  */
 SerialPortPDP11.prototype.writeRCSR = function(data, addr)
 {
+    var delta = (data ^ this.regRCSR);
+    this.regRCSR = (this.regRCSR & ~PDP11.DL11.RCSR.WMASK) | (data & PDP11.DL11.RCSR.WMASK);
     /*
      * Whenever DTR or RTS changes, we also want to notify any connected machine, via updateStatus().
      */
     if (this.updateStatus) {
-        var delta = (data ^ this.regRCSR);
         if (delta & PDP11.DL11.RCSR.RS232) {
             var pins = 0;
             if (this.fNullModem) {
@@ -737,10 +740,9 @@ SerialPortPDP11.prototype.writeRCSR = function(data, addr)
                 pins |= (data & PDP11.DL11.RCSR.RTS)? RS232.RTS.MASK : 0;
                 pins |= (data & PDP11.DL11.RCSR.DTR)? RS232.DTR.MASK : 0;
             }
-            this.updateStatus(pins);
+            this.updateStatus.call(this.connection, pins);
         }
     }
-    this.regRCSR = (this.regRCSR & ~PDP11.DL11.RCSR.WMASK) | (data & PDP11.DL11.RCSR.WMASK);
 };
 
 /**
