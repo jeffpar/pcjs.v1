@@ -914,6 +914,55 @@ BusPDP11.prototype.getByte = function(addr)
 };
 
 /**
+ * getWord(addr)
+ *
+ * @this {BusPDP11}
+ * @param {number} addr is a physical address
+ * @return {number} word (16-bit) value at that address
+ */
+BusPDP11.prototype.getWord = function(addr)
+{
+    var off = addr & this.nBlockLimit;
+    var iBlock = (addr & this.nMemMask) >>> this.nBlockShift;
+    if (!PDP11.WORDBUS && off == this.nBlockLimit) {
+        return this.aMemBlocks[iBlock++].readByte(off, addr) | (this.aMemBlocks[iBlock & this.nBlockMask].readByte(0, addr + 1) << 8);
+    }
+    return this.aMemBlocks[iBlock].readWord(off, addr);
+};
+
+/**
+ * setByte(addr, b)
+ *
+ * @this {BusPDP11}
+ * @param {number} addr is a physical address
+ * @param {number} b is the byte (8-bit) value to write
+ */
+BusPDP11.prototype.setByte = function(addr, b)
+{
+    this.assert(!(b & ~0xff));
+    this.aMemBlocks[(addr & this.nMemMask) >>> this.nBlockShift].writeByte(addr & this.nBlockLimit, b, addr);
+};
+
+/**
+ * setWord(addr, w)
+ *
+ * @this {BusPDP11}
+ * @param {number} addr is a physical address
+ * @param {number} w is the word (16-bit) value to write
+ */
+BusPDP11.prototype.setWord = function(addr, w)
+{
+    var off = addr & this.nBlockLimit;
+    var iBlock = (addr & this.nMemMask) >>> this.nBlockShift;
+    if (!PDP11.WORDBUS && off == this.nBlockLimit) {
+        this.aMemBlocks[iBlock++].writeByte(off, w & 0xff, addr);
+        this.aMemBlocks[iBlock & this.nBlockMask].writeByte(0, (w >> 8) & 0xff, addr + 1);
+        return;
+    }
+    this.aMemBlocks[iBlock].writeWord(off, w, addr);
+};
+
+/**
  * getBlockDirect(addr)
  *
  * @this {BusPDP11}
@@ -944,23 +993,6 @@ BusPDP11.prototype.getByteDirect = function(addr)
 };
 
 /**
- * getWord(addr)
- *
- * @this {BusPDP11}
- * @param {number} addr is a physical address
- * @return {number} word (16-bit) value at that address
- */
-BusPDP11.prototype.getWord = function(addr)
-{
-    var off = addr & this.nBlockLimit;
-    var iBlock = (addr & this.nMemMask) >>> this.nBlockShift;
-    if (!PDP11.WORDBUS && off == this.nBlockLimit) {
-        return this.aMemBlocks[iBlock++].readByte(off, addr) | (this.aMemBlocks[iBlock & this.nBlockMask].readByte(0, addr + 1) << 8);
-    }
-    return this.aMemBlocks[iBlock].readWord(off, addr);
-};
-
-/**
  * getWordDirect(addr)
  *
  * This is used for device I/O and Debugger physical memory requests, not the CPU.
@@ -986,18 +1018,6 @@ BusPDP11.prototype.getWordDirect = function(addr)
 };
 
 /**
- * setByte(addr, b)
- *
- * @this {BusPDP11}
- * @param {number} addr is a physical address
- * @param {number} b is the byte (8-bit) value to write (we truncate it to 8 bits to be safe)
- */
-BusPDP11.prototype.setByte = function(addr, b)
-{
-    this.aMemBlocks[(addr & this.nMemMask) >>> this.nBlockShift].writeByte(addr & this.nBlockLimit, b & 0xff, addr);
-};
-
-/**
  * setByteDirect(addr, b)
  *
  * This is used for device I/O and Debugger physical memory requests, not the CPU.
@@ -1012,25 +1032,6 @@ BusPDP11.prototype.setByteDirect = function(addr, b)
     this.nDisableFaults++;
     this.getBlockDirect(addr).writeByteDirect(addr & this.nBlockLimit, b & 0xff, addr);
     this.nDisableFaults--;
-};
-
-/**
- * setWord(addr, w)
- *
- * @this {BusPDP11}
- * @param {number} addr is a physical address
- * @param {number} w is the word (16-bit) value to write (we truncate it to 16 bits to be safe)
- */
-BusPDP11.prototype.setWord = function(addr, w)
-{
-    var off = addr & this.nBlockLimit;
-    var iBlock = (addr & this.nMemMask) >>> this.nBlockShift;
-    if (!PDP11.WORDBUS && off == this.nBlockLimit) {
-        this.aMemBlocks[iBlock++].writeByte(off, w & 0xff, addr);
-        this.aMemBlocks[iBlock & this.nBlockMask].writeByte(0, (w >> 8) & 0xff, addr + 1);
-        return;
-    }
-    this.aMemBlocks[iBlock].writeWord(off, w & 0xffff, addr);
 };
 
 /**

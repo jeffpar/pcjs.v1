@@ -875,7 +875,7 @@ PDP11.opBVS = function(opCode)
  */
 PDP11.opCLR = function(opCode)
 {
-    this.updateAllFlags(this.writeDstWord(opCode, 0));
+    this.writeDstWord(opCode, 0, this.updateAllFlags);
     this.nStepCycles -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
 };
 
@@ -887,7 +887,7 @@ PDP11.opCLR = function(opCode)
  */
 PDP11.opCLRB = function(opCode)
 {
-    this.updateAllFlags(this.writeDstByte(opCode, 0, PDP11.WRITE.BYTE));
+    this.writeDstByte(opCode, 0, PDP11.WRITE.BYTE, this.updateAllFlags);
     this.nStepCycles -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
 };
 
@@ -1283,8 +1283,8 @@ PDP11.opMARK = function(opCode)
 PDP11.opMFPD = function(opCode)
 {
     var data = this.readWordFromPrevSpace(opCode, PDP11.ACCESS.DSPACE);
-    this.pushWord(data);
     this.updateNZVFlags(data);
+    this.pushWord(data);
     this.nStepCycles -= (10 + 1);
 };
 
@@ -1297,8 +1297,8 @@ PDP11.opMFPD = function(opCode)
 PDP11.opMFPI = function(opCode)
 {
     var data = this.readWordFromPrevSpace(opCode, PDP11.ACCESS.ISPACE);
-    this.pushWord(data);
     this.updateNZVFlags(data);
+    this.pushWord(data);
     this.nStepCycles -= (10 + 1);
 };
 
@@ -1346,7 +1346,7 @@ PDP11.opMOV = function(opCode)
      */
     var data = this.readSrcWord(opCode);
     this.nSnapCycles = this.nStepCycles;
-    this.updateNZVFlags(this.writeDstWord(opCode, data));
+    this.writeDstWord(opCode, data, this.updateNZVFlags);
     this.nStepCycles = this.nSnapCycles - PDP11.MOV_CYCLES[(this.srcMode? 8 : 0) + this.dstMode] + (this.dstReg == 7 && !this.dstMode? 2 : 0);
 };
 
@@ -1359,7 +1359,7 @@ PDP11.opMOV = function(opCode)
 PDP11.opMOVB = function(opCode)
 {
     var data = this.readSrcByte(opCode);
-    this.updateNZVFlags(this.writeDstByte(opCode, data, PDP11.WRITE.SBYTE) << 8);
+    this.writeDstByte(opCode, data, PDP11.WRITE.SBYTE, this.updateNZVFlags);
     this.nStepCycles -= (this.dstMode? (8 + 1) + (this.srcReg && this.dstReg >= 6? 1 : 0) : (this.srcMode? (3 + 2) : (2 + 1)) + (this.dstReg == 7? 2 : 0));
 };
 
@@ -1381,8 +1381,8 @@ PDP11.opMTPD = function(opCode)
      */
     var data = this.popWord();
     this.nSnapCycles = this.nStepCycles;
-    this.writeWordToPrevSpace(opCode, PDP11.ACCESS.DSPACE, data);
     this.updateNZVFlags(data);
+    this.writeWordToPrevSpace(opCode, PDP11.ACCESS.DSPACE, data);
     this.nStepCycles = this.nSnapCycles - PDP11.MTP_CYCLES[this.dstMode];
 };
 
@@ -1400,8 +1400,8 @@ PDP11.opMTPI = function(opCode)
      */
     var data = this.popWord();
     this.nSnapCycles = this.nStepCycles;
-    this.writeWordToPrevSpace(opCode, PDP11.ACCESS.ISPACE, data);
     this.updateNZVFlags(data);
+    this.writeWordToPrevSpace(opCode, PDP11.ACCESS.ISPACE, data);
     this.nStepCycles = this.nSnapCycles - PDP11.MTP_CYCLES[this.dstMode];
 };
 
@@ -1775,7 +1775,7 @@ PDP11.opSWAB = function(opCode)
  */
 PDP11.opSXT = function(opCode)
 {
-    this.updateNZVFlags(this.writeDstWord(opCode, this.getNF()? 0xffff : 0));
+    this.writeDstWord(opCode, this.getNF()? 0xffff : 0, this.updateNZVFlags);
     this.nStepCycles -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
 };
 

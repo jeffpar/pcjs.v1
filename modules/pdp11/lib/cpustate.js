@@ -1188,10 +1188,8 @@ CPUStatePDP11.prototype.setPIR = function(newPIR)
  */
 CPUStatePDP11.prototype.updateNZVFlags = function(result)
 {
-    if (!(this.opFlags & PDP11.OPFLAG.NO_FLAGS)) {
-        this.flagN = this.flagZ = result;
-        this.flagV = 0;
-    }
+    this.flagN = this.flagZ = result;
+    this.flagV = 0;
 };
 
 /**
@@ -1204,10 +1202,8 @@ CPUStatePDP11.prototype.updateNZVFlags = function(result)
  */
 CPUStatePDP11.prototype.updateNZVCFlags = function(result)
 {
-    if (!(this.opFlags & PDP11.OPFLAG.NO_FLAGS)) {
-        this.flagN = this.flagZ = result;
-        this.flagV = this.flagC = 0;
-    }
+    this.flagN = this.flagZ = result;
+    this.flagV = this.flagC = 0;
 };
 
 /**
@@ -1221,10 +1217,8 @@ CPUStatePDP11.prototype.updateNZVCFlags = function(result)
  */
 CPUStatePDP11.prototype.updateAllFlags = function(result, overflow)
 {
-    if (!(this.opFlags & PDP11.OPFLAG.NO_FLAGS)) {
-        this.flagN = this.flagZ = this.flagC = result;
-        this.flagV = overflow || 0;
-    }
+    this.flagN = this.flagZ = this.flagC = result;
+    this.flagV = overflow || 0;
 };
 
 /**
@@ -1237,10 +1231,8 @@ CPUStatePDP11.prototype.updateAllFlags = function(result, overflow)
  */
 CPUStatePDP11.prototype.updateAddFlags = function(result, src, dst)
 {
-    if (!(this.opFlags & PDP11.OPFLAG.NO_FLAGS)) {
-        this.flagN = this.flagZ = this.flagC = result;
-        this.flagV = (src ^ result) & (dst ^ result);
-    }
+    this.flagN = this.flagZ = this.flagC = result;
+    this.flagV = (src ^ result) & (dst ^ result);
 };
 
 /**
@@ -1254,11 +1246,11 @@ CPUStatePDP11.prototype.updateAddFlags = function(result, src, dst)
  */
 CPUStatePDP11.prototype.updateDecFlags = function(result, dst)
 {
-    if (!(this.opFlags & PDP11.OPFLAG.NO_FLAGS)) {
-        this.flagN = this.flagZ = result;
-        // Because src is always 1 (with a zero sign bit), it can be optimized out of this calculation
-        this.flagV = (/* src ^ */ dst) & (dst ^ result);
-    }
+    this.flagN = this.flagZ = result;
+    /*
+     * Because src is always 1 (with a zero sign bit), it can be optimized out of this calculation.
+     */
+    this.flagV = (/* src ^ */ dst) & (dst ^ result);
 };
 
 /**
@@ -1272,11 +1264,11 @@ CPUStatePDP11.prototype.updateDecFlags = function(result, dst)
  */
 CPUStatePDP11.prototype.updateIncFlags = function(result, dst)
 {
-    if (!(this.opFlags & PDP11.OPFLAG.NO_FLAGS)) {
-        this.flagN = this.flagZ = result;
-        // Because src is always 1 (with a zero sign bit), it can be optimized out of this calculation
-        this.flagV = (/* src ^ */ result) & (dst ^ result);
-    }
+    this.flagN = this.flagZ = result;
+    /*
+     * Because src is always 1 (with a zero sign bit), it can be optimized out of this calculation.
+     */
+    this.flagV = (/* src ^ */ result) & (dst ^ result);
 };
 
 /**
@@ -1287,23 +1279,10 @@ CPUStatePDP11.prototype.updateIncFlags = function(result, dst)
  */
 CPUStatePDP11.prototype.updateMulFlags = function(result)
 {
-    /*
-     * NOTE: Technically, the MUL instruction doesn't need to worry about NO_FLAGS, because that instruction
-     * doesn't write to the bus, and therefore can't modify the PSW directly.  But it doesn't hurt to be consistent.
-     *
-     * TODO: Conduct a review of all opcode handlers, because one possible alternative to all this NO_FLAGS nonsense
-     * would be to pass the appropriate flag update function to the writeDstByte()/writeDstWord() functions, and
-     * have them update the flags BEFORE the write occurs, thus allowing any subsequent write to the PSW to be honored.
-     *
-     * That already happens automatically with the updateDstByte()/updateDstWord() functions, since generally the
-     * specified modify function also updates the flags BEFORE the write occurs.
-     */
-    if (!(this.opFlags & PDP11.OPFLAG.NO_FLAGS)) {
-        this.flagN = result >> 16;
-        this.flagZ = this.flagN | result;
-        this.flagV = 0;
-        this.flagC = (result < -32768 || result > 32767)? 0x10000 : 0;
-    }
+    this.flagN = result >> 16;
+    this.flagZ = this.flagN | result;
+    this.flagV = 0;
+    this.flagC = (result < -32768 || result > 32767)? 0x10000 : 0;
 };
 
 /**
@@ -1314,10 +1293,8 @@ CPUStatePDP11.prototype.updateMulFlags = function(result)
  */
 CPUStatePDP11.prototype.updateShiftFlags = function(result)
 {
-    if (!(this.opFlags & PDP11.OPFLAG.NO_FLAGS)) {
-        this.flagN = this.flagZ = this.flagC = result;
-        this.flagV = this.flagN ^ (this.flagC >> 1);
-    }
+    this.flagN = this.flagZ = this.flagC = result;
+    this.flagV = this.flagN ^ (this.flagC >> 1);
 };
 
 /**
@@ -1333,10 +1310,8 @@ CPUStatePDP11.prototype.updateShiftFlags = function(result)
  */
 CPUStatePDP11.prototype.updateSubFlags = function(result, src, dst)
 {
-    if (!(this.opFlags & PDP11.OPFLAG.NO_FLAGS)) {
-        this.flagN = this.flagZ = this.flagC = result;
-        this.flagV = (src ^ dst) & (dst ^ result);
-    }
+    this.flagN = this.flagZ = this.flagC = result;
+    this.flagV = (src ^ dst) & (dst ^ result);
 };
 
 /**
@@ -2174,7 +2149,8 @@ CPUStatePDP11.prototype.readWordFromVirtual = function(addrVirtual)
 CPUStatePDP11.prototype.writeWordToPhysical = function(addr, data)
 {
     if (addr >= BusPDP11.UNIBUS_22BIT) addr = this.mapUnibus(addr);
-    this.bus.setWord(this.addrLast = addr, data & 0xffff);
+    this.assert(!(data & ~0xffff));
+    this.bus.setWord(this.addrLast = addr, data);
 };
 
 /**
@@ -2419,10 +2395,6 @@ CPUStatePDP11.prototype.updateDstWord = function(opCode, data, fnOp)
     var reg = this.dstReg = opCode & PDP11.OPREG.MASK;
     var mode = this.dstMode = (opCode & PDP11.OPMODE.MASK) >> PDP11.OPMODE.SHIFT;
 
-    /*
-     * TODO: If callers are careful about masking data, then we don't need to mask it here or in bus.setWord().
-     * We've eliminated the 0xffff data mask here, but bus.setWord() is still masking.
-     */
     this.assert(data < 0 && data >= -8 || !(data & ~0xffff));
 
     if (!mode) {
@@ -2434,7 +2406,7 @@ CPUStatePDP11.prototype.updateDstWord = function(opCode, data, fnOp)
 };
 
 /**
- * writeDstByte(opCode, data, writeFlags)
+ * writeDstByte(opCode, data, writeFlags, fnFlags)
  *
  * Used whenever the DST operand (as described by opCode) does NOT need to be read before writing.
  *
@@ -2442,9 +2414,9 @@ CPUStatePDP11.prototype.updateDstWord = function(opCode, data, fnOp)
  * @param {number} opCode
  * @param {number} data
  * @param {number} writeFlags (WRITE.BYTE aka 0xff, or WRITE.SBYTE aka 0xffff)
- * @return {number}
+ * @param {function(number)} fnFlags
  */
-CPUStatePDP11.prototype.writeDstByte = function(opCode, data, writeFlags)
+CPUStatePDP11.prototype.writeDstByte = function(opCode, data, writeFlags, fnFlags)
 {
     this.assert(writeFlags);
     var reg = this.dstReg = opCode & PDP11.OPREG.MASK;
@@ -2463,41 +2435,39 @@ CPUStatePDP11.prototype.writeDstByte = function(opCode, data, writeFlags)
             data = (data < 0? (this.regsGen[-data-1] & 0xff): data);
             this.regsGen[reg] = (this.regsGen[reg] & ~writeFlags) | (((data << 24) >> 24) & writeFlags);
         }
+        fnFlags.call(this, data << 8);
     } else {
         var addr = this.getAddr(mode, reg, PDP11.ACCESS.WRITE_BYTE);
-        this.writeByteToPhysical(addr, (data = data < 0? (this.regsGen[-data-1] & 0xff): data));
+        fnFlags.call(this, (data = data < 0? (this.regsGen[-data-1] & 0xff) : data) << 8);
+        this.writeByteToPhysical(addr, data);
     }
-    return data;
 };
 
 /**
- * writeDstWord(opCode, data)
+ * writeDstWord(opCode, data, fnFlags)
  *
  * Used whenever the DST operand (as described by opCode) does NOT need to be read before writing.
  *
  * @this {CPUStatePDP11}
  * @param {number} opCode
  * @param {number} data
- * @return {number}
+ * @param {function(number)} fnFlags
  */
-CPUStatePDP11.prototype.writeDstWord = function(opCode, data)
+CPUStatePDP11.prototype.writeDstWord = function(opCode, data, fnFlags)
 {
     var reg = this.dstReg = opCode & PDP11.OPREG.MASK;
     var mode = this.dstMode = (opCode & PDP11.OPMODE.MASK) >> PDP11.OPMODE.SHIFT;
 
-    /*
-     * TODO: If callers are careful about masking data, then we don't need to mask it here or in bus.setWord().
-     * We've eliminated the 0xffff data mask here, but bus.setWord() is still masking.
-     */
     this.assert(data < 0 && data >= -8 || !(data & ~0xffff));
 
     if (!mode) {
-        this.regsGen[reg] = (data = (data < 0? this.regsGen[-data-1] : data));
+        this.regsGen[reg] = (data = data < 0? this.regsGen[-data-1] : data);
+        fnFlags.call(this, data);
     } else {
         var addr = this.getAddr(mode, reg, PDP11.ACCESS.WRITE_WORD);
-        this.bus.setWord(addr, (data = (data < 0? this.regsGen[-data-1] : data)));
+        fnFlags.call(this, (data = data < 0? this.regsGen[-data-1] : data));
+        this.bus.setWord(addr, data);
     }
-    return data;
 };
 
 /**

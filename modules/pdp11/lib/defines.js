@@ -274,7 +274,6 @@ var PDP11 = {
         TRAP_MASK:  0x0070,
         TRAP_LAST:  0x0080,     // set if last operation was a trap (see trapLast for the vector, and trapReason for the reason)
         TRAP_RED:   0x0100,     // set whenever a RED trap occurs, used to catch double RED traps (time to PANIC)
-        NO_FLAGS:   0x0200      // set whenever the PSW is written directly, requiring all updateXXXFlags() functions to leave flags unchanged
     },
     /*
      * Opcode reg (opcode bits 2-0)
