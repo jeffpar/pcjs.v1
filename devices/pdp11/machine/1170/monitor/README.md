@@ -1,6 +1,6 @@
 ---
 layout: page
-title: PDP-11/70 Boot Monitor
+title: PDP-11/70 with 256Kb and Boot Monitor
 permalink: /devices/pdp11/machine/1170/monitor/
 machines:
   - id: test1170

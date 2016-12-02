@@ -219,18 +219,20 @@ var PDP11 = {
      * immediate (thrown) traps, as they are considered ABORTs; the rest generate synchronous traps.
      */
     REASON: {
-        ABORT:      -1,         // immediate MMU fault
-        ILLEGAL:    -2,         // immediate invalid opcode (BUS)
-        RED:        -3,         // immediate stack overflow fault (BUS)
-        YELLOW:     -4,         // deferred stack overflow fault (BUS)
-        FAULT:      -5,         // deferred MMU fault
-        TRACE:      -6,         // deferred TF fault (BPT)
-        HALT:       -7,         // illegal HALT (BUS)
-        OPCODE:     -8,         // opcode-generated trap (eg, BPT, EMT, IOT, TRAP, or RESERVED opcode)
-        INTERRUPT:  -9,         // device-generated trap (vector is device-specific)
+        PANIC:      -1,         // immediate halt (internal error)
+        ABORT:      -2,         // immediate MMU fault
+        ILLEGAL:    -3,         // immediate invalid opcode (BUS)
+        RED:        -4,         // immediate stack overflow fault (BUS)
+        YELLOW:     -5,         // deferred stack overflow fault (BUS)
+        FAULT:      -6,         // deferred MMU fault
+        TRACE:      -7,         // deferred TF fault (BPT)
+        HALT:       -8,         // illegal HALT (BUS)
+        OPCODE:     -9,         // opcode-generated trap (eg, BPT, EMT, IOT, TRAP, or RESERVED opcode)
+        INTERRUPT:  -10,        // device-generated trap (vector is device-specific)
     },
     REASONS: [
         "UNKNOWN",
+        "PANIC",
         "ABORT",
         "ILLEGAL",
         "RED",
@@ -271,7 +273,7 @@ var PDP11 = {
         TRAP_MMU:   0x0040,
         TRAP_MASK:  0x0070,
         TRAP_LAST:  0x0080,     // set if last operation was a trap (see trapLast for the vector, and trapReason for the reason)
-        NO_FLAGS:   0x0100      // set whenever the PSW is written directly, requiring all updateXXXFlags() functions to leave flags unchanged
+        TRAP_RED:   0x0100,     // set whenever a RED trap occurs, used to catch double RED traps (time to PANIC)
     },
     /*
      * Opcode reg (opcode bits 2-0)
@@ -489,6 +491,8 @@ var PDP11 = {
         RLMP:       0o174406,   //                                  RL11 Multi-Purpose Register
         RLBE:       0o174410,   //                                  RL11 Bus (Address) Extension Register (RLV12 controller only)
 
+        DL11:       0o176500,   //                                  DL11 Additional Register Range (ends at 0o176676)
+
         RKDS:       0o177400,   //                                  RK11 Drive Status Register
         RKER:       0o177402,   //                                  RK11 Error Register
         RKCS:       0o177404,   //                                  RK11 Control Status Register
@@ -609,6 +613,7 @@ var PDP11 = {
             DSC:    0x8000,     // Dataset Status Change (R/O)
             RMASK:  0xFFFE,     // bits readable (TODO: All I know for sure is that bit 0 is NOT readable; see readRCSR())
             WMASK:  0x006F,     // bits writable
+            RS232:  0x0006,     // bits affecting RS-232 status updates
             BAUD:   9600
         },
         RBUF: {                 // 177562: DL11 Receiver Data Buffer Register
@@ -846,10 +851,10 @@ var PDP11 = {
         }
     },
     VECTORS: {
-        0o060:  "DL11.RCSR",
-        0o064:  "DL11.XCSR",
-        0o070:  "PC11.PRS",
-        0o074:  "PC11.PPS",
+        0o060:  "DL11R",
+        0o064:  "DL11X",
+        0o070:  "PC11R",
+        0o074:  "PC11X",
         0o100:  "KW11",
         0o160:  "RL11",
         0o220:  "RK11"

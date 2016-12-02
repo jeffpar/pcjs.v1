@@ -53,6 +53,6 @@
 		<control type="button" binding="loadTape">Load</control>
 		<control type="description" binding="descTape" padRight="8px"/>
 		<control type="file" binding="mountTape"/>
-		<control type="progress" binding="readProgress" pos="default" width="250px" padTop="8px">Tape Progress</control>
+		<control type="progress" binding="readProgress" pos="default" padTop="8px">Tape Progress</control>
 	</control>
 </device>

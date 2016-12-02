@@ -713,15 +713,15 @@ PC11.prototype.parseTape = function(sTapeName, sTapePath, nTapeTarget, aBytes, a
             this.sTapePath = "";
             this.sTapeSource = PC11.SOURCE.NONE;
             this.nTapeTarget = PC11.TARGET.NONE;
-            this.notice("No load address available for tape: " + sTapeName);
+            this.notice('No load address available for tape "' + sTapeName + '"');
             return;
         }
-        this.status("tape loaded: " + sTapeName);
+        this.status('Loaded tape "' + sTapeName + '"');
         return;
     }
     this.iTapeData = 0;
     this.aTapeData = aBytes;
-    this.status("tape attached: " + sTapeName);
+    this.status('Attached tape "' + sTapeName + '"');
     this.displayProgress(0);
 };
 

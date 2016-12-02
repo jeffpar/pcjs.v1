@@ -63,6 +63,51 @@ var MAXDEBUG = false;           // this @define is overridden by the Closure Com
 var PRIVATE = false;            // this @define is overridden by the Closure Compiler (to false) to enable PRIVATE code
 
 /*
+ * RS-232 DB-25 Pin Definitions, mapped to bits 1-25 in a 32-bit status value.
+ *
+ * SerialPorts in PCjs machines are considered DTE (Data Terminal Equipment), which means they should be "virtually"
+ * connected to each other via a null-modem cable, which assumes the following cross-wiring:
+ *
+ *     G       1  <->  1        G       (Ground)
+ *     TD      2  <->  3        RD      (Received Data)
+ *     RD      3  <->  2        TD      (Transmitted Data)
+ *     RTS     4  <->  5        CTS     (Clear To Send)
+ *     CTS     5  <->  4        RTS     (Request To Send)
+ *     DSR   6+8  <->  20       DTR     (Data Terminal Ready)
+ *     SG      7  <->  7        SG      (Signal Ground)
+ *     DTR    20  <->  6+8      DSR     (Data Set Ready + Carrier Detect)
+ *     RI     22  <->  22       RI      (Ring Indicator)
+ *
+ * TODO: Move these definitions to a more appropriate shared file at some point.
+ */
+var RS232 = {
+    RTS: {
+        PIN:  4,
+        MASK: 0x00000010
+    },
+    CTS: {
+        PIN:  5,
+        MASK: 0x00000020
+    },
+    DSR: {
+        PIN:  6,
+        MASK: 0x00000040
+    },
+    CD: {
+        PIN:  8,
+        MASK: 0x00000100
+    },
+    DTR: {
+        PIN:  20,
+        MASK: 0x00100000
+    },
+    RI: {
+        PIN:  22,
+        MASK: 0x00400000
+    }
+};
+
+/*
  * NODE should be true if we're running under NodeJS (eg, command-line), false if not (eg, web browser)
  */
 var NODE = false;
@@ -82,6 +127,7 @@ if (NODE) {
     global.DEBUG      = DEBUG;
     global.MAXDEBUG   = MAXDEBUG;
     global.PRIVATE    = PRIVATE;
+    global.RS232      = RS232;
     global.NODE       = NODE;
     /*
      * TODO: When we're "required" by Node, should we return anything via module.exports?

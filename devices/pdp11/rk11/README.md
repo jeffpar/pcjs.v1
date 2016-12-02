@@ -12,8 +12,8 @@ disk cartridges.
 
 Machines containing the [RK11 Component](/modules/pdp11/lib/rk11.js) include:
 
-- [PDP-11/70 Boot Monitor](/devices/pdp11/machine/1170/monitor/) (with [Debugger](/devices/pdp11/machine/1170/monitor/debugger/))
 - [PDP-11/70 with Front Panel](/devices/pdp11/machine/1170/panel/) (with [Debugger](/devices/pdp11/machine/1170/panel/debugger/))
+- [PDP-11/70 with VT100 Terminal](/devices/pdp11/machine/1170/vt100/) (with [Debugger](/devices/pdp11/machine/1170/vt100/debugger/))
 
 PCjs has archived a selection of [RK03 Disk Images](/disks/dec/rk03/) from [Paul Nankervis](http://skn.noip.me/pdp11/)
 for use by those machines, which are listed in the following RK11 Device XML file:

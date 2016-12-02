@@ -1,15 +1,14 @@
 ---
 layout: page
-title: PDP-11/70 with 256Kb and Front Panel
-permalink: /devices/pdp11/machine/1170/panel/
+title: PDP-11/45 with 256Kb, Front Panel, and Debugger
+permalink: /devices/pdp11/machine/1145/panel/debugger/
 machines:
-  - id: test1170
+  - id: test1145
     type: pdp11
+    debugger: true
 ---
 
-{% include machine.html id="test1170" %}
-
-This machine is also available with our built-in [Debugger](debugger/).
+{% include machine.html id="test1145" %}
 
 Other interesting things to know about this machine:
 
