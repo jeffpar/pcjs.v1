@@ -721,7 +721,7 @@ PC11.prototype.parseTape = function(sTapeName, sTapePath, nTapeTarget, aBytes, a
     }
     this.iTapeData = 0;
     this.aTapeData = aBytes;
-    this.status("tape attached: " + sTapeName);
+    this.status('Attached tape "' + sTapeName + '"');
     this.displayProgress(0);
 };
 

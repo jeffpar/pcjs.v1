@@ -15,6 +15,6 @@ machines:
 
 {% include machine.html id="test1145" %}
 
-This PDP-11/45 is also available with our built-in [Debugger](debugger/).
-
 {% include machine.html id="vt100" %}
+
+This PDP-11/45 is also available with our built-in [Debugger](debugger/).
