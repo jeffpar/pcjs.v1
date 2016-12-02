@@ -248,10 +248,15 @@
     }
 }
 
-@media screen and (min-width: 1400px) {
-    .machine-left, .machine-right {
-        max-width: 45%;
+@media screen and (min-width: 1200px) {
+    .machine-left {
+        max-width: 48%;
         float: left;
+    }
+    .machine-right {
+        max-width: 48%;
+        float: left;
+        margin-left: 30px;
     }
     .machine-right + * {
         clear: both;
