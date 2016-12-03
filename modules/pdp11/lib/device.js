@@ -125,6 +125,9 @@ DevicePDP11.prototype.dumpMMU = function(asArgs)
         this.dumpRegs("UDPDR", cpu.mmuPDR[3], 8, asArgs[0]);
         this.dumpRegs("UIPAR", cpu.mmuPAR[3], 0, asArgs[0]);
         this.dumpRegs("UDPAR", cpu.mmuPAR[3], 8, asArgs[0], true);
+        if (cpu.regMMR3 & PDP11.MMR3.UNIBUS_MAP) {
+            this.dumpRegs("UNIMAP", cpu.regsUniMap, -1, asArgs[0]);
+        }
     }
 };
 
@@ -143,9 +146,24 @@ DevicePDP11.prototype.dumpRegs = function(sName, aRegs, offset, sFilter, fBreak)
     if (DEBUGGER) {
         var dbg = this.dbg;
         if (sFilter && sName.indexOf(sFilter.toUpperCase()) < 0) return;
-        var sDump = sName + ":";
-        for (var i = 0; i < 8; i++) {
-            sDump += ' ' + dbg.toStrBase(aRegs[offset + i]);
+        var nRegs = 8;
+        var sDump = "";
+        var fIndex = false;
+        var nBytes = 0;
+        var nWidth = 8;
+        if (offset < 0) {
+            nRegs = aRegs.length;
+            offset = 0;
+            fIndex = true;
+            nBytes = 4;
+            nWidth = 4;
+        }
+        for (var i = 0; i < nRegs; i++) {
+            if (i % nWidth == 0) {
+                if (sDump) sDump += '\n';
+                sDump += sName + (fIndex? ('[' + str.toOct(i, 2) + ']') : '') + ':';
+            }
+            sDump += ' ' + dbg.toStrBase(aRegs[offset + i], nBytes);
         }
         dbg.println(sDump + (fBreak? '\n' : ''));
     }
@@ -292,7 +310,7 @@ DevicePDP11.prototype.writeMMR3 = function(data, addr)
 /**
  * readUNIMAP(addr)
  *
- * NOTE: The UNIBUS map is 32 registers spread across 64 words, so we first calculate the word index.
+ * NOTE: The UNIBUS map ("UNIMAP") is 32 registers spread across 64 words, so we first calculate the word index.
  *
  * @this {DevicePDP11}
  * @param {number} addr (eg, PDP11.UNIBUS.UNIMAP)
@@ -308,7 +326,7 @@ DevicePDP11.prototype.readUNIMAP = function(addr)
 /**
  * writeUNIMAP(data, addr)
  *
- * NOTE: The UNIBUS map is 32 registers spread across 64 words, so we first calculate the word index.
+ * NOTE: The UNIBUS map ("UNIMAP") is 32 registers spread across 64 words, so we first calculate the word index.
  *
  * @this {DevicePDP11}
  * @param {number} data

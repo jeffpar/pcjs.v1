@@ -1221,6 +1221,7 @@ CPUPDP11.prototype.stopCPU = function(fComplete)
             this.cmp.stop(usr.getTime(), this.getCycles());
         }
         fStopped = true;
+        if (!this.dbg) this.status("Stopped");
     }
     this.flags.complete = fComplete;
     return fStopped;

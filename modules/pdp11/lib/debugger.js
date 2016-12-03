@@ -294,6 +294,8 @@ if (DEBUGGER) {
         "SR":   DebuggerPDP11.REG_SR
     };
 
+    DebuggerPDP11.MODES = ["KI","KD","SI","SD","??","??","UI","UD"];
+
     /*
      * Operand type masks; anything that's not covered by OP_SRC or OP_DST must be a OP_OTHER value.
      */
@@ -3013,6 +3015,7 @@ if (DEBUGGER) {
             }
             sDumpers += ",state,symbols";
             this.println("dump memory commands:");
+            this.println("\tda [a]        dump info for address a");
             this.println("\tdb [a] [n]    dump n bytes at address a");
             this.println("\tdw [a] [n]    dump n words at address a");
             this.println("\tdd [a] [n]    dump n dwords at address a");
@@ -3076,6 +3079,27 @@ if (DEBUGGER) {
 
         var dbgAddr = this.parseAddr(sAddr);
         if (!dbgAddr) return;
+
+        if (sCmd == "da") {
+            /*
+             * Sample output ("da 23042"):
+             *
+             *                      00,010,011,000,100,010  00000023042
+             *                           0,011,000,100,010  00000003042
+             *   + KIPAR[1]: 0,000,001,101,111,010,000,000  00000157200
+             *   & MMU MASK: 1,111,111,111,111,111,111,111  00017777777
+             *   = PHYSICAL: 0,000,001,110,010,010,100,010  00000162242
+             */
+            var a = this.cpu.getAddrInfo(dbgAddr.addr);
+            this.println(str.pad("", 19) + str.toBin(dbgAddr.addr, 17, 3) + "  " + str.toOct(dbgAddr.addr, 8));
+            if (a.length > 1) {
+                this.println(str.pad("", 24) + str.toBin(a[1], 13, 3) + "  " + str.toOct(a[1], 8));
+                this.println("+ " + DebuggerPDP11.MODES[a[2]] + "PAR[" + a[3] + "]: " + str.toBin(a[4], 22, 3) + "  " + str.toOct(a[4], 8));
+                this.println("& MMU MASK: " + str.toBin(a[5], 22, 3) + "  " + str.toOct(a[5], 8));
+                this.println("= PHYSICAL: " + str.toBin(a[0], 22, 3) + "  " + str.toOct(a[0], 8))
+            }
+            return;
+        }
 
         var len = 0;                            // 0 is not a default; it triggers the appropriate default below
         var fRange = false;
