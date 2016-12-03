@@ -161,8 +161,8 @@ CPUStatePDP11.prototype.initProcessor = function()
  * finish()
  *
  * TODO: This function simply ensures that we don't leave any IRQs installed with unresolved floating
- * (negative) vectors; properly assigning vectors according to device type (ie, auto-configuration) is an
- * exercise left for another day.
+ * (negative) vectors; however, properly assigning vectors according to device type (ie, auto-configuration)
+ * is an exercise left for another day.
  *
  * @this {CPUStatePDP11}
  */
@@ -185,7 +185,7 @@ CPUStatePDP11.prototype.finish = function()
  */
 CPUStatePDP11.prototype.reset = function()
 {
-    this.status("model " + this.model);
+    this.status("Model " + this.model);
     if (this.flags.running) this.stopCPU();
     this.initRegs();
     this.resetCycles();
@@ -220,8 +220,7 @@ CPUStatePDP11.prototype.initRegs = function()
     this.regsAltStack = [       // Alternate R6 stack pointers (KERNEL, SUPER, UNUSED, USER)
         0, 0, 0, 0
     ];
-    this.mmuMode = 0;           // current memory management mode (see PDP11.MODE.KERNEL | SUPER | UNUSED | USER)
-    this.mmuLastPage = 0;
+    this.pswMode = 0;           // current memory management mode (see PDP11.MODE.KERNEL | SUPER | UNUSED | USER)
 	this.mapMMR3 = [4,2,0,1];   // map from mode to MMR3 I/D bit
     this.mmuPDR = [             // memory management PDR registers by mode
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],   // KERNEL (8 KIPDR regs followed by 8 KDPDR regs)
@@ -257,8 +256,9 @@ CPUStatePDP11.prototype.initRegs = function()
     this.srcMode = this.srcReg = 0;
     this.dstMode = this.dstReg = this.dstAddr = 0;
 
-    this.trapPSW = -1;
-    this.resetMMU();
+    this.pswTrap = -1;
+
+    this.resetRegs();
 };
 
 /**
@@ -269,25 +269,30 @@ CPUStatePDP11.prototype.initRegs = function()
 CPUStatePDP11.prototype.resetCPU = function()
 {
     this.bus.reset();
-    this.resetMMU();
+    this.resetRegs();
 };
 
 /**
- * resetMMU()
+ * resetRegs()
+ *
+ * Reset all registers required as part of a RESET instruction.
+ *
+ * TODO: Do we ever need to automatically clear regErr, or is it cleared manually?
  *
  * @this {CPUStatePDP11}
  */
-CPUStatePDP11.prototype.resetMMU = function()
+CPUStatePDP11.prototype.resetRegs = function()
 {
     this.regMMR0 = 0;           // 177572
     this.regMMR1 = 0;           // 177574
     this.regMMR2 = 0;           // 177576
     this.regMMR3 = 0;           // 172516
-    this.regErr = 0;            // 177766       TODO: Do we ever need to automatically clear this, or is it manually cleared?
+    this.regErr = 0;            // 177766
     this.regPIR = 0;            // 177772
     this.regSL = 0xff;          // 177774
     this.mmuEnable = 0;         // MMU enabled for PDP11.ACCESS.READ or PDP11.ACCESS.WRITE
     this.mmuLastMode = 0;
+    this.mmuLastPage = 0;
     this.mmuMask = 0x3ffff;
 
     this.addrLast = 0;          // this is queried by the Panel when it's not using its own ADDRESS register
@@ -317,8 +322,8 @@ CPUStatePDP11.prototype.getMMUState = function()
 /**
  * setMemoryAccess()
  *
- * Define handlers and DSPACE setting appropriate for the current MMU mode, in order to eliminate
- * unnecessary calls to mapVirtualToPhysical().
+ * Define handlers and DSPACE setting appropriate for the current MMU mode, in order to eliminate unnecessary calls
+ * to mapVirtualToPhysical().
  *
  * TODO: We could further optimize readWord(), splitting it into readWordFromDSpace() and readWordFromISpace(),
  * eliminating the need to OR the addrDSpace bit when we know that bit is zero, but that's a pretty tiny optimization.
@@ -389,14 +394,12 @@ CPUStatePDP11.prototype.setMMR0 = function(newMMR0)
          * NOTE: We are not protecting the read-only state of the COMPLETED bit here; that's handled by writeMMR0().
          */
         this.regMMR0 = newMMR0;
-        this.mmuLastMode = (newMMR0 >> 5) & 3;
-        this.mmuLastPage = (newMMR0 >> 1) & 0xf;
+        this.mmuLastMode = (newMMR0 & PDP11.MMR0.MODE) >> PDP11.MMR0.SHIFT.MODE;
+        this.mmuLastPage = (newMMR0 & PDP11.MMR0.PAGE) >> PDP11.MMR0.SHIFT.PAGE;
         var mmuEnable = 0;
-        if (newMMR0 & 0x101) {
+        if (newMMR0 & (PDP11.MMR0.ENABLED | PDP11.MMR0.MAINT)) {
             mmuEnable = PDP11.ACCESS.WRITE;
-            if (newMMR0 & 0x1) {
-                mmuEnable |= PDP11.ACCESS.READ;
-            }
+            if (newMMR0 & PDP11.MMR0.ENABLED) mmuEnable |= PDP11.ACCESS.READ;
         }
         if (this.mmuEnable != mmuEnable) {
             this.mmuEnable = mmuEnable;
@@ -528,7 +531,33 @@ CPUStatePDP11.prototype.getChecksum = function()
 CPUStatePDP11.prototype.save = function()
 {
     var state = new State(this);
-    state.set(0, []);
+    state.set(0, [
+        this.regsGen,
+        this.regsAlt,
+        this.regsAltStack,
+        this.regsUniMap,
+        this.regsControl,
+        this.regErr,
+        this.regMB,
+        this.regPIR,
+        this.regSL,
+        this.getPSW(),
+        this.pswTrap,
+        this.pswMode,
+        this.opFlags,
+        this.regMMR0,
+        this.regMMR1,
+        this.regMMR2,
+        this.regMMR3,
+        this.mmuLastMode,
+        this.mmuLastPage,
+        this.mmuPDR,
+        this.mmuPAR,
+        this.mmuEnable,
+        this.mmuMask,
+        this.addrLast,
+        this.opLast
+    ]);
     state.set(1, [this.nTotalCycles, this.getSpeed()]);
     state.set(2, this.bus.saveMemory());
     return state.data();
@@ -1106,14 +1135,14 @@ CPUStatePDP11.prototype.setPSW = function(newPSW)
             this.regsAlt[i] = tmp;
         }
     }
-    this.mmuMode = (newPSW >> PDP11.PSW.SHIFT.CMODE) & PDP11.MODE.MASK;
+    this.pswMode = (newPSW >> PDP11.PSW.SHIFT.CMODE) & PDP11.MODE.MASK;
     var oldMode = (this.regPSW >> PDP11.PSW.SHIFT.CMODE) & PDP11.MODE.MASK;
-    if (this.mmuMode != oldMode) {
+    if (this.pswMode != oldMode) {
         /*
          * Swap stack pointers
          */
         this.regsAltStack[oldMode] = this.regsGen[6];
-        this.regsGen[6] = this.regsAltStack[this.mmuMode];
+        this.regsGen[6] = this.regsAltStack[this.pswMode];
     }
     this.regPSW = newPSW;
 
@@ -1337,9 +1366,9 @@ CPUStatePDP11.prototype.trap = function(vector, flag, reason)
 
     if (this.nDisableTraps) return;
 
-    if (this.trapPSW < 0) {
-        this.trapPSW = this.getPSW();
-    } else if (!this.mmuMode) {
+    if (this.pswTrap < 0) {
+        this.pswTrap = this.getPSW();
+    } else if (!this.pswMode) {
         reason = PDP11.REASON.RED;      // double-fault (nested trap) forces a RED condition
     }
 
@@ -1374,16 +1403,16 @@ CPUStatePDP11.prototype.trap = function(vector, flag, reason)
         /*
          * Read from kernel D space
          */
-        this.mmuMode = 0;
+        this.pswMode = 0;
         var newPC = this.readWord(vector | this.addrDSpace);
         var newPSW = this.readWord(((vector + 2) & 0xffff) | this.addrDSpace);
 
         /*
          * Set new PSW with previous mode
          */
-        this.setPSW((newPSW & ~PDP11.PSW.PMODE) | ((this.trapPSW >> 2) & PDP11.PSW.PMODE));
+        this.setPSW((newPSW & ~PDP11.PSW.PMODE) | ((this.pswTrap >> 2) & PDP11.PSW.PMODE));
 
-        this.pushWord(this.trapPSW);
+        this.pushWord(this.pswTrap);
         this.pushWord(this.regsGen[7]);
         this.setPC(newPC);
     }
@@ -1428,7 +1457,7 @@ CPUStatePDP11.prototype.trap = function(vector, flag, reason)
     this.opFlags &= ~(flag | PDP11.OPFLAG.TRAP_TF | PDP11.OPFLAG.IRQ_MASK);
     this.opFlags |= PDP11.OPFLAG.IRQ_DELAY | PDP11.OPFLAG.TRAP_LAST;
 
-    this.trapPSW = -1;                                  // reset flag that we have a trap within a trap
+    this.pswTrap = -1;                                  // reset flag that we have a trap within a trap
 
     /*
      * These next properties (in conjunction with setting PDP11.OPFLAG.TRAP_LAST) are purely an aid for the Debugger;
@@ -1540,54 +1569,87 @@ CPUStatePDP11.prototype.mapUnibus = function(addr)
 };
 
 /**
+ * getAddrInfo(addrVirtual)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} addrVirtual
+ * @return {Array}
+ */
+CPUStatePDP11.prototype.getAddrInfo = function(addrVirtual)
+{
+    var addr;
+    var a = [];
+
+    if (!this.mmuEnable) {
+        addr = addrVirtual & 0xffff;
+        if (addr >= BusPDP11.IOPAGE_16BIT) addr |= this.addrIOPage;
+        a.push(addr);
+    }
+    else {
+        var mode = this.pswMode << 1;
+        var page = addrVirtual >> 13;
+        if (page > 7) mode |= 1;
+        if (!(this.regMMR3 & this.mapMMR3[this.pswMode])) page &= 7;
+        var pdr = this.mmuPDR[this.pswMode][page];
+        var off = addrVirtual & 0x1fff;
+        var paf = (this.mmuPAR[this.pswMode][page] << 6);
+        addr = (paf + off) & this.mmuMask;
+        if (addr >= BusPDP11.UNIBUS_22BIT) addr = this.mapUnibus(addr);
+        a.push(addr);           // a[0]
+        a.push(off);            // a[1]
+        a.push(mode);           // a[2] (0=KI, 1=KD, 2=SI, 3=SD, 4=??, 5=??, 6=UI, 7=UD)
+        a.push(page & 7);       // a[3]
+        a.push(paf);            // a[4]
+        a.push(this.mmuMask);   // a[5]
+    }
+    return a;
+};
+
+/**
  * mapVirtualToPhysical(addrVirtual, access)
  *
- * mapVirtualToPhysical() does memory management. It converts a 17-bit I/D virtual address to a
- * 22-bit physical address.  A real PDP 11/70 memory management unit can be enabled separately
- * for read and write for diagnostic purposes.  This is handled here by having an enable mask
- * (mmuEnable) which is tested against the operation access mask (access).  If there is no
- * match, then the virtual address is simply mapped as a 16 bit physical address with the upper
- * page going to the IO address space.  Significant access mask values used are PDP11.ACCESS.READ
- * and PDP11.ACCESS.WRITE.
+ * mapVirtualToPhysical() does memory management.  It converts a 17-bit I/D virtual address to a
+ * 22-bit physical address.  A real PDP 11/70 memory management unit can be enabled separately for
+ * read and write for diagnostic purposes.  This is handled here by having an enable mask (mmuEnable)
+ * which is tested against the operation access mask (access).  If there is no match, then the virtual
+ * address is simply mapped as a 16 bit physical address with the upper page going to the IO address
+ * space.  Significant access mask values used are PDP11.ACCESS.READ and PDP11.ACCESS.WRITE.
  *
- * As an aside it turns out that it is the memory management unit that does odd address and
- * non-existent memory trapping: who knew? :-) I thought these would have been handled at
- * access time.
- *
- * When doing mapping, mmuMode is used to decide what address space is to be used (0 = kernel,
- * 1 = supervisor, 2 = illegal, 3 = user).  Normally, mmuMode is set by the setPSW() function,
- * but there are exceptions for instructions which move data between address spaces (MFPD, MFPI,
- * MTPD, and MTPI) and trap().  These will modify mmuMode outside of setPSW() and then restore
- * it again if all worked.  If however something happens to cause a trap then no restore is
- * done as setPSW() will have been invoked as part of the trap, which will resynchronize mmuMode.
+ * When doing mapping, pswMode is used to decide what address space is to be used (0 = kernel,
+ * 1 = supervisor, 2 = illegal, 3 = user).  Normally, pswMode is set by the setPSW() function, but
+ * there are exceptions for instructions which move data between address spaces (MFPD, MFPI, MTPD,
+ * and MTPI) and trap().  These will modify pswMode outside of setPSW() and then restore it again if
+ * all worked.  If however something happens to cause a trap then no restore is done as setPSW()
+ * will have been invoked as part of the trap, which will resynchronize pswMode.
  *
  * A PDP-11/70 is different from other PDP-11s in that the highest 18 bit space (017000000 & above)
- * maps directly to UNIBUS space - including low memory. This doesn't appear to be particularly
- * useful as it restricts maximum system memory - although it does appear to allow software
- * testing of the UNIBUS map.  This feature also appears to confuse some OSes which test consecutive
- * memory locations to find maximum memory -- and on a full memory system find themselves accessing
- * low memory again at high addresses.
+ * maps directly to UNIBUS space - including low memory. This doesn't appear to be particularly useful
+ * as it restricts maximum system memory - although it does appear to allow software testing of the
+ * UNIBUS map.  This feature also appears to confuse some OSes which test consecutive memory locations
+ * to find maximum memory -- and on a full memory system find themselves accessing low memory again at
+ * high addresses.
  *
  * Construction of a Physical Address
  * ----------------------------------
  *
  *      Virtual Addr (VA)                                  12 11 10  9  8  7  6  5  4  3  2  1  0
- *      Page Addr Field (PAF)   15 14 13 12 11 10  9  8  7  6  5  4  3  2  1  0
- *                            + -----------------------------------------------------------------
- *      Physical Addr (PA)      21 20 19 18 17 16 15 14 13 12 11 10  9  8  7  6  5  4  3  2  1  0
+ *    + Page Addr Field (PAF)   15 14 13 12 11 10  9  8  7  6  5  4  3  2  1  0
+ *                              -----------------------------------------------------------------
+ *    = Physical Addr (PA)      21 20 19 18 17 16 15 14 13 12 11 10  9  8  7  6  5  4  3  2  1  0
  *
- * The Page Address Field (PAF) comes from a Page Address Register (PAR) that is selected by Virtual Address (VA)
- * bits 15-13.  You can see from the above alignments that the VA contributes to the low 13 bits, providing an 8Kb
- * range.
+ * The Page Address Field (PAF) comes from a Page Address Register (PAR) that is selected by Virtual
+ * Address (VA) bits 15-13.  You can see from the above alignments that the VA contributes to the low
+ * 13 bits, providing an 8Kb range.
  *
  * VA bits 0-5 pass directly through to the PA; those are also called the DIB (Displacement in Block) bits.
  * VA bits 6-12 are added to the low 7 bits of the PAF and are also called the BN (Block Number) bits.
  *
- * You can also think of the entire PAF as a block number, where each block is 64 bytes.  This is consistent with
- * the LSIZE register at 177760, which is supposed to contain the number of 64-byte blocks of memory installed.
+ * You can also think of the entire PAF as a block number, where each block is 64 bytes.  This is consistent
+ * with the LSIZE register at 177760, which is supposed to contain the block number of the last 64-byte block
+ * of memory installed.
  *
- * Note that if a PAR is initialized to zero, successively adding 0200 (0x80) to the PAR will advance the base
- * physical address to the next 8Kb page.
+ * Note that if a PAR is initialized to zero, successively adding 0200 (0x80) to the PAR will advance the
+ * base physical address to the next 8Kb page.
  *
  * @this {CPUStatePDP11}
  * @param {number} addrVirtual
@@ -1599,7 +1661,7 @@ CPUStatePDP11.prototype.mapVirtualToPhysical = function(addrVirtual, access)
     var page, pdr, addr;
 
     /*
-     * This can happen when the DSTMODE (MAINT) bit of MMR0 is set but not the ENABLED bit.
+     * This can happen when the MAINT bit of MMR0 is set but not the ENABLED bit.
      */
     if (!(access & this.mmuEnable)) {
         addr = addrVirtual & 0xffff;
@@ -1608,17 +1670,17 @@ CPUStatePDP11.prototype.mapVirtualToPhysical = function(addrVirtual, access)
     }
 
     page = addrVirtual >> 13;
-    if (!(this.regMMR3 & this.mapMMR3[this.mmuMode])) page &= 7;
-    pdr = this.mmuPDR[this.mmuMode][page];
-    addr = ((this.mmuPAR[this.mmuMode][page] << 6) + (addrVirtual & 0x1fff)) & this.mmuMask;
+    if (!(this.regMMR3 & this.mapMMR3[this.pswMode])) page &= 7;
+    pdr = this.mmuPDR[this.pswMode][page];
+    addr = ((this.mmuPAR[this.pswMode][page] << 6) + (addrVirtual & 0x1fff)) & this.mmuMask;
 
     if (addr >= BusPDP11.UNIBUS_22BIT) addr = this.mapUnibus(addr);
 
     if (this.nDisableTraps) return addr;
 
     /*
-     * TEST #122 ("KT BEND") in the "EKBEE1" diagnostic (PC 076060) triggers a NOMEMORY error
-     * using this instruction:
+     * TEST #122 ("KT BEND") in the "EKBEE1" diagnostic (PC 076060) triggers a NOMEMORY error using
+     * this instruction:
      *
      *      076170: 005037 140100          CLR   @#140100
      *
@@ -1626,7 +1688,14 @@ CPUStatePDP11.prototype.mapVirtualToPhysical = function(addrVirtual, access)
      *
      *      076356: 005037 140001          CLR   @#140001
      *
-     * These tests exercise the MMU checks that Paul mentions in the function description above.
+     * @paulnank: So it turns out that the memory management unit that does odd address and non-existent
+     * memory trapping: who knew? :-)  I thought these would have been handled at access time.
+     *
+     * @jeffpar: We're assuming, at least, that the MMU does its "NEXM" (NOMEMORY) non-existent memory test
+     * very simplistically, by range-checking the address against something like the memory SIZE registers,
+     * because otherwise the MMU would have to wait for a bus time-out: something so prohibitively expensive
+     * that the MMU could not afford to do it.  I rely on addrInvalid, which is derived from the same Bus
+     * getMemoryLimit() service that the SIZE registers (177760--177762) use to derive their value.
      */
     if (addr >= this.addrInvalid && addr < this.addrIOPage) {
         this.regErr |= PDP11.CPUERR.NOMEMORY;
@@ -1692,16 +1761,15 @@ CPUStatePDP11.prototype.mapVirtualToPhysical = function(addrVirtual, access)
     /*
      * Aborts and traps: log FIRST trap and MOST RECENT abort
      */
-
-    this.mmuPDR[this.mmuMode][page] = pdr;
-    if (addr != ((BusPDP11.IOPAGE_22BIT | PDP11.UNIBUS.MMR0) & this.mmuMask) || this.mmuMode) {
-        this.mmuLastMode = this.mmuMode;
+    this.mmuPDR[this.pswMode][page] = pdr;
+    if (addr != ((BusPDP11.IOPAGE_22BIT | PDP11.UNIBUS.MMR0) & this.mmuMask) || this.pswMode) {
+        this.mmuLastMode = this.pswMode;
         this.mmuLastPage = page;
     }
 
     if (newMMR0) {
         if (newMMR0 & PDP11.MMR0.ABORT) {
-            if (this.trapPSW >= 0) {
+            if (this.pswTrap >= 0) {
                 newMMR0 |= PDP11.MMR0.COMPLETED;
             }
             if (!(this.regMMR0 & PDP11.MMR0.ABORT)) {
@@ -1710,9 +1778,13 @@ CPUStatePDP11.prototype.mapVirtualToPhysical = function(addrVirtual, access)
                 this.setMMR0((this.regMMR0 & ~PDP11.MMR0.UPDATE) | (newMMR0 & PDP11.MMR0.UPDATE));
             }
             /*
-             * TODO: In unusual circumstances, if regMMR0 already indicated an ABORT condition above,
+             * NOTE: In unusual circumstances, if regMMR0 already indicated an ABORT condition above,
              * we run the risk of infinitely looping; eg, we call trap(), which calls mapVirtualToPhysical()
-             * on the trap vector, which faults again, etc.  We should add some safeguards against that.
+             * on the trap vector, which faults again, etc.
+             *
+             * TODO: Determine what a real PDP-11 does in that situation; in our case, trap() deals with it
+             * by checking an internal OPFLAG (TRAP_RED) and turning the next trap into a PANIC, triggering an
+             * immediate HALT.
              */
             this.trap(PDP11.TRAP.MMU, PDP11.OPFLAG.TRAP_MMU, PDP11.REASON.ABORT);
         }
@@ -1723,9 +1795,7 @@ CPUStatePDP11.prototype.mapVirtualToPhysical = function(addrVirtual, access)
             if (addr < ((BusPDP11.IOPAGE_22BIT | PDP11.UNIBUS.SIPDR0) & this.mmuMask) ||
                 addr > ((BusPDP11.IOPAGE_22BIT | PDP11.UNIBUS.UDPAR7 | 0x1) & this.mmuMask)) {
                 this.regMMR0 |= PDP11.MMR0.TRAP_MMU;
-                if (this.regMMR0 & PDP11.MMR0.MMU_TRAPS) {
-                    this.opFlags |= PDP11.OPFLAG.TRAP_MMU;
-                }
+                if (this.regMMR0 & PDP11.MMR0.MMU_TRAPS) this.opFlags |= PDP11.OPFLAG.TRAP_MMU;
             }
         }
     }
@@ -1958,7 +2028,7 @@ CPUStatePDP11.prototype.checkStackLimit1120 = function(access, step, addr)
      *
      * so if the step parameter is positive, we let it go.
      */
-    if (!this.mmuMode && step <= 0 && addr <= this.regSL) {
+    if (!this.pswMode && step <= 0 && addr <= this.regSL) {
         /*
          * On older machines (eg, the PDP-11/20), there is no "YELLOW" and "RED" distinction, and the
          * instruction is always allowed to complete, so the trap must always be issued in this fashion.
@@ -1977,7 +2047,7 @@ CPUStatePDP11.prototype.checkStackLimit1120 = function(access, step, addr)
  */
 CPUStatePDP11.prototype.checkStackLimit1145 = function(access, step, addr)
 {
-    if (!this.mmuMode) {
+    if (!this.pswMode) {
         /*
          * NOTE: The 11/70 CPU Instruction Exerciser does NOT expect reads to trigger a stack overflow,
          * so we check the access parameter.
@@ -2191,9 +2261,9 @@ CPUStatePDP11.prototype.readWordFromPrevSpace = function(opCode, access)
         if (!(access & PDP11.ACCESS.DSPACE)) {
             if ((this.regPSW & 0xf000) !== 0xf000) addr &= 0xffff;
         }
-        this.mmuMode = (this.regPSW >> 12) & 3;
+        this.pswMode = (this.regPSW >> 12) & 3;
         data = this.readWord(addr | (access & this.addrDSpace));
-        this.mmuMode = (this.regPSW >> 14) & 3;
+        this.pswMode = (this.regPSW >> 14) & 3;
     }
     return data;
 };
@@ -2221,14 +2291,14 @@ CPUStatePDP11.prototype.writeWordToPrevSpace = function(opCode, access, data)
         var addr = this.getAddrByMode(mode, reg, PDP11.ACCESS.WRITE_WORD);
         if (!(access & PDP11.ACCESS.DSPACE)) addr &= 0xffff;
         /*
-         * TODO: Consider replacing the following code with writeWord(), by adding optional mmuMode
+         * TODO: Consider replacing the following code with writeWord(), by adding optional pswMode
          * parameters for each of the discrete mapVirtualToPhysical() and bus.setWord() operations, because
          * as it stands, this is the only remaining call to mapVirtualToPhysical() outside of our
          * setMemoryAccess() handlers.
          */
-        this.mmuMode = (this.regPSW >> 12) & 3;
+        this.pswMode = (this.regPSW >> 12) & 3;
         addr = this.mapVirtualToPhysical(addr | (access & PDP11.ACCESS.DSPACE), PDP11.ACCESS.WRITE);
-        this.mmuMode = (this.regPSW >> 14) & 3;
+        this.pswMode = (this.regPSW >> 14) & 3;
         this.bus.setWord(addr, data);
     }
 };
