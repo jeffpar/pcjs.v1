@@ -481,13 +481,13 @@ CPUStatePDP11.prototype.setMMR3 = function(newMMR3)
 };
 
 /**
- * setReset(addr, fReset)
+ * setReset(addr, fStart)
  *
  * @this {CPUStatePDP11}
  * @param {number} addr
- * @param {boolean} [fReset] (true if called in the context of a complete reset, obviating the need to notify the Debugger)
+ * @param {boolean|undefined} fStart (true if a "startable" image was just loaded, false if not)
  */
-CPUStatePDP11.prototype.setReset = function(addr, fReset)
+CPUStatePDP11.prototype.setReset = function(addr, fStart)
 {
     this.addrReset = addr;
 
@@ -495,17 +495,25 @@ CPUStatePDP11.prototype.setReset = function(addr, fReset)
     this.setPC(addr);
     this.setPSW(0);
 
-    if (!fReset && this.dbg) {
-        /*
-         * TODO: Review the decision to always stop the CPU if the Debugger is loaded.  Note that
-         * when stopCPU() stops a running CPU, the Debugger gets notified, so again, no need to notify it here.
-         *
-         * TODO: There are more serious problems to deal with if another component is slamming a new PC down
-         * the CPU's throat (presumably while also dropping some new code into RAM) while the CPU was still running;
-         * we should probably force a complete reset if the CPU is running, but for now, it's up to the user
-         * to hit the reset button themselves.
-         */
-        if (!this.stopCPU()) this.dbg.updateStatus();
+    if (fStart) {
+        this.autoStart();
+    }
+    else {
+        if (this.dbg) {
+            /*
+             * TODO: Review the decision to always stop the CPU if the Debugger is loaded.  Note that
+             * when stopCPU() stops a running CPU, the Debugger gets notified, so again, no need to notify it here.
+             *
+             * TODO: There are more serious problems to deal with if another component is slamming a new PC down
+             * the CPU's throat (presumably while also dropping some new code into RAM) while the CPU was still running;
+             * we should probably force a complete reset if the CPU is running, but for now, it's up to the user
+             * to hit the reset button themselves.
+             */
+            if (!this.stopCPU()) this.dbg.updateStatus();
+        }
+        else if (fStart === false) {
+            this.stopCPU();
+        }
     }
 };
 

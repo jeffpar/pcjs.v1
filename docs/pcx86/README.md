@@ -100,7 +100,7 @@ disks at will, we'll include some UI controls.
                 <disk path="">None</disk>
                 <disk path="pcdos-1.00.json">PC-DOS 1.0</disk>
             </control>
-            <control type="button" class="input" binding="loadDrive">Load</control>
+            <control type="button" class="input" binding="loadDisk">Load</control>
         </control>
     </fdc>
     ...

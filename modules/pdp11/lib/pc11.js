@@ -44,8 +44,8 @@ if (NODE) {
  * The PC11 component has the following component-specific (parms) properties:
  *
  *      autoMount: a JSON-encoded object containing 'name' and 'path' properties, describing a
- *      tape resource to automatically attach at startup (only the "attach" operation is supported
- *      for autoMount; if you want to "load" a tape image directly into RAM at startup, you must
+ *      tape resource to automatically load at startup (only the "load" operation is supported
+ *      for autoMount; if you want to "read" a tape image directly into RAM at startup, you must
  *      ask the RAM component to do that).
  *
  *      baudReceive: the default number of bits/second that the device should receive data at;
@@ -67,11 +67,13 @@ function PC11(parms)
 {
     Component.call(this, "PC11", parms, PC11);
 
+    this.sDevice = "PTR";       // TODO: Make the device name configurable
+
     /*
      * We record any 'autoMount' object now, but we no longer parse it until initBus(), because the
      * Computer's getMachineParm() service may have an override for us.
      */
-    this.configMount = parms['autoMount'] || null;
+    this.configMount = this.parseConfig(parms['autoMount']);
     this.cAutoMount = 0;
     this.nBaudReceive = parms['baudReceive'] || PDP11.PC11.PRS.BAUD;
 
@@ -125,6 +127,30 @@ PC11.CSSCLASS = {
 };
 
 /**
+ * parseConfig(config)
+ *
+ * @this {PC11}
+ * @param {*} config
+ * @return {*}
+ */
+PC11.prototype.parseConfig = function(config)
+{
+    if (config && typeof config == "string") {
+        try {
+            /*
+             * The most likely source of any exception will be right here, where we're parsing
+             * this JSON-encoded data.
+             */
+            config = eval("(" + config + ")");
+        } catch (e) {
+            Component.error(this.type + " auto-mount error: " + e.message + " (" + config + ")");
+            config = null;
+        }
+    }
+    return config || {};
+};
+
+/**
  * setBinding(sType, sBinding, control, sValue)
  *
  * @this {PC11}
@@ -170,18 +196,18 @@ PC11.prototype.setBinding = function(sType, sBinding, control, sValue)
         return true;
 
     /*
-     * "loadTape" operation must do pretty much everything that the "attachTape" does, but whereas the attach
-     * operation records the bytes in aTapeData, the load operation stuffs them directly into the machine's memory;
+     * "readTape" operation must do pretty much everything that the "loadTape" does, but whereas the load
+     * operation records the bytes in aTapeData, the read operation stuffs them directly into the machine's memory;
      * the former sets nTapeTarget to TARGET.READER, while the latter sets it to TARGET.MEMORY.
      */
-    case "loadTape":
+    case "readTape":
         nTapeTarget = PC11.TARGET.MEMORY;
         /* falls through */
 
-    case "attachTape":
+    case "loadTape":
         if (!nTapeTarget) nTapeTarget = PC11.TARGET.READER;
         this.bindings[sBinding] = control;
-        control.onclick = function onClickLoadTape(event) {
+        control.onclick = function onClickReadTape(event) {
             var controlTapes = pc11.bindings["listTapes"];
             if (controlTapes) {
                 var sTapeName = controlTapes.options[controlTapes.selectedIndex].text;
@@ -263,20 +289,15 @@ PC11.prototype.initBus = function(cmp, bus, cpu, dbg)
 
     var pc11 = this;
 
-    this.configMount = this.cmp.getMachineParm('autoMount') || this.configMount;
+    var configMount = this.parseConfig(this.cmp.getMachineParm('autoMount'));
 
-    if (this.configMount) {
-        if (typeof this.configMount == "string") {
-            try {
-                /*
-                 * The most likely source of any exception will be right here, where we're parsing
-                 * this JSON-encoded data.
-                 */
-                this.configMount = eval("(" + this.configMount + ")");
-            } catch (e) {
-                Component.error("PC11 auto-mount error: " + e.message + " (" + this.configMount + ")");
-                this.configMount = null;
-            }
+    /*
+     * Add only devices from the machine-wide autoMount configuration that match devices managed by this component.
+     */
+    if (configMount) {
+        for (var sDevice in configMount) {
+            if (sDevice != this.sDevice) continue;
+            this.configMount[sDevice] = configMount[sDevice];
         }
     }
 
@@ -332,7 +353,7 @@ PC11.prototype.powerDown = function(fSave, fShutdown)
 /**
  * reset()
  *
- * TODO: Consider making our reset() handler ALSO restore the original attached tape, in much the same
+ * TODO: Consider making our reset() handler ALSO restore the original loaded tape, in much the same
  * way the RAM component now restores the original predefined memory or tape image after resetting the RAM.
  *
  * @this {PC11}
@@ -353,9 +374,10 @@ PC11.prototype.reset = function()
 PC11.prototype.autoMount = function(fRemount)
 {
     if (!fRemount) this.cAutoMount = 0;
-    if (this.configMount) {
-        var sTapePath = this.configMount['path'] || "";
-        var sTapeName = this.configMount['name'] || this.findTape(sTapePath);
+    var configMount = this.configMount[this.sDevice];
+    if (configMount) {
+        var sTapePath = configMount['path'] || "";
+        var sTapeName = configMount['name'] || this.findTape(sTapePath);
         if (sTapePath && sTapeName) {
             /*
              * TODO: Provide a way to autoMount tapes into MEMORY as well as READER.
@@ -460,7 +482,7 @@ PC11.prototype.loadTape = function(sTapeName, sTapePath, nTapeTarget, fAutoMount
          * Now that we're calling parseTape() again (so that the current tape can either be restarted on
          * the reader or reloaded into RAM), we can also rely on it to display an appropriate status message, too.
          *
-         *      this.status(this.nTapeTarget == PC11.TARGET.READER? "tape attached" : "tape loaded");
+         *      this.status(this.nTapeTarget == PC11.TARGET.READER? "tape loaded" : "tape read");
          */
         this.parseTape(this.sTapeName, this.sTapePath, this.nTapeTarget, this.aBytes, this.addrLoad, this.addrExec);
     }
@@ -705,23 +727,28 @@ PC11.prototype.parseTape = function(sTapeName, sTapePath, nTapeTarget, aBytes, a
          *
          * For example, the "Absolute Loader" tape is NOT itself in the Absolute Loader format.  You just have
          * to know that in order to load that tape, you must first load the appropriate "Bootstrap Loader" (which
-         * DOES include its own hard-coded load address), attach the "Absolute Loader" tape, and then run the
+         * DOES include its own hard-coded load address), load the "Absolute Loader" tape, and then run the
          * "Bootstrap Loader".
          */
-        if (!this.ram || !this.ram.loadImage(aBytes, addrLoad, addrExec)) {
-            this.sTapeName = "";
-            this.sTapePath = "";
-            this.sTapeSource = PC11.SOURCE.NONE;
-            this.nTapeTarget = PC11.TARGET.NONE;
-            this.notice('No load address available for tape "' + sTapeName + '"');
+        if (!this.ram || !this.ram.loadImage(aBytes, addrLoad, addrExec, null, false)) {
+            /*
+             * This doesn't seem to serve any purpose, other than to be annoying, because perhaps you accidentally
+             * clicked "Read" instead of "Load"....
+             *
+             *      this.sTapeName = "";
+             *      this.sTapePath = "";
+             *      this.sTapeSource = PC11.SOURCE.NONE;
+             *      this.nTapeTarget = PC11.TARGET.NONE;
+             */
+            this.notice('No valid memory address for tape "' + sTapeName + '"');
             return;
         }
-        this.status('Loaded tape "' + sTapeName + '"');
+        this.status('Read tape "' + sTapeName + '"');
         return;
     }
     this.iTapeData = 0;
     this.aTapeData = aBytes;
-    this.status('Attached tape "' + sTapeName + '"');
+    this.status('Loaded tape "' + sTapeName + '"');
     this.displayProgress(0);
 };
 

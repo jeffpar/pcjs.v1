@@ -19,7 +19,7 @@
 			<control type="list" binding="listDisks">
 				<disk path="PCDOS100.json">PC-DOS 1.00</disk>
 			</control>
-			<control type="button" binding="loadDrive">Load</control>
+			<control type="button" binding="loadDisk">Load</control>
 		</control>
 	</fdc>
 	<chipset id="chipset" model="5150" sw1="01000001" sw2="11110000"/>

@@ -260,7 +260,7 @@ RAMPDP11.prototype.reset = function()
 };
 
 /**
- * loadImage(aBytes, addrLoad, addrExec, addrInit, fReset)
+ * loadImage(aBytes, addrLoad, addrExec, addrInit, fStart)
  *
  * If the array contains a PAPER tape image in the "Absolute Format," load it as specified
  * by the format; otherwise, load it as-is using the address(es) supplied.
@@ -270,11 +270,12 @@ RAMPDP11.prototype.reset = function()
  * @param {number|null} [addrLoad]
  * @param {number|null} [addrExec] (this CAN override any starting address INSIDE the image)
  * @param {number|null} [addrInit]
- * @param {boolean} [fReset]
+ * @param {boolean} [fStart]
  * @return {boolean} (true if loaded, false if not)
  */
-RAMPDP11.prototype.loadImage = function(aBytes, addrLoad, addrExec, addrInit, fReset)
+RAMPDP11.prototype.loadImage = function(aBytes, addrLoad, addrExec, addrInit, fStart)
 {
+    var fStop = false;
     var fLoaded = false;
     /*
 	 * Data on tapes in the "Absolute Format" is organized into blocks; each block begins with
@@ -343,7 +344,7 @@ RAMPDP11.prototype.loadImage = function(aBytes, addrLoad, addrExec, addrInit, fR
             }
             if (!cbData) {
                 if (addr & 0x1) {
-                    this.cpu.stopCPU();
+                    fStop = true;
                 } else {
                     if (addrExec == null) addrExec = addr;
                 }
@@ -375,7 +376,13 @@ RAMPDP11.prototype.loadImage = function(aBytes, addrLoad, addrExec, addrInit, fR
          * image, but we know that the directions for that diagnostic say to "Start and Restart at 200",
          * so we have manually inserted an "exec":128 in the JSON containing the image.
          */
-        if (addrExec != null) this.cpu.setReset(addrExec, fReset);
+        if (addrExec == null || fStop) {
+            this.cpu.stopCPU();
+            fStart = false;
+        }
+        if (addrExec != null) {
+            this.cpu.setReset(addrExec, fStart);
+        }
     }
     return fLoaded;
 };

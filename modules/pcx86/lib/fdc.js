@@ -517,7 +517,7 @@ FDC.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
         };
         return true;
 
-    case "loadDrive":
+    case "loadDisk":
         this.bindings[sBinding] = control;
 
         control.onclick = function onClickLoadDrive(event) {
@@ -530,7 +530,7 @@ FDC.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
         };
         return true;
 
-    case "saveDrive":
+    case "saveDisk":
         /*
          * Yes, technically, this feature does not require "Local disk support" (which is really a reference
          * to FileReader support), but since fLocalDisks is also false for all mobile devices, and since there
@@ -575,7 +575,7 @@ FDC.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
         };
         return true;
 
-    case "mountDrive":
+    case "mountDisk":
         if (!this.fLocalDisks) {
             if (DEBUG) this.log("Local disk support not available");
             /*

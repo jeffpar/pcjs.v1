@@ -13,6 +13,8 @@ machines:
         path: http://archive.pcjs.org/disks/dec/rk03/RK03-RT11-V40.json
       RL0:
         path: http://archive.pcjs.org/disks/dec/rl02k/RL02K-XXDP.json
+      PTR:
+        path: /apps/pdp11/tapes/absloader/DEC-11-L2PC-PO.json
 ---
 
 This machine is ready to boot [XXDP+ Diagnostics](/disks/dec/rl02k/xxdp/) ("BOOT RL0") and run

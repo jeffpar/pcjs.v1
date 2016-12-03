@@ -12,7 +12,7 @@
 		<control type="list" binding="listDisks">
 			<manifest ref="/disks/pcx86/cpm/1.1b/manifest.xml" disk="*"/>
 		</control>
-		<control type="button" binding="loadDrive">Load</control>
+		<control type="button" binding="loadDisk">Load</control>
 		<control type="description" binding="descDisk" padLeft="8px"/>
 	</fdc>
 	<cpu id="cpu8088" model="8088" autostart="true" pos="left" padLeft="8px" padBottom="8px">

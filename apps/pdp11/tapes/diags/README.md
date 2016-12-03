@@ -12,8 +12,8 @@ website, we have been able to archive the PDP-11 diagnostics shown below.  The t
 [Default PC11 Configuration](/devices/pdp11/pc11/), so that you can easily load them into any machine with a
 [PC11](/modules/pdp11/lib/pc11.js), such as this [PDP-11/20 with Front Panel and Debugger](/devices/pdp11/machine/1120/panel/debugger/).
 
-As noted for other [DEC PDP-11 Tape Images](/apps/pdp11/tapes/), these "Absolute Format" tapes can be loaded directly
-into RAM using the machine's "Load" button instead of "Attach", allowing you to bypass the usual three-step process of
+As noted for other [DEC PDP-11 Tape Images](/apps/pdp11/tapes/), these "Absolute Format" tapes can be read directly
+into RAM using the machine's "Read" button instead of "Load", allowing you to bypass the usual three-step process of
 loading the [Bootstrap Loader](/apps/pdp11/boot/bootstrap/) in order to load the [Absolute Loader](/apps/pdp11/tapes/absloader/)
 in order to load the desired tape.
 
@@ -255,7 +255,7 @@ From [bitsavers.org](http://bitsavers.trailing-edge.com/bits/DEC/pdp11/papertape
 MD-11 11/70 CPU EXERCISER
 -------------------------
 
-When started in a [PDP-11/70](/devices/pdp11/machine/1170/panel/debugger/cpuexer/) with no disk drives attached,
+When started in a [PDP-11/70](/devices/pdp11/machine/1170/panel/debugger/cpuexer/) with no disk drives installed,
 this diagnostic displays the following startup information ("EXERCISOR" is DEC's typo, not mine):
 
 	MAINDEC-11-DEQKC-B...PDP 11/70 CPU EXERCISOR
