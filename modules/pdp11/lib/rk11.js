@@ -887,7 +887,7 @@ RK11.prototype.initDrive = function(drive, iDrive, data)
 
     if (!drive.disk) drive.sDiskPath = "";  // ensure this is initialized to a default that displayDisk() can deal with
 
-    drive.status = PDP11.RK11.RKDS.RK05 | PDP11.RK11.RKDS.SOK | PDP11.RK11.RKDS.DRDY | PDP11.RK11.RKDS.RRDY;
+    drive.status = PDP11.RK11.RKDS.RK05 | PDP11.RK11.RKDS.SOK | PDP11.RK11.RKDS.RRDY;
 
     return fSuccess;
 };
@@ -899,32 +899,59 @@ RK11.prototype.initDrive = function(drive, iDrive, data)
  */
 RK11.prototype.processCommand = function()
 {
-    var fnReadWrite;
     var fInterrupt = true;
+    var fnReadWrite, sFunc = "";
     var iDrive = (this.regRKDA & PDP11.RK11.RKDA.DS) >> PDP11.RK11.RKDA.SHIFT.DS;
     var drive = this.aDrives[iDrive];
     var iCylinder, iHead, iSector, nWords, addr;
 
     this.regRKCS &= ~PDP11.RK11.RKCS.CRDY;
+    var func = (this.regRKCS & PDP11.RK11.RKCS.FUNC) >> PDP11.RK11.RKCS.SHIFT.FUNC;
 
-    switch(this.regRKCS & PDP11.RK11.RKCS.FUNC) {
+    switch(func) {
 
     case PDP11.RK11.FUNC.CRESET:
-        this.regRKDS = drive.status;
+        if (this.messageEnabled()) this.printMessage(this.type + ": CRESET(" + iDrive + ")", true);
         this.regRKER = 0;
         this.regRKCS = PDP11.RK11.RKCS.CRDY;
         this.regRKDA = 0;
         break;
 
+    case PDP11.RK11.FUNC.SEEK:
+        iCylinder = (this.regRKDA & PDP11.RK11.RKDA.CA) >> PDP11.RK11.RKDA.SHIFT.CA;
+        if (this.messageEnabled()) this.printMessage(this.type + ": SEEK(" + iCylinder + ")", true);
+        if (iCylinder >= drive.nCylinders) {
+            this.regRKER |= PDP11.RK11.RKER.DRE | PDP11.RK11.RKER.NXC;
+            this.regRKCS |= PDP11.RK11.RKCS.HE | PDP11.RK11.RKCS.ERR;
+        }
+        break;
+
+    case PDP11.RK11.FUNC.RCHK:
+        sFunc = "RCHK";
+        /* falls through */
+
     case PDP11.RK11.FUNC.READ:
+        if (!sFunc) sFunc = "READ";
         fnReadWrite = this.readData;
         /* falls through */
 
+    case PDP11.RK11.FUNC.WCHK:
+        if (!sFunc) sFunc = "WCHK";
+        /* falls through */
+
     case PDP11.RK11.FUNC.WRITE:
-        if (!fnReadWrite) fnReadWrite = this.writeData;
+        if (!sFunc) sFunc = "WRITE";
+
         iCylinder = (this.regRKDA & PDP11.RK11.RKDA.CA) >> PDP11.RK11.RKDA.SHIFT.CA;
         iHead = (this.regRKDA & PDP11.RK11.RKDA.HS) >> PDP11.RK11.RKDA.SHIFT.HS;
         iSector = this.regRKDA & PDP11.RK11.RKDA.SA;
+        nWords = (0x10000 - this.regRKWC) & 0xffff;
+        addr = (((this.regRKCS & PDP11.RK11.RKCS.MEX)) << (16 - PDP11.RK11.RKCS.SHIFT.MEX)) | this.regRKBA;
+
+        if (this.messageEnabled()) this.printMessage(this.type + ": " + sFunc + "(" + iCylinder + ":" + iHead + ":" + iSector + ") @" + str.toOct(addr) + "-" + str.toOct(addr + ((nWords - 1) << 1)), true);
+
+        if (!fnReadWrite) fnReadWrite = this.writeData;
+
         if (iCylinder >= drive.nCylinders) {
             this.regRKER |= PDP11.RK11.RKER.DRE | PDP11.RK11.RKER.NXC;
             this.regRKCS |= PDP11.RK11.RKCS.HE | PDP11.RK11.RKCS.ERR;
@@ -935,23 +962,24 @@ RK11.prototype.processCommand = function()
             this.regRKCS |= PDP11.RK11.RKCS.HE | PDP11.RK11.RKCS.ERR;
             break;
         }
-        addr = (((this.regRKCS & PDP11.RK11.RKCS.MEX)) << (16 - PDP11.RK11.RKCS.SHIFT.MEX)) | this.regRKBA;
-        nWords = (0x10000 - this.regRKWC) & 0xffff;
-        if (DEBUG && (this.messageEnabled(MessagesPDP11.READ) || this.messageEnabled(MessagesPDP11.WRITE))) {
-            var pos = ((((iCylinder << 1) + iHead) * drive.nSectors) + iSector) * 256;
-            console.log((fnReadWrite == this.readData? "readData" : "writeData") + "(pos=" + pos + ",addr=" + str.toOct(addr) + ",bytes=" + (nWords * 2) + ")");
-        }
-        fInterrupt = fnReadWrite.call(this, drive, iCylinder, iHead, iSector, nWords, addr, this.endReadWrite.bind(this));
+
+        fInterrupt = fnReadWrite.call(this, drive, iCylinder, iHead, iSector, nWords, addr, (func >= PDP11.RK11.FUNC.WCHK), this.endReadWrite.bind(this));
+        break;
+
+    case PDP11.RK11.FUNC.DRESET:
+        if (this.messageEnabled()) this.printMessage(this.type + ": DRESET(" + iDrive + ")");
         break;
 
     default:
+        if (this.messageEnabled()) this.printMessage(this.type + ": UNSUPPORTED(" + func + ")");
         break;
     }
 
-    /*
-     * TODO: Determine what's up with the "regRKDA % 9"....
-     */
-    this.regRKDS = drive.status | (iDrive << PDP11.RK11.RKDS.SHIFT.ID) | ((this.regRKDA % 9) & PDP11.RK11.RKDS.SC);
+    this.regRKDS = drive.status | (drive.disk? PDP11.RK11.RKDS.DRDY : 0) | (iDrive << PDP11.RK11.RKDS.SHIFT.ID) | (this.regRKDA & PDP11.RK11.RKDS.SC);
+
+    if (this.regRKER & PDP11.RK11.RKER.DRE) {
+        if (this.messageEnabled()) this.printMessage(this.type + ": ERROR: " + str.toOct(this.regRKER) + ")");
+    }
 
     if (fInterrupt) {
         this.regRKCS &= ~PDP11.RK11.RKCS.GO;
@@ -977,6 +1005,7 @@ RK11.prototype.endReadWrite = function(err, iCylinder, iHead, iSector, nWords, a
     this.regRKBA = addr & 0xffff;
     this.regRKCS = (this.regRKCS & ~PDP11.RK11.RKCS.MEX) | ((addr >> (16 - PDP11.RK11.RKCS.SHIFT.MEX)) & PDP11.RK11.RKCS.MEX);
     this.regRKWC = (0x10000 - nWords) & 0xffff;
+    this.regRKDA = (this.regRKDA & ~PDP11.RK11.RKDA.SA) | (iSector & PDP11.RK11.RKDA.SA);
     if (err) {
         this.regRKER |= err | PDP11.RK11.RKER.DRE;
         this.regRKCS |= PDP11.RK11.RKCS.HE | PDP11.RK11.RKCS.ERR;
@@ -985,7 +1014,7 @@ RK11.prototype.endReadWrite = function(err, iCylinder, iHead, iSector, nWords, a
 };
 
 /**
- * readData(drive, iCylinder, iHead, iSector, nWords, addr, done)
+ * readData(drive, iCylinder, iHead, iSector, nWords, addr, fCheck, done)
  *
  * @this {RK11}
  * @param {Object} drive
@@ -994,10 +1023,11 @@ RK11.prototype.endReadWrite = function(err, iCylinder, iHead, iSector, nWords, a
  * @param {number} iSector
  * @param {number} nWords
  * @param {number} addr
+ * @param {boolean} fCheck
  * @param {function(...)} done
  * @return {boolean} true if complete, false if queued
  */
-RK11.prototype.readData = function(drive, iCylinder, iHead, iSector, nWords, addr, done)
+RK11.prototype.readData = function(drive, iCylinder, iHead, iSector, nWords, addr, fCheck, done)
 {
     var err = 0;
     var disk = drive.disk;
@@ -1018,23 +1048,26 @@ RK11.prototype.readData = function(drive, iCylinder, iHead, iSector, nWords, add
             }
             ibSector = 0;
         }
-        var b0, b1, data;
+        var b0, b1;
         if ((b0 = disk.read(sector, ibSector++)) < 0 || (b1 = disk.read(sector, ibSector++)) < 0) {
             err = PDP11.RK11.RKER.NXS;
             break;
         }
-        this.bus.setWordDirect(addr, data = b0 | (b1 << 8));
-        if (DEBUG && this.messageEnabled(MessagesPDP11.READ)) {
-            if (!sWords) sWords = str.toOct(addr) + ": ";
-            sWords += str.toOct(data) + ' ';
-            if (sWords.length >= 64) {
-                console.log(sWords);
-                sWords = "";
+        if (!fCheck) {
+            var data = b0 | (b1 << 8);
+            this.bus.setWordDirect(addr, data);
+            if (DEBUG && this.messageEnabled(MessagesPDP11.READ)) {
+                if (!sWords) sWords = str.toOct(addr) + ": ";
+                sWords += str.toOct(data) + ' ';
+                if (sWords.length >= 64) {
+                    console.log(sWords);
+                    sWords = "";
+                }
             }
-        }
-        if (this.bus.checkFault()) {
-            err = PDP11.RK11.RKER.NXM;
-            break;
+            if (this.bus.checkFault()) {
+                err = PDP11.RK11.RKER.NXM;
+                break;
+            }
         }
         addr += 2;
         if (ibSector >= disk.cbSector) {
@@ -1055,7 +1088,7 @@ RK11.prototype.readData = function(drive, iCylinder, iHead, iSector, nWords, add
 };
 
 /**
- * writeData(drive, iCylinder, iHead, iSector, nWords, addr, done)
+ * writeData(drive, iCylinder, iHead, iSector, nWords, addr, fCheck, done)
  *
  * @this {RK11}
  * @param {Object} drive
@@ -1064,10 +1097,11 @@ RK11.prototype.readData = function(drive, iCylinder, iHead, iSector, nWords, add
  * @param {number} iSector
  * @param {number} nWords
  * @param {number} addr
+ * @param {boolean} fCheck
  * @param {function(...)} done
  * @return {boolean} true if complete, false if queued
  */
-RK11.prototype.writeData = function(drive, iCylinder, iHead, iSector, nWords, addr, done)
+RK11.prototype.writeData = function(drive, iCylinder, iHead, iSector, nWords, addr, fCheck, done)
 {
     var err = 0;
     var disk = drive.disk;
@@ -1093,9 +1127,21 @@ RK11.prototype.writeData = function(drive, iCylinder, iHead, iSector, nWords, ad
             }
             ibSector = 0;
         }
-        if (!disk.write(sector, ibSector++, data & 0xff) || !disk.write(sector, ibSector++, data >> 8)) {
-            err = PDP11.RK11.RKER.NXS;
-            break;
+        if (fCheck) {
+            var b0, b1;
+            if ((b0 = disk.read(sector, ibSector++)) < 0 || (b1 = disk.read(sector, ibSector++)) < 0) {
+                err = PDP11.RK11.RKER.NXS;
+                break;
+            }
+            if (data != (b0 | (b1 << 8))) {
+                err = PDP11.RK11.RKER.WCE;
+                break;
+            }
+        } else {
+            if (!disk.write(sector, ibSector++, data & 0xff) || !disk.write(sector, ibSector++, data >> 8)) {
+                err = PDP11.RK11.RKER.NXS;
+                break;
+            }
         }
         if (ibSector >= disk.cbSector) {
             sector = null;

@@ -140,15 +140,16 @@ str.parseInt = function(s, base)
 };
 
 /**
- * toBin(n, cch)
+ * toBin(n, cch, grouping)
  *
  * Converts an integer to binary, with the specified number of digits (up to the default of 32).
  *
  * @param {number|null|undefined} n is a 32-bit value
  * @param {number} [cch] is the desired number of binary digits (32 is both the default and the maximum)
+ * @param {number} [grouping]
  * @return {string} the binary representation of n
  */
-str.toBin = function(n, cch)
+str.toBin = function(n, cch, grouping)
 {
     var s = "";
     if (!cch) {
@@ -164,13 +165,16 @@ str.toBin = function(n, cch)
      * since JavaScript coerces such operands to zero, but I think there's "value" in seeing those
      * values displayed differently.
      */
-    if (n == null || isNaN(n)) {
-        while (cch-- > 0) s = '?' + s;
-    } else {
-        while (cch-- > 0) {
-            s = ((n & 0x1)? '1' : '0') + s;
-            n >>= 1;
+    var fInvalid = (n == null || isNaN(n));
+    var group = (grouping = grouping || cch);
+    while (cch-- > 0) {
+        if (!group) {
+            s = "," + s;
+            group = grouping;
         }
+        s = (fInvalid? '?' : ((n & 0x1)? '1' : '0')) + s;
+        n >>= 1;
+        group--;
     }
     return s;
 };

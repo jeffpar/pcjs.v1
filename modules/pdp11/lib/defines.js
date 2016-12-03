@@ -349,7 +349,7 @@ var PDP11 = {
         PAGE:       0x001E,     // 000176 (all of the PAGE bits)
         MODE:       0x0060,     // 000140 processor mode as of last fault
         COMPLETED:  0x0080,     // 000200 last instruction completed (R/O) (11/70 only)
-        DSTMODE:    0x0100,     // 000400 only destination mode references will be relocated (aka MAINT bit)
+        MAINT:      0x0100,     // 000400 only destination mode references will be relocated
         MMU_TRAPS:  0x0200,     // 001000 enable MMU traps (11/70 only)
         UNUSED:     0x0C00,     // 006000
         TRAP_MMU:   0x1000,     // 010000 trap: MMU (11/70 only)
@@ -357,7 +357,11 @@ var PDP11 = {
         ABORT_PL:   0x4000,     // 040000 abort: page length
         ABORT_NR:   0x8000,     // 100000 abort: non-resident
         ABORT:      0xE000,     // 160000 (all of the ABORT bits)
-        UPDATE:     0xF0FE      // Includes all of: ABORT, TRAP, COMPLETED, MODE, and PAGE bits
+        UPDATE:     0xF0FE,     // Includes all of: ABORT, TRAP, COMPLETED, MODE, and PAGE bits
+        SHIFT: {
+            PAGE:   1,
+            MODE:   5
+        }
     },
     MMR1: {                     // 177574: general purpose auto-inc/auto-dec register (11/44 and 11/70 only)
         REG1_NUM:   0x0007,     //
@@ -743,15 +747,15 @@ var PDP11 = {
                 DS:     13
             }
         },
-        FUNC: {                 // NOTE: These function codes are pre-shifted to read/write directly from/to RKCS.FUNC
-            CRESET: 0b0000,     // Controller Reset
-            WRITE:  0b0010,     // Write
-            READ:   0b0100,     // Read
-            WCHK:   0b0110,     // Write Check
-            SEEK:   0b1000,     // Seek
-            RCHK:   0b1010,     // Read Check
-            DRESET: 0b1100,     // Drive Reset
-            WLOCK:  0b1110      // Write Lock
+        FUNC: {
+            CRESET: 0b000,      // Controller Reset
+            WRITE:  0b001,      // Write
+            READ:   0b010,      // Read
+            WCHK:   0b011,      // Write Check
+            SEEK:   0b100,      // Seek
+            RCHK:   0b101,      // Read Check
+            DRESET: 0b110,      // Drive Reset
+            WLOCK:  0b111       // Write Lock
         }
     },
     RL11: {                     // RL11 Disk Controller
