@@ -33,8 +33,7 @@ the VT100 simulation) makes a valiant effort to keep it in sync with your own ke
 
 One more comment about BACKSPACE and DELETE: in the post-PDP-11, post-VT100 world of the IBM PC, BACKSPACE has come
 to mean "delete the character to the *left* of the cursor," and DELETE now means "delete the character *under* the cursor."
-
-Those are NOT what those keys meant to a typical VT100 user.  BACKSPACE was originally a *non-destructive* leftward
+Those are NOT what those keys meant to the average VT100 user.  BACKSPACE was originally a *non-destructive* leftward
 movement of the cursor, whereas DELETE was a *destructive* leftward movement.  So DELETE on a VT100 is what an IBM PC
 user would think of as BACKSPACE.  To make matters worse, some modern keyboards now label the traditional BACKSPACE key
 as DELETE.
