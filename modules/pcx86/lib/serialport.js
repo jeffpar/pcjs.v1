@@ -477,8 +477,8 @@ SerialPort.prototype.initBus = function(cmp, bus, cpu, dbg)
  *      receiveStatus(pins): called when our control signals have changed; aliased internally to updateStatus(pins)
  *
  * For now, we're not going to worry about communication in the other direction, because when the target component
- * performs its own initConnection(), it will find our receiveData() function, at which point communication in both
- * directions should be established.
+ * performs its own initConnection(), it will find our receiveData() and receiveStatus() functions, at which point
+ * communication in both directions should be established, and the circle of life complete.
  *
  * For added robustness, if the target machine initializes much more slowly than we do, and our connection attempt
  * fails, that's OK, because when it finally initializes, its initConnection() will call our initConnection();
