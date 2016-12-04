@@ -1,6 +1,6 @@
 ---
 layout: page
-title: PDP-11/70 with Front Panel and Debugger
+title: PDP-11/70 with 256Kb running CPU Exerciser
 permalink: /devices/pdp11/machine/1170/panel/debugger/cpuexer/
 machines:
   - id: test1170
