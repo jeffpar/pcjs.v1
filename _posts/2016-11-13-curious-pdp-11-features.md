@@ -81,7 +81,7 @@ documentation for each test to learn the starting procedure, including any switc
 
 However, PDPjs makes life a bit simpler for you.  As noted for other [DEC PDP-11 Tape Images](/apps/pdp11/tapes/), any
 "Absolute Format" tape can be read directly into RAM using the machine's **Read** button instead of **Load**, allowing you
-to bypass the usual three-step process of loading the [Bootstrap Loader](/apps/pdp11/boot/bootstrap/) in order to load the
+to bypass the usual multi-step process of loading the [Bootstrap Loader](/apps/pdp11/boot/bootstrap/) in order to load the
 [Absolute Loader](/apps/pdp11/tapes/absloader/) in order to load the desired tape.
 
 Moreover, PDPjs' JSON-encoded paper tape images support an *exec* property that allows the start address to be explicitly
