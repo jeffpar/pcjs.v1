@@ -116,7 +116,7 @@ of our Markdown or XML documents.  Examples: 'automount' becomes 'autoMount', 'a
     {% if machine_type == "pc8080" %}{% assign array_scripts = site.pcjs.pc8080_scripts %}{% endif %}
     {% if machine_type == "pdp11" %}{% assign array_scripts = site.pcjs.pdp11_scripts %}{% endif %}
     {% for script in array_scripts %}
-      {% if script != "/modules/shared/lib/nodebug.js" or machine.debug != true %}
+      {% if script != "/modules/shared/lib/nodebug.js" or machine.debug != true and site.pcjs.debug != true %}
         {% capture machine_script %}<script type="text/javascript" src="{{ site.baseurl }}{{ script }}"></script>{% endcapture %}
         {% unless machine_scripts contains machine_script %}
           {{ machine_script }}

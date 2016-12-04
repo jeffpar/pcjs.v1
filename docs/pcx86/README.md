@@ -75,8 +75,8 @@ Here's a simple machine XML definition that's more useful:
 
 [Example 1](examples/example1.html) shows the [XML](examples/example1.xml) in action.
 
-Machine definitions can also include visual elements.  For example, we can include a "Run" button with the CPU component.
-Note that as soon as the machine is ready and the CPU starts running, the "Run" button will change to "Halt".
+Machine definitions can also include visual elements.  For example, we can include a **Run** button with the CPU component.
+Note that as soon as the machine is ready and the CPU starts running, the **Run** button will change to **Halt**.
 
 ```xml
 <machine id="ibm" class="pc" width="720px">
@@ -174,7 +174,7 @@ All of the examples described above are available for [download](examples/).
 
 If you have (or find) an IMG disk image file on a server, the PCjs web server provides a
 [DiskDump API](/api/v1/dump) via endpoint "/api/v1/dump" that creates PCx86-compatible disks in JSON:
-
+	
 	{{ site.url }}/api/v1/dump?disk=(file|url)&format=json
 
 For example, let's say you found a disk image online, such as:

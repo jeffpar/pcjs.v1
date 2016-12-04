@@ -24,9 +24,10 @@ and machines can now be configured to include a virtual paper tape reader, with 
 ready to be loaded.
 
 In the real world, before you could load *any* paper tape, you had to first enter a
-[Bootstrap Loader](/apps/pdp11/boot/bootstrap/).  PDPjs has simplified that process by including the Bootstrap Loader as
-just another paper tape image that you can "Read" directly into memory.  Once that has been done, you can then load any
-other paper tape image using the Bootstrap Loader, once you "Load" it into the paper tape reader.
+[Bootstrap Loader](/apps/pdp11/boot/bootstrap/).  PDPjs has simplified that process by including the "Bootstrap Loader"
+as just another paper tape image that you can read directly into memory, using the **Read** button.  Once that has been
+done, you can then load any other paper tape image using the Bootstrap Loader, once you **Load** it into the paper tape
+reader.
 
 {% include machine.html id="test1120" %}
 

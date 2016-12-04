@@ -30,11 +30,15 @@
 
 var Keys = {
     /*
-     * Alphanumeric and other common (printable) ASCII codes.
+     * Keys and/or key combinations that generate common ASCII codes.
      *
-     * TODO: Determine what we can do to get ALL constants like these inlined (enum doesn't seem to
-     * get the job done); the problem seems to be limited to property references that use quotes, which
-     * is why I've 'unquoted' as many of them as possible.
+     * NOTE: If you're looking for a general-purpose ASCII code table, see str.ASCII in strlib.js;
+     * if something's missing, that's probably the more appropriate table to add it to.
+     *
+     * TODO: The Closure Compiler doesn't inline all references to these values, at least those with
+     * quoted property names, which is why I've 'unquoted' as many of them as possible.  One solution
+     * would be to add mnemonics for all of them, not just the non-printable ones (eg, SPACE instead
+     * of ' ', AMP instead of '&', etc.)
      */
     ASCII: {
           BREAK:  0, CTRL_A:  1, CTRL_B:  2, CTRL_C:  3, CTRL_D:  4, CTRL_E:  5, CTRL_F:  6, CTRL_G:  7,

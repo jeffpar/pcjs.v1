@@ -10,13 +10,13 @@ I'm still trying to flush out lingering bugs in PDPjs.  I'll give you an example
 
 ![Image of PDP-11/70 with 256Kb, Front Panel and Debugger](/blog/images/pdp-1170-panel-debugger.png)
 
-After loading the "MD-11 11/70 CPU EXERCISER" paper tape image directly into memory using the "Load" button
-(*not* "Attach"), and then loading the "RT-11 v4.0" disk image into drive RK0, and then finally issuing a few
+After loading the "MD-11 11/70 CPU EXERCISER" paper tape image directly into memory using the **Read** button
+(*not* **Load**), and then loading the "RT-11 v4.0" disk image into drive RK0, and then finally issuing a few
 preliminary Debugger commands:
 
 	m rk11 on; bp 005254
 
-we're ready to "let 'er rip," either by using the Debugger `g` command or clicking the "Run" button.
+we're ready to "let 'er rip," either by using the Debugger `g` command or clicking the **Run** button.
 
 You'll see a variety of disk-related messages from the RK11 component in the Control Panel window, which serves
 both as the Debugger's output window and as the 11/70's terminal window.  The output begins with:

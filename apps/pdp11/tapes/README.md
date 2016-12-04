@@ -11,13 +11,16 @@ To load any of the DEC PDP-11 paper tapes listed below, you will need to use a [
 with a [PC11 High-Speed Paper Tape Reader/Punch](/devices/pdp11/pc11/), such as this
 [PDP-11/20](/devices/pdp11/machine/1120/basic/debugger), and then follow this three-step process:
 
-- "Read" the [DEC PDP-11 Bootstrap Loader](/apps/pdp11/boot/bootstrap/)
-- "Load" the [Absolute Loader](absloader/) tape image, and read it with the Bootstrap Loader
-- "Load" one of the "Absolute Format" tape images below, and read it with the Absolute Loader 
+- **Read** the [DEC PDP-11 Bootstrap Loader](/apps/pdp11/boot/bootstrap/)
+- **Load** the [Absolute Loader](absloader/) tape image
+- **Run** the Bootstrap Loader to read the Absolute Loader
+- **Load** one of the "Absolute Format" tape images below
+- **Run** the Absolute Loader to read the selected tape image 
 
-This mirrors the three-step "real world" process of loading paper tape software.  Moreover, any "Absolute
-Format" tape (which should include all the tapes listed below) can be loaded directly into RAM using the
-machine's "Read" button instead of "Load".  In most cases, that eliminates the first two steps.
+This mirrors the multi-step "real world" process of loading paper tape software.
+
+PDPjs simplifies that process: any "Absolute Format" tape (which should include all the tapes listed below) can be
+loaded directly into RAM using the machine's **Read** button, replacing all the above steps with a single click.
 
 Paper Tape Diagnostics
 ----------------------

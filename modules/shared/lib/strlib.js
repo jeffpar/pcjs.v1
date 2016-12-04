@@ -553,12 +553,16 @@ str.trim = function(s)
 };
 
 /*
- * Any codes commented out in the following table are deemed "printable"
+ * Future home of a general-purpose ASCII table.  TODO: Flesh it out.
  */
 str.ASCII = {
     LF:     0x0A,
     CR:     0x0D
 };
+
+/*
+ * Table for converting "unprintable" ASCII codes into mnemonics, to more clearly see what's being printed.
+ */
 str.aASCIICodes = {
     0x00:   "NUL",
     0x01:   "SOH",      // (CTRL_A) Start of Heading
@@ -570,10 +574,10 @@ str.aASCIICodes = {
     0x07:   "BEL",      // (CTRL_G) Bell
     0x08:   "BS",       // (CTRL_H) Backspace
     0x09:   "TAB",      // (CTRL_I) Horizontal Tab
- // 0x0A:   "LF",       // (CTRL_J) Line Feed (New Line)
+    0x0A:   "LF",       // (CTRL_J) Line Feed (New Line)
     0x0B:   "VT",       // (CTRL_K) Vertical Tab
     0x0C:   "FF",       // (CTRL_L) Form Feed (New Page)
-//  0x0D:   "CR",       // (CTRL_M) Carriage Return
+    0x0D:   "CR",       // (CTRL_M) Carriage Return
     0x0E:   "SO",       // (CTRL_N) Shift Out
     0x0F:   "SI",       // (CTRL_O) Shift In
     0x10:   "DLE",      // (CTRL_P) Data Link Escape
@@ -602,7 +606,7 @@ str.aASCIICodes = {
  */
 str.toASCIICode = function(b)
 {
-    var s = str.aASCIICodes[b];
+    var s = (b != str.ASCII.CR && b != str.ASCII.LF? str.aASCIICodes[b] : null);
     if (s) {
         s = '<' + s + '>';
     } else {
