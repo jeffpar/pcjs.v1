@@ -14,7 +14,7 @@ machines:
 Selected Live Demos from [Graphics for the IBM PC](../)
 ---
 
-All of the machine demos below are halted by default.  Click the machine's "Run" button to start it running.
+All of the machine demos below are halted by default.  Click the machine's **Run** button to start it running.
 
 From [Page 46](/modules/shared/templates/pdf.html?url=/pubs/pc/programming/Graphics_for_the_IBM_PC/pages/Graphics_for_the_IBM_PC 48.pdf&page=48&total=320):
 

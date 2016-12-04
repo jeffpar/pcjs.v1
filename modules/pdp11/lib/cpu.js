@@ -195,21 +195,6 @@ CPUPDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
         if (control) this.cmp.setBinding(null, CPUPDP11.BUTTONS[i], control);
     }
 
-    /*
-     * We've already saved the parmsCPU 'autoStart' setting, but there may be a machine (or URL) override.
-     */
-    var sAutoStart = cmp.getMachineParm('autoStart');
-    if (sAutoStart != null) {
-        this.flags.autoStart = (sAutoStart == "true"? true : (sAutoStart  == "false"? false : !!sAutoStart));
-    }
-
-    /*
-     * Start running automatically on power-up, assuming there's no Debugger and no "Run" button.
-     */
-    if ((!DEBUGGER || !this.dbg) && this.bindings["run"] === undefined) {
-        this.flags.autoStart = true;
-    }
-
     this.setReady();
 };
 
@@ -272,6 +257,21 @@ CPUPDP11.prototype.restore = function(data)
  */
 CPUPDP11.prototype.powerUp = function(data, fRepower)
 {
+    /*
+     * We've already saved the parmsCPU 'autoStart' setting, but there may be a machine (or URL) override.
+     */
+    var sAutoStart = this.cmp.getMachineParm('autoStart');
+    if (sAutoStart != null) {
+        this.flags.autoStart = (sAutoStart == "true"? true : (sAutoStart  == "false"? false : !!sAutoStart));
+    }
+    else if (this.flags.autoStart == null) {
+        /*
+         * If there's no explicit parmsCPU setting either, then we will autoStart if there's no Debugger and
+         * no "Run" button.
+         */
+        this.flags.autoStart = ((!DEBUGGER || !this.dbg) && this.bindings["run"] === undefined);
+    }
+
     if (!fRepower) {
         this.finish();
         if (!data || !this.restore) {
@@ -297,6 +297,9 @@ CPUPDP11.prototype.powerUp = function(data, fRepower)
              * a Control Panel with a "print" control is present or not.
              */
             this.println("No debugger detected");
+        }
+        if (!this.flags.autoStart) {
+            this.println("CPU will not be auto-started, click Run to start");
         }
     }
     /*
@@ -1184,6 +1187,7 @@ CPUPDP11.prototype.startCPU = function(fUpdateFocus)
         if (fUpdateFocus) this.cmp.setFocus(true);
         this.cmp.start(this.msStartRun, this.getCycles());
     }
+    if (!this.dbg) this.status("Started");
     setTimeout(this.onRunTimeout, 0);
     return true;
 };

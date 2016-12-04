@@ -23,7 +23,7 @@ It is currently playable only in desktop browsers and uses the following hard-co
 - D: Move Right
 - L: Fire Missile
 
-Click the "Run" button to start the simulation.  You'll also find assorted
+Click the **Run** button to start the simulation.  You'll also find assorted
 [Space Invaders Hardware Notes](#space-invaders-hardware-notes) below.
 
 {% include machine.html id="invaders" %}

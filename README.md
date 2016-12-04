@@ -306,7 +306,7 @@ added, too.
 
 When a PCjs machine runs in a browser, an XML machine configuration file is transformed into HTML with a set of DIVs
 for each component: an "object" DIV whose *data-value* attribute provides the initialization parameters for the
-corresponding component, along with a set of optional "control" DIVs that the component can bind to (eg, a "Run" button,
+corresponding component, along with a set of optional "control" DIVs that the component can bind to (eg, a **Run** button,
 or a visual representation of DIP switches, or whatever).
 
 When a PCjs machine is run from the command-line, there is no XML, HTML, or DIVs involved; this is basically a
@@ -379,7 +379,7 @@ where PCjs could run amok and destroy the planet.
 Other parameters that can be passed via the URL:
 
 - *autostart*: set it to "true" to allow all machines to start normally, "false" to prevent all machines from starting,
-or "no" to prevent all machines from starting *unless* they have no "Run" button; e.g.:
+or "no" to prevent all machines from starting *unless* they have no **Run** button; e.g.:
 
 	http://localhost:8088/?gort=debug&autostart=false
 

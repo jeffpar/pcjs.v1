@@ -301,7 +301,7 @@ Component.getMachineResources = function(idMachine)
  */
 Component.log = function(s, type)
 {
-    if (DEBUG) {
+    if (!COMPILED) {
         if (s) {
             var sElapsed = "", sMsg = (type? (type + ": ") : "") + s;
             if (typeof usr != "undefined") {
@@ -352,7 +352,7 @@ Component.assert = function(f, s)
  */
 Component.println = function(s, type, id)
 {
-    if (DEBUG) {
+    if (!COMPILED) {
         Component.log((id? (id + ": ") : "") + (s? ("\"" + s + "\"") : ""), type);
     }
 };
@@ -368,7 +368,7 @@ Component.println = function(s, type, id)
  */
 Component.notice = function(s, fPrintOnly, id)
 {
-    if (DEBUG) {
+    if (!COMPILED) {
         Component.println(s, "notice", id);
     }
     if (!fPrintOnly) web.alertUser((id? (id + ": ") : "") + s);
@@ -381,7 +381,7 @@ Component.notice = function(s, fPrintOnly, id)
  */
 Component.warning = function(s)
 {
-    if (DEBUG) {
+    if (!COMPILED) {
         Component.println(s, "warning");
     }
     web.alertUser(s);
@@ -394,7 +394,7 @@ Component.warning = function(s)
  */
 Component.error = function(s)
 {
-    if (DEBUG) {
+    if (!COMPILED) {
         Component.println(s, "error");
     }
     web.alertUser(s);
@@ -716,7 +716,7 @@ Component.prototype = {
                         }
                         control.value += s + "\n";
                         control.scrollTop = control.scrollHeight;
-                        if (DEBUG && window && window.console) console.log(s);
+                        if (!COMPILED && window && window.console) console.log(s);
                     };
                 }(control));
                 /**
@@ -750,7 +750,7 @@ Component.prototype = {
      * @param {string} [type] is the message type
      */
     log: function(s, type) {
-        if (DEBUG) {
+        if (!COMPILED) {
             Component.log(s, type || this.id || this.type);
         }
     },

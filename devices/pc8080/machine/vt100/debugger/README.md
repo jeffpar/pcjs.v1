@@ -12,7 +12,7 @@ DEC VT100 Terminal with Debugger
 --------------------------------
 
 The [PC8080](/modules/pc8080/) machine below is configured to simulate a [VT100 Terminal](/devices/pc8080/machine/vt100/)
-with a Control Panel and Debugger.  When you press the "Run" button, it will start running the original
+with a Control Panel and Debugger.  When you press the **Run** button, it will start running the original
 [VT100 Firmware](/devices/pc8080/rom/vt100/) inside the [PC8080](/modules/pc8080/) CPU emulator.
 
 Information about [VT100 Keys](#vt100-keys) and assorted [Hardware Notes](#vt100-memory-usage) are provided below,
@@ -208,8 +208,10 @@ Consequently, a VT100 [machine XML file](machine.xml) must set the Video compone
 to "true", indicating that existing RAM should be used, and a new property, *bufferFormat* must be set to "vt100",
 enabling support for the VT100's line data format; eg:
 
-	<ram id="ram" addr="0x2000" size="0x0C00"/>
-	<video id="video" screenWidth="1600" screenHeight="960" bufferAddr="0x2000" bufferRAM="true" bufferFormat="vt100" bufferCols="80" bufferRows="24" ...>
+```xml
+<ram id="ram" addr="0x2000" size="0x0C00"/>
+<video id="video" screenWidth="1600" screenHeight="960" bufferAddr="0x2000" bufferRAM="true" bufferFormat="vt100" bufferCols="80" bufferRows="24"/>
+```
 
 VT100 Screen and Character Dimensions
 -------------------------------------
