@@ -42,7 +42,7 @@ With all that mind, I've tried to make the best of a bad situation, by treating 
 VT100's DELETE key, and treating the ALT-BACKSPACE combination as the VT100's BACKSPACE key.
 
 Finally, while we're on the subject of keys, it's worth making a note of the following
-[VT100 Terminal Key Assignments](/devices/pc8080/machine/vt100/#vt100-keys):
+[VT100 Terminal Key Assignments](/devices/pc8080/machine/vt100/debugger/#vt100-keys):
 
 ### VT100 Keys
 

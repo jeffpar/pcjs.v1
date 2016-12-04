@@ -107,8 +107,8 @@
 		<manifest ref="/pubs/pc/programming/manifest.xml"/>
 		<disk path="/tests/pcx86/vga/VGABIN.json">VGA Tests (Black Book)</disk>
 	</control>
-	<control type="button" binding="loadDrive">Load</control>
-	<control type="button" binding="saveDrive" padRight="8px">Save</control>
+	<control type="button" binding="loadDisk">Load</control>
+	<control type="button" binding="saveDisk" padRight="8px">Save</control>
 	<control type="description" binding="descDisk" padRight="8px"/>
-	<control type="file" binding="mountDrive"/>
+	<control type="file" binding="mountDisk"/>
 </fdc>

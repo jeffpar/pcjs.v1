@@ -15,6 +15,6 @@
 		<disk path="/disks/pcx86/windows/1.03/05-APPS/">Windows 1.03 (APPS)</disk>
 		<disk path="/disks/pcx86/windows/1.03/06-WRITE/">Windows 1.03 (WRITE)</disk>
 	</control>
-	<control type="button" binding="loadDrive">Load</control>
+	<control type="button" binding="loadDisk">Load</control>
 	<control type="description" binding="descDisk" padLeft="8px"/>
 </fdc>

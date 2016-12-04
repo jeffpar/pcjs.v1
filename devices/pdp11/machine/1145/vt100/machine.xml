@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pdpjs/1.30.5/machine.xsl"?>
-<machine id="test1145" class="pdp11 machine-left" border="1" pos="center" background="#FAEBD7">
+<?xml-stylesheet type="text/xsl" href="/versions/pdpjs/1.30.6/machine.xsl"?>
+<machine id="test1145" class="pdp11" border="1" pos="center" background="#FAEBD7">
 	<name pos="center">PDP-11/45 with 256Kb and Front Panel</name>
 	<computer id="computer" busWidth="18"/>
 	<cpu id="cpu" model="1145" cycles="6666667" autoStart="true"/>

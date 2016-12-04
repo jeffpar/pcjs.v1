@@ -568,7 +568,7 @@ HDC.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
                 var drive = hdc.aDrives && hdc.aDrives[iDrive];
                 if (drive && drive.disk) {
                     /*
-                     * Note the similarity (and hence factoring opportunity) between this code and the FDC's "saveDrive" binding.
+                     * Note the similarity (and hence factoring opportunity) between this code and the FDC's "saveDisk" binding.
                      */
                     var disk = drive.disk;
                     if (DEBUG) hdc.println("saving disk " + disk.sDiskPath + "...");

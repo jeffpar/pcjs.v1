@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.30.5/machine.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.30.6/machine.xsl"?>
 <machine id="ibm5160" class="pcx86" border="1" width="740px" pos="center" background="#FAEBD7">
 	<name pos="center">IBM PC XT (Model 5160), MDA, 256Kb, 10Mb Drive</name>
 	<computer id="xt188-mda-256k" name="IBM PC XT"/>
@@ -19,10 +19,10 @@
 			<manifest ref="/apps/pcx86/1981/visicalc/manifest.xml" disk="*"/>
 			<manifest ref="/apps/pcx86/1982/esuite/manifest.xml" disk="*"/>
 		</control>
-		<control type="button" binding="loadDrive">Load</control>
-		<control type="button" binding="saveDrive" padRight="8px">Save</control>
+		<control type="button" binding="loadDisk">Load</control>
+		<control type="button" binding="saveDisk" padRight="8px">Save</control>
 		<control type="description" binding="descDisk" padRight="8px"/>
-		<control type="file" binding="mountDrive"/>
+		<control type="file" binding="mountDisk"/>
 	</fdc>
 	<keyboard ref="/devices/pcx86/keyboard/us83-buttons-minimal.xml"/>
 	<debugger id="debugger"/>

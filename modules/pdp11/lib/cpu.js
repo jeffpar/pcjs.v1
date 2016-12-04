@@ -203,6 +203,13 @@ CPUPDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
         this.flags.autoStart = (sAutoStart == "true"? true : (sAutoStart  == "false"? false : !!sAutoStart));
     }
 
+    /*
+     * Start running automatically on power-up, assuming there's no Debugger and no "Run" button.
+     */
+    if ((!DEBUGGER || !this.dbg) && this.bindings["run"] === undefined) {
+        this.flags.autoStart = true;
+    }
+
     this.setReady();
 };
 
@@ -328,10 +335,10 @@ CPUPDP11.prototype.powerDown = function(fSave, fShutdown)
  */
 CPUPDP11.prototype.autoStart = function()
 {
-    /*
-     * Start running automatically on power-up, assuming there's no Debugger and no "Run" button
-     */
-    if (this.flags.autoStart || (!DEBUGGER || !this.dbg) && this.bindings["run"] === undefined) {
+    if (this.flags.running) {
+        return true;
+    }
+    if (this.flags.autoStart) {
         /*
          * We used to also set fUpdateFocus when calling startCPU(), on the assumption that in the "auto-starting"
          * context, a machine without focus is like a day without sunshine, but in reality, focus should only be
