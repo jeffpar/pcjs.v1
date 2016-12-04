@@ -298,9 +298,7 @@ CPUPDP11.prototype.powerUp = function(data, fRepower)
              */
             this.println("No debugger detected");
         }
-        if (this.flags.autoStart) {
-            this.println("CPU will auto-start");
-        } else {
+        if (!this.flags.autoStart) {
             this.println("CPU will not be auto-started, click Run to start");
         }
     }
