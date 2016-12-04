@@ -135,7 +135,7 @@ RL11.prototype.setBinding = function(sType, sBinding, control, sValue)
 
         control.onchange = function onChangeListDisks(event) {
             var controlDesc = rl11.bindings["descDisk"];
-            var controlOption = control.options[control.selectedIndex];
+            var controlOption = control.options && control.options[control.selectedIndex];
             if (controlDesc && controlOption) {
                 var dataValue = {};
                 var sValue = controlOption.getAttribute("data-value");
@@ -174,7 +174,7 @@ RL11.prototype.setBinding = function(sType, sBinding, control, sValue)
 
         control.onclick = function onClickLoadDrive(event) {
             var controlDisks = rl11.bindings["listDisks"];
-            if (controlDisks) {
+            if (controlDisks && controlDisks.options) {
                 var sDiskName = controlDisks.options[controlDisks.selectedIndex].text;
                 var sDiskPath = controlDisks.value;
                 rl11.loadSelectedDrive(sDiskName, sDiskPath);
@@ -563,15 +563,21 @@ RL11.prototype.bootSelectedDisk = function()
         return;
     }
     if (!drive.disk) {
-        this.notice("No disk loaded in the selected drive");
+        this.notice("Load a disk into the drive first");
         return;
     }
-    var err = this.readData(drive, 0, 0, 0, drive.cbSector >> 1, 0);
+    /*
+     * NOTE: We're calling setReset() BEFORE reading the boot code in order to eliminate any side-effects
+     * of the previous state of either the controller OR the CPU; for example, we don't want any previous MMU
+     * or UNIBUS Map registers affecting the simulated readData() call.  Also, some boot code (eg, RSTS/E)
+     * expects the controller to be in a READY state; since setReset() triggers a call to our reset() handler,
+     * a READY state is assured, and the readData() call shouldn't do anything to change that.
+     */
+    this.cpu.setReset(0, true);
+    var err = this.readData(drive, 0, 0, 0, 512, 0);
     if (err) {
         this.notice("Unable to read the boot sector (" + err + ")");
-        return;
     }
-    this.cpu.setReset(0, true);
 };
 
 /**
@@ -862,7 +868,7 @@ RL11.prototype.initController = function(data)
 {
     var i = 0;
     if (!data) data = [];
-    this.regRLCS = data[i++] || 0;
+    this.regRLCS = data[i++] || (PDP11.RL11.RLCS.DRDY | PDP11.RL11.RLCS.CRDY);
     this.regRLBA = data[i++] || 0;
     this.regRLDA = data[i++] || 0;
     this.tmpRLDA = data[i++] || 0;
@@ -958,7 +964,7 @@ RL11.prototype.processCommand = function()
      *
      *  1) Normally both set
      *  2) CRDY is cleared to process a command
-     *  3) DRDY is cleared to command is in process
+     *  3) DRDY is cleared to indicate a command in process
      */
     this.regRLCS &= ~PDP11.RL11.RLCS.DRDY;
 

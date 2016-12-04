@@ -496,7 +496,14 @@ CPUStatePDP11.prototype.setReset = function(addr, fStart)
     this.setPSW(0);
 
     if (fStart) {
-        this.autoStart();
+        /*
+         * TODO: Review.  I'm zeroing R2-R5 in the fStart case (ie, for boot code) simply because that's what I
+         * saw the PDP-11 Boot Monitor doing (see /apps/pdp11/boot/monitor/BOOTMON.mac).
+         */
+        for (var i = 2; i <= 5; i++) {
+            this.regsGen[i] = 0;
+        }
+        if (!this.isRunning()) this.startCPU();
     }
     else {
         if (this.dbg) {
@@ -515,6 +522,7 @@ CPUStatePDP11.prototype.setReset = function(addr, fStart)
             this.stopCPU();
         }
     }
+    if (!this.isRunning() && this.panel) this.panel.stop();
 };
 
 /**

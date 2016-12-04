@@ -133,7 +133,7 @@ RK11.prototype.setBinding = function(sType, sBinding, control, sValue)
 
         control.onchange = function onChangeListDisks(event) {
             var controlDesc = rk11.bindings["descDisk"];
-            var controlOption = control.options[control.selectedIndex];
+            var controlOption = control.options && control.options[control.selectedIndex];
             if (controlDesc && controlOption) {
                 var dataValue = {};
                 var sValue = controlOption.getAttribute("data-value");
@@ -172,7 +172,7 @@ RK11.prototype.setBinding = function(sType, sBinding, control, sValue)
 
         control.onclick = function onClickLoadDrive(event) {
             var controlDisks = rk11.bindings["listDisks"];
-            if (controlDisks) {
+            if (controlDisks && controlDisks.options) {
                 var sDiskName = controlDisks.options[controlDisks.selectedIndex].text;
                 var sDiskPath = controlDisks.value;
                 rk11.loadSelectedDrive(sDiskName, sDiskPath);
@@ -561,15 +561,21 @@ RK11.prototype.bootSelectedDisk = function()
         return;
     }
     if (!drive.disk) {
-        this.notice("No disk loaded in the selected drive");
+        this.notice("Load a disk into the drive first");
         return;
     }
-    var err = this.readData(drive, 0, 0, 0, drive.cbSector >> 1, 0);
+    /*
+     * NOTE: We're calling setReset() BEFORE reading the boot code in order to eliminate any side-effects
+     * of the previous state of either the controller OR the CPU; for example, we don't want any previous MMU
+     * or UNIBUS Map registers affecting the simulated readData() call.  Also, some boot code (eg, RSTS/E)
+     * expects the controller to be in a READY state; since setReset() triggers a call to our reset() handler,
+     * a READY state is assured, and the readData() call shouldn't do anything to change that.
+     */
+    this.cpu.setReset(0, true);
+    var err = this.readData(drive, 0, 0, 0, 512, 0);
     if (err) {
         this.notice("Unable to read the boot sector (" + err + ")");
-        return;
     }
-    this.cpu.setReset(0, true);
 };
 
 /**
