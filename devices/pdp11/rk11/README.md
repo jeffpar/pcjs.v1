@@ -38,7 +38,8 @@ used to control the device, such as choosing which disks should be "auto-mounted
 		<control type="list" binding="listDisks">
 			<disk id="disk01" name="XXDP+ Diagnostics" path="http://archive.pcjs.org/disks/dec/rk03/RK03-XXDP.json"/>
 		</control>
-		<control type="button" binding="loadDrive">Load</control>
+		<control type="button" binding="loadDisk">Load</control>
+		<control type="button" binding="bootDisk">Boot</control>
 		<control type="description" binding="descDisk" padRight="8px"/>
 		<control type="file" binding="mountDisk"/>
 	</control>

@@ -1437,7 +1437,7 @@ if (DEBUGGER) {
          * is calling us in a loop, in which case it will perform its own updateDisplays() when it's done.
          */
         if (fUpdateDisplays !== false) {
-            if (this.panel && this.panel.stop) this.panel.stop();
+            if (this.panel) this.panel.stop();
             this.cmp.updateDisplays(-1);
         }
 
@@ -3924,7 +3924,7 @@ if (DEBUGGER) {
                  * displayLiveRegs enabled, so once the repeat count has been exhausted, we must perform
                  * a final updateDisplays().
                  */
-                if (dbg.panel && dbg.panel.stop) dbg.panel.stop();
+                if (dbg.panel) dbg.panel.stop();
                 dbg.cmp.updateDisplays(-1);
                 dbg.setBusy(false);
             }

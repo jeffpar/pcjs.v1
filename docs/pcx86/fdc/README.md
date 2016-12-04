@@ -49,7 +49,7 @@ Bindings
 	For use with a control of type *list*. This list must be manually populated, using &lt;disk&gt; tags.
 	See the example below.
 	
- * *loadDrive*
+ * *loadDisk*
  
 	For use with a control of type *button*, to load the selected diskette image into the selected drive.
 	This control is also used to unload diskette images. Select the diskette you want to unload, then select
@@ -64,7 +64,7 @@ Example
         <control type="list" class="input" binding="listDisks">
             <disk path="pcdos-1.00.json">PC-DOS 1.0</disk>
         </control>
-        <control type="button" class="input" binding="loadDrive">Load Drive</control>
+        <control type="button" class="input" binding="loadDisk">Load</control>
     </control>
 </fdc>
 ```
@@ -74,7 +74,7 @@ Output
 ```html
 <div id="..." class="pc-fdc pc-component">
     <div class="pc-container">
-        <div class="pcx86-fdc" data-value="id:'...',name:'...',listDrives:'...',listDisks:'...',loadDrive:'...'">
+        <div class="pcx86-fdc" data-value="id:'...',name:'...',listDrives:'...',listDisks:'...',loadDisk:'...'">
         </div>
     </div>
 </div>

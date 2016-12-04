@@ -8,8 +8,8 @@
 		<manifest ref="/disks/pcx86/games/microsoft/adventure/manifest.xml"/>
 		<manifest ref="/apps/pcx86/1981/visicalc/manifest.xml"/>
 	</control>
-	<control type="button" binding="loadDrive">Load</control>
-	<control type="button" binding="saveDrive" padRight="8px">Save</control>
+	<control type="button" binding="loadDisk">Load</control>
+	<control type="button" binding="saveDisk" padRight="8px">Save</control>
 	<control type="description" binding="descDisk" padRight="8px"/>
-	<control type="file" binding="mountDrive"/>
+	<control type="file" binding="mountDisk"/>
 </fdc>

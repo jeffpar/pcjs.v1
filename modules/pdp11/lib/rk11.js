@@ -65,7 +65,7 @@ function RK11(parms)
      * We record any 'autoMount' object now, but we no longer parse it until initBus(),
      * because the Computer's getMachineParm() service may have an override for us.
      */
-    this.configMount = parms['autoMount'] || {};
+    this.configMount = this.parseConfig(parms['autoMount']);
     this.cAutoMount = 0;
 
     /*
@@ -89,6 +89,30 @@ RK11.SOURCE = {
 };
 
 /**
+ * parseConfig(config)
+ *
+ * @this {RK11}
+ * @param {*} config
+ * @return {*}
+ */
+RK11.prototype.parseConfig = function(config)
+{
+    if (config && typeof config == "string") {
+        try {
+            /*
+             * The most likely source of any exception will be right here, where we're parsing
+             * this JSON-encoded data.
+             */
+            config = eval("(" + config + ")");
+        } catch (e) {
+            Component.error(this.type + " auto-mount error: " + e.message + " (" + config + ")");
+            config = null;
+        }
+    }
+    return config || {};
+};
+
+/**
  * setBinding(sType, sBinding, control, sValue)
  *
  * @this {RK11}
@@ -109,7 +133,7 @@ RK11.prototype.setBinding = function(sType, sBinding, control, sValue)
 
         control.onchange = function onChangeListDisks(event) {
             var controlDesc = rk11.bindings["descDisk"];
-            var controlOption = control.options[control.selectedIndex];
+            var controlOption = control.options && control.options[control.selectedIndex];
             if (controlDesc && controlOption) {
                 var dataValue = {};
                 var sValue = controlOption.getAttribute("data-value");
@@ -143,12 +167,12 @@ RK11.prototype.setBinding = function(sType, sBinding, control, sValue)
         };
         return true;
 
-    case "loadDrive":
+    case "loadDisk":
         this.bindings[sBinding] = control;
 
         control.onclick = function onClickLoadDrive(event) {
             var controlDisks = rk11.bindings["listDisks"];
-            if (controlDisks) {
+            if (controlDisks && controlDisks.options) {
                 var sDiskName = controlDisks.options[controlDisks.selectedIndex].text;
                 var sDiskPath = controlDisks.value;
                 rk11.loadSelectedDrive(sDiskName, sDiskPath);
@@ -156,7 +180,15 @@ RK11.prototype.setBinding = function(sType, sBinding, control, sValue)
         };
         return true;
 
-    case "saveDrive":
+    case "bootDisk":
+        this.bindings[sBinding] = control;
+
+        control.onclick = function onClickBootDisk(event) {
+            rk11.bootSelectedDisk();
+        };
+        return true;
+
+    case "saveDisk":
         /*
          * Yes, technically, this feature does not require "Local disk support" (which is really a reference
          * to FileReader support), but since fLocalDisks is also false for all mobile devices, and since there
@@ -201,7 +233,7 @@ RK11.prototype.setBinding = function(sType, sBinding, control, sValue)
         };
         return true;
 
-    case "mountDrive":
+    case "mountDisk":
         if (!this.fLocalDisks) {
             if (DEBUG) this.log("Local disk support not available");
             /*
@@ -263,21 +295,7 @@ RK11.prototype.initBus = function(cmp, bus, cpu, dbg)
     this.cpu = cpu;
     this.dbg = dbg;
 
-    var configMount = this.cmp.getMachineParm('autoMount');
-    if (configMount) {
-        if (typeof configMount == "string") {
-            try {
-                /*
-                 * The most likely source of any exception will be right here, where we're parsing
-                 * this JSON-encoded data.
-                 */
-                configMount = eval("(" + configMount + ")");
-            } catch (e) {
-                Component.error(this.type + " auto-mount error: " + e.message + " (" + configMount + ")");
-                configMount = null;
-            }
-        }
-    }
+    var configMount = this.parseConfig(this.cmp.getMachineParm('autoMount'));
 
     /*
      * Add only drives from the machine-wide autoMount configuration that match drives managed by this component.
@@ -528,6 +546,39 @@ RK11.prototype.loadSelectedDrive = function(sDiskName, sDiskPath, file)
 };
 
 /**
+ * bootSelectedDisk()
+ *
+ * @this {RK11}
+ */
+RK11.prototype.bootSelectedDisk = function()
+{
+    var drive;
+    var controlDrives = this.bindings["listDrives"];
+    var iDrive = controlDrives && str.parseInt(controlDrives.value, 10);
+
+    if (iDrive == null || iDrive < 0 || iDrive >= this.aDrives.length || !(drive = this.aDrives[iDrive])) {
+        this.notice("Unable to boot the selected drive");
+        return;
+    }
+    if (!drive.disk) {
+        this.notice("Load a disk into the drive first");
+        return;
+    }
+    /*
+     * NOTE: We're calling setReset() BEFORE reading the boot code in order to eliminate any side-effects
+     * of the previous state of either the controller OR the CPU; for example, we don't want any previous MMU
+     * or UNIBUS Map registers affecting the simulated readData() call.  Also, some boot code (eg, RSTS/E)
+     * expects the controller to be in a READY state; since setReset() triggers a call to our reset() handler,
+     * a READY state is assured, and the readData() call shouldn't do anything to change that.
+     */
+    this.cpu.setReset(0, true);
+    var err = this.readData(drive, 0, 0, 0, 512, 0);
+    if (err) {
+        this.notice("Unable to read the boot sector (" + err + ")");
+    }
+};
+
+/**
  * loadDrive(iDrive, sDiskName, sDiskPath, fAutoMount, file)
  *
  * NOTE: If sDiskPath is already loaded, nothing needs to be done.
@@ -639,7 +690,7 @@ RK11.prototype.finishLoadDrive = function onLoadDrive(drive, disk, sDiskName, sD
          * With the addition of notify(), users are now "alerted" whenever a disk has finished loading;
          * notify() is selective about its output, using print() if a print window is open, alert() otherwise.
          */
-        this.notice("Mounted disk \"" + sDiskName + "\" in drive " + this.getDriveName(drive.iDrive), drive.fAutoMount || fAutoMount);
+        this.notice("Loaded disk \"" + sDiskName + "\" in drive " + this.getDriveName(drive.iDrive), drive.fAutoMount || fAutoMount);
 
         /*
          * Since you usually want the Computer to have focus again after loading a new disk, let's try automatically
@@ -941,6 +992,7 @@ RK11.prototype.processCommand = function()
 
     case PDP11.RK11.FUNC.WRITE:
         if (!sFunc) sFunc = "WRITE";
+        if (!fnReadWrite) fnReadWrite = this.writeData;
 
         iCylinder = (this.regRKDA & PDP11.RK11.RKDA.CA) >> PDP11.RK11.RKDA.SHIFT.CA;
         iHead = (this.regRKDA & PDP11.RK11.RKDA.HS) >> PDP11.RK11.RKDA.SHIFT.HS;
@@ -949,8 +1001,6 @@ RK11.prototype.processCommand = function()
         addr = (((this.regRKCS & PDP11.RK11.RKCS.MEX)) << (16 - PDP11.RK11.RKCS.SHIFT.MEX)) | this.regRKBA;
 
         if (this.messageEnabled()) this.printMessage(this.type + ": " + sFunc + "(" + iCylinder + ":" + iHead + ":" + iSector + ") @" + str.toOct(addr) + "-" + str.toOct(addr + ((nWords - 1) << 1)), true);
-
-        if (!fnReadWrite) fnReadWrite = this.writeData;
 
         if (iCylinder >= drive.nCylinders) {
             this.regRKER |= PDP11.RK11.RKER.DRE | PDP11.RK11.RKER.NXC;
@@ -1023,9 +1073,9 @@ RK11.prototype.endReadWrite = function(err, iCylinder, iHead, iSector, nWords, a
  * @param {number} iSector
  * @param {number} nWords
  * @param {number} addr
- * @param {boolean} fCheck
- * @param {function(...)} done
- * @return {boolean} true if complete, false if queued
+ * @param {boolean} [fCheck]
+ * @param {function(...)} [done]
+ * @return {boolean|number} true if complete, false if queued (or if no done() is supplied, the error code, if any)
  */
 RK11.prototype.readData = function(drive, iCylinder, iHead, iSector, nWords, addr, fCheck, done)
 {
@@ -1084,7 +1134,7 @@ RK11.prototype.readData = function(drive, iCylinder, iHead, iSector, nWords, add
             }
         }
     }
-    return done(err, iCylinder, iHead, iSector, nWords, addr);
+    return done? done(err, iCylinder, iHead, iSector, nWords, addr) : err;
 };
 
 /**
@@ -1097,9 +1147,9 @@ RK11.prototype.readData = function(drive, iCylinder, iHead, iSector, nWords, add
  * @param {number} iSector
  * @param {number} nWords
  * @param {number} addr
- * @param {boolean} fCheck
- * @param {function(...)} done
- * @return {boolean} true if complete, false if queued
+ * @param {boolean} [fCheck]
+ * @param {function(...)} [done]
+ * @return {boolean|number} true if complete, false if queued (or if no done() is supplied, the error code, if any)
  */
 RK11.prototype.writeData = function(drive, iCylinder, iHead, iSector, nWords, addr, fCheck, done)
 {
@@ -1157,7 +1207,7 @@ RK11.prototype.writeData = function(drive, iCylinder, iHead, iSector, nWords, ad
             }
         }
     }
-    return done(err, iCylinder, iHead, iSector, nWords, addr);
+    return done? done(err, iCylinder, iHead, iSector, nWords, addr) : err;
 };
 
 /**

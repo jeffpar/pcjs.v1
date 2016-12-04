@@ -67,7 +67,7 @@ function RL11(parms)
      * We record any 'autoMount' object now, but we no longer parse it until initBus(),
      * because the Computer's getMachineParm() service may have an override for us.
      */
-    this.configMount = parms['autoMount'] || {};
+    this.configMount = this.parseConfig(parms['autoMount']);
     this.cAutoMount = 0;
 
     /*
@@ -91,6 +91,30 @@ RL11.SOURCE = {
 };
 
 /**
+ * parseConfig(config)
+ *
+ * @this {RL11}
+ * @param {*} config
+ * @return {*}
+ */
+RL11.prototype.parseConfig = function(config)
+{
+    if (config && typeof config == "string") {
+        try {
+            /*
+             * The most likely source of any exception will be right here, where we're parsing
+             * this JSON-encoded data.
+             */
+            config = eval("(" + config + ")");
+        } catch (e) {
+            Component.error(this.type + " auto-mount error: " + e.message + " (" + config + ")");
+            config = null;
+        }
+    }
+    return config || {};
+};
+
+/**
  * setBinding(sType, sBinding, control, sValue)
  *
  * @this {RL11}
@@ -111,7 +135,7 @@ RL11.prototype.setBinding = function(sType, sBinding, control, sValue)
 
         control.onchange = function onChangeListDisks(event) {
             var controlDesc = rl11.bindings["descDisk"];
-            var controlOption = control.options[control.selectedIndex];
+            var controlOption = control.options && control.options[control.selectedIndex];
             if (controlDesc && controlOption) {
                 var dataValue = {};
                 var sValue = controlOption.getAttribute("data-value");
@@ -145,12 +169,12 @@ RL11.prototype.setBinding = function(sType, sBinding, control, sValue)
         };
         return true;
 
-    case "loadDrive":
+    case "loadDisk":
         this.bindings[sBinding] = control;
 
         control.onclick = function onClickLoadDrive(event) {
             var controlDisks = rl11.bindings["listDisks"];
-            if (controlDisks) {
+            if (controlDisks && controlDisks.options) {
                 var sDiskName = controlDisks.options[controlDisks.selectedIndex].text;
                 var sDiskPath = controlDisks.value;
                 rl11.loadSelectedDrive(sDiskName, sDiskPath);
@@ -158,7 +182,15 @@ RL11.prototype.setBinding = function(sType, sBinding, control, sValue)
         };
         return true;
 
-    case "saveDrive":
+    case "bootDisk":
+        this.bindings[sBinding] = control;
+
+        control.onclick = function onClickBootDisk(event) {
+            rl11.bootSelectedDisk();
+        };
+        return true;
+
+    case "saveDisk":
         /*
          * Yes, technically, this feature does not require "Local disk support" (which is really a reference
          * to FileReader support), but since fLocalDisks is also false for all mobile devices, and since there
@@ -203,7 +235,7 @@ RL11.prototype.setBinding = function(sType, sBinding, control, sValue)
         };
         return true;
 
-    case "mountDrive":
+    case "mountDisk":
         if (!this.fLocalDisks) {
             if (DEBUG) this.log("Local disk support not available");
             /*
@@ -265,21 +297,7 @@ RL11.prototype.initBus = function(cmp, bus, cpu, dbg)
     this.cpu = cpu;
     this.dbg = dbg;
 
-    var configMount = this.cmp.getMachineParm('autoMount');
-    if (configMount) {
-        if (typeof configMount == "string") {
-            try {
-                /*
-                 * The most likely source of any exception will be right here, where we're parsing
-                 * this JSON-encoded data.
-                 */
-                configMount = eval("(" + configMount + ")");
-            } catch (e) {
-                Component.error(this.type + " auto-mount error: " + e.message + " (" + configMount + ")");
-                configMount = null;
-            }
-        }
-    }
+    var configMount = this.parseConfig(this.cmp.getMachineParm('autoMount'));
 
     /*
      * Add only drives from the machine-wide autoMount configuration that match drives managed by this component.
@@ -530,6 +548,39 @@ RL11.prototype.loadSelectedDrive = function(sDiskName, sDiskPath, file)
 };
 
 /**
+ * bootSelectedDisk()
+ *
+ * @this {RL11}
+ */
+RL11.prototype.bootSelectedDisk = function()
+{
+    var drive;
+    var controlDrives = this.bindings["listDrives"];
+    var iDrive = controlDrives && str.parseInt(controlDrives.value, 10);
+
+    if (iDrive == null || iDrive < 0 || iDrive >= this.aDrives.length || !(drive = this.aDrives[iDrive])) {
+        this.notice("Unable to boot the selected drive");
+        return;
+    }
+    if (!drive.disk) {
+        this.notice("Load a disk into the drive first");
+        return;
+    }
+    /*
+     * NOTE: We're calling setReset() BEFORE reading the boot code in order to eliminate any side-effects
+     * of the previous state of either the controller OR the CPU; for example, we don't want any previous MMU
+     * or UNIBUS Map registers affecting the simulated readData() call.  Also, some boot code (eg, RSTS/E)
+     * expects the controller to be in a READY state; since setReset() triggers a call to our reset() handler,
+     * a READY state is assured, and the readData() call shouldn't do anything to change that.
+     */
+    this.cpu.setReset(0, true);
+    var err = this.readData(drive, 0, 0, 0, 512, 0);
+    if (err) {
+        this.notice("Unable to read the boot sector (" + err + ")");
+    }
+};
+
+/**
  * loadDrive(iDrive, sDiskName, sDiskPath, fAutoMount, file)
  *
  * NOTE: If sDiskPath is already loaded, nothing needs to be done.
@@ -639,7 +690,7 @@ RL11.prototype.finishLoadDrive = function onLoadDrive(drive, disk, sDiskName, sD
          * With the addition of notify(), users are now "alerted" whenever a disk has finished loading;
          * notify() is selective about its output, using print() if a print window is open, alert() otherwise.
          */
-        this.notice("Mounted disk \"" + sDiskName + "\" in drive " + this.getDriveName(drive.iDrive), drive.fAutoMount || fAutoMount);
+        this.notice("Loaded disk \"" + sDiskName + "\" in drive " + this.getDriveName(drive.iDrive), drive.fAutoMount || fAutoMount);
 
         /*
          * Since you usually want the Computer to have focus again after loading a new disk, let's try automatically
@@ -817,7 +868,7 @@ RL11.prototype.initController = function(data)
 {
     var i = 0;
     if (!data) data = [];
-    this.regRLCS = data[i++] || 0;
+    this.regRLCS = data[i++] || (PDP11.RL11.RLCS.DRDY | PDP11.RL11.RLCS.CRDY);
     this.regRLBA = data[i++] || 0;
     this.regRLDA = data[i++] || 0;
     this.tmpRLDA = data[i++] || 0;
@@ -901,8 +952,8 @@ RL11.prototype.initDrive = function(drive, iDrive, data)
  */
 RL11.prototype.processCommand = function()
 {
-    var fnReadWrite;
     var fInterrupt = true;
+    var fnReadWrite, sFunc = "";
     var iDrive = (this.regRLCS & PDP11.RL11.RLCS.DS) >> PDP11.RL11.RLCS.SHIFT.DS;
     var drive = this.aDrives[iDrive];
     var disk = drive.disk;
@@ -913,7 +964,7 @@ RL11.prototype.processCommand = function()
      *
      *  1) Normally both set
      *  2) CRDY is cleared to process a command
-     *  3) DRDY is cleared to command is in process
+     *  3) DRDY is cleared to indicate a command in process
      */
     this.regRLCS &= ~PDP11.RL11.RLCS.DRDY;
 
@@ -954,11 +1005,14 @@ RL11.prototype.processCommand = function()
         break;
 
     case PDP11.RL11.FUNC.RDATA:
+        sFunc = "READ";
         fnReadWrite = this.readData;
         /* falls through */
 
     case PDP11.RL11.FUNC.WDATA:
+        if (!sFunc) sFunc = "WRITE";
         if (!fnReadWrite) fnReadWrite = this.writeData;
+
         iCylinder = this.regRLDA >> PDP11.RL11.RLDA.SHIFT.RW_CA;
         iHead = (this.regRLDA & PDP11.RL11.RLDA.RW_HS)? 1 : 0;
         iSector = this.regRLDA & PDP11.RL11.RLDA.RW_SA;
@@ -966,12 +1020,11 @@ RL11.prototype.processCommand = function()
             this.regRLCS |= PDP11.RL11.ERRC.HNF | PDP11.RL11.RLCS.ERR;
             break;
         }
-        addr = (((this.regRLBE & PDP11.RL11.RLBE.MASK)) << 16) | this.regRLBA;   // 22 bit mode
         nWords = (0x10000 - this.regRLMP) & 0xffff;
-        var pos = ((((iCylinder << 1) + iHead) * drive.nSectors) + iSector) * 128;
-        if (DEBUG && (this.messageEnabled(MessagesPDP11.READ) || this.messageEnabled(MessagesPDP11.WRITE))) {
-            console.log((fnReadWrite == this.readData? "readData" : "writeData") + "(pos=" + pos + ",addr=" + str.toOct(addr) + ",bytes=" + (nWords * 2) + ")");
-        }
+        addr = (((this.regRLBE & PDP11.RL11.RLBE.MASK)) << 16) | this.regRLBA;   // 22 bit mode
+
+        if (this.messageEnabled()) this.printMessage(this.type + ": " + sFunc + "(" + iCylinder + ":" + iHead + ":" + iSector + ") @" + str.toOct(addr) + "-" + str.toOct(addr + ((nWords - 1) << 1)), true);
+
         fInterrupt = fnReadWrite.call(this, drive, iCylinder, iHead, iSector, nWords, addr, this.endReadWrite.bind(this));
         break;
 
@@ -1021,8 +1074,8 @@ RL11.prototype.endReadWrite = function(err, iCylinder, iHead, iSector, nWords, a
  * @param {number} iSector
  * @param {number} nWords
  * @param {number} addr
- * @param {function(...)} done
- * @return {boolean} true if complete, false if queued
+ * @param {function(...)} [done]
+ * @return {boolean|number} true if complete, false if queued (or if no done() is supplied, the error code, if any)
  */
 RL11.prototype.readData = function(drive, iCylinder, iHead, iSector, nWords, addr, done)
 {
@@ -1091,7 +1144,7 @@ RL11.prototype.readData = function(drive, iCylinder, iHead, iSector, nWords, add
         console.log("checksum: " + (checksum|0));
     }
 
-    return done(err, iCylinder, iHead, iSector, nWords, addr);
+    return done? done(err, iCylinder, iHead, iSector, nWords, addr) : err;
 };
 
 /**
@@ -1104,8 +1157,8 @@ RL11.prototype.readData = function(drive, iCylinder, iHead, iSector, nWords, add
  * @param {number} iSector
  * @param {number} nWords
  * @param {number} addr
- * @param {function(...)} done
- * @return {boolean} true if complete, false if queued
+ * @param {function(...)} [done]
+ * @return {boolean|number} true if complete, false if queued (or if no done() is supplied, the error code, if any)
  */
 RL11.prototype.writeData = function(drive, iCylinder, iHead, iSector, nWords, addr, done)
 {
@@ -1173,7 +1226,7 @@ RL11.prototype.writeData = function(drive, iCylinder, iHead, iSector, nWords, ad
         console.log("checksum: " + (checksum|0));
     }
 
-    return done(err, iCylinder, iHead, iSector, nWords, addr);
+    return done? done(err, iCylinder, iHead, iSector, nWords, addr) : err;
 };
 
 /**

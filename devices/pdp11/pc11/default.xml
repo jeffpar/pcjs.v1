@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<device id="pc11" type="pc11" baudReceive="9600" autoMount='{path:"/apps/pdp11/tapes/absloader/DEC-11-L2PC-PO.json"}' pos="left" width="35%" padLeft="8px" padBottom="8px">
+<device id="pc11" type="pc11" baudReceive="9600" autoMount='{PTR:{path:"/apps/pdp11/boot/bootstrap/BOOTSTRAP-16KB.json"}}' pos="left" width="35%" padLeft="8px" padBottom="8px">
 	<name>Paper Tape Controls</name>
 	<control type="container">
 		<control type="list" binding="listTapes">
@@ -49,8 +49,8 @@
 			<tape id="diags.tape15" name="MD-11 TEST 15 - CPU EXERCISER" path="/apps/pdp11/tapes/diags/MAINDEC-11-D0OA-PB.json"/>
 			<tape id="tray02.tape04" name="MD-11 11/70 CPU EXERCISER" path="/apps/pdp11/tapes/diags/MAINDEC-11-DEQKC-B1-PB.json"/>
 		</control>
-		<control type="button" binding="attachTape">Attach</control>
 		<control type="button" binding="loadTape">Load</control>
+		<control type="button" binding="readTape">Read</control>
 		<control type="description" binding="descTape" padRight="8px"/>
 		<control type="file" binding="mountTape"/>
 		<control type="progress" binding="readProgress" pos="default" padTop="8px">Tape Progress</control>

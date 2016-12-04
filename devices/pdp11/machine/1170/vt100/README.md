@@ -5,11 +5,11 @@ permalink: /devices/pdp11/machine/1170/vt100/
 machines:
   - id: test1170
     type: pdp11
-    config: /devices/pdp11/machine/1170/vt100/machine.xml
+    config: /devices/pdp11/machine/1170/vt100/machine-left.xml
     connection: dl11->vt100.serialPort
   - id: vt100
     type: pc8080
-    config: /devices/pc8080/machine/vt100/machine.xml
+    config: /devices/pc8080/machine/vt100/machine-right.xml
     connection: serialPort->test1170.dl11
 ---
 
