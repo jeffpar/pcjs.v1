@@ -80,7 +80,7 @@ but unlike tapes like [PDP-11 BASIC](/apps/pdp11/tapes/basic/), they don't inclu
 documentation for each test to learn the starting procedure, including any switches that should be set first.
 
 However, PDPjs makes life a bit simpler for you.  As noted for other [DEC PDP-11 Tape Images](/apps/pdp11/tapes/), any
-"Absolute Format" tape can be read directly into RAM using the machine's "Read" button instead of "Load", allowing you
+"Absolute Format" tape can be read directly into RAM using the machine's **Read** button instead of **Load**, allowing you
 to bypass the usual three-step process of loading the [Bootstrap Loader](/apps/pdp11/boot/bootstrap/) in order to load the
 [Absolute Loader](/apps/pdp11/tapes/absloader/) in order to load the desired tape.
 

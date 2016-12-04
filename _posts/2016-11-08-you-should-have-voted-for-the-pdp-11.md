@@ -28,11 +28,11 @@ The latest release, v1.30.3, adds the following features:
 - Support for DEC's [RL11 Disk Controller](/devices/pdp11/rl11/) has been implemented
 
 To test RL11 support below, then select the "XXDP+ Diagnostics" disk from the "Disk Drive Controls",
-click "Load", and wait for the message:
+click **Load**, and wait for the message:
 
 	Mounted disk "XXDP+ Diagnostics" in drive RL0
 
-Then start the machine (click "Run") and make sure the following prompt has been displayed:
+Then start the machine (click **Run**) and make sure the following prompt has been displayed:
 
 	PDP-11 MONITOR V1.0
 	

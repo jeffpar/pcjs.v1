@@ -126,6 +126,6 @@ VGA "Black Book" Test Machine
 
 The [Compaq DeskPro 386](/devices/pcx86/machine/compaq/deskpro386/vga/2048kb/) machine below loads the
 "VGA Tests (Black Book)" disk from the PCjs [Library](/disks/pcx86/library.xml) disk collection into Drive B.
-Click the "Run" button to start the machine.
+Click the **Run** button to start the machine.
 
 {% include machine.html id="deskpro386" %}

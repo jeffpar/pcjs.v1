@@ -26,17 +26,17 @@ and then pre-loads the [Absolute Loader](/apps/pdp11/tapes/absloader/) tape imag
 <device id="pc11" type="pc11" baudReceive="9600" autoMount='{PTR:{path:"/apps/pdp11/tapes/absloader/DEC-11-L2PC-PO.json"}}'>...</device>
 ```
 
-Click "Run" to load the [Absolute Loader](/apps/pdp11/tapes/absloader/).
+Click **Run** to load the [Absolute Loader](/apps/pdp11/tapes/absloader/).
 When the [Bootstrap Loader](/apps/pdp11/boot/bootstrap/) is finished, it will HALT,
 leaving the [Absolute Loader](/apps/pdp11/tapes/absloader/) ready to run immediately after the HALT.
 
 You can then select another tape image in the Absolute Loader format, such as [BASIC (Single User)](/apps/pdp11/tapes/basic/),
-click "Load" and then "Run".
+click **Load** and then **Run**.
 
-If you need to start over, select "Bootstrap Loader (16Kb)" from the list of tapes and click "Read" instead of
-"Load", re-installing the [Bootstrap Loader](/apps/pdp11/boot/bootstrap/) directly into RAM.
+If you need to start over, select "Bootstrap Loader (16Kb)" from the list of tapes and click **Read** instead of
+**Load**, re-installing the [Bootstrap Loader](/apps/pdp11/boot/bootstrap/) directly into RAM.
 
-Alternatively, just press the "Reset" button.  The RAM component was recently updated to restore pre-loaded images whenever
+Alternatively, just press the **Reset** button.  The RAM component was recently updated to restore pre-loaded images whenever
 the entire machine is reset.  You'll still need to manually reload the [Absolute Loader](/apps/pdp11/tapes/absloader/)
 tape image, however.
 

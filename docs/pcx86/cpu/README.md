@@ -33,7 +33,7 @@ Attributes
 	* Provides an easy way to multiply the default CPU speed.
 * *autoStart* (optional)
 	* This can be set to "true" or "false" to explicitly control whether or not the machine starts running automatically.
-	If this parameter is omitted, the machine will autostart only if no Debugger component is included and no "Run" button is defined.
+	If this parameter is omitted, the machine will autostart only if no Debugger component is included and no **Run** button is defined.
 
 Also supports the attributes of *[Component](/docs/pcx86/component/)*. The *id* attribute is optional, since machines
 currently support only one CPU component.
