@@ -134,14 +134,18 @@ CPUStatePDP11.prototype.initProcessor = function()
     this.offRegSrc = 0;
     this.maskRegSrcByte = 0xff;
 
-    if (this.model == PDP11.MODEL_1120) {
+    if (this.model <= PDP11.MODEL_1120) {
         this.decode = PDP11.op1120.bind(this);
         this.checkStackLimit = this.checkStackLimit1120;
         this.offRegSrc = 8;
         this.maskRegSrcByte = -1;
+        this.pswUsed = ~(PDP11.PSW.UNUSED | PDP11.PSW.REGSET | PDP11.PSW.PMODE | PDP11.PSW.CMODE) & 0xffff;
+        this.pswRegSet = 0;
     } else {
         this.decode = PDP11.op1145.bind(this);
         this.checkStackLimit = this.checkStackLimit1145;
+        this.pswUsed = ~(PDP11.PSW.UNUSED | (this.model < PDP11.MODEL_1145? PDP11.PSW.REGSET : 0)) & 0xffff;
+        this.pswRegSet = (this.model >= PDP11.MODEL_1145? PDP11.PSW.REGSET : 0);
     }
 
     this.initRegs();
@@ -728,16 +732,15 @@ CPUStatePDP11.prototype.setNF = function()
  */
 CPUStatePDP11.prototype.getOpcode = function()
 {
-    var pc = this.regsGen[PDP11.REG.PC];
-    this.opLast = pc;
+    var pc = this.opLast = this.regsGen[PDP11.REG.PC];
     /*
      * If PC is unaligned, a BUS trap will be generated, and because it will generate an
      * exception, the next line (the equivalent of advancePC(2)) will not be executed, ensuring that
      * original unaligned PC will be pushed onto the stack by trap().
      */
-    var op = this.readWord(pc);
+    var opCode = this.readWord(pc);
     this.regsGen[PDP11.REG.PC] = (pc + 2) & 0xffff;
-    return op;
+    return opCode;
 };
 
 /**
@@ -1124,9 +1127,9 @@ CPUStatePDP11.prototype.getPSW = function()
 /**
  * setPSW(newPSW)
  *
- * This updates the CPU Processor Status Word. The PSW should generally be written through
+ * This updates the CPU Processor Status Word.  The PSW should generally be written through
  * this routine so that changes can be tracked properly, for example the correct register set,
- * the current memory management mode, etc. An exception is SPL which writes the priority directly.
+ * the current memory management mode, etc.  An exception is SPL which writes the priority directly.
  * Note that that N, Z, V, and C flags are actually stored separately for performance reasons.
  *
  * PSW    15 14 13 12 11 10  9  8  7  6  5  4  3  2  1  0
@@ -1137,11 +1140,12 @@ CPUStatePDP11.prototype.getPSW = function()
  */
 CPUStatePDP11.prototype.setPSW = function(newPSW)
 {
+    newPSW &= this.pswUsed;
     this.flagN = newPSW << 12;
     this.flagZ = (~newPSW) & 4;
     this.flagV = newPSW << 14;
     this.flagC = newPSW << 16;
-    if ((newPSW ^ this.regPSW) & PDP11.PSW.REGSET) {
+    if ((newPSW ^ this.regPSW) & this.pswRegSet) {
         /*
          * Swap register sets
          */
@@ -1500,7 +1504,7 @@ CPUStatePDP11.prototype.trapReturn = function()
      * safer, but if we're going to do pushes in trap(), then I see no reason to avoid doing pops in trapReturn().
      */
     var addr = this.popWord();
-    var newPSW = this.popWord() & ~PDP11.PSW.UNUSED;
+    var newPSW = this.popWord();
     if (this.regPSW & PDP11.PSW.CMODE) {
         /*
          * Keep SPL and allow lower only for modes and register set.
@@ -2594,11 +2598,11 @@ CPUStatePDP11.prototype.branch = function(opCode, condition)
 CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
 {
     /*
-     * The Debugger uses fComplete to determine if the instruction completed (true) or was interrupted
+     * The Debugger uses complete to determine if the instruction completed (true) or was interrupted
      * by a breakpoint or some other exceptional condition (false).  NOTE: this does NOT include JavaScript
      * exceptions, which stepCPU() expects the caller to catch using its own exception handler.
      *
-     * The CPU relies on the use of stopCPU() rather than fComplete, because the CPU never single-steps
+     * The CPU relies on the use of stopCPU() rather than complete, because the CPU never single-steps
      * (ie, nMinCycles is always some large number), whereas the Debugger does.  And conversely, when the
      * Debugger is single-stepping (even when performing multiple single-steps), fRunning is never set,
      * so stopCPU() would have no effect as far as the Debugger is concerned.
@@ -2618,11 +2622,7 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
      * if nDebugState is <= zero).
      */
     var nDebugState = (!nMinCycles)? -1 : (this.flags.starting? 0 : 1);
-
-    /*
-     * We've moved beyond "starting" now and have officially "started".
-     */
-    this.flags.starting = false;
+    this.flags.starting = false;        // we've moved beyond "starting" and have officially "started" now
 
     /*
      * We move the minimum cycle count to nStepCycles (the number of cycles left to step), so that other
@@ -2631,16 +2631,25 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
      */
     this.nBurstCycles = this.nStepCycles = nMinCycles;
 
+    /*
+     * And finally, move the nDebugCheck state to an OPFLAG bit, so that the loop need check only one variable.
+     */
+    this.opFlags = (this.opFlags & ~PDP11.OPFLAG.DEBUGGER) | (nDebugCheck? PDP11.OPFLAG.DEBUGGER : 0);
+
     do {
-        if (DEBUGGER && nDebugCheck) {
-            if (this.dbg.checkInstruction(this.getPC(), nDebugState)) {
-                this.stopCPU();
-                break;
-            }
-            if (!nDebugState) nDebugState++;
-            nDebugCheck++;
-        }
         if (this.opFlags) {
+            /*
+             * NOTE: We still check DEBUGGER to ensure that this code will be compiled out of existence in
+             * non-DEBUGGER builds.
+             */
+            if (DEBUGGER && (this.opFlags & PDP11.OPFLAG.DEBUGGER)) {
+                if (this.dbg.checkInstruction(this.getPC(), nDebugState)) {
+                    this.stopCPU();
+                    break;
+                }
+                if (!++nDebugCheck) this.opFlags &= ~PDP11.OPFLAG.DEBUGGER;
+                if (!nDebugState) nDebugState++;
+            }
             /*
              * If we're in the IRQ or WAIT state, check for any pending interrupts.
              *
@@ -2651,7 +2660,7 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
              */
             if ((this.opFlags & (PDP11.OPFLAG.IRQ_MASK | PDP11.OPFLAG.WAIT)) /* && nDebugState >= 0 */) {
                 if (this.checkInterrupts()) {
-                    if (DEBUGGER && nDebugCheck && this.dbg.checkInstruction(this.getPC(), nDebugState)) {
+                    if ((this.opFlags & PDP11.OPFLAG.DEBUGGER) && this.dbg.checkInstruction(this.getPC(), nDebugState)) {
                         this.stopCPU();
                         break;
                     }
@@ -2674,15 +2683,13 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
              */
             if (this.opFlags & PDP11.OPFLAG.TRAP_MASK) {
                 if (this.checkTraps()) {
-                    if (DEBUGGER && nDebugCheck && this.dbg.checkInstruction(this.getPC(), nDebugState)) {
+                    if ((this.opFlags & PDP11.OPFLAG.DEBUGGER) && this.dbg.checkInstruction(this.getPC(), nDebugState)) {
                         this.stopCPU();
                         break;
                     }
                     if (nDebugState < 0) break;
                 }
             }
-        } else {
-            this.assert(!this.irqNext && !this.regPIR);
         }
 
         /*
@@ -2691,7 +2698,8 @@ CPUStatePDP11.prototype.stepCPU = function(nMinCycles)
          */
         this.opFlags = (this.opFlags & PDP11.OPFLAG.PRESERVE) | (this.regPSW & PDP11.PSW.TF);
 
-        this.decode(this.getOpcode());
+        var opCode = this.getOpcode();
+        this.decode(opCode);
 
     } while (this.nStepCycles > 0);
 

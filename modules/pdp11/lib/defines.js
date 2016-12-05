@@ -124,8 +124,20 @@ var PDP11 = {
 
     /*
      * CPU model numbers (supported)
+     *
+     * The 11/20 includes the 11/10, which is not identified separately because there was
+     * nothing functionally different about it.
+     *
+     * The 11/40 added the MODE bits to the PSW (but only KERNEL=00 and USER=11) and 18-bit
+     * addressing via an MMU; there was still only one register set.
+     *
+     * The 11/45 added REGSET bit to the PSW (along with the second register set), and added
+     * SUPERVISOR=01 to the set of modes.
+     *
+     * The 11/70 added 22-bit addressing and corresponding extensions to the MMU.
      */
     MODEL_1120: 1120,
+    MODEL_1140: 1140,
     MODEL_1145: 1145,
     MODEL_1170: 1170,
 
@@ -169,9 +181,13 @@ var PDP11 = {
         PRI:        0x00E0,     // bits 5-7   (000340)  Priority
         UNUSED:     0x0700,     // bits 8-10  (003400)  UNUSED
         /*
-         * PSW bits above this point are unused on 11/20-class machines
+         * The REGSET bit (and the alternate register set stored in regsAlt) came into existence
+         * with the 11/45; (ie, they were not present on the 11/10, 11/20, or 11/40).
          */
         REGSET:     0x0800,     // bit  11    (004000)  Register Set
+        /*
+         * The MODE bits came into existence with the 11/40 (eg, not present on the 11/10 or 11/20).
+         */
         PMODE:      0x3000,     // bits 12-13 (030000)  Prev Mode (see PDP11.MODE)
         CMODE:      0xC000,     // bits 14-15 (140000)  Curr Mode (see PDP11.MODE)
         SHIFT: {
@@ -266,6 +282,7 @@ var PDP11 = {
         IRQ_DELAY:  0x0001,     // incremented until it becomes IRQ (set by SPL and traps)
         IRQ:        0x0002,     // time to call checkInterrupts()
         IRQ_MASK:   0x0003,
+        DEBUGGER:   0x0004,     // set if the Debugger wants to perform checks
         WAIT:       0x0008,     // WAIT operation in progress
         PRESERVE:   0x000F,     // OPFLAG bits to preserve prior to the next instruction
         TRAP_TF:    0x0010,     // aka PDP11.PSW.TF (WARNING: do not change this bit, or you will likely break opRTI())
@@ -873,8 +890,7 @@ PDP11.ACCESS.UPDATE_WORD = PDP11.ACCESS.WORD | PDP11.ACCESS.UPDATE;     // forme
 PDP11.ACCESS.UPDATE_BYTE = PDP11.ACCESS.BYTE | PDP11.ACCESS.UPDATE;     // formerly MODIFY_BYTE (1 | 2 | 4)
 
 /*
- * PSW arithmetic flags are NOT stored directly into the PSW register; they are maintained across separate
- * flag registers.
+ * PSW arithmetic flags are NOT stored directly into the PSW register; they are maintained across separate flag registers.
  */
 PDP11.PSW.FLAGS         = (PDP11.PSW.NF | PDP11.PSW.ZF | PDP11.PSW.VF | PDP11.PSW.CF);
 

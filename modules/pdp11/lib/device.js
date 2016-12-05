@@ -1078,11 +1078,13 @@ DevicePDP11.prototype.writePSW = function(data, addr)
      *
      *      004174: 052767 000020 173574   BIS   #20,177776
      *
-     * Since that test was written for the PDP-11/20, it's possible that newer machines
-     * have a different behavior, but for now, we assume that all machines allow setting PSW.TF.
+     * Since that test was written for the PDP-11/20, it's possible that newer machines have a different
+     * behavior, but for now, we assume that all machines allow setting PSW.TF.
+     *
+     * Moreover, we have changed setPSW() to disallow the setting of any bits not supported by the current
+     * CPU model, so it seems rather pointless to do any masking of bits here.
      */
-    var maskDisallowed = PDP11.PSW.UNUSED;
-    this.cpu.setPSW((data & ~maskDisallowed) | (this.cpu.getPSW() & maskDisallowed));
+    this.cpu.setPSW(data);
 };
 
 /**
