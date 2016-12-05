@@ -111,13 +111,25 @@ Keyboard8080.WASDCODES[Keys.ASCII.D] = Keys.KEYCODE.RIGHT;
 Keyboard8080.WASDCODES[Keys.ASCII.L] = Keys.KEYCODE.SPACE;
 
 /*
- * Supported configurations
+ * Supported keyboard configurations.
+ *
+ * A word (or two) about SOFTCODES.  Their main purpose is to provide a naming convention for machine-specific
+ * controls, without tying us to any particular keyboard mapping.  They are used in two main ways.
+ *
+ * First, if we have a binding to the machine's "screen", there will, at a minimum, be onkeydown and onkeyup
+ * handlers attached to the screen, and those handlers will need to iterate through the SOFTCODES table, looking
+ * for key codes that we care about and converting them to corresponding soft codes.  Some machines, like
+ * Space Invaders, will then act directly upon the soft code (eg, converting it to a machine-specific status bit).
+ *
+ * Second, a machine may have other bindings (eg, buttons) to one or more of these soft codes, and those bindings
+ * will need to know which key codes they're supposed to generate.  Some machines, like the VT100, will then use
+ * another table (KEYMAP) to convert key codes into a machine-specific "key addresses".
  */
 Keyboard8080.SI1978 = {
     MODEL:          1978.1,
-    KEYMAP: {},
-    ALTCODES: Keyboard8080.WASDCODES,
-    LEDCODES: {},
+    KEYMAP:         {},
+    ALTCODES:       Keyboard8080.WASDCODES,
+    LEDCODES:       {},
     SOFTCODES: {
         '1p':       Keys.KEYCODE.ONE,
         '2p':       Keys.KEYCODE.TWO,
@@ -234,7 +246,7 @@ Keyboard8080.VT100 = {
     ALTCODES: {},
     LEDCODES: {},
     SOFTCODES: {
-        'num-comma':    Keys.KEYCODE.F5,        // since modern keypads don't typically have a comma...
+        'num-comma':    Keys.KEYCODE.F5,// since modern keypads don't typically have a comma...
         'break':        Keys.KEYCODE.F6,
         'line-feed':    Keys.KEYCODE.F7,
         'no-scroll':    Keys.KEYCODE.F8,
@@ -277,7 +289,7 @@ Keyboard8080.VT100 = {
         CLICK:      0x80,
         INIT:       0x00
     },
-    KEYLAST:        0x7F            // special end-of-scan key address (all valid key addresses are < KEYLAST)
+    KEYLAST:        0x7F                // special end-of-scan key address (all valid key addresses are < KEYLAST)
 };
 
 Keyboard8080.VT100.LEDCODES = {
@@ -312,17 +324,17 @@ Keyboard8080.MODELS = {
 Keyboard8080.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
 {
     /*
-     * There's a special binding that the Video component uses ("kbd") to effectively bind its
+     * There's a special binding that the Video component uses ("screen") to effectively bind its
      * screen to the entire keyboard, in Video.powerUp(); ie:
      *
-     *      video.kbd.setBinding("canvas", "kbd", video.canvasScreen);
+     *      video.kbd.setBinding("canvas", "screen", video.canvasScreen);
      * or:
-     *      video.kbd.setBinding("textarea", "kbd", video.textareaScreen);
+     *      video.kbd.setBinding("textarea", "screen", video.textareaScreen);
      *
      * However, it's also possible for the keyboard XML definition to define a control that serves
      * a similar purpose; eg:
      *
-     *      <control type="text" binding="kbd" width="2em">Kbd</control>
+     *      <control type="text" binding="kbd" width="2em">Keyboard</control>
      *
      * The latter is purely experimental, while we work on finding ways to trigger the soft keyboard on
      * certain pesky devices (like the Kindle Fire).  Note that even if you use the latter, the former will
@@ -341,10 +353,11 @@ Keyboard8080.prototype.setBinding = function(sHTMLType, sBinding, control, sValu
 
         switch (sBinding) {
         case "kbd":
+        case "screen":
             /*
              * Recording the binding ID prevents multiple controls (or components) from attempting to erroneously
              * bind a control to the same ID, but in the case of a "dual display" configuration, we actually want
-             * to allow BOTH video components to call setBinding() for "kbd", so that it doesn't matter which
+             * to allow BOTH video components to call setBinding() for "screen", so that it doesn't matter which
              * display the user gives focus to.
              *
              *      this.bindings[id] = control;
@@ -366,14 +379,14 @@ Keyboard8080.prototype.setBinding = function(sHTMLType, sBinding, control, sValu
         default:
             if (this.config.SOFTCODES && this.config.SOFTCODES[sBinding] !== undefined) {
                 this.bindings[id] = control;
-                var fnDown = function(kbd, softCode) {
+                control.onclick = function(kbd, keyCode) {
                     return function onKeyboardBindingDown(event) {
                         /*
                          * iOS Usability Improvement: Calling preventDefault() prevents rapid clicks from
                          * also being (mis)interpreted as a desire to "zoom" in on the machine.
                          */
                         if (event.preventDefault) event.preventDefault();
-                        kbd.onSoftKeyDown(softCode, true);
+                        kbd.onSoftKeyDown(keyCode, true, true);
                         /*
                          * I'm assuming we only need to give focus back on the "up" event...
                          *
@@ -381,26 +394,38 @@ Keyboard8080.prototype.setBinding = function(sHTMLType, sBinding, control, sValu
                          */
                     };
                 }(this, this.config.SOFTCODES[sBinding]);
-                var fnUp = function (kbd, softCode) {
-                    return function onKeyboardBindingUp(event) {
-                        kbd.onSoftKeyDown(softCode, false);
-                        /*
-                         * Give focus back to the machine (since clicking the button takes focus away).
-                         *
-                         *      if (kbd.cmp) kbd.cmp.updateFocus();
-                         *
-                         * iOS Usability Improvement: NOT calling updateFocus() keeps the soft keyboard down
-                         * (assuming it was already down).
-                         */
-                    };
-                }(this, this.config.SOFTCODES[sBinding]);
-                if ('ontouchstart' in window) {
-                    control.ontouchstart = fnDown;
-                    control.ontouchend = fnUp;
-                } else {
-                    control.onmousedown = fnDown;
-                    control.onmouseup = control.onmouseout = fnUp;
-                }
+                //
+                // var fnUp = function (kbd, keyCode) {
+                //     return function onKeyboardBindingUp(event) {
+                //         kbd.onSoftKeyDown(keyCode, false);
+                //         /*
+                //          * Give focus back to the machine (since clicking the button takes focus away).
+                //          *
+                //          *      if (kbd.cmp) kbd.cmp.updateFocus();
+                //          *
+                //          * iOS Usability Improvement: NOT calling updateFocus() keeps the soft keyboard down
+                //          * (assuming it was already down).
+                //          */
+                //     };
+                // }(this, this.config.SOFTCODES[sBinding]);
+                //
+                // if ('ontouchstart' in window) {
+                //     control.ontouchstart = fnDown;
+                //     control.ontouchend = fnUp;
+                // } else {
+                //     control.onmousedown = fnDown;
+                //     control.onmouseup = control.onmouseout = fnUp;
+                // }
+                //
+                // UPDATE: Since the only controls that we explicitly bind to SOFTCODES are buttons, I'm simplifying
+                // the above code with a conventional "onclick" handler.  The only corresponding change I had to make
+                // to the onclick (formerly fnDown) function was to set fAutoRelease on its call to onSoftKeyDown(),
+                // since we're no longer attempting to detect when the control (ie, the button) is actually released.
+                //
+                // This change also resolves a problem I ran into with the Epiphany (WebKit-based) web browser running
+                // on the "elementary" (Ubuntu-based) OS, where clicks on the SET-UP button were ignored; perhaps its
+                // buttons don't generate mouse and/or touch events.  Anyway, an argument for keeping things simple.
+                //
                 return true;
             }
             break;
@@ -848,17 +873,17 @@ Keyboard8080.prototype.onSoftKeyDown = function(softCode, fDown, fAutoRelease)
     var i = this.indexOfSoftKey(softCode);
     if (fDown) {
         // this.println(softCode + " down");
-        fAutoRelease = fAutoRelease || false;
         if (i < 0) {
             this.aKeysActive.push({
                 softCode: softCode,
                 msDown: Date.now(),
-                fAutoRelease: fAutoRelease
+                fAutoRelease: fAutoRelease || false
             });
         } else {
             this.aKeysActive[i].msDown = Date.now();
-            this.aKeysActive[i].fAutoRelease = fAutoRelease;
+            this.aKeysActive[i].fAutoRelease = fAutoRelease || false;
         }
+        if (fAutoRelease) this.checkSoftKeysToRelease();        // prime the pump
     } else if (i >= 0) {
         // this.println(softCode + " up");
         if (!this.aKeysActive[i].fAutoRelease) {
