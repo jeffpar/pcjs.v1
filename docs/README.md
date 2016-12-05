@@ -23,7 +23,13 @@ Instruction documentation is also available:
 
 {% endif %}
 
-Our [Publication Archive](/pubs/) includes these PC-related resources:
+Our [Publication Archive](/pubs/) covers the following platforms:
+
+* [IBM PC and Compatibles](/pubs/pc/)
+* [Digital Equipment Corporation (DEC)](/pubs/dec/)
+* [Ohio Scientific (specifically, the 6502-based Challenger 1P)](/pubs/c1p/)
+
+For example, the [IBM PC](/pubs/pc/) section of the [Publication Archive](/pubs/) includes:
 
 * [CPU Documents](/pubs/pc/reference/intel/)
 * [Datasheets](/pubs/pc/datasheets/)
@@ -31,12 +37,6 @@ Our [Publication Archive](/pubs/) includes these PC-related resources:
 * [Programming Guides](/pubs/pc/programming/)
 * [Reference Manuals](/pubs/pc/reference/)
 * [Software User and Development Guides](/pubs/pc/software/) (eg, [DOS](/pubs/pc/software/dos/), [OS/2](/pubs/pc/software/os2/), [Windows](/pubs/pc/software/windows/))
-
-And publications related to Ohio Scientific's 6502-based [Challenger 1P](/devices/c1p/machine/):
-
-* [Datasheets](/pubs/c1p/datasheets/)
-* [Programming Guides/Samples](/pubs/c1p/programming/)
-* [Reference Manuals](/pubs/c1p/techref/)
 
 [<img src="http://archive.pcjs.org/pubs/pc/datasheets/thumbs/8088-CPU.jpg" width="200" height="260" alt= "8088 CPU"/>](/pubs/pc/datasheets/)
 [<img src="http://archive.pcjs.org/pubs/pc/magazines/byte/BYTE-1975-11/thumbs/BYTE-1975-11 1.jpeg" width="200" height="260" alt= "Byte Magazine"/>](/pubs/pc/magazines/byte/)

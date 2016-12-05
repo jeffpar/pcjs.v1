@@ -7,7 +7,7 @@ permalink: /pubs/
 Publication Archive
 ---
 
-[PC Publications](/pubs/pc/):
+[IBM PC and Compatibles](/pubs/pc/)
 
 * [CPU Documents](/pubs/pc/reference/intel/)
 * [Datasheets](/pubs/pc/datasheets/)
@@ -16,12 +16,12 @@ Publication Archive
 * [Reference Manuals](/pubs/pc/reference/)
 * [Software User and Development Guides](/pubs/pc/software/) (eg, [DOS](/pubs/pc/software/dos/), [OS/2](/pubs/pc/software/os2/), [Windows](/pubs/pc/software/windows/))
 
-[Digital Equipment Corporation (DEC) Publications](/pubs/dec/):
+[Digital Equipment Corporation (DEC)](/pubs/dec/)
 
 * [PDP-11](/pubs/dec/pdp11/)
 * [VT100](/pubs/dec/vt100/)
 
-Ohio Scientific's 6502-based [Challenger 1P Publications](/pubs/c1p/):
+[Ohio Scientific's 6502-based Challenger 1P](/pubs/c1p/)
 
 * [Datasheets](/pubs/c1p/datasheets/)
 * [Programming Guides/Samples](/pubs/c1p/programming/)
