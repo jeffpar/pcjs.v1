@@ -2206,8 +2206,7 @@ if (DEBUGGER) {
 
             /*
              * If getOperand() returns an Array rather than a string, then the first element is the original
-             * operand, and the second element contains an alternate representation of the operand (eg, target
-             * address, memory contents, etc).
+             * operand, and the second element contains additional information (eg, the target) of the operand.
              */
             if (typeof sOperand != "string") {
                 sTarget = sOperand[1];
@@ -2239,7 +2238,10 @@ if (DEBUGGER) {
                 var nCycles = this.cpu.getCycles();
                 sLine += "cycles=" + nCycles.toString() + " cs=" + str.toHex(this.cpu.nChecksum);
             }
-            if (sTarget) sLine += " @" + sTarget;
+            if (sTarget) {
+                if (sLine.slice(-1) != ';') sLine += ' ';
+                sLine += sTarget;
+            }
         }
         return sLine;
     };
@@ -2248,11 +2250,8 @@ if (DEBUGGER) {
      * getOperand(opCode, opType, dbgAddr)
      *
      * If getOperand() returns an Array rather than a string, then the first element is the original
-     * operand, and the second element is a comment containing an alternate representation of the operand.
-     *
-     * TODO: For PC-relative addresses, we now return the effective address directly, rather than as the
-     * second element of an Array;  however, I still envision using Array return values to include current
-     * memory operands, so support for such values is being left in place.
+     * operand, and the second element is a comment containing additional information (eg, the target)
+     * of the operand.
      *
      * @this {DebuggerPDP11}
      * @param {number} opCode
@@ -2295,6 +2294,7 @@ if (DEBUGGER) {
              * Isolate all OP_SRC or OP_DST bits from opcode in the opMode variable.
              */
             var opMode = opCode & opType;
+
             /*
              * Convert OP_SRC bits into OP_DST bits, since they use the same format.
              */
@@ -2304,18 +2304,23 @@ if (DEBUGGER) {
             }
             if (opType & DebuggerPDP11.OP_DST) {
                 var wIndex;
+                var sTarget = null;
                 var reg = opMode & DebuggerPDP11.OP_DSTREG;
                 /*
                  * Note that opcodes that specify only REG bits in the opType mask (ie, no MOD bits)
                  * will automatically default to OPMODE_REG below.
                  */
                 switch((opMode & DebuggerPDP11.OP_DSTMODE)) {
+
                 case PDP11.OPMODE.REG:                  // 0x0: REGISTER
                     sOperand = this.getRegName(reg);
                     break;
+
                 case PDP11.OPMODE.REGD:                 // 0x1: REGISTER DEFERRED
                     sOperand = '@' + this.getRegName(reg);
+                    sTarget = this.getTarget(this.cpu.regsGen[reg]);
                     break;
+
                 case PDP11.OPMODE.POSTINC:              // 0x2: POST-INCREMENT
                     if (reg < 7) {
                         sOperand = '(' + this.getRegName(reg) + ")+";
@@ -2327,6 +2332,7 @@ if (DEBUGGER) {
                         sOperand = '#' + this.toStrBase(wIndex, 0, true);
                     }
                     break;
+
                 case PDP11.OPMODE.POSTINCD:             // 0x3: POST-INCREMENT DEFERRED
                     if (reg < 7) {
                         sOperand = "@(" + this.getRegName(reg) + ")+";
@@ -2336,14 +2342,18 @@ if (DEBUGGER) {
                          */
                         wIndex = this.getWord(dbgAddr, 2);
                         sOperand = "@#" + this.toStrBase(wIndex, 0, true);
+                        sTarget = this.getTarget(wIndex);
                     }
                     break;
+
                 case PDP11.OPMODE.PREDEC:               // 0x4: PRE-DECREMENT
                     sOperand = "-(" + this.getRegName(reg) + ")";
                     break;
+
                 case PDP11.OPMODE.PREDECD:              // 0x5: PRE-DECREMENT DEFERRED
                     sOperand = "@-(" + this.getRegName(reg) + ")";
                     break;
+
                 case PDP11.OPMODE.INDEX:                // 0x6: INDEX
                     wIndex = this.getWord(dbgAddr, 2);
                     sOperand = this.toStrBase(wIndex, 0, true) + '(' + this.getRegName(reg) + ')';
@@ -2362,9 +2372,11 @@ if (DEBUGGER) {
                          *
                          *      sOperand = [sOperand, this.toStrBase((wIndex + dbgAddr.addr) & 0xffff)];
                          */
-                        sOperand = this.toStrBase((wIndex + dbgAddr.addr) & 0xffff);
+                        sOperand = this.toStrBase(wIndex = (wIndex + dbgAddr.addr) & 0xffff);
+                        sTarget = this.getTarget(wIndex);
                     }
                     break;
+
                 case PDP11.OPMODE.INDEXD:               // 0x7: INDEX DEFERRED
                     wIndex = this.getWord(dbgAddr, 2);
                     sOperand = '@' + this.toStrBase(wIndex) + '(' + this.getRegName(reg) + ')';
@@ -2375,19 +2387,41 @@ if (DEBUGGER) {
                          *
                          *      sOperand = [sOperand, this.toStrBase((wIndex + dbgAddr.addr) & 0xffff)];
                          */
-                        sOperand = '@' + this.toStrBase((wIndex + dbgAddr.addr) & 0xffff);
+                        sOperand = '@' + this.toStrBase(wIndex = (wIndex + dbgAddr.addr) & 0xffff);
+                        sTarget = this.getTarget(this.cpu.getWordSafe(wIndex));
                     }
                     break;
+
                 default:
                     this.assert(false);
                     break;
                 }
+
+                if (sTarget) sOperand = [sOperand, sTarget];
             }
             else {
                 this.assert(false);
             }
         }
         return sOperand;
+    };
+
+    /**
+     * getTarget(addr)
+     *
+     * @this {DebuggerPDP11}
+     * @param {number} addr
+     * @return {string|null}
+     */
+    DebuggerPDP11.prototype.getTarget = function(addr)
+    {
+        var sTarget = null;
+        var a = this.cpu.getAddrInfo(addr);
+        var addrPhysical = a[0];
+        if (addrPhysical >= this.cpu.addrIOPage && addrPhysical < this.bus.addrIOPage) {
+            addrPhysical = (addrPhysical - this.cpu.addrIOPage) + this.bus.addrIOPage;
+        }
+        return this.bus.getAddrInfo(addrPhysical);
     };
 
     /**
