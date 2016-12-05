@@ -372,7 +372,7 @@ Keyboard8080.prototype.setBinding = function(sHTMLType, sBinding, control, sValu
                          * iOS Usability Improvement: Calling preventDefault() prevents rapid clicks from
                          * also being (mis)interpreted as a desire to "zoom" in on the machine.
                          */
-                        event.preventDefault();
+                        if (event.preventDefault) event.preventDefault();
                         kbd.onSoftKeyDown(softCode, true);
                         /*
                          * I'm assuming we only need to give focus back on the "up" event...
@@ -738,9 +738,14 @@ Keyboard8080.prototype.onKeyDown = function(event, fDown)
              * an important clue regarding the CAPS-LOCK state.  For all other keys, we call preventDefault(),
              * which normally "suppresses" the keyPress event, as well as other unwanted browser behaviors
              * (eg, the SPACE key, which browsers interpret as a desire to scroll the entire web page down).
+             *
+             * And, even if the key IS a letter, we STILL want to call preventDefault() if a CTRL key is down,
+             * so that Windows-based browsers (eg, Edge) don't interfere with their stupid CTRL-based shortcuts. ;-)
+             *
+             * NOTE: We COULD check event.ctrlKey too, but it's six of one, half a dozen of another.
              */
-            if (!(softCode >= Keys.ASCII.A && softCode <= Keys.ASCII.Z)) {
-                event.preventDefault();
+            if (!(softCode >= Keys.ASCII.A && softCode <= Keys.ASCII.Z) || (this.bitsState | Keyboard8080.STATE.CTRLS)) {
+                if (event.preventDefault) event.preventDefault();
             }
         }
     }
