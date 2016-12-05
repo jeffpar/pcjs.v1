@@ -2961,7 +2961,7 @@ Video.prototype.initBus = function(cmp, bus, cpu, dbg)
         for (var s in this.bindings) {
             if (s.indexOf("lock") > 0) this.kbd.setBinding("led", s, this.bindings[s]);
         }
-        this.kbd.setBinding(this.textareaScreen? "textarea" : "canvas", "kbd", this.inputScreen);
+        this.kbd.setBinding(this.textareaScreen? "textarea" : "canvas", "screen", this.inputScreen);
     }
 
     this.bEGASwitches = 0x09;   // our default "switches" setting (see aEGAMonitorSwitches)

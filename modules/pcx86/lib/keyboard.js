@@ -951,17 +951,17 @@ Keyboard.LIMIT = {
 Keyboard.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
 {
     /*
-     * There's a special binding that the Video component uses ("kbd") to effectively bind its
+     * There's a special binding that the Video component uses ("screen") to effectively bind its
      * screen to the entire keyboard, in Video.powerUp(); ie:
      *
-     *      video.kbd.setBinding("canvas", "kbd", video.canvasScreen);
+     *      video.kbd.setBinding("canvas", "screen", video.canvasScreen);
      * or:
-     *      video.kbd.setBinding("textarea", "kbd", video.textareaScreen);
+     *      video.kbd.setBinding("textarea", "screen", video.textareaScreen);
      *
      * However, it's also possible for the keyboard XML definition to define a control that serves
      * a similar purpose; eg:
      *
-     *      <control type="text" binding="kbd" width="2em">Kbd</control>
+     *      <control type="text" binding="kbd" width="2em">Keyboard</control>
      *
      * The latter is purely experimental, while we work on finding ways to trigger the soft keyboard on
      * certain pesky devices (like the Kindle Fire).  Note that even if you use the latter, the former will
@@ -974,10 +974,11 @@ Keyboard.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
     if (this.bindings[id] === undefined) {
         switch (sBinding) {
         case "kbd":
+        case "screen":
             /*
              * Recording the binding ID prevents multiple controls (or components) from attempting to erroneously
              * bind a control to the same ID, but in the case of a "dual display" configuration, we actually want
-             * to allow BOTH video components to call setBinding() for "kbd", so that it doesn't matter which
+             * to allow BOTH video components to call setBinding() for "screen", so that it doesn't matter which
              * display the user gives focus to.
              *
              *      this.bindings[id] = control;
