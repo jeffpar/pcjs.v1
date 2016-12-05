@@ -180,6 +180,20 @@ if (DEBUGGER) {
     };
 
     /**
+     * getSymbolValue(sSymbol)
+     *
+     * NOTE: This must be implemented by the individual debuggers.
+     *
+     * @this {Debugger}
+     * @param {string} sSymbol
+     * @return {number|undefined|null}
+     */
+    Debugger.prototype.getSymbolValue = function(sSymbol)
+    {
+        return undefined;
+    };
+
+    /**
      * parseAddrReference(s, sAddr)
      *
      * Returns the given string with the given address reference replaced with the contents of that address.
@@ -577,7 +591,12 @@ if (DEBUGGER) {
                 value = this.getRegValue(iReg);
             } else {
                 value = this.getVariable(sValue);
-                if (value == null) value = str.parseInt(sValue, this.nBase);
+                if (value == null) {
+                    value = this.getSymbolValue(sValue);
+                    if (value == null) {
+                        value = str.parseInt(sValue, this.nBase);
+                    }
+                }
             }
             if (value == null && !fQuiet) this.println("invalid " + (sName? sName : "value") + ": " + sValue);
         } else {

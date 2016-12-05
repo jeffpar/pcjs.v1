@@ -1251,6 +1251,20 @@ if (DEBUGGER) {
     };
 
     /**
+     * getSymbolValue(sSymbol)
+     *
+     * NOTE: At this time, the only symbols we support are those IOPAGE symbols that the Bus component knows about.
+     *
+     * @this {DebuggerPDP11}
+     * @param {string} sSymbol
+     * @return {number|undefined|null}
+     */
+    DebuggerPDP11.prototype.getSymbolValue = function(sSymbol)
+    {
+        return this.bus.getAddrByName(sSymbol);
+    };
+
+    /**
      * replaceRegs(s)
      *
      * TODO: Implement or eliminate.
