@@ -177,7 +177,7 @@ BusPDP11.IOHANDLER = {
     WRITE_BYTE:         1,
     READ_WORD:          2,
     WRITE_WORD:         3,
-    NAME:               4,
+    REG_NAME:           4,
     MSG_CATEGORY:       5,
     DBG_BREAK:          6
 };
@@ -235,6 +235,10 @@ BusPDP11.IOController = {
         var bus = this.controller;
         var afn = bus.aIOHandlers[off];
 
+        if (DEBUGGER && this.dbg) {
+            this.dbg.checkMemoryRead(addr, 1);
+        }
+
         /*
          * Since addr is primarily used to advise an I/O handler of the target IOPAGE address, and since we don't want
          * our handlers to worry about the current IOPAGE location, we truncate addr to 16 bits (the IOPAGE's lowest location).
@@ -268,7 +272,7 @@ BusPDP11.IOController = {
         }
         if (b >= 0) {
             if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS | afn[BusPDP11.IOHANDLER.MSG_CATEGORY])) {
-                this.dbg.printMessage(afn[BusPDP11.IOHANDLER.NAME] + ".readByte(" + this.dbg.toStrBase(addr) + "): " + this.dbg.toStrBase(b), true, !bus.nDisableFaults);
+                this.dbg.printMessage(afn[BusPDP11.IOHANDLER.REG_NAME] + ".readByte(" + this.dbg.toStrBase(addr) + "): " + this.dbg.toStrBase(b), true, !bus.nDisableFaults);
             }
             return b;
         }
@@ -294,6 +298,10 @@ BusPDP11.IOController = {
         var fWrite = false;
         var bus = this.controller;
         var afn = bus.aIOHandlers[off];
+
+        if (DEBUGGER && this.dbg) {
+            this.dbg.checkMemoryWrite(addr, 1);
+        }
 
         /*
          * Since addr is primarily used to advise an I/O handler of the target IOPAGE address, and since we don't want
@@ -349,7 +357,7 @@ BusPDP11.IOController = {
         }
         if (fWrite) {
             if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS | afn[BusPDP11.IOHANDLER.MSG_CATEGORY])) {
-                this.dbg.printMessage(afn[BusPDP11.IOHANDLER.NAME] + ".writeByte(" + this.dbg.toStrBase(addr) + "," + this.dbg.toStrBase(b) + ")", true, !bus.nDisableFaults);
+                this.dbg.printMessage(afn[BusPDP11.IOHANDLER.REG_NAME] + ".writeByte(" + this.dbg.toStrBase(addr) + "," + this.dbg.toStrBase(b) + ")", true, !bus.nDisableFaults);
             }
             return;
         }
@@ -373,6 +381,10 @@ BusPDP11.IOController = {
         var bus = this.controller;
         var afn = bus.aIOHandlers[off];
 
+        if (DEBUGGER && this.dbg) {
+            this.dbg.checkMemoryRead(addr, 2);
+        }
+
         /*
          * Since addr is primarily used to advise an I/O handler of the target IOPAGE address, and since we don't want
          * our handlers to worry about the current IOPAGE location, we truncate addr to 16 bits (the IOPAGE's lowest location).
@@ -388,7 +400,7 @@ BusPDP11.IOController = {
         }
         if (w >= 0) {
             if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS | afn[BusPDP11.IOHANDLER.MSG_CATEGORY])) {
-                this.dbg.printMessage(afn[BusPDP11.IOHANDLER.NAME] + ".readWord(" + this.dbg.toStrBase(addr) + "): " + this.dbg.toStrBase(w), true, !bus.nDisableFaults);
+                this.dbg.printMessage(afn[BusPDP11.IOHANDLER.REG_NAME] + ".readWord(" + this.dbg.toStrBase(addr) + "): " + this.dbg.toStrBase(w), true, !bus.nDisableFaults);
             }
             return w;
         }
@@ -414,6 +426,10 @@ BusPDP11.IOController = {
         var bus = this.controller;
         var afn = bus.aIOHandlers[off];
 
+        if (DEBUGGER && this.dbg) {
+            this.dbg.checkMemoryWrite(addr, 2);
+        }
+
         /*
          * Since addr is primarily used to advise an I/O handler of the target IOPAGE address, and since we don't want
          * our handlers to worry about the current IOPAGE location, we truncate addr to 16 bits (the IOPAGE's lowest location).
@@ -432,7 +448,7 @@ BusPDP11.IOController = {
         }
         if (fWrite) {
             if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP11.BUS | afn[BusPDP11.IOHANDLER.MSG_CATEGORY])) {
-                this.dbg.printMessage(afn[BusPDP11.IOHANDLER.NAME] + ".writeWord(" + this.dbg.toStrBase(addr) + "," + this.dbg.toStrBase(w) + ")", true, !bus.nDisableFaults);
+                this.dbg.printMessage(afn[BusPDP11.IOHANDLER.REG_NAME] + ".writeWord(" + this.dbg.toStrBase(addr) + "," + this.dbg.toStrBase(w) + ")", true, !bus.nDisableFaults);
             }
             return;
         }
@@ -467,11 +483,14 @@ BusPDP11.prototype.initMemory = function()
     for (var iBlock = 0; iBlock < this.nBlockTotal; iBlock++) {
         this.aBusBlocks[iBlock] = this.aMemBlocks[iBlock] = block;
     }
+    /*
+     * NOTE: Don't confuse the Bus addrIOPage with the CPU's addrIOPage; ours is fixed,
+     * based on the machine's Bus width, whereas the CPU's varies according to the MMU setting.
+     */
+    this.addrIOPage = this.addrTotal - BusPDP11.IOPAGE_LENGTH;
+    this.addMemory(this.addrIOPage, BusPDP11.IOPAGE_LENGTH, MemoryPDP11.TYPE.CONTROLLER, this);
 
-    var addrIOPage = this.addrTotal - BusPDP11.IOPAGE_LENGTH;
-    this.addMemory(addrIOPage, BusPDP11.IOPAGE_LENGTH, MemoryPDP11.TYPE.CONTROLLER, this);
-
-    this.iBlockIOPageBus = (addrIOPage & this.nBusMask) >>> this.nBlockShift;
+    this.iBlockIOPageBus = (this.addrIOPage & this.nBusMask) >>> this.nBlockShift;
     this.iBlockIOPageMem = this.iBlockIOPageBus;
 
     this.nIOPageRange = 0;
@@ -1224,13 +1243,16 @@ BusPDP11.prototype.getMemoryLimit = function(type)
  */
 BusPDP11.prototype.addIOHandlers = function(start, end, fnReadByte, fnWriteByte, fnReadWord, fnWriteWord, message, sName)
 {
+    var index = (start == end? -1 : 0);
     for (var addr = start; addr <= end; addr += 2) {
         var off = addr & BusPDP11.IOPAGE_MASK;
         if (this.aIOHandlers[off] !== undefined) {
             Component.warning("I/O address already registered: " + str.toHexLong(addr));
             return false;
         }
-        this.aIOHandlers[off] = [fnReadByte, fnWriteByte, fnReadWord, fnWriteWord, sName || "unknown", message || MessagesPDP11.BUS, false];
+        var s = sName || "unknown";
+        if (s && index >= 0) s += index++;
+        this.aIOHandlers[off] = [fnReadByte, fnWriteByte, fnReadWord, fnWriteWord, s, message || MessagesPDP11.BUS, false];
         if (MAXDEBUG) this.log("addIOHandlers(" + str.toHexLong(addr) + ")");
     }
     return true;
@@ -1296,6 +1318,48 @@ BusPDP11.prototype.addIOTable = function(component, table, offReg)
         }
     }
     return true;
+};
+
+/**
+ * getAddrInfo(addr)
+ *
+ * Determine if the physical address is a known IOPAGE address, and return information about it (ie, the name).
+ *
+ * @this {BusPDP11}
+ * @param {number} addr (physical)
+ * @return {string|null}
+ */
+BusPDP11.prototype.getAddrInfo = function(addr)
+{
+    var sName = null;
+    if (addr >= this.addrIOPage) {
+        var off = addr & BusPDP11.IOPAGE_MASK;
+        var afn = this.aIOHandlers[off];
+        if (afn) sName = afn[BusPDP11.IOHANDLER.REG_NAME];
+    }
+    return sName;
+};
+
+/**
+ * getAddrByName(sName)
+ *
+ * Determine if the specified name has a corresponding physical address.
+ *
+ * @this {BusPDP11}
+ * @param {string} sName
+ * @return {number|null}
+ */
+BusPDP11.prototype.getAddrByName = function(sName)
+{
+    sName = sName.toUpperCase();
+    for (var i in this.aIOHandlers) {
+        var off = +i;
+        var afn = this.aIOHandlers[off];
+        if (afn[BusPDP11.IOHANDLER.REG_NAME] == sName) {
+            return off +  this.addrIOPage;
+        }
+    }
+    return null;
 };
 
 /**

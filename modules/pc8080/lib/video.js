@@ -421,7 +421,7 @@ Video8080.prototype.initBus = function(cmp, bus, cpu, dbg)
             this.kbd.setBinding("led", s, this.ledBindings[s]);
         }
         if (this.canvasScreen) {
-            this.kbd.setBinding(this.textareaScreen? "textarea" : "canvas", "kbd", this.inputScreen);
+            this.kbd.setBinding(this.textareaScreen? "textarea" : "canvas", "screen", this.inputScreen);
         }
     }
 
