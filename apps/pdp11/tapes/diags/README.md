@@ -43,7 +43,7 @@ Running Paper Tape Diagnostics
 ### Tests 1-12
 
 Instructions for running "TEST 1 - BRANCH" through "TEST 12 - JUMP" come from the
-[MAINDEC USER REFERENCE MANUAL, OCTOBER 1973](http://archive.pcjs.org/pubs/dec/pdp11/diags/MAINDEC-11-DZQAB-B-D_User_Reference_Manual_Oct73.pdf),
+[MAINDEC-11-DZQAB MAINDEC USER REFERENCE MANUAL (Oct 1973)](http://archive.pcjs.org/pubs/dec/pdp11/diags/MAINDEC-11-DZQAB-B-D_User_Reference_Manual_Oct73.pdf),
 p. 19:
 
 	MAINDEC-11-D0AA to D0LA (NEW NUMBER - DZKAA to DZKAL)
@@ -335,7 +335,7 @@ I disassembled the code responsible for that failure:
 
 I wasn't able to locate a source code listing for this particular (1978) version of the 11/70 CPU Instruction Exerciser,
 but I did find another useful document,
-[11/40 and 11/45 INSTRUCTION EXERCISER (Sep, 1974)](http://archive.pcjs.org/pubs/dec/pdp11/diags/MAINDEC-11-DCQKC-D-D_1140_1145_INSTRUCTION_EXERCISER_Sep74.pdf),
+[MAINDEC-11-DCQKC 11/40 and 11/45 INSTRUCTION EXERCISER (Sep 1974)](http://archive.pcjs.org/pubs/dec/pdp11/diags/MAINDEC-11-DCQKC-D-D_1140_1145_INSTRUCTION_EXERCISER_Sep74.pdf),
 where I discovered a matching test sequence on p. 86.
 
 Here's an excerpt:
