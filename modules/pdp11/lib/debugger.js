@@ -895,7 +895,7 @@ if (DEBUGGER) {
      */
     DebuggerPDP11.prototype.toStrAddr = function(dbgAddr)
     {
-        return this.toStrOffset(dbgAddr.addr);
+        return (dbgAddr.fPhysical? '%' : '') + this.toStrOffset(dbgAddr.addr);
     };
 
     /**
@@ -943,8 +943,8 @@ if (DEBUGGER) {
             n = 1;
         }
 
-        this.println("blockid   physical   blockaddr   used    size    type");
-        this.println("--------  ---------  ----------  ------  ------  ----");
+        this.println("blockid   physical   blockaddr  used    size    type");
+        this.println("--------  ---------  ---------  ------  ------  ----");
 
         var typePrev = -1, cPrev = 0;
         while (n--) {
@@ -955,7 +955,7 @@ if (DEBUGGER) {
                 typePrev = block.type;
                 var sType = MemoryPDP11.TYPE_NAMES[typePrev];
                 if (block) {
-                    this.println(str.toHex(block.id, 8) + "  %" + str.toHex(i << this.bus.nBlockShift, 8) + "  %%" + str.toHex(block.addr, 8) + "  " + str.toHexWord(block.used) + "  " + str.toHexWord(block.size) + "  " + sType);
+                    this.println(str.toHex(block.id, 8) + "  %" + str.toHex(i << this.bus.nBlockShift, 8) + "  %" + str.toHex(block.addr, 8) + "  " + str.toHexWord(block.used) + "  " + str.toHexWord(block.size) + "  " + sType);
                 }
                 if (typePrev != MemoryPDP11.TYPE.NONE) typePrev = -1;
                 cPrev = 0;
@@ -1731,12 +1731,40 @@ if (DEBUGGER) {
         var cpu = this.cpu;
 
         /*
-         * Since opHalt() will rewind the PC on a HALT, purely for our debugging benefit, we must compensate
-         * for that here by skipping over the HALT if/when the machine starts up again.
+         * If opHalt() calls our stopInstruction() function, it will effectively rewind the PC back to the HALT,
+         * purely for our debugging benefit, so we must compensate for that here by advancing the PC past the HALT
+         * when the machine starts up again.
          */
         if (!nState) {
             opCode = this.cpu.getWordSafe(addr);
-            if (opCode == PDP11.OPCODE.HALT) {
+            /*
+             * We have to be careful about this HALT-skipping code, because as fate would have it, I inadvertently
+             * stopped the following diagnostic with a breakpoint *on* a HALT instruction:
+             *
+             *      .R EKBEE1
+             *      EKBEE1.BIC
+             *
+             *      CEKBEE0 11/70 MEM MGMT
+             *
+             *      CPU UNDER TEST FOUND TO BE A KB11-CM
+             *      bp 033330 hit
+             *      stopped (28339757 instructions, 123994176 cycles, 19177 ms, 6465775 hz)
+             *      R0=140000 R1=033330 R2=100143 R3=133260 R4=000000 R5=177700
+             *      SP=000600 PC=033330 PS=140000 IR=000000 SL=000377 T0 N0 Z0 V0 C0
+             *      033330: 000000                 HALT
+             *
+             * Since we haven't executed the HALT yet, it would be wrong (and would cause a diagnostic failure) to
+             * skip over it.  In this particular case, the PDR for the address of the HALT instruction was invalid,
+             * so the HALT gets fetched but not executed.
+             *
+             * My first thought was that maybe we need to probe the address more thoroughly (getWordSafe() does
+             * not), but it should be sufficient to simply confirm that the PC of the last opcode executed matches
+             * the addr of this HALT.
+             *
+             * Yes, I could save myself this grief by eliminating these PC hacks, both here and in stopInstruction(),
+             * but I still think it's a useful debugging aid.
+             */
+            if (opCode == PDP11.OPCODE.HALT && this.cpu.getLastPC() == addr) {
                 addr = this.cpu.advancePC(2);
             }
         }
@@ -1873,19 +1901,29 @@ if (DEBUGGER) {
      */
     DebuggerPDP11.prototype.clearBreakpoints = function()
     {
-        var i, dbgAddr;
+        var i, dbgAddr, addr;
         this.aBreakExec = ["bp"];
         if (this.aBreakRead !== undefined) {
             for (i = 1; i < this.aBreakRead.length; i++) {
                 dbgAddr = this.aBreakRead[i];
-                this.bus.removeMemBreak(this.getAddr(dbgAddr), false);
+                addr = this.getAddr(dbgAddr);
+                if (!dbgAddr.fPhysical) {
+                    this.cpu.removeMemBreak(addr, false);
+                } else {
+                    this.bus.removeMemBreak(addr, false);
+                }
             }
         }
         this.aBreakRead = ["br"];
         if (this.aBreakWrite !== undefined) {
             for (i = 1; i < this.aBreakWrite.length; i++) {
                 dbgAddr = this.aBreakWrite[i];
-                this.bus.removeMemBreak(this.getAddr(dbgAddr), true);
+                addr = this.getAddr(dbgAddr);
+                if (!dbgAddr.fPhysical) {
+                    this.cpu.removeMemBreak(addr, true);
+                } else {
+                    this.bus.removeMemBreak(addr, true);
+                }
             }
         }
         this.aBreakWrite = ["bw"];
@@ -1947,7 +1985,17 @@ if (DEBUGGER) {
                 this.println("invalid address: " + this.toStrAddr(dbgAddr));
                 fSuccess = false;
             } else {
-                this.bus.addMemBreak(addr, aBreak == this.aBreakWrite);
+                var fWrite = (aBreak == this.aBreakWrite);
+                /*
+                 * We automatically promote any read/write breakpoint address to fPhysical if it's
+                 * outside the 16-bit virtual address range.
+                 */
+                if (addr > 0xffff) dbgAddr.fPhysical = true;
+                if (!dbgAddr.fPhysical) {
+                    this.cpu.addMemBreak(addr, fWrite);
+                } else {
+                    this.bus.addMemBreak(addr, fWrite);
+                }
             }
         }
 
@@ -1993,7 +2041,12 @@ if (DEBUGGER) {
                         }
                         aBreak.splice(i, 1);
                         if (aBreak != this.aBreakExec) {
-                            this.bus.removeMemBreak(addr, aBreak == this.aBreakWrite);
+                            var fWrite = (aBreak == this.aBreakWrite);
+                            if (!dbgAddrBreak.fPhysical) {
+                                this.cpu.removeMemBreak(addr, fWrite);
+                            } else {
+                                this.bus.removeMemBreak(addr, fWrite);
+                            }
                         }
                         /*
                          * We'll mirror the logic in addBreakpoint() and leave the history buffer alone if this
