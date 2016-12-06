@@ -7,7 +7,7 @@ permalink: /pubs/
 Publication Archive
 ---
 
-[IBM PC and Compatibles](/pubs/pc/)
+[IBM PCs and Compatibles](/pubs/pc/)
 
 * [CPU Documents](/pubs/pc/reference/intel/)
 * [Datasheets](/pubs/pc/datasheets/)
