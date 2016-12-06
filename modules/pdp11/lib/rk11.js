@@ -572,7 +572,7 @@ RK11.prototype.bootSelectedDisk = function()
      * a READY state is assured, and the readData() call shouldn't do anything to change that.
      */
     this.cpu.setReset(0, true);
-    var err = this.readData(drive, 0, 0, 0, 512, 0);
+    var err = this.readData(drive, 0, 0, 0, 512, 0x0000, 2);
     if (err) {
         this.notice("Unable to read the boot sector (" + err + ")");
     }
@@ -954,7 +954,7 @@ RK11.prototype.processCommand = function()
     var fnReadWrite, sFunc = "";
     var iDrive = (this.regRKDA & PDP11.RK11.RKDA.DS) >> PDP11.RK11.RKDA.SHIFT.DS;
     var drive = this.aDrives[iDrive];
-    var iCylinder, iHead, iSector, nWords, addr;
+    var iCylinder, iHead, iSector, nWords, addr, inc;
 
     this.regRKCS &= ~PDP11.RK11.RKCS.CRDY;
     var func = (this.regRKCS & PDP11.RK11.RKCS.FUNC) >> PDP11.RK11.RKCS.SHIFT.FUNC;
@@ -999,8 +999,9 @@ RK11.prototype.processCommand = function()
         iSector = this.regRKDA & PDP11.RK11.RKDA.SA;
         nWords = (0x10000 - this.regRKWC) & 0xffff;
         addr = (((this.regRKCS & PDP11.RK11.RKCS.MEX)) << (16 - PDP11.RK11.RKCS.SHIFT.MEX)) | this.regRKBA;
+        inc = (this.regRKCS & PDP11.RK11.RKCS.IBA)? 0 : 2;
 
-        if (this.messageEnabled()) this.printMessage(this.type + ": " + sFunc + "(" + iCylinder + ":" + iHead + ":" + iSector + ") @" + str.toOct(addr) + "-" + str.toOct(addr + ((nWords - 1) << 1)), true);
+        if (this.messageEnabled()) this.printMessage(this.type + ": " + sFunc + "(" + iCylinder + ":" + iHead + ":" + iSector + ") " + str.toOct(addr) + "-" + str.toOct(addr + ((nWords - 1) << 1)), true, true);
 
         if (iCylinder >= drive.nCylinders) {
             this.regRKER |= PDP11.RK11.RKER.DRE | PDP11.RK11.RKER.NXC;
@@ -1013,7 +1014,7 @@ RK11.prototype.processCommand = function()
             break;
         }
 
-        fInterrupt = fnReadWrite.call(this, drive, iCylinder, iHead, iSector, nWords, addr, (func >= PDP11.RK11.FUNC.WCHK), this.endReadWrite.bind(this));
+        fInterrupt = fnReadWrite.call(this, drive, iCylinder, iHead, iSector, nWords, addr, inc, (func >= PDP11.RK11.FUNC.WCHK), this.endReadWrite.bind(this));
         break;
 
     case PDP11.RK11.FUNC.DRESET:
@@ -1064,7 +1065,7 @@ RK11.prototype.endReadWrite = function(err, iCylinder, iHead, iSector, nWords, a
 };
 
 /**
- * readData(drive, iCylinder, iHead, iSector, nWords, addr, fCheck, done)
+ * readData(drive, iCylinder, iHead, iSector, nWords, addr, inc, fCheck, done)
  *
  * @this {RK11}
  * @param {Object} drive
@@ -1073,11 +1074,12 @@ RK11.prototype.endReadWrite = function(err, iCylinder, iHead, iSector, nWords, a
  * @param {number} iSector
  * @param {number} nWords
  * @param {number} addr
+ * @param {number} inc (normally 2, unless inhibited, in which case it's 0)
  * @param {boolean} [fCheck]
  * @param {function(...)} [done]
  * @return {boolean|number} true if complete, false if queued (or if no done() is supplied, the error code, if any)
  */
-RK11.prototype.readData = function(drive, iCylinder, iHead, iSector, nWords, addr, fCheck, done)
+RK11.prototype.readData = function(drive, iCylinder, iHead, iSector, nWords, addr, inc, fCheck, done)
 {
     var err = 0;
     var disk = drive.disk;
@@ -1119,7 +1121,7 @@ RK11.prototype.readData = function(drive, iCylinder, iHead, iSector, nWords, add
                 break;
             }
         }
-        addr += 2;
+        addr += inc;
         if (ibSector >= disk.cbSector) {
             sector = null;
             if (++iSector >= disk.nSectors) {
@@ -1138,7 +1140,7 @@ RK11.prototype.readData = function(drive, iCylinder, iHead, iSector, nWords, add
 };
 
 /**
- * writeData(drive, iCylinder, iHead, iSector, nWords, addr, fCheck, done)
+ * writeData(drive, iCylinder, iHead, iSector, nWords, addr, inc, fCheck, done)
  *
  * @this {RK11}
  * @param {Object} drive
@@ -1147,11 +1149,12 @@ RK11.prototype.readData = function(drive, iCylinder, iHead, iSector, nWords, add
  * @param {number} iSector
  * @param {number} nWords
  * @param {number} addr
+ * @param {number} inc (normally 2, unless inhibited, in which case it's 0)
  * @param {boolean} [fCheck]
  * @param {function(...)} [done]
  * @return {boolean|number} true if complete, false if queued (or if no done() is supplied, the error code, if any)
  */
-RK11.prototype.writeData = function(drive, iCylinder, iHead, iSector, nWords, addr, fCheck, done)
+RK11.prototype.writeData = function(drive, iCylinder, iHead, iSector, nWords, addr, inc, fCheck, done)
 {
     var err = 0;
     var disk = drive.disk;
@@ -1168,7 +1171,7 @@ RK11.prototype.writeData = function(drive, iCylinder, iHead, iSector, nWords, ad
             err = PDP11.RK11.RKER.NXM;
             break;
         }
-        addr += 2;
+        addr += inc;
         if (!sector) {
             sector = disk.seek(iCylinder, iHead, iSector + 1, true);
             if (!sector) {

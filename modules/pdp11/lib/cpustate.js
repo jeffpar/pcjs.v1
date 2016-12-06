@@ -1823,31 +1823,6 @@ CPUStatePDP11.prototype.mapVirtualToPhysical = function(addrVirtual, access)
 };
 
 /**
- * readByteFromPhysical(addr)
- *
- * @this {CPUStatePDP11}
- * @param {number} addr
- * @return {number}
- */
-CPUStatePDP11.prototype.readByteFromPhysical = function(addr)
-{
-    return this.bus.getByte(addr);
-};
-
-/**
- * writeByteToPhysical(addr, data)
- *
- * @this {CPUStatePDP11}
- * @param {number} addr
- * @param {number} data
- */
-CPUStatePDP11.prototype.writeByteToPhysical = function(addr, data)
-{
-    if (addr & 1) this.nStepCycles--;
-    this.bus.setByte(addr, data);
-};
-
-/**
  * popWord()
  *
  * @this {CPUStatePDP11}
@@ -2110,7 +2085,7 @@ CPUStatePDP11.prototype.checkStackLimit1145 = function(access, step, addr)
 CPUStatePDP11.prototype.getByteSafe = function(addr)
 {
     this.nDisableTraps++;
-    var b = this.readByteFromPhysical(this.mapVirtualToPhysical(addr, PDP11.ACCESS.READ_BYTE));
+    var b = this.bus.getByte(this.mapVirtualToPhysical(addr, PDP11.ACCESS.READ_BYTE));
     this.nDisableTraps--;
     return b;
 };
@@ -2127,7 +2102,7 @@ CPUStatePDP11.prototype.getByteSafe = function(addr)
 CPUStatePDP11.prototype.getWordSafe = function(addr)
 {
     this.nDisableTraps++;
-    var w = this.readWordFromPhysical(this.mapVirtualToPhysical(addr, PDP11.ACCESS.READ_WORD));
+    var w = this.readWord(addr);
     this.nDisableTraps--;
     return w;
 };
@@ -2144,7 +2119,7 @@ CPUStatePDP11.prototype.getWordSafe = function(addr)
 CPUStatePDP11.prototype.setByteSafe = function(addr, data)
 {
     this.nDisableTraps++;
-    this.writeByteToPhysical(this.mapVirtualToPhysical(addr, PDP11.ACCESS.WRITE_BYTE), data);
+    this.bus.setByte(this.mapVirtualToPhysical(addr, PDP11.ACCESS.WRITE_BYTE), data);
     this.nDisableTraps--;
 };
 
@@ -2160,7 +2135,7 @@ CPUStatePDP11.prototype.setByteSafe = function(addr, data)
 CPUStatePDP11.prototype.setWordSafe = function(addr, data)
 {
     this.nDisableTraps++;
-    this.writeWordToPhysical(this.mapVirtualToPhysical(addr, PDP11.ACCESS.WRITE_WORD), data);
+    this.writeWord(addr, data);
     this.nDisableTraps--;
 };
 
@@ -2344,7 +2319,7 @@ CPUStatePDP11.prototype.readSrcByte = function(opCode)
     if (!mode) {
         result = this.regsGen[reg + this.offRegSrc] & this.maskRegSrcByte;
     } else {
-        result = this.readByteFromPhysical(this.getAddr(mode, reg, PDP11.ACCESS.READ_BYTE));
+        result = this.bus.getByte(this.getAddr(mode, reg, PDP11.ACCESS.READ_BYTE));
     }
     return result;
 };
@@ -2420,7 +2395,7 @@ CPUStatePDP11.prototype.readDstByte = function(opCode)
     if (!mode) {
         result = this.regsGen[reg] & 0xff;
     } else {
-        result = this.readByteFromPhysical(this.getAddr(mode, reg, PDP11.ACCESS.READ_BYTE));
+        result = this.bus.getByte(this.getAddr(mode, reg, PDP11.ACCESS.READ_BYTE));
     }
     return result;
 };
@@ -2466,7 +2441,8 @@ CPUStatePDP11.prototype.updateDstByte = function(opCode, data, fnOp)
     } else {
         var addr = this.dstAddr = this.getAddr(mode, reg, PDP11.ACCESS.UPDATE_BYTE);
         data = (data < 0? (this.regsGen[-data-1] & 0xff) : data);
-        this.writeByteToPhysical(addr, fnOp.call(this, data, this.readByteFromPhysical(addr)));
+        this.bus.setByte(addr, fnOp.call(this, data, this.bus.getByte(addr)));
+        if (addr & 1) this.nStepCycles--;
     }
 };
 
@@ -2529,7 +2505,8 @@ CPUStatePDP11.prototype.writeDstByte = function(opCode, data, writeFlags, fnFlag
     } else {
         var addr = this.getAddr(mode, reg, PDP11.ACCESS.WRITE_BYTE);
         fnFlags.call(this, (data = data < 0? (this.regsGen[-data-1] & 0xff) : data) << 8);
-        this.writeByteToPhysical(addr, data);
+        this.bus.setByte(addr, data);
+        if (addr & 1) this.nStepCycles--;
     }
 };
 

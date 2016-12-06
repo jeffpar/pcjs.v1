@@ -574,7 +574,7 @@ RL11.prototype.bootSelectedDisk = function()
      * a READY state is assured, and the readData() call shouldn't do anything to change that.
      */
     this.cpu.setReset(0, true);
-    var err = this.readData(drive, 0, 0, 0, 512, 0);
+    var err = this.readData(drive, 0, 0, 0, 512, 0x0000);
     if (err) {
         this.notice("Unable to read the boot sector (" + err + ")");
     }
@@ -1023,7 +1023,7 @@ RL11.prototype.processCommand = function()
         nWords = (0x10000 - this.regRLMP) & 0xffff;
         addr = (((this.regRLBE & PDP11.RL11.RLBE.MASK)) << 16) | this.regRLBA;   // 22 bit mode
 
-        if (this.messageEnabled()) this.printMessage(this.type + ": " + sFunc + "(" + iCylinder + ":" + iHead + ":" + iSector + ") @" + str.toOct(addr) + "-" + str.toOct(addr + ((nWords - 1) << 1)), true);
+        if (this.messageEnabled()) this.printMessage(this.type + ": " + sFunc + "(" + iCylinder + ":" + iHead + ":" + iSector + ") " + str.toOct(addr) + "-" + str.toOct(addr + ((nWords - 1) << 1)), true, true);
 
         fInterrupt = fnReadWrite.call(this, drive, iCylinder, iHead, iSector, nWords, addr, this.endReadWrite.bind(this));
         break;

@@ -2087,8 +2087,8 @@ if (DEBUGGER) {
     DebuggerPDP11.prototype.checkBreakpoint = function(addr, nb, aBreak, fTemporary)
     {
         /*
-         * Time to check for execution breakpoints; note that this should be done BEFORE updating
-         * history data (see checkInstruction), since we might not actually execute the current instruction.
+         * Time to check for breakpoints; note that this should be done BEFORE updating history data
+         * (see checkInstruction), since we might not actually execute the current instruction.
          */
         var fBreak = false;
 
@@ -2101,11 +2101,11 @@ if (DEBUGGER) {
                 if (fTemporary && !dbgAddrBreak.fTemporary) continue;
 
                 /*
-                 * Since we're checking an execution address, which is always virtual, and virtual
+                 * If we're checking an execution address, which is always virtual, and virtual
                  * addresses are always restricted to 16 bits, let's mask the breakpoint address to match
                  * (the user should know better, but we'll be nice).
                  */
-                var addrBreak = this.getAddr(dbgAddrBreak) & 0xffff;
+                var addrBreak = this.getAddr(dbgAddrBreak) & (aBreak == this.aBreakExec? 0xffff : -1);
                 for (var n = 0; n < nb; n++) {
 
                     if ((addr + n) != addrBreak) continue;
@@ -3134,33 +3134,35 @@ if (DEBUGGER) {
              *
              *                      00,010,011,000,100,010  00000023042
              *                           0,011,000,100,010  00000003042
-             *   + KIPAR[1]: 0,000,001,101,111,010,000,000  00000157200
-             *   & MMU MASK: 1,111,111,111,111,111,111,111  00017777777
+             *   +   KIPAR1: 0,000,001,101,111,010,000,000  00000157200
+             *   &  MMUMASK: 1,111,111,111,111,111,111,111  00017777777
              *   = PHYSICAL: 0,000,001,110,010,010,100,010  00000162242
              */
             var a = this.cpu.getAddrInfo(dbgAddr.addr);
             this.println(str.pad("", 19) + str.toBin(dbgAddr.addr, 17, 3) + "  " + str.toOct(dbgAddr.addr, 8));
             if (a.length > 1) {
                 this.println(str.pad("", 24) + str.toBin(a[1], 13, 3) + "  " + str.toOct(a[1], 8));
-                this.println("+ " + DebuggerPDP11.MODES[a[2]] + "PAR[" + a[3] + "]: " + str.toBin(a[4], 22, 3) + "  " + str.toOct(a[4], 8));
-                this.println("& MMU MASK: " + str.toBin(a[5], 22, 3) + "  " + str.toOct(a[5], 8));
+                this.println("+   " + DebuggerPDP11.MODES[a[2]] + "PAR" + a[3] + ": " + str.toBin(a[4], 22, 3) + "  " + str.toOct(a[4], 8));
+                this.println("&  MMUMASK: " + str.toBin(a[5], 22, 3) + "  " + str.toOct(a[5], 8));
                 this.println("= PHYSICAL: " + str.toBin(a[0], 22, 3) + "  " + str.toOct(a[0], 8))
             }
             return;
         }
 
-        var len = 0;                            // 0 is not a default; it triggers the appropriate default below
-        var fRange = false;
+        var len = 0;
         var fJSON = (sCmd == "ds");
 
         if (sLen) {
-            fRange = true;
             if (sLen.charAt(0) == 'l') {
-                fRange = false;
                 sLen = sLen.substr(1) || sBytes;
+                len = this.parseValue(sLen);
             }
-            len = this.parseValue(sLen) >>> 0;  // negative lengths not allowed
-            if (len > 0x10000) len = 0x10000;   // prevent bad user (or variable) input from producing excessive output
+            else {
+                var dbgAddrEnd = this.parseAddr(sLen);
+                if (dbgAddrEnd) len = dbgAddrEnd.addr - dbgAddr.addr;
+            }
+            if (len < 0) len = 0;
+            if (len > 0x10000) len = 0x10000;
         }
 
         /*
@@ -3168,7 +3170,7 @@ if (DEBUGGER) {
          * since this is primarily a word-oriented machine.
          */
         var size = (sCmd == "dd"? 4 : (sCmd == "db"? 1 : 2));
-        var nBytes = (fRange? (len - dbgAddr.addr) : (size * len)) || 128;
+        var nBytes = (size * len) || 128;
         var nBytesPerLine = fJSON? 16 : this.nBase;
         var nLines = (((nBytes + nBytesPerLine - 1) / nBytesPerLine)|0) || 1;
 
