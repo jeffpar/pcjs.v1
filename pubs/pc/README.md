@@ -9,6 +9,7 @@ PC Publication Archive
 
 We have an assortment of PC-related resources:
 
+* [CPU Documents](/pubs/pc/reference/intel/)
 * [Datasheets](/pubs/pc/datasheets/)
 * [Magazines](/pubs/pc/magazines/)
 * [Programming Guides](/pubs/pc/programming/)
