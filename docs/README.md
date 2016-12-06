@@ -26,8 +26,8 @@ Instruction documentation is also available:
 Our [Publication Archive](/pubs/) covers the following platforms:
 
 * [IBM PCs and Compatibles](/pubs/pc/)
-* [Digital Equipment Corporation (DEC) PDP-11s and VT100](/pubs/dec/)
-* [Ohio Scientific's 6502-based Challenger 1P)](/pubs/c1p/)
+* [Digital Equipment Corporation (DEC)](/pubs/dec/)
+* [Ohio Scientific's 6502-based Challenger 1P](/pubs/c1p/)
 
 For example, the [IBM PC](/pubs/pc/) section of the [Publication Archive](/pubs/) includes:
 
