@@ -189,13 +189,23 @@ CPUPDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
     this.bus = bus;
     this.dbg = dbg;
     this.panel = cmp.panel;
-
     for (var i = 0; i < CPUPDP11.BUTTONS.length; i++) {
         var control = this.bindings[CPUPDP11.BUTTONS[i]];
         if (control) this.cmp.setBinding(null, CPUPDP11.BUTTONS[i], control);
     }
-
+    this.init();
     this.setReady();
+};
+
+/**
+ * init()
+ *
+ * Stub for initialization call (overridden by the CPUStatePDP11 component).
+ *
+ * @this {CPUPDP11}
+ */
+CPUPDP11.prototype.init = function()
+{
 };
 
 /**

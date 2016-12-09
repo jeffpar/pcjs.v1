@@ -350,7 +350,7 @@ RAMPDP11.prototype.loadImage = function(aBytes, addrLoad, addrExec, addrInit, fS
                 }
                 if (addrExec != null) this.printMessage("starting address: " + str.toHexWord(addrExec), MessagesPDP11.PAPER);
             } else {
-                this.printMessage("loading " + str.toHexWord(cbData) + " bytes at " + str.toHexWord(addr) + "-" + str.toHexWord(addr + cbData - 1), MessagesPDP11.PAPER);
+                this.printMessage("loading " + str.toHexWord(cbData) + " bytes at " + str.toHexWord(addr) + "-" + str.toHexWord(addr + cbData), MessagesPDP11.PAPER);
                 while (cbData--) {
                     this.bus.setByteDirect(addr++, aBytes[offData++] & 0xff);
                 }
