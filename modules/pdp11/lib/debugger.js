@@ -3180,24 +3180,34 @@ if (DEBUGGER) {
 
         if (sCmd == "da") {
             /*
-             * Sample output ("da 23042"):
+             * Sample output for a virtual address ("da 23042"):
              *
-             *                      00,010,011,000,100,010  00000023042
-             *                           0,011,000,100,010  00000003042
-             *   +   KIPAR1: 0,000,001,101,111,010,000,000  00000157200
-             *   &  MMUMASK: 1,111,111,111,111,111,111,111  00017777777
-             *   = PHYSICAL: 0,000,001,110,010,010,100,010  00000162242
+             *                      00,010,011,000,100,010  00023042
+             *       OFFSET:             0,011,000,100,010  00003042
+             *   +   KIPAR1: 0,000,001,101,111,010,000,000  00157200
+             *   &  MMUMASK: 1,111,111,111,111,111,111,111  17777777
+             *   = PHYSICAL: 0,000,001,110,010,010,100,010  00162242
+             *
+             * and sample output for a physical address (eg, "da %37772"; note the % prefix):
+             *
+             *               0,000,000,011,111,111,111,010  00037772
+             *       OFFSET:             1,111,111,111,010  00017772
+             *   UNIMAP[01]: 1,111,100,001,110,111,000,000  17416700
+             *     PHYSICAL: 1,111,100,011,110,110,111,010  17436672
+             *
+             * TODO: Tweak this output to accommodate 18-bit machines as well as 22-bit machines.
              */
-            var a = this.cpu.getAddrInfo(dbgAddr.addr, dbgAddr.fPhysical || dbgAddr.addr > 0xffff);
-            this.println(str.pad("", 19) + str.toBin(dbgAddr.addr, 17, 3) + "  " + str.toOct(dbgAddr.addr, 8));
+            var fPhysical = (dbgAddr.fPhysical || dbgAddr.addr > 0xffff);
+            var a = this.cpu.getAddrInfo(dbgAddr.addr, fPhysical);
+            this.println(str.pad("", fPhysical? 12: 19) + str.toBin(dbgAddr.addr, fPhysical? 22 : 17, 3) + "  " + str.toOct(dbgAddr.addr, 8));
             if (a.length < 6) {
                 if (a.length > 2) {
-                    this.println("UNIMAP[" + str.toDec(a[1], 2) + "]: " + str.toBin(a[2], 22, 3) + "  " + str.toOct(a[2], 8));
                     this.println("    OFFSET:             " + str.toBin(a[3], 13, 3) + "  " + str.toOct(a[3], 8));
+                    this.println("UNIMAP[" + str.toDec(a[1], 2) + "]: " + str.toBin(a[2], 22, 3) + "  " + str.toOct(a[2], 8));
                 }
                 this.println("  PHYSICAL: " + str.toBin(a[0], 22, 3) + "  " + str.toOct(a[0], 8))
             } else {
-                this.println(str.pad("", 24) + str.toBin(a[1], 13, 3) + "  " + str.toOct(a[1], 8));
+                this.println("    OFFSET:             " + str.toBin(a[1], 13, 3) + "  " + str.toOct(a[1], 8));
                 this.println("+   " + DebuggerPDP11.MODES[a[2]] + "PAR" + a[3] + ": " + str.toBin(a[4], 22, 3) + "  " + str.toOct(a[4], 8));
                 this.println("&  MMUMASK: " + str.toBin(a[5], 22, 3) + "  " + str.toOct(a[5], 8));
                 this.println("= PHYSICAL: " + str.toBin(a[0], 22, 3) + "  " + str.toOct(a[0], 8))
