@@ -1174,21 +1174,26 @@ RK11.prototype.writeData = function(drive, iCylinder, iHead, iSector, nWords, ad
                 break;
             }
             /*
-             * TODO: Figure out why the WCHK commands fail during the 11/70 CPU EXERCISER diagnostic,
+             * TODO: Figure out why certain WCHK commands fail during the 11/70 CPU EXERCISER diagnostic,
              * once the test starts reading/writing with physical addresses > 177777.  I think all the
              * UNIBUS address calculations are fine, so I'm at a loss to explain how a WCHK operation
-             * is supposed to succeed when the diagnostic itself appears to alter the memory that it
-             * just wrote.  Is it possible that the controller buffers the data from the previous write,
-             * and the WCHK operation is comparing against its own buffer instead of physical memory?
+             * can succeed when the diagnostic itself appears to alter the memory immediately after the
+             * preceding WRITE operation.
              *
-             * Turn on RK11 messages using the Debugger's "m rk11 on" command, and then take a look at
-             * the first RK11 operation that uses a UNIBUS address larger than 16 bits; eg:
+             * The following machine is already primed with the diagnostic, as well as the recommended
+             * breakpoints and messages:
+             *
+             *      http://www.pcjs.org/devices/pdp11/machine/1170/panel/debugger/cpuexer/
+             *
+             * If you're not using that machine, turn on RK11 messages ("m rk11 on"), set a breakpoint at
+             * 033330 ("bp 033330") and then take a look at the first RK11 operation after that breakpoint;
+             * it should be the first one using a UNIBUS address larger than 16 bits:
              *
              *      RK11: WRITE(147:1:2) 00453610--00463610 @037772
              *
-             * Use a breakpoint to halt the machine at 037772 and then use the Debugger's "da" command
-             * to determine what UNIBUS address 00453610 is mapped to (make sure you specify it as a
-             * physical address using the % prefix):
+             * Use a breakpoint to halt the machine at 037772, and then use the Debugger's "da" command
+             * to determine where UNIBUS address 00453610 is mapped (make sure you specify it as a physical
+             * address using the % prefix):
              *
              *      >> da %00453610
              *                         00,101,011,110,001,000  00453610
@@ -1196,7 +1201,7 @@ RK11.prototype.writeData = function(drive, iCylinder, iHead, iSector, nWords, ad
              *          OFFSET:             1,011,110,001,000  00013610
              *        PHYSICAL: 0,000,000,000,000,000,000,000  00000000
              *
-             * You can see that the starting address for the WRITE is perfectly calculated to start at
+             * So, you can see that the starting address for the WRITE is perfectly calculated to begin at
              * physical address 0.  And the "da" command indicates virtual address 0 points to the same
              * memory:
              *
@@ -1207,10 +1212,10 @@ RK11.prototype.writeData = function(drive, iCylinder, iHead, iSector, nWords, ad
              *      &  MMUMASK: 1,111,111,111,111,111,111,111  17777777
              *      = PHYSICAL: 0,000,000,000,000,000,000,000  00000000
              *
-             * Strangely, the diagnostic is storing its RKCS command register at 001570, which is right in
-             * the middle of the first 2048 words of memory -- the same 2048 words that the diagnostic first
-             * WRITEs and then WCHKs.  So obviously that value is changing between the time of the WRITE and
-             * the WCHK, so how can WCHK succeed?
+             * Strangely, the diagnostic (its interrupt handler to be exact) is updating the next RKCS command
+             * value at 001570, which is right in the middle of the first 2048 words of memory -- the same 2048
+             * words that the diagnostic is about to WRITE and then WCHK.  Since that value is changing between
+             * the WRITE and the WCHK, how can WCHK succeed?
              *
              * For now, I just pretend that it does, by skipping the actual comparison.
              *
