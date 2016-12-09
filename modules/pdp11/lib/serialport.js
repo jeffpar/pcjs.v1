@@ -242,25 +242,31 @@ SerialPortPDP11.prototype.setBinding = function(sType, sBinding, control, sValue
              * brilliant (or rather, the opposite of brilliant), but that's life.
              */
             event = event || window.event;
-            var bASCII = event.which || event.keyCode;
             /*
-             * Perform the same remapping of ALT-ENTER (to LINE-FEED) that our VT100 emulation performs,
-             * for PCjs-wide consistency; see onKeyDown() in /modules/pc8080/lib/keyboard.js for details.
+             * Not sure why COMMAND-key combinations are coming through here (on Safari at least),
+             * but in any case, let's make sure we don't act on them.
              */
-            if (event.altKey) {
-                if (bASCII == Keys.ASCII.CTRL_M) {
-                    bASCII = Keys.ASCII.CTRL_J;
+            if (!event.metaKey) {
+                var bASCII = event.which || event.keyCode;
+                /*
+                 * Perform the same remapping of ALT-ENTER (to LINE-FEED) that our VT100 emulation performs,
+                 * for PCjs-wide consistency; see onKeyDown() in /modules/pc8080/lib/keyboard.js for details.
+                 */
+                if (event.altKey) {
+                    if (bASCII == Keys.ASCII.CTRL_M) {
+                        bASCII = Keys.ASCII.CTRL_J;
+                    }
                 }
+                serial.receiveData(bASCII);
+                /*
+                 * Since we're going to remove the "readonly" attribute from the <textarea> control
+                 * (so that the soft keyboard activates on iOS), instead of calling preventDefault() for
+                 * selected keys (eg, the SPACE key, whose default behavior is to scroll the page), we must
+                 * now call it for *all* keys, so that the keyCode isn't added to the control immediately,
+                 * on top of whatever the machine is echoing back, resulting in double characters.
+                 */
+                if (event.preventDefault) event.preventDefault();
             }
-            serial.receiveData(bASCII);
-            /*
-             * Since we're going to remove the "readonly" attribute from the <textarea> control
-             * (so that the soft keyboard activates on iOS), instead of calling preventDefault() for
-             * selected keys (eg, the SPACE key, whose default behavior is to scroll the page), we must
-             * now call it for *all* keys, so that the keyCode isn't added to the control immediately,
-             * on top of whatever the machine is echoing back, resulting in double characters.
-             */
-            if (event.preventDefault) event.preventDefault();
             return true;
         };
 
