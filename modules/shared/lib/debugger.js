@@ -180,20 +180,6 @@ if (DEBUGGER) {
     };
 
     /**
-     * getSymbolValue(sSymbol)
-     *
-     * NOTE: This must be implemented by the individual debuggers.
-     *
-     * @this {Debugger}
-     * @param {string} sSymbol
-     * @return {number|undefined|null}
-     */
-    Debugger.prototype.getSymbolValue = function(sSymbol)
-    {
-        return undefined;
-    };
-
-    /**
      * parseAddrReference(s, sAddr)
      *
      * Returns the given string with the given address reference replaced with the contents of that address.
@@ -592,10 +578,7 @@ if (DEBUGGER) {
             } else {
                 value = this.getVariable(sValue);
                 if (value == null) {
-                    value = this.getSymbolValue(sValue);
-                    if (value == null) {
-                        value = str.parseInt(sValue, this.nBase);
-                    }
+                    value = str.parseInt(sValue, this.nBase);
                 }
             }
             if (value == null && !fQuiet) this.println("invalid " + (sName? sName : "value") + ": " + sValue);
@@ -619,7 +602,7 @@ if (DEBUGGER) {
         var fDefined = false;
         if (value !== undefined) {
             fDefined = true;
-            sValue = str.toHex(value, 0, true) + " " + value + ". " + str.toOct(value, 0, true) + " " + str.toBinBytes(value, 0, true);
+            sValue = str.toHex(value, 0, true) + " " + value + ". " + str.toOct(value, 0, true) + " " + str.toBinBytes(value, 4, true);
             if (value >= 0x20 && value < 0x7F) {
                 sValue += " '" + String.fromCharCode(value) + "'";
             }

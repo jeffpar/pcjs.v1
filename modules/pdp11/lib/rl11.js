@@ -1023,9 +1023,9 @@ RL11.prototype.processCommand = function()
         nWords = (0x10000 - this.regRLMP) & 0xffff;
         addr = (((this.regRLBE & PDP11.RL11.RLBE.MASK)) << 16) | this.regRLBA;   // 22 bit mode
 
-        if (this.messageEnabled()) this.printMessage(this.type + ": " + sFunc + "(" + iCylinder + ":" + iHead + ":" + iSector + ") " + str.toOct(addr) + "-" + str.toOct(addr + ((nWords - 1) << 1)), true, true);
+        if (this.messageEnabled()) this.printMessage(this.type + ": " + sFunc + "(" + iCylinder + ":" + iHead + ":" + iSector + ") " + str.toOct(addr) + "--" + str.toOct(addr + (nWords << 1)), true, true);
 
-        fInterrupt = fnReadWrite.call(this, drive, iCylinder, iHead, iSector, nWords, addr, this.endReadWrite.bind(this));
+        fInterrupt = fnReadWrite.call(this, drive, iCylinder, iHead, iSector, nWords, addr, this.doneReadWrite.bind(this));
         break;
 
     default:
@@ -1036,32 +1036,6 @@ RL11.prototype.processCommand = function()
         this.regRLCS |= PDP11.RL11.RLCS.DRDY | PDP11.RL11.RLCS.CRDY;
         if (this.regRLCS & PDP11.RL11.RLCS.IE) this.cpu.setIRQ(this.irq);
     }
-};
-
-/**
- * endReadWrite(err, iCylinder, iHead, iSector, nWords, addr)
- *
- * @this {RL11}
- * @param {number} err
- * @param {number} iCylinder
- * @param {number} iHead
- * @param {number} iSector
- * @param {number} nWords
- * @param {number} addr
- * @return {boolean}
- */
-RL11.prototype.endReadWrite = function(err, iCylinder, iHead, iSector, nWords, addr)
-{
-    this.regRLBA = addr & 0xffff;
-    this.regRLCS = (this.regRLCS & ~PDP11.RL11.RLCS.BAE) | ((addr >> (16 - PDP11.RL11.RLCS.SHIFT.BAE)) & PDP11.RL11.RLCS.BAE);
-    this.regRLBE = (addr >> 16) & PDP11.RL11.RLBE.MASK;         // 22 bit mode
-    this.regRLDA = (iCylinder << PDP11.RL11.RLDA.SHIFT.RW_CA) | (iHead? PDP11.RL11.RLDA.RW_HS : 0) | (iSector & PDP11.RL11.RLDA.RW_SA);
-    this.tmpRLDA = this.regRLDA;
-    this.regRLMP = (0x10000 - nWords) & 0xffff;
-    if (err) {
-        this.regRLCS |= err | PDP11.RL11.RLCS.ERR;
-    }
-    return true;
 };
 
 /**
@@ -1090,7 +1064,7 @@ RL11.prototype.readData = function(drive, iCylinder, iHead, iSector, nWords, add
     }
 
     var sWords = "";
-    while (nWords--) {
+    while (nWords) {
         if (!sector) {
             sector = disk.seek(iCylinder, iHead, iSector + 1);
             if (!sector) {
@@ -1105,9 +1079,8 @@ RL11.prototype.readData = function(drive, iCylinder, iHead, iSector, nWords, add
             break;
         }
         /*
-         * Apparently (unlike the RK and RP controllers), this controller treats all 22-bit addresses as
-         * being in the UNIBUS address space (ie, the top 256Kb), which means we must call mapUnibus() on
-         * the address REGARDLESS whether it is actually >= BusPDP11.UNIBUS_22BIT.  TODO: This is inherited
+         * Apparently, this controller honors the UNIBUS Map registers, which means we must call mapUnibus()
+         * on the address REGARDLESS whether it is actually >= BusPDP11.UNIBUS_22BIT.  TODO: This is inherited
          * code, so let's review the documentation on this.
          */
         this.bus.setWordDirect(this.cpu.mapUnibus(addr), data = b0 | (b1 << 8));
@@ -1124,6 +1097,7 @@ RL11.prototype.readData = function(drive, iCylinder, iHead, iSector, nWords, add
             break;
         }
         addr += 2;
+        nWords--;
         checksum += data;
         if (ibSector >= disk.cbSector) {
             sector = null;
@@ -1173,11 +1147,10 @@ RL11.prototype.writeData = function(drive, iCylinder, iHead, iSector, nWords, ad
     }
 
     var sWords = "";
-    while (nWords--) {
+    while (nWords) {
         /*
-         * Apparently (unlike the RK and RP controllers), this controller treats all 22-bit addresses as
-         * being in the UNIBUS address space (ie, the top 256Kb), which means we must call mapUnibus() on
-         * the address REGARDLESS whether it is actually >= BusPDP11.UNIBUS_22BIT.  TODO: This is inherited
+         * Apparently, this controller honors the UNIBUS Map registers, which means we must call mapUnibus()
+         * on the address REGARDLESS whether it is actually >= BusPDP11.UNIBUS_22BIT.  TODO: This is inherited
          * code, so let's review the documentation on this.
          */
         var data = this.bus.getWordDirect(this.cpu.mapUnibus(addr));
@@ -1194,6 +1167,7 @@ RL11.prototype.writeData = function(drive, iCylinder, iHead, iSector, nWords, ad
             }
         }
         addr += 2;
+        nWords--;
         checksum += data;
         if (!sector) {
             sector = disk.seek(iCylinder, iHead, iSector + 1, true);
@@ -1227,6 +1201,32 @@ RL11.prototype.writeData = function(drive, iCylinder, iHead, iSector, nWords, ad
     }
 
     return done? done(err, iCylinder, iHead, iSector, nWords, addr) : err;
+};
+
+/**
+ * doneReadWrite(err, iCylinder, iHead, iSector, nWords, addr)
+ *
+ * @this {RL11}
+ * @param {number} err
+ * @param {number} iCylinder
+ * @param {number} iHead
+ * @param {number} iSector
+ * @param {number} nWords
+ * @param {number} addr
+ * @return {boolean}
+ */
+RL11.prototype.doneReadWrite = function(err, iCylinder, iHead, iSector, nWords, addr)
+{
+    this.regRLBA = addr & 0xffff;
+    this.regRLCS = (this.regRLCS & ~PDP11.RL11.RLCS.BAE) | ((addr >> (16 - PDP11.RL11.RLCS.SHIFT.BAE)) & PDP11.RL11.RLCS.BAE);
+    this.regRLBE = (addr >> 16) & PDP11.RL11.RLBE.MASK;         // 22 bit mode
+    this.regRLDA = (iCylinder << PDP11.RL11.RLDA.SHIFT.RW_CA) | (iHead? PDP11.RL11.RLDA.RW_HS : 0) | (iSector & PDP11.RL11.RLDA.RW_SA);
+    this.tmpRLDA = this.regRLDA;
+    this.regRLMP = (0x10000 - nWords) & 0xffff;
+    if (err) {
+        this.regRLCS |= err | PDP11.RL11.RLCS.ERR;
+    }
+    return true;
 };
 
 /**

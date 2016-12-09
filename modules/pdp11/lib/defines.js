@@ -269,6 +269,8 @@ var PDP11 = {
         IOT:        0x0004,
         JSR_OP:     0x0800,
         JSR_MASK:   0xFE00,
+        SOB_OP:     0x7E00,
+        SOB_MASK:   0xFE00,
         EMT_OP:     0x8800,
         EMT_MASK:   0xFF00,
         TRAP_OP:    0x8900,
@@ -389,11 +391,11 @@ var PDP11 = {
     MMR2: {                     // 177576: virtual program counter register
     },
     MMR3: {                     // 172516: mapping register (11/44 and 11/70 only)
-        USER_D:     0x0001,
-        SUPER_D:    0x0002,
-        KERNEL_D:   0x0004,
-        MMU_22BIT:  0x0010,
-        UNIBUS_MAP: 0x0020      // UNIBUS map relocation enabled
+        USER_D:     0x0001,     // (000001)
+        SUPER_D:    0x0002,     // (000002)
+        KERNEL_D:   0x0004,     // (000004)
+        MMU_22BIT:  0x0010,     // (000020)
+        UNIBUS_MAP: 0x0020      // (000040) UNIBUS map relocation enabled
     },
     PDR: {
         ACF: {
@@ -516,6 +518,7 @@ var PDP11 = {
         RKWC:       0o177406,   //                                  RK11 Word Count Register
         RKBA:       0o177410,   //                                  RK11 Bus Address Register
         RKDA:       0o177412,   //                                  RK11 Disk Address Register
+        RKUN:       0o177414,   //                                  RK11 UNUSED (just to make it clear we didn't forget something)
         RKDB:       0o177416,   //                                  RK11 Data Buffer Register
         LKS:        0o177546,   //                                  KW11-L Clock Status
         PRS:        0o177550,   //                                  PC11 (and PR11) Reader Status Register
@@ -687,17 +690,17 @@ var PDP11 = {
         PRI:        5,
         VEC:        0o220,
         RKDS: {                 // 177400: Drive Status Register
-            SC:     0x000F,     // Sector Counter
-            SCESA:  0x0010,     // Sector Counter Equals Sector Address
-            WPS:    0x0020,     // Write Protected Status (set if write-protected)
-            RRDY:   0x0040,     // Read/Write/Seek Ready
-            DRDY:   0x0080,     // Drive Ready
-            SOK:    0x0100,     // Sector Counter OK
-            SIN:    0x0200,     // Seek Incomplete
-            DRU:    0x0400,     // Drive Unsafe
-            RK05:   0x0800,     // RK05 is the selected disk drive (always set)
-            DPL:    0x1000,     // Drive Power Low
-            ID:     0xE000,     // Drive ID (logical drive number of an interrupting drive)
+            SC:     0x000F,     // (000017) Sector Counter
+            SCESA:  0x0010,     // (000020) Sector Counter Equals Sector Address
+            WPS:    0x0020,     // (000040) Write Protected Status (set if write-protected)
+            RRDY:   0x0040,     // (000100) Read/Write/Seek Ready
+            DRDY:   0x0080,     // (000200) Drive Ready
+            SOK:    0x0100,     // (000400) Sector Counter OK
+            SIN:    0x0200,     // (001000) Seek Incomplete
+            DRU:    0x0400,     // (002000) Drive Unsafe
+            RK05:   0x0800,     // (004000) RK05 is the selected disk drive (always set)
+            DPL:    0x1000,     // (010000) Drive Power Low
+            ID:     0xE000,     // (160000) Drive ID (logical drive number of an interrupting drive)
             SHIFT: {
                 ID:     13
             }
@@ -719,31 +722,31 @@ var PDP11 = {
             DRE:    0x8000      // Drive Error
         },
         RKCS: {                 // 177404: Control Status Register
-            GO:     0x0001,     // Go (W/O)
-            FUNC:   0x000E,     // Function Code (F2,F1,F0) (R/W)
-            MEX:    0x0030,     // Memory Extension (R/W)
-            IE:     0x0040,     // Interrupt Enable (R/W)
-            CRDY:   0x0080,     // Controller Ready (R/O)
-            SSE:    0x0100,     // Stop on Soft Error (R/W)
-            EXB:    0x0200,     // Extra Bit (R/W)
-            FMT:    0x0400,     // Format (R/W)
-            IBA:    0x0800,     // Inhibit RKBA Increment (R/W)
-            SCP:    0x2000,     // Search Complete (R/O)
-            HE:     0x4000,     // Hard Error (R/O)
-            ERR:    0x8000,     // Composite Error (R/O) (set when any RKER bit is set)
-            UNUSED: 0x1200,     // unused
-            RMASK:  0xEFFE,     // bits readable
-            WMASK:  0x0F7F,     // bits writable
+            GO:     0x0001,     // (000001) Go (W/O)
+            FUNC:   0x000E,     // (000016) Function Code (F2,F1,F0) (R/W)
+            MEX:    0x0030,     // (000060) Memory Extension (R/W)
+            IE:     0x0040,     // (000100) Interrupt Enable (R/W)
+            CRDY:   0x0080,     // (000200) Controller Ready (R/O)
+            SSE:    0x0100,     // (000400) Stop on Soft Error (R/W)
+            EXB:    0x0200,     // (001000) Extra Bit (R/W)
+            FMT:    0x0400,     // (002000) Format (R/W)
+            IBA:    0x0800,     // (004000) Inhibit RKBA Increment (R/W)
+            SCP:    0x2000,     // (020000) Search Complete (R/O)
+            HE:     0x4000,     // (040000) Hard Error (R/O)
+            ERR:    0x8000,     // (100000) Composite Error (R/O) (set when any RKER bit is set)
+            UNUSED: 0x1200,     // (120000) unused
+            RMASK:  0xEFFE,     // (167776) bits readable
+            WMASK:  0x0F7F,     // (007577) bits writable
             SHIFT: {
                 FUNC:   1,
                 MEX:    4
             }
         },
         RKDA: {                 // 177412: Disk Address Register
-            SA:     0x000F,     // Sector Address
-            HS:     0x0010,     // Head Select (aka SUR: clear for upper disk head, set for lower)
-            CA:     0x1FE0,     // Cylinder Address (aka CYL ADDR)
-            DS:     0xE000,     // Drive Select (aka DR SEL)
+            SA:     0x000F,     // (000017) Sector Address
+            HS:     0x0010,     // (000020) Head Select (aka SUR: clear for upper disk head, set for lower)
+            CA:     0x1FE0,     // (017740) Cylinder Address (aka CYL ADDR)
+            DS:     0xE000,     // (160000) Drive Select (aka DR SEL)
             SHIFT: {
                 HS:     4,
                 CA:     5,
@@ -751,14 +754,14 @@ var PDP11 = {
             }
         },
         FUNC: {
-            CRESET: 0b000,      // Controller Reset
-            WRITE:  0b001,      // Write
-            READ:   0b010,      // Read
-            WCHK:   0b011,      // Write Check
-            SEEK:   0b100,      // Seek
-            RCHK:   0b101,      // Read Check
-            DRESET: 0b110,      // Drive Reset
-            WLOCK:  0b111       // Write Lock
+            CRESET: 0b0000,     // (00) Controller Reset
+            WRITE:  0b0010,     // (02) Write
+            READ:   0b0100,     // (04) Read
+            WCHK:   0b0110,     // (06) Write Check
+            SEEK:   0b1000,     // (10) Seek
+            RCHK:   0b1010,     // (12) Read Check
+            DRESET: 0b1100,     // (14) Drive Reset
+            WLOCK:  0b1110      // (16) Write Lock
         }
     },
     RL11: {                     // RL11 Disk Controller

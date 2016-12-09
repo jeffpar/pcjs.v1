@@ -155,13 +155,13 @@ DevicePDP11.prototype.dumpRegs = function(sName, aRegs, offset, sFilter, fBreak)
             nRegs = aRegs.length;
             offset = 0;
             fIndex = true;
-            nBytes = 4;
+            nBytes = 3;
             nWidth = 4;
         }
         for (var i = 0; i < nRegs; i++) {
             if (i % nWidth == 0) {
                 if (sDump) sDump += '\n';
-                sDump += sName + (fIndex? ('[' + str.toOct(i, 2) + ']') : '') + ':';
+                sDump += sName + (fIndex? ('[' + str.toDec(i, 2) + ']') : '') + ':';
             }
             sDump += ' ' + dbg.toStrBase(aRegs[offset + i], nBytes);
         }
@@ -973,30 +973,30 @@ DevicePDP11.prototype.writeCPUERR = function(data, addr)
 };
 
 /**
- * readMB(addr)
+ * readMBR(addr)
  *
  * @this {DevicePDP11}
  * @param {number} addr (eg, PDP11.UNIBUS.MB or 177770)
  * @return {number}
  */
-DevicePDP11.prototype.readMB = function(addr)
+DevicePDP11.prototype.readMBR = function(addr)
 {
-    return this.cpu.regMB;
+    return this.cpu.regMBR;
 };
 
 /**
- * writeMB(data, addr)
+ * writeMBR(data, addr)
  *
  * @this {DevicePDP11}
  * @param {number} data
  * @param {number} addr (eg, PDP11.UNIBUS.MB or 177770)
  */
-DevicePDP11.prototype.writeMB = function(data, addr)
+DevicePDP11.prototype.writeMBR = function(data, addr)
 {
     if (!(addr & 0x1)) {
         data &= 0xff;           // required for KB11-CM without MFPT instruction
     }
-    this.cpu.regMB = data;
+    this.cpu.regMBR = data;
 };
 
 /**
@@ -1026,29 +1026,29 @@ DevicePDP11.prototype.writePIR = function(data, addr)
 };
 
 /**
- * readSL(addr, fPreWrite)
+ * readSLR(addr, fPreWrite)
  *
  * @this {DevicePDP11}
  * @param {number} addr (eg, PDP11.UNIBUS.SL or 177774)
  * @param {boolean} [fPreWrite]
  * @return {number}
  */
-DevicePDP11.prototype.readSL = function(addr, fPreWrite)
+DevicePDP11.prototype.readSLR = function(addr, fPreWrite)
 {
     if (fPreWrite) return 0;
-    return this.cpu.getSL();
+    return this.cpu.getSLR();
 };
 
 /**
- * writeSL(data, addr)
+ * writeSLR(data, addr)
  *
  * @this {DevicePDP11}
  * @param {number} data
  * @param {number} addr (eg, PDP11.UNIBUS.SL or 177774)
  */
-DevicePDP11.prototype.writeSL = function(data, addr)
+DevicePDP11.prototype.writeSLR = function(data, addr)
 {
-    this.cpu.setSL(data);
+    this.cpu.setSLR(data);
 };
 
 /**
@@ -1143,10 +1143,10 @@ DevicePDP11.UNIBUS_IOTABLE = {
     [PDP11.UNIBUS.LSIZE]:   /* 177760 */    [null, null, DevicePDP11.prototype.readSIZE,    DevicePDP11.prototype.writeSIZE,    "LSIZE",    1,  PDP11.MODEL_1170],
     [PDP11.UNIBUS.HSIZE]:   /* 177762 */    [null, null, DevicePDP11.prototype.readSIZE,    DevicePDP11.prototype.writeSIZE,    "HSIZE",    1,  PDP11.MODEL_1170],
     [PDP11.UNIBUS.SYSID]:   /* 177764 */    [null, null, DevicePDP11.prototype.readSYSID,   DevicePDP11.prototype.writeSYSID,   "SYSID",    1,  PDP11.MODEL_1170],
-    [PDP11.UNIBUS.CPUERR]:  /* 177766 */    [null, null, DevicePDP11.prototype.readCPUERR,  DevicePDP11.prototype.writeCPUERR,  "CPUERR",   1,  PDP11.MODEL_1170],
-    [PDP11.UNIBUS.MB]:      /* 177770 */    [null, null, DevicePDP11.prototype.readMB,      DevicePDP11.prototype.writeMB,      "MB",       1,  PDP11.MODEL_1170],
+    [PDP11.UNIBUS.CPUERR]:  /* 177766 */    [null, null, DevicePDP11.prototype.readCPUERR,  DevicePDP11.prototype.writeCPUERR,  "ERR",      1,  PDP11.MODEL_1170],
+    [PDP11.UNIBUS.MB]:      /* 177770 */    [null, null, DevicePDP11.prototype.readMBR,     DevicePDP11.prototype.writeMBR,     "MBR",      1,  PDP11.MODEL_1170],
     [PDP11.UNIBUS.PIR]:     /* 177772 */    [null, null, DevicePDP11.prototype.readPIR,     DevicePDP11.prototype.writePIR,     "PIR"],
-    [PDP11.UNIBUS.SL]:      /* 177774 */    [null, null, DevicePDP11.prototype.readSL,      DevicePDP11.prototype.writeSL,      "SL"],
+    [PDP11.UNIBUS.SL]:      /* 177774 */    [null, null, DevicePDP11.prototype.readSLR,     DevicePDP11.prototype.writeSLR,     "SLR"],
     [PDP11.UNIBUS.PSW]:     /* 177776 */    [null, null, DevicePDP11.prototype.readPSW,     DevicePDP11.prototype.writePSW,     "PSW"]
 };
 

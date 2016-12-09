@@ -793,14 +793,14 @@ DiskPDP11.prototype.read = function(sector, ibSector, fCompare)
 {
     var b = -1;
     if (sector) {
-        if (DEBUG && !ibSector && !fCompare && this.messageEnabled()) {
-            this.printMessage('read("' + this.sDiskFile + '",CHS=' + sector.iCylinder + ':' + sector.iHead + ':' + sector['sector'] + ')');
-        }
         if (ibSector < sector['length']) {
             var adw = sector['data'];
             var idw = ibSector >> 2;
             var dw = (idw < adw.length ? adw[idw] : sector['pattern']);
             b = ((dw >> ((ibSector & 0x3) << 3)) & 0xff);
+        }
+        if (DEBUG && !fCompare && this.messageEnabled()) {
+            this.printMessage('read("' + this.sDiskFile + '",CHS=' + sector.iCylinder + ':' + sector.iHead + ':' + sector['sector'] + ',index=' + ibSector + ',value=' + str.toHexByte(b) + ')');
         }
     }
     return b;
@@ -820,8 +820,8 @@ DiskPDP11.prototype.write = function(sector, ibSector, b)
     if (this.fWriteProtected)
         return false;
 
-    if (DEBUG && !ibSector && this.messageEnabled()) {
-        this.printMessage('write("' + this.sDiskFile + '",CHS=' + sector.iCylinder + ':' + sector.iHead + ':' + sector['sector'] + ')');
+    if (DEBUG && this.messageEnabled()) {
+        this.printMessage('write("' + this.sDiskFile + '",CHS=' + sector.iCylinder + ':' + sector.iHead + ':' + sector['sector'] + ',index=' + ibSector + ',value=' + str.toHexByte(b) + ')');
     }
 
     if (ibSector < sector['length']) {

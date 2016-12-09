@@ -8,7 +8,7 @@
 	<device id="default" type="default"/>
 	<serial id="dl11" adapter="0" binding="print"/>
 	<panel ref="/devices/pdp11/panel/1170/debugger/front.xml"/>
-	<debugger id="debugger" base="8" messages="" commands="bp 33330"/>
+	<debugger id="debugger" base="8" messages="rk11" commands='bp 33330 "bp 037772; bp 041734; bp 042164"'/>
 	<device ref="/devices/pdp11/pc11/default.xml"/>
 	<device ref="/devices/pdp11/rk11/default.xml"/>
 	<device ref="/devices/pdp11/rl11/default.xml"/>

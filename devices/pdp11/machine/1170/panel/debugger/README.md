@@ -331,4 +331,4 @@ address.  For example, to break on this instruction:
 	17772256        062711      ADD #200,(R1)   ; Step Page
 
 use the command "bp 172256", because while the code *is* physically located at 17772256, it is being executed at
-virtual address 172256, and execution breakpoints operate on virtual addresses.
+virtual address 172256, and execution breakpoints operate on 16-bit virtual addresses.
