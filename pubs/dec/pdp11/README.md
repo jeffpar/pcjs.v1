@@ -7,6 +7,10 @@ permalink: /pubs/dec/pdp11/
 DEC PDP-11 Publications
 ---
 
+This page summarizes PDP-11 documentation that was useful in creating [PDPjs](/modules/pdp11/).  In most cases,
+these documents came from the PDF Document Archive at [bitsavers.org](http://bitsavers.org),  in the [/pdf/dec/pdp11/](http://bitsavers.informatik.uni-stuttgart.de/pdf/dec/pdp11/)
+directory.  If a PDF was not searchable, it was "OCR'ed" before being archived below. 
+
 [PDP-11/20](1120/)
 
 - [PDP-11/20 Handbook (1969)](http://archive.pcjs.org/pubs/dec/pdp11/1120/PDP1120_Handbook_1969.pdf) [[Original PDF](http://research.microsoft.com/en-us/um/people/gbell/Digital/PDP%2011%20Handbook%201969.pdf)]
@@ -73,6 +77,7 @@ DEC PDP-11 Publications
 
 [Assorted PDP-11 Handbooks](other/)
 
+- [PDP-11 Paper Tape Software Handbook (1976)](http://archive.pcjs.org/pubs/dec/pdp11/other/PDP11_Paper_Tape_Software_Handbook_1976.pdf)
 - [PDP-11 Peripherals Handbook (1976)](http://archive.pcjs.org/pubs/dec/pdp11/other/PDP11_Peripherals_Handbook_1976.pdf)
 - [PDP-11 Software Handbook (1978)](http://archive.pcjs.org/pubs/dec/pdp11/other/PDP11_Software_Handbook_1978.pdf)
 
