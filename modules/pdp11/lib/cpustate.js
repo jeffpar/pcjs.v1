@@ -159,10 +159,29 @@ CPUStatePDP11.prototype.initProcessor = function()
     this.aIRQs = [];            // list of all IRQs, active or not (to be used for auto-configuration)
 
     this.flags.complete = false;
+
+    this.nReadBreaks = this.nWriteBreaks = 0;
+};
+
+/**
+ * init()
+ *
+ * Called once the Bus has been initialized.
+ *
+ * @this {CPUStatePDP11}
+ */
+CPUStatePDP11.prototype.init = function()
+{
+    this.getByteDirect = this.bus.getByte.bind(this.bus);
+    this.getWordDirect = this.bus.getWord.bind(this.bus);
+    this.setByteDirect = this.bus.setByte.bind(this.bus);
+    this.setWordDirect = this.bus.setWord.bind(this.bus);
 };
 
 /**
  * finish()
+ *
+ * Called before the CPU is powered up.
  *
  * TODO: This function simply ensures that we don't leave any IRQs installed with unresolved floating
  * (negative) vectors; however, properly assigning vectors according to device type (ie, auto-configuration)
@@ -244,7 +263,7 @@ CPUStatePDP11.prototype.initRegs = function()
     this.regsControl = [        // various control registers (177740-177756) we don't really care about
         0, 0, 0, 0, 0, 0, 0, 0
     ];
-    this.regMB = 0;
+    this.regMBR = 0;
 
     /*
      * opFlags contains various conditions that stepCPU() needs to be aware of.
@@ -293,7 +312,7 @@ CPUStatePDP11.prototype.resetRegs = function()
     this.regMMR3 = 0;           // 172516
     this.regErr = 0;            // 177766
     this.regPIR = 0;            // 177772
-    this.regSL = 0xff;          // 177774
+    this.regSLR = 0xff;         // 177774
     this.mmuEnable = 0;         // MMU enabled for PDP11.ACCESS.READ or PDP11.ACCESS.WRITE
     this.mmuLastMode = 0;
     this.mmuLastPage = 0;
@@ -329,26 +348,35 @@ CPUStatePDP11.prototype.getMMUState = function()
  * Define handlers and DSPACE setting appropriate for the current MMU mode, in order to eliminate unnecessary calls
  * to mapVirtualToPhysical().
  *
- * TODO: We could further optimize readWord(), splitting it into readWordFromDSpace() and readWordFromISpace(),
- * eliminating the need to OR the addrDSpace bit when we know that bit is zero, but that's a pretty tiny optimization.
- *
  * @this {CPUStatePDP11}
  */
 CPUStatePDP11.prototype.setMemoryAccess = function()
 {
+    this.getByte = this.getByteDirect;
+    this.getWord = this.getWordDirect;
+    this.setByte = this.setByteDirect;
+    this.setWord = this.setWordDirect;
+    if (this.nReadBreaks) {
+        this.getByte = this.getByteChecked;
+        this.getWord = this.getWordChecked;
+    }
+    if (this.nWriteBreaks) {
+        this.setByte = this.setByteChecked;
+        this.setWord = this.setWordChecked;
+    }
     if (this.mmuEnable) {
         this.addrDSpace = PDP11.ACCESS.DSPACE;
         this.addrIOPage = (this.regMMR3 & PDP11.MMR3.MMU_22BIT)? BusPDP11.IOPAGE_22BIT : BusPDP11.IOPAGE_18BIT;
         this.getAddr = this.getVirtualAddrByMode;
-        this.readWord = this.readWordFromVirtual;
-        this.writeWord = this.writeWordToVirtual;
+        this.readWord = this.nReadBreaks? this.readWordFromVirtualChecked : this.readWordFromVirtual;
+        this.writeWord = this.nWriteBreaks? this.writeWordToVirtualChecked : this.writeWordToVirtual;
         this.bus.setIOPageRange((this.regMMR3 & PDP11.MMR3.MMU_22BIT)? 22 : 18);
     } else {
         this.addrDSpace = 0;
         this.addrIOPage = BusPDP11.IOPAGE_16BIT;
         this.getAddr = this.getPhysicalAddrByMode;
-        this.readWord = this.readWordFromPhysical;
-        this.writeWord = this.writeWordToPhysical;
+        this.readWord = this.nReadBreaks? this.readWordFromPhysicalChecked : this.readWordFromPhysical;
+        this.writeWord = this.nWriteBreaks? this.writeWordToPhysicalChecked : this.writeWordToPhysical;
         this.bus.setIOPageRange(16);
     }
 };
@@ -558,9 +586,9 @@ CPUStatePDP11.prototype.save = function()
         this.regsUniMap,
         this.regsControl,
         this.regErr,
-        this.regMB,
+        this.regMBR,
         this.regPIR,
-        this.regSL,
+        this.regSLR,
         this.getPSW(),
         this.pswTrap,
         this.pswMode,
@@ -1176,25 +1204,25 @@ CPUStatePDP11.prototype.setPSW = function(newPSW)
 };
 
 /**
- * getSL()
+ * getSLR()
  *
  * @this {CPUStatePDP11}
  * @return {number}
  */
-CPUStatePDP11.prototype.getSL = function()
+CPUStatePDP11.prototype.getSLR = function()
 {
-    return this.regSL & 0xff00;
+    return this.regSLR & 0xff00;
 };
 
 /**
- * setSL(newSL)
+ * setSLR(newSL)
  *
  * @this {CPUStatePDP11}
- * @param {number} newSL
+ * @param {number} newSLR
  */
-CPUStatePDP11.prototype.setSL = function(newSL)
+CPUStatePDP11.prototype.setSLR = function(newSLR)
 {
-    this.regSL = newSL | 0xff;
+    this.regSLR = newSLR | 0xff;
 };
 
 /**
@@ -1533,13 +1561,14 @@ CPUStatePDP11.prototype.getTrapStatus = function()
 /**
  * mapUnibus(addr)
  *
- * If bits 18-21 of addr are all set (which callers check using addr >= BusPDP11.UNIBUS_22BIT aka 0x3C0000),
- * then we have a 22-bit address pointing to the top 256Kb range, so if the UNIBUS relocation map is enabled,
- * we must pass the lower 18 bits of that address through the map.
+ * Used to convert 18-bit addresses to 22-bit addresses.  Since mapUnibus() only looks at the low 18 bits of addr,
+ * there's no need to mask addr first.  Note that if bits 13-17 are all set, then the 18-bit address points to the
+ * top 8Kb of its 256Kb range, and mapUnibus() will return addr unchanged, since it should already be pointing to
+ * the top 8Kb of the 4Mb 22-bit range.
  *
- * Since mapUnibus() only looks at the low 18 bits of addr, there's no need to mask addr first.  Note that
- * if bits 13-17 are all set, then the 18-bit address points to the top 8Kb of its 256Kb range, and mapUnibus()
- * will return addr unchanged, since it should already be pointing to the top 8Kb of the 4Mb 22-bit range.
+ * Also, when bits 18-21 of addr are ALL set (which callers check using addr >= BusPDP11.UNIBUS_22BIT aka 0x3C0000),
+ * then we have a 22-bit address pointing to the top 256Kb range, so if the UNIBUS relocation map is enabled, we again
+ * pass the lower 18 bits of that address through the map.
  *
  * From the PDP-11/70 Handbook:
  *
@@ -1557,9 +1586,8 @@ CPUStatePDP11.prototype.getTrapStatus = function()
  *      order bit of all mapping registers is always a zero, since relocation is always on word boundaries.
  *
  * Sadly, because these mappings occur at a word-granular level, we can't implement the mappings by simply shuffling
- * the underlying block around in the Bus component; it would be much more efficient if we could.  That's EXACTLY how
- * we move the IOPAGE in response to addressing changes.  If it turns out that block-granular addresses are commonly
- * stored in the unibusMap registers, we could add code to detect that and perform block remapping in those cases.
+ * the underlying block around in the Bus component; it would be much more efficient if we could.  That's how we move
+ * the IOPAGE in response to addressing changes.
  *
  * @this {CPUStatePDP11}
  * @param {number} addr
@@ -1567,14 +1595,18 @@ CPUStatePDP11.prototype.getTrapStatus = function()
  */
 CPUStatePDP11.prototype.mapUnibus = function(addr)
 {
-    var idx = (addr >> 13) & 0x1f;
+    var idx = (addr >> 13) & 0x1F;
     if (idx < 31) {
         if (this.regMMR3 & PDP11.MMR3.UNIBUS_MAP) {
             /*
              * The UNIBUS map relocation is enabled
              */
-            addr = (this.regsUniMap[idx] + (addr & 0x1ffe)) & 0x3ffffe;
-            this.assert(addr < BusPDP11.UNIBUS_22BIT || addr >= BusPDP11.IOPAGE_22BIT);
+            addr = (this.regsUniMap[idx] + (addr & 0x1FFF)) & BusPDP11.MASK_22BIT;
+            /*
+             * TODO: Review this assertion.
+             *
+             *      this.assert(addr < BusPDP11.UNIBUS_22BIT || addr >= BusPDP11.IOPAGE_22BIT);
+             */
         } else {
             /*
              * Since UNIBUS map relocation is NOT enabled, then as explained above:
@@ -1589,33 +1621,44 @@ CPUStatePDP11.prototype.mapUnibus = function(addr)
 };
 
 /**
- * getAddrInfo(addrVirtual)
+ * getAddrInfo(addr, fPhysical)
  *
  * @this {CPUStatePDP11}
- * @param {number} addrVirtual
+ * @param {number} addr
+ * @param {boolean} [fPhysical]
  * @return {Array}
  */
-CPUStatePDP11.prototype.getAddrInfo = function(addrVirtual)
+CPUStatePDP11.prototype.getAddrInfo = function(addr, fPhysical)
 {
-    var addr;
     var a = [];
+    var addrPhysical;
 
-    if (!this.mmuEnable) {
-        addr = addrVirtual & 0xffff;
-        if (addr >= BusPDP11.IOPAGE_16BIT) addr |= this.addrIOPage;
-        a.push(addr);
+    if (fPhysical) {
+        addrPhysical = this.mapUnibus(addr);
+        var idx = (addr >> 13) & 0x1F;
+        a.push(addrPhysical);
+        a.push(idx);
+        if (this.regMMR3 & PDP11.MMR3.UNIBUS_MAP) {
+            a.push(this.regsUniMap[idx]);
+            a.push(addr & 0x1FFF);
+        }
+    }
+    else if (!this.mmuEnable) {
+        addrPhysical = addr & 0xffff;
+        if (addrPhysical >= BusPDP11.IOPAGE_16BIT) addrPhysical |= this.addrIOPage;
+        a.push(addrPhysical);
     }
     else {
         var mode = this.pswMode << 1;
-        var page = addrVirtual >> 13;
+        var page = addr >> 13;
         if (page > 7) mode |= 1;
         if (!(this.regMMR3 & this.mapMMR3[this.pswMode])) page &= 7;
         var pdr = this.mmuPDR[this.pswMode][page];
-        var off = addrVirtual & 0x1fff;
+        var off = addr & 0x1fff;
         var paf = (this.mmuPAR[this.pswMode][page] << 6);
-        addr = (paf + off) & this.mmuMask;
-        if (addr >= BusPDP11.UNIBUS_22BIT) addr = this.mapUnibus(addr);
-        a.push(addr);           // a[0]
+        addrPhysical = (paf + off) & this.mmuMask;
+        if (addrPhysical >= BusPDP11.UNIBUS_22BIT) addrPhysical = this.mapUnibus(addrPhysical);
+        a.push(addrPhysical);   // a[0]
         a.push(off);            // a[1]
         a.push(mode);           // a[2] (0=KI, 1=KD, 2=SI, 3=SD, 4=??, 5=??, 6=UI, 7=UD)
         a.push(page & 7);       // a[3]
@@ -1823,31 +1866,6 @@ CPUStatePDP11.prototype.mapVirtualToPhysical = function(addrVirtual, access)
 };
 
 /**
- * readByteFromPhysical(addr)
- *
- * @this {CPUStatePDP11}
- * @param {number} addr
- * @return {number}
- */
-CPUStatePDP11.prototype.readByteFromPhysical = function(addr)
-{
-    return this.bus.getByte(addr);
-};
-
-/**
- * writeByteToPhysical(addr, data)
- *
- * @this {CPUStatePDP11}
- * @param {number} addr
- * @param {number} data
- */
-CPUStatePDP11.prototype.writeByteToPhysical = function(addr, data)
-{
-    if (addr & 1) this.nStepCycles--;
-    this.bus.setByte(addr, data);
-};
-
-/**
  * popWord()
  *
  * @this {CPUStatePDP11}
@@ -2048,7 +2066,7 @@ CPUStatePDP11.prototype.checkStackLimit1120 = function(access, step, addr)
      *
      * so if the step parameter is positive, we let it go.
      */
-    if (!this.pswMode && step <= 0 && addr <= this.regSL) {
+    if (!this.pswMode && step <= 0 && addr <= this.regSLR) {
         /*
          * On older machines (eg, the PDP-11/20), there is no "YELLOW" and "RED" distinction, and the
          * instruction is always allowed to complete, so the trap must always be issued in this fashion.
@@ -2083,12 +2101,12 @@ CPUStatePDP11.prototype.checkStackLimit1145 = function(access, step, addr)
          * address tested by the diagnostic (0xFFFE, aka the PSW), by making that address negative.
          */
         if (addr >= 0xFFFE) addr |= ~0xFFFF;
-        if ((access & PDP11.ACCESS.WRITE) && addr <= this.regSL) {
+        if ((access & PDP11.ACCESS.WRITE) && addr <= this.regSLR) {
             /*
-             * regSL can never fall below 0xFF, so this subtraction can never go negative, so this comparison
+             * regSLR can never fall below 0xFF, so this subtraction can never go negative, so this comparison
              * is always safe.
              */
-            if (addr <= this.regSL - 32) {
+            if (addr <= this.regSLR - 32) {
                 this.trap(PDP11.TRAP.BUS, 0, PDP11.REASON.RED);
             } else {
                 this.regErr |= PDP11.CPUERR.YELLOW;
@@ -2096,6 +2114,66 @@ CPUStatePDP11.prototype.checkStackLimit1145 = function(access, step, addr)
             }
         }
     }
+};
+
+/**
+ * getByteChecked(addr)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} addr
+ * @return {number}
+ */
+CPUStatePDP11.prototype.getByteChecked = function(addr)
+{
+    if (DEBUGGER && this.dbg) {
+        this.dbg.checkMemoryRead(addr, 1);
+    }
+    return this.getByteDirect(addr);
+};
+
+/**
+ * getWordChecked(addr)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} addr
+ * @return {number}
+ */
+CPUStatePDP11.prototype.getWordChecked = function(addr)
+{
+    if (DEBUGGER && this.dbg) {
+        this.dbg.checkMemoryRead(addr, 2);
+    }
+    return this.getWordDirect(addr);
+};
+
+/**
+ * setByteChecked(addr, data)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} addr
+ * @param {number} data
+ */
+CPUStatePDP11.prototype.setByteChecked = function(addr, data)
+{
+    if (DEBUGGER && this.dbg) {
+        this.dbg.checkMemoryWrite(addr, 1);
+    }
+    this.setByteDirect(addr, data);
+};
+
+/**
+ * setWordChecked(addr, data)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} addr
+ * @param {number} data
+ */
+CPUStatePDP11.prototype.setWordChecked = function(addr, data)
+{
+    if (DEBUGGER && this.dbg) {
+        this.dbg.checkMemoryWrite(addr, 2);
+    }
+    this.setWordDirect(addr, data);
 };
 
 /**
@@ -2110,7 +2188,7 @@ CPUStatePDP11.prototype.checkStackLimit1145 = function(access, step, addr)
 CPUStatePDP11.prototype.getByteSafe = function(addr)
 {
     this.nDisableTraps++;
-    var b = this.readByteFromPhysical(this.mapVirtualToPhysical(addr, PDP11.ACCESS.READ_BYTE));
+    var b = this.bus.getByte(this.mapVirtualToPhysical(addr, PDP11.ACCESS.READ_BYTE));
     this.nDisableTraps--;
     return b;
 };
@@ -2127,7 +2205,7 @@ CPUStatePDP11.prototype.getByteSafe = function(addr)
 CPUStatePDP11.prototype.getWordSafe = function(addr)
 {
     this.nDisableTraps++;
-    var w = this.readWordFromPhysical(this.mapVirtualToPhysical(addr, PDP11.ACCESS.READ_WORD));
+    var w = this.bus.getWord(this.mapVirtualToPhysical(addr, PDP11.ACCESS.READ_WORD));
     this.nDisableTraps--;
     return w;
 };
@@ -2144,7 +2222,7 @@ CPUStatePDP11.prototype.getWordSafe = function(addr)
 CPUStatePDP11.prototype.setByteSafe = function(addr, data)
 {
     this.nDisableTraps++;
-    this.writeByteToPhysical(this.mapVirtualToPhysical(addr, PDP11.ACCESS.WRITE_BYTE), data);
+    this.bus.setByte(this.mapVirtualToPhysical(addr, PDP11.ACCESS.WRITE_BYTE), data);
     this.nDisableTraps--;
 };
 
@@ -2160,8 +2238,40 @@ CPUStatePDP11.prototype.setByteSafe = function(addr, data)
 CPUStatePDP11.prototype.setWordSafe = function(addr, data)
 {
     this.nDisableTraps++;
-    this.writeWordToPhysical(this.mapVirtualToPhysical(addr, PDP11.ACCESS.WRITE_WORD), data);
+    this.bus.setWord(this.mapVirtualToPhysical(addr, PDP11.ACCESS.WRITE_WORD), data);
     this.nDisableTraps--;
+};
+
+/**
+ * addMemBreak(addr, fWrite)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} addr
+ * @param {boolean} fWrite is true for a memory write breakpoint, false for a memory read breakpoint
+ */
+CPUStatePDP11.prototype.addMemBreak = function(addr, fWrite)
+{
+    if (DEBUGGER) {
+        var nBreaks = fWrite? this.nWriteBreaks++ : this.nReadBreaks++;
+        this.assert(nBreaks >= 0);
+        if (!nBreaks) this.setMemoryAccess();
+    }
+};
+
+/**
+ * removeMemBreak(addr, fWrite)
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} addr
+ * @param {boolean} fWrite is true for a memory write breakpoint, false for a memory read breakpoint
+ */
+CPUStatePDP11.prototype.removeMemBreak = function(addr, fWrite)
+{
+    if (DEBUGGER) {
+        var nBreaks = fWrite? --this.nWriteBreaks : --this.nReadBreaks;
+        this.assert(nBreaks >= 0);
+        if (!nBreaks) this.setMemoryAccess();
+    }
 };
 
 /**
@@ -2177,9 +2287,7 @@ CPUStatePDP11.prototype.setWordSafe = function(addr, data)
  */
 CPUStatePDP11.prototype.getPhysicalAddrByMode = function(mode, reg, access)
 {
-    var addr = this.getAddrByMode(mode, reg, access);
-    if (addr >= BusPDP11.UNIBUS_22BIT) addr = this.mapUnibus(addr);
-    return addr;
+    return this.getAddrByMode(mode, reg, access);
 };
 
 /**
@@ -2209,8 +2317,24 @@ CPUStatePDP11.prototype.getVirtualAddrByMode = function(mode, reg, access)
  */
 CPUStatePDP11.prototype.readWordFromPhysical = function(addr)
 {
-    if (addr >= BusPDP11.UNIBUS_22BIT) addr = this.mapUnibus(addr);
     return this.bus.getWord(this.addrLast = addr);
+};
+
+/**
+ * readWordFromPhysicalChecked(addr)
+ *
+ * This is a handler set up by setMemoryAccess().  All calls should go through readWord().
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} addr
+ * @return {number}
+ */
+CPUStatePDP11.prototype.readWordFromPhysicalChecked = function(addr)
+{
+    if (DEBUGGER && this.dbg) {
+        this.dbg.checkMemoryRead(addr, 2);
+    }
+    return this.readWordFromPhysical(addr);
 };
 
 /**
@@ -2228,6 +2352,23 @@ CPUStatePDP11.prototype.readWordFromVirtual = function(addrVirtual)
 };
 
 /**
+ * readWordFromVirtualChecked(addrVirtual)
+ *
+ * This is a handler set up by setMemoryAccess().  All calls should go through readWord().
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} addrVirtual (input address is 17 bit (I&D))
+ * @return {number}
+ */
+CPUStatePDP11.prototype.readWordFromVirtualChecked = function(addrVirtual)
+{
+    if (DEBUGGER && this.dbg) {
+        this.dbg.checkMemoryRead(addrVirtual, 2);
+    }
+    return this.readWordFromVirtual(addrVirtual);
+};
+
+/**
  * writeWordToPhysical(addr, data)
  *
  * This is a handler set up by setMemoryAccess().  All calls should go through writeWord().
@@ -2238,9 +2379,24 @@ CPUStatePDP11.prototype.readWordFromVirtual = function(addrVirtual)
  */
 CPUStatePDP11.prototype.writeWordToPhysical = function(addr, data)
 {
-    if (addr >= BusPDP11.UNIBUS_22BIT) addr = this.mapUnibus(addr);
-    this.assert(!(data & ~0xffff));
     this.bus.setWord(this.addrLast = addr, data);
+};
+
+/**
+ * writeWordToPhysicalChecked(addr, data)
+ *
+ * This is a handler set up by setMemoryAccess().  All calls should go through writeWord().
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} addr
+ * @param {number} data
+ */
+CPUStatePDP11.prototype.writeWordToPhysicalChecked = function(addr, data)
+{
+    if (DEBUGGER && this.dbg) {
+        this.dbg.checkMemoryWrite(addr, 2);
+    }
+    this.writeWordToPhysical(addr, data);
 };
 
 /**
@@ -2255,6 +2411,23 @@ CPUStatePDP11.prototype.writeWordToPhysical = function(addr, data)
 CPUStatePDP11.prototype.writeWordToVirtual = function(addrVirtual, data)
 {
     this.bus.setWord(this.addrLast = this.mapVirtualToPhysical(addrVirtual, PDP11.ACCESS.WRITE_WORD), data);
+};
+
+/**
+ * writeWordToVirtualChecked(addrVirtual, data)
+ *
+ * This is a handler set up by setMemoryAccess().  All calls should go through writeWord().
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} addrVirtual (input address is 17 bit (I&D))
+ * @param {number} data
+ */
+CPUStatePDP11.prototype.writeWordToVirtualChecked = function(addrVirtual, data)
+{
+    if (DEBUGGER && this.dbg) {
+        this.dbg.checkMemoryWrite(addrVirtual, 2);
+    }
+    this.writeWordToVirtual(addrVirtual, data);
 };
 
 /**
@@ -2312,14 +2485,14 @@ CPUStatePDP11.prototype.writeWordToPrevSpace = function(opCode, access, data)
         if (!(access & PDP11.ACCESS.DSPACE)) addr &= 0xffff;
         /*
          * TODO: Consider replacing the following code with writeWord(), by adding optional pswMode
-         * parameters for each of the discrete mapVirtualToPhysical() and bus.setWord() operations, because
+         * parameters for each of the discrete mapVirtualToPhysical() and setWord() operations, because
          * as it stands, this is the only remaining call to mapVirtualToPhysical() outside of our
          * setMemoryAccess() handlers.
          */
         this.pswMode = (this.regPSW >> 12) & 3;
         addr = this.mapVirtualToPhysical(addr | (access & PDP11.ACCESS.DSPACE), PDP11.ACCESS.WRITE);
         this.pswMode = (this.regPSW >> 14) & 3;
-        this.bus.setWord(addr, data);
+        this.setWord(addr, data);
     }
 };
 
@@ -2344,7 +2517,7 @@ CPUStatePDP11.prototype.readSrcByte = function(opCode)
     if (!mode) {
         result = this.regsGen[reg + this.offRegSrc] & this.maskRegSrcByte;
     } else {
-        result = this.readByteFromPhysical(this.getAddr(mode, reg, PDP11.ACCESS.READ_BYTE));
+        result = this.getByte(this.getAddr(mode, reg, PDP11.ACCESS.READ_BYTE));
     }
     return result;
 };
@@ -2386,7 +2559,7 @@ CPUStatePDP11.prototype.readSrcWord = function(opCode)
     if (!mode) {
         result = this.regsGen[reg + this.offRegSrc];
     } else {
-        result = this.bus.getWord(this.getAddr(mode, reg, PDP11.ACCESS.READ_WORD));
+        result = this.getWord(this.getAddr(mode, reg, PDP11.ACCESS.READ_WORD));
     }
     return result;
 };
@@ -2420,7 +2593,7 @@ CPUStatePDP11.prototype.readDstByte = function(opCode)
     if (!mode) {
         result = this.regsGen[reg] & 0xff;
     } else {
-        result = this.readByteFromPhysical(this.getAddr(mode, reg, PDP11.ACCESS.READ_BYTE));
+        result = this.getByte(this.getAddr(mode, reg, PDP11.ACCESS.READ_BYTE));
     }
     return result;
 };
@@ -2440,7 +2613,7 @@ CPUStatePDP11.prototype.readDstWord = function(opCode)
     if (!mode) {
         result = this.regsGen[reg];
     } else {
-        result = this.bus.getWord(this.getAddr(mode, reg, PDP11.ACCESS.READ_WORD));
+        result = this.getWord(this.getAddr(mode, reg, PDP11.ACCESS.READ_WORD));
     }
     return result;
 };
@@ -2466,7 +2639,8 @@ CPUStatePDP11.prototype.updateDstByte = function(opCode, data, fnOp)
     } else {
         var addr = this.dstAddr = this.getAddr(mode, reg, PDP11.ACCESS.UPDATE_BYTE);
         data = (data < 0? (this.regsGen[-data-1] & 0xff) : data);
-        this.writeByteToPhysical(addr, fnOp.call(this, data, this.readByteFromPhysical(addr)));
+        this.setByte(addr, fnOp.call(this, data, this.getByte(addr)));
+        if (addr & 1) this.nStepCycles--;
     }
 };
 
@@ -2491,7 +2665,7 @@ CPUStatePDP11.prototype.updateDstWord = function(opCode, data, fnOp)
         this.regsGen[reg] = fnOp.call(this, data < 0? this.regsGen[-data-1] : data, this.regsGen[reg]);
     } else {
         var addr = this.getAddr(mode, reg, PDP11.ACCESS.UPDATE_WORD);
-        this.bus.setWord(addr, fnOp.call(this, data < 0? this.regsGen[-data-1] : data, this.bus.getWord(addr)));
+        this.setWord(addr, fnOp.call(this, data < 0? this.regsGen[-data-1] : data, this.getWord(addr)));
     }
 };
 
@@ -2529,7 +2703,8 @@ CPUStatePDP11.prototype.writeDstByte = function(opCode, data, writeFlags, fnFlag
     } else {
         var addr = this.getAddr(mode, reg, PDP11.ACCESS.WRITE_BYTE);
         fnFlags.call(this, (data = data < 0? (this.regsGen[-data-1] & 0xff) : data) << 8);
-        this.writeByteToPhysical(addr, data);
+        this.setByte(addr, data);
+        if (addr & 1) this.nStepCycles--;
     }
 };
 
@@ -2556,7 +2731,7 @@ CPUStatePDP11.prototype.writeDstWord = function(opCode, data, fnFlags)
     } else {
         var addr = this.getAddr(mode, reg, PDP11.ACCESS.WRITE_WORD);
         fnFlags.call(this, (data = data < 0? this.regsGen[-data-1] : data));
-        this.bus.setWord(addr, data);
+        this.setWord(addr, data);
     }
 };
 

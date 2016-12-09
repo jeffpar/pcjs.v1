@@ -162,6 +162,7 @@ BusPDP11.IOPAGE_LENGTH  =   0x2000;                             // ie, 8Kb
 BusPDP11.IOPAGE_MASK    = BusPDP11.IOPAGE_LENGTH - 1;
 
 BusPDP11.UNIBUS_22BIT   = 0x3C0000; /*017000000*/
+BusPDP11.MASK_22BIT     = 0x3FFFFF; /*017777777*/
 
 BusPDP11.ERROR = {
     RANGE_INUSE:        1,
@@ -235,10 +236,6 @@ BusPDP11.IOController = {
         var bus = this.controller;
         var afn = bus.aIOHandlers[off];
 
-        if (DEBUGGER && this.dbg) {
-            this.dbg.checkMemoryRead(addr, 1);
-        }
-
         /*
          * Since addr is primarily used to advise an I/O handler of the target IOPAGE address, and since we don't want
          * our handlers to worry about the current IOPAGE location, we truncate addr to 16 bits (the IOPAGE's lowest location).
@@ -298,10 +295,6 @@ BusPDP11.IOController = {
         var fWrite = false;
         var bus = this.controller;
         var afn = bus.aIOHandlers[off];
-
-        if (DEBUGGER && this.dbg) {
-            this.dbg.checkMemoryWrite(addr, 1);
-        }
 
         /*
          * Since addr is primarily used to advise an I/O handler of the target IOPAGE address, and since we don't want
@@ -381,10 +374,6 @@ BusPDP11.IOController = {
         var bus = this.controller;
         var afn = bus.aIOHandlers[off];
 
-        if (DEBUGGER && this.dbg) {
-            this.dbg.checkMemoryRead(addr, 2);
-        }
-
         /*
          * Since addr is primarily used to advise an I/O handler of the target IOPAGE address, and since we don't want
          * our handlers to worry about the current IOPAGE location, we truncate addr to 16 bits (the IOPAGE's lowest location).
@@ -425,10 +414,6 @@ BusPDP11.IOController = {
         var fWrite = false;
         var bus = this.controller;
         var afn = bus.aIOHandlers[off];
-
-        if (DEBUGGER && this.dbg) {
-            this.dbg.checkMemoryWrite(addr, 2);
-        }
 
         /*
          * Since addr is primarily used to advise an I/O handler of the target IOPAGE address, and since we don't want
@@ -1356,7 +1341,7 @@ BusPDP11.prototype.getAddrByName = function(sName)
         var off = +i;
         var afn = this.aIOHandlers[off];
         if (afn[BusPDP11.IOHANDLER.REG_NAME] == sName) {
-            return off +  this.addrIOPage;
+            return this.addrIOPage + off;
         }
     }
     return null;

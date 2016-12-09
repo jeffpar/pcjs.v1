@@ -55,6 +55,7 @@ if (DEBUGGER) {
  *      addr            address
  *      fPhysical       true if this is a physical address
  *      fTemporary      true if this is a temporary breakpoint address
+ *      nBase           set if the address contained an explicit base (eg, 16, 10, 8, etc)
  *      sCmd            set for breakpoint addresses if there's an associated command string
  *      aCmds           preprocessed commands (from sCmd)
  *
@@ -62,6 +63,7 @@ if (DEBUGGER) {
  *      addr:(number|undefined),
  *      fPhysical:(boolean|undefined),
  *      fTemporary:(boolean|undefined),
+ *      nBase:(number|undefined),
  *      sCmd:(string|undefined),
  *      aCmds:(Array.<string>|undefined)
  * }} DbgAddrPDP11
@@ -266,14 +268,14 @@ if (DEBUGGER) {
     /*
      * Register numbers 0-7 are reserved for cpu.regsGen, 8-15 are reserved for cpu.regsAlt, and 16-19 for cpu.regsStack.
      */
-    DebuggerPDP11.REG_PSW       = 20;
-    DebuggerPDP11.REG_PIR       = 21;
-    DebuggerPDP11.REG_ERR       = 22;
+    DebuggerPDP11.REG_PS        = 20;
+    DebuggerPDP11.REG_PI        = 21;
+    DebuggerPDP11.REG_ER        = 22;
     DebuggerPDP11.REG_SL        = 23;
-    DebuggerPDP11.REG_MMR0      = 24;
-    DebuggerPDP11.REG_MMR1      = 25;
-    DebuggerPDP11.REG_MMR2      = 26;
-    DebuggerPDP11.REG_MMR3      = 27;
+    DebuggerPDP11.REG_M0        = 24;
+    DebuggerPDP11.REG_M1        = 25;
+    DebuggerPDP11.REG_M2        = 26;
+    DebuggerPDP11.REG_M3        = 27;
     DebuggerPDP11.REG_AR        = 28;           // ADDRESS register; see Panel's getAR() and setAR()
     DebuggerPDP11.REG_DR        = 29;           // DISPLAY/DATA register; see Panel's getDR() and setDR()
     DebuggerPDP11.REG_SR        = 30;           // SWITCH register; see Panel's getSR() and setSR()
@@ -281,14 +283,14 @@ if (DEBUGGER) {
     DebuggerPDP11.REGS = {
         "SP":   6,
         "PC":   7,
-        "PS":   DebuggerPDP11.REG_PSW,
-        "IR":   DebuggerPDP11.REG_PIR,
-        "ER":   DebuggerPDP11.REG_ERR,
+        "PS":   DebuggerPDP11.REG_PS,
+        "PI":   DebuggerPDP11.REG_PI,
+        "ER":   DebuggerPDP11.REG_ER,
         "SL":   DebuggerPDP11.REG_SL,
-        "MMR0": DebuggerPDP11.REG_MMR0,
-        "MMR1": DebuggerPDP11.REG_MMR1,
-        "MMR2": DebuggerPDP11.REG_MMR2,
-        "MMR3": DebuggerPDP11.REG_MMR3,
+        "M0":   DebuggerPDP11.REG_M0,
+        "M1":   DebuggerPDP11.REG_M1,
+        "M2":   DebuggerPDP11.REG_M2,
+        "M3":   DebuggerPDP11.REG_M3,
         "AR":   DebuggerPDP11.REG_AR,
         "DR":   DebuggerPDP11.REG_DR,
         "SR":   DebuggerPDP11.REG_SR
@@ -656,7 +658,7 @@ if (DEBUGGER) {
      */
     DebuggerPDP11.prototype.mapUnibus = function(addr)
     {
-        return (addr >= BusPDP11.UNIBUS_22BIT)? this.cpu.mapUnibus(addr) : addr;
+        return this.cpu.mapUnibus(addr);
     };
 
     /**
@@ -825,7 +827,7 @@ if (DEBUGGER) {
         var dbgAddr;
         var dbgAddrNext = (fCode? this.dbgAddrNextCode : this.dbgAddrNextData);
         var addr = dbgAddrNext.addr;
-        var fPhysical = false;
+        var fPhysical = false, nBase;
         if (sAddr !== undefined) {
             sAddr = this.parseReference(sAddr);
             var ch = sAddr.charAt(0);
@@ -835,10 +837,18 @@ if (DEBUGGER) {
             }
             dbgAddr = this.findSymbolAddr(sAddr);
             if (dbgAddr) return dbgAddr;
+            if (sAddr.indexOf("0x") >= 0) {
+                nBase = 16
+            } else if (sAddr.indexOf("0o") >= 0) {
+                nBase = 8;
+            } else if (sAddr.indexOf('.') >= 0) {
+                nBase = 10;
+            }
             addr = this.parseExpression(sAddr, fPrint);
         }
         if (addr != null) {
             dbgAddr = this.newAddr(addr, fPhysical);
+            dbgAddr.nBase = nBase;
         }
         return dbgAddr;
     };
@@ -895,7 +905,7 @@ if (DEBUGGER) {
      */
     DebuggerPDP11.prototype.toStrAddr = function(dbgAddr)
     {
-        return this.toStrOffset(dbgAddr.addr);
+        return (dbgAddr.fPhysical? '%' : '') + this.toStrOffset(dbgAddr.addr);
     };
 
     /**
@@ -943,8 +953,8 @@ if (DEBUGGER) {
             n = 1;
         }
 
-        this.println("blockid   physical   blockaddr   used    size    type");
-        this.println("--------  ---------  ----------  ------  ------  ----");
+        this.println("blockid   physical   blockaddr  used    size    type");
+        this.println("--------  ---------  ---------  ------  ------  ----");
 
         var typePrev = -1, cPrev = 0;
         while (n--) {
@@ -955,7 +965,7 @@ if (DEBUGGER) {
                 typePrev = block.type;
                 var sType = MemoryPDP11.TYPE_NAMES[typePrev];
                 if (block) {
-                    this.println(str.toHex(block.id, 8) + "  %" + str.toHex(i << this.bus.nBlockShift, 8) + "  %%" + str.toHex(block.addr, 8) + "  " + str.toHexWord(block.used) + "  " + str.toHexWord(block.size) + "  " + sType);
+                    this.println(str.toHex(block.id, 8) + "  %" + str.toHex(i << this.bus.nBlockShift, 8) + "  %" + str.toHex(block.addr, 8) + "  " + str.toHexWord(block.used) + "  " + str.toHexWord(block.size) + "  " + sType);
                 }
                 if (typePrev != MemoryPDP11.TYPE.NONE) typePrev = -1;
                 cPrev = 0;
@@ -1209,28 +1219,28 @@ if (DEBUGGER) {
                 var cpu = this.cpu;
                 var panel = this.panel;
                 switch(iReg) {
-                case DebuggerPDP11.REG_PSW:
+                case DebuggerPDP11.REG_PS:
                     value = this.cpu.getPSW();
                     break;
-                case DebuggerPDP11.REG_PIR:
-                    value = cpu.regPIR;
+                case DebuggerPDP11.REG_PI:
+                    value = cpu.getPIR();
                     break;
-                case DebuggerPDP11.REG_ERR:
+                case DebuggerPDP11.REG_ER:
                     value = cpu.regErr;
                     break;
                 case DebuggerPDP11.REG_SL:
-                    value = cpu.regSL;
+                    value = cpu.getSLR();
                     break;
-                case DebuggerPDP11.REG_MMR0:
+                case DebuggerPDP11.REG_M0:
                     value = cpu.getMMR0();
                     break;
-                case DebuggerPDP11.REG_MMR1:
+                case DebuggerPDP11.REG_M1:
                     value = cpu.getMMR1();
                     break;
-                case DebuggerPDP11.REG_MMR2:
+                case DebuggerPDP11.REG_M2:
                     value = cpu.getMMR2();
                     break;
-                case DebuggerPDP11.REG_MMR3:
+                case DebuggerPDP11.REG_M3:
                     value = cpu.getMMR3();
                     break;
                 case DebuggerPDP11.REG_AR:
@@ -1248,20 +1258,6 @@ if (DEBUGGER) {
             }
         }
         return value;
-    };
-
-    /**
-     * getSymbolValue(sSymbol)
-     *
-     * NOTE: At this time, the only symbols we support are those IOPAGE symbols that the Bus component knows about.
-     *
-     * @this {DebuggerPDP11}
-     * @param {string} sSymbol
-     * @return {number|undefined|null}
-     */
-    DebuggerPDP11.prototype.getSymbolValue = function(sSymbol)
-    {
-        return this.bus.getAddrByName(sSymbol);
     };
 
     /**
@@ -1731,12 +1727,40 @@ if (DEBUGGER) {
         var cpu = this.cpu;
 
         /*
-         * Since opHalt() will rewind the PC on a HALT, purely for our debugging benefit, we must compensate
-         * for that here by skipping over the HALT if/when the machine starts up again.
+         * If opHalt() calls our stopInstruction() function, it will effectively rewind the PC back to the HALT,
+         * purely for our debugging benefit, so we must compensate for that here by advancing the PC past the HALT
+         * when the machine starts up again.
          */
         if (!nState) {
             opCode = this.cpu.getWordSafe(addr);
-            if (opCode == PDP11.OPCODE.HALT) {
+            /*
+             * We have to be careful about this HALT-skipping code, because as fate would have it, I inadvertently
+             * stopped the following diagnostic with a breakpoint *on* a HALT instruction:
+             *
+             *      .R EKBEE1
+             *      EKBEE1.BIC
+             *
+             *      CEKBEE0 11/70 MEM MGMT
+             *
+             *      CPU UNDER TEST FOUND TO BE A KB11-CM
+             *      bp 033330 hit
+             *      stopped (28339757 instructions, 123994176 cycles, 19177 ms, 6465775 hz)
+             *      R0=140000 R1=033330 R2=100143 R3=133260 R4=000000 R5=177700
+             *      SP=000600 PC=033330 PS=140000 IR=000000 SL=000377 T0 N0 Z0 V0 C0
+             *      033330: 000000                 HALT
+             *
+             * Since we haven't executed the HALT yet, it would be wrong (and would cause a diagnostic failure) to
+             * skip over it.  In this particular case, the PDR for the address of the HALT instruction was invalid,
+             * so the HALT gets fetched but not executed.
+             *
+             * My first thought was that maybe we need to probe the address more thoroughly (getWordSafe() does
+             * not), but it should be sufficient to simply confirm that the PC of the last opcode executed matches
+             * the addr of this HALT.
+             *
+             * Yes, I could save myself this grief by eliminating these PC hacks, both here and in stopInstruction(),
+             * but I still think it's a useful debugging aid.
+             */
+            if (opCode == PDP11.OPCODE.HALT && this.cpu.getLastPC() == addr) {
                 addr = this.cpu.advancePC(2);
             }
         }
@@ -1873,19 +1897,29 @@ if (DEBUGGER) {
      */
     DebuggerPDP11.prototype.clearBreakpoints = function()
     {
-        var i, dbgAddr;
+        var i, dbgAddr, addr;
         this.aBreakExec = ["bp"];
         if (this.aBreakRead !== undefined) {
             for (i = 1; i < this.aBreakRead.length; i++) {
                 dbgAddr = this.aBreakRead[i];
-                this.bus.removeMemBreak(this.getAddr(dbgAddr), false);
+                addr = this.getAddr(dbgAddr);
+                if (!dbgAddr.fPhysical) {
+                    this.cpu.removeMemBreak(addr, false);
+                } else {
+                    this.bus.removeMemBreak(addr, false);
+                }
             }
         }
         this.aBreakRead = ["br"];
         if (this.aBreakWrite !== undefined) {
             for (i = 1; i < this.aBreakWrite.length; i++) {
                 dbgAddr = this.aBreakWrite[i];
-                this.bus.removeMemBreak(this.getAddr(dbgAddr), true);
+                addr = this.getAddr(dbgAddr);
+                if (!dbgAddr.fPhysical) {
+                    this.cpu.removeMemBreak(addr, true);
+                } else {
+                    this.bus.removeMemBreak(addr, true);
+                }
             }
         }
         this.aBreakWrite = ["bw"];
@@ -1947,7 +1981,17 @@ if (DEBUGGER) {
                 this.println("invalid address: " + this.toStrAddr(dbgAddr));
                 fSuccess = false;
             } else {
-                this.bus.addMemBreak(addr, aBreak == this.aBreakWrite);
+                var fWrite = (aBreak == this.aBreakWrite);
+                /*
+                 * We automatically promote any read/write breakpoint address to fPhysical if it's
+                 * outside the 16-bit virtual address range.
+                 */
+                if (addr > 0xffff) dbgAddr.fPhysical = true;
+                if (!dbgAddr.fPhysical) {
+                    this.cpu.addMemBreak(addr, fWrite);
+                } else {
+                    this.bus.addMemBreak(addr, fWrite);
+                }
             }
         }
 
@@ -1993,7 +2037,12 @@ if (DEBUGGER) {
                         }
                         aBreak.splice(i, 1);
                         if (aBreak != this.aBreakExec) {
-                            this.bus.removeMemBreak(addr, aBreak == this.aBreakWrite);
+                            var fWrite = (aBreak == this.aBreakWrite);
+                            if (!dbgAddrBreak.fPhysical) {
+                                this.cpu.removeMemBreak(addr, fWrite);
+                            } else {
+                                this.bus.removeMemBreak(addr, fWrite);
+                            }
                         }
                         /*
                          * We'll mirror the logic in addBreakpoint() and leave the history buffer alone if this
@@ -2087,8 +2136,8 @@ if (DEBUGGER) {
     DebuggerPDP11.prototype.checkBreakpoint = function(addr, nb, aBreak, fTemporary)
     {
         /*
-         * Time to check for execution breakpoints; note that this should be done BEFORE updating
-         * history data (see checkInstruction), since we might not actually execute the current instruction.
+         * Time to check for breakpoints; note that this should be done BEFORE updating history data
+         * (see checkInstruction), since we might not actually execute the current instruction.
          */
         var fBreak = false;
 
@@ -2101,11 +2150,11 @@ if (DEBUGGER) {
                 if (fTemporary && !dbgAddrBreak.fTemporary) continue;
 
                 /*
-                 * Since we're checking an execution address, which is always virtual, and virtual
+                 * If we're checking an execution address, which is always virtual, and virtual
                  * addresses are always restricted to 16 bits, let's mask the breakpoint address to match
                  * (the user should know better, but we'll be nice).
                  */
-                var addrBreak = this.getAddr(dbgAddrBreak) & 0xffff;
+                var addrBreak = this.getAddr(dbgAddrBreak) & (aBreak == this.aBreakExec? 0xffff : -1);
                 for (var n = 0; n < nb; n++) {
 
                     if ((addr + n) != addrBreak) continue;
@@ -2510,29 +2559,29 @@ if (DEBUGGER) {
         }
         else {
             switch(iReg) {
-            case DebuggerPDP11.REG_PSW:
+            case DebuggerPDP11.REG_PS:
                 sReg = "PS=" + this.toStrBase(cpu.getPSW());
                 break;
-            case DebuggerPDP11.REG_PIR:
-                sReg = "IR=" + this.toStrBase(cpu.regPIR);
+            case DebuggerPDP11.REG_PI:
+                sReg = "PI=" + this.toStrBase(cpu.getPIR());
                 break;
-            case DebuggerPDP11.REG_ERR:
+            case DebuggerPDP11.REG_ER:
                 sReg = "ER=" + this.toStrBase(cpu.regErr);
                 break;
             case DebuggerPDP11.REG_SL:
-                sReg = "SL=" + this.toStrBase(cpu.regSL);
+                sReg = "SL=" + this.toStrBase(cpu.getSLR());
                 break;
-            case DebuggerPDP11.REG_MMR0:
-                sReg = "MMR0=" + this.toStrBase(cpu.getMMR0());
+            case DebuggerPDP11.REG_M0:
+                sReg = "M0=" + this.toStrBase(cpu.getMMR0());
                 break;
-            case DebuggerPDP11.REG_MMR1:
-                sReg = "MMR1=" + this.toStrBase(cpu.getMMR1());
+            case DebuggerPDP11.REG_M1:
+                sReg = "M1=" + this.toStrBase(cpu.getMMR1());
                 break;
-            case DebuggerPDP11.REG_MMR2:
-                sReg = "MMR2=" + this.toStrBase(cpu.getMMR2());
+            case DebuggerPDP11.REG_M2:
+                sReg = "M2=" + this.toStrBase(cpu.getMMR2());
                 break;
-            case DebuggerPDP11.REG_MMR3:
-                sReg = "MMR3=" + this.toStrBase(cpu.getMMR3());
+            case DebuggerPDP11.REG_M3:
+                sReg = "M3=" + this.toStrBase(cpu.getMMR3());
                 break;
             case DebuggerPDP11.REG_AR:
                 if (this.panel) {
@@ -2560,7 +2609,7 @@ if (DEBUGGER) {
      *
      * Sample register dump:
      *
-     *      MMR0=xxxxxx MMR1=xxxxxx MMR2=xxxxxx MMR3=xxxxxx ER=xxxxxx
+     *      M0=xxxxxx M1=xxxxxx M2=xxxxxx M3=xxxxxx ER=xxxxxx
      *
      * @this {DebuggerPDP11}
      * @return {string}
@@ -2568,8 +2617,8 @@ if (DEBUGGER) {
     DebuggerPDP11.prototype.getMiscDump = function()
     {
         var sDump = "";
-        sDump += this.getRegOutput(DebuggerPDP11.REG_MMR0) + this.getRegOutput(DebuggerPDP11.REG_MMR1);
-        sDump += this.getRegOutput(DebuggerPDP11.REG_MMR2) + this.getRegOutput(DebuggerPDP11.REG_MMR3) + this.getRegOutput(DebuggerPDP11.REG_ERR);
+        sDump += this.getRegOutput(DebuggerPDP11.REG_M0) + this.getRegOutput(DebuggerPDP11.REG_M1);
+        sDump += this.getRegOutput(DebuggerPDP11.REG_M2) + this.getRegOutput(DebuggerPDP11.REG_M3) + this.getRegOutput(DebuggerPDP11.REG_ER);
         sDump += '\n';
         sDump += this.getRegOutput(DebuggerPDP11.REG_SR) + this.getRegOutput(DebuggerPDP11.REG_AR) + this.getRegOutput(DebuggerPDP11.REG_DR);
         return sDump;
@@ -2581,7 +2630,7 @@ if (DEBUGGER) {
      * Sample register dump:
      *
      *      R0=xxxxxx R1=xxxxxx R2=xxxxxx R3=xxxxxx R4=xxxxxx R5=xxxxxx
-     *      SP=xxxxxx PC=xxxxxx PS=xxxxxx IR=xxxxxx SL=xxxxxx T0 N0 Z0 V0 C0
+     *      SP=xxxxxx PC=xxxxxx PS=xxxxxx PI=xxxxxx SL=xxxxxx T0 N0 Z0 V0 C0
      *
      * @this {DebuggerPDP11}
      * @param {boolean} [fMisc] (true to include misc registers)
@@ -2596,7 +2645,7 @@ if (DEBUGGER) {
         }
         sDump += '\n';
         sDump += this.getRegOutput(PDP11.REG.SP) + this.getRegOutput(PDP11.REG.PC);
-        sDump += this.getRegOutput(DebuggerPDP11.REG_PSW) + this.getRegOutput(DebuggerPDP11.REG_PIR) + this.getRegOutput(DebuggerPDP11.REG_SL);
+        sDump += this.getRegOutput(DebuggerPDP11.REG_PS) + this.getRegOutput(DebuggerPDP11.REG_PI) + this.getRegOutput(DebuggerPDP11.REG_SL);
         sDump += this.getFlagOutput('T') + this.getFlagOutput('N') + this.getFlagOutput('Z') + this.getFlagOutput('V') + this.getFlagOutput('C');
         if (fMisc) sDump += '\n' + this.getMiscDump();
         return sDump;
@@ -2783,7 +2832,7 @@ if (DEBUGGER) {
     /**
      * findSymbolAddr(sSymbol)
      *
-     * Search aSymbolTable for sSymbol, and if found, return a dbgAddr (same as parseAddr())
+     * Search our symbol tables for sSymbol, and if found, return a dbgAddr (same as parseAddr()).
      *
      * @this {DebuggerPDP11}
      * @param {string} sSymbol
@@ -2792,29 +2841,30 @@ if (DEBUGGER) {
     DebuggerPDP11.prototype.findSymbolAddr = function(sSymbol)
     {
         var dbgAddr;
-        if (sSymbol.match(/^[a-z_][a-z0-9_]*$/i)) {
+        var offSymbol = this.bus.getAddrByName(sSymbol);
+
+        if (offSymbol == null && sSymbol.match(/^[a-z_][a-z0-9_]*$/i)) {
             var sUpperCase = sSymbol.toUpperCase();
             for (var iTable = 0; iTable < this.aSymbolTable.length; iTable++) {
                 var symbolTable = this.aSymbolTable[iTable];
                 var symbol = symbolTable.aSymbols[sUpperCase];
-                if (symbol !== undefined) {
-                    var offSymbol = symbol['o'];
-                    if (offSymbol !== undefined) {
-                        /*
-                         * We assume that every ROM is ORG'ed at 0x0000, and therefore unless the symbol has an
-                         * explicitly-defined segment, we return the segment associated with the entire group; for
-                         * a ROM, that segment is normally "addrROM >>> 4".  Down the road, we may want/need to
-                         * support a special symbol entry (eg, ".ORG") that defines an alternate origin.
-                         */
-                        dbgAddr = this.newAddr(offSymbol);
-                    }
+                if (symbol != null) {
+                    offSymbol = symbol['o'];
                     /*
-                     * The symbol matched, but it wasn't for an address (no 'o' offset), and there's no point
-                     * looking any farther, since each symbol appears only once, so we indicate it's an unknown symbol.
+                     * If the symbol matched but there's no 'o' offset (ie, it wasn't for an address), there's
+                     * no point looking any farther, since each symbol appears only once.
+                     *
+                     * NOTE: We assume that every ROM is ORG'ed at 0x0000, and therefore unless the symbol has an
+                     * explicitly-defined segment, we return the segment associated with the entire group; for a ROM,
+                     * that segment is normally "addrROM >>> 4".  Down the road, we may want/need to support a special
+                     * symbol entry (eg, ".ORG") that defines an alternate origin.
                      */
                     break;
                 }
             }
+        }
+        if (offSymbol != null) {
+            dbgAddr = this.newAddr(offSymbol);
         }
         return dbgAddr;
     };
@@ -3134,41 +3184,52 @@ if (DEBUGGER) {
              *
              *                      00,010,011,000,100,010  00000023042
              *                           0,011,000,100,010  00000003042
-             *   + KIPAR[1]: 0,000,001,101,111,010,000,000  00000157200
-             *   & MMU MASK: 1,111,111,111,111,111,111,111  00017777777
+             *   +   KIPAR1: 0,000,001,101,111,010,000,000  00000157200
+             *   &  MMUMASK: 1,111,111,111,111,111,111,111  00017777777
              *   = PHYSICAL: 0,000,001,110,010,010,100,010  00000162242
              */
-            var a = this.cpu.getAddrInfo(dbgAddr.addr);
+            var a = this.cpu.getAddrInfo(dbgAddr.addr, dbgAddr.fPhysical || dbgAddr.addr > 0xffff);
             this.println(str.pad("", 19) + str.toBin(dbgAddr.addr, 17, 3) + "  " + str.toOct(dbgAddr.addr, 8));
-            if (a.length > 1) {
+            if (a.length < 6) {
+                if (a.length > 2) {
+                    this.println("UNIMAP[" + str.toDec(a[1], 2) + "]: " + str.toBin(a[2], 22, 3) + "  " + str.toOct(a[2], 8));
+                    this.println("    OFFSET:             " + str.toBin(a[3], 13, 3) + "  " + str.toOct(a[3], 8));
+                }
+                this.println("  PHYSICAL: " + str.toBin(a[0], 22, 3) + "  " + str.toOct(a[0], 8))
+            } else {
                 this.println(str.pad("", 24) + str.toBin(a[1], 13, 3) + "  " + str.toOct(a[1], 8));
-                this.println("+ " + DebuggerPDP11.MODES[a[2]] + "PAR[" + a[3] + "]: " + str.toBin(a[4], 22, 3) + "  " + str.toOct(a[4], 8));
-                this.println("& MMU MASK: " + str.toBin(a[5], 22, 3) + "  " + str.toOct(a[5], 8));
+                this.println("+   " + DebuggerPDP11.MODES[a[2]] + "PAR" + a[3] + ": " + str.toBin(a[4], 22, 3) + "  " + str.toOct(a[4], 8));
+                this.println("&  MMUMASK: " + str.toBin(a[5], 22, 3) + "  " + str.toOct(a[5], 8));
                 this.println("= PHYSICAL: " + str.toBin(a[0], 22, 3) + "  " + str.toOct(a[0], 8))
             }
             return;
         }
 
-        var len = 0;                            // 0 is not a default; it triggers the appropriate default below
-        var fRange = false;
+        var len = 0;
         var fJSON = (sCmd == "ds");
 
         if (sLen) {
-            fRange = true;
             if (sLen.charAt(0) == 'l') {
-                fRange = false;
                 sLen = sLen.substr(1) || sBytes;
+                len = this.parseValue(sLen);
             }
-            len = this.parseValue(sLen) >>> 0;  // negative lengths not allowed
-            if (len > 0x10000) len = 0x10000;   // prevent bad user (or variable) input from producing excessive output
+            else {
+                var dbgAddrEnd = this.parseAddr(sLen);
+                if (dbgAddrEnd) len = dbgAddrEnd.addr - dbgAddr.addr;
+            }
+            if (len < 0) len = 0;
+            if (len > 0x10000) len = 0x10000;
         }
+
+        var nBase = this.nBase;
+        if (dbgAddr.nBase) this.nBase = dbgAddr.nBase;
 
         /*
          * I've changed the code below to effectively make "dw" the default if only "d" is specified,
          * since this is primarily a word-oriented machine.
          */
         var size = (sCmd == "dd"? 4 : (sCmd == "db"? 1 : 2));
-        var nBytes = (fRange? (len - dbgAddr.addr) : (size * len)) || 128;
+        var nBytes = (size * len) || 128;
         var nBytesPerLine = fJSON? 16 : this.nBase;
         var nLines = (((nBytes + nBytesPerLine - 1) / nBytesPerLine)|0) || 1;
 
@@ -3218,7 +3279,9 @@ if (DEBUGGER) {
         }
 
         if (sDump) this.println(sDump);
+
         this.dbgAddrNextData = dbgAddr;
+        this.nBase = nBase;
     };
 
     /**
@@ -3647,7 +3710,7 @@ if (DEBUGGER) {
                 case "PS":
                     cpu.setPSW(w);
                     break;
-                case "IR":
+                case "PI":
                     cpu.setPIR(w);
                     break;
                 case "ER":
@@ -3655,13 +3718,13 @@ if (DEBUGGER) {
                     fMisc = true;
                     break;
                 case "SL":
-                    cpu.setSL(w);
+                    cpu.setSLR(w);
                     break;
-                case "MMR0":
+                case "M0":
                     cpu.setMMR0(w);
                     fMisc = true;
                     break;
-                case "MMR3":
+                case "M3":
                     cpu.setMMR3(w);
                     fMisc = true;
                     break;
@@ -3781,6 +3844,7 @@ if (DEBUGGER) {
 
             if (opCode == PDP11.OPCODE.BPT || opCode == PDP11.OPCODE.IOT ||
                 (opCode & PDP11.OPCODE.EMT_MASK) == PDP11.OPCODE.EMT_OP ||
+                (opCode & PDP11.OPCODE.SOB_MASK) == PDP11.OPCODE.SOB_OP ||
                 (opCode & PDP11.OPCODE.TRAP_MASK) == PDP11.OPCODE.TRAP_OP) {
                 if (fCallStep) {
                     this.nStep = nStep;
@@ -3834,10 +3898,10 @@ if (DEBUGGER) {
                 var s = this.getInstruction(dbgAddr);
                 if (s.indexOf("JSR") >= 0) {
                     /*
-                     * Verify that the length of this CALL (or INT), when added to the address of the CALL (or INT),
-                     * matches the original return address.  We do this by getting the string index of the opcode bytes,
-                     * subtracting that from the string index of the next space, and dividing that difference by two,
-                     * to yield the length of the CALL (or INT) instruction, in bytes.
+                     * Verify that the length of this call, when added to the address of the call, matches
+                     * the original return address.  We do this by getting the string index of the opcode bytes,
+                     * subtracting that from the string index of the next space, and dividing that difference
+                     * by two, to yield the length of the CALL (or INT) instruction, in bytes.
                      */
                     var i = s.indexOf(' ');
                     var j = s.indexOf(' ', i+1);

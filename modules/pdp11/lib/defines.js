@@ -163,10 +163,10 @@ var PDP11 = {
      * Processor modes
      */
     MODE: {
-        KERNEL:     0x0,
-        SUPER:      0x1,
+        KERNEL:     0x0,        // 11/40 and higher only
+        SUPER:      0x1,        // 11/45 and higher only
         UNUSED:     0x2,
-        USER:       0x3,
+        USER:       0x3,        // 11/40 and higher only
         MASK:       0x3
     },
     /*
@@ -269,6 +269,8 @@ var PDP11 = {
         IOT:        0x0004,
         JSR_OP:     0x0800,
         JSR_MASK:   0xFE00,
+        SOB_OP:     0x7E00,
+        SOB_MASK:   0xFE00,
         EMT_OP:     0x8800,
         EMT_MASK:   0xFF00,
         TRAP_OP:    0x8900,
@@ -389,11 +391,11 @@ var PDP11 = {
     MMR2: {                     // 177576: virtual program counter register
     },
     MMR3: {                     // 172516: mapping register (11/44 and 11/70 only)
-        USER_D:     0x0001,
-        SUPER_D:    0x0002,
-        KERNEL_D:   0x0004,
-        MMU_22BIT:  0x0010,
-        UNIBUS_MAP: 0x0020      // UNIBUS map relocation enabled
+        USER_D:     0x0001,     // (000001)
+        SUPER_D:    0x0002,     // (000002)
+        KERNEL_D:   0x0004,     // (000004)
+        MMU_22BIT:  0x0010,     // (000020)
+        UNIBUS_MAP: 0x0020      // (000040) UNIBUS map relocation enabled
     },
     PDR: {
         ACF: {
@@ -503,44 +505,34 @@ var PDP11 = {
         KDPAR5:     0o172372,   //                                  Kernel D Page Address Register 5
         KDPAR6:     0o172374,   //                                  Kernel D Page Address Register 6
         KDPAR7:     0o172376,   //                                  Kernel D Page Address Register 7
-
         MMR3:       0o172516,   // 772516   17772516
-
         RLCS:       0o174400,   //                                  RL11 Control Status Register
         RLBA:       0o174402,   //                                  RL11 Bus Address Register
         RLDA:       0o174404,   //                                  RL11 Disk Address Register
         RLMP:       0o174406,   //                                  RL11 Multi-Purpose Register
         RLBE:       0o174410,   //                                  RL11 Bus (Address) Extension Register (RLV12 controller only)
-
         DL11:       0o176500,   //                                  DL11 Additional Register Range (ends at 0o176676)
-
         RKDS:       0o177400,   //                                  RK11 Drive Status Register
         RKER:       0o177402,   //                                  RK11 Error Register
         RKCS:       0o177404,   //                                  RK11 Control Status Register
         RKWC:       0o177406,   //                                  RK11 Word Count Register
         RKBA:       0o177410,   //                                  RK11 Bus Address Register
         RKDA:       0o177412,   //                                  RK11 Disk Address Register
-                                //                                  NOTE: 177414 is unused
+        RKUN:       0o177414,   //                                  RK11 UNUSED (just to make it clear we didn't forget something)
         RKDB:       0o177416,   //                                  RK11 Data Buffer Register
-
         LKS:        0o177546,   //                                  KW11-L Clock Status
-
         PRS:        0o177550,   //                                  PC11 (and PR11) Reader Status Register
         PRB:        0o177552,   //                                  PC11 (and PR11) Reader Buffer Register
         PPS:        0o177554,   //                                  PC11 Punch Status Register
         PPB:        0o177556,   //                                  PC11 Punch Buffer Register
-
         RCSR:       0o177560,   //                                  DL11 Receiver Status Register
         RBUF:       0o177562,   //                                  DL11 Receiver Data Buffer Register
         XCSR:       0o177564,   //                                  DL11 Transmitter Status Register
         XBUF:       0o177566,   //                                  DL11 Transmitter Data Buffer Register
-
         CNSW:       0o177570,   //                                  Console (Front Panel) Switch/Display Register
-
         MMR0:       0o177572,   // 777572   17777572
         MMR1:       0o177574,   // 777574   17777574
         MMR2:       0o177576,   // 777576   17777576
-
         UIPDR0:     0o177600,   //                                  User I Page Descriptor Register 0
         UIPDR1:     0o177602,   //                                  User I Page Descriptor Register 1
         UIPDR2:     0o177604,   //                                  User I Page Descriptor Register 2
@@ -573,7 +565,6 @@ var PDP11 = {
         UDPAR5:     0o177672,   //                                  User D Page Address Register 5
         UDPAR6:     0o177674,   //                                  User D Page Address Register 6
         UDPAR7:     0o177676,   //                                  User D Page Address Register 7
-
         R0SET0:     0o177700,   //
         R1SET0:     0o177701,   //
         R2SET0:     0o177702,   //
@@ -590,7 +581,6 @@ var PDP11 = {
         R5SET1:     0o177715,   //
         R6SUPER:    0o177716,   //
         R6USER:     0o177717,   //
-
         /*
          * This next group of registers is largely ignored; all accesses are routed to regsControl[],
          * and therefore are managed as a block of 8 "CTRL" registers.
@@ -602,9 +592,8 @@ var PDP11 = {
         CACHEC:     0o177746,   //                                  Cache Control                               (11/70 only)
         MAINT:      0o177750,   //                                  Maintenance                                 (11/70 only)
         HITMISS:    0o177752,   //                                  Hit/Miss                                    (11/70 only)
-        UNDEF1:     0o177754,
-        UNDEF2:     0o177756,
-
+        UNDEF1:     0o177754,   //
+        UNDEF2:     0o177756,   //
         LSIZE:      0o177760,   //                                  Lower Size Register (last 64-byte block #)  (11/70 only)
         HSIZE:      0o177762,   //                                  Upper Size Register (always zero)           (11/70 only)
         SYSID:      0o177764,   //                                  System ID Register                          (11/70 only)
@@ -654,7 +643,7 @@ var PDP11 = {
             BAUD:   9600
         },
         XBUF: {                 // 177566: DL11 Transmitter Data Buffer Register
-            DATA:   0x00FF      // Transmitted Data (W/O)       TODO: Determine why pdp11.js effectively defined this as 0x7F
+            DATA:   0x00FF      // Transmitted Data (W/O) (TODO: Determine why pdp11.js effectively defined this as 0x7F)
         }
     },
     KW11: {                     // KW11-L Line Time Clock (60Hz; well, OK, or 50Hz, if you're in the UK, I suppose...)
@@ -701,17 +690,17 @@ var PDP11 = {
         PRI:        5,
         VEC:        0o220,
         RKDS: {                 // 177400: Drive Status Register
-            SC:     0x000F,     // Sector Counter
-            SCESA:  0x0010,     // Sector Counter Equals Sector Address
-            WPS:    0x0020,     // Write Protected Status (set if write-protected)
-            RRDY:   0x0040,     // Read/Write/Seek Ready
-            DRDY:   0x0080,     // Drive Ready
-            SOK:    0x0100,     // Sector Counter OK
-            SIN:    0x0200,     // Seek Incomplete
-            DRU:    0x0400,     // Drive Unsafe
-            RK05:   0x0800,     // RK05 is the selected disk drive (always set)
-            DPL:    0x1000,     // Drive Power Low
-            ID:     0xE000,     // Drive ID (logical drive number of an interrupting drive)
+            SC:     0x000F,     // (000017) Sector Counter
+            SCESA:  0x0010,     // (000020) Sector Counter Equals Sector Address
+            WPS:    0x0020,     // (000040) Write Protected Status (set if write-protected)
+            RRDY:   0x0040,     // (000100) Read/Write/Seek Ready
+            DRDY:   0x0080,     // (000200) Drive Ready
+            SOK:    0x0100,     // (000400) Sector Counter OK
+            SIN:    0x0200,     // (001000) Seek Incomplete
+            DRU:    0x0400,     // (002000) Drive Unsafe
+            RK05:   0x0800,     // (004000) RK05 is the selected disk drive (always set)
+            DPL:    0x1000,     // (010000) Drive Power Low
+            ID:     0xE000,     // (160000) Drive ID (logical drive number of an interrupting drive)
             SHIFT: {
                 ID:     13
             }
@@ -733,31 +722,31 @@ var PDP11 = {
             DRE:    0x8000      // Drive Error
         },
         RKCS: {                 // 177404: Control Status Register
-            GO:     0x0001,     // Go (W/O)
-            FUNC:   0x000E,     // Function Code (F2,F1,F0) (R/W)
-            MEX:    0x0030,     // Memory Extension (R/W)
-            IE:     0x0040,     // Interrupt Enable (R/W)
-            CRDY:   0x0080,     // Controller Ready (R/O)
-            SSE:    0x0100,     // Stop on Soft Error (R/W)
-            EXB:    0x0200,     // Extra Bit (R/W)
-            FMT:    0x0400,     // Format (R/W)
-            IBA:    0x0800,     // Inhibit RKBA Increment (R/W)
-            SCP:    0x2000,     // Search Complete (R/O)
-            HE:     0x4000,     // Hard Error (R/O)
-            ERR:    0x8000,     // Composite Error (R/O) (set when any RKER bit is set)
-            UNUSED: 0x1200,     // unused
-            RMASK:  0xEFFE,     // bits readable
-            WMASK:  0x0F7F,     // bits writable
+            GO:     0x0001,     // (000001) Go (W/O)
+            FUNC:   0x000E,     // (000016) Function Code (F2,F1,F0) (R/W)
+            MEX:    0x0030,     // (000060) Memory Extension (R/W)
+            IE:     0x0040,     // (000100) Interrupt Enable (R/W)
+            CRDY:   0x0080,     // (000200) Controller Ready (R/O)
+            SSE:    0x0100,     // (000400) Stop on Soft Error (R/W)
+            EXB:    0x0200,     // (001000) Extra Bit (R/W)
+            FMT:    0x0400,     // (002000) Format (R/W)
+            IBA:    0x0800,     // (004000) Inhibit RKBA Increment (R/W)
+            SCP:    0x2000,     // (020000) Search Complete (R/O)
+            HE:     0x4000,     // (040000) Hard Error (R/O)
+            ERR:    0x8000,     // (100000) Composite Error (R/O) (set when any RKER bit is set)
+            UNUSED: 0x1200,     // (120000) unused
+            RMASK:  0xEFFE,     // (167776) bits readable
+            WMASK:  0x0F7F,     // (007577) bits writable
             SHIFT: {
                 FUNC:   1,
                 MEX:    4
             }
         },
         RKDA: {                 // 177412: Disk Address Register
-            SA:     0x000F,     // Sector Address
-            HS:     0x0010,     // Head Select (aka SUR: clear for upper disk head, set for lower)
-            CA:     0x1FE0,     // Cylinder Address (aka CYL ADDR)
-            DS:     0xE000,     // Drive Select (aka DR SEL)
+            SA:     0x000F,     // (000017) Sector Address
+            HS:     0x0010,     // (000020) Head Select (aka SUR: clear for upper disk head, set for lower)
+            CA:     0x1FE0,     // (017740) Cylinder Address (aka CYL ADDR)
+            DS:     0xE000,     // (160000) Drive Select (aka DR SEL)
             SHIFT: {
                 HS:     4,
                 CA:     5,
@@ -765,20 +754,20 @@ var PDP11 = {
             }
         },
         FUNC: {
-            CRESET: 0b000,      // Controller Reset
-            WRITE:  0b001,      // Write
-            READ:   0b010,      // Read
-            WCHK:   0b011,      // Write Check
-            SEEK:   0b100,      // Seek
-            RCHK:   0b101,      // Read Check
-            DRESET: 0b110,      // Drive Reset
-            WLOCK:  0b111       // Write Lock
+            CRESET: 0b0000,     // (00) Controller Reset
+            WRITE:  0b0010,     // (02) Write
+            READ:   0b0100,     // (04) Read
+            WCHK:   0b0110,     // (06) Write Check
+            SEEK:   0b1000,     // (10) Seek
+            RCHK:   0b1010,     // (12) Read Check
+            DRESET: 0b1100,     // (14) Drive Reset
+            WLOCK:  0b1110      // (16) Write Lock
         }
     },
     RL11: {                     // RL11 Disk Controller
         PRI:        5,
         VEC:        0o160,
-        RLCS: {                 // Control Status Register (174400)
+        RLCS: {                 // 174400: Control Status Register
             DRDY:   0x0001,     // Drive Ready (R/O)
             FUNC:   0x000E,     // Function Code (F2,F1,F0) (R/W)
             BAE:    0x0030,     // Bus Address Extension bits (BA17,BA16) (R/W)
@@ -798,13 +787,13 @@ var PDP11 = {
                 DS:     8
             }
         },
-        RLBA: {                 // Bus Address Register (174402)
+        RLBA: {                 // 174402: Bus Address Register
             WMASK:  0xFFFE      // bit 0 is effectively not writable (always zero)
         },
         /*
          * This register has 3 formats: one for Seek, another for Read/Write, and a third for Get Status
          */
-        RLDA: {                 // Disk Address Register (174404)
+        RLDA: {                 // 174404: Disk Address Register
             SEEK_CMD:   0x0001, // Seek: bit 0 must be set, bits 1 and 3 must be clear
             SEEK_DIR:   0x0004, // Direction (clear to move heads away from spindle (lower cylinder), set to move to higher cylinder)
             SEEK_HS:    0x0010, // Head Select (clear to select upper head, set to select lower head)
@@ -822,7 +811,7 @@ var PDP11 = {
         /*
          * This register has 3 formats: one for Read Header, another for Read/Write, and a third for Get Status
          */
-        RLMP: {                 // Multi-Purpose Register (177406)
+        RLMP: {                 // 177406: Multi-Purpose Register
             GS_ST: {            // Major State Code (of the drive)
                 LOADC:  0x0,    // Load Cartridge
                 SPINUP: 0x1,    // Spin-Up
@@ -847,7 +836,7 @@ var PDP11 = {
             GS_CHE:     0x4000, // Current Head Error
             GS_WDE:     0x8000  // Write Data Error
         },
-        RLBE: {                 // Bus (Address) Extension Register (174410)
+        RLBE: {                 // 174410: Bus (Address) Extension Register
             MASK:   0x003F      // bits 5-0 correspond to bus address bits 21-16
         },
         ERRC: {                 // NOTE: These error codes are pre-shifted to read/write directly from/to RLCS.ERRC
