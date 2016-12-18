@@ -32,139 +32,829 @@
 
 "use strict";
 
-if (NODE) {
-    var str           = require("../../shared/lib/strlib");
-    var web           = require("../../shared/lib/weblib");
-    var Component     = require("../../shared/lib/component");
-    var Keys          = require("../../shared/lib/keys");
-    var State         = require("../../shared/lib/state");
-    var PDP11         = require("./defines");
-    var MessagesPDP11 = require("./messages");
-}
+import Str from "../../shared/lib/strlib";
+import Web from "../../shared/lib/weblib";
+import Component from "../../shared/lib/component";
+import Keys from "../../shared/lib/keys";
+import State from "../../shared/lib/state";
+import PDP11 from "./defines";
+import MessagesPDP11 from "./messages";
 
 /**
- * SerialPortPDP11(parmsSerial)
+ * Since the Closure Compiler treats ES6 classes as @struct rather than @dict by default,
+ * it deters us from defining named properties on our components; eg:
  *
- * The SerialPort component has the following component-specific (parmsSerial) properties:
+ *      this['exports'] = {...}
  *
- *      adapter: adapter number; 0 if not defined (the PCx86 SerialPort component uses this
- *      value to set the device's internal COM number, which in turn determines other properties,
- *      such as I/O ports and IRQ; for the PDP-11, this currently has no defined use)
+ * results in an error:
  *
- *      baudReceive: the default number of bits/second that the device should receive data at;
- *      0 means use the device default (PDP11.DL11.RCSR.BAUD)
+ *      Cannot do '[]' access on a struct
  *
- *      baudTransmit: the default number of bits/second that the device should transmit data at;
- *      0 means use the device default (PDP11.DL11.XCSR.BAUD)
+ * So, in order to define 'exports', we must override the @struct assumption by annotating
+ * the class as @unrestricted (or @dict).  Note that this must be done both here and in the
+ * Component class, because otherwise the Compiler won't allow us to *reference* the named
+ * property either.
  *
- *      binding: name of a control (based on its "binding" attribute) to bind to this port's I/O
+ * TODO: Consider marking ALL our classes unrestricted, because otherwise it forces us to
+ * define every single property the class uses in its constructor, which results in a fair
+ * bit of redundant initialization, since many properties aren't (and don't need to be) fully
+ * initialized until the appropriate init(), reset(), restore(), etc. function is called.
  *
- *      tabSize: set to a non-zero number to convert tabs to spaces (applies only to output to
- *      the above binding); default is 0 (no conversion)
+ * The upside, however, may be that since the structure of the class is completely defined by
+ * the constructor, JavaScript engines may be able to optimize and run more efficiently.
  *
- *      upperCase: if true, all received input is upper-cased; it is normally the responsibility
- *      of the sending device to ensure this, but sometimes it's more convenient to enforce
- *      on the receiving end.
- *
- * NOTE: Since the XSL file defines the 'adapter' and 'baud' properties as numbers, not strings,
- * there's no need to use parseInt(), and as an added benefit, we don't need to worry about whether
- * a hex or decimal format was used.
- *
- * @constructor
- * @extends Component
- * @param {Object} parmsSerial
+ * @unrestricted
  */
-function SerialPortPDP11(parmsSerial) {
-
-    this.iAdapter = parmsSerial['adapter'];
-    this.nBaudReceive = parmsSerial['baudReceive'] || PDP11.DL11.RCSR.BAUD;
-    this.nBaudTransmit = parmsSerial['baudTransmit'] || PDP11.DL11.XCSR.BAUD;
-    this.fUpperCase = parmsSerial['upperCase'];
-
+class SerialPortPDP11 extends Component {
     /**
-     * consoleOutput becomes a string that records serial port output if the 'binding' property is set to the
-     * reserved name "console".  Nothing is written to the console, however, until a linefeed (0x0A) is output
-     * or the string length reaches a threshold (currently, 1024 characters).
+     * SerialPortPDP11(parmsSerial)
      *
-     * @type {string|null}
+     * The SerialPort component has the following component-specific (parmsSerial) properties:
+     *
+     *      adapter: adapter number; 0 if not defined (the PCx86 SerialPort component uses this
+     *      value to set the device's internal COM number, which in turn determines other properties,
+     *      such as I/O ports and IRQ; for the PDP-11, this currently has no defined use)
+     *
+     *      baudReceive: the default number of bits/second that the device should receive data at;
+     *      0 means use the device default (PDP11.DL11.RCSR.BAUD)
+     *
+     *      baudTransmit: the default number of bits/second that the device should transmit data at;
+     *      0 means use the device default (PDP11.DL11.XCSR.BAUD)
+     *
+     *      binding: name of a control (based on its "binding" attribute) to bind to this port's I/O
+     *
+     *      tabSize: set to a non-zero number to convert tabs to spaces (applies only to output to
+     *      the above binding); default is 0 (no conversion)
+     *
+     *      upperCase: if true, all received input is upper-cased; it is normally the responsibility
+     *      of the sending device to ensure this, but sometimes it's more convenient to enforce
+     *      on the receiving end.
+     *
+     * NOTE: Since the XSL file defines the 'adapter' and 'baud' properties as numbers, not strings,
+     * there's no need to use parseInt(), and as an added benefit, we don't need to worry about whether
+     * a hex or decimal format was used.
+     *
+     * @param {Object} parmsSerial
      */
-    this.consoleOutput = null;
+    constructor(parmsSerial)
+    {
+        super("SerialPort", parmsSerial, SerialPortPDP11, MessagesPDP11.SERIAL);
 
-    /**
-     * controlIOBuffer is a DOM element bound to the port (currently used for output only; see transmitByte()).
-     *
-     * Example: CTTY COM2
-     *
-     * The CTTY DOS command redirects all CON I/O to the specified serial port (eg, COM2), which it assumes is
-     * connected to a serial terminal, and therefore anything it *transmits* via COM2 will be displayed by the
-     * terminal.  It further assumes that anything typed on such a terminal is NOT displayed, so as DOS *receives*
-     * serial input, DOS *transmits* the appropriate characters back to the terminal via COM2.
-     *
-     * As a result, controlIOBuffer only needs to be updated by the transmitByte() function.
-     *
-     * @type {Object}
-     */
-    this.controlIOBuffer = null;
+        this.iAdapter = parmsSerial['adapter'];
+        this.nBaudReceive = parmsSerial['baudReceive'] || PDP11.DL11.RCSR.BAUD;
+        this.nBaudTransmit = parmsSerial['baudTransmit'] || PDP11.DL11.XCSR.BAUD;
+        this.fUpperCase = parmsSerial['upperCase'];
 
-    /*
-     * If controlIOBuffer is being used AND 'tabSize' is set, then we make an attempt to monitor the characters
-     * being echoed via transmitByte(), maintain a logical column position, and convert any tabs into the appropriate
-     * number of spaces.
-     *
-     * charBOL, if nonzero, is a character to automatically output at the beginning of every line.  This probably
-     * isn't generally useful; I use it internally to preformat serial output.
-     */
-    this.tabSize = parmsSerial['tabSize'];
-    this.charBOL = parmsSerial['charBOL'];
-    this.iLogicalCol = 0;
-    this.fNullModem = true;
-
-    Component.call(this, "SerialPort", parmsSerial, SerialPortPDP11, MessagesPDP11.SERIAL);
-
-    var sBinding = parmsSerial['binding'];
-    if (sBinding == "console") {
-        this.consoleOutput = "";
-    } else {
-        /*
-         * NOTE: If sBinding is not the name of a valid Control Panel DOM element, this call does nothing.
+        /**
+         * consoleOutput becomes a string that records serial port output if the 'binding' property is set to the
+         * reserved name "console".  Nothing is written to the console, however, until a linefeed (0x0A) is output
+         * or the string length reaches a threshold (currently, 1024 characters).
+         *
+         * @type {string|null}
          */
-        Component.bindExternalControl(this, sBinding, SerialPortPDP11.sIOBuffer);
+        this.consoleOutput = null;
+
+        /**
+         * controlIOBuffer is a DOM element bound to the port (currently used for output only; see transmitByte()).
+         *
+         * Example: CTTY COM2
+         *
+         * The CTTY DOS command redirects all CON I/O to the specified serial port (eg, COM2), which it assumes is
+         * connected to a serial terminal, and therefore anything it *transmits* via COM2 will be displayed by the
+         * terminal.  It further assumes that anything typed on such a terminal is NOT displayed, so as DOS *receives*
+         * serial input, DOS *transmits* the appropriate characters back to the terminal via COM2.
+         *
+         * As a result, controlIOBuffer only needs to be updated by the transmitByte() function.
+         *
+         * @type {Object}
+         */
+        this.controlIOBuffer = null;
+
+        /*
+         * If controlIOBuffer is being used AND 'tabSize' is set, then we make an attempt to monitor the characters
+         * being echoed via transmitByte(), maintain a logical column position, and convert any tabs into the appropriate
+         * number of spaces.
+         *
+         * charBOL, if nonzero, is a character to automatically output at the beginning of every line.  This probably
+         * isn't generally useful; I use it internally to preformat serial output.
+         */
+        this.tabSize = parmsSerial['tabSize'];
+        this.charBOL = parmsSerial['charBOL'];
+        this.iLogicalCol = 0;
+        this.fNullModem = true;
+
+        this.irqReceiver = this.irqTransmitter = null;
+        this.timerReceiveInterrupt = this.timerTransmitInterrupt = -1;
+
+        this.regRBUF = this.regRCSR = this.regXCSR = 0;
+        this.abReceive = [];
+
+        var sBinding = parmsSerial['binding'];
+        if (sBinding == "console") {
+            this.consoleOutput = "";
+        } else {
+            /*
+             * NOTE: If sBinding is not the name of a valid Control Panel DOM element, this call does nothing.
+             */
+            Component.bindExternalControl(this, sBinding, SerialPortPDP11.sIOBuffer);
+        }
+
+        /*
+         * No connection until initConnection() is called.
+         */
+        this.sDataReceived = "";
+        this.connection = this.sendData = this.updateStatus = null;
+
+        /*
+         * Export all functions required by initConnection().
+         */
+        this['exports'] = {
+            'connect': this.initConnection,
+            'receiveData': this.receiveData,
+            'receiveStatus': this.receiveStatus
+        };
     }
 
-    /*
-     * No connection until initConnection() is called.
+    /**
+     * setBinding(sType, sBinding, control, sValue)
+     *
+     * @this {SerialPortPDP11}
+     * @param {string|null} sType is the type of the HTML control (eg, "button", "textarea", "register", "flag", "rled", etc)
+     * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "buffer")
+     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {string} [sValue] optional data value
+     * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
-    this.sDataReceived = "";
-    this.connection = this.sendData = this.updateStatus = null;
+    setBinding(sType, sBinding, control, sValue)
+    {
+        var serial = this;
 
-    /*
-     * Export all functions required by initConnection().
+        switch (sBinding) {
+        case SerialPortPDP11.sIOBuffer:
+            this.bindings[sBinding] = this.controlIOBuffer = control;
+
+            /*
+             * An onkeydown handler is required for certain keys that browsers tend to consume themselves;
+             * for example, BACKSPACE is often defined as going back to the previous web page, and certain
+             * CTRL keys are often used for browser shortcuts (usually on Windows-based browsers).
+             *
+             * NOTE: We don't bother with a keyUp handler, because for the most part, we're only intercepting
+             * keys that require special treatment; in general, we're content with keyPress events.
+             */
+            control.onkeydown = function onKeyDown(event) {
+                event = event || window.event;
+                var bASCII = 0;
+                var keyCode = event.keyCode;
+                /*
+                 * Perform the same remapping of BACKSPACE and DELETE that our VT100 emulation performs,
+                 * for PCjs-wide consistency; see the KEYMAP table in /modules/pc8080/lib/keyboard.js for
+                 * the rationale.  Ditto for ALT-DELETE; see onKeyDown() in /modules/pc8080/lib/keyboard.js
+                 * for details.
+                 *
+                 * NOTE: keyDown (and keyUp) events supply us with KEYCODE values, which are NOT the same as
+                 * ASCII values, which is why we are comparing with KEYCODE values but assigning ASCII values,
+                 * because receiveData() requires ASCII values.
+                 */
+                if (keyCode == Keys.KEYCODE.BS) {
+                    bASCII = event.altKey? Keys.ASCII.CTRL_H : Keys.ASCII.DEL;
+                }
+                else if (keyCode == Keys.KEYCODE.DEL) {
+                    bASCII = Keys.ASCII.CTRL_H;
+                }
+                else if (event.ctrlKey && keyCode >= Keys.ASCII.A && keyCode <= Keys.ASCII.Z) {
+                    bASCII = keyCode - (Keys.ASCII.A - Keys.ASCII.CTRL_A);
+                }
+                if (bASCII) {
+                    if (event.preventDefault) event.preventDefault();
+                    serial.receiveData(bASCII);
+                }
+                return true;
+            };
+
+            control.onkeypress = function onKeyPress(event) {
+                /*
+                 * NOTE: Unlike keyDown events, keyPress events generally supply us with ASCII values,
+                 * despite the fact that, as above, they come to us via the keyCode property.  Yes, it's
+                 * brilliant (or rather, the opposite of brilliant), but that's life.
+                 */
+                event = event || window.event;
+                /*
+                 * Not sure why COMMAND-key combinations are coming through here (on Safari at least),
+                 * but in any case, let's make sure we don't act on them.
+                 */
+                if (!event.metaKey) {
+                    var bASCII = event.which || event.keyCode;
+                    /*
+                     * Perform the same remapping of ALT-ENTER (to LINE-FEED) that our VT100 emulation performs,
+                     * for PCjs-wide consistency; see onKeyDown() in /modules/pc8080/lib/keyboard.js for details.
+                     */
+                    if (event.altKey) {
+                        if (bASCII == Keys.ASCII.CTRL_M) {
+                            bASCII = Keys.ASCII.CTRL_J;
+                        }
+                    }
+                    serial.receiveData(bASCII);
+                    /*
+                     * Since we're going to remove the "readonly" attribute from the <textarea> control
+                     * (so that the soft keyboard activates on iOS), instead of calling preventDefault() for
+                     * selected keys (eg, the SPACE key, whose default behavior is to scroll the page), we must
+                     * now call it for *all* keys, so that the keyCode isn't added to the control immediately,
+                     * on top of whatever the machine is echoing back, resulting in double characters.
+                     */
+                    if (event.preventDefault) event.preventDefault();
+                }
+                return true;
+            };
+
+            control.onpaste = function onKeyPress(event) {
+                if (event.stopPropagation) event.stopPropagation();
+                if (event.preventDefault) event.preventDefault();
+                var clipboardData = event.clipboardData || window.clipboardData;
+                if (clipboardData) {
+                    /*
+                     * NOTE: Multiple lines of pasted text will (at least on macOS) contain LFs instead of CRs;
+                     * this is dealt with in receiveData() whenever it receives a string of characters.
+                     */
+                    serial.receiveData(clipboardData.getData('Text'));
+                }
+            };
+
+            /*
+             * Now that we've added an onkeypress handler that calls preventDefault() for ALL keys, the control
+             * itself no longer needs the "readonly" attribute; we primarily need to remove it for iOS browsers,
+             * so that the soft keyboard will activate, but it shouldn't hurt to remove the attribute for all browsers.
+             */
+            control.removeAttribute("readonly");
+
+            return true;
+
+        default:
+            break;
+        }
+        return false;
+    }
+
+    /**
+     * initBus(cmp, bus, cpu, dbg)
+     *
+     * @this {SerialPortPDP11}
+     * @param {ComputerPDP11} cmp
+     * @param {BusPDP11} bus
+     * @param {CPUStatePDP11} cpu
+     * @param {DebuggerPDP11} dbg
      */
-    this['exports'] = {
-        'connect': this.initConnection,
-        'receiveData': this.receiveData,
-        'receiveStatus': this.receiveStatus
-    };
+    initBus(cmp, bus, cpu, dbg)
+    {
+        this.cmp = cmp;
+        this.bus = bus;
+        this.cpu = cpu;
+        this.dbg = dbg;
+
+        var serial = this;
+
+        this.irqReceiver = this.cpu.addIRQ(this.iAdapter? -1 : PDP11.DL11.RVEC, PDP11.DL11.PRI, MessagesPDP11.DL11);
+
+        this.timerReceiveInterrupt = this.cpu.addTimer(function readyReceiver() {
+            var b = serial.receiveByte();
+            if (b >= 0) {
+                serial.regRBUF = b;
+                if (!(serial.regRCSR & PDP11.DL11.RCSR.RD)) {
+                    serial.regRCSR |= PDP11.DL11.RCSR.RD;
+                } else {
+                    serial.regRBUF |= PDP11.DL11.RBUF.OE | PDP11.DL11.RBUF.ERROR;
+                }
+                if (serial.regRCSR & PDP11.DL11.RCSR.RIE) {
+                    cpu.setIRQ(serial.irqReceiver);
+                }
+            }
+        });
+
+        this.irqTransmitter = this.cpu.addIRQ(this.iAdapter? -1 : PDP11.DL11.XVEC, PDP11.DL11.PRI, MessagesPDP11.DL11);
+
+        this.timerTransmitInterrupt = this.cpu.addTimer(function readyTransmitter() {
+            serial.regXCSR |= PDP11.DL11.XCSR.READY;
+            if (serial.regXCSR & PDP11.DL11.XCSR.TIE) {
+                cpu.setIRQ(serial.irqTransmitter);
+            }
+        });
+
+        bus.addIOTable(this, SerialPortPDP11.UNIBUS_IOTABLE, this.iAdapter? ((PDP11.UNIBUS.DL11 + (this.iAdapter - 1) * 8) - PDP11.UNIBUS.RCSR) : 0);
+        bus.addResetHandler(this.reset.bind(this));
+
+        this.setReady();
+    }
+
+    /**
+     * initConnection(fNullModem)
+     *
+     * If a machine 'connection' parameter exists of the form "{sourcePort}->{targetMachine}.{targetPort}",
+     * and "{sourcePort}" matches our idComponent, then look for a component with id "{targetMachine}.{targetPort}".
+     *
+     * If the target component is found, then verify that it has exported functions with the following names:
+     *
+     *      receiveData(data): called when we have data to transmit; aliased internally to sendData(data)
+     *      receiveStatus(pins): called when our control signals have changed; aliased internally to updateStatus(pins)
+     *
+     * For now, we're not going to worry about communication in the other direction, because when the target component
+     * performs its own initConnection(), it will find our receiveData() and receiveStatus() functions, at which point
+     * communication in both directions should be established, and the circle of life complete.
+     *
+     * For added robustness, if the target machine initializes much more slowly than we do, and our connection attempt
+     * fails, that's OK, because when it finally initializes, its initConnection() will call our initConnection();
+     * if we've already initialized, no harm done.
+     *
+     * @this {SerialPortPDP11}
+     * @param {boolean} [fNullModem] (caller's null-modem setting, to ensure our settings are in agreement)
+     */
+    initConnection(fNullModem)
+    {
+        if (!this.connection) {
+            var sConnection = this.cmp.getMachineParm("connection");
+            if (sConnection) {
+                var asParts = sConnection.split('->');
+                if (asParts.length == 2) {
+                    var sSourceID = Str.trim(asParts[0]);
+                    if (sSourceID != this.idComponent) return;  // this connection string is intended for another instance
+                    var sTargetID = Str.trim(asParts[1]);
+                    this.connection = Component.getComponentByID(sTargetID);
+                    if (this.connection) {
+                        var exports = this.connection['exports'];
+                        if (exports) {
+                            var fnConnect = exports['connect'];
+                            if (fnConnect) fnConnect.call(this.connection, this.fNullModem);
+                            this.sendData = exports['receiveData'];
+                            if (this.sendData) {
+                                this.fNullModem = fNullModem;
+                                this.updateStatus = exports['receiveStatus'];
+                                this.status(this.idMachine + '.' + sSourceID + " connected to " + sTargetID);
+                                return;
+                            }
+                        }
+                    }
+                }
+                /*
+                 * Changed from notice() to status() because sometimes a connection fails simply because one of us is a laggard.
+                 */
+                this.status("Unable to establish connection: " + sConnection);
+            }
+        }
+    }
+
+    /**
+     * powerUp(data, fRepower)
+     *
+     * @this {SerialPortPDP11}
+     * @param {Object|null} data
+     * @param {boolean} [fRepower]
+     * @return {boolean} true if successful, false if failure
+     */
+    powerUp(data, fRepower)
+    {
+        if (!fRepower) {
+
+            /*
+             * This is as late as we can currently wait to make our first inter-machine connection attempt;
+             * even so, the target machine's initialization process may still be ongoing, so any connection
+             * may be not fully resolved until the target machine performs its own initConnection(), which will
+             * in turn invoke our initConnection() again.
+             */
+            this.initConnection(this.fNullModem);
+
+            if (!data || !this.restore) {
+                this.reset();
+            } else {
+                if (!this.restore(data)) return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * powerDown(fSave, fShutdown)
+     *
+     * @this {SerialPortPDP11}
+     * @param {boolean} [fSave]
+     * @param {boolean} [fShutdown]
+     * @return {Object|boolean} component state if fSave; otherwise, true if successful, false if failure
+     */
+    powerDown(fSave, fShutdown)
+    {
+        return fSave? this.save() : true;
+    }
+
+    /**
+     * reset()
+     *
+     * @this {SerialPortPDP11}
+     */
+    reset()
+    {
+        this.initState();
+    }
+
+    /**
+     * save()
+     *
+     * This implements save support for the SerialPort component.
+     *
+     * @this {SerialPortPDP11}
+     * @return {Object}
+     */
+    save()
+    {
+        var state = new State(this);
+        state.set(0, this.saveRegisters());
+        return state.data();
+    }
+
+    /**
+     * restore(data)
+     *
+     * This implements restore support for the SerialPort component.
+     *
+     * @this {SerialPortPDP11}
+     * @param {Object} data
+     * @return {boolean} true if successful, false if failure
+     */
+    restore(data)
+    {
+        return this.initState(data[0]);
+    }
+
+    /**
+     * initState(data)
+     *
+     * @this {SerialPortPDP11}
+     * @param {Array} [data]
+     * @return {boolean} true if successful, false if failure
+     */
+    initState(data)
+    {
+        this.regRBUF = 0;
+        this.regRCSR = PDP11.DL11.RCSR.CTS;     // TODO: I didn't use to set this initially; is this wise?
+        this.regXCSR = PDP11.DL11.XCSR.READY;
+        this.abReceive = [];
+        return true;
+    }
+
+    /**
+     * saveRegisters()
+     *
+     * @this {SerialPortPDP11}
+     * @return {Array}
+     */
+    saveRegisters()
+    {
+        return [];
+    }
+
+    /**
+     * getBaudTimeout(nBaud)
+     *
+     * Based on the selected baud rate (nBaud), convert that rate into a millisecond delay.
+     *
+     * @this {SerialPortPDP11}
+     * @param {number} nBaud
+     * @return {number} (number of milliseconds per byte)
+     */
+    getBaudTimeout(nBaud)
+    {
+        /*
+         * TODO: Do a better job computing this, based on actual numbers of start, stop and parity bits,
+         * instead of hard-coding the total number of bits per byte to 10.
+         */
+        var nBytesPerSecond = Math.round(nBaud / 10);
+        return 1000 / nBytesPerSecond;
+    }
+
+    /**
+     * receiveData(data)
+     *
+     * This replaces the old sendRBR() function, which expected an Array of bytes.  We still support that,
+     * but in order to support connections with other SerialPort components (ie, the PC8080 SerialPort), we
+     * have added support for numbers and strings as well.
+     *
+     * @this {SerialPortPDP11}
+     * @param {number|string|Array} data
+     * @return {boolean} true if received, false if not
+     */
+    receiveData(data)
+    {
+        if (typeof data == "number") {
+            this.abReceive.push(data);
+        }
+        else if (typeof data == "string") {
+            var bASCII = 0, bASCIIPrev;
+            for (var i = 0; i < data.length; i++) {
+                bASCIIPrev = bASCII;
+                bASCII = data.charCodeAt(i);
+                /*
+                 * NOTE: Multiple lines of pasted text will (at least on macOS) contain LFs instead of CRs;
+                 * we convert them to CRs below.  Windows may do something different, but in the worst case,
+                 * even if we receive CR/LF pairs, this code should keep the CRs and lose the LFs.
+                 */
+                if (bASCII == Str.ASCII.LF) {
+                    if (bASCIIPrev == Str.ASCII.CR) continue;
+                    bASCII = Str.ASCII.CR;
+                }
+                this.abReceive.push(bASCII);
+            }
+        }
+        else {
+            this.abReceive = this.abReceive.concat(data);
+        }
+
+        this.cpu.setTimer(this.timerReceiveInterrupt, this.getBaudTimeout(this.nBaudReceive));
+
+        return true;                // for now, return true regardless, since we're buffering everything anyway
+    }
+
+    /**
+     * receiveByte()
+     *
+     * @this {SerialPortPDP11}
+     * @return {number} (0x00-0xff if byte available, -1 if not)
+     */
+    receiveByte()
+    {
+        var b = -1;
+        if (this.abReceive.length) {
+            /*
+             * Here, as elsewhere (eg, the PC11 component), even if I trusted all incoming data
+             * to be byte values (which I don't), there's also the risk that it could be signed data
+             * (eg, -128 to 127, instead of 0 to 255).  Both risks are good reasons to always mask
+             * the data assigned to RBUF with 0xff.
+             */
+            b = this.abReceive.shift() & 0xff;
+            this.printMessage("receiveByte(" + Str.toHexByte(b) + ")");
+            if (this.fUpperCase) {
+                /*
+                 * Automatically transform lower-case ASCII codes to upper-case; fUpperCase should
+                 * only be set when a terminal or some sort of pseudo-display is being used and we don't
+                 * trust it to have its CAPS-LOCK setting correct.
+                 */
+                if (b >= 0x61 && b < 0x7A) b -= 0x20;
+            }
+            this.cpu.setTimer(this.timerReceiveInterrupt, this.getBaudTimeout(this.nBaudReceive));
+        }
+        return b;
+    }
+
+    /**
+     * receiveStatus(pins)
+     *
+     * @this {SerialPortPDP11}
+     * @param {number} pins
+     */
+    receiveStatus(pins)
+    {
+        var oldRCSR = this.regRCSR;
+        this.regRCSR &= ~(PDP11.DL11.RCSR.CTS | PDP11.DL11.RCSR.CD);
+        if (pins & RS232.CTS.MASK) {
+            this.regRCSR |= PDP11.DL11.RCSR.CTS;
+        }
+        if (pins & RS232.CD.MASK) {
+            this.regRCSR |= PDP11.DL11.RCSR.CD;
+        }
+        if (oldRCSR != this.regRCSR) {
+            this.regRCSR |= PDP11.DL11.RCSR.DSC;
+            if (this.regRCSR & PDP11.DL11.RCSR.DIE) {
+                this.cpu.setIRQ(this.irqReceiver);
+            }
+        }
+    }
+
+    /**
+     * transmitByte(b)
+     *
+     * @this {SerialPortPDP11}
+     * @param {number} b
+     * @return {boolean} true if transmitted, false if not
+     */
+    transmitByte(b)
+    {
+        var fTransmitted = false;
+
+        this.printMessage("transmitByte(" + Str.toHexByte(b) + ")");
+
+        if (this.sendData) {
+            if (this.sendData.call(this.connection, b)) {
+                fTransmitted = true;
+            }
+        }
+
+        /*
+         * TODO: Why do DEC diagnostics like to output bytes with bit 7 set?
+         */
+        b &= 0x7F;
+
+        if (this.controlIOBuffer) {
+            if (b == 0x0D) {
+                this.iLogicalCol = 0;
+            }
+            else if (b == 0x08) {
+                this.controlIOBuffer.value = this.controlIOBuffer.value.slice(0, -1);
+                /*
+                 * TODO: Back up the correct number of columns if the character erased was a tab.
+                 */
+                if (this.iLogicalCol > 0) this.iLogicalCol--;
+            }
+            else if (b) {
+                /*
+                 * RT-11 outputs lots of NULL characters, at least after a "D 56=5015" (0x0A0D) command has
+                 * been issued, hence the "if (b)" check above.
+                 *
+                 * TODO: Also consider a check for Keys.ASCII.CTRL_C, because by default, RT-11 outputs "raw"
+                 * CTRL_C characters, which we capture below and render as <ETX>.  RT-11 does this for other keys
+                 * as well, such as CTRL_K (<VT>) and CTRL_L (<FF>).
+                 */
+                var s = Str.toASCIICode(b); // formerly: String.fromCharCode(b);
+                var nChars = s.length;      // formerly: (b >= 0x20? 1 : 0);
+                if (b < 0x20 && nChars == 1) nChars = 0;
+                if (b == 0x09) {
+                    var tabSize = this.tabSize || 8;
+                    nChars = tabSize - (this.iLogicalCol % tabSize);
+                    if (this.tabSize) s = Str.pad("", nChars);
+                }
+                if (this.charBOL && !this.iLogicalCol && nChars) s = String.fromCharCode(this.charBOL) + s;
+                this.controlIOBuffer.value += s;
+                this.controlIOBuffer.scrollTop = this.controlIOBuffer.scrollHeight;
+                this.iLogicalCol += nChars;
+            }
+            fTransmitted = true;
+        }
+        else if (this.consoleOutput != null) {
+            if (b == 0x0A || this.consoleOutput.length >= 1024) {
+                this.println(this.consoleOutput);
+                this.consoleOutput = "";
+            }
+            if (b != 0x0A) {
+                this.consoleOutput += String.fromCharCode(b);
+            }
+            fTransmitted = true;
+        }
+
+        /*
+         * NOTE: When debugging issues involving the SerialPort, such as debugging code between a pair of
+         * transmitted bytes, you can pass 0 instead of getBaudTimeout() to setTimer() to minimize the amount
+         * of time spent waiting for XCSR.READY to be set again.
+         */
+        this.cpu.setTimer(this.timerTransmitInterrupt, this.getBaudTimeout(this.nBaudTransmit));
+
+        return fTransmitted;
+    }
+
+    /**
+     * readRCSR(addr)
+     *
+     * @this {SerialPortPDP11}
+     * @param {number} addr (eg, PDP11.UNIBUS.RCSR or 177560)
+     * @return {number}
+     */
+    readRCSR(addr)
+    {
+        var data = this.regRCSR & PDP11.DL11.RCSR.RMASK;
+        this.regRCSR &= ~PDP11.DL11.RCSR.DSC;
+        return data;
+    }
+
+    /**
+     * writeRCSR(data, addr)
+     *
+     * @this {SerialPortPDP11}
+     * @param {number} data
+     * @param {number} addr (eg, PDP11.UNIBUS.RCSR or 177560)
+     */
+    writeRCSR(data, addr)
+    {
+        var delta = (data ^ this.regRCSR);
+        this.regRCSR = (this.regRCSR & ~PDP11.DL11.RCSR.WMASK) | (data & PDP11.DL11.RCSR.WMASK);
+        /*
+         * Whenever DTR or RTS changes, we also want to notify any connected machine, via updateStatus().
+         */
+        if (this.updateStatus) {
+            if (delta & PDP11.DL11.RCSR.RS232) {
+                var pins = 0;
+                if (this.fNullModem) {
+                    pins |= (data & PDP11.DL11.RCSR.RTS)? RS232.CTS.MASK : 0;
+                    pins |= (data & PDP11.DL11.RCSR.DTR)? (RS232.DSR.MASK | RS232.CD.MASK): 0;
+                } else {
+                    pins |= (data & PDP11.DL11.RCSR.RTS)? RS232.RTS.MASK : 0;
+                    pins |= (data & PDP11.DL11.RCSR.DTR)? RS232.DTR.MASK : 0;
+                }
+                this.updateStatus.call(this.connection, pins);
+            }
+        }
+    }
+
+    /**
+     * readRBUF(addr)
+     *
+     * @this {SerialPortPDP11}
+     * @param {number} addr (eg, PDP11.UNIBUS.RBUF or 177562)
+     * @return {number}
+     */
+    readRBUF(addr)
+    {
+        this.regRCSR &= ~PDP11.DL11.RCSR.RD;
+        return this.regRBUF;
+    }
+
+    /**
+     * writeRBUF(data, addr)
+     *
+     * @this {SerialPortPDP11}
+     * @param {number} data
+     * @param {number} addr (eg, PDP11.UNIBUS.RBUF or 177562)
+     */
+    writeRBUF(data, addr)
+    {
+    }
+
+    /**
+     * readXCSR(addr)
+     *
+     * @this {SerialPortPDP11}
+     * @param {number} addr (eg, PDP11.UNIBUS.XCSR or 177564)
+     * @return {number}
+     */
+    readXCSR(addr)
+    {
+        return this.regXCSR;
+    }
+
+    /**
+     * writeXCSR(data, addr)
+     *
+     * @this {SerialPortPDP11}
+     * @param {number} data
+     * @param {number} addr (eg, PDP11.UNIBUS.XCSR or 177564)
+     */
+    writeXCSR(data, addr)
+    {
+        /*
+         * If the device is READY, and TIE is being set, then request a hardware interrupt.
+         *
+         * Conversely, if TIE is being cleared, remove the request; this resolves a problem within
+         * MAINDEC TEST 15, where the Transmitter Interrupt Enable (TIE) bit is cleared, set, and cleared
+         * in rapid succession, with the expectation that NO interrupt will be generated.  Note that
+         * this fix also requires a complementary change in setIRQ(), to request hardware interrupts with
+         * IRQ_DELAY rather than IRQ.
+         */
+        if (this.regXCSR & PDP11.DL11.XCSR.READY) {
+            if (data & PDP11.DL11.XCSR.TIE) {
+                this.cpu.setIRQ(this.irqTransmitter);
+            } else {
+                this.cpu.clearIRQ(this.irqTransmitter);
+            }
+        }
+        this.regXCSR = (this.regXCSR & ~PDP11.DL11.XCSR.WMASK) | (data & PDP11.DL11.XCSR.WMASK);
+    }
+
+    /**
+     * readXBUF(addr)
+     *
+     * @this {SerialPortPDP11}
+     * @param {number} addr (eg, PDP11.UNIBUS.XBUF or 177566)
+     * @return {number}
+     */
+    readXBUF(addr)
+    {
+        return 0;
+    }
+
+    /**
+     * writeXBUF(data, addr)
+     *
+     * @this {SerialPortPDP11}
+     * @param {number} data
+     * @param {number} addr (eg, PDP11.UNIBUS.XBUF or 177566)
+     */
+    writeXBUF(data, addr)
+    {
+        this.transmitByte(data & PDP11.DL11.XBUF.DATA);
+        this.regXCSR &= ~PDP11.DL11.XCSR.READY;
+    }
+
+    /**
+     * SerialPortPDP11.init()
+     *
+     * This function operates on every HTML element of class "serial", extracting the
+     * JSON-encoded parameters for the SerialPort constructor from the element's "data-value"
+     * attribute, invoking the constructor to create a SerialPort component, and then binding
+     * any associated HTML controls to the new component.
+     */
+    static init()
+    {
+        var aeSerial = Component.getElementsByClass(document, PDP11.APPCLASS, "serial");
+        for (var iSerial = 0; iSerial < aeSerial.length; iSerial++) {
+            var eSerial = aeSerial[iSerial];
+            var parmsSerial = Component.getComponentParms(eSerial);
+            var serial = new SerialPortPDP11(parmsSerial);
+            Component.bindComponentControls(serial, eSerial, PDP11.APPCLASS);
+        }
+    }
 }
-
-/*
- * class SerialPortPDP11
- * property {number} iAdapter
- * property {number} portBase
- * property {number} nIRQ
- * property {Object} controlIOBuffer is a DOM element bound to the port (for rudimentary output; see transmitByte())
- *
- * NOTE: This class declaration started as a way of informing the code inspector of the controlIOBuffer property,
- * which remained undefined until a setBinding() call set it later, but I've since decided that explicitly
- * initializing such properties in the constructor is a better way to go -- even though it's more code -- because
- * JavaScript compilers are supposed to be happier when the underlying object structures aren't constantly changing.
- *
- * Besides, I'm not sure I want to get into documenting every property this way, for this or any/every other class,
- * let alone getting into which ones should be considered private or protected, because PCjs isn't really a library
- * for third-party apps.
- */
-
-Component.subclass(SerialPortPDP11);
 
 /*
  * Internal name used for the I/O buffer control, if any, that we bind to the SerialPort.
@@ -179,667 +869,6 @@ Component.subclass(SerialPortPDP11);
  */
 SerialPortPDP11.sIOBuffer = "buffer";
 
-/**
- * setBinding(sType, sBinding, control, sValue)
- *
- * @this {SerialPortPDP11}
- * @param {string|null} sType is the type of the HTML control (eg, "button", "textarea", "register", "flag", "rled", etc)
- * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "buffer")
- * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
- * @param {string} [sValue] optional data value
- * @return {boolean} true if binding was successful, false if unrecognized binding request
- */
-SerialPortPDP11.prototype.setBinding = function(sType, sBinding, control, sValue)
-{
-    var serial = this;
-
-    switch (sBinding) {
-    case SerialPortPDP11.sIOBuffer:
-        this.bindings[sBinding] = this.controlIOBuffer = control;
-
-        /*
-         * An onkeydown handler is required for certain keys that browsers tend to consume themselves;
-         * for example, BACKSPACE is often defined as going back to the previous web page, and certain
-         * CTRL keys are often used for browser shortcuts (usually on Windows-based browsers).
-         *
-         * NOTE: We don't bother with a keyUp handler, because for the most part, we're only intercepting
-         * keys that require special treatment; in general, we're content with keyPress events.
-         */
-        control.onkeydown = function onKeyDown(event) {
-            event = event || window.event;
-            var bASCII = 0;
-            var keyCode = event.keyCode;
-            /*
-             * Perform the same remapping of BACKSPACE and DELETE that our VT100 emulation performs,
-             * for PCjs-wide consistency; see the KEYMAP table in /modules/pc8080/lib/keyboard.js for
-             * the rationale.  Ditto for ALT-DELETE; see onKeyDown() in /modules/pc8080/lib/keyboard.js
-             * for details.
-             *
-             * NOTE: keyDown (and keyUp) events supply us with KEYCODE values, which are NOT the same as
-             * ASCII values, which is why we are comparing with KEYCODE values but assigning ASCII values,
-             * because receiveData() requires ASCII values.
-             */
-            if (keyCode == Keys.KEYCODE.BS) {
-                bASCII = event.altKey? Keys.ASCII.CTRL_H : Keys.ASCII.DEL;
-            }
-            else if (keyCode == Keys.KEYCODE.DEL) {
-                bASCII = Keys.ASCII.CTRL_H;
-            }
-            else if (event.ctrlKey && keyCode >= Keys.ASCII.A && keyCode <= Keys.ASCII.Z) {
-                bASCII = keyCode - (Keys.ASCII.A - Keys.ASCII.CTRL_A);
-            }
-            if (bASCII) {
-                if (event.preventDefault) event.preventDefault();
-                serial.receiveData(bASCII);
-            }
-            return true;
-        };
-
-        control.onkeypress = function onKeyPress(event) {
-            /*
-             * NOTE: Unlike keyDown events, keyPress events generally supply us with ASCII values,
-             * despite the fact that, as above, they come to us via the keyCode property.  Yes, it's
-             * brilliant (or rather, the opposite of brilliant), but that's life.
-             */
-            event = event || window.event;
-            /*
-             * Not sure why COMMAND-key combinations are coming through here (on Safari at least),
-             * but in any case, let's make sure we don't act on them.
-             */
-            if (!event.metaKey) {
-                var bASCII = event.which || event.keyCode;
-                /*
-                 * Perform the same remapping of ALT-ENTER (to LINE-FEED) that our VT100 emulation performs,
-                 * for PCjs-wide consistency; see onKeyDown() in /modules/pc8080/lib/keyboard.js for details.
-                 */
-                if (event.altKey) {
-                    if (bASCII == Keys.ASCII.CTRL_M) {
-                        bASCII = Keys.ASCII.CTRL_J;
-                    }
-                }
-                serial.receiveData(bASCII);
-                /*
-                 * Since we're going to remove the "readonly" attribute from the <textarea> control
-                 * (so that the soft keyboard activates on iOS), instead of calling preventDefault() for
-                 * selected keys (eg, the SPACE key, whose default behavior is to scroll the page), we must
-                 * now call it for *all* keys, so that the keyCode isn't added to the control immediately,
-                 * on top of whatever the machine is echoing back, resulting in double characters.
-                 */
-                if (event.preventDefault) event.preventDefault();
-            }
-            return true;
-        };
-
-        control.onpaste = function onKeyPress(event) {
-            if (event.stopPropagation) event.stopPropagation();
-            if (event.preventDefault) event.preventDefault();
-            var clipboardData = event.clipboardData || window.clipboardData;
-            if (clipboardData) {
-                /*
-                 * NOTE: Multiple lines of pasted text will (at least on macOS) contain LFs instead of CRs;
-                 * this is dealt with in receiveData() whenever it receives a string of characters.
-                 */
-                serial.receiveData(clipboardData.getData('Text'));
-            }
-        };
-
-        /*
-         * Now that we've added an onkeypress handler that calls preventDefault() for ALL keys, the control
-         * itself no longer needs the "readonly" attribute; we primarily need to remove it for iOS browsers,
-         * so that the soft keyboard will activate, but it shouldn't hurt to remove the attribute for all browsers.
-         */
-        control.removeAttribute("readonly");
-
-        return true;
-
-    default:
-        break;
-    }
-    return false;
-};
-
-/**
- * initBus(cmp, bus, cpu, dbg)
- *
- * @this {SerialPortPDP11}
- * @param {ComputerPDP11} cmp
- * @param {BusPDP11} bus
- * @param {CPUStatePDP11} cpu
- * @param {DebuggerPDP11} dbg
- */
-SerialPortPDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
-{
-    this.cmp = cmp;
-    this.bus = bus;
-    this.cpu = cpu;
-    this.dbg = dbg;
-
-    var serial = this;
-
-    this.irqReceiver = this.cpu.addIRQ(this.iAdapter? -1 : PDP11.DL11.RVEC, PDP11.DL11.PRI, MessagesPDP11.DL11);
-
-    this.timerReceiveInterrupt = this.cpu.addTimer(function readyReceiver() {
-        var b = serial.receiveByte();
-        if (b >= 0) {
-            serial.regRBUF = b;
-            if (!(serial.regRCSR & PDP11.DL11.RCSR.RD)) {
-                serial.regRCSR |= PDP11.DL11.RCSR.RD;
-            } else {
-                serial.regRBUF |= PDP11.DL11.RBUF.OE | PDP11.DL11.RBUF.ERROR;
-            }
-            if (serial.regRCSR & PDP11.DL11.RCSR.RIE) {
-                cpu.setIRQ(serial.irqReceiver);
-            }
-        }
-    });
-
-    this.irqTransmitter = this.cpu.addIRQ(this.iAdapter? -1 : PDP11.DL11.XVEC, PDP11.DL11.PRI, MessagesPDP11.DL11);
-
-    this.timerTransmitInterrupt = this.cpu.addTimer(function readyTransmitter() {
-        serial.regXCSR |= PDP11.DL11.XCSR.READY;
-        if (serial.regXCSR & PDP11.DL11.XCSR.TIE) {
-            cpu.setIRQ(serial.irqTransmitter);
-        }
-    });
-
-    bus.addIOTable(this, SerialPortPDP11.UNIBUS_IOTABLE, this.iAdapter? ((PDP11.UNIBUS.DL11 + (this.iAdapter - 1) * 8) - PDP11.UNIBUS.RCSR) : 0);
-    bus.addResetHandler(this.reset.bind(this));
-
-    this.setReady();
-};
-
-/**
- * initConnection(fNullModem)
- *
- * If a machine 'connection' parameter exists of the form "{sourcePort}->{targetMachine}.{targetPort}",
- * and "{sourcePort}" matches our idComponent, then look for a component with id "{targetMachine}.{targetPort}".
- *
- * If the target component is found, then verify that it has exported functions with the following names:
- *
- *      receiveData(data): called when we have data to transmit; aliased internally to sendData(data)
- *      receiveStatus(pins): called when our control signals have changed; aliased internally to updateStatus(pins)
- *
- * For now, we're not going to worry about communication in the other direction, because when the target component
- * performs its own initConnection(), it will find our receiveData() and receiveStatus() functions, at which point
- * communication in both directions should be established, and the circle of life complete.
- *
- * For added robustness, if the target machine initializes much more slowly than we do, and our connection attempt
- * fails, that's OK, because when it finally initializes, its initConnection() will call our initConnection();
- * if we've already initialized, no harm done.
- *
- * @this {SerialPortPDP11}
- * @param {boolean} [fNullModem] (caller's null-modem setting, to ensure our settings are in agreement)
- */
-SerialPortPDP11.prototype.initConnection = function(fNullModem)
-{
-    if (!this.connection) {
-        var sConnection = this.cmp.getMachineParm("connection");
-        if (sConnection) {
-            var asParts = sConnection.split('->');
-            if (asParts.length == 2) {
-                var sSourceID = str.trim(asParts[0]);
-                if (sSourceID != this.idComponent) return;  // this connection string is intended for another instance
-                var sTargetID = str.trim(asParts[1]);
-                this.connection = Component.getComponentByID(sTargetID);
-                if (this.connection) {
-                    var exports = this.connection['exports'];
-                    if (exports) {
-                        var fnConnect = exports['connect'];
-                        if (fnConnect) fnConnect.call(this.connection, this.fNullModem);
-                        this.sendData = exports['receiveData'];
-                        if (this.sendData) {
-                            this.fNullModem = fNullModem;
-                            this.updateStatus = exports['receiveStatus'];
-                            this.status(this.idMachine + '.' + sSourceID + " connected to " + sTargetID);
-                            return;
-                        }
-                    }
-                }
-            }
-            /*
-             * Changed from notice() to status() because sometimes a connection fails simply because one of us is a laggard.
-             */
-            this.status("Unable to establish connection: " + sConnection);
-        }
-    }
-};
-
-/**
- * powerUp(data, fRepower)
- *
- * @this {SerialPortPDP11}
- * @param {Object|null} data
- * @param {boolean} [fRepower]
- * @return {boolean} true if successful, false if failure
- */
-SerialPortPDP11.prototype.powerUp = function(data, fRepower)
-{
-    if (!fRepower) {
-
-        /*
-         * This is as late as we can currently wait to make our first inter-machine connection attempt;
-         * even so, the target machine's initialization process may still be ongoing, so any connection
-         * may be not fully resolved until the target machine performs its own initConnection(), which will
-         * in turn invoke our initConnection() again.
-         */
-        this.initConnection(this.fNullModem);
-
-        if (!data || !this.restore) {
-            this.reset();
-        } else {
-            if (!this.restore(data)) return false;
-        }
-    }
-    return true;
-};
-
-/**
- * powerDown(fSave, fShutdown)
- *
- * @this {SerialPortPDP11}
- * @param {boolean} [fSave]
- * @param {boolean} [fShutdown]
- * @return {Object|boolean} component state if fSave; otherwise, true if successful, false if failure
- */
-SerialPortPDP11.prototype.powerDown = function(fSave, fShutdown)
-{
-    return fSave? this.save() : true;
-};
-
-/**
- * reset()
- *
- * @this {SerialPortPDP11}
- */
-SerialPortPDP11.prototype.reset = function()
-{
-    this.initState();
-};
-
-/**
- * save()
- *
- * This implements save support for the SerialPort component.
- *
- * @this {SerialPortPDP11}
- * @return {Object}
- */
-SerialPortPDP11.prototype.save = function()
-{
-    var state = new State(this);
-    state.set(0, this.saveRegisters());
-    return state.data();
-};
-
-/**
- * restore(data)
- *
- * This implements restore support for the SerialPort component.
- *
- * @this {SerialPortPDP11}
- * @param {Object} data
- * @return {boolean} true if successful, false if failure
- */
-SerialPortPDP11.prototype.restore = function(data)
-{
-    return this.initState(data[0]);
-};
-
-/**
- * initState(data)
- *
- * @this {SerialPortPDP11}
- * @param {Array} [data]
- * @return {boolean} true if successful, false if failure
- */
-SerialPortPDP11.prototype.initState = function(data)
-{
-    this.regRBUF = 0;
-    this.regRCSR = PDP11.DL11.RCSR.CTS;     // TODO: I didn't use to set this initially; is this wise?
-    this.regXCSR = PDP11.DL11.XCSR.READY;
-    this.abReceive = [];
-    return true;
-};
-
-/**
- * saveRegisters()
- *
- * @this {SerialPortPDP11}
- * @return {Array}
- */
-SerialPortPDP11.prototype.saveRegisters = function()
-{
-    return [];
-};
-
-/**
- * getBaudTimeout(nBaud)
- *
- * Based on the selected baud rate (nBaud), convert that rate into a millisecond delay.
- *
- * @this {SerialPortPDP11}
- * @param {number} nBaud
- * @return {number} (number of milliseconds per byte)
- */
-SerialPortPDP11.prototype.getBaudTimeout = function(nBaud)
-{
-    /*
-     * TODO: Do a better job computing this, based on actual numbers of start, stop and parity bits,
-     * instead of hard-coding the total number of bits per byte to 10.
-     */
-    var nBytesPerSecond = Math.round(nBaud / 10);
-    return 1000 / nBytesPerSecond;
-};
-
-/**
- * receiveData(data)
- *
- * This replaces the old sendRBR() function, which expected an Array of bytes.  We still support that,
- * but in order to support connections with other SerialPort components (ie, the PC8080 SerialPort), we
- * have added support for numbers and strings as well.
- *
- * @this {SerialPortPDP11}
- * @param {number|string|Array} data
- * @return {boolean} true if received, false if not
- */
-SerialPortPDP11.prototype.receiveData = function(data)
-{
-    if (typeof data == "number") {
-        this.abReceive.push(data);
-    }
-    else if (typeof data == "string") {
-        var bASCII = 0, bASCIIPrev;
-        for (var i = 0; i < data.length; i++) {
-            bASCIIPrev = bASCII;
-            bASCII = data.charCodeAt(i);
-            /*
-             * NOTE: Multiple lines of pasted text will (at least on macOS) contain LFs instead of CRs;
-             * we convert them to CRs below.  Windows may do something different, but in the worst case,
-             * even if we receive CR/LF pairs, this code should keep the CRs and lose the LFs.
-             */
-            if (bASCII == str.ASCII.LF) {
-                if (bASCIIPrev == str.ASCII.CR) continue;
-                bASCII = str.ASCII.CR;
-            }
-            this.abReceive.push(bASCII);
-        }
-    }
-    else {
-        this.abReceive = this.abReceive.concat(data);
-    }
-
-    this.cpu.setTimer(this.timerReceiveInterrupt, this.getBaudTimeout(this.nBaudReceive));
-
-    return true;                // for now, return true regardless, since we're buffering everything anyway
-};
-
-/**
- * receiveByte()
- *
- * @this {SerialPortPDP11}
- * @return {number} (0x00-0xff if byte available, -1 if not)
- */
-SerialPortPDP11.prototype.receiveByte = function()
-{
-    var b = -1;
-    if (this.abReceive.length) {
-        /*
-         * Here, as elsewhere (eg, the PC11 component), even if I trusted all incoming data
-         * to be byte values (which I don't), there's also the risk that it could be signed data
-         * (eg, -128 to 127, instead of 0 to 255).  Both risks are good reasons to always mask
-         * the data assigned to RBUF with 0xff.
-         */
-        b = this.abReceive.shift() & 0xff;
-        this.printMessage("receiveByte(" + str.toHexByte(b) + ")");
-        if (this.fUpperCase) {
-            /*
-             * Automatically transform lower-case ASCII codes to upper-case; fUpperCase should
-             * only be set when a terminal or some sort of pseudo-display is being used and we don't
-             * trust it to have its CAPS-LOCK setting correct.
-             */
-            if (b >= 0x61 && b < 0x7A) b -= 0x20;
-        }
-        this.cpu.setTimer(this.timerReceiveInterrupt, this.getBaudTimeout(this.nBaudReceive));
-    }
-    return b;
-};
-
-/**
- * receiveStatus(pins)
- *
- * @this {SerialPortPDP11}
- * @param {number} pins
- */
-SerialPortPDP11.prototype.receiveStatus = function(pins)
-{
-    var oldRCSR = this.regRCSR;
-    this.regRCSR &= ~(PDP11.DL11.RCSR.CTS | PDP11.DL11.RCSR.CD);
-    if (pins & RS232.CTS.MASK) {
-        this.regRCSR |= PDP11.DL11.RCSR.CTS;
-    }
-    if (pins & RS232.CD.MASK) {
-        this.regRCSR |= PDP11.DL11.RCSR.CD;
-    }
-    if (oldRCSR != this.regRCSR) {
-        this.regRCSR |= PDP11.DL11.RCSR.DSC;
-        if (this.regRCSR & PDP11.DL11.RCSR.DIE) {
-            this.cpu.setIRQ(this.irqReceiver);
-        }
-    }
-};
-
-/**
- * transmitByte(b)
- *
- * @this {SerialPortPDP11}
- * @param {number} b
- * @return {boolean} true if transmitted, false if not
- */
-SerialPortPDP11.prototype.transmitByte = function(b)
-{
-    var fTransmitted = false;
-
-    this.printMessage("transmitByte(" + str.toHexByte(b) + ")");
-
-    if (this.sendData) {
-        if (this.sendData.call(this.connection, b)) {
-            fTransmitted = true;
-        }
-    }
-
-    /*
-     * TODO: Why do DEC diagnostics like to output bytes with bit 7 set?
-     */
-    b &= 0x7F;
-
-    if (this.controlIOBuffer) {
-        if (b == 0x0D) {
-            this.iLogicalCol = 0;
-        }
-        else if (b == 0x08) {
-            this.controlIOBuffer.value = this.controlIOBuffer.value.slice(0, -1);
-            /*
-             * TODO: Back up the correct number of columns if the character erased was a tab.
-             */
-            if (this.iLogicalCol > 0) this.iLogicalCol--;
-        }
-        else if (b) {
-            /*
-             * RT-11 outputs lots of NULL characters, at least after a "D 56=5015" (0x0A0D) command has
-             * been issued, hence the "if (b)" check above.
-             *
-             * TODO: Also consider a check for Keys.ASCII.CTRL_C, because by default, RT-11 outputs "raw"
-             * CTRL_C characters, which we capture below and render as <ETX>.  RT-11 does this for other keys
-             * as well, such as CTRL_K (<VT>) and CTRL_L (<FF>).
-             */
-            var s = str.toASCIICode(b); // formerly: String.fromCharCode(b);
-            var nChars = s.length;      // formerly: (b >= 0x20? 1 : 0);
-            if (b < 0x20 && nChars == 1) nChars = 0;
-            if (b == 0x09) {
-                var tabSize = this.tabSize || 8;
-                nChars = tabSize - (this.iLogicalCol % tabSize);
-                if (this.tabSize) s = str.pad("", nChars);
-            }
-            if (this.charBOL && !this.iLogicalCol && nChars) s = String.fromCharCode(this.charBOL) + s;
-            this.controlIOBuffer.value += s;
-            this.controlIOBuffer.scrollTop = this.controlIOBuffer.scrollHeight;
-            this.iLogicalCol += nChars;
-        }
-        fTransmitted = true;
-    }
-    else if (this.consoleOutput != null) {
-        if (b == 0x0A || this.consoleOutput.length >= 1024) {
-            this.println(this.consoleOutput);
-            this.consoleOutput = "";
-        }
-        if (b != 0x0A) {
-            this.consoleOutput += String.fromCharCode(b);
-        }
-        fTransmitted = true;
-    }
-
-    /*
-     * NOTE: When debugging issues involving the SerialPort, such as debugging code between a pair of
-     * transmitted bytes, you can pass 0 instead of getBaudTimeout() to setTimer() to minimize the amount
-     * of time spent waiting for XCSR.READY to be set again.
-     */
-    this.cpu.setTimer(this.timerTransmitInterrupt, this.getBaudTimeout(this.nBaudTransmit));
-
-    return fTransmitted;
-};
-
-/**
- * readRCSR(addr)
- *
- * @this {SerialPortPDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.RCSR or 177560)
- * @return {number}
- */
-SerialPortPDP11.prototype.readRCSR = function(addr)
-{
-    var data = this.regRCSR & PDP11.DL11.RCSR.RMASK;
-    this.regRCSR &= ~PDP11.DL11.RCSR.DSC;
-    return data;
-};
-
-/**
- * writeRCSR(data, addr)
- *
- * @this {SerialPortPDP11}
- * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.RCSR or 177560)
- */
-SerialPortPDP11.prototype.writeRCSR = function(data, addr)
-{
-    var delta = (data ^ this.regRCSR);
-    this.regRCSR = (this.regRCSR & ~PDP11.DL11.RCSR.WMASK) | (data & PDP11.DL11.RCSR.WMASK);
-    /*
-     * Whenever DTR or RTS changes, we also want to notify any connected machine, via updateStatus().
-     */
-    if (this.updateStatus) {
-        if (delta & PDP11.DL11.RCSR.RS232) {
-            var pins = 0;
-            if (this.fNullModem) {
-                pins |= (data & PDP11.DL11.RCSR.RTS)? RS232.CTS.MASK : 0;
-                pins |= (data & PDP11.DL11.RCSR.DTR)? (RS232.DSR.MASK | RS232.CD.MASK): 0;
-            } else {
-                pins |= (data & PDP11.DL11.RCSR.RTS)? RS232.RTS.MASK : 0;
-                pins |= (data & PDP11.DL11.RCSR.DTR)? RS232.DTR.MASK : 0;
-            }
-            this.updateStatus.call(this.connection, pins);
-        }
-    }
-};
-
-/**
- * readRBUF(addr)
- *
- * @this {SerialPortPDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.RBUF or 177562)
- * @return {number}
- */
-SerialPortPDP11.prototype.readRBUF = function(addr)
-{
-    this.regRCSR &= ~PDP11.DL11.RCSR.RD;
-    return this.regRBUF;
-};
-
-/**
- * writeRBUF(data, addr)
- *
- * @this {SerialPortPDP11}
- * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.RBUF or 177562)
- */
-SerialPortPDP11.prototype.writeRBUF = function(data, addr)
-{
-};
-
-/**
- * readXCSR(addr)
- *
- * @this {SerialPortPDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.XCSR or 177564)
- * @return {number}
- */
-SerialPortPDP11.prototype.readXCSR = function(addr)
-{
-    return this.regXCSR;
-};
-
-/**
- * writeXCSR(data, addr)
- *
- * @this {SerialPortPDP11}
- * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.XCSR or 177564)
- */
-SerialPortPDP11.prototype.writeXCSR = function(data, addr)
-{
-    /*
-     * If the device is READY, and TIE is being set, then request a hardware interrupt.
-     *
-     * Conversely, if TIE is being cleared, remove the request; this resolves a problem within
-     * MAINDEC TEST 15, where the Transmitter Interrupt Enable (TIE) bit is cleared, set, and cleared
-     * in rapid succession, with the expectation that NO interrupt will be generated.  Note that
-     * this fix also requires a complementary change in setIRQ(), to request hardware interrupts with
-     * IRQ_DELAY rather than IRQ.
-     */
-    if (this.regXCSR & PDP11.DL11.XCSR.READY) {
-        if (data & PDP11.DL11.XCSR.TIE) {
-            this.cpu.setIRQ(this.irqTransmitter);
-        } else {
-            this.cpu.clearIRQ(this.irqTransmitter);
-        }
-    }
-    this.regXCSR = (this.regXCSR & ~PDP11.DL11.XCSR.WMASK) | (data & PDP11.DL11.XCSR.WMASK);
-};
-
-/**
- * readXBUF(addr)
- *
- * @this {SerialPortPDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.XBUF or 177566)
- * @return {number}
- */
-SerialPortPDP11.prototype.readXBUF = function(addr)
-{
-    return 0;
-};
-
-/**
- * writeXBUF(data, addr)
- *
- * @this {SerialPortPDP11}
- * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.XBUF or 177566)
- */
-SerialPortPDP11.prototype.writeXBUF = function(data, addr)
-{
-    this.transmitByte(data & PDP11.DL11.XBUF.DATA);
-    this.regXCSR &= ~PDP11.DL11.XCSR.READY;
-};
-
 /*
  * ES6 ALERT: As you can see below, I've finally started using computed property names.
  */
@@ -850,28 +879,9 @@ SerialPortPDP11.UNIBUS_IOTABLE = {
     [PDP11.UNIBUS.XBUF]:    /* 177566 */    [null, null, SerialPortPDP11.prototype.readXBUF,    SerialPortPDP11.prototype.writeXBUF,    "XBUF"]
 };
 
-/**
- * SerialPortPDP11.init()
- *
- * This function operates on every HTML element of class "serial", extracting the
- * JSON-encoded parameters for the SerialPort constructor from the element's "data-value"
- * attribute, invoking the constructor to create a SerialPort component, and then binding
- * any associated HTML controls to the new component.
- */
-SerialPortPDP11.init = function()
-{
-    var aeSerial = Component.getElementsByClass(document, PDP11.APPCLASS, "serial");
-    for (var iSerial = 0; iSerial < aeSerial.length; iSerial++) {
-        var eSerial = aeSerial[iSerial];
-        var parmsSerial = Component.getComponentParms(eSerial);
-        var serial = new SerialPortPDP11(parmsSerial);
-        Component.bindComponentControls(serial, eSerial, PDP11.APPCLASS);
-    }
-};
-
 /*
  * Initialize every SerialPort module on the page.
  */
-web.onInit(SerialPortPDP11.init);
+Web.onInit(SerialPortPDP11.init);
 
-if (NODE) module.exports = SerialPortPDP11;
+export default SerialPortPDP11;
