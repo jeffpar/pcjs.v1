@@ -156,7 +156,7 @@ class Net {
         var options = url.parse(sURL);
         options.method = "HEAD";
         options.path = options.pathname;    // TODO: Determine the necessity of aliasing this
-        var req = http.request(options, function (res)
+        var req = http.request(options, function(res)
         {
             var err = null;
             var stat = null;
@@ -179,7 +179,7 @@ class Net {
             }
             done(err, stat);
         });
-        req.on('error', function (err)
+        req.on('error', function(err)
         {
             done(err, null);
         });
@@ -211,9 +211,9 @@ class Net {
          */
         var sFile = "";
         var bufFile = null;
-        http.get(sURL, function (res)
+        http.get(sURL, function(res)
         {
-            res.on('data', function (data)
+            res.on('data', function(data)
             {
                 if (sEncoding) {
                     sFile += data;
@@ -241,7 +241,7 @@ class Net {
                  *      bufFile = buf;
                  */
                 bufFile = Buffer.concat([bufFile, data], bufFile.length + data.length);
-            }).on('end', function ()
+            }).on('end', function()
             {
                 /*
                  * TODO: Decide what to do when res.statusCode is actually an error code (eg, 404), because
@@ -252,7 +252,7 @@ class Net {
                 } else {
                     done(new Error(sEncoding ? sFile : bufFile), res.statusCode, null);
                 }
-            }).on('error', function (err)
+            }).on('error', function(err)
             {
                 done(err, res.statusCode, null);
             });
@@ -279,12 +279,12 @@ class Net {
          * Either the documentation isn't quite right for url.parse() or http.request() (the big brother
          * of http.get), or one of those "options" properties is aliased to the other, or...?
          */
-        http.get(sURL, function (res)
+        http.get(sURL, function(res)
         {
-            res.on('data', function (data)
+            res.on('data', function(data)
             {
                 file.write(data);
-            }).on('end', function ()
+            }).on('end', function()
             {
                 file.end();
                 /*
@@ -295,7 +295,7 @@ class Net {
                  * in such cases, the file content will likely just be an HTML error page.
                  */
                 done(null, res.statusCode);
-            }).on('error', function (err)
+            }).on('error', function(err)
             {
                 done(err, res.statusCode);
             });
@@ -329,7 +329,7 @@ class Net {
             var sBaseName = Str.getBaseName(sURL);
             var sFile = path.join(Net.sServerRoot, sURL);
             if (fAsync) {
-                fs.readFile(sFile, {encoding: "utf8"}, function (err, s)
+                fs.readFile(sFile, {encoding: "utf8"}, function(err, s)
                 {
                     /*
                      * TODO: If err is set, is there an error code we should return (instead of -1)?

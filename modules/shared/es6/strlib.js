@@ -450,7 +450,7 @@ class Str {
      */
     static escapeHTML(sHTML)
     {
-        return sHTML.replace(/[&<>"']/g, function (m)
+        return sHTML.replace(/[&<>"']/g, function(m)
         {
             return Str.aHTMLEscapeMap[m];
         });
@@ -494,7 +494,7 @@ class Str {
             k = k.replace(/([\\[\]*{}().+?])/g, "\\$1");
             sMatch += (sMatch ? '|' : '') + k;
         }
-        return s.replace(new RegExp('(' + sMatch + ')', "g"), function (m)
+        return s.replace(new RegExp('(' + sMatch + ')', "g"), function(m)
         {
             return a[m];
         });
