@@ -32,86 +32,80 @@
 
 "use strict";
 
-if (NODE) {
-    var str           = require("../../shared/lib/strlib");
-    var web           = require("../../shared/lib/weblib");
-    var Component     = require("../../shared/lib/component");
-    var Keys          = require("../../shared/lib/keys");
-    var PDP11         = require("./defines");
-    var MessagesPDP11 = require("./messages");
+import Web from "../../shared/es6/weblib";
+import Component from "../../shared/es6/component";
+import PDP11 from "./defines";
+import MessagesPDP11 from "./messages";
+
+class KeyboardPDP11 extends Component {
+    /**
+     * KeyboardPDP11(parmsKbd)
+     *
+     * @param {Object} parmsKbd
+     */
+    constructor(parmsKbd)
+    {
+        super("Keyboard", parmsKbd, KeyboardPDP11, MessagesPDP11.KEYBOARD);
+
+        this.setReady();
+    }
+
+    /**
+     * setBinding(sType, sBinding, control, sValue)
+     *
+     * @this {KeyboardPDP11}
+     * @param {string|null} sType is the type of the HTML control (eg, "button", "textarea", "register", "flag", "rled", etc)
+     * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "esc")
+     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {string} [sValue] optional data value
+     * @return {boolean} true if binding was successful, false if unrecognized binding request
+     */
+    setBinding(sType, sBinding, control, sValue)
+    {
+        return false;
+    }
+
+    /**
+     * initBus(cmp, bus, cpu, dbg)
+     *
+     * @this {KeyboardPDP11}
+     * @param {ComputerPDP11} cmp
+     * @param {BusPDP11} bus
+     * @param {CPUStatePDP11} cpu
+     * @param {DebuggerPDP11} dbg
+     */
+    initBus(cmp, bus, cpu, dbg)
+    {
+        this.cmp = cmp;
+        this.cpu = cpu;
+        this.dbg = dbg;         // NOTE: The "dbg" property must be set for the message functions to work
+    }
+
+    /**
+     * KeyboardPDP11.init()
+     *
+     * This function operates on every HTML element of class "keyboard", extracting the
+     * JSON-encoded parameters for the Keyboard constructor from the element's "data-value"
+     * attribute, invoking the constructor to create a Keyboard component, and then binding
+     * any associated HTML controls to the new component.
+     */
+    static init()
+    {
+        var aeKbd = Component.getElementsByClass(document, PDP11.APPCLASS, "keyboard");
+        for (var iKbd = 0; iKbd < aeKbd.length; iKbd++) {
+            var eKbd = aeKbd[iKbd];
+            var parmsKbd = Component.getComponentParms(eKbd);
+            var kbd = new KeyboardPDP11(parmsKbd);
+            Component.bindComponentControls(kbd, eKbd, PDP11.APPCLASS);
+        }
+    }
 }
-
-/**
- * KeyboardPDP11(parmsKbd)
- *
- * @constructor
- * @extends Component
- * @param {Object} parmsKbd
- */
-function KeyboardPDP11(parmsKbd)
-{
-    Component.call(this, "Keyboard", parmsKbd, KeyboardPDP11, MessagesPDP11.KEYBOARD);
-
-    this.setReady();
-}
-
-Component.subclass(KeyboardPDP11);
 
 KeyboardPDP11.MINPRESSTIME = 100;            // 100ms
-
-/**
- * setBinding(sType, sBinding, control, sValue)
- *
- * @this {KeyboardPDP11}
- * @param {string|null} sType is the type of the HTML control (eg, "button", "textarea", "register", "flag", "rled", etc)
- * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "esc")
- * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
- * @param {string} [sValue] optional data value
- * @return {boolean} true if binding was successful, false if unrecognized binding request
- */
-KeyboardPDP11.prototype.setBinding = function(sType, sBinding, control, sValue)
-{
-    return false;
-};
-
-/**
- * initBus(cmp, bus, cpu, dbg)
- *
- * @this {KeyboardPDP11}
- * @param {ComputerPDP11} cmp
- * @param {BusPDP11} bus
- * @param {CPUStatePDP11} cpu
- * @param {DebuggerPDP11} dbg
- */
-KeyboardPDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
-{
-    this.cmp = cmp;
-    this.cpu = cpu;
-    this.dbg = dbg;         // NOTE: The "dbg" property must be set for the message functions to work
-};
-
-/**
- * KeyboardPDP11.init()
- *
- * This function operates on every HTML element of class "keyboard", extracting the
- * JSON-encoded parameters for the Keyboard constructor from the element's "data-value"
- * attribute, invoking the constructor to create a Keyboard component, and then binding
- * any associated HTML controls to the new component.
- */
-KeyboardPDP11.init = function()
-{
-    var aeKbd = Component.getElementsByClass(document, PDP11.APPCLASS, "keyboard");
-    for (var iKbd = 0; iKbd < aeKbd.length; iKbd++) {
-        var eKbd = aeKbd[iKbd];
-        var parmsKbd = Component.getComponentParms(eKbd);
-        var kbd = new KeyboardPDP11(parmsKbd);
-        Component.bindComponentControls(kbd, eKbd, PDP11.APPCLASS);
-    }
-};
 
 /*
  * Initialize every Keyboard module on the page.
  */
-web.onInit(KeyboardPDP11.init);
+Web.onInit(KeyboardPDP11.init);
 
-if (NODE) module.exports = KeyboardPDP11;
+export default KeyboardPDP11;

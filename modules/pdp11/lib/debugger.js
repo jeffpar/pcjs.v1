@@ -32,22 +32,17 @@
 
 "use strict";
 
-if (DEBUGGER) {
-    if (NODE) {
-        var str           = require("../../shared/lib/strlib");
-        var usr           = require("../../shared/lib/usrlib");
-        var web           = require("../../shared/lib/weblib");
-        var Component     = require("../../shared/lib/component");
-        var Debugger      = require("../../shared/lib/debugger");
-        var Keys          = require("../../shared/lib/keys");
-        var State         = require("../../shared/lib/state");
-        var PDP11         = require("./defines");
-        var BusPDP11      = require("./bus");
-        var CPUPDP11      = require("./cpu");
-        var MemoryPDP11   = require("./memory");
-        var MessagesPDP11 = require("./messages");
-    }
-}
+import Str from "../../shared/es6/strlib";
+import Usr from "../../shared/es6/usrlib";
+import Web from "../../shared/es6/weblib";
+import Component from "../../shared/es6/component";
+import Debugger from "../../shared/es6/debugger";
+import Keys from "../../shared/es6/keys";
+import State from "../../shared/es6/state";
+import PDP11 from "./defines";
+import BusPDP11 from "./bus";
+import MemoryPDP11 from "./memory";
+import MessagesPDP11 from "./messages";
 
 /**
  * DebuggerPDP11 Address Object
@@ -60,9 +55,9 @@ if (DEBUGGER) {
  *      aCmds           preprocessed commands (from sCmd)
  *
  * @typedef {{
- *      addr:(number|undefined),
- *      fPhysical:(boolean|undefined),
- *      fTemporary:(boolean|undefined),
+ *      addr:(number),
+ *      fPhysical:(boolean),
+ *      fTemporary:(boolean),
  *      nBase:(number|undefined),
  *      sCmd:(string|undefined),
  *      aCmds:(Array.<string>|undefined)
@@ -70,123 +65,4015 @@ if (DEBUGGER) {
  */
 var DbgAddrPDP11;
 
-/**
- * DebuggerPDP11(parmsDbg)
- *
- * The DebuggerPDP11 component supports the following optional (parmsDbg) properties:
- *
- *      commands: string containing zero or more commands, separated by ';'
- *
- *      messages: string containing zero or more message categories to enable;
- *      multiple categories must be separated by '|' or ';'.  Parsed by messageInit().
- *
- * The DebuggerPDP11 component is an optional component that implements a variety of user
- * commands for controlling the CPU, dumping and editing memory, etc.
- *
- * @constructor
- * @extends Debugger
- * @param {Object} parmsDbg
- */
-function DebuggerPDP11(parmsDbg)
-{
-    if (DEBUGGER) {
+class DebuggerPDP11 extends Debugger {
+    /**
+     * DebuggerPDP11(parmsDbg)
+     *
+     * The DebuggerPDP11 component supports the following optional (parmsDbg) properties:
+     *
+     *      commands: string containing zero or more commands, separated by ';'
+     *
+     *      messages: string containing zero or more message categories to enable;
+     *      multiple categories must be separated by '|' or ';'.  Parsed by messageInit().
+     *
+     * The DebuggerPDP11 component is an optional component that implements a variety of user
+     * commands for controlling the CPU, dumping and editing memory, etc.
+     *
+     * @param {Object} parmsDbg
+     */
+    constructor(parmsDbg)
+    {
+        if (DEBUGGER) {
 
-        Debugger.call(this, parmsDbg);
+            super(parmsDbg);
 
-        /*
-         * Since this Debugger doesn't use replaceRegs(), we can use parentheses instead of braces.
-         */
-        this.fInit = false;
-        this.fParens = true;
+            /*
+             * Since this Debugger doesn't use replaceRegs(), we can use parentheses instead of braces.
+             */
+            this.fInit = false;
+            this.fParens = true;
 
-        /*
-         * Most commands that require an address call parseAddr(), which defaults to dbgAddrNextCode
-         * or dbgAddrNextData when no address has been given.  doDump() and doUnassemble(), in turn,
-         * update dbgAddrNextData and dbgAddrNextCode, respectively, when they're done.
-         *
-         * For TEMPORARY breakpoint addresses, we set fTemporary to true, so that they can be automatically
-         * cleared when they're hit.
-         */
-        this.dbgAddrNextCode = this.newAddr(0);
-        this.dbgAddrNextData = this.newAddr(0);
-        this.dbgAddrAssemble = this.newAddr(0);
+            /*
+             * Most commands that require an address call parseAddr(), which defaults to dbgAddrNextCode
+             * or dbgAddrNextData when no address has been given.  doDump() and doUnassemble(), in turn,
+             * update dbgAddrNextData and dbgAddrNextCode, respectively, when they're done.
+             *
+             * For TEMPORARY breakpoint addresses, we set fTemporary to true, so that they can be automatically
+             * cleared when they're hit.
+             */
+            this.dbgAddrNextCode = this.newAddr();
+            this.dbgAddrNextData = this.newAddr();
+            this.dbgAddrAssemble = this.newAddr();
 
-        /*
-         * aSymbolTable is an array of SymbolTable objects, one per ROM or other chunk of address space,
-         * where each object contains the following properties:
-         *
-         *      sModule
-         *      addr (physical address, if any; eg, symbols for a ROM)
-         *      len
-         *      aSymbols
-         *      aOffsets
-         *
-         * See addSymbols() for more details, since that's how callers add sets of symbols to the table.
-         */
-        this.aSymbolTable = [];
+            /*
+             * aSymbolTable is an array of SymbolTable objects, one per ROM or other chunk of address space,
+             * where each object contains the following properties:
+             *
+             *      sModule
+             *      addr (physical address, if any; eg, symbols for a ROM)
+             *      len
+             *      aSymbols
+             *      aOffsets
+             *
+             * See addSymbols() for more details, since that's how callers add sets of symbols to the table.
+             */
+            this.aSymbolTable = [];
 
-        /*
-         * clearBreakpoints() initializes the breakpoints lists: aBreakExec is a list of addresses
-         * to halt on whenever attempting to execute an instruction at the corresponding address,
-         * and aBreakRead and aBreakWrite are lists of addresses to halt on whenever a read or write,
-         * respectively, occurs at the corresponding address.
-         *
-         * NOTE: Curiously, after upgrading the Google Closure Compiler from v20141215 to v20150609,
-         * the resulting compiled code would crash in clearBreakpoints(), because the (renamed) aBreakRead
-         * property was already defined.  To eliminate whatever was confusing the Closure Compiler, I've
-         * explicitly initialized all the properties that clearBreakpoints() (re)initializes.
-         */
-        this.aBreakExec = this.aBreakRead = this.aBreakWrite = [];
-        this.clearBreakpoints();
+            /*
+             * clearBreakpoints() initializes the breakpoints lists: aBreakExec is a list of addresses
+             * to halt on whenever attempting to execute an instruction at the corresponding address,
+             * and aBreakRead and aBreakWrite are lists of addresses to halt on whenever a read or write,
+             * respectively, occurs at the corresponding address.
+             *
+             * NOTE: Curiously, after upgrading the Google Closure Compiler from v20141215 to v20150609,
+             * the resulting compiled code would crash in clearBreakpoints(), because the (renamed) aBreakRead
+             * property was already defined.  To eliminate whatever was confusing the Closure Compiler, I've
+             * explicitly initialized all the properties that clearBreakpoints() (re)initializes.
+             */
+            this.aBreakExec = this.aBreakRead = this.aBreakWrite = [];
+            this.clearBreakpoints();
 
-        /*
-         * The new "bn" command allows you to specify a number of instructions to execute and then stop;
-         * "bn 0" disables any outstanding count.
-         */
-        this.nBreakInstructions = 0;
+            /*
+             * The new "bn" command allows you to specify a number of instructions to execute and then stop;
+             * "bn 0" disables any outstanding count.
+             */
+            this.nBreakInstructions = 0;
 
-        /*
-         * Execution history is allocated by historyInit() whenever checksEnabled() conditions change.
-         * Execution history is updated whenever the CPU calls checkInstruction(), which will happen
-         * only when checksEnabled() returns true (eg, whenever one or more breakpoints have been set).
-         * This ensures that, by default, the CPU runs as fast as possible.
-         */
-        this.historyInit();
+            /*
+             * Execution history is allocated by historyInit() whenever checksEnabled() conditions change.
+             * Execution history is updated whenever the CPU calls checkInstruction(), which will happen
+             * only when checksEnabled() returns true (eg, whenever one or more breakpoints have been set).
+             * This ensures that, by default, the CPU runs as fast as possible.
+             */
+            this.iInstructionHistory = 0;
+            this.aInstructionHistory = [];
+            this.nextHistory = undefined;
+            this.historyInit();
 
-        /*
-         * Initialize DebuggerPDP11 message support
-         */
-        this.afnDumpers = {};
-        this.messageInit(parmsDbg['messages']);
+            /*
+             * Initialize DebuggerPDP11 message support.
+             */
+            this.dbg = this;
+            this.afnDumpers = {};
+            this.bitsMessage = this.bitsWarning = 0;
+            this.sMessagePrev = null;
+            this.aMessageBuffer = [];
+            this.messageInit(parmsDbg['messages']);
+            this.sInitCommands = parmsDbg['commands'];
 
-        this.sInitCommands = parmsDbg['commands'];
+            /*
+             * Define remaining miscellaneous DebuggerPDP11 properties.
+             */
+            this.opTable = DebuggerPDP11.OPTABLE;
+            this.aOpReserved = [];
+            this.nStep = 0;
+            this.sCmdTracePrev = null;
+            this.sCmdDumpPrev = null;
+            this.fIgnoreNextCheckFault = false;     // TODO: Does this serve any purpose on a PDP-11?
+            this.nSuppressBreaks = 0;
+            this.cInstructions = this.cInstructionsStart = 0;
+            this.nCycles = this.nCyclesStart = this.msStart = 0;
+            this.controlDebug = null;
+            this.panel = null;
 
-        /*
-         * Make it easier to access DebuggerPDP11 commands from an external REPL (eg, the WebStorm
-         * "live" console window); eg:
-         *
-         *      pdp11('r')
-         *      pdp11('dw 0:0')
-         *      pdp11('h')
-         *      ...
-         */
-        var dbg = this;
-        if (window) {
-            if (window[PDP11.APPCLASS] === undefined) {
-                window[PDP11.APPCLASS] = function(s) { return dbg.doCommands(s); };
+            /*
+             * Make it easier to access DebuggerPDP11 commands from an external REPL (eg, the WebStorm
+             * "live" console window); eg:
+             *
+             *      pdp11('r')
+             *      pdp11('dw 0:0')
+             *      pdp11('h')
+             *      ...
+             */
+            var dbg = this;
+            if (window) {
+                if (window[PDP11.APPCLASS] === undefined) {
+                    window[PDP11.APPCLASS] = function(s) { return dbg.doCommands(s); };
+                }
+            } else {
+                if (global[PDP11.APPCLASS] === undefined) {
+                    global[PDP11.APPCLASS] = function(s) { return dbg.doCommands(s); };
+                }
             }
-        } else {
-            if (global[PDP11.APPCLASS] === undefined) {
-                global[PDP11.APPCLASS] = function(s) { return dbg.doCommands(s); };
+
+        }   // endif DEBUGGER
+    }
+
+    /**
+     * getAddr(dbgAddr, fWrite, nb)
+     *
+     * @this {DebuggerPDP11}
+     * @param {DbgAddrPDP11|null|undefined} dbgAddr
+     * @param {boolean} [fWrite]
+     * @param {number} [nb] number of bytes to check (1 or 2); default is 1
+     * @return {number} is the corresponding linear address, or PDP11.ADDR_INVALID
+     */
+    getAddr(dbgAddr, fWrite, nb)
+    {
+        var addr = dbgAddr && dbgAddr.addr;
+        if (addr == null) addr = PDP11.ADDR_INVALID;
+        return addr;
+    }
+
+    /**
+     * newAddr(addr, fPhysical, nBase)
+     *
+     * Returns a NEW DbgAddrPDP11 object, initialized with specified values and/or defaults.
+     *
+     * @this {DebuggerPDP11}
+     * @param {number} [addr]
+     * @param {boolean} [fPhysical]
+     * @param {number} [nBase]
+     * @return {DbgAddrPDP11}
+     */
+    newAddr(addr, fPhysical, nBase)
+    {
+        return {addr: addr || 0, fPhysical: fPhysical || false, fTemporary: false, nBase: nBase};
+    }
+
+    /**
+     * setAddr(dbgAddr, addr)
+     *
+     * Updates an EXISTING DbgAddrPDP11 object, initialized with specified values and/or defaults.
+     *
+     * @this {DebuggerPDP11}
+     * @param {DbgAddrPDP11} dbgAddr
+     * @param {number} addr
+     * @return {DbgAddrPDP11}
+     */
+    setAddr(dbgAddr, addr)
+    {
+        dbgAddr.addr = addr;
+        dbgAddr.fTemporary = false;
+        dbgAddr.nBase = undefined;
+        return dbgAddr;
+    }
+
+    /**
+     * packAddr(dbgAddr)
+     *
+     * Packs a DbgAddrPDP11 object into an Array suitable for saving in a machine state object.
+     *
+     * @this {DebuggerPDP11}
+     * @param {DbgAddrPDP11} dbgAddr
+     * @return {Array}
+     */
+    packAddr(dbgAddr)
+    {
+        return [dbgAddr.addr, dbgAddr.fPhysical, dbgAddr.nBase, dbgAddr.fTemporary, dbgAddr.sCmd];
+    }
+
+    /**
+     * unpackAddr(aAddr)
+     *
+     * Unpacks a DbgAddrPDP11 object from an Array created by packAddr() and restored from a saved machine state.
+     *
+     * @this {DebuggerPDP11}
+     * @param {Array} aAddr
+     * @return {DbgAddrPDP11}
+     */
+    unpackAddr(aAddr)
+    {
+        var dbgAddr = this.newAddr(aAddr[0], aAddr[1], aAddr[2]);
+        dbgAddr.fTemporary = aAddr[3];
+        if (aAddr[4]) {
+            dbgAddr.aCmds = this.parseCommand(dbgAddr.sCmd = aAddr[4]);
+        }
+        return dbgAddr;
+    }
+
+    /**
+     * initBus(bus, cpu, dbg)
+     *
+     * @this {DebuggerPDP11}
+     * @param {ComputerPDP11} cmp
+     * @param {BusPDP11} bus
+     * @param {CPUStatePDP11} cpu
+     * @param {DebuggerPDP11} dbg
+     */
+    initBus(cmp, bus, cpu, dbg)
+    {
+        this.bus = bus;
+        this.cmp = cmp;
+        this.cpu = cpu;
+        this.panel = cmp.panel;
+
+        /*
+         * Re-initialize Debugger message support if necessary
+         */
+        var sMessages = cmp.getMachineParm('messages');
+        if (sMessages) this.messageInit(sMessages);
+
+        if (this.cpu.model < PDP11.MODEL_1145) this.aOpReserved = DebuggerPDP11.OP1145;
+
+        this.messageDump(MessagesPDP11.BUS,  function onDumpBus(asArgs) { dbg.dumpBus(asArgs); });
+
+        this.setReady();
+    }
+
+    /**
+     * setBinding(sType, sBinding, control, sValue)
+     *
+     * @this {DebuggerPDP11}
+     * @param {string|null} sType is the type of the HTML control (eg, "button", "textarea", "register", "flag", "rled", etc)
+     * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "debugInput")
+     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {string} [sValue] optional data value
+     * @return {boolean} true if binding was successful, false if unrecognized binding request
+     */
+    setBinding(sType, sBinding, control, sValue)
+    {
+        var dbg = this;
+        switch (sBinding) {
+
+        case "debugInput":
+            this.bindings[sBinding] = control;
+            this.controlDebug = control;
+            /*
+             * For halted machines, this is fine, but for auto-start machines, it can be annoying.
+             *
+             *      control.focus();
+             */
+            control.onkeydown = function onKeyDownDebugInput(event) {
+                var sCmd;
+                if (event.keyCode == Keys.KEYCODE.CR) {
+                    sCmd = control.value;
+                    control.value = "";
+                    dbg.doCommands(sCmd, true);
+                }
+                else if (event.keyCode == Keys.KEYCODE.ESC) {
+                    control.value = sCmd = "";
+                }
+                else {
+                    if (event.keyCode == Keys.KEYCODE.UP) {
+                        sCmd = dbg.getPrevCommand();
+                    }
+                    else if (event.keyCode == Keys.KEYCODE.DOWN) {
+                        sCmd = dbg.getNextCommand();
+                    }
+                    if (sCmd != null) {
+                        var cch = sCmd.length;
+                        control.value = sCmd;
+                        control.setSelectionRange(cch, cch);
+                    }
+                }
+                if (sCmd != null && event.preventDefault) event.preventDefault();
+            };
+            return true;
+
+        case "debugEnter":
+            this.bindings[sBinding] = control;
+            Web.onClickRepeat(
+                control,
+                500, 100,
+                function onClickDebugEnter(fRepeat) {
+                    if (dbg.controlDebug) {
+                        var sCmd = dbg.controlDebug.value;
+                        dbg.controlDebug.value = "";
+                        dbg.doCommands(sCmd, true);
+                        return true;
+                    }
+                    if (DEBUG) dbg.log("no debugger input buffer");
+                    return false;
+                }
+            );
+            return true;
+
+        case "step":
+            this.bindings[sBinding] = control;
+            Web.onClickRepeat(
+                control,
+                500, 100,
+                function onClickStep(fRepeat) {
+                    var fCompleted = false;
+                    if (!dbg.isBusy(true)) {
+                        dbg.setBusy(true);
+                        fCompleted = dbg.stepCPU(fRepeat? 1 : 0, null);
+                        dbg.setBusy(false);
+                    }
+                    return fCompleted;
+                }
+            );
+            return true;
+
+        default:
+            break;
+        }
+        return false;
+    }
+
+    /**
+     * setFocus(fScroll)
+     *
+     * @this {DebuggerPDP11}
+     * @param {boolean} [fScroll] (true if you really want the control scrolled into view)
+     */
+    setFocus(fScroll)
+    {
+        if (this.controlDebug) {
+            /*
+             * This is the recommended work-around to prevent the browser from scrolling the focused element
+             * into view.  The CPU is not a visual component, so when the CPU wants to set focus, the primary intent
+             * is to ensure that keyboard input is fielded properly.
+             */
+            var x = 0, y = 0;
+            if (!fScroll && window) {
+                x = window.scrollX;
+                y = window.scrollY;
+            }
+
+            this.controlDebug.focus();
+
+            if (!fScroll && window) {
+                window.scrollTo(x, y);
+            }
+        }
+    }
+
+    /**
+     * mapUnibus(addr)
+     *
+     * @this {DebuggerPDP11}
+     * @param {number} addr
+     * @return {number}
+     */
+    mapUnibus(addr)
+    {
+        return this.cpu.mapUnibus(addr);
+    }
+
+    /**
+     * getByte(dbgAddr, inc)
+     *
+     * We must route all our memory requests through the CPU now, in case paging is enabled.
+     *
+     * @this {DebuggerPDP11}
+     * @param {DbgAddrPDP11} dbgAddr
+     * @param {number} [inc]
+     * @return {number}
+     */
+    getByte(dbgAddr, inc)
+    {
+        var b = 0xff;
+        var addr = this.getAddr(dbgAddr, false, 1);
+        if (addr !== PDP11.ADDR_INVALID) {
+            b = (dbgAddr.fPhysical || addr > 0xffff)? this.bus.getByteDirect(this.mapUnibus(addr)) : this.cpu.getByteSafe(addr);
+            if (inc) this.incAddr(dbgAddr, inc);
+        }
+        return b;
+    }
+
+    /**
+     * getWord(dbgAddr, inc)
+     *
+     * @this {DebuggerPDP11}
+     * @param {DbgAddrPDP11} dbgAddr
+     * @param {number} [inc]
+     * @return {number}
+     */
+    getWord(dbgAddr, inc)
+    {
+        var w = 0xffff;
+        var addr = this.getAddr(dbgAddr, false, 2);
+        if (addr !== PDP11.ADDR_INVALID) {
+            w = (dbgAddr.fPhysical || addr > 0xffff)? this.bus.getWordDirect(this.mapUnibus(addr)) : this.cpu.getWordSafe(addr);
+            if (inc) this.incAddr(dbgAddr, inc);
+        }
+        return w;
+    }
+
+    /**
+     * setByte(dbgAddr, b, inc)
+     *
+     * @this {DebuggerPDP11}
+     * @param {DbgAddrPDP11} dbgAddr
+     * @param {number} b
+     * @param {number} [inc]
+     */
+    setByte(dbgAddr, b, inc)
+    {
+        var addr = this.getAddr(dbgAddr, true, 1);
+        if (addr !== PDP11.ADDR_INVALID) {
+            if (dbgAddr.fPhysical || addr > 0xffff) {
+                this.bus.setByteDirect(this.mapUnibus(addr), b);
+            } else {
+                this.cpu.setByteSafe(addr, b);
+            }
+            if (inc) this.incAddr(dbgAddr, inc);
+            this.cmp.updateDisplays(-1);
+        }
+    }
+
+    /**
+     * setWord(dbgAddr, w, inc)
+     *
+     * @this {DebuggerPDP11}
+     * @param {DbgAddrPDP11} dbgAddr
+     * @param {number} w
+     * @param {number} [inc]
+     */
+    setWord(dbgAddr, w, inc)
+    {
+        var addr = this.getAddr(dbgAddr, true, 2);
+        if (addr !== PDP11.ADDR_INVALID) {
+            if (dbgAddr.fPhysical || addr > 0xffff) {
+                this.bus.setWordDirect(this.mapUnibus(addr), w);
+            } else {
+                this.cpu.setWordSafe(addr, w);
+            }
+            if (inc) this.incAddr(dbgAddr, inc);
+            this.cmp.updateDisplays(-1);
+        }
+    }
+
+    /**
+     * parseAddr(sAddr, fCode, fNoChecks, fPrint)
+     *
+     * Address evaluation and validation (eg, range checks) are no longer performed at this stage.  That's
+     * done later, by getAddr(), which returns PDP11.ADDR_INVALID for invalid segments, out-of-range offsets,
+     * etc.  The Debugger's low-level get/set memory functions verify all getAddr() results, but even if an
+     * invalid address is passed through to the Bus memory interfaces, the address will simply be masked with
+     * bus.nBusMask; in the case of PDP11.ADDR_INVALID, that will generally refer to the top of the physical
+     * address space.
+     *
+     * @this {DebuggerPDP11}
+     * @param {string|undefined} sAddr
+     * @param {boolean} [fCode] (true if target is code, false if target is data)
+     * @param {boolean} [fNoChecks] (true when setting breakpoints that may not be valid now, but will be later)
+     * @param {boolean} [fPrint]
+     * @return {DbgAddrPDP11|null|undefined}
+     */
+    parseAddr(sAddr, fCode, fNoChecks, fPrint)
+    {
+        var dbgAddr;
+        var dbgAddrNext = (fCode? this.dbgAddrNextCode : this.dbgAddrNextData);
+        var addr = dbgAddrNext.addr;
+        var fPhysical, nBase;
+        if (sAddr !== undefined) {
+            sAddr = this.parseReference(sAddr);
+            var ch = sAddr.charAt(0);
+            if (ch == '%') {
+                fPhysical = true;
+                sAddr = sAddr.substr(1);
+            }
+            dbgAddr = this.findSymbolAddr(sAddr);
+            if (dbgAddr) return dbgAddr;
+            if (sAddr.indexOf("0x") >= 0) {
+                nBase = 16
+            } else if (sAddr.indexOf("0o") >= 0) {
+                nBase = 8;
+            } else if (sAddr.indexOf('.') >= 0) {
+                nBase = 10;
+            }
+            addr = this.parseExpression(sAddr, fPrint);
+        }
+        if (addr != null) {
+            dbgAddr = this.newAddr(addr, fPhysical, nBase);
+        }
+        return dbgAddr;
+    }
+
+    /**
+     * parseAddrOptions(dbdAddr, sOptions)
+     *
+     * @this {DebuggerPDP11}
+     * @param {DbgAddrPDP11} dbgAddr
+     * @param {string} [sOptions]
+     */
+    parseAddrOptions(dbgAddr, sOptions)
+    {
+        if (sOptions) {
+            var a = sOptions.match(/(['"])(.*?)\1/);
+            if (a) {
+                dbgAddr.aCmds = this.parseCommand(dbgAddr.sCmd = a[2]);
+            }
+        }
+    }
+
+    /**
+     * incAddr(dbgAddr, inc)
+     *
+     * @this {DebuggerPDP11}
+     * @param {DbgAddrPDP11} dbgAddr
+     * @param {number} [inc] contains value to increment dbgAddr by (default is 1)
+     */
+    incAddr(dbgAddr, inc)
+    {
+        if (dbgAddr.addr != null) {
+            dbgAddr.addr += (inc || 1);
+        }
+    }
+
+    /**
+     * toStrOffset(off)
+     *
+     * @this {DebuggerPDP11}
+     * @param {number|null|undefined} [off]
+     * @return {string} the hex representation of off
+     */
+    toStrOffset(off)
+    {
+        return this.toStrBase(off);
+    }
+
+    /**
+     * toStrAddr(dbgAddr)
+     *
+     * @this {DebuggerPDP11}
+     * @param {DbgAddrPDP11} dbgAddr
+     * @return {string} the hex representation of the address
+     */
+    toStrAddr(dbgAddr)
+    {
+        return (dbgAddr.fPhysical? '%' : '') + this.toStrOffset(dbgAddr.addr);
+    }
+
+    /**
+     * getSZ(dbgAddr, cchMax)
+     *
+     * Gets zero-terminated (aka "ASCIIZ") string from dbgAddr.  It also stops at the first '$', in case this is
+     * a '$'-terminated string -- mainly because I'm lazy and didn't feel like writing a separate get() function.
+     * Yes, a zero-terminated string containing a '$' will be prematurely terminated, and no, I don't care.
+     *
+     * @this {DebuggerPDP11}
+     * @param {DbgAddrPDP11} dbgAddr
+     * @param {number} [cchMax] (default is 256)
+     * @return {string} (and dbgAddr advanced past the terminating zero)
+     */
+    getSZ(dbgAddr, cchMax)
+    {
+        var s = "";
+        cchMax = cchMax || 256;
+        while (s.length < cchMax) {
+            var b = this.getByte(dbgAddr, 1);
+            if (!b || b == 0x24 || b >= 127) break;
+            s += (b >= 32? String.fromCharCode(b) : '.');
+        }
+        return s;
+    }
+
+    /**
+     * dumpBlocks(aBlocks, sAddr)
+     *
+     * @this {DebuggerPDP11}
+     * @param {Array} aBlocks
+     * @param {string} [sAddr] (optional block address)
+     */
+    dumpBlocks(aBlocks, sAddr)
+    {
+        var addr = 0, i = 0, n = aBlocks.length;
+
+        if (sAddr) {
+            addr = this.getAddr(this.parseAddr(sAddr));
+            if (addr === PDP11.ADDR_INVALID) {
+                this.println("invalid address: " + sAddr);
+                return;
+            }
+            i = addr >>> this.bus.nBlockShift;
+            n = 1;
+        }
+
+        this.println("blockid   physical   blockaddr  used    size    type");
+        this.println("--------  ---------  ---------  ------  ------  ----");
+
+        var typePrev = -1, cPrev = 0;
+        while (n--) {
+            var block = aBlocks[i];
+            if (block.type == typePrev) {
+                if (!cPrev++) this.println("...");
+            } else {
+                typePrev = block.type;
+                var sType = MemoryPDP11.TYPE_NAMES[typePrev];
+                if (block) {
+                    this.println(Str.toHex(block.id, 8) + "  %" + Str.toHex(i << this.bus.nBlockShift, 8) + "  %" + Str.toHex(block.addr, 8) + "  " + Str.toHexWord(block.used) + "  " + Str.toHexWord(block.size) + "  " + sType);
+                }
+                if (typePrev != MemoryPDP11.TYPE.NONE) typePrev = -1;
+                cPrev = 0;
+            }
+            addr += this.bus.nBlockSize;
+            i++;
+        }
+    }
+
+    /**
+     * dumpBus(asArgs)
+     *
+     * Dumps Bus allocations.
+     *
+     * @this {DebuggerPDP11}
+     * @param {Array.<string>} asArgs (asArgs[0] is an optional block address)
+     */
+    dumpBus(asArgs)
+    {
+        this.dumpBlocks(this.bus.aBusBlocks, asArgs[0]);
+    }
+
+    /**
+     * dumpHistory(sPrev, sLines)
+     *
+     * If sLines is not a number, it can be a instruction filter.  However, for the moment, the only
+     * supported filter is "call", which filters the history buffer for all CALL and RET instructions
+     * from the specified previous point forward.
+     *
+     * @this {DebuggerPDP11}
+     * @param {string} [sPrev] is a (decimal) number of instructions to rewind to (default is 10)
+     * @param {string} [sLines] is a (decimal) number of instructions to print (default is, again, 10)
+     */
+    dumpHistory(sPrev, sLines)
+    {
+        var sMore = "";
+        var cHistory = 0;
+        var iHistory = this.iInstructionHistory;
+        var aHistory = this.aInstructionHistory;
+
+        if (aHistory.length) {
+            var nPrev = +sPrev || this.nextHistory;
+            var nLines = +sLines || 10;
+
+            if (isNaN(nPrev)) {
+                nPrev = nLines;
+            } else {
+                sMore = "more ";
+            }
+
+            if (nPrev > aHistory.length) {
+                this.println("note: only " + aHistory.length + " available");
+                nPrev = aHistory.length;
+            }
+
+            iHistory -= nPrev;
+            if (iHistory < 0) {
+                /*
+                 * If the dbgAddr of the last aHistory element contains a valid selector, wrap around.
+                 */
+                if (aHistory[aHistory.length - 1].addr == null) {
+                    nPrev = iHistory + nPrev;
+                    iHistory = 0;
+                } else {
+                    iHistory += aHistory.length;
+                }
+            }
+
+            var aFilters = [];
+            if (sLines == "call") {
+                nLines = 100000;
+                aFilters = ["CALL"];
+            }
+
+            if (sPrev !== undefined) {
+                this.println(nPrev + " instructions earlier:");
+            }
+
+            /*
+             * TODO: The following is necessary to prevent dumpHistory() from causing additional (or worse, recursive)
+             * faults due to segmented addresses that are no longer valid, but the only alternative is to dramatically
+             * increase the amount of memory used to store instruction history (eg, storing copies of all the instruction
+             * bytes alongside the execution addresses).
+             *
+             * For now, we're living dangerously, so that our history dumps actually work.
+             *
+             *      this.nSuppressBreaks++;
+             *
+             * If you re-enable this protection, be sure to re-enable the decrement below, too.
+             */
+            while (nLines > 0 && iHistory != this.iInstructionHistory) {
+
+                var dbgAddr = aHistory[iHistory++];
+                if (dbgAddr.addr == null) break;
+
+                /*
+                 * We must create a new dbgAddr from the address in aHistory, because dbgAddr was
+                 * a reference, not a copy, and we don't want getInstruction() modifying the original.
+                 */
+                var dbgAddrNew = this.newAddr(dbgAddr.addr);
+
+                var sComment = "history";
+                var nSequence = nPrev--;
+
+                /*
+                 * TODO: Need to some UI to control whether cycle counts are displayed as part of the history.
+                 * It's currently disabled in checkInstruction(), so it's disable here, too.
+                 *
+                if (DEBUG && dbgAddr.cycleCount != null) {
+                    sComment = "cycles";
+                    nSequence = dbgAddr.cycleCount;
+                }
+                 */
+
+                var sInstruction = this.getInstruction(dbgAddrNew, sComment, nSequence);
+
+                if (!aFilters.length || sInstruction.indexOf(aFilters[0]) >= 0) {
+                    this.println(sInstruction);
+                }
+
+                /*
+                 * If there were OPERAND or ADDRESS overrides on the previous instruction, getInstruction()
+                 * will have automatically disassembled additional bytes, so skip additional history entries.
+                 */
+                if (dbgAddrNew.cOverrides) {
+                    iHistory += dbgAddrNew.cOverrides; nLines -= dbgAddrNew.cOverrides; nPrev -= dbgAddrNew.cOverrides;
+                }
+
+                if (iHistory >= aHistory.length) iHistory = 0;
+                this.nextHistory = nPrev;
+                cHistory++;
+                nLines--;
+            }
+            /*
+             * See comments above.
+             *
+             *      this.nSuppressBreaks--;
+             */
+        }
+
+        if (!cHistory) {
+            this.println("no " + sMore + "history available");
+            this.nextHistory = undefined;
+        }
+    }
+
+    /**
+     * messageInit(sEnable)
+     *
+     * @this {DebuggerPDP11}
+     * @param {string|undefined} sEnable contains zero or more message categories to enable, separated by '|'
+     */
+    messageInit(sEnable)
+    {
+        this.dbg = this;
+        this.bitsMessage = this.bitsWarning = MessagesPDP11.WARN;
+        this.sMessagePrev = null;
+        this.aMessageBuffer = [];
+        /*
+         * Internally, we use "key" instead of "keys", since the latter is a method on JavasScript objects,
+         * but externally, we allow the user to specify "keys"; "kbd" is also allowed as shorthand for "keyboard".
+         */
+        var aEnable = this.parseCommand(sEnable.replace("keys","key").replace("kbd","keyboard"), false, '|');
+        if (aEnable.length) {
+            for (var m in MessagesPDP11.CATEGORIES) {
+                if (Usr.indexOf(aEnable, m) >= 0) {
+                    this.bitsMessage |= MessagesPDP11.CATEGORIES[m];
+                    this.println(m + " messages enabled");
+                }
+            }
+        }
+    }
+
+    /**
+     * messageDump(bitMessage, fnDumper)
+     *
+     * @this {DebuggerPDP11}
+     * @param {number} bitMessage is one Messages category flag
+     * @param {function(Array.<string>)} fnDumper is a function the Debugger can use to dump data for that category
+     * @return {boolean} true if successfully registered, false if not
+     */
+    messageDump(bitMessage, fnDumper)
+    {
+        for (var m in MessagesPDP11.CATEGORIES) {
+            if (bitMessage == MessagesPDP11.CATEGORIES[m]) {
+                this.afnDumpers[m] = fnDumper;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * getRegIndex(sReg, off)
+     *
+     * @this {DebuggerPDP11}
+     * @param {string} sReg
+     * @param {number} [off] optional offset into sReg
+     * @return {number} register index, or -1 if not found
+     */
+    getRegIndex(sReg, off)
+    {
+        sReg = sReg.toUpperCase();
+        var iReg = DebuggerPDP11.REGS[sReg];
+        if (iReg == null) {
+            iReg = -1;
+            if (sReg.charAt(0) == "R") {
+                iReg = +sReg.charAt(1);
+                if (iReg < 0 || iReg > 7) iReg = -1;
+            }
+        }
+        return iReg;
+    }
+
+    /**
+     * getRegName(iReg)
+     *
+     * @this {DebuggerPDP11}
+     * @param {number} iReg (0-7; not used for other registers)
+     * @return {string}
+     */
+    getRegName(iReg)
+    {
+        return (iReg < 6? ("R" + iReg) :  (iReg == 6? "SP" : "PC"));
+    }
+
+    /**
+     * getRegValue(iReg)
+     *
+     * Register numbers 0-7 are reserved for cpu.regsGen, 8-15 are reserved for cpu.regsAlt,
+     * 16-19 for cpu.regsAltStack, 20 for regPSW, etc.
+     *
+     * @this {DebuggerPDP11}
+     * @param {number} iReg
+     * @return {number|undefined}
+     */
+    getRegValue(iReg)
+    {
+        var value;
+        if (iReg >= 0) {
+            if (iReg < 8) {
+                value = this.cpu.regsGen[iReg];
+            }
+            else if (iReg < 16) {
+                value = this.cpu.regsAlt[iReg-8];
+            }
+            else if (iReg < 20) {
+                value = this.cpu.regsAltStack[iReg-16];
+            }
+            else {
+                var cpu = this.cpu;
+                var panel = this.panel;
+                switch(iReg) {
+                case DebuggerPDP11.REG_PS:
+                    value = this.cpu.getPSW();
+                    break;
+                case DebuggerPDP11.REG_PI:
+                    value = cpu.getPIR();
+                    break;
+                case DebuggerPDP11.REG_ER:
+                    value = cpu.regErr;
+                    break;
+                case DebuggerPDP11.REG_SL:
+                    value = cpu.getSLR();
+                    break;
+                case DebuggerPDP11.REG_M0:
+                    value = cpu.getMMR0();
+                    break;
+                case DebuggerPDP11.REG_M1:
+                    value = cpu.getMMR1();
+                    break;
+                case DebuggerPDP11.REG_M2:
+                    value = cpu.getMMR2();
+                    break;
+                case DebuggerPDP11.REG_M3:
+                    value = cpu.getMMR3();
+                    break;
+                case DebuggerPDP11.REG_AR:
+                    if (panel) value = panel.getAR();
+                    break;
+                case DebuggerPDP11.REG_DR:
+                    if (panel) value = panel.getDR();
+                    break;
+                case DebuggerPDP11.REG_SR:
+                    if (panel && panel.hasSwitches()) {
+                        value = panel.getSR();
+                    }
+                    break;
+                }
+            }
+        }
+        return value;
+    }
+
+    /**
+     * replaceRegs(s)
+     *
+     * TODO: Implement or eliminate.
+     *
+     * @this {DebuggerPDP11}
+     * @param {string} s
+     * @return {string}
+     */
+    replaceRegs(s)
+    {
+        return s;
+    }
+
+    /**
+     * message(sMessage, fAddress)
+     *
+     * @this {DebuggerPDP11}
+     * @param {string} sMessage is any caller-defined message string
+     * @param {boolean} [fAddress] is true to display the current address
+     */
+    message(sMessage, fAddress)
+    {
+        if (fAddress) {
+            sMessage += " @" + this.toStrAddr(this.newAddr(this.cpu.getLastPC()));
+        }
+
+        if (this.sMessagePrev && sMessage == this.sMessagePrev) return;
+        this.sMessagePrev = sMessage;
+
+        if (this.bitsMessage & MessagesPDP11.BUFFER) {
+            this.aMessageBuffer.push(sMessage);
+            return;
+        }
+
+        var fRunning;
+        if ((this.bitsMessage & MessagesPDP11.HALT) && this.cpu && (fRunning = this.cpu.isRunning()) || this.isBusy(true)) {
+            this.stopCPU();
+            if (fRunning) sMessage += " (cpu halted)";
+        }
+
+        this.println(sMessage); // + " (" + this.cpu.getCycles() + " cycles)"
+
+        /*
+         * We have no idea what the frequency of println() calls might be; all we know is that they easily
+         * screw up the CPU's careful assumptions about cycles per burst.  So we call yieldCPU() after every
+         * message, to effectively end the current burst and start fresh.
+         *
+         * TODO: See CPUPDP11.calcStartTime() for a discussion of why we might want to call yieldCPU() *before*
+         * we display the message.
+         */
+        if (this.cpu) this.cpu.yieldCPU();
+    }
+
+    /**
+     * init()
+     *
+     * @this {DebuggerPDP11}
+     * @param {boolean} [fAutoStart]
+     */
+    init(fAutoStart)
+    {
+        this.fInit = true;
+        this.println("Type ? for help with PDPjs Debugger commands");
+        this.updateStatus();
+        if (!fAutoStart) this.setFocus();
+        if (this.sInitCommands) {
+            var sCmds = this.sInitCommands;
+            this.sInitCommands = null;
+            this.doCommands(sCmds);
+        }
+    }
+
+    /**
+     * historyInit(fQuiet)
+     *
+     * This function is intended to be called by the constructor, reset(), addBreakpoint(), findBreakpoint()
+     * and any other function that changes the checksEnabled() criteria used to decide whether checkInstruction()
+     * should be called.
+     *
+     * That is, if the history arrays need to be allocated and haven't already been allocated, then allocate them,
+     * and if the arrays are no longer needed, then deallocate them.
+     *
+     * @this {DebuggerPDP11}
+     * @param {boolean} [fQuiet]
+     */
+    historyInit(fQuiet)
+    {
+        var i;
+        if (!this.checksEnabled()) {
+            if (this.aInstructionHistory && this.aInstructionHistory.length && !fQuiet) {
+                this.println("instruction history buffer freed");
+            }
+            this.iInstructionHistory = 0;
+            this.aInstructionHistory = [];
+            return;
+        }
+        if (!this.aInstructionHistory || !this.aInstructionHistory.length) {
+            this.aInstructionHistory = new Array(DebuggerPDP11.HISTORY_LIMIT);
+            for (i = 0; i < this.aInstructionHistory.length; i++) {
+                /*
+                 * Preallocate dummy Addr (Array) objects in every history slot, so that
+                 * checkInstruction() doesn't need to call newAddr() on every slot update.
+                 */
+                this.aInstructionHistory[i] = this.newAddr();
+            }
+            this.iInstructionHistory = 0;
+            if (!fQuiet) {
+                this.println("instruction history buffer allocated");
+            }
+        }
+    }
+
+    /**
+     * startCPU(fUpdateFocus, fQuiet)
+     *
+     * @this {DebuggerPDP11}
+     * @param {boolean} [fUpdateFocus] is true to update focus
+     * @param {boolean} [fQuiet]
+     * @return {boolean} true if run request successful, false if not
+     */
+    startCPU(fUpdateFocus, fQuiet)
+    {
+        if (!this.checkCPU(fQuiet)) return false;
+        this.cpu.startCPU(fUpdateFocus);
+        return true;
+    }
+
+    /**
+     * stepCPU(nCycles, fRegs, fUpdateDisplays)
+     *
+     * @this {DebuggerPDP11}
+     * @param {number} nCycles (0 for one instruction without checking breakpoints)
+     * @param {boolean|null} [fRegs] is true to display registers after step (default is false; use null for previous setting)
+     * @param {boolean} [fUpdateDisplays] is false to disable Computer display updates (default is true)
+     * @return {boolean}
+     */
+    stepCPU(nCycles, fRegs, fUpdateDisplays)
+    {
+        if (!this.checkCPU()) return false;
+
+        if (fRegs === null) {
+            fRegs = (!this.sCmdTracePrev || this.sCmdTracePrev == "tr");
+        }
+
+        this.nCycles = 0;
+
+        if (!nCycles) {
+            /*
+             * When single-stepping, the CPU won't call checkInstruction(), which is good for
+             * avoiding breakpoints, but bad for instruction data collection if checks are enabled.
+             * So we call checkInstruction() ourselves.
+             */
+            if (this.checksEnabled()) this.checkInstruction(this.cpu.getPC(), 0);
+        }
+        /*
+         * For our typically tiny bursts (usually single instructions), mimic what runCPU() does.
+         */
+        try {
+            nCycles = this.cpu.getBurstCycles(nCycles);
+            var nCyclesStep = this.cpu.stepCPU(nCycles);
+            if (nCyclesStep > 0) {
+                this.cpu.updateTimers(nCyclesStep);
+                this.nCycles += nCyclesStep;
+                this.cpu.addCycles(nCyclesStep, true);
+                this.cpu.updateChecksum(nCyclesStep);
+                this.cInstructions++;
+            }
+        }
+        catch(exception) {
+            /*
+             * We assume that any numeric exception was explicitly thrown by the CPU to interrupt the
+             * current instruction.  For all other exceptions, we attempt a stack dump.
+             */
+            if (typeof exception != "number") {
+                var e = exception;
+                this.nCycles = 0;
+                this.cpu.setError(e.stack || e.message);
             }
         }
 
-    }   // endif DEBUGGER
+        /*
+         * Because we called cpu.stepCPU() and not cpu.startCPU(), we must nudge the Computer's update code,
+         * and then update our own state.  Normally, the only time fUpdateDisplays will be false is when doTrace()
+         * is calling us in a loop, in which case it will perform its own updateDisplays() when it's done.
+         */
+        if (fUpdateDisplays !== false) {
+            if (this.panel) this.panel.stop();
+            this.cmp.updateDisplays(-1);
+        }
+
+        this.updateStatus(fRegs || false);
+        return (this.nCycles > 0);
+    }
+
+    /**
+     * stopCPU()
+     *
+     * @this {DebuggerPDP11}
+     * @param {boolean} [fComplete]
+     */
+    stopCPU(fComplete)
+    {
+        if (this.cpu) this.cpu.stopCPU(fComplete);
+    }
+
+    /**
+     * updateStatus(fRegs)
+     *
+     * @this {DebuggerPDP11}
+     * @param {boolean} [fRegs] (default is true)
+     */
+    updateStatus(fRegs)
+    {
+        if (!this.fInit) return;
+
+        if (fRegs === undefined) fRegs = true;
+
+        var trapStatus = this.cpu.getTrapStatus();
+        if (trapStatus) {
+            var reason = trapStatus >> 8;
+            var sReason = reason < 0? PDP11.REASONS[-reason] : this.toStrBase(reason);
+            this.println("trapped to " + this.toStrBase(trapStatus & 0xff, 1) + " (" + sReason + ")");
+        }
+
+        this.dbgAddrNextCode = this.newAddr(this.cpu.getPC());
+        /*
+         * this.nStep used to be a simple boolean, but now it's 0 (or undefined)
+         * if inactive, 1 if stepping over an instruction without a register dump, or 2
+         * if stepping over an instruction with a register dump.
+         */
+        if (!fRegs || this.nStep == 1)
+            this.doUnassemble();
+        else {
+            this.doRegisters();
+        }
+    }
+
+    /**
+     * checkCPU(fQuiet)
+     *
+     * Make sure the CPU is ready (finished initializing), powered, not already running, and not in an error state.
+     *
+     * @this {DebuggerPDP11}
+     * @param {boolean} [fQuiet]
+     * @return {boolean}
+     */
+    checkCPU(fQuiet)
+    {
+        if (!this.cpu || !this.cpu.isReady() || !this.cpu.isPowered() || this.cpu.isRunning()) {
+            if (!fQuiet) this.println("cpu busy or unavailable, command ignored");
+            return false;
+        }
+        return !this.cpu.isError();
+    }
+
+    /**
+     * powerUp(data, fRepower)
+     *
+     * @this {DebuggerPDP11}
+     * @param {Object|null} data
+     * @param {boolean} [fRepower]
+     * @return {boolean} true if successful, false if failure
+     */
+    powerUp(data, fRepower)
+    {
+        if (!fRepower) {
+            /*
+             * Because Debugger save/restore support is somewhat limited (and didn't always exist),
+             * we deviate from the typical save/restore design pattern: instead of reset OR restore,
+             * we always reset and then perform a (potentially limited) restore.
+             */
+            this.reset(true);
+
+            // this.println(data? "resuming" : "powering up");
+
+            if (data && this.restore) {
+                if (!this.restore(data)) return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * powerDown(fSave, fShutdown)
+     *
+     * @this {DebuggerPDP11}
+     * @param {boolean} [fSave]
+     * @param {boolean} [fShutdown]
+     * @return {Object|boolean}
+     */
+    powerDown(fSave, fShutdown)
+    {
+        if (fShutdown) this.println(fSave? "suspending" : "shutting down");
+        return fSave? this.save() : true;
+    }
+
+    /**
+     * reset(fQuiet)
+     *
+     * This is a notification handler, called by the Computer, to inform us of a reset.
+     *
+     * @this {DebuggerPDP11}
+     * @param {boolean} fQuiet (true only when called from our own powerUp handler)
+     */
+    reset(fQuiet)
+    {
+        this.historyInit();
+        this.cInstructions = this.cInstructionsStart = 0;
+        this.sMessagePrev = null;
+        this.nCycles = 0;
+        this.dbgAddrNextCode = this.newAddr(this.cpu.getPC());
+        /*
+         * fRunning is set by start() and cleared by stop().  In addition, we clear
+         * it here, so that if the CPU is reset while running, we can prevent stop()
+         * from unnecessarily dumping the CPU state.
+         */
+        this.flags.running = false;
+        this.clearTempBreakpoint();
+        if (!fQuiet) this.updateStatus();
+    }
+
+    /**
+     * save()
+     *
+     * This implements (very rudimentary) save support for the Debugger component.
+     *
+     * @this {DebuggerPDP11}
+     * @return {Object}
+     */
+    save()
+    {
+        var state = new State(this);
+        state.set(0, this.packAddr(this.dbgAddrNextCode));
+        state.set(1, this.packAddr(this.dbgAddrAssemble));
+        state.set(2, [this.aPrevCmds, this.fAssemble, this.bitsMessage]);
+        state.set(3, this.aSymbolTable);
+        return state.data();
+    }
+
+    /**
+     * restore(data)
+     *
+     * This implements (very rudimentary) restore support for the Debugger component.
+     *
+     * @this {DebuggerPDP11}
+     * @param {Object} data
+     * @return {boolean} true if successful, false if failure
+     */
+    restore(data)
+    {
+        var i = 0;
+        if (data[2] !== undefined) {
+            this.dbgAddrNextCode = this.unpackAddr(data[i++]);
+            this.dbgAddrAssemble = this.unpackAddr(data[i++]);
+            this.aPrevCmds = data[i][0];
+            if (typeof this.aPrevCmds == "string") this.aPrevCmds = [this.aPrevCmds];
+            this.fAssemble = data[i][1];
+            this.bitsMessage |= data[i][2];     // keep our current message bits set, and simply "add" any extra bits defined by the saved state
+        }
+        if (data[3]) this.aSymbolTable = data[3];
+        return true;
+    }
+
+    /**
+     * start(ms, nCycles)
+     *
+     * This is a notification handler, called by the Computer, to inform us the CPU has started.
+     *
+     * @this {DebuggerPDP11}
+     * @param {number} ms
+     * @param {number} nCycles
+     */
+    start(ms, nCycles)
+    {
+        if (!this.nStep) this.println("running");
+        this.flags.running = true;
+        this.msStart = ms;
+        this.nCyclesStart = nCycles;
+    }
+
+    /**
+     * stop(ms, nCycles)
+     *
+     * This is a notification handler, called by the Computer, to inform us the CPU has now stopped.
+     *
+     * @this {DebuggerPDP11}
+     * @param {number} ms
+     * @param {number} nCycles
+     */
+    stop(ms, nCycles)
+    {
+        if (this.flags.running) {
+            this.flags.running = false;
+            this.nCycles = nCycles - this.nCyclesStart;
+            if (!this.nStep) {
+                var sStopped = "stopped";
+                if (this.nCycles) {
+                    var msTotal = ms - this.msStart;
+                    var nCyclesPerSecond = (msTotal > 0? Math.round(this.nCycles * 1000 / msTotal) : 0);
+                    sStopped += " (";
+                    if (this.checksEnabled()) {
+                        sStopped += this.cInstructions + " instructions, ";
+                        /*
+                         * $ops displays progress by calculating cInstructions - cInstructionsStart, so before
+                         * zeroing cInstructions, we should subtract cInstructions from cInstructionsStart (since
+                         * we're effectively subtracting cInstructions from cInstructions as well).
+                         */
+                        this.cInstructionsStart -= this.cInstructions;
+                        this.cInstructions = 0;
+                    }
+                    sStopped += this.nCycles + " cycles, " + msTotal + " ms, " + nCyclesPerSecond + " hz)";
+                } else {
+                    if (this.messageEnabled(MessagesPDP11.HALT)) {
+                        /*
+                         * It's possible the user is trying to 'g' past a fault that was blocked by helpCheckFault()
+                         * for the Debugger's benefit; if so, it will continue to be blocked, so try displaying a helpful
+                         * message (another helpful tip would be to simply turn off the "halt" message category).
+                         */
+                        sStopped += " (use the 't' command to execute blocked faults)";
+                    }
+                }
+                this.println(sStopped);
+            }
+            this.updateStatus(true);
+            this.setFocus();
+            this.clearTempBreakpoint(this.cpu.getPC());
+            this.sMessagePrev = null;
+        }
+    }
+
+    /**
+     * checksEnabled(fRelease)
+     *
+     * This "check" function is called by the CPU; we indicate whether or not every instruction needs to be checked.
+     *
+     * Originally, this returned true even when there were only read and/or write breakpoints, but those breakpoints
+     * no longer require the intervention of checkInstruction(); the Bus component automatically swaps in/out appropriate
+     * "checked" Memory access functions to deal with those breakpoints in the corresponding Memory blocks.  So I've
+     * simplified the test below.
+     *
+     * @this {DebuggerPDP11}
+     * @param {boolean} [fRelease] is true for release criteria only; default is false (any criteria)
+     * @return {boolean} true if every instruction needs to pass through checkInstruction(), false if not
+     */
+    checksEnabled(fRelease)
+    {
+        return ((DEBUG && !fRelease)? true : (this.aBreakExec.length > 1 || !!this.nBreakInstructions));
+    }
+
+    /**
+     * checkInstruction(addr, nState)
+     *
+     * This "check" function is called by the CPU to inform us about the next instruction to be executed,
+     * giving us an opportunity to look for "exec" breakpoints and update opcode instruction history.
+     *
+     * @this {DebuggerPDP11}
+     * @param {number} addr
+     * @param {number} nState is < 0 if stepping, 0 if starting, or > 0 if running
+     * @return {boolean} true if breakpoint hit, false if not
+     */
+    checkInstruction(addr, nState)
+    {
+        var opCode = -1;
+        var cpu = this.cpu;
+
+        /*
+         * If opHalt() calls our stopInstruction() function, it will effectively rewind the PC back to the HALT,
+         * purely for our debugging benefit, so we must compensate for that here by advancing the PC past the HALT
+         * when the machine starts up again.
+         */
+        if (!nState) {
+            opCode = this.cpu.getWordSafe(addr);
+            /*
+             * We have to be careful about this HALT-skipping code, because as fate would have it, I inadvertently
+             * stopped the following diagnostic with a breakpoint *on* a HALT instruction:
+             *
+             *      .R EKBEE1
+             *      EKBEE1.BIC
+             *
+             *      CEKBEE0 11/70 MEM MGMT
+             *
+             *      CPU UNDER TEST FOUND TO BE A KB11-CM
+             *      bp 033330 hit
+             *      stopped (28339757 instructions, 123994176 cycles, 19177 ms, 6465775 hz)
+             *      R0=140000 R1=033330 R2=100143 R3=133260 R4=000000 R5=177700
+             *      SP=000600 PC=033330 PS=140000 IR=000000 SL=000377 T0 N0 Z0 V0 C0
+             *      033330: 000000                 HALT
+             *
+             * Since we haven't executed the HALT yet, it would be wrong (and would cause a diagnostic failure) to
+             * skip over it.  In this particular case, the PDR for the address of the HALT instruction was invalid,
+             * so the HALT gets fetched but not executed.
+             *
+             * My first thought was that maybe we need to probe the address more thoroughly (getWordSafe() does
+             * not), but it should be sufficient to simply confirm that the PC of the last opcode executed matches
+             * the addr of this HALT.
+             *
+             * Yes, I could save myself this grief by eliminating these PC hacks, both here and in stopInstruction(),
+             * but I still think it's a useful debugging aid.
+             */
+            if (opCode == PDP11.OPCODE.HALT && this.cpu.getLastPC() == addr) {
+                addr = this.cpu.advancePC(2);
+            }
+        }
+
+        /*
+         * If the CPU stopped on a breakpoint, we're not interested in stopping again if the machine is starting.
+         */
+        if (nState > 0) {
+            if (this.nBreakInstructions) {
+                if (!--this.nBreakInstructions) return true;
+            }
+            if (this.checkBreakpoint(addr, 1, this.aBreakExec)) {
+                return true;
+            }
+        }
+
+        /*
+         * The rest of the instruction tracking logic can only be performed if historyInit() has allocated the
+         * necessary data structures.  Note that there is no explicit UI for enabling/disabling history, other than
+         * adding/removing breakpoints, simply because it's breakpoints that trigger the call to checkInstruction();
+         * well, OK, and a few other things now, like enabling MessagesPDP11.INT messages.
+         */
+        if (nState >= 0 && this.aInstructionHistory.length) {
+            this.cInstructions++;
+            if (opCode < 0) {
+                opCode = this.cpu.getWordSafe(addr);
+            }
+            if ((opCode & 0xffff) != PDP11.OPCODE.INVALID) {
+                var dbgAddr = this.aInstructionHistory[this.iInstructionHistory];
+                this.setAddr(dbgAddr, addr);
+                // if (DEBUG) dbgAddr.cycleCount = cpu.getCycles();
+                if (++this.iInstructionHistory == this.aInstructionHistory.length) this.iInstructionHistory = 0;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * stopInstruction(sMessage)
+     *
+     * TODO: Currently, the only way to prevent this call from stopping the CPU is when you're single-stepping.
+     *
+     * @this {DebuggerPDP11}
+     * @param {string} [sMessage]
+     * @return {boolean} true if stopping is enabled, false if not
+     */
+    stopInstruction(sMessage)
+    {
+        var cpu = this.cpu;
+        if (cpu.isRunning()) {
+            cpu.setPC(this.cpu.getLastPC());
+            if (sMessage) this.println(sMessage);
+            this.stopCPU();
+            /*
+             * TODO: Review the appropriate-ness of throwing a bogus vector number in order to immediately stop
+             * the instruction.  It's handy, but it also means that we no longer actually return true, so callers
+             * of either stopInstruction() or undefinedInstruction() may have unreachable code paths.
+             */
+            throw -1;
+        }
+        return false;
+    }
+
+    /**
+     * undefinedInstruction(opCode)
+     *
+     * @this {DebuggerPDP11}
+     * @param {number} opCode
+     * @return {boolean} true if stopping is enabled, false if not
+     */
+    undefinedInstruction(opCode)
+    {
+        if (this.messageEnabled(MessagesPDP11.CPU)) {
+            this.printMessage("undefined opcode " + this.toStrBase(opCode), true, true);
+            return this.stopInstruction();  // allow the caller to step over it if they really want a trap generated
+        }
+        return false;
+    }
+
+    /**
+     * checkMemoryRead(addr, nb)
+     *
+     * This "check" function is called by a Memory block to inform us that a memory read occurred, giving us an
+     * opportunity to track the read if we want, and look for a matching "read" breakpoint, if any.
+     *
+     * In the "old days", it would be an error for this call to fail to find a matching Debugger breakpoint, but now
+     * Memory blocks have no idea whether the Debugger or the machine's Debug register(s) triggered this "checked" read.
+     *
+     * If we return true, we "trump" the machine's Debug register(s); false allows normal Debug register processing.
+     *
+     * @this {DebuggerPDP11}
+     * @param {number} addr
+     * @param {number} [nb] (# of bytes; default is 1)
+     * @return {boolean} true if breakpoint hit, false if not
+     */
+    checkMemoryRead(addr, nb)
+    {
+        if (this.checkBreakpoint(addr, nb || 1, this.aBreakRead)) {
+            this.stopCPU(true);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * checkMemoryWrite(addr, nb)
+     *
+     * This "check" function is called by a Memory block to inform us that a memory write occurred, giving us an
+     * opportunity to track the write if we want, and look for a matching "write" breakpoint, if any.
+     *
+     * In the "old days", it would be an error for this call to fail to find a matching Debugger breakpoint, but now
+     * Memory blocks have no idea whether the Debugger or the machine's Debug register(s) triggered this "checked" write.
+     *
+     * If we return true, we "trump" the machine's Debug register(s); false allows normal Debug register processing.
+     *
+     * @this {DebuggerPDP11}
+     * @param {number} addr
+     * @param {number} [nb] (# of bytes; default is 1)
+     * @return {boolean} true if breakpoint hit, false if not
+     */
+    checkMemoryWrite(addr, nb)
+    {
+        if (this.checkBreakpoint(addr, nb || 1, this.aBreakWrite)) {
+            this.stopCPU(true);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * clearBreakpoints()
+     *
+     * @this {DebuggerPDP11}
+     */
+    clearBreakpoints()
+    {
+        var i, dbgAddr, addr;
+        this.aBreakExec = ["bp"];
+        if (this.aBreakRead !== undefined) {
+            for (i = 1; i < this.aBreakRead.length; i++) {
+                dbgAddr = this.aBreakRead[i];
+                addr = this.getAddr(dbgAddr);
+                if (!dbgAddr.fPhysical) {
+                    this.cpu.removeMemBreak(addr, false);
+                } else {
+                    this.bus.removeMemBreak(addr, false);
+                }
+            }
+        }
+        this.aBreakRead = ["br"];
+        if (this.aBreakWrite !== undefined) {
+            for (i = 1; i < this.aBreakWrite.length; i++) {
+                dbgAddr = this.aBreakWrite[i];
+                addr = this.getAddr(dbgAddr);
+                if (!dbgAddr.fPhysical) {
+                    this.cpu.removeMemBreak(addr, true);
+                } else {
+                    this.bus.removeMemBreak(addr, true);
+                }
+            }
+        }
+        this.aBreakWrite = ["bw"];
+        /*
+         * nSuppressBreaks ensures we can't get into an infinite loop where a breakpoint lookup
+         * requires reading memory that triggers more memory reads, which triggers more breakpoint checks.
+         */
+        this.nSuppressBreaks = 0;
+    }
+
+    /**
+     * addBreakpoint(aBreak, dbgAddr, fTemporary)
+     *
+     * In case you haven't already figured this out, all our breakpoint commands use the address
+     * to identify a breakpoint, not an incrementally assigned breakpoint index like other debuggers;
+     * see doBreak() for details.
+     *
+     * This has a few implications, one being that you CANNOT set more than one kind of breakpoint
+     * on a single address.  In practice, that's rarely a problem, because you can almost always set
+     * a different breakpoint on a neighboring address.
+     *
+     * Also, there is one exception to the "one address, one breakpoint" rule, and that involves
+     * temporary breakpoints (ie, one-time execution breakpoints that either a "p" or "g" command
+     * may create to step over a chunk of code).  Those breakpoints automatically clear themselves,
+     * so there usually isn't any need to refer to them using breakpoint commands.
+     *
+     * TODO: Consider supporting the more "traditional" breakpoint index syntax; the current
+     * address-based syntax was implemented solely for expediency and consistency.  At the same time,
+     * also consider a more WDEB386-like syntax, where "br" is used to set a variety of access-specific
+     * breakpoints, using modifiers like "r1", "r2", "w1", "w2, etc.
+     *
+     * @this {DebuggerPDP11}
+     * @param {Array} aBreak
+     * @param {DbgAddrPDP11} dbgAddr
+     * @param {boolean} [fTemporary]
+     * @return {boolean} true if breakpoint added, false if already exists
+     */
+    addBreakpoint(aBreak, dbgAddr, fTemporary)
+    {
+        var fSuccess = true;
+
+        // this.nSuppressBreaks++;
+
+        /*
+         * Instead of complaining that a breakpoint already exists (as we used to do), we now
+         * allow breakpoints to be re-set; this makes it easier to update any commands that may
+         * be associated with the breakpoint.
+         *
+         * The only exception: we DO allow a temporary breakpoint at an address where there may
+         * already be a breakpoint, so that you can easily step ("p" or "g") over such addresses.
+         */
+        if (!fTemporary) {
+            this.findBreakpoint(aBreak, dbgAddr, true, false, true);
+        }
+
+        if (aBreak != this.aBreakExec) {
+            var addr = this.getAddr(dbgAddr);
+            if (addr === PDP11.ADDR_INVALID) {
+                this.println("invalid address: " + this.toStrAddr(dbgAddr));
+                fSuccess = false;
+            } else {
+                var fWrite = (aBreak == this.aBreakWrite);
+                /*
+                 * We automatically promote any read/write breakpoint address to fPhysical if it's
+                 * outside the 16-bit virtual address range.
+                 */
+                if (addr > 0xffff) dbgAddr.fPhysical = true;
+                if (!dbgAddr.fPhysical) {
+                    this.cpu.addMemBreak(addr, fWrite);
+                } else {
+                    this.bus.addMemBreak(addr, fWrite);
+                }
+            }
+        }
+
+        if (fSuccess) {
+            aBreak.push(dbgAddr);
+            if (fTemporary) {
+                dbgAddr.fTemporary = true;
+            }
+            else {
+                this.printBreakpoint(aBreak, aBreak.length-1, "set");
+                this.historyInit();
+            }
+        }
+
+        // this.nSuppressBreaks--;
+
+        return fSuccess;
+    }
+
+    /**
+     * findBreakpoint(aBreak, dbgAddr, fRemove, fTemporary, fQuiet)
+     *
+     * @this {DebuggerPDP11}
+     * @param {Array} aBreak
+     * @param {DbgAddrPDP11} dbgAddr
+     * @param {boolean} [fRemove]
+     * @param {boolean} [fTemporary]
+     * @param {boolean} [fQuiet]
+     * @return {boolean} true if found, false if not
+     */
+    findBreakpoint(aBreak, dbgAddr, fRemove, fTemporary, fQuiet)
+    {
+        var fFound = false;
+        var addr = this.getAddr(dbgAddr);
+        for (var i = 1; i < aBreak.length; i++) {
+            var dbgAddrBreak = aBreak[i];
+            if (addr == this.getAddr(dbgAddrBreak)) {
+                if (!fTemporary || dbgAddrBreak.fTemporary) {
+                    fFound = true;
+                    if (fRemove) {
+                        if (!dbgAddrBreak.fTemporary && !fQuiet) {
+                            this.printBreakpoint(aBreak, i, "cleared");
+                        }
+                        aBreak.splice(i, 1);
+                        if (aBreak != this.aBreakExec) {
+                            var fWrite = (aBreak == this.aBreakWrite);
+                            if (!dbgAddrBreak.fPhysical) {
+                                this.cpu.removeMemBreak(addr, fWrite);
+                            } else {
+                                this.bus.removeMemBreak(addr, fWrite);
+                            }
+                        }
+                        /*
+                         * We'll mirror the logic in addBreakpoint() and leave the history buffer alone if this
+                         * was a temporary breakpoint.
+                         */
+                        if (!dbgAddrBreak.fTemporary) {
+                            this.historyInit();
+                        }
+                        break;
+                    }
+                    if (!fQuiet) this.printBreakpoint(aBreak, i, "exists");
+                    break;
+                }
+            }
+        }
+        return fFound;
+    }
+
+    /**
+     * listBreakpoints(aBreak)
+     *
+     * @this {DebuggerPDP11}
+     * @param {Array} aBreak
+     * @return {number} of breakpoints listed, 0 if none
+     */
+    listBreakpoints(aBreak)
+    {
+        for (var i = 1; i < aBreak.length; i++) {
+            this.printBreakpoint(aBreak, i);
+        }
+        return aBreak.length - 1;
+    }
+
+    /**
+     * printBreakpoint(aBreak, i, sAction)
+     *
+     * @this {DebuggerPDP11}
+     * @param {Array} aBreak
+     * @param {number} i
+     * @param {string} [sAction]
+     */
+    printBreakpoint(aBreak, i, sAction)
+    {
+        var dbgAddr = aBreak[i];
+        this.println(aBreak[0] + ' ' + this.toStrAddr(dbgAddr) + (sAction? (' ' + sAction) : (dbgAddr.sCmd? (' "' + dbgAddr.sCmd + '"') : '')));
+    }
+
+    /**
+     * setTempBreakpoint(dbgAddr)
+     *
+     * @this {DebuggerPDP11}
+     * @param {DbgAddrPDP11} dbgAddr of new temp breakpoint
+     */
+    setTempBreakpoint(dbgAddr)
+    {
+        this.addBreakpoint(this.aBreakExec, dbgAddr, true);
+    }
+
+    /**
+     * clearTempBreakpoint(addr)
+     *
+     * @this {DebuggerPDP11}
+     * @param {number|undefined} [addr] clear all temp breakpoints if no address specified
+     */
+    clearTempBreakpoint(addr)
+    {
+        if (addr !== undefined) {
+            this.checkBreakpoint(addr, 1, this.aBreakExec, true);
+            this.nStep = 0;
+        } else {
+            for (var i = 1; i < this.aBreakExec.length; i++) {
+                var dbgAddrBreak = this.aBreakExec[i];
+                if (dbgAddrBreak.fTemporary) {
+                    if (!this.findBreakpoint(this.aBreakExec, dbgAddrBreak, true, true)) break;
+                    i = 0;
+                }
+            }
+        }
+    }
+
+    /**
+     * checkBreakpoint(addr, nb, aBreak, fTemporary)
+     *
+     * @this {DebuggerPDP11}
+     * @param {number} addr
+     * @param {number} nb (# of bytes)
+     * @param {Array} aBreak
+     * @param {boolean} [fTemporary]
+     * @return {boolean} true if breakpoint has been hit, false if not
+     */
+    checkBreakpoint(addr, nb, aBreak, fTemporary)
+    {
+        /*
+         * Time to check for breakpoints; note that this should be done BEFORE updating history data
+         * (see checkInstruction), since we might not actually execute the current instruction.
+         */
+        var fBreak = false;
+
+        if (!this.nSuppressBreaks++) {
+
+            for (var i = 1; !fBreak && i < aBreak.length; i++) {
+
+                var dbgAddrBreak = aBreak[i];
+
+                if (fTemporary && !dbgAddrBreak.fTemporary) continue;
+
+                /*
+                 * If we're checking an execution address, which is always virtual, and virtual
+                 * addresses are always restricted to 16 bits, let's mask the breakpoint address to match
+                 * (the user should know better, but we'll be nice).
+                 */
+                var addrBreak = this.getAddr(dbgAddrBreak) & (aBreak == this.aBreakExec? 0xffff : -1);
+                for (var n = 0; n < nb; n++) {
+
+                    if ((addr + n) != addrBreak) continue;
+
+                    var a;
+                    fBreak = true;
+                    if (dbgAddrBreak.fTemporary) {
+                        this.findBreakpoint(aBreak, dbgAddrBreak, true, true);
+                        fTemporary = true;
+                    }
+                    if (a = dbgAddrBreak.aCmds) {
+                        /*
+                         * When one or more commands are attached to a breakpoint, we don't halt by default.
+                         * Instead, we set fBreak to true only if, at the completion of all the commands, the
+                         * CPU is halted; in other words, you should include "h" as one of the breakpoint commands
+                         * if you want the breakpoint to stop execution.
+                         *
+                         * Another useful command is "if", which will return false if the expression is false,
+                         * at which point we'll jump ahead to the next "else" command, and if there isn't an "else",
+                         * we abort.
+                         */
+                        fBreak = false;
+                        for (var j = 0; j < a.length; j++) {
+                            if (!this.doCommand(a[j], true)) {
+                                if (a[j].indexOf("if")) {
+                                    fBreak = true;          // the failed command wasn't "if", so abort
+                                    break;
+                                }
+                                var k = j + 1;
+                                for (; k < a.length; k++) {
+                                    if (!a[k].indexOf("else")) break;
+                                    j++;
+                                }
+                                if (k == a.length) {        // couldn't find an "else" after the "if", so abort
+                                    fBreak = true;
+                                    break;
+                                }
+                                /*
+                                 * If we're still here, we'll execute the "else" command (which is just a no-op),
+                                 * followed by any remaining commands.
+                                 */
+                            }
+                        }
+                        if (!this.cpu.isRunning()) fBreak = true;
+                    }
+                    if (fBreak) {
+                        if (!fTemporary) this.printBreakpoint(aBreak, i, "hit");
+                        break;
+                    }
+                }
+            }
+        }
+
+        this.nSuppressBreaks--;
+
+        return fBreak;
+    }
+
+    /**
+     * getInstruction(dbgAddr, sComment, nSequence)
+     *
+     * Get the next instruction, by decoding the opcode and any operands.
+     *
+     * @this {DebuggerPDP11}
+     * @param {DbgAddrPDP11} dbgAddr
+     * @param {string} [sComment] is an associated comment
+     * @param {number|null} [nSequence] is an associated sequence number, undefined if none
+     * @return {string} (and dbgAddr is updated to the next instruction)
+     */
+    getInstruction(dbgAddr, sComment, nSequence)
+    {
+        var opNames = DebuggerPDP11.OPNAMES;
+        var dbgAddrOp = this.newAddr(dbgAddr.addr);
+        var opCode = this.getWord(dbgAddr, 2);
+
+        var opDesc;
+        for (var mask in this.opTable) {
+            var opMasks = this.opTable[mask];
+            opDesc = opMasks[opCode & mask];
+            if (opDesc) break;
+        }
+
+        if (!opDesc) {
+            opDesc = DebuggerPDP11.OPNONE;
+        }
+
+        var opNum = opDesc[0];
+        if (this.aOpReserved.indexOf(opNum) >= 0) {
+            opDesc = DebuggerPDP11.OPNONE;
+            opNum = opDesc[0];
+        }
+
+        var sOperands = "", sTarget = "";
+        var sOpName = opNames[opNum];
+        var cOperands = opDesc.length - 1;
+
+        if (!opNum && !cOperands) {
+            sOperands = this.toStrBase(opCode);
+        }
+
+        for (var iOperand = 1; iOperand <= cOperands; iOperand++) {
+
+            var opType = opDesc[iOperand];
+            if (opType === undefined) continue;
+
+            var sOperand = this.getOperand(opCode, opType, dbgAddr);
+
+            if (!sOperand || !sOperand.length) {
+                sOperands = "INVALID";
+                break;
+            }
+
+            /*
+             * If getOperand() returns an Array rather than a string, then the first element is the original
+             * operand, and the second element contains additional information (eg, the target) of the operand.
+             */
+            if (typeof sOperand != "string") {
+                sTarget = sOperand[1];
+                sOperand = sOperand[0];
+            }
+
+            if (sOperands.length > 0) sOperands += ',';
+            sOperands += (sOperand || "???");
+        }
+
+        var sOpCodes = "";
+        var sLine = this.toStrAddr(dbgAddrOp) + ":";
+        if (dbgAddrOp.addr !== PDP11.ADDR_INVALID && dbgAddr.addr !== PDP11.ADDR_INVALID) {
+            do {
+                sOpCodes += ' ' + this.toStrBase(this.getWord(dbgAddrOp, 2));
+                if (dbgAddrOp.addr == null) break;
+            } while (dbgAddrOp.addr != dbgAddr.addr);
+        }
+
+        sLine += Str.pad(sOpCodes, 24);
+        sLine += Str.pad(sOpName, 5);
+        if (sOperands) sLine += ' ' + sOperands;
+
+        if (sComment || sTarget) {
+            sLine = Str.pad(sLine, 60) + ';' + (sComment || "");
+            if (!this.cpu.flags.checksum) {
+                sLine += (nSequence != null? '=' + nSequence.toString() : "");
+            } else {
+                var nCycles = this.cpu.getCycles();
+                sLine += "cycles=" + nCycles.toString() + " cs=" + Str.toHex(this.cpu.nChecksum);
+            }
+            if (sTarget) {
+                if (sLine.slice(-1) != ';') sLine += ' ';
+                sLine += sTarget;
+            }
+        }
+        return sLine;
+    }
+
+    /**
+     * getOperand(opCode, opType, dbgAddr)
+     *
+     * If getOperand() returns an Array rather than a string, then the first element is the original
+     * operand, and the second element is a comment containing additional information (eg, the target)
+     * of the operand.
+     *
+     * @this {DebuggerPDP11}
+     * @param {number} opCode
+     * @param {number} opType
+     * @param {DbgAddrPDP11} dbgAddr
+     * @return {string|Array.<string>}
+     */
+    getOperand(opCode, opType, dbgAddr)
+    {
+        var sOperand = "", disp, addr;
+        /*
+         * Take care of OP_OTHER opcodes first; then all we'll have to worry about
+         * next are OP_SRC or OP_DST opcodes.
+         */
+        var opTypeOther = opType & DebuggerPDP11.OP_OTHER;
+        if (opTypeOther == DebuggerPDP11.OP_BRANCH) {
+            disp = ((opCode & 0xff) << 24) >> 23;
+            addr = (dbgAddr.addr + disp) & 0xffff;
+            sOperand = this.toStrBase(addr);
+        }
+        else if (opTypeOther == DebuggerPDP11.OP_DSTOFF) {
+            disp = (opCode & 0x3f) << 1;
+            addr = (dbgAddr.addr - disp) & 0xffff;
+            sOperand = this.toStrBase(addr);
+        }
+        else if (opTypeOther == DebuggerPDP11.OP_DSTNUM3) {
+            disp = (opCode & 0x07);
+            sOperand = this.toStrBase(disp, 1);
+        }
+        else if (opTypeOther == DebuggerPDP11.OP_DSTNUM6) {
+            disp = (opCode & 0x3f);
+            sOperand = this.toStrBase(disp, 1);
+        }
+        else if (opTypeOther == DebuggerPDP11.OP_DSTNUM8) {
+            disp = (opCode & 0xff);
+            sOperand = this.toStrBase(disp, 1);
+        }
+        else {
+            /*
+             * Isolate all OP_SRC or OP_DST bits from opcode in the opMode variable.
+             */
+            var opMode = opCode & opType;
+
+            /*
+             * Convert OP_SRC bits into OP_DST bits, since they use the same format.
+             */
+            if (opType & DebuggerPDP11.OP_SRC) {
+                opMode >>= 6;
+                opType >>= 6;
+            }
+            if (opType & DebuggerPDP11.OP_DST) {
+                var wIndex;
+                var sTarget = null;
+                var reg = opMode & DebuggerPDP11.OP_DSTREG;
+                /*
+                 * Note that opcodes that specify only REG bits in the opType mask (ie, no MOD bits)
+                 * will automatically default to OPMODE_REG below.
+                 */
+                switch((opMode & DebuggerPDP11.OP_DSTMODE)) {
+
+                case PDP11.OPMODE.REG:                  // 0x0: REGISTER
+                    sOperand = this.getRegName(reg);
+                    break;
+
+                case PDP11.OPMODE.REGD:                 // 0x1: REGISTER DEFERRED
+                    sOperand = '@' + this.getRegName(reg);
+                    sTarget = this.getTarget(this.cpu.regsGen[reg]);
+                    break;
+
+                case PDP11.OPMODE.POSTINC:              // 0x2: POST-INCREMENT
+                    if (reg < 7) {
+                        sOperand = '(' + this.getRegName(reg) + ")+";
+                    } else {
+                        /*
+                         * When using R7 (aka PC), POST-INCREMENT is known as IMMEDIATE
+                         */
+                        wIndex = this.getWord(dbgAddr, 2);
+                        sOperand = '#' + this.toStrBase(wIndex, 0, true);
+                    }
+                    break;
+
+                case PDP11.OPMODE.POSTINCD:             // 0x3: POST-INCREMENT DEFERRED
+                    if (reg < 7) {
+                        sOperand = "@(" + this.getRegName(reg) + ")+";
+                    } else {
+                        /*
+                         * When using R7 (aka PC), POST-INCREMENT DEFERRED is known as ABSOLUTE
+                         */
+                        wIndex = this.getWord(dbgAddr, 2);
+                        sOperand = "@#" + this.toStrBase(wIndex, 0, true);
+                        sTarget = this.getTarget(wIndex);
+                    }
+                    break;
+
+                case PDP11.OPMODE.PREDEC:               // 0x4: PRE-DECREMENT
+                    sOperand = "-(" + this.getRegName(reg) + ")";
+                    break;
+
+                case PDP11.OPMODE.PREDECD:              // 0x5: PRE-DECREMENT DEFERRED
+                    sOperand = "@-(" + this.getRegName(reg) + ")";
+                    break;
+
+                case PDP11.OPMODE.INDEX:                // 0x6: INDEX
+                    wIndex = this.getWord(dbgAddr, 2);
+                    sOperand = this.toStrBase(wIndex, 0, true) + '(' + this.getRegName(reg) + ')';
+                    if (reg == 7) {
+                        /*
+                         * When using R7 (aka PC), INDEX is known as RELATIVE.  However, instead of displaying
+                         * such an instruction like this:
+                         *
+                         *  016156: 010167 001300          MOV   R1,1300(PC)            ; @017462
+                         *
+                         * with the effective address display to the far right, let's display it like this instead:
+                         *
+                         *  016156: 010167 001300          MOV   R1,017462
+                         *
+                         * because you can still clearly see PC-relative offset (eg, 001300) as part of the disassembly.
+                         *
+                         *      sOperand = [sOperand, this.toStrBase((wIndex + dbgAddr.addr) & 0xffff)];
+                         */
+                        sOperand = this.toStrBase(wIndex = (wIndex + dbgAddr.addr) & 0xffff);
+                        sTarget = this.getTarget(wIndex);
+                    }
+                    break;
+
+                case PDP11.OPMODE.INDEXD:               // 0x7: INDEX DEFERRED
+                    wIndex = this.getWord(dbgAddr, 2);
+                    sOperand = '@' + this.toStrBase(wIndex) + '(' + this.getRegName(reg) + ')';
+                    if (reg == 7) {
+                        /*
+                         * When using R7 (aka PC), INDEX DEFERRED is known as RELATIVE DEFERRED.  And for the same
+                         * reasons articulated above, we now display the effective address inline.
+                         *
+                         *      sOperand = [sOperand, this.toStrBase((wIndex + dbgAddr.addr) & 0xffff)];
+                         */
+                        sOperand = '@' + this.toStrBase(wIndex = (wIndex + dbgAddr.addr) & 0xffff);
+                        sTarget = this.getTarget(this.cpu.getWordSafe(wIndex));
+                    }
+                    break;
+
+                default:
+                    this.assert(false);
+                    break;
+                }
+
+                if (sTarget) sOperand = [sOperand, sTarget];
+            }
+            else {
+                this.assert(false);
+            }
+        }
+        return sOperand;
+    }
+
+    /**
+     * getTarget(addr)
+     *
+     * @this {DebuggerPDP11}
+     * @param {number} addr
+     * @return {string|null}
+     */
+    getTarget(addr)
+    {
+        var sTarget = null;
+        var a = this.cpu.getAddrInfo(addr);
+        var addrPhysical = a[0];
+        if (addrPhysical >= this.cpu.addrIOPage && addrPhysical < this.bus.addrIOPage) {
+            addrPhysical = (addrPhysical - this.cpu.addrIOPage) + this.bus.addrIOPage;
+        }
+        return this.bus.getAddrInfo(addrPhysical);
+    }
+
+    /**
+     * parseInstruction(sOp, sOperand, addr)
+     *
+     * TODO: Unimplemented.  See parseInstruction() in modules/c1pjs/lib/debugger.js for a sample implementation.
+     *
+     * @this {DebuggerPDP11}
+     * @param {string} sOp
+     * @param {string|undefined} sOperand
+     * @param {DbgAddrPDP11} dbgAddr of memory where this instruction is being assembled
+     * @return {Array.<number>} of opcode bytes; if the instruction can't be parsed, the array will be empty
+     */
+    parseInstruction(sOp, sOperand, dbgAddr)
+    {
+        var aOpBytes = [];
+        this.println("not supported yet");
+        return aOpBytes;
+    }
+
+    /**
+     * getFlagOutput(sFlag)
+     *
+     * @this {DebuggerPDP11}
+     * @param {string} sFlag
+     * @return {string} value of flag
+     */
+    getFlagOutput(sFlag)
+    {
+        var b;
+        switch (sFlag) {
+        case 'N':
+            b = this.cpu.getNF();
+            break;
+        case 'Z':
+            b = this.cpu.getZF();
+            break;
+        case 'V':
+            b = this.cpu.getVF();
+            break;
+        case 'C':
+            b = this.cpu.getCF();
+            break;
+        default:
+            b = 0;
+            break;
+        }
+        return sFlag.charAt(0) + (b? '1' : '0') + ' ';
+    }
+
+    /**
+     * getRegOutput(iReg)
+     *
+     * @this {DebuggerPDP11}
+     * @param {number} iReg
+     * @return {string}
+     */
+    getRegOutput(iReg)
+    {
+        var sReg = "";
+        var cpu = this.cpu;
+
+        if (iReg < 8) {
+            sReg = this.getRegName(iReg);
+            sReg += '=' + this.toStrBase(cpu.regsGen[iReg]);
+        }
+        else if (iReg < 13) {
+            sReg = "A" + (iReg - 8) + '=' + this.toStrBase(cpu.regsAlt[iReg - 8]);
+        }
+        else if (iReg >= 16 && iReg < 20) {
+            sReg = "S" + (iReg - 16) + '=' + this.toStrBase(cpu.regsAltStack[iReg - 16]);
+        }
+        else {
+            switch(iReg) {
+            case DebuggerPDP11.REG_PS:
+                sReg = "PS=" + this.toStrBase(cpu.getPSW());
+                break;
+            case DebuggerPDP11.REG_PI:
+                sReg = "PI=" + this.toStrBase(cpu.getPIR());
+                break;
+            case DebuggerPDP11.REG_ER:
+                sReg = "ER=" + this.toStrBase(cpu.regErr);
+                break;
+            case DebuggerPDP11.REG_SL:
+                sReg = "SL=" + this.toStrBase(cpu.getSLR());
+                break;
+            case DebuggerPDP11.REG_M0:
+                sReg = "M0=" + this.toStrBase(cpu.getMMR0());
+                break;
+            case DebuggerPDP11.REG_M1:
+                sReg = "M1=" + this.toStrBase(cpu.getMMR1());
+                break;
+            case DebuggerPDP11.REG_M2:
+                sReg = "M2=" + this.toStrBase(cpu.getMMR2());
+                break;
+            case DebuggerPDP11.REG_M3:
+                sReg = "M3=" + this.toStrBase(cpu.getMMR3());
+                break;
+            case DebuggerPDP11.REG_AR:
+                if (this.panel) {
+                    sReg = "AR=" + this.toStrBase(this.panel.getAR(), 3);
+                }
+                break;
+            case DebuggerPDP11.REG_DR:
+                if (this.panel) {
+                    sReg = "DR=" + this.toStrBase(this.panel.getDR());
+                }
+                break;
+            case DebuggerPDP11.REG_SR:
+                if (this.panel && this.panel.hasSwitches()) {
+                    sReg = "SR=" + this.toStrBase(this.panel.getSR(), 3);
+                }
+                break;
+            }
+        }
+        if (sReg) sReg += ' ';
+        return sReg;
+    }
+
+    /**
+     * getMiscDump()
+     *
+     * Sample register dump:
+     *
+     *      M0=xxxxxx M1=xxxxxx M2=xxxxxx M3=xxxxxx ER=xxxxxx
+     *
+     * @this {DebuggerPDP11}
+     * @return {string}
+     */
+    getMiscDump()
+    {
+        var sDump = "";
+        sDump += this.getRegOutput(DebuggerPDP11.REG_M0) + this.getRegOutput(DebuggerPDP11.REG_M1);
+        sDump += this.getRegOutput(DebuggerPDP11.REG_M2) + this.getRegOutput(DebuggerPDP11.REG_M3) + this.getRegOutput(DebuggerPDP11.REG_ER);
+        sDump += '\n';
+        sDump += this.getRegOutput(DebuggerPDP11.REG_SR) + this.getRegOutput(DebuggerPDP11.REG_AR) + this.getRegOutput(DebuggerPDP11.REG_DR);
+        return sDump;
+    }
+
+    /**
+     * getRegDump(fMisc)
+     *
+     * Sample register dump:
+     *
+     *      R0=xxxxxx R1=xxxxxx R2=xxxxxx R3=xxxxxx R4=xxxxxx R5=xxxxxx
+     *      SP=xxxxxx PC=xxxxxx PS=xxxxxx PI=xxxxxx SL=xxxxxx T0 N0 Z0 V0 C0
+     *
+     * @this {DebuggerPDP11}
+     * @param {boolean} [fMisc] (true to include misc registers)
+     * @return {string}
+     */
+    getRegDump(fMisc)
+    {
+        var i;
+        var sDump = "";
+        for (i = 0; i < PDP11.REG.SP; i++) {
+            sDump += this.getRegOutput(i);
+        }
+        sDump += '\n';
+        sDump += this.getRegOutput(PDP11.REG.SP) + this.getRegOutput(PDP11.REG.PC);
+        sDump += this.getRegOutput(DebuggerPDP11.REG_PS) + this.getRegOutput(DebuggerPDP11.REG_PI) + this.getRegOutput(DebuggerPDP11.REG_SL);
+        sDump += this.getFlagOutput('T') + this.getFlagOutput('N') + this.getFlagOutput('Z') + this.getFlagOutput('V') + this.getFlagOutput('C');
+        if (fMisc) sDump += '\n' + this.getMiscDump();
+        return sDump;
+    }
+
+    /**
+     * comparePairs(p1, p2)
+     *
+     * @this {DebuggerPDP11}
+     * @param {number|string|Array|Object} p1
+     * @param {number|string|Array|Object} p2
+     * @return {number}
+     */
+    comparePairs(p1, p2)
+    {
+        return p1[0] > p2[0]? 1 : p1[0] < p2[0]? -1 : 0;
+    }
+
+    /**
+     * addSymbols(sModule, addr, len, aSymbols)
+     *
+     * As filedump.js (formerly convrom.php) explains, aSymbols is a JSON-encoded object whose properties consist
+     * of all the symbols (in upper-case), and the values of those properties are objects containing any or all of
+     * the following properties:
+     *
+     *      'v': the value of an absolute (unsized) value
+     *      'b': either 1, 2, 4 or undefined if an unsized value
+     *      's': either a hard-coded segment or undefined
+     *      'o': the offset of the symbol within the associated address space
+     *      'l': the original-case version of the symbol, present only if it wasn't originally upper-case
+     *      'a': annotation for the specified offset; eg, the original assembly language, with optional comment
+     *
+     * To that list of properties, we also add:
+     *
+     *      'p': the physical address (calculated whenever both 's' and 'o' properties are defined)
+     *
+     * Note that values for any 'v', 'b', 's' and 'o' properties are unquoted decimal values, and the values
+     * for any 'l' or 'a' properties are quoted strings. Also, if double-quotes were used in any of the original
+     * annotation ('a') values, they will have been converted to two single-quotes, so we're responsible for
+     * converting them back to individual double-quotes.
+     *
+     * For example:
+     *      {
+     *          'HF_PORT': {
+     *              'v':800
+     *          },
+     *          'HDISK_INT': {
+     *              'b':4, 's':0, 'o':52
+     *          },
+     *          'ORG_VECTOR': {
+     *              'b':4, 's':0, 'o':76
+     *          },
+     *          'CMD_BLOCK': {
+     *              'b':1, 's':64, 'o':66
+     *          },
+     *          'DISK_SETUP': {
+     *              'o':3
+     *          },
+     *          '.40': {
+     *              'o':40, 'a':"MOV AX,WORD PTR ORG_VECTOR ;GET DISKETTE VECTOR"
+     *          }
+     *      }
+     *
+     * If a symbol only has an offset, then that offset value can be assigned to the symbol property directly:
+     *
+     *          'DISK_SETUP': 3
+     *
+     * The last property is an example of an "anonymous" entry, for offsets where there is no associated symbol.
+     * Such entries are identified by a period followed by a unique number (usually the offset of the entry), and
+     * they usually only contain offset ('o') and annotation ('a') properties.  I could eliminate the leading
+     * period, but it offers a very convenient way of quickly discriminating among genuine vs. anonymous symbols.
+     *
+     * We add all these entries to our internal symbol table, which is an array of 4-element arrays, each of which
+     * look like:
+     *
+     *      [addr, len, aSymbols, aOffsets]
+     *
+     * There are two basic symbol operations: findSymbol(), which takes an address and finds the symbol, if any,
+     * at that address, and findSymbolAddr(), which takes a string and attempts to match it to a non-anonymous
+     * symbol with a matching offset ('o') property.
+     *
+     * To implement findSymbol() efficiently, addSymbols() creates an array of [offset, sSymbol] pairs
+     * (aOffsets), one pair for each symbol that corresponds to an offset within the specified address space.
+     *
+     * We guarantee the elements of aOffsets are in offset order, because we build it using binaryInsert();
+     * it's quite likely that the MAP file already ordered all its symbols in offset order, but since they're
+     * hand-edited files, we can't assume that, and we need to ensure that findSymbol()'s binarySearch() operates
+     * properly.
+     *
+     * @this {DebuggerPDP11}
+     * @param {string|null} sModule
+     * @param {number|null} addr (physical address where the symbols are located, if the memory is physical; eg, ROM)
+     * @param {number} len (the size of the region, in bytes)
+     * @param {Object} aSymbols (collection of symbols in this group; the format of this collection is described below)
+     */
+    addSymbols(sModule, addr, len, aSymbols)
+    {
+        var dbgAddr = {};
+        var aOffsets = [];
+        for (var sSymbol in aSymbols) {
+            var symbol = aSymbols[sSymbol];
+            if (typeof symbol == "number") {
+                aSymbols[sSymbol] = symbol = {'o': symbol};
+            }
+            var offSymbol = symbol['o'];
+            var sAnnotation = symbol['a'];
+            if (offSymbol !== undefined) {
+                Usr.binaryInsert(aOffsets, [offSymbol >>> 0, sSymbol], this.comparePairs);
+            }
+            if (sAnnotation) symbol['a'] = sAnnotation.replace(/''/g, "\"");
+        }
+        var symbolTable = {
+            sModule: sModule,
+            addr: addr,
+            len: len,
+            aSymbols: aSymbols,
+            aOffsets: aOffsets
+        };
+        this.aSymbolTable.push(symbolTable);
+    }
+
+    /**
+     * dumpSymbols()
+     *
+     * TODO: Add "numerical" and "alphabetical" dump options. This is simply dumping them in whatever
+     * order they appeared in the original MAP file.
+     *
+     * @this {DebuggerPDP11}
+     */
+    dumpSymbols()
+    {
+        for (var iTable = 0; iTable < this.aSymbolTable.length; iTable++) {
+            var symbolTable = this.aSymbolTable[iTable];
+            for (var sSymbol in symbolTable.aSymbols) {
+                if (sSymbol.charAt(0) == '.') continue;
+                var symbol = symbolTable.aSymbols[sSymbol];
+                var offSymbol = symbol['o'];
+                if (offSymbol === undefined) continue;
+                var sSymbolOrig = symbolTable.aSymbols[sSymbol]['l'];
+                if (sSymbolOrig) sSymbol = sSymbolOrig;
+                this.println(this.toStrOffset(offSymbol) + ' ' + sSymbol);
+            }
+        }
+    }
+
+    /**
+     * findSymbol(dbgAddr, fNearest)
+     *
+     * Search aSymbolTable for dbgAddr, and return an Array for the corresponding symbol (empty if not found).
+     *
+     * If fNearest is true, and no exact match was found, then the Array returned will contain TWO sets of
+     * entries: [0]-[3] will refer to closest preceding symbol, and [4]-[7] will refer to the closest subsequent symbol.
+     *
+     * @this {DebuggerPDP11}
+     * @param {DbgAddrPDP11} dbgAddr
+     * @param {boolean} [fNearest]
+     * @return {Array} where [0] == symbol name, [1] == symbol value, [2] == any annotation, and [3] == any associated comment
+     */
+    findSymbol(dbgAddr, fNearest)
+    {
+        var aSymbol = [];
+        var addrSymbol = this.getAddr(dbgAddr) >>> 0;
+        for (var iTable = 0; iTable < this.aSymbolTable.length; iTable++) {
+            var symbolTable = this.aSymbolTable[iTable];
+            var addr = symbolTable.addr >>> 0;
+            var len = symbolTable.len;
+            if (addrSymbol >= addr && addrSymbol < addr + len) {
+                var offSymbol = addrSymbol - addr;
+                var result = Usr.binarySearch(symbolTable.aOffsets, [offSymbol], this.comparePairs);
+                if (result >= 0) {
+                    this.returnSymbol(iTable, result, aSymbol);
+                }
+                else if (fNearest) {
+                    result = ~result;
+                    this.returnSymbol(iTable, result-1, aSymbol);
+                    this.returnSymbol(iTable, result, aSymbol);
+                }
+                break;
+            }
+        }
+        return aSymbol;
+    }
+
+    /**
+     * findSymbolAddr(sSymbol)
+     *
+     * Search our symbol tables for sSymbol, and if found, return a dbgAddr (same as parseAddr()).
+     *
+     * @this {DebuggerPDP11}
+     * @param {string} sSymbol
+     * @return {DbgAddrPDP11|undefined}
+     */
+    findSymbolAddr(sSymbol)
+    {
+        var dbgAddr;
+        var offSymbol = this.bus.getAddrByName(sSymbol);
+
+        if (offSymbol == null && sSymbol.match(/^[a-z_][a-z0-9_]*$/i)) {
+            var sUpperCase = sSymbol.toUpperCase();
+            for (var iTable = 0; iTable < this.aSymbolTable.length; iTable++) {
+                var symbolTable = this.aSymbolTable[iTable];
+                var symbol = symbolTable.aSymbols[sUpperCase];
+                if (symbol != null) {
+                    offSymbol = symbol['o'];
+                    /*
+                     * If the symbol matched but there's no 'o' offset (ie, it wasn't for an address), there's
+                     * no point looking any farther, since each symbol appears only once.
+                     *
+                     * NOTE: We assume that every ROM is ORG'ed at 0x0000, and therefore unless the symbol has an
+                     * explicitly-defined segment, we return the segment associated with the entire group; for a ROM,
+                     * that segment is normally "addrROM >>> 4".  Down the road, we may want/need to support a special
+                     * symbol entry (eg, ".ORG") that defines an alternate origin.
+                     */
+                    break;
+                }
+            }
+        }
+        if (offSymbol != null) {
+            dbgAddr = this.newAddr(offSymbol);
+        }
+        return dbgAddr;
+    }
+
+    /**
+     * returnSymbol(iTable, iOffset, aSymbol)
+     *
+     * Helper function for findSymbol().
+     *
+     * @param {number} iTable
+     * @param {number} iOffset
+     * @param {Array} aSymbol is updated with the specified symbol, if it exists
+     */
+    returnSymbol(iTable, iOffset, aSymbol)
+    {
+        var symbol = {};
+        var aOffsets = this.aSymbolTable[iTable].aOffsets;
+        var offset = 0, sSymbol = null;
+        if (iOffset >= 0 && iOffset < aOffsets.length) {
+            offset = aOffsets[iOffset][0];
+            sSymbol = aOffsets[iOffset][1];
+        }
+        if (sSymbol) {
+            symbol = this.aSymbolTable[iTable].aSymbols[sSymbol];
+            sSymbol = (sSymbol.charAt(0) == '.'? null : (symbol['l'] || sSymbol));
+        }
+        aSymbol.push(sSymbol);
+        aSymbol.push(offset);
+        aSymbol.push(symbol['a']);
+        aSymbol.push(symbol['c']);
+    }
+
+    /**
+     * doHelp()
+     *
+     * @this {DebuggerPDP11}
+     */
+    doHelp()
+    {
+        var s = "commands:";
+        for (var sCommand in DebuggerPDP11.COMMANDS) {
+            s += '\n' + Str.pad(sCommand, 9) + DebuggerPDP11.COMMANDS[sCommand];
+        }
+        if (!this.checksEnabled()) s += "\nnote: history disabled if no exec breakpoints";
+        this.println(s);
+    }
+
+    /**
+     * doAssemble(asArgs)
+     *
+     * This always receives the complete argument array, where the order of the arguments is:
+     *
+     *      [0]: the assemble command (assumed to be "a")
+     *      [1]: the target address (eg, "200")
+     *      [2]: the operation code, aka instruction name (eg, "adc")
+     *      [3]: the operation mode operand, if any (eg, "14", "[1234]", etc)
+     *
+     * The Debugger enters "assemble mode" whenever only the first (or first and second) arguments are present.
+     * As long as "assemble mode is active, the user can omit the first two arguments on all later assemble commands
+     * until "assemble mode" is cancelled with an empty command line; the command processor automatically prepends "a"
+     * and the next available target address to the argument array.
+     *
+     * Entering "assemble mode" is optional; one could enter a series of fully-qualified assemble commands; eg:
+     *
+     *      a ff00 cld
+     *      a ff01 ldx 28
+     *      ...
+     *
+     * without ever entering "assemble mode", but of course, that requires more typing and doesn't take advantage
+     * of automatic target address advancement (see dbgAddrAssemble).
+     *
+     * NOTE: As the previous example implies, you can even assemble new instructions into ROM address space;
+     * as our setByte() function explains, the ROM write-notification handlers only refuse writes from the CPU.
+     *
+     * @this {DebuggerPDP11}
+     * @param {Array.<string>} asArgs is the complete argument array, beginning with the "a" command in asArgs[0]
+     */
+    doAssemble(asArgs)
+    {
+        var dbgAddr = this.parseAddr(asArgs[1], true);
+        if (!dbgAddr) return;
+
+        this.dbgAddrAssemble = dbgAddr;
+        if (asArgs[2] === undefined) {
+            this.println("begin assemble at " + this.toStrAddr(dbgAddr));
+            this.fAssemble = true;
+            this.cmp.updateDisplays();
+            return;
+        }
+
+        var aOpBytes = this.parseInstruction(asArgs[2], asArgs[3], dbgAddr);
+        if (aOpBytes.length) {
+            for (var i = 0; i < aOpBytes.length; i++) {
+                this.setByte(dbgAddr, aOpBytes[i], 1);
+            }
+            /*
+             * Since getInstruction() also updates the specified address, dbgAddrAssemble is automatically advanced.
+             */
+            this.println(this.getInstruction(this.dbgAddrAssemble));
+        }
+    }
+
+    /**
+     * doBreak(sCmd, sAddr, sOptions)
+     *
+     * As the "help" output below indicates, the following breakpoint commands are supported:
+     *
+     *      bp [a]  set exec breakpoint on linear addr [a]
+     *      br [a]  set read breakpoint on linear addr [a]
+     *      bw [a]  set write breakpoint on linear addr [a]
+     *      bc [a]  clear breakpoint on linear addr [a] (use "*" for all breakpoints)
+     *      bl      list breakpoints
+     *
+     * to which we have recently added the following I/O breakpoint commands:
+     *
+     *      bi [p]  toggle input breakpoint on port [p] (use "*" for all input ports)
+     *      bo [p]  toggle output breakpoint on port [p] (use "*" for all output ports)
+     *
+     * These two new commands operate as toggles so that if "*" is used to trap all input (or output),
+     * you can also use these commands to NOT trap specific ports.
+     *
+     *      bn [n]  break after [n] instructions
+     *
+     * TODO: Update the "bl" command to include any/all I/O breakpoints, and the "bc" command to
+     * clear them.  Because "bi" and "bo" commands are piggy-backing on Bus functions, those breakpoints
+     * are currently outside the realm of what the "bl" and "bc" commands are aware of.
+     *
+     * @this {DebuggerPDP11}
+     * @param {string} sCmd
+     * @param {string|undefined} [sAddr]
+     * @param {string} [sOptions] (the rest of the breakpoint command-line)
+     */
+    doBreak(sCmd, sAddr, sOptions)
+    {
+        if (sAddr == '?') {
+            this.println("breakpoint commands:");
+            this.println("\tbp [#]\tset exec breakpoint at addr #");
+            this.println("\tbr [#]\tset read breakpoint at addr #");
+            this.println("\tbw [#]\tset write breakpoint at addr #");
+            this.println("\tbc [#]\tclear breakpoint at addr #");
+            this.println("\tbl\tlist all breakpoints");
+            this.println("\tbn [#]\tbreak after # instruction(s)");
+            return;
+        }
+
+        var sParm = sCmd.charAt(1);
+        if (sParm == 'l') {
+            var cBreaks = 0;
+            cBreaks += this.listBreakpoints(this.aBreakExec);
+            cBreaks += this.listBreakpoints(this.aBreakRead);
+            cBreaks += this.listBreakpoints(this.aBreakWrite);
+            if (!cBreaks) this.println("no breakpoints");
+            return;
+        }
+
+        if (sParm == 'n') {
+            this.nBreakInstructions = this.parseValue(sAddr);
+            this.println("break after " + this.nBreakInstructions + " instruction(s)");
+            return;
+        }
+
+        if (sAddr === undefined) {
+            this.println("missing breakpoint address");
+            return;
+        }
+
+        var dbgAddr = this.newAddr();
+        if (sAddr != '*') {
+            dbgAddr = this.parseAddr(sAddr, true, true);
+            if (!dbgAddr) return;
+        }
+
+        if (sParm == 'c') {
+            if (dbgAddr.addr == null) {
+                this.clearBreakpoints();
+                this.println("all breakpoints cleared");
+                return;
+            }
+            if (this.findBreakpoint(this.aBreakExec, dbgAddr, true))
+                return;
+            if (this.findBreakpoint(this.aBreakRead, dbgAddr, true))
+                return;
+            if (this.findBreakpoint(this.aBreakWrite, dbgAddr, true))
+                return;
+            this.println("breakpoint missing: " + this.toStrAddr(dbgAddr));
+            return;
+        }
+
+        if (dbgAddr.addr == null) return;
+
+        this.parseAddrOptions(dbgAddr, sOptions);
+
+        if (sParm == 'p') {
+            this.addBreakpoint(this.aBreakExec, dbgAddr);
+            return;
+        }
+        if (sParm == 'r') {
+            this.addBreakpoint(this.aBreakRead, dbgAddr);
+            return;
+        }
+        if (sParm == 'w') {
+            this.addBreakpoint(this.aBreakWrite, dbgAddr);
+            return;
+        }
+        this.println("unknown breakpoint command: " + sParm);
+    }
+
+    /**
+     * doClear(sCmd)
+     *
+     * @this {DebuggerPDP11}
+     * @param {string} [sCmd] (eg, "cls" or "clear")
+     */
+    doClear(sCmd)
+    {
+        /*
+         * TODO: There should be a clear() component method that the Control Panel overrides to perform this function.
+         */
+        if (this.controlPrint) this.controlPrint.value = "";
+    }
+
+    /**
+     * doDump(asArgs)
+     *
+     * The length parameter is interpreted as a number of bytes (or words, or dwords) to dump,
+     * and it is interpreted using the current base.
+     *
+     * @this {DebuggerPDP11}
+     * @param {Array.<string>} asArgs (formerly sCmd, [sAddr], [sLen] and [sBytes])
+     */
+    doDump(asArgs)
+    {
+        var m;
+        var sCmd = asArgs[0];
+        var sAddr = asArgs[1];
+        var sLen = asArgs[2];
+        var sBytes = asArgs[3];
+
+        if (sAddr == '?') {
+            var sDumpers = "";
+            for (m in MessagesPDP11.CATEGORIES) {
+                if (this.afnDumpers[m]) {
+                    if (sDumpers) sDumpers += ',';
+                    sDumpers = sDumpers + m;
+                }
+            }
+            sDumpers += ",state,symbols";
+            this.println("dump memory commands:");
+            this.println("\tda [a]        dump info for address a");
+            this.println("\tdb [a] [n]    dump n bytes at address a");
+            this.println("\tdw [a] [n]    dump n words at address a");
+            this.println("\tdd [a] [n]    dump n dwords at address a");
+            this.println("\tds [a] [n]    dump n words at address a as JSON");
+            this.println("\tdh [p] [n]    dump n instructions from history position p");
+            if (sDumpers.length) this.println("dump extension commands:\n\t" + sDumpers);
+            return;
+        }
+
+        if (sAddr == "state") {
+            var sState = this.cmp.powerOff(true);
+            if (sLen == "console") {
+                /*
+                 * Console buffers are notoriously small, and even the following code, which breaks the
+                 * data into parts (eg, "d state console 1", "d state console 2", etc) just isn't that helpful.
+                 *
+                 *      var nPart = +sBytes;
+                 *      if (nPart) sState = sState.substr(1000000 * (nPart-1), 1000000);
+                 *
+                 * So, the best way to capture a large machine state is to use the new "Save Machine" link
+                 * that downloads a machine's entire state.  Alternatively, run your own local server and use
+                 * server-side storage.  Take a look at the "Save" binding in computer.js, which binds an HTML
+                 * control to the computer.powerOff() and computer.saveServerState() functions.
+                 */
+                console.log(sState);
+            } else {
+                this.doClear();
+                if (sState) this.println(sState);
+            }
+            return;
+        }
+
+        if (sAddr == "symbols") {
+            this.dumpSymbols();
+            return;
+        }
+
+        if (sCmd == "d") {
+            for (m in MessagesPDP11.CATEGORIES) {
+                if (asArgs[1] == m) {
+                    var fnDumper = this.afnDumpers[m];
+                    if (fnDumper) {
+                        asArgs.shift();
+                        asArgs.shift();
+                        fnDumper(asArgs);
+                    } else {
+                        this.println("no dump registered for " + sAddr);
+                    }
+                    return;
+                }
+            }
+            if (!sAddr) sCmd = this.sCmdDumpPrev || "dw";
+        } else {
+            this.sCmdDumpPrev = sCmd;
+        }
+
+        if (sCmd == "dh") {
+            this.dumpHistory(sAddr, sLen);
+            return;
+        }
+
+        var dbgAddr = this.parseAddr(sAddr);
+        if (!dbgAddr) return;
+
+        if (sCmd == "da") {
+            /*
+             * Sample output for a virtual address ("da 23042"):
+             *
+             *                      00,010,011,000,100,010  00023042
+             *       OFFSET:             0,011,000,100,010  00003042
+             *   +   KIPAR1: 0,000,001,101,111,010,000,000  00157200
+             *   &  MMUMASK: 1,111,111,111,111,111,111,111  17777777
+             *   = PHYSICAL: 0,000,001,110,010,010,100,010  00162242
+             *
+             * and sample output for a physical address (eg, "da %37772"; note the % prefix):
+             *
+             *               0,000,000,011,111,111,111,010  00037772
+             *       OFFSET:             1,111,111,111,010  00017772
+             *   UNIMAP[01]: 1,111,100,001,110,111,000,000  17416700
+             *     PHYSICAL: 1,111,100,011,110,110,111,010  17436672
+             *
+             * TODO: Tweak this output to accommodate 18-bit machines as well as 22-bit machines.
+             */
+            var fPhysical = (dbgAddr.fPhysical || dbgAddr.addr > 0xffff);
+            var a = this.cpu.getAddrInfo(dbgAddr.addr, fPhysical);
+            this.println(Str.pad("", fPhysical? 12: 19) + Str.toBin(dbgAddr.addr, fPhysical? 22 : 17, 3) + "  " + Str.toOct(dbgAddr.addr, 8));
+            if (a.length < 6) {
+                if (a.length > 2) {
+                    this.println("    OFFSET:             " + Str.toBin(a[3], 13, 3) + "  " + Str.toOct(a[3], 8));
+                    this.println("UNIMAP[" + Str.toDec(a[1], 2) + "]: " + Str.toBin(a[2], 22, 3) + "  " + Str.toOct(a[2], 8));
+                }
+                this.println("  PHYSICAL: " + Str.toBin(a[0], 22, 3) + "  " + Str.toOct(a[0], 8))
+            } else {
+                this.println("    OFFSET:             " + Str.toBin(a[1], 13, 3) + "  " + Str.toOct(a[1], 8));
+                this.println("+   " + DebuggerPDP11.MODES[a[2]] + "PAR" + a[3] + ": " + Str.toBin(a[4], 22, 3) + "  " + Str.toOct(a[4], 8));
+                this.println("&  MMUMASK: " + Str.toBin(a[5], 22, 3) + "  " + Str.toOct(a[5], 8));
+                this.println("= PHYSICAL: " + Str.toBin(a[0], 22, 3) + "  " + Str.toOct(a[0], 8))
+            }
+            return;
+        }
+
+        var len = 0;
+        var fJSON = (sCmd == "ds");
+
+        if (sLen) {
+            if (sLen.charAt(0) == 'l') {
+                sLen = sLen.substr(1) || sBytes;
+                len = this.parseValue(sLen);
+            }
+            else {
+                var dbgAddrEnd = this.parseAddr(sLen);
+                if (dbgAddrEnd) len = dbgAddrEnd.addr - dbgAddr.addr;
+            }
+            if (len < 0) len = 0;
+            if (len > 0x10000) len = 0x10000;
+        }
+
+        var nBase = this.nBase;
+        if (dbgAddr.nBase) this.nBase = dbgAddr.nBase;
+
+        /*
+         * I've changed the code below to effectively make "dw" the default if only "d" is specified,
+         * since this is primarily a word-oriented machine.
+         */
+        var size = (sCmd == "dd"? 4 : (sCmd == "db"? 1 : 2));
+        var nBytes = (size * len) || 128;
+        var nBytesPerLine = fJSON? 16 : this.nBase;
+        var nLines = (((nBytes + nBytesPerLine - 1) / nBytesPerLine)|0) || 1;
+
+        var sDump = "";
+        while (nLines-- && nBytes > 0) {
+            var sData = "", sChars = "";
+            sAddr = this.toStrAddr(dbgAddr);
+            /*
+             * Dump 8 bytes per line when using base 8, and dump 16 bytes when using base 16.
+             *
+             * And while we used to always call getByte() and assemble them into words or dwords as appropriate, I've
+             * changed the logic below to honor "dw" by calling getWord(), since the Bus interfaces have been updated
+             * to prevent generating traps due to to Debugger access of unaligned memory and/or undefined IOPAGE addresses.
+             *
+             * Besides, it's nice for "db" and "dw" to generate the same Bus activity that typical byte and word reads do.
+             */
+            var i = nBytesPerLine;
+            var data = 0, shift = 0;
+            while (i > 0 && nBytes > 0) {
+                var n = 1;
+                var v = size == 1? this.getByte(dbgAddr, n) : this.getWord(dbgAddr, (n = 2));
+                data |= (v << (shift << 3));
+                shift += n;
+                if (shift == size) {
+                    if (fJSON) {
+                        if (sData) sData += ",";
+                        sData += "0x"+ Str.toHex(data, size * 2);
+                    } else {
+                        sData += this.toStrBase(data, size);
+                        sData += (size == 1? (i == 9? '-' : ' ') : "  ");
+                    }
+                    data = shift = 0;
+                }
+                i -= n; nBytes -= n;
+                while (size == 1 && n--) {
+                    var c = v & 0xff;
+                    sChars += (c >= 32 && c < 128? String.fromCharCode(c) : '.');
+                    v >>= 8;
+                }
+            }
+            if (sDump) sDump += "\n";
+            if (fJSON) {
+                sDump += sData + ",";
+            } else {
+                sDump += sAddr + ":  " + sData + ((i == 0)? (' ' + sChars) : "");
+            }
+        }
+
+        if (sDump) this.println(sDump);
+
+        this.dbgAddrNextData = dbgAddr;
+        this.nBase = nBase;
+    }
+
+    /**
+     * doEdit(asArgs)
+     *
+     * @this {DebuggerPDP11}
+     * @param {Array.<string>} asArgs
+     */
+    doEdit(asArgs)
+    {
+        var size, mask;
+        var fnGet, fnSet;
+        var sCmd = asArgs[0];
+        var sAddr = asArgs[1];
+        if (sCmd == "eb") {
+            size = 1;
+            mask = 0xff;
+            fnGet = this.getByte;
+            fnSet = this.setByte;
+        }
+        else if (sCmd == "e" || sCmd == "ew") {
+            size = 2;
+            mask = 0xffff;
+            fnGet = this.getWord;
+            fnSet = this.setWord;
+        } else {
+            sAddr = null;
+        }
+        if (sAddr == null) {
+            this.println("edit memory commands:");
+            this.println("\teb [a] [...]  edit bytes at address a");
+            this.println("\tew [a] [...]  edit words at address a");
+            return;
+        }
+        var dbgAddr = this.parseAddr(sAddr);
+        if (!dbgAddr) return;
+        for (var i = 2; i < asArgs.length; i++) {
+            var vNew = this.parseExpression(asArgs[i]);
+            if (vNew === undefined) {
+                this.println("unrecognized value: " + asArgs[i]);
+                break;
+            }
+            if (vNew & ~mask) {
+                this.println("warning: " + Str.toHex(vNew) + " exceeds " + size + "-byte value");
+            }
+            this.println("changing " + this.toStrAddr(dbgAddr) + (this.messageEnabled(MessagesPDP11.BUS)? "" : (" from " + this.toStrBase(fnGet.call(this, dbgAddr), size))) + " to " + this.toStrBase(vNew, size));
+            fnSet.call(this, dbgAddr, vNew, size);
+        }
+    }
+
+    /**
+     * doHalt(fQuiet)
+     *
+     * @this {DebuggerPDP11}
+     * @param {boolean} [fQuiet]
+     */
+    doHalt(fQuiet)
+    {
+        var sMsg;
+        if (this.flags.running) {
+            if (!fQuiet) this.println("halting");
+            this.stopCPU();
+        } else {
+            if (this.isBusy(true)) return;
+            if (!fQuiet) this.println("already halted");
+        }
+    }
+
+    /**
+     * doIf(sCmd, fQuiet)
+     *
+     * NOTE: Don't forget that the default base for all numeric constants is 16 (hex), so when you evaluate
+     * an expression like "a==10", it will compare the value of the variable "a" to 0x10; use a trailing period
+     * (eg, "10.") if you really intend decimal.
+     *
+     * Also, if no variable named "a" exists, "a" will evaluate to 0x0A, so the expression "a==10" becomes
+     * "0x0A==0x10" (false), whereas the expression "a==10." becomes "0x0A==0x0A" (true).
+     *
+     * @this {DebuggerPDP11}
+     * @param {string} sCmd
+     * @param {boolean} [fQuiet]
+     * @return {boolean} true if expression is non-zero, false if zero (or undefined due to a parse error)
+     */
+    doIf(sCmd, fQuiet)
+    {
+        sCmd = Str.trim(sCmd);
+        if (!this.parseExpression(sCmd)) {
+            if (!fQuiet) this.println("false: " + sCmd);
+            return false;
+        }
+        if (!fQuiet) this.println("true: " + sCmd);
+        return true;
+    }
+
+    /**
+     * doInfo(asArgs)
+     *
+     * @this {DebuggerPDP11}
+     * @param {Array.<string>} asArgs
+     * @return {boolean} true only if the instruction info command ("n") is supported
+     */
+    doInfo(asArgs)
+    {
+        if (DEBUG) {
+            this.println("msPerYield: " + this.cpu.msPerYield);
+            this.println("nCyclesPerYield: " + this.cpu.nCyclesPerYield);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * doVar(sCmd)
+     *
+     * The command must be of the form "{variable} = [{expression}]", where expression may contain constants,
+     * operators, registers, symbols, other variables, or nothing at all; in the latter case, the variable, if
+     * any, is deleted.
+     *
+     * Other supported shorthand: "var" with no parameters prints the values of all variables, and "var {variable}"
+     * prints the value of the specified variable.
+     *
+     * @this {DebuggerPDP11}
+     * @param {string} sCmd
+     * @return {boolean} true if valid "var" assignment, false if not
+     */
+    doVar(sCmd)
+    {
+        var a = sCmd.match(/^\s*([A-Z_]?[A-Z0-9_]*)\s*(=?)\s*(.*)$/i);
+        if (a) {
+            if (!a[1]) {
+                if (!this.printVariable()) this.println("no variables");
+                return true;    // it's not considered an error to print an empty list of variables
+            }
+            if (!a[2]) {
+                return this.printVariable(a[1]);
+            }
+            if (!a[3]) {
+                this.delVariable(a[1]);
+                return true;    // it's not considered an error to delete a variable that didn't exist
+            }
+            var v = this.parseExpression(a[3]);
+            if (v !== undefined) {
+                this.setVariable(a[1], v);
+                return true;
+            }
+            return false;
+        }
+        this.println("invalid assignment:" + sCmd);
+        return false;
+    }
+
+    /**
+     * doList(sAddr, fPrint)
+     *
+     * @this {DebuggerPDP11}
+     * @param {string} sAddr
+     * @param {boolean} [fPrint]
+     * @return {string|null}
+     */
+    doList(sAddr, fPrint)
+    {
+        var sSymbol = null;
+
+        var dbgAddr = this.parseAddr(sAddr, true);
+        if (dbgAddr) {
+            var addr = this.getAddr(dbgAddr);
+            var aSymbol = this.findSymbol(dbgAddr, true);
+            if (aSymbol.length) {
+                var nDelta, sDelta, s;
+                if (aSymbol[0]) {
+                    sDelta = "";
+                    nDelta = dbgAddr.addr - aSymbol[1];
+                    if (nDelta) sDelta = " + " + Str.toHexWord(nDelta);
+                    s = aSymbol[0] + " (" + this.toStrOffset(aSymbol[1]) + ')' + sDelta;
+                    if (fPrint) this.println(s);
+                    sSymbol = s;
+                }
+                if (aSymbol.length > 4 && aSymbol[4]) {
+                    sDelta = "";
+                    nDelta = aSymbol[5] - dbgAddr.addr;
+                    if (nDelta) sDelta = " - " + Str.toHexWord(nDelta);
+                    s = aSymbol[4] + " (" + this.toStrOffset(aSymbol[5]) + ')' + sDelta;
+                    if (fPrint) this.println(s);
+                    if (!sSymbol) sSymbol = s;
+                }
+            } else {
+                if (fPrint) this.println("no symbols");
+            }
+        }
+        return sSymbol;
+    }
+
+    /**
+     * doMessages(asArgs)
+     *
+     * @this {DebuggerPDP11}
+     * @param {Array.<string>} asArgs
+     */
+    doMessages(asArgs)
+    {
+        var m;
+        var fCriteria = null;
+        var sCategory = asArgs[1];
+        if (sCategory == '?') sCategory = undefined;
+
+        if (sCategory !== undefined) {
+            var bitsMessage = 0;
+            if (sCategory == "all") {
+                bitsMessage = (0xffffffff|0) & ~(MessagesPDP11.HALT | MessagesPDP11.KEYS | MessagesPDP11.LOG);
+                sCategory = null;
+            } else if (sCategory == "on") {
+                fCriteria = true;
+                sCategory = null;
+            } else if (sCategory == "off") {
+                fCriteria = false;
+                sCategory = null;
+            } else {
+                /*
+                 * Internally, we use "key" instead of "keys", since the latter is a method on JavasScript objects,
+                 * but externally, we allow the user to specify "keys"; "kbd" is also allowed as shorthand for "keyboard".
+                 */
+                if (sCategory == "keys") sCategory = "key";
+                if (sCategory == "kbd") sCategory = "keyboard";
+                for (m in MessagesPDP11.CATEGORIES) {
+                    if (sCategory == m) {
+                        bitsMessage = MessagesPDP11.CATEGORIES[m];
+                        fCriteria = !!(this.bitsMessage & bitsMessage);
+                        break;
+                    }
+                }
+                if (!bitsMessage) {
+                    this.println("unknown message category: " + sCategory);
+                    return;
+                }
+            }
+            if (bitsMessage) {
+                if (asArgs[2] == "on") {
+                    this.bitsMessage |= bitsMessage;
+                    fCriteria = true;
+                }
+                else if (asArgs[2] == "off") {
+                    this.bitsMessage &= ~bitsMessage;
+                    fCriteria = false;
+                    if (bitsMessage == MessagesPDP11.BUFFER) {
+                        var i = this.aMessageBuffer.length >= 1000? this.aMessageBuffer.length - 1000 : 0;
+                        while (i < this.aMessageBuffer.length) {
+                            this.println(this.aMessageBuffer[i++]);
+                        }
+                        this.aMessageBuffer = [];
+                    }
+                }
+            }
+        }
+
+        /*
+         * Display those message categories that match the current criteria (on or off)
+         */
+        var n = 0;
+        var sCategories = "";
+        for (m in MessagesPDP11.CATEGORIES) {
+            if (!sCategory || sCategory == m) {
+                var bitMessage = MessagesPDP11.CATEGORIES[m];
+                var fEnabled = !!(this.bitsMessage & bitMessage);
+                if (fCriteria !== null && fCriteria != fEnabled) continue;
+                if (sCategories) sCategories += ',';
+                if (!(++n % 10)) sCategories += "\n\t";     // jshint ignore:line
+                /*
+                 * Internally, we use "key" instead of "keys", since the latter is a method on JavasScript objects,
+                 * but externally, we allow the user to specify "keys".
+                 */
+                if (m == "key") m = "keys";
+                sCategories += m;
+            }
+        }
+
+        if (sCategory === undefined) {
+            this.println("message commands:\n\tm [category] [on|off]\tturn categories on/off");
+        }
+
+        this.println((fCriteria !== null? (fCriteria? "messages on:  " : "messages off: ") : "message categories:\n\t") + (sCategories || "none"));
+
+        this.historyInit();     // call this just in case MessagesPDP11.INT was turned on
+    }
+
+    /**
+     * doOptions(asArgs)
+     *
+     * @this {DebuggerPDP11}
+     * @param {Array.<string>} asArgs
+     */
+    doOptions(asArgs)
+    {
+        switch (asArgs[1]) {
+
+        case "base":
+            if (asArgs[2]) {
+                var nBase = +asArgs[2];
+                if (nBase == 8 || nBase == 10 || nBase == 16) {
+                    this.nBase = nBase;
+                } else {
+                    this.println("invalid base: " + nBase);
+                    break;
+                }
+            }
+            this.println("default base: " + this.nBase);
+            break;
+
+        case "cs":
+            var nCycles;
+            if (asArgs[3] !== undefined) nCycles = +asArgs[3];          // warning: decimal instead of hex conversion
+            switch (asArgs[2]) {
+                case "int":
+                    this.cpu.nCyclesChecksumInterval = nCycles;
+                    break;
+                case "start":
+                    this.cpu.nCyclesChecksumStart = nCycles;
+                    break;
+                case "stop":
+                    this.cpu.nCyclesChecksumStop = nCycles;
+                    break;
+                default:
+                    this.println("unknown cs option");
+                    return;
+            }
+            if (nCycles !== undefined) {
+                this.cpu.resetChecksum();
+            }
+            this.println("checksums " + (this.cpu.flags.checksum? "enabled" : "disabled"));
+            return;
+
+        case "sp":
+            if (asArgs[2] !== undefined) {
+                if (!this.cpu.setSpeed(+asArgs[2])) {
+                    this.println("warning: using 1x multiplier, previous target not reached");
+                }
+            }
+            this.println("target speed: " + this.cpu.getSpeedTarget() + " (" + this.cpu.getSpeed() + "x)");
+            return;
+
+        default:
+            if (asArgs[1]) {
+                this.println("unknown option: " + asArgs[1]);
+                return;
+            }
+            /* falls through */
+
+        case "?":
+            this.println("debugger options:");
+            this.println("\tbase #\t\tset default base to #");
+            this.println("\tcs int #\tset checksum cycle interval to #");
+            this.println("\tcs start #\tset checksum cycle start count to #");
+            this.println("\tcs stop #\tset checksum cycle stop count to #");
+            this.println("\tsp #\t\tset speed multiplier to #");
+            break;
+        }
+    }
+
+    /**
+     * doRegisters(asArgs, fInstruction)
+     *
+     * @this {DebuggerPDP11}
+     * @param {Array.<string>} [asArgs]
+     * @param {boolean} [fInstruction] (true to include the current instruction; default is true)
+     */
+    doRegisters(asArgs, fInstruction)
+    {
+        if (asArgs && asArgs[1] == '?') {
+            this.println("register commands:");
+            this.println("\tr\tdump registers");
+            this.println("\trm\tdump misc registers");
+            this.println("\trx [#]\tset flag or register x to [#]");
+            return;
+        }
+
+        var fMisc = false;
+        var cpu = this.cpu;
+        if (fInstruction == null) fInstruction = true;
+
+        if (asArgs != null && asArgs.length > 1) {
+            var sReg = asArgs[1];
+
+            if (sReg == 'm') {
+                fMisc = true;
+            }
+            else {
+                var sValue = null;
+                var i = sReg.indexOf('=');
+                if (i > 0) {
+                    sValue = sReg.substr(i + 1);
+                    sReg = sReg.substr(0, i);
+                }
+                else if (asArgs.length > 2) {
+                    sValue = asArgs[2];
+                }
+                else {
+                    this.println("missing value for " + asArgs[1]);
+                    return;
+                }
+
+                var w = this.parseExpression(sValue);
+                if (w === undefined) return;
+
+                var sRegMatch = sReg.toUpperCase();
+                switch (sRegMatch) {
+                case "SP":
+                case "R6":
+                    cpu.setSP(w);
+                    break;
+                case "PC":
+                case "R7":
+                    cpu.setPC(w);
+                    this.dbgAddrNextCode = this.newAddr(cpu.getPC());
+                    break;
+                case "N":
+                    if (w) cpu.setNF(); else cpu.clearNF();
+                    break;
+                case "Z":
+                    if (w) cpu.setZF(); else cpu.clearZF();
+                    break;
+                case "V":
+                    if (w) cpu.setVF(); else cpu.clearVF();
+                    break;
+                case "C":
+                    if (w) cpu.setCF(); else cpu.clearCF();
+                    break;
+                case "PS":
+                    cpu.setPSW(w);
+                    break;
+                case "PI":
+                    cpu.setPIR(w);
+                    break;
+                case "ER":
+                    cpu.regErr = w;
+                    fMisc = true;
+                    break;
+                case "SL":
+                    cpu.setSLR(w);
+                    break;
+                case "M0":
+                    cpu.setMMR0(w);
+                    fMisc = true;
+                    break;
+                case "M3":
+                    cpu.setMMR3(w);
+                    fMisc = true;
+                    break;
+                case "AR":
+                    if (this.panel) this.panel.setAR(w);
+                    fMisc = true;
+                    break;
+                case "DR":
+                    if (this.panel) this.panel.setDR(w);
+                    fMisc = true;
+                    break;
+                case "SR":
+                    if (this.panel && this.panel.hasSwitches()) {
+                        this.panel.setSR(w);
+                        fMisc = true;
+                        break;
+                    }
+                    /* falls through */
+                default:
+                    if (sRegMatch.charAt(0) == 'R') {
+                        var iReg = +sRegMatch.charAt(1);
+                        if (iReg >= 0 && iReg < 6) {
+                            cpu.regsGen[iReg] = w & 0xffff;
+                            break;
+                        }
+                    }
+                    this.println("unknown register: " + sReg);
+                    return;
+                }
+                this.cmp.updateDisplays();
+                this.println("updated registers:");
+            }
+        }
+
+        this.println(this.getRegDump(fMisc));
+
+        if (fInstruction) {
+            this.dbgAddrNextCode = this.newAddr(cpu.getPC());
+            this.doUnassemble(this.toStrAddr(this.dbgAddrNextCode));
+        }
+    }
+
+    /**
+     * doRun(sCmd, sAddr, sOptions, fQuiet)
+     *
+     * @this {DebuggerPDP11}
+     * @param {string} sCmd
+     * @param {string|undefined} [sAddr]
+     * @param {string} [sOptions] (the rest of the breakpoint command-line)
+     * @param {boolean} [fQuiet]
+     */
+    doRun(sCmd, sAddr, sOptions, fQuiet)
+    {
+        if (sCmd == "gt") {
+            this.fIgnoreNextCheckFault = true;
+        }
+        if (sAddr !== undefined) {
+            var dbgAddr = this.parseAddr(sAddr, true);
+            if (!dbgAddr) return;
+            this.parseAddrOptions(dbgAddr, sOptions);
+            this.setTempBreakpoint(dbgAddr);
+        }
+        this.startCPU(true, fQuiet);
+    }
+
+    /**
+     * doPrint(sCmd)
+     *
+     * NOTE: If the string to print is a quoted string, then we run it through replaceRegs(), so that
+     * you can take advantage of all the special replacement options used for software interrupt logging.
+     *
+     * @this {DebuggerPDP11}
+     * @param {string} sCmd
+     */
+    doPrint(sCmd)
+    {
+        sCmd = Str.trim(sCmd);
+        var a = sCmd.match(/^(['"])(.*?)\1$/);
+        if (!a) {
+            this.parseExpression(sCmd, true);
+        } else {
+            if (a[2].length > 1) {
+                this.println(this.replaceRegs(a[2]));
+            } else {
+                this.printValue(null, a[2].charCodeAt(0));
+            }
+        }
+    }
+
+    /**
+     * doStep(sCmd, sOption)
+     *
+     * @this {DebuggerPDP11}
+     * @param {string} [sCmd] "p" or "pr"
+     * @param {string} [sOption]
+     */
+    doStep(sCmd, sOption)
+    {
+        if (sOption == '?') {
+            this.println("step commands:");
+            this.println("\tp\tstep over instruction");
+            this.println("\tpr\tstep over instruction with register update");
+            return;
+        }
+
+        var fCallStep = true;
+        var nRegs = (sCmd == "pr"? 1 : 0);
+        /*
+         * Set up the value for this.nStep (ie, 1 or 2) depending on whether the user wants
+         * a subsequent register dump ("pr") or not ("p").
+         */
+        var nStep = 1 + nRegs;
+
+        if (!this.nStep) {
+            var dbgAddr = this.newAddr(this.cpu.getPC());
+            var opCode = this.getWord(dbgAddr);
+
+            if (opCode == PDP11.OPCODE.BPT || opCode == PDP11.OPCODE.IOT ||
+                (opCode & PDP11.OPCODE.EMT_MASK) == PDP11.OPCODE.EMT_OP ||
+                (opCode & PDP11.OPCODE.SOB_MASK) == PDP11.OPCODE.SOB_OP ||
+                (opCode & PDP11.OPCODE.TRAP_MASK) == PDP11.OPCODE.TRAP_OP) {
+                if (fCallStep) {
+                    this.nStep = nStep;
+                    this.incAddr(dbgAddr, 2);
+                }
+            } else if ((opCode & PDP11.OPCODE.JSR_MASK) == PDP11.OPCODE.JSR_OP) {
+                var s = this.getInstruction(dbgAddr);
+                this.assert(s.indexOf("JSR") >= 0);
+                if (fCallStep) {
+                    this.nStep = nStep;
+                }
+            }
+
+            if (this.nStep) {
+                this.setTempBreakpoint(dbgAddr);
+                if (!this.startCPU()) {
+                    if (this.cmp) this.cmp.setFocus();
+                    this.nStep = 0;
+                }
+                /*
+                 * A successful run will ultimately call stop(), which will in turn call clearTempBreakpoint(),
+                 * which will clear nStep, so there's your assurance that nStep will be reset.  Now we may have
+                 * stopped for reasons unrelated to the temporary breakpoint, but that's OK.
+                 */
+            } else {
+                this.doTrace(nRegs? "tr" : "t");
+            }
+        } else {
+            this.println("step in progress");
+        }
+    }
+
+    /**
+     * getCall(dbgAddr)
+     *
+     * Given a possible return address (typically from the stack), look for a matching CALL (or INT) that
+     * immediately precedes that address.
+     *
+     * @this {DebuggerPDP11}
+     * @param {DbgAddrPDP11} dbgAddr
+     * @return {string|null} CALL instruction at or near dbgAddr, or null if none
+     */
+    getCall(dbgAddr)
+    {
+        var sCall = null;
+        var addr = dbgAddr.addr;
+        var addrOrig = addr;
+        for (var n = 1; n <= 6 && !!addr; n++) {
+            if (n > 2) {
+                dbgAddr.addr = addr;
+                var s = this.getInstruction(dbgAddr);
+                if (s.indexOf("JSR") >= 0) {
+                    /*
+                     * Verify that the length of this call, when added to the address of the call, matches
+                     * the original return address.  We do this by getting the string index of the opcode bytes,
+                     * subtracting that from the string index of the next space, and dividing that difference
+                     * by two, to yield the length of the CALL (or INT) instruction, in bytes.
+                     */
+                    var i = s.indexOf(' ');
+                    var j = s.indexOf(' ', i+1);
+                    if (addr + (j - i - 1)/2 == addrOrig) {
+                        sCall = s;
+                        break;
+                    }
+                }
+            }
+            addr -= 2;
+        }
+        dbgAddr.addr = addrOrig;
+        return sCall;
+    }
+
+    /**
+     * doStackTrace(sCmd, sAddr)
+     *
+     * Use "k" for a normal stack trace and "ks" for a stack trace with symbolic info.
+     *
+     * @this {DebuggerPDP11}
+     * @param {string} [sCmd]
+     * @param {string} [sAddr] (not used yet)
+     */
+    doStackTrace(sCmd, sAddr)
+    {
+        if (sAddr == '?') {
+            this.println("stack trace commands:");
+            this.println("\tk\tshow frame addresses");
+            this.println("\tks\tshow symbol information");
+            return;
+        }
+
+        var nFrames = 10, cFrames = 0;
+        var dbgAddrCall = this.newAddr();
+        var dbgAddrStack = this.newAddr(this.cpu.getSP());
+        this.println("stack trace for " + this.toStrAddr(dbgAddrStack));
+
+        while (cFrames < nFrames) {
+            var sCall = null, sCallPrev = null, cTests = 256;
+            while ((dbgAddrStack.addr >>> 0) < 0x10000) {
+                dbgAddrCall.addr = this.getWord(dbgAddrStack, 2);
+                /*
+                 * Because we're using the auto-increment feature of getWord(), and because that will automatically
+                 * wrap the offset around the end of the segment, we must also check the addr property to detect the wrap.
+                 */
+                if (dbgAddrStack.addr == null || !cTests--) break;
+                if (dbgAddrCall.addr & 0x1) continue;           // an odd address on the PDP-11 is not a valid instruction boundary
+                sCall = this.getCall(dbgAddrCall);
+                if (sCall) break;
+            }
+            /*
+             * The sCallPrev check eliminates duplicate sequential calls, which are usually (but not always)
+             * indicative of a false positive, in which case the previous call is probably bogus as well, but
+             * at least we won't duplicate that mistake.  Of course, there are always exceptions, recursion
+             * being one of them, but it's rare that we're debugging recursive code.
+             */
+            if (!sCall || sCall == sCallPrev) break;
+            var sSymbol = null;
+            if (sCmd == "ks") {
+                var a = sCall.match(/[0-9A-F]+$/);
+                if (a) sSymbol = this.doList(a[0]);
+            }
+            sCall = Str.pad(sCall, 50) + "  ;" + (sSymbol || "stack=" + this.toStrAddr(dbgAddrStack)); // + " return=" + this.toStrAddr(dbgAddrCall));
+            this.println(sCall);
+            sCallPrev = sCall;
+            cFrames++;
+        }
+        if (!cFrames) this.println("no return addresses found");
+    }
+
+    /**
+     * doTrace(sCmd, sCount)
+     *
+     * The "t" and "tr" commands interpret the count as a number of instructions, and since
+     * we call the Debugger's stepCPU() for each iteration, a single instruction includes
+     * any/all prefixes; the CPU's stepCPU() treats prefixes as discrete operations.  The only
+     * difference between "t" and "tr": the former displays only the next instruction, while
+     * the latter also displays the (updated) registers.
+     *
+     * The "tc" command interprets the count as a number of cycles rather than instructions,
+     * allowing you to quickly execute large chunks of instructions with a single command; it
+     * doesn't display anything until the the chunk has finished.  "tc 1" is also a useful
+     * command in that it doesn't inhibit interrupts like "t" or "tr" does.
+     *
+     * However, generally a more useful command is "bn", which allows you to break after some
+     * number of instructions have been executed (as opposed to some number of cycles).
+     *
+     * @this {DebuggerPDP11}
+     * @param {string} [sCmd] ("t", "tc", or "tr")
+     * @param {string} [sCount] # of instructions to step
+     */
+    doTrace(sCmd, sCount)
+    {
+        if (sCount == '?') {
+            this.println("trace commands:");
+            this.println("\tt  [#]\ttrace # instructions");
+            this.println("\ttr [#]\ttrace # instructions with register updates");
+            this.println("\ttc [#]\ttrace # cycles");
+            this.println("note: bn [#] breaks after # instructions without updates");
+            return;
+        }
+
+        var dbg = this;
+        var fRegs = (sCmd != "t");
+        var nCount = this.parseValue(sCount, null, true) || 1;
+
+        /*
+         * We used to set nCycles to 1 when a count > 1 was specified, because nCycles set
+         * to 0 used to mean "execute the next instruction without checking for interrupts".
+         * Well, this machine's stepCPU() doesn't do that; it ALWAYS checks for interrupts,
+         * so we should leave nCycles set to 0, so that if an interrupt is dispatched, we will
+         * get to see the first instruction of the interrupt handler.
+         */
+        var nCycles = 0;    // (nCount == 1? 0 : 1);
+
+        if (sCmd == "tc") {
+            nCycles = nCount;
+            nCount = 1;
+        }
+        this.sCmdTracePrev = sCmd;
+
+        Web.onCountRepeat(
+            nCount,
+            function onCountStep() {
+                return dbg.setBusy(true) && dbg.stepCPU(nCycles, fRegs, false);
+            },
+            function onCountStepComplete() {
+                /*
+                 * We explicitly called stepCPU() with fUpdateDisplays set to false, because repeatedly
+                 * calling updateDisplays() can be very slow, especially if a Control Panel is present with
+                 * displayLiveRegs enabled, so once the repeat count has been exhausted, we must perform
+                 * a final updateDisplays().
+                 */
+                if (dbg.panel) dbg.panel.stop();
+                dbg.cmp.updateDisplays(-1);
+                dbg.setBusy(false);
+            }
+        );
+    }
+
+    /**
+     * doUnassemble(sAddr, sAddrEnd, nLines)
+     *
+     * @this {DebuggerPDP11}
+     * @param {string} [sAddr]
+     * @param {string} [sAddrEnd]
+     * @param {number} [nLines]
+     */
+    doUnassemble(sAddr, sAddrEnd, nLines)
+    {
+        var dbgAddr = this.parseAddr(sAddr, true);
+        if (!dbgAddr) return;
+
+        if (nLines === undefined) nLines = 1;
+
+        var nBytes = 0x100;
+        if (sAddrEnd !== undefined) {
+
+            if (sAddrEnd.charAt(0) == 'l') {
+                var n = this.parseValue(sAddrEnd.substr(1));
+                if (n != null) nLines = n;
+            }
+            else {
+                var dbgAddrEnd = this.parseAddr(sAddrEnd, true);
+                if (!dbgAddrEnd || dbgAddrEnd.addr < dbgAddr.addr) return;
+
+                nBytes = dbgAddrEnd.addr - dbgAddr.addr;
+                if (!DEBUG && nBytes > 0x100) {
+                    /*
+                     * Limiting the amount of disassembled code to 256 bytes in non-DEBUG builds is partly to
+                     * prevent the user from wedging the browser by dumping too many lines, but also a recognition
+                     * that, in non-DEBUG builds, this.println() keeps print output buffer truncated to 8Kb anyway.
+                     */
+                    this.println("range too large");
+                    return;
+                }
+                nLines = -1;
+            }
+        }
+
+        var nPrinted = 0;
+        var sInstruction;
+
+        while (nBytes > 0 && nLines--) {
+
+            var nSequence = (this.isBusy(false) || this.nStep)? this.nCycles : null;
+            var sComment = (nSequence != null? "cycles" : null);
+            var aSymbol = this.findSymbol(dbgAddr);
+
+            var addr = dbgAddr.addr;    // we snap dbgAddr.addr *after* calling findSymbol(), which re-evaluates it
+
+            if (aSymbol[0] && nLines) {
+                if (!nPrinted && nLines || aSymbol[0].indexOf('+') < 0) {
+                    var sLabel = aSymbol[0] + ':';
+                    if (aSymbol[2]) sLabel += ' ' + aSymbol[2];
+                    this.println(sLabel);
+                }
+            }
+
+            if (aSymbol[3]) {
+                sComment = aSymbol[3];
+                nSequence = null;
+            }
+
+            sInstruction = this.getInstruction(dbgAddr, sComment, nSequence);
+
+            this.println(sInstruction);
+            this.dbgAddrNextCode = dbgAddr;
+            nBytes -= dbgAddr.addr - addr;
+            nPrinted++;
+        }
+    }
+
+    /**
+     * splitArgs(sCmd)
+     *
+     * @this {DebuggerPDP11}
+     * @param {string} sCmd
+     * @return {Array.<string>}
+     */
+    splitArgs(sCmd)
+    {
+        var asArgs = sCmd.replace(/ +/g, ' ').split(' ');
+        asArgs[0] = asArgs[0].toLowerCase();
+        if (asArgs && asArgs.length) {
+            var s0 = asArgs[0];
+            var ch0 = s0.charAt(0);
+            for (var i = 1; i < s0.length; i++) {
+                var ch = s0.charAt(i);
+                if (ch0 == '?' || ch0 == 'r' || ch < 'a' || ch > 'z') {
+                    asArgs[0] = s0.substr(i);
+                    asArgs.unshift(s0.substr(0, i));
+                    break;
+                }
+            }
+        }
+        return asArgs;
+    }
+
+    /**
+     * doCommand(sCmd, fQuiet)
+     *
+     * @this {DebuggerPDP11}
+     * @param {string} sCmd
+     * @param {boolean} [fQuiet]
+     * @return {boolean} true if command processed, false if unrecognized
+     */
+    doCommand(sCmd, fQuiet)
+    {
+        var result = true;
+
+        try {
+            if (!sCmd.length || sCmd == "end") {
+                if (this.fAssemble) {
+                    this.println("ended assemble at " + this.toStrAddr(this.dbgAddrAssemble));
+                    this.dbgAddrNextCode = this.dbgAddrAssemble;
+                    this.fAssemble = false;
+                }
+                sCmd = "";
+            }
+            else if (!fQuiet) {
+                var sPrompt = ">> ";
+                this.println(sPrompt + sCmd);
+            }
+
+            var ch = sCmd.charAt(0);
+            if (ch == '"' || ch == "'") return true;
+
+            /*
+             * Zap the previous message buffer to ensure the new command's output is not tossed out as a repeat.
+             */
+            this.sMessagePrev = null;
+
+            /*
+             * I've relaxed the !isBusy() requirement, to maximize our ability to issue Debugger commands externally.
+             */
+            if (this.isReady() /* && !this.isBusy(true) */ && sCmd.length > 0) {
+
+                if (this.fAssemble) {
+                    sCmd = "a " + this.toStrAddr(this.dbgAddrAssemble) + ' ' + sCmd;
+                }
+
+                var fError = false;
+                var asArgs = this.splitArgs(sCmd);
+
+                switch (asArgs[0].charAt(0)) {
+                case 'a':
+                    this.doAssemble(asArgs);
+                    break;
+                case 'b':
+                    this.doBreak(asArgs[0], asArgs[1], sCmd);
+                    break;
+                case 'c':
+                    this.doClear(asArgs[0]);
+                    break;
+                case 'd':
+                    if (!COMPILED && sCmd == "debug") {
+                        window.DEBUG = true;
+                        this.println("DEBUG checks on");
+                        break;
+                    }
+                    this.doDump(asArgs);
+                    break;
+                case 'e':
+                    if (asArgs[0] == "else") break;
+                    this.doEdit(asArgs);
+                    break;
+                case 'g':
+                    this.doRun(asArgs[0], asArgs[1], sCmd, fQuiet);
+                    break;
+                case 'h':
+                    this.doHalt(fQuiet);
+                    break;
+                case 'i':
+                    if (asArgs[0] == "if") {
+                        if (!this.doIf(sCmd.substr(2), fQuiet)) {
+                            result = false;
+                        }
+                        break;
+                    }
+                    fError = true;
+                    break;
+                case 'k':
+                    this.doStackTrace(asArgs[0], asArgs[1]);
+                    break;
+                case 'l':
+                    if (asArgs[0] == "ln") {
+                        this.doList(asArgs[1], true);
+                        break;
+                    }
+                    fError = true;
+                    break;
+                case 'm':
+                    this.doMessages(asArgs);
+                    break;
+                case 'p':
+                    if (asArgs[0] == "print") {
+                        this.doPrint(sCmd.substr(5));
+                        break;
+                    }
+                    this.doStep(asArgs[0], asArgs[1]);
+                    break;
+                case 'r':
+                    if (sCmd == "reset") {
+                        if (this.cmp) this.cmp.reset();
+                        break;
+                    }
+                    this.doRegisters(asArgs);
+                    break;
+                case 's':
+                    this.doOptions(asArgs);
+                    break;
+                case 't':
+                    this.doTrace(asArgs[0], asArgs[1]);
+                    break;
+                case 'u':
+                    this.doUnassemble(asArgs[1], asArgs[2], 8);
+                    break;
+                case 'v':
+                    if (asArgs[0] == "var") {
+                        if (!this.doVar(sCmd.substr(3))) {
+                            result = false;
+                        }
+                        break;
+                    }
+                    if (asArgs[0] == "ver") {
+                        this.println((PDP11.APPNAME || "PDP11") + " version " + (XMLVERSION || PDP11.APPVERSION) + " (" + this.cpu.model + (PDP11.COMPILED? ",RELEASE" : (PDP11.DEBUG? ",DEBUG" : ",NODEBUG")) + (PDP11.TYPEDARRAYS? ",TYPEDARRAYS" : (PDP11.BYTEARRAYS? ",BYTEARRAYS" : ",LONGARRAYS")) + ')');
+                        this.println(Web.getUserAgent());
+                        break;
+                    }
+                    fError = true;
+                    break;
+                case '?':
+                    if (asArgs[1]) {
+                        this.doPrint(sCmd.substr(1));
+                        break;
+                    }
+                    this.doHelp();
+                    break;
+                case 'n':
+                    if (!COMPILED && sCmd == "nodebug") {
+                        window.DEBUG = false;
+                        this.println("DEBUG checks off");
+                        break;
+                    }
+                    if (this.doInfo(asArgs)) break;
+                    /* falls through */
+                default:
+                    fError = true;
+                    break;
+                }
+                if (fError) {
+                    this.println("unknown command: " + sCmd);
+                    result = false;
+                }
+            }
+        } catch(e) {
+            this.println("debugger error: " + (e.stack || e.message));
+            result = false;
+        }
+        return result;
+    }
+
+    /**
+     * doCommands(sCmds, fSave)
+     *
+     * @this {DebuggerPDP11}
+     * @param {string} sCmds
+     * @param {boolean} [fSave]
+     * @return {boolean} true if all commands processed, false if not
+     */
+    doCommands(sCmds, fSave)
+    {
+        var a = this.parseCommand(sCmds, fSave);
+        for (var s in a) {
+            if (!this.doCommand(a[+s])) return false;
+        }
+        return true;
+    }
+
+    /**
+     * DebuggerPDP11.init()
+     *
+     * This function operates on every HTML element of class "debugger", extracting the
+     * JSON-encoded parameters for the Debugger constructor from the element's "data-value"
+     * attribute, invoking the constructor to create a Debugger component, and then binding
+     * any associated HTML controls to the new component.
+     */
+    static init()
+    {
+        var aeDbg = Component.getElementsByClass(document, PDP11.APPCLASS, "debugger");
+        for (var iDbg = 0; iDbg < aeDbg.length; iDbg++) {
+            var eDbg = aeDbg[iDbg];
+            var parmsDbg = Component.getComponentParms(eDbg);
+            var dbg = new DebuggerPDP11(parmsDbg);
+            Component.bindComponentControls(dbg, eDbg, PDP11.APPCLASS);
+        }
+    }
 }
 
 if (DEBUGGER) {
-
-    Component.subclass(DebuggerPDP11, Debugger);
 
     /*
      * NOTE: Every DebuggerPDP11 property from here to the first prototype function definition (initBus()) is
@@ -482,3881 +4369,11 @@ if (DEBUGGER) {
 
     DebuggerPDP11.HISTORY_LIMIT = DEBUG? 100000 : 1000;
 
-    /**
-     * initBus(bus, cpu, dbg)
-     *
-     * @this {DebuggerPDP11}
-     * @param {ComputerPDP11} cmp
-     * @param {BusPDP11} bus
-     * @param {CPUStatePDP11} cpu
-     * @param {DebuggerPDP11} dbg
-     */
-    DebuggerPDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
-    {
-        this.bus = bus;
-        this.cmp = cmp;
-        this.cpu = cpu;
-        this.panel = cmp.panel;
-
-        /*
-         * Re-initialize Debugger message support if necessary
-         */
-        var sMessages = cmp.getMachineParm('messages');
-        if (sMessages) this.messageInit(sMessages);
-
-        this.opTable = DebuggerPDP11.OPTABLE;
-        this.aOpReserved = this.cpu.model < PDP11.MODEL_1145? DebuggerPDP11.OP1145 : [];
-
-        this.messageDump(MessagesPDP11.BUS,  function onDumpBus(asArgs) { dbg.dumpBus(asArgs); });
-
-        this.setReady();
-    };
-
-    /**
-     * setBinding(sType, sBinding, control, sValue)
-     *
-     * @this {DebuggerPDP11}
-     * @param {string|null} sType is the type of the HTML control (eg, "button", "textarea", "register", "flag", "rled", etc)
-     * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "debugInput")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
-     * @param {string} [sValue] optional data value
-     * @return {boolean} true if binding was successful, false if unrecognized binding request
-     */
-    DebuggerPDP11.prototype.setBinding = function(sType, sBinding, control, sValue)
-    {
-        var dbg = this;
-        switch (sBinding) {
-
-        case "debugInput":
-            this.bindings[sBinding] = control;
-            this.controlDebug = control;
-            /*
-             * For halted machines, this is fine, but for auto-start machines, it can be annoying.
-             *
-             *      control.focus();
-             */
-            control.onkeydown = function onKeyDownDebugInput(event) {
-                var sCmd;
-                if (event.keyCode == Keys.KEYCODE.CR) {
-                    sCmd = control.value;
-                    control.value = "";
-                    dbg.doCommands(sCmd, true);
-                }
-                else if (event.keyCode == Keys.KEYCODE.ESC) {
-                    control.value = sCmd = "";
-                }
-                else {
-                    if (event.keyCode == Keys.KEYCODE.UP) {
-                        sCmd = dbg.getPrevCommand();
-                    }
-                    else if (event.keyCode == Keys.KEYCODE.DOWN) {
-                        sCmd = dbg.getNextCommand();
-                    }
-                    if (sCmd != null) {
-                        var cch = sCmd.length;
-                        control.value = sCmd;
-                        control.setSelectionRange(cch, cch);
-                    }
-                }
-                if (sCmd != null && event.preventDefault) event.preventDefault();
-            };
-            return true;
-
-        case "debugEnter":
-            this.bindings[sBinding] = control;
-            web.onClickRepeat(
-                control,
-                500, 100,
-                function onClickDebugEnter(fRepeat) {
-                    if (dbg.controlDebug) {
-                        var sCmd = dbg.controlDebug.value;
-                        dbg.controlDebug.value = "";
-                        dbg.doCommands(sCmd, true);
-                        return true;
-                    }
-                    if (DEBUG) dbg.log("no debugger input buffer");
-                    return false;
-                }
-            );
-            return true;
-
-        case "step":
-            this.bindings[sBinding] = control;
-            web.onClickRepeat(
-                control,
-                500, 100,
-                function onClickStep(fRepeat) {
-                    var fCompleted = false;
-                    if (!dbg.isBusy(true)) {
-                        dbg.setBusy(true);
-                        fCompleted = dbg.stepCPU(fRepeat? 1 : 0, null);
-                        dbg.setBusy(false);
-                    }
-                    return fCompleted;
-                }
-            );
-            return true;
-
-        default:
-            break;
-        }
-        return false;
-    };
-
-    /**
-     * setFocus(fScroll)
-     *
-     * @this {DebuggerPDP11}
-     * @param {boolean} [fScroll] (true if you really want the control scrolled into view)
-     */
-    DebuggerPDP11.prototype.setFocus = function(fScroll)
-    {
-        if (this.controlDebug) {
-            /*
-             * This is the recommended work-around to prevent the browser from scrolling the focused element
-             * into view.  The CPU is not a visual component, so when the CPU wants to set focus, the primary intent
-             * is to ensure that keyboard input is fielded properly.
-             */
-            var x = 0, y = 0;
-            if (!fScroll && window) {
-                x = window.scrollX;
-                y = window.scrollY;
-            }
-
-            this.controlDebug.focus();
-
-            if (!fScroll && window) {
-                window.scrollTo(x, y);
-            }
-        }
-    };
-
-    /**
-     * getAddr(dbgAddr, fWrite, nb)
-     *
-     * @this {DebuggerPDP11}
-     * @param {DbgAddrPDP11|null|undefined} dbgAddr
-     * @param {boolean} [fWrite]
-     * @param {number} [nb] number of bytes to check (1 or 2); default is 1
-     * @return {number} is the corresponding linear address, or PDP11.ADDR_INVALID
-     */
-    DebuggerPDP11.prototype.getAddr = function(dbgAddr, fWrite, nb)
-    {
-        var addr = dbgAddr && dbgAddr.addr;
-        if (addr == null) {
-            addr = PDP11.ADDR_INVALID;
-        }
-        return addr;
-    };
-
-    /**
-     * mapUnibus(addr)
-     *
-     * @this {DebuggerPDP11}
-     * @param {number} addr
-     * @return {number}
-     */
-    DebuggerPDP11.prototype.mapUnibus = function(addr)
-    {
-        return this.cpu.mapUnibus(addr);
-    };
-
-    /**
-     * getByte(dbgAddr, inc)
-     *
-     * We must route all our memory requests through the CPU now, in case paging is enabled.
-     *
-     * @this {DebuggerPDP11}
-     * @param {DbgAddrPDP11} dbgAddr
-     * @param {number} [inc]
-     * @return {number}
-     */
-    DebuggerPDP11.prototype.getByte = function(dbgAddr, inc)
-    {
-        var b = 0xff;
-        var addr = this.getAddr(dbgAddr, false, 1);
-        if (addr !== PDP11.ADDR_INVALID) {
-            b = (dbgAddr.fPhysical || addr > 0xffff)? this.bus.getByteDirect(this.mapUnibus(addr)) : this.cpu.getByteSafe(addr);
-            if (inc) this.incAddr(dbgAddr, inc);
-        }
-        return b;
-    };
-
-    /**
-     * getWord(dbgAddr, inc)
-     *
-     * @this {DebuggerPDP11}
-     * @param {DbgAddrPDP11} dbgAddr
-     * @param {number} [inc]
-     * @return {number}
-     */
-    DebuggerPDP11.prototype.getWord = function(dbgAddr, inc)
-    {
-        var w = 0xffff;
-        var addr = this.getAddr(dbgAddr, false, 2);
-        if (addr !== PDP11.ADDR_INVALID) {
-            w = (dbgAddr.fPhysical || addr > 0xffff)? this.bus.getWordDirect(this.mapUnibus(addr)) : this.cpu.getWordSafe(addr);
-            if (inc) this.incAddr(dbgAddr, inc);
-        }
-        return w;
-    };
-
-    /**
-     * setByte(dbgAddr, b, inc)
-     *
-     * @this {DebuggerPDP11}
-     * @param {DbgAddrPDP11} dbgAddr
-     * @param {number} b
-     * @param {number} [inc]
-     */
-    DebuggerPDP11.prototype.setByte = function(dbgAddr, b, inc)
-    {
-        var addr = this.getAddr(dbgAddr, true, 1);
-        if (addr !== PDP11.ADDR_INVALID) {
-            if (dbgAddr.fPhysical || addr > 0xffff) {
-                this.bus.setByteDirect(this.mapUnibus(addr), b);
-            } else {
-                this.cpu.setByteSafe(addr, b);
-            }
-            if (inc) this.incAddr(dbgAddr, inc);
-            this.cmp.updateDisplays(-1);
-        }
-    };
-
-    /**
-     * setWord(dbgAddr, w, inc)
-     *
-     * @this {DebuggerPDP11}
-     * @param {DbgAddrPDP11} dbgAddr
-     * @param {number} w
-     * @param {number} [inc]
-     */
-    DebuggerPDP11.prototype.setWord = function(dbgAddr, w, inc)
-    {
-        var addr = this.getAddr(dbgAddr, true, 2);
-        if (addr !== PDP11.ADDR_INVALID) {
-            if (dbgAddr.fPhysical || addr > 0xffff) {
-                this.bus.setWordDirect(this.mapUnibus(addr), w);
-            } else {
-                this.cpu.setWordSafe(addr, w);
-            }
-            if (inc) this.incAddr(dbgAddr, inc);
-            this.cmp.updateDisplays(-1);
-        }
-    };
-
-    /**
-     * newAddr(addr, fPhysical)
-     *
-     * Returns a NEW DbgAddrPDP11 object, initialized with specified values and/or defaults.
-     *
-     * @this {DebuggerPDP11}
-     * @param {number} [addr]
-     * @param {boolean} [fPhysical]
-     * @return {DbgAddrPDP11}
-     */
-    DebuggerPDP11.prototype.newAddr = function(addr, fPhysical)
-    {
-        return {addr: addr, fPhysical: fPhysical, fTemporary: false};
-    };
-
-    /**
-     * setAddr(dbgAddr, addr)
-     *
-     * Updates an EXISTING DbgAddrPDP11 object, initialized with specified values and/or defaults.
-     *
-     * @this {DebuggerPDP11}
-     * @param {DbgAddrPDP11} dbgAddr
-     * @param {number} addr
-     * @return {DbgAddrPDP11}
-     */
-    DebuggerPDP11.prototype.setAddr = function(dbgAddr, addr)
-    {
-        dbgAddr.addr = addr;
-        dbgAddr.fTemporary = false;
-        return dbgAddr;
-    };
-
-    /**
-     * packAddr(dbgAddr)
-     *
-     * Packs a DbgAddrPDP11 object into an Array suitable for saving in a machine state object.
-     *
-     * @this {DebuggerPDP11}
-     * @param {DbgAddrPDP11} dbgAddr
-     * @return {Array}
-     */
-    DebuggerPDP11.prototype.packAddr = function(dbgAddr)
-    {
-        return [dbgAddr.addr, dbgAddr.fTemporary];
-    };
-
-    /**
-     * unpackAddr(aAddr)
-     *
-     * Unpacks a DbgAddrPDP11 object from an Array created by packAddr() and restored from a saved machine state.
-     *
-     * @this {DebuggerPDP11}
-     * @param {Array} aAddr
-     * @return {DbgAddrPDP11}
-     */
-    DebuggerPDP11.prototype.unpackAddr = function(aAddr)
-    {
-        return {addr: aAddr[0], fTemporary: aAddr[1]};
-    };
-
-    /**
-     * parseAddr(sAddr, fCode, fNoChecks, fPrint)
-     *
-     * Address evaluation and validation (eg, range checks) are no longer performed at this stage.  That's
-     * done later, by getAddr(), which returns PDP11.ADDR_INVALID for invalid segments, out-of-range offsets,
-     * etc.  The Debugger's low-level get/set memory functions verify all getAddr() results, but even if an
-     * invalid address is passed through to the Bus memory interfaces, the address will simply be masked with
-     * bus.nBusMask; in the case of PDP11.ADDR_INVALID, that will generally refer to the top of the physical
-     * address space.
-     *
-     * @this {DebuggerPDP11}
-     * @param {string|undefined} sAddr
-     * @param {boolean} [fCode] (true if target is code, false if target is data)
-     * @param {boolean} [fNoChecks] (true when setting breakpoints that may not be valid now, but will be later)
-     * @param {boolean} [fPrint]
-     * @return {DbgAddrPDP11|null|undefined}
-     */
-    DebuggerPDP11.prototype.parseAddr = function(sAddr, fCode, fNoChecks, fPrint)
-    {
-        var dbgAddr;
-        var dbgAddrNext = (fCode? this.dbgAddrNextCode : this.dbgAddrNextData);
-        var addr = dbgAddrNext.addr;
-        var fPhysical = false, nBase;
-        if (sAddr !== undefined) {
-            sAddr = this.parseReference(sAddr);
-            var ch = sAddr.charAt(0);
-            if (ch == '%') {
-                fPhysical = true;
-                sAddr = sAddr.substr(1);
-            }
-            dbgAddr = this.findSymbolAddr(sAddr);
-            if (dbgAddr) return dbgAddr;
-            if (sAddr.indexOf("0x") >= 0) {
-                nBase = 16
-            } else if (sAddr.indexOf("0o") >= 0) {
-                nBase = 8;
-            } else if (sAddr.indexOf('.') >= 0) {
-                nBase = 10;
-            }
-            addr = this.parseExpression(sAddr, fPrint);
-        }
-        if (addr != null) {
-            dbgAddr = this.newAddr(addr, fPhysical);
-            dbgAddr.nBase = nBase;
-        }
-        return dbgAddr;
-    };
-
-    /**
-     * parseAddrOptions(dbdAddr, sOptions)
-     *
-     * @this {DebuggerPDP11}
-     * @param {DbgAddrPDP11} dbgAddr
-     * @param {string} [sOptions]
-     */
-    DebuggerPDP11.prototype.parseAddrOptions = function(dbgAddr, sOptions)
-    {
-        if (sOptions) {
-            var a = sOptions.match(/(['"])(.*?)\1/);
-            if (a) {
-                dbgAddr.aCmds = this.parseCommand(dbgAddr.sCmd = a[2]);
-            }
-        }
-    };
-
-    /**
-     * incAddr(dbgAddr, inc)
-     *
-     * @this {DebuggerPDP11}
-     * @param {DbgAddrPDP11} dbgAddr
-     * @param {number} [inc] contains value to increment dbgAddr by (default is 1)
-     */
-    DebuggerPDP11.prototype.incAddr = function(dbgAddr, inc)
-    {
-        if (dbgAddr.addr != null) {
-            dbgAddr.addr += (inc || 1);
-        }
-    };
-
-    /**
-     * toStrOffset(off)
-     *
-     * @this {DebuggerPDP11}
-     * @param {number|null|undefined} [off]
-     * @return {string} the hex representation of off
-     */
-    DebuggerPDP11.prototype.toStrOffset = function(off)
-    {
-        return this.toStrBase(off);
-    };
-
-    /**
-     * toStrAddr(dbgAddr)
-     *
-     * @this {DebuggerPDP11}
-     * @param {DbgAddrPDP11} dbgAddr
-     * @return {string} the hex representation of the address
-     */
-    DebuggerPDP11.prototype.toStrAddr = function(dbgAddr)
-    {
-        return (dbgAddr.fPhysical? '%' : '') + this.toStrOffset(dbgAddr.addr);
-    };
-
-    /**
-     * getSZ(dbgAddr, cchMax)
-     *
-     * Gets zero-terminated (aka "ASCIIZ") string from dbgAddr.  It also stops at the first '$', in case this is
-     * a '$'-terminated string -- mainly because I'm lazy and didn't feel like writing a separate get() function.
-     * Yes, a zero-terminated string containing a '$' will be prematurely terminated, and no, I don't care.
-     *
-     * @this {DebuggerPDP11}
-     * @param {DbgAddrPDP11} dbgAddr
-     * @param {number} [cchMax] (default is 256)
-     * @return {string} (and dbgAddr advanced past the terminating zero)
-     */
-    DebuggerPDP11.prototype.getSZ = function(dbgAddr, cchMax)
-    {
-        var s = "";
-        cchMax = cchMax || 256;
-        while (s.length < cchMax) {
-            var b = this.getByte(dbgAddr, 1);
-            if (!b || b == 0x24 || b >= 127) break;
-            s += (b >= 32? String.fromCharCode(b) : '.');
-        }
-        return s;
-    };
-
-    /**
-     * dumpBlocks(aBlocks, sAddr)
-     *
-     * @this {DebuggerPDP11}
-     * @param {Array} aBlocks
-     * @param {string} [sAddr] (optional block address)
-     */
-    DebuggerPDP11.prototype.dumpBlocks = function(aBlocks, sAddr)
-    {
-        var addr = 0, i = 0, n = aBlocks.length;
-
-        if (sAddr) {
-            addr = this.getAddr(this.parseAddr(sAddr));
-            if (addr === PDP11.ADDR_INVALID) {
-                this.println("invalid address: " + sAddr);
-                return;
-            }
-            i = addr >>> this.bus.nBlockShift;
-            n = 1;
-        }
-
-        this.println("blockid   physical   blockaddr  used    size    type");
-        this.println("--------  ---------  ---------  ------  ------  ----");
-
-        var typePrev = -1, cPrev = 0;
-        while (n--) {
-            var block = aBlocks[i];
-            if (block.type == typePrev) {
-                if (!cPrev++) this.println("...");
-            } else {
-                typePrev = block.type;
-                var sType = MemoryPDP11.TYPE_NAMES[typePrev];
-                if (block) {
-                    this.println(str.toHex(block.id, 8) + "  %" + str.toHex(i << this.bus.nBlockShift, 8) + "  %" + str.toHex(block.addr, 8) + "  " + str.toHexWord(block.used) + "  " + str.toHexWord(block.size) + "  " + sType);
-                }
-                if (typePrev != MemoryPDP11.TYPE.NONE) typePrev = -1;
-                cPrev = 0;
-            }
-            addr += this.bus.nBlockSize;
-            i++;
-        }
-    };
-
-    /**
-     * dumpBus(asArgs)
-     *
-     * Dumps Bus allocations.
-     *
-     * @this {DebuggerPDP11}
-     * @param {Array.<string>} asArgs (asArgs[0] is an optional block address)
-     */
-    DebuggerPDP11.prototype.dumpBus = function(asArgs)
-    {
-        this.dumpBlocks(this.bus.aBusBlocks, asArgs[0]);
-    };
-
-    /**
-     * dumpHistory(sPrev, sLines)
-     *
-     * If sLines is not a number, it can be a instruction filter.  However, for the moment, the only
-     * supported filter is "call", which filters the history buffer for all CALL and RET instructions
-     * from the specified previous point forward.
-     *
-     * @this {DebuggerPDP11}
-     * @param {string} [sPrev] is a (decimal) number of instructions to rewind to (default is 10)
-     * @param {string} [sLines] is a (decimal) number of instructions to print (default is, again, 10)
-     */
-    DebuggerPDP11.prototype.dumpHistory = function(sPrev, sLines)
-    {
-        var sMore = "";
-        var cHistory = 0;
-        var iHistory = this.iInstructionHistory;
-        var aHistory = this.aInstructionHistory;
-
-        if (aHistory.length) {
-            var nPrev = +sPrev || this.nextHistory;
-            var nLines = +sLines || 10;
-
-            if (isNaN(nPrev)) {
-                nPrev = nLines;
-            } else {
-                sMore = "more ";
-            }
-
-            if (nPrev > aHistory.length) {
-                this.println("note: only " + aHistory.length + " available");
-                nPrev = aHistory.length;
-            }
-
-            iHistory -= nPrev;
-            if (iHistory < 0) {
-                /*
-                 * If the dbgAddr of the last aHistory element contains a valid selector, wrap around.
-                 */
-                if (aHistory[aHistory.length - 1].addr == null) {
-                    nPrev = iHistory + nPrev;
-                    iHistory = 0;
-                } else {
-                    iHistory += aHistory.length;
-                }
-            }
-
-            var aFilters = [];
-            if (sLines == "call") {
-                nLines = 100000;
-                aFilters = ["CALL"];
-            }
-
-            if (sPrev !== undefined) {
-                this.println(nPrev + " instructions earlier:");
-            }
-
-            /*
-             * TODO: The following is necessary to prevent dumpHistory() from causing additional (or worse, recursive)
-             * faults due to segmented addresses that are no longer valid, but the only alternative is to dramatically
-             * increase the amount of memory used to store instruction history (eg, storing copies of all the instruction
-             * bytes alongside the execution addresses).
-             *
-             * For now, we're living dangerously, so that our history dumps actually work.
-             *
-             *      this.nSuppressBreaks++;
-             *
-             * If you re-enable this protection, be sure to re-enable the decrement below, too.
-             */
-            while (nLines > 0 && iHistory != this.iInstructionHistory) {
-
-                var dbgAddr = aHistory[iHistory++];
-                if (dbgAddr.addr == null) break;
-
-                /*
-                 * We must create a new dbgAddr from the address in aHistory, because dbgAddr was
-                 * a reference, not a copy, and we don't want getInstruction() modifying the original.
-                 */
-                var dbgAddrNew = this.newAddr(dbgAddr.addr);
-
-                var sComment = "history";
-                var nSequence = nPrev--;
-
-                /*
-                 * TODO: Need to some UI to control whether cycle counts are displayed as part of the history.
-                 * It's currently disabled in checkInstruction(), so it's disable here, too.
-                 *
-                if (DEBUG && dbgAddr.cycleCount != null) {
-                    sComment = "cycles";
-                    nSequence = dbgAddr.cycleCount;
-                }
-                 */
-
-                var sInstruction = this.getInstruction(dbgAddrNew, sComment, nSequence);
-
-                if (!aFilters.length || sInstruction.indexOf(aFilters[0]) >= 0) {
-                    this.println(sInstruction);
-                }
-
-                /*
-                 * If there were OPERAND or ADDRESS overrides on the previous instruction, getInstruction()
-                 * will have automatically disassembled additional bytes, so skip additional history entries.
-                 */
-                if (dbgAddrNew.cOverrides) {
-                    iHistory += dbgAddrNew.cOverrides; nLines -= dbgAddrNew.cOverrides; nPrev -= dbgAddrNew.cOverrides;
-                }
-
-                if (iHistory >= aHistory.length) iHistory = 0;
-                this.nextHistory = nPrev;
-                cHistory++;
-                nLines--;
-            }
-            /*
-             * See comments above.
-             *
-             *      this.nSuppressBreaks--;
-             */
-        }
-
-        if (!cHistory) {
-            this.println("no " + sMore + "history available");
-            this.nextHistory = undefined;
-        }
-    };
-
-    /**
-     * messageInit(sEnable)
-     *
-     * @this {DebuggerPDP11}
-     * @param {string|undefined} sEnable contains zero or more message categories to enable, separated by '|'
-     */
-    DebuggerPDP11.prototype.messageInit = function(sEnable)
-    {
-        this.dbg = this;
-        this.bitsMessage = this.bitsWarning = MessagesPDP11.WARN;
-        this.sMessagePrev = null;
-        this.aMessageBuffer = [];
-        /*
-         * Internally, we use "key" instead of "keys", since the latter is a method on JavasScript objects,
-         * but externally, we allow the user to specify "keys"; "kbd" is also allowed as shorthand for "keyboard".
-         */
-        var aEnable = this.parseCommand(sEnable.replace("keys","key").replace("kbd","keyboard"), false, '|');
-        if (aEnable.length) {
-            for (var m in MessagesPDP11.CATEGORIES) {
-                if (usr.indexOf(aEnable, m) >= 0) {
-                    this.bitsMessage |= MessagesPDP11.CATEGORIES[m];
-                    this.println(m + " messages enabled");
-                }
-            }
-        }
-    };
-
-    /**
-     * messageDump(bitMessage, fnDumper)
-     *
-     * @this {DebuggerPDP11}
-     * @param {number} bitMessage is one Messages category flag
-     * @param {function(Array.<string>)} fnDumper is a function the Debugger can use to dump data for that category
-     * @return {boolean} true if successfully registered, false if not
-     */
-    DebuggerPDP11.prototype.messageDump = function(bitMessage, fnDumper)
-    {
-        for (var m in MessagesPDP11.CATEGORIES) {
-            if (bitMessage == MessagesPDP11.CATEGORIES[m]) {
-                this.afnDumpers[m] = fnDumper;
-                return true;
-            }
-        }
-        return false;
-    };
-
-    /**
-     * getRegIndex(sReg, off)
-     *
-     * @this {DebuggerPDP11}
-     * @param {string} sReg
-     * @param {number} [off] optional offset into sReg
-     * @return {number} register index, or -1 if not found
-     */
-    DebuggerPDP11.prototype.getRegIndex = function(sReg, off)
-    {
-        sReg = sReg.toUpperCase();
-        var iReg = DebuggerPDP11.REGS[sReg];
-        if (iReg == null) {
-            iReg = -1;
-            if (sReg.charAt(0) == "R") {
-                iReg = +sReg.charAt(1);
-                if (iReg < 0 || iReg > 7) iReg = -1;
-            }
-        }
-        return iReg;
-    };
-
-    /**
-     * getRegName(iReg)
-     *
-     * @this {DebuggerPDP11}
-     * @param {number} iReg (0-7; not used for other registers)
-     * @return {string}
-     */
-    DebuggerPDP11.prototype.getRegName = function(iReg)
-    {
-        return (iReg < 6? ("R" + iReg) :  (iReg == 6? "SP" : "PC"));
-    };
-
-    /**
-     * getRegValue(iReg)
-     *
-     * Register numbers 0-7 are reserved for cpu.regsGen, 8-15 are reserved for cpu.regsAlt,
-     * 16-19 for cpu.regsAltStack, 20 for regPSW, etc.
-     *
-     * @this {DebuggerPDP11}
-     * @param {number} iReg
-     * @return {number|undefined}
-     */
-    DebuggerPDP11.prototype.getRegValue = function(iReg)
-    {
-        var value;
-        if (iReg >= 0) {
-            if (iReg < 8) {
-                value = this.cpu.regsGen[iReg];
-            }
-            else if (iReg < 16) {
-                value = this.cpu.regsAlt[iReg-8];
-            }
-            else if (iReg < 20) {
-                value = this.cpu.regsAltStack[iReg-16];
-            }
-            else {
-                var cpu = this.cpu;
-                var panel = this.panel;
-                switch(iReg) {
-                case DebuggerPDP11.REG_PS:
-                    value = this.cpu.getPSW();
-                    break;
-                case DebuggerPDP11.REG_PI:
-                    value = cpu.getPIR();
-                    break;
-                case DebuggerPDP11.REG_ER:
-                    value = cpu.regErr;
-                    break;
-                case DebuggerPDP11.REG_SL:
-                    value = cpu.getSLR();
-                    break;
-                case DebuggerPDP11.REG_M0:
-                    value = cpu.getMMR0();
-                    break;
-                case DebuggerPDP11.REG_M1:
-                    value = cpu.getMMR1();
-                    break;
-                case DebuggerPDP11.REG_M2:
-                    value = cpu.getMMR2();
-                    break;
-                case DebuggerPDP11.REG_M3:
-                    value = cpu.getMMR3();
-                    break;
-                case DebuggerPDP11.REG_AR:
-                    if (panel) value = panel.getAR();
-                    break;
-                case DebuggerPDP11.REG_DR:
-                    if (panel) value = panel.getDR();
-                    break;
-                case DebuggerPDP11.REG_SR:
-                    if (panel && panel.hasSwitches()) {
-                        value = panel.getSR();
-                    }
-                    break;
-                }
-            }
-        }
-        return value;
-    };
-
-    /**
-     * replaceRegs(s)
-     *
-     * TODO: Implement or eliminate.
-     *
-     * @this {DebuggerPDP11}
-     * @param {string} s
-     * @return {string}
-     */
-    DebuggerPDP11.prototype.replaceRegs = function(s)
-    {
-        return s;
-    };
-
-    /**
-     * message(sMessage, fAddress)
-     *
-     * @this {DebuggerPDP11}
-     * @param {string} sMessage is any caller-defined message string
-     * @param {boolean} [fAddress] is true to display the current address
-     */
-    DebuggerPDP11.prototype.message = function(sMessage, fAddress)
-    {
-        if (fAddress) {
-            sMessage += " @" + this.toStrAddr(this.newAddr(this.cpu.getLastPC()));
-        }
-
-        if (this.sMessagePrev && sMessage == this.sMessagePrev) return;
-        this.sMessagePrev = sMessage;
-
-        if (this.bitsMessage & MessagesPDP11.BUFFER) {
-            this.aMessageBuffer.push(sMessage);
-            return;
-        }
-
-        var fRunning;
-        if ((this.bitsMessage & MessagesPDP11.HALT) && this.cpu && (fRunning = this.cpu.isRunning()) || this.isBusy(true)) {
-            this.stopCPU();
-            if (fRunning) sMessage += " (cpu halted)";
-        }
-
-        this.println(sMessage); // + " (" + this.cpu.getCycles() + " cycles)"
-
-        /*
-         * We have no idea what the frequency of println() calls might be; all we know is that they easily
-         * screw up the CPU's careful assumptions about cycles per burst.  So we call yieldCPU() after every
-         * message, to effectively end the current burst and start fresh.
-         *
-         * TODO: See CPUPDP11.calcStartTime() for a discussion of why we might want to call yieldCPU() *before*
-         * we display the message.
-         */
-        if (this.cpu) this.cpu.yieldCPU();
-    };
-
-    /**
-     * init()
-     *
-     * @this {DebuggerPDP11}
-     * @param {boolean} [fAutoStart]
-     */
-    DebuggerPDP11.prototype.init = function(fAutoStart)
-    {
-        this.fInit = true;
-        this.println("Type ? for help with PDPjs Debugger commands");
-        this.updateStatus();
-        if (!fAutoStart) this.setFocus();
-        if (this.sInitCommands) {
-            var sCmds = this.sInitCommands;
-            this.sInitCommands = null;
-            this.doCommands(sCmds);
-        }
-    };
-
-    /**
-     * historyInit(fQuiet)
-     *
-     * This function is intended to be called by the constructor, reset(), addBreakpoint(), findBreakpoint()
-     * and any other function that changes the checksEnabled() criteria used to decide whether checkInstruction()
-     * should be called.
-     *
-     * That is, if the history arrays need to be allocated and haven't already been allocated, then allocate them,
-     * and if the arrays are no longer needed, then deallocate them.
-     *
-     * @this {DebuggerPDP11}
-     * @param {boolean} [fQuiet]
-     */
-    DebuggerPDP11.prototype.historyInit = function(fQuiet)
-    {
-        var i;
-        if (!this.checksEnabled()) {
-            if (this.aInstructionHistory && this.aInstructionHistory.length && !fQuiet) {
-                this.println("instruction history buffer freed");
-            }
-            this.iInstructionHistory = 0;
-            this.aInstructionHistory = [];
-            return;
-        }
-        if (!this.aInstructionHistory || !this.aInstructionHistory.length) {
-            this.aInstructionHistory = new Array(DebuggerPDP11.HISTORY_LIMIT);
-            for (i = 0; i < this.aInstructionHistory.length; i++) {
-                /*
-                 * Preallocate dummy Addr (Array) objects in every history slot, so that
-                 * checkInstruction() doesn't need to call newAddr() on every slot update.
-                 */
-                this.aInstructionHistory[i] = this.newAddr();
-            }
-            this.iInstructionHistory = 0;
-            if (!fQuiet) {
-                this.println("instruction history buffer allocated");
-            }
-        }
-    };
-
-    /**
-     * startCPU(fUpdateFocus, fQuiet)
-     *
-     * @this {DebuggerPDP11}
-     * @param {boolean} [fUpdateFocus] is true to update focus
-     * @param {boolean} [fQuiet]
-     * @return {boolean} true if run request successful, false if not
-     */
-    DebuggerPDP11.prototype.startCPU = function(fUpdateFocus, fQuiet)
-    {
-        if (!this.checkCPU(fQuiet)) return false;
-        this.cpu.startCPU(fUpdateFocus);
-        return true;
-    };
-
-    /**
-     * stepCPU(nCycles, fRegs, fUpdateDisplays)
-     *
-     * @this {DebuggerPDP11}
-     * @param {number} nCycles (0 for one instruction without checking breakpoints)
-     * @param {boolean|null} [fRegs] is true to display registers after step (default is false; use null for previous setting)
-     * @param {boolean} [fUpdateDisplays] is false to disable Computer display updates (default is true)
-     * @return {boolean}
-     */
-    DebuggerPDP11.prototype.stepCPU = function(nCycles, fRegs, fUpdateDisplays)
-    {
-        if (!this.checkCPU()) return false;
-
-        if (fRegs === null) {
-            fRegs = (!this.sTraceCmdPrev || this.sTraceCmdPrev == "tr");
-        }
-
-        this.nCycles = 0;
-
-        if (!nCycles) {
-            /*
-             * When single-stepping, the CPU won't call checkInstruction(), which is good for
-             * avoiding breakpoints, but bad for instruction data collection if checks are enabled.
-             * So we call checkInstruction() ourselves.
-             */
-            if (this.checksEnabled()) this.checkInstruction(this.cpu.getPC(), 0);
-        }
-        /*
-         * For our typically tiny bursts (usually single instructions), mimic what runCPU() does.
-         */
-        try {
-            nCycles = this.cpu.getBurstCycles(nCycles);
-            var nCyclesStep = this.cpu.stepCPU(nCycles);
-            if (nCyclesStep > 0) {
-                this.cpu.updateTimers(nCyclesStep);
-                this.nCycles += nCyclesStep;
-                this.cpu.addCycles(nCyclesStep, true);
-                this.cpu.updateChecksum(nCyclesStep);
-                this.cInstructions++;
-            }
-        }
-        catch(exception) {
-            /*
-             * We assume that any numeric exception was explicitly thrown by the CPU to interrupt the
-             * current instruction.  For all other exceptions, we attempt a stack dump.
-             */
-            if (typeof exception != "number") {
-                var e = exception;
-                this.nCycles = 0;
-                this.cpu.setError(e.stack || e.message);
-            }
-        }
-
-        /*
-         * Because we called cpu.stepCPU() and not cpu.startCPU(), we must nudge the Computer's update code,
-         * and then update our own state.  Normally, the only time fUpdateDisplays will be false is when doTrace()
-         * is calling us in a loop, in which case it will perform its own updateDisplays() when it's done.
-         */
-        if (fUpdateDisplays !== false) {
-            if (this.panel) this.panel.stop();
-            this.cmp.updateDisplays(-1);
-        }
-
-        this.updateStatus(fRegs || false);
-        return (this.nCycles > 0);
-    };
-
-    /**
-     * stopCPU()
-     *
-     * @this {DebuggerPDP11}
-     * @param {boolean} [fComplete]
-     */
-    DebuggerPDP11.prototype.stopCPU = function(fComplete)
-    {
-        if (this.cpu) this.cpu.stopCPU(fComplete);
-    };
-
-    /**
-     * updateStatus(fRegs)
-     *
-     * @this {DebuggerPDP11}
-     * @param {boolean} [fRegs] (default is true)
-     */
-    DebuggerPDP11.prototype.updateStatus = function(fRegs)
-    {
-        if (!this.fInit) return;
-
-        if (fRegs === undefined) fRegs = true;
-
-        var trapStatus = this.cpu.getTrapStatus();
-        if (trapStatus) {
-            var reason = trapStatus >> 8;
-            var sReason = reason < 0? PDP11.REASONS[-reason] : this.toStrBase(reason);
-            this.println("trapped to " + this.toStrBase(trapStatus & 0xff, 1) + " (" + sReason + ")");
-        }
-
-        this.dbgAddrNextCode = this.newAddr(this.cpu.getPC());
-        /*
-         * this.nStep used to be a simple boolean, but now it's 0 (or undefined)
-         * if inactive, 1 if stepping over an instruction without a register dump, or 2
-         * if stepping over an instruction with a register dump.
-         */
-        if (!fRegs || this.nStep == 1)
-            this.doUnassemble();
-        else {
-            this.doRegisters();
-        }
-    };
-
-    /**
-     * checkCPU(fQuiet)
-     *
-     * Make sure the CPU is ready (finished initializing), powered, not already running, and not in an error state.
-     *
-     * @this {DebuggerPDP11}
-     * @param {boolean} [fQuiet]
-     * @return {boolean}
-     */
-    DebuggerPDP11.prototype.checkCPU = function(fQuiet)
-    {
-        if (!this.cpu || !this.cpu.isReady() || !this.cpu.isPowered() || this.cpu.isRunning()) {
-            if (!fQuiet) this.println("cpu busy or unavailable, command ignored");
-            return false;
-        }
-        return !this.cpu.isError();
-    };
-
-    /**
-     * powerUp(data, fRepower)
-     *
-     * @this {DebuggerPDP11}
-     * @param {Object|null} data
-     * @param {boolean} [fRepower]
-     * @return {boolean} true if successful, false if failure
-     */
-    DebuggerPDP11.prototype.powerUp = function(data, fRepower)
-    {
-        if (!fRepower) {
-            /*
-             * Because Debugger save/restore support is somewhat limited (and didn't always exist),
-             * we deviate from the typical save/restore design pattern: instead of reset OR restore,
-             * we always reset and then perform a (potentially limited) restore.
-             */
-            this.reset(true);
-
-            // this.println(data? "resuming" : "powering up");
-
-            if (data && this.restore) {
-                if (!this.restore(data)) return false;
-            }
-        }
-        return true;
-    };
-
-    /**
-     * powerDown(fSave, fShutdown)
-     *
-     * @this {DebuggerPDP11}
-     * @param {boolean} [fSave]
-     * @param {boolean} [fShutdown]
-     * @return {Object|boolean}
-     */
-    DebuggerPDP11.prototype.powerDown = function(fSave, fShutdown)
-    {
-        if (fShutdown) this.println(fSave? "suspending" : "shutting down");
-        return fSave? this.save() : true;
-    };
-
-    /**
-     * reset(fQuiet)
-     *
-     * This is a notification handler, called by the Computer, to inform us of a reset.
-     *
-     * @this {DebuggerPDP11}
-     * @param {boolean} fQuiet (true only when called from our own powerUp handler)
-     */
-    DebuggerPDP11.prototype.reset = function(fQuiet)
-    {
-        this.historyInit();
-        this.cInstructions = this.cInstructionsStart = 0;
-        this.sMessagePrev = null;
-        this.nCycles = 0;
-        this.dbgAddrNextCode = this.newAddr(this.cpu.getPC());
-        /*
-         * fRunning is set by start() and cleared by stop().  In addition, we clear
-         * it here, so that if the CPU is reset while running, we can prevent stop()
-         * from unnecessarily dumping the CPU state.
-         */
-        this.flags.running = false;
-        this.clearTempBreakpoint();
-        if (!fQuiet) this.updateStatus();
-    };
-
-    /**
-     * save()
-     *
-     * This implements (very rudimentary) save support for the Debugger component.
-     *
-     * @this {DebuggerPDP11}
-     * @return {Object}
-     */
-    DebuggerPDP11.prototype.save = function()
-    {
-        var state = new State(this);
-        state.set(0, this.packAddr(this.dbgAddrNextCode));
-        state.set(1, this.packAddr(this.dbgAddrAssemble));
-        state.set(2, [this.aPrevCmds, this.fAssemble, this.bitsMessage]);
-        state.set(3, this.aSymbolTable);
-        return state.data();
-    };
-
-    /**
-     * restore(data)
-     *
-     * This implements (very rudimentary) restore support for the Debugger component.
-     *
-     * @this {DebuggerPDP11}
-     * @param {Object} data
-     * @return {boolean} true if successful, false if failure
-     */
-    DebuggerPDP11.prototype.restore = function(data)
-    {
-        var i = 0;
-        if (data[2] !== undefined) {
-            this.dbgAddrNextCode = this.unpackAddr(data[i++]);
-            this.dbgAddrAssemble = this.unpackAddr(data[i++]);
-            this.aPrevCmds = data[i][0];
-            if (typeof this.aPrevCmds == "string") this.aPrevCmds = [this.aPrevCmds];
-            this.fAssemble = data[i][1];
-            this.bitsMessage |= data[i][2];     // keep our current message bits set, and simply "add" any extra bits defined by the saved state
-        }
-        if (data[3]) this.aSymbolTable = data[3];
-        return true;
-    };
-
-    /**
-     * start(ms, nCycles)
-     *
-     * This is a notification handler, called by the Computer, to inform us the CPU has started.
-     *
-     * @this {DebuggerPDP11}
-     * @param {number} ms
-     * @param {number} nCycles
-     */
-    DebuggerPDP11.prototype.start = function(ms, nCycles)
-    {
-        if (!this.nStep) this.println("running");
-        this.flags.running = true;
-        this.msStart = ms;
-        this.nCyclesStart = nCycles;
-    };
-
-    /**
-     * stop(ms, nCycles)
-     *
-     * This is a notification handler, called by the Computer, to inform us the CPU has now stopped.
-     *
-     * @this {DebuggerPDP11}
-     * @param {number} ms
-     * @param {number} nCycles
-     */
-    DebuggerPDP11.prototype.stop = function(ms, nCycles)
-    {
-        if (this.flags.running) {
-            this.flags.running = false;
-            this.nCycles = nCycles - this.nCyclesStart;
-            if (!this.nStep) {
-                var sStopped = "stopped";
-                if (this.nCycles) {
-                    var msTotal = ms - this.msStart;
-                    var nCyclesPerSecond = (msTotal > 0? Math.round(this.nCycles * 1000 / msTotal) : 0);
-                    sStopped += " (";
-                    if (this.checksEnabled()) {
-                        sStopped += this.cInstructions + " instructions, ";
-                        /*
-                         * $ops displays progress by calculating cInstructions - cInstructionsStart, so before
-                         * zeroing cInstructions, we should subtract cInstructions from cInstructionsStart (since
-                         * we're effectively subtracting cInstructions from cInstructions as well).
-                         */
-                        this.cInstructionsStart -= this.cInstructions;
-                        this.cInstructions = 0;
-                    }
-                    sStopped += this.nCycles + " cycles, " + msTotal + " ms, " + nCyclesPerSecond + " hz)";
-                } else {
-                    if (this.messageEnabled(MessagesPDP11.HALT)) {
-                        /*
-                         * It's possible the user is trying to 'g' past a fault that was blocked by helpCheckFault()
-                         * for the Debugger's benefit; if so, it will continue to be blocked, so try displaying a helpful
-                         * message (another helpful tip would be to simply turn off the "halt" message category).
-                         */
-                        sStopped += " (use the 't' command to execute blocked faults)";
-                    }
-                }
-                this.println(sStopped);
-            }
-            this.updateStatus(true);
-            this.setFocus();
-            this.clearTempBreakpoint(this.cpu.getPC());
-            this.sMessagePrev = null;
-        }
-    };
-
-    /**
-     * checksEnabled(fRelease)
-     *
-     * This "check" function is called by the CPU; we indicate whether or not every instruction needs to be checked.
-     *
-     * Originally, this returned true even when there were only read and/or write breakpoints, but those breakpoints
-     * no longer require the intervention of checkInstruction(); the Bus component automatically swaps in/out appropriate
-     * "checked" Memory access functions to deal with those breakpoints in the corresponding Memory blocks.  So I've
-     * simplified the test below.
-     *
-     * @this {DebuggerPDP11}
-     * @param {boolean} [fRelease] is true for release criteria only; default is false (any criteria)
-     * @return {boolean} true if every instruction needs to pass through checkInstruction(), false if not
-     */
-    DebuggerPDP11.prototype.checksEnabled = function(fRelease)
-    {
-        return ((DEBUG && !fRelease)? true : (this.aBreakExec.length > 1 || !!this.nBreakInstructions));
-    };
-
-    /**
-     * checkInstruction(addr, nState)
-     *
-     * This "check" function is called by the CPU to inform us about the next instruction to be executed,
-     * giving us an opportunity to look for "exec" breakpoints and update opcode instruction history.
-     *
-     * @this {DebuggerPDP11}
-     * @param {number} addr
-     * @param {number} nState is < 0 if stepping, 0 if starting, or > 0 if running
-     * @return {boolean} true if breakpoint hit, false if not
-     */
-    DebuggerPDP11.prototype.checkInstruction = function(addr, nState)
-    {
-        var opCode = -1;
-        var cpu = this.cpu;
-
-        /*
-         * If opHalt() calls our stopInstruction() function, it will effectively rewind the PC back to the HALT,
-         * purely for our debugging benefit, so we must compensate for that here by advancing the PC past the HALT
-         * when the machine starts up again.
-         */
-        if (!nState) {
-            opCode = this.cpu.getWordSafe(addr);
-            /*
-             * We have to be careful about this HALT-skipping code, because as fate would have it, I inadvertently
-             * stopped the following diagnostic with a breakpoint *on* a HALT instruction:
-             *
-             *      .R EKBEE1
-             *      EKBEE1.BIC
-             *
-             *      CEKBEE0 11/70 MEM MGMT
-             *
-             *      CPU UNDER TEST FOUND TO BE A KB11-CM
-             *      bp 033330 hit
-             *      stopped (28339757 instructions, 123994176 cycles, 19177 ms, 6465775 hz)
-             *      R0=140000 R1=033330 R2=100143 R3=133260 R4=000000 R5=177700
-             *      SP=000600 PC=033330 PS=140000 IR=000000 SL=000377 T0 N0 Z0 V0 C0
-             *      033330: 000000                 HALT
-             *
-             * Since we haven't executed the HALT yet, it would be wrong (and would cause a diagnostic failure) to
-             * skip over it.  In this particular case, the PDR for the address of the HALT instruction was invalid,
-             * so the HALT gets fetched but not executed.
-             *
-             * My first thought was that maybe we need to probe the address more thoroughly (getWordSafe() does
-             * not), but it should be sufficient to simply confirm that the PC of the last opcode executed matches
-             * the addr of this HALT.
-             *
-             * Yes, I could save myself this grief by eliminating these PC hacks, both here and in stopInstruction(),
-             * but I still think it's a useful debugging aid.
-             */
-            if (opCode == PDP11.OPCODE.HALT && this.cpu.getLastPC() == addr) {
-                addr = this.cpu.advancePC(2);
-            }
-        }
-
-        /*
-         * If the CPU stopped on a breakpoint, we're not interested in stopping again if the machine is starting.
-         */
-        if (nState > 0) {
-            if (this.nBreakInstructions) {
-                if (!--this.nBreakInstructions) return true;
-            }
-            if (this.checkBreakpoint(addr, 1, this.aBreakExec)) {
-                return true;
-            }
-        }
-
-        /*
-         * The rest of the instruction tracking logic can only be performed if historyInit() has allocated the
-         * necessary data structures.  Note that there is no explicit UI for enabling/disabling history, other than
-         * adding/removing breakpoints, simply because it's breakpoints that trigger the call to checkInstruction();
-         * well, OK, and a few other things now, like enabling MessagesPDP11.INT messages.
-         */
-        if (nState >= 0 && this.aInstructionHistory.length) {
-            this.cInstructions++;
-            if (opCode < 0) {
-                opCode = this.cpu.getWordSafe(addr);
-            }
-            if ((opCode & 0xffff) != PDP11.OPCODE.INVALID) {
-                var dbgAddr = this.aInstructionHistory[this.iInstructionHistory];
-                this.setAddr(dbgAddr, addr);
-                // if (DEBUG) dbgAddr.cycleCount = cpu.getCycles();
-                if (++this.iInstructionHistory == this.aInstructionHistory.length) this.iInstructionHistory = 0;
-            }
-        }
-        return false;
-    };
-
-    /**
-     * stopInstruction(sMessage)
-     *
-     * TODO: Currently, the only way to prevent this call from stopping the CPU is when you're single-stepping.
-     *
-     * @this {DebuggerPDP11}
-     * @param {string} [sMessage]
-     * @return {boolean} true if stopping is enabled, false if not
-     */
-    DebuggerPDP11.prototype.stopInstruction = function(sMessage)
-    {
-        var cpu = this.cpu;
-        if (cpu.isRunning()) {
-            cpu.setPC(this.cpu.getLastPC());
-            if (sMessage) this.println(sMessage);
-            this.stopCPU();
-            /*
-             * TODO: Review the appropriate-ness of throwing a bogus vector number in order to immediately stop
-             * the instruction.  It's handy, but it also means that we no longer actually return true, so callers
-             * of either stopInstruction() or undefinedInstruction() may have unreachable code paths.
-             */
-            throw -1;
-        }
-        return false;
-    };
-
-    /**
-     * undefinedInstruction(opCode)
-     *
-     * @this {DebuggerPDP11}
-     * @param {number} opCode
-     * @return {boolean} true if stopping is enabled, false if not
-     */
-    DebuggerPDP11.prototype.undefinedInstruction = function(opCode)
-    {
-        if (this.messageEnabled(MessagesPDP11.CPU)) {
-            this.printMessage("undefined opcode " + this.toStrBase(opCode), true, true);
-            return this.stopInstruction();  // allow the caller to step over it if they really want a trap generated
-        }
-        return false;
-    };
-
-    /**
-     * checkMemoryRead(addr, nb)
-     *
-     * This "check" function is called by a Memory block to inform us that a memory read occurred, giving us an
-     * opportunity to track the read if we want, and look for a matching "read" breakpoint, if any.
-     *
-     * In the "old days", it would be an error for this call to fail to find a matching Debugger breakpoint, but now
-     * Memory blocks have no idea whether the Debugger or the machine's Debug register(s) triggered this "checked" read.
-     *
-     * If we return true, we "trump" the machine's Debug register(s); false allows normal Debug register processing.
-     *
-     * @this {DebuggerPDP11}
-     * @param {number} addr
-     * @param {number} [nb] (# of bytes; default is 1)
-     * @return {boolean} true if breakpoint hit, false if not
-     */
-    DebuggerPDP11.prototype.checkMemoryRead = function(addr, nb)
-    {
-        if (this.checkBreakpoint(addr, nb || 1, this.aBreakRead)) {
-            this.stopCPU(true);
-            return true;
-        }
-        return false;
-    };
-
-    /**
-     * checkMemoryWrite(addr, nb)
-     *
-     * This "check" function is called by a Memory block to inform us that a memory write occurred, giving us an
-     * opportunity to track the write if we want, and look for a matching "write" breakpoint, if any.
-     *
-     * In the "old days", it would be an error for this call to fail to find a matching Debugger breakpoint, but now
-     * Memory blocks have no idea whether the Debugger or the machine's Debug register(s) triggered this "checked" write.
-     *
-     * If we return true, we "trump" the machine's Debug register(s); false allows normal Debug register processing.
-     *
-     * @this {DebuggerPDP11}
-     * @param {number} addr
-     * @param {number} [nb] (# of bytes; default is 1)
-     * @return {boolean} true if breakpoint hit, false if not
-     */
-    DebuggerPDP11.prototype.checkMemoryWrite = function(addr, nb)
-    {
-        if (this.checkBreakpoint(addr, nb || 1, this.aBreakWrite)) {
-            this.stopCPU(true);
-            return true;
-        }
-        return false;
-    };
-
-    /**
-     * clearBreakpoints()
-     *
-     * @this {DebuggerPDP11}
-     */
-    DebuggerPDP11.prototype.clearBreakpoints = function()
-    {
-        var i, dbgAddr, addr;
-        this.aBreakExec = ["bp"];
-        if (this.aBreakRead !== undefined) {
-            for (i = 1; i < this.aBreakRead.length; i++) {
-                dbgAddr = this.aBreakRead[i];
-                addr = this.getAddr(dbgAddr);
-                if (!dbgAddr.fPhysical) {
-                    this.cpu.removeMemBreak(addr, false);
-                } else {
-                    this.bus.removeMemBreak(addr, false);
-                }
-            }
-        }
-        this.aBreakRead = ["br"];
-        if (this.aBreakWrite !== undefined) {
-            for (i = 1; i < this.aBreakWrite.length; i++) {
-                dbgAddr = this.aBreakWrite[i];
-                addr = this.getAddr(dbgAddr);
-                if (!dbgAddr.fPhysical) {
-                    this.cpu.removeMemBreak(addr, true);
-                } else {
-                    this.bus.removeMemBreak(addr, true);
-                }
-            }
-        }
-        this.aBreakWrite = ["bw"];
-        /*
-         * nSuppressBreaks ensures we can't get into an infinite loop where a breakpoint lookup
-         * requires reading memory that triggers more memory reads, which triggers more breakpoint checks.
-         */
-        this.nSuppressBreaks = 0;
-    };
-
-    /**
-     * addBreakpoint(aBreak, dbgAddr, fTemporary)
-     *
-     * In case you haven't already figured this out, all our breakpoint commands use the address
-     * to identify a breakpoint, not an incrementally assigned breakpoint index like other debuggers;
-     * see doBreak() for details.
-     *
-     * This has a few implications, one being that you CANNOT set more than one kind of breakpoint
-     * on a single address.  In practice, that's rarely a problem, because you can almost always set
-     * a different breakpoint on a neighboring address.
-     *
-     * Also, there is one exception to the "one address, one breakpoint" rule, and that involves
-     * temporary breakpoints (ie, one-time execution breakpoints that either a "p" or "g" command
-     * may create to step over a chunk of code).  Those breakpoints automatically clear themselves,
-     * so there usually isn't any need to refer to them using breakpoint commands.
-     *
-     * TODO: Consider supporting the more "traditional" breakpoint index syntax; the current
-     * address-based syntax was implemented solely for expediency and consistency.  At the same time,
-     * also consider a more WDEB386-like syntax, where "br" is used to set a variety of access-specific
-     * breakpoints, using modifiers like "r1", "r2", "w1", "w2, etc.
-     *
-     * @this {DebuggerPDP11}
-     * @param {Array} aBreak
-     * @param {DbgAddrPDP11} dbgAddr
-     * @param {boolean} [fTemporary]
-     * @return {boolean} true if breakpoint added, false if already exists
-     */
-    DebuggerPDP11.prototype.addBreakpoint = function(aBreak, dbgAddr, fTemporary)
-    {
-        var fSuccess = true;
-
-        // this.nSuppressBreaks++;
-
-        /*
-         * Instead of complaining that a breakpoint already exists (as we used to do), we now
-         * allow breakpoints to be re-set; this makes it easier to update any commands that may
-         * be associated with the breakpoint.
-         *
-         * The only exception: we DO allow a temporary breakpoint at an address where there may
-         * already be a breakpoint, so that you can easily step ("p" or "g") over such addresses.
-         */
-        if (!fTemporary) {
-            this.findBreakpoint(aBreak, dbgAddr, true, false, true);
-        }
-
-        if (aBreak != this.aBreakExec) {
-            var addr = this.getAddr(dbgAddr);
-            if (addr === PDP11.ADDR_INVALID) {
-                this.println("invalid address: " + this.toStrAddr(dbgAddr));
-                fSuccess = false;
-            } else {
-                var fWrite = (aBreak == this.aBreakWrite);
-                /*
-                 * We automatically promote any read/write breakpoint address to fPhysical if it's
-                 * outside the 16-bit virtual address range.
-                 */
-                if (addr > 0xffff) dbgAddr.fPhysical = true;
-                if (!dbgAddr.fPhysical) {
-                    this.cpu.addMemBreak(addr, fWrite);
-                } else {
-                    this.bus.addMemBreak(addr, fWrite);
-                }
-            }
-        }
-
-        if (fSuccess) {
-            aBreak.push(dbgAddr);
-            if (fTemporary) {
-                dbgAddr.fTemporary = true;
-            }
-            else {
-                this.printBreakpoint(aBreak, aBreak.length-1, "set");
-                this.historyInit();
-            }
-        }
-
-        // this.nSuppressBreaks--;
-
-        return fSuccess;
-    };
-
-    /**
-     * findBreakpoint(aBreak, dbgAddr, fRemove, fTemporary, fQuiet)
-     *
-     * @this {DebuggerPDP11}
-     * @param {Array} aBreak
-     * @param {DbgAddrPDP11} dbgAddr
-     * @param {boolean} [fRemove]
-     * @param {boolean} [fTemporary]
-     * @param {boolean} [fQuiet]
-     * @return {boolean} true if found, false if not
-     */
-    DebuggerPDP11.prototype.findBreakpoint = function(aBreak, dbgAddr, fRemove, fTemporary, fQuiet)
-    {
-        var fFound = false;
-        var addr = this.getAddr(dbgAddr);
-        for (var i = 1; i < aBreak.length; i++) {
-            var dbgAddrBreak = aBreak[i];
-            if (addr == this.getAddr(dbgAddrBreak)) {
-                if (!fTemporary || dbgAddrBreak.fTemporary) {
-                    fFound = true;
-                    if (fRemove) {
-                        if (!dbgAddrBreak.fTemporary && !fQuiet) {
-                            this.printBreakpoint(aBreak, i, "cleared");
-                        }
-                        aBreak.splice(i, 1);
-                        if (aBreak != this.aBreakExec) {
-                            var fWrite = (aBreak == this.aBreakWrite);
-                            if (!dbgAddrBreak.fPhysical) {
-                                this.cpu.removeMemBreak(addr, fWrite);
-                            } else {
-                                this.bus.removeMemBreak(addr, fWrite);
-                            }
-                        }
-                        /*
-                         * We'll mirror the logic in addBreakpoint() and leave the history buffer alone if this
-                         * was a temporary breakpoint.
-                         */
-                        if (!dbgAddrBreak.fTemporary) {
-                            this.historyInit();
-                        }
-                        break;
-                    }
-                    if (!fQuiet) this.printBreakpoint(aBreak, i, "exists");
-                    break;
-                }
-            }
-        }
-        return fFound;
-    };
-
-    /**
-     * listBreakpoints(aBreak)
-     *
-     * @this {DebuggerPDP11}
-     * @param {Array} aBreak
-     * @return {number} of breakpoints listed, 0 if none
-     */
-    DebuggerPDP11.prototype.listBreakpoints = function(aBreak)
-    {
-        for (var i = 1; i < aBreak.length; i++) {
-            this.printBreakpoint(aBreak, i);
-        }
-        return aBreak.length - 1;
-    };
-
-    /**
-     * printBreakpoint(aBreak, i, sAction)
-     *
-     * @this {DebuggerPDP11}
-     * @param {Array} aBreak
-     * @param {number} i
-     * @param {string} [sAction]
-     */
-    DebuggerPDP11.prototype.printBreakpoint = function(aBreak, i, sAction)
-    {
-        var dbgAddr = aBreak[i];
-        this.println(aBreak[0] + ' ' + this.toStrAddr(dbgAddr) + (sAction? (' ' + sAction) : (dbgAddr.sCmd? (' "' + dbgAddr.sCmd + '"') : '')));
-    };
-
-    /**
-     * setTempBreakpoint(dbgAddr)
-     *
-     * @this {DebuggerPDP11}
-     * @param {DbgAddrPDP11} dbgAddr of new temp breakpoint
-     */
-    DebuggerPDP11.prototype.setTempBreakpoint = function(dbgAddr)
-    {
-        this.addBreakpoint(this.aBreakExec, dbgAddr, true);
-    };
-
-    /**
-     * clearTempBreakpoint(addr)
-     *
-     * @this {DebuggerPDP11}
-     * @param {number|undefined} [addr] clear all temp breakpoints if no address specified
-     */
-    DebuggerPDP11.prototype.clearTempBreakpoint = function(addr)
-    {
-        if (addr !== undefined) {
-            this.checkBreakpoint(addr, 1, this.aBreakExec, true);
-            this.nStep = 0;
-        } else {
-            for (var i = 1; i < this.aBreakExec.length; i++) {
-                var dbgAddrBreak = this.aBreakExec[i];
-                if (dbgAddrBreak.fTemporary) {
-                    if (!this.findBreakpoint(this.aBreakExec, dbgAddrBreak, true, true)) break;
-                    i = 0;
-                }
-            }
-        }
-    };
-
-    /**
-     * checkBreakpoint(addr, nb, aBreak, fTemporary)
-     *
-     * @this {DebuggerPDP11}
-     * @param {number} addr
-     * @param {number} nb (# of bytes)
-     * @param {Array} aBreak
-     * @param {boolean} [fTemporary]
-     * @return {boolean} true if breakpoint has been hit, false if not
-     */
-    DebuggerPDP11.prototype.checkBreakpoint = function(addr, nb, aBreak, fTemporary)
-    {
-        /*
-         * Time to check for breakpoints; note that this should be done BEFORE updating history data
-         * (see checkInstruction), since we might not actually execute the current instruction.
-         */
-        var fBreak = false;
-
-        if (!this.nSuppressBreaks++) {
-
-            for (var i = 1; !fBreak && i < aBreak.length; i++) {
-
-                var dbgAddrBreak = aBreak[i];
-
-                if (fTemporary && !dbgAddrBreak.fTemporary) continue;
-
-                /*
-                 * If we're checking an execution address, which is always virtual, and virtual
-                 * addresses are always restricted to 16 bits, let's mask the breakpoint address to match
-                 * (the user should know better, but we'll be nice).
-                 */
-                var addrBreak = this.getAddr(dbgAddrBreak) & (aBreak == this.aBreakExec? 0xffff : -1);
-                for (var n = 0; n < nb; n++) {
-
-                    if ((addr + n) != addrBreak) continue;
-
-                    var a;
-                    fBreak = true;
-                    if (dbgAddrBreak.fTemporary) {
-                        this.findBreakpoint(aBreak, dbgAddrBreak, true, true);
-                        fTemporary = true;
-                    }
-                    if (a = dbgAddrBreak.aCmds) {
-                        /*
-                         * When one or more commands are attached to a breakpoint, we don't halt by default.
-                         * Instead, we set fBreak to true only if, at the completion of all the commands, the
-                         * CPU is halted; in other words, you should include "h" as one of the breakpoint commands
-                         * if you want the breakpoint to stop execution.
-                         *
-                         * Another useful command is "if", which will return false if the expression is false,
-                         * at which point we'll jump ahead to the next "else" command, and if there isn't an "else",
-                         * we abort.
-                         */
-                        fBreak = false;
-                        for (var j = 0; j < a.length; j++) {
-                            if (!this.doCommand(a[j], true)) {
-                                if (a[j].indexOf("if")) {
-                                    fBreak = true;          // the failed command wasn't "if", so abort
-                                    break;
-                                }
-                                var k = j + 1;
-                                for (; k < a.length; k++) {
-                                    if (!a[k].indexOf("else")) break;
-                                    j++;
-                                }
-                                if (k == a.length) {        // couldn't find an "else" after the "if", so abort
-                                    fBreak = true;
-                                    break;
-                                }
-                                /*
-                                 * If we're still here, we'll execute the "else" command (which is just a no-op),
-                                 * followed by any remaining commands.
-                                 */
-                            }
-                        }
-                        if (!this.cpu.isRunning()) fBreak = true;
-                    }
-                    if (fBreak) {
-                        if (!fTemporary) this.printBreakpoint(aBreak, i, "hit");
-                        break;
-                    }
-                }
-            }
-        }
-
-        this.nSuppressBreaks--;
-
-        return fBreak;
-    };
-
-    /**
-     * getInstruction(dbgAddr, sComment, nSequence)
-     *
-     * Get the next instruction, by decoding the opcode and any operands.
-     *
-     * @this {DebuggerPDP11}
-     * @param {DbgAddrPDP11} dbgAddr
-     * @param {string} [sComment] is an associated comment
-     * @param {number|null} [nSequence] is an associated sequence number, undefined if none
-     * @return {string} (and dbgAddr is updated to the next instruction)
-     */
-    DebuggerPDP11.prototype.getInstruction = function(dbgAddr, sComment, nSequence)
-    {
-        var opNames = DebuggerPDP11.OPNAMES;
-        var dbgAddrOp = this.newAddr(dbgAddr.addr);
-        var opCode = this.getWord(dbgAddr, 2);
-
-        var opDesc;
-        for (var mask in this.opTable) {
-            var opMasks = this.opTable[mask];
-            opDesc = opMasks[opCode & mask];
-            if (opDesc) break;
-        }
-
-        if (!opDesc) {
-            opDesc = DebuggerPDP11.OPNONE;
-        }
-
-        var opNum = opDesc[0];
-        if (this.aOpReserved.indexOf(opNum) >= 0) {
-            opDesc = DebuggerPDP11.OPNONE;
-            opNum = opDesc[0];
-        }
-
-        var sOperands = "", sTarget = "";
-        var sOpName = opNames[opNum];
-        var cOperands = opDesc.length - 1;
-
-        if (!opNum && !cOperands) {
-            sOperands = this.toStrBase(opCode);
-        }
-
-        for (var iOperand = 1; iOperand <= cOperands; iOperand++) {
-
-            var opType = opDesc[iOperand];
-            if (opType === undefined) continue;
-
-            var sOperand = this.getOperand(opCode, opType, dbgAddr);
-
-            if (!sOperand || !sOperand.length) {
-                sOperands = "INVALID";
-                break;
-            }
-
-            /*
-             * If getOperand() returns an Array rather than a string, then the first element is the original
-             * operand, and the second element contains additional information (eg, the target) of the operand.
-             */
-            if (typeof sOperand != "string") {
-                sTarget = sOperand[1];
-                sOperand = sOperand[0];
-            }
-
-            if (sOperands.length > 0) sOperands += ',';
-            sOperands += (sOperand || "???");
-        }
-
-        var sOpCodes = "";
-        var sLine = this.toStrAddr(dbgAddrOp) + ":";
-        if (dbgAddrOp.addr !== PDP11.ADDR_INVALID && dbgAddr.addr !== PDP11.ADDR_INVALID) {
-            do {
-                sOpCodes += ' ' + this.toStrBase(this.getWord(dbgAddrOp, 2));
-                if (dbgAddrOp.addr == null) break;
-            } while (dbgAddrOp.addr != dbgAddr.addr);
-        }
-
-        sLine += str.pad(sOpCodes, 24);
-        sLine += str.pad(sOpName, 5);
-        if (sOperands) sLine += ' ' + sOperands;
-
-        if (sComment || sTarget) {
-            sLine = str.pad(sLine, 60) + ';' + (sComment || "");
-            if (!this.cpu.flags.checksum) {
-                sLine += (nSequence != null? '=' + nSequence.toString() : "");
-            } else {
-                var nCycles = this.cpu.getCycles();
-                sLine += "cycles=" + nCycles.toString() + " cs=" + str.toHex(this.cpu.nChecksum);
-            }
-            if (sTarget) {
-                if (sLine.slice(-1) != ';') sLine += ' ';
-                sLine += sTarget;
-            }
-        }
-        return sLine;
-    };
-
-    /**
-     * getOperand(opCode, opType, dbgAddr)
-     *
-     * If getOperand() returns an Array rather than a string, then the first element is the original
-     * operand, and the second element is a comment containing additional information (eg, the target)
-     * of the operand.
-     *
-     * @this {DebuggerPDP11}
-     * @param {number} opCode
-     * @param {number} opType
-     * @param {DbgAddrPDP11} dbgAddr
-     * @return {string|Array.<string>}
-     */
-    DebuggerPDP11.prototype.getOperand = function(opCode, opType, dbgAddr)
-    {
-        var sOperand = "", disp, addr;
-        /*
-         * Take care of OP_OTHER opcodes first; then all we'll have to worry about
-         * next are OP_SRC or OP_DST opcodes.
-         */
-        var opTypeOther = opType & DebuggerPDP11.OP_OTHER;
-        if (opTypeOther == DebuggerPDP11.OP_BRANCH) {
-            disp = ((opCode & 0xff) << 24) >> 23;
-            addr = (dbgAddr.addr + disp) & 0xffff;
-            sOperand = this.toStrBase(addr);
-        }
-        else if (opTypeOther == DebuggerPDP11.OP_DSTOFF) {
-            disp = (opCode & 0x3f) << 1;
-            addr = (dbgAddr.addr - disp) & 0xffff;
-            sOperand = this.toStrBase(addr);
-        }
-        else if (opTypeOther == DebuggerPDP11.OP_DSTNUM3) {
-            disp = (opCode & 0x07);
-            sOperand = this.toStrBase(disp, 1);
-        }
-        else if (opTypeOther == DebuggerPDP11.OP_DSTNUM6) {
-            disp = (opCode & 0x3f);
-            sOperand = this.toStrBase(disp, 1);
-        }
-        else if (opTypeOther == DebuggerPDP11.OP_DSTNUM8) {
-            disp = (opCode & 0xff);
-            sOperand = this.toStrBase(disp, 1);
-        }
-        else {
-            /*
-             * Isolate all OP_SRC or OP_DST bits from opcode in the opMode variable.
-             */
-            var opMode = opCode & opType;
-
-            /*
-             * Convert OP_SRC bits into OP_DST bits, since they use the same format.
-             */
-            if (opType & DebuggerPDP11.OP_SRC) {
-                opMode >>= 6;
-                opType >>= 6;
-            }
-            if (opType & DebuggerPDP11.OP_DST) {
-                var wIndex;
-                var sTarget = null;
-                var reg = opMode & DebuggerPDP11.OP_DSTREG;
-                /*
-                 * Note that opcodes that specify only REG bits in the opType mask (ie, no MOD bits)
-                 * will automatically default to OPMODE_REG below.
-                 */
-                switch((opMode & DebuggerPDP11.OP_DSTMODE)) {
-
-                case PDP11.OPMODE.REG:                  // 0x0: REGISTER
-                    sOperand = this.getRegName(reg);
-                    break;
-
-                case PDP11.OPMODE.REGD:                 // 0x1: REGISTER DEFERRED
-                    sOperand = '@' + this.getRegName(reg);
-                    sTarget = this.getTarget(this.cpu.regsGen[reg]);
-                    break;
-
-                case PDP11.OPMODE.POSTINC:              // 0x2: POST-INCREMENT
-                    if (reg < 7) {
-                        sOperand = '(' + this.getRegName(reg) + ")+";
-                    } else {
-                        /*
-                         * When using R7 (aka PC), POST-INCREMENT is known as IMMEDIATE
-                         */
-                        wIndex = this.getWord(dbgAddr, 2);
-                        sOperand = '#' + this.toStrBase(wIndex, 0, true);
-                    }
-                    break;
-
-                case PDP11.OPMODE.POSTINCD:             // 0x3: POST-INCREMENT DEFERRED
-                    if (reg < 7) {
-                        sOperand = "@(" + this.getRegName(reg) + ")+";
-                    } else {
-                        /*
-                         * When using R7 (aka PC), POST-INCREMENT DEFERRED is known as ABSOLUTE
-                         */
-                        wIndex = this.getWord(dbgAddr, 2);
-                        sOperand = "@#" + this.toStrBase(wIndex, 0, true);
-                        sTarget = this.getTarget(wIndex);
-                    }
-                    break;
-
-                case PDP11.OPMODE.PREDEC:               // 0x4: PRE-DECREMENT
-                    sOperand = "-(" + this.getRegName(reg) + ")";
-                    break;
-
-                case PDP11.OPMODE.PREDECD:              // 0x5: PRE-DECREMENT DEFERRED
-                    sOperand = "@-(" + this.getRegName(reg) + ")";
-                    break;
-
-                case PDP11.OPMODE.INDEX:                // 0x6: INDEX
-                    wIndex = this.getWord(dbgAddr, 2);
-                    sOperand = this.toStrBase(wIndex, 0, true) + '(' + this.getRegName(reg) + ')';
-                    if (reg == 7) {
-                        /*
-                         * When using R7 (aka PC), INDEX is known as RELATIVE.  However, instead of displaying
-                         * such an instruction like this:
-                         *
-                         *  016156: 010167 001300          MOV   R1,1300(PC)            ; @017462
-                         *
-                         * with the effective address display to the far right, let's display it like this instead:
-                         *
-                         *  016156: 010167 001300          MOV   R1,017462
-                         *
-                         * because you can still clearly see PC-relative offset (eg, 001300) as part of the disassembly.
-                         *
-                         *      sOperand = [sOperand, this.toStrBase((wIndex + dbgAddr.addr) & 0xffff)];
-                         */
-                        sOperand = this.toStrBase(wIndex = (wIndex + dbgAddr.addr) & 0xffff);
-                        sTarget = this.getTarget(wIndex);
-                    }
-                    break;
-
-                case PDP11.OPMODE.INDEXD:               // 0x7: INDEX DEFERRED
-                    wIndex = this.getWord(dbgAddr, 2);
-                    sOperand = '@' + this.toStrBase(wIndex) + '(' + this.getRegName(reg) + ')';
-                    if (reg == 7) {
-                        /*
-                         * When using R7 (aka PC), INDEX DEFERRED is known as RELATIVE DEFERRED.  And for the same
-                         * reasons articulated above, we now display the effective address inline.
-                         *
-                         *      sOperand = [sOperand, this.toStrBase((wIndex + dbgAddr.addr) & 0xffff)];
-                         */
-                        sOperand = '@' + this.toStrBase(wIndex = (wIndex + dbgAddr.addr) & 0xffff);
-                        sTarget = this.getTarget(this.cpu.getWordSafe(wIndex));
-                    }
-                    break;
-
-                default:
-                    this.assert(false);
-                    break;
-                }
-
-                if (sTarget) sOperand = [sOperand, sTarget];
-            }
-            else {
-                this.assert(false);
-            }
-        }
-        return sOperand;
-    };
-
-    /**
-     * getTarget(addr)
-     *
-     * @this {DebuggerPDP11}
-     * @param {number} addr
-     * @return {string|null}
-     */
-    DebuggerPDP11.prototype.getTarget = function(addr)
-    {
-        var sTarget = null;
-        var a = this.cpu.getAddrInfo(addr);
-        var addrPhysical = a[0];
-        if (addrPhysical >= this.cpu.addrIOPage && addrPhysical < this.bus.addrIOPage) {
-            addrPhysical = (addrPhysical - this.cpu.addrIOPage) + this.bus.addrIOPage;
-        }
-        return this.bus.getAddrInfo(addrPhysical);
-    };
-
-    /**
-     * parseInstruction(sOp, sOperand, addr)
-     *
-     * TODO: Unimplemented.  See parseInstruction() in modules/c1pjs/lib/debugger.js for a sample implementation.
-     *
-     * @this {DebuggerPDP11}
-     * @param {string} sOp
-     * @param {string|undefined} sOperand
-     * @param {DbgAddrPDP11} dbgAddr of memory where this instruction is being assembled
-     * @return {Array.<number>} of opcode bytes; if the instruction can't be parsed, the array will be empty
-     */
-    DebuggerPDP11.prototype.parseInstruction = function(sOp, sOperand, dbgAddr)
-    {
-        var aOpBytes = [];
-        this.println("not supported yet");
-        return aOpBytes;
-    };
-
-    /**
-     * getFlagOutput(sFlag)
-     *
-     * @this {DebuggerPDP11}
-     * @param {string} sFlag
-     * @return {string} value of flag
-     */
-    DebuggerPDP11.prototype.getFlagOutput = function(sFlag)
-    {
-        var b;
-        switch (sFlag) {
-        case 'N':
-            b = this.cpu.getNF();
-            break;
-        case 'Z':
-            b = this.cpu.getZF();
-            break;
-        case 'V':
-            b = this.cpu.getVF();
-            break;
-        case 'C':
-            b = this.cpu.getCF();
-            break;
-        default:
-            b = 0;
-            break;
-        }
-        return sFlag.charAt(0) + (b? '1' : '0') + ' ';
-    };
-
-    /**
-     * getRegOutput(iReg)
-     *
-     * @this {DebuggerPDP11}
-     * @param {number} iReg
-     * @return {string}
-     */
-    DebuggerPDP11.prototype.getRegOutput = function(iReg)
-    {
-        var sReg = "";
-        var cpu = this.cpu;
-
-        if (iReg < 8) {
-            sReg = this.getRegName(iReg);
-            sReg += '=' + this.toStrBase(cpu.regsGen[iReg]);
-        }
-        else if (iReg < 13) {
-            sReg = "A" + (iReg - 8) + '=' + this.toStrBase(cpu.regsAlt[iReg - 8]);
-        }
-        else if (iReg >= 16 && iReg < 20) {
-            sReg = "S" + (iReg - 16) + '=' + this.toStrBase(cpu.regsAltStack[iReg - 16]);
-        }
-        else {
-            switch(iReg) {
-            case DebuggerPDP11.REG_PS:
-                sReg = "PS=" + this.toStrBase(cpu.getPSW());
-                break;
-            case DebuggerPDP11.REG_PI:
-                sReg = "PI=" + this.toStrBase(cpu.getPIR());
-                break;
-            case DebuggerPDP11.REG_ER:
-                sReg = "ER=" + this.toStrBase(cpu.regErr);
-                break;
-            case DebuggerPDP11.REG_SL:
-                sReg = "SL=" + this.toStrBase(cpu.getSLR());
-                break;
-            case DebuggerPDP11.REG_M0:
-                sReg = "M0=" + this.toStrBase(cpu.getMMR0());
-                break;
-            case DebuggerPDP11.REG_M1:
-                sReg = "M1=" + this.toStrBase(cpu.getMMR1());
-                break;
-            case DebuggerPDP11.REG_M2:
-                sReg = "M2=" + this.toStrBase(cpu.getMMR2());
-                break;
-            case DebuggerPDP11.REG_M3:
-                sReg = "M3=" + this.toStrBase(cpu.getMMR3());
-                break;
-            case DebuggerPDP11.REG_AR:
-                if (this.panel) {
-                    sReg = "AR=" + this.toStrBase(this.panel.getAR(), 3);
-                }
-                break;
-            case DebuggerPDP11.REG_DR:
-                if (this.panel) {
-                    sReg = "DR=" + this.toStrBase(this.panel.getDR());
-                }
-                break;
-            case DebuggerPDP11.REG_SR:
-                if (this.panel && this.panel.hasSwitches()) {
-                    sReg = "SR=" + this.toStrBase(this.panel.getSR(), 3);
-                }
-                break;
-            }
-        }
-        if (sReg) sReg += ' ';
-        return sReg;
-    };
-
-    /**
-     * getMiscDump()
-     *
-     * Sample register dump:
-     *
-     *      M0=xxxxxx M1=xxxxxx M2=xxxxxx M3=xxxxxx ER=xxxxxx
-     *
-     * @this {DebuggerPDP11}
-     * @return {string}
-     */
-    DebuggerPDP11.prototype.getMiscDump = function()
-    {
-        var sDump = "";
-        sDump += this.getRegOutput(DebuggerPDP11.REG_M0) + this.getRegOutput(DebuggerPDP11.REG_M1);
-        sDump += this.getRegOutput(DebuggerPDP11.REG_M2) + this.getRegOutput(DebuggerPDP11.REG_M3) + this.getRegOutput(DebuggerPDP11.REG_ER);
-        sDump += '\n';
-        sDump += this.getRegOutput(DebuggerPDP11.REG_SR) + this.getRegOutput(DebuggerPDP11.REG_AR) + this.getRegOutput(DebuggerPDP11.REG_DR);
-        return sDump;
-    };
-
-    /**
-     * getRegDump(fMisc)
-     *
-     * Sample register dump:
-     *
-     *      R0=xxxxxx R1=xxxxxx R2=xxxxxx R3=xxxxxx R4=xxxxxx R5=xxxxxx
-     *      SP=xxxxxx PC=xxxxxx PS=xxxxxx PI=xxxxxx SL=xxxxxx T0 N0 Z0 V0 C0
-     *
-     * @this {DebuggerPDP11}
-     * @param {boolean} [fMisc] (true to include misc registers)
-     * @return {string}
-     */
-    DebuggerPDP11.prototype.getRegDump = function(fMisc)
-    {
-        var i;
-        var sDump = "";
-        for (i = 0; i < PDP11.REG.SP; i++) {
-            sDump += this.getRegOutput(i);
-        }
-        sDump += '\n';
-        sDump += this.getRegOutput(PDP11.REG.SP) + this.getRegOutput(PDP11.REG.PC);
-        sDump += this.getRegOutput(DebuggerPDP11.REG_PS) + this.getRegOutput(DebuggerPDP11.REG_PI) + this.getRegOutput(DebuggerPDP11.REG_SL);
-        sDump += this.getFlagOutput('T') + this.getFlagOutput('N') + this.getFlagOutput('Z') + this.getFlagOutput('V') + this.getFlagOutput('C');
-        if (fMisc) sDump += '\n' + this.getMiscDump();
-        return sDump;
-    };
-
-    /**
-     * comparePairs(p1, p2)
-     *
-     * @this {DebuggerPDP11}
-     * @param {number|string|Array|Object} p1
-     * @param {number|string|Array|Object} p2
-     * @return {number}
-     */
-    DebuggerPDP11.prototype.comparePairs = function(p1, p2)
-    {
-        return p1[0] > p2[0]? 1 : p1[0] < p2[0]? -1 : 0;
-    };
-
-    /**
-     * addSymbols(sModule, addr, len, aSymbols)
-     *
-     * As filedump.js (formerly convrom.php) explains, aSymbols is a JSON-encoded object whose properties consist
-     * of all the symbols (in upper-case), and the values of those properties are objects containing any or all of
-     * the following properties:
-     *
-     *      'v': the value of an absolute (unsized) value
-     *      'b': either 1, 2, 4 or undefined if an unsized value
-     *      's': either a hard-coded segment or undefined
-     *      'o': the offset of the symbol within the associated address space
-     *      'l': the original-case version of the symbol, present only if it wasn't originally upper-case
-     *      'a': annotation for the specified offset; eg, the original assembly language, with optional comment
-     *
-     * To that list of properties, we also add:
-     *
-     *      'p': the physical address (calculated whenever both 's' and 'o' properties are defined)
-     *
-     * Note that values for any 'v', 'b', 's' and 'o' properties are unquoted decimal values, and the values
-     * for any 'l' or 'a' properties are quoted strings. Also, if double-quotes were used in any of the original
-     * annotation ('a') values, they will have been converted to two single-quotes, so we're responsible for
-     * converting them back to individual double-quotes.
-     *
-     * For example:
-     *      {
-     *          'HF_PORT': {
-     *              'v':800
-     *          },
-     *          'HDISK_INT': {
-     *              'b':4, 's':0, 'o':52
-     *          },
-     *          'ORG_VECTOR': {
-     *              'b':4, 's':0, 'o':76
-     *          },
-     *          'CMD_BLOCK': {
-     *              'b':1, 's':64, 'o':66
-     *          },
-     *          'DISK_SETUP': {
-     *              'o':3
-     *          },
-     *          '.40': {
-     *              'o':40, 'a':"MOV AX,WORD PTR ORG_VECTOR ;GET DISKETTE VECTOR"
-     *          }
-     *      }
-     *
-     * If a symbol only has an offset, then that offset value can be assigned to the symbol property directly:
-     *
-     *          'DISK_SETUP': 3
-     *
-     * The last property is an example of an "anonymous" entry, for offsets where there is no associated symbol.
-     * Such entries are identified by a period followed by a unique number (usually the offset of the entry), and
-     * they usually only contain offset ('o') and annotation ('a') properties.  I could eliminate the leading
-     * period, but it offers a very convenient way of quickly discriminating among genuine vs. anonymous symbols.
-     *
-     * We add all these entries to our internal symbol table, which is an array of 4-element arrays, each of which
-     * look like:
-     *
-     *      [addr, len, aSymbols, aOffsets]
-     *
-     * There are two basic symbol operations: findSymbol(), which takes an address and finds the symbol, if any,
-     * at that address, and findSymbolAddr(), which takes a string and attempts to match it to a non-anonymous
-     * symbol with a matching offset ('o') property.
-     *
-     * To implement findSymbol() efficiently, addSymbols() creates an array of [offset, sSymbol] pairs
-     * (aOffsets), one pair for each symbol that corresponds to an offset within the specified address space.
-     *
-     * We guarantee the elements of aOffsets are in offset order, because we build it using binaryInsert();
-     * it's quite likely that the MAP file already ordered all its symbols in offset order, but since they're
-     * hand-edited files, we can't assume that, and we need to ensure that findSymbol()'s binarySearch() operates
-     * properly.
-     *
-     * @this {DebuggerPDP11}
-     * @param {string|null} sModule
-     * @param {number|null} addr (physical address where the symbols are located, if the memory is physical; eg, ROM)
-     * @param {number} len (the size of the region, in bytes)
-     * @param {Object} aSymbols (collection of symbols in this group; the format of this collection is described below)
-     */
-    DebuggerPDP11.prototype.addSymbols = function(sModule, addr, len, aSymbols)
-    {
-        var dbgAddr = {};
-        var aOffsets = [];
-        for (var sSymbol in aSymbols) {
-            var symbol = aSymbols[sSymbol];
-            if (typeof symbol == "number") {
-                aSymbols[sSymbol] = symbol = {'o': symbol};
-            }
-            var offSymbol = symbol['o'];
-            var sAnnotation = symbol['a'];
-            if (offSymbol !== undefined) {
-                usr.binaryInsert(aOffsets, [offSymbol >>> 0, sSymbol], this.comparePairs);
-            }
-            if (sAnnotation) symbol['a'] = sAnnotation.replace(/''/g, "\"");
-        }
-        var symbolTable = {
-            sModule: sModule,
-            addr: addr,
-            len: len,
-            aSymbols: aSymbols,
-            aOffsets: aOffsets
-        };
-        this.aSymbolTable.push(symbolTable);
-    };
-
-    /**
-     * dumpSymbols()
-     *
-     * TODO: Add "numerical" and "alphabetical" dump options. This is simply dumping them in whatever
-     * order they appeared in the original MAP file.
-     *
-     * @this {DebuggerPDP11}
-     */
-    DebuggerPDP11.prototype.dumpSymbols = function()
-    {
-        for (var iTable = 0; iTable < this.aSymbolTable.length; iTable++) {
-            var symbolTable = this.aSymbolTable[iTable];
-            for (var sSymbol in symbolTable.aSymbols) {
-                if (sSymbol.charAt(0) == '.') continue;
-                var symbol = symbolTable.aSymbols[sSymbol];
-                var offSymbol = symbol['o'];
-                if (offSymbol === undefined) continue;
-                var sSymbolOrig = symbolTable.aSymbols[sSymbol]['l'];
-                if (sSymbolOrig) sSymbol = sSymbolOrig;
-                this.println(this.toStrOffset(offSymbol) + ' ' + sSymbol);
-            }
-        }
-    };
-
-    /**
-     * findSymbol(dbgAddr, fNearest)
-     *
-     * Search aSymbolTable for dbgAddr, and return an Array for the corresponding symbol (empty if not found).
-     *
-     * If fNearest is true, and no exact match was found, then the Array returned will contain TWO sets of
-     * entries: [0]-[3] will refer to closest preceding symbol, and [4]-[7] will refer to the closest subsequent symbol.
-     *
-     * @this {DebuggerPDP11}
-     * @param {DbgAddrPDP11} dbgAddr
-     * @param {boolean} [fNearest]
-     * @return {Array} where [0] == symbol name, [1] == symbol value, [2] == any annotation, and [3] == any associated comment
-     */
-    DebuggerPDP11.prototype.findSymbol = function(dbgAddr, fNearest)
-    {
-        var aSymbol = [];
-        var addrSymbol = this.getAddr(dbgAddr) >>> 0;
-        for (var iTable = 0; iTable < this.aSymbolTable.length; iTable++) {
-            var symbolTable = this.aSymbolTable[iTable];
-            var addr = symbolTable.addr >>> 0;
-            var len = symbolTable.len;
-            if (addrSymbol >= addr && addrSymbol < addr + len) {
-                var offSymbol = addrSymbol - addr;
-                var result = usr.binarySearch(symbolTable.aOffsets, [offSymbol], this.comparePairs);
-                if (result >= 0) {
-                    this.returnSymbol(iTable, result, aSymbol);
-                }
-                else if (fNearest) {
-                    result = ~result;
-                    this.returnSymbol(iTable, result-1, aSymbol);
-                    this.returnSymbol(iTable, result, aSymbol);
-                }
-                break;
-            }
-        }
-        return aSymbol;
-    };
-
-    /**
-     * findSymbolAddr(sSymbol)
-     *
-     * Search our symbol tables for sSymbol, and if found, return a dbgAddr (same as parseAddr()).
-     *
-     * @this {DebuggerPDP11}
-     * @param {string} sSymbol
-     * @return {DbgAddrPDP11|undefined}
-     */
-    DebuggerPDP11.prototype.findSymbolAddr = function(sSymbol)
-    {
-        var dbgAddr;
-        var offSymbol = this.bus.getAddrByName(sSymbol);
-
-        if (offSymbol == null && sSymbol.match(/^[a-z_][a-z0-9_]*$/i)) {
-            var sUpperCase = sSymbol.toUpperCase();
-            for (var iTable = 0; iTable < this.aSymbolTable.length; iTable++) {
-                var symbolTable = this.aSymbolTable[iTable];
-                var symbol = symbolTable.aSymbols[sUpperCase];
-                if (symbol != null) {
-                    offSymbol = symbol['o'];
-                    /*
-                     * If the symbol matched but there's no 'o' offset (ie, it wasn't for an address), there's
-                     * no point looking any farther, since each symbol appears only once.
-                     *
-                     * NOTE: We assume that every ROM is ORG'ed at 0x0000, and therefore unless the symbol has an
-                     * explicitly-defined segment, we return the segment associated with the entire group; for a ROM,
-                     * that segment is normally "addrROM >>> 4".  Down the road, we may want/need to support a special
-                     * symbol entry (eg, ".ORG") that defines an alternate origin.
-                     */
-                    break;
-                }
-            }
-        }
-        if (offSymbol != null) {
-            dbgAddr = this.newAddr(offSymbol);
-        }
-        return dbgAddr;
-    };
-
-    /**
-     * returnSymbol(iTable, iOffset, aSymbol)
-     *
-     * Helper function for findSymbol().
-     *
-     * @param {number} iTable
-     * @param {number} iOffset
-     * @param {Array} aSymbol is updated with the specified symbol, if it exists
-     */
-    DebuggerPDP11.prototype.returnSymbol = function(iTable, iOffset, aSymbol)
-    {
-        var symbol = {};
-        var aOffsets = this.aSymbolTable[iTable].aOffsets;
-        var offset = 0, sSymbol = null;
-        if (iOffset >= 0 && iOffset < aOffsets.length) {
-            offset = aOffsets[iOffset][0];
-            sSymbol = aOffsets[iOffset][1];
-        }
-        if (sSymbol) {
-            symbol = this.aSymbolTable[iTable].aSymbols[sSymbol];
-            sSymbol = (sSymbol.charAt(0) == '.'? null : (symbol['l'] || sSymbol));
-        }
-        aSymbol.push(sSymbol);
-        aSymbol.push(offset);
-        aSymbol.push(symbol['a']);
-        aSymbol.push(symbol['c']);
-    };
-
-    /**
-     * doHelp()
-     *
-     * @this {DebuggerPDP11}
-     */
-    DebuggerPDP11.prototype.doHelp = function()
-    {
-        var s = "commands:";
-        for (var sCommand in DebuggerPDP11.COMMANDS) {
-            s += '\n' + str.pad(sCommand, 9) + DebuggerPDP11.COMMANDS[sCommand];
-        }
-        if (!this.checksEnabled()) s += "\nnote: history disabled if no exec breakpoints";
-        this.println(s);
-    };
-
-    /**
-     * doAssemble(asArgs)
-     *
-     * This always receives the complete argument array, where the order of the arguments is:
-     *
-     *      [0]: the assemble command (assumed to be "a")
-     *      [1]: the target address (eg, "200")
-     *      [2]: the operation code, aka instruction name (eg, "adc")
-     *      [3]: the operation mode operand, if any (eg, "14", "[1234]", etc)
-     *
-     * The Debugger enters "assemble mode" whenever only the first (or first and second) arguments are present.
-     * As long as "assemble mode is active, the user can omit the first two arguments on all later assemble commands
-     * until "assemble mode" is cancelled with an empty command line; the command processor automatically prepends "a"
-     * and the next available target address to the argument array.
-     *
-     * Entering "assemble mode" is optional; one could enter a series of fully-qualified assemble commands; eg:
-     *
-     *      a ff00 cld
-     *      a ff01 ldx 28
-     *      ...
-     *
-     * without ever entering "assemble mode", but of course, that requires more typing and doesn't take advantage
-     * of automatic target address advancement (see dbgAddrAssemble).
-     *
-     * NOTE: As the previous example implies, you can even assemble new instructions into ROM address space;
-     * as our setByte() function explains, the ROM write-notification handlers only refuse writes from the CPU.
-     *
-     * @this {DebuggerPDP11}
-     * @param {Array.<string>} asArgs is the complete argument array, beginning with the "a" command in asArgs[0]
-     */
-    DebuggerPDP11.prototype.doAssemble = function(asArgs)
-    {
-        var dbgAddr = this.parseAddr(asArgs[1], true);
-        if (!dbgAddr) return;
-
-        this.dbgAddrAssemble = dbgAddr;
-        if (asArgs[2] === undefined) {
-            this.println("begin assemble at " + this.toStrAddr(dbgAddr));
-            this.fAssemble = true;
-            this.cmp.updateDisplays();
-            return;
-        }
-
-        var aOpBytes = this.parseInstruction(asArgs[2], asArgs[3], dbgAddr);
-        if (aOpBytes.length) {
-            for (var i = 0; i < aOpBytes.length; i++) {
-                this.setByte(dbgAddr, aOpBytes[i], 1);
-            }
-            /*
-             * Since getInstruction() also updates the specified address, dbgAddrAssemble is automatically advanced.
-             */
-            this.println(this.getInstruction(this.dbgAddrAssemble));
-        }
-    };
-
-    /**
-     * doBreak(sCmd, sAddr, sOptions)
-     *
-     * As the "help" output below indicates, the following breakpoint commands are supported:
-     *
-     *      bp [a]  set exec breakpoint on linear addr [a]
-     *      br [a]  set read breakpoint on linear addr [a]
-     *      bw [a]  set write breakpoint on linear addr [a]
-     *      bc [a]  clear breakpoint on linear addr [a] (use "*" for all breakpoints)
-     *      bl      list breakpoints
-     *
-     * to which we have recently added the following I/O breakpoint commands:
-     *
-     *      bi [p]  toggle input breakpoint on port [p] (use "*" for all input ports)
-     *      bo [p]  toggle output breakpoint on port [p] (use "*" for all output ports)
-     *
-     * These two new commands operate as toggles so that if "*" is used to trap all input (or output),
-     * you can also use these commands to NOT trap specific ports.
-     *
-     *      bn [n]  break after [n] instructions
-     *
-     * TODO: Update the "bl" command to include any/all I/O breakpoints, and the "bc" command to
-     * clear them.  Because "bi" and "bo" commands are piggy-backing on Bus functions, those breakpoints
-     * are currently outside the realm of what the "bl" and "bc" commands are aware of.
-     *
-     * @this {DebuggerPDP11}
-     * @param {string} sCmd
-     * @param {string|undefined} [sAddr]
-     * @param {string} [sOptions] (the rest of the breakpoint command-line)
-     */
-    DebuggerPDP11.prototype.doBreak = function(sCmd, sAddr, sOptions)
-    {
-        if (sAddr == '?') {
-            this.println("breakpoint commands:");
-            this.println("\tbp [#]\tset exec breakpoint at addr #");
-            this.println("\tbr [#]\tset read breakpoint at addr #");
-            this.println("\tbw [#]\tset write breakpoint at addr #");
-            this.println("\tbc [#]\tclear breakpoint at addr #");
-            this.println("\tbl\tlist all breakpoints");
-            this.println("\tbn [#]\tbreak after # instruction(s)");
-            return;
-        }
-
-        var sParm = sCmd.charAt(1);
-        if (sParm == 'l') {
-            var cBreaks = 0;
-            cBreaks += this.listBreakpoints(this.aBreakExec);
-            cBreaks += this.listBreakpoints(this.aBreakRead);
-            cBreaks += this.listBreakpoints(this.aBreakWrite);
-            if (!cBreaks) this.println("no breakpoints");
-            return;
-        }
-
-        if (sParm == 'n') {
-            this.nBreakInstructions = this.parseValue(sAddr);
-            this.println("break after " + this.nBreakInstructions + " instruction(s)");
-            return;
-        }
-
-        if (sAddr === undefined) {
-            this.println("missing breakpoint address");
-            return;
-        }
-
-        var dbgAddr = this.newAddr();
-        if (sAddr != '*') {
-            dbgAddr = this.parseAddr(sAddr, true, true);
-            if (!dbgAddr) return;
-        }
-
-        if (sParm == 'c') {
-            if (dbgAddr.addr == null) {
-                this.clearBreakpoints();
-                this.println("all breakpoints cleared");
-                return;
-            }
-            if (this.findBreakpoint(this.aBreakExec, dbgAddr, true))
-                return;
-            if (this.findBreakpoint(this.aBreakRead, dbgAddr, true))
-                return;
-            if (this.findBreakpoint(this.aBreakWrite, dbgAddr, true))
-                return;
-            this.println("breakpoint missing: " + this.toStrAddr(dbgAddr));
-            return;
-        }
-
-        if (dbgAddr.addr == null) return;
-
-        this.parseAddrOptions(dbgAddr, sOptions);
-
-        if (sParm == 'p') {
-            this.addBreakpoint(this.aBreakExec, dbgAddr);
-            return;
-        }
-        if (sParm == 'r') {
-            this.addBreakpoint(this.aBreakRead, dbgAddr);
-            return;
-        }
-        if (sParm == 'w') {
-            this.addBreakpoint(this.aBreakWrite, dbgAddr);
-            return;
-        }
-        this.println("unknown breakpoint command: " + sParm);
-    };
-
-    /**
-     * doClear(sCmd)
-     *
-     * @this {DebuggerPDP11}
-     * @param {string} [sCmd] (eg, "cls" or "clear")
-     */
-    DebuggerPDP11.prototype.doClear = function(sCmd)
-    {
-        /*
-         * TODO: There should be a clear() component method that the Control Panel overrides to perform this function.
-         */
-        if (this.controlPrint) this.controlPrint.value = "";
-    };
-
-    /**
-     * doDump(asArgs)
-     *
-     * The length parameter is interpreted as a number of bytes (or words, or dwords) to dump,
-     * and it is interpreted using the current base.
-     *
-     * @this {DebuggerPDP11}
-     * @param {Array.<string>} asArgs (formerly sCmd, [sAddr], [sLen] and [sBytes])
-     */
-    DebuggerPDP11.prototype.doDump = function(asArgs)
-    {
-        var m;
-        var sCmd = asArgs[0];
-        var sAddr = asArgs[1];
-        var sLen = asArgs[2];
-        var sBytes = asArgs[3];
-
-        if (sAddr == '?') {
-            var sDumpers = "";
-            for (m in MessagesPDP11.CATEGORIES) {
-                if (this.afnDumpers[m]) {
-                    if (sDumpers) sDumpers += ',';
-                    sDumpers = sDumpers + m;
-                }
-            }
-            sDumpers += ",state,symbols";
-            this.println("dump memory commands:");
-            this.println("\tda [a]        dump info for address a");
-            this.println("\tdb [a] [n]    dump n bytes at address a");
-            this.println("\tdw [a] [n]    dump n words at address a");
-            this.println("\tdd [a] [n]    dump n dwords at address a");
-            this.println("\tds [a] [n]    dump n words at address a as JSON");
-            this.println("\tdh [p] [n]    dump n instructions from history position p");
-            if (sDumpers.length) this.println("dump extension commands:\n\t" + sDumpers);
-            return;
-        }
-
-        if (sAddr == "state") {
-            var sState = this.cmp.powerOff(true);
-            if (sLen == "console") {
-                /*
-                 * Console buffers are notoriously small, and even the following code, which breaks the
-                 * data into parts (eg, "d state console 1", "d state console 2", etc) just isn't that helpful.
-                 *
-                 *      var nPart = +sBytes;
-                 *      if (nPart) sState = sState.substr(1000000 * (nPart-1), 1000000);
-                 *
-                 * So, the best way to capture a large machine state is to use the new "Save Machine" link
-                 * that downloads a machine's entire state.  Alternatively, run your own local server and use
-                 * server-side storage.  Take a look at the "Save" binding in computer.js, which binds an HTML
-                 * control to the computer.powerOff() and computer.saveServerState() functions.
-                 */
-                console.log(sState);
-            } else {
-                this.doClear();
-                this.println(sState);
-            }
-            return;
-        }
-
-        if (sAddr == "symbols") {
-            this.dumpSymbols();
-            return;
-        }
-
-        if (sCmd == "d") {
-            for (m in MessagesPDP11.CATEGORIES) {
-                if (asArgs[1] == m) {
-                    var fnDumper = this.afnDumpers[m];
-                    if (fnDumper) {
-                        asArgs.shift();
-                        asArgs.shift();
-                        fnDumper(asArgs);
-                    } else {
-                        this.println("no dump registered for " + sAddr);
-                    }
-                    return;
-                }
-            }
-            if (!sAddr) sCmd = this.sCmdDumpPrev || "dw";
-        } else {
-            this.sCmdDumpPrev = sCmd;
-        }
-
-        if (sCmd == "dh") {
-            this.dumpHistory(sAddr, sLen);
-            return;
-        }
-
-        var dbgAddr = this.parseAddr(sAddr);
-        if (!dbgAddr) return;
-
-        if (sCmd == "da") {
-            /*
-             * Sample output for a virtual address ("da 23042"):
-             *
-             *                      00,010,011,000,100,010  00023042
-             *       OFFSET:             0,011,000,100,010  00003042
-             *   +   KIPAR1: 0,000,001,101,111,010,000,000  00157200
-             *   &  MMUMASK: 1,111,111,111,111,111,111,111  17777777
-             *   = PHYSICAL: 0,000,001,110,010,010,100,010  00162242
-             *
-             * and sample output for a physical address (eg, "da %37772"; note the % prefix):
-             *
-             *               0,000,000,011,111,111,111,010  00037772
-             *       OFFSET:             1,111,111,111,010  00017772
-             *   UNIMAP[01]: 1,111,100,001,110,111,000,000  17416700
-             *     PHYSICAL: 1,111,100,011,110,110,111,010  17436672
-             *
-             * TODO: Tweak this output to accommodate 18-bit machines as well as 22-bit machines.
-             */
-            var fPhysical = (dbgAddr.fPhysical || dbgAddr.addr > 0xffff);
-            var a = this.cpu.getAddrInfo(dbgAddr.addr, fPhysical);
-            this.println(str.pad("", fPhysical? 12: 19) + str.toBin(dbgAddr.addr, fPhysical? 22 : 17, 3) + "  " + str.toOct(dbgAddr.addr, 8));
-            if (a.length < 6) {
-                if (a.length > 2) {
-                    this.println("    OFFSET:             " + str.toBin(a[3], 13, 3) + "  " + str.toOct(a[3], 8));
-                    this.println("UNIMAP[" + str.toDec(a[1], 2) + "]: " + str.toBin(a[2], 22, 3) + "  " + str.toOct(a[2], 8));
-                }
-                this.println("  PHYSICAL: " + str.toBin(a[0], 22, 3) + "  " + str.toOct(a[0], 8))
-            } else {
-                this.println("    OFFSET:             " + str.toBin(a[1], 13, 3) + "  " + str.toOct(a[1], 8));
-                this.println("+   " + DebuggerPDP11.MODES[a[2]] + "PAR" + a[3] + ": " + str.toBin(a[4], 22, 3) + "  " + str.toOct(a[4], 8));
-                this.println("&  MMUMASK: " + str.toBin(a[5], 22, 3) + "  " + str.toOct(a[5], 8));
-                this.println("= PHYSICAL: " + str.toBin(a[0], 22, 3) + "  " + str.toOct(a[0], 8))
-            }
-            return;
-        }
-
-        var len = 0;
-        var fJSON = (sCmd == "ds");
-
-        if (sLen) {
-            if (sLen.charAt(0) == 'l') {
-                sLen = sLen.substr(1) || sBytes;
-                len = this.parseValue(sLen);
-            }
-            else {
-                var dbgAddrEnd = this.parseAddr(sLen);
-                if (dbgAddrEnd) len = dbgAddrEnd.addr - dbgAddr.addr;
-            }
-            if (len < 0) len = 0;
-            if (len > 0x10000) len = 0x10000;
-        }
-
-        var nBase = this.nBase;
-        if (dbgAddr.nBase) this.nBase = dbgAddr.nBase;
-
-        /*
-         * I've changed the code below to effectively make "dw" the default if only "d" is specified,
-         * since this is primarily a word-oriented machine.
-         */
-        var size = (sCmd == "dd"? 4 : (sCmd == "db"? 1 : 2));
-        var nBytes = (size * len) || 128;
-        var nBytesPerLine = fJSON? 16 : this.nBase;
-        var nLines = (((nBytes + nBytesPerLine - 1) / nBytesPerLine)|0) || 1;
-
-        var sDump = "";
-        while (nLines-- && nBytes > 0) {
-            var sData = "", sChars = "";
-            sAddr = this.toStrAddr(dbgAddr);
-            /*
-             * Dump 8 bytes per line when using base 8, and dump 16 bytes when using base 16.
-             *
-             * And while we used to always call getByte() and assemble them into words or dwords as appropriate, I've
-             * changed the logic below to honor "dw" by calling getWord(), since the Bus interfaces have been updated
-             * to prevent generating traps due to to Debugger access of unaligned memory and/or undefined IOPAGE addresses.
-             *
-             * Besides, it's nice for "db" and "dw" to generate the same Bus activity that typical byte and word reads do.
-             */
-            var i = nBytesPerLine;
-            var data = 0, shift = 0;
-            while (i > 0 && nBytes > 0) {
-                var n = 1;
-                var v = size == 1? this.getByte(dbgAddr, n) : this.getWord(dbgAddr, (n = 2));
-                data |= (v << (shift << 3));
-                shift += n;
-                if (shift == size) {
-                    if (fJSON) {
-                        if (sData) sData += ",";
-                        sData += "0x"+ str.toHex(data, size * 2);
-                    } else {
-                        sData += this.toStrBase(data, size);
-                        sData += (size == 1? (i == 9? '-' : ' ') : "  ");
-                    }
-                    data = shift = 0;
-                }
-                i -= n; nBytes -= n;
-                while (size == 1 && n--) {
-                    var c = v & 0xff;
-                    sChars += (c >= 32 && c < 128? String.fromCharCode(c) : '.');
-                    v >>= 8;
-                }
-            }
-            if (sDump) sDump += "\n";
-            if (fJSON) {
-                sDump += sData + ",";
-            } else {
-                sDump += sAddr + ":  " + sData + ((i == 0)? (' ' + sChars) : "");
-            }
-        }
-
-        if (sDump) this.println(sDump);
-
-        this.dbgAddrNextData = dbgAddr;
-        this.nBase = nBase;
-    };
-
-    /**
-     * doEdit(asArgs)
-     *
-     * @this {DebuggerPDP11}
-     * @param {Array.<string>} asArgs
-     */
-    DebuggerPDP11.prototype.doEdit = function(asArgs)
-    {
-        var size, mask;
-        var fnGet, fnSet;
-        var sCmd = asArgs[0];
-        var sAddr = asArgs[1];
-        if (sCmd == "eb") {
-            size = 1;
-            mask = 0xff;
-            fnGet = this.getByte;
-            fnSet = this.setByte;
-        }
-        else if (sCmd == "e" || sCmd == "ew") {
-            size = 2;
-            mask = 0xffff;
-            fnGet = this.getWord;
-            fnSet = this.setWord;
-        } else {
-            sAddr = null;
-        }
-        if (sAddr == null) {
-            this.println("edit memory commands:");
-            this.println("\teb [a] [...]  edit bytes at address a");
-            this.println("\tew [a] [...]  edit words at address a");
-            return;
-        }
-        var dbgAddr = this.parseAddr(sAddr);
-        if (!dbgAddr) return;
-        for (var i = 2; i < asArgs.length; i++) {
-            var vNew = this.parseExpression(asArgs[i]);
-            if (vNew === undefined) {
-                this.println("unrecognized value: " + asArgs[i]);
-                break;
-            }
-            if (vNew & ~mask) {
-                this.println("warning: " + str.toHex(vNew) + " exceeds " + size + "-byte value");
-            }
-            this.println("changing " + this.toStrAddr(dbgAddr) + (this.messageEnabled(MessagesPDP11.BUS)? "" : (" from " + this.toStrBase(fnGet.call(this, dbgAddr), size))) + " to " + this.toStrBase(vNew, size));
-            fnSet.call(this, dbgAddr, vNew, size);
-        }
-    };
-
-    /**
-     * doHalt(fQuiet)
-     *
-     * @this {DebuggerPDP11}
-     * @param {boolean} [fQuiet]
-     */
-    DebuggerPDP11.prototype.doHalt = function(fQuiet)
-    {
-        var sMsg;
-        if (this.flags.running) {
-            if (!fQuiet) this.println("halting");
-            this.stopCPU();
-        } else {
-            if (this.isBusy(true)) return;
-            if (!fQuiet) this.println("already halted");
-        }
-    };
-
-    /**
-     * doIf(sCmd, fQuiet)
-     *
-     * NOTE: Don't forget that the default base for all numeric constants is 16 (hex), so when you evaluate
-     * an expression like "a==10", it will compare the value of the variable "a" to 0x10; use a trailing period
-     * (eg, "10.") if you really intend decimal.
-     *
-     * Also, if no variable named "a" exists, "a" will evaluate to 0x0A, so the expression "a==10" becomes
-     * "0x0A==0x10" (false), whereas the expression "a==10." becomes "0x0A==0x0A" (true).
-     *
-     * @this {DebuggerPDP11}
-     * @param {string} sCmd
-     * @param {boolean} [fQuiet]
-     * @return {boolean} true if expression is non-zero, false if zero (or undefined due to a parse error)
-     */
-    DebuggerPDP11.prototype.doIf = function(sCmd, fQuiet)
-    {
-        sCmd = str.trim(sCmd);
-        if (!this.parseExpression(sCmd)) {
-            if (!fQuiet) this.println("false: " + sCmd);
-            return false;
-        }
-        if (!fQuiet) this.println("true: " + sCmd);
-        return true;
-    };
-
-    /**
-     * doInfo(asArgs)
-     *
-     * @this {DebuggerPDP11}
-     * @param {Array.<string>} asArgs
-     * @return {boolean} true only if the instruction info command ("n") is supported
-     */
-    DebuggerPDP11.prototype.doInfo = function(asArgs)
-    {
-        if (DEBUG) {
-            this.println("msPerYield: " + this.cpu.msPerYield);
-            this.println("nCyclesPerYield: " + this.cpu.nCyclesPerYield);
-            return true;
-        }
-        return false;
-    };
-
-    /**
-     * doVar(sCmd)
-     *
-     * The command must be of the form "{variable} = [{expression}]", where expression may contain constants,
-     * operators, registers, symbols, other variables, or nothing at all; in the latter case, the variable, if
-     * any, is deleted.
-     *
-     * Other supported shorthand: "var" with no parameters prints the values of all variables, and "var {variable}"
-     * prints the value of the specified variable.
-     *
-     * @this {DebuggerPDP11}
-     * @param {string} sCmd
-     * @return {boolean} true if valid "var" assignment, false if not
-     */
-    DebuggerPDP11.prototype.doVar = function(sCmd)
-    {
-        var a = sCmd.match(/^\s*([A-Z_]?[A-Z0-9_]*)\s*(=?)\s*(.*)$/i);
-        if (a) {
-            if (!a[1]) {
-                if (!this.printVariable()) this.println("no variables");
-                return true;    // it's not considered an error to print an empty list of variables
-            }
-            if (!a[2]) {
-                return this.printVariable(a[1]);
-            }
-            if (!a[3]) {
-                this.delVariable(a[1]);
-                return true;    // it's not considered an error to delete a variable that didn't exist
-            }
-            var v = this.parseExpression(a[3]);
-            if (v !== undefined) {
-                this.setVariable(a[1], v);
-                return true;
-            }
-            return false;
-        }
-        this.println("invalid assignment:" + sCmd);
-        return false;
-    };
-
-    /**
-     * doList(sAddr, fPrint)
-     *
-     * @this {DebuggerPDP11}
-     * @param {string} sAddr
-     * @param {boolean} [fPrint]
-     * @return {string|null}
-     */
-    DebuggerPDP11.prototype.doList = function(sAddr, fPrint)
-    {
-        var sSymbol = null;
-
-        var dbgAddr = this.parseAddr(sAddr, true);
-        if (dbgAddr) {
-            var addr = this.getAddr(dbgAddr);
-            var aSymbol = this.findSymbol(dbgAddr, true);
-            if (aSymbol.length) {
-                var nDelta, sDelta, s;
-                if (aSymbol[0]) {
-                    sDelta = "";
-                    nDelta = dbgAddr.addr - aSymbol[1];
-                    if (nDelta) sDelta = " + " + str.toHexWord(nDelta);
-                    s = aSymbol[0] + " (" + this.toStrOffset(aSymbol[1]) + ')' + sDelta;
-                    if (fPrint) this.println(s);
-                    sSymbol = s;
-                }
-                if (aSymbol.length > 4 && aSymbol[4]) {
-                    sDelta = "";
-                    nDelta = aSymbol[5] - dbgAddr.addr;
-                    if (nDelta) sDelta = " - " + str.toHexWord(nDelta);
-                    s = aSymbol[4] + " (" + this.toStrOffset(aSymbol[5]) + ')' + sDelta;
-                    if (fPrint) this.println(s);
-                    if (!sSymbol) sSymbol = s;
-                }
-            } else {
-                if (fPrint) this.println("no symbols");
-            }
-        }
-        return sSymbol;
-    };
-
-    /**
-     * doMessages(asArgs)
-     *
-     * @this {DebuggerPDP11}
-     * @param {Array.<string>} asArgs
-     */
-    DebuggerPDP11.prototype.doMessages = function(asArgs)
-    {
-        var m;
-        var fCriteria = null;
-        var sCategory = asArgs[1];
-        if (sCategory == '?') sCategory = undefined;
-
-        if (sCategory !== undefined) {
-            var bitsMessage = 0;
-            if (sCategory == "all") {
-                bitsMessage = (0xffffffff|0) & ~(MessagesPDP11.HALT | MessagesPDP11.KEYS | MessagesPDP11.LOG);
-                sCategory = null;
-            } else if (sCategory == "on") {
-                fCriteria = true;
-                sCategory = null;
-            } else if (sCategory == "off") {
-                fCriteria = false;
-                sCategory = null;
-            } else {
-                /*
-                 * Internally, we use "key" instead of "keys", since the latter is a method on JavasScript objects,
-                 * but externally, we allow the user to specify "keys"; "kbd" is also allowed as shorthand for "keyboard".
-                 */
-                if (sCategory == "keys") sCategory = "key";
-                if (sCategory == "kbd") sCategory = "keyboard";
-                for (m in MessagesPDP11.CATEGORIES) {
-                    if (sCategory == m) {
-                        bitsMessage = MessagesPDP11.CATEGORIES[m];
-                        fCriteria = !!(this.bitsMessage & bitsMessage);
-                        break;
-                    }
-                }
-                if (!bitsMessage) {
-                    this.println("unknown message category: " + sCategory);
-                    return;
-                }
-            }
-            if (bitsMessage) {
-                if (asArgs[2] == "on") {
-                    this.bitsMessage |= bitsMessage;
-                    fCriteria = true;
-                }
-                else if (asArgs[2] == "off") {
-                    this.bitsMessage &= ~bitsMessage;
-                    fCriteria = false;
-                    if (bitsMessage == MessagesPDP11.BUFFER) {
-                        var i = this.aMessageBuffer.length >= 1000? this.aMessageBuffer.length - 1000 : 0;
-                        while (i < this.aMessageBuffer.length) {
-                            this.println(this.aMessageBuffer[i++]);
-                        }
-                        this.aMessageBuffer = [];
-                    }
-                }
-            }
-        }
-
-        /*
-         * Display those message categories that match the current criteria (on or off)
-         */
-        var n = 0;
-        var sCategories = "";
-        for (m in MessagesPDP11.CATEGORIES) {
-            if (!sCategory || sCategory == m) {
-                var bitMessage = MessagesPDP11.CATEGORIES[m];
-                var fEnabled = !!(this.bitsMessage & bitMessage);
-                if (fCriteria !== null && fCriteria != fEnabled) continue;
-                if (sCategories) sCategories += ',';
-                if (!(++n % 10)) sCategories += "\n\t";     // jshint ignore:line
-                /*
-                 * Internally, we use "key" instead of "keys", since the latter is a method on JavasScript objects,
-                 * but externally, we allow the user to specify "keys".
-                 */
-                if (m == "key") m = "keys";
-                sCategories += m;
-            }
-        }
-
-        if (sCategory === undefined) {
-            this.println("message commands:\n\tm [category] [on|off]\tturn categories on/off");
-        }
-
-        this.println((fCriteria !== null? (fCriteria? "messages on:  " : "messages off: ") : "message categories:\n\t") + (sCategories || "none"));
-
-        this.historyInit();     // call this just in case MessagesPDP11.INT was turned on
-    };
-
-    /**
-     * doOptions(asArgs)
-     *
-     * @this {DebuggerPDP11}
-     * @param {Array.<string>} asArgs
-     */
-    DebuggerPDP11.prototype.doOptions = function(asArgs)
-    {
-        switch (asArgs[1]) {
-
-        case "base":
-            if (asArgs[2]) {
-                var nBase = +asArgs[2];
-                if (nBase == 8 || nBase == 10 || nBase == 16) {
-                    this.nBase = nBase;
-                } else {
-                    this.println("invalid base: " + nBase);
-                    break;
-                }
-            }
-            this.println("default base: " + this.nBase);
-            break;
-
-        case "cs":
-            var nCycles;
-            if (asArgs[3] !== undefined) nCycles = +asArgs[3];          // warning: decimal instead of hex conversion
-            switch (asArgs[2]) {
-                case "int":
-                    this.cpu.nCyclesChecksumInterval = nCycles;
-                    break;
-                case "start":
-                    this.cpu.nCyclesChecksumStart = nCycles;
-                    break;
-                case "stop":
-                    this.cpu.nCyclesChecksumStop = nCycles;
-                    break;
-                default:
-                    this.println("unknown cs option");
-                    return;
-            }
-            if (nCycles !== undefined) {
-                this.cpu.resetChecksum();
-            }
-            this.println("checksums " + (this.cpu.flags.checksum? "enabled" : "disabled"));
-            return;
-
-        case "sp":
-            if (asArgs[2] !== undefined) {
-                if (!this.cpu.setSpeed(+asArgs[2])) {
-                    this.println("warning: using 1x multiplier, previous target not reached");
-                }
-            }
-            this.println("target speed: " + this.cpu.getSpeedTarget() + " (" + this.cpu.getSpeed() + "x)");
-            return;
-
-        default:
-            if (asArgs[1]) {
-                this.println("unknown option: " + asArgs[1]);
-                return;
-            }
-            /* falls through */
-
-        case "?":
-            this.println("debugger options:");
-            this.println("\tbase #\t\tset default base to #");
-            this.println("\tcs int #\tset checksum cycle interval to #");
-            this.println("\tcs start #\tset checksum cycle start count to #");
-            this.println("\tcs stop #\tset checksum cycle stop count to #");
-            this.println("\tsp #\t\tset speed multiplier to #");
-            break;
-        }
-    };
-
-    /**
-     * doRegisters(asArgs, fInstruction)
-     *
-     * @this {DebuggerPDP11}
-     * @param {Array.<string>} [asArgs]
-     * @param {boolean} [fInstruction] (true to include the current instruction; default is true)
-     */
-    DebuggerPDP11.prototype.doRegisters = function(asArgs, fInstruction)
-    {
-        if (asArgs && asArgs[1] == '?') {
-            this.println("register commands:");
-            this.println("\tr\tdump registers");
-            this.println("\trm\tdump misc registers");
-            this.println("\trx [#]\tset flag or register x to [#]");
-            return;
-        }
-
-        var fMisc = false;
-        var cpu = this.cpu;
-        if (fInstruction == null) fInstruction = true;
-
-        if (asArgs != null && asArgs.length > 1) {
-            var sReg = asArgs[1];
-
-            if (sReg == 'm') {
-                fMisc = true;
-            }
-            else {
-                var sValue = null;
-                var i = sReg.indexOf('=');
-                if (i > 0) {
-                    sValue = sReg.substr(i + 1);
-                    sReg = sReg.substr(0, i);
-                }
-                else if (asArgs.length > 2) {
-                    sValue = asArgs[2];
-                }
-                else {
-                    this.println("missing value for " + asArgs[1]);
-                    return;
-                }
-
-                var w = this.parseExpression(sValue);
-                if (w === undefined) return;
-
-                var sRegMatch = sReg.toUpperCase();
-                switch (sRegMatch) {
-                case "SP":
-                case "R6":
-                    cpu.setSP(w);
-                    break;
-                case "PC":
-                case "R7":
-                    cpu.setPC(w);
-                    this.dbgAddrNextCode = this.newAddr(cpu.getPC());
-                    break;
-                case "N":
-                    if (w) cpu.setNF(); else cpu.clearNF();
-                    break;
-                case "Z":
-                    if (w) cpu.setZF(); else cpu.clearZF();
-                    break;
-                case "V":
-                    if (w) cpu.setVF(); else cpu.clearVF();
-                    break;
-                case "C":
-                    if (w) cpu.setCF(); else cpu.clearCF();
-                    break;
-                case "PS":
-                    cpu.setPSW(w);
-                    break;
-                case "PI":
-                    cpu.setPIR(w);
-                    break;
-                case "ER":
-                    cpu.regErr = w;
-                    fMisc = true;
-                    break;
-                case "SL":
-                    cpu.setSLR(w);
-                    break;
-                case "M0":
-                    cpu.setMMR0(w);
-                    fMisc = true;
-                    break;
-                case "M3":
-                    cpu.setMMR3(w);
-                    fMisc = true;
-                    break;
-                case "AR":
-                    if (this.panel) this.panel.setAR(w);
-                    fMisc = true;
-                    break;
-                case "DR":
-                    if (this.panel) this.panel.setDR(w);
-                    fMisc = true;
-                    break;
-                case "SR":
-                    if (this.panel && this.panel.hasSwitches()) {
-                        this.panel.setSR(w);
-                        fMisc = true;
-                        break;
-                    }
-                    /* falls through */
-                default:
-                    if (sRegMatch.charAt(0) == 'R') {
-                        var iReg = +sRegMatch.charAt(1);
-                        if (iReg >= 0 && iReg < 6) {
-                            cpu.regsGen[iReg] = w & 0xffff;
-                            break;
-                        }
-                    }
-                    this.println("unknown register: " + sReg);
-                    return;
-                }
-                this.cmp.updateDisplays();
-                this.println("updated registers:");
-            }
-        }
-
-        this.println(this.getRegDump(fMisc));
-
-        if (fInstruction) {
-            this.dbgAddrNextCode = this.newAddr(cpu.getPC());
-            this.doUnassemble(this.toStrAddr(this.dbgAddrNextCode));
-        }
-    };
-
-    /**
-     * doRun(sCmd, sAddr, sOptions, fQuiet)
-     *
-     * @this {DebuggerPDP11}
-     * @param {string} sCmd
-     * @param {string|undefined} [sAddr]
-     * @param {string} [sOptions] (the rest of the breakpoint command-line)
-     * @param {boolean} [fQuiet]
-     */
-    DebuggerPDP11.prototype.doRun = function(sCmd, sAddr, sOptions, fQuiet)
-    {
-        if (sCmd == "gt") {
-            this.fIgnoreNextCheckFault = true;
-        }
-        if (sAddr !== undefined) {
-            var dbgAddr = this.parseAddr(sAddr, true);
-            if (!dbgAddr) return;
-            this.parseAddrOptions(dbgAddr, sOptions);
-            this.setTempBreakpoint(dbgAddr);
-        }
-        this.startCPU(true, fQuiet);
-    };
-
-    /**
-     * doPrint(sCmd)
-     *
-     * NOTE: If the string to print is a quoted string, then we run it through replaceRegs(), so that
-     * you can take advantage of all the special replacement options used for software interrupt logging.
-     *
-     * @this {DebuggerPDP11}
-     * @param {string} sCmd
-     */
-    DebuggerPDP11.prototype.doPrint = function(sCmd)
-    {
-        sCmd = str.trim(sCmd);
-        var a = sCmd.match(/^(['"])(.*?)\1$/);
-        if (!a) {
-            this.parseExpression(sCmd, true);
-        } else {
-            if (a[2].length > 1) {
-                this.println(this.replaceRegs(a[2]));
-            } else {
-                this.printValue(null, a[2].charCodeAt(0));
-            }
-        }
-    };
-
-    /**
-     * doStep(sCmd, sOption)
-     *
-     * @this {DebuggerPDP11}
-     * @param {string} [sCmd] "p" or "pr"
-     * @param {string} [sOption]
-     */
-    DebuggerPDP11.prototype.doStep = function(sCmd, sOption)
-    {
-        if (sOption == '?') {
-            this.println("step commands:");
-            this.println("\tp\tstep over instruction");
-            this.println("\tpr\tstep over instruction with register update");
-            return;
-        }
-
-        var fCallStep = true;
-        var nRegs = (sCmd == "pr"? 1 : 0);
-        /*
-         * Set up the value for this.nStep (ie, 1 or 2) depending on whether the user wants
-         * a subsequent register dump ("pr") or not ("p").
-         */
-        var nStep = 1 + nRegs;
-
-        if (!this.nStep) {
-            var dbgAddr = this.newAddr(this.cpu.getPC());
-            var opCode = this.getWord(dbgAddr);
-
-            if (opCode == PDP11.OPCODE.BPT || opCode == PDP11.OPCODE.IOT ||
-                (opCode & PDP11.OPCODE.EMT_MASK) == PDP11.OPCODE.EMT_OP ||
-                (opCode & PDP11.OPCODE.SOB_MASK) == PDP11.OPCODE.SOB_OP ||
-                (opCode & PDP11.OPCODE.TRAP_MASK) == PDP11.OPCODE.TRAP_OP) {
-                if (fCallStep) {
-                    this.nStep = nStep;
-                    this.incAddr(dbgAddr, 2);
-                }
-            } else if ((opCode & PDP11.OPCODE.JSR_MASK) == PDP11.OPCODE.JSR_OP) {
-                var s = this.getInstruction(dbgAddr);
-                this.assert(s.indexOf("JSR") >= 0);
-                if (fCallStep) {
-                    this.nStep = nStep;
-                }
-            }
-
-            if (this.nStep) {
-                this.setTempBreakpoint(dbgAddr);
-                if (!this.startCPU()) {
-                    if (this.cmp) this.cmp.setFocus();
-                    this.nStep = 0;
-                }
-                /*
-                 * A successful run will ultimately call stop(), which will in turn call clearTempBreakpoint(),
-                 * which will clear nStep, so there's your assurance that nStep will be reset.  Now we may have
-                 * stopped for reasons unrelated to the temporary breakpoint, but that's OK.
-                 */
-            } else {
-                this.doTrace(nRegs? "tr" : "t");
-            }
-        } else {
-            this.println("step in progress");
-        }
-    };
-
-    /**
-     * getCall(dbgAddr)
-     *
-     * Given a possible return address (typically from the stack), look for a matching CALL (or INT) that
-     * immediately precedes that address.
-     *
-     * @this {DebuggerPDP11}
-     * @param {DbgAddrPDP11} dbgAddr
-     * @return {string|null} CALL instruction at or near dbgAddr, or null if none
-     */
-    DebuggerPDP11.prototype.getCall = function(dbgAddr)
-    {
-        var sCall = null;
-        var addr = dbgAddr.addr;
-        var addrOrig = addr;
-        for (var n = 1; n <= 6 && !!addr; n++) {
-            if (n > 2) {
-                dbgAddr.addr = addr;
-                var s = this.getInstruction(dbgAddr);
-                if (s.indexOf("JSR") >= 0) {
-                    /*
-                     * Verify that the length of this call, when added to the address of the call, matches
-                     * the original return address.  We do this by getting the string index of the opcode bytes,
-                     * subtracting that from the string index of the next space, and dividing that difference
-                     * by two, to yield the length of the CALL (or INT) instruction, in bytes.
-                     */
-                    var i = s.indexOf(' ');
-                    var j = s.indexOf(' ', i+1);
-                    if (addr + (j - i - 1)/2 == addrOrig) {
-                        sCall = s;
-                        break;
-                    }
-                }
-            }
-            addr -= 2;
-        }
-        dbgAddr.addr = addrOrig;
-        return sCall;
-    };
-
-    /**
-     * doStackTrace(sCmd, sAddr)
-     *
-     * Use "k" for a normal stack trace and "ks" for a stack trace with symbolic info.
-     *
-     * @this {DebuggerPDP11}
-     * @param {string} [sCmd]
-     * @param {string} [sAddr] (not used yet)
-     */
-    DebuggerPDP11.prototype.doStackTrace = function(sCmd, sAddr)
-    {
-        if (sAddr == '?') {
-            this.println("stack trace commands:");
-            this.println("\tk\tshow frame addresses");
-            this.println("\tks\tshow symbol information");
-            return;
-        }
-
-        var nFrames = 10, cFrames = 0;
-        var dbgAddrCall = this.newAddr();
-        var dbgAddrStack = this.newAddr(this.cpu.getSP());
-        this.println("stack trace for " + this.toStrAddr(dbgAddrStack));
-
-        while (cFrames < nFrames) {
-            var sCall = null, sCallPrev = null, cTests = 256;
-            while ((dbgAddrStack.addr >>> 0) < 0x10000) {
-                dbgAddrCall.addr = this.getWord(dbgAddrStack, 2);
-                /*
-                 * Because we're using the auto-increment feature of getWord(), and because that will automatically
-                 * wrap the offset around the end of the segment, we must also check the addr property to detect the wrap.
-                 */
-                if (dbgAddrStack.addr == null || !cTests--) break;
-                if (dbgAddrCall.addr & 0x1) continue;           // an odd address on the PDP-11 is not a valid instruction boundary
-                sCall = this.getCall(dbgAddrCall);
-                if (sCall) break;
-            }
-            /*
-             * The sCallPrev check eliminates duplicate sequential calls, which are usually (but not always)
-             * indicative of a false positive, in which case the previous call is probably bogus as well, but
-             * at least we won't duplicate that mistake.  Of course, there are always exceptions, recursion
-             * being one of them, but it's rare that we're debugging recursive code.
-             */
-            if (!sCall || sCall == sCallPrev) break;
-            var sSymbol = null;
-            if (sCmd == "ks") {
-                var a = sCall.match(/[0-9A-F]+$/);
-                if (a) sSymbol = this.doList(a[0]);
-            }
-            sCall = str.pad(sCall, 50) + "  ;" + (sSymbol || "stack=" + this.toStrAddr(dbgAddrStack)); // + " return=" + this.toStrAddr(dbgAddrCall));
-            this.println(sCall);
-            sCallPrev = sCall;
-            cFrames++;
-        }
-        if (!cFrames) this.println("no return addresses found");
-    };
-
-    /**
-     * doTrace(sCmd, sCount)
-     *
-     * The "t" and "tr" commands interpret the count as a number of instructions, and since
-     * we call the Debugger's stepCPU() for each iteration, a single instruction includes
-     * any/all prefixes; the CPU's stepCPU() treats prefixes as discrete operations.  The only
-     * difference between "t" and "tr": the former displays only the next instruction, while
-     * the latter also displays the (updated) registers.
-     *
-     * The "tc" command interprets the count as a number of cycles rather than instructions,
-     * allowing you to quickly execute large chunks of instructions with a single command; it
-     * doesn't display anything until the the chunk has finished.  "tc 1" is also a useful
-     * command in that it doesn't inhibit interrupts like "t" or "tr" does.
-     *
-     * However, generally a more useful command is "bn", which allows you to break after some
-     * number of instructions have been executed (as opposed to some number of cycles).
-     *
-     * @this {DebuggerPDP11}
-     * @param {string} [sCmd] ("t", "tc", or "tr")
-     * @param {string} [sCount] # of instructions to step
-     */
-    DebuggerPDP11.prototype.doTrace = function(sCmd, sCount)
-    {
-        if (sCount == '?') {
-            this.println("trace commands:");
-            this.println("\tt  [#]\ttrace # instructions");
-            this.println("\ttr [#]\ttrace # instructions with register updates");
-            this.println("\ttc [#]\ttrace # cycles");
-            this.println("note: bn [#] breaks after # instructions without updates");
-            return;
-        }
-
-        var dbg = this;
-        var fRegs = (sCmd != "t");
-        var nCount = this.parseValue(sCount, null, true) || 1;
-
-        /*
-         * We used to set nCycles to 1 when a count > 1 was specified, because nCycles set
-         * to 0 used to mean "execute the next instruction without checking for interrupts".
-         * Well, this machine's stepCPU() doesn't do that; it ALWAYS checks for interrupts,
-         * so we should leave nCycles set to 0, so that if an interrupt is dispatched, we will
-         * get to see the first instruction of the interrupt handler.
-         */
-        var nCycles = 0;    // (nCount == 1? 0 : 1);
-
-        if (sCmd == "tc") {
-            nCycles = nCount;
-            nCount = 1;
-        }
-        this.sTraceCmdPrev = sCmd;
-
-        web.onCountRepeat(
-            nCount,
-            function onCountStep() {
-                return dbg.setBusy(true) && dbg.stepCPU(nCycles, fRegs, false);
-            },
-            function onCountStepComplete() {
-                /*
-                 * We explicitly called stepCPU() with fUpdateDisplays set to false, because repeatedly
-                 * calling updateDisplays() can be very slow, especially if a Control Panel is present with
-                 * displayLiveRegs enabled, so once the repeat count has been exhausted, we must perform
-                 * a final updateDisplays().
-                 */
-                if (dbg.panel) dbg.panel.stop();
-                dbg.cmp.updateDisplays(-1);
-                dbg.setBusy(false);
-            }
-        );
-    };
-
-    /**
-     * doUnassemble(sAddr, sAddrEnd, nLines)
-     *
-     * @this {DebuggerPDP11}
-     * @param {string} [sAddr]
-     * @param {string} [sAddrEnd]
-     * @param {number} [nLines]
-     */
-    DebuggerPDP11.prototype.doUnassemble = function(sAddr, sAddrEnd, nLines)
-    {
-        var dbgAddr = this.parseAddr(sAddr, true);
-        if (!dbgAddr) return;
-
-        if (nLines === undefined) nLines = 1;
-
-        var nBytes = 0x100;
-        if (sAddrEnd !== undefined) {
-
-            if (sAddrEnd.charAt(0) == 'l') {
-                var n = this.parseValue(sAddrEnd.substr(1));
-                if (n != null) nLines = n;
-            }
-            else {
-                var dbgAddrEnd = this.parseAddr(sAddrEnd, true);
-                if (!dbgAddrEnd || dbgAddrEnd.addr < dbgAddr.addr) return;
-
-                nBytes = dbgAddrEnd.addr - dbgAddr.addr;
-                if (!DEBUG && nBytes > 0x100) {
-                    /*
-                     * Limiting the amount of disassembled code to 256 bytes in non-DEBUG builds is partly to
-                     * prevent the user from wedging the browser by dumping too many lines, but also a recognition
-                     * that, in non-DEBUG builds, this.println() keeps print output buffer truncated to 8Kb anyway.
-                     */
-                    this.println("range too large");
-                    return;
-                }
-                nLines = -1;
-            }
-        }
-
-        var nPrinted = 0;
-        var sInstruction;
-
-        while (nBytes > 0 && nLines--) {
-
-            var nSequence = (this.isBusy(false) || this.nStep)? this.nCycles : null;
-            var sComment = (nSequence != null? "cycles" : null);
-            var aSymbol = this.findSymbol(dbgAddr);
-
-            var addr = dbgAddr.addr;    // we snap dbgAddr.addr *after* calling findSymbol(), which re-evaluates it
-
-            if (aSymbol[0] && nLines) {
-                if (!nPrinted && nLines || aSymbol[0].indexOf('+') < 0) {
-                    var sLabel = aSymbol[0] + ':';
-                    if (aSymbol[2]) sLabel += ' ' + aSymbol[2];
-                    this.println(sLabel);
-                }
-            }
-
-            if (aSymbol[3]) {
-                sComment = aSymbol[3];
-                nSequence = null;
-            }
-
-            sInstruction = this.getInstruction(dbgAddr, sComment, nSequence);
-
-            this.println(sInstruction);
-            this.dbgAddrNextCode = dbgAddr;
-            nBytes -= dbgAddr.addr - addr;
-            nPrinted++;
-        }
-    };
-
-    /**
-     * splitArgs(sCmd)
-     *
-     * @this {DebuggerPDP11}
-     * @param {string} sCmd
-     * @return {Array.<string>}
-     */
-    DebuggerPDP11.prototype.splitArgs = function(sCmd)
-    {
-        var asArgs = sCmd.replace(/ +/g, ' ').split(' ');
-        asArgs[0] = asArgs[0].toLowerCase();
-        if (asArgs && asArgs.length) {
-            var s0 = asArgs[0];
-            var ch0 = s0.charAt(0);
-            for (var i = 1; i < s0.length; i++) {
-                var ch = s0.charAt(i);
-                if (ch0 == '?' || ch0 == 'r' || ch < 'a' || ch > 'z') {
-                    asArgs[0] = s0.substr(i);
-                    asArgs.unshift(s0.substr(0, i));
-                    break;
-                }
-            }
-        }
-        return asArgs;
-    };
-
-    /**
-     * doCommand(sCmd, fQuiet)
-     *
-     * @this {DebuggerPDP11}
-     * @param {string} sCmd
-     * @param {boolean} [fQuiet]
-     * @return {boolean} true if command processed, false if unrecognized
-     */
-    DebuggerPDP11.prototype.doCommand = function(sCmd, fQuiet)
-    {
-        var result = true;
-
-        try {
-            if (!sCmd.length || sCmd == "end") {
-                if (this.fAssemble) {
-                    this.println("ended assemble at " + this.toStrAddr(this.dbgAddrAssemble));
-                    this.dbgAddrNextCode = this.dbgAddrAssemble;
-                    this.fAssemble = false;
-                }
-                sCmd = "";
-            }
-            else if (!fQuiet) {
-                var sPrompt = ">> ";
-                this.println(sPrompt + sCmd);
-            }
-
-            var ch = sCmd.charAt(0);
-            if (ch == '"' || ch == "'") return true;
-
-            /*
-             * Zap the previous message buffer to ensure the new command's output is not tossed out as a repeat.
-             */
-            this.sMessagePrev = null;
-
-            /*
-             * I've relaxed the !isBusy() requirement, to maximize our ability to issue Debugger commands externally.
-             */
-            if (this.isReady() /* && !this.isBusy(true) */ && sCmd.length > 0) {
-
-                if (this.fAssemble) {
-                    sCmd = "a " + this.toStrAddr(this.dbgAddrAssemble) + ' ' + sCmd;
-                }
-
-                var fError = false;
-                var asArgs = this.splitArgs(sCmd);
-
-                switch (asArgs[0].charAt(0)) {
-                case 'a':
-                    this.doAssemble(asArgs);
-                    break;
-                case 'b':
-                    this.doBreak(asArgs[0], asArgs[1], sCmd);
-                    break;
-                case 'c':
-                    this.doClear(asArgs[0]);
-                    break;
-                case 'd':
-                    if (!COMPILED && sCmd == "debug") {
-                        window.DEBUG = true;
-                        this.println("DEBUG checks on");
-                        break;
-                    }
-                    this.doDump(asArgs);
-                    break;
-                case 'e':
-                    if (asArgs[0] == "else") break;
-                    this.doEdit(asArgs);
-                    break;
-                case 'g':
-                    this.doRun(asArgs[0], asArgs[1], sCmd, fQuiet);
-                    break;
-                case 'h':
-                    this.doHalt(fQuiet);
-                    break;
-                case 'i':
-                    if (asArgs[0] == "if") {
-                        if (!this.doIf(sCmd.substr(2), fQuiet)) {
-                            result = false;
-                        }
-                        break;
-                    }
-                    fError = true;
-                    break;
-                case 'k':
-                    this.doStackTrace(asArgs[0], asArgs[1]);
-                    break;
-                case 'l':
-                    if (asArgs[0] == "ln") {
-                        this.doList(asArgs[1], true);
-                        break;
-                    }
-                    fError = true;
-                    break;
-                case 'm':
-                    this.doMessages(asArgs);
-                    break;
-                case 'p':
-                    if (asArgs[0] == "print") {
-                        this.doPrint(sCmd.substr(5));
-                        break;
-                    }
-                    this.doStep(asArgs[0], asArgs[1]);
-                    break;
-                case 'r':
-                    if (sCmd == "reset") {
-                        if (this.cmp) this.cmp.reset();
-                        break;
-                    }
-                    this.doRegisters(asArgs);
-                    break;
-                case 's':
-                    this.doOptions(asArgs);
-                    break;
-                case 't':
-                    this.doTrace(asArgs[0], asArgs[1]);
-                    break;
-                case 'u':
-                    this.doUnassemble(asArgs[1], asArgs[2], 8);
-                    break;
-                case 'v':
-                    if (asArgs[0] == "var") {
-                        if (!this.doVar(sCmd.substr(3))) {
-                            result = false;
-                        }
-                        break;
-                    }
-                    if (asArgs[0] == "ver") {
-                        this.println((PDP11.APPNAME || "PDP11") + " version " + (XMLVERSION || PDP11.APPVERSION) + " (" + this.cpu.model + (PDP11.COMPILED? ",RELEASE" : (PDP11.DEBUG? ",DEBUG" : ",NODEBUG")) + (PDP11.TYPEDARRAYS? ",TYPEDARRAYS" : (PDP11.BYTEARRAYS? ",BYTEARRAYS" : ",LONGARRAYS")) + ')');
-                        this.println(web.getUserAgent());
-                        break;
-                    }
-                    fError = true;
-                    break;
-                case '?':
-                    if (asArgs[1]) {
-                        this.doPrint(sCmd.substr(1));
-                        break;
-                    }
-                    this.doHelp();
-                    break;
-                case 'n':
-                    if (!COMPILED && sCmd == "nodebug") {
-                        window.DEBUG = false;
-                        this.println("DEBUG checks off");
-                        break;
-                    }
-                    if (this.doInfo(asArgs)) break;
-                    /* falls through */
-                default:
-                    fError = true;
-                    break;
-                }
-                if (fError) {
-                    this.println("unknown command: " + sCmd);
-                    result = false;
-                }
-            }
-        } catch(e) {
-            this.println("debugger error: " + (e.stack || e.message));
-            result = false;
-        }
-        return result;
-    };
-
-    /**
-     * doCommands(sCmds, fSave)
-     *
-     * @this {DebuggerPDP11}
-     * @param {string} sCmds
-     * @param {boolean} [fSave]
-     * @return {boolean} true if all commands processed, false if not
-     */
-    DebuggerPDP11.prototype.doCommands = function(sCmds, fSave)
-    {
-        var a = this.parseCommand(sCmds, fSave);
-        for (var s in a) {
-            if (!this.doCommand(a[+s])) return false;
-        }
-        return true;
-    };
-
-    /**
-     * DebuggerPDP11.init()
-     *
-     * This function operates on every HTML element of class "debugger", extracting the
-     * JSON-encoded parameters for the Debugger constructor from the element's "data-value"
-     * attribute, invoking the constructor to create a Debugger component, and then binding
-     * any associated HTML controls to the new component.
-     */
-    DebuggerPDP11.init = function()
-    {
-        var aeDbg = Component.getElementsByClass(document, PDP11.APPCLASS, "debugger");
-        for (var iDbg = 0; iDbg < aeDbg.length; iDbg++) {
-            var eDbg = aeDbg[iDbg];
-            var parmsDbg = Component.getComponentParms(eDbg);
-            var dbg = new DebuggerPDP11(parmsDbg);
-            Component.bindComponentControls(dbg, eDbg, PDP11.APPCLASS);
-        }
-    };
-
     /*
      * Initialize every Debugger module on the page (as IF there's ever going to be more than one ;-))
      */
-    web.onInit(DebuggerPDP11.init);
+    Web.onInit(DebuggerPDP11.init);
 
 }   // endif DEBUGGER
 
-if (NODE) module.exports = DebuggerPDP11;
+export default DebuggerPDP11;

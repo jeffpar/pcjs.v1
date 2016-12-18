@@ -301,7 +301,7 @@ function HTMLOut(sPath, sFile, fRebuild, req, done)
     this.done = done;
 
     this.sHTML = "";
-    this.sTemplate = null;
+    this.sTemplate = "";
     this.aTokens = {};
     this.fRandomize = false;
 
@@ -502,6 +502,26 @@ HTMLOut.filter = function(req, res, next)
     }
 
     /*
+     * This is a hack to strip ES6 syntax from JavaScript files that is not (yet) supported by browsers;
+     * specifically, "import" and "export" statements.
+     */
+    if (sBaseExt == "js") {
+        HTMLOut.logDebug("HTMLOut.filter(" + sBaseName + "): stripping unsupported ES6 syntax");
+        fs.readFile(sPath, {encoding: "utf8"}, function doneReadFileJS(err, sData) {
+            if (err) {
+                HTMLOut.logError(err);
+                next();     // alternatively: res.status(404).send("Cannot GET " + req.path);
+            } else {
+                sData = sData.replace(/^([ \t]*import\s+\S+\s+from\s+(['"]).*?\1;)/gm, "// $1");
+                sData = sData.replace(/^([ \t]*export\s+default\s+\S+;)/gm, "// $1");
+                res.set("Content-Type", "application/javascript");
+                res.status(200).send(sData);
+            }
+        });
+        return;
+    }
+
+    /*
      * The Safari "blank page" problem continues to plague us.  Our first work-around was for directory
      * "index.html" documents, which we resolved by setting fSendDefault to true, so that we would always send
      * it ourselves, along with an "ok" (200) response code, instead of letting the Express next() function
@@ -522,7 +542,7 @@ HTMLOut.filter = function(req, res, next)
             var sCacheControl = req.headers['cache-control'];
             if (sCacheControl && sCacheControl.indexOf("max-age=0") >= 0) {
                 HTMLOut.logDebug("HTMLOut.filter(" + sBaseName + "): Safari work-around in progress");
-                fs.readFile(sPath, {encoding: "utf8"}, function doneReadFileFilter(err, sData) {
+                fs.readFile(sPath, {encoding: "utf8"}, function doneReadFileXML(err, sData) {
                     if (err) {
                         HTMLOut.logError(err);
                         next();     // alternatively: res.status(404).send("Cannot GET " + req.path);
@@ -832,7 +852,7 @@ HTMLOut.prototype.findTokens = function(reTokens)
          * the token, each must be escaped.
          */
         var sToken = token[0].substr(sIndent.length);
-        sToken = sToken.replace(/([\(\)\*])/g, "\\$1");
+        sToken = sToken.replace(/([()*])/g, "\\$1");
 
         if (this.aTokens[sToken] === undefined) {
             this.aTokens[sToken] = "";
@@ -1635,6 +1655,7 @@ HTMLOut.prototype.getManifestXML = function(sToken, sIndent, aParms)
                                                     sPageLink = matchCover.replace("/thumbs/", '/pages/').replace(/( ?)[0-9]*\.(jpeg|jpg)/, "$1" + match[1] + ".pdf");
                                                 }
                                             }
+                                            //noinspection JSCheckFunctionSignatures
                                             sPageName = '<a href="' + net.encodeURL(sPageLink, obj.req, obj.fDebug) + '" target="_blank">' + sPageName + '</a>';
                                         }
                                         sItemPages += sIndent + '\t\t\t<li>' + sPageName + '</li>\n';
@@ -1762,7 +1783,7 @@ HTMLOut.prototype.getMarkdownFile = function(sFile, sToken, sIndent, aParms, sPr
                 var sTitle = match[2];
                 match = sTitle.match(/<a [^>]*>([^<]*)<\/a>/);
                 if (match) sTitle = match[1];
-                obj.sHTML = obj.sHTML.replace(/(<title[^>]*>)([^\|]*)\|[^<]*(<\/title>)/, "$1$2| " + sTitle + "$3");
+                obj.sHTML = obj.sHTML.replace(/(<title[^>]*>)([^|]*)\|[^<]*(<\/title>)/, "$1$2| " + sTitle + "$3");
             }
             /*
              * We need to query the MarkOut object for any machine definitions that the current Markdown
@@ -1881,7 +1902,7 @@ HTMLOut.prototype.processMachines = function(aMachines, buildOptions, done)
 
         var sScriptEmbed = "";
         if (infoMachine['func']) {
-            sScriptEmbed = '<script type="text/javascript">' + 'window.' + infoMachine['func'];
+            sScriptEmbed = '<' + 'script type="text/javascript">window.' + infoMachine['func'];
             sScriptEmbed += "('" + infoMachine['id'] + "','" + infoMachine['xml'] + "'";
             sScriptEmbed += (infoMachine['xsl']? (",'" + infoMachine['xsl'] + "'") : ",''");
             sScriptEmbed += (infoMachine['parms']? (",'" + infoMachine['parms'] + "'") : '') + ');</script>';

@@ -883,13 +883,4 @@ PDP11.ACCESS.UPDATE_BYTE = PDP11.ACCESS.BYTE | PDP11.ACCESS.UPDATE;     // forme
  */
 PDP11.PSW.FLAGS         = (PDP11.PSW.NF | PDP11.PSW.ZF | PDP11.PSW.VF | PDP11.PSW.CF);
 
-if (NODE) {
-    global.APPCLASS     = APPCLASS;
-    global.APPNAME      = APPNAME;
-    global.DEBUGGER     = DEBUGGER;
-    global.BYTEARRAYS   = BYTEARRAYS;
-    global.TYPEDARRAYS  = TYPEDARRAYS;
-    global.PDP11        = PDP11;
-
-    module.exports = PDP11;
-}
+export default PDP11;

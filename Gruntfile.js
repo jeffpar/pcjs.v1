@@ -199,8 +199,9 @@ module.exports = function(grunt) {
                     banner: '"use strict";\n\n',
                     process: function(src, filepath) {
                         return "/**\n * @copyright " + filepath.replace(/^\./, "http://pcjs.org") + " (C) Jeff Parsons 2012-2016\n */\n\n" +
-                            src.replace(/(^|\n)[ \t]*(['"])use strict\2;?\s*/g, '$1')
-                               .replace(/\/\*\*\s*\*\s*@fileoverview[\s\S]*?\*\/\s*/g, '') 
+                            src.replace(/(^|\n)[ \t]*(['"])use strict\2;?/g, '')
+                               .replace(/^(import|export)[ \t]+[^\n]*\n/gm, '')
+                               .replace(/\/\*\*\s*\*\s*@fileoverview[\s\S]*?\*\/\s*/g, '')
                                .replace(/[ \t]*if\s*\(NODE\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '')
                                .replace(/[ \t]*if\s*\(typeof\s+module\s*!==\s*(['"])undefined\1\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '')
                                .replace(/[ \t]*[A-Za-z_][A-Za-z0-9_.]*\.assert\([^\n]*\);[^\n]*/g, '');
@@ -214,8 +215,9 @@ module.exports = function(grunt) {
                     banner: '"use strict";\n\n',
                     process: function(src, filepath) {
                         return "/**\n * @copyright " + filepath.replace(/^\./, "http://pcjs.org") + " (C) Jeff Parsons 2012-2016\n */\n\n" +
-                            src.replace(/(^|\n)[ \t]*(['"])use strict\2;?\s*/g, '$1')
-                               .replace(/\/\*\*\s*\*\s*@fileoverview[\s\S]*?\*\/\s*/g, '') 
+                            src.replace(/(^|\n)[ \t]*(['"])use strict\2;?/g, '')
+                               .replace(/^(import|export)[ \t]+[^\n]*\n/gm, '')
+                               .replace(/\/\*\*\s*\*\s*@fileoverview[\s\S]*?\*\/\s*/g, '')
                                .replace(/[ \t]*if\s*\(NODE\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '')
                                .replace(/[ \t]*if\s*\(typeof\s+module\s*!==\s*(['"])undefined\1\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '')
                                .replace(/[ \t]*[A-Za-z_][A-Za-z0-9_.]*\.assert\([^\n]*\);[^\n]*/g, '');
@@ -229,8 +231,9 @@ module.exports = function(grunt) {
                     banner: '"use strict";\n\n',
                     process: function(src, filepath) {
                         return "/**\n * @copyright " + filepath.replace(/^\./, "http://pcjs.org") + " (C) Jeff Parsons 2012-2016\n */\n\n" +
-                            src.replace(/(^|\n)[ \t]*(['"])use strict\2;?\s*/g, '$1')
-                               .replace(/\/\*\*\s*\*\s*@fileoverview[\s\S]*?\*\/\s*/g, '') 
+                            src.replace(/(^|\n)[ \t]*(['"])use strict\2;?/g, '')
+                               .replace(/^(import|export)[ \t]+[^\n]*\n/gm, '')
+                               .replace(/\/\*\*\s*\*\s*@fileoverview[\s\S]*?\*\/\s*/g, '')
                                .replace(/[ \t]*if\s*\(NODE\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '')
                                .replace(/[ \t]*if\s*\(typeof\s+module\s*!==\s*(['"])undefined\1\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '')
                                .replace(/[ \t]*[A-Za-z_][A-Za-z0-9_.]*\.assert\([^\n]*\);[^\n]*/g, '');
@@ -244,8 +247,9 @@ module.exports = function(grunt) {
                     banner: '"use strict";\n\n',
                     process: function(src, filepath) {
                         return "/**\n * @copyright " + filepath.replace(/^\./, "http://pcjs.org") + " (C) Jeff Parsons 2012-2016\n */\n\n" +
-                            src.replace(/(^|\n)[ \t]*(['"])use strict\2;?\s*/g, '$1')
-                               .replace(/\/\*\*\s*\*\s*@fileoverview[\s\S]*?\*\/\s*/g, '') 
+                            src.replace(/(^|\n)[ \t]*(['"])use strict\2;?/g, '')
+                               .replace(/^(import|export)[ \t]+[^\n]*\n/gm, '')
+                               .replace(/\/\*\*\s*\*\s*@fileoverview[\s\S]*?\*\/\s*/g, '')
                                .replace(/[ \t]*if\s*\(NODE\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '')
                                .replace(/[ \t]*if\s*\(typeof\s+module\s*!==\s*(['"])undefined\1\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '')
                                .replace(/[ \t]*[A-Za-z_][A-Za-z0-9_.]*\.assert\([^\n]*\);[^\n]*/g, '');
