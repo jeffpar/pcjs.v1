@@ -50,8 +50,8 @@ import MemoryPDP11 from "./memory";
  * queue would constantly grow and shrink as requests were issued and dispatched, and as long as there was something
  * in the queue, the CPU was constantly examining it.
  *
- * Now we are trying something more efficient.  First, for devices that require delays (like a serial port's receiver
- * and transmitter buffer registers that are supposed to "clock" the data in and out at a specific baud rate), the
+ * Now we are trying something more efficient.  First, for devices that require delays (like the SerialPort's receiver
+ * and transmitter buffer registers, which are supposed to "clock" the data in and out at a specific baud rate), the
  * CPU offers timer services that will "fire" a callback after a specified delay, which are much more efficient than
  * requiring the CPU to dive into an interrupt queue and decrement delay counts on every instruction.
  *
@@ -337,11 +337,29 @@ class CPUStatePDP11 extends CPUPDP11 {
         this.mmuLastPage = 0;
         this.mmuMask = 0x3ffff;
 
-        this.addrLast = 0;          // this is queried by the Panel when it's not using its own ADDRESS register
-        this.opLast = 0;            // stores the PC and any auto-incs or auto-decs from the last opcode; used to update MMR1 and MMR2
+        /*
+         * This is queried and displayed by the Panel when it's not displaying its own ADDRESS register
+         * (which takes precedence when, for example, you've manually halted the CPU and are independently
+         * examining the contents of other addresses).
+         *
+         * We initialize it to whatever the current PC is, because according to @paulnank's pdp11.js: "Reset
+         * displays next instruction address" and initMMU() is called on a RESET.
+         */
+        this.addrLast = this.regsGen[7];
+
+        /*
+         * This stores the PC in the lower 16 bits, and any auto-incs or auto-decs from the last opcode in the
+         * upper 16 bits;  the lower 16 bits are used to update MMR2, and the upper 16 bits are used to update MMR1.
+         * The upper bits are automatically zeroed at the start of every operation when PC is copied to opLast.
+         */
+        this.opLast = 0;
 
         this.resetIRQs();
 
+        /*
+         * As initCPU() explains, we shouldn't be calling this function until well after initBus() has been
+         * called, but we still make absolutely sure we have Bus access.
+         */
         if (this.bus) {
             this.setMemoryAccess();
             this.addrInvalid = this.bus.getMemoryLimit(MemoryPDP11.TYPE.RAM);
@@ -479,8 +497,8 @@ class CPUStatePDP11 extends CPUPDP11 {
     getMMR1()
     {
         /*
-         * If updates to MMR1 have not been shut off (ie, MMR0.ABORT bits are clear),
-         * then we are allowed to sync MMR1 with its real-time counterpart in opLast.
+         * If updates to MMR1 have not been shut off (ie, MMR0.ABORT bits are clear), then we are allowed
+         * to sync MMR1 with its real-time counterpart in opLast.
          */
         if (!(this.regMMR0 & PDP11.MMR0.ABORT)) {
             this.regMMR1 = (this.opLast >> 16) & 0xffff;
@@ -501,8 +519,8 @@ class CPUStatePDP11 extends CPUPDP11 {
     getMMR2()
     {
         /*
-         * If updates to MMR2 have not been shut off (ie, MMR0.ABORT bits are clear),
-         * then we are allowed to sync MMR2 with its real-time counterpart in opLast.
+         * If updates to MMR2 have not been shut off (ie, MMR0.ABORT bits are clear), then we are allowed
+         * to sync MMR2 with its real-time counterpart in opLast.
          */
         if (!(this.regMMR0 & PDP11.MMR0.ABORT)) {
             this.regMMR2 = this.opLast & 0xffff;
@@ -530,14 +548,14 @@ class CPUStatePDP11 extends CPUPDP11 {
     setMMR3(newMMR3)
     {
         /*
-         * Don't allow the 11/45 to use 22-bit addressing or the UNIBUS map
+         * Don't allow the 11/45 to use 22-bit addressing or the UNIBUS map.
          */
         if (this.model < PDP11.MODEL_1170) {
             newMMR3 &= ~(PDP11.MMR3.MMU_22BIT | PDP11.MMR3.UNIBUS_MAP);
         }
         if (this.regMMR3 != newMMR3) {
             this.regMMR3 = newMMR3;
-            this.mmuMask = (newMMR3 & PDP11.MMR3.MMU_22BIT)? 0x3fffff : 0x3ffff;
+            this.mmuMask = (newMMR3 & PDP11.MMR3.MMU_22BIT)? BusPDP11.MASK_22BIT : BusPDP11.MASK_18BIT;
             this.setMemoryAccess();
         }
     }
@@ -815,6 +833,26 @@ class CPUStatePDP11 extends CPUPDP11 {
         var pc = this.regsGen[PDP11.REG.PC];
         this.regsGen[PDP11.REG.PC] = (pc + off) & 0xffff;
         return pc;
+    }
+
+    /**
+     * branch(opCode)
+     *
+     * @this {CPUStatePDP11}
+     * @param {number} opCode
+     * @param {boolean|number} condition
+     */
+    branch(opCode, condition)
+    {
+        if (condition) {
+            var off = ((opCode << 24) >> 23);
+            if (DEBUG && DEBUGGER && this.dbg && off == -2) {
+                this.dbg.stopInstruction("branch to self");
+            }
+            this.setPC(this.getPC() + off);
+            this.nStepCycles -= 2;
+        }
+        this.nStepCycles -= (2 + 1);
     }
 
     /**
@@ -2151,6 +2189,9 @@ class CPUStatePDP11 extends CPUPDP11 {
     /**
      * getByteChecked(addr)
      *
+     * This is the getByte() handler whenever the Debugger has one or more virtual memory READ breakpoints set;
+     * otherwise, getByte() is bound to Bus.getByte().
+     *
      * @this {CPUStatePDP11}
      * @param {number} addr
      * @return {number}
@@ -2165,6 +2206,9 @@ class CPUStatePDP11 extends CPUPDP11 {
 
     /**
      * getWordChecked(addr)
+     *
+     * This is the getWord() handler whenever the Debugger has one or more virtual memory READ breakpoints set;
+     * otherwise, getWord() is bound to Bus.getWord().
      *
      * @this {CPUStatePDP11}
      * @param {number} addr
@@ -2181,6 +2225,9 @@ class CPUStatePDP11 extends CPUPDP11 {
     /**
      * setByteChecked(addr, data)
      *
+     * This is the setByte() handler whenever the Debugger has one or more virtual memory WRITE breakpoints set;
+     * otherwise, setByte() is bound to Bus.setByte().
+     *
      * @this {CPUStatePDP11}
      * @param {number} addr
      * @param {number} data
@@ -2195,6 +2242,9 @@ class CPUStatePDP11 extends CPUPDP11 {
 
     /**
      * setWordChecked(addr, data)
+     *
+     * This is the setWord() handler whenever the Debugger has one or more virtual memory WRITE breakpoints set;
+     * otherwise, setWord() is bound to Bus.setWord().
      *
      * @this {CPUStatePDP11}
      * @param {number} addr
@@ -2765,26 +2815,6 @@ class CPUStatePDP11 extends CPUPDP11 {
             fnFlags.call(this, (data = data < 0? this.regsGen[-data-1] : data));
             this.setWord(addr, data);
         }
-    }
-
-    /**
-     * branch(opCode)
-     *
-     * @this {CPUStatePDP11}
-     * @param {number} opCode
-     * @param {boolean|number} condition
-     */
-    branch(opCode, condition)
-    {
-        if (condition) {
-            var off = ((opCode << 24) >> 23);
-            if (DEBUG && DEBUGGER && this.dbg && off == -2) {
-                this.dbg.stopInstruction("branch to self");
-            }
-            this.setPC(this.getPC() + off);
-            this.nStepCycles -= 2;
-        }
-        this.nStepCycles -= (2 + 1);
     }
 
     /**
