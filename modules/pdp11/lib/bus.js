@@ -982,7 +982,7 @@ class BusPDP11 extends Component {
             var fnWriteWord = afn[3]? afn[3].bind(component) : null;
 
             /*
-             * As discussed in the IOController comments above, when handlers are being registered for these
+             * As discussed in the IOController comments below, when handlers are being registered for these
              * BYTE-granular UNIBUS addresses, we must install custom fallback handlers for all BYTE accesses.
              */
             if (addr >= PDP11.UNIBUS.R0SET0 && addr <= PDP11.UNIBUS.R6USER) {
