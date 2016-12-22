@@ -29,7 +29,7 @@
 "use strict";
 
 import Str from "../../shared/es6/strlib";
-import Component from "../..shared/es6/component";
+import Component from "../../shared/es6/component";
 
 /**
  * Debugger Address Object

@@ -494,7 +494,7 @@ class BusPDP11 extends Component {
             var block = this.aBusBlocks[iBlock];
             info.cbTotal += block.size;
             if (block.size) {
-                info.aBlocks.push(Usr.initBitFields(BlockInfoPDP11, iBlock, 0, 0, block.type));
+                info.aBlocks.push(/** @type {BlockInfoPDP11} */ (Usr.initBitFields(BlockInfoPDP11, iBlock, 0, 0, block.type)));
                 info.cBlocks++
             }
             iBlock++;

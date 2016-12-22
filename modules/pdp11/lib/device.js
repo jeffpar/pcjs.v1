@@ -35,11 +35,13 @@
 import Str from "../../shared/es6/strlib";
 import Web from "../../shared/es6/weblib";
 import Component from "../../shared/es6/component";
+import PDP11 from "./defines";
 import BusPDP11 from "./bus";
 import MemoryPDP11 from "./memory";
 import MessagesPDP11 from "./messages";
 import PC11 from "./pc11";
 import RL11 from "./rl11";
+import RK11 from "./rk11";
 
 class DevicePDP11 extends Component {
     /**

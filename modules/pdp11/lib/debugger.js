@@ -55,7 +55,7 @@ import MessagesPDP11 from "./messages";
  *      aCmds           preprocessed commands (from sCmd)
  *
  * @typedef {{
- *      addr:(number),
+ *      addr:(number|undefined),
  *      fPhysical:(boolean),
  *      fTemporary:(boolean),
  *      nBase:(number|undefined),
@@ -2918,7 +2918,7 @@ class DebuggerPDP11 extends Debugger {
              * TODO: Tweak this output to accommodate 18-bit machines as well as 22-bit machines.
              */
             var fPhysical = (dbgAddr.fPhysical || dbgAddr.addr > 0xffff);
-            var a = this.cpu.getAddrInfo(dbgAddr.addr, fPhysical);
+            var a = this.cpu.getAddrInfo(dbgAddr.addr || 0, fPhysical);
             this.println(Str.pad("", fPhysical? 12: 19) + Str.toBin(dbgAddr.addr, fPhysical? 22 : 17, 3) + "  " + Str.toOct(dbgAddr.addr, 8));
             if (a.length < 6) {
                 if (a.length > 2) {

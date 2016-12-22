@@ -553,9 +553,9 @@ class Str {
      */
     static toASCIICode(b)
     {
-        var s = (b != Str.ASCII.CR && b != Str.ASCII.LF ? Str.aASCIICodes[b] : null);
-        if (s) {
-            s = '<' + s + '>';
+        var s;
+        if (b != Str.ASCII.CR && b != Str.ASCII.LF) {
+            s = '<' + Str.aASCIICodes[b] + '>';
         } else {
             s = String.fromCharCode(b);
         }
