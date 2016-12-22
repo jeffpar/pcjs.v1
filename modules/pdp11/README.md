@@ -60,8 +60,25 @@ or generate both versions and use a loader that detects the browser's capabiliti
 Caveats
 -------
 
+### Shared modules
+
+All PCjs machines rely on shared modules that are normally stored in [/shared/lib](/shared/lib/).  However, until
+ALL the machines have been converted to use ES6 classes, shared code must now exist in two flavors:
+[/shared/lib](/shared/lib/) and [/shared/es6](/shared/es6/).
+
+Once all the other machines have been converted to use ES6 classes, the shared ES6 code will be folded back into
+[/shared/lib](/shared/lib/), and the temporary ES6 folder will go away.  Obviously, there is incentive for me to do
+this sooner rather than later, since in the interim, I must make any changes to shared code in both places.
+
+There's also a less obvious problem: if you load a web page that attempts to load two or more PCjs machines, one of
+which uses [/shared/lib](/shared/lib/) and another of which uses [/shared/es6](/shared/es6/), at least one of them will
+fail to start, because the two sets of shared code cannot coexist.  Well, they *could* have coexisted if I had been
+willing to change the names of all the shared global objects (like **Component**), but I wasn't. 
+
+### *import* and *export*
+
 With regard to *import* and *export* statements, the main reason I use them is to inform my development environment
-(WebStorm) about each file's dependencies, thereby preventing inspection warnings.  Ultimately, I plan to make PDPjs
+(WebStorm) about each file's dependencies, thereby preventing inspection warnings.  And ultimately, I plan to make PDPjs
 run as a Node application, so explicitly declaring all imports and exports will be required, but for now, it's just
 a web application, so strictly speaking, they're not required.
 

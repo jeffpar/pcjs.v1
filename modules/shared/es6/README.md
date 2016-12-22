@@ -1,4 +1,4 @@
-Shared (ES6) Sources
+Shared Sources
 ===
 
 This folder contains a mix of shared code, with some files used only by Node (server) modules,
