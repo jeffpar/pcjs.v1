@@ -555,7 +555,10 @@ class Str {
     {
         var s;
         if (b != Str.ASCII.CR && b != Str.ASCII.LF) {
-            s = '<' + Str.aASCIICodes[b] + '>';
+            s = Str.aASCIICodes[b];
+        }
+        if (s) {
+            s = '<' + s + '>';
         } else {
             s = String.fromCharCode(b);
         }
