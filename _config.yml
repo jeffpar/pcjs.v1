@@ -34,7 +34,7 @@ gems:
 
 pcjs:
   domain: pcjs.org    # whereas site.url is used for linking purposes, site.pcjs.domain is used for display purposes
-  version: 1.30.6     # IMPORTANT: keep pcjs.version in sync with package.json:version
+  version: 1.31.0     # IMPORTANT: keep pcjs.version in sync with package.json:version
   compiled: true      # by default, the compiled pcjs.version scripts will be used (eg, pcx86.js or pcx86-dbg.js)
   c1p_scripts:        # if pcjs.compiled is false, the following scripts will be included instead, in the order listed
     - /modules/shared/lib/defines.js
@@ -134,16 +134,16 @@ pcjs:
     - /modules/shared/lib/state.js
     - /modules/shared/lib/embed.js
   pdp11_scripts:
-    - /modules/shared/lib/defines.js
-    - /modules/shared/lib/nodebug.js
-    - /modules/shared/lib/dumpapi.js
-    - /modules/shared/lib/reportapi.js
-    - /modules/shared/lib/userapi.js
-    - /modules/shared/lib/keys.js
-    - /modules/shared/lib/strlib.js
-    - /modules/shared/lib/usrlib.js
-    - /modules/shared/lib/weblib.js
-    - /modules/shared/lib/component.js
+    - /modules/shared/es6/defines.js
+    - /modules/shared/es6/nodebug.js
+    - /modules/shared/es6/dumpapi.js
+    - /modules/shared/es6/reportapi.js
+    - /modules/shared/es6/userapi.js
+    - /modules/shared/es6/keys.js
+    - /modules/shared/es6/strlib.js
+    - /modules/shared/es6/usrlib.js
+    - /modules/shared/es6/weblib.js
+    - /modules/shared/es6/component.js
     - /modules/pdp11/lib/defines.js
     - /modules/pdp11/lib/messages.js
     - /modules/pdp11/lib/panel.js
@@ -161,8 +161,8 @@ pcjs:
     - /modules/pdp11/lib/disk.js
     - /modules/pdp11/lib/rk11.js
     - /modules/pdp11/lib/rl11.js
-    - /modules/shared/lib/debugger.js
+    - /modules/shared/es6/debugger.js
     - /modules/pdp11/lib/debugger.js
     - /modules/pdp11/lib/computer.js
-    - /modules/shared/lib/state.js
-    - /modules/shared/lib/embed.js
+    - /modules/shared/es6/state.js
+    - /modules/shared/es6/embed.js
