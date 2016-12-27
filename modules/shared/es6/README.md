@@ -1,5 +1,5 @@
-Shared Sources
-==============
+Shared (ES6) Sources
+====================
 
 This folder contains a mix of shared code, with some files used only by Node (server) modules,
 some used only by Browser (client) modules, and others used by both.

@@ -174,7 +174,7 @@ class Web {
             return [sResource, nErrorCode];
         }
         else if (fAsync && typeof resources == 'function') {
-            resources(sURL, function (sResource, nErrorCode)
+            resources(sURL, function(sResource, nErrorCode)
             {
                 if (done) done(sURL, sResource, nErrorCode);
             });
@@ -190,7 +190,7 @@ class Web {
 
         var xmlHTTP = (window.XMLHttpRequest ? new window.XMLHttpRequest() : new window.ActiveXObject("Microsoft.XMLHTTP"));
         if (fAsync) {
-            xmlHTTP.onreadystatechange = function ()
+            xmlHTTP.onreadystatechange = function()
             {
                 if (xmlHTTP.readyState === 4) {
                     /*
@@ -679,7 +679,7 @@ class Web {
             var match;
             var pl = /\+/g; // RegExp for replacing addition symbol with a space
             var search = /([^&=]+)=?([^&]*)/g;
-            var decode = function (s)
+            var decode = function(s)
             {
                 return decodeURIComponent(s.replace(pl, " "));
             };
@@ -777,7 +777,7 @@ class Web {
                 ms = msRepeat;
             }
         };
-        e.onmousedown = function ()
+        e.onmousedown = function()
         {
             // Web.log("onMouseDown()");
             if (!fIgnoreMouseEvents) {
@@ -787,7 +787,7 @@ class Web {
                 }
             }
         };
-        e.ontouchstart = function ()
+        e.ontouchstart = function()
         {
             // Web.log("onTouchStart()");
             if (!timer) {
@@ -795,7 +795,7 @@ class Web {
                 fnRepeat();
             }
         };
-        e.onmouseup = e.onmouseout = function ()
+        e.onmouseup = e.onmouseout = function()
         {
             // Web.log("onMouseUp()/onMouseOut()");
             if (timer) {
@@ -803,7 +803,7 @@ class Web {
                 timer = null;
             }
         };
-        e.ontouchend = e.ontouchcancel = function ()
+        e.ontouchend = e.ontouchcancel = function()
         {
             // Web.log("onTouchEnd()/onTouchCancel()");
             if (timer) {

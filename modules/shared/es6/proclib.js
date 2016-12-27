@@ -44,7 +44,7 @@ class Proc {
      *
      * @return {{argc:number, argv:{}}}
      */
-    static getArgs = function ()
+    static getArgs()
     {
         var argc = 0;
         var argv = {};

@@ -56,7 +56,7 @@ class Usr {
         var right = a.length;
         var found = 0;
         if (fnCompare === undefined) {
-            fnCompare = function (a, b)
+            fnCompare = function(a, b)
             {
                 return a > b ? 1 : a < b ? -1 : 0;
             };

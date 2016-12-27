@@ -494,7 +494,7 @@ class BusPDP11 extends Component {
             var block = this.aBusBlocks[iBlock];
             info.cbTotal += block.size;
             if (block.size) {
-                info.aBlocks.push(Usr.initBitFields(BlockInfoPDP11, iBlock, 0, 0, block.type));
+                info.aBlocks.push(/** @type {BlockInfoPDP11} */ (Usr.initBitFields(BlockInfoPDP11, iBlock, 0, 0, block.type)));
                 info.cBlocks++
             }
             iBlock++;
@@ -982,7 +982,7 @@ class BusPDP11 extends Component {
             var fnWriteWord = afn[3]? afn[3].bind(component) : null;
 
             /*
-             * As discussed in the IOController comments above, when handlers are being registered for these
+             * As discussed in the IOController comments below, when handlers are being registered for these
              * BYTE-granular UNIBUS addresses, we must install custom fallback handlers for all BYTE accesses.
              */
             if (addr >= PDP11.UNIBUS.R0SET0 && addr <= PDP11.UNIBUS.R6USER) {
@@ -1131,11 +1131,13 @@ class BusPDP11 extends Component {
     }
 }
 
-BusPDP11.IOPAGE_16BIT   =   0xE000; /*000160000*/               // eg, PDP-11/20
-BusPDP11.IOPAGE_18BIT   =  0x3E000; /*000760000*/               // eg, PDP-11/45
+BusPDP11.IOPAGE_16BIT   = 0x00E000; /*000160000*/               // eg, PDP-11/20
+BusPDP11.IOPAGE_18BIT   = 0x03E000; /*000760000*/               // eg, PDP-11/45
 BusPDP11.IOPAGE_22BIT   = 0x3FE000; /*017760000*/               // eg, PDP-11/70
-BusPDP11.IOPAGE_LENGTH  =   0x2000;                             // ie, 8Kb
+BusPDP11.IOPAGE_LENGTH  = 0x002000;                             // ie, 8Kb
 BusPDP11.IOPAGE_MASK    = BusPDP11.IOPAGE_LENGTH - 1;
+
+BusPDP11.MASK_18BIT     = 0x03FFFF; /*000777777*/
 
 BusPDP11.UNIBUS_22BIT   = 0x3C0000; /*017000000*/
 BusPDP11.MASK_22BIT     = 0x3FFFFF; /*017777777*/

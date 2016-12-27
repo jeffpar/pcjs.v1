@@ -1020,7 +1020,7 @@ class PanelPDP11 extends Component {
                 }
 
                 /*
-                 * Update the ADDRESS and DATA LEDs by selecting the appropriate values
+                 * Update the ADDRESS and DATA LEDs by selecting the appropriate values.
                  *
                  * TODO: There is currently no mechanism for selecting regData over regDisplay;
                  * we are acting as if the DATASEL switch setting is locked to "DISPLAY REGISTER".
