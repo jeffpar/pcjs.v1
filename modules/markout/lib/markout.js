@@ -975,6 +975,7 @@ MarkOut.prototype.convertMDLinks = function(sBlock)
         } else {
             sURL = net.encodeURL(sURL, this.req, this.fDebug);
         }
+        sURL = sURL.replace(/_/g, "%5F");       // this helps prevent emphasis detection in URLs
         sBlock = str.replaceAll(aMatch[0], '<' + sTag +  ' ' + sType + '="' + sURL + '"' + sTitle + '>' + sText + '</' + sTag + '>', sBlock);
     }
     return sBlock;

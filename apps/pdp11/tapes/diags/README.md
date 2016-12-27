@@ -44,7 +44,7 @@ Running Paper Tape Diagnostics
 
 Instructions for running "TEST 1 - BRANCH" through "TEST 12 - JUMP" come from the
 [MAINDEC-11-DZQAB MAINDEC USER REFERENCE MANUAL (Oct 1973)](http://archive.pcjs.org/pubs/dec/pdp11/diags/MAINDEC-11-DZQAB-B-D_User_Reference_Manual_Oct73.pdf),
-p. 19:
+page 19:
 
 	MAINDEC-11-D0AA to D0LA (NEW NUMBER - DZKAA to DZKAL)
 	
@@ -250,7 +250,7 @@ so for now, I'm just going to pick out selected tapes and archive them here.
 
 From [bitsavers.org](http://bitsavers.trailing-edge.com/bits/DEC/pdp11/papertapeimages/20040101/), Tray 02:
 
-* Tape 04: [MAINDEC-11-DEQKC-B1-PB 06/12/78; 11/70 cpu instruction exerciser; (c)1975,76](#md-11-1170-cpu-exerciser)
+* Tape 04: [MAINDEC-11-DEQKC-B1-PB 06/12/78; 11/70 cpu instruction exerciser; (c)1975,76](#md-11-1170-cpu-exerciser) [[1980 Listing](http://bitsavers.org/pdf/dec/pdp11/microfiche/ftp.j-hoppe.de/bw/gh/AH-7996E-MC__PDP11-70-74__11-70_INST_EXR__CEQKCE0__%28C%2975,80.pdf)]
 
 MD-11 11/70 CPU EXERCISER
 -------------------------
@@ -336,7 +336,7 @@ I disassembled the code responsible for that failure:
 I wasn't able to locate a source code listing for this particular (1978) version of the 11/70 CPU Instruction Exerciser,
 but I did find another useful document,
 [MAINDEC-11-DCQKC 11/40 and 11/45 INSTRUCTION EXERCISER (Sep 1974)](http://archive.pcjs.org/pubs/dec/pdp11/diags/MAINDEC-11-DCQKC-D-D_1140_1145_INSTRUCTION_EXERCISER_Sep74.pdf),
-where I discovered a matching test sequence on p. 86.
+where I discovered a matching test sequence on page 86.
 
 Here's an excerpt:
 
@@ -372,6 +372,13 @@ which predates the 11/45 and 11/70, expects this instruction:
 to trap when SP is 150.  That contradicts this newer test (ie, that TST should not cause an overflow
 trap "BECAUSE TST IS A NON MODIFYING INST").  For this and other reasons, PDPjs now installs different
 checkStackLimit() handlers based on the CPU model.
+
+UPDATE: Another (1980) version of the source code for this diagnostic has been located and archived
+with the rest of our [DEC PDP-11 Diagnostic Publications](/pubs/dec/pdp11/diags/):
+
+- [CEQKCE0 11/70 INSTRUCTION EXERCISER (May 1980)](http://archive.pcjs.org/pubs/dec/pdp11/diags/AC-7994E-MC_CEQKCE0_1170_INSTRUCTION_EXERCISER_May80.pdf) [[Original PDF](http://bitsavers.org/pdf/dec/pdp11/microfiche/ftp.j-hoppe.de/bw/gh/AH-7996E-MC__PDP11-70-74__11-70_INST_EXR__CEQKCE0__%28C%2975,80.pdf)]
+
+You'll find the above excerpt on page 114, at address 024624.
 
 ---
 

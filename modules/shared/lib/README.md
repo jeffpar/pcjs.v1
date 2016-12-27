@@ -1,5 +1,5 @@
 Shared Sources
-===
+==============
 
 This folder contains a mix of shared code, with some files used only by Node (server) modules,
 some used only by Browser (client) modules, and others used by both.
@@ -8,7 +8,7 @@ At the moment, only a few files are completely agnostic; eg: [strlib.js](strlib.
 One give-away is that neither contain references to any globals (although references to each other
 would be fine).
 
-**netlib.js** is appropriate only for Node modules, because it contains code that relies on Node's
+[netlib.js](netlib.js) is appropriate only for Node modules, because it contains code that relies on Node's
 global *Buffer* object, as indicated by:
 
 	/* global Buffer: false */

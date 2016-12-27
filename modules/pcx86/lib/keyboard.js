@@ -1043,7 +1043,7 @@ Keyboard.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
                         kbd.addActiveKey(simCode);
                     };
                 }(this, sBinding, Keyboard.SOFTCODES[sBinding]);
-                var fnUp = function (kbd, sKey, simCode) {
+                var fnUp = function(kbd, sKey, simCode) {
                     return function onKeyboardBindingUp(event) {
                         kbd.removeActiveKey(simCode);
                     };
@@ -1655,7 +1655,7 @@ Keyboard.prototype.injectKeysFromBuffer = function(msDelay)
         this.addActiveKey(ch, true);
     }
     if (this.sInjectBuffer.length > 0) {
-        setTimeout(function (kbd) {
+        setTimeout(function(kbd) {
             return function onInjectKeyTimeout() {
                 kbd.injectKeysFromBuffer(msDelay);
             };

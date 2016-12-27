@@ -86,11 +86,13 @@ if (pkg.homepage) {
 }
 
 gulp.task('mktmp', function() {
-    return gulp.src(pkg.pdp11Files)
+    return gulp.src(pkg.pdp11ES6Files)
         .pipe(foreach(function(stream, file){
               return stream
-                .pipe(header('/* ' + file.path + ' */\n\n'))
-                .pipe(replace(/(^|\n)[ \t]*(['"])use strict\2;?\s*/g, "$1"))
+                .pipe(header('/**\n * @copyright ' + file.path.replace(/.*\/(modules\/.*)/, "http://pcjs.org/$1") + ' (C) Jeff Parsons 2012-2016\n */\n\n'))
+                .pipe(replace(/(^|\n)[ \t]*(['"])use strict\2;?/g, ""))
+                .pipe(replace(/^(import|export)[ \t]+[^\n]*\n/gm, ""))
+                .pipe(replace(/\/\*\*\s*\*\s*@fileoverview[\s\S]*?\*\/\s*/g, ""))
                 .pipe(replace(/[ \t]*if\s*\(NODE\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, ""))
                 .pipe(replace(/[ \t]*if\s*\(typeof\s+module\s*!==\s*(['"])undefined\1\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, ""))
                 .pipe(replace(/[ \t]*[A-Za-z_][A-Za-z0-9_.]*\.assert\([^\n]*\);[^\n]*/g, ""))

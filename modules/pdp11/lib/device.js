@@ -32,1074 +32,1107 @@
 
 "use strict";
 
-if (NODE) {
-    var str           = require("../../shared/lib/strlib");
-    var web           = require("../../shared/lib/weblib");
-    var Component     = require("../../shared/lib/component");
-    var State         = require("../../shared/lib/state");
-    var BusPDP11      = require("./bus");
-    var MemoryPDP11   = require("./memory");
-    var MessagesPDP11 = require("./messages");
-    var PC11          = require("./pc11");
-    var RL11          = require("./rl11");
-}
+import Str from "../../shared/es6/strlib";
+import Web from "../../shared/es6/weblib";
+import Component from "../../shared/es6/component";
+import PDP11 from "./defines";
+import BusPDP11 from "./bus";
+import MemoryPDP11 from "./memory";
+import MessagesPDP11 from "./messages";
+import PC11 from "./pc11";
+import RL11 from "./rl11";
+import RK11 from "./rk11";
 
-/**
- * DevicePDP11(parmsDevice)
- *
- * The Device component implements the following "default" devices:
- *
- *      KW11 (KW11-L Line Time Clock)
- *
- * as well providing access to all the MMU and CPU registers, PSW, etc.
- *
- * @constructor
- * @extends Component
- * @param {Object} parmsDevice
- */
-function DevicePDP11(parmsDevice)
-{
-    Component.call(this, "Device", parmsDevice, DevicePDP11, MessagesPDP11.DEVICE);
+class DevicePDP11 extends Component {
+    /**
+     * DevicePDP11(parmsDevice)
+     *
+     * The Device component implements the following "default" devices:
+     *
+     *      KW11 (KW11-L Line Time Clock)
+     *
+     * as well providing access to all the MMU and CPU registers, PSW, etc.
+     *
+     * @param {Object} parmsDevice
+     */
+    constructor(parmsDevice)
+    {
+        super("Device", parmsDevice, DevicePDP11, MessagesPDP11.DEVICE);
 
-    this.kw11 = {               // KW11 registers
-        csr:        0,
-        timer:      -1          // initBus() will initialize this timer ID
-    };
-}
+        this.kw11 = {               // KW11 registers
+            csr:        0,
+            timer:      -1          // initBus() will initialize this timer ID
+        };
+    }
 
-Component.subclass(DevicePDP11);
+    /**
+     * initBus(cmp, bus, cpu, dbg)
+     *
+     * @this {DevicePDP11}
+     * @param {ComputerPDP11} cmp
+     * @param {BusPDP11} bus
+     * @param {CPUStatePDP11} cpu
+     * @param {DebuggerPDP11} dbg
+     */
+    initBus(cmp, bus, cpu, dbg)
+    {
+        this.bus = bus;
+        this.cmp = cmp;
+        this.cpu = cpu;
+        this.dbg = dbg;
 
-/**
- * initBus(cmp, bus, cpu, dbg)
- *
- * @this {DevicePDP11}
- * @param {ComputerPDP11} cmp
- * @param {BusPDP11} bus
- * @param {CPUStatePDP11} cpu
- * @param {DebuggerPDP11} dbg
- */
-DevicePDP11.prototype.initBus = function(cmp, bus, cpu, dbg)
-{
-    this.bus = bus;
-    this.cmp = cmp;
-    this.cpu = cpu;
-    this.dbg = dbg;
-
-    var device = this;
-    this.kw11.timer = cpu.addTimer(function() {
-        device.interruptKW11();
-    });
-
-    this.kw11.irq = cpu.addIRQ(PDP11.KW11.VEC, PDP11.KW11.PRI, MessagesPDP11.KW11);
-
-    bus.addIOTable(this, DevicePDP11.UNIBUS_IOTABLE);
-    bus.addResetHandler(this.reset.bind(this));
-
-    if (DEBUGGER && dbg) {
-        dbg.messageDump(MessagesPDP11.MMU, function onDumpMMU(asArgs) {
-            device.dumpMMU(asArgs);
+        var device = this;
+        this.kw11.timer = cpu.addTimer(function() {
+            device.interruptKW11();
         });
-    }
-    this.setReady();
-};
 
-/**
- * dumpMMU(asArgs)
- *
- * @this {DevicePDP11}
- * @param {Array.<string>} asArgs
- */
-DevicePDP11.prototype.dumpMMU = function(asArgs)
-{
-    if (DEBUGGER) {
-        var cpu = this.cpu;
-        this.dumpRegs("KIPDR", cpu.mmuPDR[0], 0, asArgs[0]);
-        this.dumpRegs("KDPDR", cpu.mmuPDR[0], 8, asArgs[0]);
-        this.dumpRegs("KIPAR", cpu.mmuPAR[0], 0, asArgs[0]);
-        this.dumpRegs("KDPAR", cpu.mmuPAR[0], 8, asArgs[0], true);
-        this.dumpRegs("SIPDR", cpu.mmuPDR[1], 0, asArgs[0]);
-        this.dumpRegs("SDPDR", cpu.mmuPDR[1], 8, asArgs[0]);
-        this.dumpRegs("SIPAR", cpu.mmuPAR[1], 0, asArgs[0]);
-        this.dumpRegs("SDPAR", cpu.mmuPAR[1], 8, asArgs[0], true);
-        this.dumpRegs("UIPDR", cpu.mmuPDR[3], 0, asArgs[0]);
-        this.dumpRegs("UDPDR", cpu.mmuPDR[3], 8, asArgs[0]);
-        this.dumpRegs("UIPAR", cpu.mmuPAR[3], 0, asArgs[0]);
-        this.dumpRegs("UDPAR", cpu.mmuPAR[3], 8, asArgs[0], true);
-        if (cpu.regMMR3 & PDP11.MMR3.UNIBUS_MAP) {
-            this.dumpRegs("UNIMAP", cpu.regsUniMap, -1, asArgs[0]);
-        }
-    }
-};
+        this.kw11.irq = cpu.addIRQ(PDP11.KW11.VEC, PDP11.KW11.PRI, MessagesPDP11.KW11);
 
-/**
- * dumpRegs(sName, aRegs, offset, sFilter, fBreak)
- *
- * @this {DevicePDP11}
- * @param {string} sName
- * @param {Array.<number>} aRegs
- * @param {number} offset
- * @param {string} sFilter
- * @param {boolean} [fBreak]
- */
-DevicePDP11.prototype.dumpRegs = function(sName, aRegs, offset, sFilter, fBreak)
-{
-    if (DEBUGGER) {
-        var dbg = this.dbg;
-        if (sFilter && sName.indexOf(sFilter.toUpperCase()) < 0) return;
-        var nRegs = 8;
-        var sDump = "";
-        var fIndex = false;
-        var nBytes = 0;
-        var nWidth = 8;
-        if (offset < 0) {
-            nRegs = aRegs.length;
-            offset = 0;
-            fIndex = true;
-            nBytes = 3;
-            nWidth = 4;
+        bus.addIOTable(this, DevicePDP11.UNIBUS_IOTABLE);
+        bus.addResetHandler(this.reset.bind(this));
+
+        if (DEBUGGER && dbg) {
+            dbg.messageDump(MessagesPDP11.MMU, function onDumpMMU(asArgs) {
+                device.dumpMMU(asArgs);
+            });
         }
-        for (var i = 0; i < nRegs; i++) {
-            if (i % nWidth == 0) {
-                if (sDump) sDump += '\n';
-                sDump += sName + (fIndex? ('[' + str.toDec(i, 2) + ']') : '') + ':';
+        this.setReady();
+    }
+
+    /**
+     * dumpMMU(asArgs)
+     *
+     * @this {DevicePDP11}
+     * @param {Array.<string>} asArgs
+     */
+    dumpMMU(asArgs)
+    {
+        if (DEBUGGER) {
+            var cpu = this.cpu;
+            this.dumpRegs("KIPDR", cpu.mmuPDR[0], 0, asArgs[0]);
+            this.dumpRegs("KDPDR", cpu.mmuPDR[0], 8, asArgs[0]);
+            this.dumpRegs("KIPAR", cpu.mmuPAR[0], 0, asArgs[0]);
+            this.dumpRegs("KDPAR", cpu.mmuPAR[0], 8, asArgs[0], true);
+            this.dumpRegs("SIPDR", cpu.mmuPDR[1], 0, asArgs[0]);
+            this.dumpRegs("SDPDR", cpu.mmuPDR[1], 8, asArgs[0]);
+            this.dumpRegs("SIPAR", cpu.mmuPAR[1], 0, asArgs[0]);
+            this.dumpRegs("SDPAR", cpu.mmuPAR[1], 8, asArgs[0], true);
+            this.dumpRegs("UIPDR", cpu.mmuPDR[3], 0, asArgs[0]);
+            this.dumpRegs("UDPDR", cpu.mmuPDR[3], 8, asArgs[0]);
+            this.dumpRegs("UIPAR", cpu.mmuPAR[3], 0, asArgs[0]);
+            this.dumpRegs("UDPAR", cpu.mmuPAR[3], 8, asArgs[0], true);
+            if (cpu.regMMR3 & PDP11.MMR3.UNIBUS_MAP) {
+                this.dumpRegs("UNIMAP", cpu.regsUniMap, -1, asArgs[0]);
             }
-            sDump += ' ' + dbg.toStrBase(aRegs[offset + i], nBytes);
         }
-        dbg.println(sDump + (fBreak? '\n' : ''));
     }
-};
 
-/**
- * reset()
- *
- * @this {DevicePDP11}
- */
-DevicePDP11.prototype.reset = function()
-{
-    this.kw11.lks = PDP11.KW11.LKS.MON;
-    this.cpu.setTimer(this.kw11.timer, 1000/60, true);
-};
-
-/**
- * interruptKW11()
- *
- * We used to call this function only when the the KW11's "Interrupt Enable" bit was set,
- * but now we call it at 60Hz regardless.  In part, this was so we could piggy-back on it
- * to drive display updates, but more importantly, the KW11's "Monitor" bit is supposed to
- * be set at the "line frequency" independent of whether KW11 interrupts are enabled or not.
- *
- * @this {DevicePDP11}
- */
-DevicePDP11.prototype.interruptKW11 = function()
-{
-    this.kw11.lks |= PDP11.KW11.LKS.MON;
-    if (this.kw11.lks & PDP11.KW11.LKS.IE) {
-        this.cpu.setIRQ(this.kw11.irq);
-    }
-    if (this.cmp) this.cmp.updateDisplays(1);
-    this.cpu.setTimer(this.kw11.timer, 1000/60);
-};
-
-/**
- * readLKS(addr)
- *
- * @this {DevicePDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.LKS or 177546)
- * @return {number}
- */
-DevicePDP11.prototype.readLKS = function(addr)
-{
-    /*
-     * NOTE: The original code always cleared LKS.MON (bit 7) after snapping the value for the read,
-     * but based on DEC's "Non-Interrupt Mode" programming examples, it's clear that's not how LKS.MON
-     * operates; if the caller wants to clear it, they must explicitly clear it with a write.
-     */
-    return this.kw11.lks;
-};
-
-/**
- * writeLKS(data, addr)
- *
- * @this {DevicePDP11}
- * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.LKS or 177546)
- */
-DevicePDP11.prototype.writeLKS = function(data, addr)
-{
-    /*
-     * NOTE: The original code always cleared LKS.MON (bit 7) as part of any write, but based on DEC's
-     * "Non-Interrupt Mode" programming examples, which explicitly CLRB after TSTB reveals LKS.MON is set,
-     * I think that was wrong, and that all a write should do is mask off all the other (non-writable) bits.
-     */
-    this.kw11.lks = data & PDP11.KW11.LKS.MASK;
-    if (!(this.kw11.lks & PDP11.KW11.LKS.IE)) this.cpu.clearIRQ(this.kw11.irq);
-};
-
-/**
- * readMMR0(addr)
- *
- * @this {DevicePDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.MMR0 or 177572)
- * @return {number}
- */
-DevicePDP11.prototype.readMMR0 = function(addr)
-{
-    return this.cpu.getMMR0();
-};
-
-/**
- * writeMMR0(data, addr)
- *
- * @this {DevicePDP11}
- * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.MMR0 or 177572)
- */
-DevicePDP11.prototype.writeMMR0 = function(data, addr)
-{
-    this.cpu.setMMR0((data & ~PDP11.MMR0.COMPLETED) | (this.cpu.regMMR0 & PDP11.MMR0.COMPLETED));
-};
-
-/**
- * readMMR1(addr)
- *
- * @this {DevicePDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.MMR1 or 177574)
- * @return {number}
- */
-DevicePDP11.prototype.readMMR1 = function(addr)
-{
-    return this.cpu.getMMR1();
-};
-
-/**
- * readMMR2(addr)
- *
- * @this {DevicePDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.MMR2 or 177576)
- * @return {number}
- */
-DevicePDP11.prototype.readMMR2 = function(addr)
-{
-    return this.cpu.getMMR2();
-};
-
-/**
- * readMMR3(addr)
- *
- * @this {DevicePDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.MMR3 or 172516)
- * @return {number}
- */
-DevicePDP11.prototype.readMMR3 = function(addr)
-{
-    return this.cpu.getMMR3();
-};
-
-/**
- * writeMMR3(data, addr)
- *
- * @this {DevicePDP11}
- * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.MMR3 or 172516)
- */
-DevicePDP11.prototype.writeMMR3 = function(data, addr)
-{
-    this.cpu.setMMR3(data);
-};
-
-/**
- * readUNIMAP(addr)
- *
- * NOTE: The UNIBUS map ("UNIMAP") is 32 registers spread across 64 words, so we first calculate the word index.
- *
- * @this {DevicePDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.UNIMAP)
- * @return {number}
- */
-DevicePDP11.prototype.readUNIMAP = function(addr)
-{
-    var word = (addr >> 1) & 0x3f, reg = word >> 1;
-    var data = this.cpu.regsUniMap[reg];
-    return (word & 1)? (data >> 16) : (data & 0xffff);
-};
-
-/**
- * writeUNIMAP(data, addr)
- *
- * NOTE: The UNIBUS map ("UNIMAP") is 32 registers spread across 64 words, so we first calculate the word index.
- *
- * @this {DevicePDP11}
- * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.UNIMAP)
- */
-DevicePDP11.prototype.writeUNIMAP = function(data, addr)
-{
-    var word = (addr >> 1) & 0x3f, reg = word >> 1;
-    if (word & 1) {
-        this.cpu.regsUniMap[reg] = (this.cpu.regsUniMap[reg] & 0xffff) | ((data & 0x003f) << 16);
-    } else {
-        this.cpu.regsUniMap[reg] = (this.cpu.regsUniMap[reg] & ~0xffff) | (data & 0xfffe);
-    }
-};
-
-/**
- * readSIPDR(addr)
- *
- * @this {DevicePDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.SIPDR0--SIPDR7 or 172200--172216)
- * @return {number}
- */
-DevicePDP11.prototype.readSIPDR = function(addr)
-{
-    var reg = (addr >> 1) & 7;
-    return this.cpu.mmuPDR[1][reg];
-};
-
-/**
- * writeSIPDR(data, addr)
- *
- * @this {DevicePDP11}
- * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.SIPDR0--SIPDR7 or 172200--172216)
- */
-DevicePDP11.prototype.writeSIPDR = function(data, addr)
-{
-    var reg = (addr >> 1) & 7;
-    this.cpu.mmuPDR[1][reg] = data & 0xff0f;
-};
-
-/**
- * readSDPDR(addr)
- *
- * @this {DevicePDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.SDPDR0--SDPDR7 or 172220--172236)
- * @return {number}
- */
-DevicePDP11.prototype.readSDPDR = function(addr)
-{
-    var reg = ((addr >> 1) & 7) + 8;
-    return this.cpu.mmuPDR[1][reg];
-};
-
-/**
- * writeSDPDR(data, addr)
- *
- * @this {DevicePDP11}
- * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.SDPDR0--SDPDR7 or 172220--172236)
- */
-DevicePDP11.prototype.writeSDPDR = function(data, addr)
-{
-    var reg = ((addr >> 1) & 7) + 8;
-    this.cpu.mmuPDR[1][reg] = data & 0xff0f;
-};
-
-/**
- * readSIPAR(addr)
- *
- * @this {DevicePDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.SIPAR0--SIPAR7 or 172240--172256)
- * @return {number}
- */
-DevicePDP11.prototype.readSIPAR = function(addr)
-{
-    var reg = (addr >> 1) & 7;
-    return this.cpu.mmuPAR[1][reg];
-};
-
-/**
- * writeSIPAR(data, addr)
- *
- * @this {DevicePDP11}
- * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.SIPAR0--SIPAR7 or 172240--172256)
- */
-DevicePDP11.prototype.writeSIPAR = function(data, addr)
-{
-    var reg = (addr >> 1) & 7;
-    this.cpu.mmuPAR[1][reg] = data;
-    this.cpu.mmuPDR[1][reg] &= 0xff0f;
-
-};
-
-/**
- * readSDPAR(addr)
- *
- * @this {DevicePDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.SDPAR0--SDPAR7 or 172260--172276)
- * @return {number}
- */
-DevicePDP11.prototype.readSDPAR = function(addr)
-{
-    var reg = ((addr >> 1) & 7) + 8;
-    return this.cpu.mmuPAR[1][reg];
-};
-
-/**
- * writeSDPAR(data, addr)
- *
- * @this {DevicePDP11}
- * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.SDPAR0--SDPAR7 or 172260--172276)
- */
-DevicePDP11.prototype.writeSDPAR = function(data, addr)
-{
-    var reg = ((addr >> 1) & 7) + 8;
-    this.cpu.mmuPAR[1][reg] = data;
-    this.cpu.mmuPDR[1][reg] &= 0xff0f;
-};
-
-/**
- * readKIPDR(addr)
- *
- * @this {DevicePDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.KIPDR0--KIPDR7 or 172300--172316)
- * @return {number}
- */
-DevicePDP11.prototype.readKIPDR = function(addr)
-{
-    var reg = (addr >> 1) & 7;
-    return this.cpu.mmuPDR[0][reg];
-};
-
-/**
- * writeKIPDR(data, addr)
- *
- * @this {DevicePDP11}
- * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.KIPDR0--KIPDR7 or 172300--172316)
- */
-DevicePDP11.prototype.writeKIPDR = function(data, addr)
-{
-    var reg = (addr >> 1) & 7;
-    this.cpu.mmuPDR[0][reg] = data & 0xff0f;
-};
-
-/**
- * readKDPDR(addr)
- *
- * @this {DevicePDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.KDPDR0--KDPDR7 or 172320--172336)
- * @return {number}
- */
-DevicePDP11.prototype.readKDPDR = function(addr)
-{
-    var reg = ((addr >> 1) & 7) + 8;
-    return this.cpu.mmuPDR[0][reg];
-};
-
-/**
- * writeKDPDR(data, addr)
- *
- * @this {DevicePDP11}
- * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.KDPDR0--KDPDR7 or 172320--172336)
- */
-DevicePDP11.prototype.writeKDPDR = function(data, addr)
-{
-    var reg = ((addr >> 1) & 7) + 8;
-    this.cpu.mmuPDR[0][reg] = data & 0xff0f;
-};
-
-/**
- * readKIPAR(addr)
- *
- * @this {DevicePDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.KIPAR0--KIPAR7 or 172340--172356)
- * @return {number}
- */
-DevicePDP11.prototype.readKIPAR = function(addr)
-{
-    var reg = (addr >> 1) & 7;
-    return this.cpu.mmuPAR[0][reg];
-};
-
-/**
- * writeKIPAR(data, addr)
- *
- * @this {DevicePDP11}
- * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.KIPAR0--KIPAR7 or 172340--172356)
- */
-DevicePDP11.prototype.writeKIPAR = function(data, addr)
-{
-    var reg = (addr >> 1) & 7;
-    this.cpu.mmuPAR[0][reg] = data;
-    this.cpu.mmuPDR[0][reg] &= 0xff0f;
-
-};
-
-/**
- * readKDPAR(addr)
- *
- * @this {DevicePDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.KDPAR0--KDPAR7 or 172360--172376)
- * @return {number}
- */
-DevicePDP11.prototype.readKDPAR = function(addr)
-{
-    var reg = ((addr >> 1) & 7) + 8;
-    return this.cpu.mmuPAR[0][reg];
-};
-
-/**
- * writeKDPAR(data, addr)
- *
- * @this {DevicePDP11}
- * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.KDPAR0--KDPAR7 or 172360--172376)
- */
-DevicePDP11.prototype.writeKDPAR = function(data, addr)
-{
-    var reg = ((addr >> 1) & 7) + 8;
-    this.cpu.mmuPAR[0][reg] = data;
-    this.cpu.mmuPDR[0][reg] &= 0xff0f;
-};
-
-/**
- * readUIPDR(addr)
- *
- * @this {DevicePDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.UIPDR0--UIPDR7 or 177600--177616)
- * @return {number}
- */
-DevicePDP11.prototype.readUIPDR = function(addr)
-{
-    var reg = (addr >> 1) & 7;
-    return this.cpu.mmuPDR[3][reg];
-};
-
-/**
- * writeUIPDR(data, addr)
- *
- * @this {DevicePDP11}
- * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.UIPDR0--UIPDR7 or 177600--177616)
- */
-DevicePDP11.prototype.writeUIPDR = function(data, addr)
-{
-    var reg = (addr >> 1) & 7;
-    this.cpu.mmuPDR[3][reg] = data & 0xff0f;
-};
-
-/**
- * readUDPDR(addr)
- *
- * @this {DevicePDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.UDPDR0--UDPDR7 or 177620--177636)
- * @return {number}
- */
-DevicePDP11.prototype.readUDPDR = function(addr)
-{
-    var reg = ((addr >> 1) & 7) + 8;
-    return this.cpu.mmuPDR[3][reg];
-};
-
-/**
- * writeUDPDR(data, addr)
- *
- * @this {DevicePDP11}
- * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.UDPDR0--UDPDR7 or 177620--177636)
- */
-DevicePDP11.prototype.writeUDPDR = function(data, addr)
-{
-    var reg = ((addr >> 1) & 7) + 8;
-    this.cpu.mmuPDR[3][reg] = data & 0xff0f;
-};
-
-/**
- * readUIPAR(addr)
- *
- * @this {DevicePDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.UIPAR0--UIPAR7 or 177640--177656)
- * @return {number}
- */
-DevicePDP11.prototype.readUIPAR = function(addr)
-{
-    var reg = (addr >> 1) & 7;
-    return this.cpu.mmuPAR[3][reg];
-};
-
-/**
- * writeUIPAR(data, addr)
- *
- * @this {DevicePDP11}
- * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.UIPAR0--UIPAR7 or 177640--177656)
- */
-DevicePDP11.prototype.writeUIPAR = function(data, addr)
-{
-    var reg = (addr >> 1) & 7;
-    this.cpu.mmuPAR[3][reg] = data;
-    this.cpu.mmuPDR[3][reg] &= 0xff0f;
-
-};
-
-/**
- * readUDPAR(addr)
- *
- * @this {DevicePDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.UDPAR0--UDPAR7 or 177660--177676)
- * @return {number}
- */
-DevicePDP11.prototype.readUDPAR = function(addr)
-{
-    var reg = ((addr >> 1) & 7) + 8;
-    return this.cpu.mmuPAR[3][reg];
-};
-
-/**
- * writeUDPAR(data, addr)
- *
- * @this {DevicePDP11}
- * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.UDPAR0--UDPAR7 or 177660--177676)
- */
-DevicePDP11.prototype.writeUDPAR = function(data, addr)
-{
-    var reg = ((addr >> 1) & 7) + 8;
-    this.cpu.mmuPAR[3][reg] = data;
-    this.cpu.mmuPDR[3][reg] &= 0xff0f;
-};
-
-/**
- * readRSET0(addr)
- *
- * @this {DevicePDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.R0SET0--R5SET0 or 177700--177705)
- * @return {number}
- */
-DevicePDP11.prototype.readRSET0 = function(addr)
-{
-    var data;
-    var reg = addr & 7;
-    if (this.cpu.regPSW & PDP11.PSW.REGSET) {
-        data = this.cpu.regsAlt[reg];
-    } else {
-        data = this.cpu.regsGen[reg];
-    }
-    return data;
-};
-
-/**
- * writeRSET0(data, addr)
- *
- * @this {DevicePDP11}
- * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.R0SET0--R5SET0 or 177700--177705)
- */
-DevicePDP11.prototype.writeRSET0 = function(data, addr)
-{
-    var reg = addr & 7;
-    if (this.cpu.regPSW & PDP11.PSW.REGSET) {
-        this.cpu.regsAlt[reg] = data;
-    } else {
-        this.cpu.regsGen[reg] = data;
-    }
-};
-
-/**
- * readR6KERNEL(addr)
- *
- * @this {DevicePDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.R6KERNEL or 177706)
- * @return {number}
- */
-DevicePDP11.prototype.readR6KERNEL = function(addr)
-{
-    var data;
-    if (!(this.cpu.regPSW & PDP11.PSW.CMODE)) {         // Kernel Mode
-        data = this.cpu.regsGen[6];
-    } else {
-        data = this.cpu.regsAltStack[0];
-    }
-    return data;
-};
-
-/**
- * writeR6KERNEL(data, addr)
- *
- * @this {DevicePDP11}
- * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.R6KERNEL or 177706)
- */
-DevicePDP11.prototype.writeR6KERNEL = function(data, addr)
-{
-    if (!(this.cpu.regPSW & PDP11.PSW.CMODE)) {         // Kernel Mode
-        this.cpu.regsGen[6] = data;
-    } else {
-        this.cpu.regsAltStack[0] = data;
-    }
-};
-
-/**
- * readR7KERNEL(addr)
- *
- * @this {DevicePDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.R7KERNEL or 177707)
- * @return {number}
- */
-DevicePDP11.prototype.readR7KERNEL = function(addr)
-{
-    return this.cpu.regsGen[7];
-};
-
-/**
- * writeR7KERNEL(data, addr)
- *
- * @this {DevicePDP11}
- * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.R7KERNEL or 177707)
- */
-DevicePDP11.prototype.writeR7KERNEL = function(data, addr)
-{
-    this.cpu.regsGen[7] = data;
-};
-
-/**
- * readRSET1(addr)
- *
- * @this {DevicePDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.R0SET1--R5SET1 or 177710--177715)
- * @return {number}
- */
-DevicePDP11.prototype.readRSET1 = function(addr)
-{
-    var data;
-    var reg = addr & 7;
-    if (this.cpu.regPSW & PDP11.PSW.REGSET) {
-        data = this.cpu.regsGen[reg];
-    } else {
-        data = this.cpu.regsAlt[reg];
-    }
-    return data;
-};
-
-/**
- * writeRSET1(data, addr)
- *
- * @this {DevicePDP11}
- * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.R0SET1--R5SET1 or 177710--177715)
- */
-DevicePDP11.prototype.writeRSET1 = function(data, addr)
-{
-    var reg = addr & 7;
-    if (this.cpu.regPSW & PDP11.PSW.REGSET) {
-        this.cpu.regsGen[reg] = data;
-    } else {
-        this.cpu.regsAlt[reg] = data;
-    }
-};
-
-/**
- * readR6SUPER(addr)
- *
- * @this {DevicePDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.R6SUPER or 177716)
- * @return {number}
- */
-DevicePDP11.prototype.readR6SUPER = function(addr)
-{
-    var data;
-    if (((this.cpu.regPSW & PDP11.PSW.CMODE) >> PDP11.PSW.SHIFT.CMODE) == PDP11.MODE.SUPER) {
-        data = this.cpu.regsGen[6];
-    } else {
-        data = this.cpu.regsAltStack[1];
-    }
-    return data;
-};
-
-/**
- * writeR6SUPER(data, addr)
- *
- * @this {DevicePDP11}
- * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.R6SUPER or 177716)
- */
-DevicePDP11.prototype.writeR6SUPER = function(data, addr)
-{
-    if (((this.cpu.regPSW & PDP11.PSW.CMODE) >> PDP11.PSW.SHIFT.CMODE) == PDP11.MODE.SUPER) {
-        this.cpu.regsGen[6] = data;
-    } else {
-        this.cpu.regsAltStack[1] = data;
-    }
-};
-
-/**
- * readR6USER(addr)
- *
- * @this {DevicePDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.R6USER or 177717)
- * @return {number}
- */
-DevicePDP11.prototype.readR6USER = function(addr)
-{
-    var data;
-    if (((this.cpu.regPSW & PDP11.PSW.CMODE) >> PDP11.PSW.SHIFT.CMODE) == PDP11.MODE.USER) {
-        data = this.cpu.regsGen[6];
-    } else {
-        data = this.cpu.regsAltStack[3];
-    }
-    return data;
-};
-
-/**
- * writeR6USER(data, addr)
- *
- * @this {DevicePDP11}
- * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.R6USER or 177717)
- */
-DevicePDP11.prototype.writeR6USER = function(data, addr)
-{
-    if (((this.cpu.regPSW & PDP11.PSW.CMODE) >> PDP11.PSW.SHIFT.CMODE) == PDP11.MODE.USER) {
-        this.cpu.regsGen[6] = data;
-    } else {
-        this.cpu.regsAltStack[3] = data;
-    }
-};
-
-/**
- * readCTRL(addr)
- *
- * @this {DevicePDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.LAERR--UNDEF2 or 177740--177756)
- * @return {number}
- */
-DevicePDP11.prototype.readCTRL = function(addr)
-{
-    var reg = (addr - PDP11.UNIBUS.CTRL) >> 1;
-    return this.cpu.regsControl[reg];
-};
-
-/**
- * writeCTRL(data, addr)
- *
- * @this {DevicePDP11}
- * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.LAERR--UNDEF2 or 177740--177756)
- */
-DevicePDP11.prototype.writeCTRL = function(data, addr)
-{
-    var reg = (addr - PDP11.UNIBUS.CTRL) >> 1;
-    this.cpu.regsControl[reg] = data;
-};
-
-/**
- * readSIZE(addr)
- *
- * We're adhering to DEC's documentation, which says:
- *
- *      This read-only register specifies the memory size of the system. It is defined to indicate the
- *      last addressable block of 32 words in memory (bit 0 is equivalent to bit 6 of the Physical Address).
- *
- * Looking at the Memory Clear "toggle-in" code in /devices/pdp11/machine/1170/panel/debugger/README.md, the
- * memory loop gives up when the block number stored in KIPAR0 is >= LSIZE, suggesting that LSIZE is actually
- * the total number of 64-byte blocks, rather than the block number of the last block.  But that code is
- * not conclusive, since it writes 8192 bytes at a time rather than 64, so it doesn't really matter if LSIZE
- * is off by one.
- *
- * @this {DevicePDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.LSIZE--HSIZE or 177760--177762)
- * @return {number}
- */
-DevicePDP11.prototype.readSIZE = function(addr)
-{
-    return addr == PDP11.UNIBUS.LSIZE? ((this.bus.getMemoryLimit(MemoryPDP11.TYPE.RAM) >> 6) - 1) : 0;
-};
-
-/**
- * writeSIZE(data, addr)
- *
- * @this {DevicePDP11}
- * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.LSIZE--HSIZE or 177760--177762)
- */
-DevicePDP11.prototype.writeSIZE = function(data, addr)
-{
-};
-
-/**
- * readSYSID(addr)
- *
- * TODO: For SYSID, we currently ignore writes and return 1 on reads
- *
- * @this {DevicePDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.SYSID or 177764)
- * @return {number}
- */
-DevicePDP11.prototype.readSYSID = function(addr)
-{
-    return 1;
-};
-
-/**
- * writeSYSID(data, addr)
- *
- * TODO: For SYSID, we currently ignore writes and return 1 on reads
- *
- * @this {DevicePDP11}
- * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.SYSID or 177764)
- */
-DevicePDP11.prototype.writeSYSID = function(data, addr)
-{
-};
-
-/**
- * readCPUERR(addr)
- *
- * @this {DevicePDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.CPUERR or 177766)
- * @return {number}
- */
-DevicePDP11.prototype.readCPUERR = function(addr)
-{
-    return this.cpu.regErr;
-};
-
-/**
- * writeCPUERR(data, addr)
- *
- * @this {DevicePDP11}
- * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.CPUERR or 177766)
- */
-DevicePDP11.prototype.writeCPUERR = function(data, addr)
-{
-    this.cpu.regErr = 0;        // TODO: Confirm that writes always zero the register
-};
-
-/**
- * readMBR(addr)
- *
- * @this {DevicePDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.MB or 177770)
- * @return {number}
- */
-DevicePDP11.prototype.readMBR = function(addr)
-{
-    return this.cpu.regMBR;
-};
-
-/**
- * writeMBR(data, addr)
- *
- * @this {DevicePDP11}
- * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.MB or 177770)
- */
-DevicePDP11.prototype.writeMBR = function(data, addr)
-{
-    if (!(addr & 0x1)) {
-        data &= 0xff;           // required for KB11-CM without MFPT instruction
-    }
-    this.cpu.regMBR = data;
-};
-
-/**
- * readPIR(addr, fPreWrite)
- *
- * @this {DevicePDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.PIR or 177772)
- * @param {boolean} [fPreWrite]
- * @return {number}
- */
-DevicePDP11.prototype.readPIR = function(addr, fPreWrite)
-{
-    if (fPreWrite) return 0;
-    return this.cpu.getPIR();
-};
-
-/**
- * writePIR(data, addr)
- *
- * @this {DevicePDP11}
- * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.PIR or 177772)
- */
-DevicePDP11.prototype.writePIR = function(data, addr)
-{
-    this.cpu.setPIR(data);
-};
-
-/**
- * readSLR(addr, fPreWrite)
- *
- * @this {DevicePDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.SL or 177774)
- * @param {boolean} [fPreWrite]
- * @return {number}
- */
-DevicePDP11.prototype.readSLR = function(addr, fPreWrite)
-{
-    if (fPreWrite) return 0;
-    return this.cpu.getSLR();
-};
-
-/**
- * writeSLR(data, addr)
- *
- * @this {DevicePDP11}
- * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.SL or 177774)
- */
-DevicePDP11.prototype.writeSLR = function(data, addr)
-{
-    this.cpu.setSLR(data);
-};
-
-/**
- * readPSW(addr)
- *
- * @this {DevicePDP11}
- * @param {number} addr (eg, PDP11.UNIBUS.PSW or 177776)
- * @return {number}
- */
-DevicePDP11.prototype.readPSW = function(addr)
-{
-    return this.cpu.getPSW();
-};
-
-/**
- * writePSW(data, addr)
- *
- * @this {DevicePDP11}
- * @param {number} data
- * @param {number} addr (eg, PDP11.UNIBUS.PSW or 177776)
- */
-DevicePDP11.prototype.writePSW = function(data, addr)
-{
-    /*
-     * pdp11.js disallowed PSW.TF in addition to PSW.UNUSED, but DEC's "TRAP TEST" expects the
-     * following instruction to trap:
+    /**
+     * dumpRegs(sName, aRegs, offset, sFilter, fBreak)
      *
-     *      004174: 052767 000020 173574   BIS   #20,177776
-     *
-     * Since that test was written for the PDP-11/20, it's possible that newer machines have a different
-     * behavior, but for now, we assume that all machines allow setting PSW.TF.
-     *
-     * Moreover, we have changed setPSW() to disallow the setting of any bits not supported by the current
-     * CPU model, so it seems rather pointless to do any masking of bits here.
+     * @this {DevicePDP11}
+     * @param {string} sName
+     * @param {Array.<number>} aRegs
+     * @param {number} offset
+     * @param {string} sFilter
+     * @param {boolean} [fBreak]
      */
-    this.cpu.setPSW(data);
-};
-
-/**
- * writeIgnored(data, addr)
- *
- * @this {DevicePDP11}
- * @param {number} data
- * @param {number} addr
- */
-DevicePDP11.prototype.writeIgnored = function(data, addr)
-{
-    if (this.messageEnabled()) {
-        this.printMessage("writeIgnored(" + str.toOct(addr) + "): " + str.toOct(data), true, true);
+    dumpRegs(sName, aRegs, offset, sFilter, fBreak)
+    {
+        if (DEBUGGER) {
+            var dbg = this.dbg;
+            if (sFilter && sName.indexOf(sFilter.toUpperCase()) < 0) return;
+            var nRegs = 8;
+            var sDump = "";
+            var fIndex = false;
+            var nBytes = 0;
+            var nWidth = 8;
+            if (offset < 0) {
+                nRegs = aRegs.length;
+                offset = 0;
+                fIndex = true;
+                nBytes = 3;
+                nWidth = 4;
+            }
+            for (var i = 0; i < nRegs; i++) {
+                if (i % nWidth == 0) {
+                    if (sDump) sDump += '\n';
+                    sDump += sName + (fIndex? ('[' + Str.toDec(i, 2) + ']') : '') + ':';
+                }
+                sDump += ' ' + dbg.toStrBase(aRegs[offset + i], nBytes);
+            }
+            dbg.println(sDump + (fBreak? '\n' : ''));
+        }
     }
-};
+
+    /**
+     * reset()
+     *
+     * @this {DevicePDP11}
+     */
+    reset()
+    {
+        this.kw11.lks = PDP11.KW11.LKS.MON;
+        this.cpu.setTimer(this.kw11.timer, 1000/60, true);
+    }
+
+    /**
+     * interruptKW11()
+     *
+     * We used to call this function only when the the KW11's "Interrupt Enable" bit was set,
+     * but now we call it at 60Hz regardless.  In part, this was so we could piggy-back on it
+     * to drive display updates, but more importantly, the KW11's "Monitor" bit is supposed to
+     * be set at the "line frequency" independent of whether KW11 interrupts are enabled or not.
+     *
+     * @this {DevicePDP11}
+     */
+    interruptKW11()
+    {
+        this.kw11.lks |= PDP11.KW11.LKS.MON;
+        if (this.kw11.lks & PDP11.KW11.LKS.IE) {
+            this.cpu.setIRQ(this.kw11.irq);
+        }
+        if (this.cmp) this.cmp.updateDisplays(1);
+        this.cpu.setTimer(this.kw11.timer, 1000/60);
+    }
+
+    /**
+     * readLKS(addr)
+     *
+     * @this {DevicePDP11}
+     * @param {number} addr (eg, PDP11.UNIBUS.LKS or 177546)
+     * @return {number}
+     */
+    readLKS(addr)
+    {
+        /*
+         * NOTE: The original code always cleared LKS.MON (bit 7) after snapping the value for the read,
+         * but based on DEC's "Non-Interrupt Mode" programming examples, it's clear that's not how LKS.MON
+         * operates; if the caller wants to clear it, they must explicitly clear it with a write.
+         */
+        return this.kw11.lks;
+    }
+
+    /**
+     * writeLKS(data, addr)
+     *
+     * @this {DevicePDP11}
+     * @param {number} data
+     * @param {number} addr (eg, PDP11.UNIBUS.LKS or 177546)
+     */
+    writeLKS(data, addr)
+    {
+        /*
+         * NOTE: The original code always cleared LKS.MON (bit 7) as part of any write, but based on DEC's
+         * "Non-Interrupt Mode" programming examples, which explicitly CLRB after TSTB reveals LKS.MON is set,
+         * I think that was wrong, and that all a write should do is mask off all the other (non-writable) bits.
+         */
+        this.kw11.lks = data & PDP11.KW11.LKS.MASK;
+        if (!(this.kw11.lks & PDP11.KW11.LKS.IE)) this.cpu.clearIRQ(this.kw11.irq);
+    }
+
+    /**
+     * readMMR0(addr)
+     *
+     * @this {DevicePDP11}
+     * @param {number} addr (eg, PDP11.UNIBUS.MMR0 or 177572)
+     * @return {number}
+     */
+    readMMR0(addr)
+    {
+        return this.cpu.getMMR0();
+    }
+
+    /**
+     * writeMMR0(data, addr)
+     *
+     * @this {DevicePDP11}
+     * @param {number} data
+     * @param {number} addr (eg, PDP11.UNIBUS.MMR0 or 177572)
+     */
+    writeMMR0(data, addr)
+    {
+        this.cpu.setMMR0((data & ~PDP11.MMR0.COMPLETED) | (this.cpu.regMMR0 & PDP11.MMR0.COMPLETED));
+    }
+
+    /**
+     * readMMR1(addr)
+     *
+     * @this {DevicePDP11}
+     * @param {number} addr (eg, PDP11.UNIBUS.MMR1 or 177574)
+     * @return {number}
+     */
+    readMMR1(addr)
+    {
+        return this.cpu.getMMR1();
+    }
+
+    /**
+     * readMMR2(addr)
+     *
+     * @this {DevicePDP11}
+     * @param {number} addr (eg, PDP11.UNIBUS.MMR2 or 177576)
+     * @return {number}
+     */
+    readMMR2(addr)
+    {
+        return this.cpu.getMMR2();
+    }
+
+    /**
+     * readMMR3(addr)
+     *
+     * @this {DevicePDP11}
+     * @param {number} addr (eg, PDP11.UNIBUS.MMR3 or 172516)
+     * @return {number}
+     */
+    readMMR3(addr)
+    {
+        return this.cpu.getMMR3();
+    }
+
+    /**
+     * writeMMR3(data, addr)
+     *
+     * @this {DevicePDP11}
+     * @param {number} data
+     * @param {number} addr (eg, PDP11.UNIBUS.MMR3 or 172516)
+     */
+    writeMMR3(data, addr)
+    {
+        this.cpu.setMMR3(data);
+    }
+
+    /**
+     * readUNIMAP(addr)
+     *
+     * NOTE: The UNIBUS map ("UNIMAP") is 32 registers spread across 64 words, so we first calculate the word index.
+     *
+     * @this {DevicePDP11}
+     * @param {number} addr (eg, PDP11.UNIBUS.UNIMAP)
+     * @return {number}
+     */
+    readUNIMAP(addr)
+    {
+        var word = (addr >> 1) & 0x3f, reg = word >> 1;
+        var data = this.cpu.regsUniMap[reg];
+        return (word & 1)? (data >> 16) : (data & 0xffff);
+    }
+
+    /**
+     * writeUNIMAP(data, addr)
+     *
+     * NOTE: The UNIBUS map ("UNIMAP") is 32 registers spread across 64 words, so we first calculate the word index.
+     *
+     * @this {DevicePDP11}
+     * @param {number} data
+     * @param {number} addr (eg, PDP11.UNIBUS.UNIMAP)
+     */
+    writeUNIMAP(data, addr)
+    {
+        var word = (addr >> 1) & 0x3f, reg = word >> 1;
+        if (word & 1) {
+            this.cpu.regsUniMap[reg] = (this.cpu.regsUniMap[reg] & 0xffff) | ((data & 0x003f) << 16);
+        } else {
+            this.cpu.regsUniMap[reg] = (this.cpu.regsUniMap[reg] & ~0xffff) | (data & 0xfffe);
+        }
+    }
+
+    /**
+     * readSIPDR(addr)
+     *
+     * @this {DevicePDP11}
+     * @param {number} addr (eg, PDP11.UNIBUS.SIPDR0--SIPDR7 or 172200--172216)
+     * @return {number}
+     */
+    readSIPDR(addr)
+    {
+        var reg = (addr >> 1) & 7;
+        return this.cpu.mmuPDR[1][reg];
+    }
+
+    /**
+     * writeSIPDR(data, addr)
+     *
+     * @this {DevicePDP11}
+     * @param {number} data
+     * @param {number} addr (eg, PDP11.UNIBUS.SIPDR0--SIPDR7 or 172200--172216)
+     */
+    writeSIPDR(data, addr)
+    {
+        var reg = (addr >> 1) & 7;
+        this.cpu.mmuPDR[1][reg] = data & 0xff0f;
+    }
+
+    /**
+     * readSDPDR(addr)
+     *
+     * @this {DevicePDP11}
+     * @param {number} addr (eg, PDP11.UNIBUS.SDPDR0--SDPDR7 or 172220--172236)
+     * @return {number}
+     */
+    readSDPDR(addr)
+    {
+        var reg = ((addr >> 1) & 7) + 8;
+        return this.cpu.mmuPDR[1][reg];
+    }
+
+    /**
+     * writeSDPDR(data, addr)
+     *
+     * @this {DevicePDP11}
+     * @param {number} data
+     * @param {number} addr (eg, PDP11.UNIBUS.SDPDR0--SDPDR7 or 172220--172236)
+     */
+    writeSDPDR(data, addr)
+    {
+        var reg = ((addr >> 1) & 7) + 8;
+        this.cpu.mmuPDR[1][reg] = data & 0xff0f;
+    }
+
+    /**
+     * readSIPAR(addr)
+     *
+     * @this {DevicePDP11}
+     * @param {number} addr (eg, PDP11.UNIBUS.SIPAR0--SIPAR7 or 172240--172256)
+     * @return {number}
+     */
+    readSIPAR(addr)
+    {
+        var reg = (addr >> 1) & 7;
+        return this.cpu.mmuPAR[1][reg];
+    }
+
+    /**
+     * writeSIPAR(data, addr)
+     *
+     * @this {DevicePDP11}
+     * @param {number} data
+     * @param {number} addr (eg, PDP11.UNIBUS.SIPAR0--SIPAR7 or 172240--172256)
+     */
+    writeSIPAR(data, addr)
+    {
+        var reg = (addr >> 1) & 7;
+        this.cpu.mmuPAR[1][reg] = data;
+        this.cpu.mmuPDR[1][reg] &= 0xff0f;
+
+    }
+
+    /**
+     * readSDPAR(addr)
+     *
+     * @this {DevicePDP11}
+     * @param {number} addr (eg, PDP11.UNIBUS.SDPAR0--SDPAR7 or 172260--172276)
+     * @return {number}
+     */
+    readSDPAR(addr)
+    {
+        var reg = ((addr >> 1) & 7) + 8;
+        return this.cpu.mmuPAR[1][reg];
+    }
+
+    /**
+     * writeSDPAR(data, addr)
+     *
+     * @this {DevicePDP11}
+     * @param {number} data
+     * @param {number} addr (eg, PDP11.UNIBUS.SDPAR0--SDPAR7 or 172260--172276)
+     */
+    writeSDPAR(data, addr)
+    {
+        var reg = ((addr >> 1) & 7) + 8;
+        this.cpu.mmuPAR[1][reg] = data;
+        this.cpu.mmuPDR[1][reg] &= 0xff0f;
+    }
+
+    /**
+     * readKIPDR(addr)
+     *
+     * @this {DevicePDP11}
+     * @param {number} addr (eg, PDP11.UNIBUS.KIPDR0--KIPDR7 or 172300--172316)
+     * @return {number}
+     */
+    readKIPDR(addr)
+    {
+        var reg = (addr >> 1) & 7;
+        return this.cpu.mmuPDR[0][reg];
+    }
+
+    /**
+     * writeKIPDR(data, addr)
+     *
+     * @this {DevicePDP11}
+     * @param {number} data
+     * @param {number} addr (eg, PDP11.UNIBUS.KIPDR0--KIPDR7 or 172300--172316)
+     */
+    writeKIPDR(data, addr)
+    {
+        var reg = (addr >> 1) & 7;
+        this.cpu.mmuPDR[0][reg] = data & 0xff0f;
+    }
+
+    /**
+     * readKDPDR(addr)
+     *
+     * @this {DevicePDP11}
+     * @param {number} addr (eg, PDP11.UNIBUS.KDPDR0--KDPDR7 or 172320--172336)
+     * @return {number}
+     */
+    readKDPDR(addr)
+    {
+        var reg = ((addr >> 1) & 7) + 8;
+        return this.cpu.mmuPDR[0][reg];
+    }
+
+    /**
+     * writeKDPDR(data, addr)
+     *
+     * @this {DevicePDP11}
+     * @param {number} data
+     * @param {number} addr (eg, PDP11.UNIBUS.KDPDR0--KDPDR7 or 172320--172336)
+     */
+    writeKDPDR(data, addr)
+    {
+        var reg = ((addr >> 1) & 7) + 8;
+        this.cpu.mmuPDR[0][reg] = data & 0xff0f;
+    }
+
+    /**
+     * readKIPAR(addr)
+     *
+     * @this {DevicePDP11}
+     * @param {number} addr (eg, PDP11.UNIBUS.KIPAR0--KIPAR7 or 172340--172356)
+     * @return {number}
+     */
+    readKIPAR(addr)
+    {
+        var reg = (addr >> 1) & 7;
+        return this.cpu.mmuPAR[0][reg];
+    }
+
+    /**
+     * writeKIPAR(data, addr)
+     *
+     * @this {DevicePDP11}
+     * @param {number} data
+     * @param {number} addr (eg, PDP11.UNIBUS.KIPAR0--KIPAR7 or 172340--172356)
+     */
+    writeKIPAR(data, addr)
+    {
+        var reg = (addr >> 1) & 7;
+        this.cpu.mmuPAR[0][reg] = data;
+        this.cpu.mmuPDR[0][reg] &= 0xff0f;
+
+    }
+
+    /**
+     * readKDPAR(addr)
+     *
+     * @this {DevicePDP11}
+     * @param {number} addr (eg, PDP11.UNIBUS.KDPAR0--KDPAR7 or 172360--172376)
+     * @return {number}
+     */
+    readKDPAR(addr)
+    {
+        var reg = ((addr >> 1) & 7) + 8;
+        return this.cpu.mmuPAR[0][reg];
+    }
+
+    /**
+     * writeKDPAR(data, addr)
+     *
+     * @this {DevicePDP11}
+     * @param {number} data
+     * @param {number} addr (eg, PDP11.UNIBUS.KDPAR0--KDPAR7 or 172360--172376)
+     */
+    writeKDPAR(data, addr)
+    {
+        var reg = ((addr >> 1) & 7) + 8;
+        this.cpu.mmuPAR[0][reg] = data;
+        this.cpu.mmuPDR[0][reg] &= 0xff0f;
+    }
+
+    /**
+     * readUIPDR(addr)
+     *
+     * @this {DevicePDP11}
+     * @param {number} addr (eg, PDP11.UNIBUS.UIPDR0--UIPDR7 or 177600--177616)
+     * @return {number}
+     */
+    readUIPDR(addr)
+    {
+        var reg = (addr >> 1) & 7;
+        return this.cpu.mmuPDR[3][reg];
+    }
+
+    /**
+     * writeUIPDR(data, addr)
+     *
+     * @this {DevicePDP11}
+     * @param {number} data
+     * @param {number} addr (eg, PDP11.UNIBUS.UIPDR0--UIPDR7 or 177600--177616)
+     */
+    writeUIPDR(data, addr)
+    {
+        var reg = (addr >> 1) & 7;
+        this.cpu.mmuPDR[3][reg] = data & 0xff0f;
+    }
+
+    /**
+     * readUDPDR(addr)
+     *
+     * @this {DevicePDP11}
+     * @param {number} addr (eg, PDP11.UNIBUS.UDPDR0--UDPDR7 or 177620--177636)
+     * @return {number}
+     */
+    readUDPDR(addr)
+    {
+        var reg = ((addr >> 1) & 7) + 8;
+        return this.cpu.mmuPDR[3][reg];
+    }
+
+    /**
+     * writeUDPDR(data, addr)
+     *
+     * @this {DevicePDP11}
+     * @param {number} data
+     * @param {number} addr (eg, PDP11.UNIBUS.UDPDR0--UDPDR7 or 177620--177636)
+     */
+    writeUDPDR(data, addr)
+    {
+        var reg = ((addr >> 1) & 7) + 8;
+        this.cpu.mmuPDR[3][reg] = data & 0xff0f;
+    }
+
+    /**
+     * readUIPAR(addr)
+     *
+     * @this {DevicePDP11}
+     * @param {number} addr (eg, PDP11.UNIBUS.UIPAR0--UIPAR7 or 177640--177656)
+     * @return {number}
+     */
+    readUIPAR(addr)
+    {
+        var reg = (addr >> 1) & 7;
+        return this.cpu.mmuPAR[3][reg];
+    }
+
+    /**
+     * writeUIPAR(data, addr)
+     *
+     * @this {DevicePDP11}
+     * @param {number} data
+     * @param {number} addr (eg, PDP11.UNIBUS.UIPAR0--UIPAR7 or 177640--177656)
+     */
+    writeUIPAR(data, addr)
+    {
+        var reg = (addr >> 1) & 7;
+        this.cpu.mmuPAR[3][reg] = data;
+        this.cpu.mmuPDR[3][reg] &= 0xff0f;
+
+    }
+
+    /**
+     * readUDPAR(addr)
+     *
+     * @this {DevicePDP11}
+     * @param {number} addr (eg, PDP11.UNIBUS.UDPAR0--UDPAR7 or 177660--177676)
+     * @return {number}
+     */
+    readUDPAR(addr)
+    {
+        var reg = ((addr >> 1) & 7) + 8;
+        return this.cpu.mmuPAR[3][reg];
+    }
+
+    /**
+     * writeUDPAR(data, addr)
+     *
+     * @this {DevicePDP11}
+     * @param {number} data
+     * @param {number} addr (eg, PDP11.UNIBUS.UDPAR0--UDPAR7 or 177660--177676)
+     */
+    writeUDPAR(data, addr)
+    {
+        var reg = ((addr >> 1) & 7) + 8;
+        this.cpu.mmuPAR[3][reg] = data;
+        this.cpu.mmuPDR[3][reg] &= 0xff0f;
+    }
+
+    /**
+     * readRSET0(addr)
+     *
+     * @this {DevicePDP11}
+     * @param {number} addr (eg, PDP11.UNIBUS.R0SET0--R5SET0 or 177700--177705)
+     * @return {number}
+     */
+    readRSET0(addr)
+    {
+        var data;
+        var reg = addr & 7;
+        if (this.cpu.regPSW & PDP11.PSW.REGSET) {
+            data = this.cpu.regsAlt[reg];
+        } else {
+            data = this.cpu.regsGen[reg];
+        }
+        return data;
+    }
+
+    /**
+     * writeRSET0(data, addr)
+     *
+     * @this {DevicePDP11}
+     * @param {number} data
+     * @param {number} addr (eg, PDP11.UNIBUS.R0SET0--R5SET0 or 177700--177705)
+     */
+    writeRSET0(data, addr)
+    {
+        var reg = addr & 7;
+        if (this.cpu.regPSW & PDP11.PSW.REGSET) {
+            this.cpu.regsAlt[reg] = data;
+        } else {
+            this.cpu.regsGen[reg] = data;
+        }
+    }
+
+    /**
+     * readR6KERNEL(addr)
+     *
+     * @this {DevicePDP11}
+     * @param {number} addr (eg, PDP11.UNIBUS.R6KERNEL or 177706)
+     * @return {number}
+     */
+    readR6KERNEL(addr)
+    {
+        var data;
+        if (!(this.cpu.regPSW & PDP11.PSW.CMODE)) {         // Kernel Mode
+            data = this.cpu.regsGen[6];
+        } else {
+            data = this.cpu.regsAltStack[0];
+        }
+        return data;
+    }
+
+    /**
+     * writeR6KERNEL(data, addr)
+     *
+     * @this {DevicePDP11}
+     * @param {number} data
+     * @param {number} addr (eg, PDP11.UNIBUS.R6KERNEL or 177706)
+     */
+    writeR6KERNEL(data, addr)
+    {
+        if (!(this.cpu.regPSW & PDP11.PSW.CMODE)) {         // Kernel Mode
+            this.cpu.regsGen[6] = data;
+        } else {
+            this.cpu.regsAltStack[0] = data;
+        }
+    }
+
+    /**
+     * readR7KERNEL(addr)
+     *
+     * @this {DevicePDP11}
+     * @param {number} addr (eg, PDP11.UNIBUS.R7KERNEL or 177707)
+     * @return {number}
+     */
+    readR7KERNEL(addr)
+    {
+        return this.cpu.regsGen[7];
+    }
+
+    /**
+     * writeR7KERNEL(data, addr)
+     *
+     * @this {DevicePDP11}
+     * @param {number} data
+     * @param {number} addr (eg, PDP11.UNIBUS.R7KERNEL or 177707)
+     */
+    writeR7KERNEL(data, addr)
+    {
+        this.cpu.regsGen[7] = data;
+    }
+
+    /**
+     * readRSET1(addr)
+     *
+     * @this {DevicePDP11}
+     * @param {number} addr (eg, PDP11.UNIBUS.R0SET1--R5SET1 or 177710--177715)
+     * @return {number}
+     */
+    readRSET1(addr)
+    {
+        var data;
+        var reg = addr & 7;
+        if (this.cpu.regPSW & PDP11.PSW.REGSET) {
+            data = this.cpu.regsGen[reg];
+        } else {
+            data = this.cpu.regsAlt[reg];
+        }
+        return data;
+    }
+
+    /**
+     * writeRSET1(data, addr)
+     *
+     * @this {DevicePDP11}
+     * @param {number} data
+     * @param {number} addr (eg, PDP11.UNIBUS.R0SET1--R5SET1 or 177710--177715)
+     */
+    writeRSET1(data, addr)
+    {
+        var reg = addr & 7;
+        if (this.cpu.regPSW & PDP11.PSW.REGSET) {
+            this.cpu.regsGen[reg] = data;
+        } else {
+            this.cpu.regsAlt[reg] = data;
+        }
+    }
+
+    /**
+     * readR6SUPER(addr)
+     *
+     * @this {DevicePDP11}
+     * @param {number} addr (eg, PDP11.UNIBUS.R6SUPER or 177716)
+     * @return {number}
+     */
+    readR6SUPER(addr)
+    {
+        var data;
+        if (((this.cpu.regPSW & PDP11.PSW.CMODE) >> PDP11.PSW.SHIFT.CMODE) == PDP11.MODE.SUPER) {
+            data = this.cpu.regsGen[6];
+        } else {
+            data = this.cpu.regsAltStack[1];
+        }
+        return data;
+    }
+
+    /**
+     * writeR6SUPER(data, addr)
+     *
+     * @this {DevicePDP11}
+     * @param {number} data
+     * @param {number} addr (eg, PDP11.UNIBUS.R6SUPER or 177716)
+     */
+    writeR6SUPER(data, addr)
+    {
+        if (((this.cpu.regPSW & PDP11.PSW.CMODE) >> PDP11.PSW.SHIFT.CMODE) == PDP11.MODE.SUPER) {
+            this.cpu.regsGen[6] = data;
+        } else {
+            this.cpu.regsAltStack[1] = data;
+        }
+    }
+
+    /**
+     * readR6USER(addr)
+     *
+     * @this {DevicePDP11}
+     * @param {number} addr (eg, PDP11.UNIBUS.R6USER or 177717)
+     * @return {number}
+     */
+    readR6USER(addr)
+    {
+        var data;
+        if (((this.cpu.regPSW & PDP11.PSW.CMODE) >> PDP11.PSW.SHIFT.CMODE) == PDP11.MODE.USER) {
+            data = this.cpu.regsGen[6];
+        } else {
+            data = this.cpu.regsAltStack[3];
+        }
+        return data;
+    }
+
+    /**
+     * writeR6USER(data, addr)
+     *
+     * @this {DevicePDP11}
+     * @param {number} data
+     * @param {number} addr (eg, PDP11.UNIBUS.R6USER or 177717)
+     */
+    writeR6USER(data, addr)
+    {
+        if (((this.cpu.regPSW & PDP11.PSW.CMODE) >> PDP11.PSW.SHIFT.CMODE) == PDP11.MODE.USER) {
+            this.cpu.regsGen[6] = data;
+        } else {
+            this.cpu.regsAltStack[3] = data;
+        }
+    }
+
+    /**
+     * readCTRL(addr)
+     *
+     * @this {DevicePDP11}
+     * @param {number} addr (eg, PDP11.UNIBUS.LAERR--UNDEF2 or 177740--177756)
+     * @return {number}
+     */
+    readCTRL(addr)
+    {
+        var reg = (addr - PDP11.UNIBUS.CTRL) >> 1;
+        return this.cpu.regsControl[reg];
+    }
+
+    /**
+     * writeCTRL(data, addr)
+     *
+     * @this {DevicePDP11}
+     * @param {number} data
+     * @param {number} addr (eg, PDP11.UNIBUS.LAERR--UNDEF2 or 177740--177756)
+     */
+    writeCTRL(data, addr)
+    {
+        var reg = (addr - PDP11.UNIBUS.CTRL) >> 1;
+        this.cpu.regsControl[reg] = data;
+    }
+
+    /**
+     * readSIZE(addr)
+     *
+     * We're adhering to DEC's documentation, which says:
+     *
+     *      This read-only register specifies the memory size of the system. It is defined to indicate the
+     *      last addressable block of 32 words in memory (bit 0 is equivalent to bit 6 of the Physical Address).
+     *
+     * Looking at the Memory Clear "toggle-in" code in /devices/pdp11/machine/1170/panel/debugger/README.md, the
+     * memory loop gives up when the block number stored in KIPAR0 is >= LSIZE, suggesting that LSIZE is actually
+     * the total number of 64-byte blocks, rather than the block number of the last block.  But that code is
+     * not conclusive, since it writes 8192 bytes at a time rather than 64, so it doesn't really matter if LSIZE
+     * is off by one.
+     *
+     * @this {DevicePDP11}
+     * @param {number} addr (eg, PDP11.UNIBUS.LSIZE--HSIZE or 177760--177762)
+     * @return {number}
+     */
+    readSIZE(addr)
+    {
+        return addr == PDP11.UNIBUS.LSIZE? ((this.bus.getMemoryLimit(MemoryPDP11.TYPE.RAM) >> 6) - 1) : 0;
+    }
+
+    /**
+     * writeSIZE(data, addr)
+     *
+     * @this {DevicePDP11}
+     * @param {number} data
+     * @param {number} addr (eg, PDP11.UNIBUS.LSIZE--HSIZE or 177760--177762)
+     */
+    writeSIZE(data, addr)
+    {
+    }
+
+    /**
+     * readSYSID(addr)
+     *
+     * TODO: For SYSID, we currently ignore writes and return 1 on reads
+     *
+     * @this {DevicePDP11}
+     * @param {number} addr (eg, PDP11.UNIBUS.SYSID or 177764)
+     * @return {number}
+     */
+    readSYSID(addr)
+    {
+        return 1;
+    }
+
+    /**
+     * writeSYSID(data, addr)
+     *
+     * TODO: For SYSID, we currently ignore writes and return 1 on reads
+     *
+     * @this {DevicePDP11}
+     * @param {number} data
+     * @param {number} addr (eg, PDP11.UNIBUS.SYSID or 177764)
+     */
+    writeSYSID(data, addr)
+    {
+    }
+
+    /**
+     * readCPUERR(addr)
+     *
+     * @this {DevicePDP11}
+     * @param {number} addr (eg, PDP11.UNIBUS.CPUERR or 177766)
+     * @return {number}
+     */
+    readCPUERR(addr)
+    {
+        return this.cpu.regErr;
+    }
+
+    /**
+     * writeCPUERR(data, addr)
+     *
+     * @this {DevicePDP11}
+     * @param {number} data
+     * @param {number} addr (eg, PDP11.UNIBUS.CPUERR or 177766)
+     */
+    writeCPUERR(data, addr)
+    {
+        this.cpu.regErr = 0;        // TODO: Confirm that writes always zero the register
+    }
+
+    /**
+     * readMBR(addr)
+     *
+     * @this {DevicePDP11}
+     * @param {number} addr (eg, PDP11.UNIBUS.MB or 177770)
+     * @return {number}
+     */
+    readMBR(addr)
+    {
+        return this.cpu.regMBR;
+    }
+
+    /**
+     * writeMBR(data, addr)
+     *
+     * @this {DevicePDP11}
+     * @param {number} data
+     * @param {number} addr (eg, PDP11.UNIBUS.MB or 177770)
+     */
+    writeMBR(data, addr)
+    {
+        if (!(addr & 0x1)) {
+            data &= 0xff;           // required for KB11-CM without MFPT instruction
+        }
+        this.cpu.regMBR = data;
+    }
+
+    /**
+     * readPIR(addr, fPreWrite)
+     *
+     * @this {DevicePDP11}
+     * @param {number} addr (eg, PDP11.UNIBUS.PIR or 177772)
+     * @param {boolean} [fPreWrite]
+     * @return {number}
+     */
+    readPIR(addr, fPreWrite)
+    {
+        if (fPreWrite) return 0;
+        return this.cpu.getPIR();
+    }
+
+    /**
+     * writePIR(data, addr)
+     *
+     * @this {DevicePDP11}
+     * @param {number} data
+     * @param {number} addr (eg, PDP11.UNIBUS.PIR or 177772)
+     */
+    writePIR(data, addr)
+    {
+        this.cpu.setPIR(data);
+    }
+
+    /**
+     * readSLR(addr, fPreWrite)
+     *
+     * @this {DevicePDP11}
+     * @param {number} addr (eg, PDP11.UNIBUS.SL or 177774)
+     * @param {boolean} [fPreWrite]
+     * @return {number}
+     */
+    readSLR(addr, fPreWrite)
+    {
+        if (fPreWrite) return 0;
+        return this.cpu.getSLR();
+    }
+
+    /**
+     * writeSLR(data, addr)
+     *
+     * @this {DevicePDP11}
+     * @param {number} data
+     * @param {number} addr (eg, PDP11.UNIBUS.SL or 177774)
+     */
+    writeSLR(data, addr)
+    {
+        this.cpu.setSLR(data);
+    }
+
+    /**
+     * readPSW(addr)
+     *
+     * @this {DevicePDP11}
+     * @param {number} addr (eg, PDP11.UNIBUS.PSW or 177776)
+     * @return {number}
+     */
+    readPSW(addr)
+    {
+        return this.cpu.getPSW();
+    }
+
+    /**
+     * writePSW(data, addr)
+     *
+     * @this {DevicePDP11}
+     * @param {number} data
+     * @param {number} addr (eg, PDP11.UNIBUS.PSW or 177776)
+     */
+    writePSW(data, addr)
+    {
+        /*
+         * pdp11.js disallowed PSW.TF in addition to PSW.UNUSED, but DEC's "TRAP TEST" expects the
+         * following instruction to trap:
+         *
+         *      004174: 052767 000020 173574   BIS   #20,177776
+         *
+         * Since that test was written for the PDP-11/20, it's possible that newer machines have a different
+         * behavior, but for now, we assume that all machines allow setting PSW.TF.
+         *
+         * Moreover, we have changed setPSW() to disallow the setting of any bits not supported by the current
+         * CPU model, so it seems rather pointless to do any masking of bits here.
+         */
+        this.cpu.setPSW(data);
+    }
+
+    /**
+     * writeIgnored(data, addr)
+     *
+     * @this {DevicePDP11}
+     * @param {number} data
+     * @param {number} addr
+     */
+    writeIgnored(data, addr)
+    {
+        if (this.messageEnabled()) {
+            this.printMessage("writeIgnored(" + Str.toOct(addr) + "): " + Str.toOct(data), true, true);
+        }
+    }
+
+    /**
+     * DevicePDP11.init()
+     *
+     * This function operates on every HTML element of class "device", extracting the
+     * JSON-encoded parameters for the DevicePDP11 constructor from the element's "data-value"
+     * attribute, invoking the constructor to create a DevicePDP11 component, and then binding
+     * any associated HTML controls to the new component.
+     */
+    static init()
+    {
+        var aeDevice = Component.getElementsByClass(document, PDP11.APPCLASS, "device");
+        for (var iDevice = 0; iDevice < aeDevice.length; iDevice++) {
+            var device;
+            var eDevice = aeDevice[iDevice];
+            var parmsDevice = Component.getComponentParms(eDevice);
+            switch(parmsDevice['type']) {
+            case 'default':
+                device = new DevicePDP11(parmsDevice);
+                Component.bindComponentControls(device, eDevice, PDP11.APPCLASS);
+                break;
+            case 'pc11':
+                device = new PC11(parmsDevice);
+                Component.bindComponentControls(device, eDevice, PDP11.APPCLASS);
+                break;
+            case 'rl11':
+                device = new RL11(parmsDevice);
+                Component.bindComponentControls(device, eDevice, PDP11.APPCLASS);
+                break;
+            case 'rk11':
+                device = new RK11(parmsDevice);
+                Component.bindComponentControls(device, eDevice, PDP11.APPCLASS);
+                break;
+            }
+        }
+    }
+}
 
 /*
  * ES6 ALERT: As you can see below, I've finally started using computed property names.
@@ -1150,45 +1183,9 @@ DevicePDP11.UNIBUS_IOTABLE = {
     [PDP11.UNIBUS.PSW]:     /* 177776 */    [null, null, DevicePDP11.prototype.readPSW,     DevicePDP11.prototype.writePSW,     "PSW"]
 };
 
-/**
- * DevicePDP11.init()
- *
- * This function operates on every HTML element of class "device", extracting the
- * JSON-encoded parameters for the DevicePDP11 constructor from the element's "data-value"
- * attribute, invoking the constructor to create a DevicePDP11 component, and then binding
- * any associated HTML controls to the new component.
- */
-DevicePDP11.init = function()
-{
-    var aeDevice = Component.getElementsByClass(document, PDP11.APPCLASS, "device");
-    for (var iDevice = 0; iDevice < aeDevice.length; iDevice++) {
-        var device;
-        var eDevice = aeDevice[iDevice];
-        var parmsDevice = Component.getComponentParms(eDevice);
-        switch(parmsDevice['type']) {
-        case 'default':
-            device = new DevicePDP11(parmsDevice);
-            Component.bindComponentControls(device, eDevice, PDP11.APPCLASS);
-            break;
-        case 'pc11':
-            device = new PC11(parmsDevice);
-            Component.bindComponentControls(device, eDevice, PDP11.APPCLASS);
-            break;
-        case 'rl11':
-            device = new RL11(parmsDevice);
-            Component.bindComponentControls(device, eDevice, PDP11.APPCLASS);
-            break;
-        case 'rk11':
-            device = new RK11(parmsDevice);
-            Component.bindComponentControls(device, eDevice, PDP11.APPCLASS);
-            break;
-        }
-    }
-};
-
 /*
  * Initialize all the DevicePDP11 modules on the page.
  */
-web.onInit(DevicePDP11.init);
+Web.onInit(DevicePDP11.init);
 
-if (NODE) module.exports = DevicePDP11;
+export default DevicePDP11;
