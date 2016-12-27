@@ -944,30 +944,20 @@ class RK11 extends Component {
     processCommand()
     {
         var fInterrupt = true;
-        var fnReadWrite, sFunc = "";
+        var fnReadWrite, func, sFunc = "";
         var iDrive = (this.regRKDA & PDP11.RK11.RKDA.DS) >> PDP11.RK11.RKDA.SHIFT.DS;
         var drive = this.aDrives[iDrive];
         var iCylinder, iHead, iSector, nWords, addr, inc;
 
-        this.regRKCS &= ~PDP11.RK11.RKCS.CRDY;
-        var func = this.regRKCS & PDP11.RK11.RKCS.FUNC;
+        this.regRKCS &= ~(PDP11.RK11.RKCS.CRDY | PDP11.RK11.RKCS.SCP);
+        this.regRKER &= ~(PDP11.RK11.RKER.SE);
 
-        switch(func) {
+        switch(func = this.regRKCS & PDP11.RK11.RKCS.FUNC) {
 
         case PDP11.RK11.FUNC.CRESET:
             if (this.messageEnabled()) this.printMessage(this.type + ": CRESET(" + iDrive + ")", true);
-            this.regRKER = 0;
+            this.regRKER = this.regRKDA = 0;
             this.regRKCS = PDP11.RK11.RKCS.CRDY;
-            this.regRKDA = 0;
-            break;
-
-        case PDP11.RK11.FUNC.SEEK:
-            iCylinder = (this.regRKDA & PDP11.RK11.RKDA.CA) >> PDP11.RK11.RKDA.SHIFT.CA;
-            if (this.messageEnabled()) this.printMessage(this.type + ": SEEK(" + iCylinder + ")", true);
-            if (iCylinder >= drive.nCylinders) {
-                this.regRKER |= PDP11.RK11.RKER.DRE | PDP11.RK11.RKER.NXC;
-                this.regRKCS |= PDP11.RK11.RKCS.HE | PDP11.RK11.RKCS.ERR;
-            }
             break;
 
         case PDP11.RK11.FUNC.RCHK:
@@ -997,21 +987,31 @@ class RK11 extends Component {
             if (this.messageEnabled()) this.printMessage(this.type + ": " + sFunc + "(" + iCylinder + ":" + iHead + ":" + iSector + ") " + Str.toOct(addr) + "--" + Str.toOct(addr + (nWords << 1)), true, true);
 
             if (iCylinder >= drive.nCylinders) {
-                this.regRKER |= PDP11.RK11.RKER.DRE | PDP11.RK11.RKER.NXC;
-                this.regRKCS |= PDP11.RK11.RKCS.HE | PDP11.RK11.RKCS.ERR;
+                this.regRKER |= PDP11.RK11.RKER.NXC;
                 break;
             }
             if (iSector >= drive.nSectors) {
-                this.regRKER |= PDP11.RK11.RKER.DRE | PDP11.RK11.RKER.NXS;
-                this.regRKCS |= PDP11.RK11.RKCS.HE | PDP11.RK11.RKCS.ERR;
+                this.regRKER |= PDP11.RK11.RKER.NXS;
                 break;
             }
 
             fInterrupt = fnReadWrite.call(this, drive, iCylinder, iHead, iSector, nWords, addr, inc, (func >= PDP11.RK11.FUNC.WCHK), this.doneReadWrite.bind(this));
             break;
 
+        case PDP11.RK11.FUNC.SEEK:
+            iCylinder = (this.regRKDA & PDP11.RK11.RKDA.CA) >> PDP11.RK11.RKDA.SHIFT.CA;
+            if (this.messageEnabled()) this.printMessage(this.type + ": SEEK(" + iCylinder + ")", true);
+            if (iCylinder < drive.nCylinders) {
+                this.regRKCS |= PDP11.RK11.RKCS.SCP;
+            } else {
+                this.regRKER |= PDP11.RK11.RKER.NXC;
+            }
+            break;
+
         case PDP11.RK11.FUNC.DRESET:
             if (this.messageEnabled()) this.printMessage(this.type + ": DRESET(" + iDrive + ")");
+            this.regRKER = this.regRKDA = 0;
+            this.regRKCS = PDP11.RK11.RKCS.CRDY | PDP11.RK11.RKCS.SCP;
             break;
 
         default:
@@ -1021,9 +1021,7 @@ class RK11 extends Component {
 
         this.regRKDS = drive.status | (drive.disk? PDP11.RK11.RKDS.DRDY : 0) | (iDrive << PDP11.RK11.RKDS.SHIFT.ID) | (this.regRKDA & PDP11.RK11.RKDS.SC);
 
-        if (this.regRKER & PDP11.RK11.RKER.DRE) {
-            if (this.messageEnabled()) this.printMessage(this.type + ": ERROR: " + Str.toOct(this.regRKER));
-        }
+        this.updateErrors();
 
         if (fInterrupt) {
             this.regRKCS &= ~PDP11.RK11.RKCS.GO;
@@ -1139,8 +1137,6 @@ class RK11 extends Component {
                 err = PDP11.RK11.RKER.NXM;
                 break;
             }
-            addr += inc;
-            nWords--;
             if (!sector) {
                 if (iCylinder >= disk.nCylinders) {
                     err = PDP11.RK11.RKER.NXC;
@@ -1167,56 +1163,19 @@ class RK11 extends Component {
                     break;
                 }
                 /*
-                 * TODO: Figure out why certain WCHK commands fail during the 11/70 CPU EXERCISER diagnostic,
-                 * once the test starts reading/writing with physical addresses > 177777.  I think all the
-                 * UNIBUS address calculations are fine, so I'm at a loss to explain how a WCHK operation
-                 * can succeed when the diagnostic itself appears to alter the memory immediately after the
-                 * preceding WRITE operation.
+                 * NOTE: During the 11/70 CPU EXERCISER diagnostic, a number of WCHK requests will fail
+                 * when the test starts reading/writing with physical addresses > 177777.  I'm pretty sure all
+                 * the UNIBUS address calculations are fine, and therefore those failures are expected.
                  *
-                 * The following machine is already primed with the diagnostic, as well as the recommended
-                 * breakpoints and messages:
-                 *
-                 *      http://www.pcjs.org/devices/pdp11/machine/1170/panel/debugger/cpuexer/
-                 *
-                 * If you're not using that machine, turn on RK11 messages ("m rk11 on"), set a breakpoint at
-                 * 033330 ("bp 033330") and then take a look at the first RK11 operation after that breakpoint;
-                 * it should be the first one using a UNIBUS address larger than 16 bits:
-                 *
-                 *      RK11: WRITE(147:1:2) 00453610--00463610 @037772
-                 *
-                 * Use a breakpoint to halt the machine at 037772, and then use the Debugger's "da" command
-                 * to determine where UNIBUS address 00453610 is mapped (make sure you specify it as a physical
-                 * address using the % prefix):
-                 *
-                 *      >> da %00453610
-                 *                         00,101,011,110,001,000  00453610
-                 *      UNIMAP[18]: 1,111,111,110,100,001,111,000  17764170
-                 *          OFFSET:             1,011,110,001,000  00013610
-                 *        PHYSICAL: 0,000,000,000,000,000,000,000  00000000
-                 *
-                 * So, you can see that the starting address for the WRITE is perfectly calculated to begin at
-                 * physical address 0.  And the "da" command indicates virtual address 0 points to the same
-                 * memory:
-                 *
-                 *      >> da 0
-                 *                         00,000,000,000,000,000  00000000
-                 *                              0,000,000,000,000  00000000
-                 *      +   KIPAR0: 0,000,000,000,000,000,000,000  00000000
-                 *      &  MMUMASK: 1,111,111,111,111,111,111,111  17777777
-                 *      = PHYSICAL: 0,000,000,000,000,000,000,000  00000000
-                 *
-                 * Strangely, the diagnostic (its interrupt handler to be exact) is updating the next RKCS command
-                 * value at 001570, which is right in the middle of the first 2048 words of memory -- the same 2048
-                 * words that the diagnostic is about to WRITE and then WCHK.  Since that value is changing between
-                 * the WRITE and the WCHK, how can WCHK succeed?
-                 *
-                 * For now, I just pretend that it does, by skipping the actual comparison.
-                 *
-                 *      if (data != (b0 | (b1 << 8))) {
-                 *          err = PDP11.RK11.RKER.WCE;
-                 *          break;
-                 *      }
+                 * Originally, those failures were causing me some grief because I was treating a WCE error like
+                 * any other error; ie, as a HARD error.  That was wrong.  Two errors (WCE and CSE) are soft
+                 * errors, so while they should still trigger the general-purpose RKCS ERR bit, they should NOT
+                 * trigger the RKCS HE (Hard Error) bit.  This is all taken care of in updateErrors() now.
                  */
+                if (data != (b0 | (b1 << 8))) {
+                    err = PDP11.RK11.RKER.WCE;
+                    break;
+                }
             } else {
                 if (!disk.write(sector, ibSector++, data & 0xff) || !disk.write(sector, ibSector++, data >> 8)) {
                     err = PDP11.RK11.RKER.NXS;
@@ -1224,6 +1183,8 @@ class RK11 extends Component {
                 }
             }
             if (ibSector >= disk.cbSector) sector = null;
+            addr += inc;
+            nWords--;
         }
         return done? done(err, iCylinder, iHead, iSector, nWords, addr) : err;
     }
@@ -1246,11 +1207,37 @@ class RK11 extends Component {
         this.regRKCS = (this.regRKCS & ~PDP11.RK11.RKCS.MEX) | ((addr >> (16 - PDP11.RK11.RKCS.SHIFT.MEX)) & PDP11.RK11.RKCS.MEX);
         this.regRKWC = (0x10000 - nWords) & 0xffff;
         this.regRKDA = (this.regRKDA & ~PDP11.RK11.RKDA.SA) | (iSector & PDP11.RK11.RKDA.SA);
-        if (err) {
-            this.regRKER |= err | PDP11.RK11.RKER.DRE;
-            this.regRKCS |= PDP11.RK11.RKCS.HE | PDP11.RK11.RKCS.ERR;
-        }
+        this.regRKER |= err;
+        this.updateErrors();
         return true;
+    }
+
+    /**
+     * updateErrors()
+     *
+     * @this {RK11}
+     */
+    updateErrors()
+    {
+        /*
+         * Reflect RKER bits to RKCS bits as appropriate.
+         *
+         * TODO: I'm not entirely sure about the handling of the DRE bit here.  DEC's RK11 documentation says:
+         *
+         *      Sets if one of the drives in the system senses a loss of either AC or DC power and a function is
+         *      either initiated or in process while the selected drive is not ready or in some error condition.
+         *
+         * I'm not sure how to parse all the "ands" and "ors" in that sentence.  For now, we're treating the DRE bit
+         * much like the high error bit found in other hardware registers: we always set it if any lower error bits
+         * are also set.
+         */
+        this.regRKCS &= ~PDP11.RK11.RKCS.ERR;
+        if (this.regRKER) {
+            this.regRKER |= PDP11.RK11.RKER.DRE;
+            this.regRKCS |= PDP11.RK11.RKCS.ERR;
+            if (this.regRKER & PDP11.RK11.RKER.HE) this.regRKCS |= PDP11.RK11.RKCS.HE;
+            if (this.messageEnabled()) this.printMessage(this.type + ": ERROR: " + Str.toOct(this.regRKER));
+        }
     }
 
     /**

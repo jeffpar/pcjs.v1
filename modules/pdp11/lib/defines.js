@@ -708,6 +708,7 @@ var PDP11 = {
         RKER: {                 // 177402: Error Register
             WCE:    0x0001,     // Write Check Error
             CSE:    0x0002,     // Checksum Error
+            SE:     0x0003,     // Soft Error bits (cleared at the start of a new function)
             UNUSED: 0x001C,     // unused (returns zero)
             NXS:    0x0020,     // Non-Existent Sector
             NXC:    0x0040,     // Non-Existent Cylinder
@@ -719,7 +720,8 @@ var PDP11 = {
             SKE:    0x1000,     // Seek Error
             WLO:    0x2000,     // Write Lock-Out Violation
             OVR:    0x4000,     // Overrun
-            DRE:    0x8000      // Drive Error
+            DRE:    0x8000,     // Drive Error
+            HE:     0x7FE0      // Hard Error bits (cleared only by Bus RESET or RK11 CRESET function)
         },
         RKCS: {                 // 177404: Control Status Register
             GO:     0x0001,     // (000001) Go (W/O)

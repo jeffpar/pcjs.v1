@@ -373,7 +373,7 @@ to trap when SP is 150.  That contradicts this newer test (ie, that TST should n
 trap "BECAUSE TST IS A NON MODIFYING INST").  For this and other reasons, PDPjs now installs different
 checkStackLimit() handlers based on the CPU model.
 
-UPDATE: Another (1980) version of the source code for the 11/70 CPU EXERCISER diagnostic has been located and archived
+UPDATE: Another (1980) version of the source code for this diagnostic has been located and archived
 with the rest of our [DEC PDP-11 Diagnostic Publications](/pubs/dec/pdp11/diags/):
 
 - [CEQKCE0 11/70 INSTRUCTION EXERCISER (May 1980)](http://archive.pcjs.org/pubs/dec/pdp11/diags/AC-7994E-MC_CEQKCE0_1170_INSTRUCTION_EXERCISER_May80.pdf) [[Original PDF](http://bitsavers.org/pdf/dec/pdp11/microfiche/ftp.j-hoppe.de/bw/gh/AH-7996E-MC__PDP11-70-74__11-70_INST_EXR__CEQKCE0__%28C%2975,80.pdf)]

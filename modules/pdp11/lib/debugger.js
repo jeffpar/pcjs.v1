@@ -55,7 +55,7 @@ import MessagesPDP11 from "./messages";
  *      aCmds           preprocessed commands (from sCmd)
  *
  * @typedef {{
- *      addr:(number|undefined),
+ *      addr:(number|null),
  *      fPhysical:(boolean),
  *      fTemporary:(boolean),
  *      nBase:(number|undefined),
@@ -203,7 +203,7 @@ class DebuggerPDP11 extends Debugger {
      * getAddr(dbgAddr, fWrite, nb)
      *
      * @this {DebuggerPDP11}
-     * @param {DbgAddrPDP11|null|undefined} dbgAddr
+     * @param {DbgAddrPDP11|null} [dbgAddr]
      * @param {boolean} [fWrite]
      * @param {number} [nb] number of bytes to check (1 or 2); default is 1
      * @return {number} is the corresponding linear address, or PDP11.ADDR_INVALID
@@ -221,14 +221,14 @@ class DebuggerPDP11 extends Debugger {
      * Returns a NEW DbgAddrPDP11 object, initialized with specified values and/or defaults.
      *
      * @this {DebuggerPDP11}
-     * @param {number} [addr]
+     * @param {number|null} [addr]
      * @param {boolean} [fPhysical]
      * @param {number} [nBase]
      * @return {DbgAddrPDP11}
      */
     newAddr(addr, fPhysical, nBase)
     {
-        return {addr: addr || 0, fPhysical: fPhysical || false, fTemporary: false, nBase: nBase};
+        return {addr: addr || null, fPhysical: fPhysical || false, fTemporary: false, nBase: nBase};
     }
 
     /**
