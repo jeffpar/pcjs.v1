@@ -33,10 +33,12 @@
 var path = require("path");
 var fs = require("fs");
 var repl = require("repl");
+var xml2js = require("xml2js");
 var Defines = require("../../shared/es6/defines");
 var Str = require("../../shared/es6/strlib");
 var Proc = require("../../shared/es6/proclib");
 
+var idAttrs = '@';
 var fConsole = false;
 var fDebug = false;
 var args = Proc.getArgs();
@@ -186,117 +188,129 @@ function getComponentByType(sType)
 }
 
 /**
+ * initMachine(xml)
+ *
+ * @param {Object} xml
+ */
+function initMachine(xml)
+{
+    /*
+     * Clear any/all saved objects from any previous machine
+     */
+    Component = dbg = null;
+    for (var i = 0; i < aComponents.length; i++) {
+        aComponents[i].objects = [];
+    }
+
+    var machine = xml['machine'];
+    var idMachine = machine[idAttrs] && machine[idAttrs]['id'] || "";
+
+    for (var iComponent = 0; iComponent < aComponents.length; iComponent++) {
+
+        var component = aComponents[iComponent], aDevices = machine[component.name];
+        /*
+         * If aDevices is undefined, then that component does not exist in this machine.
+         */
+        if (aDevices === undefined) continue;
+
+        for (var iDevice = 0; iDevice < aDevices.length; iDevice++) {
+
+            var obj;
+            var device = aDevices[iDevice];
+            var parmsObj = device[idAttrs];
+
+            if (idMachine) parmsObj['id'] = idMachine + '.' + parmsObj['id'];
+
+            if (fDebug) {
+                console.log("creating " + component.name + "...");
+                console.log(parmsObj);
+            }
+
+            if (component.name == "cpu") {
+                parmsObj['autoStart'] = false;
+            }
+
+            try {
+                obj = new component.Create(parmsObj);
+            } catch (err) {
+                console.log("error creating " + component.name + ": " + err.message);
+                continue;
+            }
+
+            console.log(obj['id'] + " object created");
+            component.objects.push(obj);
+
+            if (obj.type == "Debugger") {
+                dbg = obj;
+            }
+        }
+    }
+}
+
+/**
  * loadMachine(sFile)
  * 
  * @param {string} sFile
- * @return {Object} representing the machine whose component objects have been loaded into aComponents
+ * @return {boolean}
  */
 function loadMachine(sFile)
 {
     if (fDebug) console.log('loadMachine("' + sFile + '")');
-    
-    /*
-     * Clear any/all saved objects from any previous machine
-     */
-    var i, j;
-    Component = dbg = null;
-    for (i = 0; i < aComponents.length; i++) {
-        aComponents[i].objects = [];
-    }
-    
-    var machine;
+    var xml = {_resolving: 0};
+    return readXML(xml, 'machine', sFile, null, 0, initMachine);
+}
+
+/**
+ * readXML(xml, sNode, sFile, aTags, iTag, done)
+ *
+ * @param {Object} xml
+ * @param {string} sNode
+ * @param {string} sFile
+ * @param {Array|null} aTags
+ * @param {number} iTag
+ * @param {function(Object)} done
+ * @return {boolean}
+ */
+function readXML(xml, sNode, sFile, aTags, iTag, done)
+{
+    var fLoading = false;
     try {
-        /*
-         * Since our JSON files may contain comments, hex values, and/or other tokens deemed
-         * unacceptable by the JSON Overlords, we can't use require() to load it, as we're able to
-         * do with "package.json".  Also note that require() assumes the same path as that of the
-         * requiring file, whereas fs.readFileSync() assumes the path reported by process.cwd().
-         * 
-         * TODO: I've since removed the comments from my sample "ibm5150.json" file, so we could
-         * try to reinstate this code; however, there are still hex constants, which I find *much*
-         * preferable to the decimal equivalents.  JSON's restrictions continue to irritate me.
-         *
-         *      var machine = require(lib + "../bin/" +sFile);
-         */
-        var sMachine = fs.readFileSync(sFile, {encoding: "utf8"});
-        sMachine = '(' + sMachine + ')';
-        if (fDebug) console.log(sMachine);
-        machine = eval(sMachine);       // jshint ignore:line
-        if (machine) {
-            /*
-             * Since we have a machine object, we now mimic the initialization sequence that occurs
-             * in the browser, by walking the list of PDPjs components we loaded above and looking for
-             * matches.
-             */
-            var idMachine = "";
-            
-            /*
-             * 'machine' is a pseudo-component that is only used to define an ID for the entire machine;
-             * if it exists, then that ID is prepended to every component ID, just as our XSLT code would
-             * do for a machine XML file.  This relieves the JSON file from having to manually prepend
-             * a machine ID to every component ID itself.
-             * 
-             * This doesn't mean I anticipate a Node environment running multiple machines, as we do in
-             * a browser; it only means that I'm trying to make both environments operate similarly.
-             */
-            if (machine['machine']) {
-                idMachine = machine['machine']['id'];
+        xml._resolving++;
+        var sXML = fs.readFileSync(sFile, {encoding: "utf8"});
+        var parser = new xml2js.Parser({attrkey: idAttrs});
+        parser.parseString(sXML, function(err, xmlNode) {
+            if (!aTags) {
+                xml[sNode] = xmlNode[sNode];
+            } else {
+                aTags[iTag] = xmlNode[sNode];
             }
-            
-            for (i = 0; i < aComponents.length; i++) {
-                
-                var component = aComponents[i];
-                var parms = machine[component.name];
-                /*
-                 * If parms is undefined, it means there is no component with that name defined in the
-                 * machine object (NOT that the component has no parms), and therefore we should skip it.
-                 */
-                if (parms === undefined) continue;
-                /*
-                 * If parms is an Array, then we must create an object for each parms element; and yes,
-                 * I'm relying on the fact that none of my parm objects use a "length" property, as a quick
-                 * and dirty way of differentiating objects from arrays.
-                 */
-                var aParms = parms.length !== undefined? parms : [parms];
-                for (j = 0; j < aParms.length; j++) {
-                    
-                    var obj;
-                    var parmsObj = aParms[j];
-                    if (idMachine) parmsObj['id'] = idMachine + '.' + parmsObj['id'];
-                    
-                    if (fDebug) {
-                        console.log("creating " + component.name + "...");
-                        console.log(parmsObj);
-                    }
-                    
-                    if (component.name == "cpu") {
-                        parmsObj['autoStart'] = false;
-                    }
-                    
-                    try {
-                        obj = new component.Create(parmsObj);
-                    } catch(err) {
-                        console.log("error creating " + component.name + ": " + err.message);
-                        continue;
-                    }
-                    
-                    console.log(obj['id'] + " object created");
-                    component.objects.push(obj);
-                    
-                    if (obj.type == "Debugger") {
-                        dbg = obj;
+            if (err) {
+                console.log(err.message);
+            }
+            else if (xmlNode && xmlNode[sNode]) {
+                for (var sTag in xmlNode[sNode]) {
+                    var aTagsXML = xmlNode[sNode][sTag];
+                    for (var iTagXML = 0; iTagXML < aTagsXML.length; iTagXML++) {
+                        var tag = aTagsXML[iTagXML];
+                        var attrs = tag[idAttrs];
+                        if (attrs) {
+                            for (var attr in attrs) {
+                                if (attr == "ref") {
+                                    var sFileXML = "../../.." + attrs[attr];
+                                    readXML(xml, sTag, sFileXML, aTagsXML, iTagXML, done);
+                                }
+                            }
+                        }
                     }
                 }
+                if (!--xml._resolving) done(xml);
             }
-            /*
-             * Return the original machine object only in DEBUG mode
-             */
-            if (!fDebug) machine = true;
-        }
+        });
+        fLoading = true;
     } catch(err) {
         console.log(err.message);
     }
-    return machine;
+    return fLoading;
 }
 
 /**
