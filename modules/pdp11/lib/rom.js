@@ -32,10 +32,10 @@
 
 "use strict";
 
-var Str = require("../../shared/lib/strlib");
-var Web = require("../../shared/lib/weblib");
-var DumpAPI = require("../../shared/lib/dumpapi");
-var Component = require("../../shared/lib/component");
+var Str = require("../../shared/es6/strlib");
+var Web = require("../../shared/es6/weblib");
+var DumpAPI = require("../../shared/es6/dumpapi");
+var Component = require("../../shared/es6/component");
 var PDP11 = require("./defines");
 var BusPDP11 = require("./bus");
 var MemoryPDP11 = require("./memory");

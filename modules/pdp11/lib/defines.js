@@ -885,4 +885,26 @@ PDP11.ACCESS.UPDATE_BYTE = PDP11.ACCESS.BYTE | PDP11.ACCESS.UPDATE;     // forme
  */
 PDP11.PSW.FLAGS         = (PDP11.PSW.NF | PDP11.PSW.ZF | PDP11.PSW.VF | PDP11.PSW.CF);
 
-module.exports = PDP11;
+/*
+ * Combine all the shared globals and machine-specific globals into one machine-specific global object,
+ * which all machine components should start using; eg: "if (PDP11.DEBUGGER)" instead of "if (DEBUGGER)".
+ */
+PDP11.APPCLASS          = APPCLASS;
+PDP11.APPNAME           = APPNAME;
+PDP11.DEBUGGER          = DEBUGGER;
+PDP11.BYTEARRAYS        = BYTEARRAYS;
+PDP11.TYPEDARRAYS       = TYPEDARRAYS;
+PDP11.MEMFAULT          = MEMFAULT;
+PDP11.WORDBUS           = WORDBUS;
+
+if (NODE) {
+    global.APPCLASS     = APPCLASS;
+    global.APPNAME      = APPNAME;
+    global.DEBUGGER     = DEBUGGER;
+    global.BYTEARRAYS   = BYTEARRAYS;
+    global.TYPEDARRAYS  = TYPEDARRAYS;
+    global.PDP11        = PDP11;
+    global.MEMFAULT     = MEMFAULT;
+    global.WORDBUS      = WORDBUS;
+    module.exports      = PDP11;
+}

@@ -971,15 +971,6 @@ class Component {
     }
 }
 
-/**
- * Component.parmsURL
- *
- * Initialized to the set of URL parameters, if any, for the current web page.
- *
- * @type {Object}
- */
-Component.parmsURL = Web.getURLParameters();
-
 /*
  * Every component created on the current page is recorded in this array (see Component.add()),
  * enabling any component to locate another component by ID (see Component.getComponentByID())

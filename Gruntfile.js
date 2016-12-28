@@ -666,7 +666,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks("grunt-run");
     grunt.loadNpmTasks("grunt-text-replace");
     
-    grunt.loadTasks("modules/grunts/manifester/tasks");
+ // grunt.loadTasks("modules/grunts/manifester/tasks");
     
     grunt.loadTasks("modules/grunts/prepjs/tasks");
 

@@ -161,7 +161,7 @@ function Video(parmsVideo, canvas, context, textarea, container)
      * that's apparently been added to Chrome.  Sigh.
      */
     var fSmoothing = parmsVideo['smoothing'];
-    var sSmoothing = Component.parmsURL['smoothing'];
+    var sSmoothing = web.getURLParm('smoothing');
     if (sSmoothing) fSmoothing = (sSmoothing == "true");
     if (fSmoothing != null) {
         for (i = 0; i < asWebPrefixes.length; i++) {
@@ -7303,7 +7303,7 @@ Video.init = function()
          * until we figure out a better UI.  And note that we use our web.onPageEvent() helper function to make
          * sure we don't trample any other 'onresize' handler(s) attached to the window object.
          */
-        var aspect = +(parmsVideo['aspect'] || Component.parmsURL['aspect']);
+        var aspect = +(parmsVideo['aspect'] || web.getURLParm('aspect'));
         /*
          * No 'aspect' parameter yields NaN, which is falsey, and anything else must satisfy my arbitrary
          * constraints of 0.3 <= aspect <= 3.33, to prevent any useless (or worse, browser-blowing) results.

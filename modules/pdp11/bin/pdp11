@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * @fileoverview Implements the PCx86 command-line interface
+ * @fileoverview Implements the PDP11 command-line interface
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © Jeff Parsons 2012-2016
  * @suppress {missingProperties}
@@ -33,13 +33,13 @@
 var path = require("path");
 var fs = require("fs");
 var repl = require("repl");
-var defines = require("../../shared/lib/defines");
-var str = require("../../shared/lib/strlib");
-var proc = require("../../shared/lib/proclib");
+var Defines = require("../../shared/es6/defines");
+var Str = require("../../shared/es6/strlib");
+var Proc = require("../../shared/es6/proclib");
 
 var fConsole = false;
 var fDebug = false;
-var args = proc.getArgs();
+var args = Proc.getArgs();
 var argv = args.argv;
 var sCmdPrev = "";
 if (argv['console'] !== undefined) fConsole = argv['console'];
@@ -80,14 +80,13 @@ var aComponents = [];
 var asComponentsIgnore = ["embed", "save"];
 
 /*
- * A few of the components are subclasses of other classes (eg, "x86cpu" is a subclass
- * of "cpu").  In those situations, we "hoist" the subclass constructor into the 
- * corresponding superclass, because it is the name of the superclass that we rely on during
- * machine initialization.
+ * A few of the components are subclasses of other classes (eg, "cpustate" is a subclass of "cpu").
+ * In those situations, we "hoist" the subclass constructor into the corresponding superclass,
+ * because it is the name of the superclass that we rely on during machine initialization.
  */
 var aSubClasses = {
-    "pcx86/lib/x86cpu": "pcx86/lib/cpu",
-    "pcx86/lib/debugger": "shared/lib/debugger"
+    "pdp11/lib/cpustate": "pdp11/lib/cpu",
+    "pdp11/lib/debugger": "shared/es6/debugger"
 };
     
 /**
@@ -99,8 +98,8 @@ function loadComponents(asFiles)
 {
     for (var i = 0; i < asFiles.length; i++) {
         var sFile = asFiles[i];
-        if (str.getExtension(sFile) != "js") continue;
-        var sName = str.getBaseName(sFile, true);
+        if (Str.getExtension(sFile) != "js") continue;
+        var sName = Str.getBaseName(sFile, true);
         if (asComponentsIgnore.indexOf(sName) >= 0) continue;
         if (fDebug) console.log(sFile);
         try {
@@ -226,7 +225,7 @@ function loadMachine(sFile)
         if (machine) {
             /*
              * Since we have a machine object, we now mimic the initialization sequence that occurs
-             * in the browser, by walking the list of PCx86 components we loaded above and looking for
+             * in the browser, by walking the list of PDPjs components we loaded above and looking for
              * matches.
              */
             var idMachine = "";
@@ -382,7 +381,7 @@ var onCommand = function (cmd, context, filename, callback)
 };
 
 if (pkg) {
-    loadComponents(pkg.pcX86Files);
+    loadComponents(pkg.pdp11Files);
 }
 
 /*
@@ -398,7 +397,7 @@ if (argv['cmd'] !== undefined) {
 }
 
 repl.start({
-    prompt: "PCx86> ",
+    prompt: "PDP11> ",
     input: process.stdin,
     output: process.stdout,
     eval: onCommand 

@@ -116,19 +116,19 @@ if (typeof module !== 'undefined') {
 }
 
 if (NODE) {
-    global.window = false;      // provides an alternative "if (typeof window === 'undefined')" (ie, "if (window) ...")
-    global.APPVERSION = APPVERSION;
-    global.XMLVERSION = XMLVERSION;
-    global.COPYRIGHT  = COPYRIGHT;
-    global.LICENSE    = LICENSE;
-    global.CSSCLASS   = CSSCLASS;
-    global.SITEHOST   = SITEHOST;
-    global.COMPILED   = COMPILED;
-    global.DEBUG      = DEBUG;
-    global.MAXDEBUG   = MAXDEBUG;
-    global.PRIVATE    = PRIVATE;
-    global.RS232      = RS232;
-    global.NODE       = NODE;
+    global.window       = false;        // provides an alternative "if (typeof window === 'undefined')" (ie, "if (window) ...")
+    global.APPVERSION   = APPVERSION;
+    global.XMLVERSION   = XMLVERSION;
+    global.COPYRIGHT    = COPYRIGHT;
+    global.LICENSE      = LICENSE;
+    global.CSSCLASS     = CSSCLASS;
+    global.SITEHOST     = SITEHOST;
+    global.COMPILED     = COMPILED;
+    global.DEBUG        = DEBUG;
+    global.MAXDEBUG     = MAXDEBUG;
+    global.PRIVATE      = PRIVATE;
+    global.RS232        = RS232;
+    global.NODE         = NODE;
     /*
      * TODO: When we're "required" by Node, should we return anything via module.exports?
      */

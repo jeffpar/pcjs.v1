@@ -1422,4 +1422,4 @@ BusPDP11.IOController = {
     }
 };
 
-if (NODE) module.exports = BusPDP11;
+module.exports = BusPDP11;

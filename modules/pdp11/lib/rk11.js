@@ -28,11 +28,11 @@
 
 "use strict";
 
-var Str = require("../../shared/lib/strlib");
-var Web = require("../../shared/lib/weblib");
-var DiskAPI = require("../../shared/lib/diskapi");
-var Component = require("../../shared/lib/component");
-var State = require("../../shared/lib/state");
+var Str = require("../../shared/es6/strlib");
+var Web = require("../../shared/es6/weblib");
+var DiskAPI = require("../../shared/es6/diskapi");
+var Component = require("../../shared/es6/component");
+var State = require("../../shared/es6/state");
 var PDP11 = require("./defines");
 var MessagesPDP11 = require("./messages");
 var DiskPDP11 = require("./disk");

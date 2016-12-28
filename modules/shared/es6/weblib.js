@@ -660,12 +660,26 @@ class Web {
     }
 
     /**
-     * getURLParameters(sParms)
+     * getURLParm(sParm)
+     *
+     * @param {string} sParm
+     * @return {string|undefined}
+     */
+    static getURLParm(sParm)
+    {
+        if (!Web.parmsURL) {
+            Web.parmsURL = Web.parseURLParms();
+        }
+        return Web.parmsURL[sParm];
+    }
+
+    /**
+     * parseURLParms(sParms)
      *
      * @param {string} [sParms] containing the parameter portion of a URL (ie, after the '?')
      * @return {Object} containing properties for each parameter found
      */
-    static getURLParameters(sParms)
+    static parseURLParms(sParms)
     {
         var aParms = {};
         if (window) {       // an alternative to "if (typeof module === 'undefined')" if require("defines") was used
@@ -943,6 +957,8 @@ class Web {
         }
     }
 }
+
+Web.parmsURL = null;            // initialized on first call to parseURLParms()
 
 Web.aPageEventHandlers = {
     'init': [],                 // list of window 'onload' handlers

@@ -32,8 +32,8 @@
 
 "use strict";
 
-var Str = require("../../shared/lib/strlib");
-var Web = require("../../shared/lib/weblib");
+var Str = require("../../shared/es6/strlib");
+var Web = require("../../shared/es6/weblib");
 var Component = require("../../shared/es6/component");
 var PDP11 = require("./defines");
 var BusPDP11 = require("./bus");

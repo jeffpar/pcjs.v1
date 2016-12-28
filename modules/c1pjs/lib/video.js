@@ -156,7 +156,7 @@ function C1PVideo(parmsVideo, canvas, context, imgChars)
      */
     var i, sEvent, asWebPrefixes = ['', 'moz', 'ms', 'webkit'];
     var fSmoothing = parmsVideo['smoothing'];
-    var sSmoothing = Component.parmsURL['smoothing'];
+    var sSmoothing = web.getURLParm('smoothing');
     if (sSmoothing) fSmoothing = (sSmoothing == "true");
     if (fSmoothing != null) {
         for (i = 0; i < asWebPrefixes.length; i++) {

@@ -325,7 +325,7 @@ class ComputerPDP11 extends Component {
          * but there are limits to my paranoia.
          */
         var sParmLC = sParm.toLowerCase();
-        var value = Component.parmsURL[sParm] || Component.parmsURL[sParmLC];
+        var value = Web.getURLParm(sParm) || Web.getURLParm(sParmLC);
 
         if (value === undefined && this.parmsMachine) {
             value = this.parmsMachine[sParm];
