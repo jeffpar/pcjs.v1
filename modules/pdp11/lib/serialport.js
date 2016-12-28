@@ -32,13 +32,13 @@
 
 "use strict";
 
-import Str from "../../shared/lib/strlib";
-import Web from "../../shared/lib/weblib";
-import Component from "../../shared/lib/component";
-import Keys from "../../shared/lib/keys";
-import State from "../../shared/lib/state";
-import PDP11 from "./defines";
-import MessagesPDP11 from "./messages";
+var Str = require("../../shared/lib/strlib");
+var Web = require("../../shared/lib/weblib");
+var Component = require("../../shared/lib/component");
+var Keys = require("../../shared/lib/keys");
+var State = require("../../shared/lib/state");
+var PDP11 = require("./defines");
+var MessagesPDP11 = require("./messages");
 
 /**
  * Since the Closure Compiler treats ES6 classes as @struct rather than @dict by default,
@@ -884,4 +884,4 @@ SerialPortPDP11.UNIBUS_IOTABLE = {
  */
 Web.onInit(SerialPortPDP11.init);
 
-export default SerialPortPDP11;
+module.exports = SerialPortPDP11;

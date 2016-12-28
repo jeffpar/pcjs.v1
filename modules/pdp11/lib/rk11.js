@@ -28,14 +28,14 @@
 
 "use strict";
 
-import Str from "../../shared/lib/strlib";
-import Web from "../../shared/lib/weblib";
-import DiskAPI from "../../shared/lib/diskapi";
-import Component from "../../shared/lib/component";
-import State from "../../shared/lib/state";
-import PDP11 from "./defines";
-import MessagesPDP11 from "./messages";
-import DiskPDP11 from "./disk";
+var Str = require("../../shared/lib/strlib");
+var Web = require("../../shared/lib/weblib");
+var DiskAPI = require("../../shared/lib/diskapi");
+var Component = require("../../shared/lib/component");
+var State = require("../../shared/lib/state");
+var PDP11 = require("./defines");
+var MessagesPDP11 = require("./messages");
+var DiskPDP11 = require("./disk");
 
 class RK11 extends Component {
     /**
@@ -1437,4 +1437,4 @@ RK11.UNIBUS_IOTABLE = {
     [PDP11.UNIBUS.RKDB]:     /* 177416 */    [null, null, RK11.prototype.readRKDB,  RK11.prototype.writeRKDB,   "RKDB"]
 };
 
-export default RK11;
+module.exports = RK11;

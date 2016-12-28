@@ -28,13 +28,13 @@
 
 "use strict";
 
-import Str from "../../shared/lib/strlib";
-import Web from "../../shared/lib/weblib";
-import DumpAPI from "../../shared/lib/dumpapi";
-import Component from "../../shared/lib/component";
-import State from "../../shared/lib/state";
-import PDP11 from "./defines";
-import MessagesPDP11 from "./messages";
+var Str = require("../../shared/lib/strlib");
+var Web = require("../../shared/lib/weblib");
+var DumpAPI = require("../../shared/lib/dumpapi");
+var Component = require("../../shared/lib/component");
+var State = require("../../shared/lib/state");
+var PDP11 = require("./defines");
+var MessagesPDP11 = require("./messages");
 
 class PC11 extends Component {
     /**
@@ -945,4 +945,4 @@ PC11.UNIBUS_IOTABLE = {
     [PDP11.UNIBUS.PRB]:     /* 177552 */    [null, null, PC11.prototype.readPRB,    PC11.prototype.writePRB,    "PRB"]
 };
 
-export default PC11;
+module.exports = PC11;

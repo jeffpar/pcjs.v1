@@ -32,9 +32,9 @@
 
 "use strict";
 
-import Component from "../../shared/lib/component";
-import PDP11 from "./defines";
-import MessagesPDP11 from "./messages";
+var Component = require("../../shared/lib/component");
+var PDP11 = require("./defines");
+var MessagesPDP11 = require("./messages");
 
 /**
  * @class DataView
@@ -1006,4 +1006,4 @@ var littleEndian = (TYPEDARRAYS? (function() {
     return new Uint16Array(buffer)[0] === 256;
 })() : false);
 
-export default MemoryPDP11;
+module.exports = MemoryPDP11;

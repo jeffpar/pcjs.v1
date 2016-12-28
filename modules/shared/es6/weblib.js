@@ -28,8 +28,8 @@
 
 "use strict";
 
-import Component from "../../shared/es6/component";
-import ReportAPI from "../../shared/es6/reportapi";
+var Component = require("../../shared/es6/component");
+var ReportAPI = require("../../shared/es6/reportapi");
 
 /*
  * According to http://www.w3schools.com/jsref/jsref_obj_global.asp, these are the *global* properties
@@ -984,4 +984,4 @@ Web.onPageEvent(Web.isUserAgent("Opera") || Web.isUserAgent("iOS")? 'onunload' :
     Web.doPageEvent(Web.aPageEventHandlers['exit']);
 });
 
-export default Web;
+module.exports = Web;

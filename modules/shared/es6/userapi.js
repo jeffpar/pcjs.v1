@@ -65,4 +65,4 @@ var UserAPI = {
     }
 };
 
-export default UserAPI;
+module.exports = UserAPI;

@@ -32,16 +32,16 @@
 
 "use strict";
 
-import Str from "../../shared/es6/strlib";
-import Web from "../../shared/es6/weblib";
-import Component from "../../shared/es6/component";
-import PDP11 from "./defines";
-import BusPDP11 from "./bus";
-import MemoryPDP11 from "./memory";
-import MessagesPDP11 from "./messages";
-import PC11 from "./pc11";
-import RL11 from "./rl11";
-import RK11 from "./rk11";
+var Str = require("../../shared/es6/strlib");
+var Web = require("../../shared/es6/weblib");
+var Component = require("../../shared/es6/component");
+var PDP11 = require("./defines");
+var BusPDP11 = require("./bus");
+var MemoryPDP11 = require("./memory");
+var MessagesPDP11 = require("./messages");
+var PC11 = require("./pc11");
+var RL11 = require("./rl11");
+var RK11 = require("./rk11");
 
 class DevicePDP11 extends Component {
     /**
@@ -1188,4 +1188,4 @@ DevicePDP11.UNIBUS_IOTABLE = {
  */
 Web.onInit(DevicePDP11.init);
 
-export default DevicePDP11;
+module.exports = DevicePDP11;

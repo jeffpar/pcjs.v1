@@ -239,4 +239,4 @@ DiskAPI.ATTR = {
     ARCHIVE:        0x20        // PC-DOS 2.0 and up
 };
 
-export default DiskAPI;
+module.exports = DiskAPI;

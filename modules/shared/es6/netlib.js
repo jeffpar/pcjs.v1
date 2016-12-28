@@ -28,11 +28,11 @@
 
 "use strict";
 
-import fs from "fs";
-import http from "http";
-import path from "path";
-import url from "url";
-import Str from "../../shared/es6/strlib";
+var fs = require("fs");
+var http = require("http");
+var path = require("path");
+var url = require("url");
+var Str = require("../../shared/es6/strlib");
 
 class Net {
     /**
@@ -387,4 +387,4 @@ Net.REVEAL_PDFS     = "pdfs";
 Net.asPropagate     = [Net.GORT_COMMAND, "autostart"];
 Net.sServerRoot     = null;
 
-export default Net;
+module.exports = Net;

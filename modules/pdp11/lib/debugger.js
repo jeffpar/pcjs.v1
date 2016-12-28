@@ -32,17 +32,17 @@
 
 "use strict";
 
-import Str from "../../shared/es6/strlib";
-import Usr from "../../shared/es6/usrlib";
-import Web from "../../shared/es6/weblib";
-import Component from "../../shared/es6/component";
-import Debugger from "../../shared/es6/debugger";
-import Keys from "../../shared/es6/keys";
-import State from "../../shared/es6/state";
-import PDP11 from "./defines";
-import BusPDP11 from "./bus";
-import MemoryPDP11 from "./memory";
-import MessagesPDP11 from "./messages";
+var Str = require("../../shared/es6/strlib");
+var Usr = require("../../shared/es6/usrlib");
+var Web = require("../../shared/es6/weblib");
+var Component = require("../../shared/es6/component");
+var Debugger = require("../../shared/es6/debugger");
+var Keys = require("../../shared/es6/keys");
+var State = require("../../shared/es6/state");
+var PDP11 = require("./defines");
+var BusPDP11 = require("./bus");
+var MemoryPDP11 = require("./memory");
+var MessagesPDP11 = require("./messages");
 
 /**
  * DebuggerPDP11 Address Object
@@ -4376,4 +4376,4 @@ if (DEBUGGER) {
 
 }   // endif DEBUGGER
 
-export default DebuggerPDP11;
+module.exports = DebuggerPDP11;

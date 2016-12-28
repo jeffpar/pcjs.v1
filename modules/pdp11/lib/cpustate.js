@@ -32,15 +32,15 @@
 
 "use strict";
 
-import Str from "../../shared/es6/strlib";
-import Web from "../../shared/es6/weblib";
-import Component from "../../shared/es6/component";
-import State from "../../shared/es6/state";
-import PDP11 from "./defines";
-import BusPDP11 from "./bus";
-import CPUPDP11 from "./cpu";
-import MessagesPDP11 from "./messages";
-import MemoryPDP11 from "./memory";
+var Str = require("../../shared/es6/strlib");
+var Web = require("../../shared/es6/weblib");
+var Component = require("../../shared/es6/component");
+var State = require("../../shared/es6/state");
+var PDP11 = require("./defines");
+var BusPDP11 = require("./bus");
+var CPUPDP11 = require("./cpu");
+var MessagesPDP11 = require("./messages");
+var MemoryPDP11 = require("./memory");
 
 /*
  * Overview of Device Interrupt Support
@@ -2969,4 +2969,4 @@ class CPUStatePDP11 extends CPUPDP11 {
  */
 Web.onInit(CPUStatePDP11.init);
 
-export default CPUStatePDP11;
+module.exports = CPUStatePDP11;

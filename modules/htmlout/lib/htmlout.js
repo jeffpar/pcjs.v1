@@ -514,6 +514,8 @@ HTMLOut.filter = function(req, res, next)
             } else {
                 sData = sData.replace(/^([ \t]*import\s+\S+\s+from\s+(['"]).*?\1;)/gm, "// $1");
                 sData = sData.replace(/^([ \t]*export\s+default\s+\S+;)/gm, "// $1");
+                sData = sData.replace(/^([ \t]*var\s+\S+\s+=\s+require\((['"]).*?\1\);)/gm, "// $1");
+                sData = sData.replace(/^([ \t]*(if\s+\(NODE\)\s*|)module\.exports\s+=\s+\S+;)/gm, "// $1");
                 res.set("Content-Type", "application/javascript");
                 res.status(200).send(sData);
             }

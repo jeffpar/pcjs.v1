@@ -32,16 +32,16 @@
 
 "use strict";
 
-import Str from "../../shared/es6/strlib";
-import Usr from "../../shared/es6/usrlib";
-import Web from "../../shared/es6/weblib";
-import UserAPI from "../../shared/es6/userapi";
-import ReportAPI from "../../shared/es6/reportapi";
-import Component from "../../shared/es6/component";
-import State from "../../shared/es6/state";
-import PDP11 from "./defines";
-import BusPDP11 from "./bus";
-import MessagesPDP11 from "./messages";
+var Str = require("../../shared/es6/strlib");
+var Usr = require("../../shared/es6/usrlib");
+var Web = require("../../shared/es6/weblib");
+var UserAPI = require("../../shared/es6/userapi");
+var ReportAPI = require("../../shared/es6/reportapi");
+var Component = require("../../shared/es6/component");
+var State = require("../../shared/es6/state");
+var PDP11 = require("./defines");
+var BusPDP11 = require("./bus");
+var MessagesPDP11 = require("./messages");
 
 class ComputerPDP11 extends Component {
     /**
@@ -50,7 +50,7 @@ class ComputerPDP11 extends Component {
      * The ComputerPDP11 component has no required (parmsComputer) properties, but it does
      * support the following:
      *
-z     *      autoPower: true to automatically power the computer (default), false to wait;
+     *      autoPower: true to automatically power the computer (default), false to wait;
      *      false is honored only if a "power" button binding exists.
      *
      *      busWidth: number of memory address lines (address bits) on the computer's "bus";
@@ -1621,4 +1621,4 @@ Web.onInit(ComputerPDP11.init);
 Web.onShow(ComputerPDP11.show);
 Web.onExit(ComputerPDP11.exit);
 
-export default ComputerPDP11;
+module.exports = ComputerPDP11;

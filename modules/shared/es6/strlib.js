@@ -620,4 +620,4 @@ Str.aASCIICodes = {
     0x1F:   "US"        // Unit Separator
 };
 
-export default Str;
+module.exports = Str;

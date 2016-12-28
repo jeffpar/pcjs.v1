@@ -32,12 +32,13 @@
 
 "use strict";
 
-import Str from "../../shared/es6/strlib";
-import Usr from "../../shared/es6/usrlib";
-import Component from "../../shared/es6/component";
-import State from "../../shared/es6/state";
-import MemoryPDP11 from "./memory";
-import MessagesPDP11 from "./messages";
+var Str = require("../../shared/es6/strlib");
+var Usr = require("../../shared/es6/usrlib");
+var Component = require("../../shared/es6/component");
+var State = require("../../shared/es6/state");
+var PDP11 = require("./defines");
+var MemoryPDP11 = require("./memory");
+var MessagesPDP11 = require("./messages");
 
 /*
  * Data types used by scanMemory()
@@ -1421,4 +1422,4 @@ BusPDP11.IOController = {
     }
 };
 
-export default BusPDP11;
+if (NODE) module.exports = BusPDP11;

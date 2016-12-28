@@ -32,13 +32,13 @@
 
 "use strict";
 
-import Str from "../../shared/lib/strlib";
-import Web from "../../shared/lib/weblib";
-import DumpAPI from "../../shared/lib/dumpapi";
-import Component from "../../shared/lib/component";
-import PDP11 from "./defines";
-import MemoryPDP11 from "./memory";
-import MessagesPDP11 from "./messages";
+var Str = require("../../shared/lib/strlib");
+var Web = require("../../shared/lib/weblib");
+var DumpAPI = require("../../shared/lib/dumpapi");
+var Component = require("../../shared/lib/component");
+var PDP11 = require("./defines");
+var MemoryPDP11 = require("./memory");
+var MessagesPDP11 = require("./messages");
 
 class RAMPDP11 extends Component {
     /**
@@ -406,4 +406,4 @@ class RAMPDP11 extends Component {
  */
 Web.onInit(RAMPDP11.init);
 
-export default RAMPDP11;
+module.exports = RAMPDP11;
