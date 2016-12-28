@@ -138,16 +138,9 @@ class Component {
         /** @type {Object|null} controlPrint is the HTML control, if any, that we can print to */
         this.controlPrint = null;
 
-        /** @type {ComputerPDP11|null} */
         this.cmp = null;
-
-        /** @type {BusPDP11|null} */
         this.bus = null;
-
-        /** @type {CPUStatePDP11|null} */
         this.cpu = null;
-
-        /** @type {DebuggerPDP11|null} */
         this.dbg = null;
 
         /*
@@ -967,6 +960,31 @@ class Component {
             if (bitsMessage === true || this.messageEnabled(bitsMessage | 0)) {
                 this.dbg.message(sMessage, fAddress);
             }
+        }
+    }
+
+    /**
+     * printMessageIO(port, bOut, addrFrom, name, bIn, bitsMessage)
+     *
+     * If bitsMessage is not specified, the component's MESSAGE category is used.
+     * If bitsMessage is true, the message is displayed as long as MESSAGE.PORT is enabled.
+     *
+     * @this {Component}
+     * @param {number} port
+     * @param {number|null} bOut if an output operation
+     * @param {number|null} [addrFrom]
+     * @param {string|null} [name] of the port, if any
+     * @param {number|null} [bIn] is the input value, if known, on an input operation
+     * @param {number|boolean} [bitsMessage] is zero or more MESSAGE_* category flag(s)
+     */
+    printMessageIO(port, bOut, addrFrom, name, bIn, bitsMessage) {
+        if (DEBUGGER && this.dbg) {
+            if (bitsMessage === true) {
+                bitsMessage = 0;
+            } else if (bitsMessage == null) {
+                bitsMessage = this.bitsMessage;
+            }
+            this.dbg.messageIO(this, port, bOut, addrFrom, name, bIn, bitsMessage);
         }
     }
 }

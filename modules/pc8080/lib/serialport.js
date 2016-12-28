@@ -28,117 +28,807 @@
 
 "use strict";
 
-if (NODE) {
-    var str         = require("../../shared/lib/strlib");
-    var web         = require("../../shared/lib/weblib");
-    var Component   = require("../../shared/lib/component");
-    var State       = require("../../shared/lib/state");
-    var PC8080      = require("./defines");
-    var Messages8080= require("./messages");
-}
+var Str          = require("../../shared/es6/strlib");
+var Web          = require("../../shared/es6/weblib");
+var Component    = require("../../shared/es6/component");
+var State        = require("../../shared/es6/state");
+var PC8080       = require("./defines");
+var Messages8080 = require("./messages");
 
 /**
- * SerialPort8080(parmsSerial)
+ * TODO: The Closure Compiler treats ES6 classes as 'struct' rather than 'dict' by default,
+ * which would force us to declare all class properties in the constructor, as well as prevent
+ * us from defining any named properties.  So, for now, we mark all our classes as 'unrestricted'.
  *
- * The SerialPort8080 component has the following component-specific (parmsSerial) properties:
- *
- *      adapter: 0 if not defined
- *
- *      binding: name of a control (based on its "binding" attribute) to bind to this port's I/O
- *
- *      tabSize: set to a non-zero number to convert tabs to spaces (applies only to output to
- *      the above binding); default is 0 (no conversion)
- *
- * In the future, we may support 'port' and 'irq' properties that allow the machine to define a
- * non-standard serial port configuration, instead of only our pre-defined 'adapter' configurations.
- *
- * NOTE: Since the XSL file defines 'adapter' as a number, not a string, there's no need to use
- * parseInt(), and as an added benefit, we don't need to worry about whether a hex or decimal format
- * was used.
- *
- * @constructor
- * @extends Component
- * @param {Object} parmsSerial
+ * @unrestricted
  */
-function SerialPort8080(parmsSerial) {
-
-    this.iAdapter = +parmsSerial['adapter'];
-
-    switch (this.iAdapter) {
-    case 0:
-        this.portBase = 0;
-        this.nIRQ = 2;
-        break;
-    default:
-        Component.warning("Unrecognized serial adapter #" + this.iAdapter);
-        return;
-    }
+class SerialPort8080 extends Component {
     /**
-     * consoleOutput becomes a string that records serial port output if the 'binding' property is set to the
-     * reserved name "console".  Nothing is written to the console, however, until a linefeed (0x0A) is output
-     * or the string length reaches a threshold (currently, 1024 characters).
+     * SerialPort8080(parmsSerial)
      *
-     * @type {string|null}
-     */
-    this.consoleOutput = null;
-
-    /**
-     * controlIOBuffer is a DOM element bound to the port (currently used for output only; see transmitByte()).
+     * The SerialPort8080 component has the following component-specific (parmsSerial) properties:
      *
-     * @type {Object}
-     */
-    this.controlIOBuffer = null;
-
-    /*
-     * If controlIOBuffer is being used AND 'tabSize' is set, then we make an attempt to monitor the characters
-     * being echoed via transmitByte(), maintain a logical column position, and convert any tabs into the appropriate
-     * number of spaces.
+     *      adapter: 0 if not defined
      *
-     * charBOL, if nonzero, is a character to automatically output at the beginning of every line.  This probably
-     * isn't generally useful; I use it internally to preformat serial output.
-     */
-    this.tabSize = parmsSerial['tabSize'];
-    this.charBOL = parmsSerial['charBOL'];
-    this.iLogicalCol = 0;
-
-    /*
-     * fAutoXOFF enables some experimental auto-XOFF/XON processing.  It assumes if the VT100 firmware
-     * issues an XOFF, receiveByte() should stop accepting more data until the firmware issues an XOFF.
+     *      binding: name of a control (based on its "binding" attribute) to bind to this port's I/O
      *
-     * The downside is that this doesn't really do anything to stem the flow of incoming data; it just
-     * prevents the VT100's internal buffer from overflowing.  TODO: Eliminate the need for this hack
-     * and add some *real* flow-control interfaces between connected SerialPort components.
+     *      tabSize: set to a non-zero number to convert tabs to spaces (applies only to output to
+     *      the above binding); default is 0 (no conversion)
+     *
+     * In the future, we may support 'port' and 'irq' properties that allow the machine to define a
+     * non-standard serial port configuration, instead of only our pre-defined 'adapter' configurations.
+     *
+     * NOTE: Since the XSL file defines 'adapter' as a number, not a string, there's no need to use
+     * parseInt(), and as an added benefit, we don't need to worry about whether a hex or decimal format
+     * was used.
+     *
+     * @this {SerialPort8080}
+     * @param {Object} parmsSerial
      */
-    this.fAutoXOFF = true;
-    this.fAutoStop = false;
-    this.fNullModem = true;
+    constructor(parmsSerial)
+    {
+        super("SerialPort", parmsSerial, SerialPort8080, Messages8080.SERIAL);
 
-    Component.call(this, "SerialPort", parmsSerial, SerialPort8080, Messages8080.SERIAL);
+        this.iAdapter = +parmsSerial['adapter'];
 
-    var sBinding = parmsSerial['binding'];
-    if (sBinding == "console") {
-        this.consoleOutput = "";
-    } else {
-        /*
-         * NOTE: If sBinding is not the name of a valid Control Panel DOM element, this call does nothing.
+        switch (this.iAdapter) {
+        case 0:
+            this.portBase = 0;
+            this.nIRQ = 2;
+            break;
+        default:
+            Component.warning("Unrecognized serial adapter #" + this.iAdapter);
+            return;
+        }
+        /**
+         * consoleOutput becomes a string that records serial port output if the 'binding' property is set to the
+         * reserved name "console".  Nothing is written to the console, however, until a linefeed (0x0A) is output
+         * or the string length reaches a threshold (currently, 1024 characters).
+         *
+         * @type {string|null}
          */
-        Component.bindExternalControl(this, sBinding, SerialPort8080.sIOBuffer);
+        this.consoleOutput = null;
+
+        /**
+         * controlIOBuffer is a DOM element bound to the port (currently used for output only; see transmitByte()).
+         *
+         * @type {Object}
+         */
+        this.controlIOBuffer = null;
+
+        /*
+         * If controlIOBuffer is being used AND 'tabSize' is set, then we make an attempt to monitor the characters
+         * being echoed via transmitByte(), maintain a logical column position, and convert any tabs into the appropriate
+         * number of spaces.
+         *
+         * charBOL, if nonzero, is a character to automatically output at the beginning of every line.  This probably
+         * isn't generally useful; I use it internally to preformat serial output.
+         */
+        this.tabSize = parmsSerial['tabSize'];
+        this.charBOL = parmsSerial['charBOL'];
+        this.iLogicalCol = 0;
+
+        /*
+         * fAutoXOFF enables some experimental auto-XOFF/XON processing.  It assumes if the VT100 firmware
+         * issues an XOFF, receiveByte() should stop accepting more data until the firmware issues an XOFF.
+         *
+         * The downside is that this doesn't really do anything to stem the flow of incoming data; it just
+         * prevents the VT100's internal buffer from overflowing.  TODO: Eliminate the need for this hack
+         * and add some *real* flow-control interfaces between connected SerialPort components.
+         */
+        this.fAutoXOFF = true;
+        this.fAutoStop = false;
+        this.fNullModem = true;
+
+        var sBinding = parmsSerial['binding'];
+        if (sBinding == "console") {
+            this.consoleOutput = "";
+        } else {
+            /*
+             * NOTE: If sBinding is not the name of a valid Control Panel DOM element, this call does nothing.
+             */
+            Component.bindExternalControl(this, sBinding, SerialPort8080.sIOBuffer);
+        }
+
+        /*
+         * No connection until initConnection() is called.
+         */
+        this.sDataReceived = "";
+        this.connection = this.sendData = this.updateStatus = null;
+
+        /*
+         * Export all functions required by initConnection().
+         */
+        this['exports'] = {
+            'connect': this.initConnection,
+            'receiveData': this.receiveData,
+            'receiveStatus': this.receiveStatus
+        };
     }
 
-    /*
-     * No connection until initConnection() is called.
+    /**
+     * setBinding(sHTMLType, sBinding, control, sValue)
+     *
+     * @this {SerialPort8080}
+     * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
+     * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "buffer")
+     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {string} [sValue] optional data value
+     * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
-    this.sDataReceived = "";
-    this.connection = this.sendData = this.updateStatus = null;
+    setBinding(sHTMLType, sBinding, control, sValue)
+    {
+        var serial = this;
 
-    /*
-     * Export all functions required by initConnection().
+        switch (sBinding) {
+        case SerialPort8080.sIOBuffer:
+            this.bindings[sBinding] = this.controlIOBuffer = control;
+
+            /*
+             * By establishing an onkeypress handler here, we make it possible for DOS commands like
+             * "CTTY COM1" to more or less work (use "CTTY CON" to restore control to the DOS console).
+             */
+            control.onkeydown = function onKeyDown(event) {
+                /*
+                 * This is required in addition to onkeypress, because it's the only way to prevent
+                 * BACKSPACE (keyCode 8) from being interpreted by the browser as a "Back" operation;
+                 * moreover, not all browsers generate an onkeypress notification for BACKSPACE.
+                 *
+                 * A related problem exists for Ctrl-key combinations in most Windows-based browsers
+                 * (eg, IE, Edge, Chrome for Windows, etc), because keys like Ctrl-C and Ctrl-S have
+                 * special meanings (eg, Copy, Save).  To the extent the browser will allow it, we
+                 * attempt to disable that default behavior when this control receives an onkeydown
+                 * event for one of those keys (probably the only event the browser generates for them).
+                 */
+                event = event || window.event;
+                var keyCode = event.keyCode;
+                if (keyCode === 0x08 || event.ctrlKey && keyCode >= 0x41 && keyCode <= 0x5A) {
+                    if (event.preventDefault) event.preventDefault();
+                    if (keyCode > 0x40) keyCode -= 0x40;
+                    serial.receiveByte(keyCode);
+                }
+                return true;
+            };
+
+            control.onkeypress = function onKeyPress(event) {
+                /*
+                 * Browser-independent keyCode extraction; refer to onKeyPress() and the other key event
+                 * handlers in keyboard.js.
+                 */
+                event = event || window.event;
+                var keyCode = event.which || event.keyCode;
+                serial.receiveByte(keyCode);
+                /*
+                 * Since we're going to remove the "readonly" attribute from the <textarea> control
+                 * (so that the soft keyboard activates on iOS), instead of calling preventDefault() for
+                 * selected keys (eg, the SPACE key, whose default behavior is to scroll the page), we must
+                 * now call it for *all* keys, so that the keyCode isn't added to the control immediately,
+                 * on top of whatever the machine is echoing back, resulting in double characters.
+                 */
+                if (event.preventDefault) event.preventDefault();
+                return true;
+            };
+
+            /*
+             * Now that we've added an onkeypress handler that calls preventDefault() for ALL keys, the control
+             * itself no longer needs the "readonly" attribute; we primarily need to remove it for iOS browsers,
+             * so that the soft keyboard will activate, but it shouldn't hurt to remove the attribute for all browsers.
+             */
+            control.removeAttribute("readonly");
+            return true;
+
+        default:
+            if (sValue) {
+                /*
+                 * Instead of just having a dedicated "test" control, we now treat any unrecognized control with
+                 * a "value" attribute as a test control.  The only caveat is that such controls must have binding IDs
+                 * that do not conflict with predefined controls (which, of course, is the only way you can get here).
+                 */
+                this.bindings[sBinding] = control;
+
+                /*
+                 * Backslash sequences like \n, \r and \\ have already been converted to LF, CR and backslash
+                 * characters, by virtue of the eval() function that all our component parameter strings pass through;
+                 * eval() treats strings like "source code", so any backslash sequence that JavaScript supports is
+                 * automatically converted.
+                 *
+                 * The complete list of supported backslash sequences:
+                 *
+                 *      \0  \'  \"  \\  \n  \r  \v  \t  \b  \f  \uXXXX \xXX
+                 *
+                 * We also want to support some additional sequences, like backslash-e for ESC.  Only one problem: for
+                 * any unrecognized backslash sequence, eval() simply removes the backslash.  So we have to double-backslash
+                 * it, which eval() will replace with a single backslash.
+                 *
+                 * So, additional supported backslash sequences include:
+                 *
+                 *      \\e (ESC)
+                 *
+                 * Note that I've judiciously avoided using terms "escape notation" or "escape sequence" to talk about
+                 * these sequences, because ESC is one of the additional characters I want to support, and using the word
+                 * "escape" in both contexts is WAY too confusing.
+                 */
+                sValue = sValue.replace(/\\e/g, String.fromCharCode(0x1b));
+
+                control.onclick = function onClickTest(event) {
+                    serial.receiveData(sValue);
+                    /*
+                     * Give focus back to the machine (since clicking the button takes focus away).
+                     *
+                     *      if (serial.cmp) serial.cmp.updateFocus();
+                     *
+                     * iOS Usability Improvement: NOT calling updateFocus() keeps the soft keyboard down
+                     * (assuming it was already down).
+                     */
+                    return true;
+                };
+                return true;
+            }
+            break;
+        }
+        return false;
+    }
+
+    /**
+     * echoByte(b)
+     *
+     * @this {SerialPort8080}
+     * @param {number} b
+     * @return {boolean} true if echo, false if not
      */
-    this['exports'] = {
-        'connect': this.initConnection,
-        'receiveData': this.receiveData,
-        'receiveStatus': this.receiveStatus
-    };
+    echoByte(b)
+    {
+        var fEchoed = false;
+
+        if (this.controlIOBuffer) {
+            if (b == 0x08) {
+                this.controlIOBuffer.value = this.controlIOBuffer.value.slice(0, -1);
+                /*
+                 * TODO: Back up the correct number of columns if the character erased was a tab.
+                 */
+                if (this.iLogicalCol > 0) this.iLogicalCol--;
+            }
+            else {
+                var s = Str.toASCIICode(b);
+                var nChars = s.length;
+                if (b == 0x09) {
+                    var tabSize = this.tabSize || 8;
+                    nChars = tabSize - (this.iLogicalCol % tabSize);
+                    if (this.tabSize) s = Str.pad("", nChars);
+                }
+                else if (b == 0x0D) {
+                    this.iLogicalCol = nChars = 0;
+                    s = "\n";
+                }
+                if (this.charBOL && !this.iLogicalCol && nChars) s = String.fromCharCode(this.charBOL) + s;
+                this.controlIOBuffer.value += s;
+                this.controlIOBuffer.scrollTop = this.controlIOBuffer.scrollHeight;
+                this.iLogicalCol += nChars;
+            }
+            fEchoed = true;
+        }
+        else if (this.consoleOutput != null) {
+            if (b == 0x0A || this.consoleOutput.length >= 1024) {
+                this.println(this.consoleOutput);
+                this.consoleOutput = "";
+            }
+            if (b != 0x0A) {
+                this.consoleOutput += String.fromCharCode(b);
+            }
+            fEchoed = true;
+        }
+
+        return fEchoed;
+    }
+
+    /**
+     * initBus(cmp, bus, cpu, dbg)
+     *
+     * @this {SerialPort8080}
+     * @param {Computer8080} cmp
+     * @param {Bus8080} bus
+     * @param {CPUState8080} cpu
+     * @param {Debugger8080} dbg
+     */
+    initBus(cmp, bus, cpu, dbg)
+    {
+        this.cmp = cmp;
+        this.bus = bus;
+        this.cpu = cpu;
+        this.dbg = dbg;
+
+        var serial = this;
+        this.timerReceiveNext = this.cpu.addTimer(function() {
+            serial.receiveData();
+        });
+        this.timerTransmitNext = this.cpu.addTimer(function() {
+            serial.transmitData();
+        });
+
+        this.chipset = /** @type {ChipSet8080} */ (cmp.getMachineComponent("ChipSet"));
+
+        bus.addPortInputTable(this, SerialPort8080.aPortInput, this.portBase);
+        bus.addPortOutputTable(this, SerialPort8080.aPortOutput, this.portBase);
+
+        this.setReady();
+    }
+
+    /**
+     * initConnection(fNullModem)
+     *
+     * If a machine 'connection' parameter exists of the form "{sourcePort}->{targetMachine}.{targetPort}",
+     * and "{sourcePort}" matches our idComponent, then look for a component with id "{targetMachine}.{targetPort}".
+     *
+     * If the target component is found, then verify that it has exported functions with the following names:
+     *
+     *      receiveData(data): called when we have data to transmit; aliased internally to sendData(data)
+     *      receiveStatus(pins): called when our control signals have changed; aliased internally to updateStatus(pins)
+     *
+     * For now, we're not going to worry about communication in the other direction, because when the target component
+     * performs its own initConnection(), it will find our receiveData() and receiveStatus() functions, at which point
+     * communication in both directions should be established, and the circle of life complete.
+     *
+     * For added robustness, if the target machine initializes much more slowly than we do, and our connection attempt
+     * fails, that's OK, because when it finally initializes, its initConnection() will call our initConnection();
+     * if we've already initialized, no harm done.
+     *
+     * @this {SerialPort8080}
+     * @param {boolean} [fNullModem] (caller's null-modem setting, to ensure our settings are in agreement)
+     */
+    initConnection(fNullModem)
+    {
+        if (!this.connection) {
+            var sConnection = this.cmp.getMachineParm("connection");
+            if (sConnection) {
+                var asParts = sConnection.split('->');
+                if (asParts.length == 2) {
+                    var sSourceID = Str.trim(asParts[0]);
+                    if (sSourceID != this.idComponent) return;  // this connection string is intended for another instance
+                    var sTargetID = Str.trim(asParts[1]);
+                    this.connection = Component.getComponentByID(sTargetID);
+                    if (this.connection) {
+                        var exports = this.connection['exports'];
+                        if (exports) {
+                            var fnConnect = exports['connect'];
+                            if (fnConnect) fnConnect.call(this.connection, this.fNullModem);
+                            this.sendData = exports['receiveData'];
+                            if (this.sendData) {
+                                this.fNullModem = fNullModem;
+                                this.updateStatus = exports['receiveStatus'];
+                                this.status(this.idMachine + '.' + sSourceID + " connected to " + sTargetID);
+                                return;
+                            }
+                        }
+                    }
+                }
+                /*
+                 * Changed from notice() to status() because sometimes a connection fails simply because one of us is a laggard.
+                 */
+                this.status("Unable to establish connection: " + sConnection);
+            }
+        }
+    }
+
+    /**
+     * powerUp(data, fRepower)
+     *
+     * @this {SerialPort8080}
+     * @param {Object|null} data
+     * @param {boolean} [fRepower]
+     * @return {boolean} true if successful, false if failure
+     */
+    powerUp(data, fRepower)
+    {
+        if (!fRepower) {
+
+            /*
+             * This is as late as we can currently wait to make our first inter-machine connection attempt;
+             * even so, the target machine's initialization process may still be ongoing, so any connection
+             * may be not fully resolved until the target machine performs its own initConnection(), which will
+             * in turn invoke our initConnection() again.
+             */
+            this.initConnection(this.fNullModem);
+
+            if (!data || !this.restore) {
+                this.reset();
+            } else {
+                if (!this.restore(data)) return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * powerDown(fSave, fShutdown)
+     *
+     * @this {SerialPort8080}
+     * @param {boolean} [fSave]
+     * @param {boolean} [fShutdown]
+     * @return {Object|boolean} component state if fSave; otherwise, true if successful, false if failure
+     */
+    powerDown(fSave, fShutdown)
+    {
+        return fSave? this.save() : true;
+    }
+
+    /**
+     * reset()
+     *
+     * @this {SerialPort8080}
+     */
+    reset()
+    {
+        this.initState();
+    }
+
+    /**
+     * save()
+     *
+     * This implements save support for the SerialPort8080 component.
+     *
+     * @this {SerialPort8080}
+     * @return {Object}
+     */
+    save()
+    {
+        var state = new State(this);
+        state.set(0, this.saveRegisters());
+        return state.data();
+    }
+
+    /**
+     * restore(data)
+     *
+     * This implements restore support for the SerialPort8080 component.
+     *
+     * @this {SerialPort8080}
+     * @param {Object} data
+     * @return {boolean} true if successful, false if failure
+     */
+    restore(data)
+    {
+        return this.initState(data[0]);
+    }
+
+    /**
+     * initState(data)
+     *
+     * @this {SerialPort8080}
+     * @param {Array} [data]
+     * @return {boolean} true if successful, false if failure
+     */
+    initState(data)
+    {
+        var i = 0;
+        if (data === undefined) {
+            data = SerialPort8080.UART8251.INIT;
+        }
+        this.fReady     = data[i++];
+        this.bDataIn    = data[i++];
+        this.bDataOut   = data[i++];
+        this.bStatus    = data[i++];
+        this.bMode      = data[i++];
+        this.bCommand   = data[i++];
+        this.bBaudRates = data[i];
+        return true;
+    }
+
+    /**
+     * saveRegisters()
+     *
+     * @this {SerialPort8080}
+     * @return {Array}
+     */
+    saveRegisters()
+    {
+        var i = 0;
+        var data = [];
+        data[i++] = this.fReady;
+        data[i++] = this.bDataIn;
+        data[i++] = this.bDataOut;
+        data[i++] = this.bStatus;
+        data[i++] = this.bMode;
+        data[i++] = this.bCommand;
+        data[i]   = this.bBaudRates;
+        return data;
+    }
+
+    /**
+     * getBaudTimeout(maskRate)
+     *
+     * @this {SerialPort8080}
+     * @param {number} maskRate (either SerialPort8080.UART8251.BAUDRATES.RECV_RATE or SerialPort8080.UART8251.BAUDRATES.XMIT_RATE)
+     * @return {number} (number of milliseconds per byte)
+     */
+    getBaudTimeout(maskRate)
+    {
+        var indexRate = (this.bBaudRates & maskRate);
+        if (!(maskRate & 0xf)) indexRate >>= 4;
+        var nBaud = SerialPort8080.UART8251.BAUDTABLE[indexRate];
+        var nBits = ((this.bMode & SerialPort8080.UART8251.MODE.DATA_BITS) >> 2) + 6;   // includes an extra +1 for start bit
+        if (this.bMode & SerialPort8080.UART8251.MODE.PARITY_ENABLE) nBits++;
+        nBits += ((((this.bMode & SerialPort8080.UART8251.MODE.STOP_BITS) >> 6) + 1) >> 1);
+        var nBytesPerSecond = Math.round(nBaud / nBits);
+        return 1000 / nBytesPerSecond;
+    }
+
+    /**
+     * receiveByte(b)
+     *
+     * @this {SerialPort8080}
+     * @param {number} b
+     * @return {boolean}
+     */
+    receiveByte(b)
+    {
+        if (MAXDEBUG) this.echoByte(b);
+        this.printMessage("receiveByte(" + Str.toHexByte(b) + "), status=" + Str.toHexByte(this.bStatus));
+        if (!this.fAutoStop && !(this.bStatus & SerialPort8080.UART8251.STATUS.RECV_FULL)) {
+            this.bDataIn = b;
+            this.bStatus |= SerialPort8080.UART8251.STATUS.RECV_FULL;
+            this.cpu.requestINTR(this.nIRQ);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * receiveData(data)
+     *
+     * Helper for clocking received data at the expected RECV_RATE.
+     *
+     * When we're cramming test data down the terminal's throat, that data will typically be in the form
+     * of a string.  When we're called by another component, data will typically be a number (ie, byte).  If no
+     * data is specified at all, then all we do is "clock" any remaining data into the receiver.
+     *
+     * @this {SerialPort8080}
+     * @param {number|string|undefined} [data]
+     * @return {boolean} true if received, false if not
+     */
+    receiveData(data)
+    {
+        if (data != null) {
+            if (typeof data != "number") {
+                this.sDataReceived = data;
+            } else {
+                this.sDataReceived += String.fromCharCode(data);
+            }
+        }
+        if (this.sDataReceived) {
+            if (this.receiveByte(this.sDataReceived.charCodeAt(0))) {
+                this.sDataReceived = this.sDataReceived.substr(1);
+            }
+            if (this.sDataReceived && this.cpu) {
+                this.cpu.setTimer(this.timerReceiveNext, this.getBaudTimeout(SerialPort8080.UART8251.BAUDRATES.RECV_RATE));
+            }
+        }
+        return true;                // for now, return true regardless, since we're buffering everything anyway
+    }
+
+    /**
+     * receiveStatus(pins)
+     *
+     * NOTE: Prior to the addition of this interface, the DSR bit was initialized set and remained set for the life
+     * of the machine.  It is entirely appropriate that this is the only way the bit can be changed, because it represents
+     * an external control signal.
+     *
+     * @this {SerialPort8080}
+     * @param {number} pins
+     */
+    receiveStatus(pins)
+    {
+        this.bStatus &= ~SerialPort8080.UART8251.STATUS.DSR;
+        if (pins & RS232.DSR.MASK) this.bStatus |= SerialPort8080.UART8251.STATUS.DSR;
+    }
+
+    /**
+     * transmitByte(b)
+     *
+     * @this {SerialPort8080}
+     * @param {number} b
+     * @return {boolean} true if transmitted, false if not
+     */
+    transmitByte(b)
+    {
+        var fTransmitted = false;
+
+        this.printMessage("transmitByte(" + Str.toHexByte(b) + ")");
+
+        if (this.fAutoXOFF) {
+            if (b == 0x13) {        // XOFF
+                this.fAutoStop = true;
+                return false;
+            }
+            if (b == 0x11) {        // XON
+                this.fAutoStop = false;
+                return false;
+            }
+        }
+
+        if (this.sendData) {
+            if (this.sendData.call(this.connection, b)) {
+                fTransmitted = true;
+            }
+        }
+
+        if (this.echoByte(b)) {
+            fTransmitted = true;
+        }
+
+        return fTransmitted;
+    }
+
+    /**
+     * transmitData(sData)
+     *
+     * Helper for clocking transmitted data at the expected XMIT_RATE.
+     *
+     * When timerTransmitNext fires, we have honored the programmed XMIT_RATE period, so we can
+     * set XMIT_READY (and XMIT_EMPTY), which signals the firmware that another byte can be transmitted.
+     *
+     * @this {SerialPort8080}
+     * @param {string} [sData]
+     * @return {boolean} true if successful, false if not
+     */
+    transmitData(sData)
+    {
+        this.bStatus |= (SerialPort8080.UART8251.STATUS.XMIT_READY | SerialPort8080.UART8251.STATUS.XMIT_EMPTY);
+        if (sData) {
+            return this.sendData? this.sendData.call(this.connection, sData) : false;
+        }
+        return true;
+    }
+
+    /**
+     * isTransmitterReady()
+     *
+     * Called whenever a ChipSet circuit needs the SerialPort8080 UART's transmitter status.
+     *
+     * @this {SerialPort8080}
+     * @return {boolean} (true if ready, false if not)
+     */
+    isTransmitterReady()
+    {
+        return !!(this.bStatus & SerialPort8080.UART8251.STATUS.XMIT_READY);
+    }
+
+    /**
+     * inData(port, addrFrom)
+     *
+     * @this {SerialPort8080}
+     * @param {number} port (0x0)
+     * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
+     * @return {number} simulated port value
+     */
+    inData(port, addrFrom)
+    {
+        var b = this.bDataIn;
+        this.printMessageIO(port, null, addrFrom, "DATA", b);
+        this.bStatus &= ~SerialPort8080.UART8251.STATUS.RECV_FULL;
+        return b;
+    }
+
+    /**
+     * inControl(port, addrFrom)
+     *
+     * @this {SerialPort8080}
+     * @param {number} port (0x1)
+     * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
+     * @return {number} simulated port value
+     */
+    inControl(port, addrFrom)
+    {
+        var b = this.bStatus;
+        this.printMessageIO(port, null, addrFrom, "STATUS", b);
+        return b;
+    }
+
+    /**
+     * outData(port, bOut, addrFrom)
+     *
+     * @this {SerialPort8080}
+     * @param {number} port (0x0)
+     * @param {number} bOut
+     * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
+     */
+    outData(port, bOut, addrFrom)
+    {
+        this.printMessageIO(port, bOut, addrFrom, "DATA");
+        this.bDataOut = bOut;
+        this.bStatus &= ~(SerialPort8080.UART8251.STATUS.XMIT_READY | SerialPort8080.UART8251.STATUS.XMIT_EMPTY);
+        /*
+         * If we're transmitting to a virtual device that has no measurable delay, this code may clear XMIT_READY
+         * too quickly:
+         *
+         *      if (this.transmitByte(bOut)) {
+         *          this.bStatus |= (SerialPort8080.UART8251.STATUS.XMIT_READY | SerialPort8080.UART8251.STATUS.XMIT_EMPTY);
+         *      }
+         *
+         * A better solution is to arm a timer based on the XMIT_RATE baud rate, and clear the above bits when that
+         * timer fires.  Consequently, we no longer care what transmitByte() reports.
+         */
+        this.transmitByte(bOut);
+        if (this.cpu) {
+            this.cpu.setTimer(this.timerTransmitNext, this.getBaudTimeout(SerialPort8080.UART8251.BAUDRATES.XMIT_RATE));
+        }
+    }
+
+    /**
+     * outControl(port, bOut, addrFrom)
+     *
+     * Writes to the CONTROL port (0x1) are either MODE or COMMAND bytes.  If the device has just
+     * been powered or reset, it is in a "not ready" state and is waiting for a MODE byte.  Once it
+     * has received that initial byte, the device is marked "ready", and all further bytes are
+     * interpreted as COMMAND bytes (until/unless a COMMAND byte with the INTERNAL_RESET bit is set).
+     *
+     * @this {SerialPort8080}
+     * @param {number} port (0x1)
+     * @param {number} bOut
+     * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
+     */
+    outControl(port, bOut, addrFrom)
+    {
+        this.printMessageIO(port, bOut, addrFrom, "CONTROL");
+        if (!this.fReady) {
+            this.bMode = bOut;
+            this.fReady = true;
+        } else {
+            /*
+             * Whenever DTR or RTS changes, we also want to notify any connected machine, via updateStatus().
+             */
+            if (this.updateStatus) {
+                var delta = (bOut ^ this.bCommand);
+                if (delta & (SerialPort8080.UART8251.COMMAND.RTS | SerialPort8080.UART8251.COMMAND.DTR)) {
+                    var pins = 0;
+                    if (this.fNullModem) {
+                        pins |= (bOut & SerialPort8080.UART8251.COMMAND.RTS)? RS232.CTS.MASK : 0;
+                        pins |= (bOut & SerialPort8080.UART8251.COMMAND.DTR)? (RS232.DSR.MASK | RS232.CD.MASK): 0;
+                    } else {
+                        pins |= (bOut & SerialPort8080.UART8251.COMMAND.RTS)? RS232.RTS.MASK : 0;
+                        pins |= (bOut & SerialPort8080.UART8251.COMMAND.DTR)? RS232.DTR.MASK : 0;
+                    }
+                    this.updateStatus.call(this.connection, pins);
+                }
+            }
+            this.bCommand = bOut;
+            if (this.bCommand & SerialPort8080.UART8251.COMMAND.INTERNAL_RESET) {
+                this.fReady = false;
+            }
+        }
+    }
+
+    /**
+     * outBaudRates(port, bOut, addrFrom)
+     *
+     * @this {SerialPort8080}
+     * @param {number} port (0x2)
+     * @param {number} bOut
+     * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
+     */
+    outBaudRates(port, bOut, addrFrom)
+    {
+        this.printMessageIO(port, bOut, addrFrom, "BAUDRATES");
+        this.bBaudRates = bOut;
+    }
+
+    /**
+     * SerialPort8080.init()
+     *
+     * This function operates on every HTML element of class "serial", extracting the
+     * JSON-encoded parameters for the SerialPort8080 constructor from the element's "data-value"
+     * attribute, invoking the constructor to create a SerialPort8080 component, and then binding
+     * any associated HTML controls to the new component.
+     */
+    static init()
+    {
+        var aeSerial = Component.getElementsByClass(document, PC8080.APPCLASS, "serial");
+        for (var iSerial = 0; iSerial < aeSerial.length; iSerial++) {
+            var eSerial = aeSerial[iSerial];
+            var parmsSerial = Component.getComponentParms(eSerial);
+            var serial = new SerialPort8080(parmsSerial);
+            Component.bindComponentControls(serial, eSerial, PC8080.APPCLASS);
+        }
+    }
 }
 
 /*
@@ -157,8 +847,6 @@ function SerialPort8080(parmsSerial) {
  * let alone getting into which ones should be considered private or protected, because PCjs isn't really a library
  * for third-party apps.
  */
-
-Component.subclass(SerialPort8080);
 
 SerialPort8080.UART8251 = {
     /*
@@ -260,671 +948,6 @@ SerialPort8080.UART8251.INIT = [
  */
 SerialPort8080.sIOBuffer = "buffer";
 
-/**
- * setBinding(sHTMLType, sBinding, control, sValue)
- *
- * @this {SerialPort8080}
- * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
- * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "buffer")
- * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
- * @param {string} [sValue] optional data value
- * @return {boolean} true if binding was successful, false if unrecognized binding request
- */
-SerialPort8080.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
-{
-    var serial = this;
-
-    switch (sBinding) {
-    case SerialPort8080.sIOBuffer:
-        this.bindings[sBinding] = this.controlIOBuffer = control;
-
-        /*
-         * By establishing an onkeypress handler here, we make it possible for DOS commands like
-         * "CTTY COM1" to more or less work (use "CTTY CON" to restore control to the DOS console).
-         */
-        control.onkeydown = function onKeyDown(event) {
-            /*
-             * This is required in addition to onkeypress, because it's the only way to prevent
-             * BACKSPACE (keyCode 8) from being interpreted by the browser as a "Back" operation;
-             * moreover, not all browsers generate an onkeypress notification for BACKSPACE.
-             *
-             * A related problem exists for Ctrl-key combinations in most Windows-based browsers
-             * (eg, IE, Edge, Chrome for Windows, etc), because keys like Ctrl-C and Ctrl-S have
-             * special meanings (eg, Copy, Save).  To the extent the browser will allow it, we
-             * attempt to disable that default behavior when this control receives an onkeydown
-             * event for one of those keys (probably the only event the browser generates for them).
-             */
-            event = event || window.event;
-            var keyCode = event.keyCode;
-            if (keyCode === 0x08 || event.ctrlKey && keyCode >= 0x41 && keyCode <= 0x5A) {
-                if (event.preventDefault) event.preventDefault();
-                if (keyCode > 0x40) keyCode -= 0x40;
-                serial.receiveByte(keyCode);
-            }
-            return true;
-        };
-
-        control.onkeypress = function onKeyPress(event) {
-            /*
-             * Browser-independent keyCode extraction; refer to onKeyPress() and the other key event
-             * handlers in keyboard.js.
-             */
-            event = event || window.event;
-            var keyCode = event.which || event.keyCode;
-            serial.receiveByte(keyCode);
-            /*
-             * Since we're going to remove the "readonly" attribute from the <textarea> control
-             * (so that the soft keyboard activates on iOS), instead of calling preventDefault() for
-             * selected keys (eg, the SPACE key, whose default behavior is to scroll the page), we must
-             * now call it for *all* keys, so that the keyCode isn't added to the control immediately,
-             * on top of whatever the machine is echoing back, resulting in double characters.
-             */
-            if (event.preventDefault) event.preventDefault();
-            return true;
-        };
-
-        /*
-         * Now that we've added an onkeypress handler that calls preventDefault() for ALL keys, the control
-         * itself no longer needs the "readonly" attribute; we primarily need to remove it for iOS browsers,
-         * so that the soft keyboard will activate, but it shouldn't hurt to remove the attribute for all browsers.
-         */
-        control.removeAttribute("readonly");
-        return true;
-
-    default:
-        if (sValue) {
-            /*
-             * Instead of just having a dedicated "test" control, we now treat any unrecognized control with
-             * a "value" attribute as a test control.  The only caveat is that such controls must have binding IDs
-             * that do not conflict with predefined controls (which, of course, is the only way you can get here).
-             */
-            this.bindings[sBinding] = control;
-
-            /*
-             * Backslash sequences like \n, \r and \\ have already been converted to LF, CR and backslash
-             * characters, by virtue of the eval() function that all our component parameter strings pass through;
-             * eval() treats strings like "source code", so any backslash sequence that JavaScript supports is
-             * automatically converted.
-             *
-             * The complete list of supported backslash sequences:
-             *
-             *      \0  \'  \"  \\  \n  \r  \v  \t  \b  \f  \uXXXX \xXX
-             *
-             * We also want to support some additional sequences, like backslash-e for ESC.  Only one problem: for
-             * any unrecognized backslash sequence, eval() simply removes the backslash.  So we have to double-backslash
-             * it, which eval() will replace with a single backslash.
-             *
-             * So, additional supported backslash sequences include:
-             *
-             *      \\e (ESC)
-             *
-             * Note that I've judiciously avoided using terms "escape notation" or "escape sequence" to talk about
-             * these sequences, because ESC is one of the additional characters I want to support, and using the word
-             * "escape" in both contexts is WAY too confusing.
-             */
-            sValue = sValue.replace(/\\e/g, String.fromCharCode(0x1b));
-
-            control.onclick = function onClickTest(event) {
-                serial.receiveData(sValue);
-                /*
-                 * Give focus back to the machine (since clicking the button takes focus away).
-                 *
-                 *      if (serial.cmp) serial.cmp.updateFocus();
-                 *
-                 * iOS Usability Improvement: NOT calling updateFocus() keeps the soft keyboard down
-                 * (assuming it was already down).
-                 */
-                return true;
-            };
-            return true;
-        }
-        break;
-    }
-    return false;
-};
-
-/**
- * echoByte(b)
- *
- * @this {SerialPort8080}
- * @param {number} b
- * @return {boolean} true if echo, false if not
- */
-SerialPort8080.prototype.echoByte = function(b)
-{
-    var fEchoed = false;
-
-    if (this.controlIOBuffer) {
-        if (b == 0x08) {
-            this.controlIOBuffer.value = this.controlIOBuffer.value.slice(0, -1);
-            /*
-             * TODO: Back up the correct number of columns if the character erased was a tab.
-             */
-            if (this.iLogicalCol > 0) this.iLogicalCol--;
-        }
-        else {
-            var s = str.toASCIICode(b);
-            var nChars = s.length;
-            if (b == 0x09) {
-                var tabSize = this.tabSize || 8;
-                nChars = tabSize - (this.iLogicalCol % tabSize);
-                if (this.tabSize) s = str.pad("", nChars);
-            }
-            else if (b == 0x0D) {
-                this.iLogicalCol = nChars = 0;
-                s = "\n";
-            }
-            if (this.charBOL && !this.iLogicalCol && nChars) s = String.fromCharCode(this.charBOL) + s;
-            this.controlIOBuffer.value += s;
-            this.controlIOBuffer.scrollTop = this.controlIOBuffer.scrollHeight;
-            this.iLogicalCol += nChars;
-        }
-        fEchoed = true;
-    }
-    else if (this.consoleOutput != null) {
-        if (b == 0x0A || this.consoleOutput.length >= 1024) {
-            this.println(this.consoleOutput);
-            this.consoleOutput = "";
-        }
-        if (b != 0x0A) {
-            this.consoleOutput += String.fromCharCode(b);
-        }
-        fEchoed = true;
-    }
-
-    return fEchoed;
-};
-
-/**
- * initBus(cmp, bus, cpu, dbg)
- *
- * @this {SerialPort8080}
- * @param {Computer8080} cmp
- * @param {Bus8080} bus
- * @param {CPUState8080} cpu
- * @param {Debugger8080} dbg
- */
-SerialPort8080.prototype.initBus = function(cmp, bus, cpu, dbg)
-{
-    this.cmp = cmp;
-    this.bus = bus;
-    this.cpu = cpu;
-    this.dbg = dbg;
-
-    var serial = this;
-    this.timerReceiveNext = this.cpu.addTimer(function() {
-        serial.receiveData();
-    });
-    this.timerTransmitNext = this.cpu.addTimer(function() {
-        serial.transmitData();
-    });
-
-    this.chipset = /** @type {ChipSet8080} */ (cmp.getMachineComponent("ChipSet"));
-
-    bus.addPortInputTable(this, SerialPort8080.aPortInput, this.portBase);
-    bus.addPortOutputTable(this, SerialPort8080.aPortOutput, this.portBase);
-
-    this.setReady();
-};
-
-/**
- * initConnection(fNullModem)
- *
- * If a machine 'connection' parameter exists of the form "{sourcePort}->{targetMachine}.{targetPort}",
- * and "{sourcePort}" matches our idComponent, then look for a component with id "{targetMachine}.{targetPort}".
- *
- * If the target component is found, then verify that it has exported functions with the following names:
- *
- *      receiveData(data): called when we have data to transmit; aliased internally to sendData(data)
- *      receiveStatus(pins): called when our control signals have changed; aliased internally to updateStatus(pins)
- *
- * For now, we're not going to worry about communication in the other direction, because when the target component
- * performs its own initConnection(), it will find our receiveData() and receiveStatus() functions, at which point
- * communication in both directions should be established, and the circle of life complete.
- *
- * For added robustness, if the target machine initializes much more slowly than we do, and our connection attempt
- * fails, that's OK, because when it finally initializes, its initConnection() will call our initConnection();
- * if we've already initialized, no harm done.
- *
- * @this {SerialPort8080}
- * @param {boolean} [fNullModem] (caller's null-modem setting, to ensure our settings are in agreement)
- */
-SerialPort8080.prototype.initConnection = function(fNullModem)
-{
-    if (!this.connection) {
-        var sConnection = this.cmp.getMachineParm("connection");
-        if (sConnection) {
-            var asParts = sConnection.split('->');
-            if (asParts.length == 2) {
-                var sSourceID = str.trim(asParts[0]);
-                if (sSourceID != this.idComponent) return;  // this connection string is intended for another instance
-                var sTargetID = str.trim(asParts[1]);
-                this.connection = Component.getComponentByID(sTargetID);
-                if (this.connection) {
-                    var exports = this.connection['exports'];
-                    if (exports) {
-                        var fnConnect = exports['connect'];
-                        if (fnConnect) fnConnect.call(this.connection, this.fNullModem);
-                        this.sendData = exports['receiveData'];
-                        if (this.sendData) {
-                            this.fNullModem = fNullModem;
-                            this.updateStatus = exports['receiveStatus'];
-                            this.status(this.idMachine + '.' + sSourceID + " connected to " + sTargetID);
-                            return;
-                        }
-                    }
-                }
-            }
-            /*
-             * Changed from notice() to status() because sometimes a connection fails simply because one of us is a laggard.
-             */
-            this.status("Unable to establish connection: " + sConnection);
-        }
-    }
-};
-
-/**
- * powerUp(data, fRepower)
- *
- * @this {SerialPort8080}
- * @param {Object|null} data
- * @param {boolean} [fRepower]
- * @return {boolean} true if successful, false if failure
- */
-SerialPort8080.prototype.powerUp = function(data, fRepower)
-{
-    if (!fRepower) {
-
-        /*
-         * This is as late as we can currently wait to make our first inter-machine connection attempt;
-         * even so, the target machine's initialization process may still be ongoing, so any connection
-         * may be not fully resolved until the target machine performs its own initConnection(), which will
-         * in turn invoke our initConnection() again.
-         */
-        this.initConnection(this.fNullModem);
-
-        if (!data || !this.restore) {
-            this.reset();
-        } else {
-            if (!this.restore(data)) return false;
-        }
-    }
-    return true;
-};
-
-/**
- * powerDown(fSave, fShutdown)
- *
- * @this {SerialPort8080}
- * @param {boolean} [fSave]
- * @param {boolean} [fShutdown]
- * @return {Object|boolean} component state if fSave; otherwise, true if successful, false if failure
- */
-SerialPort8080.prototype.powerDown = function(fSave, fShutdown)
-{
-    return fSave? this.save() : true;
-};
-
-/**
- * reset()
- *
- * @this {SerialPort8080}
- */
-SerialPort8080.prototype.reset = function()
-{
-    this.initState();
-};
-
-/**
- * save()
- *
- * This implements save support for the SerialPort8080 component.
- *
- * @this {SerialPort8080}
- * @return {Object}
- */
-SerialPort8080.prototype.save = function()
-{
-    var state = new State(this);
-    state.set(0, this.saveRegisters());
-    return state.data();
-};
-
-/**
- * restore(data)
- *
- * This implements restore support for the SerialPort8080 component.
- *
- * @this {SerialPort8080}
- * @param {Object} data
- * @return {boolean} true if successful, false if failure
- */
-SerialPort8080.prototype.restore = function(data)
-{
-    return this.initState(data[0]);
-};
-
-/**
- * initState(data)
- *
- * @this {SerialPort8080}
- * @param {Array} [data]
- * @return {boolean} true if successful, false if failure
- */
-SerialPort8080.prototype.initState = function(data)
-{
-    var i = 0;
-    if (data === undefined) {
-        data = SerialPort8080.UART8251.INIT;
-    }
-    this.fReady     = data[i++];
-    this.bDataIn    = data[i++];
-    this.bDataOut   = data[i++];
-    this.bStatus    = data[i++];
-    this.bMode      = data[i++];
-    this.bCommand   = data[i++];
-    this.bBaudRates = data[i];
-    return true;
-};
-
-/**
- * saveRegisters()
- *
- * @this {SerialPort8080}
- * @return {Array}
- */
-SerialPort8080.prototype.saveRegisters = function()
-{
-    var i = 0;
-    var data = [];
-    data[i++] = this.fReady;
-    data[i++] = this.bDataIn;
-    data[i++] = this.bDataOut;
-    data[i++] = this.bStatus;
-    data[i++] = this.bMode;
-    data[i++] = this.bCommand;
-    data[i]   = this.bBaudRates;
-    return data;
-};
-
-/**
- * getBaudTimeout(maskRate)
- *
- * @this {SerialPort8080}
- * @param {number} maskRate (either SerialPort8080.UART8251.BAUDRATES.RECV_RATE or SerialPort8080.UART8251.BAUDRATES.XMIT_RATE)
- * @return {number} (number of milliseconds per byte)
- */
-SerialPort8080.prototype.getBaudTimeout = function(maskRate)
-{
-    var indexRate = (this.bBaudRates & maskRate);
-    if (!(maskRate & 0xf)) indexRate >>= 4;
-    var nBaud = SerialPort8080.UART8251.BAUDTABLE[indexRate];
-    var nBits = ((this.bMode & SerialPort8080.UART8251.MODE.DATA_BITS) >> 2) + 6;   // includes an extra +1 for start bit
-    if (this.bMode & SerialPort8080.UART8251.MODE.PARITY_ENABLE) nBits++;
-    nBits += ((((this.bMode & SerialPort8080.UART8251.MODE.STOP_BITS) >> 6) + 1) >> 1);
-    var nBytesPerSecond = Math.round(nBaud / nBits);
-    return 1000 / nBytesPerSecond;
-};
-
-/**
- * receiveByte(b)
- *
- * @this {SerialPort8080}
- * @param {number} b
- * @return {boolean}
- */
-SerialPort8080.prototype.receiveByte = function(b)
-{
-    if (MAXDEBUG) this.echoByte(b);
-    this.printMessage("receiveByte(" + str.toHexByte(b) + "), status=" + str.toHexByte(this.bStatus));
-    if (!this.fAutoStop && !(this.bStatus & SerialPort8080.UART8251.STATUS.RECV_FULL)) {
-        this.bDataIn = b;
-        this.bStatus |= SerialPort8080.UART8251.STATUS.RECV_FULL;
-        this.cpu.requestINTR(this.nIRQ);
-        return true;
-    }
-    return false;
-};
-
-/**
- * receiveData(data)
- *
- * Helper for clocking received data at the expected RECV_RATE.
- *
- * When we're cramming test data down the terminal's throat, that data will typically be in the form
- * of a string.  When we're called by another component, data will typically be a number (ie, byte).  If no
- * data is specified at all, then all we do is "clock" any remaining data into the receiver.
- *
- * @this {SerialPort8080}
- * @param {number|string|undefined} [data]
- * @return {boolean} true if received, false if not
- */
-SerialPort8080.prototype.receiveData = function(data)
-{
-    if (data != null) {
-        if (typeof data != "number") {
-            this.sDataReceived = data;
-        } else {
-            this.sDataReceived += String.fromCharCode(data);
-        }
-    }
-    if (this.sDataReceived) {
-        if (this.receiveByte(this.sDataReceived.charCodeAt(0))) {
-            this.sDataReceived = this.sDataReceived.substr(1);
-        }
-        if (this.sDataReceived && this.cpu) {
-            this.cpu.setTimer(this.timerReceiveNext, this.getBaudTimeout(SerialPort8080.UART8251.BAUDRATES.RECV_RATE));
-        }
-    }
-    return true;                // for now, return true regardless, since we're buffering everything anyway
-};
-
-/**
- * receiveStatus(pins)
- *
- * NOTE: Prior to the addition of this interface, the DSR bit was initialized set and remained set for the life
- * of the machine.  It is entirely appropriate that this is the only way the bit can be changed, because it represents
- * an external control signal.
- *
- * @this {SerialPort8080}
- * @param {number} pins
- */
-SerialPort8080.prototype.receiveStatus = function(pins)
-{
-    this.bStatus &= ~SerialPort8080.UART8251.STATUS.DSR;
-    if (pins & RS232.DSR.MASK) this.bStatus |= SerialPort8080.UART8251.STATUS.DSR;
-};
-
-/**
- * transmitByte(b)
- *
- * @this {SerialPort8080}
- * @param {number} b
- * @return {boolean} true if transmitted, false if not
- */
-SerialPort8080.prototype.transmitByte = function(b)
-{
-    var fTransmitted = false;
-
-    this.printMessage("transmitByte(" + str.toHexByte(b) + ")");
-
-    if (this.fAutoXOFF) {
-        if (b == 0x13) {        // XOFF
-            this.fAutoStop = true;
-            return false;
-        }
-        if (b == 0x11) {        // XON
-            this.fAutoStop = false;
-            return false;
-        }
-    }
-
-    if (this.sendData) {
-        if (this.sendData.call(this.connection, b)) {
-            fTransmitted = true;
-        }
-    }
-
-    if (this.echoByte(b)) {
-        fTransmitted = true;
-    }
-
-    return fTransmitted;
-};
-
-/**
- * transmitData(sData)
- *
- * Helper for clocking transmitted data at the expected XMIT_RATE.
- *
- * When timerTransmitNext fires, we have honored the programmed XMIT_RATE period, so we can
- * set XMIT_READY (and XMIT_EMPTY), which signals the firmware that another byte can be transmitted.
- *
- * @this {SerialPort8080}
- * @param {string} [sData]
- * @return {boolean} true if successful, false if not
- */
-SerialPort8080.prototype.transmitData = function(sData)
-{
-    this.bStatus |= (SerialPort8080.UART8251.STATUS.XMIT_READY | SerialPort8080.UART8251.STATUS.XMIT_EMPTY);
-    if (sData) {
-        return this.sendData? this.sendData.call(this.connection, sData) : false;
-    }
-    return true;
-};
-
-/**
- * isTransmitterReady()
- *
- * Called whenever a ChipSet circuit needs the SerialPort8080 UART's transmitter status.
- *
- * @this {SerialPort8080}
- * @return {boolean} (true if ready, false if not)
- */
-SerialPort8080.prototype.isTransmitterReady = function()
-{
-    return !!(this.bStatus & SerialPort8080.UART8251.STATUS.XMIT_READY);
-};
-
-/**
- * inData(port, addrFrom)
- *
- * @this {SerialPort8080}
- * @param {number} port (0x0)
- * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
- * @return {number} simulated port value
- */
-SerialPort8080.prototype.inData = function(port, addrFrom)
-{
-    var b = this.bDataIn;
-    this.printMessageIO(port, null, addrFrom, "DATA", b);
-    this.bStatus &= ~SerialPort8080.UART8251.STATUS.RECV_FULL;
-    return b;
-};
-
-/**
- * inControl(port, addrFrom)
- *
- * @this {SerialPort8080}
- * @param {number} port (0x1)
- * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
- * @return {number} simulated port value
- */
-SerialPort8080.prototype.inControl = function(port, addrFrom)
-{
-    var b = this.bStatus;
-    this.printMessageIO(port, null, addrFrom, "STATUS", b);
-    return b;
-};
-
-/**
- * outData(port, bOut, addrFrom)
- *
- * @this {SerialPort8080}
- * @param {number} port (0x0)
- * @param {number} bOut
- * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
- */
-SerialPort8080.prototype.outData = function(port, bOut, addrFrom)
-{
-    this.printMessageIO(port, bOut, addrFrom, "DATA");
-    this.bDataOut = bOut;
-    this.bStatus &= ~(SerialPort8080.UART8251.STATUS.XMIT_READY | SerialPort8080.UART8251.STATUS.XMIT_EMPTY);
-    /*
-     * If we're transmitting to a virtual device that has no measurable delay, this code may clear XMIT_READY
-     * too quickly:
-     *
-     *      if (this.transmitByte(bOut)) {
-     *          this.bStatus |= (SerialPort8080.UART8251.STATUS.XMIT_READY | SerialPort8080.UART8251.STATUS.XMIT_EMPTY);
-     *      }
-     *
-     * A better solution is to arm a timer based on the XMIT_RATE baud rate, and clear the above bits when that
-     * timer fires.  Consequently, we no longer care what transmitByte() reports.
-     */
-    this.transmitByte(bOut);
-    if (this.cpu) {
-        this.cpu.setTimer(this.timerTransmitNext, this.getBaudTimeout(SerialPort8080.UART8251.BAUDRATES.XMIT_RATE));
-    }
-};
-
-/**
- * outControl(port, bOut, addrFrom)
- *
- * Writes to the CONTROL port (0x1) are either MODE or COMMAND bytes.  If the device has just
- * been powered or reset, it is in a "not ready" state and is waiting for a MODE byte.  Once it
- * has received that initial byte, the device is marked "ready", and all further bytes are
- * interpreted as COMMAND bytes (until/unless a COMMAND byte with the INTERNAL_RESET bit is set).
- *
- * @this {SerialPort8080}
- * @param {number} port (0x1)
- * @param {number} bOut
- * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
- */
-SerialPort8080.prototype.outControl = function(port, bOut, addrFrom)
-{
-    this.printMessageIO(port, bOut, addrFrom, "CONTROL");
-    if (!this.fReady) {
-        this.bMode = bOut;
-        this.fReady = true;
-    } else {
-        /*
-         * Whenever DTR or RTS changes, we also want to notify any connected machine, via updateStatus().
-         */
-        if (this.updateStatus) {
-            var delta = (bOut ^ this.bCommand);
-            if (delta & (SerialPort8080.UART8251.COMMAND.RTS | SerialPort8080.UART8251.COMMAND.DTR)) {
-                var pins = 0;
-                if (this.fNullModem) {
-                    pins |= (bOut & SerialPort8080.UART8251.COMMAND.RTS)? RS232.CTS.MASK : 0;
-                    pins |= (bOut & SerialPort8080.UART8251.COMMAND.DTR)? (RS232.DSR.MASK | RS232.CD.MASK): 0;
-                } else {
-                    pins |= (bOut & SerialPort8080.UART8251.COMMAND.RTS)? RS232.RTS.MASK : 0;
-                    pins |= (bOut & SerialPort8080.UART8251.COMMAND.DTR)? RS232.DTR.MASK : 0;
-                }
-                this.updateStatus.call(this.connection, pins);
-            }
-        }
-        this.bCommand = bOut;
-        if (this.bCommand & SerialPort8080.UART8251.COMMAND.INTERNAL_RESET) {
-            this.fReady = false;
-        }
-    }
-};
-
-/**
- * outBaudRates(port, bOut, addrFrom)
- *
- * @this {SerialPort8080}
- * @param {number} port (0x2)
- * @param {number} bOut
- * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
- */
-SerialPort8080.prototype.outBaudRates = function(port, bOut, addrFrom)
-{
-    this.printMessageIO(port, bOut, addrFrom, "BAUDRATES");
-    this.bBaudRates = bOut;
-};
-
 /*
  * Port input notification table
  */
@@ -943,28 +966,9 @@ SerialPort8080.aPortOutput = {
     0x2: SerialPort8080.prototype.outBaudRates
 };
 
-/**
- * SerialPort8080.init()
- *
- * This function operates on every HTML element of class "serial", extracting the
- * JSON-encoded parameters for the SerialPort8080 constructor from the element's "data-value"
- * attribute, invoking the constructor to create a SerialPort8080 component, and then binding
- * any associated HTML controls to the new component.
- */
-SerialPort8080.init = function()
-{
-    var aeSerial = Component.getElementsByClass(document, PC8080.APPCLASS, "serial");
-    for (var iSerial = 0; iSerial < aeSerial.length; iSerial++) {
-        var eSerial = aeSerial[iSerial];
-        var parmsSerial = Component.getComponentParms(eSerial);
-        var serial = new SerialPort8080(parmsSerial);
-        Component.bindComponentControls(serial, eSerial, PC8080.APPCLASS);
-    }
-};
-
 /*
  * Initialize every SerialPort8080 module on the page.
  */
-web.onInit(SerialPort8080.init);
+Web.onInit(SerialPort8080.init);
 
-if (NODE) module.exports = SerialPort8080;
+module.exports = SerialPort8080;
