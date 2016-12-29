@@ -21,8 +21,8 @@ begin connecting PCs to terminals.
 Below you'll find an 80286-based [IBM PC AT](/devices/pcx86/machine/5170/ega/2048kb/rev3/) connected to an 8080-based
 [VT100 Terminal](/devices/pc8080/machine/vt100/) via the PC's **COM2** serial port.
 
-At this point, the connection is *very* thin.  The [PCx86](/modules/pcx86/) [SerialPort](/modules/pcx86/lib/serialport.js)
-and [PC8080](/modules/pc8080/) [SerialPort](/modules/pc8080/lib/serialport.js) each export exactly two methods:
+At this point, the connection is *very* thin.  The [PCx86](/modules/pcx86/) [SerialPort](/modules/pcx86/lib/serial.js)
+and [PC8080](/modules/pc8080/) [SerialPort](/modules/pc8080/lib/serial.js) each export exactly two methods:
 
 - *initConnection()*
 - *receiveData()*

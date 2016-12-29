@@ -210,20 +210,6 @@ function initMachine(xml)
 
         var component = aComponents[iComponent], sDeviceName = component.name;
 
-        /*
-         * TODO: Should I change the component names serialport and parallelport to serial and parallel?
-         *
-         * The XML device names are currently serial and parallel.  I'm tempted to rev the XML device names
-         * (eg, to serialport and parallelport) and leave the component names (and corresponding script filenames)
-         * alone, but until then, we must manually remap these component names to their XML device names.
-         *
-         * I actually prefer camelCase and XML device names serialPort and parallelPort (not to mention chipSet),
-         * but that would require changing the script filenames (eg, to serialPort.js and parallelPort.js), since
-         * our list of component names is derived from the list of script filenames in package.json.
-         */
-        if (sDeviceName == "serialport") sDeviceName = "serial";
-        if (sDeviceName == "parallelport") sDeviceName = "parallel";
-
         var aDevices = machine[sDeviceName], iDevice;
 
         if (aDevices) {

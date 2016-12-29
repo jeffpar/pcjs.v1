@@ -33,7 +33,7 @@ PDPjs is currently comprised of the following PDP-11 components, as listed in [p
 * [rk11.js](/modules/pdp11/lib/rk11.js)
 * [rl11.js](/modules/pdp11/lib/rl11.js)
 * [rom.js](/modules/pdp11/lib/rom.js)
-* [serialport.js](/modules/pdp11/lib/serialport.js)
+* [serial.js](/modules/pdp11/lib/serial.js)
 
 Since this module was written in 2016, it seemed appropriate to start adopting some of the more useful features of
 [ECMAScript](http://www.ecma-international.org/ecma-262/6.0/index.html) 2015 (aka ES6), including:

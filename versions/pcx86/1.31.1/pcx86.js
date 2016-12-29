@@ -33,8 +33,8 @@
  http://pcjs.org/modules/pcx86/lib/ram.js (C) Jeff Parsons 2012-2016
  http://pcjs.org/modules/pcx86/lib/keyboard.js (C) Jeff Parsons 2012-2016
  http://pcjs.org/modules/pcx86/lib/video.js (C) Jeff Parsons 2012-2016
- http://pcjs.org/modules/pcx86/lib/parallelport.js (C) Jeff Parsons 2012-2016
- http://pcjs.org/modules/pcx86/lib/serialport.js (C) Jeff Parsons 2012-2016
+ http://pcjs.org/modules/pcx86/lib/parallel.js (C) Jeff Parsons 2012-2016
+ http://pcjs.org/modules/pcx86/lib/serial.js (C) Jeff Parsons 2012-2016
  http://pcjs.org/modules/pcx86/lib/mouse.js (C) Jeff Parsons 2012-2016
  http://pcjs.org/modules/pcx86/lib/disk.js (C) Jeff Parsons 2012-2016
  http://pcjs.org/modules/pcx86/lib/fdc.js (C) Jeff Parsons 2012-2016
