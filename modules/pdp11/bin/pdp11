@@ -38,6 +38,7 @@ var Defines = require("../../shared/es6/defines");
 var Str = require("../../shared/es6/strlib");
 var Proc = require("../../shared/es6/proclib");
 
+var replServer = null;
 var idAttrs = '@';
 var fConsole = false;
 var fDebug = false;
@@ -410,9 +411,41 @@ if (argv['cmd'] !== undefined) {
     sCmdPrev = "";
 }
 
-repl.start({
-    prompt: "PDP11> ",
-    input: process.stdin,
-    output: process.stdout,
-    eval: onCommand 
-});
+/**
+ * startInput()
+ */
+function startInput()
+{
+    var stdin = process.stdin;
+    console.log("switching to raw input (alt-r to return to REPL, alt-x to exit)");
+    stdin.setRawMode(true);
+    stdin.resume();
+    stdin.on('data', function(buf){
+        if (buf[0] == 0x1b && (buf[1] == 0x72 || buf[1] == 0x78)) {
+            stdin.removeAllListeners('data');
+            stdin.setRawMode(false);
+            stdin.pause();
+            if (buf[1] == 0x72) startREPL();
+            return;
+        }
+        // process.stdout.write(buf);
+    });
+}
+
+/**
+ * startREPL()
+ */
+function startREPL()
+{
+    replServer = repl.start({
+        prompt: "PDP11> ",
+        input: process.stdin,
+        output: process.stdout,
+        eval: onCommand
+    });
+    replServer.on('exit', () => {
+        startInput();
+    });
+}
+
+startREPL();
