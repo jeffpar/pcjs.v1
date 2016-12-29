@@ -188,6 +188,17 @@ class Web {
             sURL = sURL.replace(/^http:\/\/archive.pcjs.org(\/.*)\/([^\/]*)$/, "$1/archive/$2");
         }
 
+        if (NODE) {
+            /*
+             * We don't even need to load Component, because we can't use any of the code below
+             * within Node anyway.  Instead, we must hand this request off to our network library.
+             *
+             *      if (!Component) Component = require("./component");
+             */
+            var Net = require("./netlib");
+            return Net.getResource(sURL, dataPost, fAsync, done);
+        }
+
         var xmlHTTP = (window.XMLHttpRequest ? new window.XMLHttpRequest() : new window.ActiveXObject("Microsoft.XMLHTTP"));
         if (fAsync) {
             xmlHTTP.onreadystatechange = function()

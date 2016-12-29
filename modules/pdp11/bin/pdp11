@@ -208,13 +208,56 @@ function initMachine(xml)
 
     for (var iComponent = 0; iComponent < aComponents.length; iComponent++) {
 
-        var component = aComponents[iComponent], aDevices = machine[component.name];
-        /*
-         * If aDevices is undefined, then that component does not exist in this machine.
-         */
-        if (aDevices === undefined) continue;
+        var component = aComponents[iComponent], sDeviceName = component.name;
 
-        for (var iDevice = 0; iDevice < aDevices.length; iDevice++) {
+        /*
+         * TODO: Should I change the component names serialport and parallelport to serial and parallel?
+         *
+         * The XML device names are currently serial and parallel.  I'm tempted to rev the XML device names
+         * (eg, to serialport and parallelport) and leave the component names (and corresponding script filenames)
+         * alone, but until then, we must manually remap these component names to their XML device names.
+         *
+         * I actually prefer camelCase and XML device names serialPort and parallelPort (not to mention chipSet),
+         * but that would require changing the script filenames (eg, to serialPort.js and parallelPort.js), since
+         * our list of component names is derived from the list of script filenames in package.json.
+         */
+        if (sDeviceName == "serialport") sDeviceName = "serial";
+        if (sDeviceName == "parallelport") sDeviceName = "parallel";
+
+        var aDevices = machine[sDeviceName], iDevice;
+
+        if (aDevices) {
+            /*
+             * When processing the 'device' component, if there is a 'default' device,
+             * that's the only device we want to create at this point.
+             */
+            if (sDeviceName == 'device') {
+                for (iDevice = 0; iDevice < aDevices.length; iDevice++) {
+                    if (aDevices[iDevice][idAttrs] && aDevices[iDevice][idAttrs]['type'] == 'default') {
+                        aDevices = aDevices.slice(iDevice, iDevice + 1);
+                        break;
+                    }
+                }
+            }
+        }
+        else {
+            /*
+             * When encountering an unrecognized component, it could be another type of device.
+             */
+            var aMachineDevices = machine['device'];
+            if (aMachineDevices) {
+                for (iDevice = 0; iDevice < aMachineDevices.length; iDevice++) {
+                    if (aMachineDevices[iDevice][idAttrs] && aMachineDevices[iDevice][idAttrs]['type'] == sDeviceName) {
+                        aDevices = aMachineDevices.slice(iDevice, iDevice + 1);
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (!aDevices) continue;
+
+        for (iDevice = 0; iDevice < aDevices.length; iDevice++) {
 
             var obj;
             var device = aDevices[iDevice];
@@ -223,18 +266,18 @@ function initMachine(xml)
             if (idMachine) parmsObj['id'] = idMachine + '.' + parmsObj['id'];
 
             if (fDebug) {
-                console.log("creating " + component.name + "...");
+                console.log("creating " + sDeviceName + "...");
                 console.log(parmsObj);
             }
 
-            if (component.name == "cpu") {
+            if (sDeviceName == "cpu") {
                 parmsObj['autoStart'] = false;
             }
 
             try {
                 obj = new component.Create(parmsObj);
             } catch (err) {
-                console.log("error creating " + component.name + ": " + err.message);
+                console.log("error creating " + sDeviceName + ": " + err.message);
                 continue;
             }
 
@@ -377,47 +420,33 @@ function doCommand(sCmd)
  * in "cmd" (which is always parenthesized in preparation for a call to "eval()"), but it's not clear what
  * the first callback() parameter (represented by null) is supposed to be.  Should we assume it's an Error
  * object, in case we want to report an error?
- * 
+ *
+ * WARNING: After updating from Node v0.10.x to v0.11.x, the incoming expression in "cmd" is no longer
+ * parenthesized, so I had to tweak the RegExp below.  WTF.
+ *
  * @param {string} cmd
  * @param {Object} context
  * @param {string} filename
  * @param {function(Object|null, Object)} callback
  */
-var onCommand = function (cmd, context, filename, callback)
+function onCommand(cmd, context, filename, callback)
 {
     var result = false;
-    /*
-     * WARNING: After updating from Node v0.10.x to v0.11.x, the incoming expression in "cmd" is no longer
-     * parenthesized, so I had to tweak the RegExp below.  But... WTF.  Do we not care what we break, folks?
-     */
     var match = cmd.match(/^\(?\s*(.*?)\s*\)?$/);
     if (match) result = doCommand(match[1]);
     callback(null, result);
-};
-
-if (pkg) {
-    loadComponents(pkg.pdp11Files);
-}
-
-/*
- * Before falling into the REPL, process any command-line (--cmd) commands -- which should eventually include batch files.
- */
-if (argv['cmd'] !== undefined) {
-    var cmds = argv['cmd'];
-    var aCmds = (typeof cmds == "string"? [cmds] : cmds);
-    for (var i = 0; i < aCmds.length; i++) {
-        doCommand(aCmds[i]);
-    }
-    sCmdPrev = "";
 }
 
 /**
  * startInput()
+ *
+ * @return {boolean}
  */
 function startInput()
 {
     var stdin = process.stdin;
-    console.log("switching to raw input (alt-r to return to REPL, alt-x to exit)");
+    if (!stdin.setRawMode) return false;
+    console.log("switching to raw input (alt-r to launch REPL, alt-x to exit)");
     stdin.setRawMode(true);
     stdin.resume();
     stdin.on('data', function(buf){
@@ -426,10 +455,10 @@ function startInput()
             stdin.setRawMode(false);
             stdin.pause();
             if (buf[1] == 0x72) startREPL();
-            return;
         }
         // process.stdout.write(buf);
     });
+    return true;
 }
 
 /**
@@ -448,4 +477,20 @@ function startREPL()
     });
 }
 
-startREPL();
+if (pkg) {
+    loadComponents(pkg.pdp11Files);
+}
+
+/*
+ * Before falling into the REPL, process any command-line (--cmd) commands -- which should eventually include batch files.
+ */
+if (argv['cmd'] !== undefined) {
+    var cmds = argv['cmd'];
+    var aCmds = (typeof cmds == "string"? [cmds] : cmds);
+    for (var i = 0; i < aCmds.length; i++) {
+        doCommand(aCmds[i]);
+    }
+    sCmdPrev = "";
+}
+
+if (!startInput()) startREPL();

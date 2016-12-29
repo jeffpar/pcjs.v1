@@ -290,7 +290,7 @@ class Component {
         if (!COMPILED) {
             Component.println(s, "notice", id);
         }
-        if (!fPrintOnly) Web.alertUser((id? (id + ": ") : "") + s);
+        if (!fPrintOnly && Web.alertUser) Web.alertUser((id? (id + ": ") : "") + s);
     }
 
     /**
@@ -303,7 +303,7 @@ class Component {
         if (!COMPILED) {
             Component.println(s, "warning");
         }
-        Web.alertUser(s);
+        if (Web.alertUser) Web.alertUser(s);
     }
 
     /**
@@ -316,7 +316,7 @@ class Component {
         if (!COMPILED) {
             Component.println(s, "error");
         }
-        Web.alertUser(s);
+        if (Web.alertUser) Web.alertUser(s);
     }
 
     /**
