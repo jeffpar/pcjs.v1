@@ -492,9 +492,10 @@ function startInput()
             stdin.setRawMode(false);
             stdin.pause();
             if (buf[1] == 0x72) {
+                console.log("alt-r detected, starting REPL...");
                 startREPL();
             } else {
-                console.log("exiting...");
+                console.log("alt-x detected, exiting...");
                 process.exit();
             }
             return;
@@ -509,7 +510,6 @@ function startInput()
  */
 function startREPL()
 {
-    console.log("starting REPL...");
     replServer = repl.start({
         prompt: "PDP11> ",
         input: process.stdin,
