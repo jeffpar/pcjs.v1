@@ -31,6 +31,6 @@ PC8080 is comprised of the following non-shared components, as listed in [packag
 * [ram.js](/modules/pc8080/lib/ram.js)
 * [keyboard.js](/modules/pc8080/lib/keyboard.js)
 * [video.js](/modules/pc8080/lib/video.js)
-* [serialport.js](/modules/pc8080/lib/serialport.js)
+* [serial.js](/modules/pc8080/lib/serial.js)
 * [debugger.js](/modules/pc8080/lib/debugger.js)
 * [computer.js](/modules/pc8080/lib/computer.js)

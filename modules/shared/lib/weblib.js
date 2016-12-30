@@ -705,12 +705,26 @@ web.isMobile = function()
 };
 
 /**
- * getURLParameters(sParms)
+ * getURLParm(sParm)
+ *
+ * @param {string} sParm
+ * @return {string|undefined}
+ */
+web.getURLParm = function(sParm)
+{
+    if (!web.parmsURL) {
+        web.parmsURL = web.parseURLParms();
+    }
+    return web.parmsURL[sParm];
+};
+
+/**
+ * parseURLParms(sParms)
  *
  * @param {string} [sParms] containing the parameter portion of a URL (ie, after the '?')
  * @return {Object} containing properties for each parameter found
  */
-web.getURLParameters = function(sParms)
+web.parseURLParms = function(sParms)
 {
     var aParms = {};
     if (window) {       // an alternative to "if (typeof module === 'undefined')" if require("defines") was used
@@ -854,6 +868,8 @@ web.onClickRepeat = function(e, msDelay, msRepeat, fn)
         fIgnoreMouseEvents = true;
     };
 };
+
+web.parmsURL = null;            // initialized on first call to parseURLParms()
 
 web.aPageEventHandlers = {
     'init': [],                 // list of window 'onload' handlers

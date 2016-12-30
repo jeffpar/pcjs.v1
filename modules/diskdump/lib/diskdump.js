@@ -3243,6 +3243,6 @@ DiskDump.prototype.encodeAsBase64 = function(buf)
 if (NODE) {
     module.exports = DiskDump;
 } else {
-    var aParms = web.getURLParameters();
+    var aParms = web.parseURLParms();
     DiskDump.API(aParms);
 }

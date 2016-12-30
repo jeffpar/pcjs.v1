@@ -32,14 +32,14 @@
 
 "use strict";
 
-import Str from "../../shared/lib/strlib";
-import Web from "../../shared/lib/weblib";
-import DumpAPI from "../../shared/lib/dumpapi";
-import Component from "../../shared/lib/component";
-import PDP11 from "./defines";
-import BusPDP11 from "./bus";
-import MemoryPDP11 from "./memory";
-import MessagesPDP11 from "./messages";
+var Str = require("../../shared/es6/strlib");
+var Web = require("../../shared/es6/weblib");
+var DumpAPI = require("../../shared/es6/dumpapi");
+var Component = require("../../shared/es6/component");
+var PDP11 = require("./defines");
+var BusPDP11 = require("./bus");
+var MemoryPDP11 = require("./memory");
+var MessagesPDP11 = require("./messages");
 
 class ROMPDP11 extends Component {
     /**
@@ -67,8 +67,8 @@ class ROMPDP11 extends Component {
         this.abInit = null;
         this.aSymbols = null;
 
-        this.addrROM = parmsROM['addr'];
-        this.sizeROM = parmsROM['size'];
+        this.addrROM = +parmsROM['addr'];
+        this.sizeROM = +parmsROM['size'];
         this.fRetainROM = false;
 
         /*
@@ -83,6 +83,9 @@ class ROMPDP11 extends Component {
          * Most ROMs are not aliased, in which case the 'alias' property should have the default value of null.
          */
         this.addrAlias = parmsROM['alias'];
+        if (typeof this.addrAlias == "string") {
+            this.addrAlias = eval(this.addrAlias);
+        }
 
         this.sFilePath = parmsROM['file'];
         this.sFileName = Str.getBaseName(this.sFilePath);
@@ -387,4 +390,4 @@ class ROMPDP11 extends Component {
  */
 Web.onInit(ROMPDP11.init);
 
-export default ROMPDP11;
+module.exports = ROMPDP11;

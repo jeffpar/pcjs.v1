@@ -46,4 +46,4 @@ var ReportAPI = {
     }
 };
 
-export default ReportAPI;
+module.exports = ReportAPI;

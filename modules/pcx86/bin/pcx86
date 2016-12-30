@@ -2,11 +2,8 @@
 /**
  * @fileoverview Implements the PCx86 command-line interface
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
- * @version 1.0
+ * @copyright © Jeff Parsons 2012-2016
  * @suppress {missingProperties}
- * Created 2012-Sep-04
- *
- * Copyright © 2012-2016 Jeff Parsons <Jeff@pcjs.org>
  *
  * This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
  *
@@ -61,10 +58,6 @@ try {
  * used in a JSON machine definition file; eg:
  * 
  *  [
- *      {name: "panel",
- *       Create: Panel,
- *       objects: []
- *      },
  *      {name: "chipset":
  *       Create: ChipSet,
  *       objects: []
@@ -80,7 +73,7 @@ try {
 var Component;
 var dbg;
 var aComponents = [];
-var asComponentsIgnore = ["embed", "save"];
+var asComponentsIgnore = ["panel", "embed", "save"];
 
 /*
  * A few of the components are subclasses of other classes (eg, "x86cpu" is a subclass
@@ -218,7 +211,7 @@ function loadMachine(sFile)
          * 
          * TODO: I've since removed the comments from my sample "ibm5150.json" file, so we could
          * try to reinstate this code; however, there are still hex constants, which I find *much*
-         * preferable to the decimal equivalents.  JSON's restrictions continue to infuriate me.
+         * preferable to the decimal equivalents.  JSON's restrictions continue to irritate me.
          *
          *      var machine = require(lib + "../bin/" +sFile);
          */

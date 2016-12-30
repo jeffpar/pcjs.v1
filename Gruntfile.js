@@ -201,6 +201,8 @@ module.exports = function(grunt) {
                         return "/**\n * @copyright " + filepath.replace(/^\./, "http://pcjs.org") + " (C) Jeff Parsons 2012-2016\n */\n\n" +
                             src.replace(/(^|\n)[ \t]*(['"])use strict\2;?/g, '')
                                .replace(/^(import|export)[ \t]+[^\n]*\n/gm, '')
+                               .replace(/^[ \t]*var\s+\S+\s*=\s*require\((['"]).*?\1\);/gm, '')
+                               .replace(/^[ \t]*(if\s+\(NODE\)\s*|)module\.exports\s*=\s*\S+;/gm, '')
                                .replace(/\/\*\*\s*\*\s*@fileoverview[\s\S]*?\*\/\s*/g, '')
                                .replace(/[ \t]*if\s*\(NODE\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '')
                                .replace(/[ \t]*if\s*\(typeof\s+module\s*!==\s*(['"])undefined\1\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '')
@@ -217,6 +219,8 @@ module.exports = function(grunt) {
                         return "/**\n * @copyright " + filepath.replace(/^\./, "http://pcjs.org") + " (C) Jeff Parsons 2012-2016\n */\n\n" +
                             src.replace(/(^|\n)[ \t]*(['"])use strict\2;?/g, '')
                                .replace(/^(import|export)[ \t]+[^\n]*\n/gm, '')
+                               .replace(/^[ \t]*var\s+\S+\s*=\s*require\((['"]).*?\1\);/gm, '')
+                               .replace(/^[ \t]*(if\s+\(NODE\)\s*|)module\.exports\s*=\s*\S+;/gm, '')
                                .replace(/\/\*\*\s*\*\s*@fileoverview[\s\S]*?\*\/\s*/g, '')
                                .replace(/[ \t]*if\s*\(NODE\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '')
                                .replace(/[ \t]*if\s*\(typeof\s+module\s*!==\s*(['"])undefined\1\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '')
@@ -233,6 +237,8 @@ module.exports = function(grunt) {
                         return "/**\n * @copyright " + filepath.replace(/^\./, "http://pcjs.org") + " (C) Jeff Parsons 2012-2016\n */\n\n" +
                             src.replace(/(^|\n)[ \t]*(['"])use strict\2;?/g, '')
                                .replace(/^(import|export)[ \t]+[^\n]*\n/gm, '')
+                               .replace(/^[ \t]*var\s+\S+\s*=\s*require\((['"]).*?\1\);/gm, '')
+                               .replace(/^[ \t]*(if\s+\(NODE\)\s*|)module\.exports\s*=\s*\S+;/gm, '')
                                .replace(/\/\*\*\s*\*\s*@fileoverview[\s\S]*?\*\/\s*/g, '')
                                .replace(/[ \t]*if\s*\(NODE\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '')
                                .replace(/[ \t]*if\s*\(typeof\s+module\s*!==\s*(['"])undefined\1\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '')
@@ -249,6 +255,8 @@ module.exports = function(grunt) {
                         return "/**\n * @copyright " + filepath.replace(/^\./, "http://pcjs.org") + " (C) Jeff Parsons 2012-2016\n */\n\n" +
                             src.replace(/(^|\n)[ \t]*(['"])use strict\2;?/g, '')
                                .replace(/^(import|export)[ \t]+[^\n]*\n/gm, '')
+                               .replace(/^[ \t]*var\s+\S+\s*=\s*require\((['"]).*?\1\);/gm, '')
+                               .replace(/^[ \t]*(if\s+\(NODE\)\s*|)module\.exports\s*=\s*\S+;/gm, '')
                                .replace(/\/\*\*\s*\*\s*@fileoverview[\s\S]*?\*\/\s*/g, '')
                                .replace(/[ \t]*if\s*\(NODE\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '')
                                .replace(/[ \t]*if\s*\(typeof\s+module\s*!==\s*(['"])undefined\1\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '')
@@ -658,7 +666,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks("grunt-run");
     grunt.loadNpmTasks("grunt-text-replace");
     
-    grunt.loadTasks("modules/grunts/manifester/tasks");
+ // grunt.loadTasks("modules/grunts/manifester/tasks");
     
     grunt.loadTasks("modules/grunts/prepjs/tasks");
 

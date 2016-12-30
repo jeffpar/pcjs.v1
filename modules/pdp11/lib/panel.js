@@ -32,12 +32,12 @@
 
 "use strict";
 
-import Str from "../../shared/lib/strlib";
-import Web from "../../shared/lib/weblib";
-import Component from "../../shared/es6/component";
-import PDP11 from "./defines";
-import BusPDP11 from "./bus";
-import MessagesPDP11 from "./messages";
+var Str = require("../../shared/es6/strlib");
+var Web = require("../../shared/es6/weblib");
+var Component = require("../../shared/es6/component");
+var PDP11 = require("./defines");
+var BusPDP11 = require("./bus");
+var MessagesPDP11 = require("./messages");
 
 class PanelPDP11 extends Component {
     /**
@@ -46,8 +46,9 @@ class PanelPDP11 extends Component {
      * The PanelPDP11 component has no required (parmsPanel) properties.
      *
      * @param {Object} parmsPanel
+     * @param {boolean} fBindings (true if panel may have bindings, otherwise not)
      */
-    constructor(parmsPanel)
+    constructor(parmsPanel, fBindings)
     {
         super("Panel", parmsPanel, PanelPDP11, MessagesPDP11.PANEL);
 
@@ -59,6 +60,7 @@ class PanelPDP11 extends Component {
         this.nDisplayCount = 0;
         this.nDisplayLimit = 60;
         this.fDisplayLiveRegs = true;
+        this.fBindings = fBindings;
 
         /*
          * regSwitches contains the Front Panel (aka Console) SWITCH register, which is also available
@@ -145,6 +147,8 @@ class PanelPDP11 extends Component {
 
         /** @type {DebuggerPDP11} */
         this.dbg = null;
+
+        this.setReady();
     }
 
     /**
@@ -386,9 +390,10 @@ class PanelPDP11 extends Component {
             /*
              * As noted in init(), our powerUp() method gives us a second opportunity to notify any
              * components that that might care (eg, CPU, Keyboard, and Debugger) that we have some controls
-             * they might want to use.
+             * (ie, bindings) they might want to use.
              */
-            PanelPDP11.init();
+            if (this.fBindings) PanelPDP11.init();
+
             /*
              * TODO: Until we implement a restore() function, all we can do is reset()
              */
@@ -1089,18 +1094,13 @@ class PanelPDP11 extends Component {
      */
     static init()
     {
-        var fReady = false;
         var aePanels = Component.getElementsByClass(document, PDP11.APPCLASS, "panel");
         for (var iPanel=0; iPanel < aePanels.length; iPanel++) {
             var ePanel = aePanels[iPanel];
             var parmsPanel = Component.getComponentParms(ePanel);
             var panel = Component.getComponentByID(parmsPanel['id']);
-            if (!panel) {
-                fReady = true;
-                panel = new PanelPDP11(parmsPanel);
-            }
+            if (!panel) panel = new PanelPDP11(parmsPanel, true);
             Component.bindComponentControls(panel, ePanel, PDP11.APPCLASS);
-            if (fReady) panel.setReady();
         }
     }
 }
@@ -1148,4 +1148,4 @@ PanelPDP11.UNIBUS_IOTABLE = {
  */
 Web.onInit(PanelPDP11.init);
 
-export default PanelPDP11;
+module.exports = PanelPDP11;

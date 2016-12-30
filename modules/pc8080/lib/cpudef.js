@@ -124,4 +124,4 @@ CPUDef8080.PS.RESULT    =   (CPUDef8080.PS.CF | CPUDef8080.PS.PF | CPUDef8080.PS
  */
 CPUDef8080.PS.SET       =   (CPUDef8080.PS.BIT1);
 
-if (NODE) module.exports = CPUDef8080;
+module.exports = CPUDef8080;

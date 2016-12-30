@@ -45,12 +45,12 @@
  *  to further reduce some of the duplication between them, but the above functionality is a good start.
  */
 
-import Str from "../../shared/es6/strlib";
-import Web from "../../shared/es6/weblib";
-import DiskAPI from "../../shared/es6/diskapi";
-import DumpAPI from "../../shared/es6/dumpapi";
-import Component from "../../shared/es6/component";
-import MessagesPDP11 from "./messages";
+var Str = require("../../shared/es6/strlib");
+var Web = require("../../shared/es6/weblib");
+var DiskAPI = require("../../shared/es6/diskapi");
+var DumpAPI = require("../../shared/es6/dumpapi");
+var Component = require("../../shared/es6/component");
+var MessagesPDP11 = require("./messages");
 
 /**
  * Every Sector object (once loaded, parsed, and "normalized") should have ALL of the following named properties:
@@ -382,7 +382,7 @@ class DiskPDP11 extends Component {
      *
      * @this {DiskPDP11}
      * @param {string} sURL
-     * @param {string} sDiskData
+     * @param {string|null} sDiskData
      * @param {number} nErrorCode (response from server if anything other than 200)
      */
     doneLoad(sURL, sDiskData, nErrorCode)
@@ -1238,4 +1238,4 @@ class DiskPDP11 extends Component {
  */
 DiskPDP11.nDisks = 0;
 
-export default DiskPDP11;
+module.exports = DiskPDP11;

@@ -32,7 +32,7 @@ var Keys = {
     /*
      * Keys and/or key combinations that generate common ASCII codes.
      *
-     * NOTE: If you're looking for a general-purpose ASCII code table, see str.ASCII in strlib.js;
+     * NOTE: If you're looking for a general-purpose ASCII code table, see Str.ASCII in strlib.js;
      * if something's missing, that's probably the more appropriate table to add it to.
      *
      * TODO: The Closure Compiler doesn't inline all references to these values, at least those with
@@ -248,4 +248,4 @@ Keys.SHIFTED_KEYCODES[Keys.KEYCODE.FF_DASH]   = Keys.ASCII['_'];
 Keys.SHIFTED_KEYCODES[Keys.KEYCODE.FF_EQUALS] = Keys.ASCII['+'];
 Keys.SHIFTED_KEYCODES[Keys.KEYCODE.FF_SEMI]   = Keys.ASCII[':'];
 
-export default Keys;
+module.exports = Keys;

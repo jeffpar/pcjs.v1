@@ -98,6 +98,5 @@ if (NODE) {
     global.BYTEARRAYS  = BYTEARRAYS;
     global.TYPEDARRAYS = TYPEDARRAYS;
     global.PC8080      = PC8080;
-
-    module.exports = PC8080;
+    module.exports     = PC8080;
 }

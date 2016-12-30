@@ -32,7 +32,7 @@
 
 "use strict";
 
-import PDP11 from "./defines";
+var PDP11 = require("./defines");
 
 /*
  * Decoding starts at the bottom of this file, in op1120() and op1145().

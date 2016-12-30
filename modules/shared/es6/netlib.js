@@ -28,11 +28,11 @@
 
 "use strict";
 
-import fs from "fs";
-import http from "http";
-import path from "path";
-import url from "url";
-import Str from "../../shared/es6/strlib";
+var fs = require("fs");
+var http = require("http");
+var path = require("path");
+var url = require("url");
+var Str = require("../../shared/es6/strlib");
 
 class Net {
     /**
@@ -310,23 +310,25 @@ class Net {
      * @param {string} sURL
      * @param {Object|null} [dataPost] for a POST request (default is a GET request)
      * @param {boolean} [fAsync] is true for an asynchronous request
-     * @param {function(string,string,number)} [done]
+     * @param {function(string,string|null,number)} [done]
      * @return {Array|null} Array containing [sResource, nErrorCode], or null if no response yet
      */
     static getResource(sURL, dataPost, fAsync, done)
     {
         var nErrorCode = -1, sResource = null, response = null;
 
+        /*
+         * TODO: Revisit why we pass back sBaseName instead of the original sURL....
+         */
+        var sBaseName = Str.getBaseName(sURL);
+
         if (Net.isRemote(sURL)) {
             console.log('Net.getResource("' + sURL + '"): unimplemented');
+            if (done) done(sBaseName, null, -1);
         } else {
             if (!Net.sServerRoot) {
                 Net.sServerRoot = path.join(path.dirname(fs.realpathSync(__filename)), "../../../");
             }
-            /*
-             * TODO: Revisit why we pass back sBaseName instead of the original sURL....
-             */
-            var sBaseName = Str.getBaseName(sURL);
             var sFile = path.join(Net.sServerRoot, sURL);
             if (fAsync) {
                 fs.readFile(sFile, {encoding: "utf8"}, function(err, s)
@@ -387,4 +389,4 @@ Net.REVEAL_PDFS     = "pdfs";
 Net.asPropagate     = [Net.GORT_COMMAND, "autostart"];
 Net.sServerRoot     = null;
 
-export default Net;
+module.exports = Net;
