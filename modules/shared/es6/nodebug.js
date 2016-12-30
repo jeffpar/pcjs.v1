@@ -1,7 +1,7 @@
 /**
  * @fileoverview Compile-time definitions for non-DEBUG configurations.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
- * @copyright © Jeff Parsons 2012-2016
+ * @copyright © Jeff Parsons 2012-2017
  *
  * This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
  *

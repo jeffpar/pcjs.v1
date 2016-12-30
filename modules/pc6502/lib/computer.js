@@ -1,7 +1,7 @@
 /**
  * @fileoverview Implements the PC6502 Computer component.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
- * @copyright © Jeff Parsons 2012-2016
+ * @copyright © Jeff Parsons 2012-2017
  *
  * This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
  *
@@ -185,7 +185,7 @@ function Computer(parmsComputer, parmsMachine, fSuspended) {
         }
     }
 
-    this.println(Computer.APPNAME + " v" + Computer.APPVERSION + "\n" + Computer.COPYRIGHT + "\n" + Computer.LICENSE);
+    this.println(Computer.APPNAME + " v" + Computer.APPVERSION + "\n" + COPYRIGHT + "\n" + LICENSE);
 
     if (DEBUG && this.messageEnabled()) this.printMessage("TYPEDARRAYS: " + TYPEDARRAYS);
 
@@ -275,13 +275,6 @@ Component.subclass(Computer);
 
 Computer.APPNAME = APPNAME || "PC6502";
 Computer.APPVERSION = APPVERSION;
-Computer.COPYRIGHT = "Copyright © 2012-2016 Jeff Parsons <Jeff@pcjs.org>";
-
-/*
- * I think it's a good idea to also display a GPL notice, putting people on notice that even
- * the "compiled" source code has all the same GPL requirements as the uncompiled source code.
- */
-Computer.LICENSE = "License: GPL version 3 or later <http://gnu.org/licenses/gpl.html>";
 
 Computer.STATE_FAILSAFE  = "failsafe";
 Computer.STATE_VALIDATE  = "validate";

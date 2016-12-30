@@ -1,10 +1,7 @@
 /**
  * @fileoverview Gulp file for pcjs.org
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a> (@jeffpar)
- * @version 1.0
- * Created 2016-09-13
- *
- * Copyright © 2012-2016 Jeff Parsons <Jeff@pcjs.org>
+ * @copyright © Jeff Parsons 2012-2017
  *
  * This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
  *
@@ -89,7 +86,7 @@ gulp.task('mktmp', function() {
     return gulp.src(pkg.pdp11ES6Files)
         .pipe(foreach(function(stream, file){
               return stream
-                .pipe(header('/**\n * @copyright ' + file.path.replace(/.*\/(modules\/.*)/, "http://pcjs.org/$1") + ' (C) Jeff Parsons 2012-2016\n */\n\n'))
+                .pipe(header('/**\n * @copyright ' + file.path.replace(/.*\/(modules\/.*)/, "http://pcjs.org/$1") + ' (C) Jeff Parsons 2012-2017\n */\n\n'))
                 .pipe(replace(/(^|\n)[ \t]*(['"])use strict\2;?/g, ""))
                 .pipe(replace(/^(import|export)[ \t]+[^\n]*\n/gm, ""))
                 .pipe(replace(/^[ \t]*var\s+\S+\s*=\s*require\((['"]).*?\1\);/gm, ""))
