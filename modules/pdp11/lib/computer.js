@@ -113,7 +113,7 @@ class ComputerPDP11 extends Component {
         this.parmsMachine = null;
         this.setMachineParms(parmsMachine);
 
-        this.fAutoPower = this.getMachineParm('autoPower', parmsComputer);
+        this.fAutoPower = this.getMachineParm('autoPower', parmsComputer, Str.TYPES.BOOLEAN);
 
         /*
          * nPowerChange is 0 while the power state is stable, 1 while power is transitioning
@@ -124,7 +124,7 @@ class ComputerPDP11 extends Component {
         /*
          * TODO: Deprecate 'buswidth' (it should have always used camelCase)
          */
-        this.nBusWidth = parmsComputer['busWidth'] || parmsComputer['buswidth'];
+        this.nBusWidth = +parmsComputer['busWidth'] || +parmsComputer['buswidth'];
 
         this.resume = ComputerPDP11.RESUME_NONE;
         this.sStateData = null;
@@ -303,7 +303,7 @@ class ComputerPDP11 extends Component {
     }
 
     /**
-     * getMachineParm(sParm, parmsComponent)
+     * getMachineParm(sParm, parmsComponent, type)
      *
      * If the machine parameter doesn't exist, we check for a matching component parameter (if parmsComponent is provided),
      * and failing that, we check the bundled resources (if any).
@@ -313,10 +313,11 @@ class ComputerPDP11 extends Component {
      * resource to obtain the actual state.
      *
      * @param {string} sParm
-     * @param {Object} [parmsComponent]
+     * @param {Object|null} [parmsComponent]
+     * @param {number} [type] (from Str.TYPES)
      * @return {string|undefined}
      */
-    getMachineParm(sParm, parmsComponent)
+    getMachineParm(sParm, parmsComponent, type)
     {
         /*
          * When checking parmsURL, the check is allowed be a bit looser, because URL parameters are
@@ -335,6 +336,16 @@ class ComputerPDP11 extends Component {
         }
         if (value === undefined && typeof resources == 'object' && resources[sParm]) {
             value = sParm;
+        }
+        if (typeof value == "string" && type) {
+            switch(type) {
+            case Str.TYPES.NUMBER:
+                value = +value;
+                break;
+            case Str.TYPES.BOOLEAN:
+                value = (value == "true");
+                break;
+            }
         }
         return value;
     }

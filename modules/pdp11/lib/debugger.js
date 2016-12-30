@@ -226,9 +226,9 @@ class DebuggerPDP11 extends Debugger {
      * @param {number} [nBase]
      * @return {DbgAddrPDP11}
      */
-    newAddr(addr, fPhysical, nBase)
+    newAddr(addr = null, fPhysical = false, nBase)
     {
-        return {addr: addr || null, fPhysical: fPhysical || false, fTemporary: false, nBase: nBase};
+        return {addr: addr, fPhysical: fPhysical, fTemporary: false, nBase: nBase};
     }
 
     /**

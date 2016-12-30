@@ -67,8 +67,8 @@ class ROMPDP11 extends Component {
         this.abInit = null;
         this.aSymbols = null;
 
-        this.addrROM = parmsROM['addr'];
-        this.sizeROM = parmsROM['size'];
+        this.addrROM = +parmsROM['addr'];
+        this.sizeROM = +parmsROM['size'];
         this.fRetainROM = false;
 
         /*
@@ -83,6 +83,9 @@ class ROMPDP11 extends Component {
          * Most ROMs are not aliased, in which case the 'alias' property should have the default value of null.
          */
         this.addrAlias = parmsROM['alias'];
+        if (typeof this.addrAlias == "string") {
+            this.addrAlias = eval(this.addrAlias);
+        }
 
         this.sFilePath = parmsROM['file'];
         this.sFileName = Str.getBaseName(this.sFilePath);

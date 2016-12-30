@@ -100,11 +100,11 @@ class SerialPortPDP11 extends Component {
     {
         super("SerialPort", parmsSerial, SerialPortPDP11, MessagesPDP11.SERIAL);
 
-        this.iAdapter = parmsSerial['adapter'];
-        this.nBaudReceive = parmsSerial['baudReceive'] || PDP11.DL11.RCSR.BAUD;
-        this.nBaudTransmit = parmsSerial['baudTransmit'] || PDP11.DL11.XCSR.BAUD;
+        this.iAdapter = +parmsSerial['adapter'];
+        this.nBaudReceive = +parmsSerial['baudReceive'] || PDP11.DL11.RCSR.BAUD;
+        this.nBaudTransmit = +parmsSerial['baudTransmit'] || PDP11.DL11.XCSR.BAUD;
         this.fUpperCase = parmsSerial['upperCase'];
-
+        if (typeof this.fUpperCase == "string") this.fUpperCase = (this.fUpperCase == "true");
         /**
          * consoleOutput becomes a string that records serial port output if the 'binding' property is set to the
          * reserved name "console".  Nothing is written to the console, however, until a linefeed (0x0A) is output
@@ -138,8 +138,8 @@ class SerialPortPDP11 extends Component {
          * charBOL, if nonzero, is a character to automatically output at the beginning of every line.  This probably
          * isn't generally useful; I use it internally to preformat serial output.
          */
-        this.tabSize = parmsSerial['tabSize'];
-        this.charBOL = parmsSerial['charBOL'];
+        this.tabSize = +parmsSerial['tabSize'];
+        this.charBOL = +parmsSerial['charBOL'];
         this.iLogicalCol = 0;
         this.fNullModem = true;
 
@@ -171,7 +171,8 @@ class SerialPortPDP11 extends Component {
         this['exports'] = {
             'connect': this.initConnection,
             'receiveData': this.receiveData,
-            'receiveStatus': this.receiveStatus
+            'receiveStatus': this.receiveStatus,
+            'setConnection': this.setConnection
         };
     }
 
@@ -622,6 +623,24 @@ class SerialPortPDP11 extends Component {
                 this.cpu.setIRQ(this.irqReceiver);
             }
         }
+    }
+
+    /**
+     * setConnection(component, fn)
+     *
+     * @this {SerialPortPDP11}
+     * @param {Object|null} component
+     * @param {function(number)} fn
+     * @return {boolean}
+     */
+    setConnection(component, fn)
+    {
+        if (!this.connection) {
+            this.connection = component;
+            this.sendData = fn;
+            return true;
+        }
+        return false;
     }
 
     /**

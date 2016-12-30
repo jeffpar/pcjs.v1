@@ -382,7 +382,7 @@ class DiskPDP11 extends Component {
      *
      * @this {DiskPDP11}
      * @param {string} sURL
-     * @param {string} sDiskData
+     * @param {string|null} sDiskData
      * @param {number} nErrorCode (response from server if anything other than 200)
      */
     doneLoad(sURL, sDiskData, nErrorCode)

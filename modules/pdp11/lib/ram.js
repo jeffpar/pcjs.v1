@@ -69,10 +69,13 @@ class RAMPDP11 extends Component {
         this.abInit = null;
         this.aSymbols = null;
 
-        this.addrRAM = parmsRAM['addr'];
-        this.sizeRAM = parmsRAM['size'];
+        this.addrRAM = +parmsRAM['addr'];
+        this.sizeRAM = +parmsRAM['size'];
+
         this.addrLoad = parmsRAM['load'];
         this.addrExec = parmsRAM['exec'];
+        if (this.addrLoad != null) this.addrLoad = +this.addrLoad;
+        if (this.addrExec != null) this.addrExec = +this.addrExec;
 
         this.fInstalled = (!!this.sizeRAM); // 0 is the default value for 'size' when none is specified
         this.fAllocated = false;
@@ -222,7 +225,13 @@ class RAMPDP11 extends Component {
                  * Too early...
                  */
                 if (!this.abInit || !this.bus) return;
-                this.loadImage(this.abInit, this.addrLoad, this.addrExec, this.addrRAM);
+
+                if (this.loadImage(this.abInit, this.addrLoad, this.addrExec, this.addrRAM)) {
+                    this.status('Loaded image "' + this.sFileName + '"');
+                } else {
+                    this.notice('Error loading image "' + this.sFileName + '"');
+                }
+
                 /*
                  * NOTE: We now retain this data, so that reset() can return the RAM to its predefined state.
                  *

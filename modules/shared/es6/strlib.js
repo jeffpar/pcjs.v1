@@ -620,4 +620,16 @@ Str.aASCIICodes = {
     0x1F:   "US"        // Unit Separator
 };
 
+Str.TYPES = {
+    NULL:       0,
+    BYTE:       1,
+    WORD:       2,
+    DWORD:      3,
+    NUMBER:     4,
+    STRING:     5,
+    BOOLEAN:    6,
+    OBJECT:     7,
+    ARRAY:      8
+};
+
 module.exports = Str;

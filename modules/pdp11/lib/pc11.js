@@ -72,7 +72,7 @@ class PC11 extends Component {
          */
         this.configMount = this.parseConfig(parms['autoMount']);
         this.cAutoMount = 0;
-        this.nBaudReceive = parms['baudReceive'] || PDP11.PC11.PRS.BAUD;
+        this.nBaudReceive = +parms['baudReceive'] || PDP11.PC11.PRS.BAUD;
 
         this.regPRS = 0;            // PRS register
         this.regPRB = 0;            // PRB register

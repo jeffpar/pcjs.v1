@@ -97,7 +97,7 @@ class Debugger extends Component {
             /*
              * Default base used to display all values; modified with the "s base" command.
              */
-            this.nBase = parmsDbg['base'] || 16;
+            this.nBase = +parmsDbg['base'] || 16;
             this.fParens = false;
 
             /*

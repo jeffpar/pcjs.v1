@@ -102,7 +102,7 @@ class BusPDP11 extends Component {
          * Supported values for nBusWidth are 16 (default), 18, and 22.  This represents the maximum size
          * of the bus for the life of the machine, regardless what memory management mode the CPU has enabled.
          */
-        this.nBusWidth = parmsBus['busWidth'] || 16;
+        this.nBusWidth = +parmsBus['busWidth'] || 16;
 
         /*
          * Compute all BusPDP11 memory block parameters now, based on the width of the bus.

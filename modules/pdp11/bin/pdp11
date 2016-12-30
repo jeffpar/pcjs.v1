@@ -78,7 +78,7 @@ try {
  * TODO: Update the list of ignored (ie, ignorable) components.
  */
 var Component;
-var dbg;
+var dbg, serial, fnSendData;
 var aComponents = [];
 var asComponentsIgnore = ["embed", "save"];
 
@@ -204,6 +204,11 @@ function initMachine(xml)
     }
 
     var machine = xml['machine'];
+
+    if (fDebug) {
+        console.log(JSON.stringify(machine, null, 2));
+    }
+
     var idMachine = machine[idAttrs] && machine[idAttrs]['id'] || "";
 
     for (var iComponent = 0; iComponent < aComponents.length; iComponent++) {
@@ -257,7 +262,7 @@ function initMachine(xml)
             }
 
             if (sDeviceName == "cpu") {
-                parmsObj['autoStart'] = false;
+                parmsObj['autoStart'] = true;
             }
 
             try {
@@ -267,11 +272,23 @@ function initMachine(xml)
                 continue;
             }
 
-            console.log(obj['id'] + " object created");
+            console.log(obj['type'] + " object created: " + obj['id']);
             component.objects.push(obj);
 
             if (obj.type == "Debugger") {
                 dbg = obj;
+            }
+            else if (obj.type == "SerialPort") {
+                serial = obj;
+                var exports = serial['exports'];
+                if (exports) {
+                    var fnSetConnection = exports['setConnection'];
+                    if (fnSetConnection) {
+                        if (fnSetConnection.call(serial, null, receiveData)) {
+                            fnSendData = exports['receiveData'];
+                        }
+                    }
+                }
             }
         }
     }
@@ -381,6 +398,9 @@ function doCommand(sCmd)
             } catch(err) {
                 console.log(err.message);
             }
+            if (sCmd == '?') {
+                console.log(".exit    exit REPL and connect console to machine");
+            }
         }
         break;
     }
@@ -424,6 +444,37 @@ function onCommand(cmd, context, filename, callback)
 }
 
 /**
+ * receiveData(b)
+ *
+ * @param {number} b
+ */
+function receiveData(b)
+{
+    var s;
+    if (b != Str.ASCII.CR && b != Str.ASCII.LF) {
+        s = Str.aASCIICodes[b];
+    }
+    if (s) {
+        s = '<' + s + '>';
+    } else {
+        s = String.fromCharCode(b);
+    }
+    process.stdout.write(s);
+}
+
+/**
+ * sendData(b)
+ *
+ * @param {number} b
+ */
+function sendData(b)
+{
+    if (serial && fnSendData) {
+        fnSendData.call(serial, b);
+    }
+}
+
+/**
  * startInput()
  *
  * @return {boolean}
@@ -432,7 +483,7 @@ function startInput()
 {
     var stdin = process.stdin;
     if (!stdin.setRawMode) return false;
-    console.log("switching to raw input (alt-r to launch REPL, alt-x to exit)");
+    console.log("console connected to machine (alt-r for REPL prompt, alt-x to exit)");
     stdin.setRawMode(true);
     stdin.resume();
     stdin.on('data', function(buf){
@@ -440,9 +491,15 @@ function startInput()
             stdin.removeAllListeners('data');
             stdin.setRawMode(false);
             stdin.pause();
-            if (buf[1] == 0x72) startREPL();
+            if (buf[1] == 0x72) {
+                startREPL();
+            } else {
+                console.log("exiting...");
+                process.exit();
+            }
+            return;
         }
-        // process.stdout.write(buf);
+        sendData(buf[0]);
     });
     return true;
 }
@@ -452,6 +509,7 @@ function startInput()
  */
 function startREPL()
 {
+    console.log("starting REPL...");
     replServer = repl.start({
         prompt: "PDP11> ",
         input: process.stdin,
@@ -479,4 +537,4 @@ if (argv['cmd'] !== undefined) {
     sCmdPrev = "";
 }
 
-if (!startInput()) startREPL();
+startInput();

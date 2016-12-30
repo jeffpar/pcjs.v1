@@ -109,7 +109,7 @@ class CPUStatePDP11 extends CPUPDP11 {
         super(parmsCPU, nCyclesDefault);
 
         this.model = model;
-        this.addrReset = parmsCPU['addrReset'] || 0;
+        this.addrReset = +parmsCPU['addrReset'] || 0;
 
         /*
          * These properties will be initialized by initCPU()
