@@ -49,8 +49,8 @@
 
 "use strict";
 
-import Usr from "../../shared/es6/usrlib";
-import Web from "../../shared/es6/weblib";
+var Usr = require("../../shared/es6/usrlib");
+var Web = require("../../shared/es6/weblib");
 
 /**
  * Since the Closure Compiler treats ES6 classes as @struct rather than @dict by default,
@@ -138,16 +138,9 @@ class Component {
         /** @type {Object|null} controlPrint is the HTML control, if any, that we can print to */
         this.controlPrint = null;
 
-        /** @type {ComputerPDP11|null} */
         this.cmp = null;
-
-        /** @type {BusPDP11|null} */
         this.bus = null;
-
-        /** @type {CPUStatePDP11|null} */
         this.cpu = null;
-
-        /** @type {DebuggerPDP11|null} */
         this.dbg = null;
 
         /*
@@ -297,7 +290,7 @@ class Component {
         if (!COMPILED) {
             Component.println(s, "notice", id);
         }
-        if (!fPrintOnly) Web.alertUser((id? (id + ": ") : "") + s);
+        if (!fPrintOnly && Web.alertUser) Web.alertUser((id? (id + ": ") : "") + s);
     }
 
     /**
@@ -310,7 +303,7 @@ class Component {
         if (!COMPILED) {
             Component.println(s, "warning");
         }
-        Web.alertUser(s);
+        if (Web.alertUser) Web.alertUser(s);
     }
 
     /**
@@ -323,7 +316,7 @@ class Component {
         if (!COMPILED) {
             Component.println(s, "error");
         }
-        Web.alertUser(s);
+        if (Web.alertUser) Web.alertUser(s);
     }
 
     /**
@@ -969,16 +962,32 @@ class Component {
             }
         }
     }
-}
 
-/**
- * Component.parmsURL
- *
- * Initialized to the set of URL parameters, if any, for the current web page.
- *
- * @type {Object}
- */
-Component.parmsURL = Web.getURLParameters();
+    /**
+     * printMessageIO(port, bOut, addrFrom, name, bIn, bitsMessage)
+     *
+     * If bitsMessage is not specified, the component's MESSAGE category is used.
+     * If bitsMessage is true, the message is displayed as long as MESSAGE.PORT is enabled.
+     *
+     * @this {Component}
+     * @param {number} port
+     * @param {number|null} bOut if an output operation
+     * @param {number|null} [addrFrom]
+     * @param {string|null} [name] of the port, if any
+     * @param {number|null} [bIn] is the input value, if known, on an input operation
+     * @param {number|boolean} [bitsMessage] is zero or more MESSAGE_* category flag(s)
+     */
+    printMessageIO(port, bOut, addrFrom, name, bIn, bitsMessage) {
+        if (DEBUGGER && this.dbg) {
+            if (bitsMessage === true) {
+                bitsMessage = 0;
+            } else if (bitsMessage == null) {
+                bitsMessage = this.bitsMessage;
+            }
+            this.dbg.messageIO(this, port, bOut, addrFrom, name, bIn, bitsMessage);
+        }
+    }
+}
 
 /*
  * Every component created on the current page is recorded in this array (see Component.add()),
@@ -1053,4 +1062,4 @@ if (!Function.prototype.bind) {
     };
 }
 
-export default Component;
+module.exports = Component;

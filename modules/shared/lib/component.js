@@ -134,15 +134,6 @@ function Component(type, parms, constructor, bitsMessage)
 }
 
 /**
- * Component.parmsURL
- *
- * Initialized to the set of URL parameters, if any, for the current web page.
- *
- * @type {Object}
- */
-Component.parmsURL = web.getURLParameters();
-
-/**
  * Component.inherit(p)
  *
  * Returns a newly created object that inherits properties from the prototype object p.

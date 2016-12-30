@@ -371,13 +371,13 @@ Computer.prototype.setMachineParms = function(parmsMachine)
 Computer.prototype.getMachineParm = function(sParm, parmsComponent)
 {
     /*
-     * When checking parmsURL, the check is allowed be a bit looser, because URL parameters are
+     * When using getURLParm(), the check is allowed be a bit looser, because URL parameters are
      * user-supplied, whereas most other parameters are developer-supplied.  Granted, a developer
      * may also be sloppy and neglect to use correct case (eg, 'automount' instead of 'autoMount'),
      * but there are limits to my paranoia.
      */
     var sParmLC = sParm.toLowerCase();
-    var value = Component.parmsURL[sParm] || Component.parmsURL[sParmLC];
+    var value = web.getURLParm(sParm) || web.getURLParm(sParmLC);
 
     if (value === undefined && this.parmsMachine) {
         value = this.parmsMachine[sParm];

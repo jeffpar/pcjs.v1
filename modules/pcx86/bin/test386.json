@@ -78,7 +78,7 @@
     "model": "deskpro386",
     "sound": false
   },
-	"serialport": {
+	"serial": {
     "id": "com2",
     "adapter": 2,
     "binding": "console"

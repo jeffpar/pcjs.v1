@@ -32,13 +32,13 @@
 
 "use strict";
 
-import Str from "../../shared/lib/strlib";
-import Web from "../../shared/lib/weblib";
-import DumpAPI from "../../shared/lib/dumpapi";
-import Component from "../../shared/lib/component";
-import PDP11 from "./defines";
-import MemoryPDP11 from "./memory";
-import MessagesPDP11 from "./messages";
+var Str = require("../../shared/es6/strlib");
+var Web = require("../../shared/es6/weblib");
+var DumpAPI = require("../../shared/es6/dumpapi");
+var Component = require("../../shared/es6/component");
+var PDP11 = require("./defines");
+var MemoryPDP11 = require("./memory");
+var MessagesPDP11 = require("./messages");
 
 class RAMPDP11 extends Component {
     /**
@@ -69,10 +69,13 @@ class RAMPDP11 extends Component {
         this.abInit = null;
         this.aSymbols = null;
 
-        this.addrRAM = parmsRAM['addr'];
-        this.sizeRAM = parmsRAM['size'];
+        this.addrRAM = +parmsRAM['addr'];
+        this.sizeRAM = +parmsRAM['size'];
+
         this.addrLoad = parmsRAM['load'];
         this.addrExec = parmsRAM['exec'];
+        if (this.addrLoad != null) this.addrLoad = +this.addrLoad;
+        if (this.addrExec != null) this.addrExec = +this.addrExec;
 
         this.fInstalled = (!!this.sizeRAM); // 0 is the default value for 'size' when none is specified
         this.fAllocated = false;
@@ -222,7 +225,13 @@ class RAMPDP11 extends Component {
                  * Too early...
                  */
                 if (!this.abInit || !this.bus) return;
-                this.loadImage(this.abInit, this.addrLoad, this.addrExec, this.addrRAM);
+
+                if (this.loadImage(this.abInit, this.addrLoad, this.addrExec, this.addrRAM)) {
+                    this.status('Loaded image "' + this.sFileName + '"');
+                } else {
+                    this.notice('Error loading image "' + this.sFileName + '"');
+                }
+
                 /*
                  * NOTE: We now retain this data, so that reset() can return the RAM to its predefined state.
                  *
@@ -406,4 +415,4 @@ class RAMPDP11 extends Component {
  */
 Web.onInit(RAMPDP11.init);
 
-export default RAMPDP11;
+module.exports = RAMPDP11;

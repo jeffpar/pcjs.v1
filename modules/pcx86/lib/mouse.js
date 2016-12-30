@@ -35,7 +35,7 @@ if (NODE) {
     var State       = require("../../shared/lib/state");
     var PCX86       = require("./defines");
     var Messages    = require("./messages");
-    var SerialPort  = require("./serialport");
+    var SerialPort  = require("./serial");
 }
 
 /**

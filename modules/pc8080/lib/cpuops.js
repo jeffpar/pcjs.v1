@@ -28,11 +28,8 @@
 
 "use strict";
 
-if (NODE) {
-    var str         = require("../../shared/lib/strlib");
-    var CPUDef8080  = require("./CPUDef");
-    var Messages8080= require("./messages");
-}
+var CPUDef8080   = require("./CPUDef");
+var Messages8080 = require("./messages");
 
 /**
  * op=0x00 (NOP)

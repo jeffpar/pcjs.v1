@@ -32,16 +32,16 @@
 
 "use strict";
 
-import Str from "../../shared/es6/strlib";
-import Usr from "../../shared/es6/usrlib";
-import Web from "../../shared/es6/weblib";
-import UserAPI from "../../shared/es6/userapi";
-import ReportAPI from "../../shared/es6/reportapi";
-import Component from "../../shared/es6/component";
-import State from "../../shared/es6/state";
-import PDP11 from "./defines";
-import BusPDP11 from "./bus";
-import MessagesPDP11 from "./messages";
+var Str = require("../../shared/es6/strlib");
+var Usr = require("../../shared/es6/usrlib");
+var Web = require("../../shared/es6/weblib");
+var UserAPI = require("../../shared/es6/userapi");
+var ReportAPI = require("../../shared/es6/reportapi");
+var Component = require("../../shared/es6/component");
+var State = require("../../shared/es6/state");
+var PDP11 = require("./defines");
+var BusPDP11 = require("./bus");
+var MessagesPDP11 = require("./messages");
 
 class ComputerPDP11 extends Component {
     /**
@@ -50,7 +50,7 @@ class ComputerPDP11 extends Component {
      * The ComputerPDP11 component has no required (parmsComputer) properties, but it does
      * support the following:
      *
-z     *      autoPower: true to automatically power the computer (default), false to wait;
+     *      autoPower: true to automatically power the computer (default), false to wait;
      *      false is honored only if a "power" button binding exists.
      *
      *      busWidth: number of memory address lines (address bits) on the computer's "bus";
@@ -113,7 +113,7 @@ z     *      autoPower: true to automatically power the computer (default), fals
         this.parmsMachine = null;
         this.setMachineParms(parmsMachine);
 
-        this.fAutoPower = this.getMachineParm('autoPower', parmsComputer);
+        this.fAutoPower = this.getMachineParm('autoPower', parmsComputer, Str.TYPES.BOOLEAN);
 
         /*
          * nPowerChange is 0 while the power state is stable, 1 while power is transitioning
@@ -124,7 +124,7 @@ z     *      autoPower: true to automatically power the computer (default), fals
         /*
          * TODO: Deprecate 'buswidth' (it should have always used camelCase)
          */
-        this.nBusWidth = parmsComputer['busWidth'] || parmsComputer['buswidth'];
+        this.nBusWidth = +parmsComputer['busWidth'] || +parmsComputer['buswidth'];
 
         this.resume = ComputerPDP11.RESUME_NONE;
         this.sStateData = null;
@@ -303,7 +303,7 @@ z     *      autoPower: true to automatically power the computer (default), fals
     }
 
     /**
-     * getMachineParm(sParm, parmsComponent)
+     * getMachineParm(sParm, parmsComponent, type)
      *
      * If the machine parameter doesn't exist, we check for a matching component parameter (if parmsComponent is provided),
      * and failing that, we check the bundled resources (if any).
@@ -313,10 +313,11 @@ z     *      autoPower: true to automatically power the computer (default), fals
      * resource to obtain the actual state.
      *
      * @param {string} sParm
-     * @param {Object} [parmsComponent]
+     * @param {Object|null} [parmsComponent]
+     * @param {number} [type] (from Str.TYPES)
      * @return {string|undefined}
      */
-    getMachineParm(sParm, parmsComponent)
+    getMachineParm(sParm, parmsComponent, type)
     {
         /*
          * When checking parmsURL, the check is allowed be a bit looser, because URL parameters are
@@ -325,7 +326,7 @@ z     *      autoPower: true to automatically power the computer (default), fals
          * but there are limits to my paranoia.
          */
         var sParmLC = sParm.toLowerCase();
-        var value = Component.parmsURL[sParm] || Component.parmsURL[sParmLC];
+        var value = Web.getURLParm(sParm) || Web.getURLParm(sParmLC);
 
         if (value === undefined && this.parmsMachine) {
             value = this.parmsMachine[sParm];
@@ -335,6 +336,16 @@ z     *      autoPower: true to automatically power the computer (default), fals
         }
         if (value === undefined && typeof resources == 'object' && resources[sParm]) {
             value = sParm;
+        }
+        if (typeof value == "string" && type) {
+            switch(type) {
+            case Str.TYPES.NUMBER:
+                value = +value;
+                break;
+            case Str.TYPES.BOOLEAN:
+                value = (value == "true");
+                break;
+            }
         }
         return value;
     }
@@ -1621,4 +1632,4 @@ Web.onInit(ComputerPDP11.init);
 Web.onShow(ComputerPDP11.show);
 Web.onExit(ComputerPDP11.exit);
 
-export default ComputerPDP11;
+module.exports = ComputerPDP11;

@@ -35,7 +35,7 @@ Most of the work remaining is in device management.  Like other PCjs emulators, 
 UNIBUS addresses.  During the initial port, I moved all of Paul's original device management code into one "catch-all"
 component, [device.js](/modules/pdp11/lib/device.js), which has now been converted to the new I/O registration model.
 
-The first new device component is [serialport.js](/modules/pdp11/lib/serialport.js), which is currently the
+The first new device component is [serial.js](/modules/pdp11/lib/serial.js), which is currently the
 only means PDPjs has of communicating with the outside world.  So you can try
 [PDPjs connected to a VT100 Terminal](/devices/pdp11/machine/1170/vt100/), by clicking the **Run** button on the test machine.
 The test machine is running [custom boot code](/apps/pdp11/boot/test/), adapted from boot code written by Paul, but due to the

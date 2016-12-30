@@ -84,4 +84,4 @@ class Proc {
     }
 }
 
-export default Proc;
+module.exports = Proc;

@@ -28,9 +28,9 @@
 
 "use strict";
 
-import Str from "../../shared/es6/strlib";
-import Web from "../../shared/es6/weblib";
-import Component from "../../shared/es6/component";
+var Str = require("../../shared/es6/strlib");
+var Web = require("../../shared/es6/weblib");
+var Component = require("../../shared/es6/component");
 
 /**
  * savePC(idMachine, sPCJSFile, callback)
@@ -49,9 +49,9 @@ function savePC(idMachine, sPCJSFile, callback)
         var sParms = cmp.saveMachineParms();
         if (!sPCJSFile) {
             if (DEBUG) {
-                sPCJSFile = "/tmp/pcjs/" + (XMLVERSION || APPVERSION) + "/pc.js"
+                sPCJSFile = "/tmp/pcx86/" + (XMLVERSION || APPVERSION) + "/pcx86.js"
             } else {
-                sPCJSFile = "/versions/pcjs/" + (XMLVERSION || APPVERSION) + "/pc" + (dbg? "-dbg" : "") + ".js";
+                sPCJSFile = "/versions/pcx86/" + (XMLVERSION || APPVERSION) + "/pcx86" + (dbg? "-dbg" : "") + ".js";
             }
         }
         if (callback && callback({ state: sState, parms: sParms })) return true;

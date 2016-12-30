@@ -28,8 +28,8 @@
 
 "use strict";
 
-import Component from "../../shared/es6/component";
-import ReportAPI from "../../shared/es6/reportapi";
+var Component = require("../../shared/es6/component");
+var ReportAPI = require("../../shared/es6/reportapi");
 
 /*
  * According to http://www.w3schools.com/jsref/jsref_obj_global.asp, these are the *global* properties
@@ -186,6 +186,17 @@ class Web {
              * The larger resources we put on archive.pcjs.org should also be available locally...
              */
             sURL = sURL.replace(/^http:\/\/archive.pcjs.org(\/.*)\/([^\/]*)$/, "$1/archive/$2");
+        }
+
+        if (NODE) {
+            /*
+             * We don't even need to load Component, because we can't use any of the code below
+             * within Node anyway.  Instead, we must hand this request off to our network library.
+             *
+             *      if (!Component) Component = require("./component");
+             */
+            var Net = require("./netlib");
+            return Net.getResource(sURL, dataPost, fAsync, done);
         }
 
         var xmlHTTP = (window.XMLHttpRequest ? new window.XMLHttpRequest() : new window.ActiveXObject("Microsoft.XMLHTTP"));
@@ -660,12 +671,26 @@ class Web {
     }
 
     /**
-     * getURLParameters(sParms)
+     * getURLParm(sParm)
+     *
+     * @param {string} sParm
+     * @return {string|undefined}
+     */
+    static getURLParm(sParm)
+    {
+        if (!Web.parmsURL) {
+            Web.parmsURL = Web.parseURLParms();
+        }
+        return Web.parmsURL[sParm];
+    }
+
+    /**
+     * parseURLParms(sParms)
      *
      * @param {string} [sParms] containing the parameter portion of a URL (ie, after the '?')
      * @return {Object} containing properties for each parameter found
      */
-    static getURLParameters(sParms)
+    static parseURLParms(sParms)
     {
         var aParms = {};
         if (window) {       // an alternative to "if (typeof module === 'undefined')" if require("defines") was used
@@ -944,6 +969,8 @@ class Web {
     }
 }
 
+Web.parmsURL = null;            // initialized on first call to parseURLParms()
+
 Web.aPageEventHandlers = {
     'init': [],                 // list of window 'onload' handlers
     'show': [],                 // list of window 'onpageshow' handlers
@@ -984,4 +1011,4 @@ Web.onPageEvent(Web.isUserAgent("Opera") || Web.isUserAgent("iOS")? 'onunload' :
     Web.doPageEvent(Web.aPageEventHandlers['exit']);
 });
 
-export default Web;
+module.exports = Web;

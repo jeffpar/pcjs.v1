@@ -32,10 +32,10 @@
 
 "use strict";
 
-import Str from "../../shared/es6/strlib";
-import Usr from "../../shared/es6/usrlib";
-import Component from "../../shared/es6/component";
-import MessagesPDP11 from "./messages";
+var Str = require("../../shared/es6/strlib");
+var Usr = require("../../shared/es6/usrlib");
+var Component = require("../../shared/es6/component");
+var MessagesPDP11 = require("./messages");
 
 /*
  * A word (or more) about PDP-11 speeds:
@@ -98,9 +98,9 @@ class CPUPDP11 extends Component {
     {
         super("CPU", parmsCPU, CPUPDP11, MessagesPDP11.CPU);
 
-        var nCycles = parmsCPU['cycles'] || nCyclesDefault;
+        var nCycles = +parmsCPU['cycles'] || nCyclesDefault;
 
-        var nMultiplier = parmsCPU['multiplier'] || 1;
+        var nMultiplier = +parmsCPU['multiplier'] || 1;
 
         this.nDisplayCount = 0;
         this.nDisplayLimit = 30;
@@ -122,6 +122,7 @@ class CPUPDP11 extends Component {
         this.flags.running = false;
         this.flags.starting = false;
         this.flags.autoStart = parmsCPU['autoStart'];
+        if (typeof this.flags.autoStart == "string") this.flags.autoStart = (this.flags.autoStart == "true");
 
         /*
          * Get checksum parameters, if any. runCPU() behavior is not affected until fChecksum
@@ -134,9 +135,9 @@ class CPUPDP11 extends Component {
          */
         this.flags.checksum = false;
         this.nChecksum = this.nCyclesChecksumNext = 0;
-        this.nCyclesChecksumStart = parmsCPU["csStart"];
-        this.nCyclesChecksumInterval = parmsCPU["csInterval"];
-        this.nCyclesChecksumStop = parmsCPU["csStop"];
+        this.nCyclesChecksumStart = +parmsCPU["csStart"];
+        this.nCyclesChecksumInterval = +parmsCPU["csInterval"];
+        this.nCyclesChecksumStop = +parmsCPU["csStop"];
 
         /*
          * Array of countdown timers managed by addTimer() and setTimer().
@@ -257,8 +258,8 @@ class CPUPDP11 extends Component {
                 this.dbg.init(this.flags.autoStart);
             } else {
                 /*
-                 * The Computer (this.cmp) knows if there's a Control Panel (this.cmp.panel), and the Control Panel
-                 * knows if there's a "print" control (this.cmp.panel.controlPrint), and if there IS a "print" control
+                 * The Computer (this.cmp) knows if there's a Control Panel (this.panel), and the Control Panel
+                 * knows if there's a "print" control (this.panel.controlPrint), and if there IS a "print" control
                  * but no debugger, the machine is probably misconfigured (most likely, the page simply neglected to
                  * load the Debugger component).
                  *
@@ -268,7 +269,7 @@ class CPUPDP11 extends Component {
                 this.println("No debugger detected");
             }
             if (!this.flags.autoStart) {
-                this.println("CPU will not be auto-started, click Run to start");
+                this.println("CPU will not be auto-started " + (this.panel? "(click Run to start)" : "(type 'go' to start)"));
             }
         }
         /*
@@ -1245,4 +1246,4 @@ CPUPDP11.YIELDS_PER_STATUS      = 15;           // every 15 yields (ie, twice pe
 
 CPUPDP11.BUTTONS = ["power", "reset"];
 
-export default CPUPDP11;
+module.exports = CPUPDP11;

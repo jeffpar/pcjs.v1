@@ -82,4 +82,4 @@ var DumpAPI = {
 DumpAPI.asDiskCommands = [DumpAPI.QUERY.DIR, DumpAPI.QUERY.DISK, DumpAPI.QUERY.PATH];
 DumpAPI.asFileCommands = [DumpAPI.QUERY.FILE];
 
-export default DumpAPI;
+module.exports = DumpAPI;

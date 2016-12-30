@@ -32,13 +32,13 @@
 
 "use strict";
 
-import Str from "../../shared/lib/strlib";
-import Web from "../../shared/lib/weblib";
-import Component from "../../shared/lib/component";
-import Keys from "../../shared/lib/keys";
-import State from "../../shared/lib/state";
-import PDP11 from "./defines";
-import MessagesPDP11 from "./messages";
+var Str = require("../../shared/es6/strlib");
+var Web = require("../../shared/es6/weblib");
+var Component = require("../../shared/es6/component");
+var Keys = require("../../shared/es6/keys");
+var State = require("../../shared/es6/state");
+var PDP11 = require("./defines");
+var MessagesPDP11 = require("./messages");
 
 /**
  * Since the Closure Compiler treats ES6 classes as @struct rather than @dict by default,
@@ -100,11 +100,11 @@ class SerialPortPDP11 extends Component {
     {
         super("SerialPort", parmsSerial, SerialPortPDP11, MessagesPDP11.SERIAL);
 
-        this.iAdapter = parmsSerial['adapter'];
-        this.nBaudReceive = parmsSerial['baudReceive'] || PDP11.DL11.RCSR.BAUD;
-        this.nBaudTransmit = parmsSerial['baudTransmit'] || PDP11.DL11.XCSR.BAUD;
+        this.iAdapter = +parmsSerial['adapter'];
+        this.nBaudReceive = +parmsSerial['baudReceive'] || PDP11.DL11.RCSR.BAUD;
+        this.nBaudTransmit = +parmsSerial['baudTransmit'] || PDP11.DL11.XCSR.BAUD;
         this.fUpperCase = parmsSerial['upperCase'];
-
+        if (typeof this.fUpperCase == "string") this.fUpperCase = (this.fUpperCase == "true");
         /**
          * consoleOutput becomes a string that records serial port output if the 'binding' property is set to the
          * reserved name "console".  Nothing is written to the console, however, until a linefeed (0x0A) is output
@@ -138,8 +138,8 @@ class SerialPortPDP11 extends Component {
          * charBOL, if nonzero, is a character to automatically output at the beginning of every line.  This probably
          * isn't generally useful; I use it internally to preformat serial output.
          */
-        this.tabSize = parmsSerial['tabSize'];
-        this.charBOL = parmsSerial['charBOL'];
+        this.tabSize = +parmsSerial['tabSize'];
+        this.charBOL = +parmsSerial['charBOL'];
         this.iLogicalCol = 0;
         this.fNullModem = true;
 
@@ -171,7 +171,8 @@ class SerialPortPDP11 extends Component {
         this['exports'] = {
             'connect': this.initConnection,
             'receiveData': this.receiveData,
-            'receiveStatus': this.receiveStatus
+            'receiveStatus': this.receiveStatus,
+            'setConnection': this.setConnection
         };
     }
 
@@ -625,6 +626,24 @@ class SerialPortPDP11 extends Component {
     }
 
     /**
+     * setConnection(component, fn)
+     *
+     * @this {SerialPortPDP11}
+     * @param {Object|null} component
+     * @param {function(number)} fn
+     * @return {boolean}
+     */
+    setConnection(component, fn)
+    {
+        if (!this.connection) {
+            this.connection = component;
+            this.sendData = fn;
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * transmitByte(b)
      *
      * @this {SerialPortPDP11}
@@ -884,4 +903,4 @@ SerialPortPDP11.UNIBUS_IOTABLE = {
  */
 Web.onInit(SerialPortPDP11.init);
 
-export default SerialPortPDP11;
+module.exports = SerialPortPDP11;

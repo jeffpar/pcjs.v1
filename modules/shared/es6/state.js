@@ -28,8 +28,8 @@
 
 "use strict";
 
-import Web from "../../shared/es6/weblib";
-import Component from "../../shared/es6/component";
+var Web = require("../../shared/es6/weblib");
+var Component = require("../../shared/es6/component");
 
 class State {
     /**
@@ -392,4 +392,4 @@ class State {
     }
 }
 
-export default State;
+module.exports = State;
