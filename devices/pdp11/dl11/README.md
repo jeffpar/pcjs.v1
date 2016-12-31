@@ -11,7 +11,9 @@ PDPjs implements the DL11 component in [SerialPortPDP11](/modules/pdp11/lib/seri
 
 This component is typically instantiated by a Machine XML file using:
 
-	<serial id="dl11" adapter="0" binding="print"/>
+```xml
+<serial id="dl11" adapter="0" binding="print"/>
+```
 
 Most of our PDP-11 machines specify *binding="print"* to connect the DL11 to a `<textarea>` that serves as the machine's
 display terminal.

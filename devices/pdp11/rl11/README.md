@@ -33,16 +33,16 @@ used to control the device, such as choosing which disks should be "auto-mounted
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <device id="rl11" type="rl11" autoMount='{RL0:{path:"http://archive.pcjs.org/disks/dec/rl02k/RL02K-XXDP.json"}}' pos="left" width="35%" padLeft="8px" padBottom="8px">
-	<name>Disk Drive Controls</name>
-	<control type="container">
-		<control type="list" binding="listDrives"/>
-		<control type="list" binding="listDisks">
-			<disk id="disk01" name="XXDP+ Diagnostics" path="http://archive.pcjs.org/disks/dec/rl02k/RL02K-XXDP.json"/>
-		</control>
-		<control type="button" binding="loadDisk">Load</control>
-		<control type="button" binding="bootDisk">Boot</control>
-		<control type="description" binding="descDisk" padRight="8px"/>
-		<control type="file" binding="mountDisk"/>
-	</control>
+    <name>Disk Drive Controls</name>
+    <control type="container">
+        <control type="list" binding="listDrives"/>
+        <control type="list" binding="listDisks">
+            <disk id="disk01" name="XXDP+ Diagnostics" path="http://archive.pcjs.org/disks/dec/rl02k/RL02K-XXDP.json"/>
+        </control>
+        <control type="button" binding="loadDisk">Load</control>
+        <control type="button" binding="bootDisk">Boot</control>
+        <control type="description" binding="descDisk" padRight="8px"/>
+        <control type="file" binding="mountDisk"/>
+    </control>
 </device>
 ```
