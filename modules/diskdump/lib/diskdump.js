@@ -1,7 +1,7 @@
 /**
  * @fileoverview Converts disk images to/from JSON
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a> (@jeffpar)
- * @copyright © Jeff Parsons 2012-2016
+ * @copyright © Jeff Parsons 2012-2017
  *
  * This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
  *
@@ -399,7 +399,7 @@ DiskDump.setLogFile = function(file) {
  * Class constants
  */
 DiskDump.sAPIURL = "http://www.pcjs.org" + DumpAPI.ENDPOINT;
-DiskDump.sCopyright = "© 2012-2016 by Jeff Parsons (@jeffpar)";
+DiskDump.sCopyright = COPYRIGHT;
 DiskDump.sNotice = DiskDump.sAPIURL + " " + DiskDump.sCopyright;
 DiskDump.sUsage = "Usage: " + DiskDump.sAPIURL + "?" + DumpAPI.QUERY.PATH + "={url}&amp;" + DumpAPI.QUERY.FORMAT + "=json|data|hex|bytes|img";
 

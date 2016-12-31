@@ -24,7 +24,7 @@ The following output should appear:
 	ibm5150.debugger object created
 	warning: Component type 'Panel' not found
 	PCx86 v1.x.x
-	Copyright © 2012-2016 Jeff Parsons <Jeff@pcjs.org>
+	Copyright © 2012-2017 Jeff Parsons <Jeff@pcjs.org>
 	License: GPL version 3 or later <http://gnu.org/licenses/gpl.html>
 	ibm5150.pc-mda-64k object created
 	PCx86> bus: 8Kb ROM at 000FE000

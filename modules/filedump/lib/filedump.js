@@ -1,7 +1,7 @@
 /**
  * @fileoverview Converts file contents to JSON
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a> (@jeffpar)
- * @copyright © Jeff Parsons 2012-2016
+ * @copyright © Jeff Parsons 2012-2017
  *
  * This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
  *
@@ -80,7 +80,7 @@ function FileDump(sFormat, fComments, fDecimal, offDump, nWidthDump, sServerRoot
  * Class constants
  */
 FileDump.sAPIURL = "http://www.pcjs.org" + DumpAPI.ENDPOINT;
-FileDump.sCopyright = "© 2012-2016 by Jeff Parsons (@jeffpar)";
+FileDump.sCopyright = COPYRIGHT;
 FileDump.sNotice = FileDump.sAPIURL + " " + FileDump.sCopyright;
 FileDump.sUsage = "Usage: " + FileDump.sAPIURL + "?" + DumpAPI.QUERY.FILE + "=({path}|{URL})&" + DumpAPI.QUERY.FORMAT + "=(json|data|hex|octal|bytes|words|rom)";
 
