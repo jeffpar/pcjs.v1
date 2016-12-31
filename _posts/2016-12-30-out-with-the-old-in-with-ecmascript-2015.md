@@ -1,11 +1,11 @@
 ---
 layout: post
-title: Out With The Old, In with ECMASCript 2015
+title: Out With The Old, In with ECMAScript 2015
 date: 2016-12-30 23:00:00
 permalink: /blog/2016/12/30/
 ---
 
-As 2016 was drawing to a close, I noticed that browser support for ECMAScript 2015 (aka ES6) was looking pretty good,
+As 2016 was drawing to a close, browser support for ECMAScript 2015 (aka ES6) was looking pretty good,
 so maybe it was time to start taking advantage of a few ES6 features, especially:
 
 - [Classes](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes)
@@ -22,7 +22,7 @@ Of the four types of machines (and CPUs) that PCjs currently supports:
 - PC8080 (8080)
 - PDPjs (PDP-11)
 
-I decided to start with the code for the two newest machines: PDPjs and PC8080.
+I decided to start by updating the code for the two newest machines: PDPjs and PC8080.
 
 The single biggest change was the switch to ES6 classes.  Fortunately, since PCjs machines were already using a class-like
 object hierarchy for all its components, all I had to do was select each of my *constructor* functions in the WebStorm IDE
