@@ -1,10 +1,7 @@
 /**
  * @fileoverview Gruntfile for pcjs.org
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a> (@jeffpar)
- * @version 1.0
- * Created 2014-03-11
- *
- * Copyright © 2012-2016 Jeff Parsons <Jeff@pcjs.org>
+ * @copyright © Jeff Parsons 2012-2017
  *
  * This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
  *
@@ -198,7 +195,7 @@ module.exports = function(grunt) {
                 options: {
                     banner: '"use strict";\n\n',
                     process: function(src, filepath) {
-                        return "/**\n * @copyright " + filepath.replace(/^\./, "http://pcjs.org") + " (C) Jeff Parsons 2012-2016\n */\n\n" +
+                        return "/**\n * @copyright " + filepath.replace(/^\./, "http://pcjs.org") + " (C) Jeff Parsons 2012-2017\n */\n\n" +
                             src.replace(/(^|\n)[ \t]*(['"])use strict\2;?/g, '')
                                .replace(/^(import|export)[ \t]+[^\n]*\n/gm, '')
                                .replace(/^[ \t]*var\s+\S+\s*=\s*require\((['"]).*?\1\);/gm, '')
@@ -216,7 +213,7 @@ module.exports = function(grunt) {
                 options: {
                     banner: '"use strict";\n\n',
                     process: function(src, filepath) {
-                        return "/**\n * @copyright " + filepath.replace(/^\./, "http://pcjs.org") + " (C) Jeff Parsons 2012-2016\n */\n\n" +
+                        return "/**\n * @copyright " + filepath.replace(/^\./, "http://pcjs.org") + " (C) Jeff Parsons 2012-2017\n */\n\n" +
                             src.replace(/(^|\n)[ \t]*(['"])use strict\2;?/g, '')
                                .replace(/^(import|export)[ \t]+[^\n]*\n/gm, '')
                                .replace(/^[ \t]*var\s+\S+\s*=\s*require\((['"]).*?\1\);/gm, '')
@@ -234,7 +231,7 @@ module.exports = function(grunt) {
                 options: {
                     banner: '"use strict";\n\n',
                     process: function(src, filepath) {
-                        return "/**\n * @copyright " + filepath.replace(/^\./, "http://pcjs.org") + " (C) Jeff Parsons 2012-2016\n */\n\n" +
+                        return "/**\n * @copyright " + filepath.replace(/^\./, "http://pcjs.org") + " (C) Jeff Parsons 2012-2017\n */\n\n" +
                             src.replace(/(^|\n)[ \t]*(['"])use strict\2;?/g, '')
                                .replace(/^(import|export)[ \t]+[^\n]*\n/gm, '')
                                .replace(/^[ \t]*var\s+\S+\s*=\s*require\((['"]).*?\1\);/gm, '')
@@ -252,7 +249,7 @@ module.exports = function(grunt) {
                 options: {
                     banner: '"use strict";\n\n',
                     process: function(src, filepath) {
-                        return "/**\n * @copyright " + filepath.replace(/^\./, "http://pcjs.org") + " (C) Jeff Parsons 2012-2016\n */\n\n" +
+                        return "/**\n * @copyright " + filepath.replace(/^\./, "http://pcjs.org") + " (C) Jeff Parsons 2012-2017\n */\n\n" +
                             src.replace(/(^|\n)[ \t]*(['"])use strict\2;?/g, '')
                                .replace(/^(import|export)[ \t]+[^\n]*\n/gm, '')
                                .replace(/^[ \t]*var\s+\S+\s*=\s*require\((['"]).*?\1\);/gm, '')

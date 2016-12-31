@@ -1,10 +1,7 @@
 /**
  * @fileoverview Node web server for pcjs.org
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a> (@jeffpar)
- * @version 1.0
- * Created 2014-02-01
- *
- * Copyright © 2012-2016 Jeff Parsons <Jeff@pcjs.org>
+ * @copyright © Jeff Parsons 2012-2017
  *
  * This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
  *
@@ -30,8 +27,8 @@
  */
 
 /*
- * Usage
- * ---
+ * Usage:
+ *
  *      node server.js [options]
  *
  * The options supported are basically just pass-through options for the HTMLOut module;

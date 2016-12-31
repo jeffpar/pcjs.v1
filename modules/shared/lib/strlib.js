@@ -1,7 +1,7 @@
 /**
  * @fileoverview String-related helper functions
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a> (@jeffpar)
- * @copyright © Jeff Parsons 2012-2016
+ * @copyright © Jeff Parsons 2012-2017
  *
  * This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
  *
