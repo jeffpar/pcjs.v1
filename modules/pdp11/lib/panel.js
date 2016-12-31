@@ -845,7 +845,7 @@ class PanelPDP11 extends Component {
      */
     advanceAddr()
     {
-        var nRegs = this.cpu.model < PDP11.MODEL_1145? 8 : 16;
+        var nRegs = this.cpu.model <= PDP11.MODEL_1140? 8 : 16;
         var fGenRegs = (this.regAddr >= PDP11.UNIBUS.R0SET0 /*177700*/ && this.regAddr < PDP11.UNIBUS.R0SET0 + nRegs);
         var inc = fGenRegs? 1 : 2;
         var mask = fGenRegs? 0xf : this.bus.nBusMask;

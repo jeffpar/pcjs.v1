@@ -304,7 +304,12 @@ class DebuggerPDP11 extends Debugger {
         var sMessages = cmp.getMachineParm('messages');
         if (sMessages) this.messageInit(sMessages);
 
-        if (this.cpu.model < PDP11.MODEL_1145) this.aOpReserved = DebuggerPDP11.OP1145;
+        if (this.cpu.model < PDP11.MODEL_1140) {
+            this.aOpReserved = this.aOpReserved.concat(DebuggerPDP11.OP1140);
+        }
+        if (this.cpu.model < PDP11.MODEL_1145) {
+            this.aOpReserved = this.aOpReserved.concat(DebuggerPDP11.OP1145);
+        }
 
         this.messageDump(MessagesPDP11.BUS,  function onDumpBus(asArgs) { dbg.dumpBus(asArgs); });
 
@@ -4348,21 +4353,27 @@ if (DEBUGGER) {
     DebuggerPDP11.OPNONE = [DebuggerPDP11.OPS.NONE];
 
     /*
-     * Table of opcodes specific to the 11/45 and newer
+     * Table of opcodes added to the 11/40 and newer
      */
-    DebuggerPDP11.OP1145 = [
+    DebuggerPDP11.OP1140 = [
         DebuggerPDP11.OPS.MARK,
         DebuggerPDP11.OPS.MFPI,
         DebuggerPDP11.OPS.MTPI,
         DebuggerPDP11.OPS.SXT,
-        DebuggerPDP11.OPS.SPL,
         DebuggerPDP11.OPS.RTT,
         DebuggerPDP11.OPS.MUL,
         DebuggerPDP11.OPS.DIV,
         DebuggerPDP11.OPS.ASH,
         DebuggerPDP11.OPS.ASHC,
         DebuggerPDP11.OPS.XOR,
-        DebuggerPDP11.OPS.SOB,
+        DebuggerPDP11.OPS.SOB
+    ];
+
+    /*
+     * Table of opcodes added to the 11/45 and newer
+     */
+    DebuggerPDP11.OP1145 = [
+        DebuggerPDP11.OPS.SPL,
         DebuggerPDP11.OPS.MFPD,
         DebuggerPDP11.OPS.MTPD
     ];

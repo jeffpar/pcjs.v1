@@ -154,10 +154,14 @@ class CPUStatePDP11 extends CPUPDP11 {
             this.pswUsed = ~(PDP11.PSW.UNUSED | PDP11.PSW.REGSET | PDP11.PSW.PMODE | PDP11.PSW.CMODE) & 0xffff;
             this.pswRegSet = 0;
         } else {
-            this.decode = PDP11.op1145.bind(this);
-            this.checkStackLimit = this.checkStackLimit1145;
-            this.pswUsed = ~(PDP11.PSW.UNUSED | (this.model < PDP11.MODEL_1145? PDP11.PSW.REGSET : 0)) & 0xffff;
-            this.pswRegSet = (this.model >= PDP11.MODEL_1145? PDP11.PSW.REGSET : 0);
+            this.decode = PDP11.op1140.bind(this);
+            this.checkStackLimit = this.checkStackLimit1140;
+            /*
+             * The alternate register set (REGSET) doesn't exist on the 11/20 or 11/40; it's available on the 11/45 and 11/70.
+             * Ditto for separate I/D spaces, SUPER mode, and the instructions MFPD, MTPD, and SPL.
+             */
+            this.pswUsed = ~(PDP11.PSW.UNUSED | (this.model <= PDP11.MODEL_1140? PDP11.PSW.REGSET : 0)) & 0xffff;
+            this.pswRegSet = (this.model > PDP11.MODEL_1140? PDP11.PSW.REGSET : 0);
         }
 
         this.nDisableTraps = 0;
@@ -2146,14 +2150,14 @@ class CPUStatePDP11 extends CPUPDP11 {
     }
 
     /**
-     * checkStackLimit1145(access, step, addr)
+     * checkStackLimit1140(access, step, addr)
      *
      * @this {CPUStatePDP11}
      * @param {number} access
      * @param {number} step
      * @param {number} addr
      */
-    checkStackLimit1145(access, step, addr)
+    checkStackLimit1140(access, step, addr)
     {
         if (!this.pswMode) {
             /*
