@@ -25,7 +25,7 @@ Of the four types of machines (and CPUs) that PCjs currently supports:
 I decided to start by updating the code for the two newest machines: PDPjs and PC8080.
 
 The single biggest change was the switch to ES6 classes.  Fortunately, since PCjs machines were already using a class-like
-object hierarchy for all its components, all I had to do was select each of my *constructor* functions in the WebStorm IDE
+object hierarchy for all their components, all I had to do was select each of my *constructor* functions in the WebStorm IDE
 and tell it to convert the constructor to a class; for example:
 
 ```javascript
