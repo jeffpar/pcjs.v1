@@ -1595,6 +1595,7 @@ PDP11.opRTI = function(opCode)
 PDP11.opRTS = function(opCode)
 {
     if (opCode & 0x08) {
+        //noinspection JSUnresolvedFunction
         PDP11.opUndefined.call(this, opCode);
         return;
     }
@@ -1739,6 +1740,7 @@ PDP11.opSOB = function(opCode)
 PDP11.opSPL = function(opCode)
 {
     if (!(opCode & 0x08) || this.model < PDP11.MODEL_1145) {
+        //noinspection JSUnresolvedFunction
         PDP11.opUndefined.call(this, opCode);
         return;
     }
@@ -2311,6 +2313,7 @@ PDP11.op8Xnn_1140 = function(opCode)
 PDP11.op8DXn_1140 = function(opCode)
 {
     if (this.model < PDP11.MODEL_1145) {
+        //noinspection JSUnresolvedFunction
         PDP11.opUndefined.call(this, opCode);
         return;
     }

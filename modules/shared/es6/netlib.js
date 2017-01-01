@@ -135,10 +135,10 @@ class Net {
     /**
      * isRemote(sPath)
      *
+     * TODO: Add support for FTP? HTTPS? Anything else?
+     *
      * @param {string} sPath
      * @return {boolean} true if sPath is a (supported) remote path, false if not
-     *
-     * TODO: Add support for FTP? HTTPS? Anything else?
      */
     static isRemote(sPath)
     {
@@ -189,11 +189,11 @@ class Net {
     /**
      * getFile(sURL, sEncoding, done)
      *
+     * TODO: Add support for FTP? HTTPS? Anything else?
+     *
      * @param {string} sURL is the source file
      * @param {string|null} sEncoding is the encoding to assume, if any
      * @param {function(Error,number,(string|Buffer))} done receives an Error, an HTTP status code, and a Buffer (if any)
-     *
-     * TODO: Add support for FTP? HTTPS? Anything else?
      */
     static getFile(sURL, sEncoding, done)
     {
@@ -248,9 +248,9 @@ class Net {
                  * in such cases, the file content will likely just be an HTML error page.
                  */
                 if (res.statusCode < 400) {
-                    done(null, res.statusCode, sEncoding ? sFile : bufFile);
+                    done(null, res.statusCode, sEncoding? sFile : bufFile);
                 } else {
-                    done(new Error(sEncoding ? sFile : bufFile), res.statusCode, null);
+                    done(new Error(sEncoding? sFile : bufFile), res.statusCode, null);
                 }
             }).on('error', function(err)
             {
@@ -317,14 +317,20 @@ class Net {
     {
         var nErrorCode = -1, sResource = null, response = null;
 
-        /*
-         * TODO: Revisit why we pass back sBaseName instead of the original sURL....
-         */
-        var sBaseName = Str.getBaseName(sURL);
-
         if (Net.isRemote(sURL)) {
-            console.log('Net.getResource("' + sURL + '"): unimplemented');
-            if (done) done(sBaseName, null, -1);
+            /*
+             * TODO: This code is nothing more than a band-aid.  It assumes the URL uses "http:"
+             * (hence the call to getFile(), which only supports HTTP GET operations), it assumes
+             * the requested data is UTF-8 string data (which is normally the case, because nearly
+             * all our requests are for JSON files), it doesn't deal with dataPost, it assumes
+             * that fAsync is true, and it performs very simplistic error code mapping.
+             *
+             * But, it gets the job done for what little we actually ask of it, when our machines
+             * are running in the Node environment.
+             */
+            Net.getFile(sURL, "utf8", function(err, status, data) {
+                if (done) done(sURL, data, err? status : 0);
+            });
         } else {
             if (!Net.sServerRoot) {
                 Net.sServerRoot = path.join(path.dirname(fs.realpathSync(__filename)), "../../../");
@@ -340,7 +346,7 @@ class Net {
                         sResource = s;
                         nErrorCode = 0;
                     }
-                    if (done) done(sBaseName, sResource, nErrorCode);
+                    if (done) done(sURL, sResource, nErrorCode);
                 });
             } else {
                 try {
@@ -352,7 +358,7 @@ class Net {
                      */
                     console.log(err.message);
                 }
-                if (done) done(sBaseName, sResource, nErrorCode);
+                if (done) done(sURL, sResource, nErrorCode);
                 response = [sResource, nErrorCode];
             }
         }

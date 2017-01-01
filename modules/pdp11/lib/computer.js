@@ -327,7 +327,7 @@ class ComputerPDP11 extends Component {
             switch(type) {
             case Str.TYPES.NUMBER:
                 value = +value;
-                if (isNaN(value)) value = defaultValue || 0;
+                if (isNaN(/** @type {number} */(value))) value = defaultValue || 0;
                 break;
             case Str.TYPES.BOOLEAN:
                 value = (value == "true");
@@ -413,6 +413,7 @@ class ComputerPDP11 extends Component {
             }
         }
         if (DEBUG && this.messageEnabled()) this.printMessage("ComputerPDP11.wait(ready)");
+        //noinspection JSUnresolvedFunction
         fn.call(this, parms);
     }
 
