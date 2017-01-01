@@ -613,11 +613,15 @@ class ComputerPDP11 extends Component {
     {
         if (!component.flags.powered) {
 
+            /*
+             * TODO: If all components called super.powerUp(), the powered flag would be set automatically.
+             */
+            this.assert(component.powerUp);
             component.flags.powered = true;
 
-            if (component.powerUp) {
+            var data = null;
 
-                var data = null;
+            try {
                 if (fRestore) {
                     data = stateComputer.get(component.id);
                     if (!data) {
@@ -690,13 +694,16 @@ class ComputerPDP11 extends Component {
                      */
                     fRestore = false;
                 }
-            }
 
-            if (!fRepower && component.comment) {
-                var asComments = component.comment.split("|");
-                for (var i = 0; i < asComments.length; i++) {
-                    component.status(asComments[i]);
+                if (!fRepower && component.comment) {
+                    var asComments = component.comment.split("|");
+                    for (var i = 0; i < asComments.length; i++) {
+                        component.status(asComments[i]);
+                    }
                 }
+            }
+            catch (err) {
+                Component.error("Error restoring state for " + component.type + " (" + err.message + ")");
             }
         }
         return fRestore;

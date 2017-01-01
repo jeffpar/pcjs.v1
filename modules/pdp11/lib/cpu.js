@@ -244,7 +244,7 @@ class CPUPDP11 extends Component {
         }
 
         if (!fRepower) {
-            if (!data || !this.restore) {
+            if (!data) {
                 this.reset();
             } else {
                 this.resetCycles();
@@ -291,12 +291,6 @@ class CPUPDP11 extends Component {
      */
     powerDown(fSave, fShutdown)
     {
-        /*
-         * The Computer component (which is responsible for all powerDown and powerUp notifications)
-         * is now responsible for managing a component's fPowered flag, not us.
-         *
-         *      this.flags.powered = false;
-         */
         return fSave? this.save() : true;
     }
 

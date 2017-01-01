@@ -316,15 +316,6 @@ class BusPDP11 extends Component {
     /**
      * powerUp(data, fRepower)
      *
-     * We don't need a powerDown() handler, because for largely historical reasons, our state is saved by saveMemory(),
-     * which called by the CPU.
-     *
-     * However, we do need a powerUp() handler, because on resumable machines, the Computer's onReset() function calls
-     * everyone's powerUp() handler rather than their reset() handler.
-     *
-     * TODO: Perhaps Computer should be smarter: if there's no powerUp() handler, then fallback to the reset() handler.
-     * In that case, however, we'd either need to remove the powerUp() stub in Component, or detect the existence of the stub.
-     *
      * @this {BusPDP11}
      * @param {Object|null} data (always null because we supply no powerDown() handler)
      * @param {boolean} [fRepower]
@@ -332,8 +323,52 @@ class BusPDP11 extends Component {
      */
     powerUp(data, fRepower)
     {
-        if (!fRepower) this.reset();
+        if (!fRepower) {
+            if (!data) {
+                this.reset();
+            } else {
+                if (!this.restore(data)) return false;
+            }
+        }
         return true;
+    }
+
+    /**
+     * powerDown(fSave, fShutdown)
+     *
+     * @this {BusPDP11}
+     * @param {boolean} [fSave]
+     * @param {boolean} [fShutdown]
+     * @return {Object|boolean} component state if fSave; otherwise, true if successful, false if failure
+     */
+    powerDown(fSave, fShutdown)
+    {
+        return fSave? this.save() : true;
+    }
+
+    /**
+     * save()
+     *
+     * @this {BusPDP11}
+     * @return {Object|null}
+     */
+    save()
+    {
+        var state = new State(this);
+        state.set(0, this.saveMemory());
+        return state.data();
+    }
+
+    /**
+     * restore(data)
+     *
+     * @this {BusPDP11}
+     * @param {Object} data
+     * @return {boolean} true if restore successful, false if not
+     */
+    restore(data)
+    {
+        return this.restoreMemory(data[0]);
     }
 
     /**

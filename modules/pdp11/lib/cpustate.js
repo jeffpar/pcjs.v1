@@ -104,7 +104,7 @@ class CPUStatePDP11 extends CPUPDP11 {
         }
 
         /*
-         * WARNING: With ES6 classes, you cannot access "this" until all superclasses have been initialized as well.
+         * ES6 ALERT: Classes cannot access "this" until all superclasses have been initialized as well.
          */
         super(parmsCPU, nCyclesDefault);
 
@@ -211,6 +211,9 @@ class CPUStatePDP11 extends CPUPDP11 {
     /**
      * powerUp(data, fRepower)
      *
+     * We hook the powerUp() notification only because it's our best opportunity to take care of any
+     * floating vector assignments.
+     *
      * @this {CPUStatePDP11}
      * @param {Object|null} data
      * @param {boolean} [fRepower]
@@ -267,8 +270,7 @@ class CPUStatePDP11 extends CPUPDP11 {
         this.flagN  = 0x8000;       // PSW N bit
         this.regPSW = 0x000f;       // PSW other bits   (TODO: What's the point of setting the flag bits here, too?)
         this.regsGen = [            // General R0-R7
-            0, 0, 0, 0, 0, 0, 0, this.addrReset,
-            -1, -2, -3, -4, -5, -6, -7, -8
+            0, 0, 0, 0, 0, 0, 0, this.addrReset, -1, -2, -3, -4, -5, -6, -7, -8
         ];
 
         this.regsAlt = [            // Alternate R0-R5
@@ -612,18 +614,18 @@ class CPUStatePDP11 extends CPUPDP11 {
     /**
      * getChecksum()
      *
+     * TODO: Implement
+     *
      * @this {CPUStatePDP11}
      * @return {number} a 32-bit summation of key elements of the current CPU state (used by the CPU checksum code)
      */
     getChecksum()
     {
-        return 0;           // TODO: Implement
+        return 0;
     }
 
     /**
      * save()
-     *
-     * This implements save support for the CPUStatePDP11 component.
      *
      * @this {CPUStatePDP11}
      * @return {Object|null}
@@ -641,7 +643,6 @@ class CPUStatePDP11 extends CPUPDP11 {
             this.regMBR,
             this.regPIR,
             this.regSLR,
-            this.getPSW(),
             this.pswTrap,
             this.pswMode,
             this.opFlags,
@@ -658,15 +659,13 @@ class CPUStatePDP11 extends CPUPDP11 {
             this.addrLast,
             this.opLast
         ]);
-        state.set(1, [this.nTotalCycles, this.getSpeed()]);
-        state.set(2, this.bus.saveMemory());
+        state.set(1, [this.getPSW()]);
+        state.set(2, [this.nTotalCycles, this.getSpeed()]);
         return state.data();
     }
 
     /**
      * restore(data)
-     *
-     * This implements restore support for the CPUStatePDP11 component.
      *
      * @this {CPUStatePDP11}
      * @param {Object} data
@@ -674,10 +673,46 @@ class CPUStatePDP11 extends CPUPDP11 {
      */
     restore(data)
     {
-        var a = data[1];
-        this.nTotalCycles = a[1];
-        this.setSpeed(a[3]);
-        return this.bus.restoreMemory(data[2]);
+        var a;
+        /*
+         * ES6 ALERT: Gotta love these destructuring assignments, which make it easy to perform the inverse
+         * of what save() does when it collects a bunch of object properties into an array.
+         */
+        [
+            this.regsGen,
+            this.regsAlt,
+            this.regsAltStack,
+            this.regsUniMap,
+            this.regsControl,
+            this.regErr,
+            this.regMBR,
+            this.regPIR,
+            this.regSLR,
+            this.pswTrap,
+            this.pswMode,
+            this.opFlags,
+            this.regMMR0,
+            this.regMMR1,
+            this.regMMR2,
+            this.regMMR3,
+            this.mmuLastMode,
+            this.mmuLastPage,
+            this.mmuPDR,
+            this.mmuPAR,
+            this.mmuEnable,
+            this.mmuMask,
+            this.addrLast,
+            this.opLast
+        ] = data[0];
+
+        a = data[1];
+        this.setPSW(a[0]);
+
+        a = data[2];
+        this.nTotalCycles = a[0];
+        this.setSpeed(a[1]);
+
+        return true;
     }
 
     /**
@@ -1215,13 +1250,6 @@ class CPUStatePDP11 extends CPUPDP11 {
      */
     getPSW()
     {
-        /*
-         * TODO: I'm not sure why this function can't simply be written as:
-         *
-         *      return (this.regPSW & ~PDP11.PSW.FLAGS) | (this.getNF() | this.getZF() | this.getVF() | this.getCF());
-         *
-         * but for now, I'm keeping the same masking logic as the original pdp11.js.
-         */
         var mask = PDP11.PSW.CMODE | PDP11.PSW.PMODE | PDP11.PSW.REGSET | PDP11.PSW.PRI | PDP11.PSW.TF;
         return this.regPSW = (this.regPSW & mask) | this.getNF() | this.getZF() | this.getVF() | this.getCF();
     }
