@@ -301,7 +301,7 @@ class DebuggerPDP11 extends Debugger {
         /*
          * Re-initialize Debugger message support if necessary
          */
-        var sMessages = cmp.getMachineParm('messages');
+        var sMessages = /** @type {string|undefined} */ (cmp.getMachineParm('messages'));
         if (sMessages) this.messageInit(sMessages);
 
         if (this.cpu.model < PDP11.MODEL_1140) {
