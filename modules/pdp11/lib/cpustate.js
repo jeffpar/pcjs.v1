@@ -554,7 +554,7 @@ class CPUStatePDP11 extends CPUPDP11 {
     setMMR3(newMMR3)
     {
         /*
-         * Don't allow the 11/45 to use 22-bit addressing or the UNIBUS map.
+         * Don't allow non-11/70 models to use 22-bit addressing or the UNIBUS map.
          */
         if (this.model < PDP11.MODEL_1170) {
             newMMR3 &= ~(PDP11.MMR3.MMU_22BIT | PDP11.MMR3.UNIBUS_MAP);
