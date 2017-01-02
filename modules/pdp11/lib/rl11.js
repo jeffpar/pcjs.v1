@@ -61,8 +61,8 @@ class RL11 extends Component {
         super("RL11", parms, RL11, MessagesPDP11.RL11);
 
         /*
-         * We record any 'autoMount' object now, but we no longer parse it until initBus(),
-         * because the Computer's getMachineParm() service may have an override for us.
+         * We preliminarily parse and record any 'autoMount' object now, but we no longer process it
+         * until initBus(), because the Computer's getMachineParm() service may have an override for us.
          */
         this.configMount = this.parseConfig(parms['autoMount']);
         this.cAutoMount = 0;

@@ -1310,6 +1310,23 @@ PDP11.opMFPI = function(opCode)
 };
 
 /**
+ * opMFPS(opCode)
+ *
+ *      1067XX  MFPS - Move Byte From PSW
+ *
+ *      The 8-bit contents of the PS are moved to the effective destination.  If destination is mode 0,
+ *      PS bit 7 is sign extended through the upper byte of the register.  The destination operand is treated
+ *      as a byte address.  11/34A only.
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} opCode
+ */
+PDP11.opMFPS = function(opCode)
+{
+    PDP11.opUndefined.call(this, opCode);
+};
+
+/**
  * opMFPT(opCode)
  *
  *      000007  MFPT - Move From Processor Type
@@ -1328,10 +1345,7 @@ PDP11.opMFPI = function(opCode)
  */
 PDP11.opMFPT = function(opCode)
 {
-    /*
-     * TODO: Review
-     */
-    this.trap(PDP11.TRAP.RESERVED, 0, PDP11.REASON.OPCODE);
+    PDP11.opUndefined.call(this, opCode);
 };
 
 PDP11.MOV_CYCLES = [
@@ -1410,6 +1424,23 @@ PDP11.opMTPI = function(opCode)
     this.updateNZVFlags(data);
     this.writeWordToPrevSpace(opCode, PDP11.ACCESS.ISPACE, data);
     this.nStepCycles = this.nSnapCycles - PDP11.MTP_CYCLES[this.dstMode];
+};
+
+/**
+ * opMTPS(opCode)
+ *
+ *      1064XX  MTPS - Move Byte To PSW
+ *
+ *      The 8 bits of the effective operand replace the current contents of the PS <0:7>.  The source operand
+ *      address is treated as a byte address.  Note that PS bit 4 cannot be set with this instruction.  The
+ *      src operand remains unchanged.  11/34A only.
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} opCode
+ */
+PDP11.opMTPS = function(opCode)
+{
+    PDP11.opUndefined.call(this, opCode);
 };
 
 /**
@@ -2392,7 +2423,7 @@ PDP11.aOp000X_1140 = [
     PDP11.opIOT,                // 0x0004   000004          11/20+  9.3
     PDP11.opRESET,              // 0x0005   000005          11/20+  20ms
     PDP11.opRTT,                // 0x0006   000006          11/40+          LEIS
-    PDP11.opMFPT,               // 0x0007   000007          TBD
+    PDP11.opMFPT,               // 0x0007   000007          11/44+
     PDP11.opUndefined,          // 0x0008
     PDP11.opUndefined,          // 0x0009
     PDP11.opUndefined,          // 0x000A
@@ -2433,17 +2464,17 @@ PDP11.aOp8Xnn_1140 = [
     PDP11.opBCS,                // 0x87nn   1034XX          11/20+  2.6**
     PDP11.opEMT,                // 0x88nn   104000-104377   11/20+  9.3
     PDP11.opTRAP,               // 0x89nn   104400-104777   11/20+  9.3
-    PDP11.op8AXn_1120,          // 0x8Ann
-    PDP11.op8BXn_1120,          // 0x8Bnn
-    PDP11.op8CXn_1120,          // 0x8Cnn
-    PDP11.op8DXn_1140,          // 0x8Dnn
-    PDP11.opUndefined,          // 0x8Enn
-    PDP11.opUndefined           // 0x8Fnn
+    PDP11.op8AXn_1120,          // 0x8Ann   1050XX
+    PDP11.op8BXn_1120,          // 0x8Bnn   1054XX
+    PDP11.op8CXn_1120,          // 0x8Cnn   1060XX
+    PDP11.op8DXn_1140,          // 0x8Dnn   106400-106777
+    PDP11.opUndefined,          // 0x8Enn   1070XX
+    PDP11.opUndefined           // 0x8Fnn   1074XX
 ];
 
 PDP11.aOp8DXn_1140 = [
-    PDP11.opUndefined,          // 0x8D0n
-    PDP11.opMFPD,               // 0x8D4n                   11/45+
-    PDP11.opMTPD,               // 0x8D8n                   11/45+
-    PDP11.opUndefined           // 0x8DCn
+    PDP11.opMTPS,               // 0x8D0n   1064XX          11/34A only
+    PDP11.opMFPD,               // 0x8D4n   1065XX          11/45+
+    PDP11.opMTPD,               // 0x8D8n   1066XX          11/45+
+    PDP11.opMFPS                // 0x8DCn   1067XX          11/34A only
 ];

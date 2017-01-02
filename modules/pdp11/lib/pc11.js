@@ -67,8 +67,8 @@ class PC11 extends Component {
         this.sDevice = "PTR";       // TODO: Make the device name configurable
 
         /*
-         * We record any 'autoMount' object now, but we no longer parse it until initBus(), because the
-         * Computer's getMachineParm() service may have an override for us.
+         * We preliminarily parse and record any 'autoMount' object now, but we no longer process it
+         * until initBus(), because the Computer's getMachineParm() service may have an override for us.
          */
         this.configMount = this.parseConfig(parms['autoMount']);
         this.cAutoMount = 0;
