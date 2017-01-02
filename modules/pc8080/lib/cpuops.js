@@ -28,8 +28,10 @@
 
 "use strict";
 
-var CPUDef8080   = require("./CPUDef");
-var Messages8080 = require("./messages");
+if (NODE) {
+    var CPUDef8080 = require("./CPUDef");
+    var Messages8080 = require("./messages");
+}
 
 /**
  * op=0x00 (NOP)

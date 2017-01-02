@@ -28,15 +28,17 @@
 
 "use strict";
 
-var Str          = require("../../shared/es6/strlib");
-var Web          = require("../../shared/es6/weblib");
-var DumpAPI      = require("../../shared/es6/dumpapi");
-var Component    = require("../../shared/es6/component");
-var State        = require("../../shared/es6/state");
-var PC8080       = require("./defines");
-var ChipSet8080  = require("./chipset");
-var Memory8080   = require("./memory");
-var Messages8080 = require("./messages");
+if (NODE) {
+    var Str = require("../../shared/es6/strlib");
+    var Web = require("../../shared/es6/weblib");
+    var DumpAPI = require("../../shared/es6/dumpapi");
+    var Component = require("../../shared/es6/component");
+    var State = require("../../shared/es6/state");
+    var PC8080 = require("./defines");
+    var ChipSet8080 = require("./chipset");
+    var Memory8080 = require("./memory");
+    var Messages8080 = require("./messages");
+}
 
 /**
  * TODO: The Closure Compiler treats ES6 classes as 'struct' rather than 'dict' by default,
@@ -1501,4 +1503,4 @@ Video8080.VT100 = {
  */
 Web.onInit(Video8080.init);
 
-module.exports = Video8080;
+if (NODE) module.exports = Video8080;

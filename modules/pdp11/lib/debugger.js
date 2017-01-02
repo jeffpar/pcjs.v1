@@ -32,17 +32,19 @@
 
 "use strict";
 
-var Str = require("../../shared/es6/strlib");
-var Usr = require("../../shared/es6/usrlib");
-var Web = require("../../shared/es6/weblib");
-var Component = require("../../shared/es6/component");
-var Debugger = require("../../shared/es6/debugger");
-var Keys = require("../../shared/es6/keys");
-var State = require("../../shared/es6/state");
-var PDP11 = require("./defines");
-var BusPDP11 = require("./bus");
-var MemoryPDP11 = require("./memory");
-var MessagesPDP11 = require("./messages");
+if (NODE) {
+    var Str = require("../../shared/es6/strlib");
+    var Usr = require("../../shared/es6/usrlib");
+    var Web = require("../../shared/es6/weblib");
+    var Component = require("../../shared/es6/component");
+    var Debugger = require("../../shared/es6/debugger");
+    var Keys = require("../../shared/es6/keys");
+    var State = require("../../shared/es6/state");
+    var PDP11 = require("./defines");
+    var BusPDP11 = require("./bus");
+    var MemoryPDP11 = require("./memory");
+    var MessagesPDP11 = require("./messages");
+}
 
 /**
  * DebuggerPDP11 Address Object
@@ -4387,4 +4389,4 @@ if (DEBUGGER) {
 
 }   // endif DEBUGGER
 
-module.exports = DebuggerPDP11;
+if (NODE) module.exports = DebuggerPDP11;

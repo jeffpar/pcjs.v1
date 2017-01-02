@@ -28,14 +28,16 @@
 
 "use strict";
 
-var Web          = require("../../shared/es6/weblib");
-var Component    = require("../../shared/es6/component");
-var State        = require("../../shared/es6/state");
-var PC8080       = require("./defines");
-var CPUDef8080   = require("./cpudef");
-var CPU8080      = require("./cpu");
-var Memory8080   = require("./memory");
-var Messages8080 = require("./messages");
+if (NODE) {
+    var Web = require("../../shared/es6/weblib");
+    var Component = require("../../shared/es6/component");
+    var State = require("../../shared/es6/state");
+    var PC8080 = require("./defines");
+    var CPUDef8080 = require("./cpudef");
+    var CPU8080 = require("./cpu");
+    var Memory8080 = require("./memory");
+    var Messages8080 = require("./messages");
+}
 
 /**
  * TODO: The Closure Compiler treats ES6 classes as 'struct' rather than 'dict' by default,
@@ -1174,4 +1176,4 @@ class CPUState8080 extends CPU8080 {
  */
 Web.onInit(CPUState8080.init);
 
-module.exports = CPUState8080;
+if (NODE) module.exports = CPUState8080;

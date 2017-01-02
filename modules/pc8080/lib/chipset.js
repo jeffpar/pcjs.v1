@@ -28,14 +28,16 @@
 
 "use strict";
 
-var Str          = require("../../shared/es6/strlib");
-var Usr          = require("../../shared/es6/usrlib");
-var Web          = require("../../shared/es6/weblib");
-var Component    = require("../../shared/es6/component");
-var State        = require("../../shared/es6/state");
-var PC8080       = require("./defines");
-var CPUDef8080   = require("./cpudef");
-var Messages8080 = require("./messages");
+if (NODE) {
+    var Str = require("../../shared/es6/strlib");
+    var Usr = require("../../shared/es6/usrlib");
+    var Web = require("../../shared/es6/weblib");
+    var Component = require("../../shared/es6/component");
+    var State = require("../../shared/es6/state");
+    var PC8080 = require("./defines");
+    var CPUDef8080 = require("./cpudef");
+    var Messages8080 = require("./messages");
+}
 
 /**
  * TODO: The Closure Compiler treats ES6 classes as 'struct' rather than 'dict' by default,
@@ -1135,4 +1137,4 @@ ChipSet8080.VT100.portsOutput = {
  */
 Web.onInit(ChipSet8080.init);
 
-module.exports = ChipSet8080;
+if (NODE) module.exports = ChipSet8080;

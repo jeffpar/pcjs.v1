@@ -117,4 +117,4 @@ MessagesPDP11.CATEGORIES = {
     "halt":     MessagesPDP11.HALT
 };
 
-module.exports = MessagesPDP11;
+if (NODE) module.exports = MessagesPDP11;

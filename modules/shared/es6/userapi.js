@@ -65,4 +65,4 @@ var UserAPI = {
     }
 };
 
-module.exports = UserAPI;
+if (NODE) module.exports = UserAPI;

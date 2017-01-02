@@ -32,12 +32,14 @@
 
 "use strict";
 
-var Str = require("../../shared/es6/strlib");
-var Web = require("../../shared/es6/weblib");
-var Component = require("../../shared/es6/component");
-var PDP11 = require("./defines");
-var BusPDP11 = require("./bus");
-var MessagesPDP11 = require("./messages");
+if (NODE) {
+    var Str = require("../../shared/es6/strlib");
+    var Web = require("../../shared/es6/weblib");
+    var Component = require("../../shared/es6/component");
+    var PDP11 = require("./defines");
+    var BusPDP11 = require("./bus");
+    var MessagesPDP11 = require("./messages");
+}
 
 class PanelPDP11 extends Component {
     /**
@@ -1148,4 +1150,4 @@ PanelPDP11.UNIBUS_IOTABLE = {
  */
 Web.onInit(PanelPDP11.init);
 
-module.exports = PanelPDP11;
+if (NODE) module.exports = PanelPDP11;

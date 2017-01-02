@@ -32,14 +32,16 @@
 
 "use strict";
 
-var Str = require("../../shared/es6/strlib");
-var Web = require("../../shared/es6/weblib");
-var DumpAPI = require("../../shared/es6/dumpapi");
-var Component = require("../../shared/es6/component");
-var PDP11 = require("./defines");
-var BusPDP11 = require("./bus");
-var MemoryPDP11 = require("./memory");
-var MessagesPDP11 = require("./messages");
+if (NODE) {
+    var Str = require("../../shared/es6/strlib");
+    var Web = require("../../shared/es6/weblib");
+    var DumpAPI = require("../../shared/es6/dumpapi");
+    var Component = require("../../shared/es6/component");
+    var PDP11 = require("./defines");
+    var BusPDP11 = require("./bus");
+    var MemoryPDP11 = require("./memory");
+    var MessagesPDP11 = require("./messages");
+}
 
 class ROMPDP11 extends Component {
     /**
@@ -390,4 +392,4 @@ class ROMPDP11 extends Component {
  */
 Web.onInit(ROMPDP11.init);
 
-module.exports = ROMPDP11;
+if (NODE) module.exports = ROMPDP11;

@@ -32,9 +32,11 @@
 
 "use strict";
 
-var Component = require("../../shared/es6/component");
-var PDP11 = require("./defines");
-var MessagesPDP11 = require("./messages");
+if (NODE) {
+    var Component = require("../../shared/es6/component");
+    var PDP11 = require("./defines");
+    var MessagesPDP11 = require("./messages");
+}
 
 /**
  * @class DataView
@@ -1006,4 +1008,4 @@ var littleEndian = (TYPEDARRAYS? (function() {
     return new Uint16Array(buffer)[0] === 256;
 })() : false);
 
-module.exports = MemoryPDP11;
+if (NODE) module.exports = MemoryPDP11;

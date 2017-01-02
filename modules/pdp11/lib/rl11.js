@@ -28,14 +28,16 @@
 
 "use strict";
 
-var Str = require("../../shared/es6/strlib");
-var Web = require("../../shared/es6/weblib");
-var DiskAPI = require("../../shared/es6/diskapi");
-var Component = require("../../shared/es6/component");
-var State = require("../../shared/es6/state");
-var PDP11 = require("./defines");
-var MessagesPDP11 = require("./messages");
-var DiskPDP11 = require("./disk");
+if (NODE) {
+    var Str = require("../../shared/es6/strlib");
+    var Web = require("../../shared/es6/weblib");
+    var DiskAPI = require("../../shared/es6/diskapi");
+    var Component = require("../../shared/es6/component");
+    var State = require("../../shared/es6/state");
+    var PDP11 = require("./defines");
+    var MessagesPDP11 = require("./messages");
+    var DiskPDP11 = require("./disk");
+}
 
 class RL11 extends Component {
     /**
@@ -1385,4 +1387,4 @@ RL11.UNIBUS_IOTABLE = {
     [PDP11.UNIBUS.RLBE]:     /* 174410 */    [null, null, RL11.prototype.readRLBE,  RL11.prototype.writeRLBE,   "RLBE"]
 };
 
-module.exports = RL11;
+if (NODE) module.exports = RL11;

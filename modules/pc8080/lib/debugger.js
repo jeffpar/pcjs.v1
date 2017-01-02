@@ -28,18 +28,20 @@
 
 "use strict";
 
-var Str          = require("../../shared/es6/strlib");
-var Usr          = require("../../shared/es6/usrlib");
-var Web          = require("../../shared/es6/weblib");
-var Component    = require("../../shared/es6/component");
-var Debugger     = require("../../shared/es6/debugger");
-var Keys         = require("../../shared/es6/keys");
-var State        = require("../../shared/es6/state");
-var PC8080       = require("./defines");
-var CPUDef8080   = require("./cpudef");
-var CPU8080      = require("./cpu");
-var Memory8080   = require("./memory");
-var Messages8080 = require("./messages");
+if (NODE) {
+    var Str = require("../../shared/es6/strlib");
+    var Usr = require("../../shared/es6/usrlib");
+    var Web = require("../../shared/es6/weblib");
+    var Component = require("../../shared/es6/component");
+    var Debugger = require("../../shared/es6/debugger");
+    var Keys = require("../../shared/es6/keys");
+    var State = require("../../shared/es6/state");
+    var PC8080 = require("./defines");
+    var CPUDef8080 = require("./cpudef");
+    var CPU8080 = require("./cpu");
+    var Memory8080 = require("./memory");
+    var Messages8080 = require("./messages");
+}
 
 /**
  * Debugger8080 Address Object
@@ -4366,4 +4368,4 @@ if (DEBUGGER) {
 
 }   // endif DEBUGGER
 
-module.exports = Debugger8080;
+if (NODE) module.exports = Debugger8080;

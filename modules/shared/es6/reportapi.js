@@ -46,4 +46,4 @@ var ReportAPI = {
     }
 };
 
-module.exports = ReportAPI;
+if (NODE) module.exports = ReportAPI;

@@ -32,10 +32,12 @@
 
 "use strict";
 
-var Web = require("../../shared/es6/weblib");
-var Component = require("../../shared/es6/component");
-var PDP11 = require("./defines");
-var MessagesPDP11 = require("./messages");
+if (NODE) {
+    var Web = require("../../shared/es6/weblib");
+    var Component = require("../../shared/es6/component");
+    var PDP11 = require("./defines");
+    var MessagesPDP11 = require("./messages");
+}
 
 class KeyboardPDP11 extends Component {
     /**
@@ -108,4 +110,4 @@ KeyboardPDP11.MINPRESSTIME = 100;            // 100ms
  */
 Web.onInit(KeyboardPDP11.init);
 
-module.exports = KeyboardPDP11;
+if (NODE) module.exports = KeyboardPDP11;
