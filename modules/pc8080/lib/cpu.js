@@ -28,10 +28,12 @@
 
 "use strict";
 
-var Str          = require("../../shared/es6/strlib");
-var Usr          = require("../../shared/es6/usrlib");
-var Component    = require("../../shared/es6/component");
-var Messages8080 = require("./messages");
+if (NODE) {
+    var Str = require("../../shared/es6/strlib");
+    var Usr = require("../../shared/es6/usrlib");
+    var Component = require("../../shared/es6/component");
+    var Messages8080 = require("./messages");
+}
 
 /**
  * TODO: The Closure Compiler treats ES6 classes as 'struct' rather than 'dict' by default,
@@ -1247,4 +1249,4 @@ CPU8080.YIELDS_PER_STATUS       = 15;           // every 15 yields (ie, twice pe
 
 CPU8080.BUTTONS = ["power", "reset"];
 
-module.exports = CPU8080;
+if (NODE) module.exports = CPU8080;

@@ -28,12 +28,14 @@
 
 "use strict";
 
-var Str          = require("../../shared/es6/strlib");
-var Web          = require("../../shared/es6/weblib");
-var Component    = require("../../shared/es6/component");
-var State        = require("../../shared/es6/state");
-var PC8080       = require("./defines");
-var Messages8080 = require("./messages");
+if (NODE) {
+    var Str = require("../../shared/es6/strlib");
+    var Web = require("../../shared/es6/weblib");
+    var Component = require("../../shared/es6/component");
+    var State = require("../../shared/es6/state");
+    var PC8080 = require("./defines");
+    var Messages8080 = require("./messages");
+}
 
 /**
  * TODO: The Closure Compiler treats ES6 classes as 'struct' rather than 'dict' by default,
@@ -971,4 +973,4 @@ SerialPort8080.aPortOutput = {
  */
 Web.onInit(SerialPort8080.init);
 
-module.exports = SerialPort8080;
+if (NODE) module.exports = SerialPort8080;

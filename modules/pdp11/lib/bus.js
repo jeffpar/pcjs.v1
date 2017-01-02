@@ -32,13 +32,15 @@
 
 "use strict";
 
-var Str = require("../../shared/es6/strlib");
-var Usr = require("../../shared/es6/usrlib");
-var Component = require("../../shared/es6/component");
-var State = require("../../shared/es6/state");
-var PDP11 = require("./defines");
-var MemoryPDP11 = require("./memory");
-var MessagesPDP11 = require("./messages");
+if (NODE) {
+    var Str = require("../../shared/es6/strlib");
+    var Usr = require("../../shared/es6/usrlib");
+    var Component = require("../../shared/es6/component");
+    var State = require("../../shared/es6/state");
+    var PDP11 = require("./defines");
+    var MemoryPDP11 = require("./memory");
+    var MessagesPDP11 = require("./messages");
+}
 
 /*
  * Data types used by scanMemory()
@@ -1422,4 +1424,4 @@ BusPDP11.IOController = {
     }
 };
 
-module.exports = BusPDP11;
+if (NODE) module.exports = BusPDP11;

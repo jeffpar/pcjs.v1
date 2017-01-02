@@ -49,8 +49,10 @@
 
 "use strict";
 
-var Usr = require("../../shared/es6/usrlib");
-var Web = require("../../shared/es6/weblib");
+if (NODE) {
+    var Usr = require("../../shared/es6/usrlib");
+    var Web = require("../../shared/es6/weblib");
+}
 
 /**
  * Since the Closure Compiler treats ES6 classes as @struct rather than @dict by default,
@@ -1062,4 +1064,4 @@ if (!Function.prototype.bind) {
     };
 }
 
-module.exports = Component;
+if (NODE) module.exports = Component;

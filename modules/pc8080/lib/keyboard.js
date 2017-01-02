@@ -28,14 +28,16 @@
 
 "use strict";
 
-var Str          = require("../../shared/es6/strlib");
-var Web          = require("../../shared/es6/weblib");
-var Component    = require("../../shared/es6/component");
-var Keys         = require("../../shared/es6/keys");
-var State        = require("../../shared/es6/state");
-var PC8080       = require("./defines");
-var ChipSet8080  = require("./chipset");
-var Messages8080 = require("./messages");
+if (NODE) {
+    var Str = require("../../shared/es6/strlib");
+    var Web = require("../../shared/es6/weblib");
+    var Component = require("../../shared/es6/component");
+    var Keys = require("../../shared/es6/keys");
+    var State = require("../../shared/es6/state");
+    var PC8080 = require("./defines");
+    var ChipSet8080 = require("./chipset");
+    var Messages8080 = require("./messages");
+}
 
 /**
  * TODO: The Closure Compiler treats ES6 classes as 'struct' rather than 'dict' by default,
@@ -1134,4 +1136,4 @@ Keyboard8080.VT100.portsOutput = {
  */
 Web.onInit(Keyboard8080.init);
 
-module.exports = Keyboard8080;
+if (NODE) module.exports = Keyboard8080;

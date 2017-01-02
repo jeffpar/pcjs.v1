@@ -632,4 +632,4 @@ Str.TYPES = {
     ARRAY:      8
 };
 
-module.exports = Str;
+if (NODE) module.exports = Str;

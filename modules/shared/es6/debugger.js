@@ -28,8 +28,10 @@
 
 "use strict";
 
-var Str = require("../../shared/es6/strlib");
-var Component = require("../../shared/es6/component");
+if (NODE) {
+    var Str = require("../../shared/es6/strlib");
+    var Component = require("../../shared/es6/component");
+}
 
 /**
  * Debugger Address Object
@@ -699,4 +701,4 @@ if (DEBUGGER) {
 
 }   // endif DEBUGGER
 
-module.exports = Debugger;
+if (NODE) module.exports = Debugger;

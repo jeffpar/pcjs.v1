@@ -84,4 +84,4 @@ class Proc {
     }
 }
 
-module.exports = Proc;
+if (NODE) module.exports = Proc;

@@ -28,9 +28,11 @@
 
 "use strict";
 
-var Str = require("../../shared/es6/strlib");
-var Web = require("../../shared/es6/weblib");
-var Component = require("../../shared/es6/component");
+if (NODE) {
+    var Str = require("../../shared/es6/strlib");
+    var Web = require("../../shared/es6/weblib");
+    var Component = require("../../shared/es6/component");
+}
 
 /*
  * We now support asynchronous XML and XSL file loads; simply set fAsync (below) to true.

@@ -28,11 +28,13 @@
 
 "use strict";
 
-var fs = require("fs");
-var http = require("http");
-var path = require("path");
-var url = require("url");
-var Str = require("../../shared/es6/strlib");
+if (NODE) {
+    var fs = require("fs");
+    var http = require("http");
+    var path = require("path");
+    var url = require("url");
+    var Str = require("../../shared/es6/strlib");
+}
 
 class Net {
     /**
@@ -389,4 +391,4 @@ Net.REVEAL_PDFS     = "pdfs";
 Net.asPropagate     = [Net.GORT_COMMAND, "autostart"];
 Net.sServerRoot     = null;
 
-module.exports = Net;
+if (NODE) module.exports = Net;

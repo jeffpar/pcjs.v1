@@ -32,16 +32,18 @@
 
 "use strict";
 
-var Str = require("../../shared/es6/strlib");
-var Usr = require("../../shared/es6/usrlib");
-var Web = require("../../shared/es6/weblib");
-var UserAPI = require("../../shared/es6/userapi");
-var ReportAPI = require("../../shared/es6/reportapi");
-var Component = require("../../shared/es6/component");
-var State = require("../../shared/es6/state");
-var PDP11 = require("./defines");
-var BusPDP11 = require("./bus");
-var MessagesPDP11 = require("./messages");
+if (NODE) {
+    var Str = require("../../shared/es6/strlib");
+    var Usr = require("../../shared/es6/usrlib");
+    var Web = require("../../shared/es6/weblib");
+    var UserAPI = require("../../shared/es6/userapi");
+    var ReportAPI = require("../../shared/es6/reportapi");
+    var Component = require("../../shared/es6/component");
+    var State = require("../../shared/es6/state");
+    var PDP11 = require("./defines");
+    var BusPDP11 = require("./bus");
+    var MessagesPDP11 = require("./messages");
+}
 
 class ComputerPDP11 extends Component {
     /**
@@ -1632,4 +1634,4 @@ Web.onInit(ComputerPDP11.init);
 Web.onShow(ComputerPDP11.show);
 Web.onExit(ComputerPDP11.exit);
 
-module.exports = ComputerPDP11;
+if (NODE) module.exports = ComputerPDP11;

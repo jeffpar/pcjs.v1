@@ -28,14 +28,16 @@
 
 "use strict";
 
-var Str = require("../../shared/es6/strlib");
-var Web = require("../../shared/es6/weblib");
-var DiskAPI = require("../../shared/es6/diskapi");
-var Component = require("../../shared/es6/component");
-var State = require("../../shared/es6/state");
-var PDP11 = require("./defines");
-var MessagesPDP11 = require("./messages");
-var DiskPDP11 = require("./disk");
+if (NODE) {
+    var Str = require("../../shared/es6/strlib");
+    var Web = require("../../shared/es6/weblib");
+    var DiskAPI = require("../../shared/es6/diskapi");
+    var Component = require("../../shared/es6/component");
+    var State = require("../../shared/es6/state");
+    var PDP11 = require("./defines");
+    var MessagesPDP11 = require("./messages");
+    var DiskPDP11 = require("./disk");
+}
 
 class RK11 extends Component {
     /**
@@ -1437,4 +1439,4 @@ RK11.UNIBUS_IOTABLE = {
     [PDP11.UNIBUS.RKDB]:     /* 177416 */    [null, null, RK11.prototype.readRKDB,  RK11.prototype.writeRKDB,   "RKDB"]
 };
 
-module.exports = RK11;
+if (NODE) module.exports = RK11;

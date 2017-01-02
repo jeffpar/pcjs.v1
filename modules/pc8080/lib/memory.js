@@ -28,10 +28,12 @@
 
 "use strict";
 
-var Str          = require("../../shared/es6/strlib");
-var Component    = require("../../shared/es6/component");
-var CPUDef8080   = require("./cpudef");
-var Messages8080 = require("./messages");
+if (NODE) {
+    var Str = require("../../shared/es6/strlib");
+    var Component = require("../../shared/es6/component");
+    var CPUDef8080 = require("./cpudef");
+    var Messages8080 = require("./messages");
+}
 
 /**
  * @class DataView
@@ -915,4 +917,4 @@ if (TYPEDARRAYS) {
     ];
 }
 
-module.exports = Memory8080;
+if (NODE) module.exports = Memory8080;

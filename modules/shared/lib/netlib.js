@@ -38,7 +38,6 @@ if (NODE) {
     var http = require("http");
     var path = require("path");
     var url = require("url");
-    var str = require("./strlib");
 }
 
 /*
@@ -347,10 +346,6 @@ net.getResource = function(sURL, dataPost, fAsync, done)
         if (!sServerRoot) {
             sServerRoot = path.join(path.dirname(fs.realpathSync(__filename)), "../../../");
         }
-        /*
-         * TODO: Revisit why we pass back sBaseName instead of the original sURL....
-         */
-        var sBaseName = str.getBaseName(sURL);
         var sFile = path.join(sServerRoot, sURL);
         if (fAsync) {
             fs.readFile(sFile, {encoding: "utf8"}, function(err, s) {
@@ -361,7 +356,7 @@ net.getResource = function(sURL, dataPost, fAsync, done)
                     sResource = s;
                     nErrorCode = 0;
                 }
-                if (done) done(sBaseName, sResource, nErrorCode);
+                if (done) done(sURL, sResource, nErrorCode);
             });
         } else {
             try {
@@ -373,7 +368,7 @@ net.getResource = function(sURL, dataPost, fAsync, done)
                  */
                 console.log(err.message);
             }
-            if (done) done(sBaseName, sResource, nErrorCode);
+            if (done) done(sURL, sResource, nErrorCode);
             response = [sResource, nErrorCode];
         }
     }

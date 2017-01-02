@@ -32,10 +32,12 @@
 
 "use strict";
 
-var Str = require("../../shared/es6/strlib");
-var Usr = require("../../shared/es6/usrlib");
-var Component = require("../../shared/es6/component");
-var MessagesPDP11 = require("./messages");
+if (NODE) {
+    var Str = require("../../shared/es6/strlib");
+    var Usr = require("../../shared/es6/usrlib");
+    var Component = require("../../shared/es6/component");
+    var MessagesPDP11 = require("./messages");
+}
 
 /*
  * A word (or more) about PDP-11 speeds:
@@ -1246,4 +1248,4 @@ CPUPDP11.YIELDS_PER_STATUS      = 15;           // every 15 yields (ie, twice pe
 
 CPUPDP11.BUTTONS = ["power", "reset"];
 
-module.exports = CPUPDP11;
+if (NODE) module.exports = CPUPDP11;

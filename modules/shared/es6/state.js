@@ -392,4 +392,4 @@ class State {
     }
 }
 
-module.exports = State;
+if (NODE) module.exports = State;

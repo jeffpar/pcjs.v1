@@ -13,6 +13,7 @@ machines:
     type: pc8080
     config: /devices/pc8080/machine/vt100/machine.xml
     connection: serialPort->test1170.dl11
+    cling: top
 ---
 
 [PDPjs](/devices/pdp11/machine/) is the newest addition to the PCjs family of emulators, joining PCx86, PC8080, and C1Pjs.
