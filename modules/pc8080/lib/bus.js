@@ -28,12 +28,14 @@
 
 "use strict";
 
-var Str          = require("../../shared/es6/strlib");
-var Usr          = require("../../shared/es6/usrlib");
-var Component    = require("../../shared/es6/component");
-var State        = require("../../shared/es6/state");
-var Memory8080   = require("./memory");
-var Messages8080 = require("./messages");
+if (NODE) {
+    var Str = require("../../shared/es6/strlib");
+    var Usr = require("../../shared/es6/usrlib");
+    var Component = require("../../shared/es6/component");
+    var State = require("../../shared/es6/state");
+    var Memory8080 = require("./memory");
+    var Messages8080 = require("./messages");
+}
 
 /**
  * TODO: The Closure Compiler treats ES6 classes as 'struct' rather than 'dict' by default,
@@ -1057,4 +1059,4 @@ Bus8080.BlockInfo = Usr.defineBitFields({num:20, count:8, btmod:1, type:3});
  */
 var BusInfo8080;
 
-module.exports = Bus8080;
+if (NODE) module.exports = Bus8080;

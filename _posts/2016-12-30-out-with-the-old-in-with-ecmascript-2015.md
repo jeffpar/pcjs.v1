@@ -32,8 +32,6 @@ and tell it to convert the constructor to a class; for example:
 /**
  * BusPDP11(parmsBus, cpu, dbg)
  *
- *	...
- *
  * @constructor
  * @extends Component
  * @param {Object} parmsBus
@@ -52,8 +50,6 @@ would become:
 class BusPDP11 extends Component {
     /**
      * BusPDP11(parmsBus, cpu, dbg)
-     *
-     * 	...
      *
      * @param {Object} parmsBus
      * @param {CPUStatePDP11} cpu

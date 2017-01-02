@@ -28,16 +28,18 @@
 
 "use strict";
 
-var Str          = require("../../shared/es6/strlib");
-var Usr          = require("../../shared/es6/usrlib");
-var Web          = require("../../shared/es6/weblib");
-var UserAPI      = require("../../shared/es6/userapi");
-var ReportAPI    = require("../../shared/es6/reportapi");
-var Component    = require("../../shared/es6/component");
-var State        = require("../../shared/es6/state");
-var PC8080       = require("./defines");
-var Bus8080      = require("./bus");
-var Messages8080 = require("./messages");
+if (NODE) {
+    var Str = require("../../shared/es6/strlib");
+    var Usr = require("../../shared/es6/usrlib");
+    var Web = require("../../shared/es6/weblib");
+    var UserAPI = require("../../shared/es6/userapi");
+    var ReportAPI = require("../../shared/es6/reportapi");
+    var Component = require("../../shared/es6/component");
+    var State = require("../../shared/es6/state");
+    var PC8080 = require("./defines");
+    var Bus8080 = require("./bus");
+    var Messages8080 = require("./messages");
+}
 
 /**
  * TODO: The Closure Compiler treats ES6 classes as 'struct' rather than 'dict' by default,
@@ -1640,4 +1642,4 @@ Web.onInit(Computer8080.init);
 Web.onShow(Computer8080.show);
 Web.onExit(Computer8080.exit);
 
-module.exports = Computer8080;
+if (NODE) module.exports = Computer8080;

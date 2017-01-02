@@ -28,13 +28,15 @@
 
 "use strict";
 
-var Str = require("../../shared/es6/strlib");
-var Web = require("../../shared/es6/weblib");
-var DumpAPI = require("../../shared/es6/dumpapi");
-var Component = require("../../shared/es6/component");
-var State = require("../../shared/es6/state");
-var PDP11 = require("./defines");
-var MessagesPDP11 = require("./messages");
+if (NODE) {
+    var Str = require("../../shared/es6/strlib");
+    var Web = require("../../shared/es6/weblib");
+    var DumpAPI = require("../../shared/es6/dumpapi");
+    var Component = require("../../shared/es6/component");
+    var State = require("../../shared/es6/state");
+    var PDP11 = require("./defines");
+    var MessagesPDP11 = require("./messages");
+}
 
 class PC11 extends Component {
     /**
@@ -67,8 +69,8 @@ class PC11 extends Component {
         this.sDevice = "PTR";       // TODO: Make the device name configurable
 
         /*
-         * We record any 'autoMount' object now, but we no longer parse it until initBus(), because the
-         * Computer's getMachineParm() service may have an override for us.
+         * We preliminarily parse and record any 'autoMount' object now, but we no longer process it
+         * until initBus(), because the Computer's getMachineParm() service may have an override for us.
          */
         this.configMount = this.parseConfig(parms['autoMount']);
         this.cAutoMount = 0;
@@ -945,4 +947,4 @@ PC11.UNIBUS_IOTABLE = {
     [PDP11.UNIBUS.PRB]:     /* 177552 */    [null, null, PC11.prototype.readPRB,    PC11.prototype.writePRB,    "PRB"]
 };
 
-module.exports = PC11;
+if (NODE) module.exports = PC11;

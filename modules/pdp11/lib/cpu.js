@@ -32,10 +32,12 @@
 
 "use strict";
 
-var Str = require("../../shared/es6/strlib");
-var Usr = require("../../shared/es6/usrlib");
-var Component = require("../../shared/es6/component");
-var MessagesPDP11 = require("./messages");
+if (NODE) {
+    var Str = require("../../shared/es6/strlib");
+    var Usr = require("../../shared/es6/usrlib");
+    var Component = require("../../shared/es6/component");
+    var MessagesPDP11 = require("./messages");
+}
 
 /*
  * A word (or more) about PDP-11 speeds:
@@ -244,7 +246,7 @@ class CPUPDP11 extends Component {
         }
 
         if (!fRepower) {
-            if (!data || !this.restore) {
+            if (!data) {
                 this.reset();
             } else {
                 this.resetCycles();
@@ -291,12 +293,6 @@ class CPUPDP11 extends Component {
      */
     powerDown(fSave, fShutdown)
     {
-        /*
-         * The Computer component (which is responsible for all powerDown and powerUp notifications)
-         * is now responsible for managing a component's fPowered flag, not us.
-         *
-         *      this.flags.powered = false;
-         */
         return fSave? this.save() : true;
     }
 
@@ -1246,4 +1242,4 @@ CPUPDP11.YIELDS_PER_STATUS      = 15;           // every 15 yields (ie, twice pe
 
 CPUPDP11.BUTTONS = ["power", "reset"];
 
-module.exports = CPUPDP11;
+if (NODE) module.exports = CPUPDP11;

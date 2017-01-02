@@ -32,17 +32,19 @@
 
 "use strict";
 
-var Str = require("../../shared/es6/strlib");
-var Usr = require("../../shared/es6/usrlib");
-var Web = require("../../shared/es6/weblib");
-var Component = require("../../shared/es6/component");
-var Debugger = require("../../shared/es6/debugger");
-var Keys = require("../../shared/es6/keys");
-var State = require("../../shared/es6/state");
-var PDP11 = require("./defines");
-var BusPDP11 = require("./bus");
-var MemoryPDP11 = require("./memory");
-var MessagesPDP11 = require("./messages");
+if (NODE) {
+    var Str = require("../../shared/es6/strlib");
+    var Usr = require("../../shared/es6/usrlib");
+    var Web = require("../../shared/es6/weblib");
+    var Component = require("../../shared/es6/component");
+    var Debugger = require("../../shared/es6/debugger");
+    var Keys = require("../../shared/es6/keys");
+    var State = require("../../shared/es6/state");
+    var PDP11 = require("./defines");
+    var BusPDP11 = require("./bus");
+    var MemoryPDP11 = require("./memory");
+    var MessagesPDP11 = require("./messages");
+}
 
 /**
  * DebuggerPDP11 Address Object
@@ -301,10 +303,15 @@ class DebuggerPDP11 extends Debugger {
         /*
          * Re-initialize Debugger message support if necessary
          */
-        var sMessages = cmp.getMachineParm('messages');
+        var sMessages = /** @type {string|undefined} */ (cmp.getMachineParm('messages'));
         if (sMessages) this.messageInit(sMessages);
 
-        if (this.cpu.model < PDP11.MODEL_1145) this.aOpReserved = DebuggerPDP11.OP1145;
+        if (this.cpu.model < PDP11.MODEL_1140) {
+            this.aOpReserved = this.aOpReserved.concat(DebuggerPDP11.OP1140);
+        }
+        if (this.cpu.model < PDP11.MODEL_1145) {
+            this.aOpReserved = this.aOpReserved.concat(DebuggerPDP11.OP1145);
+        }
 
         this.messageDump(MessagesPDP11.BUS,  function onDumpBus(asArgs) { dbg.dumpBus(asArgs); });
 
@@ -4348,21 +4355,27 @@ if (DEBUGGER) {
     DebuggerPDP11.OPNONE = [DebuggerPDP11.OPS.NONE];
 
     /*
-     * Table of opcodes specific to the 11/45 and newer
+     * Table of opcodes added to the 11/40 and newer
      */
-    DebuggerPDP11.OP1145 = [
+    DebuggerPDP11.OP1140 = [
         DebuggerPDP11.OPS.MARK,
         DebuggerPDP11.OPS.MFPI,
         DebuggerPDP11.OPS.MTPI,
         DebuggerPDP11.OPS.SXT,
-        DebuggerPDP11.OPS.SPL,
         DebuggerPDP11.OPS.RTT,
         DebuggerPDP11.OPS.MUL,
         DebuggerPDP11.OPS.DIV,
         DebuggerPDP11.OPS.ASH,
         DebuggerPDP11.OPS.ASHC,
         DebuggerPDP11.OPS.XOR,
-        DebuggerPDP11.OPS.SOB,
+        DebuggerPDP11.OPS.SOB
+    ];
+
+    /*
+     * Table of opcodes added to the 11/45 and newer
+     */
+    DebuggerPDP11.OP1145 = [
+        DebuggerPDP11.OPS.SPL,
         DebuggerPDP11.OPS.MFPD,
         DebuggerPDP11.OPS.MTPD
     ];
@@ -4376,4 +4389,4 @@ if (DEBUGGER) {
 
 }   // endif DEBUGGER
 
-module.exports = DebuggerPDP11;
+if (NODE) module.exports = DebuggerPDP11;

@@ -2,13 +2,13 @@
 <?xml-stylesheet type="text/xsl" href="/versions/pdpjs/1.32.0/machine.xsl"?>
 <machine id="test1170" class="pdp11" border="1" pos="center" background="#FAEBD7">
 	<name pos="center">PDP-11/70 with 256Kb running CPU Exerciser</name>
-	<computer id="computer" busWidth="22"/>
+	<computer id="computer" busWidth="22" resume="1"/>
 	<cpu id="cpu" model="1170" cycles="6666667"/>
 	<ram id="ram" addr="0x00000" size="0x40000" file="/apps/pdp11/tapes/diags/MAINDEC-11-DEQKC-B1-PB.json"/>
 	<device id="default" type="default"/>
 	<serial id="dl11" adapter="0" binding="print"/>
 	<panel ref="/devices/pdp11/panel/1170/debugger/front.xml"/>
-	<debugger id="debugger" base="8" messages="rk11|pc11" commands='bp 033330 "bp 037772; bp 041734; bp 042164"'/>
+	<debugger id="debugger" base="8" messages="" commands=''/>
 	<device ref="/devices/pdp11/pc11/default.xml"/>
 	<device ref="/devices/pdp11/rk11/default.xml"/>
 	<device ref="/devices/pdp11/rl11/default.xml"/>

@@ -28,12 +28,14 @@
 
 "use strict";
 
-var Web        = require("../../shared/es6/weblib");
-var Component  = require("../../shared/es6/component");
-var PC8080     = require("./defines");
-var Bus8080    = require("./bus");
-var CPUDef8080 = require("./cpudef");
-var Memory8080 = require("./memory");
+if (NODE) {
+    var Web = require("../../shared/es6/weblib");
+    var Component = require("../../shared/es6/component");
+    var PC8080 = require("./defines");
+    var Bus8080 = require("./bus");
+    var CPUDef8080 = require("./cpudef");
+    var Memory8080 = require("./memory");
+}
 
 /**
  * TODO: The Closure Compiler treats ES6 classes as 'struct' rather than 'dict' by default,
@@ -181,4 +183,4 @@ class Panel8080 extends Component {
  */
 Web.onInit(Panel8080.init);
 
-module.exports = Panel8080;
+if (NODE) module.exports = Panel8080;

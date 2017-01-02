@@ -28,14 +28,16 @@
 
 "use strict";
 
-var Str        = require("../../shared/es6/strlib");
-var Web        = require("../../shared/es6/weblib");
-var DumpAPI    = require("../../shared/es6/dumpapi");
-var Component  = require("../../shared/es6/component");
-var State      = require("../../shared/es6/state");
-var PC8080     = require("./defines");
-var CPUDef8080 = require("./cpudef");
-var Memory8080 = require("./memory");
+if (NODE) {
+    var Str = require("../../shared/es6/strlib");
+    var Web = require("../../shared/es6/weblib");
+    var DumpAPI = require("../../shared/es6/dumpapi");
+    var Component = require("../../shared/es6/component");
+    var State = require("../../shared/es6/state");
+    var PC8080 = require("./defines");
+    var CPUDef8080 = require("./cpudef");
+    var Memory8080 = require("./memory");
+}
 
 /**
  * TODO: The Closure Compiler treats ES6 classes as 'struct' rather than 'dict' by default,
@@ -396,4 +398,4 @@ RAM8080.CPM.VECTORS = [RAM8080.CPM.BIOS.VECTOR, RAM8080.CPM.BDOS.VECTOR];
  */
 Web.onInit(RAM8080.init);
 
-module.exports = RAM8080;
+if (NODE) module.exports = RAM8080;

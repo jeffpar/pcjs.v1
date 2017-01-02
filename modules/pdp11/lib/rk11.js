@@ -28,14 +28,16 @@
 
 "use strict";
 
-var Str = require("../../shared/es6/strlib");
-var Web = require("../../shared/es6/weblib");
-var DiskAPI = require("../../shared/es6/diskapi");
-var Component = require("../../shared/es6/component");
-var State = require("../../shared/es6/state");
-var PDP11 = require("./defines");
-var MessagesPDP11 = require("./messages");
-var DiskPDP11 = require("./disk");
+if (NODE) {
+    var Str = require("../../shared/es6/strlib");
+    var Web = require("../../shared/es6/weblib");
+    var DiskAPI = require("../../shared/es6/diskapi");
+    var Component = require("../../shared/es6/component");
+    var State = require("../../shared/es6/state");
+    var PDP11 = require("./defines");
+    var MessagesPDP11 = require("./messages");
+    var DiskPDP11 = require("./disk");
+}
 
 class RK11 extends Component {
     /**
@@ -59,8 +61,8 @@ class RK11 extends Component {
         super("RK11", parms, RK11, MessagesPDP11.RK11);
 
         /*
-         * We record any 'autoMount' object now, but we no longer parse it until initBus(),
-         * because the Computer's getMachineParm() service may have an override for us.
+         * We preliminarily parse and record any 'autoMount' object now, but we no longer process it
+         * until initBus(), because the Computer's getMachineParm() service may have an override for us.
          */
         this.configMount = this.parseConfig(parms['autoMount']);
         this.cAutoMount = 0;
@@ -307,7 +309,7 @@ class RK11 extends Component {
          */
         this.initController();
 
-        this.irq = this.cpu.addIRQ(PDP11.RK11.VEC, PDP11.RK11.PRI, MessagesPDP11.RK11);
+        this.irq = this.cpu.addIRQ(RK11.VEC, RK11.PRI, MessagesPDP11.RK11);
 
         bus.addIOTable(this, RK11.UNIBUS_IOTABLE);
         bus.addResetHandler(this.reset.bind(this));
@@ -861,9 +863,9 @@ class RK11 extends Component {
     {
         var i = 0;
         if (!data) data = [];
-        this.regRKDS = data[i++] || (PDP11.RK11.RKDS.RK05 | PDP11.RK11.RKDS.SOK | PDP11.RK11.RKDS.RRDY);
+        this.regRKDS = data[i++] || (RK11.RKDS.RK05 | RK11.RKDS.SOK | RK11.RKDS.RRDY);
         this.regRKER = data[i++] || 0;
-        this.regRKCS = data[i++] || (PDP11.RK11.RKCS.CRDY);
+        this.regRKCS = data[i++] || (RK11.RKCS.CRDY);
         this.regRKWC = data[i++] || 0;
         this.regRKBA = data[i++] || 0;
         this.regRKDA = data[i++] || 0;
@@ -931,7 +933,7 @@ class RK11 extends Component {
 
         if (!drive.disk) drive.sDiskPath = "";  // ensure this is initialized to a default that displayDisk() can deal with
 
-        drive.status = PDP11.RK11.RKDS.RK05 | PDP11.RK11.RKDS.SOK | PDP11.RK11.RKDS.RRDY;
+        drive.status = RK11.RKDS.RK05 | RK11.RKDS.SOK | RK11.RKDS.RRDY;
 
         return fSuccess;
     }
@@ -945,73 +947,73 @@ class RK11 extends Component {
     {
         var fInterrupt = true;
         var fnReadWrite, func, sFunc = "";
-        var iDrive = (this.regRKDA & PDP11.RK11.RKDA.DS) >> PDP11.RK11.RKDA.SHIFT.DS;
+        var iDrive = (this.regRKDA & RK11.RKDA.DS) >> RK11.RKDA.SHIFT.DS;
         var drive = this.aDrives[iDrive];
         var iCylinder, iHead, iSector, nWords, addr, inc;
 
-        this.regRKCS &= ~(PDP11.RK11.RKCS.CRDY | PDP11.RK11.RKCS.SCP);
-        this.regRKER &= ~(PDP11.RK11.RKER.SE);
+        this.regRKCS &= ~(RK11.RKCS.CRDY | RK11.RKCS.SCP);
+        this.regRKER &= ~(RK11.RKER.SE);
 
-        switch(func = this.regRKCS & PDP11.RK11.RKCS.FUNC) {
+        switch(func = this.regRKCS & RK11.RKCS.FUNC) {
 
-        case PDP11.RK11.FUNC.CRESET:
+        case RK11.FUNC.CRESET:
             if (this.messageEnabled()) this.printMessage(this.type + ": CRESET(" + iDrive + ")", true);
             this.regRKER = this.regRKDA = 0;
-            this.regRKCS = PDP11.RK11.RKCS.CRDY;
+            this.regRKCS = RK11.RKCS.CRDY;
             break;
 
-        case PDP11.RK11.FUNC.RCHK:
+        case RK11.FUNC.RCHK:
             sFunc = "RCHK";
             /* falls through */
 
-        case PDP11.RK11.FUNC.READ:
+        case RK11.FUNC.READ:
             if (!sFunc) sFunc = "READ";
             fnReadWrite = this.readData;
             /* falls through */
 
-        case PDP11.RK11.FUNC.WCHK:
+        case RK11.FUNC.WCHK:
             if (!sFunc) sFunc = "WCHK";
             /* falls through */
 
-        case PDP11.RK11.FUNC.WRITE:
+        case RK11.FUNC.WRITE:
             if (!sFunc) sFunc = "WRITE";
             if (!fnReadWrite) fnReadWrite = this.writeData;
 
-            iCylinder = (this.regRKDA & PDP11.RK11.RKDA.CA) >> PDP11.RK11.RKDA.SHIFT.CA;
-            iHead = (this.regRKDA & PDP11.RK11.RKDA.HS) >> PDP11.RK11.RKDA.SHIFT.HS;
-            iSector = this.regRKDA & PDP11.RK11.RKDA.SA;
+            iCylinder = (this.regRKDA & RK11.RKDA.CA) >> RK11.RKDA.SHIFT.CA;
+            iHead = (this.regRKDA & RK11.RKDA.HS) >> RK11.RKDA.SHIFT.HS;
+            iSector = this.regRKDA & RK11.RKDA.SA;
             nWords = (0x10000 - this.regRKWC) & 0xffff;
-            addr = (((this.regRKCS & PDP11.RK11.RKCS.MEX)) << (16 - PDP11.RK11.RKCS.SHIFT.MEX)) | this.regRKBA;
-            inc = (this.regRKCS & PDP11.RK11.RKCS.IBA)? 0 : 2;
+            addr = (((this.regRKCS & RK11.RKCS.MEX)) << (16 - RK11.RKCS.SHIFT.MEX)) | this.regRKBA;
+            inc = (this.regRKCS & RK11.RKCS.IBA)? 0 : 2;
 
             if (this.messageEnabled()) this.printMessage(this.type + ": " + sFunc + "(" + iCylinder + ":" + iHead + ":" + iSector + ") " + Str.toOct(addr) + "--" + Str.toOct(addr + (nWords << 1)), true, true);
 
             if (iCylinder >= drive.nCylinders) {
-                this.regRKER |= PDP11.RK11.RKER.NXC;
+                this.regRKER |= RK11.RKER.NXC;
                 break;
             }
             if (iSector >= drive.nSectors) {
-                this.regRKER |= PDP11.RK11.RKER.NXS;
+                this.regRKER |= RK11.RKER.NXS;
                 break;
             }
 
-            fInterrupt = fnReadWrite.call(this, drive, iCylinder, iHead, iSector, nWords, addr, inc, (func >= PDP11.RK11.FUNC.WCHK), this.doneReadWrite.bind(this));
+            fInterrupt = fnReadWrite.call(this, drive, iCylinder, iHead, iSector, nWords, addr, inc, (func >= RK11.FUNC.WCHK), this.doneReadWrite.bind(this));
             break;
 
-        case PDP11.RK11.FUNC.SEEK:
-            iCylinder = (this.regRKDA & PDP11.RK11.RKDA.CA) >> PDP11.RK11.RKDA.SHIFT.CA;
+        case RK11.FUNC.SEEK:
+            iCylinder = (this.regRKDA & RK11.RKDA.CA) >> RK11.RKDA.SHIFT.CA;
             if (this.messageEnabled()) this.printMessage(this.type + ": SEEK(" + iCylinder + ")", true);
             if (iCylinder < drive.nCylinders) {
-                this.regRKCS |= PDP11.RK11.RKCS.SCP;
+                this.regRKCS |= RK11.RKCS.SCP;
             } else {
-                this.regRKER |= PDP11.RK11.RKER.NXC;
+                this.regRKER |= RK11.RKER.NXC;
             }
             break;
 
-        case PDP11.RK11.FUNC.DRESET:
+        case RK11.FUNC.DRESET:
             if (this.messageEnabled()) this.printMessage(this.type + ": DRESET(" + iDrive + ")");
             this.regRKER = this.regRKDA = 0;
-            this.regRKCS = PDP11.RK11.RKCS.CRDY | PDP11.RK11.RKCS.SCP;
+            this.regRKCS = RK11.RKCS.CRDY | RK11.RKCS.SCP;
             break;
 
         default:
@@ -1019,14 +1021,14 @@ class RK11 extends Component {
             break;
         }
 
-        this.regRKDS = drive.status | (drive.disk? PDP11.RK11.RKDS.DRDY : 0) | (iDrive << PDP11.RK11.RKDS.SHIFT.ID) | (this.regRKDA & PDP11.RK11.RKDS.SC);
+        this.regRKDS = drive.status | (drive.disk? RK11.RKDS.DRDY : 0) | (iDrive << RK11.RKDS.SHIFT.ID) | (this.regRKDA & RK11.RKDS.SC);
 
         this.updateErrors();
 
         if (fInterrupt) {
-            this.regRKCS &= ~PDP11.RK11.RKCS.GO;
-            this.regRKCS |= PDP11.RK11.RKCS.CRDY;
-            if (this.regRKCS & PDP11.RK11.RKCS.IE) this.cpu.setIRQ(this.irq);
+            this.regRKCS &= ~RK11.RKCS.GO;
+            this.regRKCS |= RK11.RKCS.CRDY;
+            if (this.regRKCS & RK11.RKCS.IE) this.cpu.setIRQ(this.irq);
         }
     }
 
@@ -1052,7 +1054,7 @@ class RK11 extends Component {
         var sector = null, ibSector;
 
         if (!disk) {
-            err = PDP11.RK11.RKER.NXD;
+            err = RK11.RKER.NXD;
             nWords = 0;
         }
 
@@ -1060,12 +1062,12 @@ class RK11 extends Component {
         while (nWords) {
             if (!sector) {
                 if (iCylinder >= disk.nCylinders) {
-                    err = PDP11.RK11.RKER.NXC;
+                    err = RK11.RKER.NXC;
                     break;
                 }
                 sector = disk.seek(iCylinder, iHead, iSector + 1);
                 if (!sector) {
-                    err = PDP11.RK11.RKER.SKE;
+                    err = RK11.RKER.SKE;
                     break;
                 }
                 ibSector = 0;
@@ -1079,7 +1081,7 @@ class RK11 extends Component {
             }
             var b0, b1;
             if ((b0 = disk.read(sector, ibSector++)) < 0 || (b1 = disk.read(sector, ibSector++)) < 0) {
-                err = PDP11.RK11.RKER.NXS;
+                err = RK11.RKER.NXS;
                 break;
             }
             if (!fCheck) {
@@ -1094,7 +1096,7 @@ class RK11 extends Component {
                     }
                 }
                 if (this.bus.checkFault()) {
-                    err = PDP11.RK11.RKER.NXM;
+                    err = RK11.RKER.NXM;
                     break;
                 }
             }
@@ -1127,24 +1129,24 @@ class RK11 extends Component {
         var sector = null, ibSector;
 
         if (!disk) {
-            err = PDP11.RK11.RKER.NXD;
+            err = RK11.RKER.NXD;
             nWords = 0;
         }
 
         while (nWords) {
             var data = this.bus.getWordDirect(this.cpu.mapUnibus(addr));
             if (this.bus.checkFault()) {
-                err = PDP11.RK11.RKER.NXM;
+                err = RK11.RKER.NXM;
                 break;
             }
             if (!sector) {
                 if (iCylinder >= disk.nCylinders) {
-                    err = PDP11.RK11.RKER.NXC;
+                    err = RK11.RKER.NXC;
                     break;
                 }
                 sector = disk.seek(iCylinder, iHead, iSector + 1, true);
                 if (!sector) {
-                    err = PDP11.RK11.RKER.SKE;
+                    err = RK11.RKER.SKE;
                     break;
                 }
                 ibSector = 0;
@@ -1159,7 +1161,7 @@ class RK11 extends Component {
             if (fCheck) {
                 var b0, b1;
                 if ((b0 = disk.read(sector, ibSector++)) < 0 || (b1 = disk.read(sector, ibSector++)) < 0) {
-                    err = PDP11.RK11.RKER.NXS;
+                    err = RK11.RKER.NXS;
                     break;
                 }
                 /*
@@ -1173,12 +1175,12 @@ class RK11 extends Component {
                  * trigger the RKCS HE (Hard Error) bit.  This is all taken care of in updateErrors() now.
                  */
                 if (data != (b0 | (b1 << 8))) {
-                    err = PDP11.RK11.RKER.WCE;
+                    err = RK11.RKER.WCE;
                     break;
                 }
             } else {
                 if (!disk.write(sector, ibSector++, data & 0xff) || !disk.write(sector, ibSector++, data >> 8)) {
-                    err = PDP11.RK11.RKER.NXS;
+                    err = RK11.RKER.NXS;
                     break;
                 }
             }
@@ -1204,9 +1206,9 @@ class RK11 extends Component {
     doneReadWrite(err, iCylinder, iHead, iSector, nWords, addr)
     {
         this.regRKBA = addr & 0xffff;
-        this.regRKCS = (this.regRKCS & ~PDP11.RK11.RKCS.MEX) | ((addr >> (16 - PDP11.RK11.RKCS.SHIFT.MEX)) & PDP11.RK11.RKCS.MEX);
+        this.regRKCS = (this.regRKCS & ~RK11.RKCS.MEX) | ((addr >> (16 - RK11.RKCS.SHIFT.MEX)) & RK11.RKCS.MEX);
         this.regRKWC = (0x10000 - nWords) & 0xffff;
-        this.regRKDA = (this.regRKDA & ~PDP11.RK11.RKDA.SA) | (iSector & PDP11.RK11.RKDA.SA);
+        this.regRKDA = (this.regRKDA & ~RK11.RKDA.SA) | (iSector & RK11.RKDA.SA);
         this.regRKER |= err;
         this.updateErrors();
         return true;
@@ -1231,11 +1233,11 @@ class RK11 extends Component {
          * much like the high error bit found in other hardware registers: we always set it if any lower error bits
          * are also set.
          */
-        this.regRKCS &= ~PDP11.RK11.RKCS.ERR;
+        this.regRKCS &= ~RK11.RKCS.ERR;
         if (this.regRKER) {
-            this.regRKER |= PDP11.RK11.RKER.DRE;
-            this.regRKCS |= PDP11.RK11.RKCS.ERR;
-            if (this.regRKER & PDP11.RK11.RKER.HE) this.regRKCS |= PDP11.RK11.RKCS.HE;
+            this.regRKER |= RK11.RKER.DRE;
+            this.regRKCS |= RK11.RKCS.ERR;
+            if (this.regRKER & RK11.RKER.HE) this.regRKCS |= RK11.RKCS.HE;
             if (this.messageEnabled()) this.printMessage(this.type + ": ERROR: " + Str.toOct(this.regRKER));
         }
     }
@@ -1301,7 +1303,7 @@ class RK11 extends Component {
      */
     readRKCS(addr)
     {
-        return this.regRKCS & PDP11.RK11.RKCS.RMASK;
+        return this.regRKCS & RK11.RKCS.RMASK;
     }
 
     /**
@@ -1313,9 +1315,9 @@ class RK11 extends Component {
      */
     writeRKCS(data, addr)
     {
-        this.regRKCS = (this.regRKCS & ~PDP11.RK11.RKCS.WMASK) | (data & PDP11.RK11.RKCS.WMASK);
+        this.regRKCS = (this.regRKCS & ~RK11.RKCS.WMASK) | (data & RK11.RKCS.WMASK);
 
-        if (this.regRKCS & PDP11.RK11.RKCS.GO) this.processCommand();
+        if (this.regRKCS & RK11.RKCS.GO) this.processCommand();
     }
 
     /**
@@ -1425,6 +1427,17 @@ RK11.SOURCE = {
 };
 
 /*
+ * Alias RK11 definitions as class constants
+ */
+RK11.PRI    =   PDP11.RK11.PRI;
+RK11.VEC    =   PDP11.RK11.VEC;
+RK11.RKDS   =   PDP11.RK11.RKDS;        // 177400: Drive Status Register
+RK11.RKER   =   PDP11.RK11.RKER;        // 177402: Error Register
+RK11.RKCS   =   PDP11.RK11.RKCS;        // 177404: Control Status Register
+RK11.RKDA   =   PDP11.RK11.RKDA;        // 177412: Disk Address Register
+RK11.FUNC   =   PDP11.RK11.FUNC;
+
+/*
  * ES6 ALERT: As you can see below, I've finally started using computed property names.
  */
 RK11.UNIBUS_IOTABLE = {
@@ -1437,4 +1450,4 @@ RK11.UNIBUS_IOTABLE = {
     [PDP11.UNIBUS.RKDB]:     /* 177416 */    [null, null, RK11.prototype.readRKDB,  RK11.prototype.writeRKDB,   "RKDB"]
 };
 
-module.exports = RK11;
+if (NODE) module.exports = RK11;

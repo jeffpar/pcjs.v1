@@ -45,12 +45,14 @@
  *  to further reduce some of the duplication between them, but the above functionality is a good start.
  */
 
-var Str = require("../../shared/es6/strlib");
-var Web = require("../../shared/es6/weblib");
-var DiskAPI = require("../../shared/es6/diskapi");
-var DumpAPI = require("../../shared/es6/dumpapi");
-var Component = require("../../shared/es6/component");
-var MessagesPDP11 = require("./messages");
+if (NODE) {
+    var Str = require("../../shared/es6/strlib");
+    var Web = require("../../shared/es6/weblib");
+    var DiskAPI = require("../../shared/es6/diskapi");
+    var DumpAPI = require("../../shared/es6/dumpapi");
+    var Component = require("../../shared/es6/component");
+    var MessagesPDP11 = require("./messages");
+}
 
 /**
  * Every Sector object (once loaded, parsed, and "normalized") should have ALL of the following named properties:
@@ -1238,4 +1240,4 @@ class DiskPDP11 extends Component {
  */
 DiskPDP11.nDisks = 0;
 
-module.exports = DiskPDP11;
+if (NODE) module.exports = DiskPDP11;

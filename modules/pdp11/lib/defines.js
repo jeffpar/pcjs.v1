@@ -131,8 +131,9 @@ var PDP11 = {
      * The 11/40 added the MODE bits to the PSW (but only KERNEL=00 and USER=11) and 18-bit
      * addressing via an MMU; there was still only one register set.
      *
-     * The 11/45 added REGSET bit to the PSW (along with the second register set), and added
-     * SUPERVISOR=01 to the set of modes.
+     * The 11/45 added REGSET bit to the PSW (to support a second register set), SUPER=01
+     * mode to the existing KERNEL=00 and USER=11 modes, separate I/D spaces, and other MMU
+     * extensions (eg, MMR1 and MMR3).
      *
      * The 11/70 added 22-bit addressing and corresponding extensions to the MMU.
      */
@@ -163,10 +164,10 @@ var PDP11 = {
      * Processor modes
      */
     MODE: {
-        KERNEL:     0x0,        // 11/40 and higher only
-        SUPER:      0x1,        // 11/45 and higher only
+        KERNEL:     0x0,        // 11/40 and higher
+        SUPER:      0x1,        // 11/45 and higher
         UNUSED:     0x2,
-        USER:       0x3,        // 11/40 and higher only
+        USER:       0x3,        // 11/40 and higher
         MASK:       0x3
     },
     /*
@@ -364,14 +365,14 @@ var PDP11 = {
     MMR0: {                     // 177572
         ENABLED:    0x0001,     // 000001 address relocation enabled
         PAGE_NUM:   0x000E,     // 000016 page number of last fault
-        PAGE_D:     0x0010,     // 000020 last fault occurred in D space (11/44 and 11/70 only)
+        PAGE_D:     0x0010,     // 000020 last fault occurred in D space (11/45 and 11/70)
         PAGE:       0x001E,     // 000176 (all of the PAGE bits)
         MODE:       0x0060,     // 000140 processor mode as of last fault
-        COMPLETED:  0x0080,     // 000200 last instruction completed (R/O) (11/70 only)
+        COMPLETED:  0x0080,     // 000200 last instruction completed (R/O) (11/70)
         MAINT:      0x0100,     // 000400 only destination mode references will be relocated
-        MMU_TRAPS:  0x0200,     // 001000 enable MMU traps (11/70 only)
+        MMU_TRAPS:  0x0200,     // 001000 enable MMU traps (11/70)
         UNUSED:     0x0C00,     // 006000
-        TRAP_MMU:   0x1000,     // 010000 trap: MMU (11/70 only)
+        TRAP_MMU:   0x1000,     // 010000 trap: MMU (11/70)
         ABORT_RO:   0x2000,     // 020000 abort: read-only
         ABORT_PL:   0x4000,     // 040000 abort: page length
         ABORT_NR:   0x8000,     // 100000 abort: non-resident
@@ -382,7 +383,7 @@ var PDP11 = {
             MODE:   5
         }
     },
-    MMR1: {                     // 177574: general purpose auto-inc/auto-dec register (11/44 and 11/70 only)
+    MMR1: {                     // 177574: general purpose auto-inc/auto-dec register (11/45 and 11/70)
         REG1_NUM:   0x0007,     //
         REG1_DELTA: 0x00F8,     //
         REG2_NUM:   0x0700,     //
@@ -390,7 +391,7 @@ var PDP11 = {
     },
     MMR2: {                     // 177576: virtual program counter register
     },
-    MMR3: {                     // 172516: mapping register (11/44 and 11/70 only)
+    MMR3: {                     // 172516: mapping register (11/45 and 11/70)
         USER_D:     0x0001,     // (000001)
         SUPER_D:    0x0002,     // (000002)
         KERNEL_D:   0x0004,     // (000004)
@@ -400,11 +401,11 @@ var PDP11 = {
     PDR: {
         ACF: {
             NR:     0x0,        // non-resident, abort all accesses
-            RO1:    0x1,        // read-only, abort on write attempt, memory management trap on read (11/70 only)
+            RO1:    0x1,        // read-only, abort on write attempt, memory management trap on read (11/70)
             RO:     0x2,        // read-only, abort on write attempt
             U1:     0x3,        // unused, abort all accesses--reserved for future use
             RW1:    0x4,        // read/write, memory management trap upon completion of a read or write
-            RW2:    0x5,        // read/write, memory management trap upon completion of a write (11/70 only)
+            RW2:    0x5,        // read/write, memory management trap upon completion of a write (11/70)
             RW:     0x6,        // read/write, no system trap/abort action
             U2:     0x7,        // unused, abort all accesses--reserved for future use
             MASK:   0x7
@@ -412,7 +413,7 @@ var PDP11 = {
         ED:         0x0008,     // expansion direction (if set, the page expands downward from block number 127)
         UNUSED:     0x0030,
         MODIFIED:   0x0040,     // page has been written (bit cleared when either PDR or PAR is written)
-        ACCESSED:   0x0080,     // page has been accessed (bit cleared when either PDR or PAR is written) (11/70 only)
+        ACCESSED:   0x0080,     // page has been accessed (bit cleared when either PDR or PAR is written) (11/70)
         PLF:        0x7F00,     // page length field
         BC:         0x8000      // bypass cache (11/44 only)
     },

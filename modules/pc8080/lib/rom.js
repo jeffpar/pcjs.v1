@@ -28,12 +28,14 @@
 
 "use strict";
 
-var Str        = require("../../shared/es6/strlib");
-var Web        = require("../../shared/es6/weblib");
-var DumpAPI    = require("../../shared/es6/dumpapi");
-var Component  = require("../../shared/es6/component");
-var PC8080     = require("./defines");
-var Memory8080 = require("./memory");
+if (NODE) {
+    var Str = require("../../shared/es6/strlib");
+    var Web = require("../../shared/es6/weblib");
+    var DumpAPI = require("../../shared/es6/dumpapi");
+    var Component = require("../../shared/es6/component");
+    var PC8080 = require("./defines");
+    var Memory8080 = require("./memory");
+}
 
 /**
  * TODO: The Closure Compiler treats ES6 classes as 'struct' rather than 'dict' by default,
@@ -377,4 +379,4 @@ class ROM8080 extends Component {
  */
 Web.onInit(ROM8080.init);
 
-module.exports = ROM8080;
+if (NODE) module.exports = ROM8080;
