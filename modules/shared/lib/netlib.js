@@ -341,7 +341,19 @@ net.getResource = function(sURL, dataPost, fAsync, done)
     var nErrorCode = -1, sResource = null, response = null;
 
     if (net.isRemote(sURL)) {
-        console.log('net.getResource("' + sURL + '"): unimplemented');
+        /*
+         * TODO: This code is nothing more than a band-aid.  It assumes the URL uses "http:"
+         * (hence the call to getFile(), which only supports HTTP GET operations), it assumes
+         * the requested data is UTF-8 string data (which is normally the case, because nearly
+         * all our requests are for JSON files), it doesn't deal with dataPost, it assumes
+         * that fAsync is true, and it performs very simplistic error code mapping.
+         *
+         * But, it gets the job done for what little we actually ask of it, when our machines
+         * are running in the Node environment.
+         */
+        Net.getFile(sURL, "utf8", function(err, status, data) {
+            if (done) done(sURL, data, err? status : 0);
+        });
     } else {
         if (!sServerRoot) {
             sServerRoot = path.join(path.dirname(fs.realpathSync(__filename)), "../../../");

@@ -28,8 +28,10 @@
 
 "use strict";
 
-var Web = require("../../shared/es6/weblib");
-var Component = require("../../shared/es6/component");
+if (NODE) {
+    var Web = require("../../shared/es6/weblib");
+    var Component = require("../../shared/es6/component");
+}
 
 class State {
     /**

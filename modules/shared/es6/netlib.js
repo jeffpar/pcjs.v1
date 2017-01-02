@@ -33,7 +33,6 @@ if (NODE) {
     var http = require("http");
     var path = require("path");
     var url = require("url");
-    var Str = require("../../shared/es6/strlib");
 }
 
 class Net {

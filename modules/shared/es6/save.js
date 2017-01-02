@@ -28,9 +28,11 @@
 
 "use strict";
 
-var Str = require("../../shared/es6/strlib");
-var Web = require("../../shared/es6/weblib");
-var Component = require("../../shared/es6/component");
+if (NODE) {
+    var Str = require("../../shared/es6/strlib");
+    var Web = require("../../shared/es6/weblib");
+    var Component = require("../../shared/es6/component");
+}
 
 /**
  * savePC(idMachine, sPCJSFile, callback)

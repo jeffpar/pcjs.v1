@@ -128,14 +128,14 @@ class ComputerPDP11 extends Component {
          */
         this.nBusWidth = +parmsComputer['busWidth'] || +parmsComputer['buswidth'];
 
-        this.resume = ComputerPDP11.RESUME_NONE;
+        this.sResumePath = this.sStatePath = null;
         this.sStateData = null;
         this.fStateData = false;            // remembers if sStateData was loaded
         this.fServerState = false;
+        this.stateComputer = this.stateFailSafe = null;
         this.fInitialized = this.fReload = this.fRestoreError = false;
-        this.stateFailSafe = null;
 
-        this.url = this.getMachineParm('url') || "";
+        this.url = /** @type {string} */ (this.getMachineParm('url') || "");
 
         /*
          * Generate a random number x (where 0 <= x < 1), add 0.1 so that it's guaranteed to be
@@ -145,7 +145,7 @@ class ComputerPDP11 extends Component {
         this.sUserID = this.queryUserID();
 
         /*
-         * Find the appropriate CPU (and Debugger and Control Panel, if any)
+         * Find the appropriate CPU (and Debugger and Control Panel, if any).
          *
          * CLOSURE COMPILER TIP: To override the type of a right-hand expression (as we need to do here,
          * where we know getComponentByType() will only return an CPUState object or null), wrap the expression
@@ -198,20 +198,7 @@ class ComputerPDP11 extends Component {
             if (component.initBus) component.initBus(this, this.bus, this.cpu, this.dbg);
         }
 
-        var sStatePath = null;
-        var sResume = parmsComputer['resume'];
-        if (sResume !== undefined) {
-            /*
-             * DEPRECATE: This goofiness is a holdover from when the 'resume' property was a string (either a
-             * single-digit string or a path); now it's always a number, so it never has a 'length' property and
-             * the call to parseInt() is unnecessary.
-             */
-            if (sResume.length > 1) {
-                sStatePath = this.sResumePath = sResume;
-            } else {
-                this.resume = parseInt(sResume, 10);
-            }
-        }
+        this.resume = /** @type {number} */ (this.getMachineParm('resume', parmsComputer, Str.TYPES.NUMBER, ComputerPDP11.RESUME_NONE));
 
         /*
          * The Computer 'state' property allows a state file to be specified independent of the 'resume' feature;
@@ -227,11 +214,11 @@ class ComputerPDP11 extends Component {
          * OVERRIDES everything; it overrides any 'state' Computer parameter AND it disables resume of any saved state in
          * localStorage (in other words, it prevents fAllowResume from being true, and forcing resume off).
          */
-        var fAllowResume;
+        var fAllowResume, sStatePath = null;
         var sState = this.getMachineParm('state') || (fAllowResume = true) && parmsComputer['state'];
 
         if (sState) {
-            sStatePath = this.sStatePath = sState;
+            this.sStatePath = sStatePath = sState;
             if (!fAllowResume) {
                 this.fServerState = true;
                 this.resume = ComputerPDP11.RESUME_NONE;
@@ -305,21 +292,26 @@ class ComputerPDP11 extends Component {
     }
 
     /**
-     * getMachineParm(sParm, parmsComponent, type)
+     * getMachineParm(sParm, parmsComponent, type, defaultValue)
      *
-     * If the machine parameter doesn't exist, we check for a matching component parameter (if parmsComponent is provided),
-     * and failing that, we check the bundled resources (if any).
+     * If the machine parameter doesn't exist, we check for a matching component parameter
+     * (if parmsComponent is provided), and failing that, we check the bundled resources (if any).
      *
-     * At the moment, the only bundled resource request we expect to encounter is 'state'; if it exists, then we return
-     * 'state' back to the caller (ie, the name of the resource), so that the caller will then attempt to load the 'state'
-     * resource to obtain the actual state.
+     * At the moment, the only bundled resource request we expect to encounter is 'state'; if it exists,
+     * then we return 'state' back to the caller (ie, the name of the resource), so that the caller will
+     * then attempt to load the 'state' resource to obtain the actual state.
+     *
+     * TODO: It would be nice if we could tell the Closure Compiler that when a specific type parameter
+     * (eg, Str.TYPES.NUMBER) is used, the return value will be that type; unfortunately, every caller
+     * must coerce their own return value.
      *
      * @param {string} sParm
      * @param {Object|null} [parmsComponent]
      * @param {number} [type] (from Str.TYPES)
-     * @return {string|undefined}
+     * @param {*} [defaultValue]
+     * @return {*}
      */
-    getMachineParm(sParm, parmsComponent, type)
+    getMachineParm(sParm, parmsComponent, type, defaultValue)
     {
         /*
          * When checking parmsURL, the check is allowed be a bit looser, because URL parameters are
@@ -329,20 +321,15 @@ class ComputerPDP11 extends Component {
          */
         var sParmLC = sParm.toLowerCase();
         var value = Web.getURLParm(sParm) || Web.getURLParm(sParmLC);
-
-        if (value === undefined && this.parmsMachine) {
-            value = this.parmsMachine[sParm];
-        }
-        if (value === undefined && parmsComponent) {
-            value = parmsComponent[sParm];
-        }
-        if (value === undefined && typeof resources == 'object' && resources[sParm]) {
-            value = sParm;
-        }
+        if (value === undefined && this.parmsMachine) value = this.parmsMachine[sParm];
+        if (value === undefined && parmsComponent) value = parmsComponent[sParm];
+        if (value === undefined && typeof resources == 'object' && resources[sParm]) value = sParm;
+        if (value === undefined) value = defaultValue;
         if (typeof value == "string" && type) {
             switch(type) {
             case Str.TYPES.NUMBER:
                 value = +value;
+                if (isNaN(/** @type {number} */(value))) value = defaultValue || 0;
                 break;
             case Str.TYPES.BOOLEAN:
                 value = (value == "true");
@@ -428,6 +415,7 @@ class ComputerPDP11 extends Component {
             }
         }
         if (DEBUG && this.messageEnabled()) this.printMessage("ComputerPDP11.wait(ready)");
+        //noinspection JSUnresolvedFunction
         fn.call(this, parms);
     }
 
@@ -615,11 +603,15 @@ class ComputerPDP11 extends Component {
     {
         if (!component.flags.powered) {
 
+            /*
+             * TODO: If all components called super.powerUp(), the powered flag would be set automatically.
+             */
+            this.assert(component.powerUp);
             component.flags.powered = true;
 
-            if (component.powerUp) {
+            var data = null;
 
-                var data = null;
+            try {
                 if (fRestore) {
                     data = stateComputer.get(component.id);
                     if (!data) {
@@ -692,13 +684,16 @@ class ComputerPDP11 extends Component {
                      */
                     fRestore = false;
                 }
-            }
 
-            if (!fRepower && component.comment) {
-                var asComments = component.comment.split("|");
-                for (var i = 0; i < asComments.length; i++) {
-                    component.status(asComments[i]);
+                if (!fRepower && component.comment) {
+                    var asComments = component.comment.split("|");
+                    for (var i = 0; i < asComments.length; i++) {
+                        component.status(asComments[i]);
+                    }
                 }
+            }
+            catch (err) {
+                Component.error("Error restoring state for " + component.type + " (" + err.message + ")");
             }
         }
         return fRestore;

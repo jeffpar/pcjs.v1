@@ -37,7 +37,11 @@ if (NODE) {
 }
 
 /*
- * Decoding starts at the bottom of this file, in op1120() and op1145().
+ * Decoding starts near the bottom of this file, in op1120() and op1140().  Obviously, there are
+ * MANY more PDP-11 models than the 11/20 and 11/40, but for the broad model categories that PDPjs
+ * supports (ie, MODEL_1120, MODEL_1140, MODEL_1145, and MODEL_1170), the biggest differences are
+ * between MODEL_1120 and MODEL_1140, so decoding is divided into those two categories, and all
+ * other differences are handled inside the opcode handlers.
  *
  * The basic decoding approach is to dispatch on the top 4 bits of the opcode, and if further
  * decoding is required, the dispatched function will dispatch on the next 4 bits, and so on
@@ -53,6 +57,11 @@ if (NODE) {
  * For example, opADD() passes the helper function fnADD() to the appropriate update method.  This
  * allows the update method to perform the entire read/modify/write operation, because the modify
  * step is performed internally, via the fnXXX() helper function.
+ *
+ * For the handful of instructions in the 1140 tables that actually exist only on the 11/45 and
+ * 11/70 (ie, MFPD, MTPD, and SPL), those opcode handlers perform their own model checks.  That's
+ * simpler than creating additional tables, and seems fine for instructions that are not commonly
+ * executed.
  */
 
 /**
@@ -1303,6 +1312,23 @@ PDP11.opMFPI = function(opCode)
 };
 
 /**
+ * opMFPS(opCode)
+ *
+ *      1067XX  MFPS - Move Byte From PSW
+ *
+ *      The 8-bit contents of the PS are moved to the effective destination.  If destination is mode 0,
+ *      PS bit 7 is sign extended through the upper byte of the register.  The destination operand is treated
+ *      as a byte address.  11/34A only.
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} opCode
+ */
+PDP11.opMFPS = function(opCode)
+{
+    PDP11.opUndefined.call(this, opCode);
+};
+
+/**
  * opMFPT(opCode)
  *
  *      000007  MFPT - Move From Processor Type
@@ -1321,10 +1347,7 @@ PDP11.opMFPI = function(opCode)
  */
 PDP11.opMFPT = function(opCode)
 {
-    /*
-     * TODO: Review
-     */
-    this.trap(PDP11.TRAP.RESERVED, 0, PDP11.REASON.OPCODE);
+    PDP11.opUndefined.call(this, opCode);
 };
 
 PDP11.MOV_CYCLES = [
@@ -1403,6 +1426,23 @@ PDP11.opMTPI = function(opCode)
     this.updateNZVFlags(data);
     this.writeWordToPrevSpace(opCode, PDP11.ACCESS.ISPACE, data);
     this.nStepCycles = this.nSnapCycles - PDP11.MTP_CYCLES[this.dstMode];
+};
+
+/**
+ * opMTPS(opCode)
+ *
+ *      1064XX  MTPS - Move Byte To PSW
+ *
+ *      The 8 bits of the effective operand replace the current contents of the PS <0:7>.  The source operand
+ *      address is treated as a byte address.  Note that PS bit 4 cannot be set with this instruction.  The
+ *      src operand remains unchanged.  11/34A only.
+ *
+ * @this {CPUStatePDP11}
+ * @param {number} opCode
+ */
+PDP11.opMTPS = function(opCode)
+{
+    PDP11.opUndefined.call(this, opCode);
 };
 
 /**
@@ -1588,6 +1628,7 @@ PDP11.opRTI = function(opCode)
 PDP11.opRTS = function(opCode)
 {
     if (opCode & 0x08) {
+        //noinspection JSUnresolvedFunction
         PDP11.opUndefined.call(this, opCode);
         return;
     }
@@ -1731,7 +1772,8 @@ PDP11.opSOB = function(opCode)
  */
 PDP11.opSPL = function(opCode)
 {
-    if (!(opCode & 0x08)) {
+    if (!(opCode & 0x08) || this.model < PDP11.MODEL_1145) {
+        //noinspection JSUnresolvedFunction
         PDP11.opUndefined.call(this, opCode);
         return;
     }
@@ -2219,103 +2261,108 @@ PDP11.aOp8CXn_1120 = [
 ];
 
 /**
- * op1145(opCode)
+ * op1140(opCode)
  *
  * @this {CPUStatePDP11}
  * @param {number} opCode
  */
-PDP11.op1145 = function(opCode)
+PDP11.op1140 = function(opCode)
 {
-    PDP11.aOpXnnn_1145[opCode >> 12].call(this, opCode);
+    PDP11.aOpXnnn_1140[opCode >> 12].call(this, opCode);
 };
 
 /**
- * op0Xnn_1145(opCode)
+ * op0Xnn_1140(opCode)
  *
  * @this {CPUStatePDP11}
  * @param {number} opCode
  */
-PDP11.op0Xnn_1145 = function(opCode)
+PDP11.op0Xnn_1140 = function(opCode)
 {
-    PDP11.aOp0Xnn_1145[(opCode >> 8) & 0xf].call(this, opCode);
+    PDP11.aOp0Xnn_1140[(opCode >> 8) & 0xf].call(this, opCode);
 };
 
 /**
- * op0DXn_1145(opCode)
+ * op0DXn_1140(opCode)
  *
  * @this {CPUStatePDP11}
  * @param {number} opCode
  */
-PDP11.op0DXn_1145 = function(opCode)
+PDP11.op0DXn_1140 = function(opCode)
 {
-    PDP11.aOp0DXn_1145[(opCode >> 6) & 0x3].call(this, opCode);
+    PDP11.aOp0DXn_1140[(opCode >> 6) & 0x3].call(this, opCode);
 };
 
 /**
- * op00Xn_1145(opCode)
+ * op00Xn_1140(opCode)
  *
  * @this {CPUStatePDP11}
  * @param {number} opCode
  */
-PDP11.op00Xn_1145 = function(opCode)
+PDP11.op00Xn_1140 = function(opCode)
 {
-    PDP11.aOp00Xn_1145[(opCode >> 4) & 0xf].call(this, opCode);
+    PDP11.aOp00Xn_1140[(opCode >> 4) & 0xf].call(this, opCode);
 };
 
 /**
- * op000X_1145(opCode)
+ * op000X_1140(opCode)
  *
  * @this {CPUStatePDP11}
  * @param {number} opCode
  */
-PDP11.op000X_1145 = function(opCode)
+PDP11.op000X_1140 = function(opCode)
 {
-    PDP11.aOp000X_1145[opCode & 0xf].call(this, opCode);
+    PDP11.aOp000X_1140[opCode & 0xf].call(this, opCode);
 };
 
 /**
- * op7Xnn_1145(opCode)
+ * op7Xnn_1140(opCode)
  *
  * @this {CPUStatePDP11}
  * @param {number} opCode
  */
-PDP11.op7Xnn_1145 = function(opCode)
+PDP11.op7Xnn_1140 = function(opCode)
 {
-    PDP11.aOp7Xnn_1145[(opCode >> 8) & 0xf].call(this, opCode);
+    PDP11.aOp7Xnn_1140[(opCode >> 8) & 0xf].call(this, opCode);
 };
 
 /**
- * op8Xnn_1145(opCode)
+ * op8Xnn_1140(opCode)
  *
  * @this {CPUStatePDP11}
  * @param {number} opCode
  */
-PDP11.op8Xnn_1145 = function(opCode)
+PDP11.op8Xnn_1140 = function(opCode)
 {
-    PDP11.aOp8Xnn_1145[(opCode >> 8) & 0xf].call(this, opCode);
+    PDP11.aOp8Xnn_1140[(opCode >> 8) & 0xf].call(this, opCode);
 };
 
 /**
- * op8DXn_1145(opCode)
+ * op8DXn_1140(opCode)
  *
  * @this {CPUStatePDP11}
  * @param {number} opCode
  */
-PDP11.op8DXn_1145 = function(opCode)
+PDP11.op8DXn_1140 = function(opCode)
 {
-    PDP11.aOp8DXn_1145[(opCode >> 6) & 0x3].call(this, opCode);
+    if (this.model < PDP11.MODEL_1145) {
+        //noinspection JSUnresolvedFunction
+        PDP11.opUndefined.call(this, opCode);
+        return;
+    }
+    PDP11.aOp8DXn_1140[(opCode >> 6) & 0x3].call(this, opCode);
 };
 
-PDP11.aOpXnnn_1145 = [
-    PDP11.op0Xnn_1145,          // 0x0nnn
+PDP11.aOpXnnn_1140 = [
+    PDP11.op0Xnn_1140,          // 0x0nnn
     PDP11.opMOV,                // 0x1nnn   01SSDD          11/20+  2.3
     PDP11.opCMP,                // 0x2nnn   02SSDD          11/20+  2.3*
     PDP11.opBIT,                // 0x3nnn   03SSDD          11/20+  2.9*
     PDP11.opBIC,                // 0x4nnn   04SSDD          11/20+  2.9
     PDP11.opBIS,                // 0x5nnn   05SSDD          11/20+  2.3
     PDP11.opADD,                // 0x6nnn   06SSDD          11/20+  2.3
-    PDP11.op7Xnn_1145,          // 0x7nnn
-    PDP11.op8Xnn_1145,          // 0x8nnn
+    PDP11.op7Xnn_1140,          // 0x7nnn
+    PDP11.op8Xnn_1140,          // 0x8nnn
     PDP11.opMOVB,               // 0x9nnn   11SSDD          11/20+  2.3
     PDP11.opCMPB,               // 0xAnnn   12SSDD          11/20+  2.3
     PDP11.opBITB,               // 0xBnnn   13SSDD          11/20+  2.9
@@ -2325,8 +2372,8 @@ PDP11.aOpXnnn_1145 = [
     PDP11.opUndefined           // 0xFnnn
 ];
 
-PDP11.aOp0Xnn_1145 = [
-    PDP11.op00Xn_1145,          // 0x00nn
+PDP11.aOp0Xnn_1140 = [
+    PDP11.op00Xn_1140,          // 0x00nn
     PDP11.opBR,                 // 0x01nn   0004XX          11/20+  2.6
     PDP11.opBNE,                // 0x02nn   0010XX          11/20+  2.6**
     PDP11.opBEQ,                // 0x03nn   0014XX          11/20+  2.6**
@@ -2339,20 +2386,20 @@ PDP11.aOp0Xnn_1145 = [
     PDP11.op0AXn_1120,          // 0x0Ann
     PDP11.op0BXn_1120,          // 0x0Bnn
     PDP11.op0CXn_1120,          // 0x0Cnn
-    PDP11.op0DXn_1145,          // 0x0Dnn
+    PDP11.op0DXn_1140,          // 0x0Dnn
     PDP11.opUndefined,          // 0x0Enn
     PDP11.opUndefined           // 0x0Fnn
 ];
 
-PDP11.aOp0DXn_1145 = [
-    PDP11.opMARK,               // 0x0D0n                   11/45+
-    PDP11.opMFPI,               // 0x0D4n                   11/45+
-    PDP11.opMTPI,               // 0x0D8n                   11/45+
-    PDP11.opSXT                 // 0x0DCn                   11/45+
+PDP11.aOp0DXn_1140 = [
+    PDP11.opMARK,               // 0x0D0n                   11/40+          LEIS
+    PDP11.opMFPI,               // 0x0D4n                   11/40+
+    PDP11.opMTPI,               // 0x0D8n                   11/40+
+    PDP11.opSXT                 // 0x0DCn                   11/40+          LEIS
 ];
 
-PDP11.aOp00Xn_1145 = [
-    PDP11.op000X_1145,          // 0x000n   000000-000017
+PDP11.aOp00Xn_1140 = [
+    PDP11.op000X_1140,          // 0x000n   000000-000017
     PDP11.opUndefined,          // 0x001n   000020-000037
     PDP11.opUndefined,          // 0x002n   000040-000057
     PDP11.opUndefined,          // 0x003n   000060-000077
@@ -2370,15 +2417,15 @@ PDP11.aOp00Xn_1145 = [
     PDP11.opSWAB                // 0x00Fn   0003DD          11/20+  2.3
 ];
 
-PDP11.aOp000X_1145 = [
+PDP11.aOp000X_1140 = [
     PDP11.opHALT,               // 0x0000   000000          11/20+  1.8
     PDP11.opWAIT,               // 0x0001   000001          11/20+  1.8
     PDP11.opRTI,                // 0x0002   000002          11/20+  4.8
     PDP11.opBPT,                // 0x0003   000003
     PDP11.opIOT,                // 0x0004   000004          11/20+  9.3
     PDP11.opRESET,              // 0x0005   000005          11/20+  20ms
-    PDP11.opRTT,                // 0x0006   000006          11/45+
-    PDP11.opMFPT,               // 0x0007   000007          TBD
+    PDP11.opRTT,                // 0x0006   000006          11/40+          LEIS
+    PDP11.opMFPT,               // 0x0007   000007          11/44+
     PDP11.opUndefined,          // 0x0008
     PDP11.opUndefined,          // 0x0009
     PDP11.opUndefined,          // 0x000A
@@ -2389,26 +2436,26 @@ PDP11.aOp000X_1145 = [
     PDP11.opUndefined           // 0x000F
 ];
 
-PDP11.aOp7Xnn_1145 = [
-    PDP11.opMUL,                // 0x70nn                   11/45+
-    PDP11.opMUL,                // 0x71nn                   11/45+
-    PDP11.opDIV,                // 0x72nn                   11/45+
-    PDP11.opDIV,                // 0x73nn                   11/45+
-    PDP11.opASH,                // 0x74nn                   11/45+
-    PDP11.opASH,                // 0x75nn                   11/45+
-    PDP11.opASHC,               // 0x76nn                   11/45+
-    PDP11.opASHC,               // 0x77nn                   11/45+
-    PDP11.opXOR,                // 0x78nn                   11/45+
-    PDP11.opXOR,                // 0x79nn                   11/45+
+PDP11.aOp7Xnn_1140 = [
+    PDP11.opMUL,                // 0x70nn                   11/40+          EIS
+    PDP11.opMUL,                // 0x71nn                   11/40+          EIS
+    PDP11.opDIV,                // 0x72nn                   11/40+          EIS
+    PDP11.opDIV,                // 0x73nn                   11/40+          EIS
+    PDP11.opASH,                // 0x74nn                   11/40+          EIS
+    PDP11.opASH,                // 0x75nn                   11/40+          EIS
+    PDP11.opASHC,               // 0x76nn                   11/40+          EIS
+    PDP11.opASHC,               // 0x77nn                   11/40+          EIS
+    PDP11.opXOR,                // 0x78nn                   11/40+          LEIS
+    PDP11.opXOR,                // 0x79nn                   11/40+          LEIS
     PDP11.opUndefined,          // 0x7Ann
     PDP11.opUndefined,          // 0x7Bnn
     PDP11.opUndefined,          // 0x7Cnn
     PDP11.opUndefined,          // 0x7Dnn
-    PDP11.opSOB,                // 0x7Enn                   11/45+
-    PDP11.opSOB                 // 0x7Fnn                   11/45+
+    PDP11.opSOB,                // 0x7Enn                   11/40+          LEIS
+    PDP11.opSOB                 // 0x7Fnn                   11/40+          LEIS
 ];
 
-PDP11.aOp8Xnn_1145 = [
+PDP11.aOp8Xnn_1140 = [
     PDP11.opBPL,                // 0x80nn   1000XX          11/20+  2.6**
     PDP11.opBMI,                // 0x81nn   1004XX          11/20+  2.6**
     PDP11.opBHI,                // 0x82nn   1010XX          11/20+  2.6**
@@ -2419,17 +2466,17 @@ PDP11.aOp8Xnn_1145 = [
     PDP11.opBCS,                // 0x87nn   1034XX          11/20+  2.6**
     PDP11.opEMT,                // 0x88nn   104000-104377   11/20+  9.3
     PDP11.opTRAP,               // 0x89nn   104400-104777   11/20+  9.3
-    PDP11.op8AXn_1120,          // 0x8Ann
-    PDP11.op8BXn_1120,          // 0x8Bnn
-    PDP11.op8CXn_1120,          // 0x8Cnn
-    PDP11.op8DXn_1145,          // 0x8Dnn
-    PDP11.opUndefined,          // 0x8Enn
-    PDP11.opUndefined           // 0x8Fnn
+    PDP11.op8AXn_1120,          // 0x8Ann   1050XX
+    PDP11.op8BXn_1120,          // 0x8Bnn   1054XX
+    PDP11.op8CXn_1120,          // 0x8Cnn   1060XX
+    PDP11.op8DXn_1140,          // 0x8Dnn   106400-106777
+    PDP11.opUndefined,          // 0x8Enn   1070XX
+    PDP11.opUndefined           // 0x8Fnn   1074XX
 ];
 
-PDP11.aOp8DXn_1145 = [
-    PDP11.opUndefined,          // 0x8D0n
-    PDP11.opMFPD,               // 0x8D4n                   11/45+
-    PDP11.opMTPD,               // 0x8D8n                   11/45+
-    PDP11.opUndefined           // 0x8DCn
+PDP11.aOp8DXn_1140 = [
+    PDP11.opMTPS,               // 0x8D0n   1064XX          11/34A only
+    PDP11.opMFPD,               // 0x8D4n   1065XX          11/45+
+    PDP11.opMTPD,               // 0x8D8n   1066XX          11/45+
+    PDP11.opMFPS                // 0x8DCn   1067XX          11/34A only
 ];
