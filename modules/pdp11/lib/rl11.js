@@ -309,7 +309,7 @@ class RL11 extends Component {
          */
         this.initController();
 
-        this.irq = this.cpu.addIRQ(PDP11.RL11.VEC, PDP11.RL11.PRI, MessagesPDP11.RL11);
+        this.irq = this.cpu.addIRQ(RL11.VEC, RL11.PRI, MessagesPDP11.RL11);
 
         bus.addIOTable(this, RL11.UNIBUS_IOTABLE);
         bus.addResetHandler(this.reset.bind(this));
@@ -861,7 +861,7 @@ class RL11 extends Component {
     {
         var i = 0;
         if (!data) data = [];
-        this.regRLCS = data[i++] || (PDP11.RL11.RLCS.DRDY | PDP11.RL11.RLCS.CRDY);
+        this.regRLCS = data[i++] || (RL11.RLCS.DRDY | RL11.RLCS.CRDY);
         this.regRLBA = data[i++] || 0;
         this.regRLDA = data[i++] || 0;
         this.tmpRLDA = data[i++] || 0;
@@ -933,7 +933,7 @@ class RL11 extends Component {
         /*
          * Default drive status bits returned via the controller's Get Status command via the RLMP register
          */
-        drive.status = PDP11.RL11.RLMP.GS_ST.LOCKON | PDP11.RL11.RLMP.GS_BH | PDP11.RL11.RLMP.GS_HO;
+        drive.status = RL11.RLMP.GS_ST.LOCKON | RL11.RLMP.GS_BH | RL11.RLMP.GS_HO;
 
         return fSuccess;
     }
@@ -947,7 +947,7 @@ class RL11 extends Component {
     {
         var fInterrupt = true;
         var fnReadWrite, sFunc = "";
-        var iDrive = (this.regRLCS & PDP11.RL11.RLCS.DS) >> PDP11.RL11.RLCS.SHIFT.DS;
+        var iDrive = (this.regRLCS & RL11.RLCS.DS) >> RL11.RLCS.SHIFT.DS;
         var drive = this.aDrives[iDrive];
         var disk = drive.disk;
         var iCylinder, iHead, iSector, nWords, addr;
@@ -959,62 +959,62 @@ class RL11 extends Component {
          *  2) CRDY is cleared to process a command
          *  3) DRDY is cleared to indicate a command in process
          */
-        this.regRLCS &= ~PDP11.RL11.RLCS.DRDY;
+        this.regRLCS &= ~RL11.RLCS.DRDY;
 
-        switch(this.regRLCS & PDP11.RL11.RLCS.FUNC) {
+        switch(this.regRLCS & RL11.RLCS.FUNC) {
 
-        case PDP11.RL11.FUNC.NOP:
-        case PDP11.RL11.FUNC.WCHK:
-        case PDP11.RL11.FUNC.RDNC:
+        case RL11.FUNC.NOP:
+        case RL11.FUNC.WCHK:
+        case RL11.FUNC.RDNC:
             break;
 
-        case PDP11.RL11.FUNC.STATUS:
-            if (this.regRLMP & PDP11.RL11.RLMP.GS_BH) {
-                this.regRLCS &= (PDP11.RL11.RLCS.DRDY | PDP11.RL11.RLCS.FUNC | PDP11.RL11.RLCS.BAE);    // TODO: Review
+        case RL11.FUNC.STATUS:
+            if (this.regRLMP & RL11.RLMP.GS_BH) {
+                this.regRLCS &= (RL11.RLCS.DRDY | RL11.RLCS.FUNC | RL11.RLCS.BAE);    // TODO: Review
             }
             /*
              * The bit indicating whether or not the disk contains 256 or 512 cylinders is critical;
              * for example, the first RSTS/E disk image we tried was an RL01K, which has only 256 cylinders,
              * and the operating system would crash mysteriously if we didn't report the correct geometry.
              */
-            this.regRLMP = drive.status | (this.tmpRLDA & PDP11.RL11.RLDA.RW_HS) | (disk && disk.nCylinders == 512? PDP11.RL11.RLMP.GS_DT : 0);
+            this.regRLMP = drive.status | (this.tmpRLDA & RL11.RLDA.RW_HS) | (disk && disk.nCylinders == 512? RL11.RLMP.GS_DT : 0);
             break;
 
-        case PDP11.RL11.FUNC.SEEK:
-            if ((this.regRLDA & PDP11.RL11.RLDA.GS_CMD) == PDP11.RL11.RLDA.SEEK_CMD) {
-                var darCA = (this.regRLDA & PDP11.RL11.RLDA.RW_CA);
-                var darHS = (this.regRLDA & PDP11.RL11.RLDA.SEEK_HS) << 2;
-                if (this.regRLDA & PDP11.RL11.RLDA.SEEK_DIR) {
+        case RL11.FUNC.SEEK:
+            if ((this.regRLDA & RL11.RLDA.GS_CMD) == RL11.RLDA.SEEK_CMD) {
+                var darCA = (this.regRLDA & RL11.RLDA.RW_CA);
+                var darHS = (this.regRLDA & RL11.RLDA.SEEK_HS) << 2;
+                if (this.regRLDA & RL11.RLDA.SEEK_DIR) {
                     this.tmpRLDA += darCA;
                 } else {
                     this.tmpRLDA -= darCA;
                 }
-                this.regRLDA = this.tmpRLDA = (this.tmpRLDA & PDP11.RL11.RLDA.RW_CA) | darHS;
+                this.regRLDA = this.tmpRLDA = (this.tmpRLDA & RL11.RLDA.RW_CA) | darHS;
             }
             break;
 
-        case PDP11.RL11.FUNC.RHDR:
+        case RL11.FUNC.RHDR:
             this.regRLMP = this.tmpRLDA;
             break;
 
-        case PDP11.RL11.FUNC.RDATA:
+        case RL11.FUNC.RDATA:
             sFunc = "READ";
             fnReadWrite = this.readData;
             /* falls through */
 
-        case PDP11.RL11.FUNC.WDATA:
+        case RL11.FUNC.WDATA:
             if (!sFunc) sFunc = "WRITE";
             if (!fnReadWrite) fnReadWrite = this.writeData;
 
-            iCylinder = this.regRLDA >> PDP11.RL11.RLDA.SHIFT.RW_CA;
-            iHead = (this.regRLDA & PDP11.RL11.RLDA.RW_HS)? 1 : 0;
-            iSector = this.regRLDA & PDP11.RL11.RLDA.RW_SA;
+            iCylinder = this.regRLDA >> RL11.RLDA.SHIFT.RW_CA;
+            iHead = (this.regRLDA & RL11.RLDA.RW_HS)? 1 : 0;
+            iSector = this.regRLDA & RL11.RLDA.RW_SA;
             if (!disk || iCylinder >= disk.nCylinders || iSector >= disk.nSectors) {
-                this.regRLCS |= PDP11.RL11.ERRC.HNF | PDP11.RL11.RLCS.ERR;
+                this.regRLCS |= RL11.ERRC.HNF | RL11.RLCS.ERR;
                 break;
             }
             nWords = (0x10000 - this.regRLMP) & 0xffff;
-            addr = (((this.regRLBE & PDP11.RL11.RLBE.MASK)) << 16) | this.regRLBA;   // 22 bit mode
+            addr = (((this.regRLBE & RL11.RLBE.MASK)) << 16) | this.regRLBA;   // 22 bit mode
 
             if (this.messageEnabled()) this.printMessage(this.type + ": " + sFunc + "(" + iCylinder + ":" + iHead + ":" + iSector + ") " + Str.toOct(addr) + "--" + Str.toOct(addr + (nWords << 1)), true, true);
 
@@ -1026,8 +1026,8 @@ class RL11 extends Component {
         }
 
         if (fInterrupt) {
-            this.regRLCS |= PDP11.RL11.RLCS.DRDY | PDP11.RL11.RLCS.CRDY;
-            if (this.regRLCS & PDP11.RL11.RLCS.IE) this.cpu.setIRQ(this.irq);
+            this.regRLCS |= RL11.RLCS.DRDY | RL11.RLCS.CRDY;
+            if (this.regRLCS & RL11.RLCS.IE) this.cpu.setIRQ(this.irq);
         }
     }
 
@@ -1052,7 +1052,7 @@ class RL11 extends Component {
         var sector = null, ibSector;
 
         if (!disk) {
-            err = PDP11.RL11.ERRC.HNF;      // TODO: Review
+            err = RL11.ERRC.HNF;      // TODO: Review
             nWords = 0;
         }
 
@@ -1061,14 +1061,14 @@ class RL11 extends Component {
             if (!sector) {
                 sector = disk.seek(iCylinder, iHead, iSector + 1);
                 if (!sector) {
-                    err = PDP11.RL11.ERRC.HNF;
+                    err = RL11.ERRC.HNF;
                     break;
                 }
                 ibSector = 0;
             }
             var b0, b1, data;
             if ((b0 = disk.read(sector, ibSector++)) < 0 || (b1 = disk.read(sector, ibSector++)) < 0) {
-                err = PDP11.RL11.ERRC.HNF;
+                err = RL11.ERRC.HNF;
                 break;
             }
             /*
@@ -1086,7 +1086,7 @@ class RL11 extends Component {
                 }
             }
             if (this.bus.checkFault()) {
-                err = PDP11.RL11.ERRC.NXM;
+                err = RL11.ERRC.NXM;
                 break;
             }
             addr += 2;
@@ -1099,7 +1099,7 @@ class RL11 extends Component {
                     if (++iHead >= disk.nHeads) {
                         iHead = 0;
                         if (++iCylinder >= disk.nCylinders) {
-                            err = PDP11.RL11.ERRC.HNF;
+                            err = RL11.ERRC.HNF;
                             break;
                         }
                     }
@@ -1135,7 +1135,7 @@ class RL11 extends Component {
         var sector = null, ibSector;
 
         if (!disk) {
-            err = PDP11.RL11.ERRC.HNF;      // TODO: Review
+            err = RL11.ERRC.HNF;      // TODO: Review
             nWords = 0;
         }
 
@@ -1148,7 +1148,7 @@ class RL11 extends Component {
              */
             var data = this.bus.getWordDirect(this.cpu.mapUnibus(addr));
             if (this.bus.checkFault()) {
-                err = PDP11.RL11.ERRC.NXM;
+                err = RL11.ERRC.NXM;
                 break;
             }
             if (DEBUG && this.messageEnabled(MessagesPDP11.WRITE)) {
@@ -1165,13 +1165,13 @@ class RL11 extends Component {
             if (!sector) {
                 sector = disk.seek(iCylinder, iHead, iSector + 1, true);
                 if (!sector) {
-                    err = PDP11.RL11.ERRC.HNF;
+                    err = RL11.ERRC.HNF;
                     break;
                 }
                 ibSector = 0;
             }
             if (!disk.write(sector, ibSector++, data & 0xff) || !disk.write(sector, ibSector++, data >> 8)) {
-                err = PDP11.RL11.ERRC.HNF;
+                err = RL11.ERRC.HNF;
                 break;
             }
             if (ibSector >= disk.cbSector) {
@@ -1181,7 +1181,7 @@ class RL11 extends Component {
                     if (++iHead >= disk.nHeads) {
                         iHead = 0;
                         if (++iCylinder >= disk.nCylinders) {
-                            err = PDP11.RL11.ERRC.HNF;
+                            err = RL11.ERRC.HNF;
                             break;
                         }
                     }
@@ -1211,13 +1211,13 @@ class RL11 extends Component {
     doneReadWrite(err, iCylinder, iHead, iSector, nWords, addr)
     {
         this.regRLBA = addr & 0xffff;
-        this.regRLCS = (this.regRLCS & ~PDP11.RL11.RLCS.BAE) | ((addr >> (16 - PDP11.RL11.RLCS.SHIFT.BAE)) & PDP11.RL11.RLCS.BAE);
-        this.regRLBE = (addr >> 16) & PDP11.RL11.RLBE.MASK;         // 22 bit mode
-        this.regRLDA = (iCylinder << PDP11.RL11.RLDA.SHIFT.RW_CA) | (iHead? PDP11.RL11.RLDA.RW_HS : 0) | (iSector & PDP11.RL11.RLDA.RW_SA);
+        this.regRLCS = (this.regRLCS & ~RL11.RLCS.BAE) | ((addr >> (16 - RL11.RLCS.SHIFT.BAE)) & RL11.RLCS.BAE);
+        this.regRLBE = (addr >> 16) & RL11.RLBE.MASK;         // 22 bit mode
+        this.regRLDA = (iCylinder << RL11.RLDA.SHIFT.RW_CA) | (iHead? RL11.RLDA.RW_HS : 0) | (iSector & RL11.RLDA.RW_SA);
         this.tmpRLDA = this.regRLDA;
         this.regRLMP = (0x10000 - nWords) & 0xffff;
         if (err) {
-            this.regRLCS |= err | PDP11.RL11.RLCS.ERR;
+            this.regRLCS |= err | RL11.RLCS.ERR;
         }
         return true;
     }
@@ -1231,7 +1231,7 @@ class RL11 extends Component {
      */
     readRLCS(addr)
     {
-        return this.regRLCS & PDP11.RL11.RLCS.RMASK;
+        return this.regRLCS & RL11.RLCS.RMASK;
     }
 
     /**
@@ -1243,9 +1243,9 @@ class RL11 extends Component {
      */
     writeRLCS(data, addr)
     {
-        this.regRLCS = (this.regRLCS & ~PDP11.RL11.RLCS.WMASK) | (data & PDP11.RL11.RLCS.WMASK);
-        this.regRLBE = (this.regRLBE & 0x3C) | ((data & PDP11.RL11.RLCS.BAE) >> PDP11.RL11.RLCS.SHIFT.BAE);
-        if (!(this.regRLCS & PDP11.RL11.RLCS.CRDY)) this.processCommand();
+        this.regRLCS = (this.regRLCS & ~RL11.RLCS.WMASK) | (data & RL11.RLCS.WMASK);
+        this.regRLBE = (this.regRLBE & 0x3C) | ((data & RL11.RLCS.BAE) >> RL11.RLCS.SHIFT.BAE);
+        if (!(this.regRLCS & RL11.RLCS.CRDY)) this.processCommand();
     }
 
     /**
@@ -1269,7 +1269,7 @@ class RL11 extends Component {
      */
     writeRLBA(data, addr)
     {
-        this.regRLBA = data & PDP11.RL11.RLBA.WMASK;
+        this.regRLBA = data & RL11.RLBA.WMASK;
     }
 
     /**
@@ -1347,8 +1347,8 @@ class RL11 extends Component {
      */
     writeRLBE(data, addr)
     {
-        this.regRLBE = data & PDP11.RL11.RLBE.MASK;
-        this.regRLCS = (this.regRLCS & ~PDP11.RL11.RLCS.BAE) | ((this.regRLBE & 0x3) << PDP11.RL11.RLCS.SHIFT.BAE);
+        this.regRLBE = data & RL11.RLBE.MASK;
+        this.regRLCS = (this.regRLCS & ~RL11.RLCS.BAE) | ((this.regRLBE & 0x3) << RL11.RLCS.SHIFT.BAE);
     }
 }
 
@@ -1360,6 +1360,19 @@ RL11.SOURCE = {
     LOCAL:  "?",
     REMOTE: "??"
 };
+
+/*
+ * Alias RL11 definitions as class constants
+ */
+RL11.PRI    =   PDP11.RL11.PRI;
+RL11.VEC    =   PDP11.RL11.VEC;
+RL11.RLCS   =   PDP11.RL11.RLCS;        // 174400: Control Status Register
+RL11.RLBA   =   PDP11.RL11.RLBA;        // 174402: Bus Address Register
+RL11.RLDA   =   PDP11.RL11.RLDA;        // 174404: Disk Address Register
+RL11.RLMP   =   PDP11.RL11.RLMP;        // 177406: Multi-Purpose Register
+RL11.RLBE   =   PDP11.RL11.RLBE;        // 174410: Bus (Address) Extension Register
+RL11.ERRC   =   PDP11.RL11.ERRC;        // NOTE: These error codes are pre-shifted to read/write directly from/to RLCS.ERRC
+RL11.FUNC   =   PDP11.RL11.FUNC;        // NOTE: These function codes are pre-shifted to read/write directly from/to RLCS.FUNC
 
 /*
  * ES6 ALERT: As you can see below, I've finally started using computed property names.
