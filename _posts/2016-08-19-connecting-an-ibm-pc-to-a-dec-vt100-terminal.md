@@ -64,10 +64,10 @@ was add the following Front Matter to the top of the Markdown file:
 
 and then embed the machines in the post, each with a single line:
 
-	{% raw %}
+{% raw %}
 	{% include machine.html id="ibm5170" %}
 	{% include machine.html id="vt100" %}
-	{% endraw %}
+{% endraw %}
 
 For people rolling their own web pages, [the basics](/docs/pcx86/) haven't changed, and adding a serial connection merely
 requires adding a *connection* property (eg, `connection:"com2->vt100.serialPort"`) to the *parms* parameter passed to the

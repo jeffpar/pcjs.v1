@@ -367,7 +367,7 @@ MarkOut.aFMBooleanMachineProps = {
     'autopower': "autoPower",
     'autostart': "autoStart"
 };
-MarkOut.aFMReservedMachineProps = ['id', 'name', 'type', 'debugger', 'config', 'template', 'uncompiled', 'autoMount', 'drives', 'parms'];
+MarkOut.aFMReservedMachineProps = ['id', 'name', 'type', 'debugger', 'config', 'template', 'uncompiled', 'autoMount', 'drives', 'parms', 'sticky'];
 
 /**
  * convertMD()
@@ -942,10 +942,12 @@ MarkOut.prototype.convertMDLinks = function(sBlock)
      * Before we start replacing Markdown links, see if there are any Liquid-style replacements
      * (in case this Markdown file is part of a Jekyll installation) and remove them.
      *
-     * TODO: These replacements should use appropriate values from _config.yml; however, unless/until
-     * we start using Node again to host the public site, that's low priority.
+     * TODO: Any double-brace replacements should use appropriate values from _config.yml or the
+     * page's Front Matter; however, unless/until we start using Node again to host the public site,
+     * that's low priority.
      */
-    sBlock = sBlock.replace(/\{([\{%]).*?\1}/g, "");
+    sBlock = sBlock.replace(/([^\t])\{([\{%]).*?\2}/g, "$1");
+    sBlock = sBlock.replace(/(\{)([\{%])(.*?\2})/g, "<pre><code>$1$2$3</code></pre>");
 
     var aMatch;
     var re = /\[([^\[\]]*)]\((.*?)(?:\s*"(.*?)"\)|\))/g;
@@ -1150,23 +1152,24 @@ MarkOut.prototype.convertMDImageLinks = function(sBlock, sIndent)
  */
 MarkOut.prototype.convertMDMachineLinks = function(sBlock)
 {
-    var aMatch, sReplacement;
+    var aMatch, sReplacement, machine;
     var sMachineType, sMachineID, sMachineXMLFile, sMachineXSLFile, sMachineVersion, sMachineOptions, sMachineParms;
 
     /*
      * Before we start looking for Markdown-style machine links, see if there are any Liquid-style machines,
      * (in case this Markdown file is part of a Jekyll installation) and convert them to Markdown-style links.
      */
-
-    var reIncludes = /\{%\s*include\s+machine\.html\s+id=(["'])(.*?)\1\s*%}/g;
+    var reIncludes = /(.){%\s*include\s+machine\.html\s+id=(["'])(.*?)\2\s*%}/g;
 
     while ((aMatch = reIncludes.exec(sBlock))) {
+        if (aMatch[1] == '\t') continue;
         sReplacement = "";
-        sMachineID = aMatch[2];
+        sMachineID = aMatch[3];
         if (this.aMachineDefs[sMachineID]) {
-            var machine = this.aMachineDefs[sMachineID];
+            machine = this.aMachineDefs[sMachineID];
             sMachineType = machine['type'] || "PCx86";
             sMachineOptions = ((sMachineType.indexOf("-dbg") > 0 || machine['debugger'] == "true")? "debugger" : "");
+            if (machine['sticky']) sMachineOptions += (sMachineOptions? "," : "") + "sticky";
             sMachineType = sMachineType.replace("-dbg", "");
             sMachineXMLFile = machine['config'] || this.sMachineFile || "machine.xml";
             sMachineXSLFile = machine['template'] || "";
@@ -1175,11 +1178,14 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
             sReplacement = machine['name'] || "Embedded PC";
             sReplacement = "[" + sReplacement + "](" + sMachineXMLFile + ' "' + sMachineType + '!' + sMachineID + '!' + sMachineXSLFile + '!!' + sMachineOptions + '!' + sMachineParms + '")';
         }
-        sBlock = sBlock.replace(aMatch[0], sReplacement);
+        sBlock = sBlock.replace(aMatch[0].substr(1), sReplacement);
         reIncludes.lastIndex = 0;       // reset lastIndex, since we just modified the string that reIncludes is iterating over
     }
 
-    sBlock = sBlock.replace(/\{%\s*include\s+build\.html\s+id=(["'])(.*?)\1\s*%}/g, '<div class="buildpc" id=$1$2$1></div>');
+    /*
+     * Ditto for any Liquid-style machine build links.
+     */
+    sBlock = sBlock.replace(/\{%\s*include\s+machine-build\.html\s+id=(["'])(.*?)\1\s*%}/g, '<div class="buildpc" id=$1$2$1></div>');
 
     /*
      * Start looking for Markdown-style machine links now...
@@ -1204,6 +1210,7 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
         sMachineParms = aMachineParms[4] || "";
         var aMachineOptions = sMachineOptions.split(',');
         var fDebugger = (aMachineOptions.indexOf("debugger") >= 0);
+        var fSticky = (aMachineOptions.indexOf("sticky") >= 0);
 
         /*
          * TODO: Consider validating the existence of this XML file and generating a more meaningful error if not found
@@ -1247,8 +1254,46 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
             'xsl':      sMachineXSLFile,
             'version':  sMachineVersion,// eg, "1.10", "*" to select the current version, or "uncompiled"; "*" is the default
             'debugger': fDebugger,      // eg, true or false; false is the default
+            'sticky':   fSticky,        // eg, true or false; false is the default
             'parms':    sMachineParms}
         );
+    }
+
+    /*
+     * Last but not least, see if there are any Liquid-style machine command links that need to be converted.
+     */
+    reIncludes = /([ \t]*)\{%\s*include\s+machine-command\.html\s+(.*?)\s*%}/g;
+
+    var findParm = function(aParms, sParm) {
+        sParm += '=';
+        for (var i = 0; i < aParms.length; i++) {
+            if (aParms[i].indexOf(sParm) == 0) {
+                return aParms[i].slice(sParm.length+1, -1);
+            }
+        }
+        return "";
+    };
+
+    while ((aMatch = reIncludes.exec(sBlock))) {
+        if (aMatch[1] == '\t') continue;
+        var aParms = aMatch[2].match(/[a-z]+=(["']).*?\1/g);
+        if (!aParms) continue;
+        sReplacement = "";
+        sMachineID = findParm(aParms, 'machine');
+        var sControl = findParm(aParms, 'type') || 'button';
+        var sControlType = sControl == 'button'? ' type="button"' : '';
+        if (this.aMachineDefs[sMachineID]) {
+            sReplacement = '<' + sControl + sControlType + ' onclick="commandMachine(';
+            sReplacement += "'" + sMachineID + "',";
+            sReplacement += "'" + findParm(aParms, 'component') + "',";
+            sReplacement += "'" + findParm(aParms, 'command') + "',";
+            sReplacement += "'" + findParm(aParms, 'value') + "')";
+            sReplacement += '">' + (findParm(aParms, 'label') || 'Try It!') + '</' + sControl + '>';
+        } else {
+            sReplacement = "<!-- Unrecognized machine ID: " + sMachineID + " -->";
+        }
+        sBlock = sBlock.replace(aMatch[0], sReplacement);
+        reIncludes.lastIndex = 0;       // reset lastIndex, since we just modified the string that reIncludes is iterating over
     }
 
     if (cMatches) {
