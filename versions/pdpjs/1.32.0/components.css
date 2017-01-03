@@ -223,7 +223,6 @@
 .pcjs-copyright a {
     text-decoration: none;
 }
-
 @media screen and (max-width: 800px) {
     .pcjs-textarea {
         width: 100% !important;
@@ -242,7 +241,6 @@
         padding-right: 0 !important;
     }
 }
-
 @media screen and (min-width: 1200px) {
     .machine-left {
         max-width: 48%;
