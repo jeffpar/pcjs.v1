@@ -83,6 +83,19 @@ pre a, code a {
     text-align: center;
     font-weight: bold;
 }
+.machine-floating {
+    position: relative;
+    z-index: auto;
+    background-color: transparent;
+    padding-right: 0;
+}
+.machine-sticky {
+    position: fixed !important;
+    z-index: 1 !important;
+    background-color: #404040 !important;
+    padding-right: 16px !important;
+    top: 0 !important;
+}
 .common-top {
     background: #202020;
     font-size: small;
