@@ -879,6 +879,7 @@ HTMLOut.prototype.findTokens = function(reTokens)
                             aParms.push(aMatch[1]);
                         }
                     }
+                    //noinspection JSUnresolvedFunction
                     fnToken.call(this, sToken, sIndent, aParms);
                 }
             }
@@ -1968,6 +1969,12 @@ HTMLOut.prototype.processMachines = function(aMachines, buildOptions, done)
                 }
             }
             this.addFilesToHTML(asFiles, sScriptEmbed);
+            if (infoMachine['sticky']) {
+                asFiles = [];
+                asFiles.push("/modules/shared/lib/sticky.js");
+                sScriptEmbed = '<script type="text/javascript">addStickyMachine("' + infoMachine['id'] + '")</script>';
+                this.addFilesToHTML(asFiles, sScriptEmbed);
+            }
             if (buildOptions.id) {
                 asFiles = [];
                 asFiles.push("/modules/build/lib/build.js");

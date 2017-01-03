@@ -24,9 +24,9 @@ beginning of the PDP-11 line: the PDP-11/20.
 I'm starting with the top-of-the-line PDP-11/70 largely because the core of the emulator is being adapted from the
 JavaScript [PDP-11/70 Emulator (v1.3)](http://skn.noip.me/pdp11/pdp11.html) written by
 Paul Nankervis, who has generously given permission to use his code in PCjs.  Since his emulator is a fully functional
-11/70, it made sense to start there and work backwards, factoring out features as needed.
+11/70, it made sense to start there and work backwards, disabling features according to the model.
 
-The code has already undergone a lot of refactoring. Opcodes are now decoded by function tables rather than a single
+The code has already undergone a lot of refactoring.  Opcodes are now decoded by function tables rather than a single
 switch statement, and every opcode is implemented with a discrete function.  Other refactoring includes flag management,
 interrupt management, and device management.
 
@@ -37,9 +37,9 @@ component, [device.js](/modules/pdp11/lib/device.js), which has now been convert
 
 The first new device component is [serial.js](/modules/pdp11/lib/serial.js), which is currently the
 only means PDPjs has of communicating with the outside world.  So you can try
-[PDPjs connected to a VT100 Terminal](/devices/pdp11/machine/1170/vt100/), by clicking the **Run** button on the test machine.
-The test machine is running [custom boot code](/apps/pdp11/boot/test/), adapted from boot code written by Paul, but due to the
-lack of other device support, nothing can be booted yet.
+[PDPjs connected to a VT100 Terminal](/devices/pdp11/machine/1170/vt100/), by clicking the **Run** button on the
+test machine.  The test machine is running a custom [Boot Monitor](/apps/pdp11/boot/monitor/) included with
+[Paul's emulator](http://skn.noip.me/pdp11/), but due to the lack of other device support, nothing can be booted yet.
 
 Obviously PDPjs is very much a work-in-progress.  Before I proceed much farther, I really want to put the CPU through
 some rigorous testing, so I'll be on the lookout for some comprehensive PDP-11 instruction tests.  Or I'll write my own,
