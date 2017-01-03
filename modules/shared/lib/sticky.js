@@ -35,31 +35,39 @@
  */
 function addStickyMachine(idMachine)
 {
-    var machine = document.getElementById(idMachine);
-    if (machine) {
-        var machineFooter = document.getElementById(idMachine + '.footer');
-        if (machineFooter) {
-            var topMachine = findTop(machine);
-            var prevOnScroll = window.onscroll;
-            window.onscroll = function() {
+    var topMachine = -1;
+    var prevOnScroll = window.onscroll;
+    window.onscroll = function() {
+        /*
+         * TODO: Determine if/when we can cache the machine and machineSibling elements; we already
+         * know we can't cache them when addStickyMachine() is first called, because that currently
+         * happens *before* embed.js replaces the placeholder machine DIV with the *real* machine DIV.
+         */
+        var machine = document.getElementById(idMachine);
+        if (machine) {
+            var machineSibling = machine.nextElementSibling;
+            if (machineSibling) {
+                if (topMachine < 0) {
+                    topMachine = findTop(machine);
+                }
                 if (window.pageYOffset <= topMachine) {
                     machine.style.position = 'relative';
                     machine.style.zIndex = 'auto';
                     machine.style.backgroundColor = '';
                     machine.style.paddingRight = 0;
-                    if (machineFooter) machineFooter.style.paddingTop = 0;
+                    if (machineSibling) machineSibling.style.paddingTop = 0;
                 } else {
                     machine.style.position = 'fixed';
                     machine.style.zIndex = 1;
-                    machine.style.backgroundColor = 'white';
-                    machine.style.paddingRight = '30px';
+                    machine.style.backgroundColor = '#404040';
+                    machine.style.paddingRight = '16px';
                     machine.style.top = 0;
-                    if (machineFooter) machineFooter.style.paddingTop = machine.offsetHeight + 'px';
+                    if (machineSibling) machineSibling.style.paddingTop = machine.offsetHeight + 'px';
                 }
-            };
-            if (prevOnScroll) prevOnScroll();
+                if (prevOnScroll) prevOnScroll();
+            }
         }
-    }
+    };
 }
 
 /**

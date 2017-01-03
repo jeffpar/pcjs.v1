@@ -367,7 +367,7 @@ MarkOut.aFMBooleanMachineProps = {
     'autopower': "autoPower",
     'autostart': "autoStart"
 };
-MarkOut.aFMReservedMachineProps = ['id', 'name', 'type', 'debugger', 'config', 'template', 'uncompiled', 'autoMount', 'drives', 'parms'];
+MarkOut.aFMReservedMachineProps = ['id', 'name', 'type', 'debugger', 'config', 'template', 'uncompiled', 'autoMount', 'drives', 'parms', 'sticky'];
 
 /**
  * convertMD()
@@ -1167,6 +1167,7 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
             var machine = this.aMachineDefs[sMachineID];
             sMachineType = machine['type'] || "PCx86";
             sMachineOptions = ((sMachineType.indexOf("-dbg") > 0 || machine['debugger'] == "true")? "debugger" : "");
+            if (machine['sticky']) sMachineOptions += (sMachineOptions? "," : "") + "sticky";
             sMachineType = sMachineType.replace("-dbg", "");
             sMachineXMLFile = machine['config'] || this.sMachineFile || "machine.xml";
             sMachineXSLFile = machine['template'] || "";
@@ -1204,6 +1205,7 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
         sMachineParms = aMachineParms[4] || "";
         var aMachineOptions = sMachineOptions.split(',');
         var fDebugger = (aMachineOptions.indexOf("debugger") >= 0);
+        var fSticky = (aMachineOptions.indexOf("sticky") >= 0);
 
         /*
          * TODO: Consider validating the existence of this XML file and generating a more meaningful error if not found
@@ -1247,6 +1249,7 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
             'xsl':      sMachineXSLFile,
             'version':  sMachineVersion,// eg, "1.10", "*" to select the current version, or "uncompiled"; "*" is the default
             'debugger': fDebugger,      // eg, true or false; false is the default
+            'sticky':   fSticky,        // eg, true or false; false is the default
             'parms':    sMachineParms}
         );
     }
