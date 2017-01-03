@@ -53,18 +53,12 @@ function addStickyMachine(idMachine)
                 if (topMachine < 0) {
                     topMachine = findTop(machine);
                 }
+                machine.className = machine.className.replace(/pcjs-machine-(floating|sticky) /g, '');
                 if (window.pageYOffset <= topMachine) {
-                    machine.style.position = 'relative';
-                    machine.style.zIndex = 'auto';
-                    machine.style.backgroundColor = '';
-                    machine.style.paddingRight = 0;
+                    machine.className = 'pcjs-machine-floating ' + machine.className;
                     if (machineSibling) machineSibling.style.paddingTop = 0;
                 } else {
-                    machine.style.position = 'fixed';
-                    machine.style.zIndex = 1;
-                    machine.style.backgroundColor = '#404040';
-                    machine.style.paddingRight = '16px';
-                    machine.style.top = 0;
+                    machine.className = 'pcjs-machine-sticky ' + machine.className;
                     if (machineSibling) machineSibling.style.paddingTop = machine.offsetHeight + 'px';
                 }
                 if (prevOnScroll) prevOnScroll();
@@ -83,7 +77,7 @@ function addStickyMachine(idMachine)
  */
 function commandMachine(idMachine, typeComponent, sCommand, sValue)
 {
-
+    console.log("commandMachine('" + idMachine + "','" + typeComponent + "','" + sCommand + "','" + sValue + "')");
 }
 
 /**
