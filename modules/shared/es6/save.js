@@ -62,7 +62,7 @@ function savePC(idMachine, sPCJSFile, callback)
         });
         return true;
     }
-    Web.alertUser("Unable to identify machine '" + idMachine + "'");
+    Component.alertUser("Unable to identify machine '" + idMachine + "'");
     return false;
 }
 
@@ -98,7 +98,7 @@ function downloadCSS(sURL, sPCJS, nErrorCode, aMachineInfo)
         }
         return;
     }
-    Web.alertUser("Error (" + nErrorCode + ") requesting " + sURL);
+    Component.alertUser("Error (" + nErrorCode + ") requesting " + sURL);
 }
 
 /**
@@ -208,10 +208,10 @@ function downloadPC(sURL, sCSS, nErrorCode, aMachineInfo)
         sAlert += '<script type="text/javascript" src="' + sScript + '"></script>\n';
         sAlert += '<script type="text/javascript">embedPC("' + idMachine + '","' + sXMLFile + '","' + sXSLFile + '");</script>\n\n';
         sAlert += 'The machine should appear where the <div> is located.';
-        Web.alertUser(sAlert);
+        Component.alertUser(sAlert);
         return;
     }
-    Web.alertUser("Missing XML/XSL resources");
+    Component.alertUser("Missing XML/XSL resources");
 }
 
 /**

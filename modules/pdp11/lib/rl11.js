@@ -219,7 +219,7 @@ class RL11 extends Component {
                         if (disk) {
                             if (DEBUG) rl11.println("saving disk " + disk.sDiskPath + "...");
                             var sAlert = Web.downloadFile(disk.encodeAsBase64(), "octet-stream", true, disk.sDiskFile.replace(".json", ".img"));
-                            Web.alertUser(sAlert);
+                            Component.alertUser(sAlert);
                         } else {
                             rl11.notice("No disk loaded in drive.");
                         }
