@@ -29,7 +29,7 @@
 "use strict";
 
 /**
- * addStickYMachine(idMachine)
+ * addStickyMachine(idMachine)
  *
  * @param {string} idMachine
  */
@@ -41,7 +41,10 @@ function addStickyMachine(idMachine)
         /*
          * TODO: Determine if/when we can cache the machine and machineSibling elements; we already
          * know we can't cache them when addStickyMachine() is first called, because that currently
-         * happens *before* embed.js replaces the placeholder machine DIV with the *real* machine DIV.
+         * happens before embed.js replaces the placeholder machine <div> with the real machine <div>.
+         *
+         * Placement of the addStickyMachine() call is irrelevant, because embed.js asynchronously
+         * reads all the XML files that define the machine *before* replacing the <div>.
          */
         var machine = document.getElementById(idMachine);
         if (machine) {
@@ -68,6 +71,19 @@ function addStickyMachine(idMachine)
             }
         }
     };
+}
+
+/**
+ * commandMachine(idMachine, typeComponent, sCommand, sValue)
+ *
+ * @param {string} idMachine
+ * @param {string} typeComponent
+ * @param {string} sCommand
+ * @param {string} [sValue]
+ */
+function commandMachine(idMachine, typeComponent, sCommand, sValue)
+{
+
 }
 
 /**

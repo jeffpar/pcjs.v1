@@ -16,39 +16,44 @@ machines:
     sticky: top
 ---
 
-Introducing PDP-11 tutorials! 
+Introducing PDP-11 tutorials.  For more information, keep scrolling.
 
 {% include machine.html id="vt100" %}
 
-[PDPjs](/devices/pdp11/machine/) is the newest addition to the PCjs family of emulators, joining PCx86, PC8080, and C1Pjs.
+[PDPjs](/devices/pdp11/machine/) is able to run a variety of old DEC operating systems, such as RT-11 and RSTS/E,
+and while there are manuals available online, thanks to the efforts of those who operate and contribute to websites
+like [bitsavers.org](http://bitsavers.org), I suspect most people don't have a lot of interest or time to spend
+reading old manuals.
 
-While PDPjs may eventually support a range of DEC PDP machines, my current focus is on the PDP-11, starting with the
-PDP-11/70.  From there, I'll work backwards to support other PDP-11 models, such as the PDP-11/45, until I reach the
-beginning of the PDP-11 line: the PDP-11/20.
+In an effort to remedy that situation, I'm adding some new features to PCjs.  The first feature is what I call
+"Sticky Machines", and it's more a website feature than a machine feature.  At the top of any PCjs webpage, in the
+*machines* section, a machine can now have a *sticky* property.  For now, the only supported value is "top"; e.g.:
 
-I'm starting with the top-of-the-line PDP-11/70 largely because the core of the emulator is being adapted from the
-JavaScript [PDP-11/70 Emulator (v1.3)](http://skn.noip.me/pdp11/pdp11.html) written by
-Paul Nankervis, who has generously given permission to use his code in PCjs.  Since his emulator is a fully functional
-11/70, it made sense to start there and work backwards, factoring out features as needed.
+	machines:
+	  - id: vt100
+		type: pc8080
+		config: /devices/pc8080/machine/vt100/machine.xml
+		connection: serialPort->test1170.dl11
+		sticky: top
 
-The code has already undergone a lot of refactoring. Opcodes are now decoded by function tables rather than a single
-switch statement, and every opcode is implemented with a discrete function.  Other refactoring includes flag management,
-interrupt management, and device management.
+A sticky machine makes it easier to construct a tutorial page for a single machine, by preventing that machine from
+scrolling off the top of the page; it "sticks" to the top instead.  The rest of the page scrolls normally, allowing the
+user to progress at their own pace through the text and/or images of an accompanying tutorial.
 
-Most of the work remaining is in device management.  Like other PCjs emulators, PDPjs has a Bus component,
-[bus.js](/modules/pdp11/lib/bus.js), that allows separate device components to register I/O handlers for specific
-UNIBUS addresses.  During the initial port, I moved all of Paul's original device management code into one "catch-all"
-component, [device.js](/modules/pdp11/lib/device.js), which has now been converted to the new I/O registration model.
+The second feature is a generalized method for sending commands to components within a machine.  For example, if we
+want to send some keyboard commands to machine:
 
-The first new device component is [serial.js](/modules/pdp11/lib/serial.js), which is currently the
-only means PDPjs has of communicating with the outside world.  So you can try
-[PDPjs connected to a VT100 Terminal](/devices/pdp11/machine/1170/vt100/), by clicking the **Run** button on the test machine.
-The test machine is running [custom boot code](/apps/pdp11/boot/test/), adapted from boot code written by Paul, but due to the
-lack of other device support, nothing can be booted yet.
+{% raw %}
+	{% include machine-command.html type='button' label='Try It!' machine='vt100' component='Keyboard' command='sendString' value='Hello World' %}
+{% endraw %}
 
-Obviously PDPjs is very much a work-in-progress.  Before I proceed much farther, I really want to put the CPU through
-some rigorous testing, so I'll be on the lookout for some comprehensive PDP-11 instruction tests.  Or I'll write my own,
-and compare results across 1 or 2 other PDP-11 emulators.
+which should translate into a control that looks like:
+
+	<button type="button" onclick="commandMachine('vt100','Keyboard','sendString','Hello World')">Try It!</button>
+
+In fact, let's try it now. {% include machine-command.html type='button' label='Try It!' machine='vt100' component='Keyboard' command='sendString' value='Hello World' %}
+
+Obviously, every component we want to control will need to be updated to export the necessary functions.
 
 {% include machine.html id="test1170" %}
 
