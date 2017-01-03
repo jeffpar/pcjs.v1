@@ -53,12 +53,12 @@ function addStickyMachine(idMachine)
                 if (topMachine < 0) {
                     topMachine = findTop(machine);
                 }
-                machine.className = machine.className.replace(/pcjs-machine-(floating|sticky) /g, '');
+                machine.className = machine.className.replace(/machine-(floating|sticky) /g, '');
                 if (window.pageYOffset <= topMachine) {
-                    machine.className = 'pcjs-machine-floating ' + machine.className;
+                    machine.className = 'machine-floating ' + machine.className;
                     if (machineSibling) machineSibling.style.paddingTop = 0;
                 } else {
-                    machine.className = 'pcjs-machine-sticky ' + machine.className;
+                    machine.className = 'machine-sticky ' + machine.className;
                     if (machineSibling) machineSibling.style.paddingTop = machine.offsetHeight + 'px';
                 }
                 if (prevOnScroll) prevOnScroll();

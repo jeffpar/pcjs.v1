@@ -228,19 +228,6 @@
 .pcjs-copyright a {
     text-decoration: none;
 }
-.pcjs-machine-floating {
-    position: relative;
-    z-index: auto;
-    background-color: transparent;
-    padding-right: 0;
-}
-.pcjs-machine-sticky {
-    position: fixed !important;
-    z-index: 1 !important;
-    background-color: #404040 !important;
-    padding-right: 16px !important;
-    top: 0 !important;
-}
 @media screen and (max-width: 800px) {
     .pcjs-textarea {
         width: 100% !important;
@@ -259,7 +246,6 @@
         padding-right: 0 !important;
     }
 }
-
 @media screen and (min-width: 1200px) {
     .machine-left {
         max-width: 48%;
