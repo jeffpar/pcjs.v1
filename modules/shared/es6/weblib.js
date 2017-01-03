@@ -135,8 +135,6 @@ class Web {
     /**
      * notice(s, fPrintOnly, id)
      *
-     * If Component.notice() calls Web.alertUser(), it will fall back to Web.log() if all else fails.
-     *
      * @param {string} s is the message text
      * @param {boolean} [fPrintOnly]
      * @param {string} [id] is the caller's ID, if any
@@ -201,7 +199,7 @@ class Web {
             return Net.getResource(sURL, dataPost, fAsync, done);
         }
 
-        var xmlHTTP = (window.XMLHttpRequest ? new window.XMLHttpRequest() : new window.ActiveXObject("Microsoft.XMLHTTP"));
+        var xmlHTTP = (window.XMLHttpRequest? new window.XMLHttpRequest() : new window.ActiveXObject("Microsoft.XMLHTTP"));
         if (fAsync) {
             xmlHTTP.onreadystatechange = function()
             {
@@ -413,7 +411,7 @@ class Web {
         dataPost[ReportAPI.QUERY.USER] = sUser;
         dataPost[ReportAPI.QUERY.TYPE] = sType;
         dataPost[ReportAPI.QUERY.DATA] = sReport;
-        var sReportURL = (sHostName ? sHostName : "http://" + SITEHOST) + ReportAPI.ENDPOINT;
+        var sReportURL = (sHostName? sHostName : "http://" + SITEHOST) + ReportAPI.ENDPOINT;
         Web.getResource(sReportURL, dataPost, true);
     }
 
@@ -424,7 +422,7 @@ class Web {
      */
     static getHost()
     {
-        return ("http://" + (window ? window.location.host : SITEHOST));
+        return ("http://" + (window? window.location.host : SITEHOST));
     }
 
     /**
@@ -434,7 +432,7 @@ class Web {
      */
     static getHostURL()
     {
-        return (window ? window.location.href : null);
+        return (window? window.location.href : null);
     }
 
     /**
@@ -444,7 +442,7 @@ class Web {
      */
     static getHostProtocol()
     {
-        return (window ? window.location.protocol : "file:");
+        return (window? window.location.protocol : "file:");
     }
 
     /**
@@ -454,48 +452,7 @@ class Web {
      */
     static getUserAgent()
     {
-        return (window ? window.navigator.userAgent : "");
-    }
-
-    /**
-     * alertUser(sMessage)
-     *
-     * @param {string} sMessage
-     */
-    static alertUser(sMessage)
-    {
-        if (window) window.alert(sMessage); else Web.log(sMessage);
-    };
-
-    /**
-     * confirmUser(sPrompt)
-     *
-     * @param {string} sPrompt
-     * @returns {boolean} true if the user clicked OK, false if Cancel/Close
-     */
-    static confirmUser(sPrompt)
-    {
-        var fResponse = false;
-        if (window) {
-            fResponse = window.confirm(sPrompt);
-        }
-        return fResponse;
-    }
-
-    /**
-     * promptUser()
-     *
-     * @param {string} sPrompt
-     * @param {string} [sDefault]
-     * @returns {string|null}
-     */
-    static promptUser(sPrompt, sDefault)
-    {
-        var sResponse = null;
-        if (window) {
-            sResponse = window.prompt(sPrompt, sDefault === undefined ? "" : sDefault);
-        }
-        return sResponse;
+        return (window? window.navigator.userAgent : "");
     }
 
     /**
@@ -729,12 +686,12 @@ class Web {
     static downloadFile(sData, sType, fBase64, sFileName)
     {
         var link = null, sAlert;
-        var sURI = "data:application/" + sType + (fBase64 ? ";base64" : "") + ",";
+        var sURI = "data:application/" + sType + (fBase64? ";base64" : "") + ",";
 
         if (!Web.isUserAgent("Firefox")) {
-            sURI += (fBase64 ? sData : encodeURI(sData));
+            sURI += (fBase64? sData : encodeURI(sData));
         } else {
-            sURI += (fBase64 ? sData : encodeURIComponent(sData));
+            sURI += (fBase64? sData : encodeURIComponent(sData));
         }
         if (sFileName) {
             link = document.createElement('a');
@@ -749,7 +706,7 @@ class Web {
             sAlert = 'Check your Downloads folder for ' + sFileName + '.';
         } else {
             window.open(sURI);
-            sAlert = 'Check your browser for a new window/tab containing the requested data' + (sFileName ? (' (' + sFileName + ')') : '') + '.';
+            sAlert = 'Check your browser for a new window/tab containing the requested data' + (sFileName? (' (' + sFileName + ')') : '') + '.';
         }
         return sAlert;
     }

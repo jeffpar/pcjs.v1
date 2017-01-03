@@ -503,7 +503,12 @@ HTMLOut.filter = function(req, res, next)
 
     /*
      * This is a hack to strip ES6 syntax from JavaScript files that is not (yet) supported by browsers;
-     * specifically, "import" and "export" statements.
+     * specifically, import (or require) and export (or module.exports) statements.
+     *
+     * What's particularly annoying, especially at this late stage of ES6 adoption, is that Node is perfectly
+     * capable of processing require() statements for modules with classes, but browsers are not; browsers appear
+     * to feel that a var declaration (which is what a require() statement, um, requires) is incompatible with
+     * a class declaration.
      */
     if (sBaseExt == "js") {
         HTMLOut.logDebug("HTMLOut.filter(" + sBaseName + "): stripping unsupported ES6 syntax");

@@ -30,7 +30,6 @@
 
 if (NODE) {
     var Str = require("../../shared/es6/strlib");
-    var Usr = require("../../shared/es6/usrlib");
     var Component = require("../../shared/es6/component");
     var Messages8080 = require("./messages");
 }
@@ -750,7 +749,7 @@ class CPU8080 extends Component {
         }
         this.addCycles(this.nRunCycles);
         this.nRunCycles = 0;
-        this.msStartRun = Usr.getTime();
+        this.msStartRun = Component.getTime();
         this.msEndThisRun = 0;
         this.calcCycles();
         return fSuccess;
@@ -785,7 +784,7 @@ class CPU8080 extends Component {
             this.calcCycles(true);
         }
         this.nCyclesThisRun = 0;
-        this.msStartThisRun = Usr.getTime();
+        this.msStartThisRun = Component.getTime();
 
         /*
          * Try to detect situations where the browser may have throttled us, such as when the user switches
@@ -838,7 +837,7 @@ class CPU8080 extends Component {
      */
     calcRemainingTime()
     {
-        this.msEndThisRun = Usr.getTime();
+        this.msEndThisRun = Component.getTime();
 
         var msYield = this.msPerYield;
         if (this.nCyclesThisRun) {
@@ -1053,7 +1052,7 @@ class CPU8080 extends Component {
     {
         if (!this.setBusy(true)) {
             this.updateCPU();
-            if (this.cmp) this.cmp.stop(Usr.getTime(), this.getCycles());
+            if (this.cmp) this.cmp.stop(Component.getTime(), this.getCycles());
             return;
         }
 
@@ -1110,7 +1109,7 @@ class CPU8080 extends Component {
         catch (e) {
             this.stopCPU();
             this.updateCPU();
-            if (this.cmp) this.cmp.stop(Usr.getTime(), this.getCycles());
+            if (this.cmp) this.cmp.stop(Component.getTime(), this.getCycles());
             this.setBusy(false);
             this.setError(e.stack || e.message);
             return;

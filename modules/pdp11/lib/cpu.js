@@ -34,7 +34,6 @@
 
 if (NODE) {
     var Str = require("../../shared/es6/strlib");
-    var Usr = require("../../shared/es6/usrlib");
     var Component = require("../../shared/es6/component");
     var MessagesPDP11 = require("./messages");
 }
@@ -733,7 +732,7 @@ class CPUPDP11 extends Component {
         }
         this.addCycles(this.nRunCycles);
         this.nRunCycles = 0;
-        this.msStartRun = Usr.getTime();
+        this.msStartRun = Component.getTime();
         this.msEndThisRun = 0;
         this.calcCycles();
         return fSuccess;
@@ -768,7 +767,7 @@ class CPUPDP11 extends Component {
             this.calcCycles(true);
         }
         this.nCyclesThisRun = 0;
-        this.msStartThisRun = Usr.getTime();
+        this.msStartThisRun = Component.getTime();
 
         /*
          * Try to detect situations where the browser may have throttled us, such as when the user switches
@@ -821,7 +820,7 @@ class CPUPDP11 extends Component {
      */
     calcRemainingTime()
     {
-        this.msEndThisRun = Usr.getTime();
+        this.msEndThisRun = Component.getTime();
 
         var msYield = this.msPerYield;
         if (this.nCyclesThisRun) {
@@ -1111,7 +1110,7 @@ class CPUPDP11 extends Component {
         }
         catch (e) {
             this.stopCPU();
-            if (this.cmp) this.cmp.stop(Usr.getTime(), this.getCycles());
+            if (this.cmp) this.cmp.stop(Component.getTime(), this.getCycles());
             this.setError(e.stack || e.message);
             return;
         }
@@ -1193,7 +1192,7 @@ class CPUPDP11 extends Component {
             var controlRun = this.bindings["run"];
             if (controlRun) controlRun.textContent = "Run";
             if (this.cmp) {
-                this.cmp.stop(Usr.getTime(), this.getCycles());
+                this.cmp.stop(Component.getTime(), this.getCycles());
             }
             fStopped = true;
             if (!this.dbg) this.status("Stopped");
