@@ -507,7 +507,7 @@ class ComputerPDP11 extends Component {
                 this.stateFailSafe.store();
 
                 var fValidate = this.resume && !this.fServerState;
-                if (resume == ComputerPDP11.RESUME_AUTO || Web.confirmUser("Click OK to restore the previous " + PDP11.APPNAME + " machine state, or CANCEL to reset the machine.")) {
+                if (resume == ComputerPDP11.RESUME_AUTO || Component.confirmUser("Click OK to restore the previous " + PDP11.APPNAME + " machine state, or CANCEL to reset the machine.")) {
                     fRestore = stateComputer.parse();
                     if (fRestore) {
                         var sCode = /** @type {string} */ (stateComputer.get(UserAPI.RES.CODE));
@@ -776,7 +776,7 @@ class ComputerPDP11 extends Component {
         }
         if (iComponent == aComponents.length) component = this;
         var s = "The " + component.type + " component (" + component.id + ") is not " + (!component.flags.ready? "ready yet" + (component.fnReady? " (waiting for notification)" : "") : "powered yet") + ".";
-        Web.alertUser(s);
+        Component.alertUser(s);
         return false;
     }
 
@@ -788,7 +788,7 @@ class ComputerPDP11 extends Component {
      */
     powerReport(stateComputer)
     {
-        if (Web.confirmUser("There may be a problem with your " + PDP11.APPNAME + " machine.\n\nTo help us diagnose it, click OK to send this " + PDP11.APPNAME + " machine state to http://" + SITEHOST + ".")) {
+        if (Component.confirmUser("There may be a problem with your " + PDP11.APPNAME + " machine.\n\nTo help us diagnose it, click OK to send this " + PDP11.APPNAME + " machine state to http://" + SITEHOST + ".")) {
             Web.sendReport(PDP11.APPNAME, PDP11.APPVERSION, this.url, this.getUserID(), ReportAPI.TYPE.BUG, stateComputer.toString());
         }
     }
@@ -1179,7 +1179,7 @@ class ComputerPDP11 extends Component {
                      * merely a precaution, because ordinarily, setBinding() should have already determined if we are
                      * running from pcjs.org and disabled any "Save" button.
                      */
-                    sUserID = Web.promptUser("Saving machine states on the pcjs.org server is currently unsupported.\n\nIf you're running your own server, enter your user ID below.");
+                    sUserID = Component.promptUser("Saving machine states on the pcjs.org server is currently unsupported.\n\nIf you're running your own server, enter your user ID below.");
                     if (sUserID) {
                         sUserID = this.verifyUserID(sUserID);
                         if (!sUserID) this.notice("The user ID is invalid.");
@@ -1377,7 +1377,7 @@ class ComputerPDP11 extends Component {
              * I used to bypass the prompt if this.resume == ComputerPDP11.RESUME_AUTO, setting fSave to true automatically,
              * but that gives the user no means of resetting a resumable machine that contains errors in its resume state.
              */
-            var fSave = (/* this.resume == ComputerPDP11.RESUME_AUTO || */ Web.confirmUser("Click OK to save changes to this " + PDP11.APPNAME + " machine.\n\nWARNING: If you CANCEL, all disk changes will be discarded."));
+            var fSave = (/* this.resume == ComputerPDP11.RESUME_AUTO || */ Component.confirmUser("Click OK to save changes to this " + PDP11.APPNAME + " machine.\n\nWARNING: If you CANCEL, all disk changes will be discarded."));
             this.powerOff(fSave, true);
             /*
              * Forcing the page to reload is an expedient option, but ugly. It's preferable to call powerOn()

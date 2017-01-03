@@ -49,9 +49,6 @@
 
 "use strict";
 
-var Usr = require("../../shared/es6/usrlib");
-var Web = require("../../shared/es6/weblib");
-
 /**
  * Since the Closure Compiler treats ES6 classes as @struct rather than @dict by default,
  * it deters us from defining named properties on our components; eg:
@@ -211,6 +208,16 @@ class Component {
     }
 
     /**
+     * Component.getTime()
+     *
+     * @return {number} the current time, in milliseconds
+     */
+    static getTime()
+    {
+        return Date.now() || +new Date();
+    }
+
+    /**
      * Component.log(s, type)
      *
      * For diagnostic output only.
@@ -225,9 +232,9 @@ class Component {
                 var sElapsed = "", sMsg = (type? (type + ": ") : "") + s;
                 if (typeof Usr != "undefined") {
                     if (Component.msStart === undefined) {
-                        Component.msStart = Usr.getTime();
+                        Component.msStart = Component.getTime();
                     }
-                    sElapsed = (Usr.getTime() - Component.msStart) + "ms: ";
+                    sElapsed = (Component.getTime() - Component.msStart) + "ms: ";
                 }
                 if (window && window.console) console.log(sElapsed + sMsg.replace(/\n/g, " "));
             }
@@ -290,7 +297,7 @@ class Component {
         if (!COMPILED) {
             Component.println(s, "notice", id);
         }
-        if (!fPrintOnly && Web.alertUser) Web.alertUser((id? (id + ": ") : "") + s);
+        if (!fPrintOnly) Component.alertUser((id? (id + ": ") : "") + s);
     }
 
     /**
@@ -303,7 +310,7 @@ class Component {
         if (!COMPILED) {
             Component.println(s, "warning");
         }
-        if (Web.alertUser) Web.alertUser(s);
+        Component.alertUser(s);
     }
 
     /**
@@ -316,7 +323,52 @@ class Component {
         if (!COMPILED) {
             Component.println(s, "error");
         }
-        if (Web.alertUser) Web.alertUser(s);
+        Component.alertUser(s);
+    }
+
+    /**
+     * Component.alertUser(sMessage)
+     *
+     * @param {string} sMessage
+     */
+    static alertUser(sMessage)
+    {
+        if (window) {
+            window.alert(sMessage);
+        } else {
+            Component.log(sMessage);
+        }
+    };
+
+    /**
+     * Component.confirmUser(sPrompt)
+     *
+     * @param {string} sPrompt
+     * @returns {boolean} true if the user clicked OK, false if Cancel/Close
+     */
+    static confirmUser(sPrompt)
+    {
+        var fResponse = false;
+        if (window) {
+            fResponse = window.confirm(sPrompt);
+        }
+        return fResponse;
+    }
+
+    /**
+     * Component.promptUser()
+     *
+     * @param {string} sPrompt
+     * @param {string} [sDefault]
+     * @returns {string|null}
+     */
+    static promptUser(sPrompt, sDefault)
+    {
+        var sResponse = null;
+        if (window) {
+            sResponse = window.prompt(sPrompt, sDefault === undefined? "" : sDefault);
+        }
+        return sResponse;
     }
 
     /**
@@ -638,7 +690,7 @@ class Component {
                     };
                 }(control));
                 /**
-                 * Override this.notice() with a replacement function that eliminates the Web.alertUser() call
+                 * Override this.notice() with a replacement function that eliminates the Component.alertUser() call
                  *
                  * @this {Component}
                  * @param {string} s
@@ -1062,4 +1114,4 @@ if (!Function.prototype.bind) {
     };
 }
 
-module.exports = Component;
+if (NODE) module.exports = Component;

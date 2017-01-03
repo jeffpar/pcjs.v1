@@ -217,7 +217,7 @@ class RK11 extends Component {
                         if (disk) {
                             if (DEBUG) rk11.println("saving disk " + disk.sDiskPath + "...");
                             var sAlert = Web.downloadFile(disk.encodeAsBase64(), "octet-stream", true, disk.sDiskFile.replace(".json", ".img"));
-                            Web.alertUser(sAlert);
+                            Component.alertUser(sAlert);
                         } else {
                             rk11.notice("No disk loaded in drive.");
                         }

@@ -94,16 +94,6 @@ class Usr {
     }
 
     /**
-     * getTime()
-     *
-     * @return {number} the current time, in milliseconds
-     */
-    static getTime()
-    {
-        return Date.now() || +new Date();
-    }
-
-    /**
      * getTimestamp()
      *
      * @return {string} timestamp containing the current date and time ("yyyy-mm-dd hh:mm:ss")
@@ -245,7 +235,6 @@ class Usr {
             bfs[f] = {mask: mask, shift: bit};
             bit += width;
         }
-        // Component.assert(bit <= 32);
         return bfs;
     }
 
@@ -288,7 +277,6 @@ class Usr {
      */
     static setBitField(bf, v, n)
     {
-        // Component.assert(!(n & ~(bf.mask >>> bf.shift)));
         return (v & ~bf.mask) | ((n << bf.shift) & bf.mask);
     }
 
