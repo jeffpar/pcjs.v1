@@ -78,7 +78,7 @@ function addStickyMachine(idMachine, sPosition)
                     if (machineSibling) machineSibling.style.paddingTop = 0;
                     machine.className = 'machine-floating ' + machine.className.replace(/machine-(floating|sticky) /g, '');
                 } else {
-                    if (machineSibling) machineSibling.style.paddingTop = (machine.offsetHeight + 16) + 'px';
+                    if (machineSibling) machineSibling.style.paddingTop = (machine.offsetHeight + 8) + 'px';
                     machine.className = 'machine-sticky ' + machine.className.replace(/machine-(floating|sticky) /g, '');
                 }
                 if (prevOnScroll) prevOnScroll();
