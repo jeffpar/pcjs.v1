@@ -145,46 +145,8 @@ of our Markdown or XML documents.  Examples: 'automount' becomes 'autoMount', 'a
   {% endif %}
   <script type="text/javascript">{{ machine_embed }}('{{ machine.id }}','{{ machine_config }}','{{ machine_template }}','{{ machine_parms }}');</script>
   {% if machine.sticky == "top" %}
-    <script type="text/javascript">
-      var startMachinePos = -1;
-      window.onscroll = function() {
-          var machine = document.getElementById('{{ machine.id }}');
-          if (machine) {
-              var machineFooter = document.getElementById('{{ machine.id }}.footer');
-              if (startMachinePos < 0) {
-                  startMachinePos = findTop(machine);
-              }
-              if (window.pageYOffset <= startMachinePos) {
-                  machine.style.position = 'relative';
-                  machine.style.zIndex = 'auto';
-                  machine.style.backgroundColor = '';
-                  machine.style.paddingRight = 0;
-                  if (machineFooter) machineFooter.style.paddingTop = 0;
-              } else {
-                  machine.style.position = 'fixed';
-                  machine.style.zIndex = 1;
-                  machine.style.backgroundColor = 'white';
-                  machine.style.paddingRight = '30px';
-                  machine.style.top = 0;
-                  if (machineFooter) machineFooter.style.paddingTop = machine.offsetHeight + 'px';
-              }
-          }
-      };
-      function findTop(obj) {
-          var curTop = 0;
-          if (typeof obj.offsetParent != 'undefined' && obj.offsetParent) {
-              while (obj.offsetParent) {
-                  curTop += obj.offsetTop;
-                  obj = obj.offsetParent;
-              }
-              curTop += obj.offsetTop;
-          }
-          else if (obj.y) {
-              curTop += obj.y;
-          }
-          return curTop;
-      }
-    </script>
+    <script type="text/javascript" src="{{ site.baseurl }}/modules/shared/lib/sticky.js"></script>
+    <script type="text/javascript">addStickyMachine('{{ machine.id }}');</script>
   {% endif %}
   {% if page.build %}
     <script type="text/javascript" src="{{ site.baseurl }}/modules/build/lib/build.js"></script>

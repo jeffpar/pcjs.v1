@@ -86,8 +86,6 @@
     }
 }
 
-
-
 /**
  * Site footer
  */
@@ -156,8 +154,6 @@
     }
 }
 
-
-
 /**
  * Page content
  */
@@ -187,8 +183,6 @@
     display: block;
     font-size: 24px;
 }
-
-
 
 /**
  * Posts
@@ -241,7 +235,19 @@
 .machine {
     margin-bottom: 16px;
 }
-
+.machine-floating {
+    position: relative;
+    z-index: auto;
+    background-color: transparent;
+    padding-right: 0;
+}
+.machine-sticky {
+    position: fixed !important;
+    z-index: 1 !important;
+    background-color: #ffffff !important;
+    padding-right: 30px !important;
+    top: 0 !important;
+}
 .screenshot-frame {
     display: inline-block;
     margin: 8px;

@@ -16,7 +16,7 @@ machines:
     sticky: top
 ---
 
-Introducing PDP-11 tutorials.  For more information, keep scrolling.
+Introducing PDP-11 tutorials.  For more details, keep scrolling, and keep your eye on the VT100 below.
 
 {% include machine.html id="vt100" %}
 
@@ -26,34 +26,42 @@ like [bitsavers.org](http://bitsavers.org), I suspect most people don't have a l
 reading old manuals.
 
 In an effort to remedy that situation, I'm adding some new features to PCjs.  The first feature is what I call
-"Sticky Machines", and it's more a website feature than a machine feature.  At the top of any PCjs webpage, in the
-*machines* section, a machine can now have a *sticky* property.  For now, the only supported value is "top"; e.g.:
+"Sticky Machines", and it's really just a new feature of the PCjs website.  At the top of any PCjs webpage, in the
+*machines* section, a machine can now define a *sticky* property.  For now, the only supported value is "top"; e.g.:
 
 	machines:
 	  - id: vt100
-		type: pc8080
-		config: /devices/pc8080/machine/vt100/machine.xml
-		connection: serialPort->test1170.dl11
-		sticky: top
+	    type: pc8080
+	    config: /devices/pc8080/machine/vt100/machine.xml
+	    connection: serialPort->test1170.dl11
+	    sticky: top
 
 A sticky machine makes it easier to construct a tutorial page for a single machine, by preventing that machine from
-scrolling off the top of the page; it "sticks" to the top instead.  The rest of the page scrolls normally, allowing the
-user to progress at their own pace through the text and/or images of an accompanying tutorial.
+scrolling off the top; it "sticks" to the top instead.  The rest of the page scrolls normally, allowing the user to
+progress at their own pace through the text and/or images of an accompanying tutorial.
 
 The second feature is a generalized method for sending commands to components within a machine.  For example, if we
-want to send some keyboard commands to machine:
+want to send some keyboard commands to a machine:
 
 {% raw %}
 	{% include machine-command.html type='button' label='Try It!' machine='vt100' component='Keyboard' command='sendString' value='Hello World' %}
 {% endraw %}
 
-which should translate into a control that looks like:
+which should translate into a control that looks like this:
 
 	<button type="button" onclick="commandMachine('vt100','Keyboard','sendString','Hello World')">Try It!</button>
 
 In fact, let's try it now. {% include machine-command.html type='button' label='Try It!' machine='vt100' component='Keyboard' command='sendString' value='Hello World' %}
 
-Obviously, every component we want to control will need to be updated to export the necessary functions.
+Obviously, every component we want to control will need to be updated to export the necessary "command" functions.
+
+So expect some PDPjs tutorials in the near future, featuring sticky machines and built-in command demos.  Some
+commands will be very simple, like the keyboard injection command shown above.  Others will perform more sophisticated
+operations, such as loading and booting a particular disk, running a particular application, automatically flipping
+selected Front Panel switches, and so on.
+
+Finally, in case you're wondering why there's another machine below, well, what did you think the VT100 was talking to?
+This PDP-11/70, of course.
 
 {% include machine.html id="test1170" %}
 
