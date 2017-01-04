@@ -41,22 +41,22 @@ scrolling off the top; it "sticks" to the top instead.  The rest of the page scr
 progress at their own pace through the text and/or images of an accompanying tutorial.
 
 The second feature is a generalized method for sending commands to components within a machine.  For example, if we
-want to send some keyboard commands to a machine:
+want to send some serial data to a machine:
 
 {% raw %}
-	{% include machine-command.html type='button' label='Try It!' machine='vt100' component='Keyboard' command='sendString' value='Hello World' %}
+	{% include machine-command.html type='button' label='Try It!' machine='vt100' component='SerialPort' command='receiveData' value='Hello World' %}
 {% endraw %}
 
 which should translate into a control that looks like this:
 
-	<button type="button" onclick="commandMachine('vt100','Keyboard','sendString','Hello World')">Try It!</button>
+	<button type="button" onclick="commandMachine('vt100','SerialPort','receiveData','Hello World')">Try It!</button>
 
-In fact, let's try it now. {% include machine-command.html type='button' label='Try It!' machine='vt100' component='Keyboard' command='sendString' value='Hello World' %}
+In fact, let's try it now. {% include machine-command.html type='button' label='Try It!' machine='vt100' component='SerialPort' command='receiveData' value='Hello World' %}
 
 Obviously, every component we want to control will need to be updated to export the necessary "command" functions.
 
 So expect some PDPjs tutorials in the near future, featuring sticky machines and built-in command demos.  Some
-commands will be very simple, like the keyboard injection command shown above.  Others will perform more sophisticated
+commands will be very simple, like the data injection command shown above.  Others will perform more sophisticated
 operations, such as loading and booting a particular disk, running a particular application, automatically flipping
 selected Front Panel switches, and so on.
 
