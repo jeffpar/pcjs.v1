@@ -245,8 +245,11 @@
     position: fixed !important;
     z-index: 1 !important;
     background-color: #ffffff !important;
-    padding-right: 30px !important;
+    padding-right: $spacing-unit !important;
     top: 0 !important;
+    @include media-query($on-laptop) {
+        padding-right: $spacing-unit / 2 !important;
+    }
 }
 .screenshot-frame {
     display: inline-block;
