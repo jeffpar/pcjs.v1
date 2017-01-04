@@ -1,5 +1,5 @@
 /**
- * @fileoverview Support for "sticky" machines
+ * @fileoverview Support for "sticky" machines and commands that drive them.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a> (@jeffpar)
  * @copyright © Jeff Parsons 2012-2017
  *
@@ -29,11 +29,19 @@
 "use strict";
 
 /**
- * addStickyMachine(idMachine)
+ * addStickyMachine(idMachine, sPosition)
+ *
+ * If a machine is defined with a 'sticky' property, then the page containing that machine should
+ * also contain a call this function.  Technically, the 'sticky' property's value should also be passed
+ * via sPosition, but since the only page position we currently support is "top", callers are currently
+ * omitting it, and "top" is simply assumed.
+ *
+ * TODO: Do something intelligent if sPosition is NOT omitted and is NOT "top".
  *
  * @param {string} idMachine
+ * @param {string} [sPosition] (if omitted, "top" is assumed)
  */
-function addStickyMachine(idMachine)
+function addStickyMachine(idMachine, sPosition)
 {
     var topMachine = -1;
     var prevOnScroll = window.onscroll;
@@ -68,16 +76,42 @@ function addStickyMachine(idMachine)
 }
 
 /**
- * commandMachine(idMachine, typeComponent, sCommand, sValue)
+ * commandMachine(idMachine, sType, sCommand, sValue)
+ *
+ * Note that this script is not compiled into any of the machines, since "sticky machines" are feature of the PCjs
+ * website rather than of the machines.  And since the machines are compiled, all their code and data is completely
+ * opaque to us, except for those functions explicitly exported by embed.js.
+ *
+ * So now, in addition to the functions for embedding machines on a webpage, embed.js includes a new function:
+ *
+ *      findMachineComponent()
+ *
+ * which uses existing Component methods to find the requested component type for a specific machine, and if a
+ * component is found, then its 'exports' table is checked for an entry matching the specified command string, and if
+ * an entry is found, then the corresponding function is called with the specified data.
  *
  * @param {string} idMachine
- * @param {string} typeComponent
+ * @param {string} sType
  * @param {string} sCommand
  * @param {string} [sValue]
  */
-function commandMachine(idMachine, typeComponent, sCommand, sValue)
+function commandMachine(idMachine, sType, sCommand, sValue)
 {
-    console.log("commandMachine('" + idMachine + "','" + typeComponent + "','" + sCommand + "','" + sValue + "')");
+    if (window.findMachineComponent) {
+        var component = window.findMachineComponent(idMachine, sType);
+        if (component) {
+            var exports = component['exports'];
+            if (exports) {
+                var fnCommand = exports[sCommand];
+                if (fnCommand) {
+                    //noinspection JSUnresolvedFunction
+                    fnCommand.call(component, sValue);
+                    return;
+                }
+            }
+        }
+    }
+    console.log("unimplemented: commandMachine('" + idMachine + "','" + typeComponent + "','" + sCommand + "','" + sValue + "')");
 }
 
 /**
