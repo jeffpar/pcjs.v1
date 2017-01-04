@@ -595,6 +595,18 @@ function embedPDP11(idMachine, sXMLFile, sXSLFile, sParms)
 }
 
 /**
+ * findMachineComponent(idMachine, sType)
+ *
+ * @param {string} idMachine
+ * @param {string} sType
+ * @return {Component|null}
+ */
+function findMachineComponent(idMachine, sType)
+{
+    return Component.getComponentByType(sType, idMachine + ".machine");
+}
+
+/**
  * Prevent the Closure Compiler from renaming functions we want to export, by adding them as global properties.
  */
 if (APPNAME == "C1Pjs") {
@@ -610,6 +622,8 @@ if (APPNAME == "PC8080") {
 if (APPNAME == "PDPjs") {
     window['embedPDP11']  = embedPDP11;
 }
+
+window['findMachineComponent'] = findMachineComponent;
 
 window['enableEvents'] = Web.enablePageEvents;
 window['sendEvent']    = Web.sendPageEvent;
