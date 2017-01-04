@@ -61,13 +61,25 @@ function addStickyMachine(idMachine, sPosition)
                 if (topMachine < 0) {
                     topMachine = findTop(machine);
                 }
-                machine.className = machine.className.replace(/machine-(floating|sticky) /g, '');
+                /*
+                 * There was a problem with this code on iOS devices using mobile Safari: when the page is
+                 * scrolled and the class of the machine <div> is changed the FIRST time from 'machine-floating'
+                 * to 'machine-sticky', the entire <div> -- with the exception of the canvas inside it -- disappears
+                 * until you lift your finger or the scrolling stops.
+                 *
+                 * The fix, according to http://stackoverflow.com/questions/32875046/ios-9-safari-changing-an-element-to-fixed-position-while-scrolling-wont-paint,
+                 * is to add a "transform: translateZ(0)", or alternatively "transform: translate3d(0px,0px,0px)",
+                 * to the machine <div> first.  Note that before I added that, the problem also seemed to be exacerbated
+                 * by my attempt to remove any pre-existing 'machine-floating' or 'machine-sticky' class separately, which
+                 * is why I now have redundant replace() calls below, updating the style in one step instead of two.
+                 */
+                machine.style.transform = "translateZ(0)";
                 if (window.pageYOffset <= topMachine) {
-                    machine.className = 'machine-floating ' + machine.className;
                     if (machineSibling) machineSibling.style.paddingTop = 0;
+                    machine.className = 'machine-floating ' + machine.className.replace(/machine-(floating|sticky) /g, '');
                 } else {
-                    machine.className = 'machine-sticky ' + machine.className;
-                    if (machineSibling) machineSibling.style.paddingTop = machine.offsetHeight + 'px';
+                    if (machineSibling) machineSibling.style.paddingTop = (machine.offsetHeight + 16) + 'px';
+                    machine.className = 'machine-sticky ' + machine.className.replace(/machine-(floating|sticky) /g, '');
                 }
                 if (prevOnScroll) prevOnScroll();
             }
