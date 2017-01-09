@@ -32,3 +32,4 @@ we need to use an RL02 drive.  A typical PDP-11 machine with a single RL11 disk 
 up to four such drives, which we refer to as RL0 through RL3.
 
 To select drive RL0, press {% include machine-command.html type='button' label='Select RL0' machine='test1170' component='RL11' command='selectDrive' value='RL0' %}
+
