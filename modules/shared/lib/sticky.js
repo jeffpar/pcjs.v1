@@ -117,7 +117,9 @@ function commandMachine(idMachine, sType, sCommand, sValue)
                 var fnCommand = exports[sCommand];
                 if (fnCommand) {
                     //noinspection JSUnresolvedFunction
-                    fnCommand.call(component, sValue);
+                    if (!fnCommand.call(component, sValue)) {
+                        window.alert("Error calling " + idMachine + "." + sType + "." + sCommand + "(" + sValue + ")");
+                    }
                     return;
                 }
             }
