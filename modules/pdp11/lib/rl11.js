@@ -39,6 +39,31 @@ if (NODE) {
     var DiskPDP11 = require("./disk");
 }
 
+/**
+ * Since the Closure Compiler treats ES6 classes as @struct rather than @dict by default,
+ * it deters us from defining named properties on our components; eg:
+ *
+ *      this['exports'] = {...}
+ *
+ * results in an error:
+ *
+ *      Cannot do '[]' access on a struct
+ *
+ * So, in order to define 'exports', we must override the @struct assumption by annotating
+ * the class as @unrestricted (or @dict).  Note that this must be done both here and in the
+ * Component class, because otherwise the Compiler won't allow us to *reference* the named
+ * property either.
+ *
+ * TODO: Consider marking ALL our classes unrestricted, because otherwise it forces us to
+ * define every single property the class uses in its constructor, which results in a fair
+ * bit of redundant initialization, since many properties aren't (and don't need to be) fully
+ * initialized until the appropriate init(), reset(), restore(), etc. function is called.
+ *
+ * The upside, however, may be that since the structure of the class is completely defined by
+ * the constructor, JavaScript engines may be able to optimize and run more efficiently.
+ *
+ * @unrestricted
+ */
 class RL11 extends Component {
     /**
      * RL11(parms)
@@ -83,6 +108,10 @@ class RL11 extends Component {
          * Define all the properties to be initialized by initController()
          */
         this.regRLCS = this.regRLBA = this.regRLDA = this.tmpRLDA = this.regRLMP = this.regRLBE = 0;
+
+        this['exports'] = {
+            'selectDrive': this.selectDrive
+        };
     }
 
     /**
@@ -756,15 +785,20 @@ class RL11 extends Component {
     /**
      * displayDisk(iDrive, fUpdateDrive)
      *
+     * This ensures that the selected disk matches the drive's sDiskPath property, and if fUpdateDrive is set,
+     * it also ensures that the selected drive matches the specified drive number.
+     *
      * @this {RL11}
-     * @param {number} iDrive (unvalidated)
+     * @param {number} iDrive
      * @param {boolean} [fUpdateDrive] is true to update the drive list to match the specified drive (eg, the auto-mount case)
+     * @return {boolean} true if successful, false if not
      */
     displayDisk(iDrive, fUpdateDrive)
     {
         /*
          * First things first: validate iDrive.
          */
+        var fSuccess = false;
         if (iDrive >= 0 && iDrive < this.aDrives.length) {
             var drive = this.aDrives[iDrive];
             var controlDisks = this.bindings["listDisks"];
@@ -774,9 +808,24 @@ class RL11 extends Component {
              */
             if (controlDisks && controlDrives && controlDisks.options && controlDrives.options) {
                 /*
-                 * Next, make sure the drive whose disk we're updating is the currently selected drive.
+                 * Next, update the drive if the caller has requested it.
                  */
                 var i;
+                if (fUpdateDrive) {
+                    this.assert(iDrive == drive.iDrive);
+                    for (i = 0; i < controlDrives.options.length; i++) {
+                        if (Str.parseInt(controlDrives.options[i].value, 10) == drive.iDrive) {
+                            if (controlDrives.selectedIndex != i) {
+                                controlDrives.selectedIndex = i;
+                            }
+                            fSuccess = true;
+                            break;
+                        }
+                    }
+                }
+                /*
+                 * Next, make sure the drive whose disk we're updating is the currently selected drive.
+                 */
                 var iDriveSelected = Str.parseInt(controlDrives.value, 10);
                 var sTargetPath = (drive.fLocal? RL11.SOURCE.LOCAL : drive.sDiskPath);
                 if (!isNaN(iDriveSelected) && iDriveSelected == iDrive) {
@@ -785,23 +834,41 @@ class RL11 extends Component {
                             if (controlDisks.selectedIndex != i) {
                                 controlDisks.selectedIndex = i;
                             }
+                            fSuccess = true;
                             break;
                         }
                     }
                     if (i == controlDisks.options.length) controlDisks.selectedIndex = 0;
                 }
-                if (fUpdateDrive) {
-                    for (i = 0; i < controlDrives.options.length; i++) {
-                        if (Str.parseInt(controlDrives.options[i].value, 10) == drive.iDrive) {
-                            if (controlDrives.selectedIndex != i) {
-                                controlDrives.selectedIndex = i;
-                            }
-                            break;
-                        }
+            }
+        }
+        return fSuccess;
+    }
+
+    /**
+     * selectDrive(sDrive)
+     *
+     * Used to programmatically select a drive by name.
+     *
+     * @this {RL11}
+     * @param {number} sDrive
+     * @return {boolean} true if successful, false if not
+     */
+    selectDrive(sDrive)
+    {
+        var controlDrives = this.bindings["listDrives"];
+        if (controlDrives && controlDrives.options) {
+            var nDrives = controlDrives.options.length;
+            for (var i = 0; i < nDrives; i++) {
+                if (controlDrives.options[i].innerHTML == sDrive) {
+                    var iDrive = Str.parseInt(controlDrives.options[i].value, 10);
+                    if (iDrive >= 0) {
+                        return this.displayDisk(iDrive, true);
                     }
                 }
             }
         }
+        return false;
     }
 
     /**
