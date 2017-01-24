@@ -1128,8 +1128,10 @@ class DebuggerPDP11 extends Debugger {
     {
         if (!this.checkCPU()) return false;
 
+        var sCmd = "";
         if (fRegs === null) {
             fRegs = (!this.sCmdTracePrev || this.sCmdTracePrev == "tr");
+            sCmd = fRegs? "tr" : "t";
         }
 
         this.nCycles = 0;
@@ -1178,7 +1180,7 @@ class DebuggerPDP11 extends Debugger {
             this.cmp.updateDisplays(-1);
         }
 
-        this.updateStatus(fRegs || false);
+        this.updateStatus(fRegs || false, sCmd);
         return (this.nCycles > 0);
     }
 
@@ -1194,16 +1196,21 @@ class DebuggerPDP11 extends Debugger {
     }
 
     /**
-     * updateStatus(fRegs)
+     * updateStatus(fRegs, sCmd)
      *
      * @this {DebuggerPDP11}
      * @param {boolean} [fRegs] (default is true)
+     * @param {string} [sCmd]
      */
-    updateStatus(fRegs)
+    updateStatus(fRegs, sCmd)
     {
         if (!this.fInit) return;
 
         if (fRegs === undefined) fRegs = true;
+
+        if (sCmd) {
+            this.println(DebuggerPDP11.PROMPT + sCmd);
+        }
 
         var trapStatus = this.cpu.getTrapStatus();
         if (trapStatus) {
@@ -1218,9 +1225,9 @@ class DebuggerPDP11 extends Debugger {
          * if inactive, 1 if stepping over an instruction without a register dump, or 2
          * if stepping over an instruction with a register dump.
          */
-        if (!fRegs || this.nStep == 1)
+        if (!fRegs || this.nStep == 1) {
             this.doUnassemble();
-        else {
+        } else {
             this.doRegisters();
         }
     }
@@ -3065,6 +3072,7 @@ class DebuggerPDP11 extends Debugger {
                 this.println("warning: " + Str.toHex(vNew) + " exceeds " + size + "-byte value");
             }
             this.println("changing " + this.toStrAddr(dbgAddr) + (this.messageEnabled(MessagesPDP11.BUS)? "" : (" from " + this.toStrBase(fnGet.call(this, dbgAddr), size))) + " to " + this.toStrBase(vNew, size));
+            //noinspection JSUnresolvedFunction
             fnSet.call(this, dbgAddr, vNew, size);
         }
     }
@@ -3901,8 +3909,7 @@ class DebuggerPDP11 extends Debugger {
                 sCmd = "";
             }
             else if (!fQuiet) {
-                var sPrompt = ">> ";
-                this.println(sPrompt + sCmd);
+                this.println(DebuggerPDP11.PROMPT + sCmd);
             }
 
             var ch = sCmd.charAt(0);
@@ -4381,6 +4388,8 @@ if (DEBUGGER) {
     ];
 
     DebuggerPDP11.HISTORY_LIMIT = DEBUG? 100000 : 1000;
+
+    DebuggerPDP11.PROMPT = ">> ";
 
     /*
      * Initialize every Debugger module on the page (as IF there's ever going to be more than one ;-))

@@ -49,7 +49,7 @@ if (NODE) {
  * with a switch statement).
  *
  * Eventually, every opcode should end up either in an opXXX() function or opUndefined().  For
- * opcodes that perform a simple read and/or write operation, the entire operation is handled by
+ * opcodes that perform a simple read or write operation, the entire operation is handled by
  * the opXXX() function.  For opcodes that perform a more extensive read/modify/write operation
  * (also known as an update operation), those opXXX() functions usually rely on a corresponding
  * fnXXX() helper function.
@@ -1455,13 +1455,11 @@ PDP11.opMUL = function(opCode)
 {
     var src = this.readDstWord(opCode);
     var reg = (opCode >> 6) & 7;
-    if (src & 0x8000) src |= ~0xffff;
     var dst = this.regsGen[reg];
-    if (dst & 0x8000) dst |= ~0xffff;
-    var result = ~~(src * dst);
+    var result = ((src << 16) >> 16) * ((dst << 16) >> 16);
     this.regsGen[reg] = (result >> 16) & 0xffff;
     this.regsGen[reg | 1] = result & 0xffff;
-    this.updateMulFlags(result);
+    this.updateMulFlags(result|0);
     this.nStepCycles -= (22 + 1);
 };
 
