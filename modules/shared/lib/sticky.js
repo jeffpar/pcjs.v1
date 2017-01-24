@@ -88,7 +88,7 @@ function addStickyMachine(idMachine, sPosition)
 }
 
 /**
- * commandMachine(idMachine, sType, sCommand, sValue)
+ * commandMachine(idMachine, sComponent, sCommand, sValue)
  *
  * Note that this script is not compiled into any of the machines, since "sticky machines" are feature of the PCjs
  * website rather than of the machines.  And since the machines are compiled, all their code and data is completely
@@ -98,19 +98,19 @@ function addStickyMachine(idMachine, sPosition)
  *
  *      findMachineComponent()
  *
- * which uses existing Component methods to find the requested component type for a specific machine, and if a
+ * which uses existing Component methods to find the requested component for a specific machine, and if the
  * component is found, then its 'exports' table is checked for an entry matching the specified command string, and if
  * an entry is found, then the corresponding function is called with the specified data.
  *
  * @param {string} idMachine
- * @param {string} sType
+ * @param {string} sComponent
  * @param {string} sCommand
  * @param {string} [sValue]
  */
-function commandMachine(idMachine, sType, sCommand, sValue)
+function commandMachine(idMachine, sComponent, sCommand, sValue)
 {
     if (window.findMachineComponent) {
-        var component = window.findMachineComponent(idMachine, sType);
+        var component = window.findMachineComponent(idMachine, sComponent);
         if (component) {
             var exports = component['exports'];
             if (exports) {
@@ -118,14 +118,14 @@ function commandMachine(idMachine, sType, sCommand, sValue)
                 if (fnCommand) {
                     //noinspection JSUnresolvedFunction
                     if (!fnCommand.call(component, sValue)) {
-                        window.alert("Error calling " + idMachine + "." + sType + "." + sCommand + "(" + sValue + ")");
+                        window.alert("Error calling " + idMachine + "." + sComponent + "." + sCommand + "(" + sValue + ")");
                     }
                     return;
                 }
             }
         }
     }
-    console.log("unimplemented: commandMachine('" + idMachine + "','" + typeComponent + "','" + sCommand + "','" + sValue + "')");
+    console.log("unimplemented: commandMachine('" + idMachine + "','" + sComponent + "','" + sCommand + "','" + sValue + "')");
 }
 
 /**
