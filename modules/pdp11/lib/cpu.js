@@ -267,7 +267,7 @@ class CPUPDP11 extends Component {
                  * However, we don't actually need to check all that; it's always safe use println(), regardless whether
                  * a Control Panel with a "print" control is present or not.
                  */
-                this.println("No debugger detected");
+                this.status("No debugger detected");
             }
             if (!this.flags.autoStart) {
                 this.println("CPU will not be auto-started " + (this.panel? "(click Run to start)" : "(type 'go' to start)"));

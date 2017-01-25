@@ -456,7 +456,7 @@ class BusPDP11 extends Component {
         }
 
         if (sizeLeft <= 0) {
-            this.status((size >> 10) + "Kb " + MemoryPDP11.TYPE_NAMES[type] + " at " + Str.toOct(addr));
+            this.status("Added " + (size >> 10) + "Kb " + MemoryPDP11.TYPE_NAMES[type] + " at " + Str.toOct(addr));
             return true;
         }
 

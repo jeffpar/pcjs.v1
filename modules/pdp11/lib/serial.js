@@ -389,7 +389,7 @@ class SerialPortPDP11 extends Component {
                             if (this.sendData) {
                                 this.fNullModem = fNullModem;
                                 this.updateStatus = exports['receiveStatus'];
-                                this.status(this.idMachine + '.' + sSourceID + " connected to " + sTargetID);
+                                this.status("Connected " + this.idMachine + '.' + sSourceID + " to " + sTargetID);
                                 return;
                             }
                         }
