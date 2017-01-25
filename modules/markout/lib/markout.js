@@ -114,6 +114,7 @@ function MarkOut(sMD, sIndent, req, aParms, fDebug, sMachineFile, fAutoHeading)
     this.aMachines = [];    // this keeps track of embedded machines on the page
     this.buildOptions = {}; // this keeps track of any build options specified on the page
     this.aMachineDefs = {}; // this keeps track of any machine definitions at the top of the file (as part of any Jekyll "Front Matter")
+    this.aCommandDefs = {}; // this keeps track of any command definitions at the top of the file (as part of any Jekyll "Front Matter")
 }
 
 /*
@@ -426,10 +427,12 @@ MarkOut.prototype.convertMD = function(sIndent)
     if (sMD.substr(0, 3) == "---") {
         aMatch = sMD.match(/^---([\s\S]*?)---[ \t]*\n*/);
         if (aMatch) {
+
             /*
              * Remove the Front Matter.
              */
             sMD = sMD.replace(aMatch[0], "");
+
             /*
              * Extract machine definitions, if any, from the Front Matter.
              */
@@ -519,14 +522,31 @@ MarkOut.prototype.convertMD = function(sIndent)
                     if (id) this.aMachineDefs[id] = machine;
                 }
             }
+
+            var aCommandDefs = aMatch[1].match(/\ncommands:([\s\S]*?)\n([^\s]|$)/);
+            if (aCommandDefs) {
+                var reCommand = /[ \t]+([^:]+):\s*\|/g;
+                var aCommands = aCommandDefs[1].split(reCommand);
+                /*
+                 * Since the preceding RegExp contains a capture group (representing the name of the command),
+                 * it will be "spliced" into the split results.  So, aCommands[0] will be whatever characters precede
+                 * the first command (which we can ignore), followed by the first command name, followed by one or more
+                 * command lines, followed by the second command name, followed by one or more command lines, and so on.
+                 */
+                for (var iCommand = 1; iCommand < aCommands.length; iCommand += 2) {
+                    this.aCommandDefs[aCommands[iCommand]] = aCommands[iCommand+1].trim().replace(/\n[ \t]*/g, "").replace(/"/g, "&quot;");
+                }
+            }
+
             /*
-             * If a "title" element existed in the Front Matter, this code auto-generates a top-level
-             * heading with the same value.
+             * If a "title" element existed in the Front Matter, this code auto-generates a top-level heading
+             * with the same value.
              */
             if (this.fAutoHeading) {
                 aSubMatch = aMatch[1].match(/title:\s*(.*?)\s*?\n/);
                 if (aSubMatch) sMD = aSubMatch[1] + "\n---\n\n" + sMD;
             }
+
             /*
              * If a "build" ID element existed in the Front Matter, capture it.
              */
@@ -576,7 +596,7 @@ MarkOut.prototype.convertMD = function(sIndent)
      * you want the second paragraph to appear as a code block, it must be indented TWICE (by 8 spaces
      * or 2 tabs).  That behavior should fall out of this hack as well.
      */
-    var re = /(^|\n)(  ? ?)([\*+-]|[0-9]+\.)([^\n]*\n)([ \t]+[^\n]*\n|\n)+([ \t]+[^\n]+)/g;
+    var re = /(^|\n)(  ? ?)([*+-]|[0-9]+\.)([^\n]*\n)([ \t]+[^\n]*\n|\n)+([ \t]+[^\n]+)/g;
     //noinspection UnnecessaryLocalVariableJS
     var sMDOrig = sMD;
     while ((aMatch = re.exec(sMDOrig))) {
@@ -845,7 +865,7 @@ MarkOut.prototype.convertMDList = function(sBlock, sIndent)
 
     var aMatch;
     var aMatches = [];
-    var re = /(^|\n) ? ? ?([\*+-]|[0-9]+\.)[ \t]+/g;
+    var re = /(^|\n) ? ? ?([*+-]|[0-9]+\.)[ \t]+/g;
     while ((aMatch = re.exec(sBlock))) {
         aMatches.push(aMatch);
     }
@@ -946,8 +966,8 @@ MarkOut.prototype.convertMDLinks = function(sBlock)
      * page's Front Matter; however, unless/until we start using Node again to host the public site,
      * that's low priority.
      */
-    sBlock = sBlock.replace(/([^\t])\{([\{%]).*?\2}/g, "$1");
-    sBlock = sBlock.replace(/(\{)([\{%])(.*?\2})/g, "<pre><code>$1$2$3</code></pre>");
+    sBlock = sBlock.replace(/([^\t])\{([{%]).*?\2}/g, "$1");
+    sBlock = sBlock.replace(/(\{)([{%])(.*?\2})/g, "<pre><code>$1$2$3</code></pre>");
 
     var aMatch;
     var re = /\[([^\[\]]*)]\((.*?)(?:\s*"(.*?)"\)|\))/g;
@@ -1283,11 +1303,17 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
         var sControl = findParm(aParms, 'type') || 'button';
         var sControlType = sControl == 'button'? ' type="button"' : '';
         if (this.aMachineDefs[sMachineID]) {
+            var sCommand = findParm(aParms, 'command');
+            var sValue = findParm(aParms, 'value');
+            if (this.aCommandDefs[sCommand]) {
+                sValue = this.aCommandDefs[sCommand];
+                sCommand = "script";
+            }
             sReplacement = '<' + sControl + sControlType + ' onclick="commandMachine(';
             sReplacement += "'" + sMachineID + "',";
             sReplacement += "'" + findParm(aParms, 'component') + "',";
-            sReplacement += "'" + findParm(aParms, 'command') + "',";
-            sReplacement += "'" + findParm(aParms, 'value') + "')";
+            sReplacement += "'" + sCommand + "',";
+            sReplacement += "'" + sValue + "')";
             sReplacement += '">' + (findParm(aParms, 'label') || 'Try It!') + '</' + sControl + '>';
         } else {
             sReplacement = "<!-- Unrecognized machine ID: " + sMachineID + " -->";
@@ -1350,8 +1376,8 @@ MarkOut.prototype.convertMDEmphasis = function(sBlock)
      *      *[modules](/modules/)*
      */
     if (sBlock.indexOf('*') >= 0 || sBlock.indexOf('_') >= 0) {
-        sBlock = sBlock.replace(/(^|[^a-z0-9-])([\*_])\2([\s\S]*?)\2\2([^a-z0-9-]|$)/gi, "$1<strong>$3</strong>$4");
-        sBlock = sBlock.replace(/(^|[^a-z0-9-])([\*_])([\s\S]*?)\2([^a-z0-9-]|$)/gi, "$1<em>$3</em>$4");
+        sBlock = sBlock.replace(/(^|[^a-z0-9-])([*_])\2([\s\S]*?)\2\2([^a-z0-9-]|$)/gi, "$1<strong>$3</strong>$4");
+        sBlock = sBlock.replace(/(^|[^a-z0-9-])([*_])([\s\S]*?)\2([^a-z0-9-]|$)/gi, "$1<em>$3</em>$4");
     }
     return sBlock;
 };

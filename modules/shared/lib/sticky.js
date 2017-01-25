@@ -113,7 +113,7 @@ function commandMachine(idMachine, sComponent, sCommand, sValue)
         var component = window.findMachineComponent(idMachine, sComponent);
         if (component) {
             if (sCommand == "script") {
-                window.alert("script(" + sValue + ")");
+                window.alert("commandScript('" + sValue + "')");
             } else {
                 var exports = component['exports'];
                 if (exports) {
