@@ -534,7 +534,7 @@ MarkOut.prototype.convertMD = function(sIndent)
                  * command lines, followed by the second command name, followed by one or more command lines, and so on.
                  */
                 for (var iCommand = 1; iCommand < aCommands.length; iCommand += 2) {
-                    this.aCommandDefs[aCommands[iCommand]] = aCommands[iCommand+1].trim().replace(/\n[ \t]*/g, "").replace(/"/g, "&quot;");
+                    this.aCommandDefs[aCommands[iCommand]] = aCommands[iCommand+1].replace(/\n[ \t]*/g, " ").trim().replace(/"/g, "&quot;");
                 }
             }
 
