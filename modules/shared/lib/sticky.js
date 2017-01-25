@@ -112,15 +112,19 @@ function commandMachine(idMachine, sComponent, sCommand, sValue)
     if (window.findMachineComponent) {
         var component = window.findMachineComponent(idMachine, sComponent);
         if (component) {
-            var exports = component['exports'];
-            if (exports) {
-                var fnCommand = exports[sCommand];
-                if (fnCommand) {
-                    //noinspection JSUnresolvedFunction
-                    if (!fnCommand.call(component, sValue)) {
-                        window.alert("Error calling " + idMachine + "." + sComponent + "." + sCommand + "(" + sValue + ")");
+            if (sCommand == "script") {
+                window.alert("script(" + sValue + ")");
+            } else {
+                var exports = component['exports'];
+                if (exports) {
+                    var fnCommand = exports[sCommand];
+                    if (fnCommand) {
+                        //noinspection JSUnresolvedFunction
+                        if (!fnCommand.call(component, sValue)) {
+                            window.alert("Error calling " + idMachine + "." + sComponent + "." + sCommand + "(" + sValue + ")");
+                        }
+                        return;
                     }
-                    return;
                 }
             }
         }

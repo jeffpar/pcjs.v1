@@ -105,7 +105,9 @@ class Component {
         this.name = parms['name'];
         this.comment = parms['comment'];
         this.parms = parms;
+
         this['exports'] = {};
+        this['bindings'] = {};
 
         var i = this.id.indexOf('.');
         if (i < 0) {
@@ -129,7 +131,6 @@ class Component {
 
         this.fnReady = null;
         this.clearError();
-        this.bindings = {};
         this.bitsMessage = bitsMessage || 0;
 
         /** @type {Object|null} controlPrint is the HTML control, if any, that we can print to */

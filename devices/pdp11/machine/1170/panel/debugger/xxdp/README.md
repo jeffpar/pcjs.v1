@@ -14,10 +14,10 @@ machines:
     sticky: top
 commands:
   bootXXDP: |
-    select rl11 listDrives RL0
-    select rl11 listDisks "XXDP+ Diagnostics"
-    load rl11
-    boot rl11
+    select rl11 listDrives RL0;
+    select rl11 listDisks "XXDP+ Diagnostics";
+    click rl11 loadDisk;
+    click rl11 bootDisk
 ---
 
 This machine is ready to boot [XXDP+ Diagnostics](/disks/dec/rl02k/xxdp/) ("BOOT RL0") and run
