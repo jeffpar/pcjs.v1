@@ -1923,7 +1923,6 @@ HTMLOut.prototype.processMachines = function(aMachines, buildOptions, done)
             var sScriptFolder = sScriptName == "c1p"? "c1pjs" : (sScriptName.substr(0, 3) == "pdp"? "pdpjs" : sScriptName);
             asFiles.push("/versions/" + sScriptFolder + "/" + sVersion + "/components.css");
             asFiles.push("/versions/" + sScriptFolder + "/" + sVersion + "/" + sScriptFile);
-            this.addFilesToHTML(asFiles, sScriptEmbed);
         }
         else if (asFiles = aMachineFiles[sType]) {
             /*
@@ -1968,22 +1967,26 @@ HTMLOut.prototype.processMachines = function(aMachines, buildOptions, done)
                     }
                 }
             }
-            this.addFilesToHTML(asFiles, sScriptEmbed);
-            if (infoMachine['sticky']) {
-                asFiles = [];
-                asFiles.push("/modules/shared/lib/sticky.js");
-                sScriptEmbed = '<script type="text/javascript">addStickyMachine("' + infoMachine['id'] + '")</script>';
-                this.addFilesToHTML(asFiles, sScriptEmbed);
-            }
-            if (buildOptions.id) {
-                asFiles = [];
-                asFiles.push("/modules/build/lib/build.js");
-                sScriptEmbed = '<script type="text/javascript">buildPC("' + buildOptions.id + '")</script>';
-                this.addFilesToHTML(asFiles, sScriptEmbed);
-            }
         }
         else {
             HTMLOut.logDebug('HTMLOut.processMachines(): unrecognized machine type "' + sType + '"');
+            continue;
+        }
+
+        this.addFilesToHTML(asFiles, sScriptEmbed);
+
+        if (infoMachine['sticky']) {
+            asFiles = [];
+            asFiles.push("/modules/shared/lib/sticky.js");
+            sScriptEmbed = '<script type="text/javascript">addStickyMachine("' + infoMachine['id'] + '")</script>';
+            this.addFilesToHTML(asFiles, sScriptEmbed);
+        }
+
+        if (buildOptions.id) {
+            asFiles = [];
+            asFiles.push("/modules/build/lib/build.js");
+            sScriptEmbed = '<script type="text/javascript">buildPC("' + buildOptions.id + '")</script>';
+            this.addFilesToHTML(asFiles, sScriptEmbed);
         }
     }
     if (done) done();
