@@ -105,7 +105,18 @@ class Component {
         this.name = parms['name'];
         this.comment = parms['comment'];
         this.parms = parms;
-        this['exports'] = {};
+
+        /*
+         * The following Component properties need to be accessible by other machines and/or command scripts;
+         * well, OK, or we could have exported some new functions to walk the contents of these properties, as we
+         * did with findMachineComponent(), but this works just as well.
+         *
+         * Also, while the double-assignment looks silly (ie, using both dot and bracket property notation), it
+         * resolves a complaint from the Closure Compiler, because if we use ONLY bracket notation here, then the
+         * Compiler wants us to change all the other references to bracket notation as well.
+         */
+        this.exports = this['exports'] = {};
+        this.bindings = this['bindings'] = {};
 
         var i = this.id.indexOf('.');
         if (i < 0) {
@@ -129,7 +140,6 @@ class Component {
 
         this.fnReady = null;
         this.clearError();
-        this.bindings = {};
         this.bitsMessage = bitsMessage || 0;
 
         /** @type {Object|null} controlPrint is the HTML control, if any, that we can print to */
