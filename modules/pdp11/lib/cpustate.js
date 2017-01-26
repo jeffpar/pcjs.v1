@@ -593,17 +593,20 @@ class CPUStatePDP11 extends CPUPDP11 {
             if (!this.isRunning()) this.startCPU();
         }
         else {
-            if (this.dbg) {
+            if (this.dbg && this.flags.powered) {
                 /*
                  * TODO: Review the decision to always stop the CPU if the Debugger is loaded.  Note that
-                 * when stopCPU() stops a running CPU, the Debugger gets notified, so again, no need to notify it here.
+                 * when stopCPU() stops a running CPU, the Debugger gets notified, so no need to notify it again.
                  *
                  * TODO: There are more serious problems to deal with if another component is slamming a new PC down
                  * the CPU's throat (presumably while also dropping some new code into RAM) while the CPU was still running;
                  * we should probably force a complete reset if the CPU is running, but for now, it's up to the user
                  * to hit the reset button themselves.
                  */
-                if (!this.stopCPU()) this.dbg.updateStatus();
+                if (!this.stopCPU()) {
+                    this.dbg.updateStatus();
+                    this.cmp.updateDisplays(-1);
+                }
             }
             else if (fStart === false) {
                 this.stopCPU();

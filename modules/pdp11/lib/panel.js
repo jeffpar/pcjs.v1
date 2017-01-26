@@ -533,12 +533,9 @@ class PanelPDP11 extends Component {
     displayValue(sLabel, nValue, cch)
     {
         if (this.bindings[sLabel]) {
-            if (nValue === undefined) {
-                this.setError("Value for " + sLabel + " is invalid");
-                this.cpu.stopCPU();
-            }
             var sVal;
             var nBase = this.dbg && this.dbg.nBase || 8;
+            nValue = nValue || 0;
             if (!this.cpu.isRunning() || this.fDisplayLiveRegs) {
                 sVal = nBase == 8? Str.toOct(nValue, cch) : Str.toHex(nValue, cch);
             } else {

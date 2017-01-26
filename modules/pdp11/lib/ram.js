@@ -137,12 +137,14 @@ class RAMPDP11 extends Component {
              */
             delete this.aSymbols;
         }
-        /*
-         * The Computer powers up the CPU last, at which point CPUState state is restored,
-         * which includes the Bus state, and since we use the Bus to allocate all our memory,
-         * memory contents are already restored for us, so we don't need the usual restore
-         * logic.
-         */
+        if (!fRepower) {
+            /*
+             * Since we use the Bus to allocate all our memory, memory contents are already restored for us,
+             * so we don't save any state, and therefore no state should be restored.  Just do a reset().
+             */
+            this.assert(!data);
+            this.reset();
+        }
         return true;
     }
 
