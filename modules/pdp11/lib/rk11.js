@@ -79,10 +79,24 @@ class RK11 extends Component {
         this.fLocalDisks = (!Web.isMobile() && window && 'FileReader' in window);
         this.sDiskSource = RK11.SOURCE.NONE;
 
+        /*
+         * The following array keeps track of every disk image we've ever mounted.  Each entry in the
+         * array is another array whose elements are:
+         *
+         *      [0]: name of disk
+         *      [1]: path of disk
+         *      [2]: array of deltas, uninitialized until the disk is unmounted and/or all state is saved
+         *
+         * See functions addDiskHistory() and updateDiskHistory().
+         */
+        this.aDiskHistory = [];
+
         this.irq = null;
 
         /*
          * Define all the properties to be initialized by initController()
+         *
+         * TODO: Determine what we should really be doing with the RKDB register.
          */
         this.regRKDS = this.regRKER = this.regRKCS = this.regRKWC = this.regRKBA = this.regRKDA = this.regRKDB = 0;
     }
@@ -436,7 +450,7 @@ class RK11 extends Component {
     save()
     {
         var state = new State(this);
-        // state.set(0, this.saveController());
+        state.set(0, this.saveController());
         return state.data();
     }
 
@@ -455,16 +469,155 @@ class RK11 extends Component {
     }
 
     /**
+     * initController(a)
+     *
+     * @this {RK11}
+     * @param {Array} [a]
+     * @return {boolean} true if successful, false if failure
+     */
+    initController(a)
+    {
+        var fSuccess = true;
+
+        if (!a) {
+            a = [(RK11.RKDS.RK05 | RK11.RKDS.SOK | RK11.RKDS.RRDY), 0, (RK11.RKCS.CRDY), 0, 0, 0, 0];
+        }
+
+        /*
+         * ES6 ALERT: Love these destructuring assignments, which make it easy to perform the
+         * inverse of what save() does when it collects a bunch of object properties into an array.
+         */
+        [
+            this.regRKDS,
+            this.regRKER,
+            this.regRKCS,
+            this.regRKWC,
+            this.regRKBA,
+            this.regRKDA,
+            this.regRKDB
+        ] = a;
+
+        /*
+         * Initialize the disk history (if available) before initializing the drives, so that any disk deltas can be
+         * applied to disk images that are already loaded.
+         */
+        if (a[7]) {
+            this.aDiskHistory = a[7];
+        }
+
+        for (var iDrive = 0; iDrive < this.aDrives.length; iDrive++) {
+            var drive = this.aDrives[iDrive];
+            if (drive === undefined) {
+                drive = this.aDrives[iDrive] = {};
+            }
+            if (!this.initDrive(drive, iDrive)) {
+                fSuccess = false;
+            }
+        }
+        return fSuccess;
+    }
+
+    /**
      * saveController()
      *
-     * TODO: Implement.
+     * Basically, the inverse of initController().
      *
      * @this {RK11}
      * @return {Array}
      */
     saveController()
     {
-        return [];
+        return [
+            this.regRKDS,
+            this.regRKER,
+            this.regRKCS,
+            this.regRKWC,
+            this.regRKBA,
+            this.regRKDA,
+            this.regRKDB,
+            this.saveDeltas()
+        ];
+    }
+
+    /**
+     * saveDeltas()
+     *
+     * This returns an array of entries, one for each disk image we've ever mounted, including any deltas; ie:
+     *
+     *      [name, path, deltas]
+     *
+     * aDiskHistory contains exactly that, except that deltas may not be up-to-date for any currently mounted
+     * disk image(s), so we call updateHistory() for all those disks, and then aDiskHistory is ready to be saved.
+     *
+     * @this {RK11}
+     * @return {Array}
+     */
+    saveDeltas()
+    {
+        for (var iDrive = 0; iDrive < this.aDrives.length; iDrive++) {
+            var drive = this.aDrives[iDrive];
+            if (drive.disk) {
+                this.updateDiskHistory(drive.sDiskName, drive.sDiskPath, drive.disk);
+            }
+        }
+        return this.aDiskHistory;
+    }
+
+    /**
+     * initDrive(drive, iDrive, data)
+     *
+     * TODO: Consider a separate Drive class that any drive controller can use, since there's a lot of commonality
+     * between the drive objects created by disk controllers.  This will clean up overall drive management and allow
+     * us to factor out some common Drive methods.
+     *
+     * Also, either use or eliminate the data parameter; if there are no drive properties that need to be preserved
+     * across save/restore, then eliminate it.
+     *
+     * @this {RK11}
+     * @param {Object} drive
+     * @param {number} iDrive
+     * @param {Array|undefined} [data]
+     * @return {boolean} true if successful, false if failure
+     */
+    initDrive(drive, iDrive, data)
+    {
+        var i = 0;
+        var fSuccess = true;
+
+        drive.iDrive = iDrive;
+        drive.name = this.idComponent;
+        drive.fBusy = drive.fLocal = false;
+
+        /*
+         * NOTE: We initialize the following drive properties to their MAXIMUMs; disks may have
+         * these or SMALLER values (subject to the limits of what the controller supports, of course).
+         */
+        drive.nCylinders = 203;
+        drive.nHeads = 2;
+        drive.nSectors = 12;
+        drive.cbSector = 512;
+        drive.fRemovable = true;
+
+        /*
+         * The next group of properties are set by various controller command sequences.
+         */
+        drive.bHead = 0;
+        drive.bCylinder = 0;
+        drive.bSector = 1;
+        drive.bSectorEnd = drive.nSectors;      // aka EOT
+        drive.nBytes = drive.cbSector;
+
+        /*
+         * The next group of properties are managed by worker functions (eg, doRead()) to maintain state across DMA requests.
+         */
+        drive.ibSector = 0;
+        drive.sector = null;
+
+        if (!drive.disk) drive.sDiskPath = "";  // ensure this is initialized to a default that displayDisk() can deal with
+
+        drive.status = RK11.RKDS.RK05 | RK11.RKDS.SOK | RK11.RKDS.RRDY;
+
+        return fSuccess;
     }
 
     /**
@@ -637,8 +790,6 @@ class RK11 extends Component {
      */
     finishLoadDrive(drive, disk, sDiskName, sDiskPath, fAutoMount)
     {
-        var aDiskInfo;
-
         drive.fBusy = false;
 
         if (disk) {
@@ -669,23 +820,7 @@ class RK11 extends Component {
              * of a local disk image, it will map all such disks to "Local Disk", and any attempt to "Mount" such
              * a disk, will essentially result in a "Disk not found" error.
              */
-            // this.addDiskHistory(sDiskName, sDiskPath, disk);
-
-            /*
-             * For a local disk (ie, one loaded via mountDrive()), the disk.restore() performed by addDiskHistory()
-             * may have altered the disk geometry, so refresh the disk info.
-             */
-            // aDiskInfo = disk.info();
-
-            /*
-             * Clearly, a successful mount implies a disk change, and I suppose that, technically, an *unsuccessful*
-             * mount should imply the same, but what would the real-world analog be?  Inserting a piece of cardboard
-             * instead of an actual disk?  In any case, if we can do the user a favor by pretending (as far as the
-             * disk change line is concerned) that an unsuccessful mount never happened, let's do it.
-             *
-             * Successful unmounts are a different story, however; those *do* trigger a change. See unloadDrive().
-             */
-            // this.regInput |= FDC.REG_INPUT.DISK_CHANGE;
+            this.addDiskHistory(sDiskName, sDiskPath, disk);
 
             /*
              * With the addition of notify(), users are now "alerted" whenever a disk has finished loading;
@@ -826,7 +961,7 @@ class RK11 extends Component {
             /*
              * Before we toss the disk's information, capture any deltas that may have occurred.
              */
-            // this.updateDiskHistory(drive.sDiskName, drive.sDiskPath, drive.disk);
+            this.updateDiskHistory(drive.sDiskName, drive.sDiskPath, drive.disk);
 
             drive.sDiskName = "";
             drive.sDiskPath = "";
@@ -851,7 +986,7 @@ class RK11 extends Component {
      */
     unloadAllDrives(fDiscard)
     {
-        // if (fDiscard) this.aDiskHistory = [];
+        if (fDiscard) this.aDiskHistory = [];
 
         for (var iDrive = 0; iDrive < this.aDrives.length; iDrive++) {
             this.unloadDrive(iDrive, true);
@@ -859,89 +994,85 @@ class RK11 extends Component {
     }
 
     /**
-     * initController(data)
+     * addDiskHistory(sDiskName, sDiskPath, disk)
      *
      * @this {RK11}
-     * @param {Array} [data]
-     * @return {boolean} true if successful, false if failure
+     * @param {string} sDiskName
+     * @param {string} sDiskPath
+     * @param {DiskPDP11} disk containing corresponding disk image
      */
-    initController(data)
+    addDiskHistory(sDiskName, sDiskPath, disk)
     {
-        var i = 0;
-        if (!data) data = [];
-        this.regRKDS = data[i++] || (RK11.RKDS.RK05 | RK11.RKDS.SOK | RK11.RKDS.RRDY);
-        this.regRKER = data[i++] || 0;
-        this.regRKCS = data[i++] || (RK11.RKCS.CRDY);
-        this.regRKWC = data[i++] || 0;
-        this.regRKBA = data[i++] || 0;
-        this.regRKDA = data[i++] || 0;
-        this.regRKDB = data[i] || 0;    // TODO: Determine if there's anything we should be doing to the RKDB register
-
-        var fSuccess = true;
-        for (var iDrive = 0; iDrive < this.aDrives.length; iDrive++) {
-            var drive = this.aDrives[iDrive];
-            if (drive === undefined) {
-                drive = this.aDrives[iDrive] = {};
-            }
-            if (!this.initDrive(drive, iDrive)) {
-                fSuccess = false;
+        var i;
+        this.assert(!!sDiskPath);
+        for (i = 0; i < this.aDiskHistory.length; i++) {
+            if (this.aDiskHistory[i][1] == sDiskPath) {
+                var nChanges = disk.restore(this.aDiskHistory[i][2]);
+                if (DEBUG && this.messageEnabled()) {
+                    this.printMessage("disk '" + sDiskName + "' restored from history (" + nChanges + " changes)");
+                }
+                return;
             }
         }
-        return fSuccess;
+        if (DEBUG && this.messageEnabled()) {
+            this.printMessage("disk '" + sDiskName + "' added to history (nothing to restore)");
+        }
+        this.aDiskHistory[i] = [sDiskName, sDiskPath, []];
     }
 
     /**
-     * initDrive(drive, iDrive, data)
-     *
-     * TODO: Consider a separate Drive class that any drive controller can use, since there's a lot of commonality
-     * between the drive objects created by disk controllers.  This will clean up overall drive management and allow
-     * us to factor out some common Drive methods.
+     * removeDiskHistory(sDiskName, sDiskPath)
      *
      * @this {RK11}
-     * @param {Object} drive
-     * @param {number} iDrive
-     * @param {Array|undefined} [data]
-     * @return {boolean} true if successful, false if failure
+     * @param {string} sDiskName
+     * @param {string} sDiskPath
      */
-    initDrive(drive, iDrive, data)
+    removeDiskHistory(sDiskName, sDiskPath)
     {
-        var i = 0;
-        var fSuccess = true;
+        var i;
+        for (i = 0; i < this.aDiskHistory.length; i++) {
+            if (this.aDiskHistory[i][1] == sDiskPath) {
+                this.aDiskHistory.splice(i, 1);
+                if (DEBUG && this.messageEnabled()) {
+                    this.printMessage("disk '" + sDiskName + "' removed from history");
+                }
+                return;
+            }
+        }
+        if (DEBUG && this.messageEnabled()) {
+            this.printMessage("unable to remove disk '" + sDiskName + "' from history (" + sDiskPath + ")");
+        }
+    }
 
-        drive.iDrive = iDrive;
-        drive.name = this.idComponent;
-        drive.fBusy = drive.fLocal = false;
-
+    /**
+     * updateDiskHistory(sDiskName, sDiskPath, disk)
+     *
+     * @this {RK11}
+     * @param {string} sDiskName
+     * @param {string} sDiskPath
+     * @param {DiskPDP11} disk containing corresponding disk image, with possible deltas
+     */
+    updateDiskHistory(sDiskName, sDiskPath, disk)
+    {
+        var i;
+        for (i = 0; i < this.aDiskHistory.length; i++) {
+            if (this.aDiskHistory[i][1] == sDiskPath) {
+                this.aDiskHistory[i][2] = disk.save();
+                if (DEBUG && this.messageEnabled()) {
+                    this.printMessage("disk '" + sDiskName + "' updated in history");
+                }
+                return;
+            }
+        }
         /*
-         * NOTE: We initialize the following drive properties to their MAXIMUMs; disks may have
-         * these or SMALLER values (subject to the limits of what the controller supports, of course).
+         * I used to report this as an error (at least in the DEBUG release), but it's no longer really
+         * an error, because if we're trying to re-mount a clean copy of a disk, we toss its history, then
+         * unload, and then reload/remount.  And since unloadDrive's normal behavior is to call updateDiskHistory()
+         * before unloading, the fact that the disk is no longer listed here can't be treated as an error.
          */
-        drive.nCylinders = 203;
-        drive.nHeads = 2;
-        drive.nSectors = 12;
-        drive.cbSector = 512;
-        drive.fRemovable = true;
-
-        /*
-         * The next group of properties are set by various controller command sequences.
-         */
-        drive.bHead = 0;
-        drive.bCylinder = 0;
-        drive.bSector = 1;
-        drive.bSectorEnd = drive.nSectors;      // aka EOT
-        drive.nBytes = drive.cbSector;
-
-        /*
-         * The next group of properties are managed by worker functions (eg, doRead()) to maintain state across DMA requests.
-         */
-        drive.ibSector = 0;
-        drive.sector = null;
-
-        if (!drive.disk) drive.sDiskPath = "";  // ensure this is initialized to a default that displayDisk() can deal with
-
-        drive.status = RK11.RKDS.RK05 | RK11.RKDS.SOK | RK11.RKDS.RRDY;
-
-        return fSuccess;
+        if (DEBUG && this.messageEnabled()) {
+            this.printMessage("unable to update disk '" + sDiskName + "' in history (" + sDiskPath + ")");
+        }
     }
 
     /**

@@ -727,7 +727,7 @@ class ComputerPDP11 extends Component {
              * TODO: Do we not care about the return value here? (ie, is checking fRestoreError sufficient)?
              */
             this.powerRestore(this.cpu, stateComputer, fRepower, fRestore);
-            this.updateDisplays();
+            this.updateDisplays(-2);
             this.cpu.autoStart();
         }
 

@@ -2752,7 +2752,9 @@ class DebuggerPDP11 extends Debugger {
 
         if (sParm == 'n') {
             this.nBreakInstructions = this.parseValue(sAddr);
-            this.println("break after " + this.nBreakInstructions + " instruction(s)");
+            if (this.nBreakInstructions != null) {
+                this.println("break after " + this.nBreakInstructions + " instruction(s)");
+            }
             return;
         }
 

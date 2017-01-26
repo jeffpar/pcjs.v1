@@ -577,9 +577,10 @@ class CPUStatePDP11 extends CPUPDP11 {
     {
         this.addrReset = addr;
 
-        this.resetCPU();
         this.setPC(addr);
         this.setPSW(0);
+
+        this.resetCPU();
 
         if (fStart) {
             /*
@@ -677,7 +678,7 @@ class CPUStatePDP11 extends CPUPDP11 {
     restore(data)
     {
         /*
-         * ES6 ALERT: Gotta love these destructuring assignments, which make it easy to perform the
+         * ES6 ALERT: Love these destructuring assignments, which make it easy to perform the
          * inverse of what save() does when it collects a bunch of object properties into an array.
          */
         [

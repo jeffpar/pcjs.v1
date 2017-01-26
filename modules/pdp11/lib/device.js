@@ -241,7 +241,7 @@ class DevicePDP11 extends Component {
     restore(data)
     {
         /*
-         * ES6 ALERT: Gotta love these destructuring assignments, which make it easy to perform the
+         * ES6 ALERT: Love these destructuring assignments, which make it easy to perform the
          * inverse of what save() does when it collects a bunch of object properties into an array.
          */
         [

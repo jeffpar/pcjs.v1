@@ -485,32 +485,48 @@ class SerialPortPDP11 extends Component {
     }
 
     /**
-     * initState(data)
+     * initState(a)
      *
      * @this {SerialPortPDP11}
-     * @param {Array} [data]
+     * @param {Array} [a]
      * @return {boolean} true if successful, false if failure
      */
-    initState(data)
+    initState(a)
     {
-        this.regRBUF = 0;
-        this.regRCSR = PDP11.DL11.RCSR.CTS;     // TODO: I didn't use to set this initially; is this wise?
-        this.regXCSR = PDP11.DL11.XCSR.READY;
-        this.abReceive = [];
+        if (!a) {
+            a = [0, PDP11.DL11.RCSR.CTS, PDP11.DL11.XCSR.READY, this.abReceive];
+        }
+
+        /*
+         * ES6 ALERT: Love these destructuring assignments, which make it easy to perform the
+         * inverse of what save() does when it collects a bunch of object properties into an array.
+         */
+        [
+            this.regRBUF,
+            this.regRCSR,
+            this.regXCSR,
+            this.abReceive
+        ] = a;
+
         return true;
     }
 
     /**
      * saveRegisters()
      *
-     * TODO: Implement.
+     * Basically, the inverse of initState().
      *
      * @this {SerialPortPDP11}
      * @return {Array}
      */
     saveRegisters()
     {
-        return [];
+        return [
+            this.regRBUF,
+            this.regRCSR,
+            this.regXCSR,
+            this.abReceive
+        ];
     }
 
     /**

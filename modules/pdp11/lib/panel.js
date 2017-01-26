@@ -36,6 +36,7 @@ if (NODE) {
     var Str = require("../../shared/es6/strlib");
     var Web = require("../../shared/es6/weblib");
     var Component = require("../../shared/es6/component");
+    var State = require("../../shared/es6/state");
     var PDP11 = require("./defines");
     var BusPDP11 = require("./bus");
     var MessagesPDP11 = require("./messages");
@@ -80,6 +81,7 @@ class PanelPDP11 extends Component {
         this.regDisplay = 0;
         this.regSwitches = 0;
         this.regAddr = this.regData = 0;
+        this.ledAddr = this.ledData = -1;
 
         /*
          * The panel hardware has the following additional (supported) state; note that there are several
@@ -246,6 +248,7 @@ class PanelPDP11 extends Component {
          * Simulate a call to our stop() handler, to update the panel's ADDRESS register with the current PC.
          */
         this.stop();
+        this.setDR(0);
     }
 
     /**
@@ -396,10 +399,11 @@ class PanelPDP11 extends Component {
              */
             if (this.fBindings) PanelPDP11.init();
 
-            /*
-             * TODO: Until we implement a restore() function, all we can do is reset()
-             */
-            this.reset();
+            if (!data) {
+                this.reset();
+            } else {
+                if (!this.restore(data)) return false;
+            }
         }
         return true;
     }
@@ -414,6 +418,45 @@ class PanelPDP11 extends Component {
      */
     powerDown(fSave, fShutdown)
     {
+        return fSave? this.save() : true;
+    }
+
+    /**
+     * save()
+     *
+     * This implements save support for the PanelPDP11 component.
+     *
+     * @this {PanelPDP11}
+     * @return {Object}
+     */
+    save()
+    {
+        var state = new State(this);
+        state.set(0, [
+            this.getAR(),
+            this.getDR(),
+            this.getSR()
+        ]);
+        return state.data();
+    }
+
+    /**
+     * restore(data)
+     *
+     * This implements restore support for the PanelPDP11 component.
+     *
+     * @this {PanelPDP11}
+     * @param {Object} data
+     * @return {boolean} true if successful, false if failure
+     */
+    restore(data)
+    {
+        var a = data[0];
+        if (a) {
+            this.setAR(a[0]);
+            this.setDR(a[1]);
+            this.setSR(a[2]);
+        }
         return true;
     }
 
@@ -865,7 +908,10 @@ class PanelPDP11 extends Component {
     updateAddr(value)
     {
         this.regAddr = value & this.bus.nBusMask;
-        this.updateLEDArray("A", this.regAddr, 22);
+        if (this.ledAddr !== this.regAddr) {
+            this.ledAddr = this.regAddr;
+            this.updateLEDArray("A", this.ledAddr, 22);
+        }
         return this.regAddr;
     }
 
@@ -879,7 +925,10 @@ class PanelPDP11 extends Component {
     updateData(value)
     {
         this.regData = value & 0xffff;
-        this.updateLEDArray("D", this.regData, 16);
+        if (this.ledData !== this.regData) {
+            this.ledData = this.regData;
+            this.updateLEDArray("D", this.ledData, 16);
+        }
         return this.regData;
     }
 
@@ -996,7 +1045,7 @@ class PanelPDP11 extends Component {
      * Called by the Computer component at intervals to update registers, LEDs, etc.
      *
      * @this {PanelPDP11}
-     * @param {number} [nUpdate] (< 0 for forced, > 0 for periodic, 0 otherwise)
+     * @param {number} [nUpdate] (-2 for power on, -1 for forced, > 0 for periodic, 0 or undefined otherwise)
      */
     updateDisplay(nUpdate)
     {
@@ -1032,7 +1081,13 @@ class PanelPDP11 extends Component {
                  * TODO: There is currently no mechanism for selecting regData over regDisplay;
                  * we are acting as if the DATASEL switch setting is locked to "DISPLAY REGISTER".
                  */
-                this.updateAddr(nUpdate > 0 && fRunning && !fWaiting? this.cpu.getLastAddr() : this.regAddr);
+                if (nUpdate < -1) {
+                    this.regAddr = this.cpu.regsGen[7];
+                } else if (nUpdate > 0 && fRunning && !fWaiting) {
+                    this.regAddr = this.cpu.getLastAddr();
+                }
+
+                this.updateAddr(this.regAddr);
                 this.updateData(this.regDisplay);
 
                 var bits = this.cpu.getMMUState();
