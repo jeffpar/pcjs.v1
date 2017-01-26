@@ -649,14 +649,8 @@ class CPUStatePDP11 extends CPUPDP11 {
             this.regMBR,
             this.regPIR,
             this.regSLR,
-            this.regMMR0,
-            this.regMMR1,
-            this.regMMR2,
-            this.regMMR3,
-            this.mmuEnable,
             this.mmuLastMode,
             this.mmuLastPage,
-            this.mmuMask,
             this.addrLast,
             this.opFlags,
             this.opLast,
@@ -664,7 +658,7 @@ class CPUStatePDP11 extends CPUPDP11 {
             this.trapReason,
             this.trapVector
         ]);
-        state.set(1, [this.getPSW()]);
+        state.set(1, [this.getPSW(),this.getMMR0(),this.getMMR1(),this.getMMR2(),this.getMMR3()]);
         state.set(2, [this.nTotalCycles, this.getSpeed(), this.flags.autoStart]);
         state.set(3, this.saveIRQs());
         state.set(4, this.saveTimers());
@@ -696,14 +690,8 @@ class CPUStatePDP11 extends CPUPDP11 {
             this.regMBR,
             this.regPIR,
             this.regSLR,
-            this.regMMR0,
-            this.regMMR1,
-            this.regMMR2,
-            this.regMMR3,
-            this.mmuEnable,
             this.mmuLastMode,
             this.mmuLastPage,
-            this.mmuMask,
             this.addrLast,
             this.opFlags,
             this.opLast,
@@ -714,6 +702,10 @@ class CPUStatePDP11 extends CPUPDP11 {
 
         var a = data[1];
         this.setPSW(a[0]);
+        this.setMMR0(a[1]);
+        this.regMMR1 = a[2];
+        this.regMMR2 = a[3];
+        this.setMMR3(a[4]);
 
         a = data[2];
         this.nTotalCycles = a[0];
@@ -2876,6 +2868,7 @@ class CPUStatePDP11 extends CPUPDP11 {
             fnFlags.call(this, data << 8);
         } else {
             var addr = this.getAddr(mode, reg, PDP11.ACCESS.WRITE_BYTE);
+            //noinspection JSUnresolvedFunction
             fnFlags.call(this, (data = data < 0? (this.regsGen[-data-1] & 0xff) : data) << 8);
             this.setByte(addr, data);
             if (addr & 1) this.nStepCycles--;

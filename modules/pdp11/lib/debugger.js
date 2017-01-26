@@ -1658,6 +1658,7 @@ class DebuggerPDP11 extends Debugger {
          * requires reading memory that triggers more memory reads, which triggers more breakpoint checks.
          */
         this.nSuppressBreaks = 0;
+        this.nBreakInstructions = 0;
     }
 
     /**
@@ -2702,25 +2703,16 @@ class DebuggerPDP11 extends Debugger {
      *
      * As the "help" output below indicates, the following breakpoint commands are supported:
      *
-     *      bp [a]  set exec breakpoint on linear addr [a]
-     *      br [a]  set read breakpoint on linear addr [a]
-     *      bw [a]  set write breakpoint on linear addr [a]
-     *      bc [a]  clear breakpoint on linear addr [a] (use "*" for all breakpoints)
-     *      bl      list breakpoints
+     *      bp #    set exec breakpoint
+     *      br #    set read breakpoint
+     *      bw #    set write breakpoint
+     *      bc #    clear breakpoint (* to clear all)
+     *      bl      list all breakpoints
+     *      bn [#]  break after # instruction(s)
      *
-     * to which we have recently added the following I/O breakpoint commands:
-     *
-     *      bi [p]  toggle input breakpoint on port [p] (use "*" for all input ports)
-     *      bo [p]  toggle output breakpoint on port [p] (use "*" for all output ports)
-     *
-     * These two new commands operate as toggles so that if "*" is used to trap all input (or output),
-     * you can also use these commands to NOT trap specific ports.
-     *
-     *      bn [n]  break after [n] instructions
-     *
-     * TODO: Update the "bl" command to include any/all I/O breakpoints, and the "bc" command to
-     * clear them.  Because "bi" and "bo" commands are piggy-backing on Bus functions, those breakpoints
-     * are currently outside the realm of what the "bl" and "bc" commands are aware of.
+     * The "bn" command, like the "dh" command and all other commands that use an instruction count,
+     * assumes a decimal value, regardless of the current base.  Use "bn" without an argument to display
+     * the break count, and use "bn 0" to clear the break count.
      *
      * @this {DebuggerPDP11}
      * @param {string} sCmd
@@ -2731,10 +2723,10 @@ class DebuggerPDP11 extends Debugger {
     {
         if (sAddr == '?') {
             this.println("breakpoint commands:");
-            this.println("\tbp [#]\tset exec breakpoint at addr #");
-            this.println("\tbr [#]\tset read breakpoint at addr #");
-            this.println("\tbw [#]\tset write breakpoint at addr #");
-            this.println("\tbc [#]\tclear breakpoint at addr #");
+            this.println("\tbp #\tset exec breakpoint");
+            this.println("\tbr #\tset read breakpoint");
+            this.println("\tbw #\tset write breakpoint");
+            this.println("\tbc #\tclear breakpoint (* to clear all)");
             this.println("\tbl\tlist all breakpoints");
             this.println("\tbn [#]\tbreak after # instruction(s)");
             return;
@@ -2751,10 +2743,9 @@ class DebuggerPDP11 extends Debugger {
         }
 
         if (sParm == 'n') {
-            this.nBreakInstructions = this.parseValue(sAddr);
-            if (this.nBreakInstructions != null) {
-                this.println("break after " + this.nBreakInstructions + " instruction(s)");
-            }
+            var n = +sAddr || 0;
+            if (sAddr) this.nBreakInstructions = n;
+            this.println("break after " + n + " instruction(s)");
             return;
         }
 

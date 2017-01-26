@@ -234,21 +234,22 @@ class PanelPDP11 extends Component {
     }
 
     /**
-     * reset()
+     * reset(fPowerUp)
      *
      * NOTE: Since we've registered our handler with the Bus component, we will be called twice whenever
      * the entire machine is reset: once when the Computer's reset() handler calls the Bus's reset() handler,
      * and again when the Computer's reset() handler calls us directly.  Multiple resets should be harmless.
      *
      * @this {PanelPDP11}
+     * @param {boolean} [fPowerUp]
      */
-    reset()
+    reset(fPowerUp)
     {
         /*
          * Simulate a call to our stop() handler, to update the panel's ADDRESS register with the current PC.
          */
         this.stop();
-        this.setDR(0);
+        if (fPowerUp) this.setDR(0);
     }
 
     /**
@@ -400,7 +401,7 @@ class PanelPDP11 extends Component {
             if (this.fBindings) PanelPDP11.init();
 
             if (!data) {
-                this.reset();
+                this.reset(true);
             } else {
                 if (!this.restore(data)) return false;
             }
