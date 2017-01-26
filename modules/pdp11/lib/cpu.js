@@ -120,8 +120,7 @@ class CPUPDP11 extends Component {
         /*
          * We add a number of flags to the set initialized by Component
          */
-        this.flags.running = false;
-        this.flags.starting = false;
+        this.flags.running = this.flags.starting = false;
         this.flags.autoStart = parmsCPU['autoStart'];
         if (typeof this.flags.autoStart == "string") this.flags.autoStart = (this.flags.autoStart == "true");
 
@@ -994,6 +993,37 @@ class CPUPDP11 extends Component {
             }
         }
         return nCycles;
+    }
+
+    /**
+     * saveTimers()
+     *
+     * @this {CPUPDP11}
+     * @return {Array.<number>}
+     */
+    saveTimers()
+    {
+        var aTimerCycles = [];
+        for (var i = 0; i < this.aTimers.length; i++) {
+            var timer = this.aTimers[i];
+            aTimerCycles.push(timer[0]);
+        }
+        return aTimerCycles;
+    }
+
+    /**
+     * restoreTimers(aTimerCycles)
+     *
+     * @this {CPUPDP11}
+     * @param {Array.<number>} aTimerCycles
+     */
+    restoreTimers(aTimerCycles)
+    {
+        this.assert(aTimerCycles.length === this.aTimers.length);
+        for (var i = 0; i < this.aTimers.length && i < aTimerCycles.length; i++) {
+            var timer = this.aTimers[i];
+            timer[0] = aTimerCycles[i];
+        }
     }
 
     /**

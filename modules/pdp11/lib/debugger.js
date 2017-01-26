@@ -1270,8 +1270,8 @@ class DebuggerPDP11 extends Debugger {
 
             // this.println(data? "resuming" : "powering up");
 
-            if (data && this.restore) {
-                if (!this.restore(data)) return false;
+            if (data) {
+                return this.restore(data);
             }
         }
         return true;
@@ -1593,7 +1593,7 @@ class DebuggerPDP11 extends Debugger {
     checkMemoryRead(addr, nb)
     {
         if (this.checkBreakpoint(addr, nb || 1, this.aBreakRead)) {
-            this.stopCPU(true);
+            this.stopCPU(false);
             return true;
         }
         return false;
@@ -1618,7 +1618,7 @@ class DebuggerPDP11 extends Debugger {
     checkMemoryWrite(addr, nb)
     {
         if (this.checkBreakpoint(addr, nb || 1, this.aBreakWrite)) {
-            this.stopCPU(true);
+            this.stopCPU(false);
             return true;
         }
         return false;

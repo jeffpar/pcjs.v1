@@ -423,7 +423,7 @@ class SerialPortPDP11 extends Component {
              */
             this.initConnection(this.fNullModem);
 
-            if (!data || !this.restore) {
+            if (!data) {
                 this.reset();
             } else {
                 if (!this.restore(data)) return false;
@@ -502,6 +502,8 @@ class SerialPortPDP11 extends Component {
 
     /**
      * saveRegisters()
+     *
+     * TODO: Implement.
      *
      * @this {SerialPortPDP11}
      * @return {Array}

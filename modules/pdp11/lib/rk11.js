@@ -361,7 +361,7 @@ class RK11 extends Component {
     powerUp(data, fRepower)
     {
         if (!fRepower) {
-            if (!data || !this.restore) {
+            if (!data) {
                 this.reset();
                 if (this.cmp.fReload) {
                     /*
@@ -452,6 +452,8 @@ class RK11 extends Component {
 
     /**
      * saveController()
+     *
+     * TODO: Implement.
      *
      * @this {RK11}
      * @return {Array}

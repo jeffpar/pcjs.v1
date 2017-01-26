@@ -306,7 +306,7 @@ class PC11 extends Component {
     powerUp(data, fRepower)
     {
         if (!fRepower) {
-            if (!data || !this.restore) {
+            if (!data) {
                 this.reset();
             } else {
                 if (!this.restore(data)) return false;

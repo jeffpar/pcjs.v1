@@ -1128,7 +1128,7 @@ PDP11.opDIV = function(opCode)
                 this.regsGen[reg] = this.regsGen[reg | 1] = 1;  // etc
             }
         }
-        this.nStepCycles -= (52 + 1);                           // 52 is the mean of the shortest and longest times
+        this.nStepCycles -= (52 + 1);                           // 52 is the average of the shortest and longest times
     }
 };
 

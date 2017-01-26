@@ -392,7 +392,7 @@ class RL11 extends Component {
     powerUp(data, fRepower)
     {
         if (!fRepower) {
-            if (!data || !this.restore) {
+            if (!data) {
                 this.reset();
                 if (this.cmp.fReload) {
                     /*
@@ -483,6 +483,8 @@ class RL11 extends Component {
 
     /**
      * saveController()
+     *
+     * TODO: Implement.
      *
      * @this {RL11}
      * @return {Array}
