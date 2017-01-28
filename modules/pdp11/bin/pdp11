@@ -83,7 +83,7 @@ var aComponents = [];
 var asComponentsIgnore = ["embed", "save"];
 
 /*
- * A few of the components are subclasses of other classes (eg, "cpustate" is a subclass of "cpu").
+ * A few of the components are subclasses of other classes (eg, "cpustate" subclasses "cpu").
  * In those situations, we "hoist" the subclass constructor into the corresponding superclass,
  * because it is the name of the superclass that we rely on during machine initialization.
  */
@@ -91,7 +91,7 @@ var aSubClasses = {
     "pdp11/lib/cpustate": "pdp11/lib/cpu",
     "pdp11/lib/debugger": "shared/es6/debugger"
 };
-    
+
 /**
  * loadComponents(asFiles)
  * 

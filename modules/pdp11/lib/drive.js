@@ -1158,3 +1158,5 @@ DriveController.SOURCE = {
     LOCAL:  "?",
     REMOTE: "??"
 };
+
+if (NODE) module.exports = DriveController;
