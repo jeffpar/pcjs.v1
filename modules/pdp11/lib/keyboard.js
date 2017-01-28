@@ -43,7 +43,7 @@ class KeyboardPDP11 extends Component {
      */
     constructor(parmsKbd)
     {
-        super("Keyboard", parmsKbd, KeyboardPDP11, MessagesPDP11.KEYBOARD);
+        super("Keyboard", parmsKbd, MessagesPDP11.KEYBOARD);
 
         this.setReady();
     }

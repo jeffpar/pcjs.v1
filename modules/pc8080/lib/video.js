@@ -101,7 +101,7 @@ class Video8080 extends Component {
      */
     constructor(parmsVideo, canvas, context, textarea, container)
     {
-        super("Video", parmsVideo, Video8080, Messages8080.VIDEO);
+        super("Video", parmsVideo, Messages8080.VIDEO);
 
         var video = this;
         this.fGecko = Web.isUserAgent("Gecko/");

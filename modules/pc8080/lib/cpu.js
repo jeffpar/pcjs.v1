@@ -76,7 +76,7 @@ class CPU8080 extends Component {
      */
     constructor(parmsCPU, nCyclesDefault)
     {
-        super("CPU", parmsCPU, CPU8080, Messages8080.CPU);
+        super("CPU", parmsCPU, Messages8080.CPU);
 
         var nCycles = parmsCPU['cycles'] || nCyclesDefault;
 

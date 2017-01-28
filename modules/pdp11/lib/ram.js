@@ -62,7 +62,7 @@ class RAMPDP11 extends Component {
      */
     constructor(parmsRAM)
     {
-        super("RAM", parmsRAM, RAMPDP11);
+        super("RAM", parmsRAM);
 
         this.abInit = null;
         this.aSymbols = null;

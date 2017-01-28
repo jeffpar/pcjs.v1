@@ -60,7 +60,7 @@ class DevicePDP11 extends Component {
      */
     constructor(parmsDevice)
     {
-        super("Device", parmsDevice, DevicePDP11, MessagesPDP11.DEVICE);
+        super("Device", parmsDevice, MessagesPDP11.DEVICE);
 
         this.kw11 = {               // KW11 registers
             lks:        PDP11.KW11.LKS.MON,
@@ -241,8 +241,8 @@ class DevicePDP11 extends Component {
     restore(data)
     {
         /*
-         * ES6 ALERT: Love these destructuring assignments, which make it easy to perform the
-         * inverse of what save() does when it collects a bunch of object properties into an array.
+         * ES6 ALERT: A handy destructuring assignment, which makes it easy to perform the inverse
+         * of what save() does when it collects a bunch of object properties into an array.
          */
         [
             this.kw11.lks

@@ -54,7 +54,7 @@ if (NODE) {
  *  count:  BitField,
  *  btmod:  BitField,
  *  type:   BitField
- * }} BlockInfoPDP11
+ * }}
  */
 var BlockInfoPDP11 = Usr.defineBitFields({num:20, count:8, btmod:1, type:3});
 
@@ -69,7 +69,7 @@ var BlockInfoPDP11 = Usr.defineBitFields({num:20, count:8, btmod:1, type:3});
  *  cbTotal:    number,
  *  cBlocks:    number,
  *  aBlocks:    Array.<BlockInfoPDP11>
- * }} BusInfoPDP11
+ * }}
  */
 var BusInfoPDP11;
 
@@ -95,7 +95,7 @@ class BusPDP11 extends Component {
      */
     constructor(parmsBus, cpu, dbg)
     {
-        super("Bus", parmsBus, BusPDP11, MessagesPDP11.BUS);
+        super("Bus", parmsBus, MessagesPDP11.BUS);
 
         this.cpu = cpu;
         this.dbg = dbg;

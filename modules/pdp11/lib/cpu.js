@@ -93,7 +93,7 @@ class CPUPDP11 extends Component {
      */
     constructor(parmsCPU, nCyclesDefault)
     {
-        super("CPU", parmsCPU, CPUPDP11, MessagesPDP11.CPU);
+        super("CPU", parmsCPU, MessagesPDP11.CPU);
 
         var nCycles = +parmsCPU['cycles'] || nCyclesDefault;
 

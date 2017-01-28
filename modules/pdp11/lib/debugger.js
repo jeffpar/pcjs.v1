@@ -59,7 +59,7 @@ if (NODE) {
  *      nBase:(number|undefined),
  *      sCmd:(string|undefined),
  *      aCmds:(Array.<string>|undefined)
- * }} DbgAddrPDP11
+ * }}
  */
 var DbgAddrPDP11;
 

@@ -112,7 +112,7 @@ class Computer8080 extends Component {
      */
     constructor(parmsComputer, parmsMachine, fSuspended)
     {
-        super("Computer", parmsComputer, Computer8080, Messages8080.COMPUTER);
+        super("Computer", parmsComputer, Messages8080.COMPUTER);
 
         this.flags.powered = false;
 

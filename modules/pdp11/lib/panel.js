@@ -53,7 +53,7 @@ class PanelPDP11 extends Component {
      */
     constructor(parmsPanel, fBindings)
     {
-        super("Panel", parmsPanel, PanelPDP11, MessagesPDP11.PANEL);
+        super("Panel", parmsPanel, MessagesPDP11.PANEL);
 
         /*
          * If there are any live registers, LEDs, etc, to display, this will provide a count.

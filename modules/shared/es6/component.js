@@ -76,7 +76,7 @@
  */
 class Component {
     /**
-     * Component(type, parms, constructor, bitsMessage)
+     * Component(type, parms, bitsMessage)
      *
      * A Component object requires:
      *
@@ -88,14 +88,13 @@ class Component {
      *      name: component name (default is ""; if blank, toString() will use the type name only)
      *      comment: component comment string (default is undefined)
      *
-     * Subclasses that use Component.subclass() to extend Component will likely have additional (parms) properties.
+     * Component subclasses will usually have additional (parms) properties.
      *
      * @param {string} type
      * @param {Object} [parms]
-     * @param {Object} [constructor]
      * @param {number} [bitsMessage] selects message(s) that the component wants to enable (default is 0)
      */
-    constructor(type, parms, constructor, bitsMessage)
+    constructor(type, parms, bitsMessage)
     {
         this.type = type;
 
@@ -153,8 +152,8 @@ class Component {
         /*
          * TODO: Consider adding another parameter to the Component() constructor that allows components to tell
          * us if they support single or multiple instances per machine.  For example, there can be multiple SerialPort
-         * components per machine, but only one CPU component (well, OK, an FPU is also supported, but that's considered
-         * a different component).
+         * components per machine, but only one CPU component (some machines also support an FPU, but that component
+         * is considered separate from the CPU).
          *
          * It's not critical, but it would help catch machine configuration errors; for example, a machine that mistakenly
          * includes two CPU components may, aside from wasting memory, end up with odd side-effects, like unresponsive

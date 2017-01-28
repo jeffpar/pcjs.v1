@@ -690,6 +690,7 @@ var PDP11 = {
     RK11: {                     // RK11 Disk Controller
         PRI:        5,
         VEC:        0o220,
+        DRIVES:     8,          // maximum of 8 drives
         RKDS: {                 // 177400: Drive Status Register
             SC:     0x000F,     // (000017) Sector Counter
             SCESA:  0x0010,     // (000020) Sector Counter Equals Sector Address
@@ -873,6 +874,8 @@ var PDP11 = {
         0o220:  "RK11"
     }
 };
+
+PDP11.RK11.RK05          = [203, 2, 12, 512, PDP11.RK11.RKDS.RK05 | PDP11.RK11.RKDS.SOK | PDP11.RK11.RKDS.RRDY];
 
 PDP11.ACCESS.READ_WORD   = PDP11.ACCESS.WORD | PDP11.ACCESS.READ;       // formerly READ_MODE (2)
 PDP11.ACCESS.READ_BYTE   = PDP11.ACCESS.BYTE | PDP11.ACCESS.READ;       // formerly READ_MODE (2) | BYTE_MODE (1)

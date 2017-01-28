@@ -103,13 +103,13 @@ class DiskPDP11 extends Component {
      * This means, for example, that all references to "track[iSector].data" must actually appear as
      * "track[iSector]['data']".
      *
-     * @param {RK11|RL11} controller
+     * @param {DriveController|RK11|RL11} controller
      * @param {Object} drive
      * @param {string} mode
      */
     constructor(controller, drive, mode)
     {
-        super("Disk", {'id': controller.idMachine + ".disk" + Str.toHex(++DiskPDP11.nDisks, 4)}, DiskPDP11, MessagesPDP11.DISK);
+        super("Disk", {'id': controller.idMachine + ".disk" + Str.toHex(++DiskPDP11.nDisks, 4)}, MessagesPDP11.DISK);
 
         /*
          * Route all non-Debugger messages (eg, notice() and println() calls) through
@@ -371,6 +371,7 @@ class DiskPDP11 extends Component {
         }
 
         if (this.fnNotify) {
+            //noinspection JSUnresolvedFunction
             this.fnNotify.call(this.controller, this.drive, disk, this.sDiskName, this.sDiskPath);
             this.fnNotify = null;
         }
@@ -590,6 +591,7 @@ class DiskPDP11 extends Component {
         }
 
         if (this.fnNotify) {
+            //noinspection JSUnresolvedFunction
             this.fnNotify.call(this.controllerNotify, this.drive, disk, this.sDiskName, this.sDiskPath);
             this.fnNotify = null;
         }

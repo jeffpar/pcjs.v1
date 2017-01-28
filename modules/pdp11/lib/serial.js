@@ -100,7 +100,7 @@ class SerialPortPDP11 extends Component {
      */
     constructor(parmsSerial)
     {
-        super("SerialPort", parmsSerial, SerialPortPDP11, MessagesPDP11.SERIAL);
+        super("SerialPort", parmsSerial, MessagesPDP11.SERIAL);
 
         this.iAdapter = +parmsSerial['adapter'];
         this.nBaudReceive = +parmsSerial['baudReceive'] || PDP11.DL11.RCSR.BAUD;
@@ -498,8 +498,8 @@ class SerialPortPDP11 extends Component {
         }
 
         /*
-         * ES6 ALERT: Love these destructuring assignments, which make it easy to perform the
-         * inverse of what save() does when it collects a bunch of object properties into an array.
+         * ES6 ALERT: A handy destructuring assignment, which makes it easy to perform the inverse
+         * of what saveRegisters() does when it collects a bunch of object properties into an array.
          */
         [
             this.regRBUF,

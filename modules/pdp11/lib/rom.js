@@ -60,7 +60,7 @@ class ROMPDP11 extends Component {
      */
     constructor(parmsROM)
     {
-        super("ROM", parmsROM, ROMPDP11, MessagesPDP11.ROM);
+        super("ROM", parmsROM, MessagesPDP11.ROM);
 
         this.abInit = null;
         this.aSymbols = null;

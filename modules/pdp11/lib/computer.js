@@ -104,7 +104,7 @@ class ComputerPDP11 extends Component {
      */
     constructor(parmsComputer, parmsMachine, fSuspended)
     {
-        super("Computer", parmsComputer, ComputerPDP11, MessagesPDP11.COMPUTER);
+        super("Computer", parmsComputer, MessagesPDP11.COMPUTER);
 
         this.flags.powered = false;
 

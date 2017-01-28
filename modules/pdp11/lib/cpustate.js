@@ -74,7 +74,7 @@ if (NODE) {
  *  priority: number,
  *  message: number,
  *  next: (IRQ|null)
- * }} IRQ
+ * }}
  */
 var IRQ;
 
@@ -675,8 +675,8 @@ class CPUStatePDP11 extends CPUPDP11 {
     restore(data)
     {
         /*
-         * ES6 ALERT: Love these destructuring assignments, which make it easy to perform the
-         * inverse of what save() does when it collects a bunch of object properties into an array.
+         * ES6 ALERT: A handy destructuring assignment, which makes it easy to perform the inverse
+         * of what save() does when it collects a bunch of object properties into an array.
          */
         [
             this.regsGen,

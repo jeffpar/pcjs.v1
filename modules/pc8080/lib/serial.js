@@ -69,7 +69,7 @@ class SerialPort8080 extends Component {
      */
     constructor(parmsSerial)
     {
-        super("SerialPort", parmsSerial, SerialPort8080, Messages8080.SERIAL);
+        super("SerialPort", parmsSerial, Messages8080.SERIAL);
 
         this.iAdapter = +parmsSerial['adapter'];
 
