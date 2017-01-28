@@ -771,6 +771,7 @@ var PDP11 = {
     RL11: {                     // RL11 Disk Controller
         PRI:        5,
         VEC:        0o160,
+        DRIVES:     4,          // maximum of 4 drives
         RLCS: {                 // 174400: Control Status Register
             DRDY:   0x0001,     // Drive Ready (R/O)
             FUNC:   0x000E,     // Function Code (F2,F1,F0) (R/W)
@@ -876,6 +877,7 @@ var PDP11 = {
 };
 
 PDP11.RK11.RK05          = [203, 2, 12, 512, PDP11.RK11.RKDS.RK05 | PDP11.RK11.RKDS.SOK | PDP11.RK11.RKDS.RRDY];
+PDP11.RL11.RL02K         = [512, 2, 40, 256, PDP11.RL11.RLMP.GS_ST.LOCKON | PDP11.RL11.RLMP.GS_BH | PDP11.RL11.RLMP.GS_HO];
 
 PDP11.ACCESS.READ_WORD   = PDP11.ACCESS.WORD | PDP11.ACCESS.READ;       // formerly READ_MODE (2)
 PDP11.ACCESS.READ_BYTE   = PDP11.ACCESS.BYTE | PDP11.ACCESS.READ;       // formerly READ_MODE (2) | BYTE_MODE (1)
