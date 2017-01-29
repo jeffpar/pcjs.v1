@@ -195,12 +195,10 @@ class ComputerPDP11 extends Component {
         }
 
         var sStatePath = null;
-        var sResume = this.getMachineParm('resume', parmsComputer);
+        var sResume = /** @type {string} */ (this.getMachineParm('resume', parmsComputer));
         if (sResume !== undefined) {
             /*
-             * DEPRECATE: This goofiness is a holdover from when the 'resume' property was a string (either a
-             * single-digit string or a path); now it's always a number, so it never has a 'length' property and
-             * the call to parseInt() is unnecessary.
+             * Decide whether the 'resume' property is a number or the path of a state file to resume.
              */
             if (sResume.length > 1) {
                 sStatePath = this.sResumePath = sResume;

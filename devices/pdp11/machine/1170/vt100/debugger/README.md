@@ -8,11 +8,13 @@ machines:
     debugger: true
     config: /devices/pdp11/machine/1170/vt100/debugger/machine-left.xml
     connection: dl11->vt100.serialPort
+    resume: 1
   - id: vt100
     type: pc8080
     debugger: true
     config: /devices/pc8080/machine/vt100/debugger/machine-right.xml
     connection: serialPort->test1170.dl11
+    resume: 1
 ---
 
 This VT100 Terminal is connected to the PDP-11/70 below.
