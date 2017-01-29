@@ -26,11 +26,14 @@
 	</video>
 	<chipset id="chipset" model="VT100"/>
 	<keyboard id="keyboard" model="VT100">
-		<control type="button" binding="setup" padLeft="8px">SET-UP</control>
+		<control type="button" binding="break" padLeft="8px" padBottom="8px">BREAK</control>
+		<control type="button" binding="ctrl" padLeft="8px" padBottom="8px">CTRL</control>
+		<control type="button" binding="esc" padLeft="8px" padBottom="8px">ESC</control>
+		<control type="button" binding="tab" padLeft="8px" padBottom="8px">TAB</control>
+		<control type="button" binding="line-feed" padLeft="8px" padBottom="8px">LINE FEED</control>
+		<control type="button" binding="setup" padLeft="8px" padBottom="8px">SET-UP</control>
 	</keyboard>
-	<serial id="serialPort" adapter="0" binding="print">
-		<control type="button" binding="test" value="HELLO WORLD!\n\\e[D\\e[D\\e[D\\e[D\\e[D\\e[D\\e[D\\e[D\\e[D\\e[D\\e[D" padLeft="8px">TEST RECEIVER</control>
-	</serial>
+	<serial id="serialPort" adapter="0" binding="print"/>
 	<panel ref="/devices/pc8080/panel/wide.xml"/>
 	<debugger id="debugger" messages="mem|port" commands="s 8086"/>
 </machine>

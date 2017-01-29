@@ -145,16 +145,24 @@ class Keyboard8080 extends Component {
                     control.onclick = function(kbd, keyCode) {
                         return function onKeyboardBindingDown(event) {
                             /*
-                             * iOS Usability Improvement: Calling preventDefault() prevents rapid clicks from
+                             * iOS usability improvement: calling preventDefault() prevents rapid clicks from
                              * also being (mis)interpreted as a desire to "zoom" in on the machine.
                              */
                             if (event.preventDefault) event.preventDefault();
-                            kbd.onSoftKeyDown(keyCode, true, true);
                             /*
-                             * I'm assuming we only need to give focus back on the "up" event...
-                             *
-                             *      if (kbd.cmp) kbd.cmp.updateFocus();
+                             * TODO: Add some additional SOFTCODES configuration info that will tell us which soft
+                             * keys (eg, CTRL) should be treated as toggles, instead of hard-coding that knowledge below.
                              */
+                            var fDown = true;
+                            var fAutoRelease = (keyCode != Keys.KEYCODE.CTRL);
+                            if (!fAutoRelease) {
+                                control.style.fontWeight = "normal";
+                                fDown = !(kbd.bitsState & Keyboard8080.STATE.CTRL);
+                                if (fDown) control.style.fontWeight = "bold";
+                                kbd.checkModifierKeys(keyCode, fDown);
+                            }
+                            kbd.onSoftKeyDown(keyCode, fDown, fAutoRelease);
+                            if (kbd.cmp) kbd.cmp.updateFocus();
                         };
                     }(this, this.config.SOFTCODES[sBinding]);
                     //
@@ -394,7 +402,7 @@ class Keyboard8080 extends Component {
      * @this {Keyboard8080}
      * @param {number} keyCode (ie, either a keycode or string ID)
      * @param {boolean} fDown (true if key going down, false if key going up)
-     * @param {boolean} fRight (true if key is on the right, false if not or unknown or n/a)
+     * @param {boolean} [fRight] (true if key is on the right, false if not or unknown or n/a)
      */
     checkModifierKeys(keyCode, fDown, fRight)
     {
@@ -1045,6 +1053,9 @@ Keyboard8080.VT100 = {
     ALTCODES: {},
     LEDCODES: {},
     SOFTCODES: {
+        'ctrl':         Keys.KEYCODE.CTRL,
+        'esc':          Keys.KEYCODE.ESC,
+        'tab':          Keys.KEYCODE.TAB,
         'num-comma':    Keys.KEYCODE.F5,// since modern keypads don't typically have a comma...
         'break':        Keys.KEYCODE.F6,
         'line-feed':    Keys.KEYCODE.F7,
