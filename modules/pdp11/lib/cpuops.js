@@ -5,9 +5,9 @@
  *
  * This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
  *
- * It has been adapted from the JavaScript PDP 11/70 Emulator v1.4 written by Paul Nankervis
- * (paulnank@hotmail.com) as of September 2016 at <http://skn.noip.me/pdp11/pdp11.html>.  This code
- * may be used freely provided the original authors are acknowledged in any modified source code.
+ * It has been adapted from the JavaScript PDP 11/70 Emulator written by Paul Nankervis
+ * (paulnank@hotmail.com) at <http://skn.noip.me/pdp11/pdp11.html>.  This code may be used
+ * freely provided the original authors are acknowledged in any modified source code.
  *
  * PCjs is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3
@@ -489,6 +489,33 @@ PDP11.opADCB = function(opCode)
 
 /**
  * opADD(opCode)
+ *
+ * From the PDP-11/20 Processor HandBook (1971), p. 61:
+ *
+ *     Add src,dst (06SSDD)
+ *
+ *     Operation:
+ *          (dst) = (src) + (dst)
+ *
+ *     Condition Codes:
+ *          N: set if result < 0; cleared otherwise
+ *          Z: set if result = 0; cleared otherwise
+ *          V: set if there was arithmetic overflow as a result of the operation, that is both operands
+ *             were of the same sign and the result was of the opposite sign; cleared otherwise
+ *          C: set if there was a carry from the most significant bit of the result; cleared otherwise
+ *
+ *     Description:
+ *          Adds the source operand to the destination operand and stores the result at the destination address.
+ *          The original contents of the destination are lost. The contents of the source are not affected.
+ *          Two's complement addition is performed.
+ *
+ *     Examples:
+ *          Add to register:            ADD 20,R0
+ *          Add to memory:              ADD R1,XXX
+ *          Add register to register:   ADD R1,R2
+ *          Add memory to memory:       ADD @#17750,XXX
+ *
+ *          XXX is a programmer-defined mnemonic for a memory location.
  *
  * @this {CPUStatePDP11}
  * @param {number} opCode
@@ -1101,7 +1128,7 @@ PDP11.opDIV = function(opCode)
                 this.regsGen[reg] = this.regsGen[reg | 1] = 1;  // etc
             }
         }
-        this.nStepCycles -= (52 + 1);                           // 52 is the mean of the shortest and longest times
+        this.nStepCycles -= (52 + 1);                           // 52 is the average of the shortest and longest times
     }
 };
 
@@ -1325,6 +1352,7 @@ PDP11.opMFPI = function(opCode)
  */
 PDP11.opMFPS = function(opCode)
 {
+    //noinspection JSUnresolvedFunction
     PDP11.opUndefined.call(this, opCode);
 };
 
@@ -1347,6 +1375,7 @@ PDP11.opMFPS = function(opCode)
  */
 PDP11.opMFPT = function(opCode)
 {
+    //noinspection JSUnresolvedFunction
     PDP11.opUndefined.call(this, opCode);
 };
 
@@ -1442,6 +1471,7 @@ PDP11.opMTPI = function(opCode)
  */
 PDP11.opMTPS = function(opCode)
 {
+    //noinspection JSUnresolvedFunction
     PDP11.opUndefined.call(this, opCode);
 };
 
@@ -1539,8 +1569,20 @@ PDP11.opRESET = function(opCode)
              * that the last CNSW.writeWord(177570) was for 000101, not 166667.  So I'm guessing that the RESET
              * instruction is supposed to propagate R0 to the console's DISPLAY register.
              *
-             * This is similar to what we do for the HALT instruction on the PDP-11/20.  None of these Console features
-             * seem to be very well documented (assuming they exist).
+             * This is similar to what we do for the HALT instruction (but only if this.model == PDP11.MODEL_1120).
+             * These Console features do not seem to be very well documented, assuming they exist.
+             *
+             * UPDATE: This behavior appears to be confirmed by remarks in the PDP-11/20 Processor Handbook (1971),
+             * p. 141:
+             *
+             *      HALT - displays processor register R0 when bus control is transferred to console during a HALT
+             *      instruction.
+             *
+             *      RESET - displays register R0 for during [duration?] of RESET (70 msec).
+             *
+             * I haven't found similar remarks in the PDP-11/70 Processor Handbooks, so I'm not sure if that's an
+             * oversight or if 11/70 panels are slightly different in this regard.  It's also not clear what they meant
+             * by "for duration of RESET".  Is something supposed to happen to the DATA lights after the RESET is done?
              */
             this.panel.setData(this.regsGen[0], true);
         }
@@ -1785,6 +1827,35 @@ PDP11.opSPL = function(opCode)
 
 /**
  * opSUB(opCode)
+ *
+ * From the PDP-11/20 Processor HandBook (1971), p. 62:
+ *
+ *     Subtract src,dst (16SSDD)
+ *
+ *     Operation:
+ *          (dst) = (dst) - (src) [in detail, (dst) + ~(src) + 1 (dst)]
+ *
+ *     Condition Codes:
+ *          N: set if result < 0; cleared otherwise
+ *          Z: set if result = 0; cleared otherwise
+ *          V: set if there was arithmetic overflow as a result of the operation, that is if operands were of
+ *             opposite signs and the sign of the source was the same as the sign of the result; cleared otherwise
+ *          C: cleared if there was a carry from the most significant bit of the result; set otherwise
+ *
+ *     Description:
+ *          Subtracts the source operand from the destination operand and leaves the result at the destination address.
+ *          The orignial [sic] contents of the destination are lost. The contents of the source are not affected.
+ *          In double-precision arithmetic the C-bit, when set, indicates a "borrow".
+ *
+ *     Example:
+ *                  SUB R1,R2
+ *
+ *              BEFORE          AFTER
+ *          (R1) = 011111   (R2) = 012345
+ *          (R1) = 011111   (R2) = 001234
+ *
+ *              NZVC            NZVC
+ *              1111            0001
  *
  * @this {CPUStatePDP11}
  * @param {number} opCode

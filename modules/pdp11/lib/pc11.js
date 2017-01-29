@@ -64,7 +64,7 @@ class PC11 extends Component {
      */
     constructor(parms)
     {
-        super("PC11", parms, PC11);
+        super("PC11", parms);
 
         this.sDevice = "PTR";       // TODO: Make the device name configurable
 
@@ -306,7 +306,7 @@ class PC11 extends Component {
     powerUp(data, fRepower)
     {
         if (!fRepower) {
-            if (!data || !this.restore) {
+            if (!data) {
                 this.reset();
             } else {
                 if (!this.restore(data)) return false;

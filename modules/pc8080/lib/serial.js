@@ -69,7 +69,7 @@ class SerialPort8080 extends Component {
      */
     constructor(parmsSerial)
     {
-        super("SerialPort", parmsSerial, SerialPort8080, Messages8080.SERIAL);
+        super("SerialPort", parmsSerial, Messages8080.SERIAL);
 
         this.iAdapter = +parmsSerial['adapter'];
 
@@ -397,7 +397,7 @@ class SerialPort8080 extends Component {
                             if (this.sendData) {
                                 this.fNullModem = fNullModem;
                                 this.updateStatus = exports['receiveStatus'];
-                                this.status(this.idMachine + '.' + sSourceID + " connected to " + sTargetID);
+                                this.status("Connected " + this.idMachine + '.' + sSourceID + " to " + sTargetID);
                                 return;
                             }
                         }

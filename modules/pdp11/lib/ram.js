@@ -5,10 +5,6 @@
  *
  * This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
  *
- * It has been adapted from the JavaScript PDP 11/70 Emulator v1.4 written by Paul Nankervis
- * (paulnank@hotmail.com) as of September 2016 at <http://skn.noip.me/pdp11/pdp11.html>.  This code
- * may be used freely provided the original authors are acknowledged in any modified source code.
- *
  * PCjs is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3
  * of the License, or (at your option) any later version.
@@ -66,7 +62,7 @@ class RAMPDP11 extends Component {
      */
     constructor(parmsRAM)
     {
-        super("RAM", parmsRAM, RAMPDP11);
+        super("RAM", parmsRAM);
 
         this.abInit = null;
         this.aSymbols = null;
@@ -141,12 +137,14 @@ class RAMPDP11 extends Component {
              */
             delete this.aSymbols;
         }
-        /*
-         * The Computer powers up the CPU last, at which point CPUState state is restored,
-         * which includes the Bus state, and since we use the Bus to allocate all our memory,
-         * memory contents are already restored for us, so we don't need the usual restore
-         * logic.
-         */
+        if (!fRepower) {
+            /*
+             * Since we use the Bus to allocate all our memory, memory contents are already restored for us,
+             * so we don't save any state, and therefore no state should be restored.  Just do a reset().
+             */
+            this.assert(!data);
+            this.reset();
+        }
         return true;
     }
 

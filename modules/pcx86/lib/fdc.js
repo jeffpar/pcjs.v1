@@ -684,7 +684,7 @@ FDC.prototype.initBus = function(cmp, bus, cpu, dbg)
 FDC.prototype.powerUp = function(data, fRepower)
 {
     if (!fRepower) {
-        if (!data || !this.restore) {
+        if (!data) {
             this.reset();
             if (this.cmp.fReload) {
                 /*
@@ -798,7 +798,7 @@ FDC.prototype.initController = function(data)
     var i = 0, iDrive;
     var fSuccess = true;
 
-    if (data === undefined) {
+    if (!data) {
         data = [0, 0, FDC.REG_STATUS.RQM, new Array(9), 0, 0, 0, []];
     }
 
@@ -1140,6 +1140,7 @@ FDC.prototype.saveDrives = function()
  * saveDrive(drive)
  *
  * @this {FDC}
+ * @param {Object} drive
  * @return {Array}
  */
 FDC.prototype.saveDrive = function(drive)

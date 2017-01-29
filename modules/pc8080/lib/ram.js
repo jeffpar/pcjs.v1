@@ -66,7 +66,7 @@ class RAM8080 extends Component {
      */
     constructor(parmsRAM)
     {
-        super("RAM", parmsRAM, RAM8080);
+        super("RAM", parmsRAM);
 
         this.abInit = null;
         this.aSymbols = null;

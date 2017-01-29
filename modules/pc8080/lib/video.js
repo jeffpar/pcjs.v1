@@ -101,7 +101,7 @@ class Video8080 extends Component {
      */
     constructor(parmsVideo, canvas, context, textarea, container)
     {
-        super("Video", parmsVideo, Video8080, Messages8080.VIDEO);
+        super("Video", parmsVideo, Messages8080.VIDEO);
 
         var video = this;
         this.fGecko = Web.isUserAgent("Gecko/");
@@ -356,6 +356,48 @@ class Video8080 extends Component {
     }
 
     /**
+     * setBinding(sHTMLType, sBinding, control, sValue)
+     *
+     * @this {Video8080}
+     * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
+     * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "refresh")
+     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {string} [sValue] optional data value
+     * @return {boolean} true if binding was successful, false if unrecognized binding request
+     */
+    setBinding(sHTMLType, sBinding, control, sValue)
+    {
+        var video = this;
+
+        /*
+         * TODO: A more general-purpose binding mechanism would be nice someday....
+         */
+        if (sHTMLType == "led" || sHTMLType == "rled") {
+            this.ledBindings[sBinding] = control;
+            return true;
+        }
+
+        switch (sBinding) {
+        case "fullScreen":
+            this.bindings[sBinding] = control;
+            if (this.container && this.container.doFullScreen) {
+                control.onclick = function onClickFullScreen() {
+                    if (DEBUG) video.printMessage("fullScreen()");
+                    video.doFullScreen();
+                };
+            } else {
+                if (DEBUG) this.log("FullScreen API not available");
+                control.parentNode.removeChild(/** @type {Node} */ (control));
+            }
+            return true;
+
+        default:
+            break;
+        }
+        return false;
+    }
+
+    /**
      * initBus(cmp, bus, cpu, dbg)
      *
      * @this {Video8080}
@@ -581,6 +623,11 @@ class Video8080 extends Component {
      */
     powerUp(data, fRepower)
     {
+        if (!fRepower) {
+            if (data) {
+                if (!this.restore(data)) return false;
+            }
+        }
         /*
          * Because the VT100 frame buffer can be located anywhere in RAM (above 0x2000), we must defer this
          * test code until the powerUp() notification handler is called, when all RAM has (hopefully) been allocated.
@@ -653,45 +700,45 @@ class Video8080 extends Component {
     }
 
     /**
-     * setBinding(sHTMLType, sBinding, control, sValue)
+     * powerDown(fSave, fShutdown)
      *
      * @this {Video8080}
-     * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
-     * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "refresh")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
-     * @param {string} [sValue] optional data value
-     * @return {boolean} true if binding was successful, false if unrecognized binding request
+     * @param {boolean} [fSave]
+     * @param {boolean} [fShutdown]
+     * @return {Object|boolean} component state if fSave; otherwise, true if successful, false if failure
      */
-    setBinding(sHTMLType, sBinding, control, sValue)
+    powerDown(fSave, fShutdown)
     {
-        var video = this;
+        return !fSave || this.save();
+    }
 
-        /*
-         * TODO: A more general-purpose binding mechanism would be nice someday....
-         */
-        if (sHTMLType == "led" || sHTMLType == "rled") {
-            this.ledBindings[sBinding] = control;
-            return true;
-        }
+    /**
+     * save()
+     *
+     * This implements save support for the Video8080 component.
+     *
+     * @this {Video8080}
+     * @return {Object|null}
+     */
+    save()
+    {
+        var state = new State(this);
+        state.set(0, []);
+        return state.data();
+    }
 
-        switch (sBinding) {
-        case "fullScreen":
-            this.bindings[sBinding] = control;
-            if (this.container && this.container.doFullScreen) {
-                control.onclick = function onClickFullScreen() {
-                    if (DEBUG) video.printMessage("fullScreen()");
-                    video.doFullScreen();
-                };
-            } else {
-                if (DEBUG) this.log("FullScreen API not available");
-                control.parentNode.removeChild(/** @type {Node} */ (control));
-            }
-            return true;
-
-        default:
-            break;
-        }
-        return false;
+    /**
+     * restore(data)
+     *
+     * This implements restore support for the Video8080 component.
+     *
+     * @this {Video8080}
+     * @param {Object} data
+     * @return {boolean} true if restore successful, false if not
+     */
+    restore(data)
+    {
+        return true;
     }
 
     /**

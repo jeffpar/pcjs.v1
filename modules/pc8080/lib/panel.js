@@ -55,7 +55,7 @@ class Panel8080 extends Component {
      */
     constructor(parmsPanel)
     {
-        super("Panel", parmsPanel, Panel8080);
+        super("Panel", parmsPanel);
     }
 
     /**

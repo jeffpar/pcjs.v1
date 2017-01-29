@@ -59,7 +59,7 @@ class Keyboard8080 extends Component {
      */
     constructor(parmsKbd)
     {
-        super("Keyboard", parmsKbd, Keyboard8080, Messages8080.KEYBOARD);
+        super("Keyboard", parmsKbd, Messages8080.KEYBOARD);
 
         var model = parmsKbd['model'];
 

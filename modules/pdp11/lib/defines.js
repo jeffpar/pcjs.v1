@@ -5,9 +5,9 @@
  *
  * This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
  *
- * It has been adapted from the JavaScript PDP 11/70 Emulator v1.4 written by Paul Nankervis
- * (paulnank@hotmail.com) as of September 2016 at <http://skn.noip.me/pdp11/pdp11.html>.  This code
- * may be used freely provided the original authors are acknowledged in any modified source code.
+ * It has been adapted from the JavaScript PDP 11/70 Emulator written by Paul Nankervis
+ * (paulnank@hotmail.com) at <http://skn.noip.me/pdp11/pdp11.html>.  This code may be used
+ * freely provided the original authors are acknowledged in any modified source code.
  *
  * PCjs is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3
@@ -690,6 +690,7 @@ var PDP11 = {
     RK11: {                     // RK11 Disk Controller
         PRI:        5,
         VEC:        0o220,
+        DRIVES:     8,          // maximum of 8 drives
         RKDS: {                 // 177400: Drive Status Register
             SC:     0x000F,     // (000017) Sector Counter
             SCESA:  0x0010,     // (000020) Sector Counter Equals Sector Address
@@ -770,6 +771,7 @@ var PDP11 = {
     RL11: {                     // RL11 Disk Controller
         PRI:        5,
         VEC:        0o160,
+        DRIVES:     4,          // maximum of 4 drives
         RLCS: {                 // 174400: Control Status Register
             DRDY:   0x0001,     // Drive Ready (R/O)
             FUNC:   0x000E,     // Function Code (F2,F1,F0) (R/W)
@@ -873,6 +875,9 @@ var PDP11 = {
         0o220:  "RK11"
     }
 };
+
+PDP11.RK11.RK05          = [203, 2, 12, 512, PDP11.RK11.RKDS.RK05 | PDP11.RK11.RKDS.SOK | PDP11.RK11.RKDS.RRDY];
+PDP11.RL11.RL02K         = [512, 2, 40, 256, PDP11.RL11.RLMP.GS_ST.LOCKON | PDP11.RL11.RLMP.GS_BH | PDP11.RL11.RLMP.GS_HO];
 
 PDP11.ACCESS.READ_WORD   = PDP11.ACCESS.WORD | PDP11.ACCESS.READ;       // formerly READ_MODE (2)
 PDP11.ACCESS.READ_BYTE   = PDP11.ACCESS.BYTE | PDP11.ACCESS.READ;       // formerly READ_MODE (2) | BYTE_MODE (1)

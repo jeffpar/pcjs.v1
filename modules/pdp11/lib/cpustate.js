@@ -5,9 +5,9 @@
  *
  * This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
  *
- * It has been adapted from the JavaScript PDP 11/70 Emulator v1.4 written by Paul Nankervis
- * (paulnank@hotmail.com) as of September 2016 at <http://skn.noip.me/pdp11/pdp11.html>.  This code
- * may be used freely provided the original authors are acknowledged in any modified source code.
+ * It has been adapted from the JavaScript PDP 11/70 Emulator written by Paul Nankervis
+ * (paulnank@hotmail.com) at <http://skn.noip.me/pdp11/pdp11.html>.  This code may be used
+ * freely provided the original authors are acknowledged in any modified source code.
  *
  * PCjs is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3
@@ -74,7 +74,7 @@ if (NODE) {
  *  priority: number,
  *  message: number,
  *  next: (IRQ|null)
- * }} IRQ
+ * }}
  */
 var IRQ;
 
@@ -117,24 +117,21 @@ class CPUStatePDP11 extends CPUPDP11 {
          * These properties will be initialized by initCPU()
          */
         this.flagC = this.flagV = this.flagZ = this.flagN = 0;
-        this.regPSW = 0;
-        this.regsGen = this.regsAlt = this.regsAltStack = [];
-        this.pswMode = 0;
-        this.mapMMR3 = [];
-        this.mmuPDR = this.mmuPAR = this.regsUniMap = this.regsControl = [];
-        this.regMBR = 0;
-        this.opFlags = 0;
-        this.srcMode = this.srcReg = 0;
-        this.dstMode = this.dstReg = this.dstAddr = 0;
+        this.regPSW = this.pswMode = 0;
         this.pswTrap = 0;
+        this.regsGen = this.regsAlt = this.regsAltStack = [];
+        this.regsPAR = this.regsPDR = this.regsUniMap = this.regsControl = [];
+        this.opFlags = 0;
 
         /*
          * These properties will be initialized by initMMU()
          */
         this.regMMR0 = this.regMMR1 = this.regMMR2 = this.regMMR3 = 0;
-        this.regErr = this.regPIR = this.regSLR = 0;
+        this.regErr = this.regMBR = this.regPIR = this.regSLR = 0;
         this.mmuEnable = this.mmuLastMode = this.mmuLastPage = this.mmuMask = 0;
         this.addrLast = this.opLast = this.addrInvalid = 0;
+
+        this.mapMMR3 = [4,2,0,1];   // map from mode to MMR3 I/D bit
 
         /*
          * Initialize processor operation to match the requested model.
@@ -167,14 +164,13 @@ class CPUStatePDP11 extends CPUPDP11 {
         }
 
         this.nDisableTraps = 0;
+        this.trapVector = this.trapReason = 0;
 
         /** @type {IRQ|null} */
         this.irqNext = null;        // the head of the active IRQ list, in priority order
 
         /** @type {Array.<IRQ>} */
         this.aIRQs = [];            // list of all IRQs, active or not (to be used for auto-configuration)
-
-        this.flags.complete = false;
 
         this.getByte = this.getByteDirect = this.getByteChecked;
         this.getWord = this.getWordDirect = this.getWordChecked;
@@ -187,7 +183,10 @@ class CPUStatePDP11 extends CPUPDP11 {
         this.readWord = this.readWordFromVirtual;
         this.writeWord = this.writeWordToVirtual;
 
-        this.trapVector = this.trapReason = 0;
+        this.srcMode = this.srcReg = 0;
+        this.dstMode = this.dstReg = this.dstAddr = 0;
+
+        this.flags.complete = false;
     }
 
     /**
@@ -271,28 +270,26 @@ class CPUStatePDP11 extends CPUPDP11 {
         this.flagZ  = f;            // PSW Z bit        (TODO: Why do we clear instead of set Z, like other flags?)
         this.flagN  = 0x8000;       // PSW N bit
         this.regPSW = 0x000f;       // PSW other bits   (TODO: What's the point of setting the flag bits here, too?)
+
         this.regsGen = [            // General R0-R7
             0, 0, 0, 0, 0, 0, 0, this.addrReset, -1, -2, -3, -4, -5, -6, -7, -8
         ];
-
         this.regsAlt = [            // Alternate R0-R5
             0, 0, 0, 0, 0, 0
         ];
         this.regsAltStack = [       // Alternate R6 stack pointers (KERNEL, SUPER, UNUSED, USER)
             0, 0, 0, 0
         ];
-        this.pswMode = 0;           // current memory management mode (see PDP11.MODE.KERNEL | SUPER | UNUSED | USER)
-        this.mapMMR3 = [4,2,0,1];   // map from mode to MMR3 I/D bit
-        this.mmuPDR = [             // memory management PDR registers by mode
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],   // KERNEL (8 KIPDR regs followed by 8 KDPDR regs)
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],   // SUPER  (8 SIPDR regs followed by 8 SDPDR regs)
-            [f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f],   // mode 2 (not used)
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]    // USER   (8 UIPDR regs followed by 8 UDPDR regs)
-        ];
-        this.mmuPAR = [             // memory management PAR registers by mode
+        this.regsPAR = [            // memory management PAR registers by mode
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],   // KERNEL (8 KIPAR regs followed by 8 KDPAR regs)
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],   // SUPER  (8 SIPDR regs followed by 8 SDPDR regs)
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],   // mode 2 (not used)
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]    // USER   (8 UIPDR regs followed by 8 UDPDR regs)
+        ];
+        this.regsPDR = [            // memory management PDR registers by mode
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],   // KERNEL (8 KIPDR regs followed by 8 KDPDR regs)
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],   // SUPER  (8 SIPDR regs followed by 8 SDPDR regs)
+            [f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f],   // mode 2 (not used)
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]    // USER   (8 UIPDR regs followed by 8 UDPDR regs)
         ];
         this.regsUniMap = [         // 32 UNIBUS map registers
@@ -301,6 +298,9 @@ class CPUStatePDP11 extends CPUPDP11 {
         this.regsControl = [        // various control registers (177740-177756) we don't really care about
             0, 0, 0, 0, 0, 0, 0, 0
         ];
+
+        this.pswMode = 0;           // current memory management mode (see PDP11.MODE.KERNEL | SUPER | UNUSED | USER)
+        this.pswTrap = -1;
         this.regMBR = 0;
 
         /*
@@ -316,8 +316,6 @@ class CPUStatePDP11 extends CPUPDP11 {
          */
         this.srcMode = this.srcReg = 0;
         this.dstMode = this.dstReg = this.dstAddr = 0;
-
-        this.pswTrap = -1;
 
         this.initMMU();
     }
@@ -358,7 +356,7 @@ class CPUStatePDP11 extends CPUPDP11 {
         /*
          * This stores the PC in the lower 16 bits, and any auto-incs or auto-decs from the last opcode in the
          * upper 16 bits;  the lower 16 bits are used to update MMR2, and the upper 16 bits are used to update MMR1.
-         * The upper bits are automatically zeroed at the start of every operation when PC is copied to opLast.
+         * The upper bits are automatically zeroed at the start of every operation when the PC is copied to opLast.
          */
         this.opLast = 0;
 
@@ -579,9 +577,10 @@ class CPUStatePDP11 extends CPUPDP11 {
     {
         this.addrReset = addr;
 
-        this.resetCPU();
         this.setPC(addr);
         this.setPSW(0);
+
+        this.resetCPU();
 
         if (fStart) {
             /*
@@ -591,20 +590,28 @@ class CPUStatePDP11 extends CPUPDP11 {
             for (var i = 2; i <= 5; i++) {
                 this.regsGen[i] = 0;
             }
-            if (!this.isRunning()) this.startCPU();
+            if (!this.flags.powered) {
+                this.flags.autoStart = true;
+            }
+            else if (!this.flags.running) {
+                this.startCPU();
+            }
         }
         else {
-            if (this.dbg) {
+            if (this.dbg && this.flags.powered) {
                 /*
                  * TODO: Review the decision to always stop the CPU if the Debugger is loaded.  Note that
-                 * when stopCPU() stops a running CPU, the Debugger gets notified, so again, no need to notify it here.
+                 * when stopCPU() stops a running CPU, the Debugger gets notified, so no need to notify it again.
                  *
                  * TODO: There are more serious problems to deal with if another component is slamming a new PC down
-                 * the CPU's throat (presumably while also dropping some new code into RAM) while the CPU was still running;
-                 * we should probably force a complete reset if the CPU is running, but for now, it's up to the user
-                 * to hit the reset button themselves.
+                 * the CPU's throat (presumably while also dropping some new code into RAM) while the CPU is running;
+                 * we should probably force a complete reset, but for now, it's up to the user to hit the reset button
+                 * themselves.
                  */
-                if (!this.stopCPU()) this.dbg.updateStatus();
+                if (!this.stopCPU()) {
+                    this.dbg.updateStatus();
+                    this.cmp.updateDisplays(-1);
+                }
             }
             else if (fStart === false) {
                 this.stopCPU();
@@ -639,30 +646,27 @@ class CPUStatePDP11 extends CPUPDP11 {
             this.regsGen,
             this.regsAlt,
             this.regsAltStack,
+            this.regsPAR,
+            this.regsPDR,
             this.regsUniMap,
             this.regsControl,
             this.regErr,
             this.regMBR,
             this.regPIR,
             this.regSLR,
-            this.pswTrap,
-            this.pswMode,
-            this.opFlags,
-            this.regMMR0,
-            this.regMMR1,
-            this.regMMR2,
-            this.regMMR3,
             this.mmuLastMode,
             this.mmuLastPage,
-            this.mmuPDR,
-            this.mmuPAR,
-            this.mmuEnable,
-            this.mmuMask,
             this.addrLast,
-            this.opLast
+            this.opFlags,
+            this.opLast,
+            this.pswTrap,
+            this.trapReason,
+            this.trapVector
         ]);
-        state.set(1, [this.getPSW()]);
-        state.set(2, [this.nTotalCycles, this.getSpeed()]);
+        state.set(1, [this.getPSW(),this.getMMR0(),this.getMMR1(),this.getMMR2(),this.getMMR3()]);
+        state.set(2, [this.nTotalCycles, this.getSpeed(), this.flags.autoStart]);
+        state.set(3, this.saveIRQs());
+        state.set(4, this.saveTimers());
         return state.data();
     }
 
@@ -675,45 +679,46 @@ class CPUStatePDP11 extends CPUPDP11 {
      */
     restore(data)
     {
-        var a;
         /*
-         * ES6 ALERT: Gotta love these destructuring assignments, which make it easy to perform the inverse
+         * ES6 ALERT: A handy destructuring assignment, which makes it easy to perform the inverse
          * of what save() does when it collects a bunch of object properties into an array.
          */
         [
             this.regsGen,
             this.regsAlt,
             this.regsAltStack,
+            this.regsPAR,
+            this.regsPDR,
             this.regsUniMap,
             this.regsControl,
             this.regErr,
             this.regMBR,
             this.regPIR,
             this.regSLR,
-            this.pswTrap,
-            this.pswMode,
-            this.opFlags,
-            this.regMMR0,
-            this.regMMR1,
-            this.regMMR2,
-            this.regMMR3,
             this.mmuLastMode,
             this.mmuLastPage,
-            this.mmuPDR,
-            this.mmuPAR,
-            this.mmuEnable,
-            this.mmuMask,
             this.addrLast,
-            this.opLast
+            this.opFlags,
+            this.opLast,
+            this.pswTrap,
+            this.trapReason,
+            this.trapVector
         ] = data[0];
 
-        a = data[1];
+        var a = data[1];
         this.setPSW(a[0]);
+        this.setMMR0(a[1]);
+        this.regMMR1 = a[2];
+        this.regMMR2 = a[3];
+        this.setMMR3(a[4]);
 
         a = data[2];
         this.nTotalCycles = a[0];
         this.setSpeed(a[1]);
+        this.flags.autoStart = a[2];
 
+        this.restoreIRQs(data[3]);
+        this.restoreTimers(data[4]);
         return true;
     }
 
@@ -985,8 +990,7 @@ class CPUStatePDP11 extends CPUPDP11 {
      */
     addIRQ(vector, priority, message)
     {
-        var irq = {vector: vector, priority: priority, message: message || 0, next: null};
-        irq.name = PDP11.VECTORS[vector];
+        var irq = {vector: vector, priority: priority, message: message || 0, name: PDP11.VECTORS[vector], next: null};
         this.aIRQs.push(irq);
         return irq;
     }
@@ -1088,6 +1092,22 @@ class CPUStatePDP11 extends CPUPDP11 {
     }
 
     /**
+     * findIRQ(vector)
+     *
+     * @this {CPUStatePDP11}
+     * @param {number} vector
+     * @return {IRQ|null}
+     */
+    findIRQ(vector)
+    {
+        for (var i = 0; i < this.aIRQs.length; i++) {
+            var irq = this.aIRQs[i];
+            if (irq.vector === vector) return irq;
+        }
+        return null;
+    }
+
+    /**
      * checkIRQs(priority)
      *
      * @this {CPUStatePDP11}
@@ -1107,6 +1127,41 @@ class CPUStatePDP11 extends CPUPDP11 {
     resetIRQs()
     {
         this.irqNext = null;
+    }
+
+    /**
+     * saveIRQs()
+     *
+     * @this {CPUStatePDP11}
+     * @return {Array.<number>}
+     */
+    saveIRQs()
+    {
+        var aIRQVectors = [];
+        var irq = this.irqNext;
+        while (irq) {
+            aIRQVectors.push(irq.vector);
+            irq = irq.next;
+        }
+        return aIRQVectors;
+    }
+
+    /**
+     * restoreIRQs(aIRQVectors)
+     *
+     * @this {CPUStatePDP11}
+     * @param {Array.<number>} aIRQVectors
+     */
+    restoreIRQs(aIRQVectors)
+    {
+        for (var i = aIRQVectors.length - 1; i >= 0; i--) {
+            var irq = this.findIRQ(aIRQVectors[i]);
+            this.assert(irq != null);
+            if (irq) {
+                irq.next = this.irqNext;
+                this.irqNext = irq;
+            }
+        }
     }
 
     /**
@@ -1615,8 +1670,8 @@ class CPUStatePDP11 extends CPUPDP11 {
          * These next properties (in conjunction with setting PDP11.OPFLAG.TRAP_LAST) are purely an aid for the Debugger;
          * see getTrapStatus().
          */
-        this.trapVector = vector;
         this.trapReason = reason;
+        this.trapVector = vector;
 
         if (reason == PDP11.REASON.PANIC) {
             this.stopCPU();
@@ -1757,9 +1812,9 @@ class CPUStatePDP11 extends CPUPDP11 {
             var page = addr >> 13;
             if (page > 7) mode |= 1;
             if (!(this.regMMR3 & this.mapMMR3[this.pswMode])) page &= 7;
-            var pdr = this.mmuPDR[this.pswMode][page];
+            var pdr = this.regsPDR[this.pswMode][page];
             var off = addr & 0x1fff;
-            var paf = (this.mmuPAR[this.pswMode][page] << 6);
+            var paf = (this.regsPAR[this.pswMode][page] << 6);
             addrPhysical = (paf + off) & this.mmuMask;
             if (addrPhysical >= BusPDP11.UNIBUS_22BIT) addrPhysical = this.mapUnibus(addrPhysical);
             a.push(addrPhysical);   // a[0]
@@ -1838,8 +1893,8 @@ class CPUStatePDP11 extends CPUPDP11 {
 
         page = addrVirtual >> 13;
         if (!(this.regMMR3 & this.mapMMR3[this.pswMode])) page &= 7;
-        pdr = this.mmuPDR[this.pswMode][page];
-        addr = ((this.mmuPAR[this.pswMode][page] << 6) + (addrVirtual & 0x1fff)) & this.mmuMask;
+        pdr = this.regsPDR[this.pswMode][page];
+        addr = ((this.regsPAR[this.pswMode][page] << 6) + (addrVirtual & 0x1fff)) & this.mmuMask;
 
         if (addr >= BusPDP11.UNIBUS_22BIT) addr = this.mapUnibus(addr);
 
@@ -1928,7 +1983,7 @@ class CPUStatePDP11 extends CPUPDP11 {
         /*
          * Aborts and traps: log FIRST trap and MOST RECENT abort
          */
-        this.mmuPDR[this.pswMode][page] = pdr;
+        this.regsPDR[this.pswMode][page] = pdr;
         if (addr != ((BusPDP11.IOPAGE_22BIT | PDP11.UNIBUS.MMR0) & this.mmuMask) || this.pswMode) {
             this.mmuLastMode = this.pswMode;
             this.mmuLastPage = page;
@@ -2818,6 +2873,7 @@ class CPUStatePDP11 extends CPUPDP11 {
             fnFlags.call(this, data << 8);
         } else {
             var addr = this.getAddr(mode, reg, PDP11.ACCESS.WRITE_BYTE);
+            //noinspection JSUnresolvedFunction
             fnFlags.call(this, (data = data < 0? (this.regsGen[-data-1] & 0xff) : data) << 8);
             this.setByte(addr, data);
             if (addr & 1) this.nStepCycles--;
@@ -2843,9 +2899,11 @@ class CPUStatePDP11 extends CPUPDP11 {
 
         if (!mode) {
             this.regsGen[reg] = (data = data < 0? this.regsGen[-data-1] : data);
+            //noinspection JSUnresolvedFunction
             fnFlags.call(this, data);
         } else {
             var addr = this.getAddr(mode, reg, PDP11.ACCESS.WRITE_WORD);
+            //noinspection JSUnresolvedFunction
             fnFlags.call(this, (data = data < 0? this.regsGen[-data-1] : data));
             this.setWord(addr, data);
         }
@@ -2974,7 +3032,7 @@ class CPUStatePDP11 extends CPUPDP11 {
 
         } while (this.nStepCycles > 0);
 
-        return (this.flags.complete? this.nBurstCycles - this.nStepCycles : (this.flags.complete === undefined? 0 : -1));
+        return (this.flags.complete? this.nBurstCycles - this.nStepCycles : (this.flags.complete === false? -1 : 0));
     }
 
     /**
