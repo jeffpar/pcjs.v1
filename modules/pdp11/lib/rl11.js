@@ -69,14 +69,13 @@ class RL11 extends DriveController {
     }
 
     /**
-     * initController(aRegs, aHistory)
+     * initController(aRegs)
      *
      * @this {RL11}
      * @param {Array} [aRegs]
-     * @param {Array} [aHistory]
      * @return {boolean} true if successful, false if failure
      */
-    initController(aRegs, aHistory)
+    initController(aRegs)
     {
         if (!aRegs) {
             aRegs = [(RL11.RLCS.DRDY | RL11.RLCS.CRDY), 0, 0, 0, 0, 0];
@@ -95,7 +94,7 @@ class RL11 extends DriveController {
             this.regRLBE
         ] = aRegs;
 
-        return super.initController(aRegs, aHistory);
+        return true;
     }
 
     /**

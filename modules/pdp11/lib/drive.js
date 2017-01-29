@@ -75,7 +75,7 @@ var Config;
  */
 class DriveController extends Component {
     /**
-     * DriveController(type, parms, bitsMessage, configDC)
+     * DriveController(type, parms, bitsMessage, configDC, configDrive, configIO)
      *
      * The DriveController component has the following component-specific (parms) properties:
      *
@@ -85,10 +85,10 @@ class DriveController extends Component {
      * @param {Object} parms
      * @param {number} bitsMessage
      * @param {Config} configDC
-     * @param {Array} driveInfo
-     * @param {Object} tableIO
+     * @param {Array} configDrive
+     * @param {Object} configIO
      */
-    constructor(type, parms, bitsMessage, configDC, driveInfo, tableIO)
+    constructor(type, parms, bitsMessage, configDC, configDrive, configIO)
     {
         super(type, parms, bitsMessage);
 
@@ -100,8 +100,8 @@ class DriveController extends Component {
         this.cAutoMount = 0;
 
         this.configDC = configDC;
-        this.driveInfo = driveInfo;
-        this.tableIO = tableIO;
+        this.configDrive = configDrive;
+        this.configIO = configIO;
 
         this.nDrives = configDC.DRIVES;
         this.aDrives = new Array(this.nDrives);
@@ -347,15 +347,15 @@ class DriveController extends Component {
         }
 
         /*
-         * If we didn't need auto-mount support, we could defer controller initialization until we received
-         * a powerUp() notification, at which point reset() would call initController(), or restore() would restore
-         * the controller; in that case, all we'd need to do here is call setReady().
+         * If we didn't need auto-mount support, we could defer controller and drive initialization until we received
+         * a powerUp() notification, at which point reset() would call initController(), or restore() would restore the
+         * controller.
          */
-        this.initController();
+        this.reset();
 
         this.irq = this.cpu.addIRQ(this.configDC.VEC, this.configDC.PRI, this.bitsMessage);
 
-        bus.addIOTable(this, this.tableIO);
+        bus.addIOTable(this, this.configIO);
         bus.addResetHandler(this.reset.bind(this));
 
         this.addDisk("None", DriveController.SOURCE.NONE, true);
@@ -465,6 +465,7 @@ class DriveController extends Component {
     reset()
     {
         this.initController();
+        this.initDrives();
     }
 
     /**
@@ -479,7 +480,8 @@ class DriveController extends Component {
     {
         var state = new State(this);
         state.set(0, this.saveController());
-        state.set(0, this.saveDeltas());
+        state.set(1, this.saveHistory());
+        state.set(2, this.saveDrives());
         return state.data();
     }
 
@@ -494,37 +496,25 @@ class DriveController extends Component {
      */
     restore(data)
     {
-        return this.initController(data[0], data[1]);
+        var fSuccess = true;
+        if (!this.initController(data[0])) fSuccess = false;
+        if (!this.initHistory(data[1])) fSuccess = false;
+        if (!this.initDrives(data[2])) fSuccess = false;
+        return fSuccess;
     }
 
     /**
-     * initController(aRegs, aHistory)
+     * initController(aRegs)
+     *
+     * Placeholder for subclasses.
      *
      * @this {DriveController}
      * @param {Array} [aRegs]
-     * @param {Array} [aHistory]
      * @return {boolean} true if successful, false if failure
      */
-    initController(aRegs, aHistory)
+    initController(aRegs)
     {
-        var fSuccess = true;
-
-        /*
-         * Initialize the disk history (if available) before initializing the drives, so that any disk deltas can be
-         * applied to disk images that are already loaded.
-         */
-        if (aHistory) this.aDiskHistory = aHistory;
-
-        for (var iDrive = 0; iDrive < this.aDrives.length; iDrive++) {
-            var drive = this.aDrives[iDrive];
-            if (drive === undefined) {
-                drive = this.aDrives[iDrive] = {};
-            }
-            if (!this.initDrive(drive, iDrive, this.driveInfo)) {
-                fSuccess = false;
-            }
-        }
-        return fSuccess;
+        return true;
     }
 
     /**
@@ -537,42 +527,20 @@ class DriveController extends Component {
      */
     saveController()
     {
+        return [];
     }
 
     /**
-     * saveDeltas()
-     *
-     * This returns an array of entries, one for each disk image we've ever mounted, including any deltas; ie:
-     *
-     *      [name, path, deltas]
-     *
-     * aDiskHistory contains exactly that, except that deltas may not be up-to-date for any currently mounted
-     * disk image(s), so we call updateHistory() for all those disks, and then aDiskHistory is ready to be saved.
-     *
-     * @this {DriveController}
-     * @return {Array}
-     */
-    saveDeltas()
-    {
-        for (var iDrive = 0; iDrive < this.aDrives.length; iDrive++) {
-            var drive = this.aDrives[iDrive];
-            if (drive.disk) {
-                this.updateDiskHistory(drive.sDiskName, drive.sDiskPath, drive.disk);
-            }
-        }
-        return this.aDiskHistory;
-    }
-
-    /**
-     * initDrive(drive, iDrive, driveInfo)
+     * initDrive(drive, iDrive, configDrive, configDisk)
      *
      * @this {DriveController}
      * @param {Object} drive
      * @param {number} iDrive
-     * @param {Array} driveInfo
+     * @param {Array} configDrive
+     * @param {Array} [configDisk]
      * @return {boolean} true if successful, false if failure
      */
-    initDrive(drive, iDrive, driveInfo)
+    initDrive(drive, iDrive, configDrive, configDisk)
     {
         var i = 0;
         var fSuccess = true;
@@ -586,11 +554,11 @@ class DriveController extends Component {
          * NOTE: We initialize the following drive properties to their MAXIMUMs; disks may have
          * these or SMALLER values (subject to the limits of what the controller supports, of course).
          */
-        drive.nCylinders = driveInfo[0];
-        drive.nHeads = driveInfo[1];
-        drive.nSectors = driveInfo[2];
-        drive.cbSector = driveInfo[3];
-        drive.status = driveInfo[4];
+        drive.nCylinders = configDrive[0];
+        drive.nHeads = configDrive[1];
+        drive.nSectors = configDrive[2];
+        drive.cbSector = configDrive[3];
+        drive.status = configDrive[4];
 
         /*
          * The next group of properties are set by various controller command sequences.
@@ -607,9 +575,138 @@ class DriveController extends Component {
         drive.ibSector = 0;
         drive.sector = null;
 
-        if (!drive.disk) drive.sDiskPath = "";  // ensure this is initialized to a default that displayDisk() can deal with
+        if (!drive.disk) {
+            drive.sDiskPath = "";               // ensure this is initialized to a default that displayDisk() can deal with
+        }
 
+        if (configDisk) {
+            var fLocal = configDisk[0];
+            var sDiskName = configDisk[1];
+            var sDiskPath = configDisk[2];
+            /*
+             * If we're restoring a local disk image, then the entire disk contents should be captured in aDiskHistory,
+             * so all we have to do is mount a blank disk and let disk.restore() do the rest; ie, there's nothing to
+             * "load" (it's a purely synchronous operation).
+             *
+             * Otherwise, we must call loadDrive(); in the common case, loadDrive() will have already "auto-mounted"
+             * the disk, so it will return true, and then we restore any deltas to the current image.
+             *
+             * However, if loadDrive() returns false, then it has initiated the load for a *different* disk image,
+             * so we must mark ourselves as "not ready" again, and add another "wait for ready" test in Computer before
+             * finally powering the CPU.
+             */
+            if (fLocal) {
+                this.mountDrive(iDrive, sDiskName, sDiskPath);
+            }
+            else if (this.loadDrive(iDrive, sDiskName, sDiskPath, true)) {
+                if (drive.disk) {
+                    if (sDiskPath) {
+                        this.addDiskHistory(sDiskName, sDiskPath, drive.disk);
+                    } else {
+                        if (MAXDEBUG) Component.warning("Disk '" + (drive.disk.sDiskName || sDiskName) + "' not recorded properly in drive " + iDrive);
+                    }
+                }
+            } else {
+                this.setReady(false);
+            }
+        }
         return fSuccess;
+    }
+
+    /**
+     * initDrives(aConfigDisks)
+     *
+     * @this {DriveController}
+     * @param {Array} [aConfigDisks]
+     * @return {boolean} true if successful, false if failure
+     */
+    initDrives(aConfigDisks)
+    {
+        var fSuccess = true;
+        for (var iDrive = 0; iDrive < this.aDrives.length; iDrive++) {
+            var drive = this.aDrives[iDrive];
+            if (drive === undefined) {
+                drive = this.aDrives[iDrive] = {};
+            }
+            var configDisk = aConfigDisks && aConfigDisks[iDrive];
+            if (!this.initDrive(drive, iDrive, this.configDrive, configDisk)) {
+                fSuccess = false;
+            }
+        }
+        return fSuccess;
+    }
+
+    /**
+     * saveDrive(drive)
+     *
+     * @this {DriveController}
+     * @param {Object} drive
+     * @return {Array}
+     */
+    saveDrive(drive)
+    {
+        return [
+            drive.fLocal,
+            drive.sDiskName,
+            drive.sDiskPath
+        ]
+    }
+
+    /**
+     * saveDrives()
+     *
+     * @this {DriveController}
+     * @return {Array}
+     */
+    saveDrives()
+    {
+        var data = [];
+        for (var iDrive = 0; iDrive < this.aDrives.length; iDrive++) {
+            data.push(this.saveDrive(this.aDrives[iDrive]));
+        }
+        return data;
+    }
+
+    /**
+     * initHistory(aHistory)
+     *
+     * @this {DriveController}
+     * @param {Array} [aHistory]
+     * @return {boolean} true if successful, false if failure
+     */
+    initHistory(aHistory)
+    {
+        /*
+         * Initialize the disk history (if available) before initializing the drives, so that any disk deltas can be
+         * applied to disk images that are already loaded.
+         */
+        if (aHistory) this.aDiskHistory = aHistory;
+
+        return true;
+    }
+
+    /**
+     * saveHistory()
+     *
+     * This returns an array of entries, one for each disk image we've ever mounted, including any deltas; ie:
+     *
+     *      [name, path, deltas]
+     *
+     * aDiskHistory contains exactly that, except that deltas may not be up-to-date for any currently mounted
+     * disk image(s), so we call updateHistory() for all those disks, and then aDiskHistory is ready to be saved.
+     *
+     * @this {DriveController}
+     * @return {Array}
+     */
+    saveHistory()
+    {
+        for (var iDrive = 0; iDrive < this.aDrives.length; iDrive++) {
+            var drive = this.aDrives[iDrive];
+            if (drive.disk) {
+                this.updateDiskHistory(drive.sDiskName, drive.sDiskPath, drive.disk);
+            }
+        }
+        return this.aDiskHistory;
     }
 
     /**
@@ -722,6 +819,23 @@ class DriveController extends Component {
         if (err) {
             this.notice("Unable to read the boot sector (" + err + ")");
         }
+    }
+
+    /**
+     * mountDrive(iDrive, sDiskName, sDiskPath)
+     *
+     * @this {DriveController}
+     * @param {number} iDrive
+     * @param {string} sDiskName
+     * @param {string} sDiskPath
+     */
+    mountDrive(iDrive, sDiskName, sDiskPath)
+    {
+        var drive = this.aDrives[iDrive];
+        this.unloadDrive(iDrive, true);
+        drive.fLocal = true;
+        var disk = new DiskPDP11(this, drive, DiskAPI.MODE.PRELOAD);
+        this.finishLoadDrive(drive, disk, sDiskName, sDiskPath, true);
     }
 
     /**
@@ -931,7 +1045,7 @@ class DriveController extends Component {
                  * Next, make sure the drive whose disk we're updating is the currently selected drive.
                  */
                 var iDriveSelected = Str.parseInt(controlDrives.value, 10);
-                var sTargetPath = (drive.fLocal? RL11.SOURCE.LOCAL : drive.sDiskPath);
+                var sTargetPath = (drive.fLocal? DriveController.SOURCE.LOCAL : drive.sDiskPath);
                 if (!isNaN(iDriveSelected) && iDriveSelected == iDrive) {
                     for (i = 0; i < controlDisks.options.length; i++) {
                         if (controlDisks.options[i].value == sTargetPath) {
@@ -997,8 +1111,6 @@ class DriveController extends Component {
             drive.sDiskPath = "";
             drive.disk = null;
             drive.fLocal = false;
-
-            // this.regInput |= FDC.REG_INPUT.DISK_CHANGE;
 
             if (!fLoading) {
                 this.notice("Drive " + this.getDriveName(iDrive) + " unloaded", fLoading);

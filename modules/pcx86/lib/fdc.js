@@ -1140,6 +1140,7 @@ FDC.prototype.saveDrives = function()
  * saveDrive(drive)
  *
  * @this {FDC}
+ * @param {Object} drive
  * @return {Array}
  */
 FDC.prototype.saveDrive = function(drive)

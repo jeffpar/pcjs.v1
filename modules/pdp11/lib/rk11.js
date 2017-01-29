@@ -69,14 +69,13 @@ class RK11 extends DriveController {
     }
 
     /**
-     * initController(aRegs, aHistory)
+     * initController(aRegs)
      *
      * @this {RK11}
      * @param {Array} [aRegs]
-     * @param {Array} [aHistory]
      * @return {boolean} true if successful, false if failure
      */
-    initController(aRegs, aHistory)
+    initController(aRegs)
     {
         if (!aRegs) {
             aRegs = [(RK11.RKDS.RK05 | RK11.RKDS.SOK | RK11.RKDS.RRDY), 0, (RK11.RKCS.CRDY), 0, 0, 0, 0];
@@ -96,7 +95,7 @@ class RK11 extends DriveController {
             this.regRKDB
         ] = aRegs;
 
-        return super.initController(aRegs, aHistory);
+        return true;
     }
 
     /**
