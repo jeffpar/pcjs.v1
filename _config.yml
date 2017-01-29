@@ -159,6 +159,7 @@ pcjs:
     - /modules/pdp11/lib/serial.js
     - /modules/pdp11/lib/pc11.js
     - /modules/pdp11/lib/disk.js
+    - /modules/pdp11/lib/drive.js
     - /modules/pdp11/lib/rk11.js
     - /modules/pdp11/lib/rl11.js
     - /modules/shared/es6/debugger.js
