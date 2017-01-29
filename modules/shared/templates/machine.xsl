@@ -13,6 +13,18 @@
 	<xsl:include href="../../shared/templates/components.xsl"/>
 
 	<xsl:template match="/machine">
+		<xsl:variable name="machineType">
+			<xsl:choose>
+				<xsl:when test="@type"><xsl:value-of select="@type"/></xsl:when>
+				<xsl:otherwise><xsl:value-of select="@class"/></xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
+		<xsl:variable name="machineClass">
+			<xsl:choose>
+				<xsl:when test="@class = 'pc' or @class = 'c1p'"><xsl:value-of select="@class"/>js</xsl:when>
+				<xsl:otherwise><xsl:value-of select="@class"/></xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
 		<html lang="en">
 			<head>
 				<title><xsl:value-of select="$SITEHOST"/></title>
@@ -24,11 +36,11 @@
 					<xsl:call-template name="commonTop"/>
 					<div class="common-middle">
 						<p></p>
-						<div id="{@id}" class="machine {@class}js">
+						<div id="{@id}" class="machine {$machineType} {$machineClass}">
 							<xsl:call-template name="component">
 								<xsl:with-param name="machine" select="@id"/>
 								<xsl:with-param name="component" select="'machine'"/>
-								<xsl:with-param name="class"><xsl:value-of select="@class"/>js</xsl:with-param>
+								<xsl:with-param name="class" select="$machineClass"/>
 								<xsl:with-param name="parms"><xsl:if test="@parms">,<xsl:value-of select="@parms"/></xsl:if></xsl:with-param>
 							</xsl:call-template>
 						</div>
@@ -38,8 +50,8 @@
 				<xsl:call-template name="componentScripts">
 					<xsl:with-param name="component">
 						<xsl:choose>
-							<xsl:when test="debugger"><xsl:value-of select="@class"/>-dbg</xsl:when>
-							<xsl:otherwise><xsl:value-of select="@class"/></xsl:otherwise>
+							<xsl:when test="debugger"><xsl:value-of select="$machineType"/>-dbg</xsl:when>
+							<xsl:otherwise><xsl:value-of select="$machineType"/></xsl:otherwise>
 						</xsl:choose>
 					</xsl:with-param>
 				</xsl:call-template>

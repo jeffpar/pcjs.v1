@@ -68,13 +68,16 @@
 		<xsl:variable name="machineStyle">
 			<xsl:if test="@float">float:<xsl:value-of select="@float"/></xsl:if>
 		</xsl:variable>
+		<xsl:variable name="machineType">
+			<xsl:if test="@type"><xsl:value-of select="@type"/></xsl:if>
+		</xsl:variable>
 		<xsl:variable name="machineClass">
 			<xsl:choose>
 				<xsl:when test="@class = 'pc' or @class = 'c1p'"><xsl:value-of select="@class"/>js</xsl:when>
 				<xsl:otherwise><xsl:value-of select="@class"/></xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
-		<div id="{$machine}" class="machine {$machineClass}" style="{$machineStyle}">
+		<div id="{$machine}" class="machine {$machineType} {$machineClass}" style="{$machineStyle}">
 			<xsl:call-template name="component">
 				<xsl:with-param name="machine" select="$machine"/>
 				<xsl:with-param name="machineState">
