@@ -194,7 +194,20 @@ class ComputerPDP11 extends Component {
             if (component.initBus) component.initBus(this, this.bus, this.cpu, this.dbg);
         }
 
-        this.resume = /** @type {number} */ (this.getMachineParm('resume', parmsComputer, Str.TYPES.NUMBER, ComputerPDP11.RESUME_NONE));
+        var sStatePath = null;
+        var sResume = this.getMachineParm('resume', parmsComputer);
+        if (sResume !== undefined) {
+            /*
+             * DEPRECATE: This goofiness is a holdover from when the 'resume' property was a string (either a
+             * single-digit string or a path); now it's always a number, so it never has a 'length' property and
+             * the call to parseInt() is unnecessary.
+             */
+            if (sResume.length > 1) {
+                sStatePath = this.sResumePath = sResume;
+            } else {
+                this.resume = parseInt(sResume, 10);
+            }
+        }
 
         /*
          * The Computer 'state' property allows a state file to be specified independent of the 'resume' feature;
@@ -210,7 +223,7 @@ class ComputerPDP11 extends Component {
          * OVERRIDES everything; it overrides any 'state' Computer parameter AND it disables resume of any saved state in
          * localStorage (in other words, it prevents fAllowResume from being true, and forcing resume off).
          */
-        var fAllowResume, sStatePath = null;
+        var fAllowResume;
         var sState = this.getMachineParm('state') || (fAllowResume = true) && parmsComputer['state'];
 
         if (sState) {
