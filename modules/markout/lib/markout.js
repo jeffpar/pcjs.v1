@@ -351,6 +351,7 @@ MarkOut.aHTMLEntities = {
  *      'messages' (eg, "disk")
  *      'autopower' (eg, true)
  *      'autostart' (eg, true)
+ *      'resume' (eg, "0", "1", "2", "3", or "state.json")
  *
  * and any other string-based property you wish to pass through to PCjs (via the embedPC() sParms parameter).
  *

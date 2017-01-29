@@ -1369,7 +1369,7 @@
 		<xsl:call-template name="component">
 			<xsl:with-param name="machine" select="$machine"/>
 			<xsl:with-param name="class">computer</xsl:with-param>
-			<xsl:with-param name="parms">,autoPower:<xsl:value-of select="$autoPower"/>,busWidth:<xsl:value-of select="$busWidth"/>,resume:<xsl:value-of select="$resume"/>,state:'<xsl:value-of select="$state"/>'</xsl:with-param>
+			<xsl:with-param name="parms">,autoPower:<xsl:value-of select="$autoPower"/>,busWidth:<xsl:value-of select="$busWidth"/>,resume:'<xsl:value-of select="$resume"/>',state:'<xsl:value-of select="$state"/>'</xsl:with-param>
 		</xsl:call-template>
 	</xsl:template>
 
