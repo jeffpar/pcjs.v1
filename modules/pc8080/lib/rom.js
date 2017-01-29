@@ -66,7 +66,7 @@ class ROM8080 extends Component {
      */
     constructor(parmsROM)
     {
-        super("ROM", parmsROM, ROM8080);
+        super("ROM", parmsROM);
 
         this.abROM = null;
         this.addrROM = parmsROM['addr'];

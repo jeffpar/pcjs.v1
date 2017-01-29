@@ -5,9 +5,9 @@
  *
  * This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
  *
- * It has been adapted from the JavaScript PDP 11/70 Emulator v1.4 written by Paul Nankervis
- * (paulnank@hotmail.com) as of September 2016 at <http://skn.noip.me/pdp11/pdp11.html>.  This code
- * may be used freely provided the original authors are acknowledged in any modified source code.
+ * It has been adapted from the JavaScript PDP 11/70 Emulator written by Paul Nankervis
+ * (paulnank@hotmail.com) at <http://skn.noip.me/pdp11/pdp11.html>.  This code may be used
+ * freely provided the original authors are acknowledged in any modified source code.
  *
  * PCjs is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3
@@ -100,7 +100,7 @@ class SerialPortPDP11 extends Component {
      */
     constructor(parmsSerial)
     {
-        super("SerialPort", parmsSerial, SerialPortPDP11, MessagesPDP11.SERIAL);
+        super("SerialPort", parmsSerial, MessagesPDP11.SERIAL);
 
         this.iAdapter = +parmsSerial['adapter'];
         this.nBaudReceive = +parmsSerial['baudReceive'] || PDP11.DL11.RCSR.BAUD;
@@ -389,7 +389,7 @@ class SerialPortPDP11 extends Component {
                             if (this.sendData) {
                                 this.fNullModem = fNullModem;
                                 this.updateStatus = exports['receiveStatus'];
-                                this.status(this.idMachine + '.' + sSourceID + " connected to " + sTargetID);
+                                this.status("Connected " + this.idMachine + '.' + sSourceID + " to " + sTargetID);
                                 return;
                             }
                         }
@@ -423,7 +423,7 @@ class SerialPortPDP11 extends Component {
              */
             this.initConnection(this.fNullModem);
 
-            if (!data || !this.restore) {
+            if (!data) {
                 this.reset();
             } else {
                 if (!this.restore(data)) return false;
@@ -485,30 +485,48 @@ class SerialPortPDP11 extends Component {
     }
 
     /**
-     * initState(data)
+     * initState(a)
      *
      * @this {SerialPortPDP11}
-     * @param {Array} [data]
+     * @param {Array} [a]
      * @return {boolean} true if successful, false if failure
      */
-    initState(data)
+    initState(a)
     {
-        this.regRBUF = 0;
-        this.regRCSR = PDP11.DL11.RCSR.CTS;     // TODO: I didn't use to set this initially; is this wise?
-        this.regXCSR = PDP11.DL11.XCSR.READY;
-        this.abReceive = [];
+        if (!a) {
+            a = [0, PDP11.DL11.RCSR.CTS, PDP11.DL11.XCSR.READY, this.abReceive];
+        }
+
+        /*
+         * ES6 ALERT: A handy destructuring assignment, which makes it easy to perform the inverse
+         * of what saveRegisters() does when it collects a bunch of object properties into an array.
+         */
+        [
+            this.regRBUF,
+            this.regRCSR,
+            this.regXCSR,
+            this.abReceive
+        ] = a;
+
         return true;
     }
 
     /**
      * saveRegisters()
      *
+     * Basically, the inverse of initState().
+     *
      * @this {SerialPortPDP11}
      * @return {Array}
      */
     saveRegisters()
     {
-        return [];
+        return [
+            this.regRBUF,
+            this.regRCSR,
+            this.regXCSR,
+            this.abReceive
+        ];
     }
 
     /**

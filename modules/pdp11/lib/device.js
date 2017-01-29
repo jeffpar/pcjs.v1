@@ -5,9 +5,9 @@
  *
  * This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
  *
- * It has been adapted from the JavaScript PDP 11/70 Emulator v1.4 written by Paul Nankervis
- * (paulnank@hotmail.com) as of September 2016 at <http://skn.noip.me/pdp11/pdp11.html>.  This code
- * may be used freely provided the original authors are acknowledged in any modified source code.
+ * It has been adapted from the JavaScript PDP 11/70 Emulator written by Paul Nankervis
+ * (paulnank@hotmail.com) at <http://skn.noip.me/pdp11/pdp11.html>.  This code may be used
+ * freely provided the original authors are acknowledged in any modified source code.
  *
  * PCjs is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3
@@ -36,6 +36,7 @@ if (NODE) {
     var Str = require("../../shared/es6/strlib");
     var Web = require("../../shared/es6/weblib");
     var Component = require("../../shared/es6/component");
+    var State = require("../../shared/es6/state");
     var PDP11 = require("./defines");
     var BusPDP11 = require("./bus");
     var MemoryPDP11 = require("./memory");
@@ -59,10 +60,10 @@ class DevicePDP11 extends Component {
      */
     constructor(parmsDevice)
     {
-        super("Device", parmsDevice, DevicePDP11, MessagesPDP11.DEVICE);
+        super("Device", parmsDevice, MessagesPDP11.DEVICE);
 
         this.kw11 = {               // KW11 registers
-            csr:        0,
+            lks:        PDP11.KW11.LKS.MON,
             timer:      -1          // initBus() will initialize this timer ID
         };
     }
@@ -111,18 +112,18 @@ class DevicePDP11 extends Component {
     {
         if (DEBUGGER) {
             var cpu = this.cpu;
-            this.dumpRegs("KIPDR", cpu.mmuPDR[0], 0, asArgs[0]);
-            this.dumpRegs("KDPDR", cpu.mmuPDR[0], 8, asArgs[0]);
-            this.dumpRegs("KIPAR", cpu.mmuPAR[0], 0, asArgs[0]);
-            this.dumpRegs("KDPAR", cpu.mmuPAR[0], 8, asArgs[0], true);
-            this.dumpRegs("SIPDR", cpu.mmuPDR[1], 0, asArgs[0]);
-            this.dumpRegs("SDPDR", cpu.mmuPDR[1], 8, asArgs[0]);
-            this.dumpRegs("SIPAR", cpu.mmuPAR[1], 0, asArgs[0]);
-            this.dumpRegs("SDPAR", cpu.mmuPAR[1], 8, asArgs[0], true);
-            this.dumpRegs("UIPDR", cpu.mmuPDR[3], 0, asArgs[0]);
-            this.dumpRegs("UDPDR", cpu.mmuPDR[3], 8, asArgs[0]);
-            this.dumpRegs("UIPAR", cpu.mmuPAR[3], 0, asArgs[0]);
-            this.dumpRegs("UDPAR", cpu.mmuPAR[3], 8, asArgs[0], true);
+            this.dumpRegs("KIPDR", cpu.regsPDR[0], 0, asArgs[0]);
+            this.dumpRegs("KDPDR", cpu.regsPDR[0], 8, asArgs[0]);
+            this.dumpRegs("KIPAR", cpu.regsPAR[0], 0, asArgs[0]);
+            this.dumpRegs("KDPAR", cpu.regsPAR[0], 8, asArgs[0], true);
+            this.dumpRegs("SIPDR", cpu.regsPDR[1], 0, asArgs[0]);
+            this.dumpRegs("SDPDR", cpu.regsPDR[1], 8, asArgs[0]);
+            this.dumpRegs("SIPAR", cpu.regsPAR[1], 0, asArgs[0]);
+            this.dumpRegs("SDPAR", cpu.regsPAR[1], 8, asArgs[0], true);
+            this.dumpRegs("UIPDR", cpu.regsPDR[3], 0, asArgs[0]);
+            this.dumpRegs("UDPDR", cpu.regsPDR[3], 8, asArgs[0]);
+            this.dumpRegs("UIPAR", cpu.regsPAR[3], 0, asArgs[0]);
+            this.dumpRegs("UDPAR", cpu.regsPAR[3], 8, asArgs[0], true);
             if (cpu.regMMR3 & PDP11.MMR3.UNIBUS_MAP) {
                 this.dumpRegs("UNIMAP", cpu.regsUniMap, -1, asArgs[0]);
             }
@@ -168,6 +169,39 @@ class DevicePDP11 extends Component {
     }
 
     /**
+     * powerUp(data, fRepower)
+     *
+     * @this {DevicePDP11}
+     * @param {Object|null} data
+     * @param {boolean} [fRepower]
+     * @return {boolean} true if successful, false if failure
+     */
+    powerUp(data, fRepower)
+    {
+        if (!fRepower) {
+            if (!data) {
+                this.reset();
+            } else {
+                if (!this.restore(data)) return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * powerDown(fSave, fShutdown)
+     *
+     * @this {DevicePDP11}
+     * @param {boolean} [fSave]
+     * @param {boolean} [fShutdown]
+     * @return {Object|boolean} component state if fSave; otherwise, true if successful, false if failure
+     */
+    powerDown(fSave, fShutdown)
+    {
+        return fSave? this.save() : true;
+    }
+
+    /**
      * reset()
      *
      * @this {DevicePDP11}
@@ -176,6 +210,45 @@ class DevicePDP11 extends Component {
     {
         this.kw11.lks = PDP11.KW11.LKS.MON;
         this.cpu.setTimer(this.kw11.timer, 1000/60, true);
+    }
+
+    /**
+     * save()
+     *
+     * This implements save support for the DevicePDP11 component.
+     *
+     * @this {DevicePDP11}
+     * @return {Object}
+     */
+    save()
+    {
+        var state = new State(this);
+        state.set(0, [
+            this.kw11.lks
+        ]);
+        return state.data();
+    }
+
+    /**
+     * restore(data)
+     *
+     * This implements restore support for the DevicePDP11 component.
+     *
+     * @this {DevicePDP11}
+     * @param {Object} data
+     * @return {boolean} true if successful, false if failure
+     */
+    restore(data)
+    {
+        /*
+         * ES6 ALERT: A handy destructuring assignment, which makes it easy to perform the inverse
+         * of what save() does when it collects a bunch of object properties into an array.
+         */
+        [
+            this.kw11.lks
+        ] = data[0];
+
+        return true;
     }
 
     /**
@@ -350,7 +423,7 @@ class DevicePDP11 extends Component {
     readSIPDR(addr)
     {
         var reg = (addr >> 1) & 7;
-        return this.cpu.mmuPDR[1][reg];
+        return this.cpu.regsPDR[1][reg];
     }
 
     /**
@@ -363,7 +436,7 @@ class DevicePDP11 extends Component {
     writeSIPDR(data, addr)
     {
         var reg = (addr >> 1) & 7;
-        this.cpu.mmuPDR[1][reg] = data & 0xff0f;
+        this.cpu.regsPDR[1][reg] = data & 0xff0f;
     }
 
     /**
@@ -376,7 +449,7 @@ class DevicePDP11 extends Component {
     readSDPDR(addr)
     {
         var reg = ((addr >> 1) & 7) + 8;
-        return this.cpu.mmuPDR[1][reg];
+        return this.cpu.regsPDR[1][reg];
     }
 
     /**
@@ -389,7 +462,7 @@ class DevicePDP11 extends Component {
     writeSDPDR(data, addr)
     {
         var reg = ((addr >> 1) & 7) + 8;
-        this.cpu.mmuPDR[1][reg] = data & 0xff0f;
+        this.cpu.regsPDR[1][reg] = data & 0xff0f;
     }
 
     /**
@@ -402,7 +475,7 @@ class DevicePDP11 extends Component {
     readSIPAR(addr)
     {
         var reg = (addr >> 1) & 7;
-        return this.cpu.mmuPAR[1][reg];
+        return this.cpu.regsPAR[1][reg];
     }
 
     /**
@@ -415,8 +488,8 @@ class DevicePDP11 extends Component {
     writeSIPAR(data, addr)
     {
         var reg = (addr >> 1) & 7;
-        this.cpu.mmuPAR[1][reg] = data;
-        this.cpu.mmuPDR[1][reg] &= 0xff0f;
+        this.cpu.regsPAR[1][reg] = data;
+        this.cpu.regsPDR[1][reg] &= 0xff0f;
 
     }
 
@@ -430,7 +503,7 @@ class DevicePDP11 extends Component {
     readSDPAR(addr)
     {
         var reg = ((addr >> 1) & 7) + 8;
-        return this.cpu.mmuPAR[1][reg];
+        return this.cpu.regsPAR[1][reg];
     }
 
     /**
@@ -443,8 +516,8 @@ class DevicePDP11 extends Component {
     writeSDPAR(data, addr)
     {
         var reg = ((addr >> 1) & 7) + 8;
-        this.cpu.mmuPAR[1][reg] = data;
-        this.cpu.mmuPDR[1][reg] &= 0xff0f;
+        this.cpu.regsPAR[1][reg] = data;
+        this.cpu.regsPDR[1][reg] &= 0xff0f;
     }
 
     /**
@@ -457,7 +530,7 @@ class DevicePDP11 extends Component {
     readKIPDR(addr)
     {
         var reg = (addr >> 1) & 7;
-        return this.cpu.mmuPDR[0][reg];
+        return this.cpu.regsPDR[0][reg];
     }
 
     /**
@@ -470,7 +543,7 @@ class DevicePDP11 extends Component {
     writeKIPDR(data, addr)
     {
         var reg = (addr >> 1) & 7;
-        this.cpu.mmuPDR[0][reg] = data & 0xff0f;
+        this.cpu.regsPDR[0][reg] = data & 0xff0f;
     }
 
     /**
@@ -483,7 +556,7 @@ class DevicePDP11 extends Component {
     readKDPDR(addr)
     {
         var reg = ((addr >> 1) & 7) + 8;
-        return this.cpu.mmuPDR[0][reg];
+        return this.cpu.regsPDR[0][reg];
     }
 
     /**
@@ -496,7 +569,7 @@ class DevicePDP11 extends Component {
     writeKDPDR(data, addr)
     {
         var reg = ((addr >> 1) & 7) + 8;
-        this.cpu.mmuPDR[0][reg] = data & 0xff0f;
+        this.cpu.regsPDR[0][reg] = data & 0xff0f;
     }
 
     /**
@@ -509,7 +582,7 @@ class DevicePDP11 extends Component {
     readKIPAR(addr)
     {
         var reg = (addr >> 1) & 7;
-        return this.cpu.mmuPAR[0][reg];
+        return this.cpu.regsPAR[0][reg];
     }
 
     /**
@@ -522,8 +595,8 @@ class DevicePDP11 extends Component {
     writeKIPAR(data, addr)
     {
         var reg = (addr >> 1) & 7;
-        this.cpu.mmuPAR[0][reg] = data;
-        this.cpu.mmuPDR[0][reg] &= 0xff0f;
+        this.cpu.regsPAR[0][reg] = data;
+        this.cpu.regsPDR[0][reg] &= 0xff0f;
 
     }
 
@@ -537,7 +610,7 @@ class DevicePDP11 extends Component {
     readKDPAR(addr)
     {
         var reg = ((addr >> 1) & 7) + 8;
-        return this.cpu.mmuPAR[0][reg];
+        return this.cpu.regsPAR[0][reg];
     }
 
     /**
@@ -550,8 +623,8 @@ class DevicePDP11 extends Component {
     writeKDPAR(data, addr)
     {
         var reg = ((addr >> 1) & 7) + 8;
-        this.cpu.mmuPAR[0][reg] = data;
-        this.cpu.mmuPDR[0][reg] &= 0xff0f;
+        this.cpu.regsPAR[0][reg] = data;
+        this.cpu.regsPDR[0][reg] &= 0xff0f;
     }
 
     /**
@@ -564,7 +637,7 @@ class DevicePDP11 extends Component {
     readUIPDR(addr)
     {
         var reg = (addr >> 1) & 7;
-        return this.cpu.mmuPDR[3][reg];
+        return this.cpu.regsPDR[3][reg];
     }
 
     /**
@@ -577,7 +650,7 @@ class DevicePDP11 extends Component {
     writeUIPDR(data, addr)
     {
         var reg = (addr >> 1) & 7;
-        this.cpu.mmuPDR[3][reg] = data & 0xff0f;
+        this.cpu.regsPDR[3][reg] = data & 0xff0f;
     }
 
     /**
@@ -590,7 +663,7 @@ class DevicePDP11 extends Component {
     readUDPDR(addr)
     {
         var reg = ((addr >> 1) & 7) + 8;
-        return this.cpu.mmuPDR[3][reg];
+        return this.cpu.regsPDR[3][reg];
     }
 
     /**
@@ -603,7 +676,7 @@ class DevicePDP11 extends Component {
     writeUDPDR(data, addr)
     {
         var reg = ((addr >> 1) & 7) + 8;
-        this.cpu.mmuPDR[3][reg] = data & 0xff0f;
+        this.cpu.regsPDR[3][reg] = data & 0xff0f;
     }
 
     /**
@@ -616,7 +689,7 @@ class DevicePDP11 extends Component {
     readUIPAR(addr)
     {
         var reg = (addr >> 1) & 7;
-        return this.cpu.mmuPAR[3][reg];
+        return this.cpu.regsPAR[3][reg];
     }
 
     /**
@@ -629,8 +702,8 @@ class DevicePDP11 extends Component {
     writeUIPAR(data, addr)
     {
         var reg = (addr >> 1) & 7;
-        this.cpu.mmuPAR[3][reg] = data;
-        this.cpu.mmuPDR[3][reg] &= 0xff0f;
+        this.cpu.regsPAR[3][reg] = data;
+        this.cpu.regsPDR[3][reg] &= 0xff0f;
 
     }
 
@@ -644,7 +717,7 @@ class DevicePDP11 extends Component {
     readUDPAR(addr)
     {
         var reg = ((addr >> 1) & 7) + 8;
-        return this.cpu.mmuPAR[3][reg];
+        return this.cpu.regsPAR[3][reg];
     }
 
     /**
@@ -657,8 +730,8 @@ class DevicePDP11 extends Component {
     writeUDPAR(data, addr)
     {
         var reg = ((addr >> 1) & 7) + 8;
-        this.cpu.mmuPAR[3][reg] = data;
-        this.cpu.mmuPDR[3][reg] &= 0xff0f;
+        this.cpu.regsPAR[3][reg] = data;
+        this.cpu.regsPDR[3][reg] &= 0xff0f;
     }
 
     /**

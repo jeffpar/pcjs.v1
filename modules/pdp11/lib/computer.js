@@ -5,10 +5,6 @@
  *
  * This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
  *
- * It has been adapted from the JavaScript PDP 11/70 Emulator v1.4 written by Paul Nankervis
- * (paulnank@hotmail.com) as of September 2016 at <http://skn.noip.me/pdp11/pdp11.html>.  This code
- * may be used freely provided the original authors are acknowledged in any modified source code.
- *
  * PCjs is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3
  * of the License, or (at your option) any later version.
@@ -108,7 +104,7 @@ class ComputerPDP11 extends Component {
      */
     constructor(parmsComputer, parmsMachine, fSuspended)
     {
-        super("Computer", parmsComputer, ComputerPDP11, MessagesPDP11.COMPUTER);
+        super("Computer", parmsComputer, MessagesPDP11.COMPUTER);
 
         this.flags.powered = false;
 
@@ -186,7 +182,7 @@ class ComputerPDP11 extends Component {
 
         this.println(PDP11.APPNAME + " v" + PDP11.APPVERSION + "\n" + COPYRIGHT + "\n" + LICENSE);
 
-        this.println("Portions adapted from the PDP-11/70 Emulator v1.4 by Paul Nankervis <paulnank@hotmail.com>");
+        this.println("Portions adapted from the PDP-11/70 Emulator by Paul Nankervis <http://skn.noip.me/pdp11/pdp11.html>");
 
         if (DEBUG && this.messageEnabled()) this.printMessage("TYPEDARRAYS: " + TYPEDARRAYS);
 
@@ -731,7 +727,7 @@ class ComputerPDP11 extends Component {
              * TODO: Do we not care about the return value here? (ie, is checking fRestoreError sufficient)?
              */
             this.powerRestore(this.cpu, stateComputer, fRepower, fRestore);
-            this.updateDisplays();
+            this.updateDisplays(-2);
             this.cpu.autoStart();
         }
 
@@ -853,7 +849,10 @@ class ComputerPDP11 extends Component {
          * after they're no longer ready.
          */
         if (this.cpu && this.cpu.powerDown) {
-            if (fShutdown) this.cpu.stopCPU();
+            if (fShutdown) {
+                if (fSave) this.cpu.flags.autoStart = this.cpu.flags.running;
+                this.cpu.stopCPU();
+            }
             data = this.cpu.powerDown(fSave, fShutdown);
             if (typeof data === "object") stateComputer.set(this.cpu.id, data);
             if (fShutdown) {

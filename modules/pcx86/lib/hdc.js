@@ -668,7 +668,7 @@ HDC.prototype.initBus = function(cmp, bus, cpu, dbg)
 HDC.prototype.powerUp = function(data, fRepower)
 {
     if (!fRepower) {
-        if (!data || !this.restore) {
+        if (!data) {
             this.initController();
             if (this.cmp.fReload) {
                 /*

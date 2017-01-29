@@ -72,7 +72,7 @@ class Bus8080 extends Component {
      */
     constructor(parmsBus, cpu, dbg)
     {
-        super("Bus", parmsBus, Bus8080);
+        super("Bus", parmsBus);
 
         this.cpu = cpu;
         this.dbg = dbg;

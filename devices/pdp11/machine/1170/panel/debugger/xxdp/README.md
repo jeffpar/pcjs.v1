@@ -17,11 +17,11 @@ commands:
     select rl11 listDrives RL0;
     select rl11 listDisks "XXDP+ Diagnostics";
     click rl11 loadDisk;
-    click rl11 bootDisk
+    click rl11 bootDisk;
 ---
 
-This machine is ready to boot [XXDP+ Diagnostics](/disks/dec/rl02k/xxdp/) ("BOOT RL0") and run
-diagnostics (e.g., "R EKBEE1"):
+This machine is ready to boot [XXDP+ Diagnostics](/disks/dec/rl02k/xxdp/) ("BOOT RL0") and run diagnostics
+(e.g., "R EKBEE1"):
 
 - [EKBAD0: 11/70 CPU DIAGNOSTIC (PART 1)](/disks/dec/rl02k/xxdp/ekbad0/)
 - [EKBBF0: 11/70 CPU DIAGNOSTIC (PART 2)](/disks/dec/rl02k/xxdp/ekbbf0/)

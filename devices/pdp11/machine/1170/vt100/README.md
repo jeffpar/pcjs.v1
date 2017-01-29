@@ -13,8 +13,10 @@ machines:
     connection: serialPort->test1170.dl11
 ---
 
-{% include machine.html id="test1170" %}
+This VT100 Terminal is connected to the PDP-11/70 below.
+
+Machine configurations with the [PCjs Debugger](debugger/) are also available.
 
 {% include machine.html id="vt100" %}
 
-This PDP-11/70 is also available with our built-in [Debugger](debugger/).
+{% include machine.html id="test1170" %}

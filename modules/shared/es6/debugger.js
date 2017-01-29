@@ -48,7 +48,7 @@ if (NODE) {
  *      fTemporary:(boolean|undefined),
  *      sCmd:(string|undefined),
  *      aCmds:(Array.<string>|undefined)
- * }} DbgAddr
+ * }}
  */
 var DbgAddr;
 
@@ -94,7 +94,7 @@ class Debugger extends Component {
     constructor(parmsDbg) {
         if (DEBUGGER) {
 
-            super("Debugger", parmsDbg, Debugger);
+            super("Debugger", parmsDbg);
 
             /*
              * Default base used to display all values; modified with the "s base" command.

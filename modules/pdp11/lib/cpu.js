@@ -5,10 +5,6 @@
  *
  * This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
  *
- * It has been adapted from the JavaScript PDP 11/70 Emulator v1.4 written by Paul Nankervis
- * (paulnank@hotmail.com) as of September 2016 at <http://skn.noip.me/pdp11/pdp11.html>.  This code
- * may be used freely provided the original authors are acknowledged in any modified source code.
- *
  * PCjs is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3
  * of the License, or (at your option) any later version.
@@ -97,7 +93,7 @@ class CPUPDP11 extends Component {
      */
     constructor(parmsCPU, nCyclesDefault)
     {
-        super("CPU", parmsCPU, CPUPDP11, MessagesPDP11.CPU);
+        super("CPU", parmsCPU, MessagesPDP11.CPU);
 
         var nCycles = +parmsCPU['cycles'] || nCyclesDefault;
 
@@ -120,8 +116,7 @@ class CPUPDP11 extends Component {
         /*
          * We add a number of flags to the set initialized by Component
          */
-        this.flags.running = false;
-        this.flags.starting = false;
+        this.flags.running = this.flags.starting = false;
         this.flags.autoStart = parmsCPU['autoStart'];
         if (typeof this.flags.autoStart == "string") this.flags.autoStart = (this.flags.autoStart == "true");
 
@@ -267,7 +262,7 @@ class CPUPDP11 extends Component {
                  * However, we don't actually need to check all that; it's always safe use println(), regardless whether
                  * a Control Panel with a "print" control is present or not.
                  */
-                this.println("No debugger detected");
+                this.status("No debugger detected");
             }
             if (!this.flags.autoStart) {
                 this.println("CPU will not be auto-started " + (this.panel? "(click Run to start)" : "(type 'go' to start)"));
@@ -994,6 +989,37 @@ class CPUPDP11 extends Component {
             }
         }
         return nCycles;
+    }
+
+    /**
+     * saveTimers()
+     *
+     * @this {CPUPDP11}
+     * @return {Array.<number>}
+     */
+    saveTimers()
+    {
+        var aTimerCycles = [];
+        for (var i = 0; i < this.aTimers.length; i++) {
+            var timer = this.aTimers[i];
+            aTimerCycles.push(timer[0]);
+        }
+        return aTimerCycles;
+    }
+
+    /**
+     * restoreTimers(aTimerCycles)
+     *
+     * @this {CPUPDP11}
+     * @param {Array.<number>} aTimerCycles
+     */
+    restoreTimers(aTimerCycles)
+    {
+        this.assert(aTimerCycles.length === this.aTimers.length);
+        for (var i = 0; i < this.aTimers.length && i < aTimerCycles.length; i++) {
+            var timer = this.aTimers[i];
+            timer[0] = aTimerCycles[i];
+        }
     }
 
     /**

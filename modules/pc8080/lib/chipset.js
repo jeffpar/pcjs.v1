@@ -60,7 +60,7 @@ class ChipSet8080 extends Component {
      */
     constructor(parmsChipSet)
     {
-        super("ChipSet", parmsChipSet, ChipSet8080, Messages8080.CHIPSET);
+        super("ChipSet", parmsChipSet, Messages8080.CHIPSET);
 
         var model = parmsChipSet['model'];
 

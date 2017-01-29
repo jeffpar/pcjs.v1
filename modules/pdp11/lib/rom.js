@@ -5,10 +5,6 @@
  *
  * This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
  *
- * It has been adapted from the JavaScript PDP 11/70 Emulator v1.4 written by Paul Nankervis
- * (paulnank@hotmail.com) as of September 2016 at <http://skn.noip.me/pdp11/pdp11.html>.  This code
- * may be used freely provided the original authors are acknowledged in any modified source code.
- *
  * PCjs is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3
  * of the License, or (at your option) any later version.
@@ -64,7 +60,7 @@ class ROMPDP11 extends Component {
      */
     constructor(parmsROM)
     {
-        super("ROM", parmsROM, ROMPDP11, MessagesPDP11.ROM);
+        super("ROM", parmsROM, MessagesPDP11.ROM);
 
         this.abInit = null;
         this.aSymbols = null;
@@ -268,14 +264,12 @@ class ROMPDP11 extends Component {
      */
     addROM(addr)
     {
-        this.status(this.sizeROM + "-byte ROM at " + Str.toOct(addr));
-
         if (addr >= BusPDP11.IOPAGE_16BIT && addr < BusPDP11.IOPAGE_16BIT + BusPDP11.IOPAGE_LENGTH) {
             /*
              * This code has been added as a work-around to effectively allow us to install small ROMs into portions
              * of the IOPAGE address space, by installing I/O handlers for the entire range that return the corresponding
              * bytes of the current ROM image on reads, and ignore any writes (which I'm only assuming is how a typical
-             * ROM "device" deals with writes; if we remove the write handler, then writes will fault).
+             * ROM "device" deals with writes; we could remove the write handler, but then writes would fault).
              *
              * TODO: It would be more efficient if we parsed ROM data as words rather than bytes, and then installed
              * only word handlers instead of only byte handlers.  It was done this way purely for historical reasons (ie,
@@ -286,6 +280,7 @@ class ROMPDP11 extends Component {
                 [addr]: [ROMPDP11.prototype.readROMByte, ROMPDP11.prototype.writeROMByte, null, null, null, this.sizeROM >> 1]
             };
             if (this.bus.addIOTable(this, IOTable)) {
+                this.status("Added " + this.sizeROM + "-byte ROM at " + Str.toOct(addr));
                 this.fRetainROM = true;
                 return true;
             }
