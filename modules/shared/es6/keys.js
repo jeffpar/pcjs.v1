@@ -69,10 +69,10 @@ var Keys = {
      * them using ASCII codes (eg, the LEFT arrow key uses the ASCII code for '%' or 37).
      */
     KEYCODE: {
-        /* 0x08 */ BS:          8,          // BACKSPACE
-        /* 0x09 */ TAB:         9,
-        /* 0x0A */ LF:          10,         // LINE FEED (TODO: Determine if any key actually generates this)
-        /* 0x0D */ CR:          13,         // CARRIAGE RETURN
+        /* 0x08 */ BS:          8,          // BACKSPACE        (ASCII.CTRL_H)
+        /* 0x09 */ TAB:         9,          // TAB              (ASCII.CTRL_I)
+        /* 0x0A */ LF:          10,         // LINE FEED        (ASCII.CTRL_J) (TODO: Determine if any key actually generates this)
+        /* 0x0D */ CR:          13,         // CARRIAGE RETURN  (ASCII.CTRL_M)
         /* 0x10 */ SHIFT:       16,
         /* 0x11 */ CTRL:        17,
         /* 0x12 */ ALT:         18,
@@ -153,17 +153,17 @@ var Keys = {
         /* 0x90 */ NUM_LOCK:    144,
         /* 0x91 */ SCROLL_LOCK: 145,
         /* 0xAD */ FF_DASH:     173,
-        /* 0xBA */ SEMI:        186,        // Firefox: 59
-        /* 0xBB */ EQUALS:      187,        // Firefox: 61
-        /* 0xBC */ COMMA:       188,        // Firefox: 44
-        /* 0xBD */ DASH:        189,        // Firefox: 173
-        /* 0xBE */ PERIOD:      190,        // Firefox: 46
-        /* 0xBF */ SLASH:       191,        // Firefox: 47
-        /* 0xC0 */ BQUOTE:      192,        // Firefox: 96
-        /* 0xDB */ LBRACK:      219,        // Firefox: 91
-        /* 0xDC */ BSLASH:      220,        // Firefox: 92
-        /* 0xDD */ RBRACK:      221,        // Firefox: 93
-        /* 0xDE */ QUOTE:       222,        // Firefox: 39
+        /* 0xBA */ SEMI:        186,        // Firefox:  59 (FF_SEMI)
+        /* 0xBB */ EQUALS:      187,        // Firefox:  61 (FF_EQUALS)
+        /* 0xBC */ COMMA:       188,        // Firefox:  44 (FF_COMMA   conflicts with PRTSC)
+        /* 0xBD */ DASH:        189,        // Firefox: 173 (FF_DASH)
+        /* 0xBE */ PERIOD:      190,        // Firefox:  46 (FF_PERIOD  conflicts with DEL)
+        /* 0xBF */ SLASH:       191,        // Firefox:  47 (FF_SLASH)
+        /* 0xC0 */ BQUOTE:      192,        // Firefox:  96 (FF_BQUOTE  conflicts with NUM_INS)
+        /* 0xDB */ LBRACK:      219,        // Firefox:  91 (FF_LBRACK  conflicts with CMD)
+        /* 0xDC */ BSLASH:      220,        // Firefox:  92 (FF_BSLASH)
+        /* 0xDD */ RBRACK:      221,        // Firefox:  93 (FF_RBRACK  conflicts with RCMD)
+        /* 0xDE */ QUOTE:       222,        // Firefox:  39 (FF_QUOTE   conflicts with RIGHT)
         /* 0xE0 */ FF_CMD:      224,        // Firefox only (used for both CMD and RCMD)
         //
         // The following biases use what I'll call Decimal Coded Binary or DCB (the opposite of BCD),
@@ -201,8 +201,25 @@ var Keys = {
  */
 Keys.KEYCODE.NUM_CR = Keys.KEYCODE.CR + Keys.KEYCODE.ONRIGHT;
 
+
 /*
- * Maps "stupid" keyCodes to their "non-stupid" counterparts
+ * Maps Firefox keyCodes to their more common counterparts (the inverse of the STUPID_KEYCODES table)
+ */
+Keys.FF_KEYCODES = {};
+Keys.FF_KEYCODES[Keys.ASCII[';']]  = Keys.KEYCODE.SEMI;         //  59 -> 186
+Keys.FF_KEYCODES[Keys.ASCII['=']]  = Keys.KEYCODE.EQUALS;       //  61 -> 187
+Keys.FF_KEYCODES[Keys.ASCII[',']]  = Keys.KEYCODE.COMMA;        //  44 -> 188
+Keys.FF_KEYCODES[Keys.KEYCODE.FF_DASH] = Keys.KEYCODE.DASH;     // 173 -> 189
+Keys.FF_KEYCODES[Keys.ASCII['.']]  = Keys.KEYCODE.PERIOD;       //  46 -> 190
+Keys.FF_KEYCODES[Keys.ASCII['/']]  = Keys.KEYCODE.SLASH;        //  47 -> 191
+Keys.FF_KEYCODES[Keys.ASCII['`']]  = Keys.KEYCODE.BQUOTE;       //  96 -> 192
+Keys.FF_KEYCODES[Keys.ASCII['[']]  = Keys.KEYCODE.LBRACK;       //  91 -> 219
+Keys.FF_KEYCODES[Keys.ASCII['\\']] = Keys.KEYCODE.BSLASH;       //  92 -> 220
+Keys.FF_KEYCODES[Keys.ASCII[']']]  = Keys.KEYCODE.RBRACK;       //  93 -> 221
+Keys.FF_KEYCODES[Keys.ASCII["'"]]  = Keys.KEYCODE.QUOTE;        //  39 -> 222
+
+/*
+ * Maps "stupid" keyCodes to their "non-stupid" (Firefox) counterparts
  */
 Keys.STUPID_KEYCODES = {};
 Keys.STUPID_KEYCODES[Keys.KEYCODE.SEMI]    = Keys.ASCII[';'];   // 186 -> 59
