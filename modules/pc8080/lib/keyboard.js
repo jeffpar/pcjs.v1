@@ -125,16 +125,57 @@ class Keyboard8080 extends Component {
                  *
                  *      this.bindings[id] = control;
                  */
-                control.onkeydown = function onKeyDown(event) {
-                    return kbd.onKeyDown(event, true);
-                };
-                control.onkeyup = function onKeyUp(event) {
-                    return kbd.onKeyDown(event, false);
-                };
-                control.onkeypress = function onKeyPress(event) {
-                    return kbd.onKeyPress(event);
-                };
-                control.onpaste = function onKeyPaste(event) {
+                if (Web.isUserAgent("iOS")) {
+                    /*
+                     * For iOS devices, it's best to deal only with keypress events.  The main reason is that we don't
+                     * get shift-key events, so we have no way of distinguishing between certain keys, such as ':' and
+                     * ';', unless we are monitoring key presses.  Another reason is that, under certain poorly documented
+                     * conditions, an iOS keyup event will not contain any keyCode; this is most easily reproduced with
+                     * the iOS simulator and a physical keyboard (not the pop-up keyboard).  When this happens, we think
+                     * the key is stuck.  Finally, certain other problems that we have tried to resolve when using a physical
+                     * keyboard (eg, keeping the physical and virtual CAPS-LOCK states in sync) simply don't exist in the
+                     * iOS environment.
+                     *
+                     * So, with all that mind, it seems best to have a separate iOS keypress handler and forego keydown
+                     * and keyup events entirely.  The iOS keypress handler must also perform some additional checks, such
+                     * as watching for keys that can only be typed on the emulated device when a shift key is down, and
+                     * simulating "fake" shift-key down and up events.
+                     *
+                     * Perhaps we can eventually standardize on this alternate keypress-centric approach for ALL devices,
+                     * but until then, it's safer to have these two code paths.
+                     *
+                     * UPDATE: So much for the best laid plans.  iOS won't deliver BACKSPACE events to the keypress handler,
+                     * so we have to deal with keydown/keyup events after all.
+                     */
+                    control.onkeypress = function oniOSKeyPress(event)
+                    {
+                        return kbd.oniOSKeyPress(event);
+                    };
+                    control.onkeydown = function oniOSKeyDown(event)
+                    {
+                        return kbd.oniOSKeyDown(event, true);
+                    };
+                    control.onkeyup = function oniOSKeyUp(event)
+                    {
+                        return kbd.oniOSKeyDown(event, false);
+                    };
+                }
+                else {
+                    control.onkeydown = function onKeyDown(event)
+                    {
+                        return kbd.onKeyDown(event, true);
+                    };
+                    control.onkeyup = function onKeyUp(event)
+                    {
+                        return kbd.onKeyDown(event, false);
+                    };
+                    control.onkeypress = function onKeyPress(event)
+                    {
+                        return kbd.onKeyPress(event);
+                    };
+                }
+                control.onpaste = function onKeyPaste(event)
+                {
                     return kbd.onPaste(event);
                 };
                 return true;
@@ -152,16 +193,25 @@ class Keyboard8080 extends Component {
                             /*
                              * TODO: Add some additional SOFTCODES configuration info that will tell us which soft
                              * keys (eg, CTRL) should be treated as toggles, instead of hard-coding that knowledge below.
+                             *
+                             * Moreover, if a *real* CTRL or CAPS-LOCK key is pressed or released, it would be nice
+                             * to update the state of these on-screen controls, too (ie, not just when the controls are
+                             * clicked).
                              */
-                            var fDown = true;
-                            var fAutoRelease = (keyCode != Keys.KEYCODE.CTRL);
-                            if (!fAutoRelease) {
+                            var fDown = true, bit = 0;
+                            if (keyCode == Keys.KEYCODE.CTRL) {
+                                bit = Keyboard8080.STATE.CTRL;
+                            }
+                            else if (keyCode == Keys.KEYCODE.CAPS_LOCK) {
+                                bit = Keyboard8080.STATE.CAPS_LOCK;
+                            }
+                            if (bit) {
                                 control.style.fontWeight = "normal";
-                                fDown = !(kbd.bitsState & Keyboard8080.STATE.CTRL);
+                                fDown = !(kbd.bitsState & bit);
                                 if (fDown) control.style.fontWeight = "bold";
                                 kbd.checkModifierKeys(keyCode, fDown);
                             }
-                            kbd.onSoftKeyDown(keyCode, fDown, fAutoRelease);
+                            kbd.onSoftKeyDown(keyCode, fDown, !bit);
                             if (kbd.cmp) kbd.cmp.updateFocus();
                         };
                     }(this, this.config.SOFTCODES[sBinding]);
@@ -403,6 +453,7 @@ class Keyboard8080 extends Component {
      * @param {number} keyCode (ie, either a keycode or string ID)
      * @param {boolean} fDown (true if key going down, false if key going up)
      * @param {boolean} [fRight] (true if key is on the right, false if not or unknown or n/a)
+     * @return {boolean} (fDown updated as needed for CAPS-LOCK weirdness)
      */
     checkModifierKeys(keyCode, fDown, fRight)
     {
@@ -422,6 +473,16 @@ class Keyboard8080 extends Component {
             break;
         case Keys.KEYCODE.CAPS_LOCK:
             bit = Keyboard8080.STATE.CAPS_LOCK;
+            /*
+             * WARNING: You have an entered a browser weirdness zone.  In Chrome, pressing-and-releasing
+             * CAPS-LOCK generates a "down" event when it turns the lock on and an "up" event when it turns
+             * the lock off.  Firefox, OTOH, generates only "down" events, so we have to "manufacture"
+             * the fDown parameter ourselves -- which means we also have to propagate it back to the caller.
+             *
+             * And, while this isn't necessary for Chrome, it doesn't appear to hurt anything in Chrome, so
+             * we're not going to bother making it browser-specific.
+             */
+            fDown = !(this.bitsState & bit);
             break;
         }
         if (bit) {
@@ -431,6 +492,7 @@ class Keyboard8080 extends Component {
                 this.bitsState &= ~bit;
             }
         }
+        return fDown;
     }
 
     /**
@@ -468,12 +530,23 @@ class Keyboard8080 extends Component {
         var fPass = true;
         var keyCode = event.keyCode;
 
+        if (!COMPILED && this.messageEnabled(Messages8080.KEYS)) {
+            this.printMessage("onKey" + (fDown? "Down" : "Up") + "(" + keyCode + ")", true);
+        }
+
+        /*
+         * A note about Firefox: it uses different keyCodes for certain keys; there's a logic to the differences
+         * (they use ASCII codes), but since other browsers didn't follow suit, we must use a mapping table to
+         * convert their keyCodes to the more traditional values.
+         */
+        keyCode = Keys.FF_KEYCODES[keyCode] || keyCode;
+
         /*
          * We now keep track of physical keyboard modifier keys.  This makes it possible for new services
          * to eventually be implemented (simulateKeysDown() and simulateKeysUp()), to map special ALT-key
          * combinations to VT100 keys, etc.
          */
-        this.checkModifierKeys(keyCode, fDown, event.location == Keys.LOCATION.RIGHT);
+        fDown = this.checkModifierKeys(keyCode, fDown, event.location == Keys.LOCATION.RIGHT);
 
         var softCode = this.getSoftCode(keyCode);
         if (softCode) {
@@ -554,21 +627,125 @@ class Keyboard8080 extends Component {
      */
     onKeyPress(event)
     {
-        var keyCode = event.keyCode;
-        if (keyCode >= Keys.ASCII.A && keyCode <= Keys.ASCII.Z) {
+        /*
+         * A note about Firefox: the KeyboardEvent they pass to a keypress handler doesn't set 'keyCode', so
+         * we have to fallback to 'charCode' (or 'which'), both of which are deprecated but realistically can't
+         * really go away.
+         *
+         * TODO: Consider "upgrading" this code to use the new 'key' property.  Note, however, that it's a string,
+         * not a number; for example; if the colon key is pressed, 'key' will be ":", whereas 'charCode' and 'which'
+         * will be 58.
+         */
+        var charCode = event.keyCode || event.charCode;
+
+        if (charCode >= Keys.ASCII.A && charCode <= Keys.ASCII.Z) {
             if (!(this.bitsState & (Keyboard8080.STATE.SHIFTS | Keyboard8080.STATE.CAPS_LOCK))) {
                 this.bitsState |= Keyboard8080.STATE.CAPS_LOCK;
                 this.onSoftKeyDown(Keys.KEYCODE.CAPS_LOCK, true);
                 this.updateLEDs();
             }
         }
-        else if (keyCode >= Keys.ASCII.a && keyCode <= Keys.ASCII.z) {
+        else if (charCode >= Keys.ASCII.a && charCode <= Keys.ASCII.z) {
             if (this.bitsState & Keyboard8080.STATE.CAPS_LOCK) {
                 this.bitsState &= ~Keyboard8080.STATE.CAPS_LOCK;
                 this.onSoftKeyDown(Keys.KEYCODE.CAPS_LOCK, false);
                 this.updateLEDs();
             }
         }
+
+        if (!COMPILED && this.messageEnabled(Messages8080.KEYS)) {
+            this.printMessage("onKeyPress(" + charCode + ")", true);
+        }
+
+        return true;
+    }
+
+    /**
+     * oniOSKeyDown(event, fDown)
+     *
+     * @this {Keyboard8080}
+     * @param {Object} event
+     * @param {boolean} fDown is true for a keyDown event, false for up
+     * @return {boolean} true to pass the event along, false to consume it
+     */
+    oniOSKeyDown(event, fDown)
+    {
+        var fPass = true;
+        /*
+         * Because keydown/keyup events on iOS are inherently "fake", they can be delivered so quickly that
+         * if we generated matching down/up events, then the emulated machine might not see the key transition.
+         * So we now deliver only down events, with fAutoRelease always set (see below).
+         *
+         * Also, because of iOS weirdness discussed in setBinding() when using a physical keyboard, the keyup
+         * event may not provide a valid keyCode, which is another reason we have no choice but to always deliver
+         * keys with fAutoRelease set to true.
+         */
+        if (fDown) {
+            var keyCode = event.keyCode;
+            var bMapping = this.config.KEYMAP[keyCode];
+            if (bMapping) {
+                /*
+                 * If this is a mappable key, but the mapping isn't in the CHARMAP table, then we have to process
+                 * it now; the most common reason is that the key doesn't generate a keypress event (eg, BACKSPACE).
+                 */
+                if (!this.indexOfCharMap(bMapping)) {
+                    fPass = this.onSoftKeyDown(keyCode, fDown, true);
+                    if (!COMPILED && this.messageEnabled(Messages8080.KEYS)) {
+                        this.printMessage("oniOSKey" + (fDown ? "Down" : "Up") + "(" + keyCode + "): pass=" + fPass, true);
+                    }
+                }
+            }
+        }
+        return fPass;
+    }
+
+    /**
+     * oniOSKeyPress(event)
+     *
+     * @this {Keyboard8080}
+     * @param {Object} event
+     * @return {boolean} true to pass the event along, false to consume it
+     */
+    oniOSKeyPress(event)
+    {
+        /*
+         * A note about Firefox: the KeyboardEvent they pass to a keypress handler doesn't set 'keyCode', so
+         * we have to fallback to 'charCode' (or 'which'), both of which are deprecated but realistically can't
+         * really go away.
+         *
+         * TODO: Consider "upgrading" this code to use the new 'key' property.  Note, however, that it's a string,
+         * not a number; for example; if the colon key is pressed, 'key' will be ":", whereas 'charCode' and 'which'
+         * will be 58.
+         */
+        var charCode = event.keyCode || event.charCode;
+
+        var fShifted = false;
+        var bMapping = this.config.CHARMAP[charCode];
+        if (bMapping) {
+            if (bMapping & 0x80) {
+                bMapping &= 0x7f;
+                fShifted = true;
+            }
+            /*
+             * Since the rest of our code was built around keyCodes, not charCodes, we look up the CHARMAP byte
+             * in the KEYMAP table to find a corresponding keyCode, and that's what we'll use to simulate the key
+             * press/release.
+             */
+            var softCode = this.indexOfKeyMap(bMapping);
+            if (softCode) {
+                if (!fShifted) {
+                    this.onSoftKeyDown(Keys.KEYCODE.SHIFT, false);
+                } else {
+                    this.onSoftKeyDown(Keys.KEYCODE.SHIFT, true, true);
+                }
+                this.onSoftKeyDown(softCode, true, true);
+            }
+        }
+
+        if (!COMPILED && this.messageEnabled(Messages8080.KEYS)) {
+            this.printMessage("oniOSKeyPress(" + charCode + ")", true);
+        }
+
         return true;
     }
 
@@ -604,6 +781,36 @@ class Keyboard8080 extends Component {
             }
         }
         return true;
+    }
+
+    /**
+     * indexOfKeyMap(bMapping)
+     *
+     * @this {Keyboard8080}
+     * @param {number} bMapping
+     * @return {number}
+     */
+    indexOfKeyMap(bMapping)
+    {
+        for (var keyCode in this.config.KEYMAP) {
+            if (this.config.KEYMAP[keyCode] == bMapping) return +keyCode;
+        }
+        return 0;
+    }
+
+    /**
+     * indexOfCharMap(bMapping)
+     *
+     * @this {Keyboard8080}
+     * @param {number} bMapping
+     * @return {number}
+     */
+    indexOfCharMap(bMapping)
+    {
+        for (var charCode in this.config.CHARMAP) {
+            if (this.config.CHARMAP[charCode] == bMapping) return +charCode;
+        }
+        return 0;
     }
 
     /**
@@ -935,6 +1142,7 @@ Keyboard8080.WASDCODES[Keys.ASCII.L] = Keys.KEYCODE.SPACE;
 Keyboard8080.SI1978 = {
     MODEL:          1978.1,
     KEYMAP:         {},
+    CHARMAP:        {},
     ALTCODES:       Keyboard8080.WASDCODES,
     LEDCODES:       {},
     SOFTCODES: {
@@ -951,7 +1159,7 @@ Keyboard8080.VT100 = {
     MODEL:          100.0,
     KEYMAP: {
         /*
-         * Map of host key codes to VT100 key addresses (7-bit values representing key positions on the VT100).
+         * Map of host keyCodes to VT100 key addresses (7-bit values representing key positions on the VT100).
          *
          * NOTE: The VT100 keyboard has both BACKSPACE and DELETE keys, whereas modern keyboards generally only
          * have DELETE.  And sadly, when you press DELETE, your modern keyboard and/or modern browser is reporting
@@ -1048,15 +1256,125 @@ Keyboard8080.VT100 = {
         [Keys.KEYCODE.F9]:      0x7B,   // aka SET-UP
         [Keys.KEYCODE.CTRL]:    0x7C,
         [Keys.KEYCODE.SHIFT]:   0x7D,   // either shift key (doesn't matter)
-        [Keys.KEYCODE.CAPS_LOCK]: 0x7E
+        [Keys.KEYCODE.CAPS_LOCK]:0x7E
+    },
+    CHARMAP: {
+        /*
+         * Map of host charCodes to VT100 key addresses (7-bit values representing key positions on the VT100);
+         * the 8th bit (0x80) is set for keys that need to be shifted.
+         *
+         * This is currently used only with the iOS keypress handler, which receives character codes rather than
+         * keyboard codes.  As a result, this table is not as complete as the KEYMAP table, because certain keys
+         * are delivered as key presses and/or are simply not present on the iOS keyboard; the arrow keys are a
+         * good example.
+         *
+         * ES6 ALERT: As you can see below, I've finally started using computed property names.
+         */
+        [Keys.ASCII.p]:         0x05,
+        [Keys.ASCII.o]:         0x06,
+        [Keys.ASCII.y]:         0x07,
+        [Keys.ASCII.t]:         0x08,
+        [Keys.ASCII.w]:         0x09,
+        [Keys.ASCII.q]:         0x0A,
+        [Keys.ASCII[']']]:      0x14,
+        [Keys.ASCII['[']]:      0x15,
+        [Keys.ASCII.i]:         0x16,
+        [Keys.ASCII.u]:         0x17,
+        [Keys.ASCII.r]:         0x18,
+        [Keys.ASCII.e]:         0x19,
+        [Keys.ASCII['1']]:      0x1A,
+        [Keys.ASCII['`']]:      0x24,
+        [Keys.ASCII['-']]:      0x25,
+        [Keys.ASCII['9']]:      0x26,
+        [Keys.ASCII['7']]:      0x27,
+        [Keys.ASCII['4']]:      0x28,
+        [Keys.ASCII['3']]:      0x29,
+        [Keys.ASCII['=']]:      0x34,
+        [Keys.ASCII['0']]:      0x35,
+        [Keys.ASCII['8']]:      0x36,
+        [Keys.ASCII['6']]:      0x37,
+        [Keys.ASCII['5']]:      0x38,
+        [Keys.ASCII['2']]:      0x39,
+        [Keys.ASCII['\\']]:     0x45,
+        [Keys.ASCII.l]:         0x46,
+        [Keys.ASCII.k]:         0x47,
+        [Keys.ASCII.g]:         0x48,
+        [Keys.ASCII.f]:         0x49,
+        [Keys.ASCII.a]:         0x4A,
+        [Keys.ASCII["'"]]:      0x55,
+        [Keys.ASCII[';']]:      0x56,
+        [Keys.ASCII.j]:         0x57,
+        [Keys.ASCII.h]:         0x58,
+        [Keys.ASCII.d]:         0x59,
+        [Keys.ASCII.s]:         0x5A,
+        [Keys.KEYCODE.CR]:      0x64,   // TODO: Figure out why the Technical Manual lists CR at both 0x04 and 0x64
+        [Keys.ASCII['.']]:      0x65,
+        [Keys.ASCII[',']]:      0x66,
+        [Keys.ASCII.n]:         0x67,
+        [Keys.ASCII.b]:         0x68,
+        [Keys.ASCII.x]:         0x69,
+        [Keys.ASCII['/']]:      0x75,
+        [Keys.ASCII.m]:         0x76,
+        [Keys.ASCII[' ']]:      0x77,
+        [Keys.ASCII.v]:         0x78,
+        [Keys.ASCII.c]:         0x79,
+        [Keys.ASCII.z]:         0x7A,
+        [Keys.ASCII.P]:         0x85,
+        [Keys.ASCII.O]:         0x86,
+        [Keys.ASCII.Y]:         0x87,
+        [Keys.ASCII.T]:         0x88,
+        [Keys.ASCII.W]:         0x89,
+        [Keys.ASCII.Q]:         0x8A,
+        [Keys.ASCII['}']]:      0x94,
+        [Keys.ASCII['{']]:      0x95,
+        [Keys.ASCII.I]:         0x96,
+        [Keys.ASCII.U]:         0x97,
+        [Keys.ASCII.R]:         0x98,
+        [Keys.ASCII.E]:         0x99,
+        [Keys.ASCII['!']]:      0x9A,
+        [Keys.ASCII['~']]:      0xA4,
+        [Keys.ASCII['_']]:      0xA5,
+        [Keys.ASCII['(']]:      0xA6,
+        [Keys.ASCII['&']]:      0xA7,
+        [Keys.ASCII['$']]:      0xA8,
+        [Keys.ASCII['#']]:      0xA9,
+        [Keys.ASCII['+']]:      0xB4,
+        [Keys.ASCII[')']]:      0xB5,
+        [Keys.ASCII['*']]:      0xB6,
+        [Keys.ASCII['^']]:      0xB7,
+        [Keys.ASCII['%']]:      0xB8,
+        [Keys.ASCII['@']]:      0xB9,
+        [Keys.ASCII['|']]:      0xC5,
+        [Keys.ASCII.L]:         0xC6,
+        [Keys.ASCII.K]:         0xC7,
+        [Keys.ASCII.G]:         0xC8,
+        [Keys.ASCII.F]:         0xC9,
+        [Keys.ASCII.A]:         0xCA,
+        [Keys.ASCII['"']]:      0xD5,
+        [Keys.ASCII[':']]:      0xD6,
+        [Keys.ASCII.J]:         0xD7,
+        [Keys.ASCII.H]:         0xD8,
+        [Keys.ASCII.D]:         0xD9,
+        [Keys.ASCII.S]:         0xDA,
+        [Keys.ASCII['>']]:      0xE5,
+        [Keys.ASCII['<']]:      0xE6,
+        [Keys.ASCII.N]:         0xE7,
+        [Keys.ASCII.B]:         0xE8,
+        [Keys.ASCII.X]:         0xE9,
+        [Keys.ASCII['?']]:      0xF5,
+        [Keys.ASCII.M]:         0xF6,
+        [Keys.ASCII.V]:         0xF8,
+        [Keys.ASCII.C]:         0xF9,
+        [Keys.ASCII.Z]:         0xFA
     },
     ALTCODES: {},
     LEDCODES: {},
     SOFTCODES: {
+        'caps-lock':    Keys.KEYCODE.CAPS_LOCK,
         'ctrl':         Keys.KEYCODE.CTRL,
         'esc':          Keys.KEYCODE.ESC,
         'tab':          Keys.KEYCODE.TAB,
-        'num-comma':    Keys.KEYCODE.F5,// since modern keypads don't typically have a comma...
+        'num-comma':    Keys.KEYCODE.F5,        // since modern keypads don't typically have a comma...
         'break':        Keys.KEYCODE.F6,
         'line-feed':    Keys.KEYCODE.F7,
         'no-scroll':    Keys.KEYCODE.F8,

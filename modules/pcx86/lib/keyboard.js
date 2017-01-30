@@ -1103,7 +1103,7 @@ Keyboard.prototype.findBinding = function(simCode, sType, fDown)
         for (var code in Keys.SHIFTED_KEYCODES) {
             if (simCode == Keys.SHIFTED_KEYCODES[code]) {
                 simCode = +code;
-                code = Keys.STUPID_KEYCODES[code];
+                code = Keys.NONASCII_KEYCODES[code];
                 if (code) simCode = code;
                 break;
             }
@@ -2045,7 +2045,7 @@ Keyboard.prototype.getSimCode = function(keyCode, fShifted)
         }
     }
     else {
-        if (code = Keys.STUPID_KEYCODES[keyCode]) {
+        if (code = Keys.NONASCII_KEYCODES[keyCode]) {
             simCode = code;
         }
     }
