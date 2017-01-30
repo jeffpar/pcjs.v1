@@ -155,15 +155,15 @@ var Keys = {
         /* 0xAD */ FF_DASH:     173,
         /* 0xBA */ SEMI:        186,        // Firefox:  59 (FF_SEMI)
         /* 0xBB */ EQUALS:      187,        // Firefox:  61 (FF_EQUALS)
-        /* 0xBC */ COMMA:       188,        // Firefox:  44 (FF_COMMA   conflicts with PRTSC)
+        /* 0xBC */ COMMA:       188,
         /* 0xBD */ DASH:        189,        // Firefox: 173 (FF_DASH)
-        /* 0xBE */ PERIOD:      190,        // Firefox:  46 (FF_PERIOD  conflicts with DEL)
-        /* 0xBF */ SLASH:       191,        // Firefox:  47 (FF_SLASH)
-        /* 0xC0 */ BQUOTE:      192,        // Firefox:  96 (FF_BQUOTE  conflicts with NUM_INS)
-        /* 0xDB */ LBRACK:      219,        // Firefox:  91 (FF_LBRACK  conflicts with CMD)
-        /* 0xDC */ BSLASH:      220,        // Firefox:  92 (FF_BSLASH)
-        /* 0xDD */ RBRACK:      221,        // Firefox:  93 (FF_RBRACK  conflicts with RCMD)
-        /* 0xDE */ QUOTE:       222,        // Firefox:  39 (FF_QUOTE   conflicts with RIGHT)
+        /* 0xBE */ PERIOD:      190,
+        /* 0xBF */ SLASH:       191,
+        /* 0xC0 */ BQUOTE:      192,
+        /* 0xDB */ LBRACK:      219,
+        /* 0xDC */ BSLASH:      220,
+        /* 0xDD */ RBRACK:      221,
+        /* 0xDE */ QUOTE:       222,
         /* 0xE0 */ FF_CMD:      224,        // Firefox only (used for both CMD and RCMD)
         //
         // The following biases use what I'll call Decimal Coded Binary or DCB (the opposite of BCD),
@@ -202,37 +202,41 @@ var Keys = {
 Keys.KEYCODE.NUM_CR = Keys.KEYCODE.CR + Keys.KEYCODE.ONRIGHT;
 
 /*
- * Maps Firefox keyCodes to their more common counterparts (the inverse of the STUPID_KEYCODES table)
+ * Maps Firefox keyCodes to their more common keyCode counterparts; a number of entries in this table
+ * are no longer valid (if indeed they ever were), so they've been commented out.  It's likely that I
+ * simply extended this table to resolve additional differences in other browsers (ie, Opera), but without
+ * browser-specific checks, it's not safe to perform all the mappings shown below.
  */
 Keys.FF_KEYCODES = {};
-Keys.FF_KEYCODES[Keys.ASCII[';']]  = Keys.KEYCODE.SEMI;         //  59 -> 186
-Keys.FF_KEYCODES[Keys.ASCII['=']]  = Keys.KEYCODE.EQUALS;       //  61 -> 187
-Keys.FF_KEYCODES[Keys.ASCII[',']]  = Keys.KEYCODE.COMMA;        //  44 -> 188
-Keys.FF_KEYCODES[Keys.KEYCODE.FF_DASH] = Keys.KEYCODE.DASH;     // 173 -> 189
-Keys.FF_KEYCODES[Keys.ASCII['.']]  = Keys.KEYCODE.PERIOD;       //  46 -> 190
-Keys.FF_KEYCODES[Keys.ASCII['/']]  = Keys.KEYCODE.SLASH;        //  47 -> 191
-Keys.FF_KEYCODES[Keys.ASCII['`']]  = Keys.KEYCODE.BQUOTE;       //  96 -> 192
-Keys.FF_KEYCODES[Keys.ASCII['[']]  = Keys.KEYCODE.LBRACK;       //  91 -> 219
-Keys.FF_KEYCODES[Keys.ASCII['\\']] = Keys.KEYCODE.BSLASH;       //  92 -> 220
-Keys.FF_KEYCODES[Keys.ASCII[']']]  = Keys.KEYCODE.RBRACK;       //  93 -> 221
-Keys.FF_KEYCODES[Keys.ASCII["'"]]  = Keys.KEYCODE.QUOTE;        //  39 -> 222
+Keys.FF_KEYCODES[Keys.KEYCODE.FF_SEMI]   = Keys.KEYCODE.SEMI;           //  59 -> 186
+Keys.FF_KEYCODES[Keys.KEYCODE.FF_EQUALS] = Keys.KEYCODE.EQUALS;         //  61 -> 187
+Keys.FF_KEYCODES[Keys.KEYCODE.FF_DASH]   = Keys.KEYCODE.DASH;           // 173 -> 189
+Keys.FF_KEYCODES[Keys.KEYCODE.FF_CMD]    = Keys.KEYCODE.CMD;            // 224 -> 91
+// Keys.FF_KEYCODES[Keys.KEYCODE.FF_COMMA]  = Keys.KEYCODE.COMMA;       //  44 -> 188
+// Keys.FF_KEYCODES[Keys.KEYCODE.FF_PERIOD] = Keys.KEYCODE.PERIOD;      //  46 -> 190
+// Keys.FF_KEYCODES[Keys.KEYCODE.FF_SLASH]  = Keys.KEYCODE.SLASH;       //  47 -> 191
+// Keys.FF_KEYCODES[Keys.KEYCODE.FF_BQUOTE] = Keys.KEYCODE.BQUOTE;      //  96 -> 192
+// Keys.FF_KEYCODES[Keys.KEYCODE.FF_LBRACK  = Keys.KEYCODE.LBRACK;      //  91 -> 219
+// Keys.FF_KEYCODES[Keys.KEYCODE.FF_BSLASH] = Keys.KEYCODE.BSLASH;      //  92 -> 220
+// Keys.FF_KEYCODES[Keys.KEYCODE.FF_RBRACK] = Keys.KEYCODE.RBRACK;      //  93 -> 221
+// Keys.FF_KEYCODES[Keys.KEYCODE.FF_QUOTE]  = Keys.KEYCODE.QUOTE;       //  39 -> 222
 
 /*
- * Maps "stupid" keyCodes to their "non-stupid" (Firefox) counterparts
+ * Maps non-ASCII keyCodes to their ASCII counterparts
  */
-Keys.STUPID_KEYCODES = {};
-Keys.STUPID_KEYCODES[Keys.KEYCODE.SEMI]    = Keys.ASCII[';'];   // 186 -> 59
-Keys.STUPID_KEYCODES[Keys.KEYCODE.EQUALS]  = Keys.ASCII['='];   // 187 -> 61
-Keys.STUPID_KEYCODES[Keys.KEYCODE.COMMA]   = Keys.ASCII[','];   // 188 -> 44
-Keys.STUPID_KEYCODES[Keys.KEYCODE.DASH]    = Keys.ASCII['-'];   // 189 -> 45
-Keys.STUPID_KEYCODES[Keys.KEYCODE.PERIOD]  = Keys.ASCII['.'];   // 190 -> 46
-Keys.STUPID_KEYCODES[Keys.KEYCODE.SLASH]   = Keys.ASCII['/'];   // 191 -> 47
-Keys.STUPID_KEYCODES[Keys.KEYCODE.BQUOTE]  = Keys.ASCII['`'];   // 192 -> 96
-Keys.STUPID_KEYCODES[Keys.KEYCODE.LBRACK]  = Keys.ASCII['['];   // 219 -> 91
-Keys.STUPID_KEYCODES[Keys.KEYCODE.BSLASH]  = Keys.ASCII['\\'];  // 220 -> 92
-Keys.STUPID_KEYCODES[Keys.KEYCODE.RBRACK]  = Keys.ASCII[']'];   // 221 -> 93
-Keys.STUPID_KEYCODES[Keys.KEYCODE.QUOTE]   = Keys.ASCII["'"];   // 222 -> 39
-Keys.STUPID_KEYCODES[Keys.KEYCODE.FF_DASH] = Keys.ASCII['-'];
+Keys.NONASCII_KEYCODES = {};
+Keys.NONASCII_KEYCODES[Keys.KEYCODE.FF_DASH] = Keys.ASCII['-'];         // 173 -> 45
+Keys.NONASCII_KEYCODES[Keys.KEYCODE.SEMI]    = Keys.ASCII[';'];         // 186 -> 59
+Keys.NONASCII_KEYCODES[Keys.KEYCODE.EQUALS]  = Keys.ASCII['='];         // 187 -> 61
+Keys.NONASCII_KEYCODES[Keys.KEYCODE.DASH]    = Keys.ASCII['-'];         // 189 -> 45
+Keys.NONASCII_KEYCODES[Keys.KEYCODE.COMMA]   = Keys.ASCII[','];         // 188 -> 44
+Keys.NONASCII_KEYCODES[Keys.KEYCODE.PERIOD]  = Keys.ASCII['.'];         // 190 -> 46
+Keys.NONASCII_KEYCODES[Keys.KEYCODE.SLASH]   = Keys.ASCII['/'];         // 191 -> 47
+Keys.NONASCII_KEYCODES[Keys.KEYCODE.BQUOTE]  = Keys.ASCII['`'];         // 192 -> 96
+Keys.NONASCII_KEYCODES[Keys.KEYCODE.LBRACK]  = Keys.ASCII['['];         // 219 -> 91
+Keys.NONASCII_KEYCODES[Keys.KEYCODE.BSLASH]  = Keys.ASCII['\\'];        // 220 -> 92
+Keys.NONASCII_KEYCODES[Keys.KEYCODE.RBRACK]  = Keys.ASCII[']'];         // 221 -> 93
+Keys.NONASCII_KEYCODES[Keys.KEYCODE.QUOTE]   = Keys.ASCII["'"];         // 222 -> 39
 
 /*
  * Maps unshifted keyCodes to their shifted counterparts; to be used when a shift-key is down.

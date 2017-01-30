@@ -521,6 +521,10 @@ class Keyboard8080 extends Component {
         var fPass = true;
         var keyCode = event.keyCode;
 
+        if (!COMPILED && this.messageEnabled(Messages8080.KEYS)) {
+            this.printMessage("onKey" + (fDown? "Down" : "Up") + "(" + keyCode + ")", true);
+        }
+
         /*
          * A note about Firefox: it uses different keyCodes for certain keys; there's a logic to the differences
          * (they use ASCII codes), but since other browsers didn't follow suit, we must use a mapping table to
