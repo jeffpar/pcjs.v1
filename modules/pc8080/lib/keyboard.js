@@ -193,16 +193,25 @@ class Keyboard8080 extends Component {
                             /*
                              * TODO: Add some additional SOFTCODES configuration info that will tell us which soft
                              * keys (eg, CTRL) should be treated as toggles, instead of hard-coding that knowledge below.
+                             *
+                             * Moreover, if a *real* CTRL or CAPS-LOCK key is pressed or released, it would be nice
+                             * to update the state of these on-screen controls, too (ie, not just when the controls are
+                             * clicked).
                              */
-                            var fDown = true;
-                            var fAutoRelease = (keyCode != Keys.KEYCODE.CTRL);
-                            if (!fAutoRelease) {
+                            var fDown = true, bit = 0;
+                            if (keyCode == Keys.KEYCODE.CTRL) {
+                                bit = Keyboard8080.STATE.CTRL;
+                            }
+                            else if (keyCode == Keys.KEYCODE.CAPS_LOCK) {
+                                bit = Keyboard8080.STATE.CAPS_LOCK;
+                            }
+                            if (bit) {
                                 control.style.fontWeight = "normal";
-                                fDown = !(kbd.bitsState & Keyboard8080.STATE.CTRL);
+                                fDown = !(kbd.bitsState & bit);
                                 if (fDown) control.style.fontWeight = "bold";
                                 kbd.checkModifierKeys(keyCode, fDown);
                             }
-                            kbd.onSoftKeyDown(keyCode, fDown, fAutoRelease);
+                            kbd.onSoftKeyDown(keyCode, fDown, !bit);
                             if (kbd.cmp) kbd.cmp.updateFocus();
                         };
                     }(this, this.config.SOFTCODES[sBinding]);
