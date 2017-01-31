@@ -29,7 +29,6 @@
 "use strict";
 
 if (NODE) {
-    var str         = require("../../shared/lib/strlib");
     var Messages    = require("./messages");
     var X86         = require("./x86");
 }

@@ -29,465 +29,469 @@
 "use strict";
 
 if (NODE) {
-    var str         = require("../../shared/lib/strlib");
-    var usr         = require("../../shared/lib/usrlib");
-    var web         = require("../../shared/lib/weblib");
-    var Component   = require("../../shared/lib/component");
+    var Str         = require("../../shared/es6/strlib");
+    var Usr         = require("../../shared/es6/usrlib");
+    var Web         = require("../../shared/es6/weblib");
+    var Component   = require("../../shared/es6/component");
 }
 
 /**
- * C1PDebugger(parmsDbg)
+ * TODO: The Closure Compiler treats ES6 classes as 'struct' rather than 'dict' by default,
+ * which would force us to declare all class properties in the constructor, as well as prevent
+ * us from defining any named properties.  So, for now, we mark all our classes as 'unrestricted'.
  *
- * The C1PDebugger component has no required (parmsDbg) properties.
- *
- * The C1PDebugger component is an optional component that implements a variety of user
- * commands for controlling the CPU, dumping and editing memory, etc.
- *
- * @constructor
- * @extends Component
+ * @unrestricted
  */
-function C1PDebugger(parmsDbg)
-{
-    if (DEBUGGER) {
+class C1PDebugger extends Component {
+    /**
+     * C1PDebugger(parmsDbg)
+     *
+     * The C1PDebugger component has no required (parmsDbg) properties.
+     *
+     * The C1PDebugger component is an optional component that implements a variety of user
+     * commands for controlling the CPU, dumping and editing memory, etc.
+     *
+     * @this {C1PDebugger}
+     * @param {Object} parmsDbg
+     */
+    constructor(parmsDbg)
+    {
+        if (DEBUGGER) {
 
-        Component.call(this, "C1PDebugger", parmsDbg);
+            super("C1PDebugger", parmsDbg);
 
-        this.dbg = this;
-        /*
-         * This keeps track of instruction activity, but only when tracing or when
-         * Debugger checks have been enabled (eg, one or more breakpoints have been set).
-         *
-         * This is zeroed by CPU notification handlers reset() and stopped().
-         * We set it here to -1 to indicate that the CPU has not yet initialized us.
-         */
-        this.cIns = -1;
+            this.dbg = this;
+            /*
+             * This keeps track of instruction activity, but only when tracing or when
+             * Debugger checks have been enabled (eg, one or more breakpoints have been set).
+             *
+             * This is zeroed by CPU notification handlers reset() and stopped().
+             * We set it here to -1 to indicate that the CPU has not yet initialized us.
+             */
+            this.cIns = -1;
 
-        /*
-         * Some commands, like the dump (d) command, start at nextAddr when no address
-         * is given (and they also update nextAddr when they're done).
-         */
-        this.nextAddr = 0;
+            /*
+             * Some commands, like the dump (d) command, start at nextAddr when no address
+             * is given (and they also update nextAddr when they're done).
+             */
+            this.nextAddr = 0;
 
-        /*
-         * When Enter is pressed on an empty input buffer, we default to the previous
-         * command, which is preserved here.
-         */
-        this.prevCmd = null;
+            /*
+             * When Enter is pressed on an empty input buffer, we default to the previous
+             * command, which is preserved here.
+             */
+            this.prevCmd = null;
 
-        /*
-         * fAssemble is true when "assemble mode" is active, false when not.
-         */
-        this.fAssemble = false;
-        this.addrAssembleNext = 0;
+            /*
+             * fAssemble is true when "assemble mode" is active, false when not.
+             */
+            this.fAssemble = false;
+            this.addrAssembleNext = 0;
 
-        /*
-         * Initialize the lists of breakpoint addresses.  aExecBreak is a list (Array) of addresses
-         * to halt at whenever attempting to execute an instruction at the corresponding address,
-         * and aReadBreak and aWriteBreak are lists of addresses to halt at whenever a read or write,
-         * respectively, occurs at the corresponding address.
-         */
-        this.clearBreakpoints();
+            /*
+             * Initialize the lists of breakpoint addresses.  aExecBreak is a list (Array) of addresses
+             * to halt at whenever attempting to execute an instruction at the corresponding address,
+             * and aReadBreak and aWriteBreak are lists of addresses to halt at whenever a read or write,
+             * respectively, occurs at the corresponding address.
+             */
+            this.clearBreakpoints();
 
-        /*
-         * Instead of pre-allocating these arrays, we wait until our reset() function is called.
-         * These arrays are updated in checkInstruction(), but the CPU will never actually call it
-         * unless checksEnabled() returns true, and that won't happen until one or more breakpoints
-         * have been set.  This ensures that, by default, the CPU runs as fast as possible.
-         */
-        this.iStepHistory = 0;
-        this.aStepHistory = [];
-        this.aaOpcodeFreqs = [];
+            /*
+             * Instead of pre-allocating these arrays, we wait until our reset() function is called.
+             * These arrays are updated in checkInstruction(), but the CPU will never actually call it
+             * unless checksEnabled() returns true, and that won't happen until one or more breakpoints
+             * have been set.  This ensures that, by default, the CPU runs as fast as possible.
+             */
+            this.iStepHistory = 0;
+            this.aStepHistory = [];
+            this.aaOpcodeFreqs = [];
 
-        /*
-         * This "info" buffer is a lightweight logging mechanism that has minimal impact on the
-         * browser (unlike printing to either window.console.log or an HTML control, which can make
-         * the browser unusable if printing is too frequent).  The Debugger's "i" command dumps
-         * this buffer.  Note that dumping too much at once can also bog things down, but by that
-         * point, you've presumably already captured the info you need and are willing to wait.
-         */
-        if (DEBUG) {
-            this.iInfoBuffer = 0;
-            this.aInfoBuffer = new Array(10000);
-        }
+            /*
+             * This "info" buffer is a lightweight logging mechanism that has minimal impact on the
+             * browser (unlike printing to either window.console.log or an HTML control, which can make
+             * the browser unusable if printing is too frequent).  The Debugger's "i" command dumps
+             * this buffer.  Note that dumping too much at once can also bog things down, but by that
+             * point, you've presumably already captured the info you need and are willing to wait.
+             */
+            if (DEBUG) {
+                this.iInfoBuffer = 0;
+                this.aInfoBuffer = new Array(10000);
+            }
 
-        /*
-         * Message categories supported by the message() function; they are designed to be combined
-         * (ie, OR'ed) as needed.  The Debugger's "option" command is used to turn message categories
-         * on and off, like so:
-         *
-         *      o msg port on
-         *      o msg port off
-         *      ...
-         */
-        this.MESSAGE_PORT   = 0x01;
-        this.MESSAGE_KBD    = 0x10;
-        this.MESSAGE_VIDEO  = 0x20;
-        this.MESSAGE_DISK   = 0x40;
-        this.MESSAGE_SERIAL = 0x80;
-        this.MESSAGE_NONE   = 0x00;
-     // this.MESSAGE_ALL    = 0xff;
-        this.bitsMessage = this.MESSAGE_NONE;
-        this.aMessageCategories = {
-            'port':     this.MESSAGE_PORT,
-            'kbd':      this.MESSAGE_KBD,
-            'video':    this.MESSAGE_VIDEO,
-            'disk':     this.MESSAGE_DISK,
-            'serial':   this.MESSAGE_SERIAL
-        };
+            /*
+             * Message categories supported by the message() function; they are designed to be combined
+             * (ie, OR'ed) as needed.  The Debugger's "option" command is used to turn message categories
+             * on and off, like so:
+             *
+             *      o msg port on
+             *      o msg port off
+             *      ...
+             */
+            this.MESSAGE_PORT   = 0x01;
+            this.MESSAGE_KBD    = 0x10;
+            this.MESSAGE_VIDEO  = 0x20;
+            this.MESSAGE_DISK   = 0x40;
+            this.MESSAGE_SERIAL = 0x80;
+            this.MESSAGE_NONE   = 0x00;
+         // this.MESSAGE_ALL    = 0xff;
+            this.bitsMessage = this.MESSAGE_NONE;
+            this.aMessageCategories = {
+                'port':     this.MESSAGE_PORT,
+                'kbd':      this.MESSAGE_KBD,
+                'video':    this.MESSAGE_VIDEO,
+                'disk':     this.MESSAGE_DISK,
+                'serial':   this.MESSAGE_SERIAL
+            };
 
-        /*
-         * The aaOperations array is indexed by opcode, and each element is a sub-array that
-         * describes the corresponding opcode. The sub-elements are as follows:
-         *
-         *      [0]: {number} of the operation code (see OP_*)
-         *      [1]: {number} of additional bytes following the opcode byte, if any
-         *      [2]: {number} of the operation mode operand, if any (see MODE_*)
-         *
-         * These sub-elements are all optional. If [0] is not present, the opcode is undefined;
-         * if [1] is not present (or contains a zero), the opcode is a single-byte opcode; and if
-         * [2] is not present, the opcode uses no (or implied) operands.
-         */
-        this.OP_ADC = 0;
-        this.OP_AND = 1;
-        this.OP_ASL = 2;
-        this.OP_BCC = 3;
-        this.OP_BCS = 4;
-        this.OP_BEQ = 5;
-        this.OP_BIT = 6;
-        this.OP_BMI = 7;
-        this.OP_BNE = 8;
-        this.OP_BPL = 9;
-        this.OP_BRK = 10;
-        this.OP_BVC = 11;
-        this.OP_BVS = 12;
-        this.OP_CLC = 13;
-        this.OP_CLD = 14;
-        this.OP_CLI = 15;
-        this.OP_CLV = 16;
-        this.OP_CMP = 17;
-        this.OP_CPX = 18;
-        this.OP_CPY = 19;
-        this.OP_DEC = 20;
-        this.OP_DEX = 21;
-        this.OP_DEY = 22;
-        this.OP_EOR = 23;
-        this.OP_INC = 24;
-        this.OP_INX = 25;
-        this.OP_INY = 26;
-        this.OP_JMP = 27;
-        this.OP_JSR = 28;
-        this.OP_LDA = 29;
-        this.OP_LDX = 30;
-        this.OP_LDY = 31;
-        this.OP_LSR = 32;
-        this.OP_NOP = 33;
-        this.OP_ORA = 34;
-        this.OP_PHA = 35;
-        this.OP_PHP = 36;
-        this.OP_PLA = 37;
-        this.OP_PLP = 38;
-        this.OP_ROL = 39;
-        this.OP_ROR = 40;
-        this.OP_RTI = 41;
-        this.OP_RTS = 42;
-        this.OP_SBC = 43;
-        this.OP_SEC = 44;
-        this.OP_SED = 45;
-        this.OP_SEI = 46;
-        this.OP_STA = 47;
-        this.OP_STX = 48;
-        this.OP_STY = 49;
-        this.OP_TAX = 50;
-        this.OP_TAY = 51;
-        this.OP_TSX = 52;
-        this.OP_TXA = 53;
-        this.OP_TXS = 54;
-        this.OP_TYA = 55;
-        this.OP_SIM = 56;
-        this.OP_DB  = 57;
+            /*
+             * The aaOperations array is indexed by opcode, and each element is a sub-array that
+             * describes the corresponding opcode. The sub-elements are as follows:
+             *
+             *      [0]: {number} of the operation code (see OP_*)
+             *      [1]: {number} of additional bytes following the opcode byte, if any
+             *      [2]: {number} of the operation mode operand, if any (see MODE_*)
+             *
+             * These sub-elements are all optional. If [0] is not present, the opcode is undefined;
+             * if [1] is not present (or contains a zero), the opcode is a single-byte opcode; and if
+             * [2] is not present, the opcode uses no (or implied) operands.
+             */
+            this.OP_ADC = 0;
+            this.OP_AND = 1;
+            this.OP_ASL = 2;
+            this.OP_BCC = 3;
+            this.OP_BCS = 4;
+            this.OP_BEQ = 5;
+            this.OP_BIT = 6;
+            this.OP_BMI = 7;
+            this.OP_BNE = 8;
+            this.OP_BPL = 9;
+            this.OP_BRK = 10;
+            this.OP_BVC = 11;
+            this.OP_BVS = 12;
+            this.OP_CLC = 13;
+            this.OP_CLD = 14;
+            this.OP_CLI = 15;
+            this.OP_CLV = 16;
+            this.OP_CMP = 17;
+            this.OP_CPX = 18;
+            this.OP_CPY = 19;
+            this.OP_DEC = 20;
+            this.OP_DEX = 21;
+            this.OP_DEY = 22;
+            this.OP_EOR = 23;
+            this.OP_INC = 24;
+            this.OP_INX = 25;
+            this.OP_INY = 26;
+            this.OP_JMP = 27;
+            this.OP_JSR = 28;
+            this.OP_LDA = 29;
+            this.OP_LDX = 30;
+            this.OP_LDY = 31;
+            this.OP_LSR = 32;
+            this.OP_NOP = 33;
+            this.OP_ORA = 34;
+            this.OP_PHA = 35;
+            this.OP_PHP = 36;
+            this.OP_PLA = 37;
+            this.OP_PLP = 38;
+            this.OP_ROL = 39;
+            this.OP_ROR = 40;
+            this.OP_RTI = 41;
+            this.OP_RTS = 42;
+            this.OP_SBC = 43;
+            this.OP_SEC = 44;
+            this.OP_SED = 45;
+            this.OP_SEI = 46;
+            this.OP_STA = 47;
+            this.OP_STX = 48;
+            this.OP_STY = 49;
+            this.OP_TAX = 50;
+            this.OP_TAY = 51;
+            this.OP_TSX = 52;
+            this.OP_TXA = 53;
+            this.OP_TXS = 54;
+            this.OP_TYA = 55;
+            this.OP_SIM = 56;
+            this.OP_DB  = 57;
 
-        this.aOpCodes = [
-            "ADC","AND","ASL","BCC","BCS","BEQ","BIT","BMI",
-            "BNE","BPL","BRK","BVC","BVS","CLC","CLD","CLI",
-            "CLV","CMP","CPX","CPY","DEC","DEX","DEY","EOR",
-            "INC","INX","INY","JMP","JSR","LDA","LDX","LDY",
-            "LSR","NOP","ORA","PHA","PHP","PLA","PLP","ROL",
-            "ROR","RTI","RTS","SBC","SEC","SED","SEI","STA",
-            "STX","STY","TAX","TAY","TSX","TXA","TXS","TYA",
-            "SIM",".DB"
-        ];
+            this.aOpCodes = [
+                "ADC","AND","ASL","BCC","BCS","BEQ","BIT","BMI",
+                "BNE","BPL","BRK","BVC","BVS","CLC","CLD","CLI",
+                "CLV","CMP","CPX","CPY","DEC","DEX","DEY","EOR",
+                "INC","INX","INY","JMP","JSR","LDA","LDX","LDY",
+                "LSR","NOP","ORA","PHA","PHP","PLA","PLP","ROL",
+                "ROR","RTI","RTS","SBC","SEC","SED","SEI","STA",
+                "STX","STY","TAX","TAY","TSX","TXA","TXS","TYA",
+                "SIM",".DB"
+            ];
 
-        this.aOpSimCodes = [
-            "HLT", "MSG"
-        ];
+            this.aOpSimCodes = [
+                "HLT", "MSG"
+            ];
 
-        this.setOpModes(true);
+            this.setOpModes(true);
 
-        this.aaOperations = [
-            /* 0x00 */ [this.OP_BRK],
-            /* 0x01 */ [this.OP_ORA, 1, this.MODE_INDX],
-            /* 0x02 */ [this.OP_SIM, 1],
-            /* 0x03 */ [],
-            /* 0x04 */ [],
-            /* 0x05 */ [this.OP_ORA, 1, this.MODE_ZP],
-            /* 0x06 */ [this.OP_ASL, 1, this.MODE_ZP],
-            /* 0x07 */ [],
-            /* 0x08 */ [this.OP_PHP],
-            /* 0x09 */ [this.OP_ORA, 1, this.MODE_IMM],
-            /* 0x0a */ [this.OP_ASL, 0, this.MODE_ACC],
-            /* 0x0b */ [],
-            /* 0x0c */ [],
-            /* 0x0d */ [this.OP_ORA, 2, this.MODE_ABS],
-            /* 0x0e */ [this.OP_ASL, 2, this.MODE_ABS],
-            /* 0x0f */ [],
-            /* 0x10 */ [this.OP_BPL, 1, this.MODE_DISP],
-            /* 0x11 */ [this.OP_ORA, 1, this.MODE_INDY],
-            /* 0x12 */ [],
-            /* 0x13 */ [],
-            /* 0x14 */ [],
-            /* 0x15 */ [this.OP_ORA, 1, this.MODE_ZPX],
-            /* 0x16 */ [this.OP_ASL, 1, this.MODE_ZPX],
-            /* 0x17 */ [],
-            /* 0x18 */ [this.OP_CLC],
-            /* 0x19 */ [this.OP_ORA, 2, this.MODE_ABSY],
-            /* 0x1a */ [],
-            /* 0x1b */ [],
-            /* 0x1c */ [],
-            /* 0x1d */ [this.OP_ORA, 2, this.MODE_ABSX],
-            /* 0x1e */ [this.OP_ASL, 2, this.MODE_ABSX],
-            /* 0x1f */ [],
-            /* 0x20 */ [this.OP_JSR, 2, this.MODE_IMM16],
-            /* 0x21 */ [this.OP_AND, 1, this.MODE_INDX],
-            /* 0x22 */ [],
-            /* 0x23 */ [],
-            /* 0x24 */ [this.OP_BIT, 1, this.MODE_ZP],
-            /* 0x25 */ [this.OP_AND, 1, this.MODE_ZP],
-            /* 0x26 */ [this.OP_ROL, 1, this.MODE_ZP],
-            /* 0x27 */ [],
-            /* 0x28 */ [this.OP_PLP],
-            /* 0x29 */ [this.OP_AND, 1, this.MODE_IMM],
-            /* 0x2a */ [this.OP_ROL, 0, this.MODE_ACC],
-            /* 0x2b */ [],
-            /* 0x2c */ [this.OP_BIT, 2, this.MODE_ABS],
-            /* 0x2d */ [this.OP_AND, 2, this.MODE_ABS],
-            /* 0x2e */ [this.OP_ROL, 2, this.MODE_ABS],
-            /* 0x2f */ [],
-            /* 0x30 */ [this.OP_BMI, 1, this.MODE_DISP],
-            /* 0x31 */ [this.OP_AND, 1, this.MODE_INDY],
-            /* 0x32 */ [],
-            /* 0x33 */ [],
-            /* 0x34 */ [],
-            /* 0x35 */ [this.OP_AND, 1, this.MODE_ZPX],
-            /* 0x36 */ [this.OP_ROL, 1, this.MODE_ZPX],
-            /* 0x37 */ [],
-            /* 0x38 */ [this.OP_SEC],
-            /* 0x39 */ [this.OP_AND, 2, this.MODE_ABSY],
-            /* 0x3a */ [],
-            /* 0x3b */ [],
-            /* 0x3c */ [],
-            /* 0x3d */ [this.OP_AND, 2, this.MODE_ABSX],
-            /* 0x3e */ [this.OP_ROL, 2, this.MODE_ABSX],
-            /* 0x3f */ [],
-            /* 0x40 */ [this.OP_RTI],
-            /* 0x41 */ [this.OP_EOR, 1, this.MODE_INDX],
-            /* 0x42 */ [],
-            /* 0x43 */ [],
-            /* 0x44 */ [],
-            /* 0x45 */ [this.OP_EOR, 1, this.MODE_ZP],
-            /* 0x46 */ [this.OP_LSR, 1, this.MODE_ZP],
-            /* 0x47 */ [],
-            /* 0x48 */ [this.OP_PHA],
-            /* 0x49 */ [this.OP_EOR, 1, this.MODE_IMM],
-            /* 0x4a */ [this.OP_LSR, 0, this.MODE_ACC],
-            /* 0x4b */ [],
-            /* 0x4c */ [this.OP_JMP, 2, this.MODE_IMM16],
-            /* 0x4d */ [this.OP_EOR, 2, this.MODE_ABS],
-            /* 0x4e */ [this.OP_LSR, 2, this.MODE_ABS],
-            /* 0x4f */ [],
-            /* 0x50 */ [this.OP_BVC, 1, this.MODE_DISP],
-            /* 0x51 */ [this.OP_EOR, 1, this.MODE_INDY],
-            /* 0x52 */ [],
-            /* 0x53 */ [],
-            /* 0x54 */ [],
-            /* 0x55 */ [this.OP_EOR, 1, this.MODE_ZPX],
-            /* 0x56 */ [this.OP_LSR, 1, this.MODE_ZPX],
-            /* 0x57 */ [],
-            /* 0x58 */ [this.OP_CLI],
-            /* 0x59 */ [this.OP_EOR, 2, this.MODE_ABSY],
-            /* 0x5a */ [],
-            /* 0x5b */ [],
-            /* 0x5c */ [],
-            /* 0x5d */ [this.OP_EOR, 2, this.MODE_ABSX],
-            /* 0x5e */ [this.OP_LSR, 2, this.MODE_ABSX],
-            /* 0x5f */ [],
-            /* 0x60 */ [this.OP_RTS],
-            /* 0x61 */ [this.OP_ADC, 1, this.MODE_INDX],
-            /* 0x62 */ [],
-            /* 0x63 */ [],
-            /* 0x64 */ [],
-            /* 0x65 */ [this.OP_ADC, 1, this.MODE_ZP],
-            /* 0x66 */ [this.OP_ROR, 1, this.MODE_ZP],
-            /* 0x67 */ [],
-            /* 0x68 */ [this.OP_PLA],
-            /* 0x69 */ [this.OP_ADC, 1, this.MODE_IMM],
-            /* 0x6a */ [this.OP_ROR, 0, this.MODE_ACC],
-            /* 0x6b */ [],
-            /* 0x6c */ [this.OP_JMP, 2, this.MODE_ABS16],
-            /* 0x6d */ [this.OP_ADC, 2, this.MODE_ABS],
-            /* 0x6e */ [this.OP_ROR, 2, this.MODE_ABS],
-            /* 0x6f */ [],
-            /* 0x70 */ [this.OP_BVS, 1, this.MODE_DISP],
-            /* 0x71 */ [this.OP_ADC, 1, this.MODE_INDY],
-            /* 0x72 */ [],
-            /* 0x73 */ [],
-            /* 0x74 */ [],
-            /* 0x75 */ [this.OP_ADC, 1, this.MODE_ZPX],
-            /* 0x76 */ [this.OP_ROR, 1, this.MODE_ZPX],
-            /* 0x77 */ [],
-            /* 0x78 */ [this.OP_SEI],
-            /* 0x79 */ [this.OP_ADC, 2, this.MODE_ABSY],
-            /* 0x7a */ [],
-            /* 0x7b */ [],
-            /* 0x7c */ [],
-            /* 0x7d */ [this.OP_ADC, 2, this.MODE_ABSX],
-            /* 0x7e */ [this.OP_ROR, 2, this.MODE_ABSX],
-            /* 0x7f */ [],
-            /* 0x80 */ [],
-            /* 0x81 */ [this.OP_STA, 1, this.MODE_INDX],
-            /* 0x82 */ [],
-            /* 0x83 */ [],
-            /* 0x84 */ [this.OP_STY, 1, this.MODE_ZP],
-            /* 0x85 */ [this.OP_STA, 1, this.MODE_ZP],
-            /* 0x86 */ [this.OP_STX, 1, this.MODE_ZP],
-            /* 0x87 */ [],
-            /* 0x88 */ [this.OP_DEY],
-            /* 0x89 */ [],
-            /* 0x8a */ [this.OP_TXA],
-            /* 0x8b */ [],
-            /* 0x8c */ [this.OP_STY, 2, this.MODE_ABS],
-            /* 0x8d */ [this.OP_STA, 2, this.MODE_ABS],
-            /* 0x8e */ [this.OP_STX, 2, this.MODE_ABS],
-            /* 0x8f */ [],
-            /* 0x90 */ [this.OP_BCC, 1, this.MODE_DISP],
-            /* 0x91 */ [this.OP_STA, 1, this.MODE_INDY],
-            /* 0x92 */ [],
-            /* 0x93 */ [],
-            /* 0x94 */ [this.OP_STY, 1, this.MODE_ZPX],
-            /* 0x95 */ [this.OP_STA, 1, this.MODE_ZPX],
-            /* 0x96 */ [this.OP_STX, 1, this.MODE_ZPY],
-            /* 0x97 */ [],
-            /* 0x98 */ [this.OP_TYA],
-            /* 0x99 */ [this.OP_STA, 2, this.MODE_ABSY],
-            /* 0x9a */ [this.OP_TXS],
-            /* 0x9b */ [],
-            /* 0x9c */ [],
-            /* 0x9d */ [this.OP_STA, 2, this.MODE_ABSX],
-            /* 0x9e */ [],
-            /* 0x9f */ [],
-            /* 0xa0 */ [this.OP_LDY, 1, this.MODE_IMM],
-            /* 0xa1 */ [this.OP_LDA, 1, this.MODE_INDX],
-            /* 0xa2 */ [this.OP_LDX, 1, this.MODE_IMM],
-            /* 0xa3 */ [],
-            /* 0xa4 */ [this.OP_LDY, 1, this.MODE_ZP],
-            /* 0xa5 */ [this.OP_LDA, 1, this.MODE_ZP],
-            /* 0xa6 */ [this.OP_LDX, 1, this.MODE_ZP],
-            /* 0xa7 */ [],
-            /* 0xa8 */ [this.OP_TAY],
-            /* 0xa9 */ [this.OP_LDA, 1, this.MODE_IMM],
-            /* 0xaa */ [this.OP_TAX],
-            /* 0xab */ [],
-            /* 0xac */ [this.OP_LDY, 2, this.MODE_ABS],
-            /* 0xad */ [this.OP_LDA, 2, this.MODE_ABS],
-            /* 0xae */ [this.OP_LDX, 2, this.MODE_ABS],
-            /* 0xaf */ [],
-            /* 0xb0 */ [this.OP_BCS, 1, this.MODE_DISP],
-            /* 0xb1 */ [this.OP_LDA, 1, this.MODE_INDY],
-            /* 0xb2 */ [],
-            /* 0xb3 */ [],
-            /* 0xb4 */ [this.OP_LDY, 1, this.MODE_ZPX],
-            /* 0xb5 */ [this.OP_LDA, 1, this.MODE_ZPX],
-            /* 0xb6 */ [this.OP_LDX, 1, this.MODE_ZPY],
-            /* 0xb7 */ [],
-            /* 0xb8 */ [this.OP_CLV],
-            /* 0xb9 */ [this.OP_LDA, 2, this.MODE_ABSY],
-            /* 0xba */ [this.OP_TSX],
-            /* 0xbb */ [],
-            /* 0xbc */ [this.OP_LDY, 2, this.MODE_ABSX],
-            /* 0xbd */ [this.OP_LDA, 2, this.MODE_ABSX],
-            /* 0xbe */ [this.OP_LDX, 2, this.MODE_ABSY],
-            /* 0xbf */ [],
-            /* 0xc0 */ [this.OP_CPY, 1, this.MODE_IMM],
-            /* 0xc1 */ [this.OP_CMP, 1, this.MODE_INDX],
-            /* 0xc2 */ [],
-            /* 0xc3 */ [],
-            /* 0xc4 */ [this.OP_CPY, 1, this.MODE_ZP],
-            /* 0xc5 */ [this.OP_CMP, 1, this.MODE_ZP],
-            /* 0xc6 */ [this.OP_DEC, 1, this.MODE_ZP],
-            /* 0xc7 */ [],
-            /* 0xc8 */ [this.OP_INY],
-            /* 0xc9 */ [this.OP_CMP, 1, this.MODE_IMM],
-            /* 0xca */ [this.OP_DEX],
-            /* 0xcb */ [],
-            /* 0xcc */ [this.OP_CPY, 2, this.MODE_ABS],
-            /* 0xcd */ [this.OP_CMP, 2, this.MODE_ABS],
-            /* 0xce */ [this.OP_DEC, 2, this.MODE_ABS],
-            /* 0xcf */ [],
-            /* 0xd0 */ [this.OP_BNE, 1, this.MODE_DISP],
-            /* 0xd1 */ [this.OP_CMP, 1, this.MODE_INDY],
-            /* 0xd2 */ [],
-            /* 0xd3 */ [],
-            /* 0xd4 */ [],
-            /* 0xd5 */ [this.OP_CMP, 1, this.MODE_ZPX],
-            /* 0xd6 */ [this.OP_DEC, 1, this.MODE_ZPX],
-            /* 0xd7 */ [],
-            /* 0xd8 */ [this.OP_CLD],
-            /* 0xd9 */ [this.OP_CMP, 2, this.MODE_ABSY],
-            /* 0xda */ [],
-            /* 0xdb */ [],
-            /* 0xdc */ [],
-            /* 0xdd */ [this.OP_CMP, 2, this.MODE_ABSX],
-            /* 0xde */ [this.OP_DEC, 2, this.MODE_ABSX],
-            /* 0xdf */ [],
-            /* 0xe0 */ [this.OP_CPX, 1, this.MODE_IMM],
-            /* 0xe1 */ [this.OP_SBC, 1, this.MODE_INDX],
-            /* 0xe2 */ [],
-            /* 0xe3 */ [],
-            /* 0xe4 */ [this.OP_CPX, 1, this.MODE_ZP],
-            /* 0xe5 */ [this.OP_SBC, 1, this.MODE_ZP],
-            /* 0xe6 */ [this.OP_INC, 1, this.MODE_ZP],
-            /* 0xe7 */ [],
-            /* 0xe8 */ [this.OP_INX],
-            /* 0xe9 */ [this.OP_SBC, 1, this.MODE_IMM],
-            /* 0xea */ [this.OP_NOP],
-            /* 0xeb */ [],
-            /* 0xec */ [this.OP_CPX, 2, this.MODE_ABS],
-            /* 0xed */ [this.OP_SBC, 2, this.MODE_ABS],
-            /* 0xee */ [this.OP_INC, 2, this.MODE_ABS],
-            /* 0xef */ [],
-            /* 0xf0 */ [this.OP_BEQ, 1, this.MODE_DISP],
-            /* 0xf1 */ [this.OP_SBC, 1, this.MODE_INDY],
-            /* 0xf2 */ [],
-            /* 0xf3 */ [],
-            /* 0xf4 */ [],
-            /* 0xf5 */ [this.OP_SBC, 1, this.MODE_ZPX],
-            /* 0xf6 */ [this.OP_INC, 1, this.MODE_ZPX],
-            /* 0xf7 */ [],
-            /* 0xf8 */ [this.OP_SED],
-            /* 0xf9 */ [this.OP_SBC, 2, this.MODE_ABSY],
-            /* 0xfa */ [],
-            /* 0xfb */ [],
-            /* 0xfc */ [],
-            /* 0xfd */ [this.OP_SBC, 2, this.MODE_ABSX],
-            /* 0xfe */ [this.OP_INC, 2, this.MODE_ABSX],
-            /* 0xff */ []
-        ];
+            this.aaOperations = [
+                /* 0x00 */ [this.OP_BRK],
+                /* 0x01 */ [this.OP_ORA, 1, this.MODE_INDX],
+                /* 0x02 */ [this.OP_SIM, 1],
+                /* 0x03 */ [],
+                /* 0x04 */ [],
+                /* 0x05 */ [this.OP_ORA, 1, this.MODE_ZP],
+                /* 0x06 */ [this.OP_ASL, 1, this.MODE_ZP],
+                /* 0x07 */ [],
+                /* 0x08 */ [this.OP_PHP],
+                /* 0x09 */ [this.OP_ORA, 1, this.MODE_IMM],
+                /* 0x0a */ [this.OP_ASL, 0, this.MODE_ACC],
+                /* 0x0b */ [],
+                /* 0x0c */ [],
+                /* 0x0d */ [this.OP_ORA, 2, this.MODE_ABS],
+                /* 0x0e */ [this.OP_ASL, 2, this.MODE_ABS],
+                /* 0x0f */ [],
+                /* 0x10 */ [this.OP_BPL, 1, this.MODE_DISP],
+                /* 0x11 */ [this.OP_ORA, 1, this.MODE_INDY],
+                /* 0x12 */ [],
+                /* 0x13 */ [],
+                /* 0x14 */ [],
+                /* 0x15 */ [this.OP_ORA, 1, this.MODE_ZPX],
+                /* 0x16 */ [this.OP_ASL, 1, this.MODE_ZPX],
+                /* 0x17 */ [],
+                /* 0x18 */ [this.OP_CLC],
+                /* 0x19 */ [this.OP_ORA, 2, this.MODE_ABSY],
+                /* 0x1a */ [],
+                /* 0x1b */ [],
+                /* 0x1c */ [],
+                /* 0x1d */ [this.OP_ORA, 2, this.MODE_ABSX],
+                /* 0x1e */ [this.OP_ASL, 2, this.MODE_ABSX],
+                /* 0x1f */ [],
+                /* 0x20 */ [this.OP_JSR, 2, this.MODE_IMM16],
+                /* 0x21 */ [this.OP_AND, 1, this.MODE_INDX],
+                /* 0x22 */ [],
+                /* 0x23 */ [],
+                /* 0x24 */ [this.OP_BIT, 1, this.MODE_ZP],
+                /* 0x25 */ [this.OP_AND, 1, this.MODE_ZP],
+                /* 0x26 */ [this.OP_ROL, 1, this.MODE_ZP],
+                /* 0x27 */ [],
+                /* 0x28 */ [this.OP_PLP],
+                /* 0x29 */ [this.OP_AND, 1, this.MODE_IMM],
+                /* 0x2a */ [this.OP_ROL, 0, this.MODE_ACC],
+                /* 0x2b */ [],
+                /* 0x2c */ [this.OP_BIT, 2, this.MODE_ABS],
+                /* 0x2d */ [this.OP_AND, 2, this.MODE_ABS],
+                /* 0x2e */ [this.OP_ROL, 2, this.MODE_ABS],
+                /* 0x2f */ [],
+                /* 0x30 */ [this.OP_BMI, 1, this.MODE_DISP],
+                /* 0x31 */ [this.OP_AND, 1, this.MODE_INDY],
+                /* 0x32 */ [],
+                /* 0x33 */ [],
+                /* 0x34 */ [],
+                /* 0x35 */ [this.OP_AND, 1, this.MODE_ZPX],
+                /* 0x36 */ [this.OP_ROL, 1, this.MODE_ZPX],
+                /* 0x37 */ [],
+                /* 0x38 */ [this.OP_SEC],
+                /* 0x39 */ [this.OP_AND, 2, this.MODE_ABSY],
+                /* 0x3a */ [],
+                /* 0x3b */ [],
+                /* 0x3c */ [],
+                /* 0x3d */ [this.OP_AND, 2, this.MODE_ABSX],
+                /* 0x3e */ [this.OP_ROL, 2, this.MODE_ABSX],
+                /* 0x3f */ [],
+                /* 0x40 */ [this.OP_RTI],
+                /* 0x41 */ [this.OP_EOR, 1, this.MODE_INDX],
+                /* 0x42 */ [],
+                /* 0x43 */ [],
+                /* 0x44 */ [],
+                /* 0x45 */ [this.OP_EOR, 1, this.MODE_ZP],
+                /* 0x46 */ [this.OP_LSR, 1, this.MODE_ZP],
+                /* 0x47 */ [],
+                /* 0x48 */ [this.OP_PHA],
+                /* 0x49 */ [this.OP_EOR, 1, this.MODE_IMM],
+                /* 0x4a */ [this.OP_LSR, 0, this.MODE_ACC],
+                /* 0x4b */ [],
+                /* 0x4c */ [this.OP_JMP, 2, this.MODE_IMM16],
+                /* 0x4d */ [this.OP_EOR, 2, this.MODE_ABS],
+                /* 0x4e */ [this.OP_LSR, 2, this.MODE_ABS],
+                /* 0x4f */ [],
+                /* 0x50 */ [this.OP_BVC, 1, this.MODE_DISP],
+                /* 0x51 */ [this.OP_EOR, 1, this.MODE_INDY],
+                /* 0x52 */ [],
+                /* 0x53 */ [],
+                /* 0x54 */ [],
+                /* 0x55 */ [this.OP_EOR, 1, this.MODE_ZPX],
+                /* 0x56 */ [this.OP_LSR, 1, this.MODE_ZPX],
+                /* 0x57 */ [],
+                /* 0x58 */ [this.OP_CLI],
+                /* 0x59 */ [this.OP_EOR, 2, this.MODE_ABSY],
+                /* 0x5a */ [],
+                /* 0x5b */ [],
+                /* 0x5c */ [],
+                /* 0x5d */ [this.OP_EOR, 2, this.MODE_ABSX],
+                /* 0x5e */ [this.OP_LSR, 2, this.MODE_ABSX],
+                /* 0x5f */ [],
+                /* 0x60 */ [this.OP_RTS],
+                /* 0x61 */ [this.OP_ADC, 1, this.MODE_INDX],
+                /* 0x62 */ [],
+                /* 0x63 */ [],
+                /* 0x64 */ [],
+                /* 0x65 */ [this.OP_ADC, 1, this.MODE_ZP],
+                /* 0x66 */ [this.OP_ROR, 1, this.MODE_ZP],
+                /* 0x67 */ [],
+                /* 0x68 */ [this.OP_PLA],
+                /* 0x69 */ [this.OP_ADC, 1, this.MODE_IMM],
+                /* 0x6a */ [this.OP_ROR, 0, this.MODE_ACC],
+                /* 0x6b */ [],
+                /* 0x6c */ [this.OP_JMP, 2, this.MODE_ABS16],
+                /* 0x6d */ [this.OP_ADC, 2, this.MODE_ABS],
+                /* 0x6e */ [this.OP_ROR, 2, this.MODE_ABS],
+                /* 0x6f */ [],
+                /* 0x70 */ [this.OP_BVS, 1, this.MODE_DISP],
+                /* 0x71 */ [this.OP_ADC, 1, this.MODE_INDY],
+                /* 0x72 */ [],
+                /* 0x73 */ [],
+                /* 0x74 */ [],
+                /* 0x75 */ [this.OP_ADC, 1, this.MODE_ZPX],
+                /* 0x76 */ [this.OP_ROR, 1, this.MODE_ZPX],
+                /* 0x77 */ [],
+                /* 0x78 */ [this.OP_SEI],
+                /* 0x79 */ [this.OP_ADC, 2, this.MODE_ABSY],
+                /* 0x7a */ [],
+                /* 0x7b */ [],
+                /* 0x7c */ [],
+                /* 0x7d */ [this.OP_ADC, 2, this.MODE_ABSX],
+                /* 0x7e */ [this.OP_ROR, 2, this.MODE_ABSX],
+                /* 0x7f */ [],
+                /* 0x80 */ [],
+                /* 0x81 */ [this.OP_STA, 1, this.MODE_INDX],
+                /* 0x82 */ [],
+                /* 0x83 */ [],
+                /* 0x84 */ [this.OP_STY, 1, this.MODE_ZP],
+                /* 0x85 */ [this.OP_STA, 1, this.MODE_ZP],
+                /* 0x86 */ [this.OP_STX, 1, this.MODE_ZP],
+                /* 0x87 */ [],
+                /* 0x88 */ [this.OP_DEY],
+                /* 0x89 */ [],
+                /* 0x8a */ [this.OP_TXA],
+                /* 0x8b */ [],
+                /* 0x8c */ [this.OP_STY, 2, this.MODE_ABS],
+                /* 0x8d */ [this.OP_STA, 2, this.MODE_ABS],
+                /* 0x8e */ [this.OP_STX, 2, this.MODE_ABS],
+                /* 0x8f */ [],
+                /* 0x90 */ [this.OP_BCC, 1, this.MODE_DISP],
+                /* 0x91 */ [this.OP_STA, 1, this.MODE_INDY],
+                /* 0x92 */ [],
+                /* 0x93 */ [],
+                /* 0x94 */ [this.OP_STY, 1, this.MODE_ZPX],
+                /* 0x95 */ [this.OP_STA, 1, this.MODE_ZPX],
+                /* 0x96 */ [this.OP_STX, 1, this.MODE_ZPY],
+                /* 0x97 */ [],
+                /* 0x98 */ [this.OP_TYA],
+                /* 0x99 */ [this.OP_STA, 2, this.MODE_ABSY],
+                /* 0x9a */ [this.OP_TXS],
+                /* 0x9b */ [],
+                /* 0x9c */ [],
+                /* 0x9d */ [this.OP_STA, 2, this.MODE_ABSX],
+                /* 0x9e */ [],
+                /* 0x9f */ [],
+                /* 0xa0 */ [this.OP_LDY, 1, this.MODE_IMM],
+                /* 0xa1 */ [this.OP_LDA, 1, this.MODE_INDX],
+                /* 0xa2 */ [this.OP_LDX, 1, this.MODE_IMM],
+                /* 0xa3 */ [],
+                /* 0xa4 */ [this.OP_LDY, 1, this.MODE_ZP],
+                /* 0xa5 */ [this.OP_LDA, 1, this.MODE_ZP],
+                /* 0xa6 */ [this.OP_LDX, 1, this.MODE_ZP],
+                /* 0xa7 */ [],
+                /* 0xa8 */ [this.OP_TAY],
+                /* 0xa9 */ [this.OP_LDA, 1, this.MODE_IMM],
+                /* 0xaa */ [this.OP_TAX],
+                /* 0xab */ [],
+                /* 0xac */ [this.OP_LDY, 2, this.MODE_ABS],
+                /* 0xad */ [this.OP_LDA, 2, this.MODE_ABS],
+                /* 0xae */ [this.OP_LDX, 2, this.MODE_ABS],
+                /* 0xaf */ [],
+                /* 0xb0 */ [this.OP_BCS, 1, this.MODE_DISP],
+                /* 0xb1 */ [this.OP_LDA, 1, this.MODE_INDY],
+                /* 0xb2 */ [],
+                /* 0xb3 */ [],
+                /* 0xb4 */ [this.OP_LDY, 1, this.MODE_ZPX],
+                /* 0xb5 */ [this.OP_LDA, 1, this.MODE_ZPX],
+                /* 0xb6 */ [this.OP_LDX, 1, this.MODE_ZPY],
+                /* 0xb7 */ [],
+                /* 0xb8 */ [this.OP_CLV],
+                /* 0xb9 */ [this.OP_LDA, 2, this.MODE_ABSY],
+                /* 0xba */ [this.OP_TSX],
+                /* 0xbb */ [],
+                /* 0xbc */ [this.OP_LDY, 2, this.MODE_ABSX],
+                /* 0xbd */ [this.OP_LDA, 2, this.MODE_ABSX],
+                /* 0xbe */ [this.OP_LDX, 2, this.MODE_ABSY],
+                /* 0xbf */ [],
+                /* 0xc0 */ [this.OP_CPY, 1, this.MODE_IMM],
+                /* 0xc1 */ [this.OP_CMP, 1, this.MODE_INDX],
+                /* 0xc2 */ [],
+                /* 0xc3 */ [],
+                /* 0xc4 */ [this.OP_CPY, 1, this.MODE_ZP],
+                /* 0xc5 */ [this.OP_CMP, 1, this.MODE_ZP],
+                /* 0xc6 */ [this.OP_DEC, 1, this.MODE_ZP],
+                /* 0xc7 */ [],
+                /* 0xc8 */ [this.OP_INY],
+                /* 0xc9 */ [this.OP_CMP, 1, this.MODE_IMM],
+                /* 0xca */ [this.OP_DEX],
+                /* 0xcb */ [],
+                /* 0xcc */ [this.OP_CPY, 2, this.MODE_ABS],
+                /* 0xcd */ [this.OP_CMP, 2, this.MODE_ABS],
+                /* 0xce */ [this.OP_DEC, 2, this.MODE_ABS],
+                /* 0xcf */ [],
+                /* 0xd0 */ [this.OP_BNE, 1, this.MODE_DISP],
+                /* 0xd1 */ [this.OP_CMP, 1, this.MODE_INDY],
+                /* 0xd2 */ [],
+                /* 0xd3 */ [],
+                /* 0xd4 */ [],
+                /* 0xd5 */ [this.OP_CMP, 1, this.MODE_ZPX],
+                /* 0xd6 */ [this.OP_DEC, 1, this.MODE_ZPX],
+                /* 0xd7 */ [],
+                /* 0xd8 */ [this.OP_CLD],
+                /* 0xd9 */ [this.OP_CMP, 2, this.MODE_ABSY],
+                /* 0xda */ [],
+                /* 0xdb */ [],
+                /* 0xdc */ [],
+                /* 0xdd */ [this.OP_CMP, 2, this.MODE_ABSX],
+                /* 0xde */ [this.OP_DEC, 2, this.MODE_ABSX],
+                /* 0xdf */ [],
+                /* 0xe0 */ [this.OP_CPX, 1, this.MODE_IMM],
+                /* 0xe1 */ [this.OP_SBC, 1, this.MODE_INDX],
+                /* 0xe2 */ [],
+                /* 0xe3 */ [],
+                /* 0xe4 */ [this.OP_CPX, 1, this.MODE_ZP],
+                /* 0xe5 */ [this.OP_SBC, 1, this.MODE_ZP],
+                /* 0xe6 */ [this.OP_INC, 1, this.MODE_ZP],
+                /* 0xe7 */ [],
+                /* 0xe8 */ [this.OP_INX],
+                /* 0xe9 */ [this.OP_SBC, 1, this.MODE_IMM],
+                /* 0xea */ [this.OP_NOP],
+                /* 0xeb */ [],
+                /* 0xec */ [this.OP_CPX, 2, this.MODE_ABS],
+                /* 0xed */ [this.OP_SBC, 2, this.MODE_ABS],
+                /* 0xee */ [this.OP_INC, 2, this.MODE_ABS],
+                /* 0xef */ [],
+                /* 0xf0 */ [this.OP_BEQ, 1, this.MODE_DISP],
+                /* 0xf1 */ [this.OP_SBC, 1, this.MODE_INDY],
+                /* 0xf2 */ [],
+                /* 0xf3 */ [],
+                /* 0xf4 */ [],
+                /* 0xf5 */ [this.OP_SBC, 1, this.MODE_ZPX],
+                /* 0xf6 */ [this.OP_INC, 1, this.MODE_ZPX],
+                /* 0xf7 */ [],
+                /* 0xf8 */ [this.OP_SED],
+                /* 0xf9 */ [this.OP_SBC, 2, this.MODE_ABSY],
+                /* 0xfa */ [],
+                /* 0xfb */ [],
+                /* 0xfc */ [],
+                /* 0xfd */ [this.OP_SBC, 2, this.MODE_ABSX],
+                /* 0xfe */ [this.OP_INC, 2, this.MODE_ABSX],
+                /* 0xff */ []
+            ];
 
-    }   // endif DEBUGGER
-}
-
-if (DEBUGGER) {
-
-    Component.subclass(C1PDebugger);
+        }   // endif DEBUGGER
+    }
 
     /**
      * @this {C1PDebugger}
@@ -497,7 +501,7 @@ if (DEBUGGER) {
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
-    C1PDebugger.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
+    setBinding(sHTMLType, sBinding, control, sValue)
     {
         var dbg = this;
         switch(sBinding) {
@@ -521,7 +525,7 @@ if (DEBUGGER) {
              * I've replaced the standard "onclick" code with a call to our onClickRepeat() helper in
              * component.js, so that the "Enter" button can be held to repeat, just like the "Step" button.
              */
-            web.onClickRepeat(
+            Web.onClickRepeat(
                 control, 500, 100,
                 function(fRepeat) {
                     if (dbg.eDebug) {
@@ -542,7 +546,7 @@ if (DEBUGGER) {
             return true;
         case "step":
             this.bindings[sBinding] = control;
-            web.onClickRepeat(
+            Web.onClickRepeat(
                 control, 500, 100,
                 function(fRepeat) {
                     var fCompleted = false;
@@ -559,7 +563,7 @@ if (DEBUGGER) {
             break;
         }
         return false;
-    };
+    }
 
     /**
      * @this {C1PDebugger}
@@ -567,35 +571,35 @@ if (DEBUGGER) {
      * @param {number} start
      * @param {number} end
      */
-    C1PDebugger.prototype.setBuffer = function(abMemory, start, end)
+    setBuffer(abMemory, start, end)
     {
         this.abMem = abMemory;
         this.offMem = start;
         this.cbMem = end - start + 1;
         this.offLimit = this.offMem + this.cbMem;
         this.setReady();
-    };
+    }
 
     /**
      * @this {C1PDebugger}
      * @param {boolean} fOn
      * @param {C1PComputer} cmp
      */
-    C1PDebugger.prototype.setPower = function(fOn, cmp)
+    setPower(fOn, cmp)
     {
         if (fOn && !this.flags.powered) {
             this.flags.powered = true;
             this.cpu = cmp.getComponentByType("cpu");
         }
-    };
+    }
 
     /**
      * @this {C1PDebugger}
      */
-    C1PDebugger.prototype.setFocus = function()
+    setFocus()
     {
         this.eDebug.focus();
-    };
+    }
 
     /**
      * @this {C1PDebugger}
@@ -638,7 +642,7 @@ if (DEBUGGER) {
      *              ABS16   ($nnnn)         Used by JMP (0x6C); I consider this an "Absolute" operation that fetches
      *                                      16 bits of data, but it is documented as "Indirect" addressing (see Zaks)
      */
-    C1PDebugger.prototype.setOpModes = function(fClassic)
+    setOpModes(fClassic)
     {
         /*
          * NOTE: The modes are arranged within aOpModes so that longer matches are checked before
@@ -711,31 +715,31 @@ if (DEBUGGER) {
          * codes (in the following array), then we should convert MODE_IMM16 (aka MODE_DISP) into MODE_ABS.
          */
         this.aImm16Codes = [this.OP_JMP, this.OP_JSR, this.OP_BPL, this.OP_BMI, this.OP_BVC, this.OP_BVS, this.OP_BCC, this.OP_BCS, this.OP_BNE, this.OP_BEQ];
-    };
+    }
 
     /**
      * @this {C1PDebugger}
      */
-    C1PDebugger.prototype.halt = function()
+    halt()
     {
         /*
          * We ask the CPU to halt, but we can't assume it's stopped until it calls stop()
          */
         this.cpu.halt();
-    };
+    }
 
     /**
      * @this {C1PDebugger}
      * @param {string} s is any diagnostic string that you can print later using the Debugger's "i" command
      */
-    C1PDebugger.prototype.info = function(s)
+    info(s)
     {
         if (DEBUG) {
             this.aInfoBuffer[this.iInfoBuffer++] = s;
             if (this.iInfoBuffer >= this.aInfoBuffer.length)
                 this.iInfoBuffer = 0;
         }
-    };
+    }
 
     /**
      * @this {C1PDebugger}
@@ -746,50 +750,50 @@ if (DEBUGGER) {
      * @param {boolean|undefined} [fWrite] is true if this was a write, false (or undefined) if read
      * @param {string|undefined} [name] of the port, if any
      */
-    C1PDebugger.prototype.messageIO = function(component, addr, addrFrom, bitsMessage, fWrite, name)
+    messageIO(component, addr, addrFrom, bitsMessage, fWrite, name)
     {
         if ((this.bitsMessage & bitsMessage) == bitsMessage) {
             var b = this.cpu.getByte(addr);
-            this.message(component.id + "." + (fWrite? "setByte":"getByte") + "(" + str.toHexWord(addr) + ")" + (addrFrom !== undefined? (" @" + str.toHexWord(addrFrom)) : "") + ": " + (name? (name + "=") : "") + str.toHexByte(b));
+            this.message(component.id + "." + (fWrite? "setByte":"getByte") + "(" + Str.toHexWord(addr) + ")" + (addrFrom !== undefined? (" @" + Str.toHexWord(addrFrom)) : "") + ": " + (name? (name + "=") : "") + Str.toHexByte(b));
         }
-    };
+    }
 
     /**
      * @this {C1PDebugger}
      * @param {string} sMessage is any caller-defined message string
      */
-    C1PDebugger.prototype.message = function(sMessage)
+    message(sMessage)
     {
         this.println(sMessage);
         this.cpu.yieldCPU();    // these print() calls are at risk of being called with high frequency, so we need to yieldCPU() more
-    };
+    }
 
     /**
      * @this {C1PDebugger}
      */
-    C1PDebugger.prototype.init = function()
+    init()
     {
         // this.doHelp();
         this.println("Type ? for list of debugger commands\n");
-    };
+    }
 
     /**
      * @this {C1PDebugger}
      * @return {boolean}
      */
-    C1PDebugger.prototype.run = function()
+    run()
     {
         if (!this.isCPUOK()) return false;
         this.cpu.run();
         return true;
-    };
+    }
 
     /**
      * @this {C1PDebugger}
      * @param {number} n (0 implies a single-step, and therefore breakpoints should be ignored)
      * @return {boolean}
      */
-    C1PDebugger.prototype.step = function(n)
+    step(n)
     {
         if (!this.isCPUOK()) return false;
         var fCompleted;
@@ -808,20 +812,20 @@ if (DEBUGGER) {
         this.cpu.update(true);
         this.update(true);
         return fCompleted;
-    };
+    }
 
     /**
      * @this {C1PDebugger}
      * @param {boolean} [fStep]
      */
-    C1PDebugger.prototype.update = function(fStep)
+    update(fStep)
     {
         this.nextAddr = this.cpu.regPC;
         if (fStep || this.fStepOver)
             this.doUnassemble();
         else
             this.doRegisters();
-    };
+    }
 
     /**
      * @this {C1PDebugger}
@@ -829,7 +833,7 @@ if (DEBUGGER) {
      *
      * Make sure the CPU is ready (finished initializing), not busy (already running), and not in an error state.
      */
-    C1PDebugger.prototype.isCPUOK = function()
+    isCPUOK()
     {
         if (!this.cpu)
             return false;
@@ -838,14 +842,14 @@ if (DEBUGGER) {
         if (this.cpu.isBusy())
             return false;
         return !this.cpu.isError();
-    };
+    }
 
     /**
      * @this {C1PDebugger}
      *
      * This is a notification handler, called by the CPU, to inform us that the CPU has been reset.
      */
-    C1PDebugger.prototype.reset = function()
+    reset()
     {
         var i;
         if (!this.aStepHistory.length)
@@ -859,17 +863,17 @@ if (DEBUGGER) {
         if (this.cIns) this.update();
         this.cIns = 0;
         this.cReads = this.cWrites = this.cWritesZP = 0;
-    };
+    }
 
     /**
      * @this {C1PDebugger}
      *
      * This is a notification handler, called by the CPU, to inform us that the CPU has started running.
      */
-    C1PDebugger.prototype.start = function()
+    start()
     {
         if (!this.fStepOver) this.println("running");
-    };
+    }
 
     /**
      * @this {C1PDebugger}
@@ -878,12 +882,12 @@ if (DEBUGGER) {
      *
      * This is a notification handler, called by the CPU, to inform us that the CPU has now stopped running.
      */
-    C1PDebugger.prototype.stop = function(msStart, nCycles)
+    stop(msStart, nCycles)
     {
         if (!this.fStepOver) {
             this.println("stopped");
             if (nCycles) {
-                var msTotal = usr.getTime();
+                var msTotal = Usr.getTime();
                 msTotal -= msStart;
                 this.println(msTotal + "ms (" + nCycles + " cycles)");
                 if (DEBUG && msTotal > 0) {
@@ -906,17 +910,17 @@ if (DEBUGGER) {
             this.cReads = this.cWrites = this.cWritesZP = 0;
         }
         this.clearTempBreakpoint(this.cpu.regPC);
-    };
+    }
 
     /**
      * @this {C1PDebugger}
      *
      * This is a check function, called by the CPU, indicating whether other instructions need to be checked.
      */
-    C1PDebugger.prototype.checksEnabled = function()
+    checksEnabled()
     {
         return (DEBUG? true : (this.aExecBreak.length > 0 || this.aReadBreak.length > 0 || this.aWriteBreak.length > 0));
-    };
+    }
 
     /**
      * @this {C1PDebugger}
@@ -927,7 +931,7 @@ if (DEBUGGER) {
      * This is a check function, called by the CPU, to inform us about the next instruction to be executed, giving
      * us an opportunity to look for "exec" breakpoints and update opcode frequencies and instruction history.
      */
-    C1PDebugger.prototype.checkInstruction = function(addr, bOpCode)
+    checkInstruction(addr, bOpCode)
     {
         var fBreak = false;
         if (this.checkBreakpoint(addr, this.aExecBreak, "exec"))
@@ -940,7 +944,7 @@ if (DEBUGGER) {
                 this.iStepHistory = 0;
         }
         return !fBreak;
-    };
+    }
 
     /**
      * @this {C1PDebugger}
@@ -950,14 +954,14 @@ if (DEBUGGER) {
      * This is a check function, called by the CPU, to inform us that a memory read occurred, giving us an
      * opportunity to track the read if we want, and look for a matching "read" breakpoint, if any.
      */
-    C1PDebugger.prototype.checkMemoryRead = function(addr)
+    checkMemoryRead(addr)
     {
         var fBreak = false;
         this.cReads++;
         if (this.checkBreakpoint(addr, this.aReadBreak, "read"))
             fBreak = true;
         return !fBreak;
-    };
+    }
 
     /**
      * @this {C1PDebugger}
@@ -968,7 +972,7 @@ if (DEBUGGER) {
      * This is a check function, called by the CPU, to inform us that a memory write occurred, giving us an
      * opportunity to track the write if we want, and look for a matching "write" breakpoint, if any.
      */
-    C1PDebugger.prototype.checkMemoryWrite = function(addr, value)
+    checkMemoryWrite(addr, value)
     {
         var fBreak = false;
         this.cWrites++;
@@ -981,13 +985,13 @@ if (DEBUGGER) {
         if (!(addr & 0xff00))
             this.cWritesZP++;
         if ((value & 0xff) != value) {
-            this.println("invalid value at " + str.toHexWord(addr) + ": " + value);
+            this.println("invalid value at " + Str.toHexWord(addr) + ": " + value);
             fBreak = true;
         }
         if (this.checkBreakpoint(addr, this.aWriteBreak, "write"))
             fBreak = true;
         return !fBreak;
-    };
+    }
 
     /**
      * @this {C1PDebugger}
@@ -995,10 +999,10 @@ if (DEBUGGER) {
      * @param {number} b
      * @return {number}
      */
-    C1PDebugger.prototype.addSignedByte = function(addr, b)
+    addSignedByte(addr, b)
     {
         return addr + ((b << 24) >> 24);
-    };
+    }
 
     /**
      * getByte() should be used for all memory reads performed by the Debugger (eg, doDump, doUnassemble),
@@ -1009,17 +1013,17 @@ if (DEBUGGER) {
      * @param {number} addr
      * @return {number|undefined}
      */
-    C1PDebugger.prototype.getByte = function(addr)
+    getByte(addr)
     {
         var b;
         if (addr >= this.offMem && addr < this.offLimit) {
             this.cpu.checkReadNotify(addr);
             b = this.abMem[this.offMem + addr];
-            Component.assert((b == (b & 0xff)), "invalid byte (" + b + ") at address: " + str.toHexWord(addr));
+            Component.assert((b == (b & 0xff)), "invalid byte (" + b + ") at address: " + Str.toHexWord(addr));
             b &= 0xff;
         }
         return b;
-    };
+    }
 
     /**
      * setByte() should be used for all memory writes performed by the Debugger (eg, doAssemble, doEdit),
@@ -1035,92 +1039,92 @@ if (DEBUGGER) {
      * @param {number} addr
      * @param {number} b
      */
-    C1PDebugger.prototype.setByte = function(addr, b)
+    setByte(addr, b)
     {
         if (addr < this.offMem || addr >= this.offLimit) {
-            this.println("invalid address: " + str.toHexWord(addr));
+            this.println("invalid address: " + Str.toHexWord(addr));
             return;
         }
         this.abMem[this.offMem + addr] = (b & 0xff);
         this.cpu.checkWriteNotify(addr);
         this.cpu.update();
-    };
+    }
 
     /**
      * @this {C1PDebugger}
      */
-    C1PDebugger.prototype.clearBreakpoints = function()
+    clearBreakpoints()
     {
         this.aExecBreak = [];
         this.aReadBreak = [];
         this.aWriteBreak = [];
-    };
+    }
 
     /**
      * @this {C1PDebugger}
      * @param {number} addr
      * @return {boolean}
      */
-    C1PDebugger.prototype.addExecBreakpoint = function(addr)
+    addExecBreakpoint(addr)
     {
         if (!this.findExecBreakpoint(addr)) {
             this.aExecBreak.push(addr);
         }
         return true;
-    };
+    }
 
     /**
      * @this {C1PDebugger}
      * @param {number} addr
      * @return {boolean}
      */
-    C1PDebugger.prototype.addReadBreakpoint = function(addr)
+    addReadBreakpoint(addr)
     {
         if (!this.findReadBreakpoint(addr)) {
             this.aReadBreak.push(addr);
         }
         return true;
-    };
+    }
 
     /**
      * @this {C1PDebugger}
      * @param {number} addr
      * @return {boolean}
      */
-    C1PDebugger.prototype.addWriteBreakpoint = function(addr)
+    addWriteBreakpoint(addr)
     {
         if (!this.findWriteBreakpoint(addr)) {
             this.aWriteBreak.push(addr);
         }
         return true;
-    };
+    }
 
     /**
      * @this {C1PDebugger}
      * @return {Array}
      */
-    C1PDebugger.prototype.getExecBreakpoints = function()
+    getExecBreakpoints()
     {
         return this.aExecBreak;
-    };
+    }
 
     /**
      * @this {C1PDebugger}
      * @return {Array}
      */
-    C1PDebugger.prototype.getReadBreakpoints = function()
+    getReadBreakpoints()
     {
         return this.aReadBreak;
-    };
+    }
 
     /**
      * @this {C1PDebugger}
      * @return {Array}
      */
-    C1PDebugger.prototype.getWriteBreakpoints = function()
+    getWriteBreakpoints()
     {
         return this.aWriteBreak;
-    };
+    }
 
     /**
      * @this {C1PDebugger}
@@ -1129,7 +1133,7 @@ if (DEBUGGER) {
      * @param {boolean} [fRemove]
      * @return {boolean}
      */
-    C1PDebugger.prototype.findBreakpoint = function(aBreak, addr, fRemove)
+    findBreakpoint(aBreak, addr, fRemove)
     {
         var fMatch = false;
         for (var i=0; i < aBreak.length; i++) {
@@ -1142,7 +1146,7 @@ if (DEBUGGER) {
             }
         }
         return fMatch;
-    };
+    }
 
     /**
      * @this {C1PDebugger}
@@ -1150,10 +1154,10 @@ if (DEBUGGER) {
      * @param {boolean} [fRemove]
      * @return {boolean}
      */
-    C1PDebugger.prototype.findExecBreakpoint = function(addr, fRemove)
+    findExecBreakpoint(addr, fRemove)
     {
         return this.findBreakpoint(this.aExecBreak, addr, fRemove);
-    };
+    }
 
     /**
      * @this {C1PDebugger}
@@ -1161,10 +1165,10 @@ if (DEBUGGER) {
      * @param {boolean} [fRemove]
      * @return {boolean}
      */
-    C1PDebugger.prototype.findReadBreakpoint = function(addr, fRemove)
+    findReadBreakpoint(addr, fRemove)
     {
         return this.findBreakpoint(this.aReadBreak, addr, fRemove);
-    };
+    }
 
     /**
      * @this {C1PDebugger}
@@ -1172,16 +1176,16 @@ if (DEBUGGER) {
      * @param {boolean} [fRemove]
      * @return {boolean}
      */
-    C1PDebugger.prototype.findWriteBreakpoint = function(addr, fRemove)
+    findWriteBreakpoint(addr, fRemove)
     {
         return this.findBreakpoint(this.aWriteBreak, addr, fRemove);
-    };
+    }
 
     /**
      * @this {C1PDebugger}
      * @param {number|undefined} addr of new temp breakpoint
      */
-    C1PDebugger.prototype.setTempBreakpoint = function(addr)
+    setTempBreakpoint(addr)
     {
         if (addr !== undefined) {
             /*
@@ -1193,13 +1197,13 @@ if (DEBUGGER) {
             if (this.addExecBreakpoint(addr))
                 this.addrTempBP = addr;
         }
-    };
+    }
 
     /**
      * @this {C1PDebugger}
      * @param {number} addr to compare to addrTempBP; the latter is cleared if there's a match
      */
-    C1PDebugger.prototype.clearTempBreakpoint = function(addr)
+    clearTempBreakpoint(addr)
     {
         if (this.addrTempBP !== undefined && addr == this.addrTempBP) {
             if (this.findExecBreakpoint(this.addrTempBP, true)) {
@@ -1207,7 +1211,7 @@ if (DEBUGGER) {
             }
         }
         this.fStepOver = false;
-    };
+    }
 
     /**
      * @this {C1PDebugger}
@@ -1216,7 +1220,7 @@ if (DEBUGGER) {
      * @param {string} sType (ie, "exec" or "write")
      * @return {boolean} true if breakpoint has been hit, false if not
      */
-    C1PDebugger.prototype.checkBreakpoint = function(addr, aBreakpoints, sType)
+    checkBreakpoint(addr, aBreakpoints, sType)
     {
         /*
          * Time to check for execution breakpoints; note that this should be done BEFORE updating any of the frequency
@@ -1226,13 +1230,13 @@ if (DEBUGGER) {
         for (var i=0; i < aBreakpoints.length; i++) {
             if (aBreakpoints[i] == addr) {
                 if (addr != this.addrTempBP)
-                    this.println("breakpoint hit: " + str.toHexWord(addr) + " (" + sType + ")");
+                    this.println("breakpoint hit: " + Str.toHexWord(addr) + " (" + sType + ")");
                 fBreak = true;
                 break;
             }
         }
         return fBreak;
-    };
+    }
 
     /**
      * @this {C1PDebugger}
@@ -1240,16 +1244,16 @@ if (DEBUGGER) {
      * @param {number} [nIns] is an associated instruction number, or 0 (or undefined) if none
      * @return {string}
      */
-    C1PDebugger.prototype.getInstruction = function(addr, nIns)
+    getInstruction(addr, nIns)
     {
-        var sLine = str.toHex(addr, 4);
+        var sLine = Str.toHex(addr, 4);
         var bOpCode = this.getByte(addr++);
         var b = (bOpCode === undefined? 0 : bOpCode);
         var aOpDesc = this.aaOperations[b];
         var abOperand = [];
         var cb = (aOpDesc[1] === undefined? 0 : aOpDesc[1]);
         do {
-            sLine += " " + str.toHex(b, 2);
+            sLine += " " + Str.toHex(b, 2);
             if (!(cb--)) break;
             b = this.getByte(addr++);
             if (b === undefined) break;
@@ -1266,11 +1270,11 @@ if (DEBUGGER) {
             var bOpMode = aOpDesc[2];
             sOperand = this.aOpModes[bOpMode];
             if (aOpDesc[1] == 1 && bOpMode == this.MODE_DISP) {
-                sOperand = sOperand.replace(/nnnn/, str.toHex(this.addSignedByte(addr, b = abOperand.pop()), 4));
+                sOperand = sOperand.replace(/nnnn/, Str.toHex(this.addSignedByte(addr, b = abOperand.pop()), 4));
             }
             else {
                 while (abOperand.length) {
-                    sOperand = sOperand.replace(/nn/, str.toHex(b = abOperand.pop(), 2));
+                    sOperand = sOperand.replace(/nn/, Str.toHex(b = abOperand.pop(), 2));
                 }
             }
             if (bOpMode == this.MODE_IMM && aOpDesc[1] == 1) {
@@ -1302,7 +1306,7 @@ if (DEBUGGER) {
         }
         this.nextIns = addr;
         return sLine;
-    };
+    }
 
     /**
      * parseInstruction(sCode, sOperand, addr)
@@ -1350,7 +1354,7 @@ if (DEBUGGER) {
      * @param {number} addr of memory where this instruction is being assembled
      * @return {Array.<number>} of opcode bytes; if the instruction can't be parsed, the array will be empty
      */
-    C1PDebugger.prototype.parseInstruction = function(sCode, sOperand, addr)
+    parseInstruction(sCode, sOperand, addr)
     {
         var aOpBytes = [];
         if (sCode !== undefined) {
@@ -1380,7 +1384,7 @@ if (DEBUGGER) {
                     for (i = 0; i < this.aaOperations.length; i++) {
                         if (this.aaOperations[i][0] === iCode) {
                             if (!cModes) this.println("supported opcodes:");
-                            this.println("     " + str.toHex(i, 2) + ": " + sCode + (this.aaOperations[i][2] !== undefined? (" " + this.aOpModes[this.aaOperations[i][2]]) : ""));
+                            this.println("     " + Str.toHex(i, 2) + ": " + sCode + (this.aaOperations[i][2] !== undefined? (" " + this.aOpModes[this.aaOperations[i][2]]) : ""));
                             cModes++;
                         }
                     }
@@ -1449,7 +1453,7 @@ if (DEBUGGER) {
                             /*
                              * This is really an internal consistency error; regardless what the user types, this should not occur.
                              */
-                            this.println("too many instruction matches (both " + str.toHexByte(bOpCode) + " and " + str.toHexByte(i) + ")");
+                            this.println("too many instruction matches (both " + Str.toHexByte(bOpCode) + " and " + Str.toHexByte(i) + ")");
                             bOpCode = -2;
                             break;
                         }
@@ -1489,28 +1493,28 @@ if (DEBUGGER) {
             }
         }
         return aOpBytes;
-    };
+    }
 
     /**
      * @this {C1PDebugger}
      * @return {string}
      */
-    C1PDebugger.prototype.getRegs = function()
+    getRegs()
     {
-        return "A=" + str.toHex(this.cpu.regA, 2) +
-              " X=" + str.toHex(this.cpu.regX, 2) +
-              " Y=" + str.toHex(this.cpu.regY, 2) +
-              " P=" + str.toHex(this.cpu.getRegP(), 2) +
-              " S=" + str.toHex(this.cpu.regS, 4) +
-              " PC=" + str.toHex(this.cpu.regPC, 4);
-    };
+        return "A=" + Str.toHex(this.cpu.regA, 2) +
+              " X=" + Str.toHex(this.cpu.regX, 2) +
+              " Y=" + Str.toHex(this.cpu.regY, 2) +
+              " P=" + Str.toHex(this.cpu.getRegP(), 2) +
+              " S=" + Str.toHex(this.cpu.regS, 4) +
+              " PC=" + Str.toHex(this.cpu.regPC, 4);
+    }
 
     /**
      * @this {C1PDebugger}
      * @param {string|undefined} [sAddr]
      * @return {number|undefined}
      */
-    C1PDebugger.prototype.getUserAddr = function(sAddr)
+    getUserAddr(sAddr)
     {
         var addr = this.nextAddr;
         if (sAddr !== undefined) {
@@ -1532,20 +1536,20 @@ if (DEBUGGER) {
             }
         }
         if (addr !== undefined && (addr < this.offMem || addr >= this.offLimit)) {
-            this.println("address out of range: " + str.toHex(addr));
+            this.println("address out of range: " + Str.toHex(addr));
             addr = undefined;
         }
         return addr;
-    };
+    }
 
     /**
      * @this {C1PDebugger}
      */
-    C1PDebugger.prototype.doHelp = function()
+    doHelp()
     {
         this.println("\ncommands:\n?\thelp\na [#]\tassemble\nb [#]\tbreakpoint\nd [#]\tdump memory\ne [#]\tedit memory\nf\tdump frequencies\ng [#]\trun to [#]\nh\thalt\no\toptions\np [#]\tdump history\nr\tdump/edit registers\ns\tstep over instruction\nt [#]\tstep instruction(s)\nu [#]\tunassemble");
         this.println("note: frequency and history commands operate only when breakpoints are set");
-    };
+    }
 
     /**
      * doAssemble() always receives the complete argument array, where the order of the arguments is:
@@ -1575,14 +1579,14 @@ if (DEBUGGER) {
      * @this {C1PDebugger}
      * @param {Array.<string>} asArgs is the complete argument array, beginning with the "a" command in asArgs[0]
      */
-    C1PDebugger.prototype.doAssemble = function(asArgs)
+    doAssemble(asArgs)
     {
         var addr = this.getUserAddr(asArgs[1]);
         if (addr === undefined)
             return;
         this.addrAssembleNext = addr;
         if (asArgs[2] === undefined) {
-            this.println("begin assemble @" + str.toHexWord(this.addrAssembleNext));
+            this.println("begin assemble @" + Str.toHexWord(this.addrAssembleNext));
             this.fAssemble = true;
             this.cpu.update();
             return;
@@ -1590,20 +1594,20 @@ if (DEBUGGER) {
         var aOpBytes = this.parseInstruction(asArgs[2], asArgs[3], this.addrAssembleNext);
         if (aOpBytes.length) {
             for (var i=0; i < aOpBytes.length; i++) {
-                // this.println(str.toHexWord(this.addrAssembleNext) + ": " + str.toHexByte(aOpBytes[i]));
+                // this.println(Str.toHexWord(this.addrAssembleNext) + ": " + Str.toHexByte(aOpBytes[i]));
                 this.setByte(this.addrAssembleNext+i, aOpBytes[i]);
             }
             this.println(this.getInstruction(this.addrAssembleNext));
             this.addrAssembleNext += aOpBytes.length;
         }
-    };
+    }
 
     /**
      * @this {C1PDebugger}
      * @param {string} [sParm]
      * @param {string} [sAddr]
      */
-    C1PDebugger.prototype.doBreak = function(sParm, sAddr)
+    doBreak(sParm, sAddr)
     {
         if (sParm === undefined || sParm == "?") {
             this.println("\nbreakpoint commands:");
@@ -1622,17 +1626,17 @@ if (DEBUGGER) {
             var cBreaks = 0, i;
             var aAddrs = this.getExecBreakpoints();
             for (i = 0; i < aAddrs.length; i++) {
-                this.println("breakpoint enabled: " + str.toHexWord(aAddrs[i]) + " (exec)");
+                this.println("breakpoint enabled: " + Str.toHexWord(aAddrs[i]) + " (exec)");
                 cBreaks++;
             }
             aAddrs = this.getReadBreakpoints();
             for (i = 0; i < aAddrs.length; i++) {
-                this.println("breakpoint enabled: " + str.toHexWord(aAddrs[i]) + " (read)");
+                this.println("breakpoint enabled: " + Str.toHexWord(aAddrs[i]) + " (read)");
                 cBreaks++;
             }
             aAddrs = this.getWriteBreakpoints();
             for (i = 0; i < aAddrs.length; i++) {
-                this.println("breakpoint enabled: " + str.toHexWord(aAddrs[i]) + " (write)");
+                this.println("breakpoint enabled: " + Str.toHexWord(aAddrs[i]) + " (write)");
                 cBreaks++;
             }
             if (!cBreaks)
@@ -1653,47 +1657,47 @@ if (DEBUGGER) {
             return;
         if (sParm == "p") {
             if (this.addExecBreakpoint(addr))
-                this.println("breakpoint enabled: " + str.toHexWord(addr) + " (exec)");
+                this.println("breakpoint enabled: " + Str.toHexWord(addr) + " (exec)");
             else
-                this.println("breakpoint not set: " + str.toHexWord(addr));
+                this.println("breakpoint not set: " + Str.toHexWord(addr));
             return;
         }
         if (sParm == "c") {
             if (this.findExecBreakpoint(addr, true))
-                this.println("breakpoint cleared: " + str.toHexWord(addr) + " (exec)");
+                this.println("breakpoint cleared: " + Str.toHexWord(addr) + " (exec)");
             else
             if (this.findReadBreakpoint(addr, true))
-                this.println("breakpoint cleared: " + str.toHexWord(addr) + " (read)");
+                this.println("breakpoint cleared: " + Str.toHexWord(addr) + " (read)");
             else
             if (this.findWriteBreakpoint(addr, true))
-                this.println("breakpoint cleared: " + str.toHexWord(addr) + " (write)");
+                this.println("breakpoint cleared: " + Str.toHexWord(addr) + " (write)");
             else
-                this.println("breakpoint missing: " + str.toHexWord(addr));
+                this.println("breakpoint missing: " + Str.toHexWord(addr));
             return;
         }
         if (sParm == "r") {
             if (this.addReadBreakpoint(addr))
-                this.println("breakpoint enabled: " + str.toHexWord(addr) + " (read)");
+                this.println("breakpoint enabled: " + Str.toHexWord(addr) + " (read)");
             else
-                this.println("breakpoint not set: " + str.toHexWord(addr));
+                this.println("breakpoint not set: " + Str.toHexWord(addr));
             return;
         }
         if (sParm == "w") {
             if (this.addWriteBreakpoint(addr))
-                this.println("breakpoint enabled: " + str.toHexWord(addr) + " (write)");
+                this.println("breakpoint enabled: " + Str.toHexWord(addr) + " (write)");
             else
-                this.println("breakpoint not set: " + str.toHexWord(addr));
+                this.println("breakpoint not set: " + Str.toHexWord(addr));
             return;
         }
         this.println("unknown breakpoint command: " + sParm);
-    };
+    }
 
     /**
      * @this {C1PDebugger}
      * @param {string} sAddr
      * @param {string} sLen
      */
-    C1PDebugger.prototype.doDump = function(sAddr, sLen)
+    doDump(sAddr, sLen)
     {
         if (sAddr == "?") {
             this.println("\ndump commands:");
@@ -1717,20 +1721,20 @@ if (DEBUGGER) {
             for (var i=0; i < 8 && addr < this.offLimit; i++) {
                 var b = this.getByte(addr);
                 if (b === undefined) b = 0;
-                sBytes += str.toHex(b, 2) + " ";
+                sBytes += Str.toHex(b, 2) + " ";
                 sChars += (b >= 32 && b < 128? String.fromCharCode(b) : ".");
                 addr++;
             }
-            this.println(str.toHex(addrLine, 4) + " " + sBytes + sChars);
+            this.println(Str.toHex(addrLine, 4) + " " + sBytes + sChars);
         }
         this.nextAddr = addr;
-    };
+    }
 
     /**
      * @this {C1PDebugger}
      * @param {Array.<string>} asArgs
      */
-    C1PDebugger.prototype.doEdit = function(asArgs)
+    doEdit(asArgs)
     {
         var sAddr = asArgs[1];
         if (sAddr === undefined) {
@@ -1744,13 +1748,13 @@ if (DEBUGGER) {
             var b = parseInt(asArgs[i], 16);
             this.setByte(addr++, b);
         }
-    };
+    }
 
     /**
      * @this {C1PDebugger}
      * @param {string} sParm
      */
-    C1PDebugger.prototype.doFreqs = function(sParm)
+    doFreqs(sParm)
     {
         if (sParm == "?") {
             this.println("\nfrequency commands:");
@@ -1776,7 +1780,7 @@ if (DEBUGGER) {
                     var bOpcode = aaSortedOpcodeFreqs[i][0];
                     var cFreq = aaSortedOpcodeFreqs[i][1];
                     if (cFreq) {
-                        this.println(this.aOpCodes[this.aaOperations[bOpcode][0]] + " (" + str.toHexByte(bOpcode) + "): " + cFreq + " times");
+                        this.println(this.aOpCodes[this.aaOperations[bOpcode][0]] + " (" + Str.toHexByte(bOpcode) + "): " + cFreq + " times");
                         cData++;
                     }
                 }
@@ -1785,21 +1789,21 @@ if (DEBUGGER) {
         if (!cData) {
             this.println("no frequency data available");
         }
-    };
+    }
 
     /**
      * @this {C1PDebugger}
      */
-    C1PDebugger.prototype.doHalt = function()
+    doHalt()
     {
         this.halt();
-    };
+    }
 
     /**
      * @this {C1PDebugger}
      * @param {string} sCount
      */
-    C1PDebugger.prototype.doHistory = function(sCount)
+    doHistory(sCount)
     {
         var cLines = 10;
         var iHistory = this.iStepHistory;
@@ -1831,7 +1835,7 @@ if (DEBUGGER) {
             this.nInsHistory = nIns;
         }
         if (cLines == 10) this.println("no history available");
-    };
+    }
 
     /**
      * Prints the contents of the Debugger's "info" buffer (filled by calls like cpu.dbg.info())
@@ -1839,7 +1843,7 @@ if (DEBUGGER) {
      * @param {string|undefined} sCount
      * @return {boolean|undefined} true only if the "info" command is supported
      */
-    C1PDebugger.prototype.doInfo = function(sCount)
+    doInfo(sCount)
     {
         if (DEBUG) {
             var cLines = (sCount === undefined? -1 : parseInt(sCount, 10));
@@ -1861,7 +1865,7 @@ if (DEBUGGER) {
             this.println("nCyclesPerStatusUpdate: " + this.cpu.nCyclesPerStatusUpdate);
             return true;
         }
-    };
+    }
 
     /**
      * @this {C1PDebugger}
@@ -1869,7 +1873,7 @@ if (DEBUGGER) {
      * @param {string} [sAddrEnd]
      * @param {number} [n]
      */
-    C1PDebugger.prototype.doUnassemble = function(sAddr, sAddrEnd, n)
+    doUnassemble(sAddr, sAddrEnd, n)
     {
         var addr = this.getUserAddr(sAddr);
         if (addr === undefined)
@@ -1903,13 +1907,13 @@ if (DEBUGGER) {
             this.println(sIns);
             this.nextAddr = addr = this.nextIns;
         }
-    };
+    }
 
     /**
      * @this {C1PDebugger}
      * @param {Array.<string>} asArgs
      */
-    C1PDebugger.prototype.doOptions = function(asArgs)
+    doOptions(asArgs)
     {
         if (asArgs[1] === undefined || asArgs[1] == "?") {
             this.println("\noption commands:");
@@ -1966,13 +1970,13 @@ if (DEBUGGER) {
             this.println("unknown option: " + sOption);
             break;
         }
-    };
+    }
 
     /**
      * @this {C1PDebugger}
      * @param {Array.<string>} [asArgs]
      */
-    C1PDebugger.prototype.doRegisters = function(asArgs)
+    doRegisters(asArgs)
     {
         if (asArgs && asArgs[1] == "?") {
             this.println("\nregister commands:");
@@ -2050,26 +2054,26 @@ if (DEBUGGER) {
             this.cpu.update();
         }
         this.println(this.getRegs());
-        if (fIns) this.doUnassemble(str.toHex(this.nextAddr = this.cpu.regPC, 4));
-    };
+        if (fIns) this.doUnassemble(Str.toHex(this.nextAddr = this.cpu.regPC, 4));
+    }
 
     /**
      * @this {C1PDebugger}
      * @param {string} sAddr
      */
-    C1PDebugger.prototype.doRun = function(sAddr)
+    doRun(sAddr)
     {
         if (sAddr !== undefined)
             this.setTempBreakpoint(this.getUserAddr(sAddr));
         if (!this.run()) {
             this.cpu.setFocus();
         }
-    };
+    }
 
     /**
      * @this {C1PDebugger}
      */
-    C1PDebugger.prototype.doStep = function()
+    doStep()
     {
         if (this.getByte(this.cpu.regPC) == this.cpu.OP_JSR) {
             this.setTempBreakpoint(this.cpu.regPC+3);
@@ -2080,17 +2084,17 @@ if (DEBUGGER) {
         else {
             this.doTrace();
         }
-    };
+    }
 
     /**
      * @this {C1PDebugger}
      * @param {string} [sCount]
      */
-    C1PDebugger.prototype.doTrace = function(sCount)
+    doTrace(sCount)
     {
         var c = (sCount === undefined? 1 : parseInt(sCount, 10));
         var n = (c == 1? 0 : 1);
-        web.onCountRepeat(
+        Web.onCountRepeat(
             c,
             function(dbg) {
                 return function() {
@@ -2103,13 +2107,13 @@ if (DEBUGGER) {
                 };
             }(this)
         );
-    };
+    }
 
-    C1PDebugger.input = function(dbg, sCmd)
+    static input(dbg, sCmd)
     {
         if (!sCmd.length) {
             if (dbg.fAssemble) {
-                dbg.println("ended assemble @" + str.toHex(dbg.addrAssembleNext, 4));
+                dbg.println("ended assemble @" + Str.toHex(dbg.addrAssembleNext, 4));
                 dbg.nextAddr = dbg.addrAssembleNext;
                 dbg.fAssemble = false;
             }
@@ -2120,7 +2124,7 @@ if (DEBUGGER) {
         if (dbg.isReady() && !dbg.isBusy(true) && sCmd.length > 0) {
 
             if (dbg.fAssemble) {
-                sCmd = "a " + str.toHex(dbg.addrAssembleNext, 4) + " " + sCmd;
+                sCmd = "a " + Str.toHex(dbg.addrAssembleNext, 4) + " " + sCmd;
             }
             else if (sCmd.length > 1 && sCmd.indexOf(" ") != 1) {
                 /*
@@ -2186,7 +2190,7 @@ if (DEBUGGER) {
                 break;
             }
         }
-    };
+    }
 
     /**
      * C1PDebugger.init()
@@ -2196,7 +2200,7 @@ if (DEBUGGER) {
      * attribute, invoking the constructor to create a C1PDebugger component, and then binding
      * any associated HTML controls to the new component.
      */
-    C1PDebugger.init = function()
+    static init()
     {
         var aeDbg = Component.getElementsByClass(document, C1PJS.APPCLASS, "debugger");
         for (var iDbg=0; iDbg < aeDbg.length; iDbg++) {
@@ -2205,11 +2209,14 @@ if (DEBUGGER) {
             var dbg = new C1PDebugger(parmsDbg);
             Component.bindComponentControls(dbg, eDbg, C1PJS.APPCLASS);
         }
-    };
+    }
+}
+
+if (DEBUGGER) {
 
     /*
      * Initialize every Debugger module on the page (as IF there's ever going to be more than one ;-))
      */
-    web.onInit(C1PDebugger.init);
+    Web.onInit(C1PDebugger.init);
 
 }   // endif DEBUGGER

@@ -29,7 +29,7 @@
 "use strict";
 
 if (NODE) {
-    var str         = require("../../shared/lib/strlib");
+    var Str         = require("../../shared/es6/strlib");
     var Messages    = require("./messages");
     var X86         = require("./x86");
 }
@@ -3564,7 +3564,7 @@ X86.opINTn = function()
      * TODO: Consider swapping out this function whenever setProtMode() changes the mode to V86-mode.
      */
     if (I386 && (this.regPS & X86.PS.VM) && this.nIOPL < 3) {
-        if (DEBUG && this.messageEnabled()) this.printMessage("INT " + str.toHexByte(nInt) + " in v86-mode (IOPL < 3)", true, true);
+        if (DEBUG && this.messageEnabled()) this.printMessage("INT " + Str.toHexByte(nInt) + " in v86-mode (IOPL < 3)", true, true);
         X86.helpFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
         return;
     }
@@ -4415,7 +4415,7 @@ X86.opInvalid = function()
 X86.opUndefined = function()
 {
     this.setIP(this.opLIP - this.segCS.base);
-    this.setError("Undefined opcode " + str.toHexByte(this.getByte(this.regLIP)) + " at " + str.toHexLong(this.regLIP));
+    this.setError("Undefined opcode " + Str.toHexByte(this.getByte(this.regLIP)) + " at " + Str.toHexLong(this.regLIP));
     this.stopCPU();
 };
 

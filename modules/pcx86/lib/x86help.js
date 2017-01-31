@@ -29,7 +29,7 @@
 "use strict";
 
 if (NODE) {
-    var str         = require("../../shared/lib/strlib");
+    var Str         = require("../../shared/es6/strlib");
     var Messages    = require("./messages");
     var X86         = require("./x86");
 }
@@ -968,7 +968,7 @@ X86.helpCheckFault = function(nFault, nError, fHalt)
     if (this.messageEnabled(bitsMessage) || fHalt) {
 
         var fRunning = this.flags.running;
-        var sMessage = "Fault " + str.toHexByte(nFault) + (nError != null? " (" + str.toHexWord(nError) + ")" : "") + " on opcode " + str.toHexByte(bOpcode);
+        var sMessage = "Fault " + Str.toHexByte(nFault) + (nError != null? " (" + Str.toHexWord(nError) + ")" : "") + " on opcode " + Str.toHexByte(bOpcode);
         if (fHalt && fRunning) sMessage += " (blocked)";
 
         if (DEBUGGER && this.dbg) {
