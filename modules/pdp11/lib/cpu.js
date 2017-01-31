@@ -29,8 +29,8 @@
 "use strict";
 
 if (NODE) {
-    var Str = require("../../shared/es6/strlib");
-    var Component = require("../../shared/es6/component");
+    var Str = require("../../shared/lib/strlib");
+    var Component = require("../../shared/lib/component");
     var MessagesPDP11 = require("./messages");
 }
 

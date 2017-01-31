@@ -28,12 +28,10 @@
 
 "use strict";
 
-/* global window: true, APPVERSION: false, XMLVERSION: true, DEBUG: true */
-
 if (NODE) {
-    var Component = require("./component");
-    var str = require("./strlib");
-    var web = require("./weblib");
+    var Str = require("../../shared/lib/strlib");
+    var Web = require("../../shared/lib/weblib");
+    var Component = require("../../shared/lib/component");
 }
 
 /**
@@ -59,12 +57,12 @@ function savePC(idMachine, sPCJSFile, callback)
             }
         }
         if (callback && callback({ state: sState, parms: sParms })) return true;
-        web.getResource(sPCJSFile, null, true, function(sURL, sResponse, nErrorCode) {
-            downloadCSS(sURL, sResponse, nErrorCode, [idMachine, str.getBaseName(sPCJSFile, true), sParms, sState]);
+        Web.getResource(sPCJSFile, null, true, function(sURL, sResponse, nErrorCode) {
+            downloadCSS(sURL, sResponse, nErrorCode, [idMachine, Str.getBaseName(sPCJSFile, true), sParms, sState]);
         });
         return true;
     }
-    web.alertUser("Unable to identify machine '" + idMachine + "'");
+    Component.alertUser("Unable to identify machine '" + idMachine + "'");
     return false;
 }
 
@@ -83,7 +81,7 @@ function downloadCSS(sURL, sPCJS, nErrorCode, aMachineInfo)
         var res = Component.getMachineResources(aMachineInfo[0]);
         var sCSSFile = null;
         for (var sName in res) {
-            if (str.endsWith(sName, "components.xsl")) {
+            if (Str.endsWith(sName, "components.xsl")) {
                 sCSSFile = sName.replace(".xsl", ".css");
                 break;
             }
@@ -94,13 +92,13 @@ function downloadCSS(sURL, sPCJS, nErrorCode, aMachineInfo)
              */
             downloadPC(sURL, null, 0, aMachineInfo);
         } else {
-            web.getResource(sCSSFile, null, true, function(sURL, sResponse, nErrorCode) {
+            Web.getResource(sCSSFile, null, true, function(sURL, sResponse, nErrorCode) {
                 downloadPC(sURL, sResponse, nErrorCode, aMachineInfo);
             });
         }
         return;
     }
-    web.alertUser("Error (" + nErrorCode + ") requesting " + sURL);
+    Component.alertUser("Error (" + nErrorCode + ") requesting " + sURL);
 }
 
 /**
@@ -152,7 +150,7 @@ function downloadPC(sURL, sCSS, nErrorCode, aMachineInfo)
     var resOld = Component.getMachineResources(idMachine), resNew = {};
     for (var sName in resOld) {
         var data = resOld[sName];
-        var sExt = str.getExtension(sName);
+        var sExt = Str.getExtension(sName);
         if (sExt == "xml") {
             /*
              * Look through this resource for <disk> entries whose paths do not appear as one of the
@@ -169,10 +167,10 @@ function downloadPC(sURL, sCSS, nErrorCode, aMachineInfo)
                     }
                 }
             }
-            sXMLFile = sName = str.getBaseName(sName);
+            sXMLFile = sName = Str.getBaseName(sName);
         }
         else if (sExt == "xsl") {
-            sXSLFile = sName = str.getBaseName(sName);
+            sXSLFile = sName = Str.getBaseName(sName);
         }
         Component.log("saving resource: '" + sName + "' (" + data.length + " bytes)");
         resNew[sName] = data;
@@ -202,7 +200,7 @@ function downloadPC(sURL, sCSS, nErrorCode, aMachineInfo)
 
         sPCJS = sPCJS.replace(/\u00A9/g, "&#xA9;");
 
-        var sAlert = web.downloadFile(sPCJS, "javascript", false, sScript);
+        var sAlert = Web.downloadFile(sPCJS, "javascript", false, sScript);
 
         sAlert += ', copy it to your web server as "' + sScript + '", and then add the following to your web page:\n\n';
         sAlert += '<div id="' + idMachine + '"></div>\n';
@@ -210,10 +208,10 @@ function downloadPC(sURL, sCSS, nErrorCode, aMachineInfo)
         sAlert += '<script type="text/javascript" src="' + sScript + '"></script>\n';
         sAlert += '<script type="text/javascript">embedPC("' + idMachine + '","' + sXMLFile + '","' + sXSLFile + '");</script>\n\n';
         sAlert += 'The machine should appear where the <div> is located.';
-        web.alertUser(sAlert);
+        Component.alertUser(sAlert);
         return;
     }
-    web.alertUser("Missing XML/XSL resources");
+    Component.alertUser("Missing XML/XSL resources");
 }
 
 /**

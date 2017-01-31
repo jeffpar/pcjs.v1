@@ -29,86 +29,13 @@
 "use strict";
 
 if (NODE) {
-    var str         = require("../../shared/lib/strlib");
-    var web         = require("../../shared/lib/weblib");
+    var Str         = require("../../shared/lib/strlib");
+    var Web         = require("../../shared/lib/weblib");
     var Component   = require("../../shared/lib/component");
     var State       = require("../../shared/lib/state");
     var PCX86       = require("./defines");
     var Messages    = require("./messages");
     var ChipSet     = require("./chipset");
-}
-
-/**
- * ParallelPort(parmsParallel)
- *
- * The ParallelPort component has the following component-specific (parmsParallel) properties:
- *
- *      adapter: 1 (port 0x3BC), 2 (port 0x378), or 3 (port 0x278); 0 if not defined
- *
- *      binding: name of a control (based on its "binding" attribute) to bind to this port's I/O
- *
- * In the future, we may support 'port' and 'irq' properties that allow the machine to define a
- * non-standard parallel port configuration, instead of only our pre-defined 'adapter' configurations.
- *
- * NOTE: Since the XSL file defines 'adapter' as a number, not a string, there's no need to use
- * parseInt(), and as an added benefit, we don't need to worry about whether a hex or decimal format
- * was used.
- *
- * DOS typically names the Primary adapter "LPT1" and the Secondary adapter "LPT2", but I prefer
- * to stick to adapter numbers, since not all operating systems follow those naming conventions.
- *
- * @constructor
- * @extends Component
- * @param {Object} parmsParallel
- */
-function ParallelPort(parmsParallel) {
-
-    this.iAdapter = parmsParallel['adapter'];
-
-    switch (this.iAdapter) {
-    case 1:
-        this.portBase = 0x3BC;
-        this.nIRQ = ChipSet.IRQ.LPT1;
-        break;
-    case 2:
-        this.portBase = 0x378;
-        this.nIRQ = ChipSet.IRQ.LPT1;
-        break;
-    case 3:
-        this.portBase = 0x278;
-        this.nIRQ = ChipSet.IRQ.LPT2;
-        break;
-    default:
-        Component.warning("Unrecognized parallel adapter #" + this.iAdapter);
-        return;
-    }
-    /**
-     * consoleOutput becomes a string that records parallel port output if the 'binding' property is set to the
-     * reserved name "console".  Nothing is written to the console, however, until a linefeed (0x0A) is output
-     * or the string length reaches a threshold (currently, 1024 characters).
-     *
-     * @type {string|null}
-     */
-    this.consoleOutput = null;
-
-    /**
-     * controlIOBuffer is a DOM element bound to the port (currently used for output only; see transmitByte()).
-     *
-     * @type {Object}
-     */
-    this.controlIOBuffer = null;
-
-    Component.call(this, "ParallelPort", parmsParallel, ParallelPort, Messages.PARALLEL);
-
-    var sBinding = parmsParallel['binding'];
-    if (sBinding == "console") {
-        this.consoleOutput = "";
-    } else {
-        /*
-         * NOTE: If sBinding is not the name of a valid Control Panel DOM element, this call does nothing.
-         */
-        Component.bindExternalControl(this, sBinding, ParallelPort.sIOBuffer);
-    }
 }
 
 /*
@@ -128,7 +55,387 @@ function ParallelPort(parmsParallel) {
  * for third-party apps.
  */
 
-Component.subclass(ParallelPort);
+/**
+ * TODO: The Closure Compiler treats ES6 classes as 'struct' rather than 'dict' by default,
+ * which would force us to declare all class properties in the constructor, as well as prevent
+ * us from defining any named properties.  So, for now, we mark all our classes as 'unrestricted'.
+ *
+ * @unrestricted
+ */
+class ParallelPort extends Component {
+    /**
+     * ParallelPort(parmsParallel)
+     *
+     * The ParallelPort component has the following component-specific (parmsParallel) properties:
+     *
+     *      adapter: 1 (port 0x3BC), 2 (port 0x378), or 3 (port 0x278); 0 if not defined
+     *
+     *      binding: name of a control (based on its "binding" attribute) to bind to this port's I/O
+     *
+     * In the future, we may support 'port' and 'irq' properties that allow the machine to define a
+     * non-standard parallel port configuration, instead of only our pre-defined 'adapter' configurations.
+     *
+     * NOTE: Since the XSL file defines 'adapter' as a number, not a string, there's no need to use
+     * parseInt(), and as an added benefit, we don't need to worry about whether a hex or decimal format
+     * was used.
+     *
+     * DOS typically names the Primary adapter "LPT1" and the Secondary adapter "LPT2", but I prefer
+     * to stick to adapter numbers, since not all operating systems follow those naming conventions.
+     *
+     * @this {ParallelPort}
+     * @param {Object} parmsParallel
+     */
+    constructor(parmsParallel)
+    {
+        super("ParallelPort", parmsParallel, Messages.PARALLEL);
+
+        this.iAdapter = parmsParallel['adapter'];
+
+        switch (this.iAdapter) {
+        case 1:
+            this.portBase = 0x3BC;
+            this.nIRQ = ChipSet.IRQ.LPT1;
+            break;
+        case 2:
+            this.portBase = 0x378;
+            this.nIRQ = ChipSet.IRQ.LPT1;
+            break;
+        case 3:
+            this.portBase = 0x278;
+            this.nIRQ = ChipSet.IRQ.LPT2;
+            break;
+        default:
+            Component.warning("Unrecognized parallel adapter #" + this.iAdapter);
+            return;
+        }
+        /**
+         * consoleOutput becomes a string that records parallel port output if the 'binding' property is set to the
+         * reserved name "console".  Nothing is written to the console, however, until a linefeed (0x0A) is output
+         * or the string length reaches a threshold (currently, 1024 characters).
+         *
+         * @type {string|null}
+         */
+        this.consoleOutput = null;
+
+        /**
+         * controlIOBuffer is a DOM element bound to the port (currently used for output only; see transmitByte()).
+         *
+         * @type {Object}
+         */
+        this.controlIOBuffer = null;
+
+        var sBinding = parmsParallel['binding'];
+        if (sBinding == "console") {
+            this.consoleOutput = "";
+        } else {
+            /*
+             * NOTE: If sBinding is not the name of a valid Control Panel DOM element, this call does nothing.
+             */
+            Component.bindExternalControl(this, sBinding, ParallelPort.sIOBuffer);
+        }
+    }
+
+    /**
+     * setBinding(sHTMLType, sBinding, control, sValue)
+     *
+     * @this {ParallelPort}
+     * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
+     * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "buffer")
+     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {string} [sValue] optional data value
+     * @return {boolean} true if binding was successful, false if unrecognized binding request
+     */
+    setBinding(sHTMLType, sBinding, control, sValue)
+    {
+        switch (sBinding) {
+        case ParallelPort.sIOBuffer:
+            this.bindings[sBinding] = this.controlIOBuffer = control;
+            return true;
+
+        default:
+            break;
+        }
+        return false;
+    }
+
+    /**
+     * initBus(cmp, bus, cpu, dbg)
+     *
+     * @this {ParallelPort}
+     * @param {Computer} cmp
+     * @param {Bus} bus
+     * @param {X86CPU} cpu
+     * @param {DebuggerX86} dbg
+     */
+    initBus(cmp, bus, cpu, dbg)
+    {
+        this.bus = bus;
+        this.cpu = cpu;
+        this.dbg = dbg;
+        this.chipset = cmp.getMachineComponent("ChipSet");
+        bus.addPortInputTable(this, ParallelPort.aPortInput, this.portBase);
+        bus.addPortOutputTable(this, ParallelPort.aPortOutput, this.portBase);
+        this.setReady();
+    }
+
+    /**
+     * powerUp(data, fRepower)
+     *
+     * @this {ParallelPort}
+     * @param {Object|null} data
+     * @param {boolean} [fRepower]
+     * @return {boolean} true if successful, false if failure
+     */
+    powerUp(data, fRepower)
+    {
+        if (!fRepower) {
+            if (!data || !this.restore) {
+                this.reset();
+            } else {
+                if (!this.restore(data)) return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * powerDown(fSave, fShutdown)
+     *
+     * @this {ParallelPort}
+     * @param {boolean} [fSave]
+     * @param {boolean} [fShutdown]
+     * @return {Object|boolean} component state if fSave; otherwise, true if successful, false if failure
+     */
+    powerDown(fSave, fShutdown)
+    {
+        return fSave? this.save() : true;
+    }
+
+    /**
+     * reset()
+     *
+     * @this {ParallelPort}
+     */
+    reset()
+    {
+        this.initState();
+    }
+
+    /**
+     * save()
+     *
+     * This implements save support for the ParallelPort component.
+     *
+     * @this {ParallelPort}
+     * @return {Object}
+     */
+    save()
+    {
+        var state = new State(this);
+        state.set(0, this.saveRegisters());
+        return state.data();
+    }
+
+    /**
+     * restore(data)
+     *
+     * This implements restore support for the ParallelPort component.
+     *
+     * @this {ParallelPort}
+     * @param {Object} data
+     * @return {boolean} true if successful, false if failure
+     */
+    restore(data)
+    {
+        return this.initState(data[0]);
+    }
+
+    /**
+     * initState(data)
+     *
+     * @this {ParallelPort}
+     * @param {Array} [data]
+     * @return {boolean} true if successful, false if failure
+     */
+    initState(data)
+    {
+        var i = 0;
+        if (data === undefined) {
+            data = [0, 0, 0];
+        }
+        this.bData = data[i++];
+        this.bStatus = data[i++];
+        this.bControl = data[i];
+        return true;
+    }
+
+    /**
+     * saveRegisters()
+     *
+     * @this {ParallelPort}
+     * @return {Array}
+     */
+    saveRegisters()
+    {
+        var i = 0;
+        var data = [];
+        data[i++] = this.bData;
+        data[i++] = this.bStatus;
+        data[i]   = this.bControl;
+        return data;
+    }
+
+    /**
+     * inData(port, addrFrom)
+     *
+     * @this {ParallelPort}
+     * @param {number} port (0x3BC, 0x378, or 0x278)
+     * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
+     * @return {number} simulated port value
+     */
+    inData(port, addrFrom)
+    {
+        var b = this.bData;
+        this.printMessageIO(port, null, addrFrom, "DATA", b);
+        return b;
+    }
+
+    /**
+     * inStatus(port, addrFrom)
+     *
+     * @this {ParallelPort}
+     * @param {number} port (0x3BD, 0x379, or 0x279)
+     * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
+     * @return {number} simulated port value
+     */
+    inStatus(port, addrFrom)
+    {
+        var b = this.bStatus;
+        this.printMessageIO(port, null, addrFrom, "STAT", b);
+        return b;
+    }
+
+    /**
+     * inControl(port, addrFrom)
+     *
+     * @this {ParallelPort}
+     * @param {number} port (0x3BE, 0x37A, or 0x27A)
+     * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
+     * @return {number} simulated port value
+     */
+    inControl(port, addrFrom)
+    {
+        var b = this.bControl;
+        this.printMessageIO(port, null, addrFrom, "CTRL", b);
+        return b;
+    }
+
+    /**
+     * outData(port, bOut, addrFrom)
+     *
+     * @this {ParallelPort}
+     * @param {number} port (0x3BC, 0x378, or 0x278)
+     * @param {number} bOut
+     * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
+     */
+    outData(port, bOut, addrFrom)
+    {
+        this.printMessageIO(port, bOut, addrFrom, "DATA");
+        this.bData = bOut;
+        this.bStatus |= ParallelPort.STATUS.NOTREADY;
+        if (this.transmitByte(bOut)) {
+            this.bStatus &= ~ParallelPort.STATUS.NOTREADY;
+        }
+        this.updateIRR();
+    }
+
+    /**
+     * outControl(port, bOut, addrFrom)
+     *
+     * @this {ParallelPort}
+     * @param {number} port (0x3BE, 0x37A, or 0x27A)
+     * @param {number} bOut
+     * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
+     */
+    outControl(port, bOut, addrFrom)
+    {
+        this.printMessageIO(port, bOut, addrFrom, "CTRL");
+        this.bControl = bOut;
+        this.updateIRR();
+    }
+
+    /**
+     * updateIRR()
+     *
+     * @this {ParallelPort}
+     */
+    updateIRR()
+    {
+        if (this.chipset && this.nIRQ) {
+            if ((this.bControl & ParallelPort.CONTROL.IRQ_ENABLE) && !(this.bStatus & ParallelPort.STATUS.NOTREADY)) {
+                this.chipset.setIRR(this.nIRQ);
+            } else {
+                this.chipset.clearIRR(this.nIRQ);
+            }
+        }
+    }
+
+    /**
+     * transmitByte(b)
+     *
+     * @this {ParallelPort}
+     * @param {number} b
+     * @return {boolean} true if transmitted, false if not
+     */
+    transmitByte(b)
+    {
+        var fTransmitted = false;
+
+        this.printMessage("transmitByte(" + Str.toHexByte(b) + ")");
+
+        if (this.controlIOBuffer) {
+            if (b == 0x08) {
+                this.controlIOBuffer.value = this.controlIOBuffer.value.slice(0, -1);
+            }
+            else {
+                this.controlIOBuffer.value += String.fromCharCode(b);
+                this.controlIOBuffer.scrollTop = this.controlIOBuffer.scrollHeight;
+            }
+            fTransmitted = true;
+        }
+        if (this.consoleOutput != null) {
+            if (b == 0x0A || this.consoleOutput.length >= 1024) {
+                this.println(this.consoleOutput);
+                this.consoleOutput = "";
+            }
+            if (b != 0x0A) {
+                this.consoleOutput += String.fromCharCode(b);
+            }
+            fTransmitted = true;
+        }
+
+        return fTransmitted;
+    }
+
+    /**
+     * ParallelPort.init()
+     *
+     * This function operates on every HTML element of class "parallel", extracting the
+     * JSON-encoded parameters for the ParallelPort constructor from the element's "data-value"
+     * attribute, invoking the constructor to create a ParallelPort component, and then binding
+     * any associated HTML controls to the new component.
+     */
+    static init()
+    {
+        var aeParallel = Component.getElementsByClass(document, PCX86.APPCLASS, "parallel");
+        for (var iParallel = 0; iParallel < aeParallel.length; iParallel++) {
+            var eParallel = aeParallel[iParallel];
+            var parmsParallel = Component.getComponentParms(eParallel);
+            var parallel = new ParallelPort(parmsParallel);
+            Component.bindComponentControls(parallel, eParallel, PCX86.APPCLASS);
+        }
+    }
+}
 
 /*
  * Internal name used for the I/O buffer control, if any, that we bind to the ParallelPort.
@@ -197,288 +504,6 @@ ParallelPort.CONTROL = {        // (read/write)
     IRQ_ENABLE: 0x10            // set to enable interrupts
 };
 
-/**
- * setBinding(sHTMLType, sBinding, control, sValue)
- *
- * @this {ParallelPort}
- * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
- * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "buffer")
- * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
- * @param {string} [sValue] optional data value
- * @return {boolean} true if binding was successful, false if unrecognized binding request
- */
-ParallelPort.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
-{
-    switch (sBinding) {
-    case ParallelPort.sIOBuffer:
-        this.bindings[sBinding] = this.controlIOBuffer = control;
-        return true;
-
-    default:
-        break;
-    }
-    return false;
-};
-
-/**
- * initBus(cmp, bus, cpu, dbg)
- *
- * @this {ParallelPort}
- * @param {Computer} cmp
- * @param {Bus} bus
- * @param {X86CPU} cpu
- * @param {DebuggerX86} dbg
- */
-ParallelPort.prototype.initBus = function(cmp, bus, cpu, dbg)
-{
-    this.bus = bus;
-    this.cpu = cpu;
-    this.dbg = dbg;
-    this.chipset = cmp.getMachineComponent("ChipSet");
-    bus.addPortInputTable(this, ParallelPort.aPortInput, this.portBase);
-    bus.addPortOutputTable(this, ParallelPort.aPortOutput, this.portBase);
-    this.setReady();
-};
-
-/**
- * powerUp(data, fRepower)
- *
- * @this {ParallelPort}
- * @param {Object|null} data
- * @param {boolean} [fRepower]
- * @return {boolean} true if successful, false if failure
- */
-ParallelPort.prototype.powerUp = function(data, fRepower)
-{
-    if (!fRepower) {
-        if (!data || !this.restore) {
-            this.reset();
-        } else {
-            if (!this.restore(data)) return false;
-        }
-    }
-    return true;
-};
-
-/**
- * powerDown(fSave, fShutdown)
- *
- * @this {ParallelPort}
- * @param {boolean} [fSave]
- * @param {boolean} [fShutdown]
- * @return {Object|boolean} component state if fSave; otherwise, true if successful, false if failure
- */
-ParallelPort.prototype.powerDown = function(fSave, fShutdown)
-{
-    return fSave? this.save() : true;
-};
-
-/**
- * reset()
- *
- * @this {ParallelPort}
- */
-ParallelPort.prototype.reset = function()
-{
-    this.initState();
-};
-
-/**
- * save()
- *
- * This implements save support for the ParallelPort component.
- *
- * @this {ParallelPort}
- * @return {Object}
- */
-ParallelPort.prototype.save = function()
-{
-    var state = new State(this);
-    state.set(0, this.saveRegisters());
-    return state.data();
-};
-
-/**
- * restore(data)
- *
- * This implements restore support for the ParallelPort component.
- *
- * @this {ParallelPort}
- * @param {Object} data
- * @return {boolean} true if successful, false if failure
- */
-ParallelPort.prototype.restore = function(data)
-{
-    return this.initState(data[0]);
-};
-
-/**
- * initState(data)
- *
- * @this {ParallelPort}
- * @param {Array} [data]
- * @return {boolean} true if successful, false if failure
- */
-ParallelPort.prototype.initState = function(data)
-{
-    var i = 0;
-    if (data === undefined) {
-        data = [0, 0, 0];
-    }
-    this.bData = data[i++];
-    this.bStatus = data[i++];
-    this.bControl = data[i];
-    return true;
-};
-
-/**
- * saveRegisters()
- *
- * @this {ParallelPort}
- * @return {Array}
- */
-ParallelPort.prototype.saveRegisters = function()
-{
-    var i = 0;
-    var data = [];
-    data[i++] = this.bData;
-    data[i++] = this.bStatus;
-    data[i]   = this.bControl;
-    return data;
-};
-
-/**
- * inData(port, addrFrom)
- *
- * @this {ParallelPort}
- * @param {number} port (0x3BC, 0x378, or 0x278)
- * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
- * @return {number} simulated port value
- */
-ParallelPort.prototype.inData = function(port, addrFrom)
-{
-    var b = this.bData;
-    this.printMessageIO(port, null, addrFrom, "DATA", b);
-    return b;
-};
-
-/**
- * inStatus(port, addrFrom)
- *
- * @this {ParallelPort}
- * @param {number} port (0x3BD, 0x379, or 0x279)
- * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
- * @return {number} simulated port value
- */
-ParallelPort.prototype.inStatus = function(port, addrFrom)
-{
-    var b = this.bStatus;
-    this.printMessageIO(port, null, addrFrom, "STAT", b);
-    return b;
-};
-
-/**
- * inControl(port, addrFrom)
- *
- * @this {ParallelPort}
- * @param {number} port (0x3BE, 0x37A, or 0x27A)
- * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
- * @return {number} simulated port value
- */
-ParallelPort.prototype.inControl = function(port, addrFrom)
-{
-    var b = this.bControl;
-    this.printMessageIO(port, null, addrFrom, "CTRL", b);
-    return b;
-};
-
-/**
- * outData(port, bOut, addrFrom)
- *
- * @this {ParallelPort}
- * @param {number} port (0x3BC, 0x378, or 0x278)
- * @param {number} bOut
- * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
- */
-ParallelPort.prototype.outData = function(port, bOut, addrFrom)
-{
-    this.printMessageIO(port, bOut, addrFrom, "DATA");
-    this.bData = bOut;
-    this.bStatus |= ParallelPort.STATUS.NOTREADY;
-    if (this.transmitByte(bOut)) {
-        this.bStatus &= ~ParallelPort.STATUS.NOTREADY;
-    }
-    this.updateIRR();
-};
-
-/**
- * outControl(port, bOut, addrFrom)
- *
- * @this {ParallelPort}
- * @param {number} port (0x3BE, 0x37A, or 0x27A)
- * @param {number} bOut
- * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
- */
-ParallelPort.prototype.outControl = function(port, bOut, addrFrom)
-{
-    this.printMessageIO(port, bOut, addrFrom, "CTRL");
-    this.bControl = bOut;
-    this.updateIRR();
-};
-
-/**
- * updateIRR()
- *
- * @this {ParallelPort}
- */
-ParallelPort.prototype.updateIRR = function()
-{
-    if (this.chipset && this.nIRQ) {
-        if ((this.bControl & ParallelPort.CONTROL.IRQ_ENABLE) && !(this.bStatus & ParallelPort.STATUS.NOTREADY)) {
-            this.chipset.setIRR(this.nIRQ);
-        } else {
-            this.chipset.clearIRR(this.nIRQ);
-        }
-    }
-};
-
-/**
- * transmitByte(b)
- *
- * @this {ParallelPort}
- * @param {number} b
- * @return {boolean} true if transmitted, false if not
- */
-ParallelPort.prototype.transmitByte = function(b)
-{
-    var fTransmitted = false;
-
-    this.printMessage("transmitByte(" + str.toHexByte(b) + ")");
-
-    if (this.controlIOBuffer) {
-        if (b == 0x08) {
-            this.controlIOBuffer.value = this.controlIOBuffer.value.slice(0, -1);
-        }
-        else {
-            this.controlIOBuffer.value += String.fromCharCode(b);
-            this.controlIOBuffer.scrollTop = this.controlIOBuffer.scrollHeight;
-        }
-        fTransmitted = true;
-    }
-    if (this.consoleOutput != null) {
-        if (b == 0x0A || this.consoleOutput.length >= 1024) {
-            this.println(this.consoleOutput);
-            this.consoleOutput = "";
-        }
-        if (b != 0x0A) {
-            this.consoleOutput += String.fromCharCode(b);
-        }
-        fTransmitted = true;
-    }
-
-    return fTransmitted;
-};
-
 /*
  * Port input notification table
  */
@@ -496,28 +521,9 @@ ParallelPort.aPortOutput = {
     0x2: ParallelPort.prototype.outControl
 };
 
-/**
- * ParallelPort.init()
- *
- * This function operates on every HTML element of class "parallel", extracting the
- * JSON-encoded parameters for the ParallelPort constructor from the element's "data-value"
- * attribute, invoking the constructor to create a ParallelPort component, and then binding
- * any associated HTML controls to the new component.
- */
-ParallelPort.init = function()
-{
-    var aeParallel = Component.getElementsByClass(document, PCX86.APPCLASS, "parallel");
-    for (var iParallel = 0; iParallel < aeParallel.length; iParallel++) {
-        var eParallel = aeParallel[iParallel];
-        var parmsParallel = Component.getComponentParms(eParallel);
-        var parallel = new ParallelPort(parmsParallel);
-        Component.bindComponentControls(parallel, eParallel, PCX86.APPCLASS);
-    }
-};
-
 /*
  * Initialize every ParallelPort module on the page.
  */
-web.onInit(ParallelPort.init);
+Web.onInit(ParallelPort.init);
 
 if (NODE) module.exports = ParallelPort;

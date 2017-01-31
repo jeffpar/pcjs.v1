@@ -46,11 +46,11 @@
  */
 
 if (NODE) {
-    var Str = require("../../shared/es6/strlib");
-    var Web = require("../../shared/es6/weblib");
-    var DiskAPI = require("../../shared/es6/diskapi");
-    var DumpAPI = require("../../shared/es6/dumpapi");
-    var Component = require("../../shared/es6/component");
+    var Str = require("../../shared/lib/strlib");
+    var Web = require("../../shared/lib/weblib");
+    var DiskAPI = require("../../shared/lib/diskapi");
+    var DumpAPI = require("../../shared/lib/dumpapi");
+    var Component = require("../../shared/lib/component");
     var MessagesPDP11 = require("./messages");
 }
 

@@ -84,10 +84,10 @@ apparently Google's Closure Compiler seized the ES6 opportunity to try to enforc
 the default is `@struct`.  Needless to say, when it came time to convert the next machine (PC8080) to classes, I prefaced
 all my classes with `@unrestricted`.
 
-One downside of switching to ES6 one machine at a time is that, for now, I've had to fork the shared modules into
+One downside of switching to ES6 one machine at a time is that I had to temporarily fork the shared modules into
 separate ES5 and ES6 folders.  For example, one of the shared modules, [Component](/modules/shared/lib/component.js),
 is the base class underlying most other machine components; ES5 objects *subclass* [Component](/modules/shared/lib/component.js),
-whereas ES6 classes *extend* [Component](/modules/shared/es6/component.js).  Not all the shared modules needed to be forked,
+whereas ES6 classes *extend* [Component](/modules/shared/lib/component.js).  Not all the shared modules needed to be forked,
 but creating a new shared folder was the simplest solution.  Once all the machines have been converted to use ES6 classes,
 the new shared modules will become the default, and the old ones will fade away.
 

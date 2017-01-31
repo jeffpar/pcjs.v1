@@ -29,7 +29,7 @@
 "use strict";
 
 if (NODE) {
-    var Component = require("../../shared/es6/component");
+    var Component = require("../../shared/lib/component");
     var PDP11 = require("./defines");
     var MessagesPDP11 = require("./messages");
 }

@@ -29,128 +29,13 @@
 "use strict";
 
 if (NODE) {
-    var str         = require("../../shared/lib/strlib");
-    var web         = require("../../shared/lib/weblib");
+    var Str         = require("../../shared/lib/strlib");
+    var Web         = require("../../shared/lib/weblib");
     var Component   = require("../../shared/lib/component");
     var State       = require("../../shared/lib/state");
     var PCX86       = require("./defines");
     var Messages    = require("./messages");
     var ChipSet     = require("./chipset");
-}
-
-/**
- * SerialPort(parmsSerial)
- *
- * The SerialPort component has the following component-specific (parmsSerial) properties:
- *
- *      adapter: 1 (port 0x3F8) or 2 (port 0x2F8); 0 if not defined
- *
- *      binding: name of a control (based on its "binding" attribute) to bind to this port's I/O
- *
- *      tabSize: set to a non-zero number to convert tabs to spaces (applies only to output to
- *      the above binding); default is 0 (no conversion)
- *
- * In the future, we may support 'port' and 'irq' properties that allow the machine to define a
- * non-standard serial port configuration, instead of only our pre-defined 'adapter' configurations.
- *
- * NOTE: Since the XSL file defines 'adapter' as a number, not a string, there's no need to use
- * parseInt(), and as an added benefit, we don't need to worry about whether a hex or decimal format
- * was used.
- *
- * This hard-coded approach mimics the original IBM PC Asynchronous Adapter configuration, which
- * contained a pair of "shunt modules" that allowed the user to select a port address of either
- * 0x3F8 ("Primary") or 0x2F8 ("Secondary").
- *
- * DOS typically names the Primary adapter "COM1" and the Secondary adapter "COM2", but I prefer
- * to stick to adapter numbers, since not all operating systems follow those naming conventions.
- *
- * @constructor
- * @extends Component
- * @param {Object} parmsSerial
- */
-function SerialPort(parmsSerial) {
-
-    this.iAdapter = parmsSerial['adapter'];
-
-    switch (this.iAdapter) {
-    case 1:
-        this.portBase = 0x3F8;
-        this.nIRQ = ChipSet.IRQ.COM1;
-        break;
-    case 2:
-        this.portBase = 0x2F8;
-        this.nIRQ = ChipSet.IRQ.COM2;
-        break;
-    default:
-        Component.warning("Unrecognized serial adapter #" + this.iAdapter);
-        return;
-    }
-    /**
-     * consoleOutput becomes a string that records serial port output if the 'binding' property is set to the
-     * reserved name "console".  Nothing is written to the console, however, until a linefeed (0x0A) is output
-     * or the string length reaches a threshold (currently, 1024 characters).
-     *
-     * @type {string|null}
-     */
-    this.consoleOutput = null;
-
-    /**
-     * controlIOBuffer is a DOM element bound to the port (currently used for output only; see transmitByte()).
-     *
-     * Example: CTTY COM2
-     *
-     * The CTTY DOS command redirects all CON I/O to the specified serial port (eg, COM2), which it assumes is
-     * connected to a serial terminal, and therefore anything it *transmits* via COM2 will be displayed by the
-     * terminal.  It further assumes that anything typed on such a terminal is NOT displayed, so as DOS *receives*
-     * serial input, DOS *transmits* the appropriate characters back to the terminal via COM2.
-     *
-     * As a result, controlIOBuffer only needs to be updated by the transmitByte() function.
-     *
-     * @type {Object}
-     */
-    this.controlIOBuffer = null;
-
-    /*
-     * If controlIOBuffer is being used AND 'tabSize' is set, then we make an attempt to monitor the characters
-     * being echoed via transmitByte(), maintain a logical column position, and convert any tabs into the appropriate
-     * number of spaces.
-     *
-     * charBOL, if nonzero, is a character to automatically output at the beginning of every line.  This probably
-     * isn't generally useful; I use it internally to preformat serial output.
-     */
-    this.tabSize = parmsSerial['tabSize'];
-    this.charBOL = parmsSerial['charBOL'];
-    this.iLogicalCol = 0;
-
-    this.bMSRInit = SerialPort.MSR.CTS | SerialPort.MSR.DSR;
-    this.fNullModem = true;
-
-    Component.call(this, "SerialPort", parmsSerial, SerialPort, Messages.SERIAL);
-
-    var sBinding = parmsSerial['binding'];
-    if (sBinding == "console") {
-        this.consoleOutput = "";
-    } else {
-        /*
-         * NOTE: If sBinding is not the name of a valid Control Panel DOM element, this call does nothing.
-         */
-        Component.bindExternalControl(this, sBinding, SerialPort.sIOBuffer);
-    }
-
-    /*
-     * No connection until initConnection() is called.
-     */
-    this.sDataReceived = "";
-    this.connection = this.sendData = this.updateStatus = null;
-
-    /*
-     * Export all functions required by initConnection().
-     */
-    this['exports'] = {
-        'connect': this.initConnection,
-        'receiveData': this.receiveData,
-        'receiveStatus': this.receiveStatus
-    };
 }
 
 /*
@@ -170,7 +55,821 @@ function SerialPort(parmsSerial) {
  * for third-party apps.
  */
 
-Component.subclass(SerialPort);
+/**
+ * TODO: The Closure Compiler treats ES6 classes as 'struct' rather than 'dict' by default,
+ * which would force us to declare all class properties in the constructor, as well as prevent
+ * us from defining any named properties.  So, for now, we mark all our classes as 'unrestricted'.
+ *
+ * @unrestricted
+ */
+class SerialPort extends Component {
+    /**
+     * SerialPort(parmsSerial)
+     *
+     * The SerialPort component has the following component-specific (parmsSerial) properties:
+     *
+     *      adapter: 1 (port 0x3F8) or 2 (port 0x2F8); 0 if not defined
+     *
+     *      binding: name of a control (based on its "binding" attribute) to bind to this port's I/O
+     *
+     *      tabSize: set to a non-zero number to convert tabs to spaces (applies only to output to
+     *      the above binding); default is 0 (no conversion)
+     *
+     * In the future, we may support 'port' and 'irq' properties that allow the machine to define a
+     * non-standard serial port configuration, instead of only our pre-defined 'adapter' configurations.
+     *
+     * NOTE: Since the XSL file defines 'adapter' as a number, not a string, there's no need to use
+     * parseInt(), and as an added benefit, we don't need to worry about whether a hex or decimal format
+     * was used.
+     *
+     * This hard-coded approach mimics the original IBM PC Asynchronous Adapter configuration, which
+     * contained a pair of "shunt modules" that allowed the user to select a port address of either
+     * 0x3F8 ("Primary") or 0x2F8 ("Secondary").
+     *
+     * DOS typically names the Primary adapter "COM1" and the Secondary adapter "COM2", but I prefer
+     * to stick to adapter numbers, since not all operating systems follow those naming conventions.
+     *
+     * @this {SerialPort}
+     * @param {Object} parmsSerial
+     */
+    constructor(parmsSerial)
+    {
+        super("SerialPort", parmsSerial, Messages.SERIAL);
+
+        this.iAdapter = parmsSerial['adapter'];
+
+        switch (this.iAdapter) {
+        case 1:
+            this.portBase = 0x3F8;
+            this.nIRQ = ChipSet.IRQ.COM1;
+            break;
+        case 2:
+            this.portBase = 0x2F8;
+            this.nIRQ = ChipSet.IRQ.COM2;
+            break;
+        default:
+            Component.warning("Unrecognized serial adapter #" + this.iAdapter);
+            return;
+        }
+        /**
+         * consoleOutput becomes a string that records serial port output if the 'binding' property is set to the
+         * reserved name "console".  Nothing is written to the console, however, until a linefeed (0x0A) is output
+         * or the string length reaches a threshold (currently, 1024 characters).
+         *
+         * @type {string|null}
+         */
+        this.consoleOutput = null;
+
+        /**
+         * controlIOBuffer is a DOM element bound to the port (currently used for output only; see transmitByte()).
+         *
+         * Example: CTTY COM2
+         *
+         * The CTTY DOS command redirects all CON I/O to the specified serial port (eg, COM2), which it assumes is
+         * connected to a serial terminal, and therefore anything it *transmits* via COM2 will be displayed by the
+         * terminal.  It further assumes that anything typed on such a terminal is NOT displayed, so as DOS *receives*
+         * serial input, DOS *transmits* the appropriate characters back to the terminal via COM2.
+         *
+         * As a result, controlIOBuffer only needs to be updated by the transmitByte() function.
+         *
+         * @type {Object}
+         */
+        this.controlIOBuffer = null;
+
+        /*
+         * If controlIOBuffer is being used AND 'tabSize' is set, then we make an attempt to monitor the characters
+         * being echoed via transmitByte(), maintain a logical column position, and convert any tabs into the appropriate
+         * number of spaces.
+         *
+         * charBOL, if nonzero, is a character to automatically output at the beginning of every line.  This probably
+         * isn't generally useful; I use it internally to preformat serial output.
+         */
+        this.tabSize = parmsSerial['tabSize'];
+        this.charBOL = parmsSerial['charBOL'];
+        this.iLogicalCol = 0;
+
+        this.bMSRInit = SerialPort.MSR.CTS | SerialPort.MSR.DSR;
+        this.fNullModem = true;
+
+        var sBinding = parmsSerial['binding'];
+        if (sBinding == "console") {
+            this.consoleOutput = "";
+        } else {
+            /*
+             * NOTE: If sBinding is not the name of a valid Control Panel DOM element, this call does nothing.
+             */
+            Component.bindExternalControl(this, sBinding, SerialPort.sIOBuffer);
+        }
+
+        /*
+         * No connection until initConnection() is called.
+         */
+        this.sDataReceived = "";
+        this.connection = this.sendData = this.updateStatus = null;
+
+        /*
+         * Export all functions required by initConnection().
+         */
+        this['exports'] = {
+            'connect': this.initConnection,
+            'receiveData': this.receiveData,
+            'receiveStatus': this.receiveStatus
+        };
+    }
+
+    /**
+     * attachMouse(id, mouse, fnUpdate)
+     *
+     * @this {SerialPort}
+     * @param {string} id
+     * @param {Mouse} mouse
+     * @param {function(number)} fnUpdate
+     * @return {Component|null}
+     */
+    attachMouse(id, mouse, fnUpdate)
+    {
+        var component = null;
+        if (id == this.idComponent && !this.connection) {
+            this.connection = mouse;
+            this.updateStatus = fnUpdate;
+            this.fNullModem = false;
+            component = this;
+        }
+        return component;
+    }
+
+    /**
+     * setBinding(sHTMLType, sBinding, control, sValue)
+     *
+     * @this {SerialPort}
+     * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
+     * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "buffer")
+     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {string} [sValue] optional data value
+     * @return {boolean} true if binding was successful, false if unrecognized binding request
+     */
+    setBinding(sHTMLType, sBinding, control, sValue)
+    {
+        var serial = this;
+
+        switch (sBinding) {
+        case SerialPort.sIOBuffer:
+            this.bindings[sBinding] = this.controlIOBuffer = control;
+
+            /*
+             * By establishing an onkeypress handler here, we make it possible for DOS commands like
+             * "CTTY COM1" to more or less work (use "CTTY CON" to restore control to the DOS console).
+             */
+            control.onkeydown = function onKeyDown(event) {
+                /*
+                 * This is required in addition to onkeypress, because it's the only way to prevent
+                 * BACKSPACE (keyCode 8) from being interpreted by the browser as a "Back" operation;
+                 * moreover, not all browsers generate an onkeypress notification for BACKSPACE.
+                 *
+                 * A related problem exists for Ctrl-key combinations in most Windows-based browsers
+                 * (eg, IE, Edge, Chrome for Windows, etc), because keys like Ctrl-C and Ctrl-S have
+                 * special meanings (eg, Copy, Save).  To the extent the browser will allow it, we
+                 * attempt to disable that default behavior when this control receives an onkeydown
+                 * event for one of those keys (probably the only event the browser generates for them).
+                 */
+                event = event || window.event;
+                var keyCode = event.keyCode;
+                if (keyCode === 0x08 || event.ctrlKey && keyCode >= 0x41 && keyCode <= 0x5A) {
+                    if (event.preventDefault) event.preventDefault();
+                    if (keyCode > 0x40) keyCode -= 0x40;
+                    serial.receiveData(keyCode);
+                }
+                return true;
+            };
+
+            control.onkeypress = function onKeyPress(event) {
+                /*
+                 * Browser-independent keyCode extraction; refer to onKeyPress() and the other key event
+                 * handlers in keyboard.js.
+                 */
+                event = event || window.event;
+                var keyCode = event.which || event.keyCode;
+                serial.receiveData(keyCode);
+                /*
+                 * Since we're going to remove the "readonly" attribute from the <textarea> control
+                 * (so that the soft keyboard activates on iOS), instead of calling preventDefault() for
+                 * selected keys (eg, the SPACE key, whose default behavior is to scroll the page), we must
+                 * now call it for *all* keys, so that the keyCode isn't added to the control immediately,
+                 * on top of whatever the machine is echoing back, resulting in double characters.
+                 */
+                if (event.preventDefault) event.preventDefault();
+                return true;
+            };
+
+            /*
+             * Now that we've added an onkeypress handler that calls preventDefault() for ALL keys, the control
+             * itself no longer needs the "readonly" attribute; we primarily need to remove it for iOS browsers,
+             * so that the soft keyboard will activate, but it shouldn't hurt to remove the attribute for all browsers.
+             */
+            control.removeAttribute("readonly");
+
+            return true;
+
+        default:
+            break;
+        }
+        return false;
+    }
+
+    /**
+     * initBus(cmp, bus, cpu, dbg)
+     *
+     * @this {SerialPort}
+     * @param {Computer} cmp
+     * @param {Bus} bus
+     * @param {X86CPU} cpu
+     * @param {DebuggerX86} dbg
+     */
+    initBus(cmp, bus, cpu, dbg)
+    {
+        this.cmp = cmp;
+        this.bus = bus;
+        this.cpu = cpu;
+        this.dbg = dbg;
+
+        this.chipset = cmp.getMachineComponent("ChipSet");
+
+        bus.addPortInputTable(this, SerialPort.aPortInput, this.portBase);
+        bus.addPortOutputTable(this, SerialPort.aPortOutput, this.portBase);
+
+        this.setReady();
+    }
+
+    /**
+     * initConnection(fNullModem)
+     *
+     * If a machine 'connection' parameter exists of the form "{sourcePort}->{targetMachine}.{targetPort}",
+     * and "{sourcePort}" matches our idComponent, then look for a component with id "{targetMachine}.{targetPort}".
+     *
+     * If the target component is found, then verify that it has exported functions with the following names:
+     *
+     *      receiveData(data): called when we have data to transmit; aliased internally to sendData(data)
+     *      receiveStatus(pins): called when our control signals have changed; aliased internally to updateStatus(pins)
+     *
+     * For now, we're not going to worry about communication in the other direction, because when the target component
+     * performs its own initConnection(), it will find our receiveData() and receiveStatus() functions, at which point
+     * communication in both directions should be established, and the circle of life complete.
+     *
+     * For added robustness, if the target machine initializes much more slowly than we do, and our connection attempt
+     * fails, that's OK, because when it finally initializes, its initConnection() will call our initConnection();
+     * if we've already initialized, no harm done.
+     *
+     * @this {SerialPort}
+     * @param {boolean} [fNullModem] (caller's null-modem setting, to ensure our settings are in agreement)
+     */
+    initConnection(fNullModem)
+    {
+        if (!this.connection) {
+            var sConnection = this.cmp.getMachineParm("connection");
+            if (sConnection) {
+                var asParts = sConnection.split('->');
+                if (asParts.length == 2) {
+                    var sSourceID = Str.trim(asParts[0]);
+                    if (sSourceID != this.idComponent) return;  // this connection string is intended for another instance
+                    var sTargetID = Str.trim(asParts[1]);
+                    this.connection = Component.getComponentByID(sTargetID);
+                    if (this.connection) {
+                        var exports = this.connection['exports'];
+                        if (exports) {
+                            var fnConnect = exports['connect'];
+                            if (fnConnect) fnConnect.call(this.connection, this.fNullModem);
+                            this.sendData = exports['receiveData'];
+                            if (this.sendData) {
+                                this.fNullModem = fNullModem;
+                                this.updateStatus = exports['receiveStatus'];
+                                this.status("Connected " + this.idMachine + '.' + sSourceID + " to " + sTargetID);
+                                return;
+                            }
+                        }
+                    }
+                }
+                /*
+                 * Changed from notice() to status() because sometimes a connection fails simply because one of us is a laggard.
+                 */
+                this.status("Unable to establish connection: " + sConnection);
+            }
+        }
+    }
+
+    /**
+     * powerUp(data, fRepower)
+     *
+     * @this {SerialPort}
+     * @param {Object|null} data
+     * @param {boolean} [fRepower]
+     * @return {boolean} true if successful, false if failure
+     */
+    powerUp(data, fRepower)
+    {
+        if (!fRepower) {
+
+            /*
+             * This is as late as we can currently wait to make our first inter-machine connection attempt;
+             * even so, the target machine's initialization process may still be ongoing, so any connection
+             * may be not fully resolved until the target machine performs its own initConnection(), which will
+             * in turn invoke our initConnection() again.
+             */
+            this.initConnection(this.fNullModem);
+
+            if (!data || !this.restore) {
+                this.reset();
+            } else {
+                if (!this.restore(data)) return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * powerDown(fSave, fShutdown)
+     *
+     * @this {SerialPort}
+     * @param {boolean} [fSave]
+     * @param {boolean} [fShutdown]
+     * @return {Object|boolean} component state if fSave; otherwise, true if successful, false if failure
+     */
+    powerDown(fSave, fShutdown)
+    {
+        return fSave? this.save() : true;
+    }
+
+    /**
+     * reset()
+     *
+     * @this {SerialPort}
+     */
+    reset()
+    {
+        this.initState();
+    }
+
+    /**
+     * save()
+     *
+     * This implements save support for the SerialPort component.
+     *
+     * @this {SerialPort}
+     * @return {Object}
+     */
+    save()
+    {
+        var state = new State(this);
+        state.set(0, this.saveRegisters());
+        return state.data();
+    }
+
+    /**
+     * restore(data)
+     *
+     * This implements restore support for the SerialPort component.
+     *
+     * @this {SerialPort}
+     * @param {Object} data
+     * @return {boolean} true if successful, false if failure
+     */
+    restore(data)
+    {
+        return this.initState(data[0]);
+    }
+
+    /**
+     * initState(data)
+     *
+     * @this {SerialPort}
+     * @param {Array} [data]
+     * @return {boolean} true if successful, false if failure
+     */
+    initState(data)
+    {
+        /*
+         * The NS8250A spec doesn't explicitly say what the RBR and THR are initialized to on a reset,
+         * but I think we can safely assume zeros.  Similarly, we reset the baud rate Divisor Latch (wDL)
+         * to an arbitrary but consistent default (DL_DEFAULT).
+         */
+        var i = 0;
+        if (data === undefined) {
+            data = [
+                0,                                          // RBR
+                0,                                          // THR
+                SerialPort.DL_DEFAULT,                      // DL
+                0,                                          // IER
+                SerialPort.IIR.NO_INT,                      // IIR
+                0,                                          // LCR
+                0,                                          // MCR
+                SerialPort.LSR.THRE | SerialPort.LSR.TSRE,  // LSR
+                this.bMSRInit,                              // MSR
+                []
+            ];
+        }
+        this.bRBR = data[i++];
+        this.bTHR = data[i++];
+        this.wDL =  data[i++];
+        this.bIER = data[i++];
+        this.bIIR = data[i++];
+        this.bLCR = data[i++];
+        this.bMCR = data[i++];
+        this.bLSR = data[i++];
+        this.bMSR = data[i++];
+        this.abReceive = data[i];
+        return true;
+    }
+
+    /**
+     * saveRegisters()
+     *
+     * @this {SerialPort}
+     * @return {Array}
+     */
+    saveRegisters()
+    {
+        var i = 0;
+        var data = [];
+        data[i++] = this.bRBR;
+        data[i++] = this.bTHR;
+        data[i++] = this.wDL;
+        data[i++] = this.bIER;
+        data[i++] = this.bIIR;
+        data[i++] = this.bLCR;
+        data[i++] = this.bMCR;
+        data[i++] = this.bLSR;
+        data[i++] = this.bMSR;
+        data[i] = this.abReceive;
+        return data;
+    }
+
+    /**
+     * receiveData(data)
+     *
+     * This replaces the old sendRBR() function, which expected an Array of bytes.  We still support that,
+     * but in order to support connections with other SerialPort components (ie, the PC8080 SerialPort), we
+     * have added support for numbers and strings as well.
+     *
+     * @this {SerialPort}
+     * @param {number|string|Array} data
+     * @return {boolean} true if received, false if not
+     */
+    receiveData(data)
+    {
+        if (typeof data == "number") {
+            this.abReceive.push(data);
+        }
+        else if (typeof data == "string") {
+            for (var i = 0; i < data.length; i++) {
+                this.abReceive.push(data.charCodeAt(i));
+            }
+        }
+        else {
+            this.abReceive = this.abReceive.concat(data);
+        }
+        this.advanceRBR();
+        return true;                // for now, return true regardless, since we're buffering everything anyway
+    }
+
+    /**
+     * receiveStatus(pins)
+     *
+     * NOTE: Prior to the addition of this interface, the CTS and DSR bits were initialized set and remained set for the life
+     * of the machine.  It is entirely appropriate that this is the only way those bits can be changed, because they represent
+     * external control signals.
+     *
+     * @this {SerialPort}
+     * @param {number} pins
+     */
+    receiveStatus(pins)
+    {
+        var bMSROld = this.bMSR;
+        this.bMSR &= ~(SerialPort.MSR.CTS | SerialPort.MSR.DSR);
+        if (pins & RS232.CTS.MASK) {
+            this.bMSR |= SerialPort.MSR.CTS | SerialPort.MSR.DCTS;
+        }
+        if (pins & RS232.DSR.MASK) {
+            this.bMSR |= SerialPort.MSR.DSR | SerialPort.MSR.DDSR;
+        }
+        if (bMSROld != this.bMSR) this.updateIRR();
+    }
+
+    /**
+     * advanceRBR()
+     *
+     * @this {SerialPort}
+     */
+    advanceRBR()
+    {
+        if (this.abReceive.length > 0 && !(this.bLSR & SerialPort.LSR.DR)) {
+            this.bRBR = this.abReceive.shift();
+            this.bLSR |= SerialPort.LSR.DR;
+        }
+        this.updateIRR();
+    }
+
+    /**
+     * inRBR(port, addrFrom)
+     *
+     * @this {SerialPort}
+     * @param {number} port (eg, 0x3F8 or 0x2F8)
+     * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
+     * @return {number} simulated port value
+     */
+    inRBR(port, addrFrom)
+    {
+        var b = ((this.bLCR & SerialPort.LCR.DLAB) ? (this.wDL & 0xff) : this.bRBR);
+        this.printMessageIO(port, null, addrFrom, (this.bLCR & SerialPort.LCR.DLAB) ? "DLL" : "RBR", b);
+        this.bLSR &= ~SerialPort.LSR.DR;
+        this.advanceRBR();
+        return b;
+    }
+
+    /**
+     * inIER(port, addrFrom)
+     *
+     * @this {SerialPort}
+     * @param {number} port (eg, 0x3F9 or 0x2F9)
+     * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
+     * @return {number} simulated port value
+     */
+    inIER(port, addrFrom)
+    {
+        var b = ((this.bLCR & SerialPort.LCR.DLAB) ? (this.wDL >> 8) : this.bIER);
+        this.printMessageIO(port, null, addrFrom, (this.bLCR & SerialPort.LCR.DLAB) ? "DLM" : "IER", b);
+        return b;
+    }
+
+    /**
+     * inIIR(port, addrFrom)
+     *
+     * @this {SerialPort}
+     * @param {number} port (eg, 0x3FA or 0x2FA)
+     * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
+     * @return {number} simulated port value
+     */
+    inIIR(port, addrFrom)
+    {
+        var b = this.bIIR;
+        this.printMessageIO(port, null, addrFrom, "IIR", b);
+        return b;
+    }
+
+    /**
+     * inLCR(port, addrFrom)
+     *
+     * @this {SerialPort}
+     * @param {number} port (eg, 0x3FB or 0x2FB)
+     * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
+     * @return {number} simulated port value
+     */
+    inLCR(port, addrFrom)
+    {
+        var b = this.bLCR;
+        this.printMessageIO(port, null, addrFrom, "LCR", b);
+        return b;
+    }
+
+    /**
+     * inMCR(port, addrFrom)
+     *
+     * @this {SerialPort}
+     * @param {number} port (eg, 0x3FC or 0x2FC)
+     * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
+     * @return {number} simulated port value
+     */
+    inMCR(port, addrFrom)
+    {
+        var b = this.bMCR;
+        this.printMessageIO(port, null, addrFrom, "MCR", b);
+        return b;
+    }
+
+    /**
+     * inLSR(port, addrFrom)
+     *
+     * @this {SerialPort}
+     * @param {number} port (eg, 0x3FD or 0x2FD)
+     * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
+     * @return {number} simulated port value
+     */
+    inLSR(port, addrFrom)
+    {
+        var b = this.bLSR;
+        this.printMessageIO(port, null, addrFrom, "LSR", b);
+        return b;
+    }
+
+    /**
+     * inMSR(port, addrFrom)
+     *
+     * @this {SerialPort}
+     * @param {number} port (eg, 0x3FE or 0x2FE)
+     * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
+     * @return {number} simulated port value
+     */
+    inMSR(port, addrFrom)
+    {
+        var b = this.bMSR;
+        this.bMSR &= ~(SerialPort.MSR.DCTS | SerialPort.MSR.DDSR);
+        this.printMessageIO(port, null, addrFrom, "MSR", b);
+        return b;
+    }
+
+    /**
+     * outTHR(port, bOut, addrFrom)
+     *
+     * @this {SerialPort}
+     * @param {number} port (eg, 0x3F8 or 0x2F8)
+     * @param {number} bOut
+     * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
+     */
+    outTHR(port, bOut, addrFrom)
+    {
+        this.printMessageIO(port, bOut, addrFrom, (this.bLCR & SerialPort.LCR.DLAB) ? "DLL" : "THR");
+        if (this.bLCR & SerialPort.LCR.DLAB) {
+            this.wDL = (this.wDL & ~0xff) | bOut;
+        } else {
+            this.bTHR = bOut;
+            this.bLSR &= ~(SerialPort.LSR.THRE | SerialPort.LSR.TSRE);
+            if (this.transmitByte(bOut)) {
+                this.bLSR |= (SerialPort.LSR.THRE | SerialPort.LSR.TSRE);
+                /*
+                 * QUESTION: Does this mean we should also flush/zero bTHR?
+                 */
+            }
+        }
+    }
+
+    /**
+     * outIER(port, bOut, addrFrom)
+     *
+     * @this {SerialPort}
+     * @param {number} port (eg, 0x3F9 or 0x2F9)
+     * @param {number} bOut
+     * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
+     */
+    outIER(port, bOut, addrFrom)
+    {
+        this.printMessageIO(port, bOut, addrFrom, (this.bLCR & SerialPort.LCR.DLAB) ? "DLM" : "IER");
+        if (this.bLCR & SerialPort.LCR.DLAB) {
+            this.wDL = (this.wDL & 0xff) | (bOut << 8);
+        } else {
+            this.bIER = bOut;
+        }
+    }
+
+    /**
+     * outLCR(port, bOut, addrFrom)
+     *
+     * @this {SerialPort}
+     * @param {number} port (eg, 0x3FB or 0x2FB)
+     * @param {number} bOut
+     * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
+     */
+    outLCR(port, bOut, addrFrom)
+    {
+        this.printMessageIO(port, bOut, addrFrom, "LCR");
+        this.bLCR = bOut;
+    }
+
+    /**
+     * outMCR(port, bOut, addrFrom)
+     *
+     * @this {SerialPort}
+     * @param {number} port (eg, 0x3FC or 0x2FC)
+     * @param {number} bOut
+     * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
+     */
+    outMCR(port, bOut, addrFrom)
+    {
+        var delta = (bOut ^ this.bMCR);
+        this.printMessageIO(port, bOut, addrFrom, "MCR");
+        this.bMCR = bOut;
+        /*
+         * Whenever DTR or RTS changes, we also need to notify any connected machine or mouse, via updateStatus().
+         */
+        if (delta & (SerialPort.MCR.DTR | SerialPort.MCR.RTS)) {
+            if (this.updateStatus) {
+                var pins = 0;
+                if (this.fNullModem) {
+                    pins |= (bOut & SerialPort.MCR.RTS)? RS232.CTS.MASK : 0;
+                    pins |= (bOut & SerialPort.MCR.DTR)? (RS232.DSR.MASK | RS232.CD.MASK): 0;
+                } else {
+                    pins |= (bOut & SerialPort.MCR.RTS)? RS232.RTS.MASK : 0;
+                    pins |= (bOut & SerialPort.MCR.DTR)? RS232.DTR.MASK : 0;
+                }
+                this.updateStatus.call(this.connection, pins);
+            }
+        }
+    }
+
+    /**
+     * updateIRR()
+     *
+     * @this {SerialPort}
+     */
+    updateIRR()
+    {
+        var bIIR = -1;
+        if ((this.bLSR & SerialPort.LSR.DR) && (this.bIER & SerialPort.IER.RBR_AVAIL)) {
+            bIIR = SerialPort.IIR.INT_RBR;
+        }
+        else if ((this.bMSR & (SerialPort.MSR.DCTS | SerialPort.MSR.DDSR)) && (this.bIER & SerialPort.IER.MSR_DELTA)) {
+            bIIR = SerialPort.IIR.INT_MSR;
+        }
+        if (bIIR >= 0) {
+            this.bIIR &= ~(SerialPort.IIR.NO_INT | SerialPort.IIR.INT_BITS);
+            this.bIIR |= bIIR;
+            /*
+             * TODO: Remove this arbitrary 100-instruction delay once we've added support for baud rate throttling
+             * (see TODO above regarding baud rate).
+             */
+            if (this.chipset && this.nIRQ) this.chipset.setIRR(this.nIRQ, 100);
+        } else {
+            this.bIIR |= SerialPort.IIR.NO_INT;
+            if (this.chipset && this.nIRQ) this.chipset.clearIRR(this.nIRQ);
+        }
+    }
+
+    /**
+     * transmitByte(b)
+     *
+     * @this {SerialPort}
+     * @param {number} b
+     * @return {boolean} true if transmitted, false if not
+     */
+    transmitByte(b)
+    {
+        var fTransmitted = false;
+
+        this.printMessage("transmitByte(" + Str.toHexByte(b) + ")");
+
+        if (this.sendData) {
+            if (this.sendData.call(this.connection, b)) {
+                fTransmitted = true;
+            }
+        }
+
+        if (this.controlIOBuffer) {
+            if (b == 0x0D) {
+                this.iLogicalCol = 0;
+            }
+            else if (b == 0x08) {
+                this.controlIOBuffer.value = this.controlIOBuffer.value.slice(0, -1);
+                /*
+                 * TODO: Back up the correct number of columns if the character erased was a tab.
+                 */
+                if (this.iLogicalCol > 0) this.iLogicalCol--;
+            }
+            else {
+                var s = Str.toASCIICode(b); // formerly: String.fromCharCode(b);
+                var nChars = s.length;      // formerly: (b >= 0x20? 1 : 0);
+                if (b < 0x20 && nChars == 1) nChars = 0;
+                if (b == 0x09) {
+                    var tabSize = this.tabSize || 8;
+                    nChars = tabSize - (this.iLogicalCol % tabSize);
+                    if (this.tabSize) s = Str.pad("", nChars);
+                }
+                if (this.charBOL && !this.iLogicalCol && nChars) s = String.fromCharCode(this.charBOL) + s;
+                this.controlIOBuffer.value += s;
+                this.controlIOBuffer.scrollTop = this.controlIOBuffer.scrollHeight;
+                this.iLogicalCol += nChars;
+            }
+            fTransmitted = true;
+        }
+        else if (this.consoleOutput != null) {
+            if (b == 0x0A || this.consoleOutput.length >= 1024) {
+                this.println(this.consoleOutput);
+                this.consoleOutput = "";
+            }
+            if (b != 0x0A) {
+                this.consoleOutput += String.fromCharCode(b);
+            }
+            fTransmitted = true;
+        }
+
+        return fTransmitted;
+    }
+
+    /**
+     * SerialPort.init()
+     *
+     * This function operates on every HTML element of class "serial", extracting the
+     * JSON-encoded parameters for the SerialPort constructor from the element's "data-value"
+     * attribute, invoking the constructor to create a SerialPort component, and then binding
+     * any associated HTML controls to the new component.
+     */
+    static init()
+    {
+        var aeSerial = Component.getElementsByClass(document, PCX86.APPCLASS, "serial");
+        for (var iSerial = 0; iSerial < aeSerial.length; iSerial++) {
+            var eSerial = aeSerial[iSerial];
+            var parmsSerial = Component.getComponentParms(eSerial);
+            var serial = new SerialPort(parmsSerial);
+            Component.bindComponentControls(serial, eSerial, PCX86.APPCLASS);
+        }
+    }
+}
 
 /*
  * Internal name used for the I/O buffer control, if any, that we bind to the SerialPort.
@@ -342,680 +1041,6 @@ SerialPort.MSR.RLSD         = 0x80;     // complement of the RLSD (Received Line
  */
 SerialPort.SCR = {REG: 7};
 
-/**
- * attachMouse(id, mouse, fnUpdate)
- *
- * @this {SerialPort}
- * @param {string} id
- * @param {Mouse} mouse
- * @param {function(number)} fnUpdate
- * @return {Component|null}
- */
-SerialPort.prototype.attachMouse = function(id, mouse, fnUpdate)
-{
-    var component = null;
-    if (id == this.idComponent && !this.connection) {
-        this.connection = mouse;
-        this.updateStatus = fnUpdate;
-        this.fNullModem = false;
-        component = this;
-    }
-    return component;
-};
-
-/**
- * setBinding(sHTMLType, sBinding, control, sValue)
- *
- * @this {SerialPort}
- * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
- * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "buffer")
- * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
- * @param {string} [sValue] optional data value
- * @return {boolean} true if binding was successful, false if unrecognized binding request
- */
-SerialPort.prototype.setBinding = function(sHTMLType, sBinding, control, sValue)
-{
-    var serial = this;
-
-    switch (sBinding) {
-    case SerialPort.sIOBuffer:
-        this.bindings[sBinding] = this.controlIOBuffer = control;
-
-        /*
-         * By establishing an onkeypress handler here, we make it possible for DOS commands like
-         * "CTTY COM1" to more or less work (use "CTTY CON" to restore control to the DOS console).
-         */
-        control.onkeydown = function onKeyDown(event) {
-            /*
-             * This is required in addition to onkeypress, because it's the only way to prevent
-             * BACKSPACE (keyCode 8) from being interpreted by the browser as a "Back" operation;
-             * moreover, not all browsers generate an onkeypress notification for BACKSPACE.
-             *
-             * A related problem exists for Ctrl-key combinations in most Windows-based browsers
-             * (eg, IE, Edge, Chrome for Windows, etc), because keys like Ctrl-C and Ctrl-S have
-             * special meanings (eg, Copy, Save).  To the extent the browser will allow it, we
-             * attempt to disable that default behavior when this control receives an onkeydown
-             * event for one of those keys (probably the only event the browser generates for them).
-             */
-            event = event || window.event;
-            var keyCode = event.keyCode;
-            if (keyCode === 0x08 || event.ctrlKey && keyCode >= 0x41 && keyCode <= 0x5A) {
-                if (event.preventDefault) event.preventDefault();
-                if (keyCode > 0x40) keyCode -= 0x40;
-                serial.receiveData(keyCode);
-            }
-            return true;
-        };
-
-        control.onkeypress = function onKeyPress(event) {
-            /*
-             * Browser-independent keyCode extraction; refer to onKeyPress() and the other key event
-             * handlers in keyboard.js.
-             */
-            event = event || window.event;
-            var keyCode = event.which || event.keyCode;
-            serial.receiveData(keyCode);
-            /*
-             * Since we're going to remove the "readonly" attribute from the <textarea> control
-             * (so that the soft keyboard activates on iOS), instead of calling preventDefault() for
-             * selected keys (eg, the SPACE key, whose default behavior is to scroll the page), we must
-             * now call it for *all* keys, so that the keyCode isn't added to the control immediately,
-             * on top of whatever the machine is echoing back, resulting in double characters.
-             */
-            if (event.preventDefault) event.preventDefault();
-            return true;
-        };
-
-        /*
-         * Now that we've added an onkeypress handler that calls preventDefault() for ALL keys, the control
-         * itself no longer needs the "readonly" attribute; we primarily need to remove it for iOS browsers,
-         * so that the soft keyboard will activate, but it shouldn't hurt to remove the attribute for all browsers.
-         */
-        control.removeAttribute("readonly");
-
-        return true;
-
-    default:
-        break;
-    }
-    return false;
-};
-
-/**
- * initBus(cmp, bus, cpu, dbg)
- *
- * @this {SerialPort}
- * @param {Computer} cmp
- * @param {Bus} bus
- * @param {X86CPU} cpu
- * @param {DebuggerX86} dbg
- */
-SerialPort.prototype.initBus = function(cmp, bus, cpu, dbg)
-{
-    this.cmp = cmp;
-    this.bus = bus;
-    this.cpu = cpu;
-    this.dbg = dbg;
-
-    this.chipset = cmp.getMachineComponent("ChipSet");
-
-    bus.addPortInputTable(this, SerialPort.aPortInput, this.portBase);
-    bus.addPortOutputTable(this, SerialPort.aPortOutput, this.portBase);
-
-    this.setReady();
-};
-
-/**
- * initConnection(fNullModem)
- *
- * If a machine 'connection' parameter exists of the form "{sourcePort}->{targetMachine}.{targetPort}",
- * and "{sourcePort}" matches our idComponent, then look for a component with id "{targetMachine}.{targetPort}".
- *
- * If the target component is found, then verify that it has exported functions with the following names:
- *
- *      receiveData(data): called when we have data to transmit; aliased internally to sendData(data)
- *      receiveStatus(pins): called when our control signals have changed; aliased internally to updateStatus(pins)
- *
- * For now, we're not going to worry about communication in the other direction, because when the target component
- * performs its own initConnection(), it will find our receiveData() and receiveStatus() functions, at which point
- * communication in both directions should be established, and the circle of life complete.
- *
- * For added robustness, if the target machine initializes much more slowly than we do, and our connection attempt
- * fails, that's OK, because when it finally initializes, its initConnection() will call our initConnection();
- * if we've already initialized, no harm done.
- *
- * @this {SerialPort}
- * @param {boolean} [fNullModem] (caller's null-modem setting, to ensure our settings are in agreement)
- */
-SerialPort.prototype.initConnection = function(fNullModem)
-{
-    if (!this.connection) {
-        var sConnection = this.cmp.getMachineParm("connection");
-        if (sConnection) {
-            var asParts = sConnection.split('->');
-            if (asParts.length == 2) {
-                var sSourceID = str.trim(asParts[0]);
-                if (sSourceID != this.idComponent) return;  // this connection string is intended for another instance
-                var sTargetID = str.trim(asParts[1]);
-                this.connection = Component.getComponentByID(sTargetID);
-                if (this.connection) {
-                    var exports = this.connection['exports'];
-                    if (exports) {
-                        var fnConnect = exports['connect'];
-                        if (fnConnect) fnConnect.call(this.connection, this.fNullModem);
-                        this.sendData = exports['receiveData'];
-                        if (this.sendData) {
-                            this.fNullModem = fNullModem;
-                            this.updateStatus = exports['receiveStatus'];
-                            this.status("Connected " + this.idMachine + '.' + sSourceID + " to " + sTargetID);
-                            return;
-                        }
-                    }
-                }
-            }
-            /*
-             * Changed from notice() to status() because sometimes a connection fails simply because one of us is a laggard.
-             */
-            this.status("Unable to establish connection: " + sConnection);
-        }
-    }
-};
-
-/**
- * powerUp(data, fRepower)
- *
- * @this {SerialPort}
- * @param {Object|null} data
- * @param {boolean} [fRepower]
- * @return {boolean} true if successful, false if failure
- */
-SerialPort.prototype.powerUp = function(data, fRepower)
-{
-    if (!fRepower) {
-
-        /*
-         * This is as late as we can currently wait to make our first inter-machine connection attempt;
-         * even so, the target machine's initialization process may still be ongoing, so any connection
-         * may be not fully resolved until the target machine performs its own initConnection(), which will
-         * in turn invoke our initConnection() again.
-         */
-        this.initConnection(this.fNullModem);
-
-        if (!data || !this.restore) {
-            this.reset();
-        } else {
-            if (!this.restore(data)) return false;
-        }
-    }
-    return true;
-};
-
-/**
- * powerDown(fSave, fShutdown)
- *
- * @this {SerialPort}
- * @param {boolean} [fSave]
- * @param {boolean} [fShutdown]
- * @return {Object|boolean} component state if fSave; otherwise, true if successful, false if failure
- */
-SerialPort.prototype.powerDown = function(fSave, fShutdown)
-{
-    return fSave? this.save() : true;
-};
-
-/**
- * reset()
- *
- * @this {SerialPort}
- */
-SerialPort.prototype.reset = function()
-{
-    this.initState();
-};
-
-/**
- * save()
- *
- * This implements save support for the SerialPort component.
- *
- * @this {SerialPort}
- * @return {Object}
- */
-SerialPort.prototype.save = function()
-{
-    var state = new State(this);
-    state.set(0, this.saveRegisters());
-    return state.data();
-};
-
-/**
- * restore(data)
- *
- * This implements restore support for the SerialPort component.
- *
- * @this {SerialPort}
- * @param {Object} data
- * @return {boolean} true if successful, false if failure
- */
-SerialPort.prototype.restore = function(data)
-{
-    return this.initState(data[0]);
-};
-
-/**
- * initState(data)
- *
- * @this {SerialPort}
- * @param {Array} [data]
- * @return {boolean} true if successful, false if failure
- */
-SerialPort.prototype.initState = function(data)
-{
-    /*
-     * The NS8250A spec doesn't explicitly say what the RBR and THR are initialized to on a reset,
-     * but I think we can safely assume zeros.  Similarly, we reset the baud rate Divisor Latch (wDL)
-     * to an arbitrary but consistent default (DL_DEFAULT).
-     */
-    var i = 0;
-    if (data === undefined) {
-        data = [
-            0,                                          // RBR
-            0,                                          // THR
-            SerialPort.DL_DEFAULT,                      // DL
-            0,                                          // IER
-            SerialPort.IIR.NO_INT,                      // IIR
-            0,                                          // LCR
-            0,                                          // MCR
-            SerialPort.LSR.THRE | SerialPort.LSR.TSRE,  // LSR
-            this.bMSRInit,                              // MSR
-            []
-        ];
-    }
-    this.bRBR = data[i++];
-    this.bTHR = data[i++];
-    this.wDL =  data[i++];
-    this.bIER = data[i++];
-    this.bIIR = data[i++];
-    this.bLCR = data[i++];
-    this.bMCR = data[i++];
-    this.bLSR = data[i++];
-    this.bMSR = data[i++];
-    this.abReceive = data[i];
-    return true;
-};
-
-/**
- * saveRegisters()
- *
- * @this {SerialPort}
- * @return {Array}
- */
-SerialPort.prototype.saveRegisters = function()
-{
-    var i = 0;
-    var data = [];
-    data[i++] = this.bRBR;
-    data[i++] = this.bTHR;
-    data[i++] = this.wDL;
-    data[i++] = this.bIER;
-    data[i++] = this.bIIR;
-    data[i++] = this.bLCR;
-    data[i++] = this.bMCR;
-    data[i++] = this.bLSR;
-    data[i++] = this.bMSR;
-    data[i] = this.abReceive;
-    return data;
-};
-
-/**
- * receiveData(data)
- *
- * This replaces the old sendRBR() function, which expected an Array of bytes.  We still support that,
- * but in order to support connections with other SerialPort components (ie, the PC8080 SerialPort), we
- * have added support for numbers and strings as well.
- *
- * @this {SerialPort}
- * @param {number|string|Array} data
- * @return {boolean} true if received, false if not
- */
-SerialPort.prototype.receiveData = function(data)
-{
-    if (typeof data == "number") {
-        this.abReceive.push(data);
-    }
-    else if (typeof data == "string") {
-        for (var i = 0; i < data.length; i++) {
-            this.abReceive.push(data.charCodeAt(i));
-        }
-    }
-    else {
-        this.abReceive = this.abReceive.concat(data);
-    }
-    this.advanceRBR();
-    return true;                // for now, return true regardless, since we're buffering everything anyway
-};
-
-/**
- * receiveStatus(pins)
- *
- * NOTE: Prior to the addition of this interface, the CTS and DSR bits were initialized set and remained set for the life
- * of the machine.  It is entirely appropriate that this is the only way those bits can be changed, because they represent
- * external control signals.
- *
- * @this {SerialPort}
- * @param {number} pins
- */
-SerialPort.prototype.receiveStatus = function(pins)
-{
-    var bMSROld = this.bMSR;
-    this.bMSR &= ~(SerialPort.MSR.CTS | SerialPort.MSR.DSR);
-    if (pins & RS232.CTS.MASK) {
-        this.bMSR |= SerialPort.MSR.CTS | SerialPort.MSR.DCTS;
-    }
-    if (pins & RS232.DSR.MASK) {
-        this.bMSR |= SerialPort.MSR.DSR | SerialPort.MSR.DDSR;
-    }
-    if (bMSROld != this.bMSR) this.updateIRR();
-};
-
-/**
- * advanceRBR()
- *
- * @this {SerialPort}
- */
-SerialPort.prototype.advanceRBR = function()
-{
-    if (this.abReceive.length > 0 && !(this.bLSR & SerialPort.LSR.DR)) {
-        this.bRBR = this.abReceive.shift();
-        this.bLSR |= SerialPort.LSR.DR;
-    }
-    this.updateIRR();
-};
-
-/**
- * inRBR(port, addrFrom)
- *
- * @this {SerialPort}
- * @param {number} port (eg, 0x3F8 or 0x2F8)
- * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
- * @return {number} simulated port value
- */
-SerialPort.prototype.inRBR = function(port, addrFrom)
-{
-    var b = ((this.bLCR & SerialPort.LCR.DLAB) ? (this.wDL & 0xff) : this.bRBR);
-    this.printMessageIO(port, null, addrFrom, (this.bLCR & SerialPort.LCR.DLAB) ? "DLL" : "RBR", b);
-    this.bLSR &= ~SerialPort.LSR.DR;
-    this.advanceRBR();
-    return b;
-};
-
-/**
- * inIER(port, addrFrom)
- *
- * @this {SerialPort}
- * @param {number} port (eg, 0x3F9 or 0x2F9)
- * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
- * @return {number} simulated port value
- */
-SerialPort.prototype.inIER = function(port, addrFrom)
-{
-    var b = ((this.bLCR & SerialPort.LCR.DLAB) ? (this.wDL >> 8) : this.bIER);
-    this.printMessageIO(port, null, addrFrom, (this.bLCR & SerialPort.LCR.DLAB) ? "DLM" : "IER", b);
-    return b;
-};
-
-/**
- * inIIR(port, addrFrom)
- *
- * @this {SerialPort}
- * @param {number} port (eg, 0x3FA or 0x2FA)
- * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
- * @return {number} simulated port value
- */
-SerialPort.prototype.inIIR = function(port, addrFrom)
-{
-    var b = this.bIIR;
-    this.printMessageIO(port, null, addrFrom, "IIR", b);
-    return b;
-};
-
-/**
- * inLCR(port, addrFrom)
- *
- * @this {SerialPort}
- * @param {number} port (eg, 0x3FB or 0x2FB)
- * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
- * @return {number} simulated port value
- */
-SerialPort.prototype.inLCR = function(port, addrFrom)
-{
-    var b = this.bLCR;
-    this.printMessageIO(port, null, addrFrom, "LCR", b);
-    return b;
-};
-
-/**
- * inMCR(port, addrFrom)
- *
- * @this {SerialPort}
- * @param {number} port (eg, 0x3FC or 0x2FC)
- * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
- * @return {number} simulated port value
- */
-SerialPort.prototype.inMCR = function(port, addrFrom)
-{
-    var b = this.bMCR;
-    this.printMessageIO(port, null, addrFrom, "MCR", b);
-    return b;
-};
-
-/**
- * inLSR(port, addrFrom)
- *
- * @this {SerialPort}
- * @param {number} port (eg, 0x3FD or 0x2FD)
- * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
- * @return {number} simulated port value
- */
-SerialPort.prototype.inLSR = function(port, addrFrom)
-{
-    var b = this.bLSR;
-    this.printMessageIO(port, null, addrFrom, "LSR", b);
-    return b;
-};
-
-/**
- * inMSR(port, addrFrom)
- *
- * @this {SerialPort}
- * @param {number} port (eg, 0x3FE or 0x2FE)
- * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
- * @return {number} simulated port value
- */
-SerialPort.prototype.inMSR = function(port, addrFrom)
-{
-    var b = this.bMSR;
-    this.bMSR &= ~(SerialPort.MSR.DCTS | SerialPort.MSR.DDSR);
-    this.printMessageIO(port, null, addrFrom, "MSR", b);
-    return b;
-};
-
-/**
- * outTHR(port, bOut, addrFrom)
- *
- * @this {SerialPort}
- * @param {number} port (eg, 0x3F8 or 0x2F8)
- * @param {number} bOut
- * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
- */
-SerialPort.prototype.outTHR = function(port, bOut, addrFrom)
-{
-    this.printMessageIO(port, bOut, addrFrom, (this.bLCR & SerialPort.LCR.DLAB) ? "DLL" : "THR");
-    if (this.bLCR & SerialPort.LCR.DLAB) {
-        this.wDL = (this.wDL & ~0xff) | bOut;
-    } else {
-        this.bTHR = bOut;
-        this.bLSR &= ~(SerialPort.LSR.THRE | SerialPort.LSR.TSRE);
-        if (this.transmitByte(bOut)) {
-            this.bLSR |= (SerialPort.LSR.THRE | SerialPort.LSR.TSRE);
-            /*
-             * QUESTION: Does this mean we should also flush/zero bTHR?
-             */
-        }
-    }
-};
-
-/**
- * outIER(port, bOut, addrFrom)
- *
- * @this {SerialPort}
- * @param {number} port (eg, 0x3F9 or 0x2F9)
- * @param {number} bOut
- * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
- */
-SerialPort.prototype.outIER = function(port, bOut, addrFrom)
-{
-    this.printMessageIO(port, bOut, addrFrom, (this.bLCR & SerialPort.LCR.DLAB) ? "DLM" : "IER");
-    if (this.bLCR & SerialPort.LCR.DLAB) {
-        this.wDL = (this.wDL & 0xff) | (bOut << 8);
-    } else {
-        this.bIER = bOut;
-    }
-};
-
-/**
- * outLCR(port, bOut, addrFrom)
- *
- * @this {SerialPort}
- * @param {number} port (eg, 0x3FB or 0x2FB)
- * @param {number} bOut
- * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
- */
-SerialPort.prototype.outLCR = function(port, bOut, addrFrom)
-{
-    this.printMessageIO(port, bOut, addrFrom, "LCR");
-    this.bLCR = bOut;
-};
-
-/**
- * outMCR(port, bOut, addrFrom)
- *
- * @this {SerialPort}
- * @param {number} port (eg, 0x3FC or 0x2FC)
- * @param {number} bOut
- * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
- */
-SerialPort.prototype.outMCR = function(port, bOut, addrFrom)
-{
-    var delta = (bOut ^ this.bMCR);
-    this.printMessageIO(port, bOut, addrFrom, "MCR");
-    this.bMCR = bOut;
-    /*
-     * Whenever DTR or RTS changes, we also need to notify any connected machine or mouse, via updateStatus().
-     */
-    if (delta & (SerialPort.MCR.DTR | SerialPort.MCR.RTS)) {
-        if (this.updateStatus) {
-            var pins = 0;
-            if (this.fNullModem) {
-                pins |= (bOut & SerialPort.MCR.RTS)? RS232.CTS.MASK : 0;
-                pins |= (bOut & SerialPort.MCR.DTR)? (RS232.DSR.MASK | RS232.CD.MASK): 0;
-            } else {
-                pins |= (bOut & SerialPort.MCR.RTS)? RS232.RTS.MASK : 0;
-                pins |= (bOut & SerialPort.MCR.DTR)? RS232.DTR.MASK : 0;
-            }
-            this.updateStatus.call(this.connection, pins);
-        }
-    }
-};
-
-/**
- * updateIRR()
- *
- * @this {SerialPort}
- */
-SerialPort.prototype.updateIRR = function()
-{
-    var bIIR = -1;
-    if ((this.bLSR & SerialPort.LSR.DR) && (this.bIER & SerialPort.IER.RBR_AVAIL)) {
-        bIIR = SerialPort.IIR.INT_RBR;
-    }
-    else if ((this.bMSR & (SerialPort.MSR.DCTS | SerialPort.MSR.DDSR)) && (this.bIER & SerialPort.IER.MSR_DELTA)) {
-        bIIR = SerialPort.IIR.INT_MSR;
-    }
-    if (bIIR >= 0) {
-        this.bIIR &= ~(SerialPort.IIR.NO_INT | SerialPort.IIR.INT_BITS);
-        this.bIIR |= bIIR;
-        /*
-         * TODO: Remove this arbitrary 100-instruction delay once we've added support for baud rate throttling
-         * (see TODO above regarding baud rate).
-         */
-        if (this.chipset && this.nIRQ) this.chipset.setIRR(this.nIRQ, 100);
-    } else {
-        this.bIIR |= SerialPort.IIR.NO_INT;
-        if (this.chipset && this.nIRQ) this.chipset.clearIRR(this.nIRQ);
-    }
-};
-
-/**
- * transmitByte(b)
- *
- * @this {SerialPort}
- * @param {number} b
- * @return {boolean} true if transmitted, false if not
- */
-SerialPort.prototype.transmitByte = function(b)
-{
-    var fTransmitted = false;
-
-    this.printMessage("transmitByte(" + str.toHexByte(b) + ")");
-
-    if (this.sendData) {
-        if (this.sendData.call(this.connection, b)) {
-            fTransmitted = true;
-        }
-    }
-
-    if (this.controlIOBuffer) {
-        if (b == 0x0D) {
-            this.iLogicalCol = 0;
-        }
-        else if (b == 0x08) {
-            this.controlIOBuffer.value = this.controlIOBuffer.value.slice(0, -1);
-            /*
-             * TODO: Back up the correct number of columns if the character erased was a tab.
-             */
-            if (this.iLogicalCol > 0) this.iLogicalCol--;
-        }
-        else {
-            var s = str.toASCIICode(b); // formerly: String.fromCharCode(b);
-            var nChars = s.length;      // formerly: (b >= 0x20? 1 : 0);
-            if (b < 0x20 && nChars == 1) nChars = 0;
-            if (b == 0x09) {
-                var tabSize = this.tabSize || 8;
-                nChars = tabSize - (this.iLogicalCol % tabSize);
-                if (this.tabSize) s = str.pad("", nChars);
-            }
-            if (this.charBOL && !this.iLogicalCol && nChars) s = String.fromCharCode(this.charBOL) + s;
-            this.controlIOBuffer.value += s;
-            this.controlIOBuffer.scrollTop = this.controlIOBuffer.scrollHeight;
-            this.iLogicalCol += nChars;
-        }
-        fTransmitted = true;
-    }
-    else if (this.consoleOutput != null) {
-        if (b == 0x0A || this.consoleOutput.length >= 1024) {
-            this.println(this.consoleOutput);
-            this.consoleOutput = "";
-        }
-        if (b != 0x0A) {
-            this.consoleOutput += String.fromCharCode(b);
-        }
-        fTransmitted = true;
-    }
-
-    return fTransmitted;
-};
-
 /*
  * Port input notification table
  */
@@ -1039,28 +1064,9 @@ SerialPort.aPortOutput = {
     0x4: SerialPort.prototype.outMCR
 };
 
-/**
- * SerialPort.init()
- *
- * This function operates on every HTML element of class "serial", extracting the
- * JSON-encoded parameters for the SerialPort constructor from the element's "data-value"
- * attribute, invoking the constructor to create a SerialPort component, and then binding
- * any associated HTML controls to the new component.
- */
-SerialPort.init = function()
-{
-    var aeSerial = Component.getElementsByClass(document, PCX86.APPCLASS, "serial");
-    for (var iSerial = 0; iSerial < aeSerial.length; iSerial++) {
-        var eSerial = aeSerial[iSerial];
-        var parmsSerial = Component.getComponentParms(eSerial);
-        var serial = new SerialPort(parmsSerial);
-        Component.bindComponentControls(serial, eSerial, PCX86.APPCLASS);
-    }
-};
-
 /*
  * Initialize every SerialPort module on the page.
  */
-web.onInit(SerialPort.init);
+Web.onInit(SerialPort.init);
 
 if (NODE) module.exports = SerialPort;

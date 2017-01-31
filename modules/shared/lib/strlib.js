@@ -28,422 +28,545 @@
 
 "use strict";
 
-var str = {};
+class Str {
+    /**
+     * isValidInt(s, base)
+     *
+     * The built-in parseInt() function has the annoying feature of returning a partial value (ie,
+     * up to the point where it encounters an invalid character); eg, parseInt("foo", 16) returns 0xf.
+     *
+     * So it's best to use our own Str.parseInt() function, which will in turn use this function to
+     * validate the entire string.
+     *
+     * @param {string} s is the string representation of some number
+     * @param {number} [base] is the radix to use (default is 10); only 2, 8, 10 and 16 are supported
+     * @return {boolean} true if valid, false if invalid (or the specified base isn't supported)
+     */
+    static isValidInt(s, base)
+    {
+        if (!base || base == 10) return s.match(/^[0-9]+$/) !== null;
+        if (base == 16) return s.match(/^[0-9a-f]+$/i) !== null;
+        if (base == 8) return s.match(/^[0-7]+$/) !== null;
+        if (base == 2) return s.match(/^[01]+$/) !== null;
+        return false;
+    }
 
-/**
- * isValidInt(s, base)
- *
- * The built-in parseInt() function has the annoying feature of returning a partial value (ie,
- * up to the point where it encounters an invalid character); eg, parseInt("foo", 16) returns 0xf.
- *
- * So it's best to use our own str.parseInt() function, which will in turn use this function to
- * validate the entire string.
- *
- * @param {string} s is the string representation of some number
- * @param {number} [base] is the radix to use (default is 10); only 2, 8, 10 and 16 are supported
- * @return {boolean} true if valid, false if invalid (or the specified base isn't supported)
- */
-str.isValidInt = function(s, base)
-{
-    if (!base || base == 10) return s.match(/^[0-9]+$/) !== null;
-    if (base == 16) return s.match(/^[0-9a-f]+$/i) !== null;
-    if (base == 8) return s.match(/^[0-7]+$/) !== null;
-    if (base == 2) return s.match(/^[01]+$/) !== null;
-    return false;
-};
+    /**
+     * parseInt(s, base)
+     *
+     * This is a wrapper around the built-in parseInt() function.  Our wrapper recognizes certain prefixes
+     * ('$' or "0x" for hex, '#' or "0o" for octal) and suffixes ('.' for decimal, 'h' for hex, 'y' for
+     * binary), and then calls isValidInt() to ensure we don't convert strings that contain partial values;
+     * see isValidInt() for details.
+     *
+     * The use of multiple prefix/suffix combinations is undefined (although for the record, we process
+     * prefixes first).  We do NOT support the "0b" prefix to indicate binary UNLESS one or more commas are
+     * also present (because "0b" is also a valid hex sequence), and we do NOT support a single leading zero
+     * to indicate octal (because such a number could also be decimal or hex).  Any number of commas are
+     * allowed; we remove them all before calling the built-in parseInt().
+     *
+     * To summarize our non-standard alternatives: a 'y' suffix indicates binary, a '#' prefix indicates
+     * octal, a '$' prefix indicates hex, and a "0b" prefix indicates binary IF at least one comma is present.
+     * Commas are useful for grouping binary digits, but if you don't want to use them, then you must use a
+     * 'y' suffix for binary numbers.
+     *
+     * @param {string} s is the string representation of some number
+     * @param {number} [base] is the radix to use (default is 10); can be overridden by prefixes/suffixes
+     * @return {number|undefined} corresponding value, or undefined if invalid
+     */
+    static parseInt(s, base)
+    {
+        var value;
 
-/**
- * parseInt(s, base)
- *
- * This is a wrapper around the built-in parseInt() function.  Our wrapper recognizes certain prefixes
- * ('$' or "0x" for hex, '#' or "0o" for octal) and suffixes ('.' for decimal, 'h' for hex, 'y' for
- * binary), and then calls isValidInt() to ensure we don't convert strings that contain partial values;
- * see isValidInt() for details.
- *
- * The use of multiple prefix/suffix combinations is undefined (although for the record, we process
- * prefixes first).  We do NOT support the "0b" prefix to indicate binary UNLESS one or more commas are
- * also present (because "0b" is also a valid hex sequence), and we do NOT support a single leading zero
- * to indicate octal (because such a number could also be decimal or hex).  Any number of commas are
- * allowed; we remove them all before calling the built-in parseInt().
- *
- * To summarize our non-standard alternatives: a 'y' suffix indicates binary, a '#' prefix indicates
- * octal, a '$' prefix indicates hex, and a "0b" prefix indicates binary IF at least one comma is present.
- * Commas are useful for grouping binary digits, but if you don't want to use them, then you must use a
- * 'y' suffix for binary numbers.
- *
- * @param {string} s is the string representation of some number
- * @param {number} [base] is the radix to use (default is 10); can be overridden by prefixes/suffixes
- * @return {number|undefined} corresponding value, or undefined if invalid
- */
-str.parseInt = function(s, base)
-{
-    var value;
-
-    if (s) {
-        if (!base) base = 10;
-        var chPrefix = s.charAt(0);
-        var fCommas = (s.indexOf(',') > 0);
-        if (fCommas) s = s.replace(/,/g, '');
-        if (chPrefix == '#') {
-            base = 8;
-            chPrefix = null;
-        }
-        else if (chPrefix == '$') {
-            base = 16;
-            chPrefix = null;
-        }
-        if (chPrefix == null) {
-            s = s.substr(1);
-        }
-        else {
-            if (chPrefix == '0') {
-                chPrefix = s.charAt(1);
-                if (chPrefix == 'b' && fCommas) {
-                    base = 2;
-                    chPrefix = null;
-                }
-                if (chPrefix == 'o') {
-                    base = 8;
-                    chPrefix = null;
-                }
-                else if (chPrefix == 'x') {
-                    base = 16;
-                    chPrefix = null;
-                }
+        if (s) {
+            if (!base) base = 10;
+            var chPrefix = s.charAt(0);
+            var fCommas = (s.indexOf(',') > 0);
+            if (fCommas) s = s.replace(/,/g, '');
+            if (chPrefix == '#') {
+                base = 8;
+                chPrefix = null;
+            }
+            else if (chPrefix == '$') {
+                base = 16;
+                chPrefix = null;
             }
             if (chPrefix == null) {
-                s = s.substr(2);
+                s = s.substr(1);
             }
             else {
-                var chSuffix = s.charAt(s.length-1).toLowerCase();
-                if (chSuffix == 'y') {
-                    base = 2;
-                    chSuffix = null;
+                if (chPrefix == '0') {
+                    chPrefix = s.charAt(1);
+                    if (chPrefix == 'b' && fCommas) {
+                        base = 2;
+                        chPrefix = null;
+                    }
+                    if (chPrefix == 'o') {
+                        base = 8;
+                        chPrefix = null;
+                    }
+                    else if (chPrefix == 'x') {
+                        base = 16;
+                        chPrefix = null;
+                    }
                 }
-                else if (chSuffix == '.') {
-                    base = 10;
-                    chSuffix = null;
+                if (chPrefix == null) {
+                    s = s.substr(2);
                 }
-                else if (chSuffix == 'h') {
-                    base = 16;
-                    chSuffix = null;
+                else {
+                    var chSuffix = s.charAt(s.length - 1).toLowerCase();
+                    if (chSuffix == 'y') {
+                        base = 2;
+                        chSuffix = null;
+                    }
+                    else if (chSuffix == '.') {
+                        base = 10;
+                        chSuffix = null;
+                    }
+                    else if (chSuffix == 'h') {
+                        base = 16;
+                        chSuffix = null;
+                    }
+                    if (chSuffix == null) s = s.substr(0, s.length - 1);
                 }
-                if (chSuffix == null) s = s.substr(0, s.length-1);
+            }
+            var v;
+            if (Str.isValidInt(s, base) && !isNaN(v = parseInt(s, base))) {
+                value = v | 0;
             }
         }
-        var v;
-        if (str.isValidInt(s, base) && !isNaN(v = parseInt(s, base))) {
-            value = v|0;
-        }
+        return value;
     }
-    return value;
-};
 
-/**
- * toBin(n, cch, grouping)
- *
- * Converts an integer to binary, with the specified number of digits (up to the default of 32).
- *
- * @param {number|null|undefined} n is a 32-bit value
- * @param {number} [cch] is the desired number of binary digits (32 is both the default and the maximum)
- * @param {number} [grouping]
- * @return {string} the binary representation of n
- */
-str.toBin = function(n, cch, grouping)
-{
-    var s = "";
-    if (!cch) {
-        cch = 32;
-    } else {
-        if (cch > 32) cch = 32;
-    }
-    /*
-     * An initial "falsey" check for null takes care of both null and undefined;
-     * we can't rely entirely on isNaN(), because isNaN(null) returns false, oddly enough.
+    /**
+     * toBin(n, cch, grouping)
      *
-     * Alternatively, we could mask and shift n regardless of whether it's null/undefined/NaN,
-     * since JavaScript coerces such operands to zero, but I think there's "value" in seeing those
-     * values displayed differently.
-     */
-    var fInvalid = (n == null || isNaN(n));
-    var group = (grouping = grouping || cch);
-    while (cch-- > 0) {
-        if (!group) {
-            s = "," + s;
-            group = grouping;
-        }
-        s = (fInvalid? '?' : ((n & 0x1)? '1' : '0')) + s;
-        n >>= 1;
-        group--;
-    }
-    return s;
-};
-
-/**
- * toBinBytes(n, cb, fPrefix)
- *
- * Converts an integer to binary, with the specified number of bytes (up to the default of 4).
- *
- * @param {number|null|undefined} n is a 32-bit value
- * @param {number} [cb] is the desired number of binary bytes (4 is both the default and the maximum)
- * @param {boolean} [fPrefix]
- * @return {string} the binary representation of n
- */
-str.toBinBytes = function(n, cb, fPrefix)
-{
-    var s = "";
-    if (!cb || cb > 4) cb = 4;
-    for (var i = 0; i < cb; i++) {
-        if (s) s = ',' + s;
-        s = str.toBin(n & 0xff, 8) + s;
-        n >>= 8;
-    }
-    return (fPrefix? "0b" : "") + s;
-};
-
-/**
- * toOct(n, cch, fPrefix)
- *
- * Converts an integer to octal, with the specified number of digits (default of 6; max of 11)
- *
- * You might be tempted to use the built-in n.toString(8) instead, but it doesn't zero-pad and it
- * doesn't properly convert negative values.  Moreover, if n is undefined, n.toString() will throw
- * an exception, whereas this function will return '?' characters.
- *
- * @param {number|null|undefined} n is a 32-bit value
- * @param {number} [cch] is the desired number of octal digits (0 or undefined for default of either 6 or 11)
- * @param {boolean} [fPrefix]
- * @return {string} the octal representation of n
- */
-str.toOct = function(n, cch, fPrefix)
-{
-    var s = "";
-
-    if (cch) {
-        if (cch > 11) cch = 11;
-    } else {
-        cch = (n & ~0xffffff)? 11 : ((n & ~0xffff)? 8 : 6);
-    }
-    /*
-     * An initial "falsey" check for null takes care of both null and undefined;
-     * we can't rely entirely on isNaN(), because isNaN(null) returns false, oddly enough.
+     * Converts an integer to binary, with the specified number of digits (up to the default of 32).
      *
-     * Alternatively, we could mask and shift n regardless of whether it's null/undefined/NaN,
-     * since JavaScript coerces such operands to zero, but I think there's "value" in seeing those
-     * values displayed differently.
+     * @param {number|null|undefined} n is a 32-bit value
+     * @param {number} [cch] is the desired number of binary digits (32 is both the default and the maximum)
+     * @param {number} [grouping]
+     * @return {string} the binary representation of n
      */
-    if (n == null || isNaN(n)) {
-        while (cch-- > 0) s = '?' + s;
-    } else {
+    static toBin(n, cch, grouping)
+    {
+        var s = "";
+        if (!cch) {
+            cch = 32;
+        } else {
+            if (cch > 32) cch = 32;
+        }
+        /*
+         * An initial "falsey" check for null takes care of both null and undefined;
+         * we can't rely entirely on isNaN(), because isNaN(null) returns false, oddly enough.
+         *
+         * Alternatively, we could mask and shift n regardless of whether it's null/undefined/NaN,
+         * since JavaScript coerces such operands to zero, but I think there's "value" in seeing those
+         * values displayed differently.
+         */
+        var fInvalid = (n == null || isNaN(n));
+        var group = (grouping = grouping || cch);
         while (cch-- > 0) {
-            var d = (n & 7) + 0x30;
-            s = String.fromCharCode(d) + s;
-            n >>= 3;
+            if (!group) {
+                s = "," + s;
+                group = grouping;
+            }
+            s = (fInvalid ? '?' : ((n & 0x1) ? '1' : '0')) + s;
+            n >>= 1;
+            group--;
         }
+        return s;
     }
-    return (fPrefix? "0o" : "") + s;
-};
 
-/**
- * toDec(n, cch)
- *
- * Converts an integer to decimal, with the specified number of digits (default of 5; max of 10)
- *
- * You might be tempted to use the built-in n.toString(10) instead, but it doesn't zero-pad and it
- * doesn't properly convert negative values.  Moreover, if n is undefined, n.toString() will throw
- * an exception, whereas this function will return '?' characters.
- *
- * @param {number|null|undefined} n is a 32-bit value
- * @param {number} [cch] is the desired number of decimal digits (0 or undefined for default of either 5 or 10)
- * @return {string} the octal representation of n
- */
-str.toDec = function(n, cch)
-{
-    var s = "";
-
-    if (cch) {
-        if (cch > 10) cch = 10;
-    } else {
-        cch = (n & ~0xffff)? 10 : 5;
-    }
-    /*
-     * An initial "falsey" check for null takes care of both null and undefined;
-     * we can't rely entirely on isNaN(), because isNaN(null) returns false, oddly enough.
+    /**
+     * toBinBytes(n, cb, fPrefix)
      *
-     * Alternatively, we could mask and shift n regardless of whether it's null/undefined/NaN,
-     * since JavaScript coerces such operands to zero, but I think there's "value" in seeing those
-     * values displayed differently.
-     */
-    if (n == null || isNaN(n)) {
-        while (cch-- > 0) s = '?' + s;
-    } else {
-        while (cch-- > 0) {
-            var d = (n % 10) + 0x30;
-            s = String.fromCharCode(d) + s;
-            n /= 10;
-        }
-    }
-    return s;
-};
-
-/**
- * toHex(n, cch, fPrefix)
- *
- * Converts an integer to hex, with the specified number of digits (default of 4 or 8, max of 8).
- *
- * You might be tempted to use the built-in n.toString(16) instead, but it doesn't zero-pad and it
- * doesn't properly convert negative values; for example, if n is -2147483647, then n.toString(16)
- * will return "-7fffffff" instead of "80000001".  Moreover, if n is undefined, n.toString() will
- * throw an exception, whereas this function will return '?' characters.
- *
- * NOTE: The following work-around (adapted from code found on StackOverflow) would be another solution,
- * taking care of negative values, zero-padding, and upper-casing, but not null/undefined/NaN values:
- *
- *      s = (n < 0? n + 0x100000000 : n).toString(16);
- *      s = "00000000".substr(0, 8 - s.length) + s;
- *      s = s.substr(0, cch).toUpperCase();
- *
- * @param {number|null|undefined} n is a 32-bit value
- * @param {number} [cch] is the desired number of hex digits (0 or undefined for default of either 4 or 8)
- * @param {boolean} [fPrefix]
- * @return {string} the hex representation of n
- */
-str.toHex = function(n, cch, fPrefix)
-{
-    var s = "";
-
-    if (cch) {
-        if (cch > 8) cch = 8;
-    } else {
-        cch = (n & ~0xffff)? 8 : 4;
-    }
-    /*
-     * An initial "falsey" check for null takes care of both null and undefined;
-     * we can't rely entirely on isNaN(), because isNaN(null) returns false, oddly enough.
+     * Converts an integer to binary, with the specified number of bytes (up to the default of 4).
      *
-     * Alternatively, we could mask and shift n regardless of whether it's null/undefined/NaN,
-     * since JavaScript coerces such operands to zero, but I think there's "value" in seeing those
-     * values displayed differently.
+     * @param {number|null|undefined} n is a 32-bit value
+     * @param {number} [cb] is the desired number of binary bytes (4 is both the default and the maximum)
+     * @param {boolean} [fPrefix]
+     * @return {string} the binary representation of n
      */
-    if (n == null || isNaN(n)) {
-        while (cch-- > 0) s = '?' + s;
-    } else {
-        while (cch-- > 0) {
-            var d = n & 0xf;
-            d += (d >= 0 && d <= 9? 0x30 : 0x41 - 10);
-            s = String.fromCharCode(d) + s;
-            n >>= 4;
+    static toBinBytes(n, cb, fPrefix)
+    {
+        var s = "";
+        if (!cb || cb > 4) cb = 4;
+        for (var i = 0; i < cb; i++) {
+            if (s) s = ',' + s;
+            s = Str.toBin(n & 0xff, 8) + s;
+            n >>= 8;
         }
+        return (fPrefix ? "0b" : "") + s;
     }
-    return (fPrefix? "0x" : "") + s;
-};
 
-/**
- * toHexByte(b)
- *
- * Alias for str.toHex(b, 2, true)
- *
- * @param {number|null|undefined} b is a byte value
- * @return {string} the hex representation of b
- */
-str.toHexByte = function(b)
-{
-    return str.toHex(b, 2, true);
-};
-
-/**
- * toHexWord(w)
- *
- * Alias for str.toHex(w, 4, true)
- *
- * @param {number|null|undefined} w is a word (16-bit) value
- * @return {string} the hex representation of w
- */
-str.toHexWord = function(w)
-{
-    return str.toHex(w, 4, true);
-};
-
-/**
- * toHexLong(l)
- *
- * Alias for str.toHex(l, 8, true)
- *
- * @param {number|null|undefined} l is a dword (32-bit) value
- * @return {string} the hex representation of w
- */
-str.toHexLong = function(l)
-{
-    return str.toHex(l, 8, true);
-};
-
-/**
- * getBaseName(sFileName, fStripExt)
- *
- * This is a poor-man's version of Node's path.basename(), which Node-only components should use instead.
- *
- * Note that if fStripExt is true, this strips ANY extension, whereas path.basename() strips the extension only
- * if it matches the second parameter (eg, path.basename("/foo/bar/baz/asdf/quux.html", ".html") returns "quux").
- *
- * @param {string} sFileName
- * @param {boolean} [fStripExt]
- * @return {string}
- */
-str.getBaseName = function(sFileName, fStripExt)
-{
-    var sBaseName = sFileName;
-
-    var i = sFileName.lastIndexOf('/');
-    if (i >= 0) sBaseName = sFileName.substr(i + 1);
-
-    /*
-     * This next bit is a kludge to clean up names that are part of a URL that includes unsightly query parameters.
+    /**
+     * toOct(n, cch, fPrefix)
+     *
+     * Converts an integer to octal, with the specified number of digits (default of 6; max of 11)
+     *
+     * You might be tempted to use the built-in n.toString(8) instead, but it doesn't zero-pad and it
+     * doesn't properly convert negative values.  Moreover, if n is undefined, n.toString() will throw
+     * an exception, whereas this function will return '?' characters.
+     *
+     * @param {number|null|undefined} n is a 32-bit value
+     * @param {number} [cch] is the desired number of octal digits (0 or undefined for default of either 6 or 11)
+     * @param {boolean} [fPrefix]
+     * @return {string} the octal representation of n
      */
-    i = sBaseName.indexOf('&');
-    if (i > 0) sBaseName = sBaseName.substr(0, i);
+    static toOct(n, cch, fPrefix)
+    {
+        var s = "";
 
-    if (fStripExt) {
-        i = sBaseName.lastIndexOf(".");
-        if (i > 0) {
-            sBaseName = sBaseName.substring(0, i);
+        if (cch) {
+            if (cch > 11) cch = 11;
+        } else {
+            cch = (n & ~0xffffff) ? 11 : ((n & ~0xffff) ? 8 : 6);
         }
+        /*
+         * An initial "falsey" check for null takes care of both null and undefined;
+         * we can't rely entirely on isNaN(), because isNaN(null) returns false, oddly enough.
+         *
+         * Alternatively, we could mask and shift n regardless of whether it's null/undefined/NaN,
+         * since JavaScript coerces such operands to zero, but I think there's "value" in seeing those
+         * values displayed differently.
+         */
+        if (n == null || isNaN(n)) {
+            while (cch-- > 0) s = '?' + s;
+        } else {
+            while (cch-- > 0) {
+                var d = (n & 7) + 0x30;
+                s = String.fromCharCode(d) + s;
+                n >>= 3;
+            }
+        }
+        return (fPrefix ? "0o" : "") + s;
     }
-    return sBaseName;
-};
 
-/**
- * getExtension(sFileName)
- *
- * This is a poor-man's version of Node's path.extname(), which Node-only components should use instead.
- *
- * Note that we EXCLUDE the period from the returned extension, whereas path.extname() includes it.
- *
- * @param {string} sFileName
- * @return {string} the filename's extension (in lower-case and EXCLUDING the "."), or an empty string
- */
-str.getExtension = function(sFileName)
-{
-    var sExtension = "";
-    var i = sFileName.lastIndexOf(".");
-    if (i >= 0) {
-        sExtension = sFileName.substr(i + 1).toLowerCase();
+    /**
+     * toDec(n, cch)
+     *
+     * Converts an integer to decimal, with the specified number of digits (default of 5; max of 10)
+     *
+     * You might be tempted to use the built-in n.toString(10) instead, but it doesn't zero-pad and it
+     * doesn't properly convert negative values.  Moreover, if n is undefined, n.toString() will throw
+     * an exception, whereas this function will return '?' characters.
+     *
+     * @param {number|null|undefined} n is a 32-bit value
+     * @param {number} [cch] is the desired number of decimal digits (0 or undefined for default of either 5 or 10)
+     * @return {string} the octal representation of n
+     */
+    static toDec(n, cch)
+    {
+        var s = "";
+
+        if (cch) {
+            if (cch > 10) cch = 10;
+        } else {
+            cch = (n & ~0xffff) ? 10 : 5;
+        }
+        /*
+         * An initial "falsey" check for null takes care of both null and undefined;
+         * we can't rely entirely on isNaN(), because isNaN(null) returns false, oddly enough.
+         *
+         * Alternatively, we could mask and shift n regardless of whether it's null/undefined/NaN,
+         * since JavaScript coerces such operands to zero, but I think there's "value" in seeing those
+         * values displayed differently.
+         */
+        if (n == null || isNaN(n)) {
+            while (cch-- > 0) s = '?' + s;
+        } else {
+            while (cch-- > 0) {
+                var d = (n % 10) + 0x30;
+                s = String.fromCharCode(d) + s;
+                n /= 10;
+            }
+        }
+        return s;
     }
-    return sExtension;
-};
 
-/**
- * endsWith(s, sSuffix)
- *
- * @param {string} s
- * @param {string} sSuffix
- * @return {boolean} true if s ends with sSuffix, false if not
- */
-str.endsWith = function(s, sSuffix)
-{
-    return s.indexOf(sSuffix, s.length - sSuffix.length) !== -1;
-};
+    /**
+     * toHex(n, cch, fPrefix)
+     *
+     * Converts an integer to hex, with the specified number of digits (default of 4 or 8, max of 8).
+     *
+     * You might be tempted to use the built-in n.toString(16) instead, but it doesn't zero-pad and it
+     * doesn't properly convert negative values; for example, if n is -2147483647, then n.toString(16)
+     * will return "-7fffffff" instead of "80000001".  Moreover, if n is undefined, n.toString() will
+     * throw an exception, whereas this function will return '?' characters.
+     *
+     * NOTE: The following work-around (adapted from code found on StackOverflow) would be another solution,
+     * taking care of negative values, zero-padding, and upper-casing, but not null/undefined/NaN values:
+     *
+     *      s = (n < 0? n + 0x100000000 : n).toString(16);
+     *      s = "00000000".substr(0, 8 - s.length) + s;
+     *      s = s.substr(0, cch).toUpperCase();
+     *
+     * @param {number|null|undefined} n is a 32-bit value
+     * @param {number} [cch] is the desired number of hex digits (0 or undefined for default of either 4 or 8)
+     * @param {boolean} [fPrefix]
+     * @return {string} the hex representation of n
+     */
+    static toHex(n, cch, fPrefix)
+    {
+        var s = "";
 
-str.aHTMLEscapeMap = {
+        if (cch) {
+            if (cch > 8) cch = 8;
+        } else {
+            cch = (n & ~0xffff) ? 8 : 4;
+        }
+        /*
+         * An initial "falsey" check for null takes care of both null and undefined;
+         * we can't rely entirely on isNaN(), because isNaN(null) returns false, oddly enough.
+         *
+         * Alternatively, we could mask and shift n regardless of whether it's null/undefined/NaN,
+         * since JavaScript coerces such operands to zero, but I think there's "value" in seeing those
+         * values displayed differently.
+         */
+        if (n == null || isNaN(n)) {
+            while (cch-- > 0) s = '?' + s;
+        } else {
+            while (cch-- > 0) {
+                var d = n & 0xf;
+                d += (d >= 0 && d <= 9 ? 0x30 : 0x41 - 10);
+                s = String.fromCharCode(d) + s;
+                n >>= 4;
+            }
+        }
+        return (fPrefix ? "0x" : "") + s;
+    }
+
+    /**
+     * toHexByte(b)
+     *
+     * Alias for Str.toHex(b, 2, true)
+     *
+     * @param {number|null|undefined} b is a byte value
+     * @return {string} the hex representation of b
+     */
+    static toHexByte(b)
+    {
+        return Str.toHex(b, 2, true);
+    }
+
+    /**
+     * toHexWord(w)
+     *
+     * Alias for Str.toHex(w, 4, true)
+     *
+     * @param {number|null|undefined} w is a word (16-bit) value
+     * @return {string} the hex representation of w
+     */
+    static toHexWord(w)
+    {
+        return Str.toHex(w, 4, true);
+    }
+
+    /**
+     * toHexLong(l)
+     *
+     * Alias for Str.toHex(l, 8, true)
+     *
+     * @param {number|null|undefined} l is a dword (32-bit) value
+     * @return {string} the hex representation of w
+     */
+    static toHexLong(l)
+    {
+        return Str.toHex(l, 8, true);
+    }
+
+    /**
+     * getBaseName(sFileName, fStripExt)
+     *
+     * This is a poor-man's version of Node's path.basename(), which Node-only components should use instead.
+     *
+     * Note that if fStripExt is true, this strips ANY extension, whereas path.basename() strips the extension only
+     * if it matches the second parameter (eg, path.basename("/foo/bar/baz/asdf/quux.html", ".html") returns "quux").
+     *
+     * @param {string} sFileName
+     * @param {boolean} [fStripExt]
+     * @return {string}
+     */
+    static getBaseName(sFileName, fStripExt)
+    {
+        var sBaseName = sFileName;
+
+        var i = sFileName.lastIndexOf('/');
+        if (i >= 0) sBaseName = sFileName.substr(i + 1);
+
+        /*
+         * This next bit is a kludge to clean up names that are part of a URL that includes unsightly query parameters.
+         */
+        i = sBaseName.indexOf('&');
+        if (i > 0) sBaseName = sBaseName.substr(0, i);
+
+        if (fStripExt) {
+            i = sBaseName.lastIndexOf(".");
+            if (i > 0) {
+                sBaseName = sBaseName.substring(0, i);
+            }
+        }
+        return sBaseName;
+    }
+
+    /**
+     * getExtension(sFileName)
+     *
+     * This is a poor-man's version of Node's path.extname(), which Node-only components should use instead.
+     *
+     * Note that we EXCLUDE the period from the returned extension, whereas path.extname() includes it.
+     *
+     * @param {string} sFileName
+     * @return {string} the filename's extension (in lower-case and EXCLUDING the "."), or an empty string
+     */
+    static getExtension(sFileName)
+    {
+        var sExtension = "";
+        var i = sFileName.lastIndexOf(".");
+        if (i >= 0) {
+            sExtension = sFileName.substr(i + 1).toLowerCase();
+        }
+        return sExtension;
+    }
+
+    /**
+     * endsWith(s, sSuffix)
+     *
+     * @param {string} s
+     * @param {string} sSuffix
+     * @return {boolean} true if s ends with sSuffix, false if not
+     */
+    static endsWith(s, sSuffix)
+    {
+        return s.indexOf(sSuffix, s.length - sSuffix.length) !== -1;
+    }
+
+    /**
+     * escapeHTML(sHTML)
+     *
+     * @param {string} sHTML
+     * @return {string} with HTML entities "escaped", similar to PHP's htmlspecialchars()
+     */
+    static escapeHTML(sHTML)
+    {
+        return sHTML.replace(/[&<>"']/g, function(m)
+        {
+            return Str.aHTMLEscapeMap[m];
+        });
+    }
+
+    /**
+     * replaceAll(sFind, sReplace, s)
+     *
+     * @param {string} sFind
+     * @param {string} sReplace
+     * @param {string} s
+     * @return {string}
+     */
+    static replaceAll(sFind, sReplace, s)
+    {
+        var a = {};
+        a[sFind] = sReplace;
+        return Str.replaceArray(a, s);
+    }
+
+    /**
+     * replaceArray(a, s)
+     *
+     * @param {Object} a
+     * @param {string} s
+     * @return {string}
+     */
+    static replaceArray(a, s)
+    {
+        var sMatch = "";
+        for (var k in a) {
+            /*
+             * As noted in:
+             *
+             *      http://www.regexguru.com/2008/04/escape-characters-only-when-necessary/
+             *
+             * inside character classes, only backslash, caret, hyphen and the closing bracket need to be
+             * escaped.  And in fact, if you ensure that the closing bracket is first, the caret is not first,
+             * and the hyphen is last, you can avoid escaping those as well.
+             */
+            k = k.replace(/([\\[\]*{}().+?])/g, "\\$1");
+            sMatch += (sMatch ? '|' : '') + k;
+        }
+        return s.replace(new RegExp('(' + sMatch + ')', "g"), function(m)
+        {
+            return a[m];
+        });
+    }
+
+    /**
+     * pad(s, cch, fPadLeft)
+     *
+     * NOTE: the maximum amount of padding currently supported is 40 spaces.
+     *
+     * @param {string} s is a string
+     * @param {number} cch is desired length
+     * @param {boolean} [fPadLeft] (default is padding on the right)
+     * @return {string} the original string (s) with spaces padding it to the specified length
+     */
+    static pad(s, cch, fPadLeft)
+    {
+        var sPadding = "                                        ";
+        return fPadLeft ? (sPadding + s).slice(-cch) : (s + sPadding).slice(0, cch);
+    }
+
+    /**
+     * stripLeadingZeros(s, fPad)
+     *
+     * @param {string} s
+     * @param {boolean} [fPad]
+     * @return {string}
+     */
+    static stripLeadingZeros(s, fPad)
+    {
+        var cch = s.length;
+        s = s.replace(/^0+([0-9A-F]+)$/i, "$1");
+        if (fPad) s = Str.pad(s, cch, true);
+        return s;
+    }
+
+    /**
+     * trim(s)
+     *
+     * @param {string} s
+     * @return {string}
+     */
+    static trim(s)
+    {
+        if (String.prototype.trim) {
+            return s.trim();
+        }
+        return s.replace(/^\s+|\s+$/g, "");
+    }
+
+    /**
+     * toASCIICode(b)
+     *
+     * @param {number} b
+     * @return {string}
+     */
+    static toASCIICode(b)
+    {
+        var s;
+        if (b != Str.ASCII.CR && b != Str.ASCII.LF) {
+            s = Str.aASCIICodes[b];
+        }
+        if (s) {
+            s = '<' + s + '>';
+        } else {
+            s = String.fromCharCode(b);
+        }
+        return s;
+    }
+}
+
+Str.aHTMLEscapeMap = {
     '&': '&amp;',
     '<': '&lt;',
     '>': '&gt;',
@@ -451,111 +574,10 @@ str.aHTMLEscapeMap = {
     "'": '&#039;'
 };
 
-/**
- * escapeHTML(sHTML)
- *
- * @param {string} sHTML
- * @return {string} with HTML entities "escaped", similar to PHP's htmlspecialchars()
- */
-str.escapeHTML = function(sHTML)
-{
-    return sHTML.replace(/[&<>"']/g, function(m) {
-        return str.aHTMLEscapeMap[m];
-    });
-};
-
-/**
- * replaceAll(sFind, sReplace, s)
- *
- * @param {string} sFind
- * @param {string} sReplace
- * @param {string} s
- * @return {string}
- */
-str.replaceAll = function(sFind, sReplace, s)
-{
-    var a = {};
-    a[sFind] = sReplace;
-    return str.replaceArray(a, s);
-};
-
-/**
- * replaceArray(a, s)
- *
- * @param {Object} a
- * @param {string} s
- * @return {string}
- */
-str.replaceArray = function(a, s)
-{
-    var sMatch = "";
-    for (var k in a) {
-        /*
-         * As noted in:
-         *
-         *      http://www.regexguru.com/2008/04/escape-characters-only-when-necessary/
-         *
-         * inside character classes, only backslash, caret, hyphen and the closing bracket need to be
-         * escaped.  And in fact, if you ensure that the closing bracket is first, the caret is not first,
-         * and the hyphen is last, you can avoid escaping those as well.
-         */
-        k = k.replace(/([\\[\]*{}().+?])/g, "\\$1");
-        sMatch += (sMatch? '|' : '') + k;
-    }
-    return s.replace(new RegExp('(' + sMatch + ')', "g"), function(m) {
-        return a[m];
-    });
-};
-
-/**
- * pad(s, cch, fPadLeft)
- *
- * NOTE: the maximum amount of padding currently supported is 40 spaces.
- *
- * @param {string} s is a string
- * @param {number} cch is desired length
- * @param {boolean} [fPadLeft] (default is padding on the right)
- * @return {string} the original string (s) with spaces padding it to the specified length
- */
-str.pad = function(s, cch, fPadLeft)
-{
-    var sPadding = "                                        ";
-    return fPadLeft? (sPadding + s).slice(-cch) : (s + sPadding).slice(0, cch);
-};
-
-/**
- * stripLeadingZeros(s, fPad)
- *
- * @param {string} s
- * @param {boolean} [fPad]
- * @return {string}
- */
-str.stripLeadingZeros = function(s, fPad)
-{
-    var cch = s.length;
-    s = s.replace(/^0+([0-9A-F]+)$/i, "$1");
-    if (fPad) s = str.pad(s, cch, true);
-    return s;
-};
-
-/**
- * trim(s)
- *
- * @param {string} s
- * @return {string}
- */
-str.trim = function(s)
-{
-    if (String.prototype.trim) {
-        return s.trim();
-    }
-    return s.replace(/^\s+|\s+$/g, "");
-};
-
 /*
  * Future home of a general-purpose ASCII table.  TODO: Flesh it out.
  */
-str.ASCII = {
+Str.ASCII = {
     LF:     0x0A,
     CR:     0x0D
 };
@@ -563,7 +585,7 @@ str.ASCII = {
 /*
  * Table for converting "unprintable" ASCII codes into mnemonics, to more clearly see what's being printed.
  */
-str.aASCIICodes = {
+Str.aASCIICodes = {
     0x00:   "NUL",
     0x01:   "SOH",      // (CTRL_A) Start of Heading
     0x02:   "STX",      // (CTRL_B) Start of Text
@@ -598,21 +620,16 @@ str.aASCIICodes = {
     0x1F:   "US"        // Unit Separator
 };
 
-/**
- * toASCIICode(b)
- *
- * @param {number} b
- * @return {string}
- */
-str.toASCIICode = function(b)
-{
-    var s = (b != str.ASCII.CR && b != str.ASCII.LF? str.aASCIICodes[b] : null);
-    if (s) {
-        s = '<' + s + '>';
-    } else {
-        s = String.fromCharCode(b);
-    }
-    return s;
+Str.TYPES = {
+    NULL:       0,
+    BYTE:       1,
+    WORD:       2,
+    DWORD:      3,
+    NUMBER:     4,
+    STRING:     5,
+    BOOLEAN:    6,
+    OBJECT:     7,
+    ARRAY:      8
 };
 
-if (NODE) module.exports = str;
+if (NODE) module.exports = Str;

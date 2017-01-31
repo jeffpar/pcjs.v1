@@ -28,12 +28,10 @@
 
 "use strict";
 
-/* global document: true, window: true, XSLTProcessor: false, APPNAME: false, APPVERSION: false, XMLVERSION: true, DEBUG: true */
-
 if (NODE) {
-    var Component = require("./component");
-    var str       = require("./strlib");
-    var web       = require("./weblib");
+    var Str = require("../../shared/lib/strlib");
+    var Web = require("../../shared/lib/weblib");
+    var Component = require("../../shared/lib/component");
 }
 
 /*
@@ -45,8 +43,8 @@ if (NODE) {
  * machine component init() handlers.
  *
  * Also, to prevent those init() handlers from running prematurely, we must disable all page
- * notification events at the start of the embedding process (web.enablePageEvents(false)) and
- * re-enable them at the end (web.enablePageEvents(true)).
+ * notification events at the start of the embedding process (Web.enablePageEvents(false)) and
+ * re-enable them at the end (Web.enablePageEvents(true)).
  */
 var fAsync = true;
 var cAsyncMachines = 0;
@@ -95,7 +93,7 @@ function loadXML(sXMLFile, idMachine, sAppName, sAppClass, sParms, fResolve, dis
         parseXML(sXML, sXMLFile, idMachine, sAppName, sAppClass, sParms, fResolve, display, done);
     };
     display("Loading " + sXMLFile + "...");
-    web.getResource(sXMLFile, null, fAsync, doneLoadXML);
+    Web.getResource(sXMLFile, null, fAsync, doneLoadXML);
 }
 
 /**
@@ -171,9 +169,11 @@ function parseXML(sXML, sXMLFile, idMachine, sAppName, sAppClass, sParms, fResol
             /*
              * Non-COMPILED kludge to replace the version number template in the XSL file (which we assume we're reading,
              * since fResolve is false) with whatever XMLVERSION we extracted from the XML file (see corresponding kludge below).
+             *
+             * ES6 ALERT: Template strings.
              */
             if (!COMPILED && XMLVERSION) {
-                sXML = sXML.replace(/<xsl:variable name="APPVERSION">1.x.x<\/xsl:variable>/, '<xsl:variable name="APPVERSION">' + XMLVERSION + '</xsl:variable>');
+                sXML = sXML.replace(/<xsl:variable name="APPVERSION">1.x.x<\/xsl:variable>/, `<xsl:variable name="APPVERSION">${XMLVERSION}</xsl:variable>`);
             }
         }
 
@@ -188,7 +188,7 @@ function parseXML(sXML, sXMLFile, idMachine, sAppName, sAppClass, sParms, fResol
          * Supposedly, the IE XML DOM parser will throw an exception, but I haven't tested that, and unless all other
          * browsers do that, that's not helpful.
          *
-         * The best I can do at this stage (assuming web.getResource() didn't drop any error information on the floor)
+         * The best I can do at this stage (assuming Web.getResource() didn't drop any error information on the floor)
          * is verify that the requested resource "looks like" valid XML (in other words, it begins with a '<').
          */
         var xmlDoc = null;
@@ -320,7 +320,7 @@ function resolveXML(sXML, display, done)
         };
 
         display("Loading " + sRefFile + "...");
-        web.getResource(sRefFile, null, fAsync, doneReadXML);
+        Web.getResource(sRefFile, null, fAsync, doneReadXML);
         return;
     }
     done(sXML, null);
@@ -350,7 +350,7 @@ function embedMachine(sAppName, sAppClass, sVersion, idMachine, sXMLFile, sXSLFi
     var doneMachine = function() {
         Component.assert(cAsyncMachines > 0);
         if (!--cAsyncMachines) {
-            if (fAsync) web.enablePageEvents(true);
+            if (fAsync) Web.enablePageEvents(true);
         }
     };
 
@@ -378,7 +378,7 @@ function embedMachine(sAppName, sAppClass, sVersion, idMachine, sXMLFile, sXSLFi
             var aeWarning = (eMachine && Component.getElementsByClass(eMachine, "machine-warning"));
             eWarning = (aeWarning && aeWarning[0]) || eMachine;
         }
-        if (eWarning) eWarning.innerHTML = str.escapeHTML(sMessage);
+        if (eWarning) eWarning.innerHTML = Str.escapeHTML(sMessage);
     };
 
     try {
@@ -545,7 +545,7 @@ function embedMachine(sAppName, sAppClass, sVersion, idMachine, sXMLFile, sXSLFi
  */
 function embedC1P(idMachine, sXMLFile, sXSLFile)
 {
-    if (fAsync) web.enablePageEvents(false);
+    if (fAsync) Web.enablePageEvents(false);
     return embedMachine("C1Pjs", "c1pjs", APPVERSION, idMachine, sXMLFile, sXSLFile);
 }
 
@@ -560,7 +560,7 @@ function embedC1P(idMachine, sXMLFile, sXSLFile)
  */
 function embedPCx86(idMachine, sXMLFile, sXSLFile, sParms)
 {
-    if (fAsync) web.enablePageEvents(false);
+    if (fAsync) Web.enablePageEvents(false);
     return embedMachine("PCx86", "pcx86", APPVERSION, idMachine, sXMLFile, sXSLFile, sParms);
 }
 
@@ -575,7 +575,7 @@ function embedPCx86(idMachine, sXMLFile, sXSLFile, sParms)
  */
 function embedPC8080(idMachine, sXMLFile, sXSLFile, sParms)
 {
-    if (fAsync) web.enablePageEvents(false);
+    if (fAsync) Web.enablePageEvents(false);
     return embedMachine("PC8080", "pc8080", APPVERSION, idMachine, sXMLFile, sXSLFile, sParms);
 }
 
@@ -590,8 +590,20 @@ function embedPC8080(idMachine, sXMLFile, sXSLFile, sParms)
  */
 function embedPDP11(idMachine, sXMLFile, sXSLFile, sParms)
 {
-    if (fAsync) web.enablePageEvents(false);
+    if (fAsync) Web.enablePageEvents(false);
     return embedMachine("PDPjs", "pdp11", APPVERSION, idMachine, sXMLFile, sXSLFile, sParms);
+}
+
+/**
+ * findMachineComponent(idMachine, sType)
+ *
+ * @param {string} idMachine
+ * @param {string} sType
+ * @return {Component|null}
+ */
+function findMachineComponent(idMachine, sType)
+{
+    return Component.getComponentByType(sType, idMachine + ".machine");
 }
 
 /**
@@ -611,5 +623,7 @@ if (APPNAME == "PDPjs") {
     window['embedPDP11']  = embedPDP11;
 }
 
-window['enableEvents'] = web.enablePageEvents;
-window['sendEvent']    = web.sendPageEvent;
+window['findMachineComponent'] = findMachineComponent;
+
+window['enableEvents'] = Web.enablePageEvents;
+window['sendEvent']    = Web.sendPageEvent;
