@@ -33,7 +33,7 @@
 "use strict";
 
 if (NODE) {
-    var Str = require("../../shared/es6/strlib");
+    var Str = require("../../shared/lib/strlib");
     var PDP11 = require("./defines");
     var MessagesPDP11 = require("./messages");
     var DriveController = require("./drive");

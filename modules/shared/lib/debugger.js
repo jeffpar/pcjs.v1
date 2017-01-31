@@ -28,11 +28,9 @@
 
 "use strict";
 
-if (DEBUGGER) {
-    if (NODE) {
-        var str         = require("../../shared/lib/strlib");
-        var Component   = require("../../shared/lib/component");
-    }
+if (NODE) {
+    var Str = require("../../shared/lib/strlib");
+    var Component = require("../../shared/lib/component");
 }
 
 /**
@@ -50,105 +48,102 @@ if (DEBUGGER) {
  *      fTemporary:(boolean|undefined),
  *      sCmd:(string|undefined),
  *      aCmds:(Array.<string>|undefined)
- * }} DbgAddr
+ * }}
  */
 var DbgAddr;
 
 /**
- * Debugger(parmsDbg)
+ * Since the Closure Compiler treats ES6 classes as @struct rather than @dict by default,
+ * it deters us from defining named properties on our components; eg:
  *
- * The Debugger component supports the following optional (parmsDbg) properties:
+ *      this['exports'] = {...}
  *
- *      base: the base to use for most numeric input/output (default is 16)
+ * results in an error:
  *
- * The Debugger component is a shared component containing a subset of functionality used by
- * the other CPU-specific Debuggers (eg, DebuggerX86).  Over time, the goal is to factor out as
- * much common debugging support as possible from those components into this one.
+ *      Cannot do '[]' access on a struct
  *
- * @constructor
- * @extends Component
- * @param {Object} parmsDbg
+ * So, in order to define 'exports', we must override the @struct assumption by annotating
+ * the class as @unrestricted (or @dict).  Note that this must be done both here and in the
+ * subclass (eg, SerialPort), because otherwise the Compiler won't allow us to *reference*
+ * the named property either.
+ *
+ * TODO: Consider marking ALL our classes unrestricted, because otherwise it forces us to
+ * define every single property the class uses in its constructor, which results in a fair
+ * bit of redundant initialization, since many properties aren't (and don't need to be) fully
+ * initialized until the appropriate init(), reset(), restore(), etc. function is called.
+ *
+ * The upside, however, may be that since the structure of the class is completely defined by
+ * the constructor, JavaScript engines may be able to optimize and run more efficiently.
+ *
+ * @unrestricted
  */
-function Debugger(parmsDbg)
-{
-    if (DEBUGGER) {
+class Debugger extends Component {
+    /**
+     * Debugger(parmsDbg)
+     *
+     * The Debugger component supports the following optional (parmsDbg) properties:
+     *
+     *      base: the base to use for most numeric input/output (default is 16)
+     *
+     * The Debugger component is a shared component containing a subset of functionality used by
+     * the other CPU-specific Debuggers (eg, DebuggerX86).  Over time, the goal is to factor out as
+     * much common debugging support as possible from those components into this one.
+     *
+     * @param {Object} parmsDbg
+     */
+    constructor(parmsDbg) {
+        if (DEBUGGER) {
 
-        Component.call(this, "Debugger", parmsDbg, Debugger);
+            super("Debugger", parmsDbg);
 
-        /*
-         * Default base used to display all values; modified with the "s base" command.
-         */
-        this.nBase = parmsDbg['base'] || 16;
-        this.fParens = false;
+            /*
+             * Default base used to display all values; modified with the "s base" command.
+             */
+            this.nBase = +parmsDbg['base'] || 16;
+            this.fParens = false;
 
-        /*
-         * These keep track of instruction activity, but only when tracing or when Debugger checks
-         * have been enabled (eg, one or more breakpoints have been set).
-         *
-         * They are zeroed by the reset() notification handler.  cInstructions is advanced by
-         * stepCPU() and checkInstruction() calls.  nCycles is updated by every stepCPU() or stop()
-         * call and simply represents the number of cycles performed by the last run of instructions.
-         */
-        this.nCycles = 0;
-        this.cOpcodes = this.cOpcodesStart = 0;
+            /*
+             * These keep track of instruction activity, but only when tracing or when Debugger checks
+             * have been enabled (eg, one or more breakpoints have been set).
+             *
+             * They are zeroed by the reset() notification handler.  cInstructions is advanced by
+             * stepCPU() and checkInstruction() calls.  nCycles is updated by every stepCPU() or stop()
+             * call and simply represents the number of cycles performed by the last run of instructions.
+             */
+            this.nCycles = 0;
+            this.cOpcodes = this.cOpcodesStart = 0;
 
-        /*
-         * fAssemble is true when "assemble mode" is active, false when not.
-         */
-        this.fAssemble = false;
+            /*
+             * fAssemble is true when "assemble mode" is active, false when not.
+             */
+            this.fAssemble = false;
 
-        /*
-         * This maintains command history.  New commands are inserted at index 0 of the array.
-         * When Enter is pressed on an empty input buffer, we default to the command at aPrevCmds[0].
-         */
-        this.iPrevCmd = -1;
-        this.aPrevCmds = [];
+            /*
+             * This maintains command history.  New commands are inserted at index 0 of the array.
+             * When Enter is pressed on an empty input buffer, we default to the command at aPrevCmds[0].
+             */
+            this.iPrevCmd = -1;
+            this.aPrevCmds = [];
 
-        /*
-         * aVariables is an object with properties that grow as setVariable() assigns more variables;
-         * each property corresponds to one variable, where the property name is the variable name (ie,
-         * a string beginning with a letter or underscore, followed by zero or more additional letters,
-         * digits, or underscores) and the property value is the variable's numeric value.  See doVar()
-         * and setVariable() for details.
-         *
-         * Note that parseValue() parses variables before numbers, so any variable that looks like a
-         * unprefixed hex value (eg, "a5" as opposed to "0xa5") will trump the numeric value.  Unprefixed
-         * hex values are a convenience of parseValue(), which always calls str.parseInt() with a default
-         * base of 16; however, that default be overridden with a variety of explicit prefixes or suffixes
-         * (eg, a leading "0o" to indicate octal, a trailing period to indicate decimal, etc.)
-         *
-         * See str.parseInt() for more details about supported numbers.
-         */
-        this.aVariables = {};
+            /*
+             * aVariables is an object with properties that grow as setVariable() assigns more variables;
+             * each property corresponds to one variable, where the property name is the variable name (ie,
+             * a string beginning with a letter or underscore, followed by zero or more additional letters,
+             * digits, or underscores) and the property value is the variable's numeric value.  See doVar()
+             * and setVariable() for details.
+             *
+             * Note that parseValue() parses variables before numbers, so any variable that looks like a
+             * unprefixed hex value (eg, "a5" as opposed to "0xa5") will trump the numeric value.  Unprefixed
+             * hex values are a convenience of parseValue(), which always calls Str.parseInt() with a default
+             * base of 16; however, that default be overridden with a variety of explicit prefixes or suffixes
+             * (eg, a leading "0o" to indicate octal, a trailing period to indicate decimal, etc.)
+             *
+             * See Str.parseInt() for more details about supported numbers.
+             */
+            this.aVariables = {};
 
-    }   // endif DEBUGGER
-}
-
-if (DEBUGGER) {
-
-    Component.subclass(Debugger);
-
-    Debugger.aBinOpPrecedence = {
-        '||':   0,      // logical OR
-        '&&':   1,      // logical AND
-        '|':    2,      // bitwise OR
-        '^':    3,      // bitwise XOR
-        '&':    4,      // bitwise AND
-        '!=':   5,      // inequality
-        '==':   5,      // equality
-        '>=':   6,      // greater than or equal to
-        '>':    6,      // greater than
-        '<=':   6,      // less than or equal to
-        '<':    6,      // less than
-        '>>>':  7,      // unsigned bitwise right shift
-        '>>':   7,      // bitwise right shift
-        '<<':   7,      // bitwise left shift
-        '-':    8,      // subtraction
-        '+':    8,      // addition
-        '%':    9,      // remainder
-        '/':    9,      // division
-        '*':    9       // multiplication
-    };
+        }   // endif DEBUGGER
+    }
 
     /**
      * getRegIndex(sReg, off)
@@ -160,10 +155,9 @@ if (DEBUGGER) {
      * @param {number} [off] optional offset into sReg
      * @return {number} register index, or -1 if not found
      */
-    Debugger.prototype.getRegIndex = function(sReg, off)
-    {
+    getRegIndex(sReg, off) {
         return -1;
-    };
+    }
 
     /**
      * getRegValue(iReg)
@@ -174,10 +168,9 @@ if (DEBUGGER) {
      * @param {number} iReg
      * @return {number|undefined}
      */
-    Debugger.prototype.getRegValue = function(iReg)
-    {
+    getRegValue(iReg) {
         return undefined;
-    };
+    }
 
     /**
      * parseAddrReference(s, sAddr)
@@ -191,10 +184,9 @@ if (DEBUGGER) {
      * @param {string} sAddr
      * @return {string}
      */
-    Debugger.prototype.parseAddrReference = function(s, sAddr)
-    {
+    parseAddrReference(s, sAddr) {
         return s.replace('[' + sAddr + ']', "unimplemented");
-    };
+    }
 
     /**
      * getNextCommand()
@@ -202,8 +194,7 @@ if (DEBUGGER) {
      * @this {Debugger}
      * @return {string}
      */
-    Debugger.prototype.getNextCommand = function()
-    {
+    getNextCommand() {
         var sCmd;
         if (this.iPrevCmd > 0) {
             sCmd = this.aPrevCmds[--this.iPrevCmd];
@@ -212,7 +203,7 @@ if (DEBUGGER) {
             this.iPrevCmd = -1;
         }
         return sCmd;
-    };
+    }
 
     /**
      * getPrevCommand()
@@ -220,14 +211,13 @@ if (DEBUGGER) {
      * @this {Debugger}
      * @return {string|null}
      */
-    Debugger.prototype.getPrevCommand = function()
-    {
+    getPrevCommand() {
         var sCmd = null;
         if (this.iPrevCmd < this.aPrevCmds.length - 1) {
             sCmd = this.aPrevCmds[++this.iPrevCmd];
         }
         return sCmd;
-    };
+    }
 
     /**
      * parseCommand(sCmd, fSave, chSep)
@@ -238,8 +228,7 @@ if (DEBUGGER) {
      * @param {string} [chSep] is the command separator character (default is ';')
      * @return {Array.<string>}
      */
-    Debugger.prototype.parseCommand = function(sCmd, fSave, chSep)
-    {
+    parseCommand(sCmd, fSave, chSep) {
         if (fSave) {
             if (!sCmd) {
                 if (this.fAssemble) {
@@ -265,7 +254,7 @@ if (DEBUGGER) {
              * associated with a breakpoint), we can no longer perform simplistic splitting.
              *
              *      a = sCmd.split(chSep || ';');
-             *      for (var i = 0; i < a.length; i++) a[i] = str.trim(a[i]);
+             *      for (var i = 0; i < a.length; i++) a[i] = Str.trim(a[i]);
              *
              * We may now split on semi-colons ONLY if they are outside a quoted sequence.
              *
@@ -298,13 +287,13 @@ if (DEBUGGER) {
                      * Recall that substring() accepts starting (inclusive) and ending (exclusive)
                      * indexes, whereas substr() accepts a starting index and a length.  We need the former.
                      */
-                    a.push(str.trim(sCmd.substring(iPrev, i)));
+                    a.push(Str.trim(sCmd.substring(iPrev, i)));
                     iPrev = i + 1;
                 }
             }
         }
         return a;
-    };
+    }
 
     /**
      * evalExpression(aVals, aOps, cOps)
@@ -327,8 +316,7 @@ if (DEBUGGER) {
      * @param {number} [cOps] (default is all)
      * @return {boolean} true if successful, false if error
      */
-    Debugger.prototype.evalExpression = function(aVals, aOps, cOps)
-    {
+    evalExpression(aVals, aOps, cOps) {
         cOps = cOps || -1;
         while (cOps-- && aOps.length) {
             var chOp = aOps.pop();
@@ -402,7 +390,7 @@ if (DEBUGGER) {
             aVals.push(valNew|0);
         }
         return true;
-    };
+    }
 
     /**
      * parseExpression(sExp, fPrint)
@@ -440,8 +428,7 @@ if (DEBUGGER) {
      * @param {boolean} [fPrint] is true to print all resolved values, false for quiet parsing
      * @return {number|undefined} numeric value, or undefined if sExp contains any undefined or invalid values
      */
-    Debugger.prototype.parseExpression = function(sExp, fPrint)
-    {
+    parseExpression(sExp, fPrint) {
         var value;
 
         if (sExp) {
@@ -468,7 +455,7 @@ if (DEBUGGER) {
             while (i < asValues.length) {
                 var sValue = asValues[i++];
                 var cchValue = sValue.length;
-                var s = str.trim(sValue);
+                var s = Str.trim(sValue);
                 if (!s) {
                     fError = true;
                     break;
@@ -500,7 +487,7 @@ if (DEBUGGER) {
             }
         }
         return value;
-    };
+    }
 
     /**
      * parseReference(s)
@@ -514,8 +501,7 @@ if (DEBUGGER) {
      * @param {string} s
      * @return {string}
      */
-    Debugger.prototype.parseReference = function(s)
-    {
+    parseReference(s) {
         var a;
         var chOpen = this.fParens? '(' : '{';
         var chClose = this.fParens? ')' : '}';
@@ -530,7 +516,7 @@ if (DEBUGGER) {
             s = this.parseAddrReference(s, a[1]);
         }
         return this.parseSysVars(s);
-    };
+    }
 
     /**
      * parseSysVars(s)
@@ -543,8 +529,7 @@ if (DEBUGGER) {
      * @param {string} s
      * @return {string}
      */
-    Debugger.prototype.parseSysVars = function(s)
-    {
+    parseSysVars(s) {
         var a;
         while (a = s.match(/\$([a-z]+)/i)) {
             var v = null;
@@ -557,7 +542,7 @@ if (DEBUGGER) {
             s = s.replace(a[0], v.toString());
         }
         return s;
-    };
+    }
 
     /**
      * parseValue(sValue, sName, fQuiet)
@@ -568,8 +553,7 @@ if (DEBUGGER) {
      * @param {boolean} [fQuiet]
      * @return {number|undefined} numeric value, or undefined if sValue is either undefined or invalid
      */
-    Debugger.prototype.parseValue = function(sValue, sName, fQuiet)
-    {
+    parseValue(sValue, sName, fQuiet) {
         var value;
         if (sValue != null) {
             var iReg = this.getRegIndex(sValue);
@@ -578,7 +562,7 @@ if (DEBUGGER) {
             } else {
                 value = this.getVariable(sValue);
                 if (value == null) {
-                    value = str.parseInt(sValue, this.nBase);
+                    value = Str.parseInt(sValue, this.nBase);
                 }
             }
             if (value == null && !fQuiet) this.println("invalid " + (sName? sName : "value") + ": " + sValue);
@@ -586,7 +570,7 @@ if (DEBUGGER) {
             if (!fQuiet) this.println("missing " + (sName || "value"));
         }
         return value;
-    };
+    }
 
     /**
      * printValue(sVar, value)
@@ -596,13 +580,12 @@ if (DEBUGGER) {
      * @param {number|undefined} value
      * @return {boolean} true if value defined, false if not
      */
-    Debugger.prototype.printValue = function(sVar, value)
-    {
+    printValue(sVar, value) {
         var sValue;
         var fDefined = false;
         if (value !== undefined) {
             fDefined = true;
-            sValue = str.toHex(value, 0, true) + " " + value + ". " + str.toOct(value, 0, true) + " " + str.toBinBytes(value, 4, true);
+            sValue = Str.toHex(value, 0, true) + " " + value + ". " + Str.toOct(value, 0, true) + " " + Str.toBinBytes(value, 4, true);
             if (value >= 0x20 && value < 0x7F) {
                 sValue += " '" + String.fromCharCode(value) + "'";
             }
@@ -610,7 +593,7 @@ if (DEBUGGER) {
         sVar = (sVar != null? (sVar + ": ") : "");
         this.println(sVar + sValue);
         return fDefined;
-    };
+    }
 
     /**
      * printVariable(sVar)
@@ -619,8 +602,7 @@ if (DEBUGGER) {
      * @param {string} [sVar]
      * @return {boolean} true if all value(s) defined, false if not
      */
-    Debugger.prototype.printVariable = function(sVar)
-    {
+    printVariable(sVar) {
         if (sVar) {
             return this.printValue(sVar, this.aVariables[sVar]);
         }
@@ -630,7 +612,7 @@ if (DEBUGGER) {
             cVariables++;
         }
         return cVariables > 0;
-    };
+    }
 
     /**
      * delVariable(sVar)
@@ -638,10 +620,9 @@ if (DEBUGGER) {
      * @this {Debugger}
      * @param {string} sVar
      */
-    Debugger.prototype.delVariable = function(sVar)
-    {
+    delVariable(sVar) {
         delete this.aVariables[sVar];
-    };
+    }
 
     /**
      * getVariable(sVar)
@@ -650,10 +631,9 @@ if (DEBUGGER) {
      * @param {string} sVar
      * @return {number|undefined}
      */
-    Debugger.prototype.getVariable = function(sVar)
-    {
+    getVariable(sVar) {
         return this.aVariables[sVar];
-    };
+    }
 
     /**
      * setVariable(sVar, value)
@@ -662,15 +642,14 @@ if (DEBUGGER) {
      * @param {string} sVar
      * @param {number} value
      */
-    Debugger.prototype.setVariable = function(sVar, value)
-    {
+    setVariable(sVar, value) {
         this.aVariables[sVar] = value;
-    };
+    }
 
     /**
      * toStrBase(n, nBytes, fStripLeadingZeros)
      *
-     * Use this instead of str.toHex() or str.toOct() to convert bytes/words to the Debugger's default base.
+     * Use this instead of Str.toHex() or Str.toOct() to convert bytes/words to the Debugger's default base.
      *
      * @this {Debugger}
      * @param {number|null|undefined} n
@@ -678,22 +657,46 @@ if (DEBUGGER) {
      * @param {boolean} [fStripLeadingZeros]
      * @return {string}
      */
-    Debugger.prototype.toStrBase = function(n, nBytes, fStripLeadingZeros)
-    {
+    toStrBase(n, nBytes, fStripLeadingZeros) {
         var s;
         switch(this.nBase) {
         case 8:
-            s = str.toOct(n, nBytes * 3 - (nBytes > 2? 1 : 0));
+            s = Str.toOct(n, nBytes * 3 - (nBytes > 2? 1 : 0));
             break;
         case 10:
             s = n.toString();
             break;
         case 16:
         default:
-            s = str.toHex(n, nBytes * 2);
+            s = Str.toHex(n, nBytes * 2);
             break;
         }
-        return (fStripLeadingZeros? str.stripLeadingZeros(s) : s);
+        return (fStripLeadingZeros? Str.stripLeadingZeros(s) : s);
+    }
+}
+
+if (DEBUGGER) {
+
+    Debugger.aBinOpPrecedence = {
+        '||':   0,      // logical OR
+        '&&':   1,      // logical AND
+        '|':    2,      // bitwise OR
+        '^':    3,      // bitwise XOR
+        '&':    4,      // bitwise AND
+        '!=':   5,      // inequality
+        '==':   5,      // equality
+        '>=':   6,      // greater than or equal to
+        '>':    6,      // greater than
+        '<=':   6,      // less than or equal to
+        '<':    6,      // less than
+        '>>>':  7,      // unsigned bitwise right shift
+        '>>':   7,      // bitwise right shift
+        '<<':   7,      // bitwise left shift
+        '-':    8,      // subtraction
+        '+':    8,      // addition
+        '%':    9,      // remainder
+        '/':    9,      // division
+        '*':    9       // multiplication
     };
 
 }   // endif DEBUGGER

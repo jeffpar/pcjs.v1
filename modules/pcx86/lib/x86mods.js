@@ -29,7 +29,7 @@
 "use strict";
 
 if (NODE) {
-    var str         = require("../../shared/lib/strlib");
+    var Str         = require("../../shared/lib/strlib");
     var X86         = require("./x86");
 }
 
@@ -196,7 +196,7 @@ X86.modRegByte16 = function(fn)
         break;
     default:
         src = 0;
-        this.assert(false, "modRegByte16(): unrecognized modrm byte " + str.toHexByte(bModRM));
+        this.assert(false, "modRegByte16(): unrecognized modrm byte " + Str.toHexByte(bModRM));
         break;
     }
 
@@ -404,7 +404,7 @@ X86.modMemByte16 = function(fn)
         break;
     default:
         dst = 0;
-        this.assert(false, "modMemByte16(): unrecognized modrm byte " + str.toHexByte(bModRM));
+        this.assert(false, "modMemByte16(): unrecognized modrm byte " + Str.toHexByte(bModRM));
         break;
     }
 
@@ -529,7 +529,7 @@ X86.modMemByte16 = function(fn)
         if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiEALo;
         break;
     default:
-        this.assert(false, "modMemByte16(): unrecognized modrm byte " + str.toHexByte(bModRM));
+        this.assert(false, "modMemByte16(): unrecognized modrm byte " + Str.toHexByte(bModRM));
         break;
     }
 };
@@ -668,7 +668,7 @@ X86.modGrpByte16 = function(afnGrp, fnSrc) {
         break;
     default:
         dst = 0;
-        this.assert(false, "modGrpByte16(): unrecognized modrm byte " + str.toHexByte(bModRM));
+        this.assert(false, "modGrpByte16(): unrecognized modrm byte " + Str.toHexByte(bModRM));
         break;
     }
 
@@ -907,7 +907,7 @@ X86.modRegShort16 = function(fn)
         break;
     default:
         src = 0;
-        this.assert(false, "modRegShort16(): unrecognized modrm byte " + str.toHexByte(bModRM));
+        this.assert(false, "modRegShort16(): unrecognized modrm byte " + Str.toHexByte(bModRM));
         break;
     }
 
@@ -1128,7 +1128,7 @@ X86.modMemShort16 = function(fn)
         break;
     default:
         dst = 0;
-        this.assert(false, "modMemShort16(): unrecognized modrm byte " + str.toHexByte(bModRM));
+        this.assert(false, "modMemShort16(): unrecognized modrm byte " + Str.toHexByte(bModRM));
         break;
     }
 
@@ -1282,7 +1282,7 @@ X86.modMemShort16 = function(fn)
         }
         break;
     default:
-        this.assert(false, "modMemShort16(): unrecognized modrm byte " + str.toHexByte(bModRM));
+        this.assert(false, "modMemShort16(): unrecognized modrm byte " + Str.toHexByte(bModRM));
         break;
     }
 };
@@ -1421,7 +1421,7 @@ X86.modGrpShort16 = function(afnGrp, fnSrc) {
         break;
     default:
         dst = 0;
-        this.assert(false, "modGrpShort16(): unrecognized modrm byte " + str.toHexByte(bModRM));
+        this.assert(false, "modGrpShort16(): unrecognized modrm byte " + Str.toHexByte(bModRM));
         break;
     }
 
@@ -1660,7 +1660,7 @@ X86.modRegLong16 = function(fn)
         break;
     default:
         src = 0;
-        this.assert(false, "modRegLong16(): unrecognized modrm byte " + str.toHexByte(bModRM));
+        this.assert(false, "modRegLong16(): unrecognized modrm byte " + Str.toHexByte(bModRM));
         break;
     }
 
@@ -1881,7 +1881,7 @@ X86.modMemLong16 = function(fn)
         break;
     default:
         dst = 0;
-        this.assert(false, "modMemLong16(): unrecognized modrm byte " + str.toHexByte(bModRM));
+        this.assert(false, "modMemLong16(): unrecognized modrm byte " + Str.toHexByte(bModRM));
         break;
     }
 
@@ -2035,7 +2035,7 @@ X86.modMemLong16 = function(fn)
         }
         break;
     default:
-        this.assert(false, "modMemLong16(): unrecognized modrm byte " + str.toHexByte(bModRM));
+        this.assert(false, "modMemLong16(): unrecognized modrm byte " + Str.toHexByte(bModRM));
         break;
     }
 };
@@ -2173,7 +2173,7 @@ X86.modGrpLong16 = function(afnGrp, fnSrc) {
         dst = this.regEDI;
         break;
     default:
-        this.assert(false, "modGrpLong16(): unrecognized modrm byte " + str.toHexByte(bModRM));
+        this.assert(false, "modGrpLong16(): unrecognized modrm byte " + Str.toHexByte(bModRM));
         break;
     }
 
@@ -2372,7 +2372,7 @@ X86.modRegByte32 = function(fn)
         break;
     default:
         src = 0;
-        this.assert(false, "modRegByte32(): unrecognized modrm byte " + str.toHexByte(bModRM));
+        this.assert(false, "modRegByte32(): unrecognized modrm byte " + Str.toHexByte(bModRM));
         break;
     }
 
@@ -2580,7 +2580,7 @@ X86.modMemByte32 = function(fn)
         break;
     default:
         dst = 0;
-        this.assert(false, "modMemByte32(): unrecognized modrm byte " + str.toHexByte(bModRM));
+        this.assert(false, "modMemByte32(): unrecognized modrm byte " + Str.toHexByte(bModRM));
         break;
     }
 
@@ -2799,7 +2799,7 @@ X86.modGrpByte32 = function(afnGrp, fnSrc) {
         break;
     default:
         dst = 0;
-        this.assert(false, "modGrpByte32(): unrecognized modrm byte " + str.toHexByte(bModRM));
+        this.assert(false, "modGrpByte32(): unrecognized modrm byte " + Str.toHexByte(bModRM));
         break;
     }
 
@@ -2972,7 +2972,7 @@ X86.modRegShort32 = function(fn)
         break;
     default:
         src = 0;
-        this.assert(false, "modRegShort32(): unrecognized modrm byte " + str.toHexByte(bModRM));
+        this.assert(false, "modRegShort32(): unrecognized modrm byte " + Str.toHexByte(bModRM));
         break;
     }
 
@@ -3193,7 +3193,7 @@ X86.modMemShort32 = function(fn)
         break;
     default:
         dst = 0;
-        this.assert(false, "modMemShort32(): unrecognized modrm byte " + str.toHexByte(bModRM));
+        this.assert(false, "modMemShort32(): unrecognized modrm byte " + Str.toHexByte(bModRM));
         break;
     }
 
@@ -3441,7 +3441,7 @@ X86.modGrpShort32 = function(afnGrp, fnSrc) {
         break;
     default:
         dst = 0;
-        this.assert(false, "modGrpShort32(): unrecognized modrm byte " + str.toHexByte(bModRM));
+        this.assert(false, "modGrpShort32(): unrecognized modrm byte " + Str.toHexByte(bModRM));
         break;
     }
 
@@ -3614,7 +3614,7 @@ X86.modRegLong32 = function(fn)
         break;
     default:
         src = 0;
-        this.assert(false, "modRegLong32(): unrecognized modrm byte " + str.toHexByte(bModRM));
+        this.assert(false, "modRegLong32(): unrecognized modrm byte " + Str.toHexByte(bModRM));
         break;
     }
 
@@ -3835,7 +3835,7 @@ X86.modMemLong32 = function(fn)
         break;
     default:
         dst = 0;
-        this.assert(false, "modMemLong32(): unrecognized modrm byte " + str.toHexByte(bModRM));
+        this.assert(false, "modMemLong32(): unrecognized modrm byte " + Str.toHexByte(bModRM));
         break;
     }
 
@@ -4083,7 +4083,7 @@ X86.modGrpLong32 = function(afnGrp, fnSrc) {
         break;
     default:
         dst = 0;
-        this.assert(false, "modGrpLong32(): unrecognized modrm byte " + str.toHexByte(bModRM));
+        this.assert(false, "modGrpLong32(): unrecognized modrm byte " + Str.toHexByte(bModRM));
         break;
     }
 

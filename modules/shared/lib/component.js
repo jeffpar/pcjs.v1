@@ -27,627 +27,614 @@
  */
 
 /*
- * All the PCjs components now use JSDoc types, primarily so that Google's Closure Compiler will
- * compile everything with ZERO warnings.  For more information about the JSDoc types supported by
- * the Closure Compiler:
+ * All PCjs components now use JSDoc types, primarily so that Google's Closure Compiler will compile
+ * everything with zero warnings when ADVANCED_OPTIMIZATIONS are enabled.  For more information about
+ * the JSDoc types supported by the Closure Compiler:
  *
  *      https://developers.google.com/closure/compiler/docs/js-for-compiler#types
  *
- * I also attempted to use JSLint, but it's excessively strict for my taste, so this is the only file
- * I tried massaging for JSLint's sake.  I gave up when it complained about my use of "while (true)";
- * replacing "true" with an assignment expression didn't make it any happier.
+ * I also attempted to validate this code with JSLint, but it complained too much; eg, it didn't like
+ * "while (true)", a tried and "true" programming convention for decades, and it wanted me to replace
+ * all "++" and "--" operators with "+= 1" and "-= 1", use "(s || '')" instead of "(s? s : '')", etc.
  *
- * I wasn't thrilled about replacing all "++" and "--" operators with "+= 1" and "-= 1", nor about using
- * "(s || '')" instead of "(s? s : '')", because while the former may seem simpler, it is NOT more portable.
- * It's not that I'm trying to write "portable JavaScript", but some of this code was ported from C code I'd
- * written about 14 years earlier, and portability is good, so I'm not going to rewrite if there's no need.
+ * I prefer sticking with traditional C-style idioms, in part because they are more portable.  That
+ * does NOT mean I'm trying to write "portable JavaScript," but some of this code was ported from C code
+ * I'd written long ago, so portability is good, and I'm not going to throw that away if there's no need.
  *
- * UPDATE: I've since switched to JSHint, which seems to have more reasonable defaults.
+ * UPDATE: I've since switched from JSLint to JSHint, which seems to have more reasonable defaults.
+ * And for new code, I have adopted some popular JavaScript idioms, like "(s || '')", although the need
+ * for those kinds of expressions will be reduced as I also start adopting some ES6 features, like
+ * default parameters.
  */
 
 "use strict";
 
-/* global window: true, DEBUG: true */
-
-if (NODE) {
-    require("./defines");
-    var usr = require("./usrlib");
-    var web = require("./weblib");
-}
-
 /**
- * Component(type, parms, constructor, bitsMessage)
+ * Since the Closure Compiler treats ES6 classes as @struct rather than @dict by default,
+ * it deters us from defining named properties on our components; eg:
  *
- * A Component object requires:
+ *      this['exports'] = {...}
  *
- *      type: a user-defined type name (eg, "CPU")
+ * results in an error:
  *
- * and accepts any or all of the following (parms) properties:
+ *      Cannot do '[]' access on a struct
  *
- *      id: component ID (default is "")
- *      name: component name (default is ""; if blank, toString() will use the type name only)
- *      comment: component comment string (default is undefined)
+ * So, in order to define 'exports', we must override the @struct assumption by annotating
+ * the class as @unrestricted (or @dict).  Note that this must be done both here and in the
+ * subclass (eg, SerialPort), because otherwise the Compiler won't allow us to *reference*
+ * the named property either.
  *
- * Subclasses that use Component.subclass() to extend Component will likely have additional (parms) properties.
+ * TODO: Consider marking ALL our classes unrestricted, because otherwise it forces us to
+ * define every single property the class uses in its constructor, which results in a fair
+ * bit of redundant initialization, since many properties aren't (and don't need to be) fully
+ * initialized until the appropriate init(), reset(), restore(), etc. function is called.
  *
- * @constructor
- * @param {string} type
- * @param {Object} [parms]
- * @param {Object} [constructor]
- * @param {number} [bitsMessage] selects message(s) that the component wants to enable (default is 0)
+ * The upside, however, may be that since the structure of the class is completely defined by
+ * the constructor, JavaScript engines may be able to optimize and run more efficiently.
+ *
+ * @unrestricted
  */
-function Component(type, parms, constructor, bitsMessage)
-{
-    this.type = type;
+class Component {
+    /**
+     * Component(type, parms, bitsMessage)
+     *
+     * A Component object requires:
+     *
+     *      type: a user-defined type name (eg, "CPU")
+     *
+     * and accepts any or all of the following (parms) properties:
+     *
+     *      id: component ID (default is "")
+     *      name: component name (default is ""; if blank, toString() will use the type name only)
+     *      comment: component comment string (default is undefined)
+     *
+     * Component subclasses will usually have additional (parms) properties.
+     *
+     * @param {string} type
+     * @param {Object} [parms]
+     * @param {number} [bitsMessage] selects message(s) that the component wants to enable (default is 0)
+     */
+    constructor(type, parms, bitsMessage)
+    {
+        this.type = type;
 
-    if (!parms) parms = {'id': "", 'name': ""};
+        if (!parms) parms = {'id': "", 'name': ""};
 
-    this.id = parms['id'] || "";
-    this.name = parms['name'];
-    this.comment = parms['comment'];
-    this.parms = parms;
+        this.id = parms['id'] || "";
+        this.name = parms['name'];
+        this.comment = parms['comment'];
+        this.parms = parms;
 
-    var i = this.id.indexOf('.');
-    if (i < 0) {
-        this.idComponent = this.id;
-    } else {
-        this.idMachine = this.id.substr(0, i);
-        this.idComponent = this.id.substr(i + 1);
+        /*
+         * The following Component properties need to be accessible by other machines and/or command scripts;
+         * well, OK, or we could have exported some new functions to walk the contents of these properties, as we
+         * did with findMachineComponent(), but this works just as well.
+         *
+         * Also, while the double-assignment looks silly (ie, using both dot and bracket property notation), it
+         * resolves a complaint from the Closure Compiler, because if we use ONLY bracket notation here, then the
+         * Compiler wants us to change all the other references to bracket notation as well.
+         */
+        this.exports = this['exports'] = {};
+        this.bindings = this['bindings'] = {};
+
+        var i = this.id.indexOf('.');
+        if (i < 0) {
+            this.idComponent = this.id;
+        } else {
+            this.idMachine = this.id.substr(0, i);
+            this.idComponent = this.id.substr(i + 1);
+        }
+
+        /*
+         * Gather all the various component flags (booleans) into a single "flags" object, and encourage
+         * subclasses to do the same, to reduce the property clutter we have to wade through while debugging.
+         */
+        this.flags = {
+            ready:      false,
+            busy:       false,
+            busyCancel: false,
+            powered:    false,
+            error:      false
+        };
+
+        this.fnReady = null;
+        this.clearError();
+        this.bitsMessage = bitsMessage || 0;
+
+        /** @type {Object|null} controlPrint is the HTML control, if any, that we can print to */
+        this.controlPrint = null;
+
+        this.cmp = null;
+        this.bus = null;
+        this.cpu = null;
+        this.dbg = null;
+
+        /*
+         * TODO: Consider adding another parameter to the Component() constructor that allows components to tell
+         * us if they support single or multiple instances per machine.  For example, there can be multiple SerialPort
+         * components per machine, but only one CPU component (some machines also support an FPU, but that component
+         * is considered separate from the CPU).
+         *
+         * It's not critical, but it would help catch machine configuration errors; for example, a machine that mistakenly
+         * includes two CPU components may, aside from wasting memory, end up with odd side-effects, like unresponsive
+         * CPU controls.
+         */
+        Component.add(this);
     }
 
-    /*
-     * Recording the constructor is really just a debugging aid, because many of our constructors
-     * have class constants, but they're hard to find when the constructors are buried among all the
-     * other globals.
+    /**
+     * Component.add(component)
+     *
+     * @param {Component} component
      */
-    this[type] = constructor;
+    static add(component)
+    {
+        /*
+         * This just generates a lot of useless noise, handy in the early days, not so much these days....
+         *
+         *      if (DEBUG) Component.log("Component.add(" + component.type + "," + component.id + ")");
+         */
+        Component.components.push(component);
+    }
 
-    /*
-     * Gather all the various component flags (booleans) into a single "flags" object, and encourage
-     * subclasses to do the same, to reduce the property clutter we have to wade through while debugging.
+    /**
+     * Component.addMachine(idMachine)
+     *
+     * @param {string} idMachine
      */
-    this.flags = {
-        ready:      false,
-        busy:       false,
-        busyCancel: false,
-        powered:    false,
-        error:      false
+    static addMachine(idMachine)
+    {
+        Component.machines[idMachine] = {};
+    }
+
+    /**
+     * Component.addMachineResource(idMachine, sName, data)
+     *
+     * @param {string} idMachine
+     * @param {string|null} sName (name of the resource)
+     * @param {*} data
+     */
+    static addMachineResource(idMachine, sName, data)
+    {
+        /*
+         * I used to assert(Component.machines[idMachine]), but when we're running as a Node app, embed.js is not used,
+         * so addMachine() is never called, so resources do not need to be recorded.
+         */
+        if (Component.machines[idMachine] && sName) {
+            Component.machines[idMachine][sName] = data;
+        }
+    }
+
+    /**
+     * Component.getMachineResources(idMachine)
+     *
+     * @param {string} idMachine
+     * @return {Object|undefined}
+     */
+    static getMachineResources(idMachine)
+    {
+        return Component.machines[idMachine];
+    }
+
+    /**
+     * Component.getTime()
+     *
+     * @return {number} the current time, in milliseconds
+     */
+    static getTime()
+    {
+        return Date.now() || +new Date();
+    }
+
+    /**
+     * Component.log(s, type)
+     *
+     * For diagnostic output only.
+     *
+     * @param {string} [s] is the message text
+     * @param {string} [type] is the message type
+     */
+    static log(s, type)
+    {
+        if (!COMPILED) {
+            if (s) {
+                var sElapsed = "", sMsg = (type? (type + ": ") : "") + s;
+                if (typeof Usr != "undefined") {
+                    if (Component.msStart === undefined) {
+                        Component.msStart = Component.getTime();
+                    }
+                    sElapsed = (Component.getTime() - Component.msStart) + "ms: ";
+                }
+                if (window && window.console) console.log(sElapsed + sMsg.replace(/\n/g, " "));
+            }
+        }
+    }
+
+    /**
+     * Component.assert(f, s)
+     *
+     * Verifies conditions that must be true (for DEBUG builds only).
+     *
+     * The Closure Compiler should automatically remove all references to Component.assert() in non-DEBUG builds.
+     * TODO: Add a task to the build process that "asserts" there are no instances of "assertion failure" in RELEASE builds.
+     *
+     * @param {boolean} f is the expression we are asserting to be true
+     * @param {string} [s] is description of the assertion on failure
+     */
+    static assert(f, s)
+    {
+        if (DEBUG) {
+            if (!f) {
+                if (!s) s = "assertion failure";
+                Component.log(s);
+                throw new Error(s);
+            }
+        }
+    }
+
+    /**
+     * Component.println(s, type, id)
+     *
+     * For non-diagnostic messages, which components may override to control the destination/appearance of their output.
+     *
+     * Components that inherit from this class should use the instance method, this.println(), rather than Component.println(),
+     * because if a Control Panel is loaded, it will override only the instance method, not the class method (overriding the class
+     * method would improperly affect any other machines loaded on the same page).
+     *
+     * @param {string} [s] is the message text
+     * @param {string} [type] is the message type
+     * @param {string} [id] is the caller's ID, if any
+     */
+    static println(s, type, id)
+    {
+        if (!COMPILED) {
+            Component.log((id? (id + ": ") : "") + (s? ("\"" + s + "\"") : ""), type);
+        }
+    }
+
+    /**
+     * Component.notice(s, fPrintOnly, id)
+     *
+     * notice() is like println() but implies a need for user notification, so we alert() as well.
+     *
+     * @param {string} s is the message text
+     * @param {boolean} [fPrintOnly]
+     * @param {string} [id] is the caller's ID, if any
+     */
+    static notice(s, fPrintOnly, id)
+    {
+        if (!COMPILED) {
+            Component.println(s, "notice", id);
+        }
+        if (!fPrintOnly) Component.alertUser((id? (id + ": ") : "") + s);
+    }
+
+    /**
+     * Component.warning(s)
+     *
+     * @param {string} s describes the warning
+     */
+    static warning(s)
+    {
+        if (!COMPILED) {
+            Component.println(s, "warning");
+        }
+        Component.alertUser(s);
+    }
+
+    /**
+     * Component.error(s)
+     *
+     * @param {string} s describes the error; an alert() is displayed as well
+     */
+    static error(s)
+    {
+        if (!COMPILED) {
+            Component.println(s, "error");
+        }
+        Component.alertUser(s);
+    }
+
+    /**
+     * Component.alertUser(sMessage)
+     *
+     * @param {string} sMessage
+     */
+    static alertUser(sMessage)
+    {
+        if (window) {
+            window.alert(sMessage);
+        } else {
+            Component.log(sMessage);
+        }
     };
 
-    this.fnReady = null;
-    this.clearError();
-    this.bindings = {};
-    this.dbg = null;                    // by default, no connection to a Debugger
-    this.bitsMessage = bitsMessage || 0;
-
-    /*
-     * TODO: Consider adding another parameter to the Component() constructor that allows components to tell
-     * us if they support single or multiple instances per machine.  For example, there can be multiple SerialPort
-     * components per machine, but only one CPU component (well, OK, an FPU is also supported, but that's considered
-     * a different component).
-     *
-     * It's not critical, but it would help catch machine configuration errors; for example, a machine that mistakenly
-     * includes two CPU components may, aside from wasting memory, end up with odd side-effects, like unresponsive
-     * CPU controls.
-     */
-    Component.add(this);
-}
-
-/**
- * Component.inherit(p)
- *
- * Returns a newly created object that inherits properties from the prototype object p.
- * It uses the ECMAScript 5 function Object.create() if it is defined, and otherwise falls back to an older technique.
- *
- * See: Flanagan, David (2011-04-18). JavaScript: The Definitive Guide: The Definitive Guide (Kindle Locations 9854-9903). OReilly Media - A. Kindle Edition (Example 6-1)
- *
- * @param {Object} p
- */
-Component.inherit = function(p)
-{
-    if (window) {
-        if (!p) throw new TypeError();
-        if (Object.create) {
-            return Object.create(p);
-        }
-        var t = typeof p;
-        if (t !== "object" && t !== "function") throw new TypeError();
-    }
     /**
-     * @constructor
-     */
-    function F() {}
-    F.prototype = p;
-    return new F();
-};
-
-/**
- * Component.extend(o, p)
- *
- * Copies the enumerable properties of p to o and returns o.
- * If o and p have a property by the same name, o's property is overwritten.
- *
- * See: Flanagan, David (2011-04-18). JavaScript: The Definitive Guide: The Definitive Guide (Kindle Locations 9854-9903). OReilly Media - A. Kindle Edition (Example 6-2)
- *
- * @param {Object} o
- * @param {Object} p
- */
-Component.extend = function(o, p)
-{
-    for (var prop in p) {
-        o[prop] = p[prop];
-    }
-    return o;
-};
-
-/**
- * Component.subclass(subclass, superclass, methods, statics)
- *
- * See: Flanagan, David (2011-04-18). JavaScript: The Definitive Guide: The Definitive Guide (Kindle Locations 9854-9903). OReilly Media - A. Kindle Edition (Example 9-11)
- *
- * @param {Object} subclass is the constructor for the new subclass
- * @param {Object} [superclass] is the constructor of the superclass (default is Component)
- * @param {Object} [methods] contains all instance methods
- * @param {Object} [statics] contains all class properties and methods
- */
-Component.subclass = function(subclass, superclass, methods, statics)
-{
-    if (!superclass) superclass = Component;
-    subclass.prototype = Component.inherit(superclass.prototype);
-    subclass.prototype.constructor = subclass;
-    subclass.prototype.parent = superclass.prototype;
-    if (methods) {
-        Component.extend(subclass.prototype, methods);
-    }
-    if (statics) {
-        Component.extend(subclass, statics);
-    }
-    return subclass;
-};
-
-/*
- * Every component created on the current page is recorded in this array (see Component.add()),
- * enabling any component to locate another component by ID (see Component.getComponentByID())
- * or by type (see Component.getComponentByType()).
- *
- * Every machine on the page are now recorded as well, by their machine ID.  We then record the
- * various resources used by that machine.
- */
-if (window) {
-    if (!window['PCjs']) window['PCjs'] = {};
-    Component.machines = window['PCjs']['Machines'] || (window['PCjs']['Machines'] = {});
-    Component.components = window['PCjs']['Components'] || (window['PCjs']['Components'] = []);
-}
-else {
-    /*
-     * Fallback for non-browser-based environments (ie, Node).  TODO: This will need to be
-     * tailored to Node, probably using the global object instead of the window object, if we
-     * ever want to support multi-machine configs in that environment.
-     */
-    Component.machines = {};
-    Component.components = [];
-}
-
-/**
- * Component.add(component)
- *
- * @param {Component} component
- */
-Component.add = function(component)
-{
-    /*
-     * This just generates a lot of useless noise, handy in the early days, not so much these days....
+     * Component.confirmUser(sPrompt)
      *
-     *      if (DEBUG) Component.log("Component.add(" + component.type + "," + component.id + ")");
+     * @param {string} sPrompt
+     * @returns {boolean} true if the user clicked OK, false if Cancel/Close
      */
-    Component.components.push(component);
-};
-
-/**
- * Component.addMachine(idMachine)
- *
- * @param {string} idMachine
- */
-Component.addMachine = function(idMachine)
-{
-    Component.machines[idMachine] = {};
-};
-
-/**
- * Component.addMachineResource(idMachine, sName, data)
- *
- * @param {string} idMachine
- * @param {string|null} sName (name of the resource)
- * @param {*} data
- */
-Component.addMachineResource = function(idMachine, sName, data)
-{
-    /*
-     * I used to assert(Component.machines[idMachine]), but when we're running as a Node app, embed.js is not used,
-     * so addMachine() is never called, so resources do not need to be recorded.
-     */
-    if (Component.machines[idMachine] && sName) {
-        Component.machines[idMachine][sName] = data;
-    }
-};
-
-/**
- * Component.getMachineResources(idMachine)
- *
- * @param {string} idMachine
- * @return {Object|undefined}
- */
-Component.getMachineResources = function(idMachine)
-{
-    return Component.machines[idMachine];
-};
-
-/**
- * Component.log(s, type)
- *
- * For diagnostic output only.
- *
- * @param {string} [s] is the message text
- * @param {string} [type] is the message type
- */
-Component.log = function(s, type)
-{
-    if (!COMPILED) {
-        if (s) {
-            var sElapsed = "", sMsg = (type? (type + ": ") : "") + s;
-            if (typeof usr != "undefined") {
-                if (Component.msStart === undefined) {
-                    Component.msStart = usr.getTime();
-                }
-                sElapsed = (usr.getTime() - Component.msStart) + "ms: ";
-            }
-            if (window && window.console) console.log(sElapsed + sMsg.replace(/\n/g, " "));
+    static confirmUser(sPrompt)
+    {
+        var fResponse = false;
+        if (window) {
+            fResponse = window.confirm(sPrompt);
         }
+        return fResponse;
     }
-};
 
-/**
- * Component.assert(f, s)
- *
- * Verifies conditions that must be true (for DEBUG builds only).
- *
- * The Closure Compiler should automatically remove all references to Component.assert() in non-DEBUG builds.
- * TODO: Add a task to the build process that "asserts" there are no instances of "assertion failure" in RELEASE builds.
- *
- * @param {boolean} f is the expression we are asserting to be true
- * @param {string} [s] is description of the assertion on failure
- */
-Component.assert = function(f, s)
-{
-    if (DEBUG) {
-        if (!f) {
-            if (!s) s = "assertion failure";
-            Component.log(s);
-            throw new Error(s);
-        }
-    }
-};
-
-/**
- * Component.println(s, type, id)
- *
- * For non-diagnostic messages, which components may override to control the destination/appearance of their output.
- *
- * Components that inherit from this class should use the instance method, this.println(), rather than Component.println(),
- * because if a Control Panel is loaded, it will override only the instance method, not the class method (overriding the class
- * method would improperly affect any other machines loaded on the same page).
- *
- * @param {string} [s] is the message text
- * @param {string} [type] is the message type
- * @param {string} [id] is the caller's ID, if any
- */
-Component.println = function(s, type, id)
-{
-    if (!COMPILED) {
-        Component.log((id? (id + ": ") : "") + (s? ("\"" + s + "\"") : ""), type);
-    }
-};
-
-/**
- * Component.notice(s, fPrintOnly, id)
- *
- * notice() is like println() but implies a need for user notification, so we alert() as well.
- *
- * @param {string} s is the message text
- * @param {boolean} [fPrintOnly]
- * @param {string} [id] is the caller's ID, if any
- */
-Component.notice = function(s, fPrintOnly, id)
-{
-    if (!COMPILED) {
-        Component.println(s, "notice", id);
-    }
-    if (!fPrintOnly) web.alertUser((id? (id + ": ") : "") + s);
-};
-
-/**
- * Component.warning(s)
- *
- * @param {string} s describes the warning
- */
-Component.warning = function(s)
-{
-    if (!COMPILED) {
-        Component.println(s, "warning");
-    }
-    web.alertUser(s);
-};
-
-/**
- * Component.error(s)
- *
- * @param {string} s describes the error; an alert() is displayed as well
- */
-Component.error = function(s)
-{
-    if (!COMPILED) {
-        Component.println(s, "error");
-    }
-    web.alertUser(s);
-};
-
-/**
- * Component.getComponents(idRelated)
- *
- * We could store components as properties, using the component's ID, and change
- * this linear lookup into a property lookup, but some components may have no ID.
- *
- * @param {string} [idRelated] of related component
- * @return {Array} of components
- */
-Component.getComponents = function(idRelated)
-{
-    var i;
-    var aComponents = [];
-    /*
-     * getComponentByID(id, idRelated)
+    /**
+     * Component.promptUser()
      *
-     * If idRelated is provided, we check it for a machine prefix, and use any
-     * existing prefix to constrain matches to IDs with the same prefix, in order to
-     * avoid matching components belonging to other machines.
+     * @param {string} sPrompt
+     * @param {string} [sDefault]
+     * @returns {string|null}
      */
-    if (idRelated) {
-        if ((i = idRelated.indexOf('.')) > 0)
-            idRelated = idRelated.substr(0, i + 1);
-        else
-            idRelated = "";
-    }
-    for (i = 0; i < Component.components.length; i++) {
-        var component = Component.components[i];
-        if (!idRelated || !component.id.indexOf(idRelated)) {
-            aComponents.push(component);
+    static promptUser(sPrompt, sDefault)
+    {
+        var sResponse = null;
+        if (window) {
+            sResponse = window.prompt(sPrompt, sDefault === undefined? "" : sDefault);
         }
+        return sResponse;
     }
-    return aComponents;
-};
 
-/**
- * Component.getComponentByID(id, idRelated)
- *
- * We could store components as properties, using the component's ID, and change
- * this linear lookup into a property lookup, but some components may have no ID.
- *
- * @param {string} id of the desired component
- * @param {string} [idRelated] of related component
- * @return {Component|null}
- */
-Component.getComponentByID = function(id, idRelated)
-{
-    if (id !== undefined) {
+    /**
+     * Component.getComponents(idRelated)
+     *
+     * We could store components as properties, using the component's ID, and change
+     * this linear lookup into a property lookup, but some components may have no ID.
+     *
+     * @param {string} [idRelated] of related component
+     * @return {Array} of components
+     */
+    static getComponents(idRelated)
+    {
         var i;
+        var aComponents = [];
         /*
-         * If idRelated is provided, we check it for a machine prefix, and use any
-         * existing prefix to constrain matches to IDs with the same prefix, in order to
-         * avoid matching components belonging to other machines.
-         */
-        if (idRelated && (i = idRelated.indexOf('.')) > 0) {
-            id = idRelated.substr(0, i + 1) + id;
-        }
-        for (i = 0; i < Component.components.length; i++) {
-            if (Component.components[i].id === id) {
-                return Component.components[i];
-            }
-        }
-        if (Component.components.length) {
-            Component.log("Component ID '" + id + "' not found", "warning");
-        }
-    }
-    return null;
-};
-
-/**
- * Component.getComponentByType(sType, idRelated, componentPrev)
- *
- * @param {string} sType of the desired component
- * @param {string} [idRelated] of related component
- * @param {Component|null} [componentPrev] of previously returned component, if any
- * @return {Component|null}
- */
-Component.getComponentByType = function(sType, idRelated, componentPrev)
-{
-    if (sType !== undefined) {
-        var i;
-        /*
+         * getComponentByID(id, idRelated)
+         *
          * If idRelated is provided, we check it for a machine prefix, and use any
          * existing prefix to constrain matches to IDs with the same prefix, in order to
          * avoid matching components belonging to other machines.
          */
         if (idRelated) {
-            if ((i = idRelated.indexOf('.')) > 0) {
+            if ((i = idRelated.indexOf('.')) > 0)
                 idRelated = idRelated.substr(0, i + 1);
-            } else {
+            else
                 idRelated = "";
-            }
         }
         for (i = 0; i < Component.components.length; i++) {
-            if (componentPrev) {
-                if (componentPrev == Component.components[i]) componentPrev = null;
-                continue;
-            }
-            if (sType == Component.components[i].type && (!idRelated || !Component.components[i].id.indexOf(idRelated))) {
-                return Component.components[i];
+            var component = Component.components[i];
+            if (!idRelated || !component.id.indexOf(idRelated)) {
+                aComponents.push(component);
             }
         }
-        Component.log("Component type '" + sType + "' not found", "warning");
+        return aComponents;
     }
-    return null;
-};
 
-/**
- * Component.getComponentParms(element)
- *
- * @param {Object} element from the DOM
- */
-Component.getComponentParms = function(element)
-{
-    var parms = null;
-    var sParms = element.getAttribute("data-value");
-    if (sParms) {
-        try {
-            parms = eval("(" + sParms + ")");   // jshint ignore:line
+    /**
+     * Component.getComponentByID(id, idRelated)
+     *
+     * We could store components as properties, using the component's ID, and change
+     * this linear lookup into a property lookup, but some components may have no ID.
+     *
+     * @param {string} id of the desired component
+     * @param {string} [idRelated] of related component
+     * @return {Component|null}
+     */
+    static getComponentByID(id, idRelated)
+    {
+        if (id !== undefined) {
+            var i;
             /*
-             * We can no longer invoke removeAttribute() because some components (eg, Panel) need
-             * to run their initXXX() code more than once, to avoid initialization-order dependencies.
-             *
-             *      if (!DEBUG) {
-             *          element.removeAttribute("data-value");
-             *      }
+             * If idRelated is provided, we check it for a machine prefix, and use any
+             * existing prefix to constrain matches to IDs with the same prefix, in order to
+             * avoid matching components belonging to other machines.
              */
-        } catch(e) {
-            Component.error(e.message + " (" + sParms + ")");
-        }
-    }
-    return parms;
-};
-
-/**
- * Component.bindExternalControl(component, sControl, sBinding, sType)
- *
- * @param {Component} component
- * @param {string} sControl
- * @param {string} sBinding
- * @param {string} [sType] is the external component type
- */
-Component.bindExternalControl = function(component, sControl, sBinding, sType)
-{
-    if (sControl) {
-        if (sType === undefined) sType = "Panel";
-        var target = Component.getComponentByType(sType, component.id);
-        if (target) {
-            var eBinding = target.bindings[sControl];
-            if (eBinding) {
-                component.setBinding(null, sBinding, eBinding);
+            if (idRelated && (i = idRelated.indexOf('.')) > 0) {
+                id = idRelated.substr(0, i + 1) + id;
+            }
+            for (i = 0; i < Component.components.length; i++) {
+                if (Component.components[i].id === id) {
+                    return Component.components[i];
+                }
+            }
+            if (Component.components.length) {
+                Component.log("Component ID '" + id + "' not found", "warning");
             }
         }
+        return null;
     }
-};
 
-/**
- * Component.bindComponentControls(component, element, sAppClass)
- *
- * @param {Component} component
- * @param {Object} element from the DOM
- * @param {string} sAppClass
- */
-Component.bindComponentControls = function(component, element, sAppClass)
-{
-    var aeControls = Component.getElementsByClass(element.parentNode, sAppClass + "-control");
-
-    for (var iControl = 0; iControl < aeControls.length; iControl++) {
-
-        var aeChildNodes = aeControls[iControl].childNodes;
-
-        for (var iNode = 0; iNode < aeChildNodes.length; iNode++) {
-            var control = aeChildNodes[iNode];
-            if (control.nodeType !== 1 /* document.ELEMENT_NODE */) {
-                continue;
+    /**
+     * Component.getComponentByType(sType, idRelated, componentPrev)
+     *
+     * @param {string} sType of the desired component
+     * @param {string} [idRelated] of related component
+     * @param {Component|null} [componentPrev] of previously returned component, if any
+     * @return {Component|null}
+     */
+    static getComponentByType(sType, idRelated, componentPrev)
+    {
+        if (sType !== undefined) {
+            var i;
+            /*
+             * If idRelated is provided, we check it for a machine prefix, and use any
+             * existing prefix to constrain matches to IDs with the same prefix, in order to
+             * avoid matching components belonging to other machines.
+             */
+            if (idRelated) {
+                if ((i = idRelated.indexOf('.')) > 0) {
+                    idRelated = idRelated.substr(0, i + 1);
+                } else {
+                    idRelated = "";
+                }
             }
-            var sClass = control.getAttribute("class");
-            if (!sClass) continue;
-            var aClasses = sClass.split(" ");
-            for (var iClass = 0; iClass < aClasses.length; iClass++) {
-                var parms;
-                sClass = aClasses[iClass];
-                switch (sClass) {
-                    case sAppClass + "-binding":
-                        parms = Component.getComponentParms(control);
-                        if (parms && parms['binding']) {
-                            component.setBinding(parms['type'], parms['binding'], control, parms['value']);
-                        } else if (!parms || parms['type'] != "description") {
-                            Component.log("Component '" + component.toString() + "' missing binding" + (parms? " for " + parms['type'] : ""), "warning");
-                        }
-                        iClass = aClasses.length;
-                        break;
-                    default:
-                        // if (DEBUG) Component.log("Component.bindComponentControls(" + component.toString() + "): unrecognized control class \"" + sClass + "\"", "warning");
-                        break;
+            for (i = 0; i < Component.components.length; i++) {
+                if (componentPrev) {
+                    if (componentPrev == Component.components[i]) componentPrev = null;
+                    continue;
+                }
+                if (sType == Component.components[i].type && (!idRelated || !Component.components[i].id.indexOf(idRelated))) {
+                    return Component.components[i];
+                }
+            }
+            Component.log("Component type '" + sType + "' not found", "warning");
+        }
+        return null;
+    }
+
+    /**
+     * Component.getComponentParms(element)
+     *
+     * @param {Object} element from the DOM
+     */
+    static getComponentParms(element)
+    {
+        var parms = null;
+        var sParms = element.getAttribute("data-value");
+        if (sParms) {
+            try {
+                parms = eval("(" + sParms + ")");   // jshint ignore:line
+                /*
+                 * We can no longer invoke removeAttribute() because some components (eg, Panel) need
+                 * to run their initXXX() code more than once, to avoid initialization-order dependencies.
+                 *
+                 *      if (!DEBUG) {
+                 *          element.removeAttribute("data-value");
+                 *      }
+                 */
+            } catch(e) {
+                Component.error(e.message + " (" + sParms + ")");
+            }
+        }
+        return parms;
+    }
+
+    /**
+     * Component.bindExternalControl(component, sControl, sBinding, sType)
+     *
+     * @param {Component} component
+     * @param {string} sControl
+     * @param {string} sBinding
+     * @param {string} [sType] is the external component type
+     */
+    static bindExternalControl(component, sControl, sBinding, sType)
+    {
+        if (sControl) {
+            if (sType === undefined) sType = "Panel";
+            var target = Component.getComponentByType(sType, component.id);
+            if (target) {
+                var eBinding = target.bindings[sControl];
+                if (eBinding) {
+                    component.setBinding(null, sBinding, eBinding);
                 }
             }
         }
     }
-};
 
-/**
- * Component.getElementsByClass(element, sClass, sObjClass)
- *
- * This is a cross-browser helper function, since not all browser's support getElementsByClassName()
- *
- * TODO: This should probably be moved into weblib.js at some point, along with the control binding functions above,
- * to keep all the browser-related code together.
- *
- * @param {Object} element from the DOM
- * @param {string} sClass
- * @param {string} [sObjClass]
- * @return {Array|NodeList}
- */
-Component.getElementsByClass = function(element, sClass, sObjClass)
-{
-    if (sObjClass) sClass += '-' + sObjClass + "-object";
-    /*
-     * Use the browser's built-in getElementsByClassName() if it appears to be available
-     * (for example, it's not available in IE8, but it should be available in IE9 and up)
+    /**
+     * Component.bindComponentControls(component, element, sAppClass)
+     *
+     * @param {Component} component
+     * @param {Object} element from the DOM
+     * @param {string} sAppClass
      */
-    if (element.getElementsByClassName) {
-        return element.getElementsByClassName(sClass);
-    }
-    var i, j, ae = [];
-    var aeAll = element.getElementsByTagName("*");
-    var re = new RegExp('(^| )' + sClass + '( |$)');
-    for (i = 0, j = aeAll.length; i < j; i++) {
-        if (re.test(aeAll[i].className)) {
-            ae.push(aeAll[i]);
+    static bindComponentControls(component, element, sAppClass)
+    {
+        var aeControls = Component.getElementsByClass(element.parentNode, sAppClass + "-control");
+
+        for (var iControl = 0; iControl < aeControls.length; iControl++) {
+
+            var aeChildNodes = aeControls[iControl].childNodes;
+
+            for (var iNode = 0; iNode < aeChildNodes.length; iNode++) {
+                var control = aeChildNodes[iNode];
+                if (control.nodeType !== 1 /* document.ELEMENT_NODE */) {
+                    continue;
+                }
+                var sClass = control.getAttribute("class");
+                if (!sClass) continue;
+                var aClasses = sClass.split(" ");
+                for (var iClass = 0; iClass < aClasses.length; iClass++) {
+                    var parms;
+                    sClass = aClasses[iClass];
+                    switch (sClass) {
+                        case sAppClass + "-binding":
+                            parms = Component.getComponentParms(control);
+                            if (parms && parms['binding']) {
+                                component.setBinding(parms['type'], parms['binding'], control, parms['value']);
+                            } else if (!parms || parms['type'] != "description") {
+                                Component.log("Component '" + component.toString() + "' missing binding" + (parms? " for " + parms['type'] : ""), "warning");
+                            }
+                            iClass = aClasses.length;
+                            break;
+                        default:
+                            // if (DEBUG) Component.log("Component.bindComponentControls(" + component.toString() + "): unrecognized control class \"" + sClass + "\"", "warning");
+                            break;
+                    }
+                }
+            }
         }
     }
-    if (!ae.length) {
-        Component.log('No elements of class "' + sClass + '" found');
-    }
-    return ae;
-};
 
-Component.prototype = {
-    constructor: Component,
-    parent: null,
+    /**
+     * Component.getElementsByClass(element, sClass, sObjClass)
+     *
+     * This is a cross-browser helper function, since not all browser's support getElementsByClassName()
+     *
+     * TODO: This should probably be moved into weblib.js at some point, along with the control binding functions above,
+     * to keep all the browser-related code together.
+     *
+     * @param {Object} element from the DOM
+     * @param {string} sClass
+     * @param {string} [sObjClass]
+     * @return {Array|NodeList}
+     */
+    static getElementsByClass(element, sClass, sObjClass)
+    {
+        if (sObjClass) sClass += '-' + sObjClass + "-object";
+        /*
+         * Use the browser's built-in getElementsByClassName() if it appears to be available
+         * (for example, it's not available in IE8, but it should be available in IE9 and up)
+         */
+        if (element.getElementsByClassName) {
+            return element.getElementsByClassName(sClass);
+        }
+        var i, j, ae = [];
+        var aeAll = element.getElementsByTagName("*");
+        var re = new RegExp('(^| )' + sClass + '( |$)');
+        for (i = 0, j = aeAll.length; i < j; i++) {
+            if (re.test(aeAll[i].className)) {
+                ae.push(aeAll[i]);
+            }
+        }
+        if (!ae.length) {
+            Component.log('No elements of class "' + sClass + '" found');
+        }
+        return ae;
+    }
+
     /**
      * toString()
      *
      * @this {Component}
      * @return {string}
      */
-    toString: function() {
+    toString() {
         return (this.name? this.name : (this.id || this.type));
-    },
+    }
+
     /**
      * getMachineNum()
      *
      * @this {Component}
      * @return {number} unique machine number
      */
-    getMachineNum: function() {
+    getMachineNum() {
         var nMachine = 1;
         if (this.idMachine) {
             var aDigits = this.idMachine.match(/\d+/);
@@ -655,7 +642,8 @@ Component.prototype = {
                 nMachine = parseInt(aDigits[0], 10);
         }
         return nMachine;
-    },
+    }
+
     /**
      * setBinding(sHTMLType, sBinding, control, sValue)
      *
@@ -668,7 +656,7 @@ Component.prototype = {
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
-    setBinding: function(sHTMLType, sBinding, control, sValue) {
+    setBinding(sHTMLType, sBinding, control, sValue) {
         switch (sBinding) {
         case "clear":
             if (!this.bindings[sBinding]) {
@@ -711,7 +699,7 @@ Component.prototype = {
                     };
                 }(control));
                 /**
-                 * Override this.notice() with a replacement function that eliminates the web.alertUser() call
+                 * Override this.notice() with a replacement function that eliminates the Component.alertUser() call
                  *
                  * @this {Component}
                  * @param {string} s
@@ -726,7 +714,8 @@ Component.prototype = {
         default:
             return false;
         }
-    },
+    }
+
     /**
      * log(s, type)
      *
@@ -740,11 +729,12 @@ Component.prototype = {
      * @param {string} [s] is the message text
      * @param {string} [type] is the message type
      */
-    log: function(s, type) {
+    log(s, type) {
         if (!COMPILED) {
             Component.log(s, type || this.id || this.type);
         }
-    },
+    }
+
     /**
      * assert(f, s)
      *
@@ -760,7 +750,7 @@ Component.prototype = {
      * @param {boolean|number} f is the expression asserted to be true
      * @param {string} [s] is a description of the assertion to be displayed or logged on failure
      */
-    assert: function(f, s) {
+    assert(f, s) {
         if (DEBUG) {
             if (!f) {
                 s = "assertion failure in " + (this.id || this.type) + (s? ": " + s : "");
@@ -792,9 +782,10 @@ Component.prototype = {
                 throw new Error(s);
             }
         }
-    },
+    }
+
     /**
-     * println(s, type, id)
+     * println(s, type)
      *
      * For non-diagnostic messages, which components may override to control the destination/appearance of their output.
      *
@@ -806,9 +797,10 @@ Component.prototype = {
      * @param {string} [type] is the message type
      * @param {string} [id] is the caller's ID, if any
      */
-    println: function(s, type, id) {
+    println(s, type, id) {
         Component.println(s, type, id || this.id);
-    },
+    }
+
     /**
      * status(s)
      *
@@ -817,9 +809,10 @@ Component.prototype = {
      *
      * @param {string} s is the message text
      */
-    status: function(s) {
+    status(s) {
         this.println(this.idComponent + ": " + s);
-    },
+    }
+
     /**
      * notice(s, fPrintOnly)
      *
@@ -832,9 +825,10 @@ Component.prototype = {
      * @param {boolean} [fPrintOnly]
      * @param {string} [id] is the caller's ID, if any
      */
-    notice: function(s, fPrintOnly, id) {
+    notice(s, fPrintOnly, id) {
         Component.notice(s, fPrintOnly, id || this.type);
-    },
+    }
+
     /**
      * setError(s)
      *
@@ -843,10 +837,11 @@ Component.prototype = {
      * @this {Component}
      * @param {string} s describes a fatal error condition
      */
-    setError: function(s) {
+    setError(s) {
         this.flags.error = true;
         this.notice(s);         // TODO: Any cases where we should still prefix this string with "Fatal error: "?
-    },
+    }
+
     /**
      * clearError()
      *
@@ -854,9 +849,10 @@ Component.prototype = {
      *
      * @this {Component}
      */
-    clearError: function() {
+    clearError() {
         this.flags.error = false;
-    },
+    }
+
     /**
      * isError()
      *
@@ -865,13 +861,14 @@ Component.prototype = {
      * @this {Component}
      * @return {boolean} true if a fatal error condition exists, false if not
      */
-    isError: function() {
+    isError() {
         if (this.flags.error) {
             this.println(this.toString() + " error");
             return true;
         }
         return false;
-    },
+    }
+
     /**
      * isReady(fnReady)
      *
@@ -885,7 +882,7 @@ Component.prototype = {
      * @param {function()} [fnReady]
      * @return {boolean} true if the component is in a "ready" state, false if not
      */
-    isReady: function(fnReady) {
+    isReady(fnReady) {
         if (fnReady) {
             if (this.flags.ready) {
                 fnReady();
@@ -895,7 +892,8 @@ Component.prototype = {
             }
         }
         return this.flags.ready;
-    },
+    }
+
     /**
      * setReady(fReady)
      *
@@ -904,7 +902,7 @@ Component.prototype = {
      * @this {Component}
      * @param {boolean} [fReady] is assumed to indicate "ready" unless EXPLICITLY set to false
      */
-    setReady: function(fReady) {
+    setReady(fReady) {
         if (!this.flags.error) {
             this.flags.ready = (fReady !== false);
             if (this.flags.ready) {
@@ -914,7 +912,8 @@ Component.prototype = {
                 if (fnReady) fnReady();
             }
         }
-    },
+    }
+
     /**
      * isBusy(fCancel)
      *
@@ -924,7 +923,7 @@ Component.prototype = {
      * @param {boolean} [fCancel] is set to true to cancel a "busy" state
      * @return {boolean} true if "busy", false if not
      */
-    isBusy: function(fCancel) {
+    isBusy(fCancel) {
         if (this.flags.busy) {
             if (fCancel) {
                 this.flags.busyCancel = true;
@@ -933,7 +932,8 @@ Component.prototype = {
             }
         }
         return this.flags.busy;
-    },
+    }
+
     /**
      * setBusy(fBusy)
      *
@@ -943,7 +943,7 @@ Component.prototype = {
      * @param {boolean} fBusy
      * @return {boolean}
      */
-    setBusy: function(fBusy) {
+    setBusy(fBusy) {
         if (this.flags.busyCancel) {
             this.flags.busy = false;
             this.flags.busyCancel = false;
@@ -955,7 +955,8 @@ Component.prototype = {
         }
         this.flags.busy = fBusy;
         return this.flags.busy;
-    },
+    }
+
     /**
      * powerUp(fSave)
      *
@@ -964,10 +965,11 @@ Component.prototype = {
      * @param {boolean} [fRepower] is true if this is "repower" notification
      * @return {boolean} true if successful, false if failure
      */
-    powerUp: function(data, fRepower) {
+    powerUp(data, fRepower) {
         this.flags.powered = true;
         return true;
-    },
+    }
+
     /**
      * powerDown(fSave, fShutdown)
      *
@@ -976,10 +978,11 @@ Component.prototype = {
      * @param {boolean} [fShutdown]
      * @return {Object|boolean} component state if fSave; otherwise, true if successful, false if failure
      */
-    powerDown: function(fSave, fShutdown) {
+    powerDown(fSave, fShutdown) {
         if (fShutdown) this.flags.powered = false;
         return true;
-    },
+    }
+
     /**
      * messageEnabled(bitsMessage)
      *
@@ -989,7 +992,7 @@ Component.prototype = {
      * @param {number} [bitsMessage] is zero or more MESSAGE_* category flag(s)
      * @return {boolean} true if all specified message enabled, false if not
      */
-    messageEnabled: function(bitsMessage) {
+    messageEnabled(bitsMessage) {
         if (DEBUGGER && this.dbg) {
             if (this === this.dbg) {
                 bitsMessage |= 0;
@@ -1000,7 +1003,8 @@ Component.prototype = {
             return (!!bitsMessage && bitsEnabled === bitsMessage || !!(bitsEnabled & this.dbg.bitsWarning));
         }
         return false;
-    },
+    }
+
     /**
      * printMessage(sMessage, bitsMessage, fAddress)
      *
@@ -1012,13 +1016,14 @@ Component.prototype = {
      * @param {number|boolean} [bitsMessage] is zero or more MESSAGE_* category flag(s)
      * @param {boolean} [fAddress] is true to display the current address
      */
-    printMessage: function(sMessage, bitsMessage, fAddress) {
+    printMessage(sMessage, bitsMessage, fAddress) {
         if (DEBUGGER && this.dbg) {
             if (bitsMessage === true || this.messageEnabled(bitsMessage | 0)) {
                 this.dbg.message(sMessage, fAddress);
             }
         }
-    },
+    }
+
     /**
      * printMessageIO(port, bOut, addrFrom, name, bIn, bitsMessage)
      *
@@ -1033,7 +1038,7 @@ Component.prototype = {
      * @param {number|null} [bIn] is the input value, if known, on an input operation
      * @param {number|boolean} [bitsMessage] is zero or more MESSAGE_* category flag(s)
      */
-    printMessageIO: function(port, bOut, addrFrom, name, bIn, bitsMessage) {
+    printMessageIO(port, bOut, addrFrom, name, bIn, bitsMessage) {
         if (DEBUGGER && this.dbg) {
             if (bitsMessage === true) {
                 bitsMessage = 0;
@@ -1043,7 +1048,27 @@ Component.prototype = {
             this.dbg.messageIO(this, port, bOut, addrFrom, name, bIn, bitsMessage);
         }
     }
-};
+}
+
+/*
+ * Every component created on the current page is recorded in this array (see Component.add()),
+ * enabling any component to locate another component by ID (see Component.getComponentByID())
+ * or by type (see Component.getComponentByType()).
+ *
+ * Every machine on the page are now recorded as well, by their machine ID.  We then record the
+ * various resources used by that machine.
+ *
+ * Includes a fallback for non-browser-based environments (ie, Node).  TODO: This will need to be
+ * tailored to Node, probably using the global object instead of the window object, if we ever want
+ * to support multi-machine configs in that environment.
+ */
+if (window) {
+    if (!window['PCjs']) window['PCjs'] = {};
+    if (!window['PCjs']['Machines']) window['PCjs']['Machines'] = {};
+    if (!window['PCjs']['Components']) window['PCjs']['Components'] = [];
+}
+Component.machines = window? window['PCjs']['Machines'] : {};
+Component.components = window? window['PCjs']['Components'] : [];
 
 /*
  * The following polyfills provide ES5 functionality that's missing in older browsers (eg, IE8),
@@ -1061,10 +1086,10 @@ Component.prototype = {
  */
 if (!Array.prototype.indexOf) {
     Array.prototype.indexOf = function(obj, start) {
-         for (var i = (start || 0), j = this.length; i < j; i++) {
-             if (this[i] === obj) { return i; }
-         }
-         return -1;
+        for (var i = (start || 0), j = this.length; i < j; i++) {
+            if (this[i] === obj) { return i; }
+        }
+        return -1;
     }
 }
 

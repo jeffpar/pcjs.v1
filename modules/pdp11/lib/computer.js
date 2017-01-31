@@ -29,13 +29,13 @@
 "use strict";
 
 if (NODE) {
-    var Str = require("../../shared/es6/strlib");
-    var Usr = require("../../shared/es6/usrlib");
-    var Web = require("../../shared/es6/weblib");
-    var UserAPI = require("../../shared/es6/userapi");
-    var ReportAPI = require("../../shared/es6/reportapi");
-    var Component = require("../../shared/es6/component");
-    var State = require("../../shared/es6/state");
+    var Str = require("../../shared/lib/strlib");
+    var Usr = require("../../shared/lib/usrlib");
+    var Web = require("../../shared/lib/weblib");
+    var UserAPI = require("../../shared/lib/userapi");
+    var ReportAPI = require("../../shared/lib/reportapi");
+    var Component = require("../../shared/lib/component");
+    var State = require("../../shared/lib/state");
     var PDP11 = require("./defines");
     var BusPDP11 = require("./bus");
     var MessagesPDP11 = require("./messages");

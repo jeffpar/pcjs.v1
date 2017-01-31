@@ -28,8 +28,6 @@
 
 "use strict";
 
-/* global PRIVATE: true */
-
 /*
  * PRIVATE enables certain private features that we don't want enabled on the public web server, so by default,
  * PRIVATE is false.  For Jekyll configurations, if site.pcjs.private is set, this file gets included, overriding

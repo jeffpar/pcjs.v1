@@ -13,17 +13,20 @@ machines:
 PCx86 Documentation
 ---
 
-[PCx86](/docs/about/pcx86/) is a full-featured IBM PC, PC XT and PC AT emulator written entirely in JavaScript.
+[PCx86](/docs/about/pcx86/) is a full-featured [IBM PC and PC-compatible](/devices/pcx86/machine/) emulator written
+entirely in JavaScript.  It supports a variety of XT and AT class machines, with processors ranging from the 8088
+through the 80386.  The PCjs website provides a variety of "stock" configurations, featuring classic machines running
+at their original clock speed, or you can create your own, by mixing, matching, and reconfiguring any of the PCx86
+components listed below.
 
 After you've read the Documentation, check out the [Examples](examples/), browse the [Source Code](/modules/pcx86/),
 and experiment!
 
 {% include machine.html id="ibm5150" %}
 
-The [simulation](/devices/pcx86/machine/5150/mda/64kb/) above features an Intel 8088
-running at 4.77Mhz, with 64Kb of RAM and an IBM Monochrome Display Adapter.  To create your
-own simulation, all you need is the PCx86 script and a machine XML file, along with a couple
-of XSL and CSS support files (included in the ZIP file below).
+The [simulation](/devices/pcx86/machine/5150/mda/64kb/) above features an Intel 8088 running at 4.77Mhz,
+with 64Kb of RAM and an IBM Monochrome Display Adapter.  To create your own simulation, all you need is the PCx86
+script and a machine XML file, along with a couple of XSL and CSS support files (included in the ZIP file below).
 
 ### Creating Machine XML Files
 

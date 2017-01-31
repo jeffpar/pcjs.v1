@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.32.2/manifest.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.33.0/manifest.xsl"?>
 <manifest type="software">
 	<title>MS OS/2 SDK 1.02</title>
 	<disk id="disk04" size="737280" chs="80:2:9" img="archive/MSOS2TK1.img" href="/disks/pcx86/tools/microsoft/os2/sdk/1.02/MSOS2-SDK102-DISK04.json" md5="e6b2bf28e29654dbfbb32b0bf4377038" md5json="978662c324153dbacf0fc9ac3a9b0c61">

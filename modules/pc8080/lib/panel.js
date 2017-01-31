@@ -29,8 +29,8 @@
 "use strict";
 
 if (NODE) {
-    var Web = require("../../shared/es6/weblib");
-    var Component = require("../../shared/es6/component");
+    var Web = require("../../shared/lib/weblib");
+    var Component = require("../../shared/lib/component");
     var PC8080 = require("./defines");
     var Bus8080 = require("./bus");
     var CPUDef8080 = require("./cpudef");

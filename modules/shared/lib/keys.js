@@ -32,7 +32,7 @@ var Keys = {
     /*
      * Keys and/or key combinations that generate common ASCII codes.
      *
-     * NOTE: If you're looking for a general-purpose ASCII code table, see str.ASCII in strlib.js;
+     * NOTE: If you're looking for a general-purpose ASCII code table, see Str.ASCII in strlib.js;
      * if something's missing, that's probably the more appropriate table to add it to.
      *
      * TODO: The Closure Compiler doesn't inline all references to these values, at least those with
@@ -200,6 +200,7 @@ var Keys = {
  * Check the event object's 'location' property for a non-zero value for the following ONRIGHT keys.
  */
 Keys.KEYCODE.NUM_CR = Keys.KEYCODE.CR + Keys.KEYCODE.ONRIGHT;
+
 
 /*
  * Maps Firefox keyCodes to their more common keyCode counterparts; a number of entries in this table
