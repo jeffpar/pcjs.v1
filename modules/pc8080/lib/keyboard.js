@@ -690,6 +690,7 @@ class Keyboard8080 extends Component {
                  */
                 if (!this.indexOfCharMap(bMapping)) {
                     fPass = this.onSoftKeyDown(keyCode, fDown, true);
+                    if (event.preventDefault) event.preventDefault();
                     if (!COMPILED && this.messageEnabled(Messages8080.KEYS)) {
                         this.printMessage("oniOSKey" + (fDown ? "Down" : "Up") + "(" + keyCode + "): pass=" + fPass, true);
                     }
@@ -1159,7 +1160,7 @@ Keyboard8080.VT100 = {
     MODEL:          100.0,
     KEYMAP: {
         /*
-         * Map of host keyCodes to VT100 key addresses (7-bit values representing key positions on the VT100).
+         * Map of keydown keyCodes to VT100 key addresses (7-bit values representing key positions on the VT100).
          *
          * NOTE: The VT100 keyboard has both BACKSPACE and DELETE keys, whereas modern keyboards generally only
          * have DELETE.  And sadly, when you press DELETE, your modern keyboard and/or modern browser is reporting
@@ -1260,13 +1261,14 @@ Keyboard8080.VT100 = {
     },
     CHARMAP: {
         /*
-         * Map of host charCodes to VT100 key addresses (7-bit values representing key positions on the VT100);
+         * Map of keypress charCodes to VT100 key addresses (7-bit values representing key positions on the VT100);
          * the 8th bit (0x80) is set for keys that need to be shifted.
          *
-         * This is currently used only with the iOS keypress handler, which receives character codes rather than
-         * keyboard codes.  As a result, this table is not as complete as the KEYMAP table, because certain keys
-         * are delivered as key presses and/or are simply not present on the iOS keyboard; the arrow keys are a
-         * good example.
+         * This is currently used only with the iOS keypress handler, which processes character codes rather than
+         * keyboard codes.  As a result, this table is not as complete as the KEYMAP table, since certain keys are
+         * not delivered as key presses (eg, BACKSPACE) and/or are simply not present on the iOS keyboard (eg, ESC,
+         * arrow keys).  Also, SPACE had to be removed from the CHARMAP table as well, because otherwise it causes
+         * the entire page to scroll down (you have to wonder who thought THAT was a good idea).
          *
          * ES6 ALERT: As you can see below, I've finally started using computed property names.
          */
@@ -1315,7 +1317,7 @@ Keyboard8080.VT100 = {
         [Keys.ASCII.x]:         0x69,
         [Keys.ASCII['/']]:      0x75,
         [Keys.ASCII.m]:         0x76,
-        [Keys.ASCII[' ']]:      0x77,
+     // [Keys.ASCII[' ']]:      0x77,   // as noted above, we need to process SPACE at keydown rather than keypress
         [Keys.ASCII.v]:         0x78,
         [Keys.ASCII.c]:         0x79,
         [Keys.ASCII.z]:         0x7A,
