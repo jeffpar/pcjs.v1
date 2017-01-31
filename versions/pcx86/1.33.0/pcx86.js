@@ -1,20 +1,20 @@
 (function(){/*
- http://pcjs.org/modules/shared/es6/diskapi.js (C) Jeff Parsons 2012-2017
- http://pcjs.org/modules/shared/es6/dumpapi.js (C) Jeff Parsons 2012-2017
- http://pcjs.org/modules/shared/es6/reportapi.js (C) Jeff Parsons 2012-2017
- http://pcjs.org/modules/shared/es6/userapi.js (C) Jeff Parsons 2012-2017
- http://pcjs.org/modules/shared/es6/keys.js (C) Jeff Parsons 2012-2017
- http://pcjs.org/modules/shared/es6/strlib.js (C) Jeff Parsons 2012-2017
- http://pcjs.org/modules/shared/es6/weblib.js (C) Jeff Parsons 2012-2017
+ http://pcjs.org/modules/shared/lib/diskapi.js (C) Jeff Parsons 2012-2017
+ http://pcjs.org/modules/shared/lib/dumpapi.js (C) Jeff Parsons 2012-2017
+ http://pcjs.org/modules/shared/lib/reportapi.js (C) Jeff Parsons 2012-2017
+ http://pcjs.org/modules/shared/lib/userapi.js (C) Jeff Parsons 2012-2017
+ http://pcjs.org/modules/shared/lib/keys.js (C) Jeff Parsons 2012-2017
+ http://pcjs.org/modules/shared/lib/strlib.js (C) Jeff Parsons 2012-2017
+ http://pcjs.org/modules/shared/lib/weblib.js (C) Jeff Parsons 2012-2017
  http://pcjs.org/modules/pcx86/lib/x86.js (C) Jeff Parsons 2012-2017
  http://pcjs.org/modules/pcx86/lib/interrupts.js (C) Jeff Parsons 2012-2017
  http://pcjs.org/modules/pcx86/lib/messages.js (C) Jeff Parsons 2012-2017
  http://pcjs.org/modules/pcx86/lib/debugger.js (C) Jeff Parsons 2012-2017
- http://pcjs.org/modules/shared/es6/state.js (C) Jeff Parsons 2012-2017
- http://pcjs.org/modules/shared/es6/embed.js (C) Jeff Parsons 2012-2017
- http://pcjs.org/modules/shared/es6/defines.js (C) Jeff Parsons 2012-2017
- http://pcjs.org/modules/shared/es6/usrlib.js (C) Jeff Parsons 2012-2017
- http://pcjs.org/modules/shared/es6/component.js (C) Jeff Parsons 2012-2017
+ http://pcjs.org/modules/shared/lib/state.js (C) Jeff Parsons 2012-2017
+ http://pcjs.org/modules/shared/lib/embed.js (C) Jeff Parsons 2012-2017
+ http://pcjs.org/modules/shared/lib/defines.js (C) Jeff Parsons 2012-2017
+ http://pcjs.org/modules/shared/lib/usrlib.js (C) Jeff Parsons 2012-2017
+ http://pcjs.org/modules/shared/lib/component.js (C) Jeff Parsons 2012-2017
  http://pcjs.org/modules/pcx86/lib/defines.js (C) Jeff Parsons 2012-2017
  http://pcjs.org/modules/pcx86/lib/panel.js (C) Jeff Parsons 2012-2017
  http://pcjs.org/modules/pcx86/lib/bus.js (C) Jeff Parsons 2012-2017
@@ -39,9 +39,9 @@
  http://pcjs.org/modules/pcx86/lib/disk.js (C) Jeff Parsons 2012-2017
  http://pcjs.org/modules/pcx86/lib/fdc.js (C) Jeff Parsons 2012-2017
  http://pcjs.org/modules/pcx86/lib/hdc.js (C) Jeff Parsons 2012-2017
- http://pcjs.org/modules/shared/es6/debugger.js (C) Jeff Parsons 2012-2017
+ http://pcjs.org/modules/shared/lib/debugger.js (C) Jeff Parsons 2012-2017
  http://pcjs.org/modules/pcx86/lib/computer.js (C) Jeff Parsons 2012-2017
- http://pcjs.org/modules/shared/es6/save.js (C) Jeff Parsons 2012-2017
+ http://pcjs.org/modules/shared/lib/save.js (C) Jeff Parsons 2012-2017
 */
 var k,aa;function ba(a,b){function c(){}c.prototype=b.prototype;a.prototype=new c;a.prototype.constructor=a;for(var d in b)if(Object.defineProperties){var e=Object.getOwnPropertyDescriptor(b,d);e&&Object.defineProperty(a,d,e)}else a[d]=b[d]}
 var da={163840:[40,1,8,,254],184320:[40,1,9,,252],327680:[40,2,8,,255],368640:[40,2,9,,253],737280:[80,2,9,,249],1228800:[80,2,15,,249],1474560:[80,2,18,,240],2949120:[80,2,36,,240],21368320:[615,4,17],2494464:[203,2,12,512],5242880:[256,2,40,256],10485760:[512,2,40,256]},n={Ln:0,Nn:1,On:2,Zj:3,Pn:4,Qn:5,Rn:6,Sn:7,Tn:8,Un:9,Vn:10,Wn:11,Xn:12,Yn:13,Zn:14,$n:15,ao:16,bo:17,co:18,eo:19,fo:20,ho:21,io:22,jo:23,ko:24,lo:25,mo:26," ":32,"!":33,'"':34,"#":35,$:36,"%":37,"&":38,"'":39,"(":40,")":41,"*":42,

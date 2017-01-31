@@ -29,183 +29,46 @@
 "use strict";
 
 if (NODE) {
-    var web       = require("./../../shared/lib/weblib");
-    var Component = require("./../../shared/lib/component");
+    var Web = require("../../shared/lib/weblib");
+    var Component = require("../../shared/lib/component");
 }
 
-/**
- * State(component, sVersion, sSuffix)
- *
- * State objects are used by components to save/restore their state.
- *
- * During a save operation, components add data to a State object via set(), and then return
- * the resulting data using data().
- *
- * During a restore operation, the Computer component passes the results of each data() call
- * back to the originating component.
- *
- * WARNING: Since State objects are low-level objects that have no UI requirements, they do not
- * inherit from the Component class, so you should only use class methods of Component, such as
- * Component.assert() (or Debugger methods if the Debugger is available).
- *
- * NOTE: 1.01 is the first version to provide limited save/restore support using localStorage.
- * From that point on, care must be taken to insure that any new version that's incompatible with
- * previous localStorage data be released with a version number that is at least 1 greater,
- * since we're tagging the localStorage data with the integer portion of the version string.
- *
- * @constructor
- * @param {Component} component
- * @param {string} [sVersion] is used to append a major version number to the key
- * @param {string} [sSuffix] is used to append any additional suffixes to the key
- */
-function State(component, sVersion, sSuffix) {
-    this.id = component.id;
-    this.key = State.key(component, sVersion, sSuffix);
-    this.dbg = component.dbg;
-    this.unload(component.parms);
-}
-
-/**
- * State.key(component, sVersion, sSuffix)
- *
- * This encapsulates the key generation code.
- *
- * @param {Component} component
- * @param {string} [sVersion] is used to append a major version number to the key
- * @param {string} [sSuffix] is used to append any additional suffixes to the key
- * @return {string} key
- */
-State.key = function(component, sVersion, sSuffix) {
-    var key = component.id;
-    if (sVersion) {
-        var i = sVersion.indexOf('.');
-        if (i > 0) key += ".v" + sVersion.substr(0, i);
+class State {
+    /**
+     * State(component, sVersion, sSuffix)
+     *
+     * State objects are used by components to save/restore their state.
+     *
+     * During a save operation, components add data to a State object via set(), and then return
+     * the resulting data using data().
+     *
+     * During a restore operation, the Computer component passes the results of each data() call
+     * back to the originating component.
+     *
+     * WARNING: Since State objects are low-level objects that have no UI requirements, they do not
+     * inherit from the Component class, so you should only use class methods of Component, such as
+     * Component.assert() (or Debugger methods if the Debugger is available).
+     *
+     * NOTE: 1.01 is the first version to provide limited save/restore support using localStorage.
+     * From that point on, care must be taken to insure that any new version that's incompatible with
+     * previous localStorage data be released with a version number that is at least 1 greater,
+     * since we're tagging the localStorage data with the integer portion of the version string.
+     *
+     * @param {Component} component
+     * @param {string} [sVersion] is used to append a major version number to the key
+     * @param {string} [sSuffix] is used to append any additional suffixes to the key
+     */
+    constructor(component, sVersion, sSuffix)
+    {
+        this.id = component.id;
+        this.dbg = component.dbg;
+        this.json = "";
+        this.state = {};
+        this.fLoaded = this.fParsed = false;
+        this.key = State.key(component, sVersion, sSuffix);
+        this.unload(component.parms);
     }
-    if (sSuffix) {
-        key += "." + sSuffix;
-    }
-    return key;
-};
 
-/**
- * State.compress(aSrc)
- *
- * @param {Array.<number>|null} aSrc
- * @return {Array.<number>|null} is either the original array (aSrc), or a smaller array of "count, value" pairs (aComp)
- */
-State.compress = function(aSrc) {
-    if (aSrc) {
-        var iSrc = 0;
-        var iComp = 0;
-        var aComp = [];
-        while (iSrc < aSrc.length) {
-            var n = aSrc[iSrc];
-            Component.assert(n !== undefined);
-            var iCompare = iSrc + 1;
-            while (iCompare < aSrc.length && aSrc[iCompare] === n) iCompare++;
-            aComp[iComp++] = iCompare - iSrc;
-            aComp[iComp++] = n;
-            iSrc = iCompare;
-        }
-        if (aComp.length < aSrc.length) return aComp;
-    }
-    return aSrc;
-};
-
-/**
- * State.decompress(aComp)
- *
- * @param {Array.<number>} aComp
- * @param {number} nLength is expected length of decompressed data
- * @return {Array.<number>}
- */
-State.decompress = function(aComp, nLength) {
-    var iDst = 0;
-    var aDst = new Array(nLength);
-    var iComp = 0;
-    while (iComp < aComp.length - 1) {
-        var c = aComp[iComp++];
-        var n = aComp[iComp++];
-        while (c--) {
-            aDst[iDst++] = n;
-        }
-    }
-    Component.assert(aDst.length == nLength);
-    return aDst;
-};
-
-/**
- * State.compressEvenOdd(aSrc)
- *
- * This is a very simple variation on compress() that compresses all the EVEN elements of aSrc first,
- * followed by all the ODD elements.  This tends to work better on EGA video memory, because when odd/even
- * addressing is enabled (eg, for text modes), the DWORD values tend to alternate, which is the worst case
- * for compress(), but the best case for compressEvenOdd().
- *
- * One wrinkle we support: if the first element is uninitialized, then we assume the entire array is undefined,
- * and return an empty compressed array.  Conversely, decompressEvenOdd() will take an empty compressed array
- * and return an uninitialized array.
- *
- * @param {Array.<number>|null} aSrc
- * @return {Array.<number>|null} is either the original array (aSrc), or a smaller array of "count, value" pairs (aComp)
- */
-State.compressEvenOdd = function(aSrc) {
-    if (aSrc) {
-        var iComp = 0, aComp = [];
-        if (aSrc[0] !== undefined) {
-            for (var off = 0; off < 2; off++) {
-                var iSrc = off;
-                while (iSrc < aSrc.length) {
-                    var n = aSrc[iSrc];
-                    var iCompare = iSrc + 2;
-                    while (iCompare < aSrc.length && aSrc[iCompare] === n) iCompare += 2;
-                    aComp[iComp++] = (iCompare - iSrc) >> 1;
-                    aComp[iComp++] = n;
-                    iSrc = iCompare;
-                }
-            }
-        }
-        if (aComp.length < aSrc.length) return aComp;
-    }
-    return aSrc;
-};
-
-/**
- * State.decompressEvenOdd(aComp, nLength)
- *
- * This is the counterpart to compressEvenOdd().  Note that because there's nothing in the compressed sequence
- * that differentiates a compress() sequence from a compressEvenOdd() sequence, you simply have to be consistent:
- * if you used even/odd compression, then you must use even/odd decompression.
- *
- * @param {Array.<number>} aComp
- * @param {number} nLength is expected length of decompressed data
- * @return {Array.<number>}
- */
-State.decompressEvenOdd = function(aComp, nLength) {
-    var iDst = 0;
-    var aDst = new Array(nLength);
-    var iComp = 0;
-    while (iComp < aComp.length - 1) {
-        var c = aComp[iComp++];
-        var n = aComp[iComp++];
-        while (c--) {
-            aDst[iDst] = n;
-            iDst += 2;
-        }
-        /*
-         * The output of a "count,value" pair will never exceed the end of the output array, so as soon as we reach it
-         * the first time, we know it's time to switch to ODD elements, and as soon as we reach it again, we should be
-         * done.
-         */
-        Component.assert(iDst <= nLength || iComp == aComp.length);
-        if (iDst == nLength) iDst = 1;
-    }
-    Component.assert(aDst.length == nLength);
-    return aDst;
-};
-
-State.prototype = {
-    constructor: State,
     /**
      * set(id, data)
      *
@@ -213,13 +76,15 @@ State.prototype = {
      * @param {number|string} id
      * @param {Object|string} data
      */
-    set: function(id, data) {
+    set(id, data)
+    {
         try {
-            this[this.id][id] = data;
+            this.state[id] = data;
         } catch(e) {
             Component.log(e.message);
         }
-    },
+    }
+
     /**
      * get(id)
      *
@@ -227,43 +92,38 @@ State.prototype = {
      * @param {number|string} id
      * @return {Object|string|null}
      */
-    get: function(id) {
-        return this[this.id][id] || null;
-    },
-    /**
-     * value()
-     *
-     * Use this instead of data() if you haven't called parse() yet.
-     *
-     * @this {State}
-     * @return {string}
-     */
-    value: function() {
-        return this[this.id];
-    },
+    get(id)
+    {
+        return this.state[id] || null;
+    }
+
     /**
      * data()
      *
      * @this {State}
      * @return {Object}
      */
-    data: function() {
-        return this[this.id];
-    },
+    data()
+    {
+        return this.state;
+    }
+
     /**
-     * load(s)
+     * load(json)
      *
      * WARNING: Make sure you follow this call with either a call to parse() or unload(),
      * because any stringified data that we've loaded isn't usable until it's been parsed.
      *
      * @this {State}
-     * @param {Object|string|null} [s]
+     * @param {string|null} [json]
      * @return {boolean} true if state exists in localStorage, false if not
      */
-    load: function(s) {
-        if (s) {
-            this[this.id] = s;
+    load(json)
+    {
+        if (json) {
+            this.json = json;
             this.fLoaded = true;
+            this.fParsed = false;
             return true;
         }
         if (this.fLoaded) {
@@ -272,17 +132,18 @@ State.prototype = {
              */
             return true;
         }
-        if (web.hasLocalStorage()) {
-            s = web.getLocalStorageItem(this.key);
+        if (Web.hasLocalStorage()) {
+            var s = Web.getLocalStorageItem(this.key);
             if (s) {
-                this[this.id] = s;
+                this.json = s;
                 this.fLoaded = true;
                 if (DEBUG) Component.log("localStorage(" + this.key + "): " + s.length + " bytes loaded");
                 return true;
             }
         }
         return false;
-    },
+    }
+
     /**
      * parse()
      *
@@ -293,27 +154,33 @@ State.prototype = {
      * @this {State}
      * @return {boolean} true if successful, false if error
      */
-    parse: function() {
+    parse()
+    {
         var fSuccess = true;
-        try {
-            this[this.id] = JSON.parse(this[this.id]);
-        } catch (e) {
-            Component.error(e.message || e);
-            fSuccess = false;
+        if (!this.fParsed) {
+            try {
+                this.state = JSON.parse(this.json);
+                this.fParsed = true;
+            } catch (e) {
+                Component.error(e.message || e);
+                fSuccess = false;
+            }
         }
         return fSuccess;
-    },
+    }
+
     /**
      * store()
      *
      * @this {State}
      * @return {boolean} true if successful, false if error
      */
-    store: function() {
+    store()
+    {
         var fSuccess = true;
-        if (web.hasLocalStorage()) {
-            var s = JSON.stringify(this[this.id]);
-            if (web.setLocalStorageItem(this.key, s)) {
+        if (Web.hasLocalStorage()) {
+            var s = JSON.stringify(this.state);
+            if (Web.setLocalStorageItem(this.key, s)) {
                 if (DEBUG) Component.log("localStorage(" + this.key + "): " + s.length + " bytes stored");
             } else {
                 /*
@@ -327,20 +194,19 @@ State.prototype = {
             }
         }
         return fSuccess;
-    },
+    }
+
     /**
      * toString()
-     *
-     * We can't know whether this might be called before parse() or after parse(), so we check.
-     * If before, then this[this.id] will still be in string form; if after, it will be an Object.
      *
      * @this {State}
      * @return {string} JSON-encoded state
      */
-    toString: function() {
-        var value = this[this.id];
-        return (typeof value == "string"? value : JSON.stringify(value));
-    },
+    toString()
+    {
+        return this.state? JSON.stringify(this.state) : this.json;
+    }
+
     /**
      * unload(parms)
      *
@@ -351,11 +217,14 @@ State.prototype = {
      * @this {State}
      * @param {Object} [parms]
      */
-    unload: function(parms) {
-        this[this.id] = {};
+    unload(parms)
+    {
+        this.json = "";
+        this.state = {};
+        this.fLoaded = this.fParsed = false;
         if (parms) this.set("parms", parms);
-        this.fLoaded = false;
-    },
+    }
+
     /**
      * clear(fAll)
      *
@@ -365,19 +234,164 @@ State.prototype = {
      * @this {State}
      * @param {boolean} [fAll] true to unconditionally clear ALL localStorage for the current domain
      */
-    clear: function(fAll) {
+    clear(fAll)
+    {
         this.unload();
-        var aKeys = web.getLocalStorageKeys();
+        var aKeys = Web.getLocalStorageKeys();
         for (var i = 0; i < aKeys.length; i++) {
             var sKey = aKeys[i];
             if (sKey && (fAll || sKey.substr(0, this.key.length) == this.key)) {
-                web.removeLocalStorageItem(sKey);
+                Web.removeLocalStorageItem(sKey);
                 if (DEBUG) Component.log("localStorage(" + sKey + ") removed");
                 aKeys.splice(i, 1);
                 i = 0;
             }
         }
     }
-};
+
+    /**
+     * State.key(component, sVersion, sSuffix)
+     *
+     * This encapsulates the key generation code.
+     *
+     * @param {Component} component
+     * @param {string} [sVersion] is used to append a major version number to the key
+     * @param {string} [sSuffix] is used to append any additional suffixes to the key
+     * @return {string} key
+     */
+    static key(component, sVersion, sSuffix)
+    {
+        var key = component.id;
+        if (sVersion) {
+            var i = sVersion.indexOf('.');
+            if (i > 0) key += ".v" + sVersion.substr(0, i);
+        }
+        if (sSuffix) {
+            key += "." + sSuffix;
+        }
+        return key;
+    }
+
+    /**
+     * State.compress(aSrc)
+     *
+     * @param {Array.<number>|null} aSrc
+     * @return {Array.<number>|null} is either the original array (aSrc), or a smaller array of "count, value" pairs (aComp)
+     */
+    static compress(aSrc)
+    {
+        if (aSrc) {
+            var iSrc = 0;
+            var iComp = 0;
+            var aComp = [];
+            while (iSrc < aSrc.length) {
+                var n = aSrc[iSrc];
+                Component.assert(n !== undefined);
+                var iCompare = iSrc + 1;
+                while (iCompare < aSrc.length && aSrc[iCompare] === n) iCompare++;
+                aComp[iComp++] = iCompare - iSrc;
+                aComp[iComp++] = n;
+                iSrc = iCompare;
+            }
+            if (aComp.length < aSrc.length) return aComp;
+        }
+        return aSrc;
+    }
+
+    /**
+     * State.decompress(aComp)
+     *
+     * @param {Array.<number>} aComp
+     * @param {number} nLength is expected length of decompressed data
+     * @return {Array.<number>}
+     */
+    static decompress(aComp, nLength)
+    {
+        var iDst = 0;
+        var aDst = new Array(nLength);
+        var iComp = 0;
+        while (iComp < aComp.length - 1) {
+            var c = aComp[iComp++];
+            var n = aComp[iComp++];
+            while (c--) {
+                aDst[iDst++] = n;
+            }
+        }
+        Component.assert(aDst.length == nLength);
+        return aDst;
+    }
+
+    /**
+     * State.compressEvenOdd(aSrc)
+     *
+     * This is a very simple variation on compress() that compresses all the EVEN elements of aSrc first,
+     * followed by all the ODD elements.  This tends to work better on EGA video memory, because when odd/even
+     * addressing is enabled (eg, for text modes), the DWORD values tend to alternate, which is the worst case
+     * for compress(), but the best case for compressEvenOdd().
+     *
+     * One wrinkle we support: if the first element is uninitialized, then we assume the entire array is undefined,
+     * and return an empty compressed array.  Conversely, decompressEvenOdd() will take an empty compressed array
+     * and return an uninitialized array.
+     *
+     * @param {Array.<number>|null} aSrc
+     * @return {Array.<number>|null} is either the original array (aSrc), or a smaller array of "count, value" pairs (aComp)
+     */
+    static compressEvenOdd(aSrc)
+    {
+        if (aSrc) {
+            var iComp = 0, aComp = [];
+            if (aSrc[0] !== undefined) {
+                for (var off = 0; off < 2; off++) {
+                    var iSrc = off;
+                    while (iSrc < aSrc.length) {
+                        var n = aSrc[iSrc];
+                        var iCompare = iSrc + 2;
+                        while (iCompare < aSrc.length && aSrc[iCompare] === n) iCompare += 2;
+                        aComp[iComp++] = (iCompare - iSrc) >> 1;
+                        aComp[iComp++] = n;
+                        iSrc = iCompare;
+                    }
+                }
+            }
+            if (aComp.length < aSrc.length) return aComp;
+        }
+        return aSrc;
+    }
+
+    /**
+     * State.decompressEvenOdd(aComp, nLength)
+     *
+     * This is the counterpart to compressEvenOdd().  Note that because there's nothing in the compressed sequence
+     * that differentiates a compress() sequence from a compressEvenOdd() sequence, you simply have to be consistent:
+     * if you used even/odd compression, then you must use even/odd decompression.
+     *
+     * @param {Array.<number>} aComp
+     * @param {number} nLength is expected length of decompressed data
+     * @return {Array.<number>}
+     */
+    static decompressEvenOdd(aComp, nLength)
+    {
+        var iDst = 0;
+        var aDst = new Array(nLength);
+        var iComp = 0;
+        while (iComp < aComp.length - 1) {
+            var c = aComp[iComp++];
+            var n = aComp[iComp++];
+            while (c--) {
+                aDst[iDst] = n;
+                iDst += 2;
+            }
+            /*
+             * The output of a "count,value" pair will never exceed the end of the output array, so as soon as we reach it
+             * the first time, we know it's time to switch to ODD elements, and as soon as we reach it again, we should be
+             * done.
+             */
+            Component.assert(iDst <= nLength || iComp == aComp.length);
+            if (iDst == nLength) iDst = 1;
+        }
+        Component.assert(aDst.length == nLength);
+        return aDst;
+    }
+}
 
 if (NODE) module.exports = State;

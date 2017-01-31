@@ -28,8 +28,6 @@
 
 "use strict";
 
-/* global DEBUG: true */
-
 /*
  * In the compiled case, we rely on the Closure Compiler to override DEBUG, setting it to false,
  * so that all DEBUG-only code will be removed by the compiler.

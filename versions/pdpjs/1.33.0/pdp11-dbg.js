@@ -1,11 +1,11 @@
 (function(){/*
- http://pcjs.org/modules/shared/es6/diskapi.js (C) Jeff Parsons 2012-2017
- http://pcjs.org/modules/shared/es6/dumpapi.js (C) Jeff Parsons 2012-2017
- http://pcjs.org/modules/shared/es6/reportapi.js (C) Jeff Parsons 2012-2017
- http://pcjs.org/modules/shared/es6/userapi.js (C) Jeff Parsons 2012-2017
- http://pcjs.org/modules/shared/es6/keys.js (C) Jeff Parsons 2012-2017
- http://pcjs.org/modules/shared/es6/strlib.js (C) Jeff Parsons 2012-2017
- http://pcjs.org/modules/shared/es6/weblib.js (C) Jeff Parsons 2012-2017
+ http://pcjs.org/modules/shared/lib/diskapi.js (C) Jeff Parsons 2012-2017
+ http://pcjs.org/modules/shared/lib/dumpapi.js (C) Jeff Parsons 2012-2017
+ http://pcjs.org/modules/shared/lib/reportapi.js (C) Jeff Parsons 2012-2017
+ http://pcjs.org/modules/shared/lib/userapi.js (C) Jeff Parsons 2012-2017
+ http://pcjs.org/modules/shared/lib/keys.js (C) Jeff Parsons 2012-2017
+ http://pcjs.org/modules/shared/lib/strlib.js (C) Jeff Parsons 2012-2017
+ http://pcjs.org/modules/shared/lib/weblib.js (C) Jeff Parsons 2012-2017
  http://pcjs.org/modules/pdp11/lib/messages.js (C) Jeff Parsons 2012-2017
  http://pcjs.org/modules/pdp11/lib/panel.js (C) Jeff Parsons 2012-2017
  http://pcjs.org/modules/pdp11/lib/device.js (C) Jeff Parsons 2012-2017
@@ -17,11 +17,11 @@
  http://pcjs.org/modules/pdp11/lib/rk11.js (C) Jeff Parsons 2012-2017
  http://pcjs.org/modules/pdp11/lib/rl11.js (C) Jeff Parsons 2012-2017
  http://pcjs.org/modules/pdp11/lib/computer.js (C) Jeff Parsons 2012-2017
- http://pcjs.org/modules/shared/es6/state.js (C) Jeff Parsons 2012-2017
- http://pcjs.org/modules/shared/es6/embed.js (C) Jeff Parsons 2012-2017
- http://pcjs.org/modules/shared/es6/defines.js (C) Jeff Parsons 2012-2017
- http://pcjs.org/modules/shared/es6/component.js (C) Jeff Parsons 2012-2017
- http://pcjs.org/modules/shared/es6/usrlib.js (C) Jeff Parsons 2012-2017
+ http://pcjs.org/modules/shared/lib/state.js (C) Jeff Parsons 2012-2017
+ http://pcjs.org/modules/shared/lib/embed.js (C) Jeff Parsons 2012-2017
+ http://pcjs.org/modules/shared/lib/defines.js (C) Jeff Parsons 2012-2017
+ http://pcjs.org/modules/shared/lib/component.js (C) Jeff Parsons 2012-2017
+ http://pcjs.org/modules/shared/lib/usrlib.js (C) Jeff Parsons 2012-2017
  http://pcjs.org/modules/pdp11/lib/defines.js (C) Jeff Parsons 2012-2017
  http://pcjs.org/modules/pdp11/lib/bus.js (C) Jeff Parsons 2012-2017
  http://pcjs.org/modules/pdp11/lib/memory.js (C) Jeff Parsons 2012-2017
@@ -30,7 +30,7 @@
  http://pcjs.org/modules/pdp11/lib/serial.js (C) Jeff Parsons 2012-2017
  http://pcjs.org/modules/pdp11/lib/disk.js (C) Jeff Parsons 2012-2017
  http://pcjs.org/modules/pdp11/lib/drive.js (C) Jeff Parsons 2012-2017
- http://pcjs.org/modules/shared/es6/debugger.js (C) Jeff Parsons 2012-2017
+ http://pcjs.org/modules/shared/lib/debugger.js (C) Jeff Parsons 2012-2017
  http://pcjs.org/modules/pdp11/lib/debugger.js (C) Jeff Parsons 2012-2017
 */
 var h,aa="function"==typeof Object.defineProperties?Object.defineProperty:function(a,b,c){if(c.get||c.set)throw new TypeError("ES3 does not support getters and setters.");a!=Array.prototype&&a!=Object.prototype&&(a[b]=c.value)},ba="undefined"!=typeof window&&window===this?this:"undefined"!=typeof global?global:this;function ca(){ca=function(){};ba.Symbol||(ba.Symbol=da)}var ea=0;function da(a){return"jscomp_symbol_"+(a||"")+ea++}

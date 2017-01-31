@@ -29,7 +29,7 @@
 "use strict";
 
 if (NODE) {
-    var Str         = require("../../shared/es6/strlib");
+    var Str         = require("../../shared/lib/strlib");
     var X86         = require("./x86");
 }
 

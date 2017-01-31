@@ -29,11 +29,11 @@
 "use strict";
 
 if (NODE) {
-    var Str         = require("../../shared/es6/strlib");
-    var Web         = require("../../shared/es6/weblib");
-    var Component   = require("../../shared/es6/component");
-    var Keys        = require("../../shared/es6/keys");
-    var State       = require("../../shared/es6/state");
+    var Str         = require("../../shared/lib/strlib");
+    var Web         = require("../../shared/lib/weblib");
+    var Component   = require("../../shared/lib/component");
+    var Keys        = require("../../shared/lib/keys");
+    var State       = require("../../shared/lib/state");
     var PCX86       = require("./defines");
     var Messages    = require("./messages");
     var ChipSet     = require("./chipset");

@@ -29,10 +29,10 @@
 "use strict";
 
 if (NODE) {
-    var Str         = require("../../shared/es6/strlib");
-    var Usr         = require("../../shared/es6/usrlib");
-    var Web         = require("../../shared/es6/weblib");
-    var Component   = require("../../shared/es6/component");
+    var Str         = require("../../shared/lib/strlib");
+    var Usr         = require("../../shared/lib/usrlib");
+    var Web         = require("../../shared/lib/weblib");
+    var Component   = require("../../shared/lib/component");
     var PCX86       = require("./defines");
     var Bus         = require("./bus");
     var Memory      = require("./memory");
