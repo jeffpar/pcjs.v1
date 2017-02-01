@@ -1,4 +1,10 @@
-Shared Sources
+---
+layout: page
+title: Shared Modules
+permalink: /modules/shared/lib/
+---
+
+Shared Modules
 ==============
 
 This folder contains a mix of shared code, with some files used only by Node (server) modules,
