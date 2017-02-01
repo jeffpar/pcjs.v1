@@ -11,7 +11,7 @@
 	<xsl:param name="rootDir" select="''"/>
 	<xsl:param name="generator" select="'client'"/>
 
-	<xsl:variable name="MACHINECLASS">pc</xsl:variable>
+	<xsl:variable name="MACHINETYPE">pc</xsl:variable>
 	<xsl:variable name="CSSCLASS">pcjs</xsl:variable>
 	<xsl:variable name="APPCLASS">pcx86</xsl:variable>
 	<xsl:variable name="APPNAME">PCx86</xsl:variable>

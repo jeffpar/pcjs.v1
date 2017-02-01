@@ -64,7 +64,7 @@ extensive use of:
 - *[const](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/const)* and *[let](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/let)*
 - [Computed Properties](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Object_initializer#Computed_property_names)
 
-Those changes will come, but on a more piece-meal basis, as code is visited.
+Those changes will come, but on a more piecemeal basis, as code is visited.
 
 *[@jeffpar](http://twitter.com/jeffpar)*  
 *Jan 31, 2017*

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/c1pjs/1.33.0/machine.xsl"?>
-<machine id="c1pSmall" class="c1p" border="1" width="272px" pos="left" padding="16px" background="#FAEBD7" style="padding-bottom:8px">
+<?xml-stylesheet type="text/xsl" href="/versions/c1pjs/1.33.1/machine.xsl"?>
+<machine id="c1pSmall" type="c1p" border="1" width="272px" pos="left" padding="16px" background="#FAEBD7" style="padding-bottom:8px">
 	<computer id="c1p" name="Challenger 1P">
 		<module type="cpu" refid="cpu6502" start="0x0000" end="0xffff"/>
 		<module type="ram" refid="ram8K" start="0x0000" end="0x1fff"/>
