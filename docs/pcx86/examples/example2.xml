@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<machine id="example2" class="pcx86" width="720px">
+<machine id="example2" type="pcx86" width="720px">
 	<computer id="pc" name="IBM PC"/>
 	<ram id="ramLow" addr="0x00000" size="0x10000"/>
 	<rom id="romBASIC" addr="0xf6000" size="0x8000" file="ibm-basic-1.00.json"/>
