@@ -34,9 +34,9 @@ var path = require("path");
 var fs = require("fs");
 var repl = require("repl");
 var xml2js = require("xml2js");
-var Defines = require("../../shared/es6/defines");
-var Str = require("../../shared/es6/strlib");
-var Proc = require("../../shared/es6/proclib");
+var Defines = require("../../shared/lib/defines");
+var Str = require("../../shared/lib/strlib");
+var Proc = require("../../shared/lib/proclib");
 
 var replServer = null;
 var idAttrs = '@';
@@ -89,7 +89,7 @@ var asComponentsIgnore = ["embed", "save"];
  */
 var aSubClasses = {
     "pdp11/lib/cpustate": "pdp11/lib/cpu",
-    "pdp11/lib/debugger": "shared/es6/debugger"
+    "pdp11/lib/debugger": "shared/lib/debugger"
 };
 
 /**
