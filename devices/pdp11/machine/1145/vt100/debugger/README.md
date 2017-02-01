@@ -6,15 +6,15 @@ machines:
   - id: test1145
     type: pdp11
     debugger: true
-    config: /devices/pdp11/machine/1145/vt100/debugger/machine-left.xml
+    config: /devices/pdp11/machine/1145/vt100/debugger/machine-right.xml
     connection: dl11->vt100.serialPort
   - id: vt100
     type: pc8080
     debugger: true
-    config: /devices/pc8080/machine/vt100/debugger/machine-right.xml
+    config: /devices/pc8080/machine/vt100/debugger/machine-left.xml
     connection: serialPort->test1145.dl11
 ---
 
-{% include machine.html id="test1145" %}
-
 {% include machine.html id="vt100" %}
+
+{% include machine.html id="test1145" %}

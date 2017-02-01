@@ -12,13 +12,13 @@
 	<xsl:include href="common.xsl"/>
 	<xsl:include href="document.xsl"/>
 	<!-- There is no "shared" components.xsl, so we just pick one to eliminate IDE inspection warnings -->
-	<xsl:include href="../../pcjs/templates/components.xsl"/>
+	<xsl:include href="../../shared/templates/components.xsl"/>
 
 	<xsl:template match="/outline">
-		<xsl:variable name="machineClass">
+		<xsl:variable name="machineType">
 			<xsl:choose>
-				<xsl:when test="machine/@class"><xsl:value-of select="machine/@class"/></xsl:when>
-				<xsl:otherwise><xsl:value-of select="$MACHINECLASS"/></xsl:otherwise>
+				<xsl:when test="machine/@type"><xsl:value-of select="machine/@type"/></xsl:when>
+				<xsl:otherwise><xsl:value-of select="$MACHINETYPE"/></xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
 		<html lang="en">
@@ -37,8 +37,8 @@
 				<xsl:call-template name="componentScripts">
 					<xsl:with-param name="component">
 						<xsl:choose>
-							<xsl:when test="debugger"><xsl:value-of select="$machineClass"/>-dbg</xsl:when>
-							<xsl:otherwise><xsl:value-of select="$machineClass"/></xsl:otherwise>
+							<xsl:when test="debugger"><xsl:value-of select="$machineType"/>-dbg</xsl:when>
+							<xsl:otherwise><xsl:value-of select="$machineType"/></xsl:otherwise>
 						</xsl:choose>
 					</xsl:with-param>
 				</xsl:call-template>

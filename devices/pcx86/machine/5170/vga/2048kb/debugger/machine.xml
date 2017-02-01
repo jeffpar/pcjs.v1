@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.33.0/machine.xsl"?>
-<machine id="ibm5170" class="pcx86" border="1" pos="center" background="#FAEBD7">
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.33.1/machine.xsl"?>
+<machine id="ibm5170" type="pcx86" border="1" pos="center" background="#FAEBD7">
 	<name pos="center">IBM PC AT (8Mhz, 2Mb, 20Mb Hard Disk) with VGA Display</name>
 	<computer id="at-vga-2048k" name="IBM PC AT" buswidth="24"/>
 	<ram id="ramLow" addr="0x00000" test="true" size="0xa0000" comment="ROM BIOS memory test has NOT been disabled"/>

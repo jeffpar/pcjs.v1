@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/modules/c1pjs/templates/outline-debug.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/modules/shared/templates/outline.xsl"?>
 <outline id="osi-6502-overview">
 	<title>C1Pjs</title>
 	<excerpt>The following document describes the C1Pjs source code.</excerpt>
 	<content>
-		<machine id="c1psim" class="c1p" border="1" width="272px" pos="right" padLeft="50px" padRight="50px">
+		<machine id="c1psim" type="c1p" border="1" width="272px" pos="right" padLeft="50px" padRight="50px">
 			<computer id="c1p" name="Challenger 1P">
 				<module type="cpu" refid="cpu6502" start="0x0000" end="0xffff"/>
 				<module type="ram" refid="ram8K" start="0x0000" end="0x1fff"/>
@@ -61,7 +61,7 @@
 		    <pre>
 	<lt/>?xml version="1.0" encoding="UTF-8"?<gt/>
 	<lt/>?xml-stylesheet type="text/xsl" href="/versions/c1pjs/1.12.1/machine.xsl"?<gt/>
-	<lt/>machine id="c1psim" class="c1p" border="1" width="272px"<gt/>
+	<lt/>machine id="c1psim" type="c1p" border="1" width="272px"<gt/>
 		<lt/>name<gt/>Challenger 1P Simulation<lt/>/name<gt/>
 		<lt/>computer id="c1p" name="Challenger 1P"<gt/>
 			<lt/>module type="cpu" refid="cpu6502" start="0x0000" end="0xffff"/<gt/>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pdpjs/1.33.0/machine.xsl"?>
-<machine id="test1170" class="pdp11" border="1" pos="center" background="#FAEBD7">
+<?xml-stylesheet type="text/xsl" href="/versions/pdpjs/1.33.1/machine.xsl"?>
+<machine id="test1170" type="pdp11" border="1" pos="center" background="#FAEBD7">
 	<name pos="center">PDP-11/70 with 256Kb and Boot Monitor</name>
 	<computer id="computer" busWidth="22"/>
 	<cpu id="cpu" model="1170" cycles="6666667" autoStart="true"/>
