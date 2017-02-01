@@ -5,7 +5,8 @@ permalink: /modules/shared/templates/
 ---
 
 Shared Templates
-===
+================
+
 Template folders contain a variety of XML and HTML templates and supporting files, including:
 
 - DTD files (Document Type Definitions)
