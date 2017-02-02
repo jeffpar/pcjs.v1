@@ -81,6 +81,10 @@ directory.  If a PDF was not searchable, it was "OCR'ed" before being archived b
 
 - [RL01/RL02 User Guide (Sep 1981)](http://archive.pcjs.org/pubs/dec/pdp11/rl11/EK-RL012-UG-005_Sep81.pdf)
 
+[PDP-11 RX11](rx11/)
+
+- [RX8/RX11 floppy disk system user's manual (Nov 1976)](http://archive.pcjs.org/pubs/dec/pdp11/rx11/EK-RX01-OP-001_RX11UM_Nov76.pdf)
+
 ---
 
 [Assorted PDP-11 Handbooks](other/)

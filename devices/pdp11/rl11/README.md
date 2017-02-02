@@ -8,7 +8,13 @@ RL11 Disk Controller
 --------------------
 
 The RL11 Disk Controller controls up to four RL01 or RL02 disk drives, which in turn read/write
-[RL01K](/disks/dec/rl01k/) or [RL02K](/disks/dec/rl02k/) disk cartridges.
+[RL01K](/disks/dec/rl01k/) or [RL02K](/disks/dec/rl02k/) disk cartridges, respectively.
+
+RL01K disks are single-platter cartridges with 256 tracks per side, 40 sectors per track, and a sector size of
+256 bytes, for a total capacity of 5Mb (5,242,880 bytes).
+
+RL02K disks are single-platter cartridges with 512 tracks per side, 40 sectors per track, and a sector size of
+256 bytes, for a total capacity of 10Mb (10,485,760 bytes).
 
 Machines containing the [RL11 Component](/modules/pdp11/lib/pc11.js) include:
 

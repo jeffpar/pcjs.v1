@@ -513,6 +513,8 @@ var PDP11 = {
         RLMP:       0o174406,   //                                  RL11 Multi-Purpose Register
         RLBE:       0o174410,   //                                  RL11 Bus (Address) Extension Register (RLV12 controller only)
         DL11:       0o176500,   //                                  DL11 Additional Register Range (ends at 0o176676)
+        RXCS:       0o177170,   //                                  RX11 Command and Status Register
+        RXDB:       0o177172,   //                                  RX11 Data Buffer Register
         RKDS:       0o177400,   //                                  RK11 Drive Status Register
         RKER:       0o177402,   //                                  RK11 Error Register
         RKCS:       0o177404,   //                                  RK11 Control Status Register
@@ -738,7 +740,7 @@ var PDP11 = {
             SCP:    0x2000,     // (020000) Search Complete (R/O)
             HE:     0x4000,     // (040000) Hard Error (R/O)
             ERR:    0x8000,     // (100000) Composite Error (R/O) (set when any RKER bit is set)
-            UNUSED: 0x1200,     // (120000) unused
+            UNUSED: 0x1200,     // (011000) unused
             RMASK:  0xEFFE,     // (167776) bits readable
             WMASK:  0x0F7F,     // (007577) bits writable
             SHIFT: {
@@ -772,6 +774,7 @@ var PDP11 = {
         PRI:        5,
         VEC:        0o160,
         DRIVES:     4,          // maximum of 4 drives
+        PREFIX:     "DY",
         RLCS: {                 // 174400: Control Status Register
             DRDY:   0x0001,     // Drive Ready (R/O)
             FUNC:   0x000E,     // Function Code (F2,F1,F0) (R/W)
@@ -865,6 +868,76 @@ var PDP11 = {
             RDNC:   0b1110      // Read Data without Header Check
         }
     },
+    RX11: {                     // RX11 Disk Controller
+        PRI:        5,
+        VEC:        0o264,
+        DRIVES:     2,          // maximum of 2 drives
+        PREFIX:     "DX",
+        RXCS: {                 // 177170: Command and Status Register
+            GO:     0x0001,     // (000001) Go (W/O)
+            FUNC:   0x000E,     // (000016) Function Code (F2,F1,F0) (W/O)
+            UNIT:   0x0010,     // (000020) Unit Select (W/O)
+            DONE:   0x0020,     // (000040) Done (R/O)
+            IE:     0x0040,     // (000100) Interrupt Enable (R/W, cleared on INIT)
+            TR:     0x0080,     // (000400) Transfer Request (R/O)
+            RXINIT: 0x4000,     // (040000) RX11 Initialize (W/O)
+            ERR:    0x8000,     // (100000) Error (R/O, cleared on INIT or command)
+            UNUSED: 0x3F00,     // (037400) unused
+            RMASK:  0x80E0,     // (100340) bits readable
+            WMASK:  0x405F      // (040137) bits writable
+        },
+        RXDB: {                 // 177172: Data Buffer Register
+        },
+        RXTA: {
+            MASK:   0x007F
+        },
+        RXSA: {
+            MASK:   0x001F
+        },
+        RXES: {
+            /*
+             * The DRDY bit is only valid when retrieved via a Read Status function or at completion of Initialize when it indicates
+             * status of drive O.  It is asserted if the unit currently selected exists, is properly supplied with power, has a diskette
+             * installed correctly, has its door closed, and has a diskette up to speed.
+             *
+             * If the Error bit was set in the RXCS but Error bits are not set in the RXES, then specific error conditions can be accessed via
+             * a Read Error Register function.
+             */
+            CRC:    0x0001,     // CRC error (RXES is moved to the RXDB, and Error and Done are asserted)
+            PARITY: 0x0002,     // parity error (RXES is moved to the RXDB, and Error and Done are asserted)
+            ID:     0x0004,     // Initialize Done (following a programmable or UNIBUS initialization, or a power failure)
+            DEL:    0x0040,     // Deleted Data Detected
+            DRDY:   0x0080      // Drive Ready
+        },
+        FUNC: {                 // NOTE: These function codes are pre-shifted to read/write directly from/to RXCS.FUNC
+            FILL:   0b0000,     // Fill Buffer
+            EMPTY:  0b0010,     // Empty Buffer
+            WRITE:  0b0100,     // Write Sector
+            READ:   0b0110,     // Read Sector
+            UNUSED: 0b1000,     // UNUSED
+            RDSTAT: 0b1010,     // Read Status
+            WRDEL:  0b1100,     // Write Deleted Data Sector
+            RDERR:  0b1110      // Read Error Register
+        },
+        ERROR: {
+            HOME0:      0o0010, // Drive 0 failed to see home on Initialize
+            HOME1:      0o0020, // Drive 1 failed to see home on Initialize
+            BAD_HOME:   0o0030, // Found home when stepping out 10 tracks for INIT
+            NO_TRACK:   0o0040, // Tried to access a track greater than 77
+            FOUND_HOME: 0o0050, // Home was found before desired track was reached
+            SELF_DIAG:  0o0060, // Self-diagnostic error
+            NO_SECTOR:  0o0070, // Desired sector could not be found after looking at 52 headers (2 revolutions)
+            NO_SEP:     0o0110, // More than 40us and no SEP clock seen
+            NO_PREAM:   0o0120, // A preamble could not be found
+            NO_IOMARK:  0o0130, // Preamble found but no I/O mark found within allowable time span
+            CRC_HEADER: 0o0140, // CRC error on what we thought was a header
+            BAD_TRACK:  0o0150, // The header track address of a good header does not compare with the desired track
+            NO_ID:      0o0160, // Too many tries for an IDAM (identifies header)
+            NO_DATA:    0o0170, // Data AM not found in allotted time
+            CRC_DATA:   0o0200, // CRC error on reading the sector from the disk (No code appears in the ERREG).
+            BAD_PARITY: 0o0210  // All parity errors
+        }
+    },
     VECTORS: {
         0o060:  "DL11R",
         0o064:  "DL11X",
@@ -872,12 +945,14 @@ var PDP11 = {
         0o074:  "PC11X",
         0o100:  "KW11",
         0o160:  "RL11",
-        0o220:  "RK11"
+        0o220:  "RK11",
+        0o264:  "RX11"
     }
 };
 
-PDP11.RK11.RK05          = [203, 2, 12, 512, PDP11.RK11.RKDS.RK05 | PDP11.RK11.RKDS.SOK | PDP11.RK11.RKDS.RRDY];
-PDP11.RL11.RL02K         = [512, 2, 40, 256, PDP11.RL11.RLMP.GS_ST.LOCKON | PDP11.RL11.RLMP.GS_BH | PDP11.RL11.RLMP.GS_HO];
+PDP11.RX11.RX01          = ["DX", 77,  1, 26, 128, 0];
+PDP11.RK11.RK05          = ["RK", 203, 2, 12, 512, PDP11.RK11.RKDS.RK05 | PDP11.RK11.RKDS.SOK | PDP11.RK11.RKDS.RRDY];
+PDP11.RL11.RL02K         = ["RL", 512, 2, 40, 256, PDP11.RL11.RLMP.GS_ST.LOCKON | PDP11.RL11.RLMP.GS_BH | PDP11.RL11.RLMP.GS_HO];
 
 PDP11.ACCESS.READ_WORD   = PDP11.ACCESS.WORD | PDP11.ACCESS.READ;       // formerly READ_MODE (2)
 PDP11.ACCESS.READ_BYTE   = PDP11.ACCESS.BYTE | PDP11.ACCESS.READ;       // formerly READ_MODE (2) | BYTE_MODE (1)

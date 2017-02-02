@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<device id="rx11" type="rx11" pos="left" width="35%" padLeft="8px" padBottom="8px">
+	<name>Disk Drive Controls</name>
+	<control type="container">
+		<control type="list" binding="listDrives"/>
+		<control type="list" binding="listDisks">
+			<disk id="disk01" name="RT-11 V3 SYS (1 OF 9)" path="http://archive.pcjs.org/disks/dec/rx01/RX01-RT11-V03-1.json"/>
+			<disk id="disk01" name="RT-11 V3 SYS (2 OF 9)" path="http://archive.pcjs.org/disks/dec/rx01/RX01-RT11-V03-2.json"/>
+			<disk id="disk01" name="RT-11 V3 SYS (3 OF 9)" path="http://archive.pcjs.org/disks/dec/rx01/RX01-RT11-V03-3.json"/>
+			<disk id="disk01" name="RT-11 V3 SYS (4 OF 9)" path="http://archive.pcjs.org/disks/dec/rx01/RX01-RT11-V03-4.json"/>
+			<disk id="disk01" name="RT-11 V3 SYS (5 OF 9)" path="http://archive.pcjs.org/disks/dec/rx01/RX01-RT11-V03-5.json"/>
+			<disk id="disk01" name="RT-11 V3 SYS (6 OF 9)" path="http://archive.pcjs.org/disks/dec/rx01/RX01-RT11-V03-6.json"/>
+			<disk id="disk01" name="RT-11 V3 SYS (7 OF 9)" path="http://archive.pcjs.org/disks/dec/rx01/RX01-RT11-V03-7.json"/>
+			<disk id="disk01" name="RT-11 V3 SYS (8 OF 9)" path="http://archive.pcjs.org/disks/dec/rx01/RX01-RT11-V03-8.json"/>
+			<disk id="disk01" name="RT-11 V3 SYS (9 OF 9)" path="http://archive.pcjs.org/disks/dec/rx01/RX01-RT11-V03-9.json"/>
+		</control>
+		<control type="button" binding="loadDisk">Load</control>
+		<control type="button" binding="bootDisk">Boot</control>
+		<control type="description" binding="descDisk" padRight="8px"/>
+		<control type="file" binding="mountDisk"/>
+	</control>
+</device>

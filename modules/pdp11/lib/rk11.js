@@ -230,12 +230,12 @@ class RK11 extends DriveController {
      */
     readData(drive, iCylinder, iHead, iSector, nWords, addr, inc, fCheck, done)
     {
-        var err = 0;
+        var nError = 0;
         var disk = drive.disk;
         var sector = null, ibSector;
 
         if (!disk) {
-            err = RK11.RKER.NXD;
+            nError = RK11.RKER.NXD;
             nWords = 0;
         }
 
@@ -243,12 +243,12 @@ class RK11 extends DriveController {
         while (nWords) {
             if (!sector) {
                 if (iCylinder >= disk.nCylinders) {
-                    err = RK11.RKER.NXC;
+                    nError = RK11.RKER.NXC;
                     break;
                 }
                 sector = disk.seek(iCylinder, iHead, iSector + 1);
                 if (!sector) {
-                    err = RK11.RKER.SKE;
+                    nError = RK11.RKER.SKE;
                     break;
                 }
                 ibSector = 0;
@@ -262,7 +262,7 @@ class RK11 extends DriveController {
             }
             var b0, b1;
             if ((b0 = disk.read(sector, ibSector++)) < 0 || (b1 = disk.read(sector, ibSector++)) < 0) {
-                err = RK11.RKER.NXS;
+                nError = RK11.RKER.NXS;
                 break;
             }
             if (!fCheck) {
@@ -277,7 +277,7 @@ class RK11 extends DriveController {
                     }
                 }
                 if (this.bus.checkFault()) {
-                    err = RK11.RKER.NXM;
+                    nError = RK11.RKER.NXM;
                     break;
                 }
             }
@@ -285,7 +285,7 @@ class RK11 extends DriveController {
             addr += inc;
             nWords--;
         }
-        return done? done(err, iCylinder, iHead, iSector, nWords, addr) : err;
+        return done? done(nError, iCylinder, iHead, iSector, nWords, addr) : nError;
     }
 
     /**
@@ -305,29 +305,29 @@ class RK11 extends DriveController {
      */
     writeData(drive, iCylinder, iHead, iSector, nWords, addr, inc, fCheck, done)
     {
-        var err = 0;
+        var nError = 0;
         var disk = drive.disk;
         var sector = null, ibSector;
 
         if (!disk) {
-            err = RK11.RKER.NXD;
+            nError = RK11.RKER.NXD;
             nWords = 0;
         }
 
         while (nWords) {
             var data = this.bus.getWordDirect(this.cpu.mapUnibus(addr));
             if (this.bus.checkFault()) {
-                err = RK11.RKER.NXM;
+                nError = RK11.RKER.NXM;
                 break;
             }
             if (!sector) {
                 if (iCylinder >= disk.nCylinders) {
-                    err = RK11.RKER.NXC;
+                    nError = RK11.RKER.NXC;
                     break;
                 }
                 sector = disk.seek(iCylinder, iHead, iSector + 1, true);
                 if (!sector) {
-                    err = RK11.RKER.SKE;
+                    nError = RK11.RKER.SKE;
                     break;
                 }
                 ibSector = 0;
@@ -342,7 +342,7 @@ class RK11 extends DriveController {
             if (fCheck) {
                 var b0, b1;
                 if ((b0 = disk.read(sector, ibSector++)) < 0 || (b1 = disk.read(sector, ibSector++)) < 0) {
-                    err = RK11.RKER.NXS;
+                    nError = RK11.RKER.NXS;
                     break;
                 }
                 /*
@@ -356,12 +356,12 @@ class RK11 extends DriveController {
                  * trigger the RKCS HE (Hard Error) bit.  This is all taken care of in updateErrors() now.
                  */
                 if (data != (b0 | (b1 << 8))) {
-                    err = RK11.RKER.WCE;
+                    nError = RK11.RKER.WCE;
                     break;
                 }
             } else {
                 if (!disk.write(sector, ibSector++, data & 0xff) || !disk.write(sector, ibSector++, data >> 8)) {
-                    err = RK11.RKER.NXS;
+                    nError = RK11.RKER.NXS;
                     break;
                 }
             }
@@ -369,14 +369,14 @@ class RK11 extends DriveController {
             addr += inc;
             nWords--;
         }
-        return done? done(err, iCylinder, iHead, iSector, nWords, addr) : err;
+        return done? done(nError, iCylinder, iHead, iSector, nWords, addr) : nError;
     }
 
     /**
-     * doneReadWrite(err, iCylinder, iHead, iSector, nWords, addr)
+     * doneReadWrite(nError, iCylinder, iHead, iSector, nWords, addr)
      *
      * @this {RK11}
-     * @param {number} err
+     * @param {number} nError
      * @param {number} iCylinder
      * @param {number} iHead
      * @param {number} iSector
@@ -384,13 +384,13 @@ class RK11 extends DriveController {
      * @param {number} addr
      * @return {boolean}
      */
-    doneReadWrite(err, iCylinder, iHead, iSector, nWords, addr)
+    doneReadWrite(nError, iCylinder, iHead, iSector, nWords, addr)
     {
         this.regRKBA = addr & 0xffff;
         this.regRKCS = (this.regRKCS & ~RK11.RKCS.MEX) | ((addr >> (16 - RK11.RKCS.SHIFT.MEX)) & RK11.RKCS.MEX);
         this.regRKWC = (0x10000 - nWords) & 0xffff;
         this.regRKDA = (this.regRKDA & ~RK11.RKDA.SA) | (iSector & RK11.RKDA.SA);
-        this.regRKER |= err;
+        this.regRKER |= nError;
         this.updateErrors();
         return true;
     }

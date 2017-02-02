@@ -376,7 +376,8 @@ class DriveController extends Component {
      */
     getDriveName(iDrive)
     {
-        return this.type.substr(0, 2) + iDrive;
+        var drive = this.aDrives[iDrive];
+        return drive.sName || "---";
     }
 
     /**
@@ -554,11 +555,12 @@ class DriveController extends Component {
          * NOTE: We initialize the following drive properties to their MAXIMUMs; disks may have
          * these or SMALLER values (subject to the limits of what the controller supports, of course).
          */
-        drive.nCylinders = configDrive[0];
-        drive.nHeads = configDrive[1];
-        drive.nSectors = configDrive[2];
-        drive.cbSector = configDrive[3];
-        drive.status = configDrive[4];
+        drive.sName = configDrive[0] + iDrive;
+        drive.nCylinders = configDrive[1];
+        drive.nHeads = configDrive[2];
+        drive.nSectors = configDrive[3];
+        drive.cbSector = configDrive[4];
+        drive.status = configDrive[5];
 
         /*
          * The next group of properties are set by various controller command sequences.
@@ -720,9 +722,9 @@ class DriveController extends Component {
     {
         if (!fRemount) this.cAutoMount = 0;
         for (var sDrive in this.configMount) {
-            var configDrive = this.configMount[sDrive];
-            var sDiskPath = configDrive['path'] || "";
-            var sDiskName = configDrive['name'] || this.findDisk(sDiskPath);
+            var configDisk = this.configMount[sDrive];
+            var sDiskPath = configDisk['path'] || "";
+            var sDiskName = configDisk['name'] || this.findDisk(sDiskPath);
             if (sDiskPath && sDiskName) {
                 var iDrive = this.getDriveNumber(sDrive);
                 if (iDrive >= 0 && iDrive < this.aDrives.length) {
@@ -732,7 +734,7 @@ class DriveController extends Component {
                     continue;
                 }
             }
-            this.notice("Incorrect auto-mount settings for drive " + sDrive + " (" + JSON.stringify(configDrive) + ")");
+            this.notice("Incorrect auto-mount settings for drive " + sDrive + " (" + JSON.stringify(configDisk) + ")");
         }
         return !!this.cAutoMount;
     }
@@ -1220,7 +1222,7 @@ class DriveController extends Component {
     /**
      * readData(drive, iCylinder, iHead, iSector, nWords, addr, inc, fCheck, done)
      *
-     * Placeholder for subclasses.
+     * Placeholder for subclasses.  Implementation is optional, but the automatic BOOT feature will be unavailable.
      *
      * @this {DriveController}
      * @param {Object} drive
@@ -1236,13 +1238,13 @@ class DriveController extends Component {
      */
     readData(drive, iCylinder, iHead, iSector, nWords, addr, inc, fCheck, done)
     {
-        return false;
+        return -1;
     }
 
     /**
      * writeData(drive, iCylinder, iHead, iSector, nWords, addr, inc, fCheck, done)
      *
-     * Placeholder for subclasses.
+     * Placeholder for subclasses.  Implementation is optional.
      *
      * @this {DriveController}
      * @param {Object} drive
@@ -1258,7 +1260,7 @@ class DriveController extends Component {
      */
     writeData(drive, iCylinder, iHead, iSector, nWords, addr, inc, fCheck, done)
     {
-        return false;
+        return -1;
     }
 }
 
