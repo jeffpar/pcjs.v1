@@ -950,9 +950,26 @@ var PDP11 = {
     }
 };
 
-PDP11.RX11.RX01          = ["DX", 77,  1, 26, 128, 0];
-PDP11.RK11.RK05          = ["RK", 203, 2, 12, 512, PDP11.RK11.RKDS.RK05 | PDP11.RK11.RKDS.SOK | PDP11.RK11.RKDS.RRDY];
-PDP11.RL11.RL02K         = ["RL", 512, 2, 40, 256, PDP11.RL11.RLMP.GS_ST.LOCKON | PDP11.RL11.RLMP.GS_BH | PDP11.RL11.RLMP.GS_HO];
+PDP11.RX11.RX01 = [
+    "DX",
+    77,  1, 26, 128,            // disk geometry (CHSN: cylinders, heads, sectors/track, and bytes/sector)
+    1,   0,  0, 128,            // boot code location (cylinder, head, sector index (NOT sector number), and number of bytes)
+    0                           // default drive status
+];
+
+PDP11.RK11.RK05 = [
+    "RK",
+    203, 2, 12, 512,            // disk geometry (CHSN: cylinders, heads, sectors/track, and bytes/sector)
+    0,   0,  0, 512,            // boot code location (cylinder, head, sector index (NOT sector number), and number of bytes)
+    PDP11.RK11.RKDS.RK05 | PDP11.RK11.RKDS.SOK | PDP11.RK11.RKDS.RRDY
+];
+
+PDP11.RL11.RL02K = [
+    "RL",
+    512, 2, 40, 256,            // disk geometry (CHSN: cylinders, heads, sectors/track, and bytes/sector)
+    0,   0,  0, 256,            // boot code location (cylinder, head, sector index (NOT sector number), and number of bytes)
+    PDP11.RL11.RLMP.GS_ST.LOCKON | PDP11.RL11.RLMP.GS_BH | PDP11.RL11.RLMP.GS_HO
+];
 
 PDP11.ACCESS.READ_WORD   = PDP11.ACCESS.WORD | PDP11.ACCESS.READ;       // formerly READ_MODE (2)
 PDP11.ACCESS.READ_BYTE   = PDP11.ACCESS.BYTE | PDP11.ACCESS.READ;       // formerly READ_MODE (2) | BYTE_MODE (1)

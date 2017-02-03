@@ -15,8 +15,8 @@ DEC PDP-11 BASIC
 
 [![DEC-11-AJPB-PB](DEC-11-AJPB-PB.jpg)](DEC-11-AJPB-PB.json)
 
-According to the [PDP-11/20 Handbook (1971)](http://archive.pcjs.org/pubs/dec/pdp11/1120/PDP1120_Handbook_1971.pdf), p. 160,
-notable features of PDP-11 BASIC included:
+According to the [PDP-11/20 Handbook (1971)](http://archive.pcjs.org/pubs/dec/pdp11/1120/PDP1120_Handbook_1971.pdf),
+p. 160, notable features of PDP-11 BASIC included:
 
 - Use of BASIC statements in immediate mode (no line number)
 - Ability to use any BASIC command (RUN, LIST, etc.) in deferred mode (with a line number)
@@ -47,19 +47,19 @@ Debugging Notes
 
 ### PDPjs Debugger vs. SIMH
 
-When I first tried to run BASIC in a PDPjs machine, it crashed almost immediately.  It was attempting to use memory beyond
-the 16Kb of installed RAM.  After a bit of poking around, I found BASIC's memory sizing code here:
+When I first tried to run BASIC in a PDPjs machine, it crashed almost immediately.  It was attempting to use memory
+beyond the 16Kb of installed RAM.  After a bit of poking around, I found BASIC's memory sizing code here:
  
 	016142: 012701 160000          MOV   #160000,R1
 	016146: 022626                 CMP   (SP)+,(SP)+
 	016150: 014111                 MOV   -(R1),@R1
 
-The code sets R1 to highest possible RAM address and starts scanning backwards for the first valid memory location.  However,
-the scanning process wasn't clear to me at first glance, and the `CMP (SP)+,(SP)+` was a bit of a head-scratcher, so I decided
-to do an instruction-by-instruction comparison with SIMH.
+The code sets R1 to highest possible RAM address and starts scanning backwards for the first valid memory location.
+However, the scanning process wasn't clear to me at first glance, and the `CMP (SP)+,(SP)+` was a bit of a
+head-scratcher, so I decided to do an instruction-by-instruction comparison with SIMH.
 
-After cloning the [SIMH project](https://github.com/simh/simh) and building the *pdp11* binary, I created a *pdp11.ini* text file
-that contained:
+After cloning the [SIMH project](https://github.com/simh/simh) and building the *pdp11* binary, I created a *pdp11.ini*
+text file that contained:
 
 	ECHO Configuring PDP-11/20 with 16Kb of RAM...
 	SET CPU 11/20
@@ -154,15 +154,15 @@ After typing several "do tr" commands, I was surprised to see SIMH execution con
 
 	Step expired, PC: 016150 (MOV -(R1),(R1))
 	
-until I remembered that when the PDP-11 accesses an invalid address, it's supposed to trap to vector 000004, and that BASIC
-must have modified vector 000004 to jump into the middle of this code.
+until I remembered that when the PDP-11 accesses an invalid address, it's supposed to trap to vector 000004, and that
+BASIC must have modified vector 000004 to jump into the middle of this code.
 
-This code fragment was simply marching down the address space until it reached an address that didn't trap.  The odd-looking
-`CMP (SP)+,(SP)+` instruction was throwing away the PC and PSW that each trap pushed onto the stack, by effectively adding
-4 to SP.
+This code fragment was simply marching down the address space until it reached an address that didn't trap.  The
+odd-looking `CMP (SP)+,(SP)+` instruction was throwing away the PC and PSW that each trap pushed onto the stack, by
+effectively adding 4 to SP.
 
-The problem with PDPjs was that it wasn't generating a trap to vector 000004 when an invalid address was accessed.  After fixing
-that, I verified with the PDPjs Debugger that the memory sizing code was working properly:
+The problem with PDPjs was that it wasn't generating a trap to vector 000004 when an invalid address was accessed.
+After fixing that, I verified with the PDPjs Debugger that the memory sizing code was working properly:
 
 	PDPjs v1.30.1
 	Copyright © 2012-2016 Jeff Parsons <Jeff@pcjs.org>
@@ -263,18 +263,19 @@ When the code starts, the TRAP instruction has already pushed two words onto the
 	0(SP):  previous PC
 	2(SP):  previous PSW
 
-The first instruction, `MOV @SP,2(SP)`, copies the *previous PC* onto the *previous PSW*, which is where we'll eventually want
-*previous PC*, so that the handler can eventually return with a simple `RTS PC`.
+The first instruction, `MOV @SP,2(SP)`, copies the *previous PC* onto the *previous PSW*, which is where we'll
+eventually want *previous PC*, so that the handler can eventually return with a simple `RTS PC`.
 
-The next instruction, `SUB #2,@SP`, subtracts 2 from the original *previous PC*, so that it now points to the TRAP instruction.
+The next instruction, `SUB #2,@SP`, subtracts 2 from the original *previous PC*, so that it now points to the TRAP
+instruction.
 
-Then `@(SP)+,-(SP)` fetches the TRAP instruction while also "popping" the original *previous PC* and then "pushing" TRAP
-instruction onto the stack, overwriting the original *previous PC*.
+Then `@(SP)+,-(SP)` fetches the TRAP instruction while also "popping" the original *previous PC* and then "pushing"
+TRAP instruction onto the stack, overwriting the original *previous PC*.
 
-The next few instructions shift the TRAP right to see if bit 0 is set, and if it is not, then the TRAP instruction is restored
-by shifting it left again, and then a large offset is added to it, transforming the TRAP instruction (which is now known to be
-an *even* value) into a jump table index.
+The next few instructions shift the TRAP right to see if bit 0 is set, and if it is not, then the TRAP instruction
+is restored by shifting it left again, and then a large offset is added to it, transforming the TRAP instruction (which
+is now known to be an *even* value) into a jump table index.
 
 The final instruction, `MOV @(SP)+,PC`, moves the address at the jump table index into PC, while also removing the TRAP
-instruction from the stack, leaving only the *previous PC* on the stack, so that when the TRAP handler is done, it can execute
-`RTS PC` to return to the caller.
+instruction from the stack, leaving only the *previous PC* on the stack, so that when the TRAP handler is done, it can
+execute `RTS PC` to return to the caller.

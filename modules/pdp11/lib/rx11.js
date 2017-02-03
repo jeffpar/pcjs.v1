@@ -217,7 +217,7 @@ class RX11 extends DriveController {
      * @param {Object} drive
      * @param {number} iCylinder
      * @param {number} iHead
-     * @param {number} iSector (0-based)
+     * @param {number} iSector
      * @param {number} nWords
      * @param {number} addr
      * @param {number} inc (normally 2, unless inhibited, in which case it's 0)
@@ -293,15 +293,15 @@ class RX11 extends DriveController {
         var iDrive = (this.regRXCS & RX11.RXCS.UNIT)? 1 : 0;
         var drive = this.aDrives[iDrive];
         var disk = drive && drive.disk;
-        var iCylinder = this.regRXTA & RX11.RXTA.MASK, iHead = 0, iSector = this.regRXSA & RX11.RXSA.MASK;
+        var iCylinder = this.regRXTA & RX11.RXTA.MASK, iHead = 0, nSector = this.regRXSA & RX11.RXSA.MASK;
 
         this.regRXES &= ~(RX11.RXES.CRC | RX11.RXES.PARITY | RX11.RXES.DEL | RX11.RXES.DRDY);
 
         if (disk) {
             this.regRXES |= RX11.RXES.DRDY;
-            if (this.messageEnabled()) this.printMessage(this.type + ".readSector(" + iCylinder + ":" + iHead + ":" + iSector + ")", true, true);
-            this.assert(iSector);       // RX sector numbers (unlike RK and RL) are supposed to be 1-based
-            var sector = disk.seek(iCylinder, iHead, iSector, true);
+            if (this.messageEnabled()) this.printMessage(this.type + ".readSector(" + iCylinder + ":" + iHead + ":" + nSector + ")", true, true);
+            this.assert(nSector);       // RX sector numbers (unlike RK and RL) are supposed to be 1-based
+            var sector = disk.seek(iCylinder, iHead, nSector, true);
             if (sector) {
                 var i = 0, nBytes = this.abBuffer.length;
                 while (i < nBytes) {
@@ -334,15 +334,15 @@ class RX11 extends DriveController {
         var iDrive = (this.regRXCS & RX11.RXCS.UNIT)? 1 : 0;
         var drive = this.aDrives[iDrive];
         var disk = drive && drive.disk;
-        var iCylinder = this.regRXTA & RX11.RXTA.MASK, iHead = 0, iSector = this.regRXSA & RX11.RXSA.MASK;
+        var iCylinder = this.regRXTA & RX11.RXTA.MASK, iHead = 0, nSector = this.regRXSA & RX11.RXSA.MASK;
 
         this.regRXES &= ~(RX11.RXES.CRC | RX11.RXES.PARITY | RX11.RXES.DEL | RX11.RXES.DRDY);
 
         if (disk) {
             this.regRXES |= RX11.RXES.DRDY;
-            if (this.messageEnabled()) this.printMessage(this.type + ".writeSector(" + iCylinder + ":" + iHead + ":" + iSector + ")", true, true);
-            this.assert(iSector);       // RX sector numbers (unlike RK and RL) are supposed to be 1-based
-            var sector = disk.seek(iCylinder, iHead, iSector, true);
+            if (this.messageEnabled()) this.printMessage(this.type + ".writeSector(" + iCylinder + ":" + iHead + ":" + nSector + ")", true, true);
+            this.assert(nSector);       // RX sector numbers (unlike RK and RL) are supposed to be 1-based
+            var sector = disk.seek(iCylinder, iHead, nSector, true);
             if (sector) {
                 if (fDeleted) sector.deleted = true;
                 var i = 0, nBytes = this.abBuffer.length;

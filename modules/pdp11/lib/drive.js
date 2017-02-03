@@ -555,12 +555,16 @@ class DriveController extends Component {
          * NOTE: We initialize the following drive properties to their MAXIMUMs; disks may have
          * these or SMALLER values (subject to the limits of what the controller supports, of course).
          */
-        drive.sName = configDrive[0] + iDrive;
-        drive.nCylinders = configDrive[1];
-        drive.nHeads = configDrive[2];
-        drive.nSectors = configDrive[3];
-        drive.cbSector = configDrive[4];
-        drive.status = configDrive[5];
+        drive.sName = configDrive[i++] + iDrive;
+        drive.nCylinders = configDrive[i++];
+        drive.nHeads = configDrive[i++];
+        drive.nSectors = configDrive[i++];
+        drive.cbSector = configDrive[i++];
+        drive.iCylinderBoot = configDrive[i++];
+        drive.iHeadBoot = configDrive[i++];
+        drive.iSectorBoot = configDrive[i++];
+        drive.cbSectorBoot = configDrive[i++];
+        drive.status = configDrive[i++];
 
         /*
          * The next group of properties are set by various controller command sequences.
@@ -817,7 +821,7 @@ class DriveController extends Component {
          * a READY state is assured, and the readData() call shouldn't do anything to change that.
          */
         this.cpu.setReset(0, true);
-        var err = this.readData(drive, 0, 0, 0, 512, 0x0000, 2);
+        var err = this.readData(drive, drive.iCylinderBoot, drive.iHeadBoot, drive.iSectorBoot, drive.cbSectorBoot, 0x0000, 2);
         if (err) {
             this.notice("Unable to read the boot sector (" + err + ")");
         }
