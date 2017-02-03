@@ -879,7 +879,7 @@ var PDP11 = {
             UNIT:   0x0010,     // (000020) Unit Select (W/O)
             DONE:   0x0020,     // (000040) Done (R/O)
             IE:     0x0040,     // (000100) Interrupt Enable (R/W, cleared on INIT)
-            TR:     0x0080,     // (000400) Transfer Request (R/O)
+            TR:     0x0080,     // (000200) Transfer Request (R/O)
             INIT:   0x4000,     // (040000) RX11 Initialize (W/O)
             ERR:    0x8000,     // (100000) Error (R/O, cleared on INIT or command)
             UNUSED: 0x3F00,     // (037400) unused

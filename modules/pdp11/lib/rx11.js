@@ -152,6 +152,9 @@ class RX11 extends DriveController {
     {
         this.funCode = this.regRXCS & RX11.RXCS.FUNC;
         this.regRXCS &= ~(RX11.RXCS.GO | RX11.RXCS.TR | RX11.RXCS.DONE | RX11.RXCS.ERR);
+        this.cpu.clearIRQ(this.irq);
+
+        if (this.messageEnabled()) this.printMessage(this.type + ".processCommand(" + RX11.FUNCS[this.funCode >> 1]+ ")", true, true);
 
         switch(this.funCode) {
 
@@ -172,8 +175,7 @@ class RX11 extends DriveController {
             break;
 
         default:
-            if (this.messageEnabled()) this.printMessage(this.type + ": UNSUPPORTED(" + this.funCode + ")");
-            this.funCode = RX11.FUNC.UNUSED;
+            this.assert(this.funCode == RX11.FUNC.UNUSED);
             break;
         }
     }
@@ -215,7 +217,7 @@ class RX11 extends DriveController {
      * @param {Object} drive
      * @param {number} iCylinder
      * @param {number} iHead
-     * @param {number} iSector
+     * @param {number} iSector (0-based)
      * @param {number} nWords
      * @param {number} addr
      * @param {number} inc (normally 2, unless inhibited, in which case it's 0)
@@ -229,6 +231,8 @@ class RX11 extends DriveController {
         var disk = drive.disk;
         var sector = null, ibSector;
 
+        if (this.messageEnabled()) this.printMessage(this.type + ".readData(" + iCylinder + ":" + iHead + ":" + iSector + ") " + Str.toOct(addr) + "--" + Str.toOct(addr + (nWords << 1)), true, true);
+
         if (!disk) {
             nError = drive.iDrive?  RX11.ERROR.HOME1 : RX11.ERROR.HOME0;
             nWords = 0;
@@ -241,7 +245,7 @@ class RX11 extends DriveController {
                     nError = RX11.ERROR.NO_TRACK;
                     break;
                 }
-                sector = disk.seek(iCylinder, iHead, iSector);
+                sector = disk.seek(iCylinder, iHead, iSector + 1);
                 if (!sector) {
                     nError = RX11.ERROR.NO_SECTOR;
                     break;
@@ -274,6 +278,7 @@ class RX11 extends DriveController {
             addr += inc;
             nWords--;
         }
+
         return done? done(nError, iCylinder, iHead, iSector, nWords, addr) : nError;
     }
 
@@ -294,6 +299,7 @@ class RX11 extends DriveController {
 
         if (disk) {
             this.regRXES |= RX11.RXES.DRDY;
+            if (this.messageEnabled()) this.printMessage(this.type + ".readSector(" + iCylinder + ":" + iHead + ":" + iSector + ")", true, true);
             this.assert(iSector);       // RX sector numbers (unlike RK and RL) are supposed to be 1-based
             var sector = disk.seek(iCylinder, iHead, iSector, true);
             if (sector) {
@@ -334,6 +340,7 @@ class RX11 extends DriveController {
 
         if (disk) {
             this.regRXES |= RX11.RXES.DRDY;
+            if (this.messageEnabled()) this.printMessage(this.type + ".writeSector(" + iCylinder + ":" + iHead + ":" + iSector + ")", true, true);
             this.assert(iSector);       // RX sector numbers (unlike RK and RL) are supposed to be 1-based
             var sector = disk.seek(iCylinder, iHead, iSector, true);
             if (sector) {
@@ -466,8 +473,9 @@ class RX11 extends DriveController {
                 if (this.regRXCS & RX11.RXCS.TR) {
                     this.regRXCS &= ~RX11.RXCS.TR;
                     this.assert(this.iBuffer < this.abBuffer.length);
-                    this.regRXDB = this.abBuffer[this.iBuffer++] & 0xff;
-                    if (this.iBuffer >= this.abBuffer.length) {
+                    this.regRXDB = this.abBuffer[this.iBuffer] & 0xff;
+                    if (this.messageEnabled()) this.printMessage(this.type + ".readByte(" + this.iBuffer + "): " + Str.toHexByte(this.regRXDB), true, true);
+                    if (++this.iBuffer >= this.abBuffer.length) {
                         this.doneCommand();
                     }
                 }
@@ -492,8 +500,9 @@ class RX11 extends DriveController {
             if (this.regRXCS & RX11.RXCS.TR) {
                 this.regRXCS &= ~RX11.RXCS.TR;
                 this.assert(this.iBuffer < this.abBuffer.length);
-                this.abBuffer[this.iBuffer++] = data & 0xff;
-                if (this.iBuffer >= this.abBuffer.length) {
+                this.abBuffer[this.iBuffer] = data & 0xff;
+                if (this.messageEnabled()) this.printMessage(this.type + ".writeByte(" + this.iBuffer + "," + Str.toHexByte(data) + ")", true, true);
+                if (++this.iBuffer >= this.abBuffer.length) {
                     this.doneCommand();
                 }
             }
@@ -540,6 +549,10 @@ RX11.RXSA   =   PDP11.RX11.RXSA;
 RX11.RXES   =   PDP11.RX11.RXES;
 RX11.FUNC   =   PDP11.RX11.FUNC;
 RX11.ERROR  =   PDP11.RX11.ERROR;
+
+RX11.FUNCS  = [
+    "FILL", "EMPTY", "WRITE", "READ", "UNUSED", "RDSTAT", "WRDEL", "RDERR"
+];
 
 /*
  * ES6 ALERT: As you can see below, I've finally started using computed property names.
