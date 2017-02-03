@@ -64,11 +64,13 @@ class RX11 extends DriveController {
          */
         this.regRXCS = this.regRXDB = 0;
         this.regRXTA = this.regRXSA = this.regRXES = this.regError = 0;
+
         /*
          * Whenever a command is issued, we record the function code internally here, and when the command
          * is completed, we set the internal function code back to UNUSED.
          */
-        this.funCode = RX11.FUNC.UNUSED;
+        this.funCode = RX11.FUNC.UNUSED;        // no function in progress (device is idle)
+
         this.iBuffer = 0;
         /*
          * We use the new ES6 fill() method to ensure that the buffer returns something reasonable if, for some
@@ -87,24 +89,34 @@ class RX11 extends DriveController {
     initController(aRegs)
     {
         if (!aRegs) {
-            aRegs = [0, 0];
+            this.regRXCS = 0;
+            this.regRXDB = 0;
+            this.regRXTA = 1;
+            this.regRXSA = 1;
+            this.regRXES = 0;
+            this.regError = 0;
+            this.funCode = RX11.FUNC.READ;
+            this.iBuffer = 0;
+            this.cpu.clearIRQ(this.irq);
+            this.readSector();
         }
-
-        /*
-         * ES6 ALERT: A handy destructuring assignment, which makes it easy to perform the inverse
-         * of what saveController() does when it collects a bunch of object properties into an array.
-         */
-        [
-            this.regRXCS,
-            this.regRXDB,
-            this.regRXTA,
-            this.regRXSA,
-            this.regRXES,
-            this.regError,
-            this.iBuffer,
-            this.abBuffer
-        ] = aRegs;
-
+        else {
+            /*
+             * ES6 ALERT: A handy destructuring assignment, which makes it easy to perform the inverse
+             * of what saveController() does when it collects a bunch of object properties into an array.
+             */
+            [
+                this.regRXCS,
+                this.regRXDB,
+                this.regRXTA,
+                this.regRXSA,
+                this.regRXES,
+                this.regError,
+                this.funCode,
+                this.iBuffer,
+                this.abBuffer
+            ] = aRegs;
+        }
         return true;
     }
 
@@ -125,6 +137,7 @@ class RX11 extends DriveController {
             this.regRXSA,
             this.regRXES,
             this.regError,
+            this.funCode,
             this.iBuffer,
             this.abBuffer
         ];
@@ -274,14 +287,14 @@ class RX11 extends DriveController {
         var nError = 0;
         var iDrive = (this.regRXCS & RX11.RXCS.UNIT)? 1 : 0;
         var drive = this.aDrives[iDrive];
-        var disk = drive.disk;
+        var disk = drive && drive.disk;
         var iCylinder = this.regRXTA & RX11.RXTA.MASK, iHead = 0, iSector = this.regRXSA & RX11.RXSA.MASK;
 
         this.regRXES &= ~(RX11.RXES.CRC | RX11.RXES.PARITY | RX11.RXES.DEL | RX11.RXES.DRDY);
 
         if (disk) {
             this.regRXES |= RX11.RXES.DRDY;
-            this.assert(!iSector);      // RX sector numbers (unlike RK and RL) are supposed to be 1-based
+            this.assert(iSector);       // RX sector numbers (unlike RK and RL) are supposed to be 1-based
             var sector = disk.seek(iCylinder, iHead, iSector, true);
             if (sector) {
                 var i = 0, nBytes = this.abBuffer.length;
@@ -314,14 +327,14 @@ class RX11 extends DriveController {
         var nError = 0;
         var iDrive = (this.regRXCS & RX11.RXCS.UNIT)? 1 : 0;
         var drive = this.aDrives[iDrive];
-        var disk = drive.disk;
+        var disk = drive && drive.disk;
         var iCylinder = this.regRXTA & RX11.RXTA.MASK, iHead = 0, iSector = this.regRXSA & RX11.RXSA.MASK;
 
         this.regRXES &= ~(RX11.RXES.CRC | RX11.RXES.PARITY | RX11.RXES.DEL | RX11.RXES.DRDY);
 
         if (disk) {
             this.regRXES |= RX11.RXES.DRDY;
-            this.assert(!iSector);      // RX sector numbers (unlike RK and RL) are supposed to be 1-based
+            this.assert(iSector);       // RX sector numbers (unlike RK and RL) are supposed to be 1-based
             var sector = disk.seek(iCylinder, iHead, iSector, true);
             if (sector) {
                 if (fDeleted) sector.deleted = true;
@@ -376,18 +389,33 @@ class RX11 extends DriveController {
      *
      * @this {RX11}
      * @param {number} addr (eg, PDP11.UNIBUS.RXCS or 177170)
+     * @param {boolean} [fPreWrite]
      * @return {number}
      */
-    readRXCS(addr)
+    readRXCS(addr, fPreWrite)
     {
-        var w = this.regRXCS & RX11.RXCS.RMASK;
-        switch(this.funCode) {
+        var w = this.regRXCS;
 
-        case RX11.FUNC.FILL:
-            if (this.iBuffer < this.abBuffer.length) {
-                this.regRXCS |= RX11.RXCS.TR;
+        if (!fPreWrite) {
+            w &= RX11.RXCS.RMASK;
+
+            switch (this.funCode) {
+
+            case RX11.FUNC.FILL:
+            case RX11.FUNC.EMPTY:
+                if (this.iBuffer < this.abBuffer.length) {
+                    this.regRXCS |= RX11.RXCS.TR;
+                }
+                break;
+
+            case RX11.FUNC.READ:
+            case RX11.FUNC.WRITE:
+            case RX11.FUNC.WRDEL:
+                if (this.iBuffer < 2) {
+                    this.regRXCS |= RX11.RXCS.TR;
+                }
+                break;
             }
-            break;
         }
         return w;
     }
@@ -403,7 +431,22 @@ class RX11 extends DriveController {
     {
         this.regRXCS = (this.regRXCS & ~RX11.RXCS.WMASK) | (data & RX11.RXCS.WMASK);
 
-        if (this.regRXCS & RX11.RXCS.GO) this.processCommand();
+        if (this.regRXCS & RX11.RXCS.INIT) {
+            this.initController();
+            return;
+        }
+
+        if ((this.regRXCS & RX11.RXCS.GO) && this.funCode == RX11.FUNC.UNUSED) {
+            this.processCommand();
+            return;
+        }
+
+        if (!(this.regRXCS & RX11.RXCS.IE)) {
+            this.cpu.clearIRQ(this.irq);
+        }
+        else if (this.regRXCS & RX11.RXCS.DONE) {
+            this.cpu.setIRQ(this.irq);
+        }
     }
 
     /**
@@ -411,22 +454,25 @@ class RX11 extends DriveController {
      *
      * @this {RX11}
      * @param {number} addr (eg, PDP11.UNIBUS.RXDB or 177172)
+     * @param {boolean} [fPreWrite]
      * @return {number}
      */
-    readRXDB(addr)
+    readRXDB(addr, fPreWrite)
     {
-        switch(this.funCode) {
+        if (!fPreWrite) {
+            switch (this.funCode) {
 
-        case RX11.FUNC.EMPTY:
-            if (this.regRXCS & RX11.RXCS.TR) {
-                this.regRXCS &= ~RX11.RXCS.TR;
-                this.assert(this.iBuffer < this.abBuffer.length);
-                this.regRXDB = this.abBuffer[this.iBuffer++] & 0xff;
-                if (this.iBuffer >= this.abBuffer.length) {
-                    this.doneCommand();
+            case RX11.FUNC.EMPTY:
+                if (this.regRXCS & RX11.RXCS.TR) {
+                    this.regRXCS &= ~RX11.RXCS.TR;
+                    this.assert(this.iBuffer < this.abBuffer.length);
+                    this.regRXDB = this.abBuffer[this.iBuffer++] & 0xff;
+                    if (this.iBuffer >= this.abBuffer.length) {
+                        this.doneCommand();
+                    }
                 }
+                break;
             }
-            break;
         }
         return this.regRXDB;
     }

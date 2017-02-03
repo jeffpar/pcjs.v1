@@ -880,7 +880,7 @@ var PDP11 = {
             DONE:   0x0020,     // (000040) Done (R/O)
             IE:     0x0040,     // (000100) Interrupt Enable (R/W, cleared on INIT)
             TR:     0x0080,     // (000400) Transfer Request (R/O)
-            RXINIT: 0x4000,     // (040000) RX11 Initialize (W/O)
+            INIT:   0x4000,     // (040000) RX11 Initialize (W/O)
             ERR:    0x8000,     // (100000) Error (R/O, cleared on INIT or command)
             UNUSED: 0x3F00,     // (037400) unused
             RMASK:  0x80E0,     // (100340) bits readable
