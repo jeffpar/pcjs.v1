@@ -567,13 +567,15 @@ class CPUStatePDP11 extends CPUPDP11 {
     }
 
     /**
-     * setReset(addr, fStart)
+     * setReset(addr, fStart, bUnit, addrStack)
      *
      * @this {CPUStatePDP11}
      * @param {number} addr
-     * @param {boolean|undefined} fStart (true if a "startable" image was just loaded, false if not)
+     * @param {boolean} [fStart] (true if a "startable" image was just loaded, false if not)
+     * @param {number} [bUnit] (boot unit #)
+     * @param {number} [addrStack]
      */
-    setReset(addr, fStart)
+    setReset(addr, fStart, bUnit, addrStack)
     {
         this.addrReset = addr;
 
@@ -583,13 +585,9 @@ class CPUStatePDP11 extends CPUPDP11 {
         this.resetCPU();
 
         if (fStart) {
-            /*
-             * TODO: Review.  I'm zeroing R2-R5 in the fStart case (ie, for boot code) simply because that's what I
-             * saw the PDP-11 Boot Monitor doing (see /apps/pdp11/boot/monitor/BOOTMON.mac).
-             */
-            for (var i = 2; i <= 5; i++) {
-                this.regsGen[i] = 0;
-            }
+            this.regsGen[0] = bUnit || 0;
+            for (var i = 1; i <= 5; i++) this.regsGen[i] = 0;
+            this.regsGen[6] = addrStack || 0o2000;
             if (!this.flags.powered) {
                 this.flags.autoStart = true;
             }

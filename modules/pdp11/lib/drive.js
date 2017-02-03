@@ -820,7 +820,7 @@ class DriveController extends Component {
          * expects the controller to be in a READY state; since setReset() triggers a call to our reset() handler,
          * a READY state is assured, and the readData() call shouldn't do anything to change that.
          */
-        this.cpu.setReset(0, true);
+        this.cpu.setReset(0, true, iDrive);
         var err = this.readData(drive, drive.iCylinderBoot, drive.iHeadBoot, drive.iSectorBoot, drive.cbSectorBoot, 0x0000, 2);
         if (err) {
             this.notice("Unable to read the boot sector (" + err + ")");
