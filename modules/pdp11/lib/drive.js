@@ -376,7 +376,8 @@ class DriveController extends Component {
      */
     getDriveName(iDrive)
     {
-        return this.type.substr(0, 2) + iDrive;
+        var drive = this.aDrives[iDrive];
+        return drive.sName || "---";
     }
 
     /**
@@ -554,11 +555,16 @@ class DriveController extends Component {
          * NOTE: We initialize the following drive properties to their MAXIMUMs; disks may have
          * these or SMALLER values (subject to the limits of what the controller supports, of course).
          */
-        drive.nCylinders = configDrive[0];
-        drive.nHeads = configDrive[1];
-        drive.nSectors = configDrive[2];
-        drive.cbSector = configDrive[3];
-        drive.status = configDrive[4];
+        drive.sName = configDrive[i++] + iDrive;
+        drive.nCylinders = configDrive[i++];
+        drive.nHeads = configDrive[i++];
+        drive.nSectors = configDrive[i++];
+        drive.cbSector = configDrive[i++];
+        drive.iCylinderBoot = configDrive[i++];
+        drive.iHeadBoot = configDrive[i++];
+        drive.iSectorBoot = configDrive[i++];
+        drive.cbSectorBoot = configDrive[i++];
+        drive.status = configDrive[i++];
 
         /*
          * The next group of properties are set by various controller command sequences.
@@ -720,9 +726,9 @@ class DriveController extends Component {
     {
         if (!fRemount) this.cAutoMount = 0;
         for (var sDrive in this.configMount) {
-            var configDrive = this.configMount[sDrive];
-            var sDiskPath = configDrive['path'] || "";
-            var sDiskName = configDrive['name'] || this.findDisk(sDiskPath);
+            var configDisk = this.configMount[sDrive];
+            var sDiskPath = configDisk['path'] || "";
+            var sDiskName = configDisk['name'] || this.findDisk(sDiskPath);
             if (sDiskPath && sDiskName) {
                 var iDrive = this.getDriveNumber(sDrive);
                 if (iDrive >= 0 && iDrive < this.aDrives.length) {
@@ -732,7 +738,7 @@ class DriveController extends Component {
                     continue;
                 }
             }
-            this.notice("Incorrect auto-mount settings for drive " + sDrive + " (" + JSON.stringify(configDrive) + ")");
+            this.notice("Incorrect auto-mount settings for drive " + sDrive + " (" + JSON.stringify(configDisk) + ")");
         }
         return !!this.cAutoMount;
     }
@@ -814,8 +820,8 @@ class DriveController extends Component {
          * expects the controller to be in a READY state; since setReset() triggers a call to our reset() handler,
          * a READY state is assured, and the readData() call shouldn't do anything to change that.
          */
-        this.cpu.setReset(0, true);
-        var err = this.readData(drive, 0, 0, 0, 512, 0x0000, 2);
+        this.cpu.setReset(0, true, iDrive);
+        var err = this.readData(drive, drive.iCylinderBoot, drive.iHeadBoot, drive.iSectorBoot, drive.cbSectorBoot, 0x0000, 2);
         if (err) {
             this.notice("Unable to read the boot sector (" + err + ")");
         }
@@ -913,6 +919,11 @@ class DriveController extends Component {
             drive.disk = disk;
             drive.sDiskName = sDiskName;
             drive.sDiskPath = sDiskPath;
+
+            /*
+             * Inform the controller implementation (eg, RX11) of the disk change.
+             */
+            this.notifyLoad(drive.iDrive);
 
             /*
              * Adding local disk image names to the disk list seems like a nice idea, but it's too confusing,
@@ -1117,6 +1128,11 @@ class DriveController extends Component {
                 this.sDiskSource = DriveController.SOURCE.NONE;
                 this.displayDisk(iDrive);
             }
+
+            /*
+             * Inform the controller implementation (eg, RX11) of the disk removal.
+             */
+            this.notifyUnload(iDrive);
         }
     }
 
@@ -1218,9 +1234,33 @@ class DriveController extends Component {
     }
 
     /**
+     * notifyLoad(iDrive)
+     *
+     * Placeholder for subclasses.  Called whenever DriveController has loaded a new disk into the specified drive.
+     *
+     * @this {RX11}
+     * @param {number} iDrive
+     */
+    notifyLoad(iDrive)
+    {
+    }
+
+    /**
+     * notifyUnload(iDrive)
+     *
+     * Placeholder for subclasses.  Called whenever DriveController has unloaded a disk from the specified drive.
+     *
+     * @this {RX11}
+     * @param {number} iDrive
+     */
+    notifyUnload(iDrive)
+    {
+    }
+
+    /**
      * readData(drive, iCylinder, iHead, iSector, nWords, addr, inc, fCheck, done)
      *
-     * Placeholder for subclasses.
+     * Placeholder for subclasses.  Implementation is optional, but the automatic BOOT feature will be unavailable.
      *
      * @this {DriveController}
      * @param {Object} drive
@@ -1236,13 +1276,13 @@ class DriveController extends Component {
      */
     readData(drive, iCylinder, iHead, iSector, nWords, addr, inc, fCheck, done)
     {
-        return false;
+        return -1;
     }
 
     /**
      * writeData(drive, iCylinder, iHead, iSector, nWords, addr, inc, fCheck, done)
      *
-     * Placeholder for subclasses.
+     * Placeholder for subclasses.  Implementation is optional.
      *
      * @this {DriveController}
      * @param {Object} drive
@@ -1258,7 +1298,7 @@ class DriveController extends Component {
      */
     writeData(drive, iCylinder, iHead, iSector, nWords, addr, inc, fCheck, done)
     {
-        return false;
+        return -1;
     }
 }
 

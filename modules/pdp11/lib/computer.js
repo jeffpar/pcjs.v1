@@ -1410,7 +1410,7 @@ class ComputerPDP11 extends Component {
             this.fReload = false;
         } else {
             this.reset();
-            if (this.cpu) this.cpu.autoStart();
+            if (this.cpu && !this.dbg) this.cpu.autoStart();
         }
     }
 

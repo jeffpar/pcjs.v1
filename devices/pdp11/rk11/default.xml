@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<device id="rk11" type="rk11" autoMount='{RK0:{path:"http://archive.pcjs.org/disks/dec/rk03/RK03-XXDP.json"}}' pos="left" width="35%" padLeft="8px" padBottom="8px">
-	<name>Disk Drive Controls</name>
+<device id="rk11" type="rk11" autoMountExample='{RK0:{path:"http://archive.pcjs.org/disks/dec/rk03/RK03-XXDP.json"}}' pos="left" width="35%" padLeft="8px" padBottom="8px">
 	<control type="container">
 		<control type="list" binding="listDrives"/>
 		<control type="list" binding="listDisks">
