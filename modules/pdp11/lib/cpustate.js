@@ -588,11 +588,13 @@ class CPUStatePDP11 extends CPUPDP11 {
             this.regsGen[0] = bUnit || 0;
             for (var i = 1; i <= 5; i++) this.regsGen[i] = 0;
             this.regsGen[6] = addrStack || 0o2000;
-            if (!this.flags.powered) {
-                this.flags.autoStart = true;
-            }
-            else if (!this.flags.running) {
-                this.startCPU();
+            if (!this.dbg) {
+                if (!this.flags.powered) {
+                    this.flags.autoStart = true;
+                }
+                else if (!this.flags.running) {
+                    this.startCPU();
+                }
             }
         }
         else {

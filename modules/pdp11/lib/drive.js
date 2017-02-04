@@ -921,6 +921,11 @@ class DriveController extends Component {
             drive.sDiskPath = sDiskPath;
 
             /*
+             * Inform the controller implementation (eg, RX11) of the disk change.
+             */
+            this.notifyLoad(drive.iDrive);
+
+            /*
              * Adding local disk image names to the disk list seems like a nice idea, but it's too confusing,
              * because then it looks like the "Mount" button should be able to (re)load them, and that can NEVER
              * happen, for security reasons; local disk images can ONLY be loaded via the "Mount" button after
@@ -1123,6 +1128,11 @@ class DriveController extends Component {
                 this.sDiskSource = DriveController.SOURCE.NONE;
                 this.displayDisk(iDrive);
             }
+
+            /*
+             * Inform the controller implementation (eg, RX11) of the disk removal.
+             */
+            this.notifyUnload(iDrive);
         }
     }
 
@@ -1221,6 +1231,30 @@ class DriveController extends Component {
         if (DEBUG && this.messageEnabled()) {
             this.printMessage("unable to update disk '" + sDiskName + "' in history (" + sDiskPath + ")");
         }
+    }
+
+    /**
+     * notifyLoad(iDrive)
+     *
+     * Placeholder for subclasses.  Called whenever DriveController has loaded a new disk into the specified drive.
+     *
+     * @this {RX11}
+     * @param {number} iDrive
+     */
+    notifyLoad(iDrive)
+    {
+    }
+
+    /**
+     * notifyUnload(iDrive)
+     *
+     * Placeholder for subclasses.  Called whenever DriveController has unloaded a disk from the specified drive.
+     *
+     * @this {RX11}
+     * @param {number} iDrive
+     */
+    notifyUnload(iDrive)
+    {
     }
 
     /**

@@ -144,6 +144,34 @@ class RX11 extends DriveController {
     }
 
     /**
+     * notifyLoad(iDrive)
+     *
+     * Called whenever DriveController has loaded a new disk into the specified drive.
+     *
+     * We're interested in this so that whenever a disk change occurs for drive 0, we can automatically
+     * refill the sector buffer with the data from sector 1 from track 1.
+     *
+     * @this {RX11}
+     * @param {number} iDrive
+     */
+    notifyLoad(iDrive)
+    {
+        if (iDrive == 0) this.initController();
+    }
+
+    /**
+     * notifyUnload(iDrive)
+     *
+     * Called whenever DriveController has unloaded a disk from the specified drive.
+     *
+     * @this {RX11}
+     * @param {number} iDrive
+     */
+    notifyUnload(iDrive)
+    {
+    }
+
+    /**
      * processCommand()
      *
      * @this {RX11}
