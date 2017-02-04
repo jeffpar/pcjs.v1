@@ -43,7 +43,7 @@ we know about the "Absolute Format":
 [Other sites](http://www.retrocmp.com/stories/dec-pc05-papertape/242-dec-pc05-working-with-paper-tapes)
 have referred to this tape format as the "Standard Absolute" format, but I've not found that terminology
 used in any DEC publication.  In fact, I think that term may have arisen from a misreading of instructions
-found in DEC manuals like the ["MEM EXER 16K" Diagnostics Manual](http://archive.pcjs.org/pubs/dec/pdp11/pc11/Mem-Exer-16k_Feb78.pdf):
+found in DEC manuals like the ["MEM EXER 16K" Diagnostics Manual](http://archive.pcjs.org/pubs/dec/pdp11/diags/AC-9045F-MC_CZQMCFO_MEM_EXER_16K_Feb78.pdf):
 
 	Load the program using any standard absolute loader.
 
@@ -54,5 +54,5 @@ for which a specific address has been selected, based on the amount of RAM prese
 PCjs has archived the following Absolute Loader resources:
 
 - [Absolute Loader](DEC-11-L2PC-PO.json)
-- [LISTING OF PDP-11 ABSOLUTE LOADER (June 1975)](http://archive.pcjs.org/pubs/dec/pdp11/pc11/Absolute_Loader_Listing_Jun75.pdf)
+- [LISTING OF PDP-11 ABSOLUTE LOADER (June 1975)](http://archive.pcjs.org/pubs/dec/pdp11/other/DEC-11-UABLA_ABSOLUTE_LOADER_LISTING_Jun75.pdf)
 - "APPENDIX D: THE BOOTSTRAP AND ABSOLUTE LOADERS" from the [PDP-11 BASIC PROGRAMMING MANUAL (December 1970)](http://archive.pcjs.org/pubs/dec/pdp11/basic/BASIC_Programming_Manual_Dec70.pdf) 

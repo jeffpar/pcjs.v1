@@ -22,6 +22,7 @@ PDPjs development and testing relied on the following PDP-11 diagnostic publicat
 - [CEQKCE0 11/70 INSTRUCTION EXERCISER (May 1980)](http://archive.pcjs.org/pubs/dec/pdp11/diags/AC-7994E-MC_CEQKCE0_1170_INSTRUCTION_EXERCISER_May80.pdf) [[Original PDF](http://bitsavers.org/pdf/dec/pdp11/microfiche/ftp.j-hoppe.de/bw/gh/AH-7996E-MC__PDP11-70-74__11-70_INST_EXR__CEQKCE0__%28C%2975,80.pdf)]
 - [CFKAAC0 11/34 BASIC INSTRUCTION TEST (Oct 1978)](http://archive.pcjs.org/pubs/dec/pdp11/diags/AC-8041C-MC_CFKAAC0_1134_BSC_INST_TST_Oct78.pdf) [[Original PDF](http://bitsavers.org/pdf/dec/pdp11/xxdp/diag_listings/1134/AC-8041C-MC_CFKAAC0-1134-Bsc-Inst-Tst_Oct78.pdf)]
 - [CXCPAG0 INSTRUCTION TEST (Sep 1978)](http://archive.pcjs.org/pubs/dec/pdp11/diags/AC-E664G-MC_CXCPAG0_PROCESSOR_TEST_Sep78.pdf) [[Original PDF](http://bitsavers.org/pdf/dec/pdp11/xxdp/x11_listings/AC-E664G-MC_CXCPAG0-Processor-test_Sep78.pdf)]
+- [CZQMCF0 0-124K MEM EXER 16K (Feb 1978)](http://archive.pcjs.org/pubs/dec/pdp11/diags/AC-9045F-MC_CZQMCFO_MEM_EXER_16K_Feb78.pdf)
 
 The *MAINDEC-11-DZQAB MAINDEC USER REFERENCE MANUAL (Oct 1973)* was particularly useful for understanding DEC's
 [Paper Tape Diagnostics](/apps/pdp11/tapes/diags/).

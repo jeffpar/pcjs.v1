@@ -44,6 +44,7 @@ if (NODE) {
     var PC11 = require("./pc11");
     var RL11 = require("./rl11");
     var RK11 = require("./rk11");
+    var RX11 = require("./rx11");
 }
 
 class DevicePDP11 extends Component {
@@ -1202,6 +1203,10 @@ class DevicePDP11 extends Component {
                 break;
             case 'rk11':
                 device = new RK11(parmsDevice);
+                Component.bindComponentControls(device, eDevice, PDP11.APPCLASS);
+                break;
+            case 'rx11':
+                device = new RX11(parmsDevice);
                 Component.bindComponentControls(device, eDevice, PDP11.APPCLASS);
                 break;
             }

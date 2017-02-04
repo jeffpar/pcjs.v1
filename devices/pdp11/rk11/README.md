@@ -7,8 +7,11 @@ permalink: /devices/pdp11/rk11/
 RK11 Disk Controller
 --------------------
 
-The RK11 Disk Controller controls up to eight RK05 disk drives, which in turn read/write [RK03-KA](/disks/dec/rk03/)
+The RK11 Disk Controller controls up to eight RK05 disk drives, which in turn read/write [RK03](/disks/dec/rk03/)
 disk cartridges.
+
+RK03 disks are single-platter cartridges with 203 tracks per side, 12 sectors per track, and a sector size of 256 words
+(512 bytes), for a total capacity of 2.38Mb (2,494,464 bytes).  
 
 Machines containing the [RK11 Component](/modules/pdp11/lib/rk11.js) include:
 

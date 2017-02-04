@@ -227,13 +227,13 @@ class RL11 extends DriveController {
      */
     readData(drive, iCylinder, iHead, iSector, nWords, addr, inc, fCheck, done)
     {
-        var err = 0;
+        var nError = 0;
         var checksum = 0;
         var disk = drive.disk;
         var sector = null, ibSector;
 
         if (!disk) {
-            err = RL11.ERRC.HNF;      // TODO: Review
+            nError = RL11.ERRC.HNF;      // TODO: Review
             nWords = 0;
         }
 
@@ -242,14 +242,14 @@ class RL11 extends DriveController {
             if (!sector) {
                 sector = disk.seek(iCylinder, iHead, iSector + 1);
                 if (!sector) {
-                    err = RL11.ERRC.HNF;
+                    nError = RL11.ERRC.HNF;
                     break;
                 }
                 ibSector = 0;
             }
             var b0, b1, data;
             if ((b0 = disk.read(sector, ibSector++)) < 0 || (b1 = disk.read(sector, ibSector++)) < 0) {
-                err = RL11.ERRC.HNF;
+                nError = RL11.ERRC.HNF;
                 break;
             }
             /*
@@ -267,7 +267,7 @@ class RL11 extends DriveController {
                 }
             }
             if (this.bus.checkFault()) {
-                err = RL11.ERRC.NXM;
+                nError = RL11.ERRC.NXM;
                 break;
             }
             addr += 2;
@@ -280,7 +280,7 @@ class RL11 extends DriveController {
                     if (++iHead >= disk.nHeads) {
                         iHead = 0;
                         if (++iCylinder >= disk.nCylinders) {
-                            err = RL11.ERRC.HNF;
+                            nError = RL11.ERRC.HNF;
                             break;
                         }
                     }
@@ -292,7 +292,7 @@ class RL11 extends DriveController {
             console.log("checksum: " + (checksum|0));
         }
 
-        return done? done(err, iCylinder, iHead, iSector, nWords, addr) : err;
+        return done? done(nError, iCylinder, iHead, iSector, nWords, addr) : nError;
     }
 
     /**
@@ -312,13 +312,13 @@ class RL11 extends DriveController {
      */
     writeData(drive, iCylinder, iHead, iSector, nWords, addr, inc, fCheck, done)
     {
-        var err = 0;
+        var nError = 0;
         var checksum = 0;
         var disk = drive.disk;
         var sector = null, ibSector;
 
         if (!disk) {
-            err = RL11.ERRC.HNF;      // TODO: Review
+            nError = RL11.ERRC.HNF;      // TODO: Review
             nWords = 0;
         }
 
@@ -331,7 +331,7 @@ class RL11 extends DriveController {
              */
             var data = this.bus.getWordDirect(this.cpu.mapUnibus(addr));
             if (this.bus.checkFault()) {
-                err = RL11.ERRC.NXM;
+                nError = RL11.ERRC.NXM;
                 break;
             }
             if (DEBUG && this.messageEnabled(MessagesPDP11.WRITE)) {
@@ -348,13 +348,13 @@ class RL11 extends DriveController {
             if (!sector) {
                 sector = disk.seek(iCylinder, iHead, iSector + 1, true);
                 if (!sector) {
-                    err = RL11.ERRC.HNF;
+                    nError = RL11.ERRC.HNF;
                     break;
                 }
                 ibSector = 0;
             }
             if (!disk.write(sector, ibSector++, data & 0xff) || !disk.write(sector, ibSector++, data >> 8)) {
-                err = RL11.ERRC.HNF;
+                nError = RL11.ERRC.HNF;
                 break;
             }
             if (ibSector >= disk.cbSector) {
@@ -364,7 +364,7 @@ class RL11 extends DriveController {
                     if (++iHead >= disk.nHeads) {
                         iHead = 0;
                         if (++iCylinder >= disk.nCylinders) {
-                            err = RL11.ERRC.HNF;
+                            nError = RL11.ERRC.HNF;
                             break;
                         }
                     }
@@ -376,14 +376,14 @@ class RL11 extends DriveController {
             console.log("checksum: " + (checksum|0));
         }
 
-        return done? done(err, iCylinder, iHead, iSector, nWords, addr) : err;
+        return done? done(nError, iCylinder, iHead, iSector, nWords, addr) : nError;
     }
 
     /**
-     * doneReadWrite(err, iCylinder, iHead, iSector, nWords, addr)
+     * doneReadWrite(nError, iCylinder, iHead, iSector, nWords, addr)
      *
      * @this {RL11}
-     * @param {number} err
+     * @param {number} nError
      * @param {number} iCylinder
      * @param {number} iHead
      * @param {number} iSector
@@ -391,7 +391,7 @@ class RL11 extends DriveController {
      * @param {number} addr
      * @return {boolean}
      */
-    doneReadWrite(err, iCylinder, iHead, iSector, nWords, addr)
+    doneReadWrite(nError, iCylinder, iHead, iSector, nWords, addr)
     {
         this.regRLBA = addr & 0xffff;
         this.regRLCS = (this.regRLCS & ~RL11.RLCS.BAE) | ((addr >> (16 - RL11.RLCS.SHIFT.BAE)) & RL11.RLCS.BAE);
@@ -399,8 +399,8 @@ class RL11 extends DriveController {
         this.regRLDA = (iCylinder << RL11.RLDA.SHIFT.RW_CA) | (iHead? RL11.RLDA.RW_HS : 0) | (iSector & RL11.RLDA.RW_SA);
         this.tmpRLDA = this.regRLDA;
         this.regRLMP = (0x10000 - nWords) & 0xffff;
-        if (err) {
-            this.regRLCS |= err | RL11.RLCS.ERR;
+        if (nError) {
+            this.regRLCS |= nError | RL11.RLCS.ERR;
         }
         return true;
     }
