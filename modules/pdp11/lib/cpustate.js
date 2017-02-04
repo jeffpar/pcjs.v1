@@ -2870,6 +2870,7 @@ class CPUStatePDP11 extends CPUPDP11 {
                 data = (data < 0? (this.regsGen[-data-1] & 0xff): data);
                 this.regsGen[reg] = (this.regsGen[reg] & ~writeFlags) | (((data << 24) >> 24) & writeFlags);
             }
+            //noinspection JSUnresolvedFunction
             fnFlags.call(this, data << 8);
         } else {
             var addr = this.getAddr(mode, reg, PDP11.ACCESS.WRITE_BYTE);
