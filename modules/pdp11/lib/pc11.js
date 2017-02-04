@@ -64,9 +64,9 @@ class PC11 extends Component {
      */
     constructor(parms)
     {
-        super("PC11", parms);
+        super("PC11", parms, MessagesPDP11.PC11);
 
-        this.sDevice = "PTR";       // TODO: Make the device name configurable
+        this.sDevice = "PTR";                   // TODO: Make the device name configurable
 
         /*
          * We preliminarily parse and record any 'autoMount' object now, but we no longer process it
@@ -78,7 +78,7 @@ class PC11 extends Component {
 
         this.regPRS = 0;                        // PRS register
         this.regPRB = 0;                        // PRB register
-        this.regPPS = PDP11.PC11.PPS.ERROR;     // PPS register (TODO: signals an error until we implement the punch)
+        this.regPPS = PDP11.PC11.PPS.ERROR;     // PPS register (TODO: Stop signaling error once punch is implemented)
         this.regPPB = 0;                        // PPB register
         this.iTapeData = 0;                     // buffer index
         this.aTapeData = [];                    // buffer for the PRB register
@@ -436,6 +436,7 @@ class PC11 extends Component {
     loadTape(sTapeName, sTapePath, nTapeTarget, fAutoMount, file)
     {
         var nResult = -1;
+
         if (this.sTapePath.toLowerCase() != sTapePath.toLowerCase() || this.nTapeTarget != nTapeTarget) {
 
             nResult++;
@@ -495,7 +496,7 @@ class PC11 extends Component {
                 pc11.finishRead(sTapeName, sTapePath, nTapeTarget, reader.result);
             };
             reader.readAsArrayBuffer(file);
-            return true;
+            return false;
         }
 
         /*
@@ -581,6 +582,7 @@ class PC11 extends Component {
             this.parseTape(sTapeName, sTapePath, nTapeTarget, aBytes);
             this.sTapeSource = PC11.SOURCE.LOCAL;
         }
+        this.flags.busy = false;
         this.displayTape();
     }
 
@@ -726,9 +728,12 @@ class PC11 extends Component {
             this.status('Read tape "' + sTapeName + '"');
             return;
         }
+
         this.iTapeData = 0;
         this.aTapeData = aBytes;
-        this.status('Loaded tape "' + sTapeName + '"');
+        this.regPRS &= ~PDP11.PC11.PRS.ERROR;
+
+        this.status('Loaded tape "' + sTapeName + '" (' + aBytes.length + " bytes)");
         this.displayProgress(0);
     }
 
@@ -822,13 +827,18 @@ class PC11 extends Component {
                      * (eg, -128 to 127, instead of 0 to 255).  Both risks are good reasons to always mask
                      * the data assigned to PRB with 0xff.
                      */
-                    this.regPRB = this.aTapeData[this.iTapeData++] & 0xff;
+                    this.regPRB = this.aTapeData[this.iTapeData] & 0xff;
+                    if (this.messageEnabled()) this.printMessage(this.type + ".advanceReader(" + this.iTapeData + "): " + Str.toHexByte(this.regPRB), true);
+                    this.iTapeData++;
                     this.displayProgress(this.iTapeData / this.aTapeData.length * 100);
-                    this.regPRS |= PDP11.PC11.PRS.DONE;
-                    this.regPRS &= ~PDP11.PC11.PRS.BUSY;
-                    if (this.regPRS & PDP11.PC11.PRS.IE) {
-                        this.cpu.setIRQ(this.irqReader);
-                    }
+                }
+                else {
+                    this.regPRS |= PDP11.PC11.PRS.ERROR;
+                }
+                this.regPRS |= PDP11.PC11.PRS.DONE;
+                this.regPRS &= ~PDP11.PC11.PRS.BUSY;
+                if (this.regPRS & PDP11.PC11.PRS.IE) {
+                    this.cpu.setIRQ(this.irqReader);
                 }
             }
         }
@@ -971,7 +981,7 @@ class PC11 extends Component {
      */
     writePPB(data, addr)
     {
-        this.regPPB = (this.regPPB & ~PDP11.PC11.PPB.WMASK) | (data & PDP11.PC11.PPB.WMASK);
+        this.regPPB = (data & PDP11.PC11.PPB.MASK);
     }
 }
 

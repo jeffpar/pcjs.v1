@@ -664,14 +664,14 @@ var PDP11 = {
         RVEC:       0o070,      // reader vector
         PVEC:       0o074,      // punch vector
         PRS: {                  // 177550: PC11 (and PR11) Reader Status Register
-            RE:     0x0001,     // Reader Enable (W/O)
-            IE:     0x0040,     // Reader Interrupt Enable (allows the DONE and ERROR bits to trigger an interrupt)
-            DONE:   0x0080,     // Done (R/O)
-            BUSY:   0x0800,     // Busy (R/O)
-            ERROR:  0x8000,     // Error (R/O)
-            CLEAR:  0x08C0,     // bits cleared on INIT
-            RMASK:  0xFFFE,     // bits readable (TODO: All I know for sure is that bit 0 is NOT readable; see readPRS())
-            WMASK:  0x0041,     // bits writable
+            RE:     0x0001,     // (000001) Reader Enable (W/O)
+            IE:     0x0040,     // (000100) Reader Interrupt Enable (allows the DONE and ERROR bits to trigger an interrupt)
+            DONE:   0x0080,     // (000200) Done (R/O)
+            BUSY:   0x0800,     // (004000) Busy (R/O)
+            ERROR:  0x8000,     // (100000) Error (R/O)
+            CLEAR:  0x08C0,     // (004300) bits cleared on INIT
+            RMASK:  0xFFFE,     // (177776) bits readable (TODO: All I know for sure is that bit 0 is NOT readable; see readPRS())
+            WMASK:  0x0041,     // (000101) bits writable
             BAUD:   3600
         },
         PRB: {                  // 177552: PC11 (and PR11) Reader Buffer Register
