@@ -76,10 +76,12 @@ class PC11 extends Component {
         this.cAutoMount = 0;
         this.nBaudReceive = +parms['baudReceive'] || PDP11.PC11.PRS.BAUD;
 
-        this.regPRS = 0;            // PRS register
-        this.regPRB = 0;            // PRB register
-        this.iTapeData = 0;         // buffer index
-        this.aTapeData = [];        // buffer for the PRB register
+        this.regPRS = 0;                        // PRS register
+        this.regPRB = 0;                        // PRB register
+        this.regPPS = PDP11.PC11.PPS.ERROR;     // PPS register (TODO: signals an error until we implement the punch)
+        this.regPPB = 0;                        // PPB register
+        this.iTapeData = 0;                     // buffer index
+        this.aTapeData = [];                    // buffer for the PRB register
         this.sTapeSource = PC11.SOURCE.NONE;
         this.nTapeTarget = PC11.TARGET.NONE;
         this.sTapeName = this.sTapePath = "";
@@ -824,7 +826,7 @@ class PC11 extends Component {
                     this.displayProgress(this.iTapeData / this.aTapeData.length * 100);
                     this.regPRS |= PDP11.PC11.PRS.DONE;
                     this.regPRS &= ~PDP11.PC11.PRS.BUSY;
-                    if (this.regPRS & PDP11.PC11.PRS.RIE) {
+                    if (this.regPRS & PDP11.PC11.PRS.IE) {
                         this.cpu.setIRQ(this.irqReader);
                     }
                 }
@@ -868,7 +870,7 @@ class PC11 extends Component {
              */
             if (this.regPRS & PDP11.PC11.PRS.ERROR) {
                 data &= ~PDP11.PC11.PRS.RE;
-                if (this.regPRS & PDP11.PC11.PRS.RIE) {
+                if (this.regPRS & PDP11.PC11.PRS.IE) {
                     this.cpu.setIRQ(this.irqReader);
                 }
             } else {
@@ -914,6 +916,63 @@ class PC11 extends Component {
     writePRB(data, addr)
     {
     }
+
+    /**
+     * readPPS(addr)
+     *
+     * @this {PC11}
+     * @param {number} addr (eg, PDP11.UNIBUS.PPS or 177554)
+     * @return {number}
+     */
+    readPPS(addr)
+    {
+        return this.regPPS;
+    }
+
+    /**
+     * writePPS(data, addr)
+     *
+     * NOTE: This was originally added ONLY because when RT-11 v4.0 copies from device "PC:" (the paper tape reader),
+     * it executes the following code:
+     *
+     *      016010: 005037 177550          CLR   @#177550               ;history=2 PRS
+     *      016014: 005037 177554          CLR   @#177554               ;history=1
+     *
+     * and as you can see, without this PPS handler, a TRAP to 4 would normally occur.  I guess since we claim to be
+     * a PC11, that makes sense.  But what about PDP-11 machines with only a PR11 (ie, a reader-only unit)?
+     *
+     * @this {PC11}
+     * @param {number} data
+     * @param {number} addr (eg, PDP11.UNIBUS.PPS or 177554)
+     */
+    writePPS(data, addr)
+    {
+        this.regPPS = (this.regPPS & ~PDP11.PC11.PPS.WMASK) | (data & PDP11.PC11.PPS.WMASK);
+    }
+
+    /**
+     * readPPB(addr)
+     *
+     * @this {PC11}
+     * @param {number} addr (eg, PDP11.UNIBUS.PPB or 177556)
+     * @return {number}
+     */
+    readPPB(addr)
+    {
+        return this.regPPB;
+    }
+
+    /**
+     * writePPB(data, addr)
+     *
+     * @this {PC11}
+     * @param {number} data
+     * @param {number} addr (eg, PDP11.UNIBUS.PPB or 177556)
+     */
+    writePPB(data, addr)
+    {
+        this.regPPB = (this.regPPB & ~PDP11.PC11.PPB.WMASK) | (data & PDP11.PC11.PPB.WMASK);
+    }
 }
 
 /*
@@ -944,7 +1003,9 @@ PC11.CSSCLASS = {
  */
 PC11.UNIBUS_IOTABLE = {
     [PDP11.UNIBUS.PRS]:     /* 177550 */    [null, null, PC11.prototype.readPRS,    PC11.prototype.writePRS,    "PRS"],
-    [PDP11.UNIBUS.PRB]:     /* 177552 */    [null, null, PC11.prototype.readPRB,    PC11.prototype.writePRB,    "PRB"]
+    [PDP11.UNIBUS.PRB]:     /* 177552 */    [null, null, PC11.prototype.readPRB,    PC11.prototype.writePRB,    "PRB"],
+    [PDP11.UNIBUS.PPS]:     /* 177554 */    [null, null, PC11.prototype.readPPS,    PC11.prototype.writePPS,    "PPS"],
+    [PDP11.UNIBUS.PPB]:     /* 177556 */    [null, null, PC11.prototype.readPPB,    PC11.prototype.writePPB,    "PPB"]
 };
 
 if (NODE) module.exports = PC11;

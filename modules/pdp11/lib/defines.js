@@ -665,7 +665,7 @@ var PDP11 = {
         PVEC:       0o074,      // punch vector
         PRS: {                  // 177550: PC11 (and PR11) Reader Status Register
             RE:     0x0001,     // Reader Enable (W/O)
-            RIE:    0x0040,     // Reader Interrupt Enable (allows the DONE and ERROR bits to trigger an interrupt)
+            IE:     0x0040,     // Reader Interrupt Enable (allows the DONE and ERROR bits to trigger an interrupt)
             DONE:   0x0080,     // Done (R/O)
             BUSY:   0x0800,     // Busy (R/O)
             ERROR:  0x8000,     // Error (R/O)
@@ -678,15 +678,14 @@ var PDP11 = {
             MASK:   0x00FF      // Data
         },
         PPS: {                  // 177554: PC11 Punch Status Register
-            /*
-             * TODO: Flesh this out if/when we add Paper Tape Punch support
-             */
+            IE:     0x0040,     // Interrupt Enable
+            RDY:    0x0080,     // Ready
+            ERROR:  0x8000,     // Error (eg, no tape in punch, or punch has no power)
+            WMASK:  0x0040,     // bits writable
             BAUD:   600
         },
         PPB: {                  // 177556: PC11 Punch Buffer Register
-            /*
-             * TODO: Flesh this out if/when we add Paper Tape Punch support
-             */
+            MASK:   0x00FF      // Data
         }
     },
     RK11: {                     // RK11 Disk Controller
