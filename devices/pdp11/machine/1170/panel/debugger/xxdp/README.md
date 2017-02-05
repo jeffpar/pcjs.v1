@@ -14,10 +14,11 @@ machines:
     sticky: top
 commands:
   bootXXDP: |
-    select rl11 listDrives RL0;
-    select rl11 listDisks "XXDP+ Diagnostics";
-    click rl11 loadDisk;
-    click rl11 bootDisk;
+    selectDrive RL11 RL0;
+    select RL11 listDisks "XXDP+ Diagnostics";
+    load RL11;
+    wait RL11;
+    boot RL11;
 ---
 
 This machine is ready to boot [XXDP+ Diagnostics](/disks/dec/rl02k/xxdp/) ("BOOT RL0") and run diagnostics
@@ -39,4 +40,4 @@ could contain up to four such drives, which we refer to as RL0 through RL3.
 
 To select drive RL0, press {% include machine-command.html type='button' label='Select RL0' machine='test1170' component='RL11' command='selectDrive' value='RL0' %}
 
-To boot the [RL02K XXDP+ Diagnostics Disk](/disks/dec/rl02k/xxdp/) in one step, press {% include machine-command.html type='button' label='Boot XXDP+' machine='test1170' component='RL11' command='bootXXDP' %}
+To boot the [RL02K XXDP+ Diagnostics Disk](/disks/dec/rl02k/xxdp/) in one step, press {% include machine-command.html type='button' label='Boot XXDP+' machine='test1170' command='bootXXDP' %}

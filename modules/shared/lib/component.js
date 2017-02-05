@@ -619,6 +619,159 @@ class Component {
     }
 
     /**
+     * Component.getScriptCommands(sScript)
+     *
+     * @param {string} sScript
+     * @return {Array}
+     */
+    static getScriptCommands(sScript)
+    {
+        var cch = sScript.length;
+        var aaCommands = [], aTokens = [], sToken = "", chQuote = null;
+        for (var i = 0; i < cch; i++) {
+            var ch = sScript[i];
+            if (ch == '"' || ch == "'") {
+                if (chQuote && ch != chQuote) {
+                    sToken += ch;
+                    continue;
+                }
+                if (!chQuote) {
+                    chQuote = ch;
+                } else {
+                    chQuote = null;
+                }
+                if (sToken) {
+                    aTokens.push(sToken);
+                    sToken = "";
+                }
+                continue;
+            }
+            if (!chQuote) {
+                if (ch == '\r' || ch == '\n') {
+                    ch = ';';
+                }
+                if (ch == ' ' || ch == '\t' || ch == ';') {
+                    if (sToken) {
+                        aTokens.push(sToken);
+                        sToken = "";
+                    }
+                    if (ch == ';' && aTokens.length) {
+                        aaCommands.push(aTokens);
+                        aTokens = [];
+                    }
+                    continue;
+                }
+            }
+            sToken += ch;
+        }
+        if (aTokens.length) {
+            aaCommands.push(aTokens);
+        }
+        return aaCommands;
+    }
+
+    /**
+     * Component.processScript(idMachine, sComponent, sScript)
+     *
+     * @param {string} idMachine
+     * @param {string} sComponent
+     * @param {string} sScript
+     * @return {boolean}
+     */
+    static processScript(idMachine, sComponent, sScript)
+    {
+        var fSuccess = false;
+        if (typeof sScript == "string") {
+            fSuccess = true;
+            var aaCommands = Component.getScriptCommands(sScript);
+            if (!Component.processCommands(idMachine + ".machine", aaCommands, 0)) {
+                fSuccess = false;
+            }
+        }
+        return fSuccess;
+    }
+
+    /**
+     * Component.processCommands(idMachine, aaCommands, iCommand)
+     *
+     * @param {string} idMachine
+     * @param {Array} aaCommands
+     * @param {number} iCommand
+     * @return {boolean}
+     */
+    static processCommands(idMachine, aaCommands, iCommand)
+    {
+        var fSuccess = true;
+        while (iCommand < aaCommands.length) {
+
+            var aTokens = aaCommands[iCommand];
+            var sCommand = aTokens[0];
+            var fnScript = Component.scriptCommands[sCommand];
+            var component = Component.getComponentByType(aTokens[1], idMachine);
+
+            if (fnScript) {
+                fSuccess = fnScript(component, aTokens[2], aTokens[3]);
+            }
+            else {
+                fSuccess = false;
+                if (component) {
+                    var exports = component['exports'];
+                    if (exports) {
+                        var fnCommand = exports[sCommand];
+                        if (fnCommand) {
+                            if (sCommand == "wait") {
+                                var fnCallReady = function processNextCommand(iNextCommand) {
+                                    return function() {
+                                        Component.processCommands(idMachine, aaCommands, iNextCommand);
+                                    }
+                                }(iCommand + 1);
+                                fSuccess = fnCommand.call(component, fnCallReady);
+                                break;
+                            }
+                            fSuccess = fnCommand.call(component, aTokens[2], aTokens[3]);
+                        }
+                    }
+                }
+            }
+            if (!fSuccess) {
+                Component.alertUser("error processing script command (" + sCommand + ")");
+                break;
+            }
+            iCommand++;
+        }
+        return fSuccess;
+    }
+
+    /**
+     * Component.scriptSelect(component, sBinding, sValue)
+     *
+     * @param {Component} component
+     * @param {string} sBinding
+     * @param {string} sValue
+     * @return {boolean}
+     */
+    static scriptSelect(component, sBinding, sValue)
+    {
+        var fSuccess = false;
+        if (component) {
+            var aBindings = component['bindings'];
+            var control = aBindings[sBinding];
+            if (control) {
+                for (var i = 0; i < control.options.length; i++) {
+                    if (control.options[i].textContent == sValue) {
+                        if (control.selectedIndex != i) {
+                            control.selectedIndex = i;
+                        }
+                        fSuccess = true;
+                        break;
+                    }
+                }
+            }
+        }
+        return fSuccess;
+    }
+
+    /**
      * toString()
      *
      * @this {Component}
@@ -1069,6 +1222,10 @@ if (window) {
 }
 Component.machines = window? window['PCjs']['Machines'] : {};
 Component.components = window? window['PCjs']['Components'] : [];
+
+Component.scriptCommands = {
+    'select':   Component.scriptSelect
+};
 
 /*
  * The following polyfills provide ES5 functionality that's missing in older browsers (eg, IE8),

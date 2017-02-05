@@ -123,7 +123,10 @@ class DriveController extends Component {
         this.irq = null;
 
         this['exports'] = {
-            'selectDrive': this.selectDrive
+            'boot': this.bootSelectedDisk,
+            'load': this.loadSelectedDrive,
+            'selectDrive': this.selectDrive,
+            'wait': this.waitDrives,
         };
     }
 
@@ -169,26 +172,8 @@ class DriveController extends Component {
 
         case "listDisks":
             this.bindings[sBinding] = control;
-
             control.onchange = function onChangeListDisks(event) {
-                var controlDesc = dc.bindings["descDisk"];
-                var controlOption = control.options && control.options[control.selectedIndex];
-                if (controlDesc && controlOption) {
-                    var dataValue = {};
-                    var sValue = controlOption.getAttribute("data-value");
-                    if (sValue) {
-                        try {
-                            dataValue = eval("(" + sValue + ")");
-                        } catch (e) {
-                            Component.error(dc.type + " option error: " + e.message);
-                        }
-                    }
-                    var sHTML = dataValue['desc'];
-                    if (sHTML === undefined) sHTML = "";
-                    var sHRef = dataValue['href'];
-                    if (sHRef !== undefined) sHTML = "<a href=\"" + sHRef + "\" target=\"_blank\">" + sHTML + "</a>";
-                    controlDesc.innerHTML = sHTML;
-                }
+                dc.updateSelectedDisk();
             };
             return true;
 
@@ -208,20 +193,13 @@ class DriveController extends Component {
 
         case "loadDisk":
             this.bindings[sBinding] = control;
-
             control.onclick = function onClickLoadDrive(event) {
-                var controlDisks = dc.bindings["listDisks"];
-                if (controlDisks && controlDisks.options) {
-                    var sDiskName = controlDisks.options[controlDisks.selectedIndex].text;
-                    var sDiskPath = controlDisks.value;
-                    dc.loadSelectedDrive(sDiskName, sDiskPath);
-                }
+                dc.loadSelectedDrive();
             };
             return true;
 
         case "bootDisk":
             this.bindings[sBinding] = control;
-
             control.onclick = function onClickBootDisk(event) {
                 dc.bootSelectedDisk();
             };
@@ -549,6 +527,7 @@ class DriveController extends Component {
         drive.iDrive = iDrive;
         drive.name = this.idComponent;
         drive.fBusy = drive.fLocal = false;
+        drive.fnCallReady = null;
         drive.fRemovable = true;
 
         /*
@@ -747,28 +726,37 @@ class DriveController extends Component {
      * loadSelectedDrive(sDiskName, sDiskPath, file)
      *
      * @this {DriveController}
-     * @param {string} sDiskName
-     * @param {string} sDiskPath
+     * @param {string} [sDiskName]
+     * @param {string} [sDiskPath]
      * @param {File} [file] is set if there's an associated File object
+     * @return {boolean}
      */
     loadSelectedDrive(sDiskName, sDiskPath, file)
     {
+        if (!sDiskName && !sDiskPath) {
+            var controlDisks = this.bindings["listDisks"];
+            if (controlDisks && controlDisks.options) {
+                sDiskName = controlDisks.options[controlDisks.selectedIndex].text;
+                sDiskPath = controlDisks.value;
+            }
+        }
+
         var controlDrives = this.bindings["listDrives"];
         var iDrive = controlDrives && Str.parseInt(controlDrives.value, 10);
 
         if (iDrive === undefined || iDrive < 0 || iDrive >= this.aDrives.length) {
             this.notice("Unable to load the selected drive");
-            return;
+            return false;
         }
 
         if (!sDiskPath) {
             this.unloadDrive(iDrive);
-            return;
+            return true;
         }
 
         if (sDiskPath == DriveController.SOURCE.LOCAL) {
             this.notice('Use "Choose File" and "Mount" to select and load a local disk.');
-            return;
+            return false;
         }
 
         /*
@@ -782,7 +770,7 @@ class DriveController extends Component {
          */
         if (sDiskPath == DriveController.SOURCE.REMOTE) {
             sDiskPath = window.prompt("Enter the URL of a remote disk image.", "") || "";
-            if (!sDiskPath) return;
+            if (!sDiskPath) return false;
             sDiskName = Str.getBaseName(sDiskPath);
             this.status("Attempting to load " + sDiskPath + " as \"" + sDiskName + "\"");
             this.sDiskSource = DriveController.SOURCE.REMOTE;
@@ -792,12 +780,14 @@ class DriveController extends Component {
         }
 
         this.loadDrive(iDrive, sDiskName, sDiskPath, false, file);
+        return true;
     }
 
     /**
      * bootSelectedDisk()
      *
      * @this {DriveController}
+     * @return {boolean}
      */
     bootSelectedDisk()
     {
@@ -807,12 +797,14 @@ class DriveController extends Component {
 
         if (iDrive == null || iDrive < 0 || iDrive >= this.aDrives.length || !(drive = this.aDrives[iDrive])) {
             this.notice("Unable to boot the selected drive");
-            return;
+            return false;
         }
+
         if (!drive.disk) {
             this.notice("Load a disk into the drive first");
-            return;
+            return false;
         }
+
         /*
          * NOTE: We're calling setReset() BEFORE reading the boot code in order to eliminate any side-effects
          * of the previous state of either the controller OR the CPU; for example, we don't want any previous MMU
@@ -821,10 +813,13 @@ class DriveController extends Component {
          * a READY state is assured, and the readData() call shouldn't do anything to change that.
          */
         this.cpu.setReset(0, true, iDrive);
+
         var err = this.readData(drive, drive.iCylinderBoot, drive.iHeadBoot, drive.iSectorBoot, drive.cbSectorBoot, 0x0000, 2);
         if (err) {
             this.notice("Unable to read the boot sector (" + err + ")");
+            return false;
         }
+        return true;
     }
 
     /**
@@ -961,6 +956,11 @@ class DriveController extends Component {
         }
 
         this.displayDisk(drive.iDrive);
+
+        if (drive.fnCallReady) {
+            drive.fnCallReady();
+            drive.fnCallReady = null;
+        }
     }
 
     /**
@@ -1077,7 +1077,7 @@ class DriveController extends Component {
     /**
      * selectDrive(sDrive)
      *
-     * Used to programmatically select a drive by name.
+     * Used to select a drive by name.
      *
      * @this {DriveController}
      * @param {number} sDrive
@@ -1089,7 +1089,7 @@ class DriveController extends Component {
         if (controlDrives && controlDrives.options) {
             var nDrives = controlDrives.options.length;
             for (var i = 0; i < nDrives; i++) {
-                if (controlDrives.options[i].innerHTML == sDrive) {
+                if (controlDrives.options[i].textContent == sDrive) {
                     var iDrive = Str.parseInt(controlDrives.options[i].value, 10);
                     if (iDrive >= 0) {
                         return this.displayDisk(iDrive, true);
@@ -1098,6 +1098,55 @@ class DriveController extends Component {
             }
         }
         return false;
+    }
+
+    /**
+     * updateSelectedDisk()
+     *
+     * @this {DriveController}
+     */
+    updateSelectedDisk()
+    {
+        var control = this.bindings["listDisks"];
+        var controlDesc = this.bindings["descDisk"];
+        var controlOption = control.options && control.options[control.selectedIndex];
+        if (controlDesc && controlOption) {
+            var dataValue = {};
+            var sValue = controlOption.getAttribute("data-value");
+            if (sValue) {
+                try {
+                    dataValue = eval("(" + sValue + ")");
+                } catch (e) {
+                    Component.error(this.type + " option error: " + e.message);
+                }
+            }
+            var sHTML = dataValue['desc'];
+            if (sHTML === undefined) sHTML = "";
+            var sHRef = dataValue['href'];
+            if (sHRef !== undefined) sHTML = "<a href=\"" + sHRef + "\" target=\"_blank\">" + sHTML + "</a>";
+            controlDesc.innerHTML = sHTML;
+        }
+    }
+
+    /**
+     * waitDrives(fnCallReady)
+     *
+     * @this {DriveController}
+     * @param {function()|null} fnCallReady
+     * @return {boolean} true if successful, false if not
+     */
+    waitDrives(fnCallReady)
+    {
+        for (var iDrive = 0; iDrive < this.aDrives.length; iDrive++) {
+            var drive = this.aDrives[iDrive];
+            if (drive && drive.fBusy) {
+                drive.fnCallReady = fnCallReady;
+                fnCallReady = null;
+                break;
+            }
+        }
+        if (fnCallReady) fnCallReady();
+        return true;
     }
 
     /**
