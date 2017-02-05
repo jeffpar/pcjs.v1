@@ -35,6 +35,7 @@ PDPjs is currently comprised of the following PDP-11 components, as listed in [p
 * [ram.js](/modules/pdp11/lib/ram.js)
 * [rk11.js](/modules/pdp11/lib/rk11.js)
 * [rl11.js](/modules/pdp11/lib/rl11.js)
+* [rx11.js](/modules/pdp11/lib/rx11.js)
 * [rom.js](/modules/pdp11/lib/rom.js)
 * [serial.js](/modules/pdp11/lib/serial.js)
 
