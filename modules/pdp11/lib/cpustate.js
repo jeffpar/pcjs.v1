@@ -588,13 +588,11 @@ class CPUStatePDP11 extends CPUPDP11 {
             this.regsGen[0] = bUnit || 0;
             for (var i = 1; i <= 5; i++) this.regsGen[i] = 0;
             this.regsGen[6] = addrStack || 0o2000;
-            if (!this.dbg) {
-                if (!this.flags.powered) {
-                    this.flags.autoStart = true;
-                }
-                else if (!this.flags.running) {
-                    this.startCPU();
-                }
+            if (!this.flags.powered) {
+                this.flags.autoStart = true;
+            }
+            else if (!this.flags.running) {
+                this.startCPU();
             }
         }
         else {
@@ -608,7 +606,7 @@ class CPUStatePDP11 extends CPUPDP11 {
                  * we should probably force a complete reset, but for now, it's up to the user to hit the reset button
                  * themselves.
                  */
-                if (!this.stopCPU()) {
+                if (!this.stopCPU() && !this.cmp.flags.reset) {
                     this.dbg.updateStatus();
                     this.cmp.updateDisplays(-1);
                 }

@@ -229,29 +229,19 @@ class SerialPort8080 extends Component {
                 this.bindings[sBinding] = control;
 
                 /*
-                 * Backslash sequences like \n, \r and \\ have already been converted to LF, CR and backslash
+                 * Backslash sequences like \n, \r, and \\ have already been converted to LF, CR and backslash
                  * characters, by virtue of the eval() function that all our component parameter strings pass through;
                  * eval() treats strings like "source code", so any backslash sequence that JavaScript supports is
                  * automatically converted.
                  *
-                 * The complete list of supported backslash sequences:
+                 * The complete list of backslash sequences supported by JavaScript:
                  *
                  *      \0  \'  \"  \\  \n  \r  \v  \t  \b  \f  \uXXXX \xXX
+                 *                      ^J  ^M  ^K  ^I  ^H  ^L
                  *
-                 * We also want to support some additional sequences, like backslash-e for ESC.  Only one problem: for
-                 * any unrecognized backslash sequence, eval() simply removes the backslash.  So we have to double-backslash
-                 * it, which eval() will replace with a single backslash.
-                 *
-                 * So, additional supported backslash sequences include:
-                 *
-                 *      \\e (ESC)
-                 *
-                 * Note that I've judiciously avoided using terms "escape notation" or "escape sequence" to talk about
-                 * these sequences, because ESC is one of the additional characters I want to support, and using the word
-                 * "escape" in both contexts is WAY too confusing.
+                 * To support any other non-printable 8-bit character, such as ESC, you should use \xXX, where XX
+                 * is the ASCII code in hex.  For ESC, that would \x1B.
                  */
-                sValue = sValue.replace(/\\e/g, String.fromCharCode(0x1b));
-
                 control.onclick = function onClickTest(event) {
                     serial.receiveData(sValue);
                     /*

@@ -961,6 +961,7 @@ class ComputerPDP11 extends Component {
      */
     reset()
     {
+        this.flags.reset = true;
         if (this.bus && this.bus.reset) {
             this.printMessage("Resetting " + this.bus.type);
             this.bus.reset();
@@ -977,6 +978,7 @@ class ComputerPDP11 extends Component {
                 component.reset();
             }
         }
+        this.flags.reset = false;
         this.updateDisplays(-1);
     }
 

@@ -621,6 +621,18 @@ class Component {
     /**
      * Component.getScriptCommands(sScript)
      *
+     * Backslash sequences like \n, \r, and \\ have already been converted to LF, CR and backslash
+     * characters, since the entire script string was injected into a JavaScript function call, so
+     * any backslash sequence that JavaScript supports was automatically converted.
+     *
+     * The complete list of backslash sequences supported by JavaScript:
+     *
+     *      \0  \'  \"  \\  \n  \r  \v  \t  \b  \f  \uXXXX \xXX
+     *                      ^J  ^M  ^K  ^I  ^H  ^L
+     *
+     * To support any other non-printable 8-bit character, such as ESC, you should use \xXX, where XX
+     * is the ASCII code in hex.  For ESC, that would \x1B.
+     *
      * @param {string} sScript
      * @return {Array}
      */
@@ -706,40 +718,69 @@ class Component {
 
             var aTokens = aaCommands[iCommand];
             var sCommand = aTokens[0];
-            var fnScript = Component.scriptCommands[sCommand];
-            var component = Component.getComponentByType(aTokens[1], idMachine);
 
+            var fnCallReady = null;
+            if (Component.asyncCommands.indexOf(sCommand) >= 0) {
+                fnCallReady = function processNextCommand(iNextCommand) {
+                    return function() {
+                        Component.processCommands(idMachine, aaCommands, iNextCommand);
+                    }
+                }(iCommand + 1);
+            }
+
+            var fnScript = Component.globalCommands[sCommand];
             if (fnScript) {
-                fSuccess = fnScript(component, aTokens[2], aTokens[3]);
+                if (!fnCallReady) {
+                    fSuccess = fnScript(aTokens[1], aTokens[2], aTokens[3]);
+                } else {
+                    if (!fnScript(fnCallReady, aTokens[1], aTokens[2], aTokens[3])) break;
+                }
             }
             else {
                 fSuccess = false;
+                var component = Component.getComponentByType(aTokens[1], idMachine);
                 if (component) {
-                    var exports = component['exports'];
-                    if (exports) {
-                        var fnCommand = exports[sCommand];
-                        if (fnCommand) {
-                            if (sCommand == "wait") {
-                                var fnCallReady = function processNextCommand(iNextCommand) {
-                                    return function() {
-                                        Component.processCommands(idMachine, aaCommands, iNextCommand);
-                                    }
-                                }(iCommand + 1);
-                                fSuccess = fnCommand.call(component, fnCallReady);
-                                break;
+                    fnScript = Component.componentCommands[sCommand];
+                    if (fnScript) {
+                        fSuccess = fnScript(component, aTokens[2], aTokens[3]);
+                    }
+                    else {
+                        var exports = component['exports'];
+                        if (exports) {
+                            var fnCommand = exports[sCommand];
+                            if (fnCommand) {
+                                fSuccess = true;
+                                if (!fnCallReady) {
+                                    fSuccess = fnCommand.call(component, aTokens[2], aTokens[3]);
+                                } else {
+                                    if (!fnCommand.call(component, fnCallReady, aTokens[2], aTokens[3])) break;
+                                }
                             }
-                            fSuccess = fnCommand.call(component, aTokens[2], aTokens[3]);
                         }
                     }
                 }
             }
+
             if (!fSuccess) {
-                Component.alertUser("error processing script command (" + sCommand + ")");
+                Component.alertUser("Script error (" + sCommand + ")");
                 break;
             }
+
             iCommand++;
         }
         return fSuccess;
+    }
+
+    /**
+     * Component.scriptAlert(sMessage)
+     *
+     * @param {string} sMessage
+     * @return {boolean}
+     */
+    static scriptAlert(sMessage)
+    {
+        Component.alertUser(sMessage);
+        return true;
     }
 
     /**
@@ -753,22 +794,33 @@ class Component {
     static scriptSelect(component, sBinding, sValue)
     {
         var fSuccess = false;
-        if (component) {
-            var aBindings = component['bindings'];
-            var control = aBindings[sBinding];
-            if (control) {
-                for (var i = 0; i < control.options.length; i++) {
-                    if (control.options[i].textContent == sValue) {
-                        if (control.selectedIndex != i) {
-                            control.selectedIndex = i;
-                        }
-                        fSuccess = true;
-                        break;
+        var aBindings = component['bindings'];
+        var control = aBindings[sBinding];
+        if (control) {
+            for (var i = 0; i < control.options.length; i++) {
+                if (control.options[i].textContent == sValue) {
+                    if (control.selectedIndex != i) {
+                        control.selectedIndex = i;
                     }
+                    fSuccess = true;
+                    break;
                 }
             }
         }
         return fSuccess;
+    }
+
+    /**
+     * Component.scriptSleep(fnCallback, sDelay)
+     *
+     * @param {function()} fnCallback
+     * @param {string} sDelay (in milliseconds)
+     * @return {boolean}
+     */
+    static scriptSleep(fnCallback, sDelay)
+    {
+        setTimeout(fnCallback, +sDelay);
+        return false;
     }
 
     /**
@@ -1223,7 +1275,14 @@ if (window) {
 Component.machines = window? window['PCjs']['Machines'] : {};
 Component.components = window? window['PCjs']['Components'] : [];
 
-Component.scriptCommands = {
+Component.asyncCommands = [
+    'sleep', 'wait'
+];
+Component.globalCommands = {
+    'alert': Component.scriptAlert,
+    'sleep': Component.scriptSleep
+};
+Component.componentCommands = {
     'select':   Component.scriptSelect
 };
 

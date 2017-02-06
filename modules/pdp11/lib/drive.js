@@ -123,8 +123,8 @@ class DriveController extends Component {
         this.irq = null;
 
         this['exports'] = {
-            'boot': this.bootSelectedDisk,
-            'load': this.loadSelectedDrive,
+            'bootDisk': this.bootSelectedDisk,
+            'loadDisk': this.loadSelectedDrive,
             'selectDrive': this.selectDrive,
             'wait': this.waitDrives,
         };
@@ -1133,19 +1133,17 @@ class DriveController extends Component {
      *
      * @this {DriveController}
      * @param {function()|null} fnCallReady
-     * @return {boolean} true if successful, false if not
+     * @return {boolean} false if wait required, true otherwise
      */
     waitDrives(fnCallReady)
     {
         for (var iDrive = 0; iDrive < this.aDrives.length; iDrive++) {
             var drive = this.aDrives[iDrive];
             if (drive && drive.fBusy) {
-                drive.fnCallReady = fnCallReady;
-                fnCallReady = null;
-                break;
+                if (!drive.fnCallReady) drive.fnCallReady = fnCallReady;
+                return false;
             }
         }
-        if (fnCallReady) fnCallReady();
         return true;
     }
 

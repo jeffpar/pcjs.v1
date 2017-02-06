@@ -674,7 +674,7 @@ class SerialPortPDP11 extends Component {
     {
         var fTransmitted = false;
 
-        this.printMessage("transmitByte(" + Str.toHexByte(b) + ")");
+        if (MAXDEBUG) this.printMessage("transmitByte(" + Str.toHexByte(b) + ")");
 
         if (this.sendData) {
             if (this.sendData.call(this.connection, b)) {

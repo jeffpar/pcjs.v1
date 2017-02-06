@@ -16,9 +16,13 @@ commands:
   bootXXDP: |
     selectDrive RL11 RL0;
     select RL11 listDisks "XXDP+ Diagnostics";
-    load RL11;
+    loadDisk RL11;
     wait RL11;
-    boot RL11;
+    bootDisk RL11;
+    sleep 1000;
+    receiveData SerialPort "\r";
+    sleep 500;
+    receiveData SerialPort "R EKBAD0\r";
 ---
 
 This machine is ready to boot [XXDP+ Diagnostics](/disks/dec/rl02k/xxdp/) ("BOOT RL0") and run diagnostics
