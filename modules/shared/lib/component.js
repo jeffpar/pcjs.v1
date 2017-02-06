@@ -1276,7 +1276,7 @@ Component.machines = window? window['PCjs']['Machines'] : {};
 Component.components = window? window['PCjs']['Components'] : [];
 
 Component.asyncCommands = [
-    'sleep', 'wait'
+    'hold', 'sleep', 'wait'
 ];
 Component.globalCommands = {
     'alert': Component.scriptAlert,

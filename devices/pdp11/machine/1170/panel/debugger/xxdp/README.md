@@ -23,6 +23,11 @@ commands:
     receiveData SerialPort "\r";
     sleep 500;
     receiveData SerialPort "R EKBAD0\r";
+    hold Panel TEST 1000;
+    toggle Panel ENABLE;
+    sleep 2000;
+    reset Panel;
+    hold Panel CONT 500;
 ---
 
 This machine is ready to boot [XXDP+ Diagnostics](/disks/dec/rl02k/xxdp/) ("BOOT RL0") and run diagnostics

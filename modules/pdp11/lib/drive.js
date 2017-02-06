@@ -126,7 +126,7 @@ class DriveController extends Component {
             'bootDisk': this.bootSelectedDisk,
             'loadDisk': this.loadSelectedDrive,
             'selectDrive': this.selectDrive,
-            'wait': this.waitDrives,
+            'wait': this.waitDrives
         };
     }
 
