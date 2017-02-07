@@ -38,9 +38,7 @@ This machine is ready to boot [XXDP+ Diagnostics](/disks/dec/rl02k/xxdp/) ("BOOT
 - [EKBBF0: 11/70 CPU DIAGNOSTIC (PART 2)](/disks/dec/rl02k/xxdp/ekbbf0/)
 - [EKBEE1: 11/70 MEMORY MANAGEMENT DIAGNOSTIC](/disks/dec/rl02k/xxdp/ekbee1/)
 
-Step-by-step instructions are included below.  Other interesting things to know about this machine:
-
-* It includes an [M9312 ROM](/devices/pdp11/rom/M9312/) at address 165000.  The exact ROM is [23-616F1](/devices/pdp11/rom/M9312/23-616F1.txt).
+[Instructions](#test1170) for running those diagnostics are provided below.
 
 {% include machine.html id="test1170" %}
 

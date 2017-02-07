@@ -717,10 +717,20 @@ class Component {
     static processCommands(idMachine, aaCommands, iCommand)
     {
         var fSuccess = true;
+
+     // var dbg = Component.getComponentByType("Debugger", idMachine);
+
         while (iCommand < aaCommands.length) {
 
             var aTokens = aaCommands[iCommand];
             var sCommand = aTokens[0];
+
+            /*
+             * It's possible to route this output to the Debugger window with dbg.println()
+             * instead, but it's a bit too confusing mingling script output in a window that
+             * already mingles Debugger and machine output.
+             */
+            Component.println('script: ' + aTokens.join(' '));
 
             var fnCallReady = null;
             if (Component.asyncCommands.indexOf(sCommand) >= 0) {
