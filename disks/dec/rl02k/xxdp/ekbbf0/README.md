@@ -96,7 +96,7 @@ After setting a breakpoint at 020646 and then dumping the instruction history bu
 	020646: 104241                 EMT   241
 
 The closest we have to a source code listing of the EKBBF0 diagnostic comes from some
-[scanned microfiche](http://archive.pcjs.org/pubs/dec/pdp11/diags/AH-7968F-MC_CEKBBF0_1170_CPU_2_May80.pdf)
+[scanned microfiche](http://archive.pcjs.org/pubs/dec/pdp11/diags/AC-7966F-MC_CEKBBF0_1170_CPU_2_May80.pdf)
 on [bitsavers.org](http://bitsavers.trailing-edge.com/pdf/dec/pdp11/microfiche/ftp.j-hoppe.de/bw/gh/) for:
 
 	PRODUCT CODE: AC-7966F-MC

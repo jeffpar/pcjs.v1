@@ -4,15 +4,15 @@
 	<control type="container">
 		<control type="list" binding="listDrives"/>
 		<control type="list" binding="listDisks">
-			<disk id="disk01" name="RT-11 V3 SYS (1 OF 9)" path="http://archive.pcjs.org/disks/dec/rx01/RX01-RT11-V03-1.json"/>
-			<disk id="disk01" name="RT-11 V3 SYS (2 OF 9)" path="http://archive.pcjs.org/disks/dec/rx01/RX01-RT11-V03-2.json"/>
-			<disk id="disk01" name="RT-11 V3 SYS (3 OF 9)" path="http://archive.pcjs.org/disks/dec/rx01/RX01-RT11-V03-3.json"/>
-			<disk id="disk01" name="RT-11 V3 SYS (4 OF 9)" path="http://archive.pcjs.org/disks/dec/rx01/RX01-RT11-V03-4.json"/>
-			<disk id="disk01" name="RT-11 V3 SYS (5 OF 9)" path="http://archive.pcjs.org/disks/dec/rx01/RX01-RT11-V03-5.json"/>
-			<disk id="disk01" name="RT-11 V3 SYS (6 OF 9)" path="http://archive.pcjs.org/disks/dec/rx01/RX01-RT11-V03-6.json"/>
-			<disk id="disk01" name="RT-11 V3 SYS (7 OF 9)" path="http://archive.pcjs.org/disks/dec/rx01/RX01-RT11-V03-7.json"/>
-			<disk id="disk01" name="RT-11 V3 SYS (8 OF 9)" path="http://archive.pcjs.org/disks/dec/rx01/RX01-RT11-V03-8.json"/>
-			<disk id="disk01" name="RT-11 V3 SYS (9 OF 9)" path="http://archive.pcjs.org/disks/dec/rx01/RX01-RT11-V03-9.json"/>
+			<disk id="disk01" name="RT-11 v3.0 (1 of 9)" path="http://archive.pcjs.org/disks/dec/rx01/RX01-RT11-V03-1.json"/>
+			<disk id="disk01" name="RT-11 v3.0 (2 of 9)" path="http://archive.pcjs.org/disks/dec/rx01/RX01-RT11-V03-2.json"/>
+			<disk id="disk01" name="RT-11 v3.0 (3 of 9)" path="http://archive.pcjs.org/disks/dec/rx01/RX01-RT11-V03-3.json"/>
+			<disk id="disk01" name="RT-11 v3.0 (4 of 9)" path="http://archive.pcjs.org/disks/dec/rx01/RX01-RT11-V03-4.json"/>
+			<disk id="disk01" name="RT-11 v3.0 (5 of 9)" path="http://archive.pcjs.org/disks/dec/rx01/RX01-RT11-V03-5.json"/>
+			<disk id="disk01" name="RT-11 v3.0 (6 of 9)" path="http://archive.pcjs.org/disks/dec/rx01/RX01-RT11-V03-6.json"/>
+			<disk id="disk01" name="RT-11 v3.0 (7 of 9)" path="http://archive.pcjs.org/disks/dec/rx01/RX01-RT11-V03-7.json"/>
+			<disk id="disk01" name="RT-11 v3.0 (8 of 9)" path="http://archive.pcjs.org/disks/dec/rx01/RX01-RT11-V03-8.json"/>
+			<disk id="disk01" name="RT-11 v3.0 (9 of 9)" path="http://archive.pcjs.org/disks/dec/rx01/RX01-RT11-V03-9.json"/>
 		</control>
 		<control type="button" binding="loadDisk">Load</control>
 		<control type="button" binding="bootDisk">Boot</control>

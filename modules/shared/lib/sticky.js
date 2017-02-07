@@ -94,9 +94,10 @@ function addStickyMachine(idMachine, sPosition)
  * website rather than of the machines.  And since the machines are compiled, all their code and data is completely
  * opaque to us, except for those functions explicitly exported by embed.js.
  *
- * So now, in addition to the functions for embedding machines on a webpage, embed.js includes a new function:
+ * So now, in addition to the functions for embedding machines on a webpage, embed.js includes a few new functions:
  *
  *      findMachineComponent()
+ *      processMachineScript()
  *
  * which uses existing Component methods to find the requested component for a specific machine, and if the
  * component is found, then its 'exports' table is checked for an entry matching the specified command string, and if
@@ -106,30 +107,28 @@ function addStickyMachine(idMachine, sPosition)
  * @param {string} sComponent
  * @param {string} sCommand
  * @param {string} [sValue]
+ * @return {boolean}
  */
 function commandMachine(idMachine, sComponent, sCommand, sValue)
 {
-    if (window.findMachineComponent) {
+    if (sCommand == "script" && window.processMachineScript) {
+        return window.processMachineScript(idMachine, sComponent, sValue);
+    }
+    if (sComponent && window.findMachineComponent) {
         var component = window.findMachineComponent(idMachine, sComponent);
         if (component) {
-            if (sCommand == "script") {
-                window.alert("commandScript('" + sValue + "')");
-            } else {
-                var exports = component['exports'];
-                if (exports) {
-                    var fnCommand = exports[sCommand];
-                    if (fnCommand) {
-                        //noinspection JSUnresolvedFunction
-                        if (!fnCommand.call(component, sValue)) {
-                            window.alert("Error calling " + idMachine + "." + sComponent + "." + sCommand + "(" + sValue + ")");
-                        }
-                        return;
-                    }
+            var exports = component['exports'];
+            if (exports) {
+                var fnCommand = exports[sCommand];
+                if (fnCommand) {
+                    //noinspection JSUnresolvedFunction
+                    return !!fnCommand.call(component, sValue);
                 }
             }
         }
     }
     console.log("unimplemented: commandMachine('" + idMachine + "','" + sComponent + "','" + sCommand + "','" + sValue + "')");
+    return false;
 }
 
 /**

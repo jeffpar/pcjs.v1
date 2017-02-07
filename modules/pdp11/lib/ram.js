@@ -257,7 +257,7 @@ class RAMPDP11 extends Component {
              */
             this.bus.zeroMemory(this.addrRAM, this.sizeRAM, 0);
             if (this.abInit) {
-                this.loadImage(this.abInit, this.addrLoad, this.addrExec, this.addrRAM, true);
+                this.loadImage(this.abInit, this.addrLoad, this.addrExec, this.addrRAM, !this.dbg);
             }
         }
     }

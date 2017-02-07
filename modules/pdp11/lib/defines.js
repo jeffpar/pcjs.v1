@@ -775,19 +775,19 @@ var PDP11 = {
         DRIVES:     4,          // maximum of 4 drives
         PREFIX:     "DY",
         RLCS: {                 // 174400: Control Status Register
-            DRDY:   0x0001,     // Drive Ready (R/O)
-            FUNC:   0x000E,     // Function Code (F2,F1,F0) (R/W)
-            BAE:    0x0030,     // Bus Address Extension bits (BA17,BA16) (R/W)
-            IE:     0x0040,     // Interrupt Enable (R/W)
-            CRDY:   0x0080,     // Controller Ready (R/W)
-            DS:     0x0300,     // Drive Select (DS1,DS0) (R/W)
-            ERRC:   0x3C00,     // Error Code (R/O)
-            DE:     0x4000,     // Drive Error (R/O)
-            ERR:    0x8000,     // Composite Error (R/O)
-            CLEAR:  0x3F7E,     // bits cleared on INIT (bits 1-6 and 8-13 are cleared)
-            SET:    0x0080,     // bits set on INIT (bit 7 is set)
-            RMASK:  0xFFFF,     // no write-only bits
-            WMASK:  0x03FE,     // bits writable
+            DRDY:   0x0001,     // (000001) Drive Ready (R/O)
+            FUNC:   0x000E,     // (000016) Function Code (F2,F1,F0) (R/W)
+            BAE:    0x0030,     // (000060) Bus Address Extension bits (BA17,BA16) (R/W)
+            IE:     0x0040,     // (000100) Interrupt Enable (R/W)
+            CRDY:   0x0080,     // (000200) Controller Ready (R/W)
+            DS:     0x0300,     // (001400) Drive Select (DS1,DS0) (R/W)
+            ERRC:   0x3C00,     // (036000) Error Code (R/O)
+            DE:     0x4000,     // (040000) Drive Error (R/O)
+            ERR:    0x8000,     // (100000) Composite Error (R/O)
+            CLEAR:  0x3F7E,     // (037576) bits cleared on INIT (bits 1-6 and 8-13 are cleared)
+            SET:    0x0080,     // (000200) bits set on INIT (bit 7 is set)
+            RMASK:  0xFFFF,     // (177777) no write-only bits
+            WMASK:  0x03FE,     // (001776) bits writable
             SHIFT: {
                 FUNC:   1,
                 BAE:    4,
@@ -857,14 +857,14 @@ var PDP11 = {
             MPE:    0x2400      // Memory Parity Error (RLV12 only)
         },
         FUNC: {                 // NOTE: These function codes are pre-shifted to read/write directly from/to RLCS.FUNC
-            NOP:    0b0000,     // No-Op
-            WCHK:   0b0010,     // Write Check
-            STATUS: 0b0100,     // Get Status
-            SEEK:   0b0110,     // Seek
-            RHDR:   0b1000,     // Read Header
-            WDATA:  0b1010,     // Write Data
-            RDATA:  0b1100,     // Read Data
-            RDNC:   0b1110      // Read Data without Header Check
+            NOP:    0b0000,     // (00) No-Op
+            WCHK:   0b0010,     // (02) Write Check
+            STATUS: 0b0100,     // (04) Get Status
+            SEEK:   0b0110,     // (06) Seek
+            RHDR:   0b1000,     // (10) Read Header
+            WDATA:  0b1010,     // (12) Write Data
+            RDATA:  0b1100,     // (14) Read Data
+            RDNC:   0b1110      // (16) Read Data without Header Check
         }
     },
     RX11: {                     // RX11 Disk Controller

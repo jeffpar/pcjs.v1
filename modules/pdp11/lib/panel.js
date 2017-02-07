@@ -42,6 +42,31 @@ if (NODE) {
     var MessagesPDP11 = require("./messages");
 }
 
+/**
+ * Since the Closure Compiler treats ES6 classes as @struct rather than @dict by default,
+ * it deters us from defining named properties on our components; eg:
+ *
+ *      this['exports'] = {...}
+ *
+ * results in an error:
+ *
+ *      Cannot do '[]' access on a struct
+ *
+ * So, in order to define 'exports', we must override the @struct assumption by annotating
+ * the class as @unrestricted (or @dict).  Note that this must be done both here and in the
+ * Component class, because otherwise the Compiler won't allow us to *reference* the named
+ * property either.
+ *
+ * TODO: Consider marking ALL our classes unrestricted, because otherwise it forces us to
+ * define every single property the class uses in its constructor, which results in a fair
+ * bit of redundant initialization, since many properties aren't (and don't need to be) fully
+ * initialized until the appropriate init(), reset(), restore(), etc. function is called.
+ *
+ * The upside, however, may be that since the structure of the class is completely defined by
+ * the constructor, JavaScript engines may be able to optimize and run more efficiently.
+ *
+ * @unrestricted
+ */
 class PanelPDP11 extends Component {
     /**
      * PanelPDP11(parmsPanel)
@@ -151,6 +176,18 @@ class PanelPDP11 extends Component {
 
         /** @type {DebuggerPDP11} */
         this.dbg = null;
+
+        /*
+         * The 'hold' and 'toggle' exports, which map to holdSwitch() and toggleSwitch(), both press and release
+         * the specified switch, but processCommands() considers a 'hold' function to be asynchronous, which means it
+         * will be passed a callback function that can be used to implement a delay.  toggleSwitch() doesn't support
+         * a delay, so it should only be used with toggles (eg, 'ENABLE'), not momentary switches (eg, 'TEST').
+         */
+        this['exports'] = {
+            'hold': this.holdSwitch,
+            'toggle': this.toggleSwitch,
+            'reset': this.resetSwitches
+        };
 
         this.setReady();
     }
@@ -462,6 +499,22 @@ class PanelPDP11 extends Component {
     }
 
     /**
+     * resetSwitches()
+     *
+     * @this {PanelPDP11}
+     * @return {boolean}
+     */
+    resetSwitches()
+    {
+        for (var sBinding in this.switches) {
+            var sw = this.switches[sBinding];
+            sw[1] = sw[0];
+        }
+        this.displaySwitches();
+        return true;
+    }
+
+    /**
      * displayLED(sBinding, value)
      *
      * @this {PanelPDP11}
@@ -553,38 +606,84 @@ class PanelPDP11 extends Component {
     }
 
     /**
+     * holdSwitch(fnCallback, sBinding, sDelay)
+     *
+     * @this {PanelPDP11}
+     * @param {function()|null} fnCallback
+     * @param {string} sBinding
+     * @param {string} [sDelay]
+     * @return {boolean} false if wait required, true otherwise
+     */
+    holdSwitch(fnCallback, sBinding, sDelay)
+    {
+        if (this.pressSwitch(sBinding)) {
+            if (sDelay) {
+                var panel = this;
+                setTimeout(function() {
+                    panel.releaseSwitch(sBinding);
+                    if (fnCallback) fnCallback();
+                }, +sDelay);
+                return false;
+            } else {
+                this.releaseSwitch(sBinding);
+            }
+        }
+        return true;
+    }
+
+    /**
+     * toggleSwitch(sBinding)
+     *
+     * @this {PanelPDP11}
+     * @param {string} sBinding
+     * @return {boolean}
+     */
+    toggleSwitch(sBinding)
+    {
+        if (this.pressSwitch(sBinding)) {
+            this.releaseSwitch(sBinding);
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * pressSwitch(sBinding)
      *
      * @this {PanelPDP11}
      * @param {string} sBinding
+     * @return {boolean}
      */
     pressSwitch(sBinding)
     {
         var sw = this.switches[sBinding];
+        if (sw) {
+            /*
+             * Set the new switch value in sw[1] and then immediately display it
+             */
+            this.displaySwitch(sBinding, (sw[1] = 1 - sw[1]));
 
-        /*
-         * Set the new switch value in sw[1] and then immediately display it
-         */
-        this.displaySwitch(sBinding, (sw[1] = 1 - sw[1]));
+            /*
+             * Mark the switch as "pressed"
+             */
+            sw[3] = true;
 
-        /*
-         * Mark the switch as "pressed"
-         */
-        sw[3] = true;
+            /*
+             * Call the appropriate process handler with the current switch value (sw[1])
+             */
+            if (sw[4]) sw[4].call(this, sw[1], sw[5]);
 
-        /*
-         * Call the appropriate process handler with the current switch value (sw[1])
-         */
-        if (sw[4]) sw[4].call(this, sw[1], sw[5]);
-
-        /*
-         * This helps the next 'DEP' or 'EXAM' press determine if the previous press was the same,
-         * while also ignoring any intervening 'STEP' presses (see processStep() for why we do that).
-         */
-        if (sBinding != PanelPDP11.SWITCH.STEP) {
-            this.fDeposit = (sBinding == PanelPDP11.SWITCH.DEP);
-            this.fExamine = (sBinding == PanelPDP11.SWITCH.EXAM);
+            /*
+             * This helps the next 'DEP' or 'EXAM' press determine if the previous press was the same,
+             * while also ignoring any intervening 'STEP' presses (see processStep() for why we do that).
+             */
+            if (sBinding != PanelPDP11.SWITCH.STEP) {
+                this.fDeposit = (sBinding == PanelPDP11.SWITCH.DEP);
+                this.fExamine = (sBinding == PanelPDP11.SWITCH.EXAM);
+            }
+            return true;
         }
+        return false;
     }
 
     /**
@@ -592,6 +691,7 @@ class PanelPDP11 extends Component {
      *
      * @this {PanelPDP11}
      * @param {string} sBinding
+     * @return {boolean}
      */
     releaseSwitch(sBinding)
     {
@@ -605,21 +705,25 @@ class PanelPDP11 extends Component {
          * Otherwise, the only thing we have to do is mark the switch as "released" (ie, set sw[3] to false).
          */
         var sw = this.switches[sBinding];
-        if (sw[2] && sw[3]) {
-            /*
-             * Set the new switch value in sw[1] and then immediately display it
-             */
-            this.displaySwitch(sBinding, (sw[1] = sw[0]));
+        if (sw) {
+            if (sw[2] && sw[3]) {
+                /*
+                 * Set the new switch value in sw[1] and then immediately display it
+                 */
+                this.displaySwitch(sBinding, (sw[1] = sw[0]));
 
+                /*
+                 * Call the appropriate process handler with the current switch value (sw[1])
+                 */
+                if (sw[4]) sw[4].call(this, sw[1], sw[5]);
+            }
             /*
-             * Call the appropriate process handler with the current switch value (sw[1])
+             * Mark the switch as "released"
              */
-            if (sw[4]) sw[4].call(this, sw[1], sw[5]);
+            sw[3] = false;
+            return true;
         }
-        /*
-         * Mark the switch as "released"
-         */
-        sw[3] = false;
+        return false;
     }
 
     /**

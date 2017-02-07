@@ -1309,6 +1309,8 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
             if (this.aCommandDefs[sCommand]) {
                 sValue = this.aCommandDefs[sCommand];
                 sCommand = "script";
+            } else if (sValue) {
+                sValue = sValue.replace(/"/g, "&quot;");
             }
             sReplacement = '<' + sControl + sControlType + ' onclick="commandMachine(';
             sReplacement += "'" + sMachineID + "',";
