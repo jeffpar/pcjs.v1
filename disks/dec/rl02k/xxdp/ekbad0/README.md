@@ -2,6 +2,24 @@
 layout: page
 title: "EKBAD0: 11/70 MEMORY MANAGEMENT DIAGNOSTIC (PART 1)"
 permalink: /disks/dec/rl02k/xxdp/ekbad0/
+machines:
+  - id: test1170
+    type: pdp11
+    config: /devices/pdp11/machine/1170/panel/debugger/machine.xml
+    debugger: true
+    autoStart: true
+    sticky: top
+commands:
+  runEKBAD0: |
+    selectDrive RL11 RL0;
+    select RL11 listDisks "XXDP+ Diagnostics";
+    loadDisk RL11;
+    wait RL11;
+    bootDisk RL11;
+    sleep 1000;
+    receiveData SerialPort "\r";
+    sleep 500;
+    receiveData SerialPort "R EKBAD0\r";
 ---
 
 EKBAD0: 11/70 CPU DIAGNOSTIC (PART 1)
@@ -44,10 +62,26 @@ p. 1-6:
 	    SW00 = 1 skip operator intervention testing
 
 The closest we have to a source code listing of the EKBAD0 diagnostic comes from some
-[scanned microfiche](http://archive.pcjs.org/pubs/dec/pdp11/diags/AH-7963D-MC_CEKBAD0_1170_CPU_1_May80.pdf)
+[scanned microfiche](http://archive.pcjs.org/pubs/dec/pdp11/diags/AC-7962D-MC_CEKBAD0_1170_CPU_1_May80.pdf)
 on [bitsavers.org](http://bitsavers.trailing-edge.com/pdf/dec/pdp11/microfiche/ftp.j-hoppe.de/bw/gh/) for:
 
 	PRODUCT CODE: AC-7962D-MC
 	PRODUCT NAME: CEKBAD0 11/70 CPU #1
 	DATE CREATED: MAY, 1980
 	MAINTAINER:   DIAGNOSTIC ENGINEERING
+
+Step-by-step instructions for running EKBAD0 can be found below. 
+
+{% include machine.html id="test1170" %}
+
+### Instructions For Running EKBAD0
+
+1. Select drive RL0 {% include machine-command.html type='button' label='Do It' machine='test1170' command='script' value='selectDrive RL11 RL0' %}
+2. Select disk "XXDP+ Diagnostics" for drive RL0 {% include machine-command.html type='button' label='Do It' machine='test1170' command='script' value='select RL11 listDisks "XXDP+ Diagnostics"' %}
+3. Click `Load` to load the disk {% include machine-command.html type='button' label='Do It' machine='test1170' command='script' value='loadDisk RL11' %}
+4. Wait for message `Loaded disk "XXDP+ Diagnostics" in drive RL0` {% include machine-command.html type='button' label='Do It' machine='test1170' command='script' value='wait RL11' %}
+5. Click `Boot` to boot the disk {% include machine-command.html type='button' label='Do It' machine='test1170' command='script' value='bootDisk RL11' %}
+6. Wait for a date prompt and then press *Return* {% include machine-command.html type='button' label='Do It' machine='test1170' command='script' value='sleep 1000; receiveData SerialPort "\r"' %}
+7. Wait for a `.` prompt and then type `R EKBAD0` and press *Return* {% include machine-command.html type='button' label='Do It' machine='test1170' command='script' value='sleep 500; receiveData SerialPort "R EKBAD0\r"' %}
+
+To automatically perform all of the above, click this button: {% include machine-command.html type='button' label='Run EKBAD0' machine='test1170' command='runEKBAD0' %}

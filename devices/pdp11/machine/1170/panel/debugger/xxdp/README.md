@@ -43,7 +43,9 @@ Step-by-step instructions are included below.  Other interesting things to know 
 
 {% include machine.html id="test1170" %}
 
-Step 1: We need to select a drive to load the [RL02K XXDP+ Diagnostics Disk](/disks/dec/rl02k/xxdp/), and since it is
+### Instructions 
+
+We need to select a drive to load the [RL02K XXDP+ Diagnostics Disk](/disks/dec/rl02k/xxdp/), and since it is
 an RL02K disk, we need to use an RL02 drive.  A typical PDP-11 machine with a single [RL11 Disk Controller](/devices/pdp11/rl11/)
 could contain up to four such drives, which we refer to as RL0 through RL3.
 

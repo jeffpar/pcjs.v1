@@ -676,6 +676,9 @@ class Component {
             }
             sToken += ch;
         }
+        if (sToken) {
+            aTokens.push(sToken);
+        }
         if (aTokens.length) {
             aaCommands.push(aTokens);
         }
