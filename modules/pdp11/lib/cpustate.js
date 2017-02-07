@@ -506,7 +506,7 @@ class CPUStatePDP11 extends CPUPDP11 {
          * If updates to MMR1 have not been shut off (ie, MMR0.ABORT bits are clear), then we are allowed
          * to sync MMR1 with its real-time counterpart in opLast.
          */
-        if (!(this.regMMR0 & PDP11.MMR0.ABORT)) {
+        if ((this.regMMR0 & (PDP11.MMR0.ABORT | PDP11.MMR0.ENABLED)) == PDP11.MMR0.ENABLED) {
             this.regMMR1 = (this.opLast >> 16) & 0xffff;
         }
         var result = this.regMMR1;
@@ -528,7 +528,7 @@ class CPUStatePDP11 extends CPUPDP11 {
          * If updates to MMR2 have not been shut off (ie, MMR0.ABORT bits are clear), then we are allowed
          * to sync MMR2 with its real-time counterpart in opLast.
          */
-        if (!(this.regMMR0 & PDP11.MMR0.ABORT)) {
+        if ((this.regMMR0 & (PDP11.MMR0.ABORT | PDP11.MMR0.ENABLED)) == PDP11.MMR0.ENABLED) {
             this.regMMR2 = this.opLast & 0xffff;
         }
         return this.regMMR2;
@@ -588,13 +588,11 @@ class CPUStatePDP11 extends CPUPDP11 {
             this.regsGen[0] = bUnit || 0;
             for (var i = 1; i <= 5; i++) this.regsGen[i] = 0;
             this.regsGen[6] = addrStack || 0o2000;
-            if (!this.dbg) {
-                if (!this.flags.powered) {
-                    this.flags.autoStart = true;
-                }
-                else if (!this.flags.running) {
-                    this.startCPU();
-                }
+            if (!this.flags.powered) {
+                this.flags.autoStart = true;
+            }
+            else if (!this.flags.running) {
+                this.startCPU();
             }
         }
         else {
@@ -608,7 +606,7 @@ class CPUStatePDP11 extends CPUPDP11 {
                  * we should probably force a complete reset, but for now, it's up to the user to hit the reset button
                  * themselves.
                  */
-                if (!this.stopCPU()) {
+                if (!this.stopCPU() && !this.cmp.flags.reset) {
                     this.dbg.updateStatus();
                     this.cmp.updateDisplays(-1);
                 }

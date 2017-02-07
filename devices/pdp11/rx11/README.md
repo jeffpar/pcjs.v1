@@ -68,7 +68,7 @@ used to control the device, such as choosing which disks should be "auto-mounted
 Loading the RX11 Bootstrap
 --------------------------
 
-From the [RT-11 v4.0 Installation Manual (March 1981)](/pubs/dec/pdp11/rt11/), p. E-9:
+From the [RT-11 v4.0 Installation Manual (March 1981)](/pubs/dec/pdp11/rt11/), p. E-3:
 
 	The procedure to deposit the RX11 disk bootstrap loader in memory depends on the type of processor you have.
 	If your computer is a PDP-11V/03, PDP-11/03, or LSI-11, see the PDP-11/03 user's manual for instructions.
@@ -114,7 +114,7 @@ From the [RT-11 v4.0 Installation Manual (March 1981)](/pubs/dec/pdp11/rt11/), p
 	 
 	 4. Press the START switch.
 
-Table E-3: RX-11 Bootstrap Loader
+Table E-3: RX11 Bootstrap Loader
 ---------------------------------
 
 	Location    Contents
@@ -138,7 +138,7 @@ Table E-3: RX-11 Bootstrap Loader
 	001040      005000
 	001042      000110
 
-Loading the RX-11 Bootstrap Loader
+Loading the RX11 Bootstrap Loader
 ----------------------------------
 
 Any PDP-11 machine using built-in PCjs Debugger makes it easy to enter the bootstrap code above.  Paste

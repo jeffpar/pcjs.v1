@@ -607,7 +607,23 @@ function findMachineComponent(idMachine, sType)
 }
 
 /**
+ * processMachineScript(idMachine, sComponent, sScript)
+ *
+ * @param {string} idMachine
+ * @param {string} sComponent
+ * @param {string} sScript
+ * @return {boolean}
+ */
+function processMachineScript(idMachine, sComponent, sScript)
+{
+    return Component.processScript(idMachine, sComponent, sScript);
+}
+
+/**
  * Prevent the Closure Compiler from renaming functions we want to export, by adding them as global properties.
+ *
+ * TODO: Consider making all these functions properties on a single global object (eg, 'PCjs'), to minimize global
+ * pollution and risk of name collision.
  */
 if (APPNAME == "C1Pjs") {
     window['embedC1P']    = embedC1P;
@@ -624,6 +640,7 @@ if (APPNAME == "PDPjs") {
 }
 
 window['findMachineComponent'] = findMachineComponent;
+window['processMachineScript'] = processMachineScript;
 
 window['enableEvents'] = Web.enablePageEvents;
 window['sendEvent']    = Web.sendPageEvent;
