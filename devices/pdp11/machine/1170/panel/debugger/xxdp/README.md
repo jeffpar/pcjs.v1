@@ -46,7 +46,8 @@ This machine is ready to boot [XXDP+ Diagnostics](/disks/dec/rl02k/xxdp/) ("BOOT
 
 We need to select a drive to load the [RL02K XXDP+ Diagnostics Disk](/disks/dec/rl02k/xxdp/), and since it is
 an RL02K disk, we need to use an RL02 drive.  A typical PDP-11 machine with a single [RL11 Disk Controller](/devices/pdp11/rl11/)
-could contain up to four such drives, which we refer to as RL0 through RL3.
+could contain up to four such drives, which we refer to as RL0 through RL3.  And since we want to boot the XXDP
+disk, we need to select drive RL0, since the boot code on the disk appears to assume drive 0. 
 
 To automatically boot the [RL02K XXDP+ Diagnostics Disk](/disks/dec/rl02k/xxdp/) and run the **EKBAD0** diagnostic,
 press: {% include machine-command.html type='button' label='Run EKBAD0' machine='test1170' command='runEKBAD0' %}

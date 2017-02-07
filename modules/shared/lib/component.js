@@ -621,11 +621,19 @@ class Component {
     /**
      * Component.getScriptCommands(sScript)
      *
-     * Backslash sequences like \n, \r, and \\ have already been converted to LF, CR and backslash
-     * characters, since the entire script string was injected into a JavaScript function call, so
-     * any backslash sequence that JavaScript supports was automatically converted.
+     * This is a simple parser that breaks sScript into an array of commands, where each command
+     * is an array of tokens, where tokens are sequences of characters separated by any of: tab, space,
+     * carriage-return (CR), line-feed (LF), semi-colon, single-quote, or double-quote;  if a quote is
+     * used, all characters up to the next matching quote become part of the token, allowing any of the
+     * other separators to be part of the token.  CR, LF and semi-colon also serve to terminate a command,
+     * with semi-colon being preferred, because it's 1) more visible, and 2) essential when the entire
+     * script is a multi-line string where all CR/LF were replaced by spaces (which is what Jekyll does,
+     * and since we can't change Jekyll, it's what our own MarkDown Front Matter parser does as well;
+     * see convertMD() in markout.js, where the aCommandDefs array is built).
      *
-     * The complete list of backslash sequences supported by JavaScript:
+     * Backslash sequences like \n, \r, and \\ have already been converted to LF, CR and backslash
+     * characters, since the entire script string is injected into a JavaScript function call, so any
+     * backslash sequence that JavaScript supports is automatically converted:
      *
      *      \0  \'  \"  \\  \n  \r  \v  \t  \b  \f  \uXXXX \xXX
      *                      ^J  ^M  ^K  ^I  ^H  ^L
@@ -741,26 +749,26 @@ class Component {
                 }(iCommand + 1);
             }
 
-            var fnScript = Component.globalCommands[sCommand];
-            if (fnScript) {
+            var fnCommand = Component.globalCommands[sCommand];
+            if (fnCommand) {
                 if (!fnCallReady) {
-                    fSuccess = fnScript(aTokens[1], aTokens[2], aTokens[3]);
+                    fSuccess = fnCommand(aTokens[1], aTokens[2], aTokens[3]);
                 } else {
-                    if (!fnScript(fnCallReady, aTokens[1], aTokens[2], aTokens[3])) break;
+                    if (!fnCommand(fnCallReady, aTokens[1], aTokens[2], aTokens[3])) break;
                 }
             }
             else {
                 fSuccess = false;
                 var component = Component.getComponentByType(aTokens[1], idMachine);
                 if (component) {
-                    fnScript = Component.componentCommands[sCommand];
-                    if (fnScript) {
-                        fSuccess = fnScript(component, aTokens[2], aTokens[3]);
+                    fnCommand = Component.componentCommands[sCommand];
+                    if (fnCommand) {
+                        fSuccess = fnCommand(component, aTokens[2], aTokens[3]);
                     }
                     else {
                         var exports = component['exports'];
                         if (exports) {
-                            var fnCommand = exports[sCommand];
+                            fnCommand = exports[sCommand];
                             if (fnCommand) {
                                 fSuccess = true;
                                 if (!fnCallReady) {
