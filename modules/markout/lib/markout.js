@@ -526,7 +526,7 @@ MarkOut.prototype.convertMD = function(sIndent)
 
             var aCommandDefs = aMatch[1].match(/\ncommands:([\s\S]*?)\n([^\s]|$)/);
             if (aCommandDefs) {
-                var reCommand = /[ \t]+([^:]+):\s*\|/g;
+                var reCommand = /[ \t]+([a-z0-9$@_-]+):\s*\|/gi;
                 var aCommands = aCommandDefs[1].split(reCommand);
                 /*
                  * Since the preceding RegExp contains a capture group (representing the name of the command),
