@@ -11,6 +11,8 @@ RK03 (or more precisely, RK03-KA) disks are single-platter cartridges with 203 t
 track, and a sector size of 256 words (512 bytes), for a total capacity of 2.38Mb (2,494,464 bytes).  They are
 used in RK05 disk drives in conjunction with an [RK11 Disk Controller](/devices/pdp11/rk11/).
 
+Below is a summary of RK03 disk images archived here.
+
 * [RT-11 v4.0](rt11v4/) [[Source](http://skn.noip.me/pdp11/): RK1.DSK]
 * [Unix v5](unixv5/) [[Source](http://skn.noip.me/pdp11/): RK0.DSK]
 * [XXDP+ Diagnostics](xxdp/) [[Source](http://skn.noip.me/pdp11/): RK2.DSK]
