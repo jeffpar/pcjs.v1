@@ -10,7 +10,7 @@ machines:
     id: deskpro386
     state: deskpro386.json
     config: /devices/pcx86/machine/compaq/deskpro386/vga/2048kb/machine.xml
-    drives: '[{name:"20Mb Hard Disk",type:2,path:"/disks/pcx86/fixed/20mb/COMPAQ310-WIN386201-VGA.json"}]'
+    drives: '[{name:"20Mb Hard Disk",type:2,path:"http://archive.pcjs.org/disks/pcx86/fixed/20mb/COMPAQ310-WIN386201-VGA.json"}]'
     autoMount: ''
 ---
 
