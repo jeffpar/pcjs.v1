@@ -209,11 +209,6 @@
 			<control type="text" binding="debugInput" width="auto"/>
 			<control type="button" binding="debugEnter">Enter</control>
 			<control type="button" binding="clear">Clear</control>
-			<control type="button" binding="run" padLeft="16px">Run</control>
-			<control type="button" binding="step">Step</control>
-			<control type="button" binding="reset">Reset</control>
-			<control type="button" binding="setSpeed">Fast</control>
-			<control type="description" binding="speed" padLeft="8px">Stopped</control>
 		</control>
 	</control>
 </panel>
