@@ -2,28 +2,28 @@
 <?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.34.0/manifest.xsl"?>
 <manifest type="software">
 	<title>Microsoft Windows/386 2.0x</title>
-	<disk id="disk01" size="1228800" chs="80:2:15" img="archive/1200K/WIN201-386-DISK1.img" href="/disks/pcx86/windows/2.0x/WIN201-386-DISK1.json" md5="aaea821752eaacbe2a531f1759544b64" md5json="eff7921e9448285acfc82b8fcf472831">
+	<disk id="disk01" size="1228800" chs="80:2:15" img="archive/1200K/WIN201-386-DISK1.img" href="http://archive.pcjs.org/disks/pcx86/windows/2.0x/WIN201-386-DISK1.json" md5="aaea821752eaacbe2a531f1759544b64" md5json="eff7921e9448285acfc82b8fcf472831">
 		<name>Windows/386 2.01 (Disk 1)</name>
 	</disk>
-	<disk id="disk02" size="1228800" chs="80:2:15" img="archive/1200K/WIN201-386-DISK2.img" href="/disks/pcx86/windows/2.0x/WIN201-386-DISK2.json" md5="d9485cd87c4f5105a422ff08dd36c632" md5json="8ad3e08dee126f1ab9cf48fb1e58b4ef">
+	<disk id="disk02" size="1228800" chs="80:2:15" img="archive/1200K/WIN201-386-DISK2.img" href="http://archive.pcjs.org/disks/pcx86/windows/2.0x/WIN201-386-DISK2.json" md5="d9485cd87c4f5105a422ff08dd36c632" md5json="8ad3e08dee126f1ab9cf48fb1e58b4ef">
 		<name>Windows/386 2.01 (Disk 2)</name>
 	</disk>
-	<disk id="disk03" size="1228800" chs="80:2:15" img="archive/1200K/WIN201-386-DISK3.img" href="/disks/pcx86/windows/2.0x/WIN201-386-DISK3.json" md5="c86d1e160cf1264eaada78141518165a" md5json="1b84ea3f03318efc2fc7f1b3791dce0a">
+	<disk id="disk03" size="1228800" chs="80:2:15" img="archive/1200K/WIN201-386-DISK3.img" href="http://archive.pcjs.org/disks/pcx86/windows/2.0x/WIN201-386-DISK3.json" md5="c86d1e160cf1264eaada78141518165a" md5json="1b84ea3f03318efc2fc7f1b3791dce0a">
 		<name>Windows/386 2.01 (Disk 3)</name>
 	</disk>
-	<disk id="disk04" size="737280" chs="80:2:9" img="archive/720K/WIN203-386-DISK1.img" href="/disks/pcx86/windows/2.0x/WIN203-386-DISK1.json" md5="d484cde3645932cf14bf01905286b2ed" md5json="c179cef758b566779118703ef5ed2c38">
+	<disk id="disk04" size="737280" chs="80:2:9" img="archive/720K/WIN203-386-DISK1.img" href="http://archive.pcjs.org/disks/pcx86/windows/2.0x/WIN203-386-DISK1.json" md5="d484cde3645932cf14bf01905286b2ed" md5json="c179cef758b566779118703ef5ed2c38">
 		<name>Windows/386 2.03 (SETUP)</name>
 	</disk>
-	<disk id="disk05" size="737280" chs="80:2:9" img="archive/720K/WIN203-386-DISK2.img" href="/disks/pcx86/windows/2.0x/WIN203-386-DISK2.json" md5="dae1a30defe29636bc7a58460012e9e7" md5json="dcc99c8ee1a895af0b7236a92378e96f">
+	<disk id="disk05" size="737280" chs="80:2:9" img="archive/720K/WIN203-386-DISK2.img" href="http://archive.pcjs.org/disks/pcx86/windows/2.0x/WIN203-386-DISK2.json" md5="dae1a30defe29636bc7a58460012e9e7" md5json="dcc99c8ee1a895af0b7236a92378e96f">
 		<name>Windows/386 2.03 (UTILITY)</name>
 	</disk>
-	<disk id="disk06" size="737280" chs="80:2:9" img="archive/720K/WIN203-386-DISK3.img" href="/disks/pcx86/windows/2.0x/WIN203-386-DISK3.json" md5="6343a6aa3779be3abbfe23d72e3fa529" md5json="de20b76902d42143098b15221363ad67">
+	<disk id="disk06" size="737280" chs="80:2:9" img="archive/720K/WIN203-386-DISK3.img" href="http://archive.pcjs.org/disks/pcx86/windows/2.0x/WIN203-386-DISK3.json" md5="6343a6aa3779be3abbfe23d72e3fa529" md5json="de20b76902d42143098b15221363ad67">
 		<name>Windows/386 2.03 (FONTS)</name>
 	</disk>
-	<disk id="disk07" size="737280" chs="80:2:9" img="archive/720K/WIN203-386-DISK4.img" href="/disks/pcx86/windows/2.0x/WIN203-386-DISK4.json" md5="2c3c30e304b0975b7afec51bfbaa216a" md5json="5f6a7441d7d575386e2d4f621deccd38">
+	<disk id="disk07" size="737280" chs="80:2:9" img="archive/720K/WIN203-386-DISK4.img" href="http://archive.pcjs.org/disks/pcx86/windows/2.0x/WIN203-386-DISK4.json" md5="2c3c30e304b0975b7afec51bfbaa216a" md5json="5f6a7441d7d575386e2d4f621deccd38">
 		<name>Windows/386 2.03 (PROGRAM)</name>
 	</disk>
-	<disk id="disk08" size="737280" chs="80:2:9" img="archive/720K/WIN203-386-DISK5.img" href="/disks/pcx86/windows/2.0x/WIN203-386-DISK5.json" md5="fb6306edc770b6e31e1e19acd83e2f5c" md5json="4d76254a33d283d355e1698864218793">
+	<disk id="disk08" size="737280" chs="80:2:9" img="archive/720K/WIN203-386-DISK5.img" href="http://archive.pcjs.org/disks/pcx86/windows/2.0x/WIN203-386-DISK5.json" md5="fb6306edc770b6e31e1e19acd83e2f5c" md5json="4d76254a33d283d355e1698864218793">
 		<name>Windows/386 2.03 (UTILITY 2)</name>
 	</disk>
 </manifest>
