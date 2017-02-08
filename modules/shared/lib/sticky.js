@@ -113,11 +113,12 @@ function addStickyMachine(idMachine, sPosition)
  */
 function commandMachine(control, fSingle, idMachine, sComponent, sCommand, sValue)
 {
-    if (fSingle) {
-        control.disabled = true;
-    }
     if (sCommand == "script" && window.processMachineScript) {
-        return window.processMachineScript(idMachine, sComponent, sValue);
+        if (window.processMachineScript(idMachine, sValue)) {
+            if (fSingle) control.disabled = true;
+            return true;
+        }
+        return false;
     }
     if (sComponent && window.findMachineComponent) {
         var component = window.findMachineComponent(idMachine, sComponent);
@@ -127,7 +128,11 @@ function commandMachine(control, fSingle, idMachine, sComponent, sCommand, sValu
                 var fnCommand = exports[sCommand];
                 if (fnCommand) {
                     //noinspection JSUnresolvedFunction
-                    return !!fnCommand.call(component, sValue);
+                    if (fnCommand.call(component, sValue)) {
+                        if (fSingle) control.disabled = true;
+                        return true;
+                    }
+                    return false;
                 }
             }
         }
