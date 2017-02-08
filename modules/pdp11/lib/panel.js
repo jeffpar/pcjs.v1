@@ -1101,17 +1101,6 @@ class PanelPDP11 extends Component {
     }
 
     /**
-     * hasSRSwitches(value)
-     *
-     * @this {PanelPDP11}
-     * @return {boolean}
-     */
-    hasSRSwitches()
-    {
-        return this.bindings[PanelPDP11.SWITCH.S0] !== undefined;
-    }
-
-    /**
      * setSRSwitches(value)
      *
      * @this {PanelPDP11}
@@ -1120,18 +1109,15 @@ class PanelPDP11 extends Component {
      */
     setSRSwitches(value)
     {
-        if (this.hasSRSwitches() && !isNaN(value)) {
-            this.regSwitches = value | 0;
-            for (var i = 0; i < 22; i++) {
-                this.switches['S'+i][1] = (this.regSwitches & (1 << i))? 1 : 0;
-            }
-            /*
-             * This (re)displays ALL switches, not merely the SR switches, but that's OK.
-             */
-            this.displaySwitches();
-            return true;
+        this.regSwitches = value | 0;
+        for (var i = 0; i < 22; i++) {
+            this.switches['S'+i][1] = (this.regSwitches & (1 << i))? 1 : 0;
         }
-        return false;
+        /*
+         * This (re)displays ALL switches, not merely the SR switches, but that's OK.
+         */
+        this.displaySwitches();
+        return true;
     }
 
     /**
@@ -1326,7 +1312,6 @@ PanelPDP11.ADDRSEL = {
  * "step" behavior when pressed more than once in a row).  Ditto for the LED table.
  */
 PanelPDP11.SWITCH = {
-    S0:     'S0',
     DEP:    'DEP',
     ENABLE: 'ENABLE',
     EXAM:   'EXAM',
