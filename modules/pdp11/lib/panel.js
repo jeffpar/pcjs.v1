@@ -162,7 +162,7 @@ class PanelPDP11 extends Component {
             'TEST':     [0, 0, true,  false, this.processLEDTest]
         };
         for (var i = 0; i < 22; i++) {
-            this.switches['S'+i] = [0, 0, false, false, this.processSwitchReg, i];
+            this.switches['S'+i] = [0, 0, false, false, this.processSRSwitch, i];
         }
 
         /** @type {ComputerPDP11} */
@@ -179,14 +179,23 @@ class PanelPDP11 extends Component {
 
         /*
          * The 'hold' and 'toggle' exports, which map to holdSwitch() and toggleSwitch(), both press and release
-         * the specified switch, but processCommands() considers a 'hold' function to be asynchronous, which means it
-         * will be passed a callback function that can be used to implement a delay.  toggleSwitch() doesn't support
-         * a delay, so it should only be used with toggles (eg, 'ENABLE'), not momentary switches (eg, 'TEST').
+         * the specified switch, but processCommands() considers a 'hold' function to be asynchronous, which means
+         * that holdSwitch() will be passed a callback function that can be used to implement a delay between the
+         * press and the release, whereas toggleSwitch() will not.
+         *
+         * holdSwitch() only makes sense for momentary switches (eg, 'TEST'), where a visual delay might be nice.
+         * If the switch isn't momentary, or no delay is desired, then use toggleSwitch(); it will be more efficient.
+         *
+         * Finally, for switches that are toggles (eg, 'ENABLE'), you can use setSwitch() to set it to a specific
+         * state: zero for "off" and non-zero for "on".  setSwitch() also supports meta-switches like "SR", using
+         * the entire value to set a series of switches at once; the value is assumed to be octal unless overridden
+         * by a prefix (eg, "0x") or suffix (eg, ".").
          */
         this['exports'] = {
             'hold': this.holdSwitch,
             'toggle': this.toggleSwitch,
-            'reset': this.resetSwitches
+            'reset': this.resetSwitches,
+            'set': this.setSwitch
         };
 
         this.setReady();
@@ -255,7 +264,7 @@ class PanelPDP11 extends Component {
      */
     setSR(value)
     {
-        this.setSwitches(value);
+        this.setSRSwitches(value);
     }
 
     /**
@@ -632,6 +641,28 @@ class PanelPDP11 extends Component {
     }
 
     /**
+     * setSwitch(sBinding, sValue)
+     *
+     * @this {PanelPDP11}
+     * @param {string} sBinding
+     * @param {string} sValue
+     * @return {boolean}
+     */
+    setSwitch(sBinding, sValue)
+    {
+        if (sBinding == "SR") {
+            return this.setSRSwitches(Str.parseInt(sValue, 8))
+        }
+        var sw = this.switches[sBinding];
+        if (sw) {
+            sw[1] = +sValue? 1 : 0;
+            this.displaySwitch(sBinding, sw[1]);
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * toggleSwitch(sBinding)
      *
      * @this {PanelPDP11}
@@ -736,12 +767,16 @@ class PanelPDP11 extends Component {
     processStart(value, index)
     {
         if (!value && !this.cpu.isRunning()) {
+
+            this.cpu.setPC(this.regAddr);
+
             /*
              * TODO: Verify what the PDP-11/70 Handbook means when it says that when the 'START' switch
              * is depressed, "the computer system will be cleared."  I take it to mean that it performs
              * the equivalent of a RESET instruction.
              */
             this.cpu.resetCPU();
+
             /*
              * The PDP-11/70 Handbook goes on to say: "If the system needs to be initialized but execution
              * is not wanted, the START switch should be depressed while the HALT/ENABLE switch is in the HALT
@@ -955,18 +990,18 @@ class PanelPDP11 extends Component {
             /*
              * This is another one of my "innovations": when you're done testing the LEDs, all the switches reset as well.
              */
-            this.setSwitches(0);
+            this.setSRSwitches(0);
         }
     }
 
     /**
-     * processSwitchReg(value, index)
+     * processSRSwitch(value, index)
      *
      * @this {PanelPDP11}
      * @param {number} value (normally 0 or 1, but we only depend on it being zero or non-zero)
      * @param {number} index
      */
-    processSwitchReg(value, index)
+    processSRSwitch(value, index)
     {
         if (value) {
             this.regSwitches |= 1 << index;
@@ -1066,31 +1101,37 @@ class PanelPDP11 extends Component {
     }
 
     /**
-     * hasSwitches(value)
+     * hasSRSwitches(value)
      *
      * @this {PanelPDP11}
      * @return {boolean}
      */
-    hasSwitches()
+    hasSRSwitches()
     {
         return this.bindings[PanelPDP11.SWITCH.S0] !== undefined;
     }
 
     /**
-     * setSwitches(value)
+     * setSRSwitches(value)
      *
      * @this {PanelPDP11}
-     * @param {number} value
+     * @param {number|undefined} value
+     * @return {boolean}
      */
-    setSwitches(value)
+    setSRSwitches(value)
     {
-        if (this.hasSwitches()) {
-            this.regSwitches = value;
+        if (this.hasSRSwitches() && !isNaN(value)) {
+            this.regSwitches = value | 0;
             for (var i = 0; i < 22; i++) {
-                this.switches['S'+i][1] = (value & (1 << i))? 1 : 0;
+                this.switches['S'+i][1] = (this.regSwitches & (1 << i))? 1 : 0;
             }
+            /*
+             * This (re)displays ALL switches, not merely the SR switches, but that's OK.
+             */
             this.displaySwitches();
+            return true;
         }
+        return false;
     }
 
     /**

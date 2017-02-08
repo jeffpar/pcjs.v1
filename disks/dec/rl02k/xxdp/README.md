@@ -34,7 +34,8 @@ At the prompt, type "BOOT RL0".  The following text should appear:
 	
 	.
 
-NOTE: Any RL11 disk drive (RL0-RL3) can be used.  RL0 was selected for demonstration purposes.
+NOTE: In theory, any RL11 disk drive (RL0-RL3) could be used.  However, the boot code on the disk appears to assume
+drive 0, so RL0 should be selected.
 
 PDPjs has been tested with the following diagnostics:
 

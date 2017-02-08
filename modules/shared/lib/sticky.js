@@ -88,7 +88,7 @@ function addStickyMachine(idMachine, sPosition)
 }
 
 /**
- * commandMachine(idMachine, sComponent, sCommand, sValue)
+ * commandMachine(control, fSingle, idMachine, sComponent, sCommand, sValue)
  *
  * Note that this script is not compiled into any of the machines, since "sticky machines" are feature of the PCjs
  * website rather than of the machines.  And since the machines are compiled, all their code and data is completely
@@ -103,14 +103,19 @@ function addStickyMachine(idMachine, sPosition)
  * component is found, then its 'exports' table is checked for an entry matching the specified command string, and if
  * an entry is found, then the corresponding function is called with the specified data.
  *
+ * @param {Object} control
+ * @param {boolean} fSingle
  * @param {string} idMachine
  * @param {string} sComponent
  * @param {string} sCommand
  * @param {string} [sValue]
  * @return {boolean}
  */
-function commandMachine(idMachine, sComponent, sCommand, sValue)
+function commandMachine(control, fSingle, idMachine, sComponent, sCommand, sValue)
 {
+    if (fSingle) {
+        control.disabled = true;
+    }
     if (sCommand == "script" && window.processMachineScript) {
         return window.processMachineScript(idMachine, sComponent, sValue);
     }

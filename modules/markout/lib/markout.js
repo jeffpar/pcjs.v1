@@ -1301,7 +1301,13 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
         if (!aParms) continue;
         sReplacement = "";
         sMachineID = findParm(aParms, 'machine');
-        var sControl = findParm(aParms, 'type') || 'button';
+        var sSingle = "false,";
+        var sControl = findParm(aParms, 'type');
+        if (sControl == "clickOnce") {
+            sControl = "";
+            sSingle = "true,";
+        }
+        sControl = sControl || "button";
         var sControlType = sControl == 'button'? ' type="button"' : '';
         if (this.aMachineDefs[sMachineID]) {
             var sCommand = findParm(aParms, 'command');
@@ -1312,7 +1318,7 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
             } else if (sValue) {
                 sValue = sValue.replace(/"/g, "&quot;");
             }
-            sReplacement = '<' + sControl + sControlType + ' onclick="commandMachine(';
+            sReplacement = '<' + sControl + sControlType + ' onclick="commandMachine(this,' + sSingle;
             sReplacement += "'" + sMachineID + "',";
             sReplacement += "'" + findParm(aParms, 'component') + "',";
             sReplacement += "'" + sCommand + "',";

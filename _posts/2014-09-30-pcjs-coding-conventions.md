@@ -81,10 +81,10 @@ However, I've gradually switched to the more conventional JavaScript object nota
  
 ``` javascript
 ChipSet.PIC_LO = {
-	OCW2_EOI:           0x20,           // non-specific EOI (end-of-interrupt)
-	OCW2_EOI_SPEC:      0x60,           // specific EOI
-	OCW2_EOI_ROT:       0xA0,           // rotate on non-specific EOI
-	OCW2_EOI_ROTSPEC:   0xE0            // rotate on specific EOI
+    OCW2_EOI:           0x20,           // non-specific EOI (end-of-interrupt)
+    OCW2_EOI_SPEC:      0x60,           // specific EOI
+    OCW2_EOI_ROT:       0xA0,           // rotate on non-specific EOI
+    OCW2_EOI_ROTSPEC:   0xE0            // rotate on specific EOI
 };
 ```
 
@@ -104,7 +104,7 @@ To ensure that debug-only code is not simply *disabled* but also *removed*, the 
 
 ``` javascript
 if (DEBUG) {
-	[code to be removed by the Closure Compiler]
+    [code to be removed by the Closure Compiler]
 }
 ```
 

@@ -388,6 +388,12 @@ specified page; e.g.:
 
 	http://localhost:8088/?aspect=2.0
 
+- *resume*: set it to a numeric value (0-3) to override a machine's *resume* setting; e.g.:
+
+	http://localhost:8088/?resume=0
+
+More information about the *resume* attribute is available in the [documentation](/docs/pcx86/computer/#attributes).
+
 Updating PCjs
 ---
 
