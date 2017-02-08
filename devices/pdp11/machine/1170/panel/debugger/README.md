@@ -6,6 +6,7 @@ machines:
   - id: test1170
     type: pdp11
     debugger: true
+    sticky: top
 ---
 
 {% include machine.html id="test1170" %}
@@ -46,8 +47,62 @@ Debugger commands described below to load and execute these "toggle-ins".
 	Load Address 300
 	Exam                Display = 070707 ... Relocation works
 
-With the PDPjs Debugger, the above "toggle-in" is easily entered with the following commands (the semicolons are optional;
-they just make it easier to paste an entire set of commands into the Debugger at once):
+Step 1: Load ADDR register with 200:
+{% include machine-command.html type='clickOnce' label='LOAD 200' machine='test1170' command='script' value='set Panel SR 200;toggle Panel LOAD' %}
+
+Step 2: Deposit 012737 at ADDR 200:
+{% include machine-command.html type='clickOnce' label='DEPOSIT 012737' machine='test1170' command='script' value='set Panel SR 012737;toggle Panel DEP' %}
+
+Step 3: Deposit 000400 at ADDR 202:
+{% include machine-command.html type='clickOnce' label='DEPOSIT 000400' machine='test1170' command='script' value='set Panel SR 000400;toggle Panel DEP' %}
+
+Step 4: Deposit 177572 at ADDR 204:
+{% include machine-command.html type='clickOnce' label='DEPOSIT 177572' machine='test1170' command='script' value='set Panel SR 177572;toggle Panel DEP' %}
+
+Step 5: Deposit 012737 at ADDR 206:
+{% include machine-command.html type='clickOnce' label='DEPOSIT 012737' machine='test1170' command='script' value='set Panel SR 012737;toggle Panel DEP' %}
+
+Step 6: Deposit 070707 at ADDR 210:
+{% include machine-command.html type='clickOnce' label='DEPOSIT 070707' machine='test1170' command='script' value='set Panel SR 070707;toggle Panel DEP' %}
+
+Step 7: Deposit 000200 at ADDR 212:
+{% include machine-command.html type='clickOnce' label='DEPOSIT 000200' machine='test1170' command='script' value='set Panel SR 000200;toggle Panel DEP' %}
+
+Step 8: Deposit 000000 at ADDR 214:
+{% include machine-command.html type='clickOnce' label='DEPOSIT 000000' machine='test1170' command='script' value='set Panel SR 000000;toggle Panel DEP' %}
+
+Step 9: Load ADDR register with 300:
+{% include machine-command.html type='clickOnce' label='LOAD 300' machine='test1170' command='script' value='set Panel SR 300;toggle Panel LOAD' %}
+
+Step 10: Deposit 300 at ADDR 300:
+{% include machine-command.html type='clickOnce' label='DEPOSIT 300' machine='test1170' command='script' value='toggle Panel DEP' %}
+
+Step 11: Load ADDR register with 17772300:
+{% include machine-command.html type='clickOnce' label='LOAD 17772300' machine='test1170' command='script' value='set Panel SR 17772300;toggle Panel LOAD' %}
+
+Step 12: Deposit 077406 at ADDR 17772300:
+{% include machine-command.html type='clickOnce' label='DEPOSIT 077406' machine='test1170' command='script' value='set Panel SR 077406;toggle Panel DEP' %}
+
+Step 13: Load ADDR register with 17772340:
+{% include machine-command.html type='clickOnce' label='LOAD 17772340' machine='test1170' command='script' value='set Panel SR 17772340;toggle Panel LOAD' %}
+
+Step 14: Deposit 000001 at ADDR 17772340:
+{% include machine-command.html type='clickOnce' label='DEPOSIT 000001' machine='test1170' command='script' value='set Panel SR 000001;toggle Panel DEP' %}
+
+Step 15: Load ADDR register with 200:
+{% include machine-command.html type='clickOnce' label='LOAD 200' machine='test1170' command='script' value='set Panel SR 200;toggle Panel LOAD' %}
+
+Step 16: Set ENABLE and toggle START:
+{% include machine-command.html type='clickOnce' label='START' machine='test1170' command='script' value='set Panel ENABLE 1; toggle Panel START' %}
+
+Step 17: Load ADDR register with 300:
+{% include machine-command.html type='clickOnce' label='LOAD 300' machine='test1170' command='script' value='set Panel SR 300;toggle Panel LOAD' %}
+
+Step 18: Examine ADDR 300:
+{% include machine-command.html type='clickOnce' label='EXAM' machine='test1170' command='script' value='toggle Panel EXAM' %}
+
+Alternatively, with the PDPjs Debugger, the above "toggle-in" is easily entered with the following commands (the
+semicolons are optional; they just make it easier to paste an entire set of commands into the Debugger at once):
 
 	e 200 012737 000400 177572 012737 070707 000200 000000;
 	e 300 000300;

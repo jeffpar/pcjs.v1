@@ -623,10 +623,10 @@ class Component {
      *
      * This is a simple parser that breaks sScript into an array of commands, where each command
      * is an array of tokens, where tokens are sequences of characters separated by any of: tab, space,
-     * carriage-return (CR), line-feed (LF), semi-colon, single-quote, or double-quote;  if a quote is
+     * carriage-return (CR), line-feed (LF), semicolon, single-quote, or double-quote;  if a quote is
      * used, all characters up to the next matching quote become part of the token, allowing any of the
-     * other separators to be part of the token.  CR, LF and semi-colon also serve to terminate a command,
-     * with semi-colon being preferred, because it's 1) more visible, and 2) essential when the entire
+     * other separators to be part of the token.  CR, LF and semicolon also serve to terminate a command,
+     * with semicolon being preferred, because it's 1) more visible, and 2) essential when the entire
      * script is a multi-line string where all CR/LF were replaced by spaces (which is what Jekyll does,
      * and since we can't change Jekyll, it's what our own MarkDown Front Matter parser does as well;
      * see convertMD() in markout.js, where the aCommandDefs array is built).
@@ -783,7 +783,7 @@ class Component {
             }
 
             if (!fSuccess) {
-                Component.alertUser("Script error (" + sCommand + ")");
+                Component.alertUser("Script error: " + sCommand + (fnCommand? " failed" : " unrecognized"));
                 break;
             }
 
