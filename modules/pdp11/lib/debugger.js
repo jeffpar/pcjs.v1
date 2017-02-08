@@ -973,9 +973,7 @@ class DebuggerPDP11 extends Debugger {
                     if (panel) value = panel.getDR();
                     break;
                 case DebuggerPDP11.REG_SR:
-                    if (panel && panel.hasSwitches()) {
-                        value = panel.getSR();
-                    }
+                    if (panel) value = panel.getSR();
                     break;
                 }
             }
@@ -2325,7 +2323,7 @@ class DebuggerPDP11 extends Debugger {
                 }
                 break;
             case DebuggerPDP11.REG_SR:
-                if (this.panel && this.panel.hasSwitches()) {
+                if (this.panel) {
                     sReg = "SR=" + this.toStrBase(this.panel.getSR(), 3);
                 }
                 break;
@@ -3471,12 +3469,9 @@ class DebuggerPDP11 extends Debugger {
                     fMisc = true;
                     break;
                 case "SR":
-                    if (this.panel && this.panel.hasSwitches()) {
-                        this.panel.setSR(w);
-                        fMisc = true;
-                        break;
-                    }
-                    /* falls through */
+                    if (this.panel) this.panel.setSR(w);
+                    fMisc = true;
+                    break;
                 default:
                     if (sRegMatch.charAt(0) == 'R') {
                         var iReg = +sRegMatch.charAt(1);

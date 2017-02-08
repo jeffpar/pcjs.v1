@@ -607,16 +607,15 @@ function findMachineComponent(idMachine, sType)
 }
 
 /**
- * processMachineScript(idMachine, sComponent, sScript)
+ * processMachineScript(idMachine, sScript)
  *
  * @param {string} idMachine
- * @param {string} sComponent
  * @param {string} sScript
  * @return {boolean}
  */
-function processMachineScript(idMachine, sComponent, sScript)
+function processMachineScript(idMachine, sScript)
 {
-    return Component.processScript(idMachine, sComponent, sScript);
+    return Component.processScript(idMachine, sScript);
 }
 
 /**

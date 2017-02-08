@@ -647,7 +647,7 @@ class Component {
     static getScriptCommands(sScript)
     {
         var cch = sScript.length;
-        var aaCommands = [], aTokens = [], sToken = "", chQuote = null;
+        var aCommands = [], aTokens = [], sToken = "", chQuote = null;
         for (var i = 0; i < cch; i++) {
             var ch = sScript[i];
             if (ch == '"' || ch == "'") {
@@ -676,7 +676,7 @@ class Component {
                         sToken = "";
                     }
                     if (ch == ';' && aTokens.length) {
-                        aaCommands.push(aTokens);
+                        aCommands.push(aTokens);
                         aTokens = [];
                     }
                     continue;
@@ -688,26 +688,26 @@ class Component {
             aTokens.push(sToken);
         }
         if (aTokens.length) {
-            aaCommands.push(aTokens);
+            aCommands.push(aTokens);
         }
-        return aaCommands;
+        return aCommands;
     }
 
     /**
-     * Component.processScript(idMachine, sComponent, sScript)
+     * Component.processScript(idMachine, sScript)
      *
      * @param {string} idMachine
-     * @param {string} sComponent
      * @param {string} sScript
      * @return {boolean}
      */
-    static processScript(idMachine, sComponent, sScript)
+    static processScript(idMachine, sScript)
     {
         var fSuccess = false;
-        if (typeof sScript == "string") {
+        idMachine += ".machine";
+        if (typeof sScript == "string" && !Component.commands[idMachine]) {
             fSuccess = true;
-            var aaCommands = Component.getScriptCommands(sScript);
-            if (!Component.processCommands(idMachine + ".machine", aaCommands, 0)) {
+            Component.commands[idMachine] = Component.getScriptCommands(sScript);
+            if (!Component.processCommands(idMachine)) {
                 fSuccess = false;
             }
         }
@@ -715,22 +715,21 @@ class Component {
     }
 
     /**
-     * Component.processCommands(idMachine, aaCommands, iCommand)
+     * Component.processCommands(idMachine)
      *
      * @param {string} idMachine
-     * @param {Array} aaCommands
-     * @param {number} iCommand
      * @return {boolean}
      */
-    static processCommands(idMachine, aaCommands, iCommand)
+    static processCommands(idMachine)
     {
         var fSuccess = true;
+        var aCommands = Component.commands[idMachine];
 
      // var dbg = Component.getComponentByType("Debugger", idMachine);
 
-        while (iCommand < aaCommands.length) {
+        while (aCommands && aCommands.length) {
 
-            var aTokens = aaCommands[iCommand];
+            var aTokens = aCommands.splice(0, 1)[0];
             var sCommand = aTokens[0];
 
             /*
@@ -742,11 +741,11 @@ class Component {
 
             var fnCallReady = null;
             if (Component.asyncCommands.indexOf(sCommand) >= 0) {
-                fnCallReady = function processNextCommand(iNextCommand) {
+                fnCallReady = function processNextCommand() {
                     return function() {
-                        Component.processCommands(idMachine, aaCommands, iNextCommand);
+                        Component.processCommands(idMachine);
                     }
-                }(iCommand + 1);
+                }();
             }
 
             var fnCommand = Component.globalCommands[sCommand];
@@ -786,9 +785,12 @@ class Component {
                 Component.alertUser("Script error: " + sCommand + (fnCommand? " failed" : " unrecognized"));
                 break;
             }
-
-            iCommand++;
         }
+
+        if (aCommands && !aCommands.length) {
+            delete Component.commands[idMachine];
+        }
+
         return fSuccess;
     }
 
@@ -1292,9 +1294,11 @@ if (window) {
     if (!window['PCjs']) window['PCjs'] = {};
     if (!window['PCjs']['Machines']) window['PCjs']['Machines'] = {};
     if (!window['PCjs']['Components']) window['PCjs']['Components'] = [];
+    if (!window['PCjs']['Commands']) window['PCjs']['Commands'] = {};
 }
 Component.machines = window? window['PCjs']['Machines'] : {};
 Component.components = window? window['PCjs']['Components'] : [];
+Component.commands = window? window['PCjs']['Commands'] : {};
 
 Component.asyncCommands = [
     'hold', 'sleep', 'wait'
