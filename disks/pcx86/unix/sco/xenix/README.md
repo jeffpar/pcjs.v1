@@ -2,8 +2,6 @@
 layout: page
 title: SCO Xenix
 permalink: /disks/pcx86/unix/sco/xenix/
-redirect_from:
-  - /disks/pc/unix/sco/xenix/
 ---
 
 SCO Xenix

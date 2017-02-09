@@ -2,8 +2,6 @@
 layout: page
 title: Microsoft Languages and Tools
 permalink: /disks/pcx86/tools/microsoft/
-redirect_from:
-  - /disks/pc/tools/microsoft/
 ---
 
 Microsoft Languages

@@ -2,8 +2,6 @@
 layout: page
 title: PC-DOS 5.00
 permalink: /disks/pcx86/dos/ibm/5.00/
-redirect_from:
-  - /disks/pc/dos/ibm/5.00/
 machines:
   - type: pcx86
     id: ibm5170-pcdos500

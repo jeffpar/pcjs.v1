@@ -2,9 +2,6 @@
 layout: page
 title: Microsoft Windows 3.00
 permalink: /disks/pcx86/windows/3.00/
-redirect_from:
-  - /devices/pc/machine/5170/ega/1152kb/win300/
-  - /disks/pc/windows/3.00/
 machines:
   - type: pcx86
     id: ibm5170-win300

@@ -2,8 +2,6 @@
 layout: page
 title: 80386 Tests
 permalink: /tests/pcx86/80386/
-redirect_from:
-  - /tests/pc/80386/
 ---
 
 Overview

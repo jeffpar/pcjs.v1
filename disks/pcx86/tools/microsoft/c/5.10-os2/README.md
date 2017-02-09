@@ -2,8 +2,6 @@
 layout: page
 title: Microsoft C Compiler 5.10 for DOS and OS/2
 permalink: /disks/pcx86/tools/microsoft/c/5.10-os2/
-redirect_from:
-  - /disks/pc/tools/microsoft/c/5.10-os2/
 ---
 
 Microsoft C Compiler 5.10 for DOS and OS/2

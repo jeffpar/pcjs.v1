@@ -2,8 +2,6 @@
 layout: page
 title: PC-DOS and MS-DOS Disks
 permalink: /disks/pcx86/dos/
-redirect_from:
-  - /disks/pc/dos/
 ---
 
 PC-DOS and MS-DOS

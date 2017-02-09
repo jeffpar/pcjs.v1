@@ -2,8 +2,6 @@
 layout: page
 title: Microsoft OS/2
 permalink: /disks/pcx86/os2/microsoft/
-redirect_from:
-  - /disks/pc/os2/microsoft/
 ---
 
 Microsoft OS/2

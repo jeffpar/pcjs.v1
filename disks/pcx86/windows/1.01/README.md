@@ -6,8 +6,6 @@ redirect_from:
   - /configs/pc/machines/5160/ega/640kb/win101/
   - /devices/pc/machine/5160/ega/640kb/win101/
   - /devices/pc/machine/5160/ega/640kb/win101/debugger/
-  - /disks/pc/win/win101/
-  - /disks/pc/windows/1.01/
 machines:
   - type: pcx86
     id: ibm5160

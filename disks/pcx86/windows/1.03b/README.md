@@ -2,8 +2,6 @@
 layout: page
 title: Microsoft Windows 1.03b
 permalink: /disks/pcx86/windows/1.03b/
-redirect_from:
-  - /disks/pc/windows/1.03b/
 ---
 
 Microsoft Windows 1.03b

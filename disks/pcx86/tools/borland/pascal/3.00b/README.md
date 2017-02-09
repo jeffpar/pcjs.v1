@@ -2,8 +2,6 @@
 layout: page
 title: Borland Turbo Pascal 3.00B
 permalink: /disks/pcx86/tools/borland/pascal/3.00b/
-redirect_from:
-  - /disks/pc/tools/borland/pascal/3.00b/
 ---
 
 Borland Turbo Pascal 3.00B

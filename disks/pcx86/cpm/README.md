@@ -2,8 +2,6 @@
 layout: page
 title: CP/M-86
 permalink: /disks/pcx86/cpm/
-redirect_from:
-  - /disks/pc/cpm/
 ---
 
 CP/M-86

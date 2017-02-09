@@ -2,8 +2,6 @@
 layout: page
 title: IBM Applications
 permalink: /disks/pcx86/apps/ibm/
-redirect_from:
-  - /disks/pc/apps/ibm/
 ---
 
 IBM Applications

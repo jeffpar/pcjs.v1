@@ -2,8 +2,6 @@
 layout: page
 title: Microsoft MS-DOS
 permalink: /disks/pcx86/dos/microsoft/
-redirect_from:
-  - /disks/pc/dos/microsoft/
 ---
 
 Microsoft MS-DOS

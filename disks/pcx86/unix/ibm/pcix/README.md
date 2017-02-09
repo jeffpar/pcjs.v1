@@ -2,8 +2,6 @@
 layout: page
 title: PC/IX Operating Systems
 permalink: /disks/pcx86/unix/ibm/pcix/
-redirect_from:
-  - /disks/pc/unix/ibm/pcix/
 ---
 
 PC/IX Operating Systems

@@ -2,9 +2,6 @@
 layout: page
 title: Microsoft Windows 95 (Build 499)
 permalink: /disks/pcx86/windows/win95/4.00.499/
-redirect_from:
-  - /disks/pc/windows/win95/build499/
-  - /disks/pc/windows/win95/4.00.499/
 machines:
   - type: pcx86
     id: deskpro386

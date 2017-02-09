@@ -2,8 +2,6 @@
 layout: page
 title: IBM OS/2 1.1
 permalink: /disks/pcx86/os2/ibm/1.1/
-redirect_from:
-  - /disks/pc/os2/ibm/1.1/
 machines:
   - type: pcx86
     id: ibm5170
