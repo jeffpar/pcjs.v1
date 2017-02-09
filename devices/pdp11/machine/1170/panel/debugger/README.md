@@ -10,11 +10,25 @@ machines:
     sticky: top
 ---
 
+PDP-11/70 with 256Kb, Front Panel, and Debugger
+---
+
+The machine below is a PDP-11/70 with a stripped-down interface that includes our stylized Front Panel and
+a "teletype" I/O window connected to the PDP-11/70's serial port.  The I/O window is shared with the built-in
+PDPjs Debugger.
+
+To make it easier to interact with the Front Panel [Toggle-In Demos](#toggle-ins) below, we've kept this machine's UI
+simple, so there are no other I/O devices attached.  Our [PDP-11 Boot Monitor](/apps/pdp11/boot/monitor/) is preloaded
+at address 140000, and the [M9312 ROM](/devices/pdp11/rom/M9312/) is installed at address 165000. 
+
+For more full-featured PDP-11/70 machines that also include a Debugger, see:
+
+- [PDP-11/70 running CPU Exerciser](cpuexer/)
+- [PDP-11/70 ready to boot RSTS/E](rsts/)
+- [PDP-11/70 ready to boot RT-11](rt11/)
+- [PDP-11/70 ready to boot XXDP+ Diagnostics](xxdp/)
+
 {% include machine.html id="test1170" %}
-
-Other interesting things to know about this machine:
-
-* It includes an [M9312 ROM](/devices/pdp11/rom/M9312/) at address 165000.  The exact ROM is [23-616F1](/devices/pdp11/rom/M9312/23-616F1.txt).
 
 Toggle-Ins
 ----------
