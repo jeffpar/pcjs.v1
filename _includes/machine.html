@@ -1,9 +1,15 @@
 <div class="machine" id="{{ include.id }}">
-	{% assign machine_name = "PCjs: The Virtual IBM PC" %}
+	{% assign machine_name = "PCjs Machine" %}
 	{% for machine in page.machines %}
-	  {% if include.id == machine.id and machine.name%}
-		{% assign machine_name = machine.name %}
-	    {% break %}
+	  {% if include.id == machine.id %}
+	    {% if machine.name %}
+		  {% assign machine_name = machine.name %}
+	      {% break %}
+	    {% endif %}
+	    {% if machine.type %}
+	      {% capture machine_name %}{{ machine.type | upcase | replace:"X86","x86" }} Machine{% endcapture %}
+	      {% break %}
+	    {% endif %}
 	  {% endif %}
 	{% endfor %}
 	[{{ machine_name }}]
