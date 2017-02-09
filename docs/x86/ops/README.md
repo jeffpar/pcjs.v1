@@ -9,9 +9,9 @@ Placeholder for future x86 documentation.
 x86 Instructions
 ---
 
-[AAA](ops/AAA/)
-[AAD](ops/AAD/)
-[AAM](ops/AAM/)
+[AAA](AAA/)
+[AAD](AAD/)
+[AAM](AAM/)
 AAS
 ADC
 ADD
@@ -31,7 +31,7 @@ DEC
 DIV
 ESC
 HLT
-[ICEBP](ops/ICEBP/)
+[ICEBP](ICEBP/)
 IDIV
 IMUL
 IN
@@ -46,7 +46,7 @@ LAHF
 LDS
 LEA
 LES
-[LOADALL](ops/LOADALL/)
+[LOADALL](LOADALL/)
 LOCK
 LODS
 LOOP
@@ -74,7 +74,7 @@ ROL
 ROR
 SAHF
 SAL
-[SALC](ops/SALC/)
+[SALC](SALC/)
 SAR
 SBB
 SCAS
@@ -86,7 +86,7 @@ STI
 STOS
 SUB
 TEST
-[UMOV](ops/UMOV/)
+[UMOV](UMOV/)
 WAIT
 XCHG
 XLAT
