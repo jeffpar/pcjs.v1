@@ -1019,7 +1019,7 @@ MarkOut.prototype.convertMDImageLinks = function(sBlock, sIndent)
      * (in case this Markdown file is part of a Jekyll installation) and convert them to Markdown-style links.
      */
     var aMatch;
-    var reIncludes = /\{%\s*include screenshot\.html\s+(.*?)\s*%}/g;
+    var reIncludes = /\{%\s*include\s+screenshot\.html\s+(.*?)\s*%}/g;
 
     while ((aMatch = reIncludes.exec(sBlock))) {
         var option, aOptions = {};

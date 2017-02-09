@@ -10,13 +10,13 @@ DEC Disk Images
 The DEC disk images we have archived are organized by type: 
 
 * [RK03](rk03/)
-	* [RT-11 v4.0](rt11v4/) [[Source](http://skn.noip.me/pdp11/): RK1.DSK]
-	* [Unix v5](unixv5/) [[Source](http://skn.noip.me/pdp11/): RK0.DSK]
-	* [XXDP+ Diagnostics](xxdp/) [[Source](http://skn.noip.me/pdp11/): RK2.DSK]
+	* [RT-11 v4.0](/disks/dec/rk03/rt11v4/) [[Source](http://skn.noip.me/pdp11/): RK1.DSK]
+	* [Unix v5](/disks/dec/rk03/unixv5/) [[Source](http://skn.noip.me/pdp11/): RK0.DSK]
+	* [XXDP+ Diagnostics](/disks/dec/rk03/xxdp/) [[Source](http://skn.noip.me/pdp11/): RK2.DSK]
 * [RL01K](rl01k/)
-	* [RSTS/E v7.0](rstsv70/) [[Source](http://skn.noip.me/pdp11/): RL2.DSK]
+	* [RSTS/E v7.0](/disks/dec/rl01k/rstsv70/) [[Source](http://skn.noip.me/pdp11/): RL2.DSK]
 * [RL02K](rl02k/)
-	* [XXDP+ Diagnostics](xxdp/) [[Source](http://skn.noip.me/pdp11/): RL3.DSK]
+	* [XXDP+ Diagnostics](/disks/dec/rl02k/xxdp/) [[Source](http://skn.noip.me/pdp11/): RL3.DSK]
 * [RX01](rx01/)
 	* [RT-11 v3.0](/disks/dec/rx01/rt11v3/) [[Source](http://www.headcrashers.org/comp/rx01/)]
 
