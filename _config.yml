@@ -20,7 +20,7 @@ encoding: UTF-8
 
 # Build settings
 
-exclude: ["index.html", "**/index.html", "**/archive", "**/ecp", "**/c64", "logs", "node_modules", "projects", "**/private", "**/restricted", "src", "**/src", "tmp", "**/tmp", "**/unlisted", "videos", "web", ".git", ".idea"]
+exclude: ["index.html", "**/index.html", "bin", "logs", "node_modules", "projects", "src", "tmp", "videos", "web", "**/archive", "**/ecp", "**/c64", "**/private", "**/restricted", "**/src", "**/tmp", "**/unlisted", ".git", ".idea"]
 markdown: kramdown
 kramdown:
   input: GFM
