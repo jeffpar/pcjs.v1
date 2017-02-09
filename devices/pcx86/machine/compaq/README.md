@@ -2,8 +2,6 @@
 layout: page
 title: COMPAQ Machines
 permalink: /devices/pcx86/machine/compaq/
-redirect_from:
-  - /devices/pc/machine/compaq/
 ---
 
 COMPAQ Machines

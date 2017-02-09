@@ -2,8 +2,6 @@
 layout: page
 title: "Microsoft OS/2 Programmer's Toolkit: Welcome"
 permalink: /pubs/pc/software/os2/microsoft/ptk10/
-redirect_from:
-  - /pubs/pc/programming/os2/microsoft/ptk/1.0/
 ---
 
 [Microsoft OS/2 Programmer's Toolkit](../../)

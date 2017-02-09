@@ -2,8 +2,6 @@
 layout: page
 title: IBM PC AT (Model 5170) with VGA Display
 permalink: /devices/pcx86/machine/5170/vga/
-redirect_from:
-  - /devices/pc/machine/5170/vga/
 ---
 
 IBM PC AT with Video Graphics Array (VGA) Display

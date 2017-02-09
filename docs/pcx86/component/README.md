@@ -2,8 +2,6 @@
 layout: page
 title: PCx86 &lt;component&gt; Element
 permalink: /docs/pcx86/component/
-redirect_from:
-  - /docs/pcjs/component/
 ---
 
 PCx86 Component

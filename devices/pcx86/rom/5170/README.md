@@ -2,11 +2,6 @@
 layout: page
 title: IBM PC AT (Model 5170) ROMs
 permalink: /devices/pcx86/rom/5170/
-redirect_from:
-  - /devices/pc/5170/
-  - /devices/pc/bios/5170/
-  - /devices/pc/rom/5170/bios/
-  - /devices/pc/rom/5170/
 ---
 
 IBM PC AT (Model 5170) ROM Revisions

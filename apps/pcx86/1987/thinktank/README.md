@@ -2,8 +2,6 @@
 layout: page
 title: "ThinkTank (1987)"
 permalink: /apps/pcx86/1987/thinktank/
-redirect_from:
-  - /apps/pc/1987/thinktank/
 machines:
   - type: pcx86
     id: ibm5160

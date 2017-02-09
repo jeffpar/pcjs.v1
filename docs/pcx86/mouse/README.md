@@ -2,8 +2,6 @@
 layout: page
 title: PCx86 &lt;mouse&gt; Element
 permalink: /docs/pcx86/mouse/
-redirect_from:
-  - /docs/pcjs/mouse/
 ---
 
 PCx86 Mouse Component

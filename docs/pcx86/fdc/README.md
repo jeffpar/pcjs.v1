@@ -2,8 +2,6 @@
 layout: page
 title: PCx86 &lt;fdc&gt; Element
 permalink: /docs/pcx86/fdc/
-redirect_from:
-  - /docs/pcjs/fdc/
 ---
 
 PCx86 Floppy Drive Controller (FDC) Component

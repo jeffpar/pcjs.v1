@@ -2,8 +2,6 @@
 layout: page
 title: IBM PC Emulation Module (PCx86)
 permalink: /modules/pcx86/
-redirect_from:
-  - /modules/pcjs/
 ---
 
 IBM PC Emulation Module (PCx86)

@@ -2,8 +2,6 @@
 layout: page
 title: PCx86 &lt;keyboard&gt; Element
 permalink: /docs/pcx86/keyboard/
-redirect_from:
-  - /docs/pcjs/keyboard/
 ---
 
 PCx86 Keyboard Component

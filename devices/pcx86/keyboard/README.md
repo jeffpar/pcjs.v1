@@ -2,8 +2,6 @@
 layout: page
 title: IBM PC Keyboard Devices
 permalink: /devices/pcx86/keyboard/
-redirect_from:
-  - /devices/pc/keyboard/
 ---
 
 IBM PC Keyboard Devices

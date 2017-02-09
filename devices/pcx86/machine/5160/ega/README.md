@@ -2,8 +2,6 @@
 layout: page
 title: IBM PC XT (Model 5160) with Enhanced Color Display
 permalink: /devices/pcx86/machine/5160/ega/
-redirect_from:
-  - /devices/pc/machine/5160/ega/
 ---
 
 IBM PC XT with Enhanced Color Graphics (EGA) Display

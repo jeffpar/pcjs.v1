@@ -2,9 +2,6 @@
 layout: page
 title: Zenith Data Systems Z-150 ROM BIOS
 permalink: /devices/pcx86/rom/zenith/z150/
-redirect_from:
-  - /devices/pc/rom/zenith/z150/
-  - /devices/pcx86/rom/zenith/
 ---
 
 Zenith Data Systems Z-150 ROM BIOS

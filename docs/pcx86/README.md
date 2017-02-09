@@ -2,8 +2,6 @@
 layout: page
 title: PCx86 Documentation
 permalink: /docs/pcx86/
-redirect_from:
-  - /docs/pcjs/
 machines:
   - type: pcx86
     id: ibm5150

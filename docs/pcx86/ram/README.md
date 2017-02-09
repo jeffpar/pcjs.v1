@@ -2,8 +2,6 @@
 layout: page
 title: PCx86 &lt;ram&gt; Element
 permalink: /docs/pcx86/ram/
-redirect_from:
-  - /docs/pcjs/ram/
 ---
 
 PCx86 Random-Access Memory (RAM) Component

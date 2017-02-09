@@ -2,8 +2,6 @@
 layout: page
 title: PCx86 &lt;rom&gt; Element
 permalink: /docs/pcx86/rom/
-redirect_from:
-  - /docs/pcjs/rom/
 ---
 
 PCx86 Read-Only Memory (ROM) Component
