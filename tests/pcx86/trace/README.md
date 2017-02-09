@@ -2,8 +2,6 @@
 layout: page
 title: PC Trace Utility
 permalink: /tests/pcx86/trace/
-redirect_from:
-  - /tests/pc/trace/
 ---
 
 WARNING: This utility is obsolete.  It has been superseded by [test386](/tests/pcx86/80386/),

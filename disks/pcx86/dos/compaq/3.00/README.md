@@ -2,8 +2,6 @@
 layout: page
 title: COMPAQ MS-DOS 3.00
 permalink: /disks/pcx86/dos/compaq/3.00/
-redirect_from:
-  - /disks/pc/dos/compaq/3.00/
 ---
 
 COMPAQ MS-DOS 3.00

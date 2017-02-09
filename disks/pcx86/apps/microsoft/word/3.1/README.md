@@ -2,8 +2,6 @@
 layout: page
 title: Microsoft Word 3.1 (for DOS)
 permalink: /disks/pcx86/apps/microsoft/word/3.1/
-redirect_from:
-  - /disks/pc/apps/microsoft/word/3.1/
 ---
 
 Microsoft Word 3.1

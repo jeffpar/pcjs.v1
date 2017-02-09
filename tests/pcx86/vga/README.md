@@ -2,8 +2,6 @@
 layout: page
 title: VGA "Black Book" Tests
 permalink: /tests/pcx86/vga/
-redirect_from:
-  - /tests/pc/vga/
 machines:
   - type: pcx86
     id: deskpro386

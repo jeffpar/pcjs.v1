@@ -2,8 +2,6 @@
 layout: page
 title: Borland Turbo Pascal
 permalink: /disks/pcx86/tools/borland/pascal/
-redirect_from:
-  - /disks/pc/tools/borland/pascal/
 ---
 
 Borland Turbo Pascal

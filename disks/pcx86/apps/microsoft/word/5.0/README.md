@@ -2,8 +2,6 @@
 layout: page
 title: Microsoft Word 5.0 (for DOS)
 permalink: /disks/pcx86/apps/microsoft/word/5.0/
-redirect_from:
-  - /disks/pc/apps/microsoft/word/5.0/
 ---
 
 Microsoft Word 5.0

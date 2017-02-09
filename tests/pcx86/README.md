@@ -2,8 +2,6 @@
 layout: page
 title: PC Test Resources
 permalink: /tests/pcx86/
-redirect_from:
-  - /tests/pc/
 ---
 
 PCx86 Test Resources

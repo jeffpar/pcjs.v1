@@ -2,8 +2,6 @@
 layout: page
 title: IBM Diagnostics and Tools 
 permalink: /disks/pcx86/tools/ibm/
-redirect_from:
-  - /disks/pc/tools/ibm/
 ---
 
 IBM Diagnostics and Tools

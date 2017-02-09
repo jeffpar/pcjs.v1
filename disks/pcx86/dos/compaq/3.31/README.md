@@ -2,8 +2,6 @@
 layout: page
 title: COMPAQ MS-DOS 3.31
 permalink: /disks/pcx86/dos/compaq/3.31/
-redirect_from:
-  - /disks/pc/dos/compaq/3.31/
 ---
 
 COMPAQ MS-DOS 3.31

@@ -2,8 +2,6 @@
 layout: page
 title: OS/2 CP-DOS Boot Disk (v7.68)
 permalink: /disks/pcx86/os2/misc/cpdos/86295/
-redirect_from:
-  - /disks/pc/os2/misc/cpdos/86295/
 machines:
   - id: ibm5170
     type: pcx86

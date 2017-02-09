@@ -2,8 +2,6 @@
 layout: page
 title: PC Tools
 permalink: /disks/pcx86/tools/
-redirect_from:
-  - /disks/pc/tools/
 ---
 
 PC Tools

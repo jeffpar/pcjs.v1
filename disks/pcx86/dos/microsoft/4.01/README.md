@@ -2,8 +2,6 @@
 layout: page
 title: Microsoft MS-DOS 4.01
 permalink: /disks/pcx86/dos/microsoft/4.01/
-redirect_from:
-  - /disks/pc/dos/microsoft/4.01/
 machines:
   - type: pcx86
     id: ibm5170-msdos401

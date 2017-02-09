@@ -2,8 +2,6 @@
 layout: page
 title: OS/2 SIZZLE Boot Disk (v7.68.18)
 permalink: /disks/pcx86/os2/misc/cpdos/87007/
-redirect_from:
-  - /disks/pc/os2/misc/cpdos/87007/
 machines:
   - id: ibm5170
     type: pcx86

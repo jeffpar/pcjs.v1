@@ -2,8 +2,6 @@
 layout: page
 title: OS/2 FOOTBALL Disks
 permalink: /disks/pcx86/os2/misc/football/
-redirect_from:
-  - /disks/pc/os2/misc/football/
 ---
 
 OS/2 FOOTBALL Disks

@@ -2,8 +2,6 @@
 layout: page
 title: Borland Turbo Pascal 3.01A
 permalink: /disks/pcx86/tools/borland/pascal/3.01a/
-redirect_from:
-  - /disks/pc/tools/borland/pascal/3.01a/
 ---
 
 Borland Turbo Pascal 3.01A

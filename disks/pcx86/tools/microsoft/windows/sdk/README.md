@@ -2,8 +2,6 @@
 layout: page
 title: Microsoft Windows SDKs
 permalink: /disks/pcx86/tools/microsoft/windows/sdk/
-redirect_from:
-  - /disks/pc/tools/microsoft/windows/sdk/
 ---
 
 Microsoft Windows SDKs

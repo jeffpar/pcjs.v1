@@ -2,8 +2,6 @@
 layout: page
 title: Microsoft C Compilers
 permalink: /disks/pcx86/tools/microsoft/c/
-redirect_from:
-  - /disks/pc/tools/microsoft/c/
 ---
 
 Microsoft C Compilers

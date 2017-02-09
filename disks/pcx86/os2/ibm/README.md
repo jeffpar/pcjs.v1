@@ -2,8 +2,6 @@
 layout: page
 title: IBM OS/2
 permalink: /disks/pcx86/os2/ibm/
-redirect_from:
-  - /disks/pc/os2/ibm/
 ---
 
 IBM OS/2

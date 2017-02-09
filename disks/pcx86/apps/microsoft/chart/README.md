@@ -2,8 +2,6 @@
 layout: page
 title: Microsoft Chart
 permalink: /disks/pcx86/apps/microsoft/chart/
-redirect_from:
-  - /disks/pc/apps/microsoft/chart/
 ---
 
 Microsoft Chart

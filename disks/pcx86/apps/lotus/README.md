@@ -2,8 +2,6 @@
 layout: page
 title: Lotus Applications
 permalink: /disks/pcx86/apps/lotus/
-redirect_from:
-  - /disks/pc/apps/lotus/
 ---
 
 Lotus Applications

@@ -2,8 +2,6 @@
 layout: page
 title: MicroPro Applications
 permalink: /disks/pcx86/apps/micropro/
-redirect_from:
-  - /disks/pc/apps/micropro/
 ---
 
 MicroPro Applications

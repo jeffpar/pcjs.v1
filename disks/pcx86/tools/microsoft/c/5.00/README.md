@@ -2,8 +2,6 @@
 layout: page
 title: Microsoft C Compiler 5.0
 permalink: /disks/pcx86/tools/microsoft/c/5.00/
-redirect_from:
-  - /disks/pc/tools/microsoft/c/5.00/
 ---
 
 Microsoft C Compiler 5.0
