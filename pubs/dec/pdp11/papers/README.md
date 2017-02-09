@@ -1,11 +1,13 @@
 ---
 layout: page
-title: Assorted PDP-11 Papers
+title: Assorted PDP-11 Research Papers
 permalink: /pubs/dec/pdp11/papers/
 ---
 
-Assorted PDP-11 Papers
+Assorted PDP-11 Research Papers
 ---
+
+The following is an assortment of research papers by [Gordon Bell](research.microsoft.com/~gbell/) and others:
 
 - A New Architecture for Mini-Computers: The DEC PDP-11 [[Original PDF](http://research.microsoft.com/en-us/um/people/gbell/CGB%20Files/New%20Architecture%20PDP11%20SJCC%201970%20c.pdf)]
 - PMS (Processor-Memory-Switch) and ISP (Instruction Set Processor) Descriptive Systems for Computer Structure [[Original PDF](http://research.microsoft.com/en-us/um/people/gbell/CGB%20Files/PMS%20and%20ISP%20Descriptive%20Systems%201970%20c.pdf)]

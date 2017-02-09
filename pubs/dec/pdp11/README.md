@@ -71,4 +71,4 @@ PDP-11 Software Publications
 PDP-11 Research Papers
 ---
 
-[Assorted PDP-11 Papers](papers/)
+[Assorted PDP-11 Research Papers](papers/)
