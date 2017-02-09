@@ -2,8 +2,6 @@
 layout: page
 title: IBM PC Application Archive
 permalink: /apps/pcx86/
-redirect_from:
-  - /apps/pc/
 ---
 
 IBM PC Application Archive

@@ -5,7 +5,6 @@ permalink: /docs/about/pcx86/
 redirect_from:
   - /pc/
   - /pcjs/
-  - /docs/about/pcjs/
 ---
 
 About PCx86

@@ -2,8 +2,6 @@
 layout: page
 title: "IBM PC (Model 5150) running Zork I with Debugger"
 permalink: /disks/pcx86/games/infocom/zork1/debugger/
-redirect_from:
-  - /disks/pc/games/infocom/zork1/debugger/
 machines:
   - type: pcx86
     debugger: true

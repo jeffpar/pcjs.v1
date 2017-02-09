@@ -2,8 +2,6 @@
 layout: page
 title: XENIX Operating Systems from IBM
 permalink: /disks/pcx86/unix/ibm/xenix/
-redirect_from:
-  - /disks/pc/unix/ibm/xenix/
 ---
 
 IBM PC XENIX

@@ -2,8 +2,6 @@
 layout: page
 title: COMPAQ Video Graphics Controller (VGA)
 permalink: /devices/pcx86/video/compaq/vga/
-redirect_from:
-  - /devices/pc/video/compaq/vga/
 ---
 
 COMPAQ Video Graphics Controller (VGA)

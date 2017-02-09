@@ -2,8 +2,6 @@
 layout: page
 title: Columbia Data Products Machines
 permalink: /devices/pcx86/machine/cdp/
-redirect_from:
-  - /devices/pc/machine/cdp/
 ---
 
 Columbia Data Products Machines

@@ -2,9 +2,6 @@
 layout: page
 title: Columbia Data Products MPC 1600 ROM BIOS
 permalink: /devices/pcx86/rom/cdp/mpc1600/
-redirect_from:
-  - /devices/pc/rom/cdp/mpc1600/
-  - /devices/pcx86/rom/cdp/
 ---
 
 Columbia Data Products MPC 1600 ROM BIOS

@@ -2,8 +2,6 @@
 layout: page
 title: PCx86 &lt;panel&gt; Element
 permalink: /docs/pcx86/panel/
-redirect_from:
-  - /docs/pcjs/panel/
 ---
 
 PCx86 Control Panel Component

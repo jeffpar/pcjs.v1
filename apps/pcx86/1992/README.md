@@ -2,8 +2,6 @@
 layout: page
 title: IBM PC Applications (1992)
 permalink: /apps/pcx86/1992/
-redirect_from:
-  - /apps/pc/1992/
 ---
 
 IBM PC Applications (1992)

@@ -2,9 +2,6 @@
 layout: page
 title: COMPAQ Portable III ROMs
 permalink: /devices/pcx86/rom/compaq/portable3/
-redirect_from:
-  - /devices/pc/rom/compaq/portable3/
-  - /devices/pc/compaq/portable3/
 ---
 
 COMPAQ Portable III ROMs

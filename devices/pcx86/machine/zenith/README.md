@@ -2,8 +2,6 @@
 layout: page
 title: Zenith Data Systems Machines
 permalink: /devices/pcx86/machine/zenith/
-redirect_from:
-  - /devices/pc/machine/zenith/
 ---
 
 Zenith Data Systems Machines

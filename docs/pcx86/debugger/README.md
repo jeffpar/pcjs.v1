@@ -2,8 +2,6 @@
 layout: page
 title: PCx86 &lt;debugger&gt; Element
 permalink: /docs/pcx86/debugger/
-redirect_from:
-  - /docs/pcjs/debugger/
 ---
 
 PCx86 Debugger Component
