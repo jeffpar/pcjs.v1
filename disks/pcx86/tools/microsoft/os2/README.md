@@ -2,8 +2,6 @@
 layout: page
 title: Microsoft OS/2 Development Kits
 permalink: /disks/pcx86/tools/microsoft/os2/
-redirect_from:
-  - /disks/pc/tools/microsoft/os2/
 ---
 
 Microsoft OS/2 Development Kits

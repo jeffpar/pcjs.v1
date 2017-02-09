@@ -2,8 +2,6 @@
 layout: page
 title: Microsoft Macro Assembler 3.01
 permalink: /disks/pcx86/tools/microsoft/masm/3.01/
-redirect_from:
-  - /disks/pc/tools/microsoft/masm/3.01/
 ---
 
 Microsoft Macro Assembler 3.01

@@ -2,8 +2,6 @@
 layout: page
 title: "id Software: Wolfenstein 3D"
 permalink: /disks/pcx86/games/id/wolf3d/
-redirect_from:
-  - /disks/pc/games/id/wolf3d/
 ---
 
 Wolfenstein 3D

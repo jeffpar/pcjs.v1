@@ -2,8 +2,6 @@
 layout: page
 title: Unix Operating Systems
 permalink: /disks/pcx86/unix/
-redirect_from:
-  - /disks/pc/unix/
 ---
 
 Unix Operating Systems

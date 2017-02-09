@@ -2,9 +2,6 @@
 layout: page
 title: Microsoft Windows/386 2.0x
 permalink: /disks/pcx86/windows/2.0x/
-redirect_from:
-  - /disks/pc/windows/2.01/
-  - /disks/pc/windows/2.0x/
 machines:
   - type: pcx86
     id: deskpro386

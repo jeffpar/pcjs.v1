@@ -2,8 +2,6 @@
 layout: page
 title: Microsoft MS-DOS 1.25
 permalink: /disks/pcx86/dos/microsoft/1.25/
-redirect_from:
-  - /disks/pc/dos/microsoft/1.25/
 ---
 
 Microsoft MS-DOS 1.25

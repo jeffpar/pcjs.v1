@@ -2,8 +2,6 @@
 layout: page
 title: Enhanced DEBUG for PC DOS and MS-DOS
 permalink: /disks/pcx86/tools/misc/enhdebug/
-redirect_from:
-  - /disks/pc/tools/misc/enhdebug/
 ---
 
 Enhanced DEBUG for PC DOS and MS-DOS

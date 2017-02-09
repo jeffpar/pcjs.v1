@@ -2,8 +2,6 @@
 layout: page
 title: Microsoft MS-DOS 6.00 (1.44M Disks)
 permalink: /disks/pcx86/dos/microsoft/6.00/1440K/
-redirect_from:
-  - /disks/pc/dos/microsoft/6.00/1440K/
 ---
 
 Microsoft MS-DOS 6.00 (1.44M Disks)

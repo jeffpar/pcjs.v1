@@ -2,8 +2,6 @@
 layout: page
 title: Microsoft Windows 1.02
 permalink: /disks/pcx86/windows/1.02/
-redirect_from:
-  - /disks/pc/windows/1.02/
 ---
 
 Microsoft Windows 1.02

@@ -2,8 +2,6 @@
 layout: page
 title: MINIX 1.1
 permalink: /disks/pcx86/minix/1.1/
-redirect_from:
-  - /disks/pc/minix/1.1/
 ---
 
 MINIX 1.1

@@ -2,8 +2,6 @@
 layout: page
 title: Microsoft Windows 3.10
 permalink: /disks/pcx86/windows/3.10/
-redirect_from:
-  - /disks/pc/windows/3.10/
 machines:
   - type: pcx86
     id: ibm5170-win310

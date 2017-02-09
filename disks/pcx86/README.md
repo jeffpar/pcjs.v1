@@ -2,9 +2,6 @@
 layout: page
 title: IBM PC Disk Library
 permalink: /disks/pcx86/
-redirect_from:
-  - /disks/pc/
-  - /configs/pc/disks/
 ---
 
 IBM PC Disk Library

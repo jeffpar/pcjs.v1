@@ -2,8 +2,6 @@
 layout: page
 title: IBM PC-DOS
 permalink: /disks/pcx86/dos/ibm/
-redirect_from:
-  - /disks/pc/dos/ibm/
 ---
 
 IBM PC-DOS

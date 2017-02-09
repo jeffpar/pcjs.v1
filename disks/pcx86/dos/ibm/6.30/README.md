@@ -2,8 +2,6 @@
 layout: page
 title: PC-DOS 6.30
 permalink: /disks/pcx86/dos/ibm/6.30/
-redirect_from:
-  - /disks/pc/dos/ibm/6.30/
 machines:
   - type: pcx86
     id: ibm5170-pcdos630
