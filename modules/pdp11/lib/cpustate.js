@@ -505,8 +505,13 @@ class CPUStatePDP11 extends CPUPDP11 {
         /*
          * If updates to MMR1 have not been shut off (ie, MMR0.ABORT bits are clear), then we are allowed
          * to sync MMR1 with its real-time counterpart in opLast.
+         *
+         * UPDATE: Apparently, I was mistaken that this register would only be updated when the MMR0 ENABLED
+         * bit was set.
+         *
+         *      if ((this.regMMR0 & (PDP11.MMR0.ABORT | PDP11.MMR0.ENABLED)) == PDP11.MMR0.ENABLED)
          */
-        if ((this.regMMR0 & (PDP11.MMR0.ABORT | PDP11.MMR0.ENABLED)) == PDP11.MMR0.ENABLED) {
+        if (!(this.regMMR0 & PDP11.MMR0.ABORT)) {
             this.regMMR1 = (this.opLast >> 16) & 0xffff;
         }
         var result = this.regMMR1;
@@ -527,8 +532,13 @@ class CPUStatePDP11 extends CPUPDP11 {
         /*
          * If updates to MMR2 have not been shut off (ie, MMR0.ABORT bits are clear), then we are allowed
          * to sync MMR2 with its real-time counterpart in opLast.
+         *
+         * UPDATE: Apparently, I was mistaken that this register would only be updated when the MMR0 ENABLED
+         * bit was set.
+         *
+         *      if ((this.regMMR0 & (PDP11.MMR0.ABORT | PDP11.MMR0.ENABLED)) == PDP11.MMR0.ENABLED)
          */
-        if ((this.regMMR0 & (PDP11.MMR0.ABORT | PDP11.MMR0.ENABLED)) == PDP11.MMR0.ENABLED) {
+        if (!(this.regMMR0 & PDP11.MMR0.ABORT)) {
             this.regMMR2 = this.opLast & 0xffff;
         }
         return this.regMMR2;
