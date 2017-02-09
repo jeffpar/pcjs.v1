@@ -239,10 +239,11 @@ class PanelPDP11 extends Component {
      *
      * @this {PanelPDP11}
      * @param {number} value (new DISPLAY register)
+     * @return {number}
      */
     setDR(value)
     {
-        this.updateData(this.regDisplay = value);
+        return this.updateData(this.regDisplay = value);
     }
 
     /**
@@ -916,7 +917,12 @@ class PanelPDP11 extends Component {
     {
         if (value && !this.cpu.isRunning()) {
             if (this.fDeposit) this.advanceAddr();
-            var w = this.updateData(this.regSwitches);
+            /*
+             * This used to be updateData(), but that only updates regData, whereas setDR() updates both regData and regDisplay,
+             * and for these kinds of explicit Front Panel operations, I'm assuming the values should be synced.
+             */
+            var w = this.setDR(this.regSwitches);
+
             if (this.nAddrSel == PanelPDP11.ADDRSEL.CONS_PHY) {
                 /*
                  * TODO: Determine if this needs to take the UNIBUS map into consideration.
@@ -954,7 +960,11 @@ class PanelPDP11 extends Component {
                  */
                 w = this.cpu.getWordSafe(this.regAddr);
             }
-            this.updateData(w);
+            /*
+             * This used to be updateData(), but that only updates regData, whereas setDR() updates both regData and regDisplay,
+             * and for these kinds of explicit Front Panel operations, I'm assuming the values should be synced.
+             */
+            this.setDR(w);
         }
     }
 
