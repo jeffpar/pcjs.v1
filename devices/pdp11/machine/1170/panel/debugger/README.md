@@ -135,7 +135,7 @@ Step 18: Examine ADDRESS 300.
 {% include machine-command.html type='clickOnce' label='EXAM' machine='test1170' command='script' value='hold Panel EXAM 250' %}
 
 At this point, the DATA register should display `070707`.  You can also use the PCjs Debugger's `rm` command to verify
-the contents of DATA register (DR), or use a Dump command (`dw 300 l1`)) to dump memory location 300.
+the contents of the DATA register (DR), or use a Dump command (`dw 300 l1`)) to dump memory location 300.
 
 In fact, using the PDPjs Debugger, it's much easier to enter the above "toggle-in" with the following commands (the
 semicolons are optional; they just make it easier to paste an entire set of commands into the Debugger at once):
