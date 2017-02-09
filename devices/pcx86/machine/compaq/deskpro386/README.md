@@ -2,8 +2,6 @@
 layout: page
 title: COMPAQ DeskPro 386 Machines
 permalink: /devices/pcx86/machine/compaq/deskpro386/
-redirect_from:
-  - /devices/pc/machine/compaq/deskpro386/
 ---
 
 COMPAQ DeskPro 386 Machines

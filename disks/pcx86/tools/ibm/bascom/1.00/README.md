@@ -2,8 +2,6 @@
 layout: page
 title: IBM BASIC Compiler 1.00
 permalink: /disks/pcx86/tools/ibm/bascom/1.00/
-redirect_from:
-  - /disks/pc/tools/ibm/bascom/1.00/
 ---
 
 IBM BASIC Compiler 1.00

@@ -2,8 +2,6 @@
 layout: page
 title: PCx86 &lt;video&gt; Element
 permalink: /docs/pcx86/video/
-redirect_from:
-  - /docs/pcjs/video/
 ---
 
 PCx86 Video Component

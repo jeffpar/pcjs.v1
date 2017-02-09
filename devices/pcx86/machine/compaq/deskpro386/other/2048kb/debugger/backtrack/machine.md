@@ -2,8 +2,6 @@
 layout: page
 title: COMPAQ DeskPro 386 (2Mb) with COMPAQ VGA
 permalink: /devices/pcx86/machine/compaq/deskpro386/other/2048kb/debugger/backtrack/
-redirect_from:
-  - /devices/pc/machine/compaq/deskpro386/other/2048kb/debugger/backtrack/
 machines:
   - type: pcx86
     id: deskpro386

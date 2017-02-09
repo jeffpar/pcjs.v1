@@ -2,8 +2,6 @@
 layout: page
 title: "Microsoft OS/2 Programmer's Learning Guide"
 permalink: /pubs/pc/software/os2/microsoft/ptk10/plguide/
-redirect_from:
-  - /pubs/pc/programming/os2/microsoft/ptk/1.0/plguide/
 ---
 
 [Microsoft OS/2 Programmer's Learning Guide](../)

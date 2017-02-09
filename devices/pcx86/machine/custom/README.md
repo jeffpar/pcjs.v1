@@ -2,8 +2,6 @@
 layout: page
 title: Build Your Own PC
 permalink: /devices/pcx86/machine/custom/
-redirect_from:
-  - /devices/pc/machine/custom/
 machines:
   - type: pcx86
     name: Custom PC

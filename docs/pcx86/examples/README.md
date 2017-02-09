@@ -6,10 +6,6 @@ machines:
   - type: pcx86
     id: example3
     config: /docs/pcx86/examples/example3b.xml
-redirect_from:
-  - /docs/pcjs/examples/
-  - /docs/pcx86/demos/
-  - /docs/pcx86/demos/sample1.html/
 ---
 
 PCx86 Documentation Examples

@@ -2,8 +2,6 @@
 layout: page
 title: "Microsoft Windows 95 (First Retail Release) with Debugger"
 permalink: /disks/pcx86/windows/win95/4.00.950/debugger/
-redirect_from:
-  - /disks/pc/windows/win95/4.00.950/debugger/
 machines:
   - type: pcx86
     id: deskpro386

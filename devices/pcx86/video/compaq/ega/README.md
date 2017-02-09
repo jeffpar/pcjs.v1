@@ -2,8 +2,6 @@
 layout: page
 title: COMPAQ Enhanced Color Graphics Board (EGA)
 permalink: /devices/pcx86/video/compaq/ega/
-redirect_from:
-  - /devices/pc/video/compaq/ega/
 ---
 
 COMPAQ Enhanced Color Graphics Board (EGA)

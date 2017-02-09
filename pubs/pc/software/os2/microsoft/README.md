@@ -2,8 +2,6 @@
 layout: page
 title: Microsoft OS/2 Software Guides
 permalink: /pubs/pc/software/os2/microsoft/
-redirect_from:
-  - /pubs/pc/programming/os2/
 ---
 
 Microsoft OS/2 Software Development Guides

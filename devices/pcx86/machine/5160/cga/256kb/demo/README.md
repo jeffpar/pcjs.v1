@@ -3,7 +3,6 @@ layout: page
 title: IBM PC XT (Model 5160, 256Kb, 10Mb Drive) with Color Display
 permalink: /devices/pcx86/machine/5160/cga/256kb/demo/
 redirect_from:
-  - /devices/pc/machine/5160/cga/256kb/demo/
   - /configs/pc/machines/5160/cga/256kb/demo/
 machines:
   - type: pcx86

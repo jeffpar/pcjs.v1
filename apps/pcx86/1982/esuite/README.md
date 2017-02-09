@@ -2,8 +2,6 @@
 layout: page
 title: "Executive Suite (1982)"
 permalink: /apps/pcx86/1982/esuite/
-redirect_from:
-  - /apps/pc/1982/esuite/
 machines:
   - type: pcx86
     id: ibm5160

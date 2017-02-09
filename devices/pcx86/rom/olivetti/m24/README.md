@@ -2,9 +2,6 @@
 layout: page
 title: Olivetti M24 ROM BIOS
 permalink: /devices/pcx86/rom/olivetti/m24/
-redirect_from:
-  - /devices/pc/rom/olivetti/m24/
-  - /devices/pcx86/rom/olivetti/
 ---
 
 Olivetti M24 ROM BIOS

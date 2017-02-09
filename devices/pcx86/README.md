@@ -3,7 +3,6 @@ layout: page
 title: IBM PC Device Configurations
 permalink: /devices/pcx86/
 redirect_from:
-  - /devices/pc/
   - /configs/pc/
 ---
 
