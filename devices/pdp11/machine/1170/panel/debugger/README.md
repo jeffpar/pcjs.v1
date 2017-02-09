@@ -106,7 +106,7 @@ Step 11: Load ADDRESS register with 17772300.
 
 {% include machine-command.html type='clickOnce' label='LOAD 17772300' machine='test1170' command='script' value='set Panel SR 17772300; sleep 500; hold Panel LOAD 250' %}
 
-Step 12: Deposit 077406 at ADDRESS 17772300.
+Step 12: Deposit 077406 at ADDRESS 17772300 ("Set Kernel I PDR 0 to R/W 4K page").
 
 {% include machine-command.html type='clickOnce' label='DEPOSIT 077406' machine='test1170' command='script' value='set Panel SR 077406; sleep 500; hold Panel DEP 250' %}
 
@@ -114,7 +114,7 @@ Step 13: Load ADDRESS register with 17772340.
 
 {% include machine-command.html type='clickOnce' label='LOAD 17772340' machine='test1170' command='script' value='set Panel SR 17772340; sleep 500; hold Panel LOAD 250' %}
 
-Step 14: Deposit 000001 at ADDRESS 17772340.
+Step 14: Deposit 000001 at ADDRESS 17772340 ("Set Kernel I PAR 0 to (Base address 100").
 
 {% include machine-command.html type='clickOnce' label='DEPOSIT 000001' machine='test1170' command='script' value='set Panel SR 000001; sleep 500; hold Panel DEP 250' %}
 
@@ -135,7 +135,7 @@ Step 18: Examine ADDRESS 300.
 {% include machine-command.html type='clickOnce' label='EXAM' machine='test1170' command='script' value='hold Panel EXAM 250' %}
 
 At this point, the DATA register should display `070707`.  You can also use the PCjs Debugger's `rm` command to verify
-the contents of DATA register (DR).
+the contents of DATA register (DR), or use a Dump command (`dw 300 l1`)) to dump memory location 300.
 
 In fact, using the PDPjs Debugger, it's much easier to enter the above "toggle-in" with the following commands (the
 semicolons are optional; they just make it easier to paste an entire set of commands into the Debugger at once):
