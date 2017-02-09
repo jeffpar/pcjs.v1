@@ -1,7 +1,7 @@
 ---
 layout: page
 title: "Jeff's Challenger 1P BASIC Programs: LIFE.BAS"
-permalink: /apps/c1p/BASIC/jeffpar/hangwoman/
+permalink: /apps/c1p/BASIC/jeffpar/life/
 ---
 
 {% highlight basic %}
