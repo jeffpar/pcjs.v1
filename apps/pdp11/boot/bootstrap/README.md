@@ -8,7 +8,7 @@ DEC PDP-11 Bootstrap Loader
 ---------------------------
 
 The **Bootstrap Loader** is a small program that loads the [Absolute Loader](/apps/pdp11/tapes/absloader/),
-which is then used to load other PDP-11 tapes in the "Absolute Format," such as [BASIC (Single User)](/apps/pdp11/tabes/basic/). 
+which is then used to load other PDP-11 tapes in the "Absolute Format," such as [BASIC (Single User)](/apps/pdp11/tapes/basic/). 
  
 Here's what the **Bootstrap Loader** looks like:
 
@@ -28,7 +28,7 @@ Here's what the **Bootstrap Loader** looks like:
 	 037774     000765
 	 037776     177550
 
-Using any [PDPjs](/modules/pdpjs/) machine with the built-in Debugger, such as this
+Using any [PDPjs](/modules/pdp11/) machine with the built-in Debugger, such as this
 [PDP-11/20 Boot Monitor](/devices/pdp11/machine/1120/monitor/debugger/), the **Bootstrap Loader**
 is easily entered with a single Debugger EDIT ("e") command:
 
