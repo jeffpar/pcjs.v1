@@ -2,6 +2,8 @@
 layout: page
 title: OS/2 Prototype Disks
 permalink: /disks/pcx86/os2/misc/
+redirect_from:
+  - /disks/pc/os2/misc/
 ---
 
 OS/2 Prototype Disks
