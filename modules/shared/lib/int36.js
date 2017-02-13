@@ -30,16 +30,32 @@
 
 var DEBUG = true;
 
+/**
+ * @class Int36
+ * @property {number} value
+ * @property {number} extended
+ * @property {number} remainder
+ * @property {number} error
+ *
+ * The 'value' property stores the 36-bit value as a two's complement integer.
+ *
+ * The 'extended' property stores an additional 36 bits of data from a multiplication;
+ * it must also be set prior to a division.
+ *
+ * The 'remainder' property stores the remainder from a division.
+ *
+ * The 'error' property records any error(s) from the last operation.
+ */
+
 class Int36 {
     /**
-     * Int36(hi, lo)
+     * Int36(obj, extended)
      *
-     * The constructor creates an Int36 from either:
+     * The constructor, which simply calls set(), creates an Int36 from either:
      *
      *      1) another Int36
-     *      2) a single (signed) 36-bit value
-     *      3) a pair of 18-bit values (the signs are irrelevant)
-     *      4) nothing (initial value will be zero)
+     *      2) a single (signed) 36-bit value, with an optional 36-bit extended value
+     *      3) nothing (initial value will be zero)
      *
      * We guarantee that an Int36 value will be (and will always remain) a signed value within this range:
      *
@@ -72,69 +88,35 @@ class Int36 {
      * but constructor calls are infrequent (if they're not, you're doing something wrong), whereas Int36-only
      * operations should be as fast and unchecked as possible.
      *
-     * @param {Int36|number} [hi] (if omitted, the default is zero)
-     * @param {number} [lo] (if present, both lo and hi must be 18-bit numbers)
+     * @param {Int36|number} [obj] (if omitted, the default is zero)
+     * @param {number} [extended]
      */
-    constructor(hi = 0, lo)
+    constructor(obj, extended)
     {
-        if (hi instanceof Int36) {
-            this.value = hi.value;
+        this.set(obj, extended);
+        this.bitsDiv = [0, 0];
+        this.bitsRem = [0, 0];
+    }
+
+    /**
+     * set(obj, extended)
+     *
+     * @param {Int36|number} [obj] (if omitted, the default is zero)
+     * @param {number} [extended]
+     */
+    set(obj = 0, extended)
+    {
+        if (obj instanceof Int36) {
+            this.value = obj.value;
+            this.extended = obj.extended;
+            this.remainder = obj.remainder;
         }
-        else if (isNaN(lo)) {
-            /*
-             * Checking isNaN(lo) includes checking for undefined.  And since there's no guarantee
-             * that hi is within the 36-bit range, we call validate() to make sure.
-             */
-            this.value = Int36.validate(hi);
-        } else {
-            /*
-             * We're masking both inputs to 18 bits, making them positive, so the result will
-             * be positive and no more than 36 bits; however, the value could be greater than MAXVAL,
-             * meaning the sign bit (bit 35) is set, in which case we must perform a two's complement
-             * conversion, by subtracting 2^36.
-             */
-            this.value = (hi & Int36.MASKLO) * Int36.BIT18 + (lo & Int36.MASKLO);
-            if (this.value > Int36.MAXVAL) {
-                this.value -= Int36.BIT36;
-            }
+        else {
+            this.value = Int36.validate(obj || 0);
+            this.extended = Int36.validate(extended || 0);
+            this.remainder = 0;
         }
-        /*
-         * The 'extended' property stores an additional 36 bits of data after a multiplication, and any
-         * remainder after a division.  It's strictly an output-only property for those operations, and
-         * its value does not affect the result of ANY operation.
-         */
-        this.extended = 0;
         this.error = Int36.ERROR.NONE;
-    }
-
-    /**
-     * validate(num)
-     *
-     * @param {number} num
-     * @return {number}
-     */
-    static validate(num)
-    {
-        var result = Math.trunc(num || 0) % Int36.BIT36;
-        if (result > Int36.MAXVAL) {
-            result -= Int36.BIT36;
-        } else if (result < Int36.MINVAL) {
-            result += Int36.BIT36;
-        }
-        if (DEBUG && num !== result) console.log("Int36.validate(" + num + " out of range, truncated to " + result + ")");
-        return result;
-    }
-
-    /**
-     * octal(value)
-     *
-     * @param {number} value
-     * @return {string}
-     */
-    static octal(value)
-    {
-        if (value < 0) value += Int36.BIT36;
-        return ("00000000000" + value.toString(8)).slice(-12);
     }
 
     /**
@@ -152,6 +134,9 @@ class Int36 {
             s = Int36.octal(value);
             if (extended) {
                 s = Int36.octal(extended) + ',' + s;
+            }
+            if (this.remainder) {
+                s += ':' + Int36.octal(this.remainder);
             }
             if (DEBUG && this.error) s += " error 0x" + this.error.toString(16);
             return s;
@@ -204,7 +189,8 @@ class Int36 {
      *
      * @param {Int36} i36
      */
-    add(i36) {
+    add(i36)
+    {
         this.value = this.truncate(this.value + i36.value);
     }
 
@@ -213,7 +199,8 @@ class Int36 {
      *
      * @param {number} num
      */
-    addNum(num) {
+    addNum(num)
+    {
         this.value = this.truncate(this.value + Int36.validate(num));
     }
 
@@ -222,7 +209,8 @@ class Int36 {
      *
      * @param {Int36} i36
      */
-    sub(i36) {
+    sub(i36)
+    {
         this.value = this.truncate(this.value - i36.value);
     }
 
@@ -231,7 +219,8 @@ class Int36 {
      *
      * @param {number} num
      */
-    subNum(num) {
+    subNum(num)
+    {
         this.value = this.truncate(this.value - Int36.validate(num));
     }
 
@@ -240,7 +229,8 @@ class Int36 {
      *
      * @param {Int36} i36
      */
-    mul(i36) {
+    mul(i36)
+    {
         this.mulExtended(i36.value);
     }
 
@@ -249,7 +239,8 @@ class Int36 {
      *
      * @param {number} num
      */
-    mulNum(num) {
+    mulNum(num)
+    {
         this.mulExtended(Int36.validate(num));
     }
 
@@ -263,7 +254,8 @@ class Int36 {
      *
      * @param {number} value
      */
-    mulExtended(value) {
+    mulExtended(value)
+    {
         var fNeg = false, extended;
         var n1 = this.value, n2 = value;
 
@@ -307,35 +299,201 @@ class Int36 {
     /**
      * div(i36)
      *
-     * TODO: Support division of dividends > 36 bits (ie, up to 72 bits) if an additional Int36
-     * parameter is provided.
-     *
-     * WARNING: JavaScript division by zero returns Infinity (or -Infinity).  For now, we simply record an error.
-     *
      * @param {Int36} i36
      */
-    div(i36) {
-        if (!i36.value) {
-            this.error |= Int36.ERROR.DIVZERO;
-        } else {
-            this.value = this.truncate(Math.trunc(this.value / i36.value));
-        }
+    div(i36)
+    {
+        this.divExtended(i36.value);
     }
 
     /**
      * divNum(num)
      *
-     * WARNING: JavaScript division by zero returns Infinity (or -Infinity).  For now, we simply record an error.
-     *
      * @param {number} num
      */
-    divNum(num) {
-        var divisor = Int36.validate(num);
+    divNum(num)
+    {
+        this.divExtended(Int36.validate(num));
+    }
+
+    /**
+     * divExtended(divisor)
+     *
+     * @param {number} divisor
+     */
+    divExtended(divisor)
+    {
+        var value = this.value;
+        var extended = this.extended;
+
+        var bNegLo = 0, bNegHi = 0;
+        /*
+         *      dividend    divisor       quotient    remainder
+         *      --------    -------       --------    ---------
+         *         +           +     ->       +           +
+         *         +           -     ->       -           +
+         *         -           +     ->       -           -
+         *         -           -     ->       +           -
+         */
+        if (divisor < 0) {
+            divisor = -divisor;
+            bNegLo = 1 - bNegLo;
+        }
+
+        if (extended < 0) {
+            value = -value;
+            extended = -extended - (value? 1 : 0);
+            bNegHi = 1;
+            bNegLo = 1 - bNegLo;
+        }
+
         if (!divisor) {
             this.error |= Int36.ERROR.DIVZERO;
-        } else {
-            this.value = this.truncate(Math.trunc(this.value / divisor));
         }
+        else if (divisor <= extended) {
+            this.error |= Int36.ERROR.OVERFLOW;
+        }
+        else {
+            var result = 0, bit = 1;
+            var bitsDiv = Int36.setBits(this.bitsDiv, divisor, 0);
+            var bitsRem = Int36.setBits(this.bitsRem, value, extended);
+
+            while (Int36.cmpBits(bitsRem, bitsDiv) > 0) {
+                Int36.addBits(bitsDiv, bitsDiv);
+                bit += bit;
+            }
+
+            do {
+                if (Int36.cmpBits(bitsRem, bitsDiv) >= 0) {
+                    Int36.subBits(bitsRem, bitsDiv);
+                    result += bit;
+                }
+                Int36.shrBits(bitsDiv);
+                bit /= 2;
+            } while (bit >= 1);
+
+            if (DEBUG) console.assert(result < Int36.BIT36 && !bitsRem[1], "divExtended() assertion failure");
+
+            this.value = result;
+            this.extended = 0;
+            this.remainder = bitsRem[0];
+
+            if (bNegLo) this.value = -this.value;
+            if (bNegHi) this.remainder = -this.remainder;
+        }
+    }
+
+    /**
+     * addBits(bitsDst, bitsSrc)
+     *
+     * Adds bitsSrc to bitsDst.
+     *
+     * @param {Array.<number>} bitsDst
+     * @param {Array.<number>} bitsSrc
+     */
+    static addBits(bitsDst, bitsSrc)
+    {
+        bitsDst[0] += bitsSrc[0];
+        bitsDst[1] += bitsSrc[1];
+        if (bitsDst[0] >= Int36.BIT36) {
+            bitsDst[0] %= Int36.BIT36;
+            bitsDst[1]++;
+        }
+    }
+
+    /**
+     * cmpBits(bitsDst, bitsSrc)
+     *
+     * Compares bitsDst to bitsSrc, by computing bitsDst - bitsSrc.
+     *
+     * @param {Array.<number>} bitsDst
+     * @param {Array.<number>} bitsSrc
+     * @return {number} > 0 if bitsDst > bitsSrc, == 0 if bitsDst == bitsSrc, < 0 if bitsDst < bitsSrc
+     */
+    static cmpBits(bitsDst, bitsSrc)
+    {
+        var result = bitsDst[1] - bitsSrc[1];
+        if (!result) result = bitsDst[0] - bitsSrc[0];
+        return result;
+    }
+
+    /**
+     * setBits(bits, lo, hi)
+     *
+     * @param {Array.<number>} bits
+     * @param {number} lo
+     * @param {number} hi
+     * @return {Array.<number>}
+     */
+    static setBits(bits, lo, hi)
+    {
+        bits[0] = lo;
+        bits[1] = hi;
+        return bits;
+    }
+
+    /**
+     * shrBits(bitsDst)
+     *
+     * Shifts bitsDst right one bit.
+     *
+     * @param {Array.<number>} bitsDst
+     */
+    static shrBits(bitsDst)
+    {
+        if (bitsDst[1] % 2) {
+            bitsDst[0] += Int36.BIT36;
+        }
+        bitsDst[0] = Math.trunc(bitsDst[0] / 2);
+        bitsDst[1] = Math.trunc(bitsDst[1] / 2);
+    }
+
+    /**
+     * subBits(bitsDst, bitsSrc)
+     *
+     * Subtracts bitsSrc from bitsDst.
+     *
+     * @param {Array.<number>} bitsDst
+     * @param {Array.<number>} bitsSrc
+     */
+    static subBits(bitsDst, bitsSrc)
+    {
+        bitsDst[0] -= bitsSrc[0];
+        bitsDst[1] -= bitsSrc[1];
+        if (bitsDst[0] < 0) {
+            bitsDst[0] += Int36.BIT36;
+            bitsDst[1]--;
+        }
+    }
+
+    /**
+     * octal(value)
+     *
+     * @param {number} value
+     * @return {string}
+     */
+    static octal(value)
+    {
+        if (value < 0) value += Int36.BIT36;
+        return ("00000000000" + value.toString(8)).slice(-12);
+    }
+
+    /**
+     * validate(num)
+     *
+     * @param {number} num
+     * @return {number}
+     */
+    static validate(num)
+    {
+        var value = Math.trunc(num) % Int36.BIT36;
+        if (value > Int36.MAXVAL) {
+            value -= Int36.BIT36;
+        } else if (value < Int36.MINVAL) {
+            value += Int36.BIT36;
+        }
+        if (DEBUG && num !== value) console.log("Int36.validate(" + num + " out of range, truncated to " + value + ")");
+        return value;
     }
 }
 
@@ -345,8 +503,6 @@ Int36.ERROR = {
     UNDERFLOW:  0x2,
     DIVZERO:    0x4
 };
-
-Int36.MASKLO    = 0o777777;             //         262,143
 
 Int36.BIT18     = Math.pow(2, 18);      //         262,144
 Int36.BIT36     = Math.pow(2, 36);      //  68,719,476,736
