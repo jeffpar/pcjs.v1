@@ -162,7 +162,9 @@ class Int36 {
             if (extended) {
                 if (fUnsigned) extended += Int36.BIT36;
                 /*
-                 * TODO: Come up with a solution that won't overflow JavaScript's more limited precision.
+                 * TODO: Need a radix-independent solution for these extended (up to 72-bit) values,
+                 * because after 52 bits, JavaScript will start dropping least-significant bits.  Until
+                 * then, you're better off sticking with octal (see above).
                  */
                 value = extended * Int36.BIT36 + value;
             }
