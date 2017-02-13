@@ -98,6 +98,12 @@ class Int36 {
                 this.value -= Int36.BIT36;
             }
         }
+        /*
+         * The 'extended' property stores an additional 36 bits of data after a multiplication, and any
+         * remainder after a division.  It's strictly an output-only property for those operations, and
+         * its value does not affect the result of ANY operation.
+         */
+        this.extended = 0;
         this.error = Int36.ERROR.NONE;
     }
 
@@ -120,25 +126,48 @@ class Int36 {
     }
 
     /**
+     * octal(value)
+     *
+     * @param {number} value
+     * @return {string}
+     */
+    static octal(value)
+    {
+        if (value < 0) value += Int36.BIT36;
+        return ("00000000000" + value.toString(8)).slice(-12);
+    }
+
+    /**
      * toString(radix, fUnsigned)
      *
      * @param {number} [radix] (default is 10)
-     * @param {boolean} [fUnsigned] (default is signed)
+     * @param {boolean} [fUnsigned] (default is signed for radix 10, unsigned for any other radix)
      */
     toString(radix = 10, fUnsigned)
     {
         var s;
         var value = this.value;
-        if (fUnsigned) {
-            if (value < 0) {
-                value += Int36.BIT36;
+        var extended = this.extended;
+        if (radix == 8) {
+            s = Int36.octal(value);
+            if (extended) {
+                s = Int36.octal(extended) + ',' + s;
             }
-            if (radix == 8) {
-                s = "0o" + ("00000000000" + value.toString(8)).slice(-12);
-                if (DEBUG && this.error) s += " error 0x" + this.error.toString(16);
+            if (DEBUG && this.error) s += " error 0x" + this.error.toString(16);
+            return s;
+        }
+        if (radix != 10) fUnsigned = true;
+        if (fUnsigned || extended) {
+            if (value < 0) value += Int36.BIT36;
+            if (extended) {
+                if (fUnsigned) extended += Int36.BIT36;
+                /*
+                 * TODO: Come up with a solution that won't overflow JavaScript's more limited precision.
+                 */
+                value = extended * Int36.BIT36 + value;
             }
         }
-        if (!s) s = value.toString(radix);
+        s = value.toString(radix);
         return s;
     }
 
@@ -207,13 +236,10 @@ class Int36 {
     /**
      * mul(i36)
      *
-     * TODO: Support multiplication results > 36 bits (ie, up to 72 bits) if an additional Int36
-     * parameter is provided.
-     *
      * @param {Int36} i36
      */
     mul(i36) {
-        this.value = this.truncate(this.value * i36.value);
+        this.mulExtended(i36.value);
     }
 
     /**
@@ -222,7 +248,58 @@ class Int36 {
      * @param {number} num
      */
     mulNum(num) {
-        this.value = this.truncate(this.value * Int36.validate(num));
+        this.mulExtended(Int36.validate(num));
+    }
+
+    /**
+     * mulExtended(value)
+     *
+     * To support 72-bit results, we perform the multiplication process as you would "by hand",
+     * treating each of the operands to be multiplied as two 2-digit numbers, where each digit is
+     * an 18-bit number (base 2^18).  Each individual multiplication of these 18-bit "digits"
+     * will produce a result within 2^36, well within JavaScript integer accuracy.
+     *
+     * @param {number} value
+     */
+    mulExtended(value) {
+        var fNeg = false, extended;
+        var n1 = this.value, n2 = value;
+
+        if (n1 < 0) {
+            n1 = -n1;
+            fNeg = !fNeg;
+        }
+
+        if (n2 < 0) {
+            n2 = -n2;
+            fNeg = !fNeg;
+        }
+
+        if (n1 < Int36.BIT18 && n2 < Int36.BIT18) {
+            value = n1 * n2;
+            extended = 0;
+        }
+        else {
+            var n1d1 = (n1 % Int36.BIT18);
+            var n1d2 = Math.trunc(n1 / Int36.BIT18);
+            var n2d1 = (n2 % Int36.BIT18);
+            var n2d2 = Math.trunc(n2 / Int36.BIT18);
+
+            var m1d1 = n1d1 * n2d1;
+            var m1d2 = (n1d2 * n2d1) + Math.trunc(m1d1 / Int36.BIT18);
+            extended = Math.trunc(m1d2 / Int36.BIT18);
+            m1d2 = (m1d2 % Int36.BIT18) + (n1d1 * n2d2);
+            value = (m1d2 * Int36.BIT18) + (m1d1 % Int36.BIT18);
+            extended += Math.trunc(m1d2 / Int36.BIT18) + (n1d2 * n2d2);
+        }
+
+        if (fNeg) {
+            value = -value;
+            extended = -extended - (value? 1 : 0);
+        }
+
+        this.value = this.truncate(value);
+        this.extended = this.truncate(extended);
     }
 
     /**

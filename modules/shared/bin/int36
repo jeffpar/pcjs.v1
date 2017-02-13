@@ -44,7 +44,7 @@ var i36Reg = new Int36();
  */
 function dumpInt36(i36)
 {
-    return i36.toString() + " (" + i36.toString(8, true) + ")";
+    return i36.toString() + " [" + i36.toString(8, true) + "]";
 }
 
 /**
@@ -93,7 +93,8 @@ function test(sCmd, fREPL)
         return false;
     }
 
-    console.log(sOp + (sNum1? (" " + dumpInt36(i36Op)) : "") + ": " + dumpInt36(i36Reg));
+    console.log(sOp + " " + dumpInt36(i36Op));
+    if (sOp != "set") console.log("  = " + dumpInt36(i36Reg));
 
     return true;
 }
@@ -115,11 +116,19 @@ var onCommand = function (cmd, context, filename, callback)
 };
 
 test("set -34,359,738,368");
-test("add 1");
-test("sub 1");
 test("sub 1");
 test("add 1");
 test("add 0");
+
+for (let i = 0; i <= 12; i++) {
+    test("set 34,000,000,000");
+    test("mul " + Math.pow(8, i));
+}
+
+for (let i = 0; i <= 12; i++) {
+    test("set -34,000,000,000");
+    test("mul " + Math.pow(8, i));
+}
 
 repl.start({
     prompt: "int36> ",
