@@ -64,6 +64,8 @@ function test(sCmd, fREPL)
 
     var i36Op = new Int36(+sNum1);
 
+    if (sNum1 != null) console.log(sOp + " " + dumpInt36(i36Op));
+
     switch(sOp) {
     case "set":
         i36Reg = new Int36(+sNum1, +sNum2);
@@ -85,6 +87,10 @@ function test(sCmd, fREPL)
         i36Reg.div(i36Op);
         break;
 
+    case "dec":
+        console.log("dec " + i36Reg.toDecimal());
+        return true;
+
     case "print":
         break;
 
@@ -93,7 +99,6 @@ function test(sCmd, fREPL)
         return false;
     }
 
-    console.log(sOp + " " + dumpInt36(i36Op));
     if (sOp != "set") console.log("  = " + dumpInt36(i36Reg));
 
     return true;
@@ -123,11 +128,13 @@ test("add 0");
 for (let i = 0; i <= 12; i++) {
     test("set 34,000,000,000");
     test("mul " + Math.pow(8, i));
+    test("dec");
 }
 
 for (let i = 0; i <= 12; i++) {
     test("set -34,000,000,000");
     test("mul " + Math.pow(8, i));
+    test("dec");
 }
 
 test("set 100");
