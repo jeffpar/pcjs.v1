@@ -34,15 +34,17 @@ var DEBUG = true;
  * @class Int36
  * @property {number} value
  * @property {number|null} extended
- * @property {number} remainder
+ * @property {number|null} remainder
  * @property {number} error
  *
  * The 'value' property stores the 36-bit value as a two's complement integer.
  *
  * The 'extended' property stores an additional 36 bits of data from a multiplication;
- * it must also be set prior to a division.
+ * it must also be set prior to a division.  Internally, it will be set to null whenever
+ * the current value is not extended.
  *
- * The 'remainder' property stores the remainder from a division.
+ * The 'remainder' property stores the remainder from the last division.  You should
+ * assume that it will be set to null by any other operation.
  *
  * The 'error' property records any error(s) from the last operation.
  */
@@ -54,7 +56,7 @@ class Int36 {
      * The constructor, which simply calls set(), creates an Int36 from either:
      *
      *      1) another Int36
-     *      2) a single (signed) 36-bit value, with an optional 36-bit extended value
+     *      2) a single (signed) 36-bit value, with an optional 36-bit extension
      *      3) nothing (initial value will be zero)
      *
      * We guarantee that an Int36 value will be (and will always remain) a signed value within this range:
@@ -90,7 +92,7 @@ class Int36 {
      *
      * @this {Int36}
      * @param {Int36|number} [obj] (if omitted, the default is zero)
-     * @param {number} [extended]
+     * @param {number|null} [extended]
      */
     constructor(obj, extended)
     {
@@ -104,7 +106,7 @@ class Int36 {
      *
      * @this {Int36}
      * @param {Int36|number} [obj] (if omitted, the default is zero)
-     * @param {number} [extended]
+     * @param {number|null} [extended]
      */
     set(obj = 0, extended)
     {
@@ -116,10 +118,13 @@ class Int36 {
         else {
             this.value = Int36.validate(obj || 0);
             this.extended = null;
+            /*
+             * NOTE: Surprisingly, isNaN(null) is false, whereas isNaN(undefined) is true.  Go figure.
+             */
             if (extended != null && !isNaN(extended)) {
                 this.extended = Int36.validate(extended);
             }
-            this.remainder = 0;
+            this.remainder = null;
         }
         this.error = Int36.ERROR.NONE;
     }
@@ -135,23 +140,19 @@ class Int36 {
         var s = "", fNeg = false;
         var i36Div = new Int36(10000000000);
         var i36Tmp = new Int36(this.value, this.extended);
-        if (i36Tmp.extended < 0 || i36Tmp.extended == null && i36Tmp.value < 0) {
-            i36Tmp.negExtended();
+        if (i36Tmp.isNegative()) {
+            i36Tmp.negate();
             fNeg = true;
         }
-        var quotient = i36Tmp.div(i36Div);
-        i36Tmp.value = i36Tmp.remainder;
-        if (quotient) {
-            var nDigits = 10;
+        do {
+            var quotient = i36Tmp.div(i36Div);
+            var nMinDigits = (quotient? 10 : 1);
+            i36Tmp.value = i36Tmp.remainder;
             do {
                 i36Tmp.divNum(10);
                 s = String.fromCharCode(0x30 + i36Tmp.remainder) + s;
-            } while (--nDigits);
+            } while (--nMinDigits > 0 || i36Tmp.value);
             i36Tmp.value = quotient;
-        }
-        do {
-            i36Tmp.divNum(10);
-            s = String.fromCharCode(0x30 + i36Tmp.remainder) + s;
         } while (i36Tmp.value);
         if (fNeg) s = '-' + s;
         return s;
@@ -190,7 +191,7 @@ class Int36 {
 
         if (fUnsigned || extended) {
             if (value < 0) value += Int36.BIT36;
-            if (extended) {
+            if (extended != null) {
                 if (fUnsigned) extended += Int36.BIT36;
                 /*
                  * TODO: Need a radix-independent solution for these extended (up to 72-bit) values,
@@ -219,6 +220,8 @@ class Int36 {
         if (DEBUG && result !== Math.trunc(result)) {
             console.log("Int36.truncate(" + result + " is not an integer)");
         }
+        this.extended = null;
+        this.remainder = null;
         this.error = Int36.ERROR.NONE;
         if (result > Int36.MAXVAL) {
             result %= Int36.BIT36;
@@ -345,7 +348,7 @@ class Int36 {
         this.value = this.truncate(value);
         this.extended = this.truncate(extended);
 
-        if (fNeg) this.negExtended();
+        if (fNeg) this.negate();
     }
 
     /**
@@ -396,8 +399,8 @@ class Int36 {
             bNegLo = 1 - bNegLo;
         }
 
-        if (this.extended < 0 || this.extended == null && this.value < 0) {
-            this.negExtended();
+        if (this.isNegative()) {
+            this.negate();
             bNegHi = 1; bNegLo = 1 - bNegLo;
         }
 
@@ -438,7 +441,7 @@ class Int36 {
             }
 
             this.value = result;
-            this.extended = 0;
+            this.extended = null;
             this.remainder = bitsRem[0];
 
             if (bNegLo && this.value && this.value > Int36.MINVAL) {
@@ -452,7 +455,17 @@ class Int36 {
     }
 
     /**
-     * negExtended()
+     * isNegative()
+     *
+     * @return {boolean}
+     */
+    isNegative()
+    {
+        return (this.extended < 0 || this.extended == null && this.value < 0);
+    }
+
+    /**
+     * negate()
      *
      * Converts the current value to its two's complement.  If we were dealing with 8-bit values:
      *
@@ -468,12 +481,12 @@ class Int36 {
      *       126    -126    -127
      *       127    -127    -128
      *
-     * So the one wrinkle is that, when performing two's complement, MINVAL and ZERO are not modified.
+     * so you can see that, when performing two's complement, MINVAL and ZERO are not modified.
      *
-     * However, in our world, since JavaScript numbers CAN represent both positive and negative MINVAL
-     * values, we don't need to exclude MINVAL from the process.
+     * However, in our happy little world, since JavaScript numbers CAN represent both positive and negative
+     * MINVAL values, we don't need to exclude MINVAL from the conversion.
      */
-    negExtended()
+    negate()
     {
         this.error = Int36.ERROR.NONE;
         /*

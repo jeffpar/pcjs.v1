@@ -140,6 +140,9 @@ for (let i = 0; i <= 12; i++) {
 test("set 100");
 test("div 3");
 
+test("set 4001");
+test("div -5");
+
 repl.start({
     prompt: "int36> ",
     input: process.stdin,
