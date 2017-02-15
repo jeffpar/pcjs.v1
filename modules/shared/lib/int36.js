@@ -37,14 +37,18 @@ var DEBUG = true;
  * @property {number|null} remainder
  * @property {number} error
  *
- * The 'value' property stores the 36-bit value as a two's complement integer.
+ * The 'value' property stores the 36-bit value as a signed integer, meaning if the sign bit
+ * (bit 35) is set, we store the corresponding negative (two's complement) value.  While there
+ * might be some slight benefits to always storing the 36-bit value as an unsigned quantity
+ * and negating it "on demand", I like having JavaScript's native representation match the
+ * emulated value.
  *
  * The 'extended' property stores an additional 36 bits of data from a multiplication;
- * it must also be set prior to a division.  Internally, it will be set to null whenever
- * the current value is not extended.
+ * it must also be set prior to a division.  Internally, it will be set to null whenever the
+ * current value is not extended.
  *
- * The 'remainder' property stores the remainder from the last division.  You should
- * assume that it will be set to null by any other operation.
+ * The 'remainder' property stores the remainder from the last division.  You should assume it
+ * will be set to null by any other operation.
  *
  * The 'error' property records any error(s) from the last operation.
  */
@@ -481,7 +485,7 @@ class Int36 {
      *       126    -126    -127
      *       127    -127    -128
      *
-     * so you can see that, when performing two's complement, MINVAL and ZERO are not modified.
+     * you can see that, when performing two's complement, MINVAL and ZERO are not modified.
      *
      * However, in our happy little world, since JavaScript numbers CAN represent both positive and negative
      * MINVAL values, we don't need to exclude MINVAL from the conversion.
