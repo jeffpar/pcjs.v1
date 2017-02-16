@@ -398,24 +398,16 @@ class Int36 {
      */
     divExtended(divisor)
     {
-        /*
-         *      dividend    divisor       quotient    remainder
-         *      --------    -------       --------    ---------
-         *         +           +     ->       +           +
-         *         +           -     ->       -           +
-         *         -           +     ->       -           -
-         *         -           -     ->       +           -
-         */
-        var bNegLo = 0, bNegHi = 0;
+        var fNegQ = false, fNegR = false;
 
         if (divisor > Int36.MAXPOS) {
             divisor = Int36.BIT36 - divisor;
-            bNegLo = 1 - bNegLo;
+            fNegQ = !fNegQ;
         }
 
         if (this.isNegative()) {
             this.negate();
-            bNegHi = 1; bNegLo = 1 - bNegLo;
+            fNegR = true; fNegQ = !fNegQ;
         }
 
         var value = this.value;
@@ -454,10 +446,10 @@ class Int36 {
             this.extended = null;
             this.remainder = bitsRem[0];
 
-            if (bNegLo && this.value) {
+            if (fNegQ && this.value) {
                 this.value = Int36.BIT36 - this.value;
             }
-            if (bNegHi && this.remainder) {
+            if (fNegR && this.remainder) {
                 this.remainder = Int36.BIT36 - this.remainder;
             }
         }
