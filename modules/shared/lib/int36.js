@@ -78,11 +78,11 @@ class Int36 {
      *
      *      -Math.pow(2, 53) <= i <= Math.pow(2, 53)
      *
-     * it seems unwise to ever permit the internal value to creep outside the 36-bit range, because
+     * it seems unwise to ever permit our internal values to creep outside the 36-bit range, because
      * floating-point operations will drop least-significant bits in favor of most-significant bits when a
      * result becomes too large, which is the opposite of what integer operations traditionally do.  There
      * might be some optimization benefits to performing our internal 36-bit truncation "lazily", but at
-     * least initially, I prefer to truncate the results of all operations immediately.
+     * least initially, I prefer to truncate() the results of all 36-bit arithmetic operations immediately.
      *
      * Most of the Int36 operations come in two flavors: those that accept numbers, and those that accept
      * another Int36.  The latter are more efficient, because (as just explained) an Int36's internal value
@@ -209,14 +209,41 @@ class Int36 {
     }
 
     /**
-     * truncate(result, original)
+     * truncate(result, operand, fSub)
      *
      * The range of valid results (0 - MAXVAL) is divided into two equal sub-ranges: 0 to MAXPOS,
      * where the sign bit is zero (the bottom range), and MAXPOS+1 to MAXVAL (the top range), where
      * the sign bit is one.  During a single arithmetic operation, the result can "wrap around" from
      * the bottom range to the top, or from the top range to the bottom, but it's an overflow/underflow
-     * condition ONLY if the result "wraps across" the midpoint between the two ranges, producing an
+     * error ONLY if the result "wraps across" the midpoint between the two ranges, producing an
      * unnaturally small delta (<= MAXPOS).
+     *
+     * This can be confirmed independently by examining the sign bits (BIT35) of the original value
+     * (V), the operand (O), the result (R), as well as two intermediate calculations, VR = (V ^ R)
+     * and OR = (O ^ R), and a final calculation: E = (VR & OR).  In the case of subtraction (fSub),
+     * OV replaces OR.
+     *
+     *      V   O   R   VR  OR  E
+     *      -   -   -   --  --  -
+     *      0   0   0   0   0   0
+     *      0   0   1   1   1   1 (adding positive to positive yielded negative: overflow)
+     *      0   1   0   0   1   0
+     *      0   1   1   1   0   0
+     *      1   0   0   1   0   0
+     *      1   0   1   0   1   0
+     *      1   1   0   1   1   1 (adding negative to negative yielded positive: underflow)
+     *      1   1   1   0   0   0
+     *
+     *      V   O   R   VR  OV  E
+     *      -   -   -   --  --  -
+     *      0   0   0   0   0   0
+     *      0   0   1   1   0   0
+     *      0   1   0   0   1   0
+     *      0   1   1   1   1   1 (subtracting negative from positive yielded negative: overflow)
+     *      1   0   0   1   1   1 (subtracting positive from negative yielded positive: underflow)
+     *      1   0   1   0   1   0
+     *      1   1   0   1   0   0
+     *      1   1   1   0   0   0
      *
      * NOTE: This function's job is to truncate the result of an operation to 36-bit accuracy,
      * not to remove any fractional portion that might also exist.  If an operation could have produced
@@ -224,10 +251,11 @@ class Int36 {
      *
      * @this {Int36}
      * @param {number} result
-     * @param {number} [original]
+     * @param {number} [operand]
+     * @param {boolean} [fSub] (true if operand was subtracted)
      * @return {number}
      */
-    truncate(result, original)
+    truncate(result, operand, fSub)
     {
         if (DEBUG && result !== Math.trunc(result)) {
             console.log("Int36.truncate(" + result + " is not an integer)");
@@ -243,11 +271,33 @@ class Int36 {
 
         result %= Int36.BIT36;
 
-        if (original !== undefined && (result > Int36.MAXPOS) != (original > Int36.MAXPOS)) {
-            var delta = result - original;
-            if (Math.abs(delta) <= Int36.MAXPOS) {
-                this.error |= (delta > 0? Int36.ERROR.OVERFLOW : Int36.ERROR.UNDERFLOW);
+        /*
+         * We don't actually need to know what the operand was to determine overflow or underflow
+         * for addition or subtraction, just the original value (this.value) the new value (result).
+         *
+         * We do, however, need to know the operand if we want to confirm our error calculation using
+         * the truth table above, which requires examining the sign bits of all the inputs and outputs.
+         */
+        if (operand !== undefined) {
+            /*
+             * Calculating V, R, O, and E as described above is somewhat tedious, because bits
+             * above bit 31 cannot be accessed directly; we shift all the sign bits down to bit 0
+             * using division first.  We don't need to truncate the results, because the subsequent
+             * bit-wise operations perform truncation automatically.
+             */
+            var e = 0;
+            if (DEBUG) {
+                var v = this.value / Int36.BIT35, r = result / Int36.BIT35, o = operand / Int36.BIT35;
+                e = ((v ^ r) & (o ^ (fSub? v : r))) & 1;
             }
+            if ((result > Int36.MAXPOS) != (this.value > Int36.MAXPOS)) {
+                var delta = result - this.value;
+                if (Math.abs(delta) <= Int36.MAXPOS) {
+                    this.error |= (delta > 0 ? Int36.ERROR.OVERFLOW : Int36.ERROR.UNDERFLOW);
+                    if (DEBUG && (delta > 0) != !(e & v)) e = 0;
+                }
+            }
+            if (DEBUG && (!this.error) != (!e)) console.log("overflow mismatch");
         }
         return result;
     }
@@ -260,7 +310,7 @@ class Int36 {
      */
     add(i36)
     {
-        this.value = this.truncate(this.value + i36.value, this.value);
+        this.value = this.truncate(this.value + i36.value, i36.value);
     }
 
     /**
@@ -271,7 +321,8 @@ class Int36 {
      */
     addNum(num)
     {
-        this.value = this.truncate(this.value + Int36.validate(num), this.value);
+        num = Int36.validate(num);
+        this.value = this.truncate(this.value + num, num);
     }
 
     /**
@@ -282,7 +333,7 @@ class Int36 {
      */
     sub(i36)
     {
-        this.value = this.truncate(this.value - i36.value, this.value);
+        this.value = this.truncate(this.value - i36.value, i36.value, true);
     }
 
     /**
@@ -293,7 +344,8 @@ class Int36 {
      */
     subNum(num)
     {
-        this.value = this.truncate(this.value - Int36.validate(num), this.value);
+        num = Int36.validate(num);
+        this.value = this.truncate(this.value - num, num, true);
     }
 
     /**
@@ -599,11 +651,18 @@ class Int36 {
     /**
      * validate(num)
      *
+     * This ensures that any incoming (external) 36-bit values conform to our internal requirements.
+     *
      * @param {number} num
      * @return {number}
      */
     static validate(num)
     {
+        /*
+         * Although it's expected that most callers will supply unsigned 36-bit values, we're nice about
+         * converting any signed values to their unsigned (two's complement) counterpart, provided they are
+         * within the acceptable range.  Any signed values outside that range will be dealt with afterward.
+         */
         if (num < 0 && num >= Int36.MINNEG) {
             num += Int36.BIT36;
         }
@@ -623,6 +682,7 @@ Int36.ERROR = {
 };
 
 Int36.BIT18     =  Math.pow(2, 18);     //         262,144
+Int36.BIT35     =  Math.pow(2, 35);     //  34,359,738,368 (aka the sign bit)
 Int36.BIT36     =  Math.pow(2, 36);     //  68,719,476,736
 
 Int36.MAXPOS    =  Math.pow(2, 35) - 1; //  34,359,738,367
