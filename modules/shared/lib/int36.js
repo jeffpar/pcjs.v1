@@ -38,7 +38,7 @@ var DEBUG = true;
  * @property {number} error
  *
  * The 'value' property stores the 36-bit value as an unsigned integer.  When the value
- * should be interpreted as a signed quantity, subtract BIT36 whenever value > MAXSIGNED.
+ * should be interpreted as a signed quantity, subtract BIT36 whenever value > MAXPOS.
  *
  * The 'extended' property stores an additional 36 bits of data from a multiplication;
  * it must also be set prior to a division.  Internally, it will be set to null whenever the
@@ -65,7 +65,7 @@ class Int36 {
      *      0 <= i <= Math.pow(2, 36) - 1
      *
      * The lower bound is ZERO and the upper bound is Int36.MAXVAL.  Whenever an Int36 value should be
-     * interpreted as a signed value, values above Int36.MAXSIGNED (ie, values with bit 35 set) should be
+     * interpreted as a signed value, values above Int36.MAXPOS (ie, values with bit 35 set) should be
      * converted to their signed counterpart by subtracting the value from Int36.BIT36 (aka MAXVAL + 1);
      * the easiest way to do that is call isNegative() to check the sign bit and then call negate() as
      * appropriate.
@@ -204,7 +204,14 @@ class Int36 {
     }
 
     /**
-     * truncate(result)
+     * truncate(result, original)
+     *
+     * The range of valid results (0 - MAXVAL) is divided into two equal sub-ranges: 0 to MAXPOS,
+     * where the sign bit is zero (the bottom range), and MAXPOS+1 to MAXVAL (the top range), where
+     * the sign bit is one.  During a single arithmetic operation, the result can "wrap around" from
+     * the bottom range to the top, or from the top range to the bottom, but it's an overflow/underflow
+     * condition ONLY if the result "wraps across" the midpoint between the two ranges, producing an
+     * unnaturally small delta (<= MAXPOS).
      *
      * NOTE: This function's job is to truncate the result of an operation to 36-bit accuracy,
      * not to remove any fractional portion that might also exist.  If an operation could have produced
@@ -212,13 +219,15 @@ class Int36 {
      *
      * @this {Int36}
      * @param {number} result
+     * @param {number} [original]
      * @return {number}
      */
-    truncate(result)
+    truncate(result, original)
     {
         if (DEBUG && result !== Math.trunc(result)) {
             console.log("Int36.truncate(" + result + " is not an integer)");
         }
+
         this.extended = null;
         this.remainder = null;
         this.error = Int36.ERROR.NONE;
@@ -226,7 +235,15 @@ class Int36 {
         if (result < 0) {
             result += Int36.BIT36;
         }
+
         result %= Int36.BIT36;
+
+        if (original !== undefined && (result > Int36.MAXPOS) != (original > Int36.MAXPOS)) {
+            var delta = result - original;
+            if (Math.abs(delta) <= Int36.MAXPOS) {
+                this.error |= (delta > 0? Int36.ERROR.OVERFLOW : Int36.ERROR.UNDERFLOW);
+            }
+        }
         return result;
     }
 
@@ -238,7 +255,7 @@ class Int36 {
      */
     add(i36)
     {
-        this.value = this.truncate(this.value + i36.value);
+        this.value = this.truncate(this.value + i36.value, this.value);
     }
 
     /**
@@ -249,7 +266,7 @@ class Int36 {
      */
     addNum(num)
     {
-        this.value = this.truncate(this.value + Int36.validate(num));
+        this.value = this.truncate(this.value + Int36.validate(num), this.value);
     }
 
     /**
@@ -260,7 +277,7 @@ class Int36 {
      */
     sub(i36)
     {
-        this.value = this.truncate(this.value - i36.value);
+        this.value = this.truncate(this.value - i36.value, this.value);
     }
 
     /**
@@ -271,7 +288,7 @@ class Int36 {
      */
     subNum(num)
     {
-        this.value = this.truncate(this.value - Int36.validate(num));
+        this.value = this.truncate(this.value - Int36.validate(num), this.value);
     }
 
     /**
@@ -312,12 +329,12 @@ class Int36 {
         var fNeg = false, extended;
         var n1 = this.value, n2 = value;
 
-        if (n1 > Int36.MAXSIGNED) {
+        if (n1 > Int36.MAXPOS) {
             n1 = Int36.BIT36 - n1;
             fNeg = !fNeg;
         }
 
-        if (n2 > Int36.MAXSIGNED) {
+        if (n2 > Int36.MAXPOS) {
             n2 = Int36.BIT36 - n2;
             fNeg = !fNeg;
         }
@@ -391,7 +408,7 @@ class Int36 {
          */
         var bNegLo = 0, bNegHi = 0;
 
-        if (divisor > Int36.MAXSIGNED) {
+        if (divisor > Int36.MAXPOS) {
             divisor = Int36.BIT36 - divisor;
             bNegLo = 1 - bNegLo;
         }
@@ -437,10 +454,10 @@ class Int36 {
             this.extended = null;
             this.remainder = bitsRem[0];
 
-            if (bNegLo && this.value && this.value > Int36.MINSIGNED) {
+            if (bNegLo && this.value) {
                 this.value = Int36.BIT36 - this.value;
             }
-            if (bNegHi && this.remainder && this.remainder > Int36.MINSIGNED) {
+            if (bNegHi && this.remainder) {
                 this.remainder = Int36.BIT36 - this.remainder;
             }
         }
@@ -454,7 +471,7 @@ class Int36 {
      */
     isNegative()
     {
-        return (this.extended > Int36.MAXSIGNED || this.extended == null && this.value > Int36.MAXSIGNED);
+        return (this.extended > Int36.MAXPOS || this.extended == null && this.value > Int36.MAXPOS);
     }
 
     /**
@@ -466,7 +483,7 @@ class Int36 {
             /*
              * Set extended to match the sign of the (negated) value.
              */
-            this.extended = (this.value > Int36.MAXSIGNED? 0 : Int36.MAXVAL);
+            this.extended = (this.value > Int36.MAXPOS? 0 : Int36.MAXVAL);
         }
         else if (this.value) {
             /*
@@ -590,7 +607,7 @@ class Int36 {
      */
     static validate(num)
     {
-        if (num < 0 && num >= Int36.MINSIGNED) {
+        if (num < 0 && num >= Int36.MINNEG) {
             num += Int36.BIT36;
         }
         var value = Math.trunc(Math.abs(num)) % Int36.BIT36;
@@ -611,8 +628,8 @@ Int36.ERROR = {
 Int36.BIT18     =  Math.pow(2, 18);     //         262,144
 Int36.BIT36     =  Math.pow(2, 36);     //  68,719,476,736
 
-Int36.MAXSIGNED =  Math.pow(2, 35) - 1; //  34,359,738,367
-Int36.MINSIGNED = -Math.pow(2, 35);     // -34,359,738,368
+Int36.MAXPOS    =  Math.pow(2, 35) - 1; //  34,359,738,367
+Int36.MINNEG    = -Math.pow(2, 35);     // -34,359,738,368
 
 Int36.MAXVAL    =  Math.pow(2, 36) - 1; //  68,719,476,735
 
