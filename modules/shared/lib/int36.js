@@ -60,13 +60,15 @@ class Int36 {
      *      2) a single 36-bit value, with an optional 36-bit extension
      *      3) nothing (initial value will be zero)
      *
-     * We guarantee that an Int36 value will be (and always remain) an unsigned value within this range:
+     * All internal Int36 values (ie, the value and any extension) are unsigned values in the range:
      *
      *      0 <= i <= Math.pow(2, 36) - 1
      *
      * The lower bound is ZERO and the upper bound is Int36.MAXVAL.  Whenever an Int36 value should be
-     * interpreted as a signed value, call isNegative() to check the sign bit (bit 35) and call negate()
-     * as appropriate.
+     * interpreted as a signed value, values above Int36.MAXSIGNED (ie, values with bit 35 set) should be
+     * converted to their signed counterpart by subtracting the value from Int36.BIT36 (aka MAXVAL + 1);
+     * the easiest way to do that is call isNegative() to check the sign bit and then call negate() as
+     * appropriate.
      *
      * NOTE: We use modern bit numbering, where bit 0 is the right-most (least-significant) bit and
      * bit 35 is the left-most bit.  This is opposite of the PDP-10 convention, which defined bit 0 as the
