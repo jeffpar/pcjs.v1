@@ -1,5 +1,5 @@
 /**
- * @fileoverview Support for 36-bit integers (using unsigned JavaScript numbers)
+ * @fileoverview Support for 36-bit integers (using signed JavaScript numbers)
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a> (@jeffpar)
  * @copyright © Jeff Parsons 2012-2017
  *
@@ -37,8 +37,11 @@ var DEBUG = true;
  * @property {number|null} remainder
  * @property {number} error
  *
- * The 'value' property stores the 36-bit value as an unsigned integer.  When the value
- * should be interpreted as a signed quantity, subtract BIT36 whenever value > MAXSIGNED.
+ * The 'value' property stores the 36-bit value as a signed integer, meaning if the sign bit
+ * (bit 35) is set, we store the corresponding negative (two's complement) value.  While there
+ * might be some slight benefits to always storing the 36-bit value as an unsigned quantity
+ * and negating it "on demand", I like having JavaScript's native representation match the
+ * emulated value.
  *
  * The 'extended' property stores an additional 36 bits of data from a multiplication;
  * it must also be set prior to a division.  Internally, it will be set to null whenever the
@@ -57,16 +60,15 @@ class Int36 {
      * The constructor, which simply calls set(), creates an Int36 from either:
      *
      *      1) another Int36
-     *      2) a single 36-bit value, with an optional 36-bit extension
+     *      2) a single (signed) 36-bit value, with an optional 36-bit extension
      *      3) nothing (initial value will be zero)
      *
-     * We guarantee that an Int36 value will be (and always remain) an unsigned value within this range:
+     * We guarantee that an Int36 value will be (and will always remain) a signed value within this range:
      *
-     *      0 <= i <= Math.pow(2, 36) - 1
+     *      -Math.pow(2, 35) <= i <= Math.pow(2, 35) - 1
      *
-     * The lower bound is ZERO and the upper bound is Int36.MAXVAL.  Whenever an Int36 value should be
-     * interpreted as a signed value, call isNegative() to check the sign bit (bit 35) and call negate()
-     * as appropriate.
+     * Those lower and upper bounds are defined as Int36.MINVAL and Int36.MAXVAL.  The sign of an Int36
+     * value is determined by (and should always match) its highest bit (bit 35).
      *
      * NOTE: We use modern bit numbering, where bit 0 is the right-most (least-significant) bit and
      * bit 35 is the left-most bit.  This is opposite of the PDP-10 convention, which defined bit 0 as the
@@ -76,7 +78,7 @@ class Int36 {
      *
      *      -Math.pow(2, 53) <= i <= Math.pow(2, 53)
      *
-     * it seems unwise to ever permit the internal value to creep outside the 36-bit range, because
+     * it seems unwise to ever permit the internal value to creep outside the signed 36-bit range, because
      * floating-point operations will drop least-significant bits in favor of most-significant bits when a
      * result becomes too large, which is the opposite of what integer operations traditionally do.  There
      * might be some optimization benefits to performing our internal 36-bit truncation "lazily", but at
@@ -190,7 +192,11 @@ class Int36 {
             return s;
         }
 
+        if (value < 0) {
+            value += Int36.BIT36;
+        }
         if (extended != null) {
+            if (extended < 0) extended += Int36.BIT36;
             /*
              * TODO: Need a radix-independent solution for these extended (up to 72-bit) values,
              * because after 52 bits, JavaScript will start dropping least-significant bits.  Until
@@ -220,11 +226,15 @@ class Int36 {
         this.extended = null;
         this.remainder = null;
         this.error = Int36.ERROR.NONE;
-
-        if (result < 0) {
-            result += Int36.BIT36;
+        if (result > Int36.MAXVAL) {
+            result %= Int36.BIT36;
+            if (result > Int36.MAXVAL) result -= Int36.BIT36;
+            this.error |= Int36.ERROR.OVERFLOW;
+        } else if (result < Int36.MINVAL) {
+            result %= Int36.BIT36;
+            if (result < Int36.MINVAL) result += Int36.BIT36;
+            this.error |= Int36.ERROR.UNDERFLOW;
         }
-        result %= Int36.BIT36;
         return result;
     }
 
@@ -310,13 +320,13 @@ class Int36 {
         var fNeg = false, extended;
         var n1 = this.value, n2 = value;
 
-        if (n1 > Int36.MAXSIGNED) {
-            n1 = Int36.BIT36 - n1;
+        if (n1 < 0) {
+            if (n1) n1 = -n1;
             fNeg = !fNeg;
         }
 
-        if (n2 > Int36.MAXSIGNED) {
-            n2 = Int36.BIT36 - n2;
+        if (n2 < 0) {
+            if (n2) n2 = -n2;
             fNeg = !fNeg;
         }
 
@@ -341,9 +351,7 @@ class Int36 {
         this.value = this.truncate(value);
         this.extended = this.truncate(extended);
 
-        if (fNeg) {
-            this.negate();
-        }
+        if (fNeg) this.negate();
     }
 
     /**
@@ -389,8 +397,8 @@ class Int36 {
          */
         var bNegLo = 0, bNegHi = 0;
 
-        if (divisor > Int36.MAXSIGNED) {
-            divisor = Int36.BIT36 - divisor;
+        if (divisor < 0 && divisor > Int36.MINVAL) {
+            divisor = -divisor;
             bNegLo = 1 - bNegLo;
         }
 
@@ -401,6 +409,10 @@ class Int36 {
 
         var value = this.value;
         var extended = this.extended || 0;
+
+        if (value < 0) {
+            value += Int36.BIT36;
+        }
 
         if (!divisor) {
             this.error |= Int36.ERROR.DIVZERO;
@@ -435,11 +447,11 @@ class Int36 {
             this.extended = null;
             this.remainder = bitsRem[0];
 
-            if (bNegLo && this.value && this.value > Int36.MINSIGNED) {
-                this.value = Int36.BIT36 - this.value;
+            if (bNegLo && this.value && this.value > Int36.MINVAL) {
+                this.value = -this.value;
             }
-            if (bNegHi && this.remainder && this.remainder > Int36.MINSIGNED) {
-                this.remainder = Int36.BIT36 - this.remainder;
+            if (bNegHi && this.remainder && this.remainder > Int36.MINVAL) {
+                this.remainder = -this.remainder;
             }
         }
         return this.value;
@@ -452,37 +464,60 @@ class Int36 {
      */
     isNegative()
     {
-        return (this.extended > Int36.MAXSIGNED || this.extended == null && this.value > Int36.MAXSIGNED);
+        return (this.extended < 0 || this.extended == null && this.value < 0);
     }
 
     /**
      * negate()
+     *
+     * Converts the current value to its two's complement.  If we were dealing with 8-bit values:
+     *
+     *   Original  Two's   One's
+     *   -------   -----   -----
+     *      -128    -128     127
+     *      -127     127     126
+     *       ...     ...     ...
+     *        -1       1       0
+     *         0       0      -1
+     *         1      -1      -2
+     *       ...     ...     ...
+     *       126    -126    -127
+     *       127    -127    -128
+     *
+     * you can see that, when performing two's complement, MINVAL and ZERO are not modified.
+     *
+     * However, in our happy little world, since JavaScript numbers CAN represent both positive and negative
+     * MINVAL values, we don't need to exclude MINVAL from the conversion.
      */
     negate()
     {
+        this.error = Int36.ERROR.NONE;
+        /*
+         * Perform two's complement on the value.
+         */
+        if (this.value /* && this.value > Int36.MINVAL */) {
+            this.value = -this.value;
+        }
         if (this.extended == null) {
             /*
-             * Set extended to match the sign of the (negated) value.
+             * Set extended to match the sign of the value.
              */
-            this.extended = (this.value > Int36.MAXSIGNED? 0 : Int36.MAXVAL);
+            this.extended = (this.value < 0? -1 : 0);
         }
         else if (this.value) {
             /*
              * Perform one's complement on the extended value.
              */
-            this.extended = Int36.MAXVAL - this.extended;
+            this.extended = -this.extended - 1;
         }
         else {
             /*
              * Perform two's complement on the extended value.
              */
-            if (this.extended) this.extended = Int36.BIT36 - this.extended;
+            if (this.extended /* && this.extended > Int36.MINVAL */) {
+                this.extended = -this.extended;
+            }
         }
-        /*
-         * Perform two's complement on the value.
-         */
-        if (this.value) this.value = Int36.BIT36 - this.value;
-        this.error = Int36.ERROR.NONE;
     }
 
     /**
@@ -588,10 +623,12 @@ class Int36 {
      */
     static validate(num)
     {
-        if (num < 0 && num >= Int36.MINSIGNED) {
-            num += Int36.BIT36;
+        var value = Math.trunc(num) % Int36.BIT36;
+        if (value > Int36.MAXVAL) {
+            value -= Int36.BIT36;
+        } else if (value < Int36.MINVAL) {
+            value += Int36.BIT36;
         }
-        var value = Math.trunc(Math.abs(num)) % Int36.BIT36;
         if (DEBUG && num !== value) {
             console.log("Int36.validate(" + num + " out of range, truncated to " + value + ")");
         }
@@ -609,9 +646,7 @@ Int36.ERROR = {
 Int36.BIT18     =  Math.pow(2, 18);     //         262,144
 Int36.BIT36     =  Math.pow(2, 36);     //  68,719,476,736
 
-Int36.MAXSIGNED =  Math.pow(2, 35) - 1; //  34,359,738,367
-Int36.MINSIGNED = -Math.pow(2, 35);     // -34,359,738,368
-
-Int36.MAXVAL    =  Math.pow(2, 36) - 1; //  68,719,476,735
+Int36.MAXVAL    =  Math.pow(2, 35) - 1; //  34,359,738,367
+Int36.MINVAL    = -Math.pow(2, 35);     // -34,359,738,368
 
 if (NODE) module.exports = Int36;

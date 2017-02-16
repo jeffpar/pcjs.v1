@@ -31,8 +31,8 @@
 "use strict";
 
 var repl = require("repl");
-var Defines = require("../../shared/lib/defines");
-var Int36 = require("../../shared/lib/int36");
+var Defines = require("../lib/defines");
+var Int36 = require("../lib/int36");
 
 var i36Reg = new Int36();
 
