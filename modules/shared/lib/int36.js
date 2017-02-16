@@ -151,6 +151,10 @@ class Int36 {
         }
         do {
             var quotient = i36Tmp.div(i36Div);
+            if (i36Tmp.error) {
+                s = "error";
+                break;
+            }
             var nMinDigits = (quotient? 10 : 1);
             i36Tmp.value = i36Tmp.remainder;
             do {
@@ -158,6 +162,7 @@ class Int36 {
                 s = String.fromCharCode(0x30 + i36Tmp.remainder) + s;
             } while (--nMinDigits > 0 || i36Tmp.value);
             i36Tmp.value = quotient;
+            i36Tmp.extended = 0;
         } while (i36Tmp.value);
         if (fNeg) s = '-' + s;
         return s;
