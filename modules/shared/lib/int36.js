@@ -232,8 +232,11 @@ class Int36 {
      *
      * This can be confirmed independently by examining the sign bits (BIT35) of the original value
      * (V), the operand (O), the result (R), as well as two intermediate calculations, VR = (V ^ R)
-     * and OR = (O ^ R), and a final calculation: E = (VR & OR).  In the case of subtraction (fSub),
-     * OV replaces OR.
+     * and OR = (O ^ R), and a final calculation, E = (VR & OR).  If E is set, then overflow (V == 0)
+     * or underflow (V == 1) occurred.
+     *
+     * In the case of subtraction (when fSub is true), consult the second table, which replaces OR
+     * with OV (O ^ V).
      *
      *      V   O   R   VR  OR  E
      *      -   -   -   --  --  -
@@ -309,7 +312,7 @@ class Int36 {
                     if (DEBUG && (delta > 0) != !(e & v)) e = 0;
                 }
             }
-            if (DEBUG && (!this.error) != (!e)) console.log("overflow mismatch");
+            if (DEBUG && (!this.error) != (!e)) console.log("overflow inconsistency");
         }
         return result;
     }
@@ -386,9 +389,9 @@ class Int36 {
      * mulExtended(value)
      *
      * To support 72-bit results, we perform the multiplication process as you would "by hand",
-     * treating each of the operands to be multiplied as two 2-digit numbers, where each digit is
-     * an 18-bit number (base 2^18).  Each individual multiplication of these 18-bit "digits"
-     * will produce a result within 2^36, well within JavaScript integer accuracy.
+     * treating the operands to be multiplied as two 2-digit numbers, where each digit is an 18-bit
+     * number (base 2^18).  Each individual multiplication of these 18-bit "digits" will produce
+     * a result within 2^36, well within JavaScript integer accuracy.
      *
      * @this {Int36}
      * @param {number} value
@@ -457,13 +460,13 @@ class Int36 {
     /**
      * divExtended(divisor)
      *
-     * We disallow a divisor of zero; however, we no longer disallow a divisor smaller than the than
-     * the extended portion of the dividend, even though such a divisor would produce a quotient larger
+     * We disallow a divisor of zero; however, we no longer disallow a divisor smaller than the
+     * extended portion of the dividend, even though such a divisor would produce a quotient larger
      * than 36 bits.  Instead, we support extended quotients, because some of our internal functions
      * (eg, toDecimal()) require it.
      *
      * For callers that can only handle 36-bit quotients, they can either perform their own preliminary
-     * check of the divisor against any dividend extension, or they can simply allow all divisions to
+     * check of the divisor against any extended dividend, or they can simply allow all divisions to
      * proceed, check for an extended quotient afterward, and report the appropriate error.
      *
      * @this {Int36}
@@ -528,12 +531,11 @@ class Int36 {
 
     /**
      * extend()
+     *
+     * Set the extended field to match the sign of the value (if not already set).
      */
     extend()
     {
-        /*
-         * Set extended to match the sign of value (if not already set).
-         */
         if (this.extended == null) {
             this.extended = (this.value > Int36.MAXPOS? Int36.MAXVAL : 0);
         }
@@ -696,7 +698,7 @@ class Int36 {
         /*
          * Although it's expected that most callers will supply unsigned 36-bit values, we're nice about
          * converting any signed values to their unsigned (two's complement) counterpart, provided they are
-         * within the acceptable range.  Any signed values outside that range will be dealt with afterward.
+         * within the acceptable range.  Any values outside that range will be dealt with afterward.
          */
         if (num < 0 && num >= Int36.MINNEG) {
             num += Int36.BIT36;
