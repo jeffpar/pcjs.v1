@@ -296,7 +296,17 @@ class Int36 {
             if (this.remainder) {
                 s += ':' + Int36.octal(this.remainder);
             }
-            if (DEBUG && this.error) s += " error 0x" + this.error.toString(16);
+            if (DEBUG && this.error) {
+                if (this.error & Int36.ERROR.OVERFLOW) {
+                    s += " overflow";
+                }
+                if (this.error & Int36.ERROR.UNDERFLOW) {
+                    s += " underflow";
+                }
+                if (this.error & Int36.ERROR.DIVZERO) {
+                    s += " divide-by-zero";
+                }
+            }
             return s;
         }
 
