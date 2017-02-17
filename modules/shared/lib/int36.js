@@ -148,13 +148,22 @@ class Int36 {
         var i36Div = new Int36(10000000000);
         var i36Rem = new Int36();
         var i36Tmp = new Int36(this.value, this.extended);
+
         if (!fUnsigned && i36Tmp.isNegative()) {
             i36Tmp.negate();
             fNeg = true;
         }
+
+        var nMaxDivs = 3;
         do {
             i36Tmp.div(i36Div);
-            if (i36Tmp.error) {
+            /*
+             * In a perfect world, there would be no errors, because all Int36 calculations would
+             * involve positive values within their respective ranges, any remainder would always be less
+             * than the divisor, and the entire process would complete within 3 divisions.  But until
+             * then, let's make sure we don't produce garbage or spin our wheels.
+             */
+            if (i36Tmp.error || i36Tmp.remainder >= 10000000000 || !nMaxDivs--) {
                 s = "error";
                 break;
             }
@@ -166,6 +175,7 @@ class Int36 {
                 s = String.fromCharCode(0x30 + i36Rem.remainder) + s;
             } while (--nMinDigits > 0 || i36Rem.value);
         } while (quotient);
+
         if (fNeg) s = '-' + s;
         return s;
     }
@@ -419,9 +429,7 @@ class Int36 {
         this.value = this.truncate(value);
         this.extended = this.truncate(extended);
 
-        if (fNeg) {
-            this.negate();
-        }
+        if (fNeg) this.negate();
     }
 
     /**
@@ -449,20 +457,20 @@ class Int36 {
     /**
      * divExtended(divisor)
      *
+     * We disallow a divisor of zero; however, we no longer disallow a divisor smaller than the than
+     * the extended portion of the dividend, even though such a divisor would produce a quotient larger
+     * than 36 bits.  Instead, we support extended quotients, because some of our internal functions
+     * (eg, toDecimal()) require it.
+     *
+     * For callers that can only handle 36-bit quotients, they can either perform their own preliminary
+     * check of the divisor against any dividend extension, or they can simply allow all divisions to
+     * proceed, check for an extended quotient afterward, and report the appropriate error.
+     *
      * @this {Int36}
      * @param {number} divisor
      */
     divExtended(divisor)
     {
-        /*
-         * NOTE: A divisor of zero is always a bad idea; however, we no longer require the divisor to be
-         * GREATER than the extended portion of the dividend, because toDecimal() needs to be able to divide
-         * large 72-bit values by 10,000,000,000 without worrying about the size of the resulting quotient.
-         *
-         * For callers that can only support 36-bit results, they can either perform their own preliminary
-         * check of the divisor against any dividend extension, or they can simply allow all divisions to
-         * proceed, check for an extended quotient afterward, and record the appropriate error.
-         */
         if (!divisor) {
             this.error |= Int36.ERROR.DIVZERO;
             return;
@@ -480,10 +488,12 @@ class Int36 {
             fNegR = true; fNegQ = !fNegQ;
         }
 
+        this.extend();
+
         var bitsRes = Int36.setBits(this.bitsRes, 0, 0);
         var bitsPow = Int36.setBits(this.bitsPow, 1, 0);
         var bitsDiv = Int36.setBits(this.bitsDiv, divisor, 0);
-        var bitsRem = Int36.setBits(this.bitsRem, this.value, this.extended || 0);
+        var bitsRem = Int36.setBits(this.bitsRem, this.value, this.extended);
 
         while (Int36.cmpBits(bitsRem, bitsDiv) > 0) {
             Int36.addBits(bitsDiv, bitsDiv);
@@ -499,12 +509,7 @@ class Int36 {
         } while (bitsPow[0] || bitsPow[1]);
 
         /*
-         * NOTE: We no longer require bitsRes[1] to be zero (that is, we no longer require the quotient
-         * to fit within the 36 bits of bitsRes[0]) because toDecimal() needs to be able to divide large
-         * 72-bit values by 10,000,000,000 without worrying about the size of the resulting quotient.
-         *
-         * We do, however, still expect remainders to fit within the 36 bits of bitsRem[0], because our
-         * divisors are limited to 36 bits as well.
+         * Since divisors are limited to 36-bit values, something's wrong if we have an extended remainder.
          */
         if (DEBUG && bitsRem[1]) {
             console.log("divExtended() assertion failure");
@@ -514,12 +519,23 @@ class Int36 {
         this.extended = bitsRes[1];
         this.remainder = bitsRem[0];
 
-        if (fNegQ) {
-            this.negate();
-        }
+        if (fNegQ) this.negate();
 
         if (fNegR && this.remainder) {
             this.remainder = Int36.BIT36 - this.remainder;
+        }
+    }
+
+    /**
+     * extend()
+     */
+    extend()
+    {
+        /*
+         * Set extended to match the sign of value (if not already set).
+         */
+        if (this.extended == null) {
+            this.extended = (this.value > Int36.MAXPOS? Int36.MAXVAL : 0);
         }
     }
 
@@ -535,12 +551,19 @@ class Int36 {
 
     /**
      * negate()
+     *
+     * negate() MUST automatically extend the value, because the two's complement of the most negative
+     * number (MINNEG) still has its sign bit set, so we must rely on the sign of the extended value to
+     * compensate.
+     *
+     * This is handled below by setting extended first, based on the opposite of the value's current sign;
+     * we could negate extended AFTER negating value, but then we'd need a special test for the MINNEG value.
      */
     negate()
     {
         if (this.extended == null) {
             /*
-             * Set extended to match the sign of the (negated) value.
+             * Set extended to the OPPOSITE of the current value.
              */
             this.extended = (this.value > Int36.MAXPOS? 0 : Int36.MAXVAL);
         }
@@ -559,7 +582,9 @@ class Int36 {
         /*
          * Perform two's complement on the value.
          */
-        if (this.value) this.value = Int36.BIT36 - this.value;
+        if (this.value) {
+            this.value = Int36.BIT36 - this.value;
+        }
         this.error = Int36.ERROR.NONE;
     }
 
