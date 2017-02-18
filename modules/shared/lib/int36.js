@@ -240,15 +240,15 @@ class Int36 {
             i36Tmp.negate();
             fNeg = true;
         }
-
+        /*
+         * Conversion of any 72-bit value should take no more than 3 divisions by 10,000,000,000.
+         */
         var nMaxDivs = 3;
         do {
             i36Tmp.div(i36Div);
             /*
-             * In a perfect world, there would be no errors, because all Int36 calculations at
-             * this point should be positive values, the remainder should always be less than the
-             * divisor, and the entire process should complete within 3 divisions.  But until then,
-             * let's make sure we don't produce garbage or spin our wheels.
+             * In a perfect world, there would be no errors, because all calculations at this point
+             * are within known bounds.  But let's make sure we don't produce garbage or spin our wheels.
              */
             if (i36Tmp.error || i36Tmp.remainder >= 10000000000 || !nMaxDivs--) {
                 s = "error";
