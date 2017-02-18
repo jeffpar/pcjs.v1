@@ -245,10 +245,10 @@ class Int36 {
         do {
             i36Tmp.div(i36Div);
             /*
-             * In a perfect world, there would be no errors, because all Int36 calculations would
-             * involve positive values within their respective ranges, any remainder would always be less
-             * than the divisor, and the entire process would complete within 3 divisions.  But until
-             * then, let's make sure we don't produce garbage or spin our wheels.
+             * In a perfect world, there would be no errors, because all Int36 calculations at
+             * this point should be positive values, the remainder should always be less than the
+             * divisor, and the entire process should complete within 3 divisions.  But until then,
+             * let's make sure we don't produce garbage or spin our wheels.
              */
             if (i36Tmp.error || i36Tmp.remainder >= 10000000000 || !nMaxDivs--) {
                 s = "error";
@@ -259,6 +259,11 @@ class Int36 {
             i36Rem.set(i36Tmp.remainder);
             do {
                 i36Rem.divNum(10);
+                if (i36Rem.remainder < 0 || i36Rem.remainder > 9) {
+                    quotient = 0;
+                    s = "error";
+                    break;
+                }
                 s = String.fromCharCode(0x30 + i36Rem.remainder) + s;
             } while (--nMinDigits > 0 || i36Rem.value);
         } while (quotient);
