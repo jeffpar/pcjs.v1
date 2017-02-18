@@ -192,10 +192,6 @@ class Int36 {
     constructor(obj, extended)
     {
         this.set(obj, extended);
-        this.bitsRes = [0, 0];
-        this.bitsPow = [0, 0];
-        this.bitsDiv = [0, 0];
-        this.bitsRem = [0, 0];
     }
 
     /**
@@ -594,10 +590,10 @@ class Int36 {
 
         this.extend();
 
-        var bitsRes = Int36.setBits(this.bitsRes, 0, 0);
-        var bitsPow = Int36.setBits(this.bitsPow, 1, 0);
-        var bitsDiv = Int36.setBits(this.bitsDiv, divisor, 0);
-        var bitsRem = Int36.setBits(this.bitsRem, this.value, this.extended);
+        var bitsRes = [0, 0];
+        var bitsPow = [1, 0];
+        var bitsDiv = [divisor, 0];
+        var bitsRem = [this.value, this.extended];
 
         while (Int36.cmpBits(bitsRem, bitsDiv) > 0) {
             Int36.addBits(bitsDiv, bitsDiv);
@@ -752,21 +748,6 @@ class Int36 {
         var result = bitsDst[1] - bitsSrc[1];
         if (!result) result = bitsDst[0] - bitsSrc[0];
         return result;
-    }
-
-    /**
-     * setBits(bits, lo, hi)
-     *
-     * @param {Array.<number>} bits
-     * @param {number} lo
-     * @param {number} hi
-     * @return {Array.<number>}
-     */
-    static setBits(bits, lo, hi)
-    {
-        bits[0] = lo;
-        bits[1] = hi;
-        return bits;
     }
 
     /**
