@@ -590,6 +590,24 @@ class Int36 {
 
         this.extend();
 
+        /*
+         * Initialize the four double-length 72-bit "bits" values we need for the division process.
+         *
+         * The process involves shifting the divisor left 1 bit (ie, doubling it) until it equals
+         * or exceeds the dividend, and then repeatedly subtracting the divisor from the dividend and
+         * shifting the divisor right 1 bit until the divisor is "exhausted" (no bits left), with an
+         * "early out" if the dividend gets "exhausted" first.
+         *
+         * Note that each element of these "bits" arrays is a 36-bit value, so it's rarely a good idea
+         * to use bit-wise operators on them, because those would operate on only the low 32 bits.
+         * Stick with the "bits" worker functions I've created, and trust your JavaScript engine to
+         * inline/optimize the code.
+         *
+         * TODO: Profile this code to determine if individual variables (eg, bitsResLo and bitsResHi)
+         * instead of 2-element arrays is faster and/or less impactful on garbage collection.  I prefer
+         * both the simplified syntax of arrays as well as their extensibility if we ever want/need
+         * to go beyond 72 bits.
+         */
         var bitsRes = [0, 0];
         var bitsPow = [1, 0];
         var bitsDiv = [divisor, 0];
@@ -603,10 +621,11 @@ class Int36 {
             if (Int36.cmpBits(bitsRem, bitsDiv) >= 0) {
                 Int36.subBits(bitsRem, bitsDiv);
                 Int36.addBits(bitsRes, bitsPow);
+                if (Int36.zeroBits(bitsRem)) break;
             }
             Int36.shrBits(bitsDiv);
             Int36.shrBits(bitsPow);
-        } while (bitsPow[0] || bitsPow[1]);
+        } while (!Int36.zeroBits(bitsPow));
 
         /*
          * Since divisors are limited to 36-bit values, something's wrong if we have an extended remainder.
@@ -782,6 +801,18 @@ class Int36 {
             bitsDst[0] += Int36.BIT36;
             bitsDst[1]--;
         }
+    }
+
+    /**
+     * zeroBits(bits)
+     *
+     * True if bits are all zero, false otherwise.
+     *
+     * @param {Array.<number>} bits
+     */
+    static zeroBits(bits)
+    {
+        return !bits[0] && !bits[1];
     }
 
     /**
