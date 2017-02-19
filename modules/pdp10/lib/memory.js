@@ -496,15 +496,10 @@ class MemoryPDP10 {
     writeBitsMemory(offBits, lenBits, bits, off, addr)
     {
         var w = this.aw[off];
-        if (offBits + lenBits <= 32) {
-            var bitsMask = ((1 << lenBits) - 1) << offBits;
-            w = (w & ~bitsMask) | ((bits << offBits) & bitsMask);
-        } else {
-            var shiftBits = Math.pow(2, offBits);
-            bits %= Math.pow(2, lenBits);
-            var v = (w % Math.pow(2, offBits + lenBits));
-            w = (w - v) + (bits * shiftBits) + (v % shiftBits);
-        }
+        var shiftBits = Math.pow(2, offBits);
+        bits %= Math.pow(2, lenBits);
+        var v = (w % Math.pow(2, offBits + lenBits));
+        w = (w - v) + (bits * shiftBits) + (v % shiftBits);
         if (this.aw[off] != w) {
             this.aw[off] = w;
             this.fDirty = true;
