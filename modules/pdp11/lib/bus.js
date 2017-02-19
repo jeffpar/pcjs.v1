@@ -1,5 +1,5 @@
 /**
- * @fileoverview Implements the PDP11 Bus component.
+ * @fileoverview Implements the PDP-11 Bus component.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © Jeff Parsons 2012-2017
  *

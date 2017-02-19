@@ -657,11 +657,11 @@ class Debugger extends Component {
      * @param {boolean} [fStripLeadingZeros]
      * @return {string}
      */
-    toStrBase(n, nBytes, fStripLeadingZeros) {
+    toStrBase(n, nBytes = 0, fStripLeadingZeros = false) {
         var s;
         switch(this.nBase) {
         case 8:
-            s = Str.toOct(n, nBytes * 3 - (nBytes > 2? 1 : 0));
+            s = Str.toOct(n, nBytes * 3 /* - (nBytes > 2? 1 : 0) */);
             break;
         case 10:
             s = n.toString();

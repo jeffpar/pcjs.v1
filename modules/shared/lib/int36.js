@@ -28,8 +28,6 @@
 
 "use strict";
 
-var DEBUG = true;
-
 /*
     From the "PDP-10 System Reference Manual", May 1968, p. 1-4:
 
@@ -116,13 +114,13 @@ var DEBUG = true;
     events in previous instructions.
  */
 
-
 /**
  * @class Int36
  * @property {number} value
  * @property {number|null} extended
  * @property {number|null} remainder
  * @property {number} error
+ * @unrestricted
  *
  * The 'value' property stores the 36-bit value as an unsigned integer.  When the value should be
  * interpreted as a signed quantity, subtract BIT36 whenever value > MAXPOS.
@@ -140,7 +138,6 @@ var DEBUG = true;
  * to the 'extended' portion as the "low order part" and the 'value' portion as the "high order part",
  * presumably because they number the left-most significant bit 0.
  */
-
 class Int36 {
     /**
      * Int36(obj, extended)
@@ -280,7 +277,7 @@ class Int36 {
      * @param {boolean} [fUnsigned] (default is signed for radix 10, unsigned for any other radix)
      * @return {string}
      */
-    toString(radix = 10, fUnsigned)
+    toString(radix = 10, fUnsigned = false)
     {
         if (radix == 10) {
             return this.toDecimal(fUnsigned);

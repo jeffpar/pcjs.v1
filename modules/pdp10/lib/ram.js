@@ -1,5 +1,5 @@
 /**
- * @fileoverview Implements the PDP-11 RAM component.
+ * @fileoverview Implements the PDP-10 RAM component.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © Jeff Parsons 2012-2017
  *
@@ -33,16 +33,16 @@ if (NODE) {
     var Web = require("../../shared/lib/weblib");
     var DumpAPI = require("../../shared/lib/dumpapi");
     var Component = require("../../shared/lib/component");
-    var PDP11 = require("./defines");
-    var MemoryPDP11 = require("./memory");
-    var MessagesPDP11 = require("./messages");
+    var PDP10 = require("./defines");
+    var MemoryPDP10 = require("./memory");
+    var MessagesPDP10 = require("./messages");
 }
 
-class RAMPDP11 extends Component {
+class RAMPDP10 extends Component {
     /**
-     * RAMPDP11(parmsRAM)
+     * RAMPDP10(parmsRAM)
      *
-     * The RAMPDP11 component expects the following (parmsRAM) properties:
+     * The RAMPDP10 component expects the following (parmsRAM) properties:
      *
      *      addr: starting physical address of RAM (default is 0)
      *      size: amount of RAM, in bytes (default is 0, which means defer to motherboard switch settings)
@@ -52,11 +52,6 @@ class RAMPDP11 extends Component {
      *
      * NOTE: We make a note of the specified size, but no memory is initially allocated for the RAM until the
      * Computer component calls powerUp().
-     *
-     * TODO: I seem to recall a PDP-11 diagnostic that failed if total RAM wasn't a multiple of 16Kb; our Bus
-     * component defaults to a block size that matches BusPDP11.IOPAGE_LENGTH (ie, 8Kb), and we even allow partial
-     * block allocations, so internally, we don't have that requirement, but for better compatibility, perhaps we
-     * should display a non-fatal warning if addr or size don't fall on 16Kb boundaries.
      *
      * @param {Object} parmsRAM
      */
@@ -103,11 +98,11 @@ class RAMPDP11 extends Component {
     /**
      * initBus(cmp, bus, cpu, dbg)
      *
-     * @this {RAMPDP11}
-     * @param {ComputerPDP11} cmp
-     * @param {BusPDP11} bus
-     * @param {CPUStatePDP11} cpu
-     * @param {DebuggerPDP11} dbg
+     * @this {RAMPDP10}
+     * @param {ComputerPDP10} cmp
+     * @param {BusPDP10} bus
+     * @param {CPUStatePDP10} cpu
+     * @param {DebuggerPDP10} dbg
      */
     initBus(cmp, bus, cpu, dbg)
     {
@@ -120,7 +115,7 @@ class RAMPDP11 extends Component {
     /**
      * powerUp(data, fRepower)
      *
-     * @this {RAMPDP11}
+     * @this {RAMPDP10}
      * @param {Object|null} data
      * @param {boolean} [fRepower]
      * @return {boolean} true if successful, false if failure
@@ -151,7 +146,7 @@ class RAMPDP11 extends Component {
     /**
      * powerDown(fSave, fShutdown)
      *
-     * @this {RAMPDP11}
+     * @this {RAMPDP10}
      * @param {boolean} [fSave]
      * @param {boolean} [fShutdown]
      * @return {Object|boolean} component state if fSave; otherwise, true if successful, false if failure
@@ -170,7 +165,7 @@ class RAMPDP11 extends Component {
     /**
      * finishLoad(sURL, sData, nErrorCode)
      *
-     * @this {RAMPDP11}
+     * @this {RAMPDP10}
      * @param {string} sURL
      * @param {string} sData
      * @param {number} nErrorCode (response from server if anything other than 200)
@@ -203,14 +198,14 @@ class RAMPDP11 extends Component {
      * until after initBus() has received the Bus component AND finishLoad() has received the data.  When both those
      * criteria are satisfied, the component becomes "ready".
      *
-     * @this {RAMPDP11}
+     * @this {RAMPDP10}
      */
     initRAM()
     {
         if (!this.bus) return;
 
         if (!this.fAllocated && this.sizeRAM) {
-            if (this.bus.addMemory(this.addrRAM, this.sizeRAM, MemoryPDP11.TYPE.RAM)) {
+            if (this.bus.addMemory(this.addrRAM, this.sizeRAM, MemoryPDP10.TYPE.RAM)) {
                 this.fAllocated = true;
             } else {
                 this.sizeRAM = 0;           // don't bother trying again (it just results in redundant error messages)
@@ -245,7 +240,7 @@ class RAMPDP11 extends Component {
     /**
      * reset()
      *
-     * @this {RAMPDP11}
+     * @this {RAMPDP10}
      */
     reset()
     {
@@ -268,7 +263,7 @@ class RAMPDP11 extends Component {
      * If the array contains a PAPER tape image in the "Absolute Format," load it as specified
      * by the format; otherwise, load it as-is using the address(es) supplied.
      *
-     * @this {RAMPDP11}
+     * @this {RAMPDP10}
      * @param {Array|Uint8Array} aBytes
      * @param {number|null} [addrLoad]
      * @param {number|null} [addrExec] (this CAN override any starting address INSIDE the image)
@@ -319,11 +314,11 @@ class RAMPDP11 extends Component {
                 }
                 var offBlock = off;
                 if (w != 0x0001) {
-                    this.printMessage("invalid signature (" + Str.toHexWord(w) + ") at offset " + Str.toHexWord(offBlock), MessagesPDP11.PAPER);
+                    this.printMessage("invalid signature (" + Str.toHexWord(w) + ") at offset " + Str.toHexWord(offBlock), MessagesPDP10.PAPER);
                     break;
                 }
                 if (off + 6 >= aBytes.length) {
-                    this.printMessage("invalid block at offset " + Str.toHexWord(offBlock), MessagesPDP11.PAPER);
+                    this.printMessage("invalid block at offset " + Str.toHexWord(offBlock), MessagesPDP10.PAPER);
                     break;
                 }
                 off += 2;
@@ -337,12 +332,12 @@ class RAMPDP11 extends Component {
                     len--;
                 }
                 if (len != 0 || off >= aBytes.length) {
-                    this.printMessage("insufficient data for block at offset " + Str.toHexWord(offBlock), MessagesPDP11.PAPER);
+                    this.printMessage("insufficient data for block at offset " + Str.toHexWord(offBlock), MessagesPDP10.PAPER);
                     break;
                 }
                 checksum += aBytes[off++] & 0xff;
                 if (checksum & 0xff) {
-                    this.printMessage("invalid checksum (" + Str.toHexByte(checksum) + ") for block at offset " + Str.toHexWord(offBlock), MessagesPDP11.PAPER);
+                    this.printMessage("invalid checksum (" + Str.toHexByte(checksum) + ") for block at offset " + Str.toHexWord(offBlock), MessagesPDP10.PAPER);
                     break;
                 }
                 if (!cbData) {
@@ -351,11 +346,11 @@ class RAMPDP11 extends Component {
                     } else {
                         if (addrExec == null) addrExec = addr;
                     }
-                    if (addrExec != null) this.printMessage("starting address: " + Str.toHexWord(addrExec), MessagesPDP11.PAPER);
+                    if (addrExec != null) this.printMessage("starting address: " + Str.toHexWord(addrExec), MessagesPDP10.PAPER);
                 } else {
-                    this.printMessage("loading " + Str.toHexWord(cbData) + " bytes at " + Str.toHexWord(addr) + "-" + Str.toHexWord(addr + cbData), MessagesPDP11.PAPER);
+                    this.printMessage("loading " + Str.toHexWord(cbData) + " bytes at " + Str.toHexWord(addr) + "-" + Str.toHexWord(addr + cbData), MessagesPDP10.PAPER);
                     while (cbData--) {
-                        this.bus.setByteDirect(addr++, aBytes[offData++] & 0xff);
+                        this.bus.setWordDirect(addr++, aBytes[offData++]);
                     }
                 }
                 fLoaded = true;
@@ -365,7 +360,7 @@ class RAMPDP11 extends Component {
             if (addrLoad == null) addrLoad = addrInit;
             if (addrLoad != null) {
                 for (var i = 0; i < aBytes.length; i++) {
-                    this.bus.setByteDirect(addrLoad + i, aBytes[i]);
+                    this.bus.setWordDirect(addrLoad + i, aBytes[i]);
                 }
                 fLoaded = true;
             }
@@ -391,28 +386,28 @@ class RAMPDP11 extends Component {
     }
 
     /**
-     * RAMPDP11.init()
+     * RAMPDP10.init()
      *
      * This function operates on every HTML element of class "ram", extracting the
-     * JSON-encoded parameters for the RAMPDP11 constructor from the element's "data-value"
-     * attribute, invoking the constructor to create a RAMPDP11 component, and then binding
+     * JSON-encoded parameters for the RAMPDP10 constructor from the element's "data-value"
+     * attribute, invoking the constructor to create a RAMPDP10 component, and then binding
      * any associated HTML controls to the new component.
      */
     static init()
     {
-        var aeRAM = Component.getElementsByClass(document, PDP11.APPCLASS, "ram");
+        var aeRAM = Component.getElementsByClass(document, PDP10.APPCLASS, "ram");
         for (var iRAM = 0; iRAM < aeRAM.length; iRAM++) {
             var eRAM = aeRAM[iRAM];
             var parmsRAM = Component.getComponentParms(eRAM);
-            var ram = new RAMPDP11(parmsRAM);
-            Component.bindComponentControls(ram, eRAM, PDP11.APPCLASS);
+            var ram = new RAMPDP10(parmsRAM);
+            Component.bindComponentControls(ram, eRAM, PDP10.APPCLASS);
         }
     }
 }
 
 /*
- * Initialize all the RAMPDP11 modules on the page.
+ * Initialize all the RAMPDP10 modules on the page.
  */
-Web.onInit(RAMPDP11.init);
+Web.onInit(RAMPDP10.init);
 
-if (NODE) module.exports = RAMPDP11;
+if (NODE) module.exports = RAMPDP10;

@@ -12,7 +12,7 @@
 
 	<xsl:variable name="MACHINETYPE">pc</xsl:variable>
 	<xsl:variable name="CSSCLASS">pcjs</xsl:variable>
-	<xsl:variable name="APPCLASS">pdp11</xsl:variable>
+	<xsl:variable name="APPCLASS">pdp10</xsl:variable>
 	<xsl:variable name="APPNAME">PDPjs</xsl:variable>
 	<xsl:variable name="APPVERSION">1.34.0</xsl:variable>
 	<xsl:variable name="SITEHOST">www.pcjs.org</xsl:variable>

@@ -1,5 +1,5 @@
 /**
- * @fileoverview Implements the PDP11 CPU component.
+ * @fileoverview Implements the PDP-11 CPU component.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © Jeff Parsons 2012-2017
  *
