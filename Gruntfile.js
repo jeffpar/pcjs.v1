@@ -114,6 +114,7 @@ module.exports = function(grunt) {
      * @property {Array.<string>} c1pJSFiles
      * @property {Array.<string>} pcX86Files
      * @property {Array.<string>} pc8080Files
+     * @property {Array.<string>} pdp10Files
      * @property {Array.<string>} pdp11Files
      * @property {Array.<string>} closureCompilerExterns
      */
@@ -122,6 +123,7 @@ module.exports = function(grunt) {
     var tmpC1Pjs  = "./tmp/c1pjs/"  + pkg.version + "/c1p.js";
     var tmpPCx86  = "./tmp/pcx86/"  + pkg.version + "/pcx86.js";
     var tmpPC8080 = "./tmp/pc8080/" + pkg.version + "/pc8080.js";
+    var tmpPDP10  = "./tmp/pdpjs/"  + pkg.version + "/pdp10.js";
     var tmpPDP11  = "./tmp/pdpjs/"  + pkg.version + "/pdp11.js";
 
     grunt.initConfig({
@@ -175,6 +177,19 @@ module.exports = function(grunt) {
             "pc8080-dbg.js": {
                 src: pkg.pc8080Files,
                 dest: "./versions/pc8080/" + pkg.version + "/pc8080-dbg.js"
+            },
+            "pdp10.js": {
+                src: pkg.pdp10Files,
+                dest: "./versions/pdpjs/" + pkg.version + "/pdp10.js",
+                options: {
+                    process: function(src, filepath) {
+                        return (path.basename(filepath) == "debugger.js"? "" : src);
+                    }
+                }
+            },
+            "pdp10-dbg.js": {
+                src: pkg.pdp10Files,
+                dest: "./versions/pdpjs/" + pkg.version + "/pdp10-dbg.js"
             },
             "pdp11.js": {
                 src: pkg.pdp11Files,
@@ -243,6 +258,24 @@ module.exports = function(grunt) {
                     }
                 }
             },
+            "tmp-pdp10": {
+                src: pkg.pdp10Files,
+                dest: tmpPDP10,
+                options: {
+                    banner: '"use strict";\n\n',
+                    process: function(src, filepath) {
+                        return "/**\n * @copyright " + filepath.replace(/^\./, "http://pcjs.org") + " (C) Jeff Parsons 2012-2017\n */\n\n" +
+                            src.replace(/(^|\n)[ \t]*(['"])use strict\2;?/g, '')
+                                .replace(/^(import|export)[ \t]+[^\n]*\n/gm, '')
+                                .replace(/^[ \t]*var\s+\S+\s*=\s*require\((['"]).*?\1\);/gm, '')
+                                .replace(/^[ \t]*(if\s+\(NODE\)\s*|)module\.exports\s*=\s*\S+;/gm, '')
+                                .replace(/\/\*\*\s*\*\s*@fileoverview[\s\S]*?\*\/\s*/g, '')
+                                .replace(/[ \t]*if\s*\(NODE\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '')
+                                .replace(/[ \t]*if\s*\(typeof\s+module\s*!==\s*(['"])undefined\1\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '')
+                                .replace(/[ \t]*[A-Za-z_][A-Za-z0-9_.]*\.assert\([^\n]*\);[^\n]*/g, '');
+                    }
+                }
+            },
             "tmp-pdp11": {
                 src: pkg.pdp11Files,
                 dest: tmpPDP11,
@@ -281,11 +314,14 @@ module.exports = function(grunt) {
                 src: pkg.pc8080Files,
                 dest: tmpPC8080
             },
+            "pdp10.js": {
+                src: pkg.pdp10Files,
+                dest: tmpPDP10
+            },
             "pdp11.js": {
                 src: pkg.pdp11Files,
                 dest: tmpPDP11
             }
-
         },
         closureCompiler: {
             options: {
@@ -293,7 +329,7 @@ module.exports = function(grunt) {
                 compilerFile: "./bin/compiler.jar",
 
                 // [OPTIONAL] set to true if you want to check if files were modified before starting compilation
-                checkModified: grunt.option("rebuild")? false : true,
+                checkModified: !grunt.option("rebuild"),
 
                 // [OPTIONAL] Set Closure Compiler Directives here
                 compilerOpts: {
@@ -420,6 +456,33 @@ module.exports = function(grunt) {
                 src: tmpPC8080,
                 dest: "./versions/pc8080/" + pkg.version + "/pc8080-dbg.js"
             },
+            "pdp10.js": {
+                TEMPcompilerOpts: {
+                    create_source_map: "./tmp/pdpjs/"  + pkg.version + "/pdp10.map",
+                    define: ["\"APPVERSION='" + pkg.version + "'\"",
+                        "\"SITEHOST='www.pcjs.org'\"", "COMPILED=true", "DEBUG=false", "DEBUGGER=false"],
+                    output_wrapper: "\"(function(){%output%})();//# sourceMappingURL=/tmp/pdpjs/" + pkg.version + "/pdp10.map\""
+                    // output_wrapper: "\"(function(){%output%})();\""
+                },
+                // src: pkg.pdp10Files,
+                src: tmpPDP10,
+                dest: "./versions/pdpjs/" + pkg.version + "/pdp10.js"
+            },
+            "pdp10-dbg.js": {
+                /*
+                 * Technically, this is the one case we don't need to override the default 'define' settings, but maybe it's best to be explicit.
+                 */
+                TEMPcompilerOpts: {
+                    create_source_map: "./tmp/pdpjs/"  + pkg.version + "/pdp10-dbg.map",
+                    define: ["\"APPVERSION='" + pkg.version + "'\"",
+                        "\"SITEHOST='www.pcjs.org'\"", "COMPILED=true", "DEBUG=false", "DEBUGGER=true"],
+                    output_wrapper: "\"(function(){%output%})();//# sourceMappingURL=/tmp/pdpjs/" + pkg.version + "/pdp10-dbg.map\""
+                    // output_wrapper: "\"(function(){%output%})();\""
+                },
+                // src: pkg.pdp10Files,
+                src: tmpPDP10,
+                dest: "./versions/pdpjs/" + pkg.version + "/pdp10-dbg.js"
+            },
             "pdp11.js": {
                 TEMPcompilerOpts: {
                     create_source_map: "./tmp/pdpjs/"  + pkg.version + "/pdp11.map",
@@ -517,6 +580,26 @@ module.exports = function(grunt) {
                         s = s.replace(/(<xsl:variable name="APPNAME">)[^<]*(<\/xsl:variable>)/g, "$1PC8080$2");
                         s = s.replace(/(<xsl:variable name="APPVERSION">)[^<]*(<\/xsl:variable>)/g, "$1" + pkg.version + "$2");
                         s = s.replace(/"[^"]*\/?(common.css|common.xsl|components.css|components.xsl|document.css|document.xsl)"/g, '"/versions/pc8080/' + pkg.version + '/$1"');
+                        s = s.replace(/[ \t]*\/\*[^*][\s\S]*?\*\//g, "").replace(/[ \t]*<!--[^@]*?-->[ \t]*\n?/g, "");
+                        return s;
+                    }
+                }
+            },
+            "pdp10": {
+                files: [
+                    {
+                        cwd: "modules/shared/templates/",
+                        src: ["common.css", "common.xsl", "components.*", "document.css", "document.xsl", "machine.xsl", "manifest.xsl", "outline.xsl"],
+                        dest: "versions/pdpjs/<%= pkg.version %>/",
+                        expand: true
+                    }
+                ],
+                options: {
+                    process: function(content, srcPath) {
+                        var s = content.replace(/(<xsl:variable name="APPCLASS">)[^<]*(<\/xsl:variable>)/g, "$1pdp10$2");
+                        s = s.replace(/(<xsl:variable name="APPNAME">)[^<]*(<\/xsl:variable>)/g, "$1PDPjs$2");
+                        s = s.replace(/(<xsl:variable name="APPVERSION">)[^<]*(<\/xsl:variable>)/g, "$1" + pkg.version + "$2");
+                        s = s.replace(/"[^"]*\/?(common.css|common.xsl|components.css|components.xsl|document.css|document.xsl)"/g, '"/versions/pdpjs/' + pkg.version + '/$1"');
                         s = s.replace(/[ \t]*\/\*[^*][\s\S]*?\*\//g, "").replace(/[ \t]*<!--[^@]*?-->[ \t]*\n?/g, "");
                         return s;
                     }
@@ -667,7 +750,7 @@ module.exports = function(grunt) {
     
     grunt.loadTasks("modules/grunts/prepjs/tasks");
 
-    grunt.registerTask("preCompiler", grunt.option("rebuild")? ["concat:tmp-c1pjs", "concat:tmp-pcx86", "concat:tmp-pc8080", "concat:tmp-pdp11"] : ["newer:concat:tmp-c1pjs", "newer:concat:tmp-pcx86", "newer:concat:tmp-pc8080", "newer:concat:tmp-pdp11"]);
+    grunt.registerTask("preCompiler", grunt.option("rebuild")? ["concat:tmp-c1pjs", "concat:tmp-pcx86", "concat:tmp-pc8080", "concat:tmp-pdp10", "concat:tmp-pdp11"] : ["newer:concat:tmp-c1pjs", "newer:concat:tmp-pcx86", "newer:concat:tmp-pc8080", "newer:concat:tmp-pdp10", "newer:concat:tmp-pdp11"]);
 
     grunt.registerTask("compile", ["preCompiler", "closureCompiler", "replace:fix-source-maps"]);
 

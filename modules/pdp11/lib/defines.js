@@ -1,5 +1,5 @@
 /**
- * @fileoverview PDP11-specific compile-time definitions.
+ * @fileoverview PDP-11 compile-time definitions.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © Jeff Parsons 2012-2017
  *

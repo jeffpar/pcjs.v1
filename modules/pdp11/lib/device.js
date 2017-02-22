@@ -1,5 +1,5 @@
 /**
- * @fileoverview Implements PDP11 device support.
+ * @fileoverview Implements PDP-11 device support.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © Jeff Parsons 2012-2017
  *
