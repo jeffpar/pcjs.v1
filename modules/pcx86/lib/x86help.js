@@ -35,81 +35,85 @@ if (NODE) {
 }
 
 /**
- * helpAdd64(dst, src)
+ * helpAdd64(r64Dst, r64Src)
  *
- * Adds src to dst.
+ * Adds r64Src to r64Dst.
  *
- * @param {Array} dst is a 64-bit value
- * @param {Array} src is a 64-bit value
+ * @param {Array.<number>} r64Dst is a 64-bit value
+ * @param {Array.<number>} r64Src is a 64-bit value
  */
-X86.helpAdd64 = function(dst, src)
+X86.helpAdd64 = function(r64Dst, r64Src)
 {
-    dst[0] += src[0];
-    dst[1] += src[1];
-    if (dst[0] > 0xffffffff) {
-        dst[0] >>>= 0;          // truncate dst[0] to 32 bits AND keep it unsigned
-        dst[1]++;
+    r64Dst[0] += r64Src[0];
+    r64Dst[1] += r64Src[1];
+    if (r64Dst[0] > 0xffffffff) {
+        r64Dst[0] >>>= 0;       // truncate r64Dst[0] to 32 bits AND keep it unsigned
+        r64Dst[1]++;
     }
 };
 
 /**
- * helpCmp64(dst, src)
+ * helpCmp64(r64Dst, r64Src)
  *
- * Compares dst to src, by computing dst - src.
+ * Compares r64Dst to r64Src, by computing r64Dst - r64Src.
  *
- * @param {Array} dst is a 64-bit value
- * @param {Array} src is a 64-bit value
- * @return {number} > 0 if dst > src, == 0 if dst == src, < 0 if dst < src
+ * @param {Array.<number>} r64Dst is a 64-bit value
+ * @param {Array.<number>} r64Src is a 64-bit value
+ * @return {number} > 0 if r64Dst > r64Src, == 0 if r64Dst == r64Src, < 0 if r64Dst < r64Src
  */
-X86.helpCmp64 = function(dst, src)
+X86.helpCmp64 = function(r64Dst, r64Src)
 {
-    var result = dst[1] - src[1];
-    if (!result) result = dst[0] - src[0];
+    var result = r64Dst[1] - r64Src[1];
+    if (!result) result = r64Dst[0] - r64Src[0];
     return result;
 };
 
 /**
- * helpSet64(lo, hi)
+ * helpSet64(r64Dst, lo, hi)
  *
+ * @param {Array.<number>} r64Dst
  * @param {number} lo
  * @param {number} hi
+ * @return {Array.<number>}
  */
-X86.helpSet64 = function(lo, hi)
+X86.helpSet64 = function(r64Dst, lo, hi)
 {
-    return [lo >>> 0, hi >>> 0];
+    r64Dst[0] = lo >>> 0;
+    r64Dst[1] = hi >>> 0;
+    return r64Dst;
 };
 
 /**
- * helpShr64(dst)
+ * helpShr64(r64Dst)
  *
- * Shifts dst right one bit.
+ * Shifts r64Dst right one bit.
  *
- * @param {Array} dst is a 64-bit value
+ * @param {Array.<number>} r64Dst is a 64-bit value
  */
-X86.helpShr64 = function(dst)
+X86.helpShr64 = function(r64Dst)
 {
-    dst[0] >>>= 1;
-    if (dst[1] & 0x1) {
-        dst[0] = (dst[0] | 0x80000000) >>> 0;
+    r64Dst[0] >>>= 1;
+    if (r64Dst[1] & 0x1) {
+        r64Dst[0] = (r64Dst[0] | 0x80000000) >>> 0;
     }
-    dst[1] >>>= 1;
+    r64Dst[1] >>>= 1;
 };
 
 /**
- * helpSub64(dst, src)
+ * helpSub64(r64Dst, r64Src)
  *
- * Subtracts src from dst.
+ * Subtracts r64Src from r64Dst.
  *
- * @param {Array} dst is a 64-bit value
- * @param {Array} src is a 64-bit value
+ * @param {Array.<number>} r64Dst is a 64-bit value
+ * @param {Array.<number>} r64Src is a 64-bit value
  */
-X86.helpSub64 = function(dst, src)
+X86.helpSub64 = function(r64Dst, r64Src)
 {
-    dst[0] -= src[0];
-    dst[1] -= src[1];
-    if (dst[0] < 0) {
-        dst[0] >>>= 0;          // truncate dst[0] to 32 bits AND keep it unsigned
-        dst[1]--;
+    r64Dst[0] -= r64Src[0];
+    r64Dst[1] -= r64Src[1];
+    if (r64Dst[0] < 0) {
+        r64Dst[0] >>>= 0;       // truncate r64Dst[0] to 32 bits AND keep it unsigned
+        r64Dst[1]--;
     }
 };
 
@@ -144,32 +148,33 @@ X86.helpDECreg = function(w)
 X86.helpDIV32 = function(dstLo, dstHi, src)
 {
     src >>>= 0;
+
     if (!src || src <= (dstHi >>> 0)) {
         return false;
     }
 
     var result = 0, bit = 1;
 
-    var div = X86.helpSet64(src, 0);
-    var rem = X86.helpSet64(dstLo, dstHi);
+    var r64Div = X86.helpSet64(this.r64Div, src, 0);
+    var r64Rem = X86.helpSet64(this.r64Rem, dstLo, dstHi);
 
-    while (X86.helpCmp64(rem, div) > 0) {
-        X86.helpAdd64(div, div);
+    while (X86.helpCmp64(r64Rem, r64Div) > 0) {
+        X86.helpAdd64(r64Div, r64Div);
         bit += bit;
     }
     do {
-        if (X86.helpCmp64(rem, div) >= 0) {
-            X86.helpSub64(rem, div);
+        if (X86.helpCmp64(r64Rem, r64Div) >= 0) {
+            X86.helpSub64(r64Rem, r64Div);
             result += bit;
         }
-        X86.helpShr64(div);
+        X86.helpShr64(r64Div);
         bit /= 2;
     } while (bit >= 1);
 
-    this.assert(result <= 0xffffffff && !rem[1]);
+    this.assert(result <= 0xffffffff && !r64Rem[1]);
 
-    this.regMDLo = result;              // result is the quotient, which callers expect in the low MD register
-    this.regMDHi = rem[0];              // rem[0] is the remainder, which callers expect in the high MD register
+    this.regMDLo = result;      // result is the quotient, which callers expect in the low MD register
+    this.regMDHi = r64Rem[0];   // r64Rem[0] is the remainder, which callers expect in the high MD register
     return true;
 };
 

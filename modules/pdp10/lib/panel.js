@@ -1,13 +1,9 @@
 /**
- * @fileoverview Implements the PDP-11 Panel component.
+ * @fileoverview Implements the PDP-10 Panel component.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © Jeff Parsons 2012-2017
  *
  * This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
- *
- * It has been adapted from the JavaScript PDP 11/70 Emulator written by Paul Nankervis
- * (paulnank@hotmail.com) at <http://skn.noip.me/pdp11/pdp11.html>.  This code may be used
- * freely provided the original authors are acknowledged in any modified source code.
  *
  * PCjs is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3
@@ -37,9 +33,9 @@ if (NODE) {
     var Web = require("../../shared/lib/weblib");
     var Component = require("../../shared/lib/component");
     var State = require("../../shared/lib/state");
-    var PDP11 = require("./defines");
-    var BusPDP11 = require("./bus");
-    var MessagesPDP11 = require("./messages");
+    var PDP10 = require("./defines");
+    var BusPDP10 = require("./bus");
+    var MessagesPDP10 = require("./messages");
 }
 
 /**
@@ -67,18 +63,18 @@ if (NODE) {
  *
  * @unrestricted
  */
-class PanelPDP11 extends Component {
+class PanelPDP10 extends Component {
     /**
-     * PanelPDP11(parmsPanel)
+     * PanelPDP10(parmsPanel)
      *
-     * The PanelPDP11 component has no required (parmsPanel) properties.
+     * The PanelPDP10 component has no required (parmsPanel) properties.
      *
      * @param {Object} parmsPanel
      * @param {boolean} fBindings (true if panel may have bindings, otherwise not)
      */
     constructor(parmsPanel, fBindings)
     {
-        super("Panel", parmsPanel, MessagesPDP11.PANEL);
+        super("Panel", parmsPanel, MessagesPDP10.PANEL);
 
         /*
          * If there are any live registers, LEDs, etc, to display, this will provide a count.
@@ -120,7 +116,7 @@ class PanelPDP11 extends Component {
         this.fLEDTest = false;              // LED (lamp) test in progress
         this.fExamine = false;              // true if the previously pressed switch was the 'EXAM' switch
         this.fDeposit = false;              // true if the previously pressed switch was the 'DEP' switch
-        this.nAddrSel = PanelPDP11.ADDRSEL.CONS_PHY;
+        this.nAddrSel = PanelPDP10.ADDRSEL.CONS_PHY;
 
         /*
          * Every LED has a simple numeric value, assigned when setBinding() is called:
@@ -165,16 +161,16 @@ class PanelPDP11 extends Component {
             this.switches['S'+i] = [0, 0, false, false, this.processSRSwitch, i];
         }
 
-        /** @type {ComputerPDP11} */
+        /** @type {ComputerPDP10} */
         this.cmp = null;
 
-        /** @type {BusPDP11} */
+        /** @type {BusPDP10} */
         this.bus = null;
 
-        /** @type {CPUStatePDP11} */
+        /** @type {CPUStatePDP10} */
         this.cpu = null;
 
-        /** @type {DebuggerPDP11} */
+        /** @type {DebuggerPDP10} */
         this.dbg = null;
 
         /*
@@ -204,7 +200,7 @@ class PanelPDP11 extends Component {
     /**
      * getAR()
      *
-     * @this {PanelPDP11}
+     * @this {PanelPDP10}
      * @return {number} (current ADDRESS register)
      */
     getAR()
@@ -215,7 +211,7 @@ class PanelPDP11 extends Component {
     /**
      * setAR(value)
      *
-     * @this {PanelPDP11}
+     * @this {PanelPDP10}
      * @param {number} value (new ADDRESS register)
      */
     setAR(value)
@@ -226,7 +222,7 @@ class PanelPDP11 extends Component {
     /**
      * getDR()
      *
-     * @this {PanelPDP11}
+     * @this {PanelPDP10}
      * @return {number} (current DISPLAY register)
      */
     getDR()
@@ -237,7 +233,7 @@ class PanelPDP11 extends Component {
     /**
      * setDR(value)
      *
-     * @this {PanelPDP11}
+     * @this {PanelPDP10}
      * @param {number} value (new DISPLAY register)
      * @return {number}
      */
@@ -249,7 +245,7 @@ class PanelPDP11 extends Component {
     /**
      * getSR()
      *
-     * @this {PanelPDP11}
+     * @this {PanelPDP10}
      * @return {number} (current SWITCH register)
      */
     getSR()
@@ -260,7 +256,7 @@ class PanelPDP11 extends Component {
     /**
      * setSR(value)
      *
-     * @this {PanelPDP11}
+     * @this {PanelPDP10}
      * @param {number} value (new SWITCH register)
      */
     setSR(value)
@@ -271,7 +267,7 @@ class PanelPDP11 extends Component {
     /**
      * getSwitch(name)
      *
-     * @this {PanelPDP11}
+     * @this {PanelPDP10}
      * @param {string} name
      * @return {number|undefined} 0 if switch is off ("down"), 1 if on ("up"), or undefined if unrecognized
      */
@@ -287,7 +283,7 @@ class PanelPDP11 extends Component {
      * the entire machine is reset: once when the Computer's reset() handler calls the Bus's reset() handler,
      * and again when the Computer's reset() handler calls us directly.  Multiple resets should be harmless.
      *
-     * @this {PanelPDP11}
+     * @this {PanelPDP10}
      * @param {boolean} [fPowerUp]
      */
     reset(fPowerUp)
@@ -307,7 +303,7 @@ class PanelPDP11 extends Component {
      * to the Computer, CPU, Keyboard and Debugger components first.  The order shouldn't matter, since any
      * component that doesn't recognize the specified binding should simply ignore it.
      *
-     * @this {PanelPDP11}
+     * @this {PanelPDP10}
      * @param {string|null} sType is the type of the HTML control (eg, "button", "textarea", "register", "flag", "rled", etc)
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "reset")
      * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
@@ -409,11 +405,11 @@ class PanelPDP11 extends Component {
     /**
      * initBus(cmp, bus, cpu, dbg)
      *
-     * @this {PanelPDP11}
-     * @param {ComputerPDP11} cmp
-     * @param {BusPDP11} bus
-     * @param {CPUStatePDP11} cpu
-     * @param {DebuggerPDP11} dbg
+     * @this {PanelPDP10}
+     * @param {ComputerPDP10} cmp
+     * @param {BusPDP10} bus
+     * @param {CPUStatePDP10} cpu
+     * @param {DebuggerPDP10} dbg
      */
     initBus(cmp, bus, cpu, dbg)
     {
@@ -422,9 +418,6 @@ class PanelPDP11 extends Component {
         this.cpu = cpu;
         this.dbg = dbg;
 
-        bus.addIOTable(this, PanelPDP11.UNIBUS_IOTABLE);
-        bus.addResetHandler(this.reset.bind(this));
-
         this.displayLEDs();
         this.displaySwitches();
     }
@@ -432,7 +425,7 @@ class PanelPDP11 extends Component {
     /**
      * powerUp(data, fRepower)
      *
-     * @this {PanelPDP11}
+     * @this {PanelPDP10}
      * @param {Object|null} data
      * @param {boolean} [fRepower]
      * @return {boolean} true if successful, false if failure
@@ -445,7 +438,7 @@ class PanelPDP11 extends Component {
              * components that that might care (eg, CPU, Keyboard, and Debugger) that we have some controls
              * (ie, bindings) they might want to use.
              */
-            if (this.fBindings) PanelPDP11.init();
+            if (this.fBindings) PanelPDP10.init();
 
             if (!data) {
                 this.reset(true);
@@ -459,7 +452,7 @@ class PanelPDP11 extends Component {
     /**
      * powerDown(fSave, fShutdown)
      *
-     * @this {PanelPDP11}
+     * @this {PanelPDP10}
      * @param {boolean} [fSave]
      * @param {boolean} [fShutdown]
      * @return {Object|boolean} component state if fSave; otherwise, true if successful, false if failure
@@ -472,9 +465,9 @@ class PanelPDP11 extends Component {
     /**
      * save()
      *
-     * This implements save support for the PanelPDP11 component.
+     * This implements save support for the PanelPDP10 component.
      *
-     * @this {PanelPDP11}
+     * @this {PanelPDP10}
      * @return {Object}
      */
     save()
@@ -491,9 +484,9 @@ class PanelPDP11 extends Component {
     /**
      * restore(data)
      *
-     * This implements restore support for the PanelPDP11 component.
+     * This implements restore support for the PanelPDP10 component.
      *
-     * @this {PanelPDP11}
+     * @this {PanelPDP10}
      * @param {Object} data
      * @return {boolean} true if successful, false if failure
      */
@@ -511,7 +504,7 @@ class PanelPDP11 extends Component {
     /**
      * resetSwitches()
      *
-     * @this {PanelPDP11}
+     * @this {PanelPDP10}
      * @return {boolean}
      */
     resetSwitches()
@@ -527,7 +520,7 @@ class PanelPDP11 extends Component {
     /**
      * displayLED(sBinding, value)
      *
-     * @this {PanelPDP11}
+     * @this {PanelPDP10}
      * @param {string} sBinding
      * @param {boolean|number} value (true or non-zero if the LED should be on, false or zero if off)
      */
@@ -545,7 +538,7 @@ class PanelPDP11 extends Component {
     /**
      * displayLEDs(override)
      *
-     * @this {PanelPDP11}
+     * @this {PanelPDP10}
      * @param {boolean|number|null} [override] (true turn on all LEDs, false to turn off all LEDs, null or undefined for normal LED activity)
      */
     displayLEDs(override)
@@ -558,7 +551,7 @@ class PanelPDP11 extends Component {
     /**
      * displaySwitch(sBinding, value)
      *
-     * @this {PanelPDP11}
+     * @this {PanelPDP10}
      * @param {string} sBinding
      * @param {boolean|number} value (true if the switch should be "up" (on), false if "down" (off))
      */
@@ -574,7 +567,7 @@ class PanelPDP11 extends Component {
     /**
      * displaySwitches()
      *
-     * @this {PanelPDP11}
+     * @this {PanelPDP10}
      */
     displaySwitches()
     {
@@ -589,7 +582,7 @@ class PanelPDP11 extends Component {
      * This is principally for displaying register values, but in reality, it can be used to display any
      * numeric value bound to the given label.
      *
-     * @this {PanelPDP11}
+     * @this {PanelPDP10}
      * @param {string} sLabel
      * @param {number} nValue
      * @param {number} [cch]
@@ -618,7 +611,7 @@ class PanelPDP11 extends Component {
     /**
      * holdSwitch(fnCallback, sBinding, sDelay)
      *
-     * @this {PanelPDP11}
+     * @this {PanelPDP10}
      * @param {function()|null} fnCallback
      * @param {string} sBinding
      * @param {string} [sDelay]
@@ -644,7 +637,7 @@ class PanelPDP11 extends Component {
     /**
      * setSwitch(sBinding, sValue)
      *
-     * @this {PanelPDP11}
+     * @this {PanelPDP10}
      * @param {string} sBinding
      * @param {string} sValue
      * @return {boolean}
@@ -666,7 +659,7 @@ class PanelPDP11 extends Component {
     /**
      * toggleSwitch(sBinding)
      *
-     * @this {PanelPDP11}
+     * @this {PanelPDP10}
      * @param {string} sBinding
      * @return {boolean}
      */
@@ -682,7 +675,7 @@ class PanelPDP11 extends Component {
     /**
      * pressSwitch(sBinding)
      *
-     * @this {PanelPDP11}
+     * @this {PanelPDP10}
      * @param {string} sBinding
      * @return {boolean}
      */
@@ -709,9 +702,9 @@ class PanelPDP11 extends Component {
              * This helps the next 'DEP' or 'EXAM' press determine if the previous press was the same,
              * while also ignoring any intervening 'STEP' presses (see processStep() for why we do that).
              */
-            if (sBinding != PanelPDP11.SWITCH.STEP) {
-                this.fDeposit = (sBinding == PanelPDP11.SWITCH.DEP);
-                this.fExamine = (sBinding == PanelPDP11.SWITCH.EXAM);
+            if (sBinding != PanelPDP10.SWITCH.STEP) {
+                this.fDeposit = (sBinding == PanelPDP10.SWITCH.DEP);
+                this.fExamine = (sBinding == PanelPDP10.SWITCH.EXAM);
             }
             return true;
         }
@@ -721,7 +714,7 @@ class PanelPDP11 extends Component {
     /**
      * releaseSwitch(sBinding)
      *
-     * @this {PanelPDP11}
+     * @this {PanelPDP10}
      * @param {string} sBinding
      * @return {boolean}
      */
@@ -761,7 +754,7 @@ class PanelPDP11 extends Component {
     /**
      * processStart(value, index)
      *
-     * @this {PanelPDP11}
+     * @this {PanelPDP10}
      * @param {number} value
      * @param {number} [index]
      */
@@ -772,18 +765,11 @@ class PanelPDP11 extends Component {
             this.cpu.setPC(this.regAddr);
 
             /*
-             * TODO: Verify what the PDP-11/70 Handbook means when it says that when the 'START' switch
-             * is depressed, "the computer system will be cleared."  I take it to mean that it performs
-             * the equivalent of a RESET instruction.
-             */
-            this.cpu.resetCPU();
-
-            /*
              * The PDP-11/70 Handbook goes on to say: "If the system needs to be initialized but execution
              * is not wanted, the START switch should be depressed while the HALT/ENABLE switch is in the HALT
              * position."
              */
-            if (this.getSwitch(PanelPDP11.SWITCH.ENABLE)) {
+            if (this.getSwitch(PanelPDP10.SWITCH.ENABLE)) {
                 this.cpu.startCPU();
             }
         }
@@ -802,7 +788,7 @@ class PanelPDP11 extends Component {
      *
      * See processLEDTest() for more of these exciting "innovations".  ;-)
      *
-     * @this {PanelPDP11}
+     * @this {PanelPDP10}
      * @param {number} value
      * @param {number} [index]
      */
@@ -819,7 +805,7 @@ class PanelPDP11 extends Component {
      *
      * If value == 1 (our initial value), then the 'ENABLE'/'HALT' switch is set to 'ENABLE', otherwise 'HALT'.
      *
-     * @this {PanelPDP11}
+     * @this {PanelPDP10}
      * @param {number} value
      * @param {number} [index]
      */
@@ -838,7 +824,7 @@ class PanelPDP11 extends Component {
     /**
      * processContinue(value, index)
      *
-     * @this {PanelPDP11}
+     * @this {PanelPDP10}
      * @param {number} value
      * @param {number} [index]
      */
@@ -849,7 +835,7 @@ class PanelPDP11 extends Component {
              * TODO: Technically, we're also supposed to check the 'STEP' switch to determine if we should
              * step one instruction or just one cycle, but we don't currently have the ability to do the latter.
              */
-            if (!this.getSwitch(PanelPDP11.SWITCH.ENABLE)) {
+            if (!this.getSwitch(PanelPDP10.SWITCH.ENABLE)) {
                 /*
                  * Using the Debugger's stepCPU() function is more convenient, and has the pleasant side-effect
                  * of updating the debugger's display; however, not all machines with a Front Panel will necessarily
@@ -909,7 +895,7 @@ class PanelPDP11 extends Component {
     /**
      * processDeposit(value, index)
      *
-     * @this {PanelPDP11}
+     * @this {PanelPDP10}
      * @param {number} value
      * @param {number} [index]
      */
@@ -923,7 +909,7 @@ class PanelPDP11 extends Component {
              */
             var w = this.setDR(this.regSwitches);
 
-            if (this.nAddrSel == PanelPDP11.ADDRSEL.CONS_PHY) {
+            if (this.nAddrSel == PanelPDP10.ADDRSEL.CONS_PHY) {
                 /*
                  * TODO: Determine if this needs to take the UNIBUS map into consideration.
                  */
@@ -932,7 +918,7 @@ class PanelPDP11 extends Component {
                 /*
                  * TODO: This code is obviously incomplete, since it doesn't take into account the precise ADDRSEL mode.
                  */
-                this.cpu.setWordSafe(this.regAddr, w);
+                this.cpu.writeWord(this.regAddr, w);
             }
         }
     }
@@ -940,7 +926,7 @@ class PanelPDP11 extends Component {
     /**
      * processExamine(value, index)
      *
-     * @this {PanelPDP11}
+     * @this {PanelPDP10}
      * @param {number} value
      * @param {number} [index]
      */
@@ -949,7 +935,7 @@ class PanelPDP11 extends Component {
         if (!value && !this.cpu.isRunning()) {
             var w;
             if (this.fExamine) this.advanceAddr();
-            if (this.nAddrSel == PanelPDP11.ADDRSEL.CONS_PHY) {
+            if (this.nAddrSel == PanelPDP10.ADDRSEL.CONS_PHY) {
                 /*
                  * TODO: Determine if this needs to take the UNIBUS map into consideration.
                  */
@@ -958,7 +944,7 @@ class PanelPDP11 extends Component {
                 /*
                  * TODO: This code is obviously incomplete, since it doesn't take into account the precise ADDRSEL mode.
                  */
-                w = this.cpu.getWordSafe(this.regAddr);
+                w = this.cpu.readWord(this.regAddr);
             }
             /*
              * This used to be updateData(), but that only updates regData, whereas setDR() updates both regData and regDisplay,
@@ -971,7 +957,7 @@ class PanelPDP11 extends Component {
     /**
      * processLoadAddr(value, index)
      *
-     * @this {PanelPDP11}
+     * @this {PanelPDP10}
      * @param {number} value
      * @param {number} [index]
      */
@@ -985,7 +971,7 @@ class PanelPDP11 extends Component {
     /**
      * processLEDTest(value, index)
      *
-     * @this {PanelPDP11}
+     * @this {PanelPDP10}
      * @param {number} value
      * @param {number} [index]
      */
@@ -1007,7 +993,7 @@ class PanelPDP11 extends Component {
     /**
      * processSRSwitch(value, index)
      *
-     * @this {PanelPDP11}
+     * @this {PanelPDP10}
      * @param {number} value (normally 0 or 1, but we only depend on it being zero or non-zero)
      * @param {number} index
      */
@@ -1032,23 +1018,21 @@ class PanelPDP11 extends Component {
      * A third behavior is NOT emulated: preventing the ADDRESS from stepping to the first General Register (177700)
      * from 177676.
      *
-     * @this {PanelPDP11}
+     * @this {PanelPDP10}
      * @return {number}
      */
     advanceAddr()
     {
-        var nRegs = this.cpu.model <= PDP11.MODEL_1140? 8 : 16;
-        var fGenRegs = (this.regAddr >= PDP11.UNIBUS.R0SET0 /*177700*/ && this.regAddr < PDP11.UNIBUS.R0SET0 + nRegs);
-        var inc = fGenRegs? 1 : 2;
-        var mask = fGenRegs? 0xf : this.bus.nBusMask;
-        if (!this.getSwitch(PanelPDP11.SWITCH.STEP)) inc = -inc;
+        var inc = 1;
+        var mask = this.bus.nBusMask;
+        if (!this.getSwitch(PanelPDP10.SWITCH.STEP)) inc = -inc;
         return this.updateAddr((this.regAddr & ~mask) | ((this.regAddr + inc) & mask));
     }
 
     /**
      * updateAddr(value)
      *
-     * @this {PanelPDP11}
+     * @this {PanelPDP10}
      * @param {number} value
      * @return {number}
      */
@@ -1065,13 +1049,13 @@ class PanelPDP11 extends Component {
     /**
      * updateData(value)
      *
-     * @this {PanelPDP11}
+     * @this {PanelPDP10}
      * @param {number} value
      * @return {number}
      */
     updateData(value)
     {
-        this.regData = value & 0xffff;
+        this.regData = value % PDP10.DATA_LIMIT;
         if (this.ledData !== this.regData) {
             this.ledData = this.regData;
             this.updateLEDArray("D", this.ledData, 16);
@@ -1082,7 +1066,7 @@ class PanelPDP11 extends Component {
     /**
      * updateLED(sBinding, value)
      *
-     * @this {PanelPDP11}
+     * @this {PanelPDP10}
      * @param {string} sBinding
      * @param {number} value
      * @return {number}
@@ -1097,7 +1081,7 @@ class PanelPDP11 extends Component {
     /**
      * updateLEDArray(sPrefix, value, nLEDs)
      *
-     * @this {PanelPDP11}
+     * @this {PanelPDP10}
      * @param {string} sPrefix
      * @param {number} value
      * @param {number} nLEDs
@@ -1113,7 +1097,7 @@ class PanelPDP11 extends Component {
     /**
      * setSRSwitches(value)
      *
-     * @this {PanelPDP11}
+     * @this {PanelPDP10}
      * @param {number|undefined} value
      * @return {boolean}
      */
@@ -1135,13 +1119,13 @@ class PanelPDP11 extends Component {
      *
      * This is a notification handler, called by the Computer, to inform us the CPU has now stopped.
      *
-     * @this {PanelPDP11}
+     * @this {PanelPDP10}
      * @param {number} [ms]
      * @param {number} [nCycles]
      */
     stop(ms, nCycles)
     {
-        this.updateAddr(this.cpu.regsGen[7]);
+        this.updateAddr(this.cpu.getPC());
     }
 
     /**
@@ -1150,7 +1134,7 @@ class PanelPDP11 extends Component {
      * This interface is for passing new addresses to the Front Panel.  However, whether or not this will become the
      * ADDRESS actually displayed will depend on other settings (see updateStatus() for details).
      *
-     * @this {PanelPDP11}
+     * @this {PanelPDP10}
      * @param {number} value
      * @param {boolean} [fActive] (true if this should become the "active" ADDRESS regardless of other settings)
      */
@@ -1165,7 +1149,7 @@ class PanelPDP11 extends Component {
      * This interface is for passing new data to the Front Panel.  However, whether or not this will become the
      * DATA actually displayed will depend on the Front Panel's DATASEL switch setting, as well as the fActive flag.
      *
-     * @this {PanelPDP11}
+     * @this {PanelPDP10}
      * @param {number} value
      * @param {boolean} [fActive] (true if this should become the "active" DATA regardless of the DATASEL switch setting)
      */
@@ -1183,7 +1167,7 @@ class PanelPDP11 extends Component {
      *
      * Called by the Computer component at intervals to update registers, LEDs, etc.
      *
-     * @this {PanelPDP11}
+     * @this {PanelPDP10}
      * @param {number} [nUpdate] (-2 for power on, -1 for forced, > 0 for periodic, 0 or undefined otherwise)
      */
     updateDisplay(nUpdate)
@@ -1202,15 +1186,7 @@ class PanelPDP11 extends Component {
                  * is a periodic update AND our periodic update counter hasn't reached the periodic update limit.
                  */
                 if (nUpdate <= 0 || (this.nDisplayCount += nUpdate) >= this.nDisplayLimit) {
-                    for (var i = 0; i < this.cpu.regsGen.length; i++) {
-                        this.displayValue('R'+i, this.cpu.regsGen[i]);
-                    }
-                    var regPSW = this.cpu.getPSW();
-                    this.displayValue("PS", regPSW);
-                    this.displayValue("NF", (regPSW & PDP11.PSW.NF)? 1 : 0, 1);
-                    this.displayValue("ZF", (regPSW & PDP11.PSW.ZF)? 1 : 0, 1);
-                    this.displayValue("VF", (regPSW & PDP11.PSW.VF)? 1 : 0, 1);
-                    this.displayValue("CF", (regPSW & PDP11.PSW.CF)? 1 : 0, 1);
+                    this.displayValue("PC", this.cpu.getPC());
                     this.nDisplayCount = 0;
                 }
 
@@ -1221,62 +1197,23 @@ class PanelPDP11 extends Component {
                  * we are acting as if the DATASEL switch setting is locked to "DISPLAY REGISTER".
                  */
                 if (nUpdate < -1) {
-                    this.regAddr = this.cpu.regsGen[7];
+                    this.regAddr = this.cpu.getPC();
                 } else if (nUpdate > 0 && fRunning && !fWaiting) {
                     this.regAddr = this.cpu.getLastAddr();
                 }
 
                 this.updateAddr(this.regAddr);
                 this.updateData(this.regDisplay);
-
-                var bits = this.cpu.getMMUState();
-                /*
-                 * Bit 0 set if 22-bit, bit 1 set if 18-bit, bit 2 set if 16-bit
-                 */
-                this.updateLED(PanelPDP11.LED.B22, bits & 1);
-                this.updateLED(PanelPDP11.LED.B18, bits & 2);
-                this.updateLED(PanelPDP11.LED.B16, bits & 4);
             }
         }
     }
 
     /**
-     * readCNSW(addr, fPreWrite)
-     *
-     * If fPreWrite, this is a read-before-write, so we must return the DISPLAY register (ie, regDisplay);
-     * otherwise, this a normal read, so we should return the SWITCH register (ie, regSwitches).
-     *
-     *
-     * @this {PanelPDP11}
-     * @param {number} addr (eg, PDP11.UNIBUS.CNSW or 177570)
-     * @param {boolean} [fPreWrite]
-     * @return {number}
-     */
-    readCNSW(addr, fPreWrite)
-    {
-        return (fPreWrite? this.regDisplay : this.regSwitches) & 0xffff;
-    }
-
-    /**
-     * writeCNSW(value, addr)
-     *
-     * Handles writes to the DISPLAY register (ie, regDisplay).
-     *
-     * @this {PanelPDP11}
-     * @param {number} value
-     * @param {number} addr (eg, PDP11.UNIBUS.CNSW or 177570)
-     */
-    writeCNSW(value, addr)
-    {
-        this.regDisplay = value;
-    }
-
-    /**
-     * PanelPDP11.init()
+     * PanelPDP10.init()
      *
      * This function operates on every HTML element of class "panel", extracting the
-     * JSON-encoded parameters for the PanelPDP11 constructor from the element's "data-value"
-     * attribute, invoking the constructor to create a PanelPDP11 component, and then binding
+     * JSON-encoded parameters for the PanelPDP10 constructor from the element's "data-value"
+     * attribute, invoking the constructor to create a PanelPDP10 component, and then binding
      * any associated HTML controls to the new component.
      *
      * NOTE: Unlike most other component init() functions, this one is designed to be
@@ -1290,57 +1227,40 @@ class PanelPDP11 extends Component {
      */
     static init()
     {
-        var aePanels = Component.getElementsByClass(document, PDP11.APPCLASS, "panel");
+        var aePanels = Component.getElementsByClass(document, PDP10.APPCLASS, "panel");
         for (var iPanel=0; iPanel < aePanels.length; iPanel++) {
             var ePanel = aePanels[iPanel];
             var parmsPanel = Component.getComponentParms(ePanel);
             var panel = Component.getComponentByID(parmsPanel['id']);
-            if (!panel) panel = new PanelPDP11(parmsPanel, true);
-            Component.bindComponentControls(panel, ePanel, PDP11.APPCLASS);
+            if (!panel) panel = new PanelPDP10(parmsPanel, true);
+            Component.bindComponentControls(panel, ePanel, PDP10.APPCLASS);
         }
     }
 }
 
-PanelPDP11.ADDRSEL = {
-    KERNEL_I:   0,      // use a 16-bit virtual address where bits 16 to 21 are always OFF
-    KERNEL_D:   1,      // use a 16-bit virtual address where bits 16 to 21 are always OFF
-    SUPER_I:    2,      // use a 16-bit virtual address where bits 16 to 21 are always OFF
-    SUPER_D:    3,      // use a 16-bit virtual address where bits 16 to 21 are always OFF
-    USER_I:     4,      // use a 16-bit virtual address where bits 16 to 21 are always OFF
-    USER_D:     5,      // use a 16-bit virtual address where bits 16 to 21 are always OFF
-    PROG_PHY:   6,      // display the 22-bit physical address of the current bus cycle generated by the MMU
-    CONS_PHY:   7       // use a 22-bit physical address to perform console operations (e.g., LOAD ADRS, EXAM, & DEP)
+PanelPDP10.ADDRSEL = {
+    CONS_PHY:   7       // use a physical address to perform console operations (e.g., LOAD ADRS, EXAM, & DEP)
 };
 
 /*
  * To get the current state of a switch; eg::
  *
- *      this.getSwitch(PanelPDP11.SWITCH.ENABLE)
+ *      this.getSwitch(PanelPDP10.SWITCH.ENABLE)
  *
  * I haven't filled out this table, primarily it only needs to list switches we actually query
  * (eg, non-momentary ones like 'ENABLE' and 'STEP', and 'EXAM' and 'DEP' since they have special
  * "step" behavior when pressed more than once in a row).  Ditto for the LED table.
  */
-PanelPDP11.SWITCH = {
+PanelPDP10.SWITCH = {
     DEP:    'DEP',
     ENABLE: 'ENABLE',
     EXAM:   'EXAM',
     STEP:   'STEP'
 };
 
-PanelPDP11.LED = {
-    B16:    'B16',
-    B18:    'B18',
-    B22:    'B22'
-};
-
-PanelPDP11.UNIBUS_IOTABLE = {
-    [PDP11.UNIBUS.CNSW]:    /* 177570 */    [null, null, PanelPDP11.prototype.readCNSW, PanelPDP11.prototype.writeCNSW, "CNSW"]
-};
-
 /*
  * Initialize every Panel module on the page.
  */
-Web.onInit(PanelPDP11.init);
+Web.onInit(PanelPDP10.init);
 
-if (NODE) module.exports = PanelPDP11;
+if (NODE) module.exports = PanelPDP10;

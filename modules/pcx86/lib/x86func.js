@@ -1773,6 +1773,9 @@ X86.fnMULb = function(dst, src)
  *
  * This sets regMDHi:regMDLo to the 64-bit result of dst * src, both of which are treated as unsigned.
  *
+ * The algorithm is based on the traditional "by hand" multiplication method, by treating the two inputs
+ * (dst and src) as two 2-digit numbers, where each digit is a base-65536 digit.
+ *
  * @this {X86CPU}
  * @param {number} dst (any 32-bit number, treated as unsigned)
  * @param {number} src (any 32-bit number, treated as unsigned)

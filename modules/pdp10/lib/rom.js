@@ -1,5 +1,5 @@
 /**
- * @fileoverview Implements the PDP-11 ROM component.
+ * @fileoverview Implements the PDP-10 ROM component.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © Jeff Parsons 2012-2017
  *
@@ -33,17 +33,17 @@ if (NODE) {
     var Web = require("../../shared/lib/weblib");
     var DumpAPI = require("../../shared/lib/dumpapi");
     var Component = require("../../shared/lib/component");
-    var PDP11 = require("./defines");
-    var BusPDP11 = require("./bus");
-    var MemoryPDP11 = require("./memory");
-    var MessagesPDP11 = require("./messages");
+    var PDP10 = require("./defines");
+    var BusPDP10 = require("./bus");
+    var MemoryPDP10 = require("./memory");
+    var MessagesPDP10 = require("./messages");
 }
 
-class ROMPDP11 extends Component {
+class ROMPDP10 extends Component {
     /**
-     * ROMPDP11(parmsROM)
+     * ROMPDP10(parmsROM)
      *
-     * The ROMPDP11 component expects the following (parmsROM) properties:
+     * The ROMPDP10 component expects the following (parmsROM) properties:
      *
      *      addr: physical address of ROM
      *      size: amount of ROM, in bytes
@@ -60,7 +60,7 @@ class ROMPDP11 extends Component {
      */
     constructor(parmsROM)
     {
-        super("ROM", parmsROM, MessagesPDP11.ROM);
+        super("ROM", parmsROM, MessagesPDP10.ROM);
 
         this.abInit = null;
         this.aSymbols = null;
@@ -110,11 +110,11 @@ class ROMPDP11 extends Component {
     /**
      * initBus(cmp, bus, cpu, dbg)
      *
-     * @this {ROMPDP11}
-     * @param {ComputerPDP11} cmp
-     * @param {BusPDP11} bus
-     * @param {CPUStatePDP11} cpu
-     * @param {DebuggerPDP11} dbg
+     * @this {ROMPDP10}
+     * @param {ComputerPDP10} cmp
+     * @param {BusPDP10} bus
+     * @param {CPUStatePDP10} cpu
+     * @param {DebuggerPDP10} dbg
      */
     initBus(cmp, bus, cpu, dbg)
     {
@@ -127,7 +127,7 @@ class ROMPDP11 extends Component {
     /**
      * powerUp(data, fRepower)
      *
-     * @this {ROMPDP11}
+     * @this {ROMPDP10}
      * @param {Object|null} data
      * @param {boolean} [fRepower]
      * @return {boolean} true if successful, false if failure
@@ -155,7 +155,7 @@ class ROMPDP11 extends Component {
      * useful down the road, like user-defined symbols (ie, symbols that the Debugger may have
      * created, above and beyond those symbols we automatically loaded, if any, along with the ROM).
      *
-     * @this {ROMPDP11}
+     * @this {ROMPDP10}
      * @param {boolean} [fSave]
      * @param {boolean} [fShutdown]
      * @return {Object|boolean} component state if fSave; otherwise, true if successful, false if failure
@@ -168,7 +168,7 @@ class ROMPDP11 extends Component {
     /**
      * finishLoad(sURL, sData, nErrorCode)
      *
-     * @this {ROMPDP11}
+     * @this {ROMPDP10}
      * @param {string} sURL
      * @param {string} sData
      * @param {number} nErrorCode (response from server if anything other than 200)
@@ -199,7 +199,7 @@ class ROMPDP11 extends Component {
      * until after initBus() has received the Bus component AND finishLoad() has received the data.  When both those
      * criteria are satisfied, the component becomes "ready".
      *
-     * @this {ROMPDP11}
+     * @this {ROMPDP10}
      */
     initROM()
     {
@@ -258,38 +258,17 @@ class ROMPDP11 extends Component {
     /**
      * addROM(addr)
      *
-     * @this {ROMPDP11}
+     * @this {ROMPDP10}
      * @param {number} addr
      * @return {boolean}
      */
     addROM(addr)
     {
-        if (addr >= BusPDP11.IOPAGE_16BIT && addr < BusPDP11.IOPAGE_16BIT + BusPDP11.IOPAGE_LENGTH) {
-            /*
-             * This code has been added as a work-around to effectively allow us to install small ROMs into portions
-             * of the IOPAGE address space, by installing I/O handlers for the entire range that return the corresponding
-             * bytes of the current ROM image on reads, and ignore any writes (which I'm only assuming is how a typical
-             * ROM "device" deals with writes; we could remove the write handler, but then writes would fault).
-             *
-             * TODO: It would be more efficient if we parsed ROM data as words rather than bytes, and then installed
-             * only word handlers instead of only byte handlers.  It was done this way purely for historical reasons (ie,
-             * because that's how other PCjs machines parse their ROMs).  For now, all this means is that executing code
-             * out of ROM will be slower than out of RAM -- although that's often true in the real world as well.
-             */
-            var IOTable = {
-                [addr]: [ROMPDP11.prototype.readROMByte, ROMPDP11.prototype.writeROMByte, null, null, null, this.sizeROM >> 1]
-            };
-            if (this.bus.addIOTable(this, IOTable)) {
-                this.status("Added " + this.sizeROM + "-byte ROM at " + Str.toOct(addr));
-                this.fRetainROM = true;
-                return true;
-            }
-        }
-        else if (this.bus.addMemory(addr, this.sizeROM, MemoryPDP11.TYPE.ROM)) {
+        if (this.bus.addMemory(addr, this.sizeROM, MemoryPDP10.TYPE.ROM)) {
             if (DEBUG) this.log("addROM(): copying ROM to " + Str.toHexLong(addr) + " (" + Str.toHexLong(this.abInit.length) + " bytes)");
             var i;
             for (i = 0; i < this.abInit.length; i++) {
-                this.bus.setByteDirect(addr + i, this.abInit[i]);
+                this.bus.setWordDirect(addr + i, this.abInit[i]);
             }
             return true;
         }
@@ -310,7 +289,7 @@ class ROMPDP11 extends Component {
      * Now that the Bus component provides low-level getMemoryBlocks() and setMemoryBlocks() methods
      * to manually get and set the blocks of any memory range, it is now possible to create true aliases.
      *
-     * @this {ROMPDP11}
+     * @this {ROMPDP10}
      * @param {number} addr
      */
     cloneROM(addr)
@@ -320,51 +299,21 @@ class ROMPDP11 extends Component {
     }
 
     /**
-     * readROMByte(addr)
-     *
-     * @this {ROMPDP11}
-     * @param {number} addr
-     * @return {number}
-     */
-    readROMByte(addr)
-    {
-        var i = (addr - this.addrROM);
-        return this.abInit[i];
-    }
-
-    /**
-     * writeROMByte(data, addr)
-     *
-     * This handler exists simply to ignore any writes, so that they don't cause faults.
-     *
-     * TODO: Another possible use for this would be to allow the Debugger to alter ROM contents,
-     * if the Debugger were to provide an interface indicating whether or not it was responsible
-     * for this write.
-     *
-     * @this {ROMPDP11}
-     * @param {number} data
-     * @param {number} addr
-     */
-    writeROMByte(data, addr)
-    {
-    }
-
-    /**
-     * ROMPDP11.init()
+     * ROMPDP10.init()
      *
      * This function operates on every HTML element of class "rom", extracting the
-     * JSON-encoded parameters for the ROMPDP11 constructor from the element's "data-value"
-     * attribute, invoking the constructor to create a ROMPDP11 component, and then binding
+     * JSON-encoded parameters for the ROMPDP10 constructor from the element's "data-value"
+     * attribute, invoking the constructor to create a ROMPDP10 component, and then binding
      * any associated HTML controls to the new component.
      */
     static init()
     {
-        var aeROM = Component.getElementsByClass(document, PDP11.APPCLASS, "rom");
+        var aeROM = Component.getElementsByClass(document, PDP10.APPCLASS, "rom");
         for (var iROM = 0; iROM < aeROM.length; iROM++) {
             var eROM = aeROM[iROM];
             var parmsROM = Component.getComponentParms(eROM);
-            var rom = new ROMPDP11(parmsROM);
-            Component.bindComponentControls(rom, eROM, PDP11.APPCLASS);
+            var rom = new ROMPDP10(parmsROM);
+            Component.bindComponentControls(rom, eROM, PDP10.APPCLASS);
         }
     }
 }
@@ -383,8 +332,8 @@ class ROMPDP11 extends Component {
  */
 
 /*
- * Initialize all the ROMPDP11 modules on the page.
+ * Initialize all the ROMPDP10 modules on the page.
  */
-Web.onInit(ROMPDP11.init);
+Web.onInit(ROMPDP10.init);
 
-if (NODE) module.exports = ROMPDP11;
+if (NODE) module.exports = ROMPDP10;

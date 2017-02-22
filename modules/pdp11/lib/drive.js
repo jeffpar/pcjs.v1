@@ -1,5 +1,5 @@
 /**
- * @fileoverview Implements a generic disk drive controller
+ * @fileoverview Implements a generic disk drive controller.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © Jeff Parsons 2012-2017
  *

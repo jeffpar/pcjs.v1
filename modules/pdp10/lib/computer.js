@@ -1,5 +1,5 @@
 /**
- * @fileoverview Implements the PDP-11 Computer component.
+ * @fileoverview Implements the PDP-10 Computer component.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © Jeff Parsons 2012-2017
  *
@@ -36,16 +36,16 @@ if (NODE) {
     var ReportAPI = require("../../shared/lib/reportapi");
     var Component = require("../../shared/lib/component");
     var State = require("../../shared/lib/state");
-    var PDP11 = require("./defines");
-    var BusPDP11 = require("./bus");
-    var MessagesPDP11 = require("./messages");
+    var PDP10 = require("./defines");
+    var BusPDP10 = require("./bus");
+    var MessagesPDP10 = require("./messages");
 }
 
-class ComputerPDP11 extends Component {
+class ComputerPDP10 extends Component {
     /**
-     * ComputerPDP11(parmsComputer, parmsMachine, fSuspended)
+     * ComputerPDP10(parmsComputer, parmsMachine, fSuspended)
      *
-     * The ComputerPDP11 component has no required (parmsComputer) properties, but it does
+     * The ComputerPDP10 component has no required (parmsComputer) properties, but it does
      * support the following:
      *
      *      autoPower: true to automatically power the computer (default), false to wait;
@@ -56,7 +56,7 @@ class ComputerPDP11 extends Component {
      *      while 24 is required for 80286 protected-mode addressing.  This value is passed
      *      directly through to the Bus component; see that component for more details.
      *
-     *      resume: one of the ComputerPDP11.RESUME constants, which are as follows:
+     *      resume: one of the ComputerPDP10.RESUME constants, which are as follows:
      *          '0' if resume disabled (default)
      *          '1' if enabled without prompting
      *          '2' if enabled with prompting
@@ -70,13 +70,13 @@ class ComputerPDP11 extends Component {
      *      autoMount: if set, this should override any 'autoMount' property in the FDC's
      *      parmsFDC object.
      *
-     *      autoPower: if set, this should override any 'autoPower' property in the ComputerPDP11's
+     *      autoPower: if set, this should override any 'autoPower' property in the ComputerPDP10's
      *      parmsComputer object.
      *
      *      messages: if set, this should override any 'messages' property in the Debugger's
      *      parmsDbg object.
      *
-     *      state: if set, this should override any 'state' property in the ComputerPDP11's
+     *      state: if set, this should override any 'state' property in the ComputerPDP10's
      *      parmsComputer object.
      *
      *      url: the location of the machine XML file
@@ -104,7 +104,7 @@ class ComputerPDP11 extends Component {
      */
     constructor(parmsComputer, parmsMachine, fSuspended)
     {
-        super("Computer", parmsComputer, MessagesPDP11.COMPUTER);
+        super("Computer", parmsComputer, MessagesPDP10.COMPUTER);
 
         this.flags.powered = false;
 
@@ -147,24 +147,24 @@ class ComputerPDP11 extends Component {
          * where we know getComponentByType() will only return an CPUState object or null), wrap the expression
          * in parentheses.  I never knew this until I stumbled across it in "Closure: The Definitive Guide".
          */
-        this.cpu = /** @type {CPUStatePDP11} */ (Component.getComponentByType("CPU", this.id));
+        this.cpu = /** @type {CPUStatePDP10} */ (Component.getComponentByType("CPU", this.id));
         if (!this.cpu) {
             Component.error("Unable to find CPU component");
             return;
         }
-        this.dbg = /** @type {DebuggerPDP11} */ (Component.getComponentByType("Debugger", this.id));
+        this.dbg = /** @type {DebuggerPDP10} */ (Component.getComponentByType("Debugger", this.id));
 
         /*
          * Initialize the Bus component
          */
-        this.bus = new BusPDP11({'id': this.idMachine + '.bus', 'busWidth': this.nBusWidth}, this.cpu, this.dbg);
+        this.bus = new BusPDP10({'id': this.idMachine + '.bus', 'busWidth': this.nBusWidth}, this.cpu, this.dbg);
 
         /*
          * Iterate through all the components and connect them to the Control Panel, if any
          */
         var iComponent, component;
         var aComponents = Component.getComponents(this.id);
-        this.panel = /** @type {PanelPDP11} */ (Component.getComponentByType("Panel", this.id));
+        this.panel = /** @type {PanelPDP10} */ (Component.getComponentByType("Panel", this.id));
 
         if (this.panel && this.panel.controlPrint) {
             for (iComponent = 0; iComponent < aComponents.length; iComponent++) {
@@ -180,11 +180,7 @@ class ComputerPDP11 extends Component {
             }
         }
 
-        this.println(PDP11.APPNAME + " v" + PDP11.APPVERSION + "\n" + COPYRIGHT + "\n" + LICENSE);
-
-        this.println("Portions adapted from the PDP-11/70 Emulator by Paul Nankervis <http://skn.noip.me/pdp11/pdp11.html>");
-
-        if (DEBUG && this.messageEnabled()) this.printMessage("TYPEDARRAYS: " + TYPEDARRAYS);
+        this.println(PDP10.APPNAME + " v" + PDP10.APPVERSION + "\n" + COPYRIGHT + "\n" + LICENSE);
 
         /*
          * Iterate through all the components again and call their initBus() handler, if any
@@ -228,10 +224,10 @@ class ComputerPDP11 extends Component {
             this.sStatePath = sStatePath = sState;
             if (!fAllowResume) {
                 this.fServerState = true;
-                this.resume = ComputerPDP11.RESUME_NONE;
+                this.resume = ComputerPDP10.RESUME_NONE;
             }
             if (this.resume) {
-                this.stateComputer = new State(this, PDP11.APPVERSION);
+                this.stateComputer = new State(this, PDP10.APPVERSION);
                 if (this.stateComputer.load()) {
                     sStatePath = null;
                 } else {
@@ -369,7 +365,7 @@ class ComputerPDP11 extends Component {
     /**
      * finishStateLoad(sURL, sStateData, nErrorCode)
      *
-     * @this {ComputerPDP11}
+     * @this {ComputerPDP10}
      * @param {string} sURL
      * @param {string} sStateData
      * @param {number} nErrorCode
@@ -404,7 +400,7 @@ class ComputerPDP11 extends Component {
      *
      *      param {function(this:Computer, (number|Array|undefined)): undefined} fn
      *
-     * @this {ComputerPDP11}
+     * @this {ComputerPDP10}
      * @param {function(...)} fn
      * @param {number|Array} [parms] optional parameters
      */
@@ -421,7 +417,7 @@ class ComputerPDP11 extends Component {
                 return;
             }
         }
-        if (DEBUG && this.messageEnabled()) this.printMessage("ComputerPDP11.wait(ready)");
+        if (DEBUG && this.messageEnabled()) this.printMessage("ComputerPDP10.wait(ready)");
         //noinspection JSUnresolvedFunction
         fn.call(this, parms);
     }
@@ -431,17 +427,17 @@ class ComputerPDP11 extends Component {
      *
      * NOTE: We clear() stateValidate only when there's no stateComputer.
      *
-     * @this {ComputerPDP11}
+     * @this {ComputerPDP10}
      * @param {State|null} [stateComputer]
      * @return {boolean} true if state passes validation, false if not
      */
     validateState(stateComputer)
     {
         var fValid = true;
-        var stateValidate = new State(this, PDP11.APPVERSION, ComputerPDP11.STATE_VALIDATE);
+        var stateValidate = new State(this, PDP10.APPVERSION, ComputerPDP10.STATE_VALIDATE);
         if (stateValidate.load() && stateValidate.parse()) {
-            var sTimestampValidate = stateValidate.get(ComputerPDP11.STATE_TIMESTAMP);
-            var sTimestampComputer = stateComputer? stateComputer.get(ComputerPDP11.STATE_TIMESTAMP) : "unknown";
+            var sTimestampValidate = stateValidate.get(ComputerPDP10.STATE_TIMESTAMP);
+            var sTimestampComputer = stateComputer? stateComputer.get(ComputerPDP10.STATE_TIMESTAMP) : "unknown";
             if (sTimestampValidate != sTimestampComputer) {
                 this.notice("Machine state may be out-of-date\n(" + sTimestampValidate + " vs. " + sTimestampComputer + ")\nCheck your browser's local storage limits");
                 fValid = false;
@@ -460,17 +456,17 @@ class ComputerPDP11 extends Component {
      *
      * Power every component "up", applying any previously available state information.
      *
-     * @this {ComputerPDP11}
+     * @this {ComputerPDP10}
      * @param {number} [resume] is a valid RESUME value; default is this.resume
      */
     powerOn(resume)
     {
         if (resume === undefined) {
-            resume = this.resume || (this.sStateData? ComputerPDP11.RESUME_AUTO : ComputerPDP11.RESUME_NONE);
+            resume = this.resume || (this.sStateData? ComputerPDP10.RESUME_AUTO : ComputerPDP10.RESUME_NONE);
         }
 
         if (DEBUG && this.messageEnabled()) {
-            this.printMessage("ComputerPDP11.powerOn(" + (resume == ComputerPDP11.RESUME_REPOWER ? "repower" : (resume ? "resume" : "")) + ")");
+            this.printMessage("ComputerPDP10.powerOn(" + (resume == ComputerPDP10.RESUME_REPOWER ? "repower" : (resume ? "resume" : "")) + ")");
         }
 
         if (this.nPowerChange) {
@@ -481,12 +477,12 @@ class ComputerPDP11 extends Component {
         var fRepower = false;
         var fRestore = false;
         this.fRestoreError = false;
-        var stateComputer = this.stateComputer || new State(this, PDP11.APPVERSION);
+        var stateComputer = this.stateComputer || new State(this, PDP10.APPVERSION);
 
-        if (resume == ComputerPDP11.RESUME_REPOWER) {
+        if (resume == ComputerPDP10.RESUME_REPOWER) {
             fRepower = true;
         }
-        else if (resume > ComputerPDP11.RESUME_NONE) {
+        else if (resume > ComputerPDP10.RESUME_NONE) {
             if (stateComputer.load(this.sStateData)) {
                 /*
                  * Since we're resuming something (either a predefined state or a state from localStorage), let's
@@ -494,7 +490,7 @@ class ComputerPDP11 extends Component {
                  * Which means, of course, that if a previous "failsafe" checkpoint already exists, something bad
                  * may have happened the last time around.
                  */
-                this.stateFailSafe = new State(this, PDP11.APPVERSION, ComputerPDP11.STATE_FAILSAFE);
+                this.stateFailSafe = new State(this, PDP10.APPVERSION, ComputerPDP10.STATE_FAILSAFE);
                 if (this.stateFailSafe.load()) {
                     this.powerReport(stateComputer);
                     /*
@@ -502,7 +498,7 @@ class ComputerPDP11 extends Component {
                      * all the way to RESUME_PROMPT, so that the user will be prompted, and if the user declines to
                      * restore, the state will be removed.
                      */
-                    resume = ComputerPDP11.RESUME_PROMPT;
+                    resume = ComputerPDP10.RESUME_PROMPT;
                     /*
                      * To ensure that the set() below succeeds, we need to call unload(), otherwise it may fail
                      * with a "read only" error (eg, "TypeError: Cannot assign to read only property 'timestamp'").
@@ -510,11 +506,11 @@ class ComputerPDP11 extends Component {
                     this.stateFailSafe.unload();
                 }
 
-                this.stateFailSafe.set(ComputerPDP11.STATE_TIMESTAMP, Usr.getTimestamp());
+                this.stateFailSafe.set(ComputerPDP10.STATE_TIMESTAMP, Usr.getTimestamp());
                 this.stateFailSafe.store();
 
                 var fValidate = this.resume && !this.fServerState;
-                if (resume == ComputerPDP11.RESUME_AUTO || Component.confirmUser("Click OK to restore the previous " + PDP11.APPNAME + " machine state, or CANCEL to reset the machine.")) {
+                if (resume == ComputerPDP10.RESUME_AUTO || Component.confirmUser("Click OK to restore the previous " + PDP10.APPNAME + " machine state, or CANCEL to reset the machine.")) {
                     fRestore = stateComputer.parse();
                     if (fRestore) {
                         var sCode = /** @type {string} */ (stateComputer.get(UserAPI.RES.CODE));
@@ -557,7 +553,7 @@ class ComputerPDP11 extends Component {
                     /*
                      * RESUME_PROMPT indicates we should delete the state if they clicked Cancel to confirm() above.
                      */
-                    if (resume == ComputerPDP11.RESUME_PROMPT) stateComputer.clear();
+                    if (resume == ComputerPDP10.RESUME_PROMPT) stateComputer.clear();
                 }
             } else {
                 /*
@@ -589,7 +585,7 @@ class ComputerPDP11 extends Component {
          */
         var aParms = [stateComputer, resume, fRestore];
 
-        if (resume != ComputerPDP11.RESUME_REPOWER) {
+        if (resume != ComputerPDP10.RESUME_REPOWER) {
             this.wait(this.donePowerOn, aParms);
             return;
         }
@@ -599,7 +595,7 @@ class ComputerPDP11 extends Component {
     /**
      * powerRestore(component, stateComputer, fRepower, fRestore)
      *
-     * @this {ComputerPDP11}
+     * @this {ComputerPDP10}
      * @param {Component} component
      * @param {State} stateComputer
      * @param {boolean} fRepower
@@ -668,7 +664,7 @@ class ComputerPDP11 extends Component {
                      */
                     if (this.sStatePath && !this.fStateData) {
                         stateComputer.clear();
-                        this.resume = ComputerPDP11.RESUME_NONE;
+                        this.resume = ComputerPDP10.RESUME_NONE;
                         Web.reloadPage();
                     } else {
                         /*
@@ -711,7 +707,7 @@ class ComputerPDP11 extends Component {
      *
      * This is nothing more than a continuation of powerOn(), giving us the option of calling wait() one more time.
      *
-     * @this {ComputerPDP11}
+     * @this {ComputerPDP10}
      * @param {Array} aParms containing [stateComputer, resume, fRestore]
      */
     donePowerOn(aParms)
@@ -721,7 +717,7 @@ class ComputerPDP11 extends Component {
         var fRestore = aParms[2];
 
         if (DEBUG && this.flags.powered && this.messageEnabled()) {
-            this.printMessage("ComputerPDP11.donePowerOn(): redundant");
+            this.printMessage("ComputerPDP10.donePowerOn(): redundant");
         }
 
         this.fInitialized = true;
@@ -762,7 +758,7 @@ class ComputerPDP11 extends Component {
     /**
      * checkPower()
      *
-     * @this {ComputerPDP11}
+     * @this {ComputerPDP10}
      * @return {boolean} true if the computer is fully powered, false otherwise
      */
     checkPower()
@@ -790,13 +786,13 @@ class ComputerPDP11 extends Component {
     /**
      * powerReport(stateComputer)
      *
-     * @this {ComputerPDP11}
+     * @this {ComputerPDP10}
      * @param {State} stateComputer
      */
     powerReport(stateComputer)
     {
-        if (Component.confirmUser("There may be a problem with your " + PDP11.APPNAME + " machine.\n\nTo help us diagnose it, click OK to send this " + PDP11.APPNAME + " machine state to http://" + SITEHOST + ".")) {
-            Web.sendReport(PDP11.APPNAME, PDP11.APPVERSION, this.url, this.getUserID(), ReportAPI.TYPE.BUG, stateComputer.toString());
+        if (Component.confirmUser("There may be a problem with your " + PDP10.APPNAME + " machine.\n\nTo help us diagnose it, click OK to send this " + PDP10.APPNAME + " machine state to http://" + SITEHOST + ".")) {
+            Web.sendReport(PDP10.APPNAME, PDP10.APPVERSION, this.url, this.getUserID(), ReportAPI.TYPE.BUG, stateComputer.toString());
         }
     }
 
@@ -826,7 +822,7 @@ class ComputerPDP11 extends Component {
      * As it stands, the worst that happens is any manually mounted disk images might have to be manually remounted,
      * which doesn't seem like a huge problem.
      *
-     * @this {ComputerPDP11}
+     * @this {ComputerPDP10}
      * @param {boolean} [fSave] is true to request a saved state
      * @param {boolean} [fShutdown] is true if the machine is being shut down
      * @return {string|null} string representing the saved state (or null if error)
@@ -837,7 +833,7 @@ class ComputerPDP11 extends Component {
         var sState = "none";
 
         if (DEBUG && this.messageEnabled()) {
-            this.printMessage("ComputerPDP11.powerOff(" + (fSave ? "save" : "nosave") + (fShutdown ? ",shutdown" : "") + ")");
+            this.printMessage("ComputerPDP10.powerOff(" + (fSave ? "save" : "nosave") + (fShutdown ? ",shutdown" : "") + ")");
         }
 
         if (this.nPowerChange) {
@@ -845,15 +841,15 @@ class ComputerPDP11 extends Component {
         }
         this.nPowerChange--;
 
-        var stateComputer = new State(this, PDP11.APPVERSION);
-        var stateValidate = new State(this, PDP11.APPVERSION, ComputerPDP11.STATE_VALIDATE);
+        var stateComputer = new State(this, PDP10.APPVERSION);
+        var stateValidate = new State(this, PDP10.APPVERSION, ComputerPDP10.STATE_VALIDATE);
 
         var sTimestamp = Usr.getTimestamp();
-        stateValidate.set(ComputerPDP11.STATE_TIMESTAMP, sTimestamp);
-        stateComputer.set(ComputerPDP11.STATE_TIMESTAMP, sTimestamp);
-        stateComputer.set(ComputerPDP11.STATE_VERSION, APPVERSION);
-        stateComputer.set(ComputerPDP11.STATE_HOSTURL, Web.getHostURL());
-        stateComputer.set(ComputerPDP11.STATE_BROWSER, Web.getUserAgent());
+        stateValidate.set(ComputerPDP10.STATE_TIMESTAMP, sTimestamp);
+        stateComputer.set(ComputerPDP10.STATE_TIMESTAMP, sTimestamp);
+        stateComputer.set(ComputerPDP10.STATE_VERSION, APPVERSION);
+        stateComputer.set(ComputerPDP10.STATE_HOSTURL, Web.getHostURL());
+        stateComputer.set(ComputerPDP10.STATE_BROWSER, Web.getUserAgent());
 
         /*
          * Always power the CPU "down" first, just to help insure it doesn't ask other components to do anything
@@ -922,7 +918,7 @@ class ComputerPDP11 extends Component {
                      */
                     if (this.resume) {
                         fClear = true;
-                        fClearAll = (this.resume == ComputerPDP11.RESUME_DELETE);
+                        fClearAll = (this.resume == ComputerPDP10.RESUME_DELETE);
                     }
                 }
                 if (fClear) {
@@ -957,7 +953,7 @@ class ComputerPDP11 extends Component {
      * snapping/displaying the PC as of the last instruction executed, before the CPU resets the PC,
      * causing the Front Panel to display a stale address when we call updateDisplays() at the end.
      *
-     * @this {ComputerPDP11}
+     * @this {ComputerPDP10}
      */
     reset()
     {
@@ -990,7 +986,7 @@ class ComputerPDP11 extends Component {
      * Note that we're called by startCPU(), which is why we exclude the CPU component,
      * as well as ourselves.
      *
-     * @this {ComputerPDP11}
+     * @this {ComputerPDP10}
      * @param {number} ms
      * @param {number} nCycles
      */
@@ -1015,7 +1011,7 @@ class ComputerPDP11 extends Component {
      * Note that we're called by stopCPU(), which is why we exclude the CPU component,
      * as well as ourselves.
      *
-     * @this {ComputerPDP11}
+     * @this {ComputerPDP10}
      * @param {number} ms
      * @param {number} nCycles
      */
@@ -1053,7 +1049,7 @@ class ComputerPDP11 extends Component {
      * but Panel is an optional component; it's often the case that only machines that include the Debugger also include
      * Panel.
      *
-     * @this {ComputerPDP11}
+     * @this {ComputerPDP10}
      * @param {number} [nUpdate] (1 for periodic, -1 for forced, 0 or undefined otherwise)
      */
     updateDisplays(nUpdate)
@@ -1073,7 +1069,7 @@ class ComputerPDP11 extends Component {
     /**
      * setBinding(sType, sBinding, control, sValue)
      *
-     * @this {ComputerPDP11}
+     * @this {ComputerPDP10}
      * @param {string|null} sType is the type of the HTML control (eg, "button", "textarea", "register", "flag", "rled", etc)
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "reset")
      * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
@@ -1169,7 +1165,7 @@ class ComputerPDP11 extends Component {
      */
     resetUserID()
     {
-        Web.setLocalStorageItem(ComputerPDP11.STATE_USERID, "");
+        Web.setLocalStorageItem(ComputerPDP10.STATE_USERID, "");
         this.sUserID = null;
     }
 
@@ -1183,7 +1179,7 @@ class ComputerPDP11 extends Component {
     {
         var sUserID = this.sUserID;
         if (!sUserID) {
-            sUserID = Web.getLocalStorageItem(ComputerPDP11.STATE_USERID);
+            sUserID = Web.getLocalStorageItem(ComputerPDP10.STATE_USERID);
             if (sUserID !== undefined) {
                 if (!sUserID && fPrompt) {
                     /*
@@ -1207,7 +1203,7 @@ class ComputerPDP11 extends Component {
     /**
      * verifyUserID(sUserID)
      *
-     * @this {ComputerPDP11}
+     * @this {ComputerPDP10}
      * @param {string} sUserID
      * @return {string} validated user ID, or null if error
      */
@@ -1224,8 +1220,8 @@ class ComputerPDP11 extends Component {
             try {
                 response = eval("(" + sResponse + ")");
                 if (response.code && response.code == UserAPI.CODE.OK) {
-                    Web.setLocalStorageItem(ComputerPDP11.STATE_USERID, response.data);
-                    if (fMessages) this.printMessage(ComputerPDP11.STATE_USERID + " updated: " + response.data);
+                    Web.setLocalStorageItem(ComputerPDP10.STATE_USERID, response.data);
+                    if (fMessages) this.printMessage(ComputerPDP10.STATE_USERID + " updated: " + response.data);
                     this.sUserID = response.data;
                 } else {
                     if (fMessages) this.printMessage(response.code + ": " + response.data);
@@ -1242,7 +1238,7 @@ class ComputerPDP11 extends Component {
     /**
      * getServerStatePath()
      *
-     * @this {ComputerPDP11}
+     * @this {ComputerPDP10}
      * @return {string|null} sStatePath (null if no localStorage or no USERID stored in localStorage)
      */
     getServerStatePath()
@@ -1250,12 +1246,12 @@ class ComputerPDP11 extends Component {
         var sStatePath = null;
         if (this.sUserID) {
             if (DEBUG && this.messageEnabled()) {
-                this.printMessage(ComputerPDP11.STATE_USERID + " for load: " + this.sUserID);
+                this.printMessage(ComputerPDP10.STATE_USERID + " for load: " + this.sUserID);
             }
-            sStatePath = Web.getHost() + UserAPI.ENDPOINT + '?' + UserAPI.QUERY.REQ + '=' + UserAPI.REQ.LOAD + '&' + UserAPI.QUERY.USER + '=' + this.sUserID + '&' + UserAPI.QUERY.STATE + '=' + State.key(this, PDP11.APPVERSION);
+            sStatePath = Web.getHost() + UserAPI.ENDPOINT + '?' + UserAPI.QUERY.REQ + '=' + UserAPI.REQ.LOAD + '&' + UserAPI.QUERY.USER + '=' + this.sUserID + '&' + UserAPI.QUERY.STATE + '=' + State.key(this, PDP10.APPVERSION);
         } else {
             if (DEBUG && this.messageEnabled()) {
-                this.printMessage(ComputerPDP11.STATE_USERID + " unavailable");
+                this.printMessage(ComputerPDP10.STATE_USERID + " unavailable");
             }
         }
         return sStatePath;
@@ -1302,7 +1298,7 @@ class ComputerPDP11 extends Component {
     /**
      * storeServerState(sUserID, sState, fSync)
      *
-     * @this {ComputerPDP11}
+     * @this {ComputerPDP10}
      * @param {string} sUserID
      * @param {string} sState
      * @param {boolean} [fSync] is true if we're powering down and should perform a synchronous request (default is async)
@@ -1311,7 +1307,7 @@ class ComputerPDP11 extends Component {
     storeServerState(sUserID, sState, fSync)
     {
         if (DEBUG && this.messageEnabled()) {
-            this.printMessage(ComputerPDP11.STATE_USERID + " for store: " + sUserID);
+            this.printMessage(ComputerPDP10.STATE_USERID + " for store: " + sUserID);
         }
         /*
          * TODO: Determine whether or not any browsers cancel our request if we're called during a browser "shutdown" event,
@@ -1320,7 +1316,7 @@ class ComputerPDP11 extends Component {
         var dataPost = {};
         dataPost[UserAPI.QUERY.REQ] = UserAPI.REQ.STORE;
         dataPost[UserAPI.QUERY.USER] = sUserID;
-        dataPost[UserAPI.QUERY.STATE] = State.key(this, PDP11.APPVERSION);
+        dataPost[UserAPI.QUERY.STATE] = State.key(this, PDP10.APPVERSION);
         dataPost[UserAPI.QUERY.DATA] = sState;
         var sRequest = Web.getHost() + UserAPI.ENDPOINT;
         if (!fSync) {
@@ -1347,7 +1343,7 @@ class ComputerPDP11 extends Component {
      *
      * This handles UI requests to toggle the computer's power (eg, see the "power" button binding).
      *
-     * @this {ComputerPDP11}
+     * @this {ComputerPDP10}
      */
     onPower()
     {
@@ -1365,7 +1361,7 @@ class ComputerPDP11 extends Component {
      *
      * This handles UI requests to reset the computer's state (eg, see the "reset" button binding).
      *
-     * @this {ComputerPDP11}
+     * @this {ComputerPDP10}
      */
     onReset()
     {
@@ -1386,10 +1382,10 @@ class ComputerPDP11 extends Component {
          */
         if (this.resume && !this.sResumePath) {
             /*
-             * I used to bypass the prompt if this.resume == ComputerPDP11.RESUME_AUTO, setting fSave to true automatically,
+             * I used to bypass the prompt if this.resume == ComputerPDP10.RESUME_AUTO, setting fSave to true automatically,
              * but that gives the user no means of resetting a resumable machine that contains errors in its resume state.
              */
-            var fSave = (/* this.resume == ComputerPDP11.RESUME_AUTO || */ Component.confirmUser("Click OK to save changes to this " + PDP11.APPNAME + " machine.\n\nWARNING: If you CANCEL, all disk changes will be discarded."));
+            var fSave = (/* this.resume == ComputerPDP10.RESUME_AUTO || */ Component.confirmUser("Click OK to save changes to this " + PDP10.APPNAME + " machine.\n\nWARNING: If you CANCEL, all disk changes will be discarded."));
             this.powerOff(fSave, true);
             /*
              * Forcing the page to reload is an expedient option, but ugly. It's preferable to call powerOn()
@@ -1408,7 +1404,7 @@ class ComputerPDP11 extends Component {
                 return;
             }
             if (!fSave) this.fReload = true;
-            this.powerOn(ComputerPDP11.RESUME_NONE);
+            this.powerOn(ComputerPDP10.RESUME_NONE);
             this.fReload = false;
         } else {
             this.reset();
@@ -1419,7 +1415,7 @@ class ComputerPDP11 extends Component {
     /**
      * getMachineComponent(sType, componentPrev)
      *
-     * @this {ComputerPDP11}
+     * @this {ComputerPDP10}
      * @param {string} sType
      * @param {Component|null} [componentPrev] of previously returned component, if any
      * @return {Component|null}
@@ -1447,7 +1443,7 @@ class ComputerPDP11 extends Component {
      * the browser's default behavior is to scroll the element into view, which can be annoying, especially on iOS,
      * where the display is more constrained, so we no longer do it by default (fScroll must be true).
      *
-     * @this {ComputerPDP11}
+     * @this {ComputerPDP10}
      * @param {boolean} [fScroll] (true if you really want the control scrolled into view)
      */
     setFocus(fScroll)
@@ -1473,9 +1469,9 @@ class ComputerPDP11 extends Component {
     }
 
     /**
-     * ComputerPDP11.init()
+     * ComputerPDP10.init()
      *
-     * For every machine represented by an HTML element of class "pdp11-machine", this function
+     * For every machine represented by an HTML element of class "PDP10-machine", this function
      * locates the HTML element of class "computer", extracting the JSON-encoded parameters for the
      * Computer constructor from the element's "data-value" attribute, invoking the constructor to
      * create a Computer component, and then binding any associated HTML controls to the new component.
@@ -1485,16 +1481,16 @@ class ComputerPDP11 extends Component {
         /*
          * In non-COMPILED builds, embedMachine() may have set XMLVERSION.
          */
-        if (!COMPILED && XMLVERSION) PDP11.APPVERSION = XMLVERSION;
+        if (!COMPILED && XMLVERSION) PDP10.APPVERSION = XMLVERSION;
 
-        var aeMachines = Component.getElementsByClass(document, PDP11.APPCLASS + "-machine");
+        var aeMachines = Component.getElementsByClass(document, PDP10.APPCLASS + "-machine");
 
         for (var iMachine = 0; iMachine < aeMachines.length; iMachine++) {
 
             var eMachine = aeMachines[iMachine];
             var parmsMachine = Component.getComponentParms(eMachine);
 
-            var aeComputers = Component.getElementsByClass(eMachine, PDP11.APPCLASS, "computer");
+            var aeComputers = Component.getElementsByClass(eMachine, PDP10.APPCLASS, "computer");
 
             for (var iComputer = 0; iComputer < aeComputers.length; iComputer++) {
 
@@ -1505,7 +1501,7 @@ class ComputerPDP11 extends Component {
                  * We set fSuspended in the Computer constructor because we want to "power up" the
                  * computer ourselves, after any/all bindings are in place.
                  */
-                var computer = new ComputerPDP11(parmsComputer, parmsMachine, true);
+                var computer = new ComputerPDP10(parmsComputer, parmsMachine, true);
 
                 if (DEBUG && computer.messageEnabled()) {
                     computer.printMessage("onInit(" + computer.flags.powered + ")");
@@ -1516,7 +1512,7 @@ class ComputerPDP11 extends Component {
                  * but "reset" now provides a way to force the machine to start from scratch again, so "erase"
                  * may be redundant now.
                  */
-                Component.bindComponentControls(computer, eComputer, PDP11.APPCLASS);
+                Component.bindComponentControls(computer, eComputer, PDP10.APPCLASS);
 
                 /*
                  * Power on the computer, giving every component the opportunity to reset or restore itself.
@@ -1527,7 +1523,7 @@ class ComputerPDP11 extends Component {
     }
 
     /**
-     * ComputerPDP11.show()
+     * ComputerPDP10.show()
      *
      * When exit() is using an "onbeforeunload" handler, this "onpageshow" handler allows us to repower everything,
      * without either resetting or restoring.  We call powerOn() with a special resume value (RESUME_REPOWER) if the
@@ -1537,11 +1533,11 @@ class ComputerPDP11 extends Component {
      */
     static show()
     {
-        var aeComputers = Component.getElementsByClass(document, PDP11.APPCLASS, "computer");
+        var aeComputers = Component.getElementsByClass(document, PDP10.APPCLASS, "computer");
         for (var iComputer = 0; iComputer < aeComputers.length; iComputer++) {
             var eComputer = aeComputers[iComputer];
             var parmsComputer = Component.getComponentParms(eComputer);
-            var computer = /** @type {ComputerPDP11} */ (Component.getComponentByType("Computer", parmsComputer['id']));
+            var computer = /** @type {ComputerPDP10} */ (Component.getComponentByType("Computer", parmsComputer['id']));
             if (computer) {
 
                 if (DEBUG && computer.messageEnabled()) {
@@ -1557,14 +1553,14 @@ class ComputerPDP11 extends Component {
                     /**
                      * Repower the computer, notifying every component to continue running as-is.
                      */
-                    computer.powerOn(ComputerPDP11.RESUME_REPOWER);
+                    computer.powerOn(ComputerPDP10.RESUME_REPOWER);
                 }
             }
         }
     }
 
     /**
-     * ComputerPDP11.exit()
+     * ComputerPDP10.exit()
      *
      * The Computer is currently the only component that uses an "exit" handler, which Web.onExit() defines as
      * either an "unload" or "onbeforeunload" handler.  This gives us the opportunity to save the machine state,
@@ -1580,7 +1576,7 @@ class ComputerPDP11 extends Component {
      * presence of an "onunload" handler generally causes a browser to throw the page away once the handler returns.
      *
      * However, in order to safely use "onbeforeunload", we must add yet another handler ("onpageshow") to repower
-     * everything, without either resetting or restoring.  Hence, the ComputerPDP11.show() function, which calls powerOn()
+     * everything, without either resetting or restoring.  Hence, the ComputerPDP10.show() function, which calls powerOn()
      * with a special resume value (RESUME_REPOWER) if the computer is already marked as "ready", meaning the browser
      * didn't change anything.  This "repower" process should be very quick, essentially just marking all components as
      * powered again (so that, for example, the Video component will start drawing again) and firing the CPU up again.
@@ -1591,11 +1587,11 @@ class ComputerPDP11 extends Component {
      */
     static exit()
     {
-        var aeComputers = Component.getElementsByClass(document, PDP11.APPCLASS, "computer");
+        var aeComputers = Component.getElementsByClass(document, PDP10.APPCLASS, "computer");
         for (var iComputer = 0; iComputer < aeComputers.length; iComputer++) {
             var eComputer = aeComputers[iComputer];
             var parmsComputer = Component.getComponentParms(eComputer);
-            var computer = /** @type {ComputerPDP11} */ (Component.getComponentByType("Computer", parmsComputer['id']));
+            var computer = /** @type {ComputerPDP10} */ (Component.getComponentByType("Computer", parmsComputer['id']));
             if (computer) {
 
                 if (DEBUG && computer.messageEnabled()) {
@@ -1615,30 +1611,30 @@ class ComputerPDP11 extends Component {
     }
 }
 
-ComputerPDP11.STATE_FAILSAFE  = "failsafe";
-ComputerPDP11.STATE_VALIDATE  = "validate";
-ComputerPDP11.STATE_TIMESTAMP = "timestamp";
-ComputerPDP11.STATE_VERSION   = "version";
-ComputerPDP11.STATE_HOSTURL   = "url";
-ComputerPDP11.STATE_BROWSER   = "browser";
-ComputerPDP11.STATE_USERID    = "user";
+ComputerPDP10.STATE_FAILSAFE  = "failsafe";
+ComputerPDP10.STATE_VALIDATE  = "validate";
+ComputerPDP10.STATE_TIMESTAMP = "timestamp";
+ComputerPDP10.STATE_VERSION   = "version";
+ComputerPDP10.STATE_HOSTURL   = "url";
+ComputerPDP10.STATE_BROWSER   = "browser";
+ComputerPDP10.STATE_USERID    = "user";
 
 /*
  * The following constants define all the resume options.  Negative values (eg, RESUME_REPOWER) are for
  * internal use only, and RESUME_DELETE is not documented (it provides a way of deleting ALL saved states
  * whenever a resume is declined).  As a result, the only "end-user" values are 0, 1 and 2.
  */
-ComputerPDP11.RESUME_REPOWER  = -1;  // resume without changing any state (for internal use only)
-ComputerPDP11.RESUME_NONE     =  0;  // default (no resume)
-ComputerPDP11.RESUME_AUTO     =  1;  // automatically save/restore state
-ComputerPDP11.RESUME_PROMPT   =  2;  // automatically save but conditionally restore (WARNING: if restore is declined, any state is discarded)
-ComputerPDP11.RESUME_DELETE   =  3;  // same as RESUME_PROMPT but discards ALL machines states whenever ANY machine restore is declined (undocumented)
+ComputerPDP10.RESUME_REPOWER  = -1;  // resume without changing any state (for internal use only)
+ComputerPDP10.RESUME_NONE     =  0;  // default (no resume)
+ComputerPDP10.RESUME_AUTO     =  1;  // automatically save/restore state
+ComputerPDP10.RESUME_PROMPT   =  2;  // automatically save but conditionally restore (WARNING: if restore is declined, any state is discarded)
+ComputerPDP10.RESUME_DELETE   =  3;  // same as RESUME_PROMPT but discards ALL machines states whenever ANY machine restore is declined (undocumented)
 
 /*
  * Initialize every Computer on the page.
  */
-Web.onInit(ComputerPDP11.init);
-Web.onShow(ComputerPDP11.show);
-Web.onExit(ComputerPDP11.exit);
+Web.onInit(ComputerPDP10.init);
+Web.onShow(ComputerPDP10.show);
+Web.onExit(ComputerPDP10.exit);
 
-if (NODE) module.exports = ComputerPDP11;
+if (NODE) module.exports = ComputerPDP10;

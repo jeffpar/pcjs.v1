@@ -1,5 +1,5 @@
 /**
- * @fileoverview Implements the PDP11 Memory component.
+ * @fileoverview Implements the PDP-11 Memory component.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © Jeff Parsons 2012-2017
  *
@@ -738,8 +738,8 @@ class MemoryPDP11 {
      *
      * @this {MemoryPDP11}
      * @param {number} off
-     * @param {number} addr
      * @param {number} b
+     * @param {number} addr
      */
     writeByteChecked(off, b, addr)
     {
@@ -754,8 +754,8 @@ class MemoryPDP11 {
      *
      * @this {MemoryPDP11}
      * @param {number} off
-     * @param {number} addr
      * @param {number} w
+     * @param {number} addr
      */
     writeWordChecked(off, w, addr)
     {
@@ -859,8 +859,8 @@ class MemoryPDP11 {
      *
      * @this {MemoryPDP11}
      * @param {number} off
-     * @param {number} addr
      * @param {number} b
+     * @param {number} addr
      */
     writeByteLE(off, b, addr)
     {
@@ -876,8 +876,8 @@ class MemoryPDP11 {
      *
      * @this {MemoryPDP11}
      * @param {number} off
-     * @param {number} addr
      * @param {number} w
+     * @param {number} addr
      */
     writeWordBE(off, w, addr)
     {
@@ -893,8 +893,8 @@ class MemoryPDP11 {
      *
      * @this {MemoryPDP11}
      * @param {number} off
-     * @param {number} addr
      * @param {number} w
+     * @param {number} addr
      */
     writeWordLE(off, w, addr)
     {

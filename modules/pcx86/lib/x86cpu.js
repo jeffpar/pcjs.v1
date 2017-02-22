@@ -1050,6 +1050,8 @@ class X86CPU extends CPU {
          */
         this.fMDSet = false;        // regMDHi and/or regMDLo are invalid unless fMDSet is true
         this.regMDLo = this.regMDHi = 0;
+        this.r64Div = [0, 0];
+        this.r64Rem = [0, 0];
         this.regXX = 0;             // for internal use only (eg, assists with ModRM helper functions)
 
         /*
