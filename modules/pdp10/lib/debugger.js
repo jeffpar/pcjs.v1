@@ -757,7 +757,7 @@ class DebuggerPDP10 extends Debugger {
     messageInit(sEnable)
     {
         this.dbg = this;
-        this.bitsMessage = this.bitsWarning = MessagesPDP10.WARN;
+        this.bitsMessage = this.bitsWarning = MessagesPDP10.FAULT | MessagesPDP10.WARN;
         this.sMessagePrev = null;
         this.aMessageBuffer = [];
         /*
@@ -1311,7 +1311,7 @@ class DebuggerPDP10 extends Debugger {
          */
         if (!nState) {
             opCode = this.cpu.readWord(addr);
-            if (opCode == PDP10.OPCODE.HALT && this.cpu.getLastPC() == addr) {
+            if ((opCode & PDP10.OPCODE.HALTMASK) == PDP10.OPCODE.HALT && this.cpu.getLastPC() == addr) {
                 addr = this.cpu.advancePC(1);
             }
         }

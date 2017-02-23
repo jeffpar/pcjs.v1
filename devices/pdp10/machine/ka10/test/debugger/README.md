@@ -13,4 +13,6 @@ PDP-10 Test Machine with Debugger
 
 A PDP-10 (Model KA10) is simulated below.
 
+**WARNING**: PDP-10 emulation is still in development, so functionality will be limited until further notice.
+
 {% include machine.html id="ka10test" %}

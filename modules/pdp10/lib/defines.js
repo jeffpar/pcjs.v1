@@ -103,7 +103,10 @@ var PDP10 = {
      * Assorted common opcodes
      */
     OPCODE: {
-        HALT:       0o000000000000,     // TODO: Resolve
+        INSMASK:    0o777000000000,
+        ACCMASK:    0o000740000000,
+        HALTMASK:   0o777740000000,
+        HALT:       0o254200000000,
         INVALID:    0o777777777777      // TODO: Resolve
     },
     /*

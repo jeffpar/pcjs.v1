@@ -84,9 +84,9 @@ class MemoryPDP10 {
         this.fReadOnly = (type == MemoryPDP10.TYPE.ROM);
         this.dbg = null;
         this.readBits = this.readBitsDirect = this.readNone;
-        this.readWord = this.readWordDirect = this.readWordDefault;
+        this.readWord = this.readWordDirect = this.readNone;
         this.writeBits = this.writeBitsDirect = this.writeNone;
-        this.writeWord = this.writeWordDirect = this.writeWordDefault;
+        this.writeWord = this.writeWordDirect = this.writeNone;
         this.cReadBreakpoints = this.cWriteBreakpoints = 0;
         this.copyBreakpoints();     // initialize the block's Debugger info; the caller will reinitialize
 
@@ -261,11 +261,11 @@ class MemoryPDP10 {
     {
         if (!fDirect || !this.cReadBreakpoints) {
             this.readBits = afn[0] || this.readNone;
-            this.readWord = afn[2] || this.readWordDefault;
+            this.readWord = afn[2] || this.readNone;
         }
         if (fDirect || fDirect === undefined) {
             this.readBitsDirect = afn[0] || this.readNone;
-            this.readWordDirect = afn[2] || this.readWordDefault;
+            this.readWordDirect = afn[2] || this.readNone;
         }
     }
 
@@ -280,11 +280,11 @@ class MemoryPDP10 {
     {
         if (!fDirect || !this.cWriteBreakpoints) {
             this.writeBits = !this.fReadOnly && afn[1] || this.writeNone;
-            this.writeWord = !this.fReadOnly && afn[3] || this.writeWordDefault;
+            this.writeWord = !this.fReadOnly && afn[3] || this.writeNone;
         }
         if (fDirect || fDirect === undefined) {
             this.writeBitsDirect = afn[1] || this.writeNone;
-            this.writeWordDirect = afn[3] || this.writeWordDefault;
+            this.writeWordDirect = afn[3] || this.writeNone;
         }
     }
 
@@ -307,7 +307,7 @@ class MemoryPDP10 {
     resetWriteAccess()
     {
         this.writeBits = this.fReadOnly? this.writeNone : this.writeBitsDirect;
-        this.writeWord = this.fReadOnly? this.writeWordDefault : this.writeWordDirect;
+        this.writeWord = this.fReadOnly? this.writeNone : this.writeWordDirect;
     }
 
     /**
@@ -393,7 +393,7 @@ class MemoryPDP10 {
     }
 
     /**
-     * readNone(off)
+     * readNone(off, addr)
      *
      * @this {MemoryPDP10}
      * @param {number} off
@@ -405,6 +405,7 @@ class MemoryPDP10 {
         if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP10.MEMORY) /* && !off */) {
             this.dbg.printMessage("attempt to read invalid address " + this.dbg.toStrBase(addr), true);
         }
+        this.bus.fault(addr);
         return 0;
     }
 
@@ -424,42 +425,16 @@ class MemoryPDP10 {
     }
 
     /**
-     * readWordDefault(off, addr)
+     * readBitsMemory(off, addr, offBits, lenBits)
      *
      * @this {MemoryPDP10}
      * @param {number} off
      * @param {number} addr
-     * @return {number}
-     */
-    readWordDefault(off, addr)
-    {
-        return this.readWord(off, addr);
-    }
-
-    /**
-     * writeWordDefault(w, off, addr)
-     *
-     * @this {MemoryPDP10}
-     * @param {number} w
-     * @param {number} off
-     * @param {number} addr
-     */
-    writeWordDefault(w, off, addr)
-    {
-        this.writeWord(w, off, addr);
-    }
-
-    /**
-     * readBitsMemory(offBits, lenBits, off, addr)
-     *
-     * @this {MemoryPDP10}
      * @param {number} offBits (the bit position of the right-most bit of the result, using modern bit numbering)
      * @param {number} lenBits
-     * @param {number} off
-     * @param {number} addr
      * @return {number}
      */
-    readBitsMemory(offBits, lenBits, off, addr)
+    readBitsMemory(off, addr, offBits, lenBits)
     {
         var w = this.aw[off];
         if (offBits + lenBits <= 32) {
@@ -484,16 +459,16 @@ class MemoryPDP10 {
     }
 
     /**
-     * writeBitsMemory(offBits, lenBits, bits, off, addr)
+     * writeBitsMemory(bits, off, addr, offBits, lenBits)
      *
      * @this {MemoryPDP10}
-     * @param {number} offBits (the bit position of the right-most bit of the result, using modern bit numbering)
-     * @param {number} lenBits
-     * @param {number} bits (only the right-most lenBits of bits are used, so this value doesn't need to be pre-masked)
+     * @param {number} bits (only the right-most lenBits of bits are used, so it doesn't need to be pre-masked)
      * @param {number} off
      * @param {number} addr
+     * @param {number} offBits (the bit position of the right-most bit of the result, using modern bit numbering)
+     * @param {number} lenBits
      */
-    writeBitsMemory(offBits, lenBits, bits, off, addr)
+    writeBitsMemory(bits, off, addr, offBits, lenBits)
     {
         var w = this.aw[off];
         var shiftBits = Math.pow(2, offBits);
@@ -521,21 +496,21 @@ class MemoryPDP10 {
     }
 
     /**
-     * readBitsChecked(offBits, lenBits, off, addr)
+     * readBitsChecked(off, addr, offBits, lenBits)
      *
      * @this {MemoryPDP10}
-     * @param {number} offBits (the bit position of the right-most bit of the result, using modern bit numbering)
-     * @param {number} lenBits
      * @param {number} off
      * @param {number} addr
+     * @param {number} offBits (the bit position of the right-most bit of the result, using modern bit numbering)
+     * @param {number} lenBits
      * @return {number}
      */
-    readBitsChecked(offBits, lenBits, off, addr)
+    readBitsChecked(off, addr, offBits, lenBits)
     {
         if (DEBUGGER && this.dbg && this.addr != null) {
             this.dbg.checkMemoryRead(this.addr + off);
         }
-        return this.readBitsDirect(offBits, lenBits, off, addr);
+        return this.readBitsDirect(off, addr, offBits, lenBits);
     }
 
     /**
@@ -555,21 +530,21 @@ class MemoryPDP10 {
     }
 
     /**
-     * writeBitsChecked(offBits, lenBits, bits, off, addr)
+     * writeBitsChecked(bits, off, addr, offBits, lenBits)
      *
      * @this {MemoryPDP10}
-     * @param {number} offBits (the bit position of the right-most bit of the result, using modern bit numbering)
-     * @param {number} lenBits
      * @param {number} bits
      * @param {number} off
      * @param {number} addr
+     * @param {number} offBits (the bit position of the right-most bit of the result, using modern bit numbering)
+     * @param {number} lenBits
      */
-    writeBitsChecked(offBits, lenBits, bits, off, addr)
+    writeBitsChecked(bits, off, addr, offBits, lenBits)
     {
         if (DEBUGGER && this.dbg && this.addr != null) {
             this.dbg.checkMemoryWrite(this.addr + off);
         }
-        if (this.fReadOnly) this.writeNone(bits, off, addr); else this.writeBitsDirect(offBits, lenBits, bits, off, addr);
+        if (this.fReadOnly) this.writeNone(bits, off, addr); else this.writeBitsDirect(bits, off, addr, offBits, lenBits);
     }
 
     /**
@@ -617,8 +592,8 @@ MemoryPDP10.idBlock = 0;
 MemoryPDP10.afnNone = [
     MemoryPDP10.prototype.readNone,
     MemoryPDP10.prototype.writeNone,
-    MemoryPDP10.prototype.readWordDefault,
-    MemoryPDP10.prototype.writeWordDefault
+    MemoryPDP10.prototype.readNone,
+    MemoryPDP10.prototype.writeNone
 ];
  */
 MemoryPDP10.afnNone = [];
