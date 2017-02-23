@@ -88,8 +88,29 @@ class CPUStatePDP11 extends CPUPDP11 {
      *      addrReset: reset address (default is 0)
      *
      * This extends the CPU class and passes any remaining parmsCPU properties to the CPU class
-     * constructor, along with a default speed (cycles per second) based on the specified (or default)
-     * CPU model number.
+     * constructor, along with a default speed (cycles per second) based on the specified
+     * (or default) CPU model number.
+     *
+     * After looking over the timings of PDP-11/70 instructions, nearly all of them appear
+     * to be multiples of 150ns.  So that's what we'll consider a cycle.  How many 150ns are
+     * in one second?  Approximately 6666667.  So by way of comparison to other PCjs machines,
+     * that makes the PDP-11 (or at least the PDP-11/70) look like a 6.67Mhz machine.
+     *
+     * I've started with the PDP-11/70, since that's what Paul Nankervis started with.  When
+     * I go back and add support for earlier PDP-11 models (primarily by neutering functions
+     * that didn't exist), I will no doubt have to tweak some instruction cycle counts, too.
+     *
+     * Examples of operations that take 1 extra cycle (150ns): single and double operand byte
+     * instructions with an odd address (except MOV/MTPI/MTPD/JMP/JRS), ADD/SUB/BIC/BIS/MOVB/CMP/BIT
+     * instructions with src of R1-R7 and dst of R6-R7, RORB/ASRB with an odd address, and each
+     * shift of ASH/ASHC.  As you can see, the rules are not simple.
+     *
+     * We're not simulating cache hardware, but our timings should be optimistic and assume 100%
+     * cache hits; for cache hits, each read cycle is 300ns.  As for write cycles, they are always
+     * 750ns.  My initial take on DEC's timings is that they are including the write time as part
+     * of the total EF (execute/fetch) time.  So, for instructions that write to memory, it looks
+     * like we'll normally need to add 5 cycles (750/150) to the instruction's base time, but
+     * we'll need to keep an eye out for exceptions.
      *
      * @param {Object} parmsCPU
      */

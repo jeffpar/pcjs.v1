@@ -92,6 +92,16 @@ class CPUStatePDP10 extends CPUPDP10 {
      * constructor, along with a default speed (cycles per second) based on the specified (or default)
      * CPU model number.
      *
+     * Speeds are highly instruction-specific and are not broken down into cycles; DEC documents them
+     * as a number of microseconds, with two decimal places of accuracy.  The simplest instructions
+     * execute in 1-3us, a number of others require 5-6us, and the most time-consuming take anywhere
+     * from 10us (MUL) to 17us (DIV).  Of course, instructions that perform multiple indirect memory
+     * accesses take even longer.
+     *
+     * I think we'll just say that the original PDP-10 was roughly a 1Mhz machine, and pretend that all
+     * instructions completed in 1 or more multiples of a microsecond.  I'm not sure that trying to be
+     * accurate to the nearest 1/100 of a microsecond would have much observable benefit.
+     *
      * @param {Object} parmsCPU
      */
     constructor(parmsCPU)
@@ -102,7 +112,7 @@ class CPUStatePDP10 extends CPUPDP10 {
         switch(model) {
         case PDP10.MODEL_KA10:
         default:
-            nCyclesDefault = 6666667;
+            nCyclesDefault = 1000000;
             break;
         }
 
