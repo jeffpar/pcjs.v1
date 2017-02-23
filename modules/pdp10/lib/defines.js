@@ -75,18 +75,6 @@ var PDP10 = {
 
     /*
      * CPU model numbers (supported)
-     *
-     * The 11/20 includes the 11/10, which is not identified separately because there was
-     * nothing functionally different about it.
-     *
-     * The 11/40 added the MODE bits to the PSW (but only KERNEL=00 and USER=11) and 18-bit
-     * addressing via an MMU; there was still only one register set.
-     *
-     * The 11/45 added REGSET bit to the PSW (to support a second register set), SUPER=01
-     * mode to the existing KERNEL=00 and USER=11 modes, separate I/D spaces, and other MMU
-     * extensions (eg, MMR1 and MMR3).
-     *
-     * The 11/70 added 22-bit addressing and corresponding extensions to the MMU.
      */
     MODEL_KA10: 1001,
 

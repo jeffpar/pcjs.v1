@@ -580,6 +580,21 @@ function embedPC8080(idMachine, sXMLFile, sXSLFile, sParms)
 }
 
 /**
+ * embedPDP10(idMachine, sXMLFile, sXSLFile, sParms)
+ *
+ * @param {string} idMachine
+ * @param {string} sXMLFile
+ * @param {string} sXSLFile
+ * @param {string} [sParms]
+ * @return {boolean} true if successful, false if error
+ */
+function embedPDP10(idMachine, sXMLFile, sXSLFile, sParms)
+{
+    if (fAsync) Web.enablePageEvents(false);
+    return embedMachine("PDPjs", "pdp10", APPVERSION, idMachine, sXMLFile, sXSLFile, sParms);
+}
+
+/**
  * embedPDP11(idMachine, sXMLFile, sXSLFile, sParms)
  *
  * @param {string} idMachine
@@ -635,6 +650,7 @@ if (APPNAME == "PC8080") {
     window['embedPC8080'] = embedPC8080;
 }
 if (APPNAME == "PDPjs") {
+    window['embedPDP10']  = embedPDP10;
     window['embedPDP11']  = embedPDP11;
 }
 

@@ -54,6 +54,7 @@ var usr     = require("../../shared/lib/usrlib");
  * @property {Array.<string>} pcCSSFiles
  * @property {Array.<string>} pcX86Files
  * @property {Array.<string>} pc8080Files
+ * @property {Array.<string>} pdp10Files
  * @property {Array.<string>} pdp11Files
  */
 var pkg = require("../../../package.json");
@@ -169,6 +170,7 @@ var aMachineFiles = {
     'PC':       pkg.pcCSSFiles.concat(pkg.pcX86Files),      // deprecated (same as PCx86)
     'PCx86':    pkg.pcCSSFiles.concat(pkg.pcX86Files),
     'PC8080':   pkg.pcCSSFiles.concat(pkg.pc8080Files),
+    'PDP10':    pkg.pcCSSFiles.concat(pkg.pdp10Files),
     'PDP11':    pkg.pcCSSFiles.concat(pkg.pdp11Files)
 };
 var aMachineFileTypes = {
@@ -1872,7 +1874,7 @@ HTMLOut.prototype.getRandomString = function(sIndent)
  *
  * At a minimum, each machine object should contain the following properties:
  *
- *      'type' (eg, a machine type, such as "C1P", "PCx86", "PC8080", or "PDP11")
+ *      'type' (eg, a machine type, such as "C1P", "PCx86", "PC8080", "PDP10", or "PDP11")
  *      'version' (eg, "1.10", "*" to select the current version, or "uncompiled"; "*" is the default)
  *      'debugger' (eg, true or false; false is the default)
  *
