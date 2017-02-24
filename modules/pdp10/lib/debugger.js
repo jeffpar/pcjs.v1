@@ -2487,7 +2487,7 @@ class DebuggerPDP10 extends Debugger {
                     sData += '  ';
                 }
                 for (var i = 0; size == 1 && i < 6; i++) {
-                    var c = ((w % 64)|0) + 33;
+                    var c = ((w % 64)|0) + 32;
                     sChars += String.fromCharCode(c);
                     w /= 64;
                 }

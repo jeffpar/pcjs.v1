@@ -478,7 +478,7 @@ class BusPDP10 extends Component {
      *
      * @this {BusPDP10}
      * @param {number} addr is a physical address
-     * @return {number} word (16-bit) value at that address
+     * @return {number} word (36-bit) value at that address
      */
     getWord(addr)
     {
@@ -492,13 +492,13 @@ class BusPDP10 extends Component {
      *
      * @this {BusPDP10}
      * @param {number} addr is a physical address
-     * @param {number} w is the word (16-bit) value to write
+     * @param {number} w is the word (36-bit) value to write
      */
     setWord(addr, w)
     {
         var off = addr & this.nBlockLimit;
         var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
-        this.aBusBlocks[iBlock].writeWord(off, w, addr);
+        this.aBusBlocks[iBlock].writeWord(w, off, addr);
     }
 
     /**
@@ -520,7 +520,7 @@ class BusPDP10 extends Component {
      *
      * @this {BusPDP10}
      * @param {number} addr is a physical address
-     * @return {number} word (16-bit) value at that address
+     * @return {number} word (36-bit) value at that address
      */
     getWordDirect(addr)
     {
@@ -540,14 +540,14 @@ class BusPDP10 extends Component {
      *
      * @this {BusPDP10}
      * @param {number} addr is a physical address
-     * @param {number} w is the word (16-bit) value to write (we truncate it to 16 bits to be safe)
+     * @param {number} w is the word (36-bit) value to write (we truncate it to 16 bits to be safe)
      */
     setWordDirect(addr, w)
     {
         var off = addr & this.nBlockLimit;
         var block = this.getBlockDirect(addr);
         this.nDisableFaults++;
-        block.writeWordDirect(off, w & 0xffff, addr);
+        block.writeWordDirect(w, off, addr);
         this.nDisableFaults--;
     }
 

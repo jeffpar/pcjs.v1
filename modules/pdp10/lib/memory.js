@@ -216,7 +216,7 @@ class MemoryPDP10 {
          */
         if (len === undefined) len = this.size;
         Component.assert(off >= 0 && off < this.size);
-        for (i = off; len-- && i < this.size; i++) this.writeWordDirect(off, pattern, this.addr + off);
+        for (i = off; len-- && i < this.size; i++) this.writeWordDirect(pattern, off, this.addr + off);
     }
 
     /**

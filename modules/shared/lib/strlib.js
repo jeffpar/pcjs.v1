@@ -132,7 +132,12 @@ class Str {
             }
             var v;
             if (Str.isValidInt(s, base) && !isNaN(v = parseInt(s, base))) {
-                value = v | 0;
+                /*
+                 * With the need to support larger (eg, 36-bit) integers, truncating to 32 bits is no longer helpful.
+                 *
+                 *      value = v|0;
+                 */
+                value = v;
             }
         }
         return value;
@@ -234,6 +239,13 @@ class Str {
         if (n == null || isNaN(n)) {
             while (cch-- > 0) s = '?' + s;
         } else {
+            /*
+             * Callers that produced an input by dividing by a power of two rather than shifting (in order
+             * to access more than 32 bits) may produce a fractional result, which ordinarily we would simply
+             * ignore, but if the integer portion is zero and the sign is negative, we should probably treat
+             * this value as a sign-extension.
+             */
+            if (n < 0 && n > -1) n = -1;
             while (cch-- > 0) {
                 var d = (n & 7) + 0x30;
                 s = String.fromCharCode(d) + s;
@@ -254,7 +266,7 @@ class Str {
      *
      * @param {number|null|undefined} n (interpreted as a 32-bit value)
      * @param {number} [cch] is the desired number of decimal digits (0 or undefined for default of either 5 or 10)
-     * @return {string} the octal representation of n
+     * @return {string} the decimal representation of n
      */
     static toDec(n, cch)
     {
@@ -276,6 +288,13 @@ class Str {
         if (n == null || isNaN(n)) {
             while (cch-- > 0) s = '?' + s;
         } else {
+            /*
+             * Callers that produced an input by dividing by a power of two rather than shifting (in order
+             * to access more than 32 bits) may produce a fractional result, which ordinarily we would simply
+             * ignore, but if the integer portion is zero and the sign is negative, we should probably treat
+             * this value as a sign-extension.
+             */
+            if (n < 0 && n > -1) n = -1;
             while (cch-- > 0) {
                 var d = (n % 10) + 0x30;
                 s = String.fromCharCode(d) + s;
@@ -327,6 +346,13 @@ class Str {
         if (n == null || isNaN(n)) {
             while (cch-- > 0) s = '?' + s;
         } else {
+            /*
+             * Callers that produced an input by dividing by a power of two rather than shifting (in order
+             * to access more than 32 bits) may produce a fractional result, which ordinarily we would simply
+             * ignore, but if the integer portion is zero and the sign is negative, we should probably treat
+             * this value as a sign-extension.
+             */
+            if (n < 0 && n > -1) n = -1;
             while (cch-- > 0) {
                 var d = n & 0xf;
                 d += (d >= 0 && d <= 9? 0x30 : 0x41 - 10);
