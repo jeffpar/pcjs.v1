@@ -812,11 +812,11 @@ class DebuggerPDP10 extends Debugger {
      *
      * @this {DebuggerPDP10}
      * @param {number} iReg (0-7; not used for other registers)
-     * @return {string|undefined}
+     * @return {string}
      */
     getRegName(iReg)
     {
-        return DebuggerPDP10.REGNAMES[iReg];
+        return DebuggerPDP10.REGNAMES[iReg] || "";
     }
 
     /**
@@ -1885,8 +1885,10 @@ class DebuggerPDP10 extends Debugger {
      */
     getRegOutput(iReg)
     {
-        var sReg = this.getRegName(iReg) || "undefined";
-        if (sReg) sReg += ' ';
+        var sReg = this.getRegName(iReg);
+        if (sReg) {
+            sReg += '=' + this.toStrBase(this.getRegValue(iReg)) + ' ';
+        }
         return sReg;
     }
 

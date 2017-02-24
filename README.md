@@ -8,7 +8,7 @@ includes:
 * [PCx86](/docs/pcx86/), an x86-based emulator of [IBM PC and PC-compatible](/devices/pcx86/machine/) machines
 * [PC8080](/modules/pc8080/), an 8080 machine emulator (e.g., [Space Invaders](/devices/pc8080/machine/invaders/) and the [VT100 Terminal](/devices/pc8080/machine/vt100/))
 * [C1Pjs](/docs/c1pjs/), an emulation of the 6502-based [Ohio Scientific Challenger 1P](/devices/c1p/)
-* [PDPjs](/docs/pdpjs/) emulators, with support for [PDP-10](/devices/pdp10/machine/) and [PDP-11](/devices/pdp11/machine/) machines
+* [PDPjs](/docs/pdpjs/), a set of emulation modules supporting [PDP-10](/devices/pdp10/machine/) and [PDP-11](/devices/pdp11/machine/) machines
 
 All PCjs machine simulations are written entirely in [JavaScript](/modules/).  No Flash, Java or other plugins are
 required.  Supported browsers include modern versions of Chrome, Safari, Firefox, Internet Explorer (v9.0 and up), Edge,
