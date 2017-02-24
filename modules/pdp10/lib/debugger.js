@@ -549,7 +549,7 @@ class DebuggerPDP10 extends Debugger {
      *
      * @this {DebuggerPDP10}
      * @param {number|null|undefined} [off]
-     * @return {string} the hex representation of off
+     * @return {string} default base representation of off
      */
     toStrOffset(off)
     {
@@ -561,11 +561,27 @@ class DebuggerPDP10 extends Debugger {
      *
      * @this {DebuggerPDP10}
      * @param {DbgAddrPDP10} dbgAddr
-     * @return {string} the hex representation of the address
+     * @return {string} default base representation of the address
      */
     toStrAddr(dbgAddr)
     {
         return this.toStrOffset(dbgAddr.addr);
+    }
+
+    /**
+     * toStrWord(w)
+     *
+     * @this {DebuggerPDP10}
+     * @param {number} w (up to, but not including, DATA_LIMIT)
+     * @return {string} octal representation of the 36-bit word, as two 18-bit values
+     */
+    toStrWord(w)
+    {
+        /*
+         * ADDR_LIMIT is not derived from DATA_LIMIT; we're just taking advantage of the fact
+         * that ADDR_LIMIT happens to be exactly half of DATA_LIMIT, and they are both powers of two.
+         */
+        return Str.toOct(w / PDP10.ADDR_LIMIT, 6) + ' ' + Str.toOct(w % PDP10.ADDR_LIMIT, 6);
     }
 
     /**
@@ -1759,7 +1775,7 @@ class DebuggerPDP10 extends Debugger {
     {
         var opNames = DebuggerPDP10.OPNAMES;
         var dbgAddrOp = this.newAddr(dbgAddr.addr);
-        var opCode = this.getWord(dbgAddr, 2);
+        var opCode = this.getWord(dbgAddr, 1);
 
         var opDesc;
         for (var mask in this.opTable) {
@@ -1783,7 +1799,7 @@ class DebuggerPDP10 extends Debugger {
         var cOperands = opDesc.length - 1;
 
         if (!opNum && !cOperands) {
-            sOperands = this.toStrBase(opCode);
+            sOperands = this.toStrWord(opCode);
         }
 
         for (var iOperand = 1; iOperand <= cOperands; iOperand++) {
@@ -1815,12 +1831,13 @@ class DebuggerPDP10 extends Debugger {
         var sLine = this.toStrAddr(dbgAddrOp) + ":";
         if (dbgAddrOp.addr !== PDP10.ADDR_INVALID && dbgAddr.addr !== PDP10.ADDR_INVALID) {
             do {
-                sOpCodes += ' ' + this.toStrBase(this.getWord(dbgAddrOp, 2));
+                var w = this.getWord(dbgAddrOp, 1);
+                sOpCodes += ' ' + this.toStrWord(w);
                 if (dbgAddrOp.addr == null) break;
             } while (dbgAddrOp.addr != dbgAddr.addr);
         }
 
-        sLine += Str.pad(sOpCodes, 24);
+        sLine += Str.pad(sOpCodes, 16);
         sLine += Str.pad(sOpName, 5);
         if (sOperands) sLine += ' ' + sOperands;
 
@@ -2450,9 +2467,9 @@ class DebuggerPDP10 extends Debugger {
         var nBase = this.nBase;
         if (dbgAddr.nBase) this.nBase = dbgAddr.nBase;
 
-        var nBitsPerWord = 36;
+        var size = (sCmd == "db"? 1 : 2);
         var nWords = len || 32;
-        var nWordsPerLine = 4; // fJSON? 16 : this.nBase;
+        var nWordsPerLine = (size == 1? 2 : 4);
         var nLines = (((nWords + nWordsPerLine - 1) / nWordsPerLine)|0) || 1;
 
         var sDump = "";
@@ -2464,23 +2481,22 @@ class DebuggerPDP10 extends Debugger {
                 var w = this.getWord(dbgAddr, 1);
                 if (fJSON) {
                     if (sData) sData += ",";
-                    sData += "0x"+ Str.toHex(w, nBitsPerWord >> 2);
+                    sData += w;
                 } else {
-                    sData += this.toStrBase(w, nBitsPerWord >> 3);
-                    sData += ' ';
+                    sData += this.toStrWord(w);
+                    sData += '  ';
                 }
-                var nBytesPerWord = nBitsPerWord >> 3;
-                while (nBytesPerWord--) {
-                    var c = w % 256;
-                    sChars += (c >= 32 && c < 128? String.fromCharCode(c) : '.');
-                    w /= 256;
+                for (var i = 0; size == 1 && i < 6; i++) {
+                    var c = ((w % 64)|0) + 33;
+                    sChars += String.fromCharCode(c);
+                    w /= 64;
                 }
             }
             if (sDump) sDump += "\n";
             if (fJSON) {
                 sDump += sData + ",";
             } else {
-                sDump += sAddr + ":  " + sData + ((n == 0)? (' ' + sChars) : "");
+                sDump += sAddr + ":  " + sData + ((n < 0)? (' ' + sChars) : "");
             }
         }
 
@@ -2498,13 +2514,10 @@ class DebuggerPDP10 extends Debugger {
      */
     doEdit(asArgs)
     {
-        var size, mask;
         var fnGet, fnSet;
         var sCmd = asArgs[0];
         var sAddr = asArgs[1];
         if (sCmd == "e" || sCmd == "ew") {
-            size = 2;
-            mask = 0xffff;
             fnGet = this.getWord;
             fnSet = this.setWord;
         } else {
@@ -2523,12 +2536,9 @@ class DebuggerPDP10 extends Debugger {
                 this.println("unrecognized value: " + asArgs[i]);
                 break;
             }
-            if (vNew & ~mask) {
-                this.println("warning: " + Str.toHex(vNew) + " exceeds " + size + "-byte value");
-            }
-            this.println("changing " + this.toStrAddr(dbgAddr) + (this.messageEnabled(MessagesPDP10.BUS)? "" : (" from " + this.toStrBase(fnGet.call(this, dbgAddr), size))) + " to " + this.toStrBase(vNew, size));
+            this.println("changing " + this.toStrAddr(dbgAddr) + " from " + this.toStrWord(fnGet.call(this, dbgAddr)) + " to " + this.toStrWord(vNew));
             //noinspection JSUnresolvedFunction
-            fnSet.call(this, dbgAddr, vNew, size);
+            fnSet.call(this, dbgAddr, vNew, 1);
         }
     }
 

@@ -1596,7 +1596,7 @@ class CPUStatePDP11 extends CPUPDP11 {
         if (DEBUG && this.dbg) {
             if (this.messageEnabled(MessagesPDP11.TRAP)) {
                 var sReason = reason < 0? PDP11.REASONS[-reason] : this.dbg.toStrBase(reason);
-                this.printMessage("trap to vector " + this.dbg.toStrBase(vector, 1) + " (" + sReason + ")", MessagesPDP11.TRAP, true);
+                this.printMessage("trap to vector " + this.dbg.toStrBase(vector, 8) + " (" + sReason + ")", MessagesPDP11.TRAP, true);
             }
         }
 

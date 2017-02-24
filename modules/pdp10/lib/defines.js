@@ -97,7 +97,7 @@ var PDP10 = {
      */
     ADDR_INVALID:   -1,
     ADDR_LIMIT:     Math.pow(2, 18),
-    DATA_INVALID:   0,
+    DATA_INVALID:   -1,
     DATA_LIMIT:     Math.pow(2, 36),
     /*
      * Assorted common opcodes

@@ -1212,7 +1212,7 @@ class DebuggerPDP11 extends Debugger {
         if (trapStatus) {
             var reason = trapStatus >> 8;
             var sReason = reason < 0? PDP11.REASONS[-reason] : this.toStrBase(reason);
-            this.println("trapped to " + this.toStrBase(trapStatus & 0xff, 1) + " (" + sReason + ")");
+            this.println("trapped to " + this.toStrBase(trapStatus & 0xff, 8) + " (" + sReason + ")");
         }
 
         this.dbgAddrNextCode = this.newAddr(this.cpu.getPC());
@@ -2073,15 +2073,15 @@ class DebuggerPDP11 extends Debugger {
         }
         else if (opTypeOther == DebuggerPDP11.OP_DSTNUM3) {
             disp = (opCode & 0x07);
-            sOperand = this.toStrBase(disp, 1);
+            sOperand = this.toStrBase(disp, 3);
         }
         else if (opTypeOther == DebuggerPDP11.OP_DSTNUM6) {
             disp = (opCode & 0x3f);
-            sOperand = this.toStrBase(disp, 1);
+            sOperand = this.toStrBase(disp, 6);
         }
         else if (opTypeOther == DebuggerPDP11.OP_DSTNUM8) {
             disp = (opCode & 0xff);
-            sOperand = this.toStrBase(disp, 1);
+            sOperand = this.toStrBase(disp, 8);
         }
         else {
             /*
@@ -2123,7 +2123,7 @@ class DebuggerPDP11 extends Debugger {
                          * When using R7 (aka PC), POST-INCREMENT is known as IMMEDIATE
                          */
                         wIndex = this.getWord(dbgAddr, 2);
-                        sOperand = '#' + this.toStrBase(wIndex, 0, true);
+                        sOperand = '#' + this.toStrBase(wIndex, -1);
                     }
                     break;
 
@@ -2135,7 +2135,7 @@ class DebuggerPDP11 extends Debugger {
                          * When using R7 (aka PC), POST-INCREMENT DEFERRED is known as ABSOLUTE
                          */
                         wIndex = this.getWord(dbgAddr, 2);
-                        sOperand = "@#" + this.toStrBase(wIndex, 0, true);
+                        sOperand = "@#" + this.toStrBase(wIndex, -1);
                         sTarget = this.getTarget(wIndex);
                     }
                     break;
@@ -2150,7 +2150,7 @@ class DebuggerPDP11 extends Debugger {
 
                 case PDP11.OPMODE.INDEX:                // 0x6: INDEX
                     wIndex = this.getWord(dbgAddr, 2);
-                    sOperand = this.toStrBase(wIndex, 0, true) + '(' + this.getRegName(reg) + ')';
+                    sOperand = this.toStrBase(wIndex, -1) + '(' + this.getRegName(reg) + ')';
                     if (reg == 7) {
                         /*
                          * When using R7 (aka PC), INDEX is known as RELATIVE.  However, instead of displaying
@@ -2936,9 +2936,9 @@ class DebuggerPDP11 extends Debugger {
                 if (shift == size) {
                     if (fJSON) {
                         if (sData) sData += ",";
-                        sData += "0x"+ Str.toHex(data, size * 2);
+                        sData += "0x"+ Str.toHex(data, size << 1);
                     } else {
-                        sData += this.toStrBase(data, size);
+                        sData += this.toStrBase(data, size << 3);
                         sData += (size == 1? (i == 9? '-' : ' ') : "  ");
                     }
                     data = shift = 0;
@@ -3007,7 +3007,7 @@ class DebuggerPDP11 extends Debugger {
             if (vNew & ~mask) {
                 this.println("warning: " + Str.toHex(vNew) + " exceeds " + size + "-byte value");
             }
-            this.println("changing " + this.toStrAddr(dbgAddr) + (this.messageEnabled(MessagesPDP11.BUS)? "" : (" from " + this.toStrBase(fnGet.call(this, dbgAddr), size))) + " to " + this.toStrBase(vNew, size));
+            this.println("changing " + this.toStrAddr(dbgAddr) + (this.messageEnabled(MessagesPDP11.BUS)? "" : (" from " + this.toStrBase(fnGet.call(this, dbgAddr), size << 3))) + " to " + this.toStrBase(vNew, size << 3));
             //noinspection JSUnresolvedFunction
             fnSet.call(this, dbgAddr, vNew, size);
         }

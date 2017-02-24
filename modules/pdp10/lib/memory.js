@@ -406,7 +406,7 @@ class MemoryPDP10 {
             this.dbg.printMessage("attempt to read invalid address " + this.dbg.toStrBase(addr), true);
         }
         this.bus.fault(addr);
-        return 0;
+        return PDP10.DATA_INVALID;
     }
 
     /**

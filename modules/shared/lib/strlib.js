@@ -143,7 +143,7 @@ class Str {
      *
      * Converts an integer to binary, with the specified number of digits (up to the default of 32).
      *
-     * @param {number|null|undefined} n is a 32-bit value
+     * @param {number|null|undefined} n (interpreted as a 32-bit value)
      * @param {number} [cch] is the desired number of binary digits (32 is both the default and the maximum)
      * @param {number} [grouping]
      * @return {string} the binary representation of n
@@ -171,7 +171,7 @@ class Str {
                 s = "," + s;
                 group = grouping;
             }
-            s = (fInvalid ? '?' : ((n & 0x1) ? '1' : '0')) + s;
+            s = (fInvalid? '?' : ((n & 0x1)? '1' : '0')) + s;
             n >>= 1;
             group--;
         }
@@ -183,7 +183,7 @@ class Str {
      *
      * Converts an integer to binary, with the specified number of bytes (up to the default of 4).
      *
-     * @param {number|null|undefined} n is a 32-bit value
+     * @param {number|null|undefined} n (interpreted as a 32-bit value)
      * @param {number} [cb] is the desired number of binary bytes (4 is both the default and the maximum)
      * @param {boolean} [fPrefix]
      * @return {string} the binary representation of n
@@ -197,7 +197,7 @@ class Str {
             s = Str.toBin(n & 0xff, 8) + s;
             n >>= 8;
         }
-        return (fPrefix ? "0b" : "") + s;
+        return (fPrefix? "0b" : "") + s;
     }
 
     /**
@@ -209,7 +209,7 @@ class Str {
      * doesn't properly convert negative values.  Moreover, if n is undefined, n.toString() will throw
      * an exception, whereas this function will return '?' characters.
      *
-     * @param {number|null|undefined} n is a 32-bit value
+     * @param {number|null|undefined} n (interpreted as a 32-bit value)
      * @param {number} [cch] is the desired number of octal digits (0 or undefined for default of either 6 or 11)
      * @param {boolean} [fPrefix]
      * @return {string} the octal representation of n
@@ -221,7 +221,7 @@ class Str {
         if (cch) {
             if (cch > 11) cch = 11;
         } else {
-            cch = (n & ~0xffffff) ? 11 : ((n & ~0xffff) ? 8 : 6);
+            cch = (n & ~0xffffff)? 11 : ((n & ~0xffff)? 8 : 6);
         }
         /*
          * An initial "falsey" check for null takes care of both null and undefined;
@@ -240,7 +240,7 @@ class Str {
                 n >>= 3;
             }
         }
-        return (fPrefix ? "0o" : "") + s;
+        return (fPrefix? "0o" : "") + s;
     }
 
     /**
@@ -252,7 +252,7 @@ class Str {
      * doesn't properly convert negative values.  Moreover, if n is undefined, n.toString() will throw
      * an exception, whereas this function will return '?' characters.
      *
-     * @param {number|null|undefined} n is a 32-bit value
+     * @param {number|null|undefined} n (interpreted as a 32-bit value)
      * @param {number} [cch] is the desired number of decimal digits (0 or undefined for default of either 5 or 10)
      * @return {string} the octal representation of n
      */
@@ -263,7 +263,7 @@ class Str {
         if (cch) {
             if (cch > 10) cch = 10;
         } else {
-            cch = (n & ~0xffff) ? 10 : 5;
+            cch = (n & ~0xffff)? 10 : 5;
         }
         /*
          * An initial "falsey" check for null takes care of both null and undefined;
@@ -302,7 +302,7 @@ class Str {
      *      s = "00000000".substr(0, 8 - s.length) + s;
      *      s = s.substr(0, cch).toUpperCase();
      *
-     * @param {number|null|undefined} n is a 32-bit value
+     * @param {number|null|undefined} n (interpreted as a 32-bit value)
      * @param {number} [cch] is the desired number of hex digits (0 or undefined for default of either 4 or 8)
      * @param {boolean} [fPrefix]
      * @return {string} the hex representation of n
@@ -314,7 +314,7 @@ class Str {
         if (cch) {
             if (cch > 8) cch = 8;
         } else {
-            cch = (n & ~0xffff) ? 8 : 4;
+            cch = (n & ~0xffff)? 8 : 4;
         }
         /*
          * An initial "falsey" check for null takes care of both null and undefined;
@@ -329,12 +329,12 @@ class Str {
         } else {
             while (cch-- > 0) {
                 var d = n & 0xf;
-                d += (d >= 0 && d <= 9 ? 0x30 : 0x41 - 10);
+                d += (d >= 0 && d <= 9? 0x30 : 0x41 - 10);
                 s = String.fromCharCode(d) + s;
                 n >>= 4;
             }
         }
-        return (fPrefix ? "0x" : "") + s;
+        return (fPrefix? "0x" : "") + s;
     }
 
     /**
@@ -492,7 +492,7 @@ class Str {
              * and the hyphen is last, you can avoid escaping those as well.
              */
             k = k.replace(/([\\[\]*{}().+?])/g, "\\$1");
-            sMatch += (sMatch ? '|' : '') + k;
+            sMatch += (sMatch? '|' : '') + k;
         }
         return s.replace(new RegExp('(' + sMatch + ')', "g"), function(m)
         {
@@ -513,7 +513,7 @@ class Str {
     static pad(s, cch, fPadLeft)
     {
         var sPadding = "                                        ";
-        return fPadLeft ? (sPadding + s).slice(-cch) : (s + sPadding).slice(0, cch);
+        return fPadLeft? (sPadding + s).slice(-cch) : (s + sPadding).slice(0, cch);
     }
 
     /**
