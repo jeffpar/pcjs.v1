@@ -23,6 +23,7 @@
  http://pcjs.org/modules/pdp10/lib/memory.js (C) Jeff Parsons 2012-2017
  http://pcjs.org/modules/pdp10/lib/cpu.js (C) Jeff Parsons 2012-2017
  http://pcjs.org/modules/pdp10/lib/cpustate.js (C) Jeff Parsons 2012-2017
+ http://pcjs.org/modules/pdp10/lib/cpuops.js (C) Jeff Parsons 2012-2017
  http://pcjs.org/modules/pdp10/lib/serial.js (C) Jeff Parsons 2012-2017
  http://pcjs.org/modules/shared/lib/debugger.js (C) Jeff Parsons 2012-2017
  http://pcjs.org/modules/pdp10/lib/debugger.js (C) Jeff Parsons 2012-2017

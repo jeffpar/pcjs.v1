@@ -194,6 +194,7 @@
     "./modules/pdp10/lib/memory.js",
     "./modules/pdp10/lib/cpu.js",
     "./modules/pdp10/lib/cpustate.js",
+    "./modules/pdp10/lib/cpuops.js",
     "./modules/pdp10/lib/rom.js",
     "./modules/pdp10/lib/ram.js",
     "./modules/pdp10/lib/serial.js",

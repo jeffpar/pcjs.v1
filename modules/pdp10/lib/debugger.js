@@ -1365,23 +1365,16 @@ class DebuggerPDP10 extends Debugger {
     }
 
     /**
-     * getInstruction(dbgAddr, sComment, nSequence)
-     *
-     * Get the next instruction, by decoding the opcode and any operands.
+     * findInstruction(opCode, fOperands)
      *
      * @this {DebuggerPDP10}
-     * @param {DbgAddrPDP10} dbgAddr
-     * @param {string} [sComment] is an associated comment
-     * @param {number|null} [nSequence] is an associated sequence number, undefined if none
-     * @return {string} (and dbgAddr is updated to the next instruction)
+     * @param {number} opCode
+     * @param {boolean} [fOperands] (optional; default is true)
+     * @return {string}
      */
-    getInstruction(dbgAddr, sComment, nSequence)
+    findInstruction(opCode, fOperands = true)
     {
-        var opNames = DebuggerPDP10.OPNAMES;
-        var dbgAddrOp = this.newAddr(dbgAddr.addr);
-
         var opNum, opMask, aModes, iMode = 0;
-        var opCode = this.getWord(dbgAddr, 1);
         var op = (opCode / PDP10.OPCODE.OPSHIFT)|0;
 
         for (var mask in DebuggerPDP10.OPTABLE) {
@@ -1392,7 +1385,7 @@ class DebuggerPDP10 extends Debugger {
                 /*
                  * When we extracted op from opCode using OPSHIFT, we included 6 additional bits
                  * to help distinguish OPIO instructions from non-OPIO instructions.  But for the
-                  * following tests, we don't need those bits, so we get rid of them now.
+                 * following tests, we don't need those bits, so we get rid of them now.
                  */
                 op >>= 6;
                 switch(opMask) {
@@ -1413,25 +1406,48 @@ class DebuggerPDP10 extends Debugger {
             }
         }
 
-        var sOperands = "";
         var sMode = aModes && aModes[iMode] || "";
         if (sMode == "S" && opNum > DebuggerPDP10.OPS.MOVM) sMode = "B";
+        var sOperation = DebuggerPDP10.OPNAMES[opNum || 0] + sMode;
 
-        var sOpName = opNames[opNum] + sMode;
-        if (!opNum) {
-            sOperands = this.toStrWord(opCode);
+        if (!fOperands) {
+            if (!opNum) sOperation = "";
         } else {
-            if (opMask == PDP10.OPCODE.OPIO) {
-                sOperands = this.toStrBase((opCode / PDP10.OPCODE.IOSHIFT) & PDP10.OPCODE.IOMASK, -1);
+            sOperation = Str.pad(sOperation, 8);
+            if (!opNum) {
+                sOperation += this.toStrWord(opCode);
             } else {
-                sOperands = this.toStrBase((opCode >> PDP10.OPCODE.FNSHIFT) & PDP10.OPCODE.FNMASK, -1);
+                if (opMask == PDP10.OPCODE.OPIO) {
+                    sOperation += this.toStrBase((opCode / PDP10.OPCODE.IOSHIFT) & PDP10.OPCODE.IOMASK, -1);
+                } else {
+                    sOperation += this.toStrBase((opCode >> PDP10.OPCODE.FNSHIFT) & PDP10.OPCODE.FNMASK, -1);
+                }
+                sOperation += ',';
+                if (opCode & PDP10.OPCODE.I_BIT) sOperation += '@';
+                sOperation += this.toStrBase(opCode & PDP10.OPCODE.Y_MASK, -1);
+                var i = (opCode >> PDP10.OPCODE.X_SHIFT) & PDP10.OPCODE.X_MASK;
+                if (i) sOperation += '(' + this.toStrBase(i, -1) + ')';
             }
-            if (sOperands) sOperands += ',';
-            if (opCode & PDP10.OPCODE.I_BIT) sOperands += '@';
-            sOperands += this.toStrBase(opCode & PDP10.OPCODE.Y_MASK, -1);
-            var i = (opCode >> PDP10.OPCODE.X_SHIFT) & PDP10.OPCODE.X_MASK;
-            if (i) sOperands += '(' + this.toStrBase(i, -1) + ')';
         }
+        return sOperation;
+    }
+
+    /**
+     * getInstruction(dbgAddr, sComment, nSequence)
+     *
+     * Get the next instruction, by decoding the opcode and any operands.
+     *
+     * @this {DebuggerPDP10}
+     * @param {DbgAddrPDP10} dbgAddr
+     * @param {string} [sComment] is an associated comment
+     * @param {number|null} [nSequence] is an associated sequence number, undefined if none
+     * @return {string} (and dbgAddr is updated to the next instruction)
+     */
+    getInstruction(dbgAddr, sComment, nSequence)
+    {
+        var dbgAddrOp = this.newAddr(dbgAddr.addr);
+        var opCode = this.getWord(dbgAddr, 1);
+        var sOperation = this.findInstruction(opCode);
 
         var sOpCodes = "";
         var sLine = this.toStrAddr(dbgAddrOp) + ":";
@@ -1443,9 +1459,7 @@ class DebuggerPDP10 extends Debugger {
             } while (dbgAddrOp.addr != dbgAddr.addr);
         }
 
-        sLine += Str.pad(sOpCodes, 16);
-        sLine += Str.pad(sOpName, 5);
-        if (sOperands) sLine += ' ' + sOperands;
+        sLine += Str.pad(sOpCodes, 16) + sOperation;
 
         if (sComment) {
             sLine = Str.pad(sLine, 60) + ';' + (sComment || "");
@@ -3268,6 +3282,10 @@ class DebuggerPDP10 extends Debugger {
         var result = true;
 
         try {
+            if (DEBUG && sCmd == "test") {
+                this.doTest();
+                return true;
+            }
             if (!sCmd.length || sCmd == "end") {
                 if (this.fAssemble) {
                     this.println("ended assemble at " + this.toStrAddr(this.dbgAddrAssemble));
@@ -3436,6 +3454,40 @@ class DebuggerPDP10 extends Debugger {
     }
 
     /**
+     * doTest()
+     *
+     * @this {DebuggerPDP10}
+     */
+    doTest()
+    {
+        var aOps = {};
+        var sOperation;
+        for (var op = 0o00000; op <= 0o77774; op += 4) {
+            var opCode = op * Math.pow(2, 21);
+            sOperation = this.findInstruction(opCode, false);
+            if (!sOperation) continue;
+            if (aOps[sOperation] === undefined) {
+                aOps[sOperation] = op;
+            } else {
+                aOps[sOperation] &= op;
+            }
+        }
+        for (sOperation in aOps) {
+            if (sOperation == null) continue;
+            this.println(sOperation + ": " + this.toStrWord(aOps[sOperation] * Math.pow(2, 21)));
+            // this.println("/**");
+            // this.println(" * op" + sOperation + "(" + this.toStrWord(aOps[sOperation] * Math.pow(2, 21)) + ")");
+            // this.println(" *");
+            // this.println(" * @this {CPUStatePDP10}");
+            // this.println(" * @param {number} opCode");
+            // this.println(" */");
+            // this.println("PDP10.op" + sOperation + " = function(opCode)");
+            // this.println("{");
+            // this.println("};\n");
+        }
+    }
+
+    /**
      * DebuggerPDP10.init()
      *
      * This function operates on every HTML element of class "debugger", extracting the
@@ -3579,7 +3631,7 @@ if (DEBUGGER) {
      *      5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0
      *      O O O O O O O M M A A A A I X X X X Y Y Y Y Y Y Y Y Y Y Y Y Y Y Y Y Y Y
      *
-     * where OOOOOOOMM represents the operation, with MM (if used) represents the mode:
+     * where OOOOOOOMM represents the operation, and MM (if used) represents the mode:
      *
      *      Mode        Suffix      Source  Destination
      *      ----        ------      -----   -----------
@@ -3600,7 +3652,7 @@ if (DEBUGGER) {
      * we're done; otherwise, we must set set R to [E] and repeat the process.
      */
     DebuggerPDP10.OPTABLE = {
-        [PDP10.OPCODE.OPMASK]: {
+        [PDP10.OPCODE.OPMASK]: {                // 0o77700
             0o13000: DebuggerPDP10.OPS.UFA,
             0o13100: DebuggerPDP10.OPS.DFN,
             0o13200: DebuggerPDP10.OPS.FSC,
@@ -3632,7 +3684,7 @@ if (DEBUGGER) {
             0o26600: DebuggerPDP10.OPS.JSA,
             0o26700: DebuggerPDP10.OPS.JRA,
         },
-        [PDP10.OPCODE.OPMODE]: {
+        [PDP10.OPCODE.OPMODE]: {                // 0o77400
             0o14000: DebuggerPDP10.OPS.FAD,
             0o14400: DebuggerPDP10.OPS.FADR,
             0o15000: DebuggerPDP10.OPS.FSB,
@@ -3684,7 +3736,7 @@ if (DEBUGGER) {
             0o57000: DebuggerPDP10.OPS.HRRE,
             0o57400: DebuggerPDP10.OPS.HLRE
         },
-        [PDP10.OPCODE.OPCOMP]: {
+        [PDP10.OPCODE.OPCOMP]: {                // 0o77000
             0o30000: DebuggerPDP10.OPS.CAI,
             0o31000: DebuggerPDP10.OPS.CA,
             0o32000: DebuggerPDP10.OPS.JUMP,
@@ -3694,13 +3746,13 @@ if (DEBUGGER) {
             0o36000: DebuggerPDP10.OPS.SOJ,
             0o37000: DebuggerPDP10.OPS.SOS,
         },
-        [PDP10.OPCODE.OPTEST]: {
+        [PDP10.OPCODE.OPTEST]: {                // 0o71100
             0o60000: DebuggerPDP10.OPS.TR,
             0o60100: DebuggerPDP10.OPS.TL,
             0o61000: DebuggerPDP10.OPS.TD,
             0o61100: DebuggerPDP10.OPS.TS,
         },
-        [PDP10.OPCODE.OPIO]: {
+        [PDP10.OPCODE.OPIO]: {                  // 0o70034
             0o70000: DebuggerPDP10.OPS.BLKI,
             0o70004: DebuggerPDP10.OPS.DATAI,
             0o70010: DebuggerPDP10.OPS.BLKO,
@@ -3710,7 +3762,7 @@ if (DEBUGGER) {
             0o70030: DebuggerPDP10.OPS.CONSZ,
             0o70034: DebuggerPDP10.OPS.CONSO
         },
-        [PDP10.OPCODE.OPUUO]: {
+        [PDP10.OPCODE.OPUUO]: {                 // 0o70000
             0o00000: DebuggerPDP10.OPS.UUO
         }
     };
