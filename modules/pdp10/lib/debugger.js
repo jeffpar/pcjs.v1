@@ -1326,7 +1326,7 @@ class DebuggerPDP10 extends Debugger {
          */
         if (!nState) {
             opCode = this.cpu.readWord(addr);
-            if ((opCode / PDP10.OPCODE.FNSHIFT)|0 == PDP10.OPCODE.FNHALT && this.cpu.getLastPC() == addr) {
+            if ((opCode >> PDP10.OPCODE.FNSHIFT) == PDP10.OPCODE.HALT && this.cpu.getLastPC() == addr) {
                 addr = this.cpu.advancePC(1);
             }
         }
@@ -1354,7 +1354,7 @@ class DebuggerPDP10 extends Debugger {
             if (opCode < 0) {
                 opCode = this.cpu.readWord(addr);
             }
-            if ((opCode & 0xffff) != PDP10.OPCODE.INVALID) {
+            if (opCode >= 0) {
                 var dbgAddr = this.aInstructionHistory[this.iInstructionHistory];
                 this.setAddr(dbgAddr, addr);
                 // if (DEBUG) dbgAddr.cycleCount = cpu.getCycles();
@@ -1389,6 +1389,12 @@ class DebuggerPDP10 extends Debugger {
             opNum = opMasks[op & mask];
             if (opNum) {
                 opMask = +mask;
+                /*
+                 * When we extracted op from opCode using OPSHIFT, we included 6 additional bits
+                 * to help distinguish OPIO instructions from non-OPIO instructions.  But for the
+                  * following tests, we don't need those bits, so we get rid of them now.
+                 */
+                op >>= 6;
                 switch(opMask) {
                 case PDP10.OPCODE.OPMODE:
                     aModes = DebuggerPDP10.OPMODES;
@@ -1412,7 +1418,20 @@ class DebuggerPDP10 extends Debugger {
         if (sMode == "S" && opNum > DebuggerPDP10.OPS.MOVM) sMode = "B";
 
         var sOpName = opNames[opNum] + sMode;
-        if (!opNum) sOperands = this.toStrWord(opCode);
+        if (!opNum) {
+            sOperands = this.toStrWord(opCode);
+        } else {
+            if (opMask == PDP10.OPCODE.OPIO) {
+                sOperands = this.toStrBase((opCode / PDP10.OPCODE.IOSHIFT) & PDP10.OPCODE.IOMASK, -1);
+            } else {
+                sOperands = this.toStrBase((opCode >> PDP10.OPCODE.FNSHIFT) & PDP10.OPCODE.FNMASK, -1);
+            }
+            if (sOperands) sOperands += ',';
+            if (opCode & PDP10.OPCODE.I_BIT) sOperands += '@';
+            sOperands += this.toStrBase(opCode & PDP10.OPCODE.Y_MASK, -1);
+            var i = (opCode >> PDP10.OPCODE.X_SHIFT) & PDP10.OPCODE.X_MASK;
+            if (i) sOperands += '(' + this.toStrBase(i, -1) + ')';
+        }
 
         var sOpCodes = "";
         var sLine = this.toStrAddr(dbgAddrOp) + ":";
@@ -3501,7 +3520,9 @@ if (DEBUGGER) {
         TD:     81,     TS:     82,     XCT:    83,     JFFO:   84,
         JFCL:   85,     JSR:    86,     JSP:    87,     JRST:   88,
         JSA:    89,     JRA:    90,     PUSHJ:  91,     POPJ:   92,
-        UUO:    93
+        BLKI:   93,     DATAI:  94,     BLKO:   95,     DATAO:  96,
+        CONO:   97,     CONI:   98,     CONSZ:  99,     CONSO:  100,
+        UUO:    101
     };
 
     /*
@@ -3532,6 +3553,8 @@ if (DEBUGGER) {
         "TD",           "TS",           "XCT",          "JFFO",
         "JFCL",         "JSR",          "JSP",          "JRST",
         "JSA",          "JRA",          "PUSHJ",        "POPJ",
+        "BLKI",         "DATAI",        "BLKO",         "DATAO",
+        "CONO",         "CONI",         "CONSZ",        "CONSO",
         "UUO"
     ];
 
@@ -3544,7 +3567,7 @@ if (DEBUGGER) {
     ];
 
     /*
-     * PDP-10 opcodes are 36-bit values:
+     * PDP-10 opcodes are 36-bit values, many of which use the following layout:
      *
      *                          1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 3 3 3 3 3 3
      *      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5
@@ -3565,114 +3588,130 @@ if (DEBUGGER) {
      *  2:  MEMORY      M           AC      E
      *  3:  SELF        S           E       E (and AC if A is non-zero)
      *
-     * Bits 0-21 (I,X,Y) contain what we call a "reference address" (R), which is used to
+     * Input-output instructions look like:
+     *
+     *      3 3 3 3 3 3 2 2 2 2 2 2 2 2 2 2 1 1 1 1 1 1 1 1 1 1
+     *      5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0
+     *      1 1 1 D D D D D D D O O O I X X X X Y Y Y Y Y Y Y Y Y Y Y Y Y Y Y Y Y Y
+     *
+     * Bits 0-22 (I,X,Y) contain what we call a "reference address" (R), which is used to
      * calculate the "effective address" (E).  To determine E from R, we must extract I, X,
      * and Y from R, set E to Y, then add [X] to E if X is non-zero.  If I is zero, then
      * we're done; otherwise, we must set set R to [E] and repeat the process.
      */
     DebuggerPDP10.OPTABLE = {
         [PDP10.OPCODE.OPMASK]: {
-            0o130: DebuggerPDP10.OPS.UFA,
-            0o131: DebuggerPDP10.OPS.DFN,
-            0o132: DebuggerPDP10.OPS.FSC,
-            0o133: DebuggerPDP10.OPS.IBP,
-            0o134: DebuggerPDP10.OPS.ILDB,
-            0o135: DebuggerPDP10.OPS.LDB,
-            0o136: DebuggerPDP10.OPS.IDPB,
-            0o137: DebuggerPDP10.OPS.DPB,
-            0o240: DebuggerPDP10.OPS.ASH,
-            0o241: DebuggerPDP10.OPS.ROT,
-            0o242: DebuggerPDP10.OPS.LSH,
-            0o243: DebuggerPDP10.OPS.JFFO,
-            0o244: DebuggerPDP10.OPS.ASHC,
-            0o245: DebuggerPDP10.OPS.ROTC,
-            0o246: DebuggerPDP10.OPS.LSHC,
-            0o250: DebuggerPDP10.OPS.EXCH,
-            0o251: DebuggerPDP10.OPS.BLT,
-            0o252: DebuggerPDP10.OPS.AOBJP,
-            0o253: DebuggerPDP10.OPS.AOBJN,
-            0o254: DebuggerPDP10.OPS.JRST,      // includes HALT, JRSTF, and JEN
-            0o255: DebuggerPDP10.OPS.JFCL,      // includes JOV, JCRY0, JCRY1, JCRY, and JFOV
-            0o256: DebuggerPDP10.OPS.XCT,
-            0o260: DebuggerPDP10.OPS.PUSHJ,
-            0o261: DebuggerPDP10.OPS.PUSH,
-            0o262: DebuggerPDP10.OPS.POP,
-            0o263: DebuggerPDP10.OPS.POPJ,
-            0o264: DebuggerPDP10.OPS.JSR,
-            0o265: DebuggerPDP10.OPS.JSP,
-            0o266: DebuggerPDP10.OPS.JSA,
-            0o267: DebuggerPDP10.OPS.JRA,
+            0o13000: DebuggerPDP10.OPS.UFA,
+            0o13100: DebuggerPDP10.OPS.DFN,
+            0o13200: DebuggerPDP10.OPS.FSC,
+            0o13300: DebuggerPDP10.OPS.IBP,
+            0o13400: DebuggerPDP10.OPS.ILDB,
+            0o13500: DebuggerPDP10.OPS.LDB,
+            0o13600: DebuggerPDP10.OPS.IDPB,
+            0o13700: DebuggerPDP10.OPS.DPB,
+            0o24000: DebuggerPDP10.OPS.ASH,
+            0o24100: DebuggerPDP10.OPS.ROT,
+            0o24200: DebuggerPDP10.OPS.LSH,
+            0o24300: DebuggerPDP10.OPS.JFFO,
+            0o24400: DebuggerPDP10.OPS.ASHC,
+            0o24500: DebuggerPDP10.OPS.ROTC,
+            0o24600: DebuggerPDP10.OPS.LSHC,
+            0o25000: DebuggerPDP10.OPS.EXCH,
+            0o25100: DebuggerPDP10.OPS.BLT,
+            0o25200: DebuggerPDP10.OPS.AOBJP,
+            0o25300: DebuggerPDP10.OPS.AOBJN,
+            0o25400: DebuggerPDP10.OPS.JRST,    // includes HALT, JRSTF, and JEN
+            0o25500: DebuggerPDP10.OPS.JFCL,    // includes JOV, JCRY0, JCRY1, JCRY, and JFOV
+            0o25600: DebuggerPDP10.OPS.XCT,
+            0o26000: DebuggerPDP10.OPS.PUSHJ,
+            0o26100: DebuggerPDP10.OPS.PUSH,
+            0o26200: DebuggerPDP10.OPS.POP,
+            0o26300: DebuggerPDP10.OPS.POPJ,
+            0o26400: DebuggerPDP10.OPS.JSR,
+            0o26500: DebuggerPDP10.OPS.JSP,
+            0o26600: DebuggerPDP10.OPS.JSA,
+            0o26700: DebuggerPDP10.OPS.JRA,
         },
         [PDP10.OPCODE.OPMODE]: {
-            0o140: DebuggerPDP10.OPS.FAD,
-            0o144: DebuggerPDP10.OPS.FADR,
-            0o150: DebuggerPDP10.OPS.FSB,
-            0o154: DebuggerPDP10.OPS.FSBR,
-            0o160: DebuggerPDP10.OPS.FMP,
-            0o164: DebuggerPDP10.OPS.FMPR,
-            0o170: DebuggerPDP10.OPS.FDV,
-            0o174: DebuggerPDP10.OPS.FDVR,
-            0o200: DebuggerPDP10.OPS.MOV,
-            0o204: DebuggerPDP10.OPS.MOVS,
-            0o210: DebuggerPDP10.OPS.MOVN,
-            0o214: DebuggerPDP10.OPS.MOVM,
-            0o220: DebuggerPDP10.OPS.IMUL,
-            0o224: DebuggerPDP10.OPS.MUL,
-            0o230: DebuggerPDP10.OPS.IDIV,
-            0o234: DebuggerPDP10.OPS.DIV,
-            0o270: DebuggerPDP10.OPS.ADD,
-            0o274: DebuggerPDP10.OPS.SUB,
-            0o400: DebuggerPDP10.OPS.SETZ,
-            0o404: DebuggerPDP10.OPS.AND,
-            0o410: DebuggerPDP10.OPS.ANDCA,
-            0o414: DebuggerPDP10.OPS.SETM,
-            0o420: DebuggerPDP10.OPS.ANDCM,
-            0o424: DebuggerPDP10.OPS.SETA,
-            0o430: DebuggerPDP10.OPS.XOR,
-            0o434: DebuggerPDP10.OPS.IOR,
-            0o440: DebuggerPDP10.OPS.ANDCB,
-            0o444: DebuggerPDP10.OPS.EQV,
-            0o450: DebuggerPDP10.OPS.SETCA,
-            0o454: DebuggerPDP10.OPS.ORCA,
-            0o460: DebuggerPDP10.OPS.SETCM,
-            0o464: DebuggerPDP10.OPS.ORCM,
-            0o470: DebuggerPDP10.OPS.ORCB,
-            0o474: DebuggerPDP10.OPS.SETO,
-            0o500: DebuggerPDP10.OPS.HLL,
-            0o504: DebuggerPDP10.OPS.HRL,
-            0o510: DebuggerPDP10.OPS.HLLZ,
-            0o514: DebuggerPDP10.OPS.HRLZ,
-            0o520: DebuggerPDP10.OPS.HLLO,
-            0o524: DebuggerPDP10.OPS.HRLO,
-            0o530: DebuggerPDP10.OPS.HLLE,
-            0o534: DebuggerPDP10.OPS.HRLE,
-            0o540: DebuggerPDP10.OPS.HRR,
-            0o544: DebuggerPDP10.OPS.HLR,
-            0o550: DebuggerPDP10.OPS.HRRZ,
-            0o554: DebuggerPDP10.OPS.HLRZ,
-            0o560: DebuggerPDP10.OPS.HRRO,
-            0o564: DebuggerPDP10.OPS.HLRO,
-            0o570: DebuggerPDP10.OPS.HRRE,
-            0o574: DebuggerPDP10.OPS.HLRE
+            0o14000: DebuggerPDP10.OPS.FAD,
+            0o14400: DebuggerPDP10.OPS.FADR,
+            0o15000: DebuggerPDP10.OPS.FSB,
+            0o15400: DebuggerPDP10.OPS.FSBR,
+            0o16000: DebuggerPDP10.OPS.FMP,
+            0o16400: DebuggerPDP10.OPS.FMPR,
+            0o17000: DebuggerPDP10.OPS.FDV,
+            0o17400: DebuggerPDP10.OPS.FDVR,
+            0o20000: DebuggerPDP10.OPS.MOV,
+            0o20400: DebuggerPDP10.OPS.MOVS,
+            0o21000: DebuggerPDP10.OPS.MOVN,
+            0o21400: DebuggerPDP10.OPS.MOVM,
+            0o22000: DebuggerPDP10.OPS.IMUL,
+            0o22400: DebuggerPDP10.OPS.MUL,
+            0o23000: DebuggerPDP10.OPS.IDIV,
+            0o23400: DebuggerPDP10.OPS.DIV,
+            0o27000: DebuggerPDP10.OPS.ADD,
+            0o27400: DebuggerPDP10.OPS.SUB,
+            0o40000: DebuggerPDP10.OPS.SETZ,
+            0o40400: DebuggerPDP10.OPS.AND,
+            0o41000: DebuggerPDP10.OPS.ANDCA,
+            0o41400: DebuggerPDP10.OPS.SETM,
+            0o42000: DebuggerPDP10.OPS.ANDCM,
+            0o42400: DebuggerPDP10.OPS.SETA,
+            0o43000: DebuggerPDP10.OPS.XOR,
+            0o43400: DebuggerPDP10.OPS.IOR,
+            0o44000: DebuggerPDP10.OPS.ANDCB,
+            0o44400: DebuggerPDP10.OPS.EQV,
+            0o45000: DebuggerPDP10.OPS.SETCA,
+            0o45400: DebuggerPDP10.OPS.ORCA,
+            0o46000: DebuggerPDP10.OPS.SETCM,
+            0o46400: DebuggerPDP10.OPS.ORCM,
+            0o47000: DebuggerPDP10.OPS.ORCB,
+            0o47400: DebuggerPDP10.OPS.SETO,
+            0o50000: DebuggerPDP10.OPS.HLL,
+            0o50400: DebuggerPDP10.OPS.HRL,
+            0o51000: DebuggerPDP10.OPS.HLLZ,
+            0o51400: DebuggerPDP10.OPS.HRLZ,
+            0o52000: DebuggerPDP10.OPS.HLLO,
+            0o52400: DebuggerPDP10.OPS.HRLO,
+            0o53000: DebuggerPDP10.OPS.HLLE,
+            0o53400: DebuggerPDP10.OPS.HRLE,
+            0o54000: DebuggerPDP10.OPS.HRR,
+            0o54400: DebuggerPDP10.OPS.HLR,
+            0o55000: DebuggerPDP10.OPS.HRRZ,
+            0o55400: DebuggerPDP10.OPS.HLRZ,
+            0o56000: DebuggerPDP10.OPS.HRRO,
+            0o56400: DebuggerPDP10.OPS.HLRO,
+            0o57000: DebuggerPDP10.OPS.HRRE,
+            0o57400: DebuggerPDP10.OPS.HLRE
         },
         [PDP10.OPCODE.OPCOMP]: {
-            0o300: DebuggerPDP10.OPS.CAI,
-            0o310: DebuggerPDP10.OPS.CA,
-            0o320: DebuggerPDP10.OPS.JUMP,
-            0o330: DebuggerPDP10.OPS.SKIP,
-            0o340: DebuggerPDP10.OPS.AOJ,
-            0o350: DebuggerPDP10.OPS.AOS,
-            0o360: DebuggerPDP10.OPS.SOJ,
-            0o370: DebuggerPDP10.OPS.SOS,
+            0o30000: DebuggerPDP10.OPS.CAI,
+            0o31000: DebuggerPDP10.OPS.CA,
+            0o32000: DebuggerPDP10.OPS.JUMP,
+            0o33000: DebuggerPDP10.OPS.SKIP,
+            0o34000: DebuggerPDP10.OPS.AOJ,
+            0o35000: DebuggerPDP10.OPS.AOS,
+            0o36000: DebuggerPDP10.OPS.SOJ,
+            0o37000: DebuggerPDP10.OPS.SOS,
         },
         [PDP10.OPCODE.OPTEST]: {
-            0o600: DebuggerPDP10.OPS.TR,
-            0o601: DebuggerPDP10.OPS.TL,
-            0o610: DebuggerPDP10.OPS.TD,
-            0o611: DebuggerPDP10.OPS.TS,
+            0o60000: DebuggerPDP10.OPS.TR,
+            0o60100: DebuggerPDP10.OPS.TL,
+            0o61000: DebuggerPDP10.OPS.TD,
+            0o61100: DebuggerPDP10.OPS.TS,
+        },
+        [PDP10.OPCODE.OPIO]: {
+            0o70000: DebuggerPDP10.OPS.BLKI,
+            0o70004: DebuggerPDP10.OPS.DATAI,
+            0o70010: DebuggerPDP10.OPS.BLKO,
+            0o70014: DebuggerPDP10.OPS.DATAO,
+            0o70020: DebuggerPDP10.OPS.CONO,
+            0o70024: DebuggerPDP10.OPS.CONI,
+            0o70030: DebuggerPDP10.OPS.CONSZ,
+            0o70034: DebuggerPDP10.OPS.CONSO
         },
         [PDP10.OPCODE.OPUUO]: {
-            0o000: DebuggerPDP10.OPS.UUO
+            0o00000: DebuggerPDP10.OPS.UUO
         }
     };
 

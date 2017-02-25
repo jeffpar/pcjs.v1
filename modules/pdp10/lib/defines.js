@@ -104,15 +104,22 @@ var PDP10 = {
      * Opcode definitions
      */
     OPCODE: {
-        OPMASK:     0o777,              // operation mask
-        OPMODE:     0o774,              // operation with mode
-        OPCOMP:     0o770,              // operation with compare
-        OPTEST:     0o611,              // operation with test
-        OPUUO:      0o700,              // unimplemented user operation (UUO) mask
-        OPSHIFT:    Math.pow(2, 27),    // operation shift
-        FNSHIFT:    Math.pow(2, 23),    // function shift
-        FNHALT:     0o5304,             // function code for HALT
-        INVALID:    0o777777777777      // TODO: Resolve
+        OPMASK:     0o77700,            // operation mask
+        OPMODE:     0o77400,            // operation with mode
+        OPCOMP:     0o77000,            // operation with compare
+        OPTEST:     0o71100,            // operation with test
+        OPIO:       0o70034,            // input-output instructions
+        OPUUO:      0o70000,            // unimplemented user operation (UUO) mask
+        OPSHIFT:    Math.pow(2, 21),    // operation shift
+        FNSHIFT:    23,                 // accumulator/function shift
+        FNMASK:     0o17,               // accumulator/function mask (after shift)
+        IOSHIFT:    Math.pow(2, 26),    // input-output device code shift
+        IOMASK:     0o177,              // input-output device code mask (after shift)
+        Y_MASK:     0o777777,
+        X_SHIFT:    18,
+        X_MASK:     0o17,
+        I_BIT:      0o20000000,
+        HALT:       0o5304              // operation code for HALT
     },
 
     /*
