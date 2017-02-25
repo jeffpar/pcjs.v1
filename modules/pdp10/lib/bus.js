@@ -706,8 +706,8 @@ class BusPDP10 extends Component {
         if (!this.nDisableFaults) {
             if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP10.FAULT)) {
                 this.dbg.printMessage("memory fault on " + this.dbg.toStrBase(addr), true, true);
-                this.dbg.stopCPU();
             }
+            this.cpu.stopCPU();
         }
     }
 

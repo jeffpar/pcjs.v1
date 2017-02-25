@@ -7,5 +7,5 @@
 	<ram id="ram" addr="0x0000" size="0x4000"/>
 	<device id="default" type="default"/>
 	<serial id="serial" adapter="0" binding="print" upperCase="true"/>
-	<panel ref="/devices/pdp10/panel/test/debugger/terminal.xml"/>
+	<panel ref="/devices/pdp10/panel/test/terminal.xml"/>
 </machine>

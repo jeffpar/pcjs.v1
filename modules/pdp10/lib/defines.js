@@ -99,16 +99,22 @@ var PDP10 = {
     ADDR_LIMIT:     Math.pow(2, 18),
     DATA_INVALID:   -1,
     DATA_LIMIT:     Math.pow(2, 36),
+
     /*
-     * Assorted common opcodes
+     * Opcode definitions
      */
     OPCODE: {
-        INSMASK:    0o777000000000,
-        ACCMASK:    0o000740000000,
-        HALTMASK:   0o777740000000,
-        HALT:       0o254200000000,
+        OPMASK:     0o777,              // operation mask
+        OPMODE:     0o774,              // operation with mode
+        OPCOMP:     0o770,              // operation with compare
+        OPTEST:     0o611,              // operation with test
+        OPUUO:      0o700,              // unimplemented user operation (UUO) mask
+        OPSHIFT:    Math.pow(2, 27),    // operation shift
+        FNSHIFT:    Math.pow(2, 23),    // function shift
+        FNHALT:     0o5304,             // function code for HALT
         INVALID:    0o777777777777      // TODO: Resolve
     },
+
     /*
      * Internal operation state flags
      */

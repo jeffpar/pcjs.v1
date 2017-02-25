@@ -324,7 +324,7 @@ class CPUStatePDP10 extends CPUPDP10 {
      */
     getOpcode()
     {
-        var pc = this.regPC;
+        var pc = this.pcLast = this.regPC;
         var opCode = this.readWord(pc);
         this.regPC = (pc + 1) % PDP10.ADDR_LIMIT;
         return opCode;
