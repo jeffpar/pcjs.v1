@@ -108,13 +108,14 @@ var PDP10 = {
         OPMODE:     0o77400,            // operation with mode
         OPCOMP:     0o77000,            // operation with compare
         OPTEST:     0o71100,            // operation with test
-        OPIO:       0o70034,            // input-output instructions
+        OPIO:       0o70034,            // input-output operation
         OPUUO:      0o70000,            // unimplemented user operation (UUO) mask
         OPSHIFT:    Math.pow(2, 21),    // operation shift
         FNSHIFT:    23,                 // accumulator/function shift
         FNMASK:     0o17,               // accumulator/function mask (after shift)
         IOSHIFT:    Math.pow(2, 26),    // input-output device code shift
         IOMASK:     0o177,              // input-output device code mask (after shift)
+        SHIFT:      Math.pow(2, 27),    // operation code shift
         Y_MASK:     0o777777,
         X_SHIFT:    18,
         X_MASK:     0o17,

@@ -3460,23 +3460,29 @@ class DebuggerPDP10 extends Debugger {
      */
     doTest()
     {
-        var aOps = {};
-        var sOperation;
-        for (var op = 0o00000; op <= 0o77774; op += 4) {
-            var opCode = op * Math.pow(2, 21);
+        var ops = {}, aOpXXX = [];
+        var op, opXXX, opCode, sOperation;
+        for (op = 0o00000; op <= 0o77774; op += 4) {
+            opCode = op * Math.pow(2, 21);
             sOperation = this.findInstruction(opCode, false);
             if (!sOperation) continue;
-            if (aOps[sOperation] === undefined) {
-                aOps[sOperation] = op;
+            if (ops[sOperation] === undefined) {
+                ops[sOperation] = op;
             } else {
-                aOps[sOperation] &= op;
+                ops[sOperation] &= op;
+            }
+            opXXX = op >> 6;
+            if (!aOpXXX[opXXX]) {
+                aOpXXX[opXXX] = sOperation;
+            } else if (aOpXXX[opXXX] != sOperation) {
+                aOpXXX[opXXX] = "XXX";
             }
         }
-        for (sOperation in aOps) {
-            if (sOperation == null) continue;
-            this.println(sOperation + ": " + this.toStrWord(aOps[sOperation] * Math.pow(2, 21)));
+        for (sOperation in ops) {
+            op = ops[sOperation];
+            this.println(sOperation + ": " + this.toStrWord(op * Math.pow(2, 21)));
             // this.println("/**");
-            // this.println(" * op" + sOperation + "(" + this.toStrWord(aOps[sOperation] * Math.pow(2, 21)) + ")");
+            // this.println(" * op" + sOperation + "(" + this.toStrWord(op * Math.pow(2, 21)) + ")");
             // this.println(" *");
             // this.println(" * @this {CPUStatePDP10}");
             // this.println(" * @param {number} opCode");
@@ -3485,6 +3491,15 @@ class DebuggerPDP10 extends Debugger {
             // this.println("{");
             // this.println("};\n");
         }
+        // this.println("PDP10.aOpXXX = [");
+        // for (opXXX = 0o000; opXXX <= 0o777; opXXX++) {
+        //     sOperation = aOpXXX[opXXX];
+        //     sOperation = sOperation? ("    PDP10.op" + sOperation + ",") : "    PDP10.opUndefined,";
+        //     sOperation = Str.pad(sOperation, 32);
+        //     sOperation += "// " + Str.toOct(opXXX, 3, true) + "xxx yyyyyy";
+        //     this.println(sOperation);
+        // }
+        // this.println("];");
     }
 
     /**
@@ -3652,6 +3667,9 @@ if (DEBUGGER) {
      * we're done; otherwise, we must set set R to [E] and repeat the process.
      */
     DebuggerPDP10.OPTABLE = {
+        [PDP10.OPCODE.OPUUO]: {                 // 0o70000
+            0o00000: DebuggerPDP10.OPS.UUO
+        },
         [PDP10.OPCODE.OPMASK]: {                // 0o77700
             0o13000: DebuggerPDP10.OPS.UFA,
             0o13100: DebuggerPDP10.OPS.DFN,
@@ -3761,9 +3779,6 @@ if (DEBUGGER) {
             0o70024: DebuggerPDP10.OPS.CONI,
             0o70030: DebuggerPDP10.OPS.CONSZ,
             0o70034: DebuggerPDP10.OPS.CONSO
-        },
-        [PDP10.OPCODE.OPUUO]: {                 // 0o70000
-            0o00000: DebuggerPDP10.OPS.UUO
         }
     };
 
