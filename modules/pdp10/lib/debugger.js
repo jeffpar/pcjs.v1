@@ -3456,50 +3456,62 @@ class DebuggerPDP10 extends Debugger {
     /**
      * doTest()
      *
+     * This function exercises the disassembler by performing look-ups for all possible operation codes
+     * and displaying the results.  It's not intended to be included in the compiled version of the Debugger
+     * (DEBUG only).
+     *
      * @this {DebuggerPDP10}
      */
     doTest()
     {
-        var ops = {}, aOpXXX = [];
-        var op, opXXX, opCode, sOperation;
-        for (op = 0o00000; op <= 0o77774; op += 4) {
-            opCode = op * Math.pow(2, 21);
-            sOperation = this.findInstruction(opCode, false);
-            if (!sOperation) continue;
-            if (ops[sOperation] === undefined) {
-                ops[sOperation] = op;
-            } else {
-                ops[sOperation] &= op;
+        if (DEBUG) {
+            var ops = {}, aOpXXX = [];
+            var op, opXXX, opCode, sOperation;
+            for (op = 0o00000; op <= 0o77774; op += 4) {
+                opCode = op * Math.pow(2, 21);
+                sOperation = this.findInstruction(opCode, false);
+                if (!sOperation) continue;
+                if (ops[sOperation] === undefined) {
+                    ops[sOperation] = op;
+                } else {
+                    ops[sOperation] &= op;
+                }
+                opXXX = op >> 6;
+                if (!aOpXXX[opXXX]) {
+                    aOpXXX[opXXX] = sOperation;
+                } else if (aOpXXX[opXXX] != sOperation) {
+                    aOpXXX[opXXX] = "XXX";
+                }
             }
-            opXXX = op >> 6;
-            if (!aOpXXX[opXXX]) {
-                aOpXXX[opXXX] = sOperation;
-            } else if (aOpXXX[opXXX] != sOperation) {
-                aOpXXX[opXXX] = "XXX";
+            for (sOperation in ops) {
+                op = ops[sOperation];
+                this.println(Str.pad(sOperation + ":", 8) + this.toStrWord(op * Math.pow(2, 21)));
+                //
+                // The following code leveraged the disassembler to generate opcode handlers for all known opcodes.
+                //
+                // this.println("/**");
+                // this.println(" * op" + sOperation + "(" + this.toStrWord(op * Math.pow(2, 21)) + ")");
+                // this.println(" *");
+                // this.println(" * @this {CPUStatePDP10}");
+                // this.println(" * @param {number} opCode");
+                // this.println(" */");
+                // this.println("PDP10.op" + sOperation + " = function(opCode)");
+                // this.println("{");
+                // this.println("};\n");
             }
+            //
+            // The following code leveraged the disassembler to generate an opcode dispatch table for all known opcodes.
+            //
+            // this.println("PDP10.aOpXXX = [");
+            // for (opXXX = 0o000; opXXX <= 0o777; opXXX++) {
+            //     sOperation = aOpXXX[opXXX];
+            //     sOperation = sOperation? ("    PDP10.op" + sOperation + ",") : "    PDP10.opUndefined,";
+            //     sOperation = Str.pad(sOperation, 32);
+            //     sOperation += "// " + Str.toOct(opXXX, 3, true) + "xxx yyyyyy";
+            //     this.println(sOperation);
+            // }
+            // this.println("];");
         }
-        for (sOperation in ops) {
-            op = ops[sOperation];
-            this.println(sOperation + ": " + this.toStrWord(op * Math.pow(2, 21)));
-            // this.println("/**");
-            // this.println(" * op" + sOperation + "(" + this.toStrWord(op * Math.pow(2, 21)) + ")");
-            // this.println(" *");
-            // this.println(" * @this {CPUStatePDP10}");
-            // this.println(" * @param {number} opCode");
-            // this.println(" */");
-            // this.println("PDP10.op" + sOperation + " = function(opCode)");
-            // this.println("{");
-            // this.println("};\n");
-        }
-        // this.println("PDP10.aOpXXX = [");
-        // for (opXXX = 0o000; opXXX <= 0o777; opXXX++) {
-        //     sOperation = aOpXXX[opXXX];
-        //     sOperation = sOperation? ("    PDP10.op" + sOperation + ",") : "    PDP10.opUndefined,";
-        //     sOperation = Str.pad(sOperation, 32);
-        //     sOperation += "// " + Str.toOct(opXXX, 3, true) + "xxx yyyyyy";
-        //     this.println(sOperation);
-        // }
-        // this.println("];");
     }
 
     /**
@@ -3634,37 +3646,10 @@ if (DEBUGGER) {
     ];
 
     /*
-     * PDP-10 opcodes are 36-bit values, many of which use the following layout:
-     *
-     *                          1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 3 3 3 3 3 3
-     *      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5
-     *      O O O O O O O M M A A A A I X X X X Y Y Y Y Y Y Y Y Y Y Y Y Y Y Y Y Y Y
-     *
-     * or using modern bit-numbering:
-     *
-     *      3 3 3 3 3 3 2 2 2 2 2 2 2 2 2 2 1 1 1 1 1 1 1 1 1 1
-     *      5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0
-     *      O O O O O O O M M A A A A I X X X X Y Y Y Y Y Y Y Y Y Y Y Y Y Y Y Y Y Y
-     *
-     * where OOOOOOOMM represents the operation, and MM (if used) represents the mode:
-     *
-     *      Mode        Suffix      Source  Destination
-     *      ----        ------      -----   -----------
-     *  0:  BASIC       None        E       AC
-     *  1:  IMMEDIATE   I           0,E     AC
-     *  2:  MEMORY      M           AC      E
-     *  3:  SELF        S           E       E (and AC if A is non-zero)
-     *
-     * Input-output instructions look like:
-     *
-     *      3 3 3 3 3 3 2 2 2 2 2 2 2 2 2 2 1 1 1 1 1 1 1 1 1 1
-     *      5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0
-     *      1 1 1 D D D D D D D O O O I X X X X Y Y Y Y Y Y Y Y Y Y Y Y Y Y Y Y Y Y
-     *
-     * Bits 0-22 (I,X,Y) contain what we call a "reference address" (R), which is used to
-     * calculate the "effective address" (E).  To determine E from R, we must extract I, X,
-     * and Y from R, set E to Y, then add [X] to E if X is non-zero.  If I is zero, then
-     * we're done; otherwise, we must set set R to [E] and repeat the process.
+     * OPTABLE is a collection of masks, and each mask refers to a collection of opcode
+     * patterns associated with that mask; the disassembler applies each mask to the opcode,
+     * and when a masked opcode matches one of the associated patterns, the corresponding
+     * instruction is considered a match.
      */
     DebuggerPDP10.OPTABLE = {
         [PDP10.OPCODE.OPUUO]: {                 // 0o70000

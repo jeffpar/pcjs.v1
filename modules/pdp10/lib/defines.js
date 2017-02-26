@@ -101,7 +101,37 @@ var PDP10 = {
     DATA_LIMIT:     Math.pow(2, 36),
 
     /*
-     * Opcode definitions
+     * PDP-10 opcodes are 36-bit values, most of which use the following layout:
+     *
+     *                          1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 3 3 3 3 3 3
+     *      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5
+     *      O O O O O O O M M A A A A I X X X X Y Y Y Y Y Y Y Y Y Y Y Y Y Y Y Y Y Y
+     *
+     * or using modern bit-numbering:
+     *
+     *      3 3 3 3 3 3 2 2 2 2 2 2 2 2 2 2 1 1 1 1 1 1 1 1 1 1
+     *      5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0
+     *      O O O O O O O M M A A A A I X X X X Y Y Y Y Y Y Y Y Y Y Y Y Y Y Y Y Y Y
+     *
+     * where OOOOOOOMM represents the operation, and MM (if used) represents the mode:
+     *
+     *      Mode        Suffix      Source  Destination
+     *      ----        ------      -----   -----------
+     *  0:  BASIC       None        E       AC
+     *  1:  IMMEDIATE   I           0,E     AC
+     *  2:  MEMORY      M           AC      E
+     *  3:  SELF        S           E       E (and AC if A is non-zero)
+     *
+     * Input-output instructions look like:
+     *
+     *      3 3 3 3 3 3 2 2 2 2 2 2 2 2 2 2 1 1 1 1 1 1 1 1 1 1
+     *      5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0
+     *      1 1 1 D D D D D D D O O O I X X X X Y Y Y Y Y Y Y Y Y Y Y Y Y Y Y Y Y Y
+     *
+     * Bits 0-22 (I,X,Y) contain what we call a "reference address" (R), which is used to
+     * calculate the "effective address" (E).  To determine E from R, we must extract I, X,
+     * and Y from R, set E to Y, then add [X] to E if X is non-zero.  If I is zero, then
+     * we're done; otherwise, we must set set R to [E] and repeat the process.
      */
     OPCODE: {
         OPMASK:     0o77700,            // operation mask
@@ -115,11 +145,12 @@ var PDP10 = {
         FNMASK:     0o17,               // accumulator/function mask (after shift)
         IOSHIFT:    Math.pow(2, 26),    // input-output device code shift
         IOMASK:     0o177,              // input-output device code mask (after shift)
-        SHIFT:      Math.pow(2, 27),    // operation code shift
-        Y_MASK:     0o777777,
-        X_SHIFT:    18,
-        X_MASK:     0o17,
-        I_BIT:      0o20000000,
+        O_SHIFT:    Math.pow(2, 27),    // operation shift
+        O_MASK:     0o777,              // operation mask (after shift)
+        I_BIT:      0o20000000,         // indirect bit
+        X_SHIFT:    18,                 // X shift
+        X_MASK:     0o17,               // X mask (after shift)
+        Y_MASK:     0o777777,           // Y mask
         HALT:       0o5304              // operation code for HALT
     },
 

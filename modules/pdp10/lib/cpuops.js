@@ -3790,7 +3790,7 @@ PDP10.opUndefined = function(opCode)
  */
 PDP10.opKA10 = function(opCode)
 {
-    var op = (opCode / PDP10.OPCODE.SHIFT)|0;
+    var op = (opCode / PDP10.OPCODE.O_SHIFT)|0;
     PDP10.aOpXXX_KA10[op].call(this, opCode);
 };
 
