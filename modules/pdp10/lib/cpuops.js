@@ -38,22 +38,22 @@ if (NODE) {
  *
  *  From the DEC PDP-10 System Reference Manual (May 1968), p. 2-64:
  *
- *  Store the instruction code, A and the effective address E in bits 0-8, 9-12 and 18-35 respectively of
- *  location 40; clear bits 13-17.  Execute the instruction contained in location 41.  The original contents
- *  of location 40 are lost.
+ *      Store the instruction code, A and the effective address E in bits 0-8, 9-12 and 18-35 respectively of
+ *      location 40; clear bits 13-17.  Execute the instruction contained in location 41.  The original contents
+ *      of location 40 are lost.
  *
- *  All of these codes are equivalent when they occur in the Monitor or when time sharing is not in effect.
- *  But when a UUO appears in a user program, a code in the range 001-037 uses relocated locations 40 and 41
- *  (ie 40 and 41 in the user's block) and is thus entirely a part of and under control of the user program.
+ *      All of these codes are equivalent when they occur in the Monitor or when time sharing is not in effect.
+ *      But when a UUO appears in a user program, a code in the range 001-037 uses relocated locations 40 and 41
+ *      (ie 40 and 41 in the user's block) and is thus entirely a part of and under control of the user program.
  *
- *  A code in the range 040-077 on the other hand uses unrelocated 40 and 41, and the instruction in the latter
- *  location is under control of the Monitor; these codes are thus specifically for user communication with
- *  the Monitor, which interprets them (refer to the Monitor manual for the meanings of the various codes).
+ *      A code in the range 040-077 on the other hand uses unrelocated 40 and 41, and the instruction in the latter
+ *      location is under control of the Monitor; these codes are thus specifically for user communication with
+ *      the Monitor, which interprets them (refer to the Monitor manual for the meanings of the various codes).
  *
- *  The code 000 executes in the same way as 040-077 but is not a standard communication code: it is included
- *  so that control returns to the Monitor should a user program wipe itself out.
+ *      The code 000 executes in the same way as 040-077 but is not a standard communication code: it is included
+ *      so that control returns to the Monitor should a user program wipe itself out.
  *
- *  For a second processor connected to the same memory, the UUO trap is locations 140-141 instead of 40-41.
+ *      For a second processor connected to the same memory, the UUO trap is locations 140-141 instead of 40-41.
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
@@ -68,18 +68,18 @@ PDP10.opUUO = function(opCode)
  *
  *  From the DEC PDP-10 System Reference Manual (May 1968), p. 2-37:
  *
- *  Floating add the contents of location E to AC.  If the double length fraction in the sum is zero, clear
- *  accumulator A+1.  Otherwise normalize the sum only if the magnitude of its fractional part is >= 1, and place
- *  the high order part of the result in AC A+1.  The original contents of AC and E are unaffected.
+ *      Floating add the contents of location E to AC.  If the double length fraction in the sum is zero, clear
+ *      accumulator A+1.  Otherwise normalize the sum only if the magnitude of its fractional part is >= 1, and place
+ *      the high order part of the result in AC A+1.  The original contents of AC and E are unaffected.
  *
- *  NOTE: The result is placed in accumulator A+1. T his is the only arithmetic instruction that stores the result
- *  in a second accumulator, leaving the original operands intact.
+ *      NOTE: The result is placed in accumulator A+1. T his is the only arithmetic instruction that stores the result
+ *      in a second accumulator, leaving the original operands intact.
  *
- *  If the exponent of the sum following the one-step normalization is > 127, set Overflow and Floating Overflow;
- *  the result stored has an exponent 256 less than the correct one.
+ *      If the exponent of the sum following the one-step normalization is > 127, set Overflow and Floating Overflow;
+ *      the result stored has an exponent 256 less than the correct one.
  *
- *  SIDEBAR: The exponent of the sum is equal to that of the larger summand unless addition of the fractions
- *  overflows, in which case it is greater by 1.  Exponent overflow can occur only in the latter case.
+ *      SIDEBAR: The exponent of the sum is equal to that of the larger summand unless addition of the fractions
+ *      overflows, in which case it is greater by 1.  Exponent overflow can occur only in the latter case.
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
@@ -94,11 +94,11 @@ PDP10.opUFA = function(opCode)
  *
  *  From the DEC PDP-10 System Reference Manual (May 1968), p. 2-37:
  *
- *  Negate the double length floating point number composed of the contents of AC and location E with AC on the left.
- *  Do this by taking the twos complement of the number whose sign is AC bit 0, whose exponent is in AC bits 1-8, and
- *  whose fraction is the 54-bit string in bits 9-35 of AC and location E.  Place the high order word of the result
- *  in AC; place the low order part of the fraction in bits 9-35 of location E without altering the original contents
- *  of bits 0-8 of that location.
+ *      Negate the double length floating point number composed of the contents of AC and location E with AC on the left.
+ *      Do this by taking the twos complement of the number whose sign is AC bit 0, whose exponent is in AC bits 1-8, and
+ *      whose fraction is the 54-bit string in bits 9-35 of AC and location E.  Place the high order word of the result
+ *      in AC; place the low order part of the fraction in bits 9-35 of location E without altering the original contents
+ *      of bits 0-8 of that location.
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
@@ -113,24 +113,24 @@ PDP10.opDFN = function(opCode)
  *
  *  From the DEC PDP-10 System Reference Manual (May 1968), p. 2-34:
  *
- *  If the fractional part of AC is zero, clear AC.  Otherwise add the scale factor given by E to the exponent part
- *  of AC (thus multiplying AC by 2^E), normalize the resulting word bringing 0s into bit positions vacated at the
- *  right, and place the result back in AC.
+ *      If the fractional part of AC is zero, clear AC.  Otherwise add the scale factor given by E to the exponent part
+ *      of AC (thus multiplying AC by 2^E), normalize the resulting word bringing 0s into bit positions vacated at the
+ *      right, and place the result back in AC.
  *
- *  NOTE: A negative E is represented in standard twos complement notation, but the hardware compensates for this
- *  when scaling the exponent.
+ *      NOTE: A negative E is represented in standard twos complement notation, but the hardware compensates for this
+ *      when scaling the exponent.
  *
- *  If the exponent after normalization is > 127, set Overflow and Floating Overflow; the result stored has an
- *  exponent 256 less than the correct one.  If < -128, set Overflow, Floating Overflow and Floating Underflow;
- *  the result stored has an exponent 256 greater than the correct one.
+ *      If the exponent after normalization is > 127, set Overflow and Floating Overflow; the result stored has an
+ *      exponent 256 less than the correct one.  If < -128, set Overflow, Floating Overflow and Floating Underflow;
+ *      the result stored has an exponent 256 greater than the correct one.
  *
- *  SIDEBAR: This instruction can be used to float a fixed number with 27 or fewer significant bits.  To float an
- *  integer contained within AC bits 9-35,
+ *      SIDEBAR: This instruction can be used to float a fixed number with 27 or fewer significant bits.  To float an
+ *      integer contained within AC bits 9-35,
  *
- *      FSC AC,233
+ *          FSC AC,233
  *
- *  inserts the correct exponent to move the binary point from the right end to the left of bit 9 and then normalizes
- *  (233(base 8) = 155(base 10) = 128 + 27).
+ *      inserts the correct exponent to move the binary point from the right end to the left of bit 9 and then normalizes
+ *      (233(base 8) = 155(base 10) = 128 + 27).
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
@@ -145,19 +145,19 @@ PDP10.opFSC = function(opCode)
  *
  *  From the DEC PDP-10 System Reference Manual (May 1968), p. 2-16:
  *
- *  Increment the byte pointer in location E as explained above.
+ *      Increment the byte pointer in location E as explained above.
  *
- *  FROM ABOVE: To facilitate processing a series of bytes, several of the byte instructions increment the pointer,
- *  ie, modify it so that it points to the next byte position in a set of memory locations.  Bytes are processed from
- *  left to right in a word, so incrementing merely replaces the current value of P by P - S, unless there is
- *  insufficient space in the present location for another byte of the specified size (P - S < 0).  In this case Y is
- *  increased by one to point to the next consecutive location, and P is set to 36 - S to point to the first byte at
- *  the left in the new location.
+ *      FROM ABOVE: To facilitate processing a series of bytes, several of the byte instructions increment the pointer,
+ *      ie, modify it so that it points to the next byte position in a set of memory locations.  Bytes are processed from
+ *      left to right in a word, so incrementing merely replaces the current value of P by P - S, unless there is
+ *      insufficient space in the present location for another byte of the specified size (P - S < 0).  In this case Y is
+ *      increased by one to point to the next consecutive location, and P is set to 36 - S to point to the first byte at
+ *      the left in the new location.
  *
- *  CAUTION: Do not allow Y to reach maximum value.  The whole pointer is incremented, so if Y is 2^18 - 1 it becomes
- *  zero and X is also incremented.  The address calculation for the pointer uses the original X, but if a priority
- *  interrupt should occur before the calculation is complete, the incremented X is used when the instruction is
- *  repeated.
+ *      CAUTION: Do not allow Y to reach maximum value.  The whole pointer is incremented, so if Y is 2^18 - 1 it becomes
+ *      zero and X is also incremented.  The address calculation for the pointer uses the original X, but if a priority
+ *      interrupt should occur before the calculation is complete, the incremented X is used when the instruction is
+ *      repeated.
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
