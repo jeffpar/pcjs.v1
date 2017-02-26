@@ -34,6 +34,25 @@ if (NODE) {
 }
 
 /**
+ * opKA10(op)
+ *
+ * Originally, we received the full opcode (36 bits), then only the upper half-word (18 bits),
+ * and now we receive only the upper 13 bits.  However, the octal values shown in the table and
+ * function comments below still include all 18 bits of the original upper half-word, so that
+ * you don't have to mentally un-shift them 5 bits.
+ *
+ * @this {CPUStatePDP10}
+ * @param {number} op (the top 13 bits of the original opcode, shifted right to bit 0)
+ */
+PDP10.opKA10 = function(op)
+{
+    /*
+     * We shift op right 4 more bits, leaving only the 9 bits required for the table index.
+     */
+    PDP10.aOpXXX_KA10[op >> 4].call(this, op);
+};
+
+/**
  * opUUO(0o0xx000): Unimplemented User Operation
  *
  *  From the DEC PDP-10 System Reference Manual (May 1968), p. 2-64:
@@ -56,11 +75,11 @@ if (NODE) {
  *      For a second processor connected to the same memory, the UUO trap is locations 140-141 instead of 40-41.
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opUUO = function(opCode)
+PDP10.opUUO = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
@@ -82,11 +101,11 @@ PDP10.opUUO = function(opCode)
  *      overflows, in which case it is greater by 1.  Exponent overflow can occur only in the latter case.
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opUFA = function(opCode)
+PDP10.opUFA = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
@@ -101,11 +120,11 @@ PDP10.opUFA = function(opCode)
  *      of bits 0-8 of that location.
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opDFN = function(opCode)
+PDP10.opDFN = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
@@ -133,11 +152,11 @@ PDP10.opDFN = function(opCode)
  *      (233(base 8) = 155(base 10) = 128 + 27).
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opFSC = function(opCode)
+PDP10.opFSC = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
@@ -160,4005 +179,4038 @@ PDP10.opFSC = function(opCode)
  *      repeated.
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opIBP = function(opCode)
+PDP10.opIBP = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opILDB(0o134000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opILDB = function(opCode)
+PDP10.opILDB = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opLDB(0o135000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opLDB = function(opCode)
+PDP10.opLDB = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opIDPB(0o136000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opIDPB = function(opCode)
+PDP10.opIDPB = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opDPB(0o137000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opDPB = function(opCode)
+PDP10.opDPB = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opFAD(0o140000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opFAD = function(opCode)
+PDP10.opFAD = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opFADI(0o141000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opFADI = function(opCode)
+PDP10.opFADI = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opFADM(0o142000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opFADM = function(opCode)
+PDP10.opFADM = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opFADB(0o143000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opFADB = function(opCode)
+PDP10.opFADB = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opFADR(0o144000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opFADR = function(opCode)
+PDP10.opFADR = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opFADRI(0o145000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opFADRI = function(opCode)
+PDP10.opFADRI = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opFADRM(0o146000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opFADRM = function(opCode)
+PDP10.opFADRM = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opFADRB(0o147000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opFADRB = function(opCode)
+PDP10.opFADRB = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opFSB(0o150000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opFSB = function(opCode)
+PDP10.opFSB = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opFSBI(0o151000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opFSBI = function(opCode)
+PDP10.opFSBI = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opFSBM(0o152000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opFSBM = function(opCode)
+PDP10.opFSBM = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opFSBB(0o153000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opFSBB = function(opCode)
+PDP10.opFSBB = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opFSBR(0o154000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opFSBR = function(opCode)
+PDP10.opFSBR = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opFSBRI(0o155000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opFSBRI = function(opCode)
+PDP10.opFSBRI = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opFSBRM(0o156000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opFSBRM = function(opCode)
+PDP10.opFSBRM = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opFSBRB(0o157000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opFSBRB = function(opCode)
+PDP10.opFSBRB = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opFMP(0o160000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opFMP = function(opCode)
+PDP10.opFMP = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opFMPI(0o161000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opFMPI = function(opCode)
+PDP10.opFMPI = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opFMPM(0o162000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opFMPM = function(opCode)
+PDP10.opFMPM = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opFMPB(0o163000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opFMPB = function(opCode)
+PDP10.opFMPB = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opFMPR(0o164000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opFMPR = function(opCode)
+PDP10.opFMPR = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opFMPRI(0o165000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opFMPRI = function(opCode)
+PDP10.opFMPRI = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opFMPRM(0o166000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opFMPRM = function(opCode)
+PDP10.opFMPRM = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opFMPRB(0o167000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opFMPRB = function(opCode)
+PDP10.opFMPRB = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opFDV(0o170000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opFDV = function(opCode)
+PDP10.opFDV = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opFDVI(0o171000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opFDVI = function(opCode)
+PDP10.opFDVI = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opFDVM(0o172000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opFDVM = function(opCode)
+PDP10.opFDVM = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opFDVB(0o173000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opFDVB = function(opCode)
+PDP10.opFDVB = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opFDVR(0o174000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opFDVR = function(opCode)
+PDP10.opFDVR = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opFDVRI(0o175000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opFDVRI = function(opCode)
+PDP10.opFDVRI = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opFDVRM(0o176000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opFDVRM = function(opCode)
+PDP10.opFDVRM = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opFDVRB(0o177000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opFDVRB = function(opCode)
+PDP10.opFDVRB = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opMOV(0o200000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opMOV = function(opCode)
+PDP10.opMOV = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opMOVI(0o201000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opMOVI = function(opCode)
+PDP10.opMOVI = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opMOVM(0o200000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opMOVM = function(opCode)
+PDP10.opMOVM = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opMOVS(0o200000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opMOVS = function(opCode)
+PDP10.opMOVS = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opMOVSI(0o205000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opMOVSI = function(opCode)
+PDP10.opMOVSI = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opMOVSM(0o206000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opMOVSM = function(opCode)
+PDP10.opMOVSM = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opMOVSS(0o207000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opMOVSS = function(opCode)
+PDP10.opMOVSS = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opMOVN(0o210000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opMOVN = function(opCode)
+PDP10.opMOVN = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opMOVNI(0o211000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opMOVNI = function(opCode)
+PDP10.opMOVNI = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opMOVNM(0o212000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opMOVNM = function(opCode)
+PDP10.opMOVNM = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opMOVNS(0o213000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opMOVNS = function(opCode)
+PDP10.opMOVNS = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opMOVMI(0o215000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opMOVMI = function(opCode)
+PDP10.opMOVMI = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opMOVMM(0o216000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opMOVMM = function(opCode)
+PDP10.opMOVMM = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opMOVMS(0o217000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opMOVMS = function(opCode)
+PDP10.opMOVMS = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opIMUL(0o220000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opIMUL = function(opCode)
+PDP10.opIMUL = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opIMULI(0o221000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opIMULI = function(opCode)
+PDP10.opIMULI = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opIMULM(0o222000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opIMULM = function(opCode)
+PDP10.opIMULM = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opIMULB(0o223000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opIMULB = function(opCode)
+PDP10.opIMULB = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opMUL(0o224000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opMUL = function(opCode)
+PDP10.opMUL = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opMULI(0o225000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opMULI = function(opCode)
+PDP10.opMULI = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opMULM(0o226000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opMULM = function(opCode)
+PDP10.opMULM = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opMULB(0o227000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opMULB = function(opCode)
+PDP10.opMULB = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opIDIV(0o230000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opIDIV = function(opCode)
+PDP10.opIDIV = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opIDIVI(0o231000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opIDIVI = function(opCode)
+PDP10.opIDIVI = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opIDIVM(0o232000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opIDIVM = function(opCode)
+PDP10.opIDIVM = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opIDIVB(0o233000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opIDIVB = function(opCode)
+PDP10.opIDIVB = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opDIV(0o234000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opDIV = function(opCode)
+PDP10.opDIV = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opDIVI(0o235000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opDIVI = function(opCode)
+PDP10.opDIVI = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opDIVM(0o236000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opDIVM = function(opCode)
+PDP10.opDIVM = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opDIVB(0o237000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opDIVB = function(opCode)
+PDP10.opDIVB = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opASH(0o240000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opASH = function(opCode)
+PDP10.opASH = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opROT(0o241000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opROT = function(opCode)
+PDP10.opROT = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opLSH(0o242000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opLSH = function(opCode)
+PDP10.opLSH = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opJFFO(0o243000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opJFFO = function(opCode)
+PDP10.opJFFO = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opASHC(0o244000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opASHC = function(opCode)
+PDP10.opASHC = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opROTC(0o245000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opROTC = function(opCode)
+PDP10.opROTC = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opLSHC(0o246000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opLSHC = function(opCode)
+PDP10.opLSHC = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opEXCH(0o250000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opEXCH = function(opCode)
+PDP10.opEXCH = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opBLT(0o251000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opBLT = function(opCode)
+PDP10.opBLT = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opAOBJP(0o252000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opAOBJP = function(opCode)
+PDP10.opAOBJP = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opAOBJN(0o253000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opAOBJN = function(opCode)
+PDP10.opAOBJN = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opJRST(0o254000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opJRST = function(opCode)
+PDP10.opJRST = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opJFCL(0o255000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opJFCL = function(opCode)
+PDP10.opJFCL = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opXCT(0o256000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opXCT = function(opCode)
+PDP10.opXCT = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opPUSHJ(0o260000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opPUSHJ = function(opCode)
+PDP10.opPUSHJ = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opPUSH(0o261000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opPUSH = function(opCode)
+PDP10.opPUSH = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opPOP(0o262000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opPOP = function(opCode)
+PDP10.opPOP = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opPOPJ(0o263000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opPOPJ = function(opCode)
+PDP10.opPOPJ = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opJSR(0o264000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opJSR = function(opCode)
+PDP10.opJSR = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opJSP(0o265000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opJSP = function(opCode)
+PDP10.opJSP = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opJSA(0o266000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opJSA = function(opCode)
+PDP10.opJSA = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opJRA(0o267000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opJRA = function(opCode)
+PDP10.opJRA = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opADD(0o270000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opADD = function(opCode)
+PDP10.opADD = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opADDI(0o271000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opADDI = function(opCode)
+PDP10.opADDI = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opADDM(0o272000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opADDM = function(opCode)
+PDP10.opADDM = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opADDB(0o273000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opADDB = function(opCode)
+PDP10.opADDB = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opSUB(0o274000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opSUB = function(opCode)
+PDP10.opSUB = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opSUBI(0o275000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opSUBI = function(opCode)
+PDP10.opSUBI = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opSUBM(0o276000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opSUBM = function(opCode)
+PDP10.opSUBM = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opSUBB(0o277000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opSUBB = function(opCode)
+PDP10.opSUBB = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opCAI(0o300000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opCAI = function(opCode)
+PDP10.opCAI = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opCAIL(0o301000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opCAIL = function(opCode)
+PDP10.opCAIL = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opCAIE(0o302000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opCAIE = function(opCode)
+PDP10.opCAIE = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opCAILE(0o303000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opCAILE = function(opCode)
+PDP10.opCAILE = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opCAIA(0o304000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opCAIA = function(opCode)
+PDP10.opCAIA = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opCAIGE(0o305000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opCAIGE = function(opCode)
+PDP10.opCAIGE = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opCAIN(0o306000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opCAIN = function(opCode)
+PDP10.opCAIN = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opCAIG(0o307000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opCAIG = function(opCode)
+PDP10.opCAIG = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opCA(0o310000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opCA = function(opCode)
+PDP10.opCA = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opCAL(0o311000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opCAL = function(opCode)
+PDP10.opCAL = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opCAE(0o312000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opCAE = function(opCode)
+PDP10.opCAE = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opCALE(0o313000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opCALE = function(opCode)
+PDP10.opCALE = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opCAA(0o314000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opCAA = function(opCode)
+PDP10.opCAA = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opCAGE(0o315000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opCAGE = function(opCode)
+PDP10.opCAGE = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opCAN(0o316000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opCAN = function(opCode)
+PDP10.opCAN = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opCAG(0o317000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opCAG = function(opCode)
+PDP10.opCAG = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opJUMP(0o320000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opJUMP = function(opCode)
+PDP10.opJUMP = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opJUMPL(0o321000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opJUMPL = function(opCode)
+PDP10.opJUMPL = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opJUMPE(0o322000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opJUMPE = function(opCode)
+PDP10.opJUMPE = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opJUMPLE(0o323000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opJUMPLE = function(opCode)
+PDP10.opJUMPLE = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opJUMPA(0o324000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opJUMPA = function(opCode)
+PDP10.opJUMPA = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opJUMPGE(0o325000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opJUMPGE = function(opCode)
+PDP10.opJUMPGE = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opJUMPN(0o326000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opJUMPN = function(opCode)
+PDP10.opJUMPN = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opJUMPG(0o327000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opJUMPG = function(opCode)
+PDP10.opJUMPG = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opSKIP(0o330000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opSKIP = function(opCode)
+PDP10.opSKIP = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opSKIPL(0o331000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opSKIPL = function(opCode)
+PDP10.opSKIPL = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opSKIPE(0o332000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opSKIPE = function(opCode)
+PDP10.opSKIPE = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opSKIPLE(0o333000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opSKIPLE = function(opCode)
+PDP10.opSKIPLE = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opSKIPA(0o334000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opSKIPA = function(opCode)
+PDP10.opSKIPA = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opSKIPGE(0o335000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opSKIPGE = function(opCode)
+PDP10.opSKIPGE = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opSKIPN(0o336000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opSKIPN = function(opCode)
+PDP10.opSKIPN = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opSKIPG(0o337000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opSKIPG = function(opCode)
+PDP10.opSKIPG = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opAOJ(0o340000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opAOJ = function(opCode)
+PDP10.opAOJ = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opAOJL(0o341000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opAOJL = function(opCode)
+PDP10.opAOJL = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opAOJE(0o342000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opAOJE = function(opCode)
+PDP10.opAOJE = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opAOJLE(0o343000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opAOJLE = function(opCode)
+PDP10.opAOJLE = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opAOJA(0o344000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opAOJA = function(opCode)
+PDP10.opAOJA = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opAOJGE(0o345000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opAOJGE = function(opCode)
+PDP10.opAOJGE = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opAOJN(0o346000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opAOJN = function(opCode)
+PDP10.opAOJN = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opAOJG(0o347000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opAOJG = function(opCode)
+PDP10.opAOJG = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opAOS(0o350000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opAOS = function(opCode)
+PDP10.opAOS = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opAOSL(0o351000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opAOSL = function(opCode)
+PDP10.opAOSL = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opAOSE(0o352000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opAOSE = function(opCode)
+PDP10.opAOSE = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opAOSLE(0o353000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opAOSLE = function(opCode)
+PDP10.opAOSLE = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opAOSA(0o354000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opAOSA = function(opCode)
+PDP10.opAOSA = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opAOSGE(0o355000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opAOSGE = function(opCode)
+PDP10.opAOSGE = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opAOSN(0o356000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opAOSN = function(opCode)
+PDP10.opAOSN = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opAOSG(0o357000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opAOSG = function(opCode)
+PDP10.opAOSG = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opSOJ(0o360000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opSOJ = function(opCode)
+PDP10.opSOJ = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opSOJL(0o361000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opSOJL = function(opCode)
+PDP10.opSOJL = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opSOJE(0o362000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opSOJE = function(opCode)
+PDP10.opSOJE = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opSOJLE(0o363000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opSOJLE = function(opCode)
+PDP10.opSOJLE = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opSOJA(0o364000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opSOJA = function(opCode)
+PDP10.opSOJA = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opSOJGE(0o365000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opSOJGE = function(opCode)
+PDP10.opSOJGE = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opSOJN(0o366000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opSOJN = function(opCode)
+PDP10.opSOJN = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opSOJG(0o367000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opSOJG = function(opCode)
+PDP10.opSOJG = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opSOS(0o370000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opSOS = function(opCode)
+PDP10.opSOS = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opSOSL(0o371000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opSOSL = function(opCode)
+PDP10.opSOSL = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opSOSE(0o372000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opSOSE = function(opCode)
+PDP10.opSOSE = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opSOSLE(0o373000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opSOSLE = function(opCode)
+PDP10.opSOSLE = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opSOSA(0o374000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opSOSA = function(opCode)
+PDP10.opSOSA = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opSOSGE(0o375000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opSOSGE = function(opCode)
+PDP10.opSOSGE = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opSOSN(0o376000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opSOSN = function(opCode)
+PDP10.opSOSN = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opSOSG(0o377000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opSOSG = function(opCode)
+PDP10.opSOSG = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opSETZ(0o400000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opSETZ = function(opCode)
+PDP10.opSETZ = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opSETZI(0o401000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opSETZI = function(opCode)
+PDP10.opSETZI = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opSETZM(0o402000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opSETZM = function(opCode)
+PDP10.opSETZM = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opSETZB(0o403000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opSETZB = function(opCode)
+PDP10.opSETZB = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opAND(0o404000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opAND = function(opCode)
+PDP10.opAND = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opANDI(0o405000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opANDI = function(opCode)
+PDP10.opANDI = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opANDM(0o406000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opANDM = function(opCode)
+PDP10.opANDM = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opANDB(0o407000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opANDB = function(opCode)
+PDP10.opANDB = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opANDCA(0o410000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opANDCA = function(opCode)
+PDP10.opANDCA = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opANDCAI(0o411000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opANDCAI = function(opCode)
+PDP10.opANDCAI = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opANDCAM(0o412000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opANDCAM = function(opCode)
+PDP10.opANDCAM = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opANDCAB(0o413000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opANDCAB = function(opCode)
+PDP10.opANDCAB = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opSETM(0o414000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opSETM = function(opCode)
+PDP10.opSETM = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opSETMI(0o415000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opSETMI = function(opCode)
+PDP10.opSETMI = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opSETMM(0o416000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opSETMM = function(opCode)
+PDP10.opSETMM = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opSETMB(0o417000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opSETMB = function(opCode)
+PDP10.opSETMB = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opANDCM(0o420000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opANDCM = function(opCode)
+PDP10.opANDCM = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opANDCMI(0o421000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opANDCMI = function(opCode)
+PDP10.opANDCMI = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opANDCMM(0o422000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opANDCMM = function(opCode)
+PDP10.opANDCMM = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opANDCMB(0o423000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opANDCMB = function(opCode)
+PDP10.opANDCMB = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opSETA(0o424000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opSETA = function(opCode)
+PDP10.opSETA = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opSETAI(0o425000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opSETAI = function(opCode)
+PDP10.opSETAI = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opSETAM(0o426000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opSETAM = function(opCode)
+PDP10.opSETAM = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opSETAB(0o427000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opSETAB = function(opCode)
+PDP10.opSETAB = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opXOR(0o430000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opXOR = function(opCode)
+PDP10.opXOR = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opXORI(0o431000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opXORI = function(opCode)
+PDP10.opXORI = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opXORM(0o432000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opXORM = function(opCode)
+PDP10.opXORM = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opXORB(0o433000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opXORB = function(opCode)
+PDP10.opXORB = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opIOR(0o434000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opIOR = function(opCode)
+PDP10.opIOR = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opIORI(0o435000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opIORI = function(opCode)
+PDP10.opIORI = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opIORM(0o436000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opIORM = function(opCode)
+PDP10.opIORM = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opIORB(0o437000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opIORB = function(opCode)
+PDP10.opIORB = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opANDCB(0o440000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opANDCB = function(opCode)
+PDP10.opANDCB = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opANDCBI(0o441000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opANDCBI = function(opCode)
+PDP10.opANDCBI = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opANDCBM(0o442000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opANDCBM = function(opCode)
+PDP10.opANDCBM = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opANDCBB(0o443000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opANDCBB = function(opCode)
+PDP10.opANDCBB = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opEQV(0o444000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opEQV = function(opCode)
+PDP10.opEQV = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opEQVI(0o445000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opEQVI = function(opCode)
+PDP10.opEQVI = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opEQVM(0o446000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opEQVM = function(opCode)
+PDP10.opEQVM = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opEQVB(0o447000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opEQVB = function(opCode)
+PDP10.opEQVB = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opSETCA(0o450000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opSETCA = function(opCode)
+PDP10.opSETCA = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opSETCAI(0o451000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opSETCAI = function(opCode)
+PDP10.opSETCAI = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opSETCAM(0o452000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opSETCAM = function(opCode)
+PDP10.opSETCAM = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opSETCAB(0o453000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opSETCAB = function(opCode)
+PDP10.opSETCAB = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opORCA(0o454000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opORCA = function(opCode)
+PDP10.opORCA = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opORCAI(0o455000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opORCAI = function(opCode)
+PDP10.opORCAI = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opORCAM(0o456000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opORCAM = function(opCode)
+PDP10.opORCAM = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opORCAB(0o457000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opORCAB = function(opCode)
+PDP10.opORCAB = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opSETCM(0o460000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opSETCM = function(opCode)
+PDP10.opSETCM = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opSETCMI(0o461000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opSETCMI = function(opCode)
+PDP10.opSETCMI = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opSETCMM(0o462000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opSETCMM = function(opCode)
+PDP10.opSETCMM = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opSETCMB(0o463000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opSETCMB = function(opCode)
+PDP10.opSETCMB = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opORCM(0o464000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opORCM = function(opCode)
+PDP10.opORCM = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opORCMI(0o465000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opORCMI = function(opCode)
+PDP10.opORCMI = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opORCMM(0o466000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opORCMM = function(opCode)
+PDP10.opORCMM = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opORCMB(0o467000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opORCMB = function(opCode)
+PDP10.opORCMB = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opORCB(0o470000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opORCB = function(opCode)
+PDP10.opORCB = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opORCBI(0o471000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opORCBI = function(opCode)
+PDP10.opORCBI = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opORCBM(0o472000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opORCBM = function(opCode)
+PDP10.opORCBM = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opORCBB(0o473000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opORCBB = function(opCode)
+PDP10.opORCBB = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opSETO(0o474000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opSETO = function(opCode)
+PDP10.opSETO = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opSETOI(0o475000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opSETOI = function(opCode)
+PDP10.opSETOI = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opSETOM(0o476000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opSETOM = function(opCode)
+PDP10.opSETOM = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opSETOB(0o477000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opSETOB = function(opCode)
+PDP10.opSETOB = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
- * opHLL(0o500000)
+ * opHLL(0o500000): Half Word Left to Left
+ *
+ *  From the DEC PDP-10 System Reference Manual (May 1968), p. 2-3:
+ *
+ *      Move the left half of the source word specified by M to the left half of the specified destination.
+ *      The source and the destination right half are unaffected; the original contents of the destination are lost.
+ *
+ * For HLL, the source is [E] and the destination is [A].
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHLL = function(opCode)
+PDP10.opHLL = function(op)
 {
-    this.opUndefined(opCode);
+    var a = op & PDP10.OPCODE.A_MASK;
+    var src = this.readWord(this.regEA);
+    var dst = this.readWord(a);
+    dst = (dst & PDP10.RHWORD_MASK) + (src - (src & PDP10.RHWORD_MASK));
+    this.writeWord(a, dst);
 };
 
 /**
  * opHLLI(0o501000)
  *
+ *  From the DEC PDP-10 System Reference Manual (May 1968), p. 2-3:
+ *
+ *      Move the left half of the source word specified by M to the left half of the specified destination.
+ *      The source and the destination right half are unaffected; the original contents of the destination are lost.
+ *
+ * For HLLI, the source is 0,E and the destination is [A].  But since this is a left-half-only operation, src is
+ * effectively 0.
+ *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHLLI = function(opCode)
+PDP10.opHLLI = function(op)
 {
-    this.opUndefined(opCode);
+    var a = op & PDP10.OPCODE.A_MASK;
+    var dst = this.readWord(a);
+    dst = (dst & PDP10.RHWORD_MASK);
+    this.writeWord(a, dst);
 };
 
 /**
  * opHLLM(0o502000)
  *
+ *  From the DEC PDP-10 System Reference Manual (May 1968), p. 2-3:
+ *
+ *      Move the left half of the source word specified by M to the left half of the specified destination.
+ *      The source and the destination right half are unaffected; the original contents of the destination are lost.
+ *
+ * For HLLM, the source is [A] and the destination is [E].
+ *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHLLM = function(opCode)
+PDP10.opHLLM = function(op)
 {
-    this.opUndefined(opCode);
+    var a = op & PDP10.OPCODE.A_MASK;
+    var src = this.readWord(a);
+    var dst = this.readWord(this.regEA);
+    dst = (dst & PDP10.RHWORD_MASK) + (src - (src & PDP10.RHWORD_MASK));
+    this.writeWord(this.regEA, dst);
 };
 
 /**
  * opHLLS(0o503000)
  *
+ *  From the DEC PDP-10 System Reference Manual (May 1968), p. 2-3:
+ *
+ *      Move the left half of the source word specified by M to the left half of the specified destination.
+ *      The source and the destination right half are unaffected; the original contents of the destination are lost.
+ *
+ *      If A is zero, HLLS is a no-op, otherwise it is equivalent to HLL.
+ *
+ * For HLLS, the source is [E] and the destination is [E] (and also [A] if A is non-zero).
+ *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHLLS = function(opCode)
+PDP10.opHLLS = function(op)
 {
-    this.opUndefined(opCode);
+    if (op & PDP10.OPCODE.A_MASK) {
+        PDP10.opHLL.call(this, op);
+    }
 };
 
 /**
  * opHRL(0o504000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHRL = function(opCode)
+PDP10.opHRL = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opHRLI(0o505000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHRLI = function(opCode)
+PDP10.opHRLI = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opHRLM(0o506000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHRLM = function(opCode)
+PDP10.opHRLM = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opHRLS(0o507000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHRLS = function(opCode)
+PDP10.opHRLS = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opHLLZ(0o510000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHLLZ = function(opCode)
+PDP10.opHLLZ = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opHLLZI(0o511000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHLLZI = function(opCode)
+PDP10.opHLLZI = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opHLLZM(0o512000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHLLZM = function(opCode)
+PDP10.opHLLZM = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opHLLZS(0o513000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHLLZS = function(opCode)
+PDP10.opHLLZS = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opHRLZ(0o514000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHRLZ = function(opCode)
+PDP10.opHRLZ = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opHRLZI(0o515000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHRLZI = function(opCode)
+PDP10.opHRLZI = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opHRLZM(0o516000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHRLZM = function(opCode)
+PDP10.opHRLZM = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opHRLZS(0o517000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHRLZS = function(opCode)
+PDP10.opHRLZS = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opHLLO(0o520000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHLLO = function(opCode)
+PDP10.opHLLO = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opHLLOI(0o521000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHLLOI = function(opCode)
+PDP10.opHLLOI = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opHLLOM(0o522000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHLLOM = function(opCode)
+PDP10.opHLLOM = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opHLLOS(0o523000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHLLOS = function(opCode)
+PDP10.opHLLOS = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opHRLO(0o524000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHRLO = function(opCode)
+PDP10.opHRLO = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opHRLOI(0o525000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHRLOI = function(opCode)
+PDP10.opHRLOI = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opHRLOM(0o526000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHRLOM = function(opCode)
+PDP10.opHRLOM = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opHRLOS(0o527000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHRLOS = function(opCode)
+PDP10.opHRLOS = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opHLLE(0o530000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHLLE = function(opCode)
+PDP10.opHLLE = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opHLLEI(0o531000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHLLEI = function(opCode)
+PDP10.opHLLEI = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opHLLEM(0o532000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHLLEM = function(opCode)
+PDP10.opHLLEM = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opHLLES(0o533000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHLLES = function(opCode)
+PDP10.opHLLES = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opHRLE(0o534000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHRLE = function(opCode)
+PDP10.opHRLE = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opHRLEI(0o535000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHRLEI = function(opCode)
+PDP10.opHRLEI = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opHRLEM(0o536000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHRLEM = function(opCode)
+PDP10.opHRLEM = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opHRLES(0o537000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHRLES = function(opCode)
+PDP10.opHRLES = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opHRR(0o540000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHRR = function(opCode)
+PDP10.opHRR = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opHRRI(0o541000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHRRI = function(opCode)
+PDP10.opHRRI = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opHRRM(0o542000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHRRM = function(opCode)
+PDP10.opHRRM = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opHRRS(0o543000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHRRS = function(opCode)
+PDP10.opHRRS = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opHLR(0o544000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHLR = function(opCode)
+PDP10.opHLR = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opHLRI(0o545000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHLRI = function(opCode)
+PDP10.opHLRI = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opHLRM(0o546000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHLRM = function(opCode)
+PDP10.opHLRM = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opHLRS(0o547000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHLRS = function(opCode)
+PDP10.opHLRS = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opHRRZ(0o550000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHRRZ = function(opCode)
+PDP10.opHRRZ = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opHRRZI(0o551000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHRRZI = function(opCode)
+PDP10.opHRRZI = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opHRRZM(0o552000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHRRZM = function(opCode)
+PDP10.opHRRZM = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opHRRZS(0o553000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHRRZS = function(opCode)
+PDP10.opHRRZS = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opHLRZ(0o554000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHLRZ = function(opCode)
+PDP10.opHLRZ = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opHLRZI(0o555000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHLRZI = function(opCode)
+PDP10.opHLRZI = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opHLRZM(0o556000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHLRZM = function(opCode)
+PDP10.opHLRZM = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opHLRZS(0o557000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHLRZS = function(opCode)
+PDP10.opHLRZS = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opHRRO(0o560000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHRRO = function(opCode)
+PDP10.opHRRO = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opHRROI(0o561000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHRROI = function(opCode)
+PDP10.opHRROI = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opHRROM(0o562000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHRROM = function(opCode)
+PDP10.opHRROM = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opHRROS(0o563000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHRROS = function(opCode)
+PDP10.opHRROS = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opHLRO(0o564000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHLRO = function(opCode)
+PDP10.opHLRO = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opHLROI(0o565000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHLROI = function(opCode)
+PDP10.opHLROI = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opHLROM(0o566000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHLROM = function(opCode)
+PDP10.opHLROM = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opHLROS(0o567000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHLROS = function(opCode)
+PDP10.opHLROS = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opHRRE(0o570000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHRRE = function(opCode)
+PDP10.opHRRE = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opHRREI(0o571000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHRREI = function(opCode)
+PDP10.opHRREI = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opHRREM(0o572000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHRREM = function(opCode)
+PDP10.opHRREM = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opHRRES(0o573000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHRRES = function(opCode)
+PDP10.opHRRES = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opHLRE(0o574000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHLRE = function(opCode)
+PDP10.opHLRE = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opHLREI(0o575000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHLREI = function(opCode)
+PDP10.opHLREI = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opHLREM(0o576000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHLREM = function(opCode)
+PDP10.opHLREM = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opHLRES(0o577000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opHLRES = function(opCode)
+PDP10.opHLRES = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTRN(0o600000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTRN = function(opCode)
+PDP10.opTRN = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTLN(0o601000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTLN = function(opCode)
+PDP10.opTLN = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTRNE(0o602000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTRNE = function(opCode)
+PDP10.opTRNE = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTLNE(0o603000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTLNE = function(opCode)
+PDP10.opTLNE = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTRNA(0o604000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTRNA = function(opCode)
+PDP10.opTRNA = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTLNA(0o605000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTLNA = function(opCode)
+PDP10.opTLNA = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTRNN(0o606000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTRNN = function(opCode)
+PDP10.opTRNN = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTLNN(0o607000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTLNN = function(opCode)
+PDP10.opTLNN = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTDN(0o610000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTDN = function(opCode)
+PDP10.opTDN = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTSN(0o611000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTSN = function(opCode)
+PDP10.opTSN = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTDNE(0o612000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTDNE = function(opCode)
+PDP10.opTDNE = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTSNE(0o613000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTSNE = function(opCode)
+PDP10.opTSNE = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTDNA(0o614000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTDNA = function(opCode)
+PDP10.opTDNA = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTSNA(0o615000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTSNA = function(opCode)
+PDP10.opTSNA = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTDNN(0o616000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTDNN = function(opCode)
+PDP10.opTDNN = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTSNN(0o617000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTSNN = function(opCode)
+PDP10.opTSNN = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTRZ(0o620000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTRZ = function(opCode)
+PDP10.opTRZ = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTLZ(0o621000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTLZ = function(opCode)
+PDP10.opTLZ = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTRZE(0o622000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTRZE = function(opCode)
+PDP10.opTRZE = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTLZE(0o623000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTLZE = function(opCode)
+PDP10.opTLZE = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTRZA(0o624000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTRZA = function(opCode)
+PDP10.opTRZA = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTLZA(0o625000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTLZA = function(opCode)
+PDP10.opTLZA = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTRZN(0o626000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTRZN = function(opCode)
+PDP10.opTRZN = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTLZN(0o627000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTLZN = function(opCode)
+PDP10.opTLZN = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTDZ(0o630000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTDZ = function(opCode)
+PDP10.opTDZ = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTSZ(0o631000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTSZ = function(opCode)
+PDP10.opTSZ = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTDZE(0o632000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTDZE = function(opCode)
+PDP10.opTDZE = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTSZE(0o633000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTSZE = function(opCode)
+PDP10.opTSZE = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTDZA(0o634000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTDZA = function(opCode)
+PDP10.opTDZA = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTSZA(0o635000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTSZA = function(opCode)
+PDP10.opTSZA = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTDZN(0o636000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTDZN = function(opCode)
+PDP10.opTDZN = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTSZN(0o637000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTSZN = function(opCode)
+PDP10.opTSZN = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTRC(0o640000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTRC = function(opCode)
+PDP10.opTRC = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTLC(0o641000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTLC = function(opCode)
+PDP10.opTLC = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTRCE(0o642000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTRCE = function(opCode)
+PDP10.opTRCE = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTLCE(0o643000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTLCE = function(opCode)
+PDP10.opTLCE = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTRCA(0o644000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTRCA = function(opCode)
+PDP10.opTRCA = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTLCA(0o645000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTLCA = function(opCode)
+PDP10.opTLCA = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTRCN(0o646000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTRCN = function(opCode)
+PDP10.opTRCN = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTLCN(0o647000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTLCN = function(opCode)
+PDP10.opTLCN = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTDC(0o650000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTDC = function(opCode)
+PDP10.opTDC = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTSC(0o651000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTSC = function(opCode)
+PDP10.opTSC = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTDCE(0o652000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTDCE = function(opCode)
+PDP10.opTDCE = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTSCE(0o653000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTSCE = function(opCode)
+PDP10.opTSCE = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTDCA(0o654000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTDCA = function(opCode)
+PDP10.opTDCA = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTSCA(0o655000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTSCA = function(opCode)
+PDP10.opTSCA = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTDCN(0o656000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTDCN = function(opCode)
+PDP10.opTDCN = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTSCN(0o657000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTSCN = function(opCode)
+PDP10.opTSCN = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTRO(0o660000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTRO = function(opCode)
+PDP10.opTRO = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTLO(0o661000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTLO = function(opCode)
+PDP10.opTLO = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTROE(0o662000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTROE = function(opCode)
+PDP10.opTROE = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTLOE(0o663000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTLOE = function(opCode)
+PDP10.opTLOE = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTROA(0o664000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTROA = function(opCode)
+PDP10.opTROA = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTLOA(0o665000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTLOA = function(opCode)
+PDP10.opTLOA = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTRON(0o666000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTRON = function(opCode)
+PDP10.opTRON = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTLON(0o667000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTLON = function(opCode)
+PDP10.opTLON = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTDO(0o670000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTDO = function(opCode)
+PDP10.opTDO = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTSO(0o671000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTSO = function(opCode)
+PDP10.opTSO = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTDOE(0o672000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTDOE = function(opCode)
+PDP10.opTDOE = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTSOE(0o673000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTSOE = function(opCode)
+PDP10.opTSOE = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTDOA(0o674000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTDOA = function(opCode)
+PDP10.opTDOA = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTSOA(0o675000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTSOA = function(opCode)
+PDP10.opTSOA = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTDON(0o676000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTDON = function(opCode)
+PDP10.opTDON = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opTSON(0o677000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opTSON = function(opCode)
+PDP10.opTSON = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opBLKI(0o700000)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opBLKI = function(opCode)
+PDP10.opBLKI = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opDATAI(0o700040)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opDATAI = function(opCode)
+PDP10.opDATAI = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opBLKO(0o700100)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opBLKO = function(opCode)
+PDP10.opBLKO = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opDATAO(0o700140)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opDATAO = function(opCode)
+PDP10.opDATAO = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opCONO(0o700200)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opCONO = function(opCode)
+PDP10.opCONO = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opCONI(0o700240)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opCONI = function(opCode)
+PDP10.opCONI = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opCONSZ(0o700300)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opCONSZ = function(opCode)
+PDP10.opCONSZ = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opCONSO(0o700340)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opCONSO = function(opCode)
+PDP10.opCONSO = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
- * opIO(opCode)
+ * opIO(op)
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opIO = function(opCode)
+PDP10.opIO = function(op)
 {
-    this.opUndefined(opCode);
+    this.opUndefined(op);
 };
 
 /**
  * opUndefined()
  *
  * @this {CPUStatePDP10}
- * @param {number} opCode
+ * @param {number} op
  */
-PDP10.opUndefined = function(opCode)
+PDP10.opUndefined = function(op)
 {
-    this.println("undefined opcode: " + Str.toOct(opCode));
+    this.println("undefined opcode: " + Str.toOct(op));
     this.stopCPU();
-};
-
-/**
- * opKA10(opCode)
- *
- * @this {CPUStatePDP10}
- * @param {number} opCode
- */
-PDP10.opKA10 = function(opCode)
-{
-    PDP10.aOpXXX_KA10[opCode >> 9].call(this, opCode);
 };
 
 PDP10.aOpXXX_KA10 = [

@@ -1326,7 +1326,7 @@ class DebuggerPDP10 extends Debugger {
          */
         if (!nState) {
             opCode = this.cpu.readWord(addr);
-            if ((opCode >> PDP10.OPCODE.FNSHIFT) == PDP10.OPCODE.HALT && this.cpu.getLastPC() == addr) {
+            if ((opCode >> PDP10.OPCODE.A_SHIFT) == PDP10.OPCODE.HALT && this.cpu.getLastPC() == addr) {
                 addr = this.cpu.advancePC(1);
             }
         }
@@ -1420,7 +1420,7 @@ class DebuggerPDP10 extends Debugger {
                 if (opMask == PDP10.OPCODE.OPIO) {
                     sOperation += this.toStrBase((opCode / PDP10.OPCODE.IOSHIFT) & PDP10.OPCODE.IOMASK, -1);
                 } else {
-                    sOperation += this.toStrBase((opCode >> PDP10.OPCODE.FNSHIFT) & PDP10.OPCODE.FNMASK, -1);
+                    sOperation += this.toStrBase((opCode >> PDP10.OPCODE.A_SHIFT) & PDP10.OPCODE.A_MASK, -1);
                 }
                 sOperation += ',';
                 if (opCode & PDP10.OPCODE.I_BIT) sOperation += '@';

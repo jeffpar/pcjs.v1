@@ -100,6 +100,7 @@ var PDP10 = {
     ADDR_MASK:      Math.pow(2, 18) - 1,
     DATA_INVALID:   -1,
     DATA_LIMIT:     Math.pow(2, 36),
+    RHWORD_MASK:    0o777777,
 
     /*
      * PDP-10 opcodes are 36-bit values, most of which use the following layout:
@@ -142,10 +143,11 @@ var PDP10 = {
         OPIO:       0o70034,            // input-output operation
         OPUUO:      0o70000,            // unimplemented user operation (UUO) mask
         OPSHIFT:    Math.pow(2, 21),    // operation shift
-        FNSHIFT:    23,                 // accumulator/function shift
-        FNMASK:     0o17,               // accumulator/function mask (after shift)
         IOSHIFT:    Math.pow(2, 26),    // input-output device code shift
         IOMASK:     0o177,              // input-output device code mask (after shift)
+        ACSHIFT:    Math.pow(2, 23),    // used to isolate the high 13 bits, with A starting at bit 0
+        A_SHIFT:    23,                 // A shift
+        A_MASK:     0o17,               // A mask (after shift)
         I_BIT:      0o20000000,         // indirect bit
         X_SHIFT:    18,                 // X shift
         X_MASK:     0o17,               // X mask (after shift)

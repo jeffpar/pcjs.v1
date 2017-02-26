@@ -174,6 +174,7 @@ class CPUStatePDP10 extends CPUPDP10 {
      */
     initCPU()
     {
+        this.regOP = 0;
         this.regEA = 0;
         this.regPC = this.lastPC = this.addrReset;
 
@@ -276,6 +277,7 @@ class CPUStatePDP10 extends CPUPDP10 {
     {
         var state = new State(this);
         state.set(0, [
+            this.regOP,
             this.regEA,
             this.regPC,
             this.lastPC,
@@ -303,6 +305,7 @@ class CPUStatePDP10 extends CPUPDP10 {
          * of what save() does when it collects a bunch of object properties into an array.
          */
         [
+            this.regOP,
             this.regEA,
             this.regPC,
             this.lastPC,
@@ -324,8 +327,7 @@ class CPUStatePDP10 extends CPUPDP10 {
      * getOpcode()
      *
      * This fetches the next opcode, decodes the low 23 bits (I,X,Y), sets regEA, and returns the
-     * the high 18 bits for further decoding.  While it's true that, in general, only the high 13 bits
-     * are relevant to the operation, it's cleaner to treat the original opcode as two half-words.
+     * the high 13 bits for further decoding.
      *
      * @this {CPUStatePDP10}
      * @return {number}
@@ -333,9 +335,9 @@ class CPUStatePDP10 extends CPUPDP10 {
     getOpcode()
     {
         var pc = this.lastPC = this.regPC;
-        var opCode = this.readWord(pc);
+        var r = this.regOP = this.readWord(pc);
         this.regPC = (pc + 1) % PDP10.ADDR_LIMIT;
-        var e, x, r = opCode, nMaxIndirect = 4;
+        var e, x, nMaxIndirect = 4;
         while (true) {
             /*
              * Bits 0-22 (I,X,Y) contain what we call a "reference address" (R), which is used to calculate the
@@ -360,7 +362,7 @@ class CPUStatePDP10 extends CPUPDP10 {
             r = this.readWord(e);
         }
         this.regEA = e;
-        return (opCode / PDP10.ADDR_LIMIT)|0;
+        return (this.regOP / PDP10.OPCODE.ACSHIFT)|0;
     }
 
     /**
@@ -807,8 +809,8 @@ class CPUStatePDP10 extends CPUPDP10 {
 
             this.opFlags &= PDP10.OPFLAG.PRESERVE;
 
-            var opCode = this.getOpcode();
-            this.opDecode(opCode);
+            var op = this.getOpcode();
+            this.opDecode(op);
 
         } while (this.nStepCycles > 0);
 
