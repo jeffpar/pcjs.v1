@@ -4210,6 +4210,7 @@ PDP10.opIO = function(op)
 PDP10.opUndefined = function(op)
 {
     this.println("undefined opcode: " + Str.toOct(op));
+    this.advancePC(-1);
     this.stopCPU();
 };
 

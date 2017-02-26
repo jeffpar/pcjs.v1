@@ -174,8 +174,7 @@ class CPUStatePDP10 extends CPUPDP10 {
      */
     initCPU()
     {
-        this.regOP = 0;
-        this.regEA = 0;
+        this.regEA = this.regRA = this.regOP = 0;
         this.regPC = this.lastPC = this.addrReset;
 
         /*
@@ -277,8 +276,9 @@ class CPUStatePDP10 extends CPUPDP10 {
     {
         var state = new State(this);
         state.set(0, [
-            this.regOP,
             this.regEA,
+            this.regRA,
+            this.regOP,
             this.regPC,
             this.lastPC,
             this.lastAddr,
@@ -305,8 +305,9 @@ class CPUStatePDP10 extends CPUPDP10 {
          * of what save() does when it collects a bunch of object properties into an array.
          */
         [
-            this.regOP,
             this.regEA,
+            this.regRA,
+            this.regOP,
             this.regPC,
             this.lastPC,
             this.lastAddr,
@@ -326,42 +327,39 @@ class CPUStatePDP10 extends CPUPDP10 {
     /**
      * getOpcode()
      *
-     * This fetches the next opcode, decodes the low 23 bits (I,X,Y), sets regEA, and returns the
-     * the high 13 bits for further decoding.
+     * Normally, this fetches the next opcode in regOP, decodes the low 23 bits (I,X,Y), records the effective
+     * address (E) in regEA, updates regPC, and returns the high 13 bits of the opcode for further decoding.
+     *
+     * However, if a reference address still needs to be decoded (due to indirection), we take care of that first.
      *
      * @this {CPUStatePDP10}
-     * @return {number}
+     * @return {number} (-1 if the reference address in regRA has not yet been fully decoded)
      */
     getOpcode()
     {
-        var pc = this.lastPC = this.regPC;
-        var r = this.regOP = this.readWord(pc);
-        this.regPC = (pc + 1) % PDP10.ADDR_LIMIT;
-        var e, x, nMaxIndirect = 4;
-        while (true) {
-            /*
-             * Bits 0-22 (I,X,Y) contain what we call a "reference address" (R), which is used to calculate the
-             * "effective address" (E).  To determine E from R, we must extract I, X, and Y from R, set E to Y,
-             * then add [X] to E if X is non-zero.  If I is zero, then we're done; otherwise, we must set R to [E]
-             * and repeat the process.
-             */
-            e = r & PDP10.OPCODE.Y_MASK;
-            x = (r >> PDP10.OPCODE.X_SHIFT) & PDP10.OPCODE.X_MASK;
-            if (x) e = (e + this.readWord(x)) & PDP10.ADDR_MASK;
-            if (!(r & PDP10.OPCODE.I_BIT)) break;
-            /*
-             * We allow this process to repeat only a few times, because more than that suggests we're executing
-             * garbage.  Also, allowing this to loop endlessly would hang the simulation; if it turns out there is
-             * real-world PDP-10 code that requires a long series of indirections, we should factor this logic out
-             * as a separate operation.  Note that would mean passing the full opcode on to the next level of decoding.
-             */
-            if (--nMaxIndirect < 0) {
-                this.bus.fault(r);
-                break;
-            }
-            r = this.readWord(e);
+        if ((this.regRA & PDP10.OPCODE.I_BIT)) {
+            this.regRA = this.readWord(this.regEA);
+        } else {
+            this.regRA = this.regOP = this.readWord(this.lastPC = this.regPC);
         }
-        this.regEA = e;
+
+        /*
+         * Bits 0-22 (I,X,Y) contain what we call a "reference address" (R), which is used to calculate the
+         * "effective address" (E).  To determine E from R, we must extract I, X, and Y from R, set E to Y,
+         * then add [X] to E if X is non-zero.  If I is zero, then we're done; otherwise, we must set R to [E]
+         * and repeat the process.
+         *
+         * However, we don't actually repeat the process immediately; we need to treat each indirection as a
+         * separate decoding step, to ensure that the emulator can "breathe" periodically.  So instead, we
+         * return -1, indicating that the opcode is not fully decoded, and then on the next call, instead of
+         * fetching another opcode, we fetch [E], update R, and decode R again.
+         */
+        this.regEA = this.regRA & PDP10.OPCODE.Y_MASK;
+        var x = (this.regRA >> PDP10.OPCODE.X_SHIFT) & PDP10.OPCODE.X_MASK;
+        if (x) this.regEA = (this.regEA + this.readWord(x)) & PDP10.ADDR_MASK;
+        if (this.regRA & PDP10.OPCODE.I_BIT) return -1;
+
+        this.regPC = (this.regPC + 1) % PDP10.ADDR_LIMIT;
         return (this.regOP / PDP10.OPCODE.ACSHIFT)|0;
     }
 
@@ -810,7 +808,9 @@ class CPUStatePDP10 extends CPUPDP10 {
             this.opFlags &= PDP10.OPFLAG.PRESERVE;
 
             var op = this.getOpcode();
-            this.opDecode(op);
+            if (op >= 0) {
+                this.opDecode(op);
+            }
 
         } while (this.nStepCycles > 0);
 

@@ -848,6 +848,12 @@ class DebuggerPDP10 extends Debugger {
         case DebuggerPDP10.REGS.PC:
             value = this.cpu.getPC();
             break;
+        case DebuggerPDP10.REGS.RA:
+            value = this.cpu.regRA;
+            break;
+        case DebuggerPDP10.REGS.EA:
+            value = this.cpu.regEA;
+            break;
         }
         return value;
     }
@@ -1924,7 +1930,7 @@ class DebuggerPDP10 extends Debugger {
     {
         var i;
         var sDump = "";
-        sDump += this.getRegOutput(DebuggerPDP10.REGS.PC);
+        sDump += this.getRegOutput(DebuggerPDP10.REGS.RA) + this.getRegOutput(DebuggerPDP10.REGS.EA);
         if (fMisc) sDump += '\n' + this.getMiscDump();
         return sDump;
     }
@@ -3638,11 +3644,13 @@ if (DEBUGGER) {
     ];
 
     DebuggerPDP10.REGS = {
-        PC:     0
+        PC:     0,
+        RA:     1,
+        EA:     2
     };
 
     DebuggerPDP10.REGNAMES = [
-        "PC"
+        "PC", "RA", "EA"
     ];
 
     /*
