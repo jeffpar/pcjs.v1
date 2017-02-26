@@ -97,6 +97,7 @@ var PDP10 = {
      */
     ADDR_INVALID:   -1,
     ADDR_LIMIT:     Math.pow(2, 18),
+    ADDR_MASK:      Math.pow(2, 18) - 1,
     DATA_INVALID:   -1,
     DATA_LIMIT:     Math.pow(2, 36),
 
@@ -128,10 +129,10 @@ var PDP10 = {
      *      5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0
      *      1 1 1 D D D D D D D O O O I X X X X Y Y Y Y Y Y Y Y Y Y Y Y Y Y Y Y Y Y
      *
-     * Bits 0-22 (I,X,Y) contain what we call a "reference address" (R), which is used to
-     * calculate the "effective address" (E).  To determine E from R, we must extract I, X,
-     * and Y from R, set E to Y, then add [X] to E if X is non-zero.  If I is zero, then
-     * we're done; otherwise, we must set set R to [E] and repeat the process.
+     * Bits 0-22 (I,X,Y) contain what we call a "reference address" (R), which is used to calculate the
+     * "effective address" (E).  To determine E from R, we must extract I, X, and Y from R, set E to Y,
+     * then add [X] to E if X is non-zero.  If I is zero, then we're done; otherwise, we must set R to [E]
+     * and repeat the process.
      */
     OPCODE: {
         OPMASK:     0o77700,            // operation mask
@@ -145,8 +146,6 @@ var PDP10 = {
         FNMASK:     0o17,               // accumulator/function mask (after shift)
         IOSHIFT:    Math.pow(2, 26),    // input-output device code shift
         IOMASK:     0o177,              // input-output device code mask (after shift)
-        O_SHIFT:    Math.pow(2, 27),    // operation shift
-        O_MASK:     0o777,              // operation mask (after shift)
         I_BIT:      0o20000000,         // indirect bit
         X_SHIFT:    18,                 // X shift
         X_MASK:     0o17,               // X mask (after shift)

@@ -167,14 +167,14 @@ class CPUStatePDP11 extends CPUPDP11 {
         this.maskRegSrcByte = 0xff;
 
         if (this.model <= PDP11.MODEL_1120) {
-            this.decode = PDP11.op1120.bind(this);
+            this.opDecode = PDP11.op1120.bind(this);
             this.checkStackLimit = this.checkStackLimit1120;
             this.offRegSrc = 8;
             this.maskRegSrcByte = -1;
             this.pswUsed = ~(PDP11.PSW.UNUSED | PDP11.PSW.REGSET | PDP11.PSW.PMODE | PDP11.PSW.CMODE) & 0xffff;
             this.pswRegSet = 0;
         } else {
-            this.decode = PDP11.op1140.bind(this);
+            this.opDecode = PDP11.op1140.bind(this);
             this.checkStackLimit = this.checkStackLimit1140;
             /*
              * The alternate register set (REGSET) doesn't exist on the 11/20 or 11/40; it's available on the 11/45 and 11/70.
@@ -3058,7 +3058,7 @@ class CPUStatePDP11 extends CPUPDP11 {
             this.opFlags = (this.opFlags & PDP11.OPFLAG.PRESERVE) | (this.regPSW & PDP11.PSW.TF);
 
             var opCode = this.getOpcode();
-            this.decode(opCode);
+            this.opDecode(opCode);
 
         } while (this.nStepCycles > 0);
 

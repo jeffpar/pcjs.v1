@@ -29,11 +29,12 @@
 "use strict";
 
 if (NODE) {
+    var Str = require("../../shared/lib/strlib");
     var PDP10 = require("./defines");
 }
 
 /**
- * opUUO(0xx000 000000): Unimplemented User Operation
+ * opUUO(0o0xx000): Unimplemented User Operation
  *
  *  From the DEC PDP-10 System Reference Manual (May 1968), p. 2-64:
  *
@@ -59,10 +60,11 @@ if (NODE) {
  */
 PDP10.opUUO = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opUFA(130000 000000): Unnormalized Floating Add
+ * opUFA(0o130000): Unnormalized Floating Add
  *
  *  From the DEC PDP-10 System Reference Manual (May 1968), p. 2-37:
  *
@@ -84,10 +86,11 @@ PDP10.opUUO = function(opCode)
  */
 PDP10.opUFA = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opDFN(131000 000000): Double Floating Negate
+ * opDFN(0o131000): Double Floating Negate
  *
  *  From the DEC PDP-10 System Reference Manual (May 1968), p. 2-37:
  *
@@ -102,10 +105,11 @@ PDP10.opUFA = function(opCode)
  */
 PDP10.opDFN = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opFSC(132000 000000): Floating Scale
+ * opFSC(0o132000): Floating Scale
  *
  *  From the DEC PDP-10 System Reference Manual (May 1968), p. 2-34:
  *
@@ -133,10 +137,11 @@ PDP10.opDFN = function(opCode)
  */
 PDP10.opFSC = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opIBP(133000 000000): Increment Byte Pointer
+ * opIBP(0o133000): Increment Byte Pointer
  *
  *  From the DEC PDP-10 System Reference Manual (May 1968), p. 2-16:
  *
@@ -159,3606 +164,3967 @@ PDP10.opFSC = function(opCode)
  */
 PDP10.opIBP = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opILDB(134000 000000)
+ * opILDB(0o134000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opILDB = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opLDB(135000 000000)
+ * opLDB(0o135000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opLDB = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opIDPB(136000 000000)
+ * opIDPB(0o136000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opIDPB = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opDPB(137000 000000)
+ * opDPB(0o137000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opDPB = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opFAD(140000 000000)
+ * opFAD(0o140000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opFAD = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opFADI(141000 000000)
+ * opFADI(0o141000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opFADI = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opFADM(142000 000000)
+ * opFADM(0o142000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opFADM = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opFADB(143000 000000)
+ * opFADB(0o143000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opFADB = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opFADR(144000 000000)
+ * opFADR(0o144000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opFADR = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opFADRI(145000 000000)
+ * opFADRI(0o145000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opFADRI = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opFADRM(146000 000000)
+ * opFADRM(0o146000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opFADRM = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opFADRB(147000 000000)
+ * opFADRB(0o147000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opFADRB = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opFSB(150000 000000)
+ * opFSB(0o150000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opFSB = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opFSBI(151000 000000)
+ * opFSBI(0o151000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opFSBI = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opFSBM(152000 000000)
+ * opFSBM(0o152000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opFSBM = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opFSBB(153000 000000)
+ * opFSBB(0o153000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opFSBB = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opFSBR(154000 000000)
+ * opFSBR(0o154000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opFSBR = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opFSBRI(155000 000000)
+ * opFSBRI(0o155000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opFSBRI = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opFSBRM(156000 000000)
+ * opFSBRM(0o156000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opFSBRM = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opFSBRB(157000 000000)
+ * opFSBRB(0o157000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opFSBRB = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opFMP(160000 000000)
+ * opFMP(0o160000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opFMP = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opFMPI(161000 000000)
+ * opFMPI(0o161000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opFMPI = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opFMPM(162000 000000)
+ * opFMPM(0o162000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opFMPM = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opFMPB(163000 000000)
+ * opFMPB(0o163000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opFMPB = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opFMPR(164000 000000)
+ * opFMPR(0o164000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opFMPR = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opFMPRI(165000 000000)
+ * opFMPRI(0o165000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opFMPRI = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opFMPRM(166000 000000)
+ * opFMPRM(0o166000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opFMPRM = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opFMPRB(167000 000000)
+ * opFMPRB(0o167000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opFMPRB = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opFDV(170000 000000)
+ * opFDV(0o170000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opFDV = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opFDVI(171000 000000)
+ * opFDVI(0o171000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opFDVI = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opFDVM(172000 000000)
+ * opFDVM(0o172000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opFDVM = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opFDVB(173000 000000)
+ * opFDVB(0o173000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opFDVB = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opFDVR(174000 000000)
+ * opFDVR(0o174000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opFDVR = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opFDVRI(175000 000000)
+ * opFDVRI(0o175000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opFDVRI = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opFDVRM(176000 000000)
+ * opFDVRM(0o176000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opFDVRM = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opFDVRB(177000 000000)
+ * opFDVRB(0o177000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opFDVRB = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opMOV(200000 000000)
+ * opMOV(0o200000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opMOV = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opMOVI(201000 000000)
+ * opMOVI(0o201000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opMOVI = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opMOVM(200000 000000)
+ * opMOVM(0o200000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opMOVM = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opMOVS(200000 000000)
+ * opMOVS(0o200000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opMOVS = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opMOVSI(205000 000000)
+ * opMOVSI(0o205000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opMOVSI = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opMOVSM(206000 000000)
+ * opMOVSM(0o206000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opMOVSM = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opMOVSS(207000 000000)
+ * opMOVSS(0o207000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opMOVSS = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opMOVN(210000 000000)
+ * opMOVN(0o210000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opMOVN = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opMOVNI(211000 000000)
+ * opMOVNI(0o211000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opMOVNI = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opMOVNM(212000 000000)
+ * opMOVNM(0o212000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opMOVNM = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opMOVNS(213000 000000)
+ * opMOVNS(0o213000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opMOVNS = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opMOVMI(215000 000000)
+ * opMOVMI(0o215000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opMOVMI = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opMOVMM(216000 000000)
+ * opMOVMM(0o216000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opMOVMM = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opMOVMS(217000 000000)
+ * opMOVMS(0o217000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opMOVMS = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opIMUL(220000 000000)
+ * opIMUL(0o220000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opIMUL = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opIMULI(221000 000000)
+ * opIMULI(0o221000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opIMULI = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opIMULM(222000 000000)
+ * opIMULM(0o222000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opIMULM = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opIMULB(223000 000000)
+ * opIMULB(0o223000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opIMULB = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opMUL(224000 000000)
+ * opMUL(0o224000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opMUL = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opMULI(225000 000000)
+ * opMULI(0o225000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opMULI = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opMULM(226000 000000)
+ * opMULM(0o226000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opMULM = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opMULB(227000 000000)
+ * opMULB(0o227000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opMULB = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opIDIV(230000 000000)
+ * opIDIV(0o230000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opIDIV = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opIDIVI(231000 000000)
+ * opIDIVI(0o231000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opIDIVI = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opIDIVM(232000 000000)
+ * opIDIVM(0o232000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opIDIVM = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opIDIVB(233000 000000)
+ * opIDIVB(0o233000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opIDIVB = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opDIV(234000 000000)
+ * opDIV(0o234000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opDIV = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opDIVI(235000 000000)
+ * opDIVI(0o235000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opDIVI = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opDIVM(236000 000000)
+ * opDIVM(0o236000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opDIVM = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opDIVB(237000 000000)
+ * opDIVB(0o237000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opDIVB = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opASH(240000 000000)
+ * opASH(0o240000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opASH = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opROT(241000 000000)
+ * opROT(0o241000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opROT = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opLSH(242000 000000)
+ * opLSH(0o242000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opLSH = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opJFFO(243000 000000)
+ * opJFFO(0o243000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opJFFO = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opASHC(244000 000000)
+ * opASHC(0o244000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opASHC = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opROTC(245000 000000)
+ * opROTC(0o245000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opROTC = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opLSHC(246000 000000)
+ * opLSHC(0o246000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opLSHC = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opEXCH(250000 000000)
+ * opEXCH(0o250000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opEXCH = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opBLT(251000 000000)
+ * opBLT(0o251000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opBLT = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opAOBJP(252000 000000)
+ * opAOBJP(0o252000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opAOBJP = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opAOBJN(253000 000000)
+ * opAOBJN(0o253000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opAOBJN = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opJRST(254000 000000)
+ * opJRST(0o254000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opJRST = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opJFCL(255000 000000)
+ * opJFCL(0o255000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opJFCL = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opXCT(256000 000000)
+ * opXCT(0o256000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opXCT = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opPUSHJ(260000 000000)
+ * opPUSHJ(0o260000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opPUSHJ = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opPUSH(261000 000000)
+ * opPUSH(0o261000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opPUSH = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opPOP(262000 000000)
+ * opPOP(0o262000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opPOP = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opPOPJ(263000 000000)
+ * opPOPJ(0o263000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opPOPJ = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opJSR(264000 000000)
+ * opJSR(0o264000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opJSR = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opJSP(265000 000000)
+ * opJSP(0o265000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opJSP = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opJSA(266000 000000)
+ * opJSA(0o266000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opJSA = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opJRA(267000 000000)
+ * opJRA(0o267000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opJRA = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opADD(270000 000000)
+ * opADD(0o270000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opADD = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opADDI(271000 000000)
+ * opADDI(0o271000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opADDI = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opADDM(272000 000000)
+ * opADDM(0o272000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opADDM = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opADDB(273000 000000)
+ * opADDB(0o273000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opADDB = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opSUB(274000 000000)
+ * opSUB(0o274000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opSUB = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opSUBI(275000 000000)
+ * opSUBI(0o275000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opSUBI = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opSUBM(276000 000000)
+ * opSUBM(0o276000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opSUBM = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opSUBB(277000 000000)
+ * opSUBB(0o277000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opSUBB = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opCAI(300000 000000)
+ * opCAI(0o300000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opCAI = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opCAIL(301000 000000)
+ * opCAIL(0o301000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opCAIL = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opCAIE(302000 000000)
+ * opCAIE(0o302000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opCAIE = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opCAILE(303000 000000)
+ * opCAILE(0o303000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opCAILE = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opCAIA(304000 000000)
+ * opCAIA(0o304000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opCAIA = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opCAIGE(305000 000000)
+ * opCAIGE(0o305000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opCAIGE = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opCAIN(306000 000000)
+ * opCAIN(0o306000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opCAIN = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opCAIG(307000 000000)
+ * opCAIG(0o307000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opCAIG = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opCA(310000 000000)
+ * opCA(0o310000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opCA = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opCAL(311000 000000)
+ * opCAL(0o311000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opCAL = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opCAE(312000 000000)
+ * opCAE(0o312000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opCAE = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opCALE(313000 000000)
+ * opCALE(0o313000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opCALE = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opCAA(314000 000000)
+ * opCAA(0o314000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opCAA = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opCAGE(315000 000000)
+ * opCAGE(0o315000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opCAGE = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opCAN(316000 000000)
+ * opCAN(0o316000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opCAN = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opCAG(317000 000000)
+ * opCAG(0o317000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opCAG = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opJUMP(320000 000000)
+ * opJUMP(0o320000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opJUMP = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opJUMPL(321000 000000)
+ * opJUMPL(0o321000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opJUMPL = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opJUMPE(322000 000000)
+ * opJUMPE(0o322000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opJUMPE = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opJUMPLE(323000 000000)
+ * opJUMPLE(0o323000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opJUMPLE = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opJUMPA(324000 000000)
+ * opJUMPA(0o324000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opJUMPA = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opJUMPGE(325000 000000)
+ * opJUMPGE(0o325000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opJUMPGE = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opJUMPN(326000 000000)
+ * opJUMPN(0o326000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opJUMPN = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opJUMPG(327000 000000)
+ * opJUMPG(0o327000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opJUMPG = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opSKIP(330000 000000)
+ * opSKIP(0o330000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opSKIP = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opSKIPL(331000 000000)
+ * opSKIPL(0o331000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opSKIPL = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opSKIPE(332000 000000)
+ * opSKIPE(0o332000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opSKIPE = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opSKIPLE(333000 000000)
+ * opSKIPLE(0o333000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opSKIPLE = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opSKIPA(334000 000000)
+ * opSKIPA(0o334000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opSKIPA = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opSKIPGE(335000 000000)
+ * opSKIPGE(0o335000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opSKIPGE = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opSKIPN(336000 000000)
+ * opSKIPN(0o336000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opSKIPN = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opSKIPG(337000 000000)
+ * opSKIPG(0o337000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opSKIPG = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opAOJ(340000 000000)
+ * opAOJ(0o340000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opAOJ = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opAOJL(341000 000000)
+ * opAOJL(0o341000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opAOJL = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opAOJE(342000 000000)
+ * opAOJE(0o342000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opAOJE = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opAOJLE(343000 000000)
+ * opAOJLE(0o343000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opAOJLE = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opAOJA(344000 000000)
+ * opAOJA(0o344000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opAOJA = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opAOJGE(345000 000000)
+ * opAOJGE(0o345000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opAOJGE = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opAOJN(346000 000000)
+ * opAOJN(0o346000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opAOJN = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opAOJG(347000 000000)
+ * opAOJG(0o347000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opAOJG = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opAOS(350000 000000)
+ * opAOS(0o350000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opAOS = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opAOSL(351000 000000)
+ * opAOSL(0o351000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opAOSL = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opAOSE(352000 000000)
+ * opAOSE(0o352000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opAOSE = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opAOSLE(353000 000000)
+ * opAOSLE(0o353000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opAOSLE = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opAOSA(354000 000000)
+ * opAOSA(0o354000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opAOSA = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opAOSGE(355000 000000)
+ * opAOSGE(0o355000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opAOSGE = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opAOSN(356000 000000)
+ * opAOSN(0o356000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opAOSN = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opAOSG(357000 000000)
+ * opAOSG(0o357000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opAOSG = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opSOJ(360000 000000)
+ * opSOJ(0o360000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opSOJ = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opSOJL(361000 000000)
+ * opSOJL(0o361000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opSOJL = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opSOJE(362000 000000)
+ * opSOJE(0o362000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opSOJE = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opSOJLE(363000 000000)
+ * opSOJLE(0o363000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opSOJLE = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opSOJA(364000 000000)
+ * opSOJA(0o364000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opSOJA = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opSOJGE(365000 000000)
+ * opSOJGE(0o365000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opSOJGE = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opSOJN(366000 000000)
+ * opSOJN(0o366000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opSOJN = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opSOJG(367000 000000)
+ * opSOJG(0o367000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opSOJG = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opSOS(370000 000000)
+ * opSOS(0o370000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opSOS = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opSOSL(371000 000000)
+ * opSOSL(0o371000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opSOSL = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opSOSE(372000 000000)
+ * opSOSE(0o372000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opSOSE = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opSOSLE(373000 000000)
+ * opSOSLE(0o373000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opSOSLE = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opSOSA(374000 000000)
+ * opSOSA(0o374000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opSOSA = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opSOSGE(375000 000000)
+ * opSOSGE(0o375000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opSOSGE = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opSOSN(376000 000000)
+ * opSOSN(0o376000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opSOSN = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opSOSG(377000 000000)
+ * opSOSG(0o377000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opSOSG = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opSETZ(400000 000000)
+ * opSETZ(0o400000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opSETZ = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opSETZI(401000 000000)
+ * opSETZI(0o401000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opSETZI = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opSETZM(402000 000000)
+ * opSETZM(0o402000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opSETZM = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opSETZB(403000 000000)
+ * opSETZB(0o403000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opSETZB = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opAND(404000 000000)
+ * opAND(0o404000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opAND = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opANDI(405000 000000)
+ * opANDI(0o405000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opANDI = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opANDM(406000 000000)
+ * opANDM(0o406000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opANDM = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opANDB(407000 000000)
+ * opANDB(0o407000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opANDB = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opANDCA(410000 000000)
+ * opANDCA(0o410000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opANDCA = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opANDCAI(411000 000000)
+ * opANDCAI(0o411000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opANDCAI = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opANDCAM(412000 000000)
+ * opANDCAM(0o412000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opANDCAM = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opANDCAB(413000 000000)
+ * opANDCAB(0o413000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opANDCAB = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opSETM(414000 000000)
+ * opSETM(0o414000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opSETM = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opSETMI(415000 000000)
+ * opSETMI(0o415000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opSETMI = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opSETMM(416000 000000)
+ * opSETMM(0o416000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opSETMM = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opSETMB(417000 000000)
+ * opSETMB(0o417000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opSETMB = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opANDCM(420000 000000)
+ * opANDCM(0o420000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opANDCM = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opANDCMI(421000 000000)
+ * opANDCMI(0o421000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opANDCMI = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opANDCMM(422000 000000)
+ * opANDCMM(0o422000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opANDCMM = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opANDCMB(423000 000000)
+ * opANDCMB(0o423000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opANDCMB = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opSETA(424000 000000)
+ * opSETA(0o424000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opSETA = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opSETAI(425000 000000)
+ * opSETAI(0o425000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opSETAI = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opSETAM(426000 000000)
+ * opSETAM(0o426000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opSETAM = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opSETAB(427000 000000)
+ * opSETAB(0o427000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opSETAB = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opXOR(430000 000000)
+ * opXOR(0o430000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opXOR = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opXORI(431000 000000)
+ * opXORI(0o431000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opXORI = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opXORM(432000 000000)
+ * opXORM(0o432000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opXORM = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opXORB(433000 000000)
+ * opXORB(0o433000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opXORB = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opIOR(434000 000000)
+ * opIOR(0o434000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opIOR = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opIORI(435000 000000)
+ * opIORI(0o435000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opIORI = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opIORM(436000 000000)
+ * opIORM(0o436000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opIORM = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opIORB(437000 000000)
+ * opIORB(0o437000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opIORB = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opANDCB(440000 000000)
+ * opANDCB(0o440000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opANDCB = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opANDCBI(441000 000000)
+ * opANDCBI(0o441000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opANDCBI = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opANDCBM(442000 000000)
+ * opANDCBM(0o442000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opANDCBM = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opANDCBB(443000 000000)
+ * opANDCBB(0o443000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opANDCBB = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opEQV(444000 000000)
+ * opEQV(0o444000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opEQV = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opEQVI(445000 000000)
+ * opEQVI(0o445000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opEQVI = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opEQVM(446000 000000)
+ * opEQVM(0o446000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opEQVM = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opEQVB(447000 000000)
+ * opEQVB(0o447000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opEQVB = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opSETCA(450000 000000)
+ * opSETCA(0o450000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opSETCA = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opSETCAI(451000 000000)
+ * opSETCAI(0o451000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opSETCAI = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opSETCAM(452000 000000)
+ * opSETCAM(0o452000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opSETCAM = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opSETCAB(453000 000000)
+ * opSETCAB(0o453000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opSETCAB = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opORCA(454000 000000)
+ * opORCA(0o454000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opORCA = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opORCAI(455000 000000)
+ * opORCAI(0o455000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opORCAI = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opORCAM(456000 000000)
+ * opORCAM(0o456000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opORCAM = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opORCAB(457000 000000)
+ * opORCAB(0o457000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opORCAB = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opSETCM(460000 000000)
+ * opSETCM(0o460000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opSETCM = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opSETCMI(461000 000000)
+ * opSETCMI(0o461000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opSETCMI = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opSETCMM(462000 000000)
+ * opSETCMM(0o462000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opSETCMM = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opSETCMB(463000 000000)
+ * opSETCMB(0o463000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opSETCMB = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opORCM(464000 000000)
+ * opORCM(0o464000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opORCM = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opORCMI(465000 000000)
+ * opORCMI(0o465000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opORCMI = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opORCMM(466000 000000)
+ * opORCMM(0o466000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opORCMM = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opORCMB(467000 000000)
+ * opORCMB(0o467000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opORCMB = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opORCB(470000 000000)
+ * opORCB(0o470000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opORCB = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opORCBI(471000 000000)
+ * opORCBI(0o471000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opORCBI = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opORCBM(472000 000000)
+ * opORCBM(0o472000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opORCBM = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opORCBB(473000 000000)
+ * opORCBB(0o473000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opORCBB = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opSETO(474000 000000)
+ * opSETO(0o474000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opSETO = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opSETOI(475000 000000)
+ * opSETOI(0o475000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opSETOI = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opSETOM(476000 000000)
+ * opSETOM(0o476000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opSETOM = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opSETOB(477000 000000)
+ * opSETOB(0o477000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opSETOB = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHLL(500000 000000)
+ * opHLL(0o500000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHLL = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHLLI(501000 000000)
+ * opHLLI(0o501000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHLLI = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHLLM(502000 000000)
+ * opHLLM(0o502000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHLLM = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHLLS(503000 000000)
+ * opHLLS(0o503000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHLLS = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHRL(504000 000000)
+ * opHRL(0o504000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHRL = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHRLI(505000 000000)
+ * opHRLI(0o505000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHRLI = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHRLM(506000 000000)
+ * opHRLM(0o506000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHRLM = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHRLS(507000 000000)
+ * opHRLS(0o507000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHRLS = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHLLZ(510000 000000)
+ * opHLLZ(0o510000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHLLZ = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHLLZI(511000 000000)
+ * opHLLZI(0o511000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHLLZI = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHLLZM(512000 000000)
+ * opHLLZM(0o512000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHLLZM = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHLLZS(513000 000000)
+ * opHLLZS(0o513000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHLLZS = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHRLZ(514000 000000)
+ * opHRLZ(0o514000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHRLZ = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHRLZI(515000 000000)
+ * opHRLZI(0o515000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHRLZI = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHRLZM(516000 000000)
+ * opHRLZM(0o516000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHRLZM = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHRLZS(517000 000000)
+ * opHRLZS(0o517000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHRLZS = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHLLO(520000 000000)
+ * opHLLO(0o520000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHLLO = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHLLOI(521000 000000)
+ * opHLLOI(0o521000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHLLOI = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHLLOM(522000 000000)
+ * opHLLOM(0o522000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHLLOM = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHLLOS(523000 000000)
+ * opHLLOS(0o523000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHLLOS = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHRLO(524000 000000)
+ * opHRLO(0o524000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHRLO = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHRLOI(525000 000000)
+ * opHRLOI(0o525000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHRLOI = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHRLOM(526000 000000)
+ * opHRLOM(0o526000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHRLOM = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHRLOS(527000 000000)
+ * opHRLOS(0o527000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHRLOS = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHLLE(530000 000000)
+ * opHLLE(0o530000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHLLE = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHLLEI(531000 000000)
+ * opHLLEI(0o531000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHLLEI = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHLLEM(532000 000000)
+ * opHLLEM(0o532000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHLLEM = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHLLES(533000 000000)
+ * opHLLES(0o533000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHLLES = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHRLE(534000 000000)
+ * opHRLE(0o534000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHRLE = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHRLEI(535000 000000)
+ * opHRLEI(0o535000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHRLEI = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHRLEM(536000 000000)
+ * opHRLEM(0o536000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHRLEM = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHRLES(537000 000000)
+ * opHRLES(0o537000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHRLES = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHRR(540000 000000)
+ * opHRR(0o540000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHRR = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHRRI(541000 000000)
+ * opHRRI(0o541000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHRRI = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHRRM(542000 000000)
+ * opHRRM(0o542000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHRRM = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHRRS(543000 000000)
+ * opHRRS(0o543000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHRRS = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHLR(544000 000000)
+ * opHLR(0o544000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHLR = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHLRI(545000 000000)
+ * opHLRI(0o545000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHLRI = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHLRM(546000 000000)
+ * opHLRM(0o546000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHLRM = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHLRS(547000 000000)
+ * opHLRS(0o547000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHLRS = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHRRZ(550000 000000)
+ * opHRRZ(0o550000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHRRZ = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHRRZI(551000 000000)
+ * opHRRZI(0o551000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHRRZI = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHRRZM(552000 000000)
+ * opHRRZM(0o552000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHRRZM = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHRRZS(553000 000000)
+ * opHRRZS(0o553000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHRRZS = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHLRZ(554000 000000)
+ * opHLRZ(0o554000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHLRZ = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHLRZI(555000 000000)
+ * opHLRZI(0o555000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHLRZI = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHLRZM(556000 000000)
+ * opHLRZM(0o556000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHLRZM = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHLRZS(557000 000000)
+ * opHLRZS(0o557000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHLRZS = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHRRO(560000 000000)
+ * opHRRO(0o560000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHRRO = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHRROI(561000 000000)
+ * opHRROI(0o561000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHRROI = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHRROM(562000 000000)
+ * opHRROM(0o562000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHRROM = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHRROS(563000 000000)
+ * opHRROS(0o563000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHRROS = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHLRO(564000 000000)
+ * opHLRO(0o564000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHLRO = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHLROI(565000 000000)
+ * opHLROI(0o565000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHLROI = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHLROM(566000 000000)
+ * opHLROM(0o566000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHLROM = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHLROS(567000 000000)
+ * opHLROS(0o567000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHLROS = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHRRE(570000 000000)
+ * opHRRE(0o570000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHRRE = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHRREI(571000 000000)
+ * opHRREI(0o571000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHRREI = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHRREM(572000 000000)
+ * opHRREM(0o572000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHRREM = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHRRES(573000 000000)
+ * opHRRES(0o573000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHRRES = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHLRE(574000 000000)
+ * opHLRE(0o574000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHLRE = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHLREI(575000 000000)
+ * opHLREI(0o575000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHLREI = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHLREM(576000 000000)
+ * opHLREM(0o576000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHLREM = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opHLRES(577000 000000)
+ * opHLRES(0o577000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opHLRES = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTRN(600000 000000)
+ * opTRN(0o600000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTRN = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTLN(601000 000000)
+ * opTLN(0o601000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTLN = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTRNE(602000 000000)
+ * opTRNE(0o602000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTRNE = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTLNE(603000 000000)
+ * opTLNE(0o603000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTLNE = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTRNA(604000 000000)
+ * opTRNA(0o604000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTRNA = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTLNA(605000 000000)
+ * opTLNA(0o605000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTLNA = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTRNN(606000 000000)
+ * opTRNN(0o606000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTRNN = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTLNN(607000 000000)
+ * opTLNN(0o607000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTLNN = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTDN(610000 000000)
+ * opTDN(0o610000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTDN = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTSN(611000 000000)
+ * opTSN(0o611000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTSN = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTDNE(612000 000000)
+ * opTDNE(0o612000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTDNE = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTSNE(613000 000000)
+ * opTSNE(0o613000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTSNE = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTDNA(614000 000000)
+ * opTDNA(0o614000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTDNA = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTSNA(615000 000000)
+ * opTSNA(0o615000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTSNA = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTDNN(616000 000000)
+ * opTDNN(0o616000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTDNN = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTSNN(617000 000000)
+ * opTSNN(0o617000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTSNN = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTRZ(620000 000000)
+ * opTRZ(0o620000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTRZ = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTLZ(621000 000000)
+ * opTLZ(0o621000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTLZ = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTRZE(622000 000000)
+ * opTRZE(0o622000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTRZE = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTLZE(623000 000000)
+ * opTLZE(0o623000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTLZE = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTRZA(624000 000000)
+ * opTRZA(0o624000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTRZA = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTLZA(625000 000000)
+ * opTLZA(0o625000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTLZA = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTRZN(626000 000000)
+ * opTRZN(0o626000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTRZN = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTLZN(627000 000000)
+ * opTLZN(0o627000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTLZN = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTDZ(630000 000000)
+ * opTDZ(0o630000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTDZ = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTSZ(631000 000000)
+ * opTSZ(0o631000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTSZ = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTDZE(632000 000000)
+ * opTDZE(0o632000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTDZE = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTSZE(633000 000000)
+ * opTSZE(0o633000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTSZE = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTDZA(634000 000000)
+ * opTDZA(0o634000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTDZA = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTSZA(635000 000000)
+ * opTSZA(0o635000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTSZA = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTDZN(636000 000000)
+ * opTDZN(0o636000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTDZN = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTSZN(637000 000000)
+ * opTSZN(0o637000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTSZN = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTRC(640000 000000)
+ * opTRC(0o640000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTRC = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTLC(641000 000000)
+ * opTLC(0o641000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTLC = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTRCE(642000 000000)
+ * opTRCE(0o642000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTRCE = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTLCE(643000 000000)
+ * opTLCE(0o643000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTLCE = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTRCA(644000 000000)
+ * opTRCA(0o644000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTRCA = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTLCA(645000 000000)
+ * opTLCA(0o645000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTLCA = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTRCN(646000 000000)
+ * opTRCN(0o646000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTRCN = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTLCN(647000 000000)
+ * opTLCN(0o647000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTLCN = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTDC(650000 000000)
+ * opTDC(0o650000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTDC = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTSC(651000 000000)
+ * opTSC(0o651000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTSC = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTDCE(652000 000000)
+ * opTDCE(0o652000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTDCE = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTSCE(653000 000000)
+ * opTSCE(0o653000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTSCE = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTDCA(654000 000000)
+ * opTDCA(0o654000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTDCA = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTSCA(655000 000000)
+ * opTSCA(0o655000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTSCA = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTDCN(656000 000000)
+ * opTDCN(0o656000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTDCN = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTSCN(657000 000000)
+ * opTSCN(0o657000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTSCN = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTRO(660000 000000)
+ * opTRO(0o660000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTRO = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTLO(661000 000000)
+ * opTLO(0o661000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTLO = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTROE(662000 000000)
+ * opTROE(0o662000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTROE = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTLOE(663000 000000)
+ * opTLOE(0o663000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTLOE = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTROA(664000 000000)
+ * opTROA(0o664000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTROA = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTLOA(665000 000000)
+ * opTLOA(0o665000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTLOA = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTRON(666000 000000)
+ * opTRON(0o666000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTRON = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTLON(667000 000000)
+ * opTLON(0o667000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTLON = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTDO(670000 000000)
+ * opTDO(0o670000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTDO = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTSO(671000 000000)
+ * opTSO(0o671000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTSO = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTDOE(672000 000000)
+ * opTDOE(0o672000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTDOE = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTSOE(673000 000000)
+ * opTSOE(0o673000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTSOE = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTDOA(674000 000000)
+ * opTDOA(0o674000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTDOA = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTSOA(675000 000000)
+ * opTSOA(0o675000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTSOA = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTDON(676000 000000)
+ * opTDON(0o676000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTDON = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opTSON(677000 000000)
+ * opTSON(0o677000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opTSON = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opBLKI(700000 000000)
+ * opBLKI(0o700000)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opBLKI = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opDATAI(700040 000000)
+ * opDATAI(0o700040)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opDATAI = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opBLKO(700100 000000)
+ * opBLKO(0o700100)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opBLKO = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opDATAO(700140 000000)
+ * opDATAO(0o700140)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opDATAO = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opCONO(700200 000000)
+ * opCONO(0o700200)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opCONO = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opCONI(700240 000000)
+ * opCONI(0o700240)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opCONI = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opCONSZ(700300 000000)
+ * opCONSZ(0o700300)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opCONSZ = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
- * opCONSO(700340 000000)
+ * opCONSO(0o700340)
  *
  * @this {CPUStatePDP10}
  * @param {number} opCode
  */
 PDP10.opCONSO = function(opCode)
 {
+    this.opUndefined(opCode);
 };
 
 /**
@@ -3769,7 +4135,7 @@ PDP10.opCONSO = function(opCode)
  */
 PDP10.opIO = function(opCode)
 {
-    PDP10.opUndefined.call(this, opCode);
+    this.opUndefined(opCode);
 };
 
 /**
@@ -3780,6 +4146,8 @@ PDP10.opIO = function(opCode)
  */
 PDP10.opUndefined = function(opCode)
 {
+    this.println("undefined opcode: " + Str.toOct(opCode));
+    this.stopCPU();
 };
 
 /**
@@ -3790,521 +4158,520 @@ PDP10.opUndefined = function(opCode)
  */
 PDP10.opKA10 = function(opCode)
 {
-    var op = (opCode / PDP10.OPCODE.O_SHIFT)|0;
-    PDP10.aOpXXX_KA10[op].call(this, opCode);
+    PDP10.aOpXXX_KA10[opCode >> 9].call(this, opCode);
 };
 
 PDP10.aOpXXX_KA10 = [
-    PDP10.opUUO,                // 0o000xxx yyyyyy
-    PDP10.opUUO,                // 0o001xxx yyyyyy
-    PDP10.opUUO,                // 0o002xxx yyyyyy
-    PDP10.opUUO,                // 0o003xxx yyyyyy
-    PDP10.opUUO,                // 0o004xxx yyyyyy
-    PDP10.opUUO,                // 0o005xxx yyyyyy
-    PDP10.opUUO,                // 0o006xxx yyyyyy
-    PDP10.opUUO,                // 0o007xxx yyyyyy
-    PDP10.opUUO,                // 0o010xxx yyyyyy
-    PDP10.opUUO,                // 0o011xxx yyyyyy
-    PDP10.opUUO,                // 0o012xxx yyyyyy
-    PDP10.opUUO,                // 0o013xxx yyyyyy
-    PDP10.opUUO,                // 0o014xxx yyyyyy
-    PDP10.opUUO,                // 0o015xxx yyyyyy
-    PDP10.opUUO,                // 0o016xxx yyyyyy
-    PDP10.opUUO,                // 0o017xxx yyyyyy
-    PDP10.opUUO,                // 0o020xxx yyyyyy
-    PDP10.opUUO,                // 0o021xxx yyyyyy
-    PDP10.opUUO,                // 0o022xxx yyyyyy
-    PDP10.opUUO,                // 0o023xxx yyyyyy
-    PDP10.opUUO,                // 0o024xxx yyyyyy
-    PDP10.opUUO,                // 0o025xxx yyyyyy
-    PDP10.opUUO,                // 0o026xxx yyyyyy
-    PDP10.opUUO,                // 0o027xxx yyyyyy
-    PDP10.opUUO,                // 0o030xxx yyyyyy
-    PDP10.opUUO,                // 0o031xxx yyyyyy
-    PDP10.opUUO,                // 0o032xxx yyyyyy
-    PDP10.opUUO,                // 0o033xxx yyyyyy
-    PDP10.opUUO,                // 0o034xxx yyyyyy
-    PDP10.opUUO,                // 0o035xxx yyyyyy
-    PDP10.opUUO,                // 0o036xxx yyyyyy
-    PDP10.opUUO,                // 0o037xxx yyyyyy
-    PDP10.opUUO,                // 0o040xxx yyyyyy
-    PDP10.opUUO,                // 0o041xxx yyyyyy
-    PDP10.opUUO,                // 0o042xxx yyyyyy
-    PDP10.opUUO,                // 0o043xxx yyyyyy
-    PDP10.opUUO,                // 0o044xxx yyyyyy
-    PDP10.opUUO,                // 0o045xxx yyyyyy
-    PDP10.opUUO,                // 0o046xxx yyyyyy
-    PDP10.opUUO,                // 0o047xxx yyyyyy
-    PDP10.opUUO,                // 0o050xxx yyyyyy
-    PDP10.opUUO,                // 0o051xxx yyyyyy
-    PDP10.opUUO,                // 0o052xxx yyyyyy
-    PDP10.opUUO,                // 0o053xxx yyyyyy
-    PDP10.opUUO,                // 0o054xxx yyyyyy
-    PDP10.opUUO,                // 0o055xxx yyyyyy
-    PDP10.opUUO,                // 0o056xxx yyyyyy
-    PDP10.opUUO,                // 0o057xxx yyyyyy
-    PDP10.opUUO,                // 0o060xxx yyyyyy
-    PDP10.opUUO,                // 0o061xxx yyyyyy
-    PDP10.opUUO,                // 0o062xxx yyyyyy
-    PDP10.opUUO,                // 0o063xxx yyyyyy
-    PDP10.opUUO,                // 0o064xxx yyyyyy
-    PDP10.opUUO,                // 0o065xxx yyyyyy
-    PDP10.opUUO,                // 0o066xxx yyyyyy
-    PDP10.opUUO,                // 0o067xxx yyyyyy
-    PDP10.opUUO,                // 0o070xxx yyyyyy
-    PDP10.opUUO,                // 0o071xxx yyyyyy
-    PDP10.opUUO,                // 0o072xxx yyyyyy
-    PDP10.opUUO,                // 0o073xxx yyyyyy
-    PDP10.opUUO,                // 0o074xxx yyyyyy
-    PDP10.opUUO,                // 0o075xxx yyyyyy
-    PDP10.opUUO,                // 0o076xxx yyyyyy
-    PDP10.opUUO,                // 0o077xxx yyyyyy
-    PDP10.opUndefined,          // 0o100xxx yyyyyy
-    PDP10.opUndefined,          // 0o101xxx yyyyyy
-    PDP10.opUndefined,          // 0o102xxx yyyyyy
-    PDP10.opUndefined,          // 0o103xxx yyyyyy
-    PDP10.opUndefined,          // 0o104xxx yyyyyy
-    PDP10.opUndefined,          // 0o105xxx yyyyyy
-    PDP10.opUndefined,          // 0o106xxx yyyyyy
-    PDP10.opUndefined,          // 0o107xxx yyyyyy
-    PDP10.opUndefined,          // 0o110xxx yyyyyy
-    PDP10.opUndefined,          // 0o111xxx yyyyyy
-    PDP10.opUndefined,          // 0o112xxx yyyyyy
-    PDP10.opUndefined,          // 0o113xxx yyyyyy
-    PDP10.opUndefined,          // 0o114xxx yyyyyy
-    PDP10.opUndefined,          // 0o115xxx yyyyyy
-    PDP10.opUndefined,          // 0o116xxx yyyyyy
-    PDP10.opUndefined,          // 0o117xxx yyyyyy
-    PDP10.opUndefined,          // 0o120xxx yyyyyy
-    PDP10.opUndefined,          // 0o121xxx yyyyyy
-    PDP10.opUndefined,          // 0o122xxx yyyyyy
-    PDP10.opUndefined,          // 0o123xxx yyyyyy
-    PDP10.opUndefined,          // 0o124xxx yyyyyy
-    PDP10.opUndefined,          // 0o125xxx yyyyyy
-    PDP10.opUndefined,          // 0o126xxx yyyyyy
-    PDP10.opUndefined,          // 0o127xxx yyyyyy
-    PDP10.opUFA,                // 0o130xxx yyyyyy
-    PDP10.opDFN,                // 0o131xxx yyyyyy
-    PDP10.opFSC,                // 0o132xxx yyyyyy
-    PDP10.opIBP,                // 0o133xxx yyyyyy
-    PDP10.opILDB,               // 0o134xxx yyyyyy
-    PDP10.opLDB,                // 0o135xxx yyyyyy
-    PDP10.opIDPB,               // 0o136xxx yyyyyy
-    PDP10.opDPB,                // 0o137xxx yyyyyy
-    PDP10.opFAD,                // 0o140xxx yyyyyy
-    PDP10.opFADI,               // 0o141xxx yyyyyy
-    PDP10.opFADM,               // 0o142xxx yyyyyy
-    PDP10.opFADB,               // 0o143xxx yyyyyy
-    PDP10.opFADR,               // 0o144xxx yyyyyy
-    PDP10.opFADRI,              // 0o145xxx yyyyyy
-    PDP10.opFADRM,              // 0o146xxx yyyyyy
-    PDP10.opFADRB,              // 0o147xxx yyyyyy
-    PDP10.opFSB,                // 0o150xxx yyyyyy
-    PDP10.opFSBI,               // 0o151xxx yyyyyy
-    PDP10.opFSBM,               // 0o152xxx yyyyyy
-    PDP10.opFSBB,               // 0o153xxx yyyyyy
-    PDP10.opFSBR,               // 0o154xxx yyyyyy
-    PDP10.opFSBRI,              // 0o155xxx yyyyyy
-    PDP10.opFSBRM,              // 0o156xxx yyyyyy
-    PDP10.opFSBRB,              // 0o157xxx yyyyyy
-    PDP10.opFMP,                // 0o160xxx yyyyyy
-    PDP10.opFMPI,               // 0o161xxx yyyyyy
-    PDP10.opFMPM,               // 0o162xxx yyyyyy
-    PDP10.opFMPB,               // 0o163xxx yyyyyy
-    PDP10.opFMPR,               // 0o164xxx yyyyyy
-    PDP10.opFMPRI,              // 0o165xxx yyyyyy
-    PDP10.opFMPRM,              // 0o166xxx yyyyyy
-    PDP10.opFMPRB,              // 0o167xxx yyyyyy
-    PDP10.opFDV,                // 0o170xxx yyyyyy
-    PDP10.opFDVI,               // 0o171xxx yyyyyy
-    PDP10.opFDVM,               // 0o172xxx yyyyyy
-    PDP10.opFDVB,               // 0o173xxx yyyyyy
-    PDP10.opFDVR,               // 0o174xxx yyyyyy
-    PDP10.opFDVRI,              // 0o175xxx yyyyyy
-    PDP10.opFDVRM,              // 0o176xxx yyyyyy
-    PDP10.opFDVRB,              // 0o177xxx yyyyyy
-    PDP10.opMOV,                // 0o200xxx yyyyyy
-    PDP10.opMOVI,               // 0o201xxx yyyyyy
-    PDP10.opMOVM,               // 0o202xxx yyyyyy
-    PDP10.opMOVS,               // 0o203xxx yyyyyy
-    PDP10.opMOVS,               // 0o204xxx yyyyyy
-    PDP10.opMOVSI,              // 0o205xxx yyyyyy
-    PDP10.opMOVSM,              // 0o206xxx yyyyyy
-    PDP10.opMOVSS,              // 0o207xxx yyyyyy
-    PDP10.opMOVN,               // 0o210xxx yyyyyy
-    PDP10.opMOVNI,              // 0o211xxx yyyyyy
-    PDP10.opMOVNM,              // 0o212xxx yyyyyy
-    PDP10.opMOVNS,              // 0o213xxx yyyyyy
-    PDP10.opMOVM,               // 0o214xxx yyyyyy
-    PDP10.opMOVMI,              // 0o215xxx yyyyyy
-    PDP10.opMOVMM,              // 0o216xxx yyyyyy
-    PDP10.opMOVMS,              // 0o217xxx yyyyyy
-    PDP10.opIMUL,               // 0o220xxx yyyyyy
-    PDP10.opIMULI,              // 0o221xxx yyyyyy
-    PDP10.opIMULM,              // 0o222xxx yyyyyy
-    PDP10.opIMULB,              // 0o223xxx yyyyyy
-    PDP10.opMUL,                // 0o224xxx yyyyyy
-    PDP10.opMULI,               // 0o225xxx yyyyyy
-    PDP10.opMULM,               // 0o226xxx yyyyyy
-    PDP10.opMULB,               // 0o227xxx yyyyyy
-    PDP10.opIDIV,               // 0o230xxx yyyyyy
-    PDP10.opIDIVI,              // 0o231xxx yyyyyy
-    PDP10.opIDIVM,              // 0o232xxx yyyyyy
-    PDP10.opIDIVB,              // 0o233xxx yyyyyy
-    PDP10.opDIV,                // 0o234xxx yyyyyy
-    PDP10.opDIVI,               // 0o235xxx yyyyyy
-    PDP10.opDIVM,               // 0o236xxx yyyyyy
-    PDP10.opDIVB,               // 0o237xxx yyyyyy
-    PDP10.opASH,                // 0o240xxx yyyyyy
-    PDP10.opROT,                // 0o241xxx yyyyyy
-    PDP10.opLSH,                // 0o242xxx yyyyyy
-    PDP10.opJFFO,               // 0o243xxx yyyyyy
-    PDP10.opASHC,               // 0o244xxx yyyyyy
-    PDP10.opROTC,               // 0o245xxx yyyyyy
-    PDP10.opLSHC,               // 0o246xxx yyyyyy
-    PDP10.opUndefined,          // 0o247xxx yyyyyy
-    PDP10.opEXCH,               // 0o250xxx yyyyyy
-    PDP10.opBLT,                // 0o251xxx yyyyyy
-    PDP10.opAOBJP,              // 0o252xxx yyyyyy
-    PDP10.opAOBJN,              // 0o253xxx yyyyyy
-    PDP10.opJRST,               // 0o254xxx yyyyyy
-    PDP10.opJFCL,               // 0o255xxx yyyyyy
-    PDP10.opXCT,                // 0o256xxx yyyyyy
-    PDP10.opUndefined,          // 0o257xxx yyyyyy
-    PDP10.opPUSHJ,              // 0o260xxx yyyyyy
-    PDP10.opPUSH,               // 0o261xxx yyyyyy
-    PDP10.opPOP,                // 0o262xxx yyyyyy
-    PDP10.opPOPJ,               // 0o263xxx yyyyyy
-    PDP10.opJSR,                // 0o264xxx yyyyyy
-    PDP10.opJSP,                // 0o265xxx yyyyyy
-    PDP10.opJSA,                // 0o266xxx yyyyyy
-    PDP10.opJRA,                // 0o267xxx yyyyyy
-    PDP10.opADD,                // 0o270xxx yyyyyy
-    PDP10.opADDI,               // 0o271xxx yyyyyy
-    PDP10.opADDM,               // 0o272xxx yyyyyy
-    PDP10.opADDB,               // 0o273xxx yyyyyy
-    PDP10.opSUB,                // 0o274xxx yyyyyy
-    PDP10.opSUBI,               // 0o275xxx yyyyyy
-    PDP10.opSUBM,               // 0o276xxx yyyyyy
-    PDP10.opSUBB,               // 0o277xxx yyyyyy
-    PDP10.opCAI,                // 0o300xxx yyyyyy
-    PDP10.opCAIL,               // 0o301xxx yyyyyy
-    PDP10.opCAIE,               // 0o302xxx yyyyyy
-    PDP10.opCAILE,              // 0o303xxx yyyyyy
-    PDP10.opCAIA,               // 0o304xxx yyyyyy
-    PDP10.opCAIGE,              // 0o305xxx yyyyyy
-    PDP10.opCAIN,               // 0o306xxx yyyyyy
-    PDP10.opCAIG,               // 0o307xxx yyyyyy
-    PDP10.opCA,                 // 0o310xxx yyyyyy
-    PDP10.opCAL,                // 0o311xxx yyyyyy
-    PDP10.opCAE,                // 0o312xxx yyyyyy
-    PDP10.opCALE,               // 0o313xxx yyyyyy
-    PDP10.opCAA,                // 0o314xxx yyyyyy
-    PDP10.opCAGE,               // 0o315xxx yyyyyy
-    PDP10.opCAN,                // 0o316xxx yyyyyy
-    PDP10.opCAG,                // 0o317xxx yyyyyy
-    PDP10.opJUMP,               // 0o320xxx yyyyyy
-    PDP10.opJUMPL,              // 0o321xxx yyyyyy
-    PDP10.opJUMPE,              // 0o322xxx yyyyyy
-    PDP10.opJUMPLE,             // 0o323xxx yyyyyy
-    PDP10.opJUMPA,              // 0o324xxx yyyyyy
-    PDP10.opJUMPGE,             // 0o325xxx yyyyyy
-    PDP10.opJUMPN,              // 0o326xxx yyyyyy
-    PDP10.opJUMPG,              // 0o327xxx yyyyyy
-    PDP10.opSKIP,               // 0o330xxx yyyyyy
-    PDP10.opSKIPL,              // 0o331xxx yyyyyy
-    PDP10.opSKIPE,              // 0o332xxx yyyyyy
-    PDP10.opSKIPLE,             // 0o333xxx yyyyyy
-    PDP10.opSKIPA,              // 0o334xxx yyyyyy
-    PDP10.opSKIPGE,             // 0o335xxx yyyyyy
-    PDP10.opSKIPN,              // 0o336xxx yyyyyy
-    PDP10.opSKIPG,              // 0o337xxx yyyyyy
-    PDP10.opAOJ,                // 0o340xxx yyyyyy
-    PDP10.opAOJL,               // 0o341xxx yyyyyy
-    PDP10.opAOJE,               // 0o342xxx yyyyyy
-    PDP10.opAOJLE,              // 0o343xxx yyyyyy
-    PDP10.opAOJA,               // 0o344xxx yyyyyy
-    PDP10.opAOJGE,              // 0o345xxx yyyyyy
-    PDP10.opAOJN,               // 0o346xxx yyyyyy
-    PDP10.opAOJG,               // 0o347xxx yyyyyy
-    PDP10.opAOS,                // 0o350xxx yyyyyy
-    PDP10.opAOSL,               // 0o351xxx yyyyyy
-    PDP10.opAOSE,               // 0o352xxx yyyyyy
-    PDP10.opAOSLE,              // 0o353xxx yyyyyy
-    PDP10.opAOSA,               // 0o354xxx yyyyyy
-    PDP10.opAOSGE,              // 0o355xxx yyyyyy
-    PDP10.opAOSN,               // 0o356xxx yyyyyy
-    PDP10.opAOSG,               // 0o357xxx yyyyyy
-    PDP10.opSOJ,                // 0o360xxx yyyyyy
-    PDP10.opSOJL,               // 0o361xxx yyyyyy
-    PDP10.opSOJE,               // 0o362xxx yyyyyy
-    PDP10.opSOJLE,              // 0o363xxx yyyyyy
-    PDP10.opSOJA,               // 0o364xxx yyyyyy
-    PDP10.opSOJGE,              // 0o365xxx yyyyyy
-    PDP10.opSOJN,               // 0o366xxx yyyyyy
-    PDP10.opSOJG,               // 0o367xxx yyyyyy
-    PDP10.opSOS,                // 0o370xxx yyyyyy
-    PDP10.opSOSL,               // 0o371xxx yyyyyy
-    PDP10.opSOSE,               // 0o372xxx yyyyyy
-    PDP10.opSOSLE,              // 0o373xxx yyyyyy
-    PDP10.opSOSA,               // 0o374xxx yyyyyy
-    PDP10.opSOSGE,              // 0o375xxx yyyyyy
-    PDP10.opSOSN,               // 0o376xxx yyyyyy
-    PDP10.opSOSG,               // 0o377xxx yyyyyy
-    PDP10.opSETZ,               // 0o400xxx yyyyyy
-    PDP10.opSETZI,              // 0o401xxx yyyyyy
-    PDP10.opSETZM,              // 0o402xxx yyyyyy
-    PDP10.opSETZB,              // 0o403xxx yyyyyy
-    PDP10.opAND,                // 0o404xxx yyyyyy
-    PDP10.opANDI,               // 0o405xxx yyyyyy
-    PDP10.opANDM,               // 0o406xxx yyyyyy
-    PDP10.opANDB,               // 0o407xxx yyyyyy
-    PDP10.opANDCA,              // 0o410xxx yyyyyy
-    PDP10.opANDCAI,             // 0o411xxx yyyyyy
-    PDP10.opANDCAM,             // 0o412xxx yyyyyy
-    PDP10.opANDCAB,             // 0o413xxx yyyyyy
-    PDP10.opSETM,               // 0o414xxx yyyyyy
-    PDP10.opSETMI,              // 0o415xxx yyyyyy
-    PDP10.opSETMM,              // 0o416xxx yyyyyy
-    PDP10.opSETMB,              // 0o417xxx yyyyyy
-    PDP10.opANDCM,              // 0o420xxx yyyyyy
-    PDP10.opANDCMI,             // 0o421xxx yyyyyy
-    PDP10.opANDCMM,             // 0o422xxx yyyyyy
-    PDP10.opANDCMB,             // 0o423xxx yyyyyy
-    PDP10.opSETA,               // 0o424xxx yyyyyy
-    PDP10.opSETAI,              // 0o425xxx yyyyyy
-    PDP10.opSETAM,              // 0o426xxx yyyyyy
-    PDP10.opSETAB,              // 0o427xxx yyyyyy
-    PDP10.opXOR,                // 0o430xxx yyyyyy
-    PDP10.opXORI,               // 0o431xxx yyyyyy
-    PDP10.opXORM,               // 0o432xxx yyyyyy
-    PDP10.opXORB,               // 0o433xxx yyyyyy
-    PDP10.opIOR,                // 0o434xxx yyyyyy
-    PDP10.opIORI,               // 0o435xxx yyyyyy
-    PDP10.opIORM,               // 0o436xxx yyyyyy
-    PDP10.opIORB,               // 0o437xxx yyyyyy
-    PDP10.opANDCB,              // 0o440xxx yyyyyy
-    PDP10.opANDCBI,             // 0o441xxx yyyyyy
-    PDP10.opANDCBM,             // 0o442xxx yyyyyy
-    PDP10.opANDCBB,             // 0o443xxx yyyyyy
-    PDP10.opEQV,                // 0o444xxx yyyyyy
-    PDP10.opEQVI,               // 0o445xxx yyyyyy
-    PDP10.opEQVM,               // 0o446xxx yyyyyy
-    PDP10.opEQVB,               // 0o447xxx yyyyyy
-    PDP10.opSETCA,              // 0o450xxx yyyyyy
-    PDP10.opSETCAI,             // 0o451xxx yyyyyy
-    PDP10.opSETCAM,             // 0o452xxx yyyyyy
-    PDP10.opSETCAB,             // 0o453xxx yyyyyy
-    PDP10.opORCA,               // 0o454xxx yyyyyy
-    PDP10.opORCAI,              // 0o455xxx yyyyyy
-    PDP10.opORCAM,              // 0o456xxx yyyyyy
-    PDP10.opORCAB,              // 0o457xxx yyyyyy
-    PDP10.opSETCM,              // 0o460xxx yyyyyy
-    PDP10.opSETCMI,             // 0o461xxx yyyyyy
-    PDP10.opSETCMM,             // 0o462xxx yyyyyy
-    PDP10.opSETCMB,             // 0o463xxx yyyyyy
-    PDP10.opORCM,               // 0o464xxx yyyyyy
-    PDP10.opORCMI,              // 0o465xxx yyyyyy
-    PDP10.opORCMM,              // 0o466xxx yyyyyy
-    PDP10.opORCMB,              // 0o467xxx yyyyyy
-    PDP10.opORCB,               // 0o470xxx yyyyyy
-    PDP10.opORCBI,              // 0o471xxx yyyyyy
-    PDP10.opORCBM,              // 0o472xxx yyyyyy
-    PDP10.opORCBB,              // 0o473xxx yyyyyy
-    PDP10.opSETO,               // 0o474xxx yyyyyy
-    PDP10.opSETOI,              // 0o475xxx yyyyyy
-    PDP10.opSETOM,              // 0o476xxx yyyyyy
-    PDP10.opSETOB,              // 0o477xxx yyyyyy
-    PDP10.opHLL,                // 0o500xxx yyyyyy
-    PDP10.opHLLI,               // 0o501xxx yyyyyy
-    PDP10.opHLLM,               // 0o502xxx yyyyyy
-    PDP10.opHLLS,               // 0o503xxx yyyyyy
-    PDP10.opHRL,                // 0o504xxx yyyyyy
-    PDP10.opHRLI,               // 0o505xxx yyyyyy
-    PDP10.opHRLM,               // 0o506xxx yyyyyy
-    PDP10.opHRLS,               // 0o507xxx yyyyyy
-    PDP10.opHLLZ,               // 0o510xxx yyyyyy
-    PDP10.opHLLZI,              // 0o511xxx yyyyyy
-    PDP10.opHLLZM,              // 0o512xxx yyyyyy
-    PDP10.opHLLZS,              // 0o513xxx yyyyyy
-    PDP10.opHRLZ,               // 0o514xxx yyyyyy
-    PDP10.opHRLZI,              // 0o515xxx yyyyyy
-    PDP10.opHRLZM,              // 0o516xxx yyyyyy
-    PDP10.opHRLZS,              // 0o517xxx yyyyyy
-    PDP10.opHLLO,               // 0o520xxx yyyyyy
-    PDP10.opHLLOI,              // 0o521xxx yyyyyy
-    PDP10.opHLLOM,              // 0o522xxx yyyyyy
-    PDP10.opHLLOS,              // 0o523xxx yyyyyy
-    PDP10.opHRLO,               // 0o524xxx yyyyyy
-    PDP10.opHRLOI,              // 0o525xxx yyyyyy
-    PDP10.opHRLOM,              // 0o526xxx yyyyyy
-    PDP10.opHRLOS,              // 0o527xxx yyyyyy
-    PDP10.opHLLE,               // 0o530xxx yyyyyy
-    PDP10.opHLLEI,              // 0o531xxx yyyyyy
-    PDP10.opHLLEM,              // 0o532xxx yyyyyy
-    PDP10.opHLLES,              // 0o533xxx yyyyyy
-    PDP10.opHRLE,               // 0o534xxx yyyyyy
-    PDP10.opHRLEI,              // 0o535xxx yyyyyy
-    PDP10.opHRLEM,              // 0o536xxx yyyyyy
-    PDP10.opHRLES,              // 0o537xxx yyyyyy
-    PDP10.opHRR,                // 0o540xxx yyyyyy
-    PDP10.opHRRI,               // 0o541xxx yyyyyy
-    PDP10.opHRRM,               // 0o542xxx yyyyyy
-    PDP10.opHRRS,               // 0o543xxx yyyyyy
-    PDP10.opHLR,                // 0o544xxx yyyyyy
-    PDP10.opHLRI,               // 0o545xxx yyyyyy
-    PDP10.opHLRM,               // 0o546xxx yyyyyy
-    PDP10.opHLRS,               // 0o547xxx yyyyyy
-    PDP10.opHRRZ,               // 0o550xxx yyyyyy
-    PDP10.opHRRZI,              // 0o551xxx yyyyyy
-    PDP10.opHRRZM,              // 0o552xxx yyyyyy
-    PDP10.opHRRZS,              // 0o553xxx yyyyyy
-    PDP10.opHLRZ,               // 0o554xxx yyyyyy
-    PDP10.opHLRZI,              // 0o555xxx yyyyyy
-    PDP10.opHLRZM,              // 0o556xxx yyyyyy
-    PDP10.opHLRZS,              // 0o557xxx yyyyyy
-    PDP10.opHRRO,               // 0o560xxx yyyyyy
-    PDP10.opHRROI,              // 0o561xxx yyyyyy
-    PDP10.opHRROM,              // 0o562xxx yyyyyy
-    PDP10.opHRROS,              // 0o563xxx yyyyyy
-    PDP10.opHLRO,               // 0o564xxx yyyyyy
-    PDP10.opHLROI,              // 0o565xxx yyyyyy
-    PDP10.opHLROM,              // 0o566xxx yyyyyy
-    PDP10.opHLROS,              // 0o567xxx yyyyyy
-    PDP10.opHRRE,               // 0o570xxx yyyyyy
-    PDP10.opHRREI,              // 0o571xxx yyyyyy
-    PDP10.opHRREM,              // 0o572xxx yyyyyy
-    PDP10.opHRRES,              // 0o573xxx yyyyyy
-    PDP10.opHLRE,               // 0o574xxx yyyyyy
-    PDP10.opHLREI,              // 0o575xxx yyyyyy
-    PDP10.opHLREM,              // 0o576xxx yyyyyy
-    PDP10.opHLRES,              // 0o577xxx yyyyyy
-    PDP10.opTRN,                // 0o600xxx yyyyyy
-    PDP10.opTLN,                // 0o601xxx yyyyyy
-    PDP10.opTRNE,               // 0o602xxx yyyyyy
-    PDP10.opTLNE,               // 0o603xxx yyyyyy
-    PDP10.opTRNA,               // 0o604xxx yyyyyy
-    PDP10.opTLNA,               // 0o605xxx yyyyyy
-    PDP10.opTRNN,               // 0o606xxx yyyyyy
-    PDP10.opTLNN,               // 0o607xxx yyyyyy
-    PDP10.opTDN,                // 0o610xxx yyyyyy
-    PDP10.opTSN,                // 0o611xxx yyyyyy
-    PDP10.opTDNE,               // 0o612xxx yyyyyy
-    PDP10.opTSNE,               // 0o613xxx yyyyyy
-    PDP10.opTDNA,               // 0o614xxx yyyyyy
-    PDP10.opTSNA,               // 0o615xxx yyyyyy
-    PDP10.opTDNN,               // 0o616xxx yyyyyy
-    PDP10.opTSNN,               // 0o617xxx yyyyyy
-    PDP10.opTRZ,                // 0o620xxx yyyyyy
-    PDP10.opTLZ,                // 0o621xxx yyyyyy
-    PDP10.opTRZE,               // 0o622xxx yyyyyy
-    PDP10.opTLZE,               // 0o623xxx yyyyyy
-    PDP10.opTRZA,               // 0o624xxx yyyyyy
-    PDP10.opTLZA,               // 0o625xxx yyyyyy
-    PDP10.opTRZN,               // 0o626xxx yyyyyy
-    PDP10.opTLZN,               // 0o627xxx yyyyyy
-    PDP10.opTDZ,                // 0o630xxx yyyyyy
-    PDP10.opTSZ,                // 0o631xxx yyyyyy
-    PDP10.opTDZE,               // 0o632xxx yyyyyy
-    PDP10.opTSZE,               // 0o633xxx yyyyyy
-    PDP10.opTDZA,               // 0o634xxx yyyyyy
-    PDP10.opTSZA,               // 0o635xxx yyyyyy
-    PDP10.opTDZN,               // 0o636xxx yyyyyy
-    PDP10.opTSZN,               // 0o637xxx yyyyyy
-    PDP10.opTRC,                // 0o640xxx yyyyyy
-    PDP10.opTLC,                // 0o641xxx yyyyyy
-    PDP10.opTRCE,               // 0o642xxx yyyyyy
-    PDP10.opTLCE,               // 0o643xxx yyyyyy
-    PDP10.opTRCA,               // 0o644xxx yyyyyy
-    PDP10.opTLCA,               // 0o645xxx yyyyyy
-    PDP10.opTRCN,               // 0o646xxx yyyyyy
-    PDP10.opTLCN,               // 0o647xxx yyyyyy
-    PDP10.opTDC,                // 0o650xxx yyyyyy
-    PDP10.opTSC,                // 0o651xxx yyyyyy
-    PDP10.opTDCE,               // 0o652xxx yyyyyy
-    PDP10.opTSCE,               // 0o653xxx yyyyyy
-    PDP10.opTDCA,               // 0o654xxx yyyyyy
-    PDP10.opTSCA,               // 0o655xxx yyyyyy
-    PDP10.opTDCN,               // 0o656xxx yyyyyy
-    PDP10.opTSCN,               // 0o657xxx yyyyyy
-    PDP10.opTRO,                // 0o660xxx yyyyyy
-    PDP10.opTLO,                // 0o661xxx yyyyyy
-    PDP10.opTROE,               // 0o662xxx yyyyyy
-    PDP10.opTLOE,               // 0o663xxx yyyyyy
-    PDP10.opTROA,               // 0o664xxx yyyyyy
-    PDP10.opTLOA,               // 0o665xxx yyyyyy
-    PDP10.opTRON,               // 0o666xxx yyyyyy
-    PDP10.opTLON,               // 0o667xxx yyyyyy
-    PDP10.opTDO,                // 0o670xxx yyyyyy
-    PDP10.opTSO,                // 0o671xxx yyyyyy
-    PDP10.opTDOE,               // 0o672xxx yyyyyy
-    PDP10.opTSOE,               // 0o673xxx yyyyyy
-    PDP10.opTDOA,               // 0o674xxx yyyyyy
-    PDP10.opTSOA,               // 0o675xxx yyyyyy
-    PDP10.opTDON,               // 0o676xxx yyyyyy
-    PDP10.opTSON,               // 0o677xxx yyyyyy
-    PDP10.opIO,                 // 0o700xxx yyyyyy
-    PDP10.opIO,                 // 0o701xxx yyyyyy
-    PDP10.opIO,                 // 0o702xxx yyyyyy
-    PDP10.opIO,                 // 0o703xxx yyyyyy
-    PDP10.opIO,                 // 0o704xxx yyyyyy
-    PDP10.opIO,                 // 0o705xxx yyyyyy
-    PDP10.opIO,                 // 0o706xxx yyyyyy
-    PDP10.opIO,                 // 0o707xxx yyyyyy
-    PDP10.opIO,                 // 0o710xxx yyyyyy
-    PDP10.opIO,                 // 0o711xxx yyyyyy
-    PDP10.opIO,                 // 0o712xxx yyyyyy
-    PDP10.opIO,                 // 0o713xxx yyyyyy
-    PDP10.opIO,                 // 0o714xxx yyyyyy
-    PDP10.opIO,                 // 0o715xxx yyyyyy
-    PDP10.opIO,                 // 0o716xxx yyyyyy
-    PDP10.opIO,                 // 0o717xxx yyyyyy
-    PDP10.opIO,                 // 0o720xxx yyyyyy
-    PDP10.opIO,                 // 0o721xxx yyyyyy
-    PDP10.opIO,                 // 0o722xxx yyyyyy
-    PDP10.opIO,                 // 0o723xxx yyyyyy
-    PDP10.opIO,                 // 0o724xxx yyyyyy
-    PDP10.opIO,                 // 0o725xxx yyyyyy
-    PDP10.opIO,                 // 0o726xxx yyyyyy
-    PDP10.opIO,                 // 0o727xxx yyyyyy
-    PDP10.opIO,                 // 0o730xxx yyyyyy
-    PDP10.opIO,                 // 0o731xxx yyyyyy
-    PDP10.opIO,                 // 0o732xxx yyyyyy
-    PDP10.opIO,                 // 0o733xxx yyyyyy
-    PDP10.opIO,                 // 0o734xxx yyyyyy
-    PDP10.opIO,                 // 0o735xxx yyyyyy
-    PDP10.opIO,                 // 0o736xxx yyyyyy
-    PDP10.opIO,                 // 0o737xxx yyyyyy
-    PDP10.opIO,                 // 0o740xxx yyyyyy
-    PDP10.opIO,                 // 0o741xxx yyyyyy
-    PDP10.opIO,                 // 0o742xxx yyyyyy
-    PDP10.opIO,                 // 0o743xxx yyyyyy
-    PDP10.opIO,                 // 0o744xxx yyyyyy
-    PDP10.opIO,                 // 0o745xxx yyyyyy
-    PDP10.opIO,                 // 0o746xxx yyyyyy
-    PDP10.opIO,                 // 0o747xxx yyyyyy
-    PDP10.opIO,                 // 0o750xxx yyyyyy
-    PDP10.opIO,                 // 0o751xxx yyyyyy
-    PDP10.opIO,                 // 0o752xxx yyyyyy
-    PDP10.opIO,                 // 0o753xxx yyyyyy
-    PDP10.opIO,                 // 0o754xxx yyyyyy
-    PDP10.opIO,                 // 0o755xxx yyyyyy
-    PDP10.opIO,                 // 0o756xxx yyyyyy
-    PDP10.opIO,                 // 0o757xxx yyyyyy
-    PDP10.opIO,                 // 0o760xxx yyyyyy
-    PDP10.opIO,                 // 0o761xxx yyyyyy
-    PDP10.opIO,                 // 0o762xxx yyyyyy
-    PDP10.opIO,                 // 0o763xxx yyyyyy
-    PDP10.opIO,                 // 0o764xxx yyyyyy
-    PDP10.opIO,                 // 0o765xxx yyyyyy
-    PDP10.opIO,                 // 0o766xxx yyyyyy
-    PDP10.opIO,                 // 0o767xxx yyyyyy
-    PDP10.opIO,                 // 0o770xxx yyyyyy
-    PDP10.opIO,                 // 0o771xxx yyyyyy
-    PDP10.opIO,                 // 0o772xxx yyyyyy
-    PDP10.opIO,                 // 0o773xxx yyyyyy
-    PDP10.opIO,                 // 0o774xxx yyyyyy
-    PDP10.opIO,                 // 0o775xxx yyyyyy
-    PDP10.opIO,                 // 0o776xxx yyyyyy
-    PDP10.opIO                  // 0o777xxx yyyyyy
+    PDP10.opUUO,                // 0o000xxx
+    PDP10.opUUO,                // 0o001xxx
+    PDP10.opUUO,                // 0o002xxx
+    PDP10.opUUO,                // 0o003xxx
+    PDP10.opUUO,                // 0o004xxx
+    PDP10.opUUO,                // 0o005xxx
+    PDP10.opUUO,                // 0o006xxx
+    PDP10.opUUO,                // 0o007xxx
+    PDP10.opUUO,                // 0o010xxx
+    PDP10.opUUO,                // 0o011xxx
+    PDP10.opUUO,                // 0o012xxx
+    PDP10.opUUO,                // 0o013xxx
+    PDP10.opUUO,                // 0o014xxx
+    PDP10.opUUO,                // 0o015xxx
+    PDP10.opUUO,                // 0o016xxx
+    PDP10.opUUO,                // 0o017xxx
+    PDP10.opUUO,                // 0o020xxx
+    PDP10.opUUO,                // 0o021xxx
+    PDP10.opUUO,                // 0o022xxx
+    PDP10.opUUO,                // 0o023xxx
+    PDP10.opUUO,                // 0o024xxx
+    PDP10.opUUO,                // 0o025xxx
+    PDP10.opUUO,                // 0o026xxx
+    PDP10.opUUO,                // 0o027xxx
+    PDP10.opUUO,                // 0o030xxx
+    PDP10.opUUO,                // 0o031xxx
+    PDP10.opUUO,                // 0o032xxx
+    PDP10.opUUO,                // 0o033xxx
+    PDP10.opUUO,                // 0o034xxx
+    PDP10.opUUO,                // 0o035xxx
+    PDP10.opUUO,                // 0o036xxx
+    PDP10.opUUO,                // 0o037xxx
+    PDP10.opUUO,                // 0o040xxx
+    PDP10.opUUO,                // 0o041xxx
+    PDP10.opUUO,                // 0o042xxx
+    PDP10.opUUO,                // 0o043xxx
+    PDP10.opUUO,                // 0o044xxx
+    PDP10.opUUO,                // 0o045xxx
+    PDP10.opUUO,                // 0o046xxx
+    PDP10.opUUO,                // 0o047xxx
+    PDP10.opUUO,                // 0o050xxx
+    PDP10.opUUO,                // 0o051xxx
+    PDP10.opUUO,                // 0o052xxx
+    PDP10.opUUO,                // 0o053xxx
+    PDP10.opUUO,                // 0o054xxx
+    PDP10.opUUO,                // 0o055xxx
+    PDP10.opUUO,                // 0o056xxx
+    PDP10.opUUO,                // 0o057xxx
+    PDP10.opUUO,                // 0o060xxx
+    PDP10.opUUO,                // 0o061xxx
+    PDP10.opUUO,                // 0o062xxx
+    PDP10.opUUO,                // 0o063xxx
+    PDP10.opUUO,                // 0o064xxx
+    PDP10.opUUO,                // 0o065xxx
+    PDP10.opUUO,                // 0o066xxx
+    PDP10.opUUO,                // 0o067xxx
+    PDP10.opUUO,                // 0o070xxx
+    PDP10.opUUO,                // 0o071xxx
+    PDP10.opUUO,                // 0o072xxx
+    PDP10.opUUO,                // 0o073xxx
+    PDP10.opUUO,                // 0o074xxx
+    PDP10.opUUO,                // 0o075xxx
+    PDP10.opUUO,                // 0o076xxx
+    PDP10.opUUO,                // 0o077xxx
+    PDP10.opUndefined,          // 0o100xxx
+    PDP10.opUndefined,          // 0o101xxx
+    PDP10.opUndefined,          // 0o102xxx
+    PDP10.opUndefined,          // 0o103xxx
+    PDP10.opUndefined,          // 0o104xxx
+    PDP10.opUndefined,          // 0o105xxx
+    PDP10.opUndefined,          // 0o106xxx
+    PDP10.opUndefined,          // 0o107xxx
+    PDP10.opUndefined,          // 0o110xxx
+    PDP10.opUndefined,          // 0o111xxx
+    PDP10.opUndefined,          // 0o112xxx
+    PDP10.opUndefined,          // 0o113xxx
+    PDP10.opUndefined,          // 0o114xxx
+    PDP10.opUndefined,          // 0o115xxx
+    PDP10.opUndefined,          // 0o116xxx
+    PDP10.opUndefined,          // 0o117xxx
+    PDP10.opUndefined,          // 0o120xxx
+    PDP10.opUndefined,          // 0o121xxx
+    PDP10.opUndefined,          // 0o122xxx
+    PDP10.opUndefined,          // 0o123xxx
+    PDP10.opUndefined,          // 0o124xxx
+    PDP10.opUndefined,          // 0o125xxx
+    PDP10.opUndefined,          // 0o126xxx
+    PDP10.opUndefined,          // 0o127xxx
+    PDP10.opUFA,                // 0o130xxx
+    PDP10.opDFN,                // 0o131xxx
+    PDP10.opFSC,                // 0o132xxx
+    PDP10.opIBP,                // 0o133xxx
+    PDP10.opILDB,               // 0o134xxx
+    PDP10.opLDB,                // 0o135xxx
+    PDP10.opIDPB,               // 0o136xxx
+    PDP10.opDPB,                // 0o137xxx
+    PDP10.opFAD,                // 0o140xxx
+    PDP10.opFADI,               // 0o141xxx
+    PDP10.opFADM,               // 0o142xxx
+    PDP10.opFADB,               // 0o143xxx
+    PDP10.opFADR,               // 0o144xxx
+    PDP10.opFADRI,              // 0o145xxx
+    PDP10.opFADRM,              // 0o146xxx
+    PDP10.opFADRB,              // 0o147xxx
+    PDP10.opFSB,                // 0o150xxx
+    PDP10.opFSBI,               // 0o151xxx
+    PDP10.opFSBM,               // 0o152xxx
+    PDP10.opFSBB,               // 0o153xxx
+    PDP10.opFSBR,               // 0o154xxx
+    PDP10.opFSBRI,              // 0o155xxx
+    PDP10.opFSBRM,              // 0o156xxx
+    PDP10.opFSBRB,              // 0o157xxx
+    PDP10.opFMP,                // 0o160xxx
+    PDP10.opFMPI,               // 0o161xxx
+    PDP10.opFMPM,               // 0o162xxx
+    PDP10.opFMPB,               // 0o163xxx
+    PDP10.opFMPR,               // 0o164xxx
+    PDP10.opFMPRI,              // 0o165xxx
+    PDP10.opFMPRM,              // 0o166xxx
+    PDP10.opFMPRB,              // 0o167xxx
+    PDP10.opFDV,                // 0o170xxx
+    PDP10.opFDVI,               // 0o171xxx
+    PDP10.opFDVM,               // 0o172xxx
+    PDP10.opFDVB,               // 0o173xxx
+    PDP10.opFDVR,               // 0o174xxx
+    PDP10.opFDVRI,              // 0o175xxx
+    PDP10.opFDVRM,              // 0o176xxx
+    PDP10.opFDVRB,              // 0o177xxx
+    PDP10.opMOV,                // 0o200xxx
+    PDP10.opMOVI,               // 0o201xxx
+    PDP10.opMOVM,               // 0o202xxx
+    PDP10.opMOVS,               // 0o203xxx
+    PDP10.opMOVS,               // 0o204xxx
+    PDP10.opMOVSI,              // 0o205xxx
+    PDP10.opMOVSM,              // 0o206xxx
+    PDP10.opMOVSS,              // 0o207xxx
+    PDP10.opMOVN,               // 0o210xxx
+    PDP10.opMOVNI,              // 0o211xxx
+    PDP10.opMOVNM,              // 0o212xxx
+    PDP10.opMOVNS,              // 0o213xxx
+    PDP10.opMOVM,               // 0o214xxx
+    PDP10.opMOVMI,              // 0o215xxx
+    PDP10.opMOVMM,              // 0o216xxx
+    PDP10.opMOVMS,              // 0o217xxx
+    PDP10.opIMUL,               // 0o220xxx
+    PDP10.opIMULI,              // 0o221xxx
+    PDP10.opIMULM,              // 0o222xxx
+    PDP10.opIMULB,              // 0o223xxx
+    PDP10.opMUL,                // 0o224xxx
+    PDP10.opMULI,               // 0o225xxx
+    PDP10.opMULM,               // 0o226xxx
+    PDP10.opMULB,               // 0o227xxx
+    PDP10.opIDIV,               // 0o230xxx
+    PDP10.opIDIVI,              // 0o231xxx
+    PDP10.opIDIVM,              // 0o232xxx
+    PDP10.opIDIVB,              // 0o233xxx
+    PDP10.opDIV,                // 0o234xxx
+    PDP10.opDIVI,               // 0o235xxx
+    PDP10.opDIVM,               // 0o236xxx
+    PDP10.opDIVB,               // 0o237xxx
+    PDP10.opASH,                // 0o240xxx
+    PDP10.opROT,                // 0o241xxx
+    PDP10.opLSH,                // 0o242xxx
+    PDP10.opJFFO,               // 0o243xxx
+    PDP10.opASHC,               // 0o244xxx
+    PDP10.opROTC,               // 0o245xxx
+    PDP10.opLSHC,               // 0o246xxx
+    PDP10.opUndefined,          // 0o247xxx
+    PDP10.opEXCH,               // 0o250xxx
+    PDP10.opBLT,                // 0o251xxx
+    PDP10.opAOBJP,              // 0o252xxx
+    PDP10.opAOBJN,              // 0o253xxx
+    PDP10.opJRST,               // 0o254xxx
+    PDP10.opJFCL,               // 0o255xxx
+    PDP10.opXCT,                // 0o256xxx
+    PDP10.opUndefined,          // 0o257xxx
+    PDP10.opPUSHJ,              // 0o260xxx
+    PDP10.opPUSH,               // 0o261xxx
+    PDP10.opPOP,                // 0o262xxx
+    PDP10.opPOPJ,               // 0o263xxx
+    PDP10.opJSR,                // 0o264xxx
+    PDP10.opJSP,                // 0o265xxx
+    PDP10.opJSA,                // 0o266xxx
+    PDP10.opJRA,                // 0o267xxx
+    PDP10.opADD,                // 0o270xxx
+    PDP10.opADDI,               // 0o271xxx
+    PDP10.opADDM,               // 0o272xxx
+    PDP10.opADDB,               // 0o273xxx
+    PDP10.opSUB,                // 0o274xxx
+    PDP10.opSUBI,               // 0o275xxx
+    PDP10.opSUBM,               // 0o276xxx
+    PDP10.opSUBB,               // 0o277xxx
+    PDP10.opCAI,                // 0o300xxx
+    PDP10.opCAIL,               // 0o301xxx
+    PDP10.opCAIE,               // 0o302xxx
+    PDP10.opCAILE,              // 0o303xxx
+    PDP10.opCAIA,               // 0o304xxx
+    PDP10.opCAIGE,              // 0o305xxx
+    PDP10.opCAIN,               // 0o306xxx
+    PDP10.opCAIG,               // 0o307xxx
+    PDP10.opCA,                 // 0o310xxx
+    PDP10.opCAL,                // 0o311xxx
+    PDP10.opCAE,                // 0o312xxx
+    PDP10.opCALE,               // 0o313xxx
+    PDP10.opCAA,                // 0o314xxx
+    PDP10.opCAGE,               // 0o315xxx
+    PDP10.opCAN,                // 0o316xxx
+    PDP10.opCAG,                // 0o317xxx
+    PDP10.opJUMP,               // 0o320xxx
+    PDP10.opJUMPL,              // 0o321xxx
+    PDP10.opJUMPE,              // 0o322xxx
+    PDP10.opJUMPLE,             // 0o323xxx
+    PDP10.opJUMPA,              // 0o324xxx
+    PDP10.opJUMPGE,             // 0o325xxx
+    PDP10.opJUMPN,              // 0o326xxx
+    PDP10.opJUMPG,              // 0o327xxx
+    PDP10.opSKIP,               // 0o330xxx
+    PDP10.opSKIPL,              // 0o331xxx
+    PDP10.opSKIPE,              // 0o332xxx
+    PDP10.opSKIPLE,             // 0o333xxx
+    PDP10.opSKIPA,              // 0o334xxx
+    PDP10.opSKIPGE,             // 0o335xxx
+    PDP10.opSKIPN,              // 0o336xxx
+    PDP10.opSKIPG,              // 0o337xxx
+    PDP10.opAOJ,                // 0o340xxx
+    PDP10.opAOJL,               // 0o341xxx
+    PDP10.opAOJE,               // 0o342xxx
+    PDP10.opAOJLE,              // 0o343xxx
+    PDP10.opAOJA,               // 0o344xxx
+    PDP10.opAOJGE,              // 0o345xxx
+    PDP10.opAOJN,               // 0o346xxx
+    PDP10.opAOJG,               // 0o347xxx
+    PDP10.opAOS,                // 0o350xxx
+    PDP10.opAOSL,               // 0o351xxx
+    PDP10.opAOSE,               // 0o352xxx
+    PDP10.opAOSLE,              // 0o353xxx
+    PDP10.opAOSA,               // 0o354xxx
+    PDP10.opAOSGE,              // 0o355xxx
+    PDP10.opAOSN,               // 0o356xxx
+    PDP10.opAOSG,               // 0o357xxx
+    PDP10.opSOJ,                // 0o360xxx
+    PDP10.opSOJL,               // 0o361xxx
+    PDP10.opSOJE,               // 0o362xxx
+    PDP10.opSOJLE,              // 0o363xxx
+    PDP10.opSOJA,               // 0o364xxx
+    PDP10.opSOJGE,              // 0o365xxx
+    PDP10.opSOJN,               // 0o366xxx
+    PDP10.opSOJG,               // 0o367xxx
+    PDP10.opSOS,                // 0o370xxx
+    PDP10.opSOSL,               // 0o371xxx
+    PDP10.opSOSE,               // 0o372xxx
+    PDP10.opSOSLE,              // 0o373xxx
+    PDP10.opSOSA,               // 0o374xxx
+    PDP10.opSOSGE,              // 0o375xxx
+    PDP10.opSOSN,               // 0o376xxx
+    PDP10.opSOSG,               // 0o377xxx
+    PDP10.opSETZ,               // 0o400xxx
+    PDP10.opSETZI,              // 0o401xxx
+    PDP10.opSETZM,              // 0o402xxx
+    PDP10.opSETZB,              // 0o403xxx
+    PDP10.opAND,                // 0o404xxx
+    PDP10.opANDI,               // 0o405xxx
+    PDP10.opANDM,               // 0o406xxx
+    PDP10.opANDB,               // 0o407xxx
+    PDP10.opANDCA,              // 0o410xxx
+    PDP10.opANDCAI,             // 0o411xxx
+    PDP10.opANDCAM,             // 0o412xxx
+    PDP10.opANDCAB,             // 0o413xxx
+    PDP10.opSETM,               // 0o414xxx
+    PDP10.opSETMI,              // 0o415xxx
+    PDP10.opSETMM,              // 0o416xxx
+    PDP10.opSETMB,              // 0o417xxx
+    PDP10.opANDCM,              // 0o420xxx
+    PDP10.opANDCMI,             // 0o421xxx
+    PDP10.opANDCMM,             // 0o422xxx
+    PDP10.opANDCMB,             // 0o423xxx
+    PDP10.opSETA,               // 0o424xxx
+    PDP10.opSETAI,              // 0o425xxx
+    PDP10.opSETAM,              // 0o426xxx
+    PDP10.opSETAB,              // 0o427xxx
+    PDP10.opXOR,                // 0o430xxx
+    PDP10.opXORI,               // 0o431xxx
+    PDP10.opXORM,               // 0o432xxx
+    PDP10.opXORB,               // 0o433xxx
+    PDP10.opIOR,                // 0o434xxx
+    PDP10.opIORI,               // 0o435xxx
+    PDP10.opIORM,               // 0o436xxx
+    PDP10.opIORB,               // 0o437xxx
+    PDP10.opANDCB,              // 0o440xxx
+    PDP10.opANDCBI,             // 0o441xxx
+    PDP10.opANDCBM,             // 0o442xxx
+    PDP10.opANDCBB,             // 0o443xxx
+    PDP10.opEQV,                // 0o444xxx
+    PDP10.opEQVI,               // 0o445xxx
+    PDP10.opEQVM,               // 0o446xxx
+    PDP10.opEQVB,               // 0o447xxx
+    PDP10.opSETCA,              // 0o450xxx
+    PDP10.opSETCAI,             // 0o451xxx
+    PDP10.opSETCAM,             // 0o452xxx
+    PDP10.opSETCAB,             // 0o453xxx
+    PDP10.opORCA,               // 0o454xxx
+    PDP10.opORCAI,              // 0o455xxx
+    PDP10.opORCAM,              // 0o456xxx
+    PDP10.opORCAB,              // 0o457xxx
+    PDP10.opSETCM,              // 0o460xxx
+    PDP10.opSETCMI,             // 0o461xxx
+    PDP10.opSETCMM,             // 0o462xxx
+    PDP10.opSETCMB,             // 0o463xxx
+    PDP10.opORCM,               // 0o464xxx
+    PDP10.opORCMI,              // 0o465xxx
+    PDP10.opORCMM,              // 0o466xxx
+    PDP10.opORCMB,              // 0o467xxx
+    PDP10.opORCB,               // 0o470xxx
+    PDP10.opORCBI,              // 0o471xxx
+    PDP10.opORCBM,              // 0o472xxx
+    PDP10.opORCBB,              // 0o473xxx
+    PDP10.opSETO,               // 0o474xxx
+    PDP10.opSETOI,              // 0o475xxx
+    PDP10.opSETOM,              // 0o476xxx
+    PDP10.opSETOB,              // 0o477xxx
+    PDP10.opHLL,                // 0o500xxx
+    PDP10.opHLLI,               // 0o501xxx
+    PDP10.opHLLM,               // 0o502xxx
+    PDP10.opHLLS,               // 0o503xxx
+    PDP10.opHRL,                // 0o504xxx
+    PDP10.opHRLI,               // 0o505xxx
+    PDP10.opHRLM,               // 0o506xxx
+    PDP10.opHRLS,               // 0o507xxx
+    PDP10.opHLLZ,               // 0o510xxx
+    PDP10.opHLLZI,              // 0o511xxx
+    PDP10.opHLLZM,              // 0o512xxx
+    PDP10.opHLLZS,              // 0o513xxx
+    PDP10.opHRLZ,               // 0o514xxx
+    PDP10.opHRLZI,              // 0o515xxx
+    PDP10.opHRLZM,              // 0o516xxx
+    PDP10.opHRLZS,              // 0o517xxx
+    PDP10.opHLLO,               // 0o520xxx
+    PDP10.opHLLOI,              // 0o521xxx
+    PDP10.opHLLOM,              // 0o522xxx
+    PDP10.opHLLOS,              // 0o523xxx
+    PDP10.opHRLO,               // 0o524xxx
+    PDP10.opHRLOI,              // 0o525xxx
+    PDP10.opHRLOM,              // 0o526xxx
+    PDP10.opHRLOS,              // 0o527xxx
+    PDP10.opHLLE,               // 0o530xxx
+    PDP10.opHLLEI,              // 0o531xxx
+    PDP10.opHLLEM,              // 0o532xxx
+    PDP10.opHLLES,              // 0o533xxx
+    PDP10.opHRLE,               // 0o534xxx
+    PDP10.opHRLEI,              // 0o535xxx
+    PDP10.opHRLEM,              // 0o536xxx
+    PDP10.opHRLES,              // 0o537xxx
+    PDP10.opHRR,                // 0o540xxx
+    PDP10.opHRRI,               // 0o541xxx
+    PDP10.opHRRM,               // 0o542xxx
+    PDP10.opHRRS,               // 0o543xxx
+    PDP10.opHLR,                // 0o544xxx
+    PDP10.opHLRI,               // 0o545xxx
+    PDP10.opHLRM,               // 0o546xxx
+    PDP10.opHLRS,               // 0o547xxx
+    PDP10.opHRRZ,               // 0o550xxx
+    PDP10.opHRRZI,              // 0o551xxx
+    PDP10.opHRRZM,              // 0o552xxx
+    PDP10.opHRRZS,              // 0o553xxx
+    PDP10.opHLRZ,               // 0o554xxx
+    PDP10.opHLRZI,              // 0o555xxx
+    PDP10.opHLRZM,              // 0o556xxx
+    PDP10.opHLRZS,              // 0o557xxx
+    PDP10.opHRRO,               // 0o560xxx
+    PDP10.opHRROI,              // 0o561xxx
+    PDP10.opHRROM,              // 0o562xxx
+    PDP10.opHRROS,              // 0o563xxx
+    PDP10.opHLRO,               // 0o564xxx
+    PDP10.opHLROI,              // 0o565xxx
+    PDP10.opHLROM,              // 0o566xxx
+    PDP10.opHLROS,              // 0o567xxx
+    PDP10.opHRRE,               // 0o570xxx
+    PDP10.opHRREI,              // 0o571xxx
+    PDP10.opHRREM,              // 0o572xxx
+    PDP10.opHRRES,              // 0o573xxx
+    PDP10.opHLRE,               // 0o574xxx
+    PDP10.opHLREI,              // 0o575xxx
+    PDP10.opHLREM,              // 0o576xxx
+    PDP10.opHLRES,              // 0o577xxx
+    PDP10.opTRN,                // 0o600xxx
+    PDP10.opTLN,                // 0o601xxx
+    PDP10.opTRNE,               // 0o602xxx
+    PDP10.opTLNE,               // 0o603xxx
+    PDP10.opTRNA,               // 0o604xxx
+    PDP10.opTLNA,               // 0o605xxx
+    PDP10.opTRNN,               // 0o606xxx
+    PDP10.opTLNN,               // 0o607xxx
+    PDP10.opTDN,                // 0o610xxx
+    PDP10.opTSN,                // 0o611xxx
+    PDP10.opTDNE,               // 0o612xxx
+    PDP10.opTSNE,               // 0o613xxx
+    PDP10.opTDNA,               // 0o614xxx
+    PDP10.opTSNA,               // 0o615xxx
+    PDP10.opTDNN,               // 0o616xxx
+    PDP10.opTSNN,               // 0o617xxx
+    PDP10.opTRZ,                // 0o620xxx
+    PDP10.opTLZ,                // 0o621xxx
+    PDP10.opTRZE,               // 0o622xxx
+    PDP10.opTLZE,               // 0o623xxx
+    PDP10.opTRZA,               // 0o624xxx
+    PDP10.opTLZA,               // 0o625xxx
+    PDP10.opTRZN,               // 0o626xxx
+    PDP10.opTLZN,               // 0o627xxx
+    PDP10.opTDZ,                // 0o630xxx
+    PDP10.opTSZ,                // 0o631xxx
+    PDP10.opTDZE,               // 0o632xxx
+    PDP10.opTSZE,               // 0o633xxx
+    PDP10.opTDZA,               // 0o634xxx
+    PDP10.opTSZA,               // 0o635xxx
+    PDP10.opTDZN,               // 0o636xxx
+    PDP10.opTSZN,               // 0o637xxx
+    PDP10.opTRC,                // 0o640xxx
+    PDP10.opTLC,                // 0o641xxx
+    PDP10.opTRCE,               // 0o642xxx
+    PDP10.opTLCE,               // 0o643xxx
+    PDP10.opTRCA,               // 0o644xxx
+    PDP10.opTLCA,               // 0o645xxx
+    PDP10.opTRCN,               // 0o646xxx
+    PDP10.opTLCN,               // 0o647xxx
+    PDP10.opTDC,                // 0o650xxx
+    PDP10.opTSC,                // 0o651xxx
+    PDP10.opTDCE,               // 0o652xxx
+    PDP10.opTSCE,               // 0o653xxx
+    PDP10.opTDCA,               // 0o654xxx
+    PDP10.opTSCA,               // 0o655xxx
+    PDP10.opTDCN,               // 0o656xxx
+    PDP10.opTSCN,               // 0o657xxx
+    PDP10.opTRO,                // 0o660xxx
+    PDP10.opTLO,                // 0o661xxx
+    PDP10.opTROE,               // 0o662xxx
+    PDP10.opTLOE,               // 0o663xxx
+    PDP10.opTROA,               // 0o664xxx
+    PDP10.opTLOA,               // 0o665xxx
+    PDP10.opTRON,               // 0o666xxx
+    PDP10.opTLON,               // 0o667xxx
+    PDP10.opTDO,                // 0o670xxx
+    PDP10.opTSO,                // 0o671xxx
+    PDP10.opTDOE,               // 0o672xxx
+    PDP10.opTSOE,               // 0o673xxx
+    PDP10.opTDOA,               // 0o674xxx
+    PDP10.opTSOA,               // 0o675xxx
+    PDP10.opTDON,               // 0o676xxx
+    PDP10.opTSON,               // 0o677xxx
+    PDP10.opIO,                 // 0o700xx
+    PDP10.opIO,                 // 0o701xxx
+    PDP10.opIO,                 // 0o702xxx
+    PDP10.opIO,                 // 0o703xxx
+    PDP10.opIO,                 // 0o704xxx
+    PDP10.opIO,                 // 0o705xxx
+    PDP10.opIO,                 // 0o706xxx
+    PDP10.opIO,                 // 0o707xxx
+    PDP10.opIO,                 // 0o710xxx
+    PDP10.opIO,                 // 0o711xxx
+    PDP10.opIO,                 // 0o712xxx
+    PDP10.opIO,                 // 0o713xxx
+    PDP10.opIO,                 // 0o714xxx
+    PDP10.opIO,                 // 0o715xxx
+    PDP10.opIO,                 // 0o716xxx
+    PDP10.opIO,                 // 0o717xxx
+    PDP10.opIO,                 // 0o720xxx
+    PDP10.opIO,                 // 0o721xxx
+    PDP10.opIO,                 // 0o722xxx
+    PDP10.opIO,                 // 0o723xxx
+    PDP10.opIO,                 // 0o724xxx
+    PDP10.opIO,                 // 0o725xxx
+    PDP10.opIO,                 // 0o726xxx
+    PDP10.opIO,                 // 0o727xxx
+    PDP10.opIO,                 // 0o730xxx
+    PDP10.opIO,                 // 0o731xxx
+    PDP10.opIO,                 // 0o732xxx
+    PDP10.opIO,                 // 0o733xxx
+    PDP10.opIO,                 // 0o734xxx
+    PDP10.opIO,                 // 0o735xxx
+    PDP10.opIO,                 // 0o736xxx
+    PDP10.opIO,                 // 0o737xxx
+    PDP10.opIO,                 // 0o740xxx
+    PDP10.opIO,                 // 0o741xxx
+    PDP10.opIO,                 // 0o742xxx
+    PDP10.opIO,                 // 0o743xxx
+    PDP10.opIO,                 // 0o744xxx
+    PDP10.opIO,                 // 0o745xxx
+    PDP10.opIO,                 // 0o746xxx
+    PDP10.opIO,                 // 0o747xxx
+    PDP10.opIO,                 // 0o750xxx
+    PDP10.opIO,                 // 0o751xxx
+    PDP10.opIO,                 // 0o752xxx
+    PDP10.opIO,                 // 0o753xxx
+    PDP10.opIO,                 // 0o754xxx
+    PDP10.opIO,                 // 0o755xxx
+    PDP10.opIO,                 // 0o756xxx
+    PDP10.opIO,                 // 0o757xxx
+    PDP10.opIO,                 // 0o760xxx
+    PDP10.opIO,                 // 0o761xxx
+    PDP10.opIO,                 // 0o762xxx
+    PDP10.opIO,                 // 0o763xxx
+    PDP10.opIO,                 // 0o764xxx
+    PDP10.opIO,                 // 0o765xxx
+    PDP10.opIO,                 // 0o766xxx
+    PDP10.opIO,                 // 0o767xxx
+    PDP10.opIO,                 // 0o770xxx
+    PDP10.opIO,                 // 0o771xxx
+    PDP10.opIO,                 // 0o772xxx
+    PDP10.opIO,                 // 0o773xxx
+    PDP10.opIO,                 // 0o774xxx
+    PDP10.opIO,                 // 0o775xxx
+    PDP10.opIO,                 // 0o776xxx
+    PDP10.opIO                  // 0o777xxx
 ];
