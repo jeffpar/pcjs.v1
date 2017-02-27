@@ -2495,7 +2495,7 @@ class DebuggerPDP10 extends Debugger {
             if (fJSON) {
                 sDump += sData + ",";
             } else {
-                sDump += sAddr + ":  " + sData + ((n < 0)? (' ' + sChars) : "");
+                sDump += sAddr + ": " + sData + ((n < 0)? (' ' + sChars) : "");
             }
         }
 
