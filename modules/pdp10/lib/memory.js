@@ -83,9 +83,7 @@ class MemoryPDP10 {
         this.type = type || MemoryPDP10.TYPE.NONE;
         this.fReadOnly = (type == MemoryPDP10.TYPE.ROM);
         this.dbg = null;
-        this.readBits = this.readBitsDirect = this.readNone;
         this.readWord = this.readWordDirect = this.readNone;
-        this.writeBits = this.writeBitsDirect = this.writeNone;
         this.writeWord = this.writeWordDirect = this.writeNone;
         this.cReadBreakpoints = this.cWriteBreakpoints = 0;
         this.copyBreakpoints();     // initialize the block's Debugger info; the caller will reinitialize
@@ -222,13 +220,11 @@ class MemoryPDP10 {
     /**
      * setAccess(afn, fDirect)
      *
-     * The afn parameter should be a 4-entry function table containing two bits handlers and
-     * two word handlers.  See the static afnMemory table for an example.
+     * The afn parameter should be a 2-entry function table containing word read and write handlers.
+     * See the static afnMemory table for an example.
      *
-     * If no function table is specified, a default is selected based on the Memory type;
-     * similarly, any undefined entries in the table are filled with default handlers that fall
-     * back to the bits handlers, and if one or both bits handlers are undefined, they default
-     * to handlers that simply ignore the access.
+     * If no function table is specified, a default is selected based on the Memory type; similarly,
+     * any undefined entries in the table are filled with default handlers.
      *
      * fDirect indicates that both the default AND the direct handlers should be updated.  Direct
      * handlers normally match the default handlers, except when "checked" handlers are installed;
@@ -260,12 +256,10 @@ class MemoryPDP10 {
     setReadAccess(afn, fDirect)
     {
         if (!fDirect || !this.cReadBreakpoints) {
-            this.readBits = afn[0] || this.readNone;
-            this.readWord = afn[2] || this.readNone;
+            this.readWord = afn[0] || this.readNone;
         }
         if (fDirect || fDirect === undefined) {
-            this.readBitsDirect = afn[0] || this.readNone;
-            this.readWordDirect = afn[2] || this.readNone;
+            this.readWordDirect = afn[0] || this.readNone;
         }
     }
 
@@ -279,12 +273,10 @@ class MemoryPDP10 {
     setWriteAccess(afn, fDirect)
     {
         if (!fDirect || !this.cWriteBreakpoints) {
-            this.writeBits = !this.fReadOnly && afn[1] || this.writeNone;
-            this.writeWord = !this.fReadOnly && afn[3] || this.writeNone;
+            this.writeWord = !this.fReadOnly && afn[1] || this.writeNone;
         }
         if (fDirect || fDirect === undefined) {
-            this.writeBitsDirect = afn[1] || this.writeNone;
-            this.writeWordDirect = afn[3] || this.writeNone;
+            this.writeWordDirect = afn[1] || this.writeNone;
         }
     }
 
@@ -295,7 +287,6 @@ class MemoryPDP10 {
      */
     resetReadAccess()
     {
-        this.readBits = this.readBitsDirect;
         this.readWord = this.readWordDirect;
     }
 
@@ -306,7 +297,6 @@ class MemoryPDP10 {
      */
     resetWriteAccess()
     {
-        this.writeBits = this.fReadOnly? this.writeNone : this.writeBitsDirect;
         this.writeWord = this.fReadOnly? this.writeNone : this.writeWordDirect;
     }
 
@@ -425,27 +415,6 @@ class MemoryPDP10 {
     }
 
     /**
-     * readBitsMemory(off, addr, offBits, lenBits)
-     *
-     * @this {MemoryPDP10}
-     * @param {number} off
-     * @param {number} addr
-     * @param {number} offBits (the bit position of the right-most bit of the result, using modern bit numbering)
-     * @param {number} lenBits
-     * @return {number}
-     */
-    readBitsMemory(off, addr, offBits, lenBits)
-    {
-        var w = this.aw[off];
-        if (offBits + lenBits <= 32) {
-            w = (w >> offBits) & ((1 << lenBits) - 1);
-        } else {
-            w = Math.trunc(w / Math.pow(2, offBits)) % Math.pow(2, lenBits);
-        }
-        return w;
-    }
-
-    /**
      * readWordMemory(off, addr)
      *
      * @this {MemoryPDP10}
@@ -459,29 +428,6 @@ class MemoryPDP10 {
     }
 
     /**
-     * writeBitsMemory(bits, off, addr, offBits, lenBits)
-     *
-     * @this {MemoryPDP10}
-     * @param {number} bits (only the right-most lenBits of bits are used, so it doesn't need to be pre-masked)
-     * @param {number} off
-     * @param {number} addr
-     * @param {number} offBits (the bit position of the right-most bit of the result, using modern bit numbering)
-     * @param {number} lenBits
-     */
-    writeBitsMemory(bits, off, addr, offBits, lenBits)
-    {
-        var w = this.aw[off];
-        var shiftBits = Math.pow(2, offBits);
-        bits %= Math.pow(2, lenBits);
-        var v = (w % Math.pow(2, offBits + lenBits));
-        w = (w - v) + (bits * shiftBits) + (v % shiftBits);
-        if (this.aw[off] != w) {
-            this.aw[off] = w;
-            this.fDirty = true;
-        }
-    }
-
-    /**
      * writeWordMemory(w, off, addr)
      *
      * @this {MemoryPDP10}
@@ -491,26 +437,10 @@ class MemoryPDP10 {
      */
     writeWordMemory(w, off, addr)
     {
-        this.aw[off] = w;
-        this.fDirty = true;
-    }
-
-    /**
-     * readBitsChecked(off, addr, offBits, lenBits)
-     *
-     * @this {MemoryPDP10}
-     * @param {number} off
-     * @param {number} addr
-     * @param {number} offBits (the bit position of the right-most bit of the result, using modern bit numbering)
-     * @param {number} lenBits
-     * @return {number}
-     */
-    readBitsChecked(off, addr, offBits, lenBits)
-    {
-        if (DEBUGGER && this.dbg && this.addr != null) {
-            this.dbg.checkMemoryRead(this.addr + off);
+        if (this.aw[off] != w) {
+            this.aw[off] = w;
+            this.fDirty = true;
         }
-        return this.readBitsDirect(off, addr, offBits, lenBits);
     }
 
     /**
@@ -527,24 +457,6 @@ class MemoryPDP10 {
             this.dbg.checkMemoryRead(this.addr + off, 2);
         }
         return this.readWordDirect(off, addr);
-    }
-
-    /**
-     * writeBitsChecked(bits, off, addr, offBits, lenBits)
-     *
-     * @this {MemoryPDP10}
-     * @param {number} bits
-     * @param {number} off
-     * @param {number} addr
-     * @param {number} offBits (the bit position of the right-most bit of the result, using modern bit numbering)
-     * @param {number} lenBits
-     */
-    writeBitsChecked(bits, off, addr, offBits, lenBits)
-    {
-        if (DEBUGGER && this.dbg && this.addr != null) {
-            this.dbg.checkMemoryWrite(this.addr + off);
-        }
-        if (this.fReadOnly) this.writeNone(bits, off, addr); else this.writeBitsDirect(bits, off, addr, offBits, lenBits);
     }
 
     /**
@@ -587,11 +499,9 @@ MemoryPDP10.idBlock = 0;
 
 /*
  * This is the effective definition of afnNone, but we need not fully define it, because setAccess()
- * uses these defaults when any of the 4 handlers (ie, 2 bits handlers and 2 word handlers) are undefined.
+ * uses these defaults when any of the handlers are undefined.
  *
 MemoryPDP10.afnNone = [
-    MemoryPDP10.prototype.readNone,
-    MemoryPDP10.prototype.writeNone,
     MemoryPDP10.prototype.readNone,
     MemoryPDP10.prototype.writeNone
 ];
@@ -599,15 +509,11 @@ MemoryPDP10.afnNone = [
 MemoryPDP10.afnNone = [];
 
 MemoryPDP10.afnMemory = [
-    MemoryPDP10.prototype.readBitsMemory,
-    MemoryPDP10.prototype.writeBitsMemory,
     MemoryPDP10.prototype.readWordMemory,
     MemoryPDP10.prototype.writeWordMemory
 ];
 
 MemoryPDP10.afnChecked = [
-    MemoryPDP10.prototype.readBitsChecked,
-    MemoryPDP10.prototype.writeBitsChecked,
     MemoryPDP10.prototype.readWordChecked,
     MemoryPDP10.prototype.writeWordChecked
 ];

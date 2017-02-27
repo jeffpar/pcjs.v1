@@ -540,7 +540,7 @@ class BusPDP10 extends Component {
      *
      * @this {BusPDP10}
      * @param {number} addr is a physical address
-     * @param {number} w is the word (36-bit) value to write (we truncate it to 16 bits to be safe)
+     * @param {number} w is the word (36-bit) value to write
      */
     setWordDirect(addr, w)
     {

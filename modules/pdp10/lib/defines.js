@@ -102,6 +102,7 @@ var PDP10 = {
     DATA_LIMIT:     Math.pow(2, 36),
     WORD_SHIFT:     Math.pow(2, 18),
     WORD_MASK:      0o777777,
+    MAX_POS:        Math.pow(2, 35) - 1,
 
     /*
      * PDP-10 opcodes are 36-bit values, most of which use the following layout:

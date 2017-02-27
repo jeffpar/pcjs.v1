@@ -2651,7 +2651,7 @@ PDP10.opSETOB = function(op)
 };
 
 /**
- * opHLL(0o500000): Half Word Left to Left
+ * opHLL(0o5N0000): Half Word Left to Left
  *
  * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-3:
  *
@@ -2668,12 +2668,12 @@ PDP10.opHLL = function(op)
     var a = op & PDP10.OPCODE.A_MASK;
     var src = this.readWord(this.regEA);
     var dst = this.readWord(a);
-    dst = (dst & PDP10.WORD_MASK) + (src - (src & PDP10.WORD_MASK));
+    dst = PDP10.setHR(op, dst, src) + (src - (src & PDP10.WORD_MASK));
     this.writeWord(a, dst);
 };
 
 /**
- * opHLLI(0o501000): Half Word Left to Left, Immediate
+ * opHLLI(0o5N1000): Half Word Left to Left, Immediate
  *
  * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-3:
  *
@@ -2692,12 +2692,12 @@ PDP10.opHLLI = function(op)
 {
     var a = op & PDP10.OPCODE.A_MASK;
     var dst = this.readWord(a);
-    dst = (dst & PDP10.WORD_MASK);
+    dst = PDP10.setHR(op, dst, 0);
     this.writeWord(a, dst);
 };
 
 /**
- * opHLLM(0o502000): Half Word Left to Left, Memory
+ * opHLLM(0o5N2000): Half Word Left to Left, Memory
  *
  * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-3:
  *
@@ -2714,12 +2714,12 @@ PDP10.opHLLM = function(op)
     var a = op & PDP10.OPCODE.A_MASK;
     var src = this.readWord(a);
     var dst = this.readWord(this.regEA);
-    dst = (dst & PDP10.WORD_MASK) + (src - (src & PDP10.WORD_MASK));
+    dst = PDP10.setHR(op, dst, src) + (src - (src & PDP10.WORD_MASK));
     this.writeWord(this.regEA, dst);
 };
 
 /**
- * opHLLS(0o503000): Half Word Left to Left, Self
+ * opHLLS(0o5N3000): Half Word Left to Left, Self
  *
  * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-3:
  *
@@ -2735,7 +2735,13 @@ PDP10.opHLLM = function(op)
  */
 PDP10.opHLLS = function(op)
 {
-    if (op & PDP10.OPCODE.A_MASK) PDP10.opHLL.call(this, op);
+    var dst = this.readWord(this.regEA);
+    this.writeWord(this.regEA, PDP10.setHR(op, dst, dst));
+    var a = op & PDP10.OPCODE.A_MASK;
+    if (a) {
+        dst = this.readWord(a);
+        this.writeWord(a, PDP10.setHR(op, dst, dst));
+    }
 };
 
 /**
@@ -2832,50 +2838,6 @@ PDP10.opHRLS = function(op)
 };
 
 /**
- * opHLLZ(0o510000)
- *
- * @this {CPUStatePDP10}
- * @param {number} op
- */
-PDP10.opHLLZ = function(op)
-{
-    this.opUndefined(op);
-};
-
-/**
- * opHLLZI(0o511000)
- *
- * @this {CPUStatePDP10}
- * @param {number} op
- */
-PDP10.opHLLZI = function(op)
-{
-    this.opUndefined(op);
-};
-
-/**
- * opHLLZM(0o512000)
- *
- * @this {CPUStatePDP10}
- * @param {number} op
- */
-PDP10.opHLLZM = function(op)
-{
-    this.opUndefined(op);
-};
-
-/**
- * opHLLZS(0o513000)
- *
- * @this {CPUStatePDP10}
- * @param {number} op
- */
-PDP10.opHLLZS = function(op)
-{
-    this.opUndefined(op);
-};
-
-/**
  * opHRLZ(0o514000)
  *
  * @this {CPUStatePDP10}
@@ -2920,50 +2882,6 @@ PDP10.opHRLZS = function(op)
 };
 
 /**
- * opHLLO(0o520000)
- *
- * @this {CPUStatePDP10}
- * @param {number} op
- */
-PDP10.opHLLO = function(op)
-{
-    this.opUndefined(op);
-};
-
-/**
- * opHLLOI(0o521000)
- *
- * @this {CPUStatePDP10}
- * @param {number} op
- */
-PDP10.opHLLOI = function(op)
-{
-    this.opUndefined(op);
-};
-
-/**
- * opHLLOM(0o522000)
- *
- * @this {CPUStatePDP10}
- * @param {number} op
- */
-PDP10.opHLLOM = function(op)
-{
-    this.opUndefined(op);
-};
-
-/**
- * opHLLOS(0o523000)
- *
- * @this {CPUStatePDP10}
- * @param {number} op
- */
-PDP10.opHLLOS = function(op)
-{
-    this.opUndefined(op);
-};
-
-/**
  * opHRLO(0o524000)
  *
  * @this {CPUStatePDP10}
@@ -3003,50 +2921,6 @@ PDP10.opHRLOM = function(op)
  * @param {number} op
  */
 PDP10.opHRLOS = function(op)
-{
-    this.opUndefined(op);
-};
-
-/**
- * opHLLE(0o530000)
- *
- * @this {CPUStatePDP10}
- * @param {number} op
- */
-PDP10.opHLLE = function(op)
-{
-    this.opUndefined(op);
-};
-
-/**
- * opHLLEI(0o531000)
- *
- * @this {CPUStatePDP10}
- * @param {number} op
- */
-PDP10.opHLLEI = function(op)
-{
-    this.opUndefined(op);
-};
-
-/**
- * opHLLEM(0o532000)
- *
- * @this {CPUStatePDP10}
- * @param {number} op
- */
-PDP10.opHLLEM = function(op)
-{
-    this.opUndefined(op);
-};
-
-/**
- * opHLLES(0o533000)
- *
- * @this {CPUStatePDP10}
- * @param {number} op
- */
-PDP10.opHLLES = function(op)
 {
     this.opUndefined(op);
 };
@@ -4354,6 +4228,56 @@ PDP10.opUndefined = function(op)
     this.advancePC(-1);
     this.stopCPU();
 };
+
+/**
+ * setHR(op, dst, src)
+ *
+ * @param {number} op
+ * @param {number} dst (36-bit value whose 18-bit right half is either preserved or modified)
+ * @param {number} src (36-bit value used to determine the sign extension, if any, for the right half of dst)
+ * @return {number} (updated dst)
+ */
+PDP10.setHR = function(op, dst, src)
+{
+    switch(op & 0o600) {
+    case 0o000:
+        dst = (dst & PDP10.WORD_MASK);
+        break;
+    case 0o200:
+        dst = 0;
+        break;
+    case 0o400:
+        dst = PDP10.WORD_MASK;
+        break;
+    case 0o600:
+        dst = (src > PDP10.MAX_POS? PDP10.WORD_MASK : 0);
+        break;
+    }
+    return dst;
+};
+
+/*
+ * If we want the basic half-word operations to handle all the sub-operations; ie:
+ *
+ *      None
+ *      Zero-extend
+ *      One-extend
+ *      Sign-extend
+ *
+ * then we need to alias all the sub-functions to the corresponding primary functions.
+ */
+PDP10.opHLLZ    = PDP10.opHLL;
+PDP10.opHLLZI   = PDP10.opHLLI;
+PDP10.opHLLZM   = PDP10.opHLLM;
+PDP10.opHLLZS   = PDP10.opHLLS;
+PDP10.opHLLO    = PDP10.opHLL;
+PDP10.opHLLOI   = PDP10.opHLLI;
+PDP10.opHLLOM   = PDP10.opHLLM;
+PDP10.opHLLOS   = PDP10.opHLLS;
+PDP10.opHLLE    = PDP10.opHLL;
+PDP10.opHLLEI   = PDP10.opHLLI;
+PDP10.opHLLEM   = PDP10.opHLLM;
+PDP10.opHLLES   = PDP10.opHLLS;
 
 PDP10.aOpXXX_KA10 = [
     PDP10.opUUO,                // 0o000xxx
