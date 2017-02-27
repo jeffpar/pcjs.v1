@@ -268,6 +268,23 @@ class Web {
     /**
      * parseMemoryResource(sURL, sData)
      *
+     * This converts a variety of JSON-style data streams into an Object with the following properties:
+     *
+     *      aBytes
+     *      aSymbols
+     *      addrLoad
+     *      addrExec
+     *
+     * If the source data contains a 'bytes' array, it's passed through to 'aBytes'; alternatively, if
+     * it contains a 'words' array, the values are converted from 16-bit to 8-bit and stored in 'aBytes',
+     * and if it contains a 'longs' array, the values are converted from 32-bit longs into bytes and
+     * stored in 'aBytes'.
+     *
+     * Alternatively, if the source data contains a 'data' array, we simply pass that through to the output
+     * object as:
+     *
+     *      aData
+     *
      * @param {string} sURL
      * @param {string} sData
      * @return {Object|null} (resource)
@@ -315,8 +332,8 @@ class Web {
                  *
                  *      ["unrecognized disk path: test.img"]
                  */
-                if (sData.indexOf("0x") < 0 && sData.substr(0, 2) != "[\"") {
-                    data = JSON.parse(sData.replace(/([a-z]+):/gm, "\"$1\":").replace(/\/\/[^\n]*/gm, ""));
+                if (sData.indexOf("0x") < 0 && sData.indexOf("0o") < 0 && sData.substr(0, 2) != '["') {
+                    data = JSON.parse(sData.replace(/([a-z]+):/gm, '"$1":').replace(/\/\/[^\n]*/gm, ""));
                 } else {
                     data = eval("(" + sData + ")");
                 }
@@ -338,7 +355,7 @@ class Web {
                         Component.assert(!(a[i] & ~0xffff));
                     }
                 }
-                else if (a = data['data']) {
+                else if (a = data['longs']) {
                     /*
                      * Convert all dwords (longs) into bytes
                      */
@@ -350,20 +367,25 @@ class Web {
                         resource.aBytes[ib++] = (a[i] >> 24) & 0xff;
                     }
                 }
+                else if (a = data['data']) {
+                    resource.aData = a;
+                }
                 else {
                     resource.aBytes = data;
                 }
 
+                if (resource.aBytes) {
+                    if (!resource.aBytes.length) {
+                        Component.error("Empty resource: " + sURL);
+                        resource = null;
+                    }
+                    else if (resource.aBytes.length == 1) {
+                        Component.error(resource.aBytes[0]);
+                        resource = null;
+                    }
+                }
                 resource.aSymbols = data['symbols'];
 
-                if (!resource.aBytes.length) {
-                    Component.error("Empty resource: " + sURL);
-                    resource = null;
-                }
-                else if (resource.aBytes.length == 1) {
-                    Component.error(resource.aBytes[0]);
-                    resource = null;
-                }
             } catch (e) {
                 Component.error("Resource data error (" + sURL + "): " + e.message);
                 resource = null;

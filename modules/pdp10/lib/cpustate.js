@@ -344,10 +344,10 @@ class CPUStatePDP10 extends CPUPDP10 {
         }
 
         /*
-         * Bits 0-22 (I,X,Y) contain what we call a "reference address" (R), which is used to calculate the
-         * "effective address" (E).  To determine E from R, we must extract I, X, and Y from R, set E to Y,
-         * then add [X] to E if X is non-zero.  If I is zero, then we're done; otherwise, we must set R to [E]
-         * and repeat the process.
+         * Bits 0-22 (I,X,Y) contain what we call a "reference address" (R), which is used to calculate an
+         * 18-bit "effective address" (E).  To determine E from R, we must extract I, X, and Y from R, set E
+         * to Y, then add [X] to E if X is non-zero.  If I is zero, then we're done; otherwise, we must set R
+         * to [E] and repeat the process.
          *
          * However, we don't actually repeat the process immediately; we need to treat each indirection as a
          * separate decoding step, to ensure that the emulator can "breathe" periodically.  So instead, we
