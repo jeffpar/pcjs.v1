@@ -53,9 +53,9 @@ PDP10.opKA10 = function(op)
 };
 
 /**
- * opUUO(0o0xx000): Unimplemented User Operation
+ * opUUO(0o0NN000): Unimplemented User Operation
  *
- *  From the DEC PDP-10 System Reference Manual (May 1968), p. 2-64:
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-64:
  *
  *      Store the instruction code, A and the effective address E in bits 0-8, 9-12 and 18-35 respectively of
  *      location 40; clear bits 13-17.  Execute the instruction contained in location 41.  The original contents
@@ -85,7 +85,7 @@ PDP10.opUUO = function(op)
 /**
  * opUFA(0o130000): Unnormalized Floating Add
  *
- *  From the DEC PDP-10 System Reference Manual (May 1968), p. 2-37:
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-37:
  *
  *      Floating add the contents of location E to AC.  If the double length fraction in the sum is zero, clear
  *      accumulator A+1.  Otherwise normalize the sum only if the magnitude of its fractional part is >= 1, and place
@@ -111,7 +111,7 @@ PDP10.opUFA = function(op)
 /**
  * opDFN(0o131000): Double Floating Negate
  *
- *  From the DEC PDP-10 System Reference Manual (May 1968), p. 2-37:
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-37:
  *
  *      Negate the double length floating point number composed of the contents of AC and location E with AC on the left.
  *      Do this by taking the twos complement of the number whose sign is AC bit 0, whose exponent is in AC bits 1-8, and
@@ -130,7 +130,7 @@ PDP10.opDFN = function(op)
 /**
  * opFSC(0o132000): Floating Scale
  *
- *  From the DEC PDP-10 System Reference Manual (May 1968), p. 2-34:
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-34:
  *
  *      If the fractional part of AC is zero, clear AC.  Otherwise add the scale factor given by E to the exponent part
  *      of AC (thus multiplying AC by 2^E), normalize the resulting word bringing 0s into bit positions vacated at the
@@ -162,7 +162,7 @@ PDP10.opFSC = function(op)
 /**
  * opIBP(0o133000): Increment Byte Pointer
  *
- *  From the DEC PDP-10 System Reference Manual (May 1968), p. 2-16:
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-16:
  *
  *      Increment the byte pointer in location E as explained above.
  *
@@ -2653,7 +2653,7 @@ PDP10.opSETOB = function(op)
 /**
  * opHLL(0o500000): Half Word Left to Left
  *
- *  From the DEC PDP-10 System Reference Manual (May 1968), p. 2-3:
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-3:
  *
  *      Move the left half of the source word specified by M to the left half of the specified destination.
  *      The source and the destination right half are unaffected; the original contents of the destination are lost.
@@ -2668,17 +2668,19 @@ PDP10.opHLL = function(op)
     var a = op & PDP10.OPCODE.A_MASK;
     var src = this.readWord(this.regEA);
     var dst = this.readWord(a);
-    dst = (dst & PDP10.RHWORD_MASK) + (src - (src & PDP10.RHWORD_MASK));
+    dst = (dst & PDP10.WORD_MASK) + (src - (src & PDP10.WORD_MASK));
     this.writeWord(a, dst);
 };
 
 /**
- * opHLLI(0o501000)
+ * opHLLI(0o501000): Half Word Left to Left, Immediate
  *
- *  From the DEC PDP-10 System Reference Manual (May 1968), p. 2-3:
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-3:
  *
  *      Move the left half of the source word specified by M to the left half of the specified destination.
  *      The source and the destination right half are unaffected; the original contents of the destination are lost.
+ *
+ *      SIDEBAR: HLLI merely clears AC left.
  *
  * For HLLI, the source is 0,E and the destination is [A].  But since this is a left-half-only operation, src is
  * effectively 0.
@@ -2690,14 +2692,14 @@ PDP10.opHLLI = function(op)
 {
     var a = op & PDP10.OPCODE.A_MASK;
     var dst = this.readWord(a);
-    dst = (dst & PDP10.RHWORD_MASK);
+    dst = (dst & PDP10.WORD_MASK);
     this.writeWord(a, dst);
 };
 
 /**
- * opHLLM(0o502000)
+ * opHLLM(0o502000): Half Word Left to Left, Memory
  *
- *  From the DEC PDP-10 System Reference Manual (May 1968), p. 2-3:
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-3:
  *
  *      Move the left half of the source word specified by M to the left half of the specified destination.
  *      The source and the destination right half are unaffected; the original contents of the destination are lost.
@@ -2712,19 +2714,19 @@ PDP10.opHLLM = function(op)
     var a = op & PDP10.OPCODE.A_MASK;
     var src = this.readWord(a);
     var dst = this.readWord(this.regEA);
-    dst = (dst & PDP10.RHWORD_MASK) + (src - (src & PDP10.RHWORD_MASK));
+    dst = (dst & PDP10.WORD_MASK) + (src - (src & PDP10.WORD_MASK));
     this.writeWord(this.regEA, dst);
 };
 
 /**
- * opHLLS(0o503000)
+ * opHLLS(0o503000): Half Word Left to Left, Self
  *
- *  From the DEC PDP-10 System Reference Manual (May 1968), p. 2-3:
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-3:
  *
  *      Move the left half of the source word specified by M to the left half of the specified destination.
  *      The source and the destination right half are unaffected; the original contents of the destination are lost.
  *
- *      If A is zero, HLLS is a no-op, otherwise it is equivalent to HLL.
+ *      SIDEBAR: If A is zero, HLLS is a no-op, otherwise it is equivalent to HLL.
  *
  * For HLLS, the source is [E] and the destination is [E] (and also [A] if A is non-zero).
  *
@@ -2733,53 +2735,100 @@ PDP10.opHLLM = function(op)
  */
 PDP10.opHLLS = function(op)
 {
-    if (op & PDP10.OPCODE.A_MASK) {
-        PDP10.opHLL.call(this, op);
-    }
+    if (op & PDP10.OPCODE.A_MASK) PDP10.opHLL.call(this, op);
 };
 
 /**
- * opHRL(0o504000)
+ * opHRL(0o504000): Half Word Right to Left
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-4:
+ *
+ *      Move the right half of the source word specified by M to the left half of the specified destination.
+ *      The source and the destination right half are unaffected; the original contents of the destination left
+ *      half are lost.
+ *
+ * For HRL, the source is [E] and the destination is [A].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
  */
 PDP10.opHRL = function(op)
 {
-    this.opUndefined(op);
+    var a = op & PDP10.OPCODE.A_MASK;
+    var src = this.readWord(this.regEA) & PDP10.WORD_MASK;
+    var dst = this.readWord(a);
+    dst = (dst & PDP10.WORD_MASK) + src * PDP10.WORD_SHIFT;
+    this.writeWord(a, dst);
 };
 
 /**
- * opHRLI(0o505000)
+ * opHRLI(0o505000): Half Word Right to Left, Immediate
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-4:
+ *
+ *      Move the right half of the source word specified by M to the left half of the specified destination.
+ *      The source and the destination right half are unaffected; the original contents of the destination left
+ *      half are lost.
+ *
+ * For HRLI, the source is 0,E and the destination is [A].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
  */
 PDP10.opHRLI = function(op)
 {
-    this.opUndefined(op);
+    var a = op & PDP10.OPCODE.A_MASK;
+    var dst = this.readWord(a);
+    dst = (dst & PDP10.WORD_MASK) + this.regEA * PDP10.WORD_SHIFT;
+    this.writeWord(a, dst);
 };
 
 /**
- * opHRLM(0o506000)
+ * opHRLM(0o506000): Half Word Right to Left, Memory
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-4:
+ *
+ *      Move the right half of the source word specified by M to the left half of the specified destination.
+ *      The source and the destination right half are unaffected; the original contents of the destination left
+ *      half are lost.
+ *
+ * For HRLM, the source is [A] and the destination is [E].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
  */
 PDP10.opHRLM = function(op)
 {
-    this.opUndefined(op);
+    var a = op & PDP10.OPCODE.A_MASK;
+    var src = this.readWord(a) & PDP10.WORD_MASK;
+    var dst = this.readWord(this.regEA);
+    dst = (dst & PDP10.WORD_MASK) + src * PDP10.WORD_SHIFT;
+    this.writeWord(this.regEA, dst);
 };
 
 /**
- * opHRLS(0o507000)
+ * opHRLS(0o507000): Half Word Right to Left, Self
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-4:
+ *
+ *      Move the right half of the source word specified by M to the left half of the specified destination.
+ *      The source and the destination right half are unaffected; the original contents of the destination left
+ *      half are lost.
+ *
+ * For HRLS, the source is [E] and the destination is [E] (and also [A] if A is non-zero).
  *
  * @this {CPUStatePDP10}
  * @param {number} op
  */
 PDP10.opHRLS = function(op)
 {
-    this.opUndefined(op);
+    var dst = this.readWord(this.regEA) & PDP10.WORD_MASK;
+    this.writeWord(this.regEA, dst + dst * PDP10.WORD_SHIFT);
+    var a = op & PDP10.OPCODE.A_MASK;
+    if (a) {
+        dst = this.readWord(a) & PDP10.WORD_MASK;
+        this.writeWord(a, dst + dst * PDP10.WORD_SHIFT);
+    }
 };
 
 /**
@@ -3047,91 +3096,183 @@ PDP10.opHRLES = function(op)
 };
 
 /**
- * opHRR(0o540000)
+ * opHRR(0o540000): Half Word Right to Right
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-6:
+ *
+ *      Move the right half of the source word specified by M to the right half of the specified destination.
+ *      The source and the destination left half are unaffected; the original contents of the destination right
+ *      half are lost.
+ *
+ * For HRR, the source is [E] and the destination is [A].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
  */
 PDP10.opHRR = function(op)
 {
-    this.opUndefined(op);
+    var a = op & PDP10.OPCODE.A_MASK;
+    var src = this.readWord(this.regEA) & PDP10.WORD_MASK;
+    var dst = this.readWord(a);
+    dst = (dst - (dst & PDP10.WORD_MASK)) + src;
+    this.writeWord(a, dst);
 };
 
 /**
- * opHRRI(0o541000)
+ * opHRRI(0o541000): Half Word Right to Right, Immediate
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-6:
+ *
+ *      Move the right half of the source word specified by M to the right half of the specified destination.
+ *      The source and the destination left half are unaffected; the original contents of the destination right
+ *      half are lost.
+ *
+ * For HRRI, the source is 0,E and the destination is [A].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
  */
 PDP10.opHRRI = function(op)
 {
-    this.opUndefined(op);
+    var a = op & PDP10.OPCODE.A_MASK;
+    var dst = this.readWord(a);
+    dst = (dst - (dst & PDP10.WORD_MASK)) + this.regEA;
+    this.writeWord(a, dst);
 };
 
 /**
- * opHRRM(0o542000)
+ * opHRRM(0o542000): Half Word Right to Right, Memory
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-6:
+ *
+ *      Move the right half of the source word specified by M to the right half of the specified destination.
+ *      The source and the destination left half are unaffected; the original contents of the destination right
+ *      half are lost.
+ *
+ * For HRRM, the source is [A] and the destination is [E].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
  */
 PDP10.opHRRM = function(op)
 {
-    this.opUndefined(op);
+    var a = op & PDP10.OPCODE.A_MASK;
+    var src = this.readWord(a) & PDP10.WORD_MASK;
+    var dst = this.readWord(this.regEA);
+    dst = (dst - (dst & PDP10.WORD_MASK)) + src;
+    this.writeWord(this.regEA, dst);
 };
 
 /**
- * opHRRS(0o543000)
+ * opHRRS(0o543000): Half Word Right to Right, Self
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-6:
+ *
+ *      Move the right half of the source word specified by M to the right half of the specified destination.
+ *      The source and the destination left half are unaffected; the original contents of the destination right
+ *      half are lost.
+ *
+ *      SIDEBAR: If A is zero, HRRS is a no-op; otherwise it is equivalent to HRR.
+ *
+ * For HRRS, the source is [E] and the destination is [E] (and also [A] if A is non-zero).
  *
  * @this {CPUStatePDP10}
  * @param {number} op
  */
 PDP10.opHRRS = function(op)
 {
-    this.opUndefined(op);
+    if (op & PDP10.OPCODE.A_MASK) PDP10.opHRR.call(this, op);
 };
 
 /**
- * opHLR(0o544000)
+ * opHLR(0o544000): Half Word Left to Right
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-7:
+ *
+ *      Move the left half of the source word specified by M to the right half of the specified destination.
+ *      The source and the destination left half are unaffected; the original contents of the destination right half are lost.
+ *
+ * For HLR, the source is [E] and the destination is [A].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
  */
 PDP10.opHLR = function(op)
 {
-    this.opUndefined(op);
+    var a = op & PDP10.OPCODE.A_MASK;
+    var src = (this.readWord(this.regEA) / PDP10.WORD_SHIFT)|0;
+    var dst = this.readWord(a);
+    dst = (dst - (dst & PDP10.WORD_MASK)) + src;
+    this.writeWord(a, dst);
 };
 
 /**
- * opHLRI(0o545000)
+ * opHLRI(0o545000): Half Word Left to Right, Immediate
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-7:
+ *
+ *      Move the left half of the source word specified by M to the right half of the specified destination.
+ *      The source and the destination left half are unaffected; the original contents of the destination right half are lost.
+ *
+ *      SIDEBAR: HLRI merely clears AC right.
+ *
+ * For HLRI, the source is 0,E and the destination is [A].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
  */
 PDP10.opHLRI = function(op)
 {
-    this.opUndefined(op);
+    var a = op & PDP10.OPCODE.A_MASK;
+    var dst = this.readWord(a);
+    dst = (dst - (dst & PDP10.WORD_MASK));
+    this.writeWord(a, dst);
 };
 
 /**
- * opHLRM(0o546000)
+ * opHLRM(0o546000): Half Word Left to Right, Memory
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-7:
+ *
+ *      Move the left half of the source word specified by M to the right half of the specified destination.
+ *      The source and the destination left half are unaffected; the original contents of the destination right half are lost.
+ *
+ * For HLRM, the source is [A] and the destination is [E].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
  */
 PDP10.opHLRM = function(op)
 {
-    this.opUndefined(op);
+    var a = op & PDP10.OPCODE.A_MASK;
+    var src = (this.readWord(a) / PDP10.WORD_SHIFT)|0;
+    var dst = this.readWord(this.regEA);
+    dst = (dst - (dst & PDP10.WORD_MASK)) + src;
+    this.writeWord(this.regEA, dst);
 };
 
 /**
- * opHLRS(0o547000)
+ * opHLRS(0o547000): Half Word Left to Right, Self
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-7:
+ *
+ *      Move the left half of the source word specified by M to the right half of the specified destination.
+ *      The source and the destination left half are unaffected; the original contents of the destination right half are lost.
+ *
+ * For HLRS, the source is [E] and the destination is [E] (and also [A] if A is non-zero).
  *
  * @this {CPUStatePDP10}
  * @param {number} op
  */
 PDP10.opHLRS = function(op)
 {
-    this.opUndefined(op);
+    var dst = this.readWord(this.regEA);
+    this.writeWord(this.regEA, (dst & PDP10.WORD_MASK) + ((dst / PDP10.WORD_SHIFT)|0));
+    var a = op & PDP10.OPCODE.A_MASK;
+    if (a) {
+        dst = this.readWord(a);
+        this.writeWord(a, (dst & PDP10.WORD_MASK) + ((dst / PDP10.WORD_SHIFT)|0));
+    }
 };
 
 /**
