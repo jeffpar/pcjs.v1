@@ -2853,8 +2853,7 @@ PDP10.opHRR = function(op)
     var a = op & PDP10.OPCODE.A_MASK;
     var src = this.readWord(this.regEA) & PDP10.WORD_MASK;
     var dst = this.readWord(a);
-    dst = (dst - (dst & PDP10.WORD_MASK)) + src;
-    this.writeWord(a, dst);
+    this.writeWord(a, PDP10.getHL(op, dst, src) + src);
 };
 
 /**
@@ -2875,8 +2874,7 @@ PDP10.opHRRI = function(op)
 {
     var a = op & PDP10.OPCODE.A_MASK;
     var dst = this.readWord(a);
-    dst = (dst - (dst & PDP10.WORD_MASK)) + this.regEA;
-    this.writeWord(a, dst);
+    this.writeWord(a, PDP10.getHL(op, dst, this.regEA) + this.regEA);
 };
 
 /**
@@ -2898,8 +2896,7 @@ PDP10.opHRRM = function(op)
     var a = op & PDP10.OPCODE.A_MASK;
     var src = this.readWord(a) & PDP10.WORD_MASK;
     var dst = this.readWord(this.regEA);
-    dst = (dst - (dst & PDP10.WORD_MASK)) + src;
-    this.writeWord(this.regEA, dst);
+    this.writeWord(this.regEA, PDP10.getHL(op, dst, src) + src);
 };
 
 /**
@@ -2920,7 +2917,13 @@ PDP10.opHRRM = function(op)
  */
 PDP10.opHRRS = function(op)
 {
-    if (op & PDP10.OPCODE.A_MASK) PDP10.opHRR.call(this, op);
+    var dst = this.readWord(this.regEA);
+    this.writeWord(this.regEA, PDP10.setHL(op, dst, dst));
+    var a = op & PDP10.OPCODE.A_MASK;
+    if (a) {
+        dst = this.readWord(a);
+        this.writeWord(a, PDP10.setHL(op, dst, dst));
+    }
 };
 
 /**
@@ -2941,8 +2944,7 @@ PDP10.opHLR = function(op)
     var a = op & PDP10.OPCODE.A_MASK;
     var src = (this.readWord(this.regEA) / PDP10.WORD_SHIFT)|0;
     var dst = this.readWord(a);
-    dst = (dst - (dst & PDP10.WORD_MASK)) + src;
-    this.writeWord(a, dst);
+    this.writeWord(a, PDP10.getHL(op, dst, src) + src);
 };
 
 /**
@@ -2964,8 +2966,7 @@ PDP10.opHLRI = function(op)
 {
     var a = op & PDP10.OPCODE.A_MASK;
     var dst = this.readWord(a);
-    dst = (dst - (dst & PDP10.WORD_MASK));
-    this.writeWord(a, dst);
+    this.writeWord(a, PDP10.getHL(op, dst, 0));
 };
 
 /**
@@ -2986,8 +2987,7 @@ PDP10.opHLRM = function(op)
     var a = op & PDP10.OPCODE.A_MASK;
     var src = (this.readWord(a) / PDP10.WORD_SHIFT)|0;
     var dst = this.readWord(this.regEA);
-    dst = (dst - (dst & PDP10.WORD_MASK)) + src;
-    this.writeWord(this.regEA, dst);
+    this.writeWord(this.regEA, PDP10.getHL(op, dst, src) + src);
 };
 
 /**
@@ -3006,276 +3006,14 @@ PDP10.opHLRM = function(op)
 PDP10.opHLRS = function(op)
 {
     var dst = this.readWord(this.regEA);
-    this.writeWord(this.regEA, (dst & PDP10.WORD_MASK) + ((dst / PDP10.WORD_SHIFT)|0));
+    var src = (dst / PDP10.WORD_SHIFT)|0;
+    this.writeWord(this.regEA, PDP10.getHL(op, dst, src) + src);
     var a = op & PDP10.OPCODE.A_MASK;
     if (a) {
         dst = this.readWord(a);
-        this.writeWord(a, (dst & PDP10.WORD_MASK) + ((dst / PDP10.WORD_SHIFT)|0));
+        src = (dst / PDP10.WORD_SHIFT)|0;
+        this.writeWord(a, PDP10.getHL(op, dst, src) + src);
     }
-};
-
-/**
- * opHRRZ(0o550000)
- *
- * @this {CPUStatePDP10}
- * @param {number} op
- */
-PDP10.opHRRZ = function(op)
-{
-    this.opUndefined(op);
-};
-
-/**
- * opHRRZI(0o551000)
- *
- * @this {CPUStatePDP10}
- * @param {number} op
- */
-PDP10.opHRRZI = function(op)
-{
-    this.opUndefined(op);
-};
-
-/**
- * opHRRZM(0o552000)
- *
- * @this {CPUStatePDP10}
- * @param {number} op
- */
-PDP10.opHRRZM = function(op)
-{
-    this.opUndefined(op);
-};
-
-/**
- * opHRRZS(0o553000)
- *
- * @this {CPUStatePDP10}
- * @param {number} op
- */
-PDP10.opHRRZS = function(op)
-{
-    this.opUndefined(op);
-};
-
-/**
- * opHLRZ(0o554000)
- *
- * @this {CPUStatePDP10}
- * @param {number} op
- */
-PDP10.opHLRZ = function(op)
-{
-    this.opUndefined(op);
-};
-
-/**
- * opHLRZI(0o555000)
- *
- * @this {CPUStatePDP10}
- * @param {number} op
- */
-PDP10.opHLRZI = function(op)
-{
-    this.opUndefined(op);
-};
-
-/**
- * opHLRZM(0o556000)
- *
- * @this {CPUStatePDP10}
- * @param {number} op
- */
-PDP10.opHLRZM = function(op)
-{
-    this.opUndefined(op);
-};
-
-/**
- * opHLRZS(0o557000)
- *
- * @this {CPUStatePDP10}
- * @param {number} op
- */
-PDP10.opHLRZS = function(op)
-{
-    this.opUndefined(op);
-};
-
-/**
- * opHRRO(0o560000)
- *
- * @this {CPUStatePDP10}
- * @param {number} op
- */
-PDP10.opHRRO = function(op)
-{
-    this.opUndefined(op);
-};
-
-/**
- * opHRROI(0o561000)
- *
- * @this {CPUStatePDP10}
- * @param {number} op
- */
-PDP10.opHRROI = function(op)
-{
-    this.opUndefined(op);
-};
-
-/**
- * opHRROM(0o562000)
- *
- * @this {CPUStatePDP10}
- * @param {number} op
- */
-PDP10.opHRROM = function(op)
-{
-    this.opUndefined(op);
-};
-
-/**
- * opHRROS(0o563000)
- *
- * @this {CPUStatePDP10}
- * @param {number} op
- */
-PDP10.opHRROS = function(op)
-{
-    this.opUndefined(op);
-};
-
-/**
- * opHLRO(0o564000)
- *
- * @this {CPUStatePDP10}
- * @param {number} op
- */
-PDP10.opHLRO = function(op)
-{
-    this.opUndefined(op);
-};
-
-/**
- * opHLROI(0o565000)
- *
- * @this {CPUStatePDP10}
- * @param {number} op
- */
-PDP10.opHLROI = function(op)
-{
-    this.opUndefined(op);
-};
-
-/**
- * opHLROM(0o566000)
- *
- * @this {CPUStatePDP10}
- * @param {number} op
- */
-PDP10.opHLROM = function(op)
-{
-    this.opUndefined(op);
-};
-
-/**
- * opHLROS(0o567000)
- *
- * @this {CPUStatePDP10}
- * @param {number} op
- */
-PDP10.opHLROS = function(op)
-{
-    this.opUndefined(op);
-};
-
-/**
- * opHRRE(0o570000)
- *
- * @this {CPUStatePDP10}
- * @param {number} op
- */
-PDP10.opHRRE = function(op)
-{
-    this.opUndefined(op);
-};
-
-/**
- * opHRREI(0o571000)
- *
- * @this {CPUStatePDP10}
- * @param {number} op
- */
-PDP10.opHRREI = function(op)
-{
-    this.opUndefined(op);
-};
-
-/**
- * opHRREM(0o572000)
- *
- * @this {CPUStatePDP10}
- * @param {number} op
- */
-PDP10.opHRREM = function(op)
-{
-    this.opUndefined(op);
-};
-
-/**
- * opHRRES(0o573000)
- *
- * @this {CPUStatePDP10}
- * @param {number} op
- */
-PDP10.opHRRES = function(op)
-{
-    this.opUndefined(op);
-};
-
-/**
- * opHLRE(0o574000)
- *
- * @this {CPUStatePDP10}
- * @param {number} op
- */
-PDP10.opHLRE = function(op)
-{
-    this.opUndefined(op);
-};
-
-/**
- * opHLREI(0o575000)
- *
- * @this {CPUStatePDP10}
- * @param {number} op
- */
-PDP10.opHLREI = function(op)
-{
-    this.opUndefined(op);
-};
-
-/**
- * opHLREM(0o576000)
- *
- * @this {CPUStatePDP10}
- * @param {number} op
- */
-PDP10.opHLREM = function(op)
-{
-    this.opUndefined(op);
-};
-
-/**
- * opHLRES(0o577000)
- *
- * @this {CPUStatePDP10}
- * @param {number} op
- */
-PDP10.opHLRES = function(op)
-{
-    this.opUndefined(op);
 };
 
 /**
@@ -4095,6 +3833,61 @@ PDP10.opUndefined = function(op)
 };
 
 /**
+ * getHL(op, dst, src)
+ *
+ * Used by callers to obtain HL (half-word left) with HR (half-word right) zeroed.
+ *
+ * @param {number} op
+ * @param {number} dst (36-bit value whose 18-bit left half is either preserved or modified)
+ * @param {number} src (18-bit value used to determine the sign extension, if any, for the left half of dst)
+ * @return {number} (updated dst)
+ */
+PDP10.getHL = function(op, dst, src)
+{
+    switch(op & 0o600) {
+    case 0o000:
+        dst -= (dst & PDP10.WORD_MASK);
+        break;
+    case 0o200:
+        dst = 0;
+        break;
+    case 0o400:
+        dst = (PDP10.WORD_MASK * PDP10.WORD_SHIFT);
+        break;
+    case 0o600:
+        dst = (src > PDP10.MAX_POS18? (PDP10.WORD_MASK * PDP10.WORD_SHIFT) : 0);
+        break;
+    }
+    return dst;
+};
+
+/**
+ * setHL(op, dst, src)
+ *
+ * Used by callers to obtain HL (half-word left) with HR (half-word right) preserved.
+ *
+ * @param {number} op
+ * @param {number} dst (36-bit value whose 18-bit left half is either preserved or modified)
+ * @param {number} src (18-bit value used to determine the sign extension, if any, for the left half of dst)
+ * @return {number} (updated dst)
+ */
+PDP10.setHL = function(op, dst, src)
+{
+    if (op &= 0o600) {
+        dst &= PDP10.WORD_MASK;
+        switch(op) {
+        case 0o400:
+            dst += (PDP10.WORD_MASK * PDP10.WORD_SHIFT);
+            break;
+        case 0o600:
+            dst += (src > PDP10.MAX_POS18? (PDP10.WORD_MASK * PDP10.WORD_SHIFT) : 0);
+            break;
+        }
+    }
+    return dst;
+};
+
+/**
  * getHR(op, dst, src)
  *
  * Used by callers to obtain HR (half-word right) with HL (half-word left) zeroed.
@@ -4183,6 +3976,30 @@ PDP10.opHRLE    = PDP10.opHRL;
 PDP10.opHRLEI   = PDP10.opHRLI;
 PDP10.opHRLEM   = PDP10.opHRLM;
 PDP10.opHRLES   = PDP10.opHRLS;
+PDP10.opHRRZ    = PDP10.opHRR;
+PDP10.opHRRZI   = PDP10.opHRRI;
+PDP10.opHRRZM   = PDP10.opHRRM;
+PDP10.opHRRZS   = PDP10.opHRRS;
+PDP10.opHRRO    = PDP10.opHRR;
+PDP10.opHRROI   = PDP10.opHRRI;
+PDP10.opHRROM   = PDP10.opHRRM;
+PDP10.opHRROS   = PDP10.opHRRS;
+PDP10.opHRRE    = PDP10.opHRR;
+PDP10.opHRREI   = PDP10.opHRRI;
+PDP10.opHRREM   = PDP10.opHRRM;
+PDP10.opHRRES   = PDP10.opHRRS;
+PDP10.opHLRZ    = PDP10.opHLR;
+PDP10.opHLRZI   = PDP10.opHLRI;
+PDP10.opHLRZM   = PDP10.opHLRM;
+PDP10.opHLRZS   = PDP10.opHLRS;
+PDP10.opHLRO    = PDP10.opHLR;
+PDP10.opHLROI   = PDP10.opHLRI;
+PDP10.opHLROM   = PDP10.opHLRM;
+PDP10.opHLROS   = PDP10.opHLRS;
+PDP10.opHLRE    = PDP10.opHLR;
+PDP10.opHLREI   = PDP10.opHLRI;
+PDP10.opHLREM   = PDP10.opHLRM;
+PDP10.opHLRES   = PDP10.opHLRS;
 
 PDP10.aOpXXX_KA10 = [
     PDP10.opUUO,                // 0o000xxx

@@ -102,6 +102,7 @@ var PDP10 = {
     DATA_LIMIT:     Math.pow(2, 36),
     WORD_SHIFT:     Math.pow(2, 18),
     WORD_MASK:      0o777777,
+    MAX_POS18:      Math.pow(2, 17) - 1,
     MAX_POS:        Math.pow(2, 35) - 1,
 
     /*
