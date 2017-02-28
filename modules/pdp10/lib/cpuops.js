@@ -2668,8 +2668,7 @@ PDP10.opHLL = function(op)
     var a = op & PDP10.OPCODE.A_MASK;
     var src = this.readWord(this.regEA);
     var dst = this.readWord(a);
-    dst = PDP10.setHR(op, dst, src) + (src - (src & PDP10.WORD_MASK));
-    this.writeWord(a, dst);
+    this.writeWord(a, PDP10.getHR(op, dst, src) + (src - (src & PDP10.WORD_MASK)));
 };
 
 /**
@@ -2692,8 +2691,7 @@ PDP10.opHLLI = function(op)
 {
     var a = op & PDP10.OPCODE.A_MASK;
     var dst = this.readWord(a);
-    dst = PDP10.setHR(op, dst, 0);
-    this.writeWord(a, dst);
+    this.writeWord(a, PDP10.getHR(op, dst, 0));
 };
 
 /**
@@ -2714,8 +2712,7 @@ PDP10.opHLLM = function(op)
     var a = op & PDP10.OPCODE.A_MASK;
     var src = this.readWord(a);
     var dst = this.readWord(this.regEA);
-    dst = PDP10.setHR(op, dst, src) + (src - (src & PDP10.WORD_MASK));
-    this.writeWord(this.regEA, dst);
+    this.writeWord(this.regEA, PDP10.getHR(op, dst, src) + (src - (src & PDP10.WORD_MASK)));
 };
 
 /**
@@ -2761,10 +2758,9 @@ PDP10.opHLLS = function(op)
 PDP10.opHRL = function(op)
 {
     var a = op & PDP10.OPCODE.A_MASK;
-    var src = this.readWord(this.regEA) & PDP10.WORD_MASK;
+    var src = (this.readWord(this.regEA) & PDP10.WORD_MASK) * PDP10.WORD_SHIFT;
     var dst = this.readWord(a);
-    dst = (dst & PDP10.WORD_MASK) + src * PDP10.WORD_SHIFT;
-    this.writeWord(a, dst);
+    this.writeWord(a, PDP10.getHR(op, dst, src) + src);
 };
 
 /**
@@ -2784,9 +2780,9 @@ PDP10.opHRL = function(op)
 PDP10.opHRLI = function(op)
 {
     var a = op & PDP10.OPCODE.A_MASK;
+    var src = this.regEA * PDP10.WORD_SHIFT;
     var dst = this.readWord(a);
-    dst = (dst & PDP10.WORD_MASK) + this.regEA * PDP10.WORD_SHIFT;
-    this.writeWord(a, dst);
+    this.writeWord(a, PDP10.getHR(op, dst, src) + src);
 };
 
 /**
@@ -2806,10 +2802,9 @@ PDP10.opHRLI = function(op)
 PDP10.opHRLM = function(op)
 {
     var a = op & PDP10.OPCODE.A_MASK;
-    var src = this.readWord(a) & PDP10.WORD_MASK;
+    var src = (this.readWord(a) & PDP10.WORD_MASK) * PDP10.WORD_SHIFT;
     var dst = this.readWord(this.regEA);
-    dst = (dst & PDP10.WORD_MASK) + src * PDP10.WORD_SHIFT;
-    this.writeWord(this.regEA, dst);
+    this.writeWord(this.regEA, PDP10.getHR(op, dst, src) + src);
 };
 
 /**
@@ -2828,145 +2823,15 @@ PDP10.opHRLM = function(op)
  */
 PDP10.opHRLS = function(op)
 {
-    var dst = this.readWord(this.regEA) & PDP10.WORD_MASK;
-    this.writeWord(this.regEA, dst + dst * PDP10.WORD_SHIFT);
+    var dst = this.readWord(this.regEA);
+    var src = (dst & PDP10.WORD_MASK) * PDP10.WORD_SHIFT;
+    this.writeWord(this.regEA, PDP10.getHR(op, dst, src) + src);
     var a = op & PDP10.OPCODE.A_MASK;
     if (a) {
-        dst = this.readWord(a) & PDP10.WORD_MASK;
-        this.writeWord(a, dst + dst * PDP10.WORD_SHIFT);
+        dst = this.readWord(a);
+        src = (dst & PDP10.WORD_MASK) * PDP10.WORD_SHIFT;
+        this.writeWord(a, PDP10.getHR(op, dst, src) + src);
     }
-};
-
-/**
- * opHRLZ(0o514000)
- *
- * @this {CPUStatePDP10}
- * @param {number} op
- */
-PDP10.opHRLZ = function(op)
-{
-    this.opUndefined(op);
-};
-
-/**
- * opHRLZI(0o515000)
- *
- * @this {CPUStatePDP10}
- * @param {number} op
- */
-PDP10.opHRLZI = function(op)
-{
-    this.opUndefined(op);
-};
-
-/**
- * opHRLZM(0o516000)
- *
- * @this {CPUStatePDP10}
- * @param {number} op
- */
-PDP10.opHRLZM = function(op)
-{
-    this.opUndefined(op);
-};
-
-/**
- * opHRLZS(0o517000)
- *
- * @this {CPUStatePDP10}
- * @param {number} op
- */
-PDP10.opHRLZS = function(op)
-{
-    this.opUndefined(op);
-};
-
-/**
- * opHRLO(0o524000)
- *
- * @this {CPUStatePDP10}
- * @param {number} op
- */
-PDP10.opHRLO = function(op)
-{
-    this.opUndefined(op);
-};
-
-/**
- * opHRLOI(0o525000)
- *
- * @this {CPUStatePDP10}
- * @param {number} op
- */
-PDP10.opHRLOI = function(op)
-{
-    this.opUndefined(op);
-};
-
-/**
- * opHRLOM(0o526000)
- *
- * @this {CPUStatePDP10}
- * @param {number} op
- */
-PDP10.opHRLOM = function(op)
-{
-    this.opUndefined(op);
-};
-
-/**
- * opHRLOS(0o527000)
- *
- * @this {CPUStatePDP10}
- * @param {number} op
- */
-PDP10.opHRLOS = function(op)
-{
-    this.opUndefined(op);
-};
-
-/**
- * opHRLE(0o534000)
- *
- * @this {CPUStatePDP10}
- * @param {number} op
- */
-PDP10.opHRLE = function(op)
-{
-    this.opUndefined(op);
-};
-
-/**
- * opHRLEI(0o535000)
- *
- * @this {CPUStatePDP10}
- * @param {number} op
- */
-PDP10.opHRLEI = function(op)
-{
-    this.opUndefined(op);
-};
-
-/**
- * opHRLEM(0o536000)
- *
- * @this {CPUStatePDP10}
- * @param {number} op
- */
-PDP10.opHRLEM = function(op)
-{
-    this.opUndefined(op);
-};
-
-/**
- * opHRLES(0o537000)
- *
- * @this {CPUStatePDP10}
- * @param {number} op
- */
-PDP10.opHRLES = function(op)
-{
-    this.opUndefined(op);
 };
 
 /**
@@ -4230,14 +4095,16 @@ PDP10.opUndefined = function(op)
 };
 
 /**
- * setHR(op, dst, src)
+ * getHR(op, dst, src)
+ *
+ * Used by callers to obtain HR (half-word right) with HL (half-word left) zeroed.
  *
  * @param {number} op
  * @param {number} dst (36-bit value whose 18-bit right half is either preserved or modified)
  * @param {number} src (36-bit value used to determine the sign extension, if any, for the right half of dst)
  * @return {number} (updated dst)
  */
-PDP10.setHR = function(op, dst, src)
+PDP10.getHR = function(op, dst, src)
 {
     switch(op & 0o600) {
     case 0o000:
@@ -4252,6 +4119,32 @@ PDP10.setHR = function(op, dst, src)
     case 0o600:
         dst = (src > PDP10.MAX_POS? PDP10.WORD_MASK : 0);
         break;
+    }
+    return dst;
+};
+
+/**
+ * setHR(op, dst, src)
+ *
+ * Used by callers to obtain HR (half-word right) with HL (half-word left) preserved.
+ *
+ * @param {number} op
+ * @param {number} dst (36-bit value whose 18-bit right half is either preserved or modified)
+ * @param {number} src (36-bit value used to determine the sign extension, if any, for the right half of dst)
+ * @return {number} (updated dst)
+ */
+PDP10.setHR = function(op, dst, src)
+{
+    if (op &= 0o600) {
+        dst -= (dst & PDP10.WORD_MASK);
+        switch(op) {
+        case 0o400:
+            dst += PDP10.WORD_MASK;
+            break;
+        case 0o600:
+            dst += (src > PDP10.MAX_POS? PDP10.WORD_MASK : 0);
+            break;
+        }
     }
     return dst;
 };
@@ -4278,6 +4171,18 @@ PDP10.opHLLE    = PDP10.opHLL;
 PDP10.opHLLEI   = PDP10.opHLLI;
 PDP10.opHLLEM   = PDP10.opHLLM;
 PDP10.opHLLES   = PDP10.opHLLS;
+PDP10.opHRLZ    = PDP10.opHRL;
+PDP10.opHRLZI   = PDP10.opHRLI;
+PDP10.opHRLZM   = PDP10.opHRLM;
+PDP10.opHRLZS   = PDP10.opHRLS;
+PDP10.opHRLO    = PDP10.opHRL;
+PDP10.opHRLOI   = PDP10.opHRLI;
+PDP10.opHRLOM   = PDP10.opHRLM;
+PDP10.opHRLOS   = PDP10.opHRLS;
+PDP10.opHRLE    = PDP10.opHRL;
+PDP10.opHRLEI   = PDP10.opHRLI;
+PDP10.opHRLEM   = PDP10.opHRLM;
+PDP10.opHRLES   = PDP10.opHRLS;
 
 PDP10.aOpXXX_KA10 = [
     PDP10.opUUO,                // 0o000xxx
