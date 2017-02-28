@@ -99,6 +99,7 @@ class DebuggerPDP10 extends Debugger {
              * For TEMPORARY breakpoint addresses, we set fTemporary to true, so that they can be automatically
              * cleared when they're hit.
              */
+            this.dbgAddrAcc = this.newAddr();
             this.dbgAddrNextCode = this.newAddr();
             this.dbgAddrNextData = this.newAddr();
             this.dbgAddrAssemble = this.newAddr();
@@ -2019,6 +2020,21 @@ class DebuggerPDP10 extends Debugger {
     }
 
     /**
+     * getAccOutput(iAcc)
+     *
+     * @this {DebuggerPDP10}
+     * @param {number} iAcc
+     * @return {string}
+     */
+    getAccOutput(iAcc)
+    {
+        var sReg = Str.toOct(iAcc, 2);
+        this.setAddr(this.dbgAddrAcc, iAcc);
+        sReg += '=' + this.toStrBase(this.getWord(this.dbgAddrAcc), 36) + ' ';
+        return sReg;
+    }
+
+    /**
      * getRegOutput(iReg)
      *
      * @this {DebuggerPDP10}
@@ -2043,7 +2059,9 @@ class DebuggerPDP10 extends Debugger {
      */
     getMiscDump()
     {
-        return "";
+        var sDump = "";
+        sDump += this.getRegOutput(DebuggerPDP10.REGS.PC) + this.getRegOutput(DebuggerPDP10.REGS.RA) + this.getRegOutput(DebuggerPDP10.REGS.EA);
+        return sDump;
     }
 
     /**
@@ -2055,9 +2073,11 @@ class DebuggerPDP10 extends Debugger {
      */
     getRegDump(fMisc)
     {
-        var i;
         var sDump = "";
-        sDump += this.getRegOutput(DebuggerPDP10.REGS.RA) + this.getRegOutput(DebuggerPDP10.REGS.EA);
+        for (var i = 0; i < 16; i++) {
+            if (i && !(i & 3)) sDump += '\n';
+            sDump += this.getAccOutput(i);
+        }
         if (fMisc) sDump += '\n' + this.getMiscDump();
         return sDump;
     }
