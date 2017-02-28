@@ -1585,16 +1585,26 @@ class DebuggerPDP10 extends Debugger {
                         break;
                     }
                     if (!i && aOperands.length > 1) {
-                        if (operand < 0 || operand > PDP10.OPCODE.A_MASK) {
-                            this.println("accumulator index out of range: " + match[2]);
-                            opCode = -1;
-                            break;
+                        if (opMask == PDP10.OPCODE.OPIO) {
+                            if (operand < 0 || operand > PDP10.OPCODE.IOMASK) {
+                                this.println("device code out of range: " + match[2]);
+                                opCode = -1;
+                                break;
+                            }
+                            opCode += (operand * PDP10.OPCODE.IOSHIFT);
                         }
-                        opCode += (operand << PDP10.OPCODE.A_SHIFT);
+                        else {
+                            if (operand < 0 || operand > PDP10.OPCODE.A_MASK) {
+                                this.println("accumulator address out of range: " + match[2]);
+                                opCode = -1;
+                                break;
+                            }
+                            opCode += (operand << PDP10.OPCODE.A_SHIFT);
+                        }
                         continue;
                     }
                     if (operand < 0 || operand > PDP10.OPCODE.Y_MASK) {
-                        this.println("address out of range: " + match[2]);
+                        this.println("memory address out of range: " + match[2]);
                         opCode = -1;
                         break;
                     }
@@ -1606,7 +1616,7 @@ class DebuggerPDP10 extends Debugger {
                             break;
                         }
                         if (operand < 0 || operand > PDP10.OPCODE.X_MASK) {
-                            this.println("index out of range: " + match[3]);
+                            this.println("memory index out of range: " + match[3]);
                             opCode = -1;
                             break;
                         }
@@ -3644,7 +3654,7 @@ class DebuggerPDP10 extends Debugger {
                 op = ops[sOperation];
                 this.println(Str.pad(sOperation + ":", 8) + this.toStrWord(op * Math.pow(2, 21)));
                 //
-                // The following code leveraged the disassembler to generate opcode handlers for all known opcodes.
+                // The following code leveraged the disassembler to generate opcode handlers.
                 //
                 // this.println("/**");
                 // this.println(" * op" + sOperation + "(" + this.toStrWord(op * Math.pow(2, 21)) + ")");
@@ -3654,17 +3664,18 @@ class DebuggerPDP10 extends Debugger {
                 // this.println(" */");
                 // this.println("PDP10.op" + sOperation + " = function(opCode)");
                 // this.println("{");
+                // this.println("    this.opUndefined(op);");
                 // this.println("};\n");
             }
             //
-            // The following code leveraged the disassembler to generate an opcode dispatch table for all known opcodes.
+            // The following code generated an opcode dispatch table.
             //
             // this.println("PDP10.aOpXXX = [");
             // for (opXXX = 0o000; opXXX <= 0o777; opXXX++) {
             //     sOperation = aOpXXX[opXXX];
             //     sOperation = sOperation? ("    PDP10.op" + sOperation + ",") : "    PDP10.opUndefined,";
             //     sOperation = Str.pad(sOperation, 32);
-            //     sOperation += "// " + Str.toOct(opXXX, 3, true) + "xxx yyyyyy";
+            //     sOperation += "// " + Str.toOct(opXXX, 3, true) + "xxx";
             //     this.println(sOperation);
             // }
             // this.println("];");
