@@ -337,10 +337,14 @@ class CPUStatePDP10 extends CPUPDP10 {
      */
     getOpcode()
     {
+        /*
+         * Technically, we don't REALLY need to mask regRA with R_MASK, because all regRA accesses
+         * ignore any higher opcode bits, but let's keep things tidy.
+         */
         if ((this.regRA & PDP10.OPCODE.I_BIT)) {
-            this.regRA = this.readWord(this.regEA);
+            this.regRA = this.readWord(this.regEA) & PDP10.OPCODE.R_MASK;
         } else {
-            this.regRA = this.regOP = this.readWord(this.lastPC = this.regPC);
+            this.regRA = (this.regOP = this.readWord(this.lastPC = this.regPC)) & PDP10.OPCODE.R_MASK;
         }
 
         /*

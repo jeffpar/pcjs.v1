@@ -147,13 +147,14 @@ var PDP10 = {
         OPSHIFT:    Math.pow(2, 21),    // operation shift
         IOSHIFT:    Math.pow(2, 26),    // input-output device code shift
         IOMASK:     0o177,              // input-output device code mask (after shift)
-        ACSHIFT:    Math.pow(2, 23),    // used to isolate the high 13 bits, with A starting at bit 0
+        ACSHIFT:    Math.pow(2, 23),    // used to shift down the high 13 bits, with A starting at bit 0
         A_SHIFT:    23,                 // A shift
         A_MASK:     0o17,               // A mask (after shift)
         I_BIT:      0o20000000,         // indirect bit
         X_SHIFT:    18,                 // X shift
         X_MASK:     0o17,               // X mask (after shift)
         Y_MASK:     0o777777,           // Y mask
+        R_MASK:     0o37777777,         // used to isolate the low 23 bits (I,X,Y)
         HALT:       0o5304              // operation code for HALT
     },
 
