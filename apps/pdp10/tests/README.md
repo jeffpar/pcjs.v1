@@ -23,10 +23,11 @@ are provided below.
 
 The [PDP-10 Half-Word Opcode Test](optest-v01.json) file specifies that the following words:
 
-	0o505040111111,   // HRLI   1,111111
-	0o541040444444,   // HRRI   1,444444
-	0o544100000001,   // HLR    2,1
-	0o504100000001,   // HRL    2,1
+	0o505040111111,   // HRLI    1,111111
+	0o541040444444,   // HRRI    1,444444
+	0o544100000001,   // HLR     2,1
+	0o504100000001,   // HRL     2,1
+	...
 
 should be loaded at address 0o100, and that the program counter (PC register) should be set to 0o100.  The embedded
 comments display the instructions that correspond to each word.
