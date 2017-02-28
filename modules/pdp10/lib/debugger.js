@@ -1486,7 +1486,7 @@ class DebuggerPDP10 extends Debugger {
         sLine += Str.pad(sOpCodes, 16) + sOperation;
 
         if (sComment) {
-            sLine = Str.pad(sLine, 60) + ';' + (sComment || "");
+            sLine = Str.pad(sLine, 48) + ';' + (sComment || "");
             if (!this.cpu.flags.checksum) {
                 sLine += (nSequence != null? '=' + nSequence.toString() : "");
             } else {
