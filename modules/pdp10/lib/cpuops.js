@@ -990,25 +990,59 @@ PDP10.opLSHC = function(op)
 };
 
 /**
- * opEXCH(0o250000)
+ * opEXCH(0o250000): Exchange
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-9:
+ *
+ *      Move the contents of location E to AC and move AC to location E.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
  */
 PDP10.opEXCH = function(op)
 {
-    this.opUndefined(op);
+    var acc = op & PDP10.OPCODE.A_MASK;
+    var tmp = this.readWord(acc);
+    this.writeWord(acc, this.readWord(this.regEA));
+    this.writeWord(this.regEA, tmp);
 };
 
 /**
- * opBLT(0o251000)
+ * opBLT(0o251000): Block Transfer
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-10:
+ *
+ *      Beginning at the location addressed by AC left, move words to another area of memory beginning at the
+ *      location addressed by AC right.  Continue until a word is moved to location E.  The total number of words
+ *      in the block is thus E - AC(right) + 1.
+ *
+ *      CAUTION: Priority interrupts are allowed during the execution of this instruction, following the processing
+ *      of each word.  If an interrupt occurs, the BLT stores the source and destination addresses for the next word
+ *      in AC, so when the processor restarts upon the return to the interrupted program, it actually resumes at
+ *      the correct point within the BLT.  Therefore, unless the interrupt system is inactive, A and X must not address
+ *      the same register as this would produce a different effective address calculation upon resumption should an
+ *      interrupt occur; and the program must not attempt to load an accumulator addressed either by A or X unless it
+ *      is the final location being loaded.  Furthermore, the program cannot assume that AC is the same after the BLT
+ *      as it was before.
+ *
+ * NOTE: As currently implemented, we will NEVER acknowledge an interrupt during a block transfer, so the above
+ * caution can be ignored (for now).
  *
  * @this {CPUStatePDP10}
  * @param {number} op
  */
 PDP10.opBLT = function(op)
 {
-    this.opUndefined(op);
+    var acc = op & PDP10.OPCODE.A_MASK;
+    var addrDst = this.readWord(acc);
+    var addrSrc = (addrDst / PDP10.WORD_SHIFT)|0;
+    addrDst &= PDP10.WORD_MASK;
+    while (true) {
+        this.writeWord(addrDst, this.readWord(addrSrc));
+        if (addrDst == this.regEA) break;
+        addrSrc = (addrSrc + 1) & PDP10.WORD_MASK;
+        addrDst = (addrDst + 1) & PDP10.WORD_MASK;
+    }
 };
 
 /**
@@ -2665,10 +2699,10 @@ PDP10.opSETOB = function(op)
  */
 PDP10.opHLL = function(op)
 {
-    var a = op & PDP10.OPCODE.A_MASK;
+    var acc = op & PDP10.OPCODE.A_MASK;
     var src = this.readWord(this.regEA);
-    var dst = this.readWord(a);
-    this.writeWord(a, PDP10.getHR(op, dst, src) + (src - (src & PDP10.WORD_MASK)));
+    var dst = this.readWord(acc);
+    this.writeWord(acc, PDP10.getHR(op, dst, src) + (src - (src & PDP10.WORD_MASK)));
 };
 
 /**
@@ -2689,9 +2723,9 @@ PDP10.opHLL = function(op)
  */
 PDP10.opHLLI = function(op)
 {
-    var a = op & PDP10.OPCODE.A_MASK;
-    var dst = this.readWord(a);
-    this.writeWord(a, PDP10.getHR(op, dst, 0));
+    var acc = op & PDP10.OPCODE.A_MASK;
+    var dst = this.readWord(acc);
+    this.writeWord(acc, PDP10.getHR(op, dst, 0));
 };
 
 /**
@@ -2709,8 +2743,8 @@ PDP10.opHLLI = function(op)
  */
 PDP10.opHLLM = function(op)
 {
-    var a = op & PDP10.OPCODE.A_MASK;
-    var src = this.readWord(a);
+    var acc = op & PDP10.OPCODE.A_MASK;
+    var src = this.readWord(acc);
     var dst = this.readWord(this.regEA);
     this.writeWord(this.regEA, PDP10.getHR(op, dst, src) + (src - (src & PDP10.WORD_MASK)));
 };
@@ -2734,10 +2768,10 @@ PDP10.opHLLS = function(op)
 {
     var dst = this.readWord(this.regEA);
     this.writeWord(this.regEA, PDP10.setHR(op, dst, dst));
-    var a = op & PDP10.OPCODE.A_MASK;
-    if (a) {
-        dst = this.readWord(a);
-        this.writeWord(a, PDP10.setHR(op, dst, dst));
+    var acc = op & PDP10.OPCODE.A_MASK;
+    if (acc) {
+        dst = this.readWord(acc);
+        this.writeWord(acc, PDP10.setHR(op, dst, dst));
     }
 };
 
@@ -2757,10 +2791,10 @@ PDP10.opHLLS = function(op)
  */
 PDP10.opHRL = function(op)
 {
-    var a = op & PDP10.OPCODE.A_MASK;
+    var acc = op & PDP10.OPCODE.A_MASK;
     var src = (this.readWord(this.regEA) & PDP10.WORD_MASK) * PDP10.WORD_SHIFT;
-    var dst = this.readWord(a);
-    this.writeWord(a, PDP10.getHR(op, dst, src) + src);
+    var dst = this.readWord(acc);
+    this.writeWord(acc, PDP10.getHR(op, dst, src) + src);
 };
 
 /**
@@ -2779,10 +2813,10 @@ PDP10.opHRL = function(op)
  */
 PDP10.opHRLI = function(op)
 {
-    var a = op & PDP10.OPCODE.A_MASK;
+    var acc = op & PDP10.OPCODE.A_MASK;
     var src = this.regEA * PDP10.WORD_SHIFT;
-    var dst = this.readWord(a);
-    this.writeWord(a, PDP10.getHR(op, dst, src) + src);
+    var dst = this.readWord(acc);
+    this.writeWord(acc, PDP10.getHR(op, dst, src) + src);
 };
 
 /**
@@ -2801,8 +2835,8 @@ PDP10.opHRLI = function(op)
  */
 PDP10.opHRLM = function(op)
 {
-    var a = op & PDP10.OPCODE.A_MASK;
-    var src = (this.readWord(a) & PDP10.WORD_MASK) * PDP10.WORD_SHIFT;
+    var acc = op & PDP10.OPCODE.A_MASK;
+    var src = (this.readWord(acc) & PDP10.WORD_MASK) * PDP10.WORD_SHIFT;
     var dst = this.readWord(this.regEA);
     this.writeWord(this.regEA, PDP10.getHR(op, dst, src) + src);
 };
@@ -2826,11 +2860,11 @@ PDP10.opHRLS = function(op)
     var dst = this.readWord(this.regEA);
     var src = (dst & PDP10.WORD_MASK) * PDP10.WORD_SHIFT;
     this.writeWord(this.regEA, PDP10.getHR(op, dst, src) + src);
-    var a = op & PDP10.OPCODE.A_MASK;
-    if (a) {
-        dst = this.readWord(a);
+    var acc = op & PDP10.OPCODE.A_MASK;
+    if (acc) {
+        dst = this.readWord(acc);
         src = (dst & PDP10.WORD_MASK) * PDP10.WORD_SHIFT;
-        this.writeWord(a, PDP10.getHR(op, dst, src) + src);
+        this.writeWord(acc, PDP10.getHR(op, dst, src) + src);
     }
 };
 
@@ -2850,10 +2884,10 @@ PDP10.opHRLS = function(op)
  */
 PDP10.opHRR = function(op)
 {
-    var a = op & PDP10.OPCODE.A_MASK;
+    var acc = op & PDP10.OPCODE.A_MASK;
     var src = this.readWord(this.regEA) & PDP10.WORD_MASK;
-    var dst = this.readWord(a);
-    this.writeWord(a, PDP10.getHL(op, dst, src) + src);
+    var dst = this.readWord(acc);
+    this.writeWord(acc, PDP10.getHL(op, dst, src) + src);
 };
 
 /**
@@ -2872,9 +2906,9 @@ PDP10.opHRR = function(op)
  */
 PDP10.opHRRI = function(op)
 {
-    var a = op & PDP10.OPCODE.A_MASK;
-    var dst = this.readWord(a);
-    this.writeWord(a, PDP10.getHL(op, dst, this.regEA) + this.regEA);
+    var acc = op & PDP10.OPCODE.A_MASK;
+    var dst = this.readWord(acc);
+    this.writeWord(acc, PDP10.getHL(op, dst, this.regEA) + this.regEA);
 };
 
 /**
@@ -2893,8 +2927,8 @@ PDP10.opHRRI = function(op)
  */
 PDP10.opHRRM = function(op)
 {
-    var a = op & PDP10.OPCODE.A_MASK;
-    var src = this.readWord(a) & PDP10.WORD_MASK;
+    var acc = op & PDP10.OPCODE.A_MASK;
+    var src = this.readWord(acc) & PDP10.WORD_MASK;
     var dst = this.readWord(this.regEA);
     this.writeWord(this.regEA, PDP10.getHL(op, dst, src) + src);
 };
@@ -2919,10 +2953,10 @@ PDP10.opHRRS = function(op)
 {
     var dst = this.readWord(this.regEA);
     this.writeWord(this.regEA, PDP10.setHL(op, dst, dst));
-    var a = op & PDP10.OPCODE.A_MASK;
-    if (a) {
-        dst = this.readWord(a);
-        this.writeWord(a, PDP10.setHL(op, dst, dst));
+    var acc = op & PDP10.OPCODE.A_MASK;
+    if (acc) {
+        dst = this.readWord(acc);
+        this.writeWord(acc, PDP10.setHL(op, dst, dst));
     }
 };
 
@@ -2941,10 +2975,10 @@ PDP10.opHRRS = function(op)
  */
 PDP10.opHLR = function(op)
 {
-    var a = op & PDP10.OPCODE.A_MASK;
+    var acc = op & PDP10.OPCODE.A_MASK;
     var src = (this.readWord(this.regEA) / PDP10.WORD_SHIFT)|0;
-    var dst = this.readWord(a);
-    this.writeWord(a, PDP10.getHL(op, dst, src) + src);
+    var dst = this.readWord(acc);
+    this.writeWord(acc, PDP10.getHL(op, dst, src) + src);
 };
 
 /**
@@ -2964,9 +2998,9 @@ PDP10.opHLR = function(op)
  */
 PDP10.opHLRI = function(op)
 {
-    var a = op & PDP10.OPCODE.A_MASK;
-    var dst = this.readWord(a);
-    this.writeWord(a, PDP10.getHL(op, dst, 0));
+    var acc = op & PDP10.OPCODE.A_MASK;
+    var dst = this.readWord(acc);
+    this.writeWord(acc, PDP10.getHL(op, dst, 0));
 };
 
 /**
@@ -2984,8 +3018,8 @@ PDP10.opHLRI = function(op)
  */
 PDP10.opHLRM = function(op)
 {
-    var a = op & PDP10.OPCODE.A_MASK;
-    var src = (this.readWord(a) / PDP10.WORD_SHIFT)|0;
+    var acc = op & PDP10.OPCODE.A_MASK;
+    var src = (this.readWord(acc) / PDP10.WORD_SHIFT)|0;
     var dst = this.readWord(this.regEA);
     this.writeWord(this.regEA, PDP10.getHL(op, dst, src) + src);
 };
@@ -3008,11 +3042,11 @@ PDP10.opHLRS = function(op)
     var dst = this.readWord(this.regEA);
     var src = (dst / PDP10.WORD_SHIFT)|0;
     this.writeWord(this.regEA, PDP10.getHL(op, dst, src) + src);
-    var a = op & PDP10.OPCODE.A_MASK;
-    if (a) {
-        dst = this.readWord(a);
+    var acc = op & PDP10.OPCODE.A_MASK;
+    if (acc) {
+        dst = this.readWord(acc);
         src = (dst / PDP10.WORD_SHIFT)|0;
-        this.writeWord(a, PDP10.getHL(op, dst, src) + src);
+        this.writeWord(acc, PDP10.getHL(op, dst, src) + src);
     }
 };
 
