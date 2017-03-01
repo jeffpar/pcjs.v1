@@ -205,7 +205,11 @@ ROM.prototype.doneLoad = function(sURL, sROMData, nErrorCode)
              */
             var rom = eval("(" + sROMData + ")");
             var ab = rom['bytes'];
-            var adw = rom['data'];
+            /*
+             * Resource 'longs' should always be 32-bit DWORD values, whereas 'data' bit lengths
+             * will vary according to the machine architecture for which the resource was designed.
+             */
+            var adw = rom['longs'] || rom['data'];
 
             if (ab) {
                 this.abROM = ab;
