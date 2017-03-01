@@ -5,7 +5,7 @@ permalink: /pubs/dec/pdp10/
 ---
 
 PDP-10 Hardware Publications
----
+----------------------------
 
 This page summarizes PDP-10 documentation that was useful in creating [PDPjs](/docs/pdpjs/).  In most cases,
 these documents came from the PDF Document Archive at [bitsavers.org](http://bitsavers.org),  in the [/pdf/dec/pdp10/](http://bitsavers.org/pdf/dec/pdp10/)
