@@ -75,18 +75,6 @@ var PDP10 = {
 
     /*
      * CPU model numbers (supported)
-     *
-     * The 11/20 includes the 11/10, which is not identified separately because there was
-     * nothing functionally different about it.
-     *
-     * The 11/40 added the MODE bits to the PSW (but only KERNEL=00 and USER=11) and 18-bit
-     * addressing via an MMU; there was still only one register set.
-     *
-     * The 11/45 added REGSET bit to the PSW (to support a second register set), SUPER=01
-     * mode to the existing KERNEL=00 and USER=11 modes, separate I/D spaces, and other MMU
-     * extensions (eg, MMR1 and MMR3).
-     *
-     * The 11/70 added 22-bit addressing and corresponding extensions to the MMU.
      */
     MODEL_KA10: 1001,
 
@@ -109,15 +97,68 @@ var PDP10 = {
      */
     ADDR_INVALID:   -1,
     ADDR_LIMIT:     Math.pow(2, 18),
-    DATA_INVALID:   0,
+    ADDR_MASK:      Math.pow(2, 18) - 1,
+    DATA_INVALID:   -1,
     DATA_LIMIT:     Math.pow(2, 36),
+    WORD_SHIFT:     Math.pow(2, 18),
+    WORD_MASK:      0o777777,
+    MAX_POS18:      Math.pow(2, 17) - 1,
+    MAX_POS:        Math.pow(2, 35) - 1,
+
     /*
-     * Assorted common opcodes
+     * PDP-10 opcodes are 36-bit values, most of which use the following layout:
+     *
+     *                          1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 3 3 3 3 3 3
+     *      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5
+     *      O O O O O O O M M A A A A I X X X X Y Y Y Y Y Y Y Y Y Y Y Y Y Y Y Y Y Y
+     *
+     * or using modern bit-numbering:
+     *
+     *      3 3 3 3 3 3 2 2 2 2 2 2 2 2 2 2 1 1 1 1 1 1 1 1 1 1
+     *      5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0
+     *      O O O O O O O M M A A A A I X X X X Y Y Y Y Y Y Y Y Y Y Y Y Y Y Y Y Y Y
+     *
+     * where OOOOOOOMM represents the operation, and MM (if used) represents the mode:
+     *
+     *      Mode        Suffix      Source  Destination
+     *      ----        ------      -----   -----------
+     *  0:  BASIC       None        E       AC
+     *  1:  IMMEDIATE   I           0,E     AC
+     *  2:  MEMORY      M           AC      E
+     *  3:  SELF        S           E       E (and AC if A is non-zero)
+     *
+     * Input-output instructions look like:
+     *
+     *      3 3 3 3 3 3 2 2 2 2 2 2 2 2 2 2 1 1 1 1 1 1 1 1 1 1
+     *      5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0
+     *      1 1 1 D D D D D D D O O O I X X X X Y Y Y Y Y Y Y Y Y Y Y Y Y Y Y Y Y Y
+     *
+     * Bits 0-22 (I,X,Y) contain what we call a "reference address" (R), which is used to calculate the
+     * "effective address" (E).  To determine E from R, we must extract I, X, and Y from R, set E to Y,
+     * then add [X] to E if X is non-zero.  If I is zero, then we're done; otherwise, we must set R to [E]
+     * and repeat the process.
      */
     OPCODE: {
-        HALT:       0o000000000000,     // TODO: Resolve
-        INVALID:    0o777777777777      // TODO: Resolve
+        OPMASK:     0o77700,            // operation mask
+        OPMODE:     0o77400,            // operation with mode
+        OPCOMP:     0o77000,            // operation with compare
+        OPTEST:     0o71100,            // operation with test
+        OPIO:       0o70034,            // input-output operation
+        OPUUO:      0o70000,            // unimplemented user operation (UUO) mask
+        OPSHIFT:    Math.pow(2, 21),    // operation shift
+        IOSHIFT:    Math.pow(2, 26),    // input-output device code shift
+        IOMASK:     0o177,              // input-output device code mask (after shift)
+        ACSHIFT:    Math.pow(2, 23),    // used to shift down the high 13 bits, with A starting at bit 0
+        A_SHIFT:    23,                 // A shift
+        A_MASK:     0o17,               // A mask (after shift)
+        I_BIT:      0o20000000,         // indirect bit
+        X_SHIFT:    18,                 // X shift
+        X_MASK:     0o17,               // X mask (after shift)
+        Y_MASK:     0o777777,           // Y mask
+        R_MASK:     0o37777777,         // used to isolate the low 23 bits (I,X,Y)
+        HALT:       0o5304              // operation code for HALT
     },
+
     /*
      * Internal operation state flags
      */

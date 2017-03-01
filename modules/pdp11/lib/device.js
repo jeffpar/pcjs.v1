@@ -146,16 +146,16 @@ class DevicePDP11 extends Component {
         if (DEBUGGER) {
             var dbg = this.dbg;
             if (sFilter && sName.indexOf(sFilter.toUpperCase()) < 0) return;
+            var nBits = 0;
             var nRegs = 8;
             var sDump = "";
             var fIndex = false;
-            var nBytes = 0;
             var nWidth = 8;
             if (offset < 0) {
+                nBits = 22;
                 nRegs = aRegs.length;
                 offset = 0;
                 fIndex = true;
-                nBytes = 3;
                 nWidth = 4;
             }
             for (var i = 0; i < nRegs; i++) {
@@ -163,7 +163,7 @@ class DevicePDP11 extends Component {
                     if (sDump) sDump += '\n';
                     sDump += sName + (fIndex? ('[' + Str.toDec(i, 2) + ']') : '') + ':';
                 }
-                sDump += ' ' + dbg.toStrBase(aRegs[offset + i], nBytes);
+                sDump += ' ' + dbg.toStrBase(aRegs[offset + i], nBits);
             }
             dbg.println(sDump + (fBreak? '\n' : ''));
         }

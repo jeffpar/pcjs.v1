@@ -534,7 +534,7 @@ class MemoryPDP11 {
     }
 
     /**
-     * readNone(off)
+     * readNone(off, addr)
      *
      * Previously, this always returned 0x00, but the initial memory probe by the COMPAQ DeskPro 386 ROM BIOS
      * writes 0x0000 to the first word of every 64Kb block in the nearly 16Mb address space it supports, and

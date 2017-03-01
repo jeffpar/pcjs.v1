@@ -119,6 +119,9 @@ class BusPDP10 extends Component {
         this.nBlockMask = this.nBlockTotal - 1;
         this.assert(this.nBlockMask <= BlockInfoPDP10.num.mask);
 
+        this.nDisableFaults = 0;
+        this.fFault = false;
+
         /*
          * Define all the properties to be initialized by initMemory()
          */
@@ -475,7 +478,7 @@ class BusPDP10 extends Component {
      *
      * @this {BusPDP10}
      * @param {number} addr is a physical address
-     * @return {number} word (16-bit) value at that address
+     * @return {number} word (36-bit) value at that address
      */
     getWord(addr)
     {
@@ -489,13 +492,13 @@ class BusPDP10 extends Component {
      *
      * @this {BusPDP10}
      * @param {number} addr is a physical address
-     * @param {number} w is the word (16-bit) value to write
+     * @param {number} w is the word (36-bit) value to write
      */
     setWord(addr, w)
     {
         var off = addr & this.nBlockLimit;
         var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
-        this.aBusBlocks[iBlock].writeWord(off, w, addr);
+        this.aBusBlocks[iBlock].writeWord(w, off, addr);
     }
 
     /**
@@ -517,14 +520,16 @@ class BusPDP10 extends Component {
      *
      * @this {BusPDP10}
      * @param {number} addr is a physical address
-     * @return {number} word (16-bit) value at that address
+     * @return {number} word (36-bit) value at that address
      */
     getWordDirect(addr)
     {
         var w;
         var off = addr & this.nBlockLimit;
         var block = this.getBlockDirect(addr);
+        this.nDisableFaults++;
         w = block.readWordDirect(off, addr);
+        this.nDisableFaults--;
         return w;
     }
 
@@ -535,13 +540,15 @@ class BusPDP10 extends Component {
      *
      * @this {BusPDP10}
      * @param {number} addr is a physical address
-     * @param {number} w is the word (16-bit) value to write (we truncate it to 16 bits to be safe)
+     * @param {number} w is the word (36-bit) value to write
      */
     setWordDirect(addr, w)
     {
         var off = addr & this.nBlockLimit;
         var block = this.getBlockDirect(addr);
-        block.writeWordDirect(off, w & 0xffff, addr);
+        this.nDisableFaults++;
+        block.writeWordDirect(w, off, addr);
+        this.nDisableFaults--;
     }
 
     /**
@@ -681,6 +688,42 @@ class BusPDP10 extends Component {
             }
         }
         return addr;
+    }
+
+    /**
+     * fault(addr, err, access)
+     *
+     * Bus interface for signaling alignment errors, invalid memory, etc.
+     *
+     * @this {BusPDP10}
+     * @param {number} addr
+     * @param {number} [err]
+     * @param {number} [access] (for diagnostic purposes only)
+     */
+    fault(addr, err, access)
+    {
+        this.fFault = true;
+        if (!this.nDisableFaults) {
+            if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP10.FAULT)) {
+                this.dbg.printMessage("memory fault on " + this.dbg.toStrBase(addr), true, true);
+            }
+            this.cpu.stopCPU();
+        }
+    }
+
+    /**
+     * checkFault()
+     *
+     * This also serves as a clearFault() function.
+     *
+     * @this {BusPDP10}
+     * @return {boolean}
+     */
+    checkFault()
+    {
+        var f = this.fFault;
+        this.fFault = false;
+        return f;
     }
 
     /**

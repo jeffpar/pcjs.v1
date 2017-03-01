@@ -59,7 +59,7 @@ class RAMPDP10 extends Component {
     {
         super("RAM", parmsRAM);
 
-        this.abInit = null;
+        this.aData = null;
         this.aSymbols = null;
 
         this.addrRAM = +parmsRAM['addr'];
@@ -71,7 +71,7 @@ class RAMPDP10 extends Component {
         if (this.addrExec != null) this.addrExec = +this.addrExec;
 
         this.fInstalled = (!!this.sizeRAM); // 0 is the default value for 'size' when none is specified
-        this.fAllocated = false;
+        this.fAllocated = this.fReset = false;
 
         this.sFilePath = parmsRAM['file'];
         this.sFileName = Str.getBaseName(this.sFilePath);
@@ -180,7 +180,7 @@ class RAMPDP10 extends Component {
             Component.addMachineResource(this.idMachine, sURL, sData);
             var resource = Web.parseMemoryResource(sURL, sData);
             if (resource) {
-                this.abInit = resource.aBytes;
+                this.aData = resource.aData;
                 this.aSymbols = resource.aSymbols;
                 if (this.addrLoad == null) this.addrLoad = resource.addrLoad;
                 if (this.addrExec == null) this.addrExec = resource.addrExec;
@@ -219,9 +219,9 @@ class RAMPDP10 extends Component {
                 /*
                  * Too early...
                  */
-                if (!this.abInit || !this.bus) return;
+                if (!this.aData) return;
 
-                if (this.loadImage(this.abInit, this.addrLoad, this.addrExec, this.addrRAM)) {
+                if (this.loadImage(this.aData, this.addrLoad, this.addrExec, this.addrRAM)) {
                     this.status('Loaded image "' + this.sFileName + '"');
                 } else {
                     this.notice('Error loading image "' + this.sFileName + '"');
@@ -230,9 +230,10 @@ class RAMPDP10 extends Component {
                 /*
                  * NOTE: We now retain this data, so that reset() can return the RAM to its predefined state.
                  *
-                 *      delete this.abInit;
+                 *      delete this.aData;
                  */
             }
+            this.fReset = true;
             this.setReady();
         }
     }
@@ -244,126 +245,46 @@ class RAMPDP10 extends Component {
      */
     reset()
     {
-        if (this.fAllocated) {
+        if (this.fAllocated && !this.fReset) {
             /*
              * TODO: Add a configuration parameter for selecting the byte pattern on reset?
              * Note that when memory blocks are originally created, they are currently always
              * zero-initialized, so this would only affect resets.
              */
             this.bus.zeroMemory(this.addrRAM, this.sizeRAM, 0);
-            if (this.abInit) {
-                this.loadImage(this.abInit, this.addrLoad, this.addrExec, this.addrRAM, !this.dbg);
+            if (this.aData) {
+                this.loadImage(this.aData, this.addrLoad, this.addrExec, this.addrRAM, !this.dbg);
             }
         }
+        this.fReset = false;
     }
 
     /**
-     * loadImage(aBytes, addrLoad, addrExec, addrInit, fStart)
+     * loadImage(aData, addrLoad, addrExec, addrInit, fStart)
      *
      * If the array contains a PAPER tape image in the "Absolute Format," load it as specified
      * by the format; otherwise, load it as-is using the address(es) supplied.
      *
      * @this {RAMPDP10}
-     * @param {Array|Uint8Array} aBytes
+     * @param {Array} aData
      * @param {number|null} [addrLoad]
      * @param {number|null} [addrExec] (this CAN override any starting address INSIDE the image)
      * @param {number|null} [addrInit]
      * @param {boolean} [fStart]
      * @return {boolean} (true if loaded, false if not)
      */
-    loadImage(aBytes, addrLoad, addrExec, addrInit, fStart)
+    loadImage(aData, addrLoad, addrExec, addrInit, fStart)
     {
-        var fStop = false;
         var fLoaded = false;
-        /*
-         * Data on tapes in the "Absolute Format" is organized into blocks; each block begins with
-         * a 6-byte header:
-         *
-         *      2-byte signature (0x0001)
-         *      2-byte block length (N + 6, because it includes the 6-byte header)
-         *      2-byte load address
-         *
-         * followed by N data bytes.  If N is zero, then the 2-byte load address is the exec address,
-         * unless the address is odd (usually 1).  DEC's Absolute Loader jumps to the exec address
-         * in former case, halts in the latter.
-         *
-         * All values are stored "little endian" (low byte followed by high byte), just like the
-         * PDP-11's memory architecture.
-         *
-         * After the data bytes, there is a single checksum byte.  The 8-bit sum of all the bytes in
-         * the block (including the header bytes and checksum byte) should be zero.
-         *
-         * ANOMALIES: Tape files don't always begin with a signature word, so I allow any number of
-         * leading zeros before the first signature.  Tape files don't always end cleanly either, so as
-         * soon as I see an invalid signature, I break out of the loop without signalling an error, as
-         * long as at least ONE block was successfully processed.  In fact, it's possible that as
-         * soon as a block with ZERO data bytes is encountered, processing is supposed to stop, but
-         * I haven't examined enough tapes (or the Absolute Loader code) to know for sure.
-         */
+
         if (addrLoad == null) {
-            var off = 0, fError = false;
-            while (off < aBytes.length - 1) {
-                var w = (aBytes[off] & 0xff) | ((aBytes[off+1] & 0xff) << 8);
-                if (!w) {           // ignore pairs of leading zeros
-                    off += 2;
-                    continue;
-                }
-                if (!(w & 0xff)) {  // as well as single bytes of zero
-                    off++;
-                    continue;
-                }
-                var offBlock = off;
-                if (w != 0x0001) {
-                    this.printMessage("invalid signature (" + Str.toHexWord(w) + ") at offset " + Str.toHexWord(offBlock), MessagesPDP10.PAPER);
-                    break;
-                }
-                if (off + 6 >= aBytes.length) {
-                    this.printMessage("invalid block at offset " + Str.toHexWord(offBlock), MessagesPDP10.PAPER);
-                    break;
-                }
-                off += 2;
-                var checksum = w;
-                var len = (aBytes[off++] & 0xff) | ((aBytes[off++] & 0xff) << 8);
-                var addr = (aBytes[off++] & 0xff) | ((aBytes[off++] & 0xff) << 8);
-                checksum += (len & 0xff) + (len >> 8) + (addr & 0xff) + (addr >> 8);
-                var offData = off, cbData = len -= 6;
-                while (len > 0 && off < aBytes.length) {
-                    checksum += aBytes[off++] & 0xff;
-                    len--;
-                }
-                if (len != 0 || off >= aBytes.length) {
-                    this.printMessage("insufficient data for block at offset " + Str.toHexWord(offBlock), MessagesPDP10.PAPER);
-                    break;
-                }
-                checksum += aBytes[off++] & 0xff;
-                if (checksum & 0xff) {
-                    this.printMessage("invalid checksum (" + Str.toHexByte(checksum) + ") for block at offset " + Str.toHexWord(offBlock), MessagesPDP10.PAPER);
-                    break;
-                }
-                if (!cbData) {
-                    if (addr & 0x1) {
-                        fStop = true;
-                    } else {
-                        if (addrExec == null) addrExec = addr;
-                    }
-                    if (addrExec != null) this.printMessage("starting address: " + Str.toHexWord(addrExec), MessagesPDP10.PAPER);
-                } else {
-                    this.printMessage("loading " + Str.toHexWord(cbData) + " bytes at " + Str.toHexWord(addr) + "-" + Str.toHexWord(addr + cbData), MessagesPDP10.PAPER);
-                    while (cbData--) {
-                        this.bus.setWordDirect(addr++, aBytes[offData++]);
-                    }
-                }
-                fLoaded = true;
-            }
+            addrLoad = addrInit;
         }
-        if (!fLoaded) {
-            if (addrLoad == null) addrLoad = addrInit;
-            if (addrLoad != null) {
-                for (var i = 0; i < aBytes.length; i++) {
-                    this.bus.setWordDirect(addrLoad + i, aBytes[i]);
-                }
-                fLoaded = true;
+        if (addrLoad != null) {
+            for (var i = 0; i < aData.length; i++) {
+                this.bus.setWordDirect(addrLoad + i, aData[i]);
             }
+            fLoaded = true;
         }
         if (fLoaded) {
             /*
@@ -374,7 +295,7 @@ class RAMPDP10 extends Component {
              * image, but we know that the directions for that diagnostic say to "Start and Restart at 200",
              * so we have manually inserted an "exec":128 in the JSON containing the image.
              */
-            if (addrExec == null || fStop) {
+            if (addrExec == null) {
                 this.cpu.stopCPU();
                 fStart = false;
             }

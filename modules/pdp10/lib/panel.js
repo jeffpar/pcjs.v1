@@ -323,19 +323,7 @@ class PanelPDP10 extends Component {
         }
 
         switch (sBinding) {
-        case 'R0':
-        case 'R1':
-        case 'R2':
-        case 'R3':
-        case 'R4':
-        case 'R5':
-        case 'R6':
-        case 'R7':
-        case 'NF':
-        case 'ZF':
-        case 'VF':
-        case 'CF':
-        case 'PS':
+        case 'PC':
             this.bindings[sBinding] = control;
             this.cLiveRegs++;
             return true;

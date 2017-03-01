@@ -647,31 +647,42 @@ class Debugger extends Component {
     }
 
     /**
-     * toStrBase(n, nBytes, fStripLeadingZeros)
+     * toStrBase(n, nBits)
      *
-     * Use this instead of Str.toHex() or Str.toOct() to convert bytes/words to the Debugger's default base.
+     * Use this instead of Str's toOct()/toDec()/toHex() to convert numbers to the Debugger's default base.
+     *
+     * TODO: The 32-bit limitation on n is imposed by the Str functions we call, not us.  Consider modifying
+     * those functions to support a higher number of bits (eg, 36), using arithmetic operators instead of bit-wise
+     * operators, and increasing the maximum number of supported bits to at least 52, while still using JavaScript
+     * floating-point numbers as the underlying data type.
+     *
+     * For now, the only component that really cares about supporting more than 32 bits (eg, 36 bits) is the PDP-10
+     * Debugger, which currently uses its own functions (eg, toStrWord()) to divide quantities into smaller (eg, 18-bit)
+     * values.
      *
      * @this {Debugger}
-     * @param {number|null|undefined} n
-     * @param {number} [nBytes] is the number of bytes to display, which we translate into a number of characters
-     * @param {boolean} [fStripLeadingZeros]
+     * @param {number|null|undefined} n (interpreted as a 32-bit value)
+     * @param {number} [nBits] (-1 to strip leading zeros, 0 to allow a variable number of digits)
      * @return {string}
      */
-    toStrBase(n, nBytes = 0, fStripLeadingZeros = false) {
+    toStrBase(n, nBits = 0) {
         var s;
         switch(this.nBase) {
         case 8:
-            s = Str.toOct(n, nBytes * 3 /* - (nBytes > 2? 1 : 0) */);
+            s = Str.toOct(n, nBits > 0? ((nBits + 2)/3)|0 : 0);
             break;
         case 10:
-            s = n.toString();
+            /*
+             * The multiplier is actually Math.log(2)/Math.log(10), but an approximation is more than adequate.
+             */
+            s = Str.toDec(n, nBits > 0? Math.ceil(nBits * 0.3) : 0);
             break;
         case 16:
         default:
-            s = Str.toHex(n, nBytes * 2);
+            s = Str.toHex(n, nBits > 0? ((nBits + 3) >> 2) : 0);
             break;
         }
-        return (fStripLeadingZeros? Str.stripLeadingZeros(s) : s);
+        return (nBits < 0? Str.stripLeadingZeros(s) : s);
     }
 }
 

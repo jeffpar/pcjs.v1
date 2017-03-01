@@ -155,7 +155,7 @@ class Int36 {
      * The lower bound is ZERO and the upper bound is Int36.MAXVAL.  Whenever an Int36 value should be
      * interpreted as a signed value, values above Int36.MAXPOS (ie, values with bit 35 set) should be
      * converted to their signed counterpart by subtracting the value from Int36.BIT36 (aka MAXVAL + 1);
-     * the easiest way to do that is call isNegative() to check the sign bit and then call negate() as
+     * the easiest way to do that is call isNeg() to check the sign bit and then call negate() as
      * appropriate.
      *
      * NOTE: We use modern bit numbering, where bit 0 is the right-most (least-significant) bit and
@@ -233,7 +233,7 @@ class Int36 {
         var i36Rem = new Int36();
         var i36Tmp = new Int36(this.value, this.extended);
 
-        if (!fUnsigned && i36Tmp.isNegative()) {
+        if (!fUnsigned && i36Tmp.isNeg()) {
             i36Tmp.negate();
             fNeg = true;
         }
@@ -585,7 +585,7 @@ class Int36 {
             fNegQ = !fNegQ;
         }
 
-        if (this.isNegative()) {
+        if (this.isNeg()) {
             this.negate();
             fNegR = true; fNegQ = !fNegQ;
         }
@@ -593,52 +593,52 @@ class Int36 {
         this.extend();
 
         /*
-         * Initialize the four double-length 72-bit "bits" values we need for the division process.
+         * Initialize the four double-length 72-bit values we need for the division process.
          *
          * The process involves shifting the divisor left 1 bit (ie, doubling it) until it equals
          * or exceeds the dividend, and then repeatedly subtracting the divisor from the dividend and
          * shifting the divisor right 1 bit until the divisor is "exhausted" (no bits left), with an
          * "early out" if the dividend gets "exhausted" first.
          *
-         * Note that each element of these "bits" arrays is a 36-bit value, so it's rarely a good idea
+         * Note that each element of these double arrays is a 36-bit value, so it's rarely a good idea
          * to use bit-wise operators on them, because those would operate on only the low 32 bits.
-         * Stick with the "bits" worker functions I've created, and trust your JavaScript engine to
+         * Stick with the double worker functions I've created, and trust your JavaScript engine to
          * inline/optimize the code.
          *
-         * TODO: Profile this code to determine if individual variables (eg, bitsResLo and bitsResHi)
+         * TODO: Profile this code to determine if individual variables (eg, dResLo and dResHi)
          * instead of 2-element arrays is faster and/or less impactful on garbage collection.  I prefer
          * both the simplified syntax of arrays as well as their extensibility if we ever want/need
          * to go beyond 72 bits.
          */
-        var bitsRes = [0, 0];
-        var bitsPow = [1, 0];
-        var bitsDiv = [divisor, 0];
-        var bitsRem = [this.value, this.extended];
+        var dRes = [0, 0];
+        var dPow = [1, 0];
+        var dDiv = [divisor, 0];
+        var dRem = [this.value, this.extended];
 
-        while (Int36.cmpBits(bitsRem, bitsDiv) > 0) {
-            Int36.addBits(bitsDiv, bitsDiv);
-            Int36.addBits(bitsPow, bitsPow);
+        while (Int36.cmpD(dRem, dDiv) > 0) {
+            Int36.addD(dDiv, dDiv);
+            Int36.addD(dPow, dPow);
         }
         do {
-            if (Int36.cmpBits(bitsRem, bitsDiv) >= 0) {
-                Int36.subBits(bitsRem, bitsDiv);
-                Int36.addBits(bitsRes, bitsPow);
-                if (Int36.zeroBits(bitsRem)) break;
+            if (Int36.cmpD(dRem, dDiv) >= 0) {
+                Int36.subD(dRem, dDiv);
+                Int36.addD(dRes, dPow);
+                if (Int36.zeroD(dRem)) break;
             }
-            Int36.shrBits(bitsDiv);
-            Int36.shrBits(bitsPow);
-        } while (!Int36.zeroBits(bitsPow));
+            Int36.shrD(dDiv);
+            Int36.shrD(dPow);
+        } while (!Int36.zeroD(dPow));
 
         /*
          * Since divisors are limited to 36-bit values, something's wrong if we have an extended remainder.
          */
-        if (DEBUG && bitsRem[1]) {
+        if (DEBUG && dRem[1]) {
             console.log("divExtended() assertion failure");
         }
 
-        this.value = bitsRes[0];
-        this.extended = bitsRes[1];
-        this.remainder = bitsRem[0];
+        this.value = dRes[0];
+        this.extended = dRes[1];
+        this.remainder = dRem[0];
 
         if (fNegQ) this.negate();
 
@@ -689,11 +689,11 @@ class Int36 {
     }
 
     /**
-     * isNegative()
+     * isNeg()
      *
      * @return {boolean}
      */
-    isNegative()
+    isNeg()
     {
         return (this.extended > Int36.MAXPOS || this.extended == null && this.value > Int36.MAXPOS);
     }
@@ -738,83 +738,118 @@ class Int36 {
     }
 
     /**
-     * addBits(bitsDst, bitsSrc)
+     * readBits(off, len)
      *
-     * Adds bitsSrc to bitsDst.
-     *
-     * @param {Array.<number>} bitsDst
-     * @param {Array.<number>} bitsSrc
+     * @param {number} off (the bit position of the right-most bit of the result, using modern bit numbering)
+     * @param {number} len
+     * @return {number}
      */
-    static addBits(bitsDst, bitsSrc)
+    readBits(off, len)
     {
-        bitsDst[0] += bitsSrc[0];
-        bitsDst[1] += bitsSrc[1];
-        if (bitsDst[0] >= Int36.BIT36) {
-            bitsDst[0] %= Int36.BIT36;
-            bitsDst[1]++;
+        var w = this.value;
+        if (off + len <= 32) {
+            w = (w >> off) & ((1 << len) - 1);
+        } else {
+            w = Math.trunc(w / Math.pow(2, off)) % Math.pow(2, len);
+        }
+        return w;
+    }
+
+    /**
+     * writeBits(bits, off, len)
+     *
+     * @param {number} bits (only the right-most len of bits are used, so it doesn't need to be pre-masked)
+     * @param {number} off (the bit position of the right-most bit of the result, using modern bit numbering)
+     * @param {number} len
+     */
+    writeBits(bits, off, len)
+    {
+        var w = this.value;
+        var shift = Math.pow(2, off);
+        bits %= Math.pow(2, len);
+        var v = (w % Math.pow(2, off + len));
+        w = (w - v) + (bits * shift) + (v % shift);
+        this.value = w;
+    }
+
+    /**
+     * addD(dDst, dSrc)
+     *
+     * Adds dSrc to dDst.
+     *
+     * @param {Array.<number>} dDst
+     * @param {Array.<number>} dSrc
+     */
+    static addD(dDst, dSrc)
+    {
+        dDst[0] += dSrc[0];
+        dDst[1] += dSrc[1];
+        if (dDst[0] >= Int36.BIT36) {
+            dDst[0] %= Int36.BIT36;
+            dDst[1]++;
         }
     }
 
     /**
-     * cmpBits(bitsDst, bitsSrc)
+     * cmpD(dDst, dSrc)
      *
-     * Compares bitsDst to bitsSrc, by computing bitsDst - bitsSrc.
+     * Compares dDst to dSrc, by computing dDst - dSrc.
      *
-     * @param {Array.<number>} bitsDst
-     * @param {Array.<number>} bitsSrc
-     * @return {number} > 0 if bitsDst > bitsSrc, == 0 if bitsDst == bitsSrc, < 0 if bitsDst < bitsSrc
+     * @param {Array.<number>} dDst
+     * @param {Array.<number>} dSrc
+     * @return {number} > 0 if dDst > dSrc, == 0 if dDst == dSrc, < 0 if dDst < dSrc
      */
-    static cmpBits(bitsDst, bitsSrc)
+    static cmpD(dDst, dSrc)
     {
-        var result = bitsDst[1] - bitsSrc[1];
-        if (!result) result = bitsDst[0] - bitsSrc[0];
+        var result = dDst[1] - dSrc[1];
+        if (!result) result = dDst[0] - dSrc[0];
         return result;
     }
 
     /**
-     * shrBits(bitsDst)
+     * shrD(dDst)
      *
-     * Shifts bitsDst right one bit.
+     * Shifts dDst right one bit.
      *
-     * @param {Array.<number>} bitsDst
+     * @param {Array.<number>} dDst
      */
-    static shrBits(bitsDst)
+    static shrD(dDst)
     {
-        if (bitsDst[1] % 2) {
-            bitsDst[0] += Int36.BIT36;
+        if (dDst[1] % 2) {
+            dDst[0] += Int36.BIT36;
         }
-        bitsDst[0] = Math.trunc(bitsDst[0] / 2);
-        bitsDst[1] = Math.trunc(bitsDst[1] / 2);
+        dDst[0] = Math.trunc(dDst[0] / 2);
+        dDst[1] = Math.trunc(dDst[1] / 2);
     }
 
     /**
-     * subBits(bitsDst, bitsSrc)
+     * subD(dDst, dSrc)
      *
-     * Subtracts bitsSrc from bitsDst.
+     * Subtracts dSrc from dDst.
      *
-     * @param {Array.<number>} bitsDst
-     * @param {Array.<number>} bitsSrc
+     * @param {Array.<number>} dDst
+     * @param {Array.<number>} dSrc
      */
-    static subBits(bitsDst, bitsSrc)
+    static subD(dDst, dSrc)
     {
-        bitsDst[0] -= bitsSrc[0];
-        bitsDst[1] -= bitsSrc[1];
-        if (bitsDst[0] < 0) {
-            bitsDst[0] += Int36.BIT36;
-            bitsDst[1]--;
+        dDst[0] -= dSrc[0];
+        dDst[1] -= dSrc[1];
+        if (dDst[0] < 0) {
+            dDst[0] += Int36.BIT36;
+            dDst[1]--;
         }
     }
 
     /**
-     * zeroBits(bits)
+     * zeroD(d)
      *
      * True if bits are all zero, false otherwise.
      *
-     * @param {Array.<number>} bits
+     * @param {Array.<number>} d
      */
-    static zeroBits(bits)
+    static zeroD(d)
     {
-        return !bits[0] && !bits[1];
+        return !d[0] && !d[1];
     }
 
     /**

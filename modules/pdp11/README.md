@@ -1,20 +1,21 @@
 ---
 layout: page
-title: PDP-11 Machine Emulation Module (PDPjs)
+title: PDPjs Support for PDP-11 Machines
 permalink: /modules/pdp11/
 ---
 
-PDP-11 Machine Emulation Module (PDPjs)
-=======================================
+PDPjs Support for PDP-11 Machines
+=================================
 
 Overview
 ---
-PDPjs, our [PDP-11 Machine](/devices/pdp11/machine/) emulation module, was added to the PCjs Project in 2016.
+
+This PDPjs module for [PDP-11 Machines](/devices/pdp11/machine/) was added to the PCjs Project in 2016.
 
 It was adapted from the [PDP-11/70 Emulator](http://skn.noip.me/pdp11/pdp11.html) written by Paul Nankervis,
 with permission.
 
-PDPjs is currently comprised of the following PDP-11 components, as listed in [package.json](../../package.json)
+The module is currently comprised of the following components, as listed in [package.json](../../package.json)
 (see the *pdp11Files* property):
 
 * [bus.js](/modules/pdp11/lib/bus.js)
