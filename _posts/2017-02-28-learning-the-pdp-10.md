@@ -12,9 +12,9 @@ Having never used a real DEC PDP-10, I've had a steep learning curve creating a 
 So far, the only [PDP-10 Hardware Documentation](/pubs/dec/pdp10/) I've read (or rather, skimmed) is the
 [PDP-10 System Reference Manual (1968)](http://archive.pcjs.org/pubs/dec/pdp10/ka10/DEC-10-HGAA-D_PDP-10_System_Reference_Manual_May1968.pdf).
 
-To make the process a little less painful, most of my initial development efforts have centered on the built-in PDP-10
-Debugger.  In addition to the usual disassembler capabilities, I've also included an assembler, so that I can easily enter
-instruction sequences like this:
+To make it easier to create and run some simple [PDP-10 Opcode Tests](/apps/pdp10/tests/), most of my initial development
+efforts have centered on the built-in PDP-10 Debugger.  In addition to the usual disassembler capabilities, I've also included
+an assembler, so that I can easily enter instruction sequences like this:
 
 	a 100;
 	hrli 1,111111;
