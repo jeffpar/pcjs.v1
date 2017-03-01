@@ -2,7 +2,7 @@
   {% capture machine_type %}{{ machine.type | remove:"-dbg" }}{% endcapture %}
   {% if machine_type == "c1p" %}
     {% assign machine_app = "c1pjs" %}
-  {% elsif machine_type == "pdp11" %}
+  {% elsif machine_type == "pdp10" or machine_type == "pdp11" %}
     {% assign machine_app = "pdpjs" %}
   {% else %}
     {% capture machine_app %}{{ machine_type }}{% endcapture %}
