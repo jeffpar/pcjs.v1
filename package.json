@@ -1,6 +1,6 @@
 {
   "name": "pcjs",
-  "version": "1.34.0",
+  "version": "1.34.1",
   "description": "Node-enabled version of PCjs",
   "license": "GPL-3.0",
   "engine": "node ^6.7.0",
@@ -194,6 +194,7 @@
     "./modules/pdp10/lib/memory.js",
     "./modules/pdp10/lib/cpu.js",
     "./modules/pdp10/lib/cpustate.js",
+    "./modules/pdp10/lib/cpuops.js",
     "./modules/pdp10/lib/rom.js",
     "./modules/pdp10/lib/ram.js",
     "./modules/pdp10/lib/serial.js",

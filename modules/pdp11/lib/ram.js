@@ -76,7 +76,7 @@ class RAMPDP11 extends Component {
         if (this.addrExec != null) this.addrExec = +this.addrExec;
 
         this.fInstalled = (!!this.sizeRAM); // 0 is the default value for 'size' when none is specified
-        this.fAllocated = false;
+        this.fAllocated = this.fReset = false;
 
         this.sFilePath = parmsRAM['file'];
         this.sFileName = Str.getBaseName(this.sFilePath);
@@ -224,7 +224,7 @@ class RAMPDP11 extends Component {
                 /*
                  * Too early...
                  */
-                if (!this.abInit || !this.bus) return;
+                if (!this.abInit) return;
 
                 if (this.loadImage(this.abInit, this.addrLoad, this.addrExec, this.addrRAM)) {
                     this.status('Loaded image "' + this.sFileName + '"');
@@ -238,6 +238,7 @@ class RAMPDP11 extends Component {
                  *      delete this.abInit;
                  */
             }
+            this.fReset = true;
             this.setReady();
         }
     }
@@ -249,7 +250,7 @@ class RAMPDP11 extends Component {
      */
     reset()
     {
-        if (this.fAllocated) {
+        if (this.fAllocated && !this.fReset) {
             /*
              * TODO: Add a configuration parameter for selecting the byte pattern on reset?
              * Note that when memory blocks are originally created, they are currently always
@@ -260,6 +261,7 @@ class RAMPDP11 extends Component {
                 this.loadImage(this.abInit, this.addrLoad, this.addrExec, this.addrRAM, !this.dbg);
             }
         }
+        this.fReset = false;
     }
 
     /**

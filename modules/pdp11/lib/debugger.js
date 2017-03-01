@@ -912,7 +912,9 @@ class DebuggerPDP11 extends Debugger {
      */
     getRegName(iReg)
     {
-        return (iReg < 6? ("R" + iReg) :  (iReg == 6? "SP" : "PC"));
+        var sReg;
+        if (iReg < DebuggerPDP11.REG_AR || this.panel) sReg = DebuggerPDP11.REGNAMES[iReg];
+        return sReg || "";
     }
 
     /**
@@ -1210,7 +1212,7 @@ class DebuggerPDP11 extends Debugger {
         if (trapStatus) {
             var reason = trapStatus >> 8;
             var sReason = reason < 0? PDP11.REASONS[-reason] : this.toStrBase(reason);
-            this.println("trapped to " + this.toStrBase(trapStatus & 0xff, 1) + " (" + sReason + ")");
+            this.println("trapped to " + this.toStrBase(trapStatus & 0xff, 8) + " (" + sReason + ")");
         }
 
         this.dbgAddrNextCode = this.newAddr(this.cpu.getPC());
@@ -2071,15 +2073,15 @@ class DebuggerPDP11 extends Debugger {
         }
         else if (opTypeOther == DebuggerPDP11.OP_DSTNUM3) {
             disp = (opCode & 0x07);
-            sOperand = this.toStrBase(disp, 1);
+            sOperand = this.toStrBase(disp, 3);
         }
         else if (opTypeOther == DebuggerPDP11.OP_DSTNUM6) {
             disp = (opCode & 0x3f);
-            sOperand = this.toStrBase(disp, 1);
+            sOperand = this.toStrBase(disp, 6);
         }
         else if (opTypeOther == DebuggerPDP11.OP_DSTNUM8) {
             disp = (opCode & 0xff);
-            sOperand = this.toStrBase(disp, 1);
+            sOperand = this.toStrBase(disp, 8);
         }
         else {
             /*
@@ -2121,7 +2123,7 @@ class DebuggerPDP11 extends Debugger {
                          * When using R7 (aka PC), POST-INCREMENT is known as IMMEDIATE
                          */
                         wIndex = this.getWord(dbgAddr, 2);
-                        sOperand = '#' + this.toStrBase(wIndex, 0, true);
+                        sOperand = '#' + this.toStrBase(wIndex, -1);
                     }
                     break;
 
@@ -2133,7 +2135,7 @@ class DebuggerPDP11 extends Debugger {
                          * When using R7 (aka PC), POST-INCREMENT DEFERRED is known as ABSOLUTE
                          */
                         wIndex = this.getWord(dbgAddr, 2);
-                        sOperand = "@#" + this.toStrBase(wIndex, 0, true);
+                        sOperand = "@#" + this.toStrBase(wIndex, -1);
                         sTarget = this.getTarget(wIndex);
                     }
                     break;
@@ -2148,7 +2150,7 @@ class DebuggerPDP11 extends Debugger {
 
                 case PDP11.OPMODE.INDEX:                // 0x6: INDEX
                     wIndex = this.getWord(dbgAddr, 2);
-                    sOperand = this.toStrBase(wIndex, 0, true) + '(' + this.getRegName(reg) + ')';
+                    sOperand = this.toStrBase(wIndex, -1) + '(' + this.getRegName(reg) + ')';
                     if (reg == 7) {
                         /*
                          * When using R7 (aka PC), INDEX is known as RELATIVE.  However, instead of displaying
@@ -2273,63 +2275,10 @@ class DebuggerPDP11 extends Debugger {
      */
     getRegOutput(iReg)
     {
-        var sReg = "";
-        var cpu = this.cpu;
-
-        if (iReg < 8) {
-            sReg = this.getRegName(iReg);
-            sReg += '=' + this.toStrBase(cpu.regsGen[iReg]);
+        var sReg = this.getRegName(iReg);
+        if (sReg) {
+            sReg += '=' + this.toStrBase(this.getRegValue(iReg)) + ' ';
         }
-        else if (iReg < 13) {
-            sReg = "A" + (iReg - 8) + '=' + this.toStrBase(cpu.regsAlt[iReg - 8]);
-        }
-        else if (iReg >= 16 && iReg < 20) {
-            sReg = "S" + (iReg - 16) + '=' + this.toStrBase(cpu.regsAltStack[iReg - 16]);
-        }
-        else {
-            switch(iReg) {
-            case DebuggerPDP11.REG_PS:
-                sReg = "PS=" + this.toStrBase(cpu.getPSW());
-                break;
-            case DebuggerPDP11.REG_PI:
-                sReg = "PI=" + this.toStrBase(cpu.getPIR());
-                break;
-            case DebuggerPDP11.REG_ER:
-                sReg = "ER=" + this.toStrBase(cpu.regErr);
-                break;
-            case DebuggerPDP11.REG_SL:
-                sReg = "SL=" + this.toStrBase(cpu.getSLR());
-                break;
-            case DebuggerPDP11.REG_M0:
-                sReg = "M0=" + this.toStrBase(cpu.getMMR0());
-                break;
-            case DebuggerPDP11.REG_M1:
-                sReg = "M1=" + this.toStrBase(cpu.getMMR1());
-                break;
-            case DebuggerPDP11.REG_M2:
-                sReg = "M2=" + this.toStrBase(cpu.getMMR2());
-                break;
-            case DebuggerPDP11.REG_M3:
-                sReg = "M3=" + this.toStrBase(cpu.getMMR3());
-                break;
-            case DebuggerPDP11.REG_AR:
-                if (this.panel) {
-                    sReg = "AR=" + this.toStrBase(this.panel.getAR(), 3);
-                }
-                break;
-            case DebuggerPDP11.REG_DR:
-                if (this.panel) {
-                    sReg = "DR=" + this.toStrBase(this.panel.getDR());
-                }
-                break;
-            case DebuggerPDP11.REG_SR:
-                if (this.panel) {
-                    sReg = "SR=" + this.toStrBase(this.panel.getSR(), 3);
-                }
-                break;
-            }
-        }
-        if (sReg) sReg += ' ';
         return sReg;
     }
 
@@ -2987,9 +2936,9 @@ class DebuggerPDP11 extends Debugger {
                 if (shift == size) {
                     if (fJSON) {
                         if (sData) sData += ",";
-                        sData += "0x"+ Str.toHex(data, size * 2);
+                        sData += "0x"+ Str.toHex(data, size << 1);
                     } else {
-                        sData += this.toStrBase(data, size);
+                        sData += this.toStrBase(data, size << 3);
                         sData += (size == 1? (i == 9? '-' : ' ') : "  ");
                     }
                     data = shift = 0;
@@ -3058,7 +3007,7 @@ class DebuggerPDP11 extends Debugger {
             if (vNew & ~mask) {
                 this.println("warning: " + Str.toHex(vNew) + " exceeds " + size + "-byte value");
             }
-            this.println("changing " + this.toStrAddr(dbgAddr) + (this.messageEnabled(MessagesPDP11.BUS)? "" : (" from " + this.toStrBase(fnGet.call(this, dbgAddr), size))) + " to " + this.toStrBase(vNew, size));
+            this.println("changing " + this.toStrAddr(dbgAddr) + (this.messageEnabled(MessagesPDP11.BUS)? "" : (" from " + this.toStrBase(fnGet.call(this, dbgAddr), size << 3))) + " to " + this.toStrBase(vNew, size << 3));
             //noinspection JSUnresolvedFunction
             fnSet.call(this, dbgAddr, vNew, size);
         }
@@ -4180,6 +4129,14 @@ if (DEBUGGER) {
         "DR":   DebuggerPDP11.REG_DR,
         "SR":   DebuggerPDP11.REG_SR
     };
+
+    DebuggerPDP11.REGNAMES = [
+        "R0", "R1", "R2", "R3", "R4", "R5", "SP", "PC",
+        "A0", "A1", "A2", "A3", "A4", "A5", "A6", "A7",
+        "S0", "S1", "S2", "S3",
+        "PS", "PI", "ER", "SL", "M0", "M1", "M2", "M3",
+        "AR", "DR", "SR"
+    ];
 
     DebuggerPDP11.MODES = ["KI","KD","SI","SD","??","??","UI","UD"];
 

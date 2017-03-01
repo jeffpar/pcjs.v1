@@ -46,7 +46,7 @@ var DumpAPI = require("../../shared/lib/dumpapi");
  * what the loadFile() function already does.
  *
  * @constructor
- * @param {string|undefined} sFormat should be one of "json"|"data"|"hex"|"bytes"|"rom" (see the FORMAT constants)
+ * @param {string|undefined} sFormat should be one of "json"|"longs"|"hex"|"bytes"|"rom" (see the FORMAT constants)
  * @param {boolean|string|undefined} fComments enables comments and other readability enhancements in the JSON output
  * @param {boolean|string|undefined} fDecimal forces decimal output if not undefined
  * @param {number|string|undefined} offDump
@@ -82,7 +82,7 @@ function FileDump(sFormat, fComments, fDecimal, offDump, nWidthDump, sServerRoot
 FileDump.sAPIURL = "http://www.pcjs.org" + DumpAPI.ENDPOINT;
 FileDump.sCopyright = COPYRIGHT;
 FileDump.sNotice = FileDump.sAPIURL + " " + FileDump.sCopyright;
-FileDump.sUsage = "Usage: " + FileDump.sAPIURL + "?" + DumpAPI.QUERY.FILE + "=({path}|{URL})&" + DumpAPI.QUERY.FORMAT + "=(json|data|hex|octal|bytes|words|rom)";
+FileDump.sUsage = "Usage: " + FileDump.sAPIURL + "?" + DumpAPI.QUERY.FILE + "=({path}|{URL})&" + DumpAPI.QUERY.FORMAT + "=(json|longs|hex|octal|bytes|words|rom)";
 
 FileDump.asBadExts = [
     "js", "log"
@@ -99,7 +99,7 @@ FileDump.asBadExts = [
  *
  * Usage
  * ---
- *      filedump --file=({path}|{URL}) [--merge=({path}|{url})] [--format=(json|data|hex|octal|bytes|words|rom)]
+ *      filedump --file=({path}|{URL}) [--merge=({path}|{url})] [--format=(json|longs|hex|octal|bytes|words|rom)]
  *                  [--comments] [--decimal] [--offset={number}] [--width={number}] [--load={number}] [--exec={number}]
  *                  [--output={path}] [--overwrite]
  *
@@ -146,7 +146,7 @@ FileDump.CLI = function()
     var args = proc.getArgs();
 
     if (!args.argc) {
-        console.log("usage: filedump --file=({path}|{URL}) [--merge=({path}|{url})] [--format=(json|data|hex|octal|bytes|words|rom)] [--comments] [--decimal] [--offset={number}] [--width={number}] [--output={path}] [--overwrite]");
+        console.log("usage: filedump --file=({path}|{URL}) [--merge=({path}|{url})] [--format=(json|longs|hex|octal|bytes|words|rom)] [--comments] [--decimal] [--offset={number}] [--width={number}] [--output={path}] [--overwrite]");
         return;
     }
 
@@ -752,7 +752,7 @@ FileDump.prototype.buildJSON = function()
         else if (this.sFormat == DumpAPI.FORMAT.OCTAL || this.sFormat == DumpAPI.FORMAT.WORDS) {
             this.json += this.dumpBuffer(this.sFormat, this.buf, this.buf.length, 2);
         } else {
-            this.json += this.dumpBuffer("data", this.buf, this.buf.length, 4);
+            this.json += this.dumpBuffer(DumpAPI.FORMAT.LONGS, this.buf, this.buf.length, 4);
         }
     }
 };
