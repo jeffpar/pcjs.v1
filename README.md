@@ -5,7 +5,7 @@ Welcome to PCjs, home of [PCx86](/docs/pcx86/), the original IBM PC simulation t
 one of several JavaScript Machines in the [PCjs Project](https://github.com/jeffpar/pcjs), an open-source project that
 includes:
 
-* [PCx86](/docs/pcx86/), an x86-based emulator of [IBM PC and PC-compatible](/devices/pcx86/machine/) machines
+* [PCx86](/docs/pcx86/), an x86-based emulator of [IBM PC and PC-compatible Machines](/devices/pcx86/machine/)
 * [PC8080](/modules/pc8080/), an 8080 machine emulator (e.g., [Space Invaders](/devices/pc8080/machine/invaders/) and the [VT100 Terminal](/devices/pc8080/machine/vt100/))
 * [C1Pjs](/docs/c1pjs/), an emulation of the 6502-based [Ohio Scientific Challenger 1P](/devices/c1p/)
 * [PDPjs](/docs/pdpjs/), a set of emulation modules supporting [PDP-10](/devices/pdp10/machine/) and [PDP-11](/devices/pdp11/machine/) machines
@@ -26,7 +26,7 @@ PCx86 has steadily evolved to support more classic x86-based machines, including
 and the 80386-based COMPAQ DeskPro 386.  PCx86 fully supports the original machine ROMs, video cards, etc, and all
 machines run at their original speeds.
 
-The goals of the [PCjs Project](/docs/about/) project are to create fast, full-featured simulations of classic
+The goals of the [PCjs Project](/docs/about/) are to create fast, full-featured simulations of classic
 computer hardware, help people understand how these early machines worked, make it easy to experiment with different
 machine configurations, and provide a platform for running and analyzing old computer software.
 

@@ -6,9 +6,8 @@ description: >
   Welcome to PCjs, home of the original IBM PC in a web browser.
   PCjs provides a variety of computer emulators written in JavaScript, including PCx86 for x86-based machines
   (up through the 80386), C1Pjs for the 6502-based Ohio Scientific Challenger 1P, PC8080 for 8080-based machines
-  such as Space Invaders and the DEC VT100 Terminal, and PDPjs, a PDP-11 emulator for the PDP-11/20, PDP-11/45,
-  and PDP-11/70.  PCjs also provides an archive of selected historical PC software, publications, and reference
-  materials.
+  such as Space Invaders and the DEC VT100 Terminal, and PDPjs with support for PDP-10 and PDP-11 machines.
+  PCjs also provides an archive of selected historical PC software, publications, and reference materials.
 baseurl: ""                 # "/pcjs" when using http://jeffpar.github.io or "" when using http://www.pcjs.org 
 url: "http://www.pcjs.org"  # "http://jeffpar.github.io" or "http://www.pcjs.org"
 twitter_username: jeffpar
@@ -34,7 +33,7 @@ gems:
 
 pcjs:
   domain: pcjs.org    # whereas site.url is used for linking purposes, site.pcjs.domain is used for display purposes
-  version: 1.34.0     # IMPORTANT: keep pcjs.version in sync with package.json:version
+  version: 1.34.1     # IMPORTANT: keep pcjs.version in sync with package.json:version
   compiled: true      # by default, the compiled pcjs.version scripts will be used (eg, pcx86.js or pcx86-dbg.js)
   c1p_scripts:        # if pcjs.compiled is false, the following scripts will be included instead, in the order listed
     - /modules/shared/lib/defines.js
@@ -133,6 +132,35 @@ pcjs:
     - /modules/pc8080/lib/computer.js
     - /modules/shared/lib/state.js
     - /modules/shared/lib/embed.js
+  pdp10_scripts:
+    - /modules/shared/lib/defines.js
+    - /modules/shared/lib/nodebug.js
+    - /modules/shared/lib/dumpapi.js
+    - /modules/shared/lib/reportapi.js
+    - /modules/shared/lib/userapi.js
+    - /modules/shared/lib/int36.js
+    - /modules/shared/lib/keys.js
+    - /modules/shared/lib/strlib.js
+    - /modules/shared/lib/usrlib.js
+    - /modules/shared/lib/weblib.js
+    - /modules/shared/lib/component.js
+    - /modules/pdp10/lib/defines.js
+    - /modules/pdp10/lib/messages.js
+    - /modules/pdp10/lib/panel.js
+    - /modules/pdp10/lib/bus.js
+    - /modules/pdp10/lib/device.js
+    - /modules/pdp10/lib/memory.js
+    - /modules/pdp10/lib/cpu.js
+    - /modules/pdp10/lib/cpustate.js
+    - /modules/pdp10/lib/cpuops.js
+    - /modules/pdp10/lib/rom.js
+    - /modules/pdp10/lib/ram.js
+    - /modules/pdp10/lib/serial.js
+    - /modules/shared/lib/debugger.js
+    - /modules/pdp10/lib/debugger.js
+    - /modules/pdp10/lib/computer.js
+    - /modules/shared/lib/state.js
+    - /modules/shared/lib/embed.js
   pdp11_scripts:
     - /modules/shared/lib/defines.js
     - /modules/shared/lib/nodebug.js
@@ -162,6 +190,7 @@ pcjs:
     - /modules/pdp11/lib/drive.js
     - /modules/pdp11/lib/rk11.js
     - /modules/pdp11/lib/rl11.js
+    - /modules/pdp11/lib/rx11.js
     - /modules/shared/lib/debugger.js
     - /modules/pdp11/lib/debugger.js
     - /modules/pdp11/lib/computer.js
