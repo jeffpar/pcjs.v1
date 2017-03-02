@@ -583,40 +583,84 @@ PDP10.opFDVRB = function(op)
 };
 
 /**
- * opMOV(0o200000)
+ * opMOVE(0o200000)
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-11:
+ *
+ *      Move one word from the source to the destination specified by M.  The source is unaffected,
+ *      the original contents of the destination are lost.
+ *
+ * NOTE: This is a "Basic" mode instruction: the source is [E] and the destination is [A] (opposite of "Memory").
  *
  * @this {CPUStatePDP10}
  * @param {number} op
  */
-PDP10.opMOV = function(op)
+PDP10.opMOVE = function(op)
 {
-    this.opUndefined(op);
+    this.writeWord(op & PDP10.OPCODE.A_MASK, this.readWord(this.regEA));
 };
 
 /**
- * opMOVI(0o201000)
+ * opMOVEI(0o201000)
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-11:
+ *
+ *      Move one word from the source to the destination specified by M.  The source is unaffected,
+ *      the original contents of the destination are lost.
+ *
+ *      SIDEBAR: MOVEI loads the word 0,E into AC and is thus equivalent to HRRZI.
+ *
+ * NOTE: This is an "Immediate" mode instruction: the source is the word 0,E and the destination is [A].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
  */
-PDP10.opMOVI = function(op)
+PDP10.opMOVEI = function(op)
 {
-    this.opUndefined(op);
+    this.writeWord(op & PDP10.OPCODE.A_MASK, this.regEA);
 };
 
 /**
- * opMOVM(0o200000)
+ * opMOVEM(0o202000)
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-11:
+ *
+ *      Move one word from the source to the destination specified by M.  The source is unaffected,
+ *      the original contents of the destination are lost.
+ *
+ * NOTE: This is a "Memory" mode instruction: the source is [A] and the destination is [E] (opposite of "Basic").
  *
  * @this {CPUStatePDP10}
  * @param {number} op
  */
-PDP10.opMOVM = function(op)
+PDP10.opMOVEM = function(op)
 {
-    this.opUndefined(op);
+    this.writeWord(this.regEA, this.readWord(op & PDP10.OPCODE.A_MASK));
 };
 
 /**
- * opMOVS(0o200000)
+ * opMOVES(0o203000)
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-11:
+ *
+ *      Move one word from the source to the destination specified by M.  The source is unaffected,
+ *      the original contents of the destination are lost.
+ *
+ *      SIDEBAR: If A is zero, MOVES is a no-op; otherwise it is equivalent to MOVE.
+ *
+ * NOTE: This is a "Self" mode instruction: the source AND destination is [E] (and also [A] if A is non-zero).
+ *
+ * @this {CPUStatePDP10}
+ * @param {number} op
+ */
+PDP10.opMOVES = function(op)
+{
+    var acc = op & PDP10.OPCODE.A_MASK;
+    if (acc) this.writeWord(acc, this.readWord(this.regEA));
+};
+
+/**
+ * opMOVS(0o204000)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -699,6 +743,17 @@ PDP10.opMOVNM = function(op)
  * @param {number} op
  */
 PDP10.opMOVNS = function(op)
+{
+    this.opUndefined(op);
+};
+
+/**
+ * opMOVM(0o214000)
+ *
+ * @this {CPUStatePDP10}
+ * @param {number} op
+ */
+PDP10.opMOVM = function(op)
 {
     this.opUndefined(op);
 };
@@ -1025,23 +1080,30 @@ PDP10.opEXCH = function(op)
  *      is the final location being loaded.  Furthermore, the program cannot assume that AC is the same after the BLT
  *      as it was before.
  *
- * NOTE: As currently implemented, we will NEVER acknowledge an interrupt during a block transfer, so the above
- * caution can be ignored (for now).
- *
  * @this {CPUStatePDP10}
  * @param {number} op
  */
 PDP10.opBLT = function(op)
 {
+    var fDone = false;
     var acc = op & PDP10.OPCODE.A_MASK;
     var addrDst = this.readWord(acc);
     var addrSrc = (addrDst / PDP10.WORD_SHIFT)|0;
     addrDst &= PDP10.WORD_MASK;
-    while (true) {
+    while (!fDone) {
         this.writeWord(addrDst, this.readWord(addrSrc));
-        if (addrDst == this.regEA) break;
+        if (addrDst == this.regEA) fDone = true;
         addrSrc = (addrSrc + 1) & PDP10.WORD_MASK;
         addrDst = (addrDst + 1) & PDP10.WORD_MASK;
+        if (!this.isRunning()) {
+            /*
+             * Since the CPU isn't currently running, the CPU is presumably being stepped, so we'll treat that the
+             * same as the "priority interrupt" condition described above, update the accumulator, rewind the PC, and leave.
+             */
+            this.writeWord(acc, addrSrc * PDP10.WORD_SHIFT + addrDst);
+            if (!fDone) this.advancePC(-1);
+            fDone = true;
+        }
     }
 };
 
@@ -2759,7 +2821,7 @@ PDP10.opHLLM = function(op)
  *
  *      SIDEBAR: If A is zero, HLLS is a no-op, otherwise it is equivalent to HLL.
  *
- * For HLLS, the source is [E] and the destination is [E] (and also [A] if A is non-zero).
+ * For HLLS, the source AND destination is [E] (and also [A] if A is non-zero).
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2767,12 +2829,10 @@ PDP10.opHLLM = function(op)
 PDP10.opHLLS = function(op)
 {
     var dst = this.readWord(this.regEA);
-    this.writeWord(this.regEA, PDP10.setHR(op, dst, dst));
+    dst = PDP10.setHR(op, dst, dst);
+    this.writeWord(this.regEA, dst);
     var acc = op & PDP10.OPCODE.A_MASK;
-    if (acc) {
-        dst = this.readWord(acc);
-        this.writeWord(acc, PDP10.setHR(op, dst, dst));
-    }
+    if (acc) this.writeWord(acc, dst);
 };
 
 /**
@@ -2850,7 +2910,7 @@ PDP10.opHRLM = function(op)
  *      The source and the destination right half are unaffected; the original contents of the destination left
  *      half are lost.
  *
- * For HRLS, the source is [E] and the destination is [E] (and also [A] if A is non-zero).
+ * For HRLS, the source AND destination is [E] (and also [A] if A is non-zero).
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2859,13 +2919,10 @@ PDP10.opHRLS = function(op)
 {
     var dst = this.readWord(this.regEA);
     var src = (dst & PDP10.WORD_MASK) * PDP10.WORD_SHIFT;
-    this.writeWord(this.regEA, PDP10.getHR(op, dst, src) + src);
+    dst = PDP10.getHR(op, dst, src) + src;
+    this.writeWord(this.regEA, dst);
     var acc = op & PDP10.OPCODE.A_MASK;
-    if (acc) {
-        dst = this.readWord(acc);
-        src = (dst & PDP10.WORD_MASK) * PDP10.WORD_SHIFT;
-        this.writeWord(acc, PDP10.getHR(op, dst, src) + src);
-    }
+    if (acc) this.writeWord(acc, dst);
 };
 
 /**
@@ -2944,7 +3001,7 @@ PDP10.opHRRM = function(op)
  *
  *      SIDEBAR: If A is zero, HRRS is a no-op; otherwise it is equivalent to HRR.
  *
- * For HRRS, the source is [E] and the destination is [E] (and also [A] if A is non-zero).
+ * For HRRS, the source AND destination is [E] (and also [A] if A is non-zero).
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2952,12 +3009,10 @@ PDP10.opHRRM = function(op)
 PDP10.opHRRS = function(op)
 {
     var dst = this.readWord(this.regEA);
-    this.writeWord(this.regEA, PDP10.setHL(op, dst, dst));
+    dst = PDP10.setHL(op, dst, dst);
+    this.writeWord(this.regEA, dst);
     var acc = op & PDP10.OPCODE.A_MASK;
-    if (acc) {
-        dst = this.readWord(acc);
-        this.writeWord(acc, PDP10.setHL(op, dst, dst));
-    }
+    if (acc) this.writeWord(acc, dst);
 };
 
 /**
@@ -3032,7 +3087,7 @@ PDP10.opHLRM = function(op)
  *      Move the left half of the source word specified by M to the right half of the specified destination.
  *      The source and the destination left half are unaffected; the original contents of the destination right half are lost.
  *
- * For HLRS, the source is [E] and the destination is [E] (and also [A] if A is non-zero).
+ * For HLRS, the source AND destination is [E] (and also [A] if A is non-zero).
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3041,13 +3096,10 @@ PDP10.opHLRS = function(op)
 {
     var dst = this.readWord(this.regEA);
     var src = (dst / PDP10.WORD_SHIFT)|0;
-    this.writeWord(this.regEA, PDP10.getHL(op, dst, src) + src);
+    dst = PDP10.getHL(op, dst, src) + src;
+    this.writeWord(this.regEA, dst);
     var acc = op & PDP10.OPCODE.A_MASK;
-    if (acc) {
-        dst = this.readWord(acc);
-        src = (dst / PDP10.WORD_SHIFT)|0;
-        this.writeWord(acc, PDP10.getHL(op, dst, src) + src);
-    }
+    if (acc) this.writeWord(acc, dst);
 };
 
 /**
@@ -4164,10 +4216,10 @@ PDP10.aOpXXX_KA10 = [
     PDP10.opFDVRI,              // 0o175xxx
     PDP10.opFDVRM,              // 0o176xxx
     PDP10.opFDVRB,              // 0o177xxx
-    PDP10.opMOV,                // 0o200xxx
-    PDP10.opMOVI,               // 0o201xxx
-    PDP10.opMOVM,               // 0o202xxx
-    PDP10.opMOVS,               // 0o203xxx
+    PDP10.opMOVE,               // 0o200xxx
+    PDP10.opMOVEI,              // 0o201xxx
+    PDP10.opMOVEM,              // 0o202xxx
+    PDP10.opMOVES,              // 0o203xxx
     PDP10.opMOVS,               // 0o204xxx
     PDP10.opMOVSI,              // 0o205xxx
     PDP10.opMOVSM,              // 0o206xxx

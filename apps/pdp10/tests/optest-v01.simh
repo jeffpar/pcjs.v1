@@ -8,6 +8,34 @@ dep 106 544240000003
 dep 107 504300000004
 dep 110 573000000005
 dep 111 533000000006
-ex -m 100-111
+dep 112 541000000010
+dep 113 251000000017
+dep 114 577040000002
+ex -m 100-114
 dep pc 100
-step 10
+step 11
+ex 0-17
+;
+echo Execute the BLT 8 times...
+;
+step
+ex 0-17
+step
+ex 0-17
+step
+ex 0-17
+step
+ex 0-17
+step
+ex 0-17
+step
+ex 0-17
+step
+ex 0-17
+step
+ex 0-17
+;
+echo next up: HLRES 1,2
+;
+step 1
+ex 0-17
