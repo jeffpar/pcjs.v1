@@ -102,8 +102,16 @@ var PDP10 = {
     DATA_LIMIT:     Math.pow(2, 36),
     WORD_SHIFT:     Math.pow(2, 18),
     WORD_MASK:      0o777777,
-    MAX_POS18:      Math.pow(2, 17) - 1,
-    MAX_POS:        Math.pow(2, 35) - 1,
+
+    /*
+     * 18-bit and 36-bit largest positive (and smallest negative) values; however, since we store all
+     * values as unsigned quantities, these are the unsigned equivalents.
+     */
+    MAX_POS18:      Math.pow(2, 17) - 1,        //         131,071        (377777)
+    MIN_NEG18:      Math.pow(2, 17),            //        -131,072        (400000)
+    MAX_POS36:      Math.pow(2, 35) - 1,        //  34,359,738,367 (377777 777777)
+    MIN_NEG36:      Math.pow(2, 35),            // -34,359,738,368 (400000 000000)
+    TWO_POW36:      Math.pow(2, 36),            // the two's complement of a 36-bit value is (value? TWO_POW36 - value : 0)
 
     /*
      * PDP-10 opcodes are 36-bit values, most of which use the following layout:

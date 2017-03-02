@@ -583,7 +583,7 @@ PDP10.opFDVRB = function(op)
 };
 
 /**
- * opMOVE(0o200000)
+ * opMOVE(0o200000): Move
  *
  * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-11:
  *
@@ -601,7 +601,7 @@ PDP10.opMOVE = function(op)
 };
 
 /**
- * opMOVEI(0o201000)
+ * opMOVEI(0o201000): Move Immediate
  *
  * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-11:
  *
@@ -621,7 +621,7 @@ PDP10.opMOVEI = function(op)
 };
 
 /**
- * opMOVEM(0o202000)
+ * opMOVEM(0o202000): Move to Memory
  *
  * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-11:
  *
@@ -639,7 +639,7 @@ PDP10.opMOVEM = function(op)
 };
 
 /**
- * opMOVES(0o203000)
+ * opMOVES(0o203000): Move to Self
  *
  * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-11:
  *
@@ -660,62 +660,128 @@ PDP10.opMOVES = function(op)
 };
 
 /**
- * opMOVS(0o204000)
+ * opMOVS(0o204000): Move Swapped
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-11:
+ *
+ *      Interchange the left and right halves of the word from the source specified by M and move it to the
+ *      specified destination.  The source is unaffected, the original contents of the destination are lost.
+ *
+ * NOTE: This is a "Basic" mode instruction: the source is [E] and the destination is [A] (opposite of "Memory").
  *
  * @this {CPUStatePDP10}
  * @param {number} op
  */
 PDP10.opMOVS = function(op)
 {
-    this.opUndefined(op);
+    var src = this.readWord(this.regEA);
+    src = (src / PDP10.WORD_SHIFT) | ((src & PDP10.WORD_MASK) * PDP10.WORD_SHIFT);
+    this.writeWord(op & PDP10.OPCODE.A_MASK, src);
 };
 
 /**
- * opMOVSI(0o205000)
+ * opMOVSI(0o205000): Move Swapped Immediate
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-11:
+ *
+ *      Interchange the left and right halves of the word from the source specified by M and move it to the
+ *      specified destination.  The source is unaffected, the original contents of the destination are lost.
+ *
+ *      SIDEBAR: Swapping halves in immediate mode loads the word E,0 into AC.  MOVSI is thus equivalent to HRLZI.
+ *
+ * NOTE: This is an "Immediate" mode instruction: the source is the word 0,E and the destination is [A].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
  */
 PDP10.opMOVSI = function(op)
 {
-    this.opUndefined(op);
+    this.writeWord(op & PDP10.OPCODE.A_MASK, this.regEA * PDP10.WORD_SHIFT);
 };
 
 /**
- * opMOVSM(0o206000)
+ * opMOVSM(0o206000): Move Swapped to Memory
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-11:
+ *
+ *      Interchange the left and right halves of the word from the source specified by M and move it to the
+ *      specified destination.  The source is unaffected, the original contents of the destination are lost.
+ *
+ * NOTE: This is a "Memory" mode instruction: the source is [A] and the destination is [E] (opposite of "Basic").
  *
  * @this {CPUStatePDP10}
  * @param {number} op
  */
 PDP10.opMOVSM = function(op)
 {
-    this.opUndefined(op);
+    var src = this.readWord(op & PDP10.OPCODE.A_MASK);
+    src = (src / PDP10.WORD_SHIFT) | ((src & PDP10.WORD_MASK) * PDP10.WORD_SHIFT);
+    this.writeWord(this.regEA, src);
 };
 
 /**
- * opMOVSS(0o207000)
+ * opMOVSS(0o207000): Move Swapped to Self
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-11:
+ *
+ *      Interchange the left and right halves of the word from the source specified by M and move it to the
+ *      specified destination.  The source is unaffected, the original contents of the destination are lost.
+ *
+ * NOTE: This is a "Self" mode instruction: the source AND destination is [E] (and also [A] if A is non-zero).
  *
  * @this {CPUStatePDP10}
  * @param {number} op
  */
 PDP10.opMOVSS = function(op)
 {
-    this.opUndefined(op);
+    var src = this.readWord(this.regEA);
+    src = (src / PDP10.WORD_SHIFT) | ((src & PDP10.WORD_MASK) * PDP10.WORD_SHIFT);
+    this.writeWord(this.regEA, src);
+    var acc = op & PDP10.OPCODE.A_MASK;
+    if (acc) this.writeWord(acc, src)
 };
 
 /**
- * opMOVN(0o210000)
+ * opMOVN(0o210000): Move Negative
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-11:
+ *
+ *      Negate the word from the source specified by M and move it to the specified destination.
+ *      If the source word is fixed point -2^35 (400000 000000) set the Overflow and Carry 1 flags.
+ *
+ *      (Negating the equivalent floating point -1 * 2^127 sets the flags, but this is not a normalized
+ *      number).
+ *
+ *      If the source word is zero, set Carry 0 and Carry 1.  The source is unaffected, the original
+ *      contents of the destination are lost.
+ *
+ * NOTE: This is a "Basic" mode instruction: the source is [E] and the destination is [A] (opposite of "Memory").
  *
  * @this {CPUStatePDP10}
  * @param {number} op
  */
 PDP10.opMOVN = function(op)
 {
-    this.opUndefined(op);
+    this.writeWord(op & PDP10.OPCODE.A_MASK, this.negate(this.readWord(this.regEA)));
 };
 
 /**
- * opMOVNI(0o211000)
+ * opMOVNI(0o211000): Move Negative Immediate
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-11:
+ *
+ *      Negate the word from the source specified by M and move it to the specified destination.
+ *      If the source word is fixed point -2^35 (400000 000000) set the Overflow and Carry 1 flags.
+ *
+ *      (Negating the equivalent floating point -1 * 2^127 sets the flags, but this is not a normalized
+ *      number).
+ *
+ *      If the source word is zero, set Carry 0 and Carry 1.  The source is unaffected, the original
+ *      contents of the destination are lost.
+ *
+ *      SIDEBAR: MOVNI loads AC with the negative of the word 0,E and can set no flags.
+ *
+ * NOTE: This is an "Immediate" mode instruction: the source is the word 0,E and the destination is [A].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -726,7 +792,20 @@ PDP10.opMOVNI = function(op)
 };
 
 /**
- * opMOVNM(0o212000)
+ * opMOVNM(0o212000): Move Negative to Memory
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-11:
+ *
+ *      Negate the word from the source specified by M and move it to the specified destination.
+ *      If the source word is fixed point -2^35 (400000 000000) set the Overflow and Carry 1 flags.
+ *
+ *      (Negating the equivalent floating point -1 * 2^127 sets the flags, but this is not a normalized
+ *      number).
+ *
+ *      If the source word is zero, set Carry 0 and Carry 1.  The source is unaffected, the original
+ *      contents of the destination are lost.
+ *
+ * NOTE: This is a "Memory" mode instruction: the source is [A] and the destination is [E] (opposite of "Basic").
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -737,7 +816,20 @@ PDP10.opMOVNM = function(op)
 };
 
 /**
- * opMOVNS(0o213000)
+ * opMOVNS(0o213000): Move Negative to Self
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-11:
+ *
+ *      Negate the word from the source specified by M and move it to the specified destination.
+ *      If the source word is fixed point -2^35 (400000 000000) set the Overflow and Carry 1 flags.
+ *
+ *      (Negating the equivalent floating point -1 * 2^127 sets the flags, but this is not a normalized
+ *      number).
+ *
+ *      If the source word is zero, set Carry 0 and Carry 1.  The source is unaffected, the original
+ *      contents of the destination are lost.
+ *
+ * NOTE: This is a "Self" mode instruction: the source AND destination is [E] (and also [A] if A is non-zero).
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3996,7 +4088,7 @@ PDP10.getHR = function(op, dst, src)
         dst = PDP10.WORD_MASK;
         break;
     case 0o600:
-        dst = (src > PDP10.MAX_POS? PDP10.WORD_MASK : 0);
+        dst = (src > PDP10.MAX_POS36? PDP10.WORD_MASK : 0);
         break;
     }
     return dst;
@@ -4021,7 +4113,7 @@ PDP10.setHR = function(op, dst, src)
             dst += PDP10.WORD_MASK;
             break;
         case 0o600:
-            dst += (src > PDP10.MAX_POS? PDP10.WORD_MASK : 0);
+            dst += (src > PDP10.MAX_POS36? PDP10.WORD_MASK : 0);
             break;
         }
     }

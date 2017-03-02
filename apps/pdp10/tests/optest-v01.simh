@@ -16,7 +16,7 @@ dep pc 100
 step 11
 ex 0-17
 ;
-echo Execute the BLT 8 times...
+echo Execute BLT 8 times (note the weird value that SIMH moves on the first iteration (ie, from AC 0 to AC 10)
 ;
 step
 ex 0-17
@@ -35,7 +35,7 @@ ex 0-17
 step
 ex 0-17
 ;
-echo next up: HLRES 1,2
+echo Execute HLRES 1,2
 ;
 step 1
 ex 0-17

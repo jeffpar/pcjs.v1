@@ -176,6 +176,7 @@ class CPUStatePDP10 extends CPUPDP10 {
     {
         this.regEA = this.regRA = this.regOP = 0;
         this.regPC = this.lastPC = this.addrReset;
+        this.fOverflow = this.fCarry0 = this.fCarry1 = this.fNoDivide = false;
 
         /*
          * This is queried and displayed by the Panel when it's not displaying its own ADDRESS register
@@ -327,25 +328,29 @@ class CPUStatePDP10 extends CPUPDP10 {
     /**
      * getOpcode()
      *
-     * Normally, this fetches the next opcode in regOP, decodes the low 23 bits (I,X,Y), records the effective
-     * address (E) in regEA, updates regPC, and returns the high 13 bits of the opcode for further decoding.
+     * Normally, this fetches the next opcode in regOP, decodes the low 23 bits (I,X,Y), records
+     * the effective address (E) in regEA, updates regPC, and returns the high 13 bits of the opcode
+     * for further decoding.
      *
-     * However, if a reference address still needs to be decoded (due to indirection), we take care of that first.
+     * However, if a reference address (R) in regRA still needs to be decoded (due to indirection),
+     * we take care of that first.
      *
      * @this {CPUStatePDP10}
      * @return {number} (-1 if the reference address in regRA has not yet been fully decoded)
      */
     getOpcode()
     {
+        if ((this.regRA & PDP10.OPCODE.I_BIT)) {
+            this.regRA = this.readWord(this.regEA);
+        } else {
+            this.regRA = this.regOP = this.readWord(this.lastPC = this.regPC);
+        }
+
         /*
          * Technically, we don't REALLY need to mask regRA with R_MASK, because all regRA accesses
-         * ignore any higher opcode bits, but let's keep things tidy.
+         * ignore any higher bits, but let's keep things tidy.
          */
-        if ((this.regRA & PDP10.OPCODE.I_BIT)) {
-            this.regRA = this.readWord(this.regEA) & PDP10.OPCODE.R_MASK;
-        } else {
-            this.regRA = (this.regOP = this.readWord(this.lastPC = this.regPC)) & PDP10.OPCODE.R_MASK;
-        }
+        this.regRA &= PDP10.OPCODE.R_MASK;
 
         /*
          * Bits 0-22 (I,X,Y) contain what we call a "reference address" (R), which is used to calculate an
@@ -431,6 +436,32 @@ class CPUStatePDP10 extends CPUPDP10 {
     setPC(addr)
     {
         this.regPC = addr % PDP10.ADDR_LIMIT;
+    }
+
+    /**
+     * negate(src)
+     *
+     * @this {CPUStatePDP10}
+     * @param {number} src (36-bit)
+     * @return {number} (negated 36-bit src)
+     */
+    negate(src)
+    {
+        if (!src) {
+            this.fCarry = this.fCarry1 = true;
+        }
+        else {
+            /*
+             * In the non-zero case, it's always safe to subtract src from TWO_POW36, but since we have to check for
+             * the MIN_NEG36 case anyway, and since subtraction in that case doesn't alter src, we skip the subtraction.
+             */
+            if (src == PDP10.MIN_NEG36) {
+                this.fOverflow = this.fCarry1 = true;
+            } else {
+                src = PDP10.TWO_POW36 - src;
+            }
+        }
+        return src;
     }
 
     /**
