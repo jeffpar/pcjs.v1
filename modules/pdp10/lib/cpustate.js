@@ -443,12 +443,12 @@ class CPUStatePDP10 extends CPUPDP10 {
      *
      * @this {CPUStatePDP10}
      * @param {number} src (36-bit)
-     * @return {number} (negated 36-bit src)
+     * @return {number} (negated, but as an unsigned 36-bit result)
      */
     negate(src)
     {
         if (!src) {
-            this.fCarry = this.fCarry1 = true;
+            this.fCarry0 = this.fCarry1 = true;
         }
         else {
             /*

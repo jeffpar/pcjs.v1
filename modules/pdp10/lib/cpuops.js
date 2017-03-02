@@ -49,7 +49,7 @@ PDP10.opKA10 = function(op)
     /*
      * We shift op right 4 more bits, leaving only the 9 bits required for the table index.
      */
-    PDP10.aOpXXX_KA10[op >> 4].call(this, op);
+    PDP10.aOpXXX_KA10[op >> 4].call(this, op, op & PDP10.OPCODE.A_MASK);
 };
 
 /**
@@ -76,8 +76,9 @@ PDP10.opKA10 = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opUUO = function(op)
+PDP10.opUUO = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -102,8 +103,9 @@ PDP10.opUUO = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opUFA = function(op)
+PDP10.opUFA = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -121,8 +123,9 @@ PDP10.opUFA = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opDFN = function(op)
+PDP10.opDFN = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -153,8 +156,9 @@ PDP10.opDFN = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opFSC = function(op)
+PDP10.opFSC = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -180,8 +184,9 @@ PDP10.opFSC = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opIBP = function(op)
+PDP10.opIBP = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -191,8 +196,9 @@ PDP10.opIBP = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opILDB = function(op)
+PDP10.opILDB = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -202,8 +208,9 @@ PDP10.opILDB = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opLDB = function(op)
+PDP10.opLDB = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -213,8 +220,9 @@ PDP10.opLDB = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opIDPB = function(op)
+PDP10.opIDPB = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -224,8 +232,9 @@ PDP10.opIDPB = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opDPB = function(op)
+PDP10.opDPB = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -235,8 +244,9 @@ PDP10.opDPB = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opFAD = function(op)
+PDP10.opFAD = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -246,8 +256,9 @@ PDP10.opFAD = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opFADI = function(op)
+PDP10.opFADI = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -257,8 +268,9 @@ PDP10.opFADI = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opFADM = function(op)
+PDP10.opFADM = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -268,8 +280,9 @@ PDP10.opFADM = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opFADB = function(op)
+PDP10.opFADB = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -279,8 +292,9 @@ PDP10.opFADB = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opFADR = function(op)
+PDP10.opFADR = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -290,8 +304,9 @@ PDP10.opFADR = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opFADRI = function(op)
+PDP10.opFADRI = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -301,8 +316,9 @@ PDP10.opFADRI = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opFADRM = function(op)
+PDP10.opFADRM = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -312,8 +328,9 @@ PDP10.opFADRM = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opFADRB = function(op)
+PDP10.opFADRB = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -323,8 +340,9 @@ PDP10.opFADRB = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opFSB = function(op)
+PDP10.opFSB = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -334,8 +352,9 @@ PDP10.opFSB = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opFSBI = function(op)
+PDP10.opFSBI = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -345,8 +364,9 @@ PDP10.opFSBI = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opFSBM = function(op)
+PDP10.opFSBM = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -356,8 +376,9 @@ PDP10.opFSBM = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opFSBB = function(op)
+PDP10.opFSBB = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -367,8 +388,9 @@ PDP10.opFSBB = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opFSBR = function(op)
+PDP10.opFSBR = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -378,8 +400,9 @@ PDP10.opFSBR = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opFSBRI = function(op)
+PDP10.opFSBRI = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -389,8 +412,9 @@ PDP10.opFSBRI = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opFSBRM = function(op)
+PDP10.opFSBRM = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -400,8 +424,9 @@ PDP10.opFSBRM = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opFSBRB = function(op)
+PDP10.opFSBRB = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -411,8 +436,9 @@ PDP10.opFSBRB = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opFMP = function(op)
+PDP10.opFMP = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -422,8 +448,9 @@ PDP10.opFMP = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opFMPI = function(op)
+PDP10.opFMPI = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -433,8 +460,9 @@ PDP10.opFMPI = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opFMPM = function(op)
+PDP10.opFMPM = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -444,8 +472,9 @@ PDP10.opFMPM = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opFMPB = function(op)
+PDP10.opFMPB = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -455,8 +484,9 @@ PDP10.opFMPB = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opFMPR = function(op)
+PDP10.opFMPR = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -466,8 +496,9 @@ PDP10.opFMPR = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opFMPRI = function(op)
+PDP10.opFMPRI = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -477,8 +508,9 @@ PDP10.opFMPRI = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opFMPRM = function(op)
+PDP10.opFMPRM = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -488,8 +520,9 @@ PDP10.opFMPRM = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opFMPRB = function(op)
+PDP10.opFMPRB = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -499,8 +532,9 @@ PDP10.opFMPRB = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opFDV = function(op)
+PDP10.opFDV = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -510,8 +544,9 @@ PDP10.opFDV = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opFDVI = function(op)
+PDP10.opFDVI = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -521,8 +556,9 @@ PDP10.opFDVI = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opFDVM = function(op)
+PDP10.opFDVM = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -532,8 +568,9 @@ PDP10.opFDVM = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opFDVB = function(op)
+PDP10.opFDVB = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -543,8 +580,9 @@ PDP10.opFDVB = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opFDVR = function(op)
+PDP10.opFDVR = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -554,8 +592,9 @@ PDP10.opFDVR = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opFDVRI = function(op)
+PDP10.opFDVRI = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -565,8 +604,9 @@ PDP10.opFDVRI = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opFDVRM = function(op)
+PDP10.opFDVRM = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -576,8 +616,9 @@ PDP10.opFDVRM = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opFDVRB = function(op)
+PDP10.opFDVRB = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -594,10 +635,11 @@ PDP10.opFDVRB = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opMOVE = function(op)
+PDP10.opMOVE = function(op, acc)
 {
-    this.writeWord(op & PDP10.OPCODE.A_MASK, this.readWord(this.regEA));
+    this.writeWord(acc, this.readWord(this.regEA));
 };
 
 /**
@@ -614,10 +656,11 @@ PDP10.opMOVE = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opMOVEI = function(op)
+PDP10.opMOVEI = function(op, acc)
 {
-    this.writeWord(op & PDP10.OPCODE.A_MASK, this.regEA);
+    this.writeWord(acc, this.regEA);
 };
 
 /**
@@ -632,10 +675,11 @@ PDP10.opMOVEI = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opMOVEM = function(op)
+PDP10.opMOVEM = function(op, acc)
 {
-    this.writeWord(this.regEA, this.readWord(op & PDP10.OPCODE.A_MASK));
+    this.writeWord(this.regEA, this.readWord(acc));
 };
 
 /**
@@ -652,10 +696,10 @@ PDP10.opMOVEM = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opMOVES = function(op)
+PDP10.opMOVES = function(op, acc)
 {
-    var acc = op & PDP10.OPCODE.A_MASK;
     if (acc) this.writeWord(acc, this.readWord(this.regEA));
 };
 
@@ -671,12 +715,13 @@ PDP10.opMOVES = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opMOVS = function(op)
+PDP10.opMOVS = function(op, acc)
 {
     var src = this.readWord(this.regEA);
     src = (src / PDP10.WORD_SHIFT) | ((src & PDP10.WORD_MASK) * PDP10.WORD_SHIFT);
-    this.writeWord(op & PDP10.OPCODE.A_MASK, src);
+    this.writeWord(acc, src);
 };
 
 /**
@@ -693,10 +738,11 @@ PDP10.opMOVS = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opMOVSI = function(op)
+PDP10.opMOVSI = function(op, acc)
 {
-    this.writeWord(op & PDP10.OPCODE.A_MASK, this.regEA * PDP10.WORD_SHIFT);
+    this.writeWord(acc, this.regEA * PDP10.WORD_SHIFT);
 };
 
 /**
@@ -711,10 +757,11 @@ PDP10.opMOVSI = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opMOVSM = function(op)
+PDP10.opMOVSM = function(op, acc)
 {
-    var src = this.readWord(op & PDP10.OPCODE.A_MASK);
+    var src = this.readWord(acc);
     src = (src / PDP10.WORD_SHIFT) | ((src & PDP10.WORD_MASK) * PDP10.WORD_SHIFT);
     this.writeWord(this.regEA, src);
 };
@@ -731,13 +778,13 @@ PDP10.opMOVSM = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opMOVSS = function(op)
+PDP10.opMOVSS = function(op, acc)
 {
     var src = this.readWord(this.regEA);
     src = (src / PDP10.WORD_SHIFT) | ((src & PDP10.WORD_MASK) * PDP10.WORD_SHIFT);
     this.writeWord(this.regEA, src);
-    var acc = op & PDP10.OPCODE.A_MASK;
     if (acc) this.writeWord(acc, src)
 };
 
@@ -759,10 +806,11 @@ PDP10.opMOVSS = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opMOVN = function(op)
+PDP10.opMOVN = function(op, acc)
 {
-    this.writeWord(op & PDP10.OPCODE.A_MASK, this.negate(this.readWord(this.regEA)));
+    this.writeWord(acc, this.negate(this.readWord(this.regEA)));
 };
 
 /**
@@ -785,10 +833,16 @@ PDP10.opMOVN = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opMOVNI = function(op)
+PDP10.opMOVNI = function(op, acc)
 {
-    this.opUndefined(op);
+    /*
+     * We perform an in-line two's complement of regEA, since negate() updates the flags, and the documentation
+     * above claims that this operation must "set no flags."  It's certainly true that regEA, being an 18-bit value,
+     * could never be -2^35, but it COULD be zero -- and apparently this instruction treats zero differently from MOVN.
+     */
+    this.writeWord(acc, this.regEA? PDP10.TWO_POW36 - this.regEA : 0);
 };
 
 /**
@@ -809,10 +863,11 @@ PDP10.opMOVNI = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opMOVNM = function(op)
+PDP10.opMOVNM = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(this.regEA, this.negate(this.readWord(acc)));
 };
 
 /**
@@ -833,10 +888,13 @@ PDP10.opMOVNM = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opMOVNS = function(op)
+PDP10.opMOVNS = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = this.negate(this.readWord(this.regEA));
+    this.writeWord(this.regEA, dst);
+    if (acc) this.writeWord(acc, dst);
 };
 
 /**
@@ -844,8 +902,9 @@ PDP10.opMOVNS = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opMOVM = function(op)
+PDP10.opMOVM = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -855,8 +914,9 @@ PDP10.opMOVM = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opMOVMI = function(op)
+PDP10.opMOVMI = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -866,8 +926,9 @@ PDP10.opMOVMI = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opMOVMM = function(op)
+PDP10.opMOVMM = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -877,8 +938,9 @@ PDP10.opMOVMM = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opMOVMS = function(op)
+PDP10.opMOVMS = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -888,8 +950,9 @@ PDP10.opMOVMS = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opIMUL = function(op)
+PDP10.opIMUL = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -899,8 +962,9 @@ PDP10.opIMUL = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opIMULI = function(op)
+PDP10.opIMULI = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -910,8 +974,9 @@ PDP10.opIMULI = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opIMULM = function(op)
+PDP10.opIMULM = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -921,8 +986,9 @@ PDP10.opIMULM = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opIMULB = function(op)
+PDP10.opIMULB = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -932,8 +998,9 @@ PDP10.opIMULB = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opMUL = function(op)
+PDP10.opMUL = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -943,8 +1010,9 @@ PDP10.opMUL = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opMULI = function(op)
+PDP10.opMULI = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -954,8 +1022,9 @@ PDP10.opMULI = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opMULM = function(op)
+PDP10.opMULM = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -965,8 +1034,9 @@ PDP10.opMULM = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opMULB = function(op)
+PDP10.opMULB = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -976,8 +1046,9 @@ PDP10.opMULB = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opIDIV = function(op)
+PDP10.opIDIV = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -987,8 +1058,9 @@ PDP10.opIDIV = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opIDIVI = function(op)
+PDP10.opIDIVI = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -998,8 +1070,9 @@ PDP10.opIDIVI = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opIDIVM = function(op)
+PDP10.opIDIVM = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1009,8 +1082,9 @@ PDP10.opIDIVM = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opIDIVB = function(op)
+PDP10.opIDIVB = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1020,8 +1094,9 @@ PDP10.opIDIVB = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opDIV = function(op)
+PDP10.opDIV = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1031,8 +1106,9 @@ PDP10.opDIV = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opDIVI = function(op)
+PDP10.opDIVI = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1042,8 +1118,9 @@ PDP10.opDIVI = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opDIVM = function(op)
+PDP10.opDIVM = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1053,8 +1130,9 @@ PDP10.opDIVM = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opDIVB = function(op)
+PDP10.opDIVB = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1064,8 +1142,9 @@ PDP10.opDIVB = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opASH = function(op)
+PDP10.opASH = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1075,8 +1154,9 @@ PDP10.opASH = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opROT = function(op)
+PDP10.opROT = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1086,8 +1166,9 @@ PDP10.opROT = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opLSH = function(op)
+PDP10.opLSH = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1097,8 +1178,9 @@ PDP10.opLSH = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opJFFO = function(op)
+PDP10.opJFFO = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1108,8 +1190,9 @@ PDP10.opJFFO = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opASHC = function(op)
+PDP10.opASHC = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1119,8 +1202,9 @@ PDP10.opASHC = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opROTC = function(op)
+PDP10.opROTC = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1130,8 +1214,9 @@ PDP10.opROTC = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opLSHC = function(op)
+PDP10.opLSHC = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1145,10 +1230,10 @@ PDP10.opLSHC = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opEXCH = function(op)
+PDP10.opEXCH = function(op, acc)
 {
-    var acc = op & PDP10.OPCODE.A_MASK;
     var tmp = this.readWord(acc);
     this.writeWord(acc, this.readWord(this.regEA));
     this.writeWord(this.regEA, tmp);
@@ -1174,11 +1259,11 @@ PDP10.opEXCH = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opBLT = function(op)
+PDP10.opBLT = function(op, acc)
 {
     var fDone = false;
-    var acc = op & PDP10.OPCODE.A_MASK;
     var addrDst = this.readWord(acc);
     var addrSrc = (addrDst / PDP10.WORD_SHIFT)|0;
     addrDst &= PDP10.WORD_MASK;
@@ -1204,8 +1289,9 @@ PDP10.opBLT = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opAOBJP = function(op)
+PDP10.opAOBJP = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1215,8 +1301,9 @@ PDP10.opAOBJP = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opAOBJN = function(op)
+PDP10.opAOBJN = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1226,8 +1313,9 @@ PDP10.opAOBJN = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opJRST = function(op)
+PDP10.opJRST = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1237,8 +1325,9 @@ PDP10.opJRST = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opJFCL = function(op)
+PDP10.opJFCL = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1248,8 +1337,9 @@ PDP10.opJFCL = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opXCT = function(op)
+PDP10.opXCT = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1259,8 +1349,9 @@ PDP10.opXCT = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opPUSHJ = function(op)
+PDP10.opPUSHJ = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1270,8 +1361,9 @@ PDP10.opPUSHJ = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opPUSH = function(op)
+PDP10.opPUSH = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1281,8 +1373,9 @@ PDP10.opPUSH = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opPOP = function(op)
+PDP10.opPOP = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1292,8 +1385,9 @@ PDP10.opPOP = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opPOPJ = function(op)
+PDP10.opPOPJ = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1303,8 +1397,9 @@ PDP10.opPOPJ = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opJSR = function(op)
+PDP10.opJSR = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1314,8 +1409,9 @@ PDP10.opJSR = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opJSP = function(op)
+PDP10.opJSP = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1325,8 +1421,9 @@ PDP10.opJSP = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opJSA = function(op)
+PDP10.opJSA = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1336,8 +1433,9 @@ PDP10.opJSA = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opJRA = function(op)
+PDP10.opJRA = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1347,8 +1445,9 @@ PDP10.opJRA = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opADD = function(op)
+PDP10.opADD = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1358,8 +1457,9 @@ PDP10.opADD = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opADDI = function(op)
+PDP10.opADDI = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1369,8 +1469,9 @@ PDP10.opADDI = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opADDM = function(op)
+PDP10.opADDM = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1380,8 +1481,9 @@ PDP10.opADDM = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opADDB = function(op)
+PDP10.opADDB = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1391,8 +1493,9 @@ PDP10.opADDB = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opSUB = function(op)
+PDP10.opSUB = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1402,8 +1505,9 @@ PDP10.opSUB = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opSUBI = function(op)
+PDP10.opSUBI = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1413,8 +1517,9 @@ PDP10.opSUBI = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opSUBM = function(op)
+PDP10.opSUBM = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1424,8 +1529,9 @@ PDP10.opSUBM = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opSUBB = function(op)
+PDP10.opSUBB = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1435,8 +1541,9 @@ PDP10.opSUBB = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opCAI = function(op)
+PDP10.opCAI = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1446,8 +1553,9 @@ PDP10.opCAI = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opCAIL = function(op)
+PDP10.opCAIL = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1457,8 +1565,9 @@ PDP10.opCAIL = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opCAIE = function(op)
+PDP10.opCAIE = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1468,8 +1577,9 @@ PDP10.opCAIE = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opCAILE = function(op)
+PDP10.opCAILE = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1479,8 +1589,9 @@ PDP10.opCAILE = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opCAIA = function(op)
+PDP10.opCAIA = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1490,8 +1601,9 @@ PDP10.opCAIA = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opCAIGE = function(op)
+PDP10.opCAIGE = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1501,8 +1613,9 @@ PDP10.opCAIGE = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opCAIN = function(op)
+PDP10.opCAIN = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1512,8 +1625,9 @@ PDP10.opCAIN = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opCAIG = function(op)
+PDP10.opCAIG = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1523,8 +1637,9 @@ PDP10.opCAIG = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opCA = function(op)
+PDP10.opCA = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1534,8 +1649,9 @@ PDP10.opCA = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opCAL = function(op)
+PDP10.opCAL = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1545,8 +1661,9 @@ PDP10.opCAL = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opCAE = function(op)
+PDP10.opCAE = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1556,8 +1673,9 @@ PDP10.opCAE = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opCALE = function(op)
+PDP10.opCALE = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1567,8 +1685,9 @@ PDP10.opCALE = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opCAA = function(op)
+PDP10.opCAA = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1578,8 +1697,9 @@ PDP10.opCAA = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opCAGE = function(op)
+PDP10.opCAGE = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1589,8 +1709,9 @@ PDP10.opCAGE = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opCAN = function(op)
+PDP10.opCAN = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1600,8 +1721,9 @@ PDP10.opCAN = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opCAG = function(op)
+PDP10.opCAG = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1611,8 +1733,9 @@ PDP10.opCAG = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opJUMP = function(op)
+PDP10.opJUMP = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1622,8 +1745,9 @@ PDP10.opJUMP = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opJUMPL = function(op)
+PDP10.opJUMPL = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1633,8 +1757,9 @@ PDP10.opJUMPL = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opJUMPE = function(op)
+PDP10.opJUMPE = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1644,8 +1769,9 @@ PDP10.opJUMPE = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opJUMPLE = function(op)
+PDP10.opJUMPLE = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1655,8 +1781,9 @@ PDP10.opJUMPLE = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opJUMPA = function(op)
+PDP10.opJUMPA = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1666,8 +1793,9 @@ PDP10.opJUMPA = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opJUMPGE = function(op)
+PDP10.opJUMPGE = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1677,8 +1805,9 @@ PDP10.opJUMPGE = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opJUMPN = function(op)
+PDP10.opJUMPN = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1688,8 +1817,9 @@ PDP10.opJUMPN = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opJUMPG = function(op)
+PDP10.opJUMPG = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1699,8 +1829,9 @@ PDP10.opJUMPG = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opSKIP = function(op)
+PDP10.opSKIP = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1710,8 +1841,9 @@ PDP10.opSKIP = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opSKIPL = function(op)
+PDP10.opSKIPL = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1721,8 +1853,9 @@ PDP10.opSKIPL = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opSKIPE = function(op)
+PDP10.opSKIPE = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1732,8 +1865,9 @@ PDP10.opSKIPE = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opSKIPLE = function(op)
+PDP10.opSKIPLE = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1743,8 +1877,9 @@ PDP10.opSKIPLE = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opSKIPA = function(op)
+PDP10.opSKIPA = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1754,8 +1889,9 @@ PDP10.opSKIPA = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opSKIPGE = function(op)
+PDP10.opSKIPGE = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1765,8 +1901,9 @@ PDP10.opSKIPGE = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opSKIPN = function(op)
+PDP10.opSKIPN = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1776,8 +1913,9 @@ PDP10.opSKIPN = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opSKIPG = function(op)
+PDP10.opSKIPG = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1787,8 +1925,9 @@ PDP10.opSKIPG = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opAOJ = function(op)
+PDP10.opAOJ = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1798,8 +1937,9 @@ PDP10.opAOJ = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opAOJL = function(op)
+PDP10.opAOJL = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1809,8 +1949,9 @@ PDP10.opAOJL = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opAOJE = function(op)
+PDP10.opAOJE = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1820,8 +1961,9 @@ PDP10.opAOJE = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opAOJLE = function(op)
+PDP10.opAOJLE = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1831,8 +1973,9 @@ PDP10.opAOJLE = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opAOJA = function(op)
+PDP10.opAOJA = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1842,8 +1985,9 @@ PDP10.opAOJA = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opAOJGE = function(op)
+PDP10.opAOJGE = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1853,8 +1997,9 @@ PDP10.opAOJGE = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opAOJN = function(op)
+PDP10.opAOJN = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1864,8 +2009,9 @@ PDP10.opAOJN = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opAOJG = function(op)
+PDP10.opAOJG = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1875,8 +2021,9 @@ PDP10.opAOJG = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opAOS = function(op)
+PDP10.opAOS = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1886,8 +2033,9 @@ PDP10.opAOS = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opAOSL = function(op)
+PDP10.opAOSL = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1897,8 +2045,9 @@ PDP10.opAOSL = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opAOSE = function(op)
+PDP10.opAOSE = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1908,8 +2057,9 @@ PDP10.opAOSE = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opAOSLE = function(op)
+PDP10.opAOSLE = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1919,8 +2069,9 @@ PDP10.opAOSLE = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opAOSA = function(op)
+PDP10.opAOSA = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1930,8 +2081,9 @@ PDP10.opAOSA = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opAOSGE = function(op)
+PDP10.opAOSGE = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1941,8 +2093,9 @@ PDP10.opAOSGE = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opAOSN = function(op)
+PDP10.opAOSN = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1952,8 +2105,9 @@ PDP10.opAOSN = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opAOSG = function(op)
+PDP10.opAOSG = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1963,8 +2117,9 @@ PDP10.opAOSG = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opSOJ = function(op)
+PDP10.opSOJ = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1974,8 +2129,9 @@ PDP10.opSOJ = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opSOJL = function(op)
+PDP10.opSOJL = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1985,8 +2141,9 @@ PDP10.opSOJL = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opSOJE = function(op)
+PDP10.opSOJE = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -1996,8 +2153,9 @@ PDP10.opSOJE = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opSOJLE = function(op)
+PDP10.opSOJLE = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2007,8 +2165,9 @@ PDP10.opSOJLE = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opSOJA = function(op)
+PDP10.opSOJA = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2018,8 +2177,9 @@ PDP10.opSOJA = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opSOJGE = function(op)
+PDP10.opSOJGE = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2029,8 +2189,9 @@ PDP10.opSOJGE = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opSOJN = function(op)
+PDP10.opSOJN = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2040,8 +2201,9 @@ PDP10.opSOJN = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opSOJG = function(op)
+PDP10.opSOJG = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2051,8 +2213,9 @@ PDP10.opSOJG = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opSOS = function(op)
+PDP10.opSOS = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2062,8 +2225,9 @@ PDP10.opSOS = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opSOSL = function(op)
+PDP10.opSOSL = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2073,8 +2237,9 @@ PDP10.opSOSL = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opSOSE = function(op)
+PDP10.opSOSE = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2084,8 +2249,9 @@ PDP10.opSOSE = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opSOSLE = function(op)
+PDP10.opSOSLE = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2095,8 +2261,9 @@ PDP10.opSOSLE = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opSOSA = function(op)
+PDP10.opSOSA = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2106,8 +2273,9 @@ PDP10.opSOSA = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opSOSGE = function(op)
+PDP10.opSOSGE = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2117,8 +2285,9 @@ PDP10.opSOSGE = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opSOSN = function(op)
+PDP10.opSOSN = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2128,8 +2297,9 @@ PDP10.opSOSN = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opSOSG = function(op)
+PDP10.opSOSG = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2139,8 +2309,9 @@ PDP10.opSOSG = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opSETZ = function(op)
+PDP10.opSETZ = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2150,8 +2321,9 @@ PDP10.opSETZ = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opSETZI = function(op)
+PDP10.opSETZI = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2161,8 +2333,9 @@ PDP10.opSETZI = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opSETZM = function(op)
+PDP10.opSETZM = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2172,8 +2345,9 @@ PDP10.opSETZM = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opSETZB = function(op)
+PDP10.opSETZB = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2183,8 +2357,9 @@ PDP10.opSETZB = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opAND = function(op)
+PDP10.opAND = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2194,8 +2369,9 @@ PDP10.opAND = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opANDI = function(op)
+PDP10.opANDI = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2205,8 +2381,9 @@ PDP10.opANDI = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opANDM = function(op)
+PDP10.opANDM = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2216,8 +2393,9 @@ PDP10.opANDM = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opANDB = function(op)
+PDP10.opANDB = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2227,8 +2405,9 @@ PDP10.opANDB = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opANDCA = function(op)
+PDP10.opANDCA = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2238,8 +2417,9 @@ PDP10.opANDCA = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opANDCAI = function(op)
+PDP10.opANDCAI = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2249,8 +2429,9 @@ PDP10.opANDCAI = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opANDCAM = function(op)
+PDP10.opANDCAM = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2260,8 +2441,9 @@ PDP10.opANDCAM = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opANDCAB = function(op)
+PDP10.opANDCAB = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2271,8 +2453,9 @@ PDP10.opANDCAB = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opSETM = function(op)
+PDP10.opSETM = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2282,8 +2465,9 @@ PDP10.opSETM = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opSETMI = function(op)
+PDP10.opSETMI = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2293,8 +2477,9 @@ PDP10.opSETMI = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opSETMM = function(op)
+PDP10.opSETMM = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2304,8 +2489,9 @@ PDP10.opSETMM = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opSETMB = function(op)
+PDP10.opSETMB = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2315,8 +2501,9 @@ PDP10.opSETMB = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opANDCM = function(op)
+PDP10.opANDCM = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2326,8 +2513,9 @@ PDP10.opANDCM = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opANDCMI = function(op)
+PDP10.opANDCMI = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2337,8 +2525,9 @@ PDP10.opANDCMI = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opANDCMM = function(op)
+PDP10.opANDCMM = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2348,8 +2537,9 @@ PDP10.opANDCMM = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opANDCMB = function(op)
+PDP10.opANDCMB = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2359,8 +2549,9 @@ PDP10.opANDCMB = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opSETA = function(op)
+PDP10.opSETA = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2370,8 +2561,9 @@ PDP10.opSETA = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opSETAI = function(op)
+PDP10.opSETAI = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2381,8 +2573,9 @@ PDP10.opSETAI = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opSETAM = function(op)
+PDP10.opSETAM = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2392,8 +2585,9 @@ PDP10.opSETAM = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opSETAB = function(op)
+PDP10.opSETAB = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2403,8 +2597,9 @@ PDP10.opSETAB = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opXOR = function(op)
+PDP10.opXOR = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2414,8 +2609,9 @@ PDP10.opXOR = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opXORI = function(op)
+PDP10.opXORI = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2425,8 +2621,9 @@ PDP10.opXORI = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opXORM = function(op)
+PDP10.opXORM = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2436,8 +2633,9 @@ PDP10.opXORM = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opXORB = function(op)
+PDP10.opXORB = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2447,8 +2645,9 @@ PDP10.opXORB = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opIOR = function(op)
+PDP10.opIOR = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2458,8 +2657,9 @@ PDP10.opIOR = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opIORI = function(op)
+PDP10.opIORI = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2469,8 +2669,9 @@ PDP10.opIORI = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opIORM = function(op)
+PDP10.opIORM = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2480,8 +2681,9 @@ PDP10.opIORM = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opIORB = function(op)
+PDP10.opIORB = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2491,8 +2693,9 @@ PDP10.opIORB = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opANDCB = function(op)
+PDP10.opANDCB = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2502,8 +2705,9 @@ PDP10.opANDCB = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opANDCBI = function(op)
+PDP10.opANDCBI = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2513,8 +2717,9 @@ PDP10.opANDCBI = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opANDCBM = function(op)
+PDP10.opANDCBM = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2524,8 +2729,9 @@ PDP10.opANDCBM = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opANDCBB = function(op)
+PDP10.opANDCBB = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2535,8 +2741,9 @@ PDP10.opANDCBB = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opEQV = function(op)
+PDP10.opEQV = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2546,8 +2753,9 @@ PDP10.opEQV = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opEQVI = function(op)
+PDP10.opEQVI = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2557,8 +2765,9 @@ PDP10.opEQVI = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opEQVM = function(op)
+PDP10.opEQVM = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2568,8 +2777,9 @@ PDP10.opEQVM = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opEQVB = function(op)
+PDP10.opEQVB = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2579,8 +2789,9 @@ PDP10.opEQVB = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opSETCA = function(op)
+PDP10.opSETCA = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2590,8 +2801,9 @@ PDP10.opSETCA = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opSETCAI = function(op)
+PDP10.opSETCAI = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2601,8 +2813,9 @@ PDP10.opSETCAI = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opSETCAM = function(op)
+PDP10.opSETCAM = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2612,8 +2825,9 @@ PDP10.opSETCAM = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opSETCAB = function(op)
+PDP10.opSETCAB = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2623,8 +2837,9 @@ PDP10.opSETCAB = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opORCA = function(op)
+PDP10.opORCA = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2634,8 +2849,9 @@ PDP10.opORCA = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opORCAI = function(op)
+PDP10.opORCAI = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2645,8 +2861,9 @@ PDP10.opORCAI = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opORCAM = function(op)
+PDP10.opORCAM = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2656,8 +2873,9 @@ PDP10.opORCAM = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opORCAB = function(op)
+PDP10.opORCAB = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2667,8 +2885,9 @@ PDP10.opORCAB = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opSETCM = function(op)
+PDP10.opSETCM = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2678,8 +2897,9 @@ PDP10.opSETCM = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opSETCMI = function(op)
+PDP10.opSETCMI = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2689,8 +2909,9 @@ PDP10.opSETCMI = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opSETCMM = function(op)
+PDP10.opSETCMM = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2700,8 +2921,9 @@ PDP10.opSETCMM = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opSETCMB = function(op)
+PDP10.opSETCMB = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2711,8 +2933,9 @@ PDP10.opSETCMB = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opORCM = function(op)
+PDP10.opORCM = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2722,8 +2945,9 @@ PDP10.opORCM = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opORCMI = function(op)
+PDP10.opORCMI = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2733,8 +2957,9 @@ PDP10.opORCMI = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opORCMM = function(op)
+PDP10.opORCMM = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2744,8 +2969,9 @@ PDP10.opORCMM = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opORCMB = function(op)
+PDP10.opORCMB = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2755,8 +2981,9 @@ PDP10.opORCMB = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opORCB = function(op)
+PDP10.opORCB = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2766,8 +2993,9 @@ PDP10.opORCB = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opORCBI = function(op)
+PDP10.opORCBI = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2777,8 +3005,9 @@ PDP10.opORCBI = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opORCBM = function(op)
+PDP10.opORCBM = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2788,8 +3017,9 @@ PDP10.opORCBM = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opORCBB = function(op)
+PDP10.opORCBB = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2799,8 +3029,9 @@ PDP10.opORCBB = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opSETO = function(op)
+PDP10.opSETO = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2810,8 +3041,9 @@ PDP10.opSETO = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opSETOI = function(op)
+PDP10.opSETOI = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2821,8 +3053,9 @@ PDP10.opSETOI = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opSETOM = function(op)
+PDP10.opSETOM = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2832,8 +3065,9 @@ PDP10.opSETOM = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opSETOB = function(op)
+PDP10.opSETOB = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -2850,10 +3084,10 @@ PDP10.opSETOB = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opHLL = function(op)
+PDP10.opHLL = function(op, acc)
 {
-    var acc = op & PDP10.OPCODE.A_MASK;
     var src = this.readWord(this.regEA);
     var dst = this.readWord(acc);
     this.writeWord(acc, PDP10.getHR(op, dst, src) + (src - (src & PDP10.WORD_MASK)));
@@ -2874,10 +3108,10 @@ PDP10.opHLL = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opHLLI = function(op)
+PDP10.opHLLI = function(op, acc)
 {
-    var acc = op & PDP10.OPCODE.A_MASK;
     var dst = this.readWord(acc);
     this.writeWord(acc, PDP10.getHR(op, dst, 0));
 };
@@ -2894,10 +3128,10 @@ PDP10.opHLLI = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opHLLM = function(op)
+PDP10.opHLLM = function(op, acc)
 {
-    var acc = op & PDP10.OPCODE.A_MASK;
     var src = this.readWord(acc);
     var dst = this.readWord(this.regEA);
     this.writeWord(this.regEA, PDP10.getHR(op, dst, src) + (src - (src & PDP10.WORD_MASK)));
@@ -2917,13 +3151,13 @@ PDP10.opHLLM = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opHLLS = function(op)
+PDP10.opHLLS = function(op, acc)
 {
     var dst = this.readWord(this.regEA);
     dst = PDP10.setHR(op, dst, dst);
     this.writeWord(this.regEA, dst);
-    var acc = op & PDP10.OPCODE.A_MASK;
     if (acc) this.writeWord(acc, dst);
 };
 
@@ -2940,10 +3174,10 @@ PDP10.opHLLS = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opHRL = function(op)
+PDP10.opHRL = function(op, acc)
 {
-    var acc = op & PDP10.OPCODE.A_MASK;
     var src = (this.readWord(this.regEA) & PDP10.WORD_MASK) * PDP10.WORD_SHIFT;
     var dst = this.readWord(acc);
     this.writeWord(acc, PDP10.getHR(op, dst, src) + src);
@@ -2962,10 +3196,10 @@ PDP10.opHRL = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opHRLI = function(op)
+PDP10.opHRLI = function(op, acc)
 {
-    var acc = op & PDP10.OPCODE.A_MASK;
     var src = this.regEA * PDP10.WORD_SHIFT;
     var dst = this.readWord(acc);
     this.writeWord(acc, PDP10.getHR(op, dst, src) + src);
@@ -2984,10 +3218,10 @@ PDP10.opHRLI = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opHRLM = function(op)
+PDP10.opHRLM = function(op, acc)
 {
-    var acc = op & PDP10.OPCODE.A_MASK;
     var src = (this.readWord(acc) & PDP10.WORD_MASK) * PDP10.WORD_SHIFT;
     var dst = this.readWord(this.regEA);
     this.writeWord(this.regEA, PDP10.getHR(op, dst, src) + src);
@@ -3006,14 +3240,14 @@ PDP10.opHRLM = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opHRLS = function(op)
+PDP10.opHRLS = function(op, acc)
 {
     var dst = this.readWord(this.regEA);
     var src = (dst & PDP10.WORD_MASK) * PDP10.WORD_SHIFT;
     dst = PDP10.getHR(op, dst, src) + src;
     this.writeWord(this.regEA, dst);
-    var acc = op & PDP10.OPCODE.A_MASK;
     if (acc) this.writeWord(acc, dst);
 };
 
@@ -3030,10 +3264,10 @@ PDP10.opHRLS = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opHRR = function(op)
+PDP10.opHRR = function(op, acc)
 {
-    var acc = op & PDP10.OPCODE.A_MASK;
     var src = this.readWord(this.regEA) & PDP10.WORD_MASK;
     var dst = this.readWord(acc);
     this.writeWord(acc, PDP10.getHL(op, dst, src) + src);
@@ -3052,10 +3286,10 @@ PDP10.opHRR = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opHRRI = function(op)
+PDP10.opHRRI = function(op, acc)
 {
-    var acc = op & PDP10.OPCODE.A_MASK;
     var dst = this.readWord(acc);
     this.writeWord(acc, PDP10.getHL(op, dst, this.regEA) + this.regEA);
 };
@@ -3073,10 +3307,10 @@ PDP10.opHRRI = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opHRRM = function(op)
+PDP10.opHRRM = function(op, acc)
 {
-    var acc = op & PDP10.OPCODE.A_MASK;
     var src = this.readWord(acc) & PDP10.WORD_MASK;
     var dst = this.readWord(this.regEA);
     this.writeWord(this.regEA, PDP10.getHL(op, dst, src) + src);
@@ -3097,13 +3331,13 @@ PDP10.opHRRM = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opHRRS = function(op)
+PDP10.opHRRS = function(op, acc)
 {
     var dst = this.readWord(this.regEA);
     dst = PDP10.setHL(op, dst, dst);
     this.writeWord(this.regEA, dst);
-    var acc = op & PDP10.OPCODE.A_MASK;
     if (acc) this.writeWord(acc, dst);
 };
 
@@ -3119,10 +3353,10 @@ PDP10.opHRRS = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opHLR = function(op)
+PDP10.opHLR = function(op, acc)
 {
-    var acc = op & PDP10.OPCODE.A_MASK;
     var src = (this.readWord(this.regEA) / PDP10.WORD_SHIFT)|0;
     var dst = this.readWord(acc);
     this.writeWord(acc, PDP10.getHL(op, dst, src) + src);
@@ -3142,10 +3376,10 @@ PDP10.opHLR = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opHLRI = function(op)
+PDP10.opHLRI = function(op, acc)
 {
-    var acc = op & PDP10.OPCODE.A_MASK;
     var dst = this.readWord(acc);
     this.writeWord(acc, PDP10.getHL(op, dst, 0));
 };
@@ -3162,10 +3396,10 @@ PDP10.opHLRI = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opHLRM = function(op)
+PDP10.opHLRM = function(op, acc)
 {
-    var acc = op & PDP10.OPCODE.A_MASK;
     var src = (this.readWord(acc) / PDP10.WORD_SHIFT)|0;
     var dst = this.readWord(this.regEA);
     this.writeWord(this.regEA, PDP10.getHL(op, dst, src) + src);
@@ -3183,14 +3417,14 @@ PDP10.opHLRM = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opHLRS = function(op)
+PDP10.opHLRS = function(op, acc)
 {
     var dst = this.readWord(this.regEA);
     var src = (dst / PDP10.WORD_SHIFT)|0;
     dst = PDP10.getHL(op, dst, src) + src;
     this.writeWord(this.regEA, dst);
-    var acc = op & PDP10.OPCODE.A_MASK;
     if (acc) this.writeWord(acc, dst);
 };
 
@@ -3199,8 +3433,9 @@ PDP10.opHLRS = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTRN = function(op)
+PDP10.opTRN = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3210,8 +3445,9 @@ PDP10.opTRN = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTLN = function(op)
+PDP10.opTLN = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3221,8 +3457,9 @@ PDP10.opTLN = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTRNE = function(op)
+PDP10.opTRNE = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3232,8 +3469,9 @@ PDP10.opTRNE = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTLNE = function(op)
+PDP10.opTLNE = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3243,8 +3481,9 @@ PDP10.opTLNE = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTRNA = function(op)
+PDP10.opTRNA = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3254,8 +3493,9 @@ PDP10.opTRNA = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTLNA = function(op)
+PDP10.opTLNA = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3265,8 +3505,9 @@ PDP10.opTLNA = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTRNN = function(op)
+PDP10.opTRNN = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3276,8 +3517,9 @@ PDP10.opTRNN = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTLNN = function(op)
+PDP10.opTLNN = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3287,8 +3529,9 @@ PDP10.opTLNN = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTDN = function(op)
+PDP10.opTDN = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3298,8 +3541,9 @@ PDP10.opTDN = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTSN = function(op)
+PDP10.opTSN = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3309,8 +3553,9 @@ PDP10.opTSN = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTDNE = function(op)
+PDP10.opTDNE = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3320,8 +3565,9 @@ PDP10.opTDNE = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTSNE = function(op)
+PDP10.opTSNE = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3331,8 +3577,9 @@ PDP10.opTSNE = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTDNA = function(op)
+PDP10.opTDNA = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3342,8 +3589,9 @@ PDP10.opTDNA = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTSNA = function(op)
+PDP10.opTSNA = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3353,8 +3601,9 @@ PDP10.opTSNA = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTDNN = function(op)
+PDP10.opTDNN = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3364,8 +3613,9 @@ PDP10.opTDNN = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTSNN = function(op)
+PDP10.opTSNN = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3375,8 +3625,9 @@ PDP10.opTSNN = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTRZ = function(op)
+PDP10.opTRZ = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3386,8 +3637,9 @@ PDP10.opTRZ = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTLZ = function(op)
+PDP10.opTLZ = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3397,8 +3649,9 @@ PDP10.opTLZ = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTRZE = function(op)
+PDP10.opTRZE = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3408,8 +3661,9 @@ PDP10.opTRZE = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTLZE = function(op)
+PDP10.opTLZE = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3419,8 +3673,9 @@ PDP10.opTLZE = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTRZA = function(op)
+PDP10.opTRZA = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3430,8 +3685,9 @@ PDP10.opTRZA = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTLZA = function(op)
+PDP10.opTLZA = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3441,8 +3697,9 @@ PDP10.opTLZA = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTRZN = function(op)
+PDP10.opTRZN = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3452,8 +3709,9 @@ PDP10.opTRZN = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTLZN = function(op)
+PDP10.opTLZN = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3463,8 +3721,9 @@ PDP10.opTLZN = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTDZ = function(op)
+PDP10.opTDZ = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3474,8 +3733,9 @@ PDP10.opTDZ = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTSZ = function(op)
+PDP10.opTSZ = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3485,8 +3745,9 @@ PDP10.opTSZ = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTDZE = function(op)
+PDP10.opTDZE = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3496,8 +3757,9 @@ PDP10.opTDZE = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTSZE = function(op)
+PDP10.opTSZE = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3507,8 +3769,9 @@ PDP10.opTSZE = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTDZA = function(op)
+PDP10.opTDZA = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3518,8 +3781,9 @@ PDP10.opTDZA = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTSZA = function(op)
+PDP10.opTSZA = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3529,8 +3793,9 @@ PDP10.opTSZA = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTDZN = function(op)
+PDP10.opTDZN = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3540,8 +3805,9 @@ PDP10.opTDZN = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTSZN = function(op)
+PDP10.opTSZN = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3551,8 +3817,9 @@ PDP10.opTSZN = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTRC = function(op)
+PDP10.opTRC = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3562,8 +3829,9 @@ PDP10.opTRC = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTLC = function(op)
+PDP10.opTLC = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3573,8 +3841,9 @@ PDP10.opTLC = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTRCE = function(op)
+PDP10.opTRCE = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3584,8 +3853,9 @@ PDP10.opTRCE = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTLCE = function(op)
+PDP10.opTLCE = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3595,8 +3865,9 @@ PDP10.opTLCE = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTRCA = function(op)
+PDP10.opTRCA = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3606,8 +3877,9 @@ PDP10.opTRCA = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTLCA = function(op)
+PDP10.opTLCA = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3617,8 +3889,9 @@ PDP10.opTLCA = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTRCN = function(op)
+PDP10.opTRCN = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3628,8 +3901,9 @@ PDP10.opTRCN = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTLCN = function(op)
+PDP10.opTLCN = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3639,8 +3913,9 @@ PDP10.opTLCN = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTDC = function(op)
+PDP10.opTDC = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3650,8 +3925,9 @@ PDP10.opTDC = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTSC = function(op)
+PDP10.opTSC = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3661,8 +3937,9 @@ PDP10.opTSC = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTDCE = function(op)
+PDP10.opTDCE = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3672,8 +3949,9 @@ PDP10.opTDCE = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTSCE = function(op)
+PDP10.opTSCE = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3683,8 +3961,9 @@ PDP10.opTSCE = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTDCA = function(op)
+PDP10.opTDCA = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3694,8 +3973,9 @@ PDP10.opTDCA = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTSCA = function(op)
+PDP10.opTSCA = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3705,8 +3985,9 @@ PDP10.opTSCA = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTDCN = function(op)
+PDP10.opTDCN = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3716,8 +3997,9 @@ PDP10.opTDCN = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTSCN = function(op)
+PDP10.opTSCN = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3727,8 +4009,9 @@ PDP10.opTSCN = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTRO = function(op)
+PDP10.opTRO = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3738,8 +4021,9 @@ PDP10.opTRO = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTLO = function(op)
+PDP10.opTLO = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3749,8 +4033,9 @@ PDP10.opTLO = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTROE = function(op)
+PDP10.opTROE = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3760,8 +4045,9 @@ PDP10.opTROE = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTLOE = function(op)
+PDP10.opTLOE = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3771,8 +4057,9 @@ PDP10.opTLOE = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTROA = function(op)
+PDP10.opTROA = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3782,8 +4069,9 @@ PDP10.opTROA = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTLOA = function(op)
+PDP10.opTLOA = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3793,8 +4081,9 @@ PDP10.opTLOA = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTRON = function(op)
+PDP10.opTRON = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3804,8 +4093,9 @@ PDP10.opTRON = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTLON = function(op)
+PDP10.opTLON = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3815,8 +4105,9 @@ PDP10.opTLON = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTDO = function(op)
+PDP10.opTDO = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3826,8 +4117,9 @@ PDP10.opTDO = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTSO = function(op)
+PDP10.opTSO = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3837,8 +4129,9 @@ PDP10.opTSO = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTDOE = function(op)
+PDP10.opTDOE = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3848,8 +4141,9 @@ PDP10.opTDOE = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTSOE = function(op)
+PDP10.opTSOE = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3859,8 +4153,9 @@ PDP10.opTSOE = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTDOA = function(op)
+PDP10.opTDOA = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3870,8 +4165,9 @@ PDP10.opTDOA = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTSOA = function(op)
+PDP10.opTSOA = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3881,8 +4177,9 @@ PDP10.opTSOA = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTDON = function(op)
+PDP10.opTDON = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3892,8 +4189,9 @@ PDP10.opTDON = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opTSON = function(op)
+PDP10.opTSON = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3903,8 +4201,9 @@ PDP10.opTSON = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opBLKI = function(op)
+PDP10.opBLKI = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3914,8 +4213,9 @@ PDP10.opBLKI = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opDATAI = function(op)
+PDP10.opDATAI = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3925,8 +4225,9 @@ PDP10.opDATAI = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opBLKO = function(op)
+PDP10.opBLKO = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3936,8 +4237,9 @@ PDP10.opBLKO = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opDATAO = function(op)
+PDP10.opDATAO = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3947,8 +4249,9 @@ PDP10.opDATAO = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opCONO = function(op)
+PDP10.opCONO = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3958,8 +4261,9 @@ PDP10.opCONO = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opCONI = function(op)
+PDP10.opCONI = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3969,8 +4273,9 @@ PDP10.opCONI = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opCONSZ = function(op)
+PDP10.opCONSZ = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3980,30 +4285,33 @@ PDP10.opCONSZ = function(op)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opCONSO = function(op)
+PDP10.opCONSO = function(op, acc)
 {
     this.opUndefined(op);
 };
 
 /**
- * opIO(op)
+ * opIO(op, acc)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} acc
  */
-PDP10.opIO = function(op)
+PDP10.opIO = function(op, acc)
 {
     this.opUndefined(op);
 };
 
 /**
- * opUndefined()
+ * opUndefined(op, acc)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
+ * @param {number} [acc]
  */
-PDP10.opUndefined = function(op)
+PDP10.opUndefined = function(op, acc)
 {
     this.println("undefined opcode: " + Str.toOct(op));
     this.advancePC(-1);

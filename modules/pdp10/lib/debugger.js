@@ -873,6 +873,18 @@ class DebuggerPDP10 extends Debugger {
         case DebuggerPDP10.REGS.EA:
             value = this.cpu.regEA;
             break;
+        case DebuggerPDP10.REGS.C0:
+            value = this.cpu.fCarry0? 1 : 0;
+            break;
+        case DebuggerPDP10.REGS.C1:
+            value = this.cpu.fCarry1? 1 : 0;
+            break;
+        case DebuggerPDP10.REGS.OV:
+            value = this.cpu.fOverflow? 1 : 0;
+            break;
+        case DebuggerPDP10.REGS.ND:
+            value = this.cpu.fNoDivide? 1 : 0;
+            break;
         }
         return value;
     }
@@ -2055,7 +2067,7 @@ class DebuggerPDP10 extends Debugger {
     {
         var sReg = this.getRegName(iReg);
         if (sReg) {
-            var nBits = (iReg == DebuggerPDP10.REGS.RA? 23 : 18);
+            var nBits = (iReg >= DebuggerPDP10.REGS.C0? 1 : (iReg == DebuggerPDP10.REGS.RA? 23 : 18));
             sReg += '=' + this.toStrBase(this.getRegValue(iReg), nBits) + ' ';
         }
         return sReg;
@@ -2070,18 +2082,22 @@ class DebuggerPDP10 extends Debugger {
     getMiscDump()
     {
         var sDump = "";
-        sDump += this.getRegOutput(DebuggerPDP10.REGS.PC) + this.getRegOutput(DebuggerPDP10.REGS.RA) + this.getRegOutput(DebuggerPDP10.REGS.EA);
+        for (var i = 0; i < DebuggerPDP10.REGNAMES.length; i++) {
+            sDump += this.getRegOutput(i);
+        }
         return sDump;
     }
 
     /**
      * getRegDump(fMisc)
      *
+     * For now, fMisc defaults to true, providing a full register dump by default.
+     *
      * @this {DebuggerPDP10}
      * @param {boolean} [fMisc] (true to include misc registers)
      * @return {string}
      */
-    getRegDump(fMisc)
+    getRegDump(fMisc = true)
     {
         var sDump = "";
         for (var i = 0; i < 16; i++) {
@@ -3022,8 +3038,8 @@ class DebuggerPDP10 extends Debugger {
             return;
         }
 
-        var fMisc = false;
         var cpu = this.cpu;
+        var fMisc = undefined;
         if (fInstruction == null) fInstruction = true;
 
         if (asArgs != null && asArgs.length > 1) {
@@ -3798,11 +3814,15 @@ if (DEBUGGER) {
     DebuggerPDP10.REGS = {
         PC:     0,
         RA:     1,
-        EA:     2
+        EA:     2,
+        C0:     3,                              // single-bit "register" representing the Carry 0 flag
+        C1:     4,                              // single-bit "register" representing the Carry 1 flag
+        OV:     5,                              // single-bit "register" representing the Overflow flag
+        ND:     6,                              // single-bit "register" representing the No Divide flag
     };
 
     DebuggerPDP10.REGNAMES = [
-        "PC", "RA", "EA"
+        "PC", "RA", "EA", "C0", "C1", "OV", "ND"
     ];
 
     /*
