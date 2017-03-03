@@ -1415,7 +1415,7 @@ class DebuggerPDP10 extends Debugger {
     findInstruction(opCode, fOperands = true)
     {
         var opNum, opMask, aModes, iMode = 0;
-        var op = (opCode / PDP10.OPCODE.OPSHIFT)|0;
+        var op = (opCode / PDP10.OPCODE.OP_SCALE)|0;
 
         for (var mask in DebuggerPDP10.OPTABLE) {
             var opMasks = DebuggerPDP10.OPTABLE[mask];
@@ -1423,7 +1423,7 @@ class DebuggerPDP10 extends Debugger {
             if (opNum) {
                 opMask = +mask;
                 /*
-                 * When we extracted op from opCode using OPSHIFT, we included 6 additional bits
+                 * When we extracted op from opCode using OP_SCALE, we included 6 additional bits
                  * to help distinguish OPIO instructions from non-OPIO instructions.  But for the
                  * following tests, we don't need those bits, so we get rid of them now.
                  */
@@ -1458,7 +1458,7 @@ class DebuggerPDP10 extends Debugger {
                 sOperation += this.toStrWord(opCode);
             } else {
                 if (opMask == PDP10.OPCODE.OPIO) {
-                    sOperation += this.toStrBase((opCode / PDP10.OPCODE.IOSHIFT) & PDP10.OPCODE.IOMASK, -1);
+                    sOperation += this.toStrBase((opCode / PDP10.OPCODE.IO_SCALE) & PDP10.OPCODE.IO_MASK, -1);
                 } else {
                     sOperation += this.toStrBase((opCode >> PDP10.OPCODE.A_SHIFT) & PDP10.OPCODE.A_MASK, -1);
                 }
@@ -1564,7 +1564,7 @@ class DebuggerPDP10 extends Debugger {
                         } else {
                             opMode = ((iMode & 0o3) << 1) | ((iMode & 0o14) << 2);
                         }
-                        opCode = (op | (opMode << 6)) * PDP10.OPCODE.OPSHIFT;
+                        opCode = (op | (opMode << 6)) * PDP10.OPCODE.OP_SCALE;
                         break;
                     }
                 }
@@ -1601,12 +1601,12 @@ class DebuggerPDP10 extends Debugger {
                     }
                     if (!i && aOperands.length > 1) {
                         if (opMask == PDP10.OPCODE.OPIO) {
-                            if (operand < 0 || operand > PDP10.OPCODE.IOMASK) {
+                            if (operand < 0 || operand > PDP10.OPCODE.IO_MASK) {
                                 this.println("device code out of range: " + match[2]);
                                 opCode = -1;
                                 break;
                             }
-                            opCode += (operand * PDP10.OPCODE.IOSHIFT);
+                            opCode += (operand * PDP10.OPCODE.IO_SCALE);
                         }
                         else {
                             if (operand < 0 || operand > PDP10.OPCODE.A_MASK) {

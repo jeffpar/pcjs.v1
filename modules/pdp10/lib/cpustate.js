@@ -179,6 +179,12 @@ class CPUStatePDP10 extends CPUPDP10 {
         this.fOverflow = this.fCarry0 = this.fCarry1 = this.fNoDivide = this.fPDOverflow = false;
 
         /*
+         * This next two internal regs are used only with byte instructions, to record an active byte
+         * pointer state (regPS) and pointer address (regPA).
+         */
+        this.regPS = this.regPA = -1;
+
+        /*
          * This is queried and displayed by the Panel when it's not displaying its own ADDRESS register
          * (which takes precedence when, for example, you've manually halted the CPU and are independently
          * examining the contents of other addresses).
@@ -279,6 +285,8 @@ class CPUStatePDP10 extends CPUPDP10 {
         state.set(0, [
             this.regEA,
             this.regRA,
+            this.regPS,
+            this.regPA,
             this.regOP,
             this.regPC,
             this.lastPC,
@@ -308,6 +316,8 @@ class CPUStatePDP10 extends CPUPDP10 {
         [
             this.regEA,
             this.regRA,
+            this.regPS,
+            this.regPA,
             this.regOP,
             this.regPC,
             this.lastPC,
@@ -369,7 +379,7 @@ class CPUStatePDP10 extends CPUPDP10 {
         if (this.regRA & PDP10.OPCODE.I_BIT) return -1;
 
         this.regPC = (this.regPC + 1) % PDP10.ADDR_LIMIT;
-        return (this.regOP / PDP10.OPCODE.ACSHIFT)|0;
+        return (this.regOP / PDP10.OPCODE.A_SCALE)|0;
     }
 
     /**

@@ -158,10 +158,14 @@ var PDP10 = {
         OPTEST:     0o71100,            // operation with test
         OPIO:       0o70034,            // input-output operation
         OPUUO:      0o70000,            // unimplemented user operation (UUO) mask
-        OPSHIFT:    Math.pow(2, 21),    // operation shift
-        IOSHIFT:    Math.pow(2, 26),    // input-output device code shift
-        IOMASK:     0o177,              // input-output device code mask (after shift)
-        ACSHIFT:    Math.pow(2, 23),    // used to shift down the high 13 bits, with A starting at bit 0
+        OP_SCALE:   Math.pow(2, 21),    // operation scale
+        IO_SCALE:   Math.pow(2, 26),    // input-output device code scale
+        IO_MASK:    0o177,              // input-output device code mask (after descale)
+        A_SCALE:    Math.pow(2, 23),    // used to shift down the high 13 bits, with A starting at bit 0
+        P_SCALE:    Math.pow(2, 30),    // P scale
+        P_MASK:     0o77,               // P mask (after descale)
+        S_SHIFT:    24,                 // S shift
+        S_MASK:     0o77,               // S mask (after shift)
         A_SHIFT:    23,                 // A shift
         A_MASK:     0o17,               // A mask (after shift)
         I_BIT:      0o20000000,         // indirect bit
@@ -169,6 +173,7 @@ var PDP10 = {
         X_MASK:     0o17,               // X mask (after shift)
         Y_MASK:     0o777777,           // Y mask
         R_MASK:     0o37777777,         // used to isolate the low 23 bits (I,X,Y)
+        PTR_MASK:   0o77777777,         // used to isolate the low 24 bits (?,I,X,Y) of a byte pointer
         HALT:       0o5304              // operation code for HALT
     },
 

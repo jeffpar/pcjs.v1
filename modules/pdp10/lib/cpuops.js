@@ -188,11 +188,27 @@ PDP10.opFSC = function(op, acc)
  */
 PDP10.opIBP = function(op, acc)
 {
-    this.opUndefined(op);
+    var w = this.readWord(this.regEA);
+    var p = (w / PDP10.OPCODE.P_SCALE) & PDP10.OPCODE.P_MASK;
+    var s = (w >> PDP10.OPCODE.S_SHIFT) & PDP10.OPCODE.S_MASK;
+    p -= s;
+    if (p < 0) {
+        p = 36 - s;
+        w++;
+    }
+    w = (p * PDP10.OPCODE.P_SCALE) + (s << PDP10.OPCODE.S_SHIFT) + (w & PDP10.OPCODE.PTR_MASK);
+    this.writeWord(this.regEA, w);
 };
 
 /**
- * opILDB(0o134000)
+ * opILDB(0o134000): Increment Pointer and Load Byte
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-16:
+ *
+ *      Increment the byte pointer in location E as explained above. Then retrieve a byte of S bits from the
+ *      location and position specified by the newly incremented pointer, load it into the right end of AC,
+ *      and clear the remaining AC bits.  The location containing the byte is unaffected, the original contents
+ *      of AC are lost.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -200,11 +216,30 @@ PDP10.opIBP = function(op, acc)
  */
 PDP10.opILDB = function(op, acc)
 {
-    this.opUndefined(op);
+    /*
+     * We're called in two phases: phase 1 is with regEA containing the address of the pointer, and phase 2
+     * is with regEA containing the address of the bits to be loaded.
+     *
+     * We can implement this as a simple combination of opIBP() and opLDB(), but taking care that we only call
+     * opIBP() on phase 1.
+     */
+    if (this.regPS < 0) {
+        //noinspection JSUnresolvedFunction
+        PDP10.opIBP.call(this, op, acc);
+    }
+
+    //noinspection JSUnresolvedFunction
+    PDP10.opLDB.call(this, op, acc);
 };
 
 /**
- * opLDB(0o135000)
+ * opLDB(0o135000): Load Byte
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-16:
+ *
+ *      Retrieve a byte of S bits from the location and position specified by the pointer contained in location E,
+ *      load it into the right end of AC, and clear the remaining AC bits.  The location containing the byte is unaffected,
+ *      the original contents of AC are lost.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -212,11 +247,36 @@ PDP10.opILDB = function(op, acc)
  */
 PDP10.opLDB = function(op, acc)
 {
-    this.opUndefined(op);
+    /*
+     * We're called in two phases: phase 1 is with regEA containing the address of the pointer, and phase 2
+     * is with regEA containing the address of the bits to be loaded.
+     */
+    var w = this.readWord(this.regEA);
+    if (this.regPS < 0) {
+        this.regPS = w;
+        this.regRA = this.regEA | PDP10.OPCODE.I_BIT;
+        this.advancePC(-1);
+        return;
+    }
+    var p = (this.regPS / PDP10.OPCODE.P_SCALE) & PDP10.OPCODE.P_MASK;
+    var s = (this.regPS >> PDP10.OPCODE.S_SHIFT) & PDP10.OPCODE.S_MASK;
+    if (p + s <= 32) {
+        w = (w >> p) & ((1 << s) - 1);
+    } else {
+        w = Math.trunc(w / Math.pow(2, p)) % Math.pow(2, s);
+    }
+    this.writeWord(acc, w);
+    this.regPS = -1;
 };
 
 /**
  * opIDPB(0o136000)
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-16:
+ *
+ *      Increment the byte pointer in location E as explained above.  Then deposit the right S bits of AC into
+ *      the location and position specified by the newly incremented pointer.  The original contents of the bits
+ *      that receive the byte are lost, AC and the remaining bits of the deposit location are unaffected.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -224,11 +284,30 @@ PDP10.opLDB = function(op, acc)
  */
 PDP10.opIDPB = function(op, acc)
 {
-    this.opUndefined(op);
+    /*
+     * We're called in two phases: phase 1 is with regEA containing the address of the pointer, and phase 2
+     * is with regEA containing the address of the bits to be stored.
+     *
+     * We can implement this as a simple combination of opIBP() and opDDB(), but taking care that we only call
+     * opIBP() on phase 1.
+     */
+    if (this.regPS < 0) {
+        //noinspection JSUnresolvedFunction
+        PDP10.opIBP.call(this, op, acc);
+    }
+
+    //noinspection JSUnresolvedFunction
+    PDP10.opDPB.call(this, op, acc);
 };
 
 /**
- * opDPB(0o137000)
+ * opDPB(0o137000): Deposit Byte
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-16:
+ *
+ *      Deposit the right S bits of AC into the location and position specified by the pointer contained
+ *      in location E.  The original contents of the bits that receive the byte are lost, AC and the remaining
+ *      bits of the deposit location are unaffected.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -236,7 +315,23 @@ PDP10.opIDPB = function(op, acc)
  */
 PDP10.opDPB = function(op, acc)
 {
-    this.opUndefined(op);
+    /*
+     * We're called in two phases: phase 1 is with regEA containing the address of the pointer, and phase 2
+     * is with regEA containing the address of the bits to be stored.
+     */
+    var w = this.readWord(this.regEA);
+    if (this.regPS < 0) {
+        this.regPS = w;
+        this.regRA = this.regEA | PDP10.OPCODE.I_BIT;
+        this.advancePC(-1);
+        return;
+    }
+    var p = (this.regPS / PDP10.OPCODE.P_SCALE) & PDP10.OPCODE.P_MASK;
+    var s = (this.regPS >> PDP10.OPCODE.S_SHIFT) & PDP10.OPCODE.S_MASK;
+    var b = (this.readWord(acc) % Math.pow(2, s)) * Math.pow(2, p);
+    w = (w - (w % Math.pow(2, p + s))) + b + (w % Math.pow(2, p));
+    this.writeWord(this.regEA, w);
+    this.regPS = -1;
 };
 
 /**
