@@ -168,19 +168,28 @@ PDP10.opFSC = function(op, acc)
  *
  * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-16:
  *
- *      Increment the byte pointer in location E as explained above.
+ *      Increment the byte pointer in location E as explained [below].
  *
- *      FROM ABOVE: To facilitate processing a series of bytes, several of the byte instructions increment the pointer,
- *      ie, modify it so that it points to the next byte position in a set of memory locations.  Bytes are processed from
- *      left to right in a word, so incrementing merely replaces the current value of P by P - S, unless there is
- *      insufficient space in the present location for another byte of the specified size (P - S < 0).  In this case Y is
- *      increased by one to point to the next consecutive location, and P is set to 36 - S to point to the first byte at
- *      the left in the new location.
+ *      To facilitate processing a series of bytes, several of the byte instructions increment the
+ *      pointer, ie, modify it so that it points to the next byte position in a set of memory locations.
+ *      Bytes are processed from left to right in a word, so incrementing merely replaces the current value
+ *      of P by P - S, unless there is insufficient space in the present location for another byte of the
+ *      specified size (P - S < 0).  In this case Y is increased by one to point to the next consecutive
+ *      location, and P is set to 36 - S to point to the first byte at the left in the new location.
  *
- *      CAUTION: Do not allow Y to reach maximum value.  The whole pointer is incremented, so if Y is 2^18 - 1 it becomes
- *      zero and X is also incremented.  The address calculation for the pointer uses the original X, but if a priority
- *      interrupt should occur before the calculation is complete, the incremented X is used when the instruction is
- *      repeated.
+ *      CAUTION: Do not allow Y to reach maximum value.  The whole pointer is incremented, so if Y is 2^18 - 1
+ *      it becomes zero and X is also incremented.  The address calculation for the pointer uses the original X,
+ *      but if a priority interrupt should occur before the calculation is complete, the incremented X is used
+ *      when the instruction is repeated.
+ *
+ *      SPECIAL CONSIDERATIONS: If S is greater than P and also greater than 36, incrementing produces a new
+ *      P equal to 100 - S rather than 36 - S.  For S > 36 the byte is at most the entire word; for P >= 36 no
+ *      byte is processed (loading merely clears AC).  If both P and S are less than 36 but P + S > 36,
+ *      a byte of size 36 - P is loaded from position P, or the right 36 - P bits of the byte are deposited
+ *      in position P.
+ *
+ * NOTE: Until I can conduct real-world testing, I'm assuming when they say "100 - S", DEC really meant "64 - S",
+ * which is 100 (base 8), which makes much more sense, since P is limited to a range of 00-77 (base 8).
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -188,15 +197,26 @@ PDP10.opFSC = function(op, acc)
  */
 PDP10.opIBP = function(op, acc)
 {
+    var inc = 0;
     var w = this.readWord(this.regEA);
     var p = (w / PDP10.OPCODE.P_SCALE) & PDP10.OPCODE.P_MASK;
     var s = (w >> PDP10.OPCODE.S_SHIFT) & PDP10.OPCODE.S_MASK;
     p -= s;
     if (p < 0) {
+        inc++;
         p = 36 - s;
-        w++;
+        if (p < 0) p = 64 - s;      // see SPECIAL CONSIDERATIONS and NOTE above
     }
+    /*
+     * Since the documentation above makes clear that the effect of the increment (of w) extends past the Y
+     * bits and into (at least) the X bits, we first re-assemble a new pointer with updated P bits (along with
+     * the original S bits and the remaining bits covered by PTR_MASK) and then increment as needed.
+     *
+     * Yes, PTR_MASK could have included the S bits as well and made the following expression a TINY bit simpler,
+     * but I would like to keep PTR_MASK distinct from both the P and S fields.
+     */
     w = (p * PDP10.OPCODE.P_SCALE) + (s << PDP10.OPCODE.S_SHIFT) + (w & PDP10.OPCODE.PTR_MASK);
+    if (inc) w = (w + inc) % PDP10.DATA_LIMIT;
     this.writeWord(this.regEA, w);
 };
 
@@ -209,6 +229,12 @@ PDP10.opIBP = function(op, acc)
  *      location and position specified by the newly incremented pointer, load it into the right end of AC,
  *      and clear the remaining AC bits.  The location containing the byte is unaffected, the original contents
  *      of AC are lost.
+ *
+ *      SPECIAL CONSIDERATIONS: If S is greater than P and also greater than 36, incrementing produces a new
+ *      P equal to 100 - S rather than 36 - S.  For S > 36 the byte is at most the entire word; for P >= 36 no
+ *      byte is processed (loading merely clears AC).  If both P and S are less than 36 but P + S > 36,
+ *      a byte of size 36 - P is loaded from position P, or the right 36 - P bits of the byte are deposited
+ *      in position P.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -238,8 +264,14 @@ PDP10.opILDB = function(op, acc)
  * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-16:
  *
  *      Retrieve a byte of S bits from the location and position specified by the pointer contained in location E,
- *      load it into the right end of AC, and clear the remaining AC bits.  The location containing the byte is unaffected,
- *      the original contents of AC are lost.
+ *      load it into the right end of AC, and clear the remaining AC bits.  The location containing the byte is
+ *      unaffected, the original contents of AC are lost.
+ *
+ *      SPECIAL CONSIDERATIONS: If S is greater than P and also greater than 36, incrementing produces a new
+ *      P equal to 100 - S rather than 36 - S.  For S > 36 the byte is at most the entire word; for P >= 36 no
+ *      byte is processed (loading merely clears AC).  If both P and S are less than 36 but P + S > 36,
+ *      a byte of size 36 - P is loaded from position P, or the right 36 - P bits of the byte are deposited
+ *      in position P.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -263,6 +295,11 @@ PDP10.opLDB = function(op, acc)
     if (p + s <= 32) {
         w = (w >> p) & ((1 << s) - 1);
     } else {
+        /*
+         * Regarding the SPECIAL CONSIDERATIONS above, even if the P ("shift") and/or S ("mask") values are
+         * over-large, that should be fine, because nothing but additional zero bits will be included (provided
+         * our memory is working properly and didn't give us more than 36 bits).
+         */
         w = Math.trunc(w / Math.pow(2, p)) % Math.pow(2, s);
     }
     this.writeWord(acc, w);
@@ -277,6 +314,12 @@ PDP10.opLDB = function(op, acc)
  *      Increment the byte pointer in location E as explained above.  Then deposit the right S bits of AC into
  *      the location and position specified by the newly incremented pointer.  The original contents of the bits
  *      that receive the byte are lost, AC and the remaining bits of the deposit location are unaffected.
+ *
+ *      SPECIAL CONSIDERATIONS: If S is greater than P and also greater than 36, incrementing produces a new
+ *      P equal to 100 - S rather than 36 - S.  For S > 36 the byte is at most the entire word; for P >= 36 no
+ *      byte is processed (loading merely clears AC).  If both P and S are less than 36 but P + S > 36,
+ *      a byte of size 36 - P is loaded from position P, or the right 36 - P bits of the byte are deposited
+ *      in position P.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -309,6 +352,12 @@ PDP10.opIDPB = function(op, acc)
  *      in location E.  The original contents of the bits that receive the byte are lost, AC and the remaining
  *      bits of the deposit location are unaffected.
  *
+ *      SPECIAL CONSIDERATIONS: If S is greater than P and also greater than 36, incrementing produces a new
+ *      P equal to 100 - S rather than 36 - S.  For S > 36 the byte is at most the entire word; for P >= 36 no
+ *      byte is processed (loading merely clears AC).  If both P and S are less than 36 but P + S > 36,
+ *      a byte of size 36 - P is loaded from position P, or the right 36 - P bits of the byte are deposited
+ *      in position P.
+ *
  * @this {CPUStatePDP10}
  * @param {number} op
  * @param {number} acc
@@ -328,7 +377,12 @@ PDP10.opDPB = function(op, acc)
     }
     var p = (this.regPS / PDP10.OPCODE.P_SCALE) & PDP10.OPCODE.P_MASK;
     var s = (this.regPS >> PDP10.OPCODE.S_SHIFT) & PDP10.OPCODE.S_MASK;
-    var b = (this.readWord(acc) % Math.pow(2, s)) * Math.pow(2, p);
+    /*
+     * Regarding the SPECIAL CONSIDERATIONS above, even if the P ("shift") and/or S ("mask") values are
+     * over-large, we "mask" the resulting byte value (b) to 36 bits, so that when we re-assemble the final
+     * result (w), there shouldn't be any overlap or overflow.
+     */
+    var b = ((this.readWord(acc) % Math.pow(2, s)) * Math.pow(2, p)) % PDP10.DATA_LIMIT;
     w = (w - (w % Math.pow(2, p + s))) + b + (w % Math.pow(2, p));
     this.writeWord(this.regEA, w);
     this.regPS = -1;
