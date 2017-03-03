@@ -312,7 +312,7 @@ PDP10.opLDB = function(op, acc)
 };
 
 /**
- * opIDPB(0o136000)
+ * opIDPB(0o136000): Increment Pointer and Deposit Byte
  *
  * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-16:
  *
@@ -2584,7 +2584,12 @@ PDP10.opSOSG = function(op, acc)
 };
 
 /**
- * opSETZ(0o400000) and opSETZI(0o401000)
+ * opSETZ(0o400000): Set to Zeros
+ * opSETZI(0o401000): Set to Zeros Immediate
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-18:
+ *
+ *      Change the contents of the destination specified by M to all 0s.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2596,7 +2601,11 @@ PDP10.opSETZ = function(op, acc)
 };
 
 /**
- * opSETZM(0o402000)
+ * opSETZM(0o402000): Set to Zeros Memory
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-18:
+ *
+ *      Change the contents of the destination specified by M to all 0s.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2608,7 +2617,11 @@ PDP10.opSETZM = function(op, acc)
 };
 
 /**
- * opSETZB(0o403000)
+ * opSETZB(0o403000): Set to Zeros Both
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-18:
+ *
+ *      Change the contents of the destination specified by M to all 0s.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2616,14 +2629,15 @@ PDP10.opSETZM = function(op, acc)
  */
 PDP10.opSETZB = function(op, acc)
 {
-    this.writeWord(acc, 0);
-    this.writeWord(this.regEA, 0);
+    this.writeWord(this.regEA, this.writeWord(acc, 0));
 };
 
 /**
- * opAND(0o404000)
+ * opAND(0o404000): And with AC
  *
- * Change the contents of the destination specified by M ([AC]) to the AND function of the specified operand ([E]) and [AC].
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-20:
+ *
+ *      Change the contents of the destination specified by M ([AC]) to the AND function of the specified operand ([E]) and [AC].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2635,9 +2649,11 @@ PDP10.opAND = function(op, acc)
 };
 
 /**
- * opANDI(0o405000)
+ * opANDI(0o405000): And with AC Immediate
  *
- * Change the contents of the destination specified by M ([AC]) to the AND function of the specified operand (E) and [AC].
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-20:
+ *
+ *      Change the contents of the destination specified by M ([AC]) to the AND function of the specified operand (E) and [AC].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2649,9 +2665,11 @@ PDP10.opANDI = function(op, acc)
 };
 
 /**
- * opANDM(0o406000)
+ * opANDM(0o406000): And with AC to Memory
  *
- * Change the contents of the destination specified by M ([E]) to the AND function of the specified operand ([E]) and [AC].
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-20:
+ *
+ *      Change the contents of the destination specified by M ([E]) to the AND function of the specified operand ([E]) and [AC].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2663,9 +2681,12 @@ PDP10.opANDM = function(op, acc)
 };
 
 /**
- * opANDB(0o407000)
+ * opANDB(0o407000): And with AC to Both
  *
- * Change the contents of the destination specified by M ([E] and [AC]) to the AND function of the specified operand ([E]) and [AC].
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-20:
+ *
+ *      Change the contents of the destination specified by M ([E] and [AC]) to the AND function of the specified operand ([E])
+ *      and [AC].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2673,13 +2694,16 @@ PDP10.opANDM = function(op, acc)
  */
 PDP10.opANDB = function(op, acc)
 {
-    var result = PDP10.doAND(this.readWord(acc), this.readWord(this.regEA));
-    this.writeWord(this.regEA, result);
-    this.writeWord(acc, result);
+    this.writeWord(this.regEA, this.writeWord(acc, PDP10.doAND(this.readWord(acc), this.readWord(this.regEA))));
 };
 
 /**
- * opANDCA(0o410000)
+ * opANDCA(0o410000): And with Complement of AC
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-20:
+ *
+ *      Change the contents of the destination specified by M ([AC]) to the AND function of the specified operand ([E])
+ *      and the complement of [AC].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2687,11 +2711,16 @@ PDP10.opANDB = function(op, acc)
  */
 PDP10.opANDCA = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(acc, PDP10.doAND(PDP10.WORD_MASK - this.readWord(acc), this.readWord(this.regEA)));
 };
 
 /**
- * opANDCAI(0o411000)
+ * opANDCAI(0o411000): And with Complement of AC Immediate
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-20:
+ *
+ *      Change the contents of the destination specified by M ([AC]) to the AND function of the specified operand (E)
+ *      and the complement of [AC].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2699,11 +2728,16 @@ PDP10.opANDCA = function(op, acc)
  */
 PDP10.opANDCAI = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(acc, PDP10.doAND(PDP10.WORD_MASK - this.readWord(acc), this.regEA));
 };
 
 /**
- * opANDCAM(0o412000)
+ * opANDCAM(0o412000): And with Complement of AC to Memory
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-20:
+ *
+ *      Change the contents of the destination specified by M ([E]) to the AND function of the specified operand ([E])
+ *      and the complement of [AC].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2711,11 +2745,16 @@ PDP10.opANDCAI = function(op, acc)
  */
 PDP10.opANDCAM = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(this.regEA, PDP10.doAND(PDP10.WORD_MASK - this.readWord(acc), this.readWord(this.regEA)));
 };
 
 /**
- * opANDCAB(0o413000)
+ * opANDCAB(0o413000): And with Complement of AC to Both
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-20:
+ *
+ *      Change the contents of the destination specified by M ([E] and [AC]) to the AND function of the specified operand ([E])
+ *      and the complement of [AC].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2723,11 +2762,16 @@ PDP10.opANDCAM = function(op, acc)
  */
 PDP10.opANDCAB = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(this.regEA, this.writeWord(acc, PDP10.doAND(PDP10.WORD_MASK - this.readWord(acc), this.readWord(this.regEA))));
 };
 
 /**
- * opANDCM(0o420000)
+ * opANDCM(0o420000): And Complement of Memory with AC
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-20:
+ *
+ *      Change the contents of the destination specified by M ([AC]) to the AND function of the complement of the specified
+ *      operand ([E]) and [AC].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2735,11 +2779,16 @@ PDP10.opANDCAB = function(op, acc)
  */
 PDP10.opANDCM = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(acc, PDP10.doAND(this.readWord(acc), PDP10.WORD_MASK - this.readWord(this.regEA)));
 };
 
 /**
- * opANDCMI(0o421000)
+ * opANDCMI(0o421000): And Complement of Memory Immediate
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-20:
+ *
+ *      Change the contents of the destination specified by M ([AC]) to the AND function of the complement of the specified
+ *      operand (E) and [AC].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2747,11 +2796,16 @@ PDP10.opANDCM = function(op, acc)
  */
 PDP10.opANDCMI = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(acc, PDP10.doAND(this.readWord(acc), PDP10.WORD_MASK - this.regEA));
 };
 
 /**
- * opANDCMM(0o422000)
+ * opANDCMM(0o422000): And Complement of Memory to Memory
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-20:
+ *
+ *      Change the contents of the destination specified by M ([E]) to the AND function of the complement of the specified
+ *      operand ([E]) and [AC].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2759,11 +2813,16 @@ PDP10.opANDCMI = function(op, acc)
  */
 PDP10.opANDCMM = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(this.regEA, PDP10.doAND(this.readWord(acc), PDP10.WORD_MASK - this.readWord(this.regEA)));
 };
 
 /**
- * opANDCMB(0o423000)
+ * opANDCMB(0o423000): And Complement of Memory to Both
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-20:
+ *
+ *      Change the contents of the destination specified by M ([E] and [AC]) to the AND function of the complement of the specified
+ *      operand ([E]) and [AC].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2771,11 +2830,16 @@ PDP10.opANDCMM = function(op, acc)
  */
 PDP10.opANDCMB = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(this.regEA, this.writeWord(acc, PDP10.doAND(this.readWord(acc), PDP10.WORD_MASK - this.readWord(this.regEA))));
 };
 
 /**
- * opXOR(0o430000)
+ * opXOR(0o430000): Exclusive Or with AC
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-22:
+ *
+ *      Change the contents of the destination specified by M ([AC]) to the exclusive OR function of the specified
+ *      operand ([E]) and [AC].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2783,11 +2847,16 @@ PDP10.opANDCMB = function(op, acc)
  */
 PDP10.opXOR = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(acc, PDP10.doEOR(this.readWord(acc), this.readWord(this.regEA)));
 };
 
 /**
- * opXORI(0o431000)
+ * opXORI(0o431000): Exclusive Or Immediate
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-22:
+ *
+ *      Change the contents of the destination specified by M ([AC]) to the exclusive OR function of the specified
+ *      operand (E) and [AC].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2795,11 +2864,16 @@ PDP10.opXOR = function(op, acc)
  */
 PDP10.opXORI = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(acc, PDP10.doEOR(this.readWord(acc), this.regEA));
 };
 
 /**
- * opXORM(0o432000)
+ * opXORM(0o432000): Exclusive Or to Memory
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-22:
+ *
+ *      Change the contents of the destination specified by M ([E]) to the exclusive OR function of the specified
+ *      operand ([E]) and [AC].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2807,11 +2881,16 @@ PDP10.opXORI = function(op, acc)
  */
 PDP10.opXORM = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(this.regEA, PDP10.doEOR(this.readWord(acc), this.readWord(this.regEA)));
 };
 
 /**
- * opXORB(0o433000)
+ * opXORB(0o433000): Exclusive Or to Both
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-22:
+ *
+ *      Change the contents of the destination specified by M ([E] and [AC]) to the exclusive OR function of the specified
+ *      operand ([E]) and [AC].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2819,11 +2898,16 @@ PDP10.opXORM = function(op, acc)
  */
 PDP10.opXORB = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(this.regEA, this.writeWord(acc, PDP10.doEOR(this.readWord(acc), this.readWord(this.regEA))));
 };
 
 /**
- * opIOR(0o434000)
+ * opIOR(0o434000): Inclusive Or with AC
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-21:
+ *
+ *      Change the contents of the destination specified by M ([AC]) to the inclusive OR function of the specified
+ *      operand ([E]) and [AC].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2831,11 +2915,16 @@ PDP10.opXORB = function(op, acc)
  */
 PDP10.opIOR = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(acc, PDP10.doIOR(this.readWord(acc), this.readWord(this.regEA)));
 };
 
 /**
- * opIORI(0o435000)
+ * opIORI(0o435000): Inclusive Or with AC Immediate
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-21:
+ *
+ *      Change the contents of the destination specified by M ([AC]) to the inclusive OR function of the specified
+ *      operand (E) and [AC].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2843,11 +2932,16 @@ PDP10.opIOR = function(op, acc)
  */
 PDP10.opIORI = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(acc, PDP10.doIOR(this.readWord(acc), this.regEA));
 };
 
 /**
- * opIORM(0o436000)
+ * opIORM(0o436000): Inclusive Or with AC to Memory
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-21:
+ *
+ *      Change the contents of the destination specified by M ([E]) to the inclusive OR function of the specified
+ *      operand ([E]) and [AC].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2855,11 +2949,16 @@ PDP10.opIORI = function(op, acc)
  */
 PDP10.opIORM = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(this.regEA, PDP10.doIOR(this.readWord(acc), this.readWord(this.regEA)));
 };
 
 /**
- * opIORB(0o437000)
+ * opIORB(0o437000): Inclusive Or with AC to Both
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-21:
+ *
+ *      Change the contents of the destination specified by M ([E] and [AC]) to the inclusive OR function of the specified
+ *      operand ([E]) and [AC].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2867,11 +2966,16 @@ PDP10.opIORM = function(op, acc)
  */
 PDP10.opIORB = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(this.regEA, this.writeWord(acc, PDP10.doIOR(this.readWord(acc), this.readWord(this.regEA))));
 };
 
 /**
- * opANDCB(0o440000)
+ * opANDCB(0o440000): And Complements of Both
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-21:
+ *
+ *      Change the contents of the destination specified by M ([AC]) to the AND function of the complements of both
+ *      the specified operand ([E]) and [AC].  The result is the NOR function of the operands.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2879,11 +2983,16 @@ PDP10.opIORB = function(op, acc)
  */
 PDP10.opANDCB = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(acc, PDP10.doAND(PDP10.WORD_MASK - this.readWord(acc), PDP10.WORD_MASK - this.readWord(this.regEA)));
 };
 
 /**
- * opANDCBI(0o441000)
+ * opANDCBI(0o441000): And Complements of Both Immediate
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-21:
+ *
+ *      Change the contents of the destination specified by M ([AC]) to the AND function of the complements of both
+ *      the specified operand (E) and [AC].  The result is the NOR function of the operands.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2891,11 +3000,16 @@ PDP10.opANDCB = function(op, acc)
  */
 PDP10.opANDCBI = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(acc, PDP10.doAND(PDP10.WORD_MASK - this.readWord(acc), PDP10.WORD_MASK - this.regEA));
 };
 
 /**
- * opANDCBM(0o442000)
+ * opANDCBM(0o442000): And Complements of Both to Memory
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-21:
+ *
+ *      Change the contents of the destination specified by M ([E]) to the AND function of the complements of both
+ *      the specified operand ([E]) and [AC].  The result is the NOR function of the operands.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2903,11 +3017,16 @@ PDP10.opANDCBI = function(op, acc)
  */
 PDP10.opANDCBM = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(this.regEA, PDP10.doAND(PDP10.WORD_MASK - this.readWord(acc), PDP10.WORD_MASK - this.readWord(this.regEA)));
 };
 
 /**
- * opANDCBB(0o443000)
+ * opANDCBB(0o443000): And Complements of Both to Both
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-21:
+ *
+ *      Change the contents of the destination specified by M ([E] and [AC]) to the AND function of the complements of both
+ *      the specified operand ([E]) and [AC].  The result is the NOR function of the operands.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2915,11 +3034,16 @@ PDP10.opANDCBM = function(op, acc)
  */
 PDP10.opANDCBB = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(this.regEA, this.writeWord(acc, PDP10.doAND(PDP10.WORD_MASK - this.readWord(acc), PDP10.WORD_MASK - this.readWord(this.regEA))));
 };
 
 /**
- * opEQV(0o444000)
+ * opEQV(0o444000): Equivalence with AC
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-23:
+ *
+ *      Change the contents of the destination specified by M ([AC]) to the complement of the exclusive OR function of the
+ *      specified operand ([E]) and [AC] (the result has 1s wherever the corresponding bits of the operands are the same).
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2927,11 +3051,16 @@ PDP10.opANDCBB = function(op, acc)
  */
 PDP10.opEQV = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(acc, PDP10.doEQV(this.readWord(acc), this.readWord(this.regEA)));
 };
 
 /**
- * opEQVI(0o445000)
+ * opEQVI(0o445000): Equivalence Immediate
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-23:
+ *
+ *      Change the contents of the destination specified by M ([AC]) to the complement of the exclusive OR function of the
+ *      specified operand (E) and [AC] (the result has 1s wherever the corresponding bits of the operands are the same).
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2939,11 +3068,16 @@ PDP10.opEQV = function(op, acc)
  */
 PDP10.opEQVI = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(acc, PDP10.doEQV(this.readWord(acc), this.regEA));
 };
 
 /**
- * opEQVM(0o446000)
+ * opEQVM(0o446000): Equivalence to Memory
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-23:
+ *
+ *      Change the contents of the destination specified by M ([E]) to the complement of the exclusive OR function of the
+ *      specified operand ([E]) and [AC] (the result has 1s wherever the corresponding bits of the operands are the same).
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2951,11 +3085,16 @@ PDP10.opEQVI = function(op, acc)
  */
 PDP10.opEQVM = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(this.regEA, PDP10.doEQV(this.readWord(acc), this.readWord(this.regEA)));
 };
 
 /**
- * opEQVB(0o447000)
+ * opEQVB(0o447000): Equivalence to Both
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-23:
+ *
+ *      Change the contents of the destination specified by M ([E] and [AC]) to the complement of the exclusive OR function of the
+ *      specified operand ([E]) and [AC] (the result has 1s wherever the corresponding bits of the operands are the same).
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2963,13 +3102,16 @@ PDP10.opEQVM = function(op, acc)
  */
 PDP10.opEQVB = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(this.regEA, this.writeWord(acc, PDP10.doEQV(this.readWord(acc), this.readWord(this.regEA))));
 };
 
 /**
- * opSETCA(0o450000) and opSETCAI(0o451000)
+ * opSETCA(0o450000): Set to Complement of AC
+ * opSETCAI(0o451000): Set to Complement of AC Immediate
  *
- * Change the contents of the destination specified by M ([AC]) to the complement of [AC].
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-19:
+ *
+ *      Change the contents of the destination specified by M ([AC]) to the complement of [AC].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2981,9 +3123,11 @@ PDP10.opSETCA = function(op, acc)
 };
 
 /**
- * opSETCAM(0o452000)
+ * opSETCAM(0o452000): Set to Complement of AC Memory
  *
- * Change the contents of the destination specified by M ([E]) to the complement of [AC].
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-19:
+ *
+ *      Change the contents of the destination specified by M ([E]) to the complement of [AC].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2995,9 +3139,11 @@ PDP10.opSETCAM = function(op, acc)
 };
 
 /**
- * opSETCAB(0o453000)
+ * opSETCAB(0o453000): Set to Complement of AC Both
  *
- * Change the contents of the destination specified by M ([E] and [AC]) to the complement of [AC].
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-19:
+ *
+ *      Change the contents of the destination specified by M ([E] and [AC]) to the complement of [AC].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3005,13 +3151,16 @@ PDP10.opSETCAM = function(op, acc)
  */
 PDP10.opSETCAB = function(op, acc)
 {
-    var dst = PDP10.WORD_MASK - this.readWord(acc);
-    this.writeWord(acc, dst);
-    this.writeWord(this.regEA, dst);
+    this.writeWord(this.regEA, this.writeWord(acc, PDP10.WORD_MASK - this.readWord(acc)));
 };
 
 /**
- * opORCA(0o454000)
+ * opORCA(0o454000): Inclusive Or with Complement of AC
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-21:
+ *
+ *      Change the contents of the destination specified by M ([AC]) to the inclusive OR function of the specified
+ *      operand ([E]) and the complement of [AC].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3019,11 +3168,16 @@ PDP10.opSETCAB = function(op, acc)
  */
 PDP10.opORCA = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(acc, PDP10.doIOR(PDP10.WORD_MASK - this.readWord(acc), this.readWord(this.regEA)));
 };
 
 /**
- * opORCAI(0o455000)
+ * opORCAI(0o455000): Inclusive Or with Complement of AC Immediate
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-21:
+ *
+ *      Change the contents of the destination specified by M ([AC]) to the inclusive OR function of the specified
+ *      operand (E) and the complement of [AC].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3031,11 +3185,16 @@ PDP10.opORCA = function(op, acc)
  */
 PDP10.opORCAI = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(acc, PDP10.doIOR(PDP10.WORD_MASK - this.readWord(acc), this.regEA));
 };
 
 /**
- * opORCAM(0o456000)
+ * opORCAM(0o456000): Inclusive Or with Complement of AC to Memory
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-21:
+ *
+ *      Change the contents of the destination specified by M ([E]) to the inclusive OR function of the specified
+ *      operand ([E]) and the complement of [AC].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3043,11 +3202,16 @@ PDP10.opORCAI = function(op, acc)
  */
 PDP10.opORCAM = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(this.regEA, PDP10.doIOR(PDP10.WORD_MASK - this.readWord(acc), this.readWord(this.regEA)));
 };
 
 /**
- * opORCAB(0o457000)
+ * opORCAB(0o457000): Inclusive Or with Complement of AC to Both
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-21:
+ *
+ *      Change the contents of the destination specified by M ([E] and [AC]) to the inclusive OR function of the specified
+ *      operand ([E]) and the complement of [AC].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3055,13 +3219,16 @@ PDP10.opORCAM = function(op, acc)
  */
 PDP10.opORCAB = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(this.regEA, this.writeWord(acc, PDP10.doIOR(PDP10.WORD_MASK - this.readWord(acc), this.readWord(this.regEA))));
 };
 
 /**
- * opSETCM(0o460000)
+ * opSETCM(0o460000): Set to Complement of Memory
  *
- * Change the contents of the destination specified by M ([AC]) to the complement of the specified source operand ([E]).
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-19:
+ *
+ *      Change the contents of the destination specified by M ([AC]) to the complement of the specified source
+ *      operand ([E]).
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3073,9 +3240,12 @@ PDP10.opSETCM = function(op, acc)
 };
 
 /**
- * opSETCMI(0o461000)
+ * opSETCMI(0o461000): Set to Complement of Memory Immediate
  *
- * Change the contents of the destination specified by M ([AC]) to the complement of the specified source operand (E).
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-19:
+ *
+ *      Change the contents of the destination specified by M ([AC]) to the complement of the specified source
+ *      operand (E).
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3087,9 +3257,12 @@ PDP10.opSETCMI = function(op, acc)
 };
 
 /**
- * opSETCMM(0o462000)
+ * opSETCMM(0o462000): Set to Complement of Memory Memory
  *
- * Change the contents of the destination specified by M ([E]) to the complement of the specified source operand ([E]).
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-19:
+ *
+ *      Change the contents of the destination specified by M ([E]) to the complement of the specified source
+ *      operand ([E]).
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3101,9 +3274,12 @@ PDP10.opSETCMM = function(op, acc)
 };
 
 /**
- * opSETCMB(0o463000)
+ * opSETCMB(0o463000): Set to Complement of Memory Both
  *
- * Change the contents of the destination specified by M ([E] and [AC]) to the complement of the specified source operand ([E]).
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-19:
+ *
+ *      Change the contents of the destination specified by M ([E] and [AC]) to the complement of the specified source
+ *      operand ([E]).
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3111,13 +3287,16 @@ PDP10.opSETCMM = function(op, acc)
  */
 PDP10.opSETCMB = function(op, acc)
 {
-    var dst = PDP10.WORD_MASK - this.readWord(this.regEA);
-    this.writeWord(acc, dst);
-    this.writeWord(this.regEA, dst);
+    this.writeWord(this.regEA, this.writeWord(acc, PDP10.WORD_MASK - this.readWord(this.regEA)));
 };
 
 /**
- * opORCM(0o464000)
+ * opORCM(0o464000): Inclusive Or Complement of Memory with AC
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-22:
+ *
+ *      Change the contents of the destination specified by M ([AC]) to the inclusive OR function of the complement of the
+ *      specified operand ([E]) and [AC].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3125,11 +3304,16 @@ PDP10.opSETCMB = function(op, acc)
  */
 PDP10.opORCM = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(acc, PDP10.doIOR(this.readWord(acc), PDP10.WORD_MASK - this.readWord(this.regEA)));
 };
 
 /**
- * opORCMI(0o465000)
+ * opORCMI(0o465000): Inclusive Or Complement of Memory Immediate
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-22:
+ *
+ *      Change the contents of the destination specified by M ([AC]) to the inclusive OR function of the complement of the
+ *      specified operand (E) and [AC].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3137,11 +3321,16 @@ PDP10.opORCM = function(op, acc)
  */
 PDP10.opORCMI = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(acc, PDP10.doIOR(this.readWord(acc), PDP10.WORD_MASK - this.regEA));
 };
 
 /**
- * opORCMM(0o466000)
+ * opORCMM(0o466000): Inclusive Or Complement of Memory to Memory
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-22:
+ *
+ *      Change the contents of the destination specified by M ([E]) to the inclusive OR function of the complement of the
+ *      specified operand ([E]) and [AC].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3149,11 +3338,16 @@ PDP10.opORCMI = function(op, acc)
  */
 PDP10.opORCMM = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(this.regEA, PDP10.doIOR(this.readWord(acc), PDP10.WORD_MASK - this.readWord(this.regEA)));
 };
 
 /**
- * opORCMB(0o467000)
+ * opORCMB(0o467000): Inclusive Or Complement of Memory to Both
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-22:
+ *
+ *      Change the contents of the destination specified by M ([E] and [AC]) to the inclusive OR function of the complement of the
+ *      specified operand ([E]) and [AC].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3161,11 +3355,16 @@ PDP10.opORCMM = function(op, acc)
  */
 PDP10.opORCMB = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(this.regEA, this.writeWord(acc, PDP10.doIOR(this.readWord(acc), PDP10.WORD_MASK - this.readWord(this.regEA))));
 };
 
 /**
- * opORCB(0o470000)
+ * opORCB(0o470000): Inclusive Or Complements of Both
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-22:
+ *
+ *      Change the contents of the destination specified by M ([AC]) to the inclusive OR function of the complements of both
+ *      the specified operand ([E]) and [AC].  The result is the NAND function of the operands.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3173,11 +3372,16 @@ PDP10.opORCMB = function(op, acc)
  */
 PDP10.opORCB = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(acc, PDP10.doIOR(PDP10.WORD_MASK - this.readWord(acc), PDP10.WORD_MASK - this.readWord(this.regEA)));
 };
 
 /**
- * opORCBI(0o471000)
+ * opORCBI(0o471000): Inclusive Or Complements of Both Immediate
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-22:
+ *
+ *      Change the contents of the destination specified by M ([AC]) to the inclusive OR function of the complements of both
+ *      the specified operand (E) and [AC].  The result is the NAND function of the operands.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3185,11 +3389,16 @@ PDP10.opORCB = function(op, acc)
  */
 PDP10.opORCBI = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(acc, PDP10.doIOR(PDP10.WORD_MASK - this.readWord(acc), PDP10.WORD_MASK - this.regEA));
 };
 
 /**
- * opORCBM(0o472000)
+ * opORCBM(0o472000): Inclusive Or Complements of Both To Memory
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-22:
+ *
+ *      Change the contents of the destination specified by M ([E]) to the inclusive OR function of the complements of both
+ *      the specified operand ([E]) and [AC].  The result is the NAND function of the operands.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3197,11 +3406,16 @@ PDP10.opORCBI = function(op, acc)
  */
 PDP10.opORCBM = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(this.regEA, PDP10.doIOR(PDP10.WORD_MASK - this.readWord(acc), PDP10.WORD_MASK - this.readWord(this.regEA)));
 };
 
 /**
- * opORCBB(0o473000)
+ * opORCBB(0o473000): Inclusive Or Complements of Both to Both
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-22:
+ *
+ *      Change the contents of the destination specified by M ([E] and [AC]) to the inclusive OR function of the complements of both
+ *      the specified operand ([E]) and [AC].  The result is the NAND function of the operands.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3209,13 +3423,16 @@ PDP10.opORCBM = function(op, acc)
  */
 PDP10.opORCBB = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(this.regEA, this.writeWord(acc, PDP10.doIOR(PDP10.WORD_MASK - this.readWord(acc), PDP10.WORD_MASK - this.readWord(this.regEA))));
 };
 
 /**
- * opSETO(0o474000) and opSETOI(0o475000)
+ * opSETO(0o474000): Set to Ones
+ * opSETOI(0o475000): Set to Ones Immediate
  *
- * Change the contents of the destination specified by M (AC) to all 1s.
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-18:
+ *
+ *      Change the contents of the destination specified by M (AC) to all 1s.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3227,9 +3444,11 @@ PDP10.opSETO = function(op, acc)
 };
 
 /**
- * opSETOM(0o476000)
+ * opSETOM(0o476000): Set to Ones Memory
  *
- * Change the contents of the destination specified by M ([E]) to all 1s.
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-18:
+ *
+ *      Change the contents of the destination specified by M ([E]) to all 1s.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3241,9 +3460,11 @@ PDP10.opSETOM = function(op, acc)
 };
 
 /**
- * opSETOB(0o477000)
+ * opSETOB(0o477000): Set to Ones Both
  *
- * Change the contents of the destination specified by M ([E] and [AC]) to all 1s.
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-18:
+ *
+ *      Change the contents of the destination specified by M ([E] and [AC]) to all 1s.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3251,8 +3472,7 @@ PDP10.opSETOM = function(op, acc)
  */
 PDP10.opSETOB = function(op, acc)
 {
-    this.writeWord(acc, PDP10.WORD_MASK);
-    this.writeWord(this.regEA, PDP10.WORD_MASK);
+    this.writeWord(this.regEA, this.writeWord(acc, PDP10.WORD_MASK));
 };
 
 /**
@@ -4627,7 +4847,7 @@ PDP10.setHR = function(op, dst, src)
 /**
  * doAND(dst, src)
  *
- * Used by callers to perform a logical "AND" of two 36-bit operands.
+ * Used by callers to perform the logical "and" (AND) of two 36-bit operands.
  *
  * @param {number} dst (36-bit value)
  * @param {number} src (36-bit value)
@@ -4636,14 +4856,84 @@ PDP10.setHR = function(op, dst, src)
 PDP10.doAND = function(dst, src)
 {
     /*
-     * Since dst and src are 36-bit values, we must "AND" the low 32 bits separately from the higher bits,
-     * and then combine them with addition.
+     * Since dst and src are 36-bit values, we must AND the low 32 bits separately from the higher bits,
+     * and then combine them with addition.  Since all bits above 36 will be zero, and since 0 AND 0 is 0,
+     * no special masking for the higher bits is required.
      *
      * WARNING: When using JavaScript's 32-bit operators with values that could set bit 31 and produce a
      * negative value, it's critical to perform a final right-shift of 0, ensuring that the final result is
      * positive.
      */
     return ((((dst / PDP10.TWO_POW32)|0) & ((src / PDP10.TWO_POW32)|0)) * PDP10.TWO_POW32) + ((dst & src) >>> 0);
+};
+
+/**
+ * doEOR(dst, src)
+ *
+ * Used by callers to perform the logical "exclusive-or" (XOR) of two 36-bit operands.
+ *
+ * @param {number} dst (36-bit value)
+ * @param {number} src (36-bit value)
+ * @return {number} (dst ^ src)
+ */
+PDP10.doEOR = function(dst, src)
+{
+    /*
+     * Since dst and src are 36-bit values, we must XOR the low 32 bits separately from the higher bits,
+     * and then combine them with addition.  Since all bits above 36 will be zero, and since 0 XOR 0 is 0,
+     * no special masking for the higher bits is required.
+     *
+     * WARNING: When using JavaScript's 32-bit operators with values that could set bit 31 and produce a
+     * negative value, it's critical to perform a final right-shift of 0, ensuring that the final result is
+     * positive.
+     */
+    return ((((dst / PDP10.TWO_POW32)|0) ^ ((src / PDP10.TWO_POW32)|0)) * PDP10.TWO_POW32) + ((dst ^ src) >>> 0);
+};
+
+/**
+ * doEQV(dst, src)
+ *
+ * Used by callers to perform the logical "equivalence" (EQV) of two 36-bit operands.
+ *
+ * @param {number} dst (36-bit value)
+ * @param {number} src (36-bit value)
+ * @return {number} (~(dst ^ src))
+ */
+PDP10.doEQV = function(dst, src)
+{
+    /*
+     * Since dst and src are 36-bit values, we must EQV the low 32 bits separately from the higher bits,
+     * and then combine them with addition.  Since all bits above 36 will be zero, and since 0 EQV 0 is 1,
+     * we must mask the higher 4 bits with 0o17.
+     *
+     * WARNING: When using JavaScript's 32-bit operators with values that could set bit 31 and produce a
+     * negative value, it's critical to perform a final right-shift of 0, ensuring that the final result is
+     * positive.
+     */
+    return ((~(((dst / PDP10.TWO_POW32)|0) ^ ((src / PDP10.TWO_POW32)|0)) & 0o17) * PDP10.TWO_POW32) + (~(dst ^ src) >>> 0);
+};
+
+/**
+ * doIOR(dst, src)
+ *
+ * Used by callers to perform the logical "inclusive-or" (OR) of two 36-bit operands.
+ *
+ * @param {number} dst (36-bit value)
+ * @param {number} src (36-bit value)
+ * @return {number} (dst | src)
+ */
+PDP10.doIOR = function(dst, src)
+{
+    /*
+     * Since dst and src are 36-bit values, we must OR the low 32 bits separately from the higher bits,
+     * and then combine them with addition.  Since all bits above 36 will be zero, and since 0 OR 0 is 0,
+     * no special masking for the higher bits is required.
+     *
+     * WARNING: When using JavaScript's 32-bit operators with values that could set bit 31 and produce a
+     * negative value, it's critical to perform a final right-shift of 0, ensuring that the final result is
+     * positive.
+     */
+    return ((((dst / PDP10.TWO_POW32)|0) | ((src / PDP10.TWO_POW32)|0)) * PDP10.TWO_POW32) + ((dst | src) >>> 0);
 };
 
 /*

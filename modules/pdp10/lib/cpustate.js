@@ -769,10 +769,12 @@ class CPUStatePDP10 extends CPUPDP10 {
      * @this {CPUStatePDP10}
      * @param {number} addr
      * @param {number} data
+     * @return {number} (we return the data back to the caller to permit nested writes)
      */
     writeWordToPhysical(addr, data)
     {
         this.bus.setWord(this.lastAddr = addr, data);
+        return data;
     }
 
     /**

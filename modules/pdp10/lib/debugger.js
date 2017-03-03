@@ -3898,7 +3898,7 @@ if (DEBUGGER) {
             0o42000: DebuggerPDP10.OPS.ANDCM,
             0o42400: DebuggerPDP10.OPS.SETA,
             0o43000: DebuggerPDP10.OPS.XOR,
-            0o43400: DebuggerPDP10.OPS.IOR,
+            0o43400: DebuggerPDP10.OPS.IOR,     // MACRO alias: OR
             0o44000: DebuggerPDP10.OPS.ANDCB,
             0o44400: DebuggerPDP10.OPS.EQV,
             0o45000: DebuggerPDP10.OPS.SETCA,
