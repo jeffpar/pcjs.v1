@@ -885,6 +885,9 @@ class DebuggerPDP10 extends Debugger {
         case DebuggerPDP10.REGS.ND:
             value = this.cpu.fNoDivide? 1 : 0;
             break;
+        case DebuggerPDP10.REGS.PD:
+            value = this.cpu.fPDOverflow? 1 : 0;
+            break;
         }
         return value;
     }
@@ -3145,15 +3148,16 @@ class DebuggerPDP10 extends Debugger {
      */
     doStep(sCmd, sOption)
     {
-        if (sOption == '?') {
+        var fCallStep = true;
+        var nRegs = (sCmd == "p"? 0 : (sCmd == "pr"? 1 : -1));
+
+        if (sOption == '?' || nRegs < 0) {
             this.println("step commands:");
             this.println("\tp\tstep over instruction");
             this.println("\tpr\tstep over instruction with register update");
             return;
         }
 
-        var fCallStep = true;
-        var nRegs = (sCmd == "pr"? 1 : 0);
         /*
          * Set up the value for this.nStep (ie, 1 or 2) depending on whether the user wants
          * a subsequent register dump ("pr") or not ("p").
@@ -3819,10 +3823,11 @@ if (DEBUGGER) {
         C1:     4,                              // single-bit "register" representing the Carry 1 flag
         OV:     5,                              // single-bit "register" representing the Overflow flag
         ND:     6,                              // single-bit "register" representing the No Divide flag
+        PD:     7,                              // single-bit "register" representing the Pushdown Overflow flag
     };
 
     DebuggerPDP10.REGNAMES = [
-        "PC", "RA", "EA", "C0", "C1", "OV", "ND"
+        "PC", "RA", "EA", "C0", "C1", "OV", "ND", "PD"
     ];
 
     /*

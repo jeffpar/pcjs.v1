@@ -11,7 +11,9 @@ dep 111 533000000006
 dep 112 541000000010
 dep 113 251000000017
 dep 114 577040000002
-ex -m 100-114
+dep 115 261240000011
+dep 116 262240000005
+ex -m 100-116
 dep pc 100
 step 11
 ex 0-17
@@ -37,5 +39,16 @@ ex 0-17
 ;
 echo Execute HLRES 1,2
 ;
+step 1
+ex 0-17
+;
+echo Execute PUSH 5,11
+;
+step 1
+ex 0-17
+;
+echo Execute POP 5,5
+;
+dep 5 1000000
 step 1
 ex 0-17

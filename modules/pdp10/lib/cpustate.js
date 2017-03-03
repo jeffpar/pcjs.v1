@@ -176,7 +176,7 @@ class CPUStatePDP10 extends CPUPDP10 {
     {
         this.regEA = this.regRA = this.regOP = 0;
         this.regPC = this.lastPC = this.addrReset;
-        this.fOverflow = this.fCarry0 = this.fCarry1 = this.fNoDivide = false;
+        this.fOverflow = this.fCarry0 = this.fCarry1 = this.fNoDivide = this.fPDOverflow = false;
 
         /*
          * This is queried and displayed by the Panel when it's not displaying its own ADDRESS register
@@ -439,11 +439,34 @@ class CPUStatePDP10 extends CPUPDP10 {
     }
 
     /**
-     * negate(src)
+     * abs(src)
+     *
+     * Used by the MOVM* (Move Magnitude) instructions.
      *
      * @this {CPUStatePDP10}
      * @param {number} src (36-bit)
-     * @return {number} (negated, but as an unsigned 36-bit result)
+     * @return {number} (absolute value of src)
+     */
+    abs(src)
+    {
+        if (src > PDP10.MAX_POS36) {
+            if (src != PDP10.MIN_NEG36) {
+                src = PDP10.TWO_POW36 - src;
+            } else {
+                this.fOverflow = this.fCarry1 = true;
+            }
+        }
+        return src;
+    }
+
+    /**
+     * negate(src)
+     *
+     * Used by the MOVN* (Move Negative) instructions.
+     *
+     * @this {CPUStatePDP10}
+     * @param {number} src (36-bit)
+     * @return {number} (src negated, but as an unsigned 36-bit result)
      */
     negate(src)
     {

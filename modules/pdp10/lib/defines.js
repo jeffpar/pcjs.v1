@@ -57,6 +57,11 @@ var APPNAME = "PDPjs";          // this @define is the default application name 
 var DEBUGGER = true;            // this @define is overridden by the Closure Compiler to remove Debugger-related support
 
 /*
+ * Set this to true to enable behavior compatible with SIMH.
+ */
+var SIMH = false;
+
+/*
  * Combine all the shared globals and machine-specific globals into one machine-specific global object,
  * which all machine components should start using; eg: "if (PDP10.DEBUG) ..." instead of "if (DEBUG) ...".
  */

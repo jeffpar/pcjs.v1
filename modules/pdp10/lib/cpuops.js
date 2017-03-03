@@ -841,6 +841,8 @@ PDP10.opMOVNI = function(op, acc)
      * We perform an in-line two's complement of regEA, since negate() updates the flags, and the documentation
      * above claims that this operation must "set no flags."  It's certainly true that regEA, being an 18-bit value,
      * could never be -2^35, but it COULD be zero -- and apparently this instruction treats zero differently from MOVN.
+     *
+     * TODO: Verify the "set no flags" assertion.
      */
     this.writeWord(acc, this.regEA? PDP10.TWO_POW36 - this.regEA : 0);
 };
@@ -898,7 +900,20 @@ PDP10.opMOVNS = function(op, acc)
 };
 
 /**
- * opMOVM(0o214000)
+ * opMOVM(0o214000): Move Magnitude
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-12:
+ *
+ *      Take the magnitude of the word contained in the source specified by M and move it to the
+ *      specified destination.  If the source word is fixed point -2^35 (400000 000000) set the
+ *      Overflow and Carry 1 flags.
+ *
+ *      (Negating the equivalent floating point -1 * 2^27 sets the flags, but this is not a normalized
+ *      number).
+ *
+ *      The source is unaffected, the original contents of the destination are lost.
+ *
+ * NOTE: This is a "Basic" mode instruction: the source is [E] and the destination is [A] (opposite of "Memory").
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -906,11 +921,26 @@ PDP10.opMOVNS = function(op, acc)
  */
 PDP10.opMOVM = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(acc, this.abs(this.readWord(this.regEA)));
 };
 
 /**
- * opMOVMI(0o215000)
+ * opMOVMI(0o215000): Move Magnitude Immediate
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-12:
+ *
+ *      Take the magnitude of the word contained in the source specified by M and move it to the
+ *      specified destination.  If the source word is fixed point -2^35 (400000 000000) set the
+ *      Overflow and Carry 1 flags.
+ *
+ *      (Negating the equivalent floating point -1 * 2^27 sets the flags, but this is not a normalized
+ *      number).
+ *
+ *      The source is unaffected, the original contents of the destination are lost.
+ *
+ *      SIDEBAR: The word 0,E is equivalent to its magnitude, so MOVMI is equivalent to MOVEI.
+ *
+ * NOTE: This is an "Immediate" mode instruction: the source is the word 0,E and the destination is [A].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -918,11 +948,24 @@ PDP10.opMOVM = function(op, acc)
  */
 PDP10.opMOVMI = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(acc, this.regEA);
 };
 
 /**
- * opMOVMM(0o216000)
+ * opMOVMM(0o216000): Move Magnitude to Memory
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-12:
+ *
+ *      Take the magnitude of the word contained in the source specified by M and move it to the
+ *      specified destination.  If the source word is fixed point -2^35 (400000 000000) set the
+ *      Overflow and Carry 1 flags.
+ *
+ *      (Negating the equivalent floating point -1 * 2^27 sets the flags, but this is not a normalized
+ *      number).
+ *
+ *      The source is unaffected, the original contents of the destination are lost.
+ *
+ * NOTE: This is a "Memory" mode instruction: the source is [A] and the destination is [E] (opposite of "Basic").
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -930,11 +973,24 @@ PDP10.opMOVMI = function(op, acc)
  */
 PDP10.opMOVMM = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(this.regEA, this.abs(this.readWord(acc)));
 };
 
 /**
- * opMOVMS(0o217000)
+ * opMOVMS(0o217000): Move Magnitude to Self
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-12:
+ *
+ *      Take the magnitude of the word contained in the source specified by M and move it to the
+ *      specified destination.  If the source word is fixed point -2^35 (400000 000000) set the
+ *      Overflow and Carry 1 flags.
+ *
+ *      (Negating the equivalent floating point -1 * 2^27 sets the flags, but this is not a normalized
+ *      number).
+ *
+ *      The source is unaffected, the original contents of the destination are lost.
+ *
+ * NOTE: This is a "Self" mode instruction: the source AND destination is [E] (and also [A] if A is non-zero).
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -942,7 +998,9 @@ PDP10.opMOVMM = function(op, acc)
  */
 PDP10.opMOVMS = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = this.abs(this.readWord(this.regEA));
+    this.writeWord(this.regEA, dst);
+    if (acc) this.writeWord(acc, dst);
 };
 
 /**
@@ -1257,6 +1315,9 @@ PDP10.opEXCH = function(op, acc)
  *      is the final location being loaded.  Furthermore, the program cannot assume that AC is the same after the BLT
  *      as it was before.
  *
+ * TODO: Determine the logic behind SIMH's bizarre treatment of the AC register when it's part of the memory
+ * being transferred.
+ *
  * @this {CPUStatePDP10}
  * @param {number} op
  * @param {number} acc
@@ -1357,7 +1418,28 @@ PDP10.opPUSHJ = function(op, acc)
 };
 
 /**
- * opPUSH(0o261000)
+ * opPUSH(0o261000): Push Down
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-13:
+ *
+ *      Add 000001 000001 to AC to increment both halves by one, then move the contents of location E to the
+ *      location now addressed by AC right.  If the addition causes the count in AC left to reach zero, set the
+ *      Pushdown Overflow flag.  The contents of E are unaffected, the original contents of the location added
+ *      to the list are lost.
+ *
+ * If we trusted SIMH, then we could not literally interpret this instruction as adding 000001 000001 to AC,
+ * because if AC contained 777777 777777, adding 000001 000001 would result in 000001 000000, not 000000 000000,
+ * and yet 000000 000000 is EXACTLY what we get in SIMH.
+ *
+ * And yet, DEC's documentation clearly contradicts what SIMH is doing:
+ *
+ *      The incrementing and decrementing of both halves of AC simultaneously is effected by adding and subtracting
+ *      000001 000001.  Hence a count of -2 in AC left is increased to zero if 2^18 - 1 is incremented in AC right,
+ *      and conversely, 1 in AC left is decreased to -1 if zero is decremented in AC right.
+ *
+ * Perhaps SIMH is simply emulating the behavior of some later PDP-10 model, which performed independent increments?
+ *
+ * TODO: Investigate.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -1365,11 +1447,41 @@ PDP10.opPUSHJ = function(op, acc)
  */
 PDP10.opPUSH = function(op, acc)
 {
-    this.opUndefined(op);
+    var p = this.readWord(acc);
+    if (!SIMH) {
+        /*
+         * This is the behavior that is clearly documented by DEC.
+         */
+        p += 0o000001000001;
+        this.writeWord(p & PDP10.WORD_MASK, this.readWord(this.regEA));
+        if (p >= PDP10.DATA_LIMIT) p -= PDP10.DATA_LIMIT;
+        if (!((p / PDP10.WORD_SHIFT) | 0)) this.fPDOverflow = true;
+    } else {
+        /*
+         * This is the SIMH behavior, which appears to increment each half of AC independently.
+         */
+        var addr = (p + 1) & PDP10.WORD_MASK;
+        this.writeWord(addr, this.readWord(this.regEA));
+        p = (p + 0o000001000000) - (p & PDP10.WORD_MASK) + addr;
+        if (p >= PDP10.DATA_LIMIT) {
+            p -= PDP10.DATA_LIMIT;
+            this.fPDOverflow = true;
+        }
+    }
+    this.writeWord(acc, p);
 };
 
 /**
- * opPOP(0o262000)
+ * opPOP(0o262000): Pop Up
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-13:
+ *
+ *      Move the contents of the location addressed by AC right to location E, then subtract 000001 000001
+ *      from AC to decrement both halves by one.  If the subtraction causes the count in AC left to reach -1,
+ *      set the Pushdown Overflow flag.  The original contents of E are lost.
+ *
+ *      NOTE: Because of the order in which the operands are stored, the instruction POP AC,AC would load the
+ *      contents of the location addressed by AC right into AC on top of the pushdown count, destroying it.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -1377,7 +1489,14 @@ PDP10.opPUSH = function(op, acc)
  */
 PDP10.opPOP = function(op, acc)
 {
-    this.opUndefined(op);
+    var p = this.readWord(acc);
+    var src = this.readWord(p & PDP10.WORD_MASK);
+    this.writeWord(this.regEA, src);
+    if (this.regEA == acc) p = src;     // this avoids re-reading the accumulator if the write just overwrote it
+    p -= 0o000001000001;
+    if (p < 0) p += PDP10.DATA_LIMIT;
+    if (((p / PDP10.WORD_SHIFT) | 0) == PDP10.WORD_MASK) this.fPDOverflow = true;
+    this.writeWord(acc, p);
 };
 
 /**
