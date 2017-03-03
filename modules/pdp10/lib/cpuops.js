@@ -216,7 +216,7 @@ PDP10.opIBP = function(op, acc)
      * but I would like to keep PTR_MASK distinct from both the P and S fields.
      */
     w = (p * PDP10.OPCODE.P_SCALE) + (s << PDP10.OPCODE.S_SHIFT) + (w & PDP10.OPCODE.PTR_MASK);
-    if (inc) w = (w + inc) % PDP10.DATA_LIMIT;
+    if (inc) w = (w + inc) % PDP10.WORD_LIMIT;
     this.writeWord(this.regEA, w);
 };
 
@@ -293,7 +293,12 @@ PDP10.opLDB = function(op, acc)
     var p = (this.regPS / PDP10.OPCODE.P_SCALE) & PDP10.OPCODE.P_MASK;
     var s = (this.regPS >> PDP10.OPCODE.S_SHIFT) & PDP10.OPCODE.S_MASK;
     if (p + s <= 32) {
-        w = (w >> p) & ((1 << s) - 1);
+        /*
+         * WARNING: When using JavaScript's 32-bit operators with values that could set bit 31 and produce a
+         * negative value, it's critical to perform a final right-shift of 0, ensuring that the final result is
+         * positive.
+         */
+        w = ((w >> p) & ((1 << s) - 1)) >>> 0;
     } else {
         /*
          * Regarding the SPECIAL CONSIDERATIONS above, even if the P ("shift") and/or S ("mask") values are
@@ -382,7 +387,7 @@ PDP10.opDPB = function(op, acc)
      * over-large, we "mask" the resulting byte value (b) to 36 bits, so that when we re-assemble the final
      * result (w), there shouldn't be any overlap or overflow.
      */
-    var b = ((this.readWord(acc) % Math.pow(2, s)) * Math.pow(2, p)) % PDP10.DATA_LIMIT;
+    var b = ((this.readWord(acc) % Math.pow(2, s)) * Math.pow(2, p)) % PDP10.WORD_LIMIT;
     w = (w - (w % Math.pow(2, p + s))) + b + (w % Math.pow(2, p));
     this.writeWord(this.regEA, w);
     this.regPS = -1;
@@ -782,6 +787,8 @@ PDP10.opFDVRB = function(op, acc)
  *
  * NOTE: This is a "Basic" mode instruction: the source is [E] and the destination is [A] (opposite of "Memory").
  *
+ * Equivalents: opSETM(0o414000) and opSETMB(0o417000)
+ *
  * @this {CPUStatePDP10}
  * @param {number} op
  * @param {number} acc
@@ -803,6 +810,8 @@ PDP10.opMOVE = function(op, acc)
  *
  * NOTE: This is an "Immediate" mode instruction: the source is the word 0,E and the destination is [A].
  *
+ * Equivalents: opSETMI(0o415000)
+ *
  * @this {CPUStatePDP10}
  * @param {number} op
  * @param {number} acc
@@ -821,6 +830,8 @@ PDP10.opMOVEI = function(op, acc)
  *      the original contents of the destination are lost.
  *
  * NOTE: This is a "Memory" mode instruction: the source is [A] and the destination is [E] (opposite of "Basic").
+ *
+ * Equivalents: opSETAM(0o426000) and opSETAB(0o427000).
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -869,7 +880,7 @@ PDP10.opMOVES = function(op, acc)
 PDP10.opMOVS = function(op, acc)
 {
     var src = this.readWord(this.regEA);
-    src = (src / PDP10.WORD_SHIFT) | ((src & PDP10.WORD_MASK) * PDP10.WORD_SHIFT);
+    src = ((src / PDP10.HALF_SHIFT)|0) + ((src % PDP10.HALF_SHIFT) * PDP10.HALF_SHIFT);
     this.writeWord(acc, src);
 };
 
@@ -891,7 +902,7 @@ PDP10.opMOVS = function(op, acc)
  */
 PDP10.opMOVSI = function(op, acc)
 {
-    this.writeWord(acc, this.regEA * PDP10.WORD_SHIFT);
+    this.writeWord(acc, this.regEA * PDP10.HALF_SHIFT);
 };
 
 /**
@@ -911,7 +922,7 @@ PDP10.opMOVSI = function(op, acc)
 PDP10.opMOVSM = function(op, acc)
 {
     var src = this.readWord(acc);
-    src = (src / PDP10.WORD_SHIFT) | ((src & PDP10.WORD_MASK) * PDP10.WORD_SHIFT);
+    src = ((src / PDP10.HALF_SHIFT)|0) + ((src % PDP10.HALF_SHIFT) * PDP10.HALF_SHIFT);
     this.writeWord(this.regEA, src);
 };
 
@@ -932,7 +943,7 @@ PDP10.opMOVSM = function(op, acc)
 PDP10.opMOVSS = function(op, acc)
 {
     var src = this.readWord(this.regEA);
-    src = (src / PDP10.WORD_SHIFT) | ((src & PDP10.WORD_MASK) * PDP10.WORD_SHIFT);
+    src = ((src / PDP10.HALF_SHIFT)|0) + ((src % PDP10.HALF_SHIFT) * PDP10.HALF_SHIFT);
     this.writeWord(this.regEA, src);
     if (acc) this.writeWord(acc, src)
 };
@@ -1475,19 +1486,19 @@ PDP10.opBLT = function(op, acc)
 {
     var fDone = false;
     var addrDst = this.readWord(acc);
-    var addrSrc = (addrDst / PDP10.WORD_SHIFT)|0;
-    addrDst &= PDP10.WORD_MASK;
+    var addrSrc = (addrDst / PDP10.HALF_SHIFT)|0;
+    addrDst &= PDP10.HALF_MASK;
     while (!fDone) {
         this.writeWord(addrDst, this.readWord(addrSrc));
         if (addrDst == this.regEA) fDone = true;
-        addrSrc = (addrSrc + 1) & PDP10.WORD_MASK;
-        addrDst = (addrDst + 1) & PDP10.WORD_MASK;
+        addrSrc = (addrSrc + 1) & PDP10.HALF_MASK;
+        addrDst = (addrDst + 1) & PDP10.HALF_MASK;
         if (!this.isRunning()) {
             /*
              * Since the CPU isn't currently running, the CPU is presumably being stepped, so we'll treat that the
              * same as the "priority interrupt" condition described above, update the accumulator, rewind the PC, and leave.
              */
-            this.writeWord(acc, addrSrc * PDP10.WORD_SHIFT + addrDst);
+            this.writeWord(acc, addrSrc * PDP10.HALF_SHIFT + addrDst);
             if (!fDone) this.advancePC(-1);
             fDone = true;
         }
@@ -1602,18 +1613,18 @@ PDP10.opPUSH = function(op, acc)
          * This is the behavior that is clearly documented by DEC.
          */
         p += 0o000001000001;
-        this.writeWord(p & PDP10.WORD_MASK, this.readWord(this.regEA));
-        if (p >= PDP10.DATA_LIMIT) p -= PDP10.DATA_LIMIT;
-        if (!((p / PDP10.WORD_SHIFT) | 0)) this.fPDOverflow = true;
+        this.writeWord(p & PDP10.HALF_MASK, this.readWord(this.regEA));
+        if (p >= PDP10.WORD_LIMIT) p -= PDP10.WORD_LIMIT;
+        if (!((p / PDP10.HALF_SHIFT)|0)) this.fPDOverflow = true;
     } else {
         /*
          * This is the SIMH behavior, which appears to increment each half of AC independently.
          */
-        var addr = (p + 1) & PDP10.WORD_MASK;
+        var addr = (p + 1) & PDP10.HALF_MASK;
         this.writeWord(addr, this.readWord(this.regEA));
-        p = (p + 0o000001000000) - (p & PDP10.WORD_MASK) + addr;
-        if (p >= PDP10.DATA_LIMIT) {
-            p -= PDP10.DATA_LIMIT;
+        p = (p + 0o000001000000) - (p & PDP10.HALF_MASK) + addr;
+        if (p >= PDP10.WORD_LIMIT) {
+            p -= PDP10.WORD_LIMIT;
             this.fPDOverflow = true;
         }
     }
@@ -1639,12 +1650,12 @@ PDP10.opPUSH = function(op, acc)
 PDP10.opPOP = function(op, acc)
 {
     var p = this.readWord(acc);
-    var src = this.readWord(p & PDP10.WORD_MASK);
+    var src = this.readWord(p & PDP10.HALF_MASK);
     this.writeWord(this.regEA, src);
     if (this.regEA == acc) p = src;     // this avoids re-reading the accumulator if the write just overwrote it
     p -= 0o000001000001;
-    if (p < 0) p += PDP10.DATA_LIMIT;
-    if (((p / PDP10.WORD_SHIFT) | 0) == PDP10.WORD_MASK) this.fPDOverflow = true;
+    if (p < 0) p += PDP10.WORD_LIMIT;
+    if (((p / PDP10.HALF_SHIFT)|0) == PDP10.HALF_MASK) this.fPDOverflow = true;
     this.writeWord(acc, p);
 };
 
@@ -2573,7 +2584,7 @@ PDP10.opSOSG = function(op, acc)
 };
 
 /**
- * opSETZ(0o400000)
+ * opSETZ(0o400000) and opSETZI(0o401000)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2581,19 +2592,7 @@ PDP10.opSOSG = function(op, acc)
  */
 PDP10.opSETZ = function(op, acc)
 {
-    this.opUndefined(op);
-};
-
-/**
- * opSETZI(0o401000)
- *
- * @this {CPUStatePDP10}
- * @param {number} op
- * @param {number} acc
- */
-PDP10.opSETZI = function(op, acc)
-{
-    this.opUndefined(op);
+    this.writeWord(acc, 0);
 };
 
 /**
@@ -2605,7 +2604,7 @@ PDP10.opSETZI = function(op, acc)
  */
 PDP10.opSETZM = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(this.regEA, 0);
 };
 
 /**
@@ -2617,11 +2616,14 @@ PDP10.opSETZM = function(op, acc)
  */
 PDP10.opSETZB = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(acc, 0);
+    this.writeWord(this.regEA, 0);
 };
 
 /**
  * opAND(0o404000)
+ *
+ * Change the contents of the destination specified by M ([AC]) to the AND function of the specified operand ([E]) and [AC].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2629,11 +2631,13 @@ PDP10.opSETZB = function(op, acc)
  */
 PDP10.opAND = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(acc, PDP10.doAND(this.readWord(acc), this.readWord(this.regEA)));
 };
 
 /**
  * opANDI(0o405000)
+ *
+ * Change the contents of the destination specified by M ([AC]) to the AND function of the specified operand (E) and [AC].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2641,11 +2645,13 @@ PDP10.opAND = function(op, acc)
  */
 PDP10.opANDI = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(acc, PDP10.doAND(this.readWord(acc), this.regEA));
 };
 
 /**
  * opANDM(0o406000)
+ *
+ * Change the contents of the destination specified by M ([E]) to the AND function of the specified operand ([E]) and [AC].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2653,11 +2659,13 @@ PDP10.opANDI = function(op, acc)
  */
 PDP10.opANDM = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(this.regEA, PDP10.doAND(this.readWord(acc), this.readWord(this.regEA)));
 };
 
 /**
  * opANDB(0o407000)
+ *
+ * Change the contents of the destination specified by M ([E] and [AC]) to the AND function of the specified operand ([E]) and [AC].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2665,7 +2673,9 @@ PDP10.opANDM = function(op, acc)
  */
 PDP10.opANDB = function(op, acc)
 {
-    this.opUndefined(op);
+    var result = PDP10.doAND(this.readWord(acc), this.readWord(this.regEA));
+    this.writeWord(this.regEA, result);
+    this.writeWord(acc, result);
 };
 
 /**
@@ -2717,54 +2727,6 @@ PDP10.opANDCAB = function(op, acc)
 };
 
 /**
- * opSETM(0o414000)
- *
- * @this {CPUStatePDP10}
- * @param {number} op
- * @param {number} acc
- */
-PDP10.opSETM = function(op, acc)
-{
-    this.opUndefined(op);
-};
-
-/**
- * opSETMI(0o415000)
- *
- * @this {CPUStatePDP10}
- * @param {number} op
- * @param {number} acc
- */
-PDP10.opSETMI = function(op, acc)
-{
-    this.opUndefined(op);
-};
-
-/**
- * opSETMM(0o416000)
- *
- * @this {CPUStatePDP10}
- * @param {number} op
- * @param {number} acc
- */
-PDP10.opSETMM = function(op, acc)
-{
-    this.opUndefined(op);
-};
-
-/**
- * opSETMB(0o417000)
- *
- * @this {CPUStatePDP10}
- * @param {number} op
- * @param {number} acc
- */
-PDP10.opSETMB = function(op, acc)
-{
-    this.opUndefined(op);
-};
-
-/**
  * opANDCM(0o420000)
  *
  * @this {CPUStatePDP10}
@@ -2808,54 +2770,6 @@ PDP10.opANDCMM = function(op, acc)
  * @param {number} acc
  */
 PDP10.opANDCMB = function(op, acc)
-{
-    this.opUndefined(op);
-};
-
-/**
- * opSETA(0o424000)
- *
- * @this {CPUStatePDP10}
- * @param {number} op
- * @param {number} acc
- */
-PDP10.opSETA = function(op, acc)
-{
-    this.opUndefined(op);
-};
-
-/**
- * opSETAI(0o425000)
- *
- * @this {CPUStatePDP10}
- * @param {number} op
- * @param {number} acc
- */
-PDP10.opSETAI = function(op, acc)
-{
-    this.opUndefined(op);
-};
-
-/**
- * opSETAM(0o426000)
- *
- * @this {CPUStatePDP10}
- * @param {number} op
- * @param {number} acc
- */
-PDP10.opSETAM = function(op, acc)
-{
-    this.opUndefined(op);
-};
-
-/**
- * opSETAB(0o427000)
- *
- * @this {CPUStatePDP10}
- * @param {number} op
- * @param {number} acc
- */
-PDP10.opSETAB = function(op, acc)
 {
     this.opUndefined(op);
 };
@@ -3053,7 +2967,9 @@ PDP10.opEQVB = function(op, acc)
 };
 
 /**
- * opSETCA(0o450000)
+ * opSETCA(0o450000) and opSETCAI(0o451000)
+ *
+ * Change the contents of the destination specified by M ([AC]) to the complement of [AC].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3061,23 +2977,13 @@ PDP10.opEQVB = function(op, acc)
  */
 PDP10.opSETCA = function(op, acc)
 {
-    this.opUndefined(op);
-};
-
-/**
- * opSETCAI(0o451000)
- *
- * @this {CPUStatePDP10}
- * @param {number} op
- * @param {number} acc
- */
-PDP10.opSETCAI = function(op, acc)
-{
-    this.opUndefined(op);
+    this.writeWord(acc, PDP10.WORD_MASK - this.readWord(acc));
 };
 
 /**
  * opSETCAM(0o452000)
+ *
+ * Change the contents of the destination specified by M ([E]) to the complement of [AC].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3085,11 +2991,13 @@ PDP10.opSETCAI = function(op, acc)
  */
 PDP10.opSETCAM = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(this.regEA, PDP10.WORD_MASK - this.readWord(acc));
 };
 
 /**
  * opSETCAB(0o453000)
+ *
+ * Change the contents of the destination specified by M ([E] and [AC]) to the complement of [AC].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3097,7 +3005,9 @@ PDP10.opSETCAM = function(op, acc)
  */
 PDP10.opSETCAB = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = PDP10.WORD_MASK - this.readWord(acc);
+    this.writeWord(acc, dst);
+    this.writeWord(this.regEA, dst);
 };
 
 /**
@@ -3151,17 +3061,21 @@ PDP10.opORCAB = function(op, acc)
 /**
  * opSETCM(0o460000)
  *
+ * Change the contents of the destination specified by M ([AC]) to the complement of the specified source operand ([E]).
+ *
  * @this {CPUStatePDP10}
  * @param {number} op
  * @param {number} acc
  */
 PDP10.opSETCM = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(acc, PDP10.WORD_MASK - this.readWord(this.regEA));
 };
 
 /**
  * opSETCMI(0o461000)
+ *
+ * Change the contents of the destination specified by M ([AC]) to the complement of the specified source operand (E).
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3169,11 +3083,13 @@ PDP10.opSETCM = function(op, acc)
  */
 PDP10.opSETCMI = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(acc, PDP10.WORD_MASK - this.regEA);
 };
 
 /**
  * opSETCMM(0o462000)
+ *
+ * Change the contents of the destination specified by M ([E]) to the complement of the specified source operand ([E]).
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3181,11 +3097,13 @@ PDP10.opSETCMI = function(op, acc)
  */
 PDP10.opSETCMM = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(this.regEA, PDP10.WORD_MASK - this.readWord(this.regEA));
 };
 
 /**
  * opSETCMB(0o463000)
+ *
+ * Change the contents of the destination specified by M ([E] and [AC]) to the complement of the specified source operand ([E]).
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3193,7 +3111,9 @@ PDP10.opSETCMM = function(op, acc)
  */
 PDP10.opSETCMB = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = PDP10.WORD_MASK - this.readWord(this.regEA);
+    this.writeWord(acc, dst);
+    this.writeWord(this.regEA, dst);
 };
 
 /**
@@ -3293,7 +3213,9 @@ PDP10.opORCBB = function(op, acc)
 };
 
 /**
- * opSETO(0o474000)
+ * opSETO(0o474000) and opSETOI(0o475000)
+ *
+ * Change the contents of the destination specified by M (AC) to all 1s.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3301,23 +3223,13 @@ PDP10.opORCBB = function(op, acc)
  */
 PDP10.opSETO = function(op, acc)
 {
-    this.opUndefined(op);
-};
-
-/**
- * opSETOI(0o475000)
- *
- * @this {CPUStatePDP10}
- * @param {number} op
- * @param {number} acc
- */
-PDP10.opSETOI = function(op, acc)
-{
-    this.opUndefined(op);
+    this.writeWord(acc, PDP10.WORD_MASK);
 };
 
 /**
  * opSETOM(0o476000)
+ *
+ * Change the contents of the destination specified by M ([E]) to all 1s.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3325,11 +3237,13 @@ PDP10.opSETOI = function(op, acc)
  */
 PDP10.opSETOM = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(this.regEA, PDP10.WORD_MASK);
 };
 
 /**
  * opSETOB(0o477000)
+ *
+ * Change the contents of the destination specified by M ([E] and [AC]) to all 1s.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3337,7 +3251,8 @@ PDP10.opSETOM = function(op, acc)
  */
 PDP10.opSETOB = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(acc, PDP10.WORD_MASK);
+    this.writeWord(this.regEA, PDP10.WORD_MASK);
 };
 
 /**
@@ -3358,7 +3273,7 @@ PDP10.opHLL = function(op, acc)
 {
     var src = this.readWord(this.regEA);
     var dst = this.readWord(acc);
-    this.writeWord(acc, PDP10.getHR(op, dst, src) + (src - (src & PDP10.WORD_MASK)));
+    this.writeWord(acc, PDP10.getHR(op, dst, src) + (src - (src & PDP10.HALF_MASK)));
 };
 
 /**
@@ -3402,7 +3317,7 @@ PDP10.opHLLM = function(op, acc)
 {
     var src = this.readWord(acc);
     var dst = this.readWord(this.regEA);
-    this.writeWord(this.regEA, PDP10.getHR(op, dst, src) + (src - (src & PDP10.WORD_MASK)));
+    this.writeWord(this.regEA, PDP10.getHR(op, dst, src) + (src - (src & PDP10.HALF_MASK)));
 };
 
 /**
@@ -3446,7 +3361,7 @@ PDP10.opHLLS = function(op, acc)
  */
 PDP10.opHRL = function(op, acc)
 {
-    var src = (this.readWord(this.regEA) & PDP10.WORD_MASK) * PDP10.WORD_SHIFT;
+    var src = (this.readWord(this.regEA) & PDP10.HALF_MASK) * PDP10.HALF_SHIFT;
     var dst = this.readWord(acc);
     this.writeWord(acc, PDP10.getHR(op, dst, src) + src);
 };
@@ -3468,7 +3383,7 @@ PDP10.opHRL = function(op, acc)
  */
 PDP10.opHRLI = function(op, acc)
 {
-    var src = this.regEA * PDP10.WORD_SHIFT;
+    var src = this.regEA * PDP10.HALF_SHIFT;
     var dst = this.readWord(acc);
     this.writeWord(acc, PDP10.getHR(op, dst, src) + src);
 };
@@ -3490,7 +3405,7 @@ PDP10.opHRLI = function(op, acc)
  */
 PDP10.opHRLM = function(op, acc)
 {
-    var src = (this.readWord(acc) & PDP10.WORD_MASK) * PDP10.WORD_SHIFT;
+    var src = (this.readWord(acc) & PDP10.HALF_MASK) * PDP10.HALF_SHIFT;
     var dst = this.readWord(this.regEA);
     this.writeWord(this.regEA, PDP10.getHR(op, dst, src) + src);
 };
@@ -3513,7 +3428,7 @@ PDP10.opHRLM = function(op, acc)
 PDP10.opHRLS = function(op, acc)
 {
     var dst = this.readWord(this.regEA);
-    var src = (dst & PDP10.WORD_MASK) * PDP10.WORD_SHIFT;
+    var src = (dst & PDP10.HALF_MASK) * PDP10.HALF_SHIFT;
     dst = PDP10.getHR(op, dst, src) + src;
     this.writeWord(this.regEA, dst);
     if (acc) this.writeWord(acc, dst);
@@ -3536,7 +3451,7 @@ PDP10.opHRLS = function(op, acc)
  */
 PDP10.opHRR = function(op, acc)
 {
-    var src = this.readWord(this.regEA) & PDP10.WORD_MASK;
+    var src = this.readWord(this.regEA) & PDP10.HALF_MASK;
     var dst = this.readWord(acc);
     this.writeWord(acc, PDP10.getHL(op, dst, src) + src);
 };
@@ -3579,7 +3494,7 @@ PDP10.opHRRI = function(op, acc)
  */
 PDP10.opHRRM = function(op, acc)
 {
-    var src = this.readWord(acc) & PDP10.WORD_MASK;
+    var src = this.readWord(acc) & PDP10.HALF_MASK;
     var dst = this.readWord(this.regEA);
     this.writeWord(this.regEA, PDP10.getHL(op, dst, src) + src);
 };
@@ -3625,7 +3540,7 @@ PDP10.opHRRS = function(op, acc)
  */
 PDP10.opHLR = function(op, acc)
 {
-    var src = (this.readWord(this.regEA) / PDP10.WORD_SHIFT)|0;
+    var src = (this.readWord(this.regEA) / PDP10.HALF_SHIFT)|0;
     var dst = this.readWord(acc);
     this.writeWord(acc, PDP10.getHL(op, dst, src) + src);
 };
@@ -3668,7 +3583,7 @@ PDP10.opHLRI = function(op, acc)
  */
 PDP10.opHLRM = function(op, acc)
 {
-    var src = (this.readWord(acc) / PDP10.WORD_SHIFT)|0;
+    var src = (this.readWord(acc) / PDP10.HALF_SHIFT)|0;
     var dst = this.readWord(this.regEA);
     this.writeWord(this.regEA, PDP10.getHL(op, dst, src) + src);
 };
@@ -3690,7 +3605,7 @@ PDP10.opHLRM = function(op, acc)
 PDP10.opHLRS = function(op, acc)
 {
     var dst = this.readWord(this.regEA);
-    var src = (dst / PDP10.WORD_SHIFT)|0;
+    var src = (dst / PDP10.HALF_SHIFT)|0;
     dst = PDP10.getHL(op, dst, src) + src;
     this.writeWord(this.regEA, dst);
     if (acc) this.writeWord(acc, dst);
@@ -4573,6 +4488,19 @@ PDP10.opIO = function(op, acc)
 };
 
 /**
+ * opNOP(op, acc)
+ *
+ * Used for all "defined" operations that, in fact, do nothing (eg, SETA and SETAI).
+ *
+ * @this {CPUStatePDP10}
+ * @param {number} op
+ * @param {number} acc
+ */
+PDP10.opNOP = function(op, acc)
+{
+};
+
+/**
  * opUndefined(op, acc)
  *
  * @this {CPUStatePDP10}
@@ -4600,16 +4528,16 @@ PDP10.getHL = function(op, dst, src)
 {
     switch(op & 0o600) {
     case 0o000:
-        dst -= (dst & PDP10.WORD_MASK);
+        dst -= (dst & PDP10.HALF_MASK);
         break;
     case 0o200:
         dst = 0;
         break;
     case 0o400:
-        dst = (PDP10.WORD_MASK * PDP10.WORD_SHIFT);
+        dst = (PDP10.HALF_MASK * PDP10.HALF_SHIFT);
         break;
     case 0o600:
-        dst = (src > PDP10.MAX_POS18? (PDP10.WORD_MASK * PDP10.WORD_SHIFT) : 0);
+        dst = (src > PDP10.MAX_POS18? (PDP10.HALF_MASK * PDP10.HALF_SHIFT) : 0);
         break;
     }
     return dst;
@@ -4628,13 +4556,13 @@ PDP10.getHL = function(op, dst, src)
 PDP10.setHL = function(op, dst, src)
 {
     if (op &= 0o600) {
-        dst &= PDP10.WORD_MASK;
+        dst &= PDP10.HALF_MASK;
         switch(op) {
         case 0o400:
-            dst += (PDP10.WORD_MASK * PDP10.WORD_SHIFT);
+            dst += (PDP10.HALF_MASK * PDP10.HALF_SHIFT);
             break;
         case 0o600:
-            dst += (src > PDP10.MAX_POS18? (PDP10.WORD_MASK * PDP10.WORD_SHIFT) : 0);
+            dst += (src > PDP10.MAX_POS18? (PDP10.HALF_MASK * PDP10.HALF_SHIFT) : 0);
             break;
         }
     }
@@ -4655,16 +4583,16 @@ PDP10.getHR = function(op, dst, src)
 {
     switch(op & 0o600) {
     case 0o000:
-        dst = (dst & PDP10.WORD_MASK);
+        dst = (dst & PDP10.HALF_MASK);
         break;
     case 0o200:
         dst = 0;
         break;
     case 0o400:
-        dst = PDP10.WORD_MASK;
+        dst = PDP10.HALF_MASK;
         break;
     case 0o600:
-        dst = (src > PDP10.MAX_POS36? PDP10.WORD_MASK : 0);
+        dst = (src > PDP10.MAX_POS36? PDP10.HALF_MASK : 0);
         break;
     }
     return dst;
@@ -4683,17 +4611,39 @@ PDP10.getHR = function(op, dst, src)
 PDP10.setHR = function(op, dst, src)
 {
     if (op &= 0o600) {
-        dst -= (dst & PDP10.WORD_MASK);
+        dst -= (dst & PDP10.HALF_MASK);
         switch(op) {
         case 0o400:
-            dst += PDP10.WORD_MASK;
+            dst += PDP10.HALF_MASK;
             break;
         case 0o600:
-            dst += (src > PDP10.MAX_POS36? PDP10.WORD_MASK : 0);
+            dst += (src > PDP10.MAX_POS36? PDP10.HALF_MASK : 0);
             break;
         }
     }
     return dst;
+};
+
+/**
+ * doAND(dst, src)
+ *
+ * Used by callers to perform a logical "AND" of two 36-bit operands.
+ *
+ * @param {number} dst (36-bit value)
+ * @param {number} src (36-bit value)
+ * @return {number} (dst & src)
+ */
+PDP10.doAND = function(dst, src)
+{
+    /*
+     * Since dst and src are 36-bit values, we must "AND" the low 32 bits separately from the higher bits,
+     * and then combine them with addition.
+     *
+     * WARNING: When using JavaScript's 32-bit operators with values that could set bit 31 and produce a
+     * negative value, it's critical to perform a final right-shift of 0, ensuring that the final result is
+     * positive.
+     */
+    return ((((dst / PDP10.TWO_POW32)|0) & ((src / PDP10.TWO_POW32)|0)) * PDP10.TWO_POW32) + ((dst & src) >>> 0);
 };
 
 /*
@@ -4754,6 +4704,18 @@ PDP10.opHLRE    = PDP10.opHLR;
 PDP10.opHLREI   = PDP10.opHLRI;
 PDP10.opHLREM   = PDP10.opHLRM;
 PDP10.opHLRES   = PDP10.opHLRS;
+
+PDP10.opSETZI   = PDP10.opSETZ;
+PDP10.opSETOI   = PDP10.opSETO;
+PDP10.opSETCAI  = PDP10.opSETCA;
+PDP10.opSETA    = PDP10.opNOP;
+PDP10.opSETAI   = PDP10.opNOP;
+PDP10.opSETAM   = PDP10.opMOVEM;
+PDP10.opSETAB   = PDP10.opMOVEM;
+PDP10.opSETM    = PDP10.opMOVE;
+PDP10.opSETMI   = PDP10.opMOVEI;
+PDP10.opSETMM   = PDP10.opNOP;
+PDP10.opSETMB   = PDP10.opMOVE;
 
 PDP10.aOpXXX_KA10 = [
     PDP10.opUUO,                // 0o000xxx

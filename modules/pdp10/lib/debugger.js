@@ -459,7 +459,7 @@ class DebuggerPDP10 extends Debugger {
      */
     getWord(dbgAddr, inc)
     {
-        var w = PDP10.DATA_INVALID;
+        var w = PDP10.WORD_INVALID;
         var addr = this.getAddr(dbgAddr, false);
         if (addr !== PDP10.ADDR_INVALID) {
             w = this.bus.getWordDirect(addr);
@@ -590,14 +590,14 @@ class DebuggerPDP10 extends Debugger {
      * toStrWord(w)
      *
      * @this {DebuggerPDP10}
-     * @param {number} w (up to, but not including, DATA_LIMIT)
+     * @param {number} w (up to, but not including, WORD_LIMIT)
      * @return {string} octal representation of the 36-bit word, as two 18-bit values
      */
     toStrWord(w)
     {
         /*
-         * ADDR_LIMIT is not derived from DATA_LIMIT; we're just taking advantage of the fact
-         * that ADDR_LIMIT happens to be exactly half of DATA_LIMIT, and they are both powers of two.
+         * ADDR_LIMIT is not derived from WORD_LIMIT; we're just taking advantage of the fact
+         * that ADDR_LIMIT happens to be exactly half of WORD_LIMIT, and they are both powers of two.
          */
         return Str.toOct(w / PDP10.ADDR_LIMIT, 6) + ' ' + Str.toOct(w % PDP10.ADDR_LIMIT, 6);
     }
@@ -3891,7 +3891,7 @@ if (DEBUGGER) {
             0o23400: DebuggerPDP10.OPS.DIV,
             0o27000: DebuggerPDP10.OPS.ADD,
             0o27400: DebuggerPDP10.OPS.SUB,
-            0o40000: DebuggerPDP10.OPS.SETZ,
+            0o40000: DebuggerPDP10.OPS.SETZ,    // MACRO alias: CLEAR
             0o40400: DebuggerPDP10.OPS.AND,
             0o41000: DebuggerPDP10.OPS.ANDCA,
             0o41400: DebuggerPDP10.OPS.SETM,

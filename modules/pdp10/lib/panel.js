@@ -1043,7 +1043,7 @@ class PanelPDP10 extends Component {
      */
     updateData(value)
     {
-        this.regData = value % PDP10.DATA_LIMIT;
+        this.regData = value % PDP10.WORD_LIMIT;
         if (this.ledData !== this.regData) {
             this.ledData = this.regData;
             this.updateLEDArray("D", this.ledData, 16);
