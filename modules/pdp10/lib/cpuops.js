@@ -1368,7 +1368,12 @@ PDP10.opASH = function(op, acc)
 };
 
 /**
- * opROT(0o241000)
+ * opROT(0o241000): Rotate
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-25:
+ *
+ *      Rotate AC the number of places specified by E.  If E is positive, rotate left; bit 0 is rotated
+ *      into bit 35.  If E is negative, rotate right; bit 35 is rotated into bit O.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -1376,7 +1381,19 @@ PDP10.opASH = function(op, acc)
  */
 PDP10.opROT = function(op, acc)
 {
-    this.opUndefined(op);
+    /*
+     * Convert the unsigned 18-bit value in regEA to a signed 8-bit value, modulo +/-36.
+     */
+    var s = ((this.regEA << 14) >> 24) % 36;
+    if (s) {
+        var w = this.readWord(acc);
+        if (s > 0) {
+            w = ((w * Math.pow(2, s)) % PDP10.WORD_LIMIT) + Math.trunc(w / Math.pow(2, 36 - s));
+        } else {
+            w = Math.trunc(w / Math.pow(2, -s)) + ((w * Math.pow(2, 36 + s)) % PDP10.WORD_LIMIT);
+        }
+        this.writeWord(acc, w);
+    }
 };
 
 /**
@@ -1442,7 +1459,14 @@ PDP10.opASHC = function(op, acc)
 };
 
 /**
- * opROTC(0o245000)
+ * opROTC(0o245000): Rotate Combined
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-26:
+ *
+ *      Concatenate accumulators A and A+1 with A on the left, and rotate the 72-bit combination the
+ *      number of places specified by E.  If E is positive, rotate left; bit 0 is rotated into bit 71
+ *      (bit 35 of AC A +1) and bit 36 into bit 35.  If E is negative, rotate right; bit 35 is rotated
+ *      into bit 36 and bit 71 into bit 0.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -1450,7 +1474,34 @@ PDP10.opASHC = function(op, acc)
  */
 PDP10.opROTC = function(op, acc)
 {
-    this.opUndefined(op);
+    /*
+     * Convert the unsigned 18-bit value in regEA to a signed 8-bit value.
+     */
+    var s = ((this.regEA << 14) >> 24) % 72;
+    if (s) {
+        var wLeft = this.readWord(acc);
+        var wRight = this.readWord((acc + 1) & 0o17);
+        var wExcess = wLeft;
+        if (s > 0) {
+            if (s < 36) {
+                wLeft = ((wLeft * Math.pow(2, s)) % PDP10.WORD_LIMIT) + Math.trunc(wRight / Math.pow(2, 36 - s));
+                wRight = ((wRight * Math.pow(2, s)) % PDP10.WORD_LIMIT) + Math.trunc(wExcess / Math.pow(2, 36 - s));
+            } else {
+                wLeft = ((wRight * Math.pow(2, s - 36)) % PDP10.WORD_LIMIT) + Math.trunc(wLeft / Math.pow(2, 72 - s));
+                wRight = ((wExcess * Math.pow(2, s - 36)) % PDP10.WORD_LIMIT) + Math.trunc(wRight / Math.pow(2, 72 - s));
+            }
+        } else {
+            if (s > -36) {
+                wLeft = Math.trunc(wLeft / Math.pow(2, -s)) + ((wRight * Math.pow(2, 36 + s)) % PDP10.WORD_LIMIT);
+                wRight = Math.trunc(wRight / Math.pow(2, -s)) + ((wExcess * Math.pow(2, 36 + s)) % PDP10.WORD_LIMIT);
+            } else {
+                wLeft = Math.trunc(wRight / Math.pow(2, -s - 36)) + ((wLeft * Math.pow(2, 72 + s)) % PDP10.WORD_LIMIT);
+                wRight = Math.trunc(wExcess / Math.pow(2, -s - 36)) + ((wRight * Math.pow(2, 72 + s)) % PDP10.WORD_LIMIT);
+            }
+        }
+        this.writeWord(acc, wLeft);
+        this.writeWord((acc + 1) & 0o17, wRight);
+    }
 };
 
 /**
