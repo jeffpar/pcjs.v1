@@ -1380,7 +1380,13 @@ PDP10.opROT = function(op, acc)
 };
 
 /**
- * opLSH(0o242000)
+ * opLSH(0o242000): Logical Shift
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-25:
+ *
+ *      Shift AC the number of places specified by E.  If E is positive, shift left bringing 0s into bit 35;
+ *      data shifted out of bit 0 is lost.  If E is negative, shift right bringing 0s into bit 0; data shifted
+ *      out of bit 35 is lost.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -1388,7 +1394,27 @@ PDP10.opROT = function(op, acc)
  */
 PDP10.opLSH = function(op, acc)
 {
-    this.opUndefined(op);
+    /*
+     * Convert the unsigned 18-bit value in regEA to a signed 8-bit value.
+     */
+    var s = (this.regEA << 14) >> 24;
+    if (s) {
+        var w = this.readWord(acc);
+        if (s > 0) {
+            if (s >= 36) {
+                w = 0;
+            } else {
+                w = (w * Math.pow(2, s)) % PDP10.WORD_LIMIT;
+            }
+        } else {
+            if (s <= -36) {
+                w = 0;
+            } else {
+                w = Math.trunc(w / Math.pow(2, -s));
+            }
+        }
+        this.writeWord(acc, w);
+    }
 };
 
 /**
@@ -1428,7 +1454,14 @@ PDP10.opROTC = function(op, acc)
 };
 
 /**
- * opLSHC(0o246000)
+ * opLSHC(0o246000): Logical Shift Combined
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-25:
+ *
+ *      Concatenate accumulators A and A+1 with A on the left, and shift the 72-bit combination the number
+ *      of places specified by E.  If E is positive, shift left bringing 0s into bit 71 (bit 35 of AC A + 1);
+ *      bit 36 is shifted into bit 35; data shifted out of bit 0 is lost.  If E is negative, shift right
+ *      bringing 0s into bit 0; bit 35 is shifted into bit 36; data shifted out of bit 71 is lost.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -1436,7 +1469,41 @@ PDP10.opROTC = function(op, acc)
  */
 PDP10.opLSHC = function(op, acc)
 {
-    this.opUndefined(op);
+    /*
+     * Convert the unsigned 18-bit value in regEA to a signed 8-bit value.
+     */
+    var s = (this.regEA << 14) >> 24;
+    if (s) {
+        var wLeft = this.readWord(acc);
+        var wRight = this.readWord((acc + 1) & 0o17);
+        if (s > 0) {
+            if (s >= 36) {
+                wRight = 0;
+                if (s >= 72) {
+                    wLeft = 0;
+                } else {
+                    wLeft = (wRight * Math.pow(2, s - 36)) % PDP10.WORD_LIMIT;
+                }
+            } else {
+                wLeft = ((wLeft * Math.pow(2, s)) % PDP10.WORD_LIMIT) + Math.trunc(wRight / Math.pow(2, 36 - s));
+                wRight = (wRight * Math.pow(2, s)) % PDP10.WORD_LIMIT;
+            }
+        } else {
+            if (s <= -36) {
+                wLeft = 0;
+                if (s <= -72) {
+                    wRight = 0;
+                } else {
+                    wRight = Math.trunc(wLeft / Math.pow(2, -s - 36));
+                }
+            } else {
+                wRight = Math.trunc(wRight / Math.pow(2, -s)) + ((wLeft * Math.pow(2, 36 + s)) % PDP10.WORD_LIMIT);
+                wLeft = Math.trunc(wLeft / Math.pow(2, -s));
+            }
+        }
+        this.writeWord(acc, wLeft);
+        this.writeWord((acc + 1) & 0o17, wRight);
+    }
 };
 
 /**
