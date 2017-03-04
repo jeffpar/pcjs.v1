@@ -998,7 +998,7 @@ PDP10.opMOVN = function(op, acc)
 PDP10.opMOVNI = function(op, acc)
 {
     /*
-     * We perform an in-line two's complement of regEA, since negate() updates the flags, and the documentation
+     * We perform an in-line twos complement of regEA, since negate() updates the flags, and the documentation
      * above claims that this operation must "set no flags."  It's certainly true that regEA, being an 18-bit value,
      * could never be -2^35, but it COULD be zero -- and apparently this instruction treats zero differently from MOVN.
      *
@@ -1356,7 +1356,40 @@ PDP10.opDIVB = function(op, acc)
 };
 
 /**
- * opASH(0o240000)
+ * opASH(0o240000): Artithmetic Shift
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-31:
+ *
+ *      Arithmetic Shifting
+ *
+ *      These two instructions produce an arithmetic shift right or left of the number in AC or the
+ *      double length number in accumulators A and A+1.  Shifting is the movement of the contents of
+ *      a register bit-to-bit.  The operation discussed here is similar to logical shifting [see §2.4
+ *      and the illustration on page 2-24], but in an arithmetic shift only the magnitude part is
+ *      shifted - the sign is unaffected.  In a double length number the 70-bit string made up of the
+ *      magnitude parts of the two words is shifted, but the sign of the low order word is made equal
+ *      to the sign of the high order word.
+ *
+ *      Null bits are brought in at the end being vacated: a left shift brings in 0s at the right,
+ *      whereas a right shift brings in the equivalent of the sign bit at the left.  In either case,
+ *      information shifted out at the other end is lost.  A single shift left is equivalent to multiplying
+ *      the number by 2 (provided no bit of significance is shifted out); a shift right divides the number
+ *      by 2.
+ *
+ *      The number of places shifted is specified by the result of the effective address calculation
+ *      taken as a signed number (in twos complement notation) modulo 28 in magnitude.  In other words
+ *      the effective shift E is the number composed of bit 18 (which is the sign) and bits 28-35 of the
+ *      calculation result.  Hence the programmer may specify the shift directly in the instruction
+ *      (perhaps indexed) or give an indirect address to be used in calculating the shift.  A positive E
+ *      produces motion to the left, a negative E to the right; E is thus the power of 2 by which the
+ *      number is multiplied.  Maximum movement is 255 places.
+ *
+ *      ASH: Arithmetic Shift
+ *
+ *      Shift AC arithmetically the number of places specified by E.  Do not shift bit 0.  If E is positive,
+ *      shift left bringing 0s into bit 35; data shifted out of bit 1 is lost; set Overflow if any bit of
+ *      significance is lost (a 1 in a positive number, a 0 in a negative one).  If E is negative, shift right
+ *      bringing 0s into bit 1 if AC is positive, 1s if negative; data shifted out of bit 35 is lost.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -1364,7 +1397,62 @@ PDP10.opDIVB = function(op, acc)
  */
 PDP10.opASH = function(op, acc)
 {
-    this.opUndefined(op);
+    /*
+     * Convert the unsigned 18-bit value in regEA to a signed 8-bit value (+/-255).
+     */
+    var s = (this.regEA << 14) >> 24;
+    if (s) {
+        var w = this.readWord(acc), bitsShifted;
+        /*
+         * Convert the unsigned word (w) to a signed value (i), for convenience.
+         */
+        var i = w > PDP10.MAX_POS36? -(PDP10.WORD_LIMIT - w) : w;
+        if (s > 0) {
+            if (s >= 35) {
+                i = (i < 0? PDP10.INT_LIMIT : 0);
+                bitsShifted = PDP10.INT_MASK;
+            } else {
+                i = (i * Math.pow(2, s)) % PDP10.INT_LIMIT;
+                /*
+                 * bitsShifted must be set to the mask of all magnitude bits shifted out of
+                 * the original word.  Using 8-bit signed words as an example, this table shows
+                 * the bitsShifted values that would correspond to shifting 1-7 bits left:
+                 *
+                 *    shifts    bitsShifted     value       calculation
+                 *    ------    -----------     ------      -----------
+                 *      1       0b01000000      128-64      128-Math.pow(2, 7-1)
+                 *      2       0b01100000      128-32      128-Math.pow(2, 7-2)
+                 *      3       0b01110000      128-16      128-Math.pow(2, 7-3)
+                 *     ...
+                 *      7       0b01111111      128-1       128-Math.pow(2, 7-7)
+                 */
+                bitsShifted = PDP10.INT_LIMIT - Math.pow(2, 35-s);
+            }
+            if (w <= PDP10.MAX_POS36) {
+                /*
+                 * Since w was positive, overflow occurs ONLY if any of the bits we shifted out were 1s.
+                 * If all those bits in the original value (w) were 0s, then adding bitsShifted to it could NOT
+                 * produce a value > MAX_POS36.
+                 */
+                if (w + bitsShifted > PDP10.MAX_POS36) this.fOverflow = true;
+            } else {
+                /*
+                 * Since w was negative, overflow occurs ONLY if any of the bits we shifted out were 0s.
+                 * If all those bits in the original value (w) were 1s, subtracting bitsShifted from it could NOT
+                 * produce a value <= MAX_POS36.
+                 */
+                if (w - bitsShifted <= PDP10.MAX_POS36) this.fOverflow = true;
+            }
+        } else {
+            if (s <= -35) {
+                i = (i < 0? -1 : 0);
+            } else {
+                i = Math.trunc(i / Math.pow(2, -s));
+            }
+        }
+        w = (i < 0? i + PDP10.WORD_LIMIT: i);
+        this.writeWord(acc, w);
+    }
 };
 
 /**
@@ -1399,7 +1487,26 @@ PDP10.opROT = function(op, acc)
 /**
  * opLSH(0o242000): Logical Shift
  *
- * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-25:
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-24:
+ *
+ *      Shift and Rotate
+ *
+ *      The remaining logical instructions shift or rotate right or left the contents of AC or the contents
+ *      of two accumulators, A and A+1 (mod 20 [base 8]), concatenated into a 72-bit register with A on the
+ *      left.  The illustration below shows the movement of information these instructions produce in the
+ *      accumulators.  In a (logical) shift the contents of a register are moved bit-to-bit with 0s brought
+ *      in at the end being vacated; information shifted out at the other end is lost.  [For a discussion of
+ *      arithmetic shifting see § 2.5.]  In rotation the contents are moved cyclically such that information
+ *      rotated out at one end is put in at the other.
+ *
+ *      The number of places moved is specified by the result of the effective address calculation taken as a
+ *      signed number (in twos complement notation) modulo 2^8 in magnitude.  In other words the effective shift
+ *      E is the number composed of bit 18 (which is the sign) and bits 28-35 of the calculation result.  Hence
+ *      the programmer may specify the shift directly in the instruction (perhaps indexed) or give an indirect
+ *      address to be used in calculating the shift.  A positive E produces motion to the left, a negative E to
+ *      the right; maximum movement is 255 places.
+ *
+ *      LSH: Logical Shift
  *
  *      Shift AC the number of places specified by E.  If E is positive, shift left bringing 0s into bit 35;
  *      data shifted out of bit 0 is lost.  If E is negative, shift right bringing 0s into bit 0; data shifted
@@ -1447,7 +1554,19 @@ PDP10.opJFFO = function(op, acc)
 };
 
 /**
- * opASHC(0o244000)
+ * opASHC(0o244000): Arithmetic Shift
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-32:
+ *
+ *      Concatenate the magnitude portions of accumulators A and A+1 with A on the left, and shift
+ *      the 70-bit combination in bits 1-35 and 37-71 the number of places specified by E.  Do not shift
+ *      AC bit 0, but make bit 0 of AC A +1 equal to it if at least one shift occurs (ie if E is nonzero).
+ *
+ *      If E is positive, shift left bringing 0s into bit 71 (bit 35 of AC A+1); bit 37 (bit 1 of AC A+1)
+ *      is shifted into bit 35; data shifted out of bit 1 is lost; set Overflow if any bit of significance
+ *      is lost (a 1 in a positive number, a 0 in a negative one).  If E is negative, shift right bringing 0s
+ *      into bit 1 if AC is positive, 1s if negative; bit 35 is shifted into bit 37; data shifted out of
+ *      bit 71 is lost.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -1504,7 +1623,7 @@ PDP10.opROTC = function(op, acc)
  * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-25:
  *
  *      Concatenate accumulators A and A+1 with A on the left, and shift the 72-bit combination the number
- *      of places specified by E.  If E is positive, shift left bringing 0s into bit 71 (bit 35 of AC A + 1);
+ *      of places specified by E.  If E is positive, shift left bringing 0s into bit 71 (bit 35 of AC A+1);
  *      bit 36 is shifted into bit 35; data shifted out of bit 0 is lost.  If E is negative, shift right
  *      bringing 0s into bit 0; bit 35 is shifted into bit 36; data shifted out of bit 71 is lost.
  *

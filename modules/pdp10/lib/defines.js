@@ -104,10 +104,12 @@ var PDP10 = {
     ADDR_LIMIT:     Math.pow(2, 18),
     ADDR_MASK:      Math.pow(2, 18) - 1,
     WORD_INVALID:   -1,
-    WORD_LIMIT:     Math.pow(2, 36),
-    WORD_MASK:      Math.pow(2, 36) - 1,
-    HALF_SHIFT:     Math.pow(2, 18),
-    HALF_MASK:      Math.pow(2, 18) - 1,
+    INT_LIMIT:      Math.pow(2, 35),            // signed word (magnitude) limit
+    INT_MASK:       Math.pow(2, 35) - 1,        // signed word (magnitude) mask
+    WORD_LIMIT:     Math.pow(2, 36),            // unsigned word limit
+    WORD_MASK:      Math.pow(2, 36) - 1,        // unsigned word mask
+    HALF_SHIFT:     Math.pow(2, 18),            // unsigned half-word shift
+    HALF_MASK:      Math.pow(2, 18) - 1,        // unsigned half-word mask
 
     /*
      * 18-bit and 36-bit largest positive (and smallest negative) values; however, since we store all
