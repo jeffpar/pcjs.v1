@@ -1356,7 +1356,7 @@ PDP10.opDIVB = function(op, acc)
 };
 
 /**
- * opASH(0o240000): Artithmetic Shift
+ * opASH(0o240000): Arithmetic Shift
  *
  * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-31:
  *
