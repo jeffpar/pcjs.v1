@@ -1382,16 +1382,16 @@ PDP10.opASH = function(op, acc)
 PDP10.opROT = function(op, acc)
 {
     /*
-     * Convert the unsigned 18-bit value in regEA to a signed 8-bit value, modulo +/-36.
+     * Convert the unsigned 18-bit value in regEA to a signed 8-bit value, modulo 36 (+/-35).
      */
     var s = ((this.regEA << 14) >> 24) % 36;
     if (s) {
         var w = this.readWord(acc);
-        if (s > 0) {
-            w = ((w * Math.pow(2, s)) % PDP10.WORD_LIMIT) + Math.trunc(w / Math.pow(2, 36 - s));
-        } else {
-            w = Math.trunc(w / Math.pow(2, -s)) + ((w * Math.pow(2, 36 + s)) % PDP10.WORD_LIMIT);
-        }
+        /*
+         * Note that a right rotation (s < 0) of s bits is equivalent to a left rotation (s > 0) of 36 + s bits.
+         */
+        if (s < 0) s = 36 + s;
+        w = ((w * Math.pow(2, s)) % PDP10.WORD_LIMIT) + Math.trunc(w / Math.pow(2, 36 - s));
         this.writeWord(acc, w);
     }
 };
@@ -1412,7 +1412,7 @@ PDP10.opROT = function(op, acc)
 PDP10.opLSH = function(op, acc)
 {
     /*
-     * Convert the unsigned 18-bit value in regEA to a signed 8-bit value.
+     * Convert the unsigned 18-bit value in regEA to a signed 8-bit value (+/-255).
      */
     var s = (this.regEA << 14) >> 24;
     if (s) {
@@ -1475,29 +1475,23 @@ PDP10.opASHC = function(op, acc)
 PDP10.opROTC = function(op, acc)
 {
     /*
-     * Convert the unsigned 18-bit value in regEA to a signed 8-bit value.
+     * Convert the unsigned 18-bit value in regEA to a signed 8-bit value, modulo 72 (+/-71).
      */
     var s = ((this.regEA << 14) >> 24) % 72;
     if (s) {
         var wLeft = this.readWord(acc);
         var wRight = this.readWord((acc + 1) & 0o17);
-        var wExcess = wLeft;
-        if (s > 0) {
-            if (s < 36) {
-                wLeft = ((wLeft * Math.pow(2, s)) % PDP10.WORD_LIMIT) + Math.trunc(wRight / Math.pow(2, 36 - s));
-                wRight = ((wRight * Math.pow(2, s)) % PDP10.WORD_LIMIT) + Math.trunc(wExcess / Math.pow(2, 36 - s));
-            } else {
-                wLeft = ((wRight * Math.pow(2, s - 36)) % PDP10.WORD_LIMIT) + Math.trunc(wLeft / Math.pow(2, 72 - s));
-                wRight = ((wExcess * Math.pow(2, s - 36)) % PDP10.WORD_LIMIT) + Math.trunc(wRight / Math.pow(2, 72 - s));
-            }
+        var wLeftOrig = wLeft;
+        /*
+         * Note that a right rotation (s < 0) of s bits is equivalent to a left rotation (s > 0) of 72 + s bits.
+         */
+        if (s < 0) s = 72 + s;
+        if (s < 36) {
+            wLeft = ((wLeft * Math.pow(2, s)) % PDP10.WORD_LIMIT) + Math.trunc(wRight / Math.pow(2, 36 - s));
+            wRight = ((wRight * Math.pow(2, s)) % PDP10.WORD_LIMIT) + Math.trunc(wLeftOrig / Math.pow(2, 36 - s));
         } else {
-            if (s > -36) {
-                wLeft = Math.trunc(wLeft / Math.pow(2, -s)) + ((wRight * Math.pow(2, 36 + s)) % PDP10.WORD_LIMIT);
-                wRight = Math.trunc(wRight / Math.pow(2, -s)) + ((wExcess * Math.pow(2, 36 + s)) % PDP10.WORD_LIMIT);
-            } else {
-                wLeft = Math.trunc(wRight / Math.pow(2, -s - 36)) + ((wLeft * Math.pow(2, 72 + s)) % PDP10.WORD_LIMIT);
-                wRight = Math.trunc(wExcess / Math.pow(2, -s - 36)) + ((wRight * Math.pow(2, 72 + s)) % PDP10.WORD_LIMIT);
-            }
+            wLeft = ((wRight * Math.pow(2, s - 36)) % PDP10.WORD_LIMIT) + Math.trunc(wLeft / Math.pow(2, 72 - s));
+            wRight = ((wLeftOrig * Math.pow(2, s - 36)) % PDP10.WORD_LIMIT) + Math.trunc(wRight / Math.pow(2, 72 - s));
         }
         this.writeWord(acc, wLeft);
         this.writeWord((acc + 1) & 0o17, wRight);
@@ -1521,7 +1515,7 @@ PDP10.opROTC = function(op, acc)
 PDP10.opLSHC = function(op, acc)
 {
     /*
-     * Convert the unsigned 18-bit value in regEA to a signed 8-bit value.
+     * Convert the unsigned 18-bit value in regEA to a signed 8-bit value (+/-255).
      */
     var s = (this.regEA << 14) >> 24;
     if (s) {
