@@ -240,6 +240,7 @@ class DebuggerPDP10 extends Debugger {
     copyAddr(dbgAddr, dbgCopy)
     {
         dbgAddr.addr = dbgCopy.addr;
+        dbgAddr.fPhysical = dbgCopy.fPhysical;
         dbgAddr.fTemporary = dbgCopy.fTemporary;
         dbgAddr.nBase = dbgCopy.nBase;
         return dbgAddr;
@@ -277,7 +278,7 @@ class DebuggerPDP10 extends Debugger {
      */
     packAddr(dbgAddr)
     {
-        return [dbgAddr.addr, dbgAddr.fPhysical, dbgAddr.nBase, dbgAddr.fTemporary, dbgAddr.sCmd];
+        return [dbgAddr.addr, dbgAddr.fPhysical, dbgAddr.fTemporary, dbgAddr.nBase, dbgAddr.sCmd];
     }
 
     /**
@@ -863,30 +864,31 @@ class DebuggerPDP10 extends Debugger {
     getRegValue(iReg)
     {
         var value;
+        var cpu = this.cpu;
         switch(iReg) {
         case DebuggerPDP10.REGS.PC:
-            value = this.cpu.getPC();
+            value = cpu.getPC();
             break;
         case DebuggerPDP10.REGS.RA:
-            value = this.cpu.regRA;
+            value = cpu.regRA;
             break;
         case DebuggerPDP10.REGS.EA:
-            value = this.cpu.regEA;
+            value = cpu.regEA;
             break;
         case DebuggerPDP10.REGS.C0:
-            value = this.cpu.fCarry0? 1 : 0;
+            value = (cpu.regPS & PDP10.PSFLAG.CARRY0)? 1 : 0;
             break;
         case DebuggerPDP10.REGS.C1:
-            value = this.cpu.fCarry1? 1 : 0;
+            value = (cpu.regPS & PDP10.PSFLAG.CARRY1)? 1 : 0;
             break;
         case DebuggerPDP10.REGS.OV:
-            value = this.cpu.fOverflow? 1 : 0;
+            value = (cpu.regPS & PDP10.PSFLAG.OVFL)? 1 : 0;
             break;
         case DebuggerPDP10.REGS.ND:
-            value = this.cpu.fNoDivide? 1 : 0;
+            value = (cpu.regPS & PDP10.PSFLAG.NO_DIVIDE)? 1 : 0;
             break;
         case DebuggerPDP10.REGS.PD:
-            value = this.cpu.fPDOverflow? 1 : 0;
+            value = (cpu.regPS & PDP10.PSFLAG.PD_OVFL)? 1 : 0;
             break;
         }
         return value;

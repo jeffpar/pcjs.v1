@@ -190,7 +190,27 @@ var PDP10 = {
         IRQ_MASK:   0x0003,
         DEBUGGER:   0x0004,             // set if the Debugger wants to perform checks
         WAIT:       0x0008,             // WAIT operation in progress
-        PRESERVE:   0x000F,             // OPFLAG bits to preserve prior to the next instruction
+        PRESERVE:   0x000F              // OPFLAG bits to preserve prior to the next instruction
+    },
+
+    /*
+     * Flags returned by getPS() for various program control operations.
+     */
+    PSFLAG: {
+        OVFL:       0o400000,          // Overflow
+        CARRY0:     0o200000,          // Carry 0
+        CARRY1:     0o100000,          // Carry 1
+        FP_OVFL:    0o040000,          // Floating-Point Overflow
+        BYTE_INT:   0o020000,          // Byte Interrupt
+        USER_MODE:  0o010000,          // Processor is in User Mode
+        USER_IO:    0o004000,          // User I/O
+        FP_UNFL:    0o000100,          // Floating-Point Underflow
+        NO_DIVIDE:  0o000040,          // No Divide
+        /*
+         * Only the low 18 bits (above) are returned by getPS(); the following (bits 18 to 31)
+         * are defined for internal use only.
+         */
+        PD_OVFL:   0o1000000           // Pushdown Overflow
     },
 
     /*
@@ -201,15 +221,15 @@ var PDP10 = {
         OVFL:       0o000010,           // Overflow
         OVFL_IE:    0o000020,           // Overflow Interrupt Enabled
         TRAP_OFF:   0o000040,           // Trap Offset
-        FPOVFL:     0o000100,           // Floating-Point Overflow
-        FPOVFL_IE:  0o000200,           // Floating-Point Overflow Interrupt Enabled
+        FP_OVFL:    0o000100,           // Floating-Point Overflow
+        FP_OVFL_IE: 0o000200,           // Floating-Point Overflow Interrupt Enabled
         CLOCK:      0o001000,           // Clock Flag
         CLOCK_IE:   0o002000,           // Clock Interrupt Enabled
         NXM:        0o010000,           // Non-Existent Memory
         PRM:        0o020000,           // Memory Protection
         ADB:        0o040000,           // Address Break
         UIO:        0o100000,           // User In-Out
-        PDOVFL:     0o200000            // Pushdown Overflow (TODO: Verify this is correct; the May 1968 doc may have a typo)
+        PD_OVFL:    0o200000            // Pushdown Overflow (TODO: Verify this is correct; the May 1968 doc may have a typo)
     },
 
     /*
@@ -222,9 +242,9 @@ var PDP10 = {
         OVFL_CL:    0o000010,           // Clear Overflow
         OVFL_IE:    0o000020,           // Enable Overflow Interrupt
         OVFL_ID:    0o000040,           // Disable Overflow Interrupt
-        FPOVFL_CL:  0o000100,           // Clear Floating-Point Overflow
-        FPOVFL_IE:  0o000200,           // Enable Floating-Point Overflow Interrupt
-        FPOVFL_ID:  0o000400,           // Disable Floating-Point Overflow Interrupt
+        FP_OVFL_CL: 0o000100,           // Clear Floating-Point Overflow
+        FP_OVFL_IE: 0o000200,           // Enable Floating-Point Overflow Interrupt
+        FP_OVFL_ID: 0o000400,           // Disable Floating-Point Overflow Interrupt
         CLOCK_CL:   0o001000,           // Clear Clock Flag
         CLOCK_IE:   0o002000,           // Enable Clock Interrupt
         CLOCK_ID:   0o004000,           // Disable Clock Interrupt
@@ -232,7 +252,7 @@ var PDP10 = {
         PRM_CL:     0o020000,           // Clear Memory Protection
         ADB_CL:     0o040000,           // Clear Address Break
         UIO_CL:     0o200000,           // Clear All In-Out Devices
-        PDOVFL_CL:  0o400000            // Clear Pushdown Overflow
+        PD_OVFL_CL: 0o400000            // Clear Pushdown Overflow
     },
 
     /*

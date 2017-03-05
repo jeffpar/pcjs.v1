@@ -251,7 +251,7 @@ PDP10.opILDB = function(op, acc)
      * We can implement this as a simple combination of opIBP() and opLDB(), but taking care that we only call
      * opIBP() on phase 1.
      */
-    if (this.regPS < 0) {
+    if (this.regBP < 0) {
         //noinspection JSUnresolvedFunction
         PDP10.opIBP.call(this, op, acc);
     }
@@ -286,14 +286,14 @@ PDP10.opLDB = function(op, acc)
      * is with regEA containing the address of the bits to be loaded.
      */
     var w = this.readWord(this.regEA);
-    if (this.regPS < 0) {
-        this.regPS = w;
+    if (this.regBP < 0) {
+        this.regBP = w;
         this.regRA = this.regEA | PDP10.OPCODE.I_BIT;
         this.advancePC(-1);
         return;
     }
-    var p = (this.regPS / PDP10.OPCODE.P_SCALE) & PDP10.OPCODE.P_MASK;
-    var s = (this.regPS >> PDP10.OPCODE.S_SHIFT) & PDP10.OPCODE.S_MASK;
+    var p = (this.regBP / PDP10.OPCODE.P_SCALE) & PDP10.OPCODE.P_MASK;
+    var s = (this.regBP >> PDP10.OPCODE.S_SHIFT) & PDP10.OPCODE.S_MASK;
     if (p + s <= 32) {
         /*
          * WARNING: When using JavaScript's 32-bit operators with values that could set bit 31 and produce a
@@ -310,7 +310,7 @@ PDP10.opLDB = function(op, acc)
         w = Math.trunc(w / Math.pow(2, p)) % Math.pow(2, s);
     }
     this.writeWord(acc, w);
-    this.regPS = -1;
+    this.regBP = -1;
 };
 
 /**
@@ -341,7 +341,7 @@ PDP10.opIDPB = function(op, acc)
      * We can implement this as a simple combination of opIBP() and opDDB(), but taking care that we only call
      * opIBP() on phase 1.
      */
-    if (this.regPS < 0) {
+    if (this.regBP < 0) {
         //noinspection JSUnresolvedFunction
         PDP10.opIBP.call(this, op, acc);
     }
@@ -376,14 +376,14 @@ PDP10.opDPB = function(op, acc)
      * is with regEA containing the address of the bits to be stored.
      */
     var w = this.readWord(this.regEA);
-    if (this.regPS < 0) {
-        this.regPS = w;
+    if (this.regBP < 0) {
+        this.regBP = w;
         this.regRA = this.regEA | PDP10.OPCODE.I_BIT;
         this.advancePC(-1);
         return;
     }
-    var p = (this.regPS / PDP10.OPCODE.P_SCALE) & PDP10.OPCODE.P_MASK;
-    var s = (this.regPS >> PDP10.OPCODE.S_SHIFT) & PDP10.OPCODE.S_MASK;
+    var p = (this.regBP / PDP10.OPCODE.P_SCALE) & PDP10.OPCODE.P_MASK;
+    var s = (this.regBP >> PDP10.OPCODE.S_SHIFT) & PDP10.OPCODE.S_MASK;
     /*
      * Regarding the SPECIAL CONSIDERATIONS above, even if the P ("shift") and/or S ("mask") values are
      * over-large, we "mask" the resulting byte value (b) to 36 bits, so that when we re-assemble the final
@@ -392,7 +392,7 @@ PDP10.opDPB = function(op, acc)
     var b = ((this.readWord(acc) % Math.pow(2, s)) * Math.pow(2, p)) % PDP10.WORD_LIMIT;
     w = (w - (w % Math.pow(2, p + s))) + b + (w % Math.pow(2, p));
     this.writeWord(this.regEA, w);
-    this.regPS = -1;
+    this.regBP = -1;
 };
 
 /**
@@ -1436,14 +1436,14 @@ PDP10.opASH = function(op, acc)
                  * If all those bits in the original value (w) were 0s, then adding bitsShifted to it could NOT
                  * produce a value > MAX_POS36.
                  */
-                if (w + bitsShifted > PDP10.MAX_POS36) this.fOverflow = true;
+                if (w + bitsShifted > PDP10.MAX_POS36) this.regPS |= PDP10.PSFLAG.OVFL;
             } else {
                 /*
                  * Since w was negative, overflow occurs ONLY if any of the bits we shifted out were 0s.
                  * If all those bits in the original value (w) were 1s, subtracting bitsShifted from it could NOT
                  * produce a value <= MAX_POS36.
                  */
-                if (w - bitsShifted <= PDP10.MAX_POS36) this.fOverflow = true;
+                if (w - bitsShifted <= PDP10.MAX_POS36) this.regPS |= PDP10.PSFLAG.OVFL;
             }
         } else {
             if (s <= -35) {
@@ -1848,7 +1848,7 @@ PDP10.opPUSH = function(op, acc)
         p += 0o000001000001;
         this.writeWord(p & PDP10.HALF_MASK, this.readWord(this.regEA));
         if (p >= PDP10.WORD_LIMIT) p -= PDP10.WORD_LIMIT;
-        if (!((p / PDP10.HALF_SHIFT)|0)) this.fPDOverflow = true;
+        if (!((p / PDP10.HALF_SHIFT)|0)) this.regPS |= PDP10.PSFLAG.PD_OVFL;
     } else {
         /*
          * This is the SIMH behavior, which appears to increment each half of AC independently.
@@ -1858,7 +1858,7 @@ PDP10.opPUSH = function(op, acc)
         p = (p + 0o000001000000) - (p & PDP10.HALF_MASK) + addr;
         if (p >= PDP10.WORD_LIMIT) {
             p -= PDP10.WORD_LIMIT;
-            this.fPDOverflow = true;
+            this.regPS |= PDP10.PSFLAG.PD_OVFL;
         }
     }
     this.writeWord(acc, p);
@@ -1888,7 +1888,7 @@ PDP10.opPOP = function(op, acc)
     if (this.regEA == acc) p = src;     // this avoids re-reading the accumulator if the write just overwrote it
     p -= 0o000001000001;
     if (p < 0) p += PDP10.WORD_LIMIT;
-    if (((p / PDP10.HALF_SHIFT)|0) == PDP10.HALF_MASK) this.fPDOverflow = true;
+    if (((p / PDP10.HALF_SHIFT)|0) == PDP10.HALF_MASK) this.regPS |= PDP10.PSFLAG.PD_OVFL;
     this.writeWord(acc, p);
 };
 

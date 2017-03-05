@@ -178,15 +178,14 @@ class CPUStatePDP10 extends CPUPDP10 {
         this.regPC = this.lastPC = this.addrReset;
 
         /*
-         * This next internal reg is used only with byte instructions, to record an active byte
-         * pointer state (regPS).
+         * This next internal reg is used only with byte instructions, to record an active byte pointer.
          */
-        this.regPS = -1;
+        this.regBP = -1;
 
         /*
          * Assorted processor flags
          */
-        this.fOverflow = this.fCarry0 = this.fCarry1 = this.fNoDivide = this.fPDOverflow = false;
+        this.regPS = 0;
 
         /*
          * This is queried and displayed by the Panel when it's not displaying its own ADDRESS register
@@ -291,13 +290,9 @@ class CPUStatePDP10 extends CPUPDP10 {
             this.regRA,
             this.regOP,
             this.regPC,
+            this.regBP,
             this.regPS,
             this.opFlags,
-            this.fOverflow,
-            this.fCarry0,
-            this.fCarry1,
-            this.fNoDivide,
-            this.fPDOverflow,
             this.lastPC,
             this.addrLast,
             this.addrReset
@@ -327,13 +322,9 @@ class CPUStatePDP10 extends CPUPDP10 {
             this.regRA,
             this.regOP,
             this.regPC,
+            this.regBP,
             this.regPS,
             this.opFlags,
-            this.fOverflow,
-            this.fCarry0,
-            this.fCarry1,
-            this.fNoDivide,
-            this.fPDOverflow,
             this.lastPC,
             this.addrLast,
             this.addrReset
@@ -350,6 +341,19 @@ class CPUStatePDP10 extends CPUPDP10 {
     }
 
     /**
+     * getPS()
+     *
+     * Gets the processor state flags in the format required by various program control operations.
+     *
+     * @this {CPUStatePDP10}
+     * @return {number}
+     */
+    getPS()
+    {
+        return this.regPS & PDP10.HALF_MASK;
+    }
+
+    /**
      * readFlags()
      *
      * Used to implement the ""CONI APR," instruction; see opCONI().
@@ -360,8 +364,8 @@ class CPUStatePDP10 extends CPUPDP10 {
     readFlags()
     {
         var flags = 0;
-        if (this.fOverflow) flags |= PDP10.RFLAG.OVFL;
-        if (this.fPDOverflow) flags |= PDP10.RFLAG.PDOVFL;
+        if (this.regPS & PDP10.PSFLAG.OVFL) flags |= PDP10.RFLAG.OVFL;
+        if (this.regPS & PDP10.PSFLAG.PD_OVFL) flags |= PDP10.RFLAG.PD_OVFL;
         return flags;
     }
 
@@ -375,8 +379,8 @@ class CPUStatePDP10 extends CPUPDP10 {
      */
     writeFlags(w)
     {
-        if (w & PDP10.WFLAG.OVFL_CL) this.fOverflow = false;
-        if (w & PDP10.WFLAG.PDOVFL_CL) this.fPDOverflow = false;
+        if (w & PDP10.WFLAG.OVFL_CL) this.regPS &= ~PDP10.PSFLAG.OVFL;
+        if (w & PDP10.WFLAG.PD_OVFL_CL) this.regPS &= ~PDP10.PSFLAG.PD_OVFL;
     }
 
     /**
@@ -507,7 +511,7 @@ class CPUStatePDP10 extends CPUPDP10 {
             if (src != PDP10.MIN_NEG36) {
                 src = PDP10.TWO_POW36 - src;
             } else {
-                this.fOverflow = this.fCarry1 = true;
+                this.regPS |= (PDP10.PSFLAG.OVFL | PDP10.PSFLAG.CARRY1);
             }
         }
         return src;
@@ -525,7 +529,7 @@ class CPUStatePDP10 extends CPUPDP10 {
     negate(src)
     {
         if (!src) {
-            this.fCarry0 = this.fCarry1 = true;
+            this.regPS |= (PDP10.PSFLAG.CARRY0 | PDP10.PSFLAG.CARRY1);
         }
         else {
             /*
@@ -533,7 +537,7 @@ class CPUStatePDP10 extends CPUPDP10 {
              * the MIN_NEG36 case anyway, and since subtraction in that case doesn't alter src, we skip the subtraction.
              */
             if (src == PDP10.MIN_NEG36) {
-                this.fOverflow = this.fCarry1 = true;
+                this.regPS |= (PDP10.PSFLAG.OVFL | PDP10.PSFLAG.CARRY1);
             } else {
                 src = PDP10.TWO_POW36 - src;
             }
