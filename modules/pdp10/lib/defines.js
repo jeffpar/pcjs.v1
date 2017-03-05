@@ -116,10 +116,10 @@ var PDP10 = {
     WORD_MASK:      Math.pow(2, 36) - 1,        //  68,719,476,735   (777777 777777): unsigned word mask
     WORD_LIMIT:     Math.pow(2, 36),            //  68,719,476,736 (1 000000 000000): unsigned word limit
 
-    MAX_POS18:      Math.pow(2, 17) - 1,        //         131,071        (377777)
-    MIN_NEG18:      Math.pow(2, 17),            //        -131,072        (400000)
-    MAX_POS36:      Math.pow(2, 35) - 1,        //  34,359,738,367 (377777 777777)
-    MIN_NEG36:      Math.pow(2, 35),            // -34,359,738,368 (400000 000000)
+    MAX_POS18:      Math.pow(2, 17) - 1,        //         131,071          (377777)
+    MIN_NEG18:      Math.pow(2, 17),            //        -131,072          (400000)
+    MAX_POS36:      Math.pow(2, 35) - 1,        //  34,359,738,367   (377777 777777)
+    MIN_NEG36:      Math.pow(2, 35),            // -34,359,738,368   (400000 000000)
 
     TWO_POW36:      Math.pow(2, 36),            // the two's complement of a 36-bit value is (value? TWO_POW36 - value : 0)
     TWO_POW32:      Math.pow(2, 32),
