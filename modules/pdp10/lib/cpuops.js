@@ -1404,7 +1404,7 @@ PDP10.opASH = function(op, acc)
      */
     var s = ((this.regEA << 14) >> 14) % 256;
     if (s) {
-        var w = this.readWord(acc), bitsShifted;
+        var w = this.readWord(acc), bits;
         /*
          * Convert the unsigned word (w) to a signed value (i), for convenience.
          */
@@ -1412,15 +1412,15 @@ PDP10.opASH = function(op, acc)
         if (s > 0) {
             if (s >= 35) {
                 i = (i < 0? PDP10.INT_LIMIT : 0);
-                bitsShifted = PDP10.INT_MASK;
+                bits = PDP10.INT_MASK;
             } else {
                 i = (i * Math.pow(2, s)) % PDP10.INT_LIMIT;
                 /*
-                 * bitsShifted must be set to the mask of all magnitude bits shifted out of
+                 * bits must be set to the mask of all magnitude bits shifted out of
                  * the original word.  Using 8-bit signed words as an example, this table shows
-                 * the bitsShifted values that would correspond to shifting 1-7 bits left:
+                 * the bits values that would correspond to shifting 1-7 bits left:
                  *
-                 *    shifts    bitsShifted     value       calculation
+                 *    shifts    bits            value       calculation
                  *    ------    -----------     ------      -----------
                  *      1       0b01000000      128-64      128-Math.pow(2, 7-1)
                  *      2       0b01100000      128-32      128-Math.pow(2, 7-2)
@@ -1428,22 +1428,22 @@ PDP10.opASH = function(op, acc)
                  *     ...
                  *      7       0b01111111      128-1       128-Math.pow(2, 7-7)
                  */
-                bitsShifted = PDP10.INT_LIMIT - Math.pow(2, 35-s);
+                bits = PDP10.INT_LIMIT - Math.pow(2, 35 - s);
             }
             if (w <= PDP10.MAX_POS36) {
                 /*
                  * Since w was positive, overflow occurs ONLY if any of the bits we shifted out were 1s.
-                 * If all those bits in the original value (w) were 0s, then adding bitsShifted to it could NOT
+                 * If all those bits in the original value (w) were 0s, then adding bits to it could NOT
                  * produce a value > MAX_POS36.
                  */
-                if (w + bitsShifted > PDP10.MAX_POS36) this.regPS |= PDP10.PSFLAG.OVFL;
+                if (w + bits > PDP10.MAX_POS36) this.regPS |= PDP10.PSFLAG.OVFL;
             } else {
                 /*
                  * Since w was negative, overflow occurs ONLY if any of the bits we shifted out were 0s.
-                 * If all those bits in the original value (w) were 1s, subtracting bitsShifted from it could NOT
+                 * If all those bits in the original value (w) were 1s, subtracting bits from it could NOT
                  * produce a value <= MAX_POS36.
                  */
-                if (w - bitsShifted <= PDP10.MAX_POS36) this.regPS |= PDP10.PSFLAG.OVFL;
+                if (w - bits <= PDP10.MAX_POS36) this.regPS |= PDP10.PSFLAG.OVFL;
             }
         } else {
             if (s <= -35) {
@@ -1576,7 +1576,133 @@ PDP10.opJFFO = function(op, acc)
  */
 PDP10.opASHC = function(op, acc)
 {
-    this.opUndefined(op);
+    /*
+     * Convert the unsigned 18-bit value in regEA to a signed 8-bit value (+/-255).
+     */
+    var s = ((this.regEA << 14) >> 14) % 256;
+    if (s) {
+        var bits;
+        var wLeft = this.readWord(acc);
+        var wRight = this.readWord((acc + 1) & 0o17);
+        if (s > 0) {
+            /*
+             * Handle all the left shift cases below, which don't need to worry about sign-extension
+             * but DO need to worry about overflow.
+             */
+            var wLeftOrig = wLeft;
+            if (s >= 36) {
+                /*
+                 * Since all wLeft bits are being shifted out, any positive value other than zero OR any negative value
+                 * other than WORD_MASK indicates an overflow.
+                 */
+                if (wLeft > 0 && wLeft < PDP10.INT_LIMIT || wLeft > PDP10.INT_MASK && wLeft < PDP10.WORD_MASK) {
+                    this.regPS |= PDP10.PSFLAG.OVFL;
+                }
+                if (s >= 71) {
+                    /*
+                     * Since all wRight bits are being shifted out, any positive value other than zero OR any negative value
+                     * other than WORD_MASK indicates an overflow.
+                     */
+                    if (wRight > 0 && wRight < PDP10.INT_LIMIT || wRight > PDP10.INT_MASK && wRight < PDP10.WORD_MASK) {
+                        this.regPS |= PDP10.PSFLAG.OVFL;
+                    }
+                    wLeft = 0;
+                } else {
+                    /*
+                     * Left shift 36-70 bits.
+                     */
+                    wLeft = (wRight * Math.pow(2, s - 35)) % PDP10.INT_LIMIT;
+                    bits = PDP10.INT_LIMIT - Math.pow(2, 70 - s);
+                    if (wLeftOrig <= PDP10.MAX_POS36) {
+                        /*
+                         * Since wLeft was positive, overflow occurs ONLY if any of the bits we shifted out were 1s.
+                         * If all those bits in the original value were 0s, then adding bits to it could NOT produce
+                         * a value > MAX_POS36.
+                         */
+                        if (wRight + bits > PDP10.MAX_POS36) this.regPS |= PDP10.PSFLAG.OVFL;
+                    } else {
+                        /*
+                         * Since wLeft was negative, overflow occurs ONLY if any of the bits we shifted out were 0s.
+                         * If all those bits in the original value were 1s, subtracting bits from it could NOT produce
+                         * a value <= MAX_POS36.
+                         */
+                        if (wRight - bits <= PDP10.MAX_POS36) this.regPS |= PDP10.PSFLAG.OVFL;
+                    }
+                }
+                wRight = 0;
+                if (wLeftOrig > PDP10.INT_MASK) {
+                    wLeft += PDP10.INT_LIMIT;
+                    wRight += PDP10.INT_LIMIT;
+                }
+            } else {
+                /*
+                 * Left shift 1-35 bits.
+                 */
+                wLeft = ((wLeft * Math.pow(2, s)) % PDP10.INT_LIMIT) + Math.trunc((wRight % PDP10.INT_LIMIT) / Math.pow(2, 35 - s));
+                wRight = (wRight * Math.pow(2, s)) % PDP10.INT_LIMIT;
+                /*
+                 * Determine overflow and update the sign bits.
+                 */
+                bits = PDP10.INT_LIMIT - Math.pow(2, 35 - s);
+                if (wLeftOrig <= PDP10.MAX_POS36) {
+                    /*
+                     * Since wLeft was positive, overflow occurs ONLY if any of the bits we shifted out were 1s.
+                     * If all those bits in the original value were 0s, then adding bits to it could NOT produce
+                     * a value > MAX_POS36.
+                     */
+                    if (wLeftOrig + bits > PDP10.MAX_POS36) this.regPS |= PDP10.PSFLAG.OVFL;
+                } else {
+                    /*
+                     * Since wLeft was negative, overflow occurs ONLY if any of the bits we shifted out were 0s.
+                     * If all those bits in the original value were 1s, subtracting bits from it could NOT produce
+                     * a value <= MAX_POS36.
+                     */
+                    if (wLeftOrig - bits <= PDP10.MAX_POS36) this.regPS |= PDP10.PSFLAG.OVFL;
+                    /*
+                     * Last but not least, update the sign bits of wLeft and wRight to indicate negative values.
+                     */
+                    wLeft += PDP10.INT_LIMIT;
+                    wRight += PDP10.INT_LIMIT;
+                }
+            }
+        } else {
+            /*
+             * Handle all the right shift cases below, which don't need to worry about overflow but DO
+             * need to worry about sign-extension.
+             */
+            if (s <= -36) {
+                if (s <= -72) {
+                    wRight = (wLeft > PDP10.INT_MASK? PDP10.WORD_MASK : 0);
+                } else {
+                    wRight = Math.trunc((wLeft % PDP10.INT_LIMIT) / Math.pow(2, -s - 35));
+                }
+                if (wLeft <= PDP10.INT_MASK) {
+                    wLeft = 0;
+                } else {
+                    wLeft = PDP10.WORD_MASK;
+                    wRight += PDP10.INT_LIMIT;
+                }
+            } else {
+                /*
+                 * For this right shift of 1-35 bits, determine the value of bits shifted in from the left.
+                 */
+                bits = (wLeft > PDP10.INT_MASK? PDP10.WORD_LIMIT - Math.pow(2, 36 - s) : 0);
+                /*
+                 * The bits that we add to wRight from wLeft must be shifted right one additional bit, because
+                 * they must "skip over" the sign bit of wRight.  This means we must zero the sign bit of wRight,
+                 * which can be done by performing a "mod" with INT_LIMIT.
+                 */
+                wRight = Math.trunc((wRight % PDP10.INT_LIMIT) / Math.pow(2, -s)) + (((wLeft % PDP10.INT_LIMIT) * Math.pow(2, 35 + s)) % PDP10.INT_LIMIT);
+                wLeft = Math.trunc(wLeft / Math.pow(2, -s)) + bits;
+                /*
+                 * Last but not least, we must set the sign of wRight to the sign of wLeft.
+                 */
+                if (wLeft > PDP10.INT_MASK) wRight += PDP10.INT_LIMIT;
+            }
+        }
+        this.writeWord(acc, wLeft);
+        this.writeWord((acc + 1) & 0o17, wRight);
+    }
 };
 
 /**
@@ -1644,24 +1770,24 @@ PDP10.opLSHC = function(op, acc)
         var wRight = this.readWord((acc + 1) & 0o17);
         if (s > 0) {
             if (s >= 36) {
-                wRight = 0;
                 if (s >= 72) {
                     wLeft = 0;
                 } else {
                     wLeft = (wRight * Math.pow(2, s - 36)) % PDP10.WORD_LIMIT;
                 }
+                wRight = 0;
             } else {
                 wLeft = ((wLeft * Math.pow(2, s)) % PDP10.WORD_LIMIT) + Math.trunc(wRight / Math.pow(2, 36 - s));
                 wRight = (wRight * Math.pow(2, s)) % PDP10.WORD_LIMIT;
             }
         } else {
             if (s <= -36) {
-                wLeft = 0;
                 if (s <= -72) {
                     wRight = 0;
                 } else {
                     wRight = Math.trunc(wLeft / Math.pow(2, -s - 36));
                 }
+                wLeft = 0;
             } else {
                 wRight = Math.trunc(wRight / Math.pow(2, -s)) + ((wLeft * Math.pow(2, 36 + s)) % PDP10.WORD_LIMIT);
                 wLeft = Math.trunc(wLeft / Math.pow(2, -s));
