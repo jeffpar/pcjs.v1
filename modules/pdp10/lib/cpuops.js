@@ -4963,7 +4963,7 @@ PDP10.opCONSO = function(op, dev)
  */
 PDP10.opIO = function(op)
 {
-    PDP10.aOpIO_KA10[op & 7].call(this, (op >> 3) & 0o177);
+    PDP10.aOpIO_KA10[op & 7].call(this, op, (op >> 3) & 0o177);
 };
 
 /**
