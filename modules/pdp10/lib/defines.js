@@ -139,10 +139,10 @@ var PDP10 = {
      *
      *      Mode        Suffix      Source  Destination
      *      ----        ------      -----   -----------
-     *  0:  BASIC       None        E       AC
-     *  1:  IMMEDIATE   I           0,E     AC
-     *  2:  MEMORY      M           AC      E
-     *  3:  SELF        S           E       E (and AC if A is non-zero)
+     *  0:  Basic       None        E       AC
+     *  1:  Immediate   I           0,E     AC
+     *  2:  Memory      M           AC      E
+     *  3:  Self/Both   S or B      E       E (and AC if A is non-zero)
      *
      * Input-output instructions look like:
      *
@@ -191,6 +191,56 @@ var PDP10 = {
         DEBUGGER:   0x0004,             // set if the Debugger wants to perform checks
         WAIT:       0x0008,             // WAIT operation in progress
         PRESERVE:   0x000F,             // OPFLAG bits to preserve prior to the next instruction
+    },
+
+    /*
+     * Readable CPU (or APR for "Arithmetic Processor") flags provided by the "CONI APR," instruction; see opCONI().
+     */
+    RFLAG: {
+        PIA:        0o000007,           // Priority Interrupt Assignment
+        OVFL:       0o000010,           // Overflow
+        OVFL_IE:    0o000020,           // Overflow Interrupt Enabled
+        TRAP_OFF:   0o000040,           // Trap Offset
+        FPOVFL:     0o000100,           // Floating-Point Overflow
+        FPOVFL_IE:  0o000200,           // Floating-Point Overflow Interrupt Enabled
+        CLOCK:      0o001000,           // Clock Flag
+        CLOCK_IE:   0o002000,           // Clock Interrupt Enabled
+        NXM:        0o010000,           // Non-Existent Memory
+        PRM:        0o020000,           // Memory Protection
+        ADB:        0o040000,           // Address Break
+        UIO:        0o100000,           // User In-Out
+        PDOVFL:     0o200000            // Pushdown Overflow (TODO: Verify this is correct; the May 1968 doc may have a typo)
+    },
+
+    /*
+     * Writable CPU (or APR for "Arithmetic Processor") flags provided by the "CONO APR," instruction; see opCONO().
+     *
+     * A set bit performs the function shown below, a clear bit does nothing.
+     */
+    WFLAG: {
+        PIA:        0o000007,           // Priority Interrupt Assignment
+        OVFL_CL:    0o000010,           // Clear Overflow
+        OVFL_IE:    0o000020,           // Enable Overflow Interrupt
+        OVFL_ID:    0o000040,           // Disable Overflow Interrupt
+        FPOVFL_CL:  0o000100,           // Clear Floating-Point Overflow
+        FPOVFL_IE:  0o000200,           // Enable Floating-Point Overflow Interrupt
+        FPOVFL_ID:  0o000400,           // Disable Floating-Point Overflow Interrupt
+        CLOCK_CL:   0o001000,           // Clear Clock Flag
+        CLOCK_IE:   0o002000,           // Enable Clock Interrupt
+        CLOCK_ID:   0o004000,           // Disable Clock Interrupt
+        NXM_CL:     0o010000,           // Clear Non-Existent Memory
+        PRM_CL:     0o020000,           // Clear Memory Protection
+        ADB_CL:     0o040000,           // Clear Address Break
+        UIO_CL:     0o200000,           // Clear All In-Out Devices
+        PDOVFL_CL:  0o400000            // Clear Pushdown Overflow
+    },
+
+    /*
+     * 7-bit device codes used by Input-Output instructions; see opIO().
+     */
+    DEVICES: {
+        APR:        0o000,              // Arithmetic Processor
+        PI:         0o001               // Priority Interrupt
     }
 };
 

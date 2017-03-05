@@ -424,7 +424,9 @@ class MemoryPDP10 {
      */
     readWordMemory(off, addr)
     {
-        return this.aw[off];
+        var w = this.aw[off];
+        Component.assert(w >= 0 && w < PDP10.WORD_LIMIT);
+        return w;
     }
 
     /**
@@ -437,6 +439,7 @@ class MemoryPDP10 {
      */
     writeWordMemory(w, off, addr)
     {
+        Component.assert(w >= 0 && w < PDP10.WORD_LIMIT);
         if (this.aw[off] != w) {
             this.aw[off] = w;
             this.fDirty = true;

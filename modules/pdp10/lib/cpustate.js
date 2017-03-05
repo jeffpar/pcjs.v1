@@ -176,7 +176,6 @@ class CPUStatePDP10 extends CPUPDP10 {
     {
         this.regEA = this.regRA = this.regOP = 0;
         this.regPC = this.lastPC = this.addrReset;
-        this.fOverflow = this.fCarry0 = this.fCarry1 = this.fNoDivide = this.fPDOverflow = false;
 
         /*
          * This next internal reg is used only with byte instructions, to record an active byte
@@ -185,13 +184,18 @@ class CPUStatePDP10 extends CPUPDP10 {
         this.regPS = -1;
 
         /*
+         * Assorted processor flags
+         */
+        this.fOverflow = this.fCarry0 = this.fCarry1 = this.fNoDivide = this.fPDOverflow = false;
+
+        /*
          * This is queried and displayed by the Panel when it's not displaying its own ADDRESS register
          * (which takes precedence when, for example, you've manually halted the CPU and are independently
          * examining the contents of other addresses).
          *
          * We initialize it to the current PC.
          */
-        this.lastAddr = this.regPC;
+        this.addrLast = this.regPC;
 
         /*
          * opFlags contains various conditions that stepCPU() needs to be aware of.
@@ -285,12 +289,18 @@ class CPUStatePDP10 extends CPUPDP10 {
         state.set(0, [
             this.regEA,
             this.regRA,
-            this.regPS,
             this.regOP,
             this.regPC,
+            this.regPS,
+            this.opFlags,
+            this.fOverflow,
+            this.fCarry0,
+            this.fCarry1,
+            this.fNoDivide,
+            this.fPDOverflow,
             this.lastPC,
-            this.lastAddr,
-            this.opFlags
+            this.addrLast,
+            this.addrReset
         ]);
         state.set(1, []);
         state.set(2, [this.nTotalCycles, this.getSpeed(), this.flags.autoStart]);
@@ -315,12 +325,18 @@ class CPUStatePDP10 extends CPUPDP10 {
         [
             this.regEA,
             this.regRA,
-            this.regPS,
             this.regOP,
             this.regPC,
+            this.regPS,
+            this.opFlags,
+            this.fOverflow,
+            this.fCarry0,
+            this.fCarry1,
+            this.fNoDivide,
+            this.fPDOverflow,
             this.lastPC,
-            this.lastAddr,
-            this.opFlags
+            this.addrLast,
+            this.addrReset
         ] = data[0];
 
         var a = data[2];
@@ -331,6 +347,36 @@ class CPUStatePDP10 extends CPUPDP10 {
         this.restoreIRQs(data[3]);
         this.restoreTimers(data[4]);
         return true;
+    }
+
+    /**
+     * readFlags()
+     *
+     * Used to implement the ""CONI APR," instruction; see opCONI().
+     *
+     * @this {CPUStatePDP10}
+     * @return {number}
+     */
+    readFlags()
+    {
+        var flags = 0;
+        if (this.fOverflow) flags |= PDP10.RFLAG.OVFL;
+        if (this.fPDOverflow) flags |= PDP10.RFLAG.PDOVFL;
+        return flags;
+    }
+
+    /**
+     * writeFlags(w)
+     *
+     * Used to implement the ""CONO APR," instruction; see opCONO().
+     *
+     * @this {CPUStatePDP10}
+     * @param {number} w
+     */
+    writeFlags(w)
+    {
+        if (w & PDP10.WFLAG.OVFL_CL) this.fOverflow = false;
+        if (w & PDP10.WFLAG.PDOVFL_CL) this.fPDOverflow = false;
     }
 
     /**
@@ -417,7 +463,7 @@ class CPUStatePDP10 extends CPUPDP10 {
      */
     getLastAddr()
     {
-        return this.lastAddr;
+        return this.addrLast;
     }
 
     /**
@@ -758,7 +804,7 @@ class CPUStatePDP10 extends CPUPDP10 {
      */
     readWordFromPhysical(addr)
     {
-        return this.bus.getWord(this.lastAddr = addr);
+        return this.bus.getWord(this.addrLast = addr);
     }
 
     /**
@@ -773,7 +819,7 @@ class CPUStatePDP10 extends CPUPDP10 {
      */
     writeWordToPhysical(addr, data)
     {
-        this.bus.setWord(this.lastAddr = addr, data);
+        this.bus.setWord(this.addrLast = addr, data);
         return data;
     }
 

@@ -47,7 +47,9 @@ if (NODE) {
 PDP10.opKA10 = function(op)
 {
     /*
-     * We shift op right 4 more bits, leaving only the 9 bits required for the table index.
+     * We shift op right 4 more bits, leaving only the 9 bits required for the table index.  Those
+     * 4 bits are normally an accumulator index, which we also mask and pass along, since most instructions
+     * will use an accumulator, and those that don't simply ignore it.
      */
     PDP10.aOpXXX_KA10[op >> 4].call(this, op, op & PDP10.OPCODE.A_MASK);
 };
@@ -1362,9 +1364,9 @@ PDP10.opDIVB = function(op, acc)
  *
  *      Arithmetic Shifting
  *
- *      These two instructions produce an arithmetic shift right or left of the number in AC or the
- *      double length number in accumulators A and A+1.  Shifting is the movement of the contents of
- *      a register bit-to-bit.  The operation discussed here is similar to logical shifting [see §2.4
+ *      These two instructions [ASH, ASHC] produce an arithmetic shift right or left of the number in AC
+ *      or the double length number in accumulators A and A+1.  Shifting is the movement of the contents
+ *      of a register bit-to-bit.  The operation discussed here is similar to logical shifting [see §2.4
  *      and the illustration on page 2-24], but in an arithmetic shift only the magnitude part is
  *      shifted - the sign is unaffected.  In a double length number the 70-bit string made up of the
  *      magnitude parts of the two words is shifted, but the sign of the low order word is made equal
@@ -1560,7 +1562,7 @@ PDP10.opJFFO = function(op, acc)
  *
  *      Concatenate the magnitude portions of accumulators A and A+1 with A on the left, and shift
  *      the 70-bit combination in bits 1-35 and 37-71 the number of places specified by E.  Do not shift
- *      AC bit 0, but make bit 0 of AC A +1 equal to it if at least one shift occurs (ie if E is nonzero).
+ *      AC bit 0, but make bit 0 of AC A+1 equal to it if at least one shift occurs (ie if E is nonzero).
  *
  *      If E is positive, shift left bringing 0s into bit 71 (bit 35 of AC A+1); bit 37 (bit 1 of AC A+1)
  *      is shifted into bit 35; data shifted out of bit 1 is lost; set Overflow if any bit of significance
@@ -1584,7 +1586,7 @@ PDP10.opASHC = function(op, acc)
  *
  *      Concatenate accumulators A and A+1 with A on the left, and rotate the 72-bit combination the
  *      number of places specified by E.  If E is positive, rotate left; bit 0 is rotated into bit 71
- *      (bit 35 of AC A +1) and bit 36 into bit 35.  If E is negative, rotate right; bit 35 is rotated
+ *      (bit 35 of AC A+1) and bit 36 into bit 35.  If E is negative, rotate right; bit 35 is rotated
  *      into bit 36 and bit 71 into bit 0.
  *
  * @this {CPUStatePDP10}
@@ -4835,9 +4837,9 @@ PDP10.opTSON = function(op, acc)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
- * @param {number} acc
+ * @param {number} dev
  */
-PDP10.opBLKI = function(op, acc)
+PDP10.opBLKI = function(op, dev)
 {
     this.opUndefined(op);
 };
@@ -4847,9 +4849,9 @@ PDP10.opBLKI = function(op, acc)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
- * @param {number} acc
+ * @param {number} dev
  */
-PDP10.opDATAI = function(op, acc)
+PDP10.opDATAI = function(op, dev)
 {
     this.opUndefined(op);
 };
@@ -4859,9 +4861,9 @@ PDP10.opDATAI = function(op, acc)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
- * @param {number} acc
+ * @param {number} dev
  */
-PDP10.opBLKO = function(op, acc)
+PDP10.opBLKO = function(op, dev)
 {
     this.opUndefined(op);
 };
@@ -4871,9 +4873,9 @@ PDP10.opBLKO = function(op, acc)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
- * @param {number} acc
+ * @param {number} dev
  */
-PDP10.opDATAO = function(op, acc)
+PDP10.opDATAO = function(op, dev)
 {
     this.opUndefined(op);
 };
@@ -4883,11 +4885,18 @@ PDP10.opDATAO = function(op, acc)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
- * @param {number} acc
+ * @param {number} dev
  */
-PDP10.opCONO = function(op, acc)
+PDP10.opCONO = function(op, dev)
 {
-    this.opUndefined(op);
+    switch(dev) {
+    case PDP10.DEVICES.APR:
+        this.writeFlags(this.readWord(this.regEA));
+        break;
+    default:
+        this.opUndefined(op);
+        break;
+    }
 };
 
 /**
@@ -4895,11 +4904,18 @@ PDP10.opCONO = function(op, acc)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
- * @param {number} acc
+ * @param {number} dev
  */
-PDP10.opCONI = function(op, acc)
+PDP10.opCONI = function(op, dev)
 {
-    this.opUndefined(op);
+    switch(dev) {
+    case PDP10.DEVICES.APR:
+        this.writeWord(this.regEA, this.readFlags());
+        break;
+    default:
+        this.opUndefined(op);
+        break;
+    }
 };
 
 /**
@@ -4907,9 +4923,9 @@ PDP10.opCONI = function(op, acc)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
- * @param {number} acc
+ * @param {number} dev
  */
-PDP10.opCONSZ = function(op, acc)
+PDP10.opCONSZ = function(op, dev)
 {
     this.opUndefined(op);
 };
@@ -4919,23 +4935,35 @@ PDP10.opCONSZ = function(op, acc)
  *
  * @this {CPUStatePDP10}
  * @param {number} op
- * @param {number} acc
+ * @param {number} dev
  */
-PDP10.opCONSO = function(op, acc)
+PDP10.opCONSO = function(op, dev)
 {
     this.opUndefined(op);
 };
 
 /**
- * opIO(op, acc)
+ * opIO(0o700xxx-0o777xxx): Input-Output Instructions
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-68:
+ *
+ *      The input-output instructions govern all transfers of data to and from the peripheral equipment, and also
+ *      perform many operations within the processor.  An instruction in the in-out class is designated by 111 in
+ *      bits 0-2, ie its left octal digit is 7.  Bits 3-9 address the device that is to respond to the instruction.
+ *      The format thus allows for 128 codes, two of which, 000 and 004 respectively, address the processor and
+ *      priority interrupt, and are used for the console and time share hardware as well.  A chart in Appendix A
+ *      lists all devices for which codes have been assigned, and gives their mnemonics and DEC option numbers.
+ *
+ *      Bits 13-35 are the same as in all other instructions: they are the I, X, and Y parts, which are used to
+ *      calculate an effective address, set of conditions, or mask to be used in the execution of the instruction.
+ *      The remaining bits, 10-12, select one of the following eight 10 instructions.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
- * @param {number} acc
  */
-PDP10.opIO = function(op, acc)
+PDP10.opIO = function(op)
 {
-    this.opUndefined(op);
+    PDP10.aOpIO_KA10[op & 7].call(this, (op >> 3) & 0o177);
 };
 
 /**
@@ -5687,7 +5715,7 @@ PDP10.aOpXXX_KA10 = [
     PDP10.opTSOA,               // 0o675xxx
     PDP10.opTDON,               // 0o676xxx
     PDP10.opTSON,               // 0o677xxx
-    PDP10.opIO,                 // 0o700xx
+    PDP10.opIO,                 // 0o700xxx
     PDP10.opIO,                 // 0o701xxx
     PDP10.opIO,                 // 0o702xxx
     PDP10.opIO,                 // 0o703xxx
@@ -5751,4 +5779,15 @@ PDP10.aOpXXX_KA10 = [
     PDP10.opIO,                 // 0o775xxx
     PDP10.opIO,                 // 0o776xxx
     PDP10.opIO                  // 0o777xxx
+];
+
+PDP10.aOpIO_KA10 = [
+    PDP10.opBLKI,               // 0o70000x
+    PDP10.opDATAI,              // 0o70004x
+    PDP10.opBLKO,               // 0o70010x
+    PDP10.opDATAO,              // 0o70014x
+    PDP10.opCONO,               // 0o70020x
+    PDP10.opCONI,               // 0o70024x
+    PDP10.opCONSZ,              // 0o70030x
+    PDP10.opCONSO               // 0o70034x
 ];
