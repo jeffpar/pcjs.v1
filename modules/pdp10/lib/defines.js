@@ -101,20 +101,21 @@ var PDP10 = {
      * automatic inlining will no longer occur.
      */
     ADDR_INVALID:   -1,
-    ADDR_LIMIT:     Math.pow(2, 18),
     ADDR_MASK:      Math.pow(2, 18) - 1,
-    WORD_INVALID:   -1,
-    INT_LIMIT:      Math.pow(2, 35),            // signed word (magnitude) limit
-    INT_MASK:       Math.pow(2, 35) - 1,        // signed word (magnitude) mask
-    WORD_LIMIT:     Math.pow(2, 36),            // unsigned word limit
-    WORD_MASK:      Math.pow(2, 36) - 1,        // unsigned word mask
-    HALF_SHIFT:     Math.pow(2, 18),            // unsigned half-word shift
-    HALF_MASK:      Math.pow(2, 18) - 1,        // unsigned half-word mask
+    ADDR_LIMIT:     Math.pow(2, 18),
 
     /*
      * 18-bit and 36-bit largest positive (and smallest negative) values; however, since we store all
      * values as unsigned quantities, these are the unsigned equivalents.
      */
+    WORD_INVALID:   -1,
+    INT_MASK:       Math.pow(2, 35) - 1,        //  34,359,738,367   (377777 777777): signed word (magnitude) mask
+    INT_LIMIT:      Math.pow(2, 35),            // -34,359,738,368   (400000 000000): signed word (magnitude) limit
+    WORD_MASK:      Math.pow(2, 36) - 1,        //  68,719,476,735   (777777 777777): unsigned word mask
+    WORD_LIMIT:     Math.pow(2, 36),            //  68,719,476,735 (1 000000 000000): unsigned word limit
+    HALF_MASK:      Math.pow(2, 18) - 1,        // unsigned half-word mask
+    HALF_SHIFT:     Math.pow(2, 18),            // unsigned half-word shift
+
     MAX_POS18:      Math.pow(2, 17) - 1,        //         131,071        (377777)
     MIN_NEG18:      Math.pow(2, 17),            //        -131,072        (400000)
     MAX_POS36:      Math.pow(2, 35) - 1,        //  34,359,738,367 (377777 777777)
