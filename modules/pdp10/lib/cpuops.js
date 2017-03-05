@@ -1402,7 +1402,7 @@ PDP10.opASH = function(op, acc)
     /*
      * Convert the unsigned 18-bit value in regEA to a signed 8-bit value (+/-255).
      */
-    var s = (this.regEA << 14) >> 24;
+    var s = ((this.regEA << 14) >> 14) % 256;
     if (s) {
         var w = this.readWord(acc), bitsShifted;
         /*
@@ -1474,7 +1474,7 @@ PDP10.opROT = function(op, acc)
     /*
      * Convert the unsigned 18-bit value in regEA to a signed 8-bit value, modulo 36 (+/-35).
      */
-    var s = ((this.regEA << 14) >> 24) % 36;
+    var s = ((this.regEA << 14) >> 14) % 36;
     if (s) {
         var w = this.readWord(acc);
         /*
@@ -1523,7 +1523,7 @@ PDP10.opLSH = function(op, acc)
     /*
      * Convert the unsigned 18-bit value in regEA to a signed 8-bit value (+/-255).
      */
-    var s = (this.regEA << 14) >> 24;
+    var s = ((this.regEA << 14) >> 14) % 256;
     if (s) {
         var w = this.readWord(acc);
         if (s > 0) {
@@ -1598,7 +1598,7 @@ PDP10.opROTC = function(op, acc)
     /*
      * Convert the unsigned 18-bit value in regEA to a signed 8-bit value, modulo 72 (+/-71).
      */
-    var s = ((this.regEA << 14) >> 24) % 72;
+    var s = ((this.regEA << 14) >> 14) % 72;
     if (s) {
         var wLeft = this.readWord(acc);
         var wRight = this.readWord((acc + 1) & 0o17);
@@ -1638,7 +1638,7 @@ PDP10.opLSHC = function(op, acc)
     /*
      * Convert the unsigned 18-bit value in regEA to a signed 8-bit value (+/-255).
      */
-    var s = (this.regEA << 14) >> 24;
+    var s = ((this.regEA << 14) >> 14) % 256;
     if (s) {
         var wLeft = this.readWord(acc);
         var wRight = this.readWord((acc + 1) & 0o17);

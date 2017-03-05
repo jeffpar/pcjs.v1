@@ -71,8 +71,19 @@ function test(sCmd, fREPL)
     if (sNum2 != null) console.log(sOp + " " + dumpInt36(i36Op));
 
     switch(sOp) {
+    case "get":
+        break;
+
     case "set":
         i36Reg = new Int36(i36Op);
+        break;
+
+    case "ext":
+        i36Reg.extend(i36Op);
+        break;
+
+    case "red":
+        i36Reg.reduce(i36Op);
         break;
 
     case "add":
@@ -89,6 +100,18 @@ function test(sCmd, fREPL)
 
     case "div":
         i36Reg.div(i36Op);
+        break;
+
+    case "ash":
+        i36Reg.ash(i36Op);
+        break;
+
+    case "lsh":
+        i36Reg.lsh(i36Op);
+        break;
+
+    case "rot":
+        i36Reg.rot(i36Op);
         break;
 
     default:
@@ -150,6 +173,12 @@ test("set 0o477777777777 0o777777777777");
 test("set 0o577777777777 0o777777777777");
 test("set 0o677777777777 0o777777777777");
 test("set 0o777777777777 0o777777777777");
+
+test("set 0o112233445566");
+test("lsh 3");
+test("lsh -3");
+test("rot 6");
+test("rot -6");
 
 repl.start({
     prompt: "int36> ",

@@ -84,7 +84,7 @@ var PDP10 = {
     MODEL_KA10: 1001,
 
     /*
-     * This constant is used to mark points in the code where the physical address being returned
+     * ADDR_INVALID is used to mark points in the code where the physical address being returned
      * is invalid and should not be used.
      *
      * In a 32-bit CPU, -1 (ie, 0xffffffff) could actually be a valid address, so consider changing

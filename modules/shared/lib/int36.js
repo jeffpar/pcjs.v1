@@ -500,6 +500,8 @@ class Int36 {
         var fNeg = false, extended;
         var n1 = this.value, n2 = value;
 
+        this.error = Int36.ERROR.NONE;
+
         if (n1 > Int36.MAXPOS) {
             n1 = Int36.BIT36 - n1;
             fNeg = !fNeg;
@@ -573,6 +575,8 @@ class Int36 {
      */
     divExtended(divisor)
     {
+        this.error = Int36.ERROR.NONE;
+
         if (!divisor) {
             this.error |= Int36.ERROR.DIVZERO;
             return;
@@ -646,6 +650,236 @@ class Int36 {
 
         if (fNegR && this.remainder) {
             this.remainder = Int36.BIT36 - this.remainder;
+        }
+    }
+
+    /**
+     * ash(i36)
+     *
+     * @this {Int36}
+     * @param {Int36} i36 (18-bit value representing the number of bits to arithmetically shift left (> 0) or right (< 0))
+     */
+    ash(i36)
+    {
+        this.ashNum(i36.value);
+    }
+
+    /**
+     * ashNum(num)
+     *
+     * @this {Int36}
+     * @param {number} num (18-bit value representing the number of bits to arithmetically shift left (> 0) or right (< 0))
+     */
+    ashNum(num)
+    {
+        num = Int36.validate(num);
+        this.error = Int36.ERROR.NONE;
+        /*
+         * Convert the unsigned 18-bit value in regEA to a signed 8-bit value (+/-255).
+         */
+        var s = ((num << 14) >> 14) % 256;
+        if (s) {
+            if (this.extended == null) {
+                /*
+                 * Simulate opASH()
+                 */
+                var w = this.value, bitsShifted;
+                /*
+                 * Convert the unsigned word (w) to a signed value (i), for convenience.
+                 */
+                var i = w > Int36.MAXPOS? -(Int36.BIT36 - w) : w;
+                if (s > 0) {
+                    if (s >= 35) {
+                        i = (i < 0? Int36.BIT35 : 0);
+                        bitsShifted = Int36.MAXPOS;
+                    } else {
+                        i = (i * Math.pow(2, s)) % Int36.BIT35;
+                        /*
+                         * bitsShifted must be set to the mask of all magnitude bits shifted out of
+                         * the original word.  Using 8-bit signed words as an example, this table shows
+                         * the bitsShifted values that would correspond to shifting 1-7 bits left:
+                         *
+                         *    shifts    bitsShifted     value       calculation
+                         *    ------    -----------     ------      -----------
+                         *      1       0b01000000      128-64      128-Math.pow(2, 7-1)
+                         *      2       0b01100000      128-32      128-Math.pow(2, 7-2)
+                         *      3       0b01110000      128-16      128-Math.pow(2, 7-3)
+                         *     ...
+                         *      7       0b01111111      128-1       128-Math.pow(2, 7-7)
+                         */
+                        bitsShifted = Int36.BIT35 - Math.pow(2, 35 - s);
+                    }
+                    if (w <= Int36.MAXPOS) {
+                        /*
+                         * Since w was positive, overflow occurs ONLY if any of the bits we shifted out were 1s.
+                         * If all those bits in the original value (w) were 0s, then adding bitsShifted to it could NOT
+                         * produce a value > MAX_POS36.
+                         */
+                        if (w + bitsShifted > Int36.MAXPOS) this.error |= Int36.ERROR.OVERFLOW;
+                    } else {
+                        /*
+                         * Since w was negative, overflow occurs ONLY if any of the bits we shifted out were 0s.
+                         * If all those bits in the original value (w) were 1s, subtracting bitsShifted from it could NOT
+                         * produce a value <= MAX_POS36.
+                         */
+                        if (w - bitsShifted <= Int36.MAXPOS) this.error |= Int36.ERROR.OVERFLOW;
+                    }
+                } else {
+                    if (s <= -35) {
+                        i = (i < 0? -1 : 0);
+                    } else {
+                        i = Math.trunc(i / Math.pow(2, -s));
+                    }
+                }
+                w = (i < 0? i + Int36.BIT36 : i);
+                this.value = w;
+            }
+            else {
+                /*
+                 * Simulate opASHC()
+                 */
+                console.log("ASHC unimplemented");
+            }
+        }
+    }
+
+    /**
+     * lsh(i36)
+     *
+     * @this {Int36}
+     * @param {Int36} i36 (18-bit value representing the number of bits to logically shift left (> 0) or right (< 0))
+     */
+    lsh(i36)
+    {
+        this.lshNum(i36.value);
+    }
+
+    /**
+     * lshNum(num)
+     *
+     * @this {Int36}
+     * @param {number} num (18-bit value representing the number of bits to logically shift left (> 0) or right (< 0))
+     */
+    lshNum(num)
+    {
+        num = Int36.validate(num);
+        this.error = Int36.ERROR.NONE;
+        /*
+         * Convert the unsigned 18-bit value in regEA to a signed 8-bit value (+/-255).
+         */
+        var s = ((num << 14) >> 14) % 256;
+        if (s) {
+            if (this.extended == null) {
+                var w = this.value;
+                if (s > 0) {
+                    if (s >= 36) {
+                        w = 0;
+                    } else {
+                        w = (w * Math.pow(2, s)) % Int36.BIT36;
+                    }
+                } else {
+                    if (s <= -36) {
+                        w = 0;
+                    } else {
+                        w = Math.trunc(w / Math.pow(2, -s));
+                    }
+                }
+                this.value = w;
+            } else {
+                var wRight = this.value;
+                var wLeft = this.extended;
+                if (s > 0) {
+                    if (s >= 36) {
+                        wRight = 0;
+                        if (s >= 72) {
+                            wLeft = 0;
+                        } else {
+                            wLeft = (wRight * Math.pow(2, s - 36)) % Int36.BIT36;
+                        }
+                    } else {
+                        wLeft = ((wLeft * Math.pow(2, s)) % Int36.BIT36) + Math.trunc(wRight / Math.pow(2, 36 - s));
+                        wRight = (wRight * Math.pow(2, s)) % Int36.BIT36;
+                    }
+                } else {
+                    if (s <= -36) {
+                        wLeft = 0;
+                        if (s <= -72) {
+                            wRight = 0;
+                        } else {
+                            wRight = Math.trunc(wLeft / Math.pow(2, -s - 36));
+                        }
+                    } else {
+                        wRight = Math.trunc(wRight / Math.pow(2, -s)) + ((wLeft * Math.pow(2, 36 + s)) % Int36.BIT36);
+                        wLeft = Math.trunc(wLeft / Math.pow(2, -s));
+                    }
+                }
+                this.value = wRight;
+                this.extended = wLeft;
+            }
+        }
+    }
+
+    /**
+     * rot(i36)
+     *
+     * @this {Int36}
+     * @param {Int36} i36 (18-bit value representing the number of bits to logically rotate left (> 0) or right (< 0))
+     */
+    rot(i36)
+    {
+        this.rotNum(i36.value);
+    }
+
+    /**
+     * rotNum(num)
+     *
+     * @this {Int36}
+     * @param {number} num (18-bit value representing the number of bits to logically rotate left (> 0) or right (< 0))
+     */
+    rotNum(num)
+    {
+        var s;
+        num = Int36.validate(num);
+        this.error = Int36.ERROR.NONE;
+
+        if (this.extended == null) {
+            /*
+             * Convert the unsigned 18-bit value in regEA to a signed 8-bit value, modulo 36 (+/-35).
+             */
+            s = ((num << 14) >> 14) % 36;
+            if (s) {
+                var w = this.value;
+                /*
+                 * Note that a right rotation (s < 0) of s bits is equivalent to a left rotation (s > 0) of 36 + s bits.
+                 */
+                if (s < 0) s = 36 + s;
+                w = ((w * Math.pow(2, s)) % Int36.BIT36) + Math.trunc(w / Math.pow(2, 36 - s));
+                this.value = w;
+            }
+        }
+        else {
+            /*
+             * Convert the unsigned 18-bit value in regEA to a signed 8-bit value, modulo 72 (+/-71).
+             */
+            s = ((num << 14) >> 14) % 72;
+            if (s) {
+                var wRight = this.value;
+                var wLeft = this.extended;
+                var wLeftOrig = wLeft;
+                /*
+                 * Note that a right rotation (s < 0) of s bits is equivalent to a left rotation (s > 0) of 72 + s bits.
+                 */
+                if (s < 0) s = 72 + s;
+                if (s < 36) {
+                    wLeft = ((wLeft * Math.pow(2, s)) % Int36.BIT36) + Math.trunc(wRight / Math.pow(2, 36 - s));
+                    wRight = ((wRight * Math.pow(2, s)) % Int36.BIT36) + Math.trunc(wLeftOrig / Math.pow(2, 36 - s));
+                } else {
+                    wLeft = ((wRight * Math.pow(2, s - 36)) % Int36.BIT36) + Math.trunc(wLeft / Math.pow(2, 72 - s));
+                    wRight = ((wLeftOrig * Math.pow(2, s - 36)) % Int36.BIT36) + Math.trunc(wRight / Math.pow(2, 72 - s));
+                }
+                this.value = wRight;
+                this.extended = wLeft;
+            }
         }
     }
 
@@ -734,7 +968,6 @@ class Int36 {
         if (this.value) {
             this.value = Int36.BIT36 - this.value;
         }
-        this.error = Int36.ERROR.NONE;
     }
 
     /**
@@ -865,14 +1098,15 @@ class Int36 {
     }
 
     /**
-     * validate(num)
+     * validate(num, bits)
      *
      * This ensures that any incoming (external) 36-bit values conform to our internal requirements.
      *
      * @param {number} num
+     * @param {number} [bits] (an alternative number of bits to restrict the value to)
      * @return {number}
      */
-    static validate(num)
+    static validate(num, bits = 36)
     {
         /*
          * Although it's expected that most callers will supply unsigned 36-bit values, we're nice about
@@ -882,7 +1116,7 @@ class Int36 {
         if (num < 0 && num >= Int36.MINNEG) {
             num += Int36.BIT36;
         }
-        var value = Math.trunc(Math.abs(num)) % Int36.BIT36;
+        var value = Math.trunc(Math.abs(num)) % Math.pow(2, bits);
         if (DEBUG && num !== value) {
             console.log("Int36.validate(" + num + " out of range, truncated to " + value + ")");
         }
