@@ -1686,7 +1686,7 @@ PDP10.opASHC = function(op, acc)
                 /*
                  * For this right shift of 1-35 bits, determine the value of bits shifted in from the left.
                  */
-                bits = (wLeft > PDP10.INT_MASK? PDP10.WORD_LIMIT - Math.pow(2, 36 - s) : 0);
+                bits = (wLeft > PDP10.INT_MASK? PDP10.WORD_LIMIT - Math.pow(2, 36 + s) : 0);
                 /*
                  * The bits that we add to wRight from wLeft must be shifted right one additional bit, because
                  * they must "skip over" the sign bit of wRight.  This means we must zero the sign bit of wRight,

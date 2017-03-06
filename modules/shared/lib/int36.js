@@ -289,7 +289,7 @@ class Int36 {
         if (radix == 8) {
             var s = Int36.octal(value);
             if (extended) {
-                s = Int36.octal(extended) + ',' + s;
+                s = Int36.octal(extended) + ' ' + s;
             }
             if (this.remainder) {
                 s += ':' + Int36.octal(this.remainder);
@@ -843,7 +843,7 @@ class Int36 {
                         /*
                          * For this right shift of 1-35 bits, determine the value of bits shifted in from the left.
                          */
-                        bits = (wLeft > Int36.INT_MASK? Int36.WORD_LIMIT - Math.pow(2, 36 - s) : 0);
+                        bits = (wLeft > Int36.INT_MASK? Int36.WORD_LIMIT - Math.pow(2, 36 + s) : 0);
                         /*
                          * The bits that we add to wRight from wLeft must be shifted right one additional bit, because
                          * they must "skip over" the sign bit of wRight.  This means we must zero the sign bit of wRight,
@@ -1213,8 +1213,14 @@ class Int36 {
      */
     static octal(value)
     {
-        if (value < 0) value += Int36.WORD_LIMIT;
-        return ("00000000000" + value.toString(8)).slice(-12);
+        if (value < 0) {
+            value += Int36.WORD_LIMIT;
+        }
+        var s = value.toString(8);
+        if (value >= 0 && !Math.trunc(value / Int36.WORD_LIMIT)) {
+            s = "0o" + ("000000000000" + s).slice(-12);
+        }
+        return s;
     }
 
     /**
@@ -1238,7 +1244,7 @@ class Int36 {
         }
         var value = Math.trunc(Math.abs(num)) % Math.pow(2, bits);
         if (DEBUG && num !== value) {
-            console.log("Int36.validate(" + num + " out of range, truncated to " + value + ")");
+            console.log("Int36.validate(" + Int36.octal(num) + " out of range, truncated to " + Int36.octal(value) + ")");
         }
         return value;
     }

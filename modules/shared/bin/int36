@@ -179,6 +179,9 @@ test("lsh 3");
 test("lsh -3");
 test("rot 6");
 test("rot -6");
+test("set 0o112233445566 0o123456123456");
+test("rot 18");
+test("ash -3");
 
 repl.start({
     prompt: "int36> ",
