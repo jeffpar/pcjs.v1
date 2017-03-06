@@ -118,6 +118,7 @@
  * @class Int36
  * @property {number} value
  * @property {number|null} extended
+ * @property {number} magnitude
  * @property {number|null} remainder
  * @property {number} error
  * @unrestricted
@@ -128,6 +129,10 @@
  * The 'extended' property stores an additional 36 bits of data from a multiplication, and can also
  * provide an additional 36 bits of data to a division.  Internally, it should be null whenever the
  * value is not extended.
+ *
+ * The 'magnitude' property is normally 35 for non-extended values and 71 for extended values;
+ * it is set to 70 whenever 'value' and 'extended' are both converted to 35-bit values with matching
+ * signs; see setMagnitude().
  *
  * The 'remainder' property stores the remainder from the last division.  You should assume it will
  * be set to null by any other operation.
@@ -203,16 +208,24 @@ class Int36 {
         if (obj instanceof Int36) {
             this.value = obj.value;
             this.extended = obj.extended;
+            this.magnitude = obj.magnitude;
             this.remainder = obj.remainder;
         }
         else {
             this.value = Int36.validate(obj || 0);
             this.extended = null;
+            this.magnitude = 35;
             /*
              * NOTE: Surprisingly, isNaN(null) is false, whereas isNaN(undefined) is true.  Go figure.
              */
             if (extended != null && !isNaN(extended)) {
                 this.extended = Int36.validate(extended);
+                /*
+                 * Since I'm not requiring there to be any relationship between these independently set values
+                 * (ie, that their sign bits match), we have to treat this Int36 as a signed 71-bit value until
+                 * further notice.
+                 */
+                this.magnitude = 71;
             }
             this.remainder = null;
         }
@@ -231,7 +244,7 @@ class Int36 {
         var s = "", fNeg = false;
         var i36Div = new Int36(10000000000);
         var i36Rem = new Int36();
-        var i36Tmp = new Int36(this.value, this.extended);
+        var i36Tmp = new Int36(this);
 
         if (!fUnsigned && i36Tmp.isNeg()) {
             i36Tmp.negate();
@@ -376,6 +389,7 @@ class Int36 {
         }
 
         this.extended = null;
+        this.magnitude = 35;
         this.remainder = null;
         this.error = Int36.ERROR.NONE;
 
@@ -492,6 +506,9 @@ class Int36 {
      * number (base 2^18).  Each individual multiplication of these 18-bit "digits" will produce
      * a result within 2^36, well within JavaScript integer accuracy.
      *
+     * TODO: Review what should happen when the multiplicand is extended; currently, we simply ignore
+     * the extended portion.
+     *
      * @this {Int36}
      * @param {number} value
      */
@@ -532,8 +549,11 @@ class Int36 {
 
         this.value = this.truncate(value);
         this.extended = this.truncate(extended);
+        this.magnitude = 71;
 
         if (fNeg) this.negate();
+
+        this.setMagnitude(70);
     }
 
     /**
@@ -596,6 +616,8 @@ class Int36 {
 
         this.extend();
 
+        this.setMagnitude(71);
+
         /*
          * Initialize the four double-length 72-bit values we need for the division process.
          *
@@ -636,9 +658,7 @@ class Int36 {
         /*
          * Since divisors are limited to 36-bit values, something's wrong if we have an extended remainder.
          */
-        if (DEBUG && dRem[1]) {
-            console.log("divExtended() assertion failure");
-        }
+        this.assert(!dRem[1], "extended remainder");
 
         this.value = dRes[0];
         this.extended = dRes[1];
@@ -1007,6 +1027,8 @@ class Int36 {
      * extend()
      *
      * Sets extended to match the sign of value (if not already set).
+     *
+     * @this {Int36}
      */
     extend()
     {
@@ -1024,27 +1046,31 @@ class Int36 {
      *
      *      Multiplication produces a double length product, and the programmer must remember that discarding
      *      the low order part ['extended'] of a double length negative leaves the high order part ['value'] in
-     *      correct twos complement form only if the low order part ['extended'] is null.
+     *      correct twos complement form only if the low order part ['extended'] is null [zero].
      *
-     * is not entirely applicable to us.  For one thing, when value is MINNEG and extended is ZERO, we interpret
-     * that extended value as 34,359,738,368; we cannot simply eliminate the extended portion, otherwise value
-     * would be interpreted as -34,359,738,368.
+     * is not applicable when we're using 71-bit magnitude values; for example, when value is MIN_NEG36 and
+     * extended is ZERO, we interpret that extended value as 34,359,738,368; we cannot simply eliminate the
+     * extended portion, otherwise value would be interpreted as -34,359,738,368.
      *
      * DEC can say that because each of the words in a PDP-10 double-length product contains its own sign bit,
      * resulting in only 70 bits of magnitude.  However, we don't store our extended (double-length) results that
-     * way, so be aware of these mismatches in both terminology and format when converting an Int36 to/from PDP-10
-     * registers/memory.
+     * way, unless setMagnitude(70) has been called, so be aware of these mismatches in both terminology and
+     * format when converting an Int36 to/from PDP-10 registers/memory.
+     *
+     * @this {Int36}
      */
     reduce()
     {
         if (this.extended == 0 && this.value <= Int36.MAX_POS36 || this.extended == Int36.WORD_MASK && this.value > Int36.MAX_POS36) {
             this.extended = null;
+            this.magnitude = 35;
         }
     }
 
     /**
      * isNeg()
      *
+     * @this {Int36}
      * @return {boolean}
      */
     isNeg()
@@ -1061,6 +1087,12 @@ class Int36 {
      *
      * This is handled below by setting extended first, based on the opposite of the value's current sign;
      * we could negate extended AFTER negating value, but then we'd need a special test for the MIN_NEG36 value.
+     *
+     * A side-effect of this call is that the magnitude is forced to 71, on the presumption that we're about
+     * to perform an arithmetic operation that is more easily performed on a unified 71-bit value than two
+     * independently signed 35-bit values.
+     *
+     * @this {Int36}
      */
     negate()
     {
@@ -1068,25 +1100,75 @@ class Int36 {
             /*
              * Set extended to the OPPOSITE of the current value.
              */
+            this.assert(this.magnitude == 35);
             this.extended = (this.value > Int36.MAX_POS36? 0 : Int36.WORD_MASK);
-        }
-        else if (this.value) {
-            /*
-             * Perform one's complement on the extended value.
-             */
-            this.extended = Int36.WORD_MASK - this.extended;
+            this.magnitude = 71;
         }
         else {
-            /*
-             * Perform two's complement on the extended value.
-             */
-            if (this.extended) this.extended = Int36.WORD_LIMIT - this.extended;
+            this.setMagnitude(71);
+            if (this.value) {
+                /*
+                 * Perform one's complement on the extended value.
+                 */
+                this.extended = Int36.WORD_MASK - this.extended;
+            }
+            else {
+                /*
+                 * Perform two's complement on the extended value.
+                 */
+                if (this.extended) this.extended = Int36.WORD_LIMIT - this.extended;
+            }
         }
         /*
          * Perform two's complement on the value.
          */
         if (this.value) {
             this.value = Int36.WORD_LIMIT - this.value;
+        }
+    }
+
+    /**
+     * setMagnitude(n)
+     *
+     * NOTE: This handles only two specific magnitude conversions: 71 to 70, and 70 to 71.  Conversions to/from 35-bit
+     * values are generally handled inline.
+     *
+     * @this {Int36}
+     * @param {number} n
+     */
+    setMagnitude(n)
+    {
+        if (this.extended != null) {
+
+            var sign = this.extended - (this.extended % Int36.INT_LIMIT);
+
+            if (this.magnitude == 70 && n == 71) {
+                /*
+                 * Let's assert that the sign bits of both halves match.
+                 */
+                this.assert(Math.trunc(this.value / Int36.INT_LIMIT) == Math.trunc(this.extended / Int36.INT_LIMIT), "sign mismatch");
+                /*
+                 * Compute value without the sign bit and add the low bit of extended in its place.
+                 */
+                this.value = (this.value % Int36.INT_LIMIT) + ((this.extended * Int36.INT_LIMIT) % Int36.WORD_LIMIT);
+                this.extended = sign + Math.trunc(this.extended / 2);
+                this.magnitude = 71;
+            }
+            else if (this.magnitude == 71 && n == 70) {
+                /*
+                 * Reducing the magnitude requires shifting extended left one bit so that we can move
+                 * the high bit of value into the low bit of extended, and then set the sign bit of value
+                 * to match the sign bit of extended.
+                 */
+                this.extended = ((this.extended * 2) % Int36.WORD_LIMIT) + Math.trunc(this.value / Int36.INT_LIMIT);
+                this.value = sign + (this.value % Int36.INT_LIMIT);
+                var signNew = this.extended - (this.extended % Int36.INT_LIMIT);
+                if (sign != signNew) {
+                    this.extended = sign + (this.extended - signNew);
+                    this.error |= Int36.ERROR.OVERFLOW;
+                }
+                this.magnitude = 70;
+            }
         }
     }
 
@@ -1123,6 +1205,27 @@ class Int36 {
         var v = (w % Math.pow(2, off + len));
         w = (w - v) + (bits * shift) + (v % shift);
         this.value = w;
+    }
+
+    /**
+     * assert(fCondition, sMessage)
+     *
+     * @param {boolean} fCondition
+     * @param {string} [sMessage]
+     */
+    assert(fCondition, sMessage)
+    {
+        if (DEBUG) {
+            if (!fCondition) {
+                try {
+                    throw(new Error(sMessage || "assertion failure"));
+                }
+                catch(err) {
+                    console.log(err.message);
+                    if (err.stack) console.log(err.stack);
+                }
+            }
+        }
     }
 
     /**
