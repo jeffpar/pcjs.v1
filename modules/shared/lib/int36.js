@@ -694,6 +694,7 @@ class Int36 {
     {
         num = Int36.validate(num);
         this.error = Int36.ERROR.NONE;
+
         /*
          * Convert the unsigned 18-bit value in regEA to a signed 8-bit value (+/-255).
          */
@@ -757,6 +758,10 @@ class Int36 {
             else {
                 /*
                  * Simulate opASHC()
+                 *
+                 * TODO: Note that we force the result to be treated as a 70-bit result (we set magnitude to 70 at the end);
+                 * however, what should happen if the incoming value wasn't a proper 70-bit value (ie, if the signs of value
+                 * and extended didn't match)?
                  */
                 var bits;
                 var wRight = this.value;
@@ -879,6 +884,7 @@ class Int36 {
                 }
                 this.value = wRight;
                 this.extended = wLeft;
+                this.magnitude = 70;
             }
         }
     }
@@ -955,6 +961,11 @@ class Int36 {
                 }
                 this.value = wRight;
                 this.extended = wLeft;
+                /*
+                 * TODO: Perhaps we should support magnitude 72 as way of indicating that the value should always be
+                 * treated as an unsigned 72-bit value?
+                 */
+                this.magnitude = 71;
             }
         }
     }
@@ -1019,6 +1030,11 @@ class Int36 {
                 }
                 this.value = wRight;
                 this.extended = wLeft;
+                /*
+                 * TODO: Perhaps we should support magnitude 72 as way of indicating that the value should always be
+                 * treated as an unsigned 72-bit value?
+                 */
+                this.magnitude = 71;
             }
         }
     }
