@@ -163,7 +163,7 @@ class CPUStatePDP10 extends CPUPDP10 {
         if (this.flags.running) this.stopCPU();
         this.initCPU();
         this.resetCycles();
-        this.clearError();          // clear any fatal error/exception that setError() may have flagged
+        this.clearError();      // clear any fatal error/exception that setError() may have flagged
         super.reset();
     }
 
@@ -176,16 +176,9 @@ class CPUStatePDP10 extends CPUPDP10 {
     {
         this.regEA = this.regRA = this.regOP = 0;
         this.regPC = this.lastPC = this.addrReset;
-
-        /*
-         * This next internal reg is used only with byte instructions, to record an active byte pointer.
-         */
-        this.regBP = -1;
-
-        /*
-         * Assorted processor flags
-         */
-        this.regPS = 0;
+        this.regBP = -1;        // active byte pointer (-1 if none)
+        this.regPS = 0;         // assorted processor flags (see PSFLAG bit definitions)
+        this.regExt = 0;        // internal "extension" register used for 72-bit calculations (eg, MUL)
 
         /*
          * This is queried and displayed by the Panel when it's not displaying its own ADDRESS register

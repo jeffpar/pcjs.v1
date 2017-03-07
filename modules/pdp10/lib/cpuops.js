@@ -1214,7 +1214,15 @@ PDP10.opIMULB = function(op, acc)
 };
 
 /**
- * opMUL(0o224000)
+ * opMUL(0o224000): Multiply
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-28:
+ *
+ *      Multiply AC by the operand specified by M, and place the high order word of the double length result
+ *      in the specified destination.  If M specifies AC as a destination, place the low order word in accumulator
+ *      A+1.  If both operands are -2^35 set Overflow; the double length result stored is -2^70.
+ *
+ * NOTE: This is a "Basic" mode instruction: the source is [E] and the destination is [A],[A+1] (opposite of "Memory").
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -1222,11 +1230,20 @@ PDP10.opIMULB = function(op, acc)
  */
 PDP10.opMUL = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(acc, PDP10.doMUL.call(this, this.readWord(acc), this.readWord(this.regEA)));
+    this.writeWord((acc + 1) & 0o17, this.regExt);
 };
 
 /**
- * opMULI(0o225000)
+ * opMULI(0o225000): Multiply Immediate
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-28:
+ *
+ *      Multiply AC by the operand specified by M, and place the high order word of the double length result
+ *      in the specified destination.  If M specifies AC as a destination, place the low order word in accumulator
+ *      A+1.  If both operands are -2^35 set Overflow; the double length result stored is -2^70.
+ *
+ * NOTE: This is an "Immediate" mode instruction: the source is the word 0,E and the destination is [A],[A+1].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -1234,11 +1251,20 @@ PDP10.opMUL = function(op, acc)
  */
 PDP10.opMULI = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(acc, PDP10.doMUL.call(this, this.readWord(acc), this.regEA));
+    this.writeWord((acc + 1) & 0o17, this.regExt);
 };
 
 /**
- * opMULM(0o226000)
+ * opMULM(0o226000): Multiply to Memory
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-28:
+ *
+ *      Multiply AC by the operand specified by M, and place the high order word of the double length result
+ *      in the specified destination.  If M specifies AC as a destination, place the low order word in accumulator
+ *      A+1.  If both operands are -2^35 set Overflow; the double length result stored is -2^70.
+ *
+ * NOTE: This is a "Memory" mode instruction: the source is [E] and the destination is [E] (opposite of "Basic").
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -1246,11 +1272,19 @@ PDP10.opMULI = function(op, acc)
  */
 PDP10.opMULM = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(this.regEA, PDP10.doMUL.call(this, this.readWord(acc), this.readWord(this.regEA)));
 };
 
 /**
- * opMULB(0o227000)
+ * opMULB(0o227000): Multiply to Both
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-28:
+ *
+ *      Multiply AC by the operand specified by M, and place the high order word of the double length result
+ *      in the specified destination.  If M specifies AC as a destination, place the low order word in accumulator
+ *      A+1.  If both operands are -2^35 set Overflow; the double length result stored is -2^70.
+ *
+ * NOTE: This is a "Both" mode instruction: the source is [E] and the destination is [E] and [A],[A+1].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -1258,7 +1292,8 @@ PDP10.opMULM = function(op, acc)
  */
 PDP10.opMULB = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(this.regEA, this.writeWord(acc, PDP10.doMUL.call(this, this.readWord(acc), this.readWord(this.regEA))));
+    this.writeWord((acc + 1) & 0o17, this.regExt);
 };
 
 /**
@@ -2167,7 +2202,17 @@ PDP10.opADDB = function(op, acc)
 };
 
 /**
- * opSUB(0o274000)
+ * opSUB(0o274000): Subtract
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-27:
+ *
+ *      Subtract the operand specified by M from AC and place the result in the specified destination.  If the difference
+ *      is >= 2^35 set Overflow and Carry 1; the result stored has a minus sign but a magnitude in positive form equal to the
+ *      difference less 2^35.  If the difference is < -2^35 set Overflow and Carry 0; the result stored has a plus sign but
+ *      a magnitude in negative form equal to the difference plus 2^35.  Set both carry flags if the signs of the operands are
+ *      the same and AC is the greater or the two are equal, or the signs of the operands differ and AC is negative.
+ *
+ * NOTE: This is a "Basic" mode instruction: the source is [E] and the destination is [A] (opposite of "Memory").
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2175,11 +2220,21 @@ PDP10.opADDB = function(op, acc)
  */
 PDP10.opSUB = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(acc, PDP10.doSUB.call(this, this.readWord(acc), this.readWord(this.regEA)));
 };
 
 /**
- * opSUBI(0o275000)
+ * opSUBI(0o275000): Subtract Immediate
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-27:
+ *
+ *      Subtract the operand specified by M from AC and place the result in the specified destination.  If the difference
+ *      is >= 2^35 set Overflow and Carry 1; the result stored has a minus sign but a magnitude in positive form equal to the
+ *      difference less 2^35.  If the difference is < -2^35 set Overflow and Carry 0; the result stored has a plus sign but
+ *      a magnitude in negative form equal to the difference plus 2^35.  Set both carry flags if the signs of the operands are
+ *      the same and AC is the greater or the two are equal, or the signs of the operands differ and AC is negative.
+ *
+ * NOTE: This is an "Immediate" mode instruction: the source is the word 0,E and the destination is [A].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2187,11 +2242,21 @@ PDP10.opSUB = function(op, acc)
  */
 PDP10.opSUBI = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(acc, PDP10.doSUB.call(this, this.readWord(acc), this.regEA));
 };
 
 /**
- * opSUBM(0o276000)
+ * opSUBM(0o276000): Subtract to Memory
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-27:
+ *
+ *      Subtract the operand specified by M from AC and place the result in the specified destination.  If the difference
+ *      is >= 2^35 set Overflow and Carry 1; the result stored has a minus sign but a magnitude in positive form equal to the
+ *      difference less 2^35.  If the difference is < -2^35 set Overflow and Carry 0; the result stored has a plus sign but
+ *      a magnitude in negative form equal to the difference plus 2^35.  Set both carry flags if the signs of the operands are
+ *      the same and AC is the greater or the two are equal, or the signs of the operands differ and AC is negative.
+ *
+ * NOTE: This is a "Memory" mode instruction: the source is [E] and the destination is [E] (opposite of "Basic").
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2199,11 +2264,21 @@ PDP10.opSUBI = function(op, acc)
  */
 PDP10.opSUBM = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(this.regEA, PDP10.doSUB.call(this, this.readWord(acc), this.readWord(this.regEA)));
 };
 
 /**
- * opSUBB(0o277000)
+ * opSUBB(0o277000): Subtract to Both
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-27:
+ *
+ *      Subtract the operand specified by M from AC and place the result in the specified destination.  If the difference
+ *      is >= 2^35 set Overflow and Carry 1; the result stored has a minus sign but a magnitude in positive form equal to the
+ *      difference less 2^35.  If the difference is < -2^35 set Overflow and Carry 0; the result stored has a plus sign but
+ *      a magnitude in negative form equal to the difference plus 2^35.  Set both carry flags if the signs of the operands are
+ *      the same and AC is the greater or the two are equal, or the signs of the operands differ and AC is negative.
+ *
+ * NOTE: This is a "Both" mode instruction: the source is [E] and the destination is [E] and [A].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2211,7 +2286,7 @@ PDP10.opSUBM = function(op, acc)
  */
 PDP10.opSUBB = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(this.regEA, this.writeWord(acc, PDP10.doSUB.call(this, this.readWord(acc), this.readWord(this.regEA))));
 };
 
 /**
@@ -5171,15 +5246,12 @@ PDP10.opUndefined = function(op, acc)
  */
 PDP10.doADD = function(dst, src)
 {
+    /*
+     * Since, in our happy little world, 36-bit values are always unsigned, the
+     * only possible out-of-bounds value is a result >= WORD_LIMIT, which the mod cures.
+     */
     var res = (dst + src) % PDP10.WORD_LIMIT;
-    var dst01 = Math.trunc(dst / PDP10.TWO_POW34);
-    var src01 = Math.trunc(src / PDP10.TWO_POW34);
-    var res01 = Math.trunc(res / PDP10.TWO_POW34);
-    var bitsCarry = (dst01 ^ ((dst01 ^ src01) & (src01 ^ res01)));
-    var fCarry0 = bitsCarry & 0b10;
-    var fCarry1 = bitsCarry & 0b01;
-    var fOverflow = ((dst01 ^ res01) & (src01 ^ res01)) & 0b10;
-    this.regPS |= (fCarry0? PDP10.PSFLAG.CARRY0 : 0) | (fCarry1? PDP10.PSFLAG.CARRY1 : 0) | (fOverflow? PDP10.PSFLAG.OVFL : 0);
+    PDP10.setAddFlags.call(this, dst, src, res);
     return res;
 };
 
@@ -5277,6 +5349,132 @@ PDP10.doIOR = function(dst, src)
      * positive.
      */
     return ((((dst / PDP10.TWO_POW32)|0) | ((src / PDP10.TWO_POW32)|0)) * PDP10.TWO_POW32) + ((dst | src) >>> 0);
+};
+
+/**
+ * doMUL(dst, src)
+ *
+ * Used by callers to perform the multiplication (MUL) of two signed 36-bit operands.
+ *
+ * @this {CPUStatePDP10}
+ * @param {number} dst (36-bit value)
+ * @param {number} src (36-bit value)
+ * @return {number} (dst * src) (the low 36 bits of the result; the high 36 bits are stored in regExt)
+ */
+PDP10.doMUL = function(dst, src)
+{
+    var n1 = dst, n2 = src;
+    var fNeg = false, res, ext;
+
+    /*
+     * If either input is in the negative range, record the sign and make it positive;
+     * we'll negate the result afterward if necessary.
+     */
+    if (n1 > PDP10.MAX_POS36) {
+        n1 = PDP10.WORD_LIMIT - n1;
+        fNeg = !fNeg;
+    }
+
+    if (n2 > PDP10.MAX_POS36) {
+        n2 = PDP10.WORD_LIMIT - n2;
+        fNeg = !fNeg;
+    }
+
+    if (n1 < PDP10.HALF_SHIFT && n2 < PDP10.HALF_SHIFT) {
+        res = n1 * n2;
+        ext = 0;
+    }
+    else {
+        var n1d1 = (n1 % PDP10.HALF_SHIFT);
+        var n1d2 = Math.trunc(n1 / PDP10.HALF_SHIFT);
+        var n2d1 = (n2 % PDP10.HALF_SHIFT);
+        var n2d2 = Math.trunc(n2 / PDP10.HALF_SHIFT);
+        var m1d1 = n1d1 * n2d1;
+        var m1d2 = (n1d2 * n2d1) + Math.trunc(m1d1 / PDP10.HALF_SHIFT);
+        ext = Math.trunc(m1d2 / PDP10.HALF_SHIFT);
+        m1d2 = (m1d2 % PDP10.HALF_SHIFT) + (n1d1 * n2d2);
+        res = (m1d2 * PDP10.HALF_SHIFT) + (m1d1 % PDP10.HALF_SHIFT);
+        ext += Math.trunc(m1d2 / PDP10.HALF_SHIFT) + (n1d2 * n2d2);
+    }
+
+    this.assert(res == res % PDP10.WORD_LIMIT);
+    this.assert(ext == ext % PDP10.WORD_LIMIT);
+
+    if (fNeg) {
+        if (res) {
+            ext = PDP10.WORD_MASK - ext;
+            res = PDP10.WORD_LIMIT - res;
+        }
+        else {
+            if (ext) ext = PDP10.WORD_LIMIT - ext;
+        }
+    }
+
+    /*
+     * We just produced a signed 72-bit result, whereas the PDP-10 stores 72-bit arithmetic values as two
+     * signed 36-bit results with matching signs.  Since that's effectively only 70 bits of magnitude (with
+     * two sign bits), we lose one bit of magnitude.
+     *
+     * The conversion requires shifting ext left one bit so that we can move the high bit of res into the
+     * low bit of ext, and then set the sign bit of res to match the sign bit of ext.
+     */
+    var sign = ext - (ext % PDP10.INT_LIMIT);
+    ext = ((ext * 2) % PDP10.WORD_LIMIT) + Math.trunc(res / PDP10.INT_LIMIT);
+    res = sign + (res % PDP10.INT_LIMIT);
+    var signNew = ext - (ext % PDP10.INT_LIMIT);
+    if (sign != signNew) {
+        ext = sign + (ext - signNew);
+        this.regPS |= PDP10.PSFLAG.OVFL;
+    }
+
+    this.regExt = ext;
+    return res;
+};
+
+/**
+ * doSUB(dst, src)
+ *
+ * Used by callers to perform the subtraction (SUB) of two signed 36-bit operands.
+ *
+ * @this {CPUStatePDP10}
+ * @param {number} dst (36-bit value)
+ * @param {number} src (36-bit value)
+ * @return {number} (dst - src)
+ */
+PDP10.doSUB = function(dst, src)
+{
+    /*
+     * Since, in our happy little world, 36-bit values are always unsigned, the
+     * only possible out-of-bounds value is a result < 0, which adding WORD_LIMIT cures.
+     */
+    var res = (dst - src);
+    if (res < 0) res += PDP10.WORD_LIMIT;
+    /*
+     * We can leverage setAddFlags() by treating the subtraction as addition;
+     * since res = dst - src, it is also true that dst = res + src.
+     */
+    PDP10.setAddFlags.call(this, res, src, dst);
+    return res;
+};
+
+/**
+ * setAddFlags(dst, src, res)
+ *
+ * @this {CPUStatePDP10}
+ * @param {number} dst (36-bit value)
+ * @param {number} src (36-bit value)
+ * @param {number} res (36-bit value)
+ */
+PDP10.setAddFlags = function(dst, src, res)
+{
+    var dst01 = Math.trunc(dst / PDP10.TWO_POW34);
+    var src01 = Math.trunc(src / PDP10.TWO_POW34);
+    var res01 = Math.trunc(res / PDP10.TWO_POW34);
+    var bitsCarry = (dst01 ^ ((dst01 ^ src01) & (src01 ^ res01)));
+    var fCarry0 = bitsCarry & 0b10;
+    var fCarry1 = bitsCarry & 0b01;
+    var fOverflow = ((dst01 ^ res01) & (src01 ^ res01)) & 0b10;
+    this.regPS |= (fCarry0? PDP10.PSFLAG.CARRY0 : 0) | (fCarry1? PDP10.PSFLAG.CARRY1 : 0) | (fOverflow? PDP10.PSFLAG.OVFL : 0);
 };
 
 /**
