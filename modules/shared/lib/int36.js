@@ -301,10 +301,10 @@ class Int36 {
 
         if (radix == 8) {
             var s = Int36.octal(value);
-            if (extended) {
+            if (extended != null) {
                 s = Int36.octal(extended) + ' ' + s;
             }
-            if (this.remainder) {
+            if (this.remainder != null) {
                 s += ':' + Int36.octal(this.remainder);
             }
             if (DEBUG && this.error) {
@@ -699,8 +699,9 @@ class Int36 {
          * Convert the unsigned 18-bit value in regEA to a signed 8-bit value (+/-255).
          */
         var s = ((num << 14) >> 14) % 256;
-        if (s) {
-            if (this.extended == null) {
+
+        if (this.extended == null) {
+            if (s) {
                 /*
                  * Simulate opASH()
                  */
@@ -755,7 +756,9 @@ class Int36 {
                 w = (i < 0? i + Int36.WORD_LIMIT : i);
                 this.value = w;
             }
-            else {
+        }
+        else {
+            if (s) {
                 /*
                  * Simulate opASHC()
                  *
@@ -884,8 +887,11 @@ class Int36 {
                 }
                 this.value = wRight;
                 this.extended = wLeft;
-                this.magnitude = 70;
             }
+            /*
+             * We allow ashNum(0) as a way of marking an extended Int36 as a 70-bit value.
+             */
+            this.magnitude = 70;
         }
     }
 
@@ -910,12 +916,14 @@ class Int36 {
     {
         num = Int36.validate(num);
         this.error = Int36.ERROR.NONE;
+
         /*
          * Convert the unsigned 18-bit value in regEA to a signed 8-bit value (+/-255).
          */
         var s = ((num << 14) >> 14) % 256;
-        if (s) {
-            if (this.extended == null) {
+
+        if (this.extended == null) {
+            if (s) {
                 var w = this.value;
                 if (s > 0) {
                     if (s >= 36) {
@@ -931,7 +939,9 @@ class Int36 {
                     }
                 }
                 this.value = w;
-            } else {
+            }
+        } else {
+            if (s) {
                 var wRight = this.value;
                 var wLeft = this.extended;
                 if (s > 0) {
@@ -961,12 +971,14 @@ class Int36 {
                 }
                 this.value = wRight;
                 this.extended = wLeft;
-                /*
-                 * TODO: Perhaps we should support magnitude 72 as way of indicating that the value should always be
-                 * treated as an unsigned 72-bit value?
-                 */
-                this.magnitude = 71;
             }
+            /*
+             * We allow lshNum(0) as a way of marking an extended Int36 as a 71-bit value.
+             *
+             * TODO: Perhaps we should support magnitude 72 as way of indicating that the value should be treated as an
+             * unsigned 72-bit value?
+             */
+            this.magnitude = 71;
         }
     }
 
@@ -1030,12 +1042,14 @@ class Int36 {
                 }
                 this.value = wRight;
                 this.extended = wLeft;
-                /*
-                 * TODO: Perhaps we should support magnitude 72 as way of indicating that the value should always be
-                 * treated as an unsigned 72-bit value?
-                 */
-                this.magnitude = 71;
             }
+            /*
+             * We allow rotNum(0) as a way of marking an extended Int36 as a 71-bit value.
+             *
+             * TODO: Perhaps we should support magnitude 72 as way of indicating that the value should be treated as an
+             * unsigned 72-bit value?
+             */
+            this.magnitude = 71;
         }
     }
 

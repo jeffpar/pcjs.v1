@@ -183,6 +183,16 @@ test("set 0o112233445566 0o123456123456");
 test("rot 18");
 test("ash -3");
 
+test("set 0o377777777777 0o377777777777");
+test("ash 0");      // this is a no-op, but it's useful for setting the magnitude to 70-bit
+for (let i = 0; i <= 70; i++) {
+    test("ash -1");
+}
+test("set 0 1");
+for (let i = 0; i <= 70; i++) {
+    test("ash 1");
+}
+
 repl.start({
     prompt: "int36> ",
     input: process.stdin,
