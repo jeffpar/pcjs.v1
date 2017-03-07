@@ -336,14 +336,15 @@ class CPUStatePDP10 extends CPUPDP10 {
     /**
      * getPS()
      *
-     * Gets the processor state flags in the format required by various program control operations.
+     * Gets the processor state flags in the format required by various program control operations (eg, JSP),
+     * pre-masked and pre-shifted for convenient loading into the left half of an accumulator.
      *
      * @this {CPUStatePDP10}
      * @return {number}
      */
     getPS()
     {
-        return this.regPS & PDP10.HALF_MASK;
+        return (this.regPS & PDP10.HALF_MASK) * PDP10.HALF_SHIFT;
     }
 
     /**
@@ -487,55 +488,6 @@ class CPUStatePDP10 extends CPUPDP10 {
     setPC(addr)
     {
         this.regPC = addr % PDP10.ADDR_LIMIT;
-    }
-
-    /**
-     * abs(src)
-     *
-     * Used by the MOVM* (Move Magnitude) instructions.
-     *
-     * @this {CPUStatePDP10}
-     * @param {number} src (36-bit)
-     * @return {number} (absolute value of src)
-     */
-    abs(src)
-    {
-        if (src > PDP10.MAX_POS36) {
-            if (src != PDP10.MIN_NEG36) {
-                src = PDP10.TWO_POW36 - src;
-            } else {
-                this.regPS |= (PDP10.PSFLAG.OVFL | PDP10.PSFLAG.CARRY1);
-            }
-        }
-        return src;
-    }
-
-    /**
-     * negate(src)
-     *
-     * Used by the MOVN* (Move Negative) instructions.
-     *
-     * @this {CPUStatePDP10}
-     * @param {number} src (36-bit)
-     * @return {number} (src negated, but as an unsigned 36-bit result)
-     */
-    negate(src)
-    {
-        if (!src) {
-            this.regPS |= (PDP10.PSFLAG.CARRY0 | PDP10.PSFLAG.CARRY1);
-        }
-        else {
-            /*
-             * In the non-zero case, it's always safe to subtract src from TWO_POW36, but since we have to check for
-             * the MIN_NEG36 case anyway, and since subtraction in that case doesn't alter src, we skip the subtraction.
-             */
-            if (src == PDP10.MIN_NEG36) {
-                this.regPS |= (PDP10.PSFLAG.OVFL | PDP10.PSFLAG.CARRY1);
-            } else {
-                src = PDP10.TWO_POW36 - src;
-            }
-        }
-        return src;
     }
 
     /**

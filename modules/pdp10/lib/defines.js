@@ -198,6 +198,11 @@ var PDP10 = {
 
     /*
      * Flags returned by getPS() for various program control operations.
+     *
+     * NOTE: I see SIMH setting PS bits like 0o000200 and 0o000400, which are not documented for the KA10.
+     * The SIMH docs only refer to the KS10 ("KS10 CPU with 1MW of memory"), so I'm guessing it doesn't have
+     * a KA10 emulation option.  The `pdp10` SIMH binary does have some SET CPU options, but unlike the `pdp11`
+     * binary, the only options you can set relate to the operating system to be run -- which seems very hacky.
      */
     PSFLAG: {
         OVFL:       0o400000,          // Overflow

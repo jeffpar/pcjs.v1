@@ -1497,16 +1497,25 @@ class DebuggerPDP10 extends Debugger {
         if (!fOperands) {
             if (!opNum) sOperation = "";
         } else {
-            sOperation = Str.pad(sOperation, 8);
             if (!opNum) {
-                sOperation += this.toStrWord(opCode);
+                sOperation = Str.pad(sOperation, 8) + this.toStrWord(opCode);
             } else {
+                var n, sOperand;
                 if (opMask == PDP10.OPCODE.OPIO) {
-                    sOperation += this.toStrBase((opCode / PDP10.OPCODE.IO_SCALE) & PDP10.OPCODE.IO_MASK, -1);
+                    n = (opCode / PDP10.OPCODE.IO_SCALE) & PDP10.OPCODE.IO_MASK;
+                    sOperand = this.toStrBase(n, -1);
                 } else {
-                    sOperation += this.toStrBase((opCode >> PDP10.OPCODE.A_SHIFT) & PDP10.OPCODE.A_MASK, -1);
+                    n = (opCode >> PDP10.OPCODE.A_SHIFT) & PDP10.OPCODE.A_MASK;
+                    sOperand = this.toStrBase(n, -1);
+                    if (opNum == DebuggerPDP10.OPS.JFCL) {
+                        var opAlt = DebuggerPDP10.JFCL[n];
+                        if (opAlt) {
+                            sOperation = DebuggerPDP10.OPNAMES[opAlt];
+                            sOperand = "";
+                        }
+                    }
                 }
-                sOperation += ',';
+                sOperation = Str.pad(sOperation, 8) + (sOperand? sOperand + ',' : "");
                 if (opCode & PDP10.OPCODE.I_BIT) sOperation += '@';
                 sOperation += this.toStrBase(opCode & PDP10.OPCODE.Y_MASK, -1);
                 var i = (opCode >> PDP10.OPCODE.X_SHIFT) & PDP10.OPCODE.X_MASK;
@@ -1558,7 +1567,7 @@ class DebuggerPDP10 extends Debugger {
     }
 
     /**
-     * parseInstruction(sOpCode, sOperands, addr)
+     * parseInstruction(sOpCode, sOperands, dbgAddr)
      *
      * @this {DebuggerPDP10}
      * @param {string} sOpCode
@@ -1568,8 +1577,20 @@ class DebuggerPDP10 extends Debugger {
      */
     parseInstruction(sOpCode, sOperands, dbgAddr)
     {
-        var opCode = -1, opMask;
+        var opCode = -1, opMask, opNum;
         var sMnemonic = sOpCode.toUpperCase();
+
+        /*
+         * Perform any alternate mnemonic substitutions first
+         */
+        for (var n in DebuggerPDP10.JFCL) {
+            opNum = DebuggerPDP10.JFCL[n];
+            if (sMnemonic == DebuggerPDP10.OPNAMES[opNum]) {
+                sMnemonic = DebuggerPDP10.OPNAMES[DebuggerPDP10.OPS.JFCL];
+                sOperands = this.toStrBase(+n) + ',' + sOperands;
+                break;
+            }
+        }
 
         for (var mask in DebuggerPDP10.OPTABLE) {
 
@@ -1595,7 +1616,7 @@ class DebuggerPDP10 extends Debugger {
             var opMode = 0;
             for (var op in opMasks) {
 
-                var opNum = opMasks[op];
+                opNum = opMasks[op];
                 for (var iMode = 0; iMode < aModes.length; iMode++) {
 
                     var sMode = aModes[iMode];
@@ -1638,7 +1659,15 @@ class DebuggerPDP10 extends Debugger {
                         opCode = -1;
                         break;
                     }
-                    var operand = this.parseExpression(match[2]);
+                    sOperand = match[2];
+                    if (i) {
+                        /*
+                         * If this is NOT the first operand, then replace all periods NOT preceded
+                         * by a digit with the current address.
+                         */
+                        sOperand = sOperand.replace(/(^|[^0-9])\./g, "$1" + this.toStrAddr(dbgAddr));
+                    }
+                    var operand = this.parseExpression(sOperand);
                     if (operand == undefined) {
                         opCode = -1;
                         break;
@@ -1646,7 +1675,7 @@ class DebuggerPDP10 extends Debugger {
                     if (!i && aOperands.length > 1) {
                         if (opMask == PDP10.OPCODE.OPIO) {
                             if (operand < 0 || operand > PDP10.OPCODE.IO_MASK) {
-                                this.println("device code out of range: " + match[2]);
+                                this.println("device code out of range: " + sOperand);
                                 opCode = -1;
                                 break;
                             }
@@ -1654,7 +1683,7 @@ class DebuggerPDP10 extends Debugger {
                         }
                         else {
                             if (operand < 0 || operand > PDP10.OPCODE.A_MASK) {
-                                this.println("accumulator address out of range: " + match[2]);
+                                this.println("accumulator address out of range: " + sOperand);
                                 opCode = -1;
                                 break;
                             }
@@ -1663,19 +1692,20 @@ class DebuggerPDP10 extends Debugger {
                         continue;
                     }
                     if (operand < 0 || operand > PDP10.OPCODE.Y_MASK) {
-                        this.println("memory address out of range: " + match[2]);
+                        this.println("memory address out of range: " + sOperand);
                         opCode = -1;
                         break;
                     }
                     opCode += operand;
-                    if (match[3]) {
-                        operand = this.parseExpression(match[3]);
+                    sOperand = match[3];
+                    if (sOperand) {
+                        operand = this.parseExpression(sOperand);
                         if (operand == undefined) {
                             opCode = -1;
                             break;
                         }
                         if (operand < 0 || operand > PDP10.OPCODE.X_MASK) {
-                            this.println("memory index out of range: " + match[3]);
+                            this.println("memory index out of range: " + sOperand);
                             opCode = -1;
                             break;
                         }
@@ -2141,7 +2171,7 @@ class DebuggerPDP10 extends Debugger {
      * For now, fMisc defaults to true, providing a full register dump by default.
      *
      * @this {DebuggerPDP10}
-     * @param {boolean} [fMisc] (true to include misc registers)
+     * @param {boolean|undefined} [fMisc] (true to include misc registers)
      * @return {string}
      */
     getRegDump(fMisc = true)
@@ -3821,7 +3851,8 @@ if (DEBUGGER) {
         JSA:    89,     JRA:    90,     PUSHJ:  91,     POPJ:   92,
         BLKI:   93,     DATAI:  94,     BLKO:   95,     DATAO:  96,
         CONO:   97,     CONI:   98,     CONSZ:  99,     CONSO:  100,
-        UUO:    101
+        UUO:    101,    JOV:    102,    JCRY0:  103,    JCRY1:  104,
+        JCRY:   105,    JFOV:   106
     };
 
     /*
@@ -3854,7 +3885,8 @@ if (DEBUGGER) {
         "JSA",          "JRA",          "PUSHJ",        "POPJ",
         "BLKI",         "DATAI",        "BLKO",         "DATAO",
         "CONO",         "CONI",         "CONSZ",        "CONSO",
-        "UUO"
+        "UUO",          "JOV",          "JCRY0",        "JCRY1",
+        "JCRY",         "JFOV"
     ];
 
     DebuggerPDP10.REGS = {
@@ -3997,6 +4029,20 @@ if (DEBUGGER) {
     DebuggerPDP10.OPMODES = ["", "I", "M", "S"];
     DebuggerPDP10.OPCOMPS = ["", "L", "E", "LE", "A", "GE", "N", "G"];
     DebuggerPDP10.OPTESTS = ["N", "NE", "NA", "NN", "Z", "ZE", "ZA", "ZN", "C", "CE", "CA", "CN", "O", "OE", "OA", "ON"];
+
+    /*
+     * Apparently, DEC's MACRO program permits "JFCL xxx" (with a single argument) as an alternate for "JFCL 0,xxx"
+     * (which in turn is long-hand for "No-op", since JFCL with 0 does nothing).  If we allowed JFCL to be both a
+     * primary and a alternate mnemonic, that would complicate our simplistic parseInstruction() logic, so we don't.
+     */
+    DebuggerPDP10.JFCL = {
+    //  0o00:    DebuggerPDP10.OPS.JFCL,
+        0o10:    DebuggerPDP10.OPS.JOV,
+        0o04:    DebuggerPDP10.OPS.JCRY0,
+        0o02:    DebuggerPDP10.OPS.JCRY1,
+        0o06:    DebuggerPDP10.OPS.JCRY,
+        0o01:    DebuggerPDP10.OPS.JFOV
+    };
 
     DebuggerPDP10.HISTORY_LIMIT = DEBUG? 100000 : 1000;
 

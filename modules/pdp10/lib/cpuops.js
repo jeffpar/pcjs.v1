@@ -972,7 +972,7 @@ PDP10.opMOVSS = function(op, acc)
  */
 PDP10.opMOVN = function(op, acc)
 {
-    this.writeWord(acc, this.negate(this.readWord(this.regEA)));
+    this.writeWord(acc, PDP10.doNEG.call(this, this.readWord(this.regEA)));
 };
 
 /**
@@ -1000,7 +1000,7 @@ PDP10.opMOVN = function(op, acc)
 PDP10.opMOVNI = function(op, acc)
 {
     /*
-     * We perform an in-line twos complement of regEA, since negate() updates the flags, and the documentation
+     * We perform an in-line twos complement of regEA, since doNEG() updates the flags, and the documentation
      * above claims that this operation must "set no flags."  It's certainly true that regEA, being an 18-bit value,
      * could never be -2^35, but it COULD be zero -- and apparently this instruction treats zero differently from MOVN.
      *
@@ -1031,7 +1031,7 @@ PDP10.opMOVNI = function(op, acc)
  */
 PDP10.opMOVNM = function(op, acc)
 {
-    this.writeWord(this.regEA, this.negate(this.readWord(acc)));
+    this.writeWord(this.regEA, PDP10.doNEG.call(this, this.readWord(acc)));
 };
 
 /**
@@ -1056,7 +1056,7 @@ PDP10.opMOVNM = function(op, acc)
  */
 PDP10.opMOVNS = function(op, acc)
 {
-    var dst = this.negate(this.readWord(this.regEA));
+    var dst = PDP10.doNEG.call(this, this.readWord(this.regEA));
     this.writeWord(this.regEA, dst);
     if (acc) this.writeWord(acc, dst);
 };
@@ -1083,7 +1083,7 @@ PDP10.opMOVNS = function(op, acc)
  */
 PDP10.opMOVM = function(op, acc)
 {
-    this.writeWord(acc, this.abs(this.readWord(this.regEA)));
+    this.writeWord(acc, PDP10.doABS.call(this, this.readWord(this.regEA)));
 };
 
 /**
@@ -1110,6 +1110,9 @@ PDP10.opMOVM = function(op, acc)
  */
 PDP10.opMOVMI = function(op, acc)
 {
+    /*
+     * Since the src is an 18-bit immediate value, there's no need to call doABS().
+     */
     this.writeWord(acc, this.regEA);
 };
 
@@ -1135,7 +1138,7 @@ PDP10.opMOVMI = function(op, acc)
  */
 PDP10.opMOVMM = function(op, acc)
 {
-    this.writeWord(this.regEA, this.abs(this.readWord(acc)));
+    this.writeWord(this.regEA, PDP10.doABS.call(this, this.readWord(acc)));
 };
 
 /**
@@ -1160,7 +1163,7 @@ PDP10.opMOVMM = function(op, acc)
  */
 PDP10.opMOVMS = function(op, acc)
 {
-    var dst = this.abs(this.readWord(this.regEA));
+    var dst = PDP10.doABS.call(this, this.readWord(this.regEA));
     this.writeWord(this.regEA, dst);
     if (acc) this.writeWord(acc, dst);
 };
@@ -1936,7 +1939,31 @@ PDP10.opJRST = function(op, acc)
 };
 
 /**
- * opJFCL(0o255000)
+ * opJFCL(0o255000): Jump on Flag and Clear
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-57:
+ *
+ *      If any flag specified by F [acc] is set, clear it and take the next instruction from location E,
+ *      continuing sequential operation from there.
+ *
+ *      To select one or a combination of these flags (which are among those described above) the programmer can specify
+ *      the equivalent of an AC address that places 1s in the appropriate bits, but MACRO recognizes mnemonics for some of
+ *      the 13-bit instruction codes (bits 0-12).
+ *
+ *          JFCL        JFCL    0,      No-op                       25500
+ *          JOV         JFCL    10,     Jump on Overflow            25540
+ *          JCRY0       JFCL    4,      Jump on Carry 0             25520
+ *          JCRY1       JFCL    2,      Jump on Carry 1             25510
+ *          JCRY        JFCL    6,      Jump on Carry 0 or 1        25530
+ *          JFOV        JFCL    1,      Jump on Floating Overflow   25504
+ *
+ *      SIDEBAR: This instruction can be used simply to clear the selected flags by having the jump address point to the
+ *      next consecutive location, as in:
+ *
+ *          JFCL 17,.+1
+ *
+ *      which clears all four flags without disrupting the normal program sequence.  A JFCL that selects no flag is the fastest
+ *      no-op as it neither fetches nor stores an operand, and bits 18-35 of the instruction word can be used to store information.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -1944,7 +1971,14 @@ PDP10.opJRST = function(op, acc)
  */
 PDP10.opJFCL = function(op, acc)
 {
-    this.opUndefined(op);
+    /*
+     * The acc (F) bits from the opcode align perfectly with the top 4 bits of regPS; all we have to do is shift acc left 14.
+     */
+    var bitsPS = acc << 14;
+    if (this.regPS & bitsPS) {
+        this.regPS &= ~bitsPS;
+        this.setPC(this.regEA);
+    }
 };
 
 /**
@@ -2078,7 +2112,15 @@ PDP10.opJSR = function(op, acc)
 };
 
 /**
- * opJSP(0o265000)
+ * opJSP(0o265000): Jump and Save PC
+ *
+ *      Place the current contents of the flags (as described above) in AC left and the contents of PC in AC right
+ *      (at this time PC contains an address one greater than the location of the JSP instruction).  Take the next
+ *      instruction from location E and continue sequential operation from there.  The flags are unaffected except
+ *      Byte Interrupt, which is cleared.
+ *
+ *      If this instruction is executed as a result of a priority interrupt or in un-relocated 41 or 61 while the
+ *      processor is in user mode, bit 5 of the PC word stored is 1 and the processor leaves user mode.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2086,7 +2128,8 @@ PDP10.opJSR = function(op, acc)
  */
 PDP10.opJSP = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(acc, this.getPS() + this.getPC());
+    this.setPC(this.regEA);
 };
 
 /**
@@ -5235,6 +5278,27 @@ PDP10.opUndefined = function(op, acc)
 };
 
 /**
+ * doABS(src)
+ *
+ * Used by the MOVM* (Move Magnitude) instructions.
+ *
+ * @this {CPUStatePDP10}
+ * @param {number} src (36-bit)
+ * @return {number} (absolute value of src)
+ */
+PDP10.doABS = function(src)
+{
+    if (src > PDP10.MAX_POS36) {
+        if (src != PDP10.MIN_NEG36) {
+            src = PDP10.TWO_POW36 - src;
+        } else {
+            this.regPS |= (PDP10.PSFLAG.OVFL | PDP10.PSFLAG.CARRY1);
+        }
+    }
+    return src;
+};
+
+/**
  * doADD(dst, src)
  *
  * Used by callers to perform the addition (ADD) of two signed 36-bit operands.
@@ -5429,6 +5493,34 @@ PDP10.doMUL = function(dst, src)
 
     this.regExt = ext;
     return res;
+};
+
+/**
+ * doNEG(src)
+ *
+ * Used by the MOVN* (Move Negative) instructions.
+ *
+ * @this {CPUStatePDP10}
+ * @param {number} src (36-bit)
+ * @return {number} (src negated, but as an unsigned 36-bit result)
+ */
+PDP10.doNEG = function(src)
+{
+    if (!src) {
+        this.regPS |= (PDP10.PSFLAG.CARRY0 | PDP10.PSFLAG.CARRY1);
+    }
+    else {
+        /*
+         * In the non-zero case, it's always safe to subtract src from TWO_POW36, but since we have to check for
+         * the MIN_NEG36 case anyway, and since subtraction in that case doesn't alter src, we skip the subtraction.
+         */
+        if (src == PDP10.MIN_NEG36) {
+            this.regPS |= (PDP10.PSFLAG.OVFL | PDP10.PSFLAG.CARRY1);
+        } else {
+            src = PDP10.TWO_POW36 - src;
+        }
+    }
+    return src;
 };
 
 /**
