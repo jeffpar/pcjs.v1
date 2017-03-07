@@ -2079,7 +2079,17 @@ PDP10.opJRA = function(op, acc)
 };
 
 /**
- * opADD(0o270000)
+ * opADD(0o270000): Add
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-27:
+ *
+ *      Add the operand specified by M to AC and place the result in the specified destination.  If the sum is >= 2^35
+ *      set Overflow and Carry 1; the result stored has a minus sign but a magnitude in positive form equal to the sum less 2^35.
+ *      If the sum is < -2^35 set Overflow and Carry 0; the result stored has a plus sign but a magnitude in negative form equal
+ *      to the sum plus 2^35.  Set both carry flags if both summands are negative, or their signs differ and their magnitudes
+ *      are equal or the positive one is the greater in magnitude.
+ *
+ * NOTE: This is a "Basic" mode instruction: the source is [E] and the destination is [A] (opposite of "Memory").
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2087,11 +2097,21 @@ PDP10.opJRA = function(op, acc)
  */
 PDP10.opADD = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(acc, PDP10.doADD.call(this, this.readWord(acc), this.readWord(this.regEA)));
 };
 
 /**
- * opADDI(0o271000)
+ * opADDI(0o271000): Add Immediate
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-27:
+ *
+ *      Add the operand specified by M to AC and place the result in the specified destination.  If the sum is >= 2^35
+ *      set Overflow and Carry 1; the result stored has a minus sign but a magnitude in positive form equal to the sum less 2^35.
+ *      If the sum is < -2^35 set Overflow and Carry 0; the result stored has a plus sign but a magnitude in negative form equal
+ *      to the sum plus 2^35.  Set both carry flags if both summands are negative, or their signs differ and their magnitudes
+ *      are equal or the positive one is the greater in magnitude.
+ *
+ * NOTE: This is an "Immediate" mode instruction: the source is the word 0,E and the destination is [A].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2099,11 +2119,21 @@ PDP10.opADD = function(op, acc)
  */
 PDP10.opADDI = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(acc, PDP10.doADD.call(this, this.readWord(acc), this.regEA));
 };
 
 /**
- * opADDM(0o272000)
+ * opADDM(0o272000): Add to Memory
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-27:
+ *
+ *      Add the operand specified by M to AC and place the result in the specified destination.  If the sum is >= 2^35
+ *      set Overflow and Carry 1; the result stored has a minus sign but a magnitude in positive form equal to the sum less 2^35.
+ *      If the sum is < -2^35 set Overflow and Carry 0; the result stored has a plus sign but a magnitude in negative form equal
+ *      to the sum plus 2^35.  Set both carry flags if both summands are negative, or their signs differ and their magnitudes
+ *      are equal or the positive one is the greater in magnitude.
+ *
+ * NOTE: This is a "Memory" mode instruction: the source is [E] and the destination is [E] (opposite of "Basic").
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2111,11 +2141,21 @@ PDP10.opADDI = function(op, acc)
  */
 PDP10.opADDM = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(this.regEA, PDP10.doADD.call(this, this.readWord(acc), this.readWord(this.regEA)));
 };
 
 /**
- * opADDB(0o273000)
+ * opADDB(0o273000): Add to Both
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-27:
+ *
+ *      Add the operand specified by M to AC and place the result in the specified destination.  If the sum is >= 2^35
+ *      set Overflow and Carry 1; the result stored has a minus sign but a magnitude in positive form equal to the sum less 2^35.
+ *      If the sum is < -2^35 set Overflow and Carry 0; the result stored has a plus sign but a magnitude in negative form equal
+ *      to the sum plus 2^35.  Set both carry flags if both summands are negative, or their signs differ and their magnitudes
+ *      are equal or the positive one is the greater in magnitude.
+ *
+ * NOTE: This is a "Both" mode instruction: the source is [E] and the destination is [E] and [A].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2123,7 +2163,7 @@ PDP10.opADDM = function(op, acc)
  */
 PDP10.opADDB = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(this.regEA, this.writeWord(acc, PDP10.doADD.call(this, this.readWord(acc), this.readWord(this.regEA))));
 };
 
 /**
@@ -3004,7 +3044,7 @@ PDP10.opSETZB = function(op, acc)
  */
 PDP10.opAND = function(op, acc)
 {
-    this.writeWord(acc, PDP10.doAND(this.readWord(acc), this.readWord(this.regEA)));
+    this.writeWord(acc, PDP10.doAND.call(this, this.readWord(acc), this.readWord(this.regEA)));
 };
 
 /**
@@ -3020,7 +3060,7 @@ PDP10.opAND = function(op, acc)
  */
 PDP10.opANDI = function(op, acc)
 {
-    this.writeWord(acc, PDP10.doAND(this.readWord(acc), this.regEA));
+    this.writeWord(acc, PDP10.doAND.call(this, this.readWord(acc), this.regEA));
 };
 
 /**
@@ -3036,7 +3076,7 @@ PDP10.opANDI = function(op, acc)
  */
 PDP10.opANDM = function(op, acc)
 {
-    this.writeWord(this.regEA, PDP10.doAND(this.readWord(acc), this.readWord(this.regEA)));
+    this.writeWord(this.regEA, PDP10.doAND.call(this, this.readWord(acc), this.readWord(this.regEA)));
 };
 
 /**
@@ -3053,7 +3093,7 @@ PDP10.opANDM = function(op, acc)
  */
 PDP10.opANDB = function(op, acc)
 {
-    this.writeWord(this.regEA, this.writeWord(acc, PDP10.doAND(this.readWord(acc), this.readWord(this.regEA))));
+    this.writeWord(this.regEA, this.writeWord(acc, PDP10.doAND.call(this, this.readWord(acc), this.readWord(this.regEA))));
 };
 
 /**
@@ -3070,7 +3110,7 @@ PDP10.opANDB = function(op, acc)
  */
 PDP10.opANDCA = function(op, acc)
 {
-    this.writeWord(acc, PDP10.doAND(PDP10.WORD_MASK - this.readWord(acc), this.readWord(this.regEA)));
+    this.writeWord(acc, PDP10.doAND.call(this, PDP10.WORD_MASK - this.readWord(acc), this.readWord(this.regEA)));
 };
 
 /**
@@ -3087,7 +3127,7 @@ PDP10.opANDCA = function(op, acc)
  */
 PDP10.opANDCAI = function(op, acc)
 {
-    this.writeWord(acc, PDP10.doAND(PDP10.WORD_MASK - this.readWord(acc), this.regEA));
+    this.writeWord(acc, PDP10.doAND.call(this, PDP10.WORD_MASK - this.readWord(acc), this.regEA));
 };
 
 /**
@@ -3104,7 +3144,7 @@ PDP10.opANDCAI = function(op, acc)
  */
 PDP10.opANDCAM = function(op, acc)
 {
-    this.writeWord(this.regEA, PDP10.doAND(PDP10.WORD_MASK - this.readWord(acc), this.readWord(this.regEA)));
+    this.writeWord(this.regEA, PDP10.doAND.call(this, PDP10.WORD_MASK - this.readWord(acc), this.readWord(this.regEA)));
 };
 
 /**
@@ -3121,7 +3161,7 @@ PDP10.opANDCAM = function(op, acc)
  */
 PDP10.opANDCAB = function(op, acc)
 {
-    this.writeWord(this.regEA, this.writeWord(acc, PDP10.doAND(PDP10.WORD_MASK - this.readWord(acc), this.readWord(this.regEA))));
+    this.writeWord(this.regEA, this.writeWord(acc, PDP10.doAND.call(this, PDP10.WORD_MASK - this.readWord(acc), this.readWord(this.regEA))));
 };
 
 /**
@@ -3138,7 +3178,7 @@ PDP10.opANDCAB = function(op, acc)
  */
 PDP10.opANDCM = function(op, acc)
 {
-    this.writeWord(acc, PDP10.doAND(this.readWord(acc), PDP10.WORD_MASK - this.readWord(this.regEA)));
+    this.writeWord(acc, PDP10.doAND.call(this, this.readWord(acc), PDP10.WORD_MASK - this.readWord(this.regEA)));
 };
 
 /**
@@ -3155,7 +3195,7 @@ PDP10.opANDCM = function(op, acc)
  */
 PDP10.opANDCMI = function(op, acc)
 {
-    this.writeWord(acc, PDP10.doAND(this.readWord(acc), PDP10.WORD_MASK - this.regEA));
+    this.writeWord(acc, PDP10.doAND.call(this, this.readWord(acc), PDP10.WORD_MASK - this.regEA));
 };
 
 /**
@@ -3172,7 +3212,7 @@ PDP10.opANDCMI = function(op, acc)
  */
 PDP10.opANDCMM = function(op, acc)
 {
-    this.writeWord(this.regEA, PDP10.doAND(this.readWord(acc), PDP10.WORD_MASK - this.readWord(this.regEA)));
+    this.writeWord(this.regEA, PDP10.doAND.call(this, this.readWord(acc), PDP10.WORD_MASK - this.readWord(this.regEA)));
 };
 
 /**
@@ -3189,7 +3229,7 @@ PDP10.opANDCMM = function(op, acc)
  */
 PDP10.opANDCMB = function(op, acc)
 {
-    this.writeWord(this.regEA, this.writeWord(acc, PDP10.doAND(this.readWord(acc), PDP10.WORD_MASK - this.readWord(this.regEA))));
+    this.writeWord(this.regEA, this.writeWord(acc, PDP10.doAND.call(this, this.readWord(acc), PDP10.WORD_MASK - this.readWord(this.regEA))));
 };
 
 /**
@@ -3206,7 +3246,7 @@ PDP10.opANDCMB = function(op, acc)
  */
 PDP10.opXOR = function(op, acc)
 {
-    this.writeWord(acc, PDP10.doEOR(this.readWord(acc), this.readWord(this.regEA)));
+    this.writeWord(acc, PDP10.doEOR.call(this, this.readWord(acc), this.readWord(this.regEA)));
 };
 
 /**
@@ -3223,7 +3263,7 @@ PDP10.opXOR = function(op, acc)
  */
 PDP10.opXORI = function(op, acc)
 {
-    this.writeWord(acc, PDP10.doEOR(this.readWord(acc), this.regEA));
+    this.writeWord(acc, PDP10.doEOR.call(this, this.readWord(acc), this.regEA));
 };
 
 /**
@@ -3240,7 +3280,7 @@ PDP10.opXORI = function(op, acc)
  */
 PDP10.opXORM = function(op, acc)
 {
-    this.writeWord(this.regEA, PDP10.doEOR(this.readWord(acc), this.readWord(this.regEA)));
+    this.writeWord(this.regEA, PDP10.doEOR.call(this, this.readWord(acc), this.readWord(this.regEA)));
 };
 
 /**
@@ -3257,7 +3297,7 @@ PDP10.opXORM = function(op, acc)
  */
 PDP10.opXORB = function(op, acc)
 {
-    this.writeWord(this.regEA, this.writeWord(acc, PDP10.doEOR(this.readWord(acc), this.readWord(this.regEA))));
+    this.writeWord(this.regEA, this.writeWord(acc, PDP10.doEOR.call(this, this.readWord(acc), this.readWord(this.regEA))));
 };
 
 /**
@@ -3274,7 +3314,7 @@ PDP10.opXORB = function(op, acc)
  */
 PDP10.opIOR = function(op, acc)
 {
-    this.writeWord(acc, PDP10.doIOR(this.readWord(acc), this.readWord(this.regEA)));
+    this.writeWord(acc, PDP10.doIOR.call(this, this.readWord(acc), this.readWord(this.regEA)));
 };
 
 /**
@@ -3291,7 +3331,7 @@ PDP10.opIOR = function(op, acc)
  */
 PDP10.opIORI = function(op, acc)
 {
-    this.writeWord(acc, PDP10.doIOR(this.readWord(acc), this.regEA));
+    this.writeWord(acc, PDP10.doIOR.call(this, this.readWord(acc), this.regEA));
 };
 
 /**
@@ -3308,7 +3348,7 @@ PDP10.opIORI = function(op, acc)
  */
 PDP10.opIORM = function(op, acc)
 {
-    this.writeWord(this.regEA, PDP10.doIOR(this.readWord(acc), this.readWord(this.regEA)));
+    this.writeWord(this.regEA, PDP10.doIOR.call(this, this.readWord(acc), this.readWord(this.regEA)));
 };
 
 /**
@@ -3325,7 +3365,7 @@ PDP10.opIORM = function(op, acc)
  */
 PDP10.opIORB = function(op, acc)
 {
-    this.writeWord(this.regEA, this.writeWord(acc, PDP10.doIOR(this.readWord(acc), this.readWord(this.regEA))));
+    this.writeWord(this.regEA, this.writeWord(acc, PDP10.doIOR.call(this, this.readWord(acc), this.readWord(this.regEA))));
 };
 
 /**
@@ -3342,7 +3382,7 @@ PDP10.opIORB = function(op, acc)
  */
 PDP10.opANDCB = function(op, acc)
 {
-    this.writeWord(acc, PDP10.doAND(PDP10.WORD_MASK - this.readWord(acc), PDP10.WORD_MASK - this.readWord(this.regEA)));
+    this.writeWord(acc, PDP10.doAND.call(this, PDP10.WORD_MASK - this.readWord(acc), PDP10.WORD_MASK - this.readWord(this.regEA)));
 };
 
 /**
@@ -3359,7 +3399,7 @@ PDP10.opANDCB = function(op, acc)
  */
 PDP10.opANDCBI = function(op, acc)
 {
-    this.writeWord(acc, PDP10.doAND(PDP10.WORD_MASK - this.readWord(acc), PDP10.WORD_MASK - this.regEA));
+    this.writeWord(acc, PDP10.doAND.call(this, PDP10.WORD_MASK - this.readWord(acc), PDP10.WORD_MASK - this.regEA));
 };
 
 /**
@@ -3376,7 +3416,7 @@ PDP10.opANDCBI = function(op, acc)
  */
 PDP10.opANDCBM = function(op, acc)
 {
-    this.writeWord(this.regEA, PDP10.doAND(PDP10.WORD_MASK - this.readWord(acc), PDP10.WORD_MASK - this.readWord(this.regEA)));
+    this.writeWord(this.regEA, PDP10.doAND.call(this, PDP10.WORD_MASK - this.readWord(acc), PDP10.WORD_MASK - this.readWord(this.regEA)));
 };
 
 /**
@@ -3393,7 +3433,7 @@ PDP10.opANDCBM = function(op, acc)
  */
 PDP10.opANDCBB = function(op, acc)
 {
-    this.writeWord(this.regEA, this.writeWord(acc, PDP10.doAND(PDP10.WORD_MASK - this.readWord(acc), PDP10.WORD_MASK - this.readWord(this.regEA))));
+    this.writeWord(this.regEA, this.writeWord(acc, PDP10.doAND.call(this, PDP10.WORD_MASK - this.readWord(acc), PDP10.WORD_MASK - this.readWord(this.regEA))));
 };
 
 /**
@@ -3410,7 +3450,7 @@ PDP10.opANDCBB = function(op, acc)
  */
 PDP10.opEQV = function(op, acc)
 {
-    this.writeWord(acc, PDP10.doEQV(this.readWord(acc), this.readWord(this.regEA)));
+    this.writeWord(acc, PDP10.doEQV.call(this, this.readWord(acc), this.readWord(this.regEA)));
 };
 
 /**
@@ -3427,7 +3467,7 @@ PDP10.opEQV = function(op, acc)
  */
 PDP10.opEQVI = function(op, acc)
 {
-    this.writeWord(acc, PDP10.doEQV(this.readWord(acc), this.regEA));
+    this.writeWord(acc, PDP10.doEQV.call(this, this.readWord(acc), this.regEA));
 };
 
 /**
@@ -3444,7 +3484,7 @@ PDP10.opEQVI = function(op, acc)
  */
 PDP10.opEQVM = function(op, acc)
 {
-    this.writeWord(this.regEA, PDP10.doEQV(this.readWord(acc), this.readWord(this.regEA)));
+    this.writeWord(this.regEA, PDP10.doEQV.call(this, this.readWord(acc), this.readWord(this.regEA)));
 };
 
 /**
@@ -3461,7 +3501,7 @@ PDP10.opEQVM = function(op, acc)
  */
 PDP10.opEQVB = function(op, acc)
 {
-    this.writeWord(this.regEA, this.writeWord(acc, PDP10.doEQV(this.readWord(acc), this.readWord(this.regEA))));
+    this.writeWord(this.regEA, this.writeWord(acc, PDP10.doEQV.call(this, this.readWord(acc), this.readWord(this.regEA))));
 };
 
 /**
@@ -3527,7 +3567,7 @@ PDP10.opSETCAB = function(op, acc)
  */
 PDP10.opORCA = function(op, acc)
 {
-    this.writeWord(acc, PDP10.doIOR(PDP10.WORD_MASK - this.readWord(acc), this.readWord(this.regEA)));
+    this.writeWord(acc, PDP10.doIOR.call(this, PDP10.WORD_MASK - this.readWord(acc), this.readWord(this.regEA)));
 };
 
 /**
@@ -3544,7 +3584,7 @@ PDP10.opORCA = function(op, acc)
  */
 PDP10.opORCAI = function(op, acc)
 {
-    this.writeWord(acc, PDP10.doIOR(PDP10.WORD_MASK - this.readWord(acc), this.regEA));
+    this.writeWord(acc, PDP10.doIOR.call(this, PDP10.WORD_MASK - this.readWord(acc), this.regEA));
 };
 
 /**
@@ -3561,7 +3601,7 @@ PDP10.opORCAI = function(op, acc)
  */
 PDP10.opORCAM = function(op, acc)
 {
-    this.writeWord(this.regEA, PDP10.doIOR(PDP10.WORD_MASK - this.readWord(acc), this.readWord(this.regEA)));
+    this.writeWord(this.regEA, PDP10.doIOR.call(this, PDP10.WORD_MASK - this.readWord(acc), this.readWord(this.regEA)));
 };
 
 /**
@@ -3578,7 +3618,7 @@ PDP10.opORCAM = function(op, acc)
  */
 PDP10.opORCAB = function(op, acc)
 {
-    this.writeWord(this.regEA, this.writeWord(acc, PDP10.doIOR(PDP10.WORD_MASK - this.readWord(acc), this.readWord(this.regEA))));
+    this.writeWord(this.regEA, this.writeWord(acc, PDP10.doIOR.call(this, PDP10.WORD_MASK - this.readWord(acc), this.readWord(this.regEA))));
 };
 
 /**
@@ -3663,7 +3703,7 @@ PDP10.opSETCMB = function(op, acc)
  */
 PDP10.opORCM = function(op, acc)
 {
-    this.writeWord(acc, PDP10.doIOR(this.readWord(acc), PDP10.WORD_MASK - this.readWord(this.regEA)));
+    this.writeWord(acc, PDP10.doIOR.call(this, this.readWord(acc), PDP10.WORD_MASK - this.readWord(this.regEA)));
 };
 
 /**
@@ -3680,7 +3720,7 @@ PDP10.opORCM = function(op, acc)
  */
 PDP10.opORCMI = function(op, acc)
 {
-    this.writeWord(acc, PDP10.doIOR(this.readWord(acc), PDP10.WORD_MASK - this.regEA));
+    this.writeWord(acc, PDP10.doIOR.call(this, this.readWord(acc), PDP10.WORD_MASK - this.regEA));
 };
 
 /**
@@ -3697,7 +3737,7 @@ PDP10.opORCMI = function(op, acc)
  */
 PDP10.opORCMM = function(op, acc)
 {
-    this.writeWord(this.regEA, PDP10.doIOR(this.readWord(acc), PDP10.WORD_MASK - this.readWord(this.regEA)));
+    this.writeWord(this.regEA, PDP10.doIOR.call(this, this.readWord(acc), PDP10.WORD_MASK - this.readWord(this.regEA)));
 };
 
 /**
@@ -3714,7 +3754,7 @@ PDP10.opORCMM = function(op, acc)
  */
 PDP10.opORCMB = function(op, acc)
 {
-    this.writeWord(this.regEA, this.writeWord(acc, PDP10.doIOR(this.readWord(acc), PDP10.WORD_MASK - this.readWord(this.regEA))));
+    this.writeWord(this.regEA, this.writeWord(acc, PDP10.doIOR.call(this, this.readWord(acc), PDP10.WORD_MASK - this.readWord(this.regEA))));
 };
 
 /**
@@ -3731,7 +3771,7 @@ PDP10.opORCMB = function(op, acc)
  */
 PDP10.opORCB = function(op, acc)
 {
-    this.writeWord(acc, PDP10.doIOR(PDP10.WORD_MASK - this.readWord(acc), PDP10.WORD_MASK - this.readWord(this.regEA)));
+    this.writeWord(acc, PDP10.doIOR.call(this, PDP10.WORD_MASK - this.readWord(acc), PDP10.WORD_MASK - this.readWord(this.regEA)));
 };
 
 /**
@@ -3748,7 +3788,7 @@ PDP10.opORCB = function(op, acc)
  */
 PDP10.opORCBI = function(op, acc)
 {
-    this.writeWord(acc, PDP10.doIOR(PDP10.WORD_MASK - this.readWord(acc), PDP10.WORD_MASK - this.regEA));
+    this.writeWord(acc, PDP10.doIOR.call(this, PDP10.WORD_MASK - this.readWord(acc), PDP10.WORD_MASK - this.regEA));
 };
 
 /**
@@ -3765,7 +3805,7 @@ PDP10.opORCBI = function(op, acc)
  */
 PDP10.opORCBM = function(op, acc)
 {
-    this.writeWord(this.regEA, PDP10.doIOR(PDP10.WORD_MASK - this.readWord(acc), PDP10.WORD_MASK - this.readWord(this.regEA)));
+    this.writeWord(this.regEA, PDP10.doIOR.call(this, PDP10.WORD_MASK - this.readWord(acc), PDP10.WORD_MASK - this.readWord(this.regEA)));
 };
 
 /**
@@ -3782,7 +3822,7 @@ PDP10.opORCBM = function(op, acc)
  */
 PDP10.opORCBB = function(op, acc)
 {
-    this.writeWord(this.regEA, this.writeWord(acc, PDP10.doIOR(PDP10.WORD_MASK - this.readWord(acc), PDP10.WORD_MASK - this.readWord(this.regEA))));
+    this.writeWord(this.regEA, this.writeWord(acc, PDP10.doIOR.call(this, PDP10.WORD_MASK - this.readWord(acc), PDP10.WORD_MASK - this.readWord(this.regEA))));
 };
 
 /**
@@ -5120,6 +5160,126 @@ PDP10.opUndefined = function(op, acc)
 };
 
 /**
+ * doADD(dst, src)
+ *
+ * Used by callers to perform the addition (ADD) of two signed 36-bit operands.
+ *
+ * @this {CPUStatePDP10}
+ * @param {number} dst (36-bit value)
+ * @param {number} src (36-bit value)
+ * @return {number} (dst + src)
+ */
+PDP10.doADD = function(dst, src)
+{
+    var res = (dst + src) % PDP10.WORD_LIMIT;
+    var dst01 = Math.trunc(dst / PDP10.TWO_POW34);
+    var src01 = Math.trunc(src / PDP10.TWO_POW34);
+    var res01 = Math.trunc(res / PDP10.TWO_POW34);
+    var bitsCarry = (dst01 ^ ((dst01 ^ src01) & (src01 ^ res01)));
+    var fCarry0 = bitsCarry & 0b10;
+    var fCarry1 = bitsCarry & 0b01;
+    var fOverflow = ((dst01 ^ res01) & (src01 ^ res01)) & 0b10;
+    this.regPS |= (fCarry0? PDP10.PSFLAG.CARRY0 : 0) | (fCarry1? PDP10.PSFLAG.CARRY1 : 0) | (fOverflow? PDP10.PSFLAG.OVFL : 0);
+    return res;
+};
+
+/**
+ * doAND(dst, src)
+ *
+ * Used by callers to perform the logical "and" (AND) of two 36-bit operands.
+ *
+ * @this {CPUStatePDP10}
+ * @param {number} dst (36-bit value)
+ * @param {number} src (36-bit value)
+ * @return {number} (dst & src)
+ */
+PDP10.doAND = function(dst, src)
+{
+    /*
+     * Since dst and src are 36-bit values, we must AND the low 32 bits separately from the higher bits,
+     * and then combine them with addition.  Since all bits above 36 will be zero, and since 0 AND 0 is 0,
+     * no special masking for the higher bits is required.
+     *
+     * WARNING: When using JavaScript's 32-bit operators with values that could set bit 31 and produce a
+     * negative value, it's critical to perform a final right-shift of 0, ensuring that the final result is
+     * positive.
+     */
+    return ((((dst / PDP10.TWO_POW32)|0) & ((src / PDP10.TWO_POW32)|0)) * PDP10.TWO_POW32) + ((dst & src) >>> 0);
+};
+
+/**
+ * doEOR(dst, src)
+ *
+ * Used by callers to perform the logical "exclusive-or" (XOR) of two 36-bit operands.
+ *
+ * @this {CPUStatePDP10}
+ * @param {number} dst (36-bit value)
+ * @param {number} src (36-bit value)
+ * @return {number} (dst ^ src)
+ */
+PDP10.doEOR = function(dst, src)
+{
+    /*
+     * Since dst and src are 36-bit values, we must XOR the low 32 bits separately from the higher bits,
+     * and then combine them with addition.  Since all bits above 36 will be zero, and since 0 XOR 0 is 0,
+     * no special masking for the higher bits is required.
+     *
+     * WARNING: When using JavaScript's 32-bit operators with values that could set bit 31 and produce a
+     * negative value, it's critical to perform a final right-shift of 0, ensuring that the final result is
+     * positive.
+     */
+    return ((((dst / PDP10.TWO_POW32)|0) ^ ((src / PDP10.TWO_POW32)|0)) * PDP10.TWO_POW32) + ((dst ^ src) >>> 0);
+};
+
+/**
+ * doEQV(dst, src)
+ *
+ * Used by callers to perform the logical "equivalence" (EQV) of two 36-bit operands.
+ *
+ * @this {CPUStatePDP10}
+ * @param {number} dst (36-bit value)
+ * @param {number} src (36-bit value)
+ * @return {number} (~(dst ^ src))
+ */
+PDP10.doEQV = function(dst, src)
+{
+    /*
+     * Since dst and src are 36-bit values, we must EQV the low 32 bits separately from the higher bits,
+     * and then combine them with addition.  Since all bits above 36 will be zero, and since 0 EQV 0 is 1,
+     * we must mask the higher 4 bits with 0o17.
+     *
+     * WARNING: When using JavaScript's 32-bit operators with values that could set bit 31 and produce a
+     * negative value, it's critical to perform a final right-shift of 0, ensuring that the final result is
+     * positive.
+     */
+    return ((~(((dst / PDP10.TWO_POW32)|0) ^ ((src / PDP10.TWO_POW32)|0)) & 0o17) * PDP10.TWO_POW32) + (~(dst ^ src) >>> 0);
+};
+
+/**
+ * doIOR(dst, src)
+ *
+ * Used by callers to perform the logical "inclusive-or" (OR) of two 36-bit operands.
+ *
+ * @this {CPUStatePDP10}
+ * @param {number} dst (36-bit value)
+ * @param {number} src (36-bit value)
+ * @return {number} (dst | src)
+ */
+PDP10.doIOR = function(dst, src)
+{
+    /*
+     * Since dst and src are 36-bit values, we must OR the low 32 bits separately from the higher bits,
+     * and then combine them with addition.  Since all bits above 36 will be zero, and since 0 OR 0 is 0,
+     * no special masking for the higher bits is required.
+     *
+     * WARNING: When using JavaScript's 32-bit operators with values that could set bit 31 and produce a
+     * negative value, it's critical to perform a final right-shift of 0, ensuring that the final result is
+     * positive.
+     */
+    return ((((dst / PDP10.TWO_POW32)|0) | ((src / PDP10.TWO_POW32)|0)) * PDP10.TWO_POW32) + ((dst | src) >>> 0);
+};
+
+/**
  * getHL(op, dst, src)
  *
  * Used by callers to obtain HL (half-word left) with HR (half-word right) zeroed.
@@ -5227,98 +5387,6 @@ PDP10.setHR = function(op, dst, src)
         }
     }
     return dst;
-};
-
-/**
- * doAND(dst, src)
- *
- * Used by callers to perform the logical "and" (AND) of two 36-bit operands.
- *
- * @param {number} dst (36-bit value)
- * @param {number} src (36-bit value)
- * @return {number} (dst & src)
- */
-PDP10.doAND = function(dst, src)
-{
-    /*
-     * Since dst and src are 36-bit values, we must AND the low 32 bits separately from the higher bits,
-     * and then combine them with addition.  Since all bits above 36 will be zero, and since 0 AND 0 is 0,
-     * no special masking for the higher bits is required.
-     *
-     * WARNING: When using JavaScript's 32-bit operators with values that could set bit 31 and produce a
-     * negative value, it's critical to perform a final right-shift of 0, ensuring that the final result is
-     * positive.
-     */
-    return ((((dst / PDP10.TWO_POW32)|0) & ((src / PDP10.TWO_POW32)|0)) * PDP10.TWO_POW32) + ((dst & src) >>> 0);
-};
-
-/**
- * doEOR(dst, src)
- *
- * Used by callers to perform the logical "exclusive-or" (XOR) of two 36-bit operands.
- *
- * @param {number} dst (36-bit value)
- * @param {number} src (36-bit value)
- * @return {number} (dst ^ src)
- */
-PDP10.doEOR = function(dst, src)
-{
-    /*
-     * Since dst and src are 36-bit values, we must XOR the low 32 bits separately from the higher bits,
-     * and then combine them with addition.  Since all bits above 36 will be zero, and since 0 XOR 0 is 0,
-     * no special masking for the higher bits is required.
-     *
-     * WARNING: When using JavaScript's 32-bit operators with values that could set bit 31 and produce a
-     * negative value, it's critical to perform a final right-shift of 0, ensuring that the final result is
-     * positive.
-     */
-    return ((((dst / PDP10.TWO_POW32)|0) ^ ((src / PDP10.TWO_POW32)|0)) * PDP10.TWO_POW32) + ((dst ^ src) >>> 0);
-};
-
-/**
- * doEQV(dst, src)
- *
- * Used by callers to perform the logical "equivalence" (EQV) of two 36-bit operands.
- *
- * @param {number} dst (36-bit value)
- * @param {number} src (36-bit value)
- * @return {number} (~(dst ^ src))
- */
-PDP10.doEQV = function(dst, src)
-{
-    /*
-     * Since dst and src are 36-bit values, we must EQV the low 32 bits separately from the higher bits,
-     * and then combine them with addition.  Since all bits above 36 will be zero, and since 0 EQV 0 is 1,
-     * we must mask the higher 4 bits with 0o17.
-     *
-     * WARNING: When using JavaScript's 32-bit operators with values that could set bit 31 and produce a
-     * negative value, it's critical to perform a final right-shift of 0, ensuring that the final result is
-     * positive.
-     */
-    return ((~(((dst / PDP10.TWO_POW32)|0) ^ ((src / PDP10.TWO_POW32)|0)) & 0o17) * PDP10.TWO_POW32) + (~(dst ^ src) >>> 0);
-};
-
-/**
- * doIOR(dst, src)
- *
- * Used by callers to perform the logical "inclusive-or" (OR) of two 36-bit operands.
- *
- * @param {number} dst (36-bit value)
- * @param {number} src (36-bit value)
- * @return {number} (dst | src)
- */
-PDP10.doIOR = function(dst, src)
-{
-    /*
-     * Since dst and src are 36-bit values, we must OR the low 32 bits separately from the higher bits,
-     * and then combine them with addition.  Since all bits above 36 will be zero, and since 0 OR 0 is 0,
-     * no special masking for the higher bits is required.
-     *
-     * WARNING: When using JavaScript's 32-bit operators with values that could set bit 31 and produce a
-     * negative value, it's critical to perform a final right-shift of 0, ensuring that the final result is
-     * positive.
-     */
-    return ((((dst / PDP10.TWO_POW32)|0) | ((src / PDP10.TWO_POW32)|0)) * PDP10.TWO_POW32) + ((dst | src) >>> 0);
 };
 
 /*

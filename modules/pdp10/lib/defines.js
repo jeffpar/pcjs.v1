@@ -122,6 +122,7 @@ var PDP10 = {
     MIN_NEG36:      Math.pow(2, 35),            // -34,359,738,368   (400000 000000)
 
     TWO_POW36:      Math.pow(2, 36),            // the two's complement of a 36-bit value is (value? TWO_POW36 - value : 0)
+    TWO_POW34:      Math.pow(2, 34),
     TWO_POW32:      Math.pow(2, 32),
 
     /*

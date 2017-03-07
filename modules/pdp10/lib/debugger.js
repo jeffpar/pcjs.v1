@@ -895,6 +895,48 @@ class DebuggerPDP10 extends Debugger {
     }
 
     /**
+     * setRegValue(iReg, value)
+     *
+     * @this {DebuggerPDP10}
+     * @param {number} iReg
+     * @param {number} value
+     */
+    setRegValue(iReg, value)
+    {
+        var flag = 0;
+        var cpu = this.cpu;
+
+        switch(iReg) {
+        case DebuggerPDP10.REGS.PC:
+            cpu.setPC(value);
+            this.setAddr(this.dbgAddrCode, cpu.getPC());
+            break;
+        case DebuggerPDP10.REGS.C0:
+            flag = PDP10.PSFLAG.CARRY0;
+            break;
+        case DebuggerPDP10.REGS.C1:
+            flag = PDP10.PSFLAG.CARRY1;
+            break;
+        case DebuggerPDP10.REGS.OV:
+            flag = PDP10.PSFLAG.OVFL;
+            break;
+        case DebuggerPDP10.REGS.ND:
+            flag = PDP10.PSFLAG.NO_DIVIDE;
+            break;
+        case DebuggerPDP10.REGS.PD:
+            flag = PDP10.PSFLAG.PD_OVFL;
+            break;
+        }
+        if (flag) {
+            if (value) {
+                cpu.regPS |= flag;
+            } else {
+                cpu.regPS &= ~flag;
+            }
+        }
+    }
+
+    /**
      * replaceRegs(s)
      *
      * TODO: Implement or eliminate.
@@ -3068,19 +3110,17 @@ class DebuggerPDP10 extends Debugger {
                     return;
                 }
 
-                var w = this.parseExpression(sValue);
-                if (w === undefined) return;
+                var value = this.parseExpression(sValue);
+                if (value === undefined) return;
 
-                var sRegMatch = sReg.toUpperCase();
-                switch (sRegMatch) {
-                case "PC":
-                    cpu.setPC(w);
-                    this.setAddr(this.dbgAddrCode, cpu.getPC());
-                    break;
-                default:
+                var iReg = this.getRegIndex(sReg);
+                if (iReg < 0) {
                     this.println("unknown register: " + sReg);
                     return;
                 }
+
+                this.setRegValue(iReg, value);
+
                 this.cmp.updateDisplays();
                 this.println("updated registers:");
             }

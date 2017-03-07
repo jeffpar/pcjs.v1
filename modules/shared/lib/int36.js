@@ -421,7 +421,7 @@ class Int36 {
             if ((result > Int36.MAX_POS36) != (this.value > Int36.MAX_POS36)) {
                 var delta = result - this.value;
                 if (Math.abs(delta) <= Int36.MAX_POS36) {
-                    this.error |= (delta > 0 ? Int36.ERROR.OVERFLOW : Int36.ERROR.UNDERFLOW);
+                    this.error |= (delta > 0? Int36.ERROR.OVERFLOW : Int36.ERROR.UNDERFLOW);
                     if (DEBUG && (delta > 0) != !(e & v)) e = 0;
                 }
             }
