@@ -60,7 +60,6 @@
     negating any positive number (its octal representation is 400000 000000 and its magnitude is one greater
     than the largest positive number).
 
-
     If ones complements were used for negatives one could read a negative number by attaching significance
     to the as instead of the 1s.  In twos complement notation each negative number is one greater than the
     complement of the positive number of the same magnitude, so one can read a negative number by attaching
@@ -138,10 +137,6 @@
  * be set to null by any other operation.
  *
  * The 'error' property records any error(s) from the last operation.
- *
- * NOTE: What we call extended Int36 values DEC refers to as "double length numbers", and they refer
- * to the 'extended' portion as the "low order part" and the 'value' portion as the "high order part",
- * presumably because they number the left-most significant bit 0.
  */
 class Int36 {
     /**
@@ -1071,21 +1066,6 @@ class Int36 {
      * reduce()
      *
      * Unsets extended if it's superfluous; opposite of extend().
-     *
-     * It's worth noting DEC's SIDEBAR comment (from above):
-     *
-     *      Multiplication produces a double length product, and the programmer must remember that discarding
-     *      the low order part ['extended'] of a double length negative leaves the high order part ['value'] in
-     *      correct twos complement form only if the low order part ['extended'] is null [zero].
-     *
-     * is not applicable when we're using 71-bit magnitude values; for example, when value is MIN_NEG36 and
-     * extended is ZERO, we interpret that extended value as 34,359,738,368; we cannot simply eliminate the
-     * extended portion, otherwise value would be interpreted as -34,359,738,368.
-     *
-     * DEC can say that because each of the words in a PDP-10 double-length product contains its own sign bit,
-     * resulting in only 70 bits of magnitude.  However, we don't store our extended (double-length) results that
-     * way, unless setMagnitude(70) has been called, so be aware of these mismatches in both terminology and
-     * format when converting an Int36 to/from PDP-10 registers/memory.
      *
      * @this {Int36}
      */

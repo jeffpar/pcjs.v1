@@ -33,6 +33,92 @@ if (NODE) {
     var PDP10 = require("./defines");
 }
 
+/*
+    From the "PDP-10 System Reference Manual", May 1968, p. 1-4:
+
+    1.1 NUMBER SYSTEM
+
+    The program can interpret a data word as a 36-digit, unsigned binary number, or the left and right
+    halves of a word can be taken as separate 18-bit numbers.  The PDP-10 repertoire includes instructions
+    that effectively add or subtract one from both halves of a word, so the right half can be used for
+    address modification when the word is addressed as an index register, while the left half is used to
+    keep a control count.
+
+    The standard arithmetic instructions in the PDP-10 use twos complement, fixed point conventions to do
+    binary arithmetic.  In a word used as a number, bit 0 (the leftmost bit) represents the sign, 0 for positive,
+    1 for negative.  In a positive number the remaining 35 bits are the magnitude in ordinary binary notation.
+    The negative of a number is obtained by taking its twos complement. If x is an n-digit binary number, its
+    twos complement is 2^n - x, and its ones complement is (2^n - 1) - x, or equivalently (2^n - x) - 1.
+
+    Subtracting a number from 2^n - 1 (ie, from all 1s) is equivalent to performing the logical complement,
+    ie changing all 0s to 1s and all 1s to 0s.  Therefore, to form the twos complement one takes the logical
+    complement (usually referred to merely as the complement) of the entire word including the sign, and adds
+    1 to the result.  In a negative number the sign bit is 1, and the remaining bits are the twos complement
+    of the magnitude.
+
+    Zero is represented by a word containing all 0s.  Complementing this number produces all 1s, and adding
+    1 to that produces all 0s again.  Hence there is only one zero representation and its sign is positive.
+    Since the numbers are symmetrical in magnitude about a single zero representation, all even numbers both
+    positive and negative end in 0, all odd numbers in 1 (a number all 1s represents -1).  But since there are
+    the same number of positive and negative numbers and zero is positive, there is one more negative number
+    than there are nonzero positive numbers.  This is the most negative number and it cannot be produced by
+    negating any positive number (its octal representation is 400000 000000 and its magnitude is one greater
+    than the largest positive number).
+
+    If ones complements were used for negatives one could read a negative number by attaching significance
+    to the as instead of the 1s.  In twos complement notation each negative number is one greater than the
+    complement of the positive number of the same magnitude, so one can read a negative number by attaching
+    significance to the rightmost 1 and attaching significance to the 0s at the left of it (the negative number
+    of largest magnitude has a 1 in only the sign position).  In a negative integer, 1s may be discarded at the
+    left, just as leading 0s may be dropped in a positive integer.  In a negative fraction, 0s may be discarded
+    at the right.  So long as only 0s are discarded, the number remains in twos complement form because it
+    still has a 1 that possesses significance; but if a portion including the rightmost 1 is discarded, the
+    remaining part of the fraction is now a ones complement.
+
+    The computer does not keep track of a binary point - the programmer must adopt a point convention and shift
+    the magnitude of the result to conform to the convention used.  Two common conventions are to regard a number
+    as an integer (binary point at the right) or as a proper fraction (binary point at the left); in these two
+    cases the range of numbers represented by a single word is -2^35 to 2^35 - 1, or -1 to 1 - 2^35.  Since
+    multiplication and division make use of double length numbers, there are special instructions for performing
+    these operations with integral operands.
+
+    SIDEBAR: Multiplication produces a double length product, and the programmer must remember that discarding
+    the low order part of a double length negative leaves the high order part in correct twos complement form
+    only if the low order part is null.
+
+    ...
+
+    2.5 FIXED POINT ARITHMETIC
+
+    For fixed point arithmetic the PDP-10 has instructions for arithmetic shifting (which is essentially
+    multiplication by a power of 2) as well as for performing addition, subtraction, multiplication and division
+    of numbers in fixed point format [§ 1.1].  In such numbers the position of the binary point is arbitrary
+    (the programmer may adopt any point convention).  The add and subtract instructions involve only single length
+    numbers, whereas multiply supplies a double length product, and divide uses a double length dividend.  The high
+    and low order words respectively of a double length fixed point number are in accumulators A and A+1 (mod 20),
+    where the magnitude is the 70-bit string in bits 1-35 of the two words and the signs of the two are identical.
+    There are also integer multiply and divide instructions that involve only single length numbers and are
+    especially suited for handling smaller integers, particularly those of eighteen bits or less such as addresses
+    (of course they can be used for small fractions as well provided the programmer keeps track of the binary point).
+    For convenience in the following, all operands are assumed to be integers (binary point at the right).
+
+    The processor has four flags, Overflow, Carry 0, Carry 1 and No Divide, that indicate when the magnitude of a
+    number is or would be larger than can be accommodated.  Carry 0 and Carry 1 actually detect carries out of bits
+    0 and 1 in certain instructions that employ fixed point arithmetic operations: the add and subtract instructions
+    treated here, the move instructions that produce the negative or magnitude of the word moved [§ 2.2], and the
+    arithmetic test instructions that increment or decrement the test word [§ 2.7].  In these instructions an
+    incorrect result is indicated - and the Overflow flag set - if the carries are different, ie if there is a carry
+    into the sign but not out of it, or vice versa.  The Overflow flag is also set by No Divide being set, which
+    means the processor has failed to perform a division because the magnitude of the dividend is greater than or
+    equal to that of the divisor, or in integer divide, simply that the divisor is zero.  In other overflow cases
+    only Overflow itself is set: these include too large a product in multiplication, and loss of significant bits
+    in left arithmetic shifting.
+
+    SIDEBAR: Overflow is determined directly from the carries, not from the carry flags, as their states may reflect
+    events in previous instructions.
+
+ */
+
 /**
  * opKA10(op)
  *
@@ -5315,6 +5401,7 @@ PDP10.doADD = function(dst, src)
      * only possible out-of-bounds value is a result >= WORD_LIMIT, which the mod cures.
      */
     var res = (dst + src) % PDP10.WORD_LIMIT;
+    //noinspection JSUnresolvedFunction
     PDP10.setAddFlags.call(this, dst, src, res);
     return res;
 };
@@ -5423,7 +5510,7 @@ PDP10.doIOR = function(dst, src)
  * @this {CPUStatePDP10}
  * @param {number} dst (36-bit value)
  * @param {number} src (36-bit value)
- * @return {number} (dst * src) (the low 36 bits of the result; the high 36 bits are stored in regExt)
+ * @return {number} (dst * src) (the high 36 bits of the result; the low 36 bits are stored in regExt)
  */
 PDP10.doMUL = function(dst, src)
 {
@@ -5491,8 +5578,8 @@ PDP10.doMUL = function(dst, src)
         this.regPS |= PDP10.PSFLAG.OVFL;
     }
 
-    this.regExt = ext;
-    return res;
+    this.regExt = res;
+    return ext;
 };
 
 /**
@@ -5545,6 +5632,7 @@ PDP10.doSUB = function(dst, src)
      * We can leverage setAddFlags() by treating the subtraction as addition;
      * since res = dst - src, it is also true that dst = res + src.
      */
+    //noinspection JSUnresolvedFunction
     PDP10.setAddFlags.call(this, res, src, dst);
     return res;
 };
