@@ -459,7 +459,6 @@ PDP10.opDPB = function(op, acc)
     if (this.regBP < 0) {
         this.regBP = w;
         this.regRA = this.regEA | PDP10.OPCODE.I_BIT;
-        this.advancePC(-1);
         return;
     }
     var p = (this.regBP / PDP10.OPCODE.P_SCALE) & PDP10.OPCODE.P_MASK;
@@ -1080,13 +1079,14 @@ PDP10.opMOVN = function(op, acc)
 PDP10.opMOVNI = function(op, acc)
 {
     /*
-     * We perform an in-line twos complement of regEA, since doNEG() updates the flags, and the documentation
-     * above claims that this operation must "set no flags."  It's certainly true that regEA, being an 18-bit value,
-     * could never be -2^35, but it COULD be zero -- and apparently this instruction treats zero differently from MOVN.
+     * We used to perform an in-line two's complement of regEA, since doNEG() updates the flags, and the
+     * documentation above claimed that MOVNI must "set no flags."  It's certainly true that regEA, being an
+     * 18-bit value, could never be -2^35, but it COULD be zero.  However, SIMH doesn't treat zero any
+     * differently for MOVNI, so we currently don't either.
      *
-     * TODO: Verify the "set no flags" assertion.
+     * TODO: Verify the "set no flags" assertion on *real* (KA10) hardware.
      */
-    this.writeWord(acc, this.regEA? PDP10.TWO_POW36 - this.regEA : 0);
+    this.writeWord(acc, PDP10.doNEG.call(this, this.regEA) /* this.regEA? PDP10.TWO_POW36 - this.regEA : 0 */);
 };
 
 /**
@@ -1190,10 +1190,7 @@ PDP10.opMOVM = function(op, acc)
  */
 PDP10.opMOVMI = function(op, acc)
 {
-    /*
-     * Since the src is an 18-bit immediate value, there's no need to call doABS().
-     */
-    this.writeWord(acc, this.regEA);
+    this.writeWord(acc, this.regEA);    // src is an 18-bit immediate value, so there's no need to call doABS()
 };
 
 /**
@@ -1249,7 +1246,15 @@ PDP10.opMOVMS = function(op, acc)
 };
 
 /**
- * opIMUL(0o220000)
+ * opIMUL(0o220000): Integer Multiply
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-28:
+ *
+ *      Multiply AC by the operand specified by M, and place the sign and the 35 low order magnitude bits of the
+ *      product in the specified destination.  Set Overflow if the product is >= 2^35 or < -2^35 (ie if the high order
+ *      word of the double length product is not null); the high order word is lost.
+ *
+ * NOTE: This is a "Basic" mode instruction: the source is [E] and the destination is [A] (opposite of "Memory").
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -1257,11 +1262,19 @@ PDP10.opMOVMS = function(op, acc)
  */
 PDP10.opIMUL = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(acc, PDP10.doMUL.call(this, this.readWord(acc), this.readWord(this.regEA), true));
 };
 
 /**
- * opIMULI(0o221000)
+ * opIMULI(0o221000): Integer Multiply Immediate
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-28:
+ *
+ *      Multiply AC by the operand specified by M, and place the sign and the 35 low order magnitude bits of the
+ *      product in the specified destination.  Set Overflow if the product is >= 2^35 or < -2^35 (ie if the high order
+ *      word of the double length product is not null); the high order word is lost.
+ *
+ * NOTE: This is an "Immediate" mode instruction: the source is the word 0,E and the destination is [A].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -1269,11 +1282,19 @@ PDP10.opIMUL = function(op, acc)
  */
 PDP10.opIMULI = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(acc, PDP10.doMUL.call(this, this.readWord(acc), this.regEA, true));
 };
 
 /**
- * opIMULM(0o222000)
+ * opIMULM(0o222000): Integer Multiply to Memory
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-28:
+ *
+ *      Multiply AC by the operand specified by M, and place the sign and the 35 low order magnitude bits of the
+ *      product in the specified destination.  Set Overflow if the product is >= 2^35 or < -2^35 (ie if the high order
+ *      word of the double length product is not null); the high order word is lost.
+ *
+ * NOTE: This is a "Memory" mode instruction: the source is [E] and the destination is [E] (opposite of "Basic").
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -1281,11 +1302,19 @@ PDP10.opIMULI = function(op, acc)
  */
 PDP10.opIMULM = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(this.regEA, PDP10.doMUL.call(this, this.readWord(acc), this.readWord(this.regEA), true));
 };
 
 /**
- * opIMULB(0o223000)
+ * opIMULB(0o223000): Integer Multiply to Both
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-28:
+ *
+ *      Multiply AC by the operand specified by M, and place the sign and the 35 low order magnitude bits of the
+ *      product in the specified destination.  Set Overflow if the product is >= 2^35 or < -2^35 (ie if the high order
+ *      word of the double length product is not null); the high order word is lost.
+ *
+ * NOTE: This is a "Both" mode instruction: the source is [E] and the destination is [E] and [A].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -1293,7 +1322,7 @@ PDP10.opIMULM = function(op, acc)
  */
 PDP10.opIMULB = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(this.regEA, this.writeWord(acc, PDP10.doMUL.call(this, this.readWord(acc), this.readWord(this.regEA), true)));
 };
 
 /**
@@ -1380,7 +1409,17 @@ PDP10.opMULB = function(op, acc)
 };
 
 /**
- * opIDIV(0o230000)
+ * opIDIV(0o230000): Integer Divide
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-29:
+ *
+ *      If the operand specified by M is zero, set Overflow and No Divide, and go immediately to the next instruction
+ *      without affecting the original AC or memory operand in any way.  Otherwise divide AC by the specified operand,
+ *      calculating a quotient of 35 magnitude bits including leading zeros.  Place the unrounded quotient in the
+ *      specified destination.  If M specifies AC as the destination, place the remainder, with the same sign as the
+ *      dividend, in accumulator A+1.
+ *
+ * NOTE: This is a "Basic" mode instruction: the source is [E] and the destination is [A],[A+1] (opposite of "Memory").
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -1388,11 +1427,24 @@ PDP10.opMULB = function(op, acc)
  */
 PDP10.opIDIV = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = PDP10.doDIV.call(this, this.readWord(acc), 0, this.readWord(this.regEA));
+    if (dst < 0) return;
+    this.writeWord(acc, dst);
+    this.writeWord((acc + 1) & 0o17, this.regExt);
 };
 
 /**
- * opIDIVI(0o231000)
+ * opIDIVI(0o231000): Integer Divide Immediate
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-29:
+ *
+ *      If the operand specified by M is zero, set Overflow and No Divide, and go immediately to the next instruction
+ *      without affecting the original AC or memory operand in any way.  Otherwise divide AC by the specified operand,
+ *      calculating a quotient of 35 magnitude bits including leading zeros.  Place the unrounded quotient in the
+ *      specified destination.  If M specifies AC as the destination, place the remainder, with the same sign as the
+ *      dividend, in accumulator A+1.
+ *
+ * NOTE: This is an "Immediate" mode instruction: the source is the word 0,E and the destination is [A],[A+1].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -1400,11 +1452,24 @@ PDP10.opIDIV = function(op, acc)
  */
 PDP10.opIDIVI = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = PDP10.doDIV.call(this, this.readWord(acc), 0, this.regEA);
+    if (dst < 0) return;
+    this.writeWord(acc, dst);
+    this.writeWord((acc + 1) & 0o17, this.regExt);
 };
 
 /**
- * opIDIVM(0o232000)
+ * opIDIVM(0o232000): Integer Divide to Memory
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-29:
+ *
+ *      If the operand specified by M is zero, set Overflow and No Divide, and go immediately to the next instruction
+ *      without affecting the original AC or memory operand in any way.  Otherwise divide AC by the specified operand,
+ *      calculating a quotient of 35 magnitude bits including leading zeros.  Place the unrounded quotient in the
+ *      specified destination.  If M specifies AC as the destination, place the remainder, with the same sign as the
+ *      dividend, in accumulator A+1.
+ *
+ * NOTE: This is a "Memory" mode instruction: the source is [E] and the destination is [E] (opposite of "Basic").
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -1412,11 +1477,23 @@ PDP10.opIDIVI = function(op, acc)
  */
 PDP10.opIDIVM = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = PDP10.doDIV.call(this, this.readWord(acc), 0, this.readWord(this.regEA));
+    if (dst < 0) return;
+    this.writeWord(this.regEA, dst);
 };
 
 /**
- * opIDIVB(0o233000)
+ * opIDIVB(0o233000): Integer Divide to Both
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-29:
+ *
+ *      If the operand specified by M is zero, set Overflow and No Divide, and go immediately to the next instruction
+ *      without affecting the original AC or memory operand in any way.  Otherwise divide AC by the specified operand,
+ *      calculating a quotient of 35 magnitude bits including leading zeros.  Place the unrounded quotient in the
+ *      specified destination.  If M specifies AC as the destination, place the remainder, with the same sign as the
+ *      dividend, in accumulator A+1.
+ *
+ * NOTE: This is a "Both" mode instruction: the source is [E] and the destination is [E] and [A],[A+1].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -1424,7 +1501,9 @@ PDP10.opIDIVM = function(op, acc)
  */
 PDP10.opIDIVB = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = PDP10.doDIV.call(this, this.readWord(acc), 0, this.readWord(this.regEA));
+    if (dst < 0) return;
+    this.writeWord(acc, this.writeWord(this.regEA, dst));
 };
 
 /**
@@ -1456,7 +1535,18 @@ PDP10.opDIV = function(op, acc)
 };
 
 /**
- * opDIVI(0o235000)
+ * opDIVI(0o235000): Divide Immediate
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-29:
+ *
+ *      If the magnitude of the number in AC is greater than or equal to that of the operand specified by M,
+ *      set Overflow and No Divide, and go immediately to the next instruction without affecting the original AC
+ *      or memory operand in any way.  Otherwise divide the double length number contained in accumulators A and A+1
+ *      by the specified operand, calculating a quotient of 35 magnitude bits including leading zeros.  Place the
+ *      unrounded quotient in the specified destination.  If M specifies AC as a destination, place the remainder,
+ *      with the same sign as the dividend, in accumulator A+1.
+ *
+ * NOTE: This is an "Immediate" mode instruction: the source is the word 0,E and the destination is [A],[A+1].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -1464,11 +1554,27 @@ PDP10.opDIV = function(op, acc)
  */
 PDP10.opDIVI = function(op, acc)
 {
-    this.opUndefined(op);
+    var ext = this.readWord(acc);
+    var dst = this.readWord((acc + 1) & 0o17);
+    dst = PDP10.doDIV.call(this, dst, ext, this.regEA);
+    if (dst < 0) return;
+    this.writeWord(acc, dst);
+    this.writeWord((acc + 1) & 0o17, this.regExt);
 };
 
 /**
- * opDIVM(0o236000)
+ * opDIVM(0o236000): Divide to Memory
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-29:
+ *
+ *      If the magnitude of the number in AC is greater than or equal to that of the operand specified by M,
+ *      set Overflow and No Divide, and go immediately to the next instruction without affecting the original AC
+ *      or memory operand in any way.  Otherwise divide the double length number contained in accumulators A and A+1
+ *      by the specified operand, calculating a quotient of 35 magnitude bits including leading zeros.  Place the
+ *      unrounded quotient in the specified destination.  If M specifies AC as a destination, place the remainder,
+ *      with the same sign as the dividend, in accumulator A+1.
+ *
+ * NOTE: This is a "Memory" mode instruction: the source is [E] and the destination is [E] (opposite of "Basic").
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -1476,11 +1582,26 @@ PDP10.opDIVI = function(op, acc)
  */
 PDP10.opDIVM = function(op, acc)
 {
-    this.opUndefined(op);
+    var ext = this.readWord(acc);
+    var dst = this.readWord((acc + 1) & 0o17);
+    dst = PDP10.doDIV.call(this, dst, ext, this.readWord(this.regEA));
+    if (dst < 0) return;
+    this.writeWord(this.regEA, dst);
 };
 
 /**
- * opDIVB(0o237000)
+ * opDIVB(0o237000): Divide to Both
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-29:
+ *
+ *      If the magnitude of the number in AC is greater than or equal to that of the operand specified by M,
+ *      set Overflow and No Divide, and go immediately to the next instruction without affecting the original AC
+ *      or memory operand in any way.  Otherwise divide the double length number contained in accumulators A and A+1
+ *      by the specified operand, calculating a quotient of 35 magnitude bits including leading zeros.  Place the
+ *      unrounded quotient in the specified destination.  If M specifies AC as a destination, place the remainder,
+ *      with the same sign as the dividend, in accumulator A+1.
+ *
+ * NOTE: This is a "Both" mode instruction: the source is [E] and the destination is [E] and [A],[A+1].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -1488,7 +1609,12 @@ PDP10.opDIVM = function(op, acc)
  */
 PDP10.opDIVB = function(op, acc)
 {
-    this.opUndefined(op);
+    var ext = this.readWord(acc);
+    var dst = this.readWord((acc + 1) & 0o17);
+    dst = PDP10.doDIV.call(this, dst, ext, this.readWord(this.regEA));
+    if (dst < 0) return;
+    this.writeWord(acc, this.writeWord(this.regEA, dst));
+    this.writeWord((acc + 1) & 0o17, this.regExt);
 };
 
 /**
@@ -5670,7 +5796,7 @@ PDP10.doIOR = function(dst, src)
 };
 
 /**
- * doMUL(dst, src)
+ * doMUL(dst, src, fTruncate)
  *
  * Used by callers to perform the multiplication (MUL) of two signed 36-bit operands.
  *
@@ -5682,9 +5808,10 @@ PDP10.doIOR = function(dst, src)
  * @this {CPUStatePDP10}
  * @param {number} dst (36-bit value)
  * @param {number} src (36-bit value)
+ * @param {boolean} [fTruncate] (true to truncate the result to 36 bits)
  * @return {number} (dst * src) (the high 36 bits of the result; the low 36 bits are stored in regExt)
  */
-PDP10.doMUL = function(dst, src)
+PDP10.doMUL = function(dst, src, fTruncate)
 {
     var n1 = dst, n2 = src;
     var fNeg = false, res, ext;
@@ -5731,6 +5858,20 @@ PDP10.doMUL = function(dst, src)
         else {
             if (ext) ext = PDP10.WORD_LIMIT - ext;
         }
+    }
+
+    if (fTruncate) {
+        /*
+         * If ext is something OTHER than an extension of the res sign bit, then we have overflow.
+         */
+        if ((ext || res > PDP10.MAX_POS36) && (ext != PDP10.WORD_MASK || res <= PDP10.MAX_POS36)) {
+            this.regPS |= PDP10.PSFLAG.OVFL;
+        }
+        /*
+         * Also note that, in the truncate case, we return the low order bits (res), rather than the
+         * the high order bits (ext) that split72() does.
+         */
+        return res;
     }
 
     return PDP10.split72.call(this, res, ext);
