@@ -30,6 +30,7 @@
 
 if (NODE) {
     var Str = require("../../shared/lib/strlib");
+    var Component = require("../../shared/lib/component");
     var PDP10 = require("./defines");
 }
 
@@ -1427,7 +1428,18 @@ PDP10.opIDIVB = function(op, acc)
 };
 
 /**
- * opDIV(0o234000)
+ * opDIV(0o234000): Divide
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-29:
+ *
+ *      If the magnitude of the number in AC is greater than or equal to that of the operand specified by M,
+ *      set Overflow and No Divide, and go immediately to the next instruction without affecting the original AC
+ *      or memory operand in any way.  Otherwise divide the double length number contained in accumulators A and A+1
+ *      by the specified operand, calculating a quotient of 35 magnitude bits including leading zeros.  Place the
+ *      unrounded quotient in the specified destination.  If M specifies AC as a destination, place the remainder,
+ *      with the same sign as the dividend, in accumulator A+1.
+ *
+ * NOTE: This is a "Basic" mode instruction: the source is [E] and the destination is [A],[A+1] (opposite of "Memory").
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -1435,7 +1447,12 @@ PDP10.opIDIVB = function(op, acc)
  */
 PDP10.opDIV = function(op, acc)
 {
-    this.opUndefined(op);
+    var ext = this.readWord(acc);
+    var dst = this.readWord((acc + 1) & 0o17);
+    dst = PDP10.doDIV.call(this, dst, ext, this.readWord(this.regEA));
+    if (dst < 0) return;
+    this.writeWord(acc, dst);
+    this.writeWord((acc + 1) & 0o17, this.regExt);
 };
 
 /**
@@ -2023,7 +2040,41 @@ PDP10.opAOBJN = function(op, acc)
 };
 
 /**
- * opJRST(0o254000)
+ * opJRST(0o254000): Jump and Restore
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-57:
+ *
+ *      Perform the functions specified by F, then take the next instruction from location E and continue sequential
+ *      operation from there. Bits 9-12 are programmed as follows.
+ *
+ *        9     Restore the channel on which the highest priority interrupt is currently being held [§ 2.13].
+ *
+ *              Unless the User In-out flag is set, this function cannot be executed in a user program.  Instead
+ *              of restoring the channel, it stores its own instruction code, F and effective address E in bits 0-8,
+ *              9-12 and 18-35 respectively of unrelocated location 40 (clearing bits 13-17), and then executes the
+ *              instruction contained in location 41, which is under control of the monitor [§ 2.15].
+ *
+ *       10     Halt the processor.  When it stops, the MA lights on the console display an address one greater
+ *              than that of the location containing the instruction that caused the halt, and PC displays the jump
+ *              address (the location from which the next instruction will be taken if the operator causes the processor
+ *              to resume operation without changing PC).
+ *
+ *              Unless the User In-out flag is set, this function cannot be executed in a user program.  Instead of
+ *              halting the processor, it stores its own instruction code, F and effective address E in Bits 0-8, 9-12
+ *              and 18-35 respectively of unrelocated location 40 (clearing bits 13-17), and then executes the
+ *              instruction contained in location 41, which is under control of the monitor [§ 2.15].
+ *
+ *       11     Restore the flags listed above from the left half of the word in the last location referenced in the
+ *              effective address calculation.  Hence to restore flags requires that the JRST instruction use indexing
+ *              or indirect addressing.
+ *
+ *              Restoration of all but the user flags is directly according to the contents of the corresponding bits
+ *              as given above: a flag is set by a 1 in the bit, cleared by a 0.  A 1 in bit 5 sets User but a 0 has no
+ *              effect, so the Monitor can restart a user program by restoring flags but the user cannot leave user
+ *              mode by this method.  A 0 in bit 6 clears User In-out, but a 1 sets it only if the JRST is being
+ *              executed by the Monitor, ie if User is clear.
+ *
+ *       12     Enter user mode.  The user program starts at relocated location E.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2204,7 +2255,17 @@ PDP10.opPOPJ = function(op, acc)
 };
 
 /**
- * opJSR(0o264000)
+ * opJSR(0o264000): Jump to Subroutine
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-57:
+ *
+ *      Place the current contents of the flags (as described above) in the left half of location E and the
+ *      contents of PC in the right half (at this time PC contains an address one greater than the location of
+ *      the JSR instruction).  Take the next instruction from location E + 1 and continue sequential operation
+ *      from there.  The flags are unaffected except Byte Interrupt, which is cleared.
+ *
+ *      If this instruction is executed as a result of a priority interrupt or in un-relocated 41 or 61 while
+ *      the processor is in user mode, bit 5 of the PC word stored is 1 and the processor leaves user mode.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2212,7 +2273,8 @@ PDP10.opPOPJ = function(op, acc)
  */
 PDP10.opJSR = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(this.regEA, this.getPS() + this.getPC());
+    this.setPC(this.regEA + 1);
 };
 
 /**
@@ -5448,6 +5510,96 @@ PDP10.doAND = function(dst, src)
 };
 
 /**
+ * doDIV(dst, ext, src)
+ *
+ * Used by callers to perform the division (DIV) of a 72-bit operand by a 36-bit operand.
+ *
+ * @this {CPUStatePDP10}
+ * @param {number} dst (36-bit value)
+ * @param {number} ext (36-bit value extension)
+ * @param {number} src (36-bit divisor)
+ * @return {number} (dst / src) (the remainder is stored in regExt); -1 if error (no division performed)
+ */
+PDP10.doDIV = function(dst, ext, src)
+{
+    var fNegQ = false, fNegR = false;
+
+    dst = PDP10.merge72.call(this, dst, ext);
+    ext = this.regExt;
+
+    if (src > PDP10.MAX_POS36) {
+        src = PDP10.WORD_LIMIT - src;
+        fNegQ = !fNegQ;
+    }
+
+    if (ext > PDP10.MAX_POS36) {
+        if (dst) {
+            ext = PDP10.WORD_MASK - ext;
+            dst = PDP10.WORD_LIMIT - dst;
+        }
+        else {
+            if (ext) ext = PDP10.WORD_LIMIT - ext;
+        }
+        fNegR = true; fNegQ = !fNegQ;
+    }
+
+    if (ext >= src) {
+        this.regPS |= PDP10.PSFLAG.NO_DIVIDE;
+        return -1;
+    }
+
+    /*
+     * Initialize the four double-length 72-bit values we need for the division process.
+     *
+     * The process involves shifting the divisor left 1 bit (ie, doubling it) until it equals
+     * or exceeds the dividend, and then repeatedly subtracting the divisor from the dividend and
+     * shifting the divisor right 1 bit until the divisor is "exhausted" (no bits left), with an
+     * "early out" if the dividend gets "exhausted" first.
+     *
+     * Note that each element of these double arrays is a 36-bit value, so it's rarely a good idea
+     * to use bit-wise operators on them, because those would operate on only the low 32 bits.
+     * Stick with the double worker functions I've created, and trust your JavaScript engine to
+     * inline/optimize the code.
+     *
+     * TODO: Consider pre-allocating these double-length arrays to minimize the impact on GC.
+     */
+    var dRes = [0, 0];
+    var dPow = [1, 0];
+    var dDiv = [src, 0];
+    var dRem = [dst, ext];
+
+    while (PDP10.cmpD(dRem, dDiv) > 0) {
+        PDP10.addD(dDiv, dDiv);
+        PDP10.addD(dPow, dPow);
+    }
+    do {
+        if (PDP10.cmpD(dRem, dDiv) >= 0) {
+            PDP10.subD(dRem, dDiv);
+            PDP10.addD(dRes, dPow);
+            if (PDP10.zeroD(dRem)) break;
+        }
+        PDP10.shrD(dDiv);
+        PDP10.shrD(dPow);
+    } while (!PDP10.zeroD(dPow));
+
+    this.assert(!dRes[1], "extended quotient");
+    this.assert(!dRem[1], "extended remainder");
+
+    dst = dRes[0];
+    this.regExt = dRem[0];
+
+    if (fNegQ && dst) {
+        dst = PDP10.WORD_LIMIT - dst;
+    }
+
+    if (fNegR && this.regExt) {
+        this.regExt = PDP10.WORD_LIMIT - this.regExt;
+    }
+
+    return dst;
+};
+
+/**
  * doEOR(dst, src)
  *
  * Used by callers to perform the logical "exclusive-or" (XOR) of two 36-bit operands.
@@ -5524,6 +5676,11 @@ PDP10.doIOR = function(dst, src)
  *
  * Used by callers to perform the multiplication (MUL) of two signed 36-bit operands.
  *
+ * To support 72-bit results, we perform the multiplication process as you would "by hand",
+ * treating the operands to be multiplied as two 2-digit numbers, where each "digit" is an 18-bit
+ * number (base 2^18).  Each individual multiplication of these 18-bit "digits" will produce
+ * a result within 2^36, well within JavaScript integer accuracy.
+ *
  * @this {CPUStatePDP10}
  * @param {number} dst (36-bit value)
  * @param {number} src (36-bit value)
@@ -5578,25 +5735,7 @@ PDP10.doMUL = function(dst, src)
         }
     }
 
-    /*
-     * We just produced a signed 72-bit result, whereas the PDP-10 stores 72-bit arithmetic values as two
-     * signed 36-bit results with matching signs.  Since that's effectively only 70 bits of magnitude (with
-     * two sign bits), we lose one bit of magnitude.
-     *
-     * The conversion requires shifting ext left one bit so that we can move the high bit of res into the
-     * low bit of ext, and then set the sign bit of res to match the sign bit of ext.
-     */
-    var sign = ext - (ext % PDP10.INT_LIMIT);
-    ext = ((ext * 2) % PDP10.WORD_LIMIT) + Math.trunc(res / PDP10.INT_LIMIT);
-    res = sign + (res % PDP10.INT_LIMIT);
-    var signNew = ext - (ext % PDP10.INT_LIMIT);
-    if (sign != signNew) {
-        ext = sign + (ext - signNew);
-        this.regPS |= PDP10.PSFLAG.OVFL;
-    }
-
-    this.regExt = res;
-    return ext;
+    return PDP10.split72.call(this, res, ext);
 };
 
 /**
@@ -5651,6 +5790,65 @@ PDP10.doSUB = function(dst, src)
      */
     PDP10.setAddFlags.call(this, res, src, dst);
     return res;
+};
+
+/**
+ * merge72(dst, ext)
+ *
+ * Returns a unified 72-bit result from dst and ext.
+ *
+ * @this {CPUStatePDP10}
+ * @param {number} dst (36-bit value)
+ * @param {number} ext (36-bit value)
+ * @return {number} (returns the lower 36 bits; the upper 36 bits  are stored in regExt)
+ */
+PDP10.merge72 = function(dst, ext)
+{
+    var sign = (ext - (ext % PDP10.INT_LIMIT));
+
+    /*
+     * Let's assert that the sign bits of both halves match.
+     */
+    Component.assert(sign == (dst - (dst % PDP10.INT_LIMIT)), "sign mismatch");
+
+    /*
+     * Compute value without the sign bit and add the low bit of extended in its place.
+     */
+    dst = (dst % PDP10.INT_LIMIT) + ((ext * PDP10.INT_LIMIT) % PDP10.WORD_LIMIT);
+    this.regExt = sign + Math.trunc(ext / 2);
+    return dst;
+};
+
+/**
+ * split72(res, ext)
+ *
+ * Returns two split 36-bit values from a 72-bit result.
+ *
+ * @this {CPUStatePDP10}
+ * @param {number} res (36-bit value)
+ * @param {number} ext (36-bit value)
+ * @return {number} (returns the upper 36 bits; the lower 36 bits are stored in regExt)
+ */
+PDP10.split72 = function(res, ext)
+{
+    /*
+     * We just produced a signed 72-bit result, whereas the PDP-10 stores 72-bit arithmetic values as two
+     * signed 36-bit results with matching signs.  Since that's effectively only 70 bits of magnitude (with
+     * two sign bits), we lose one bit of magnitude.
+     *
+     * The conversion requires shifting ext left one bit so that we can move the high bit of res into the
+     * low bit of ext, and then set the sign bit of res to match the sign bit of ext.
+     */
+    var sign = ext - (ext % PDP10.INT_LIMIT);
+    ext = ((ext * 2) % PDP10.WORD_LIMIT) + Math.trunc(res / PDP10.INT_LIMIT);
+    res = sign + (res % PDP10.INT_LIMIT);
+    var signNew = ext - (ext % PDP10.INT_LIMIT);
+    if (sign != signNew) {
+        ext = sign + (ext - signNew);
+        this.regPS |= PDP10.PSFLAG.OVFL;
+    }
+    this.regExt = res;
+    return ext;
 };
 
 /**
@@ -5781,6 +5979,86 @@ PDP10.setHR = function(op, dst, src)
         }
     }
     return dst;
+};
+
+/**
+ * addD(dDst, dSrc)
+ *
+ * Adds dSrc to dDst.
+ *
+ * @param {Array.<number>} dDst
+ * @param {Array.<number>} dSrc
+ */
+PDP10.addD = function(dDst, dSrc)
+{
+    dDst[0] += dSrc[0];
+    dDst[1] += dSrc[1];
+    if (dDst[0] >= PDP10.WORD_LIMIT) {
+        dDst[0] %= PDP10.WORD_LIMIT;
+        dDst[1]++;
+    }
+};
+
+/**
+ * cmpD(dDst, dSrc)
+ *
+ * Compares dDst to dSrc, by computing dDst - dSrc.
+ *
+ * @param {Array.<number>} dDst
+ * @param {Array.<number>} dSrc
+ * @return {number} > 0 if dDst > dSrc, == 0 if dDst == dSrc, < 0 if dDst < dSrc
+ */
+PDP10.cmpD = function(dDst, dSrc)
+{
+    var result = dDst[1] - dSrc[1];
+    if (!result) result = dDst[0] - dSrc[0];
+    return result;
+};
+
+/**
+ * shrD(dDst)
+ *
+ * Shifts dDst right one bit.
+ *
+ * @param {Array.<number>} dDst
+ */
+PDP10.shrD = function(dDst)
+{
+    if (dDst[1] % 2) {
+        dDst[0] += PDP10.WORD_LIMIT;
+    }
+    dDst[0] = Math.trunc(dDst[0] / 2);
+    dDst[1] = Math.trunc(dDst[1] / 2);
+};
+
+/**
+ * subD(dDst, dSrc)
+ *
+ * Subtracts dSrc from dDst.
+ *
+ * @param {Array.<number>} dDst
+ * @param {Array.<number>} dSrc
+ */
+PDP10.subD = function(dDst, dSrc)
+{
+    dDst[0] -= dSrc[0];
+    dDst[1] -= dSrc[1];
+    if (dDst[0] < 0) {
+        dDst[0] += PDP10.WORD_LIMIT;
+        dDst[1]--;
+    }
+};
+
+/**
+ * zeroD(d)
+ *
+ * True if bits are all zero, false otherwise.
+ *
+ * @param {Array.<number>} d
+ */
+PDP10.zeroD = function(d)
+{
+    return !d[0] && !d[1];
 };
 
 /*
