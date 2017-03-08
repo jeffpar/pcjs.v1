@@ -163,7 +163,7 @@ class CPUStatePDP10 extends CPUPDP10 {
         if (this.flags.running) this.stopCPU();
         this.initCPU();
         this.resetCycles();
-        this.clearError();          // clear any fatal error/exception that setError() may have flagged
+        this.clearError();      // clear any fatal error/exception that setError() may have flagged
         super.reset();
     }
 
@@ -176,6 +176,10 @@ class CPUStatePDP10 extends CPUPDP10 {
     {
         this.regEA = this.regRA = this.regOP = 0;
         this.regPC = this.lastPC = this.addrReset;
+        this.regXC = -1;        // if >= 0 this supersedes regPC (refers to an opcode from XCT)
+        this.regBP = -1;        // active byte pointer (-1 if none)
+        this.regPS = 0;         // assorted processor flags (see PSFLAG bit definitions)
+        this.regExt = 0;        // internal "extension" register used for 72-bit calculations (eg, MUL)
 
         /*
          * This is queried and displayed by the Panel when it's not displaying its own ADDRESS register
@@ -184,7 +188,7 @@ class CPUStatePDP10 extends CPUPDP10 {
          *
          * We initialize it to the current PC.
          */
-        this.lastAddr = this.regPC;
+        this.addrLast = this.regPC;
 
         /*
          * opFlags contains various conditions that stepCPU() needs to be aware of.
@@ -280,9 +284,13 @@ class CPUStatePDP10 extends CPUPDP10 {
             this.regRA,
             this.regOP,
             this.regPC,
+            this.regXC,
+            this.regBP,
+            this.regPS,
+            this.opFlags,
             this.lastPC,
-            this.lastAddr,
-            this.opFlags
+            this.addrLast,
+            this.addrReset
         ]);
         state.set(1, []);
         state.set(2, [this.nTotalCycles, this.getSpeed(), this.flags.autoStart]);
@@ -309,9 +317,13 @@ class CPUStatePDP10 extends CPUPDP10 {
             this.regRA,
             this.regOP,
             this.regPC,
+            this.regXC,
+            this.regBP,
+            this.regPS,
+            this.opFlags,
             this.lastPC,
-            this.lastAddr,
-            this.opFlags
+            this.addrLast,
+            this.addrReset
         ] = data[0];
 
         var a = data[2];
@@ -325,27 +337,79 @@ class CPUStatePDP10 extends CPUPDP10 {
     }
 
     /**
+     * getPS()
+     *
+     * Gets the processor state flags in the format required by various program control operations (eg, JSP),
+     * pre-masked and pre-shifted for convenient loading into the left half of an accumulator.
+     *
+     * @this {CPUStatePDP10}
+     * @return {number}
+     */
+    getPS()
+    {
+        return (this.regPS & PDP10.HALF_MASK) * PDP10.HALF_SHIFT;
+    }
+
+    /**
+     * readFlags()
+     *
+     * Used to implement the ""CONI APR," instruction; see opCONI().
+     *
+     * @this {CPUStatePDP10}
+     * @return {number}
+     */
+    readFlags()
+    {
+        var flags = 0;
+        if (this.regPS & PDP10.PSFLAG.OVFL) flags |= PDP10.RFLAG.OVFL;
+        if (this.regPS & PDP10.PSFLAG.PD_OVFL) flags |= PDP10.RFLAG.PD_OVFL;
+        return flags;
+    }
+
+    /**
+     * writeFlags(w)
+     *
+     * Used to implement the ""CONO APR," instruction; see opCONO().
+     *
+     * @this {CPUStatePDP10}
+     * @param {number} w
+     */
+    writeFlags(w)
+    {
+        if (w & PDP10.WFLAG.OVFL_CL) this.regPS &= ~PDP10.PSFLAG.OVFL;
+        if (w & PDP10.WFLAG.PD_OVFL_CL) this.regPS &= ~PDP10.PSFLAG.PD_OVFL;
+    }
+
+    /**
      * getOpcode()
      *
-     * Normally, this fetches the next opcode in regOP, decodes the low 23 bits (I,X,Y), records the effective
-     * address (E) in regEA, updates regPC, and returns the high 13 bits of the opcode for further decoding.
+     * Normally, this fetches the next opcode in regOP, decodes the low 23 bits (I,X,Y), records
+     * the effective address (E) in regEA, updates regPC, and returns the high 13 bits of the opcode
+     * for further decoding.
      *
-     * However, if a reference address still needs to be decoded (due to indirection), we take care of that first.
+     * However, if a reference address (R) in regRA still needs to be decoded (due to indirection),
+     * we take care of that first.
      *
      * @this {CPUStatePDP10}
      * @return {number} (-1 if the reference address in regRA has not yet been fully decoded)
      */
     getOpcode()
     {
+        if ((this.regRA & PDP10.OPCODE.I_BIT)) {
+            this.regRA = this.readWord(this.regEA);
+        } else if (this.regXC >= 0) {
+            this.regRA = this.regOP = this.readWord(this.regXC);
+            this.regXC = -1;
+        } else {
+            this.regRA = this.regOP = this.readWord(this.lastPC = this.regPC);
+            this.regPC = (this.regPC + 1) % PDP10.ADDR_LIMIT;
+        }
+
         /*
          * Technically, we don't REALLY need to mask regRA with R_MASK, because all regRA accesses
-         * ignore any higher opcode bits, but let's keep things tidy.
+         * ignore any higher bits, but let's keep things tidy.
          */
-        if ((this.regRA & PDP10.OPCODE.I_BIT)) {
-            this.regRA = this.readWord(this.regEA) & PDP10.OPCODE.R_MASK;
-        } else {
-            this.regRA = (this.regOP = this.readWord(this.lastPC = this.regPC)) & PDP10.OPCODE.R_MASK;
-        }
+        this.regRA &= PDP10.OPCODE.R_MASK;
 
         /*
          * Bits 0-22 (I,X,Y) contain what we call a "reference address" (R), which is used to calculate an
@@ -361,10 +425,8 @@ class CPUStatePDP10 extends CPUPDP10 {
         this.regEA = this.regRA & PDP10.OPCODE.Y_MASK;
         var x = (this.regRA >> PDP10.OPCODE.X_SHIFT) & PDP10.OPCODE.X_MASK;
         if (x) this.regEA = (this.regEA + this.readWord(x)) & PDP10.ADDR_MASK;
-        if (this.regRA & PDP10.OPCODE.I_BIT) return -1;
 
-        this.regPC = (this.regPC + 1) % PDP10.ADDR_LIMIT;
-        return (this.regOP / PDP10.OPCODE.ACSHIFT)|0;
+        return (this.regRA & PDP10.OPCODE.I_BIT)? -1 : ((this.regOP / PDP10.OPCODE.A_SCALE)|0);
     }
 
     /**
@@ -404,7 +466,7 @@ class CPUStatePDP10 extends CPUPDP10 {
      */
     getLastAddr()
     {
-        return this.lastAddr;
+        return this.addrLast;
     }
 
     /**
@@ -696,7 +758,7 @@ class CPUStatePDP10 extends CPUPDP10 {
      */
     readWordFromPhysical(addr)
     {
-        return this.bus.getWord(this.lastAddr = addr);
+        return this.bus.getWord(this.addrLast = addr);
     }
 
     /**
@@ -707,10 +769,12 @@ class CPUStatePDP10 extends CPUPDP10 {
      * @this {CPUStatePDP10}
      * @param {number} addr
      * @param {number} data
+     * @return {number} (we return the data back to the caller to permit nested writes)
      */
     writeWordToPhysical(addr, data)
     {
-        this.bus.setWord(this.lastAddr = addr, data);
+        this.bus.setWord(this.addrLast = addr, data);
+        return data;
     }
 
     /**

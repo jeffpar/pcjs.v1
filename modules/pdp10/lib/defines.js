@@ -57,6 +57,11 @@ var APPNAME = "PDPjs";          // this @define is the default application name 
 var DEBUGGER = true;            // this @define is overridden by the Closure Compiler to remove Debugger-related support
 
 /*
+ * Set this to true to enable behavior compatible with SIMH.
+ */
+var SIMH = false;
+
+/*
  * Combine all the shared globals and machine-specific globals into one machine-specific global object,
  * which all machine components should start using; eg: "if (PDP10.DEBUG) ..." instead of "if (DEBUG) ...".
  */
@@ -79,7 +84,7 @@ var PDP10 = {
     MODEL_KA10: 1001,
 
     /*
-     * This constant is used to mark points in the code where the physical address being returned
+     * ADDR_INVALID is used to mark points in the code where the physical address being returned
      * is invalid and should not be used.
      *
      * In a 32-bit CPU, -1 (ie, 0xffffffff) could actually be a valid address, so consider changing
@@ -96,14 +101,29 @@ var PDP10 = {
      * automatic inlining will no longer occur.
      */
     ADDR_INVALID:   -1,
-    ADDR_LIMIT:     Math.pow(2, 18),
     ADDR_MASK:      Math.pow(2, 18) - 1,
-    DATA_INVALID:   -1,
-    DATA_LIMIT:     Math.pow(2, 36),
-    WORD_SHIFT:     Math.pow(2, 18),
-    WORD_MASK:      0o777777,
-    MAX_POS18:      Math.pow(2, 17) - 1,
-    MAX_POS:        Math.pow(2, 35) - 1,
+    ADDR_LIMIT:     Math.pow(2, 18),
+
+    /*
+     * 18-bit and 36-bit largest positive (and smallest negative) values; however, since we store all
+     * values as unsigned quantities, these are the unsigned equivalents.
+     */
+    WORD_INVALID:   -1,
+    HALF_MASK:      Math.pow(2, 18) - 1,        //         262,143   (000000 777777): unsigned half-word mask
+    HALF_SHIFT:     Math.pow(2, 18),            //         262,144   (000001 000000): unsigned half-word shift
+    INT_MASK:       Math.pow(2, 35) - 1,        //  34,359,738,367   (377777 777777): signed word (magnitude) mask
+    INT_LIMIT:      Math.pow(2, 35),            //  34,359,738,368   (400000 000000): signed word (magnitude) limit
+    WORD_MASK:      Math.pow(2, 36) - 1,        //  68,719,476,735   (777777 777777): unsigned word mask
+    WORD_LIMIT:     Math.pow(2, 36),            //  68,719,476,736 (1 000000 000000): unsigned word limit
+
+    MAX_POS18:      Math.pow(2, 17) - 1,        //         131,071          (377777)
+    MIN_NEG18:      Math.pow(2, 17),            //        -131,072          (400000)
+    MAX_POS36:      Math.pow(2, 35) - 1,        //  34,359,738,367   (377777 777777)
+    MIN_NEG36:      Math.pow(2, 35),            // -34,359,738,368   (400000 000000)
+
+    TWO_POW36:      Math.pow(2, 36),            // the two's complement of a 36-bit value is (value? TWO_POW36 - value : 0)
+    TWO_POW34:      Math.pow(2, 34),
+    TWO_POW32:      Math.pow(2, 32),
 
     /*
      * PDP-10 opcodes are 36-bit values, most of which use the following layout:
@@ -122,10 +142,10 @@ var PDP10 = {
      *
      *      Mode        Suffix      Source  Destination
      *      ----        ------      -----   -----------
-     *  0:  BASIC       None        E       AC
-     *  1:  IMMEDIATE   I           0,E     AC
-     *  2:  MEMORY      M           AC      E
-     *  3:  SELF        S           E       E (and AC if A is non-zero)
+     *  0:  Basic       None        E       AC
+     *  1:  Immediate   I           0,E     AC
+     *  2:  Memory      M           AC      E
+     *  3:  Self/Both   S or B      E       E (and AC if A is non-zero)
      *
      * Input-output instructions look like:
      *
@@ -145,10 +165,14 @@ var PDP10 = {
         OPTEST:     0o71100,            // operation with test
         OPIO:       0o70034,            // input-output operation
         OPUUO:      0o70000,            // unimplemented user operation (UUO) mask
-        OPSHIFT:    Math.pow(2, 21),    // operation shift
-        IOSHIFT:    Math.pow(2, 26),    // input-output device code shift
-        IOMASK:     0o177,              // input-output device code mask (after shift)
-        ACSHIFT:    Math.pow(2, 23),    // used to shift down the high 13 bits, with A starting at bit 0
+        OP_SCALE:   Math.pow(2, 21),    // operation scale
+        IO_SCALE:   Math.pow(2, 26),    // input-output device code scale
+        IO_MASK:    0o177,              // input-output device code mask (after descale)
+        A_SCALE:    Math.pow(2, 23),    // used to shift down the high 13 bits, with A starting at bit 0
+        P_SCALE:    Math.pow(2, 30),    // P scale
+        P_MASK:     0o77,               // P mask (after descale)
+        S_SHIFT:    24,                 // S shift
+        S_MASK:     0o77,               // S mask (after shift)
         A_SHIFT:    23,                 // A shift
         A_MASK:     0o17,               // A mask (after shift)
         I_BIT:      0o20000000,         // indirect bit
@@ -156,6 +180,7 @@ var PDP10 = {
         X_MASK:     0o17,               // X mask (after shift)
         Y_MASK:     0o777777,           // Y mask
         R_MASK:     0o37777777,         // used to isolate the low 23 bits (I,X,Y)
+        PTR_MASK:   0o77777777,         // used to isolate the low 24 bits (?,I,X,Y) of a byte pointer
         HALT:       0o5304              // operation code for HALT
     },
 
@@ -168,7 +193,82 @@ var PDP10 = {
         IRQ_MASK:   0x0003,
         DEBUGGER:   0x0004,             // set if the Debugger wants to perform checks
         WAIT:       0x0008,             // WAIT operation in progress
-        PRESERVE:   0x000F,             // OPFLAG bits to preserve prior to the next instruction
+        PRESERVE:   0x000F              // OPFLAG bits to preserve prior to the next instruction
+    },
+
+    /*
+     * Flags returned by getPS() for various program control operations.
+     *
+     * NOTE: I see SIMH setting PS bits like 0o000200 and 0o000400, which are not documented for the KA10.
+     * The SIMH docs only refer to the KS10 ("KS10 CPU with 1MW of memory"), so I'm guessing it doesn't have
+     * a KA10 emulation option.  The `pdp10` SIMH binary does have some SET CPU options, but unlike the `pdp11`
+     * binary, the only options you can set relate to the operating system to be run -- which seems very hacky.
+     */
+    PSFLAG: {
+        OVFL:       0o400000,          // Overflow
+        CARRY0:     0o200000,          // Carry 0
+        CARRY1:     0o100000,          // Carry 1
+        FP_OVFL:    0o040000,          // Floating-Point Overflow
+        BYTE_INT:   0o020000,          // Byte Interrupt
+        USER_MODE:  0o010000,          // Processor is in User Mode
+        USER_IO:    0o004000,          // User I/O
+        FP_UNFL:    0o000100,          // Floating-Point Underflow
+        NO_DIVIDE:  0o000040,          // No Divide
+        /*
+         * Only the low 18 bits (above) are returned by getPS(); the following (bits 18 to 31)
+         * are defined for internal use only.
+         */
+        PD_OVFL:   0o1000000           // Pushdown Overflow
+    },
+
+    /*
+     * Readable CPU (or APR for "Arithmetic Processor") flags provided by the "CONI APR," instruction; see opCONI().
+     */
+    RFLAG: {
+        PIA:        0o000007,           // Priority Interrupt Assignment
+        OVFL:       0o000010,           // Overflow
+        OVFL_IE:    0o000020,           // Overflow Interrupt Enabled
+        TRAP_OFF:   0o000040,           // Trap Offset
+        FP_OVFL:    0o000100,           // Floating-Point Overflow
+        FP_OVFL_IE: 0o000200,           // Floating-Point Overflow Interrupt Enabled
+        CLOCK:      0o001000,           // Clock Flag
+        CLOCK_IE:   0o002000,           // Clock Interrupt Enabled
+        NXM:        0o010000,           // Non-Existent Memory
+        PRM:        0o020000,           // Memory Protection
+        ADB:        0o040000,           // Address Break
+        UIO:        0o100000,           // User In-Out
+        PD_OVFL:    0o200000            // Pushdown Overflow (TODO: Verify this is correct; the May 1968 doc may have a typo)
+    },
+
+    /*
+     * Writable CPU (or APR for "Arithmetic Processor") flags provided by the "CONO APR," instruction; see opCONO().
+     *
+     * A set bit performs the function shown below, a clear bit does nothing.
+     */
+    WFLAG: {
+        PIA:        0o000007,           // Priority Interrupt Assignment
+        OVFL_CL:    0o000010,           // Clear Overflow
+        OVFL_IE:    0o000020,           // Enable Overflow Interrupt
+        OVFL_ID:    0o000040,           // Disable Overflow Interrupt
+        FP_OVFL_CL: 0o000100,           // Clear Floating-Point Overflow
+        FP_OVFL_IE: 0o000200,           // Enable Floating-Point Overflow Interrupt
+        FP_OVFL_ID: 0o000400,           // Disable Floating-Point Overflow Interrupt
+        CLOCK_CL:   0o001000,           // Clear Clock Flag
+        CLOCK_IE:   0o002000,           // Enable Clock Interrupt
+        CLOCK_ID:   0o004000,           // Disable Clock Interrupt
+        NXM_CL:     0o010000,           // Clear Non-Existent Memory
+        PRM_CL:     0o020000,           // Clear Memory Protection
+        ADB_CL:     0o040000,           // Clear Address Break
+        UIO_CL:     0o200000,           // Clear All In-Out Devices
+        PD_OVFL_CL: 0o400000            // Clear Pushdown Overflow
+    },
+
+    /*
+     * 7-bit device codes used by Input-Output instructions; see opIO().
+     */
+    DEVICES: {
+        APR:        0o000,              // Arithmetic Processor
+        PI:         0o001               // Priority Interrupt
     }
 };
 

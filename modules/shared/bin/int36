@@ -71,8 +71,19 @@ function test(sCmd, fREPL)
     if (sNum2 != null) console.log(sOp + " " + dumpInt36(i36Op));
 
     switch(sOp) {
+    case "get":
+        break;
+
     case "set":
         i36Reg = new Int36(i36Op);
+        break;
+
+    case "ext":
+        i36Reg.extend(i36Op);
+        break;
+
+    case "red":
+        i36Reg.reduce(i36Op);
         break;
 
     case "add":
@@ -89,6 +100,18 @@ function test(sCmd, fREPL)
 
     case "div":
         i36Reg.div(i36Op);
+        break;
+
+    case "ash":
+        i36Reg.ash(i36Op);
+        break;
+
+    case "lsh":
+        i36Reg.lsh(i36Op);
+        break;
+
+    case "rot":
+        i36Reg.rot(i36Op);
         break;
 
     default:
@@ -150,6 +173,25 @@ test("set 0o477777777777 0o777777777777");
 test("set 0o577777777777 0o777777777777");
 test("set 0o677777777777 0o777777777777");
 test("set 0o777777777777 0o777777777777");
+
+test("set 0o112233445566");
+test("lsh 3");
+test("lsh -3");
+test("rot 6");
+test("rot -6");
+test("set 0o112233445566 0o123456123456");
+test("rot 18");
+test("ash -3");
+
+test("set 0o377777777777 0o377777777777");
+test("ash 0");      // this is a no-op, but it's useful for setting the magnitude to 70-bit
+for (let i = 0; i <= 70; i++) {
+    test("ash -1");
+}
+test("set 0 1");
+for (let i = 0; i <= 70; i++) {
+    test("ash 1");
+}
 
 repl.start({
     prompt: "int36> ",

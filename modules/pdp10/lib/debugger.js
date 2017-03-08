@@ -92,17 +92,16 @@ class DebuggerPDP10 extends Debugger {
             this.fParens = true;
 
             /*
-             * Most commands that require an address call parseAddr(), which defaults to dbgAddrNextCode
-             * or dbgAddrNextData when no address has been given.  doDump() and doUnassemble(), in turn,
-             * update dbgAddrNextData and dbgAddrNextCode, respectively, when they're done.
+             * Most commands that require an address call parseAddr(), and if a dbgAddr parameter is supplied
+             * as as well (eg, dbgAddrCode, dbgAddrData), then that address will be used as the default.
              *
              * For TEMPORARY breakpoint addresses, we set fTemporary to true, so that they can be automatically
              * cleared when they're hit.
              */
             this.dbgAddrAcc = this.newAddr();
-            this.dbgAddrNextCode = this.newAddr();
-            this.dbgAddrNextData = this.newAddr();
-            this.dbgAddrAssemble = this.newAddr();
+            this.dbgAddrCode = this.newAddr(0);
+            this.dbgAddrData = this.newAddr(0);
+            this.dbgAddrAssemble = this.newAddr(0);
 
             /*
              * aSymbolTable is an array of SymbolTable objects, one per ROM or other chunk of address space,
@@ -241,26 +240,30 @@ class DebuggerPDP10 extends Debugger {
     copyAddr(dbgAddr, dbgCopy)
     {
         dbgAddr.addr = dbgCopy.addr;
+        dbgAddr.fPhysical = dbgCopy.fPhysical;
         dbgAddr.fTemporary = dbgCopy.fTemporary;
         dbgAddr.nBase = dbgCopy.nBase;
         return dbgAddr;
     }
 
     /**
-     * setAddr(dbgAddr, addr)
+     * setAddr(dbgAddr, addr, fPhysical, nBase)
      *
      * Updates an EXISTING DbgAddrPDP10 object, initialized with specified values and/or defaults.
      *
      * @this {DebuggerPDP10}
      * @param {DbgAddrPDP10} dbgAddr
      * @param {number} addr
+     * @param {boolean} [fPhysical]
+     * @param {number} [nBase]
      * @return {DbgAddrPDP10}
      */
-    setAddr(dbgAddr, addr)
+    setAddr(dbgAddr, addr, fPhysical, nBase)
     {
         dbgAddr.addr = addr;
+        dbgAddr.fPhysical = fPhysical || false;
         dbgAddr.fTemporary = false;
-        dbgAddr.nBase = undefined;
+        dbgAddr.nBase = nBase;
         return dbgAddr;
     }
 
@@ -275,7 +278,7 @@ class DebuggerPDP10 extends Debugger {
      */
     packAddr(dbgAddr)
     {
-        return [dbgAddr.addr, dbgAddr.fPhysical, dbgAddr.nBase, dbgAddr.fTemporary, dbgAddr.sCmd];
+        return [dbgAddr.addr, dbgAddr.fPhysical, dbgAddr.fTemporary, dbgAddr.nBase, dbgAddr.sCmd];
     }
 
     /**
@@ -457,7 +460,7 @@ class DebuggerPDP10 extends Debugger {
      */
     getWord(dbgAddr, inc)
     {
-        var w = PDP10.DATA_INVALID;
+        var w = PDP10.WORD_INVALID;
         var addr = this.getAddr(dbgAddr, false);
         if (addr !== PDP10.ADDR_INVALID) {
             w = this.bus.getWordDirect(addr);
@@ -485,7 +488,7 @@ class DebuggerPDP10 extends Debugger {
     }
 
     /**
-     * parseAddr(sAddr, fCode, fNoChecks, fPrint)
+     * parseAddr(sAddr, dbgAddr, fPrint)
      *
      * Address evaluation and validation (eg, range checks) are no longer performed at this stage.  That's
      * done later, by getAddr(), which returns PDP10.ADDR_INVALID for invalid segments, out-of-range offsets,
@@ -496,17 +499,15 @@ class DebuggerPDP10 extends Debugger {
      *
      * @this {DebuggerPDP10}
      * @param {string|undefined} sAddr
-     * @param {boolean} [fCode] (true if target is code, false if target is data)
-     * @param {boolean} [fNoChecks] (true when setting breakpoints that may not be valid now, but will be later)
+     * @param {DbgAddrPDP10} [dbgAddr]
      * @param {boolean} [fPrint]
      * @return {DbgAddrPDP10|null|undefined}
      */
-    parseAddr(sAddr, fCode, fNoChecks, fPrint)
+    parseAddr(sAddr, dbgAddr, fPrint)
     {
-        var dbgAddr;
-        var dbgAddrNext = (fCode? this.dbgAddrNextCode : this.dbgAddrNextData);
-        var addr = dbgAddrNext.addr;
         var fPhysical, nBase;
+        if (!dbgAddr) dbgAddr = this.newAddr();
+        var addr = dbgAddr.addr;
         if (sAddr !== undefined) {
             sAddr = this.parseReference(sAddr);
             var ch = sAddr.charAt(0);
@@ -514,8 +515,8 @@ class DebuggerPDP10 extends Debugger {
                 fPhysical = true;
                 sAddr = sAddr.substr(1);
             }
-            dbgAddr = this.findSymbolAddr(sAddr);
-            if (dbgAddr) return dbgAddr;
+            var dbgAddrTmp = this.findSymbolAddr(sAddr);
+            if (dbgAddrTmp) return dbgAddrTmp;
             if (sAddr.indexOf("0x") >= 0) {
                 nBase = 16
             } else if (sAddr.indexOf("0o") >= 0) {
@@ -526,7 +527,7 @@ class DebuggerPDP10 extends Debugger {
             addr = this.parseExpression(sAddr, fPrint);
         }
         if (addr != null) {
-            dbgAddr = this.newAddr(addr, fPhysical, nBase);
+            this.setAddr(dbgAddr, addr, fPhysical, nBase);
         }
         return dbgAddr;
     }
@@ -590,14 +591,14 @@ class DebuggerPDP10 extends Debugger {
      * toStrWord(w)
      *
      * @this {DebuggerPDP10}
-     * @param {number} w (up to, but not including, DATA_LIMIT)
+     * @param {number} w (up to, but not including, WORD_LIMIT)
      * @return {string} octal representation of the 36-bit word, as two 18-bit values
      */
     toStrWord(w)
     {
         /*
-         * ADDR_LIMIT is not derived from DATA_LIMIT; we're just taking advantage of the fact
-         * that ADDR_LIMIT happens to be exactly half of DATA_LIMIT, and they are both powers of two.
+         * ADDR_LIMIT is not derived from WORD_LIMIT; we're just taking advantage of the fact
+         * that ADDR_LIMIT happens to be exactly half of WORD_LIMIT, and they are both powers of two.
          */
         return Str.toOct(w / PDP10.ADDR_LIMIT, 6) + ' ' + Str.toOct(w % PDP10.ADDR_LIMIT, 6);
     }
@@ -614,7 +615,7 @@ class DebuggerPDP10 extends Debugger {
         var addr = 0, i = 0, n = aBlocks.length;
 
         if (sAddr) {
-            addr = this.getAddr(this.parseAddr(sAddr));
+            addr = this.getAddr(this.parseAddr(sAddr, this.dbgAddrData));
             if (addr === PDP10.ADDR_INVALID) {
                 this.println("invalid address: " + sAddr);
                 return;
@@ -863,18 +864,76 @@ class DebuggerPDP10 extends Debugger {
     getRegValue(iReg)
     {
         var value;
+        var cpu = this.cpu;
         switch(iReg) {
         case DebuggerPDP10.REGS.PC:
-            value = this.cpu.getPC();
+            value = cpu.getPC();
             break;
         case DebuggerPDP10.REGS.RA:
-            value = this.cpu.regRA;
+            value = cpu.regRA;
             break;
         case DebuggerPDP10.REGS.EA:
-            value = this.cpu.regEA;
+            value = cpu.regEA;
+            break;
+        case DebuggerPDP10.REGS.C0:
+            value = (cpu.regPS & PDP10.PSFLAG.CARRY0)? 1 : 0;
+            break;
+        case DebuggerPDP10.REGS.C1:
+            value = (cpu.regPS & PDP10.PSFLAG.CARRY1)? 1 : 0;
+            break;
+        case DebuggerPDP10.REGS.OV:
+            value = (cpu.regPS & PDP10.PSFLAG.OVFL)? 1 : 0;
+            break;
+        case DebuggerPDP10.REGS.ND:
+            value = (cpu.regPS & PDP10.PSFLAG.NO_DIVIDE)? 1 : 0;
+            break;
+        case DebuggerPDP10.REGS.PD:
+            value = (cpu.regPS & PDP10.PSFLAG.PD_OVFL)? 1 : 0;
             break;
         }
         return value;
+    }
+
+    /**
+     * setRegValue(iReg, value)
+     *
+     * @this {DebuggerPDP10}
+     * @param {number} iReg
+     * @param {number} value
+     */
+    setRegValue(iReg, value)
+    {
+        var flag = 0;
+        var cpu = this.cpu;
+
+        switch(iReg) {
+        case DebuggerPDP10.REGS.PC:
+            cpu.setPC(value);
+            this.setAddr(this.dbgAddrCode, cpu.getPC());
+            break;
+        case DebuggerPDP10.REGS.C0:
+            flag = PDP10.PSFLAG.CARRY0;
+            break;
+        case DebuggerPDP10.REGS.C1:
+            flag = PDP10.PSFLAG.CARRY1;
+            break;
+        case DebuggerPDP10.REGS.OV:
+            flag = PDP10.PSFLAG.OVFL;
+            break;
+        case DebuggerPDP10.REGS.ND:
+            flag = PDP10.PSFLAG.NO_DIVIDE;
+            break;
+        case DebuggerPDP10.REGS.PD:
+            flag = PDP10.PSFLAG.PD_OVFL;
+            break;
+        }
+        if (flag) {
+            if (value) {
+                cpu.regPS |= flag;
+            } else {
+                cpu.regPS &= ~flag;
+            }
+        }
     }
 
     /**
@@ -1092,17 +1151,15 @@ class DebuggerPDP10 extends Debugger {
      * @param {boolean} [fRegs] (default is true)
      * @param {string} [sCmd]
      */
-    updateStatus(fRegs, sCmd)
+    updateStatus(fRegs = true, sCmd)
     {
         if (!this.fInit) return;
-
-        if (fRegs === undefined) fRegs = true;
 
         if (sCmd) {
             this.println(DebuggerPDP10.PROMPT + sCmd);
         }
 
-        this.setAddr(this.dbgAddrNextCode, this.cpu.getPC());
+        this.setAddr(this.dbgAddrCode, this.cpu.getPC());
 
         /*
          * this.nStep used to be a simple boolean, but now it's 0 (or undefined)
@@ -1189,7 +1246,7 @@ class DebuggerPDP10 extends Debugger {
         this.cInstructions = this.cInstructionsStart = 0;
         this.sMessagePrev = null;
         this.nCycles = 0;
-        this.setAddr(this.dbgAddrNextCode, this.cpu.getPC());
+        this.setAddr(this.dbgAddrCode, this.cpu.getPC());
         /*
          * fRunning is set by start() and cleared by stop().  In addition, we clear
          * it here, so that if the CPU is reset while running, we can prevent stop()
@@ -1211,10 +1268,11 @@ class DebuggerPDP10 extends Debugger {
     save()
     {
         var state = new State(this);
-        state.set(0, this.packAddr(this.dbgAddrNextCode));
-        state.set(1, this.packAddr(this.dbgAddrAssemble));
-        state.set(2, [this.aPrevCmds, this.fAssemble, this.bitsMessage]);
-        state.set(3, this.aSymbolTable);
+        state.set(0, this.packAddr(this.dbgAddrCode));
+        state.set(1, this.packAddr(this.dbgAddrData));
+        state.set(2, this.packAddr(this.dbgAddrAssemble));
+        state.set(3, [this.aPrevCmds, this.fAssemble, this.bitsMessage]);
+        state.set(4, this.aSymbolTable);
         return state.data();
     }
 
@@ -1230,15 +1288,16 @@ class DebuggerPDP10 extends Debugger {
     restore(data)
     {
         var i = 0;
-        if (data[2] !== undefined) {
-            this.dbgAddrNextCode = this.unpackAddr(data[i++]);
+        if (data[3] !== undefined) {
+            this.dbgAddrCode = this.unpackAddr(data[i++]);
+            this.dbgAddrData = this.unpackAddr(data[i++]);
             this.dbgAddrAssemble = this.unpackAddr(data[i++]);
             this.aPrevCmds = data[i][0];
             if (typeof this.aPrevCmds == "string") this.aPrevCmds = [this.aPrevCmds];
             this.fAssemble = data[i][1];
             this.bitsMessage |= data[i][2];     // keep our current message bits set, and simply "add" any extra bits defined by the saved state
         }
-        if (data[3]) this.aSymbolTable = data[3];
+        if (data[4]) this.aSymbolTable = data[4];
         return true;
     }
 
@@ -1400,7 +1459,7 @@ class DebuggerPDP10 extends Debugger {
     findInstruction(opCode, fOperands = true)
     {
         var opNum, opMask, aModes, iMode = 0;
-        var op = (opCode / PDP10.OPCODE.OPSHIFT)|0;
+        var op = (opCode / PDP10.OPCODE.OP_SCALE)|0;
 
         for (var mask in DebuggerPDP10.OPTABLE) {
             var opMasks = DebuggerPDP10.OPTABLE[mask];
@@ -1408,7 +1467,7 @@ class DebuggerPDP10 extends Debugger {
             if (opNum) {
                 opMask = +mask;
                 /*
-                 * When we extracted op from opCode using OPSHIFT, we included 6 additional bits
+                 * When we extracted op from opCode using OP_SCALE, we included 6 additional bits
                  * to help distinguish OPIO instructions from non-OPIO instructions.  But for the
                  * following tests, we don't need those bits, so we get rid of them now.
                  */
@@ -1438,16 +1497,25 @@ class DebuggerPDP10 extends Debugger {
         if (!fOperands) {
             if (!opNum) sOperation = "";
         } else {
-            sOperation = Str.pad(sOperation, 8);
             if (!opNum) {
-                sOperation += this.toStrWord(opCode);
+                sOperation = Str.pad(sOperation, 8) + this.toStrWord(opCode);
             } else {
+                var n, sOperand;
                 if (opMask == PDP10.OPCODE.OPIO) {
-                    sOperation += this.toStrBase((opCode / PDP10.OPCODE.IOSHIFT) & PDP10.OPCODE.IOMASK, -1);
+                    n = (opCode / PDP10.OPCODE.IO_SCALE) & PDP10.OPCODE.IO_MASK;
+                    sOperand = this.toStrBase(n, -1);
                 } else {
-                    sOperation += this.toStrBase((opCode >> PDP10.OPCODE.A_SHIFT) & PDP10.OPCODE.A_MASK, -1);
+                    n = (opCode >> PDP10.OPCODE.A_SHIFT) & PDP10.OPCODE.A_MASK;
+                    sOperand = this.toStrBase(n, -1);
+                    if (opNum == DebuggerPDP10.OPS.JFCL) {
+                        var opAlt = DebuggerPDP10.JFCL[n];
+                        if (opAlt) {
+                            sOperation = DebuggerPDP10.OPNAMES[opAlt];
+                            sOperand = "";
+                        }
+                    }
                 }
-                sOperation += ',';
+                sOperation = Str.pad(sOperation, 8) + (sOperand? sOperand + ',' : "");
                 if (opCode & PDP10.OPCODE.I_BIT) sOperation += '@';
                 sOperation += this.toStrBase(opCode & PDP10.OPCODE.Y_MASK, -1);
                 var i = (opCode >> PDP10.OPCODE.X_SHIFT) & PDP10.OPCODE.X_MASK;
@@ -1499,7 +1567,7 @@ class DebuggerPDP10 extends Debugger {
     }
 
     /**
-     * parseInstruction(sOpCode, sOperands, addr)
+     * parseInstruction(sOpCode, sOperands, dbgAddr)
      *
      * @this {DebuggerPDP10}
      * @param {string} sOpCode
@@ -1509,8 +1577,20 @@ class DebuggerPDP10 extends Debugger {
      */
     parseInstruction(sOpCode, sOperands, dbgAddr)
     {
-        var opCode = -1, opMask;
+        var opCode = -1, opMask, opNum;
         var sMnemonic = sOpCode.toUpperCase();
+
+        /*
+         * Perform any alternate mnemonic substitutions first
+         */
+        for (var n in DebuggerPDP10.JFCL) {
+            opNum = DebuggerPDP10.JFCL[n];
+            if (sMnemonic == DebuggerPDP10.OPNAMES[opNum]) {
+                sMnemonic = DebuggerPDP10.OPNAMES[DebuggerPDP10.OPS.JFCL];
+                sOperands = this.toStrBase(+n) + ',' + sOperands;
+                break;
+            }
+        }
 
         for (var mask in DebuggerPDP10.OPTABLE) {
 
@@ -1536,7 +1616,7 @@ class DebuggerPDP10 extends Debugger {
             var opMode = 0;
             for (var op in opMasks) {
 
-                var opNum = opMasks[op];
+                opNum = opMasks[op];
                 for (var iMode = 0; iMode < aModes.length; iMode++) {
 
                     var sMode = aModes[iMode];
@@ -1549,7 +1629,7 @@ class DebuggerPDP10 extends Debugger {
                         } else {
                             opMode = ((iMode & 0o3) << 1) | ((iMode & 0o14) << 2);
                         }
-                        opCode = (op | (opMode << 6)) * PDP10.OPCODE.OPSHIFT;
+                        opCode = (op | (opMode << 6)) * PDP10.OPCODE.OP_SCALE;
                         break;
                     }
                 }
@@ -1579,23 +1659,31 @@ class DebuggerPDP10 extends Debugger {
                         opCode = -1;
                         break;
                     }
-                    var operand = this.parseExpression(match[2]);
+                    sOperand = match[2];
+                    if (i) {
+                        /*
+                         * If this is NOT the first operand, then replace all periods NOT preceded
+                         * by a digit with the current address.
+                         */
+                        sOperand = sOperand.replace(/(^|[^0-9])\./g, "$1" + this.toStrAddr(dbgAddr));
+                    }
+                    var operand = this.parseExpression(sOperand);
                     if (operand == undefined) {
                         opCode = -1;
                         break;
                     }
                     if (!i && aOperands.length > 1) {
                         if (opMask == PDP10.OPCODE.OPIO) {
-                            if (operand < 0 || operand > PDP10.OPCODE.IOMASK) {
-                                this.println("device code out of range: " + match[2]);
+                            if (operand < 0 || operand > PDP10.OPCODE.IO_MASK) {
+                                this.println("device code out of range: " + sOperand);
                                 opCode = -1;
                                 break;
                             }
-                            opCode += (operand * PDP10.OPCODE.IOSHIFT);
+                            opCode += (operand * PDP10.OPCODE.IO_SCALE);
                         }
                         else {
                             if (operand < 0 || operand > PDP10.OPCODE.A_MASK) {
-                                this.println("accumulator address out of range: " + match[2]);
+                                this.println("accumulator address out of range: " + sOperand);
                                 opCode = -1;
                                 break;
                             }
@@ -1604,19 +1692,20 @@ class DebuggerPDP10 extends Debugger {
                         continue;
                     }
                     if (operand < 0 || operand > PDP10.OPCODE.Y_MASK) {
-                        this.println("memory address out of range: " + match[2]);
+                        this.println("memory address out of range: " + sOperand);
                         opCode = -1;
                         break;
                     }
                     opCode += operand;
-                    if (match[3]) {
-                        operand = this.parseExpression(match[3]);
+                    sOperand = match[3];
+                    if (sOperand) {
+                        operand = this.parseExpression(sOperand);
                         if (operand == undefined) {
                             opCode = -1;
                             break;
                         }
                         if (operand < 0 || operand > PDP10.OPCODE.X_MASK) {
-                            this.println("memory index out of range: " + match[3]);
+                            this.println("memory index out of range: " + sOperand);
                             opCode = -1;
                             break;
                         }
@@ -2055,7 +2144,7 @@ class DebuggerPDP10 extends Debugger {
     {
         var sReg = this.getRegName(iReg);
         if (sReg) {
-            var nBits = (iReg == DebuggerPDP10.REGS.RA? 23 : 18);
+            var nBits = (iReg >= DebuggerPDP10.REGS.C0? 1 : (iReg == DebuggerPDP10.REGS.RA? 23 : 18));
             sReg += '=' + this.toStrBase(this.getRegValue(iReg), nBits) + ' ';
         }
         return sReg;
@@ -2070,18 +2159,22 @@ class DebuggerPDP10 extends Debugger {
     getMiscDump()
     {
         var sDump = "";
-        sDump += this.getRegOutput(DebuggerPDP10.REGS.PC) + this.getRegOutput(DebuggerPDP10.REGS.RA) + this.getRegOutput(DebuggerPDP10.REGS.EA);
+        for (var i = 0; i < DebuggerPDP10.REGNAMES.length; i++) {
+            sDump += this.getRegOutput(i);
+        }
         return sDump;
     }
 
     /**
      * getRegDump(fMisc)
      *
+     * For now, fMisc defaults to true, providing a full register dump by default.
+     *
      * @this {DebuggerPDP10}
-     * @param {boolean} [fMisc] (true to include misc registers)
+     * @param {boolean|undefined} [fMisc] (true to include misc registers)
      * @return {string}
      */
-    getRegDump(fMisc)
+    getRegDump(fMisc = true)
     {
         var sDump = "";
         for (var i = 0; i < 16; i++) {
@@ -2384,11 +2477,10 @@ class DebuggerPDP10 extends Debugger {
      */
     doAssemble(asArgs)
     {
-        var dbgAddr = this.parseAddr(asArgs[1], true);
+        var dbgAddr = this.parseAddr(asArgs[1], this.dbgAddrAssemble);
         if (!dbgAddr) return;
 
         var sOpCode = asArgs[2];
-        this.dbgAddrAssemble = dbgAddr;
 
         if (sOpCode == undefined) {
             this.println("begin assemble at " + this.toStrAddr(dbgAddr));
@@ -2405,10 +2497,7 @@ class DebuggerPDP10 extends Debugger {
 
         if (opCode >= 0) {
             this.setWord(dbgAddr, opCode);
-            /*
-             * Since getInstruction() also updates the specified address, dbgAddrAssemble is automatically advanced.
-             */
-            this.println(this.getInstruction(this.dbgAddrAssemble));
+            this.println(this.getInstruction(dbgAddr));
         }
     }
 
@@ -2470,7 +2559,7 @@ class DebuggerPDP10 extends Debugger {
 
         var dbgAddr = this.newAddr();
         if (sAddr != '*') {
-            dbgAddr = this.parseAddr(sAddr, true, true);
+            dbgAddr = this.parseAddr(sAddr, this.dbgAddrCode);
             if (!dbgAddr) return;
         }
 
@@ -2606,7 +2695,7 @@ class DebuggerPDP10 extends Debugger {
             return;
         }
 
-        var dbgAddr = this.parseAddr(sAddr);
+        var dbgAddr = this.parseAddr(sAddr, this.dbgAddrData);
         if (!dbgAddr) return;
 
         var len = 0;
@@ -2662,7 +2751,7 @@ class DebuggerPDP10 extends Debugger {
         }
 
         if (sDump) this.println(sDump);
-        this.copyAddr(this.dbgAddrNextData, dbgAddr);
+
         this.nBase = nBase;
     }
 
@@ -2688,7 +2777,7 @@ class DebuggerPDP10 extends Debugger {
             this.println("\tew [a] [...]  edit words at address a");
             return;
         }
-        var dbgAddr = this.parseAddr(sAddr);
+        var dbgAddr = this.parseAddr(sAddr, this.dbgAddrData);
         if (!dbgAddr) return;
         for (var i = 2; i < asArgs.length; i++) {
             var vNew = this.parseExpression(asArgs[i]);
@@ -2815,7 +2904,7 @@ class DebuggerPDP10 extends Debugger {
     {
         var sSymbol = null;
 
-        var dbgAddr = this.parseAddr(sAddr, true);
+        var dbgAddr = this.parseAddr(sAddr);
         if (dbgAddr) {
             var addr = this.getAddr(dbgAddr);
             var aSymbol = this.findSymbol(dbgAddr, true);
@@ -3026,8 +3115,8 @@ class DebuggerPDP10 extends Debugger {
             return;
         }
 
-        var fMisc = false;
         var cpu = this.cpu;
+        var fMisc = undefined;
         if (fInstruction == null) fInstruction = true;
 
         if (asArgs != null && asArgs.length > 1) {
@@ -3051,19 +3140,17 @@ class DebuggerPDP10 extends Debugger {
                     return;
                 }
 
-                var w = this.parseExpression(sValue);
-                if (w === undefined) return;
+                var value = this.parseExpression(sValue);
+                if (value === undefined) return;
 
-                var sRegMatch = sReg.toUpperCase();
-                switch (sRegMatch) {
-                case "PC":
-                    cpu.setPC(w);
-                    this.setAddr(this.dbgAddrNextCode, cpu.getPC());
-                    break;
-                default:
+                var iReg = this.getRegIndex(sReg);
+                if (iReg < 0) {
                     this.println("unknown register: " + sReg);
                     return;
                 }
+
+                this.setRegValue(iReg, value);
+
                 this.cmp.updateDisplays();
                 this.println("updated registers:");
             }
@@ -3072,8 +3159,8 @@ class DebuggerPDP10 extends Debugger {
         this.println(this.getRegDump(fMisc));
 
         if (fInstruction) {
-            this.setAddr(this.dbgAddrNextCode, cpu.getPC());
-            this.doUnassemble(this.toStrAddr(this.dbgAddrNextCode));
+            this.setAddr(this.dbgAddrCode, cpu.getPC());
+            this.doUnassemble(this.toStrAddr(this.dbgAddrCode));
         }
     }
 
@@ -3092,7 +3179,7 @@ class DebuggerPDP10 extends Debugger {
             this.fIgnoreNextCheckFault = true;
         }
         if (sAddr !== undefined) {
-            var dbgAddr = this.parseAddr(sAddr, true);
+            var dbgAddr = this.parseAddr(sAddr);
             if (!dbgAddr) return;
             this.parseAddrOptions(dbgAddr, sOptions);
             this.setTempBreakpoint(dbgAddr);
@@ -3133,15 +3220,16 @@ class DebuggerPDP10 extends Debugger {
      */
     doStep(sCmd, sOption)
     {
-        if (sOption == '?') {
+        var fCallStep = true;
+        var nRegs = (sCmd == "p"? 0 : (sCmd == "pr"? 1 : -1));
+
+        if (sOption == '?' || nRegs < 0) {
             this.println("step commands:");
             this.println("\tp\tstep over instruction");
             this.println("\tpr\tstep over instruction with register update");
             return;
         }
 
-        var fCallStep = true;
-        var nRegs = (sCmd == "pr"? 1 : 0);
         /*
          * Set up the value for this.nStep (ie, 1 or 2) depending on whether the user wants
          * a subsequent register dump ("pr") or not ("p").
@@ -3347,7 +3435,7 @@ class DebuggerPDP10 extends Debugger {
      */
     doUnassemble(sAddr, sAddrEnd, nLines)
     {
-        var dbgAddr = this.parseAddr(sAddr, true);
+        var dbgAddr = this.parseAddr(sAddr, this.dbgAddrCode);
         if (!dbgAddr) return;
 
         if (nLines === undefined) nLines = 1;
@@ -3360,7 +3448,7 @@ class DebuggerPDP10 extends Debugger {
                 if (n != null) nLines = n;
             }
             else {
-                var dbgAddrEnd = this.parseAddr(sAddrEnd, true);
+                var dbgAddrEnd = this.parseAddr(sAddrEnd);
                 if (!dbgAddrEnd || dbgAddrEnd.addr < dbgAddr.addr) return;
 
                 nBytes = dbgAddrEnd.addr - dbgAddr.addr;
@@ -3378,7 +3466,6 @@ class DebuggerPDP10 extends Debugger {
         }
 
         var nPrinted = 0;
-        var sInstruction;
 
         while (nBytes > 0 && nLines--) {
 
@@ -3395,16 +3482,12 @@ class DebuggerPDP10 extends Debugger {
                     this.println(sLabel);
                 }
             }
-
             if (aSymbol[3]) {
                 sComment = aSymbol[3];
                 nSequence = null;
             }
-
-            sInstruction = this.getInstruction(dbgAddr, sComment, nSequence);
-
-            this.println(sInstruction);
-            this.copyAddr(this.dbgAddrNextCode, dbgAddr);
+            this.copyAddr(this.dbgAddrAssemble, dbgAddr);
+            this.println(this.getInstruction(dbgAddr, sComment, nSequence));
             nBytes -= dbgAddr.addr - addr;
             nPrinted++;
         }
@@ -3456,7 +3539,6 @@ class DebuggerPDP10 extends Debugger {
             if (!sCmd.length || sCmd == "end") {
                 if (this.fAssemble) {
                     this.println("ended assemble at " + this.toStrAddr(this.dbgAddrAssemble));
-                    this.copyAddr(this.dbgAddrNextCode, this.dbgAddrAssemble);
                     this.fAssemble = false;
                 }
                 sCmd = "";
@@ -3748,7 +3830,7 @@ if (DEBUGGER) {
         HRL:    5,      HRLZ:   6,      HRLO:   7,      HRLE:   8,
         HRR:    9,      HRRZ:   10,     HRRO:   11,     HRRE:   12,
         HLR:    13,     HLRZ:   14,     HLRO:   15,     HLRE:   16,
-        MOV:    17,     MOVS:   18,     MOVN:   19,     MOVM:   20,
+        MOVE:   17,     MOVS:   18,     MOVN:   19,     MOVM:   20,
         EXCH:   21,     BLT:    22,     PUSH:   23,     POP:    24,
         LDB:    25,     DPB:    26,     IBP:    27,     ILDB:   28,
         IDPB:   29,     SETZ:   30,     SETO:   31,     SETA:   32,
@@ -3769,7 +3851,8 @@ if (DEBUGGER) {
         JSA:    89,     JRA:    90,     PUSHJ:  91,     POPJ:   92,
         BLKI:   93,     DATAI:  94,     BLKO:   95,     DATAO:  96,
         CONO:   97,     CONI:   98,     CONSZ:  99,     CONSO:  100,
-        UUO:    101
+        UUO:    101,    JOV:    102,    JCRY0:  103,    JCRY1:  104,
+        JCRY:   105,    JFOV:   106
     };
 
     /*
@@ -3781,7 +3864,7 @@ if (DEBUGGER) {
         "HRL",          "HRLZ",         "HRLO",         "HRLE",
         "HRR",          "HRRZ",         "HRRO",         "HRRE",
         "HLR",          "HLRZ",         "HLRO",         "HLRE",
-        "MOV",          "MOVS",         "MOVN",         "MOVM",
+        "MOVE",         "MOVS",         "MOVN",         "MOVM",
         "EXCH",         "BLT",          "PUSH",         "POP",
         "LDB",          "DPB",          "IBP",          "ILDB",
         "IDPB",         "SETZ",         "SETO",         "SETA",
@@ -3802,17 +3885,23 @@ if (DEBUGGER) {
         "JSA",          "JRA",          "PUSHJ",        "POPJ",
         "BLKI",         "DATAI",        "BLKO",         "DATAO",
         "CONO",         "CONI",         "CONSZ",        "CONSO",
-        "UUO"
+        "UUO",          "JOV",          "JCRY0",        "JCRY1",
+        "JCRY",         "JFOV"
     ];
 
     DebuggerPDP10.REGS = {
         PC:     0,
         RA:     1,
-        EA:     2
+        EA:     2,
+        C0:     3,                              // single-bit "register" representing the Carry 0 flag
+        C1:     4,                              // single-bit "register" representing the Carry 1 flag
+        OV:     5,                              // single-bit "register" representing the Overflow flag
+        ND:     6,                              // single-bit "register" representing the No Divide flag
+        PD:     7,                              // single-bit "register" representing the Pushdown Overflow flag
     };
 
     DebuggerPDP10.REGNAMES = [
-        "PC", "RA", "EA"
+        "PC", "RA", "EA", "C0", "C1", "OV", "ND", "PD"
     ];
 
     /*
@@ -3866,7 +3955,7 @@ if (DEBUGGER) {
             0o16400: DebuggerPDP10.OPS.FMPR,
             0o17000: DebuggerPDP10.OPS.FDV,
             0o17400: DebuggerPDP10.OPS.FDVR,
-            0o20000: DebuggerPDP10.OPS.MOV,
+            0o20000: DebuggerPDP10.OPS.MOVE,
             0o20400: DebuggerPDP10.OPS.MOVS,
             0o21000: DebuggerPDP10.OPS.MOVN,
             0o21400: DebuggerPDP10.OPS.MOVM,
@@ -3876,14 +3965,14 @@ if (DEBUGGER) {
             0o23400: DebuggerPDP10.OPS.DIV,
             0o27000: DebuggerPDP10.OPS.ADD,
             0o27400: DebuggerPDP10.OPS.SUB,
-            0o40000: DebuggerPDP10.OPS.SETZ,
+            0o40000: DebuggerPDP10.OPS.SETZ,    // MACRO alias: CLEAR
             0o40400: DebuggerPDP10.OPS.AND,
             0o41000: DebuggerPDP10.OPS.ANDCA,
             0o41400: DebuggerPDP10.OPS.SETM,
             0o42000: DebuggerPDP10.OPS.ANDCM,
             0o42400: DebuggerPDP10.OPS.SETA,
             0o43000: DebuggerPDP10.OPS.XOR,
-            0o43400: DebuggerPDP10.OPS.IOR,
+            0o43400: DebuggerPDP10.OPS.IOR,     // MACRO alias: OR
             0o44000: DebuggerPDP10.OPS.ANDCB,
             0o44400: DebuggerPDP10.OPS.EQV,
             0o45000: DebuggerPDP10.OPS.SETCA,
@@ -3940,6 +4029,20 @@ if (DEBUGGER) {
     DebuggerPDP10.OPMODES = ["", "I", "M", "S"];
     DebuggerPDP10.OPCOMPS = ["", "L", "E", "LE", "A", "GE", "N", "G"];
     DebuggerPDP10.OPTESTS = ["N", "NE", "NA", "NN", "Z", "ZE", "ZA", "ZN", "C", "CE", "CA", "CN", "O", "OE", "OA", "ON"];
+
+    /*
+     * Apparently, DEC's MACRO program permits "JFCL xxx" (with a single argument) as an alternate for "JFCL 0,xxx"
+     * (which in turn is long-hand for "No-op", since JFCL with 0 does nothing).  If we allowed JFCL to be both a
+     * primary and a alternate mnemonic, that would complicate our simplistic parseInstruction() logic, so we don't.
+     */
+    DebuggerPDP10.JFCL = {
+    //  0o00:    DebuggerPDP10.OPS.JFCL,
+        0o10:    DebuggerPDP10.OPS.JOV,
+        0o04:    DebuggerPDP10.OPS.JCRY0,
+        0o02:    DebuggerPDP10.OPS.JCRY1,
+        0o06:    DebuggerPDP10.OPS.JCRY,
+        0o01:    DebuggerPDP10.OPS.JFOV
+    };
 
     DebuggerPDP10.HISTORY_LIMIT = DEBUG? 100000 : 1000;
 

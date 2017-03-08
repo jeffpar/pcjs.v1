@@ -690,7 +690,8 @@ class CPUStatePDP11 extends CPUPDP11 {
             this.opLast,
             this.pswTrap,
             this.trapReason,
-            this.trapVector
+            this.trapVector,
+            this.addrReset
         ]);
         state.set(1, [this.getPSW(),this.getMMR0(),this.getMMR1(),this.getMMR2(),this.getMMR3()]);
         state.set(2, [this.nTotalCycles, this.getSpeed(), this.flags.autoStart]);
@@ -731,7 +732,8 @@ class CPUStatePDP11 extends CPUPDP11 {
             this.opLast,
             this.pswTrap,
             this.trapReason,
-            this.trapVector
+            this.trapVector,
+            this.addrReset
         ] = data[0];
 
         var a = data[1];
