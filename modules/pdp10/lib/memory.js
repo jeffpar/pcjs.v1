@@ -30,7 +30,6 @@
 
 if (NODE) {
     var Component = require("../../shared/lib/component");
-    var Int36 = require("../../shared/lib/int36");
     var PDP10 = require("./defines");
     var MessagesPDP10 = require("./messages");
 }
@@ -202,19 +201,28 @@ class MemoryPDP10 {
      * @this {MemoryPDP10}
      * @param {number} [off] (optional starting word offset within block)
      * @param {number} [len] (optional maximum number of words; default is the entire block)
-     * @param {number} [pattern]
+     * @param {number} [pattern] (default is zero)
      */
-    zero(off, len, pattern)
+    zero(off, len, pattern = 0)
     {
-        var i;
-        off = off || 0;
-        pattern = Int36.validate(pattern || 0);
         /*
-         * NOTE: If len happens to be larger than the block, that's OK, because we also bounds-check the index.
+         * NOTE: If len is larger than the block, that's OK, because we also bounds-check the index.
          */
+        off = off || 0;
         if (len === undefined) len = this.size;
         Component.assert(off >= 0 && off < this.size);
-        for (i = off; len-- && i < this.size; i++) this.writeWordDirect(pattern, off, this.addr + off);
+
+        /*
+         * Although it's expected that most callers will supply unsigned 36-bit values, we're nice about
+         * converting any signed values to their unsigned (two's complement) counterpart, provided they are
+         * within the acceptable range.  Any values outside that range will be dealt with afterward.
+         */
+        if (pattern < 0 && pattern >= -PDP10.MIN_NEG36) {
+            pattern += PDP10.WORD_LIMIT;
+        }
+        pattern = Math.trunc(Math.abs(pattern)) % PDP10.WORD_LIMIT;
+
+        for (var i = off; len-- && i < this.size; i++) this.writeWordDirect(pattern, off, this.addr + off);
     }
 
     /**

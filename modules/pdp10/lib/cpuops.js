@@ -338,11 +338,8 @@ PDP10.opILDB = function(op, acc)
      * opIBP() on phase 1.
      */
     if (this.regBP < 0) {
-        //noinspection JSUnresolvedFunction
         PDP10.opIBP.call(this, op, acc);
     }
-
-    //noinspection JSUnresolvedFunction
     PDP10.opLDB.call(this, op, acc);
 };
 
@@ -375,7 +372,6 @@ PDP10.opLDB = function(op, acc)
     if (this.regBP < 0) {
         this.regBP = w;
         this.regRA = this.regEA | PDP10.OPCODE.I_BIT;
-        this.advancePC(-1);
         return;
     }
     var p = (this.regBP / PDP10.OPCODE.P_SCALE) & PDP10.OPCODE.P_MASK;
@@ -428,11 +424,8 @@ PDP10.opIDPB = function(op, acc)
      * opIBP() on phase 1.
      */
     if (this.regBP < 0) {
-        //noinspection JSUnresolvedFunction
         PDP10.opIBP.call(this, op, acc);
     }
-
-    //noinspection JSUnresolvedFunction
     PDP10.opDPB.call(this, op, acc);
 };
 
@@ -1668,7 +1661,15 @@ PDP10.opLSH = function(op, acc)
 };
 
 /**
- * opJFFO(0o243000)
+ * opJFFO(0o243000): Jump if Find First One
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-56:
+ *
+ *      If AC contains zero, clear AC A+1 and go on to the next instruction in sequence.
+ *
+ *      If AC is not zero, count the number of leading 0s in it (0s to the left of the leftmost 1),
+ *      and place the count in AC A+1.  Take the next instruction from location E and continue sequential
+ *      operation from there.  In either case AC is unaffected, the original contents of AC A +1 are lost.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -1676,7 +1677,16 @@ PDP10.opLSH = function(op, acc)
  */
 PDP10.opJFFO = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = 0;
+    var src = this.readWord(acc);
+    if (src) {
+        while (src < PDP10.INT_LIMIT) {
+            dst++;
+            src *= 2;
+        }
+        this.setPC(this.regEA);
+    }
+    this.writeWord((acc + 1) & 0o17, dst);
 };
 
 /**
@@ -2068,7 +2078,15 @@ PDP10.opJFCL = function(op, acc)
 };
 
 /**
- * opXCT(0o256000)
+ * opXCT(0o256000): Execute
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-56:
+ *
+ *      Execute the contents of location E as an instruction.  Any instruction may be executed, including another XCT.
+ *      If an XCT executes a skip instruction, the skip is relative to the location of the XCT (the first XCT if there
+ *      are several in a chain).  If an XCT executes a jump, program flow is altered as specified by the jump (no matter
+ *      how many XCTs precede a jump instruction, when PC is saved it contains an address one greater than the location
+ *      of the first XCT in the chain).
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2076,7 +2094,7 @@ PDP10.opJFCL = function(op, acc)
  */
 PDP10.opXCT = function(op, acc)
 {
-    this.opUndefined(op);
+    this.regXC = this.regEA;
 };
 
 /**
@@ -5401,7 +5419,6 @@ PDP10.doADD = function(dst, src)
      * only possible out-of-bounds value is a result >= WORD_LIMIT, which the mod cures.
      */
     var res = (dst + src) % PDP10.WORD_LIMIT;
-    //noinspection JSUnresolvedFunction
     PDP10.setAddFlags.call(this, dst, src, res);
     return res;
 };
@@ -5632,7 +5649,6 @@ PDP10.doSUB = function(dst, src)
      * We can leverage setAddFlags() by treating the subtraction as addition;
      * since res = dst - src, it is also true that dst = res + src.
      */
-    //noinspection JSUnresolvedFunction
     PDP10.setAddFlags.call(this, res, src, dst);
     return res;
 };

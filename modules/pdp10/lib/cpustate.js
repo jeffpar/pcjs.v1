@@ -176,6 +176,7 @@ class CPUStatePDP10 extends CPUPDP10 {
     {
         this.regEA = this.regRA = this.regOP = 0;
         this.regPC = this.lastPC = this.addrReset;
+        this.regXC = -1;        // if >= 0 this supersedes regPC (refers to an opcode from XCT)
         this.regBP = -1;        // active byte pointer (-1 if none)
         this.regPS = 0;         // assorted processor flags (see PSFLAG bit definitions)
         this.regExt = 0;        // internal "extension" register used for 72-bit calculations (eg, MUL)
@@ -283,6 +284,7 @@ class CPUStatePDP10 extends CPUPDP10 {
             this.regRA,
             this.regOP,
             this.regPC,
+            this.regXC,
             this.regBP,
             this.regPS,
             this.opFlags,
@@ -315,6 +317,7 @@ class CPUStatePDP10 extends CPUPDP10 {
             this.regRA,
             this.regOP,
             this.regPC,
+            this.regXC,
             this.regBP,
             this.regPS,
             this.opFlags,
@@ -394,8 +397,12 @@ class CPUStatePDP10 extends CPUPDP10 {
     {
         if ((this.regRA & PDP10.OPCODE.I_BIT)) {
             this.regRA = this.readWord(this.regEA);
+        } else if (this.regXC >= 0) {
+            this.regRA = this.regOP = this.readWord(this.regXC);
+            this.regXC = -1;
         } else {
             this.regRA = this.regOP = this.readWord(this.lastPC = this.regPC);
+            this.regPC = (this.regPC + 1) % PDP10.ADDR_LIMIT;
         }
 
         /*
@@ -418,10 +425,8 @@ class CPUStatePDP10 extends CPUPDP10 {
         this.regEA = this.regRA & PDP10.OPCODE.Y_MASK;
         var x = (this.regRA >> PDP10.OPCODE.X_SHIFT) & PDP10.OPCODE.X_MASK;
         if (x) this.regEA = (this.regEA + this.readWord(x)) & PDP10.ADDR_MASK;
-        if (this.regRA & PDP10.OPCODE.I_BIT) return -1;
 
-        this.regPC = (this.regPC + 1) % PDP10.ADDR_LIMIT;
-        return (this.regOP / PDP10.OPCODE.A_SCALE)|0;
+        return (this.regRA & PDP10.OPCODE.I_BIT)? -1 : ((this.regOP / PDP10.OPCODE.A_SCALE)|0);
     }
 
     /**
