@@ -174,12 +174,17 @@ class CPUStatePDP10 extends CPUPDP10 {
      */
     initCPU()
     {
-        this.regEA = this.regRA = this.regOP = 0;
-        this.regPC = this.lastPC = this.addrReset;
-        this.regXC = -1;        // if >= 0 this supersedes regPC (refers to an opcode from XCT)
-        this.regBP = -1;        // active byte pointer (-1 if none)
-        this.regPS = 0;         // assorted processor flags (see PSFLAG bit definitions)
-        this.regExt = 0;        // internal "extension" register used for 72-bit calculations (eg, MUL)
+        this.regEA  = this.regRA = this.regOP = 0;
+        this.regPC  = this.lastPC = this.addrReset;
+        this.regXC  = -1;       // if >= 0 this supersedes regPC (refers to an opcode from XCT)
+        this.regBP  = -1;       // active byte pointer (-1 if none)
+        this.regPS  =  0;       // assorted processor flags (see PSFLAG bit definitions)
+        this.regExt =  0;       // internal "extension" register used for 72-bit MUL and DIV calculations
+
+        this.regRes = [0, 0];   // four internal "double-length" registers used for 72-bit DIV calculations
+        this.regPow = [0, 0];
+        this.regDiv = [0, 0];
+        this.regRem = [0, 0];
 
         /*
          * This is queried and displayed by the Panel when it's not displaying its own ADDRESS register

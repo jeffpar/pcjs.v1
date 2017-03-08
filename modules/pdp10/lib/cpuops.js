@@ -5544,7 +5544,7 @@ PDP10.doDIV = function(dst, ext, src)
     }
 
     if (ext >= src) {
-        this.regPS |= PDP10.PSFLAG.NO_DIVIDE;
+        this.regPS |= PDP10.PSFLAG.NO_DIVIDE | PDP10.PSFLAG.OVFL;
         return -1;
     }
 
@@ -5560,33 +5560,31 @@ PDP10.doDIV = function(dst, ext, src)
      * to use bit-wise operators on them, because those would operate on only the low 32 bits.
      * Stick with the double worker functions I've created, and trust your JavaScript engine to
      * inline/optimize the code.
-     *
-     * TODO: Consider pre-allocating these double-length arrays to minimize the impact on GC.
      */
-    var dRes = [0, 0];
-    var dPow = [1, 0];
-    var dDiv = [src, 0];
-    var dRem = [dst, ext];
+    PDP10.initD(this.regRes, 0, 0);
+    PDP10.initD(this.regPow, 1, 0);
+    PDP10.initD(this.regDiv, src, 0);
+    PDP10.initD(this.regRem, dst, ext);
 
-    while (PDP10.cmpD(dRem, dDiv) > 0) {
-        PDP10.addD(dDiv, dDiv);
-        PDP10.addD(dPow, dPow);
+    while (PDP10.cmpD(this.regRem, this.regDiv) > 0) {
+        PDP10.addD(this.regDiv, this.regDiv);
+        PDP10.addD(this.regPow, this.regPow);
     }
     do {
-        if (PDP10.cmpD(dRem, dDiv) >= 0) {
-            PDP10.subD(dRem, dDiv);
-            PDP10.addD(dRes, dPow);
-            if (PDP10.zeroD(dRem)) break;
+        if (PDP10.cmpD(this.regRem, this.regDiv) >= 0) {
+            PDP10.subD(this.regRem, this.regDiv);
+            PDP10.addD(this.regRes, this.regPow);
+            if (PDP10.zeroD(this.regRem)) break;
         }
-        PDP10.shrD(dDiv);
-        PDP10.shrD(dPow);
-    } while (!PDP10.zeroD(dPow));
+        PDP10.shrD(this.regDiv);
+        PDP10.shrD(this.regPow);
+    } while (!PDP10.zeroD(this.regPow));
 
-    this.assert(!dRes[1], "extended quotient");
-    this.assert(!dRem[1], "extended remainder");
+    this.assert(!this.regRes[1], "extended quotient");
+    this.assert(!this.regRem[1], "extended remainder");
 
-    dst = dRes[0];
-    this.regExt = dRem[0];
+    dst = this.regRes[0];
+    this.regExt = this.regRem[0];
 
     if (fNegQ && dst) {
         dst = PDP10.WORD_LIMIT - dst;
@@ -6013,6 +6011,19 @@ PDP10.cmpD = function(dDst, dSrc)
     var result = dDst[1] - dSrc[1];
     if (!result) result = dDst[0] - dSrc[0];
     return result;
+};
+
+/**
+ * initD(dDst, lo, hi)
+ *
+ * @param {Array.<number>} dDst
+ * @param {number} lo
+ * @param {number} hi
+ */
+PDP10.initD = function(dDst, lo, hi)
+{
+    dDst[0] = lo;
+    dDst[1] = hi;
 };
 
 /**
