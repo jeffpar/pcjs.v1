@@ -60,7 +60,6 @@
     negating any positive number (its octal representation is 400000 000000 and its magnitude is one greater
     than the largest positive number).
 
-
     If ones complements were used for negatives one could read a negative number by attaching significance
     to the as instead of the 1s.  In twos complement notation each negative number is one greater than the
     complement of the positive number of the same magnitude, so one can read a negative number by attaching
@@ -118,25 +117,26 @@
  * @class Int36
  * @property {number} value
  * @property {number|null} extended
+ * @property {number} magnitude
  * @property {number|null} remainder
  * @property {number} error
  * @unrestricted
  *
  * The 'value' property stores the 36-bit value as an unsigned integer.  When the value should be
- * interpreted as a signed quantity, subtract BIT36 whenever value > MAXPOS.
+ * interpreted as a signed quantity, subtract BIT36 whenever value > MAX_POS36.
  *
  * The 'extended' property stores an additional 36 bits of data from a multiplication, and can also
  * provide an additional 36 bits of data to a division.  Internally, it should be null whenever the
  * value is not extended.
  *
+ * The 'magnitude' property is normally 35 for non-extended values and 71 for extended values;
+ * it is set to 70 whenever 'value' and 'extended' are both converted to 35-bit values with matching
+ * signs; see setMagnitude().
+ *
  * The 'remainder' property stores the remainder from the last division.  You should assume it will
  * be set to null by any other operation.
  *
  * The 'error' property records any error(s) from the last operation.
- *
- * NOTE: What we call extended Int36 values DEC refers to as "double length numbers", and they refer
- * to the 'extended' portion as the "low order part" and the 'value' portion as the "high order part",
- * presumably because they number the left-most significant bit 0.
  */
 class Int36 {
     /**
@@ -152,9 +152,9 @@ class Int36 {
      *
      *      0 <= i <= Math.pow(2, 36) - 1
      *
-     * The lower bound is ZERO and the upper bound is Int36.MAXVAL.  Whenever an Int36 value should be
-     * interpreted as a signed value, values above Int36.MAXPOS (ie, values with bit 35 set) should be
-     * converted to their signed counterpart by subtracting the value from Int36.BIT36 (aka MAXVAL + 1);
+     * The lower bound is ZERO and the upper bound is Int36.WORD_MASK.  Whenever an Int36 value should be
+     * interpreted as a signed value, values above Int36.MAX_POS36 (ie, values with bit 35 set) should be
+     * converted to their signed counterpart by subtracting the value from Int36.WORD_LIMIT (aka WORD_MASK + 1);
      * the easiest way to do that is call isNeg() to check the sign bit and then call negate() as
      * appropriate.
      *
@@ -203,16 +203,24 @@ class Int36 {
         if (obj instanceof Int36) {
             this.value = obj.value;
             this.extended = obj.extended;
+            this.magnitude = obj.magnitude;
             this.remainder = obj.remainder;
         }
         else {
             this.value = Int36.validate(obj || 0);
             this.extended = null;
+            this.magnitude = 35;
             /*
              * NOTE: Surprisingly, isNaN(null) is false, whereas isNaN(undefined) is true.  Go figure.
              */
             if (extended != null && !isNaN(extended)) {
                 this.extended = Int36.validate(extended);
+                /*
+                 * Since I'm not requiring there to be any relationship between these independently set values
+                 * (ie, that their sign bits match), we have to treat this Int36 as a signed 71-bit value until
+                 * further notice.
+                 */
+                this.magnitude = 71;
             }
             this.remainder = null;
         }
@@ -231,7 +239,7 @@ class Int36 {
         var s = "", fNeg = false;
         var i36Div = new Int36(10000000000);
         var i36Rem = new Int36();
-        var i36Tmp = new Int36(this.value, this.extended);
+        var i36Tmp = new Int36(this);
 
         if (!fUnsigned && i36Tmp.isNeg()) {
             i36Tmp.negate();
@@ -288,10 +296,10 @@ class Int36 {
 
         if (radix == 8) {
             var s = Int36.octal(value);
-            if (extended) {
-                s = Int36.octal(extended) + ',' + s;
+            if (extended != null) {
+                s = Int36.octal(extended) + ' ' + s;
             }
-            if (this.remainder) {
+            if (this.remainder != null) {
                 s += ':' + Int36.octal(this.remainder);
             }
             if (DEBUG && this.error) {
@@ -314,7 +322,7 @@ class Int36 {
              * because after 52 bits, JavaScript will start dropping least-significant bits.  Until
              * then, you're better off sticking with octal (see above).
              */
-            value = extended * Int36.BIT36 + value;
+            value = extended * Int36.WORD_LIMIT + value;
         }
         return value.toString(radix);
     }
@@ -322,12 +330,12 @@ class Int36 {
     /**
      * truncate(result, operand, fSub)
      *
-     * The range of valid results (0 - MAXVAL) is divided into two equal sub-ranges: 0 to MAXPOS,
-     * where the sign bit is zero (the bottom range), and MAXPOS+1 to MAXVAL (the top range), where
+     * The range of valid results (0 - WORD_MASK) is divided into two equal sub-ranges: 0 to MAX_POS36,
+     * where the sign bit is zero (the bottom range), and MAX_POS36+1 to WORD_MASK (the top range), where
      * the sign bit is one.  During a single arithmetic operation, the result can "wrap around" from
      * the bottom range to the top, or from the top range to the bottom, but it's an overflow/underflow
      * error ONLY if the result "wraps across" the midpoint between the two ranges, producing an
-     * unnaturally small delta (<= MAXPOS).
+     * unnaturally small delta (<= MAX_POS36).
      *
      * This can be confirmed independently by examining the sign bits (BIT35) of the original value
      * (V), the operand (O), the result (R), as well as two intermediate calculations, VR = (V ^ R)
@@ -376,14 +384,15 @@ class Int36 {
         }
 
         this.extended = null;
+        this.magnitude = 35;
         this.remainder = null;
         this.error = Int36.ERROR.NONE;
 
         if (result < 0) {
-            result += Int36.BIT36;
+            result += Int36.WORD_LIMIT;
         }
 
-        result %= Int36.BIT36;
+        result %= Int36.WORD_LIMIT;
 
         /*
          * We don't actually need to know what the operand was to determine overflow or underflow
@@ -401,13 +410,13 @@ class Int36 {
              */
             var e = 0;
             if (DEBUG) {
-                var v = this.value / Int36.BIT35, r = result / Int36.BIT35, o = operand / Int36.BIT35;
+                var v = this.value / Int36.INT_LIMIT, r = result / Int36.INT_LIMIT, o = operand / Int36.INT_LIMIT;
                 e = ((v ^ r) & (o ^ (fSub? v : r))) & 1;
             }
-            if ((result > Int36.MAXPOS) != (this.value > Int36.MAXPOS)) {
+            if ((result > Int36.MAX_POS36) != (this.value > Int36.MAX_POS36)) {
                 var delta = result - this.value;
-                if (Math.abs(delta) <= Int36.MAXPOS) {
-                    this.error |= (delta > 0 ? Int36.ERROR.OVERFLOW : Int36.ERROR.UNDERFLOW);
+                if (Math.abs(delta) <= Int36.MAX_POS36) {
+                    this.error |= (delta > 0? Int36.ERROR.OVERFLOW : Int36.ERROR.UNDERFLOW);
                     if (DEBUG && (delta > 0) != !(e & v)) e = 0;
                 }
             }
@@ -492,6 +501,9 @@ class Int36 {
      * number (base 2^18).  Each individual multiplication of these 18-bit "digits" will produce
      * a result within 2^36, well within JavaScript integer accuracy.
      *
+     * TODO: Review what should happen when the multiplicand is extended; currently, we simply ignore
+     * the extended portion.
+     *
      * @this {Int36}
      * @param {number} value
      */
@@ -500,38 +512,43 @@ class Int36 {
         var fNeg = false, extended;
         var n1 = this.value, n2 = value;
 
-        if (n1 > Int36.MAXPOS) {
-            n1 = Int36.BIT36 - n1;
+        this.error = Int36.ERROR.NONE;
+
+        if (n1 > Int36.MAX_POS36) {
+            n1 = Int36.WORD_LIMIT - n1;
             fNeg = !fNeg;
         }
 
-        if (n2 > Int36.MAXPOS) {
-            n2 = Int36.BIT36 - n2;
+        if (n2 > Int36.MAX_POS36) {
+            n2 = Int36.WORD_LIMIT - n2;
             fNeg = !fNeg;
         }
 
-        if (n1 < Int36.BIT18 && n2 < Int36.BIT18) {
+        if (n1 < Int36.HALF_SHIFT && n2 < Int36.HALF_SHIFT) {
             value = n1 * n2;
             extended = 0;
         }
         else {
-            var n1d1 = (n1 % Int36.BIT18);
-            var n1d2 = Math.trunc(n1 / Int36.BIT18);
-            var n2d1 = (n2 % Int36.BIT18);
-            var n2d2 = Math.trunc(n2 / Int36.BIT18);
+            var n1d1 = (n1 % Int36.HALF_SHIFT);
+            var n1d2 = Math.trunc(n1 / Int36.HALF_SHIFT);
+            var n2d1 = (n2 % Int36.HALF_SHIFT);
+            var n2d2 = Math.trunc(n2 / Int36.HALF_SHIFT);
 
             var m1d1 = n1d1 * n2d1;
-            var m1d2 = (n1d2 * n2d1) + Math.trunc(m1d1 / Int36.BIT18);
-            extended = Math.trunc(m1d2 / Int36.BIT18);
-            m1d2 = (m1d2 % Int36.BIT18) + (n1d1 * n2d2);
-            value = (m1d2 * Int36.BIT18) + (m1d1 % Int36.BIT18);
-            extended += Math.trunc(m1d2 / Int36.BIT18) + (n1d2 * n2d2);
+            var m1d2 = (n1d2 * n2d1) + Math.trunc(m1d1 / Int36.HALF_SHIFT);
+            extended = Math.trunc(m1d2 / Int36.HALF_SHIFT);
+            m1d2 = (m1d2 % Int36.HALF_SHIFT) + (n1d1 * n2d2);
+            value = (m1d2 * Int36.HALF_SHIFT) + (m1d1 % Int36.HALF_SHIFT);
+            extended += Math.trunc(m1d2 / Int36.HALF_SHIFT) + (n1d2 * n2d2);
         }
 
         this.value = this.truncate(value);
         this.extended = this.truncate(extended);
+        this.magnitude = 71;
 
         if (fNeg) this.negate();
+
+        this.setMagnitude(70);
     }
 
     /**
@@ -573,6 +590,8 @@ class Int36 {
      */
     divExtended(divisor)
     {
+        this.error = Int36.ERROR.NONE;
+
         if (!divisor) {
             this.error |= Int36.ERROR.DIVZERO;
             return;
@@ -580,8 +599,8 @@ class Int36 {
 
         var fNegQ = false, fNegR = false;
 
-        if (divisor > Int36.MAXPOS) {
-            divisor = Int36.BIT36 - divisor;
+        if (divisor > Int36.MAX_POS36) {
+            divisor = Int36.WORD_LIMIT - divisor;
             fNegQ = !fNegQ;
         }
 
@@ -591,6 +610,8 @@ class Int36 {
         }
 
         this.extend();
+
+        this.setMagnitude(71);
 
         /*
          * Initialize the four double-length 72-bit values we need for the division process.
@@ -632,9 +653,7 @@ class Int36 {
         /*
          * Since divisors are limited to 36-bit values, something's wrong if we have an extended remainder.
          */
-        if (DEBUG && dRem[1]) {
-            console.log("divExtended() assertion failure");
-        }
+        this.assert(!dRem[1], "extended remainder");
 
         this.value = dRes[0];
         this.extended = dRes[1];
@@ -645,7 +664,387 @@ class Int36 {
         this.reduce();
 
         if (fNegR && this.remainder) {
-            this.remainder = Int36.BIT36 - this.remainder;
+            this.remainder = Int36.WORD_LIMIT - this.remainder;
+        }
+    }
+
+    /**
+     * ash(i36)
+     *
+     * @this {Int36}
+     * @param {Int36} i36 (18-bit value representing the number of bits to arithmetically shift left (> 0) or right (< 0))
+     */
+    ash(i36)
+    {
+        this.ashNum(i36.value);
+    }
+
+    /**
+     * ashNum(num)
+     *
+     * @this {Int36}
+     * @param {number} num (18-bit value representing the number of bits to arithmetically shift left (> 0) or right (< 0))
+     */
+    ashNum(num)
+    {
+        num = Int36.validate(num);
+        this.error = Int36.ERROR.NONE;
+
+        /*
+         * Convert the unsigned 18-bit value in regEA to a signed 8-bit value (+/-255).
+         */
+        var s = ((num << 14) >> 14) % 256;
+
+        if (this.extended == null) {
+            if (s) {
+                /*
+                 * Simulate opASH()
+                 */
+                var w = this.value, bitsShifted;
+                /*
+                 * Convert the unsigned word (w) to a signed value (i), for convenience.
+                 */
+                var i = w > Int36.MAX_POS36? -(Int36.WORD_LIMIT - w) : w;
+                if (s > 0) {
+                    if (s >= 35) {
+                        i = (i < 0? Int36.INT_LIMIT : 0);
+                        bitsShifted = Int36.MAX_POS36;
+                    } else {
+                        i = (i * Math.pow(2, s)) % Int36.INT_LIMIT;
+                        /*
+                         * bitsShifted must be set to the mask of all magnitude bits shifted out of
+                         * the original word.  Using 8-bit signed words as an example, this table shows
+                         * the bitsShifted values that would correspond to shifting 1-7 bits left:
+                         *
+                         *    shifts    bitsShifted     value       calculation
+                         *    ------    -----------     ------      -----------
+                         *      1       0b01000000      128-64      128-Math.pow(2, 7-1)
+                         *      2       0b01100000      128-32      128-Math.pow(2, 7-2)
+                         *      3       0b01110000      128-16      128-Math.pow(2, 7-3)
+                         *     ...
+                         *      7       0b01111111      128-1       128-Math.pow(2, 7-7)
+                         */
+                        bitsShifted = Int36.INT_LIMIT - Math.pow(2, 35 - s);
+                    }
+                    if (w <= Int36.MAX_POS36) {
+                        /*
+                         * Since w was positive, overflow occurs ONLY if any of the bits we shifted out were 1s.
+                         * If all those bits in the original value (w) were 0s, then adding bitsShifted to it could NOT
+                         * produce a value > MAX_POS36.
+                         */
+                        if (w + bitsShifted > Int36.MAX_POS36) this.error |= Int36.ERROR.OVERFLOW;
+                    } else {
+                        /*
+                         * Since w was negative, overflow occurs ONLY if any of the bits we shifted out were 0s.
+                         * If all those bits in the original value (w) were 1s, subtracting bitsShifted from it could NOT
+                         * produce a value <= MAX_POS36.
+                         */
+                        if (w - bitsShifted <= Int36.MAX_POS36) this.error |= Int36.ERROR.OVERFLOW;
+                    }
+                } else {
+                    if (s <= -35) {
+                        i = (i < 0? -1 : 0);
+                    } else {
+                        i = Math.trunc(i / Math.pow(2, -s));
+                    }
+                }
+                w = (i < 0? i + Int36.WORD_LIMIT : i);
+                this.value = w;
+            }
+        }
+        else {
+            if (s) {
+                /*
+                 * Simulate opASHC()
+                 *
+                 * TODO: Note that we force the result to be treated as a 70-bit result (we set magnitude to 70 at the end);
+                 * however, what should happen if the incoming value wasn't a proper 70-bit value (ie, if the signs of value
+                 * and extended didn't match)?
+                 */
+                var bits;
+                var wRight = this.value;
+                var wLeft = this.extended;
+                if (s > 0) {
+                    /*
+                     * Handle all the left shift cases below, which don't need to worry about sign-extension
+                     * but DO need to worry about overflow.
+                     */
+                    var wLeftOrig = wLeft;
+                    if (s >= 36) {
+                        /*
+                         * Since all wLeft bits are being shifted out, any positive value other than zero OR any negative value
+                         * other than WORD_MASK indicates an overflow.
+                         */
+                        if (wLeft > 0 && wLeft < Int36.INT_LIMIT || wLeft > Int36.INT_MASK && wLeft < Int36.WORD_MASK) {
+                            this.error |= Int36.ERROR.OVERFLOW;
+                        }
+                        if (s >= 71) {
+                            /*
+                             * Since all wRight bits are being shifted out, any positive value other than zero OR any negative value
+                             * other than WORD_MASK indicates an overflow.
+                             */
+                            if (wRight > 0 && wRight < Int36.INT_LIMIT || wRight > Int36.INT_MASK && wRight < Int36.WORD_MASK) {
+                                this.error |= Int36.ERROR.OVERFLOW;
+                            }
+                            wLeft = 0;
+                        } else {
+                            /*
+                             * Left shift 36-70 bits.
+                             */
+                            wLeft = (wRight * Math.pow(2, s - 35)) % Int36.INT_LIMIT;
+                            bits = Int36.INT_LIMIT - Math.pow(2, 70 - s);
+                            if (wLeftOrig <= Int36.MAX_POS36) {
+                                /*
+                                 * Since wLeft was positive, overflow occurs ONLY if any of the bits we shifted out were 1s.
+                                 * If all those bits in the original value were 0s, then adding bits to it could NOT produce
+                                 * a value > MAX_POS36.
+                                 */
+                                if (wRight + bits > Int36.MAX_POS36) this.error |= Int36.ERROR.OVERFLOW;
+                            } else {
+                                /*
+                                 * Since wLeft was negative, overflow occurs ONLY if any of the bits we shifted out were 0s.
+                                 * If all those bits in the original value were 1s, subtracting bits from it could NOT produce
+                                 * a value <= MAX_POS36.
+                                 */
+                                if (wRight - bits <= Int36.MAX_POS36) this.error |= Int36.ERROR.OVERFLOW;
+                            }
+                        }
+                        wRight = 0;
+                        if (wLeftOrig > Int36.INT_MASK) {
+                            wLeft += Int36.INT_LIMIT;
+                            wRight += Int36.INT_LIMIT;
+                        }
+                    } else {
+                        /*
+                         * Left shift 1-35 bits.
+                         */
+                        wLeft = ((wLeft * Math.pow(2, s)) % Int36.INT_LIMIT) + Math.trunc((wRight % Int36.INT_LIMIT) / Math.pow(2, 35 - s));
+                        wRight = (wRight * Math.pow(2, s)) % Int36.INT_LIMIT;
+                        /*
+                         * Determine overflow and update the sign bits.
+                         */
+                        bits = Int36.INT_LIMIT - Math.pow(2, 35 - s);
+                        if (wLeftOrig <= Int36.MAX_POS36) {
+                            /*
+                             * Since wLeft was positive, overflow occurs ONLY if any of the bits we shifted out were 1s.
+                             * If all those bits in the original value were 0s, then adding bits to it could NOT produce
+                             * a value > MAX_POS36.
+                             */
+                            if (wLeftOrig + bits > Int36.MAX_POS36) this.error |= Int36.ERROR.OVERFLOW;
+                        } else {
+                            /*
+                             * Since wLeft was negative, overflow occurs ONLY if any of the bits we shifted out were 0s.
+                             * If all those bits in the original value were 1s, subtracting bits from it could NOT produce
+                             * a value <= MAX_POS36.
+                             */
+                            if (wLeftOrig - bits <= Int36.MAX_POS36) this.error |= Int36.ERROR.OVERFLOW;
+                            /*
+                             * Last but not least, update the sign bits of wLeft and wRight to indicate negative values.
+                             */
+                            wLeft += Int36.INT_LIMIT;
+                            wRight += Int36.INT_LIMIT;
+                        }
+                    }
+                } else {
+                    /*
+                     * Handle all the right shift cases below, which don't need to worry about overflow but DO
+                     * need to worry about sign-extension.
+                     */
+                    if (s <= -36) {
+                        if (s <= -72) {
+                            wRight = (wLeft > Int36.INT_MASK? Int36.WORD_MASK : 0);
+                        } else {
+                            wRight = Math.trunc((wLeft % Int36.INT_LIMIT) / Math.pow(2, -s - 35));
+                        }
+                        if (wLeft <= Int36.INT_MASK) {
+                            wLeft = 0;
+                        } else {
+                            wLeft = Int36.WORD_MASK;
+                            wRight += Int36.INT_LIMIT;
+                        }
+                    } else {
+                        /*
+                         * For this right shift of 1-35 bits, determine the value of bits shifted in from the left.
+                         */
+                        bits = (wLeft > Int36.INT_MASK? Int36.WORD_LIMIT - Math.pow(2, 36 + s) : 0);
+                        /*
+                         * The bits that we add to wRight from wLeft must be shifted right one additional bit, because
+                         * they must "skip over" the sign bit of wRight.  This means we must zero the sign bit of wRight,
+                         * which can be done by performing a "mod" with INT_LIMIT.
+                         */
+                        wRight = Math.trunc((wRight % Int36.INT_LIMIT) / Math.pow(2, -s)) + (((wLeft % Int36.INT_LIMIT) * Math.pow(2, 35 + s)) % Int36.INT_LIMIT);
+                        wLeft = Math.trunc(wLeft / Math.pow(2, -s)) + bits;
+                        /*
+                         * Last but not least, we must set the sign of wRight to the sign of wLeft.
+                         */
+                        if (wLeft > Int36.INT_MASK) wRight += Int36.INT_LIMIT;
+                    }
+                }
+                this.value = wRight;
+                this.extended = wLeft;
+            }
+            /*
+             * We allow ashNum(0) as a way of marking an extended Int36 as a 70-bit value.
+             */
+            this.magnitude = 70;
+        }
+    }
+
+    /**
+     * lsh(i36)
+     *
+     * @this {Int36}
+     * @param {Int36} i36 (18-bit value representing the number of bits to logically shift left (> 0) or right (< 0))
+     */
+    lsh(i36)
+    {
+        this.lshNum(i36.value);
+    }
+
+    /**
+     * lshNum(num)
+     *
+     * @this {Int36}
+     * @param {number} num (18-bit value representing the number of bits to logically shift left (> 0) or right (< 0))
+     */
+    lshNum(num)
+    {
+        num = Int36.validate(num);
+        this.error = Int36.ERROR.NONE;
+
+        /*
+         * Convert the unsigned 18-bit value in regEA to a signed 8-bit value (+/-255).
+         */
+        var s = ((num << 14) >> 14) % 256;
+
+        if (this.extended == null) {
+            if (s) {
+                var w = this.value;
+                if (s > 0) {
+                    if (s >= 36) {
+                        w = 0;
+                    } else {
+                        w = (w * Math.pow(2, s)) % Int36.WORD_LIMIT;
+                    }
+                } else {
+                    if (s <= -36) {
+                        w = 0;
+                    } else {
+                        w = Math.trunc(w / Math.pow(2, -s));
+                    }
+                }
+                this.value = w;
+            }
+        } else {
+            if (s) {
+                var wRight = this.value;
+                var wLeft = this.extended;
+                if (s > 0) {
+                    if (s >= 36) {
+                        wRight = 0;
+                        if (s >= 72) {
+                            wLeft = 0;
+                        } else {
+                            wLeft = (wRight * Math.pow(2, s - 36)) % Int36.WORD_LIMIT;
+                        }
+                    } else {
+                        wLeft = ((wLeft * Math.pow(2, s)) % Int36.WORD_LIMIT) + Math.trunc(wRight / Math.pow(2, 36 - s));
+                        wRight = (wRight * Math.pow(2, s)) % Int36.WORD_LIMIT;
+                    }
+                } else {
+                    if (s <= -36) {
+                        wLeft = 0;
+                        if (s <= -72) {
+                            wRight = 0;
+                        } else {
+                            wRight = Math.trunc(wLeft / Math.pow(2, -s - 36));
+                        }
+                    } else {
+                        wRight = Math.trunc(wRight / Math.pow(2, -s)) + ((wLeft * Math.pow(2, 36 + s)) % Int36.WORD_LIMIT);
+                        wLeft = Math.trunc(wLeft / Math.pow(2, -s));
+                    }
+                }
+                this.value = wRight;
+                this.extended = wLeft;
+            }
+            /*
+             * We allow lshNum(0) as a way of marking an extended Int36 as a 71-bit value.
+             *
+             * TODO: Perhaps we should support magnitude 72 as way of indicating that the value should be treated as an
+             * unsigned 72-bit value?
+             */
+            this.magnitude = 71;
+        }
+    }
+
+    /**
+     * rot(i36)
+     *
+     * @this {Int36}
+     * @param {Int36} i36 (18-bit value representing the number of bits to logically rotate left (> 0) or right (< 0))
+     */
+    rot(i36)
+    {
+        this.rotNum(i36.value);
+    }
+
+    /**
+     * rotNum(num)
+     *
+     * @this {Int36}
+     * @param {number} num (18-bit value representing the number of bits to logically rotate left (> 0) or right (< 0))
+     */
+    rotNum(num)
+    {
+        var s;
+        num = Int36.validate(num);
+        this.error = Int36.ERROR.NONE;
+
+        if (this.extended == null) {
+            /*
+             * Convert the unsigned 18-bit value in regEA to a signed 8-bit value, modulo 36 (+/-35).
+             */
+            s = ((num << 14) >> 14) % 36;
+            if (s) {
+                var w = this.value;
+                /*
+                 * Note that a right rotation (s < 0) of s bits is equivalent to a left rotation (s > 0) of 36 + s bits.
+                 */
+                if (s < 0) s = 36 + s;
+                w = ((w * Math.pow(2, s)) % Int36.WORD_LIMIT) + Math.trunc(w / Math.pow(2, 36 - s));
+                this.value = w;
+            }
+        }
+        else {
+            /*
+             * Convert the unsigned 18-bit value in regEA to a signed 8-bit value, modulo 72 (+/-71).
+             */
+            s = ((num << 14) >> 14) % 72;
+            if (s) {
+                var wRight = this.value;
+                var wLeft = this.extended;
+                var wLeftOrig = wLeft;
+                /*
+                 * Note that a right rotation (s < 0) of s bits is equivalent to a left rotation (s > 0) of 72 + s bits.
+                 */
+                if (s < 0) s = 72 + s;
+                if (s < 36) {
+                    wLeft = ((wLeft * Math.pow(2, s)) % Int36.WORD_LIMIT) + Math.trunc(wRight / Math.pow(2, 36 - s));
+                    wRight = ((wRight * Math.pow(2, s)) % Int36.WORD_LIMIT) + Math.trunc(wLeftOrig / Math.pow(2, 36 - s));
+                } else {
+                    wLeft = ((wRight * Math.pow(2, s - 36)) % Int36.WORD_LIMIT) + Math.trunc(wLeft / Math.pow(2, 72 - s));
+                    wRight = ((wLeftOrig * Math.pow(2, s - 36)) % Int36.WORD_LIMIT) + Math.trunc(wRight / Math.pow(2, 72 - s));
+                }
+                this.value = wRight;
+                this.extended = wLeft;
+            }
+            /*
+             * We allow rotNum(0) as a way of marking an extended Int36 as a 71-bit value.
+             *
+             * TODO: Perhaps we should support magnitude 72 as way of indicating that the value should be treated as an
+             * unsigned 72-bit value?
+             */
+            this.magnitude = 71;
         }
     }
 
@@ -653,11 +1052,13 @@ class Int36 {
      * extend()
      *
      * Sets extended to match the sign of value (if not already set).
+     *
+     * @this {Int36}
      */
     extend()
     {
         if (this.extended == null) {
-            this.extended = (this.value > Int36.MAXPOS? Int36.MAXVAL : 0);
+            this.extended = (this.value > Int36.MAX_POS36? Int36.WORD_MASK : 0);
         }
     }
 
@@ -666,47 +1067,42 @@ class Int36 {
      *
      * Unsets extended if it's superfluous; opposite of extend().
      *
-     * It's worth noting DEC's SIDEBAR comment (from above):
-     *
-     *      Multiplication produces a double length product, and the programmer must remember that discarding
-     *      the low order part ['extended'] of a double length negative leaves the high order part ['value'] in
-     *      correct twos complement form only if the low order part ['extended'] is null.
-     *
-     * is not entirely applicable to us.  For one thing, when value is MINNEG and extended is ZERO, we interpret
-     * that extended value as 34,359,738,368; we cannot simply eliminate the extended portion, otherwise value
-     * would be interpreted as -34,359,738,368.
-     *
-     * DEC can say that because each of the words in a PDP-10 double-length product contains its own sign bit,
-     * resulting in only 70 bits of magnitude.  However, we don't store our extended (double-length) results that
-     * way, so be aware of these mismatches in both terminology and format when converting an Int36 to/from PDP-10
-     * registers/memory.
+     * @this {Int36}
      */
     reduce()
     {
-        if (this.extended == 0 && this.value <= Int36.MAXPOS || this.extended == Int36.MAXVAL && this.value > Int36.MAXPOS) {
+        if (this.extended == 0 && this.value <= Int36.MAX_POS36 || this.extended == Int36.WORD_MASK && this.value > Int36.MAX_POS36) {
             this.extended = null;
+            this.magnitude = 35;
         }
     }
 
     /**
      * isNeg()
      *
+     * @this {Int36}
      * @return {boolean}
      */
     isNeg()
     {
-        return (this.extended > Int36.MAXPOS || this.extended == null && this.value > Int36.MAXPOS);
+        return (this.extended > Int36.MAX_POS36 || this.extended == null && this.value > Int36.MAX_POS36);
     }
 
     /**
      * negate()
      *
      * negate() MUST automatically extend the value, because the two's complement of the most negative
-     * number (MINNEG) still has its sign bit set, so we must rely on the sign of the extended value to
+     * number (MIN_NEG36) still has its sign bit set, so we must rely on the sign of the extended value to
      * compensate.
      *
      * This is handled below by setting extended first, based on the opposite of the value's current sign;
-     * we could negate extended AFTER negating value, but then we'd need a special test for the MINNEG value.
+     * we could negate extended AFTER negating value, but then we'd need a special test for the MIN_NEG36 value.
+     *
+     * A side-effect of this call is that the magnitude is forced to 71, on the presumption that we're about
+     * to perform an arithmetic operation that is more easily performed on a unified 71-bit value than two
+     * independently signed 35-bit values.
+     *
+     * @this {Int36}
      */
     negate()
     {
@@ -714,27 +1110,76 @@ class Int36 {
             /*
              * Set extended to the OPPOSITE of the current value.
              */
-            this.extended = (this.value > Int36.MAXPOS? 0 : Int36.MAXVAL);
-        }
-        else if (this.value) {
-            /*
-             * Perform one's complement on the extended value.
-             */
-            this.extended = Int36.MAXVAL - this.extended;
+            this.assert(this.magnitude == 35);
+            this.extended = (this.value > Int36.MAX_POS36? 0 : Int36.WORD_MASK);
+            this.magnitude = 71;
         }
         else {
-            /*
-             * Perform two's complement on the extended value.
-             */
-            if (this.extended) this.extended = Int36.BIT36 - this.extended;
+            this.setMagnitude(71);
+            if (this.value) {
+                /*
+                 * Perform one's complement on the extended value.
+                 */
+                this.extended = Int36.WORD_MASK - this.extended;
+            }
+            else {
+                /*
+                 * Perform two's complement on the extended value.
+                 */
+                if (this.extended) this.extended = Int36.WORD_LIMIT - this.extended;
+            }
         }
         /*
          * Perform two's complement on the value.
          */
         if (this.value) {
-            this.value = Int36.BIT36 - this.value;
+            this.value = Int36.WORD_LIMIT - this.value;
         }
-        this.error = Int36.ERROR.NONE;
+    }
+
+    /**
+     * setMagnitude(n)
+     *
+     * NOTE: This handles only two specific magnitude conversions: 71 to 70, and 70 to 71.  Conversions to/from 35-bit
+     * values are generally handled inline.
+     *
+     * @this {Int36}
+     * @param {number} n
+     */
+    setMagnitude(n)
+    {
+        if (this.extended != null) {
+
+            var sign = this.extended - (this.extended % Int36.INT_LIMIT);
+
+            if (this.magnitude == 70 && n == 71) {
+                /*
+                 * Let's assert that the sign bits of both halves match.
+                 */
+                this.assert(Math.trunc(this.value / Int36.INT_LIMIT) == Math.trunc(this.extended / Int36.INT_LIMIT), "sign mismatch");
+                /*
+                 * Compute value without the sign bit and add the low bit of extended in its place.
+                 */
+                this.value = (this.value % Int36.INT_LIMIT) + ((this.extended * Int36.INT_LIMIT) % Int36.WORD_LIMIT);
+                this.extended = sign + Math.trunc(this.extended / 2);
+                this.magnitude = 71;
+            }
+            else if (this.magnitude == 71 && n == 70) {
+                /*
+                 * Reducing the magnitude requires shifting extended left one bit so that we can move
+                 * the high bit of value into the low bit of extended, and then set the sign bit of value
+                 * to match the sign bit of extended.
+                 */
+                this.extended = ((this.extended * 2) % Int36.WORD_LIMIT) + Math.trunc(this.value / Int36.INT_LIMIT);
+                this.value = sign + (this.value % Int36.INT_LIMIT);
+                var signNew = this.extended - (this.extended % Int36.INT_LIMIT);
+                if (sign != signNew) {
+                    this.extended = sign + (this.extended - signNew);
+                    this.error |= Int36.ERROR.OVERFLOW;
+                }
+                this.magnitude = 70;
+            }
+        }
     }
 
     /**
@@ -773,6 +1218,27 @@ class Int36 {
     }
 
     /**
+     * assert(fCondition, sMessage)
+     *
+     * @param {boolean} fCondition
+     * @param {string} [sMessage]
+     */
+    assert(fCondition, sMessage)
+    {
+        if (DEBUG) {
+            if (!fCondition) {
+                try {
+                    throw(new Error(sMessage || "assertion failure"));
+                }
+                catch(err) {
+                    console.log(err.message);
+                    if (err.stack) console.log(err.stack);
+                }
+            }
+        }
+    }
+
+    /**
      * addD(dDst, dSrc)
      *
      * Adds dSrc to dDst.
@@ -784,8 +1250,8 @@ class Int36 {
     {
         dDst[0] += dSrc[0];
         dDst[1] += dSrc[1];
-        if (dDst[0] >= Int36.BIT36) {
-            dDst[0] %= Int36.BIT36;
+        if (dDst[0] >= Int36.WORD_LIMIT) {
+            dDst[0] %= Int36.WORD_LIMIT;
             dDst[1]++;
         }
     }
@@ -816,7 +1282,7 @@ class Int36 {
     static shrD(dDst)
     {
         if (dDst[1] % 2) {
-            dDst[0] += Int36.BIT36;
+            dDst[0] += Int36.WORD_LIMIT;
         }
         dDst[0] = Math.trunc(dDst[0] / 2);
         dDst[1] = Math.trunc(dDst[1] / 2);
@@ -835,7 +1301,7 @@ class Int36 {
         dDst[0] -= dSrc[0];
         dDst[1] -= dSrc[1];
         if (dDst[0] < 0) {
-            dDst[0] += Int36.BIT36;
+            dDst[0] += Int36.WORD_LIMIT;
             dDst[1]--;
         }
     }
@@ -860,31 +1326,38 @@ class Int36 {
      */
     static octal(value)
     {
-        if (value < 0) value += Int36.BIT36;
-        return ("00000000000" + value.toString(8)).slice(-12);
+        if (value < 0) {
+            value += Int36.WORD_LIMIT;
+        }
+        var s = value.toString(8);
+        if (value >= 0 && !Math.trunc(value / Int36.WORD_LIMIT)) {
+            s = "0o" + ("000000000000" + s).slice(-12);
+        }
+        return s;
     }
 
     /**
-     * validate(num)
+     * validate(num, bits)
      *
      * This ensures that any incoming (external) 36-bit values conform to our internal requirements.
      *
      * @param {number} num
+     * @param {number} [bits] (an alternative number of bits to restrict the value to)
      * @return {number}
      */
-    static validate(num)
+    static validate(num, bits = 36)
     {
         /*
          * Although it's expected that most callers will supply unsigned 36-bit values, we're nice about
          * converting any signed values to their unsigned (two's complement) counterpart, provided they are
          * within the acceptable range.  Any values outside that range will be dealt with afterward.
          */
-        if (num < 0 && num >= Int36.MINNEG) {
-            num += Int36.BIT36;
+        if (num < 0 && num >= -Int36.MIN_NEG36) {
+            num += Int36.WORD_LIMIT;
         }
-        var value = Math.trunc(Math.abs(num)) % Int36.BIT36;
+        var value = Math.trunc(Math.abs(num)) % Math.pow(2, bits);
         if (DEBUG && num !== value) {
-            console.log("Int36.validate(" + num + " out of range, truncated to " + value + ")");
+            console.log("Int36.validate(" + Int36.octal(num) + " out of range, truncated to " + Int36.octal(value) + ")");
         }
         return value;
     }
@@ -897,13 +1370,16 @@ Int36.ERROR = {
     DIVZERO:    0x4
 };
 
-Int36.BIT18     =  Math.pow(2, 18);     //         262,144
-Int36.BIT35     =  Math.pow(2, 35);     //  34,359,738,368 (aka the sign bit)
-Int36.BIT36     =  Math.pow(2, 36);     //  68,719,476,736
+Int36.HALF_MASK  = Math.pow(2, 18) - 1; //         262,143   (000000 777777): unsigned half-word mask
+Int36.HALF_SHIFT = Math.pow(2, 18);     //         262,144   (000001 000000): unsigned half-word shift
+Int36.INT_MASK   = Math.pow(2, 35) - 1; //  34,359,738,367   (377777 777777): signed word (magnitude) mask
+Int36.INT_LIMIT  = Math.pow(2, 35);     //  34,359,738,368   (400000 000000): signed word (magnitude) limit
+Int36.WORD_MASK  = Math.pow(2, 36) - 1; //  68,719,476,735
+Int36.WORD_LIMIT = Math.pow(2, 36);     //  68,719,476,736 (1 000000 000000): unsigned word limit
 
-Int36.MAXPOS    =  Math.pow(2, 35) - 1; //  34,359,738,367
-Int36.MINNEG    = -Math.pow(2, 35);     // -34,359,738,368
-
-Int36.MAXVAL    =  Math.pow(2, 36) - 1; //  68,719,476,735
+Int36.MAX_POS18  = Math.pow(2, 17) - 1; //         131,071        (377777)
+Int36.MIN_NEG18  = Math.pow(2, 17);     //        -131,072        (400000)
+Int36.MAX_POS36  = Math.pow(2, 35) - 1; //  34,359,738,367 (377777 777777)
+Int36.MIN_NEG36  = Math.pow(2, 35);     // -34,359,738,368 (400000 000000)
 
 if (NODE) module.exports = Int36;
