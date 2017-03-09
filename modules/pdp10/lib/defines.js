@@ -109,6 +109,7 @@ var PDP10 = {
      * values as unsigned quantities, these are the unsigned equivalents.
      */
     WORD_INVALID:   -1,
+    HINT_MASK:      Math.pow(2, 17) - 1,        //         131,071          (377777)  signed half-word (half-int) mask
     HALF_MASK:      Math.pow(2, 18) - 1,        //         262,143   (000000 777777): unsigned half-word mask
     HALF_SHIFT:     Math.pow(2, 18),            //         262,144   (000001 000000): unsigned half-word shift
     INT_MASK:       Math.pow(2, 35) - 1,        //  34,359,738,367   (377777 777777): signed word (magnitude) mask
@@ -116,14 +117,9 @@ var PDP10 = {
     WORD_MASK:      Math.pow(2, 36) - 1,        //  68,719,476,735   (777777 777777): unsigned word mask
     WORD_LIMIT:     Math.pow(2, 36),            //  68,719,476,736 (1 000000 000000): unsigned word limit
 
-    MAX_POS18:      Math.pow(2, 17) - 1,        //         131,071          (377777)
-    MIN_NEG18:      Math.pow(2, 17),            //        -131,072          (400000)
-    MAX_POS36:      Math.pow(2, 35) - 1,        //  34,359,738,367   (377777 777777)
-    MIN_NEG36:      Math.pow(2, 35),            // -34,359,738,368   (400000 000000)
-
-    TWO_POW36:      Math.pow(2, 36),            // the two's complement of a 36-bit value is (value? TWO_POW36 - value : 0)
-    TWO_POW34:      Math.pow(2, 34),
     TWO_POW32:      Math.pow(2, 32),
+    TWO_POW34:      Math.pow(2, 34),
+    TWO_POW36:      Math.pow(2, 36),            // the two's complement of a 36-bit value is (value? TWO_POW36 - value : 0)
 
     /*
      * PDP-10 opcodes are 36-bit values, most of which use the following layout:

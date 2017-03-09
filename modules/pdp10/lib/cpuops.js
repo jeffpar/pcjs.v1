@@ -241,7 +241,7 @@ PDP10.opDFN = function(op, acc)
  *          FSC AC,233
  *
  *      inserts the correct exponent to move the binary point from the right end to the left of bit 9 and then normalizes
- *      (233(base 8) = 155(base 10) = 128 + 27).
+ *      (233 [base 8] = 155 [base 10] = 128 + 27).
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -278,7 +278,7 @@ PDP10.opFSC = function(op, acc)
  *      in position P.
  *
  * NOTE: Until I can conduct real-world testing, I'm assuming when they say "100 - S", DEC really meant "64 - S",
- * which is 100 (base 8), which makes much more sense, since P is limited to a range of 00-77 (base 8).
+ * which is 100 [base 8], which makes much more sense, since P is limited to a range of 00-77 [base 8].
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -1503,7 +1503,7 @@ PDP10.opIDIVB = function(op, acc)
 {
     var dst = PDP10.doDIV.call(this, this.readWord(acc), 0, this.readWord(this.regEA));
     if (dst < 0) return;
-    this.writeWord(acc, this.writeWord(this.regEA, dst));
+    this.writeWord(this.regEA, dst);
 };
 
 /**
@@ -1668,7 +1668,7 @@ PDP10.opASH = function(op, acc)
         /*
          * Convert the unsigned word (w) to a signed value (i), for convenience.
          */
-        var i = w > PDP10.MAX_POS36? -(PDP10.WORD_LIMIT - w) : w;
+        var i = w > PDP10.INT_MASK? -(PDP10.WORD_LIMIT - w) : w;
         if (s > 0) {
             if (s >= 35) {
                 i = (i < 0? PDP10.INT_LIMIT : 0);
@@ -1690,20 +1690,20 @@ PDP10.opASH = function(op, acc)
                  */
                 bits = PDP10.INT_LIMIT - Math.pow(2, 35 - s);
             }
-            if (w <= PDP10.MAX_POS36) {
+            if (w <= PDP10.INT_MASK) {
                 /*
                  * Since w was positive, overflow occurs ONLY if any of the bits we shifted out were 1s.
                  * If all those bits in the original value (w) were 0s, then adding bits to it could NOT
-                 * produce a value > MAX_POS36.
+                 * produce a value > INT_MASK.
                  */
-                if (w + bits > PDP10.MAX_POS36) this.regPS |= PDP10.PSFLAG.OVFL;
+                if (w + bits > PDP10.INT_MASK) this.regPS |= PDP10.PSFLAG.OVFL;
             } else {
                 /*
                  * Since w was negative, overflow occurs ONLY if any of the bits we shifted out were 0s.
                  * If all those bits in the original value (w) were 1s, subtracting bits from it could NOT
-                 * produce a value <= MAX_POS36.
+                 * produce a value <= INT_MASK.
                  */
-                if (w - bits <= PDP10.MAX_POS36) this.regPS |= PDP10.PSFLAG.OVFL;
+                if (w - bits <= PDP10.INT_MASK) this.regPS |= PDP10.PSFLAG.OVFL;
             }
         } else {
             if (s <= -35) {
@@ -1890,20 +1890,20 @@ PDP10.opASHC = function(op, acc)
                      */
                     wLeft = (wRight * Math.pow(2, s - 35)) % PDP10.INT_LIMIT;
                     bits = PDP10.INT_LIMIT - Math.pow(2, 70 - s);
-                    if (wLeftOrig <= PDP10.MAX_POS36) {
+                    if (wLeftOrig <= PDP10.INT_MASK) {
                         /*
                          * Since wLeft was positive, overflow occurs ONLY if any of the bits we shifted out were 1s.
                          * If all those bits in the original value were 0s, then adding bits to it could NOT produce
-                         * a value > MAX_POS36.
+                         * a value > INT_MASK.
                          */
-                        if (wRight + bits > PDP10.MAX_POS36) this.regPS |= PDP10.PSFLAG.OVFL;
+                        if (wRight + bits > PDP10.INT_MASK) this.regPS |= PDP10.PSFLAG.OVFL;
                     } else {
                         /*
                          * Since wLeft was negative, overflow occurs ONLY if any of the bits we shifted out were 0s.
                          * If all those bits in the original value were 1s, subtracting bits from it could NOT produce
-                         * a value <= MAX_POS36.
+                         * a value <= INT_MASK.
                          */
-                        if (wRight - bits <= PDP10.MAX_POS36) this.regPS |= PDP10.PSFLAG.OVFL;
+                        if (wRight - bits <= PDP10.INT_MASK) this.regPS |= PDP10.PSFLAG.OVFL;
                     }
                 }
                 wRight = 0;
@@ -1921,20 +1921,20 @@ PDP10.opASHC = function(op, acc)
                  * Determine overflow and update the sign bits.
                  */
                 bits = PDP10.INT_LIMIT - Math.pow(2, 35 - s);
-                if (wLeftOrig <= PDP10.MAX_POS36) {
+                if (wLeftOrig <= PDP10.INT_MASK) {
                     /*
                      * Since wLeft was positive, overflow occurs ONLY if any of the bits we shifted out were 1s.
                      * If all those bits in the original value were 0s, then adding bits to it could NOT produce
-                     * a value > MAX_POS36.
+                     * a value > INT_MASK.
                      */
-                    if (wLeftOrig + bits > PDP10.MAX_POS36) this.regPS |= PDP10.PSFLAG.OVFL;
+                    if (wLeftOrig + bits > PDP10.INT_MASK) this.regPS |= PDP10.PSFLAG.OVFL;
                 } else {
                     /*
                      * Since wLeft was negative, overflow occurs ONLY if any of the bits we shifted out were 0s.
                      * If all those bits in the original value were 1s, subtracting bits from it could NOT produce
-                     * a value <= MAX_POS36.
+                     * a value <= INT_MASK.
                      */
-                    if (wLeftOrig - bits <= PDP10.MAX_POS36) this.regPS |= PDP10.PSFLAG.OVFL;
+                    if (wLeftOrig - bits <= PDP10.INT_MASK) this.regPS |= PDP10.PSFLAG.OVFL;
                     /*
                      * Last but not least, update the sign bits of wLeft and wRight to indicate negative values.
                      */
@@ -2142,7 +2142,17 @@ PDP10.opBLT = function(op, acc)
 };
 
 /**
- * opAOBJP(0o252000)
+ * opAOBJP(0o252000): Add One to Both Halves of AC and Jump if Positive
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-41:
+ *
+ *      Add 1000001 [base 8] to AC and place the result back in AC.  If the result is greater than or equal
+ *      to zero (ie if bit 0 is 0, and hence a negative count in the left half has reached zero or a positive
+ *      count has not yet reached 2^17), take the next instruction from location E and continue sequential
+ *      operation from there.
+ *
+ *      The incrementing of both halves of AC simultaneously is effected by adding 1000001 [base 8].  A count
+ *      of -2 in AC left is therefore increased to zero if 2^18 - 1 is incremented in AC right.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2150,11 +2160,23 @@ PDP10.opBLT = function(op, acc)
  */
 PDP10.opAOBJP = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = (this.readWord(acc) + 0o000001000001) % PDP10.WORD_MASK;
+    this.writeWord(acc, dst);
+    if (dst < PDP10.INT_LIMIT) this.setPC(this.regEA);
 };
 
 /**
- * opAOBJN(0o253000)
+ * opAOBJN(0o253000): Add One to Both Halves of AC and Jump if Negative
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-41:
+ *
+ *      Add 1000001 [base 8] to AC and place the result back in AC.  If the result is less than zero
+ *      (ie if bit 0 is 1, and hence a negative count in the left half has not yet reached zero or a positive
+ *      count has reached 2^17), take the next instruction from location E and continue sequential operation
+ *      from there.
+ *
+ *      The incrementing of both halves of AC simultaneously is effected by adding 1000001 [base 8].  A count
+ *      of -2 in AC left is therefore increased to zero if 2^18 - 1 is incremented in AC right.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2162,7 +2184,9 @@ PDP10.opAOBJP = function(op, acc)
  */
 PDP10.opAOBJN = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = (this.readWord(acc) + 0o000001000001) % PDP10.WORD_MASK;
+    this.writeWord(acc, dst);
+    if (dst >= PDP10.INT_LIMIT) this.setPC(this.regEA);
 };
 
 /**
@@ -2625,19 +2649,12 @@ PDP10.opSUBB = function(op, acc)
 };
 
 /**
- * opCAI(0o300000)
+ * opCAIL(0o301000): Compare AC Immediate and Skip if AC Less than E
  *
- * @this {CPUStatePDP10}
- * @param {number} op
- * @param {number} acc
- */
-PDP10.opCAI = function(op, acc)
-{
-    this.opUndefined(op);
-};
-
-/**
- * opCAIL(0o301000)
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-42:
+ *
+ *      Compare AC with E (ie with the word 0,E) and skip the next instruction in sequence if the condition
+ *      specified by M is satisfied.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2645,11 +2662,16 @@ PDP10.opCAI = function(op, acc)
  */
 PDP10.opCAIL = function(op, acc)
 {
-    this.opUndefined(op);
+    if (PDP10.doCMP.call(this, this.readWord(acc), this.regEA) < 0) this.setPC(this.regPC + 1);
 };
 
 /**
- * opCAIE(0o302000)
+ * opCAIE(0o302000): Compare AC Immediate and Skip if Equal
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-42:
+ *
+ *      Compare AC with E (ie with the word 0,E) and skip the next instruction in sequence if the condition
+ *      specified by M is satisfied.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2657,11 +2679,16 @@ PDP10.opCAIL = function(op, acc)
  */
 PDP10.opCAIE = function(op, acc)
 {
-    this.opUndefined(op);
+    if (PDP10.doCMP.call(this, this.readWord(acc), this.regEA) == 0) this.setPC(this.regPC + 1);
 };
 
 /**
- * opCAILE(0o303000)
+ * opCAILE(0o303000): Compare AC Immediate and Skip if AC Less than or Equal to E
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-42:
+ *
+ *      Compare AC with E (ie with the word 0,E) and skip the next instruction in sequence if the condition
+ *      specified by M is satisfied.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2669,11 +2696,16 @@ PDP10.opCAIE = function(op, acc)
  */
 PDP10.opCAILE = function(op, acc)
 {
-    this.opUndefined(op);
+    if (PDP10.doCMP.call(this, this.readWord(acc), this.regEA) <= 0) this.setPC(this.regPC + 1);
 };
 
 /**
- * opCAIA(0o304000)
+ * opCAIA(0o304000): Compare AC Immediate but Always Skip
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-42:
+ *
+ *      Compare AC with E (ie with the word 0,E) and skip the next instruction in sequence if the condition
+ *      specified by M is satisfied.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2681,11 +2713,17 @@ PDP10.opCAILE = function(op, acc)
  */
 PDP10.opCAIA = function(op, acc)
 {
-    this.opUndefined(op);
+    // TODO: Determine if there's any need to actually perform the comparison.
+    this.setPC(this.regPC + 1);
 };
 
 /**
- * opCAIGE(0o305000)
+ * opCAIGE(0o305000): Compare AC Immediate and Skip if AC Greater than or Equal to E
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-42:
+ *
+ *      Compare AC with E (ie with the word 0,E) and skip the next instruction in sequence if the condition
+ *      specified by M is satisfied.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2693,11 +2731,16 @@ PDP10.opCAIA = function(op, acc)
  */
 PDP10.opCAIGE = function(op, acc)
 {
-    this.opUndefined(op);
+    if (PDP10.doCMP.call(this, this.readWord(acc), this.regEA) >= 0) this.setPC(this.regPC + 1);
 };
 
 /**
- * opCAIN(0o306000)
+ * opCAIN(0o306000): Compare AC Immediate and Skip if Not Equal
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-42:
+ *
+ *      Compare AC with E (ie with the word 0,E) and skip the next instruction in sequence if the condition
+ *      specified by M is satisfied.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2705,11 +2748,16 @@ PDP10.opCAIGE = function(op, acc)
  */
 PDP10.opCAIN = function(op, acc)
 {
-    this.opUndefined(op);
+    if (PDP10.doCMP.call(this, this.readWord(acc), this.regEA) != 0) this.setPC(this.regPC + 1);
 };
 
 /**
- * opCAIG(0o307000)
+ * opCAIG(0o307000): Compare AC Immediate and Skip if AC Greater than E
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-42:
+ *
+ *      Compare AC with E (ie with the word 0,E) and skip the next instruction in sequence if the condition
+ *      specified by M is satisfied.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2717,119 +2765,143 @@ PDP10.opCAIN = function(op, acc)
  */
 PDP10.opCAIG = function(op, acc)
 {
-    this.opUndefined(op);
+    if (PDP10.doCMP.call(this, this.readWord(acc), this.regEA) > 0) this.setPC(this.regPC + 1);
 };
 
 /**
- * opCA(0o310000)
+ * opCAML(0o311000): Compare AC with Memory and Skip if AC Less
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-43:
+ *
+ *      Compare AC with the contents of location E and skip the next instruction in sequence if the condition
+ *      specified by M is satisfied.  The pair of numbers compared may be either both fixed or both normalized
+ *      floating point.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
  * @param {number} acc
  */
-PDP10.opCA = function(op, acc)
+PDP10.opCAML = function(op, acc)
 {
-    this.opUndefined(op);
+    if (PDP10.doCMP.call(this, this.readWord(acc), this.readWord(this.regEA)) < 0) this.setPC(this.regPC + 1);
 };
 
 /**
- * opCAL(0o311000)
+ * opCAME(0o312000): Compare AC with Memory and Skip if Equal
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-43:
+ *
+ *      Compare AC with the contents of location E and skip the next instruction in sequence if the condition
+ *      specified by M is satisfied.  The pair of numbers compared may be either both fixed or both normalized
+ *      floating point.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
  * @param {number} acc
  */
-PDP10.opCAL = function(op, acc)
+PDP10.opCAME = function(op, acc)
 {
-    this.opUndefined(op);
+    if (PDP10.doCMP.call(this, this.readWord(acc), this.readWord(this.regEA)) == 0) this.setPC(this.regPC + 1);
 };
 
 /**
- * opCAE(0o312000)
+ * opCAMLE(0o313000): Compare AC with Memory and Skip if AC Less or Equal
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-43:
+ *
+ *      Compare AC with the contents of location E and skip the next instruction in sequence if the condition
+ *      specified by M is satisfied.  The pair of numbers compared may be either both fixed or both normalized
+ *      floating point.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
  * @param {number} acc
  */
-PDP10.opCAE = function(op, acc)
+PDP10.opCAMLE = function(op, acc)
 {
-    this.opUndefined(op);
+    if (PDP10.doCMP.call(this, this.readWord(acc), this.readWord(this.regEA)) <= 0) this.setPC(this.regPC + 1);
 };
 
 /**
- * opCALE(0o313000)
+ * opCAMA(0o314000): Compare AC with Memory but Always Skip
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-43:
+ *
+ *      Compare AC with the contents of location E and skip the next instruction in sequence if the condition
+ *      specified by M is satisfied.  The pair of numbers compared may be either both fixed or both normalized
+ *      floating point.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
  * @param {number} acc
  */
-PDP10.opCALE = function(op, acc)
+PDP10.opCAMA = function(op, acc)
 {
-    this.opUndefined(op);
+    // TODO: Determine if there's any need to actually perform the comparison.
+    this.setPC(this.regPC + 1);
 };
 
 /**
- * opCAA(0o314000)
+ * opCAMGE(0o315000): Compare AC with Memory and Skip if AC Greater or Equal
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-43:
+ *
+ *      Compare AC with the contents of location E and skip the next instruction in sequence if the condition
+ *      specified by M is satisfied.  The pair of numbers compared may be either both fixed or both normalized
+ *      floating point.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
  * @param {number} acc
  */
-PDP10.opCAA = function(op, acc)
+PDP10.opCAMGE = function(op, acc)
 {
-    this.opUndefined(op);
+    if (PDP10.doCMP.call(this, this.readWord(acc), this.readWord(this.regEA)) >= 0) this.setPC(this.regPC + 1);
 };
 
 /**
- * opCAGE(0o315000)
+ * opCAMN(0o316000): Compare AC with Memory and Skip if Not Equal
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-43:
+ *
+ *      Compare AC with the contents of location E and skip the next instruction in sequence if the condition
+ *      specified by M is satisfied.  The pair of numbers compared may be either both fixed or both normalized
+ *      floating point.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
  * @param {number} acc
  */
-PDP10.opCAGE = function(op, acc)
+PDP10.opCAMN = function(op, acc)
 {
-    this.opUndefined(op);
+    if (PDP10.doCMP.call(this, this.readWord(acc), this.readWord(this.regEA)) != 0) this.setPC(this.regPC + 1);
 };
 
 /**
- * opCAN(0o316000)
+ * opCAMG(0o317000): Compare AC with Memory and Skip if AC Greater
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-43:
+ *
+ *      Compare AC with the contents of location E and skip the next instruction in sequence if the condition
+ *      specified by M is satisfied.  The pair of numbers compared may be either both fixed or both normalized
+ *      floating point.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
  * @param {number} acc
  */
-PDP10.opCAN = function(op, acc)
+PDP10.opCAMG = function(op, acc)
 {
-    this.opUndefined(op);
+    if (PDP10.doCMP.call(this, this.readWord(acc), this.readWord(this.regEA)) > 0) this.setPC(this.regPC + 1);
 };
 
 /**
- * opCAG(0o317000)
+ * opJUMPL(0o321000): Jump if AC Less than Zero
  *
- * @this {CPUStatePDP10}
- * @param {number} op
- * @param {number} acc
- */
-PDP10.opCAG = function(op, acc)
-{
-    this.opUndefined(op);
-};
-
-/**
- * opJUMP(0o320000)
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-43:
  *
- * @this {CPUStatePDP10}
- * @param {number} op
- * @param {number} acc
- */
-PDP10.opJUMP = function(op, acc)
-{
-    this.opUndefined(op);
-};
-
-/**
- * opJUMPL(0o321000)
+ *      Compare AC (fixed or floating) with zero, and if the condition specified by M is satisfied,
+ *      take the next instruction from location E and continue sequential operation from there.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2837,11 +2909,16 @@ PDP10.opJUMP = function(op, acc)
  */
 PDP10.opJUMPL = function(op, acc)
 {
-    this.opUndefined(op);
+    if (PDP10.doSGN.call(this, this.readWord(acc)) < 0) this.setPC(this.regEA);
 };
 
 /**
- * opJUMPE(0o322000)
+ * opJUMPE(0o322000): Jump if AC Equal to Zero
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-43:
+ *
+ *      Compare AC (fixed or floating) with zero, and if the condition specified by M is satisfied,
+ *      take the next instruction from location E and continue sequential operation from there.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2849,11 +2926,16 @@ PDP10.opJUMPL = function(op, acc)
  */
 PDP10.opJUMPE = function(op, acc)
 {
-    this.opUndefined(op);
+    if (PDP10.doSGN.call(this, this.readWord(acc)) == 0) this.setPC(this.regEA);
 };
 
 /**
- * opJUMPLE(0o323000)
+ * opJUMPLE(0o323000): Jump if AC Less than or Equal to Zero
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-43:
+ *
+ *      Compare AC (fixed or floating) with zero, and if the condition specified by M is satisfied,
+ *      take the next instruction from location E and continue sequential operation from there.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2861,11 +2943,16 @@ PDP10.opJUMPE = function(op, acc)
  */
 PDP10.opJUMPLE = function(op, acc)
 {
-    this.opUndefined(op);
+    if (PDP10.doSGN.call(this, this.readWord(acc)) <= 0) this.setPC(this.regEA);
 };
 
 /**
- * opJUMPA(0o324000)
+ * opJUMPA(0o324000): Jump Always
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-43:
+ *
+ *      Compare AC (fixed or floating) with zero, and if the condition specified by M is satisfied,
+ *      take the next instruction from location E and continue sequential operation from there.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2873,11 +2960,16 @@ PDP10.opJUMPLE = function(op, acc)
  */
 PDP10.opJUMPA = function(op, acc)
 {
-    this.opUndefined(op);
+    this.setPC(this.regEA);
 };
 
 /**
- * opJUMPGE(0o325000)
+ * opJUMPGE(0o325000): Jump if AC Greater than or Equal to Zero
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-43:
+ *
+ *      Compare AC (fixed or floating) with zero, and if the condition specified by M is satisfied,
+ *      take the next instruction from location E and continue sequential operation from there.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2885,11 +2977,16 @@ PDP10.opJUMPA = function(op, acc)
  */
 PDP10.opJUMPGE = function(op, acc)
 {
-    this.opUndefined(op);
+    if (PDP10.doSGN.call(this, this.readWord(acc)) >= 0) this.setPC(this.regEA);
 };
 
 /**
- * opJUMPN(0o326000)
+ * opJUMPN(0o326000): Jump if AC Not Equal to Zero
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-43:
+ *
+ *      Compare AC (fixed or floating) with zero, and if the condition specified by M is satisfied,
+ *      take the next instruction from location E and continue sequential operation from there.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2897,11 +2994,16 @@ PDP10.opJUMPGE = function(op, acc)
  */
 PDP10.opJUMPN = function(op, acc)
 {
-    this.opUndefined(op);
+    if (PDP10.doSGN.call(this, this.readWord(acc)) != 0) this.setPC(this.regEA);
 };
 
 /**
- * opJUMPG(0o327000)
+ * opJUMPG(0o327000): Jump if AC Greater than Zero
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-43:
+ *
+ *      Compare AC (fixed or floating) with zero, and if the condition specified by M is satisfied,
+ *      take the next instruction from location E and continue sequential operation from there.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2909,11 +3011,17 @@ PDP10.opJUMPN = function(op, acc)
  */
 PDP10.opJUMPG = function(op, acc)
 {
-    this.opUndefined(op);
+    if (PDP10.doSGN.call(this, this.readWord(acc)) > 0) this.setPC(this.regEA);
 };
 
 /**
- * opSKIP(0o330000)
+ * opSKIP(0o330000): Do Not Skip
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-44:
+ *
+ *      Compare the contents (fixed or floating) of location E with zero, and skip the next instruction
+ *      in sequence if the condition specified by M is satisfied.  If A is nonzero also place the contents
+ *      of location E in AC.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2921,11 +3029,17 @@ PDP10.opJUMPG = function(op, acc)
  */
 PDP10.opSKIP = function(op, acc)
 {
-    this.opUndefined(op);
+    if (acc) this.writeWord(acc, this.readWord(this.regEA));
 };
 
 /**
- * opSKIPL(0o331000)
+ * opSKIPL(0o331000): Skip if Memory Less than Zero
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-44:
+ *
+ *      Compare the contents (fixed or floating) of location E with zero, and skip the next instruction
+ *      in sequence if the condition specified by M is satisfied.  If A is nonzero also place the contents
+ *      of location E in AC.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2933,11 +3047,19 @@ PDP10.opSKIP = function(op, acc)
  */
 PDP10.opSKIPL = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = this.readWord(this.regEA);
+    if (PDP10.doSGN.call(this, dst) < 0) this.setPC(this.regPC + 1);
+    if (acc) this.writeWord(acc, dst);
 };
 
 /**
- * opSKIPE(0o332000)
+ * opSKIPE(0o332000): Skip if Memory Equal to Zero
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-44:
+ *
+ *      Compare the contents (fixed or floating) of location E with zero, and skip the next instruction
+ *      in sequence if the condition specified by M is satisfied.  If A is nonzero also place the contents
+ *      of location E in AC.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2945,11 +3067,19 @@ PDP10.opSKIPL = function(op, acc)
  */
 PDP10.opSKIPE = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = this.readWord(this.regEA);
+    if (PDP10.doSGN.call(this, dst) == 0) this.setPC(this.regPC + 1);
+    if (acc) this.writeWord(acc, dst);
 };
 
 /**
- * opSKIPLE(0o333000)
+ * opSKIPLE(0o333000): Skip if Memory Less than or Equal to Zero
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-44:
+ *
+ *      Compare the contents (fixed or floating) of location E with zero, and skip the next instruction
+ *      in sequence if the condition specified by M is satisfied.  If A is nonzero also place the contents
+ *      of location E in AC.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2957,11 +3087,19 @@ PDP10.opSKIPE = function(op, acc)
  */
 PDP10.opSKIPLE = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = this.readWord(this.regEA);
+    if (PDP10.doSGN.call(this, dst) <= 0) this.setPC(this.regPC + 1);
+    if (acc) this.writeWord(acc, dst);
 };
 
 /**
- * opSKIPA(0o334000)
+ * opSKIPA(0o334000): Skip Always
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-44:
+ *
+ *      Compare the contents (fixed or floating) of location E with zero, and skip the next instruction
+ *      in sequence if the condition specified by M is satisfied.  If A is nonzero also place the contents
+ *      of location E in AC.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2969,11 +3107,18 @@ PDP10.opSKIPLE = function(op, acc)
  */
 PDP10.opSKIPA = function(op, acc)
 {
-    this.opUndefined(op);
+    this.setPC(this.regPC + 1);
+    if (acc) this.writeWord(acc, this.readWord(this.regEA));
 };
 
 /**
- * opSKIPGE(0o335000)
+ * opSKIPGE(0o335000): Skip if Memory Greater than or Equal to Zero
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-44:
+ *
+ *      Compare the contents (fixed or floating) of location E with zero, and skip the next instruction
+ *      in sequence if the condition specified by M is satisfied.  If A is nonzero also place the contents
+ *      of location E in AC.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2981,11 +3126,19 @@ PDP10.opSKIPA = function(op, acc)
  */
 PDP10.opSKIPGE = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = this.readWord(this.regEA);
+    if (PDP10.doSGN.call(this, dst) >= 0) this.setPC(this.regPC + 1);
+    if (acc) this.writeWord(acc, dst);
 };
 
 /**
- * opSKIPN(0o336000)
+ * opSKIPN(0o336000): Skip if Memory Not Equal to Zero
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-44:
+ *
+ *      Compare the contents (fixed or floating) of location E with zero, and skip the next instruction
+ *      in sequence if the condition specified by M is satisfied.  If A is nonzero also place the contents
+ *      of location E in AC.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2993,11 +3146,19 @@ PDP10.opSKIPGE = function(op, acc)
  */
 PDP10.opSKIPN = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = this.readWord(this.regEA);
+    if (PDP10.doSGN.call(this, dst) != 0) this.setPC(this.regPC + 1);
+    if (acc) this.writeWord(acc, dst);
 };
 
 /**
- * opSKIPG(0o337000)
+ * opSKIPG(0o337000): Skip if Memory Greater than Zero
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-44:
+ *
+ *      Compare the contents (fixed or floating) of location E with zero, and skip the next instruction
+ *      in sequence if the condition specified by M is satisfied.  If A is nonzero also place the contents
+ *      of location E in AC.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3005,11 +3166,20 @@ PDP10.opSKIPN = function(op, acc)
  */
 PDP10.opSKIPG = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = this.readWord(this.regEA);
+    if (PDP10.doSGN.call(this, dst) > 0) this.setPC(this.regPC + 1);
+    if (acc) this.writeWord(acc, dst);
 };
 
 /**
- * opAOJ(0o340000)
+ * opAOJ(0o340000): Add One to AC but Do Not Jump
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-44:
+ *
+ *      Increment AC by one and place the result back in AC.  Compare the result with zero, and if the
+ *      condition specified by M is satisfied, take the next instruction from location E and continue
+ *      sequential operation from there.  If AC originally contained 2^35 - 1, set the Overflow and Carry 1
+ *      flags; if -1, set Carry 0 and Carry 1.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3017,11 +3187,18 @@ PDP10.opSKIPG = function(op, acc)
  */
 PDP10.opAOJ = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(acc, PDP10.doADD.call(this, this.readWord(acc), 1));
 };
 
 /**
- * opAOJL(0o341000)
+ * opAOJL(0o341000): Add One to AC and Jump if Less than Zero
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-44:
+ *
+ *      Increment AC by one and place the result back in AC.  Compare the result with zero, and if the
+ *      condition specified by M is satisfied, take the next instruction from location E and continue
+ *      sequential operation from there.  If AC originally contained 2^35 - 1, set the Overflow and Carry 1
+ *      flags; if -1, set Carry 0 and Carry 1.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3029,11 +3206,19 @@ PDP10.opAOJ = function(op, acc)
  */
 PDP10.opAOJL = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = this.writeWord(acc, PDP10.doADD.call(this, this.readWord(acc), 1));
+    if (PDP10.doSGN.call(this, dst) < 0) this.setPC(this.regEA);
 };
 
 /**
- * opAOJE(0o342000)
+ * opAOJE(0o342000): Add One to AC and Jump if Equal to Zero
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-44:
+ *
+ *      Increment AC by one and place the result back in AC.  Compare the result with zero, and if the
+ *      condition specified by M is satisfied, take the next instruction from location E and continue
+ *      sequential operation from there.  If AC originally contained 2^35 - 1, set the Overflow and Carry 1
+ *      flags; if -1, set Carry 0 and Carry 1.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3041,11 +3226,19 @@ PDP10.opAOJL = function(op, acc)
  */
 PDP10.opAOJE = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = this.writeWord(acc, PDP10.doADD.call(this, this.readWord(acc), 1));
+    if (PDP10.doSGN.call(this, dst) == 0) this.setPC(this.regEA);
 };
 
 /**
- * opAOJLE(0o343000)
+ * opAOJLE(0o343000): Add One to AC and Jump if Less than or Equal to Zero
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-44:
+ *
+ *      Increment AC by one and place the result back in AC.  Compare the result with zero, and if the
+ *      condition specified by M is satisfied, take the next instruction from location E and continue
+ *      sequential operation from there.  If AC originally contained 2^35 - 1, set the Overflow and Carry 1
+ *      flags; if -1, set Carry 0 and Carry 1.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3053,11 +3246,19 @@ PDP10.opAOJE = function(op, acc)
  */
 PDP10.opAOJLE = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = this.writeWord(acc, PDP10.doADD.call(this, this.readWord(acc), 1));
+    if (PDP10.doSGN.call(this, dst) <= 0) this.setPC(this.regEA);
 };
 
 /**
- * opAOJA(0o344000)
+ * opAOJA(0o344000): Add One to AC and Jump Always
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-44:
+ *
+ *      Increment AC by one and place the result back in AC.  Compare the result with zero, and if the
+ *      condition specified by M is satisfied, take the next instruction from location E and continue
+ *      sequential operation from there.  If AC originally contained 2^35 - 1, set the Overflow and Carry 1
+ *      flags; if -1, set Carry 0 and Carry 1.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3065,11 +3266,19 @@ PDP10.opAOJLE = function(op, acc)
  */
 PDP10.opAOJA = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = this.writeWord(acc, PDP10.doADD.call(this, this.readWord(acc), 1));
+    this.setPC(this.regEA);
 };
 
 /**
- * opAOJGE(0o345000)
+ * opAOJGE(0o345000): Add One to AC and Jump if Greater than or Equal to Zero
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-44:
+ *
+ *      Increment AC by one and place the result back in AC.  Compare the result with zero, and if the
+ *      condition specified by M is satisfied, take the next instruction from location E and continue
+ *      sequential operation from there.  If AC originally contained 2^35 - 1, set the Overflow and Carry 1
+ *      flags; if -1, set Carry 0 and Carry 1.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3077,11 +3286,19 @@ PDP10.opAOJA = function(op, acc)
  */
 PDP10.opAOJGE = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = this.writeWord(acc, PDP10.doADD.call(this, this.readWord(acc), 1));
+    if (PDP10.doSGN.call(this, dst) >= 0) this.setPC(this.regEA);
 };
 
 /**
- * opAOJN(0o346000)
+ * opAOJN(0o346000): Add One to AC and Jump if Not Equal to Zero
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-44:
+ *
+ *      Increment AC by one and place the result back in AC.  Compare the result with zero, and if the
+ *      condition specified by M is satisfied, take the next instruction from location E and continue
+ *      sequential operation from there.  If AC originally contained 2^35 - 1, set the Overflow and Carry 1
+ *      flags; if -1, set Carry 0 and Carry 1.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3089,11 +3306,19 @@ PDP10.opAOJGE = function(op, acc)
  */
 PDP10.opAOJN = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = this.writeWord(acc, PDP10.doADD.call(this, this.readWord(acc), 1));
+    if (PDP10.doSGN.call(this, dst) != 0) this.setPC(this.regEA);
 };
 
 /**
- * opAOJG(0o347000)
+ * opAOJG(0o347000): Add One to AC and Jump if Greater than Zero
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-44:
+ *
+ *      Increment AC by one and place the result back in AC.  Compare the result with zero, and if the
+ *      condition specified by M is satisfied, take the next instruction from location E and continue
+ *      sequential operation from there.  If AC originally contained 2^35 - 1, set the Overflow and Carry 1
+ *      flags; if -1, set Carry 0 and Carry 1.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3101,11 +3326,19 @@ PDP10.opAOJN = function(op, acc)
  */
 PDP10.opAOJG = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = this.writeWord(acc, PDP10.doADD.call(this, this.readWord(acc), 1));
+    if (PDP10.doSGN.call(this, dst) > 0) this.setPC(this.regEA);
 };
 
 /**
- * opAOS(0o350000)
+ * opAOS(0o350000): Add One to Memory but Do Not Skip
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-45:
+ *
+ *      Increment the contents of location E by one and place the result back in E.  Compare the result
+ *      with zero, and skip the next instruction in sequence if the condition specified by M is satisfied.
+ *      If location E originally contained 2^35 - 1, set the Overflow and Carry 1 flags; if -1, set Carry 0
+ *      and Carry 1.  If A is nonzero also place the result in AC.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3113,11 +3346,19 @@ PDP10.opAOJG = function(op, acc)
  */
 PDP10.opAOS = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = this.writeWord(this.regEA, PDP10.doADD.call(this, this.readWord(this.regEA), 1));
+    if (acc) this.writeWord(acc, dst);
 };
 
 /**
- * opAOSL(0o351000)
+ * opAOSL(0o351000): Add One to Memory and Skip if Less than Zero
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-45:
+ *
+ *      Increment the contents of location E by one and place the result back in E.  Compare the result
+ *      with zero, and skip the next instruction in sequence if the condition specified by M is satisfied.
+ *      If location E originally contained 2^35 - 1, set the Overflow and Carry 1 flags; if -1, set Carry 0
+ *      and Carry 1.  If A is nonzero also place the result in AC.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3125,11 +3366,20 @@ PDP10.opAOS = function(op, acc)
  */
 PDP10.opAOSL = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = this.writeWord(this.regEA, PDP10.doADD.call(this, this.readWord(this.regEA), 1));
+    if (PDP10.doSGN.call(this, dst) < 0) this.setPC(this.regPC + 1);
+    if (acc) this.writeWord(acc, dst);
 };
 
 /**
- * opAOSE(0o352000)
+ * opAOSE(0o352000): Add One to Memory and Skip if Equal to Zero
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-45:
+ *
+ *      Increment the contents of location E by one and place the result back in E.  Compare the result
+ *      with zero, and skip the next instruction in sequence if the condition specified by M is satisfied.
+ *      If location E originally contained 2^35 - 1, set the Overflow and Carry 1 flags; if -1, set Carry 0
+ *      and Carry 1.  If A is nonzero also place the result in AC.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3137,11 +3387,20 @@ PDP10.opAOSL = function(op, acc)
  */
 PDP10.opAOSE = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = this.writeWord(this.regEA, PDP10.doADD.call(this, this.readWord(this.regEA), 1));
+    if (PDP10.doSGN.call(this, dst) == 0) this.setPC(this.regPC + 1);
+    if (acc) this.writeWord(acc, dst);
 };
 
 /**
- * opAOSLE(0o353000)
+ * opAOSLE(0o353000): Add One to Memory and Skip if Less than to Equal to Zero
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-45:
+ *
+ *      Increment the contents of location E by one and place the result back in E.  Compare the result
+ *      with zero, and skip the next instruction in sequence if the condition specified by M is satisfied.
+ *      If location E originally contained 2^35 - 1, set the Overflow and Carry 1 flags; if -1, set Carry 0
+ *      and Carry 1.  If A is nonzero also place the result in AC.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3149,11 +3408,20 @@ PDP10.opAOSE = function(op, acc)
  */
 PDP10.opAOSLE = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = this.writeWord(this.regEA, PDP10.doADD.call(this, this.readWord(this.regEA), 1));
+    if (PDP10.doSGN.call(this, dst) <= 0) this.setPC(this.regPC + 1);
+    if (acc) this.writeWord(acc, dst);
 };
 
 /**
- * opAOSA(0o354000)
+ * opAOSA(0o354000): Add One to Memory and Skip Always
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-45:
+ *
+ *      Increment the contents of location E by one and place the result back in E.  Compare the result
+ *      with zero, and skip the next instruction in sequence if the condition specified by M is satisfied.
+ *      If location E originally contained 2^35 - 1, set the Overflow and Carry 1 flags; if -1, set Carry 0
+ *      and Carry 1.  If A is nonzero also place the result in AC.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3161,11 +3429,20 @@ PDP10.opAOSLE = function(op, acc)
  */
 PDP10.opAOSA = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = this.writeWord(this.regEA, PDP10.doADD.call(this, this.readWord(this.regEA), 1));
+    this.setPC(this.regPC + 1);
+    if (acc) this.writeWord(acc, dst);
 };
 
 /**
- * opAOSGE(0o355000)
+ * opAOSGE(0o355000): Add One to Memory and Skip if Greater than or Equal to Zero
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-45:
+ *
+ *      Increment the contents of location E by one and place the result back in E.  Compare the result
+ *      with zero, and skip the next instruction in sequence if the condition specified by M is satisfied.
+ *      If location E originally contained 2^35 - 1, set the Overflow and Carry 1 flags; if -1, set Carry 0
+ *      and Carry 1.  If A is nonzero also place the result in AC.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3173,11 +3450,20 @@ PDP10.opAOSA = function(op, acc)
  */
 PDP10.opAOSGE = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = this.writeWord(this.regEA, PDP10.doADD.call(this, this.readWord(this.regEA), 1));
+    if (PDP10.doSGN.call(this, dst) >= 0) this.setPC(this.regPC + 1);
+    if (acc) this.writeWord(acc, dst);
 };
 
 /**
- * opAOSN(0o356000)
+ * opAOSN(0o356000): Add One to Memory and Skip if Not Equal to Zero
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-45:
+ *
+ *      Increment the contents of location E by one and place the result back in E.  Compare the result
+ *      with zero, and skip the next instruction in sequence if the condition specified by M is satisfied.
+ *      If location E originally contained 2^35 - 1, set the Overflow and Carry 1 flags; if -1, set Carry 0
+ *      and Carry 1.  If A is nonzero also place the result in AC.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3185,11 +3471,20 @@ PDP10.opAOSGE = function(op, acc)
  */
 PDP10.opAOSN = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = this.writeWord(this.regEA, PDP10.doADD.call(this, this.readWord(this.regEA), 1));
+    if (PDP10.doSGN.call(this, dst) != 0) this.setPC(this.regPC + 1);
+    if (acc) this.writeWord(acc, dst);
 };
 
 /**
- * opAOSG(0o357000)
+ * opAOSG(0o357000): Add One to Memory and Skip if Greater than Zero
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-45:
+ *
+ *      Increment the contents of location E by one and place the result back in E.  Compare the result
+ *      with zero, and skip the next instruction in sequence if the condition specified by M is satisfied.
+ *      If location E originally contained 2^35 - 1, set the Overflow and Carry 1 flags; if -1, set Carry 0
+ *      and Carry 1.  If A is nonzero also place the result in AC.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3197,11 +3492,20 @@ PDP10.opAOSN = function(op, acc)
  */
 PDP10.opAOSG = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = this.writeWord(this.regEA, PDP10.doADD.call(this, this.readWord(this.regEA), 1));
+    if (PDP10.doSGN.call(this, dst) > 0) this.setPC(this.regPC + 1);
+    if (acc) this.writeWord(acc, dst);
 };
 
 /**
- * opSOJ(0o360000)
+ * opSOJ(0o360000): Subtract One from AC but Do Not Jump
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-45:
+ *
+ *      Decrement AC by one and place the result back in AC.  Compare the result with zero, and if the
+ *      condition specified by M is satisfied, take the next instruction from location E and continue sequential
+ *      operation from there.  If AC originally contained - 2^35 , set the Overflow and Carry 0 flags; if any
+ *      other nonzero number, set Carry 0 and Carry 1.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3209,11 +3513,18 @@ PDP10.opAOSG = function(op, acc)
  */
 PDP10.opSOJ = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(acc, PDP10.doSUB.call(this, this.readWord(acc), 1));
 };
 
 /**
- * opSOJL(0o361000)
+ * opSOJL(0o361000): Subtract One from AC and Jump if Less than Zero
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-45:
+ *
+ *      Decrement AC by one and place the result back in AC.  Compare the result with zero, and if the
+ *      condition specified by M is satisfied, take the next instruction from location E and continue sequential
+ *      operation from there.  If AC originally contained - 2^35 , set the Overflow and Carry 0 flags; if any
+ *      other nonzero number, set Carry 0 and Carry 1.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3221,11 +3532,19 @@ PDP10.opSOJ = function(op, acc)
  */
 PDP10.opSOJL = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = this.writeWord(acc, PDP10.doSUB.call(this, this.readWord(acc), 1));
+    if (PDP10.doSGN.call(this, dst) < 0) this.setPC(this.regEA);
 };
 
 /**
- * opSOJE(0o362000)
+ * opSOJE(0o362000): Subtract One from AC and Jump if Equal to Zero
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-45:
+ *
+ *      Decrement AC by one and place the result back in AC.  Compare the result with zero, and if the
+ *      condition specified by M is satisfied, take the next instruction from location E and continue sequential
+ *      operation from there.  If AC originally contained - 2^35 , set the Overflow and Carry 0 flags; if any
+ *      other nonzero number, set Carry 0 and Carry 1.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3233,11 +3552,19 @@ PDP10.opSOJL = function(op, acc)
  */
 PDP10.opSOJE = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = this.writeWord(acc, PDP10.doSUB.call(this, this.readWord(acc), 1));
+    if (PDP10.doSGN.call(this, dst) == 0) this.setPC(this.regEA);
 };
 
 /**
- * opSOJLE(0o363000)
+ * opSOJLE(0o363000): Subtract One from AC and Jump if Less than or Equal to Zero
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-45:
+ *
+ *      Decrement AC by one and place the result back in AC.  Compare the result with zero, and if the
+ *      condition specified by M is satisfied, take the next instruction from location E and continue sequential
+ *      operation from there.  If AC originally contained - 2^35 , set the Overflow and Carry 0 flags; if any
+ *      other nonzero number, set Carry 0 and Carry 1.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3245,11 +3572,19 @@ PDP10.opSOJE = function(op, acc)
  */
 PDP10.opSOJLE = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = this.writeWord(acc, PDP10.doSUB.call(this, this.readWord(acc), 1));
+    if (PDP10.doSGN.call(this, dst) <= 0) this.setPC(this.regEA);
 };
 
 /**
- * opSOJA(0o364000)
+ * opSOJA(0o364000): Subtract One from AC and Jump Always
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-45:
+ *
+ *      Decrement AC by one and place the result back in AC.  Compare the result with zero, and if the
+ *      condition specified by M is satisfied, take the next instruction from location E and continue sequential
+ *      operation from there.  If AC originally contained - 2^35 , set the Overflow and Carry 0 flags; if any
+ *      other nonzero number, set Carry 0 and Carry 1.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3257,11 +3592,19 @@ PDP10.opSOJLE = function(op, acc)
  */
 PDP10.opSOJA = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(acc, PDP10.doSUB.call(this, this.readWord(acc), 1));
+    this.setPC(this.regEA);
 };
 
 /**
- * opSOJGE(0o365000)
+ * opSOJGE(0o365000): Subtract One from AC and Jump if Greater than or Equal to Zero
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-45:
+ *
+ *      Decrement AC by one and place the result back in AC.  Compare the result with zero, and if the
+ *      condition specified by M is satisfied, take the next instruction from location E and continue sequential
+ *      operation from there.  If AC originally contained - 2^35 , set the Overflow and Carry 0 flags; if any
+ *      other nonzero number, set Carry 0 and Carry 1.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3269,11 +3612,19 @@ PDP10.opSOJA = function(op, acc)
  */
 PDP10.opSOJGE = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = this.writeWord(acc, PDP10.doSUB.call(this, this.readWord(acc), 1));
+    if (PDP10.doSGN.call(this, dst) >= 0) this.setPC(this.regEA);
 };
 
 /**
- * opSOJN(0o366000)
+ * opSOJN(0o366000): Subtract One from AC and Jump if Not Equal to Zero
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-45:
+ *
+ *      Decrement AC by one and place the result back in AC.  Compare the result with zero, and if the
+ *      condition specified by M is satisfied, take the next instruction from location E and continue sequential
+ *      operation from there.  If AC originally contained - 2^35 , set the Overflow and Carry 0 flags; if any
+ *      other nonzero number, set Carry 0 and Carry 1.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3281,11 +3632,19 @@ PDP10.opSOJGE = function(op, acc)
  */
 PDP10.opSOJN = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = this.writeWord(acc, PDP10.doSUB.call(this, this.readWord(acc), 1));
+    if (PDP10.doSGN.call(this, dst) != 0) this.setPC(this.regEA);
 };
 
 /**
- * opSOJG(0o367000)
+ * opSOJG(0o367000): Subtract One from AC and Jump if Greater than Zero
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-45:
+ *
+ *      Decrement AC by one and place the result back in AC.  Compare the result with zero, and if the
+ *      condition specified by M is satisfied, take the next instruction from location E and continue sequential
+ *      operation from there.  If AC originally contained - 2^35 , set the Overflow and Carry 0 flags; if any
+ *      other nonzero number, set Carry 0 and Carry 1.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3293,11 +3652,19 @@ PDP10.opSOJN = function(op, acc)
  */
 PDP10.opSOJG = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = this.writeWord(acc, PDP10.doSUB.call(this, this.readWord(acc), 1));
+    if (PDP10.doSGN.call(this, dst) > 0) this.setPC(this.regEA);
 };
 
 /**
- * opSOS(0o370000)
+ * opSOS(0o370000): Subtract One from Memory but Do Not Skip
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-46:
+ *
+ *      Decrement the contents of location E by one and place the result back in E.  Compare the result with zero,
+ *      and skip the next instruction in sequence if the condition specified by M is satisfied.  If location E originally
+ *      contained -2^35 , set the Overflow and Carry 0 flags; if any other nonzero number, set Carry 0 and Carry 1.
+ *      If A is nonzero also place the result in AC.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3305,11 +3672,19 @@ PDP10.opSOJG = function(op, acc)
  */
 PDP10.opSOS = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = this.writeWord(this.regEA, PDP10.doSUB.call(this, this.readWord(this.regEA), 1));
+    if (acc) this.writeWord(acc, dst);
 };
 
 /**
- * opSOSL(0o371000)
+ * opSOSL(0o371000): Subtract One from Memory and Skip if Less than Zero
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-46:
+ *
+ *      Decrement the contents of location E by one and place the result back in E.  Compare the result with zero,
+ *      and skip the next instruction in sequence if the condition specified by M is satisfied.  If location E originally
+ *      contained -2^35 , set the Overflow and Carry 0 flags; if any other nonzero number, set Carry 0 and Carry 1.
+ *      If A is nonzero also place the result in AC.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3317,11 +3692,20 @@ PDP10.opSOS = function(op, acc)
  */
 PDP10.opSOSL = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = this.writeWord(this.regEA, PDP10.doSUB.call(this, this.readWord(this.regEA), 1));
+    if (PDP10.doSGN.call(this, dst) < 0) this.setPC(this.regPC + 1);
+    if (acc) this.writeWord(acc, dst);
 };
 
 /**
- * opSOSE(0o372000)
+ * opSOSE(0o372000): Subtract One from Memory and Skip if Equal to Zero
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-46:
+ *
+ *      Decrement the contents of location E by one and place the result back in E.  Compare the result with zero,
+ *      and skip the next instruction in sequence if the condition specified by M is satisfied.  If location E originally
+ *      contained -2^35 , set the Overflow and Carry 0 flags; if any other nonzero number, set Carry 0 and Carry 1.
+ *      If A is nonzero also place the result in AC.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3329,11 +3713,20 @@ PDP10.opSOSL = function(op, acc)
  */
 PDP10.opSOSE = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = this.writeWord(this.regEA, PDP10.doSUB.call(this, this.readWord(this.regEA), 1));
+    if (PDP10.doSGN.call(this, dst) == 0) this.setPC(this.regPC + 1);
+    if (acc) this.writeWord(acc, dst);
 };
 
 /**
- * opSOSLE(0o373000)
+ * opSOSLE(0o373000): Subtract One from Memory and Skip if Less than or Equal to Zero
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-46:
+ *
+ *      Decrement the contents of location E by one and place the result back in E.  Compare the result with zero,
+ *      and skip the next instruction in sequence if the condition specified by M is satisfied.  If location E originally
+ *      contained -2^35 , set the Overflow and Carry 0 flags; if any other nonzero number, set Carry 0 and Carry 1.
+ *      If A is nonzero also place the result in AC.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3341,11 +3734,20 @@ PDP10.opSOSE = function(op, acc)
  */
 PDP10.opSOSLE = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = this.writeWord(this.regEA, PDP10.doSUB.call(this, this.readWord(this.regEA), 1));
+    if (PDP10.doSGN.call(this, dst) <= 0) this.setPC(this.regPC + 1);
+    if (acc) this.writeWord(acc, dst);
 };
 
 /**
- * opSOSA(0o374000)
+ * opSOSA(0o374000): Subtract One from Memory and Skip Always
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-46:
+ *
+ *      Decrement the contents of location E by one and place the result back in E.  Compare the result with zero,
+ *      and skip the next instruction in sequence if the condition specified by M is satisfied.  If location E originally
+ *      contained -2^35 , set the Overflow and Carry 0 flags; if any other nonzero number, set Carry 0 and Carry 1.
+ *      If A is nonzero also place the result in AC.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3353,11 +3755,20 @@ PDP10.opSOSLE = function(op, acc)
  */
 PDP10.opSOSA = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = this.writeWord(this.regEA, PDP10.doSUB.call(this, this.readWord(this.regEA), 1));
+    this.setPC(this.regPC + 1);
+    if (acc) this.writeWord(acc, dst);
 };
 
 /**
- * opSOSGE(0o375000)
+ * opSOSGE(0o375000): Subtract One from Memory and Skip if Greater than or Equal to Zero
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-46:
+ *
+ *      Decrement the contents of location E by one and place the result back in E.  Compare the result with zero,
+ *      and skip the next instruction in sequence if the condition specified by M is satisfied.  If location E originally
+ *      contained -2^35 , set the Overflow and Carry 0 flags; if any other nonzero number, set Carry 0 and Carry 1.
+ *      If A is nonzero also place the result in AC.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3365,11 +3776,20 @@ PDP10.opSOSA = function(op, acc)
  */
 PDP10.opSOSGE = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = this.writeWord(this.regEA, PDP10.doSUB.call(this, this.readWord(this.regEA), 1));
+    if (PDP10.doSGN.call(this, dst) >= 0) this.setPC(this.regPC + 1);
+    if (acc) this.writeWord(acc, dst);
 };
 
 /**
- * opSOSN(0o376000)
+ * opSOSN(0o376000): Subtract One from Memory and Skip if Not Equal to Zero
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-46:
+ *
+ *      Decrement the contents of location E by one and place the result back in E.  Compare the result with zero,
+ *      and skip the next instruction in sequence if the condition specified by M is satisfied.  If location E originally
+ *      contained -2^35 , set the Overflow and Carry 0 flags; if any other nonzero number, set Carry 0 and Carry 1.
+ *      If A is nonzero also place the result in AC.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3377,11 +3797,20 @@ PDP10.opSOSGE = function(op, acc)
  */
 PDP10.opSOSN = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = this.writeWord(this.regEA, PDP10.doSUB.call(this, this.readWord(this.regEA), 1));
+    if (PDP10.doSGN.call(this, dst) != 0) this.setPC(this.regPC + 1);
+    if (acc) this.writeWord(acc, dst);
 };
 
 /**
- * opSOSG(0o377000)
+ * opSOSG(0o377000): Subtract One from Memory and Skip if Greater than Zero
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-46:
+ *
+ *      Decrement the contents of location E by one and place the result back in E.  Compare the result with zero,
+ *      and skip the next instruction in sequence if the condition specified by M is satisfied.  If location E originally
+ *      contained -2^35 , set the Overflow and Carry 0 flags; if any other nonzero number, set Carry 0 and Carry 1.
+ *      If A is nonzero also place the result in AC.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -3389,7 +3818,9 @@ PDP10.opSOSN = function(op, acc)
  */
 PDP10.opSOSG = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = this.writeWord(this.regEA, PDP10.doSUB.call(this, this.readWord(this.regEA), 1));
+    if (PDP10.doSGN.call(this, dst) > 0) this.setPC(this.regPC + 1);
+    if (acc) this.writeWord(acc, dst);
 };
 
 /**
@@ -5545,13 +5976,26 @@ PDP10.opIO = function(op)
 /**
  * opNOP(op, acc)
  *
- * Used for all "defined" operations that, in fact, do nothing (eg, SETA and SETAI).
+ * Used for all "defined" operations that, in fact, do nothing (eg, SETA, SETAI, CAI, JUMP).
  *
  * @this {CPUStatePDP10}
  * @param {number} op
  * @param {number} acc
  */
 PDP10.opNOP = function(op, acc)
+{
+};
+
+/**
+ * opNOPM(op, acc)
+ *
+ * Used for all "defined" operations that, in fact, do nothing (eg, SETMM, CAM) EXCEPT reference memory.
+ *
+ * @this {CPUStatePDP10}
+ * @param {number} op
+ * @param {number} acc
+ */
+PDP10.opNOPM = function(op, acc)
 {
 };
 
@@ -5572,7 +6016,7 @@ PDP10.opUndefined = function(op, acc)
 /**
  * doABS(src)
  *
- * Used by the MOVM* (Move Magnitude) instructions.
+ * Returns the absolute value (ABS) of the 36-bit operand; used by the MOVM* (Move Magnitude) instructions.
  *
  * @this {CPUStatePDP10}
  * @param {number} src (36-bit)
@@ -5580,8 +6024,8 @@ PDP10.opUndefined = function(op, acc)
  */
 PDP10.doABS = function(src)
 {
-    if (src > PDP10.MAX_POS36) {
-        if (src != PDP10.MIN_NEG36) {
+    if (src > PDP10.INT_MASK) {
+        if (src != PDP10.INT_LIMIT) {
             src = PDP10.TWO_POW36 - src;
         } else {
             this.regPS |= (PDP10.PSFLAG.OVFL | PDP10.PSFLAG.CARRY1);
@@ -5593,7 +6037,7 @@ PDP10.doABS = function(src)
 /**
  * doADD(dst, src)
  *
- * Used by callers to perform the addition (ADD) of two signed 36-bit operands.
+ * Performs the addition (ADD) of two signed 36-bit operands.
  *
  * @this {CPUStatePDP10}
  * @param {number} dst (36-bit value)
@@ -5614,7 +6058,7 @@ PDP10.doADD = function(dst, src)
 /**
  * doAND(dst, src)
  *
- * Used by callers to perform the logical "and" (AND) of two 36-bit operands.
+ * Performs the logical "and" (AND) of two 36-bit operands.
  *
  * @this {CPUStatePDP10}
  * @param {number} dst (36-bit value)
@@ -5636,9 +6080,24 @@ PDP10.doAND = function(dst, src)
 };
 
 /**
+ * doCMP(dst, src)
+ *
+ * Performs the SIGNED comparison (CMP) of two 36-bit operands.
+ *
+ * @this {CPUStatePDP10}
+ * @param {number} dst (36-bit value)
+ * @param {number} src (36-bit value)
+ * @return {number} (dst - src)
+ */
+PDP10.doCMP = function(dst, src)
+{
+    return (dst < PDP10.INT_LIMIT? dst : dst - PDP10.WORD_LIMIT) - (src < PDP10.INT_LIMIT? src : src - PDP10.INT_LIMIT);
+};
+
+/**
  * doDIV(dst, ext, src)
  *
- * Used by callers to perform the division (DIV) of a 72-bit operand by a 36-bit operand.
+ * Performs the division (DIV) of a 72-bit operand by a 36-bit operand.
  *
  * @this {CPUStatePDP10}
  * @param {number} dst (36-bit value)
@@ -5653,12 +6112,12 @@ PDP10.doDIV = function(dst, ext, src)
     dst = PDP10.merge72.call(this, dst, ext);
     ext = this.regExt;
 
-    if (src > PDP10.MAX_POS36) {
+    if (src > PDP10.INT_MASK) {
         src = PDP10.WORD_LIMIT - src;
         fNegQ = !fNegQ;
     }
 
-    if (ext > PDP10.MAX_POS36) {
+    if (ext > PDP10.INT_MASK) {
         if (dst) {
             ext = PDP10.WORD_MASK - ext;
             dst = PDP10.WORD_LIMIT - dst;
@@ -5726,7 +6185,7 @@ PDP10.doDIV = function(dst, ext, src)
 /**
  * doEOR(dst, src)
  *
- * Used by callers to perform the logical "exclusive-or" (XOR) of two 36-bit operands.
+ * Performs the logical "exclusive-or" (XOR) of two 36-bit operands.
  *
  * @this {CPUStatePDP10}
  * @param {number} dst (36-bit value)
@@ -5750,7 +6209,7 @@ PDP10.doEOR = function(dst, src)
 /**
  * doEQV(dst, src)
  *
- * Used by callers to perform the logical "equivalence" (EQV) of two 36-bit operands.
+ * Performs the logical "equivalence" (EQV) of two 36-bit operands.
  *
  * @this {CPUStatePDP10}
  * @param {number} dst (36-bit value)
@@ -5774,7 +6233,7 @@ PDP10.doEQV = function(dst, src)
 /**
  * doIOR(dst, src)
  *
- * Used by callers to perform the logical "inclusive-or" (OR) of two 36-bit operands.
+ * Performs the logical "inclusive-or" (OR) of two 36-bit operands.
  *
  * @this {CPUStatePDP10}
  * @param {number} dst (36-bit value)
@@ -5798,7 +6257,7 @@ PDP10.doIOR = function(dst, src)
 /**
  * doMUL(dst, src, fTruncate)
  *
- * Used by callers to perform the multiplication (MUL) of two signed 36-bit operands.
+ * Performs the multiplication (MUL) of two signed 36-bit operands.
  *
  * To support 72-bit results, we perform the multiplication process as you would "by hand",
  * treating the operands to be multiplied as two 2-digit numbers, where each "digit" is an 18-bit
@@ -5820,12 +6279,12 @@ PDP10.doMUL = function(dst, src, fTruncate)
      * If either input is in the negative range, record the sign and make it positive;
      * we'll negate the result afterward if necessary.
      */
-    if (n1 > PDP10.MAX_POS36) {
+    if (n1 > PDP10.INT_MASK) {
         n1 = PDP10.WORD_LIMIT - n1;
         fNeg = !fNeg;
     }
 
-    if (n2 > PDP10.MAX_POS36) {
+    if (n2 > PDP10.INT_MASK) {
         n2 = PDP10.WORD_LIMIT - n2;
         fNeg = !fNeg;
     }
@@ -5864,7 +6323,7 @@ PDP10.doMUL = function(dst, src, fTruncate)
         /*
          * If ext is something OTHER than an extension of the res sign bit, then we have overflow.
          */
-        if ((ext || res > PDP10.MAX_POS36) && (ext != PDP10.WORD_MASK || res <= PDP10.MAX_POS36)) {
+        if ((ext || res > PDP10.INT_MASK) && (ext != PDP10.WORD_MASK || res <= PDP10.INT_MASK)) {
             this.regPS |= PDP10.PSFLAG.OVFL;
         }
         /*
@@ -5880,7 +6339,7 @@ PDP10.doMUL = function(dst, src, fTruncate)
 /**
  * doNEG(src)
  *
- * Used by the MOVN* (Move Negative) instructions.
+ * Returns the negation (NEG) of the 36-bit operand; used by the MOVN* (Move Negative) instructions.
  *
  * @this {CPUStatePDP10}
  * @param {number} src (36-bit)
@@ -5894,9 +6353,9 @@ PDP10.doNEG = function(src)
     else {
         /*
          * In the non-zero case, it's always safe to subtract src from TWO_POW36, but since we have to check for
-         * the MIN_NEG36 case anyway, and since subtraction in that case doesn't alter src, we skip the subtraction.
+         * the INT_LIMIT case anyway, and since subtraction in that case doesn't alter src, we skip the subtraction.
          */
-        if (src == PDP10.MIN_NEG36) {
+        if (src == PDP10.INT_LIMIT) {
             this.regPS |= (PDP10.PSFLAG.OVFL | PDP10.PSFLAG.CARRY1);
         } else {
             src = PDP10.TWO_POW36 - src;
@@ -5906,9 +6365,23 @@ PDP10.doNEG = function(src)
 };
 
 /**
+ * doSGN(dst)
+ *
+ * Returns the signed form of the 36-bit operand; more efficient than doCMP(dst, 0).
+ *
+ * @this {CPUStatePDP10}
+ * @param {number} dst (36-bit value)
+ * @return {number}
+ */
+PDP10.doSGN = function(dst)
+{
+    return (dst < PDP10.INT_LIMIT? dst : dst - PDP10.WORD_LIMIT);
+};
+
+/**
  * doSUB(dst, src)
  *
- * Used by callers to perform the subtraction (SUB) of two signed 36-bit operands.
+ * Performs the subtraction (SUB) of two signed 36-bit operands.
  *
  * @this {CPUStatePDP10}
  * @param {number} dst (36-bit value)
@@ -5934,7 +6407,7 @@ PDP10.doSUB = function(dst, src)
 /**
  * merge72(dst, ext)
  *
- * Returns a unified 72-bit result from dst and ext.
+ * Returns a unified 72-bit result from two independently-signed 36-bit values.
  *
  * @this {CPUStatePDP10}
  * @param {number} dst (36-bit value)
@@ -5961,7 +6434,7 @@ PDP10.merge72 = function(dst, ext)
 /**
  * split72(res, ext)
  *
- * Returns two split 36-bit values from a 72-bit result.
+ * Returns two 36-bit values with matching sign bits from a unified 72-bit result.
  *
  * @this {CPUStatePDP10}
  * @param {number} res (36-bit value)
@@ -6000,12 +6473,46 @@ PDP10.split72 = function(res, ext)
  */
 PDP10.setAddFlags = function(dst, src, res)
 {
+    /*
+     * Isolate the top two bits of dst, src, and res by "shifting" them into bits 0 and 1 of the following variables.
+     */
     var dst01 = Math.trunc(dst / PDP10.TWO_POW34);
     var src01 = Math.trunc(src / PDP10.TWO_POW34);
     var res01 = Math.trunc(res / PDP10.TWO_POW34);
+
+    /*
+     * Transform bits 0 and 1 into carry flags, based on the following truth table:
+     *
+     *      D   S   R   C   Carry?
+     *      -   -   -   -   ------
+     *      0   0   0   0   no
+     *      0   0   1   0   no (there must have been a carry out of the preceding bit, but it was "absorbed")
+     *      0   1   0   1   yes (there must have been a carry out of the preceding bit, but it was NOT "absorbed")
+     *      0   1   1   0   no
+     *      1   0   0   1   yes (same as the preceding "yes" case)
+     *      1   0   1   0   no
+     *      1   1   0   1   yes (since the addition of two ones must always produce a carry)
+     *      1   1   1   1   yes (since the addition of two ones must always produce a carry)
+     */
     var bitsCarry = (dst01 ^ ((dst01 ^ src01) & (src01 ^ res01)));
     var fCarry0 = bitsCarry & 0b10;
     var fCarry1 = bitsCarry & 0b01;
+
+    /*
+     * Similarly, we transform bit 1 into an overflow flag, based on the following truth table;
+     * note that X is (D ^ R) and Y is (S ^ R):
+     *
+     *      D   S   R   X   Y   O   Overflow?
+     *      -   -   -   -   -   -   ---------
+     *      0   0   0   0   0   0   no
+     *      0   0   1   1   1   1   yes (adding two positive values yielded a negative value)
+     *      0   1   0   0   1   0   no
+     *      0   1   1   1   0   0   no
+     *      1   0   0   1   0   0   no
+     *      1   0   1   0   1   0   no
+     *      1   1   0   1   1   1   yes (adding two negative values yielded a positive value)
+     *      1   1   1   0   0   0   no
+     */
     var fOverflow = ((dst01 ^ res01) & (src01 ^ res01)) & 0b10;
     this.regPS |= (fCarry0? PDP10.PSFLAG.CARRY0 : 0) | (fCarry1? PDP10.PSFLAG.CARRY1 : 0) | (fOverflow? PDP10.PSFLAG.OVFL : 0);
 };
@@ -6033,7 +6540,7 @@ PDP10.getHL = function(op, dst, src)
         dst = (PDP10.HALF_MASK * PDP10.HALF_SHIFT);
         break;
     case 0o600:
-        dst = (src > PDP10.MAX_POS18? (PDP10.HALF_MASK * PDP10.HALF_SHIFT) : 0);
+        dst = (src > PDP10.HINT_MASK? (PDP10.HALF_MASK * PDP10.HALF_SHIFT) : 0);
         break;
     }
     return dst;
@@ -6058,7 +6565,7 @@ PDP10.setHL = function(op, dst, src)
             dst += (PDP10.HALF_MASK * PDP10.HALF_SHIFT);
             break;
         case 0o600:
-            dst += (src > PDP10.MAX_POS18? (PDP10.HALF_MASK * PDP10.HALF_SHIFT) : 0);
+            dst += (src > PDP10.HINT_MASK? (PDP10.HALF_MASK * PDP10.HALF_SHIFT) : 0);
             break;
         }
     }
@@ -6088,7 +6595,7 @@ PDP10.getHR = function(op, dst, src)
         dst = PDP10.HALF_MASK;
         break;
     case 0o600:
-        dst = (src > PDP10.MAX_POS36? PDP10.HALF_MASK : 0);
+        dst = (src > PDP10.INT_MASK? PDP10.HALF_MASK : 0);
         break;
     }
     return dst;
@@ -6113,7 +6620,7 @@ PDP10.setHR = function(op, dst, src)
             dst += PDP10.HALF_MASK;
             break;
         case 0o600:
-            dst += (src > PDP10.MAX_POS36? PDP10.HALF_MASK : 0);
+            dst += (src > PDP10.INT_MASK? PDP10.HALF_MASK : 0);
             break;
         }
     }
@@ -6123,7 +6630,7 @@ PDP10.setHR = function(op, dst, src)
 /**
  * addD(dDst, dSrc)
  *
- * Adds dSrc to dDst.
+ * Adds a double-length value (dSrc) to another (dDst).
  *
  * @param {Array.<number>} dDst
  * @param {Array.<number>} dSrc
@@ -6141,7 +6648,7 @@ PDP10.addD = function(dDst, dSrc)
 /**
  * cmpD(dDst, dSrc)
  *
- * Compares dDst to dSrc, by computing dDst - dSrc.
+ * Compares double-length values (dDst and dSrc) by computing dDst - dSrc.
  *
  * @param {Array.<number>} dDst
  * @param {Array.<number>} dSrc
@@ -6157,6 +6664,8 @@ PDP10.cmpD = function(dDst, dSrc)
 /**
  * initD(dDst, lo, hi)
  *
+ * Initializes a double-length value (dDst).
+ *
  * @param {Array.<number>} dDst
  * @param {number} lo
  * @param {number} hi
@@ -6170,7 +6679,7 @@ PDP10.initD = function(dDst, lo, hi)
 /**
  * shrD(dDst)
  *
- * Shifts dDst right one bit.
+ * Shifts a double-length value (dDst) right one bit.
  *
  * @param {Array.<number>} dDst
  */
@@ -6186,7 +6695,7 @@ PDP10.shrD = function(dDst)
 /**
  * subD(dDst, dSrc)
  *
- * Subtracts dSrc from dDst.
+ * Subtracts a double-length value (dSrc) from another (dDst).
  *
  * @param {Array.<number>} dDst
  * @param {Array.<number>} dSrc
@@ -6204,7 +6713,7 @@ PDP10.subD = function(dDst, dSrc)
 /**
  * zeroD(d)
  *
- * True if bits are all zero, false otherwise.
+ * True if all bits in the double-length value (d) are zero, false otherwise.
  *
  * @param {Array.<number>} d
  */
@@ -6281,8 +6790,11 @@ PDP10.opSETAM   = PDP10.opMOVEM;
 PDP10.opSETAB   = PDP10.opMOVEM;
 PDP10.opSETM    = PDP10.opMOVE;
 PDP10.opSETMI   = PDP10.opMOVEI;
-PDP10.opSETMM   = PDP10.opNOP;
+PDP10.opSETMM   = PDP10.opNOPM;
 PDP10.opSETMB   = PDP10.opMOVE;
+PDP10.opCAI     = PDP10.opNOP;
+PDP10.opCAM     = PDP10.opNOPM;
+PDP10.opJUMP    = PDP10.opNOP;
 
 PDP10.aOpXXX_KA10 = [
     PDP10.opUUO,                // 0o000xxx
@@ -6485,14 +6997,14 @@ PDP10.aOpXXX_KA10 = [
     PDP10.opCAIGE,              // 0o305xxx
     PDP10.opCAIN,               // 0o306xxx
     PDP10.opCAIG,               // 0o307xxx
-    PDP10.opCA,                 // 0o310xxx
-    PDP10.opCAL,                // 0o311xxx
-    PDP10.opCAE,                // 0o312xxx
-    PDP10.opCALE,               // 0o313xxx
-    PDP10.opCAA,                // 0o314xxx
-    PDP10.opCAGE,               // 0o315xxx
-    PDP10.opCAN,                // 0o316xxx
-    PDP10.opCAG,                // 0o317xxx
+    PDP10.opCAM,                // 0o310xxx
+    PDP10.opCAML,               // 0o311xxx
+    PDP10.opCAME,               // 0o312xxx
+    PDP10.opCAMLE,              // 0o313xxx
+    PDP10.opCAMA,               // 0o314xxx
+    PDP10.opCAMGE,              // 0o315xxx
+    PDP10.opCAMN,               // 0o316xxx
+    PDP10.opCAMG,               // 0o317xxx
     PDP10.opJUMP,               // 0o320xxx
     PDP10.opJUMPL,              // 0o321xxx
     PDP10.opJUMPE,              // 0o322xxx

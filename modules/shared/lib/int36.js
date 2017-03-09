@@ -123,7 +123,7 @@
  * @unrestricted
  *
  * The 'value' property stores the 36-bit value as an unsigned integer.  When the value should be
- * interpreted as a signed quantity, subtract BIT36 whenever value > MAX_POS36.
+ * interpreted as a signed quantity, subtract BIT36 whenever value > INT_MASK.
  *
  * The 'extended' property stores an additional 36 bits of data from a multiplication, and can also
  * provide an additional 36 bits of data to a division.  Internally, it should be null whenever the
@@ -153,7 +153,7 @@ class Int36 {
      *      0 <= i <= Math.pow(2, 36) - 1
      *
      * The lower bound is ZERO and the upper bound is Int36.WORD_MASK.  Whenever an Int36 value should be
-     * interpreted as a signed value, values above Int36.MAX_POS36 (ie, values with bit 35 set) should be
+     * interpreted as a signed value, values above Int36.INT_MASK (ie, values with bit 35 set) should be
      * converted to their signed counterpart by subtracting the value from Int36.WORD_LIMIT (aka WORD_MASK + 1);
      * the easiest way to do that is call isNeg() to check the sign bit and then call negate() as
      * appropriate.
@@ -330,12 +330,12 @@ class Int36 {
     /**
      * truncate(result, operand, fSub)
      *
-     * The range of valid results (0 - WORD_MASK) is divided into two equal sub-ranges: 0 to MAX_POS36,
-     * where the sign bit is zero (the bottom range), and MAX_POS36+1 to WORD_MASK (the top range), where
+     * The range of valid results (0 - WORD_MASK) is divided into two equal sub-ranges: 0 to INT_MASK,
+     * where the sign bit is zero (the bottom range), and INT_MASK+1 to WORD_MASK (the top range), where
      * the sign bit is one.  During a single arithmetic operation, the result can "wrap around" from
      * the bottom range to the top, or from the top range to the bottom, but it's an overflow/underflow
      * error ONLY if the result "wraps across" the midpoint between the two ranges, producing an
-     * unnaturally small delta (<= MAX_POS36).
+     * unnaturally small delta (<= INT_MASK).
      *
      * This can be confirmed independently by examining the sign bits (BIT35) of the original value
      * (V), the operand (O), the result (R), as well as two intermediate calculations, VR = (V ^ R)
@@ -413,9 +413,9 @@ class Int36 {
                 var v = this.value / Int36.INT_LIMIT, r = result / Int36.INT_LIMIT, o = operand / Int36.INT_LIMIT;
                 e = ((v ^ r) & (o ^ (fSub? v : r))) & 1;
             }
-            if ((result > Int36.MAX_POS36) != (this.value > Int36.MAX_POS36)) {
+            if ((result > Int36.INT_MASK) != (this.value > Int36.INT_MASK)) {
                 var delta = result - this.value;
-                if (Math.abs(delta) <= Int36.MAX_POS36) {
+                if (Math.abs(delta) <= Int36.INT_MASK) {
                     this.error |= (delta > 0? Int36.ERROR.OVERFLOW : Int36.ERROR.UNDERFLOW);
                     if (DEBUG && (delta > 0) != !(e & v)) e = 0;
                 }
@@ -514,12 +514,12 @@ class Int36 {
 
         this.error = Int36.ERROR.NONE;
 
-        if (n1 > Int36.MAX_POS36) {
+        if (n1 > Int36.INT_MASK) {
             n1 = Int36.WORD_LIMIT - n1;
             fNeg = !fNeg;
         }
 
-        if (n2 > Int36.MAX_POS36) {
+        if (n2 > Int36.INT_MASK) {
             n2 = Int36.WORD_LIMIT - n2;
             fNeg = !fNeg;
         }
@@ -599,7 +599,7 @@ class Int36 {
 
         var fNegQ = false, fNegR = false;
 
-        if (divisor > Int36.MAX_POS36) {
+        if (divisor > Int36.INT_MASK) {
             divisor = Int36.WORD_LIMIT - divisor;
             fNegQ = !fNegQ;
         }
@@ -704,11 +704,11 @@ class Int36 {
                 /*
                  * Convert the unsigned word (w) to a signed value (i), for convenience.
                  */
-                var i = w > Int36.MAX_POS36? -(Int36.WORD_LIMIT - w) : w;
+                var i = w > Int36.INT_MASK? -(Int36.WORD_LIMIT - w) : w;
                 if (s > 0) {
                     if (s >= 35) {
                         i = (i < 0? Int36.INT_LIMIT : 0);
-                        bitsShifted = Int36.MAX_POS36;
+                        bitsShifted = Int36.INT_MASK;
                     } else {
                         i = (i * Math.pow(2, s)) % Int36.INT_LIMIT;
                         /*
@@ -726,20 +726,20 @@ class Int36 {
                          */
                         bitsShifted = Int36.INT_LIMIT - Math.pow(2, 35 - s);
                     }
-                    if (w <= Int36.MAX_POS36) {
+                    if (w <= Int36.INT_MASK) {
                         /*
                          * Since w was positive, overflow occurs ONLY if any of the bits we shifted out were 1s.
                          * If all those bits in the original value (w) were 0s, then adding bitsShifted to it could NOT
-                         * produce a value > MAX_POS36.
+                         * produce a value > INT_MASK.
                          */
-                        if (w + bitsShifted > Int36.MAX_POS36) this.error |= Int36.ERROR.OVERFLOW;
+                        if (w + bitsShifted > Int36.INT_MASK) this.error |= Int36.ERROR.OVERFLOW;
                     } else {
                         /*
                          * Since w was negative, overflow occurs ONLY if any of the bits we shifted out were 0s.
                          * If all those bits in the original value (w) were 1s, subtracting bitsShifted from it could NOT
-                         * produce a value <= MAX_POS36.
+                         * produce a value <= INT_MASK.
                          */
-                        if (w - bitsShifted <= Int36.MAX_POS36) this.error |= Int36.ERROR.OVERFLOW;
+                        if (w - bitsShifted <= Int36.INT_MASK) this.error |= Int36.ERROR.OVERFLOW;
                     }
                 } else {
                     if (s <= -35) {
@@ -793,20 +793,20 @@ class Int36 {
                              */
                             wLeft = (wRight * Math.pow(2, s - 35)) % Int36.INT_LIMIT;
                             bits = Int36.INT_LIMIT - Math.pow(2, 70 - s);
-                            if (wLeftOrig <= Int36.MAX_POS36) {
+                            if (wLeftOrig <= Int36.INT_MASK) {
                                 /*
                                  * Since wLeft was positive, overflow occurs ONLY if any of the bits we shifted out were 1s.
                                  * If all those bits in the original value were 0s, then adding bits to it could NOT produce
-                                 * a value > MAX_POS36.
+                                 * a value > INT_MASK.
                                  */
-                                if (wRight + bits > Int36.MAX_POS36) this.error |= Int36.ERROR.OVERFLOW;
+                                if (wRight + bits > Int36.INT_MASK) this.error |= Int36.ERROR.OVERFLOW;
                             } else {
                                 /*
                                  * Since wLeft was negative, overflow occurs ONLY if any of the bits we shifted out were 0s.
                                  * If all those bits in the original value were 1s, subtracting bits from it could NOT produce
-                                 * a value <= MAX_POS36.
+                                 * a value <= INT_MASK.
                                  */
-                                if (wRight - bits <= Int36.MAX_POS36) this.error |= Int36.ERROR.OVERFLOW;
+                                if (wRight - bits <= Int36.INT_MASK) this.error |= Int36.ERROR.OVERFLOW;
                             }
                         }
                         wRight = 0;
@@ -824,20 +824,20 @@ class Int36 {
                          * Determine overflow and update the sign bits.
                          */
                         bits = Int36.INT_LIMIT - Math.pow(2, 35 - s);
-                        if (wLeftOrig <= Int36.MAX_POS36) {
+                        if (wLeftOrig <= Int36.INT_MASK) {
                             /*
                              * Since wLeft was positive, overflow occurs ONLY if any of the bits we shifted out were 1s.
                              * If all those bits in the original value were 0s, then adding bits to it could NOT produce
-                             * a value > MAX_POS36.
+                             * a value > INT_MASK.
                              */
-                            if (wLeftOrig + bits > Int36.MAX_POS36) this.error |= Int36.ERROR.OVERFLOW;
+                            if (wLeftOrig + bits > Int36.INT_MASK) this.error |= Int36.ERROR.OVERFLOW;
                         } else {
                             /*
                              * Since wLeft was negative, overflow occurs ONLY if any of the bits we shifted out were 0s.
                              * If all those bits in the original value were 1s, subtracting bits from it could NOT produce
-                             * a value <= MAX_POS36.
+                             * a value <= INT_MASK.
                              */
-                            if (wLeftOrig - bits <= Int36.MAX_POS36) this.error |= Int36.ERROR.OVERFLOW;
+                            if (wLeftOrig - bits <= Int36.INT_MASK) this.error |= Int36.ERROR.OVERFLOW;
                             /*
                              * Last but not least, update the sign bits of wLeft and wRight to indicate negative values.
                              */
@@ -1058,7 +1058,7 @@ class Int36 {
     extend()
     {
         if (this.extended == null) {
-            this.extended = (this.value > Int36.MAX_POS36? Int36.WORD_MASK : 0);
+            this.extended = (this.value > Int36.INT_MASK? Int36.WORD_MASK : 0);
         }
     }
 
@@ -1071,7 +1071,7 @@ class Int36 {
      */
     reduce()
     {
-        if (this.extended == 0 && this.value <= Int36.MAX_POS36 || this.extended == Int36.WORD_MASK && this.value > Int36.MAX_POS36) {
+        if (this.extended == 0 && this.value <= Int36.INT_MASK || this.extended == Int36.WORD_MASK && this.value > Int36.INT_MASK) {
             this.extended = null;
             this.magnitude = 35;
         }
@@ -1085,18 +1085,18 @@ class Int36 {
      */
     isNeg()
     {
-        return (this.extended > Int36.MAX_POS36 || this.extended == null && this.value > Int36.MAX_POS36);
+        return (this.extended > Int36.INT_MASK || this.extended == null && this.value > Int36.INT_MASK);
     }
 
     /**
      * negate()
      *
      * negate() MUST automatically extend the value, because the two's complement of the most negative
-     * number (MIN_NEG36) still has its sign bit set, so we must rely on the sign of the extended value to
+     * number (INT_LIMIT) still has its sign bit set, so we must rely on the sign of the extended value to
      * compensate.
      *
      * This is handled below by setting extended first, based on the opposite of the value's current sign;
-     * we could negate extended AFTER negating value, but then we'd need a special test for the MIN_NEG36 value.
+     * we could negate extended AFTER negating value, but then we'd need a special test for the INT_LIMIT value.
      *
      * A side-effect of this call is that the magnitude is forced to 71, on the presumption that we're about
      * to perform an arithmetic operation that is more easily performed on a unified 71-bit value than two
@@ -1111,7 +1111,7 @@ class Int36 {
              * Set extended to the OPPOSITE of the current value.
              */
             this.assert(this.magnitude == 35);
-            this.extended = (this.value > Int36.MAX_POS36? 0 : Int36.WORD_MASK);
+            this.extended = (this.value > Int36.INT_MASK? 0 : Int36.WORD_MASK);
             this.magnitude = 71;
         }
         else {
@@ -1352,7 +1352,7 @@ class Int36 {
          * converting any signed values to their unsigned (two's complement) counterpart, provided they are
          * within the acceptable range.  Any values outside that range will be dealt with afterward.
          */
-        if (num < 0 && num >= -Int36.MIN_NEG36) {
+        if (num < 0 && num >= -Int36.INT_LIMIT) {
             num += Int36.WORD_LIMIT;
         }
         var value = Math.trunc(Math.abs(num)) % Math.pow(2, bits);
@@ -1370,16 +1370,13 @@ Int36.ERROR = {
     DIVZERO:    0x4
 };
 
+Int36.HINT_MASK  = Math.pow(2, 17) - 1; //         131,071          (377777): signed half-word (half-int) mask
+Int36.HINT_LIMIT = Math.pow(2, 17);     //         131,072          (400000): signed half-word (half-int) limit
 Int36.HALF_MASK  = Math.pow(2, 18) - 1; //         262,143   (000000 777777): unsigned half-word mask
 Int36.HALF_SHIFT = Math.pow(2, 18);     //         262,144   (000001 000000): unsigned half-word shift
 Int36.INT_MASK   = Math.pow(2, 35) - 1; //  34,359,738,367   (377777 777777): signed word (magnitude) mask
 Int36.INT_LIMIT  = Math.pow(2, 35);     //  34,359,738,368   (400000 000000): signed word (magnitude) limit
-Int36.WORD_MASK  = Math.pow(2, 36) - 1; //  68,719,476,735
+Int36.WORD_MASK  = Math.pow(2, 36) - 1; //  68,719,476,735   (777777 777777): unsigned word mask
 Int36.WORD_LIMIT = Math.pow(2, 36);     //  68,719,476,736 (1 000000 000000): unsigned word limit
-
-Int36.MAX_POS18  = Math.pow(2, 17) - 1; //         131,071        (377777)
-Int36.MIN_NEG18  = Math.pow(2, 17);     //        -131,072        (400000)
-Int36.MAX_POS36  = Math.pow(2, 35) - 1; //  34,359,738,367 (377777 777777)
-Int36.MIN_NEG36  = Math.pow(2, 35);     // -34,359,738,368 (400000 000000)
 
 if (NODE) module.exports = Int36;

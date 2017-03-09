@@ -217,7 +217,7 @@ class MemoryPDP10 {
          * converting any signed values to their unsigned (two's complement) counterpart, provided they are
          * within the acceptable range.  Any values outside that range will be dealt with afterward.
          */
-        if (pattern < 0 && pattern >= -PDP10.MIN_NEG36) {
+        if (pattern < 0 && pattern >= -PDP10.INT_LIMIT) {
             pattern += PDP10.WORD_LIMIT;
         }
         pattern = Math.trunc(Math.abs(pattern)) % PDP10.WORD_LIMIT;

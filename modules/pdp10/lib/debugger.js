@@ -567,7 +567,7 @@ class DebuggerPDP10 extends Debugger {
          * converting any signed values to their unsigned (two's complement) counterpart, provided they are
          * within the acceptable range.  Any values outside that range will be dealt with afterward.
          */
-        if (w < 0 && w >= -PDP10.MIN_NEG36) {
+        if (w < 0 && w >= -PDP10.INT_LIMIT) {
             w += PDP10.WORD_LIMIT;
         }
         var value = Math.trunc(Math.abs(w)) % Math.pow(2, bits);
@@ -3869,7 +3869,7 @@ if (DEBUGGER) {
         ASHC:   57,     FSC:    58,     FADR:   59,     FSBR:   60,
         FMPR:   61,     FDVR:   62,     DFN:    63,     UFA:    64,
         FAD:    65,     FSB:    66,     FMP:    67,     FDV:    68,
-        AOBJP:  69,     AOBJN:  70,     CAI:    71,     CA:     72,
+        AOBJP:  69,     AOBJN:  70,     CAI:    71,     CAM:    72,
         JUMP:   73,     SKIP:   74,     AOJ:    75,     AOS:    76,
         SOJ:    77,     SOS:    78,     TR:     79,     TL:     80,
         TD:     81,     TS:     82,     XCT:    83,     JFFO:   84,
@@ -3903,7 +3903,7 @@ if (DEBUGGER) {
         "ASHC",         "FSC",          "FADR",         "FSBR",
         "FMPR",         "FDVR",         "DFN",          "UFA",
         "FAD",          "FSB",          "FMP",          "FDV",
-        "AOBJP",        "AOBJN",        "CAI",          "CA",
+        "AOBJP",        "AOBJN",        "CAI",          "CAM",
         "JUMP",         "SKIP",         "AOJ",          "AOS",
         "SOJ",          "SOS",          "TR",           "TL",
         "TD",           "TS",           "XCT",          "JFFO",
@@ -4026,7 +4026,7 @@ if (DEBUGGER) {
         },
         [PDP10.OPCODE.OPCOMP]: {                // 0o77000
             0o30000: DebuggerPDP10.OPS.CAI,
-            0o31000: DebuggerPDP10.OPS.CA,
+            0o31000: DebuggerPDP10.OPS.CAM,
             0o32000: DebuggerPDP10.OPS.JUMP,
             0o33000: DebuggerPDP10.OPS.SKIP,
             0o34000: DebuggerPDP10.OPS.AOJ,
