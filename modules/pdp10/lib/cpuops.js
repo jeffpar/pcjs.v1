@@ -961,7 +961,7 @@ PDP10.opMOVES = function(op, acc)
 PDP10.opMOVS = function(op, acc)
 {
     var src = this.readWord(this.regEA);
-    src = ((src / PDP10.HALF_SHIFT)|0) + ((src % PDP10.HALF_SHIFT) * PDP10.HALF_SHIFT);
+    src = ((src / PDP10.HALF_SHIFT)|0) + ((src & PDP10.HALF_MASK) * PDP10.HALF_SHIFT);
     this.writeWord(acc, src);
 };
 
@@ -1003,7 +1003,7 @@ PDP10.opMOVSI = function(op, acc)
 PDP10.opMOVSM = function(op, acc)
 {
     var src = this.readWord(acc);
-    src = ((src / PDP10.HALF_SHIFT)|0) + ((src % PDP10.HALF_SHIFT) * PDP10.HALF_SHIFT);
+    src = ((src / PDP10.HALF_SHIFT)|0) + ((src & PDP10.HALF_MASK) * PDP10.HALF_SHIFT);
     this.writeWord(this.regEA, src);
 };
 
@@ -1024,7 +1024,7 @@ PDP10.opMOVSM = function(op, acc)
 PDP10.opMOVSS = function(op, acc)
 {
     var src = this.readWord(this.regEA);
-    src = ((src / PDP10.HALF_SHIFT)|0) + ((src % PDP10.HALF_SHIFT) * PDP10.HALF_SHIFT);
+    src = ((src / PDP10.HALF_SHIFT)|0) + ((src & PDP10.HALF_MASK) * PDP10.HALF_SHIFT);
     this.writeWord(this.regEA, src);
     if (acc) this.writeWord(acc, src)
 };
@@ -2662,7 +2662,7 @@ PDP10.opSUBB = function(op, acc)
  */
 PDP10.opCAIL = function(op, acc)
 {
-    if (PDP10.doCMP.call(this, this.readWord(acc), this.regEA) < 0) this.setPC(this.regPC + 1);
+    if (PDP10.CMP(this.readWord(acc), this.regEA) < 0) this.setPC(this.regPC + 1);
 };
 
 /**
@@ -2679,7 +2679,7 @@ PDP10.opCAIL = function(op, acc)
  */
 PDP10.opCAIE = function(op, acc)
 {
-    if (PDP10.doCMP.call(this, this.readWord(acc), this.regEA) == 0) this.setPC(this.regPC + 1);
+    if (PDP10.CMP(this.readWord(acc), this.regEA) == 0) this.setPC(this.regPC + 1);
 };
 
 /**
@@ -2696,7 +2696,7 @@ PDP10.opCAIE = function(op, acc)
  */
 PDP10.opCAILE = function(op, acc)
 {
-    if (PDP10.doCMP.call(this, this.readWord(acc), this.regEA) <= 0) this.setPC(this.regPC + 1);
+    if (PDP10.CMP(this.readWord(acc), this.regEA) <= 0) this.setPC(this.regPC + 1);
 };
 
 /**
@@ -2731,7 +2731,7 @@ PDP10.opCAIA = function(op, acc)
  */
 PDP10.opCAIGE = function(op, acc)
 {
-    if (PDP10.doCMP.call(this, this.readWord(acc), this.regEA) >= 0) this.setPC(this.regPC + 1);
+    if (PDP10.CMP(this.readWord(acc), this.regEA) >= 0) this.setPC(this.regPC + 1);
 };
 
 /**
@@ -2748,7 +2748,7 @@ PDP10.opCAIGE = function(op, acc)
  */
 PDP10.opCAIN = function(op, acc)
 {
-    if (PDP10.doCMP.call(this, this.readWord(acc), this.regEA) != 0) this.setPC(this.regPC + 1);
+    if (PDP10.CMP(this.readWord(acc), this.regEA) != 0) this.setPC(this.regPC + 1);
 };
 
 /**
@@ -2765,7 +2765,7 @@ PDP10.opCAIN = function(op, acc)
  */
 PDP10.opCAIG = function(op, acc)
 {
-    if (PDP10.doCMP.call(this, this.readWord(acc), this.regEA) > 0) this.setPC(this.regPC + 1);
+    if (PDP10.CMP(this.readWord(acc), this.regEA) > 0) this.setPC(this.regPC + 1);
 };
 
 /**
@@ -2783,7 +2783,7 @@ PDP10.opCAIG = function(op, acc)
  */
 PDP10.opCAML = function(op, acc)
 {
-    if (PDP10.doCMP.call(this, this.readWord(acc), this.readWord(this.regEA)) < 0) this.setPC(this.regPC + 1);
+    if (PDP10.CMP(this.readWord(acc), this.readWord(this.regEA)) < 0) this.setPC(this.regPC + 1);
 };
 
 /**
@@ -2801,7 +2801,7 @@ PDP10.opCAML = function(op, acc)
  */
 PDP10.opCAME = function(op, acc)
 {
-    if (PDP10.doCMP.call(this, this.readWord(acc), this.readWord(this.regEA)) == 0) this.setPC(this.regPC + 1);
+    if (PDP10.CMP(this.readWord(acc), this.readWord(this.regEA)) == 0) this.setPC(this.regPC + 1);
 };
 
 /**
@@ -2819,7 +2819,7 @@ PDP10.opCAME = function(op, acc)
  */
 PDP10.opCAMLE = function(op, acc)
 {
-    if (PDP10.doCMP.call(this, this.readWord(acc), this.readWord(this.regEA)) <= 0) this.setPC(this.regPC + 1);
+    if (PDP10.CMP(this.readWord(acc), this.readWord(this.regEA)) <= 0) this.setPC(this.regPC + 1);
 };
 
 /**
@@ -2856,7 +2856,7 @@ PDP10.opCAMA = function(op, acc)
  */
 PDP10.opCAMGE = function(op, acc)
 {
-    if (PDP10.doCMP.call(this, this.readWord(acc), this.readWord(this.regEA)) >= 0) this.setPC(this.regPC + 1);
+    if (PDP10.CMP(this.readWord(acc), this.readWord(this.regEA)) >= 0) this.setPC(this.regPC + 1);
 };
 
 /**
@@ -2874,7 +2874,7 @@ PDP10.opCAMGE = function(op, acc)
  */
 PDP10.opCAMN = function(op, acc)
 {
-    if (PDP10.doCMP.call(this, this.readWord(acc), this.readWord(this.regEA)) != 0) this.setPC(this.regPC + 1);
+    if (PDP10.CMP(this.readWord(acc), this.readWord(this.regEA)) != 0) this.setPC(this.regPC + 1);
 };
 
 /**
@@ -2892,7 +2892,7 @@ PDP10.opCAMN = function(op, acc)
  */
 PDP10.opCAMG = function(op, acc)
 {
-    if (PDP10.doCMP.call(this, this.readWord(acc), this.readWord(this.regEA)) > 0) this.setPC(this.regPC + 1);
+    if (PDP10.CMP(this.readWord(acc), this.readWord(this.regEA)) > 0) this.setPC(this.regPC + 1);
 };
 
 /**
@@ -2909,7 +2909,7 @@ PDP10.opCAMG = function(op, acc)
  */
 PDP10.opJUMPL = function(op, acc)
 {
-    if (PDP10.doSGN.call(this, this.readWord(acc)) < 0) this.setPC(this.regEA);
+    if (PDP10.SIGN(this.readWord(acc)) < 0) this.setPC(this.regEA);
 };
 
 /**
@@ -2926,7 +2926,7 @@ PDP10.opJUMPL = function(op, acc)
  */
 PDP10.opJUMPE = function(op, acc)
 {
-    if (PDP10.doSGN.call(this, this.readWord(acc)) == 0) this.setPC(this.regEA);
+    if (PDP10.SIGN(this.readWord(acc)) == 0) this.setPC(this.regEA);
 };
 
 /**
@@ -2943,7 +2943,7 @@ PDP10.opJUMPE = function(op, acc)
  */
 PDP10.opJUMPLE = function(op, acc)
 {
-    if (PDP10.doSGN.call(this, this.readWord(acc)) <= 0) this.setPC(this.regEA);
+    if (PDP10.SIGN(this.readWord(acc)) <= 0) this.setPC(this.regEA);
 };
 
 /**
@@ -2977,7 +2977,7 @@ PDP10.opJUMPA = function(op, acc)
  */
 PDP10.opJUMPGE = function(op, acc)
 {
-    if (PDP10.doSGN.call(this, this.readWord(acc)) >= 0) this.setPC(this.regEA);
+    if (PDP10.SIGN(this.readWord(acc)) >= 0) this.setPC(this.regEA);
 };
 
 /**
@@ -2994,7 +2994,7 @@ PDP10.opJUMPGE = function(op, acc)
  */
 PDP10.opJUMPN = function(op, acc)
 {
-    if (PDP10.doSGN.call(this, this.readWord(acc)) != 0) this.setPC(this.regEA);
+    if (PDP10.SIGN(this.readWord(acc)) != 0) this.setPC(this.regEA);
 };
 
 /**
@@ -3011,7 +3011,7 @@ PDP10.opJUMPN = function(op, acc)
  */
 PDP10.opJUMPG = function(op, acc)
 {
-    if (PDP10.doSGN.call(this, this.readWord(acc)) > 0) this.setPC(this.regEA);
+    if (PDP10.SIGN(this.readWord(acc)) > 0) this.setPC(this.regEA);
 };
 
 /**
@@ -3048,7 +3048,7 @@ PDP10.opSKIP = function(op, acc)
 PDP10.opSKIPL = function(op, acc)
 {
     var dst = this.readWord(this.regEA);
-    if (PDP10.doSGN.call(this, dst) < 0) this.setPC(this.regPC + 1);
+    if (PDP10.SIGN(dst) < 0) this.setPC(this.regPC + 1);
     if (acc) this.writeWord(acc, dst);
 };
 
@@ -3068,7 +3068,7 @@ PDP10.opSKIPL = function(op, acc)
 PDP10.opSKIPE = function(op, acc)
 {
     var dst = this.readWord(this.regEA);
-    if (PDP10.doSGN.call(this, dst) == 0) this.setPC(this.regPC + 1);
+    if (PDP10.SIGN(dst) == 0) this.setPC(this.regPC + 1);
     if (acc) this.writeWord(acc, dst);
 };
 
@@ -3088,7 +3088,7 @@ PDP10.opSKIPE = function(op, acc)
 PDP10.opSKIPLE = function(op, acc)
 {
     var dst = this.readWord(this.regEA);
-    if (PDP10.doSGN.call(this, dst) <= 0) this.setPC(this.regPC + 1);
+    if (PDP10.SIGN(dst) <= 0) this.setPC(this.regPC + 1);
     if (acc) this.writeWord(acc, dst);
 };
 
@@ -3127,7 +3127,7 @@ PDP10.opSKIPA = function(op, acc)
 PDP10.opSKIPGE = function(op, acc)
 {
     var dst = this.readWord(this.regEA);
-    if (PDP10.doSGN.call(this, dst) >= 0) this.setPC(this.regPC + 1);
+    if (PDP10.SIGN(dst) >= 0) this.setPC(this.regPC + 1);
     if (acc) this.writeWord(acc, dst);
 };
 
@@ -3147,7 +3147,7 @@ PDP10.opSKIPGE = function(op, acc)
 PDP10.opSKIPN = function(op, acc)
 {
     var dst = this.readWord(this.regEA);
-    if (PDP10.doSGN.call(this, dst) != 0) this.setPC(this.regPC + 1);
+    if (PDP10.SIGN(dst) != 0) this.setPC(this.regPC + 1);
     if (acc) this.writeWord(acc, dst);
 };
 
@@ -3167,7 +3167,7 @@ PDP10.opSKIPN = function(op, acc)
 PDP10.opSKIPG = function(op, acc)
 {
     var dst = this.readWord(this.regEA);
-    if (PDP10.doSGN.call(this, dst) > 0) this.setPC(this.regPC + 1);
+    if (PDP10.SIGN(dst) > 0) this.setPC(this.regPC + 1);
     if (acc) this.writeWord(acc, dst);
 };
 
@@ -3207,7 +3207,7 @@ PDP10.opAOJ = function(op, acc)
 PDP10.opAOJL = function(op, acc)
 {
     var dst = this.writeWord(acc, PDP10.doADD.call(this, this.readWord(acc), 1));
-    if (PDP10.doSGN.call(this, dst) < 0) this.setPC(this.regEA);
+    if (PDP10.SIGN(dst) < 0) this.setPC(this.regEA);
 };
 
 /**
@@ -3227,7 +3227,7 @@ PDP10.opAOJL = function(op, acc)
 PDP10.opAOJE = function(op, acc)
 {
     var dst = this.writeWord(acc, PDP10.doADD.call(this, this.readWord(acc), 1));
-    if (PDP10.doSGN.call(this, dst) == 0) this.setPC(this.regEA);
+    if (PDP10.SIGN(dst) == 0) this.setPC(this.regEA);
 };
 
 /**
@@ -3247,7 +3247,7 @@ PDP10.opAOJE = function(op, acc)
 PDP10.opAOJLE = function(op, acc)
 {
     var dst = this.writeWord(acc, PDP10.doADD.call(this, this.readWord(acc), 1));
-    if (PDP10.doSGN.call(this, dst) <= 0) this.setPC(this.regEA);
+    if (PDP10.SIGN(dst) <= 0) this.setPC(this.regEA);
 };
 
 /**
@@ -3287,7 +3287,7 @@ PDP10.opAOJA = function(op, acc)
 PDP10.opAOJGE = function(op, acc)
 {
     var dst = this.writeWord(acc, PDP10.doADD.call(this, this.readWord(acc), 1));
-    if (PDP10.doSGN.call(this, dst) >= 0) this.setPC(this.regEA);
+    if (PDP10.SIGN(dst) >= 0) this.setPC(this.regEA);
 };
 
 /**
@@ -3307,7 +3307,7 @@ PDP10.opAOJGE = function(op, acc)
 PDP10.opAOJN = function(op, acc)
 {
     var dst = this.writeWord(acc, PDP10.doADD.call(this, this.readWord(acc), 1));
-    if (PDP10.doSGN.call(this, dst) != 0) this.setPC(this.regEA);
+    if (PDP10.SIGN(dst) != 0) this.setPC(this.regEA);
 };
 
 /**
@@ -3327,7 +3327,7 @@ PDP10.opAOJN = function(op, acc)
 PDP10.opAOJG = function(op, acc)
 {
     var dst = this.writeWord(acc, PDP10.doADD.call(this, this.readWord(acc), 1));
-    if (PDP10.doSGN.call(this, dst) > 0) this.setPC(this.regEA);
+    if (PDP10.SIGN(dst) > 0) this.setPC(this.regEA);
 };
 
 /**
@@ -3367,7 +3367,7 @@ PDP10.opAOS = function(op, acc)
 PDP10.opAOSL = function(op, acc)
 {
     var dst = this.writeWord(this.regEA, PDP10.doADD.call(this, this.readWord(this.regEA), 1));
-    if (PDP10.doSGN.call(this, dst) < 0) this.setPC(this.regPC + 1);
+    if (PDP10.SIGN(dst) < 0) this.setPC(this.regPC + 1);
     if (acc) this.writeWord(acc, dst);
 };
 
@@ -3388,7 +3388,7 @@ PDP10.opAOSL = function(op, acc)
 PDP10.opAOSE = function(op, acc)
 {
     var dst = this.writeWord(this.regEA, PDP10.doADD.call(this, this.readWord(this.regEA), 1));
-    if (PDP10.doSGN.call(this, dst) == 0) this.setPC(this.regPC + 1);
+    if (PDP10.SIGN(dst) == 0) this.setPC(this.regPC + 1);
     if (acc) this.writeWord(acc, dst);
 };
 
@@ -3409,7 +3409,7 @@ PDP10.opAOSE = function(op, acc)
 PDP10.opAOSLE = function(op, acc)
 {
     var dst = this.writeWord(this.regEA, PDP10.doADD.call(this, this.readWord(this.regEA), 1));
-    if (PDP10.doSGN.call(this, dst) <= 0) this.setPC(this.regPC + 1);
+    if (PDP10.SIGN(dst) <= 0) this.setPC(this.regPC + 1);
     if (acc) this.writeWord(acc, dst);
 };
 
@@ -3451,7 +3451,7 @@ PDP10.opAOSA = function(op, acc)
 PDP10.opAOSGE = function(op, acc)
 {
     var dst = this.writeWord(this.regEA, PDP10.doADD.call(this, this.readWord(this.regEA), 1));
-    if (PDP10.doSGN.call(this, dst) >= 0) this.setPC(this.regPC + 1);
+    if (PDP10.SIGN(dst) >= 0) this.setPC(this.regPC + 1);
     if (acc) this.writeWord(acc, dst);
 };
 
@@ -3472,7 +3472,7 @@ PDP10.opAOSGE = function(op, acc)
 PDP10.opAOSN = function(op, acc)
 {
     var dst = this.writeWord(this.regEA, PDP10.doADD.call(this, this.readWord(this.regEA), 1));
-    if (PDP10.doSGN.call(this, dst) != 0) this.setPC(this.regPC + 1);
+    if (PDP10.SIGN(dst) != 0) this.setPC(this.regPC + 1);
     if (acc) this.writeWord(acc, dst);
 };
 
@@ -3493,7 +3493,7 @@ PDP10.opAOSN = function(op, acc)
 PDP10.opAOSG = function(op, acc)
 {
     var dst = this.writeWord(this.regEA, PDP10.doADD.call(this, this.readWord(this.regEA), 1));
-    if (PDP10.doSGN.call(this, dst) > 0) this.setPC(this.regPC + 1);
+    if (PDP10.SIGN(dst) > 0) this.setPC(this.regPC + 1);
     if (acc) this.writeWord(acc, dst);
 };
 
@@ -3533,7 +3533,7 @@ PDP10.opSOJ = function(op, acc)
 PDP10.opSOJL = function(op, acc)
 {
     var dst = this.writeWord(acc, PDP10.doSUB.call(this, this.readWord(acc), 1));
-    if (PDP10.doSGN.call(this, dst) < 0) this.setPC(this.regEA);
+    if (PDP10.SIGN(dst) < 0) this.setPC(this.regEA);
 };
 
 /**
@@ -3553,7 +3553,7 @@ PDP10.opSOJL = function(op, acc)
 PDP10.opSOJE = function(op, acc)
 {
     var dst = this.writeWord(acc, PDP10.doSUB.call(this, this.readWord(acc), 1));
-    if (PDP10.doSGN.call(this, dst) == 0) this.setPC(this.regEA);
+    if (PDP10.SIGN(dst) == 0) this.setPC(this.regEA);
 };
 
 /**
@@ -3573,7 +3573,7 @@ PDP10.opSOJE = function(op, acc)
 PDP10.opSOJLE = function(op, acc)
 {
     var dst = this.writeWord(acc, PDP10.doSUB.call(this, this.readWord(acc), 1));
-    if (PDP10.doSGN.call(this, dst) <= 0) this.setPC(this.regEA);
+    if (PDP10.SIGN(dst) <= 0) this.setPC(this.regEA);
 };
 
 /**
@@ -3613,7 +3613,7 @@ PDP10.opSOJA = function(op, acc)
 PDP10.opSOJGE = function(op, acc)
 {
     var dst = this.writeWord(acc, PDP10.doSUB.call(this, this.readWord(acc), 1));
-    if (PDP10.doSGN.call(this, dst) >= 0) this.setPC(this.regEA);
+    if (PDP10.SIGN(dst) >= 0) this.setPC(this.regEA);
 };
 
 /**
@@ -3633,7 +3633,7 @@ PDP10.opSOJGE = function(op, acc)
 PDP10.opSOJN = function(op, acc)
 {
     var dst = this.writeWord(acc, PDP10.doSUB.call(this, this.readWord(acc), 1));
-    if (PDP10.doSGN.call(this, dst) != 0) this.setPC(this.regEA);
+    if (PDP10.SIGN(dst) != 0) this.setPC(this.regEA);
 };
 
 /**
@@ -3653,7 +3653,7 @@ PDP10.opSOJN = function(op, acc)
 PDP10.opSOJG = function(op, acc)
 {
     var dst = this.writeWord(acc, PDP10.doSUB.call(this, this.readWord(acc), 1));
-    if (PDP10.doSGN.call(this, dst) > 0) this.setPC(this.regEA);
+    if (PDP10.SIGN(dst) > 0) this.setPC(this.regEA);
 };
 
 /**
@@ -3693,7 +3693,7 @@ PDP10.opSOS = function(op, acc)
 PDP10.opSOSL = function(op, acc)
 {
     var dst = this.writeWord(this.regEA, PDP10.doSUB.call(this, this.readWord(this.regEA), 1));
-    if (PDP10.doSGN.call(this, dst) < 0) this.setPC(this.regPC + 1);
+    if (PDP10.SIGN(dst) < 0) this.setPC(this.regPC + 1);
     if (acc) this.writeWord(acc, dst);
 };
 
@@ -3714,7 +3714,7 @@ PDP10.opSOSL = function(op, acc)
 PDP10.opSOSE = function(op, acc)
 {
     var dst = this.writeWord(this.regEA, PDP10.doSUB.call(this, this.readWord(this.regEA), 1));
-    if (PDP10.doSGN.call(this, dst) == 0) this.setPC(this.regPC + 1);
+    if (PDP10.SIGN(dst) == 0) this.setPC(this.regPC + 1);
     if (acc) this.writeWord(acc, dst);
 };
 
@@ -3735,7 +3735,7 @@ PDP10.opSOSE = function(op, acc)
 PDP10.opSOSLE = function(op, acc)
 {
     var dst = this.writeWord(this.regEA, PDP10.doSUB.call(this, this.readWord(this.regEA), 1));
-    if (PDP10.doSGN.call(this, dst) <= 0) this.setPC(this.regPC + 1);
+    if (PDP10.SIGN(dst) <= 0) this.setPC(this.regPC + 1);
     if (acc) this.writeWord(acc, dst);
 };
 
@@ -3777,7 +3777,7 @@ PDP10.opSOSA = function(op, acc)
 PDP10.opSOSGE = function(op, acc)
 {
     var dst = this.writeWord(this.regEA, PDP10.doSUB.call(this, this.readWord(this.regEA), 1));
-    if (PDP10.doSGN.call(this, dst) >= 0) this.setPC(this.regPC + 1);
+    if (PDP10.SIGN(dst) >= 0) this.setPC(this.regPC + 1);
     if (acc) this.writeWord(acc, dst);
 };
 
@@ -3798,7 +3798,7 @@ PDP10.opSOSGE = function(op, acc)
 PDP10.opSOSN = function(op, acc)
 {
     var dst = this.writeWord(this.regEA, PDP10.doSUB.call(this, this.readWord(this.regEA), 1));
-    if (PDP10.doSGN.call(this, dst) != 0) this.setPC(this.regPC + 1);
+    if (PDP10.SIGN(dst) != 0) this.setPC(this.regPC + 1);
     if (acc) this.writeWord(acc, dst);
 };
 
@@ -3819,7 +3819,7 @@ PDP10.opSOSN = function(op, acc)
 PDP10.opSOSG = function(op, acc)
 {
     var dst = this.writeWord(this.regEA, PDP10.doSUB.call(this, this.readWord(this.regEA), 1));
-    if (PDP10.doSGN.call(this, dst) > 0) this.setPC(this.regPC + 1);
+    if (PDP10.SIGN(dst) > 0) this.setPC(this.regPC + 1);
     if (acc) this.writeWord(acc, dst);
 };
 
@@ -3885,7 +3885,7 @@ PDP10.opSETZB = function(op, acc)
  */
 PDP10.opAND = function(op, acc)
 {
-    this.writeWord(acc, PDP10.doAND.call(this, this.readWord(acc), this.readWord(this.regEA)));
+    this.writeWord(acc, PDP10.AND(this.readWord(acc), this.readWord(this.regEA)));
 };
 
 /**
@@ -3901,7 +3901,7 @@ PDP10.opAND = function(op, acc)
  */
 PDP10.opANDI = function(op, acc)
 {
-    this.writeWord(acc, PDP10.doAND.call(this, this.readWord(acc), this.regEA));
+    this.writeWord(acc, PDP10.AND(this.readWord(acc), this.regEA));
 };
 
 /**
@@ -3917,7 +3917,7 @@ PDP10.opANDI = function(op, acc)
  */
 PDP10.opANDM = function(op, acc)
 {
-    this.writeWord(this.regEA, PDP10.doAND.call(this, this.readWord(acc), this.readWord(this.regEA)));
+    this.writeWord(this.regEA, PDP10.AND(this.readWord(acc), this.readWord(this.regEA)));
 };
 
 /**
@@ -3934,7 +3934,7 @@ PDP10.opANDM = function(op, acc)
  */
 PDP10.opANDB = function(op, acc)
 {
-    this.writeWord(this.regEA, this.writeWord(acc, PDP10.doAND.call(this, this.readWord(acc), this.readWord(this.regEA))));
+    this.writeWord(this.regEA, this.writeWord(acc, PDP10.AND(this.readWord(acc), this.readWord(this.regEA))));
 };
 
 /**
@@ -3951,7 +3951,7 @@ PDP10.opANDB = function(op, acc)
  */
 PDP10.opANDCA = function(op, acc)
 {
-    this.writeWord(acc, PDP10.doAND.call(this, PDP10.WORD_MASK - this.readWord(acc), this.readWord(this.regEA)));
+    this.writeWord(acc, PDP10.AND(PDP10.WORD_MASK - this.readWord(acc), this.readWord(this.regEA)));
 };
 
 /**
@@ -3968,7 +3968,7 @@ PDP10.opANDCA = function(op, acc)
  */
 PDP10.opANDCAI = function(op, acc)
 {
-    this.writeWord(acc, PDP10.doAND.call(this, PDP10.WORD_MASK - this.readWord(acc), this.regEA));
+    this.writeWord(acc, PDP10.AND(PDP10.WORD_MASK - this.readWord(acc), this.regEA));
 };
 
 /**
@@ -3985,7 +3985,7 @@ PDP10.opANDCAI = function(op, acc)
  */
 PDP10.opANDCAM = function(op, acc)
 {
-    this.writeWord(this.regEA, PDP10.doAND.call(this, PDP10.WORD_MASK - this.readWord(acc), this.readWord(this.regEA)));
+    this.writeWord(this.regEA, PDP10.AND(PDP10.WORD_MASK - this.readWord(acc), this.readWord(this.regEA)));
 };
 
 /**
@@ -4002,7 +4002,7 @@ PDP10.opANDCAM = function(op, acc)
  */
 PDP10.opANDCAB = function(op, acc)
 {
-    this.writeWord(this.regEA, this.writeWord(acc, PDP10.doAND.call(this, PDP10.WORD_MASK - this.readWord(acc), this.readWord(this.regEA))));
+    this.writeWord(this.regEA, this.writeWord(acc, PDP10.AND(PDP10.WORD_MASK - this.readWord(acc), this.readWord(this.regEA))));
 };
 
 /**
@@ -4019,7 +4019,7 @@ PDP10.opANDCAB = function(op, acc)
  */
 PDP10.opANDCM = function(op, acc)
 {
-    this.writeWord(acc, PDP10.doAND.call(this, this.readWord(acc), PDP10.WORD_MASK - this.readWord(this.regEA)));
+    this.writeWord(acc, PDP10.AND(this.readWord(acc), PDP10.WORD_MASK - this.readWord(this.regEA)));
 };
 
 /**
@@ -4036,7 +4036,7 @@ PDP10.opANDCM = function(op, acc)
  */
 PDP10.opANDCMI = function(op, acc)
 {
-    this.writeWord(acc, PDP10.doAND.call(this, this.readWord(acc), PDP10.WORD_MASK - this.regEA));
+    this.writeWord(acc, PDP10.AND(this.readWord(acc), PDP10.WORD_MASK - this.regEA));
 };
 
 /**
@@ -4053,7 +4053,7 @@ PDP10.opANDCMI = function(op, acc)
  */
 PDP10.opANDCMM = function(op, acc)
 {
-    this.writeWord(this.regEA, PDP10.doAND.call(this, this.readWord(acc), PDP10.WORD_MASK - this.readWord(this.regEA)));
+    this.writeWord(this.regEA, PDP10.AND(this.readWord(acc), PDP10.WORD_MASK - this.readWord(this.regEA)));
 };
 
 /**
@@ -4070,7 +4070,7 @@ PDP10.opANDCMM = function(op, acc)
  */
 PDP10.opANDCMB = function(op, acc)
 {
-    this.writeWord(this.regEA, this.writeWord(acc, PDP10.doAND.call(this, this.readWord(acc), PDP10.WORD_MASK - this.readWord(this.regEA))));
+    this.writeWord(this.regEA, this.writeWord(acc, PDP10.AND(this.readWord(acc), PDP10.WORD_MASK - this.readWord(this.regEA))));
 };
 
 /**
@@ -4087,7 +4087,7 @@ PDP10.opANDCMB = function(op, acc)
  */
 PDP10.opXOR = function(op, acc)
 {
-    this.writeWord(acc, PDP10.doEOR.call(this, this.readWord(acc), this.readWord(this.regEA)));
+    this.writeWord(acc, PDP10.XOR(this.readWord(acc), this.readWord(this.regEA)));
 };
 
 /**
@@ -4104,7 +4104,7 @@ PDP10.opXOR = function(op, acc)
  */
 PDP10.opXORI = function(op, acc)
 {
-    this.writeWord(acc, PDP10.doEOR.call(this, this.readWord(acc), this.regEA));
+    this.writeWord(acc, PDP10.XOR(this.readWord(acc), this.regEA));
 };
 
 /**
@@ -4121,7 +4121,7 @@ PDP10.opXORI = function(op, acc)
  */
 PDP10.opXORM = function(op, acc)
 {
-    this.writeWord(this.regEA, PDP10.doEOR.call(this, this.readWord(acc), this.readWord(this.regEA)));
+    this.writeWord(this.regEA, PDP10.XOR(this.readWord(acc), this.readWord(this.regEA)));
 };
 
 /**
@@ -4138,7 +4138,7 @@ PDP10.opXORM = function(op, acc)
  */
 PDP10.opXORB = function(op, acc)
 {
-    this.writeWord(this.regEA, this.writeWord(acc, PDP10.doEOR.call(this, this.readWord(acc), this.readWord(this.regEA))));
+    this.writeWord(this.regEA, this.writeWord(acc, PDP10.XOR(this.readWord(acc), this.readWord(this.regEA))));
 };
 
 /**
@@ -4155,7 +4155,7 @@ PDP10.opXORB = function(op, acc)
  */
 PDP10.opIOR = function(op, acc)
 {
-    this.writeWord(acc, PDP10.doIOR.call(this, this.readWord(acc), this.readWord(this.regEA)));
+    this.writeWord(acc, PDP10.IOR(this.readWord(acc), this.readWord(this.regEA)));
 };
 
 /**
@@ -4172,7 +4172,7 @@ PDP10.opIOR = function(op, acc)
  */
 PDP10.opIORI = function(op, acc)
 {
-    this.writeWord(acc, PDP10.doIOR.call(this, this.readWord(acc), this.regEA));
+    this.writeWord(acc, PDP10.IOR(this.readWord(acc), this.regEA));
 };
 
 /**
@@ -4189,7 +4189,7 @@ PDP10.opIORI = function(op, acc)
  */
 PDP10.opIORM = function(op, acc)
 {
-    this.writeWord(this.regEA, PDP10.doIOR.call(this, this.readWord(acc), this.readWord(this.regEA)));
+    this.writeWord(this.regEA, PDP10.IOR(this.readWord(acc), this.readWord(this.regEA)));
 };
 
 /**
@@ -4206,7 +4206,7 @@ PDP10.opIORM = function(op, acc)
  */
 PDP10.opIORB = function(op, acc)
 {
-    this.writeWord(this.regEA, this.writeWord(acc, PDP10.doIOR.call(this, this.readWord(acc), this.readWord(this.regEA))));
+    this.writeWord(this.regEA, this.writeWord(acc, PDP10.IOR(this.readWord(acc), this.readWord(this.regEA))));
 };
 
 /**
@@ -4223,7 +4223,7 @@ PDP10.opIORB = function(op, acc)
  */
 PDP10.opANDCB = function(op, acc)
 {
-    this.writeWord(acc, PDP10.doAND.call(this, PDP10.WORD_MASK - this.readWord(acc), PDP10.WORD_MASK - this.readWord(this.regEA)));
+    this.writeWord(acc, PDP10.AND(PDP10.WORD_MASK - this.readWord(acc), PDP10.WORD_MASK - this.readWord(this.regEA)));
 };
 
 /**
@@ -4240,7 +4240,7 @@ PDP10.opANDCB = function(op, acc)
  */
 PDP10.opANDCBI = function(op, acc)
 {
-    this.writeWord(acc, PDP10.doAND.call(this, PDP10.WORD_MASK - this.readWord(acc), PDP10.WORD_MASK - this.regEA));
+    this.writeWord(acc, PDP10.AND(PDP10.WORD_MASK - this.readWord(acc), PDP10.WORD_MASK - this.regEA));
 };
 
 /**
@@ -4257,7 +4257,7 @@ PDP10.opANDCBI = function(op, acc)
  */
 PDP10.opANDCBM = function(op, acc)
 {
-    this.writeWord(this.regEA, PDP10.doAND.call(this, PDP10.WORD_MASK - this.readWord(acc), PDP10.WORD_MASK - this.readWord(this.regEA)));
+    this.writeWord(this.regEA, PDP10.AND(PDP10.WORD_MASK - this.readWord(acc), PDP10.WORD_MASK - this.readWord(this.regEA)));
 };
 
 /**
@@ -4274,7 +4274,7 @@ PDP10.opANDCBM = function(op, acc)
  */
 PDP10.opANDCBB = function(op, acc)
 {
-    this.writeWord(this.regEA, this.writeWord(acc, PDP10.doAND.call(this, PDP10.WORD_MASK - this.readWord(acc), PDP10.WORD_MASK - this.readWord(this.regEA))));
+    this.writeWord(this.regEA, this.writeWord(acc, PDP10.AND(PDP10.WORD_MASK - this.readWord(acc), PDP10.WORD_MASK - this.readWord(this.regEA))));
 };
 
 /**
@@ -4291,7 +4291,7 @@ PDP10.opANDCBB = function(op, acc)
  */
 PDP10.opEQV = function(op, acc)
 {
-    this.writeWord(acc, PDP10.doEQV.call(this, this.readWord(acc), this.readWord(this.regEA)));
+    this.writeWord(acc, PDP10.EQV(this.readWord(acc), this.readWord(this.regEA)));
 };
 
 /**
@@ -4308,7 +4308,7 @@ PDP10.opEQV = function(op, acc)
  */
 PDP10.opEQVI = function(op, acc)
 {
-    this.writeWord(acc, PDP10.doEQV.call(this, this.readWord(acc), this.regEA));
+    this.writeWord(acc, PDP10.EQV(this.readWord(acc), this.regEA));
 };
 
 /**
@@ -4325,7 +4325,7 @@ PDP10.opEQVI = function(op, acc)
  */
 PDP10.opEQVM = function(op, acc)
 {
-    this.writeWord(this.regEA, PDP10.doEQV.call(this, this.readWord(acc), this.readWord(this.regEA)));
+    this.writeWord(this.regEA, PDP10.EQV(this.readWord(acc), this.readWord(this.regEA)));
 };
 
 /**
@@ -4342,7 +4342,7 @@ PDP10.opEQVM = function(op, acc)
  */
 PDP10.opEQVB = function(op, acc)
 {
-    this.writeWord(this.regEA, this.writeWord(acc, PDP10.doEQV.call(this, this.readWord(acc), this.readWord(this.regEA))));
+    this.writeWord(this.regEA, this.writeWord(acc, PDP10.EQV(this.readWord(acc), this.readWord(this.regEA))));
 };
 
 /**
@@ -4408,7 +4408,7 @@ PDP10.opSETCAB = function(op, acc)
  */
 PDP10.opORCA = function(op, acc)
 {
-    this.writeWord(acc, PDP10.doIOR.call(this, PDP10.WORD_MASK - this.readWord(acc), this.readWord(this.regEA)));
+    this.writeWord(acc, PDP10.IOR(PDP10.WORD_MASK - this.readWord(acc), this.readWord(this.regEA)));
 };
 
 /**
@@ -4425,7 +4425,7 @@ PDP10.opORCA = function(op, acc)
  */
 PDP10.opORCAI = function(op, acc)
 {
-    this.writeWord(acc, PDP10.doIOR.call(this, PDP10.WORD_MASK - this.readWord(acc), this.regEA));
+    this.writeWord(acc, PDP10.IOR(PDP10.WORD_MASK - this.readWord(acc), this.regEA));
 };
 
 /**
@@ -4442,7 +4442,7 @@ PDP10.opORCAI = function(op, acc)
  */
 PDP10.opORCAM = function(op, acc)
 {
-    this.writeWord(this.regEA, PDP10.doIOR.call(this, PDP10.WORD_MASK - this.readWord(acc), this.readWord(this.regEA)));
+    this.writeWord(this.regEA, PDP10.IOR(PDP10.WORD_MASK - this.readWord(acc), this.readWord(this.regEA)));
 };
 
 /**
@@ -4459,7 +4459,7 @@ PDP10.opORCAM = function(op, acc)
  */
 PDP10.opORCAB = function(op, acc)
 {
-    this.writeWord(this.regEA, this.writeWord(acc, PDP10.doIOR.call(this, PDP10.WORD_MASK - this.readWord(acc), this.readWord(this.regEA))));
+    this.writeWord(this.regEA, this.writeWord(acc, PDP10.IOR(PDP10.WORD_MASK - this.readWord(acc), this.readWord(this.regEA))));
 };
 
 /**
@@ -4544,7 +4544,7 @@ PDP10.opSETCMB = function(op, acc)
  */
 PDP10.opORCM = function(op, acc)
 {
-    this.writeWord(acc, PDP10.doIOR.call(this, this.readWord(acc), PDP10.WORD_MASK - this.readWord(this.regEA)));
+    this.writeWord(acc, PDP10.IOR(this.readWord(acc), PDP10.WORD_MASK - this.readWord(this.regEA)));
 };
 
 /**
@@ -4561,7 +4561,7 @@ PDP10.opORCM = function(op, acc)
  */
 PDP10.opORCMI = function(op, acc)
 {
-    this.writeWord(acc, PDP10.doIOR.call(this, this.readWord(acc), PDP10.WORD_MASK - this.regEA));
+    this.writeWord(acc, PDP10.IOR(this.readWord(acc), PDP10.WORD_MASK - this.regEA));
 };
 
 /**
@@ -4578,7 +4578,7 @@ PDP10.opORCMI = function(op, acc)
  */
 PDP10.opORCMM = function(op, acc)
 {
-    this.writeWord(this.regEA, PDP10.doIOR.call(this, this.readWord(acc), PDP10.WORD_MASK - this.readWord(this.regEA)));
+    this.writeWord(this.regEA, PDP10.IOR(this.readWord(acc), PDP10.WORD_MASK - this.readWord(this.regEA)));
 };
 
 /**
@@ -4595,7 +4595,7 @@ PDP10.opORCMM = function(op, acc)
  */
 PDP10.opORCMB = function(op, acc)
 {
-    this.writeWord(this.regEA, this.writeWord(acc, PDP10.doIOR.call(this, this.readWord(acc), PDP10.WORD_MASK - this.readWord(this.regEA))));
+    this.writeWord(this.regEA, this.writeWord(acc, PDP10.IOR(this.readWord(acc), PDP10.WORD_MASK - this.readWord(this.regEA))));
 };
 
 /**
@@ -4612,7 +4612,7 @@ PDP10.opORCMB = function(op, acc)
  */
 PDP10.opORCB = function(op, acc)
 {
-    this.writeWord(acc, PDP10.doIOR.call(this, PDP10.WORD_MASK - this.readWord(acc), PDP10.WORD_MASK - this.readWord(this.regEA)));
+    this.writeWord(acc, PDP10.IOR(PDP10.WORD_MASK - this.readWord(acc), PDP10.WORD_MASK - this.readWord(this.regEA)));
 };
 
 /**
@@ -4629,7 +4629,7 @@ PDP10.opORCB = function(op, acc)
  */
 PDP10.opORCBI = function(op, acc)
 {
-    this.writeWord(acc, PDP10.doIOR.call(this, PDP10.WORD_MASK - this.readWord(acc), PDP10.WORD_MASK - this.regEA));
+    this.writeWord(acc, PDP10.IOR(PDP10.WORD_MASK - this.readWord(acc), PDP10.WORD_MASK - this.regEA));
 };
 
 /**
@@ -4646,7 +4646,7 @@ PDP10.opORCBI = function(op, acc)
  */
 PDP10.opORCBM = function(op, acc)
 {
-    this.writeWord(this.regEA, PDP10.doIOR.call(this, PDP10.WORD_MASK - this.readWord(acc), PDP10.WORD_MASK - this.readWord(this.regEA)));
+    this.writeWord(this.regEA, PDP10.IOR(PDP10.WORD_MASK - this.readWord(acc), PDP10.WORD_MASK - this.readWord(this.regEA)));
 };
 
 /**
@@ -4663,7 +4663,7 @@ PDP10.opORCBM = function(op, acc)
  */
 PDP10.opORCBB = function(op, acc)
 {
-    this.writeWord(this.regEA, this.writeWord(acc, PDP10.doIOR.call(this, PDP10.WORD_MASK - this.readWord(acc), PDP10.WORD_MASK - this.readWord(this.regEA))));
+    this.writeWord(this.regEA, this.writeWord(acc, PDP10.IOR(PDP10.WORD_MASK - this.readWord(acc), PDP10.WORD_MASK - this.readWord(this.regEA))));
 };
 
 /**
@@ -4733,7 +4733,7 @@ PDP10.opHLL = function(op, acc)
 {
     var src = this.readWord(this.regEA);
     var dst = this.readWord(acc);
-    this.writeWord(acc, PDP10.getHR(op, dst, src) + (src - (src & PDP10.HALF_MASK)));
+    this.writeWord(acc, PDP10.GETHR(op, dst, src) + (src - (src & PDP10.HALF_MASK)));
 };
 
 /**
@@ -4756,7 +4756,7 @@ PDP10.opHLL = function(op, acc)
 PDP10.opHLLI = function(op, acc)
 {
     var dst = this.readWord(acc);
-    this.writeWord(acc, PDP10.getHR(op, dst, 0));
+    this.writeWord(acc, PDP10.GETHR(op, dst, 0));
 };
 
 /**
@@ -4777,7 +4777,7 @@ PDP10.opHLLM = function(op, acc)
 {
     var src = this.readWord(acc);
     var dst = this.readWord(this.regEA);
-    this.writeWord(this.regEA, PDP10.getHR(op, dst, src) + (src - (src & PDP10.HALF_MASK)));
+    this.writeWord(this.regEA, PDP10.GETHR(op, dst, src) + (src - (src & PDP10.HALF_MASK)));
 };
 
 /**
@@ -4799,7 +4799,7 @@ PDP10.opHLLM = function(op, acc)
 PDP10.opHLLS = function(op, acc)
 {
     var dst = this.readWord(this.regEA);
-    dst = PDP10.setHR(op, dst, dst);
+    dst = PDP10.SETHR(op, dst, dst);
     this.writeWord(this.regEA, dst);
     if (acc) this.writeWord(acc, dst);
 };
@@ -4823,7 +4823,7 @@ PDP10.opHRL = function(op, acc)
 {
     var src = (this.readWord(this.regEA) & PDP10.HALF_MASK) * PDP10.HALF_SHIFT;
     var dst = this.readWord(acc);
-    this.writeWord(acc, PDP10.getHR(op, dst, src) + src);
+    this.writeWord(acc, PDP10.GETHR(op, dst, src) + src);
 };
 
 /**
@@ -4845,7 +4845,7 @@ PDP10.opHRLI = function(op, acc)
 {
     var src = this.regEA * PDP10.HALF_SHIFT;
     var dst = this.readWord(acc);
-    this.writeWord(acc, PDP10.getHR(op, dst, src) + src);
+    this.writeWord(acc, PDP10.GETHR(op, dst, src) + src);
 };
 
 /**
@@ -4867,7 +4867,7 @@ PDP10.opHRLM = function(op, acc)
 {
     var src = (this.readWord(acc) & PDP10.HALF_MASK) * PDP10.HALF_SHIFT;
     var dst = this.readWord(this.regEA);
-    this.writeWord(this.regEA, PDP10.getHR(op, dst, src) + src);
+    this.writeWord(this.regEA, PDP10.GETHR(op, dst, src) + src);
 };
 
 /**
@@ -4889,7 +4889,7 @@ PDP10.opHRLS = function(op, acc)
 {
     var dst = this.readWord(this.regEA);
     var src = (dst & PDP10.HALF_MASK) * PDP10.HALF_SHIFT;
-    dst = PDP10.getHR(op, dst, src) + src;
+    dst = PDP10.GETHR(op, dst, src) + src;
     this.writeWord(this.regEA, dst);
     if (acc) this.writeWord(acc, dst);
 };
@@ -4913,7 +4913,7 @@ PDP10.opHRR = function(op, acc)
 {
     var src = this.readWord(this.regEA) & PDP10.HALF_MASK;
     var dst = this.readWord(acc);
-    this.writeWord(acc, PDP10.getHL(op, dst, src) + src);
+    this.writeWord(acc, PDP10.GETHL(op, dst, src) + src);
 };
 
 /**
@@ -4934,7 +4934,7 @@ PDP10.opHRR = function(op, acc)
 PDP10.opHRRI = function(op, acc)
 {
     var dst = this.readWord(acc);
-    this.writeWord(acc, PDP10.getHL(op, dst, this.regEA) + this.regEA);
+    this.writeWord(acc, PDP10.GETHL(op, dst, this.regEA) + this.regEA);
 };
 
 /**
@@ -4956,7 +4956,7 @@ PDP10.opHRRM = function(op, acc)
 {
     var src = this.readWord(acc) & PDP10.HALF_MASK;
     var dst = this.readWord(this.regEA);
-    this.writeWord(this.regEA, PDP10.getHL(op, dst, src) + src);
+    this.writeWord(this.regEA, PDP10.GETHL(op, dst, src) + src);
 };
 
 /**
@@ -4979,7 +4979,7 @@ PDP10.opHRRM = function(op, acc)
 PDP10.opHRRS = function(op, acc)
 {
     var dst = this.readWord(this.regEA);
-    dst = PDP10.setHL(op, dst, dst);
+    dst = PDP10.SETHL(op, dst, dst);
     this.writeWord(this.regEA, dst);
     if (acc) this.writeWord(acc, dst);
 };
@@ -5002,7 +5002,7 @@ PDP10.opHLR = function(op, acc)
 {
     var src = (this.readWord(this.regEA) / PDP10.HALF_SHIFT)|0;
     var dst = this.readWord(acc);
-    this.writeWord(acc, PDP10.getHL(op, dst, src) + src);
+    this.writeWord(acc, PDP10.GETHL(op, dst, src) + src);
 };
 
 /**
@@ -5024,7 +5024,7 @@ PDP10.opHLR = function(op, acc)
 PDP10.opHLRI = function(op, acc)
 {
     var dst = this.readWord(acc);
-    this.writeWord(acc, PDP10.getHL(op, dst, 0));
+    this.writeWord(acc, PDP10.GETHL(op, dst, 0));
 };
 
 /**
@@ -5045,7 +5045,7 @@ PDP10.opHLRM = function(op, acc)
 {
     var src = (this.readWord(acc) / PDP10.HALF_SHIFT)|0;
     var dst = this.readWord(this.regEA);
-    this.writeWord(this.regEA, PDP10.getHL(op, dst, src) + src);
+    this.writeWord(this.regEA, PDP10.GETHL(op, dst, src) + src);
 };
 
 /**
@@ -5066,37 +5066,13 @@ PDP10.opHLRS = function(op, acc)
 {
     var dst = this.readWord(this.regEA);
     var src = (dst / PDP10.HALF_SHIFT)|0;
-    dst = PDP10.getHL(op, dst, src) + src;
+    dst = PDP10.GETHL(op, dst, src) + src;
     this.writeWord(this.regEA, dst);
     if (acc) this.writeWord(acc, dst);
 };
 
 /**
- * opTRN(0o600000)
- *
- * @this {CPUStatePDP10}
- * @param {number} op
- * @param {number} acc
- */
-PDP10.opTRN = function(op, acc)
-{
-    this.opUndefined(op);
-};
-
-/**
- * opTLN(0o601000)
- *
- * @this {CPUStatePDP10}
- * @param {number} op
- * @param {number} acc
- */
-PDP10.opTLN = function(op, acc)
-{
-    this.opUndefined(op);
-};
-
-/**
- * opTRNE(0o602000)
+ * opTRNE(0o602000): Test Right, No Modification, and Skip if All Masked Bits Equal 0
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -5104,11 +5080,11 @@ PDP10.opTLN = function(op, acc)
  */
 PDP10.opTRNE = function(op, acc)
 {
-    this.opUndefined(op);
+    if (PDP10.AND(this.readWord(acc), this.regEA) == 0) this.setPC(this.regPC + 1);
 };
 
 /**
- * opTLNE(0o603000)
+ * opTLNE(0o603000): Test Left, No Modification, and Skip if All Masked Bits Equal 0
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -5116,11 +5092,11 @@ PDP10.opTRNE = function(op, acc)
  */
 PDP10.opTLNE = function(op, acc)
 {
-    this.opUndefined(op);
+    if (PDP10.AND(this.readWord(acc), this.regEA * PDP10.HALF_SHIFT) == 0) this.setPC(this.regPC + 1);
 };
 
 /**
- * opTRNA(0o604000)
+ * opTRNA(0o604000): Test Right, No Modification, but Always Skip
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -5128,11 +5104,11 @@ PDP10.opTLNE = function(op, acc)
  */
 PDP10.opTRNA = function(op, acc)
 {
-    this.opUndefined(op);
+    this.setPC(this.regPC + 1);
 };
 
 /**
- * opTLNA(0o605000)
+ * opTLNA(0o605000): Test Left, No Modification, but Always Skip
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -5140,11 +5116,11 @@ PDP10.opTRNA = function(op, acc)
  */
 PDP10.opTLNA = function(op, acc)
 {
-    this.opUndefined(op);
+    this.setPC(this.regPC + 1);
 };
 
 /**
- * opTRNN(0o606000)
+ * opTRNN(0o606000): Test Right, No Modification, and Skip if Not All Masked Bits Equal 0
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -5152,11 +5128,11 @@ PDP10.opTLNA = function(op, acc)
  */
 PDP10.opTRNN = function(op, acc)
 {
-    this.opUndefined(op);
+    if (PDP10.AND(this.readWord(acc), this.regEA) != 0) this.setPC(this.regPC + 1);
 };
 
 /**
- * opTLNN(0o607000)
+ * opTLNN(0o607000): Test Left, No Modification, and Skip if Not All Masked Bits Equal 0
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -5164,35 +5140,11 @@ PDP10.opTRNN = function(op, acc)
  */
 PDP10.opTLNN = function(op, acc)
 {
-    this.opUndefined(op);
+    if (PDP10.AND(this.readWord(acc), this.regEA * PDP10.HALF_SHIFT) != 0) this.setPC(this.regPC + 1);
 };
 
 /**
- * opTDN(0o610000)
- *
- * @this {CPUStatePDP10}
- * @param {number} op
- * @param {number} acc
- */
-PDP10.opTDN = function(op, acc)
-{
-    this.opUndefined(op);
-};
-
-/**
- * opTSN(0o611000)
- *
- * @this {CPUStatePDP10}
- * @param {number} op
- * @param {number} acc
- */
-PDP10.opTSN = function(op, acc)
-{
-    this.opUndefined(op);
-};
-
-/**
- * opTDNE(0o612000)
+ * opTDNE(0o612000): Test Direct, No Modification, and Skip if All Masked Bits Equal 0
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -5200,11 +5152,11 @@ PDP10.opTSN = function(op, acc)
  */
 PDP10.opTDNE = function(op, acc)
 {
-    this.opUndefined(op);
+    if (PDP10.AND(this.readWord(acc), this.readWord(this.regEA)) == 0) this.setPC(this.regPC + 1);
 };
 
 /**
- * opTSNE(0o613000)
+ * opTSNE(0o613000): Test Swapped, No Modification, and Skip if All Masked Bits Equal 0
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -5212,11 +5164,11 @@ PDP10.opTDNE = function(op, acc)
  */
 PDP10.opTSNE = function(op, acc)
 {
-    this.opUndefined(op);
+    if (PDP10.AND(this.readWord(acc), PDP10.SWAP(this.readWord(this.regEA))) == 0) this.setPC(this.regPC + 1);
 };
 
 /**
- * opTDNA(0o614000)
+ * opTDNA(0o614000): Test Direct, No Modification, but Always Skip
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -5224,11 +5176,11 @@ PDP10.opTSNE = function(op, acc)
  */
 PDP10.opTDNA = function(op, acc)
 {
-    this.opUndefined(op);
+    this.setPC(this.regPC + 1);
 };
 
 /**
- * opTSNA(0o615000)
+ * opTSNA(0o615000): Test Swapped, No Modification, but Always Skip
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -5236,11 +5188,11 @@ PDP10.opTDNA = function(op, acc)
  */
 PDP10.opTSNA = function(op, acc)
 {
-    this.opUndefined(op);
+    this.setPC(this.regPC + 1);
 };
 
 /**
- * opTDNN(0o616000)
+ * opTDNN(0o616000): Test Direct, No Modification, and Skip if Not All Masked Bits Equal 0
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -5248,11 +5200,11 @@ PDP10.opTSNA = function(op, acc)
  */
 PDP10.opTDNN = function(op, acc)
 {
-    this.opUndefined(op);
+    if (PDP10.AND(this.readWord(acc), this.readWord(this.regEA)) != 0) this.setPC(this.regPC + 1);
 };
 
 /**
- * opTSNN(0o617000)
+ * opTSNN(0o617000): Test Swapped, No Modification, and Skip if Not All Masked Bits Equal 0
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -5260,11 +5212,11 @@ PDP10.opTDNN = function(op, acc)
  */
 PDP10.opTSNN = function(op, acc)
 {
-    this.opUndefined(op);
+    if (PDP10.AND(this.readWord(acc), PDP10.SWAP(this.readWord(this.regEA))) != 0) this.setPC(this.regPC + 1);
 };
 
 /**
- * opTRZ(0o620000)
+ * opTRZ(0o620000): Test Right, Zeros, but Do Not Skip
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -5272,11 +5224,11 @@ PDP10.opTSNN = function(op, acc)
  */
 PDP10.opTRZ = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(acc, PDP10.CLR(this.readWord(acc), this.regEA));
 };
 
 /**
- * opTLZ(0o621000)
+ * opTLZ(0o621000): Test Left, Zeros, but Do Not Skip
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -5284,11 +5236,11 @@ PDP10.opTRZ = function(op, acc)
  */
 PDP10.opTLZ = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(acc, PDP10.CLR(this.readWord(acc), this.regEA * PDP10.HALF_SHIFT));
 };
 
 /**
- * opTRZE(0o622000)
+ * opTRZE(0o622000): Test Right, Zeros, and Skip if All Masked Bits Equaled 0
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -5296,11 +5248,13 @@ PDP10.opTLZ = function(op, acc)
  */
 PDP10.opTRZE = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = this.readWord(acc);
+    if (PDP10.AND(dst, this.regEA) == 0) this.setPC(this.regPC + 1);
+    this.writeWord(acc, PDP10.CLR(dst, this.regEA));
 };
 
 /**
- * opTLZE(0o623000)
+ * opTLZE(0o623000): Test Left, Zeros, and Skip if All Masked Bits Equaled 0
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -5308,11 +5262,14 @@ PDP10.opTRZE = function(op, acc)
  */
 PDP10.opTLZE = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = this.readWord(acc);
+    var src = this.regEA * PDP10.HALF_SHIFT;
+    if (PDP10.AND(dst, src) == 0) this.setPC(this.regPC + 1);
+    this.writeWord(acc, PDP10.CLR(dst, src));
 };
 
 /**
- * opTRZA(0o624000)
+ * opTRZA(0o624000): Test Right, Zeros, but Always Skip
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -5320,11 +5277,12 @@ PDP10.opTLZE = function(op, acc)
  */
 PDP10.opTRZA = function(op, acc)
 {
-    this.opUndefined(op);
+    this.setPC(this.regPC + 1);
+    this.writeWord(acc, PDP10.CLR(this.readWord(acc), this.regEA));
 };
 
 /**
- * opTLZA(0o625000)
+ * opTLZA(0o625000): Test Left, Zeros, but Always Skip
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -5332,11 +5290,12 @@ PDP10.opTRZA = function(op, acc)
  */
 PDP10.opTLZA = function(op, acc)
 {
-    this.opUndefined(op);
+    this.setPC(this.regPC + 1);
+    this.writeWord(acc, PDP10.CLR(this.readWord(acc), this.regEA * PDP10.HALF_SHIFT));
 };
 
 /**
- * opTRZN(0o626000)
+ * opTRZN(0o626000): Test Right, Zeros, and Skip if Not All Masked Bits Equaled 0
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -5344,11 +5303,13 @@ PDP10.opTLZA = function(op, acc)
  */
 PDP10.opTRZN = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = this.readWord(acc);
+    if (PDP10.AND(dst, this.regEA) != 0) this.setPC(this.regPC + 1);
+    this.writeWord(acc, PDP10.CLR(dst, this.regEA));
 };
 
 /**
- * opTLZN(0o627000)
+ * opTLZN(0o627000): Test Left, Zeros, and Skip if Not All Masked Bits Equaled 0
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -5356,11 +5317,14 @@ PDP10.opTRZN = function(op, acc)
  */
 PDP10.opTLZN = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = this.readWord(acc);
+    var src = this.regEA * PDP10.HALF_SHIFT;
+    if (PDP10.AND(dst, src) != 0) this.setPC(this.regPC + 1);
+    this.writeWord(acc, PDP10.CLR(dst, src));
 };
 
 /**
- * opTDZ(0o630000)
+ * opTDZ(0o630000): Test Direct, Zeros, but Do Not Skip
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -5368,11 +5332,11 @@ PDP10.opTLZN = function(op, acc)
  */
 PDP10.opTDZ = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(acc, PDP10.CLR(this.readWord(acc), this.readWord(this.regEA)));
 };
 
 /**
- * opTSZ(0o631000)
+ * opTSZ(0o631000): Test Swapped, Zeros, but Do Not Skip
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -5380,11 +5344,11 @@ PDP10.opTDZ = function(op, acc)
  */
 PDP10.opTSZ = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(acc, PDP10.CLR(this.readWord(acc), PDP10.SWAP(this.readWord(this.regEA))));
 };
 
 /**
- * opTDZE(0o632000)
+ * opTDZE(0o632000): Test Direct, Zeros, and Skip if All Masked Bits Equaled a
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -5392,11 +5356,14 @@ PDP10.opTSZ = function(op, acc)
  */
 PDP10.opTDZE = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = this.readWord(acc);
+    var src = this.readWord(this.regEA);
+    if (PDP10.AND(dst, src) == 0) this.setPC(this.regPC + 1);
+    this.writeWord(acc, PDP10.CLR(dst, src));
 };
 
 /**
- * opTSZE(0o633000)
+ * opTSZE(0o633000): Test Swapped, Zeros, and Skip if All Masked Bits Equaled 0
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -5404,11 +5371,14 @@ PDP10.opTDZE = function(op, acc)
  */
 PDP10.opTSZE = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = this.readWord(acc);
+    var src = PDP10.SWAP(this.readWord(this.regEA));
+    if (PDP10.AND(dst, src) == 0) this.setPC(this.regPC + 1);
+    this.writeWord(acc, PDP10.CLR(dst, src));
 };
 
 /**
- * opTDZA(0o634000)
+ * opTDZA(0o634000): Test Direct, Zeros, but Always Skip
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -5416,11 +5386,12 @@ PDP10.opTSZE = function(op, acc)
  */
 PDP10.opTDZA = function(op, acc)
 {
-    this.opUndefined(op);
+    this.setPC(this.regPC + 1);
+    this.writeWord(acc, PDP10.CLR(this.readWord(acc), this.readWord(this.regEA)));
 };
 
 /**
- * opTSZA(0o635000)
+ * opTSZA(0o635000): Test Swapped, Zeros, but Always Skip
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -5428,11 +5399,12 @@ PDP10.opTDZA = function(op, acc)
  */
 PDP10.opTSZA = function(op, acc)
 {
-    this.opUndefined(op);
+    this.setPC(this.regPC + 1);
+    this.writeWord(acc, PDP10.CLR(this.readWord(acc), PDP10.SWAP(this.readWord(this.regEA))));
 };
 
 /**
- * opTDZN(0o636000)
+ * opTDZN(0o636000): Test Direct, Zeros, and Skip if Not All Masked Bits Equaled 0
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -5440,11 +5412,14 @@ PDP10.opTSZA = function(op, acc)
  */
 PDP10.opTDZN = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = this.readWord(acc);
+    var src = this.readWord(this.regEA);
+    if (PDP10.AND(dst, src) != 0) this.setPC(this.regPC + 1);
+    this.writeWord(acc, PDP10.CLR(dst, src));
 };
 
 /**
- * opTSZN(0o637000)
+ * opTSZN(0o637000): Test Swapped, Zeros, and Skip if Not All Masked Bits Equaled 0
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -5452,11 +5427,14 @@ PDP10.opTDZN = function(op, acc)
  */
 PDP10.opTSZN = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = this.readWord(acc);
+    var src = PDP10.SWAP(this.readWord(this.regEA));
+    if (PDP10.AND(dst, src) != 0) this.setPC(this.regPC + 1);
+    this.writeWord(acc, PDP10.CLR(dst, src));
 };
 
 /**
- * opTRC(0o640000)
+ * opTRC(0o640000): Test Right, Complement, but Do Not Skip
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -5464,11 +5442,11 @@ PDP10.opTSZN = function(op, acc)
  */
 PDP10.opTRC = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(acc, PDP10.XOR(this.readWord(acc), this.regEA));
 };
 
 /**
- * opTLC(0o641000)
+ * opTLC(0o641000): Test Left, Complement, but Do Not Skip
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -5476,11 +5454,11 @@ PDP10.opTRC = function(op, acc)
  */
 PDP10.opTLC = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(acc, PDP10.XOR(this.readWord(acc), this.regEA * PDP10.HALF_SHIFT));
 };
 
 /**
- * opTRCE(0o642000)
+ * opTRCE(0o642000): Test Right, Complement, and Skip if All Masked Bits Equaled 0
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -5488,11 +5466,13 @@ PDP10.opTLC = function(op, acc)
  */
 PDP10.opTRCE = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = this.readWord(acc);
+    if (PDP10.AND(dst, this.regEA) == 0) this.setPC(this.regPC + 1);
+    this.writeWord(acc, PDP10.XOR(dst, this.regEA));
 };
 
 /**
- * opTLCE(0o643000)
+ * opTLCE(0o643000): Test Left, Complement, and Skip if All Masked Bits Equaled 0
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -5500,11 +5480,14 @@ PDP10.opTRCE = function(op, acc)
  */
 PDP10.opTLCE = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = this.readWord(acc);
+    var src = this.regEA * PDP10.HALF_SHIFT;
+    if (PDP10.AND(dst, src) == 0) this.setPC(this.regPC + 1);
+    this.writeWord(acc, PDP10.XOR(dst, src));
 };
 
 /**
- * opTRCA(0o644000)
+ * opTRCA(0o644000): Test Right, Complement, but Always Skip
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -5512,11 +5495,12 @@ PDP10.opTLCE = function(op, acc)
  */
 PDP10.opTRCA = function(op, acc)
 {
-    this.opUndefined(op);
+    this.setPC(this.regPC + 1);
+    this.writeWord(acc, PDP10.XOR(this.readWord(acc), this.regEA));
 };
 
 /**
- * opTLCA(0o645000)
+ * opTLCA(0o645000): Test Left, Complement, but Always Skip
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -5524,11 +5508,12 @@ PDP10.opTRCA = function(op, acc)
  */
 PDP10.opTLCA = function(op, acc)
 {
-    this.opUndefined(op);
+    this.setPC(this.regPC + 1);
+    this.writeWord(acc, PDP10.XOR(this.readWord(acc), this.regEA * PDP10.HALF_SHIFT));
 };
 
 /**
- * opTRCN(0o646000)
+ * opTRCN(0o646000): Test Right, Complement, and Skip if Not All Masked Bits Equaled 0
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -5536,11 +5521,13 @@ PDP10.opTLCA = function(op, acc)
  */
 PDP10.opTRCN = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = this.readWord(acc);
+    if (PDP10.AND(dst, this.regEA) != 0) this.setPC(this.regPC + 1);
+    this.writeWord(acc, PDP10.XOR(dst, this.regEA));
 };
 
 /**
- * opTLCN(0o647000)
+ * opTLCN(0o647000): Test Left, Complement, and Skip if Not All Masked Bits Equaled 0
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -5548,11 +5535,14 @@ PDP10.opTRCN = function(op, acc)
  */
 PDP10.opTLCN = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = this.readWord(acc);
+    var src = this.regEA * PDP10.HALF_SHIFT;
+    if (PDP10.AND(dst, src) != 0) this.setPC(this.regPC + 1);
+    this.writeWord(acc, PDP10.XOR(dst, src));
 };
 
 /**
- * opTDC(0o650000)
+ * opTDC(0o650000): Test Direct, Complement, but Do Not Skip
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -5560,11 +5550,11 @@ PDP10.opTLCN = function(op, acc)
  */
 PDP10.opTDC = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(acc, PDP10.XOR(this.readWord(acc), this.readWord(this.regEA)));
 };
 
 /**
- * opTSC(0o651000)
+ * opTSC(0o651000): Test Swapped, Complement, but Do Not Skip
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -5572,11 +5562,11 @@ PDP10.opTDC = function(op, acc)
  */
 PDP10.opTSC = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(acc, PDP10.XOR(this.readWord(acc), PDP10.SWAP(this.readWord(this.regEA))));
 };
 
 /**
- * opTDCE(0o652000)
+ * opTDCE(0o652000): Test Direct, Complement, and Skip if All Masked Bits Equaled 0
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -5584,11 +5574,14 @@ PDP10.opTSC = function(op, acc)
  */
 PDP10.opTDCE = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = this.readWord(acc);
+    var src = this.readWord(this.regEA);
+    if (PDP10.AND(dst, src) == 0) this.setPC(this.regPC + 1);
+    this.writeWord(acc, PDP10.XOR(dst, src));
 };
 
 /**
- * opTSCE(0o653000)
+ * opTSCE(0o653000): Test Swapped, Complement, and Skip if All Masked Bits Equaled 0
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -5596,11 +5589,14 @@ PDP10.opTDCE = function(op, acc)
  */
 PDP10.opTSCE = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = this.readWord(acc);
+    var src = PDP10.SWAP(this.readWord(this.regEA));
+    if (PDP10.AND(dst, src) == 0) this.setPC(this.regPC + 1);
+    this.writeWord(acc, PDP10.XOR(dst, src));
 };
 
 /**
- * opTDCA(0o654000)
+ * opTDCA(0o654000): Test Direct, Complement, but Always Skip
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -5608,11 +5604,12 @@ PDP10.opTSCE = function(op, acc)
  */
 PDP10.opTDCA = function(op, acc)
 {
-    this.opUndefined(op);
+    this.setPC(this.regPC + 1);
+    this.writeWord(acc, PDP10.XOR(this.readWord(acc), this.readWord(this.regEA)));
 };
 
 /**
- * opTSCA(0o655000)
+ * opTSCA(0o655000): Test Swapped, Complement, but Always Skip
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -5620,11 +5617,12 @@ PDP10.opTDCA = function(op, acc)
  */
 PDP10.opTSCA = function(op, acc)
 {
-    this.opUndefined(op);
+    this.setPC(this.regPC + 1);
+    this.writeWord(acc, PDP10.XOR(this.readWord(acc), PDP10.SWAP(this.readWord(this.regEA))));
 };
 
 /**
- * opTDCN(0o656000)
+ * opTDCN(0o656000): Test Direct, Complement, and Skip if Not All Masked Bits Equaled 0
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -5632,11 +5630,14 @@ PDP10.opTSCA = function(op, acc)
  */
 PDP10.opTDCN = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = this.readWord(acc);
+    var src = this.readWord(this.regEA);
+    if (PDP10.AND(dst, src) != 0) this.setPC(this.regPC + 1);
+    this.writeWord(acc, PDP10.XOR(dst, src));
 };
 
 /**
- * opTSCN(0o657000)
+ * opTSCN(0o657000): Test Swapped, Complement, and Skip if Not All Masked Bits Equaled 0
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -5644,11 +5645,14 @@ PDP10.opTDCN = function(op, acc)
  */
 PDP10.opTSCN = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = this.readWord(acc);
+    var src = PDP10.SWAP(this.readWord(this.regEA));
+    if (PDP10.AND(dst, src) != 0) this.setPC(this.regPC + 1);
+    this.writeWord(acc, PDP10.XOR(dst, src));
 };
 
 /**
- * opTRO(0o660000)
+ * opTRO(0o660000): Test Right, Ones, but Do Not Skip
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -5656,11 +5660,11 @@ PDP10.opTSCN = function(op, acc)
  */
 PDP10.opTRO = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(acc, PDP10.IOR(this.readWord(acc), this.regEA));
 };
 
 /**
- * opTLO(0o661000)
+ * opTLO(0o661000): Test Left, Ones, but Do Not Skip
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -5668,11 +5672,11 @@ PDP10.opTRO = function(op, acc)
  */
 PDP10.opTLO = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(acc, PDP10.IOR(this.readWord(acc), this.regEA * PDP10.HALF_SHIFT));
 };
 
 /**
- * opTROE(0o662000)
+ * opTROE(0o662000): Test Right, Ones, and Skip if All Masked Bits Equaled 0
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -5680,11 +5684,13 @@ PDP10.opTLO = function(op, acc)
  */
 PDP10.opTROE = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = this.readWord(acc);
+    if (PDP10.AND(dst, this.regEA) == 0) this.setPC(this.regPC + 1);
+    this.writeWord(acc, PDP10.IOR(dst, this.regEA));
 };
 
 /**
- * opTLOE(0o663000)
+ * opTLOE(0o663000): Test Left, Ones, and Skip if All Masked Bits Equaled 0
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -5692,11 +5698,13 @@ PDP10.opTROE = function(op, acc)
  */
 PDP10.opTLOE = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = this.readWord(acc);
+    if (PDP10.AND(dst, this.regEA * PDP10.HALF_SHIFT) == 0) this.setPC(this.regPC + 1);
+    this.writeWord(acc, PDP10.IOR(dst, this.regEA * PDP10.HALF_SHIFT));
 };
 
 /**
- * opTROA(0o664000)
+ * opTROA(0o664000): Test Right, Ones, but Always Skip
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -5704,11 +5712,12 @@ PDP10.opTLOE = function(op, acc)
  */
 PDP10.opTROA = function(op, acc)
 {
-    this.opUndefined(op);
+    this.setPC(this.regPC + 1);
+    this.writeWord(acc, PDP10.IOR(this.readWord(acc), this.regEA));
 };
 
 /**
- * opTLOA(0o665000)
+ * opTLOA(0o665000): Test Left, Ones, but Always Skip
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -5716,11 +5725,12 @@ PDP10.opTROA = function(op, acc)
  */
 PDP10.opTLOA = function(op, acc)
 {
-    this.opUndefined(op);
+    this.setPC(this.regPC + 1);
+    this.writeWord(acc, PDP10.IOR(this.readWord(acc), this.regEA * PDP10.HALF_SHIFT));
 };
 
 /**
- * opTRON(0o666000)
+ * opTRON(0o666000): Test Right, Ones, and Skip if Not All Masked Bits Equaled 0
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -5728,11 +5738,13 @@ PDP10.opTLOA = function(op, acc)
  */
 PDP10.opTRON = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = this.readWord(acc);
+    if (PDP10.AND(dst, this.regEA) != 0) this.setPC(this.regPC + 1);
+    this.writeWord(acc, PDP10.IOR(dst, this.regEA));
 };
 
 /**
- * opTLON(0o667000)
+ * opTLON(0o667000): Test Left, Ones, and Skip if Not All Masked Bits Equaled 0
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -5740,11 +5752,14 @@ PDP10.opTRON = function(op, acc)
  */
 PDP10.opTLON = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = this.readWord(acc);
+    var src = this.regEA * PDP10.HALF_SHIFT;
+    if (PDP10.AND(dst, src) != 0) this.setPC(this.regPC + 1);
+    this.writeWord(acc, PDP10.IOR(dst, src));
 };
 
 /**
- * opTDO(0o670000)
+ * opTDO(0o670000): Test Direct, Ones, but Do Not Skip
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -5752,11 +5767,11 @@ PDP10.opTLON = function(op, acc)
  */
 PDP10.opTDO = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(acc, PDP10.IOR(this.readWord(acc), this.readWord(this.regEA)));
 };
 
 /**
- * opTSO(0o671000)
+ * opTSO(0o671000): Test Swapped, Ones, but Do Not Skip
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -5764,11 +5779,11 @@ PDP10.opTDO = function(op, acc)
  */
 PDP10.opTSO = function(op, acc)
 {
-    this.opUndefined(op);
+    this.writeWord(acc, PDP10.IOR(this.readWord(acc), PDP10.SWAP(this.readWord(this.regEA))));
 };
 
 /**
- * opTDOE(0o672000)
+ * opTDOE(0o672000): Test Direct, Ones, and Skip if All Masked Bits Equaled 0
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -5776,11 +5791,14 @@ PDP10.opTSO = function(op, acc)
  */
 PDP10.opTDOE = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = this.readWord(acc);
+    var src = this.readWord(this.regEA);
+    if (PDP10.AND(dst, src) == 0) this.setPC(this.regPC + 1);
+    this.writeWord(acc, PDP10.IOR(dst, src));
 };
 
 /**
- * opTSOE(0o673000)
+ * opTSOE(0o673000): Test Swapped, Ones, and Skip if All Masked Bits Equaled 0
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -5788,11 +5806,14 @@ PDP10.opTDOE = function(op, acc)
  */
 PDP10.opTSOE = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = this.readWord(acc);
+    var src = PDP10.SWAP(this.readWord(this.regEA));
+    if (PDP10.AND(dst, src) == 0) this.setPC(this.regPC + 1);
+    this.writeWord(acc, PDP10.IOR(dst, src));
 };
 
 /**
- * opTDOA(0o674000)
+ * opTDOA(0o674000): Test Direct, Ones, but Always Skip
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -5800,11 +5821,12 @@ PDP10.opTSOE = function(op, acc)
  */
 PDP10.opTDOA = function(op, acc)
 {
-    this.opUndefined(op);
+    this.setPC(this.regPC + 1);
+    this.writeWord(acc, PDP10.IOR(this.readWord(acc), this.readWord(this.regEA)));
 };
 
 /**
- * opTSOA(0o675000)
+ * opTSOA(0o675000): Test Swapped, Ones, but Always Skip
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -5812,11 +5834,12 @@ PDP10.opTDOA = function(op, acc)
  */
 PDP10.opTSOA = function(op, acc)
 {
-    this.opUndefined(op);
+    this.setPC(this.regPC + 1);
+    this.writeWord(acc, PDP10.IOR(this.readWord(acc), PDP10.SWAP(this.readWord(this.regEA))));
 };
 
 /**
- * opTDON(0o676000)
+ * opTDON(0o676000): Test Direct, Ones, and Skip if Not All Masked Bits Equaled 0
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -5824,11 +5847,14 @@ PDP10.opTSOA = function(op, acc)
  */
 PDP10.opTDON = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = this.readWord(acc);
+    var src = this.readWord(this.regEA);
+    if (PDP10.AND(dst, src) != 0) this.setPC(this.regPC + 1);
+    this.writeWord(acc, PDP10.IOR(dst, src));
 };
 
 /**
- * opTSON(0o677000)
+ * opTSON(0o677000): Test Swapped, Ones, and Skip if Not All Masked Bits Equaled a
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -5836,7 +5862,10 @@ PDP10.opTDON = function(op, acc)
  */
 PDP10.opTSON = function(op, acc)
 {
-    this.opUndefined(op);
+    var dst = this.readWord(acc);
+    var src = PDP10.SWAP(this.readWord(this.regEA));
+    if (PDP10.AND(dst, src) != 0) this.setPC(this.regPC + 1);
+    this.writeWord(acc, PDP10.IOR(dst, src));
 };
 
 /**
@@ -6056,45 +6085,6 @@ PDP10.doADD = function(dst, src)
 };
 
 /**
- * doAND(dst, src)
- *
- * Performs the logical "and" (AND) of two 36-bit operands.
- *
- * @this {CPUStatePDP10}
- * @param {number} dst (36-bit value)
- * @param {number} src (36-bit value)
- * @return {number} (dst & src)
- */
-PDP10.doAND = function(dst, src)
-{
-    /*
-     * Since dst and src are 36-bit values, we must AND the low 32 bits separately from the higher bits,
-     * and then combine them with addition.  Since all bits above 36 will be zero, and since 0 AND 0 is 0,
-     * no special masking for the higher bits is required.
-     *
-     * WARNING: When using JavaScript's 32-bit operators with values that could set bit 31 and produce a
-     * negative value, it's critical to perform a final right-shift of 0, ensuring that the final result is
-     * positive.
-     */
-    return ((((dst / PDP10.TWO_POW32)|0) & ((src / PDP10.TWO_POW32)|0)) * PDP10.TWO_POW32) + ((dst & src) >>> 0);
-};
-
-/**
- * doCMP(dst, src)
- *
- * Performs the SIGNED comparison (CMP) of two 36-bit operands.
- *
- * @this {CPUStatePDP10}
- * @param {number} dst (36-bit value)
- * @param {number} src (36-bit value)
- * @return {number} (dst - src)
- */
-PDP10.doCMP = function(dst, src)
-{
-    return (dst < PDP10.INT_LIMIT? dst : dst - PDP10.WORD_LIMIT) - (src < PDP10.INT_LIMIT? src : src - PDP10.INT_LIMIT);
-};
-
-/**
  * doDIV(dst, ext, src)
  *
  * Performs the division (DIV) of a 72-bit operand by a 36-bit operand.
@@ -6146,24 +6136,24 @@ PDP10.doDIV = function(dst, ext, src)
      * Stick with the double worker functions I've created, and trust your JavaScript engine to
      * inline/optimize the code.
      */
-    PDP10.initD(this.regRes, 0, 0);
-    PDP10.initD(this.regPow, 1, 0);
-    PDP10.initD(this.regDiv, src, 0);
-    PDP10.initD(this.regRem, dst, ext);
+    PDP10.INITD(this.regRes, 0, 0);
+    PDP10.INITD(this.regPow, 1, 0);
+    PDP10.INITD(this.regDiv, src, 0);
+    PDP10.INITD(this.regRem, dst, ext);
 
-    while (PDP10.cmpD(this.regRem, this.regDiv) > 0) {
-        PDP10.addD(this.regDiv, this.regDiv);
-        PDP10.addD(this.regPow, this.regPow);
+    while (PDP10.CMPD(this.regRem, this.regDiv) > 0) {
+        PDP10.ADDD(this.regDiv, this.regDiv);
+        PDP10.ADDD(this.regPow, this.regPow);
     }
     do {
-        if (PDP10.cmpD(this.regRem, this.regDiv) >= 0) {
-            PDP10.subD(this.regRem, this.regDiv);
-            PDP10.addD(this.regRes, this.regPow);
-            if (PDP10.zeroD(this.regRem)) break;
+        if (PDP10.CMPD(this.regRem, this.regDiv) >= 0) {
+            PDP10.SUBD(this.regRem, this.regDiv);
+            PDP10.ADDD(this.regRes, this.regPow);
+            if (PDP10.ZEROD(this.regRem)) break;
         }
-        PDP10.shrD(this.regDiv);
-        PDP10.shrD(this.regPow);
-    } while (!PDP10.zeroD(this.regPow));
+        PDP10.SHRD(this.regDiv);
+        PDP10.SHRD(this.regPow);
+    } while (!PDP10.ZEROD(this.regPow));
 
     this.assert(!this.regRes[1], "extended quotient");
     this.assert(!this.regRem[1], "extended remainder");
@@ -6180,78 +6170,6 @@ PDP10.doDIV = function(dst, ext, src)
     }
 
     return dst;
-};
-
-/**
- * doEOR(dst, src)
- *
- * Performs the logical "exclusive-or" (XOR) of two 36-bit operands.
- *
- * @this {CPUStatePDP10}
- * @param {number} dst (36-bit value)
- * @param {number} src (36-bit value)
- * @return {number} (dst ^ src)
- */
-PDP10.doEOR = function(dst, src)
-{
-    /*
-     * Since dst and src are 36-bit values, we must XOR the low 32 bits separately from the higher bits,
-     * and then combine them with addition.  Since all bits above 36 will be zero, and since 0 XOR 0 is 0,
-     * no special masking for the higher bits is required.
-     *
-     * WARNING: When using JavaScript's 32-bit operators with values that could set bit 31 and produce a
-     * negative value, it's critical to perform a final right-shift of 0, ensuring that the final result is
-     * positive.
-     */
-    return ((((dst / PDP10.TWO_POW32)|0) ^ ((src / PDP10.TWO_POW32)|0)) * PDP10.TWO_POW32) + ((dst ^ src) >>> 0);
-};
-
-/**
- * doEQV(dst, src)
- *
- * Performs the logical "equivalence" (EQV) of two 36-bit operands.
- *
- * @this {CPUStatePDP10}
- * @param {number} dst (36-bit value)
- * @param {number} src (36-bit value)
- * @return {number} (~(dst ^ src))
- */
-PDP10.doEQV = function(dst, src)
-{
-    /*
-     * Since dst and src are 36-bit values, we must EQV the low 32 bits separately from the higher bits,
-     * and then combine them with addition.  Since all bits above 36 will be zero, and since 0 EQV 0 is 1,
-     * we must mask the higher 4 bits with 0o17.
-     *
-     * WARNING: When using JavaScript's 32-bit operators with values that could set bit 31 and produce a
-     * negative value, it's critical to perform a final right-shift of 0, ensuring that the final result is
-     * positive.
-     */
-    return ((~(((dst / PDP10.TWO_POW32)|0) ^ ((src / PDP10.TWO_POW32)|0)) & 0o17) * PDP10.TWO_POW32) + (~(dst ^ src) >>> 0);
-};
-
-/**
- * doIOR(dst, src)
- *
- * Performs the logical "inclusive-or" (OR) of two 36-bit operands.
- *
- * @this {CPUStatePDP10}
- * @param {number} dst (36-bit value)
- * @param {number} src (36-bit value)
- * @return {number} (dst | src)
- */
-PDP10.doIOR = function(dst, src)
-{
-    /*
-     * Since dst and src are 36-bit values, we must OR the low 32 bits separately from the higher bits,
-     * and then combine them with addition.  Since all bits above 36 will be zero, and since 0 OR 0 is 0,
-     * no special masking for the higher bits is required.
-     *
-     * WARNING: When using JavaScript's 32-bit operators with values that could set bit 31 and produce a
-     * negative value, it's critical to perform a final right-shift of 0, ensuring that the final result is
-     * positive.
-     */
-    return ((((dst / PDP10.TWO_POW32)|0) | ((src / PDP10.TWO_POW32)|0)) * PDP10.TWO_POW32) + ((dst | src) >>> 0);
 };
 
 /**
@@ -6294,15 +6212,15 @@ PDP10.doMUL = function(dst, src, fTruncate)
         ext = 0;
     }
     else {
-        var n1d1 = (n1 % PDP10.HALF_SHIFT);
+        var n1d1 = (n1 & PDP10.HALF_MASK);
         var n1d2 = Math.trunc(n1 / PDP10.HALF_SHIFT);
-        var n2d1 = (n2 % PDP10.HALF_SHIFT);
+        var n2d1 = (n2 & PDP10.HALF_MASK);
         var n2d2 = Math.trunc(n2 / PDP10.HALF_SHIFT);
         var m1d1 = n1d1 * n2d1;
         var m1d2 = (n1d2 * n2d1) + Math.trunc(m1d1 / PDP10.HALF_SHIFT);
         ext = Math.trunc(m1d2 / PDP10.HALF_SHIFT);
-        m1d2 = (m1d2 % PDP10.HALF_SHIFT) + (n1d1 * n2d2);
-        res = (m1d2 * PDP10.HALF_SHIFT) + (m1d1 % PDP10.HALF_SHIFT);
+        m1d2 = (m1d2 & PDP10.HALF_MASK) + (n1d1 * n2d2);
+        res = (m1d2 * PDP10.HALF_SHIFT) + (m1d1 & PDP10.HALF_MASK);
         ext += Math.trunc(m1d2 / PDP10.HALF_SHIFT) + (n1d2 * n2d2);
     }
 
@@ -6362,20 +6280,6 @@ PDP10.doNEG = function(src)
         }
     }
     return src;
-};
-
-/**
- * doSGN(dst)
- *
- * Returns the signed form of the 36-bit operand; more efficient than doCMP(dst, 0).
- *
- * @this {CPUStatePDP10}
- * @param {number} dst (36-bit value)
- * @return {number}
- */
-PDP10.doSGN = function(dst)
-{
-    return (dst < PDP10.INT_LIMIT? dst : dst - PDP10.WORD_LIMIT);
 };
 
 /**
@@ -6518,7 +6422,177 @@ PDP10.setAddFlags = function(dst, src, res)
 };
 
 /**
- * getHL(op, dst, src)
+ * AND(dst, src)
+ *
+ * Performs the logical "and" (AND) of two 36-bit operands.
+ *
+ * @param {number} dst (36-bit value)
+ * @param {number} src (36-bit value)
+ * @return {number} (dst & src)
+ */
+PDP10.AND = function(dst, src)
+{
+    /*
+     * Since dst and src are 36-bit values, we must AND the low 32 bits separately from the higher bits,
+     * and then combine them with addition.  Since all bits above 36 will be zero, and since 0 AND 0 is 0,
+     * no special masking for the higher bits is required.
+     *
+     * WARNING: When using JavaScript's 32-bit operators with values that could set bit 31 and produce a
+     * negative value, it's critical to perform a final right-shift of 0, ensuring that the final result is
+     * positive.
+     */
+    return ((((dst / PDP10.TWO_POW32)|0) & ((src / PDP10.TWO_POW32)|0)) * PDP10.TWO_POW32) + ((dst & src) >>> 0);
+};
+
+/**
+ * CLR(dst, src)
+ *
+ * Performs the logical "and" (AND) of a 36-bit operand and its complement.
+ *
+ * @param {number} dst (36-bit value)
+ * @param {number} src (36-bit value)
+ * @return {number} (dst & ~src)
+ */
+PDP10.CLR = function(dst, src)
+{
+    return PDP10.AND(dst, PDP10.NOT(src));
+};
+
+/**
+ * CMP(dst, src)
+ *
+ * Performs the SIGNED comparison (CMP) of two 36-bit operands.
+ *
+ * @param {number} dst (36-bit value)
+ * @param {number} src (36-bit value)
+ * @return {number} (dst - src)
+ */
+PDP10.CMP = function(dst, src)
+{
+    return (dst < PDP10.INT_LIMIT? dst : dst - PDP10.WORD_LIMIT) - (src < PDP10.INT_LIMIT? src : src - PDP10.INT_LIMIT);
+};
+
+/**
+ * EQV(dst, src)
+ *
+ * Performs the logical "equivalence" (EQV) of two 36-bit operands (ie, NOT XOR)
+ *
+ * @param {number} dst (36-bit value)
+ * @param {number} src (36-bit value)
+ * @return {number} (~(dst ^ src))
+ */
+PDP10.EQV = function(dst, src)
+{
+    /*
+     * Since dst and src are 36-bit values, we must EQV the low 32 bits separately from the higher bits,
+     * and then combine them with addition.  Since all bits above 36 will be zero, and since 0 EQV 0 is 1,
+     * we must mask the higher 4 bits with 0o17.
+     *
+     * WARNING: When using JavaScript's 32-bit operators with values that could set bit 31 and produce a
+     * negative value, it's critical to perform a final right-shift of 0, ensuring that the final result is
+     * positive.
+     */
+    return ((~(((dst / PDP10.TWO_POW32)|0) ^ ((src / PDP10.TWO_POW32)|0)) & 0o17) * PDP10.TWO_POW32) + (~(dst ^ src) >>> 0);
+};
+
+/**
+ * IOR(dst, src)
+ *
+ * Performs the logical "inclusive-or" (OR) of two 36-bit operands.
+ *
+ * @param {number} dst (36-bit value)
+ * @param {number} src (36-bit value)
+ * @return {number} (dst | src)
+ */
+PDP10.IOR = function(dst, src)
+{
+    /*
+     * Since dst and src are 36-bit values, we must OR the low 32 bits separately from the higher bits,
+     * and then combine them with addition.  Since all bits above 36 will be zero, and since 0 OR 0 is 0,
+     * no special masking for the higher bits is required.
+     *
+     * WARNING: When using JavaScript's 32-bit operators with values that could set bit 31 and produce a
+     * negative value, it's critical to perform a final right-shift of 0, ensuring that the final result is
+     * positive.
+     */
+    return ((((dst / PDP10.TWO_POW32)|0) | ((src / PDP10.TWO_POW32)|0)) * PDP10.TWO_POW32) + ((dst | src) >>> 0);
+};
+
+/**
+ * NOT(src)
+ *
+ * Performs the one's complement (NOT) of a 36-bit operand.
+ *
+ * @param {number} src (36-bit value)
+ * @return {number} (~src)
+ */
+PDP10.NOT = function(src)
+{
+    /*
+     * Since src is a 36-bit value, we must NOT the low 32 bits separately from the higher bits,
+     * and then combine them with addition.  Since all bits above 36 will be zero, and since ~0 is 1,
+     * we must mask the higher 4 bits with 0o17.
+     *
+     * WARNING: When using JavaScript's 32-bit operators with values that could set bit 31 and produce a
+     * negative value, it's critical to perform a final right-shift of 0, ensuring that the final result is
+     * positive.
+     */
+    return ((~((src / PDP10.TWO_POW32)|0) & 0o17) * PDP10.TWO_POW32) + (~src >>> 0);
+};
+
+/**
+ * SIGN(dst)
+ *
+ * Returns the signed form of the 36-bit operand; more efficient than doCMP(dst, 0).
+ *
+ * @param {number} dst (36-bit value)
+ * @return {number}
+ */
+PDP10.SIGN = function(dst)
+{
+    return (dst < PDP10.INT_LIMIT? dst : dst - PDP10.WORD_LIMIT);
+};
+
+/**
+ * XOR(dst, src)
+ *
+ * Performs the logical "exclusive-or" (XOR) of two 36-bit operands.
+ *
+ * @param {number} dst (36-bit value)
+ * @param {number} src (36-bit value)
+ * @return {number} (dst ^ src)
+ */
+PDP10.XOR = function(dst, src)
+{
+    /*
+     * Since dst and src are 36-bit values, we must XOR the low 32 bits separately from the higher bits,
+     * and then combine them with addition.  Since all bits above 36 will be zero, and since 0 XOR 0 is 0,
+     * no special masking for the higher bits is required.
+     *
+     * WARNING: When using JavaScript's 32-bit operators with values that could set bit 31 and produce a
+     * negative value, it's critical to perform a final right-shift of 0, ensuring that the final result is
+     * positive.
+     */
+    return ((((dst / PDP10.TWO_POW32)|0) ^ ((src / PDP10.TWO_POW32)|0)) * PDP10.TWO_POW32) + ((dst ^ src) >>> 0);
+};
+
+/**
+ * SWAP(src)
+ *
+ * Used by callers to "swap" the left and right half-words of a 36-bit operand.
+ *
+ * NOTE: Since HALF_MASK is an 18-bit value, it's safe to use "&" with HALF_MASK (equivalent to "%" with HALF_SHIFT).
+ *
+ * @param {number} src
+ * @return {number} (updated src)
+ */
+PDP10.SWAP = function(src)
+{
+    return ((src / PDP10.HALF_SHIFT)|0) + ((src & PDP10.HALF_MASK) * PDP10.HALF_SHIFT);
+};
+
+/**
+ * GETHL(op, dst, src)
  *
  * Used by callers to obtain HL (half-word left) with HR (half-word right) zeroed.
  *
@@ -6527,7 +6601,7 @@ PDP10.setAddFlags = function(dst, src, res)
  * @param {number} src (18-bit value used to determine the sign extension, if any, for the left half of dst)
  * @return {number} (updated dst)
  */
-PDP10.getHL = function(op, dst, src)
+PDP10.GETHL = function(op, dst, src)
 {
     switch(op & 0o600) {
     case 0o000:
@@ -6547,7 +6621,7 @@ PDP10.getHL = function(op, dst, src)
 };
 
 /**
- * setHL(op, dst, src)
+ * SETHL(op, dst, src)
  *
  * Used by callers to obtain HL (half-word left) with HR (half-word right) preserved.
  *
@@ -6556,7 +6630,7 @@ PDP10.getHL = function(op, dst, src)
  * @param {number} src (18-bit value used to determine the sign extension, if any, for the left half of dst)
  * @return {number} (updated dst)
  */
-PDP10.setHL = function(op, dst, src)
+PDP10.SETHL = function(op, dst, src)
 {
     if (op &= 0o600) {
         dst &= PDP10.HALF_MASK;
@@ -6573,7 +6647,7 @@ PDP10.setHL = function(op, dst, src)
 };
 
 /**
- * getHR(op, dst, src)
+ * GETHR(op, dst, src)
  *
  * Used by callers to obtain HR (half-word right) with HL (half-word left) zeroed.
  *
@@ -6582,7 +6656,7 @@ PDP10.setHL = function(op, dst, src)
  * @param {number} src (36-bit value used to determine the sign extension, if any, for the right half of dst)
  * @return {number} (updated dst)
  */
-PDP10.getHR = function(op, dst, src)
+PDP10.GETHR = function(op, dst, src)
 {
     switch(op & 0o600) {
     case 0o000:
@@ -6602,7 +6676,7 @@ PDP10.getHR = function(op, dst, src)
 };
 
 /**
- * setHR(op, dst, src)
+ * SETHR(op, dst, src)
  *
  * Used by callers to obtain HR (half-word right) with HL (half-word left) preserved.
  *
@@ -6611,7 +6685,7 @@ PDP10.getHR = function(op, dst, src)
  * @param {number} src (36-bit value used to determine the sign extension, if any, for the right half of dst)
  * @return {number} (updated dst)
  */
-PDP10.setHR = function(op, dst, src)
+PDP10.SETHR = function(op, dst, src)
 {
     if (op &= 0o600) {
         dst -= (dst & PDP10.HALF_MASK);
@@ -6628,14 +6702,14 @@ PDP10.setHR = function(op, dst, src)
 };
 
 /**
- * addD(dDst, dSrc)
+ * ADDD(dDst, dSrc)
  *
  * Adds a double-length value (dSrc) to another (dDst).
  *
  * @param {Array.<number>} dDst
  * @param {Array.<number>} dSrc
  */
-PDP10.addD = function(dDst, dSrc)
+PDP10.ADDD = function(dDst, dSrc)
 {
     dDst[0] += dSrc[0];
     dDst[1] += dSrc[1];
@@ -6646,7 +6720,7 @@ PDP10.addD = function(dDst, dSrc)
 };
 
 /**
- * cmpD(dDst, dSrc)
+ * CMPD(dDst, dSrc)
  *
  * Compares double-length values (dDst and dSrc) by computing dDst - dSrc.
  *
@@ -6654,7 +6728,7 @@ PDP10.addD = function(dDst, dSrc)
  * @param {Array.<number>} dSrc
  * @return {number} > 0 if dDst > dSrc, == 0 if dDst == dSrc, < 0 if dDst < dSrc
  */
-PDP10.cmpD = function(dDst, dSrc)
+PDP10.CMPD = function(dDst, dSrc)
 {
     var result = dDst[1] - dSrc[1];
     if (!result) result = dDst[0] - dSrc[0];
@@ -6662,7 +6736,7 @@ PDP10.cmpD = function(dDst, dSrc)
 };
 
 /**
- * initD(dDst, lo, hi)
+ * INITD(dDst, lo, hi)
  *
  * Initializes a double-length value (dDst).
  *
@@ -6670,20 +6744,20 @@ PDP10.cmpD = function(dDst, dSrc)
  * @param {number} lo
  * @param {number} hi
  */
-PDP10.initD = function(dDst, lo, hi)
+PDP10.INITD = function(dDst, lo, hi)
 {
     dDst[0] = lo;
     dDst[1] = hi;
 };
 
 /**
- * shrD(dDst)
+ * SHRD(dDst)
  *
  * Shifts a double-length value (dDst) right one bit.
  *
  * @param {Array.<number>} dDst
  */
-PDP10.shrD = function(dDst)
+PDP10.SHRD = function(dDst)
 {
     if (dDst[1] % 2) {
         dDst[0] += PDP10.WORD_LIMIT;
@@ -6693,14 +6767,14 @@ PDP10.shrD = function(dDst)
 };
 
 /**
- * subD(dDst, dSrc)
+ * SUBD(dDst, dSrc)
  *
  * Subtracts a double-length value (dSrc) from another (dDst).
  *
  * @param {Array.<number>} dDst
  * @param {Array.<number>} dSrc
  */
-PDP10.subD = function(dDst, dSrc)
+PDP10.SUBD = function(dDst, dSrc)
 {
     dDst[0] -= dSrc[0];
     dDst[1] -= dSrc[1];
@@ -6711,13 +6785,14 @@ PDP10.subD = function(dDst, dSrc)
 };
 
 /**
- * zeroD(d)
+ * ZEROD(d)
  *
  * True if all bits in the double-length value (d) are zero, false otherwise.
  *
  * @param {Array.<number>} d
+ * @return {boolean}
  */
-PDP10.zeroD = function(d)
+PDP10.ZEROD = function(d)
 {
     return !d[0] && !d[1];
 };
@@ -6795,6 +6870,10 @@ PDP10.opSETMB   = PDP10.opMOVE;
 PDP10.opCAI     = PDP10.opNOP;
 PDP10.opCAM     = PDP10.opNOPM;
 PDP10.opJUMP    = PDP10.opNOP;
+PDP10.opTRN     = PDP10.opNOP;
+PDP10.opTLN     = PDP10.opNOP;
+PDP10.opTDN     = PDP10.opNOPM;
+PDP10.opTSN     = PDP10.opNOPM;
 
 PDP10.aOpXXX_KA10 = [
     PDP10.opUUO,                // 0o000xxx
