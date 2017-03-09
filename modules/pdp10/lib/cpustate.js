@@ -174,12 +174,17 @@ class CPUStatePDP10 extends CPUPDP10 {
      */
     initCPU()
     {
-        this.regEA = this.regRA = this.regOP = 0;
-        this.regPC = this.lastPC = this.addrReset;
-        this.regXC = -1;        // if >= 0 this supersedes regPC (refers to an opcode from XCT)
-        this.regBP = -1;        // active byte pointer (-1 if none)
-        this.regPS = 0;         // assorted processor flags (see PSFLAG bit definitions)
-        this.regExt = 0;        // internal "extension" register used for 72-bit calculations (eg, MUL)
+        this.regEA  = this.regRA = this.regOP = 0;
+        this.regPC  = this.lastPC = this.addrReset;
+        this.regXC  = -1;       // if >= 0 this supersedes regPC (refers to an opcode from XCT)
+        this.regBP  = -1;       // active byte pointer (-1 if none)
+        this.regPS  =  0;       // assorted processor flags (see PSFLAG bit definitions)
+        this.regExt =  0;       // internal "extension" register used for 72-bit MUL and DIV calculations
+
+        this.regRes = [0, 0];   // four internal "double-length" registers used for 72-bit DIV calculations
+        this.regPow = [0, 0];
+        this.regDiv = [0, 0];
+        this.regRem = [0, 0];
 
         /*
          * This is queried and displayed by the Panel when it's not displaying its own ADDRESS register
@@ -481,11 +486,10 @@ class CPUStatePDP10 extends CPUPDP10 {
     }
 
     /**
-     * setPC()
+     * setPC(addr)
      *
-     * NOTE: Unlike other PCjs emulators, such as PCx86, where all PC updates MUST go through the setPC()
-     * function, this function is nothing more than a convenience, because in the PDP-11, the PC can be loaded
-     * like any other general register.  We fully expect this function to be inlined at runtime.
+     * Updates the PC register with the new address after masking it with ADDR_LIMIT (in case the
+     * new address was the result of an unchecked calculation).
      *
      * @this {CPUStatePDP10}
      * @param {number} addr

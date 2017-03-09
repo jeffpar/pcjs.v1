@@ -44,10 +44,10 @@ class Str {
      */
     static isValidInt(s, base)
     {
-        if (!base || base == 10) return s.match(/^[0-9]+$/) !== null;
-        if (base == 16) return s.match(/^[0-9a-f]+$/i) !== null;
-        if (base == 8) return s.match(/^[0-7]+$/) !== null;
-        if (base == 2) return s.match(/^[01]+$/) !== null;
+        if (!base || base == 10) return s.match(/^-?[0-9]+$/) !== null;
+        if (base == 16) return s.match(/^-?[0-9a-f]+$/i) !== null;
+        if (base == 8) return s.match(/^-?[0-7]+$/) !== null;
+        if (base == 2) return s.match(/^-?[01]+$/) !== null;
         return false;
     }
 
@@ -165,9 +165,9 @@ class Str {
          * values displayed differently.
          */
         var s = "";
-        if (n == null || isNaN(n)) {
-            while (cch-- > 0) s = '?' + s;
-        } else {
+        if (isNaN(n)) {
+            n = null;
+        } else if (n != null) {
             /*
              * Callers that produced an input by dividing by a power of two rather than shifting (in order
              * to access more than 32 bits) may produce a fractional result, which ordinarily we would simply
@@ -175,6 +175,20 @@ class Str {
              * this value as a sign-extension.
              */
             if (n < 0 && n > -1) n = -1;
+            /*
+             * Negative values should be two's complemented according to the number of digits; for example,
+             * 12 octal digits implies an upper limit 8^12.
+             */
+            if (n < 0) {
+                n += Math.pow(radix, cch);
+            }
+            if (n < 0 || n >= Math.pow(radix, cch)) {
+                n = null;
+            }
+        }
+        if (n == null) {
+            while (cch-- > 0) s = '?' + s;
+        } else {
             while (cch-- > 0) {
                 var d = n % radix;
                 d += (d >= 0 && d <= 9? 0x30 : 0x41 - 10);
@@ -266,7 +280,7 @@ class Str {
         if (cch) {
             if (cch > 12) cch = 12;
         } else {
-            cch = (n & ~0xffffff)? 11 : ((n & ~0xffff)? 8 : 6);
+            cch = (n & ~0xffffff)? 12 : ((n & ~0xffff)? 8 : 6);
         }
         return Str.toBase(n, 8, cch, fPrefix? "0o" : "");
     }

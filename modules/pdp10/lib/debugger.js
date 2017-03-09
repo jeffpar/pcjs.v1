@@ -90,6 +90,7 @@ class DebuggerPDP10 extends Debugger {
              */
             this.fInit = false;
             this.fParens = true;
+            this.nBusWidth = 18;        // default value, updated by initBus()
 
             /*
              * Most commands that require an address call parseAddr(), and if a dbgAddr parameter is supplied
@@ -315,6 +316,7 @@ class DebuggerPDP10 extends Debugger {
         this.cmp = cmp;
         this.cpu = cpu;
         this.panel = cmp.panel;
+        this.nBusWidth = bus.getWidth();
 
         /*
          * Re-initialize Debugger message support if necessary
@@ -527,6 +529,7 @@ class DebuggerPDP10 extends Debugger {
             addr = this.parseExpression(sAddr, fPrint);
         }
         if (addr != null) {
+            addr = this.validateWord(addr, this.nBusWidth);
             this.setAddr(dbgAddr, addr, fPhysical, nBase);
         }
         return dbgAddr;
@@ -547,6 +550,31 @@ class DebuggerPDP10 extends Debugger {
                 dbgAddr.aCmds = this.parseCommand(dbgAddr.sCmd = a[2]);
             }
         }
+    }
+
+    /**
+     * validateWord(w, bits)
+     *
+     * @this {DebuggerPDP10}
+     * @param {number} w
+     * @param {number} [bits]
+     * @return {number}
+     */
+    validateWord(w, bits = 36)
+    {
+        /*
+         * Although it's expected that most callers will supply unsigned 36-bit values, we're nice about
+         * converting any signed values to their unsigned (two's complement) counterpart, provided they are
+         * within the acceptable range.  Any values outside that range will be dealt with afterward.
+         */
+        if (w < 0 && w >= -PDP10.INT_LIMIT) {
+            w += PDP10.WORD_LIMIT;
+        }
+        var value = Math.trunc(Math.abs(w)) % Math.pow(2, bits);
+        if (DEBUG && w !== value) {
+            this.println("validateWord(" + Str.toOct(w) + "): out of range, truncated to " + Str.toOct(value));
+        }
+        return value;
     }
 
     /**
@@ -2780,14 +2808,12 @@ class DebuggerPDP10 extends Debugger {
         var dbgAddr = this.parseAddr(sAddr, this.dbgAddrData);
         if (!dbgAddr) return;
         for (var i = 2; i < asArgs.length; i++) {
-            var vNew = this.parseExpression(asArgs[i]);
-            if (vNew === undefined) {
-                this.println("unknown value: " + asArgs[i]);
-                break;
-            }
-            this.println("changing " + this.toStrAddr(dbgAddr) + " from " + this.toStrWord(fnGet.call(this, dbgAddr)) + " to " + this.toStrWord(vNew));
+            var w = this.parseExpression(asArgs[i]);
+            if (w === undefined) break;
+            w = this.validateWord(w);
+            this.println("changing " + this.toStrAddr(dbgAddr) + " from " + this.toStrWord(fnGet.call(this, dbgAddr)) + " to " + this.toStrWord(w));
             //noinspection JSUnresolvedFunction
-            fnSet.call(this, dbgAddr, vNew, 1);
+            fnSet.call(this, dbgAddr, w, 1);
         }
     }
 
@@ -3679,7 +3705,7 @@ class DebuggerPDP10 extends Debugger {
                 }
             }
         } catch(e) {
-            this.println("debugger error: " + (e.stack || e.message));
+            this.println("Debugger " + (e.stack || e.message));
             result = false;
         }
         return result;
@@ -3843,7 +3869,7 @@ if (DEBUGGER) {
         ASHC:   57,     FSC:    58,     FADR:   59,     FSBR:   60,
         FMPR:   61,     FDVR:   62,     DFN:    63,     UFA:    64,
         FAD:    65,     FSB:    66,     FMP:    67,     FDV:    68,
-        AOBJP:  69,     AOBJN:  70,     CAI:    71,     CA:     72,
+        AOBJP:  69,     AOBJN:  70,     CAI:    71,     CAM:    72,
         JUMP:   73,     SKIP:   74,     AOJ:    75,     AOS:    76,
         SOJ:    77,     SOS:    78,     TR:     79,     TL:     80,
         TD:     81,     TS:     82,     XCT:    83,     JFFO:   84,
@@ -3877,7 +3903,7 @@ if (DEBUGGER) {
         "ASHC",         "FSC",          "FADR",         "FSBR",
         "FMPR",         "FDVR",         "DFN",          "UFA",
         "FAD",          "FSB",          "FMP",          "FDV",
-        "AOBJP",        "AOBJN",        "CAI",          "CA",
+        "AOBJP",        "AOBJN",        "CAI",          "CAM",
         "JUMP",         "SKIP",         "AOJ",          "AOS",
         "SOJ",          "SOS",          "TR",           "TL",
         "TD",           "TS",           "XCT",          "JFFO",
@@ -4000,7 +4026,7 @@ if (DEBUGGER) {
         },
         [PDP10.OPCODE.OPCOMP]: {                // 0o77000
             0o30000: DebuggerPDP10.OPS.CAI,
-            0o31000: DebuggerPDP10.OPS.CA,
+            0o31000: DebuggerPDP10.OPS.CAM,
             0o32000: DebuggerPDP10.OPS.JUMP,
             0o33000: DebuggerPDP10.OPS.SKIP,
             0o34000: DebuggerPDP10.OPS.AOJ,
