@@ -1357,7 +1357,7 @@ class Int36 {
         }
         var value = Math.trunc(Math.abs(num)) % Math.pow(2, bits);
         if (DEBUG && num !== value) {
-            console.log("Int36.validate(" + Int36.octal(num) + " out of range, truncated to " + Int36.octal(value) + ")");
+            console.log("Int36.validate(" + Int36.octal(num) + "): out of range, truncated to " + Int36.octal(value));
         }
         return value;
     }
