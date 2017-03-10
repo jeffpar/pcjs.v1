@@ -196,9 +196,9 @@
     "./modules/pdp10/lib/rom.js",
     "./modules/pdp10/lib/ram.js",
     "./modules/pdp10/lib/serial.js",
-    "./modules/pdp10/lib/macro10.js",
     "./modules/shared/lib/debugger.js",
     "./modules/pdp10/lib/debugger.js",
+    "./modules/pdp10/lib/macro10.js",
     "./modules/pdp10/lib/computer.js",
     "./modules/shared/lib/state.js",
     "./modules/shared/lib/embed.js"
