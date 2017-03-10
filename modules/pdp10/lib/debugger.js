@@ -2812,7 +2812,6 @@ class DebuggerPDP10 extends Debugger {
             if (w === undefined) break;
             w = this.validateWord(w);
             this.println("changing " + this.toStrAddr(dbgAddr) + " from " + this.toStrWord(fnGet.call(this, dbgAddr)) + " to " + this.toStrWord(w));
-            //noinspection JSUnresolvedFunction
             fnSet.call(this, dbgAddr, w, 1);
         }
     }

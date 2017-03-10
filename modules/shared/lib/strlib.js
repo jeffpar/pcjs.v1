@@ -182,8 +182,8 @@ class Str {
             if (n < 0) {
                 n += Math.pow(radix, cch);
             }
-            if (n < 0 || n >= Math.pow(radix, cch)) {
-                n = null;
+            if (n >= Math.pow(radix, cch)) {
+                cch = Math.ceil(Math.log(n) / Math.log(radix));
             }
         }
         if (n == null) {

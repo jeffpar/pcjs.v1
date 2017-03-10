@@ -3008,7 +3008,6 @@ class DebuggerPDP11 extends Debugger {
                 this.println("warning: " + Str.toHex(vNew) + " exceeds " + size + "-byte value");
             }
             this.println("changing " + this.toStrAddr(dbgAddr) + (this.messageEnabled(MessagesPDP11.BUS)? "" : (" from " + this.toStrBase(fnGet.call(this, dbgAddr), size << 3))) + " to " + this.toStrBase(vNew, size << 3));
-            //noinspection JSUnresolvedFunction
             fnSet.call(this, dbgAddr, vNew, size);
         }
     }

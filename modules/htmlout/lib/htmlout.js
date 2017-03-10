@@ -881,7 +881,6 @@ HTMLOut.prototype.findTokens = function(reTokens)
                             aParms.push(aMatch[1]);
                         }
                     }
-                    //noinspection JSUnresolvedFunction
                     fnToken.call(this, sToken, sIndent, aParms);
                 }
             }

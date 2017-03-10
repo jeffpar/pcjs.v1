@@ -2341,7 +2341,7 @@ PDP10.opPUSHJ = function(op, acc)
 PDP10.opPUSH = function(op, acc)
 {
     var p = this.readWord(acc);
-    if (!SIMH) {
+    if (!PDP10.SIMH) {
         /*
          * This is the behavior that is clearly documented by DEC.
          */

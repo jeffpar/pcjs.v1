@@ -422,7 +422,6 @@ class ComputerPDP11 extends Component {
             }
         }
         if (DEBUG && this.messageEnabled()) this.printMessage("ComputerPDP11.wait(ready)");
-        //noinspection JSUnresolvedFunction
         fn.call(this, parms);
     }
 
