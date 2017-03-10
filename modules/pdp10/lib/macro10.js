@@ -65,46 +65,126 @@ class Macro10 {
     {
         this.sURL = sURL;
         this.nAddr = nAddr;
-        this.dbg = dbg;
         this.done = done;
+
+        /*
+         * Set up all the services we need to use.
+         */
+        this.println = dbg && dbg.println || console.log;
+
+        /*
+         * Initialize all the tables that MACRO-10 uses.
+         */
+        this.tblMacros = {};
+        this.tblSymbols = {};
+
         var macro10 = this;
         Web.getResource(sURL, null, true, function(sURL, sResource, nErrorCode) {
             if (!nErrorCode) {
-                nErrorCode = macro10.parse(sURL, sResource);
+                nErrorCode = macro10.parseFile(sURL, sResource);
             }
             macro10.done(macro10, sURL, nErrorCode);
         });
     }
 
     /**
-     * parse(sURL, sResource)
+     * parseFile(sPath, sContents)
      *
      * Begin the assembly process.
      *
      * @this {Macro10}
-     * @param {string} sURL
-     * @param {string} sResource
+     * @param {string} sPath
+     * @param {string} sContents
      * @return {number}
      */
-    parse(sURL, sResource)
+    parseFile(sPath, sContents)
     {
-        var match, re;
-        var sText = sResource;
-        if (Str.endsWith(sURL, ".html")) {
+        var sText = sContents;
+        if (Str.endsWith(sPath, ".html")) {
             /*
-             * We want to parse ONLY text between <PRE>...</PRE> tags.
+             * We want to parse ONLY the text between <PRE>...</PRE> tags, and eliminate any HTML entities.
              */
             sText = "";
-            re = /<pre>([\s\S]*?)<\/pre>/gi;
-            while (match = re.exec(sResource)) {
-                sText += match[1];
+            var match, re = /<pre>([\s\S]*?)<\/pre>/gi;
+            while (match = re.exec(sContents)) {
+                var s = match[1];
+                if (s.indexOf('&') >= 0) s = s.replace(/&lt;/gi, '<').replace(/&gt;/gi, '>').replace(/&amp;/gi, '&');
+                sText += s;
             }
+            match = sText.match(/&[a-z]+;/i);
+            if (match) this.warning("unrecognized HTML entity: " + match[0]);
         }
         var i;
         var asLines = sText.split(/\r?\n/);
         for (i = 0; i < asLines.length; i++) {
-            //this.dbg.println(asLines[i]);
+            if (!this.parseLine(i + 1, asLines[i])) break;
         }
         return 0;
+    }
+
+    /**
+     * parseLine(nLine, sLine)
+     *
+     * @this {Macro10}
+     * @param {number} nLine (line number)
+     * @param {string} sLine (line contents)
+     * @return {boolean}
+     */
+    parseLine(nLine, sLine)
+    {
+        var reLine = /([A-Z$%.][0-9A-Z$%.]*[:=]|)\s*([^\s;]+|)\s*([^;]+|)\s*(;?.*)/i;
+        var match = sLine.match(reLine);
+        if (!match || match[4] && match[4].slice(0, 1) != ';') {
+            this.warning("failed to parse line " + nLine + ": " + sLine);
+            return false;
+        }
+        var sLabel = match[1];
+        var sOperator = match[2];
+        var sOperands = match[3].trim();
+        var sComment = match[4].slice(1);
+        if (sLabel) {
+            var chSep = sLabel.slice(-1);
+            sLabel = sLabel.slice(0, -1);
+            if (chSep == ':') {
+                this.addLabel(sLabel);
+            } else {
+                this.addVariable(sLabel, sOperands = sOperator + sOperands);
+                sOperator = chSep;
+            }
+        }
+        if (DEBUG) this.println(Str.toDec(nLine, 5) + ": label(" + sLabel + ") operator(" + sOperator + ") operands(" + sOperands + ") comment(" + sComment + ")");
+        return true;
+    }
+
+    /**
+     * warning(sWarning)
+     *
+     * @this {Macro10}
+     * @param {string} sWarning
+     */
+    warning(sWarning)
+    {
+        this.println("warning: " + sWarning);
+    }
+
+    /**
+     * addLabel(sLabel)
+     *
+     * @this {Macro10}
+     * @param {string} sLabel
+     */
+    addLabel(sLabel)
+    {
+    }
+
+    /**
+     * addVariable(sVar, sExp)
+     *
+     * @this {Macro10}
+     * @param {string} sVar
+     * @param {string} sExp
+     */
+    addVariable(sVar, sExp)
+    {
     }
 }
