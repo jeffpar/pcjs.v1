@@ -70,23 +70,41 @@ class Macro10 {
         var macro10 = this;
         Web.getResource(sURL, null, true, function(sURL, sResource, nErrorCode) {
             if (!nErrorCode) {
-                nErrorCode = macro10.parse(sResource);
+                nErrorCode = macro10.parse(sURL, sResource);
             }
             macro10.done(macro10, sURL, nErrorCode);
         });
     }
 
     /**
-     * parse(sResource)
+     * parse(sURL, sResource)
      *
      * Begin the assembly process.
      *
      * @this {Macro10}
+     * @param {string} sURL
      * @param {string} sResource
      * @return {number}
      */
-    parse(sResource) {
-        this.dbg.println("resource length: " + sResource.length);
-        return 999;
+    parse(sURL, sResource)
+    {
+        var match, re;
+        var sText = sResource;
+        if (Str.endsWith(sURL, ".html")) {
+            /*
+             * We want to parse ONLY text between <PRE>...</PRE> tags.
+             */
+            sText = "";
+            re = /<pre>([\s\S]*?)<\/pre>/gi;
+            while (match = re.exec(sResource)) {
+                sText += match[1];
+            }
+        }
+        var i;
+        var asLines = sText.split(/\r?\n/);
+        for (i = 0; i < asLines.length; i++) {
+            //this.dbg.println(asLines[i]);
+        }
+        return 0;
     }
 }

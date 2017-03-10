@@ -2448,6 +2448,7 @@ class DebuggerPDP10 extends Debugger {
      */
     loadAssembly(macro10, addrLoad)
     {
+        this.println("loadAssembly()");
     }
 
     /**
