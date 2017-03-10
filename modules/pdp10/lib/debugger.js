@@ -40,6 +40,7 @@ if (NODE) {
     var BusPDP10 = require("./bus");
     var MemoryPDP10 = require("./memory");
     var MessagesPDP10 = require("./messages");
+    var Macro10 = require("./macro10");
 }
 
 /**
@@ -77,6 +78,7 @@ class DebuggerPDP10 extends Debugger {
      * The DebuggerPDP10 component is an optional component that implements a variety of user
      * commands for controlling the CPU, dumping and editing memory, etc.
      *
+     * @this {DebuggerPDP10}
      * @param {Object} parmsDbg
      */
     constructor(parmsDbg)
@@ -173,6 +175,13 @@ class DebuggerPDP10 extends Debugger {
             this.nCycles = this.nCyclesStart = this.msStart = 0;
             this.controlDebug = null;
             this.panel = null;
+
+            /**
+             * This records any active Macro10 assembler object.
+             *
+             * @type {Macro10|null}
+             */
+            this.macro10 = null;
 
             /*
              * Make it easier to access DebuggerPDP10 commands from an external REPL (eg, the WebStorm
@@ -2431,10 +2440,23 @@ class DebuggerPDP10 extends Debugger {
     }
 
     /**
+     * loadAssembly(macro10, addrLoad)
+     *
+     * @this {DebuggerPDP10}
+     * @param {Macro10} macro10
+     * @param {number|null} addrLoad
+     */
+    loadAssembly(macro10, addrLoad)
+    {
+        this.println("loadAssembly()");
+    }
+
+    /**
      * returnSymbol(iTable, iOffset, aSymbol)
      *
      * Helper function for findSymbol().
      *
+     * @this {DebuggerPDP10}
      * @param {number} iTable
      * @param {number} iOffset
      * @param {Array} aSymbol is updated with the specified symbol, if it exists
@@ -2514,6 +2536,25 @@ class DebuggerPDP10 extends Debugger {
             this.println("begin assemble at " + this.toStrAddr(dbgAddr));
             this.fAssemble = true;
             this.cmp.updateDisplays();
+            return;
+        }
+
+        if (sOpCode.indexOf(':') >= 0) {
+            var dbg = this;
+            if (this.macro10) {
+                dbg.println("assembly already in progress");
+            }
+            else {
+                var addrLoad = dbgAddr.addr;
+                this.macro10 = new Macro10(sOpCode, addrLoad, dbg, function(macro10, sURL, nErrorCode) {
+                    if (!nErrorCode) {
+                        dbg.loadAssembly(macro10, addrLoad);
+                    } else {
+                        dbg.println("error assembling " + sURL + ": (" + nErrorCode + ")");
+                    }
+                    dbg.macro10 = null;
+                });
+            }
             return;
         }
 
@@ -2812,7 +2853,6 @@ class DebuggerPDP10 extends Debugger {
             if (w === undefined) break;
             w = this.validateWord(w);
             this.println("changing " + this.toStrAddr(dbgAddr) + " from " + this.toStrWord(fnGet.call(this, dbgAddr)) + " to " + this.toStrWord(w));
-            //noinspection JSUnresolvedFunction
             fnSet.call(this, dbgAddr, w, 1);
         }
     }

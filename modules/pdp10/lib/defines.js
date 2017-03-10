@@ -275,11 +275,13 @@ var PDP10 = {
 PDP10.APPCLASS          = APPCLASS;
 PDP10.APPNAME           = APPNAME;
 PDP10.DEBUGGER          = DEBUGGER;
+PDP10.SIMH              = SIMH;
 
 if (NODE) {
     global.APPCLASS     = APPCLASS;
     global.APPNAME      = APPNAME;
     global.DEBUGGER     = DEBUGGER;
+    global.SIMH         = SIMH;
     global.PDP10        = PDP10;
     module.exports      = PDP10;
 }

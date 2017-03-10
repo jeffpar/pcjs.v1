@@ -371,7 +371,6 @@ class DiskPDP11 extends Component {
         }
 
         if (this.fnNotify) {
-            //noinspection JSUnresolvedFunction
             this.fnNotify.call(this.controller, this.drive, disk, this.sDiskName, this.sDiskPath);
             this.fnNotify = null;
         }
@@ -591,7 +590,6 @@ class DiskPDP11 extends Component {
         }
 
         if (this.fnNotify) {
-            //noinspection JSUnresolvedFunction
             this.fnNotify.call(this.controllerNotify, this.drive, disk, this.sDiskName, this.sDiskPath);
             this.fnNotify = null;
         }

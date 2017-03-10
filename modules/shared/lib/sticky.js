@@ -127,7 +127,6 @@ function commandMachine(control, fSingle, idMachine, sComponent, sCommand, sValu
             if (exports) {
                 var fnCommand = exports[sCommand];
                 if (fnCommand) {
-                    //noinspection JSUnresolvedFunction
                     if (fnCommand.call(component, sValue)) {
                         if (fSingle) control.disabled = true;
                         return true;

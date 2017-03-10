@@ -2901,11 +2901,9 @@ class CPUStatePDP11 extends CPUPDP11 {
                 data = (data < 0? (this.regsGen[-data-1] & 0xff): data);
                 this.regsGen[reg] = (this.regsGen[reg] & ~writeFlags) | (((data << 24) >> 24) & writeFlags);
             }
-            //noinspection JSUnresolvedFunction
             fnFlags.call(this, data << 8);
         } else {
             var addr = this.getAddr(mode, reg, PDP11.ACCESS.WRITE_BYTE);
-            //noinspection JSUnresolvedFunction
             fnFlags.call(this, (data = data < 0? (this.regsGen[-data-1] & 0xff) : data) << 8);
             this.setByte(addr, data);
             if (addr & 1) this.nStepCycles--;
@@ -2931,11 +2929,9 @@ class CPUStatePDP11 extends CPUPDP11 {
 
         if (!mode) {
             this.regsGen[reg] = (data = data < 0? this.regsGen[-data-1] : data);
-            //noinspection JSUnresolvedFunction
             fnFlags.call(this, data);
         } else {
             var addr = this.getAddr(mode, reg, PDP11.ACCESS.WRITE_WORD);
-            //noinspection JSUnresolvedFunction
             fnFlags.call(this, (data = data < 0? this.regsGen[-data-1] : data));
             this.setWord(addr, data);
         }

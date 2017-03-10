@@ -149,15 +149,20 @@ class Web {
      *
      * Request the specified resource (sURL), and once the request is complete, notify done().
      *
-     * Also, if dataPost is set to a string, that string can be used to control the response format;
+     * If fAsync is true, a done() callback should ALWAYS be supplied; otherwise, you'll have no
+     * idea when the request is complete or what the response was.  done() is passed three parameters:
+     *
+     *      done(sURL, sResource, nErrorCode)
+     *
+     * If nErrorCode is zero, sResource should contain the requested data; otherwise, an error occurred.
+     *
+     * If dataPost is set to a string, that string can be used to control the response format;
      * by default, the response format is plain text, but you can specify "bytes" to request arbitrary
      * binary data, which should come back as a string of bytes.
      *
      * TODO: The "bytes" option works by calling overrideMimeType(), which was never a best practice.
      * Instead, we should implement supported response types ("text" and "arraybuffer", at a minimum)
      * by setting xmlHTTP.responseType to one of those values before calling xmlHTTP.send().
-     *
-     * ES6 ALERT: Default parameters.
      *
      * @param {string} sURL
      * @param {string|Object|null} [dataPost] for a POST request (default is a GET request)

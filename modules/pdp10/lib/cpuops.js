@@ -2341,7 +2341,7 @@ PDP10.opPUSHJ = function(op, acc)
 PDP10.opPUSH = function(op, acc)
 {
     var p = this.readWord(acc);
-    if (!SIMH) {
+    if (!PDP10.SIMH) {
         /*
          * This is the behavior that is clearly documented by DEC.
          */
@@ -6325,7 +6325,7 @@ PDP10.merge72 = function(dst, ext)
     /*
      * Let's assert that the sign bits of both halves match.
      */
-    Component.assert(sign == (dst - (dst % PDP10.INT_LIMIT)), "sign mismatch");
+    this.assert(sign == (dst - (dst % PDP10.INT_LIMIT)), "sign mismatch");
 
     /*
      * Compute value without the sign bit and add the low bit of extended in its place.
