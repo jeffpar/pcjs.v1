@@ -1,12 +1,12 @@
 ---
 layout: page
-title: PDP-10 Tape Software
+title: PDP-10 Software Tapes
 permalink: /apps/pdp10/tapes/
 ---
 
-PDP-10 Tape Software
---------------------
+PDP-10 Software Tapes
+---------------------
 
-PCjs provides the following PDP-10 tape software:
+PCjs has archived the following PDP-10 software from tape:
 
-[PDP-10 Diagnostic Tapes](diags/)
+- [PDP-10 Diagnostic Tapes](diags/)
