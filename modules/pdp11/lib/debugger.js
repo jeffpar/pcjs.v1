@@ -89,7 +89,9 @@ class DebuggerPDP11 extends Debugger {
              * Since this Debugger doesn't use replaceRegs(), we can use parentheses instead of braces.
              */
             this.fInit = false;
-            this.fParens = true;
+
+            this.achGroup = ['(',')'];
+            this.achAddress = [];
 
             /*
              * Most commands that require an address call parseAddr(), which defaults to dbgAddrNextCode

@@ -100,7 +100,9 @@ class Debugger extends Component {
              * Default base used to display all values; modified with the "s base" command.
              */
             this.nBase = +parmsDbg['base'] || 16;
-            this.fParens = false;
+
+            this.achGroup = ['{','}'];
+            this.achAddress = ['[',']'];
 
             /*
              * These keep track of instruction activity, but only when tracing or when Debugger checks
@@ -409,19 +411,19 @@ class Debugger extends Component {
      *      ...
      *
      * We pop 1 "binop" from aOps and 2 values from aVals whenever a "binop" of lower priority than its
-     * predecessor is encountered, evaluate, and push the result back onto aVals.
+     * predecessor is encountered, evaluate, and push the result back onto aVals.  Unary operators like
+     * '~' and ternary operators like '?:' are not supported.
      *
-     * Unary operators like '~' and ternary operators like '?:' are not supported; neither are parentheses.
+     * parseReference() makes it possible to write parenthetical-style sub-expressions by using whatever
+     * characters achGroup contains (default is braces}.  Address references are resolved using the characters
+     * in achAddress (default is brackets).
      *
-     * However, parseReference() now makes it possible to write parenthetical-style sub-expressions by using
-     * {...} (braces), as well as address references by using [...] (brackets).
+     * Why not always use parentheses for sub-expressions?  Because parseReference() serves multiple purposes,
+     * the other being reference replacement in message strings passing through replaceRegs(), and some
+     * Debuggers don't want parentheses taking on a new meaning in message strings.
      *
-     * Why am I using braces instead of parentheses for sub-expressions?  Because parseReference() serves
-     * multiple purposes, the other being reference replacement in message strings passing through replaceRegs(),
-     * and I didn't want parentheses taking on a new meaning in message strings.
-     *
-     * However, a Debugger can override this choice by setting fParens to true, if there's no conflict in its
-     * replaceRegs() implementation.
+     * However, a Debugger can override these choices by modifying achGroup and/or achAddress, if there's no
+     * conflict in its replaceRegs() implementation.
      *
      * @this {Debugger}
      * @param {string|undefined} sExp
@@ -494,8 +496,7 @@ class Debugger extends Component {
      *
      * Returns the given string with any "{expression}" sequences replaced with the value of the expression,
      * and any "[address]" references replaced with the contents of the address.  Expressions are parsed BEFORE
-     * addresses.  Owing to this function's simplistic parsing, nested braces/brackets are not supported
-     * (define intermediate variables if needed).
+     * addresses.
      *
      * @this {Debugger}
      * @param {string} s
@@ -503,17 +504,36 @@ class Debugger extends Component {
      */
     parseReference(s) {
         var a;
-        var chOpen = this.fParens? '(' : '{';
-        var chClose = this.fParens? ')' : '}';
-        var reSubExp = new RegExp(this.fParens? "\\((.*?)\\)" : "\\{(.*?)\\}");
+        var chOpen = this.achGroup[0];
+        var chClose = this.achGroup[1];
+        var chEscape = (chOpen == '(' || chOpen == '{' || chOpen == '[')? '\\' : '';
+        var chInnerEscape = (chOpen == '['? '\\' : '');
+        var reSubExp = new RegExp(chEscape + chOpen + "([^" + chInnerEscape + chOpen + chInnerEscape + chClose + "]+)" + chEscape + chClose);
         while (a = s.match(reSubExp)) {
-            if (a[1].indexOf(chOpen) >= 0) break;       // unsupported nested brace(s)
             var value = this.parseExpression(a[1]);
-            s = s.replace(chOpen + a[1] + chClose, value != null? this.toStrBase(value) : "undefined");
+            var sSearch = chOpen + a[1] + chClose;
+            var sReplace = value != null? this.toStrBase(value) : "undefined";
+            /*
+             * Note that by default, the String replace() method only replaces the FIRST occurrence,
+             * and there MIGHT be more than one occurrence of the expression we just parsed, so we could
+             * do this instead:
+             *
+             *      s = s.split(sSearch).join(sReplace);
+             *
+             * However, that's knd of an expensive (slow) solution, and it's not strictly necessary, since
+             * any additional identical expressions will be picked up on a subsequent iteration through this loop.
+             */
+            s = s.replace(sSearch, sReplace);
         }
-        while (a = s.match(/\[(.*?)]/)) {
-            if (a[1].indexOf('[') >= 0) break;          // unsupported nested bracket(s)
-            s = this.parseAddrReference(s, a[1]);
+        if (this.achAddress.length) {
+            chOpen = this.achAddress[0];
+            chClose = this.achAddress[1];
+            chEscape = (chOpen == '(' || chOpen == '{' || chOpen == '[')? '\\' : '';
+            chInnerEscape = (chOpen == '['? '\\' : '');
+            reSubExp = new RegExp(chEscape + chOpen + "([^" + chInnerEscape + chOpen + chInnerEscape + chClose + "]+)" + chEscape + chClose);
+            while (a = s.match(reSubExp)) {
+                s = this.parseAddrReference(s, a[1]);
+            }
         }
         return this.parseSysVars(s);
     }
@@ -593,6 +613,28 @@ class Debugger extends Component {
         sVar = (sVar != null? (sVar + ": ") : "");
         this.println(sVar + sValue);
         return fDefined;
+    }
+
+    /**
+     * resetVariables()
+     *
+     * @this {Debugger}
+     * @return {Object}
+     */
+    resetVariables() {
+        var a = this.aVariables;
+        this.aVariables = {};
+        return a;
+    }
+
+    /**
+     * restoreVariables(a)
+     *
+     * @this {Debugger}
+     * @param {Object} a (from previous resetVariables() call)
+     */
+    restoreVariables(a) {
+        this.aVariables = a;
     }
 
     /**
