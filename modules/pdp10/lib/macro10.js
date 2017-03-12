@@ -565,7 +565,7 @@ class Macro10 {
     /**
      * genASCII()
      *
-     * Based on the last operator, generate the appropriate ASCII data.
+     * Based on the last operator, generate the appropriate ASCII/ASCIZ/SIXBIT data.
      *
      * @this {Macro10}
      */
@@ -588,6 +588,14 @@ class Macro10 {
              * get zero, so it's all good.
              */
             var c = this.sASCII.charCodeAt(i) & 0o177;
+            /*
+             * If we're doing 6-bit encoding, then perform the conversion of lower-case to upper-case,
+             * and then adjust/mask.
+             */
+            if (bits == 6) {
+                if (c >= 0x61 && c <= 0x7A) c -= 0x20;
+                c = (c + 0o40) & 0o77;
+            }
             w += c * Math.pow(2, shift);
             shift -= bits;
             n++;

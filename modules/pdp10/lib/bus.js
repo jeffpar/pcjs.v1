@@ -594,7 +594,7 @@ class BusPDP10 extends Component {
      *      [iBlock0, [dw0, dw1, ...], iBlock1, [dw0, dw1, ...], ...]
      *
      * In a normal 4Kb block, there will be 1K DWORD values in the data array.  Remember that each DWORD is a signed 32-bit
-     * integer (because they are formed using bit-wise operator rather than floating-point math operators), so don't be
+     * integer (because they are formed using bitwise operator rather than floating-point math operators), so don't be
      * surprised to see negative numbers in the data.
      *
      * The above example assumes "uncompressed" data arrays.  If we choose to use "compressed" data arrays, the data arrays

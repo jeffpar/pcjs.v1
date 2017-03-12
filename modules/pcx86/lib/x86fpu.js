@@ -1530,7 +1530,7 @@ class X86FPU extends Component {
      * might exist.  That test code can be resurrected from the repo; this code is being retained for future tests.
      *
      * NOTE: If either min or max is a value containing 32 or more significant bits AND bit 31 is set AND it has passed
-     * through some bit-wise operation(s), then that value may end up being negative, so you may end up with an inverted
+     * through some bitwise operation(s), then that value may end up being negative, so you may end up with an inverted
      * range, or a range that's smaller or larger than intended.
      *
      * @this {X86FPU}

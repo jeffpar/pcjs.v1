@@ -678,7 +678,7 @@ X86.fnDIVw = function(dst, src)
          * Detect too-small divisor (quotient overflow)
          *
          * WARNING: We CANNOT simply do "src = (this.regEDX << 16) | this.regEAX", because if bit 15 of DX
-         * is set, JavaScript will create a negative 32-bit number.  So we instead use non-bit-wise operators
+         * is set, JavaScript will create a negative 32-bit number.  So we instead use non-bitwise operators
          * to force JavaScript to create a floating-point value that won't suffer from 32-bit-math side-effects.
          */
         src = (this.regEDX & 0xffff) * 0x10000 + (this.regEAX & 0xffff);
