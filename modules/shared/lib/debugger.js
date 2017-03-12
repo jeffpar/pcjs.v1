@@ -101,6 +101,12 @@ class Debugger extends Component {
              */
             this.nBase = +parmsDbg['base'] || 16;
 
+            /*
+             * Default number of bits of integer precision; it can be overridden by the Debugger
+             * but there is no command to adjust it.
+             */
+            this.nBits = 32;
+
             this.achGroup = ['{','}'];
             this.achAddress = ['[',']'];
 
@@ -298,13 +304,99 @@ class Debugger extends Component {
     }
 
     /**
-     * evalExpression(aVals, aOps, cOps)
+     * evalAND(dst, src)
      *
-     * In Node, if you set a variable to 0x80000001; ie:
+     * Adapted from /modules/pdp10/lib/cpuops.js:PDP10.AND().
+     *
+     * Performs the bitwise "and" (AND) of two operands > 32 bits.
+     *
+     * @this {Debugger}
+     * @param {number} dst
+     * @param {number} src
+     * @return {number} (dst & src)
+     */
+    evalAND(dst, src)
+    {
+        /*
+         * We AND the low 32 bits separately from the higher bits, and then combine them with addition.
+         * Since all bits above 32 will be zero, and since 0 AND 0 is 0, no special masking for the higher
+         * bits is required.
+         *
+         * WARNING: When using JavaScript's 32-bit operators with values that could set bit 31 and produce a
+         * negative value, it's critical to perform a final right-shift of 0, ensuring that the final result is
+         * positive.
+         */
+        if (this.nBits <= 32) {
+            return dst & src;
+        }
+        return ((((dst / Debugger.TWO_POW32)|0) & ((src / Debugger.TWO_POW32)|0)) * Debugger.TWO_POW32) + ((dst & src) >>> 0);
+    }
+
+    /**
+     * evalIOR(dst, src)
+     *
+     * Adapted from /modules/pdp10/lib/cpuops.js:PDP10.IOR().
+     *
+     * Performs the logical "inclusive-or" (OR) of two operands > 32 bits.
+     *
+     * @this {Debugger}
+     * @param {number} dst
+     * @param {number} src
+     * @return {number} (dst | src)
+     */
+    evalIOR(dst, src)
+    {
+        /*
+         * We OR the low 32 bits separately from the higher bits, and then combine them with addition.
+         * Since all bits above 32 will be zero, and since 0 OR 0 is 0, no special masking for the higher
+         * bits is required.
+         *
+         * WARNING: When using JavaScript's 32-bit operators with values that could set bit 31 and produce a
+         * negative value, it's critical to perform a final right-shift of 0, ensuring that the final result is
+         * positive.
+         */
+        if (this.nBits <= 32) {
+            return dst | src;
+        }
+        return ((((dst / Debugger.TWO_POW32)|0) | ((src / Debugger.TWO_POW32)|0)) * Debugger.TWO_POW32) + ((dst | src) >>> 0);
+    }
+
+    /**
+     * truncate(v)
+     *
+     * @this {Debugger}
+     * @param {number} v
+     * @return {number}
+     */
+    truncate(v)
+    {
+        if (this.nBits <= 32) {
+            v = v|0;
+        } else {
+            var limit = Math.pow(2, this.nBits-1);
+            if (v < -limit || v >= limit) {
+                var vNew = v % limit;
+                if (DEBUG) this.println("warning: value " + v + " truncated to " + vNew);
+                v = vNew;
+            }
+        }
+        return v;
+    }
+
+    /**
+     * evalOps(aVals, aOps, cOps)
+     *
+     * Some of our clients want a specific number of bits of integer precision.  If that precision is
+     * greater than 32, some of the operations below will fail; for example, JavaScript bitwise operators
+     * always truncate the result to 32 bits, so beware when using shift operations.  Similarly, it would
+     * be wrong to always "|0" the final result, which is why we rely on truncate() now.
+     *
+     * Note that JavaScript integer precision is limited to 52 bits.  For example, in Node, if you set a
+     * variable to 0x80000001:
      *
      *      foo=0x80000001|0
      *
-     * and then calculate foo*foo using "(foo*foo).toString(2)", the result is:
+     * then calculate foo*foo and display the result in binary using "(foo*foo).toString(2)":
      *
      *      '11111111111111111111111111111100000000000000000000000000000000'
      *
@@ -315,11 +407,10 @@ class Debugger extends Component {
      * @this {Debugger}
      * @param {Array.<number>} aVals
      * @param {Array.<string>} aOps
-     * @param {number} [cOps] (default is all)
+     * @param {number} [cOps] (default is -1 for all)
      * @return {boolean} true if successful, false if error
      */
-    evalExpression(aVals, aOps, cOps) {
-        cOps = cOps || -1;
+    evalOps(aVals, aOps, cOps = -1) {
         while (cOps-- && aOps.length) {
             var chOp = aOps.pop();
             if (aVals.length < 2) return false;
@@ -372,13 +463,14 @@ class Debugger extends Component {
                 valNew = (val1 != val2? 1 : 0);
                 break;
             case '&':
-                valNew = val1 & val2;
+                valNew = this.evalAND(val1, val2);
                 break;
-            case '^':
-                valNew = val1 ^ val2;
-                break;
+            case '!':           // alias for MACRO-10 to perform a bitwise inclusive-or (OR)
             case '|':
-                valNew = val1 | val2;
+                valNew = this.evalIOR(val1, val2);
+                break;
+            case '^^':          // since MACRO-10 uses '^' for base overrides, you must now use '^^' for bitwise exclusive-or (XOR)
+                valNew = val1 ^ val2;
                 break;
             case '&&':
                 valNew = (val1 && val2? 1 : 0);
@@ -389,7 +481,7 @@ class Debugger extends Component {
             default:
                 return false;
             }
-            aVals.push(valNew|0);
+            aVals.push(this.truncate(valNew));
         }
         return true;
     }
@@ -433,26 +525,37 @@ class Debugger extends Component {
     parseExpression(sExp, fPrint) {
         var value;
 
-        if (sExp) {
-            /*
-             * First process (and eliminate) any references, aka sub-expressions.
-             */
-            sExp = this.parseReference(sExp);
+        /*
+         * First process (and eliminate) any references, aka sub-expressions.
+         */
+        if (sExp) sExp = this.parseReference(sExp);
 
+        if (sExp) {
             var i = 0;
             var fError = false;
             var sExpOrig = sExp;
             var aVals = [], aOps = [];
             /*
-             * All browsers (including, I believe, IE9 and up) support the following idiosyncrasy of a regexp split():
-             * when the regexp uses a capturing pattern, the resulting array will include entries for all the pattern
+             * All browsers (including, I believe, IE9 and up) support the following idiosyncrasy of a RegExp split():
+             * when the RegExp uses a capturing pattern, the resulting array will include entries for all the pattern
              * matches along with the non-matches.  This effectively means that, in the set of expressions that we
              * support, all even entries in asValues will contain "values" and all odd entries will contain "operators".
              *
-             * And although I tried to list the supported operators in "precedential" order, bitwise operators must
-             * be out-of-order so that we don't mistakenly match either '>' or '<' when they're part of '>>' or '<<'.
+             * Although I starting listing the operators in the RegExp in "precedential" order, that's not important;
+             * what IS important is listing operators than contain shorter operators first.  For example, bitwise
+             * shift operators must be listed BEFORE the logical less-than or greater-than operators.
+             *
+             * Finally, to better accommodate MACRO-10 syntax, I've replaced the single '^' for XOR with '^^', since
+             * MACRO-10 uses prefixes like "^D", "^O" and "^B" with numeric constants to indicate a base override, and
+             * I've added '!' as an alias for '|' to perform bitwise inclusive-or.
+             *
+             * MACRO-10 supports only a subset of all the PCjs operators; for example, MACRO-10 doesn't support bitwise
+             * exclusive-or, shift operators, or any of the boolean logical/compare operators.  But unless we run into
+             * conflicts, I prefer sticking with this common set of operators.
+             *
+             * WARNING: Whenever you make changes to this RegExp, make sure you update aBinOpPrecedence as needed, too.
              */
-            var regExp = /(\|\||&&|\||^|&|!=|==|>=|>>>|>>|>|<=|<<|<|-|\+|%|\/|\*)/;
+            var regExp = /(\|\||&&|\||^^|&|!=|!|==|>=|>>>|>>|>|<=|<<|<|-|\+|%|\/|\*)/;
             var asValues = sExp.split(regExp);
             while (i < asValues.length) {
                 var sValue = asValues[i++];
@@ -473,12 +576,12 @@ class Debugger extends Component {
                 var sOp = asValues[i++], cchOp = sOp.length;
                 this.assert(Debugger.aBinOpPrecedence[sOp] != null);
                 if (aOps.length && Debugger.aBinOpPrecedence[sOp] < Debugger.aBinOpPrecedence[aOps[aOps.length-1]]) {
-                    this.evalExpression(aVals, aOps, 1);
+                    this.evalOps(aVals, aOps, 1);
                 }
                 aOps.push(sOp);
                 sExp = sExp.substr(cchValue + cchOp);
             }
-            if (!this.evalExpression(aVals, aOps) || aVals.length != 1) {
+            if (!this.evalOps(aVals, aOps) || aVals.length != 1) {
                 fError = true;
             }
             if (!fError) {
@@ -500,7 +603,7 @@ class Debugger extends Component {
      *
      * @this {Debugger}
      * @param {string} s
-     * @return {string}
+     * @return {string|undefined}
      */
     parseReference(s) {
         var a;
@@ -511,6 +614,7 @@ class Debugger extends Component {
         var reSubExp = new RegExp(chEscape + chOpen + "([^" + chInnerEscape + chOpen + chInnerEscape + chClose + "]+)" + chEscape + chClose);
         while (a = s.match(reSubExp)) {
             var value = this.parseExpression(a[1]);
+            if (value === undefined) return undefined;
             var sSearch = chOpen + a[1] + chClose;
             var sReplace = value != null? this.toStrBase(value) : "undefined";
             /*
@@ -693,17 +797,8 @@ class Debugger extends Component {
      *
      * Use this instead of Str's toOct()/toDec()/toHex() to convert numbers to the Debugger's default base.
      *
-     * TODO: The 32-bit limitation on n is imposed by the Str functions we call, not us.  Consider modifying
-     * those functions to support a higher number of bits (eg, 36), using arithmetic operators instead of bit-wise
-     * operators, and increasing the maximum number of supported bits to at least 52, while still using JavaScript
-     * floating-point numbers as the underlying data type.
-     *
-     * For now, the only component that really cares about supporting more than 32 bits (eg, 36 bits) is the PDP-10
-     * Debugger, which currently uses its own functions (eg, toStrWord()) to divide quantities into smaller (eg, 18-bit)
-     * values.
-     *
      * @this {Debugger}
-     * @param {number|null|undefined} n (interpreted as a 32-bit value)
+     * @param {number|null|undefined} n
      * @param {number} [nBits] (-1 to strip leading zeros, 0 to allow a variable number of digits)
      * @return {string}
      */
@@ -733,8 +828,9 @@ if (DEBUGGER) {
     Debugger.aBinOpPrecedence = {
         '||':   0,      // logical OR
         '&&':   1,      // logical AND
+        '!':    2,      // bitwise OR
         '|':    2,      // bitwise OR
-        '^':    3,      // bitwise XOR
+        '^^':   3,      // bitwise XOR
         '&':    4,      // bitwise AND
         '!=':   5,      // inequality
         '==':   5,      // equality
@@ -751,6 +847,11 @@ if (DEBUGGER) {
         '/':    9,      // division
         '*':    9       // multiplication
     };
+
+    /*
+     * Assorted constants
+     */
+    Debugger.TWO_POW32 = Math.pow(2, 32);
 
 }   // endif DEBUGGER
 

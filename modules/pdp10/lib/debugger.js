@@ -93,6 +93,7 @@ class DebuggerPDP10 extends Debugger {
             this.fInit = false;
             this.nBusWidth = 18;        // default value, updated by initBus()
 
+            this.nBits = 36;            // default integer precision
             this.achGroup = ['<','>'];
             this.achAddress = [];
 
