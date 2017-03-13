@@ -233,36 +233,39 @@ class Macro10 {
         this.sOperator = sOperator;
         sOperands = sOperands.trim();
 
-        switch(sOperator) {
-        case "":
-            break;                      // eg, a blank line or a line that contains only a label and/or a comment
+        if (!this.parseMacro(sOperator, sOperands)) {
 
-        case "=":
-            this.addAssign(sLabel, sOperands);
-            break;
+            switch (sOperator) {
+            case "":
+                break;                      // eg, a blank line or a line that contains only a label and/or a comment
 
-        case Macro10.PSEUDO_OP.ASCII:
-        case Macro10.PSEUDO_OP.ASCIZ:
-        case Macro10.PSEUDO_OP.SIXBIT:
-            this.addASCII(sOperands);
-            break;
+            case "=":
+                this.addAssign(sLabel, sOperands);
+                break;
 
-        case Macro10.PSEUDO_OP.DEFINE:
-        case Macro10.PSEUDO_OP.IFE:
-        case Macro10.PSEUDO_OP.REPEAT:
-            this.addMacro(sOperator, sOperands);
-            break;
+            case Macro10.PSEUDO_OP.ASCII:
+            case Macro10.PSEUDO_OP.ASCIZ:
+            case Macro10.PSEUDO_OP.SIXBIT:
+                this.addASCII(sOperands);
+                break;
 
-        case Macro10.PSEUDO_OP.PAGE:    // TODO
-        case Macro10.PSEUDO_OP.SUBTTL:  // TODO
-            break;
+            case Macro10.PSEUDO_OP.DEFINE:
+            case Macro10.PSEUDO_OP.IFE:
+            case Macro10.PSEUDO_OP.REPEAT:
+                this.addMacro(sOperator, sOperands);
+                break;
 
-        default:
-            if (DEBUG) this.println(Str.toDec(this.nLine, 5) + ": label(" + sLabel + ") operator(" + sOperator + ") operands(" + sOperands + ") comment(" + sComment + ")");
-            break;
+            case Macro10.PSEUDO_OP.PAGE:    // TODO
+            case Macro10.PSEUDO_OP.SUBTTL:  // TODO
+                break;
+
+            default:
+                if (DEBUG) this.println(Str.toDec(this.nLine, 5) + ": label(" + sLabel + ") operator(" + sOperator + ") operands(" + sOperands + ") comment(" + sComment + ")");
+                break;
+            }
         }
 
-        if (this.nLine >= 330) {
+        if (this.nLine >= 820) {
             this.dbg.printVariable();
             this.error("temporary line limit reached");
             return false;
@@ -271,18 +274,42 @@ class Macro10 {
     }
 
     /**
-     * parseMacro()
+     * parseMacro(name, sOperands)
      *
      * @this {Macro10}
+     * @param {string} name
+     * @param {string} [sOperands]
+     * @return {boolean}
      */
-    parseMacro()
+    parseMacro(name, sOperands)
     {
-        if (!this.sMacroDef) return;
+        var macro = this.tblMacros[name];
+        if (!macro) return false;
 
-        var macro = this.tblMacros[this.sMacroDef];
-        var sOperator = this.sMacroDef[0] == '@'? this.sMacroDef.substr(1) : this.sOperator;
+        if (sOperands != null) {
+            /*
+             * Process this macro call; start by extracting macro argument values from sOperands.
+             */
+            var aValues = [];
+            var sDelims = ',';
+            if (sOperands[0] == '(') {
+                sDelims += ')';
+                sOperands = sOperands.substr(1);
+            }
+            while (sOperands) {
+                sOperands = sOperands.trim();
+                var sExp = this.getExpression(sOperands, sDelims);
+                if (!sExp) break;
+                aValues.push(sExp);
+                sOperands = sOperands.substr(sExp.length + 1);
+            }
+            this.parseText(macro.sText, macro.aParms, aValues);
+            return true;
+        }
 
-        switch(sOperator) {
+        if (name[0] != '@') return false;
+
+        switch(name.substr(1)) {
         case Macro10.PSEUDO_OP.IFE:
             if (!macro.nOperand) {
                 this.parseText(macro.sText);
@@ -294,20 +321,56 @@ class Macro10 {
                 this.parseText(macro.sText);
             }
             break;
+
+        default:
+            return false;
         }
+        return true;
     }
 
     /**
-     * parseText(sText)
+     * isSymbolChar(ch)
+     *
+     * @this {Macro10}
+     * @param {string} ch
+     * @return {boolean}
+     */
+    isSymbolChar(ch)
+    {
+        return !!ch.match(/[0-9A-Z$%.]/i);
+    }
+
+    /**
+     * parseText(sText, aParms, aValues)
      *
      * @this {Macro10}
      * @param {string} sText
+     * @param {Array.<string>} [aParms]
+     * @param {Array.<string>} [aValues]
      */
-    parseText(sText)
+    parseText(sText, aParms, aValues)
     {
         var asLines = sText.split(/\r?\n/);
-        for (var i = 0; i < asLines.length; i++) {
-            if (!this.parseLine(asLines[i] + '\r\n')) break;
+        for (var iLine = 0; iLine < asLines.length; iLine++) {
+            var sLine = asLines[iLine] + '\r\n';
+            if (aParms) {
+                for (var iParm = 0; iParm < aParms.length; iParm++) {
+                    var sParm = aParms[iParm];
+                    var sReplace = aValues[iParm] || "";
+                    var iSearch = 0;
+                    while (true) {
+                        var iMatch = sLine.indexOf(sParm, iSearch);
+                        if (iMatch < 0) break;
+                        iSearch = iMatch + 1;
+                        var iMatchEnd = iMatch + sParm.length;
+                        if ((!iMatch || !this.isSymbolChar(sLine[iMatch - 1])) && (iMatchEnd >= sLine.length || !this.isSymbolChar(sLine[iMatchEnd]))) {
+                            sLine = sLine.substr(0, iMatch) + sReplace + sLine.substr(iMatchEnd);
+                            iSearch = iMatch + sReplace.length;
+                        }
+                    }
+                }
+            }
+            if (!this.parseLine(sLine)) break;
         }
     }
 
@@ -334,24 +397,22 @@ class Macro10 {
     }
 
     /**
-     * getExpression(sInput, chDelim)
+     * getExpression(sInput, sDelims)
      *
      * @this {Macro10}
      * @param {string} sInput
-     * @param {string} [chDelim]
+     * @param {string} [sDelims]
      * @return {string|null} (if the input string begins with an expression, return it)
      */
-    getExpression(sInput, chDelim)
+    getExpression(sInput, sDelims = "")
     {
+        var i = 0;
         var sExp = null;
         var cNesting = 0;
-        for (var i = 0; i < sInput.length; i++) {
+        while (i < sInput.length) {
             var ch = sInput[i];
-            if (ch == chDelim) {
-                if (!cNesting) {
-                    sExp = sInput.substr(0, i);
-                    break;
-                }
+            if (sDelims.indexOf(ch) >= 0) {
+                break;
             }
             if (ch == '<') {
                 cNesting++;
@@ -361,6 +422,13 @@ class Macro10 {
                     break;
                 }
             }
+            i++;
+        }
+        if (!cNesting) {
+            sExp = sInput.substr(0, i);
+        }
+        else if (cNesting > 0) {
+            this.error("extra angle bracket(s): " + sInput);
         }
         return sExp;
     }
@@ -448,7 +516,7 @@ class Macro10 {
      */
     addMacro(sOperator, sOperands)
     {
-        var match, name, aParms, nOperand, iDelim;
+        var match, name, aParms, nOperand, iBracket;
 
         if (sOperator == Macro10.PSEUDO_OP.DEFINE) {
             match = sOperands.match(/([A-Z$%.][0-9A-Z$%.]*)\s*(\([^)]*\)|)\s*(<|)(.*)/i);
@@ -464,7 +532,7 @@ class Macro10 {
             name = match[1];
             aParms = match[2].match(/[A-Z$%.][0-9A-Z$%.]*/g);
             nOperand = -1;
-            iDelim = 3;
+            iBracket = 3;
         } else {
             var sExp = this.getExpression(sOperands, ',');
             if (!sExp) {
@@ -477,7 +545,7 @@ class Macro10 {
             name = '@' + sOperator;
             aParms = [];
             nOperand = this.dbg.parseExpression(sExp);
-            iDelim = 1;
+            iBracket = 1;
         }
 
         /*
@@ -485,25 +553,31 @@ class Macro10 {
          * subsequent lines (1), the definition has already started on the current line (2), or the definition
          * started and ended on the current line (0).
          */
+        name = name.toUpperCase();
         this.nMacroDef = 1;
-        this.sMacroDef = name;
 
         var sText = "";
-        if (match[iDelim]) {                    // if there IS an angle bracket...
+        if (match[iBracket]) {                  // if there IS an angle bracket...
             this.nMacroDef = 2;                 // then the macro definition has begun
-            sText = match[iDelim + 1];
+            sText = match[iBracket + 1];
             if (sText.slice(-1) == '>') {       // and if there is ALSO a closing angle bracket...
                 this.nMacroDef = 0;             // the macro definition has also ended
                 sText = sText.slice(0, -1);
             }
         }
+
         this.tblMacros[name] = {
             name:     name,
             aParms:   aParms,
             nOperand: nOperand,
             sText:    sText
         };
-        if (!this.nMacroDef) this.parseMacro();
+
+        if (!this.nMacroDef) {
+            this.parseMacro(name);
+        } else {
+            this.sMacroDef = name;
+        }
     }
 
     /**
@@ -529,9 +603,12 @@ class Macro10 {
                 }
             }
         }
-        var macro = this.tblMacros[this.sMacroDef];
-        macro.sText += sLine;
-        if (!this.nMacroDef) this.parseMacro();
+        var name = this.sMacroDef || "";
+        this.tblMacros[name].sText += sLine;
+        if (!this.nMacroDef) {
+            this.sMacroDef = null;
+            this.parseMacro(name);
+        }
         return sRemain;
     }
 
