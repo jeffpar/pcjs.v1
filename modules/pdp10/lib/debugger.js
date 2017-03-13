@@ -1547,11 +1547,15 @@ class DebuggerPDP10 extends Debugger {
                 } else {
                     n = (opCode >> PDP10.OPCODE.A_SHIFT) & PDP10.OPCODE.A_MASK;
                     sOperand = this.toStrBase(n, -1);
-                    if (opNum == DebuggerPDP10.OPS.JFCL) {
-                        var opAlt = DebuggerPDP10.JFCL[n];
-                        if (opAlt) {
-                            sOperation = DebuggerPDP10.OPNAMES[opAlt];
-                            sOperand = "";
+                    if (n) {
+                        for (var m = 0; m < DebuggerPDP10.ALTOPS.length; m++) {
+                            if (opNum == DebuggerPDP10.ALTOPS[m][0]) {
+                                var opAlt = DebuggerPDP10.ALTOPS[m][n];
+                                if (opAlt) {
+                                    sOperation = DebuggerPDP10.OPNAMES[opAlt];
+                                    sOperand = "";
+                                }
+                            }
                         }
                     }
                 }
@@ -1582,17 +1586,17 @@ class DebuggerPDP10 extends Debugger {
         var opCode = this.getWord(dbgAddr, 1);
         var sOperation = this.findInstruction(opCode);
 
-        var sOpCodes = "";
+        var sOpcodes = "";
         var sLine = this.toStrAddr(dbgAddrOp) + ":";
         if (dbgAddrOp.addr !== PDP10.ADDR_INVALID && dbgAddr.addr !== PDP10.ADDR_INVALID) {
             do {
                 var w = this.getWord(dbgAddrOp, 1);
-                sOpCodes += ' ' + this.toStrWord(w);
+                sOpcodes += ' ' + this.toStrWord(w);
                 if (dbgAddrOp.addr == null) break;
             } while (dbgAddrOp.addr != dbgAddr.addr);
         }
 
-        sLine += Str.pad(sOpCodes, 16) + sOperation;
+        sLine += Str.pad(sOpcodes, 16) + sOperation;
 
         if (sComment) {
             sLine = Str.pad(sLine, 48) + ';' + (sComment || "");
@@ -1607,28 +1611,31 @@ class DebuggerPDP10 extends Debugger {
     }
 
     /**
-     * parseInstruction(sOpCode, sOperands, dbgAddr)
+     * parseInstruction(sOpcode, sOperands, addr)
      *
      * @this {DebuggerPDP10}
-     * @param {string} sOpCode
-     * @param {string|undefined} sOperands
-     * @param {DbgAddrPDP10} dbgAddr of memory where this instruction is being assembled
+     * @param {string} sOpcode
+     * @param {string} [sOperands]
+     * @param {number} [addr] of memory where this instruction is being assembled
      * @return {number} (opcode, or -1 if unrecognized instruction)
      */
-    parseInstruction(sOpCode, sOperands, dbgAddr)
+    parseInstruction(sOpcode, sOperands, addr)
     {
         var opCode = -1, opMask, opNum;
-        var sMnemonic = sOpCode.toUpperCase();
+        var sMnemonic = sOpcode.toUpperCase();
 
         /*
          * Perform any alternate mnemonic substitutions first
          */
-        for (var n in DebuggerPDP10.JFCL) {
-            opNum = DebuggerPDP10.JFCL[n];
-            if (sMnemonic == DebuggerPDP10.OPNAMES[opNum]) {
-                sMnemonic = DebuggerPDP10.OPNAMES[DebuggerPDP10.OPS.JFCL];
-                sOperands = this.toStrBase(+n) + ',' + sOperands;
-                break;
+        for (var m = 0; m < DebuggerPDP10.ALTOPS.length; m++) {
+            for (var n in DebuggerPDP10.ALTOPS[m]) {
+                if (!+n) continue;
+                opNum = DebuggerPDP10.ALTOPS[m][n];
+                if (sMnemonic == DebuggerPDP10.OPNAMES[opNum]) {
+                    sMnemonic = DebuggerPDP10.OPNAMES[DebuggerPDP10.ALTOPS[m][0]];
+                    if (sOperands) sOperands = this.toStrBase(+n) + ',' + sOperands;
+                    break;
+                }
             }
         }
 
@@ -1679,11 +1686,7 @@ class DebuggerPDP10 extends Debugger {
         }
 
         if (opCode >= 0) {
-            if (!sOperands) {
-                this.println("missing operand(s)");
-                opCode = -1;
-            }
-            else {
+            if (sOperands) {
                 var aOperands = sOperands.split(',');
                 for (var i = 0; i < aOperands.length; i++) {
                     var sOperand = aOperands[i].trim();
@@ -1705,7 +1708,7 @@ class DebuggerPDP10 extends Debugger {
                          * If this is NOT the first operand, then replace all periods NOT preceded
                          * by a digit with the current address.
                          */
-                        sOperand = sOperand.replace(/(^|[^0-9])\./g, "$1" + this.toStrAddr(dbgAddr));
+                        sOperand = sOperand.replace(/(^|[^0-9])\./g, "$1" + this.toStrOffset(addr));
                     }
                     var operand = this.parseExpression(sOperand);
                     if (operand == undefined) {
@@ -1756,9 +1759,16 @@ class DebuggerPDP10 extends Debugger {
                     }
                 }
             }
+            //
+            // TODO: Complain about missing operands only if we know the instruction requires them.
+            //
+            // else {
+            //     this.println("missing operand(s)");
+            //     opCode = -1;
+            // }
         }
-        else {
-            this.println("unknown instruction: " + sOpCode);
+        else if (sOperands != null) {
+            this.println("unknown instruction: " + sOpcode + ' ' + sOperands);
         }
         return opCode;
     }
@@ -2533,23 +2543,23 @@ class DebuggerPDP10 extends Debugger {
         var dbgAddr = this.parseAddr(asArgs[1], this.dbgAddrAssemble);
         if (!dbgAddr) return;
 
-        var sOpCode = asArgs[2];
+        var sOpcode = asArgs[2];
 
-        if (sOpCode == undefined) {
+        if (sOpcode == undefined) {
             this.println("begin assemble at " + this.toStrAddr(dbgAddr));
             this.fAssemble = true;
             this.cmp.updateDisplays();
             return;
         }
 
-        if (sOpCode.indexOf(':') >= 0) {
+        if (sOpcode.indexOf(':') >= 0) {
             var dbg = this;
             if (this.macro10) {
                 dbg.println("assembly already in progress");
             }
             else {
                 var addrLoad = dbgAddr.addr;
-                this.macro10 = new Macro10(sOpCode, addrLoad, dbg, function(macro10, sURL, nErrorCode) {
+                this.macro10 = new Macro10(sOpcode, addrLoad, dbg, function(macro10, sURL, nErrorCode) {
                     if (!nErrorCode) {
                         dbg.loadAssembly(macro10, addrLoad);
                     } else {
@@ -2565,7 +2575,7 @@ class DebuggerPDP10 extends Debugger {
         asArgs.shift();
         asArgs.shift();
         var sOperands = asArgs.join("");
-        var opCode = this.parseInstruction(sOpCode, sOperands, dbgAddr);
+        var opCode = this.parseInstruction(sOpcode, sOperands, dbgAddr.addr || 0);
 
         if (opCode >= 0) {
             this.setWord(dbgAddr, opCode);
@@ -3921,7 +3931,8 @@ if (DEBUGGER) {
         BLKI:   93,     DATAI:  94,     BLKO:   95,     DATAO:  96,
         CONO:   97,     CONI:   98,     CONSZ:  99,     CONSO:  100,
         UUO:    101,    JOV:    102,    JCRY0:  103,    JCRY1:  104,
-        JCRY:   105,    JFOV:   106
+        JCRY:   105,    JFOV:   106,    HALT:   107,    JRSTF:  108,
+        JEN:    109
     };
 
     /*
@@ -3955,7 +3966,8 @@ if (DEBUGGER) {
         "BLKI",         "DATAI",        "BLKO",         "DATAO",
         "CONO",         "CONI",         "CONSZ",        "CONSO",
         "UUO",          "JOV",          "JCRY0",        "JCRY1",
-        "JCRY",         "JFOV"
+        "JCRY",         "JFOV",         "HALT",         'JRSTF',
+        "JEN"
     ];
 
     DebuggerPDP10.REGS = {
@@ -4101,17 +4113,27 @@ if (DEBUGGER) {
 
     /*
      * Apparently, DEC's MACRO program permits "JFCL xxx" (with a single argument) as an alternate for "JFCL 0,xxx"
-     * (which in turn is long-hand for "No-op", since JFCL with 0 does nothing).  If we allowed JFCL to be both a
-     * primary and a alternate mnemonic, that would complicate our simplistic parseInstruction() logic, so we don't.
+     * (which in turn is long-hand for "No-op", since JFCL with 0 does nothing).
      */
     DebuggerPDP10.JFCL = {
-    //  0o00:    DebuggerPDP10.OPS.JFCL,
+        0o00:    DebuggerPDP10.OPS.JFCL,
         0o10:    DebuggerPDP10.OPS.JOV,
         0o04:    DebuggerPDP10.OPS.JCRY0,
         0o02:    DebuggerPDP10.OPS.JCRY1,
         0o06:    DebuggerPDP10.OPS.JCRY,
         0o01:    DebuggerPDP10.OPS.JFOV
     };
+
+    DebuggerPDP10.JRST = {
+        0o00:    DebuggerPDP10.OPS.JRST,
+        0o04:    DebuggerPDP10.OPS.HALT,
+        0o02:    DebuggerPDP10.OPS.JRSTF,
+        0o12:    DebuggerPDP10.OPS.JEN
+    };
+
+    DebuggerPDP10.ALTOPS = [
+        DebuggerPDP10.JFCL, DebuggerPDP10.JRST
+    ];
 
     DebuggerPDP10.HISTORY_LIMIT = DEBUG? 100000 : 1000;
 
