@@ -44,7 +44,7 @@ if (NODE) {
  *      sText:(string)
  * }}
  */
-var Macro;
+var Mac;
 
 /**
  * @typedef {{
@@ -100,6 +100,19 @@ class Macro10 {
 
         /*
          * Initialize all the tables that MACRO-10 uses.
+         *
+         * The Macros and Symbols tables are fairly straightforward: they are indexed by a macro or symbol
+         * name, and each index points to a Mac or Sym object, respectively.
+         *
+         * We also treat REPEAT blocks and conditional (eg, IFE) blocks like macros, except that they are
+         * anonymous and immediately invoked as appropriate.  What does that mean?  Well, REPEAT blocks are
+         * always immediately invoked (repeatedly, based on the repeat count), whereas conditional blocks are
+         * either immediately invoked if the associated condition is true or skipped if the condition is false.
+         *
+         * Finally, we have LITERAL blocks, which are also semi-anonymous (because we give each one an
+         * auto-generated label based on the current line number), but they are never immediately invoked;
+         * instead, after we've finished processing all the lines in the original input file, we run through
+         * all the LITERAL entries in the Macros table and process the associated statement(s).
          */
         this.tblMacros = {};
         this.tblSymbols = {};
@@ -111,6 +124,7 @@ class Macro10 {
         this.sOperator = null;          // the active operator, if any
         this.nMacroDef = 0;             // the active MACRO definition state
         this.sMacroDef = null;          // the active MACRO definition name
+        this.chMacroOpen = this.chMacroClose = '';
 
         /*
          * If an ASCII/ASCIZ/SIXBIT pseudo-op is active, chASCII is set to the separator and sASCII collects
@@ -190,7 +204,7 @@ class Macro10 {
     {
         if (this.nMacroDef) {
             if (this.nMacroDef == 1) {
-                var i = sLine.indexOf('<');
+                var i = sLine.indexOf(this.chMacroOpen);
                 if (i >= 0) {
                     this.nMacroDef++;
                     sLine = sLine.substr(i+1);
@@ -232,6 +246,14 @@ class Macro10 {
 
         this.sOperator = sOperator;
         sOperands = sOperands.trim();
+
+        /*
+         * Check the operands for a literal.
+         */
+        var sLiteral = this.getLiteral(sOperands);
+        if (sLiteral) {
+            sOperands = sOperands.replace(sLiteral, this.addMacro(Macro10.PSEUDO_OP.LITERAL, sLiteral));
+        }
 
         if (!this.parseMacro(sOperator, sOperands)) {
 
@@ -397,20 +419,20 @@ class Macro10 {
     }
 
     /**
-     * getExpression(sInput, sDelims)
+     * getExpression(sOperands, sDelims)
      *
      * @this {Macro10}
-     * @param {string} sInput
-     * @param {string} [sDelims]
-     * @return {string|null} (if the input string begins with an expression, return it)
+     * @param {string} sOperands
+     * @param {string} [sDelims] (eg, comma, closing parenthesis)
+     * @return {string|null} (if the operands begin with an expression, return it)
      */
-    getExpression(sInput, sDelims = "")
+    getExpression(sOperands, sDelims = ",")
     {
         var i = 0;
         var sExp = null;
         var cNesting = 0;
-        while (i < sInput.length) {
-            var ch = sInput[i];
+        while (i < sOperands.length) {
+            var ch = sOperands[i];
             if (sDelims.indexOf(ch) >= 0) {
                 break;
             }
@@ -418,19 +440,48 @@ class Macro10 {
                 cNesting++;
             } else if (ch == '>') {
                 if (--cNesting < 0) {
-                    this.error("missing angle bracket(s): " + sInput);
+                    this.error("missing bracket(s): " + sOperands);
                     break;
                 }
             }
             i++;
         }
         if (!cNesting) {
-            sExp = sInput.substr(0, i);
+            sExp = sOperands.substr(0, i);
         }
         else if (cNesting > 0) {
-            this.error("extra angle bracket(s): " + sInput);
+            this.error("extra bracket(s): " + sOperands);
         }
         return sExp;
+    }
+
+    /**
+     * getLiteral(sOperands)
+     *
+     * @this {Macro10}
+     * @param {string} sOperands
+     * @return {string|null} (if the operands contain a literal, return it)
+     */
+    getLiteral(sOperands)
+    {
+        var sLit = null;
+        var cNesting = 0;
+        var i = 0, iLiteral = -1;
+        while (i < sOperands.length) {
+            var ch = sOperands[i];
+            if (ch == '[') {
+                if (!cNesting++) iLiteral = i;
+            }
+            i++;
+            if (ch == ']' && --cNesting <= 0) break;
+        }
+        if (cNesting < 0) {
+            this.error("missing bracket(s): " + sOperands);
+        }
+        if (iLiteral >= 0) {
+            sLit = sOperands.substr(iLiteral, i - iLiteral);
+        }
+        return sLit;
     }
 
     /**
@@ -513,16 +564,20 @@ class Macro10 {
      * @this {Macro10}
      * @param {string} sOperator
      * @param {string} sOperands
+     * @return {string}
      */
     addMacro(sOperator, sOperands)
     {
         var match, name, aParms, nOperand, iBracket;
 
+        this.chMacroOpen = '<';
+        this.chMacroClose = '>';
+
         if (sOperator == Macro10.PSEUDO_OP.DEFINE) {
             match = sOperands.match(/([A-Z$%.][0-9A-Z$%.]*)\s*(\([^)]*\)|)\s*(<|)(.*)/i);
             if (!match) {
                 this.error("unrecognized " + sOperator + " definition: " + sOperands);
-                return;
+                return "";
             }
             /*
              * TODO: Tighten up this parsing at some point.  All this is doing is extracting entire symbols
@@ -533,11 +588,21 @@ class Macro10 {
             aParms = match[2].match(/[A-Z$%.][0-9A-Z$%.]*/g);
             nOperand = -1;
             iBracket = 3;
-        } else {
-            var sExp = this.getExpression(sOperands, ',');
+        }
+        else if (sOperator == Macro10.PSEUDO_OP.LITERAL) {
+            this.chMacroOpen = '[';
+            this.chMacroClose = ']';
+            name = '@' + Str.toDec(this.nLine, 5);
+            match = [sOperands[0], sOperands.substr(1)];
+            aParms = [];
+            nOperand = this.nLine;
+            iBracket = 0;
+        }
+        else {
+            var sExp = this.getExpression(sOperands);
             if (!sExp) {
                 this.error("missing " + sOperator + " expression: " + sOperands);
-                return;
+                return "";
             }
             sOperands = sOperands.substr(sExp.length + 1);
             sExp = sExp.trim();
@@ -557,11 +622,11 @@ class Macro10 {
         this.nMacroDef = 1;
 
         var sText = "";
-        if (match[iBracket]) {                  // if there IS an angle bracket...
-            this.nMacroDef = 2;                 // then the macro definition has begun
+        if (match[iBracket]) {                          // if there IS also an opening bracket...
+            this.nMacroDef = 2;                         // then the macro definition has begun
             sText = match[iBracket + 1];
-            if (sText.slice(-1) == '>') {       // and if there is ALSO a closing angle bracket...
-                this.nMacroDef = 0;             // the macro definition has also ended
+            if (sText.slice(-1) == this.chMacroClose) { // and if there is ALSO a closing bracket...
+                this.nMacroDef = 0;                     // the macro definition has ended as well
                 sText = sText.slice(0, -1);
             }
         }
@@ -578,6 +643,7 @@ class Macro10 {
         } else {
             this.sMacroDef = name;
         }
+        return name;
     }
 
     /**
@@ -591,9 +657,9 @@ class Macro10 {
     {
         var sRemain = "";
         for (var i = 0; i < sLine.length; i++) {
-            if (sLine[i] == '<') {
+            if (sLine[i] == this.chMacroOpen) {
                 this.nMacroDef++;
-            } else if (sLine[i] == '>') {
+            } else if (sLine[i] == this.chMacroClose) {
                 this.nMacroDef--;
                 if (this.nMacroDef == 1) {
                     this.nMacroDef = 0;
@@ -701,6 +767,7 @@ Macro10.PSEUDO_OP = {
     ASCIZ:  "ASCIZ",
     SIXBIT: "SIXBIT",
     DEFINE: "DEFINE",
+    LITERAL:"LITERAL",
     IFE:    "IFE",
     REPEAT: "REPEAT",
     PAGE:   "PAGE",
