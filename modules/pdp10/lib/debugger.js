@@ -1703,12 +1703,16 @@ class DebuggerPDP10 extends Debugger {
                         break;
                     }
                     sOperand = match[2];
-                    if (i) {
+                    if (i || aOperands.length == 1) {
                         /*
                          * If this is NOT the first operand, then replace all periods NOT preceded
                          * by a digit with the current address.
                          */
-                        sOperand = sOperand.replace(/(^|[^0-9])\./g, "$1" + this.toStrOffset(addr));
+                        if (!sOperand) {
+                            sOperand = "0";
+                        } else {
+                            sOperand = sOperand.replace(/(^|[^0-9])\./g, "$1" + this.toStrOffset(addr));
+                        }
                     }
                     var operand = this.parseExpression(sOperand);
                     if (operand == undefined) {
@@ -1718,17 +1722,15 @@ class DebuggerPDP10 extends Debugger {
                     if (!i && aOperands.length > 1) {
                         if (opMask == PDP10.OPCODE.OPIO) {
                             if (operand < 0 || operand > PDP10.OPCODE.IO_MASK) {
-                                this.println("device code out of range: " + sOperand);
-                                opCode = -1;
-                                break;
+                                operand &= PDP10.OPCODE.IO_MASK;
+                                this.println("device code (" + sOperand + ") truncated to " + this.toStrBase(operand));
                             }
                             opCode += (operand * PDP10.OPCODE.IO_SCALE);
                         }
                         else {
                             if (operand < 0 || operand > PDP10.OPCODE.A_MASK) {
-                                this.println("accumulator address out of range: " + sOperand);
-                                opCode = -1;
-                                break;
+                                operand &= PDP10.OPCODE.A_MASK;
+                                this.println("accumulator (" + sOperand + ") truncated to " + this.toStrBase(operand));
                             }
                             opCode += (operand << PDP10.OPCODE.A_SHIFT);
                         }
@@ -1748,15 +1750,12 @@ class DebuggerPDP10 extends Debugger {
                             break;
                         }
                         if (operand < 0 || operand > PDP10.OPCODE.X_MASK) {
-                            this.println("memory index out of range: " + sOperand);
-                            opCode = -1;
-                            break;
+                            operand &= PDP10.OPCODE.X_MASK;
+                            this.println("index (" + sOperand + ") truncated to " + this.toStrBase(operand));
                         }
                         opCode += operand << PDP10.OPCODE.X_SHIFT;
                     }
-                    if (match[1]) {
-                        opCode += PDP10.OPCODE.I_BIT;
-                    }
+                    if (match[1]) opCode += PDP10.OPCODE.I_BIT;
                 }
             }
             //
@@ -2552,7 +2551,7 @@ class DebuggerPDP10 extends Debugger {
             return;
         }
 
-        if (sOpcode.indexOf(':') >= 0) {
+        if (sOpcode[0] == '/' || sOpcode.indexOf(':') >= 0) {
             var dbg = this;
             if (this.macro10) {
                 dbg.println("assembly already in progress");

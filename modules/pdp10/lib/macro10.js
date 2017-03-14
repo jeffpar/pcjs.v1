@@ -123,6 +123,9 @@ class Macro10 {
          * auto-generated label based on the current line number), but they are never immediately invoked;
          * instead, after we've finished processing all the lines in the original input file, we run through
          * all the LITERAL entries in the Macros table and process the associated statement(s).
+         *
+         * REPEAT and LITERAL blocks are assigned internal labels, using a leading underscore ('_') so that
+         * they don't conflict with normal MACRO-10 labels.
          */
 
         /**
@@ -222,9 +225,10 @@ class Macro10 {
             }
 
             for (i = 0; i < this.aLiterals.length; i++) {
-                var macro = this.tblMacros[this.aLiterals[i]];
+                var name = this.aLiterals[i];
+                var macro = this.tblMacros[name];
                 if (!macro) {
-                    this.error("missing definition for literal: " + this.aLiterals[i]);
+                    this.error("missing definition for literal: " + name);
                     continue;
                 }
                 this.parseText(macro.sText);
@@ -301,7 +305,7 @@ class Macro10 {
             sLine = this.addASCII(sLine);
         }
 
-        var reLine = /\s*([A-Z$%.][0-9A-Z$%.]*[:=]|)\s*([A-Z$%.][0-9A-Z$%.]*|)\s*([^;]+|)\s*(;?.*)/i;
+        var reLine = /\s*([A-Z$%._][0-9A-Z$%.]*[:=]|)\s*([A-Z$%.][0-9A-Z$%.]*|)\s*([^;]+|)\s*(;?.*)/i;
         var match = sLine.match(reLine);
         if (!match || match[4] && match[4].slice(0, 1) != ';') {
             this.error("failed to parse line: " + sLine);
@@ -420,7 +424,7 @@ class Macro10 {
             return true;
         }
 
-        if (name[0] != '@') return false;
+        if (name[0] != '_') return false;
 
         switch(name.substr(1)) {
         case Macro10.PSEUDO_OP.IFE:
@@ -628,7 +632,7 @@ class Macro10 {
         var match, sReserved = null;
         if (match = sOperands.match(/([A-Z$%.][0-9A-Z$%.]*)#/i)) {
             var sLabel = match[1];
-            var name = '@' + sLabel;
+            var name = '_' + sLabel;
             this.tblMacros[name] = {name: name, nOperand: 0, aParms: [], aDefaults: [], sText: sLabel + ": 0"};
             this.aLiterals.push(name);
             sReserved = match[0];
@@ -726,7 +730,7 @@ class Macro10 {
      * REPEAT block instead.
      *
      * REPEAT blocks piggy-back on this code because they're essentially anonymous immediately-invoked macros;
-     * we use an illegal MACRO-10 symbol ('@REPEAT') to name the anonymous macro while it's being defined, and the
+     * we use an illegal MACRO-10 symbol ('_REPEAT') to name the anonymous macro while it's being defined, and the
      * macro's nOperand field will contain the repeat count (-1 for regular macros).
      *
      * The piggy-backing continues with other pseudo-ops like IFE, which again contain an anonymous block of text
@@ -765,9 +769,9 @@ class Macro10 {
         else if (sOperator == Macro10.PSEUDO_OP.LITERAL) {
             this.chMacroOpen = '[';
             this.chMacroClose = ']';
-            name = '@' + Str.toDec(this.nLocation, 5);
+            name = '_' + Str.toDec(this.nLocation, 5);
             this.aLiterals.push(name);
-            match = [sOperands[0], sOperands.substr(1)];
+            match = [sOperands[0], name + ": " + sOperands.substr(1)];
             aParms = [];
             nOperand = this.nLine;
             iBracket = 0;
@@ -781,7 +785,7 @@ class Macro10 {
             sOperands = sOperands.substr(sOperand.length + 1);
             sOperand = sOperand.trim();
             match = sOperands.match(/\s*(<|)(.*)/i);
-            name = '@' + sOperator;
+            name = '_' + sOperator;
             aParms = [];
             nOperand = this.parseExpression(sOperand) || 0;
             iBracket = 1;

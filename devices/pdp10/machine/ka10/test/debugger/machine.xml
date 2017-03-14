@@ -8,5 +8,5 @@
 	<device id="default" type="default"/>
 	<serial id="serial" adapter="0" binding="print" upperCase="true"/>
 	<panel ref="/devices/pdp10/panel/test/debugger/terminal.xml"/>
-	<debugger id="debugger" base="8" messages="" commands="a 100 http://archive.pcjs.org/apps/pdp10/tapes/diags/klad/dakadm.mac.html"/>
+	<debugger id="debugger" base="8" messages="" commands="a 100 /apps/pdp10/tapes/diags/klad/dakad/DAKAD.MAC"/>
 </machine>
