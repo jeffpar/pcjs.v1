@@ -234,9 +234,9 @@ class Macro10 {
                 this.parseText(macro.sText);
             }
 
-            for (var f in this.aFixups) {
+            for (i = 0; i < this.aFixups.length; i++) {
                 var w = 0, nBits = 0;
-                var fixup = this.aFixups[+f];
+                var fixup = this.aFixups[i];
                 var nLocation = fixup.nLocation;
                 if (fixup.nBits < 0) {
                     w = this.dbg.parseInstruction(fixup.aValues[0], fixup.aValues[1], nLocation);
@@ -247,9 +247,9 @@ class Macro10 {
                     this.aWords[nLocation++] += w;
                     continue;
                 }
-                for (i = 0; i < fixup.aValues.length; i++) {
-                    var sValue = fixup.aValues[i];
-                    var value = this.parseExpression(sValue);
+                for (var j = 0; j < fixup.aValues.length; j++) {
+                    var sValue = fixup.aValues[j];
+                    var value = this.parseExpression(sValue, nLocation);
                     if (value === undefined) {
                         this.error("unable to parse expression: " + sValue);
                         break;
@@ -569,17 +569,19 @@ class Macro10 {
     }
 
     /**
-     * parseExpression(sOperand)
+     * parseExpression(sOperand, nLocation)
      *
      * This is a wrapper around the Debugger's parseExpression() function to take care of some
      * additional requirements we have, such as interpreting '.' as the current location counter.
      *
      * @this {Macro10}
      * @param {string} sOperand
+     * @param {number} [nLocation]
      * @return {number|undefined}
      */
-    parseExpression(sOperand)
+    parseExpression(sOperand, nLocation)
     {
+        if (nLocation === undefined) nLocation = this.nLocation;
         /*
          * The Debugger's parseInstruction() replaces any period not PRECEDED by a decimal digit with
          * the current address, because our Debuggers' only other interpretation of a period is as the
@@ -587,7 +589,7 @@ class Macro10 {
          * the decimal point within a floating-point number, so here we only replace periods that are
          * not FOLLOWED by a decimal digit.
          */
-        sOperand = sOperand.replace(/\.([^0-9]|$)/g, "$1" + this.dbg.toStrBase(this.nLocation));
+        sOperand = sOperand.replace(/\.([^0-9]|$)/g, this.dbg.toStrBase(nLocation, -1) + "$1");
         return this.dbg.parseExpression(sOperand);
     }
 
@@ -808,6 +810,10 @@ class Macro10 {
                 sText = sText.slice(0, -1);
             }
         }
+
+        // if (this.tblMacros[name] !== undefined) {
+        //     this.warning("macro redefined: " + name);
+        // }
 
         this.tblMacros[name] = {name, nOperand, aParms, aDefaults, sText};
 

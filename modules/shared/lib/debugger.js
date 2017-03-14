@@ -689,9 +689,13 @@ class Debugger extends Component {
                     value = Str.parseInt(sValue, this.nBase);
                 }
             }
-            if (value == null && !fQuiet) this.println("invalid " + (sName? sName : "value") + ": " + sValue);
+            if (value == null && !fQuiet) {
+                this.println("invalid " + (sName? sName : "value") + ": " + sValue);
+            }
         } else {
-            if (!fQuiet) this.println("missing " + (sName || "value"));
+            if (!fQuiet) {
+                this.println("missing " + (sName || "value"));
+            }
         }
         return value;
     }

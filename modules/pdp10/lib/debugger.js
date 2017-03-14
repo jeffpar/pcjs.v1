@@ -1723,23 +1723,22 @@ class DebuggerPDP10 extends Debugger {
                         if (opMask == PDP10.OPCODE.OPIO) {
                             if (operand < 0 || operand > PDP10.OPCODE.IO_MASK) {
                                 operand &= PDP10.OPCODE.IO_MASK;
-                                this.println("device code (" + sOperand + ") truncated to " + this.toStrBase(operand));
+                                if (MAXDEBUG) this.println("device code (" + sOperand + ") truncated to " + this.toStrBase(operand));
                             }
                             opCode += (operand * PDP10.OPCODE.IO_SCALE);
                         }
                         else {
                             if (operand < 0 || operand > PDP10.OPCODE.A_MASK) {
                                 operand &= PDP10.OPCODE.A_MASK;
-                                this.println("accumulator (" + sOperand + ") truncated to " + this.toStrBase(operand));
+                                if (MAXDEBUG) this.println("accumulator (" + sOperand + ") truncated to " + this.toStrBase(operand));
                             }
                             opCode += (operand << PDP10.OPCODE.A_SHIFT);
                         }
                         continue;
                     }
                     if (operand < 0 || operand > PDP10.OPCODE.Y_MASK) {
-                        this.println("memory address out of range: " + sOperand);
-                        opCode = -1;
-                        break;
+                        operand &= PDP10.ADDR_MASK;
+                        if (MAXDEBUG) this.println("address (" + sOperand + ") truncated to " + this.toStrBase(operand));
                     }
                     opCode += operand;
                     sOperand = match[3];
@@ -1751,7 +1750,7 @@ class DebuggerPDP10 extends Debugger {
                         }
                         if (operand < 0 || operand > PDP10.OPCODE.X_MASK) {
                             operand &= PDP10.OPCODE.X_MASK;
-                            this.println("index (" + sOperand + ") truncated to " + this.toStrBase(operand));
+                            if (MAXDEBUG) this.println("index (" + sOperand + ") truncated to " + this.toStrBase(operand));
                         }
                         opCode += operand << PDP10.OPCODE.X_SHIFT;
                     }
