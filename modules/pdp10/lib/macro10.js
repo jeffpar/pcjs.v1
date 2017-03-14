@@ -37,20 +37,26 @@ if (NODE) {
 }
 
 /**
+ * Elements of tblMacros.
+ *
  * @typedef {{
  *      name:(string),
  *      nOperand:(number),
  *      aParms:(Array.<string>),
  *      aDefaults:(Array.<string>),
- *      sText:(string)
+ *      sText:(string),
+ *      nLine:(number)
  * }}
  */
 var Mac;
 
 /**
+ * Elements of tblSymbols.
+ *
  * @typedef {{
  *      name:(string),
  *      value:(number),
+ *      nLine:(number),
  *      fLabel:(boolean),
  *      fGlobal:(boolean),
  *      fPrivate:(boolean)
@@ -62,7 +68,6 @@ var Sym;
  * @typedef {{
  *      nLocation:(number),
  *      aValues:(Array.<string>),
- *      nBits:(number)
  * }}
  */
 var Fixup;
@@ -111,21 +116,23 @@ class Macro10 {
         /*
          * Initialize all the tables that MACRO-10 uses.
          *
-         * The Macros and Symbols tables are fairly straightforward: they are indexed by a macro or symbol
-         * name, and each index points to a Mac or Sym object, respectively.
+         * The Macros (tblMacros) and Symbols (tblSymbols) tables are fairly straightforward: they are
+         * indexed by a macro or symbol name, and each element is a Mac or Sym object, respectively.
          *
-         * We also treat REPEAT blocks and conditional (eg, IFE) blocks like macros, except that they are
-         * anonymous and immediately invoked as appropriate.  What does that mean?  Well, REPEAT blocks are
-         * always immediately invoked (repeatedly, based on the repeat count), whereas conditional blocks are
-         * either immediately invoked if the associated condition is true or skipped if the condition is false.
+         * We also treat REPEAT blocks and CONDITIONAL (eg, IFE) blocks like macros, except that they are
+         * anonymous, parameter-less, and immediately invoked.  REPEAT blocks are always immediately invoked
+         * (repeatedly, based on the repeat count), whereas CONDITIONAL blocks are either immediately
+         * invoked if the associated condition is true or skipped if the condition is false.
          *
-         * Finally, we have LITERAL blocks, which are also semi-anonymous (because we give each one an
-         * auto-generated label based on the current line number), but they are never immediately invoked;
-         * instead, after we've finished processing all the lines in the original input file, we run through
-         * all the LITERAL entries in the Macros table and process the associated statement(s).
+         * Finally, we have LITERAL blocks, which are semi-anonymous (we give each one an auto-generated
+         * name based on the current location) and are automatically but not immediately invoked.  Instead,
+         * after we've finished processing all the lines in the original input file, we run through all
+         * the LITERAL blocks in tblMacros and process the associated statement(s) at that time.
          *
-         * REPEAT and LITERAL blocks are assigned internal labels, using a leading underscore ('_') so that
-         * they don't conflict with normal MACRO-10 labels.
+         * Macros have the name that was assigned to them, REPEAT and conditional blocks have generated names
+         * that match the pseudo-op (eg, "_REPEAT", "_IFE"), and LITERAL blocks have generated location-based
+         * names.  All generated names use a leading underscore ('_') so that they don't conflict with
+         * normal MACRO-10 labels.
          */
 
         /**
@@ -138,16 +145,12 @@ class Macro10 {
          */
         this.tblSymbols = {};
 
-        this.nLine = 0;
-        this.nError = 0;
-
-        /**
-         * @type {Array.<number>}
-         */
-        this.aWords = [];               // filled in by the various genXXX() functions
-
         /**
          * @type {Array.<string>}
+         *
+         * This array is mostly a convenience; we could also enumerate all the literals by walking tblMacros
+         * and looking for elements with MACRO_OP.LITERAL, but the ordering wouldn't necessarily match the order
+         * in which the literals were defined.
          */
         this.aLiterals = [];
 
@@ -156,6 +159,13 @@ class Macro10 {
          */
         this.aFixups = [];
 
+        /**
+         * @type {Array.<number|undefined>}
+         */
+        this.aWords = [];               // filled in by the various genXXX() functions
+
+        this.nLine = 0;
+        this.nError = 0;
         this.nLocation = this.nAddr;    // advanced by the various genXXX() functions
 
         this.sOperator = null;          // the active operator, if any
@@ -163,12 +173,10 @@ class Macro10 {
         this.sMacroDef = null;          // the active MACRO definition name
         this.chMacroOpen = this.chMacroClose = '';
 
-        /*
+        /**
          * If an ASCII/ASCIZ/SIXBIT pseudo-op is active, chASCII is set to the separator and sASCII collects
          * the intervening character(s).
-         */
-
-        /**
+         *
          * @type {null|string}
          */
         this.chASCII = null;
@@ -179,12 +187,23 @@ class Macro10 {
         this.sASCII = "";
 
         var macro10 = this;
-        Web.getResource(sURL, null, true, function(sURL, sResource, nErrorCode) {
+        Web.getResource(sURL, null, true, function processMacro10(sURL, sResource, nErrorCode) {
             if (!nErrorCode) {
                 nErrorCode = macro10.parseFile(sURL, sResource);
             }
             macro10.done(macro10, sURL, nErrorCode);
         });
+    }
+
+    /**
+     * getBin()
+     *
+     * @this {Macro10}
+     * @return {Array.<number>}
+     */
+    getBin()
+    {
+        return this.aWords;
     }
 
     /**
@@ -199,6 +218,7 @@ class Macro10 {
      */
     parseFile(sPath, sContents)
     {
+        var macro10 = this;
         var a = this.dbg.resetVariables();
         try {
             var sText = sContents;
@@ -224,50 +244,70 @@ class Macro10 {
                 if (!this.parseLine(asLines[i] + '\r\n')) break;
             }
 
+            if (this.nMacroDef) {
+                this.error("open block from line " + this.tblMacros[this.sMacroDef].nLine);
+            }
+
             for (i = 0; i < this.aLiterals.length; i++) {
                 var name = this.aLiterals[i];
                 var macro = this.tblMacros[name];
                 if (!macro) {
+                    /*
+                     * This is more of an assert(), because it should never happen, regardless of input.
+                     */
                     this.error("missing definition for literal: " + name);
                     continue;
                 }
                 this.parseText(macro.sText);
             }
 
-            for (i = 0; i < this.aFixups.length; i++) {
-                var w = 0, nBits = 0;
-                var fixup = this.aFixups[i];
+            this.aFixups.forEach(function processFixup(fixup){
+                var value = 0;
+                var sValue = fixup.aValues[0];
+                var sOperand = fixup.aValues[1];
                 var nLocation = fixup.nLocation;
-                if (fixup.nBits < 0) {
-                    w = this.dbg.parseInstruction(fixup.aValues[0], fixup.aValues[1], nLocation);
-                    if (w < 0) {
-                        this.error("unable to parse instruction: " + fixup.aValues[0] + ' ' + fixup.aValues[1]);
-                        break;
+                if (fixup.aValues.length == 1) {
+                    if (sValue.indexOf('@') >= 0 || sValue.indexOf('(') >= 0) {
+                        sOperand = sValue;
+                        sValue = "";
                     }
-                    this.aWords[nLocation++] += w;
-                    continue;
                 }
-                for (var j = 0; j < fixup.aValues.length; j++) {
-                    var sValue = fixup.aValues[j];
-                    var value = this.parseExpression(sValue, nLocation);
+                if (sOperand != null) {
+                    value = macro10.dbg.parseInstruction(sValue, sOperand, nLocation);
+                    if (value < 0) {
+                        macro10.error("unable to parse instruction: " + fixup.aValues[0] + ' ' + fixup.aValues[1]);
+                    }
+                } else {
+                    value = macro10.parseExpression(sValue, nLocation);
                     if (value === undefined) {
-                        this.error("unable to parse expression: " + sValue);
-                        break;
+                        macro10.error("unable to parse expression: " + sValue);
                     }
-                    w += value;
-                    nBits += fixup.nBits;
-                    if (nBits < 36) {
-                        w *= Math.pow(2, 36 - nBits);
-                    } else {
-                        if (this.aWords[nLocation] === undefined) {
-                            this.error("undefined fixup location: " + Str.toOct(nLocation, 0, true));
-                            break;
-                        }
-                        this.aWords[nLocation++] += w;
-                        w = nBits = 0;
+                    else if (macro10.aWords[nLocation] === undefined) {
+                        macro10.error("undefined fixup location: " + Str.toOct(nLocation, 0, true));
+                    }
+                    else {
+                        value += macro10.aWords[nLocation];
                     }
                 }
-            }
+                /*
+                 * At the end of the day, we only want unsigned 36-bit values, and some of our internal calculations
+                 * already adhere to that (eg, the parseExpression() concatenation of two unsigned 18-bit values).
+                 * But in general, the expression parser is allowed to return negative values, so that signed arithmetic
+                 * works naturally.  Perhaps that decision should be revisited, but for now, this particular mix of
+                 * behaviors means that when checking for out-of-range values, the upper bound must be the unsigned
+                 * WORD_LIMIT, while the lower bound must be the signed INT_LIMIT.
+                 *
+                 * In a perfect world, the bounds would either be -INT_LIMIT,INT_LIMIT-1 or 0,WORD_LIMIT-1.  In any
+                 * event, the truncate() call will ensure everything is an unsigned 36-bit value.  The warning should
+                 * trigger only if the original value contained more than 36 significant bits.
+                 */
+                var w = macro10.dbg.truncate(value || 0, 36, true);
+                if (value < -PDP10.INT_LIMIT || value >= PDP10.WORD_LIMIT) {
+                    macro10.warning("truncated value " + Str.toOct(value) + " at location " + Str.toOct(nLocation) + " to " + Str.toOct(w));
+                }
+                macro10.aWords[nLocation] = w;
+            });
+
         } catch(err) {
             this.println(err.message);
             this.nError = -1;
@@ -341,7 +381,9 @@ class Macro10 {
         }
 
         /*
-         * Check the operands for a literal.
+         * Check the operands for a literal.  If the line contains and/or ends with a literal
+         * we record it and replace it with an internal symbol.  We assume only one literal per line,
+         * especially since they can be open-ended (ie, continue for multiple lines).
          */
         var sLiteral = this.getLiteral(sOperands);
         if (sLiteral) {
@@ -349,18 +391,21 @@ class Macro10 {
         }
 
         /*
-         * Check the operands for a reserved symbol.
+         * Check the operands for any reserved symbols (ie, symbols with a trailing '#', such as "USER#").
          */
-        var sReserved = this.getReserved(sOperands);
-        if (sReserved) {
-            sOperands = sOperands.replace(sReserved, sReserved.slice(0, -1));
+        var sSymbol;
+        while (sSymbol = this.getReserved(sOperands)) {
+            sOperands = sOperands.replace(sSymbol, sSymbol.slice(0, -1));
         }
 
         if (!this.parseMacro(sOperator, sOperands)) {
 
             switch (sOperator) {
             case "":
-                break;                      // eg, a blank line or a line that contains only a label and/or a comment
+                if (sOperands) {
+                    this.genWord(0, [sOperands]);
+                }
+                break;
 
             case "=":
                 this.addAssign(sLabel, sOperands);
@@ -457,7 +502,7 @@ class Macro10 {
     {
         var opCode = this.dbg.parseInstruction(sOpcode);
         if (opCode >= 0) {
-            this.genWord(opCode, [sOpcode, sOperands], -1);
+            this.genWord(opCode, [sOpcode, sOperands]);
             return true;
         }
         return false;
@@ -572,7 +617,9 @@ class Macro10 {
      * parseExpression(sOperand, nLocation)
      *
      * This is a wrapper around the Debugger's parseExpression() function to take care of some
-     * additional requirements we have, such as interpreting '.' as the current location counter.
+     * additional requirements we have, such as interpreting a period as the current location and
+     * interpreting two expressions separated by two commas as the left and right 18-bit halves
+     * of a 36-bit value.
      *
      * @this {Macro10}
      * @param {string} sOperand
@@ -581,20 +628,48 @@ class Macro10 {
      */
     parseExpression(sOperand, nLocation)
     {
+        var result;
+
         if (nLocation === undefined) nLocation = this.nLocation;
+
         /*
-         * The Debugger's parseInstruction() replaces any period not PRECEDED by a decimal digit with
-         * the current address, because our Debuggers' only other interpretation of a period is as the
-         * suffix of a decimal integer, whereas MACRO-10's only other interpretation of a period is as
-         * the decimal point within a floating-point number, so here we only replace periods that are
-         * not FOLLOWED by a decimal digit.
+         * Check for the "period" syntax that MACRO-10 uses to represent the value of the current
+         * location.  The Debugger's parseInstruction() method understands that syntax, but its
+         * parseExpression() method does not.
+         *
+         * Note that the Debugger's parseInstruction() replaces any period not PRECEDED by a decimal
+         * digit with the current address, because our Debuggers' only other interpretation of a period
+         * is as the suffix of a decimal integer, whereas MACRO-10's only other interpretation of a period
+         * is (I think) as the decimal point within a floating-point number, so here we only replace
+         * periods that are not FOLLOWED by a decimal digit.
          */
         sOperand = sOperand.replace(/\.([^0-9]|$)/g, this.dbg.toStrBase(nLocation, -1) + "$1");
-        return this.dbg.parseExpression(sOperand);
+
+        /*
+         * Check for the "double comma" syntax that MACRO-10 uses to express a 36-bit value as two 18-bit halves.
+         */
+        var match = sOperand.match(/^([^,]*),,([^,]*)$/);
+        if (!match) {
+            result = this.dbg.parseExpression(sOperand);
+        } else {
+            var wLeft = match[1]? this.dbg.parseExpression(match[1]) : 0;
+            if (wLeft !== undefined) {
+                var wRight = match[2]? this.dbg.parseExpression(match[2]) : 0;
+                if (wRight !== undefined) {
+                    /*
+                     * NOTE: These must be combined as UNSIGNED values, so that's what we tell truncate().
+                     */
+                    result = this.dbg.truncate(wLeft, 18, true) * Math.pow(2, 18) + this.dbg.truncate(wRight, 18, true);
+                }
+            }
+        }
+        return result;
     }
 
     /**
      * getLiteral(sOperands)
+     *
+     * Check the operands for a literal (ie, an expression starting with a square bracket).
      *
      * @this {Macro10}
      * @param {string} sOperands
@@ -625,6 +700,8 @@ class Macro10 {
     /**
      * getReserved(sOperands)
      *
+     * Check the operands for any reserved symbols (ie, symbols with a trailing '#', such as "USER#").
+     *
      * @this {Macro10}
      * @param {string} sOperands
      * @return {string|null} (if the operands contain a reserved symbol, return it)
@@ -633,11 +710,21 @@ class Macro10 {
     {
         var match, sReserved = null;
         if (match = sOperands.match(/([A-Z$%.][0-9A-Z$%.]*)#/i)) {
+            sReserved = match[0];
             var sLabel = match[1];
             var name = '_' + sLabel;
-            this.tblMacros[name] = {name: name, nOperand: 0, aParms: [], aDefaults: [], sText: sLabel + ": 0"};
+            if (this.tblMacros[name] !== undefined) {
+                this.error("reserved symbol redefined: " + sReserved);
+            }
+            this.tblMacros[name] = {
+                name: name,
+                nOperand: Macro10.MACRO_OP.RESERVED,
+                aParms: [],
+                aDefaults: [],
+                sText: sLabel + ": 0",
+                nLine: this.nLine
+            };
             this.aLiterals.push(name);
-            sReserved = match[0];
         }
         return sReserved;
     }
@@ -733,7 +820,7 @@ class Macro10 {
      *
      * REPEAT blocks piggy-back on this code because they're essentially anonymous immediately-invoked macros;
      * we use an illegal MACRO-10 symbol ('_REPEAT') to name the anonymous macro while it's being defined, and the
-     * macro's nOperand field will contain the repeat count (-1 for regular macros).
+     * macro's nOperand field will contain the repeat count.
      *
      * The piggy-backing continues with other pseudo-ops like IFE, which again contain an anonymous block of text
      * that is immediately invoked if the criteria associated with the expression stored in the nOperand field is
@@ -747,10 +834,11 @@ class Macro10 {
      */
     addMacro(sOperator, sOperands)
     {
-        var match, name, nOperand, aParms, aDefaults = [], iBracket;
+        var match, name, nOperand, aParms, aDefaults, iMatch;
 
         this.chMacroOpen = '<';
         this.chMacroClose = '>';
+        aParms = aDefaults = [];
 
         if (sOperator == Macro10.PSEUDO_OP.DEFINE) {
             match = sOperands.match(/([A-Z$%.][0-9A-Z$%.]*)\s*(\([^)]*\)|)\s*(<|)(.*)/i);
@@ -758,25 +846,33 @@ class Macro10 {
                 this.error("unrecognized " + sOperator + " definition: " + sOperands);
                 return "";
             }
+            name = match[1];
+            /*
+             * TODO: This may not actually be an error, but I'd like to take a look if/when it happens.
+             */
+            if (this.tblMacros[name] !== undefined) {
+                this.error("macro redefined: " + name);
+            }
             /*
              * TODO: Tighten up this parsing at some point.  All this is doing is extracting entire symbols
              * from within the parentheses, if any; it's NOT ensuring that those symbols are comma-separated
              * with no other intervening characters.
              */
-            name = match[1];
             aParms = match[2].match(/[A-Z$%.][0-9A-Z$%.]*/g);
-            nOperand = -1;
-            iBracket = 3;
+            nOperand = Macro10.MACRO_OP.DEFINE;
+            iMatch = 3;
         }
         else if (sOperator == Macro10.PSEUDO_OP.LITERAL) {
             this.chMacroOpen = '[';
             this.chMacroClose = ']';
             name = '_' + Str.toDec(this.nLocation, 5);
-            this.aLiterals.push(name);
+            if (this.tblMacros[name] !== undefined) {
+                this.error("literal symbol redefined: " + name);
+            }
             match = [sOperands[0], name + ": " + sOperands.substr(1)];
-            aParms = [];
-            nOperand = this.nLine;
-            iBracket = 0;
+            nOperand = Macro10.MACRO_OP.LITERAL;
+            this.aLiterals.push(name);
+            iMatch = 0;
         }
         else {
             var sOperand = this.getExpression(sOperands);
@@ -788,9 +884,8 @@ class Macro10 {
             sOperand = sOperand.trim();
             match = sOperands.match(/\s*(<|)(.*)/i);
             name = '_' + sOperator;
-            aParms = [];
             nOperand = this.parseExpression(sOperand) || 0;
-            iBracket = 1;
+            iMatch = 1;
         }
 
         /*
@@ -802,20 +897,16 @@ class Macro10 {
         this.nMacroDef = 1;
 
         var sText = "";
-        if (match[iBracket]) {                          // if there IS also an opening bracket...
+        if (match[iMatch]) {                            // if there IS also an opening bracket...
             this.nMacroDef = 2;                         // then the macro definition has begun
-            sText = match[iBracket + 1];
+            sText = match[iMatch + 1];
             if (sText.slice(-1) == this.chMacroClose) { // and if there is ALSO a closing bracket...
                 this.nMacroDef = 0;                     // the macro definition has ended as well
                 sText = sText.slice(0, -1);
             }
         }
 
-        // if (this.tblMacros[name] !== undefined) {
-        //     this.warning("macro redefined: " + name);
-        // }
-
-        this.tblMacros[name] = {name, nOperand, aParms, aDefaults, sText};
+        this.tblMacros[name] = {name, nOperand, aParms, aDefaults, sText, nLine: this.nLine};
 
         if (!this.nMacroDef) {
             this.parseMacro(name);
@@ -874,19 +965,22 @@ class Macro10 {
             this.error("label " + name + " redefined");
             return;
         }
-        this.tblSymbols[name] = {name, value, fLabel, fGlobal, fPrivate};
+        this.tblSymbols[name] = {name, value, nLine: this.nLine, fLabel, fGlobal, fPrivate};
         this.dbg.setVariable(name, value);
     }
 
     /**
      * addXWD()
      *
+     * The XWD pseudo-op appears to be equivalent to two values separated by two commas, which our fixup code
+     * must also support, so we simply treat the XWD operands as a fixup expression.
+     *
      * @this {Macro10}
      * @param {string} sOperands
      */
     addXWD(sOperands)
     {
-        this.genWord(0, this.getValues(sOperands), 18);
+        this.genWord(0, [sOperands.replace(",", ",,")]);
     }
 
     /**
@@ -935,17 +1029,16 @@ class Macro10 {
     }
 
     /**
-     * genWord(w, aValues, nBits)
+     * genWord(w, aValues)
      *
      * @this {Macro10}
-     * @param {number} w
-     * @param {Array.<string>} [aValues]
-     * @param {number} [nBits] (-1 for opcode, otherwise the size of the data; default is 36)
+     * @param {number} w (default value for the current location)
+     * @param {Array.<string>} [aValues] (optional fixup value(s) to evaluate later)
      */
-    genWord(w, aValues, nBits = 36)
+    genWord(w, aValues)
     {
         this.aWords[this.nLocation] = w;
-        if (aValues) this.aFixups.push({nLocation: this.nLocation, aValues, nBits});
+        if (aValues) this.aFixups.push({nLocation: this.nLocation, aValues});
         this.nLocation++;
     }
 }
@@ -961,4 +1054,15 @@ Macro10.PSEUDO_OP = {
     SIXBIT: "SIXBIT",
     SUBTTL: "SUBTTL",
     XWD:    "XWD"
+};
+
+/*
+ * This enumerates the kinds of macros stored in tblMacros.  The nOperand field should contain
+ * one of these values, unless it's a REPEAT or CONDITIONAL block, in which case it will contain
+ * either a repeat count or conditional value.
+ */
+Macro10.MACRO_OP = {
+    DEFINE:         -1,
+    LITERAL:        -2,
+    RESERVED:       -3,
 };

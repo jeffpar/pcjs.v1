@@ -362,23 +362,47 @@ class Debugger extends Component {
     }
 
     /**
-     * truncate(v)
+     * truncate(v, nBits, fUnsigned)
      *
      * @this {Debugger}
      * @param {number} v
+     * @param {number} [nBits]
+     * @param {boolean} [fUnsigned]
      * @return {number}
      */
-    truncate(v)
+    truncate(v, nBits, fUnsigned)
     {
-        if (this.nBits <= 32) {
-            v = v|0;
-        } else {
-            var limit = Math.pow(2, this.nBits-1);
-            if (v < -limit || v >= limit) {
-                var vNew = v % limit;
-                if (DEBUG) this.println("warning: value " + v + " truncated to " + vNew);
-                v = vNew;
+        var limit, vNew = v;
+        nBits = nBits || this.nBits;
+
+        if (fUnsigned) {
+            if (nBits == 32) {
+                vNew = v >>> 0;
             }
+            else if (nBits < 32) {
+                vNew = v & ((1 << nBits) - 1);
+            }
+            else {
+                limit = Math.pow(2, nBits);
+                if (v < 0 || v >= limit) {
+                    vNew = v % limit;
+                    if (vNew < 0) vNew += limit;
+                }
+            }
+        }
+        else {
+            if (nBits <= 32) {
+                vNew = v | 0;
+            } else {
+                limit = Math.pow(2, nBits - 1);
+                if (v < -limit || v >= limit) {
+                    vNew = v % limit;
+                }
+            }
+        }
+        if (v != vNew) {
+            if (MAXDEBUG) this.println("warning: value " + v + " truncated to " + vNew);
+            v = vNew;
         }
         return v;
     }
@@ -481,7 +505,7 @@ class Debugger extends Component {
             default:
                 return false;
             }
-            aVals.push(this.truncate(valNew));
+            aVals.push(this.truncate(valNew, this.nBits));
         }
         return true;
     }
@@ -571,7 +595,7 @@ class Debugger extends Component {
                     fPrint = false;
                     break;
                 }
-                aVals.push(v);
+                aVals.push(this.truncate(v, this.nBits));
                 if (i == asValues.length) break;
                 var sOp = asValues[i++], cchOp = sOp.length;
                 this.assert(Debugger.aBinOpPrecedence[sOp] != null);
