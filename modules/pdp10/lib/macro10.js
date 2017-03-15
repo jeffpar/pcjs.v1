@@ -87,6 +87,9 @@ class Macro10 {
     /**
      * Macro10(sURL, nAddr, sOptions, dbg, done)
      *
+     * A "mini" version of DEC's MACRO-10 assembler, with just enough features to support the handful
+     * of DEC diagnostic source code files that we choose to throw at it.
+     *
      * Requests the resource(s) specified by sURL; multiple resources can be requested by separating
      * them with semicolons.
      *

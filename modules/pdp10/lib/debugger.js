@@ -2479,7 +2479,11 @@ class DebuggerPDP10 extends Debugger {
             bus.setWordDirect(addr, w);
             nWords++;
         });
-        this.println(nWords + " words loaded at " + this.toStrBase(addrLoad) + '-' + this.toStrBase(addrLoad + nWords - (nWords?1:0)));
+        if (!nWords) {
+            this.println("no data");
+        } else {
+            this.println(nWords + " words loaded at " + this.toStrBase(addrLoad) + '-' + this.toStrBase(addrLoad + nWords - 1));
+        }
     }
 
     /**
@@ -2578,7 +2582,7 @@ class DebuggerPDP10 extends Debugger {
             }
             else {
                 var addrLoad = dbgAddr.addr;
-                var sOptions = ""; // "p";
+                var sOptions = "";      // add "p" for preprocessing only
                 this.macro10 = new Macro10(match[2], addrLoad, sOptions, dbg, function doneMacro10(nErrorCode, sURL) {
                     if (!nErrorCode) {
                         dbg.loadBin(dbg.macro10.getBin(), addrLoad);
