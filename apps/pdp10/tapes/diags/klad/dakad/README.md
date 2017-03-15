@@ -2,18 +2,29 @@
 layout: page
 title: PDP-10 KA10 BASIC INSTRUCTION DIAGNOSTIC
 permalink: /apps/pdp10/tapes/diags/klad/dakad/
+machines:
+  - id: testka10
+    type: pdp10
+    config: /devices/pdp10/machine/ka10/test/debugger/machine.xml
+    debugger: true
 ---
 
 PDP-10 KA10 BASIC INSTRUCTION DIAGNOSTIC
 ----------------------------------------
 
-The **PDP-10 KA10 BASIC INSTRUCTION DIAGNOSTIC** (MAINDEC-10-DAKAD-B-D), as extracted from the
-[original file](http://pdp-10.trailing-edge.com/klad_sources/01/klad.sources/dakaam.mac.html), is shown below.
+The **PDP-10 KA10 BASIC INSTRUCTION DIAGNOSTIC** ([DAKAD.MAC](DAKAD.MAC)), as extracted from the
+[original file](http://pdp-10.trailing-edge.com/klad_sources/01/klad.sources/dakaam.mac.html), is shown below,
+along with a [PDP-10 Test Machine with Debugger](/devices/pdp10/machine/ka10/test/debugger/).
 
-The Debugger command `a 100 http://archive.pcjs.org/apps/pdp10/tapes/diags/klad/dakadm.mac.html` can be used to test the
-new [MACRO-10](http://archive.pcjs.org/pubs/dec/pdp10/tops10/02_1973AsmRef_macro.pdf) work-alike assembler being added to
-the PDP-10 Emulator.
- 
+The Debugger command `a 100 /apps/pdp10/tapes/diags/klad/dakad/TEST.MAC`
+can be used to test the new [MACRO-10](http://archive.pcjs.org/pubs/dec/pdp10/tops10/02_1973AsmRef_macro.pdf)
+work-alike assembler being added to the PDP-10 Emulator.
+
+{% include machine.html id="testka10" %}
+
+More information about MAINDEC-10-DAKAD-B-D:
+
+
 ```
 SUBTTL	DIAGNOSTIC PARAMETERS
 

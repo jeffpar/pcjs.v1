@@ -2461,21 +2461,25 @@ class DebuggerPDP10 extends Debugger {
     }
 
     /**
-     * loadBin(aWords, addr)
+     * loadBin(aWords, addrLoad)
      *
      * @this {DebuggerPDP10}
      * @param {Array.<number>} aWords
-     * @param {number|null} addr
+     * @param {number|null} addrLoad
      */
-    loadBin(aWords, addr)
+    loadBin(aWords, addrLoad)
     {
         /*
-         * TODO: Decide what to do about the load address (addr); either drop it or use it.
+         * TODO: Decide what to do about addrLoad; either drop it or use it.
          */
+        var nWords = 0;
         var bus = this.bus;
+        var dbg = this.dbg;
         aWords.forEach(function(w, addr) {
             bus.setWordDirect(addr, w);
+            nWords++;
         });
+        this.println(nWords + " words loaded at " + this.toStrBase(addrLoad) + '-' + this.toStrBase(addrLoad + nWords - (nWords?1:0)));
     }
 
     /**
