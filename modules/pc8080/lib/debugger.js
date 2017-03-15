@@ -495,7 +495,7 @@ class Debugger8080 extends Debugger {
         var dbgAddrNext = (fCode? this.dbgAddrNextCode : this.dbgAddrNextData);
         var addr = dbgAddrNext.addr;
         if (sAddr !== undefined) {
-            sAddr = this.parseReference(sAddr);
+            sAddr = this.parseReference(sAddr) || sAddr;
             dbgAddr = this.findSymbolAddr(sAddr);
             if (dbgAddr) return dbgAddr;
             addr = this.parseExpression(sAddr, fPrint);
@@ -941,7 +941,7 @@ class Debugger8080 extends Debugger {
          * Replace any references first; this means that register references inside the reference
          * do NOT need to be prefixed with '@'.
          */
-        s = this.parseReference(s);
+        s = this.parseReference(s) || s;
 
         /*
          * Replace every @XX (or @XXX), where XX (or XXX) is a register, with the register's value.

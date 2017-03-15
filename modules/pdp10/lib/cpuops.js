@@ -6132,7 +6132,7 @@ PDP10.doDIV = function(dst, ext, src)
      * "early out" if the dividend gets "exhausted" first.
      *
      * Note that each element of these double arrays is a 36-bit value, so it's rarely a good idea
-     * to use bit-wise operators on them, because those would operate on only the low 32 bits.
+     * to use bitwise operators on them, because those would operate on only the low 32 bits.
      * Stick with the double worker functions I've created, and trust your JavaScript engine to
      * inline/optimize the code.
      */

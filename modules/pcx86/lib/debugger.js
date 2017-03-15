@@ -2426,7 +2426,7 @@ class DebuggerX86 extends Debugger {
          * Replace any references first; this means that register references inside the reference
          * do NOT need to be prefixed with '@'.
          */
-        s = this.parseReference(s);
+        s = this.parseReference(s) || s;
 
         /*
          * Replace every @XX (or @XXX), where XX (or XXX) is a register, with the register's value.

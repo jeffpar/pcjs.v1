@@ -65,6 +65,10 @@ class Str {
      * to indicate octal (because such a number could also be decimal or hex).  Any number of commas are
      * allowed; we remove them all before calling the built-in parseInt().
      *
+     * More recently, we've added support for "^D", "^O", and "^B" prefixes to accommodate the base overrides
+     * that the PDP-10's MACRO-10 assembly language supports.  If this support turns out to adversely affect
+     * other debuggers, then it will have to be "conditionalized".
+     *
      * To summarize our non-standard alternatives: a 'y' suffix indicates binary, a '#' prefix indicates
      * octal, a '$' prefix indicates hex, and a "0b" prefix indicates binary IF at least one comma is present.
      * Commas are useful for grouping binary digits, but if you don't want to use them, then you must use a
@@ -107,6 +111,21 @@ class Str {
                     }
                     else if (chPrefix == 'x') {
                         base = 16;
+                        chPrefix = null;
+                    }
+                }
+                else if (chPrefix == '^') {
+                    chPrefix = s.charAt(1);
+                    if (chPrefix == 'D') {
+                        base = 10;
+                        chPrefix = null;
+                    }
+                    else if (chPrefix == 'O') {
+                        base = 8;
+                        chPrefix = null;
+                    }
+                    else if (chPrefix == 'B') {
+                        base = 2;
                         chPrefix = null;
                     }
                 }

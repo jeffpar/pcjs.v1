@@ -406,7 +406,7 @@ class Int36 {
              * Calculating V, R, O, and E as described above is somewhat tedious, because bits
              * above bit 31 cannot be accessed directly; we shift all the sign bits down to bit 0
              * using division first.  We don't need to truncate the results, because the subsequent
-             * bit-wise operations perform truncation automatically.
+             * bitwise operations perform truncation automatically.
              */
             var e = 0;
             if (DEBUG) {
@@ -622,7 +622,7 @@ class Int36 {
          * "early out" if the dividend gets "exhausted" first.
          *
          * Note that each element of these double arrays is a 36-bit value, so it's rarely a good idea
-         * to use bit-wise operators on them, because those would operate on only the low 32 bits.
+         * to use bitwise operators on them, because those would operate on only the low 32 bits.
          * Stick with the double worker functions I've created, and trust your JavaScript engine to
          * inline/optimize the code.
          *

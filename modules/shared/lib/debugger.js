@@ -100,7 +100,15 @@ class Debugger extends Component {
              * Default base used to display all values; modified with the "s base" command.
              */
             this.nBase = +parmsDbg['base'] || 16;
-            this.fParens = false;
+
+            /*
+             * Default number of bits of integer precision; it can be overridden by the Debugger
+             * but there is no command to adjust it.
+             */
+            this.nBits = 32;
+
+            this.achGroup = ['{','}'];
+            this.achAddress = ['[',']'];
 
             /*
              * These keep track of instruction activity, but only when tracing or when Debugger checks
@@ -296,13 +304,123 @@ class Debugger extends Component {
     }
 
     /**
-     * evalExpression(aVals, aOps, cOps)
+     * evalAND(dst, src)
      *
-     * In Node, if you set a variable to 0x80000001; ie:
+     * Adapted from /modules/pdp10/lib/cpuops.js:PDP10.AND().
+     *
+     * Performs the bitwise "and" (AND) of two operands > 32 bits.
+     *
+     * @this {Debugger}
+     * @param {number} dst
+     * @param {number} src
+     * @return {number} (dst & src)
+     */
+    evalAND(dst, src)
+    {
+        /*
+         * We AND the low 32 bits separately from the higher bits, and then combine them with addition.
+         * Since all bits above 32 will be zero, and since 0 AND 0 is 0, no special masking for the higher
+         * bits is required.
+         *
+         * WARNING: When using JavaScript's 32-bit operators with values that could set bit 31 and produce a
+         * negative value, it's critical to perform a final right-shift of 0, ensuring that the final result is
+         * positive.
+         */
+        if (this.nBits <= 32) {
+            return dst & src;
+        }
+        return ((((dst / Debugger.TWO_POW32)|0) & ((src / Debugger.TWO_POW32)|0)) * Debugger.TWO_POW32) + ((dst & src) >>> 0);
+    }
+
+    /**
+     * evalIOR(dst, src)
+     *
+     * Adapted from /modules/pdp10/lib/cpuops.js:PDP10.IOR().
+     *
+     * Performs the logical "inclusive-or" (OR) of two operands > 32 bits.
+     *
+     * @this {Debugger}
+     * @param {number} dst
+     * @param {number} src
+     * @return {number} (dst | src)
+     */
+    evalIOR(dst, src)
+    {
+        /*
+         * We OR the low 32 bits separately from the higher bits, and then combine them with addition.
+         * Since all bits above 32 will be zero, and since 0 OR 0 is 0, no special masking for the higher
+         * bits is required.
+         *
+         * WARNING: When using JavaScript's 32-bit operators with values that could set bit 31 and produce a
+         * negative value, it's critical to perform a final right-shift of 0, ensuring that the final result is
+         * positive.
+         */
+        if (this.nBits <= 32) {
+            return dst | src;
+        }
+        return ((((dst / Debugger.TWO_POW32)|0) | ((src / Debugger.TWO_POW32)|0)) * Debugger.TWO_POW32) + ((dst | src) >>> 0);
+    }
+
+    /**
+     * truncate(v, nBits, fUnsigned)
+     *
+     * @this {Debugger}
+     * @param {number} v
+     * @param {number} [nBits]
+     * @param {boolean} [fUnsigned]
+     * @return {number}
+     */
+    truncate(v, nBits, fUnsigned)
+    {
+        var limit, vNew = v;
+        nBits = nBits || this.nBits;
+
+        if (fUnsigned) {
+            if (nBits == 32) {
+                vNew = v >>> 0;
+            }
+            else if (nBits < 32) {
+                vNew = v & ((1 << nBits) - 1);
+            }
+            else {
+                limit = Math.pow(2, nBits);
+                if (v < 0 || v >= limit) {
+                    vNew = v % limit;
+                    if (vNew < 0) vNew += limit;
+                }
+            }
+        }
+        else {
+            if (nBits <= 32) {
+                vNew = v | 0;
+            } else {
+                limit = Math.pow(2, nBits - 1);
+                if (v < -limit || v >= limit) {
+                    vNew = v % limit;
+                }
+            }
+        }
+        if (v != vNew) {
+            if (MAXDEBUG) this.println("warning: value " + v + " truncated to " + vNew);
+            v = vNew;
+        }
+        return v;
+    }
+
+    /**
+     * evalOps(aVals, aOps, cOps)
+     *
+     * Some of our clients want a specific number of bits of integer precision.  If that precision is
+     * greater than 32, some of the operations below will fail; for example, JavaScript bitwise operators
+     * always truncate the result to 32 bits, so beware when using shift operations.  Similarly, it would
+     * be wrong to always "|0" the final result, which is why we rely on truncate() now.
+     *
+     * Note that JavaScript integer precision is limited to 52 bits.  For example, in Node, if you set a
+     * variable to 0x80000001:
      *
      *      foo=0x80000001|0
      *
-     * and then calculate foo*foo using "(foo*foo).toString(2)", the result is:
+     * then calculate foo*foo and display the result in binary using "(foo*foo).toString(2)":
      *
      *      '11111111111111111111111111111100000000000000000000000000000000'
      *
@@ -313,11 +431,10 @@ class Debugger extends Component {
      * @this {Debugger}
      * @param {Array.<number>} aVals
      * @param {Array.<string>} aOps
-     * @param {number} [cOps] (default is all)
+     * @param {number} [cOps] (default is -1 for all)
      * @return {boolean} true if successful, false if error
      */
-    evalExpression(aVals, aOps, cOps) {
-        cOps = cOps || -1;
+    evalOps(aVals, aOps, cOps = -1) {
         while (cOps-- && aOps.length) {
             var chOp = aOps.pop();
             if (aVals.length < 2) return false;
@@ -370,13 +487,14 @@ class Debugger extends Component {
                 valNew = (val1 != val2? 1 : 0);
                 break;
             case '&':
-                valNew = val1 & val2;
+                valNew = this.evalAND(val1, val2);
                 break;
-            case '^':
-                valNew = val1 ^ val2;
-                break;
+            case '!':           // alias for MACRO-10 to perform a bitwise inclusive-or (OR)
             case '|':
-                valNew = val1 | val2;
+                valNew = this.evalIOR(val1, val2);
+                break;
+            case '^^':          // since MACRO-10 uses '^' for base overrides, you must now use '^^' for bitwise exclusive-or (XOR)
+                valNew = val1 ^ val2;
                 break;
             case '&&':
                 valNew = (val1 && val2? 1 : 0);
@@ -387,7 +505,7 @@ class Debugger extends Component {
             default:
                 return false;
             }
-            aVals.push(valNew|0);
+            aVals.push(this.truncate(valNew, this.nBits));
         }
         return true;
     }
@@ -409,19 +527,19 @@ class Debugger extends Component {
      *      ...
      *
      * We pop 1 "binop" from aOps and 2 values from aVals whenever a "binop" of lower priority than its
-     * predecessor is encountered, evaluate, and push the result back onto aVals.
+     * predecessor is encountered, evaluate, and push the result back onto aVals.  Unary operators like
+     * '~' and ternary operators like '?:' are not supported.
      *
-     * Unary operators like '~' and ternary operators like '?:' are not supported; neither are parentheses.
+     * parseReference() makes it possible to write parenthetical-style sub-expressions by using whatever
+     * characters achGroup contains (default is braces}.  Address references are resolved using the characters
+     * in achAddress (default is brackets).
      *
-     * However, parseReference() now makes it possible to write parenthetical-style sub-expressions by using
-     * {...} (braces), as well as address references by using [...] (brackets).
+     * Why not always use parentheses for sub-expressions?  Because parseReference() serves multiple purposes,
+     * the other being reference replacement in message strings passing through replaceRegs(), and some
+     * Debuggers don't want parentheses taking on a new meaning in message strings.
      *
-     * Why am I using braces instead of parentheses for sub-expressions?  Because parseReference() serves
-     * multiple purposes, the other being reference replacement in message strings passing through replaceRegs(),
-     * and I didn't want parentheses taking on a new meaning in message strings.
-     *
-     * However, a Debugger can override this choice by setting fParens to true, if there's no conflict in its
-     * replaceRegs() implementation.
+     * However, a Debugger can override these choices by modifying achGroup and/or achAddress, if there's no
+     * conflict in its replaceRegs() implementation.
      *
      * @this {Debugger}
      * @param {string|undefined} sExp
@@ -431,26 +549,37 @@ class Debugger extends Component {
     parseExpression(sExp, fPrint) {
         var value;
 
-        if (sExp) {
-            /*
-             * First process (and eliminate) any references, aka sub-expressions.
-             */
-            sExp = this.parseReference(sExp);
+        /*
+         * First process (and eliminate) any references, aka sub-expressions.
+         */
+        if (sExp) sExp = this.parseReference(sExp);
 
+        if (sExp) {
             var i = 0;
             var fError = false;
             var sExpOrig = sExp;
             var aVals = [], aOps = [];
             /*
-             * All browsers (including, I believe, IE9 and up) support the following idiosyncrasy of a regexp split():
-             * when the regexp uses a capturing pattern, the resulting array will include entries for all the pattern
+             * All browsers (including, I believe, IE9 and up) support the following idiosyncrasy of a RegExp split():
+             * when the RegExp uses a capturing pattern, the resulting array will include entries for all the pattern
              * matches along with the non-matches.  This effectively means that, in the set of expressions that we
              * support, all even entries in asValues will contain "values" and all odd entries will contain "operators".
              *
-             * And although I tried to list the supported operators in "precedential" order, bitwise operators must
-             * be out-of-order so that we don't mistakenly match either '>' or '<' when they're part of '>>' or '<<'.
+             * Although I starting listing the operators in the RegExp in "precedential" order, that's not important;
+             * what IS important is listing operators than contain shorter operators first.  For example, bitwise
+             * shift operators must be listed BEFORE the logical less-than or greater-than operators.
+             *
+             * Finally, to better accommodate MACRO-10 syntax, I've replaced the single '^' for XOR with '^^', since
+             * MACRO-10 uses prefixes like "^D", "^O" and "^B" with numeric constants to indicate a base override, and
+             * I've added '!' as an alias for '|' to perform bitwise inclusive-or.
+             *
+             * MACRO-10 supports only a subset of all the PCjs operators; for example, MACRO-10 doesn't support bitwise
+             * exclusive-or, shift operators, or any of the boolean logical/compare operators.  But unless we run into
+             * conflicts, I prefer sticking with this common set of operators.
+             *
+             * WARNING: Whenever you make changes to this RegExp, make sure you update aBinOpPrecedence as needed, too.
              */
-            var regExp = /(\|\||&&|\||^|&|!=|==|>=|>>>|>>|>|<=|<<|<|-|\+|%|\/|\*)/;
+            var regExp = /(\|\||&&|\||^^|&|!=|!|==|>=|>>>|>>|>|<=|<<|<|-|\+|%|\/|\*)/;
             var asValues = sExp.split(regExp);
             while (i < asValues.length) {
                 var sValue = asValues[i++];
@@ -466,17 +595,17 @@ class Debugger extends Component {
                     fPrint = false;
                     break;
                 }
-                aVals.push(v);
+                aVals.push(this.truncate(v, this.nBits));
                 if (i == asValues.length) break;
                 var sOp = asValues[i++], cchOp = sOp.length;
                 this.assert(Debugger.aBinOpPrecedence[sOp] != null);
                 if (aOps.length && Debugger.aBinOpPrecedence[sOp] < Debugger.aBinOpPrecedence[aOps[aOps.length-1]]) {
-                    this.evalExpression(aVals, aOps, 1);
+                    this.evalOps(aVals, aOps, 1);
                 }
                 aOps.push(sOp);
                 sExp = sExp.substr(cchValue + cchOp);
             }
-            if (!this.evalExpression(aVals, aOps) || aVals.length != 1) {
+            if (!this.evalOps(aVals, aOps) || aVals.length != 1) {
                 fError = true;
             }
             if (!fError) {
@@ -494,26 +623,45 @@ class Debugger extends Component {
      *
      * Returns the given string with any "{expression}" sequences replaced with the value of the expression,
      * and any "[address]" references replaced with the contents of the address.  Expressions are parsed BEFORE
-     * addresses.  Owing to this function's simplistic parsing, nested braces/brackets are not supported
-     * (define intermediate variables if needed).
+     * addresses.
      *
      * @this {Debugger}
      * @param {string} s
-     * @return {string}
+     * @return {string|undefined}
      */
     parseReference(s) {
         var a;
-        var chOpen = this.fParens? '(' : '{';
-        var chClose = this.fParens? ')' : '}';
-        var reSubExp = new RegExp(this.fParens? "\\((.*?)\\)" : "\\{(.*?)\\}");
+        var chOpen = this.achGroup[0];
+        var chClose = this.achGroup[1];
+        var chEscape = (chOpen == '(' || chOpen == '{' || chOpen == '[')? '\\' : '';
+        var chInnerEscape = (chOpen == '['? '\\' : '');
+        var reSubExp = new RegExp(chEscape + chOpen + "([^" + chInnerEscape + chOpen + chInnerEscape + chClose + "]+)" + chEscape + chClose);
         while (a = s.match(reSubExp)) {
-            if (a[1].indexOf(chOpen) >= 0) break;       // unsupported nested brace(s)
             var value = this.parseExpression(a[1]);
-            s = s.replace(chOpen + a[1] + chClose, value != null? this.toStrBase(value) : "undefined");
+            if (value === undefined) return undefined;
+            var sSearch = chOpen + a[1] + chClose;
+            var sReplace = value != null? this.toStrBase(value) : "undefined";
+            /*
+             * Note that by default, the String replace() method only replaces the FIRST occurrence,
+             * and there MIGHT be more than one occurrence of the expression we just parsed, so we could
+             * do this instead:
+             *
+             *      s = s.split(sSearch).join(sReplace);
+             *
+             * However, that's knd of an expensive (slow) solution, and it's not strictly necessary, since
+             * any additional identical expressions will be picked up on a subsequent iteration through this loop.
+             */
+            s = s.replace(sSearch, sReplace);
         }
-        while (a = s.match(/\[(.*?)]/)) {
-            if (a[1].indexOf('[') >= 0) break;          // unsupported nested bracket(s)
-            s = this.parseAddrReference(s, a[1]);
+        if (this.achAddress.length) {
+            chOpen = this.achAddress[0];
+            chClose = this.achAddress[1];
+            chEscape = (chOpen == '(' || chOpen == '{' || chOpen == '[')? '\\' : '';
+            chInnerEscape = (chOpen == '['? '\\' : '');
+            reSubExp = new RegExp(chEscape + chOpen + "([^" + chInnerEscape + chOpen + chInnerEscape + chClose + "]+)" + chEscape + chClose);
+            while (a = s.match(reSubExp)) {
+                s = this.parseAddrReference(s, a[1]);
+            }
         }
         return this.parseSysVars(s);
     }
@@ -565,9 +713,13 @@ class Debugger extends Component {
                     value = Str.parseInt(sValue, this.nBase);
                 }
             }
-            if (value == null && !fQuiet) this.println("invalid " + (sName? sName : "value") + ": " + sValue);
+            if (value == null && !fQuiet) {
+                this.println("invalid " + (sName? sName : "value") + ": " + sValue);
+            }
         } else {
-            if (!fQuiet) this.println("missing " + (sName || "value"));
+            if (!fQuiet) {
+                this.println("missing " + (sName || "value"));
+            }
         }
         return value;
     }
@@ -593,6 +745,28 @@ class Debugger extends Component {
         sVar = (sVar != null? (sVar + ": ") : "");
         this.println(sVar + sValue);
         return fDefined;
+    }
+
+    /**
+     * resetVariables()
+     *
+     * @this {Debugger}
+     * @return {Object}
+     */
+    resetVariables() {
+        var a = this.aVariables;
+        this.aVariables = {};
+        return a;
+    }
+
+    /**
+     * restoreVariables(a)
+     *
+     * @this {Debugger}
+     * @param {Object} a (from previous resetVariables() call)
+     */
+    restoreVariables(a) {
+        this.aVariables = a;
     }
 
     /**
@@ -651,17 +825,8 @@ class Debugger extends Component {
      *
      * Use this instead of Str's toOct()/toDec()/toHex() to convert numbers to the Debugger's default base.
      *
-     * TODO: The 32-bit limitation on n is imposed by the Str functions we call, not us.  Consider modifying
-     * those functions to support a higher number of bits (eg, 36), using arithmetic operators instead of bit-wise
-     * operators, and increasing the maximum number of supported bits to at least 52, while still using JavaScript
-     * floating-point numbers as the underlying data type.
-     *
-     * For now, the only component that really cares about supporting more than 32 bits (eg, 36 bits) is the PDP-10
-     * Debugger, which currently uses its own functions (eg, toStrWord()) to divide quantities into smaller (eg, 18-bit)
-     * values.
-     *
      * @this {Debugger}
-     * @param {number|null|undefined} n (interpreted as a 32-bit value)
+     * @param {number|null|undefined} n
      * @param {number} [nBits] (-1 to strip leading zeros, 0 to allow a variable number of digits)
      * @return {string}
      */
@@ -691,8 +856,9 @@ if (DEBUGGER) {
     Debugger.aBinOpPrecedence = {
         '||':   0,      // logical OR
         '&&':   1,      // logical AND
+        '!':    2,      // bitwise OR
         '|':    2,      // bitwise OR
-        '^':    3,      // bitwise XOR
+        '^^':   3,      // bitwise XOR
         '&':    4,      // bitwise AND
         '!=':   5,      // inequality
         '==':   5,      // equality
@@ -709,6 +875,11 @@ if (DEBUGGER) {
         '/':    9,      // division
         '*':    9       // multiplication
     };
+
+    /*
+     * Assorted constants
+     */
+    Debugger.TWO_POW32 = Math.pow(2, 32);
 
 }   // endif DEBUGGER
 
