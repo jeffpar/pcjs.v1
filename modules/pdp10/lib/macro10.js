@@ -76,35 +76,43 @@ var Fixup;
  * @class Macro10
  * @property {string} sURL
  * @property {number} nAddr
+ * @property {string} sOptions
  * @property {DebuggerPDP10} dbg
- * @property {function(Macro10,string,number)} done
+ * @property {function(...)} done
+ * @property {string} sText
+ * @property {number} iURL
+ * @property {Array.<string>} asURLs
  */
 class Macro10 {
     /**
-     * Macro10(sURL, nAddr, dbg, done)
+     * Macro10(sURL, nAddr, sOptions, dbg, done)
      *
-     * The done() callback is called after the resource has been loaded and parsed, with an error code
-     * indicating overall success or failure.  The caller must use other methods to obtain further results.
+     * Requests the resource(s) specified by sURL; multiple resources can be requested by separating
+     * them with semicolons.
      *
-     * The callback is passed three parameters:
+     * The done() callback is called after the resource(s) have been loaded and parsed.  The caller
+     * must use other methods to obtain further results (eg, getBin()).
      *
-     *      done(macro10, sURL, nErrorCode)
+     * The callback includes a non-zero error code if there was an error (and the URL):
      *
-     * If nErrorCode is zero, the assembly process completed successfully.
+     *      done(nErrorCode, sURL)
      *
-     * For access to basic services (eg, println()), we rely on the caller.  This is NOT an extension of
-     * Component, so those services are NOT part of this class.
+     * We rely on the calling component (dbg) to provide a variety of helper services (eg, println(),
+     * parseExpression(), etc).  This is NOT a subclass of Component, so Component services are not part
+     * of this class.
      *
      * @this {Macro10}
-     * @param {string} sURL (the URL of the resource to be assembled)
+     * @param {string} sURL (the URL(s) of the resource to be assembled)
      * @param {number|null} nAddr (the absolute address to assemble the code at, if any)
-     * @param {DebuggerPDP10} dbg (used to provide services like println() to the Macro10 class)
-     * @param {function(Macro10,string,number)} done
+     * @param {string} sOptions (zero or more letter codes to control the assembly process)
+     * @param {DebuggerPDP10} dbg (used to provide helper services to the Macro10 class)
+     * @param {function(...)} done
      */
-    constructor(sURL, nAddr, dbg, done)
+    constructor(sURL, nAddr, sOptions, dbg, done)
     {
         this.sURL = sURL;
         this.nAddr = nAddr || 0;
+        this.sOptions = sOptions;
         this.dbg = dbg;
         this.done = done;
 
@@ -174,8 +182,8 @@ class Macro10 {
         this.chMacroOpen = this.chMacroClose = '';
 
         /**
-         * If an ASCII/ASCIZ/SIXBIT pseudo-op is active, chASCII is set to the separator and sASCII collects
-         * the intervening character(s).
+         * If an ASCII/ASCIZ/SIXBIT pseudo-op is active, chASCII is set to the separator
+         * and sASCII collects the intervening character(s).
          *
          * @type {null|string}
          */
@@ -186,12 +194,49 @@ class Macro10 {
          */
         this.sASCII = "";
 
+        this.sText = "";
+        this.iURL = 0;
+        this.asURLs = sURL.split(';');
+        this.loadNextResource();
+    }
+
+    /**
+     * loadNextResource()
+     *
+     * @this {Macro10}
+     */
+    loadNextResource()
+    {
+        if (this.iURL == this.asURLs.length) {
+            this.done(this.parseFile());
+            return;
+        }
         var macro10 = this;
-        Web.getResource(sURL, null, true, function processMacro10(sURL, sResource, nErrorCode) {
-            if (!nErrorCode) {
-                nErrorCode = macro10.parseFile(sURL, sResource);
+        Web.getResource(this.asURLs[this.iURL++], null, true, function processMacro10(sURL, sResource, nErrorCode) {
+            if (nErrorCode) {
+                macro10.done(nErrorCode, sURL);
+                return;
             }
-            macro10.done(macro10, sURL, nErrorCode);
+            var sText = sResource;
+            if (Str.endsWith(sURL, ".html")) {
+                /*
+                 * We want to parse ONLY the text between <PRE>...</PRE> tags, and eliminate any HTML entities.
+                 */
+                sText = "";
+                var match, re = /<pre>([\s\S]*?)<\/pre>/gi;
+                while (match = re.exec(sResource)) {
+                    var s = match[1];
+                    if (s.indexOf('&') >= 0) s = s.replace(/&lt;/gi, '<').replace(/&gt;/gi, '>').replace(/&amp;/gi, '&');
+                    sText += s;
+                }
+                match = sText.match(/&[a-z]+;/i);
+                if (match) macro10.warning("unrecognized HTML entity: " + match[0]);
+            }
+            if (macro10.sText) macro10.sText += '\n';
+            macro10.sText += sText;
+            setTimeout(function() {
+                macro10.loadNextResource();
+            }, 0);
         });
     }
 
@@ -207,38 +252,29 @@ class Macro10 {
     }
 
     /**
-     * parseFile(sPath, sContents)
+     * parseFile()
      *
      * Begin the assembly process.
      *
      * @this {Macro10}
-     * @param {string} sPath
-     * @param {string} sContents
      * @return {number}
      */
-    parseFile(sPath, sContents)
+    parseFile()
     {
         var macro10 = this;
+
+        /*
+         * If the "preprocess" option is set, then just return the plain text we retrieved.
+         */
+        if (this.sOptions.indexOf('p') >= 0) {
+            this.dbg.println(this.sText);
+            return 0;
+        }
+
         var a = this.dbg.resetVariables();
         try {
-            var sText = sContents;
-            if (Str.endsWith(sPath, ".html")) {
-                /*
-                 * We want to parse ONLY the text between <PRE>...</PRE> tags, and eliminate any HTML entities.
-                 */
-                sText = "";
-                var match, re = /<pre>([\s\S]*?)<\/pre>/gi;
-                while (match = re.exec(sContents)) {
-                    var s = match[1];
-                    if (s.indexOf('&') >= 0) s = s.replace(/&lt;/gi, '<').replace(/&gt;/gi, '>').replace(/&amp;/gi, '&');
-                    sText += s;
-                }
-                match = sText.match(/&[a-z]+;/i);
-                if (match) this.warning("unrecognized HTML entity: " + match[0]);
-            }
-
             var i;
-            var asLines = sText.split(/\r?\n/);
+            var asLines = this.sText.split(/\r?\n/);
             for (i = 0; i < asLines.length; i++) {
                 this.nLine++;
                 if (!this.parseLine(asLines[i] + '\r\n')) break;

@@ -187,8 +187,8 @@ class DebuggerPDP10 extends Debugger {
             this.macro10 = null;
 
             /*
-             * Make it easier to access DebuggerPDP10 commands from an external REPL (eg, the WebStorm
-             * "live" console window); eg:
+             * Make it easier to access DebuggerPDP10 commands from an external REPL;
+             * eg, the WebStorm "live" console window:
              *
              *      pdp10('r')
              *      pdp10('dw 0:0')
@@ -2566,18 +2566,20 @@ class DebuggerPDP10 extends Debugger {
             return;
         }
 
-        if (sOpcode[0] == '/' || sOpcode.indexOf(':') >= 0) {
+        var match = sOpcode.match(/^(['"]?)((\/|http:).*)\1$/);
+        if (match) {
             var dbg = this;
             if (this.macro10) {
                 dbg.println("assembly already in progress");
             }
             else {
                 var addrLoad = dbgAddr.addr;
-                this.macro10 = new Macro10(sOpcode, addrLoad, dbg, function(macro10, sURL, nErrorCode) {
+                var sOptions = ""; // "p";
+                this.macro10 = new Macro10(match[2], addrLoad, sOptions, dbg, function doneMacro10(nErrorCode, sURL) {
                     if (!nErrorCode) {
-                        dbg.loadBin(macro10.getBin(), addrLoad);
+                        dbg.loadBin(dbg.macro10.getBin(), addrLoad);
                     } else {
-                        dbg.println("error assembling " + sURL + ": (" + nErrorCode + ")");
+                        dbg.println("error (" + nErrorCode + ") processing " + sURL);
                     }
                     dbg.macro10 = null;
                 });
