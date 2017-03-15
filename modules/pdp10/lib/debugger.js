@@ -2557,6 +2557,15 @@ class DebuggerPDP10 extends Debugger {
      * NOTE: As the previous example implies, you can even assemble new instructions into ROM address space;
      * as our setByte() function explains, the ROM write-notification handlers only refuse writes from the CPU.
      *
+     * When filename(s) or URL(s) are provided in lieu of an opcode, we pass those on to the Macro10 component
+     * for assembling, along with any option letters that were included with the "a" command; for example, if "ap"
+     * was specified, then "p" will be passed to Macro10 as an option.
+     *
+     * Macro10 options include:
+     *
+     *      p:  preprocess the specified resource(s) without assembling them
+     *      l:  generate listing information
+     *
      * @this {DebuggerPDP10}
      * @param {Array.<string>} asArgs is the complete argument array, beginning with the "a" command in asArgs[0]
      */
@@ -2574,6 +2583,7 @@ class DebuggerPDP10 extends Debugger {
             return;
         }
 
+        var sOptions = asArgs[0].substr(1);
         var match = sOpcode.match(/^(['"]?)((\/|http:).*)\1$/);
         if (match) {
             var dbg = this;
@@ -2582,7 +2592,6 @@ class DebuggerPDP10 extends Debugger {
             }
             else {
                 var addrLoad = dbgAddr.addr;
-                var sOptions = "";      // add "p" for preprocessing only
                 this.macro10 = new Macro10(match[2], addrLoad, sOptions, dbg, function doneMacro10(nErrorCode, sURL) {
                     if (!nErrorCode) {
                         dbg.loadBin(dbg.macro10.getBin(), addrLoad);

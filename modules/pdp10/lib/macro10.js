@@ -107,7 +107,7 @@ class Macro10 {
      * @this {Macro10}
      * @param {string} sURL (the URL(s) of the resource to be assembled)
      * @param {number|null} nAddr (the absolute address to assemble the code at, if any)
-     * @param {string} sOptions (zero or more letter codes to control the assembly process)
+     * @param {string|null} sOptions (zero or more letter codes to control the assembly process)
      * @param {DebuggerPDP10} dbg (used to provide helper services to the Macro10 class)
      * @param {function(...)} done
      */
@@ -115,12 +115,12 @@ class Macro10 {
     {
         this.sURL = sURL;
         this.nAddr = nAddr || 0;
-        this.sOptions = sOptions;
+        this.sOptions = sOptions || "";
         this.dbg = dbg;
         this.done = done;
 
         /*
-         * Set up all the services we need to use.
+         * Set up shortcuts to frequently used helper services that the caller must provide.
          */
         this.println = dbg.println;
 
@@ -270,7 +270,7 @@ class Macro10 {
          * If the "preprocess" option is set, then just return the plain text we retrieved.
          */
         if (this.sOptions.indexOf('p') >= 0) {
-            this.dbg.println(this.sText);
+            this.println(this.sText);
             return 0;
         }
 

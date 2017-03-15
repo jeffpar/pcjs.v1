@@ -13,12 +13,30 @@ PDP-10 KA10 BASIC INSTRUCTION DIAGNOSTIC
 ----------------------------------------
 
 The *PDP-10 KA10 BASIC INSTRUCTION DIAGNOSTIC* (MAINDEC-10-DAKAD-B-D) test code has been extracted from [DAKAD.MAC](DAKAD.MAC)
-[[original file](http://pdp-10.trailing-edge.com/klad_sources/01/klad.sources/dakaam.mac.html)] and is shown below,
-along with a [PDP-10 Test Machine with Debugger](/devices/pdp10/machine/ka10/test/debugger/).
+[[original file](http://pdp-10.trailing-edge.com/klad_sources/01/klad.sources/dakadm.mac.html)] for use with the
+[PDP-10 Test Machine with Debugger](/devices/pdp10/machine/ka10/test/debugger/) below.
 
-The Debugger command `a 100 /apps/pdp10/tapes/diags/klad/dakad/TEST.MAC`
-can be used to test the new [Mini MACRO-10](http://archive.pcjs.org/pubs/dec/pdp10/tops10/02_1973AsmRef_macro.pdf)
-assembler being added to the PDP-10 Emulator.
+Resources for this test include:
+
+- [DAKAD.TXT](#dakadtxt)
+- [DAKAD.MAC](#dakadmac)
+- [DAKAD.SEQ](#dakadseq)
+
+The Debugger's assemble ("a") command can be used to test the new built-in
+[MACRO-10 mini-assembler](/modules/pdp10/lib/macro10.js), which supports a subset
+of the [MACRO-10](http://archive.pcjs.org/pubs/dec/pdp10/tops10/02_1973AsmRef_macro.pdf) assembly language.  This command:
+
+	a 100 /apps/pdp10/tapes/diags/klad/dakad/TEST.MAC
+
+will automatically read the [TEST.MAC](TEST.MAC) source file (a slightly modified copy of [DAKAD.MAC](DAKAD.MAC)), assemble it,
+and then load the binary output at the specified address.  Use the command `db 100` to dump the first block of binary data:
+
+	000100: 254000 000114  502112 026542   +...&PDP-1
+    000102: 301011 340542  301010 240646   0 KA10 BAS
+    000104: 446064 044634  516512 252606   IC INSTRUC
+    000106: 522231 747100  422230 143634   TION DIAGN
+    000110: 476472 444606  201206 424500   OSTIC (4) 
+    000112: 556110 145602  422721 505000   [DAKAD]...
 
 {% include machine.html id="testka10" %}
 
@@ -2279,3 +2297,9 @@ C22700:	SETZM	2		;INITIALIZE AC
 
 	JRST	BEGEND
 ```
+
+DAKAD.SEQ
+---------
+
+To view the contents of **DAKAD.SEQ** (a combination of [DAKAD.TXT](#dakadtxt), a MACRO-10 assembly listing, and run data),
+click [here](DAKAD.SEQ.txt).
