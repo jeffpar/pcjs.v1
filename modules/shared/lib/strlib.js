@@ -66,8 +66,8 @@ class Str {
      * allowed; we remove them all before calling the built-in parseInt().
      *
      * More recently, we've added support for "^D", "^O", and "^B" prefixes to accommodate the base overrides
-     * that the PDP-10's MACRO-10 assembly language supports.  If this support turns out to adversely affect
-     * other debuggers, then it will have to be "conditionalized".
+     * that the PDP-10's MACRO-10 assembly language supports (decimal, octal, and binary, respectively).
+     * If this support turns out to adversely affect other debuggers, then it will have to be "conditionalized".
      *
      * To summarize our non-standard alternatives: a 'y' suffix indicates binary, a '#' prefix indicates
      * octal, a '$' prefix indicates hex, and a "0b" prefix indicates binary IF at least one comma is present.
@@ -149,13 +149,37 @@ class Str {
                     if (chSuffix == null) s = s.substr(0, s.length - 1);
                 }
             }
-            var v;
+            /*
+             * This adds support for the MACRO-10 binary shifting (Bn) suffix, which must be stripped from the
+             * number before parsing, and then applied to the value after parsing.  If n is omitted, 35 is assumed,
+             * which is a net shift of zero.  If n < 35, then a left shift of (35 - n) is required; if n > 35, then
+             * a right shift of -(35 - n) is required.
+             */
+            var v, shift = 0;
+            var match = s.match(/(-?[0-9]+)B([0-9]*)/);
+            if (match) {
+                s = match[1];
+                shift = 35 - ((match[2] || 35) & 0xff);
+            }
             if (Str.isValidInt(s, base) && !isNaN(v = parseInt(s, base))) {
                 /*
                  * With the need to support larger (eg, 36-bit) integers, truncating to 32 bits is no longer helpful.
                  *
                  *      value = v|0;
                  */
+                if (shift) {
+                    /*
+                     * Since binary shifting is a logical operation, and since shifting by division only works properly
+                     * with positive numbers, we must convert a negative value to a positive value, by computing the two's
+                     * complement.
+                     */
+                    if (v < 0) v += Math.pow(2, 36);
+                    if (shift > 0) {
+                        v *= Math.pow(2, shift);
+                    } else {
+                        v = Math.trunc(v / Math.pow(2, -shift));
+                    }
+                }
                 value = v;
             }
         }

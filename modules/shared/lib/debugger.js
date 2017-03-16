@@ -103,6 +103,8 @@ class Debugger extends Component
              */
             this.nBase = +parmsDbg['base'] || 16;
 
+            this.nBaseSave = -1;        // used to provide one level of saveBase()/restoreBase()
+
             /*
              * Default number of bits of integer precision; it can be overridden by the Debugger
              * but there is no command to adjust it.
@@ -480,6 +482,35 @@ class Debugger extends Component
     }
 
     /**
+     * saveBase(nBase)
+     *
+     * @this {Debugger}
+     * @param {number} nBase
+     */
+    saveBase(nBase)
+    {
+        if (this.nBaseSave < 0) {
+            this.nBaseSave = this.nBase;
+            this.nBase = nBase;
+            return;
+        }
+        if (DEBUG) this.println("saveBase() overflow");
+    }
+
+    /**
+     * restoreBase()
+     *
+     * @this {Debugger}
+     */
+    restoreBase()
+    {
+        if (this.nBaseSave > 0) {
+            this.nBase = this.nBaseSave;
+            this.nBaseSave = -1;
+        }
+    }
+
+    /**
      * evalOps(aVals, aOps, cOps)
      *
      * Some of our clients want a specific number of bits of integer precision.  If that precision is
@@ -530,7 +561,6 @@ class Debugger extends Component
                 valNew = val1 + val2;
                 break;
             case '-':
-            case '--':
                 valNew = val1 - val2;
                 break;
             case '<<':
@@ -575,6 +605,24 @@ class Debugger extends Component
                 break;
             case '||':
                 valNew = (val1 || val2? 1 : 0);
+                break;
+            case '><':
+                valNew = val1;
+                val2 = 35 - (val2 & 0xff);
+                if (val2) {
+                    /*
+                     * Since binary shifting is a logical operation, and since shifting by division only works properly
+                     * with positive numbers, we must convert a negative value to a positive value, by computing the two's
+                     * complement.
+                     */
+                    if (valNew < 0) valNew += Math.pow(2, 36);
+                    if (val2 > 0) {
+                        valNew *= Math.pow(2, val2);
+                    } else {
+                        valNew = Math.trunc(valNew / Math.pow(2, -val2));
+                    }
+                }
+                this.restoreBase();
                 break;
             default:
                 return false;
@@ -633,6 +681,7 @@ class Debugger extends Component
         if (sExp) {
             var i = 0;
             var fError = false;
+            var fNegate = false;
             var sExpOrig = sExp;
             var aVals = [], aOps = [];
 
@@ -646,17 +695,25 @@ class Debugger extends Component
              * what IS important is listing operators than contain shorter operators first.  For example, bitwise
              * shift operators must be listed BEFORE the logical less-than or greater-than operators.
              *
-             * Finally, to better accommodate MACRO-10 syntax, I've replaced the single '^' for XOR with '^^', since
+             * Also, to better accommodate MACRO-10 syntax, I've replaced the single '^' for XOR with '^^', since
              * MACRO-10 uses prefixes like "^D", "^O" and "^B" with numeric constants to indicate a base override, and
              * I've added '!' as an alias for '|' to perform bitwise inclusive-or.
+             *
+             * The MACRO-10 binary shifting operator ('B') is a bit more problematic, since a capital B can also appear
+             * inside symbols.  So I pre-scan for that operator and replace occurrences with an internal operator ('><').
+             * Note that Str.parseInt(), which parseValue() relies on, also support numeric constants with an embedded
+             * 'B' shifting operator, just to be safe.
              *
              * MACRO-10 supports only a subset of all the PCjs operators; for example, MACRO-10 doesn't support bitwise
              * exclusive-or, shift operators, or any of the boolean logical/compare operators.  But unless we run into
              * conflicts, I prefer sticking with this common set of operators.
-             *
+             */
+            sExp = sExp.replace(/([^A-Z0-9$%.][0-9]+)B/, "$1><");
+
+            /*
              * WARNING: Whenever you make changes to this RegExp, make sure you update aBinOpPrecedence as needed, too.
              */
-            var regExp = /(\|\||&&|\||\^\^|&|!=|!|==|>=|>>>|>>|>|<=|<<|<|-|\+|%|\/|\*)/;
+            var regExp = /(\|\||&&|\||\^\^|><|&|!=|!|==|>=|>>>|>>|>|<=|<<|<|-|\+|%|\/|\*)/;
             var asValues = sExp.split(regExp);
 
             while (i < asValues.length) {
@@ -672,31 +729,38 @@ class Debugger extends Component
                         fError = true;
                         break;
                     }
-                    /*
-                     * We detect a unary minus by the presence of a blank value, and replace the unary minus
-                     * with a "double minus", which does NOT mean decrement, but rather transforms the unary
-                     * operator into a high-priority binary operator (subtraction from zero).
-                     */
-                    sOp = '--'; sValue = '0';
+                    fNegate = true;
                 }
-                var v = this.parseValue(sValue, null, fQuiet);
-                if (v === undefined) {
-                    if (this.sUndefined == null && fQuiet) {
-                        this.sUndefined = sValue;
-                        v = 0;
-                    } else {
-                        fError = true;
-                        fQuiet = !fQuiet;
-                        break;
+                else {
+                    var v = this.parseValue(sValue, null, fQuiet, fNegate);
+                    if (v === undefined) {
+                        if (this.sUndefined == null && fQuiet) {
+                            this.sUndefined = sValue;
+                            v = 0;
+                        } else {
+                            fError = true;
+                            fQuiet = !fQuiet;
+                            break;
+                        }
                     }
+                    aVals.push(this.truncate(v));
+                    if (!sOp) break;
+                    this.assert(Debugger.aBinOpPrecedence[sOp] != null);
+                    if (aOps.length && Debugger.aBinOpPrecedence[sOp] < Debugger.aBinOpPrecedence[aOps[aOps.length - 1]]) {
+                        this.evalOps(aVals, aOps, 1);
+                    }
+                    aOps.push(sOp);
+                    /*
+                     * The MACRO-10 binary shifting operator assumes a base-10 shift count, regardless of the current
+                     * base, so we must override the current base to ensure the count is parsed correctly.
+                      *
+                     * TODO: The following kludge will not save us if the binary shift count is a sub-expression,
+                     * since we currently evaluate all sub-expressions first, via parseReference().  We will have to
+                     * rewrite this code to fold sub-expression parsing into the main loop if that becomes a problem.
+                     */
+                    if (sOp == '><') this.saveBase(10);
+                    fNegate = false;
                 }
-                aVals.push(this.truncate(v));
-                if (!sOp) break;
-                this.assert(Debugger.aBinOpPrecedence[sOp] != null);
-                if (aOps.length && Debugger.aBinOpPrecedence[sOp] < Debugger.aBinOpPrecedence[aOps[aOps.length-1]]) {
-                    this.evalOps(aVals, aOps, 1);
-                }
-                aOps.push(sOp);
                 sExp = sExp.substr(cchValue + cchOp);
             }
             if (!this.evalOps(aVals, aOps) || aVals.length != 1) {
@@ -708,6 +772,7 @@ class Debugger extends Component
             } else {
                 if (fQuiet === false) this.println("error parsing '" + sExpOrig + "' at character " + (sExpOrig.length - sExp.length));
             }
+            this.restoreBase();
         }
         return value;
     }
@@ -789,15 +854,16 @@ class Debugger extends Component
     }
 
     /**
-     * parseValue(sValue, sName, fQuiet)
+     * parseValue(sValue, sName, fQuiet, fNegate)
      *
      * @this {Debugger}
      * @param {string|undefined} sValue
      * @param {string|null} [sName] is the name of the value, if any
      * @param {boolean} [fQuiet]
+     * @param {boolean} [fNegate]
      * @return {number|undefined} numeric value, or undefined if sValue is either undefined or invalid
      */
-    parseValue(sValue, sName, fQuiet)
+    parseValue(sValue, sName, fQuiet, fNegate)
     {
         var value;
         if (sValue != null) {
@@ -807,11 +873,16 @@ class Debugger extends Component
             } else {
                 value = this.getVariable(sValue);
                 if (value == null) {
-                    value = Str.parseInt(sValue, this.nBase);
+                    value = Str.parseInt(fNegate? ('-' + sValue) : sValue, this.nBase);
+                    fNegate = false;
                 }
             }
-            if (value == null && !fQuiet) {
-                this.println("invalid " + (sName? sName : "value") + ": " + sValue);
+            if (value != null) {
+                if (fNegate) value = -value;
+            } else {
+                if (!fQuiet) {
+                    this.println("invalid " + (sName? sName : "value") + ": " + sValue);
+                }
             }
         } else {
             if (!fQuiet) {
@@ -979,7 +1050,7 @@ if (DEBUGGER) {
         '%':    9,      // remainder
         '/':    9,      // division
         '*':    9,      // multiplication
-        '--':   10,     // subtract from zero (conversion of a unary minus)
+        '><':   10      // internal binary shifting (MACRO-10-style)
     };
 
     /*
