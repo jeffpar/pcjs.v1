@@ -2850,8 +2850,8 @@ class DebuggerPDP10 extends Debugger {
         if (dbgAddr.nBase) this.nBase = dbgAddr.nBase;
 
         var size = (sCmd == "db"? 1 : 2);
-        var nWords = len || 32;
-        var nWordsPerLine = (size == 1? 2 : 4);
+        var nWords = len || 16;
+        var nWordsPerLine = (size == 1? 1 : 4);
         var nLines = (((nWords + nWordsPerLine - 1) / nWordsPerLine)|0) || 1;
 
         var sDump = "";
@@ -2874,7 +2874,9 @@ class DebuggerPDP10 extends Debugger {
                 var nBits = 7;
                 var shift = 36 - nBits;
                 for (var i = 0; size == 1 && shift >= 0; i++) {
-                    var c = ((w / Math.pow(2, shift)) % Math.pow(2, nBits)) + (nBits == 6? 0x20 : 0);
+                    var c = ((w / Math.pow(2, shift)) % Math.pow(2, nBits));
+                    sData += this.toStrBase(c, nBits) + ' ';
+                    c += (nBits == 6? 0x20 : 0);
                     sChars += (c < 0x20? '.' : String.fromCharCode(c));
                     shift -= nBits;
                 }

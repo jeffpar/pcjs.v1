@@ -348,7 +348,7 @@ class Macro10 {
             sLine = this.addASCII(sLine);
         }
 
-        var reLine = /\s*([A-Z$%._][0-9A-Z$%.]*[:=]|)\s*([A-Z$%.][0-9A-Z$%.]*|)\s*([^;]+|)\s*(;?.*)/i;
+        var reLine = /\s*([A-Z$%._][0-9A-Z$%.]*[:=]|)\s*([A-Z$%.][0-9A-Z$%.]*|)\s*([^;]+|)(;?[\s\S]*)/i;
         var match = sLine.match(reLine);
         if (!match || match[4] && match[4].slice(0, 1) != ';') {
             this.error("failed to parse line: " + sLine);
@@ -358,7 +358,9 @@ class Macro10 {
         var sLabel = match[1];
         var sOperator = match[2].toUpperCase();
         var sOperands = match[3].trim();
-        var sComment = match[4].slice(1);
+        var sComment = match[4];
+        var sRemainder = match[3] + match[4];
+
         if (sLabel) {
             var chSep = sLabel.slice(-1);
             sLabel = sLabel.slice(0, -1);
@@ -369,8 +371,6 @@ class Macro10 {
                 sOperator = chSep;
             }
         }
-
-        sOperands = sOperands.trim();
 
         if (!sOperator && !sOperands) return true;
 
@@ -413,7 +413,7 @@ class Macro10 {
             case Macro10.PSEUDO_OP.ASCII:
             case Macro10.PSEUDO_OP.ASCIZ:
             case Macro10.PSEUDO_OP.SIXBIT:
-                this.addASCII(sOperands);
+                this.addASCII(sRemainder);
                 break;
 
             case Macro10.PSEUDO_OP.XWD:

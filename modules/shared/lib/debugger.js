@@ -103,8 +103,6 @@ class Debugger extends Component
              */
             this.nBase = +parmsDbg['base'] || 16;
 
-            this.nBaseSave = -1;        // used to provide one level of saveBase()/restoreBase()
-
             /*
              * Default number of bits of integer precision; it can be overridden by the Debugger
              * but there is no command to adjust it.
@@ -482,35 +480,6 @@ class Debugger extends Component
     }
 
     /**
-     * saveBase(nBase)
-     *
-     * @this {Debugger}
-     * @param {number} nBase
-     */
-    saveBase(nBase)
-    {
-        if (this.nBaseSave < 0) {
-            this.nBaseSave = this.nBase;
-            this.nBase = nBase;
-            return;
-        }
-        if (DEBUG) this.println("saveBase() overflow");
-    }
-
-    /**
-     * restoreBase()
-     *
-     * @this {Debugger}
-     */
-    restoreBase()
-    {
-        if (this.nBaseSave > 0) {
-            this.nBase = this.nBaseSave;
-            this.nBaseSave = -1;
-        }
-    }
-
-    /**
      * evalOps(aVals, aOps, cOps)
      *
      * Some of our clients want a specific number of bits of integer precision.  If that precision is
@@ -622,7 +591,6 @@ class Debugger extends Component
                         valNew = Math.trunc(valNew / Math.pow(2, -val2));
                     }
                 }
-                this.restoreBase();
                 break;
             default:
                 return false;
@@ -630,6 +598,113 @@ class Debugger extends Component
             aVals.push(this.truncate(valNew));
         }
         return true;
+    }
+
+    /**
+     * parseArray(asValues, iValue, iLimit, nBase, fQuiet)
+     *
+     * Helper function for parseExpression().
+     *
+     * Imagine the original expression was "2*{3+{4/2}}".  parseExpression() divides it into array elements:
+     *
+     *      0   1   2   3   4   5   6   7   8   9  10  11  12  13  14
+     *      -   -   -   -   -   -   -   -   -   -  --  --  --  --  --
+     *      2   *   _   {   3   +   _   {   4   /   2   }   _   }   _
+     *
+     * @param {Array.<string>} asValues
+     * @param {number} iValue
+     * @param {number} iLimit
+     * @param {number} nBase
+     * @param {boolean} [fQuiet]
+     * @return {number|undefined}
+     */
+    parseArray(asValues, iValue, iLimit, nBase, fQuiet)
+    {
+        var value;
+        var sValue, sOp;
+        var fError = false;
+        var fNegate = false;
+        var aVals = [], aOps = [];
+
+        var nBasePrev = this.nBase;
+        this.nBase = nBase;
+
+        while (iValue < iLimit) {
+            var v;
+            sValue = asValues[iValue++].trim();
+            sOp = (iValue < iLimit? asValues[iValue++] : "");
+
+            if (!sValue) {
+                if (sOp == '{') {
+                    var cOpen = 1;
+                    var iStart = iValue;
+                    while (iValue < iLimit) {
+                        sValue = asValues[iValue++].trim();
+                        sOp = (iValue < asValues.length? asValues[iValue++] : "");
+                        if (sOp == '{') {
+                            cOpen++;
+                        } else if (sOp == '}') {
+                            if (!--cOpen) break;
+                        }
+                    }
+                    v = this.parseArray(asValues, iStart, iValue-1, this.nBase, fQuiet);
+                    sValue = (iValue < iLimit? asValues[iValue++].trim() : "");
+                    sOp = (iValue < iLimit? asValues[iValue++] : "");
+                }
+                else {
+                    if (sOp != '-') {
+                        fError = true;
+                        break;
+                    }
+                    fNegate = true;
+                    continue;
+                }
+            }
+            else {
+                v = this.parseValue(sValue, null, fQuiet, fNegate);
+            }
+
+            if (v === undefined) {
+                if (this.sUndefined == null && fQuiet) {
+                    this.sUndefined = sValue;
+                    v = 0;
+                } else {
+                    fError = true;
+                    fQuiet = !fQuiet;
+                    break;
+                }
+            }
+
+            aVals.push(this.truncate(v));
+            if (!sOp) break;
+
+            this.assert(Debugger.aBinOpPrecedence[sOp] != null);
+            if (aOps.length && Debugger.aBinOpPrecedence[sOp] < Debugger.aBinOpPrecedence[aOps[aOps.length - 1]]) {
+                this.evalOps(aVals, aOps, 1);
+            }
+
+            aOps.push(sOp);
+
+            /*
+             * The MACRO-10 binary shifting operator assumes a base-10 shift count, regardless of the current
+             * base, so we must override the current base to ensure the count is parsed correctly.
+             */
+            this.nBase = (sOp == '><')? 10 : nBase;
+            fNegate = false;
+        }
+
+        if (!this.evalOps(aVals, aOps) || aVals.length != 1) {
+            fError = true;
+        }
+
+        if (!fError) {
+            value = aVals.pop();
+        } else if (fQuiet === false) {
+            this.println("parse error (" + (sValue || sOp) + ")");
+        }
+
+        this.nBase = nBasePrev;
+        return value;
     }
 
     /**
@@ -649,19 +724,8 @@ class Debugger extends Component
      *      ...
      *
      * We pop 1 "binop" from aOps and 2 values from aVals whenever a "binop" of lower priority than its
-     * predecessor is encountered, evaluate, and push the result back onto aVals.  Unary operators like
-     * '~' and ternary operators like '?:' are not supported.
-     *
-     * parseReference() makes it possible to write parenthetical-style sub-expressions by using whatever
-     * characters achGroup contains (default is braces}.  Address references are resolved using the characters
-     * in achAddress (default is brackets).
-     *
-     * Why not always use parentheses for sub-expressions?  Because parseReference() serves multiple purposes,
-     * the other being reference replacement in message strings passing through replaceRegs(), and some
-     * Debuggers don't want parentheses taking on a new meaning in message strings.
-     *
-     * However, a Debugger can override these choices by modifying achGroup and/or achAddress, if there's no
-     * conflict in its replaceRegs() implementation.
+     * predecessor is encountered, evaluate, and push the result back onto aVals.  Only selected unary
+     * operators are supported (eg, minus), and ternary operators like '?:' are not supported at all.
      *
      * @this {Debugger}
      * @param {string|undefined} sExp
@@ -672,18 +736,21 @@ class Debugger extends Component
     {
         var value;
 
-        /*
-         * First process (and eliminate) any references, aka sub-expressions.
-         */
         this.sUndefined = null;
-        if (sExp) sExp = this.parseReference(sExp);
 
         if (sExp) {
-            var i = 0;
-            var fError = false;
-            var fNegate = false;
-            var sExpOrig = sExp;
-            var aVals = [], aOps = [];
+
+            /*
+             * The default grouping characters for sub-expressions are braces; they can be changed by altering
+             * achGroup, but when that happens, we replace them all with braces anyway, for consistent parsing.
+             *
+             * Why not just always use parentheses for sub-expressions?  Because some debuggers use parseReference()
+             * to perform parenthetical value replacements in message strings, and they don't want parentheses taking
+             * on a new meaning in those strings.
+             */
+            if (this.achGroup[0] != '{') {
+                sExp = sExp.split(this.achGroup[0]).join('{').split(this.achGroup[1]).join('}');
+            }
 
             /*
              * All browsers (including, I believe, IE9 and up) support the following idiosyncrasy of a RegExp split():
@@ -699,80 +766,26 @@ class Debugger extends Component
              * MACRO-10 uses prefixes like "^D", "^O" and "^B" with numeric constants to indicate a base override, and
              * I've added '!' as an alias for '|' to perform bitwise inclusive-or.
              *
-             * The MACRO-10 binary shifting operator ('B') is a bit more problematic, since a capital B can also appear
-             * inside symbols.  So I pre-scan for that operator and replace occurrences with an internal operator ('><').
-             * Note that Str.parseInt(), which parseValue() relies on, also support numeric constants with an embedded
-             * 'B' shifting operator, just to be safe.
+             * The MACRO-10 binary shifting suffix ('B') is a bit more problematic, since a capital B can also appear
+             * inside symbols.  So I pre-scan for that operator and replace appropriate occurrences with an internal
+             * operator ('><').
+             *
+             * Note that Str.parseInt(), which parseValue() relies on, supports both the MACRO-10 base prefix overrides
+             * and the binary shifting suffix.
              *
              * MACRO-10 supports only a subset of all the PCjs operators; for example, MACRO-10 doesn't support bitwise
              * exclusive-or, shift operators, or any of the boolean logical/compare operators.  But unless we run into
              * conflicts, I prefer sticking with this common set of operators.
-             */
-            sExp = sExp.replace(/([^A-Z0-9$%.][0-9]+)B/, "$1><");
-
-            /*
+             *
              * WARNING: Whenever you make changes to this RegExp, make sure you update aBinOpPrecedence as needed, too.
              */
-            var regExp = /(\|\||&&|\||\^\^|><|&|!=|!|==|>=|>>>|>>|>|<=|<<|<|-|\+|%|\/|\*)/;
+            var regExp = /(\{|}|\|\||&&|\||\^\^|><|&|!=|!|==|>=|>>>|>>|>|<=|<<|<|-|\+|%|\/|\*)/;
+            sExp = sExp.replace(/(^|[^A-Z0-9$%.])([0-9]+)B/, "$1$2><");
             var asValues = sExp.split(regExp);
-
-            while (i < asValues.length) {
-                var sValue = asValues[i++];
-                var cchValue = sValue.length;
-                var sOp = null, cchOp = 0;
-                if (i < asValues.length) {
-                    sOp = asValues[i++]; cchOp = sOp.length;
-                }
-                sValue = Str.trim(sValue);
-                if (!sValue) {
-                    if (sOp != '-') {
-                        fError = true;
-                        break;
-                    }
-                    fNegate = true;
-                }
-                else {
-                    var v = this.parseValue(sValue, null, fQuiet, fNegate);
-                    if (v === undefined) {
-                        if (this.sUndefined == null && fQuiet) {
-                            this.sUndefined = sValue;
-                            v = 0;
-                        } else {
-                            fError = true;
-                            fQuiet = !fQuiet;
-                            break;
-                        }
-                    }
-                    aVals.push(this.truncate(v));
-                    if (!sOp) break;
-                    this.assert(Debugger.aBinOpPrecedence[sOp] != null);
-                    if (aOps.length && Debugger.aBinOpPrecedence[sOp] < Debugger.aBinOpPrecedence[aOps[aOps.length - 1]]) {
-                        this.evalOps(aVals, aOps, 1);
-                    }
-                    aOps.push(sOp);
-                    /*
-                     * The MACRO-10 binary shifting operator assumes a base-10 shift count, regardless of the current
-                     * base, so we must override the current base to ensure the count is parsed correctly.
-                      *
-                     * TODO: The following kludge will not save us if the binary shift count is a sub-expression,
-                     * since we currently evaluate all sub-expressions first, via parseReference().  We will have to
-                     * rewrite this code to fold sub-expression parsing into the main loop if that becomes a problem.
-                     */
-                    if (sOp == '><') this.saveBase(10);
-                    fNegate = false;
-                }
-                sExp = sExp.substr(cchValue + cchOp);
+            value = this.parseArray(asValues, 0, asValues.length, this.nBase, fQuiet);
+            if (value !== undefined && fQuiet === false) {
+                this.printValue(null, value);
             }
-            if (!this.evalOps(aVals, aOps) || aVals.length != 1) {
-                fError = true;
-            }
-            if (!fError) {
-                value = aVals.pop();
-                if (fQuiet === false) this.printValue(null, value);
-            } else {
-                if (fQuiet === false) this.println("error parsing '" + sExpOrig + "' at character " + (sExpOrig.length - sExp.length));
-            }
-            this.restoreBase();
         }
         return value;
     }
@@ -1050,7 +1063,9 @@ if (DEBUGGER) {
         '%':    9,      // remainder
         '/':    9,      // division
         '*':    9,      // multiplication
-        '><':   10      // internal binary shifting (MACRO-10-style)
+        '><':   10,     // internal binary shifting (MACRO-10-style)
+        '{':    11,
+        '}':    11
     };
 
     /*
