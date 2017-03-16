@@ -18,7 +18,7 @@ The module is currently comprised of the following components, as listed in [pac
 * [bus.js](/modules/pdp10/lib/bus.js)
 * [computer.js](/modules/pdp10/lib/computer.js)
 * [cpu.js](/modules/pdp10/lib/cpu.js)
-* [cpuop.js](/modules/pdp10/lib/cpuop.js)
+* [cpuops.js](/modules/pdp10/lib/cpuops.js)
 * [cpustate.js](/modules/pdp10/lib/cpustate.js)
 * [debugger.js](/modules/pdp10/lib/debugger.js)
 * [defines.js](/modules/pdp10/lib/defines.js)

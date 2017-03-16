@@ -350,6 +350,11 @@ class Debugger extends Component
         if (this.nBits <= 32) {
             return dst & src;
         }
+        /*
+         * Negative values don't yield correct results when dividing, so pass them through an unsigned truncate().
+         */
+        dst = this.truncate(dst, 0, true);
+        src = this.truncate(src, 0, true);
         return ((((dst / Debugger.TWO_POW32)|0) & ((src / Debugger.TWO_POW32)|0)) * Debugger.TWO_POW32) + ((dst & src) >>> 0);
     }
 
@@ -379,7 +384,46 @@ class Debugger extends Component
         if (this.nBits <= 32) {
             return dst | src;
         }
+        /*
+         * Negative values don't yield correct results when dividing, so pass them through an unsigned truncate().
+         */
+        dst = this.truncate(dst, 0, true);
+        src = this.truncate(src, 0, true);
         return ((((dst / Debugger.TWO_POW32)|0) | ((src / Debugger.TWO_POW32)|0)) * Debugger.TWO_POW32) + ((dst | src) >>> 0);
+    }
+
+    /**
+     * evalXOR(dst, src)
+     *
+     * Adapted from /modules/pdp10/lib/cpuops.js:PDP10.XOR().
+     *
+     * Performs the logical "exclusive-or" (XOR) of two operands > 32 bits.
+     *
+     * @this {Debugger}
+     * @param {number} dst
+     * @param {number} src
+     * @return {number} (dst ^ src)
+     */
+    evalXOR(dst, src)
+    {
+        /*
+         * We XOR the low 32 bits separately from the higher bits, and then combine them with addition.
+         * Since all bits above 32 will be zero, and since 0 XOR 0 is 0, no special masking for the higher
+         * bits is required.
+         *
+         * WARNING: When using JavaScript's 32-bit operators with values that could set bit 31 and produce a
+         * negative value, it's critical to perform a final right-shift of 0, ensuring that the final result is
+         * positive.
+         */
+        if (this.nBits <= 32) {
+            return dst | src;
+        }
+        /*
+         * Negative values don't yield correct results when dividing, so pass them through an unsigned truncate().
+         */
+        dst = this.truncate(dst, 0, true);
+        src = this.truncate(src, 0, true);
+        return ((((dst / Debugger.TWO_POW32)|0) ^ ((src / Debugger.TWO_POW32)|0)) * Debugger.TWO_POW32) + ((dst ^ src) >>> 0);
     }
 
     /**
@@ -415,9 +459,16 @@ class Debugger extends Component
             if (nBits <= 32) {
                 vNew = v | 0;
             } else {
+                /*
+                 * For negative values, we require them to fit within nBits - 1, reserving the left-most bit
+                 * for the sign bit, but for positive values, we can't really be sure if the caller is treating
+                 * the left-most bit as a sign bit or not, so the upper range is based on nBits.
+                 */
                 limit = Math.pow(2, nBits - 1);
-                if (v < -limit || v >= limit) {
+                if (v < -limit) {
                     vNew = v % limit;
+                } else if (v >= limit * 2) {
+                    vNew = v % (limit * 2);
                 }
             }
         }
@@ -469,7 +520,7 @@ class Debugger extends Component
                 break;
             case '/':
                 if (!val2) return false;
-                valNew = val1 / val2;
+                valNew = Math.trunc(val1 / val2);
                 break;
             case '%':
                 if (!val2) return false;
@@ -479,6 +530,7 @@ class Debugger extends Component
                 valNew = val1 + val2;
                 break;
             case '-':
+            case '--':
                 valNew = val1 - val2;
                 break;
             case '<<':
@@ -516,7 +568,7 @@ class Debugger extends Component
                 valNew = this.evalIOR(val1, val2);
                 break;
             case '^^':          // since MACRO-10 uses '^' for base overrides, you must now use '^^' for bitwise exclusive-or (XOR)
-                valNew = val1 ^ val2;
+                valNew = this.evalXOR(val1, val2);
                 break;
             case '&&':
                 valNew = (val1 && val2? 1 : 0);
@@ -527,7 +579,7 @@ class Debugger extends Component
             default:
                 return false;
             }
-            aVals.push(this.truncate(valNew, this.nBits));
+            aVals.push(this.truncate(valNew));
         }
         return true;
     }
@@ -583,6 +635,7 @@ class Debugger extends Component
             var fError = false;
             var sExpOrig = sExp;
             var aVals = [], aOps = [];
+
             /*
              * All browsers (including, I believe, IE9 and up) support the following idiosyncrasy of a RegExp split():
              * when the RegExp uses a capturing pattern, the resulting array will include entries for all the pattern
@@ -603,15 +656,28 @@ class Debugger extends Component
              *
              * WARNING: Whenever you make changes to this RegExp, make sure you update aBinOpPrecedence as needed, too.
              */
-            var regExp = /(\|\||&&|\||^^|&|!=|!|==|>=|>>>|>>|>|<=|<<|<|-|\+|%|\/|\*)/;
+            var regExp = /(\|\||&&|\||\^\^|&|!=|!|==|>=|>>>|>>|>|<=|<<|<|-|\+|%|\/|\*)/;
             var asValues = sExp.split(regExp);
+
             while (i < asValues.length) {
                 var sValue = asValues[i++];
                 var cchValue = sValue.length;
+                var sOp = null, cchOp = 0;
+                if (i < asValues.length) {
+                    sOp = asValues[i++]; cchOp = sOp.length;
+                }
                 sValue = Str.trim(sValue);
                 if (!sValue) {
-                    fError = true;
-                    break;
+                    if (sOp != '-') {
+                        fError = true;
+                        break;
+                    }
+                    /*
+                     * We detect a unary minus by the presence of a blank value, and replace the unary minus
+                     * with a "double minus", which does NOT mean decrement, but rather transforms the unary
+                     * operator into a high-priority binary operator (subtraction from zero).
+                     */
+                    sOp = '--'; sValue = '0';
                 }
                 var v = this.parseValue(sValue, null, fQuiet);
                 if (v === undefined) {
@@ -624,9 +690,8 @@ class Debugger extends Component
                         break;
                     }
                 }
-                aVals.push(this.truncate(v, this.nBits));
-                if (i == asValues.length) break;
-                var sOp = asValues[i++], cchOp = sOp.length;
+                aVals.push(this.truncate(v));
+                if (!sOp) break;
                 this.assert(Debugger.aBinOpPrecedence[sOp] != null);
                 if (aOps.length && Debugger.aBinOpPrecedence[sOp] < Debugger.aBinOpPrecedence[aOps[aOps.length-1]]) {
                     this.evalOps(aVals, aOps, 1);
@@ -913,7 +978,8 @@ if (DEBUGGER) {
         '+':    8,      // addition
         '%':    9,      // remainder
         '/':    9,      // division
-        '*':    9       // multiplication
+        '*':    9,      // multiplication
+        '--':   10,     // subtract from zero (conversion of a unary minus)
     };
 
     /*

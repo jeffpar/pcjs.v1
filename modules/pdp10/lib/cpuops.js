@@ -6378,8 +6378,11 @@ PDP10.split72 = function(res, ext)
 PDP10.setAddFlags = function(dst, src, res)
 {
     /*
-     * Isolate the top two bits of dst, src, and res by "shifting" them into bits 0 and 1 of the following variables.
+     * Isolate the top two bits of dst, src, and res by "shifting" them into bits 0 and 1 of the
+     * following variables.  Note that shifting with division only works when the values are unsigned
+     * (which they MUST be).
      */
+    Component.assert(dst >= 0 && src >= 0 && res >= 0);
     var dst01 = Math.trunc(dst / PDP10.TWO_POW34);
     var src01 = Math.trunc(src / PDP10.TWO_POW34);
     var res01 = Math.trunc(res / PDP10.TWO_POW34);
@@ -6440,7 +6443,11 @@ PDP10.AND = function(dst, src)
      * WARNING: When using JavaScript's 32-bit operators with values that could set bit 31 and produce a
      * negative value, it's critical to perform a final right-shift of 0, ensuring that the final result is
      * positive.
+     *
+     * Finally, all 36-bit data within a PDP-10 machine should ALWAYS be unsigned, which we now assert,
+     * because the divisions below would not yield correct results with negative inputs.
      */
+    Component.assert(dst >= 0 && src >= 0);
     return ((((dst / PDP10.TWO_POW32)|0) & ((src / PDP10.TWO_POW32)|0)) * PDP10.TWO_POW32) + ((dst & src) >>> 0);
 };
 
@@ -6491,7 +6498,11 @@ PDP10.EQV = function(dst, src)
      * WARNING: When using JavaScript's 32-bit operators with values that could set bit 31 and produce a
      * negative value, it's critical to perform a final right-shift of 0, ensuring that the final result is
      * positive.
+     *
+     * Finally, all 36-bit data within a PDP-10 machine should ALWAYS be unsigned, which we now assert,
+     * because the divisions below would not yield correct results with negative inputs.
      */
+    Component.assert(dst >= 0 && src >= 0);
     return ((~(((dst / PDP10.TWO_POW32)|0) ^ ((src / PDP10.TWO_POW32)|0)) & 0o17) * PDP10.TWO_POW32) + (~(dst ^ src) >>> 0);
 };
 
@@ -6514,7 +6525,11 @@ PDP10.IOR = function(dst, src)
      * WARNING: When using JavaScript's 32-bit operators with values that could set bit 31 and produce a
      * negative value, it's critical to perform a final right-shift of 0, ensuring that the final result is
      * positive.
+     *
+     * Finally, all 36-bit data within a PDP-10 machine should ALWAYS be unsigned, which we now assert,
+     * because the divisions below would not yield correct results with negative inputs.
      */
+    Component.assert(dst >= 0 && src >= 0);
     return ((((dst / PDP10.TWO_POW32)|0) | ((src / PDP10.TWO_POW32)|0)) * PDP10.TWO_POW32) + ((dst | src) >>> 0);
 };
 
@@ -6536,7 +6551,11 @@ PDP10.NOT = function(src)
      * WARNING: When using JavaScript's 32-bit operators with values that could set bit 31 and produce a
      * negative value, it's critical to perform a final right-shift of 0, ensuring that the final result is
      * positive.
+     *
+     * Finally, all 36-bit data within a PDP-10 machine should ALWAYS be unsigned, which we now assert,
+     * because the divisions below would not yield correct results with negative inputs.
      */
+    Component.assert(src >= 0);
     return ((~((src / PDP10.TWO_POW32)|0) & 0o17) * PDP10.TWO_POW32) + (~src >>> 0);
 };
 
@@ -6572,7 +6591,11 @@ PDP10.XOR = function(dst, src)
      * WARNING: When using JavaScript's 32-bit operators with values that could set bit 31 and produce a
      * negative value, it's critical to perform a final right-shift of 0, ensuring that the final result is
      * positive.
+     *
+     * Finally, all 36-bit data within a PDP-10 machine should ALWAYS be unsigned, which we now assert,
+     * because the divisions below would not yield correct results with negative inputs.
      */
+    Component.assert(dst >= 0 && src >= 0);
     return ((((dst / PDP10.TWO_POW32)|0) ^ ((src / PDP10.TWO_POW32)|0)) * PDP10.TWO_POW32) + ((dst ^ src) >>> 0);
 };
 
