@@ -959,7 +959,7 @@ if (DEBUGGER) {
     };
 
     /**
-     * parseAddr(sAddr, fCode, fNoChecks, fPrint)
+     * parseAddr(sAddr, fCode, fNoChecks)
      *
      * Address evaluation and validation (eg, range checks) are no longer performed at this stage.  That's
      * done later, by getAddr(), which returns CPUDef.ADDR_INVALID for invalid segments, out-of-range offsets,
@@ -972,10 +972,9 @@ if (DEBUGGER) {
      * @param {string|undefined} sAddr
      * @param {boolean} [fCode] (true if target is code, false if target is data)
      * @param {boolean} [fNoChecks] (true when setting breakpoints that may not be valid now, but will be later)
-     * @param {boolean} [fPrint]
      * @return {DbgAddr6502|null|undefined}
      */
-    Debugger6502.prototype.parseAddr = function(sAddr, fCode, fNoChecks, fPrint)
+    Debugger6502.prototype.parseAddr = function(sAddr, fCode, fNoChecks)
     {
         var dbgAddr;
         var dbgAddrNext = (fCode? this.dbgAddrNextCode : this.dbgAddrNextData);
@@ -984,7 +983,7 @@ if (DEBUGGER) {
             sAddr = this.parseReference(sAddr);
             dbgAddr = this.findSymbolAddr(sAddr);
             if (dbgAddr) return dbgAddr;
-            addr = this.parseExpression(sAddr, fPrint);
+            addr = this.parseExpression(sAddr);
         }
         if (addr != null) {
             dbgAddr = this.newAddr(addr);
@@ -3801,7 +3800,7 @@ if (DEBUGGER) {
         sCmd = str.trim(sCmd);
         var a = sCmd.match(/^(['"])(.*?)\1$/);
         if (!a) {
-            this.parseExpression(sCmd, true);
+            this.parseExpression(sCmd, false);
         } else {
             this.println(this.replaceRegs(a[2]));
         }

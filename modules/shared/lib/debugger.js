@@ -77,7 +77,8 @@ var DbgAddr;
  *
  * @unrestricted
  */
-class Debugger extends Component {
+class Debugger extends Component
+{
     /**
      * Debugger(parmsDbg)
      *
@@ -91,7 +92,8 @@ class Debugger extends Component {
      *
      * @param {Object} parmsDbg
      */
-    constructor(parmsDbg) {
+    constructor(parmsDbg)
+    {
         if (DEBUGGER) {
 
             super("Debugger", parmsDbg);
@@ -106,6 +108,19 @@ class Debugger extends Component {
              * but there is no command to adjust it.
              */
             this.nBits = 32;
+
+            /*
+             * sUndefined is set to the last unknown variable that parseExpression() encounters, if if
+             * is called in "quiet mode"; the value used for the variable is zero.  This mode was added
+             * for components that need to support expressions containing "fixups" (ie, values that
+             * must be determined later).
+             *
+             * TODO: Only one unknown (fixup) per expression is supported, and we don't indicate what
+             * operation was performed with the value (callers generally assume addition).  If a call
+             * encounters more than one undefined value, it will revert to normal error reporting and
+             * return an undefined value for the entire expression.
+             */
+            this.sUndefined = null;
 
             this.achGroup = ['{','}'];
             this.achAddress = ['[',']'];
@@ -163,7 +178,8 @@ class Debugger extends Component {
      * @param {number} [off] optional offset into sReg
      * @return {number} register index, or -1 if not found
      */
-    getRegIndex(sReg, off) {
+    getRegIndex(sReg, off)
+    {
         return -1;
     }
 
@@ -176,7 +192,8 @@ class Debugger extends Component {
      * @param {number} iReg
      * @return {number|undefined}
      */
-    getRegValue(iReg) {
+    getRegValue(iReg)
+    {
         return undefined;
     }
 
@@ -192,7 +209,8 @@ class Debugger extends Component {
      * @param {string} sAddr
      * @return {string}
      */
-    parseAddrReference(s, sAddr) {
+    parseAddrReference(s, sAddr)
+    {
         return s.replace('[' + sAddr + ']', "unimplemented");
     }
 
@@ -202,7 +220,8 @@ class Debugger extends Component {
      * @this {Debugger}
      * @return {string}
      */
-    getNextCommand() {
+    getNextCommand()
+    {
         var sCmd;
         if (this.iPrevCmd > 0) {
             sCmd = this.aPrevCmds[--this.iPrevCmd];
@@ -219,7 +238,8 @@ class Debugger extends Component {
      * @this {Debugger}
      * @return {string|null}
      */
-    getPrevCommand() {
+    getPrevCommand()
+    {
         var sCmd = null;
         if (this.iPrevCmd < this.aPrevCmds.length - 1) {
             sCmd = this.aPrevCmds[++this.iPrevCmd];
@@ -236,7 +256,8 @@ class Debugger extends Component {
      * @param {string} [chSep] is the command separator character (default is ';')
      * @return {Array.<string>}
      */
-    parseCommand(sCmd, fSave, chSep) {
+    parseCommand(sCmd, fSave, chSep)
+    {
         if (fSave) {
             if (!sCmd) {
                 if (this.fAssemble) {
@@ -434,7 +455,8 @@ class Debugger extends Component {
      * @param {number} [cOps] (default is -1 for all)
      * @return {boolean} true if successful, false if error
      */
-    evalOps(aVals, aOps, cOps = -1) {
+    evalOps(aVals, aOps, cOps = -1)
+    {
         while (cOps-- && aOps.length) {
             var chOp = aOps.pop();
             if (aVals.length < 2) return false;
@@ -511,7 +533,7 @@ class Debugger extends Component {
     }
 
     /**
-     * parseExpression(sExp, fPrint)
+     * parseExpression(sExp, fQuiet)
      *
      * A quick-and-dirty expression parser.  It takes an expression like:
      *
@@ -543,15 +565,17 @@ class Debugger extends Component {
      *
      * @this {Debugger}
      * @param {string|undefined} sExp
-     * @param {boolean} [fPrint] is true to print all resolved values, false for quiet parsing
+     * @param {boolean} [fQuiet] (true for quiet parsing)
      * @return {number|undefined} numeric value, or undefined if sExp contains any undefined or invalid values
      */
-    parseExpression(sExp, fPrint) {
+    parseExpression(sExp, fQuiet)
+    {
         var value;
 
         /*
          * First process (and eliminate) any references, aka sub-expressions.
          */
+        this.sUndefined = null;
         if (sExp) sExp = this.parseReference(sExp);
 
         if (sExp) {
@@ -584,16 +608,21 @@ class Debugger extends Component {
             while (i < asValues.length) {
                 var sValue = asValues[i++];
                 var cchValue = sValue.length;
-                var s = Str.trim(sValue);
-                if (!s) {
+                sValue = Str.trim(sValue);
+                if (!sValue) {
                     fError = true;
                     break;
                 }
-                var v = this.parseValue(s, null, fPrint === false);
+                var v = this.parseValue(sValue, null, fQuiet);
                 if (v === undefined) {
-                    fError = true;
-                    fPrint = false;
-                    break;
+                    if (this.sUndefined == null && fQuiet) {
+                        this.sUndefined = sValue;
+                        v = 0;
+                    } else {
+                        fError = true;
+                        fQuiet = !fQuiet;
+                        break;
+                    }
                 }
                 aVals.push(this.truncate(v, this.nBits));
                 if (i == asValues.length) break;
@@ -610,9 +639,9 @@ class Debugger extends Component {
             }
             if (!fError) {
                 value = aVals.pop();
-                if (fPrint) this.printValue(null, value);
+                if (fQuiet === false) this.printValue(null, value);
             } else {
-                if (fPrint) this.println("error parsing '" + sExpOrig + "' at character " + (sExpOrig.length - sExp.length));
+                if (fQuiet === false) this.println("error parsing '" + sExpOrig + "' at character " + (sExpOrig.length - sExp.length));
             }
         }
         return value;
@@ -629,7 +658,8 @@ class Debugger extends Component {
      * @param {string} s
      * @return {string|undefined}
      */
-    parseReference(s) {
+    parseReference(s)
+    {
         var a;
         var chOpen = this.achGroup[0];
         var chClose = this.achGroup[1];
@@ -677,7 +707,8 @@ class Debugger extends Component {
      * @param {string} s
      * @return {string}
      */
-    parseSysVars(s) {
+    parseSysVars(s)
+    {
         var a;
         while (a = s.match(/\$([a-z]+)/i)) {
             var v = null;
@@ -701,7 +732,8 @@ class Debugger extends Component {
      * @param {boolean} [fQuiet]
      * @return {number|undefined} numeric value, or undefined if sValue is either undefined or invalid
      */
-    parseValue(sValue, sName, fQuiet) {
+    parseValue(sValue, sName, fQuiet)
+    {
         var value;
         if (sValue != null) {
             var iReg = this.getRegIndex(sValue);
@@ -732,7 +764,8 @@ class Debugger extends Component {
      * @param {number|undefined} value
      * @return {boolean} true if value defined, false if not
      */
-    printValue(sVar, value) {
+    printValue(sVar, value)
+    {
         var sValue;
         var fDefined = false;
         if (value !== undefined) {
@@ -753,7 +786,8 @@ class Debugger extends Component {
      * @this {Debugger}
      * @return {Object}
      */
-    resetVariables() {
+    resetVariables()
+    {
         var a = this.aVariables;
         this.aVariables = {};
         return a;
@@ -765,7 +799,8 @@ class Debugger extends Component {
      * @this {Debugger}
      * @param {Object} a (from previous resetVariables() call)
      */
-    restoreVariables(a) {
+    restoreVariables(a)
+    {
         this.aVariables = a;
     }
 
@@ -776,7 +811,8 @@ class Debugger extends Component {
      * @param {string} [sVar]
      * @return {boolean} true if all value(s) defined, false if not
      */
-    printVariable(sVar) {
+    printVariable(sVar)
+    {
         if (sVar) {
             return this.printValue(sVar, this.aVariables[sVar]);
         }
@@ -794,7 +830,8 @@ class Debugger extends Component {
      * @this {Debugger}
      * @param {string} sVar
      */
-    delVariable(sVar) {
+    delVariable(sVar)
+    {
         delete this.aVariables[sVar];
     }
 
@@ -805,7 +842,8 @@ class Debugger extends Component {
      * @param {string} sVar
      * @return {number|undefined}
      */
-    getVariable(sVar) {
+    getVariable(sVar)
+    {
         return this.aVariables[sVar];
     }
 
@@ -816,7 +854,8 @@ class Debugger extends Component {
      * @param {string} sVar
      * @param {number} value
      */
-    setVariable(sVar, value) {
+    setVariable(sVar, value)
+    {
         this.aVariables[sVar] = value;
     }
 
@@ -830,7 +869,8 @@ class Debugger extends Component {
      * @param {number} [nBits] (-1 to strip leading zeros, 0 to allow a variable number of digits)
      * @return {string}
      */
-    toStrBase(n, nBits = 0) {
+    toStrBase(n, nBits = 0)
+    {
         var s;
         switch(this.nBase) {
         case 8:

@@ -502,7 +502,7 @@ class DebuggerPDP10 extends Debugger {
     }
 
     /**
-     * parseAddr(sAddr, dbgAddr, fPrint)
+     * parseAddr(sAddr, dbgAddr)
      *
      * Address evaluation and validation (eg, range checks) are no longer performed at this stage.  That's
      * done later, by getAddr(), which returns PDP10.ADDR_INVALID for invalid segments, out-of-range offsets,
@@ -514,10 +514,9 @@ class DebuggerPDP10 extends Debugger {
      * @this {DebuggerPDP10}
      * @param {string|undefined} sAddr
      * @param {DbgAddrPDP10} [dbgAddr]
-     * @param {boolean} [fPrint]
      * @return {DbgAddrPDP10|null|undefined}
      */
-    parseAddr(sAddr, dbgAddr, fPrint)
+    parseAddr(sAddr, dbgAddr)
     {
         var fPhysical, nBase;
         if (!dbgAddr) dbgAddr = this.newAddr();
@@ -538,7 +537,7 @@ class DebuggerPDP10 extends Debugger {
             } else if (sAddr.indexOf('.') >= 0) {
                 nBase = 10;
             }
-            addr = this.parseExpression(sAddr, fPrint);
+            addr = this.parseExpression(sAddr);
         }
         if (addr != null) {
             addr = this.validateWord(addr, this.nBusWidth);
@@ -1611,18 +1610,26 @@ class DebuggerPDP10 extends Debugger {
     }
 
     /**
-     * parseInstruction(sOpcode, sOperands, addr)
+     * parseInstruction(sOpcode, sOperands, addr, fQuiet)
      *
      * @this {DebuggerPDP10}
      * @param {string} sOpcode
      * @param {string} [sOperands]
      * @param {number} [addr] of memory where this instruction is being assembled
+     * @param {boolean} [fQuiet]
      * @return {number} (opcode, or -1 if unrecognized instruction)
      */
-    parseInstruction(sOpcode, sOperands, addr)
+    parseInstruction(sOpcode, sOperands, addr, fQuiet)
     {
         var opCode = -1;
         var opMask, opNum;
+
+        /*
+         * It's best to always clear sUndefined up front, because the caller won't
+         * necessarily know whether or not we had to call parseExpression() for this
+         * instruction.
+         */
+        this.sUndefined = null;
 
         if (!sOpcode) {
             /*
@@ -1700,7 +1707,7 @@ class DebuggerPDP10 extends Debugger {
                     var sOperand = aOperands[i].trim();
                     if (!sOperand) continue;
                     if (i > 1) {
-                        this.println("too many operands: " + sOperand);
+                        this.println("too many operands: " + sOperands);
                         opCode = -1;
                         break;
                     }
@@ -1722,7 +1729,7 @@ class DebuggerPDP10 extends Debugger {
                             sOperand = sOperand.replace(/(^|[^0-9])\./g, "$1" + this.toStrOffset(addr));
                         }
                     }
-                    var operand = this.parseExpression(sOperand);
+                    var operand = this.parseExpression(sOperand, fQuiet);
                     if (operand == undefined) {
                         opCode = -1;
                         break;
@@ -1751,7 +1758,7 @@ class DebuggerPDP10 extends Debugger {
                     opCode += operand;
                     sOperand = match[3];
                     if (sOperand) {
-                        operand = this.parseExpression(sOperand);
+                        operand = this.parseExpression(sOperand, fQuiet);
                         if (operand == undefined) {
                             opCode = -1;
                             break;
@@ -1774,7 +1781,7 @@ class DebuggerPDP10 extends Debugger {
             // }
         }
 
-        if (opCode < 0 && sOperands != null) {
+        if (opCode < 0 && !fQuiet) {
             this.println("unknown instruction: " + sOpcode + ' ' + sOperands);
         }
 
@@ -2591,12 +2598,22 @@ class DebuggerPDP10 extends Debugger {
                 dbg.println("assembly already in progress");
             }
             else {
+                var sFile = match[2];
                 var addrLoad = dbgAddr.addr;
-                this.macro10 = new Macro10(match[2], addrLoad, sOptions, dbg, function doneMacro10(nErrorCode, sURL) {
+                this.macro10 = new Macro10(sFile, addrLoad, sOptions, dbg, function doneMacro10(nErrorCode, sURL) {
                     if (!nErrorCode) {
-                        dbg.loadBin(dbg.macro10.getBin(), addrLoad);
+                        /*
+                         * NOTE: Most Debugger operations run in the context of doCommand(), which catches any exceptions;
+                         * however, this callback may be running in a different context (eg, a network request callback), so
+                         * better safe than sorry.
+                         */
+                        try {
+                            dbg.loadBin(dbg.macro10.getBin(), addrLoad);
+                        } catch(e) {
+                            dbg.println(e.message);
+                        }
                     } else {
-                        dbg.println("error (" + nErrorCode + ") processing " + sURL);
+                        dbg.println("error (" + nErrorCode + ") processing " + (sURL || sFile));
                     }
                     dbg.macro10 = null;
                 });
@@ -3318,7 +3335,7 @@ class DebuggerPDP10 extends Debugger {
         sCmd = Str.trim(sCmd);
         var a = sCmd.match(/^(['"])(.*?)\1$/);
         if (!a) {
-            this.parseExpression(sCmd, true);
+            this.parseExpression(sCmd, false);
         } else {
             if (a[2].length > 1) {
                 this.println(this.replaceRegs(a[2]));

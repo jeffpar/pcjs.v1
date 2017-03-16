@@ -473,7 +473,7 @@ class Debugger8080 extends Debugger {
     }
 
     /**
-     * parseAddr(sAddr, fCode, fNoChecks, fPrint)
+     * parseAddr(sAddr, fCode, fNoChecks)
      *
      * Address evaluation and validation (eg, range checks) are no longer performed at this stage.  That's
      * done later, by getAddr(), which returns CPUDef8080.ADDR_INVALID for invalid segments, out-of-range offsets,
@@ -486,10 +486,9 @@ class Debugger8080 extends Debugger {
      * @param {string|undefined} sAddr
      * @param {boolean} [fCode] (true if target is code, false if target is data)
      * @param {boolean} [fNoChecks] (true when setting breakpoints that may not be valid now, but will be later)
-     * @param {boolean} [fPrint]
      * @return {DbgAddr8080|null|undefined}
      */
-    parseAddr(sAddr, fCode, fNoChecks, fPrint)
+    parseAddr(sAddr, fCode, fNoChecks)
     {
         var dbgAddr;
         var dbgAddrNext = (fCode? this.dbgAddrNextCode : this.dbgAddrNextData);
@@ -498,7 +497,7 @@ class Debugger8080 extends Debugger {
             sAddr = this.parseReference(sAddr) || sAddr;
             dbgAddr = this.findSymbolAddr(sAddr);
             if (dbgAddr) return dbgAddr;
-            addr = this.parseExpression(sAddr, fPrint);
+            addr = this.parseExpression(sAddr);
         }
         if (addr != null) {
             dbgAddr = this.newAddr(addr);
@@ -3337,7 +3336,7 @@ class Debugger8080 extends Debugger {
         sCmd = Str.trim(sCmd);
         var a = sCmd.match(/^(['"])(.*?)\1$/);
         if (!a) {
-            this.parseExpression(sCmd, true);
+            this.parseExpression(sCmd, false);
         } else {
             this.println(this.replaceRegs(a[2]));
         }

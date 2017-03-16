@@ -1375,7 +1375,7 @@ class DebuggerX86 extends Debugger {
     }
 
     /**
-     * parseAddr(sAddr, fCode, fNoChecks, fPrint)
+     * parseAddr(sAddr, fCode, fNoChecks, fQuiet)
      *
      * As discussed above, dbgAddr variables contain one or more of: off, sel, and addr.  They represent
      * a segmented address (sel:off) when sel is defined or a linear address (addr) when sel is undefined
@@ -1400,10 +1400,10 @@ class DebuggerX86 extends Debugger {
      * @param {string|undefined} sAddr
      * @param {boolean} [fCode] (true if target is code, false if target is data)
      * @param {boolean} [fNoChecks] (true when setting breakpoints that may not be valid now, but will be later)
-     * @param {boolean} [fPrint]
+     * @param {boolean} [fQuiet]
      * @return {DbgAddrX86|null|undefined}
      */
-    parseAddr(sAddr, fCode, fNoChecks, fPrint)
+    parseAddr(sAddr, fCode, fNoChecks, fQuiet)
     {
         var dbgAddr;
         var dbgAddrNext = (fCode? this.dbgAddrNextCode : this.dbgAddrNextData);
@@ -1451,16 +1451,16 @@ class DebuggerX86 extends Debugger {
 
             if (iColon < 0) {
                 if (sel != null) {
-                    off = this.parseExpression(sAddr, fPrint);
+                    off = this.parseExpression(sAddr, fQuiet);
                     addr = null;
                 } else {
-                    addr = this.parseExpression(sAddr, fPrint);
+                    addr = this.parseExpression(sAddr, fQuiet);
                     if (addr == null) off = null;
                 }
             }
             else {
-                sel = this.parseExpression(sAddr.substring(0, iColon), fPrint);
-                off = this.parseExpression(sAddr.substring(iColon + 1), fPrint);
+                sel = this.parseExpression(sAddr.substring(0, iColon), fQuiet);
+                off = this.parseExpression(sAddr.substring(iColon + 1), fQuiet);
                 addr = null;
             }
         }
@@ -1598,7 +1598,7 @@ class DebuggerX86 extends Debugger {
         var sInfo = "no information";
         if (BACKTRACK) {
             var sAddr = asArgs[0];
-            var dbgAddr = this.parseAddr(sAddr, true, true, false);
+            var dbgAddr = this.parseAddr(sAddr, true, true, true);
             if (dbgAddr) {
                 var addr = this.getAddr(dbgAddr);
                 if (dbgAddr.type != DebuggerX86.ADDRTYPE.PHYSICAL) {
@@ -5907,7 +5907,7 @@ class DebuggerX86 extends Debugger {
         sCmd = Str.trim(sCmd);
         var a = sCmd.match(/^(['"])(.*?)\1$/);
         if (!a) {
-            this.parseExpression(sCmd, true);
+            this.parseExpression(sCmd, false);
         } else {
             this.println(this.replaceRegs(a[2]));
         }

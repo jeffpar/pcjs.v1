@@ -67,7 +67,7 @@ var Sym;
 /**
  * @typedef {{
  *      nLocation:(number),
- *      aValues:(Array.<string>),
+ *      sValue:(string)
  * }}
  */
 var Fixup;
@@ -301,50 +301,14 @@ class Macro10 {
             }
 
             this.aFixups.forEach(function processFixup(fixup){
-                var value = 0;
-                var sValue = fixup.aValues[0];
-                var sOperand = fixup.aValues[1];
                 var nLocation = fixup.nLocation;
-                if (fixup.aValues.length == 1) {
-                    if (sValue.indexOf('@') >= 0 || sValue.indexOf('(') >= 0) {
-                        sOperand = sValue;
-                        sValue = "";
-                    }
+                var value = macro10.parseExpression(fixup.sValue, undefined, nLocation);
+                if (value === undefined) {
+                    macro10.error("unable to parse expression: " + fixup.sValue);
+                    return;
                 }
-                if (sOperand != null) {
-                    value = macro10.dbg.parseInstruction(sValue, sOperand, nLocation);
-                    if (value < 0) {
-                        macro10.error("unable to parse instruction: " + fixup.aValues[0] + ' ' + fixup.aValues[1]);
-                    }
-                } else {
-                    value = macro10.parseExpression(sValue, nLocation);
-                    if (value === undefined) {
-                        macro10.error("unable to parse expression: " + sValue);
-                    }
-                    else if (macro10.aWords[nLocation] === undefined) {
-                        macro10.error("undefined fixup location: " + Str.toOct(nLocation, 0, true));
-                    }
-                    else {
-                        value += macro10.aWords[nLocation];
-                    }
-                }
-                /*
-                 * At the end of the day, we only want unsigned 36-bit values, and some of our internal calculations
-                 * already adhere to that (eg, the parseExpression() concatenation of two unsigned 18-bit values).
-                 * But in general, the expression parser is allowed to return negative values, so that signed arithmetic
-                 * works naturally.  Perhaps that decision should be revisited, but for now, this particular mix of
-                 * behaviors means that when checking for out-of-range values, the upper bound must be the unsigned
-                 * WORD_LIMIT, while the lower bound must be the signed INT_LIMIT.
-                 *
-                 * In a perfect world, the bounds would either be -INT_LIMIT,INT_LIMIT-1 or 0,WORD_LIMIT-1.  In any
-                 * event, the truncate() call will ensure everything is an unsigned 36-bit value.  The warning should
-                 * trigger only if the original value contained more than 36 significant bits.
-                 */
-                var w = macro10.dbg.truncate(value || 0, 36, true);
-                if (value < -PDP10.INT_LIMIT || value >= PDP10.WORD_LIMIT) {
-                    macro10.warning("truncated value " + Str.toOct(value) + " at location " + Str.toOct(nLocation) + " to " + Str.toOct(w));
-                }
-                macro10.aWords[nLocation] = w;
+                value += macro10.aWords[nLocation];
+                macro10.aWords[nLocation] = macro10.truncate(value, nLocation);
             });
 
         } catch(err) {
@@ -406,8 +370,9 @@ class Macro10 {
             }
         }
 
-        this.sOperator = sOperator;
         sOperands = sOperands.trim();
+
+        if (!sOperator && !sOperands) return true;
 
         /*
          * My initial read of the MACRO-10 specification suggested that lines may begin with EITHER
@@ -418,6 +383,7 @@ class Macro10 {
             sOperands = sOperands.substr(1);
             sOperator = '=';
         }
+        this.sOperator = sOperator;
 
         /*
          * Check the operands for a literal.  If the line contains and/or ends with a literal
@@ -440,12 +406,6 @@ class Macro10 {
         if (!this.parseMacro(sOperator, sOperands)) {
 
             switch (sOperator) {
-            case "":
-                if (sOperands) {
-                    this.genWord(0, [sOperands]);
-                }
-                break;
-
             case "=":
                 this.addAssign(sLabel, sOperands);
                 break;
@@ -471,10 +431,7 @@ class Macro10 {
                 break;
 
             default:
-                if (!this.parseOpcode(sOperator, sOperands)) {
-                    this.genWord(0, [sOperator + sOperands]);
-                    // if (DEBUG) this.println(Str.toDec(this.nLine, 5) + ": label(" + sLabel + ") operator(" + sOperator + ") operands(" + sOperands + ") comment(" + sComment + ")");
-                }
+                this.addWord(sOperator, sOperands);
                 break;
             }
         }
@@ -527,24 +484,6 @@ class Macro10 {
             return false;
         }
         return true;
-    }
-
-    /**
-     * parseOpcode(sOpcode, sOperands)
-     *
-     * @this {Macro10}
-     * @param {string} sOpcode
-     * @param {string} sOperands
-     * @return {boolean}
-     */
-    parseOpcode(sOpcode, sOperands)
-    {
-        var opCode = this.dbg.parseInstruction(sOpcode);
-        if (opCode >= 0) {
-            this.genWord(opCode, [sOpcode, sOperands]);
-            return true;
-        }
-        return false;
     }
 
     /**
@@ -653,7 +592,7 @@ class Macro10 {
     }
 
     /**
-     * parseExpression(sOperand, nLocation)
+     * parseExpression(sOperand, fPass1, nLocation)
      *
      * This is a wrapper around the Debugger's parseExpression() function to take care of some
      * additional requirements we have, such as interpreting a period as the current location and
@@ -662,38 +601,44 @@ class Macro10 {
      *
      * @this {Macro10}
      * @param {string} sOperand
-     * @param {number} [nLocation]
+     * @param {boolean|undefined} [fPass1]
+     * @param {number|undefined} [nLocation]
      * @return {number|undefined}
      */
-    parseExpression(sOperand, nLocation)
+    parseExpression(sOperand, fPass1, nLocation)
     {
         var result;
-
-        if (nLocation === undefined) nLocation = this.nLocation;
-
         /*
-         * Check for the "period" syntax that MACRO-10 uses to represent the value of the current
-         * location.  The Debugger's parseInstruction() method understands that syntax, but its
-         * parseExpression() method does not.
-         *
-         * Note that the Debugger's parseInstruction() replaces any period not PRECEDED by a decimal
-         * digit with the current address, because our Debuggers' only other interpretation of a period
-         * is as the suffix of a decimal integer, whereas MACRO-10's only other interpretation of a period
-         * is (I think) as the decimal point within a floating-point number, so here we only replace
-         * periods that are not FOLLOWED by a decimal digit.
-         */
-        sOperand = sOperand.replace(/\.([^0-9]|$)/g, this.dbg.toStrBase(nLocation, -1) + "$1");
-
-        /*
-         * Check for the "double comma" syntax that MACRO-10 uses to express a 36-bit value as two 18-bit halves.
+         * Check for the "double comma" syntax that MACRO-10 uses to express a 36-bit value as two 18-bit halves,
+         * and invoke ourselves recursively for each half.
          */
         var match = sOperand.match(/^([^,]*),,([^,]*)$/);
         if (!match) {
-            result = this.dbg.parseExpression(sOperand);
+            if (nLocation === undefined) nLocation = this.nLocation;
+            /*
+             * Check for the "period" syntax that MACRO-10 uses to represent the value of the current
+             * location.  The Debugger's parseInstruction() method understands that syntax, but its
+             * parseExpression() method does not.
+             *
+             * Note that the Debugger's parseInstruction() replaces any period not PRECEDED by a decimal
+             * digit with the current address, because our Debuggers' only other interpretation of a period
+             * is as the suffix of a decimal integer, whereas MACRO-10's only other interpretation of a period
+             * is (I think) as the decimal point within a floating-point number, so here we only replace
+             * periods that are not FOLLOWED by a decimal digit.
+             */
+            result = this.dbg.parseExpression(sOperand.replace(/\.([^0-9]|$)/g, this.dbg.toStrBase(nLocation, -1) + "$1"), fPass1);
+            if (result === undefined) {
+                this.error("error parsing expression: " + sOperand);
+            }
+            // else if (this.dbg.sUndefined != null) {
+            //     /*
+            //      * If a valid result was returned but sUndefined is also set, then this must be a pass1 evaluation.
+            //      */
+            // }
         } else {
-            var wLeft = match[1]? this.dbg.parseExpression(match[1]) : 0;
+            var wLeft = match[1]? this.parseExpression(match[1]) : 0;
             if (wLeft !== undefined) {
-                var wRight = match[2]? this.dbg.parseExpression(match[2]) : 0;
+                var wRight = match[2]? this.parseExpression(match[2]) : 0;
                 if (wRight !== undefined) {
                     /*
                      * NOTE: These must be combined as UNSIGNED values, so that's what we tell truncate().
@@ -880,6 +825,9 @@ class Macro10 {
         aParms = aDefaults = [];
 
         if (sOperator == Macro10.PSEUDO_OP.DEFINE) {
+            /*
+             * This is a DEFINE (macro) block.
+             */
             match = sOperands.match(/([A-Z$%.][0-9A-Z$%.]*)\s*(\([^)]*\)|)\s*(<|)(.*)/i);
             if (!match) {
                 this.error("unrecognized " + sOperator + " definition: " + sOperands);
@@ -902,6 +850,9 @@ class Macro10 {
             iMatch = 3;
         }
         else if (sOperator == Macro10.PSEUDO_OP.LITERAL) {
+            /*
+             * This is a LITERAL block.
+             */
             this.chMacroOpen = '[';
             this.chMacroClose = ']';
             name = '_' + Str.toDec(this.nLocation, 5);
@@ -914,6 +865,9 @@ class Macro10 {
             iMatch = 0;
         }
         else {
+            /*
+             * This must be a REPEAT or CONDITIONAL block.
+             */
             var sOperand = this.getExpression(sOperands);
             if (!sOperand) {
                 this.error("missing " + sOperator + " expression: " + sOperands);
@@ -923,6 +877,10 @@ class Macro10 {
             sOperand = sOperand.trim();
             match = sOperands.match(/\s*(<|)(.*)/i);
             name = '_' + sOperator;
+            /*
+             * The expression is either a repeat count or a condition.  Either way, we must be able to
+             * resolve it now, so we don't set fPass1 (but that doesn't mean it's the second pass, either).
+             */
             nOperand = this.parseExpression(sOperand) || 0;
             iMatch = 1;
         }
@@ -1009,6 +967,36 @@ class Macro10 {
     }
 
     /**
+     * addWord(sOperator, sOperands)
+     *
+     * @this {Macro10}
+     * @param {string} sOperator
+     * @param {string} sOperands
+     */
+    addWord(sOperator, sOperands)
+    {
+        var w;
+        var sExp = sOperator + sOperands;
+        if (sExp.indexOf(",,") >= 0 || !sOperator && sExp.indexOf('@') < 0 && sExp.indexOf('(') < 0) {
+            w = this.parseExpression(sExp, true);
+        } else {
+            w = this.dbg.parseInstruction(sOperator, sOperands, this.nLocation, true);
+            if (w < 0) {
+                /*
+                 * MACRO-10 also allows instructions to be assembled without an opcode (ie, just an address reference).
+                 */
+                w = this.dbg.parseInstruction("", sExp, this.nLocation, true);
+                if (w < 0) w = undefined;
+            }
+        }
+        if (w !== undefined) {
+            this.genWord(w, this.dbg.sUndefined);
+        } else {
+            this.error("unrecognized expression: " + sExp);
+        }
+    }
+
+    /**
      * addXWD()
      *
      * The XWD pseudo-op appears to be equivalent to two values separated by two commas, which our fixup code
@@ -1019,7 +1007,7 @@ class Macro10 {
      */
     addXWD(sOperands)
     {
-        this.genWord(0, [sOperands.replace(",", ",,")]);
+        this.genWord(0, sOperands.replace(",", ",,"));
     }
 
     /**
@@ -1068,17 +1056,34 @@ class Macro10 {
     }
 
     /**
-     * genWord(w, aValues)
+     * genWord(value, sFixup)
      *
      * @this {Macro10}
-     * @param {number} w (default value for the current location)
-     * @param {Array.<string>} [aValues] (optional fixup value(s) to evaluate later)
+     * @param {number} value (default value for the current location)
+     * @param {string|null} [sFixup] (optional fixup value to evaluate later)
      */
-    genWord(w, aValues)
+    genWord(value, sFixup)
     {
-        this.aWords[this.nLocation] = w;
-        if (aValues) this.aFixups.push({nLocation: this.nLocation, aValues});
+        this.aWords[this.nLocation] = this.truncate(value);
+        if (sFixup != null) this.aFixups.push({nLocation: this.nLocation, sValue: sFixup});
         this.nLocation++;
+    }
+
+    /**
+     * truncate(value, nLocation)
+     *
+     * @this {Macro10}
+     * @param {number} value
+     * @param {number} [nLocation]
+     * @return {number}
+     */
+    truncate(value, nLocation = this.nLocation)
+    {
+        var w = this.dbg.truncate(value || 0, 36, true);
+        if (value < -PDP10.INT_LIMIT || value >= PDP10.WORD_LIMIT) {
+            this.warning("truncated value " + Str.toOct(value) + " at location " + Str.toOct(nLocation) + " to " + Str.toOct(w));
+        }
+        return w;
     }
 }
 
