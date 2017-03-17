@@ -201,15 +201,16 @@ var PDP10 = {
      * binary, the only options you can set relate to the operating system to be run -- which seems very hacky.
      */
     PSFLAG: {
-        OVFL:       0o400000,          // Overflow
-        CARRY0:     0o200000,          // Carry 0
-        CARRY1:     0o100000,          // Carry 1
-        FP_OVFL:    0o040000,          // Floating-Point Overflow
-        BYTE_INT:   0o020000,          // Byte Interrupt
-        USER_MODE:  0o010000,          // Processor is in User Mode
-        USER_IO:    0o004000,          // User I/O
-        FP_UNFL:    0o000100,          // Floating-Point Underflow
-        NO_DIVIDE:  0o000040,          // No Divide
+        OVFL:       0o400000,           // Overflow
+        CARRY0:     0o200000,           // Carry 0
+        CARRY1:     0o100000,           // Carry 1
+        FP_OVFL:    0o040000,           // Floating-Point Overflow
+        BYTE_INT:   0o020000,           // Byte Interrupt
+        USER_MODE:  0o010000,           // Processor is in User Mode
+        USER_IO:    0o004000,           // User I/O
+        FP_UNFL:    0o000100,           // Floating-Point Underflow
+        NO_DIVIDE:  0o000040,           // No Divide
+        SET_MASK:   0o760140,           // the flags that are always settable/clearable
         /*
          * Only the low 18 bits (above) are returned by getPS(); the following (bits 18 to 31)
          * are defined for internal use only.

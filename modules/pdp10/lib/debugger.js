@@ -331,10 +331,16 @@ class DebuggerPDP10 extends Debugger {
         this.nBusWidth = bus.getWidth();
 
         /*
-         * Re-initialize Debugger message support if necessary
+         * Override the Debugger's message configuration if specified.
          */
         var sMessages = /** @type {string|undefined} */ (cmp.getMachineParm('messages'));
         if (sMessages) this.messageInit(sMessages);
+
+        /*
+         * Override the Debugger's initialization commands if specified.
+         */
+        var sCommands = /** @type {string|undefined} */ (cmp.getMachineParm('commands'));
+        if (sCommands) this.sInitCommands = sCommands;
 
         /*
          * Update aOpReserved as appropriate for the current model
@@ -502,7 +508,7 @@ class DebuggerPDP10 extends Debugger {
     }
 
     /**
-     * parseAddr(sAddr, dbgAddr, fPrint)
+     * parseAddr(sAddr, dbgAddr)
      *
      * Address evaluation and validation (eg, range checks) are no longer performed at this stage.  That's
      * done later, by getAddr(), which returns PDP10.ADDR_INVALID for invalid segments, out-of-range offsets,
@@ -514,10 +520,9 @@ class DebuggerPDP10 extends Debugger {
      * @this {DebuggerPDP10}
      * @param {string|undefined} sAddr
      * @param {DbgAddrPDP10} [dbgAddr]
-     * @param {boolean} [fPrint]
      * @return {DbgAddrPDP10|null|undefined}
      */
-    parseAddr(sAddr, dbgAddr, fPrint)
+    parseAddr(sAddr, dbgAddr)
     {
         var fPhysical, nBase;
         if (!dbgAddr) dbgAddr = this.newAddr();
@@ -538,7 +543,7 @@ class DebuggerPDP10 extends Debugger {
             } else if (sAddr.indexOf('.') >= 0) {
                 nBase = 10;
             }
-            addr = this.parseExpression(sAddr, fPrint);
+            addr = this.parseExpression(sAddr);
         }
         if (addr != null) {
             addr = this.validateWord(addr, this.nBusWidth);
@@ -1547,14 +1552,13 @@ class DebuggerPDP10 extends Debugger {
                 } else {
                     n = (opCode >> PDP10.OPCODE.A_SHIFT) & PDP10.OPCODE.A_MASK;
                     sOperand = this.toStrBase(n, -1);
-                    if (n) {
-                        for (var m = 0; m < DebuggerPDP10.ALTOPS.length; m++) {
-                            if (opNum == DebuggerPDP10.ALTOPS[m][0]) {
-                                var opAlt = DebuggerPDP10.ALTOPS[m][n];
-                                if (opAlt) {
-                                    sOperation = DebuggerPDP10.OPNAMES[opAlt];
-                                    sOperand = "";
-                                }
+                    for (var m = 0; sOperand && m < DebuggerPDP10.ALTOPS.length; m++) {
+                        if (opNum == DebuggerPDP10.ALTOPS[m][0]) {
+                            var opAlt = DebuggerPDP10.ALTOPS[m][n];
+                            if (opAlt) {
+                                sOperation = DebuggerPDP10.OPNAMES[opAlt];
+                                sOperand = "";
+                                break;
                             }
                         }
                     }
@@ -1611,18 +1615,26 @@ class DebuggerPDP10 extends Debugger {
     }
 
     /**
-     * parseInstruction(sOpcode, sOperands, addr)
+     * parseInstruction(sOpcode, sOperands, addr, fQuiet)
      *
      * @this {DebuggerPDP10}
      * @param {string} sOpcode
      * @param {string} [sOperands]
      * @param {number} [addr] of memory where this instruction is being assembled
+     * @param {boolean} [fQuiet]
      * @return {number} (opcode, or -1 if unrecognized instruction)
      */
-    parseInstruction(sOpcode, sOperands, addr)
+    parseInstruction(sOpcode, sOperands, addr, fQuiet)
     {
         var opCode = -1;
         var opMask, opNum;
+
+        /*
+         * It's best to always clear sUndefined up front, because the caller won't
+         * necessarily know whether or not we had to call parseExpression() for this
+         * instruction.
+         */
+        this.sUndefined = null;
 
         if (!sOpcode) {
             /*
@@ -1700,7 +1712,7 @@ class DebuggerPDP10 extends Debugger {
                     var sOperand = aOperands[i].trim();
                     if (!sOperand) continue;
                     if (i > 1) {
-                        this.println("too many operands: " + sOperand);
+                        this.println("too many operands: " + sOperands);
                         opCode = -1;
                         break;
                     }
@@ -1722,7 +1734,7 @@ class DebuggerPDP10 extends Debugger {
                             sOperand = sOperand.replace(/(^|[^0-9])\./g, "$1" + this.toStrOffset(addr));
                         }
                     }
-                    var operand = this.parseExpression(sOperand);
+                    var operand = this.parseExpression(sOperand, fQuiet);
                     if (operand == undefined) {
                         opCode = -1;
                         break;
@@ -1751,7 +1763,7 @@ class DebuggerPDP10 extends Debugger {
                     opCode += operand;
                     sOperand = match[3];
                     if (sOperand) {
-                        operand = this.parseExpression(sOperand);
+                        operand = this.parseExpression(sOperand, fQuiet);
                         if (operand == undefined) {
                             opCode = -1;
                             break;
@@ -1774,7 +1786,7 @@ class DebuggerPDP10 extends Debugger {
             // }
         }
 
-        if (opCode < 0 && sOperands != null) {
+        if (opCode < 0 && !fQuiet) {
             this.println("unknown instruction: " + sOpcode + ' ' + sOperands);
         }
 
@@ -2469,20 +2481,20 @@ class DebuggerPDP10 extends Debugger {
      */
     loadBin(aWords, addrLoad)
     {
-        /*
-         * TODO: Decide what to do about addrLoad; either drop it or use it.
-         */
         var nWords = 0;
         var bus = this.bus;
         var dbg = this.dbg;
         aWords.forEach(function(w, addr) {
             bus.setWordDirect(addr, w);
+            if (addrLoad == null) addrLoad = addr;
             nWords++;
         });
         if (!nWords) {
             this.println("no data");
         } else {
             this.println(nWords + " words loaded at " + this.toStrBase(addrLoad) + '-' + this.toStrBase(addrLoad + nWords - 1));
+            this.cpu.setPC(addrLoad || 0);
+            this.updateStatus();
         }
     }
 
@@ -2591,12 +2603,22 @@ class DebuggerPDP10 extends Debugger {
                 dbg.println("assembly already in progress");
             }
             else {
+                var sFile = match[2];
                 var addrLoad = dbgAddr.addr;
-                this.macro10 = new Macro10(match[2], addrLoad, sOptions, dbg, function doneMacro10(nErrorCode, sURL) {
+                this.macro10 = new Macro10(sFile, addrLoad, sOptions, dbg, function doneMacro10(nErrorCode, sURL) {
                     if (!nErrorCode) {
-                        dbg.loadBin(dbg.macro10.getBin(), addrLoad);
+                        /*
+                         * NOTE: Most Debugger operations run in the context of doCommand(), which catches any exceptions;
+                         * however, this callback may be running in a different context (eg, a network request callback), so
+                         * better safe than sorry.
+                         */
+                        try {
+                            dbg.loadBin(dbg.macro10.getBin(), addrLoad);
+                        } catch(e) {
+                            dbg.println(e.message);
+                        }
                     } else {
-                        dbg.println("error (" + nErrorCode + ") processing " + sURL);
+                        dbg.println("error (" + nErrorCode + ") processing " + (sURL || sFile));
                     }
                     dbg.macro10 = null;
                 });
@@ -2834,7 +2856,7 @@ class DebuggerPDP10 extends Debugger {
 
         var size = (sCmd == "db"? 1 : 2);
         var nWords = len || 32;
-        var nWordsPerLine = (size == 1? 2 : 4);
+        var nWordsPerLine = (size == 1? 1 : 4);
         var nLines = (((nWords + nWordsPerLine - 1) / nWordsPerLine)|0) || 1;
 
         var sDump = "";
@@ -2857,7 +2879,9 @@ class DebuggerPDP10 extends Debugger {
                 var nBits = 7;
                 var shift = 36 - nBits;
                 for (var i = 0; size == 1 && shift >= 0; i++) {
-                    var c = ((w / Math.pow(2, shift)) % Math.pow(2, nBits)) + (nBits == 6? 0x20 : 0);
+                    var c = ((w / Math.pow(2, shift)) % Math.pow(2, nBits));
+                    sData += this.toStrBase(c, nBits);
+                    c += (nBits == 6? 0x20 : 0);
                     sChars += (c < 0x20? '.' : String.fromCharCode(c));
                     shift -= nBits;
                 }
@@ -3318,7 +3342,7 @@ class DebuggerPDP10 extends Debugger {
         sCmd = Str.trim(sCmd);
         var a = sCmd.match(/^(['"])(.*?)\1$/);
         if (!a) {
-            this.parseExpression(sCmd, true);
+            this.parseExpression(sCmd, false);
         } else {
             if (a[2].length > 1) {
                 this.println(this.replaceRegs(a[2]));

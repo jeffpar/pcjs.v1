@@ -77,7 +77,8 @@ var DbgAddr;
  *
  * @unrestricted
  */
-class Debugger extends Component {
+class Debugger extends Component
+{
     /**
      * Debugger(parmsDbg)
      *
@@ -91,7 +92,8 @@ class Debugger extends Component {
      *
      * @param {Object} parmsDbg
      */
-    constructor(parmsDbg) {
+    constructor(parmsDbg)
+    {
         if (DEBUGGER) {
 
             super("Debugger", parmsDbg);
@@ -106,6 +108,19 @@ class Debugger extends Component {
              * but there is no command to adjust it.
              */
             this.nBits = 32;
+
+            /*
+             * sUndefined is set to the last unknown variable that parseExpression() encounters, if if
+             * is called in "quiet mode"; the value used for the variable is zero.  This mode was added
+             * for components that need to support expressions containing "fixups" (ie, values that
+             * must be determined later).
+             *
+             * TODO: Only one unknown (fixup) per expression is supported, and we don't indicate what
+             * operation was performed with the value (callers generally assume addition).  If a call
+             * encounters more than one undefined value, it will revert to normal error reporting and
+             * return an undefined value for the entire expression.
+             */
+            this.sUndefined = null;
 
             this.achGroup = ['{','}'];
             this.achAddress = ['[',']'];
@@ -163,7 +178,8 @@ class Debugger extends Component {
      * @param {number} [off] optional offset into sReg
      * @return {number} register index, or -1 if not found
      */
-    getRegIndex(sReg, off) {
+    getRegIndex(sReg, off)
+    {
         return -1;
     }
 
@@ -176,7 +192,8 @@ class Debugger extends Component {
      * @param {number} iReg
      * @return {number|undefined}
      */
-    getRegValue(iReg) {
+    getRegValue(iReg)
+    {
         return undefined;
     }
 
@@ -192,7 +209,8 @@ class Debugger extends Component {
      * @param {string} sAddr
      * @return {string}
      */
-    parseAddrReference(s, sAddr) {
+    parseAddrReference(s, sAddr)
+    {
         return s.replace('[' + sAddr + ']', "unimplemented");
     }
 
@@ -202,7 +220,8 @@ class Debugger extends Component {
      * @this {Debugger}
      * @return {string}
      */
-    getNextCommand() {
+    getNextCommand()
+    {
         var sCmd;
         if (this.iPrevCmd > 0) {
             sCmd = this.aPrevCmds[--this.iPrevCmd];
@@ -219,7 +238,8 @@ class Debugger extends Component {
      * @this {Debugger}
      * @return {string|null}
      */
-    getPrevCommand() {
+    getPrevCommand()
+    {
         var sCmd = null;
         if (this.iPrevCmd < this.aPrevCmds.length - 1) {
             sCmd = this.aPrevCmds[++this.iPrevCmd];
@@ -236,7 +256,8 @@ class Debugger extends Component {
      * @param {string} [chSep] is the command separator character (default is ';')
      * @return {Array.<string>}
      */
-    parseCommand(sCmd, fSave, chSep) {
+    parseCommand(sCmd, fSave, chSep)
+    {
         if (fSave) {
             if (!sCmd) {
                 if (this.fAssemble) {
@@ -329,6 +350,11 @@ class Debugger extends Component {
         if (this.nBits <= 32) {
             return dst & src;
         }
+        /*
+         * Negative values don't yield correct results when dividing, so pass them through an unsigned truncate().
+         */
+        dst = this.truncate(dst, 0, true);
+        src = this.truncate(src, 0, true);
         return ((((dst / Debugger.TWO_POW32)|0) & ((src / Debugger.TWO_POW32)|0)) * Debugger.TWO_POW32) + ((dst & src) >>> 0);
     }
 
@@ -358,7 +384,46 @@ class Debugger extends Component {
         if (this.nBits <= 32) {
             return dst | src;
         }
+        /*
+         * Negative values don't yield correct results when dividing, so pass them through an unsigned truncate().
+         */
+        dst = this.truncate(dst, 0, true);
+        src = this.truncate(src, 0, true);
         return ((((dst / Debugger.TWO_POW32)|0) | ((src / Debugger.TWO_POW32)|0)) * Debugger.TWO_POW32) + ((dst | src) >>> 0);
+    }
+
+    /**
+     * evalXOR(dst, src)
+     *
+     * Adapted from /modules/pdp10/lib/cpuops.js:PDP10.XOR().
+     *
+     * Performs the logical "exclusive-or" (XOR) of two operands > 32 bits.
+     *
+     * @this {Debugger}
+     * @param {number} dst
+     * @param {number} src
+     * @return {number} (dst ^ src)
+     */
+    evalXOR(dst, src)
+    {
+        /*
+         * We XOR the low 32 bits separately from the higher bits, and then combine them with addition.
+         * Since all bits above 32 will be zero, and since 0 XOR 0 is 0, no special masking for the higher
+         * bits is required.
+         *
+         * WARNING: When using JavaScript's 32-bit operators with values that could set bit 31 and produce a
+         * negative value, it's critical to perform a final right-shift of 0, ensuring that the final result is
+         * positive.
+         */
+        if (this.nBits <= 32) {
+            return dst | src;
+        }
+        /*
+         * Negative values don't yield correct results when dividing, so pass them through an unsigned truncate().
+         */
+        dst = this.truncate(dst, 0, true);
+        src = this.truncate(src, 0, true);
+        return ((((dst / Debugger.TWO_POW32)|0) ^ ((src / Debugger.TWO_POW32)|0)) * Debugger.TWO_POW32) + ((dst ^ src) >>> 0);
     }
 
     /**
@@ -394,9 +459,16 @@ class Debugger extends Component {
             if (nBits <= 32) {
                 vNew = v | 0;
             } else {
+                /*
+                 * For negative values, we require them to fit within nBits - 1, reserving the left-most bit
+                 * for the sign bit, but for positive values, we can't really be sure if the caller is treating
+                 * the left-most bit as a sign bit or not, so the upper range is based on nBits.
+                 */
                 limit = Math.pow(2, nBits - 1);
-                if (v < -limit || v >= limit) {
+                if (v < -limit) {
                     vNew = v % limit;
+                } else if (v >= limit * 2) {
+                    vNew = v % (limit * 2);
                 }
             }
         }
@@ -434,7 +506,8 @@ class Debugger extends Component {
      * @param {number} [cOps] (default is -1 for all)
      * @return {boolean} true if successful, false if error
      */
-    evalOps(aVals, aOps, cOps = -1) {
+    evalOps(aVals, aOps, cOps = -1)
+    {
         while (cOps-- && aOps.length) {
             var chOp = aOps.pop();
             if (aVals.length < 2) return false;
@@ -447,7 +520,7 @@ class Debugger extends Component {
                 break;
             case '/':
                 if (!val2) return false;
-                valNew = val1 / val2;
+                valNew = Math.trunc(val1 / val2);
                 break;
             case '%':
                 if (!val2) return false;
@@ -494,7 +567,7 @@ class Debugger extends Component {
                 valNew = this.evalIOR(val1, val2);
                 break;
             case '^^':          // since MACRO-10 uses '^' for base overrides, you must now use '^^' for bitwise exclusive-or (XOR)
-                valNew = val1 ^ val2;
+                valNew = this.evalXOR(val1, val2);
                 break;
             case '&&':
                 valNew = (val1 && val2? 1 : 0);
@@ -502,16 +575,144 @@ class Debugger extends Component {
             case '||':
                 valNew = (val1 || val2? 1 : 0);
                 break;
+            case '><':
+                valNew = val1;
+                val2 = 35 - (val2 & 0xff);
+                if (val2) {
+                    /*
+                     * Since binary shifting is a logical operation, and since shifting by division only works properly
+                     * with positive numbers, we must convert a negative value to a positive value, by computing the two's
+                     * complement.
+                     */
+                    if (valNew < 0) valNew += Math.pow(2, 36);
+                    if (val2 > 0) {
+                        valNew *= Math.pow(2, val2);
+                    } else {
+                        valNew = Math.trunc(valNew / Math.pow(2, -val2));
+                    }
+                }
+                break;
             default:
                 return false;
             }
-            aVals.push(this.truncate(valNew, this.nBits));
+            aVals.push(this.truncate(valNew));
         }
         return true;
     }
 
     /**
-     * parseExpression(sExp, fPrint)
+     * parseArray(asValues, iValue, iLimit, nBase, fQuiet)
+     *
+     * parseExpression() takes a complete expression and divides it into array elements, where even elements
+     * are values (which may be empty if two or more operators appear consecutively) and odd elements are operators.
+     *
+     * For example, if the original expression was "2*{3+{4/2}}", parseExpression() would call parseArray() with:
+     *
+     *      0   1   2   3   4   5   6   7   8   9  10  11  12  13  14
+     *      -   -   -   -   -   -   -   -   -   -  --  --  --  --  --
+     *      2   *   _   {   3   +   _   {   4   /   2   }   _   }   _
+     *
+     * This function takes care of recursively processing sub-expressions, by processing subsets of the array,
+     * as well as handling certain base overrides (eg, temporarily switching to base-10 for binary shift suffixes).
+     *
+     * @param {Array.<string>} asValues
+     * @param {number} iValue
+     * @param {number} iLimit
+     * @param {number} nBase
+     * @param {boolean} [fQuiet]
+     * @return {number|undefined}
+     */
+    parseArray(asValues, iValue, iLimit, nBase, fQuiet)
+    {
+        var value;
+        var sValue, sOp;
+        var fError = false;
+        var fNegate = false;
+        var aVals = [], aOps = [];
+
+        var nBasePrev = this.nBase;
+        this.nBase = nBase;
+
+        while (iValue < iLimit) {
+            var v;
+            sValue = asValues[iValue++].trim();
+            sOp = (iValue < iLimit? asValues[iValue++] : "");
+
+            if (!sValue) {
+                if (sOp == '{') {
+                    var cOpen = 1;
+                    var iStart = iValue;
+                    while (iValue < iLimit) {
+                        sValue = asValues[iValue++].trim();
+                        sOp = (iValue < asValues.length? asValues[iValue++] : "");
+                        if (sOp == '{') {
+                            cOpen++;
+                        } else if (sOp == '}') {
+                            if (!--cOpen) break;
+                        }
+                    }
+                    v = this.parseArray(asValues, iStart, iValue-1, this.nBase, fQuiet);
+                    sValue = (iValue < iLimit? asValues[iValue++].trim() : "");
+                    sOp = (iValue < iLimit? asValues[iValue++] : "");
+                }
+                else {
+                    if (sOp != '-') {
+                        fError = true;
+                        break;
+                    }
+                    fNegate = true;
+                    continue;
+                }
+            }
+            else {
+                v = this.parseValue(sValue, null, fQuiet, fNegate);
+            }
+
+            if (v === undefined) {
+                if (this.sUndefined == null && fQuiet) {
+                    this.sUndefined = sValue;
+                    v = 0;
+                } else {
+                    fError = true;
+                    fQuiet = !fQuiet;
+                    break;
+                }
+            }
+
+            aVals.push(this.truncate(v));
+            if (!sOp) break;
+
+            this.assert(Debugger.aBinOpPrecedence[sOp] != null);
+            if (aOps.length && Debugger.aBinOpPrecedence[sOp] < Debugger.aBinOpPrecedence[aOps[aOps.length - 1]]) {
+                this.evalOps(aVals, aOps, 1);
+            }
+
+            aOps.push(sOp);
+
+            /*
+             * The MACRO-10 binary shifting operator assumes a base-10 shift count, regardless of the current
+             * base, so we must override the current base to ensure the count is parsed correctly.
+             */
+            this.nBase = (sOp == '><')? 10 : nBase;
+            fNegate = false;
+        }
+
+        if (!this.evalOps(aVals, aOps) || aVals.length != 1) {
+            fError = true;
+        }
+
+        if (!fError) {
+            value = aVals.pop();
+        } else if (fQuiet === false) {
+            this.println("parse error (" + (sValue || sOp) + ")");
+        }
+
+        this.nBase = nBasePrev;
+        return value;
+    }
+
+    /**
+     * parseExpression(sExp, fQuiet)
      *
      * A quick-and-dirty expression parser.  It takes an expression like:
      *
@@ -527,51 +728,57 @@ class Debugger extends Component {
      *      ...
      *
      * We pop 1 "binop" from aOps and 2 values from aVals whenever a "binop" of lower priority than its
-     * predecessor is encountered, evaluate, and push the result back onto aVals.  Unary operators like
-     * '~' and ternary operators like '?:' are not supported.
-     *
-     * parseReference() makes it possible to write parenthetical-style sub-expressions by using whatever
-     * characters achGroup contains (default is braces}.  Address references are resolved using the characters
-     * in achAddress (default is brackets).
-     *
-     * Why not always use parentheses for sub-expressions?  Because parseReference() serves multiple purposes,
-     * the other being reference replacement in message strings passing through replaceRegs(), and some
-     * Debuggers don't want parentheses taking on a new meaning in message strings.
-     *
-     * However, a Debugger can override these choices by modifying achGroup and/or achAddress, if there's no
-     * conflict in its replaceRegs() implementation.
+     * predecessor is encountered, evaluate, and push the result back onto aVals.  Only selected unary
+     * operators are supported (eg, minus), and ternary operators like '?:' are not supported at all.
      *
      * @this {Debugger}
      * @param {string|undefined} sExp
-     * @param {boolean} [fPrint] is true to print all resolved values, false for quiet parsing
+     * @param {boolean} [fQuiet] (true for quiet parsing)
      * @return {number|undefined} numeric value, or undefined if sExp contains any undefined or invalid values
      */
-    parseExpression(sExp, fPrint) {
+    parseExpression(sExp, fQuiet)
+    {
         var value;
 
-        /*
-         * First process (and eliminate) any references, aka sub-expressions.
-         */
-        if (sExp) sExp = this.parseReference(sExp);
+        this.sUndefined = null;
 
         if (sExp) {
-            var i = 0;
-            var fError = false;
-            var sExpOrig = sExp;
-            var aVals = [], aOps = [];
+
+            /*
+             * The default grouping characters for sub-expressions are braces; they can be changed by altering
+             * achGroup, but when that happens, instead of changing our regular expressions and operator tables,
+             * we simply replace all achGroup characters with braces in the given expression.
+             *
+             * Why not just always use parentheses for sub-expressions?  Because some debuggers use parseReference()
+             * to perform parenthetical value replacements in message strings, and they don't want parentheses taking
+             * on a different meaning.  And for some machines, like the PDP-10, the convention is to use parentheses
+             * for indexed addressing and angle brackets for sub-expressions.
+             */
+            if (this.achGroup[0] != '{') {
+                sExp = sExp.split(this.achGroup[0]).join('{').split(this.achGroup[1]).join('}');
+            }
+
             /*
              * All browsers (including, I believe, IE9 and up) support the following idiosyncrasy of a RegExp split():
              * when the RegExp uses a capturing pattern, the resulting array will include entries for all the pattern
              * matches along with the non-matches.  This effectively means that, in the set of expressions that we
              * support, all even entries in asValues will contain "values" and all odd entries will contain "operators".
              *
-             * Although I starting listing the operators in the RegExp in "precedential" order, that's not important;
+             * Although I started listing the operators in the RegExp in "precedential" order, that's not important;
              * what IS important is listing operators than contain shorter operators first.  For example, bitwise
              * shift operators must be listed BEFORE the logical less-than or greater-than operators.
              *
-             * Finally, to better accommodate MACRO-10 syntax, I've replaced the single '^' for XOR with '^^', since
+             * Also, to better accommodate MACRO-10 syntax, I've replaced the single '^' for XOR with '^^', since
              * MACRO-10 uses prefixes like "^D", "^O" and "^B" with numeric constants to indicate a base override, and
              * I've added '!' as an alias for '|' to perform bitwise inclusive-or.
+             *
+             * The MACRO-10 binary shifting suffix ('B') is a bit more problematic, since a capital B can also appear
+             * inside symbols.  So I pre-scan for that operator and replace non-symbolic occurrences with an internal
+             * operator ('><').
+             *
+             * Note that Str.parseInt(), which parseValue() relies on, supports both the MACRO-10 base prefix overrides
+             * and the binary shifting suffix.  But since the B suffix can also be a bracketed expression, we have to
+             * support it here as well.
              *
              * MACRO-10 supports only a subset of all the PCjs operators; for example, MACRO-10 doesn't support bitwise
              * exclusive-or, shift operators, or any of the boolean logical/compare operators.  But unless we run into
@@ -579,40 +786,12 @@ class Debugger extends Component {
              *
              * WARNING: Whenever you make changes to this RegExp, make sure you update aBinOpPrecedence as needed, too.
              */
-            var regExp = /(\|\||&&|\||^^|&|!=|!|==|>=|>>>|>>|>|<=|<<|<|-|\+|%|\/|\*)/;
+            var regExp = /(\{|}|\|\||&&|\||\^\^|><|&|!=|!|==|>=|>>>|>>|>|<=|<<|<|-|\+|%|\/|\*)/;
+            sExp = sExp.replace(/(^|[^A-Z0-9$%.])([0-9]+)B/, "$1$2><");
             var asValues = sExp.split(regExp);
-            while (i < asValues.length) {
-                var sValue = asValues[i++];
-                var cchValue = sValue.length;
-                var s = Str.trim(sValue);
-                if (!s) {
-                    fError = true;
-                    break;
-                }
-                var v = this.parseValue(s, null, fPrint === false);
-                if (v === undefined) {
-                    fError = true;
-                    fPrint = false;
-                    break;
-                }
-                aVals.push(this.truncate(v, this.nBits));
-                if (i == asValues.length) break;
-                var sOp = asValues[i++], cchOp = sOp.length;
-                this.assert(Debugger.aBinOpPrecedence[sOp] != null);
-                if (aOps.length && Debugger.aBinOpPrecedence[sOp] < Debugger.aBinOpPrecedence[aOps[aOps.length-1]]) {
-                    this.evalOps(aVals, aOps, 1);
-                }
-                aOps.push(sOp);
-                sExp = sExp.substr(cchValue + cchOp);
-            }
-            if (!this.evalOps(aVals, aOps) || aVals.length != 1) {
-                fError = true;
-            }
-            if (!fError) {
-                value = aVals.pop();
-                if (fPrint) this.printValue(null, value);
-            } else {
-                if (fPrint) this.println("error parsing '" + sExpOrig + "' at character " + (sExpOrig.length - sExp.length));
+            value = this.parseArray(asValues, 0, asValues.length, this.nBase, fQuiet);
+            if (value !== undefined && fQuiet === false) {
+                this.printValue(null, value);
             }
         }
         return value;
@@ -629,7 +808,8 @@ class Debugger extends Component {
      * @param {string} s
      * @return {string|undefined}
      */
-    parseReference(s) {
+    parseReference(s)
+    {
         var a;
         var chOpen = this.achGroup[0];
         var chClose = this.achGroup[1];
@@ -677,7 +857,8 @@ class Debugger extends Component {
      * @param {string} s
      * @return {string}
      */
-    parseSysVars(s) {
+    parseSysVars(s)
+    {
         var a;
         while (a = s.match(/\$([a-z]+)/i)) {
             var v = null;
@@ -693,15 +874,17 @@ class Debugger extends Component {
     }
 
     /**
-     * parseValue(sValue, sName, fQuiet)
+     * parseValue(sValue, sName, fQuiet, fNegate)
      *
      * @this {Debugger}
      * @param {string|undefined} sValue
      * @param {string|null} [sName] is the name of the value, if any
      * @param {boolean} [fQuiet]
+     * @param {boolean} [fNegate]
      * @return {number|undefined} numeric value, or undefined if sValue is either undefined or invalid
      */
-    parseValue(sValue, sName, fQuiet) {
+    parseValue(sValue, sName, fQuiet, fNegate)
+    {
         var value;
         if (sValue != null) {
             var iReg = this.getRegIndex(sValue);
@@ -710,11 +893,16 @@ class Debugger extends Component {
             } else {
                 value = this.getVariable(sValue);
                 if (value == null) {
-                    value = Str.parseInt(sValue, this.nBase);
+                    value = Str.parseInt(fNegate? ('-' + sValue) : sValue, this.nBase);
+                    fNegate = false;
                 }
             }
-            if (value == null && !fQuiet) {
-                this.println("invalid " + (sName? sName : "value") + ": " + sValue);
+            if (value != null) {
+                if (fNegate) value = -value;
+            } else {
+                if (!fQuiet) {
+                    this.println("invalid " + (sName? sName : "value") + ": " + sValue);
+                }
             }
         } else {
             if (!fQuiet) {
@@ -732,7 +920,8 @@ class Debugger extends Component {
      * @param {number|undefined} value
      * @return {boolean} true if value defined, false if not
      */
-    printValue(sVar, value) {
+    printValue(sVar, value)
+    {
         var sValue;
         var fDefined = false;
         if (value !== undefined) {
@@ -753,7 +942,8 @@ class Debugger extends Component {
      * @this {Debugger}
      * @return {Object}
      */
-    resetVariables() {
+    resetVariables()
+    {
         var a = this.aVariables;
         this.aVariables = {};
         return a;
@@ -765,7 +955,8 @@ class Debugger extends Component {
      * @this {Debugger}
      * @param {Object} a (from previous resetVariables() call)
      */
-    restoreVariables(a) {
+    restoreVariables(a)
+    {
         this.aVariables = a;
     }
 
@@ -776,7 +967,8 @@ class Debugger extends Component {
      * @param {string} [sVar]
      * @return {boolean} true if all value(s) defined, false if not
      */
-    printVariable(sVar) {
+    printVariable(sVar)
+    {
         if (sVar) {
             return this.printValue(sVar, this.aVariables[sVar]);
         }
@@ -794,7 +986,8 @@ class Debugger extends Component {
      * @this {Debugger}
      * @param {string} sVar
      */
-    delVariable(sVar) {
+    delVariable(sVar)
+    {
         delete this.aVariables[sVar];
     }
 
@@ -805,7 +998,8 @@ class Debugger extends Component {
      * @param {string} sVar
      * @return {number|undefined}
      */
-    getVariable(sVar) {
+    getVariable(sVar)
+    {
         return this.aVariables[sVar];
     }
 
@@ -816,7 +1010,8 @@ class Debugger extends Component {
      * @param {string} sVar
      * @param {number} value
      */
-    setVariable(sVar, value) {
+    setVariable(sVar, value)
+    {
         this.aVariables[sVar] = value;
     }
 
@@ -830,7 +1025,8 @@ class Debugger extends Component {
      * @param {number} [nBits] (-1 to strip leading zeros, 0 to allow a variable number of digits)
      * @return {string}
      */
-    toStrBase(n, nBits = 0) {
+    toStrBase(n, nBits = 0)
+    {
         var s;
         switch(this.nBase) {
         case 8:
@@ -873,7 +1069,10 @@ if (DEBUGGER) {
         '+':    8,      // addition
         '%':    9,      // remainder
         '/':    9,      // division
-        '*':    9       // multiplication
+        '*':    9,      // multiplication
+        '><':   10,     // internal binary shift operator (MACRO-10-style; converted from a 'B' suffix)
+        '{':    11,     // open sub-expression (achGroup[0] default)
+        '}':    11      // close sub-expression (achGroup[1] default)
     };
 
     /*

@@ -174,7 +174,12 @@ class CPUStatePDP10 extends CPUPDP10 {
      */
     initCPU()
     {
-        this.regEA  = this.regRA = this.regOP = 0;
+        /*
+         * regEA is the last effective address, while regLA is the last fetch from an effective address
+         * calculation.  regRA is the last reference address used to calculate the last effective address.
+         */
+        this.regEA  = this.regRA = 0;
+        this.regLA  = this.regOP = 0;
         this.regPC  = this.lastPC = this.addrReset;
         this.regXC  = -1;       // if >= 0 this supersedes regPC (refers to an opcode from XCT)
         this.regBP  = -1;       // active byte pointer (-1 if none)
@@ -287,6 +292,7 @@ class CPUStatePDP10 extends CPUPDP10 {
         state.set(0, [
             this.regEA,
             this.regRA,
+            this.regLA,
             this.regOP,
             this.regPC,
             this.regXC,
@@ -320,6 +326,7 @@ class CPUStatePDP10 extends CPUPDP10 {
         [
             this.regEA,
             this.regRA,
+            this.regLA,
             this.regOP,
             this.regPC,
             this.regXC,
@@ -353,6 +360,38 @@ class CPUStatePDP10 extends CPUPDP10 {
     getPS()
     {
         return (this.regPS & PDP10.HALF_MASK) * PDP10.HALF_SHIFT;
+    }
+
+    /**
+     * setPS(w)
+     *
+     * Sets the processor state flags in the format used by various program control operations (eg, JRST).
+     *
+     * @this {CPUStatePDP10}
+     * @param {number} w
+     */
+    setPS(w)
+    {
+        w = (w / PDP10.HALF_SHIFT)|0;
+        this.regPS = (this.regPS & ~PDP10.PSFLAG.SET_MASK) | (w & PDP10.PSFLAG.SET_MASK);
+        this.regPS |= (w & PDP10.PSFLAG.USER_MODE);
+        if (!(w & PDP10.PSFLAG.USER_IO)) {
+            this.regPS &= ~PDP10.PSFLAG.USER_IO;
+        } else {
+            if (!(this.regPS & PDP10.PSFLAG.USER_MODE)) this.regPS |= PDP10.PSFLAG.USER_IO;
+        }
+    }
+
+    /**
+     * setUserMode()
+     *
+     * Sets the processor's USER_MODE flag.
+     *
+     * @this {CPUStatePDP10}
+     */
+    setUserMode()
+    {
+        this.regPS |= PDP10.PSFLAG.USER_MODE;
     }
 
     /**
@@ -401,7 +440,7 @@ class CPUStatePDP10 extends CPUPDP10 {
     getOpcode()
     {
         if ((this.regRA & PDP10.OPCODE.I_BIT)) {
-            this.regRA = this.readWord(this.regEA);
+            this.regRA = this.regLA = this.readWord(this.regEA);
         } else if (this.regXC >= 0) {
             this.regRA = this.regOP = this.readWord(this.regXC);
             this.regXC = -1;
@@ -429,7 +468,7 @@ class CPUStatePDP10 extends CPUPDP10 {
          */
         this.regEA = this.regRA & PDP10.OPCODE.Y_MASK;
         var x = (this.regRA >> PDP10.OPCODE.X_SHIFT) & PDP10.OPCODE.X_MASK;
-        if (x) this.regEA = (this.regEA + this.readWord(x)) & PDP10.ADDR_MASK;
+        if (x) this.regEA = (this.regEA + (this.regLA = this.readWord(x))) & PDP10.ADDR_MASK;
 
         return (this.regRA & PDP10.OPCODE.I_BIT)? -1 : ((this.regOP / PDP10.OPCODE.A_SCALE)|0);
     }
