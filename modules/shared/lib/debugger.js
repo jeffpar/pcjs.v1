@@ -603,13 +603,17 @@ class Debugger extends Component
     /**
      * parseArray(asValues, iValue, iLimit, nBase, fQuiet)
      *
-     * Helper function for parseExpression().
+     * parseExpression() takes a complete expression and divides it into array elements, where even elements
+     * are values (which may be empty if two or more operators appear consecutively) and odd elements are operators.
      *
-     * Imagine the original expression was "2*{3+{4/2}}".  parseExpression() divides it into array elements:
+     * For example, if the original expression was "2*{3+{4/2}}", parseExpression() would call parseArray() with:
      *
      *      0   1   2   3   4   5   6   7   8   9  10  11  12  13  14
      *      -   -   -   -   -   -   -   -   -   -  --  --  --  --  --
      *      2   *   _   {   3   +   _   {   4   /   2   }   _   }   _
+     *
+     * This function takes care of recursively processing sub-expressions, by processing subsets of the array,
+     * as well as handling certain base overrides (eg, temporarily switching to base-10 for binary shift suffixes).
      *
      * @param {Array.<string>} asValues
      * @param {number} iValue
@@ -742,11 +746,13 @@ class Debugger extends Component
 
             /*
              * The default grouping characters for sub-expressions are braces; they can be changed by altering
-             * achGroup, but when that happens, we replace them all with braces anyway, for consistent parsing.
+             * achGroup, but when that happens, instead of changing our regular expressions and operator tables,
+             * we simply replace all achGroup characters with braces in the given expression.
              *
              * Why not just always use parentheses for sub-expressions?  Because some debuggers use parseReference()
              * to perform parenthetical value replacements in message strings, and they don't want parentheses taking
-             * on a new meaning in those strings.
+             * on a different meaning.  And for some machines, like the PDP-10, the convention is to use parentheses
+             * for indexed addressing and angle brackets for sub-expressions.
              */
             if (this.achGroup[0] != '{') {
                 sExp = sExp.split(this.achGroup[0]).join('{').split(this.achGroup[1]).join('}');
@@ -758,7 +764,7 @@ class Debugger extends Component
              * matches along with the non-matches.  This effectively means that, in the set of expressions that we
              * support, all even entries in asValues will contain "values" and all odd entries will contain "operators".
              *
-             * Although I starting listing the operators in the RegExp in "precedential" order, that's not important;
+             * Although I started listing the operators in the RegExp in "precedential" order, that's not important;
              * what IS important is listing operators than contain shorter operators first.  For example, bitwise
              * shift operators must be listed BEFORE the logical less-than or greater-than operators.
              *
@@ -767,11 +773,12 @@ class Debugger extends Component
              * I've added '!' as an alias for '|' to perform bitwise inclusive-or.
              *
              * The MACRO-10 binary shifting suffix ('B') is a bit more problematic, since a capital B can also appear
-             * inside symbols.  So I pre-scan for that operator and replace appropriate occurrences with an internal
+             * inside symbols.  So I pre-scan for that operator and replace non-symbolic occurrences with an internal
              * operator ('><').
              *
              * Note that Str.parseInt(), which parseValue() relies on, supports both the MACRO-10 base prefix overrides
-             * and the binary shifting suffix.
+             * and the binary shifting suffix.  But since the B suffix can also be a bracketed expression, we have to
+             * support it here as well.
              *
              * MACRO-10 supports only a subset of all the PCjs operators; for example, MACRO-10 doesn't support bitwise
              * exclusive-or, shift operators, or any of the boolean logical/compare operators.  But unless we run into
@@ -1063,9 +1070,9 @@ if (DEBUGGER) {
         '%':    9,      // remainder
         '/':    9,      // division
         '*':    9,      // multiplication
-        '><':   10,     // internal binary shifting (MACRO-10-style)
-        '{':    11,
-        '}':    11
+        '><':   10,     // internal binary shift operator (MACRO-10-style; converted from a 'B' suffix)
+        '{':    11,     // open sub-expression (achGroup[0] default)
+        '}':    11      // close sub-expression (achGroup[1] default)
     };
 
     /*

@@ -1546,14 +1546,13 @@ class DebuggerPDP10 extends Debugger {
                 } else {
                     n = (opCode >> PDP10.OPCODE.A_SHIFT) & PDP10.OPCODE.A_MASK;
                     sOperand = this.toStrBase(n, -1);
-                    if (n) {
-                        for (var m = 0; m < DebuggerPDP10.ALTOPS.length; m++) {
-                            if (opNum == DebuggerPDP10.ALTOPS[m][0]) {
-                                var opAlt = DebuggerPDP10.ALTOPS[m][n];
-                                if (opAlt) {
-                                    sOperation = DebuggerPDP10.OPNAMES[opAlt];
-                                    sOperand = "";
-                                }
+                    for (var m = 0; sOperand && m < DebuggerPDP10.ALTOPS.length; m++) {
+                        if (opNum == DebuggerPDP10.ALTOPS[m][0]) {
+                            var opAlt = DebuggerPDP10.ALTOPS[m][n];
+                            if (opAlt) {
+                                sOperation = DebuggerPDP10.OPNAMES[opAlt];
+                                sOperand = "";
+                                break;
                             }
                         }
                     }
@@ -2476,20 +2475,20 @@ class DebuggerPDP10 extends Debugger {
      */
     loadBin(aWords, addrLoad)
     {
-        /*
-         * TODO: Decide what to do about addrLoad; either drop it or use it.
-         */
         var nWords = 0;
         var bus = this.bus;
         var dbg = this.dbg;
         aWords.forEach(function(w, addr) {
             bus.setWordDirect(addr, w);
+            if (addrLoad == null) addrLoad = addr;
             nWords++;
         });
         if (!nWords) {
             this.println("no data");
         } else {
             this.println(nWords + " words loaded at " + this.toStrBase(addrLoad) + '-' + this.toStrBase(addrLoad + nWords - 1));
+            this.cpu.setPC(addrLoad || 0);
+            this.updateStatus();
         }
     }
 
@@ -2850,7 +2849,7 @@ class DebuggerPDP10 extends Debugger {
         if (dbgAddr.nBase) this.nBase = dbgAddr.nBase;
 
         var size = (sCmd == "db"? 1 : 2);
-        var nWords = len || 16;
+        var nWords = len || 32;
         var nWordsPerLine = (size == 1? 1 : 4);
         var nLines = (((nWords + nWordsPerLine - 1) / nWordsPerLine)|0) || 1;
 
@@ -2875,7 +2874,7 @@ class DebuggerPDP10 extends Debugger {
                 var shift = 36 - nBits;
                 for (var i = 0; size == 1 && shift >= 0; i++) {
                     var c = ((w / Math.pow(2, shift)) % Math.pow(2, nBits));
-                    sData += this.toStrBase(c, nBits) + ' ';
+                    sData += this.toStrBase(c, nBits);
                     c += (nBits == 6? 0x20 : 0);
                     sChars += (c < 0x20? '.' : String.fromCharCode(c));
                     shift -= nBits;

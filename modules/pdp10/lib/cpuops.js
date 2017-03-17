@@ -2232,7 +2232,31 @@ PDP10.opAOBJN = function(op, acc)
  */
 PDP10.opJRST = function(op, acc)
 {
-    this.opUndefined(op);
+    if (acc & 0b0001) {
+        /*
+         * Enter user mode.
+         */
+        this.setUserMode();
+    }
+    if (acc & 0b0010) {
+        /*
+         * Restore the flags.
+         */
+        this.setPS(this.regLA);
+    }
+    if (acc & 0b0100) {
+        /*
+         * Halt the processor.
+         */
+        this.stopCPU();
+    }
+    if (acc & 0b1000) {
+        /*
+         * Restore interrupt channel.
+         */
+        this.opUndefined(op);
+    }
+    this.setPC(this.regEA);
 };
 
 /**
