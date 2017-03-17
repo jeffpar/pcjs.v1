@@ -22,6 +22,8 @@ Resources for this test include:
 - [DAKAD.MAC](#dakadmac)
 - [DAKAD.SEQ](#dakadseq)
 
+{% include machine.html id="testka10" %}
+
 The Debugger's assemble ("a") command can be used to test the new built-in
 [MACRO-10 mini-assembler](/modules/pdp10/lib/macro10.js), which supports a subset
 of the [MACRO-10](http://archive.pcjs.org/pubs/dec/pdp10/tops10/02_1973AsmRef_macro.pdf) assembly language.
@@ -30,7 +32,7 @@ This command:
 	a 30724 /apps/pdp10/tapes/diags/klad/dakad/TEST.MAC
 
 will automatically read the [TEST.MAC](TEST.MAC) source file (a slightly modified copy of [DAKAD.MAC](DAKAD.MAC)), assemble it,
-and then load the binary output at the specified address.  Use the command `db 30725` to dump the first few words of binary data:
+and then load the binary output at the specified address.  Use the command `db 30724` to dump the first few words of binary data:
 
 	030724: 254000 030741  053 000 000 061 160  +..1p
 	030725: 064252 042240  015 012 120 104 120  ..PDP
@@ -44,8 +46,6 @@ and then load the binary output at the specified address.  Use the command `db 3
 	030735: 446064 024150  111 103 040 050 064  IC (4
 	030736: 245013 342202  051 040 133 104 101  ) [DA
 	030737: 456030 456432  113 101 104 135 015  KAD].
-
-{% include machine.html id="testka10" %}
 
 ---
 
