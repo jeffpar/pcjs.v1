@@ -1,29 +1,29 @@
 ---
 layout: page
-title: PDP-10 KA10 Basic Instruction Diagnostic #4
-permalink: /apps/pdp10/tapes/diags/klad/dakad/
+title: PDP-10 KA10 Basic Instruction Diagnostic #1
+permalink: /apps/pdp10/diags/klad/dakaa/
 machines:
   - id: testka10
     type: pdp10
     config: /devices/pdp10/machine/ka10/test/debugger/machine.xml
     debugger: true
-    commands: a 30724 /apps/pdp10/tapes/diags/klad/dakad/TEST.MAC
+    commands: a 30724 /apps/pdp10/diags/klad/dakaa/TEST.MAC
 ---
 
-PDP-10 KA10 Basic Instruction Diagnostic #4
+PDP-10 KA10 Basic Instruction Diagnostic #1
 -------------------------------------------
 
-The *PDP-10 KA10 Basic Instruction Diagnostic #4* (MAINDEC-10-DAKAD-B-D) test code has been extracted from
-[DAKAD.MAC](DAKAD.MAC.txt) [[original](http://pdp-10.trailing-edge.com/klad_sources/01/klad.sources/dakadm.mac.html)]
+The *PDP-10 KA10 Basic Instruction Diagnostic #1* (MAINDEC-10-DAKAA-B-D) test code has been extracted from
+[DAKAA.MAC](DAKAA.MAC.txt) [[original](http://pdp-10.trailing-edge.com/klad_sources/01/klad.sources/dakaam.mac.html)]
 for use with the [PDP-10 Test Machine with Debugger](/devices/pdp10/machine/ka10/test/debugger/) below.
 
 Resources for this test include:
 
-- [Instructions](#dakadtxt)
-- [History](#dakadhst)
-- [Source Code](#dakadmac) [[file](DAKAD.MAC.txt)]
-- [MACRO-10 Listing](#dakadlst) [[file](DAKAD.LST.txt)]
-- [Additional Information](#dakadseq)
+- [Instructions](#dakaatxt)
+- [History](#dakaahst)
+- [Source Code](#dakaamac)
+- [MACRO-10 Listing](DAKAA.LST.txt)
+- [Additional Information](http://archive.pcjs.org/apps/pdp10/diags/klad/dakaa/DAKAA.SEQ.txt)
 
 {% include machine.html id="testka10" %}
 
@@ -32,47 +32,34 @@ The Debugger's assemble ("a") command can be used to test the new built-in
 of the [MACRO-10](http://archive.pcjs.org/pubs/dec/pdp10/tops10/02_1973AsmRef_macro.pdf) assembly language.
 This command:
 
-	a 30724 /apps/pdp10/tapes/diags/klad/dakad/TEST.MAC
+	a 30724 /apps/pdp10/diags/klad/dakaa/TEST.MAC
 
-will automatically read the [TEST.MAC](TEST.MAC.txt) source file (a slightly modified copy of [DAKAD.MAC](DAKAD.MAC.txt)),
-assemble it, and then load the binary output at the specified address.  Use the command `db 30724` to dump the first few words
-of binary data:
-
-	030724: 254000 030741  053 000 000 061 160  +..1p
-	030725: 064252 042240  015 012 120 104 120  ..PDP
-	030726: 265426 020226  055 061 060 040 113  -10 K
-	030727: 405426 020204  101 061 060 040 102  A10 B
-	030730: 406471 141500  101 123 111 103 040  ASIC 
-	030731: 446352 352244  111 116 123 124 122  INSTR
-	030732: 526072 444636  125 103 124 111 117  UCTIO
-	030733: 471010 444602  116 040 104 111 101  N DIA
-	030734: 436351 751650  107 116 117 123 124  GNOST
-	030735: 446064 024150  111 103 040 050 064  IC (4
-	030736: 245013 342202  051 040 133 104 101  ) [DA
-	030737: 456030 456432  113 101 104 135 015  KAD].
+will automatically read the [TEST.MAC](TEST.MAC.txt) source file (a slightly modified copy of [DAKAA.MAC](DAKAA.MAC.txt)),
+assemble it, and then load the binary output at the specified address.
 
 ---
 
-DAKAD.TXT
+DAKAA.TXT
 ---------
 
 ```
-MAINDEC-10-DAKAD.TXT
+MAINDEC-10-DAKAA
 
 
 
 
 
 
+ 
 			IDENTIFICATION
 			--------------
 
-	PRODUCT CODE:	MAINDEC-10-DAKAD-B-D
+	PRODUCT CODE:	MAINDEC-10-DAKAA-B-D
 
 	PRODUCT NAME:	DECSYSTEM10 PDP-10 KA10 BASIC
-			INSTRUCTION DIAGNOSTIC (4)
+			INSTRUCTION DIAGNOSTIC (1)
 
-	FUNCTION:	REGISTER ADDRESSING, PC CHANGE, XCT
+	FUNCTION:	BASIC INSTRUCTIONS
 
 	VERSION:	0.2
 
@@ -100,7 +87,7 @@ EQUIPMENT CORPORATION.
 
 DEC ASSUMES NO RESPONSIBILITY FOR THE USE OR RELIABILITY OF ITS
 SOFTWARE ON EQUIPMENT WHICH IS NOT SUPPLIED BY DEC.
-							MAINDEC-10-DAKAD.TXT
+							MAINDEC-10-DAKAA.TXT
 							PAGE 2
 
 
@@ -136,17 +123,22 @@ SOFTWARE ON EQUIPMENT WHICH IS NOT SUPPLIED BY DEC.
 8.0	MISCELLANEOUS
 
 9.0	LISTING
-							MAINDEC-10-DAKAD.TXT
+							MAINDEC-10-DAKAA.TXT
 							PAGE 3
 
 
 1.0	ABSTRACT
 
-	THIS PDP-10 KA10 BASIC INSTRUCTION DIAGNOSTIC IS THE
-	FOURTH IN A SERIES OF PDP-10 KA10 PROCESSOR DIAGNOSTICS.
-	THE DIAGNOSTIC TESTS REGISTER ADDRESSING, JFCL, AR FLAGS,
-	AOS, SOS, JRST, AOBJX, JSP, XCT, INDIRECT AND
-	INDEXED ADDRESSING.
+	THIS PDP-10 KA10 BASIC INSTRUCTION DIAGNOSTIC IS THE FIRST IN A
+	SERIES OF PDP-10 KA10 PROCESSOR DIAGNOSTICS.  IT IS THE MOST
+	BASIC OF THE PROCESSOR DIAGNOSTICS.  THIS DIAGNOSTIC
+	ASSUMES THE HALT INSTRUCTION AND THE COMPUTER CONSOLE
+	TO BE OPERATIVE.  IT MAKES NO FURTHER ASSUMPTIONS EXCEPT
+	THAT IT IS LOADED INTO MEMORY CORRECTLY.
+
+	THE DIAGNOSTIC TESTS SOME OF THE MOVE AND SKIP INSTRUCTIONS.
+	IT ALSO TESTS THE ADDERS AND OTHER LOGIC WITH AND, XOR, EQV,
+	AND ALL BOOLE INSTRUCTIONS.
 
 2.0	REQUIREMENTS
 
@@ -154,7 +146,7 @@ SOFTWARE ON EQUIPMENT WHICH IS NOT SUPPLIED BY DEC.
 
 	A PDP-10 KA10 WITH A MINIMUM OF 32K OF MEMORY
 
-	PAPER-TAPE READER
+	PAPER TAPE READER
 	DECTAPE (OPTIONAL)
 	CONSOLE TELETYPE
 
@@ -165,9 +157,8 @@ SOFTWARE ON EQUIPMENT WHICH IS NOT SUPPLIED BY DEC.
 2.3	PRELIMINARY PROGRAMS
 
 	CONSOLE FUNCTIONS WORKING PROPERLY
-	PAPER-TAPE OR DECTAPE READ-IN WORKING PROPERLY
-	PREVIOUS PROCESSOR DIAGNOSTICS
-							MAINDEC-10-DAKAD.TXT
+	PAPER TAPE OR DECTAPE READ-IN WORKING PROPERLY 
+							MAINDEC-10-DAKAA.TXT
 							PAGE 4
 
 
@@ -210,7 +201,7 @@ SOFTWARE ON EQUIPMENT WHICH IS NOT SUPPLIED BY DEC.
 	THE CYCLE TIME OF THE PROGRAM IS IN THE MILLISECOND RANGE AND
 	IS THEREFORE SUITABLE FOR TAKING MARGINS, VIBRATION TESTS, ETC.
 
-							MAINDEC-10-DAKAD.TXT
+							MAINDEC-10-DAKAA.TXT
 							PAGE 5
 
 
@@ -249,17 +240,17 @@ SOFTWARE ON EQUIPMENT WHICH IS NOT SUPPLIED BY DEC.
 
 ```
 
-DAKAD.HST
+DAKAA.HST
 ---------
 
 ```
-	THIS IS A HISTORY OF THE DEVELOPMENT OF MAINDEC-10-DAKAD
-                                                                                                                           SEQ 0006
+	THIS IS A HISTORY OF THE DEVELOPMENT OF MAINDEC-10-DAKAA
+
 ************************************************************************
 
-PRODUCT CODE:		MAINDEC-10-DAKAD
+PRODUCT CODE:		MAINDEC-10-DAKAA
 
-PRODUCT NAME:		BASIC INSTRUCTION DIAGNOSTIC #4
+PRODUCT NAME:		BASIC INSTRUCTION DIAGNOSTIC #1
 
 DATE RELEASED:		JANUARY 1977
 
@@ -280,25 +271,13 @@ ORIGINAL AUTHOR:	RICHARD MALISKA
 ORIGINAL RELEASE:	16-MAR-72
 
 ************************************************************************
-
 ```
 
-DAKAD.MAC
+DAKAA.MAC
 ---------
+
+[[Download](DAKAA.MAC.txt)]
 
 {% highlight text %}
-{% include_relative DAKAD.MAC.txt %}
+{% include_relative DAKAA.MAC.txt %}
 {% endhighlight %}
-
-DAKAD.LST
----------
-
-{% highlight text %}
-{% include_relative DAKAD.LST.txt %}
-{% endhighlight %}
-
-DAKAD.SEQ
----------
-
-To view the contents of **DAKAD.SEQ**, the source of all the above information, click
-[here](http://archive.pcjs.org/apps/pdp10/tapes/diags/klad/dakad/DAKAD.SEQ.txt).
