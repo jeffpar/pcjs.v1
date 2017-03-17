@@ -1,11 +1,11 @@
 ---
 layout: page
-title: PDP-10 KLAD Diagnostic Tapes
-permalink: /apps/pdp10/tapes/diags/klad/
+title: PDP-10 KLAD Diagnostics
+permalink: /apps/pdp10/diags/klad/
 ---
 
-PDP-10 KLAD Diagnostic Tapes
-----------------------------
+PDP-10 KLAD Diagnostics
+-----------------------
 
 PCjs has archived selected files from [PDP-10 KLAD Diagnostics Sources](http://pdp-10.trailing-edge.com/klad_sources/index.html),
 including:
