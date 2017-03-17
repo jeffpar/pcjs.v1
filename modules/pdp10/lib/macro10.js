@@ -214,14 +214,22 @@ class Macro10 {
             this.done(this.parseFile());
             return;
         }
+
         var macro10 = this;
-        Web.getResource(this.asURLs[this.iURL++], null, true, function processMacro10(sURL, sResource, nErrorCode) {
+        var sURL = this.asURLs[this.iURL++];
+
+        /*
+         * We know that local resources ending with ".MAC" are actually stored with a ".txt" extension.
+         */
+        if (sURL[0] == '/' && sURL.slice(-4) == ".MAC") sURL += ".txt";
+
+        Web.getResource(sURL, null, true, function processMacro10(sFile, sResource, nErrorCode) {
             if (nErrorCode) {
-                macro10.done(nErrorCode, sURL);
+                macro10.done(nErrorCode, sFile);
                 return;
             }
             var sText = sResource;
-            if (Str.endsWith(sURL, ".html")) {
+            if (Str.endsWith(sFile, ".html")) {
                 /*
                  * We want to parse ONLY the text between <PRE>...</PRE> tags, and eliminate any HTML entities.
                  */

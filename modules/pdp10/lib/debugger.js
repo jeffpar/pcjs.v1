@@ -331,10 +331,16 @@ class DebuggerPDP10 extends Debugger {
         this.nBusWidth = bus.getWidth();
 
         /*
-         * Re-initialize Debugger message support if necessary
+         * Override the Debugger's message configuration if specified.
          */
         var sMessages = /** @type {string|undefined} */ (cmp.getMachineParm('messages'));
         if (sMessages) this.messageInit(sMessages);
+
+        /*
+         * Override the Debugger's initialization commands if specified.
+         */
+        var sCommands = /** @type {string|undefined} */ (cmp.getMachineParm('commands'));
+        if (sCommands) this.sInitCommands = sCommands;
 
         /*
          * Update aOpReserved as appropriate for the current model
