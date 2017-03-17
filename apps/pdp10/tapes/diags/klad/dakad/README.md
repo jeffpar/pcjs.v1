@@ -24,19 +24,26 @@ Resources for this test include:
 
 The Debugger's assemble ("a") command can be used to test the new built-in
 [MACRO-10 mini-assembler](/modules/pdp10/lib/macro10.js), which supports a subset
-of the [MACRO-10](http://archive.pcjs.org/pubs/dec/pdp10/tops10/02_1973AsmRef_macro.pdf) assembly language.  This command:
+of the [MACRO-10](http://archive.pcjs.org/pubs/dec/pdp10/tops10/02_1973AsmRef_macro.pdf) assembly language.
+This command:
 
-	a 100 /apps/pdp10/tapes/diags/klad/dakad/TEST.MAC
+	a 30724 /apps/pdp10/tapes/diags/klad/dakad/TEST.MAC
 
 will automatically read the [TEST.MAC](TEST.MAC) source file (a slightly modified copy of [DAKAD.MAC](DAKAD.MAC)), assemble it,
-and then load the binary output at the specified address.  Use the command `db 100` to dump the first block of binary data:
+and then load the binary output at the specified address.  Use the command `db 30725` to dump the first few words of binary data:
 
-	000100: 254000 000114  502112 026542   +...&PDP-1
-    000102: 301011 340542  301010 240646   0 KA10 BAS
-    000104: 446064 044634  516512 252606   IC INSTRUC
-    000106: 522231 747100  422230 143634   TION DIAGN
-    000110: 476472 444606  201206 424500   OSTIC (4) 
-    000112: 556110 145602  422721 505000   [DAKAD]...
+	030724: 254000 030741  053 000 000 061 160  +..1p
+	030725: 064252 042240  015 012 120 104 120  ..PDP
+	030726: 265426 020226  055 061 060 040 113  -10 K
+	030727: 405426 020204  101 061 060 040 102  A10 B
+	030730: 406471 141500  101 123 111 103 040  ASIC 
+	030731: 446352 352244  111 116 123 124 122  INSTR
+	030732: 526072 444636  125 103 124 111 117  UCTIO
+	030733: 471010 444602  116 040 104 111 101  N DIA
+	030734: 436351 751650  107 116 117 123 124  GNOST
+	030735: 446064 024150  111 103 040 050 064  IC (4
+	030736: 245013 342202  051 040 133 104 101  ) [DA
+	030737: 456030 456432  113 101 104 135 015  KAD].
 
 {% include machine.html id="testka10" %}
 

@@ -246,6 +246,8 @@ class Macro10 {
     /**
      * getBin()
      *
+     * Service for the Debugger to obtain the data after a (hopefully) successful assembly process.
+     *
      * @this {Macro10}
      * @return {Array.<number>}
      */
@@ -616,9 +618,9 @@ class Macro10 {
         if (!match) {
             if (nLocation === undefined) nLocation = this.nLocation;
             /*
-             * Check for the "period" syntax that MACRO-10 uses to represent the value of the current
-             * location.  The Debugger's parseInstruction() method understands that syntax, but its
-             * parseExpression() method does not.
+             * Check for the "period" syntax that MACRO-10 uses to represent the value of the current location.
+             * The Debugger's parseInstruction() method understands that syntax, but its parseExpression() method
+             * does not.
              *
              * Note that the Debugger's parseInstruction() replaces any period not PRECEDED by a decimal
              * digit with the current address, because our Debuggers' only other interpretation of a period
@@ -630,18 +632,13 @@ class Macro10 {
             if (result === undefined) {
                 this.error("error parsing expression: " + sOperand);
             }
-            // else if (this.dbg.sUndefined != null) {
-            //     /*
-            //      * If a valid result was returned but sUndefined is also set, then this must be a pass1 evaluation.
-            //      */
-            // }
         } else {
             var wLeft = match[1]? this.parseExpression(match[1]) : 0;
             if (wLeft !== undefined) {
                 var wRight = match[2]? this.parseExpression(match[2]) : 0;
                 if (wRight !== undefined) {
                     /*
-                     * NOTE: These must be combined as UNSIGNED values, so that's what we tell truncate().
+                     * NOTE: These must be combined as UNSIGNED values, so that's what we tell truncate() to produce.
                      */
                     result = this.dbg.truncate(wLeft, 18, true) * Math.pow(2, 18) + this.dbg.truncate(wRight, 18, true);
                 }
