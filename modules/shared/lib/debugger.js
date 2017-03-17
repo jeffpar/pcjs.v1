@@ -926,7 +926,11 @@ class Debugger extends Component
         var fDefined = false;
         if (value !== undefined) {
             fDefined = true;
-            sValue = Str.toHex(value, 0, true) + " " + value + ". " + Str.toOct(value, 0, true) + " " + Str.toBinBytes(value, 4, true);
+            if (this.nBase == 8) {
+                sValue = value + ". " + Str.toOct(value, 0, true);
+            } else {
+                sValue = Str.toHex(value, 0, true) + " " + value + ". " + Str.toOct(value, 0, true) + "  " + Str.toBinBytes(value, 4, true);
+            }
             if (value >= 0x20 && value < 0x7F) {
                 sValue += " '" + String.fromCharCode(value) + "'";
             }
@@ -1029,6 +1033,9 @@ class Debugger extends Component
     {
         var s;
         switch(this.nBase) {
+        case 2:
+            s = Str.toBin(n, nBits > 0? nBits : 0);
+            break;
         case 8:
             s = Str.toOct(n, nBits > 0? ((nBits + 2)/3)|0 : 0);
             break;

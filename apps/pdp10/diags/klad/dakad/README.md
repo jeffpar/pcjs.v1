@@ -28,7 +28,7 @@ Resources for this test include:
 {% include machine.html id="testka10" %}
 
 The Debugger's assemble ("a") command can be used to test the new built-in
-[MACRO-10 mini-assembler](/modules/pdp10/lib/macro10.js), which supports a subset
+[MACRO-10 Mini-Assembler](/modules/pdp10/lib/macro10.js), which supports a subset
 of the [MACRO-10](http://archive.pcjs.org/pubs/dec/pdp10/tops10/02_1973AsmRef_macro.pdf) assembly language.
 This command:
 

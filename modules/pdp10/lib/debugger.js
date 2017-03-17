@@ -3179,7 +3179,7 @@ class DebuggerPDP10 extends Debugger {
         case "base":
             if (asArgs[2]) {
                 var nBase = +asArgs[2];
-                if (nBase == 8 || nBase == 10 || nBase == 16) {
+                if (nBase == 2 || nBase == 8 || nBase == 10 || nBase == 16) {
                     this.nBase = nBase;
                 } else {
                     this.println("invalid base: " + nBase);

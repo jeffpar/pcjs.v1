@@ -1,5 +1,5 @@
 /**
- * @fileoverview My homage to MACRO-10: a work-alike assembler for the PDP-10
+ * @fileoverview A MACRO-10 "work-alike" Mini-Assembler for the PDP-10
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © Jeff Parsons 2012-2017
  *
@@ -119,10 +119,7 @@ class Macro10 {
         this.dbg = dbg;
         this.done = done;
 
-        /*
-         * Set up shortcuts to frequently used helper services that the caller must provide.
-         */
-        this.println = dbg.println;
+        this.println("starting PCjs MACRO-10 Mini-Assembler...");
 
         /*
          * Initialize all the tables that MACRO-10 uses.
@@ -200,6 +197,7 @@ class Macro10 {
         this.sText = "";
         this.iURL = 0;
         this.asURLs = sURL.split(';');
+
         this.loadNextResource();
     }
 
@@ -217,6 +215,8 @@ class Macro10 {
 
         var macro10 = this;
         var sURL = this.asURLs[this.iURL++];
+
+        this.println("loading " + Str.getBaseName(sURL));
 
         /*
          * We know that local resources ending with ".MAC" are actually stored with a ".txt" extension.
@@ -1089,6 +1089,21 @@ class Macro10 {
             this.warning("truncated value " + Str.toOct(value) + " at location " + Str.toOct(nLocation) + " to " + Str.toOct(w));
         }
         return w;
+    }
+
+    /**
+     * println(s)
+     *
+     * @this {Macro10}
+     * @param {string} s
+     */
+    println(s)
+    {
+        if (!this.dbg) {
+            console.log(s);
+        } else {
+            this.dbg.println(s);
+        }
     }
 }
 
