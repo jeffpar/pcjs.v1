@@ -1,6 +1,6 @@
 ---
 layout: page
-title: PDP-10 KA10 BASIC INSTRUCTION DIAGNOSTIC
+title: PDP-10 KA10 Basic Instruction Diagnostic #4
 permalink: /apps/pdp10/tapes/diags/klad/dakad/
 machines:
   - id: testka10
@@ -9,12 +9,12 @@ machines:
     debugger: true
 ---
 
-PDP-10 KA10 BASIC INSTRUCTION DIAGNOSTIC
-----------------------------------------
+PDP-10 KA10 Basic Instruction Diagnostic #4
+-------------------------------------------
 
-The *PDP-10 KA10 BASIC INSTRUCTION DIAGNOSTIC* (MAINDEC-10-DAKAD-B-D) test code has been extracted from [DAKAD.MAC](DAKAD.MAC)
-[[original file](http://pdp-10.trailing-edge.com/klad_sources/01/klad.sources/dakadm.mac.html)] for use with the
-[PDP-10 Test Machine with Debugger](/devices/pdp10/machine/ka10/test/debugger/) below.
+The *PDP-10 KA10 Basic Instruction Diagnostic #4* (MAINDEC-10-DAKAD-B-D) test code has been extracted from
+[DAKAD.MAC](DAKAD.MAC) [[original file](http://pdp-10.trailing-edge.com/klad_sources/01/klad.sources/dakadm.mac.html)]
+for use with the [PDP-10 Test Machine with Debugger](/devices/pdp10/machine/ka10/test/debugger/) below.
 
 Resources for this test include:
 
