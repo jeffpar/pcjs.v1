@@ -566,7 +566,7 @@ class Debugger extends Component
             case '|':
                 valNew = this.evalIOR(val1, val2);
                 break;
-            case '^^':          // since MACRO-10 uses '^' for base overrides, you must now use '^^' for bitwise exclusive-or (XOR)
+            case '^!':          // since MACRO-10 uses '^' for base overrides, '^!' is used for bitwise exclusive-or (XOR)
                 valNew = this.evalXOR(val1, val2);
                 break;
             case '&&':
@@ -575,16 +575,21 @@ class Debugger extends Component
             case '||':
                 valNew = (val1 || val2? 1 : 0);
                 break;
-            case '><':
+            case '_':
+            case '^_':
                 valNew = val1;
-                val2 = 35 - (val2 & 0xff);
+                /*
+                 * While we always try to avoid assuming any particular number of bits of precision, the 'B' shift
+                 * operator (which we've converted to '^_') is unique to the MACRO-10 environment, which imposes the
+                 * following restrictions on the shift count.
+                 */
+                if (chOp == '^_') val2 = 35 - (val2 & 0xff);
                 if (val2) {
                     /*
-                     * Since binary shifting is a logical operation, and since shifting by division only works properly
-                     * with positive numbers, we must convert a negative value to a positive value, by computing the two's
-                     * complement.
+                     * Since binary shifting is a logical (not arithmetic) operation, and since shifting by division only
+                     * works properly with positive numbers, we call truncate() to produce an unsigned value.
                      */
-                    if (valNew < 0) valNew += Math.pow(2, 36);
+                    valNew = this.truncate(valNew, 0, true);
                     if (val2 > 0) {
                         valNew *= Math.pow(2, val2);
                     } else {
@@ -610,7 +615,7 @@ class Debugger extends Component
      *
      *      0   1   2   3   4   5   6   7   8   9  10  11  12  13  14
      *      -   -   -   -   -   -   -   -   -   -  --  --  --  --  --
-     *      2   *   _   {   3   +   _   {   4   /   2   }   _   }   _
+     *      2   *       {   3   +       {   4   /   2   }       }
      *
      * This function takes care of recursively processing sub-expressions, by processing subsets of the array,
      * as well as handling certain base overrides (eg, temporarily switching to base-10 for binary shift suffixes).
@@ -627,7 +632,7 @@ class Debugger extends Component
         var value;
         var sValue, sOp;
         var fError = false;
-        var fNegate = false;
+        var iNegate = 0;
         var aVals = [], aOps = [];
 
         var nBasePrev = this.nBase;
@@ -656,16 +661,20 @@ class Debugger extends Component
                     sOp = (iValue < iLimit? asValues[iValue++] : "");
                 }
                 else {
-                    if (sOp != '-') {
-                        fError = true;
-                        break;
+                    if (sOp == '~' || sOp == '^-') {
+                        iNegate = 1;
+                        continue;
                     }
-                    fNegate = true;
-                    continue;
+                    if (sOp == '-') {
+                        iNegate = -1;
+                        continue;
+                    }
+                    fError = true;
+                    break;
                 }
             }
             else {
-                v = this.parseValue(sValue, null, fQuiet, fNegate);
+                v = this.parseValue(sValue, null, fQuiet, iNegate);
             }
 
             if (v === undefined) {
@@ -693,8 +702,8 @@ class Debugger extends Component
              * The MACRO-10 binary shifting operator assumes a base-10 shift count, regardless of the current
              * base, so we must override the current base to ensure the count is parsed correctly.
              */
-            this.nBase = (sOp == '><')? 10 : nBase;
-            fNegate = false;
+            this.nBase = (sOp == '^_')? 10 : nBase;
+            iNegate = 0;
         }
 
         if (!this.evalOps(aVals, aOps) || aVals.length != 1) {
@@ -729,7 +738,7 @@ class Debugger extends Component
      *
      * We pop 1 "binop" from aOps and 2 values from aVals whenever a "binop" of lower priority than its
      * predecessor is encountered, evaluate, and push the result back onto aVals.  Only selected unary
-     * operators are supported (eg, minus), and ternary operators like '?:' are not supported at all.
+     * operators are supported (eg, minus and "not"); ternary operators like '?:' are not supported at all.
      *
      * @this {Debugger}
      * @param {string|undefined} sExp
@@ -768,13 +777,14 @@ class Debugger extends Component
              * what IS important is listing operators than contain shorter operators first.  For example, bitwise
              * shift operators must be listed BEFORE the logical less-than or greater-than operators.
              *
-             * Also, to better accommodate MACRO-10 syntax, I've replaced the single '^' for XOR with '^^', since
-             * MACRO-10 uses prefixes like "^D", "^O" and "^B" with numeric constants to indicate a base override, and
-             * I've added '!' as an alias for '|' to perform bitwise inclusive-or.
+             * Also, to better accommodate MACRO-10 syntax, I've replaced the single '^' for XOR with '^!' (since
+             * MACRO-10 uses prefixes like "^D", "^O" and "^B" with numeric constants to indicate a base override).
+             * Similarly, I've added '!' as an alias for '|' (bitwise inclusive-or), '^-' as an alias for '~' (unary
+             * complement "not" operator), and '_' as a shift operator.
              *
              * The MACRO-10 binary shifting suffix ('B') is a bit more problematic, since a capital B can also appear
-             * inside symbols.  So I pre-scan for that operator and replace non-symbolic occurrences with an internal
-             * operator ('><').
+             * inside symbols.  So I pre-scan for that suffix and replace all non-symbolic occurrences with an internal
+             * shift operator ('^_').
              *
              * Note that Str.parseInt(), which parseValue() relies on, supports both the MACRO-10 base prefix overrides
              * and the binary shifting suffix.  But since the B suffix can also be a bracketed expression, we have to
@@ -786,8 +796,8 @@ class Debugger extends Component
              *
              * WARNING: Whenever you make changes to this RegExp, make sure you update aBinOpPrecedence as needed, too.
              */
-            var regExp = /(\{|}|\|\||&&|\||\^\^|><|&|!=|!|==|>=|>>>|>>|>|<=|<<|<|-|\+|%|\/|\*)/;
-            sExp = sExp.replace(/(^|[^A-Z0-9$%.])([0-9]+)B/, "$1$2><");
+            var regExp = /(\{|}|\|\||&&|\||\^!|\^-|~|\^_|_|&|!=|!|==|>=|>>>|>>|>|<=|<<|<|-|\+|%|\/|\*)/;
+            sExp = sExp.replace(/(^|[^A-Z0-9$%.])([0-9]+)B/, "$1$2^_");
             var asValues = sExp.split(regExp);
             value = this.parseArray(asValues, 0, asValues.length, this.nBase, fQuiet);
             if (value !== undefined && fQuiet === false) {
@@ -874,16 +884,16 @@ class Debugger extends Component
     }
 
     /**
-     * parseValue(sValue, sName, fQuiet, fNegate)
+     * parseValue(sValue, sName, fQuiet, iNegate)
      *
      * @this {Debugger}
      * @param {string|undefined} sValue
      * @param {string|null} [sName] is the name of the value, if any
      * @param {boolean} [fQuiet]
-     * @param {boolean} [fNegate]
+     * @param {number} [iNegate] (-1 to negate , 1 to complement)
      * @return {number|undefined} numeric value, or undefined if sValue is either undefined or invalid
      */
-    parseValue(sValue, sName, fQuiet, fNegate)
+    parseValue(sValue, sName, fQuiet, iNegate = 0)
     {
         var value;
         if (sValue != null) {
@@ -893,12 +903,19 @@ class Debugger extends Component
             } else {
                 value = this.getVariable(sValue);
                 if (value == null) {
-                    value = Str.parseInt(fNegate? ('-' + sValue) : sValue, this.nBase);
-                    fNegate = false;
+                    if (iNegate < 0) {
+                        sValue = '-' + sValue;
+                        iNegate = 0;
+                    }
+                    value = Str.parseInt(sValue, this.nBase);
                 }
             }
             if (value != null) {
-                if (fNegate) value = -value;
+                if (iNegate < 0) {
+                    value = -value;
+                } else if (iNegate > 0) {
+                    value = this.evalXOR(value, -1);
+                }
             } else {
                 if (!fQuiet) {
                     this.println("invalid " + (sName? sName : "value") + ": " + sValue);
@@ -1056,12 +1073,17 @@ class Debugger extends Component
 
 if (DEBUGGER) {
 
+    /*
+     * Missing from this table are the (limited) set of unary operators we support (negate and complement),
+     * since this is only a BINARY operator precedence, not a general-purpose precedence table.  Assume that
+     * all unary operators take precedence over all binary operators.
+     */
     Debugger.aBinOpPrecedence = {
         '||':   0,      // logical OR
         '&&':   1,      // logical AND
         '!':    2,      // bitwise OR
         '|':    2,      // bitwise OR
-        '^^':   3,      // bitwise XOR
+        '^!':   3,      // bitwise XOR (added by MACRO-10 sometime between the 1972 and 1978 versions)
         '&':    4,      // bitwise AND
         '!=':   5,      // inequality
         '==':   5,      // equality
@@ -1077,7 +1099,8 @@ if (DEBUGGER) {
         '%':    9,      // remainder
         '/':    9,      // division
         '*':    9,      // multiplication
-        '><':   10,     // internal binary shift operator (MACRO-10-style; converted from a 'B' suffix)
+        '_':    10,     // MACRO-10 shift operator
+        '^_':   10,     // MACRO-10 internal shift operator (converted from 'B' suffix form that MACRO-10 uses)
         '{':    11,     // open sub-expression (achGroup[0] default)
         '}':    11      // close sub-expression (achGroup[1] default)
     };

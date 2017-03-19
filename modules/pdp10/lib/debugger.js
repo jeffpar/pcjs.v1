@@ -1050,7 +1050,7 @@ class DebuggerPDP10 extends Debugger {
         if (this.sInitCommands) {
             var sCmds = this.sInitCommands;
             this.sInitCommands = null;
-            this.doCommands(sCmds);
+            this.doCommands(sCmds, true);
         }
     }
 

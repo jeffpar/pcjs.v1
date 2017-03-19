@@ -14,14 +14,14 @@ DEC PDP-10 Opcode Tests
 
 The PDP-10 machine below loads the following test:
 
-- [PDP-10 Half-Word Opcode Test](optest-v01.json)
+- [PDP-10 Half-Word Opcode Test](OPTEST01.json)
 
 Details on how to run and modify the test, and perform similar tests in [SIMH](https://github.com/simh/simh),
 are provided below.
 
 {% include machine.html id="testka10" %}
 
-The [PDP-10 Half-Word Opcode Test](optest-v01.json) file specifies that the following words:
+The [PDP-10 Half-Word Opcode Test](OPTEST01.json) file specifies that the following words:
 
 	0o505040111111,   // HRLI    1,111111
 	0o541040444444,   // HRRI    1,444444
@@ -34,7 +34,7 @@ comments display the instructions that correspond to each word.
 
 If you want to alter or add new instructions, the PDP-10 Debugger now includes a rudimentary assembler.  Using the `a` command,
 along with an optional start address, you can enter "assembler mode".  For example, here's how the first four instructions from
-the [PDP-10 Half-Word Opcode Test](optest-v01.json) could be entered by hand:
+the [PDP-10 Half-Word Opcode Test](OPTEST01.json) could be entered by hand:
 
 	>> a 100
 	begin assemble at 000100

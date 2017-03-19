@@ -6,6 +6,7 @@ machines:
   - id: testka10
     type: pdp10
     debugger: true
+    commands: a 100 /apps/pdp10/tests/MACTEST.MAC
 ---
 
 PDP-10 Test Machine with Debugger

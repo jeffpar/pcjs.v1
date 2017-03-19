@@ -57,17 +57,21 @@ var Mac;
  *      name:(string),
  *      value:(number),
  *      nLine:(number),
- *      fLabel:(boolean),
- *      fGlobal:(boolean),
- *      fPrivate:(boolean)
+ *      nType:(number)
  * }}
  */
 var Sym;
 
 /**
+ *
+ * Elements of aFixups.
+ *
+ * NOTE: The nLine property is not required; it's added for DEBUG support.
+ *
  * @typedef {{
  *      nLocation:(number),
- *      sValue:(string)
+ *      sValue:(string),
+ *      nLine:(number)
  * }}
  */
 var Fixup;
@@ -79,9 +83,9 @@ var Fixup;
  * @property {string} sOptions
  * @property {DebuggerPDP10} dbg
  * @property {function(...)} done
- * @property {string} sText
  * @property {number} iURL
  * @property {Array.<string>} asURLs
+ * @property {Array.<string>} asLines
  */
 class Macro10 {
     /**
@@ -138,8 +142,8 @@ class Macro10 {
          * the LITERAL blocks in tblMacros and process the associated statement(s) at that time.
          *
          * Macros have the name that was assigned to them, REPEAT and conditional blocks have generated names
-         * that match the pseudo-op (eg, "_REPEAT", "_IFE"), and LITERAL blocks have generated location-based
-         * names.  All generated names use a leading underscore ('_') so that they don't conflict with
+         * that match the pseudo-op (eg, "?REPEAT", "?IFE"), and LITERAL blocks have generated location-based
+         * names.  All generated names use a leading question mark ('?') so that they don't conflict with
          * normal MACRO-10 labels.
          */
 
@@ -194,7 +198,11 @@ class Macro10 {
          */
         this.sASCII = "";
 
-        this.sText = "";
+        /**
+         * @type {Array.<string>}
+         */
+        this.asLines = [];
+
         this.iURL = 0;
         this.asURLs = sURL.split(';');
 
@@ -209,7 +217,7 @@ class Macro10 {
     loadNextResource()
     {
         if (this.iURL == this.asURLs.length) {
-            this.done(this.parseFile());
+            this.done(this.parseResources());
             return;
         }
 
@@ -243,8 +251,9 @@ class Macro10 {
                 match = sText.match(/&[a-z]+;/i);
                 if (match) macro10.warning("unrecognized HTML entity: " + match[0]);
             }
-            if (macro10.sText) macro10.sText += '\n';
-            macro10.sText += sText;
+
+            macro10.asLines = macro10.asLines.concat(sText.split(/(\r?\n)/));
+
             setTimeout(function() {
                 macro10.loadNextResource();
             }, 0);
@@ -265,14 +274,14 @@ class Macro10 {
     }
 
     /**
-     * parseFile()
+     * parseResources()
      *
      * Begin the assembly process.
      *
      * @this {Macro10}
      * @return {number}
      */
-    parseFile()
+    parseResources()
     {
         var macro10 = this;
 
@@ -280,17 +289,22 @@ class Macro10 {
          * If the "preprocess" option is set, then just return the plain text we retrieved.
          */
         if (this.sOptions.indexOf('p') >= 0) {
-            this.println(this.sText);
+            this.println(this.asLines.join());
             return 0;
         }
 
         var a = this.dbg.resetVariables();
         try {
             var i;
-            var asLines = this.sText.split(/\r?\n/);
-            for (i = 0; i < asLines.length; i++) {
+            for (i = 0; i < this.asLines.length; i += 2) {
                 this.nLine++;
-                if (!this.parseLine(asLines[i] + '\r\n')) break;
+                /*
+                 * Since, at this early stage, I'm not sure whether all the resources I'm interested in
+                 * assembling have had their original CR/LF line endings preserved (eg, some files may have
+                 * been converted to LF-only line endings), I'm going to skip over whatever line endings
+                 * are in the array and insert my own uniform CR/LF sequences.
+                 */
+                if (!this.parseLine(this.asLines[i] + '\r\n')) break;
             }
 
             if (this.nMacroDef) {
@@ -338,9 +352,10 @@ class Macro10 {
      */
     parseLine(sLine)
     {
+        var i;
         if (this.nMacroDef) {
             if (this.nMacroDef == 1) {
-                var i = sLine.indexOf(this.chMacroOpen);
+                i = sLine.indexOf(this.chMacroOpen);
                 if (i >= 0) {
                     this.nMacroDef++;
                     sLine = sLine.substr(i+1);
@@ -358,41 +373,42 @@ class Macro10 {
             sLine = this.addASCII(sLine);
         }
 
-        var reLine = /\s*([A-Z$%._][0-9A-Z$%.]*[:=]|)\s*([A-Z$%.][0-9A-Z$%.]*|)\s*([^;]+|)(;?[\s\S]*)/i;
-        var match = sLine.match(reLine);
-        if (!match || match[4] && match[4].slice(0, 1) != ';') {
+        var reLine = /\s*([A-Z$%.?][0-9A-Z$%.]*:|)\s*([A-Z$%.][0-9A-Z$%.]*|)\s*([^;]+|)(;?[\s\S]*)/i;
+        var matchLine = sLine.match(reLine);
+        if (!matchLine || matchLine[4] && matchLine[4].slice(0, 1) != ';') {
             this.error("failed to parse line: " + sLine);
             return false;
         }
 
-        var sLabel = match[1];
-        var sOperator = match[2].toUpperCase();
-        var sOperands = match[3].trim();
-        var sComment = match[4];
-        var sRemainder = match[3] + match[4];
+        var sLabel = matchLine[1];
+        var sOperator = matchLine[2].toUpperCase();
+        var sOperands = matchLine[3].trim();
+        var sComment = matchLine[4];
+        var sRemainder = matchLine[3] + matchLine[4];
 
         if (sLabel) {
-            var chSep = sLabel.slice(-1);
             sLabel = sLabel.slice(0, -1);
-            if (chSep == ':') {
-                this.addLabel(sLabel);
-            } else {
-                sOperands = sOperator + sOperands;
-                sOperator = chSep;
+            this.addSymbol(sLabel, this.nLocation, Macro10.SYMTYPE.LABEL);
+        }
+
+        var matchOp;
+        if (sOperator && (matchOp = sOperands.match(/^([=:]+)(.*)/))) {
+            var nType = 0;
+            sLabel = sOperator;
+            sOperator = matchOp[1];
+            sOperands = matchOp[2];
+            if (sOperator == '==') {
+                nType |= Macro10.SYMTYPE.PRIVATE;
             }
+            else if (sOperator == '=:') {
+                nType |= Macro10.SYMTYPE.INTERNAL;
+            }
+            this.addSymbol(sLabel, sOperands, nType);
+            sOperator = sOperands = "";
         }
 
         if (!sOperator && !sOperands) return true;
 
-        /*
-         * My initial read of the MACRO-10 specification suggested that lines may begin with EITHER
-         * "symbol:" (for a label) or "symbol=" (for an assignment), but apparently they can have BOTH.
-         */
-        if (sOperands[0] == '=') {
-            sLabel = sOperator;
-            sOperands = sOperands.substr(1);
-            sOperator = '=';
-        }
         this.sOperator = sOperator;
 
         /*
@@ -416,10 +432,6 @@ class Macro10 {
         if (!this.parseMacro(sOperator, sOperands)) {
 
             switch (sOperator) {
-            case "=":
-                this.addAssign(sLabel, sOperands);
-                break;
-
             case Macro10.PSEUDO_OP.ASCII:
             case Macro10.PSEUDO_OP.ASCIZ:
             case Macro10.PSEUDO_OP.SIXBIT:
@@ -432,6 +444,7 @@ class Macro10 {
 
             case Macro10.PSEUDO_OP.DEFINE:
             case Macro10.PSEUDO_OP.IFE:
+            case Macro10.PSEUDO_OP.IRP:
             case Macro10.PSEUDO_OP.REPEAT:
                 this.addMacro(sOperator, sOperands);
                 break;
@@ -462,20 +475,12 @@ class Macro10 {
         if (!macro) return false;
 
         if (sOperands != null) {
-            /*
-             * Process this macro call; start by extracting macro argument values from sOperands.
-             */
-            var sDelim = ',';
-            if (sOperands[0] == '(') {
-                sDelim += ')';
-                sOperands = sOperands.substr(1);
-            }
-            var aValues = this.getValues(sOperands, sDelim);
+            var aValues = this.getValues(sOperands);
             this.parseText(macro.sText, macro.aParms, aValues);
             return true;
         }
 
-        if (name[0] != '_') return false;
+        if (name[0] != '?') return false;
 
         switch(name.substr(1)) {
         case Macro10.PSEUDO_OP.IFE:
@@ -531,7 +536,13 @@ class Macro10 {
                         if (iMatch < 0) break;
                         iSearch = iMatch + 1;
                         var iMatchEnd = iMatch + sParm.length;
-                        if ((!iMatch || !this.isSymbolChar(sLine[iMatch - 1])) && (iMatchEnd >= sLine.length || !this.isSymbolChar(sLine[iMatchEnd]))) {
+                        var chPre = '', chPost = '';
+                        if ((!iMatch || !this.isSymbolChar(chPre = sLine[iMatch - 1])) && (iMatchEnd >= sLine.length || !this.isSymbolChar(chPost = sLine[iMatchEnd]))) {
+                            /*
+                             * If the "concatenation character" (') appears before (or after) the symbol being replaced, remove it.
+                             */
+                            if (chPre == "'") iMatch--;
+                            if (chPost == "'") iMatchEnd++;
                             sLine = sLine.substr(0, iMatch) + sReplace + sLine.substr(iMatchEnd);
                             iSearch = iMatch + sReplace.length;
                         }
@@ -575,11 +586,18 @@ class Macro10 {
     getExpression(sOperands, sDelim = ",")
     {
         var i = 0;
+        var fQuotes = false;
         var sOperand = null;
         var cNesting = 0;
         while (i < sOperands.length) {
-            var ch = sOperands[i];
+            var ch = sOperands[i++];
+            if (ch == '"') {
+                fQuotes = !fQuotes;
+                continue;
+            }
+            if (fQuotes) continue;
             if (sDelim.indexOf(ch) >= 0) {
+                i--;
                 break;
             }
             if (ch == '<') {
@@ -590,7 +608,6 @@ class Macro10 {
                     break;
                 }
             }
-            i++;
         }
         if (!cNesting) {
             sOperand = sOperands.substr(0, i);
@@ -687,6 +704,30 @@ class Macro10 {
     }
 
     /**
+     * getDefaults(aParms)
+     *
+     * Check the given array of macro parameters for default values, remove them, and return them in a parallel array.
+     *
+     * @this {Macro10}
+     * @param {Array.<string>} aParms
+     * @return {Array.<string>}
+     */
+    getDefaults(aParms)
+    {
+        var aDefaults = [];
+        for (var i = 0; i < aParms.length; i++) {
+            var j = aParms[i].indexOf('<');
+            if (j >= 0) {
+                var k = aParms[i].lastIndexOf('>');
+                if (k < 0) k = aParms[i].length;
+                aDefaults[i] = aParms[i].substr(j, k - j);
+                aParms[i] = aParms[i].substr(0, j);
+            }
+        }
+        return aDefaults;
+    }
+
+    /**
      * getReserved(sOperands)
      *
      * Check the operands for any reserved symbols (ie, symbols with a trailing '#', such as "USER#").
@@ -701,7 +742,7 @@ class Macro10 {
         if (match = sOperands.match(/([A-Z$%.][0-9A-Z$%.]*)#/i)) {
             sReserved = match[0];
             var sLabel = match[1];
-            var name = '_' + sLabel;
+            var name = '?' + sLabel;
             if (this.tblMacros[name] !== undefined) {
                 this.error("reserved symbol redefined: " + sReserved);
             }
@@ -774,41 +815,13 @@ class Macro10 {
     }
 
     /**
-     * addAssign(sName, sOperand)
-     *
-     * @this {Macro10}
-     * @param {string} sName
-     * @param {string} sOperand
-     */
-    addAssign(sName, sOperand)
-    {
-        var value = this.parseExpression(sOperand);
-        if (value === undefined) {
-            this.error("parseExpression(" + sOperand + ")");
-            return;
-        }
-        this.addSymbol(sName, value);
-    }
-
-    /**
-     * addLabel(sLabel)
-     *
-     * @this {Macro10}
-     * @param {string} sLabel
-     */
-    addLabel(sLabel)
-    {
-        this.addSymbol(sLabel, this.nLocation, true);
-    }
-
-    /**
      * addMacro(sOperator, sOperands)
      *
      * If sOperator is DEFINE, then a macro definition is expected.  If it's REPEAT, then we're starting a
      * REPEAT block instead.
      *
      * REPEAT blocks piggy-back on this code because they're essentially anonymous immediately-invoked macros;
-     * we use an illegal MACRO-10 symbol ('_REPEAT') to name the anonymous macro while it's being defined, and the
+     * we use an illegal MACRO-10 symbol ('?REPEAT') to name the anonymous macro while it's being defined, and the
      * macro's nOperand field will contain the repeat count.
      *
      * The piggy-backing continues with other pseudo-ops like IFE, which again contain an anonymous block of text
@@ -833,24 +846,19 @@ class Macro10 {
             /*
              * This is a DEFINE (macro) block.
              */
-            match = sOperands.match(/([A-Z$%.][0-9A-Z$%.]*)\s*(\([^)]*\)|)\s*(<|)(.*)/i);
+            match = sOperands.match(/([A-Z$%.][0-9A-Z$%.]*)\s*(?:\(([^)]*)\)|)\s*(<|)(.*)/i);
             if (!match) {
-                this.error("unrecognized " + sOperator + " definition: " + sOperands);
+                this.error("unrecognized " + sOperator + ": " + sOperands);
                 return "";
             }
             name = match[1];
             /*
-             * TODO: This may not actually be an error, but I'd like to take a look if/when it happens.
+             * If this macro has defined parameters, parse them (and any defaults) now.
              */
-            if (this.tblMacros[name] !== undefined) {
-                this.error("macro redefined: " + name);
+            if (match[2]) {
+                aParms = this.getValues(match[2]);
+                aDefaults = this.getDefaults(aParms);
             }
-            /*
-             * TODO: Tighten up this parsing at some point.  All this is doing is extracting entire symbols
-             * from within the parentheses, if any; it's NOT ensuring that those symbols are comma-separated
-             * with no other intervening characters.
-             */
-            aParms = match[2].match(/[A-Z$%.][0-9A-Z$%.]*/g);
             nOperand = Macro10.MACRO_OP.DEFINE;
             iMatch = 3;
         }
@@ -860,7 +868,7 @@ class Macro10 {
              */
             this.chMacroOpen = '[';
             this.chMacroClose = ']';
-            name = '_' + Str.toDec(this.nLocation, 5);
+            name = '?' + Str.toDec(this.nLocation, 5);
             if (this.tblMacros[name] !== undefined) {
                 this.error("literal symbol redefined: " + name);
             }
@@ -881,7 +889,7 @@ class Macro10 {
             sOperands = sOperands.substr(sOperand.length + 1);
             sOperand = sOperand.trim();
             match = sOperands.match(/\s*(<|)(.*)/i);
-            name = '_' + sOperator;
+            name = '?' + sOperator;
             /*
              * The expression is either a repeat count or a condition.  Either way, we must be able to
              * resolve it now, so we don't set fPass1 (but that doesn't mean it's the second pass, either).
@@ -951,23 +959,29 @@ class Macro10 {
     }
 
     /**
-     * addSymbol(name, value, fLabel, fGlobal, fPrivate)
+     * addSymbol(name, value, nType)
      *
      * @this {Macro10}
      * @param {string} name
-     * @param {number} value
-     * @param {boolean} [fLabel] (default is false, meaning the symbol is an assignment)
-     * @param {boolean} [fGlobal] (default is false, meaning the symbol is local to the current file)
-     * @param {boolean} [fPrivate] (default is false, meaning the symbol has visibility to the caller)
+     * @param {number|string} value
+     * @param {number} [nType]
      */
-    addSymbol(name, value, fLabel = false, fGlobal = false, fPrivate = false)
+    addSymbol(name, value, nType = 0)
     {
         name = name.toUpperCase().substr(0, 6);
-        if (fLabel && this.tblSymbols[name] !== undefined) {
+        if ((nType & Macro10.SYMTYPE.LABEL) && this.tblSymbols[name] !== undefined) {
             this.error("label " + name + " redefined");
             return;
         }
-        this.tblSymbols[name] = {name, value, nLine: this.nLine, fLabel, fGlobal, fPrivate};
+        if (typeof value == 'string') {
+            var v = this.parseExpression(value);
+            if (v === undefined) {
+                this.error("parseExpression(" + value + ")");
+                return;
+            }
+            value = v;
+        }
+        this.tblSymbols[name] = {name, value, nLine: this.nLine, nType};
         this.dbg.setVariable(name, value);
     }
 
@@ -1070,7 +1084,7 @@ class Macro10 {
     genWord(value, sFixup)
     {
         this.aWords[this.nLocation] = this.truncate(value);
-        if (sFixup != null) this.aFixups.push({nLocation: this.nLocation, sValue: sFixup});
+        if (sFixup != null) this.aFixups.push({nLocation: this.nLocation, sValue: sFixup, nLine: this.nLine});
         this.nLocation++;
     }
 
@@ -1107,17 +1121,24 @@ class Macro10 {
     }
 }
 
+Macro10.SYMTYPE = {
+    LABEL:      0x01,
+    PRIVATE:    0x02,
+    INTERNAL:   0x04
+};
+
 Macro10.PSEUDO_OP = {
-    ASCII:  "ASCII",
-    ASCIZ:  "ASCIZ",
-    DEFINE: "DEFINE",
-    IFE:    "IFE",
-    LITERAL:"LITERAL",
-    PAGE:   "PAGE",
-    REPEAT: "REPEAT",
-    SIXBIT: "SIXBIT",
-    SUBTTL: "SUBTTL",
-    XWD:    "XWD"
+    ASCII:      "ASCII",
+    ASCIZ:      "ASCIZ",
+    DEFINE:     "DEFINE",
+    IFE:        "IFE",
+    IRP:        "IRP",
+    LITERAL:    "LITERAL",
+    PAGE:       "PAGE",
+    REPEAT:     "REPEAT",
+    SIXBIT:     "SIXBIT",
+    SUBTTL:     "SUBTTL",
+    XWD:        "XWD"
 };
 
 /*
