@@ -738,12 +738,14 @@ class Debugger extends Component
             var v = 0;
             var j = i + 1;
             var cch = cchMax;
-            while (cch) {
+            while (j < sExp.length) {
                 var ch = sExp[j++];
                 if (ch == chDelim) {
                     cch = -1;
                     break;
                 }
+                if (!cch) break;
+                cch--;
                 var c = ch.charCodeAt(0);
                 if (nBits == 7) {
                     c &= 0x7F;
@@ -751,7 +753,6 @@ class Debugger extends Component
                     c = (c - 0x20) & 0x3F;
                 }
                 v = this.truncate(v * Math.pow(2, nBits) + c, nBits * cchMax, true);
-                cch--;
             }
             if (cch >= 0) {
                 if (fQuiet === false) this.println("parse error (" + sExp + ")");
