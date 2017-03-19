@@ -492,11 +492,12 @@ class Macro10 {
             case Macro10.PSEUDO_OP.IRP:
             case Macro10.PSEUDO_OP.IRPC:
             case Macro10.PSEUDO_OP.REPEAT:
-                this.addMacro(sOperator, sOperands);
+                this.addMacro(sOperator, sRemainder);
                 break;
 
             case Macro10.PSEUDO_OP.PAGE:    // TODO
             case Macro10.PSEUDO_OP.SUBTTL:  // TODO
+            case Macro10.PSEUDO_OP.TITLE:   // TODO
                 break;
 
             default:
@@ -899,7 +900,7 @@ class Macro10 {
             /*
              * This is a DEFINE (macro) block.
              */
-            match = sOperands.match(/([A-Z$%.][0-9A-Z$%.]*)\s*(\([^)]*\)|)\s*(<|)(.*)/i);
+            match = sOperands.match(/([A-Z$%.][0-9A-Z$%.]*)\s*(\([^)]*\)|)\s*(<|)([\s\S]*)/i);
             if (!match) {
                 this.error("unrecognized " + sOperator + ": " + sOperands);
                 return sOperands;
@@ -940,7 +941,7 @@ class Macro10 {
             if (!this.macroCall) {
                 this.error(sOperator + " outside of macro");
             }
-            match = sOperands.match(/([A-Z$%.][0-9A-Z$%.]*)\s*,\s*(<|)(.*)/i);
+            match = sOperands.match(/([A-Z$%.][0-9A-Z$%.]*)\s*,\s*(<|)([\s\S]*)/i);
             if (!match) {
                 this.error("unrecognized " + sOperator + ": " + sOperands);
                 return sOperands;
@@ -973,7 +974,7 @@ class Macro10 {
             }
             sOperands = sOperands.substr(sOperand.length + 1);
             sOperand = sOperand.trim();
-            match = sOperands.match(/\s*(<|)(.*)/i);
+            match = sOperands.match(/\s*(<|)([\s\S]*)/i);
             name = '?' + sOperator;
             /*
              * The expression is either a repeat count or a condition.  Either way, we must be able to
@@ -990,24 +991,14 @@ class Macro10 {
          */
         name = name.toUpperCase();
         this.nMacroDef = 1;
+        this.sMacroDef = name;
+        this.tblMacros[name] = {name, nOperand, aParms, aDefaults, aValues, sText: "", nLine: this.nLine};
 
-        var sText = "";
-        if (match[iMatch]) {                            // if there IS also an opening bracket...
-            this.nMacroDef = 2;                         // then the macro definition has begun
-            sText = match[iMatch + 1];
-            if (sText.slice(-1) == this.chMacroClose) { // and if there is ALSO a closing bracket...
-                this.nMacroDef = 0;                     // the macro definition has ended as well
-                sText = sText.slice(0, -1);
-            }
+        if (match[iMatch]) {                            // if there is an opening bracket
+            this.nMacroDef = 2;                         // then the macro definition has started
+            this.appendMacro(match[iMatch + 1]);
         }
 
-        this.tblMacros[name] = {name, nOperand, aParms, aDefaults, aValues, sText, nLine: this.nLine};
-
-        if (!this.nMacroDef) {
-            this.parseMacro(name);
-        } else {
-            this.sMacroDef = name;
-        }
         return name;
     }
 
@@ -1087,7 +1078,7 @@ class Macro10 {
     addWord(sOperator, sOperands)
     {
         var w;
-        var sExp = sOperator + sOperands;
+        var sExp = sOperator + ' ' + sOperands;
         if (sExp.indexOf(",,") >= 0 || !sOperator && sExp.indexOf('@') < 0 && sExp.indexOf('(') < 0) {
             w = this.parseExpression(sExp, true);
         } else {
@@ -1232,6 +1223,7 @@ Macro10.PSEUDO_OP = {
     REPEAT:     "REPEAT",
     SIXBIT:     "SIXBIT",
     SUBTTL:     "SUBTTL",
+    TITLE:      "TITLE",
     XWD:        "XWD"
 };
 

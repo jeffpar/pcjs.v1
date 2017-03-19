@@ -617,7 +617,7 @@ class Debugger extends Component
      *      -   -   -   -   -   -   -   -   -   -  --  --  --  --  --
      *      2   *       {   3   +       {   4   /   2   }       }
      *
-     * This function takes care of recursively processing sub-expressions, by processing subsets of the array,
+     * This function takes care of recursively processing grouped expressions, by processing subsets of the array,
      * as well as handling certain base overrides (eg, temporarily switching to base-10 for binary shift suffixes).
      *
      * @param {Array.<string>} asValues
@@ -721,6 +721,39 @@ class Debugger extends Component
     }
 
     /**
+     * parseASCII(sExp, chDelim, nBits, nMax)
+     *
+     * @this {Debugger}
+     * @param {string} sExp
+     * @param {string} chDelim
+     * @param {number} nBits
+     * @param {number} nMax
+     * @return {string}
+     */
+    parseASCII(sExp, chDelim, nBits, nMax)
+    {
+        var i;
+        while ((i = sExp.indexOf(chDelim)) >= 0) {
+            var v = 0;
+            var n = nMax;
+            var j = i + 1;
+            while (n--) {
+                var ch = sExp[j++];
+                if (ch == chDelim) break;
+                var c = ch.charCodeAt(0);
+                if (nBits == 7) {
+                    c &= 0x7F;
+                } else {
+                    c = (c - 0x20) & 0x3F;
+                }
+                v = this.truncate(v * Math.pow(2, nBits) + c, nBits * nMax, true);
+            }
+            sExp = sExp.substr(0, i) + this.toStrBase(v, -1) + sExp.substr(j);
+        }
+        return sExp;
+    }
+
+    /**
      * parseExpression(sExp, fQuiet)
      *
      * A quick-and-dirty expression parser.  It takes an expression like:
@@ -754,18 +787,25 @@ class Debugger extends Component
         if (sExp) {
 
             /*
-             * The default grouping characters for sub-expressions are braces; they can be changed by altering
+             * The default delimiting characters for grouped expressions are braces; they can be changed by altering
              * achGroup, but when that happens, instead of changing our regular expressions and operator tables,
              * we simply replace all achGroup characters with braces in the given expression.
              *
-             * Why not just always use parentheses for sub-expressions?  Because some debuggers use parseReference()
-             * to perform parenthetical value replacements in message strings, and they don't want parentheses taking
-             * on a different meaning.  And for some machines, like the PDP-10, the convention is to use parentheses
-             * for indexed addressing and angle brackets for sub-expressions.
+             * Why not use parentheses for grouped expressions?  Because some debuggers use parseReference() to perform
+             * parenthetical value replacements in message strings, and they don't want parentheses taking on a different
+             * meaning.  And for some machines, like the PDP-10, the convention is to use parentheses for other things,
+             * like indexed addressing, and to use angle brackets for grouped expressions.
              */
             if (this.achGroup[0] != '{') {
                 sExp = sExp.split(this.achGroup[0]).join('{').split(this.achGroup[1]).join('}');
             }
+
+            /*
+             * Quoted ASCII characters can have a numeric value, too, which must be converted now, to avoid any
+             * conflicts with the operators below.
+             */
+            sExp = this.parseASCII(sExp, '"', 7, 5);    // MACRO-10 packs up to 5 7-bit ASCII codes in the value
+            sExp = this.parseASCII(sExp, "'", 6, 6);    // MACRO-10 packs up to 6 6-bit ASCII (SIXBIT) codes in the value
 
             /*
              * All browsers (including, I believe, IE9 and up) support the following idiosyncrasy of a RegExp split():
@@ -903,17 +943,24 @@ class Debugger extends Component
             } else {
                 value = this.getVariable(sValue);
                 if (value == null) {
+                    /*
+                     * A feature of MACRO-10 is that any single-digit number is automatically interpreted as base-10.
+                     */
+                    var nBase = sValue.length > 1? this.nBase : 10;
                     if (iNegate < 0) {
                         sValue = '-' + sValue;
                         iNegate = 0;
                     }
-                    value = Str.parseInt(sValue, this.nBase);
+                    value = Str.parseInt(sValue, nBase);
                 }
             }
             if (value != null) {
                 if (iNegate < 0) {
                     value = -value;
                 } else if (iNegate > 0) {
+                    /*
+                     * This is easier than adding an evalNOT()....
+                     */
                     value = this.evalXOR(value, -1);
                 }
             } else {
@@ -1101,8 +1148,8 @@ if (DEBUGGER) {
         '*':    9,      // multiplication
         '_':    10,     // MACRO-10 shift operator
         '^_':   10,     // MACRO-10 internal shift operator (converted from 'B' suffix form that MACRO-10 uses)
-        '{':    11,     // open sub-expression (achGroup[0] default)
-        '}':    11      // close sub-expression (achGroup[1] default)
+        '{':    11,     // open grouped expression (achGroup[0] default)
+        '}':    11      // close grouped expression (achGroup[1] default)
     };
 
     /*
