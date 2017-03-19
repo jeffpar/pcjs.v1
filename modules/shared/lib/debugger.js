@@ -721,34 +721,44 @@ class Debugger extends Component
     }
 
     /**
-     * parseASCII(sExp, chDelim, nBits, nMax)
+     * parseASCII(sExp, chDelim, nBits, cchMax, fQuiet)
      *
      * @this {Debugger}
      * @param {string} sExp
      * @param {string} chDelim
      * @param {number} nBits
-     * @param {number} nMax
+     * @param {number} cchMax
+     * @param {boolean} [fQuiet] (true for quiet parsing)
      * @return {string}
      */
-    parseASCII(sExp, chDelim, nBits, nMax)
+    parseASCII(sExp, chDelim, nBits, cchMax, fQuiet)
     {
         var i;
         while ((i = sExp.indexOf(chDelim)) >= 0) {
             var v = 0;
-            var n = nMax;
             var j = i + 1;
-            while (n--) {
+            var cch = cchMax;
+            while (cch) {
                 var ch = sExp[j++];
-                if (ch == chDelim) break;
+                if (ch == chDelim) {
+                    cch = -1;
+                    break;
+                }
                 var c = ch.charCodeAt(0);
                 if (nBits == 7) {
                     c &= 0x7F;
                 } else {
                     c = (c - 0x20) & 0x3F;
                 }
-                v = this.truncate(v * Math.pow(2, nBits) + c, nBits * nMax, true);
+                v = this.truncate(v * Math.pow(2, nBits) + c, nBits * cchMax, true);
+                cch--;
             }
-            sExp = sExp.substr(0, i) + this.toStrBase(v, -1) + sExp.substr(j);
+            if (cch >= 0) {
+                if (fQuiet === false) this.println("parse error (" + sExp + ")");
+                break;
+            } else {
+                sExp = sExp.substr(0, i) + this.toStrBase(v, -1) + sExp.substr(j);
+            }
         }
         return sExp;
     }
@@ -780,8 +790,7 @@ class Debugger extends Component
      */
     parseExpression(sExp, fQuiet)
     {
-        var value;
-
+        var value = undefined;
         this.sUndefined = null;
 
         if (sExp) {
@@ -804,8 +813,10 @@ class Debugger extends Component
              * Quoted ASCII characters can have a numeric value, too, which must be converted now, to avoid any
              * conflicts with the operators below.
              */
-            sExp = this.parseASCII(sExp, '"', 7, 5);    // MACRO-10 packs up to 5 7-bit ASCII codes in the value
-            sExp = this.parseASCII(sExp, "'", 6, 6);    // MACRO-10 packs up to 6 6-bit ASCII (SIXBIT) codes in the value
+            sExp = this.parseASCII(sExp, '"', 7, 5, fQuiet);    // MACRO-10 packs up to 5 7-bit ASCII codes into a value
+            if (!sExp) return value;
+            sExp = this.parseASCII(sExp, "'", 6, 6, fQuiet);    // MACRO-10 packs up to 6 6-bit ASCII (SIXBIT) codes into a value
+            if (!sExp) return value;
 
             /*
              * All browsers (including, I believe, IE9 and up) support the following idiosyncrasy of a RegExp split():

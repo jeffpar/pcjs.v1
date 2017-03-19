@@ -9,13 +9,20 @@
 ;	last word if it is not already left-justified.  The first part of the example shows the
 ;	normal listing, then SALL is set to show what code the macros are generating.
 ;
-; The original listing encodes the following two lines as follows:
+; The original listing encoded two of the lines as follows:
 ;
 ;	IFN ZZ,<DEFINE SHIFT		;;REMAINDER LEFT
 ;	 IFE ZZ&777B8,>			;;IF NOT LEFT JUSTIFIED
 ;
 ; The April 1978 MACRO-10 manual says that a macro body "must be enclosed in angle brackets",
-; so I'm not sure how the above lines make sense.
+; so the DEFINE looks wrong, and the IFE contains only a closing angle bracket, which also seems
+; wrong.  Perhaps what's shown above is a side-effect of some MACRO-10 listing generation bug
+; and not an accurate reflection of the original code.  In any event, after making two small
+; modifications below, macro10.js is able to assemble the code fine.
+;
+; This example also begs the question: did MACRO-10 optimize tail recursion?  Because without
+; it, if the SHIFT macro required many iterations (for example, if "ZZ==ZZ_9" was replaced with
+; "ZZ==ZZ+9"), wouldn't MACRO-10 blow its stack?  I've noted this in macro10.js as well.
 ;
 	TITLE	STORE TEXT CHARACTER BY CHARACTER
 	SUBTTL	%1 5-APR-72

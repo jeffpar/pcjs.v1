@@ -91,6 +91,7 @@ var Fixup;
  * @property {number} iURL
  * @property {Array.<string>} asURLs
  * @property {Array.<string>} asLines
+ * @property {number|null|undefined} nAddrStart
  */
 class Macro10 {
     /**
@@ -128,6 +129,11 @@ class Macro10 {
         this.dbg = dbg;
         this.done = done;
 
+        /*
+         * The next set of properties may be updated by the assembly process and queried by the caller.
+         */
+        this.nAddrStart = null;
+
         this.println("starting PCjs MACRO-10 Mini-Assembler...");
 
         /*
@@ -149,7 +155,7 @@ class Macro10 {
          * Macros have the name that was assigned to them, REPEAT and conditional blocks have generated names
          * that match the pseudo-op (eg, "?REPEAT", "?IFE"), and LITERAL blocks have generated location-based
          * names.  All generated names use a leading question mark ('?') so that they don't conflict with
-         * normal MACRO-10 labels.
+         * normal MACRO-10 symbols.
          */
 
         /**
@@ -313,6 +319,11 @@ class Macro10 {
                  * are in the array and insert my own uniform CR/LF sequences.
                  */
                 if (!this.parseLine(this.asLines[i] + '\r\n')) break;
+                /*
+                 * When an END statement is encountered, nAddrStart will change from null to either undefined
+                 * or a starting address.
+                 */
+                if (this.nAddrStart !== null) break;
             }
 
             if (this.nMacroDef) {
@@ -482,6 +493,14 @@ class Macro10 {
                 this.addASCII(sRemainder);
                 break;
 
+            case Macro10.PSEUDO_OP.END:
+                this.addEND(sOperands);
+                break;
+
+            case Macro10.PSEUDO_OP.EXP:
+                this.addEXP(sOperands);
+                break;
+
             case Macro10.PSEUDO_OP.XWD:
                 this.addXWD(sOperands);
                 break;
@@ -527,6 +546,13 @@ class Macro10 {
             this.macroCall = macro;
             macro.aValues = this.getValues(sOperands, true);
             this.parseText(macro.sText, macro.aParms, macro.aValues, macro.aDefaults);
+            /*
+             * WARNING: Our simplistic approach to macro expansion and processing means that recursive macros
+             * (such as the SHIFT macro contained in /apps/pdp10/tests/MACTEST1.MAC) could blow the stack.  Nothing
+             * bad should happen (other than a JavaScript stack limit exception aborting the assembly), but it begs
+             * the question: did MACRO-10 perform any tail recursion optimizations or other tricks to prevent macros
+             * from running amok?
+             */
             this.macroCall = macroPrev;
             return true;
         }
@@ -700,9 +726,9 @@ class Macro10 {
                 this.error("error parsing expression: " + sOperand);
             }
         } else {
-            var wLeft = match[1]? this.parseExpression(match[1]) : 0;
+            var wLeft = match[1]? this.parseExpression(match[1], fPass1, nLocation) : 0;
             if (wLeft !== undefined) {
-                var wRight = match[2]? this.parseExpression(match[2]) : 0;
+                var wRight = match[2]? this.parseExpression(match[2], fPass1, nLocation) : 0;
                 if (wRight !== undefined) {
                     /*
                      * NOTE: These must be combined as UNSIGNED values, so that's what we tell truncate() to produce.
@@ -1035,6 +1061,44 @@ class Macro10 {
     }
 
     /**
+     * addEND()
+     *
+     * Processes the END pseudo-op.
+     *
+     * @this {Macro10}
+     * @param {string} sOperands
+     */
+    addEND(sOperands)
+    {
+        if (!sOperands) {
+            this.nAddrStart = this.nAddr;
+        } else {
+            this.nAddrStart = this.parseExpression(sOperands, true);
+            if (this.nAddrStart === undefined) {
+                this.error("unrecognized expression: " + sOperands);
+            }
+        }
+    }
+
+    /**
+     * addEXP()
+     *
+     * Processes the EXP pseudo-op.
+     *
+     * @this {Macro10}
+     * @param {string} sOperands
+     */
+    addEXP(sOperands)
+    {
+        var w = this.parseExpression(sOperands, true);
+        if (w !== undefined) {
+            this.genWord(w, this.dbg.sUndefined);
+        } else {
+            this.error("unrecognized expression: " + sOperands);
+        }
+    }
+
+    /**
      * addSymbol(name, value, nType)
      *
      * @this {Macro10}
@@ -1101,15 +1165,17 @@ class Macro10 {
     /**
      * addXWD()
      *
-     * The XWD pseudo-op appears to be equivalent to two values separated by two commas, which our fixup code
-     * must also support, so we simply treat the XWD operands as a fixup expression.
+     * Processes the XWD pseudo-op.
+     *
+     * Since the XWD pseudo-op appears to be equivalent to two values separated by two commas, which addEXP() must also
+     * support, we can piggy-back on addExp().
      *
      * @this {Macro10}
      * @param {string} sOperands
      */
     addXWD(sOperands)
     {
-        this.genWord(0, sOperands.replace(",", ",,"));
+        this.addEXP(sOperands.replace(",", ",,"));
     }
 
     /**
@@ -1214,6 +1280,8 @@ Macro10.PSEUDO_OP = {
     ASCII:      "ASCII",
     ASCIZ:      "ASCIZ",
     DEFINE:     "DEFINE",
+    END:        "END",
+    EXP:        "EXP",
     IFE:        "IFE",
     IFN:        "IFN",
     IRP:        "IRP",

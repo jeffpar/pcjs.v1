@@ -7,7 +7,7 @@ machines:
     type: pdp10
     config: /devices/pdp10/machine/ka10/test/debugger/machine.xml
     debugger: true
-    commands: a 100 /apps/pdp10/tests/MACTEST.MAC
+    commands: a 100 /apps/pdp10/tests/MACTEST1.MAC
 ---
 
 DEC PDP-10 Opcode Tests
