@@ -7,7 +7,7 @@ machines:
     type: pdp10
     config: /devices/pdp10/machine/ka10/test/debugger/machine.xml
     debugger: true
-    commands: a 30724 /apps/pdp10/diags/klad/dakaa/TEST.MAC
+    commands: a 30724 /apps/pdp10/diags/klad/dakaa/MYDAKAA.MAC
 ---
 
 PDP-10 KA10 Basic Instruction Diagnostic #1
@@ -34,7 +34,7 @@ This command:
 
 	a 30724 /apps/pdp10/diags/klad/dakaa/TEST.MAC
 
-will automatically read the [TEST.MAC](TEST.MAC.txt) source file (a slightly modified copy of [DAKAA.MAC](DAKAA.MAC.txt)),
+will automatically read the [MYDAKAA.MAC](MYDAKAA.MAC.txt) source file (a slightly modified copy of [DAKAA.MAC](DAKAA.MAC.txt)),
 assemble it, and then load the binary output at the specified address.
 
 ---

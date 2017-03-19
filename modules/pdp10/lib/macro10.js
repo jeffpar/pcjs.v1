@@ -39,11 +39,14 @@ if (NODE) {
 /**
  * Elements of tblMacros.
  *
+ * NOTE: The nLine property is not required; it's added for improved error reporting.
+ *
  * @typedef {{
  *      name:(string),
  *      nOperand:(number),
  *      aParms:(Array.<string>),
  *      aDefaults:(Array.<string>),
+ *      aValues:(Array.<string>),
  *      sText:(string),
  *      nLine:(number)
  * }}
@@ -53,11 +56,13 @@ var Mac;
 /**
  * Elements of tblSymbols.
  *
+ * NOTE: The nLine property is not required; it's added for improved error reporting.
+ *
  * @typedef {{
  *      name:(string),
  *      value:(number),
- *      nLine:(number),
- *      nType:(number)
+ *      nType:(number),
+ *      nLine:(number)
  * }}
  */
 var Sym;
@@ -66,7 +71,7 @@ var Sym;
  *
  * Elements of aFixups.
  *
- * NOTE: The nLine property is not required; it's added for DEBUG support.
+ * NOTE: The nLine property is not required; it's added for improved error reporting.
  *
  * @typedef {{
  *      nLocation:(number),
@@ -181,9 +186,12 @@ class Macro10 {
         this.nLocation = this.nAddr;    // advanced by the various genXXX() functions
 
         this.sOperator = null;          // the active operator, if any
-        this.nMacroDef = 0;             // the active MACRO definition state
-        this.sMacroDef = null;          // the active MACRO definition name
+        this.nMacroDef = 0;             // the active macro definition state
+        this.sMacroDef = null;          // the active macro definition name
         this.chMacroOpen = this.chMacroClose = '';
+        this.reLine = /\s*([A-Z$%.?][0-9A-Z$%.]*:|)\s*([A-Z$%.][0-9A-Z$%.]*|)\s*([^;]+|)(;?[\s\S]*)/i;
+
+        this.macroCall = null;          // the active macro being called, if any
 
         /**
          * If an ASCII/ASCIZ/SIXBIT pseudo-op is active, chASCII is set to the separator
@@ -344,13 +352,16 @@ class Macro10 {
     }
 
     /**
-     * parseLine(sLine)
+     * parseLine(sLine, aParms, aValues, aDefaults)
      *
      * @this {Macro10}
      * @param {string} sLine (line contents)
+     * @param {Array.<string>} [aParms]
+     * @param {Array.<string>} [aValues]
+     * @param {Array.<string>} [aDefaults]
      * @return {boolean}
      */
-    parseLine(sLine)
+    parseLine(sLine, aParms, aValues, aDefaults)
     {
         var i;
         if (this.nMacroDef) {
@@ -373,18 +384,51 @@ class Macro10 {
             sLine = this.addASCII(sLine);
         }
 
-        var reLine = /\s*([A-Z$%.?][0-9A-Z$%.]*:|)\s*([A-Z$%.][0-9A-Z$%.]*|)\s*([^;]+|)(;?[\s\S]*)/i;
-        var matchLine = sLine.match(reLine);
-        if (!matchLine || matchLine[4] && matchLine[4].slice(0, 1) != ';') {
-            this.error("failed to parse line: " + sLine);
-            return false;
+        var fParse = true;
+        var sLabel, sOperator = "", sOperands, sRemainder;
+
+        while (fParse) {
+            var matchLine = sLine.match(this.reLine);
+            if (!matchLine || matchLine[4] && matchLine[4].slice(0, 1) != ';') {
+                this.error("failed to parse line: " + sLine);
+                return false;
+            }
+            fParse = false;
+            sOperator = matchLine[2].toUpperCase();
+            if (sOperator == Macro10.PSEUDO_OP.IRP || sOperator == Macro10.PSEUDO_OP.IRPC) {
+                aParms = null;
+            }
+            if (aParms) {
+                for (var iParm = 0; iParm < aParms.length; iParm++) {
+                    var sParm = aParms[iParm];
+                    var sReplace = aValues[iParm] || aDefaults[iParm] || "";
+                    var iSearch = 0;
+                    var iLimit = sLine.length - matchLine[4].length;    // set the limit at the start of the comment, if any
+                    while (iSearch < iLimit) {
+                        var iMatch = sLine.indexOf(sParm, iSearch);
+                        if (iMatch < 0) break;
+                        iSearch = iMatch + 1;
+                        var iMatchEnd = iMatch + sParm.length;
+                        var chPre = '', chPost = '';
+                        if ((!iMatch || !this.isSymbolChar(chPre = sLine[iMatch - 1])) && (iMatchEnd >= sLine.length || !this.isSymbolChar(chPost = sLine[iMatchEnd]))) {
+                            /*
+                             * If the "concatenation character" (') appears before (or after) the symbol being replaced, remove it.
+                             */
+                            if (chPre == "'") iMatch--;
+                            if (chPost == "'") iMatchEnd++;
+                            sLine = sLine.substr(0, iMatch) + sReplace + sLine.substr(iMatchEnd);
+                            iSearch = iMatch + sReplace.length;
+                            fParse = true;
+                        }
+                    }
+                }
+                aParms = null;
+            }
         }
 
-        var sLabel = matchLine[1];
-        var sOperator = matchLine[2].toUpperCase();
-        var sOperands = matchLine[3].trim();
-        var sComment = matchLine[4];
-        var sRemainder = matchLine[3] + matchLine[4];
+        sLabel = matchLine[1];
+        sOperands = matchLine[3].trim();
+        sRemainder = matchLine[3] + matchLine[4];
 
         if (sLabel) {
             sLabel = sLabel.slice(0, -1);
@@ -444,7 +488,9 @@ class Macro10 {
 
             case Macro10.PSEUDO_OP.DEFINE:
             case Macro10.PSEUDO_OP.IFE:
+            case Macro10.PSEUDO_OP.IFN:
             case Macro10.PSEUDO_OP.IRP:
+            case Macro10.PSEUDO_OP.IRPC:
             case Macro10.PSEUDO_OP.REPEAT:
                 this.addMacro(sOperator, sOperands);
                 break;
@@ -471,12 +517,16 @@ class Macro10 {
      */
     parseMacro(name, sOperands)
     {
+        var i;
         var macro = this.tblMacros[name];
         if (!macro) return false;
 
         if (sOperands != null) {
-            var aValues = this.getValues(sOperands);
-            this.parseText(macro.sText, macro.aParms, aValues);
+            var macroPrev = this.macroCall;
+            this.macroCall = macro;
+            macro.aValues = this.getValues(sOperands, true);
+            this.parseText(macro.sText, macro.aParms, macro.aValues, macro.aDefaults);
+            this.macroCall = macroPrev;
             return true;
         }
 
@@ -486,6 +536,19 @@ class Macro10 {
         case Macro10.PSEUDO_OP.IFE:
             if (!macro.nOperand) {
                 this.parseText(macro.sText);
+            }
+            break;
+
+        case Macro10.PSEUDO_OP.IFN:
+            if (macro.nOperand) {
+                this.parseText(macro.sText);
+            }
+            break;
+
+        case Macro10.PSEUDO_OP.IRP:
+        case Macro10.PSEUDO_OP.IRPC:
+            for (i = 0; i < macro.aValues.length; i++) {
+                this.parseText(macro.sText, macro.aParms, [macro.aValues[i]], []);
             }
             break;
 
@@ -514,42 +577,20 @@ class Macro10 {
     }
 
     /**
-     * parseText(sText, aParms, aValues)
+     * parseText(sText, aParms, aValues, aDefaults)
      *
      * @this {Macro10}
      * @param {string} sText
      * @param {Array.<string>} [aParms]
      * @param {Array.<string>} [aValues]
+     * @param {Array.<string>} [aDefaults]
      */
-    parseText(sText, aParms, aValues)
+    parseText(sText, aParms, aValues, aDefaults)
     {
         var asLines = sText.split(/\r?\n/);
         for (var iLine = 0; iLine < asLines.length; iLine++) {
             var sLine = asLines[iLine] + '\r\n';
-            if (aParms) {
-                for (var iParm = 0; iParm < aParms.length; iParm++) {
-                    var sParm = aParms[iParm];
-                    var sReplace = aValues[iParm] || "";
-                    var iSearch = 0;
-                    while (true) {
-                        var iMatch = sLine.indexOf(sParm, iSearch);
-                        if (iMatch < 0) break;
-                        iSearch = iMatch + 1;
-                        var iMatchEnd = iMatch + sParm.length;
-                        var chPre = '', chPost = '';
-                        if ((!iMatch || !this.isSymbolChar(chPre = sLine[iMatch - 1])) && (iMatchEnd >= sLine.length || !this.isSymbolChar(chPost = sLine[iMatchEnd]))) {
-                            /*
-                             * If the "concatenation character" (') appears before (or after) the symbol being replaced, remove it.
-                             */
-                            if (chPre == "'") iMatch--;
-                            if (chPost == "'") iMatchEnd++;
-                            sLine = sLine.substr(0, iMatch) + sReplace + sLine.substr(iMatchEnd);
-                            iSearch = iMatch + sReplace.length;
-                        }
-                    }
-                }
-            }
-            if (!this.parseLine(sLine)) break;
+            if (!this.parseLine(sLine, aParms, aValues, aDefaults)) break;
         }
     }
 
@@ -746,11 +787,14 @@ class Macro10 {
             if (this.tblMacros[name] !== undefined) {
                 this.error("reserved symbol redefined: " + sReserved);
             }
+            var aParms, aDefaults, aValues;
+            aParms = aDefaults = aValues = [];
             this.tblMacros[name] = {
                 name: name,
                 nOperand: Macro10.MACRO_OP.RESERVED,
-                aParms: [],
-                aDefaults: [],
+                aParms,
+                aDefaults,
+                aValues,
                 sText: sLabel + ": 0",
                 nLine: this.nLine
             };
@@ -759,20 +803,29 @@ class Macro10 {
         return sReserved;
     }
 
+    getSymbol(sOperands)
+    {
+        var match;
+        if (match = sOperands.match(/([A-Z$%.][0-9A-Z$%.]*)/i)) {
+            return match[1];
+        }
+    }
+
     /**
-     * getValues(sOperands, sDelim)
+     * getValues(sOperands, fParens)
      *
      * @this {Macro10}
      * @param {string} sOperands
-     * @param {string} [sDelim]
+     * @param {boolean} [fParens] (true to strip any parens from around the entire operands)
      * @return {Array.<string>}
      */
-    getValues(sOperands, sDelim)
+    getValues(sOperands, fParens)
     {
         var aValues = [];
+        if (fParens) sOperands = sOperands.replace(/^\(?(.*?)\)?$/, "$1");
         while (sOperands) {
             sOperands = sOperands.trim();
-            var sOperand = this.getExpression(sOperands, sDelim);
+            var sOperand = this.getExpression(sOperands);
             if (!sOperand) break;
             aValues.push(sOperand);
             sOperands = sOperands.substr(sOperand.length + 1);
@@ -836,27 +889,27 @@ class Macro10 {
      */
     addMacro(sOperator, sOperands)
     {
-        var match, name, nOperand, aParms, aDefaults, iMatch;
+        var i, match, name, nOperand, aParms, aDefaults, aValues, iMatch;
 
         this.chMacroOpen = '<';
         this.chMacroClose = '>';
-        aParms = aDefaults = [];
+        aParms = aDefaults = aValues = [];
 
         if (sOperator == Macro10.PSEUDO_OP.DEFINE) {
             /*
              * This is a DEFINE (macro) block.
              */
-            match = sOperands.match(/([A-Z$%.][0-9A-Z$%.]*)\s*(?:\(([^)]*)\)|)\s*(<|)(.*)/i);
+            match = sOperands.match(/([A-Z$%.][0-9A-Z$%.]*)\s*(\([^)]*\)|)\s*(<|)(.*)/i);
             if (!match) {
                 this.error("unrecognized " + sOperator + ": " + sOperands);
-                return "";
+                return sOperands;
             }
             name = match[1];
             /*
              * If this macro has defined parameters, parse them (and any defaults) now.
              */
             if (match[2]) {
-                aParms = this.getValues(match[2]);
+                aParms = this.getValues(match[2], true);
                 aDefaults = this.getDefaults(aParms);
             }
             nOperand = Macro10.MACRO_OP.DEFINE;
@@ -877,6 +930,38 @@ class Macro10 {
             this.aLiterals.push(name);
             iMatch = 0;
         }
+        else if (sOperator == Macro10.PSEUDO_OP.IRP || sOperator == Macro10.PSEUDO_OP.IRPC) {
+            /*
+             * IRP (and IRPC) blocks are very similar to DEFINE blocks, but they define exactly ONE macro parameter
+             * with NO parentheses (whereas regular macros always define their parameters, if any, WITH parentheses),
+             * and then the IRP (or IRPC) block is immediately invoked with the corresponding value from the
+             * enclosing macro.
+             */
+            if (!this.macroCall) {
+                this.error(sOperator + " outside of macro");
+            }
+            match = sOperands.match(/([A-Z$%.][0-9A-Z$%.]*)\s*,\s*(<|)(.*)/i);
+            if (!match) {
+                this.error("unrecognized " + sOperator + ": " + sOperands);
+                return sOperands;
+            }
+            for (i = 0; i < this.macroCall.aParms.length; i++) {
+                if (match[1] == this.macroCall.aParms[i]) break;
+            }
+            if (i == this.macroCall.aParms.length) {
+                this.error("invalid " + sOperator + " parameter: " + match[1]);
+                return sOperands;
+            }
+            name = '?' + sOperator;
+            aParms = [match[1]];
+            if (sOperator == Macro10.PSEUDO_OP.IRPC) {
+                aValues = this.macroCall.aValues[i].split("");
+            } else {
+                aValues = this.getValues(this.macroCall.aValues[i]);
+            }
+            nOperand = aValues.length;
+            iMatch = 2;
+        }
         else {
             /*
              * This must be a REPEAT or CONDITIONAL block.
@@ -884,7 +969,7 @@ class Macro10 {
             var sOperand = this.getExpression(sOperands);
             if (!sOperand) {
                 this.error("missing " + sOperator + " expression: " + sOperands);
-                return "";
+                return sOperands;
             }
             sOperands = sOperands.substr(sOperand.length + 1);
             sOperand = sOperand.trim();
@@ -916,7 +1001,7 @@ class Macro10 {
             }
         }
 
-        this.tblMacros[name] = {name, nOperand, aParms, aDefaults, sText, nLine: this.nLine};
+        this.tblMacros[name] = {name, nOperand, aParms, aDefaults, aValues, sText, nLine: this.nLine};
 
         if (!this.nMacroDef) {
             this.parseMacro(name);
@@ -981,7 +1066,14 @@ class Macro10 {
             }
             value = v;
         }
-        this.tblSymbols[name] = {name, value, nLine: this.nLine, nType};
+        var sym = this.tblSymbols[name];
+        if (sym) {
+            sym.value = value;
+            sym.nType = nType;
+            sym.nLine = this.nLine;
+        } else {
+            this.tblSymbols[name] = {name, value, nType, nLine: this.nLine};
+        }
         this.dbg.setVariable(name, value);
     }
 
@@ -1132,7 +1224,9 @@ Macro10.PSEUDO_OP = {
     ASCIZ:      "ASCIZ",
     DEFINE:     "DEFINE",
     IFE:        "IFE",
+    IFN:        "IFN",
     IRP:        "IRP",
+    IRPC:       "IRPC",
     LITERAL:    "LITERAL",
     PAGE:       "PAGE",
     REPEAT:     "REPEAT",

@@ -5,8 +5,9 @@ permalink: /apps/pdp10/tests/
 machines:
   - id: testka10
     type: pdp10
-    debugger: true
     config: /devices/pdp10/machine/ka10/test/debugger/machine.xml
+    debugger: true
+    commands: a 100 /apps/pdp10/tests/MACTEST.MAC
 ---
 
 DEC PDP-10 Opcode Tests
