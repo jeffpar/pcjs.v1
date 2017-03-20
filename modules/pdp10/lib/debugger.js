@@ -2867,7 +2867,7 @@ class DebuggerPDP10 extends Debugger {
             while (n-- > 0 && nWords-- > 0) {
                 var w = this.getWord(dbgAddr, 1);
                 if (fJSON) {
-                    if (sData) sData += ",";
+                    if (sData) sData += ',';
                     sData += w;
                 } else {
                     sData += this.toStrWord(w);
@@ -2880,7 +2880,7 @@ class DebuggerPDP10 extends Debugger {
                 var shift = 36 - nBits;
                 for (var i = 0; size == 1 && shift >= 0; i++) {
                     var c = ((w / Math.pow(2, shift)) % Math.pow(2, nBits));
-                    sData += this.toStrBase(c, nBits);
+                    sData += this.toStrBase(c, nBits) + ' ';
                     c += (nBits == 6? 0x20 : 0);
                     sChars += (c < 0x20? '.' : String.fromCharCode(c));
                     shift -= nBits;
