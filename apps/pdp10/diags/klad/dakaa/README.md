@@ -243,35 +243,33 @@ SOFTWARE ON EQUIPMENT WHICH IS NOT SUPPLIED BY DEC.
 DAKAA.HST
 ---------
 
-```
-	THIS IS A HISTORY OF THE DEVELOPMENT OF MAINDEC-10-DAKAA
-
-************************************************************************
-
-PRODUCT CODE:		MAINDEC-10-DAKAA
-
-PRODUCT NAME:		BASIC INSTRUCTION DIAGNOSTIC #1
-
-DATE RELEASED:		JANUARY 1977
-
-VERSION:		0.2
-
-UPDATE AUTHOR:		JOHN R. KIRCHOFF
-
-CHANGES MADE:
-
-	1. UPGRADE TO ALLOW COMPATABILITY WITH THE SUBROUTINE PACKAGE.
-
-************************************************************************
-
-ORIGINAL VERSION:	0.1
-
-ORIGINAL AUTHOR:	RICHARD MALISKA
-
-ORIGINAL RELEASE:	16-MAR-72
-
-************************************************************************
-```
+	    THIS IS A HISTORY OF THE DEVELOPMENT OF MAINDEC-10-DAKAA
+	
+	************************************************************************
+	
+	PRODUCT CODE:       MAINDEC-10-DAKAA
+	
+	PRODUCT NAME:       BASIC INSTRUCTION DIAGNOSTIC #1
+	
+	DATE RELEASED:      JANUARY 1977
+	
+	VERSION:            0.2
+	
+	UPDATE AUTHOR:      JOHN R. KIRCHOFF
+	
+	CHANGES MADE:
+	
+	    1. UPGRADE TO ALLOW COMPATABILITY WITH THE SUBROUTINE PACKAGE.
+	
+	************************************************************************
+	
+	ORIGINAL VERSION:   0.1
+	
+	ORIGINAL AUTHOR:    RICHARD MALISKA
+	
+	ORIGINAL RELEASE:   16-MAR-72
+	
+	************************************************************************
 
 DAKAA.MAC
 ---------
