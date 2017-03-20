@@ -617,7 +617,7 @@ class DebuggerPDP10 extends Debugger {
      */
     toStrOffset(off)
     {
-        return this.toStrBase(off);
+        return this.toStrBase(off, 18);
     }
 
     /**
@@ -645,7 +645,7 @@ class DebuggerPDP10 extends Debugger {
          * ADDR_LIMIT is not derived from WORD_LIMIT; we're just taking advantage of the fact
          * that ADDR_LIMIT happens to be exactly half of WORD_LIMIT, and they are both powers of two.
          */
-        return Str.toOct(w / PDP10.ADDR_LIMIT, 6) + ' ' + Str.toOct(w % PDP10.ADDR_LIMIT, 6);
+        return this.toStrBase(w / PDP10.ADDR_LIMIT, 18) + ' ' + this.toStrBase(w % PDP10.ADDR_LIMIT, 18);
     }
 
     /**

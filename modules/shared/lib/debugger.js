@@ -459,16 +459,13 @@ class Debugger extends Component
             if (nBits <= 32) {
                 vNew = v | 0;
             } else {
-                /*
-                 * For negative values, we require them to fit within nBits - 1, reserving the left-most bit
-                 * for the sign bit, but for positive values, we can't really be sure if the caller is treating
-                 * the left-most bit as a sign bit or not, so the upper range is based on nBits.
-                 */
                 limit = Math.pow(2, nBits - 1);
                 if (v < -limit) {
-                    vNew = v % limit;
-                } else if (v >= limit * 2) {
-                    vNew = v % (limit * 2);
+                    if (v < -limit * 2) vNew = v % (limit * 2);
+                    vNew += (limit * 2);
+                } else if (vNew >= limit) {
+                    if (v >= limit * 2) vNew = v % (limit * 2);
+                    vNew -= (limit * 2);    // the sign bit was set in this overly large value, so make it negative
                 }
             }
         }
@@ -632,7 +629,7 @@ class Debugger extends Component
         var value;
         var sValue, sOp;
         var fError = false;
-        var iNegate = 0;
+        var nUnary = 0;
         var aVals = [], aOps = [];
 
         var nBasePrev = this.nBase;
@@ -643,7 +640,9 @@ class Debugger extends Component
             sValue = asValues[iValue++].trim();
             sOp = (iValue < iLimit? asValues[iValue++] : "");
 
-            if (!sValue) {
+            if (sValue) {
+                v = this.parseValue(sValue, null, fQuiet, nUnary);
+            } else {
                 if (sOp == '{') {
                     var cOpen = 1;
                     var iStart = iValue;
@@ -661,20 +660,31 @@ class Debugger extends Component
                     sOp = (iValue < iLimit? asValues[iValue++] : "");
                 }
                 else {
-                    if (sOp == '~' || sOp == '^-') {
-                        iNegate = 1;
+                    if (sOp == '^B') {
+                        this.nBase = 2;
                         continue;
                     }
-                    if (sOp == '-') {
-                        iNegate = -1;
+                    if (sOp == '^O') {
+                        this.nBase = 8;
                         continue;
+                    }
+                    if (sOp == '^D') {
+                        this.nBase = 10;
+                        continue;
+                    }
+                    if (!(nUnary & (0xC0000000|0))) {
+                        if (sOp == '-') {
+                            nUnary = (nUnary << 2) | 1;
+                            continue;
+                        }
+                        if (sOp == '~' || sOp == '^-') {
+                            nUnary = (nUnary << 2) | 2;
+                            continue;
+                        }
                     }
                     fError = true;
                     break;
                 }
-            }
-            else {
-                v = this.parseValue(sValue, null, fQuiet, iNegate);
             }
 
             if (v === undefined) {
@@ -703,10 +713,10 @@ class Debugger extends Component
              * base, so we must override the current base to ensure the count is parsed correctly.
              */
             this.nBase = (sOp == '^_')? 10 : nBase;
-            iNegate = 0;
+            nUnary = 0;
         }
 
-        if (!this.evalOps(aVals, aOps) || aVals.length != 1) {
+        if (fError || !this.evalOps(aVals, aOps) || aVals.length != 1) {
             fError = true;
         }
 
@@ -848,7 +858,7 @@ class Debugger extends Component
              *
              * WARNING: Whenever you make changes to this RegExp, make sure you update aBinOpPrecedence as needed, too.
              */
-            var regExp = /(\{|}|\|\||&&|\||\^!|\^-|~|\^_|_|&|!=|!|==|>=|>>>|>>|>|<=|<<|<|-|\+|%|\/|\*)/;
+            var regExp = /(\{|}|\|\||&&|\||\^!|\^B|\^O|\^D|\^-|~|\^_|_|&|!=|!|==|>=|>>>|>>|>|<=|<<|<|-|\+|%|\/|\*)/;
             sExp = sExp.replace(/(^|[^A-Z0-9$%.])([0-9]+)B/, "$1$2^_");
             var asValues = sExp.split(regExp);
             value = this.parseArray(asValues, 0, asValues.length, this.nBase, fQuiet);
@@ -936,16 +946,26 @@ class Debugger extends Component
     }
 
     /**
-     * parseValue(sValue, sName, fQuiet, iNegate)
+     * parseValue(sValue, sName, fQuiet, nUnary)
+     *
+     * nUnary is actually a small "stack" of unary operations encoded in successive pairs of bits.
+     * As parseExpression() encounters each unary operator, nUnary is shifted left 2 bits, and the
+     * new unary operator is encoded in bits 0 and 1 (0b00 is none, 0b01 is negate, 0b10 is complement,
+     * and 0b11 is reserved).  Here, we process the bits in reverse order (hence the stack-like nature),
+     * ensuring that we process the unary operators associated with this value right-to-left.
+     *
+     * Since bitwise operators see only 32 bits, more than 16 unary operators cannot be supported
+     * using this method.  We'll let parseExpression() worry about that; if it ever happens in practice,
+     * then we'll have to switch to a more "expensive" approach (eg, an actual array of unary operators).
      *
      * @this {Debugger}
      * @param {string|undefined} sValue
      * @param {string|null} [sName] is the name of the value, if any
      * @param {boolean} [fQuiet]
-     * @param {number} [iNegate] (-1 to negate , 1 to complement)
+     * @param {number} [nUnary] (0 for none, 1 for negate, 2 for complement)
      * @return {number|undefined} numeric value, or undefined if sValue is either undefined or invalid
      */
-    parseValue(sValue, sName, fQuiet, iNegate = 0)
+    parseValue(sValue, sName, fQuiet, nUnary = 0)
     {
         var value;
         if (sValue != null) {
@@ -958,23 +978,20 @@ class Debugger extends Component
                     /*
                      * A feature of MACRO-10 is that any single-digit number is automatically interpreted as base-10.
                      */
-                    var nBase = sValue.length > 1? this.nBase : 10;
-                    if (iNegate < 0) {
-                        sValue = '-' + sValue;
-                        iNegate = 0;
-                    }
-                    value = Str.parseInt(sValue, nBase);
+                    value = Str.parseInt(sValue, sValue.length > 1? this.nBase : 10);
                 }
             }
             if (value != null) {
-                if (iNegate < 0) {
-                    value = -value;
-                } else if (iNegate > 0) {
-                    /*
-                     * This is easier than adding an evalNOT()....
-                     */
-                    value = this.evalXOR(value, -1);
+                while (nUnary) {
+                    if (nUnary & 1) {
+                        value = -this.truncate(value);
+                    }
+                    else if (nUnary & 2) {
+                        value = this.evalXOR(value, -1);        // this is easier than adding an evalNOT()...
+                    }
+                    nUnary >>>= 2;
                 }
+                value = this.truncate(value);
             } else {
                 if (!fQuiet) {
                     this.println("invalid " + (sName? sName : "value") + ": " + sValue);

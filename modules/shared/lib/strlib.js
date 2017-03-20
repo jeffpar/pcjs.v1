@@ -68,6 +68,8 @@ class Str {
      * More recently, we've added support for "^D", "^O", and "^B" prefixes to accommodate the base overrides
      * that the PDP-10's MACRO-10 assembly language supports (decimal, octal, and binary, respectively).
      * If this support turns out to adversely affect other debuggers, then it will have to be "conditionalized".
+     * Similarly, we've added support for "K", "M", and "G" MACRO-10-style suffixes that add 3, 6, or 9 zeros
+     * to the value to be parsed, respectively.
      *
      * To summarize our non-standard alternatives: a 'y' suffix indicates binary, a '#' prefix indicates
      * octal, a '$' prefix indicates hex, and a "0b" prefix indicates binary IF at least one comma is present.
@@ -84,71 +86,66 @@ class Str {
 
         if (s) {
             if (!base) base = 10;
-            var chPrefix = s.charAt(0);
+
+            var ch, chPrefix, chSuffix;
             var fCommas = (s.indexOf(',') > 0);
             if (fCommas) s = s.replace(/,/g, '');
+
+            ch = chPrefix = s.charAt(0);
             if (chPrefix == '#') {
                 base = 8;
-                chPrefix = null;
+                chPrefix = '';
             }
             else if (chPrefix == '$') {
                 base = 16;
-                chPrefix = null;
+                chPrefix = '';
             }
-            if (chPrefix == null) {
+            if (ch != chPrefix) {
                 s = s.substr(1);
             }
             else {
-                if (chPrefix == '0') {
-                    chPrefix = s.charAt(1);
-                    if (chPrefix == 'b' && fCommas) {
-                        base = 2;
-                        chPrefix = null;
-                    }
-                    if (chPrefix == 'o') {
-                        base = 8;
-                        chPrefix = null;
-                    }
-                    else if (chPrefix == 'x') {
-                        base = 16;
-                        chPrefix = null;
-                    }
+                ch = chPrefix = s.substr(0, 2);
+                if (chPrefix == '0b' && fCommas || chPrefix == '^B') {
+                    base = 2;
+                    chPrefix = '';
                 }
-                else if (chPrefix == '^') {
-                    chPrefix = s.charAt(1);
-                    if (chPrefix == 'D') {
-                        base = 10;
-                        chPrefix = null;
-                    }
-                    else if (chPrefix == 'O') {
-                        base = 8;
-                        chPrefix = null;
-                    }
-                    else if (chPrefix == 'B') {
-                        base = 2;
-                        chPrefix = null;
-                    }
+                else if (chPrefix == '0o' || chPrefix == '^O') {
+                    base = 8;
+                    chPrefix = '';
                 }
-                if (chPrefix == null) {
-                    s = s.substr(2);
+                else if (chPrefix == '^D') {
+                    base = 10;
+                    chPrefix = '';
                 }
-                else {
-                    var chSuffix = s.charAt(s.length - 1).toLowerCase();
-                    if (chSuffix == 'y') {
-                        base = 2;
-                        chSuffix = null;
-                    }
-                    else if (chSuffix == '.') {
-                        base = 10;
-                        chSuffix = null;
-                    }
-                    else if (chSuffix == 'h') {
-                        base = 16;
-                        chSuffix = null;
-                    }
-                    if (chSuffix == null) s = s.substr(0, s.length - 1);
+                else if (chPrefix == '0x') {
+                    base = 16;
+                    chPrefix = '';
                 }
+                if (ch != chPrefix) s = s.substr(2);
             }
+            ch = chSuffix = s.slice(-1);
+            if (chSuffix == 'Y' || chSuffix == 'y') {
+                base = 2;
+                chSuffix = '';
+            }
+            else if (chSuffix == '.') {
+                base = 10;
+                chSuffix = '';
+            }
+            else if (chSuffix == 'H' || chSuffix == 'h') {
+                base = 16;
+                chSuffix = '';
+            }
+            else if (chSuffix == 'K') {
+                chSuffix = '000';
+            }
+            else if (chSuffix == 'M') {
+                chSuffix = '000000';
+            }
+            else if (chSuffix == 'G') {
+                chSuffix = '000000000';
+            }
+            if (ch != chSuffix) s = s.slice(0, -1) + chSuffix;
             /*
              * This adds support for the MACRO-10 binary shifting (Bn) suffix, which must be stripped from the
              * number before parsing, and then applied to the value after parsing.  If n is omitted, 35 is assumed,
@@ -187,7 +184,7 @@ class Str {
     }
 
     /**
-     * toBase(n, radix, cch, sPrefix)
+     * toBase(n, radix, cch, sPrefix, grouping)
      *
      * Displays the given number as an unsigned integer using the specified radix and number of digits.
      *
@@ -195,9 +192,10 @@ class Str {
      * @param {number} radix (ie, the base)
      * @param {number} cch (the desired number of digits)
      * @param {string} [sPrefix] (default is none)
+     * @param {number} [grouping]
      * @return {string}
      */
-    static toBase(n, radix, cch, sPrefix = "")
+    static toBase(n, radix, cch, sPrefix = "", grouping = -1)
     {
         /*
          * An initial "falsey" check for null takes care of both null and undefined;
@@ -229,15 +227,21 @@ class Str {
                 cch = Math.ceil(Math.log(n) / Math.log(radix));
             }
         }
-        if (n == null) {
-            while (cch-- > 0) s = '?' + s;
-        } else {
-            while (cch-- > 0) {
+        var g = grouping;
+        while (cch-- > 0) {
+            if (!g) {
+                s = ',' + s;
+                g = grouping;
+            }
+            if (n == null) {
+                s = '?' + s;
+            } else {
                 var d = n % radix;
                 d += (d >= 0 && d <= 9? 0x30 : 0x41 - 10);
                 s = String.fromCharCode(d) + s;
                 n = Math.trunc(n / radix);
             }
+            g--;
         }
         return sPrefix + s;
     }
@@ -245,41 +249,27 @@ class Str {
     /**
      * toBin(n, cch, grouping)
      *
-     * Converts an integer to binary, with the specified number of digits (up to the default of 32).
+     * Converts an integer to binary, with the specified number of digits (up to a maximum of 36).
      *
-     * @param {number|null|undefined} n (interpreted as a 32-bit value)
-     * @param {number} [cch] is the desired number of binary digits (32 is both the default and the maximum)
+     * @param {number|null|undefined} n (supports integers up to 36 bits now)
+     * @param {number} [cch] is the desired number of binary digits (0 or undefined for default of either 8, 18, or 36)
      * @param {number} [grouping]
      * @return {string} the binary representation of n
      */
     static toBin(n, cch, grouping)
     {
-        var s = "";
         if (!cch) {
-            cch = 32;
-        } else {
-            if (cch > 32) cch = 32;
-        }
-        /*
-         * An initial "falsey" check for null takes care of both null and undefined;
-         * we can't rely entirely on isNaN(), because isNaN(null) returns false, oddly enough.
-         *
-         * Alternatively, we could mask and shift n regardless of whether it's null/undefined/NaN,
-         * since JavaScript coerces such operands to zero, but I think there's "value" in seeing those
-         * values displayed differently.
-         */
-        var fInvalid = (n == null || isNaN(n));
-        var group = (grouping = grouping || cch);
-        while (cch-- > 0) {
-            if (!group) {
-                s = "," + s;
-                group = grouping;
+            // cch = Math.ceil(Math.log(Math.abs(n) + 1) / Math.LN2) || 1;
+            var v = Math.abs(n);
+            if (v <= 0b11111111) {
+                cch = 8;
+            } else if (v <= 0b111111111111111111) {
+                cch = 18;
+            } else {
+                cch = 36;
             }
-            s = (fInvalid? '?' : ((n & 0x1)? '1' : '0')) + s;
-            n >>= 1;
-            group--;
-        }
-        return s;
+        } else if (cch > 36) cch = 36;
+        return Str.toBase(n, 2, cch, "", grouping);
     }
 
     /**
@@ -314,17 +304,23 @@ class Str {
      * an exception, whereas this function will return '?' characters.
      *
      * @param {number|null|undefined} n (supports integers up to 36 bits now)
-     * @param {number} [cch] is the desired number of octal digits (0 or undefined for default of either 6 or 11)
+     * @param {number} [cch] is the desired number of octal digits (0 or undefined for default of either 6, 8, or 12)
      * @param {boolean} [fPrefix]
      * @return {string} the octal representation of n
      */
     static toOct(n, cch, fPrefix)
     {
-        if (cch) {
-            if (cch > 12) cch = 12;
-        } else {
-            cch = (n & ~0xffffff)? 12 : ((n & ~0xffff)? 8 : 6);
-        }
+        if (!cch) {
+            // cch = Math.ceil(Math.log(Math.abs(n) + 1) / Math.log(8)) || 1;
+            var v = Math.abs(n);
+            if (v <= 0o777777) {
+                cch = 6;
+            } else if (v <= 0o77777777) {
+                cch = 8;
+            } else {
+                cch = 12;
+            }
+        } else if (cch > 12) cch = 12;
         return Str.toBase(n, 8, cch, fPrefix? "0o" : "");
     }
 
@@ -338,16 +334,20 @@ class Str {
      * an exception, whereas this function will return '?' characters.
      *
      * @param {number|null|undefined} n (supports integers up to 36 bits now)
-     * @param {number} [cch] is the desired number of decimal digits (0 or undefined for default of either 5 or 10)
+     * @param {number} [cch] is the desired number of decimal digits (0 or undefined for default of either 5 or 11)
      * @return {string} the decimal representation of n
      */
     static toDec(n, cch)
     {
-        if (cch) {
-            if (cch > 11) cch = 11;
-        } else {
-            cch = (n & ~0xffff)? 10 : 5;
-        }
+        if (!cch) {
+            // cch = Math.ceil(Math.log(Math.abs(n) + 1) / Math.LN10) || 1;
+            var v = Math.abs(n);
+            if (v <= 99999) {
+                cch = 5;
+            } else {
+                cch = 11;
+            }
+        } else if (cch > 11) cch = 11;
         return Str.toBase(n, 10, cch);
     }
 
@@ -369,17 +369,23 @@ class Str {
      *      s = s.substr(0, cch).toUpperCase();
      *
      * @param {number|null|undefined} n (supports integers up to 36 bits now)
-     * @param {number} [cch] is the desired number of hex digits (0 or undefined for default of either 4 or 8)
+     * @param {number} [cch] is the desired number of hex digits (0 or undefined for default of either 4, 8, or 9)
      * @param {boolean} [fPrefix]
      * @return {string} the hex representation of n
      */
     static toHex(n, cch, fPrefix)
     {
-        if (cch) {
-            if (cch > 9) cch = 9;
-        } else {
-            cch = (n & ~0xffff)? 8 : 4;
-        }
+        if (!cch) {
+            // cch = Math.ceil(Math.log(Math.abs(n) + 1) / Math.log(16)) || 1;
+            var v = Math.abs(n);
+            if (v <= 0xffff) {
+                cch = 4;
+            } else if (v <= 0xffffffff) {
+                cch = 8;
+            } else {
+                cch = 9;
+            }
+        } else if (cch > 9) cch = 9;
         return Str.toBase(n, 16, cch, fPrefix? "0x" : "");
     }
 
