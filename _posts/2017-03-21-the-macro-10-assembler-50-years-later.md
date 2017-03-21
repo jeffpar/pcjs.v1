@@ -22,7 +22,7 @@ falls into these categories:
 Floating-point is the biggest chunk of work, which I'm going to save for last, with the hope that most PDP-10 software
 didn't use floating-point.  However, if all PDP-10 systems included floating-point hardware (which I haven't been able to
 confirm yet), I may have no choice.  Floating-point emulation in JavaScript isn't hard -- PCjs already includes an
-[8087 Coprocessor Emulator](/modules/pcx86/lib/x86fpu.js) -- but getting all the details right is time-consuming.
+[8087 Coprocessor Emulation](/modules/pcx86/lib/x86fpu.js) -- but getting all the details right is time-consuming.
 
 The PDP-10 has a lot of instructions, and I quickly had far more instructions than I was willing or able to write tests for.
 Besides, any tests I wrote would be based on the same potentially-flawed understandings that I had gleaned from DEC's
@@ -66,7 +66,7 @@ since they share the same expression parser.  Here are some examples, using the 
 	23. 0o000027
 
 Both the Debugger and MACRO-10 start out by assuming a default base (radix) of 8, so the value "27" is evaluated as an octal
-number, and for convenience, the "print" command displays the result in both decimal and octal.  You can change the default base
+number, and for convenience, the "print" command displays the result in both octal and decimal.  You can change the default base
 in the Debugger with the `s base` command (eg, `s base 10`), where the new base is always interpreted as a decimal number.
 This command differs from MACRO-10, which uses the `RADIX` pseudo-op to change the default base.
 
