@@ -7,7 +7,7 @@ machines:
     type: pdp10
     config: /devices/pdp10/machine/ka10/test/debugger/machine.xml
     debugger: true
-    commands: a 30724 /apps/pdp10/diags/klad/dakad/TEST.MAC
+    commands: a 30724 /apps/pdp10/diags/klad/dakad/MYDAKAD.MAC
 ---
 
 PDP-10 KA10 Basic Instruction Diagnostic #4
@@ -28,13 +28,13 @@ Resources for this test include:
 {% include machine.html id="testka10" %}
 
 The Debugger's assemble ("a") command can be used to test the new built-in
-[MACRO-10 mini-assembler](/modules/pdp10/lib/macro10.js), which supports a subset
+[MACRO-10 Mini-Assembler](/modules/pdp10/lib/macro10.js), which supports a subset
 of the [MACRO-10](http://archive.pcjs.org/pubs/dec/pdp10/tops10/02_1973AsmRef_macro.pdf) assembly language.
 This command:
 
 	a 30724 /apps/pdp10/diags/klad/dakad/TEST.MAC
 
-will automatically read the [TEST.MAC](TEST.MAC.txt) source file (a slightly modified copy of [DAKAD.MAC](DAKAD.MAC.txt)),
+will automatically read the [MYDAKAD.MAC](MYDAKAD.MAC.txt) source file (a slightly modified copy of [DAKAD.MAC](DAKAD.MAC.txt)),
 assemble it, and then load the binary output at the specified address.  Use the command `db 30724` to dump the first few words
 of binary data:
 
@@ -252,35 +252,33 @@ SOFTWARE ON EQUIPMENT WHICH IS NOT SUPPLIED BY DEC.
 DAKAD.HST
 ---------
 
-```
-	THIS IS A HISTORY OF THE DEVELOPMENT OF MAINDEC-10-DAKAD
-
-************************************************************************
-
-PRODUCT CODE:		MAINDEC-10-DAKAD
-
-PRODUCT NAME:		BASIC INSTRUCTION DIAGNOSTIC #4
-
-DATE RELEASED:		JANUARY 1977
-
-VERSION:		0.2
-
-UPDATE AUTHOR:		JOHN R. KIRCHOFF
-
-CHANGES MADE:
-
-	1. UPGRADE TO ALLOW COMPATABILITY WITH THE SUBROUTINE PACKAGE.
-
-************************************************************************
-
-ORIGINAL VERSION:	0.1
-
-ORIGINAL AUTHOR:	RICHARD MALISKA
-
-ORIGINAL RELEASE:	16-MAR-72
-
-************************************************************************
-```
+	    THIS IS A HISTORY OF THE DEVELOPMENT OF MAINDEC-10-DAKAD
+	
+	************************************************************************
+	
+	PRODUCT CODE:       MAINDEC-10-DAKAD
+	
+	PRODUCT NAME:       BASIC INSTRUCTION DIAGNOSTIC #4
+	
+	DATE RELEASED:      JANUARY 1977
+	
+	VERSION:            0.2
+	
+	UPDATE AUTHOR:      JOHN R. KIRCHOFF
+	
+	CHANGES MADE:
+	
+	    1. UPGRADE TO ALLOW COMPATABILITY WITH THE SUBROUTINE PACKAGE.
+	
+	************************************************************************
+	
+	ORIGINAL VERSION:   0.1
+	
+	ORIGINAL AUTHOR:    RICHARD MALISKA
+	
+	ORIGINAL RELEASE:   16-MAR-72
+	
+	************************************************************************
 
 DAKAD.MAC
 ---------

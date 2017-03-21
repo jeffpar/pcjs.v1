@@ -617,7 +617,7 @@ class DebuggerPDP10 extends Debugger {
      */
     toStrOffset(off)
     {
-        return this.toStrBase(off);
+        return this.toStrBase(off, 18);
     }
 
     /**
@@ -645,7 +645,7 @@ class DebuggerPDP10 extends Debugger {
          * ADDR_LIMIT is not derived from WORD_LIMIT; we're just taking advantage of the fact
          * that ADDR_LIMIT happens to be exactly half of WORD_LIMIT, and they are both powers of two.
          */
-        return Str.toOct(w / PDP10.ADDR_LIMIT, 6) + ' ' + Str.toOct(w % PDP10.ADDR_LIMIT, 6);
+        return this.toStrBase(w / PDP10.ADDR_LIMIT, 18) + ' ' + this.toStrBase(w % PDP10.ADDR_LIMIT, 18);
     }
 
     /**
@@ -1050,7 +1050,7 @@ class DebuggerPDP10 extends Debugger {
         if (this.sInitCommands) {
             var sCmds = this.sInitCommands;
             this.sInitCommands = null;
-            this.doCommands(sCmds);
+            this.doCommands(sCmds, true);
         }
     }
 
@@ -2867,7 +2867,7 @@ class DebuggerPDP10 extends Debugger {
             while (n-- > 0 && nWords-- > 0) {
                 var w = this.getWord(dbgAddr, 1);
                 if (fJSON) {
-                    if (sData) sData += ",";
+                    if (sData) sData += ',';
                     sData += w;
                 } else {
                     sData += this.toStrWord(w);
@@ -2880,7 +2880,7 @@ class DebuggerPDP10 extends Debugger {
                 var shift = 36 - nBits;
                 for (var i = 0; size == 1 && shift >= 0; i++) {
                     var c = ((w / Math.pow(2, shift)) % Math.pow(2, nBits));
-                    sData += this.toStrBase(c, nBits);
+                    sData += this.toStrBase(c, nBits) + ' ';
                     c += (nBits == 6? 0x20 : 0);
                     sChars += (c < 0x20? '.' : String.fromCharCode(c));
                     shift -= nBits;
@@ -3179,7 +3179,7 @@ class DebuggerPDP10 extends Debugger {
         case "base":
             if (asArgs[2]) {
                 var nBase = +asArgs[2];
-                if (nBase == 8 || nBase == 10 || nBase == 16) {
+                if (nBase == 2 || nBase == 8 || nBase == 10 || nBase == 16) {
                     this.nBase = nBase;
                 } else {
                     this.println("invalid base: " + nBase);

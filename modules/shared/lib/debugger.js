@@ -459,16 +459,13 @@ class Debugger extends Component
             if (nBits <= 32) {
                 vNew = v | 0;
             } else {
-                /*
-                 * For negative values, we require them to fit within nBits - 1, reserving the left-most bit
-                 * for the sign bit, but for positive values, we can't really be sure if the caller is treating
-                 * the left-most bit as a sign bit or not, so the upper range is based on nBits.
-                 */
                 limit = Math.pow(2, nBits - 1);
                 if (v < -limit) {
-                    vNew = v % limit;
-                } else if (v >= limit * 2) {
-                    vNew = v % (limit * 2);
+                    if (v < -limit * 2) vNew = v % (limit * 2);
+                    vNew += (limit * 2);
+                } else if (vNew >= limit) {
+                    if (v >= limit * 2) vNew = v % (limit * 2);
+                    vNew -= (limit * 2);    // the sign bit was set in this overly large value, so make it negative
                 }
             }
         }
@@ -566,7 +563,7 @@ class Debugger extends Component
             case '|':
                 valNew = this.evalIOR(val1, val2);
                 break;
-            case '^^':          // since MACRO-10 uses '^' for base overrides, you must now use '^^' for bitwise exclusive-or (XOR)
+            case '^!':          // since MACRO-10 uses '^' for base overrides, '^!' is used for bitwise exclusive-or (XOR)
                 valNew = this.evalXOR(val1, val2);
                 break;
             case '&&':
@@ -575,16 +572,21 @@ class Debugger extends Component
             case '||':
                 valNew = (val1 || val2? 1 : 0);
                 break;
-            case '><':
+            case '_':
+            case '^_':
                 valNew = val1;
-                val2 = 35 - (val2 & 0xff);
+                /*
+                 * While we always try to avoid assuming any particular number of bits of precision, the 'B' shift
+                 * operator (which we've converted to '^_') is unique to the MACRO-10 environment, which imposes the
+                 * following restrictions on the shift count.
+                 */
+                if (chOp == '^_') val2 = 35 - (val2 & 0xff);
                 if (val2) {
                     /*
-                     * Since binary shifting is a logical operation, and since shifting by division only works properly
-                     * with positive numbers, we must convert a negative value to a positive value, by computing the two's
-                     * complement.
+                     * Since binary shifting is a logical (not arithmetic) operation, and since shifting by division only
+                     * works properly with positive numbers, we call truncate() to produce an unsigned value.
                      */
-                    if (valNew < 0) valNew += Math.pow(2, 36);
+                    valNew = this.truncate(valNew, 0, true);
                     if (val2 > 0) {
                         valNew *= Math.pow(2, val2);
                     } else {
@@ -610,9 +612,9 @@ class Debugger extends Component
      *
      *      0   1   2   3   4   5   6   7   8   9  10  11  12  13  14
      *      -   -   -   -   -   -   -   -   -   -  --  --  --  --  --
-     *      2   *   _   {   3   +   _   {   4   /   2   }   _   }   _
+     *      2   *       {   3   +       {   4   /   2   }       }
      *
-     * This function takes care of recursively processing sub-expressions, by processing subsets of the array,
+     * This function takes care of recursively processing grouped expressions, by processing subsets of the array,
      * as well as handling certain base overrides (eg, temporarily switching to base-10 for binary shift suffixes).
      *
      * @param {Array.<string>} asValues
@@ -627,7 +629,7 @@ class Debugger extends Component
         var value;
         var sValue, sOp;
         var fError = false;
-        var fNegate = false;
+        var nUnary = 0;
         var aVals = [], aOps = [];
 
         var nBasePrev = this.nBase;
@@ -638,7 +640,9 @@ class Debugger extends Component
             sValue = asValues[iValue++].trim();
             sOp = (iValue < iLimit? asValues[iValue++] : "");
 
-            if (!sValue) {
+            if (sValue) {
+                v = this.parseValue(sValue, null, fQuiet, nUnary);
+            } else {
                 if (sOp == '{') {
                     var cOpen = 1;
                     var iStart = iValue;
@@ -656,16 +660,34 @@ class Debugger extends Component
                     sOp = (iValue < iLimit? asValues[iValue++] : "");
                 }
                 else {
-                    if (sOp != '-') {
-                        fError = true;
-                        break;
+                    if (sOp == '^B') {
+                        this.nBase = 2;
+                        continue;
                     }
-                    fNegate = true;
-                    continue;
+                    if (sOp == '^O') {
+                        this.nBase = 8;
+                        continue;
+                    }
+                    if (sOp == '^D') {
+                        this.nBase = 10;
+                        continue;
+                    }
+                    if (!(nUnary & (0xC0000000|0))) {
+                        if (sOp == '+') {
+                            continue;
+                        }
+                        if (sOp == '-') {
+                            nUnary = (nUnary << 2) | 1;
+                            continue;
+                        }
+                        if (sOp == '~' || sOp == '^-') {
+                            nUnary = (nUnary << 2) | 2;
+                            continue;
+                        }
+                    }
+                    fError = true;
+                    break;
                 }
-            }
-            else {
-                v = this.parseValue(sValue, null, fQuiet, fNegate);
             }
 
             if (v === undefined) {
@@ -693,11 +715,11 @@ class Debugger extends Component
              * The MACRO-10 binary shifting operator assumes a base-10 shift count, regardless of the current
              * base, so we must override the current base to ensure the count is parsed correctly.
              */
-            this.nBase = (sOp == '><')? 10 : nBase;
-            fNegate = false;
+            this.nBase = (sOp == '^_')? 10 : nBase;
+            nUnary = 0;
         }
 
-        if (!this.evalOps(aVals, aOps) || aVals.length != 1) {
+        if (fError || !this.evalOps(aVals, aOps) || aVals.length != 1) {
             fError = true;
         }
 
@@ -709,6 +731,50 @@ class Debugger extends Component
 
         this.nBase = nBasePrev;
         return value;
+    }
+
+    /**
+     * parseASCII(sExp, chDelim, nBits, cchMax, fQuiet)
+     *
+     * @this {Debugger}
+     * @param {string} sExp
+     * @param {string} chDelim
+     * @param {number} nBits
+     * @param {number} cchMax
+     * @param {boolean} [fQuiet] (true for quiet parsing)
+     * @return {string}
+     */
+    parseASCII(sExp, chDelim, nBits, cchMax, fQuiet)
+    {
+        var i;
+        while ((i = sExp.indexOf(chDelim)) >= 0) {
+            var v = 0;
+            var j = i + 1;
+            var cch = cchMax;
+            while (j < sExp.length) {
+                var ch = sExp[j++];
+                if (ch == chDelim) {
+                    cch = -1;
+                    break;
+                }
+                if (!cch) break;
+                cch--;
+                var c = ch.charCodeAt(0);
+                if (nBits == 7) {
+                    c &= 0x7F;
+                } else {
+                    c = (c - 0x20) & 0x3F;
+                }
+                v = this.truncate(v * Math.pow(2, nBits) + c, nBits * cchMax, true);
+            }
+            if (cch >= 0) {
+                if (fQuiet === false) this.println("parse error (" + sExp + ")");
+                break;
+            } else {
+                sExp = sExp.substr(0, i) + this.toStrBase(v, -1) + sExp.substr(j);
+            }
+        }
+        return sExp;
     }
 
     /**
@@ -729,7 +795,7 @@ class Debugger extends Component
      *
      * We pop 1 "binop" from aOps and 2 values from aVals whenever a "binop" of lower priority than its
      * predecessor is encountered, evaluate, and push the result back onto aVals.  Only selected unary
-     * operators are supported (eg, minus), and ternary operators like '?:' are not supported at all.
+     * operators are supported (eg, minus and "not"); ternary operators like '?:' are not supported at all.
      *
      * @this {Debugger}
      * @param {string|undefined} sExp
@@ -738,25 +804,33 @@ class Debugger extends Component
      */
     parseExpression(sExp, fQuiet)
     {
-        var value;
-
+        var value = undefined;
         this.sUndefined = null;
 
         if (sExp) {
 
             /*
-             * The default grouping characters for sub-expressions are braces; they can be changed by altering
+             * The default delimiting characters for grouped expressions are braces; they can be changed by altering
              * achGroup, but when that happens, instead of changing our regular expressions and operator tables,
              * we simply replace all achGroup characters with braces in the given expression.
              *
-             * Why not just always use parentheses for sub-expressions?  Because some debuggers use parseReference()
-             * to perform parenthetical value replacements in message strings, and they don't want parentheses taking
-             * on a different meaning.  And for some machines, like the PDP-10, the convention is to use parentheses
-             * for indexed addressing and angle brackets for sub-expressions.
+             * Why not use parentheses for grouped expressions?  Because some debuggers use parseReference() to perform
+             * parenthetical value replacements in message strings, and they don't want parentheses taking on a different
+             * meaning.  And for some machines, like the PDP-10, the convention is to use parentheses for other things,
+             * like indexed addressing, and to use angle brackets for grouped expressions.
              */
             if (this.achGroup[0] != '{') {
                 sExp = sExp.split(this.achGroup[0]).join('{').split(this.achGroup[1]).join('}');
             }
+
+            /*
+             * Quoted ASCII characters can have a numeric value, too, which must be converted now, to avoid any
+             * conflicts with the operators below.
+             */
+            sExp = this.parseASCII(sExp, '"', 7, 5, fQuiet);    // MACRO-10 packs up to 5 7-bit ASCII codes into a value
+            if (!sExp) return value;
+            sExp = this.parseASCII(sExp, "'", 6, 6, fQuiet);    // MACRO-10 packs up to 6 6-bit ASCII (SIXBIT) codes into a value
+            if (!sExp) return value;
 
             /*
              * All browsers (including, I believe, IE9 and up) support the following idiosyncrasy of a RegExp split():
@@ -768,13 +842,14 @@ class Debugger extends Component
              * what IS important is listing operators than contain shorter operators first.  For example, bitwise
              * shift operators must be listed BEFORE the logical less-than or greater-than operators.
              *
-             * Also, to better accommodate MACRO-10 syntax, I've replaced the single '^' for XOR with '^^', since
-             * MACRO-10 uses prefixes like "^D", "^O" and "^B" with numeric constants to indicate a base override, and
-             * I've added '!' as an alias for '|' to perform bitwise inclusive-or.
+             * Also, to better accommodate MACRO-10 syntax, I've replaced the single '^' for XOR with '^!' (since
+             * MACRO-10 uses prefixes like "^D", "^O" and "^B" with numeric constants to indicate a base override).
+             * Similarly, I've added '!' as an alias for '|' (bitwise inclusive-or), '^-' as an alias for '~' (unary
+             * complement "not" operator), and '_' as a shift operator.
              *
              * The MACRO-10 binary shifting suffix ('B') is a bit more problematic, since a capital B can also appear
-             * inside symbols.  So I pre-scan for that operator and replace non-symbolic occurrences with an internal
-             * operator ('><').
+             * inside symbols.  So I pre-scan for that suffix and replace all non-symbolic occurrences with an internal
+             * shift operator ('^_').
              *
              * Note that Str.parseInt(), which parseValue() relies on, supports both the MACRO-10 base prefix overrides
              * and the binary shifting suffix.  But since the B suffix can also be a bracketed expression, we have to
@@ -786,8 +861,8 @@ class Debugger extends Component
              *
              * WARNING: Whenever you make changes to this RegExp, make sure you update aBinOpPrecedence as needed, too.
              */
-            var regExp = /(\{|}|\|\||&&|\||\^\^|><|&|!=|!|==|>=|>>>|>>|>|<=|<<|<|-|\+|%|\/|\*)/;
-            sExp = sExp.replace(/(^|[^A-Z0-9$%.])([0-9]+)B/, "$1$2><");
+            var regExp = /(\{|}|\|\||&&|\||\^!|\^B|\^O|\^D|\^-|~|\^_|_|&|!=|!|==|>=|>>>|>>|>|<=|<<|<|-|\+|%|\/|\*)/;
+            sExp = sExp.replace(/(^|[^A-Z0-9$%.])([0-9]+)B/, "$1$2^_");
             var asValues = sExp.split(regExp);
             value = this.parseArray(asValues, 0, asValues.length, this.nBase, fQuiet);
             if (value !== undefined && fQuiet === false) {
@@ -874,16 +949,26 @@ class Debugger extends Component
     }
 
     /**
-     * parseValue(sValue, sName, fQuiet, fNegate)
+     * parseValue(sValue, sName, fQuiet, nUnary)
+     *
+     * nUnary is actually a small "stack" of unary operations encoded in successive pairs of bits.
+     * As parseExpression() encounters each unary operator, nUnary is shifted left 2 bits, and the
+     * new unary operator is encoded in bits 0 and 1 (0b00 is none, 0b01 is negate, 0b10 is complement,
+     * and 0b11 is reserved).  Here, we process the bits in reverse order (hence the stack-like nature),
+     * ensuring that we process the unary operators associated with this value right-to-left.
+     *
+     * Since bitwise operators see only 32 bits, more than 16 unary operators cannot be supported
+     * using this method.  We'll let parseExpression() worry about that; if it ever happens in practice,
+     * then we'll have to switch to a more "expensive" approach (eg, an actual array of unary operators).
      *
      * @this {Debugger}
      * @param {string|undefined} sValue
      * @param {string|null} [sName] is the name of the value, if any
      * @param {boolean} [fQuiet]
-     * @param {boolean} [fNegate]
+     * @param {number} [nUnary] (0 for none, 1 for negate, 2 for complement)
      * @return {number|undefined} numeric value, or undefined if sValue is either undefined or invalid
      */
-    parseValue(sValue, sName, fQuiet, fNegate)
+    parseValue(sValue, sName, fQuiet, nUnary = 0)
     {
         var value;
         if (sValue != null) {
@@ -893,12 +978,23 @@ class Debugger extends Component
             } else {
                 value = this.getVariable(sValue);
                 if (value == null) {
-                    value = Str.parseInt(fNegate? ('-' + sValue) : sValue, this.nBase);
-                    fNegate = false;
+                    /*
+                     * A feature of MACRO-10 is that any single-digit number is automatically interpreted as base-10.
+                     */
+                    value = Str.parseInt(sValue, sValue.length > 1? this.nBase : 10);
                 }
             }
             if (value != null) {
-                if (fNegate) value = -value;
+                while (nUnary) {
+                    if (nUnary & 1) {
+                        value = -this.truncate(value);
+                    }
+                    else if (nUnary & 2) {
+                        value = this.evalXOR(value, -1);        // this is easier than adding an evalNOT()...
+                    }
+                    nUnary >>>= 2;
+                }
+                value = this.truncate(value);
             } else {
                 if (!fQuiet) {
                     this.println("invalid " + (sName? sName : "value") + ": " + sValue);
@@ -926,7 +1022,11 @@ class Debugger extends Component
         var fDefined = false;
         if (value !== undefined) {
             fDefined = true;
-            sValue = Str.toHex(value, 0, true) + " " + value + ". " + Str.toOct(value, 0, true) + " " + Str.toBinBytes(value, 4, true);
+            if (this.nBase == 8) {
+                sValue = this.toStrBase(value, this.nBits, 8, 1) + "  " + value + '.';
+            } else {
+                sValue = this.toStrBase(value, this.nBits, 16, 1) + "  " + this.toStrBase(value, this.nBits, 8, 1) + "  " + this.toStrBase(value, this.nBits, 2, this.nBits <= 32? 8 : 6) + "  " + value + '.';
+            }
             if (value >= 0x20 && value < 0x7F) {
                 sValue += " '" + String.fromCharCode(value) + "'";
             }
@@ -1016,21 +1116,26 @@ class Debugger extends Component
     }
 
     /**
-     * toStrBase(n, nBits)
+     * toStrBase(n, nBits, nBase, nGrouping)
      *
      * Use this instead of Str's toOct()/toDec()/toHex() to convert numbers to the Debugger's default base.
      *
      * @this {Debugger}
      * @param {number|null|undefined} n
      * @param {number} [nBits] (-1 to strip leading zeros, 0 to allow a variable number of digits)
+     * @param {number} [nBase]
+     * @param {number} [nGrouping] (if nBase is 2, this is a grouping; otherwise, it's a prefix condition)
      * @return {string}
      */
-    toStrBase(n, nBits = 0)
+    toStrBase(n, nBits = 0, nBase = 0, nGrouping = 0)
     {
         var s;
-        switch(this.nBase) {
+        switch(nBase || this.nBase) {
+        case 2:
+            s = Str.toBin(n, nBits > 0? nBits : 0, nGrouping);
+            break;
         case 8:
-            s = Str.toOct(n, nBits > 0? ((nBits + 2)/3)|0 : 0);
+            s = Str.toOct(n, nBits > 0? ((nBits + 2)/3)|0 : 0, !!nGrouping);
             break;
         case 10:
             /*
@@ -1040,7 +1145,7 @@ class Debugger extends Component
             break;
         case 16:
         default:
-            s = Str.toHex(n, nBits > 0? ((nBits + 3) >> 2) : 0);
+            s = Str.toHex(n, nBits > 0? ((nBits + 3) >> 2) : 0, !!nGrouping);
             break;
         }
         return (nBits < 0? Str.stripLeadingZeros(s) : s);
@@ -1049,12 +1154,17 @@ class Debugger extends Component
 
 if (DEBUGGER) {
 
+    /*
+     * Missing from this table are the (limited) set of unary operators we support (negate and complement),
+     * since this is only a BINARY operator precedence, not a general-purpose precedence table.  Assume that
+     * all unary operators take precedence over all binary operators.
+     */
     Debugger.aBinOpPrecedence = {
         '||':   0,      // logical OR
         '&&':   1,      // logical AND
         '!':    2,      // bitwise OR
         '|':    2,      // bitwise OR
-        '^^':   3,      // bitwise XOR
+        '^!':   3,      // bitwise XOR (added by MACRO-10 sometime between the 1972 and 1978 versions)
         '&':    4,      // bitwise AND
         '!=':   5,      // inequality
         '==':   5,      // equality
@@ -1070,9 +1180,10 @@ if (DEBUGGER) {
         '%':    9,      // remainder
         '/':    9,      // division
         '*':    9,      // multiplication
-        '><':   10,     // internal binary shift operator (MACRO-10-style; converted from a 'B' suffix)
-        '{':    11,     // open sub-expression (achGroup[0] default)
-        '}':    11      // close sub-expression (achGroup[1] default)
+        '_':    10,     // MACRO-10 shift operator
+        '^_':   10,     // MACRO-10 internal shift operator (converted from 'B' suffix form that MACRO-10 uses)
+        '{':    11,     // open grouped expression (achGroup[0] default)
+        '}':    11      // close grouped expression (achGroup[1] default)
     };
 
     /*

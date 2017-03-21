@@ -1,11 +1,11 @@
 ---
 layout: page
-title: PDP-10 Diagnostics
+title: DEC PDP-10 Diagnostics
 permalink: /apps/pdp10/diags/
 ---
 
-PDP-10 Diagnostics
-------------------
+DEC PDP-10 Diagnostics
+----------------------
 
 PCjs has archived the following PDP-10 diagnostics:
 
