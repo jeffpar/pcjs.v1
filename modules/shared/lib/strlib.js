@@ -179,7 +179,7 @@ class Str {
     }
 
     /**
-     * toBase(n, radix, cch, sPrefix, grouping)
+     * toBase(n, radix, cch, sPrefix, nGrouping)
      *
      * Displays the given number as an unsigned integer using the specified radix and number of digits.
      *
@@ -187,10 +187,10 @@ class Str {
      * @param {number} radix (ie, the base)
      * @param {number} cch (the desired number of digits)
      * @param {string} [sPrefix] (default is none)
-     * @param {number} [grouping]
+     * @param {number} [nGrouping]
      * @return {string}
      */
-    static toBase(n, radix, cch, sPrefix = "", grouping = -1)
+    static toBase(n, radix, cch, sPrefix = "", nGrouping = 0)
     {
         /*
          * An initial "falsey" check for null takes care of both null and undefined;
@@ -222,11 +222,11 @@ class Str {
                 cch = Math.ceil(Math.log(n) / Math.log(radix));
             }
         }
-        var g = grouping;
+        var g = nGrouping || -1;
         while (cch-- > 0) {
             if (!g) {
                 s = ',' + s;
-                g = grouping;
+                g = nGrouping;
             }
             if (n == null) {
                 s = '?' + s;
@@ -242,16 +242,16 @@ class Str {
     }
 
     /**
-     * toBin(n, cch, grouping)
+     * toBin(n, cch, nGrouping)
      *
      * Converts an integer to binary, with the specified number of digits (up to a maximum of 36).
      *
      * @param {number|null|undefined} n (supports integers up to 36 bits now)
      * @param {number} [cch] is the desired number of binary digits (0 or undefined for default of either 8, 18, or 36)
-     * @param {number} [grouping]
+     * @param {number} [nGrouping]
      * @return {string} the binary representation of n
      */
-    static toBin(n, cch, grouping)
+    static toBin(n, cch, nGrouping)
     {
         if (!cch) {
             // cch = Math.ceil(Math.log(Math.abs(n) + 1) / Math.LN2) || 1;
@@ -264,7 +264,7 @@ class Str {
                 cch = 36;
             }
         } else if (cch > 36) cch = 36;
-        return Str.toBase(n, 2, cch, "", grouping);
+        return Str.toBase(n, 2, cch, "", nGrouping);
     }
 
     /**

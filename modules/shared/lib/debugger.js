@@ -673,6 +673,9 @@ class Debugger extends Component
                         continue;
                     }
                     if (!(nUnary & (0xC0000000|0))) {
+                        if (sOp == '+') {
+                            continue;
+                        }
                         if (sOp == '-') {
                             nUnary = (nUnary << 2) | 1;
                             continue;
@@ -1020,9 +1023,9 @@ class Debugger extends Component
         if (value !== undefined) {
             fDefined = true;
             if (this.nBase == 8) {
-                sValue = value + ". " + Str.toOct(value, 0, true);
+                sValue = this.toStrBase(value, this.nBits, 8, 1) + "  " + value + '.';
             } else {
-                sValue = Str.toHex(value, 0, true) + " " + value + ". " + Str.toOct(value, 0, true) + "  " + Str.toBinBytes(value, 4, true);
+                sValue = this.toStrBase(value, this.nBits, 16, 1) + "  " + this.toStrBase(value, this.nBits, 8, 1) + "  " + this.toStrBase(value, this.nBits, 2, this.nBits <= 32? 8 : 6) + "  " + value + '.';
             }
             if (value >= 0x20 && value < 0x7F) {
                 sValue += " '" + String.fromCharCode(value) + "'";
@@ -1113,24 +1116,26 @@ class Debugger extends Component
     }
 
     /**
-     * toStrBase(n, nBits)
+     * toStrBase(n, nBits, nBase, nGrouping)
      *
      * Use this instead of Str's toOct()/toDec()/toHex() to convert numbers to the Debugger's default base.
      *
      * @this {Debugger}
      * @param {number|null|undefined} n
      * @param {number} [nBits] (-1 to strip leading zeros, 0 to allow a variable number of digits)
+     * @param {number} [nBase]
+     * @param {number} [nGrouping] (if nBase is 2, this is a grouping; otherwise, it's a prefix condition)
      * @return {string}
      */
-    toStrBase(n, nBits = 0)
+    toStrBase(n, nBits = 0, nBase = 0, nGrouping = 0)
     {
         var s;
-        switch(this.nBase) {
+        switch(nBase || this.nBase) {
         case 2:
-            s = Str.toBin(n, nBits > 0? nBits : 0);
+            s = Str.toBin(n, nBits > 0? nBits : 0, nGrouping);
             break;
         case 8:
-            s = Str.toOct(n, nBits > 0? ((nBits + 2)/3)|0 : 0);
+            s = Str.toOct(n, nBits > 0? ((nBits + 2)/3)|0 : 0, !!nGrouping);
             break;
         case 10:
             /*
@@ -1140,7 +1145,7 @@ class Debugger extends Component
             break;
         case 16:
         default:
-            s = Str.toHex(n, nBits > 0? ((nBits + 3) >> 2) : 0);
+            s = Str.toHex(n, nBits > 0? ((nBits + 3) >> 2) : 0, !!nGrouping);
             break;
         }
         return (nBits < 0? Str.stripLeadingZeros(s) : s);

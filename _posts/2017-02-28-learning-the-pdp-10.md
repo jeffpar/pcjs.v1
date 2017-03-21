@@ -5,14 +5,15 @@ date: 2017-02-28 22:00:00
 permalink: /blog/2017/02/28/
 ---
 
-Since I've more or less achieved all my goals for the PCjs [PDP-11 Emulator](/devices/pdp11/machine/), I've decided
-to turn my attention to an even older historically important DEC computer: the [PDP-10](https://en.wikipedia.org/wiki/PDP-10#Cancellation_and_influence).  
+Since I've more or less achieved all my goals for the PCjs [PDP-11 Emulator](/devices/pdp11/machine/),
+I've decided to turn my attention to an even older historically important DEC computer:
+the [PDP-10](https://en.wikipedia.org/wiki/PDP-10#Cancellation_and_influence).  
 
 Having never used a real DEC PDP-10, I've had a steep learning curve creating a [PDP-10 Emulator](/modules/pdp10/).
 So far, the only [PDP-10 Hardware Documentation](/pubs/dec/pdp10/) I've read (or rather, skimmed) is the
 [PDP-10 System Reference Manual (1968)](http://archive.pcjs.org/pubs/dec/pdp10/ka10/DEC-10-HGAA-D_PDP-10_System_Reference_Manual_May1968.pdf).
 
-To make it easier to create and run some simple [PDP-10 Opcode Tests](/apps/pdp10/tests/), most of my initial development
+To make it easier to create and run some simple [PDP-10 Opcode Tests](/apps/pdp10/tests/opcodes/), most of my initial development
 efforts have centered on the built-in PDP-10 Debugger.  In addition to the usual disassembler capabilities, I've also included
 an assembler, so that I can easily enter instruction sequences like this:
 
@@ -34,7 +35,7 @@ and immediately see the corresponding opcodes:
 It's not a full-featured assembler; it's little more than a brute-force reverse look-up through the disassembler's
 opcode-to-mnemonic tables.  But it gets the job done.
 
-Next, I've written an initial set of [PDP-10 Opcode Tests](/apps/pdp10/tests/) and compared the results to those produced
+Next, I've written an initial set of [PDP-10 Opcode Tests](/apps/pdp10/tests/opcodes/) and compared the results to those produced
 by [SIMH](https://github.com/simh/simh), and so far, so good.  More than anything else, that's just a testament to DEC's
 excellent documentation.
 

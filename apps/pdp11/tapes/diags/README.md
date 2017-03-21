@@ -1,11 +1,11 @@
 ---
 layout: page
-title: DEC Paper Tape Diagnostics
+title: DEC PDP-11 Paper Tape Diagnostics
 permalink: /apps/pdp11/tapes/diags/
 ---
 
-Paper Tape Diagnostics
-----------------------
+PDP-11 Paper Tape Diagnostics
+-----------------------------
 
 Thanks to the [iamvirtual.ca](http://iamvirtual.ca/collection/systems/mediadoc/mediadoc.html#papertape)
 website, we have been able to archive the PDP-11 diagnostics shown below.  The tapes have been added to the

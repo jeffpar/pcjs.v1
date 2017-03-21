@@ -1,0 +1,184 @@
+---
+layout: post
+title: The MACRO-10 Assembler, 50 Years Later
+date: 2017-02-28 22:00:00
+permalink: /blog/2017/03/21/
+machines:
+  - id: testka10
+    type: pdp10
+    config: /devices/pdp10/machine/ka10/test/debugger/machine.xml
+    debugger: true
+    commands: a 30724 /apps/pdp10/diags/klad/dakaa/MYDAKAA.MAC
+---
+
+A few weeks ago, I finished my first cut of the *core* PDP-10 instructions in PDPjs.  Most of my remaining work
+falls into these categories:
+
+- UUOs (Unimplemented User Operations)
+- Floating-point instructions 
+- Input-Output instructions (eg, BLKI, BLKO, DATAI, DATAO)
+- Miscellaneous instructions (eg, variations of PUSH, POP, JUMP) 
+
+Floating-point is the biggest chunk of work, which I'm going to save for last, with the hope that most PDP-10 software
+didn't use floating-point.  However, if all PDP-10 systems included floating-point hardware (which I haven't been able to
+confirm yet), I may have no choice.  Floating-point emulation in JavaScript isn't hard -- PCjs already includes an
+[8087 Coprocessor Emulator](/modules/pcx86/lib/x86fpu.js) -- but getting all the details right is time-consuming.
+
+The PDP-10 has a lot of instructions, and I quickly had far more instructions than I was willing or able to write tests for.
+Besides, any tests I wrote would be based on the same potentially-flawed understandings that I had gleaned from DEC's
+[PDP-10 Hardware Documentation](/pubs/dec/pdp10/).  It was obvious that I needed to find a set of DEC PDP-10 diagnostics, much
+like the [DEC PDP-11 Paper Tape Diagnostics](/apps/pdp11/tapes/diags/) I had used to flush most of the early bugs out of my
+PDP-11 emulator.
+
+Unfortunately, this presented something of a chicken-and-egg problem, because the PDP-10 emulator is still too immature to
+support any simulated devices, even something as simple as paper tape.  However, since I did find a series of PDP-10 Model KA10
+diagnostics in [source code form](http://pdp-10.trailing-edge.com/klad_sources/), all I needed was some way to assemble those
+files into binaries that I could load directly in a PDPjs test machine.
+
+One solution would have been to run a TOPS-10 simulation using the SIMH emulator, assemble the desired tests inside that virtual
+machine, extract the binaries, and then load them into a PDPjs machine.  But that would have meant familiarizing myself with
+both SIMH and TOPS-10, and the process of editing, assembling, and transferring binaries to PDPjs would have been cumbersome at
+best.
+
+### Introducing the MACRO-10 "Mini-Assembler"
+
+I decided that the shortest turn-around from *assembly* phase to *run* phase (aka *crash-and-burn* phase) would be to
+assemble the files in PDPjs itself.  So the PDPjs MACRO-10 "Mini-Assembler" was born.  Any machine that includes the PDPjs
+Debugger (like the machine below) now includes MACRO-10 support as well.
+
+{% include machine.html id="testka10" %}
+
+The above machine uses the Debugger's assemble ('a') command to assemble DEC's "DAKAA" diagnostic
+[KA10 Basic Instruction Diagnostic](/apps/pdp10/diags/klad/dakaa/) and load the resulting code at address 30724:
+
+	a 30724 /apps/pdp10/diags/klad/dakaa/MYDAKAA.MAC
+
+The Debugger invokes the MACRO-10 mini-assembler whenever the argument following the target address appears to be a URL.
+
+As previously described in the section on [PDPjs PDP-10 Opcode Tests](/apps/pdp10/tests/opcodes/), the Debugger already
+allowed you to assemble instructions directly into memory (eg, `a 100 hrli 1,111111`).  This "immediate mode" feature is provided
+exclusively by the Debugger; MACRO-10 mini-assembler features are not available in that mode.
+
+However, one feature that *is* available in both the Debugger and the mini-assembler is full MACRO-10-style expression evaluation,
+since they share the same expression parser.  Here are some examples, using the Debugger's 'print' command:
+
+	>> print 27
+	23. 0o000027
+
+Both the Debugger and MACRO-10 start out by assuming a default base (radix) of 8, so the value "27" is evaluated as an octal
+number, and for convenience, the "print" command displays the result in both decimal and octal.  You can change the default base
+in the Debugger with the `s base` command (eg, `s base 10`), where the new base is always interpreted as a decimal number.
+This command differs from MACRO-10, which uses the `RADIX` pseudo-op to change the default base.
+
+Obviously, it would be nice if both the Debugger and the MACRO-10 mini-assembler used matching commands, but the PCjs debuggers
+were written before MACRO-10 support was a consideration, so for now, that's life.
+
+All of the MACRO-10-style base prefixes are supported (^D for decimal, ^B for binary, an ^O for octal):
+
+	>> print ^D27
+	0o000000000033  27.
+	
+	>> print ^B1001
+	0o000000000011  9.
+	
+	>> print ^O1001
+	0o000000001001  513.
+
+Expressions using angle brackets, another MACRO-10 convention, is also supported:
+
+	>> print ^D<45-22>
+	0o000000000027  23.
+
+Note that the base modifier (^D) applies to the entire expression.  You can also add MACRO-10 suffixes to integers:
+
+	K:  "kilo-", thousands
+	M:  "mega-", millions
+	G:  "giga-", billions
+	
+so:
+
+	>> print 5K
+	0o000000005000  2560.
+	
+	>> print ^D5K
+	0o000000011610  5000.
+
+Binary shifting using a B suffix is also supported:
+
+	>> print 1B0
+	0o400000000000  -34359738368.
+	
+	>> print 1B17
+	0o000001000000  262144.
+	
+	>> print 1B35
+	0o000000000001  1.
+	
+	>> print -1B35
+	0o777777777777  -1.
+	
+	>> print -1B53
+	0o000000777777  262143.
+	
+	>> print -1B70
+	0o000000000001  1.
+
+And as the MACRO-10 ASSEMBLER PROGRAMMER'S REFERENCE MANUAL (June 1972), p. 1-17, points out, all the following expressions are
+equivalent:
+
+	>> print 10B32
+	0o000000000100  64. '@'
+	
+	>> print ^O10B32
+	0o000000000100  64. '@'
+	
+	>> print 10B<42-10>
+	0o000000000100  64. '@'
+	
+	>> print 10B<^D<42-10>>
+	0o000000000100  64. '@'
+	
+	>> print 10B<^D42-^D10>
+	0o000000000100  64. '@'
+
+"Left arrow" shifting is also supported, although the character that the original MACRO-10 manuals referred to as a "left arrow"
+is actually an underscore; later manuals refer to this as "underscore shifting":
+
+	>> print 1_^D18
+	0o000001000000  262144.
+
+	>> print -1_^D-18
+	0o000000777777  262143.
+
+Character-based constants are also supported, in the both 7-bit ASCII the 6-bit SIXBIT formats.  Use double-quotes 
+for 7-bit right-justified character constants and single-quotes for 6-bit right-justified character constants:
+
+	>> print +'SIXBIT'
+	0o635170425164  -13255955852.
+
+	>> print +"HELLO"
+	0o221054623117  19473311311.
+
+NOTE: When using the PCjs debugger, the constant must be preceded by an arithmetic operator, otherwise it interprets the
+quoted argument as a string.  This is an idiosyncrasy of the "print" command, not the expression parser.
+
+All MACRO-10 logical and arithmetic operators are supported, including:
+
+- Unary arithmetic operators (+ and -)
+- Unary complement operator (^-, aliased to ~)
+- Unary base overrides (^D, ^O, and ^B)
+- Binary shifting (B) and underscore shifting (_) operators
+- Logical binary operations (! for OR, ^! for XOR, and & for AND)
+- Multiplication and division (* and /)
+- Addition and subtraction (+ and -)
+- Angle brackets for expression grouping (< and >)
+
+Much more work is needed to make the MACRO-10 "Mini-Assembler" a general-purpose assembler, but it's already proved itself
+useful in assembling the following tests:
+
+- [KA10 Basic Instruction Diagnostic #1](/apps/pdp10/diags/klad/dakaa/)
+- [KA10 Basic Instruction Diagnostic #4](/apps/pdp10/diags/klad/dakad/)
+- [Assorted MACRO-10 Mini-Assembler Tests](/apps/pdp10/tests/macro10/)
+
+*[@jeffpar](http://twitter.com/jeffpar)*
+*Mar 21, 2017*
