@@ -548,7 +548,7 @@ class Macro10 {
             this.parseText(macro.sText, macro.aParms, macro.aValues, macro.aDefaults);
             /*
              * WARNING: Our simplistic approach to macro expansion and processing means that recursive macros
-             * (such as the SHIFT macro contained in /apps/pdp10/tests/MACTEST1.MAC) could blow the stack.  Nothing
+             * (such as the SHIFT macro contained in /apps/pdp10/tests/macro10/TEXT.MAC) could blow the stack.  Nothing
              * bad should happen (other than a JavaScript stack limit exception aborting the assembly), but it begs
              * the question: did MACRO-10 perform any tail recursion optimizations or other tricks to prevent macros
              * from running amok?
