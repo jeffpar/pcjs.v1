@@ -21,7 +21,7 @@ falls into these categories:
 
 Floating-point is the biggest chunk of work, which I'm going to save for last, with the hope that most PDP-10 software
 didn't use floating-point.  However, if all PDP-10 systems included floating-point hardware (which I haven't been able to
-confirm yet), I may have no choice.  Floating-point emulation in JavaScript isn't hard -- PCjs already includes an
+confirm yet), I may have no choice.  Floating-point emulation in JavaScript isn't hard -- PCjs already includes
 [8087 Coprocessor Emulation](/modules/pcx86/lib/x86fpu.js) -- but getting all the details right is time-consuming.
 
 The PDP-10 has a lot of instructions, and I quickly had far more instructions than I was willing or able to write tests for.
@@ -150,7 +150,7 @@ is actually an underscore; later manuals refer to this as "underscore shifting":
 	>> print -1_^D-18
 	0o000000777777  262143.
 
-Character-based constants are also supported, in the both 7-bit ASCII the 6-bit SIXBIT formats.  Use double-quotes 
+Character-based constants are also supported, in both the 7-bit ASCII and 6-bit SIXBIT formats.  Use double-quotes 
 for 7-bit right-justified character constants and single-quotes for 6-bit right-justified character constants:
 
 	>> print +'SIXBIT'
