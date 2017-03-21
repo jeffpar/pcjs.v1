@@ -43,8 +43,8 @@ best.
 ### Introducing the MACRO-10 "Mini-Assembler"
 
 I decided that the shortest turn-around from *assembly* phase to *run* phase (aka *crash-and-burn* phase) would be to
-assemble the files in PDPjs itself.  So the PDPjs MACRO-10 "Mini-Assembler" was born.  Any machine that includes the PDPjs
-Debugger (like the machine below) now includes MACRO-10 support as well.
+assemble the files in PDPjs itself.  So the PDPjs [MACRO-10 "Mini-Assembler"](/modules/pdp10/lib/macro10.js) was born.
+Any machine that includes the PDPjs Debugger (like the machine below) now includes MACRO-10 support as well.
 
 {% include machine.html id="testka10" %}
 
