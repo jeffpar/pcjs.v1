@@ -183,16 +183,23 @@ Use double-quotes for ASCII constants and single-quotes for SIXBIT constants:
 NOTE: When using the PCjs debugger, the constant must be preceded by an arithmetic operator (eg, '+'), otherwise it interprets
 the quoted argument as a string.  This is an idiosyncrasy of the "print" command, not the expression parser.
 
-All MACRO-10 logical and arithmetic operators are supported, including:
+Most MACRO-10 logical and arithmetic operators are supported, including:
 
 - Unary arithmetic operators (+ and -)
 - Unary complement operator (^-, aliased to ~)
 - Unary base overrides (^D, ^O, and ^B)
+- Unary zero-bit-count operator (^L)
 - Binary shifting (B) and underscore shifting (_) operators
 - Logical binary operations (! for OR, ^! for XOR, and & for AND)
 - Multiplication and division (* and /)
 - Addition and subtraction (+ and -)
 - Angle brackets for expression grouping (< and >)
+
+Unfortunately, since the PCjs expression parser predates MACRO-10 support, there are bound to be differences that I
+haven't ironed out yet.  One known difference involves numeric constants with a trailing period (decimal point): PCjs
+historically treats such constants as decimal *integers*, whereas MACRO-10 treats numeric constants with either a
+leading, embedded, or trailing period as a decimal *floating-point* number.  I've chosen to ignore this difference for
+now, since I'm holding off on all floating-point support for as long as possible.
 
 Much more work is needed to make the MACRO-10 "Mini-Assembler" a general-purpose assembler, but it's already proved itself
 useful in assembling the following tests:
