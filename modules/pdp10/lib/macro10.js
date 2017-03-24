@@ -288,7 +288,7 @@ class Macro10 {
         /*
          * We know that local resources ending with ".MAC" are actually stored with a ".txt" extension.
          */
-        if (sURL[0] == '/' && sURL.slice(-4) == ".MAC") sURL += ".txt";
+        if (sURL.slice(-4).toUpperCase() == ".MAC") sURL += ".txt";
 
         Web.getResource(sURL, null, true, function processMacro10(sFile, sResource, nErrorCode) {
             if (nErrorCode) {
