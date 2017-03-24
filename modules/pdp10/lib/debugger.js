@@ -1756,9 +1756,11 @@ class DebuggerPDP10 extends Debugger {
                         }
                         continue;
                     }
-                    if (operand < 0 || operand > PDP10.OPCODE.Y_MASK) {
-                        operand &= PDP10.ADDR_MASK;
-                        if (MAXDEBUG) this.println("address (" + sOperand + ") truncated to " + this.toStrBase(operand));
+                    if (sOpcode) {
+                        if (operand < 0 || operand > PDP10.OPCODE.Y_MASK) {
+                            operand &= PDP10.ADDR_MASK;
+                            if (MAXDEBUG) this.println("address (" + sOperand + ") truncated to " + this.toStrBase(operand));
+                        }
                     }
                     opCode += operand;
                     sOperand = match[3];

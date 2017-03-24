@@ -32,7 +32,7 @@ The Debugger's assemble ("a") command can be used to test the new built-in
 of the [MACRO-10](http://archive.pcjs.org/pubs/dec/pdp10/tops10/02_1973AsmRef_macro.pdf) assembly language.
 This command:
 
-	a 30724 /apps/pdp10/diags/klad/dakaa/TEST.MAC
+	a 30724 /apps/pdp10/diags/klad/dakaa/MYDAKAA.MAC
 
 will automatically read the [MYDAKAA.MAC](MYDAKAA.MAC.txt) source file (a slightly modified copy of [DAKAA.MAC](DAKAA.MAC.txt)),
 assemble it, and then load the binary output at the specified address.

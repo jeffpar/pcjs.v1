@@ -68,18 +68,29 @@ var Mac;
 var Sym;
 
 /**
- *
- * Elements of aFixups.
- *
- * NOTE: The nLine property is not required; it's added for improved error reporting.
+ * Elements of aLiterals.
  *
  * @typedef {{
+ *      name:(string),
+ *      aWords:(Array.<number>),
+ *      aFixups:(Array.<string>)
+ * }}
+ */
+var Lit;
+
+/**
+ * Elements of stackScopes.
+ *
+ * @typedef {{
+ *      name:(string),
+ *      aWords:(Array.<number>),
+ *      aFixups:(Array.<string>),
  *      nLocation:(number),
- *      sValue:(string),
+ *      nLocationScope:(number),
  *      nLine:(number)
  * }}
  */
-var Fixup;
+var Scope;
 
 /**
  * @class Macro10
@@ -169,27 +180,51 @@ class Macro10 {
         this.tblSymbols = {};
 
         /**
-         * @type {Array.<string>}
+         * @type {Array.<Lit>}
+         */
+        this.aLiterals = [];            // array of literals
+
+        /**
+         * This keeps track of symbols suffixed with '#', which are later assembled into a variable pool,
+         * following the literal pool.
          *
-         * This array is mostly a convenience; we could also enumerate all the literals by walking tblMacros
-         * and looking for elements with MACRO_OP.LITERAL, but the ordering wouldn't necessarily match the order
-         * in which the literals were defined.
+         * @type {Array.<string>}
          */
-        this.aLiterals = [];
+        this.aVariables = [];
 
         /**
-         * @type {Array.<Fixup>}
-         */
-        this.aFixups = [];
-
-        /**
-         * @type {Array.<number|undefined>}
+         * @type {Array.<number>}
          */
         this.aWords = [];               // filled in by the various genXXX() functions
 
+        /**
+         * This sparse array is indexed by location, and each used entry contains an undefined symbol that
+         * must be evaluated to fully resolve the word at the corresponding location.  NOTE: There's no requirement
+         * that the array be sparse; we could certainly fill each unused entry with null (ie, for locations that
+         * don't require a fixup).
+         *
+         * @type {Array.<string>}
+         */
+        this.aFixups = [];
+
         this.nLine = 0;
         this.nError = 0;
+        this.nLiteral = 0;              // used to uniquely number literals
+
+        /**
+         * @type {number}
+         */
         this.nLocation = this.nAddr;    // advanced by the various genXXX() functions
+
+        /**
+         * @type {number}
+         */
+        this.nLocationScope = -1;
+
+        /**
+         * @type {Array.<Scope>}
+         */
+        this.stackScopes = [];
 
         this.sOperator = null;          // the active operator, if any
         this.nMacroDef = 0;             // the active macro definition state
@@ -309,8 +344,7 @@ class Macro10 {
 
         var a = this.dbg.resetVariables();
         try {
-            var i;
-            for (i = 0; i < this.asLines.length; i += 2) {
+            for (let i = 0; i < this.asLines.length; i += 2) {
                 this.nLine++;
                 /*
                  * Since, at this early stage, I'm not sure whether all the resources I'm interested in
@@ -330,24 +364,42 @@ class Macro10 {
                 this.error("open block from line " + this.tblMacros[this.sMacroDef].nLine);
             }
 
-            for (i = 0; i < this.aLiterals.length; i++) {
-                var name = this.aLiterals[i];
-                var macro = this.tblMacros[name];
+            if (this.stackScopes.length) {
+                this.error("open scope from line " + this.stackScopes[0].nLine);
+            }
+
+            for (let i = 0; i < this.aLiterals.length; i++) {
+                let lit = this.aLiterals[i];
+                this.addSymbol(lit.name, this.nLocation, Macro10.SYMTYPE.LABEL);
+                lit.aWords.forEach(function(w, nLocation) {
+                    macro10.genWord(w, lit.aFixups[nLocation]);
+                });
+
+                /*
+                 * TODO: Add support for "literal collapsing"; ie, if two or more literals generate the same
+                 * set of values, then all instances after the first should refer back to the first (subject to
+                 * exceptions identified by MACRO-10: eg, "literals that contain errors, undefined expressions,
+                 * or EXTERNAL symbols.")
+                 */
+            }
+
+            for (let i = 0; i < this.aVariables.length; i++) {
+                let name = this.aVariables[i];
+                let macro = this.tblMacros[name];
                 if (!macro) {
                     /*
                      * This is more of an assert(), because it should never happen, regardless of input.
                      */
-                    this.error("missing definition for literal: " + name);
+                    this.error("missing definition for variable: " + name);
                     continue;
                 }
                 this.parseText(macro.sText);
             }
 
-            this.aFixups.forEach(function processFixup(fixup){
-                var nLocation = fixup.nLocation;
-                var value = macro10.parseExpression(fixup.sValue, undefined, nLocation);
+            this.aFixups.forEach(function processFixup(sValue, nLocation){
+                let value = macro10.parseExpression(sValue, undefined, nLocation);
                 if (value === undefined) {
-                    macro10.error("unable to parse expression: " + fixup.sValue);
+                    macro10.error("unable to parse expression: " + sValue);
                     return;
                 }
                 value += macro10.aWords[nLocation];
@@ -473,7 +525,7 @@ class Macro10 {
          */
         var sLiteral = this.getLiteral(sOperands);
         if (sLiteral) {
-            sOperands = sOperands.replace(sLiteral, this.addMacro(Macro10.PSEUDO_OP.LITERAL, sLiteral));
+            sOperands = sOperands.replace(sLiteral, this.addMacro(Macro10.PSEUDO_OP.LITERAL, this.getLiteral(sRemainder)));
         }
 
         /*
@@ -528,6 +580,23 @@ class Macro10 {
     }
 
     /**
+     * parseLiteral(name, sText)
+     *
+     * This is like parseText() except that we first set up a new scope, which includes new aWords and aFixups
+     * arrays.
+     *
+     * @this {Macro10}
+     * @param {string} name
+     * @param {string} sText
+     */
+    parseLiteral(name, sText)
+    {
+        this.pushScope(name);
+        this.parseText(sText);
+        this.popScope();
+    }
+
+    /**
      * parseMacro(name, sOperands)
      *
      * @this {Macro10}
@@ -548,10 +617,10 @@ class Macro10 {
             this.parseText(macro.sText, macro.aParms, macro.aValues, macro.aDefaults);
             /*
              * WARNING: Our simplistic approach to macro expansion and processing means that recursive macros
-             * (such as the SHIFT macro contained in /apps/pdp10/tests/macro10/TEXT.MAC) could blow the stack.  Nothing
-             * bad should happen (other than a JavaScript stack limit exception aborting the assembly), but it begs
+             * (such as the SHIFT macro in /apps/pdp10/tests/macro10/TEXT.MAC) could blow the stack.  Nothing bad
+             * should happen (other than a JavaScript stack limit exception aborting the assembly), but it begs
              * the question: did MACRO-10 perform any tail recursion optimizations or other tricks to prevent macros
-             * from running amok?
+             * from running amok, or could they blow MACRO-10's stack just as easily?
              */
             this.macroCall = macroPrev;
             return true;
@@ -559,7 +628,9 @@ class Macro10 {
 
         if (name[0] != '?') return false;
 
-        switch(name.substr(1)) {
+        var sOperator = name.substr(1);
+
+        switch(sOperator) {
         case Macro10.PSEUDO_OP.IFE:
             if (!macro.nOperand) {
                 this.parseText(macro.sText);
@@ -586,21 +657,10 @@ class Macro10 {
             break;
 
         default:
-            return false;
+            this.parseLiteral(name, macro.sText);
+            break;
         }
         return true;
-    }
-
-    /**
-     * isSymbolChar(ch)
-     *
-     * @this {Macro10}
-     * @param {string} ch
-     * @return {boolean}
-     */
-    isSymbolChar(ch)
-    {
-        return !!ch.match(/[0-9A-Z$%.]/i);
     }
 
     /**
@@ -622,6 +682,47 @@ class Macro10 {
     }
 
     /**
+     * pushScope(name)
+     *
+     * @this {Macro10}
+     * @param {string} name
+     */
+    pushScope(name)
+    {
+        this.stackScopes.push(
+            {name, aWords: this.aWords, aFixups: this.aFixups, nLocation: this.nLocation, nLocationScope: this.nLocationScope, nLine: this.nLine}
+        );
+        this.aWords = [];
+        this.aFixups = [];
+        this.nLocationScope = this.nLocation;
+        this.nLocation = 0;
+    }
+
+    /**
+     * popScope()
+     *
+     * @this {Macro10}
+     */
+    popScope()
+    {
+        if (!this.stackScopes.length) {
+            this.error("scope nesting error");
+            return;
+        }
+        var name = this.stackScopes[this.stackScopes.length - 1].name;
+        this.aLiterals.push({name, aWords: this.aWords, aFixups: this.aFixups});
+        var scope = this.stackScopes.pop();
+        this.aWords = scope.aWords;
+        this.aFixups = scope.aFixups;
+        this.nLocation = scope.nLocation;
+        this.nLocationScope = scope.nLocationScope;
+        if (!this.stackScopes.length && this.nLocationScope != -1) {
+            this.error("scope restore error");
+        }
+    }
+
+
+    /**
      * error(sError)
      *
      * @this {Macro10}
@@ -641,6 +742,18 @@ class Macro10 {
     warning(sWarning)
     {
         this.println("warning" + (this.nLine? " at line " + Str.toDec(this.nLine) : "") + ": " + sWarning);
+    }
+
+    /**
+     * isSymbolChar(ch)
+     *
+     * @this {Macro10}
+     * @param {string} ch
+     * @return {boolean}
+     */
+    isSymbolChar(ch)
+    {
+        return !!ch.match(/[0-9A-Z$%.]/i);
     }
 
     /**
@@ -709,7 +822,7 @@ class Macro10 {
          */
         var match = sOperand.match(/^([^,]*),,([^,]*)$/);
         if (!match) {
-            if (nLocation === undefined) nLocation = this.nLocation;
+            if (nLocation === undefined) nLocation = (this.nLocationScope >= 0? this.nLocationScope : this.nLocation);
             /*
              * Check for the "period" syntax that MACRO-10 uses to represent the value of the current location.
              * The Debugger's parseInstruction() method understands that syntax, but its parseExpression() method
@@ -747,26 +860,30 @@ class Macro10 {
      *
      * @this {Macro10}
      * @param {string} sOperands
-     * @return {string|null} (if the operands contain a literal, return it)
+     * @return {string} (if the operands contain a literal, return it)
      */
     getLiteral(sOperands)
     {
         var cNesting = 0;
-        var sLiteral = null;
-        var i = 0, iLiteral = -1;
+        var sLiteral = "";
+        var i = 0, iBegin = -1, iEnd = sOperands.length;
         while (i < sOperands.length) {
             var ch = sOperands[i];
+            if (ch == ';') break;
             if (ch == '[') {
-                if (!cNesting++) iLiteral = i;
+                if (!cNesting++) iBegin = i;
             }
             i++;
-            if (ch == ']' && --cNesting <= 0) break;
+            if (ch == ']' && --cNesting <= 0) {
+                iEnd = i;
+                break;
+            }
         }
         if (cNesting < 0) {
             this.error("missing bracket(s): " + sOperands);
         }
-        if (iLiteral >= 0) {
-            sLiteral = sOperands.substr(iLiteral, i - iLiteral);
+        if (iBegin >= 0) {
+            sLiteral = sOperands.substr(iBegin, iEnd - iBegin);
         }
         return sLiteral;
     }
@@ -825,17 +942,24 @@ class Macro10 {
                 sText: sLabel + ": 0",
                 nLine: this.nLine
             };
-            this.aLiterals.push(name);
+            this.aVariables.push(name);
         }
         return sReserved;
     }
 
+    /**
+     * getSymbol(sOperands)
+     *
+     * Check the operands for a symbol.  TODO: Use this method?
+     *
+     * @this {Macro10}
+     * @param {string} sOperands
+     * @return {string|null} (if the operands contain a symbol, return it)
+     */
     getSymbol(sOperands)
     {
-        var match;
-        if (match = sOperands.match(/([A-Z$%.][0-9A-Z$%.]*)/i)) {
-            return match[1];
-        }
+        var match = sOperands.match(/([A-Z$%.][0-9A-Z$%.]*)/i);
+        return match && match[1] || null;
     }
 
     /**
@@ -948,13 +1072,12 @@ class Macro10 {
              */
             this.chMacroOpen = '[';
             this.chMacroClose = ']';
-            name = '?' + Str.toDec(this.nLocation, 5);
+            name = '?' + Str.toDec(++this.nLiteral, 5);
             if (this.tblMacros[name] !== undefined) {
                 this.error("literal symbol redefined: " + name);
             }
-            match = [sOperands[0], name + ": " + sOperands.substr(1)];
+            match = [sOperands[0], sOperands.substr(1)];
             nOperand = Macro10.MACRO_OP.LITERAL;
-            this.aLiterals.push(name);
             iMatch = 0;
         }
         else if (sOperator == Macro10.PSEUDO_OP.IRP || sOperator == Macro10.PSEUDO_OP.IRPC) {
@@ -1141,20 +1264,21 @@ class Macro10 {
      */
     addWord(sOperator, sOperands)
     {
-        var w;
-        var sExp = sOperator + ' ' + sOperands;
-        if (sExp.indexOf(",,") >= 0 || !sOperator && sExp.indexOf('@') < 0 && sExp.indexOf('(') < 0) {
-            w = this.parseExpression(sExp, true);
-        } else {
+        var w = -1;
+        var sExp = (sOperator + ' ' + sOperands).trim();
+
+        if (sOperands.indexOf(",,") < 0) {
             w = this.dbg.parseInstruction(sOperator, sOperands, this.nLocation, true);
             if (w < 0) {
                 /*
                  * MACRO-10 also allows instructions to be assembled without an opcode (ie, just an address reference).
                  */
                 w = this.dbg.parseInstruction("", sExp, this.nLocation, true);
-                if (w < 0) w = undefined;
             }
         }
+
+        if (w < 0) w = this.parseExpression(sExp, true);
+
         if (w !== undefined) {
             this.genWord(w, this.dbg.sUndefined);
         } else {
@@ -1228,12 +1352,12 @@ class Macro10 {
      *
      * @this {Macro10}
      * @param {number} value (default value for the current location)
-     * @param {string|null} [sFixup] (optional fixup value to evaluate later)
+     * @param {string|null|undefined} [sFixup] (optional fixup value to evaluate later)
      */
     genWord(value, sFixup)
     {
         this.aWords[this.nLocation] = this.truncate(value);
-        if (sFixup != null) this.aFixups.push({nLocation: this.nLocation, sValue: sFixup, nLine: this.nLine});
+        if (sFixup != null) this.aFixups[this.nLocation] = sFixup;
         this.nLocation++;
     }
 
@@ -1286,7 +1410,7 @@ Macro10.PSEUDO_OP = {
     IFN:        "IFN",
     IRP:        "IRP",
     IRPC:       "IRPC",
-    LITERAL:    "LITERAL",
+    LITERAL:    "LITERAL",      // this is a pseudo-pseudo-op, used for internal purposes
     PAGE:       "PAGE",
     REPEAT:     "REPEAT",
     SIXBIT:     "SIXBIT",

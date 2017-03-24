@@ -1,4 +1,4 @@
-; From the MACR0-10 ASSEMBLER PROGRAMMER'S REFERENCE MANUAL (June 1972):
+; From the MACRO-10 ASSEMBLER PROGRAMMER'S REFERENCE MANUAL (June 1972), p. 7-9:
 ;
 ;	Example 4 (Figure 7-4) shows nested macros which use IRPC.  The desired operation
 ;	is to take an ASCII text string and store the characters four per word, left-justified,

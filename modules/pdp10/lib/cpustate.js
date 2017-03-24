@@ -922,6 +922,11 @@ class CPUStatePDP10 extends CPUPDP10 {
             if (op >= 0) {
                 this.opDecode(op);
             }
+            /*
+             * TODO: This is a temporary cycle charge, required for CPU operational bookkeeping until we add
+             * correct cycle counts for all instructions.
+             */
+            this.nStepCycles--;
 
         } while (this.nStepCycles > 0);
 

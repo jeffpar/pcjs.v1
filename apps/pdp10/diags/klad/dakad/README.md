@@ -32,7 +32,7 @@ The Debugger's assemble ("a") command can be used to test the new built-in
 of the [MACRO-10](http://archive.pcjs.org/pubs/dec/pdp10/tops10/02_1973AsmRef_macro.pdf) assembly language.
 This command:
 
-	a 30724 /apps/pdp10/diags/klad/dakad/TEST.MAC
+	a 30724 /apps/pdp10/diags/klad/dakad/MYDAKAD.MAC
 
 will automatically read the [MYDAKAD.MAC](MYDAKAD.MAC.txt) source file (a slightly modified copy of [DAKAD.MAC](DAKAD.MAC.txt)),
 assemble it, and then load the binary output at the specified address.  Use the command `db 30724` to dump the first few words
