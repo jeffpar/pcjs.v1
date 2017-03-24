@@ -1703,6 +1703,14 @@ class DebuggerPDP10 extends Debugger {
                 }
                 if (opCode >= 0) break;
             }
+            /*
+             * MACRO-10 also allows instructions to be assembled without an opcode (ie, just an address reference),
+             * so we'll give that a try next.
+             */
+            if (opCode < 0) {
+                sOperands = sOpcode + sOperands;
+                opCode = 0;
+            }
         }
 
         if (opCode >= 0) {

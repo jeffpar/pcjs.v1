@@ -7,7 +7,7 @@ machines:
     type: pdp10
     config: /devices/pdp10/machine/ka10/test/debugger/machine.xml
     debugger: true
-    commands: a 100 /apps/pdp10/tests/macro10/LITNEST.MAC
+    commands: a 100 /apps/pdp10/tests/macro10/TEXT.MAC
 ---
 
 PDPjs MACRO-10 Mini-Assembler Tests

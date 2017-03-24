@@ -230,7 +230,17 @@ class Macro10 {
         this.nMacroDef = 0;             // the active macro definition state
         this.sMacroDef = null;          // the active macro definition name
         this.chMacroOpen = this.chMacroClose = '';
-        this.reLine = /\s*([A-Z$%.?][0-9A-Z$%.]*:|)\s*([A-Z$%.][0-9A-Z$%.]*|)\s*([^;]+|)(;?[\s\S]*)/i;
+
+        /*
+         * This regular expression breaks each MACRO-10 line into the following elements:
+         *
+         *      [1]: label (with trailing semicolon), if any
+         *      [2]: operator (eg, opcode mnemonic or pseudo-op), if any
+         *      [3]: operator/operand whitespace separator, if any
+         *      [4]: operand(s), if any
+         *      [5]: comment, if any
+         */
+        this.reLine = /^\s*([A-Z$%.?][0-9A-Z$%.]*:|)\s*([A-Z$%.][0-9A-Z$%.]*|)(\s*)([^;]+|)(;?[\s\S]*)/i;
 
         this.macroCall = null;          // the active macro being called, if any
 
@@ -448,11 +458,11 @@ class Macro10 {
         }
 
         var fParse = true;
-        var sLabel, sOperator = "", sOperands, sRemainder;
+        var sLabel, sOperator = "", sSeparator, sOperands, sRemainder;
 
         while (fParse) {
             var matchLine = sLine.match(this.reLine);
-            if (!matchLine || matchLine[4] && matchLine[4].slice(0, 1) != ';') {
+            if (!matchLine || matchLine[5] && matchLine[5].slice(0, 1) != ';') {
                 this.error("failed to parse line: " + sLine);
                 return false;
             }
@@ -466,7 +476,7 @@ class Macro10 {
                     var sParm = aParms[iParm];
                     var sReplace = aValues[iParm] || aDefaults[iParm] || "";
                     var iSearch = 0;
-                    var iLimit = sLine.length - matchLine[4].length;    // set the limit at the start of the comment, if any
+                    var iLimit = sLine.length - matchLine[5].length;    // set the limit at the start of the comment, if any
                     while (iSearch < iLimit) {
                         var iMatch = sLine.indexOf(sParm, iSearch);
                         if (iMatch < 0) break;
@@ -490,8 +500,9 @@ class Macro10 {
         }
 
         sLabel = matchLine[1];
-        sOperands = matchLine[3].trim();
-        sRemainder = matchLine[3] + matchLine[4];
+        sSeparator = matchLine[3];
+        sOperands = matchLine[4].trim();
+        sRemainder = matchLine[4] + matchLine[5];
 
         if (sLabel) {
             sLabel = sLabel.slice(0, -1);
@@ -572,7 +583,7 @@ class Macro10 {
                 break;
 
             default:
-                this.addWord(sOperator, sOperands);
+                this.addWord(sOperator, sSeparator, sOperands);
                 break;
             }
         }
@@ -1256,25 +1267,21 @@ class Macro10 {
     }
 
     /**
-     * addWord(sOperator, sOperands)
+     * addWord(sOperator, sSeparator, sOperands)
      *
      * @this {Macro10}
      * @param {string} sOperator
+     * @param {string} sSeparator
      * @param {string} sOperands
      */
-    addWord(sOperator, sOperands)
+    addWord(sOperator, sSeparator, sOperands)
     {
         var w = -1;
-        var sExp = (sOperator + ' ' + sOperands).trim();
+
+        var sExp = (sOperator + sSeparator + sOperands).trim();
 
         if (sOperands.indexOf(",,") < 0) {
             w = this.dbg.parseInstruction(sOperator, sOperands, this.nLocation, true);
-            if (w < 0) {
-                /*
-                 * MACRO-10 also allows instructions to be assembled without an opcode (ie, just an address reference).
-                 */
-                w = this.dbg.parseInstruction("", sExp, this.nLocation, true);
-            }
         }
 
         if (w < 0) w = this.parseExpression(sExp, true);
