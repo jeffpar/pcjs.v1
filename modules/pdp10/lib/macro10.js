@@ -240,7 +240,7 @@ class Macro10 {
          *      [4]: operand(s), if any
          *      [5]: comment, if any
          */
-        this.reLine = /^\s*([A-Z$%.?][0-9A-Z$%.]*:|)\s*([A-Z$%.][0-9A-Z$%.]*|)(\s*)([^;]+|)(;?[\s\S]*)/i;
+        this.reLine = /^[ \t]*([A-Z$%.?][0-9A-Z$%.]*:|)[ \t]*([A-Z$%.][0-9A-Z$%.]*|)([ \t]*)([^;]+|)(;?[\s\S]*)/i;
 
         this.macroCall = null;          // the active macro being called, if any
 

@@ -1709,6 +1709,7 @@ class DebuggerPDP10 extends Debugger {
              */
             if (opCode < 0) {
                 sOperands = sOpcode + sOperands;
+                sOpcode = "";
                 opCode = 0;
             }
         }

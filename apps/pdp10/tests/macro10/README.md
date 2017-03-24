@@ -25,7 +25,7 @@ and pseudo-ops **IRPC**, **IFE**, **IFN**, and **EXP**.  It generates 4 words of
 
 {% include machine.html id="testka10" %}
 
-Assemble TEXT.MAC:
+Assemble [TEXT.MAC](TEXT.MAC.txt):
 
 	a 100 TEXT.MAC
 
@@ -48,7 +48,7 @@ Dump the 4 assembled words with the command `db 100 l4`:
 	000102: 110111 112113  022 004 111 024 045  ..I.%
 	000103: 114000 000000  023 000 000 000 000  .....
 
-Source code from TEXT.MAC:
+Source code from [TEXT.MAC](TEXT.MAC.txt):
  
 {% highlight text %}
 {% include_relative TEXT.MAC.txt %}
@@ -56,11 +56,11 @@ Source code from TEXT.MAC:
 
 ### Nested Literal Test
 
-Assemble NESTLIT.MAC:
+Assemble [NESTLIT.MAC](NESTLIT.MAC.txt):
 
     a 100 NESTLIT.MAC
  
-Source code from NESTLIT.MAC:
+Source code from [NESTLIT.MAC](NESTLIT.MAC.txt):
 
 {% highlight text %}
 {% include_relative NESTLIT.MAC.txt %}
