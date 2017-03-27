@@ -8,7 +8,7 @@ machines:
     type: pdp10
     config: /devices/pdp10/machine/ka10/test/debugger/machine.xml
     debugger: true
-    commands: a 30724 /apps/pdp10/diags/klad/dakaa/MYDAKAA.MAC
+    commands: a 30724 /apps/pdp10/diags/klad/dakaa/DAKAA.MAC
 ---
 
 A few weeks ago, I finished my first cut of the *core* PDP-10 instructions in PDPjs.  Most of my remaining work
@@ -51,7 +51,7 @@ Any machine that includes the PDPjs Debugger (like the machine below) now includ
 The above machine uses the Debugger's assemble ('a') command to assemble DEC's "DAKAA" diagnostic
 [KA10 Basic Instruction Diagnostic](/apps/pdp10/diags/klad/dakaa/) and load the resulting code at address 30724:
 
-	a 30724 /apps/pdp10/diags/klad/dakaa/MYDAKAA.MAC
+	a 30724 /apps/pdp10/diags/klad/dakaa/DAKAA.MAC
 
 The Debugger invokes the MACRO-10 mini-assembler whenever the target address is followed by an argument ending with ".MAC".
 
