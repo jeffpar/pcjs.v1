@@ -1,14 +1,14 @@
 ---
 layout: post
 title: The MACRO-10 Assembler, 50 Years Later
-date: 2017-02-28 22:00:00
+date: 2017-03-21 22:00:00
 permalink: /blog/2017/03/21/
 machines:
   - id: testka10
     type: pdp10
     config: /devices/pdp10/machine/ka10/test/debugger/machine.xml
     debugger: true
-    commands: a 30724 /apps/pdp10/diags/klad/dakaa/MYDAKAA.MAC
+    commands: a 30724 /apps/pdp10/diags/klad/dakaa/DAKAA.MAC
 ---
 
 A few weeks ago, I finished my first cut of the *core* PDP-10 instructions in PDPjs.  Most of my remaining work
@@ -51,9 +51,9 @@ Any machine that includes the PDPjs Debugger (like the machine below) now includ
 The above machine uses the Debugger's assemble ('a') command to assemble DEC's "DAKAA" diagnostic
 [KA10 Basic Instruction Diagnostic](/apps/pdp10/diags/klad/dakaa/) and load the resulting code at address 30724:
 
-	a 30724 /apps/pdp10/diags/klad/dakaa/MYDAKAA.MAC
+	a 30724 /apps/pdp10/diags/klad/dakaa/DAKAA.MAC
 
-The Debugger invokes the MACRO-10 mini-assembler whenever the argument following the target address appears to be a URL.
+The Debugger invokes the MACRO-10 mini-assembler whenever the target address is followed by an argument ending with ".MAC".
 
 As previously described in the section on [PDPjs PDP-10 Opcode Tests](/apps/pdp10/tests/opcodes/), the Debugger already
 allowed you to assemble instructions directly into memory (eg, `a 100 hrli 1,111111`).  This "immediate mode" feature is provided
@@ -73,7 +73,7 @@ This command differs from MACRO-10, which uses the `RADIX` pseudo-op to change t
 Obviously, it would be nice if both the Debugger and the MACRO-10 mini-assembler used matching commands, but the PCjs debuggers
 were written before MACRO-10 support was a consideration, so for now, that's life.
 
-All of the MACRO-10-style base prefixes are supported (^D for decimal, ^B for binary, an ^O for octal):
+All of the MACRO-10-style base prefixes are supported (**^D** for decimal, **^B** for binary, an **^O** for octal):
 
 	>> print ^D27
 	0o000000000033  27.
@@ -89,7 +89,7 @@ Expressions using angle brackets, another MACRO-10 convention, is also supported
 	>> print ^D<45-22>
 	0o000000000027  23.
 
-Note that the base modifier (^D) applies to the entire expression.  You can also add MACRO-10 suffixes to integers:
+Note that the base modifier (**^D**) applies to the entire expression.  You can also add MACRO-10 suffixes to integers:
 
 	K:  "kilo-", thousands
 	M:  "mega-", millions
@@ -118,8 +118,10 @@ so:
 Binary shifting using a **B** suffix is also supported.  Note that MACRO-10 binary shifting is a "bit" unusual by today's
 standards, because the value after the **B**, *n*, is not a count but rather the desired bit position of the right-most bit of
 the original value.  Moreover, MACRO-10 considers bit 0 the left-most bit, and bit 35 the right-most bit.  Last but not least,
-*n* is always interpreted as a decimal value, regardless of the current base (radix).  *n* can be converted to a shift count
-by calculating (35 - n): if the count is positive, it's a left-shift, and if it's negative, it's a right-shift. 
+*n* is always interpreted as a decimal value, regardless of the current base (radix).
+
+*n* can be converted to a shift count by calculating (35 - n): if the count is positive, it's a left-shift, and if it's negative,
+it's a right-shift.  Here are some examples: 
 
 	>> print 1B0
 	0o400000000000  -34359738368.
@@ -140,7 +142,7 @@ by calculating (35 - n): if the count is positive, it's a left-shift, and if it'
 	0o000000000001  1.
 
 And as the [MACRO-10 Assembler Programmer's Reference Manual (June 1972)](http://archive.pcjs.org/pubs/dec/pdp10/tops10/Macro_Assembler_Reference_Manual-Jun72.pdf),
-p. 1-17, points out, all the following expressions are equivalent:
+p. 1-17, points out, all of the following "binary shifting" expressions are equivalent:
 
 	>> print 10B32
 	0o000000000100  64. '@'
@@ -207,6 +209,81 @@ useful in assembling the following tests:
 - [KA10 Basic Instruction Diagnostic #1](/apps/pdp10/diags/klad/dakaa/)
 - [KA10 Basic Instruction Diagnostic #4](/apps/pdp10/diags/klad/dakad/)
 - [Assorted MACRO-10 Mini-Assembler Tests](/apps/pdp10/tests/macro10/)
+
+However, there's "*assembling*" and then there's "*assembling correctly*".  One early problem I had to immediately
+address was the handling of literals.  I was originally collecting all the literal (square-bracketed) expressions, like the
+**[ZZ]** in the following statement:
+
+	    MOVE    [ZZ]            ;MOVE THE CURRENT VALUE OF ZZ INTO E. ZZ IS NON-ZERO
+
+and processing them at the end of the first pass.  Well, since ZZ is a symbol that changes repeatedly inside a REPEAT pseudo-op, it
+became clear that I needed to process literals immediately.  This meant creating a separate assembly scope while processing each
+literal; in fact, it meant a stack of scopes, in case literals contained nested literals.
+
+As the [MACRO-10 Assembler Programmer's Reference Manual (April 1978)](http://archive.pcjs.org/pubs/dec/pdp10/tops10/Macro_Assembler_Reference_Manual-Apr78.pdf)
+explains:
+
+	A literal can include any term, symbol, expression, or statement, but
+	it must generate at least one but no more than 99 words of data.  A
+	statement that does not generate data (such as a direct-assignment
+	statement or a RADIX pseudo-op)	can be included in a literal, but the
+	literal must not consist entirely of such statements.
+	
+	You can nest literals up to 18 levels.  You can include any number of
+	labels in a literal, but a forward reference to a label in a literal
+	is illegal.
+	
+	If you use a dot (.) in a literal to retrieve the location counter,
+	remember that the counter is pointing at the statement containing the
+	literal, not at the literal itself.
+	
+	In nested literals, a dot location counter references a statement
+	outside the outermost literal.
+	
+	In the sequence:
+	
+	    JRST [HRRZ AC1,V
+	            CAIE AC1,OP
+	            JRST .+1
+	            JRST EVTSTS]
+	    SKIPE C
+	
+	the expression .+1 generates the address of SKIPE C, not JRST EVTSTS.
+	
+	Literals having the same value are collapsed in MACRO's literal pool.
+	Thus for the statements:
+	
+	    PUSH P,[0]
+	    PUSH P,[0]
+	    MOVEI AC1,[ASCIZ /TEST1/]
+	    
+	the same address is shared by the two literals [0], and by the null
+	word generated at the end of [ASCIZ /TESTI/].  Literal collapsing is
+	suppressed for those literals that contain errors, undefined expressions,
+	or EXTERNAL symbols.
+	
+Our Mini-Assembler doesn't enforce all the above requirements.  It doesn't care if less than 1 or more
+than 99 words of data are generated, and it doesn't care if you nest more than 18 levels.  It does attempt to honor
+MACRO-10's scoping rules for the dot (.) operator, however.
+
+There's also some ambiguity in the above documentation.  For example, it says that a literal may contain "any
+term, symbol, expression, or statement," but it's not clear if that includes labels.
+And when they say that "a forward reference to a label in a literal is illegal," does that only apply to a label
+defined *within* the literal, or to *any* forward reference?  In other words, which element is illegal in a literal:
+the forward reference, or the label?
+
+In any case, our assembler doesn't care, and it's now able to assemble a simple
+[Nested Literal Test](/apps/pdp10/tests/macro10/#nested-literal-test) on the
+[MACRO-10 Mini-Assembler Tests](/apps/pdp10/tests/macro10/) page.
+
+So, things are improving, but it's still too early expect a lot from the MACRO-10 Mini-Assembler.  It currently supports
+only a handful of pseudo-ops, and all the code and data it generates is intended for absolute loading only; for now,
+it makes no distinction between relocatable and absolute addresses, and the **LOC** and **RELOC** pseudo-ops, like every
+other unrecognized or unsupported opcode or pseudo-op, will simply generate an error.
+
+If that sounds like a joke, it's not.  This, however, is:
+
+> A man walks into a bar, asks the bartender for a fixup, and the bartender responds, "Absolutely!"
 
 *[@jeffpar](http://twitter.com/jeffpar)*
 *Mar 21, 2017*

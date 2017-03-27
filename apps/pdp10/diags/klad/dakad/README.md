@@ -7,14 +7,14 @@ machines:
     type: pdp10
     config: /devices/pdp10/machine/ka10/test/debugger/machine.xml
     debugger: true
-    commands: a 30724 /apps/pdp10/diags/klad/dakad/MYDAKAD.MAC
+    commands: a 30724 DAKAD.MAC
 ---
 
 PDP-10 KA10 Basic Instruction Diagnostic #4
 -------------------------------------------
 
 The *PDP-10 KA10 Basic Instruction Diagnostic #4* (MAINDEC-10-DAKAD-B-D) test code has been extracted from
-[DAKAD.MAC](DAKAD.MAC.txt) [[original](http://pdp-10.trailing-edge.com/klad_sources/01/klad.sources/dakadm.mac.html)]
+[DAKADM.MAC](DAKADM.MAC.txt) [[original](http://pdp-10.trailing-edge.com/klad_sources/01/klad.sources/dakadm.mac.html)]
 for use with the [PDP-10 Test Machine with Debugger](/devices/pdp10/machine/ka10/test/debugger/) below.
 
 Resources for this test include:
@@ -32,9 +32,9 @@ The Debugger's assemble ("a") command can be used to test the new built-in
 of the [MACRO-10](http://archive.pcjs.org/pubs/dec/pdp10/tops10/02_1973AsmRef_macro.pdf) assembly language.
 This command:
 
-	a 30724 /apps/pdp10/diags/klad/dakad/TEST.MAC
+	a 30724 DAKAD.MAC
 
-will automatically read the [MYDAKAD.MAC](MYDAKAD.MAC.txt) source file (a slightly modified copy of [DAKAD.MAC](DAKAD.MAC.txt)),
+will automatically read the [DAKAD.MAC](DAKAD.MAC.txt) source file (a slightly modified copy of [DAKADM.MAC](DAKADM.MAC.txt)),
 assemble it, and then load the binary output at the specified address.  Use the command `db 30724` to dump the first few words
 of binary data:
 
@@ -246,7 +246,6 @@ SOFTWARE ON EQUIPMENT WHICH IS NOT SUPPLIED BY DEC.
 	NONE
 
 9.0	LISTING
-
 ```
 
 DAKAD.HST

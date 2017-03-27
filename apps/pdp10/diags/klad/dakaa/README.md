@@ -7,14 +7,14 @@ machines:
     type: pdp10
     config: /devices/pdp10/machine/ka10/test/debugger/machine.xml
     debugger: true
-    commands: a 30724 /apps/pdp10/diags/klad/dakaa/MYDAKAA.MAC
+    commands: a 30724 DAKAA.MAC
 ---
 
 PDP-10 KA10 Basic Instruction Diagnostic #1
 -------------------------------------------
 
 The *PDP-10 KA10 Basic Instruction Diagnostic #1* (MAINDEC-10-DAKAA-B-D) test code has been extracted from
-[DAKAA.MAC](DAKAA.MAC.txt) [[original](http://pdp-10.trailing-edge.com/klad_sources/01/klad.sources/dakaam.mac.html)]
+[DAKAAM.MAC](DAKAAM.MAC.txt) [[original](http://pdp-10.trailing-edge.com/klad_sources/01/klad.sources/dakaam.mac.html)]
 for use with the [PDP-10 Test Machine with Debugger](/devices/pdp10/machine/ka10/test/debugger/) below.
 
 Resources for this test include:
@@ -32,9 +32,9 @@ The Debugger's assemble ("a") command can be used to test the new built-in
 of the [MACRO-10](http://archive.pcjs.org/pubs/dec/pdp10/tops10/02_1973AsmRef_macro.pdf) assembly language.
 This command:
 
-	a 30724 /apps/pdp10/diags/klad/dakaa/TEST.MAC
+	a 30724 DAKAA.MAC
 
-will automatically read the [MYDAKAA.MAC](MYDAKAA.MAC.txt) source file (a slightly modified copy of [DAKAA.MAC](DAKAA.MAC.txt)),
+will automatically read the [DAKAA.MAC](DAKAA.MAC.txt) source file (a slightly modified copy of [DAKAAM.MAC](DAKAAM.MAC.txt)),
 assemble it, and then load the binary output at the specified address.
 
 ---

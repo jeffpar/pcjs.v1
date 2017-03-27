@@ -684,6 +684,10 @@ class Debugger extends Component
                             nUnary = (nUnary << 2) | 2;
                             continue;
                         }
+                        if (sOp == '^L') {
+                            nUnary = (nUnary << 2) | 3;
+                            continue;
+                        }
                     }
                     fError = true;
                     break;
@@ -861,7 +865,7 @@ class Debugger extends Component
              *
              * WARNING: Whenever you make changes to this RegExp, make sure you update aBinOpPrecedence as needed, too.
              */
-            var regExp = /(\{|}|\|\||&&|\||\^!|\^B|\^O|\^D|\^-|~|\^_|_|&|!=|!|==|>=|>>>|>>|>|<=|<<|<|-|\+|%|\/|\*)/;
+            var regExp = /(\{|}|\|\||&&|\||\^!|\^B|\^O|\^D|\^L|\^-|~|\^_|_|&|!=|!|==|>=|>>>|>>|>|<=|<<|<|-|\+|%|\/|\*)/;
             sExp = sExp.replace(/(^|[^A-Z0-9$%.])([0-9]+)B/, "$1$2^_");
             var asValues = sExp.split(regExp);
             value = this.parseArray(asValues, 0, asValues.length, this.nBase, fQuiet);
@@ -965,7 +969,7 @@ class Debugger extends Component
      * @param {string|undefined} sValue
      * @param {string|null} [sName] is the name of the value, if any
      * @param {boolean} [fQuiet]
-     * @param {number} [nUnary] (0 for none, 1 for negate, 2 for complement)
+     * @param {number} [nUnary] (0 for none, 1 for negate, 2 for complement, 3 for leading zeros)
      * @return {number|undefined} numeric value, or undefined if sValue is either undefined or invalid
      */
     parseValue(sValue, sName, fQuiet, nUnary = 0)
@@ -986,11 +990,18 @@ class Debugger extends Component
             }
             if (value != null) {
                 while (nUnary) {
-                    if (nUnary & 1) {
+                    switch(nUnary & 0o3) {
+                    case 1:
                         value = -this.truncate(value);
-                    }
-                    else if (nUnary & 2) {
+                        break;
+                    case 2:
                         value = this.evalXOR(value, -1);        // this is easier than adding an evalNOT()...
+                        break;
+                    case 3:
+                        var bit = 35;                           // simple left-to-right zero-bit-counting loop...
+                        while (bit >= 0 && !this.evalAND(value, Math.pow(2, bit))) bit--;
+                        value = 35 - bit;
+                        break;
                     }
                     nUnary >>>= 2;
                 }

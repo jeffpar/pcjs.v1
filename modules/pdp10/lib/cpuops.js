@@ -2160,7 +2160,7 @@ PDP10.opBLT = function(op, acc)
  */
 PDP10.opAOBJP = function(op, acc)
 {
-    var dst = (this.readWord(acc) + 0o000001000001) % PDP10.WORD_MASK;
+    var dst = (this.readWord(acc) + 0o000001000001) % PDP10.WORD_LIMIT;
     this.writeWord(acc, dst);
     if (dst < PDP10.INT_LIMIT) this.setPC(this.regEA);
 };
@@ -2184,7 +2184,7 @@ PDP10.opAOBJP = function(op, acc)
  */
 PDP10.opAOBJN = function(op, acc)
 {
-    var dst = (this.readWord(acc) + 0o000001000001) % PDP10.WORD_MASK;
+    var dst = (this.readWord(acc) + 0o000001000001) % PDP10.WORD_LIMIT;
     this.writeWord(acc, dst);
     if (dst >= PDP10.INT_LIMIT) this.setPC(this.regEA);
 };
@@ -6500,7 +6500,7 @@ PDP10.CLR = function(dst, src)
  */
 PDP10.CMP = function(dst, src)
 {
-    return (dst < PDP10.INT_LIMIT? dst : dst - PDP10.WORD_LIMIT) - (src < PDP10.INT_LIMIT? src : src - PDP10.INT_LIMIT);
+    return (dst < PDP10.INT_LIMIT? dst : dst - PDP10.WORD_LIMIT) - (src < PDP10.INT_LIMIT? src : src - PDP10.WORD_LIMIT);
 };
 
 /**

@@ -172,7 +172,6 @@ class DebuggerPDP10 extends Debugger {
             this.nStep = 0;
             this.sCmdTracePrev = null;
             this.sCmdDumpPrev = null;
-            this.fIgnoreNextCheckFault = false;     // TODO: Does this serve any purpose on a PDP-11?
             this.nSuppressBreaks = 0;
             this.cInstructions = this.cInstructionsStart = 0;
             this.nCycles = this.nCyclesStart = this.msStart = 0;
@@ -1703,6 +1702,15 @@ class DebuggerPDP10 extends Debugger {
                 }
                 if (opCode >= 0) break;
             }
+            /*
+             * MACRO-10 also allows instructions to be assembled without an opcode (ie, just an address reference),
+             * so we'll give that a try next.
+             */
+            if (opCode < 0) {
+                sOperands = sOpcode + sOperands;
+                sOpcode = "";
+                opCode = 0;
+            }
         }
 
         if (opCode >= 0) {
@@ -1756,9 +1764,11 @@ class DebuggerPDP10 extends Debugger {
                         }
                         continue;
                     }
-                    if (operand < 0 || operand > PDP10.OPCODE.Y_MASK) {
-                        operand &= PDP10.ADDR_MASK;
-                        if (MAXDEBUG) this.println("address (" + sOperand + ") truncated to " + this.toStrBase(operand));
+                    if (sOpcode) {
+                        if (operand < 0 || operand > PDP10.OPCODE.Y_MASK) {
+                            operand &= PDP10.ADDR_MASK;
+                            if (MAXDEBUG) this.println("address (" + sOperand + ") truncated to " + this.toStrBase(operand));
+                        }
                     }
                     opCode += operand;
                     sOperand = match[3];
@@ -2596,7 +2606,7 @@ class DebuggerPDP10 extends Debugger {
         }
 
         var sOptions = asArgs[0].substr(1);
-        var match = sOpcode.match(/^(['"]?)((\/|http:).*)\1$/);
+        var match = sOpcode.match(/^(['"]?)(.*\.mac|.*\.html)\1$/i);
         if (match) {
             var dbg = this;
             if (this.macro10) {
@@ -3316,9 +3326,6 @@ class DebuggerPDP10 extends Debugger {
      */
     doRun(sCmd, sAddr, sOptions, fQuiet)
     {
-        if (sCmd == "gt") {
-            this.fIgnoreNextCheckFault = true;
-        }
         if (sAddr !== undefined) {
             var dbgAddr = this.parseAddr(sAddr);
             if (!dbgAddr) return;
