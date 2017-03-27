@@ -5,7 +5,7 @@ permalink: /pubs/pc/magazines/pctj/
 ---
 
 PC Tech Journal
----
+---------------
 
 (The nearly-complete collection!)
 
