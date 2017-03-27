@@ -12,9 +12,10 @@ machines:
 ---
 
 Now that the PDPjs MACRO-10 Mini-Assembler is [limping along](/blog/2017/03/21/), it's time to start assembling some
-of DEC's PDP-10 diagnostics and loading them into a test machine.  The first diagnostic I tried was
-[KA10 Basic Instruction Diagnostic #1 (MAINDEC-10-DAKAA-B-D)](/apps/pdp10/diags/klad/dakaa/), which has been loaded into
-the machine below.
+of DEC's PDP-10 "Basic Instruction" diagnostics and loading them into a test machine.
+
+The first diagnostic I tried was [KA10 Basic Instruction Diagnostic #1 (MAINDEC-10-DAKAA-B-D)](/apps/pdp10/diags/klad/dakaa/),
+which has been loaded into the machine below.
 
 {% include machine.html id="testka10" %}
 
@@ -91,8 +92,9 @@ Next, I tried [KA10 Basic Instruction Diagnostic #4 (MAINDEC-10-DAKAD-B-D)](/app
 	032005: 312140 034462  CAME    3,34462          ;history=2
 	032006: 254200 032007  HALT    32007            ;history=1
 
-This looked less good.  Both AC3 and memory location 34462 contained 400000000000, so the CAME instruction should have
-"skipped if equal."  There was a bug in the [cpuops.js](/modules/pdp10/lib/cpuops.js) *CMP()* function:
+This looked less good.  Both AC3 and memory location 34462 contained 400000000000, so the CAME ("Compare AC with Memory
+and Skip if Equal") instruction should have "skipped" the HALT, but it didn't.  Thus was due to a bug in the
+[cpuops.js](/modules/pdp10/lib/cpuops.js) *CMP()* function:
 
 ```javascript
 /**
@@ -116,7 +118,7 @@ And here's the correction:
     return (dst < PDP10.INT_LIMIT? dst : dst - PDP10.WORD_LIMIT) - (src < PDP10.INT_LIMIT? src : src - PDP10.WORD_LIMIT);
 ```
 
-Just a stupid typo.  After fixing that and trying again, the diagnostic got a bit farther:
+After fixing that and trying again, the diagnostic got a bit farther:
 
 	>> g
 	running
@@ -139,8 +141,9 @@ Just a stupid typo.  After fixing that and trying again, the diagnostic got a bi
 	033444: 312000 034574  CAME    0,34574          ;history=2
 	033445: 254200 033446  HALT    33446            ;history=1
 
-The problem here was that after `SETO 0,0`, AC0 contained 777777777777, so when AOBJN added 000001000001 to it, the result
-should have been 000001000000, but because other another typo, this time in the *opAOBJN()* function:
+The problem here was that after `SETO 0,0`, AC0 contained 777777777777, so when the AOBJN ("Add One to Both Halves
+of AC and Jump if Negative") instruction added 000001000001 to it, the result should have been 000001000000, but
+because other another typo, this time in the *opAOBJN()* function:
 
 ```javascript
 /**
@@ -173,6 +176,9 @@ not WORD_MASK, to truncate the value to 36 bits.  Here's the corrected line:
 ```javascript
     var dst = (this.readWord(acc) + 0o000001000001) % PDP10.WORD_LIMIT;
 ```
+
+There are more PDPjs emulation failures in these [Basic Instruction Diagnostics](/apps/pdp10/diags/klad/) from DEC,
+but I've run out of time today.  To be continued....
 
 *[@jeffpar](http://twitter.com/jeffpar)*
 *Mar 24, 2017*
