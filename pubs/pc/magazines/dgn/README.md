@@ -18,6 +18,10 @@ DosGetNews() will be published every Wednesday and will be full of information o
 Presentation Manager, future projects, new product discussions, interviews with various personnel and
 announcements on a variety of departmental activities.
 
+PCjs has unearthed copies of these newsletters below for your historical enjoyment.
+
+---
+
 [<img src="http://archive.pcjs.org/pubs/pc/magazines/dgn/1988-05-11/thumbs/DosGetNews--1988-05-11 1.jpeg" width="200" height="260" alt='DosGetNews("May 11, 1988")'/>](1988-05-11/)
 [<img src="http://archive.pcjs.org/pubs/pc/magazines/dgn/1988-05-18/thumbs/DosGetNews--1988-05-18 1.jpeg" width="200" height="260" alt='DosGetNews("May 18, 1988")'/>](1988-05-18/)
 [<img src="http://archive.pcjs.org/pubs/pc/magazines/dgn/1988-05-25/thumbs/DosGetNews--1988-05-25 1.jpeg" width="200" height="260" alt='DosGetNews("May 25, 1988")'/>](1988-05-25/)
