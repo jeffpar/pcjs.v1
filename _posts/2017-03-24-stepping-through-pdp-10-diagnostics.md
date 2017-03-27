@@ -180,5 +180,5 @@ not WORD_MASK, to truncate the value to 36 bits.  Here's the corrected line:
 There are more PDPjs emulation failures in these [Basic Instruction Diagnostics](/apps/pdp10/diags/klad/) from DEC,
 but I've run out of time today.  To be continued....
 
-*[@jeffpar](http://twitter.com/jeffpar)*
+*[@jeffpar](http://twitter.com/jeffpar)*  
 *Mar 24, 2017*
