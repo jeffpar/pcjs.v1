@@ -348,7 +348,7 @@ class Macro10 {
          * If the "preprocess" option is set, then just return the plain text we retrieved.
          */
         if (this.sOptions.indexOf('p') >= 0) {
-            this.println(this.asLines.join());
+            this.println(this.asLines.join(""));
             return 0;
         }
 
@@ -577,6 +577,7 @@ class Macro10 {
                 this.addMacro(sOperator, sRemainder);
                 break;
 
+            case Macro10.PSEUDO_OP.LALL:    // TODO
             case Macro10.PSEUDO_OP.PAGE:    // TODO
             case Macro10.PSEUDO_OP.SUBTTL:  // TODO
             case Macro10.PSEUDO_OP.TITLE:   // TODO
@@ -1417,6 +1418,7 @@ Macro10.PSEUDO_OP = {
     IFN:        "IFN",
     IRP:        "IRP",
     IRPC:       "IRPC",
+    LALL:       "LALL",
     LITERAL:    "LITERAL",      // this is a pseudo-pseudo-op, used for internal purposes
     PAGE:       "PAGE",
     REPEAT:     "REPEAT",

@@ -8,10 +8,10 @@ machines:
     type: pdp10
     config: /devices/pdp10/machine/ka10/test/debugger/machine.xml
     debugger: true
-    commands: a 30724 /apps/pdp10/diags/klad/dakaa/MYDAKAA.MAC
+    commands: a 30724 /apps/pdp10/diags/klad/dakaa/DAKAA.MAC
 ---
 
-Now that the PDPjs MACRO-10 Mini-Assembler is [limping along](/blog/2017/03/21/), it was time to start assembling some
+Now that the PDPjs MACRO-10 Mini-Assembler is [limping along](/blog/2017/03/21/), it's time to start assembling some
 of DEC's PDP-10 diagnostics and loading them into a test machine.  The first diagnostic I tried was
 [KA10 Basic Instruction Diagnostic #1 (MAINDEC-10-DAKAA-B-D)](/apps/pdp10/diags/klad/dakaa/), which has been loaded into
 the machine below.
@@ -20,9 +20,9 @@ the machine below.
 
 Here were the results of my first run attempt:
 
-	>> a 30724 /apps/pdp10/diags/klad/dakaa/MYDAKAA.MAC
+	>> a 30724 /apps/pdp10/diags/klad/dakaa/DAKAA.MAC
 	starting PCjs MACRO-10 Mini-Assembler...
-	loading MYDAKAA.MAC
+	loading DAKAA.MAC
 	CPU will not be auto-started (click Run to start)
 	2844 words loaded at 030724-036357
 	00=000000000000 01=000000000000 02=000000000000 03=000000000000 
@@ -60,9 +60,9 @@ Happily, this was a good outcome, because 035057 is the end of the test.  If you
 
 Next, I tried [KA10 Basic Instruction Diagnostic #4 (MAINDEC-10-DAKAD-B-D)](/apps/pdp10/diags/klad/dakad/):
 
-	>> a 30724 /apps/pdp10/diags/klad/dakad/MYDAKAD.MAC
+	>> a 30724 /apps/pdp10/diags/klad/dakad/DAKAD.MAC
 	starting PCjs MACRO-10 Mini-Assembler...
-	loading MYDAKAD.MAC
+	loading DAKAD.MAC
 	1986 words loaded at 030724-034625
 	00=000000000000 01=000000000000 02=777777777777 03=000000000000 
 	04=777777777777 05=000000000000 06=000000000000 07=777777777777 
@@ -91,8 +91,88 @@ Next, I tried [KA10 Basic Instruction Diagnostic #4 (MAINDEC-10-DAKAD-B-D)](/app
 	032005: 312140 034462  CAME    3,34462          ;history=2
 	032006: 254200 032007  HALT    32007            ;history=1
 
-This looked less good.
+This looked less good.  Both AC3 and memory location 34462 contained 400000000000, so the CAME instruction should have
+"skipped if equal."  There was a bug in the [cpuops.js](/modules/pdp10/lib/cpuops.js) *CMP()* function:
 
+```javascript
+/**
+ * CMP(dst, src)
+ *
+ * Performs the SIGNED comparison (CMP) of two 36-bit operands.
+ *
+ * @param {number} dst (36-bit value)
+ * @param {number} src (36-bit value)
+ * @return {number} (dst - src)
+ */
+PDP10.CMP = function(dst, src)
+{
+    return (dst < PDP10.INT_LIMIT? dst : dst - PDP10.WORD_LIMIT) - (src < PDP10.INT_LIMIT? src : src - PDP10.INT_LIMIT);
+};
+```
+
+And here's the correction:
+
+```javascript
+    return (dst < PDP10.INT_LIMIT? dst : dst - PDP10.WORD_LIMIT) - (src < PDP10.INT_LIMIT? src : src - PDP10.WORD_LIMIT);
+```
+
+Just a stupid typo.  After fixing that and trying again, the diagnostic got a bit farther:
+
+	>> g
+	running
+	stopped (1119 instructions, 1118 cycles, 12 ms, 93167 hz)
+	00=000001000001 01=000000000000 02=000000000002 03=000000000003 
+	04=000000000004 05=000000000005 06=000000000006 07=000000000007 
+	10=000000000010 11=000000000011 12=000000000012 13=000000000013 
+	14=000000000014 15=000000000015 16=000000000016 17=000000777723 
+	PC=033446 RA=00033446 EA=033446 C0=0 C1=0 OV=0 ND=0 PD=0 
+	033446: 324000 033447  JUMPA   0,33447
+	>> dh
+	033432: 253000 033434  AOBJN   0,33434          ;history=10
+	033434: 324000 033435  JUMPA   0,33435          ;history=9
+	033435: 200000 034573  MOVE    0,34573          ;history=8
+	033436: 252000 033440  AOBJP   0,33440          ;history=7
+	033437: 334000 000000  SKIPA   0,0              ;history=6
+	033441: 324000 033442  JUMPA   0,33442          ;history=5
+	033442: 474000 000000  SETO    0,0              ;history=4
+	033443: 253000 033444  AOBJN   0,33444          ;history=3
+	033444: 312000 034574  CAME    0,34574          ;history=2
+	033445: 254200 033446  HALT    33446            ;history=1
+
+The problem here was that after `SETO 0,0`, AC0 contained 777777777777, so when AOBJN added 000001000001 to it, the result
+should have been 000001000000, but because other another typo, this time in the *opAOBJN()* function:
+
+```javascript
+/**
+ * opAOBJN(0o253000): Add One to Both Halves of AC and Jump if Negative
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-41:
+ *
+ *      Add 1000001 [base 8] to AC and place the result back in AC.  If the result is less than zero
+ *      (ie if bit 0 is 1, and hence a negative count in the left half has not yet reached zero or a positive
+ *      count has reached 2^17), take the next instruction from location E and continue sequential operation
+ *      from there.
+ *
+ *      The incrementing of both halves of AC simultaneously is effected by adding 1000001 [base 8].  A count
+ *      of -2 in AC left is therefore increased to zero if 2^18 - 1 is incremented in AC right.
+ *
+ * @this {CPUStatePDP10}
+ * @param {number} op
+ * @param {number} acc
+ */
+PDP10.opAOBJN = function(op, acc)
+{
+    var dst = (this.readWord(acc) + 0o000001000001) % PDP10.WORD_MASK;
+    this.writeWord(acc, dst);
+    if (dst >= PDP10.INT_LIMIT) this.setPC(this.regEA);
+};
+```
+when `dst` became 0o1000001000000 and exceeded WORD_MASK (0o777777777777), it needed to be mod'ed with WORD_LIMIT (0o1000000000000),
+not WORD_MASK, to truncate the value to 36 bits.  Here's the corrected line:
+
+```javascript
+    var dst = (this.readWord(acc) + 0o000001000001) % PDP10.WORD_LIMIT;
+```
 
 *[@jeffpar](http://twitter.com/jeffpar)*
 *Mar 24, 2017*
