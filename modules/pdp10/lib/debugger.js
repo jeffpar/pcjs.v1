@@ -919,20 +919,23 @@ class DebuggerPDP10 extends Debugger {
         case DebuggerPDP10.REGS.EA:
             value = cpu.regEA;
             break;
+        case DebuggerPDP10.REGS.PS:
+            value = (cpu.getPS() / PDP10.HALF_SHIFT)|0;
+            break;
         case DebuggerPDP10.REGS.C0:
-            value = (cpu.regPS & PDP10.PSFLAG.CARRY0)? 1 : 0;
+            value = (cpu.regPS & PDP10.PSFLAG.CRY0)? 1 : 0;
             break;
         case DebuggerPDP10.REGS.C1:
-            value = (cpu.regPS & PDP10.PSFLAG.CARRY1)? 1 : 0;
+            value = (cpu.regPS & PDP10.PSFLAG.CRY1)? 1 : 0;
             break;
         case DebuggerPDP10.REGS.OV:
-            value = (cpu.regPS & PDP10.PSFLAG.OVFL)? 1 : 0;
+            value = (cpu.regPS & PDP10.PSFLAG.AROV)? 1 : 0;
             break;
         case DebuggerPDP10.REGS.ND:
-            value = (cpu.regPS & PDP10.PSFLAG.NO_DIVIDE)? 1 : 0;
+            value = (cpu.regPS & PDP10.PSFLAG.DCK)? 1 : 0;
             break;
         case DebuggerPDP10.REGS.PD:
-            value = (cpu.regPS & PDP10.PSFLAG.PD_OVFL)? 1 : 0;
+            value = (cpu.regPS & PDP10.PSFLAG.PDOV)? 1 : 0;
             break;
         }
         return value;
@@ -955,20 +958,23 @@ class DebuggerPDP10 extends Debugger {
             cpu.setPC(value);
             this.setAddr(this.dbgAddrCode, cpu.getPC());
             break;
+        case DebuggerPDP10.REGS.PS:
+            cpu.setPS(value * PDP10.HALF_SHIFT);
+            break;
         case DebuggerPDP10.REGS.C0:
-            flag = PDP10.PSFLAG.CARRY0;
+            flag = PDP10.PSFLAG.CRY0;
             break;
         case DebuggerPDP10.REGS.C1:
-            flag = PDP10.PSFLAG.CARRY1;
+            flag = PDP10.PSFLAG.CRY1;
             break;
         case DebuggerPDP10.REGS.OV:
-            flag = PDP10.PSFLAG.OVFL;
+            flag = PDP10.PSFLAG.AROV;
             break;
         case DebuggerPDP10.REGS.ND:
-            flag = PDP10.PSFLAG.NO_DIVIDE;
+            flag = PDP10.PSFLAG.DCK;
             break;
         case DebuggerPDP10.REGS.PD:
-            flag = PDP10.PSFLAG.PD_OVFL;
+            flag = PDP10.PSFLAG.PDOV;
             break;
         }
         if (flag) {
@@ -4069,15 +4075,16 @@ if (DEBUGGER) {
         PC:     0,
         RA:     1,
         EA:     2,
-        C0:     3,                              // single-bit "register" representing the Carry 0 flag
-        C1:     4,                              // single-bit "register" representing the Carry 1 flag
-        OV:     5,                              // single-bit "register" representing the Overflow flag
-        ND:     6,                              // single-bit "register" representing the No Divide flag
-        PD:     7,                              // single-bit "register" representing the Pushdown Overflow flag
+        PS:     3,
+        C0:     4,                              // single-bit "register" representing the Carry 0 flag
+        C1:     5,                              // single-bit "register" representing the Carry 1 flag
+        OV:     6,                              // single-bit "register" representing the Overflow flag
+        ND:     7,                              // single-bit "register" representing the No Divide flag
+        PD:     8,                              // single-bit "register" representing the Pushdown Overflow flag
     };
 
     DebuggerPDP10.REGNAMES = [
-        "PC", "RA", "EA", "C0", "C1", "OV", "ND", "PD"
+        "PC", "RA", "EA", "PS", "C0", "C1", "OV", "ND", "PD"
     ];
 
     /*

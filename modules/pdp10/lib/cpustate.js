@@ -374,11 +374,11 @@ class CPUStatePDP10 extends CPUPDP10 {
     {
         w = (w / PDP10.HALF_SHIFT)|0;
         this.regPS = (this.regPS & ~PDP10.PSFLAG.SET_MASK) | (w & PDP10.PSFLAG.SET_MASK);
-        this.regPS |= (w & PDP10.PSFLAG.USER_MODE);
-        if (!(w & PDP10.PSFLAG.USER_IO)) {
-            this.regPS &= ~PDP10.PSFLAG.USER_IO;
+        this.regPS |= (w & PDP10.PSFLAG.USERF);
+        if (!(w & PDP10.PSFLAG.EXIOT)) {
+            this.regPS &= ~PDP10.PSFLAG.EXIOT;
         } else {
-            if (!(this.regPS & PDP10.PSFLAG.USER_MODE)) this.regPS |= PDP10.PSFLAG.USER_IO;
+            if (!(this.regPS & PDP10.PSFLAG.USERF)) this.regPS |= PDP10.PSFLAG.EXIOT;
         }
     }
 
@@ -391,7 +391,7 @@ class CPUStatePDP10 extends CPUPDP10 {
      */
     setUserMode()
     {
-        this.regPS |= PDP10.PSFLAG.USER_MODE;
+        this.regPS |= PDP10.PSFLAG.USERF;
     }
 
     /**
@@ -405,8 +405,8 @@ class CPUStatePDP10 extends CPUPDP10 {
     readFlags()
     {
         var flags = 0;
-        if (this.regPS & PDP10.PSFLAG.OVFL) flags |= PDP10.RFLAG.OVFL;
-        if (this.regPS & PDP10.PSFLAG.PD_OVFL) flags |= PDP10.RFLAG.PD_OVFL;
+        if (this.regPS & PDP10.PSFLAG.AROV) flags |= PDP10.RFLAG.AROV;
+        if (this.regPS & PDP10.PSFLAG.PDOV) flags |= PDP10.RFLAG.PDOV;
         return flags;
     }
 
@@ -420,8 +420,8 @@ class CPUStatePDP10 extends CPUPDP10 {
      */
     writeFlags(w)
     {
-        if (w & PDP10.WFLAG.OVFL_CL) this.regPS &= ~PDP10.PSFLAG.OVFL;
-        if (w & PDP10.WFLAG.PD_OVFL_CL) this.regPS &= ~PDP10.PSFLAG.PD_OVFL;
+        if (w & PDP10.WFLAG.AROV_CL) this.regPS &= ~PDP10.PSFLAG.AROV;
+        if (w & PDP10.WFLAG.PDOV_CL) this.regPS &= ~PDP10.PSFLAG.PDOV;
     }
 
     /**

@@ -1696,14 +1696,14 @@ PDP10.opASH = function(op, ac)
                  * If all those bits in the original value (w) were 0s, then adding bits to it could NOT
                  * produce a value > INT_MASK.
                  */
-                if (w + bits > PDP10.INT_MASK) this.regPS |= PDP10.PSFLAG.OVFL;
+                if (w + bits > PDP10.INT_MASK) this.regPS |= PDP10.PSFLAG.AROV;
             } else {
                 /*
                  * Since w was negative, overflow occurs ONLY if any of the bits we shifted out were 0s.
                  * If all those bits in the original value (w) were 1s, subtracting bits from it could NOT
                  * produce a value <= INT_MASK.
                  */
-                if (w - bits <= PDP10.INT_MASK) this.regPS |= PDP10.PSFLAG.OVFL;
+                if (w - bits <= PDP10.INT_MASK) this.regPS |= PDP10.PSFLAG.AROV;
             }
         } else {
             if (s <= -35) {
@@ -1873,7 +1873,7 @@ PDP10.opASHC = function(op, ac)
                  * other than WORD_MASK indicates an overflow.
                  */
                 if (wLeft > 0 && wLeft < PDP10.INT_LIMIT || wLeft > PDP10.INT_MASK && wLeft < PDP10.WORD_MASK) {
-                    this.regPS |= PDP10.PSFLAG.OVFL;
+                    this.regPS |= PDP10.PSFLAG.AROV;
                 }
                 if (s >= 71) {
                     /*
@@ -1881,7 +1881,7 @@ PDP10.opASHC = function(op, ac)
                      * other than WORD_MASK indicates an overflow.
                      */
                     if (wRight > 0 && wRight < PDP10.INT_LIMIT || wRight > PDP10.INT_MASK && wRight < PDP10.WORD_MASK) {
-                        this.regPS |= PDP10.PSFLAG.OVFL;
+                        this.regPS |= PDP10.PSFLAG.AROV;
                     }
                     wLeft = 0;
                 } else {
@@ -1896,14 +1896,14 @@ PDP10.opASHC = function(op, ac)
                          * If all those bits in the original value were 0s, then adding bits to it could NOT produce
                          * a value > INT_MASK.
                          */
-                        if (wRight + bits > PDP10.INT_MASK) this.regPS |= PDP10.PSFLAG.OVFL;
+                        if (wRight + bits > PDP10.INT_MASK) this.regPS |= PDP10.PSFLAG.AROV;
                     } else {
                         /*
                          * Since wLeft was negative, overflow occurs ONLY if any of the bits we shifted out were 0s.
                          * If all those bits in the original value were 1s, subtracting bits from it could NOT produce
                          * a value <= INT_MASK.
                          */
-                        if (wRight - bits <= PDP10.INT_MASK) this.regPS |= PDP10.PSFLAG.OVFL;
+                        if (wRight - bits <= PDP10.INT_MASK) this.regPS |= PDP10.PSFLAG.AROV;
                     }
                 }
                 wRight = 0;
@@ -1927,14 +1927,14 @@ PDP10.opASHC = function(op, ac)
                      * If all those bits in the original value were 0s, then adding bits to it could NOT produce
                      * a value > INT_MASK.
                      */
-                    if (wLeftOrig + bits > PDP10.INT_MASK) this.regPS |= PDP10.PSFLAG.OVFL;
+                    if (wLeftOrig + bits > PDP10.INT_MASK) this.regPS |= PDP10.PSFLAG.AROV;
                 } else {
                     /*
                      * Since wLeft was negative, overflow occurs ONLY if any of the bits we shifted out were 0s.
                      * If all those bits in the original value were 1s, subtracting bits from it could NOT produce
                      * a value <= INT_MASK.
                      */
-                    if (wLeftOrig - bits <= PDP10.INT_MASK) this.regPS |= PDP10.PSFLAG.OVFL;
+                    if (wLeftOrig - bits <= PDP10.INT_MASK) this.regPS |= PDP10.PSFLAG.AROV;
                     /*
                      * Last but not least, update the sign bits of wLeft and wRight to indicate negative values.
                      */
@@ -2372,7 +2372,7 @@ PDP10.opPUSH = function(op, ac)
         p += 0o000001000001;
         this.writeWord(p & PDP10.HALF_MASK, this.readWord(this.regEA));
         if (p >= PDP10.WORD_LIMIT) p -= PDP10.WORD_LIMIT;
-        if (!((p / PDP10.HALF_SHIFT)|0)) this.regPS |= PDP10.PSFLAG.PD_OVFL;
+        if (!((p / PDP10.HALF_SHIFT)|0)) this.regPS |= PDP10.PSFLAG.PDOV;
     } else {
         /*
          * This is the SIMH behavior, which appears to increment each half of AC independently.
@@ -2382,7 +2382,7 @@ PDP10.opPUSH = function(op, ac)
         p = (p + 0o000001000000) - (p & PDP10.HALF_MASK) + addr;
         if (p >= PDP10.WORD_LIMIT) {
             p -= PDP10.WORD_LIMIT;
-            this.regPS |= PDP10.PSFLAG.PD_OVFL;
+            this.regPS |= PDP10.PSFLAG.PDOV;
         }
     }
     this.writeWord(ac, p);
@@ -2412,7 +2412,7 @@ PDP10.opPOP = function(op, ac)
     if (this.regEA == ac) p = src;     // this avoids re-reading the accumulator if the write just overwrote it
     p -= 0o000001000001;
     if (p < 0) p += PDP10.WORD_LIMIT;
-    if (((p / PDP10.HALF_SHIFT)|0) == PDP10.HALF_MASK) this.regPS |= PDP10.PSFLAG.PD_OVFL;
+    if (((p / PDP10.HALF_SHIFT)|0) == PDP10.HALF_MASK) this.regPS |= PDP10.PSFLAG.PDOV;
     this.writeWord(ac, p);
 };
 
@@ -2448,6 +2448,7 @@ PDP10.opPOPJ = function(op, ac)
 PDP10.opJSR = function(op, ac)
 {
     this.writeWord(this.regEA, this.getPS() + this.getPC());
+    this.regPS &= ~PDP10.PSFLAG.BIS;            // TODO: Verify that BIS is cleared AFTER writing
     this.setPC(this.regEA + 1);
 };
 
@@ -2471,6 +2472,7 @@ PDP10.opJSR = function(op, ac)
 PDP10.opJSP = function(op, ac)
 {
     this.writeWord(ac, this.getPS() + this.getPC());
+    this.regPS &= ~PDP10.PSFLAG.BIS;            // TODO: Verify that BIS is cleared AFTER writing
     this.setPC(this.regEA);
 };
 
@@ -2513,7 +2515,7 @@ PDP10.opJSA = function(op, ac)
  *      Place the contents of the location addressed by AC left into AC.  Take the next instruction from location E and
  *      continue sequential operation from there.
  *
- * This opcode functions as the counterpart to JSA, but ONLY if location E (the effective address stored in the JRA) indexes
+ * This opcode functions as the counterpart to JSA, but ONLY if location E (the effective address calculated by the JRA) indexes
  * with the same AC that was used with the JSA.
  *
  *              JSA     17,F1
@@ -6119,7 +6121,7 @@ PDP10.doABS = function(src)
         if (src != PDP10.INT_LIMIT) {
             src = PDP10.TWO_POW36 - src;
         } else {
-            this.regPS |= (PDP10.PSFLAG.OVFL | PDP10.PSFLAG.CARRY1);
+            this.regPS |= (PDP10.PSFLAG.AROV | PDP10.PSFLAG.CRY1);
         }
     }
     return src;
@@ -6181,7 +6183,7 @@ PDP10.doDIV = function(dst, ext, src)
     }
 
     if (ext >= src) {
-        this.regPS |= PDP10.PSFLAG.NO_DIVIDE | PDP10.PSFLAG.OVFL;
+        this.regPS |= PDP10.PSFLAG.DCK | PDP10.PSFLAG.AROV;
         return -1;
     }
 
@@ -6304,7 +6306,7 @@ PDP10.doMUL = function(dst, src, fTruncate)
          * If ext is something OTHER than an extension of the res sign bit, then we have overflow.
          */
         if ((ext || res > PDP10.INT_MASK) && (ext != PDP10.WORD_MASK || res <= PDP10.INT_MASK)) {
-            this.regPS |= PDP10.PSFLAG.OVFL;
+            this.regPS |= PDP10.PSFLAG.AROV;
         }
         /*
          * Also note that, in the truncate case, we return the low order bits (res), rather than the
@@ -6328,7 +6330,7 @@ PDP10.doMUL = function(dst, src, fTruncate)
 PDP10.doNEG = function(src)
 {
     if (!src) {
-        this.regPS |= (PDP10.PSFLAG.CARRY0 | PDP10.PSFLAG.CARRY1);
+        this.regPS |= (PDP10.PSFLAG.CRY0 | PDP10.PSFLAG.CRY1);
     }
     else {
         /*
@@ -6336,7 +6338,7 @@ PDP10.doNEG = function(src)
          * the INT_LIMIT case anyway, and since subtraction in that case doesn't alter src, we skip the subtraction.
          */
         if (src == PDP10.INT_LIMIT) {
-            this.regPS |= (PDP10.PSFLAG.OVFL | PDP10.PSFLAG.CARRY1);
+            this.regPS |= (PDP10.PSFLAG.AROV | PDP10.PSFLAG.CRY1);
         } else {
             src = PDP10.TWO_POW36 - src;
         }
@@ -6423,7 +6425,7 @@ PDP10.split72 = function(res, ext)
     var signNew = ext - (ext % PDP10.INT_LIMIT);
     if (sign != signNew) {
         ext = sign + (ext - signNew);
-        this.regPS |= PDP10.PSFLAG.OVFL;
+        this.regPS |= PDP10.PSFLAG.AROV;
     }
     this.regExt = res;
     return ext;
@@ -6483,7 +6485,7 @@ PDP10.setAddFlags = function(dst, src, res)
      *      1   1   1   0   0   0   no
      */
     var fOverflow = ((dst01 ^ res01) & (src01 ^ res01)) & 0b10;
-    this.regPS |= (fCarry0? PDP10.PSFLAG.CARRY0 : 0) | (fCarry1? PDP10.PSFLAG.CARRY1 : 0) | (fOverflow? PDP10.PSFLAG.OVFL : 0);
+    this.regPS |= (fCarry0? PDP10.PSFLAG.CRY0 : 0) | (fCarry1? PDP10.PSFLAG.CRY1 : 0) | (fOverflow? PDP10.PSFLAG.AROV : 0);
 };
 
 /**
