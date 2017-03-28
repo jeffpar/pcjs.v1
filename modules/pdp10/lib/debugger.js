@@ -1704,9 +1704,9 @@ class DebuggerPDP10 extends Debugger {
             }
             /*
              * MACRO-10 also allows instructions to be assembled without an opcode (ie, just an address reference),
-             * so we'll give that a try next.
+             * so we'll give that a try next (as long as we're not mashing two symbols together).
              */
-            if (opCode < 0) {
+            if (opCode < 0 && sOperands && !sOperands.match(/^[0-9A-Z$%.?]/i)) {
                 sOperands = sOpcode + sOperands;
                 sOpcode = "";
                 opCode = 0;

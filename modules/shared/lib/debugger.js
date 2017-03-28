@@ -708,6 +708,11 @@ class Debugger extends Component
             aVals.push(this.truncate(v));
             if (!sOp) break;
 
+            if (sOp == ' ') {
+                fError = true;
+                break;
+            }
+
             this.assert(Debugger.aBinOpPrecedence[sOp] != null);
             if (aOps.length && Debugger.aBinOpPrecedence[sOp] < Debugger.aBinOpPrecedence[aOps[aOps.length - 1]]) {
                 this.evalOps(aVals, aOps, 1);
@@ -865,8 +870,8 @@ class Debugger extends Component
              *
              * WARNING: Whenever you make changes to this RegExp, make sure you update aBinOpPrecedence as needed, too.
              */
-            var regExp = /(\{|}|\|\||&&|\||\^!|\^B|\^O|\^D|\^L|\^-|~|\^_|_|&|!=|!|==|>=|>>>|>>|>|<=|<<|<|-|\+|%|\/|\*)/;
-            sExp = sExp.replace(/(^|[^A-Z0-9$%.])([0-9]+)B/, "$1$2^_");
+            var regExp = /(\{|}|\|\||&&|\||\^!|\^B|\^O|\^D|\^L|\^-|~|\^_|_|&|!=|!|==|>=|>>>|>>|>|<=|<<|<|-|\+|%|\/|\*| )/;
+            sExp = sExp.replace(/(^|[^A-Z0-9$%.])([0-9]+)B/, "$1$2^_").replace(/\s+/g, ' ');
             var asValues = sExp.split(regExp);
             value = this.parseArray(asValues, 0, asValues.length, this.nBase, fQuiet);
             if (value !== undefined && fQuiet === false) {
