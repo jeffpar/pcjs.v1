@@ -922,14 +922,14 @@ class DebuggerPDP10 extends Debugger {
         case DebuggerPDP10.REGS.PS:
             value = (cpu.getPS() / PDP10.HALF_SHIFT)|0;
             break;
+        case DebuggerPDP10.REGS.OV:
+            value = (cpu.regPS & PDP10.PSFLAG.AROV)? 1 : 0;
+            break;
         case DebuggerPDP10.REGS.C0:
             value = (cpu.regPS & PDP10.PSFLAG.CRY0)? 1 : 0;
             break;
         case DebuggerPDP10.REGS.C1:
             value = (cpu.regPS & PDP10.PSFLAG.CRY1)? 1 : 0;
-            break;
-        case DebuggerPDP10.REGS.OV:
-            value = (cpu.regPS & PDP10.PSFLAG.AROV)? 1 : 0;
             break;
         case DebuggerPDP10.REGS.ND:
             value = (cpu.regPS & PDP10.PSFLAG.DCK)? 1 : 0;
@@ -961,14 +961,14 @@ class DebuggerPDP10 extends Debugger {
         case DebuggerPDP10.REGS.PS:
             cpu.setPS(value * PDP10.HALF_SHIFT);
             break;
+        case DebuggerPDP10.REGS.OV:
+            flag = PDP10.PSFLAG.AROV;
+            break;
         case DebuggerPDP10.REGS.C0:
             flag = PDP10.PSFLAG.CRY0;
             break;
         case DebuggerPDP10.REGS.C1:
             flag = PDP10.PSFLAG.CRY1;
-            break;
-        case DebuggerPDP10.REGS.OV:
-            flag = PDP10.PSFLAG.AROV;
             break;
         case DebuggerPDP10.REGS.ND:
             flag = PDP10.PSFLAG.DCK;
@@ -2256,7 +2256,7 @@ class DebuggerPDP10 extends Debugger {
     {
         var sReg = this.getRegName(iReg);
         if (sReg) {
-            var nBits = (iReg >= DebuggerPDP10.REGS.C0? 1 : (iReg == DebuggerPDP10.REGS.RA? 23 : 18));
+            var nBits = (iReg >= DebuggerPDP10.REGS.OV? 1 : (iReg == DebuggerPDP10.REGS.RA? 23 : 18));
             sReg += '=' + this.toStrBase(this.getRegValue(iReg), nBits) + ' ';
         }
         return sReg;
@@ -4076,15 +4076,15 @@ if (DEBUGGER) {
         RA:     1,
         EA:     2,
         PS:     3,
-        C0:     4,                              // single-bit "register" representing the Carry 0 flag
-        C1:     5,                              // single-bit "register" representing the Carry 1 flag
-        OV:     6,                              // single-bit "register" representing the Overflow flag
+        OV:     4,                              // single-bit "register" representing the Overflow flag
+        C0:     5,                              // single-bit "register" representing the Carry 0 flag
+        C1:     6,                              // single-bit "register" representing the Carry 1 flag
         ND:     7,                              // single-bit "register" representing the No Divide flag
         PD:     8,                              // single-bit "register" representing the Pushdown Overflow flag
     };
 
     DebuggerPDP10.REGNAMES = [
-        "PC", "RA", "EA", "PS", "C0", "C1", "OV", "ND", "PD"
+        "PC", "RA", "EA", "PS", "OV", "C0", "C1", "ND", "PD"
     ];
 
     /*
