@@ -872,26 +872,30 @@ class Debugger extends Component
              *
              * Although I started listing the operators in the RegExp in "precedential" order, that's not important;
              * what IS important is listing operators than contain shorter operators first.  For example, bitwise
-             * shift operators must be listed BEFORE the logical less-than or greater-than operators.
+             * shift operators must be listed BEFORE the logical less-than or greater-than operators.  aBinOpPrecedence
+             * is what determines precedence.
              *
-             * Also, to better accommodate MACRO-10 syntax, I've replaced the single '^' for XOR with '^!' (since
-             * MACRO-10 uses prefixes like "^D", "^O" and "^B" with numeric constants to indicate a base override).
-             * Similarly, I've added '!' as an alias for '|' (bitwise inclusive-or), '^-' as an alias for '~' (unary
-             * complement "not" operator), and '_' as a shift operator.
+             * Also, to better accommodate MACRO-10 syntax, I've replaced the single '^' for XOR with '^!', and I've
+             * added '!' as an alias for '|' (bitwise inclusive-or), '^-' as an alias for '~' (one's complement operator),
+             * and '_' as a shift operator (+/- values specify a left/right shift, and the count is not limited to 32).
              *
              * The MACRO-10 binary shifting suffix ('B') is a bit more problematic, since a capital B can also appear
              * inside symbols.  So I pre-scan for that suffix and replace all non-symbolic occurrences with an internal
              * shift operator ('^_').
              *
              * Note that Str.parseInt(), which parseValue() relies on, supports both the MACRO-10 base prefix overrides
-             * and the binary shifting suffix.  But since the B suffix can also be a bracketed expression, we have to
+             * and the binary shifting suffix ('B'), but since that suffix can also be a bracketed expression, we have to
              * support it here as well.
              *
-             * MACRO-10 supports only a subset of all the PCjs operators; for example, MACRO-10 doesn't support bitwise
-             * exclusive-or, shift operators, or any of the boolean logical/compare operators.  But unless we run into
-             * conflicts, I prefer sticking with this common set of operators.
+             * MACRO-10 supports only a subset of all the PCjs operators; for example, MACRO-10 doesn't support any of
+             * the boolean logical/compare operators.  But unless we run into conflicts, I prefer sticking with this
+             * common set of operators.
              *
-             * WARNING: Whenever you make changes to this RegExp, make sure you update aBinOpPrecedence as needed, too.
+             * All whitespace in the expression is collapsed to single spaces, and space has been added to the list
+             * of "operators", but its sole function is as a separator, not as an operator.  parseArray() will ignore
+             * single spaces as long as they are preceded and/or followed by a "real" operator.  It would be dangerous
+             * to remove spaces entirely, because if an operator-less expression like "A B" was passed in, we would want
+             * that to generate an error; if we converted it to "AB", evaluation might inadvertently succeed.
              */
             var regExp = /(\{|}|\|\||&&|\||\^!|\^B|\^O|\^D|\^L|\^-|~|\^_|_|&|!=|!|==|>=|>>>|>>|>|<=|<<|<|-|\+|%|\/|\*| )/;
             sExp = sExp.replace(/(^|[^A-Z0-9$%.])([0-9]+)B/, "$1$2^_").replace(/\s+/g, ' ');

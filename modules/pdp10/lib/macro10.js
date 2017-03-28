@@ -378,19 +378,70 @@ class Macro10 {
                 this.error("open scope from line " + this.stackScopes[0].nLine);
             }
 
-            for (let i = 0; i < this.aLiterals.length; i++) {
-                let lit = this.aLiterals[i];
-                this.addSymbol(lit.name, this.nLocation, Macro10.SYMTYPE.LABEL);
-                lit.aWords.forEach(function(w, nLocation) {
-                    macro10.genWord(w, lit.aFixups[nLocation]);
-                });
+            let nLocationLiterals = this.nLocation;
 
+            for (let i = 0; i < this.aLiterals.length; i++) {
                 /*
-                 * TODO: Add support for "literal collapsing"; ie, if two or more literals generate the same
-                 * set of values, then all instances after the first should refer back to the first (subject to
-                 * exceptions identified by MACRO-10: eg, "literals that contain errors, undefined expressions,
-                 * or EXTERNAL symbols.")
+                 * Apparently, the time has come to implement "literal collapsing"; I was treating it as just
+                 * a nice optimization, but it turns out that DEC has written tests that actually DEPEND on it:
+                 *
+                 *      C26300: HRRZI   [135531,,246642]    ;PRELOAD AC0 WITH 0,, LITERAL ADDRESS
+                 *              JRA     .+1                 ;*JRA SHOULD PLACE C(AC0) INTO AC0
+                 *              CAIE    [135531,,246642]    ;PASS IF JRA PLACED C(AC0) INTO AC0
+                 *              STOP
+                 *
+                 * If the HRRZI and CAIE instructions don't refer to the same exact literal, the test will fail.
+                 * For purposes of this particular test, the values they stuffed into the literals are essentially
+                 * gibberish, but the same literal may be used in another test where the values are significant.
+                 *
+                 * However, I'm still going to keep it simple.  In this example from p. 2-8 of the April 1978
+                 * MACRO-10 manual, I will NOT be attempting to collapse null words at the end of ASCIZ sequences
+                 * with other null words, especially if they were defined before the ASCIZ:
+                 *
+                 *      Literals having the same value are collapsed in MACRO's literal pool.
+                 *      Thus for the statements:
+                 *
+                 *              PUSH    P,[0]
+                 *              PUSH    P,[0]
+                 *              MOVEI   1,[ASCIZ /TEST1/]
+                 *
+                 *      the same address is shared by the two literals [0], and by the null word
+                 *      generated at the end of [ASCIZ /TEST1/].
                  */
+                let lit = this.aLiterals[i];
+                /*
+                 * First things first: verify that the literal is one contiguous set of words (I'm not sure how
+                 * it couldn't be, but better safe than sorry).
+                 */
+                let aWords = [];
+                let nWords = 0;
+                lit.aWords.forEach(function(w, nLocation) {
+                    if (nLocation === aWords.length) aWords.push(w);
+                    nWords++;
+                });
+                if (nWords == aWords.length) {
+                    /*
+                     * So far, so good.  Now we'll simply brute-force-search our way through the existing set of
+                     * literals, looking for a complete match.
+                     */
+                    for (let nLocation = nLocationLiterals; nLocation + nWords <= this.nLocation; nLocation++) {
+                        let n;
+                        for (n = 0; n < nWords; n++) {
+                            if (aWords[n] !== this.aWords[nLocation + n] || lit.aFixups[n] != this.aFixups[nLocation]) break;
+                        }
+                        if (n == nWords) {
+                            this.addSymbol(lit.name, nLocation, Macro10.SYMTYPE.LABEL);
+                            lit = null;
+                            break;
+                        }
+                    }
+                }
+                if (lit) {
+                    this.addSymbol(lit.name, this.nLocation, Macro10.SYMTYPE.LABEL);
+                    lit.aWords.forEach(function(w, nLocation) {
+                        macro10.genWord(w, lit.aFixups[nLocation]);
+                    });
+                }
             }
 
             for (let i = 0; i < this.aVariables.length; i++) {
@@ -701,9 +752,14 @@ class Macro10 {
      */
     pushScope(name)
     {
-        this.stackScopes.push(
-            {name, aWords: this.aWords, aFixups: this.aFixups, nLocation: this.nLocation, nLocationScope: this.nLocationScope, nLine: this.nLine}
-        );
+        this.stackScopes.push({
+            name,
+            aWords: this.aWords,
+            aFixups: this.aFixups,
+            nLocation: this.nLocation,
+            nLocationScope: this.nLocationScope,
+            nLine: this.nLine
+        });
         this.aWords = [];
         this.aFixups = [];
         this.nLocationScope = this.nLocation;

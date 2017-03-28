@@ -7,7 +7,7 @@ machines:
     type: pdp10
     config: /devices/pdp10/machine/ka10/test/debugger/machine.xml
     debugger: true
-    commands: a 30724 DAKAE.MAC
+    commands: a 30706 DAKAE.MAC
 ---
 
 PDP-10 KA10 Basic Instruction Diagnostic #5
@@ -32,7 +32,7 @@ The Debugger's assemble ("a") command can be used to test the new built-in
 of the [MACRO-10](http://archive.pcjs.org/pubs/dec/pdp10/tops10/02_1973AsmRef_macro.pdf) assembly language.
 This command:
 
-	a 30724 DAKAE.MAC
+	a 30706 DAKAE.MAC
 
 will automatically read the [DAKAE.MAC](DAKAE.MAC.txt) source file (a slightly modified copy of [DAKAEM.MAC](DAKAEM.MAC.txt)),
 assemble it, and then load the binary output at the specified address.
