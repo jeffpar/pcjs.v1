@@ -13,7 +13,7 @@ machines:
 PDP-10 KA10 Basic Instruction Diagnostic #2
 -------------------------------------------
 
-The *PDP-10 KA10 Basic Instruction Diagnostic #2* (MAINDEC-10-DAKAB-B-D) test code has been extracted from
+The *PDP-10 KA10 Basic Instruction Diagnostic #2* (MAINDEC-10-DAKAB) test code has been extracted from
 [DAKABM.MAC](DAKABM.MAC.txt) [[original](http://pdp-10.trailing-edge.com/klad_sources/01/klad.sources/dakabm.mac.html)]
 for use with the [PDP-10 Test Machine with Debugger](/devices/pdp10/machine/ka10/test/debugger/) below.
 
@@ -52,20 +52,20 @@ MAINDEC-10-DAKAB.TXT
 			IDENTIFICATION
 			--------------
 
-	PRODUCT CODE:	MAINDEC-10-DAKAB-B-D
+	PRODUCT CODE:   MAINDEC-10-DAKAB-B-D
 
-	PRODUCT NAME:	DECSYSTEM10 PDP-10 KA10 BASIC
-			INSTRUCTION DIAGNOSTIC (2)
+	PRODUCT NAME:   DECSYSTEM10 PDP-10 KA10 BASIC
+	                INSTRUCTION DIAGNOSTIC (2)
 
-	FUNCTION:	BASIC INSTRUCTIONS 2
+	FUNCTION:       BASIC INSTRUCTIONS 2
 
-	VERSION:	0.2
+	VERSION:        0.2
 
-	DATE RELEASED:	JANUARY 1977
+	DATE RELEASED:  JANUARY 1977
 
-	MAINTAINED BY:	DIAGNOSTIC ENGINEERING GROUP
+	MAINTAINED BY:  DIAGNOSTIC ENGINEERING GROUP
 
-	AUTHOR:		JOHN R. KIRCHOFF
+	AUTHOR:         JOHN R. KIRCHOFF
 
 COPYRIGHT(C) 1976,1977
 DIGITAL EQUIPMENT CORPORATION

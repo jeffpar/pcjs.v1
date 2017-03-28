@@ -13,7 +13,7 @@ machines:
 PDP-10 KA10 Basic Instruction Diagnostic #4
 -------------------------------------------
 
-The *PDP-10 KA10 Basic Instruction Diagnostic #4* (MAINDEC-10-DAKAD-B-D) test code has been extracted from
+The *PDP-10 KA10 Basic Instruction Diagnostic #4* (MAINDEC-10-DAKAD) test code has been extracted from
 [DAKADM.MAC](DAKADM.MAC.txt) [[original](http://pdp-10.trailing-edge.com/klad_sources/01/klad.sources/dakadm.mac.html)]
 for use with the [PDP-10 Test Machine with Debugger](/devices/pdp10/machine/ka10/test/debugger/) below.
 
@@ -67,20 +67,20 @@ MAINDEC-10-DAKAD.TXT
 			IDENTIFICATION
 			--------------
 
-	PRODUCT CODE:	MAINDEC-10-DAKAD-B-D
+	PRODUCT CODE:   MAINDEC-10-DAKAD-B-D
 
-	PRODUCT NAME:	DECSYSTEM10 PDP-10 KA10 BASIC
-			INSTRUCTION DIAGNOSTIC (4)
+	PRODUCT NAME:   DECSYSTEM10 PDP-10 KA10 BASIC
+	                INSTRUCTION DIAGNOSTIC (4)
 
-	FUNCTION:	REGISTER ADDRESSING, PC CHANGE, XCT
+	FUNCTION:       REGISTER ADDRESSING, PC CHANGE, XCT
 
-	VERSION:	0.2
+	VERSION:        0.2
 
-	DATE RELEASED:	JANUARY 1977
+	DATE RELEASED:  JANUARY 1977
 
-	MAINTAINED BY:	DIAGNOSTIC ENGINEERING GROUP
+	MAINTAINED BY:  DIAGNOSTIC ENGINEERING GROUP
 
-	AUTHOR:		JOHN R. KIRCHOFF
+	AUTHOR:         JOHN R. KIRCHOFF
 
 COPYRIGHT(C) 1976,1977
 DIGITAL EQUIPMENT CORPORATION
