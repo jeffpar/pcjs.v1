@@ -1285,7 +1285,9 @@ class Macro10 {
             w = this.dbg.parseInstruction(sOperator, sOperands, this.nLocation, true);
         }
 
-        if (w < 0) w = this.parseExpression(sExp, true);
+        if (w < 0) {
+            w = this.parseExpression(sExp, true);
+        }
 
         if (w !== undefined) {
             this.genWord(w, this.dbg.sUndefined);

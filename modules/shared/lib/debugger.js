@@ -660,6 +660,16 @@ class Debugger extends Component
                     sOp = (iValue < iLimit? asValues[iValue++] : "");
                 }
                 else {
+                    /*
+                     * When parseExpression() calls us, it has collapsed all runs of whitespace into single spaces,
+                     * and although it allows single spaces to divide the elements of the expression, a space is neither
+                     * a unary nor binary operator.  It's essentially a no-op.  If we encounter it here, then it followed
+                     * another operator and is easily ignored (although perhaps it should still trigger a reset of nBase
+                     * and nUnary -- TBD).
+                     */
+                    if (sOp == ' ') {
+                        continue;
+                    }
                     if (sOp == '^B') {
                         this.nBase = 2;
                         continue;
@@ -706,15 +716,27 @@ class Debugger extends Component
             }
 
             aVals.push(this.truncate(v));
+
+            /*
+             * When parseExpression() calls us, it has collapsed all runs of whitespace into single spaces,
+             * and although it allows single spaces to divide the elements of the expression, a space is neither
+             * a unary nor binary operator.  It's essentially a no-op.  If we encounter it here, then it followed
+             * a value, and since we don't want to misinterpret the next operator as a unary operator, we look
+             * ahead and grab the next operator as appropriate.
+             */
+            if (sOp == ' ') {
+                if (iValue < asValues.length - 1 && !asValues[iValue]) {
+                    iValue++;
+                    sOp = asValues[iValue++]
+                } else {
+                    fError = true;
+                    break;
+                }
+            }
             if (!sOp) break;
 
-            if (sOp == ' ') {
-                fError = true;
-                break;
-            }
-
             this.assert(Debugger.aBinOpPrecedence[sOp] != null);
-            if (aOps.length && Debugger.aBinOpPrecedence[sOp] < Debugger.aBinOpPrecedence[aOps[aOps.length - 1]]) {
+            if (aOps.length && Debugger.aBinOpPrecedence[sOp] <= Debugger.aBinOpPrecedence[aOps[aOps.length - 1]]) {
                 this.evalOps(aVals, aOps, 1);
             }
 
@@ -734,6 +756,7 @@ class Debugger extends Component
 
         if (!fError) {
             value = aVals.pop();
+            this.assert(!aVals.length);
         } else if (fQuiet === false) {
             this.println("parse error (" + (sValue || sOp) + ")");
         }
