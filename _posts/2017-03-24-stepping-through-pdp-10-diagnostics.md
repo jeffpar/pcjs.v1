@@ -12,10 +12,9 @@ machines:
 ---
 
 Now that the PDPjs MACRO-10 Mini-Assembler is [limping along](/blog/2017/03/21/), it's time to start assembling some
-of DEC's PDP-10 "Basic Instruction" diagnostics and loading them into a test machine.
-
-The first diagnostic I tried was [KA10 Basic Instruction Diagnostic #1 (MAINDEC-10-DAKAA-B-D)](/apps/pdp10/diags/klad/dakaa/),
-which has been loaded into the machine below.
+of DEC's PDP-10 "Basic Instruction" diagnostics and loading them into a test machine.  The first diagnostic I tried was
+[KA10 Basic Instruction Diagnostic #1 (MAINDEC-10-DAKAA-B-D)](/apps/pdp10/diags/klad/dakaa/), which has been loaded into
+the machine below.
 
 {% include machine.html id="testka10" %}
 
@@ -59,9 +58,17 @@ Happily, this was a good outcome, because 035057 is the end of the test.  If you
 
 	035057	254 00 0 00 030057 	ENDXX:	JRST	BEGEND		;LOOP PROGRAM
 
-I had similar success with Basic Instruction Diagnostics #2 (MAINDEC-10-DAKAB-B-D) and #3 (MAINDEC-10-DAKAC-B-D).
+I had similar success with [Diagnostic #2 (MAINDEC-10-DAKAB-B-D)](/apps/pdp10/diags/klad/dakab/).
 
-However, when I tried [KA10 Basic Instruction Diagnostic #4 (MAINDEC-10-DAKAD-B-D)](/apps/pdp10/diags/klad/dakad/):
+Problems started to crop up in [Diagnostic #3 (MAINDEC-10-DAKAC-B-D)](/apps/pdp10/diags/klad/dakac/):
+
+	        CAME    [0,-1]          ;PASS TEST IF C(AC)=0,,-1
+
+Based on the comment, it's clear what they really meant was either "[0,,-1]" or "[XWD 0,-1]".  However, they still got the
+desired result, which means that even when the assembler parses an mnemonic-less instruction like "0,-1", it must still truncate
+the second (address) operand.  Once I generated the appropriate value (000000,777777), the test passed.
+
+And I had several failures running [Diagnostic #4 (MAINDEC-10-DAKAD-B-D)](/apps/pdp10/diags/klad/dakad/):
 
 	>> a 30724 /apps/pdp10/diags/klad/dakad/DAKAD.MAC
 	starting PCjs MACRO-10 Mini-Assembler...
@@ -94,9 +101,10 @@ However, when I tried [KA10 Basic Instruction Diagnostic #4 (MAINDEC-10-DAKAD-B-
 	032005: 312140 034462  CAME    3,34462          ;history=2
 	032006: 254200 032007  HALT    32007            ;history=1
 
-This looked less good.  Both AC3 and memory location 34462 contained 400000000000, so the CAME ("Compare AC with Memory
-and Skip if Equal") instruction should have "skipped" the HALT, but it didn't.  Thus was due to a bug in the
-[cpuops.js](/modules/pdp10/lib/cpuops.js) *CMP()* function:
+In this case, both AC3 and memory location 34462 contained 400000000000, so the CAME ("Compare AC with Memory
+and Skip if Equal") instruction should have "skipped" the HALT, but it didn't.
+
+Thus was due to a bug in the [cpuops.js](/modules/pdp10/lib/cpuops.js) *CMP()* function:
 
 ```javascript
 /**
@@ -114,7 +122,7 @@ PDP10.CMP = function(dst, src)
 };
 ```
 
-And here's the correction:
+Basically, there was a typo.  Here's the correction:
 
 ```javascript
     return (dst < PDP10.INT_LIMIT? dst : dst - PDP10.WORD_LIMIT) - (src < PDP10.INT_LIMIT? src : src - PDP10.WORD_LIMIT);
@@ -143,8 +151,8 @@ After fixing that and trying again, the diagnostic got a bit farther:
 	033444: 312000 034574  CAME    0,34574          ;history=2
 	033445: 254200 033446  HALT    33446            ;history=1
 
-The problem here was that after `SETO 0,0`, AC0 contained 777777777777, so when the AOBJN ("Add One to Both Halves
-of AC and Jump if Negative") instruction added 000001000001 to it, the result should have been 000001000000, but
+The problem here was that after `SETO 0,0`, AC0 contained 777777,777777, so when the AOBJN ("Add One to Both Halves
+of AC and Jump if Negative") instruction added 000001,000001 to it, the result should have been 000001,000000, but
 because other another typo, this time in the *opAOBJN()* function:
 
 ```javascript
@@ -179,18 +187,9 @@ not WORD_MASK, to truncate the value to 36 bits.  Here's the corrected line:
     var dst = (this.readWord(acc) + 0o000001000001) % PDP10.WORD_LIMIT;
 ```
 
-The next problem I encountered involved this instruction in DEC's "DAKAC" diagnostic:
-
-	CAME    [0,-1]      ;PASS TEST IF C(AC)=0,,-1
-
-Based on the comment, it's clear what they really meant was either "[0,,-1]" or "[XWD 0,-1]".  However, they still got the
-desired result, which means that even when the assembler parses an mnemonic-less instruction like "0,-1", it must still truncate
-the second (address) operand.
-
-The last few problems I ran into during my initial testing were in DEC's "DAKAD" diagnostic.  When it tests the `SOJ` and `SOS`
-instructions, it expects the carry and overflow flags to be set consistently with an *addition* of negative 1 (777777,777777)
-rather than a *subtraction* of positive 1.  That was an easy fix, but I'm not convinced that all flag-related issues are resolved,
-so more arithmetic operation testing will be performed at a later date.
+The last few problems involved the `SOJ` and `SOS` instructions, which expected the carry and overflow flags to be set
+consistently with an *addition* of negative 1 (777777,777777) rather than a *subtraction* of positive 1.  That was an easy fix,
+but I'm not convinced that all flag-related issues are resolved, so more arithmetic operation testing is required.
 
 Finally, when the "DAKAD" diagnostic generated an indirect word reference:
 
