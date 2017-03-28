@@ -3537,7 +3537,7 @@ PDP10.opAOSG = function(op, acc)
  */
 PDP10.opSOJ = function(op, acc)
 {
-    this.writeWord(acc, PDP10.doSUB.call(this, this.readWord(acc), 1));
+    this.writeWord(acc, PDP10.doADD.call(this, this.readWord(acc), PDP10.WORD_MASK));
 };
 
 /**
@@ -3556,7 +3556,7 @@ PDP10.opSOJ = function(op, acc)
  */
 PDP10.opSOJL = function(op, acc)
 {
-    var dst = this.writeWord(acc, PDP10.doSUB.call(this, this.readWord(acc), 1));
+    var dst = this.writeWord(acc, PDP10.doADD.call(this, this.readWord(acc), PDP10.WORD_MASK));
     if (PDP10.SIGN(dst) < 0) this.setPC(this.regEA);
 };
 
@@ -3576,7 +3576,7 @@ PDP10.opSOJL = function(op, acc)
  */
 PDP10.opSOJE = function(op, acc)
 {
-    var dst = this.writeWord(acc, PDP10.doSUB.call(this, this.readWord(acc), 1));
+    var dst = this.writeWord(acc, PDP10.doADD.call(this, this.readWord(acc), PDP10.WORD_MASK));
     if (PDP10.SIGN(dst) == 0) this.setPC(this.regEA);
 };
 
@@ -3596,7 +3596,7 @@ PDP10.opSOJE = function(op, acc)
  */
 PDP10.opSOJLE = function(op, acc)
 {
-    var dst = this.writeWord(acc, PDP10.doSUB.call(this, this.readWord(acc), 1));
+    var dst = this.writeWord(acc, PDP10.doADD.call(this, this.readWord(acc), PDP10.WORD_MASK));
     if (PDP10.SIGN(dst) <= 0) this.setPC(this.regEA);
 };
 
@@ -3616,7 +3616,7 @@ PDP10.opSOJLE = function(op, acc)
  */
 PDP10.opSOJA = function(op, acc)
 {
-    this.writeWord(acc, PDP10.doSUB.call(this, this.readWord(acc), 1));
+    this.writeWord(acc, PDP10.doADD.call(this, this.readWord(acc), PDP10.WORD_MASK));
     this.setPC(this.regEA);
 };
 
@@ -3636,7 +3636,7 @@ PDP10.opSOJA = function(op, acc)
  */
 PDP10.opSOJGE = function(op, acc)
 {
-    var dst = this.writeWord(acc, PDP10.doSUB.call(this, this.readWord(acc), 1));
+    var dst = this.writeWord(acc, PDP10.doADD.call(this, this.readWord(acc), PDP10.WORD_MASK));
     if (PDP10.SIGN(dst) >= 0) this.setPC(this.regEA);
 };
 
@@ -3656,7 +3656,7 @@ PDP10.opSOJGE = function(op, acc)
  */
 PDP10.opSOJN = function(op, acc)
 {
-    var dst = this.writeWord(acc, PDP10.doSUB.call(this, this.readWord(acc), 1));
+    var dst = this.writeWord(acc, PDP10.doADD.call(this, this.readWord(acc), PDP10.WORD_MASK));
     if (PDP10.SIGN(dst) != 0) this.setPC(this.regEA);
 };
 
@@ -3676,7 +3676,7 @@ PDP10.opSOJN = function(op, acc)
  */
 PDP10.opSOJG = function(op, acc)
 {
-    var dst = this.writeWord(acc, PDP10.doSUB.call(this, this.readWord(acc), 1));
+    var dst = this.writeWord(acc, PDP10.doADD.call(this, this.readWord(acc), PDP10.WORD_MASK));
     if (PDP10.SIGN(dst) > 0) this.setPC(this.regEA);
 };
 
@@ -3696,7 +3696,7 @@ PDP10.opSOJG = function(op, acc)
  */
 PDP10.opSOS = function(op, acc)
 {
-    var dst = this.writeWord(this.regEA, PDP10.doSUB.call(this, this.readWord(this.regEA), 1));
+    var dst = this.writeWord(this.regEA, PDP10.doADD.call(this, this.readWord(this.regEA), PDP10.WORD_MASK));
     if (acc) this.writeWord(acc, dst);
 };
 
@@ -3716,7 +3716,7 @@ PDP10.opSOS = function(op, acc)
  */
 PDP10.opSOSL = function(op, acc)
 {
-    var dst = this.writeWord(this.regEA, PDP10.doSUB.call(this, this.readWord(this.regEA), 1));
+    var dst = this.writeWord(this.regEA, PDP10.doADD.call(this, this.readWord(this.regEA), PDP10.WORD_MASK));
     if (PDP10.SIGN(dst) < 0) this.setPC(this.regPC + 1);
     if (acc) this.writeWord(acc, dst);
 };
@@ -3737,7 +3737,7 @@ PDP10.opSOSL = function(op, acc)
  */
 PDP10.opSOSE = function(op, acc)
 {
-    var dst = this.writeWord(this.regEA, PDP10.doSUB.call(this, this.readWord(this.regEA), 1));
+    var dst = this.writeWord(this.regEA, PDP10.doADD.call(this, this.readWord(this.regEA), PDP10.WORD_MASK));
     if (PDP10.SIGN(dst) == 0) this.setPC(this.regPC + 1);
     if (acc) this.writeWord(acc, dst);
 };
@@ -3758,7 +3758,7 @@ PDP10.opSOSE = function(op, acc)
  */
 PDP10.opSOSLE = function(op, acc)
 {
-    var dst = this.writeWord(this.regEA, PDP10.doSUB.call(this, this.readWord(this.regEA), 1));
+    var dst = this.writeWord(this.regEA, PDP10.doADD.call(this, this.readWord(this.regEA), PDP10.WORD_MASK));
     if (PDP10.SIGN(dst) <= 0) this.setPC(this.regPC + 1);
     if (acc) this.writeWord(acc, dst);
 };
@@ -3779,7 +3779,7 @@ PDP10.opSOSLE = function(op, acc)
  */
 PDP10.opSOSA = function(op, acc)
 {
-    var dst = this.writeWord(this.regEA, PDP10.doSUB.call(this, this.readWord(this.regEA), 1));
+    var dst = this.writeWord(this.regEA, PDP10.doADD.call(this, this.readWord(this.regEA), PDP10.WORD_MASK));
     this.setPC(this.regPC + 1);
     if (acc) this.writeWord(acc, dst);
 };
@@ -3800,7 +3800,7 @@ PDP10.opSOSA = function(op, acc)
  */
 PDP10.opSOSGE = function(op, acc)
 {
-    var dst = this.writeWord(this.regEA, PDP10.doSUB.call(this, this.readWord(this.regEA), 1));
+    var dst = this.writeWord(this.regEA, PDP10.doADD.call(this, this.readWord(this.regEA), PDP10.WORD_MASK));
     if (PDP10.SIGN(dst) >= 0) this.setPC(this.regPC + 1);
     if (acc) this.writeWord(acc, dst);
 };
@@ -3821,7 +3821,7 @@ PDP10.opSOSGE = function(op, acc)
  */
 PDP10.opSOSN = function(op, acc)
 {
-    var dst = this.writeWord(this.regEA, PDP10.doSUB.call(this, this.readWord(this.regEA), 1));
+    var dst = this.writeWord(this.regEA, PDP10.doADD.call(this, this.readWord(this.regEA), PDP10.WORD_MASK));
     if (PDP10.SIGN(dst) != 0) this.setPC(this.regPC + 1);
     if (acc) this.writeWord(acc, dst);
 };
@@ -3842,7 +3842,7 @@ PDP10.opSOSN = function(op, acc)
  */
 PDP10.opSOSG = function(op, acc)
 {
-    var dst = this.writeWord(this.regEA, PDP10.doSUB.call(this, this.readWord(this.regEA), 1));
+    var dst = this.writeWord(this.regEA, PDP10.doADD.call(this, this.readWord(this.regEA), PDP10.WORD_MASK));
     if (PDP10.SIGN(dst) > 0) this.setPC(this.regPC + 1);
     if (acc) this.writeWord(acc, dst);
 };
