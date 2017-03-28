@@ -1717,24 +1717,49 @@ class DebuggerPDP10 extends Debugger {
             if (sOperands) {
                 var aOperands = sOperands.split(',');
                 for (var i = 0; i < aOperands.length; i++) {
+
                     var sOperand = aOperands[i].trim();
                     if (!sOperand) continue;
+
                     if (i > 1) {
                         this.println("too many operands: " + sOperands);
                         opCode = -1;
                         break;
                     }
+
                     var match = sOperand.match(/(@?)([^(]*)\(?([^)]*)\)?/);
                     if (!match) {
                         this.println("unknown operand: " + sOperand);
                         opCode = -1;
                         break;
                     }
+
+                    /*
+                     * If the operand contains an indirection operator (@) and/or index register (X), we parse those
+                     * first and update the indirect (I) bit and index (X) bits as appropriate.  The order is important,
+                     * because if we parse them AFTER parsing the address expression, we might lose an undefined symbol
+                     * indication, and if the caller needs to handle address fixups, that would be bad.
+                     */
+                    if (match[1]) opCode += PDP10.OPCODE.I_BIT;
+
+                    sOperand = match[3];
+                    if (sOperand) {
+                        operand = this.parseExpression(sOperand, fQuiet);
+                        if (operand == undefined) {
+                            opCode = -1;
+                            break;
+                        }
+                        if (operand < 0 || operand > PDP10.OPCODE.X_MASK) {
+                            operand &= PDP10.OPCODE.X_MASK;
+                            if (MAXDEBUG) this.println("index (" + sOperand + ") truncated to " + this.toStrBase(operand));
+                        }
+                        opCode += operand << PDP10.OPCODE.X_SHIFT;
+                    }
+
                     sOperand = match[2];
                     if (i || aOperands.length == 1) {
                         /*
-                         * If this is NOT the first operand, then replace all periods NOT preceded
-                         * by a digit with the current address.
+                         * If this is NOT the first operand, replace all periods NOT preceded by a digit with the current address.
                          */
                         if (!sOperand) {
                             sOperand = "0";
@@ -1742,11 +1767,13 @@ class DebuggerPDP10 extends Debugger {
                             sOperand = sOperand.replace(/(^|[^0-9])\./g, "$1" + this.toStrOffset(addr));
                         }
                     }
+
                     var operand = this.parseExpression(sOperand, fQuiet);
                     if (operand == undefined) {
                         opCode = -1;
                         break;
                     }
+
                     if (!i && aOperands.length > 1) {
                         if (opMask == PDP10.OPCODE.OPIO) {
                             if (operand < 0 || operand > PDP10.OPCODE.IO_MASK) {
@@ -1764,27 +1791,26 @@ class DebuggerPDP10 extends Debugger {
                         }
                         continue;
                     }
-                    if (sOpcode) {
+
+                    /*
+                     * I came across what I believe is a typo in the DEC "DAKAC" diagnostic:
+                     *
+                     *      CAME	[0,-1]		;PASS TEST IF C(AC)=0,,-1
+                     *
+                     * Based on the comment, it's clear what they really meant was either "[0,,-1]" or "[XWD 0,-1]".
+                     * However, they still got the desired result, which means when the assembler parses an mnemonic-less
+                     * instruction like "0,-1", it must truncate the second (address) operand.
+                     *
+                     * TODO: Determine if I should ALWAYS truncate.  I'm trying to retain the flexibility of allowing
+                     * a full 36-bit instruction to be encoded with a single numeric expression (ie, one operand).
+                     */
+                    if (sOpcode || i) {
                         if (operand < 0 || operand > PDP10.OPCODE.Y_MASK) {
                             operand &= PDP10.ADDR_MASK;
                             if (MAXDEBUG) this.println("address (" + sOperand + ") truncated to " + this.toStrBase(operand));
                         }
                     }
                     opCode += operand;
-                    sOperand = match[3];
-                    if (sOperand) {
-                        operand = this.parseExpression(sOperand, fQuiet);
-                        if (operand == undefined) {
-                            opCode = -1;
-                            break;
-                        }
-                        if (operand < 0 || operand > PDP10.OPCODE.X_MASK) {
-                            operand &= PDP10.OPCODE.X_MASK;
-                            if (MAXDEBUG) this.println("index (" + sOperand + ") truncated to " + this.toStrBase(operand));
-                        }
-                        opCode += operand << PDP10.OPCODE.X_SHIFT;
-                    }
-                    if (match[1]) opCode += PDP10.OPCODE.I_BIT;
                 }
             }
             //

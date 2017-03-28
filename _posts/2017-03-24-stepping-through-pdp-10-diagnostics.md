@@ -59,7 +59,9 @@ Happily, this was a good outcome, because 035057 is the end of the test.  If you
 
 	035057	254 00 0 00 030057 	ENDXX:	JRST	BEGEND		;LOOP PROGRAM
 
-Next, I tried [KA10 Basic Instruction Diagnostic #4 (MAINDEC-10-DAKAD-B-D)](/apps/pdp10/diags/klad/dakad/):
+I had similar success with Basic Instruction Diagnostics #2 (MAINDEC-10-DAKAB-B-D) and #3 (MAINDEC-10-DAKAC-B-D).
+
+However, when I tried [KA10 Basic Instruction Diagnostic #4 (MAINDEC-10-DAKAD-B-D)](/apps/pdp10/diags/klad/dakad/):
 
 	>> a 30724 /apps/pdp10/diags/klad/dakad/DAKAD.MAC
 	starting PCjs MACRO-10 Mini-Assembler...
@@ -177,8 +179,27 @@ not WORD_MASK, to truncate the value to 36 bits.  Here's the corrected line:
     var dst = (this.readWord(acc) + 0o000001000001) % PDP10.WORD_LIMIT;
 ```
 
-There are more PDPjs emulation failures in these [Basic Instruction Diagnostics](/apps/pdp10/diags/klad/) from DEC,
-but I've run out of time today.  To be continued....
+The next problem I encountered involved this instruction in DEC's "DAKAC" diagnostic:
 
-*[@jeffpar](http://twitter.com/jeffpar)*
+	CAME    [0,-1]      ;PASS TEST IF C(AC)=0,,-1
+
+Based on the comment, it's clear what they really meant was either "[0,,-1]" or "[XWD 0,-1]".  However, they still got the
+desired result, which means that even when the assembler parses an mnemonic-less instruction like "0,-1", it must still truncate
+the second (address) operand.
+
+The last few problems I ran into during my initial testing were in DEC's "DAKAD" diagnostic.  When it tests the `SOJ` and `SOS`
+instructions, it expects the carry and overflow flags to be set consistently with an *addition* of negative 1 (777777,777777)
+rather than a *subtraction* of positive 1.  That was an easy fix, but I'm not convinced that all flag-related issues are resolved,
+so more arithmetic operation testing will be performed at a later date.
+
+Finally, when the "DAKAD" diagnostic generated an indirect word reference:
+
+	E217:   E217A(3)
+
+my MACRO-10 Mini-Assembler passed the reference to the Debugger's assembler function first, because that function already knows
+how to parse address expressions that use indirection and/or indexing, including expressions (eg, "E217A") that require a fix-up.
+Unfortunately, the Debugger failed to pass the fix-up information back to the MACRO-10 Mini-Assembler, because evaluation of the
+indexing expression was overwriting fix-up information, if any, from the preceding expression.
+
+*[@jeffpar](http://twitter.com/jeffpar)*  
 *Mar 24, 2017*
