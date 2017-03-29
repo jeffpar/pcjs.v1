@@ -501,6 +501,19 @@ class CPUStatePDP10 extends CPUPDP10 {
     }
 
     /**
+     * getXC()
+     *
+     * NOTE: This function is nothing more than a convenience, and we fully expect it to be inlined at runtime.
+     *
+     * @this {CPUStatePDP10}
+     * @return {number}
+     */
+    getXC()
+    {
+        return this.regXC >= 0? this.regXC : this.regPC;
+    }
+
+    /**
      * getLastAddr()
      *
      * @this {CPUStatePDP10}
@@ -534,6 +547,7 @@ class CPUStatePDP10 extends CPUPDP10 {
     setPC(addr)
     {
         this.regPC = addr % PDP10.ADDR_LIMIT;
+        this.regXC = -1;
     }
 
     /**

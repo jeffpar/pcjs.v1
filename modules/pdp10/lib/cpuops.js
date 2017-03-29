@@ -336,17 +336,18 @@ PDP10.opILDB = function(op, ac)
      * is with regEA containing the address of the bits to be loaded.
      *
      * We can implement this as a simple combination of opIBP() and opLDB(), but taking care that we only call
-     * opIBP() on phase 1.
+     * opIBP() on phase 1 (and only if the BIS flag is not set).
      */
-    if (this.regBP < 0) {
+    if (!(this.regPS & PDP10.PSFLAG.BIS)) {
         PDP10.opIBP.call(this, op, ac);
+        this.regPS |= PDP10.PSFLAG.BIS;
     }
     PDP10.opLDB.call(this, op, ac);
 };
 
 /**
  * opLDB(0o135000): Load Byte
- *
+ *z
  * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-16:
  *
  *      Retrieve a byte of S bits from the location and position specified by the pointer contained in location E,
@@ -393,6 +394,7 @@ PDP10.opLDB = function(op, ac)
         w = Math.trunc(w / Math.pow(2, p)) % Math.pow(2, s);
     }
     this.writeWord(ac, w);
+    this.regPS &= ~PDP10.PSFLAG.BIS;
     this.regBP = -1;
 };
 
@@ -422,10 +424,11 @@ PDP10.opIDPB = function(op, ac)
      * is with regEA containing the address of the bits to be stored.
      *
      * We can implement this as a simple combination of opIBP() and opDDB(), but taking care that we only call
-     * opIBP() on phase 1.
+     * opIBP() on phase 1 (and only if the BIS flag is not set).
      */
-    if (this.regBP < 0) {
+    if (!(this.regPS & PDP10.PSFLAG.BIS)) {
         PDP10.opIBP.call(this, op, ac);
+        this.regPS |= PDP10.PSFLAG.BIS;
     }
     PDP10.opDPB.call(this, op, ac);
 };
@@ -471,6 +474,7 @@ PDP10.opDPB = function(op, ac)
     var b = ((this.readWord(ac) % Math.pow(2, s)) * Math.pow(2, p)) % PDP10.WORD_LIMIT;
     w = (w - (w % Math.pow(2, p + s))) + b + (w % Math.pow(2, p));
     this.writeWord(this.regEA, w);
+    this.regPS &= ~PDP10.PSFLAG.BIS;
     this.regBP = -1;
 };
 
@@ -2323,7 +2327,19 @@ PDP10.opXCT = function(op, ac)
 };
 
 /**
- * opPUSHJ(0o260000)
+ * opPUSHJ(0o260000): Push Down and Jump
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-62:
+ *
+ *      Add 1000001 [base 8] to AC to increment both halves by one and place the result back in AC.  If the addition
+ *      causes the count in AC left to reach zero, set the Pushdown Overflow flag.  Then place the current contents of
+ *      the flags (as described above) in the left half of the location now addressed by AC right and the contents of
+ *      PC in the right half of that location (at this time PC contains an address one greater than the location of
+ *      the PUSHJ instruction).  Take the next instruction from location E and continue sequential operation from there.
+ *
+ *      The flags are unaffected except Byte Interrupt, which is cleared.  The original contents of the location added
+ *      to the list are lost.  If this instruction is executed as a result of a priority interrupt or in unrelocated
+ *      41 or 61 while the processor is in user mode, bit 5 of the PC word stored is 1 and the processor leaves user mode.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2331,7 +2347,12 @@ PDP10.opXCT = function(op, ac)
  */
 PDP10.opPUSHJ = function(op, ac)
 {
-    this.opUndefined(op);
+    var p = (this.readWord(ac) + 0o000001000001) % PDP10.WORD_LIMIT;
+    this.writeWord(ac, p);
+    if (!((p / PDP10.HALF_SHIFT)|0)) this.regPS |= PDP10.PSFLAG.PDOV;
+    this.writeWord(p & PDP10.ADDR_MASK, this.getPS() * PDP10.HALF_SHIFT + this.getPC());
+    this.regPS &= ~PDP10.PSFLAG.BIS;            // TODO: Verify that BIS is cleared AFTER calling getPS()
+    this.setPC(this.regEA);
 };
 
 /**
@@ -2370,16 +2391,16 @@ PDP10.opPUSH = function(op, ac)
          * This is the behavior that is clearly documented by DEC.
          */
         p += 0o000001000001;
-        this.writeWord(p & PDP10.HALF_MASK, this.readWord(this.regEA));
+        this.writeWord(p & PDP10.ADDR_MASK, this.readWord(this.regEA));
         if (p >= PDP10.WORD_LIMIT) p -= PDP10.WORD_LIMIT;
         if (!((p / PDP10.HALF_SHIFT)|0)) this.regPS |= PDP10.PSFLAG.PDOV;
     } else {
         /*
          * This is the SIMH behavior, which appears to increment each half of AC independently.
          */
-        var addr = (p + 1) & PDP10.HALF_MASK;
+        var addr = (p + 1) & PDP10.ADDR_MASK;
         this.writeWord(addr, this.readWord(this.regEA));
-        p = (p + 0o000001000000) - (p & PDP10.HALF_MASK) + addr;
+        p = (p + 0o000001000000) - (p & PDP10.ADDR_MASK) + addr;
         if (p >= PDP10.WORD_LIMIT) {
             p -= PDP10.WORD_LIMIT;
             this.regPS |= PDP10.PSFLAG.PDOV;
@@ -2407,7 +2428,7 @@ PDP10.opPUSH = function(op, ac)
 PDP10.opPOP = function(op, ac)
 {
     var p = this.readWord(ac);
-    var src = this.readWord(p & PDP10.HALF_MASK);
+    var src = this.readWord(p & PDP10.ADDR_MASK);
     this.writeWord(this.regEA, src);
     if (this.regEA == ac) p = src;     // this avoids re-reading the accumulator if the write just overwrote it
     p -= 0o000001000001;
@@ -2417,7 +2438,16 @@ PDP10.opPOP = function(op, ac)
 };
 
 /**
- * opPOPJ(0o263000)
+ * opPOPJ(0o263000): Pop Up and Jump
+ *
+ * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-63:
+ *
+ *      Subtract 1000001 [base 8] from AC to decrement both halves by one and place the result back in AC.
+ *      If the subtraction causes the count in AC left to reach -1, set the Pushdown Overflow flag.  Take the
+ *      next instruction from the location addressed by the right half of the location that was addressed by
+ *      AC right prior to the decrementing, and continue sequential operation from there.
+ *
+ *      SIDEBAR: The effective address E is ignored.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2425,7 +2455,13 @@ PDP10.opPOP = function(op, ac)
  */
 PDP10.opPOPJ = function(op, ac)
 {
-    this.opUndefined(op);
+    var p = this.readWord(ac);
+    var pc = this.readWord(p & PDP10.ADDR_MASK);
+    p -= 0o000001000001;
+    if (p < 0) p += PDP10.WORD_LIMIT;
+    if (((p / PDP10.HALF_SHIFT)|0) == PDP10.HALF_MASK) this.regPS |= PDP10.PSFLAG.PDOV;
+    this.writeWord(ac, p);
+    this.setPC(pc & PDP10.ADDR_MASK);
 };
 
 /**
@@ -2448,7 +2484,7 @@ PDP10.opPOPJ = function(op, ac)
 PDP10.opJSR = function(op, ac)
 {
     this.writeWord(this.regEA, this.getPS() * PDP10.HALF_SHIFT + this.getPC());
-    this.regPS &= ~PDP10.PSFLAG.BIS;            // TODO: Verify that BIS is cleared AFTER writing
+    this.regPS &= ~PDP10.PSFLAG.BIS;            // TODO: Verify that BIS is cleared AFTER calling getPS()
     this.setPC(this.regEA + 1);
 };
 
@@ -2472,7 +2508,7 @@ PDP10.opJSR = function(op, ac)
 PDP10.opJSP = function(op, ac)
 {
     this.writeWord(ac, this.getPS() * PDP10.HALF_SHIFT + this.getPC());
-    this.regPS &= ~PDP10.PSFLAG.BIS;            // TODO: Verify that BIS is cleared AFTER writing
+    this.regPS &= ~PDP10.PSFLAG.BIS;            // TODO: Verify that BIS is cleared AFTER calling getPS()
     this.setPC(this.regEA);
 };
 

@@ -3344,7 +3344,7 @@ class DebuggerPDP10 extends Debugger {
         this.println(this.getRegDump(fMisc));
 
         if (fInstruction) {
-            this.setAddr(this.dbgAddrCode, cpu.getPC());
+            this.setAddr(this.dbgAddrCode, cpu.getXC());
             this.doUnassemble(this.toStrAddr(this.dbgAddrCode));
         }
     }
@@ -3881,7 +3881,7 @@ class DebuggerPDP10 extends Debugger {
      */
     doCommands(sCmds, fSave)
     {
-        if (sCmds) {
+        if (sCmds != null) {
             this.aCommands = this.parseCommand(sCmds, fSave);
         }
         var sCmd;
