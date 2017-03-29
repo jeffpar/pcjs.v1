@@ -832,7 +832,7 @@ class Macro10 {
         });
         this.aWords = [];
         this.aFixups = [];
-        this.nLocationScope = this.nLocation;
+        if (this.nLocationScope < 0) this.nLocationScope = this.nLocation;
         this.nLocation = 0;
     }
 
@@ -960,7 +960,9 @@ class Macro10 {
          */
         var match = sOperand.match(/^([^,]*),,([^,]*)$/);
         if (!match) {
-            if (nLocation === undefined) nLocation = (this.nLocationScope >= 0? this.nLocationScope : this.nLocation);
+            if (nLocation === undefined) {
+                nLocation = (this.nLocationScope >= 0? this.nLocationScope : this.nLocation);
+            }
             /*
              * Check for the "period" syntax that MACRO-10 uses to represent the value of the current location.
              * The Debugger's parseInstruction() method understands that syntax, but its parseExpression() method
@@ -1428,7 +1430,8 @@ class Macro10 {
         var sExp = (sOperator + sSeparator + sOperands).trim();
 
         if (sOperands.indexOf(",,") < 0) {
-            w = this.dbg.parseInstruction(sOperator, sOperands, this.nLocation, true);
+            var nLocation = this.nLocationScope >= 0? this.nLocationScope : this.nLocation;
+            w = this.dbg.parseInstruction(sOperator, sOperands, nLocation, true);
         }
 
         if (w < 0) {
