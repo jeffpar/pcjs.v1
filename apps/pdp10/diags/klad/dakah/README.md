@@ -1,29 +1,29 @@
 ---
 layout: page
-title: PDP-10 KA10 Basic Instruction Diagnostic #7
-permalink: /apps/pdp10/diags/klad/dakag/
+title: PDP-10 KA10 Basic Instruction Diagnostic #8
+permalink: /apps/pdp10/diags/klad/dakah/
 machines:
   - id: testka10
     type: pdp10
     config: /devices/pdp10/machine/ka10/test/debugger/machine.xml
     debugger: true
-    commands: a 30724 DAKAG.MAC
+    commands: a 30724 DAKAH.MAC
 ---
 
-PDP-10 KA10 Basic Instruction Diagnostic #7
+PDP-10 KA10 Basic Instruction Diagnostic #8
 -------------------------------------------
 
-The *PDP-10 KA10 Basic Instruction Diagnostic #7* (MAINDEC-10-DAKAG) test code has been extracted from
-[DAKAGM.MAC](DAKAGM.MAC.txt) [[original](http://pdp-10.trailing-edge.com/klad_sources/01/klad.sources/dakagm.mac.html)]
+The *PDP-10 KA10 Basic Instruction Diagnostic #8* (MAINDEC-10-DAKAH) test code has been extracted from
+[DAKAHM.MAC](DAKAHM.MAC.txt) [[original](http://pdp-10.trailing-edge.com/klad_sources/01/klad.sources/dakahm.mac.html)]
 for use with the [PDP-10 Test Machine with Debugger](/devices/pdp10/machine/ka10/test/debugger/) below.
 
 Resources for this test include:
 
-- [Instructions](#dakagtxt)
-- [History](#dakaghst)
-- [Source Code](#dakagmac)
-- [MACRO-10 Listing](DAKAG.LST.txt)
-- [Additional Information](http://archive.pcjs.org/apps/pdp10/diags/klad/dakag/DAKAG.SEQ.txt)
+- [Instructions](#dakahtxt)
+- [History](#dakahhst)
+- [Source Code](#dakahmac)
+- [MACRO-10 Listing](DAKAH.LST.txt)
+- [Additional Information](http://archive.pcjs.org/apps/pdp10/diags/klad/dakah/DAKAH.SEQ.txt)
 
 {% include machine.html id="testka10" %}
 
@@ -32,18 +32,18 @@ The Debugger's assemble ("a") command can be used to test the new built-in
 of the [MACRO-10](http://archive.pcjs.org/pubs/dec/pdp10/tops10/02_1973AsmRef_macro.pdf) assembly language.
 This command:
 
-	a 30724 DAKAG.MAC
+	a 30724 DAKAH.MAC
 
-will automatically read the [DAKAG.MAC](DAKAG.MAC.txt) source file (a slightly modified copy of [DAKAGM.MAC](DAKAGM.MAC.txt)),
+will automatically read the [DAKAH.MAC](DAKAH.MAC.txt) source file (a slightly modified copy of [DAKAHM.MAC](DAKAHM.MAC.txt)),
 assemble it, and then load the binary output at the specified address.
 
 ---
 
-DAKAG.TXT
+DAKAH.TXT
 ---------
 
 ```
-MAINDEC-10-DAKAG.TXT
+MAINDEC-10-DAKAH.TXT
 
 
 
@@ -54,12 +54,12 @@ MAINDEC-10-DAKAG.TXT
 			IDENTIFICATION
 			--------------
 
-	PRODUCT CODE:   MAINDEC-10-DAKAG-B-D
+	PRODUCT CODE:   MAINDEC-10-DAKAH-B-D
 
 	PRODUCT NAME:   DECSYSTEM10 PDP-10 KA10 BASIC
-	                INSTRUCTION DIAGNOSTIC (7)
+	                INSTRUCTION DIAGNOSTIC (8)
 
-	FUNCTION:       PUSH, POP, XCT, BASIC SHIFT/ROTATE
+	FUNCTION:       PI, INTERRUPTS, LUUO'S, I/O
 
 	VERSION:        0.2
 
@@ -88,7 +88,7 @@ EQUIPMENT CORPORATION.
 DEC ASSUMES NO RESPONSIBILITY FOR THE USE OR RELIABILITY OF ITS
 SOFTWARE ON EQUIPMENT WHICH IS NOT SUPPLIED BY DEC.
 
-							MAINDEC-10-DAKAG.TXT
+							MAINDEC-10-DAKAH.TXT
 							PAGE 2
 
 
@@ -125,16 +125,16 @@ SOFTWARE ON EQUIPMENT WHICH IS NOT SUPPLIED BY DEC.
 
 9.0	LISTING
 
-							MAINDEC-10-DAKAG.TXT
+							MAINDEC-10-DAKAH.TXT
 							PAGE 3
 
 
 1.0	ABSTRACT
 
 	THIS PDP-10 KA10 BASIC INSTRUCTION DIAGNOSTIC IS THE
-	SEVENTH IN A SERIES OF PDP-10 KA10 PROCESSOR DIAGNOSTICS.
-	THE DIAGNOSTIC TESTS THE PUSH, POP, XCT AND BASIC
-	SHIFT ROTATE INSTRUCTIONS.
+	EIGHTH IN A SERIES OF PDP-10 KA10 PROCESSOR DIAGNOSTICS.
+	THE DIAGNOSTIC TESTS THE PI SYSTEM, INTERRUPTS, LUUO'S
+	AND INPUT/OUTPUT.
 
 2.0	REQUIREMENTS
 
@@ -156,7 +156,7 @@ SOFTWARE ON EQUIPMENT WHICH IS NOT SUPPLIED BY DEC.
 	PAPER TAPE OR DECTAPE READ-IN WORKING PROPERLY 
 	PREVIOUS PROCESSOR DIAGNOSTICS
 	
-							MAINDEC-10-DAKAG.TXT
+							MAINDEC-10-DAKAH.TXT
 							PAGE 4
 
 
@@ -199,7 +199,7 @@ SOFTWARE ON EQUIPMENT WHICH IS NOT SUPPLIED BY DEC.
 	THE CYCLE TIME OF THE PROGRAM IS IN THE MILLISECOND RANGE AND
 	IS THEREFORE SUITABLE FOR TAKING MARGINS, VIBRATION TESTS, ETC.
 
-							MAINDEC-10-DAKAG.TXT
+							MAINDEC-10-DAKAH.TXT
 							PAGE 5
 
 
@@ -237,22 +237,23 @@ SOFTWARE ON EQUIPMENT WHICH IS NOT SUPPLIED BY DEC.
 9.0	LISTING
 ```
 
-DAKAG.HST
+DAKAH.HST
 ---------
 
-	    THIS IS A HISTORY OF THE DEVELOPMENT OF MAINDEC-10-DAKAG
+	    THIS IS A HISTORY OF THE DEVELOPMENT OF MAINDEC-10-DAKAH
 	
 	************************************************************************
 	
-	PRODUCT CODE:       MAINDEC-10-DAKAG
+	PRODUCT CODE:       MAINDEC-10-DAKAH
 	
-	PRODUCT NAME:       BASIC INSTRUCTION DIAGNOSTIC #7
+	PRODUCT NAME:       BASIC INSTRUCTION DIAGNOSTIC #8
 	
 	DATE RELEASED:      JANUARY 1977
 	
 	VERSION:            0.2
 	
 	UPDATE AUTHOR:      JOHN R. KIRCHOFF
+	                    EDWARD G. PRENTICE
 	
 	CHANGES MADE:
 	
@@ -268,11 +269,11 @@ DAKAG.HST
 	
 	************************************************************************
 
-DAKAG.MAC
+DAKAH.MAC
 ---------
 
-[[Download](DAKAG.MAC.txt)]
+[[Download](DAKAH.MAC.txt)]
  
 {% highlight text %}
-{% include_relative DAKAGM.MAC.txt %}
+{% include_relative DAKAHM.MAC.txt %}
 {% endhighlight %}

@@ -288,7 +288,10 @@ class Macro10 {
         /*
          * We know that local resources ending with ".MAC" are actually stored with a ".txt" extension.
          */
-        if (sURL.indexOf(':') < 0 && sURL.slice(-4).toUpperCase() == ".MAC") sURL += ".txt";
+        if (sURL.indexOf(':') < 0) {
+            var sExt = sURL.slice(-4).toUpperCase();
+            if (".MAC.KLM".indexOf(sExt) >= 0) sURL += ".txt";
+        }
 
         Web.getResource(sURL, null, true, function processMacro10(sFile, sResource, nErrorCode) {
             if (nErrorCode) {
@@ -521,7 +524,7 @@ class Macro10 {
         }
 
         if (this.chASCII != null) {
-            sLine = this.addASCII(sLine);
+            sLine = this.defASCII(sLine);
         }
 
         var fParse = true;
@@ -603,7 +606,7 @@ class Macro10 {
          */
         var sLiteral = this.getLiteral(sOperands);
         if (sLiteral) {
-            sOperands = sOperands.replace(sLiteral, this.addMacro(Macro10.PSEUDO_OP.LITERAL, this.getLiteral(sRemainder)));
+            sOperands = sOperands.replace(sLiteral, this.defMacro(Macro10.PSEUDO_OP.LITERAL, this.getLiteral(sRemainder)));
         }
 
         /*
@@ -620,39 +623,48 @@ class Macro10 {
             case Macro10.PSEUDO_OP.ASCII:
             case Macro10.PSEUDO_OP.ASCIZ:
             case Macro10.PSEUDO_OP.SIXBIT:
-                this.addASCII(sRemainder);
+                this.defASCII(sRemainder);
                 break;
 
             case Macro10.PSEUDO_OP.END:
-                this.addEND(sOperands);
+                this.defEND(sOperands);
                 break;
 
             case Macro10.PSEUDO_OP.EXP:
-                this.addEXP(sOperands);
+                this.defEXP(sOperands);
+                break;
+
+            case Macro10.PSEUDO_OP.LOC:
+                this.defLocation(sOperands);
                 break;
 
             case Macro10.PSEUDO_OP.XWD:
-                this.addXWD(sOperands);
+                this.defXWD(sOperands);
                 break;
 
             case Macro10.PSEUDO_OP.DEFINE:
             case Macro10.PSEUDO_OP.IFE:
+            case Macro10.PSEUDO_OP.IFG:
+            case Macro10.PSEUDO_OP.IFL:
             case Macro10.PSEUDO_OP.IFN:
             case Macro10.PSEUDO_OP.IRP:
             case Macro10.PSEUDO_OP.IRPC:
             case Macro10.PSEUDO_OP.OPDEF:
             case Macro10.PSEUDO_OP.REPEAT:
-                this.addMacro(sOperator, sRemainder);
+                this.defMacro(sOperator, sRemainder);
                 break;
 
             case Macro10.PSEUDO_OP.LALL:    // TODO
+            case Macro10.PSEUDO_OP.LIST:    // TODO
+            case Macro10.PSEUDO_OP.NOSYM:   // TODO
             case Macro10.PSEUDO_OP.PAGE:    // TODO
             case Macro10.PSEUDO_OP.SUBTTL:  // TODO
             case Macro10.PSEUDO_OP.TITLE:   // TODO
+            case Macro10.PSEUDO_OP.XLIST:   // TODO
                 break;
 
             default:
-                this.addWord(sOperator, sSeparator, sOperands);
+                this.defWord(sOperator, sSeparator, sOperands);
                 break;
             }
         }
@@ -758,6 +770,18 @@ class Macro10 {
         switch(sOperator) {
         case Macro10.PSEUDO_OP.IFE:
             if (!macro.nOperand) {
+                this.parseText(macro.sText);
+            }
+            break;
+
+        case Macro10.PSEUDO_OP.IFG:
+            if (macro.nOperand > 0) {
+                this.parseText(macro.sText);
+            }
+            break;
+
+        case Macro10.PSEUDO_OP.IFL:
+            if (macro.nOperand < 0) {
                 this.parseText(macro.sText);
             }
             break;
@@ -915,7 +939,7 @@ class Macro10 {
                 continue;
             }
             if (fQuotes) continue;
-            if (sDelim.indexOf(ch) >= 0) {
+            if (!cNesting && sDelim.indexOf(ch) >= 0) {
                 i--;
                 break;
             }
@@ -963,6 +987,12 @@ class Macro10 {
             if (nLocation === undefined) {
                 nLocation = (this.nLocationScope >= 0? this.nLocationScope : this.nLocation);
             }
+            /*
+             * The SIXBIT (and presumably ASCII; not sure about ASCIZ) pseudo-ops can also be used in expressions
+             * (or at least assignments), so we check for those in the given expression and convert them to quoted
+             * sequences that the debugger's parseExpression() understands.
+             */
+            sOperand = sOperand.replace(/SIXBIT\s*(\S)(.*?)\1/g, "'$2'").replace(/ASCII\s*(\S)(.*?)\1/g, '"$2"');
             /*
              * Check for the "period" syntax that MACRO-10 uses to represent the value of the current location.
              * The Debugger's parseInstruction() method understands that syntax, but its parseExpression() method
@@ -1068,21 +1098,23 @@ class Macro10 {
             sReserved = match[0];
             var sLabel = match[1];
             var name = '?' + sLabel;
-            if (this.tblMacros[name] !== undefined) {
-                this.error("reserved symbol redefined: " + sReserved);
+            /*
+             * We now allow reserved symbols to reused (which would make sense if they appeared in a macro).
+             */
+            if (this.tblMacros[name] === undefined) {
+                var aParms, aDefaults, aValues;
+                aParms = aDefaults = aValues = [];
+                this.tblMacros[name] = {
+                    name: name,
+                    nOperand: Macro10.MACRO_OP.RESERVED,
+                    aParms,
+                    aDefaults,
+                    aValues,
+                    sText: sLabel + ": 0",
+                    nLine: this.nLine
+                };
+                this.aVariables.push(name);
             }
-            var aParms, aDefaults, aValues;
-            aParms = aDefaults = aValues = [];
-            this.tblMacros[name] = {
-                name: name,
-                nOperand: Macro10.MACRO_OP.RESERVED,
-                aParms,
-                aDefaults,
-                aValues,
-                sText: sLabel + ": 0",
-                nLine: this.nLine
-            };
-            this.aVariables.push(name);
         }
         return sReserved;
     }
@@ -1125,13 +1157,13 @@ class Macro10 {
     }
 
     /**
-     * addASCII(sOperands)
+     * defASCII(sOperands)
      *
      * @this {Macro10}
      * @param {string} sOperands
      * @return {string} (returns whatever portion of the string was not part of an ASCII pseudo-op)
      */
-    addASCII(sOperands)
+    defASCII(sOperands)
     {
         var sRemain = sOperands;
         if (this.chASCII == null) {
@@ -1159,7 +1191,7 @@ class Macro10 {
     }
 
     /**
-     * addMacro(sOperator, sOperands)
+     * defMacro(sOperator, sOperands)
      *
      * If sOperator is DEFINE (or OPDEF), then a macro definition is expected.  If it's REPEAT, then we're
      * starting a REPEAT block instead.
@@ -1178,7 +1210,7 @@ class Macro10 {
      * @param {string} sOperands
      * @return {string}
      */
-    addMacro(sOperator, sOperands)
+    defMacro(sOperator, sOperands)
     {
         var i, match, name, nOperand, aParms, aDefaults, aValues, iMatch;
 
@@ -1192,7 +1224,7 @@ class Macro10 {
              * (parenthesized) parameters exist on the same line, but the (angle-bracketed)
              * definition can continue on for multiple lines.
              */
-            match = sOperands.match(/([A-Z$%.][0-9A-Z$%.]*)\s*(\([^)]*\)|)\s*(<|)([\s\S]*)/i);
+            match = sOperands.match(/([A-Z$%.][0-9A-Z$%.]*)\s*(\([^)]*\)|)\s*,?\s*(<|)([\s\S]*)/i);
             if (!match) {
                 this.error("unrecognized " + sOperator + ": " + sOperands);
                 return sOperands;
@@ -1201,7 +1233,7 @@ class Macro10 {
             /*
              * If this macro has defined parameters, parse them (and any defaults) now.
              */
-            if (match[2]) {
+            if (match[2] && match[2] != ',') {
                 aParms = this.getValues(match[2], true);
                 aDefaults = this.getDefaults(aParms);
             }
@@ -1344,44 +1376,6 @@ class Macro10 {
     }
 
     /**
-     * addEND()
-     *
-     * Processes the END pseudo-op.
-     *
-     * @this {Macro10}
-     * @param {string} sOperands
-     */
-    addEND(sOperands)
-    {
-        if (!sOperands) {
-            this.nAddrStart = this.nAddr;
-        } else {
-            this.nAddrStart = this.parseExpression(sOperands, true);
-            if (this.nAddrStart === undefined) {
-                this.error("unrecognized expression: " + sOperands);
-            }
-        }
-    }
-
-    /**
-     * addEXP()
-     *
-     * Processes the EXP pseudo-op.
-     *
-     * @this {Macro10}
-     * @param {string} sOperands
-     */
-    addEXP(sOperands)
-    {
-        var w = this.parseExpression(sOperands, true);
-        if (w !== undefined) {
-            this.genWord(w, this.dbg.sUndefined);
-        } else {
-            this.error("unrecognized expression: " + sOperands);
-        }
-    }
-
-    /**
      * addSymbol(name, value, nType)
      *
      * @this {Macro10}
@@ -1416,14 +1410,81 @@ class Macro10 {
     }
 
     /**
-     * addWord(sOperator, sSeparator, sOperands)
+     * defEND()
+     *
+     * Processes the END pseudo-op.
+     *
+     * @this {Macro10}
+     * @param {string} sOperands
+     */
+    defEND(sOperands)
+    {
+        if (!sOperands) {
+            this.nAddrStart = this.nAddr;
+        } else {
+            this.nAddrStart = this.parseExpression(sOperands, true);
+            if (this.nAddrStart === undefined) {
+                this.error("unrecognized expression: " + sOperands);
+            }
+        }
+    }
+
+    /**
+     * defEXP()
+     *
+     * Processes the EXP pseudo-op.
+     *
+     * @this {Macro10}
+     * @param {string} sOperands
+     */
+    defEXP(sOperands)
+    {
+        var w = this.parseExpression(sOperands, true);
+        if (w !== undefined) {
+            this.genWord(w, this.dbg.sUndefined);
+        } else {
+            this.error("unrecognized expression: " + sOperands);
+        }
+    }
+
+    /**
+     * defLocation(sOperands)
+     *
+     * Processes the LOC pseudo-op.
+     *
+     * @this {Macro10}
+     * @param {string} sOperands
+     */
+    defLocation(sOperands)
+    {
+        this.nLocation = this.parseExpression(sOperands) || 0;
+    }
+
+    /**
+     * defXWD()
+     *
+     * Processes the XWD pseudo-op.
+     *
+     * Since the XWD pseudo-op appears to be equivalent to two values separated by two commas, which defEXP() must also
+     * support, we can piggy-back on defExp().
+     *
+     * @this {Macro10}
+     * @param {string} sOperands
+     */
+    defXWD(sOperands)
+    {
+        this.defEXP(sOperands.replace(",", ",,"));
+    }
+
+    /**
+     * defWord(sOperator, sSeparator, sOperands)
      *
      * @this {Macro10}
      * @param {string} sOperator
      * @param {string} sSeparator
      * @param {string} sOperands
      */
-    addWord(sOperator, sSeparator, sOperands)
+    defWord(sOperator, sSeparator, sOperands)
     {
         var w = -1;
 
@@ -1443,22 +1504,6 @@ class Macro10 {
         } else {
             this.error("unrecognized expression: " + sExp);
         }
-    }
-
-    /**
-     * addXWD()
-     *
-     * Processes the XWD pseudo-op.
-     *
-     * Since the XWD pseudo-op appears to be equivalent to two values separated by two commas, which addEXP() must also
-     * support, we can piggy-back on addExp().
-     *
-     * @this {Macro10}
-     * @param {string} sOperands
-     */
-    addXWD(sOperands)
-    {
-        this.addEXP(sOperands.replace(",", ",,"));
     }
 
     /**
@@ -1566,18 +1611,24 @@ Macro10.PSEUDO_OP = {
     END:        "END",
     EXP:        "EXP",
     IFE:        "IFE",
+    IFG:        "IFG",
+    IFL:        "IFL",
     IFN:        "IFN",
     IRP:        "IRP",
     IRPC:       "IRPC",
     LALL:       "LALL",
     LITERAL:    "LITERAL",      // this is a pseudo-pseudo-op, used for internal purposes
+    LIST:       "LIST",
+    LOC:        "LOC",
+    NOSYM:      "NOSYM",
     OPDEF:      "OPDEF",
     PAGE:       "PAGE",
     REPEAT:     "REPEAT",
     SIXBIT:     "SIXBIT",
     SUBTTL:     "SUBTTL",
     TITLE:      "TITLE",
-    XWD:        "XWD"
+    XWD:        "XWD",
+    XLIST:      "XLIST"
 };
 
 /*
