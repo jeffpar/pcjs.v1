@@ -171,10 +171,14 @@ var PDP10 = {
         S_MASK:     0o77,               // S mask (after shift)
         A_SHIFT:    23,                 // A shift
         A_MASK:     0o17,               // A mask (after shift)
-        I_BIT:      0o20000000,         // indirect bit
+        A_FIELD:    0o740000000,        // A field mask
+        I_FIELD:    0o20000000,         // indirect bit mask
         X_SHIFT:    18,                 // X shift
         X_MASK:     0o17,               // X mask (after shift)
-        Y_MASK:     0o777777,           // Y mask
+        X_FIELD:    0o17000000,         // X field mask
+        Y_SHIFT:    0,                  // Y shift
+        Y_MASK:     0o777777,           // Y mask (after shift)
+        Y_FIELD:    0o777777,           // Y field mask
         R_MASK:     0o37777777,         // used to isolate the low 23 bits (I,X,Y)
         PTR_MASK:   0o77777777,         // used to isolate the low 24 bits (?,I,X,Y) of a byte pointer
         HALT:       0o5304              // operation code for HALT

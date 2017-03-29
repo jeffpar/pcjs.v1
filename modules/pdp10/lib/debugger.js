@@ -1570,7 +1570,7 @@ class DebuggerPDP10 extends Debugger {
                     }
                 }
                 sOperation = Str.pad(sOperation, 8) + (sOperand? sOperand + ',' : "");
-                if (opCode & PDP10.OPCODE.I_BIT) sOperation += '@';
+                if (opCode & PDP10.OPCODE.I_FIELD) sOperation += '@';
                 sOperation += this.toStrBase(opCode & PDP10.OPCODE.Y_MASK, -1);
                 var i = (opCode >> PDP10.OPCODE.X_SHIFT) & PDP10.OPCODE.X_MASK;
                 if (i) sOperation += '(' + this.toStrBase(i, -1) + ')';
@@ -1747,7 +1747,7 @@ class DebuggerPDP10 extends Debugger {
                      * because if we parse them AFTER parsing the address expression, we might lose an undefined symbol
                      * indication, and if the caller needs to handle address fixups, that would be bad.
                      */
-                    if (match[1]) opCode += PDP10.OPCODE.I_BIT;
+                    if (match[1]) opCode += PDP10.OPCODE.I_FIELD;
 
                     sOperand = match[3];
                     if (sOperand) {

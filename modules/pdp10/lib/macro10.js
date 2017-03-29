@@ -82,7 +82,7 @@ var Lit;
  * Elements of stackScopes.
  *
  * @typedef {{
- *      name:(string),
+ *      name:(string|undefined),
  *      aWords:(Array.<number>),
  *      aFixups:(Array.<string>),
  *      nLocation:(number),
@@ -145,7 +145,7 @@ class Macro10 {
          */
         this.nAddrStart = null;
 
-        this.println("starting PCjs MACRO-10 Mini-Assembler...");
+        if (MAXDEBUG) this.println("starting PCjs MACRO-10 Mini-Assembler...");
 
         /*
          * Initialize all the tables that MACRO-10 uses.
@@ -288,7 +288,7 @@ class Macro10 {
         /*
          * We know that local resources ending with ".MAC" are actually stored with a ".txt" extension.
          */
-        if (sURL.slice(-4).toUpperCase() == ".MAC") sURL += ".txt";
+        if (sURL.indexOf(':') < 0 && sURL.slice(-4).toUpperCase() == ".MAC") sURL += ".txt";
 
         Web.getResource(sURL, null, true, function processMacro10(sFile, sResource, nErrorCode) {
             if (nErrorCode) {
@@ -360,7 +360,7 @@ class Macro10 {
                  * Since, at this early stage, I'm not sure whether all the resources I'm interested in
                  * assembling have had their original CR/LF line endings preserved (eg, some files may have
                  * been converted to LF-only line endings), I'm going to skip over whatever line endings
-                 * are in the array and insert my own uniform CR/LF sequences.
+                 * are in the array (stored in every OTHER entry) and insert my own uniform CR/LF sequences.
                  */
                 if (!this.parseLine(this.asLines[i] + '\r\n')) break;
                 /*
@@ -378,6 +378,9 @@ class Macro10 {
                 this.error("open scope from line " + this.stackScopes[0].nLine);
             }
 
+            /*
+             * Process all literals next.
+             */
             let nLocationLiterals = this.nLocation;
 
             for (let i = 0; i < this.aLiterals.length; i++) {
@@ -410,8 +413,8 @@ class Macro10 {
                  */
                 let lit = this.aLiterals[i];
                 /*
-                 * First things first: verify that the literal is one contiguous set of words (I'm not sure how
-                 * it couldn't be, but better safe than sorry).
+                 * First things first: verify that the literal is one contiguous zero-based set of words (I'm not sure
+                 * how it couldn't be, but better safe than sorry).
                  */
                 let aWords = [];
                 let nWords = 0;
@@ -427,6 +430,13 @@ class Macro10 {
                     for (let nLocation = nLocationLiterals; nLocation + nWords <= this.nLocation; nLocation++) {
                         let n;
                         for (n = 0; n < nWords; n++) {
+                            /*
+                             * This check requires that the initial values of the words in the literals match AND that
+                             * their fixup expressions, if any, match as well.  Here again, MACRO-10 may be more aggressive
+                             * in either verifying fixup equality or evaluating any fixups that it can immediately, but
+                             * but I prefer to leave all fixup evaluation where it is (below), after all literals and then
+                             * all variables have been added to the output.
+                             */
                             if (aWords[n] !== this.aWords[nLocation + n] || lit.aFixups[n] != this.aFixups[nLocation]) break;
                         }
                         if (n == nWords) {
@@ -444,6 +454,9 @@ class Macro10 {
                 }
             }
 
+            /*
+             * Now add all variable definitions.
+             */
             for (let i = 0; i < this.aVariables.length; i++) {
                 let name = this.aVariables[i];
                 let macro = this.tblMacros[name];
@@ -457,6 +470,9 @@ class Macro10 {
                 this.parseText(macro.sText);
             }
 
+            /*
+             * And last but not least, perform all fixups.
+             */
             this.aFixups.forEach(function processFixup(sValue, nLocation){
                 let value = macro10.parseExpression(sValue, undefined, nLocation);
                 if (value === undefined) {
@@ -624,6 +640,7 @@ class Macro10 {
             case Macro10.PSEUDO_OP.IFN:
             case Macro10.PSEUDO_OP.IRP:
             case Macro10.PSEUDO_OP.IRPC:
+            case Macro10.PSEUDO_OP.OPDEF:
             case Macro10.PSEUDO_OP.REPEAT:
                 this.addMacro(sOperator, sRemainder);
                 break;
@@ -662,6 +679,22 @@ class Macro10 {
     /**
      * parseMacro(name, sOperands)
      *
+     * For OPDEF macros, the operands are opcode values rather than conventional macro parameter values.
+     * As the MACRO-10 manual explains:
+     *
+     *      Defines the symbol as an operator equivalent to expression, giving the symbol a fullword value.
+     *      When the operator is later used with operands, the accumulator fields are added, the indirect bits
+     *      are ORed, the memory addresses are added, and the index register addresses are added.
+     *
+     *      EXAMPLE:    OPDEF CAL [MOVE 1,@SYM(2)]
+     *                  CAL 1,BOL(2)
+     *
+     *      RESULT:     MOVE 2,@SYM+BOL(4)
+     *
+     * The easiest thing to do is parse the OPDEF text, allowing it to generate its default "fullword value",
+     * then parse the operands in their own scope, extract the bits generated from the operands, and merge them
+     * into the generated OPDEF value.
+     *
      * @this {Macro10}
      * @param {string} name
      * @param {string} [sOperands]
@@ -674,6 +707,35 @@ class Macro10 {
         if (!macro) return false;
 
         if (sOperands != null) {
+            /*
+             * If this is an OPDEF, then a two-step process is required: generate the OPDEF's value, then parse
+             * the operands and merge their bits with the OPDEF's bits.
+             */
+            if (macro.nOperand == Macro10.MACRO_OP.OPDEF) {
+                var nLocation = this.nLocation;
+                this.parseText(macro.sText);
+                if (nLocation < this.nLocation) {
+                    this.pushScope();
+                    this.parseText(sOperands);
+                    var w = this.aWords[0];
+                    var sFixup = this.aFixups[0];
+                    this.popScope();
+                    if (w !== undefined) {
+                        this.aWords[nLocation] += (w & (PDP10.OPCODE.A_FIELD | PDP10.OPCODE.X_FIELD | PDP10.OPCODE.Y_FIELD));
+                        this.aWords[nLocation] |= (w & PDP10.OPCODE.I_FIELD);
+                        if (sFixup) {
+                            if (!this.aFixups[nLocation]) {
+                                this.aFixups[nLocation] = sFixup;
+                            } else {
+                                this.aFixups[nLocation] += '+' + sFixup;
+                            }
+                        }
+                        return true;
+                    }
+                }
+                this.error("OPDEF '" + name + "' error: " + sOperands);
+                return false;
+            }
             var macroPrev = this.macroCall;
             this.macroCall = macro;
             macro.aValues = this.getValues(sOperands, true);
@@ -683,7 +745,7 @@ class Macro10 {
              * (such as the SHIFT macro in /apps/pdp10/tests/macro10/TEXT.MAC) could blow the stack.  Nothing bad
              * should happen (other than a JavaScript stack limit exception aborting the assembly), but it begs
              * the question: did MACRO-10 perform any tail recursion optimizations or other tricks to prevent macros
-             * from running amok, or could they blow MACRO-10's stack just as easily?
+             * from gobbling stack, or could they blow MACRO-10's stack just as easily?
              */
             this.macroCall = macroPrev;
             return true;
@@ -737,6 +799,14 @@ class Macro10 {
      */
     parseText(sText, aParms, aValues, aDefaults)
     {
+        /*
+         * Unlike the caller of parseResources(), we don't split the text using a capture group,
+         * so all line separators are tossed, and just like parseResources(), we always include a
+         * uniform CR/LF sequence at the end of each line.
+         *
+         * TODO: Consider whether callers should always store their text snippets as line arrays, too,
+         * to avoid this re-splitting.
+         */
         var asLines = sText.split(/\r?\n/);
         for (var iLine = 0; iLine < asLines.length; iLine++) {
             var sLine = asLines[iLine] + '\r\n';
@@ -748,7 +818,7 @@ class Macro10 {
      * pushScope(name)
      *
      * @this {Macro10}
-     * @param {string} name
+     * @param {string} [name] (must be defined for literals only)
      */
     pushScope(name)
     {
@@ -778,7 +848,7 @@ class Macro10 {
             return;
         }
         var name = this.stackScopes[this.stackScopes.length - 1].name;
-        this.aLiterals.push({name, aWords: this.aWords, aFixups: this.aFixups});
+        if (name) this.aLiterals.push({name, aWords: this.aWords, aFixups: this.aFixups});
         var scope = this.stackScopes.pop();
         this.aWords = scope.aWords;
         this.aFixups = scope.aFixups;
@@ -1089,8 +1159,8 @@ class Macro10 {
     /**
      * addMacro(sOperator, sOperands)
      *
-     * If sOperator is DEFINE, then a macro definition is expected.  If it's REPEAT, then we're starting a
-     * REPEAT block instead.
+     * If sOperator is DEFINE (or OPDEF), then a macro definition is expected.  If it's REPEAT, then we're
+     * starting a REPEAT block instead.
      *
      * REPEAT blocks piggy-back on this code because they're essentially anonymous immediately-invoked macros;
      * we use an illegal MACRO-10 symbol ('?REPEAT') to name the anonymous macro while it's being defined, and the
@@ -1116,7 +1186,9 @@ class Macro10 {
 
         if (sOperator == Macro10.PSEUDO_OP.DEFINE) {
             /*
-             * This is a DEFINE (macro) block.
+             * This is a DEFINE (macro) block.  At present, this requires that all
+             * (parenthesized) parameters exist on the same line, but the (angle-bracketed)
+             * definition can continue on for multiple lines.
              */
             match = sOperands.match(/([A-Z$%.][0-9A-Z$%.]*)\s*(\([^)]*\)|)\s*(<|)([\s\S]*)/i);
             if (!match) {
@@ -1133,6 +1205,24 @@ class Macro10 {
             }
             nOperand = Macro10.MACRO_OP.DEFINE;
             iMatch = 3;
+        }
+        else if (sOperator == Macro10.PSEUDO_OP.OPDEF) {
+            /*
+             * This is a OPDEF block.  Unlike DEFINE blocks, I'm assuming that the
+             * (square-bracketed) definition begins on the same line, but I'm not requiring
+             * it to end on the same line (I'm not sure that MACRO-10 allowed multi-line
+             * OPDEFs, but it doesn't matter to us).
+             */
+            this.chMacroOpen = '[';
+            this.chMacroClose = ']';
+            match = sOperands.match(/([A-Z$%.][0-9A-Z$%.]*)\s*(\[)([\s\S]*)/i);
+            if (!match) {
+                this.error("unrecognized " + sOperator + ": " + sOperands);
+                return sOperands;
+            }
+            name = match[1];
+            nOperand = Macro10.MACRO_OP.OPDEF;
+            iMatch = 2;
         }
         else if (sOperator == Macro10.PSEUDO_OP.LITERAL) {
             /*
@@ -1478,6 +1568,7 @@ Macro10.PSEUDO_OP = {
     IRPC:       "IRPC",
     LALL:       "LALL",
     LITERAL:    "LITERAL",      // this is a pseudo-pseudo-op, used for internal purposes
+    OPDEF:      "OPDEF",
     PAGE:       "PAGE",
     REPEAT:     "REPEAT",
     SIXBIT:     "SIXBIT",
@@ -1493,6 +1584,7 @@ Macro10.PSEUDO_OP = {
  */
 Macro10.MACRO_OP = {
     DEFINE:         -1,
-    LITERAL:        -2,
-    RESERVED:       -3,
+    OPDEF:          -2,
+    LITERAL:        -3,
+    RESERVED:       -4,
 };

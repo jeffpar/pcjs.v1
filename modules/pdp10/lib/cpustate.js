@@ -437,7 +437,7 @@ class CPUStatePDP10 extends CPUPDP10 {
      */
     getOpcode()
     {
-        if ((this.regRA & PDP10.OPCODE.I_BIT)) {
+        if ((this.regRA & PDP10.OPCODE.I_FIELD)) {
             this.regRA = this.regLA = this.readWord(this.regEA);
         } else if (this.regXC >= 0) {
             this.regRA = this.regOP = this.readWord(this.regXC);
@@ -468,7 +468,7 @@ class CPUStatePDP10 extends CPUPDP10 {
         var x = (this.regRA >> PDP10.OPCODE.X_SHIFT) & PDP10.OPCODE.X_MASK;
         if (x) this.regEA = (this.regEA + (this.regLA = this.readWord(x))) & PDP10.ADDR_MASK;
 
-        return (this.regRA & PDP10.OPCODE.I_BIT)? -1 : ((this.regOP / PDP10.OPCODE.A_SCALE)|0);
+        return (this.regRA & PDP10.OPCODE.I_FIELD)? -1 : ((this.regOP / PDP10.OPCODE.A_SCALE)|0);
     }
 
     /**

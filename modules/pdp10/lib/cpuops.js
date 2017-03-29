@@ -372,7 +372,7 @@ PDP10.opLDB = function(op, ac)
     var w = this.readWord(this.regEA);
     if (this.regBP < 0) {
         this.regBP = w;
-        this.regRA = this.regEA | PDP10.OPCODE.I_BIT;
+        this.regRA = this.regEA | PDP10.OPCODE.I_FIELD;
         return;
     }
     var p = (this.regBP / PDP10.OPCODE.P_SCALE) & PDP10.OPCODE.P_MASK;
@@ -458,7 +458,7 @@ PDP10.opDPB = function(op, ac)
     var w = this.readWord(this.regEA);
     if (this.regBP < 0) {
         this.regBP = w;
-        this.regRA = this.regEA | PDP10.OPCODE.I_BIT;
+        this.regRA = this.regEA | PDP10.OPCODE.I_FIELD;
         return;
     }
     var p = (this.regBP / PDP10.OPCODE.P_SCALE) & PDP10.OPCODE.P_MASK;
