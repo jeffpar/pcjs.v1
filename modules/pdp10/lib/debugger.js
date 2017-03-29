@@ -164,6 +164,7 @@ class DebuggerPDP10 extends Debugger {
             this.aMessageBuffer = [];
             this.messageInit(parmsDbg['messages']);
             this.sInitCommands = parmsDbg['commands'];
+            this.aCommands = [];
 
             /*
              * Define remaining miscellaneous DebuggerPDP10 properties.
@@ -920,7 +921,7 @@ class DebuggerPDP10 extends Debugger {
             value = cpu.regEA;
             break;
         case DebuggerPDP10.REGS.PS:
-            value = (cpu.getPS() / PDP10.HALF_SHIFT)|0;
+            value = cpu.getPS();
             break;
         case DebuggerPDP10.REGS.OV:
             value = (cpu.regPS & PDP10.PSFLAG.AROV)? 1 : 0;
@@ -959,7 +960,7 @@ class DebuggerPDP10 extends Debugger {
             this.setAddr(this.dbgAddrCode, cpu.getPC());
             break;
         case DebuggerPDP10.REGS.PS:
-            cpu.setPS(value * PDP10.HALF_SHIFT);
+            cpu.setPS(value);
             break;
         case DebuggerPDP10.REGS.OV:
             flag = PDP10.PSFLAG.AROV;
@@ -2591,8 +2592,8 @@ class DebuggerPDP10 extends Debugger {
      *
      *      [0]: the assemble command (assumed to be "a")
      *      [1]: the target address (eg, "200")
-     *      [2]: the operation code, aka instruction name (eg, "adc")
-     *      [3]: the operation mode operand, if any (eg, "14", "[1234]", etc)
+     *      [2]: the opcode mnemonic (eg, "hrli")
+     *      [3]: the operands, if any
      *
      * The Debugger enters "assemble mode" whenever only the first (or first and second) arguments are present.
      * As long as "assemble mode is active, the user can omit the first two arguments on all later assemble commands
@@ -2601,15 +2602,12 @@ class DebuggerPDP10 extends Debugger {
      *
      * Entering "assemble mode" is optional; one could enter a series of fully-qualified assemble commands; eg:
      *
-     *      a ff00 cld
-     *      a ff01 ldx 28
+     *      a 100 hrli 1,111111
+     *      a 101 hrri 1,444444
      *      ...
      *
      * without ever entering "assemble mode", but of course, that requires more typing and doesn't take advantage
      * of automatic target address advancement (see dbgAddrAssemble).
-     *
-     * NOTE: As the previous example implies, you can even assemble new instructions into ROM address space;
-     * as our setByte() function explains, the ROM write-notification handlers only refuse writes from the CPU.
      *
      * When filename(s) or URL(s) are provided in lieu of an opcode, we pass those on to the Macro10 component
      * for assembling, along with any option letters that were included with the "a" command; for example, if "ap"
@@ -2618,15 +2616,16 @@ class DebuggerPDP10 extends Debugger {
      * Macro10 options include:
      *
      *      p:  preprocess the specified resource(s) without assembling them
-     *      l:  generate listing information
+     *      l:  generate listing information (TODO)
      *
      * @this {DebuggerPDP10}
      * @param {Array.<string>} asArgs is the complete argument array, beginning with the "a" command in asArgs[0]
+     * @return {boolean}
      */
     doAssemble(asArgs)
     {
         var dbgAddr = this.parseAddr(asArgs[1], this.dbgAddrAssemble);
-        if (!dbgAddr) return;
+        if (!dbgAddr) return false;
 
         var sOpcode = asArgs[2];
 
@@ -2634,7 +2633,7 @@ class DebuggerPDP10 extends Debugger {
             this.println("begin assemble at " + this.toStrAddr(dbgAddr));
             this.fAssemble = true;
             this.cmp.updateDisplays();
-            return;
+            return true;
         }
 
         var sOptions = asArgs[0].substr(1);
@@ -2658,14 +2657,16 @@ class DebuggerPDP10 extends Debugger {
                             dbg.loadBin(dbg.macro10.getBin(), addrLoad);
                         } catch(e) {
                             dbg.println(e.message);
+                            nErrorCode = -1;    // fake error so that command processing stops
                         }
                     } else {
                         dbg.println("error (" + nErrorCode + ") processing " + (sURL || sFile));
                     }
                     dbg.macro10 = null;
+                    if (!nErrorCode) dbg.doCommands();
                 });
             }
-            return;
+            return false;
         }
 
         asArgs.shift();
@@ -2678,6 +2679,7 @@ class DebuggerPDP10 extends Debugger {
             this.setWord(dbgAddr, opCode);
             this.println(this.getInstruction(dbgAddr));
         }
+        return true;
     }
 
     /**
@@ -3749,7 +3751,7 @@ class DebuggerPDP10 extends Debugger {
 
                 switch (asArgs[0].charAt(0)) {
                 case 'a':
-                    this.doAssemble(asArgs);
+                    result = this.doAssemble(asArgs);
                     break;
                 case 'b':
                     this.doBreak(asArgs[0], asArgs[1], sCmd);
@@ -3868,16 +3870,23 @@ class DebuggerPDP10 extends Debugger {
     /**
      * doCommands(sCmds, fSave)
      *
+     * This function is now written so that if any async command, such as assemble ('a'), stopped the
+     * flow of commands by returning false, it can call us from its callback handler with no arguments,
+     * and command processing should continue where it left off.
+     *
      * @this {DebuggerPDP10}
-     * @param {string} sCmds
+     * @param {string} [sCmds]
      * @param {boolean} [fSave]
      * @return {boolean} true if all commands processed, false if not
      */
     doCommands(sCmds, fSave)
     {
-        var a = this.parseCommand(sCmds, fSave);
-        for (var s in a) {
-            if (!this.doCommand(a[+s])) return false;
+        if (sCmds) {
+            this.aCommands = this.parseCommand(sCmds, fSave);
+        }
+        var sCmd;
+        while (sCmd = this.aCommands.shift()) {
+            if (!this.doCommand(sCmd)) return false;
         }
         return true;
     }

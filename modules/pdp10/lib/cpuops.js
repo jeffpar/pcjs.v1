@@ -1343,7 +1343,7 @@ PDP10.opIMULB = function(op, ac)
 PDP10.opMUL = function(op, ac)
 {
     this.writeWord(ac, PDP10.doMUL.call(this, this.readWord(ac), this.readWord(this.regEA)));
-    this.writeWord((ac + 1) & 0o17, this.regExt);
+    this.writeWord((ac + 1) & 0o17, this.regEX);
 };
 
 /**
@@ -1364,7 +1364,7 @@ PDP10.opMUL = function(op, ac)
 PDP10.opMULI = function(op, ac)
 {
     this.writeWord(ac, PDP10.doMUL.call(this, this.readWord(ac), this.regEA));
-    this.writeWord((ac + 1) & 0o17, this.regExt);
+    this.writeWord((ac + 1) & 0o17, this.regEX);
 };
 
 /**
@@ -1405,7 +1405,7 @@ PDP10.opMULM = function(op, ac)
 PDP10.opMULB = function(op, ac)
 {
     this.writeWord(this.regEA, this.writeWord(ac, PDP10.doMUL.call(this, this.readWord(ac), this.readWord(this.regEA))));
-    this.writeWord((ac + 1) & 0o17, this.regExt);
+    this.writeWord((ac + 1) & 0o17, this.regEX);
 };
 
 /**
@@ -1430,7 +1430,7 @@ PDP10.opIDIV = function(op, ac)
     var dst = PDP10.doDIV.call(this, this.readWord(ac), 0, this.readWord(this.regEA));
     if (dst < 0) return;
     this.writeWord(ac, dst);
-    this.writeWord((ac + 1) & 0o17, this.regExt);
+    this.writeWord((ac + 1) & 0o17, this.regEX);
 };
 
 /**
@@ -1455,7 +1455,7 @@ PDP10.opIDIVI = function(op, ac)
     var dst = PDP10.doDIV.call(this, this.readWord(ac), 0, this.regEA);
     if (dst < 0) return;
     this.writeWord(ac, dst);
-    this.writeWord((ac + 1) & 0o17, this.regExt);
+    this.writeWord((ac + 1) & 0o17, this.regEX);
 };
 
 /**
@@ -1531,7 +1531,7 @@ PDP10.opDIV = function(op, ac)
     dst = PDP10.doDIV.call(this, dst, ext, this.readWord(this.regEA));
     if (dst < 0) return;
     this.writeWord(ac, dst);
-    this.writeWord((ac + 1) & 0o17, this.regExt);
+    this.writeWord((ac + 1) & 0o17, this.regEX);
 };
 
 /**
@@ -1559,7 +1559,7 @@ PDP10.opDIVI = function(op, ac)
     dst = PDP10.doDIV.call(this, dst, ext, this.regEA);
     if (dst < 0) return;
     this.writeWord(ac, dst);
-    this.writeWord((ac + 1) & 0o17, this.regExt);
+    this.writeWord((ac + 1) & 0o17, this.regEX);
 };
 
 /**
@@ -1614,7 +1614,7 @@ PDP10.opDIVB = function(op, ac)
     dst = PDP10.doDIV.call(this, dst, ext, this.readWord(this.regEA));
     if (dst < 0) return;
     this.writeWord(ac, this.writeWord(this.regEA, dst));
-    this.writeWord((ac + 1) & 0o17, this.regExt);
+    this.writeWord((ac + 1) & 0o17, this.regEX);
 };
 
 /**
@@ -2242,7 +2242,7 @@ PDP10.opJRST = function(op, ac)
         /*
          * Restore the flags.
          */
-        this.setPS(this.regLA);
+        this.setPS((this.regLA / PDP10.HALF_SHIFT)|0);
     }
     if (ac & 0b0100) {
         /*
@@ -2447,7 +2447,7 @@ PDP10.opPOPJ = function(op, ac)
  */
 PDP10.opJSR = function(op, ac)
 {
-    this.writeWord(this.regEA, this.getPS() + this.getPC());
+    this.writeWord(this.regEA, this.getPS() * PDP10.HALF_SHIFT + this.getPC());
     this.regPS &= ~PDP10.PSFLAG.BIS;            // TODO: Verify that BIS is cleared AFTER writing
     this.setPC(this.regEA + 1);
 };
@@ -2471,7 +2471,7 @@ PDP10.opJSR = function(op, ac)
  */
 PDP10.opJSP = function(op, ac)
 {
-    this.writeWord(ac, this.getPS() + this.getPC());
+    this.writeWord(ac, this.getPS() * PDP10.HALF_SHIFT + this.getPC());
     this.regPS &= ~PDP10.PSFLAG.BIS;            // TODO: Verify that BIS is cleared AFTER writing
     this.setPC(this.regEA);
 };
@@ -6157,14 +6157,14 @@ PDP10.doADD = function(dst, src)
  * @param {number} dst (36-bit value)
  * @param {number} ext (36-bit value extension)
  * @param {number} src (36-bit divisor)
- * @return {number} (dst / src) (the remainder is stored in regExt); -1 if error (no division performed)
+ * @return {number} (dst / src) (the remainder is stored in regEX); -1 if error (no division performed)
  */
 PDP10.doDIV = function(dst, ext, src)
 {
     var fNegQ = false, fNegR = false;
 
     dst = PDP10.merge72.call(this, dst, ext);
-    ext = this.regExt;
+    ext = this.regEX;
 
     if (src > PDP10.INT_MASK) {
         src = PDP10.WORD_LIMIT - src;
@@ -6223,14 +6223,14 @@ PDP10.doDIV = function(dst, ext, src)
     this.assert(!this.regRem[1], "extended remainder");
 
     dst = this.regRes[0];
-    this.regExt = this.regRem[0];
+    this.regEX = this.regRem[0];
 
     if (fNegQ && dst) {
         dst = PDP10.WORD_LIMIT - dst;
     }
 
-    if (fNegR && this.regExt) {
-        this.regExt = PDP10.WORD_LIMIT - this.regExt;
+    if (fNegR && this.regEX) {
+        this.regEX = PDP10.WORD_LIMIT - this.regEX;
     }
 
     return dst;
@@ -6250,7 +6250,7 @@ PDP10.doDIV = function(dst, ext, src)
  * @param {number} dst (36-bit value)
  * @param {number} src (36-bit value)
  * @param {boolean} [fTruncate] (true to truncate the result to 36 bits)
- * @return {number} (dst * src) (the high 36 bits of the result; the low 36 bits are stored in regExt)
+ * @return {number} (dst * src) (the high 36 bits of the result; the low 36 bits are stored in regEX)
  */
 PDP10.doMUL = function(dst, src, fTruncate)
 {
@@ -6380,7 +6380,7 @@ PDP10.doSUB = function(dst, src)
  * @this {CPUStatePDP10}
  * @param {number} dst (36-bit value)
  * @param {number} ext (36-bit value)
- * @return {number} (returns the lower 36 bits; the upper 36 bits  are stored in regExt)
+ * @return {number} (returns the lower 36 bits; the upper 36 bits  are stored in regEX)
  */
 PDP10.merge72 = function(dst, ext)
 {
@@ -6395,7 +6395,7 @@ PDP10.merge72 = function(dst, ext)
      * Compute value without the sign bit and add the low bit of extended in its place.
      */
     dst = (dst % PDP10.INT_LIMIT) + ((ext * PDP10.INT_LIMIT) % PDP10.WORD_LIMIT);
-    this.regExt = sign + Math.trunc(ext / 2);
+    this.regEX = sign + Math.trunc(ext / 2);
     return dst;
 };
 
@@ -6407,7 +6407,7 @@ PDP10.merge72 = function(dst, ext)
  * @this {CPUStatePDP10}
  * @param {number} res (36-bit value)
  * @param {number} ext (36-bit value)
- * @return {number} (returns the upper 36 bits; the lower 36 bits are stored in regExt)
+ * @return {number} (returns the upper 36 bits; the lower 36 bits are stored in regEX)
  */
 PDP10.split72 = function(res, ext)
 {
@@ -6427,7 +6427,7 @@ PDP10.split72 = function(res, ext)
         ext = sign + (ext - signNew);
         this.regPS |= PDP10.PSFLAG.AROV;
     }
-    this.regExt = res;
+    this.regEX = res;
     return ext;
 };
 

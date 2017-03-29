@@ -184,7 +184,7 @@ class CPUStatePDP10 extends CPUPDP10 {
         this.regXC  = -1;       // if >= 0 this supersedes regPC (refers to an opcode from XCT)
         this.regBP  = -1;       // active byte pointer (-1 if none)
         this.regPS  =  0;       // assorted processor flags (see PSFLAG bit definitions)
-        this.regExt =  0;       // internal "extension" register used for 72-bit MUL and DIV calculations
+        this.regEX  =  0;       // internal "extension" register used for 72-bit MUL and DIV calculations
 
         this.regRes = [0, 0];   // four internal "double-length" registers used for 72-bit DIV calculations
         this.regPow = [0, 0];
@@ -351,28 +351,26 @@ class CPUStatePDP10 extends CPUPDP10 {
     /**
      * getPS()
      *
-     * Gets the processor state flags in the format required by various program control operations (eg, JSP),
-     * pre-masked and pre-shifted for convenient loading into the left half of an accumulator.
+     * Gets the processor state flags in the format required by various program control operations (eg, JSP).
      *
      * @this {CPUStatePDP10}
      * @return {number}
      */
     getPS()
     {
-        return (this.regPS & PDP10.HALF_MASK) * PDP10.HALF_SHIFT;
+        return (this.regPS & PDP10.HALF_MASK);
     }
 
     /**
      * setPS(w)
      *
-     * Sets the processor state flags in the format used by various program control operations (eg, JRST).
+     * Sets the processor state flags in the format required by various program control operations (eg, JRST).
      *
      * @this {CPUStatePDP10}
      * @param {number} w
      */
     setPS(w)
     {
-        w = (w / PDP10.HALF_SHIFT)|0;
         this.regPS = (this.regPS & ~PDP10.PSFLAG.SET_MASK) | (w & PDP10.PSFLAG.SET_MASK);
         this.regPS |= (w & PDP10.PSFLAG.USERF);
         if (!(w & PDP10.PSFLAG.EXIOT)) {
