@@ -2637,7 +2637,7 @@ class DebuggerPDP10 extends Debugger {
         }
 
         var sOptions = asArgs[0].substr(1);
-        var match = sOpcode.match(/^(['"]?)(.*\.mac|.*\.html)\1$/i);
+        var match = sOpcode.match(/^(['"]?)(.*\.mac|.*\.html|.*\.txt)\1$/i);
         if (match) {
             var dbg = this;
             if (this.macro10) {

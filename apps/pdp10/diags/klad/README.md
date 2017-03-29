@@ -15,3 +15,4 @@ PCjs has archived selected files from
 - [KA10 Basic Instruction Diagnostic #3 (MAINDEC-10-DAKAC)](dakac/)
 - [KA10 Basic Instruction Diagnostic #4 (MAINDEC-10-DAKAD)](dakad/)
 - [KA10 Basic Instruction Diagnostic #5 (MAINDEC-10-DAKAE)](dakae/)
+- [KA10 Basic Instruction Diagnostic #6 (MAINDEC-10-DAKAF)](dakaf/)
