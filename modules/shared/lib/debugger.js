@@ -722,7 +722,7 @@ class Debugger extends Component
              * and although it allows single spaces to divide the elements of the expression, a space is neither
              * a unary nor binary operator.  It's essentially a no-op.  If we encounter it here, then it followed
              * a value, and since we don't want to misinterpret the next operator as a unary operator, we look
-             * ahead and grab the next operator as appropriate.
+             * ahead and grab the next operator if it's not preceded by a value.
              */
             if (sOp == ' ') {
                 if (iValue < asValues.length - 1 && !asValues[iValue]) {
@@ -733,13 +733,17 @@ class Debugger extends Component
                     break;
                 }
             }
+
             if (!sOp) break;
 
-            this.assert(Debugger.aBinOpPrecedence[sOp] != null);
-            if (aOps.length && Debugger.aBinOpPrecedence[sOp] <= Debugger.aBinOpPrecedence[aOps[aOps.length - 1]]) {
+            var aBinOp = (this.achGroup[0] == '<'? Debugger.aDECOpPrecedence : Debugger.aBinOpPrecedence);
+            if (!aBinOp[sOp]) {
+                fError = true;
+                break;
+            }
+            if (aOps.length && aBinOp[sOp] <= aBinOp[aOps[aOps.length - 1]]) {
                 this.evalOps(aVals, aOps, 1);
             }
-
             aOps.push(sOp);
 
             /*
@@ -827,7 +831,7 @@ class Debugger extends Component
      *
      * We pop 1 "binop" from aOps and 2 values from aVals whenever a "binop" of lower priority than its
      * predecessor is encountered, evaluate, and push the result back onto aVals.  Only selected unary
-     * operators are supported (eg, minus and "not"); ternary operators like '?:' are not supported at all.
+     * operators are supported (eg, negate and complement); no ternary operators like '?:' are supported.
      *
      * @this {Debugger}
      * @param {string|undefined} sExp
@@ -872,8 +876,8 @@ class Debugger extends Component
              *
              * Although I started listing the operators in the RegExp in "precedential" order, that's not important;
              * what IS important is listing operators than contain shorter operators first.  For example, bitwise
-             * shift operators must be listed BEFORE the logical less-than or greater-than operators.  aBinOpPrecedence
-             * is what determines precedence.
+             * shift operators must be listed BEFORE the logical less-than or greater-than operators.  The aBinOp tables
+             * (aBinOpPrecedence and aDECOpPrecedence) are what determine precedence, not the RegExp.
              *
              * Also, to better accommodate MACRO-10 syntax, I've replaced the single '^' for XOR with '^!', and I've
              * added '!' as an alias for '|' (bitwise inclusive-or), '^-' as an alias for '~' (one's complement operator),
@@ -897,7 +901,7 @@ class Debugger extends Component
              * to remove spaces entirely, because if an operator-less expression like "A B" was passed in, we would want
              * that to generate an error; if we converted it to "AB", evaluation might inadvertently succeed.
              */
-            var regExp = /(\{|}|\|\||&&|\||\^!|\^B|\^O|\^D|\^L|\^-|~|\^_|_|&|!=|!|==|>=|>>>|>>|>|<=|<<|<|-|\+|%|\/|\*| )/;
+            var regExp = /({|}|\|\||&&|\||\^!|\^B|\^O|\^D|\^L|\^-|~|\^_|_|&|!=|!|==|>=|>>>|>>|>|<=|<<|<|-|\+|%|\/|\*| )/;
             sExp = sExp.replace(/(^|[^A-Z0-9$%.])([0-9]+)B/, "$1$2^_").replace(/\s+/g, ' ');
             var asValues = sExp.split(regExp);
             value = this.parseArray(asValues, 0, asValues.length, this.nBase, fQuiet);
@@ -1198,35 +1202,67 @@ class Debugger extends Component
 if (DEBUGGER) {
 
     /*
-     * Missing from this table are the (limited) set of unary operators we support (negate and complement),
+     * These are our operator precedence tables.  Operators toward the bottom (with higher values) have
+     * higher precedence.  aBinOpPrecedence was our original table; we had to add aDECOpPrecedence because
+     * the precedence of operators in DEC's MACRO-10 expressions differ.  Having separate tables also allows
+     * us to remove operators that shouldn't be supported, but unless some operator creates a problem,
+     * I prefer to keep as much commonality between the tables as possible.
+     *
+     * Missing from these tables are the (limited) set of unary operators we support (negate and complement),
      * since this is only a BINARY operator precedence, not a general-purpose precedence table.  Assume that
      * all unary operators take precedence over all binary operators.
      */
     Debugger.aBinOpPrecedence = {
-        '||':   0,      // logical OR
-        '&&':   1,      // logical AND
-        '!':    2,      // bitwise OR
-        '|':    2,      // bitwise OR
-        '^!':   3,      // bitwise XOR (added by MACRO-10 sometime between the 1972 and 1978 versions)
-        '&':    4,      // bitwise AND
-        '!=':   5,      // inequality
-        '==':   5,      // equality
-        '>=':   6,      // greater than or equal to
-        '>':    6,      // greater than
-        '<=':   6,      // less than or equal to
-        '<':    6,      // less than
-        '>>>':  7,      // unsigned bitwise right shift
-        '>>':   7,      // bitwise right shift
-        '<<':   7,      // bitwise left shift
-        '-':    8,      // subtraction
-        '+':    8,      // addition
-        '%':    9,      // remainder
-        '/':    9,      // division
-        '*':    9,      // multiplication
-        '_':    10,     // MACRO-10 shift operator
-        '^_':   10,     // MACRO-10 internal shift operator (converted from 'B' suffix form that MACRO-10 uses)
-        '{':    11,     // open grouped expression (achGroup[0] default)
-        '}':    11      // close grouped expression (achGroup[1] default)
+        '||':   5,      // logical OR
+        '&&':   6,      // logical AND
+        '!':    7,      // bitwise OR (conflicts with logical NOT, but we never supported that)
+        '|':    7,      // bitwise OR
+        '^!':   8,      // bitwise XOR (added by MACRO-10 sometime between the 1972 and 1978 versions)
+        '&':    9,      // bitwise AND
+        '!=':   10,     // inequality
+        '==':   10,     // equality
+        '>=':   11,     // greater than or equal to
+        '>':    11,     // greater than
+        '<=':   11,     // less than or equal to
+        '<':    11,     // less than
+        '>>>':  12,     // unsigned bitwise right shift
+        '>>':   12,     // bitwise right shift
+        '<<':   12,     // bitwise left shift
+        '-':    13,     // subtraction
+        '+':    13,     // addition
+        '%':    14,     // remainder
+        '/':    14,     // division
+        '*':    14,     // multiplication
+        '_':    19,     // MACRO-10 shift operator
+        '^_':   19,     // MACRO-10 internal shift operator (converted from 'B' suffix form that MACRO-10 uses)
+        '{':    20,     // open grouped expression (converted from achGroup[0])
+        '}':    20      // close grouped expression (converted from achGroup[1])
+    };
+    Debugger.aDECOpPrecedence = {
+        '||':   5,      // logical OR
+        '&&':   6,      // logical AND
+        '!=':   10,     // inequality
+        '==':   10,     // equality
+        '>=':   11,     // greater than or equal to
+        '>':    11,     // greater than
+        '<=':   11,     // less than or equal to
+        '<':    11,     // less than
+        '>>>':  12,     // unsigned bitwise right shift
+        '>>':   12,     // bitwise right shift
+        '<<':   12,     // bitwise left shift
+        '-':    13,     // subtraction
+        '+':    13,     // addition
+        '%':    14,     // remainder
+        '/':    14,     // division
+        '*':    14,     // multiplication
+        '!':    15,     // bitwise OR (conflicts with logical NOT, but we never supported that)
+        '|':    15,     // bitwise OR
+        '^!':   15,     // bitwise XOR (added by MACRO-10 sometime between the 1972 and 1978 versions)
+        '&':    15,     // bitwise AND
+        '_':    19,     // MACRO-10 shift operator
+        '^_':   19,     // MACRO-10 internal shift operator (converted from 'B' suffix form that MACRO-10 uses)
+        '{':    20,     // open grouped expression (converted from achGroup[0])
+        '}':    20      // close grouped expression (converted from achGroup[1])
     };
 
     /*
