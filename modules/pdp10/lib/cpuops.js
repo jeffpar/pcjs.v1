@@ -1668,17 +1668,13 @@ PDP10.opASH = function(op, ac)
      */
     var s = ((this.regEA << 14) >> 14) % 256;
     if (s) {
-        var w = this.readWord(ac), bits;
-        /*
-         * Convert the unsigned word (w) to a signed value (i), for convenience.
-         */
-        var i = w > PDP10.INT_MASK? -(PDP10.WORD_LIMIT - w) : w;
+        var v , bits;
+        var w = this.readWord(ac);
         if (s > 0) {
-            if (s >= 35) {
-                i = (i < 0? PDP10.INT_LIMIT : 0);
-                bits = PDP10.INT_MASK;
-            } else {
-                i = (i * Math.pow(2, s)) % PDP10.INT_LIMIT;
+            bits = PDP10.INT_MASK;
+            v = (w < PDP10.INT_LIMIT)? 0 : PDP10.INT_LIMIT;
+            if (s < 35) {
+                v += (w * Math.pow(2, s)) % PDP10.INT_LIMIT;
                 /*
                  * bits must be set to the mask of all magnitude bits shifted out of
                  * the original word.  Using 8-bit signed words as an example, this table shows
@@ -1694,30 +1690,38 @@ PDP10.opASH = function(op, ac)
                  */
                 bits = PDP10.INT_LIMIT - Math.pow(2, 35 - s);
             }
-            if (w <= PDP10.INT_MASK) {
+            if (w < PDP10.INT_LIMIT) {
                 /*
                  * Since w was positive, overflow occurs ONLY if any of the bits we shifted out were 1s.
                  * If all those bits in the original value (w) were 0s, then adding bits to it could NOT
                  * produce a value > INT_MASK.
                  */
-                if (w + bits > PDP10.INT_MASK) this.regPS |= PDP10.PSFLAG.AROV;
+                if (w + bits > PDP10.INT_MASK) {
+                    this.regPS |= PDP10.PSFLAG.AROV;
+                }
             } else {
                 /*
                  * Since w was negative, overflow occurs ONLY if any of the bits we shifted out were 0s.
                  * If all those bits in the original value (w) were 1s, subtracting bits from it could NOT
                  * produce a value <= INT_MASK.
                  */
-                if (w - bits <= PDP10.INT_MASK) this.regPS |= PDP10.PSFLAG.AROV;
+                if (w - bits < PDP10.INT_LIMIT) {
+                    this.regPS |= PDP10.PSFLAG.AROV;
+                }
             }
         } else {
             if (s <= -35) {
-                i = (i < 0? -1 : 0);
+                v = (w < PDP10.INT_LIMIT)? 0 : PDP10.INT_MASK;
             } else {
-                i = Math.trunc(i / Math.pow(2, -s));
+                v = Math.trunc(w / Math.pow(2, -s));
+                if (w > PDP10.INT_MASK) {
+                    bits = PDP10.WORD_LIMIT - Math.pow(2, 36 + s);
+                    v += bits;
+                }
             }
         }
-        w = (i < 0? i + PDP10.WORD_LIMIT: i);
-        this.writeWord(ac, w);
+        this.assert(v >= 0 && v < PDP10.WORD_LIMIT);
+        this.writeWord(ac, v);
     }
 };
 
@@ -1900,14 +1904,18 @@ PDP10.opASHC = function(op, ac)
                          * If all those bits in the original value were 0s, then adding bits to it could NOT produce
                          * a value > INT_MASK.
                          */
-                        if (wRight + bits > PDP10.INT_MASK) this.regPS |= PDP10.PSFLAG.AROV;
+                        if (wRight + bits > PDP10.INT_MASK) {
+                            this.regPS |= PDP10.PSFLAG.AROV;
+                        }
                     } else {
                         /*
                          * Since wLeft was negative, overflow occurs ONLY if any of the bits we shifted out were 0s.
                          * If all those bits in the original value were 1s, subtracting bits from it could NOT produce
                          * a value <= INT_MASK.
                          */
-                        if (wRight - bits <= PDP10.INT_MASK) this.regPS |= PDP10.PSFLAG.AROV;
+                        if (wRight - bits <= PDP10.INT_MASK) {
+                            this.regPS |= PDP10.PSFLAG.AROV;
+                        }
                     }
                 }
                 wRight = 0;
@@ -1931,14 +1939,18 @@ PDP10.opASHC = function(op, ac)
                      * If all those bits in the original value were 0s, then adding bits to it could NOT produce
                      * a value > INT_MASK.
                      */
-                    if (wLeftOrig + bits > PDP10.INT_MASK) this.regPS |= PDP10.PSFLAG.AROV;
+                    if (wLeftOrig + bits > PDP10.INT_MASK) {
+                        this.regPS |= PDP10.PSFLAG.AROV;
+                    }
                 } else {
                     /*
                      * Since wLeft was negative, overflow occurs ONLY if any of the bits we shifted out were 0s.
                      * If all those bits in the original value were 1s, subtracting bits from it could NOT produce
                      * a value <= INT_MASK.
                      */
-                    if (wLeftOrig - bits <= PDP10.INT_MASK) this.regPS |= PDP10.PSFLAG.AROV;
+                    if (wLeftOrig - bits <= PDP10.INT_MASK) {
+                        this.regPS |= PDP10.PSFLAG.AROV;
+                    }
                     /*
                      * Last but not least, update the sign bits of wLeft and wRight to indicate negative values.
                      */
@@ -2349,7 +2361,9 @@ PDP10.opPUSHJ = function(op, ac)
 {
     var p = (this.readWord(ac) + 0o000001000001) % PDP10.WORD_LIMIT;
     this.writeWord(ac, p);
-    if (!((p / PDP10.HALF_SHIFT)|0)) this.regPS |= PDP10.PSFLAG.PDOV;
+    if (!((p / PDP10.HALF_SHIFT)|0)) {
+        this.regPS |= PDP10.PSFLAG.PDOV;
+    }
     this.writeWord(p & PDP10.ADDR_MASK, this.getPS() * PDP10.HALF_SHIFT + this.getPC());
     this.regPS &= ~PDP10.PSFLAG.BIS;            // TODO: Verify that BIS is cleared AFTER calling getPS()
     this.setPC(this.regEA);
@@ -2393,7 +2407,9 @@ PDP10.opPUSH = function(op, ac)
         p += 0o000001000001;
         this.writeWord(p & PDP10.ADDR_MASK, this.readWord(this.regEA));
         if (p >= PDP10.WORD_LIMIT) p -= PDP10.WORD_LIMIT;
-        if (!((p / PDP10.HALF_SHIFT)|0)) this.regPS |= PDP10.PSFLAG.PDOV;
+        if (!((p / PDP10.HALF_SHIFT)|0)) {
+            this.regPS |= PDP10.PSFLAG.PDOV;
+        }
     } else {
         /*
          * This is the SIMH behavior, which appears to increment each half of AC independently.
@@ -2433,7 +2449,9 @@ PDP10.opPOP = function(op, ac)
     if (this.regEA == ac) p = src;     // this avoids re-reading the accumulator if the write just overwrote it
     p -= 0o000001000001;
     if (p < 0) p += PDP10.WORD_LIMIT;
-    if (((p / PDP10.HALF_SHIFT)|0) == PDP10.HALF_MASK) this.regPS |= PDP10.PSFLAG.PDOV;
+    if (((p / PDP10.HALF_SHIFT)|0) == PDP10.HALF_MASK) {
+        this.regPS |= PDP10.PSFLAG.PDOV;
+    }
     this.writeWord(ac, p);
 };
 
@@ -2459,7 +2477,9 @@ PDP10.opPOPJ = function(op, ac)
     var pc = this.readWord(p & PDP10.ADDR_MASK);
     p -= 0o000001000001;
     if (p < 0) p += PDP10.WORD_LIMIT;
-    if (((p / PDP10.HALF_SHIFT)|0) == PDP10.HALF_MASK) this.regPS |= PDP10.PSFLAG.PDOV;
+    if (((p / PDP10.HALF_SHIFT)|0) == PDP10.HALF_MASK) {
+        this.regPS |= PDP10.PSFLAG.PDOV;
+    }
     this.writeWord(ac, p);
     this.setPC(pc & PDP10.ADDR_MASK);
 };
