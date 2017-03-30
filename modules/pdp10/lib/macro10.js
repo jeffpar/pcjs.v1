@@ -1133,6 +1133,48 @@ class Macro10 {
     }
 
     /**
+     * getString(sValue, nConversion)
+     *
+     * Converts the given expression string (sValue) to one of the following, based on the conversion code (nConversion):
+     *
+     *      0: numeric string (default)
+     *      1: SIXBIT string
+     *      2: ASCII string
+     *
+     * If the expression cannot be evaluated, or if the requested conversion isn't recognized, the original value is returned.
+     *
+     * @this {Macro10}
+     * @param {string} sValue
+     * @param {number} [nConversion]
+     * @return {string}
+     */
+    getString(sValue, nConversion = 0)
+    {
+        var c, s;
+        var value = this.parseExpression(sValue);
+        if (value !== undefined) {
+            var cchMax = 5;
+            switch(nConversion) {
+            case 0:
+                sValue = this.dbg.toStrBase(value, -1);
+                break;
+            case 6:
+                cchMax++;
+                /* falls through */
+            case 7:
+                s = "";
+                while (value && cchMax--) {
+                    c = value & (Math.pow(2, nConversion) - 1);
+                    s = String.fromCharCode(c + (nConversion == 6? 0x20 : 0)) + s;
+                    value = Math.trunc(value / Math.pow(2, nConversion));
+                }
+                break;
+            }
+        }
+        return sValue;
+    }
+
+    /**
      * getSymbol(sOperands)
      *
      * Check the operands for a symbol.  TODO: Use this method?
@@ -1163,7 +1205,20 @@ class Macro10 {
             sOperands = sOperands.trim();
             var sOperand = this.getExpression(sOperands);
             if (!sOperand) break;
-            aValues.push(sOperand);
+            var sValue = sOperand;
+            if (sOperand[0] == '\\') {
+                var cchPrefix = 1;
+                var nConversion = 0;
+                if (sOperand[1] == "'") {
+                    cchPrefix++;
+                    nConversion = 6;
+                } else if (sOperand[1] == '"') {
+                    cchPrefix++;
+                    nConversion = 7;
+                }
+                sValue = this.getString(sOperand.substr(cchPrefix), nConversion);
+            }
+            aValues.push(sValue);
             sOperands = sOperands.substr(sOperand.length + 1);
         }
         return aValues;
