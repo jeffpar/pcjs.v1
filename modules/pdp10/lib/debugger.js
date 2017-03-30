@@ -2528,7 +2528,7 @@ class DebuggerPDP10 extends Debugger {
         var dbg = this.dbg;
         var nWords = 0, addrLo = null, addrHi = 0;
         aWords.forEach(function(w, addr) {
-            bus.setWordDirect(addr, w);
+            bus.setWord(addr, w);
             if (addrLo == null) addrLo = addr;
             if (addr > addrHi) addrHi = addr;
             nWords++;
@@ -2665,10 +2665,15 @@ class DebuggerPDP10 extends Debugger {
                             if (addrStart == null) addrStart = addrLoad;
                             dbg.loadImage(macro10.getImage(), addrStart);
                         } catch(e) {
-                            dbg.println(e.message);
-                            nErrorCode = -1;    // fake error so that command processing stops
+                            if (typeof e == "number") {
+                                nErrorCode = e || -1;
+                            } else {
+                                dbg.println(e.message);
+                                nErrorCode = -1;        // fake error so that command processing stops
+                            }
                         }
-                    } else {
+                    }
+                    if (nErrorCode) {
                         dbg.println("error (" + nErrorCode + ") processing " + (sURL || sFile));
                     }
                     dbg.macro10 = null;

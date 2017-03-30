@@ -420,6 +420,7 @@ class MemoryPDP10 {
         if (DEBUGGER && this.dbg && this.dbg.messageEnabled(MessagesPDP10.MEMORY) /* && !off */) {
             this.dbg.printMessage("attempt to write " + this.dbg.toStrBase(v) + " to invalid addresses " + this.dbg.toStrBase(addr), true);
         }
+        this.bus.fault(addr);
     }
 
     /**

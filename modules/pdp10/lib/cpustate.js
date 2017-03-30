@@ -833,6 +833,20 @@ class CPUStatePDP10 extends CPUPDP10 {
     }
 
     /**
+     * haltCPU()
+     *
+     * This is a temporary helper function for the Bus component, to force the CPU to stop executing the
+     * current instruction.
+     *
+     * @this {CPUStatePDP10}
+     */
+    haltCPU()
+    {
+        this.stopCPU();
+        throw -1;
+    }
+
+    /**
      * stepCPU(nMinCycles)
      *
      * NOTE: Single-stepping should not be confused with the Trap flag; single-stepping is a Debugger
