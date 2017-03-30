@@ -36,7 +36,41 @@ This command:
 	a DAKAI.MAC
 
 will automatically read the [DAKAI.MAC](DAKAI.MAC.txt) source file (a slightly modified copy of [DAKAIM.MAC](DAKAIM.MAC.txt)),
-assemble it, and then load the binary output at the specified address.
+assemble it, and then load the binary image at the location specified in the file.
+
+Interesting MACRO-10 Bug
+------------------------
+
+Take a look at this piece of original [source code](#dakaimac):
+
+	MOVSI   AC+1,ZZ     ;SET BIT (N) OF AC+1 LEFT
+	IFG     <ZZ-2,>,<
+	MOVSI   AC-1,YY     ;SETUP FOR COMPARISON>
+
+and the corresponding lines in the [listing file](DAKAI.LST.txt):
+
+	11660   037024  205 07 0 00 000001      MOVSI   AC+1,ZZ     ;SET BIT (N) OF AC+1 LEFT
+	11661                                   IFG     <ZZ-2,>,<
+	11662   037025  205 05 0 00 000000      MOVSI   AC-1,YY     ;SETUP FOR COMPARISON>
+
+It's clear from the listing file that *ZZ* is 1, and therefore the *IFG* expression *<ZZ-2>* should be -1, so the
+*MOVSI AC-1,YY* should be suppressed.  And my MACRO-10 Mini-Assembler *does* suppress it.  But as you can see from
+DEC's listing file, they didn't suppress it.  This results in an unfortunate mismatch between our respective
+instruction sequences from that point on.
+
+Why did this happen?  Since earlier identical *IFG* expansions work as expected, I have to assume that the spurious
+comma in that particular *IFG* pseudo-op somehow tripped up the expression evaluation.  Commas *are* allowed in MACRO-10
+expressions; for example:
+
+	777777,,666666
+
+combines two 18-bit values (0o777777 and 0o666666) into a single 36-bit value (0o777777666666).  But I'm not aware of
+a *single* comma meaning anything to MACRO-10, and it's pretty clear that the comma in that *IFG* is just a typo,
+so I'm not going to try to replicate MACRO-10's behavior here.
+
+The PCjs expression evaluator (which is what my MACRO-10 Mini-Assembler uses) is OK with the comma, but not because it
+supports a comma operator (it doesn't); it simply allows numbers to contain commas, in case the user is using commas to
+group digits.  So "2," is the same as "2".
 
 ---
 
