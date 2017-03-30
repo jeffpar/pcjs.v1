@@ -95,18 +95,18 @@ var Scope;
 /**
  * @class Macro10
  * @property {string} sURL
- * @property {number} nAddr
+ * @property {number} addrLoad
  * @property {string} sOptions
  * @property {DebuggerPDP10} dbg
  * @property {function(...)} done
  * @property {number} iURL
  * @property {Array.<string>} asURLs
  * @property {Array.<string>} asLines
- * @property {number|null|undefined} nAddrStart
+ * @property {number|null|undefined} addrStart
  */
 class Macro10 {
     /**
-     * Macro10(sURL, nAddr, sOptions, dbg, done)
+     * Macro10(sURL, addrLoad, sOptions, dbg, done)
      *
      * A "mini" version of DEC's MACRO-10 assembler, with just enough features to support the handful
      * of DEC diagnostic source code files that we choose to throw at it.
@@ -115,7 +115,7 @@ class Macro10 {
      * them with semicolons.
      *
      * The done() callback is called after the resource(s) have been loaded and parsed.  The caller
-     * must use other methods to obtain further results (eg, getBin()).
+     * must use other methods to obtain further results (eg, getImage(), getStart()).
      *
      * The callback includes a non-zero error code if there was an error (and the URL):
      *
@@ -127,15 +127,15 @@ class Macro10 {
      *
      * @this {Macro10}
      * @param {string} sURL (the URL(s) of the resource to be assembled)
-     * @param {number|null} nAddr (the absolute address to assemble the code at, if any)
+     * @param {number|null} addrLoad (the absolute address to assemble the code at, if any)
      * @param {string|null} sOptions (zero or more letter codes to control the assembly process)
      * @param {DebuggerPDP10} dbg (used to provide helper services to the Macro10 class)
      * @param {function(...)} done
      */
-    constructor(sURL, nAddr, sOptions, dbg, done)
+    constructor(sURL, addrLoad, sOptions, dbg, done)
     {
         this.sURL = sURL;
-        this.nAddr = nAddr || 0;
+        this.addrLoad = addrLoad;
         this.sOptions = sOptions || "";
         this.dbg = dbg;
         this.done = done;
@@ -143,7 +143,7 @@ class Macro10 {
         /*
          * The next set of properties may be updated by the assembly process and queried by the caller.
          */
-        this.nAddrStart = null;
+        this.addrStart = null;
 
         if (MAXDEBUG) this.println("starting PCjs MACRO-10 Mini-Assembler...");
 
@@ -214,7 +214,7 @@ class Macro10 {
         /**
          * @type {number}
          */
-        this.nLocation = this.nAddr;    // advanced by the various genXXX() functions
+        this.nLocation = this.addrLoad || 0;
 
         /**
          * @type {number}
@@ -323,16 +323,29 @@ class Macro10 {
     }
 
     /**
-     * getBin()
+     * getImage()
      *
-     * Service for the Debugger to obtain the data after a (hopefully) successful assembly process.
+     * Service for the Debugger to obtain the assembled data after a (hopefully) successful assembly process.
      *
      * @this {Macro10}
      * @return {Array.<number>}
      */
-    getBin()
+    getImage()
     {
         return this.aWords;
+    }
+
+    /**
+     * getStart()
+     *
+     * Service for the Debugger to obtain the starting address after a (hopefully) successful assembly process.
+     *
+     * @this {Macro10}
+     * @return {number|null|undefined}
+     */
+    getStart()
+    {
+        return this.addrStart;
     }
 
     /**
@@ -367,10 +380,10 @@ class Macro10 {
                  */
                 if (!this.parseLine(this.asLines[i] + '\r\n')) break;
                 /*
-                 * When an END statement is encountered, nAddrStart will change from null to either undefined
+                 * When an END statement is encountered, addrStart will change from null to either undefined
                  * or a starting address.
                  */
-                if (this.nAddrStart !== null) break;
+                if (this.addrStart !== null) break;
             }
 
             if (this.nMacroDef) {
@@ -1420,10 +1433,10 @@ class Macro10 {
     defEND(sOperands)
     {
         if (!sOperands) {
-            this.nAddrStart = this.nAddr;
+            this.addrStart = this.addrLoad;
         } else {
-            this.nAddrStart = this.parseExpression(sOperands, true);
-            if (this.nAddrStart === undefined) {
+            this.addrStart = this.parseExpression(sOperands, true);
+            if (this.addrStart === undefined) {
                 this.error("unrecognized expression: " + sOperands);
             }
         }

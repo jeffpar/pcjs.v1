@@ -520,7 +520,7 @@ class DebuggerPDP10 extends Debugger {
      * @this {DebuggerPDP10}
      * @param {string|undefined} sAddr
      * @param {DbgAddrPDP10} [dbgAddr]
-     * @return {DbgAddrPDP10|null|undefined}
+     * @return {DbgAddrPDP10}
      */
     parseAddr(sAddr, dbgAddr)
     {
@@ -2516,27 +2516,28 @@ class DebuggerPDP10 extends Debugger {
     }
 
     /**
-     * loadBin(aWords, addrLoad)
+     * loadImage(aWords, addrStart)
      *
      * @this {DebuggerPDP10}
      * @param {Array.<number>} aWords
-     * @param {number|null} addrLoad
+     * @param {number|null|undefined} addrStart
      */
-    loadBin(aWords, addrLoad)
+    loadImage(aWords, addrStart)
     {
-        var nWords = 0;
         var bus = this.bus;
         var dbg = this.dbg;
+        var nWords = 0, addrLo = null, addrHi = 0;
         aWords.forEach(function(w, addr) {
             bus.setWordDirect(addr, w);
-            if (addrLoad == null) addrLoad = addr;
+            if (addrLo == null) addrLo = addr;
+            if (addr > addrHi) addrHi = addr;
             nWords++;
         });
         if (!nWords) {
             this.println("no data");
         } else {
-            this.println(nWords + " words loaded at " + this.toStrBase(addrLoad) + '-' + this.toStrBase(addrLoad + nWords - 1));
-            this.cpu.setPC(addrLoad || 0);
+            this.println(nWords + " words loaded at " + this.toStrBase(addrLo) + '-' + this.toStrBase(addrHi));
+            if (addrStart != null) this.cpu.setPC(addrStart);
             this.updateStatus();
         }
     }
@@ -2609,14 +2610,19 @@ class DebuggerPDP10 extends Debugger {
      * without ever entering "assemble mode", but of course, that requires more typing and doesn't take advantage
      * of automatic target address advancement (see dbgAddrAssemble).
      *
-     * When filename(s) or URL(s) are provided in lieu of an opcode, we pass those on to the Macro10 component
-     * for assembling, along with any option letters that were included with the "a" command; for example, if "ap"
-     * was specified, then "p" will be passed to Macro10 as an option.
+     * When filename(s) or URL(s) are provided in lieu of an opcode, we pass those on to the Macro10 component for
+     * assembling (multiple files must be separated by semicolons), along with any option letters that were included
+     * with the "a" command; for example, if "ap" was specified, then "p" will be passed to Macro10 as an option.
      *
      * Macro10 options include:
      *
      *      p:  preprocess the specified resource(s) without assembling them
      *      l:  generate listing information (TODO)
+     *
+     * When assembling a file, the target address determines the initial location counter for the assembly process,
+     * but that can always be overridden by a LOC (or RELOC) pseudo-op in the file.  The target address will also be
+     * used as the starting address unless that's overridden by an END pseudo-op.  In the absence of a target address,
+     * the location counter starts at zero, and the starting address defaults to the PC register.
      *
      * @this {DebuggerPDP10}
      * @param {Array.<string>} asArgs is the complete argument array, beginning with the "a" command in asArgs[0]
@@ -2624,29 +2630,30 @@ class DebuggerPDP10 extends Debugger {
      */
     doAssemble(asArgs)
     {
-        var dbgAddr = this.parseAddr(asArgs[1], this.dbgAddrAssemble);
-        if (!dbgAddr) return false;
+        var sOptions = asArgs[0].substr(1);
+        var sAddr = asArgs[1] && asArgs[1][0] >= '0' && asArgs[1][0] <= '9'? asArgs[1] : undefined;
+        var sOpcode = sAddr? asArgs[2] : asArgs[1];
+        var dbgAddr = this.parseAddr(sAddr, this.dbgAddrAssemble);
 
-        var sOpcode = asArgs[2];
-
-        if (sOpcode == undefined) {
+        if (!sOpcode) {
             this.println("begin assemble at " + this.toStrAddr(dbgAddr));
             this.fAssemble = true;
             this.cmp.updateDisplays();
             return true;
         }
 
-        var sOptions = asArgs[0].substr(1);
         var match = sOpcode.match(/^(['"]?)(.*\.mac|.*\.html|.*\.txt)\1$/i);
         if (match) {
             var dbg = this;
+            var cpu = this.cpu;
+            dbgAddr = this.parseAddr(sAddr);
             if (this.macro10) {
                 dbg.println("assembly already in progress");
             }
             else {
                 var sFile = match[2];
                 var addrLoad = dbgAddr.addr;
-                this.macro10 = new Macro10(sFile, addrLoad, sOptions, dbg, function doneMacro10(nErrorCode, sURL) {
+                var macro10 = this.macro10 = new Macro10(sFile, addrLoad, sOptions, dbg, function doneMacro10(nErrorCode, sURL) {
                     if (!nErrorCode) {
                         /*
                          * NOTE: Most Debugger operations run in the context of doCommand(), which catches any exceptions;
@@ -2654,7 +2661,9 @@ class DebuggerPDP10 extends Debugger {
                          * better safe than sorry.
                          */
                         try {
-                            dbg.loadBin(dbg.macro10.getBin(), addrLoad);
+                            var addrStart = macro10.getStart();
+                            if (addrStart == null) addrStart = addrLoad;
+                            dbg.loadImage(macro10.getImage(), addrStart);
                         } catch(e) {
                             dbg.println(e.message);
                             nErrorCode = -1;    // fake error so that command processing stops
@@ -2738,11 +2747,7 @@ class DebuggerPDP10 extends Debugger {
             return;
         }
 
-        var dbgAddr = this.newAddr();
-        if (sAddr != '*') {
-            dbgAddr = this.parseAddr(sAddr, this.dbgAddrCode);
-            if (!dbgAddr) return;
-        }
+        var dbgAddr = sAddr == '*'? this.newAddr() : this.parseAddr(sAddr, this.dbgAddrCode);
 
         if (sParm == 'c') {
             if (dbgAddr.addr == null) {
@@ -2876,11 +2881,9 @@ class DebuggerPDP10 extends Debugger {
             return;
         }
 
-        var dbgAddr = this.parseAddr(sAddr, this.dbgAddrData);
-        if (!dbgAddr) return;
-
         var len = 0;
         var fJSON = (sCmd == "ds");
+        var dbgAddr = this.parseAddr(sAddr, this.dbgAddrData);
 
         if (sLen) {
             if (sLen.charAt(0) == 'l') {
@@ -2889,7 +2892,7 @@ class DebuggerPDP10 extends Debugger {
             }
             else {
                 var dbgAddrEnd = this.parseAddr(sLen);
-                if (dbgAddrEnd) len = dbgAddrEnd.addr - dbgAddr.addr;
+                len = dbgAddrEnd.addr - dbgAddr.addr;
             }
             if (len < 0) len = 0;
             if (len > 0x10000) len = 0x10000;
@@ -2966,7 +2969,6 @@ class DebuggerPDP10 extends Debugger {
             return;
         }
         var dbgAddr = this.parseAddr(sAddr, this.dbgAddrData);
-        if (!dbgAddr) return;
         for (var i = 2; i < asArgs.length; i++) {
             var w = this.parseExpression(asArgs[i]);
             if (w === undefined) break;
@@ -3090,30 +3092,28 @@ class DebuggerPDP10 extends Debugger {
         var sSymbol = null;
 
         var dbgAddr = this.parseAddr(sAddr);
-        if (dbgAddr) {
-            var addr = this.getAddr(dbgAddr);
-            var aSymbol = this.findSymbol(dbgAddr, true);
-            if (aSymbol.length) {
-                var nDelta, sDelta, s;
-                if (aSymbol[0]) {
-                    sDelta = "";
-                    nDelta = dbgAddr.addr - aSymbol[1];
-                    if (nDelta) sDelta = " + " + Str.toHexWord(nDelta);
-                    s = aSymbol[0] + " (" + this.toStrOffset(aSymbol[1]) + ')' + sDelta;
-                    if (fPrint) this.println(s);
-                    sSymbol = s;
-                }
-                if (aSymbol.length > 4 && aSymbol[4]) {
-                    sDelta = "";
-                    nDelta = aSymbol[5] - dbgAddr.addr;
-                    if (nDelta) sDelta = " - " + Str.toHexWord(nDelta);
-                    s = aSymbol[4] + " (" + this.toStrOffset(aSymbol[5]) + ')' + sDelta;
-                    if (fPrint) this.println(s);
-                    if (!sSymbol) sSymbol = s;
-                }
-            } else {
-                if (fPrint) this.println("no symbols");
+        var addr = this.getAddr(dbgAddr);
+        var aSymbol = this.findSymbol(dbgAddr, true);
+        if (aSymbol.length) {
+            var nDelta, sDelta, s;
+            if (aSymbol[0]) {
+                sDelta = "";
+                nDelta = dbgAddr.addr - aSymbol[1];
+                if (nDelta) sDelta = " + " + Str.toHexWord(nDelta);
+                s = aSymbol[0] + " (" + this.toStrOffset(aSymbol[1]) + ')' + sDelta;
+                if (fPrint) this.println(s);
+                sSymbol = s;
             }
+            if (aSymbol.length > 4 && aSymbol[4]) {
+                sDelta = "";
+                nDelta = aSymbol[5] - dbgAddr.addr;
+                if (nDelta) sDelta = " - " + Str.toHexWord(nDelta);
+                s = aSymbol[4] + " (" + this.toStrOffset(aSymbol[5]) + ')' + sDelta;
+                if (fPrint) this.println(s);
+                if (!sSymbol) sSymbol = s;
+            }
+        } else {
+            if (fPrint) this.println("no symbols");
         }
         return sSymbol;
     }
@@ -3362,7 +3362,6 @@ class DebuggerPDP10 extends Debugger {
     {
         if (sAddr !== undefined) {
             var dbgAddr = this.parseAddr(sAddr);
-            if (!dbgAddr) return;
             this.parseAddrOptions(dbgAddr, sOptions);
             this.setTempBreakpoint(dbgAddr);
         }
@@ -3618,7 +3617,6 @@ class DebuggerPDP10 extends Debugger {
     doUnassemble(sAddr, sAddrEnd, nLines)
     {
         var dbgAddr = this.parseAddr(sAddr, this.dbgAddrCode);
-        if (!dbgAddr) return;
 
         if (nLines === undefined) nLines = 1;
 
@@ -3631,7 +3629,7 @@ class DebuggerPDP10 extends Debugger {
             }
             else {
                 var dbgAddrEnd = this.parseAddr(sAddrEnd);
-                if (!dbgAddrEnd || dbgAddrEnd.addr < dbgAddr.addr) return;
+                if (dbgAddrEnd.addr < dbgAddr.addr) return;
 
                 nBytes = dbgAddrEnd.addr - dbgAddr.addr;
                 if (!DEBUG && nBytes > 0x100) {
