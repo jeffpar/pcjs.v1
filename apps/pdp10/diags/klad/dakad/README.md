@@ -288,5 +288,5 @@ DAKAD.MAC
 [[Download](DAKAD.MAC.txt)]
  
 {% highlight text %}
-{% include_relative DAKADM.MAC.txt %}
+{% include_relative DAKAD.MAC.txt %}
 {% endhighlight %}

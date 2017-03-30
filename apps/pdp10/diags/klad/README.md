@@ -80,4 +80,4 @@ PCjs has archived selected files from
 - [KA10 Basic Instruction Diagnostic #8 (MAINDEC-10-DAKAH)](dakah/)
 	- TESTS OF PI, INTERRUPTS, LUUO'S, I/O
 - [KA10 Basic Instruction Diagnostic #9 (MAINDEC-10-DAKAI)](dakai/)
-	- SHIFT-ROTATE TEST (PART 1)
+	- TESTS OF LOGICAL SHIFT, ROTATE, ARITHMETIC SHIFT; SINGLE AND COMBINED

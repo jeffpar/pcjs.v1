@@ -274,5 +274,5 @@ DAKAG.MAC
 [[Download](DAKAG.MAC.txt)]
  
 {% highlight text %}
-{% include_relative DAKAGM.MAC.txt %}
+{% include_relative DAKAG.MAC.txt %}
 {% endhighlight %}

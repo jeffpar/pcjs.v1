@@ -14,7 +14,8 @@ PDP-10 KA10 Basic Instruction Diagnostic #9
 -------------------------------------------
 
 The *PDP-10 KA10 Basic Instruction Diagnostic #9* (MAINDEC-10-DAKAI) test code has been extracted from
-[DAKAIM.MAC](DAKAIM.MAC.txt) [[original](http://pdp-10.trailing-edge.com/klad_sources/01/klad.sources/dakaim.mac.html)]
+[DAKAIM.MAC](DAKAIM.MAC.txt) [[original](http://pdp-10.trailing-edge.com/klad_sources/01/klad.sources/dakaim.mac.html)] and
+[DAKAIT.MAC](DAKAIT.MAC.txt) [[original](http://pdp-10.trailing-edge.com/klad_sources/01/klad.sources/dakait.mac.html)]
 for use with the [PDP-10 Test Machine with Debugger](/devices/pdp10/machine/ka10/test/debugger/) below.
 
 Resources for this test include:
@@ -418,5 +419,5 @@ DAKAI.MAC
 [[Download](DAKAI.MAC.txt)]
  
 {% highlight text %}
-{% include_relative DAKAIM.MAC.txt %}
+{% include_relative DAKAI.MAC.txt %}
 {% endhighlight %}

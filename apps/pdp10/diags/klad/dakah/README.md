@@ -14,7 +14,8 @@ PDP-10 KA10 Basic Instruction Diagnostic #8
 -------------------------------------------
 
 The *PDP-10 KA10 Basic Instruction Diagnostic #8* (MAINDEC-10-DAKAH) test code has been extracted from
-[DAKAHM.MAC](DAKAHM.MAC.txt) [[original](http://pdp-10.trailing-edge.com/klad_sources/01/klad.sources/dakahm.mac.html)]
+[DAKAHM.MAC](DAKAHM.MAC.txt) [[original](http://pdp-10.trailing-edge.com/klad_sources/01/klad.sources/dakahm.mac.html)] and
+[DAKAHT.MAC](DAKAHT.MAC.txt) [[original](http://pdp-10.trailing-edge.com/klad_sources/01/klad.sources/dakaht.mac.html)]
 for use with the [PDP-10 Test Machine with Debugger](/devices/pdp10/machine/ka10/test/debugger/) below.
 
 Resources for this test include:
@@ -275,5 +276,5 @@ DAKAH.MAC
 [[Download](DAKAH.MAC.txt)]
  
 {% highlight text %}
-{% include_relative DAKAHM.MAC.txt %}
+{% include_relative DAKAH.MAC.txt %}
 {% endhighlight %}

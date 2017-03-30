@@ -280,5 +280,5 @@ DAKAA.MAC
 [[Download](DAKAA.MAC.txt)]
 
 {% highlight text %}
-{% include_relative DAKAAM.MAC.txt %}
+{% include_relative DAKAA.MAC.txt %}
 {% endhighlight %}
