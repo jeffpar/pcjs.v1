@@ -184,7 +184,7 @@ class CPUStatePDP10 extends CPUPDP10 {
         this.regXC  = -1;       // if >= 0 this supersedes regPC (refers to an opcode from XCT)
         this.regBP  = -1;       // active byte pointer (-1 if none)
         this.regPS  =  0;       // assorted processor flags (see PSFLAG bit definitions)
-        this.regExt =  0;       // internal "extension" register used for 72-bit MUL and DIV calculations
+        this.regEX  =  0;       // internal "extension" register used for 72-bit MUL and DIV calculations
 
         this.regRes = [0, 0];   // four internal "double-length" registers used for 72-bit DIV calculations
         this.regPow = [0, 0];
@@ -351,34 +351,32 @@ class CPUStatePDP10 extends CPUPDP10 {
     /**
      * getPS()
      *
-     * Gets the processor state flags in the format required by various program control operations (eg, JSP),
-     * pre-masked and pre-shifted for convenient loading into the left half of an accumulator.
+     * Gets the processor state flags in the format required by various program control operations (eg, JSP).
      *
      * @this {CPUStatePDP10}
      * @return {number}
      */
     getPS()
     {
-        return (this.regPS & PDP10.HALF_MASK) * PDP10.HALF_SHIFT;
+        return (this.regPS & PDP10.HALF_MASK);
     }
 
     /**
      * setPS(w)
      *
-     * Sets the processor state flags in the format used by various program control operations (eg, JRST).
+     * Sets the processor state flags in the format required by various program control operations (eg, JRST).
      *
      * @this {CPUStatePDP10}
      * @param {number} w
      */
     setPS(w)
     {
-        w = (w / PDP10.HALF_SHIFT)|0;
         this.regPS = (this.regPS & ~PDP10.PSFLAG.SET_MASK) | (w & PDP10.PSFLAG.SET_MASK);
-        this.regPS |= (w & PDP10.PSFLAG.USER_MODE);
-        if (!(w & PDP10.PSFLAG.USER_IO)) {
-            this.regPS &= ~PDP10.PSFLAG.USER_IO;
+        this.regPS |= (w & PDP10.PSFLAG.USERF);
+        if (!(w & PDP10.PSFLAG.EXIOT)) {
+            this.regPS &= ~PDP10.PSFLAG.EXIOT;
         } else {
-            if (!(this.regPS & PDP10.PSFLAG.USER_MODE)) this.regPS |= PDP10.PSFLAG.USER_IO;
+            if (!(this.regPS & PDP10.PSFLAG.USERF)) this.regPS |= PDP10.PSFLAG.EXIOT;
         }
     }
 
@@ -391,7 +389,7 @@ class CPUStatePDP10 extends CPUPDP10 {
      */
     setUserMode()
     {
-        this.regPS |= PDP10.PSFLAG.USER_MODE;
+        this.regPS |= PDP10.PSFLAG.USERF;
     }
 
     /**
@@ -405,8 +403,8 @@ class CPUStatePDP10 extends CPUPDP10 {
     readFlags()
     {
         var flags = 0;
-        if (this.regPS & PDP10.PSFLAG.OVFL) flags |= PDP10.RFLAG.OVFL;
-        if (this.regPS & PDP10.PSFLAG.PD_OVFL) flags |= PDP10.RFLAG.PD_OVFL;
+        if (this.regPS & PDP10.PSFLAG.AROV) flags |= PDP10.RFLAG.AROV;
+        if (this.regPS & PDP10.PSFLAG.PDOV) flags |= PDP10.RFLAG.PDOV;
         return flags;
     }
 
@@ -420,8 +418,8 @@ class CPUStatePDP10 extends CPUPDP10 {
      */
     writeFlags(w)
     {
-        if (w & PDP10.WFLAG.OVFL_CL) this.regPS &= ~PDP10.PSFLAG.OVFL;
-        if (w & PDP10.WFLAG.PD_OVFL_CL) this.regPS &= ~PDP10.PSFLAG.PD_OVFL;
+        if (w & PDP10.WFLAG.AROV_CL) this.regPS &= ~PDP10.PSFLAG.AROV;
+        if (w & PDP10.WFLAG.PDOV_CL) this.regPS &= ~PDP10.PSFLAG.PDOV;
     }
 
     /**
@@ -439,7 +437,7 @@ class CPUStatePDP10 extends CPUPDP10 {
      */
     getOpcode()
     {
-        if ((this.regRA & PDP10.OPCODE.I_BIT)) {
+        if ((this.regRA & PDP10.OPCODE.I_FIELD)) {
             this.regRA = this.regLA = this.readWord(this.regEA);
         } else if (this.regXC >= 0) {
             this.regRA = this.regOP = this.readWord(this.regXC);
@@ -470,7 +468,7 @@ class CPUStatePDP10 extends CPUPDP10 {
         var x = (this.regRA >> PDP10.OPCODE.X_SHIFT) & PDP10.OPCODE.X_MASK;
         if (x) this.regEA = (this.regEA + (this.regLA = this.readWord(x))) & PDP10.ADDR_MASK;
 
-        return (this.regRA & PDP10.OPCODE.I_BIT)? -1 : ((this.regOP / PDP10.OPCODE.A_SCALE)|0);
+        return (this.regRA & PDP10.OPCODE.I_FIELD)? -1 : ((this.regOP / PDP10.OPCODE.A_SCALE)|0);
     }
 
     /**
@@ -500,6 +498,19 @@ class CPUStatePDP10 extends CPUPDP10 {
     getPC()
     {
         return this.regPC;
+    }
+
+    /**
+     * getXC()
+     *
+     * NOTE: This function is nothing more than a convenience, and we fully expect it to be inlined at runtime.
+     *
+     * @this {CPUStatePDP10}
+     * @return {number}
+     */
+    getXC()
+    {
+        return this.regXC >= 0? this.regXC : this.regPC;
     }
 
     /**
@@ -536,6 +547,7 @@ class CPUStatePDP10 extends CPUPDP10 {
     setPC(addr)
     {
         this.regPC = addr % PDP10.ADDR_LIMIT;
+        this.regXC = -1;
     }
 
     /**
@@ -818,6 +830,20 @@ class CPUStatePDP10 extends CPUPDP10 {
     {
         this.bus.setWord(this.addrLast = addr, data);
         return data;
+    }
+
+    /**
+     * haltCPU()
+     *
+     * This is a temporary helper function for the Bus component, to force the CPU to stop executing the
+     * current instruction.
+     *
+     * @this {CPUStatePDP10}
+     */
+    haltCPU()
+    {
+        this.stopCPU();
+        throw -1;
     }
 
     /**

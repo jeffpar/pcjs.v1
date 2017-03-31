@@ -164,6 +164,7 @@ class DebuggerPDP10 extends Debugger {
             this.aMessageBuffer = [];
             this.messageInit(parmsDbg['messages']);
             this.sInitCommands = parmsDbg['commands'];
+            this.aCommands = [];
 
             /*
              * Define remaining miscellaneous DebuggerPDP10 properties.
@@ -519,7 +520,7 @@ class DebuggerPDP10 extends Debugger {
      * @this {DebuggerPDP10}
      * @param {string|undefined} sAddr
      * @param {DbgAddrPDP10} [dbgAddr]
-     * @return {DbgAddrPDP10|null|undefined}
+     * @return {DbgAddrPDP10}
      */
     parseAddr(sAddr, dbgAddr)
     {
@@ -919,20 +920,23 @@ class DebuggerPDP10 extends Debugger {
         case DebuggerPDP10.REGS.EA:
             value = cpu.regEA;
             break;
-        case DebuggerPDP10.REGS.C0:
-            value = (cpu.regPS & PDP10.PSFLAG.CARRY0)? 1 : 0;
-            break;
-        case DebuggerPDP10.REGS.C1:
-            value = (cpu.regPS & PDP10.PSFLAG.CARRY1)? 1 : 0;
+        case DebuggerPDP10.REGS.PS:
+            value = cpu.getPS();
             break;
         case DebuggerPDP10.REGS.OV:
-            value = (cpu.regPS & PDP10.PSFLAG.OVFL)? 1 : 0;
+            value = (cpu.regPS & PDP10.PSFLAG.AROV)? 1 : 0;
+            break;
+        case DebuggerPDP10.REGS.C0:
+            value = (cpu.regPS & PDP10.PSFLAG.CRY0)? 1 : 0;
+            break;
+        case DebuggerPDP10.REGS.C1:
+            value = (cpu.regPS & PDP10.PSFLAG.CRY1)? 1 : 0;
             break;
         case DebuggerPDP10.REGS.ND:
-            value = (cpu.regPS & PDP10.PSFLAG.NO_DIVIDE)? 1 : 0;
+            value = (cpu.regPS & PDP10.PSFLAG.DCK)? 1 : 0;
             break;
         case DebuggerPDP10.REGS.PD:
-            value = (cpu.regPS & PDP10.PSFLAG.PD_OVFL)? 1 : 0;
+            value = (cpu.regPS & PDP10.PSFLAG.PDOV)? 1 : 0;
             break;
         }
         return value;
@@ -955,20 +959,23 @@ class DebuggerPDP10 extends Debugger {
             cpu.setPC(value);
             this.setAddr(this.dbgAddrCode, cpu.getPC());
             break;
-        case DebuggerPDP10.REGS.C0:
-            flag = PDP10.PSFLAG.CARRY0;
-            break;
-        case DebuggerPDP10.REGS.C1:
-            flag = PDP10.PSFLAG.CARRY1;
+        case DebuggerPDP10.REGS.PS:
+            cpu.setPS(value);
             break;
         case DebuggerPDP10.REGS.OV:
-            flag = PDP10.PSFLAG.OVFL;
+            flag = PDP10.PSFLAG.AROV;
+            break;
+        case DebuggerPDP10.REGS.C0:
+            flag = PDP10.PSFLAG.CRY0;
+            break;
+        case DebuggerPDP10.REGS.C1:
+            flag = PDP10.PSFLAG.CRY1;
             break;
         case DebuggerPDP10.REGS.ND:
-            flag = PDP10.PSFLAG.NO_DIVIDE;
+            flag = PDP10.PSFLAG.DCK;
             break;
         case DebuggerPDP10.REGS.PD:
-            flag = PDP10.PSFLAG.PD_OVFL;
+            flag = PDP10.PSFLAG.PDOV;
             break;
         }
         if (flag) {
@@ -1563,7 +1570,7 @@ class DebuggerPDP10 extends Debugger {
                     }
                 }
                 sOperation = Str.pad(sOperation, 8) + (sOperand? sOperand + ',' : "");
-                if (opCode & PDP10.OPCODE.I_BIT) sOperation += '@';
+                if (opCode & PDP10.OPCODE.I_FIELD) sOperation += '@';
                 sOperation += this.toStrBase(opCode & PDP10.OPCODE.Y_MASK, -1);
                 var i = (opCode >> PDP10.OPCODE.X_SHIFT) & PDP10.OPCODE.X_MASK;
                 if (i) sOperation += '(' + this.toStrBase(i, -1) + ')';
@@ -1704,9 +1711,9 @@ class DebuggerPDP10 extends Debugger {
             }
             /*
              * MACRO-10 also allows instructions to be assembled without an opcode (ie, just an address reference),
-             * so we'll give that a try next.
+             * so we'll give that a try next (as long as we're not mashing two symbols together).
              */
-            if (opCode < 0) {
+            if (opCode < 0 && sOperands && !sOperands.match(/^[0-9A-Z$%.?]/i)) {
                 sOperands = sOpcode + sOperands;
                 sOpcode = "";
                 opCode = 0;
@@ -1740,7 +1747,7 @@ class DebuggerPDP10 extends Debugger {
                      * because if we parse them AFTER parsing the address expression, we might lose an undefined symbol
                      * indication, and if the caller needs to handle address fixups, that would be bad.
                      */
-                    if (match[1]) opCode += PDP10.OPCODE.I_BIT;
+                    if (match[1]) opCode += PDP10.OPCODE.I_FIELD;
 
                     sOperand = match[3];
                     if (sOperand) {
@@ -2250,7 +2257,7 @@ class DebuggerPDP10 extends Debugger {
     {
         var sReg = this.getRegName(iReg);
         if (sReg) {
-            var nBits = (iReg >= DebuggerPDP10.REGS.C0? 1 : (iReg == DebuggerPDP10.REGS.RA? 23 : 18));
+            var nBits = (iReg >= DebuggerPDP10.REGS.OV? 1 : (iReg == DebuggerPDP10.REGS.RA? 23 : 18));
             sReg += '=' + this.toStrBase(this.getRegValue(iReg), nBits) + ' ';
         }
         return sReg;
@@ -2509,27 +2516,28 @@ class DebuggerPDP10 extends Debugger {
     }
 
     /**
-     * loadBin(aWords, addrLoad)
+     * loadImage(aWords, addrStart)
      *
      * @this {DebuggerPDP10}
      * @param {Array.<number>} aWords
-     * @param {number|null} addrLoad
+     * @param {number|null|undefined} addrStart
      */
-    loadBin(aWords, addrLoad)
+    loadImage(aWords, addrStart)
     {
-        var nWords = 0;
         var bus = this.bus;
         var dbg = this.dbg;
+        var nWords = 0, addrLo = null, addrHi = 0;
         aWords.forEach(function(w, addr) {
-            bus.setWordDirect(addr, w);
-            if (addrLoad == null) addrLoad = addr;
+            bus.setWord(addr, w);
+            if (addrLo == null) addrLo = addr;
+            if (addr > addrHi) addrHi = addr;
             nWords++;
         });
         if (!nWords) {
             this.println("no data");
         } else {
-            this.println(nWords + " words loaded at " + this.toStrBase(addrLoad) + '-' + this.toStrBase(addrLoad + nWords - 1));
-            this.cpu.setPC(addrLoad || 0);
+            this.println(nWords + " words loaded at " + this.toStrBase(addrLo) + '-' + this.toStrBase(addrHi));
+            if (addrStart != null) this.cpu.setPC(addrStart);
             this.updateStatus();
         }
     }
@@ -2585,8 +2593,8 @@ class DebuggerPDP10 extends Debugger {
      *
      *      [0]: the assemble command (assumed to be "a")
      *      [1]: the target address (eg, "200")
-     *      [2]: the operation code, aka instruction name (eg, "adc")
-     *      [3]: the operation mode operand, if any (eg, "14", "[1234]", etc)
+     *      [2]: the opcode mnemonic (eg, "hrli")
+     *      [3]: the operands, if any
      *
      * The Debugger enters "assemble mode" whenever only the first (or first and second) arguments are present.
      * As long as "assemble mode is active, the user can omit the first two arguments on all later assemble commands
@@ -2595,53 +2603,57 @@ class DebuggerPDP10 extends Debugger {
      *
      * Entering "assemble mode" is optional; one could enter a series of fully-qualified assemble commands; eg:
      *
-     *      a ff00 cld
-     *      a ff01 ldx 28
+     *      a 100 hrli 1,111111
+     *      a 101 hrri 1,444444
      *      ...
      *
      * without ever entering "assemble mode", but of course, that requires more typing and doesn't take advantage
      * of automatic target address advancement (see dbgAddrAssemble).
      *
-     * NOTE: As the previous example implies, you can even assemble new instructions into ROM address space;
-     * as our setByte() function explains, the ROM write-notification handlers only refuse writes from the CPU.
-     *
-     * When filename(s) or URL(s) are provided in lieu of an opcode, we pass those on to the Macro10 component
-     * for assembling, along with any option letters that were included with the "a" command; for example, if "ap"
-     * was specified, then "p" will be passed to Macro10 as an option.
+     * When filename(s) or URL(s) are provided in lieu of an opcode, we pass those on to the Macro10 component for
+     * assembling (multiple files must be separated by semicolons), along with any option letters that were included
+     * with the "a" command; for example, if "ap" was specified, then "p" will be passed to Macro10 as an option.
      *
      * Macro10 options include:
      *
      *      p:  preprocess the specified resource(s) without assembling them
-     *      l:  generate listing information
+     *      l:  generate listing information (TODO)
+     *
+     * When assembling a file, the target address determines the initial location counter for the assembly process,
+     * but that can always be overridden by a LOC (or RELOC) pseudo-op in the file.  The target address will also be
+     * used as the starting address unless that's overridden by an END pseudo-op.  In the absence of a target address,
+     * the location counter starts at zero, and the starting address defaults to the PC register.
      *
      * @this {DebuggerPDP10}
      * @param {Array.<string>} asArgs is the complete argument array, beginning with the "a" command in asArgs[0]
+     * @return {boolean}
      */
     doAssemble(asArgs)
     {
-        var dbgAddr = this.parseAddr(asArgs[1], this.dbgAddrAssemble);
-        if (!dbgAddr) return;
+        var sOptions = asArgs[0].substr(1);
+        var sAddr = asArgs[1] && asArgs[1][0] >= '0' && asArgs[1][0] <= '9'? asArgs[1] : undefined;
+        var sOpcode = sAddr? asArgs[2] : asArgs[1];
+        var dbgAddr = this.parseAddr(sAddr, this.dbgAddrAssemble);
 
-        var sOpcode = asArgs[2];
-
-        if (sOpcode == undefined) {
+        if (!sOpcode) {
             this.println("begin assemble at " + this.toStrAddr(dbgAddr));
             this.fAssemble = true;
             this.cmp.updateDisplays();
-            return;
+            return true;
         }
 
-        var sOptions = asArgs[0].substr(1);
-        var match = sOpcode.match(/^(['"]?)(.*\.mac|.*\.html)\1$/i);
+        var match = sOpcode.match(/^(['"]?)(.*\.klm|.*\.mac|.*\.html|.*\.txt)\1$/i);
         if (match) {
             var dbg = this;
+            var cpu = this.cpu;
+            dbgAddr = this.parseAddr(sAddr);
             if (this.macro10) {
                 dbg.println("assembly already in progress");
             }
             else {
                 var sFile = match[2];
                 var addrLoad = dbgAddr.addr;
-                this.macro10 = new Macro10(sFile, addrLoad, sOptions, dbg, function doneMacro10(nErrorCode, sURL) {
+                var macro10 = this.macro10 = new Macro10(sFile, addrLoad, sOptions, dbg, function doneMacro10(nErrorCode, sURL) {
                     if (!nErrorCode) {
                         /*
                          * NOTE: Most Debugger operations run in the context of doCommand(), which catches any exceptions;
@@ -2649,17 +2661,26 @@ class DebuggerPDP10 extends Debugger {
                          * better safe than sorry.
                          */
                         try {
-                            dbg.loadBin(dbg.macro10.getBin(), addrLoad);
+                            var addrStart = macro10.getStart();
+                            if (addrStart == null) addrStart = addrLoad;
+                            dbg.loadImage(macro10.getImage(), addrStart);
                         } catch(e) {
-                            dbg.println(e.message);
+                            if (typeof e == "number") {
+                                nErrorCode = e || -1;
+                            } else {
+                                dbg.println(e.message);
+                                nErrorCode = -1;        // fake error so that command processing stops
+                            }
                         }
-                    } else {
+                    }
+                    if (nErrorCode) {
                         dbg.println("error (" + nErrorCode + ") processing " + (sURL || sFile));
                     }
                     dbg.macro10 = null;
+                    if (!nErrorCode) dbg.doCommands();
                 });
             }
-            return;
+            return false;
         }
 
         asArgs.shift();
@@ -2672,6 +2693,7 @@ class DebuggerPDP10 extends Debugger {
             this.setWord(dbgAddr, opCode);
             this.println(this.getInstruction(dbgAddr));
         }
+        return true;
     }
 
     /**
@@ -2730,11 +2752,7 @@ class DebuggerPDP10 extends Debugger {
             return;
         }
 
-        var dbgAddr = this.newAddr();
-        if (sAddr != '*') {
-            dbgAddr = this.parseAddr(sAddr, this.dbgAddrCode);
-            if (!dbgAddr) return;
-        }
+        var dbgAddr = sAddr == '*'? this.newAddr() : this.parseAddr(sAddr, this.dbgAddrCode);
 
         if (sParm == 'c') {
             if (dbgAddr.addr == null) {
@@ -2868,11 +2886,9 @@ class DebuggerPDP10 extends Debugger {
             return;
         }
 
-        var dbgAddr = this.parseAddr(sAddr, this.dbgAddrData);
-        if (!dbgAddr) return;
-
         var len = 0;
         var fJSON = (sCmd == "ds");
+        var dbgAddr = this.parseAddr(sAddr, this.dbgAddrData);
 
         if (sLen) {
             if (sLen.charAt(0) == 'l') {
@@ -2881,7 +2897,7 @@ class DebuggerPDP10 extends Debugger {
             }
             else {
                 var dbgAddrEnd = this.parseAddr(sLen);
-                if (dbgAddrEnd) len = dbgAddrEnd.addr - dbgAddr.addr;
+                len = dbgAddrEnd.addr - dbgAddr.addr;
             }
             if (len < 0) len = 0;
             if (len > 0x10000) len = 0x10000;
@@ -2958,7 +2974,6 @@ class DebuggerPDP10 extends Debugger {
             return;
         }
         var dbgAddr = this.parseAddr(sAddr, this.dbgAddrData);
-        if (!dbgAddr) return;
         for (var i = 2; i < asArgs.length; i++) {
             var w = this.parseExpression(asArgs[i]);
             if (w === undefined) break;
@@ -3082,30 +3097,28 @@ class DebuggerPDP10 extends Debugger {
         var sSymbol = null;
 
         var dbgAddr = this.parseAddr(sAddr);
-        if (dbgAddr) {
-            var addr = this.getAddr(dbgAddr);
-            var aSymbol = this.findSymbol(dbgAddr, true);
-            if (aSymbol.length) {
-                var nDelta, sDelta, s;
-                if (aSymbol[0]) {
-                    sDelta = "";
-                    nDelta = dbgAddr.addr - aSymbol[1];
-                    if (nDelta) sDelta = " + " + Str.toHexWord(nDelta);
-                    s = aSymbol[0] + " (" + this.toStrOffset(aSymbol[1]) + ')' + sDelta;
-                    if (fPrint) this.println(s);
-                    sSymbol = s;
-                }
-                if (aSymbol.length > 4 && aSymbol[4]) {
-                    sDelta = "";
-                    nDelta = aSymbol[5] - dbgAddr.addr;
-                    if (nDelta) sDelta = " - " + Str.toHexWord(nDelta);
-                    s = aSymbol[4] + " (" + this.toStrOffset(aSymbol[5]) + ')' + sDelta;
-                    if (fPrint) this.println(s);
-                    if (!sSymbol) sSymbol = s;
-                }
-            } else {
-                if (fPrint) this.println("no symbols");
+        var addr = this.getAddr(dbgAddr);
+        var aSymbol = this.findSymbol(dbgAddr, true);
+        if (aSymbol.length) {
+            var nDelta, sDelta, s;
+            if (aSymbol[0]) {
+                sDelta = "";
+                nDelta = dbgAddr.addr - aSymbol[1];
+                if (nDelta) sDelta = " + " + Str.toHexWord(nDelta);
+                s = aSymbol[0] + " (" + this.toStrOffset(aSymbol[1]) + ')' + sDelta;
+                if (fPrint) this.println(s);
+                sSymbol = s;
             }
+            if (aSymbol.length > 4 && aSymbol[4]) {
+                sDelta = "";
+                nDelta = aSymbol[5] - dbgAddr.addr;
+                if (nDelta) sDelta = " - " + Str.toHexWord(nDelta);
+                s = aSymbol[4] + " (" + this.toStrOffset(aSymbol[5]) + ')' + sDelta;
+                if (fPrint) this.println(s);
+                if (!sSymbol) sSymbol = s;
+            }
+        } else {
+            if (fPrint) this.println("no symbols");
         }
         return sSymbol;
     }
@@ -3336,7 +3349,7 @@ class DebuggerPDP10 extends Debugger {
         this.println(this.getRegDump(fMisc));
 
         if (fInstruction) {
-            this.setAddr(this.dbgAddrCode, cpu.getPC());
+            this.setAddr(this.dbgAddrCode, cpu.getXC());
             this.doUnassemble(this.toStrAddr(this.dbgAddrCode));
         }
     }
@@ -3354,7 +3367,6 @@ class DebuggerPDP10 extends Debugger {
     {
         if (sAddr !== undefined) {
             var dbgAddr = this.parseAddr(sAddr);
-            if (!dbgAddr) return;
             this.parseAddrOptions(dbgAddr, sOptions);
             this.setTempBreakpoint(dbgAddr);
         }
@@ -3610,7 +3622,6 @@ class DebuggerPDP10 extends Debugger {
     doUnassemble(sAddr, sAddrEnd, nLines)
     {
         var dbgAddr = this.parseAddr(sAddr, this.dbgAddrCode);
-        if (!dbgAddr) return;
 
         if (nLines === undefined) nLines = 1;
 
@@ -3623,7 +3634,7 @@ class DebuggerPDP10 extends Debugger {
             }
             else {
                 var dbgAddrEnd = this.parseAddr(sAddrEnd);
-                if (!dbgAddrEnd || dbgAddrEnd.addr < dbgAddr.addr) return;
+                if (dbgAddrEnd.addr < dbgAddr.addr) return;
 
                 nBytes = dbgAddrEnd.addr - dbgAddr.addr;
                 if (!DEBUG && nBytes > 0x100) {
@@ -3743,7 +3754,7 @@ class DebuggerPDP10 extends Debugger {
 
                 switch (asArgs[0].charAt(0)) {
                 case 'a':
-                    this.doAssemble(asArgs);
+                    result = this.doAssemble(asArgs);
                     break;
                 case 'b':
                     this.doBreak(asArgs[0], asArgs[1], sCmd);
@@ -3862,16 +3873,23 @@ class DebuggerPDP10 extends Debugger {
     /**
      * doCommands(sCmds, fSave)
      *
+     * This function is now written so that if any async command, such as assemble ('a'), stopped the
+     * flow of commands by returning false, it can call us from its callback handler with no arguments,
+     * and command processing should continue where it left off.
+     *
      * @this {DebuggerPDP10}
-     * @param {string} sCmds
+     * @param {string} [sCmds]
      * @param {boolean} [fSave]
      * @return {boolean} true if all commands processed, false if not
      */
     doCommands(sCmds, fSave)
     {
-        var a = this.parseCommand(sCmds, fSave);
-        for (var s in a) {
-            if (!this.doCommand(a[+s])) return false;
+        if (sCmds != null) {
+            this.aCommands = this.parseCommand(sCmds, fSave);
+        }
+        var sCmd;
+        while (sCmd = this.aCommands.shift()) {
+            if (!this.doCommand(sCmd)) return false;
         }
         return true;
     }
@@ -4069,15 +4087,16 @@ if (DEBUGGER) {
         PC:     0,
         RA:     1,
         EA:     2,
-        C0:     3,                              // single-bit "register" representing the Carry 0 flag
-        C1:     4,                              // single-bit "register" representing the Carry 1 flag
-        OV:     5,                              // single-bit "register" representing the Overflow flag
-        ND:     6,                              // single-bit "register" representing the No Divide flag
-        PD:     7,                              // single-bit "register" representing the Pushdown Overflow flag
+        PS:     3,
+        OV:     4,                              // single-bit "register" representing the Overflow flag
+        C0:     5,                              // single-bit "register" representing the Carry 0 flag
+        C1:     6,                              // single-bit "register" representing the Carry 1 flag
+        ND:     7,                              // single-bit "register" representing the No Divide flag
+        PD:     8,                              // single-bit "register" representing the Pushdown Overflow flag
     };
 
     DebuggerPDP10.REGNAMES = [
-        "PC", "RA", "EA", "C0", "C1", "OV", "ND", "PD"
+        "PC", "RA", "EA", "PS", "OV", "C0", "C1", "ND", "PD"
     ];
 
     /*

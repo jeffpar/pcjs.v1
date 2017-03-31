@@ -110,6 +110,7 @@ var PDP10 = {
      */
     WORD_INVALID:   -1,
     HINT_MASK:      Math.pow(2, 17) - 1,        //         131,071          (377777)  signed half-word (half-int) mask
+    HINT_LIMIT:     Math.pow(2, 17),            //         131,072          (400000)  signed half-word (half-int) limit
     HALF_MASK:      Math.pow(2, 18) - 1,        //         262,143   (000000 777777): unsigned half-word mask
     HALF_SHIFT:     Math.pow(2, 18),            //         262,144   (000001 000000): unsigned half-word shift
     INT_MASK:       Math.pow(2, 35) - 1,        //  34,359,738,367   (377777 777777): signed word (magnitude) mask
@@ -171,10 +172,14 @@ var PDP10 = {
         S_MASK:     0o77,               // S mask (after shift)
         A_SHIFT:    23,                 // A shift
         A_MASK:     0o17,               // A mask (after shift)
-        I_BIT:      0o20000000,         // indirect bit
+        A_FIELD:    0o740000000,        // A field mask
+        I_FIELD:    0o20000000,         // indirect bit mask
         X_SHIFT:    18,                 // X shift
         X_MASK:     0o17,               // X mask (after shift)
-        Y_MASK:     0o777777,           // Y mask
+        X_FIELD:    0o17000000,         // X field mask
+        Y_SHIFT:    0,                  // Y shift
+        Y_MASK:     0o777777,           // Y mask (after shift)
+        Y_FIELD:    0o777777,           // Y field mask
         R_MASK:     0o37777777,         // used to isolate the low 23 bits (I,X,Y)
         PTR_MASK:   0o77777777,         // used to isolate the low 24 bits (?,I,X,Y) of a byte pointer
         HALT:       0o5304              // operation code for HALT
@@ -201,21 +206,21 @@ var PDP10 = {
      * binary, the only options you can set relate to the operating system to be run -- which seems very hacky.
      */
     PSFLAG: {
-        OVFL:       0o400000,           // Overflow
-        CARRY0:     0o200000,           // Carry 0
-        CARRY1:     0o100000,           // Carry 1
-        FP_OVFL:    0o040000,           // Floating-Point Overflow
-        BYTE_INT:   0o020000,           // Byte Interrupt
-        USER_MODE:  0o010000,           // Processor is in User Mode
-        USER_IO:    0o004000,           // User I/O
-        FP_UNFL:    0o000100,           // Floating-Point Underflow
-        NO_DIVIDE:  0o000040,           // No Divide
-        SET_MASK:   0o760140,           // the flags that are always settable/clearable
+        AROV:       0o400000,           // Arithmetic Overflow
+        CRY0:       0o200000,           // Carry 0
+        CRY1:       0o100000,           // Carry 1
+        FOV:        0o040000,           // Floating-Point Overflow
+        BIS:        0o020000,           // Byte Interrupt
+        USERF:      0o010000,           // User Mode Flag
+        EXIOT:      0o004000,           // User Privileged I/O Flag
+        FXU:        0o000100,           // Floating-Point Underflow
+        DCK:        0o000040,           // Divide Check (aka No Divide)
         /*
          * Only the low 18 bits (above) are returned by getPS(); the following (bits 18 to 31)
          * are defined for internal use only.
          */
-        PD_OVFL:   0o1000000           // Pushdown Overflow
+        PDOV:      0o1000000,           // Pushdown Overflow
+        SET_MASK:  0o0760140            // flags that are always settable/clearable
     },
 
     /*
@@ -223,18 +228,18 @@ var PDP10 = {
      */
     RFLAG: {
         PIA:        0o000007,           // Priority Interrupt Assignment
-        OVFL:       0o000010,           // Overflow
-        OVFL_IE:    0o000020,           // Overflow Interrupt Enabled
+        AROV:       0o000010,           // Arithmetic Overflow
+        AROV_IE:    0o000020,           // Arithmetic Overflow Interrupt Enabled
         TRAP_OFF:   0o000040,           // Trap Offset
-        FP_OVFL:    0o000100,           // Floating-Point Overflow
-        FP_OVFL_IE: 0o000200,           // Floating-Point Overflow Interrupt Enabled
-        CLOCK:      0o001000,           // Clock Flag
-        CLOCK_IE:   0o002000,           // Clock Interrupt Enabled
+        FOV:        0o000100,           // Floating-Point Overflow
+        FOV_IE:     0o000200,           // Floating-Point Overflow Interrupt Enabled
+        CLK:        0o001000,           // Clock Flag
+        CLK_IE:     0o002000,           // Clock Interrupt Enabled
         NXM:        0o010000,           // Non-Existent Memory
         PRM:        0o020000,           // Memory Protection
         ADB:        0o040000,           // Address Break
         UIO:        0o100000,           // User In-Out
-        PD_OVFL:    0o200000            // Pushdown Overflow (TODO: Verify this is correct; the May 1968 doc may have a typo)
+        PDOV:       0o200000            // Pushdown Overflow (TODO: Verify this is correct; the May 1968 doc may have a typo)
     },
 
     /*
@@ -244,20 +249,20 @@ var PDP10 = {
      */
     WFLAG: {
         PIA:        0o000007,           // Priority Interrupt Assignment
-        OVFL_CL:    0o000010,           // Clear Overflow
-        OVFL_IE:    0o000020,           // Enable Overflow Interrupt
-        OVFL_ID:    0o000040,           // Disable Overflow Interrupt
-        FP_OVFL_CL: 0o000100,           // Clear Floating-Point Overflow
-        FP_OVFL_IE: 0o000200,           // Enable Floating-Point Overflow Interrupt
-        FP_OVFL_ID: 0o000400,           // Disable Floating-Point Overflow Interrupt
-        CLOCK_CL:   0o001000,           // Clear Clock Flag
-        CLOCK_IE:   0o002000,           // Enable Clock Interrupt
-        CLOCK_ID:   0o004000,           // Disable Clock Interrupt
+        AROV_CL:    0o000010,           // Clear Overflow
+        AROV_IE:    0o000020,           // Enable Overflow Interrupt
+        AROV_ID:    0o000040,           // Disable Overflow Interrupt
+        FOV_CL:     0o000100,           // Clear Floating-Point Overflow
+        FOV_IE:     0o000200,           // Enable Floating-Point Overflow Interrupt
+        FOV_ID:     0o000400,           // Disable Floating-Point Overflow Interrupt
+        CLK_CL:     0o001000,           // Clear Clock Flag
+        CLK_IE:     0o002000,           // Enable Clock Interrupt
+        CLK_ID:     0o004000,           // Disable Clock Interrupt
         NXM_CL:     0o010000,           // Clear Non-Existent Memory
         PRM_CL:     0o020000,           // Clear Memory Protection
         ADB_CL:     0o040000,           // Clear Address Break
         UIO_CL:     0o200000,           // Clear All In-Out Devices
-        PD_OVFL_CL: 0o400000            // Clear Pushdown Overflow
+        PDOV_CL:    0o400000            // Clear Pushdown Overflow
     },
 
     /*

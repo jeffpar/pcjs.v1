@@ -13,7 +13,7 @@ machines:
 
 Now that the PDPjs MACRO-10 Mini-Assembler is [limping along](/blog/2017/03/21/), it's time to start assembling some
 of DEC's PDP-10 "Basic Instruction" diagnostics and loading them into a test machine.  The first diagnostic I tried was
-[KA10 Basic Instruction Diagnostic #1 (MAINDEC-10-DAKAA-B-D)](/apps/pdp10/diags/klad/dakaa/), which has been loaded into
+[KA10 Basic Instruction Diagnostic #1 (MAINDEC-10-DAKAA)](/apps/pdp10/diags/klad/dakaa/), which has been loaded into
 the machine below.
 
 {% include machine.html id="testka10" %}
@@ -58,9 +58,9 @@ Happily, this was a good outcome, because 035057 is the end of the test.  If you
 
 	035057	254 00 0 00 030057 	ENDXX:	JRST	BEGEND		;LOOP PROGRAM
 
-I had similar success with [Diagnostic #2 (MAINDEC-10-DAKAB-B-D)](/apps/pdp10/diags/klad/dakab/).
+I had similar success with [Diagnostic #2 (MAINDEC-10-DAKAB)](/apps/pdp10/diags/klad/dakab/).
 
-Problems started to crop up in [Diagnostic #3 (MAINDEC-10-DAKAC-B-D)](/apps/pdp10/diags/klad/dakac/):
+Problems started to crop up in [Diagnostic #3 (MAINDEC-10-DAKAC)](/apps/pdp10/diags/klad/dakac/):
 
 	        CAME    [0,-1]          ;PASS TEST IF C(AC)=0,,-1
 
@@ -68,7 +68,7 @@ Based on the comment, it's clear what they really meant was either "[0,,-1]" or 
 desired result, which means that even when the assembler parses an mnemonic-less instruction like "0,-1", it must still truncate
 the second (address) operand.  Once I generated the appropriate value (000000,777777), the test passed.
 
-And I had several failures running [Diagnostic #4 (MAINDEC-10-DAKAD-B-D)](/apps/pdp10/diags/klad/dakad/):
+And I had several failures running [Diagnostic #4 (MAINDEC-10-DAKAD)](/apps/pdp10/diags/klad/dakad/):
 
 	>> a 30724 /apps/pdp10/diags/klad/dakad/DAKAD.MAC
 	starting PCjs MACRO-10 Mini-Assembler...
