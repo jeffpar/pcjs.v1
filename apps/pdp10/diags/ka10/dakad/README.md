@@ -1,29 +1,31 @@
 ---
 layout: page
-title: PDP-10 KA10 Basic Instruction Diagnostic #6
-permalink: /apps/pdp10/diags/klad/dakaf/
+title: PDP-10 KA10 Basic Instruction Diagnostic #4
+permalink: /apps/pdp10/diags/ka10/dakad/
 machines:
   - id: testka10
     type: pdp10
     config: /devices/pdp10/machine/ka10/test/debugger/machine.xml
     debugger: true
-    commands: a 30724 DAKAF.MAC
+    commands: a 30724 DAKAD.MAC
 ---
 
-PDP-10 KA10 Basic Instruction Diagnostic #6
+PDP-10 KA10 Basic Instruction Diagnostic #4
 -------------------------------------------
 
-The *PDP-10 KA10 Basic Instruction Diagnostic #6* (MAINDEC-10-DAKAF) test code has been extracted from
-[DAKAFM.MAC](DAKAFM.MAC.txt) [[original](http://pdp-10.trailing-edge.com/klad_sources/01/klad.sources/dakafm.mac.html)]
+The *PDP-10 KA10 Basic Instruction Diagnostic #4* (MAINDEC-10-DAKAD) test code has been extracted from
+[DAKADM.MAC](DAKADM.MAC.txt) [[original](http://pdp-10.trailing-edge.com/klad_sources/01/klad.sources/dakadm.mac.html)]
 for use with the [PDP-10 Test Machine with Debugger](/devices/pdp10/machine/ka10/test/debugger/) below.
 
-Resources for this test include:
+This diagnostic "TESTS REGISTER ADDRESSING, JFCL, AR FLAGS, AOS, SOS, JRST, AOBJX, JSP, XCT, INDIRECT AND INDEXED ADDRESSING."
 
-- [Instructions](#dakaftxt)
-- [History](#dakafhst)
-- [Source Code](#dakafmac)
-- [MACRO-10 Listing](DAKAF.LST.txt)
-- [Additional Information](http://archive.pcjs.org/apps/pdp10/diags/klad/dakaf/DAKAF.SEQ.txt)
+Resources for this diagnostic include:
+
+- [Instructions](#dakadtxt)
+- [History](#dakadhst)
+- [Source Code](#dakadmac)
+- [MACRO-10 Listing](DAKAD.LST.txt)
+- [Additional Information](http://archive.pcjs.org/apps/pdp10/diags/ka10/dakad/DAKAD.SEQ.txt)
 
 {% include machine.html id="testka10" %}
 
@@ -32,18 +34,32 @@ The Debugger's assemble ("a") command can be used to test the new built-in
 of the [MACRO-10](http://archive.pcjs.org/pubs/dec/pdp10/tops10/02_1973AsmRef_macro.pdf) assembly language.
 This command:
 
-	a 30724 DAKAF.MAC
+	a 30724 DAKAD.MAC
 
-will automatically read the [DAKAF.MAC](DAKAF.MAC.txt) source file (a slightly modified copy of [DAKAFM.MAC](DAKAFM.MAC.txt)),
-assemble it, and then load the binary output at the specified address.
+will automatically read the [DAKAD.MAC](DAKAD.MAC.txt) source file (a slightly modified copy of [DAKADM.MAC](DAKADM.MAC.txt)),
+assemble it, and then load the binary output at the specified address.  Use the command `db 30724` to dump the first few words
+of binary data:
+
+	030724: 254000 030741  053 000 000 061 160  +..1p
+	030725: 064252 042240  015 012 120 104 120  ..PDP
+	030726: 265426 020226  055 061 060 040 113  -10 K
+	030727: 405426 020204  101 061 060 040 102  A10 B
+	030730: 406471 141500  101 123 111 103 040  ASIC 
+	030731: 446352 352244  111 116 123 124 122  INSTR
+	030732: 526072 444636  125 103 124 111 117  UCTIO
+	030733: 471010 444602  116 040 104 111 101  N DIA
+	030734: 436351 751650  107 116 117 123 124  GNOST
+	030735: 446064 024150  111 103 040 050 064  IC (4
+	030736: 245013 342202  051 040 133 104 101  ) [DA
+	030737: 456030 456432  113 101 104 135 015  KAD].
 
 ---
 
-DAKAF.TXT
+DAKAD.TXT
 ---------
 
 ```
-MAINDEC-10-DAKAF.TXT
+MAINDEC-10-DAKAD.TXT
 
 
 
@@ -53,12 +69,12 @@ MAINDEC-10-DAKAF.TXT
 			IDENTIFICATION
 			--------------
 
-	PRODUCT CODE:   MAINDEC-10-DAKAF-B-D
+	PRODUCT CODE:   MAINDEC-10-DAKAD-B-D
 
 	PRODUCT NAME:   DECSYSTEM10 PDP-10 KA10 BASIC
-	                INSTRUCTION DIAGNOSTIC (6)
+	                INSTRUCTION DIAGNOSTIC (4)
 
-	FUNCTION:       BOOLE, HWT, TEST
+	FUNCTION:       REGISTER ADDRESSING, PC CHANGE, XCT
 
 	VERSION:        0.2
 
@@ -87,7 +103,7 @@ EQUIPMENT CORPORATION.
 DEC ASSUMES NO RESPONSIBILITY FOR THE USE OR RELIABILITY OF ITS
 SOFTWARE ON EQUIPMENT WHICH IS NOT SUPPLIED BY DEC.
 
-							MAINDEC-10-DAKAF.TXT
+							MAINDEC-10-DAKAD.TXT
 							PAGE 2
 
 
@@ -124,15 +140,17 @@ SOFTWARE ON EQUIPMENT WHICH IS NOT SUPPLIED BY DEC.
 
 9.0	LISTING
 
-							MAINDEC-10-DAKAF.TXT
+							MAINDEC-10-DAKAD.TXT
 							PAGE 3
 
 
 1.0	ABSTRACT
 
 	THIS PDP-10 KA10 BASIC INSTRUCTION DIAGNOSTIC IS THE
-	SIXTH IN A SERIES OF PDP-10 KA10 PROCESSOR DIAGNOSTICS.
-	THE DIAGNOSTIC TESTS THE BOOLE, HWT AND TEST INSTRUCTIONS.
+	FOURTH IN A SERIES OF PDP-10 KA10 PROCESSOR DIAGNOSTICS.
+	THE DIAGNOSTIC TESTS REGISTER ADDRESSING, JFCL, AR FLAGS,
+	AOS, SOS, JRST, AOBJX, JSP, XCT, INDIRECT AND
+	INDEXED ADDRESSING.
 
 2.0	REQUIREMENTS
 
@@ -140,7 +158,7 @@ SOFTWARE ON EQUIPMENT WHICH IS NOT SUPPLIED BY DEC.
 
 	A PDP-10 KA10 WITH A MINIMUM OF 32K OF MEMORY
 
-	PAPER TAPE READER  
+	PAPER-TAPE READER
 	DECTAPE (OPTIONAL)
 	CONSOLE TELETYPE
 
@@ -151,10 +169,10 @@ SOFTWARE ON EQUIPMENT WHICH IS NOT SUPPLIED BY DEC.
 2.3	PRELIMINARY PROGRAMS
 
 	CONSOLE FUNCTIONS WORKING PROPERLY
-	PAPER TAPE OR DECTAPE READ-IN WORKING PROPERLY  
+	PAPER-TAPE OR DECTAPE READ-IN WORKING PROPERLY
 	PREVIOUS PROCESSOR DIAGNOSTICS
 	
-							MAINDEC-10-DAKAF.TXT
+							MAINDEC-10-DAKAD.TXT
 							PAGE 4
 
 
@@ -197,7 +215,7 @@ SOFTWARE ON EQUIPMENT WHICH IS NOT SUPPLIED BY DEC.
 	THE CYCLE TIME OF THE PROGRAM IS IN THE MILLISECOND RANGE AND
 	IS THEREFORE SUITABLE FOR TAKING MARGINS, VIBRATION TESTS, ETC.
 
-							MAINDEC-10-DAKAF.TXT
+							MAINDEC-10-DAKAD.TXT
 							PAGE 5
 
 
@@ -235,16 +253,16 @@ SOFTWARE ON EQUIPMENT WHICH IS NOT SUPPLIED BY DEC.
 9.0	LISTING
 ```
 
-DAKAF.HST
+DAKAD.HST
 ---------
 
-	    THIS IS A HISTORY OF THE DEVELOPMENT OF MAINDEC-10-DAKAF
+	    THIS IS A HISTORY OF THE DEVELOPMENT OF MAINDEC-10-DAKAD
 	
 	************************************************************************
 	
-	PRODUCT CODE:       MAINDEC-10-DAKAF
+	PRODUCT CODE:       MAINDEC-10-DAKAD
 	
-	PRODUCT NAME:       BASIC INSTRUCTION DIAGNOSTIC #6
+	PRODUCT NAME:       BASIC INSTRUCTION DIAGNOSTIC #4
 	
 	DATE RELEASED:      JANUARY 1977
 	
@@ -266,11 +284,11 @@ DAKAF.HST
 	
 	************************************************************************
 
-DAKAF.MAC
+DAKAD.MAC
 ---------
 
-[[Download](DAKAF.MAC.txt)]
+[[Download](DAKAD.MAC.txt)]
  
 {% highlight text %}
-{% include_relative DAKAF.MAC.txt %}
+{% include_relative DAKAD.MAC.txt %}
 {% endhighlight %}

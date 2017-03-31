@@ -1,29 +1,31 @@
 ---
 layout: page
-title: PDP-10 KA10 Basic Instruction Diagnostic #2
-permalink: /apps/pdp10/diags/klad/dakab/
+title: PDP-10 KA10 Basic Instruction Diagnostic #5
+permalink: /apps/pdp10/diags/ka10/dakae/
 machines:
   - id: testka10
     type: pdp10
     config: /devices/pdp10/machine/ka10/test/debugger/machine.xml
     debugger: true
-    commands: a 30724 DAKAB.MAC
+    commands: a 30706 DAKAE.MAC
 ---
 
-PDP-10 KA10 Basic Instruction Diagnostic #2
+PDP-10 KA10 Basic Instruction Diagnostic #5
 -------------------------------------------
 
-The *PDP-10 KA10 Basic Instruction Diagnostic #2* (MAINDEC-10-DAKAB) test code has been extracted from
-[DAKABM.MAC](DAKABM.MAC.txt) [[original](http://pdp-10.trailing-edge.com/klad_sources/01/klad.sources/dakabm.mac.html)]
+The *PDP-10 KA10 Basic Instruction Diagnostic #5* (MAINDEC-10-DAKAE) test code has been extracted from
+[DAKAEM.MAC](DAKAEM.MAC.txt) [[original](http://pdp-10.trailing-edge.com/klad_sources/01/klad.sources/dakaem.mac.html)]
 for use with the [PDP-10 Test Machine with Debugger](/devices/pdp10/machine/ka10/test/debugger/) below.
 
-Resources for this test include:
+This diagnostic "TESTS THE FWT, ADD/SUB, PC CHANGE AND COMPARE INSTRUCTIONS."
 
-- [Instructions](#dakabtxt)
-- [History](#dakabhst)
-- [Source Code](#dakabmac)
-- [MACRO-10 Listing](DAKAB.LST.txt)
-- [Additional Information](http://archive.pcjs.org/apps/pdp10/diags/klad/dakab/DAKAB.SEQ.txt)
+Resources for this diagnostic include:
+
+- [Instructions](#dakaetxt)
+- [History](#dakaehst)
+- [Source Code](#dakaemac)
+- [MACRO-10 Listing](DAKAE.LST.txt)
+- [Additional Information](http://archive.pcjs.org/apps/pdp10/diags/ka10/dakae/DAKAE.SEQ.txt)
 
 {% include machine.html id="testka10" %}
 
@@ -32,61 +34,57 @@ The Debugger's assemble ("a") command can be used to test the new built-in
 of the [MACRO-10](http://archive.pcjs.org/pubs/dec/pdp10/tops10/02_1973AsmRef_macro.pdf) assembly language.
 This command:
 
-	a 30724 DAKAB.MAC
+	a 30706 DAKAE.MAC
 
-will automatically read the [DAKAB.MAC](DAKAB.MAC.txt) source file (a slightly modified copy of [DAKABM.MAC](DAKABM.MAC.txt)),
+will automatically read the [DAKAE.MAC](DAKAE.MAC.txt) source file (a slightly modified copy of [DAKAEM.MAC](DAKAEM.MAC.txt)),
 assemble it, and then load the binary output at the specified address.
 
 ---
 
-DAKAB.TXT
+DAKAE.TXT
 ---------
 
 ```
-MAINDEC-10-DAKAB.TXT
+				IDENTIFICATION
+				--------------
 
+	PRODUCT CODE:       AH-6859C-DD
 
+	DIAGNOSTIC CODE:    DAKAE
 
+	PRODUCT NAME:       DAKAEC0 DECSYSTEM10 PDP-10 KA10 BASIC
+	                    INSTRUCTION DIAGNOSTIC (5)
 
+	VERSION:            0.3
 
-			IDENTIFICATION
-			--------------
+	DATE RELEASED:      JANUARY 1979
 
-	PRODUCT CODE:   MAINDEC-10-DAKAB-B-D
+	MAINTAINED BY:      DIAGNOSTIC ENGINEERING
 
-	PRODUCT NAME:   DECSYSTEM10 PDP-10 KA10 BASIC
-	                INSTRUCTION DIAGNOSTIC (2)
+	AUTHOR:             BILL SCORZELLI
 
-	FUNCTION:       BASIC INSTRUCTIONS 2
+		        COPYRIGHT (C) 1967, 1979
 
-	VERSION:        0.2
+	        DIGITAL EQUIPMENT CORPORATION, MAYNARD, MASS.
 
-	DATE RELEASED:  JANUARY 1977
+	THIS SOFTWARE IS FURNISHED UNDER A LICENSE FOR  USE  ONLY  ON  A
+	SINGLE COMPUTER SYSTEM AND MAY BE COPIED ONLY WITH THE INCLUSION
+	OF THE ABOVE COPYRIGHT NOTICE.   THIS  SOFTWARE,  OR  ANY  OTHER
+	COPIES  THEREOF, MAY NOT BE PROVIDED OR OTHERWISE MADE AVAILABLE
+	TO ANY OTHER PERSON EXCEPT FOR USE ON SUCH SYSTEM AND TO ONE WHO
+	AGREES  TO  THESE  LICENSE TERMS.  TITLE TO AND OWNERSHIP OF THE
+	SOFTWARE  SHALL  AT   ALL  TIMES  REMAIN  IN  DIGITAL  EQUIPMENT
+	CORPORATION.
 
-	MAINTAINED BY:  DIAGNOSTIC ENGINEERING GROUP
+	THE INFORMATION IN THIS DOCUMENT IS SUBJECT  TO  CHANGE  WITHOUT
+	NOTICE  AND  SHOULD  NOT BE CONSTRUED AS A COMMITMENT BY DIGITAL
+	EQUIPMENT CORPORATION.
 
-	AUTHOR:         JOHN R. KIRCHOFF
-
-COPYRIGHT(C) 1976,1977
-DIGITAL EQUIPMENT CORPORATION
-MARLBORO, MASS. 01752
-
-THIS SOFTWARE IS FURNISHED UNDER A LICENSE FOR USE ONLY
-ON A SINGLE COMPUTER SYSTEM AND MAY BE COPIED ONLY WITH
-THE INCLUSION OF THE ABOVE COPYRIGHT NOTICE.  THIS SOFTWARE,
-OR ANY OTHER COPIES THEREOF, MAY NOT BE PROVIDED OR OTHERWISE
-MADE AVAILABLE TO ANY OTHER PERSON EXECPT FOR USE ON SUCH SYSTEM
-AND TO ONE WHO AGREES TO THESE LICENSE TERMS.  TITLE TO AND
-OWNERSHIP OF THE SOFTWARE SHALL AT ALL TIMES REMAIN IN DEC.
-
-THE INFORMATION IN THIS DOCUMENT IS SUBJECT TO CHANGE WITHOUT
-NOTICE AND SHOULD NOT BE CONSTRUED AS A COMMITMENT BY DIGITAL
-EQUIPMENT CORPORATION.
-
-DEC ASSUMES NO RESPONSIBILITY FOR THE USE OR RELIABILITY OF ITS
-SOFTWARE ON EQUIPMENT WHICH IS NOT SUPPLIED BY DEC.
-
-							MAINDEC-10-DAKAB.TXT
+	DIGITAL EQUIPMENT CORPORATION ASSUMES NO  RESPONSIBILITY FOR THE
+	USE  OR  RELIABILITY  OF  ITS SOFTWARE IN EQUIPMENT WHICH IS NOT
+	SUPPLIED BY DIGITAL EQUIPMENT CORPORATION.
+	
+							MAINDEC-10-DAKAE.TXT
 							PAGE 2
 
 
@@ -123,17 +121,16 @@ SOFTWARE ON EQUIPMENT WHICH IS NOT SUPPLIED BY DEC.
 
 9.0	LISTING
 
-							MAINDEC-10-DAKAB.TXT
+							MAINDEC-10-DAKAE.TXT
 							PAGE 3
 
 
 1.0	ABSTRACT
 
 	THIS PDP-10 KA10 BASIC INSTRUCTION DIAGNOSTIC IS THE
-	SECOND IN A SERIES OF PDP-10 KA10 PROCESSOR DIAGNOSTICS.
-	THE DIAGNOSTIC TESTS SOME FOLLOWING INSTRUCTIONS.
-	MOVE, COMPARE, TEST, HALF WORD AND BOOLE.
-	IT ALSO TESTS THE ADDERS USING ADD AND COMPARE INSTRUCTIONS.
+	FIFTH IN A SERIES OF PDP-10 KA10 PROCESSOR DIAGNOSTICS.
+	THE DIAGNOSTIC TESTS THE FWT, ADD/SUB, PC CHANGE
+	AND COMPARE INSTRUCTIONS.
 
 2.0	REQUIREMENTS
 
@@ -152,10 +149,10 @@ SOFTWARE ON EQUIPMENT WHICH IS NOT SUPPLIED BY DEC.
 2.3	PRELIMINARY PROGRAMS
 
 	CONSOLE FUNCTIONS WORKING PROPERLY
-	PAPER TAPE OR DECTAPE READ-IN WORKING PROPERLY 
+	PAPER-TAPE OR DECTAPE READ-IN WORKING PROPERLY
 	PREVIOUS PROCESSOR DIAGNOSTICS
 
-							MAINDEC-10-DAKAB.TXT
+							MAINDEC-10-DAKAE.TXT
 							PAGE 4
 
 
@@ -198,7 +195,7 @@ SOFTWARE ON EQUIPMENT WHICH IS NOT SUPPLIED BY DEC.
 	THE CYCLE TIME OF THE PROGRAM IS IN THE MILLISECOND RANGE AND
 	IS THEREFORE SUITABLE FOR TAKING MARGINS, VIBRATION TESTS, ETC.
 
-							MAINDEC-10-DAKAB.TXT
+							MAINDEC-10-DAKAE.TXT
 							PAGE 5
 
 
@@ -236,26 +233,10 @@ SOFTWARE ON EQUIPMENT WHICH IS NOT SUPPLIED BY DEC.
 9.0	LISTING
 ```
 
-DAKAB.HST
+DAKAE.HST
 ---------
 
-	    THIS IS A HISTORY OF THE DEVELOPMENT OF MAINDEC-10-DAKAB
-	
-	************************************************************************
-	
-	PRODUCT CODE:       MAINDEC-10-DAKAB
-	
-	PRODUCT NAME:       BASIC INSTRUCTION DIAGNOSTIC #2
-	
-	DATE RELEASED:      JANUARY 1977
-	
-	VERSION:            0.2
-	
-	UPDATE AUTHOR:      JOHN R. KIRCHOFF
-	
-	CHANGES MADE:
-	
-	    1. UPGRADE TO ALLOW COMPATABILITY WITH THE SUBROUTINE PACKAGE.
+	    THIS IS A HISTORY OF THE DEVELOPMENT OF MAINDEC-10-DAKAE
 	
 	************************************************************************
 	
@@ -266,12 +247,45 @@ DAKAB.HST
 	ORIGINAL RELEASE:   16-MAR-72
 	
 	************************************************************************
+	
+	PRODUCT CODE:       MAINDEC-10-DAKAE
+	
+	PRODUCT NAME:       BASIC INSTRUCTION DIAGNOSTIC #5
+	
+	DATE RELEASED:      JANUARY 1977
+	
+	VERSION:            0.2
+	
+	UPDATE AUTHOR:      JOHN R. KIRCHOFF
+	
+	CHANGES MADE:
+	
+	    1. UPGRADE TO ALLOW COMPATABILITY WITH THE SUBROUTINE PACKAGE.
+	************************************************************************
+	
+	PRODUCT CODE:       MAINDEC-10-DAKAE
+	
+	PRODUCT NAME:       BASIC INSTRUCTION DIAGNOSTIC #5
+	
+	DATE RELEASED:      JANUARY 1979
+	
+	VERSION:            0.3
+	
+	UPDATE AUTHOR:      BILL SCORZELLI
+	
+	CHANGES MADE:
+	
+	    1. THE COMPARE INSTRUCTION TESTS DID NOT CHECK THE COMPARE OF 2
+	    NEGATIVE NUMBERS WITH THE CONTENTS OF THE (AC) BEING LARGER
+	    THAN THE CONTENTS OF (E). ADDED TEST C52205.
+	
+	************************************************************************
 
-DAKAB.MAC
+DAKAE.MAC
 ---------
 
-[[Download](DAKAB.MAC.txt)]
-
+[[Download](DAKAE.MAC.txt)]
+ 
 {% highlight text %}
-{% include_relative DAKAB.MAC.txt %}
+{% include_relative DAKAE.MAC.txt %}
 {% endhighlight %}

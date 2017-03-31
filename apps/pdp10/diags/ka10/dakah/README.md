@@ -1,29 +1,32 @@
 ---
 layout: page
-title: PDP-10 KA10 Basic Instruction Diagnostic #1
-permalink: /apps/pdp10/diags/klad/dakaa/
+title: PDP-10 KA10 Basic Instruction Diagnostic #8
+permalink: /apps/pdp10/diags/ka10/dakah/
 machines:
   - id: testka10
     type: pdp10
     config: /devices/pdp10/machine/ka10/test/debugger/machine.xml
     debugger: true
-    commands: a 30724 DAKAA.MAC
+    commands: a 30724 DAKAH.MAC
 ---
 
-PDP-10 KA10 Basic Instruction Diagnostic #1
+PDP-10 KA10 Basic Instruction Diagnostic #8
 -------------------------------------------
 
-The *PDP-10 KA10 Basic Instruction Diagnostic #1* (MAINDEC-10-DAKAA) test code has been extracted from
-[DAKAAM.MAC](DAKAAM.MAC.txt) [[original](http://pdp-10.trailing-edge.com/klad_sources/01/klad.sources/dakaam.mac.html)]
+The *PDP-10 KA10 Basic Instruction Diagnostic #8* (MAINDEC-10-DAKAH) test code has been extracted from
+[DAKAHM.MAC](DAKAHM.MAC.txt) [[original](http://pdp-10.trailing-edge.com/klad_sources/01/klad.sources/dakahm.mac.html)] and
+[DAKAHT.MAC](DAKAHT.MAC.txt) [[original](http://pdp-10.trailing-edge.com/klad_sources/01/klad.sources/dakaht.mac.html)]
 for use with the [PDP-10 Test Machine with Debugger](/devices/pdp10/machine/ka10/test/debugger/) below.
 
-Resources for this test include:
+This diagnostic "TESTS THE PI SYSTEM, INTERRUPTS, LUUO'S AND INPUT/OUTPUT."
 
-- [Instructions](#dakaatxt)
-- [History](#dakaahst)
-- [Source Code](#dakaamac)
-- [MACRO-10 Listing](DAKAA.LST.txt)
-- [Additional Information](http://archive.pcjs.org/apps/pdp10/diags/klad/dakaa/DAKAA.SEQ.txt)
+Resources for this diagnostic include:
+
+- [Instructions](#dakahtxt)
+- [History](#dakahhst)
+- [Source Code](#dakahmac)
+- [MACRO-10 Listing](DAKAH.LST.txt)
+- [Additional Information](http://archive.pcjs.org/apps/pdp10/diags/ka10/dakah/DAKAH.SEQ.txt)
 
 {% include machine.html id="testka10" %}
 
@@ -32,18 +35,18 @@ The Debugger's assemble ("a") command can be used to test the new built-in
 of the [MACRO-10](http://archive.pcjs.org/pubs/dec/pdp10/tops10/02_1973AsmRef_macro.pdf) assembly language.
 This command:
 
-	a 30724 DAKAA.MAC
+	a 30724 DAKAH.MAC
 
-will automatically read the [DAKAA.MAC](DAKAA.MAC.txt) source file (a slightly modified copy of [DAKAAM.MAC](DAKAAM.MAC.txt)),
+will automatically read the [DAKAH.MAC](DAKAH.MAC.txt) source file (a slightly modified copy of [DAKAHM.MAC](DAKAHM.MAC.txt)),
 assemble it, and then load the binary output at the specified address.
 
 ---
 
-DAKAA.TXT
+DAKAH.TXT
 ---------
 
 ```
-MAINDEC-10-DAKAA
+MAINDEC-10-DAKAH.TXT
 
 
 
@@ -54,12 +57,12 @@ MAINDEC-10-DAKAA
 			IDENTIFICATION
 			--------------
 
-	PRODUCT CODE:   MAINDEC-10-DAKAA-B-D
+	PRODUCT CODE:   MAINDEC-10-DAKAH-B-D
 
 	PRODUCT NAME:   DECSYSTEM10 PDP-10 KA10 BASIC
-	                INSTRUCTION DIAGNOSTIC (1)
+	                INSTRUCTION DIAGNOSTIC (8)
 
-	FUNCTION:       BASIC INSTRUCTIONS
+	FUNCTION:       PI, INTERRUPTS, LUUO'S, I/O
 
 	VERSION:        0.2
 
@@ -88,7 +91,7 @@ EQUIPMENT CORPORATION.
 DEC ASSUMES NO RESPONSIBILITY FOR THE USE OR RELIABILITY OF ITS
 SOFTWARE ON EQUIPMENT WHICH IS NOT SUPPLIED BY DEC.
 
-							MAINDEC-10-DAKAA.TXT
+							MAINDEC-10-DAKAH.TXT
 							PAGE 2
 
 
@@ -125,22 +128,16 @@ SOFTWARE ON EQUIPMENT WHICH IS NOT SUPPLIED BY DEC.
 
 9.0	LISTING
 
-							MAINDEC-10-DAKAA.TXT
+							MAINDEC-10-DAKAH.TXT
 							PAGE 3
 
 
 1.0	ABSTRACT
 
-	THIS PDP-10 KA10 BASIC INSTRUCTION DIAGNOSTIC IS THE FIRST IN A
-	SERIES OF PDP-10 KA10 PROCESSOR DIAGNOSTICS.  IT IS THE MOST
-	BASIC OF THE PROCESSOR DIAGNOSTICS.  THIS DIAGNOSTIC
-	ASSUMES THE HALT INSTRUCTION AND THE COMPUTER CONSOLE
-	TO BE OPERATIVE.  IT MAKES NO FURTHER ASSUMPTIONS EXCEPT
-	THAT IT IS LOADED INTO MEMORY CORRECTLY.
-
-	THE DIAGNOSTIC TESTS SOME OF THE MOVE AND SKIP INSTRUCTIONS.
-	IT ALSO TESTS THE ADDERS AND OTHER LOGIC WITH AND, XOR, EQV,
-	AND ALL BOOLE INSTRUCTIONS.
+	THIS PDP-10 KA10 BASIC INSTRUCTION DIAGNOSTIC IS THE
+	EIGHTH IN A SERIES OF PDP-10 KA10 PROCESSOR DIAGNOSTICS.
+	THE DIAGNOSTIC TESTS THE PI SYSTEM, INTERRUPTS, LUUO'S
+	AND INPUT/OUTPUT.
 
 2.0	REQUIREMENTS
 
@@ -148,7 +145,7 @@ SOFTWARE ON EQUIPMENT WHICH IS NOT SUPPLIED BY DEC.
 
 	A PDP-10 KA10 WITH A MINIMUM OF 32K OF MEMORY
 
-	PAPER TAPE READER
+	PAPER TAPE READER 
 	DECTAPE (OPTIONAL)
 	CONSOLE TELETYPE
 
@@ -159,9 +156,10 @@ SOFTWARE ON EQUIPMENT WHICH IS NOT SUPPLIED BY DEC.
 2.3	PRELIMINARY PROGRAMS
 
 	CONSOLE FUNCTIONS WORKING PROPERLY
-	PAPER TAPE OR DECTAPE READ-IN WORKING PROPERLY
-
-							MAINDEC-10-DAKAA.TXT
+	PAPER TAPE OR DECTAPE READ-IN WORKING PROPERLY 
+	PREVIOUS PROCESSOR DIAGNOSTICS
+	
+							MAINDEC-10-DAKAH.TXT
 							PAGE 4
 
 
@@ -204,7 +202,7 @@ SOFTWARE ON EQUIPMENT WHICH IS NOT SUPPLIED BY DEC.
 	THE CYCLE TIME OF THE PROGRAM IS IN THE MILLISECOND RANGE AND
 	IS THEREFORE SUITABLE FOR TAKING MARGINS, VIBRATION TESTS, ETC.
 
-							MAINDEC-10-DAKAA.TXT
+							MAINDEC-10-DAKAH.TXT
 							PAGE 5
 
 
@@ -240,25 +238,25 @@ SOFTWARE ON EQUIPMENT WHICH IS NOT SUPPLIED BY DEC.
 	NONE
 
 9.0	LISTING
-
 ```
 
-DAKAA.HST
+DAKAH.HST
 ---------
 
-	    THIS IS A HISTORY OF THE DEVELOPMENT OF MAINDEC-10-DAKAA
+	    THIS IS A HISTORY OF THE DEVELOPMENT OF MAINDEC-10-DAKAH
 	
 	************************************************************************
 	
-	PRODUCT CODE:       MAINDEC-10-DAKAA
+	PRODUCT CODE:       MAINDEC-10-DAKAH
 	
-	PRODUCT NAME:       BASIC INSTRUCTION DIAGNOSTIC #1
+	PRODUCT NAME:       BASIC INSTRUCTION DIAGNOSTIC #8
 	
 	DATE RELEASED:      JANUARY 1977
 	
 	VERSION:            0.2
 	
 	UPDATE AUTHOR:      JOHN R. KIRCHOFF
+	                    EDWARD G. PRENTICE
 	
 	CHANGES MADE:
 	
@@ -274,11 +272,11 @@ DAKAA.HST
 	
 	************************************************************************
 
-DAKAA.MAC
+DAKAH.MAC
 ---------
 
-[[Download](DAKAA.MAC.txt)]
-
+[[Download](DAKAH.MAC.txt)]
+ 
 {% highlight text %}
-{% include_relative DAKAA.MAC.txt %}
+{% include_relative DAKAH.MAC.txt %}
 {% endhighlight %}

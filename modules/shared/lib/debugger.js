@@ -151,9 +151,9 @@ class Debugger extends Component
             /*
              * aVariables is an object with properties that grow as setVariable() assigns more variables;
              * each property corresponds to one variable, where the property name is the variable name (ie,
-             * a string beginning with a letter or underscore, followed by zero or more additional letters,
-             * digits, or underscores) and the property value is the variable's numeric value.  See doVar()
-             * and setVariable() for details.
+             * a string beginning with a non-digit, followed by zero or more symbol characters and/or digits)
+             * and the property value is the variable's numeric value.  See doVar() and setVariable() for
+             * details.
              *
              * Note that parseValue() parses variables before numbers, so any variable that looks like a
              * unprefixed hex value (eg, "a5" as opposed to "0xa5") will trump the numeric value.  Unprefixed
@@ -1019,7 +1019,20 @@ class Debugger extends Component
                 value = this.getRegValue(iReg);
             } else {
                 value = this.getVariable(sValue);
-                if (value == null) {
+                if (value != null) {
+                    var sUndefined = this.getVariableFixup(sValue);
+                    if (sUndefined) {
+                        if (!this.sUndefined) {
+                            this.sUndefined = sUndefined;
+                        } else {
+                            if (!fQuiet) {
+                                this.println(sValue + " has too many undefined values (" + sUndefined + ',' + this.sUndefined + ")");
+                                fQuiet = true;
+                            }
+                            value = undefined;
+                        }
+                    }
+                } else {
                     /*
                      * A feature of MACRO-10 is that any single-digit number is automatically interpreted as base-10.
                      */
@@ -1119,11 +1132,11 @@ class Debugger extends Component
     printVariable(sVar)
     {
         if (sVar) {
-            return this.printValue(sVar, this.aVariables[sVar]);
+            return this.printValue(sVar, this.aVariables[sVar].value);
         }
         var cVariables = 0;
         for (sVar in this.aVariables) {
-            this.printValue(sVar, this.aVariables[sVar]);
+            this.printValue(sVar, this.aVariables[sVar].value);
             cVariables++;
         }
         return cVariables > 0;
@@ -1149,7 +1162,19 @@ class Debugger extends Component
      */
     getVariable(sVar)
     {
-        return this.aVariables[sVar];
+        return this.aVariables[sVar] && this.aVariables[sVar].value;
+    }
+
+    /**
+     * getVariableFixup(sVar)
+     *
+     * @this {Debugger}
+     * @param {string} sVar
+     * @return {string|undefined}
+     */
+    getVariableFixup(sVar)
+    {
+        return this.aVariables[sVar] && this.aVariables[sVar].sUndefined;
     }
 
     /**
@@ -1165,15 +1190,16 @@ class Debugger extends Component
     }
 
     /**
-     * setVariable(sVar, value)
+     * setVariable(sVar, value, sUndefined)
      *
      * @this {Debugger}
      * @param {string} sVar
      * @param {number} value
+     * @param {string|null} [sUndefined]
      */
-    setVariable(sVar, value)
+    setVariable(sVar, value, sUndefined)
     {
-        this.aVariables[sVar] = value;
+        this.aVariables[sVar] = {value, sUndefined};
     }
 
     /**

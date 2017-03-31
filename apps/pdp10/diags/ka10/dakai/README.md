@@ -1,30 +1,32 @@
 ---
 layout: page
-title: PDP-10 KA10 Basic Instruction Diagnostic #10
-permalink: /apps/pdp10/diags/klad/dakaj/
+title: PDP-10 KA10 Basic Instruction Diagnostic #9
+permalink: /apps/pdp10/diags/ka10/dakai/
 machines:
   - id: testka10
     type: pdp10
     config: /devices/pdp10/machine/ka10/test/debugger/machine.xml
     debugger: true
-    commands: a DAKAJ.MAC
+    commands: a DAKAI.MAC
 ---
 
-PDP-10 KA10 Basic Instruction Diagnostic #10
---------------------------------------------
+PDP-10 KA10 Basic Instruction Diagnostic #9
+-------------------------------------------
 
-The *PDP-10 KA10 Basic Instruction Diagnostic #10* (MAINDEC-10-DAKAJ) test code has been extracted from
-[DAKAJM.MAC](DAKAJM.MAC.txt) [[original](http://pdp-10.trailing-edge.com/klad_sources/01/klad.sources/dakajm.mac.html)] and
-[DAKAJT.MAC](DAKAJT.MAC.txt) [[original](http://pdp-10.trailing-edge.com/klad_sources/01/klad.sources/dakajt.mac.html)]
+The *PDP-10 KA10 Basic Instruction Diagnostic #9* (MAINDEC-10-DAKAI) test code has been extracted from
+[DAKAIM.MAC](DAKAIM.MAC.txt) [[original](http://pdp-10.trailing-edge.com/klad_sources/01/klad.sources/dakaim.mac.html)] and
+[DAKAIT.MAC](DAKAIT.MAC.txt) [[original](http://pdp-10.trailing-edge.com/klad_sources/01/klad.sources/dakait.mac.html)]
 for use with the [PDP-10 Test Machine with Debugger](/devices/pdp10/machine/ka10/test/debugger/) below.
 
-Resources for this test include:
+This diagnostic "TESTS THE SHIFTING AND ROTATING INSTRUCTIONS."
 
-- [Instructions](#dakajtxt)
-- [History](#dakajhst)
-- [Source Code](#dakajmac)
-- [MACRO-10 Listing](DAKAJ.LST.txt)
-- [Additional Information](http://archive.pcjs.org/apps/pdp10/diags/klad/dakaj/DAKAJ.SEQ.txt)
+Resources for this diagnostic include:
+
+- [Instructions](#dakaitxt)
+- [History](#dakaihst)
+- [Source Code](#dakaimac)
+- [MACRO-10 Listing](DAKAI.LST.txt)
+- [Additional Information](http://archive.pcjs.org/apps/pdp10/diags/ka10/dakai/DAKAI.SEQ.txt)
 
 {% include machine.html id="testka10" %}
 
@@ -33,18 +35,52 @@ The Debugger's assemble ("a") command can be used to test the new built-in
 of the [MACRO-10](http://archive.pcjs.org/pubs/dec/pdp10/tops10/02_1973AsmRef_macro.pdf) assembly language.
 This command:
 
-	a DAKAJ.MAC
+	a DAKAI.MAC
 
-will automatically read the [DAKAJ.MAC](DAKAJ.MAC.txt) source file (a slightly modified copy of [DAKAJM.MAC](DAKAJM.MAC.txt)),
+will automatically read the [DAKAI.MAC](DAKAI.MAC.txt) source file (a slightly modified copy of [DAKAIM.MAC](DAKAIM.MAC.txt)),
 assemble it, and then load the binary image at the location specified in the file.
+
+Interesting MACRO-10 Bug
+------------------------
+
+Take a look at this piece of original [source code](#dakaimac):
+
+	MOVSI   AC+1,ZZ     ;SET BIT (N) OF AC+1 LEFT
+	IFG     <ZZ-2,>,<
+	MOVSI   AC-1,YY     ;SETUP FOR COMPARISON>
+
+and the corresponding lines in the [listing file](DAKAI.LST.txt):
+
+	11660   037024  205 07 0 00 000001      MOVSI   AC+1,ZZ     ;SET BIT (N) OF AC+1 LEFT
+	11661                                   IFG     <ZZ-2,>,<
+	11662   037025  205 05 0 00 000000      MOVSI   AC-1,YY     ;SETUP FOR COMPARISON>
+
+It's clear from the listing file that *ZZ* is 1, and therefore the *IFG* expression *<ZZ-2>* should be -1, so the
+*MOVSI AC-1,YY* should be suppressed.  And my MACRO-10 Mini-Assembler *does* suppress it.  But as you can see from
+DEC's listing file, they didn't suppress it.  This results in an unfortunate mismatch between our respective
+instruction sequences from that point on.
+
+Why did this happen?  Since earlier identical *IFG* expansions work as expected, I have to assume that the spurious
+comma in that particular *IFG* pseudo-op somehow tripped up the expression evaluation.  Commas *are* allowed in MACRO-10
+expressions; for example:
+
+	777777,,666666
+
+combines two 18-bit values (0o777777 and 0o666666) into a single 36-bit value (0o777777666666).  But I'm not aware of
+a *single* comma meaning anything to MACRO-10, and it's pretty clear that the comma in that *IFG* is just a typo,
+so I'm not going to try to replicate MACRO-10's behavior here.
+
+The PCjs expression evaluator (which is what my MACRO-10 Mini-Assembler uses) is OK with the comma, but not because it
+supports a comma operator (it doesn't); it simply allows numbers to contain commas, in case the user is using commas to
+group digits.  So "2," is the same as "2".
 
 ---
 
-DAKAJ.TXT
+DAKAI.TXT
 ---------
 
 ```
-MAINDEC-10-DAKAJ.TXT
+MAINDEC-10-DAKAI.TXT
 
 
 
@@ -55,12 +91,12 @@ MAINDEC-10-DAKAJ.TXT
 			IDENTIFICATION
 			--------------
 
-	PRODUCT CODE:   MAINDEC-10-DAKAJ-B-D
+	PRODUCT CODE:   MAINDEC-10-DAKAI-B-D
 
 	PRODUCT NAME:   DECSYSTEM10 PDP-10 KA10 BASIC
-	                INSTRUCTION DIAGNOSTIC (10)
+	                INSTRUCTION DIAGNOSTIC (9)
 
-	FUNCTION:       SHIFT-ROTATE TEST (PART 2)
+	FUNCTION:       SHIFT-ROTATE TEST (PART 1)
 
 	VERSION:        0.2
 
@@ -89,7 +125,7 @@ EQUIPMENT CORPORATION.
 DEC ASSUMES NO RESPONSIBILITY FOR THE USE OR RELIABILITY OF ITS
 SOFTWARE ON EQUIPMENT WHICH IS NOT SUPPLIED BY DEC.
 
-							MAINDEC-10-DAKAJ.TXT
+							MAINDEC-10-DAKAI.TXT
 							PAGE 2
 
 			TABLE OF CONTENTS
@@ -127,15 +163,14 @@ SOFTWARE ON EQUIPMENT WHICH IS NOT SUPPLIED BY DEC.
 
 10.0	LISTING
 
-							MAINDEC-10-DAKAJ.TXT
+							MAINDEC-10-DAKAI.TXT
 							PAGE 3
 
 1.0	ABSTRACT
 
 	THIS PDP-10 KA10 BASIC INSTRUCTION DIAGNOSTIC IS THE
-	TENTH IN A SERIES OF PDP-10 KA10 PROCESSOR DIAGNOSTICS.
-	THE DIAGNOSTIC CONTINUES TESTING THE SHIFT
-	AND ROTATE INSTRUCTIONS.
+	NINTH IN A SERIES OF PDP-10 KA10 PROCESSOR DIAGNOSTICS.
+	THE DIAGNOSTIC TESTS THE SHIFTING AND ROTATING INSTRUCTIONS.
 
 2.0	REQUIREMENTS
 
@@ -166,8 +201,8 @@ SOFTWARE ON EQUIPMENT WHICH IS NOT SUPPLIED BY DEC.
 	PAPER TAPE - HARDWARE READ-IN (READER DEVICE CODE 104)
 	DECTAPE - LOAD WITH DIAMON (DECTAPE DEVICE CODE 320)
 	TIME SHARING - RUN UNDER DIAMON.
-	
-							MAINDEC-10-DAKAJ.TXT
+
+							MAINDEC-10-DAKAI.TXT
 							PAGE 4
 
 3.2	STARTING PROCEDURE
@@ -205,8 +240,8 @@ SOFTWARE ON EQUIPMENT WHICH IS NOT SUPPLIED BY DEC.
 		    IF THE OPERATOR TYPES "S", PREVIOUSLY SET SWITCHES
 		    ARE USED.  THIS IS ONLY VALID UPON RESTARTING
 		    OF AN INTERRUPTED PROGRAM.
-		    
-							MAINDEC-10-DAKAJ.TXT
+	
+							MAINDEC-10-DAKAI.TXT
 							PAGE 5
 
 3.3	OPERATING PROCEDURE
@@ -241,7 +276,7 @@ SOFTWARE ON EQUIPMENT WHICH IS NOT SUPPLIED BY DEC.
 	    AND THE 'ERSTOP' SWITCH MAY BE SET TO INHIBIT PRINTOUT 
 	    BUT HALT THE PROGRAM POINTING TO THE ERROR.
 
-							MAINDEC-10-DAKAJ.TXT
+							MAINDEC-10-DAKAI.TXT
 							PAGE 6
 
 4.0	DATA SWITCH FUNCTIONS
@@ -289,7 +324,7 @@ SOFTWARE ON EQUIPMENT WHICH IS NOT SUPPLIED BY DEC.
 
 	13   INHCSH		NOT USED
 	
-							MAINDEC-10-DAKAJ.TXT
+							MAINDEC-10-DAKAI.TXT
 							PAGE 7
 
 5.0	ERRORS
@@ -317,8 +352,7 @@ SOFTWARE ON EQUIPMENT WHICH IS NOT SUPPLIED BY DEC.
 	THE CYCLE TIME OF THE PROGRAM IS IN THE MILLISECOND RANGE AND
 	IS THEREFORE SUITABLE FOR TAKING MARGINS, VIBRATION TESTS,
 	ETC.
-	
-							MAINDEC-10-DAKAJ.TXT
+							MAINDEC-10-DAKAI.TXT
 							PAGE 8
 
 8.0	OPERATIONAL VARIATIONS
@@ -349,7 +383,7 @@ SOFTWARE ON EQUIPMENT WHICH IS NOT SUPPLIED BY DEC.
 	    DEVICE NAME 'DEV' AND SET SWITCH 'PNTLPT'.  THE PHYSICAL
 	    DEVICE USED CAN BE ANY DEVICE THAT CAN ACCEPT ASCII OUTPUT
 	    FORMAT SUCH AS LPT, DSK, DTA, ETC.  THE CORRESPONDING 
-	    OUTPUT FILE IS 'DAKAJ.TMP'
+	    OUTPUT FILE IS 'DAKAI.TMP'
 
 	    EXAMPLE DEVICE ASSIGNMENT:
 
@@ -358,7 +392,7 @@ SOFTWARE ON EQUIPMENT WHICH IS NOT SUPPLIED BY DEC.
 	    IN USER MODE THE PROGRAM WILL MAKE 1000(8) PASSES AND THEN
 	    RETURN TO DIAMON COMMAND MODE.
 	    
-							MAINDEC-10-DAKAJ.TXT
+							MAINDEC-10-DAKAI.TXT
 							PAGE 9
 
 8.0	OPERATIONAL VARIATIONS (CON'T)
@@ -384,16 +418,16 @@ SOFTWARE ON EQUIPMENT WHICH IS NOT SUPPLIED BY DEC.
 10.0	LISTING
 ```
 
-DAKAJ.HST
+DAKAI.HST
 ---------
 
-	    THIS IS A HISTORY OF THE DEVELOPMENT OF MAINDEC-10-DAKAJ
+	    THIS IS A HISTORY OF THE DEVELOPMENT OF MAINDEC-10-DAKAI
 	
 	************************************************************************
 	
-	PRODUCT CODE:       MAINDEC-10-DAKAJ
+	PRODUCT CODE:       MAINDEC-10-DAKAI
 	
-	PRODUCT NAME:       BASIC INSTRUCTION DIAGNOSTIC #10
+	PRODUCT NAME:       BASIC INSTRUCTION DIAGNOSTIC #9
 	
 	DATE RELEASED:      JANUARY 1977
 	
@@ -407,16 +441,6 @@ DAKAJ.HST
 	
 	************************************************************************
 	
-	VERSION:            1.1
-	
-	DATE RELEASED:      09-APR-73
-	
-	UPDATE AUTHOR:      RICHARD MALISKA
-	
-	REASON FOR UPDATE:  FIX PROBLEM WITH PROGRAM INITIALIZATION
-	
-	************************************************************************
-	
 	ORIGINAL VERSION:   0.1
 	
 	ORIGINAL AUTHOR:    RICHARD MALISKA
@@ -425,11 +449,11 @@ DAKAJ.HST
 	
 	************************************************************************
 
-DAKAJ.MAC
+DAKAI.MAC
 ---------
 
-[[Download](DAKAJ.MAC.txt)]
+[[Download](DAKAI.MAC.txt)]
  
 {% highlight text %}
-{% include_relative DAKAJ.MAC.txt %}
+{% include_relative DAKAI.MAC.txt %}
 {% endhighlight %}
