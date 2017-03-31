@@ -1664,9 +1664,9 @@ PDP10.opDIVB = function(op, ac)
 PDP10.opASH = function(op, ac)
 {
     /*
-     * Convert the unsigned 18-bit value in regEA to a signed 8-bit value (+/-255).
+     * Convert the unsigned 18-bit value in regEA to a signed 8-bit value (-256 to 255).
      */
-    var s = ((this.regEA << 14) >> 14) % 256;
+    var s = (((this.regEA & PDP10.HINT_LIMIT) << 14) >> 23) | (this.regEA & 0xff);
     if (s) {
         var v , bits;
         var w = this.readWord(ac);
@@ -1733,6 +1733,13 @@ PDP10.opASH = function(op, ac)
  *      Rotate AC the number of places specified by E.  If E is positive, rotate left; bit 0 is rotated
  *      into bit 35.  If E is negative, rotate right; bit 35 is rotated into bit O.
  *
+ *      The number of places moved is specified by the result of the effective address calculation taken as
+ *      a signed number (in twos complement notation) modulo 2^8 in magnitude.  In other words the effective
+ *      shift E is the number composed of bit 18 (which is the sign) and bits 28-35 of the calculation result.
+ *      Hence the programmer may specify the shift directly in the instruction (perhaps indexed) or give an
+ *      indirect address to be used in calculating the shift.  A positive E produces motion to the left,
+ *      a negative E to the right; maximum movement is 255 places.
+ *
  * @this {CPUStatePDP10}
  * @param {number} op
  * @param {number} ac
@@ -1742,7 +1749,7 @@ PDP10.opROT = function(op, ac)
     /*
      * Convert the unsigned 18-bit value in regEA to a signed 8-bit value, modulo 36 (+/-35).
      */
-    var s = ((this.regEA << 14) >> 14) % 36;
+    var s = ((((this.regEA & PDP10.HINT_LIMIT) << 14) >> 23) | (this.regEA & 0xff)) % 36;
     if (s) {
         var w = this.readWord(ac);
         /*
@@ -1789,9 +1796,9 @@ PDP10.opROT = function(op, ac)
 PDP10.opLSH = function(op, ac)
 {
     /*
-     * Convert the unsigned 18-bit value in regEA to a signed 8-bit value (+/-255).
+     * Convert the unsigned 18-bit value in regEA to a signed 8-bit value (-256 to 255).
      */
-    var s = ((this.regEA << 14) >> 14) % 256;
+    var s = (((this.regEA & PDP10.HINT_LIMIT) << 14) >> 23) | (this.regEA & 0xff);
     if (s) {
         var w = this.readWord(ac);
         if (s > 0) {
@@ -1862,9 +1869,9 @@ PDP10.opJFFO = function(op, ac)
 PDP10.opASHC = function(op, ac)
 {
     /*
-     * Convert the unsigned 18-bit value in regEA to a signed 8-bit value (+/-255).
+     * Convert the unsigned 18-bit value in regEA to a signed 8-bit value (-256 to 255).
      */
-    var s = ((this.regEA << 14) >> 14) % 256;
+    var s = (((this.regEA & PDP10.HINT_LIMIT) << 14) >> 23) | (this.regEA & 0xff);
     if (s) {
         var bits;
         var wLeft = this.readWord(ac);
@@ -2008,6 +2015,13 @@ PDP10.opASHC = function(op, ac)
  *      (bit 35 of AC A+1) and bit 36 into bit 35.  If E is negative, rotate right; bit 35 is rotated
  *      into bit 36 and bit 71 into bit 0.
  *
+ *      The number of places moved is specified by the result of the effective address calculation taken as
+ *      a signed number (in twos complement notation) modulo 2^8 in magnitude.  In other words the effective
+ *      shift E is the number composed of bit 18 (which is the sign) and bits 28-35 of the calculation result.
+ *      Hence the programmer may specify the shift directly in the instruction (perhaps indexed) or give an
+ *      indirect address to be used in calculating the shift.  A positive E produces motion to the left,
+ *      a negative E to the right; maximum movement is 255 places.
+ *
  * @this {CPUStatePDP10}
  * @param {number} op
  * @param {number} ac
@@ -2017,7 +2031,7 @@ PDP10.opROTC = function(op, ac)
     /*
      * Convert the unsigned 18-bit value in regEA to a signed 8-bit value, modulo 72 (+/-71).
      */
-    var s = ((this.regEA << 14) >> 14) % 72;
+    var s = ((((this.regEA & PDP10.HINT_LIMIT) << 14) >> 23) | (this.regEA & 0xff)) % 72;
     if (s) {
         var wLeft = this.readWord(ac);
         var wRight = this.readWord((ac + 1) & 0o17);
@@ -2048,6 +2062,13 @@ PDP10.opROTC = function(op, ac)
  *      bit 36 is shifted into bit 35; data shifted out of bit 0 is lost.  If E is negative, shift right
  *      bringing 0s into bit 0; bit 35 is shifted into bit 36; data shifted out of bit 71 is lost.
  *
+ *      The number of places moved is specified by the result of the effective address calculation taken as
+ *      a signed number (in twos complement notation) modulo 2^8 in magnitude.  In other words the effective
+ *      shift E is the number composed of bit 18 (which is the sign) and bits 28-35 of the calculation result.
+ *      Hence the programmer may specify the shift directly in the instruction (perhaps indexed) or give an
+ *      indirect address to be used in calculating the shift.  A positive E produces motion to the left,
+ *      a negative E to the right; maximum movement is 255 places.
+ *
  * @this {CPUStatePDP10}
  * @param {number} op
  * @param {number} ac
@@ -2055,9 +2076,9 @@ PDP10.opROTC = function(op, ac)
 PDP10.opLSHC = function(op, ac)
 {
     /*
-     * Convert the unsigned 18-bit value in regEA to a signed 8-bit value (+/-255).
+     * Convert the unsigned 18-bit value in regEA to a signed 8-bit value (-256 to 255).
      */
-    var s = ((this.regEA << 14) >> 14) % 256;
+    var s = (((this.regEA & PDP10.HINT_LIMIT) << 14) >> 23) | (this.regEA & 0xff);
     if (s) {
         var wLeft = this.readWord(ac);
         var wRight = this.readWord((ac + 1) & 0o17);

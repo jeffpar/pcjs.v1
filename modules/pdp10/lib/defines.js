@@ -110,6 +110,7 @@ var PDP10 = {
      */
     WORD_INVALID:   -1,
     HINT_MASK:      Math.pow(2, 17) - 1,        //         131,071          (377777)  signed half-word (half-int) mask
+    HINT_LIMIT:     Math.pow(2, 17),            //         131,072          (400000)  signed half-word (half-int) limit
     HALF_MASK:      Math.pow(2, 18) - 1,        //         262,143   (000000 777777): unsigned half-word mask
     HALF_SHIFT:     Math.pow(2, 18),            //         262,144   (000001 000000): unsigned half-word shift
     INT_MASK:       Math.pow(2, 35) - 1,        //  34,359,738,367   (377777 777777): signed word (magnitude) mask
