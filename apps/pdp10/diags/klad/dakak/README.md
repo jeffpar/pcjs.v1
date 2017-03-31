@@ -7,7 +7,7 @@ machines:
     type: pdp10
     config: /devices/pdp10/machine/ka10/test/debugger/machine.xml
     debugger: true
-    commands: a &apos;dakakt.mac;../param.klm;../fixed.klm;dakakm.mac;../uuoerr.klm&apos;
+    commands: a dakak.mac
 ---
 
 PDP-10 KA10 Basic Instruction Diagnostic #11
@@ -18,7 +18,9 @@ The *PDP-10 KA10 Basic Instruction Diagnostic #11* (MAINDEC-10-DAKAK) test code 
 [DAKAKT.MAC](DAKAKT.MAC.txt) [[original](http://pdp-10.trailing-edge.com/klad_sources/01/klad.sources/dakakt.mac.html)]
 for use with the [PDP-10 Test Machine with Debugger](/devices/pdp10/machine/ka10/test/debugger/) below.
 
-Resources for this test include:
+This diagnostic "TESTS THE MULTIPLY INSTRUCTION AND THE MULTIPLY ALGORITHM."
+
+Resources for this diagnostic include:
 
 - [Instructions](#dakaktxt)
 - [History](#dakakhst)
@@ -37,6 +39,23 @@ This command:
 
 will automatically read the [DAKAK.MAC](DAKAK.MAC.txt) source file (a slightly modified copy of [DAKAKM.MAC](DAKAKM.MAC.txt)),
 assemble it, and then load the binary image at the location specified in the file.
+
+To assemble the diagnostic using the original DEC source files:
+
+	a 'dakakt.mac;../param.klm;../fixed.klm;dakakm.mac;../uuoerr.klm;../stor.klm'
+
+The quotes (either single or double) are required to prevent the PDPjs Debugger from interpreting the filenames as
+separate commands, because a semicolon is the Debugger's normal command separator.
+
+If you want a machine to automatically assemble and load those files on startup, you can add the following machine configuration
+setting in the page's Front Matter:
+
+    commands: a &apos;dakakt.mac;../param.klm;../fixed.klm;dakakm.mac;../uuoerr.klm;../stor.klm&apos;
+
+However, in this case, you *must* use `&apos;` as the quoting sequence, because of the way these settings are encoded into
+JavaScript parameters; e.g.:
+
+	embedPDP10(...,'{commands:"a &apos;dakakt.mac;../param.klm;../fixed.klm;dakakm.mac;../uuoerr.klm;../stor.klm&apos;"}');
 
 ---
 

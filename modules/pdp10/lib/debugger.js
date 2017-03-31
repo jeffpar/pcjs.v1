@@ -2536,8 +2536,14 @@ class DebuggerPDP10 extends Debugger {
         if (!nWords) {
             this.println("no data");
         } else {
-            this.println(nWords + " words loaded at " + this.toStrBase(addrLo) + '-' + this.toStrBase(addrHi));
-            if (addrStart != null) this.cpu.setPC(addrStart);
+            var sStart = "start address ";
+            if (addrStart != null) {
+                this.cpu.setPC(addrStart);
+                sStart += this.toStrBase(addrStart);
+            } else {
+                sStart += "unspecified";
+            }
+            this.println(nWords + " words loaded at " + this.toStrBase(addrLo) + '-' + this.toStrBase(addrHi) + ", " + sStart);
             this.updateStatus();
         }
     }
@@ -2614,10 +2620,7 @@ class DebuggerPDP10 extends Debugger {
      * assembling (multiple files must be separated by semicolons), along with any option letters that were included
      * with the "a" command; for example, if "ap" was specified, then "p" will be passed to Macro10 as an option.
      *
-     * Macro10 options include:
-     *
-     *      p:  preprocess the specified resource(s) without assembling them
-     *      l:  generate listing information (TODO)
+     * See the Macro10 component for a list of supported options.
      *
      * When assembling a file, the target address determines the initial location counter for the assembly process,
      * but that can always be overridden by a LOC (or RELOC) pseudo-op in the file.  The target address will also be

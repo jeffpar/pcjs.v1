@@ -125,6 +125,11 @@ class Macro10 {
      * parseExpression(), etc).  This is NOT a subclass of Component, so Component services are not part
      * of this class.
      *
+     * Supported options include:
+     *
+     *      'p': print the preprocessed resource(s) without assembling them
+     *      'l': print lines as they are parsed
+     *
      * @this {Macro10}
      * @param {string} sURL (the URL(s) of the resource to be assembled)
      * @param {number|null} addrLoad (the absolute address to assemble the code at, if any)
@@ -264,6 +269,7 @@ class Macro10 {
 
         this.iURL = 0;
         this.asURLs = sURL.split(';');
+        this.anLines = [];              // keeps track of the number of lines per file
 
         this.loadNextResource();
     }
@@ -281,7 +287,7 @@ class Macro10 {
         }
 
         var macro10 = this;
-        var sURL = this.asURLs[this.iURL++];
+        var sURL = this.asURLs[this.iURL];
 
         this.println("loading " + Str.getBaseName(sURL));
 
@@ -311,10 +317,31 @@ class Macro10 {
                     sText += s;
                 }
                 match = sText.match(/&[a-z]+;/i);
-                if (match) macro10.warning("unrecognized HTML entity: " + match[0]);
+                if (match) macro10.warning("unrecognized HTML entity '" + match[0] + "'");
             }
 
-            macro10.asLines = macro10.asLines.concat(sText.split(/(\r?\n)/));
+            /*
+             * For a file containing N lines, split() will return an array of N*2+1 entries, with every even entry
+             * containing the characters, if any, preceding a line-ending, and every odd entry (including the final
+             * entry) containing a line-ending.
+             *
+             * If, for some reason, split() doesn't do that, then we try to warn and patch things up as best we can.
+             */
+            var asLines = sText.split(/(\r?\n)/);
+            if (asLines.length & 1) {
+                s = asLines.pop();
+                if (s) {
+                    macro10.warning("unexpected line '" + s + "'");
+                    asLines.push(s);
+                    asLines.push("");
+                }
+            } else {
+                macro10.warning("unexpected number of lines (" + asLines.length + ")");
+            }
+
+            macro10.asLines = macro10.asLines.concat(asLines);
+            macro10.anLines[macro10.iURL] = (asLines.length >> 1);
+            macro10.iURL++;
 
             setTimeout(function() {
                 macro10.loadNextResource();
@@ -361,7 +388,7 @@ class Macro10 {
         var macro10 = this;
 
         /*
-         * If the "preprocess" option is set, then just return the plain text we retrieved.
+         * If the "preprocess" option is set, then print everything without assembling.
          */
         if (this.sOptions.indexOf('p') >= 0) {
             this.println(this.asLines.join(""));
@@ -371,7 +398,16 @@ class Macro10 {
         var a = this.dbg.resetVariables();
         try {
             for (let i = 0; i < this.asLines.length; i += 2) {
+
                 this.nLine++;
+
+                /*
+                 * If the "line" option is set, then print all the lines as they are parsed.
+                 */
+                if (this.sOptions.indexOf('l') >= 0) {
+                    this.println(this.getLineRef() + ": " + this.asLines[i]);
+                }
+
                 /*
                  * Since, at this early stage, I'm not sure whether all the resources I'm interested in
                  * assembling have had their original CR/LF line endings preserved (eg, some files may have
@@ -379,6 +415,7 @@ class Macro10 {
                  * are in the array (stored in every OTHER entry) and insert my own uniform CR/LF sequences.
                  */
                 if (!this.parseLine(this.asLines[i] + '\r\n')) break;
+
                 /*
                  * When an END statement is encountered, addrStart will change from null to either undefined
                  * or a starting address.
@@ -387,11 +424,11 @@ class Macro10 {
             }
 
             if (this.nMacroDef) {
-                this.error("open block from line " + this.tblMacros[this.sMacroDef].nLine);
+                this.error("open block", this.tblMacros[this.sMacroDef].nLine);
             }
 
             if (this.stackScopes.length) {
-                this.error("open scope from line " + this.stackScopes[0].nLine);
+                this.error("open scope", this.stackScopes[0].nLine);
             }
 
             /*
@@ -480,7 +517,7 @@ class Macro10 {
                     /*
                      * This is more of an assert(), because it should never happen, regardless of input.
                      */
-                    this.error("missing definition for variable: " + name);
+                    this.error("missing definition for variable '" + name + "'");
                     continue;
                 }
                 this.parseText(macro.sText);
@@ -492,7 +529,7 @@ class Macro10 {
             this.aFixups.forEach(function processFixup(sValue, nLocation){
                 let value = macro10.parseExpression(sValue, undefined, nLocation);
                 if (value === undefined) {
-                    macro10.error("unable to parse expression: " + sValue);
+                    macro10.error("unable to parse expression '" + sValue + "'");
                     return;
                 }
                 value += macro10.aWords[nLocation];
@@ -527,7 +564,7 @@ class Macro10 {
                     this.nMacroDef++;
                     sLine = sLine.substr(i+1);
                 } else {
-                    this.error("expected " + this.sOperator + " definition: " + sLine);
+                    this.error("expected " + this.sOperator + " definition in '" + sLine + "'");
                 }
             }
             if (this.nMacroDef > 1) {
@@ -546,7 +583,7 @@ class Macro10 {
         while (fParse) {
             var matchLine = sLine.match(this.reLine);
             if (!matchLine || matchLine[5] && matchLine[5].slice(0, 1) != ';') {
-                this.error("failed to parse line: " + sLine);
+                this.error("failed to parse line '" + sLine + "'");
                 return false;
             }
             fParse = false;
@@ -639,6 +676,10 @@ class Macro10 {
                 this.defASCII(sRemainder);
                 break;
 
+            case Macro10.PSEUDO_OP.BLOCK:
+                this.defBLOCK(sOperands);
+                break;
+
             case Macro10.PSEUDO_OP.END:
                 this.defEND(sOperands);
                 break;
@@ -661,6 +702,7 @@ class Macro10 {
             case Macro10.PSEUDO_OP.IFG:
             case Macro10.PSEUDO_OP.IFL:
             case Macro10.PSEUDO_OP.IFN:
+            case Macro10.PSEUDO_OP.IFNDEF:
             case Macro10.PSEUDO_OP.IRP:
             case Macro10.PSEUDO_OP.IRPC:
             case Macro10.PSEUDO_OP.OPDEF:
@@ -728,7 +770,6 @@ class Macro10 {
      */
     parseMacro(name, sOperands)
     {
-        var i;
         var macro = this.tblMacros[name];
         if (!macro) return false;
 
@@ -738,9 +779,16 @@ class Macro10 {
              * the operands and merge their bits with the OPDEF's bits.
              */
             if (macro.nOperand == Macro10.MACRO_OP.OPDEF) {
+
                 var nLocation = this.nLocation;
                 this.parseText(macro.sText);
                 if (nLocation < this.nLocation) {
+
+                    /*
+                     * An OPDEF invokation *may* have operands, but it's not required to.
+                     */
+                    if (!sOperands) return true;
+
                     this.pushScope();
                     this.parseText(sOperands);
                     var w = this.aWords[0];
@@ -759,7 +807,11 @@ class Macro10 {
                         return true;
                     }
                 }
-                this.error("OPDEF '" + name + "' error: " + sOperands);
+
+                /*
+                 * Either the OPDEF didn't generate any data OR the OPDEF's operands failed to evaluate.
+                 */
+                this.error("OPDEF '" + name + "' (" + sOperands + ") failed");
                 return false;
             }
             var macroPrev = this.macroCall;
@@ -782,13 +834,8 @@ class Macro10 {
         var sOperator = name.substr(1);
 
         switch(sOperator) {
-        case Macro10.PSEUDO_OP.IFDEF:
-            if (macro.nOperand) {
-                this.parseText(macro.sText);
-            }
-            break;
-
         case Macro10.PSEUDO_OP.IFE:
+        case Macro10.PSEUDO_OP.IFNDEF:
             if (!macro.nOperand) {
                 this.parseText(macro.sText);
             }
@@ -807,6 +854,7 @@ class Macro10 {
             break;
 
         case Macro10.PSEUDO_OP.IFN:
+        case Macro10.PSEUDO_OP.IFDEF:
             if (macro.nOperand) {
                 this.parseText(macro.sText);
             }
@@ -814,7 +862,7 @@ class Macro10 {
 
         case Macro10.PSEUDO_OP.IRP:
         case Macro10.PSEUDO_OP.IRPC:
-            for (i = 0; i < macro.aValues.length; i++) {
+            for (let i = 0; i < macro.aValues.length; i++) {
                 this.parseText(macro.sText, macro.aParms, [macro.aValues[i]], []);
             }
             break;
@@ -903,29 +951,6 @@ class Macro10 {
         }
     }
 
-
-    /**
-     * error(sError)
-     *
-     * @this {Macro10}
-     * @param {string} sError
-     */
-    error(sError)
-    {
-        throw new Error("error" + (this.nLine? " at line " + Str.toDec(this.nLine) : "") + ": " + sError);
-    }
-
-    /**
-     * warning(sWarning)
-     *
-     * @this {Macro10}
-     * @param {string} sWarning
-     */
-    warning(sWarning)
-    {
-        this.println("warning" + (this.nLine? " at line " + Str.toDec(this.nLine) : "") + ": " + sWarning);
-    }
-
     /**
      * getExpression(sOperands, sDelim)
      *
@@ -955,7 +980,7 @@ class Macro10 {
                 cNesting++;
             } else if (ch == '>') {
                 if (--cNesting < 0) {
-                    this.error("missing bracket(s): " + sOperands);
+                    this.error("missing bracket(s) in '" + sOperands + "'");
                     break;
                 }
             }
@@ -964,7 +989,7 @@ class Macro10 {
             sOperand = sOperands.substr(0, i);
         }
         else if (cNesting > 0) {
-            this.error("extra bracket(s): " + sOperands);
+            this.error("extra bracket(s) in '" + sOperands + "'");
         }
         return sOperand;
     }
@@ -998,23 +1023,33 @@ class Macro10 {
             /*
              * The SIXBIT (and presumably ASCII; not sure about ASCIZ) pseudo-ops can also be used in expressions
              * (or at least assignments), so we check for those in the given expression and convert them to quoted
-             * sequences that the debugger's parseExpression() understands.
+             * sequences that the Debugger's parseExpression() understands.
              */
             sOperand = sOperand.replace(/SIXBIT\s*(\S)(.*?)\1/g, "'$2'").replace(/ASCII\s*(\S)(.*?)\1/g, '"$2"');
-            /*
-             * Check for the "period" syntax that MACRO-10 uses to represent the value of the current location.
-             * The Debugger's parseInstruction() method understands that syntax, but its parseExpression() method
-             * does not.
-             *
-             * Note that the Debugger's parseInstruction() replaces any period not PRECEDED by a decimal
-             * digit with the current address, because our Debuggers' only other interpretation of a period
-             * is as the suffix of a decimal integer, whereas MACRO-10's only other interpretation of a period
-             * is (I think) as the decimal point within a floating-point number, so here we only replace
-             * periods that are not FOLLOWED by a decimal digit.
-             */
-            result = this.dbg.parseExpression(sOperand.replace(/\.([^0-9]|$)/g, this.dbg.toStrBase(nLocation, -1) + "$1"), fPass1);
-            if (result === undefined) {
-                this.error("error parsing expression: " + sOperand);
+
+            var sOperator = "";
+            var sOperands = sOperand;
+            if (match = sOperand.match(/^([^\s]+)\s+(.+?)\s*$/)) {
+                sOperator = match[1];
+                sOperands = match[2];
+            }
+            result = this.dbg.parseInstruction(sOperator, sOperands, nLocation, true);
+            if (result < 0) {
+                /*
+                 * Check for the "period" syntax that MACRO-10 uses to represent the value of the current location.
+                 * The Debugger's parseInstruction() method understands that syntax, but its parseExpression() method
+                 * does not.
+                 *
+                 * Note that the Debugger's parseInstruction() replaces any period not PRECEDED by a decimal
+                 * digit with the current address, because our Debuggers' only other interpretation of a period
+                 * is as the suffix of a decimal integer, whereas MACRO-10's only other interpretation of a period
+                 * is (I think) as the decimal point within a floating-point number, so here we only replace
+                 * periods that are not FOLLOWED by a decimal digit.
+                 */
+                result = this.dbg.parseExpression(sOperand.replace(/\.([^0-9]|$)/g, this.dbg.toStrBase(nLocation, -1) + "$1"), fPass1);
+                if (result === undefined) {
+                    this.error("unable to parse expression '" + sOperand + "'");
+                }
             }
         } else {
             var wLeft = match[1]? this.parseExpression(match[1], fPass1, nLocation) : 0;
@@ -1058,7 +1093,7 @@ class Macro10 {
             }
         }
         if (cNesting < 0) {
-            this.error("missing bracket(s): " + sOperands);
+            this.error("missing bracket(s) in '" + sOperands + "'");
         }
         if (iBegin >= 0) {
             sLiteral = sOperands.substr(iBegin, iEnd - iBegin);
@@ -1088,6 +1123,27 @@ class Macro10 {
             }
         }
         return aDefaults;
+    }
+
+    /**
+     * getLineRef(nLine)
+     *
+     * @this {Macro10}
+     * @param {number|undefined} [nLine]
+     * @return {string}
+     */
+    getLineRef(nLine = this.nLine)
+    {
+        var iURL = 0;
+        while (nLine > this.anLines[iURL]) {
+            nLine -= this.anLines[iURL];
+            if (iURL < this.asURLs.length - 1) {
+                iURL++;
+            } else {
+                break;
+            }
+        }
+        return Str.getBaseName(this.asURLs[iURL] + " line " + nLine);
     }
 
     /**
@@ -1337,7 +1393,7 @@ class Macro10 {
              */
             match = sOperands.match(/([A-Z$%.][0-9A-Z$%.]*)\s*(\([^)]*\)|)\s*,?\s*(<|)([\s\S]*)/i);
             if (!match) {
-                this.error("unrecognized " + sOperator + ": " + sOperands);
+                this.error("unrecognized " + sOperator + " in '" + sOperands + "'");
                 return sOperands;
             }
             name = match[1];
@@ -1362,7 +1418,7 @@ class Macro10 {
             this.chMacroClose = ']';
             match = sOperands.match(/([A-Z$%.][0-9A-Z$%.]*)\s*(\[)([\s\S]*)/i);
             if (!match) {
-                this.error("unrecognized " + sOperator + ": " + sOperands);
+                this.error("unrecognized " + sOperator + " in '" + sOperands + "'");
                 return sOperands;
             }
             name = match[1];
@@ -1377,7 +1433,7 @@ class Macro10 {
             this.chMacroClose = ']';
             name = '?' + Str.toDec(++this.nLiteral, 5);
             if (this.tblMacros[name] !== undefined) {
-                this.error("literal symbol redefined: " + name);
+                this.error("literal symbol '" + name + "' redefined");
             }
             match = [sOperands[0], sOperands.substr(1)];
             nOperand = Macro10.MACRO_OP.LITERAL;
@@ -1395,14 +1451,14 @@ class Macro10 {
             }
             match = sOperands.match(/([A-Z$%.][0-9A-Z$%.]*)\s*,\s*(<|)([\s\S]*)/i);
             if (!match) {
-                this.error("unrecognized " + sOperator + ": " + sOperands);
+                this.error("unrecognized " + sOperator + " operands '" + sOperands + "'");
                 return sOperands;
             }
             for (i = 0; i < this.macroCall.aParms.length; i++) {
                 if (match[1] == this.macroCall.aParms[i]) break;
             }
             if (i == this.macroCall.aParms.length) {
-                this.error("invalid " + sOperator + " parameter: " + match[1]);
+                this.error("invalid " + sOperator + " parameter '" + match[1] + "'");
                 return sOperands;
             }
             name = '?' + sOperator;
@@ -1421,7 +1477,7 @@ class Macro10 {
              */
             var sOperand = this.getExpression(sOperands);
             if (!sOperand) {
-                this.error("missing " + sOperator + " expression: " + sOperands);
+                this.error("missing " + sOperator + " expression '" + sOperands + "'");
                 return sOperands;
             }
             sOperands = sOperands.substr(sOperand.length + 1);
@@ -1429,7 +1485,7 @@ class Macro10 {
             match = sOperands.match(/\s*(<|)([\s\S]*)/i);
             name = '?' + sOperator;
 
-            if (sOperator == Macro10.PSEUDO_OP.IFDEF) {
+            if (sOperator == Macro10.PSEUDO_OP.IFDEF || sOperator == Macro10.PSEUDO_OP.IFNDEF) {
                 nOperand = this.isDefined(sOperand)? 1 : 0;
             } else {
                 /*
@@ -1503,16 +1559,22 @@ class Macro10 {
     {
         name = name.toUpperCase().substr(0, 6);
         if ((nType & Macro10.SYMTYPE.LABEL) && this.tblSymbols[name] !== undefined) {
-            this.error("label " + name + " redefined");
+            this.error("label '" + name + "' redefined");
             return;
         }
+        var sUndefined = null;
         if (typeof value == 'string') {
-            var v = this.parseExpression(value);
+            /*
+             * We now pass true to parseExpression() to allow at least one undefined symbol to exist in the expression,
+             * which we will record alongside the variable.
+             */
+            var v = this.parseExpression(value, true);
             if (v === undefined) {
-                this.error("parseExpression(" + value + ")");
+                this.error("parseExpression(" + value + ") failed");
                 return;
             }
             value = v;
+            sUndefined = this.dbg.sUndefined;
         }
         var sym = this.tblSymbols[name];
         if (sym) {
@@ -1522,7 +1584,25 @@ class Macro10 {
         } else {
             this.tblSymbols[name] = {name, value, nType, nLine: this.nLine};
         }
-        this.dbg.setVariable(name, value);
+        this.dbg.setVariable(name, value, sUndefined);
+    }
+
+    /**
+     * defBLOCK()
+     *
+     * Processes the BLOCK pseudo-op.
+     *
+     * @this {Macro10}
+     * @param {string} sOperands
+     */
+    defBLOCK(sOperands)
+    {
+        var w = this.parseExpression(sOperands);
+        if (w !== undefined && this.dbg.sUndefined == null && w >= 0 && w <= 0o777777) {
+            this.nLocation += w;    // while (w--) this.genWord(0);
+        } else {
+            this.error("unrecognized BLOCK expression '" + sOperands + "'");
+        }
     }
 
     /**
@@ -1540,7 +1620,7 @@ class Macro10 {
         } else {
             this.addrStart = this.parseExpression(sOperands, true);
             if (this.addrStart === undefined) {
-                this.error("unrecognized expression: " + sOperands);
+                this.error("unrecognized END expression '" + sOperands + "'");
             }
         }
     }
@@ -1559,7 +1639,7 @@ class Macro10 {
         if (w !== undefined) {
             this.genWord(w, this.dbg.sUndefined);
         } else {
-            this.error("unrecognized expression: " + sOperands);
+            this.error("unrecognized EXP expression '" + sOperands + "'");
         }
     }
 
@@ -1602,23 +1682,14 @@ class Macro10 {
      */
     defWord(sOperator, sSeparator, sOperands)
     {
-        var w = -1;
-
         var sExp = (sOperator + sSeparator + sOperands).trim();
 
-        if (sOperands.indexOf(",,") < 0) {
-            var nLocation = this.nLocationScope >= 0? this.nLocationScope : this.nLocation;
-            w = this.dbg.parseInstruction(sOperator, sOperands, nLocation, true);
-        }
-
-        if (w < 0) {
-            w = this.parseExpression(sExp, true);
-        }
+        var w = this.parseExpression(sExp, true);
 
         if (w !== undefined) {
             this.genWord(w, this.dbg.sUndefined);
         } else {
-            this.error("unrecognized expression: " + sExp);
+            this.error("unrecognized word expression '" + sExp + "'");
         }
     }
 
@@ -1699,6 +1770,31 @@ class Macro10 {
     }
 
     /**
+     * error(sError, nLine)
+     *
+     * @this {Macro10}
+     * @param {string} sError
+     * @param {number} [nLine]
+     * @throws {Error}
+     */
+    error(sError, nLine)
+    {
+        throw new Error("error in " + this.getLineRef(nLine) + ": " + sError);
+    }
+
+    /**
+     * warning(sWarning, nLine)
+     *
+     * @this {Macro10}
+     * @param {string} sWarning
+     * @param {number} [nLine]
+     */
+    warning(sWarning, nLine)
+    {
+        this.println("warning in " + this.getLineRef(nLine) + ": " + sWarning);
+    }
+
+    /**
      * println(s)
      *
      * @this {Macro10}
@@ -1723,6 +1819,7 @@ Macro10.SYMTYPE = {
 Macro10.PSEUDO_OP = {
     ASCII:      "ASCII",
     ASCIZ:      "ASCIZ",
+    BLOCK:      "BLOCK",
     DEFINE:     "DEFINE",
     END:        "END",
     EXP:        "EXP",
@@ -1731,10 +1828,11 @@ Macro10.PSEUDO_OP = {
     IFG:        "IFG",
     IFL:        "IFL",
     IFN:        "IFN",
+    IFNDEF:     "IFNDEF",
     IRP:        "IRP",
     IRPC:       "IRPC",
     LALL:       "LALL",
-    LITERAL:    "LITERAL",      // this is a pseudo-pseudo-op, used for internal purposes
+    LITERAL:    "LITERAL",      // this is a pseudo-pseudo-op, for internal use only
     LIST:       "LIST",
     LOC:        "LOC",
     NOSYM:      "NOSYM",
