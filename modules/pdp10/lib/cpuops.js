@@ -6323,6 +6323,33 @@ PDP10.doDIV = function(dst, ext, src)
  * number (base 2^18).  Each individual multiplication of these 18-bit "digits" will produce
  * a result within 2^36, well within JavaScript integer accuracy.
  *
+ * PDP-10 "DAKAK" Diagnostic Notes
+ * -------------------------------
+ *
+ *      036174: 200240 043643  MOVE    5,43643      ; [43643] = 400000000000
+ *      036175: 200300 043603  MOVE    6,43603      ; [43603] = 777777777777
+ *      036176: 200140 043604  MOVE    3,43604      ; [43604] = 000000000001
+ *      036177: 224240 000003  MUL     5,3          ; Multiply 400000000000 by 000000000001
+ *      036200: 312240 043604  CAME    5,43604      ; high order result in AC should be: 000000000001
+ *      036201: 003240 033721  UUO     5,33721      ;
+ *      036202: 312300 043602  CAME    6,43602      ; low order result in AC+1 should be: 000000000000
+ *
+ * The "natural" result is:
+ *
+ *      05=777777777777 06=400000000000
+ *
+ * And SIMH seems to agree.  So why does the DEC diagnostic expect:
+ *
+ *      05=000000000001 06=000000000000
+ *
+ * The answer can be found in the June 1982 "DECSYSTEM-10 and DECSYSTEM-20 Processor Reference Manual",
+ * in the description of the MUL instruction:
+ *
+ *      CAUTION: In the KA10, an AC operand of 2^35 is treated as though it were +2^35, producing the
+ *      incorrect sign in the product.
+ *
+ * This behavior is now simulated below for MODEL_KA10, at least to the extent that the diagnostic is happy.
+ *
  * @this {CPUStatePDP10}
  * @param {number} dst (36-bit value)
  * @param {number} src (36-bit value)
@@ -6339,8 +6366,10 @@ PDP10.doMUL = function(dst, src, fTruncate)
      * we'll negate the result afterward if necessary.
      */
     if (n1 > PDP10.INT_MASK) {
-        n1 = PDP10.WORD_LIMIT - n1;
-        fNeg = !fNeg;
+        if (this.model != PDP10.MODEL_KA10 || n1 != PDP10.INT_LIMIT) {
+            n1 = PDP10.WORD_LIMIT - n1;
+            fNeg = !fNeg;
+        }
     }
 
     if (n2 > PDP10.INT_MASK) {

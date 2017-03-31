@@ -83,3 +83,7 @@ PCjs has archived selected files from
 	- TESTS OF LOGICAL SHIFT, ROTATE, ARITHMETIC SHIFT; SINGLE AND COMBINED
 - [KA10 Basic Instruction Diagnostic #10 (MAINDEC-10-DAKAJ)](dakaj/)
 	- TESTS OF LOGICAL SHIFT, ROTATE, ARITHMETIC SHIFT; SINGLE AND COMBINED
+- [KA10 Basic Instruction Diagnostic #11 (MAINDEC-10-DAKAK)](dakak/)
+	- TESTS OF MULTIPY, INTERGER MULTIPLY, DIVIDE, INTERGER DIVIDE*
+
+*Gotta love those interger multipy tests! -JP
