@@ -2642,7 +2642,7 @@ class DebuggerPDP10 extends Debugger {
             return true;
         }
 
-        var match = sOpcode.match(/^(['"]?)(.*\.mac|.*\.html|.*\.txt)\1$/i);
+        var match = sOpcode.match(/^(['"]?)(.*\.klm|.*\.mac|.*\.html|.*\.txt)\1$/i);
         if (match) {
             var dbg = this;
             var cpu = this.cpu;

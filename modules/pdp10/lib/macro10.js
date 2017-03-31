@@ -656,6 +656,7 @@ class Macro10 {
                 break;
 
             case Macro10.PSEUDO_OP.DEFINE:
+            case Macro10.PSEUDO_OP.IFDEF:
             case Macro10.PSEUDO_OP.IFE:
             case Macro10.PSEUDO_OP.IFG:
             case Macro10.PSEUDO_OP.IFL:
@@ -781,6 +782,12 @@ class Macro10 {
         var sOperator = name.substr(1);
 
         switch(sOperator) {
+        case Macro10.PSEUDO_OP.IFDEF:
+            if (macro.nOperand) {
+                this.parseText(macro.sText);
+            }
+            break;
+
         case Macro10.PSEUDO_OP.IFE:
             if (!macro.nOperand) {
                 this.parseText(macro.sText);
@@ -917,18 +924,6 @@ class Macro10 {
     warning(sWarning)
     {
         this.println("warning" + (this.nLine? " at line " + Str.toDec(this.nLine) : "") + ": " + sWarning);
-    }
-
-    /**
-     * isSymbolChar(ch)
-     *
-     * @this {Macro10}
-     * @param {string} ch
-     * @return {boolean}
-     */
-    isSymbolChar(ch)
-    {
-        return !!ch.match(/[0-9A-Z$%.]/i);
     }
 
     /**
@@ -1225,6 +1220,54 @@ class Macro10 {
     }
 
     /**
+     * isDefined(sName)
+     *
+     * @this {Macro10}
+     * @param {string} sName
+     * @return {boolean}
+     */
+    isDefined(sName)
+    {
+        return this.isMacro(sName) || this.isSymbol(sName) || this.dbg.isVariable(sName);
+    }
+
+    /**
+     * isMacro(sName)
+     *
+     * @this {Macro10}
+     * @param {string} sName
+     * @return {boolean}
+     */
+    isMacro(sName)
+    {
+        return this.tblMacros[sName] !== undefined;
+    }
+
+    /**
+     * isSymbol(sName)
+     *
+     * @this {Macro10}
+     * @param {string} sName
+     * @return {boolean}
+     */
+    isSymbol(sName)
+    {
+        return this.tblSymbols[sName] !== undefined;
+    }
+
+    /**
+     * isSymbolChar(ch)
+     *
+     * @this {Macro10}
+     * @param {string} ch
+     * @return {boolean}
+     */
+    isSymbolChar(ch)
+    {
+        return !!ch.match(/[0-9A-Z$%.]/i);
+    }
+
+    /**
      * defASCII(sOperands)
      *
      * @this {Macro10}
@@ -1385,11 +1428,16 @@ class Macro10 {
             sOperand = sOperand.trim();
             match = sOperands.match(/\s*(<|)([\s\S]*)/i);
             name = '?' + sOperator;
-            /*
-             * The expression is either a repeat count or a condition.  Either way, we must be able to
-             * resolve it now, so we don't set fPass1 (but that doesn't mean it's the second pass, either).
-             */
-            nOperand = this.parseExpression(sOperand) || 0;
+
+            if (sOperator == Macro10.PSEUDO_OP.IFDEF) {
+                nOperand = this.isDefined(sOperand)? 1 : 0;
+            } else {
+                /*
+                 * The expression is either a repeat count or a condition.  Either way, we must be able to
+                 * resolve it now, so we don't set fPass1 (but that doesn't mean it's the second pass, either).
+                 */
+                nOperand = this.parseExpression(sOperand) || 0;
+            }
             iMatch = 1;
         }
 
@@ -1678,6 +1726,7 @@ Macro10.PSEUDO_OP = {
     DEFINE:     "DEFINE",
     END:        "END",
     EXP:        "EXP",
+    IFDEF:      "IFDEF",
     IFE:        "IFE",
     IFG:        "IFG",
     IFL:        "IFL",

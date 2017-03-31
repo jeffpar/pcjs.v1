@@ -519,7 +519,7 @@ class Debugger extends Component
                 if (!val2) return false;
                 valNew = Math.trunc(val1 / val2);
                 break;
-            case '%':
+            case '^/':
                 if (!val2) return false;
                 valNew = val1 % val2;
                 break;
@@ -883,6 +883,8 @@ class Debugger extends Component
              * added '!' as an alias for '|' (bitwise inclusive-or), '^-' as an alias for '~' (one's complement operator),
              * and '_' as a shift operator (+/- values specify a left/right shift, and the count is not limited to 32).
              *
+             * And to avoid conflicts with MACRO-10 syntax, I've replaced the original mod operator ('%') with '^/'.
+             *
              * The MACRO-10 binary shifting suffix ('B') is a bit more problematic, since a capital B can also appear
              * inside symbols.  So I pre-scan for that suffix and replace all non-symbolic occurrences with an internal
              * shift operator ('^_').
@@ -901,7 +903,7 @@ class Debugger extends Component
              * to remove spaces entirely, because if an operator-less expression like "A B" was passed in, we would want
              * that to generate an error; if we converted it to "AB", evaluation might inadvertently succeed.
              */
-            var regExp = /({|}|\|\||&&|\||\^!|\^B|\^O|\^D|\^L|\^-|~|\^_|_|&|!=|!|==|>=|>>>|>>|>|<=|<<|<|-|\+|%|\/|\*| )/;
+            var regExp = /({|}|\|\||&&|\||\^!|\^B|\^O|\^D|\^L|\^-|~|\^_|_|&|!=|!|==|>=|>>>|>>|>|<=|<<|<|-|\+|\^\/|\/|\*| )/;
             sExp = sExp.replace(/(^|[^A-Z0-9$%.])([0-9]+)B/, "$1$2^_").replace(/\s+/g, ' ');
             var asValues = sExp.split(regExp);
             value = this.parseArray(asValues, 0, asValues.length, this.nBase, fQuiet);
@@ -1151,6 +1153,18 @@ class Debugger extends Component
     }
 
     /**
+     * isVariable(sVar)
+     *
+     * @this {Debugger}
+     * @param {string} sVar
+     * @return {boolean}
+     */
+    isVariable(sVar)
+    {
+        return this.aVariables[sVar] !== undefined;
+    }
+
+    /**
      * setVariable(sVar, value)
      *
      * @this {Debugger}
@@ -1230,7 +1244,7 @@ if (DEBUGGER) {
         '<<':   12,     // bitwise left shift
         '-':    13,     // subtraction
         '+':    13,     // addition
-        '%':    14,     // remainder
+        '^/':   14,     // remainder
         '/':    14,     // division
         '*':    14,     // multiplication
         '_':    19,     // MACRO-10 shift operator
@@ -1252,7 +1266,7 @@ if (DEBUGGER) {
         '<<':   12,     // bitwise left shift
         '-':    13,     // subtraction
         '+':    13,     // addition
-        '%':    14,     // remainder
+        '^/':   14,     // remainder
         '/':    14,     // division
         '*':    14,     // multiplication
         '!':    15,     // bitwise OR (conflicts with logical NOT, but we never supported that)

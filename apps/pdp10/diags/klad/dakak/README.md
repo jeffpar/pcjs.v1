@@ -7,7 +7,7 @@ machines:
     type: pdp10
     config: /devices/pdp10/machine/ka10/test/debugger/machine.xml
     debugger: true
-    commands: a DAKAK.MAC;g 043004
+    commands: a &apos;dakakt.mac;../param.klm;../fixed.klm;dakakm.mac;../uuoerr.klm&apos;
 ---
 
 PDP-10 KA10 Basic Instruction Diagnostic #11
