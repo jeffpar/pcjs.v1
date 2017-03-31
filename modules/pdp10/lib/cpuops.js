@@ -6390,12 +6390,9 @@ PDP10.doMUL = function(dst, src, fTruncate)
         var m1d2 = (n1d2 * n2d1) + Math.trunc(m1d1 / PDP10.HALF_SHIFT);
         ext = Math.trunc(m1d2 / PDP10.HALF_SHIFT);
         m1d2 = (m1d2 & PDP10.HALF_MASK) + (n1d1 * n2d2);
-        res = (m1d2 * PDP10.HALF_SHIFT) + (m1d1 & PDP10.HALF_MASK);
+        res = ((m1d2 * PDP10.HALF_SHIFT) + (m1d1 & PDP10.HALF_MASK)) % PDP10.WORD_LIMIT;
         ext += Math.trunc(m1d2 / PDP10.HALF_SHIFT) + (n1d2 * n2d2);
     }
-
-    this.assert(res == res % PDP10.WORD_LIMIT);
-    this.assert(ext == ext % PDP10.WORD_LIMIT);
 
     if (fNeg) {
         if (res) {
