@@ -1,29 +1,31 @@
 ---
 layout: page
-title: PDP-10 KA10 Basic Instruction Diagnostic #3
-permalink: /apps/pdp10/diags/klad/dakac/
+title: PDP-10 KA10 Basic Instruction Diagnostic #2
+permalink: /apps/pdp10/diags/ka10/dakab/
 machines:
   - id: testka10
     type: pdp10
     config: /devices/pdp10/machine/ka10/test/debugger/machine.xml
     debugger: true
-    commands: a 30724 DAKAC.MAC
+    commands: a 30724 DAKAB.MAC
 ---
 
-PDP-10 KA10 Basic Instruction Diagnostic #3
+PDP-10 KA10 Basic Instruction Diagnostic #2
 -------------------------------------------
 
-The *PDP-10 KA10 Basic Instruction Diagnostic #3* (MAINDEC-10-DAKAC) test code has been extracted from
-[DAKACM.MAC](DAKACM.MAC.txt) [[original](http://pdp-10.trailing-edge.com/klad_sources/01/klad.sources/dakacm.mac.html)]
+The *PDP-10 KA10 Basic Instruction Diagnostic #2* (MAINDEC-10-DAKAB) test code has been extracted from
+[DAKABM.MAC](DAKABM.MAC.txt) [[original](http://pdp-10.trailing-edge.com/klad_sources/01/klad.sources/dakabm.mac.html)]
 for use with the [PDP-10 Test Machine with Debugger](/devices/pdp10/machine/ka10/test/debugger/) below.
 
-Resources for this test include:
+This diagnostic tests "MOVE, COMPARE, TEST, HALF WORD AND BOOLE. IT ALSO TESTS THE ADDERS USING ADD AND COMPARE INSTRUCTIONS."
 
-- [Instructions](#dakactxt)
-- [History](#dakachst)
-- [Source Code](#dakacmac)
-- [MACRO-10 Listing](DAKAC.LST.txt)
-- [Additional Information](http://archive.pcjs.org/apps/pdp10/diags/klad/dakac/DAKAC.SEQ.txt)
+Resources for this diagnostic include:
+
+- [Instructions](#dakabtxt)
+- [History](#dakabhst)
+- [Source Code](#dakabmac)
+- [MACRO-10 Listing](DAKAB.LST.txt)
+- [Additional Information](http://archive.pcjs.org/apps/pdp10/diags/ka10/dakab/DAKAB.SEQ.txt)
 
 {% include machine.html id="testka10" %}
 
@@ -32,18 +34,18 @@ The Debugger's assemble ("a") command can be used to test the new built-in
 of the [MACRO-10](http://archive.pcjs.org/pubs/dec/pdp10/tops10/02_1973AsmRef_macro.pdf) assembly language.
 This command:
 
-	a 30724 DAKAC.MAC
+	a 30724 DAKAB.MAC
 
-will automatically read the [DAKAC.MAC](DAKAC.MAC.txt) source file (a slightly modified copy of [DAKACM.MAC](DAKACM.MAC.txt)),
+will automatically read the [DAKAB.MAC](DAKAB.MAC.txt) source file (a slightly modified copy of [DAKABM.MAC](DAKABM.MAC.txt)),
 assemble it, and then load the binary output at the specified address.
 
 ---
 
-DAKAC.TXT
+DAKAB.TXT
 ---------
 
 ```
-MAINDEC-10-DAKAC.TXT
+MAINDEC-10-DAKAB.TXT
 
 
 
@@ -52,12 +54,12 @@ MAINDEC-10-DAKAC.TXT
 			IDENTIFICATION
 			--------------
 
-	PRODUCT CODE:   MAINDEC-10-DAKAC-B-D
+	PRODUCT CODE:   MAINDEC-10-DAKAB-B-D
 
 	PRODUCT NAME:   DECSYSTEM10 PDP-10 KA10 BASIC
-	                INSTRUCTION DIAGNOSTIC (3)
+	                INSTRUCTION DIAGNOSTIC (2)
 
-	FUNCTION:       LOGICAL, HALF WORD, ADDER
+	FUNCTION:       BASIC INSTRUCTIONS 2
 
 	VERSION:        0.2
 
@@ -86,7 +88,7 @@ EQUIPMENT CORPORATION.
 DEC ASSUMES NO RESPONSIBILITY FOR THE USE OR RELIABILITY OF ITS
 SOFTWARE ON EQUIPMENT WHICH IS NOT SUPPLIED BY DEC.
 
-							MAINDEC-10-DAKAC.TXT
+							MAINDEC-10-DAKAB.TXT
 							PAGE 2
 
 
@@ -123,16 +125,17 @@ SOFTWARE ON EQUIPMENT WHICH IS NOT SUPPLIED BY DEC.
 
 9.0	LISTING
 
-							MAINDEC-10-DAKAC.TXT
+							MAINDEC-10-DAKAB.TXT
 							PAGE 3
 
 
 1.0	ABSTRACT
 
 	THIS PDP-10 KA10 BASIC INSTRUCTION DIAGNOSTIC IS THE
-	THIRD IN A SERIES OF PDP-10 KA10 PROCESSOR DIAGNOSTICS.
+	SECOND IN A SERIES OF PDP-10 KA10 PROCESSOR DIAGNOSTICS.
 	THE DIAGNOSTIC TESTS SOME FOLLOWING INSTRUCTIONS.
-	LOGICAL TEST, HALF WORD INSTRUCTIONS AND THE ADDER.
+	MOVE, COMPARE, TEST, HALF WORD AND BOOLE.
+	IT ALSO TESTS THE ADDERS USING ADD AND COMPARE INSTRUCTIONS.
 
 2.0	REQUIREMENTS
 
@@ -140,7 +143,7 @@ SOFTWARE ON EQUIPMENT WHICH IS NOT SUPPLIED BY DEC.
 
 	A PDP-10 KA10 WITH A MINIMUM OF 32K OF MEMORY
 
-	PAPER-TAPE READER
+	PAPER TAPE READER
 	DECTAPE (OPTIONAL)
 	CONSOLE TELETYPE
 
@@ -151,10 +154,10 @@ SOFTWARE ON EQUIPMENT WHICH IS NOT SUPPLIED BY DEC.
 2.3	PRELIMINARY PROGRAMS
 
 	CONSOLE FUNCTIONS WORKING PROPERLY
-	PAPER-TAPE OR DECTAPE READ-IN WORKING PROPERLY
+	PAPER TAPE OR DECTAPE READ-IN WORKING PROPERLY 
 	PREVIOUS PROCESSOR DIAGNOSTICS
 
-							MAINDEC-10-DAKAC.TXT
+							MAINDEC-10-DAKAB.TXT
 							PAGE 4
 
 
@@ -197,7 +200,7 @@ SOFTWARE ON EQUIPMENT WHICH IS NOT SUPPLIED BY DEC.
 	THE CYCLE TIME OF THE PROGRAM IS IN THE MILLISECOND RANGE AND
 	IS THEREFORE SUITABLE FOR TAKING MARGINS, VIBRATION TESTS, ETC.
 
-							MAINDEC-10-DAKAC.TXT
+							MAINDEC-10-DAKAB.TXT
 							PAGE 5
 
 
@@ -235,16 +238,16 @@ SOFTWARE ON EQUIPMENT WHICH IS NOT SUPPLIED BY DEC.
 9.0	LISTING
 ```
 
-DAKAC.HST
+DAKAB.HST
 ---------
 
-	    THIS IS A HISTORY OF THE DEVELOPMENT OF MAINDEC-10-DAKAC
+	    THIS IS A HISTORY OF THE DEVELOPMENT OF MAINDEC-10-DAKAB
 	
 	************************************************************************
 	
-	PRODUCT CODE:       MAINDEC-10-DAKAC
+	PRODUCT CODE:       MAINDEC-10-DAKAB
 	
-	PRODUCT NAME:       BASIC INSTRUCTION DIAGNOSTIC #3
+	PRODUCT NAME:       BASIC INSTRUCTION DIAGNOSTIC #2
 	
 	DATE RELEASED:      JANUARY 1977
 	
@@ -266,11 +269,11 @@ DAKAC.HST
 	
 	************************************************************************
 
-DAKAC.MAC
+DAKAB.MAC
 ---------
 
-[[Download](DAKAC.MAC.txt)]
+[[Download](DAKAB.MAC.txt)]
 
 {% highlight text %}
-{% include_relative DAKAC.MAC.txt %}
+{% include_relative DAKAB.MAC.txt %}
 {% endhighlight %}

@@ -1,32 +1,32 @@
 ---
 layout: page
-title: PDP-10 KA10 Basic Instruction Diagnostic #11
-permalink: /apps/pdp10/diags/klad/dakak/
+title: PDP-10 KA10 Basic Instruction Diagnostic #10
+permalink: /apps/pdp10/diags/ka10/dakaj/
 machines:
   - id: testka10
     type: pdp10
     config: /devices/pdp10/machine/ka10/test/debugger/machine.xml
     debugger: true
-    commands: a dakak.mac
+    commands: a DAKAJ.MAC
 ---
 
-PDP-10 KA10 Basic Instruction Diagnostic #11
+PDP-10 KA10 Basic Instruction Diagnostic #10
 --------------------------------------------
 
-The *PDP-10 KA10 Basic Instruction Diagnostic #11* (MAINDEC-10-DAKAK) test code has been extracted from
-[DAKAKM.MAC](DAKAKM.MAC.txt) [[original](http://pdp-10.trailing-edge.com/klad_sources/01/klad.sources/dakakm.mac.html)] and
-[DAKAKT.MAC](DAKAKT.MAC.txt) [[original](http://pdp-10.trailing-edge.com/klad_sources/01/klad.sources/dakakt.mac.html)]
+The *PDP-10 KA10 Basic Instruction Diagnostic #10* (MAINDEC-10-DAKAJ) test code has been extracted from
+[DAKAJM.MAC](DAKAJM.MAC.txt) [[original](http://pdp-10.trailing-edge.com/klad_sources/01/klad.sources/dakajm.mac.html)] and
+[DAKAJT.MAC](DAKAJT.MAC.txt) [[original](http://pdp-10.trailing-edge.com/klad_sources/01/klad.sources/dakajt.mac.html)]
 for use with the [PDP-10 Test Machine with Debugger](/devices/pdp10/machine/ka10/test/debugger/) below.
 
-This diagnostic "TESTS THE MULTIPLY INSTRUCTION AND THE MULTIPLY ALGORITHM."
+This diagnostic "CONTINUES TESTING THE SHIFT AND ROTATE INSTRUCTIONS."
 
 Resources for this diagnostic include:
 
-- [Instructions](#dakaktxt)
-- [History](#dakakhst)
-- [Source Code](#dakakmac)
-- [MACRO-10 Listing](DAKAK.LST.txt)
-- [Additional Information](http://archive.pcjs.org/apps/pdp10/diags/klad/dakak/DAKAK.SEQ.txt)
+- [Instructions](#dakajtxt)
+- [History](#dakajhst)
+- [Source Code](#dakajmac)
+- [MACRO-10 Listing](DAKAJ.LST.txt)
+- [Additional Information](http://archive.pcjs.org/apps/pdp10/diags/ka10/dakaj/DAKAJ.SEQ.txt)
 
 {% include machine.html id="testka10" %}
 
@@ -35,35 +35,18 @@ The Debugger's assemble ("a") command can be used to test the new built-in
 of the [MACRO-10](http://archive.pcjs.org/pubs/dec/pdp10/tops10/02_1973AsmRef_macro.pdf) assembly language.
 This command:
 
-	a DAKAK.MAC
+	a DAKAJ.MAC
 
-will automatically read the [DAKAK.MAC](DAKAK.MAC.txt) source file (a slightly modified copy of [DAKAKM.MAC](DAKAKM.MAC.txt)),
+will automatically read the [DAKAJ.MAC](DAKAJ.MAC.txt) source file (a slightly modified copy of [DAKAJM.MAC](DAKAJM.MAC.txt)),
 assemble it, and then load the binary image at the location specified in the file.
-
-To assemble the diagnostic using the original DEC source files:
-
-	a 'dakakt.mac;../param.klm;../fixed.klm;dakakm.mac;../uuoerr.klm;../stor.klm'
-
-The quotes (either single or double) are required to prevent the PDPjs Debugger from interpreting the filenames as
-separate commands, because a semicolon is the Debugger's normal command separator.
-
-If you want a machine to automatically assemble and load those files on startup, you can add the following machine configuration
-setting in the page's Front Matter:
-
-    commands: a &apos;dakakt.mac;../param.klm;../fixed.klm;dakakm.mac;../uuoerr.klm;../stor.klm&apos;
-
-However, in this case, you *must* use `&apos;` as the quoting sequence, because of the way these settings are encoded into
-JavaScript parameters; e.g.:
-
-	embedPDP10(...,'{commands:"a &apos;dakakt.mac;../param.klm;../fixed.klm;dakakm.mac;../uuoerr.klm;../stor.klm&apos;"}');
 
 ---
 
-DAKAK.TXT
+DAKAJ.TXT
 ---------
 
 ```
-MAINDEC-10-DAKAK.TXT
+MAINDEC-10-DAKAJ.TXT
 
 
 
@@ -74,13 +57,12 @@ MAINDEC-10-DAKAK.TXT
 			IDENTIFICATION
 			--------------
 
-
-	PRODUCT CODE:   MAINDEC-10-DAKAK-B-D
+	PRODUCT CODE:   MAINDEC-10-DAKAJ-B-D
 
 	PRODUCT NAME:   DECSYSTEM10 PDP-10 KA10 BASIC
-	                INSTRUCTION DIAGNOSTIC (11)
+	                INSTRUCTION DIAGNOSTIC (10)
 
-	FUNCTION:       MULTIPLY TEST
+	FUNCTION:       SHIFT-ROTATE TEST (PART 2)
 
 	VERSION:        0.2
 
@@ -109,7 +91,7 @@ EQUIPMENT CORPORATION.
 DEC ASSUMES NO RESPONSIBILITY FOR THE USE OR RELIABILITY OF ITS
 SOFTWARE ON EQUIPMENT WHICH IS NOT SUPPLIED BY DEC.
 
-							MAINDEC-10-DAKAK.TXT
+							MAINDEC-10-DAKAJ.TXT
 							PAGE 2
 
 			TABLE OF CONTENTS
@@ -147,15 +129,15 @@ SOFTWARE ON EQUIPMENT WHICH IS NOT SUPPLIED BY DEC.
 
 10.0	LISTING
 
-							MAINDEC-10-DAKAK.TXT
+							MAINDEC-10-DAKAJ.TXT
 							PAGE 3
 
 1.0	ABSTRACT
 
 	THIS PDP-10 KA10 BASIC INSTRUCTION DIAGNOSTIC IS THE
-	ELEVENTH IN A SERIES OF PDP-10 KA10 PROCESSOR DIAGNOSTICS.
-	THE DIAGNOSTIC TESTS THE MULTIPLY INSTRUCTION AND THE
-	MULTIPLY ALGORITHM.
+	TENTH IN A SERIES OF PDP-10 KA10 PROCESSOR DIAGNOSTICS.
+	THE DIAGNOSTIC CONTINUES TESTING THE SHIFT
+	AND ROTATE INSTRUCTIONS.
 
 2.0	REQUIREMENTS
 
@@ -187,7 +169,7 @@ SOFTWARE ON EQUIPMENT WHICH IS NOT SUPPLIED BY DEC.
 	DECTAPE - LOAD WITH DIAMON (DECTAPE DEVICE CODE 320)
 	TIME SHARING - RUN UNDER DIAMON.
 	
-							MAINDEC-10-DAKAK.TXT
+							MAINDEC-10-DAKAJ.TXT
 							PAGE 4
 
 3.2	STARTING PROCEDURE
@@ -226,7 +208,7 @@ SOFTWARE ON EQUIPMENT WHICH IS NOT SUPPLIED BY DEC.
 		    ARE USED.  THIS IS ONLY VALID UPON RESTARTING
 		    OF AN INTERRUPTED PROGRAM.
 		    
-							MAINDEC-10-DAKAK.TXT
+							MAINDEC-10-DAKAJ.TXT
 							PAGE 5
 
 3.3	OPERATING PROCEDURE
@@ -261,7 +243,7 @@ SOFTWARE ON EQUIPMENT WHICH IS NOT SUPPLIED BY DEC.
 	    AND THE 'ERSTOP' SWITCH MAY BE SET TO INHIBIT PRINTOUT 
 	    BUT HALT THE PROGRAM POINTING TO THE ERROR.
 
-							MAINDEC-10-DAKAK.TXT
+							MAINDEC-10-DAKAJ.TXT
 							PAGE 6
 
 4.0	DATA SWITCH FUNCTIONS
@@ -309,7 +291,7 @@ SOFTWARE ON EQUIPMENT WHICH IS NOT SUPPLIED BY DEC.
 
 	13   INHCSH		NOT USED
 	
-							MAINDEC-10-DAKAK.TXT
+							MAINDEC-10-DAKAJ.TXT
 							PAGE 7
 
 5.0	ERRORS
@@ -338,7 +320,7 @@ SOFTWARE ON EQUIPMENT WHICH IS NOT SUPPLIED BY DEC.
 	IS THEREFORE SUITABLE FOR TAKING MARGINS, VIBRATION TESTS,
 	ETC.
 	
-							MAINDEC-10-DAKAK.TXT
+							MAINDEC-10-DAKAJ.TXT
 							PAGE 8
 
 8.0	OPERATIONAL VARIATIONS
@@ -369,7 +351,7 @@ SOFTWARE ON EQUIPMENT WHICH IS NOT SUPPLIED BY DEC.
 	    DEVICE NAME 'DEV' AND SET SWITCH 'PNTLPT'.  THE PHYSICAL
 	    DEVICE USED CAN BE ANY DEVICE THAT CAN ACCEPT ASCII OUTPUT
 	    FORMAT SUCH AS LPT, DSK, DTA, ETC.  THE CORRESPONDING 
-	    OUTPUT FILE IS 'DAKAK.TMP'
+	    OUTPUT FILE IS 'DAKAJ.TMP'
 
 	    EXAMPLE DEVICE ASSIGNMENT:
 
@@ -378,7 +360,7 @@ SOFTWARE ON EQUIPMENT WHICH IS NOT SUPPLIED BY DEC.
 	    IN USER MODE THE PROGRAM WILL MAKE 1000(8) PASSES AND THEN
 	    RETURN TO DIAMON COMMAND MODE.
 	    
-							MAINDEC-10-DAKAK.TXT
+							MAINDEC-10-DAKAJ.TXT
 							PAGE 9
 
 8.0	OPERATIONAL VARIATIONS (CON'T)
@@ -404,16 +386,16 @@ SOFTWARE ON EQUIPMENT WHICH IS NOT SUPPLIED BY DEC.
 10.0	LISTING
 ```
 
-DAKAK.HST
+DAKAJ.HST
 ---------
 
-	    THIS IS A HISTORY OF THE DEVELOPMENT OF MAINDEC-10-DAKAK
+	    THIS IS A HISTORY OF THE DEVELOPMENT OF MAINDEC-10-DAKAJ
 	
 	************************************************************************
 	
-	PRODUCT CODE:       MAINDEC-10-DAKAK
+	PRODUCT CODE:       MAINDEC-10-DAKAJ
 	
-	PRODUCT NAME:       BASIC INSTRUCTION DIAGNOSTIC #11
+	PRODUCT NAME:       BASIC INSTRUCTION DIAGNOSTIC #10
 	
 	DATE RELEASED:      JANUARY 1977
 	
@@ -427,6 +409,16 @@ DAKAK.HST
 	
 	************************************************************************
 	
+	VERSION:            1.1
+	
+	DATE RELEASED:      09-APR-73
+	
+	UPDATE AUTHOR:      RICHARD MALISKA
+	
+	REASON FOR UPDATE:  FIX PROBLEM WITH PROGRAM INITIALIZATION
+	
+	************************************************************************
+	
 	ORIGINAL VERSION:   0.1
 	
 	ORIGINAL AUTHOR:    RICHARD MALISKA
@@ -435,11 +427,11 @@ DAKAK.HST
 	
 	************************************************************************
 
-DAKAK.MAC
+DAKAJ.MAC
 ---------
 
-[[Download](DAKAK.MAC.txt)]
+[[Download](DAKAJ.MAC.txt)]
  
 {% highlight text %}
-{% include_relative DAKAK.MAC.txt %}
+{% include_relative DAKAJ.MAC.txt %}
 {% endhighlight %}

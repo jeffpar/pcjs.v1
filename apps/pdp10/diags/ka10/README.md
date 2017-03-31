@@ -1,19 +1,20 @@
 ---
 layout: page
-title: PDP-10 KLAD Diagnostics
-permalink: /apps/pdp10/diags/klad/
+title: PDP-10 KA10 Diagnostics
+permalink: /apps/pdp10/diags/ka10/
 ---
 
-PDP-10 KLAD Diagnostics
+PDP-10 KA10 Diagnostics
 -----------------------
 
-PCjs has archived selected files from
+PCjs has archived selected KA10 diagnostic source files from the
 [PDP-10 KLAD Diagnostics Sources](http://pdp-10.trailing-edge.com/klad_sources/index.html) and turned them into
-stand-alone PDP-10 diagnostics, using the new PCjs [MACRO-10 Mini-Assembler](/modules/pdp10/lib/macro10.js).  A complete
-list is provided [below](#list-of-ka10-diagnostics).
+stand-alone PDP-10 diagnostics, using the new PCjs [MACRO-10 Mini-Assembler](/modules/pdp10/lib/macro10.js).
 
-I experimented with assembling an entire diagnostic (**DAKAK**) from all its original pieces, by going to the
-[DAKAK Diagnostic](dakak/) page and typing the following command:
+A complete list of supported diagnostics is provided [below](#list-of-ka10-diagnostics).
+
+I've also experimented with assembling these diagnostics from the original (unmodified) source files.  For example,
+you can go to the [DAKAK Diagnostic](dakak/) page and try the following command:
 
 	a 'dakakt.mac;../param.klm;../fixed.klm;dakakm.mac;../uuoerr.klm;../stor.klm'
 

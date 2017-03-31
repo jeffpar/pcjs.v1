@@ -8,7 +8,7 @@ machines:
     type: pdp10
     config: /devices/pdp10/machine/ka10/test/debugger/machine.xml
     debugger: true
-    commands: a 30724 /apps/pdp10/diags/klad/dakaa/DAKAA.MAC
+    commands: a 30724 /apps/pdp10/diags/ka10/dakaa/DAKAA.MAC
 ---
 
 A few weeks ago, I finished my first cut of the *core* PDP-10 instructions in PDPjs.  Most of my remaining work
@@ -49,9 +49,9 @@ Any machine that includes the PDPjs Debugger (like the machine below) now includ
 {% include machine.html id="testka10" %}
 
 The above machine uses the Debugger's assemble ('a') command to assemble DEC's "DAKAA" diagnostic
-[KA10 Basic Instruction Diagnostic](/apps/pdp10/diags/klad/dakaa/) and load the resulting code at address 30724:
+[KA10 Basic Instruction Diagnostic](/apps/pdp10/diags/ka10/dakaa/) and load the resulting code at address 30724:
 
-	a 30724 /apps/pdp10/diags/klad/dakaa/DAKAA.MAC
+	a 30724 /apps/pdp10/diags/ka10/dakaa/DAKAA.MAC
 
 The Debugger invokes the MACRO-10 mini-assembler whenever the target address is followed by an argument ending with ".MAC".
 
@@ -206,8 +206,8 @@ now, since I'm holding off on all floating-point support for as long as possible
 Much more work is needed to make the MACRO-10 "Mini-Assembler" a general-purpose assembler, but it's already proved itself
 useful in assembling the following tests:
 
-- [KA10 Basic Instruction Diagnostic #1](/apps/pdp10/diags/klad/dakaa/)
-- [KA10 Basic Instruction Diagnostic #4](/apps/pdp10/diags/klad/dakad/)
+- [KA10 Basic Instruction Diagnostic #1](/apps/pdp10/diags/ka10/dakaa/)
+- [KA10 Basic Instruction Diagnostic #4](/apps/pdp10/diags/ka10/dakad/)
 - [Assorted MACRO-10 Mini-Assembler Tests](/apps/pdp10/tests/macro10/)
 
 However, there's "*assembling*" and then there's "*assembling correctly*".  One early problem I had to immediately

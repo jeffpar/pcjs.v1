@@ -9,4 +9,4 @@ DEC PDP-10 Diagnostics
 
 PCjs has archived the following PDP-10 diagnostics:
 
-- [KLAD Diagnostics](klad/)
+- [KA10 Diagnostics](ka10/)

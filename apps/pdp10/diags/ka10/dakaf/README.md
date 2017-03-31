@@ -1,29 +1,31 @@
 ---
 layout: page
-title: PDP-10 KA10 Basic Instruction Diagnostic #7
-permalink: /apps/pdp10/diags/klad/dakag/
+title: PDP-10 KA10 Basic Instruction Diagnostic #6
+permalink: /apps/pdp10/diags/ka10/dakaf/
 machines:
   - id: testka10
     type: pdp10
     config: /devices/pdp10/machine/ka10/test/debugger/machine.xml
     debugger: true
-    commands: a 30724 DAKAG.MAC
+    commands: a 30724 DAKAF.MAC
 ---
 
-PDP-10 KA10 Basic Instruction Diagnostic #7
+PDP-10 KA10 Basic Instruction Diagnostic #6
 -------------------------------------------
 
-The *PDP-10 KA10 Basic Instruction Diagnostic #7* (MAINDEC-10-DAKAG) test code has been extracted from
-[DAKAGM.MAC](DAKAGM.MAC.txt) [[original](http://pdp-10.trailing-edge.com/klad_sources/01/klad.sources/dakagm.mac.html)]
+The *PDP-10 KA10 Basic Instruction Diagnostic #6* (MAINDEC-10-DAKAF) test code has been extracted from
+[DAKAFM.MAC](DAKAFM.MAC.txt) [[original](http://pdp-10.trailing-edge.com/klad_sources/01/klad.sources/dakafm.mac.html)]
 for use with the [PDP-10 Test Machine with Debugger](/devices/pdp10/machine/ka10/test/debugger/) below.
 
-Resources for this test include:
+This diagnostic "TESTS THE BOOLE, HWT AND TEST INSTRUCTIONS."
 
-- [Instructions](#dakagtxt)
-- [History](#dakaghst)
-- [Source Code](#dakagmac)
-- [MACRO-10 Listing](DAKAG.LST.txt)
-- [Additional Information](http://archive.pcjs.org/apps/pdp10/diags/klad/dakag/DAKAG.SEQ.txt)
+Resources for this diagnostic include:
+
+- [Instructions](#dakaftxt)
+- [History](#dakafhst)
+- [Source Code](#dakafmac)
+- [MACRO-10 Listing](DAKAF.LST.txt)
+- [Additional Information](http://archive.pcjs.org/apps/pdp10/diags/ka10/dakaf/DAKAF.SEQ.txt)
 
 {% include machine.html id="testka10" %}
 
@@ -32,34 +34,33 @@ The Debugger's assemble ("a") command can be used to test the new built-in
 of the [MACRO-10](http://archive.pcjs.org/pubs/dec/pdp10/tops10/02_1973AsmRef_macro.pdf) assembly language.
 This command:
 
-	a 30724 DAKAG.MAC
+	a 30724 DAKAF.MAC
 
-will automatically read the [DAKAG.MAC](DAKAG.MAC.txt) source file (a slightly modified copy of [DAKAGM.MAC](DAKAGM.MAC.txt)),
+will automatically read the [DAKAF.MAC](DAKAF.MAC.txt) source file (a slightly modified copy of [DAKAFM.MAC](DAKAFM.MAC.txt)),
 assemble it, and then load the binary output at the specified address.
 
 ---
 
-DAKAG.TXT
+DAKAF.TXT
 ---------
 
 ```
-MAINDEC-10-DAKAG.TXT
+MAINDEC-10-DAKAF.TXT
 
 
 
 
 
 
- 
 			IDENTIFICATION
 			--------------
 
-	PRODUCT CODE:   MAINDEC-10-DAKAG-B-D
+	PRODUCT CODE:   MAINDEC-10-DAKAF-B-D
 
 	PRODUCT NAME:   DECSYSTEM10 PDP-10 KA10 BASIC
-	                INSTRUCTION DIAGNOSTIC (7)
+	                INSTRUCTION DIAGNOSTIC (6)
 
-	FUNCTION:       PUSH, POP, XCT, BASIC SHIFT/ROTATE
+	FUNCTION:       BOOLE, HWT, TEST
 
 	VERSION:        0.2
 
@@ -88,7 +89,7 @@ EQUIPMENT CORPORATION.
 DEC ASSUMES NO RESPONSIBILITY FOR THE USE OR RELIABILITY OF ITS
 SOFTWARE ON EQUIPMENT WHICH IS NOT SUPPLIED BY DEC.
 
-							MAINDEC-10-DAKAG.TXT
+							MAINDEC-10-DAKAF.TXT
 							PAGE 2
 
 
@@ -125,16 +126,15 @@ SOFTWARE ON EQUIPMENT WHICH IS NOT SUPPLIED BY DEC.
 
 9.0	LISTING
 
-							MAINDEC-10-DAKAG.TXT
+							MAINDEC-10-DAKAF.TXT
 							PAGE 3
 
 
 1.0	ABSTRACT
 
 	THIS PDP-10 KA10 BASIC INSTRUCTION DIAGNOSTIC IS THE
-	SEVENTH IN A SERIES OF PDP-10 KA10 PROCESSOR DIAGNOSTICS.
-	THE DIAGNOSTIC TESTS THE PUSH, POP, XCT AND BASIC
-	SHIFT ROTATE INSTRUCTIONS.
+	SIXTH IN A SERIES OF PDP-10 KA10 PROCESSOR DIAGNOSTICS.
+	THE DIAGNOSTIC TESTS THE BOOLE, HWT AND TEST INSTRUCTIONS.
 
 2.0	REQUIREMENTS
 
@@ -142,7 +142,7 @@ SOFTWARE ON EQUIPMENT WHICH IS NOT SUPPLIED BY DEC.
 
 	A PDP-10 KA10 WITH A MINIMUM OF 32K OF MEMORY
 
-	PAPER TAPE READER 
+	PAPER TAPE READER  
 	DECTAPE (OPTIONAL)
 	CONSOLE TELETYPE
 
@@ -153,10 +153,10 @@ SOFTWARE ON EQUIPMENT WHICH IS NOT SUPPLIED BY DEC.
 2.3	PRELIMINARY PROGRAMS
 
 	CONSOLE FUNCTIONS WORKING PROPERLY
-	PAPER TAPE OR DECTAPE READ-IN WORKING PROPERLY 
+	PAPER TAPE OR DECTAPE READ-IN WORKING PROPERLY  
 	PREVIOUS PROCESSOR DIAGNOSTICS
 	
-							MAINDEC-10-DAKAG.TXT
+							MAINDEC-10-DAKAF.TXT
 							PAGE 4
 
 
@@ -199,7 +199,7 @@ SOFTWARE ON EQUIPMENT WHICH IS NOT SUPPLIED BY DEC.
 	THE CYCLE TIME OF THE PROGRAM IS IN THE MILLISECOND RANGE AND
 	IS THEREFORE SUITABLE FOR TAKING MARGINS, VIBRATION TESTS, ETC.
 
-							MAINDEC-10-DAKAG.TXT
+							MAINDEC-10-DAKAF.TXT
 							PAGE 5
 
 
@@ -237,16 +237,16 @@ SOFTWARE ON EQUIPMENT WHICH IS NOT SUPPLIED BY DEC.
 9.0	LISTING
 ```
 
-DAKAG.HST
+DAKAF.HST
 ---------
 
-	    THIS IS A HISTORY OF THE DEVELOPMENT OF MAINDEC-10-DAKAG
+	    THIS IS A HISTORY OF THE DEVELOPMENT OF MAINDEC-10-DAKAF
 	
 	************************************************************************
 	
-	PRODUCT CODE:       MAINDEC-10-DAKAG
+	PRODUCT CODE:       MAINDEC-10-DAKAF
 	
-	PRODUCT NAME:       BASIC INSTRUCTION DIAGNOSTIC #7
+	PRODUCT NAME:       BASIC INSTRUCTION DIAGNOSTIC #6
 	
 	DATE RELEASED:      JANUARY 1977
 	
@@ -268,11 +268,11 @@ DAKAG.HST
 	
 	************************************************************************
 
-DAKAG.MAC
+DAKAF.MAC
 ---------
 
-[[Download](DAKAG.MAC.txt)]
+[[Download](DAKAF.MAC.txt)]
  
 {% highlight text %}
-{% include_relative DAKAG.MAC.txt %}
+{% include_relative DAKAF.MAC.txt %}
 {% endhighlight %}
