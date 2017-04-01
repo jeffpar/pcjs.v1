@@ -1644,9 +1644,8 @@ class DebuggerPDP10 extends Debugger {
 
         if (!sOpcode) {
             /*
-             * MACRO-10 permits instructions to be assembled without an explicit opcode;
-             * an address expression is sufficient.  This is done to generate UUO opcodes,
-             * for example.
+             * MACRO-10 also allows instructions to be assembled without an opcode (ie, just an address expression),
+             * so if that's all we have, skip the opcode parsing.
              */
             if (sOperands) opCode = opMask = 0;
         }
@@ -1710,10 +1709,10 @@ class DebuggerPDP10 extends Debugger {
                 if (opCode >= 0) break;
             }
             /*
-             * MACRO-10 also allows instructions to be assembled without an opcode (ie, just an address reference),
+             * MACRO-10 also allows instructions to be assembled without an opcode (ie, just an address expression),
              * so we'll give that a try next (as long as we're not mashing two symbols together).
              */
-            if (opCode < 0 && sOperands && !sOperands.match(/^[0-9A-Z$%.?]/i)) {
+            if (opCode < 0 && (!sOperands || !sOperands.match(/^[0-9A-Z$%.?]/i))) {
                 sOperands = sOpcode + sOperands;
                 sOpcode = "";
                 opCode = 0;
