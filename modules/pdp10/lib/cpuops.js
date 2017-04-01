@@ -6531,12 +6531,21 @@ PDP10.split72 = function(res, ext, fExternal)
     var sign = ext - (ext % PDP10.INT_LIMIT);
     ext = ((ext * 2) % PDP10.WORD_LIMIT) + Math.trunc(res / PDP10.INT_LIMIT);
     res = sign + (res % PDP10.INT_LIMIT);
-    if (fExternal) return res;
     var signNew = ext - (ext % PDP10.INT_LIMIT);
     if (sign != signNew) {
-        ext = sign + (ext - signNew);
-        this.regPS |= PDP10.PSFLAG.AROV;
+        /*
+         * I used to restore ext's original sign (ext = sign + (ext - signNew)), but the PDP-10's defined
+         * behavior for multiplication overflow (ie, whenever both operands are 0o400000000000) is to set both
+         * res and ext to 0o400000000000.
+         *
+         * To quote the original spec for the MUL instruction:
+         *
+         *      If both operands are -2^35 set Overflow; the double length result stored is -2^70.
+         */
+        res = ext;
+        if (!fExternal) this.regPS |= PDP10.PSFLAG.AROV;
     }
+    if (fExternal) return res;
     this.regEX = res;
     return ext;
 };
