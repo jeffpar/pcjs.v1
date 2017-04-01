@@ -54,8 +54,8 @@ MACRO-10 listing file) without stopping on an UUO opcode, then you can assume it
 List of KA10 Diagnostics
 ------------------------
 
-The following list of KA10 Diagnostics is not comprehensive.  It's simply a list of thosr diagnostics we have archived and
-tested with PDPjs so far.
+The following list of KA10 Diagnostics is not comprehensive.  It's simply a list of diagnostics archived and tested with PDPjs
+so far.
 
 - [KA10 Basic Instruction Diagnostic #1 (MAINDEC-10-DAKAA)](dakaa/)
 	- TEST OF JUMP, JUMPA AND SKIPX INSTRUCTIONS
