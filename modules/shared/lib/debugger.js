@@ -473,15 +473,21 @@ class Debugger extends Component
         }
         else {
             if (nBits <= 32) {
-                vNew = v | 0;
-            } else {
+                vNew = (v << (32 - nBits)) >> (32 - nBits);
+            }
+            else {
                 limit = Math.pow(2, nBits - 1);
-                if (v < -limit) {
-                    if (v < -limit * 2) vNew = v % (limit * 2);
-                    vNew += (limit * 2);
-                } else if (vNew >= limit) {
-                    if (v >= limit * 2) vNew = v % (limit * 2);
-                    vNew -= (limit * 2);    // the sign bit was set in this overly large value, so make it negative
+                if (v >= limit) {
+                    vNew = (v % limit);
+                    if (((v / limit)|0) & 1) vNew -= limit;
+                } else if (v < -limit) {
+                    vNew = (v % limit);
+                    if ((((-v - 1) / limit) | 0) & 1) {
+                        if (vNew) vNew += limit;
+                    }
+                    else {
+                        if (!vNew) vNew -= limit;
+                    }
                 }
             }
         }

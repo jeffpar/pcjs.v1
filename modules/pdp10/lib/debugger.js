@@ -519,7 +519,14 @@ class DebuggerPDP10 extends Debugger {
      */
     evalMUL(dst, src)
     {
+        /*
+         * The CPU requires that all 36-bit inputs/outputs be UNSIGNED, whereas our expression evaluator allows signed
+         * inputs/outputs.  So we perform two's complement conversions on all inputs/outputs as needed.
+         */
+        if (dst < 0) dst += PDP10.WORD_LIMIT;
+        if (src < 0) src += PDP10.WORD_LIMIT;
         var result = PDP10.doMUL.call(this.cpu, dst, src, false, true);
+        if (result >= PDP10.INT_LIMIT) result -= PDP10.WORD_LIMIT;
         if (MAXDEBUG) {
             var resultJS = this.truncate(dst * src);
             if (resultJS !== result) {
@@ -3932,7 +3939,7 @@ class DebuggerPDP10 extends Debugger {
      */
     doTest()
     {
-        if (DEBUG) {
+        if (MAXDEBUG) {
             var ops = {}, aOpXXX = [];
             var op, opXXX, opCode, sOperation;
             for (op = 0o00000; op <= 0o77774; op += 4) {
