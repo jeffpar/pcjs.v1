@@ -6314,7 +6314,7 @@ PDP10.doDIV = function(dst, ext, src)
 };
 
 /**
- * doMUL(dst, src, fTruncate)
+ * doMUL(dst, src, fTruncate, fExternal)
  *
  * Performs the multiplication (MUL) of two signed 36-bit operands.
  *
@@ -6353,10 +6353,11 @@ PDP10.doDIV = function(dst, ext, src)
  * @this {CPUStatePDP10}
  * @param {number} dst (36-bit value)
  * @param {number} src (36-bit value)
- * @param {boolean} [fTruncate] (true to truncate the result to 36 bits)
+ * @param {boolean} [fTruncate] (true to truncate the result to 36 bits; used by IMUL instructions)
+ * @param {boolean} [fExternal] (true if external caller; avoids modifying the CPU state)
  * @return {number} (dst * src) (the high 36 bits of the result; the low 36 bits are stored in regEX)
  */
-PDP10.doMUL = function(dst, src, fTruncate)
+PDP10.doMUL = function(dst, src, fTruncate, fExternal)
 {
     var n1 = dst, n2 = src;
     var fNeg = false, res, ext;
@@ -6366,7 +6367,7 @@ PDP10.doMUL = function(dst, src, fTruncate)
      * we'll negate the result afterward if necessary.
      */
     if (n1 > PDP10.INT_MASK) {
-        if (this.model != PDP10.MODEL_KA10 || n1 != PDP10.INT_LIMIT) {
+        if (fExternal || this.model != PDP10.MODEL_KA10 || n1 != PDP10.INT_LIMIT) {
             n1 = PDP10.WORD_LIMIT - n1;
             fNeg = !fNeg;
         }
@@ -6408,8 +6409,10 @@ PDP10.doMUL = function(dst, src, fTruncate)
         /*
          * If ext is something OTHER than an extension of the res sign bit, then we have overflow.
          */
-        if ((ext || res > PDP10.INT_MASK) && (ext != PDP10.WORD_MASK || res <= PDP10.INT_MASK)) {
-            this.regPS |= PDP10.PSFLAG.AROV;
+        if (!fExternal) {
+            if ((ext || res > PDP10.INT_MASK) && (ext != PDP10.WORD_MASK || res <= PDP10.INT_MASK)) {
+                this.regPS |= PDP10.PSFLAG.AROV;
+            }
         }
         /*
          * Also note that, in the truncate case, we return the low order bits (res), rather than the
@@ -6418,7 +6421,7 @@ PDP10.doMUL = function(dst, src, fTruncate)
         return res;
     }
 
-    return PDP10.split72.call(this, res, ext);
+    return PDP10.split72.call(this, res, ext, fExternal);
 };
 
 /**
@@ -6503,16 +6506,17 @@ PDP10.merge72 = function(dst, ext)
 };
 
 /**
- * split72(res, ext)
+ * split72(res, ext, fExternal)
  *
  * Returns two 36-bit values with matching sign bits from a unified 72-bit result.
  *
  * @this {CPUStatePDP10}
  * @param {number} res (36-bit value)
  * @param {number} ext (36-bit value)
+ * @param {boolean} [fExternal] (true if external caller; avoids modifying the CPU state)
  * @return {number} (returns the upper 36 bits; the lower 36 bits are stored in regEX)
  */
-PDP10.split72 = function(res, ext)
+PDP10.split72 = function(res, ext, fExternal)
 {
     /*
      * We just produced a signed 72-bit result, whereas the PDP-10 stores 72-bit arithmetic values as two
@@ -6525,6 +6529,7 @@ PDP10.split72 = function(res, ext)
     var sign = ext - (ext % PDP10.INT_LIMIT);
     ext = ((ext * 2) % PDP10.WORD_LIMIT) + Math.trunc(res / PDP10.INT_LIMIT);
     res = sign + (res % PDP10.INT_LIMIT);
+    if (fExternal) return res;
     var signNew = ext - (ext % PDP10.INT_LIMIT);
     if (sign != signNew) {
         ext = sign + (ext - signNew);

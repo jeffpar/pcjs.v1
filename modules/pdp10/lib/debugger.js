@@ -508,6 +508,21 @@ class DebuggerPDP10 extends Debugger {
     }
 
     /**
+     * evalMUL(dst, src)
+     *
+     * Overrides the standard multiplication function with one that honors PDP-10 semantics and precision.
+     *
+     * @this {DebuggerPDP10}
+     * @param {number} dst
+     * @param {number} src
+     * @return {number} (dst * src)
+     */
+    evalMUL(dst, src)
+    {
+        return PDP10.doMUL.call(this.cpu, dst, src, false, true);
+    }
+
+    /**
      * parseAddr(sAddr, dbgAddr)
      *
      * Address evaluation and validation (eg, range checks) are no longer performed at this stage.  That's

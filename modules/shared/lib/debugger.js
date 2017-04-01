@@ -427,6 +427,22 @@ class Debugger extends Component
     }
 
     /**
+     * evalMUL(dst, src)
+     *
+     * I could have adapted the code from /modules/pdp10/lib/cpuops.js:PDP10.doMUL(), but it was simpler to
+     * write this base method and let the PDP-10 Debugger override it with a call to the *actual* doMUL() method.
+     *
+     * @this {Debugger}
+     * @param {number} dst
+     * @param {number} src
+     * @return {number} (dst * src)
+     */
+    evalMUL(dst, src)
+    {
+        return dst * src;
+    }
+
+    /**
      * truncate(v, nBits, fUnsigned)
      *
      * @this {Debugger}
@@ -513,7 +529,7 @@ class Debugger extends Component
             var val1 = aVals.pop();
             switch(chOp) {
             case '*':
-                valNew = val1 * val2;
+                valNew = this.evalMUL(val1, val2);
                 break;
             case '/':
                 if (!val2) return false;
