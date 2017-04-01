@@ -20,8 +20,9 @@ for use with the [PDP-10 Test Machine with Debugger](/devices/pdp10/machine/ka10
 
 This diagnostic "TESTS THE MULTIPLY INSTRUCTION AND THE MULTIPLY ALGORITHM."
 
-Resources for this diagnostic include:
+Information regarding this diagnostic includes:
 
+- [Issues](#issues)
 - [Instructions](#dakaktxt)
 - [History](#dakakhst)
 - [Source Code](#dakakmac)
@@ -56,6 +57,37 @@ However, in this case, you *must* use `&apos;` as the quoting sequence, because 
 JavaScript parameters; e.g.:
 
 	embedPDP10(...,'{commands:"a &apos;dakakt.mac;../param.klm;../fixed.klm;dakakm.mac;../uuoerr.klm;../stor.klm&apos;"}');
+
+Issues
+------
+
+As noted in [cpuops.js](/modules/pdp10/lib/cpuops.js), in the *doMUL()* function:
+
+> The DAKAK diagnostic contains the following code:
+ 
+	036174: 200240 043643  MOVE    5,43643      ; [43643] = 400000000000
+	036175: 200300 043603  MOVE    6,43603      ; [43603] = 777777777777
+	036176: 200140 043604  MOVE    3,43604      ; [43604] = 000000000001
+	036177: 224240 000003  MUL     5,3          ; Multiply 400000000000 by 000000000001
+	036200: 312240 043604  CAME    5,43604      ; high order result in AC should be: 000000000001
+	036201: 003240 033721  UUO     5,33721      ;
+	036202: 312300 043602  CAME    6,43602      ; low order result in AC+1 should be: 000000000000
+
+> The "natural" result is:
+
+	05=777777777777 06=400000000000
+
+> And SIMH seems to agree.  So why does the DEC diagnostic expect:
+
+	05=000000000001 06=000000000000
+
+> The answer can be found in the [DECSYSTEM-10 and DECSYSTEM-20 Processor Reference Manual (June 1982)](http://archive.pcjs.org/pubs/dec/pdp10/kl10/AA-H391A-TK_DECsystem-10_DECSYSTEM-20_Processor_Reference_Jun1982.pdf),
+in the description of the MUL instruction:
+
+	CAUTION: In the KA10, an AC operand of 2^35 is treated as though it were +2^35, producing the
+	incorrect sign in the product.
+
+> This behavior is now simulated below for MODEL_KA10, at least to the extent that the diagnostic is happy.
 
 ---
 

@@ -6326,6 +6326,8 @@ PDP10.doDIV = function(dst, ext, src)
  * PDP-10 "DAKAK" Diagnostic Notes
  * -------------------------------
  *
+ * The DAKAK diagnostic contains the following code:
+ *
  *      036174: 200240 043643  MOVE    5,43643      ; [43643] = 400000000000
  *      036175: 200300 043603  MOVE    6,43603      ; [43603] = 777777777777
  *      036176: 200140 043604  MOVE    3,43604      ; [43604] = 000000000001

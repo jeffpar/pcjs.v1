@@ -519,7 +519,16 @@ class DebuggerPDP10 extends Debugger {
      */
     evalMUL(dst, src)
     {
-        return PDP10.doMUL.call(this.cpu, dst, src, false, true);
+        var result = PDP10.doMUL.call(this.cpu, dst, src, false, true);
+        if (MAXDEBUG) {
+            var resultJS = this.truncate(dst * src);
+            if (resultJS !== result) {
+                var sReference = this.macro10? (" @" + this.toStrBase(this.macro10.nLocation)) : "";
+                var sResults = "PDP-10: " + this.toStrBase(result, 36) + " JavaScript: " + this.toStrBase(resultJS, 36);
+                this.println("MUL(" + this.toStrBase(dst, 36) + "," + this.toStrBase(src, 36) + ") " + sResults + sReference);
+            }
+        }
+        return result;
     }
 
     /**
