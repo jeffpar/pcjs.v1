@@ -132,5 +132,7 @@ so far.
 	- TESTS OF LOGICAL SHIFT, ROTATE, ARITHMETIC SHIFT; SINGLE AND COMBINED
 - [KA10 Basic Instruction Diagnostic #11 (MAINDEC-10-DAKAK)](dakak/)
 	- TESTS OF MULTIPY, INTERGER MULTIPLY, DIVIDE, INTERGER DIVIDE*
+- [KA10 Basic Instruction Diagnostic #12 (MAINDEC-10-DAKAL)](dakal/)
+	- TESTS THE MULTIPY, INTERGER MULIPLY, DIVIDE AND INTERGER DIVIDE INSTRUCTIONS*
 
-*Gotta love those interger multipy tests! -JP
+*Gotta love those multipy, interger muliply, and interger divide tests! -JP
