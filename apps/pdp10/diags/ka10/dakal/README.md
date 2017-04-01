@@ -18,7 +18,8 @@ The *PDP-10 KA10 Basic Instruction Diagnostic #12* (MAINDEC-10-DAKAL) test code 
 [DAKALT.MAC](DAKALT.MAC.txt) [[original](http://pdp-10.trailing-edge.com/klad_sources/01/klad.sources/dakalt.mac.html)]
 for use with the [PDP-10 Test Machine with Debugger](/devices/pdp10/machine/ka10/test/debugger/) below.
 
-This diagnostic "TESTS THE MULTIPY [sic], INTERGER [sic] MULIPLY [sic], DIVIDE AND INTERGER [sic] DIVIDE INSTRUCTIONS."
+This diagnostic "TESTS THE MULTIPY, INTERGER MULIPLY, DIVIDE AND INTERGER DIVIDE INSTRUCTIONS."  Hopefully the tests work better
+than their spell-checking.
 
 Resources for this diagnostic include:
 
