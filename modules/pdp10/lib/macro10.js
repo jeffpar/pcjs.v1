@@ -527,7 +527,7 @@ class Macro10 {
              * And last but not least, perform all fixups.
              */
             this.aFixups.forEach(function processFixup(sValue, nLocation) {
-                let value = macro10.parseExpression(sValue, undefined, nLocation);
+                let value = macro10.parseExpression(sValue, false, nLocation);
                 if (value === undefined) {
                     macro10.error("unable to parse expression '" + sValue + "'");
                     return;
@@ -1021,6 +1021,7 @@ class Macro10 {
             if (nLocation === undefined) {
                 nLocation = (this.nLocationScope >= 0? this.nLocationScope : this.nLocation);
             }
+
             /*
              * The SIXBIT (and presumably ASCII; not sure about ASCIZ) pseudo-ops can also be used in expressions
              * (or at least assignments), so we check for those in the given expression and convert them to quoted
@@ -1028,13 +1029,22 @@ class Macro10 {
              */
             sExp = sExp.replace(/SIXBIT\s*(\S)(.*?)\1/g, "'$2'").replace(/ASCII\s*(\S)(.*?)\1/g, '"$2"');
 
-            var sOperator = "";
-            var sOperands = sExp;
-            if (match = sExp.match(/^([^\s]+)\s*(.*?)\s*$/)) {
-                sOperator = match[1];
-                sOperands = match[2];
+            /*
+             * If this is NOT a first-pass call, then let's not waste time calling parseInstruction(); not only
+             * may it generate redundant error messages, but it shouldn't be necessary, because we should be down
+             * to fixup expressions.
+             */
+            result = -1;
+            if (fPass1 !== false) {
+                var sOperator = "";
+                var sOperands = sExp;
+                if (match = sExp.match(/^([^\s]+)\s*(.*?)\s*$/)) {
+                    sOperator = match[1];
+                    sOperands = match[2];
+                }
+                result = this.dbg.parseInstruction(sOperator, sOperands, nLocation, fPass1, true);
             }
-            result = this.dbg.parseInstruction(sOperator, sOperands, nLocation, true);
+
             if (result < 0) {
                 /*
                  * Check for the "period" syntax that MACRO-10 uses to represent the value of the current location.
@@ -1047,6 +1057,7 @@ class Macro10 {
                  * is (I think) as the decimal point within a floating-point number, so here we only replace
                  * periods that are not FOLLOWED by a decimal digit.
                  */
+                if (fPass1 === false) fPass1 = undefined;
                 result = this.dbg.parseExpression(sExp.replace(/\.([^0-9]|$)/g, this.dbg.toStrBase(nLocation, -1) + "$1"), fPass1);
                 if (result === undefined) {
                     this.error("unable to parse expression '" + sExp + "'");

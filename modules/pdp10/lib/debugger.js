@@ -1621,16 +1621,17 @@ class DebuggerPDP10 extends Debugger {
     }
 
     /**
-     * parseInstruction(sOpcode, sOperands, addr, fQuiet)
+     * parseInstruction(sOpcode, sOperands, addr, fQuiet, fPrelim)
      *
      * @this {DebuggerPDP10}
      * @param {string} sOpcode
      * @param {string} [sOperands]
      * @param {number} [addr] of memory where this instruction is being assembled
      * @param {boolean} [fQuiet]
+     * @param {boolean} [fPrelim] (true if this is a preliminary call and error messages should be suppressed)
      * @return {number} (opcode, or -1 if unrecognized instruction)
      */
-    parseInstruction(sOpcode, sOperands, addr, fQuiet)
+    parseInstruction(sOpcode, sOperands, addr, fQuiet, fPrelim)
     {
         var opCode = -1;
         var opMask, opNum;
@@ -1828,7 +1829,7 @@ class DebuggerPDP10 extends Debugger {
             // }
         }
 
-        if (opCode < 0 && !fQuiet) {
+        if (opCode < 0 && !fPrelim) {
             this.println("unknown instruction: " + sOpcode + ' ' + sOperands);
         }
 
