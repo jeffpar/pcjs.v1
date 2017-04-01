@@ -526,7 +526,7 @@ class Macro10 {
             /*
              * And last but not least, perform all fixups.
              */
-            this.aFixups.forEach(function processFixup(sValue, nLocation){
+            this.aFixups.forEach(function processFixup(sValue, nLocation) {
                 let value = macro10.parseExpression(sValue, undefined, nLocation);
                 if (value === undefined) {
                     macro10.error("unable to parse expression '" + sValue + "'");
@@ -657,6 +657,7 @@ class Macro10 {
         var sLiteral = this.getLiteral(sOperands);
         if (sLiteral) {
             sOperands = sOperands.replace(sLiteral, this.defMacro(Macro10.PSEUDO_OP.LITERAL, this.getLiteral(sRemainder)));
+            if (!sSeparator) sSeparator = "\t";
         }
 
         /*
@@ -785,7 +786,7 @@ class Macro10 {
                 if (nLocation < this.nLocation) {
 
                     /*
-                     * An OPDEF invokation *may* have operands, but it's not required to.
+                     * An OPDEF invocation *may* have operands, but it's not required to.
                      */
                     if (!sOperands) return true;
 
@@ -995,7 +996,7 @@ class Macro10 {
     }
 
     /**
-     * parseExpression(sOperand, fPass1, nLocation)
+     * parseExpression(sExp, fPass1, nLocation)
      *
      * This is a wrapper around the Debugger's parseExpression() function to take care of some
      * additional requirements we have, such as interpreting a period as the current location and
@@ -1003,19 +1004,19 @@ class Macro10 {
      * of a 36-bit value.
      *
      * @this {Macro10}
-     * @param {string} sOperand
+     * @param {string} sExp
      * @param {boolean|undefined} [fPass1]
      * @param {number|undefined} [nLocation]
      * @return {number|undefined}
      */
-    parseExpression(sOperand, fPass1, nLocation)
+    parseExpression(sExp, fPass1, nLocation)
     {
         var result;
         /*
          * Check for the "double comma" syntax that MACRO-10 uses to express a 36-bit value as two 18-bit halves,
          * and invoke ourselves recursively for each half.
          */
-        var match = sOperand.match(/^([^,]*),,([^,]*)$/);
+        var match = sExp.match(/^([^,]*),,([^,]*)$/);
         if (!match) {
             if (nLocation === undefined) {
                 nLocation = (this.nLocationScope >= 0? this.nLocationScope : this.nLocation);
@@ -1025,11 +1026,11 @@ class Macro10 {
              * (or at least assignments), so we check for those in the given expression and convert them to quoted
              * sequences that the Debugger's parseExpression() understands.
              */
-            sOperand = sOperand.replace(/SIXBIT\s*(\S)(.*?)\1/g, "'$2'").replace(/ASCII\s*(\S)(.*?)\1/g, '"$2"');
+            sExp = sExp.replace(/SIXBIT\s*(\S)(.*?)\1/g, "'$2'").replace(/ASCII\s*(\S)(.*?)\1/g, '"$2"');
 
             var sOperator = "";
-            var sOperands = sOperand;
-            if (match = sOperand.match(/^([^\s]+)\s+(.+?)\s*$/)) {
+            var sOperands = sExp;
+            if (match = sExp.match(/^([^\s]+)\s*(.*?)\s*$/)) {
                 sOperator = match[1];
                 sOperands = match[2];
             }
@@ -1046,9 +1047,9 @@ class Macro10 {
                  * is (I think) as the decimal point within a floating-point number, so here we only replace
                  * periods that are not FOLLOWED by a decimal digit.
                  */
-                result = this.dbg.parseExpression(sOperand.replace(/\.([^0-9]|$)/g, this.dbg.toStrBase(nLocation, -1) + "$1"), fPass1);
+                result = this.dbg.parseExpression(sExp.replace(/\.([^0-9]|$)/g, this.dbg.toStrBase(nLocation, -1) + "$1"), fPass1);
                 if (result === undefined) {
-                    this.error("unable to parse expression '" + sOperand + "'");
+                    this.error("unable to parse expression '" + sExp + "'");
                 }
             }
         } else {
