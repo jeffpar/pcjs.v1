@@ -1431,7 +1431,7 @@ PDP10.opMULB = function(op, ac)
  */
 PDP10.opIDIV = function(op, ac)
 {
-    var dst = PDP10.doDIV.call(this, this.readWord(ac), 0, this.readWord(this.regEA));
+    var dst = PDP10.doDIV.call(this, this.readWord(this.regEA), this.readWord(ac));
     if (dst < 0) return;
     this.writeWord(ac, dst);
     this.writeWord((ac + 1) & 0o17, this.regEX);
@@ -1456,7 +1456,7 @@ PDP10.opIDIV = function(op, ac)
  */
 PDP10.opIDIVI = function(op, ac)
 {
-    var dst = PDP10.doDIV.call(this, this.readWord(ac), 0, this.regEA);
+    var dst = PDP10.doDIV.call(this, this.regEA, this.readWord(ac));
     if (dst < 0) return;
     this.writeWord(ac, dst);
     this.writeWord((ac + 1) & 0o17, this.regEX);
@@ -1481,7 +1481,7 @@ PDP10.opIDIVI = function(op, ac)
  */
 PDP10.opIDIVM = function(op, ac)
 {
-    var dst = PDP10.doDIV.call(this, this.readWord(ac), 0, this.readWord(this.regEA));
+    var dst = PDP10.doDIV.call(this, this.readWord(this.regEA), this.readWord(ac));
     if (dst < 0) return;
     this.writeWord(this.regEA, dst);
 };
@@ -1505,9 +1505,10 @@ PDP10.opIDIVM = function(op, ac)
  */
 PDP10.opIDIVB = function(op, ac)
 {
-    var dst = PDP10.doDIV.call(this, this.readWord(ac), 0, this.readWord(this.regEA));
+    var dst = PDP10.doDIV.call(this, this.readWord(this.regEA), this.readWord(ac));
     if (dst < 0) return;
-    this.writeWord(this.regEA, dst);
+    this.writeWord(this.regEA, this.writeWord(ac, dst));
+    this.writeWord((ac + 1) & 0o17, this.regEX);
 };
 
 /**
@@ -1532,7 +1533,7 @@ PDP10.opDIV = function(op, ac)
 {
     var ext = this.readWord(ac);
     var dst = this.readWord((ac + 1) & 0o17);
-    dst = PDP10.doDIV.call(this, dst, ext, this.readWord(this.regEA));
+    dst = PDP10.doDIV.call(this, this.readWord(this.regEA), dst, ext);
     if (dst < 0) return;
     this.writeWord(ac, dst);
     this.writeWord((ac + 1) & 0o17, this.regEX);
@@ -1560,7 +1561,7 @@ PDP10.opDIVI = function(op, ac)
 {
     var ext = this.readWord(ac);
     var dst = this.readWord((ac + 1) & 0o17);
-    dst = PDP10.doDIV.call(this, dst, ext, this.regEA);
+    dst = PDP10.doDIV.call(this, this.regEA, dst, ext);
     if (dst < 0) return;
     this.writeWord(ac, dst);
     this.writeWord((ac + 1) & 0o17, this.regEX);
@@ -1588,7 +1589,7 @@ PDP10.opDIVM = function(op, ac)
 {
     var ext = this.readWord(ac);
     var dst = this.readWord((ac + 1) & 0o17);
-    dst = PDP10.doDIV.call(this, dst, ext, this.readWord(this.regEA));
+    dst = PDP10.doDIV.call(this, this.readWord(this.regEA), dst, ext);
     if (dst < 0) return;
     this.writeWord(this.regEA, dst);
 };
@@ -1615,7 +1616,7 @@ PDP10.opDIVB = function(op, ac)
 {
     var ext = this.readWord(ac);
     var dst = this.readWord((ac + 1) & 0o17);
-    dst = PDP10.doDIV.call(this, dst, ext, this.readWord(this.regEA));
+    dst = PDP10.doDIV.call(this, this.readWord(this.regEA), dst, ext);
     if (dst < 0) return;
     this.writeWord(ac, this.writeWord(this.regEA, dst));
     this.writeWord((ac + 1) & 0o17, this.regEX);
@@ -1643,7 +1644,7 @@ PDP10.opDIVB = function(op, ac)
  *      by 2.
  *
  *      The number of places shifted is specified by the result of the effective address calculation
- *      taken as a signed number (in twos complement notation) modulo 28 in magnitude.  In other words
+ *      taken as a signed number (in twos complement notation) modulo 2^8 in magnitude.  In other words
  *      the effective shift E is the number composed of bit 18 (which is the sign) and bits 28-35 of the
  *      calculation result.  Hence the programmer may specify the shift directly in the instruction
  *      (perhaps indexed) or give an indirect address to be used in calculating the shift.  A positive E
@@ -6226,19 +6227,35 @@ PDP10.doADD = function(dst, src)
 };
 
 /**
- * doDIV(dst, ext, src)
+ * doDIV(src, dst, ext)
  *
  * Performs the division (DIV) of a 72-bit operand by a 36-bit operand.
  *
  * @this {CPUStatePDP10}
- * @param {number} dst (36-bit value)
- * @param {number} ext (36-bit value extension)
  * @param {number} src (36-bit divisor)
+ * @param {number} dst (36-bit value)
+ * @param {number} [ext] (36-bit value extension)
  * @return {number} (dst / src) (the remainder is stored in regEX); -1 if error (no division performed)
  */
-PDP10.doDIV = function(dst, ext, src)
+PDP10.doDIV = function(src, dst, ext)
 {
     var fNegQ = false, fNegR = false;
+
+    if (ext === undefined) {
+        if (!src) {
+            this.regPS |= PDP10.PSFLAG.DCK | PDP10.PSFLAG.AROV;
+            return -1;
+        }
+        ext = (dst > PDP10.INT_MASK)? PDP10.WORD_MASK : 0;
+    } else {
+        var srcAbs = (src < PDP10.INT_LIMIT? src : PDP10.TWO_POW36 - src);
+        var dstAbs = (dst < PDP10.INT_LIMIT? dst : PDP10.TWO_POW36 - dst);
+        var extAbs = (ext < PDP10.INT_LIMIT? ext : PDP10.TWO_POW36 - ext - (dstAbs? 1 : 0));
+        if (extAbs >= srcAbs) {
+            this.regPS |= PDP10.PSFLAG.DCK | PDP10.PSFLAG.AROV;
+            return -1;
+        }
+    }
 
     dst = PDP10.merge72.call(this, dst, ext);
     ext = this.regEX;
@@ -6257,11 +6274,6 @@ PDP10.doDIV = function(dst, ext, src)
             if (ext) ext = PDP10.WORD_LIMIT - ext;
         }
         fNegR = true; fNegQ = !fNegQ;
-    }
-
-    if (ext >= src) {
-        this.regPS |= PDP10.PSFLAG.DCK | PDP10.PSFLAG.AROV;
-        return -1;
     }
 
     /*
@@ -6515,14 +6527,14 @@ PDP10.merge72 = function(dst, ext)
     var sign = (ext - (ext % PDP10.INT_LIMIT));
 
     /*
-     * Let's assert that the sign bits of both halves match.
-     */
-    this.assert(sign == (dst - (dst % PDP10.INT_LIMIT)), "sign mismatch");
-
-    /*
+     * For 72-bit inputs, the PDP-10 doesn't care whether or not the low word's sign
+     * matches the high word's sign.  The high word's sign bit is the controlling bit.
+     *
+     *      this.assert(sign == (dst - (dst % PDP10.INT_LIMIT)), "sign mismatch");
+     *
      * Compute value without the sign bit and add the low bit of extended in its place.
      */
-    dst = (dst % PDP10.INT_LIMIT) + ((ext * PDP10.INT_LIMIT) % PDP10.WORD_LIMIT);
+    dst = (dst % PDP10.INT_LIMIT) + ((ext & 1) * PDP10.INT_LIMIT);
     this.regEX = sign + Math.trunc(ext / 2);
     return dst;
 };
