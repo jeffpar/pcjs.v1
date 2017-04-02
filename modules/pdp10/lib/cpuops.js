@@ -1431,7 +1431,7 @@ PDP10.opMULB = function(op, ac)
  */
 PDP10.opIDIV = function(op, ac)
 {
-    var dst = PDP10.doDIV.call(this, this.readWord(ac), 0, this.readWord(this.regEA));
+    var dst = PDP10.doDIV.call(this, this.readWord(this.regEA), this.readWord(ac));
     if (dst < 0) return;
     this.writeWord(ac, dst);
     this.writeWord((ac + 1) & 0o17, this.regEX);
@@ -1456,7 +1456,7 @@ PDP10.opIDIV = function(op, ac)
  */
 PDP10.opIDIVI = function(op, ac)
 {
-    var dst = PDP10.doDIV.call(this, this.readWord(ac), 0, this.regEA);
+    var dst = PDP10.doDIV.call(this, this.regEA, this.readWord(ac));
     if (dst < 0) return;
     this.writeWord(ac, dst);
     this.writeWord((ac + 1) & 0o17, this.regEX);
@@ -1481,7 +1481,7 @@ PDP10.opIDIVI = function(op, ac)
  */
 PDP10.opIDIVM = function(op, ac)
 {
-    var dst = PDP10.doDIV.call(this, this.readWord(ac), 0, this.readWord(this.regEA));
+    var dst = PDP10.doDIV.call(this, this.readWord(this.regEA), this.readWord(ac));
     if (dst < 0) return;
     this.writeWord(this.regEA, dst);
 };
@@ -1505,9 +1505,10 @@ PDP10.opIDIVM = function(op, ac)
  */
 PDP10.opIDIVB = function(op, ac)
 {
-    var dst = PDP10.doDIV.call(this, this.readWord(ac), 0, this.readWord(this.regEA));
+    var dst = PDP10.doDIV.call(this, this.readWord(this.regEA), this.readWord(ac));
     if (dst < 0) return;
-    this.writeWord(this.regEA, dst);
+    this.writeWord(this.regEA, this.writeWord(ac, dst));
+    this.writeWord((ac + 1) & 0o17, this.regEX);
 };
 
 /**
@@ -1532,7 +1533,7 @@ PDP10.opDIV = function(op, ac)
 {
     var ext = this.readWord(ac);
     var dst = this.readWord((ac + 1) & 0o17);
-    dst = PDP10.doDIV.call(this, dst, ext, this.readWord(this.regEA));
+    dst = PDP10.doDIV.call(this, this.readWord(this.regEA), dst, ext);
     if (dst < 0) return;
     this.writeWord(ac, dst);
     this.writeWord((ac + 1) & 0o17, this.regEX);
@@ -1560,7 +1561,7 @@ PDP10.opDIVI = function(op, ac)
 {
     var ext = this.readWord(ac);
     var dst = this.readWord((ac + 1) & 0o17);
-    dst = PDP10.doDIV.call(this, dst, ext, this.regEA);
+    dst = PDP10.doDIV.call(this, this.regEA, dst, ext);
     if (dst < 0) return;
     this.writeWord(ac, dst);
     this.writeWord((ac + 1) & 0o17, this.regEX);
@@ -1588,7 +1589,7 @@ PDP10.opDIVM = function(op, ac)
 {
     var ext = this.readWord(ac);
     var dst = this.readWord((ac + 1) & 0o17);
-    dst = PDP10.doDIV.call(this, dst, ext, this.readWord(this.regEA));
+    dst = PDP10.doDIV.call(this, this.readWord(this.regEA), dst, ext);
     if (dst < 0) return;
     this.writeWord(this.regEA, dst);
 };
@@ -1615,7 +1616,7 @@ PDP10.opDIVB = function(op, ac)
 {
     var ext = this.readWord(ac);
     var dst = this.readWord((ac + 1) & 0o17);
-    dst = PDP10.doDIV.call(this, dst, ext, this.readWord(this.regEA));
+    dst = PDP10.doDIV.call(this, this.readWord(this.regEA), dst, ext);
     if (dst < 0) return;
     this.writeWord(ac, this.writeWord(this.regEA, dst));
     this.writeWord((ac + 1) & 0o17, this.regEX);
@@ -1643,7 +1644,7 @@ PDP10.opDIVB = function(op, ac)
  *      by 2.
  *
  *      The number of places shifted is specified by the result of the effective address calculation
- *      taken as a signed number (in twos complement notation) modulo 28 in magnitude.  In other words
+ *      taken as a signed number (in twos complement notation) modulo 2^8 in magnitude.  In other words
  *      the effective shift E is the number composed of bit 18 (which is the sign) and bits 28-35 of the
  *      calculation result.  Hence the programmer may specify the shift directly in the instruction
  *      (perhaps indexed) or give an indirect address to be used in calculating the shift.  A positive E
@@ -6226,28 +6227,53 @@ PDP10.doADD = function(dst, src)
 };
 
 /**
- * doDIV(dst, ext, src)
+ * doDIV(src, dst, ext)
  *
  * Performs the division (DIV) of a 72-bit operand by a 36-bit operand.
  *
  * @this {CPUStatePDP10}
- * @param {number} dst (36-bit value)
- * @param {number} ext (36-bit value extension)
  * @param {number} src (36-bit divisor)
+ * @param {number} dst (36-bit value)
+ * @param {number} [ext] (36-bit value extension)
  * @return {number} (dst / src) (the remainder is stored in regEX); -1 if error (no division performed)
  */
-PDP10.doDIV = function(dst, ext, src)
+PDP10.doDIV = function(src, dst, ext)
 {
     var fNegQ = false, fNegR = false;
 
+    /*
+     * Perform all the same up-front checks that the PDP-10 performs; if we do our job correctly, then it
+     * will be impossible for the actual division operation to overflow (the asserts below should never fire).
+     */
+    if (ext === undefined) {
+        if (!src) {
+            this.regPS |= PDP10.PSFLAG.DCK | PDP10.PSFLAG.AROV;
+            return -1;
+        }
+        ext = (dst > PDP10.INT_MASK)? PDP10.WORD_MASK : 0;
+    } else {
+        var srcAbs = (src < PDP10.INT_LIMIT? src : PDP10.TWO_POW36 - src);
+        var dstAbs = (dst < PDP10.INT_LIMIT? dst : PDP10.TWO_POW36 - dst);
+        var extAbs = (ext < PDP10.INT_LIMIT? ext : PDP10.TWO_POW36 - ext - (dstAbs? 1 : 0));
+        if (extAbs >= srcAbs) {
+            this.regPS |= PDP10.PSFLAG.DCK | PDP10.PSFLAG.AROV;
+            return -1;
+        }
+    }
+
+    /*
+     * We're done with the PDP-10's "dual sign" operands now; produce a (unified) signed 72-bit dividend.
+     */
     dst = PDP10.merge72.call(this, dst, ext);
     ext = this.regEX;
 
+    /*
+     * Make all the inputs positive now, to keep the division simple.  Fix up the results when we're done.
+     */
     if (src > PDP10.INT_MASK) {
         src = PDP10.WORD_LIMIT - src;
         fNegQ = !fNegQ;
     }
-
     if (ext > PDP10.INT_MASK) {
         if (dst) {
             ext = PDP10.WORD_MASK - ext;
@@ -6257,11 +6283,6 @@ PDP10.doDIV = function(dst, ext, src)
             if (ext) ext = PDP10.WORD_LIMIT - ext;
         }
         fNegR = true; fNegQ = !fNegQ;
-    }
-
-    if (ext >= src) {
-        this.regPS |= PDP10.PSFLAG.DCK | PDP10.PSFLAG.AROV;
-        return -1;
     }
 
     /*
@@ -6314,7 +6335,7 @@ PDP10.doDIV = function(dst, ext, src)
 };
 
 /**
- * doMUL(dst, src, fTruncate)
+ * doMUL(dst, src, fTruncate, fExternal)
  *
  * Performs the multiplication (MUL) of two signed 36-bit operands.
  *
@@ -6323,8 +6344,10 @@ PDP10.doDIV = function(dst, ext, src)
  * number (base 2^18).  Each individual multiplication of these 18-bit "digits" will produce
  * a result within 2^36, well within JavaScript integer accuracy.
  *
- * PDP-10 "DAKAK" Diagnostic Notes
- * -------------------------------
+ * PDP-10 Diagnostic Notes
+ * -----------------------
+ *
+ * The "DAKAK" diagnostic contains the following code:
  *
  *      036174: 200240 043643  MOVE    5,43643      ; [43643] = 400000000000
  *      036175: 200300 043603  MOVE    6,43603      ; [43603] = 777777777777
@@ -6353,10 +6376,11 @@ PDP10.doDIV = function(dst, ext, src)
  * @this {CPUStatePDP10}
  * @param {number} dst (36-bit value)
  * @param {number} src (36-bit value)
- * @param {boolean} [fTruncate] (true to truncate the result to 36 bits)
+ * @param {boolean} [fTruncate] (true to truncate the result to 36 bits; used by IMUL instructions)
+ * @param {boolean} [fExternal] (true if external caller; avoids modifying the CPU state)
  * @return {number} (dst * src) (the high 36 bits of the result; the low 36 bits are stored in regEX)
  */
-PDP10.doMUL = function(dst, src, fTruncate)
+PDP10.doMUL = function(dst, src, fTruncate, fExternal)
 {
     var n1 = dst, n2 = src;
     var fNeg = false, res, ext;
@@ -6366,7 +6390,7 @@ PDP10.doMUL = function(dst, src, fTruncate)
      * we'll negate the result afterward if necessary.
      */
     if (n1 > PDP10.INT_MASK) {
-        if (this.model != PDP10.MODEL_KA10 || n1 != PDP10.INT_LIMIT) {
+        if (fExternal || this.model != PDP10.MODEL_KA10 || n1 != PDP10.INT_LIMIT) {
             n1 = PDP10.WORD_LIMIT - n1;
             fNeg = !fNeg;
         }
@@ -6404,21 +6428,43 @@ PDP10.doMUL = function(dst, src, fTruncate)
         }
     }
 
+    ext = PDP10.split72.call(this, res, ext, fExternal);
+
     if (fTruncate) {
         /*
-         * If ext is something OTHER than an extension of the res sign bit, then we have overflow.
+         * Special code for IMUL.  I originally tried to avoid calling split72() in this case, but the PDP-10
+         * still appears to be splitting the result of the multiplication into separately signed 36-bit values,
+         * so the simplest solution is to call split72() in all cases.
          */
-        if ((ext || res > PDP10.INT_MASK) && (ext != PDP10.WORD_MASK || res <= PDP10.INT_MASK)) {
-            this.regPS |= PDP10.PSFLAG.AROV;
+        res = this.regEX;
+        if (!fExternal) {
+            /*
+             * Regarding IMUL overflows, the original spec says:
+             *
+             *      Set Overflow if the product is >= 2^35 or < -2^35 (ie, if the high order word of the double
+             *      length product is not null); the high order word is lost.
+             *
+             * However, when the "DAKAL" diagnostic performs a sequence like this:
+             *
+             *      00=000000000000 01=000000000000 02=000000000000 03=400000036755
+             *      04=400000000000 05=000000000003 06=400000000000 07=000000000004
+             *      10=000000000000 11=000000000011 12=777777400000 13=777777777776
+             *      14=000000200000 15=400000037134 16=000000000016 17=000000000000
+             *      PC=037145 RA=00400000 EA=400000 PS=000000 OV=0 C0=0 C1=0 ND=0 PD=0
+             *      037145: 220600 000013  IMUL    14,13            ;cycles=1
+             *
+             * it sets 14=777777400000 and leaves overflow clear; since the 'high order word" would be 777777777777,
+             * not null, I think the spec over-simplifies.  So our check is more exhaustive: it verifies that ext is
+             * nothing more than an extension of the sign bit of res (ie, 0 if res is positive, -1 if res is negative).
+             * Any other combination of values implies an overflow.
+             */
+            if ((ext || res > PDP10.INT_MASK) && (ext != PDP10.WORD_MASK || res <= PDP10.INT_MASK)) {
+                this.regPS |= PDP10.PSFLAG.AROV;
+            }
         }
-        /*
-         * Also note that, in the truncate case, we return the low order bits (res), rather than the
-         * the high order bits (ext) that split72() does.
-         */
-        return res;
+        ext = res;
     }
-
-    return PDP10.split72.call(this, res, ext);
+    return ext;
 };
 
 /**
@@ -6490,29 +6536,30 @@ PDP10.merge72 = function(dst, ext)
     var sign = (ext - (ext % PDP10.INT_LIMIT));
 
     /*
-     * Let's assert that the sign bits of both halves match.
-     */
-    this.assert(sign == (dst - (dst % PDP10.INT_LIMIT)), "sign mismatch");
-
-    /*
+     * For 72-bit inputs, the PDP-10 doesn't care whether or not the low word's sign
+     * matches the high word's sign.  The high word's sign bit is the controlling bit.
+     *
+     *      this.assert(sign == (dst - (dst % PDP10.INT_LIMIT)), "sign mismatch");
+     *
      * Compute value without the sign bit and add the low bit of extended in its place.
      */
-    dst = (dst % PDP10.INT_LIMIT) + ((ext * PDP10.INT_LIMIT) % PDP10.WORD_LIMIT);
+    dst = (dst % PDP10.INT_LIMIT) + ((ext & 1) * PDP10.INT_LIMIT);
     this.regEX = sign + Math.trunc(ext / 2);
     return dst;
 };
 
 /**
- * split72(res, ext)
+ * split72(res, ext, fExternal)
  *
  * Returns two 36-bit values with matching sign bits from a unified 72-bit result.
  *
  * @this {CPUStatePDP10}
  * @param {number} res (36-bit value)
  * @param {number} ext (36-bit value)
+ * @param {boolean} [fExternal] (true if external caller; avoids modifying the CPU state)
  * @return {number} (returns the upper 36 bits; the lower 36 bits are stored in regEX)
  */
-PDP10.split72 = function(res, ext)
+PDP10.split72 = function(res, ext, fExternal)
 {
     /*
      * We just produced a signed 72-bit result, whereas the PDP-10 stores 72-bit arithmetic values as two
@@ -6525,9 +6572,24 @@ PDP10.split72 = function(res, ext)
     var sign = ext - (ext % PDP10.INT_LIMIT);
     ext = ((ext * 2) % PDP10.WORD_LIMIT) + Math.trunc(res / PDP10.INT_LIMIT);
     res = sign + (res % PDP10.INT_LIMIT);
+
     var signNew = ext - (ext % PDP10.INT_LIMIT);
-    if (sign != signNew) {
-        ext = sign + (ext - signNew);
+    if (signNew != sign) {
+        /*
+         * I used to restore ext's original sign (ext = sign + (ext - signNew)), but the PDP-10's defined
+         * behavior for multiplication overflow (ie, whenever both operands are 0o400000000000) is to set both
+         * res and ext to 0o400000000000.
+         *
+         * To quote the original spec for the MUL instruction:
+         *
+         *      If both operands are -2^35 set Overflow; the double length result stored is -2^70.
+         */
+        res = ext;
+    }
+
+    if (fExternal) return res;
+
+    if (res == PDP10.INT_LIMIT && ext == PDP10.INT_LIMIT) {
         this.regPS |= PDP10.PSFLAG.AROV;
     }
     this.regEX = res;

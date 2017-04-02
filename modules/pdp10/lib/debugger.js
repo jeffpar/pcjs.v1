@@ -508,6 +508,37 @@ class DebuggerPDP10 extends Debugger {
     }
 
     /**
+     * evalMUL(dst, src)
+     *
+     * Overrides the standard multiplication function with one that honors PDP-10 semantics and precision.
+     *
+     * @this {DebuggerPDP10}
+     * @param {number} dst
+     * @param {number} src
+     * @return {number} (dst * src)
+     */
+    evalMUL(dst, src)
+    {
+        /*
+         * The CPU requires that all 36-bit inputs/outputs be UNSIGNED, whereas our expression evaluator allows signed
+         * inputs/outputs.  So we perform two's complement conversions on all inputs/outputs as needed.
+         */
+        if (dst < 0) dst += PDP10.WORD_LIMIT;
+        if (src < 0) src += PDP10.WORD_LIMIT;
+        var result = PDP10.doMUL.call(this.cpu, dst, src, false, true);
+        if (result >= PDP10.INT_LIMIT) result -= PDP10.WORD_LIMIT;
+        if (MAXDEBUG) {
+            var resultJS = this.truncate(dst * src);
+            if (resultJS !== result) {
+                var sReference = this.macro10? (" @" + this.toStrBase(this.macro10.nLocation)) : "";
+                var sResults = "PDP-10: " + this.toStrBase(result, 36) + " JavaScript: " + this.toStrBase(resultJS, 36);
+                this.println("MUL(" + this.toStrBase(dst, 36) + "," + this.toStrBase(src, 36) + ") " + sResults + sReference);
+            }
+        }
+        return result;
+    }
+
+    /**
      * parseAddr(sAddr, dbgAddr)
      *
      * Address evaluation and validation (eg, range checks) are no longer performed at this stage.  That's
@@ -3908,7 +3939,7 @@ class DebuggerPDP10 extends Debugger {
      */
     doTest()
     {
-        if (DEBUG) {
+        if (MAXDEBUG) {
             var ops = {}, aOpXXX = [];
             var op, opXXX, opCode, sOperation;
             for (op = 0o00000; op <= 0o77774; op += 4) {
