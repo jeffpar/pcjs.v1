@@ -510,7 +510,7 @@ class CPUStatePDP10 extends CPUPDP10 {
      */
     getXC()
     {
-        return this.regXC >= 0? this.regXC : this.regPC;
+        return this.regXC >= 0? this.regXC : ((this.regRA & PDP10.OPCODE.I_FIELD)? this.lastPC : this.regPC);
     }
 
     /**
@@ -546,8 +546,9 @@ class CPUStatePDP10 extends CPUPDP10 {
      */
     setPC(addr)
     {
-        this.regPC = addr % PDP10.ADDR_LIMIT;
+        this.regRA = 0;
         this.regXC = -1;
+        this.regPC = addr % PDP10.ADDR_LIMIT;
     }
 
     /**

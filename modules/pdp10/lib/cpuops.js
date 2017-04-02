@@ -6407,23 +6407,43 @@ PDP10.doMUL = function(dst, src, fTruncate, fExternal)
         }
     }
 
+    ext = PDP10.split72.call(this, res, ext, fExternal);
+
     if (fTruncate) {
         /*
-         * If ext is something OTHER than an extension of the res sign bit, then we have overflow.
+         * Special code for IMUL.  I originally tried to avoid calling split72() in this case, but the PDP-10
+         * still appears to be splitting the result of the multiplication into separately signed 36-bit values,
+         * so the simplest solution is to call split72() in both cases.
          */
+        res = this.regEX;
         if (!fExternal) {
+            /*
+             * Regarding IMUL overflows, the original spec says:
+             *
+             *      Set Overflow if the product is >= 2^35 or < -2^35 (ie, if the high order word of the double
+             *      length product is not null); the high order word is lost.
+             *
+             * However, when the DAKAL diagnostic performs a sequence like this:
+             *
+             *      00=000000000000 01=000000000000 02=000000000000 03=400000036755
+             *      04=400000000000 05=000000000003 06=400000000000 07=000000000004
+             *      10=000000000000 11=000000000011 12=777777400000 13=777777777776
+             *      14=000000200000 15=400000037134 16=000000000016 17=000000000000
+             *      PC=037145 RA=00400000 EA=400000 PS=000000 OV=0 C0=0 C1=0 ND=0 PD=0
+             *      037145: 220600 000013  IMUL    14,13            ;cycles=1
+             *
+             * it sets 14=777777400000 and leaves overflow clear; since the 'high order word" would be 777777777777,
+             * not null, I think the spec over-simplifies.  So our check is more exhaustive: it verifies that ext is
+             * nothing more than an extension of the sign bit of res (ie, 0 if res is positive, -1 if res is negative).
+             * Any other combination of values implies an overflow.
+             */
             if ((ext || res > PDP10.INT_MASK) && (ext != PDP10.WORD_MASK || res <= PDP10.INT_MASK)) {
                 this.regPS |= PDP10.PSFLAG.AROV;
             }
         }
-        /*
-         * Also note that, in the truncate case, we return the low order bits (res), rather than the
-         * the high order bits (ext) that split72() does.
-         */
-        return res;
+        ext = res;
     }
-
-    return PDP10.split72.call(this, res, ext, fExternal);
+    return ext;
 };
 
 /**
@@ -6531,8 +6551,9 @@ PDP10.split72 = function(res, ext, fExternal)
     var sign = ext - (ext % PDP10.INT_LIMIT);
     ext = ((ext * 2) % PDP10.WORD_LIMIT) + Math.trunc(res / PDP10.INT_LIMIT);
     res = sign + (res % PDP10.INT_LIMIT);
+
     var signNew = ext - (ext % PDP10.INT_LIMIT);
-    if (sign != signNew) {
+    if (signNew != sign) {
         /*
          * I used to restore ext's original sign (ext = sign + (ext - signNew)), but the PDP-10's defined
          * behavior for multiplication overflow (ie, whenever both operands are 0o400000000000) is to set both
@@ -6543,9 +6564,13 @@ PDP10.split72 = function(res, ext, fExternal)
          *      If both operands are -2^35 set Overflow; the double length result stored is -2^70.
          */
         res = ext;
-        if (!fExternal) this.regPS |= PDP10.PSFLAG.AROV;
     }
+
     if (fExternal) return res;
+
+    if (res == PDP10.INT_LIMIT && ext == PDP10.INT_LIMIT) {
+        this.regPS |= PDP10.PSFLAG.AROV;
+    }
     this.regEX = res;
     return ext;
 };
