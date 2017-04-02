@@ -6241,6 +6241,10 @@ PDP10.doDIV = function(src, dst, ext)
 {
     var fNegQ = false, fNegR = false;
 
+    /*
+     * Perform all the same up-front checks that the PDP-10 performs; if we do our job correctly, then it
+     * will be impossible for the actual division operation to overflow (the asserts below should never fire).
+     */
     if (ext === undefined) {
         if (!src) {
             this.regPS |= PDP10.PSFLAG.DCK | PDP10.PSFLAG.AROV;
@@ -6257,14 +6261,19 @@ PDP10.doDIV = function(src, dst, ext)
         }
     }
 
+    /*
+     * We're done with the PDP-10's "dual sign" operands now; produce a (unified) signed 72-bit dividend.
+     */
     dst = PDP10.merge72.call(this, dst, ext);
     ext = this.regEX;
 
+    /*
+     * Make all the inputs positive now, to keep the division simple.  Fix up the results when we're done.
+     */
     if (src > PDP10.INT_MASK) {
         src = PDP10.WORD_LIMIT - src;
         fNegQ = !fNegQ;
     }
-
     if (ext > PDP10.INT_MASK) {
         if (dst) {
             ext = PDP10.WORD_MASK - ext;
@@ -6335,10 +6344,10 @@ PDP10.doDIV = function(src, dst, ext)
  * number (base 2^18).  Each individual multiplication of these 18-bit "digits" will produce
  * a result within 2^36, well within JavaScript integer accuracy.
  *
- * PDP-10 "DAKAK" Diagnostic Notes
- * -------------------------------
+ * PDP-10 Diagnostic Notes
+ * -----------------------
  *
- * The DAKAK diagnostic contains the following code:
+ * The "DAKAK" diagnostic contains the following code:
  *
  *      036174: 200240 043643  MOVE    5,43643      ; [43643] = 400000000000
  *      036175: 200300 043603  MOVE    6,43603      ; [43603] = 777777777777
@@ -6425,7 +6434,7 @@ PDP10.doMUL = function(dst, src, fTruncate, fExternal)
         /*
          * Special code for IMUL.  I originally tried to avoid calling split72() in this case, but the PDP-10
          * still appears to be splitting the result of the multiplication into separately signed 36-bit values,
-         * so the simplest solution is to call split72() in both cases.
+         * so the simplest solution is to call split72() in all cases.
          */
         res = this.regEX;
         if (!fExternal) {
@@ -6435,7 +6444,7 @@ PDP10.doMUL = function(dst, src, fTruncate, fExternal)
              *      Set Overflow if the product is >= 2^35 or < -2^35 (ie, if the high order word of the double
              *      length product is not null); the high order word is lost.
              *
-             * However, when the DAKAL diagnostic performs a sequence like this:
+             * However, when the "DAKAL" diagnostic performs a sequence like this:
              *
              *      00=000000000000 01=000000000000 02=000000000000 03=400000036755
              *      04=400000000000 05=000000000003 06=400000000000 07=000000000004
