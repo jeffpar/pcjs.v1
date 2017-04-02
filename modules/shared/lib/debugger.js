@@ -678,6 +678,9 @@ class Debugger extends Component
                         }
                     }
                     v = this.parseArray(asValues, iStart, iValue-1, this.nBase, fQuiet);
+                    if (v != null && nUnary) {
+                        v = this.parseUnary(v, nUnary);
+                    }
                     sValue = (iValue < iLimit? asValues[iValue++].trim() : "");
                     sOp = (iValue < iLimit? asValues[iValue++] : "");
                 }
@@ -1013,7 +1016,7 @@ class Debugger extends Component
     }
 
     /**
-     * parseValue(sValue, sName, fQuiet, nUnary)
+     * parseUnary(value, nUnary)
      *
      * nUnary is actually a small "stack" of unary operations encoded in successive pairs of bits.
      * As parseExpression() encounters each unary operator, nUnary is shifted left 2 bits, and the
@@ -1024,6 +1027,35 @@ class Debugger extends Component
      * Since bitwise operators see only 32 bits, more than 16 unary operators cannot be supported
      * using this method.  We'll let parseExpression() worry about that; if it ever happens in practice,
      * then we'll have to switch to a more "expensive" approach (eg, an actual array of unary operators).
+     *
+     * @this {Debugger}
+     * @param {number} value
+     * @param {number} nUnary
+     * @return {number}
+     */
+    parseUnary(value, nUnary)
+    {
+        while (nUnary) {
+            switch(nUnary & 0o3) {
+            case 1:
+                value = -this.truncate(value);
+                break;
+            case 2:
+                value = this.evalXOR(value, -1);        // this is easier than adding an evalNOT()...
+                break;
+            case 3:
+                var bit = 35;                           // simple left-to-right zero-bit-counting loop...
+                while (bit >= 0 && !this.evalAND(value, Math.pow(2, bit))) bit--;
+                value = 35 - bit;
+                break;
+            }
+            nUnary >>>= 2;
+        }
+        return value;
+    }
+
+    /**
+     * parseValue(sValue, sName, fQuiet, nUnary)
      *
      * @this {Debugger}
      * @param {string|undefined} sValue
@@ -1062,23 +1094,7 @@ class Debugger extends Component
                 }
             }
             if (value != null) {
-                while (nUnary) {
-                    switch(nUnary & 0o3) {
-                    case 1:
-                        value = -this.truncate(value);
-                        break;
-                    case 2:
-                        value = this.evalXOR(value, -1);        // this is easier than adding an evalNOT()...
-                        break;
-                    case 3:
-                        var bit = 35;                           // simple left-to-right zero-bit-counting loop...
-                        while (bit >= 0 && !this.evalAND(value, Math.pow(2, bit))) bit--;
-                        value = 35 - bit;
-                        break;
-                    }
-                    nUnary >>>= 2;
-                }
-                value = this.truncate(value);
+                value = this.truncate(this.parseUnary(value, nUnary));
             } else {
                 if (!fQuiet) {
                     this.println("invalid " + (sName? sName : "value") + ": " + sValue);
