@@ -6253,8 +6253,7 @@ PDP10.doDIV = function(src, dst, ext)
         ext = (dst > PDP10.INT_MASK)? PDP10.WORD_MASK : 0;
     } else {
         var srcAbs = (src < PDP10.INT_LIMIT? src : PDP10.TWO_POW36 - src);
-        var dstAbs = (dst < PDP10.INT_LIMIT? dst : PDP10.TWO_POW36 - dst);
-        var extAbs = (ext < PDP10.INT_LIMIT? ext : PDP10.TWO_POW36 - ext - (dstAbs? 1 : 0));
+        var extAbs = (ext < PDP10.INT_LIMIT? ext : PDP10.TWO_POW36 - ext - (dst? 1 : 0));
         if (extAbs >= srcAbs) {
             this.regPS |= PDP10.PSFLAG.DCK | PDP10.PSFLAG.AROV;
             return -1;
