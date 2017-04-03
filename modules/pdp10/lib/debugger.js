@@ -1652,27 +1652,19 @@ class DebuggerPDP10 extends Debugger {
     }
 
     /**
-     * parseInstruction(sOpcode, sOperands, addr, fQuiet, fPrelim)
+     * parseInstruction(sOpcode, sOperands, addr, aUndefined)
      *
      * @this {DebuggerPDP10}
      * @param {string} sOpcode
      * @param {string} [sOperands]
      * @param {number} [addr] of memory where this instruction is being assembled
-     * @param {boolean} [fQuiet]
-     * @param {boolean} [fPrelim] (true if this is a preliminary call and error messages should be suppressed)
+     * @param {Array} [aUndefined]
      * @return {number} (opcode, or -1 if unrecognized instruction)
      */
-    parseInstruction(sOpcode, sOperands, addr, fQuiet, fPrelim)
+    parseInstruction(sOpcode, sOperands, addr, aUndefined)
     {
         var opCode = -1;
         var opMask, opNum;
-
-        /*
-         * It's best to always clear sUndefined up front, because the caller won't
-         * necessarily know whether or not we had to call parseExpression() for this
-         * instruction.
-         */
-        this.sUndefined = null;
 
         if (!sOpcode) {
             /*
@@ -1753,21 +1745,22 @@ class DebuggerPDP10 extends Debugger {
 
         if (opCode >= 0) {
             if (sOperands) {
+
                 var aOperands = sOperands.split(',');
+                if (aOperands.length > 2) {
+                    if (!aUndefined) this.println("too many operands: " + sOperands);
+                    aOperands.length = 0;
+                    opCode = -1;
+                }
+
                 for (var i = 0; i < aOperands.length; i++) {
 
                     var sOperand = aOperands[i].trim();
                     if (!sOperand) continue;
 
-                    if (i > 1) {
-                        this.println("too many operands: " + sOperands);
-                        opCode = -1;
-                        break;
-                    }
-
                     var match = sOperand.match(/(@?)([^(]*)\(?([^)]*)\)?/);
                     if (!match) {
-                        this.println("unknown operand: " + sOperand);
+                        if (!aUndefined) this.println("unknown operand: " + sOperand);
                         opCode = -1;
                         break;
                     }
@@ -1782,7 +1775,7 @@ class DebuggerPDP10 extends Debugger {
 
                     sOperand = match[3];
                     if (sOperand) {
-                        operand = this.parseExpression(sOperand, fQuiet);
+                        operand = this.parseExpression(sOperand, aUndefined);
                         if (operand == undefined) {
                             opCode = -1;
                             break;
@@ -1806,7 +1799,7 @@ class DebuggerPDP10 extends Debugger {
                         }
                     }
 
-                    var operand = this.parseExpression(sOperand, fQuiet);
+                    var operand = this.parseExpression(sOperand, aUndefined);
                     if (operand == undefined) {
                         opCode = -1;
                         break;
@@ -1860,7 +1853,7 @@ class DebuggerPDP10 extends Debugger {
             // }
         }
 
-        if (opCode < 0 && !fPrelim) {
+        if (opCode < 0 && !aUndefined) {
             this.println("unknown instruction: " + sOpcode + ' ' + sOperands);
         }
 
