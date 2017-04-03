@@ -148,10 +148,12 @@ class Str {
              * a right shift of -(35 - n) is required.
              */
             var v, shift = 0;
-            var match = s.match(/(-?[0-9]+)B([0-9]*)/);
-            if (match) {
-                s = match[1];
-                shift = 35 - ((match[2] || 35) & 0xff);
+            if (base <= 10) {
+                var match = s.match(/(-?[0-9]+)B([0-9]*)/);
+                if (match) {
+                    s = match[1];
+                    shift = 35 - ((match[2] || 35) & 0xff);
+                }
             }
             if (Str.isValidInt(s, base) && !isNaN(v = parseInt(s, base))) {
                 /*

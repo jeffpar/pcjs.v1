@@ -1083,7 +1083,7 @@ class Debugger extends Component
                     /*
                      * A feature of MACRO-10 is that any single-digit number is automatically interpreted as base-10.
                      */
-                    value = Str.parseInt(sValue, sValue.length > 1? this.nBase : 10);
+                    value = Str.parseInt(sValue, sValue.length > 1 || this.nBase > 10? this.nBase : 10);
                 }
             }
             if (value != null) {
