@@ -1075,8 +1075,13 @@ class Debugger extends Component
                         if (aUndefined) {
                             aUndefined.push(sUndefined);
                         } else {
-                            this.println(sValue + " is undefined (" + sUndefined + ")");
-                            value = undefined;
+                            var valueUndefined = this.parseExpression(sUndefined, false);
+                            if (valueUndefined !== undefined) {
+                                value += valueUndefined;
+                            } else {
+                                this.println(sValue + " = " + this.toStrBase(value) + " + (" + sUndefined + ")");
+                                value = undefined;
+                            }
                         }
                     }
                 } else {

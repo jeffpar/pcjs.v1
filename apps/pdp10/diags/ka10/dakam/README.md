@@ -7,7 +7,7 @@ machines:
     type: pdp10
     config: /devices/pdp10/machine/ka10/test/debugger/machine.xml
     debugger: true
-    commands: a dakam.mac;g 033352
+    commands: a dakam.mac;g 036547
 ---
 
 PDP-10 KA10 Basic Instruction Diagnostic #13

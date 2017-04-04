@@ -688,7 +688,7 @@ class Macro10 {
                 break;
 
             case Macro10.PSEUDO_OP.EXP:
-                this.defEXP(sOperands);
+                this.defWord(sOperands);
                 break;
 
             case Macro10.PSEUDO_OP.LIT:
@@ -1723,25 +1723,6 @@ class Macro10 {
     }
 
     /**
-     * defEXP()
-     *
-     * Processes the EXP pseudo-op.
-     *
-     * @this {Macro10}
-     * @param {string} sOperands
-     */
-    defEXP(sOperands)
-    {
-        var aUndefined = [];
-        var w = this.parseExpression(sOperands, aUndefined);
-        if (w !== undefined) {
-            this.genWord(w, aUndefined[0]);
-        } else {
-            this.error("unrecognized EXP expression '" + sOperands + "'");
-        }
-    }
-
-    /**
      * defLocation(sOperands)
      *
      * Processes the LOC pseudo-op.
@@ -1759,15 +1740,15 @@ class Macro10 {
      *
      * Processes the XWD pseudo-op.
      *
-     * Since the XWD pseudo-op appears to be equivalent to two values separated by two commas, which defEXP() must also
-     * support, we can piggy-back on defExp().
+     * Since the XWD pseudo-op appears to be equivalent to two values separated by two commas, which defWord() must also
+     * support, we can piggy-back on defWord().
      *
      * @this {Macro10}
      * @param {string} sOperands
      */
     defXWD(sOperands)
     {
-        this.defEXP(sOperands.replace(",", ",,"));
+        this.defWord(sOperands.replace(",", ",,"));
     }
 
     /**
@@ -1775,16 +1756,23 @@ class Macro10 {
      *
      * @this {Macro10}
      * @param {string} sOperator
-     * @param {string} sSeparator
-     * @param {string} sOperands
+     * @param {string} [sSeparator]
+     * @param {string} [sOperands]
      */
-    defWord(sOperator, sSeparator, sOperands)
+    defWord(sOperator, sSeparator = "", sOperands = "")
     {
         var aUndefined = [];
         var sExp = (sOperator + sSeparator + sOperands).trim();
         var w = this.parseExpression(sExp, aUndefined);
         if (w !== undefined) {
-            this.genWord(w, aUndefined[0]);
+            if (!aUndefined.length) {
+                this.genWord(w);
+            } else if (aUndefined.length == 1) {
+                this.genWord(w, aUndefined[0]);
+            }
+            else {
+                this.genWord(0, sExp);
+            }
         } else {
             this.error("unrecognized word expression '" + sExp + "'");
         }
