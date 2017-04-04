@@ -815,7 +815,12 @@ class Macro10 {
                     this.popScope();
                     if (w !== undefined) {
                         this.aWords[nLocation] += (w & (PDP10.OPCODE.A_FIELD | PDP10.OPCODE.X_FIELD | PDP10.OPCODE.Y_FIELD));
-                        this.aWords[nLocation] |= (w & PDP10.OPCODE.I_FIELD);
+                        /*
+                         * We can't "OR" (|=) the I_FIELD bit into the target word, because it's a 36-bit value and bitwise
+                         * operators truncate to 32 bits, so we'll use addition, trusting that the field was initially zero.
+                         */
+                        this.dbg.assert(!(this.aWords[nLocation] & PDP10.OPCODE.I_FIELD));
+                        this.aWords[nLocation] += (w & PDP10.OPCODE.I_FIELD);
                         if (sFixup) {
                             if (!this.aFixups[nLocation]) {
                                 this.aFixups[nLocation] = sFixup;

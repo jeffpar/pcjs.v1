@@ -963,6 +963,9 @@ class DebuggerPDP10 extends Debugger {
         case DebuggerPDP10.REGS.C1:
             value = (cpu.regPS & PDP10.PSFLAG.CRY1)? 1 : 0;
             break;
+        case DebuggerPDP10.REGS.BI:
+            value = (cpu.regPS & PDP10.PSFLAG.BIS)? 1 : 0;
+            break;
         case DebuggerPDP10.REGS.ND:
             value = (cpu.regPS & PDP10.PSFLAG.DCK)? 1 : 0;
             break;
@@ -1001,6 +1004,9 @@ class DebuggerPDP10 extends Debugger {
             break;
         case DebuggerPDP10.REGS.C1:
             flag = PDP10.PSFLAG.CRY1;
+            break;
+        case DebuggerPDP10.REGS.BI:
+            flag = PDP10.PSFLAG.BIS;
             break;
         case DebuggerPDP10.REGS.ND:
             flag = PDP10.PSFLAG.DCK;
@@ -4147,12 +4153,13 @@ if (DEBUGGER) {
         OV:     4,                              // single-bit "register" representing the Overflow flag
         C0:     5,                              // single-bit "register" representing the Carry 0 flag
         C1:     6,                              // single-bit "register" representing the Carry 1 flag
-        ND:     7,                              // single-bit "register" representing the No Divide flag
-        PD:     8,                              // single-bit "register" representing the Pushdown Overflow flag
+        BI:     7,                              // single-bit "register" representing the Byte Interrupt flag
+        ND:     8,                              // single-bit "register" representing the No Divide flag
+        PD:     9,                              // single-bit "register" representing the Pushdown Overflow flag
     };
 
     DebuggerPDP10.REGNAMES = [
-        "PC", "RA", "EA", "PS", "OV", "C0", "C1", "ND", "PD"
+        "PC", "RA", "EA", "PS", "OV", "C0", "C1", "BI", "ND", "PD"
     ];
 
     /*
