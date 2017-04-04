@@ -91,66 +91,87 @@ var Scope;
 /**
  * @class Macro10
  * @property {string} sURL
- * @property {number} addrLoad
+ * @property {number|null} addrLoad
  * @property {string} sOptions
  * @property {DebuggerPDP10} dbg
- * @property {function(...)} done
+ * @property {function(...)|undefined} done
  * @property {number} iURL
- * @property {Array.<string>} asURLs
+ * @property {Array.<string>} aURLs
+ * @property {Array.<number>} anLines
  * @property {Array.<string>} asLines
  * @property {number|null|undefined} addrStart
+ * @unrestricted
  */
 class Macro10 {
     /**
-     * Macro10(sURL, addrLoad, sOptions, dbg, done)
+     * Macro10(dbg)
      *
      * A "mini" version of DEC's MACRO-10 assembler, with just enough features to support the handful
      * of DEC diagnostic source code files that we choose to throw at it.
      *
-     * Requests the resource(s) specified by sURL; multiple resources can be requested by separating
-     * them with semicolons.
-     *
-     * The done() callback is called after the resource(s) have been loaded and parsed.  The caller
-     * must use other methods to obtain further results (eg, getImage(), getStart()).
-     *
-     * The callback includes a non-zero error code if there was an error (and the URL):
-     *
-     *      done(nErrorCode, sURL)
-     *
      * We rely on the calling component (dbg) to provide a variety of helper services (eg, println(),
      * parseExpression(), etc).  This is NOT a subclass of Component, so Component services are not part
      * of this class.
+     *
+     * @this {Macro10}
+     * @param {DebuggerPDP10} dbg (used to provide helper services to the Macro10 class)
+     */
+    constructor(dbg)
+    {
+        this.dbg = dbg;
+    }
+
+    /**
+     * init(addrLoad, sOptions, done)
+     *
+     * Initializes all instance properties.  Called by assembleFiles() and assembleString().
      *
      * Supported options include:
      *
      *      'd': leave all symbols in the debugger's variable table
      *      'p': print the preprocessed resource(s) without assembling them
      *      'l': print lines as they are parsed
+     *      's': treat the URL as a string and assemble it (assembleFiles() only)
+     *
+     * The done() callback is called after the resource(s) have been loaded (if necessary), parsed, and
+     * assembled.  The caller must use other methods to obtain further results (eg, getImage(), getStart()).
+     *
+     * The callback includes a non-zero error code if there was an error (and the URL):
+     *
+     *      done(nErrorCode, sURL)
      *
      * @this {Macro10}
-     * @param {string} sURL (the URL(s) of the resource to be assembled)
-     * @param {number|null} addrLoad (the absolute address to assemble the code at, if any)
-     * @param {string|null} sOptions (zero or more letter codes to control the assembly process)
-     * @param {DebuggerPDP10} dbg (used to provide helper services to the Macro10 class)
-     * @param {function(...)} done
+     * @param {number|null} [addrLoad] (the absolute address to assemble the code at, if any)
+     * @param {string|undefined} [sOptions] (zero or more letter codes to control the assembly process)
+     * @param {function(...)|undefined} [done]
      */
-    constructor(sURL, addrLoad, sOptions, dbg, done)
+    init(addrLoad, sOptions, done)
     {
-        this.sURL = sURL;
         this.addrLoad = addrLoad;
-        this.sOptions = sOptions || "";
-        this.dbg = dbg;
+        this.sOptions = (sOptions || "").toLowerCase();
         this.done = done;
 
-        /*
-         * The next set of properties may be updated by the assembly process and queried by the caller.
+        this.iURL = 0;
+        this.aURLs = [];
+
+        /**
+         * Number of lines per file.
+         *
+         * @type {Array.<number>}
          */
-        this.addrStart = null;
+        this.anLines = [];
+
+        /**
+         * Lines from all the resources.
+         *
+         * @type {Array.<string>}
+         */
+        this.asLines = [];
 
         if (MAXDEBUG) this.println("starting PCjs MACRO-10 Mini-Assembler...");
 
         /*
-         * Initialize all the tables that MACRO-10 uses.
+         * Initialize all the tables and other data structures that MACRO-10 uses.
          *
          * The Macros (tblMacros) and Symbols (tblSymbols) tables are fairly straightforward: they are
          * indexed by a macro or symbol name, and each element is a Mac or Sym object, respectively.
@@ -266,16 +287,63 @@ class Macro10 {
          */
         this.sASCII = "";
 
-        /**
-         * @type {Array.<string>}
-         */
-        this.asLines = [];
+        this.addrStart = null;
+    }
 
-        this.iURL = 0;
-        this.asURLs = sURL.split(';');
-        this.anLines = [];              // keeps track of the number of lines per file
+    /**
+     * assembleFiles(sURL, addrLoad, sOptions, done)
+     *
+     * Requests the resource(s) specified by sURL; multiple resources can be requested by separating
+     * them with semicolons.  The resources are requested and combined in the same order they are listed,
+     * and after the last resource has been received, they are assembled as a single unit.
+     *
+     * As a courtesy to the Debugger's doAssemble() function, we allow it to select between assembleFiles()
+     * and assembleString() by specifying an 's' option here, rather than having two separate code paths.
+     *
+     * @this {Macro10}
+     * @param {string} sURL (the URL(s) of the resource to be assembled)
+     * @param {number|null} [addrLoad] (the absolute address to assemble the code at, if any)
+     * @param {string|undefined} [sOptions] (zero or more letter codes to control the assembly process)
+     * @param {function(...)|undefined} [done]
+     */
+    assembleFiles(sURL, addrLoad, sOptions, done)
+    {
+        if (sOptions && sOptions.indexOf('s') >= 0) {
+            this.assembleString(sURL, addrLoad, sOptions, done);
+            return;
+        }
+
+        this.init(addrLoad, sOptions, done);
+
+        this.aURLs = sURL.split(';');
 
         this.loadNextResource();
+    }
+
+    /**
+     * assembleString(sText, addrLoad, sOptions, done)
+     *
+     * Assembles the given text.
+     *
+     * @this {Macro10}
+     * @param {string} sText
+     * @param {number|null} [addrLoad] (the absolute address to assemble the code at, if any)
+     * @param {string|undefined} [sOptions] (zero or more letter codes to control the assembly process)
+     * @param {function(...)|undefined} [done]
+     * @return {number}
+     */
+    assembleString(sText, addrLoad, sOptions, done)
+    {
+        this.init(addrLoad, sOptions, done);
+
+        this.asLines = sText.split(/(\r?\n)/);
+        this.anLines.push(this.asLines.length);
+
+        this.parseResources();
+
+        if (this.done) this.done(this.nError);
+
+        return this.nError;
     }
 
     /**
@@ -285,13 +353,14 @@ class Macro10 {
      */
     loadNextResource()
     {
-        if (this.iURL == this.asURLs.length) {
-            this.done(this.parseResources());
+        if (this.iURL == this.aURLs.length) {
+            this.parseResources();
+            if (this.done) this.done(this.nError);
             return;
         }
 
         var macro10 = this;
-        var sURL = this.asURLs[this.iURL];
+        var sURL = this.aURLs[this.iURL];
 
         this.println("loading " + Str.getBaseName(sURL));
 
@@ -305,7 +374,7 @@ class Macro10 {
 
         Web.getResource(sURL, null, true, function processMacro10(sFile, sResource, nErrorCode) {
             if (nErrorCode) {
-                macro10.done(nErrorCode, sFile);
+                if (macro10.done) macro10.done(nErrorCode, sFile);
                 return;
             }
             var sText = sResource;
@@ -1100,13 +1169,13 @@ class Macro10 {
         var iURL = 0;
         while (nLine > this.anLines[iURL]) {
             nLine -= this.anLines[iURL];
-            if (iURL < this.asURLs.length - 1) {
+            if (iURL < this.aURLs.length - 1) {
                 iURL++;
             } else {
                 break;
             }
         }
-        return Str.getBaseName(this.asURLs[iURL] + " line " + nLine);
+        return Str.getBaseName(this.aURLs[iURL] + " line " + nLine);
     }
 
     /**

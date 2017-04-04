@@ -2669,8 +2669,8 @@ class DebuggerPDP10 extends Debugger {
             return true;
         }
 
-        var match = sOpcode.match(/^(['"]?)(.*\.klm|.*\.mac|.*\.html|.*\.txt)\1$/i);
-        if (match) {
+        var match = sOpcode.match(/^(['"]?)(.*?)(\.klm|\.mac|\.html|\.txt|)\1$/i);
+        if (match && (match[1] || match[3])) {
             var dbg = this;
             var cpu = this.cpu;
             dbgAddr = this.parseAddr(sAddr);
@@ -2678,9 +2678,11 @@ class DebuggerPDP10 extends Debugger {
                 dbg.println("assembly already in progress");
             }
             else {
-                var sFile = match[2];
+                var sFile = match[2] + match[3];
+                if (!match[3]) sOptions += 's';
                 var addrLoad = dbgAddr.addr;
-                var macro10 = this.macro10 = new Macro10(sFile, addrLoad, sOptions, dbg, function doneMacro10(nErrorCode, sURL) {
+                var macro10 = this.macro10 = new Macro10(dbg);
+                macro10.assembleFiles(sFile, addrLoad, sOptions, function doneMacro10(nErrorCode, sURL) {
                     if (!nErrorCode) {
                         /*
                          * NOTE: Most Debugger operations run in the context of doCommand(), which catches any exceptions;
@@ -3706,21 +3708,48 @@ class DebuggerPDP10 extends Debugger {
     }
 
     /**
-     * splitArgs(sCmd)
+     * splitArgs(sCmd, sDelim)
      *
      * @this {DebuggerPDP10}
      * @param {string} sCmd
+     * @param {string} [sDelim]
      * @return {Array.<string>}
      */
-    splitArgs(sCmd)
+    splitArgs(sCmd, sDelim = " ")
     {
-        var asArgs = sCmd.replace(/ +/g, ' ').split(' ');
+        var asArgs = [];
+        var chQuote = "";
+        var i = 0, iLast = 0;
+
+        while (i < sCmd.length) {
+            var ch = sCmd[i++];
+            if (chQuote) {
+                if (ch == chQuote) {
+                    chQuote = "";
+                    asArgs.push(sCmd.substr(iLast, i - iLast));
+                    iLast = i;
+                }
+                continue;
+            }
+            if (ch == '"' || ch == "'") {
+                chQuote = ch;
+                continue;
+            }
+            if (sDelim.indexOf(ch) >= 0) {
+                asArgs.push(sCmd.substr(iLast, i - iLast - 1));
+                iLast = i;
+            }
+        }
+        if (iLast < i) {
+            asArgs.push(sCmd.substr(iLast, i - iLast));
+        }
+
         asArgs[0] = asArgs[0].toLowerCase();
         if (asArgs && asArgs.length) {
             var s0 = asArgs[0];
             var ch0 = s0.charAt(0);
-            for (var i = 1; i < s0.length; i++) {
-                var ch = s0.charAt(i);
+            for (i = 1; i < s0.length; i++) {
+                ch = s0.charAt(i);
                 if (ch0 == '?' || ch0 == 'r' || ch < 'a' || ch > 'z') {
                     asArgs[0] = s0.substr(i);
                     asArgs.unshift(s0.substr(0, i));
