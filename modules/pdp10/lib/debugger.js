@@ -1786,11 +1786,27 @@ class DebuggerPDP10 extends Debugger {
                             opCode = -1;
                             break;
                         }
-                        if (operand < 0 || operand > PDP10.OPCODE.X_MASK) {
-                            operand &= PDP10.OPCODE.X_MASK;
-                            if (MAXDEBUG) this.println("index (" + sOperand + ") truncated to " + this.toStrBase(operand));
-                        }
-                        opCode += operand << PDP10.OPCODE.X_SHIFT;
+                        /*
+                         * Here's a fun tidbit from the April 1978 MACRO-10 manual, p. 4-5:
+                         *
+                         *      NOTE: To assemble the index, MACRO places the index register address in a fullword of storage,
+                         *      swaps its halfwords, and then adds the swapped word to the instruction word.
+                         *
+                         * Which means that an instruction like this (where AC is zero):
+                         *
+                         *        8839	037653	205 00 0 00 400000 		MOVSI	AC,(1B<^O<AC>>)	;INITIALIZE AC
+                         *
+                         * produces an instruction that does NOT use indexing at all, even though it is coded as such.  So my
+                         * simplistic masking of the index operand with PDP10.OPCODE.X_MASK, while logical, was completely wrong:
+                         *
+                         *      if (operand < 0 || operand > PDP10.OPCODE.X_MASK) {
+                         *          operand &= PDP10.OPCODE.X_MASK;
+                         *          if (MAXDEBUG) this.println("index (" + sOperand + ") truncated to " + this.toStrBase(operand));
+                         *      }
+                         *      opCode += operand << PDP10.OPCODE.X_SHIFT;
+                         */
+                        operand = PDP10.SWAP(this.truncate(operand, 36, true));
+                        opCode += operand;
                     }
 
                     sOperand = match[2];
