@@ -11,7 +11,8 @@ PCjs has archived selected KA10 diagnostic source files from the
 [PDP-10 KLAD Diagnostics Sources](http://pdp-10.trailing-edge.com/klad_sources/index.html) and turned them into
 stand-alone PDP-10 diagnostics, using the new PCjs [MACRO-10 Mini-Assembler](/modules/pdp10/lib/macro10.js).
 
-A complete list of supported diagnostics is provided [below](#list-of-ka10-diagnostics).
+Complete lists of supported [diagnostics](#list-of-ka10-diagnostics) and [reliability tests](#list-of-ka10-reliability-tests)
+are provided below.
 
 I've also experimented with assembling these diagnostics from the original (unmodified) source files.  For example,
 you can go to the [DAKAK Diagnostic](dakak/) page and try the following command:
@@ -134,5 +135,16 @@ so far.
 	- TESTS OF MULTIPY, INTERGER MULTIPLY, DIVIDE, INTERGER DIVIDE*
 - [KA10 Basic Instruction Diagnostic #12 (MAINDEC-10-DAKAL)](dakal/)
 	- TESTS THE MULTIPY, INTERGER MULIPLY, DIVIDE AND INTERGER DIVIDE INSTRUCTIONS*
+- [KA10 Basic Instruction Diagnostic #13 (MAINDEC-10-DAKAL)](dakam/)
+	- TESTS THE BYTE, BLOCK TRANSFER AND JFFO INSTRUCTIONS
 
 *Gotta love those multipy, interger muliply, and interger divide tests! -JP
+
+List of KA10 Reliability Tests
+------------------------------
+
+Like the diagnostics above, the following list of KA10 Reliability Tests are simple those tests that have been archived and tested
+with PDPjs so far.
+
+- [KA10 Basic Instruction Reliability Test #1 (MAINDEC-10-DAKBA)](dakba/)
+	- COMPARES, SKIPS, EXCHANGES, BOOLE, ROTATES, TESTS
