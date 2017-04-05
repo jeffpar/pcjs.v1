@@ -2155,8 +2155,7 @@ PDP10.opEXCH = function(op, ac)
  *      is the final location being loaded.  Furthermore, the program cannot assume that AC is the same after the BLT
  *      as it was before.
  *
- * TODO: Determine the logic behind SIMH's bizarre treatment of the AC register when it's part of the memory
- * being transferred.
+ * TODO: Determine the logic behind SIMH's treatment of the AC register when it's part of the memory being transferred.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2164,23 +2163,31 @@ PDP10.opEXCH = function(op, ac)
  */
 PDP10.opBLT = function(op, ac)
 {
-    var fDone = false;
+    var fDone = false, fUpdate = false;
     var addrDst = this.readWord(ac);
     var addrSrc = (addrDst / PDP10.HALF_SHIFT)|0;
     addrDst &= PDP10.HALF_MASK;
     while (!fDone) {
         this.writeWord(addrDst, this.readWord(addrSrc));
-        if (addrDst == this.regEA) fDone = true;
-        addrSrc = (addrSrc + 1) & PDP10.HALF_MASK;
-        addrDst = (addrDst + 1) & PDP10.HALF_MASK;
-        if (!this.isRunning()) {
+        /*
+         * NOTE: The PDP-10 specs (especially the KA10 Reference Manual) are not very clear on the exit criteria:
+         * the transfer stops once AC left >= E, not AC left == E.  They are also not very clear on whether the addresses
+         * are incremented before or after the exit criteria is checked; however, the KA10 "DAKAM" diagnostic seems
+         * pretty adamant that, at least after a one-word BLT operation, the addresses should NOT be incremented.
+         */
+        if (!(fDone = (addrDst >= this.regEA))) {
+            addrSrc = (addrSrc + 1) & PDP10.HALF_MASK;
+            addrDst = (addrDst + 1) & PDP10.HALF_MASK;
+            fUpdate = true;
+        }
+        if (fDone || !this.isRunning()) {
             /*
-             * Since the CPU isn't currently running, the CPU is presumably being stepped, so we'll treat that the
-             * same as the "priority interrupt" condition described above, update the accumulator, rewind the PC, and leave.
+             * If the CPU isn't currently running, the CPU is presumably being stepped, so we'll treat that the
+             * same as the "priority interrupt" condition described above, update the addresses, rewind the PC, and leave.
              */
-            this.writeWord(ac, addrSrc * PDP10.HALF_SHIFT + addrDst);
+            if (fUpdate) this.writeWord(ac, addrSrc * PDP10.HALF_SHIFT + addrDst);
             if (!fDone) this.advancePC(-1);
-            fDone = true;
+            break;
         }
     }
 };

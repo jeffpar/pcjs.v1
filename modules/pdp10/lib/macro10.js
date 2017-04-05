@@ -1611,7 +1611,7 @@ class Macro10 {
     {
         name = name.toUpperCase().substr(0, 6);
         if ((nType & Macro10.SYMTYPE.LABEL) && this.tblSymbols[name] !== undefined) {
-            this.error("label '" + name + "' redefined");
+            this.error("redefined label '" + name + "'");
             return;
         }
         var sUndefined = undefined;
@@ -1619,8 +1619,11 @@ class Macro10 {
             var aUndefined = [];
             var v = this.parseExpression(value, aUndefined);
             if (v === undefined) {
-                this.error("symbol error (" + value + ")");
+                this.error("invalid symbol '" + name + "': " + value);
                 return;
+            }
+            if (aUndefined.length > 1) {
+                this.error("too many undefined symbols in '" + name + "': " + aUndefined.join());
             }
             value = v;
             sUndefined = aUndefined[0];

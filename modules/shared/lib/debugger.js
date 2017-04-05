@@ -1075,11 +1075,13 @@ class Debugger extends Component
                         if (aUndefined) {
                             aUndefined.push(sUndefined);
                         } else {
-                            var valueUndefined = this.parseExpression(sUndefined, false);
+                            var valueUndefined = this.parseExpression(sUndefined, fQuiet);
                             if (valueUndefined !== undefined) {
                                 value += valueUndefined;
                             } else {
-                                this.println(sValue + " = " + this.toStrBase(value) + " + (" + sUndefined + ")");
+                                if (!fQuiet) {
+                                    this.println("undefined " + (sName || "value") + ": " + sValue + " (" + sUndefined + ")");
+                                }
                                 value = undefined;
                             }
                         }
@@ -1095,7 +1097,7 @@ class Debugger extends Component
                 value = this.truncate(this.parseUnary(value, nUnary));
             } else {
                 if (!fQuiet) {
-                    this.println("invalid " + (sName? sName : "value") + ": " + sValue);
+                    this.println("invalid " + (sName || "value") + ": " + sValue);
                 }
             }
         } else {
