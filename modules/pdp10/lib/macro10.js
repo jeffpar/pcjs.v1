@@ -736,6 +736,7 @@ class Macro10 {
             case Macro10.PSEUDO_OP.PAGE:    // TODO
             case Macro10.PSEUDO_OP.SUBTTL:  // TODO
             case Macro10.PSEUDO_OP.TITLE:   // TODO
+            case Macro10.PSEUDO_OP.XALL:    // TODO
             case Macro10.PSEUDO_OP.XLIST:   // TODO
                 break;
 
@@ -2060,6 +2061,7 @@ Macro10.PSEUDO_OP = {
     SUBTTL:     "SUBTTL",
     TITLE:      "TITLE",
     VAR:        "VAR",
+    XALL:       "XALL",
     XWD:        "XWD",
     XLIST:      "XLIST"
 };
