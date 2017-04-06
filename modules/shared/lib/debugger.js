@@ -792,7 +792,7 @@ class Debugger extends Component
      * @param {string} chDelim
      * @param {number} nBits
      * @param {number} cchMax
-     * @return {string}
+     * @return {string|undefined}
      */
     parseASCII(sExp, chDelim, nBits, cchMax)
     {
@@ -819,7 +819,7 @@ class Debugger extends Component
             }
             if (cch >= 0) {
                 this.println("parse error (" + chDelim + sExp + chDelim + ")");
-                break;
+                return undefined;
             } else {
                 sExp = sExp.substr(0, i) + this.toStrBase(v, -1) + sExp.substr(j);
             }

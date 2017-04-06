@@ -570,12 +570,26 @@ class Macro10 {
             }
             fParse = false;
             sOperator = matchLine[2].toUpperCase();
+
+            /*
+             * TODO: The following kludge needs to be fixed at some point.  The goal here is to prevent any
+             * of the caller's parameters from replacing any IRP/IRPC call parameters, but the goal is actually
+             * much bigger than that, because it's not just IRP/IRPC call parameters that must be left intact,
+             * but ANY macro call parameters; IRP/IRPC macros are just easier to pick out.  Unfortunately, as
+             * the code is currently structured, we won't know if we're dealing with any macro call parameters
+             * on this line until parseMacro() is called, below.
+             */
             if (sOperator == Macro10.PSEUDO_OP.IRP || sOperator == Macro10.PSEUDO_OP.IRPC) {
                 aParms = null;
             }
+
             if (aParms) {
                 for (var iParm = 0; iParm < aParms.length; iParm++) {
                     var sParm = aParms[iParm];
+
+                    var macroDef = this.tblMacros[this.sMacroDef];
+                    if (macroDef && macroDef.aParms.indexOf(sParm) >= 0) continue;
+
                     var sReplace = aValues[iParm] || aDefaults[iParm] || "";
                     var iSearch = 0;
                     var iLimit = sLine.length - matchLine[5].length;    // set the limit at the start of the comment, if any
