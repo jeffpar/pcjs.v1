@@ -963,6 +963,9 @@ class DebuggerPDP10 extends Debugger {
         case DebuggerPDP10.REGS.C1:
             value = (cpu.regPS & PDP10.PSFLAG.CRY1)? 1 : 0;
             break;
+        case DebuggerPDP10.REGS.BI:
+            value = (cpu.regPS & PDP10.PSFLAG.BIS)? 1 : 0;
+            break;
         case DebuggerPDP10.REGS.ND:
             value = (cpu.regPS & PDP10.PSFLAG.DCK)? 1 : 0;
             break;
@@ -1001,6 +1004,9 @@ class DebuggerPDP10 extends Debugger {
             break;
         case DebuggerPDP10.REGS.C1:
             flag = PDP10.PSFLAG.CRY1;
+            break;
+        case DebuggerPDP10.REGS.BI:
+            flag = PDP10.PSFLAG.BIS;
             break;
         case DebuggerPDP10.REGS.ND:
             flag = PDP10.PSFLAG.DCK;
@@ -1652,27 +1658,19 @@ class DebuggerPDP10 extends Debugger {
     }
 
     /**
-     * parseInstruction(sOpcode, sOperands, addr, fQuiet, fPrelim)
+     * parseInstruction(sOpcode, sOperands, addr, aUndefined)
      *
      * @this {DebuggerPDP10}
      * @param {string} sOpcode
      * @param {string} [sOperands]
      * @param {number} [addr] of memory where this instruction is being assembled
-     * @param {boolean} [fQuiet]
-     * @param {boolean} [fPrelim] (true if this is a preliminary call and error messages should be suppressed)
+     * @param {Array} [aUndefined]
      * @return {number} (opcode, or -1 if unrecognized instruction)
      */
-    parseInstruction(sOpcode, sOperands, addr, fQuiet, fPrelim)
+    parseInstruction(sOpcode, sOperands, addr, aUndefined)
     {
         var opCode = -1;
         var opMask, opNum;
-
-        /*
-         * It's best to always clear sUndefined up front, because the caller won't
-         * necessarily know whether or not we had to call parseExpression() for this
-         * instruction.
-         */
-        this.sUndefined = null;
 
         if (!sOpcode) {
             /*
@@ -1753,21 +1751,22 @@ class DebuggerPDP10 extends Debugger {
 
         if (opCode >= 0) {
             if (sOperands) {
+
                 var aOperands = sOperands.split(',');
+                if (aOperands.length > 2) {
+                    if (!aUndefined) this.println("too many operands: " + sOperands);
+                    aOperands.length = 0;
+                    opCode = -1;
+                }
+
                 for (var i = 0; i < aOperands.length; i++) {
 
                     var sOperand = aOperands[i].trim();
                     if (!sOperand) continue;
 
-                    if (i > 1) {
-                        this.println("too many operands: " + sOperands);
-                        opCode = -1;
-                        break;
-                    }
-
                     var match = sOperand.match(/(@?)([^(]*)\(?([^)]*)\)?/);
                     if (!match) {
-                        this.println("unknown operand: " + sOperand);
+                        if (!aUndefined) this.println("unknown operand: " + sOperand);
                         opCode = -1;
                         break;
                     }
@@ -1782,16 +1781,32 @@ class DebuggerPDP10 extends Debugger {
 
                     sOperand = match[3];
                     if (sOperand) {
-                        operand = this.parseExpression(sOperand, fQuiet);
+                        operand = this.parseExpression(sOperand, aUndefined);
                         if (operand == undefined) {
                             opCode = -1;
                             break;
                         }
-                        if (operand < 0 || operand > PDP10.OPCODE.X_MASK) {
-                            operand &= PDP10.OPCODE.X_MASK;
-                            if (MAXDEBUG) this.println("index (" + sOperand + ") truncated to " + this.toStrBase(operand));
-                        }
-                        opCode += operand << PDP10.OPCODE.X_SHIFT;
+                        /*
+                         * Here's a fun tidbit from the April 1978 MACRO-10 manual, p. 4-5:
+                         *
+                         *      NOTE: To assemble the index, MACRO places the index register address in a fullword of storage,
+                         *      swaps its halfwords, and then adds the swapped word to the instruction word.
+                         *
+                         * Which means that an instruction like this (where AC is zero):
+                         *
+                         *        8839	037653	205 00 0 00 400000 		MOVSI	AC,(1B<^O<AC>>)	;INITIALIZE AC
+                         *
+                         * produces an instruction that does NOT use indexing at all, even though it is coded as such.  So my
+                         * simplistic masking of the index operand with PDP10.OPCODE.X_MASK, while logical, was completely wrong:
+                         *
+                         *      if (operand < 0 || operand > PDP10.OPCODE.X_MASK) {
+                         *          operand &= PDP10.OPCODE.X_MASK;
+                         *          if (MAXDEBUG) this.println("index (" + sOperand + ") truncated to " + this.toStrBase(operand));
+                         *      }
+                         *      opCode += operand << PDP10.OPCODE.X_SHIFT;
+                         */
+                        operand = PDP10.SWAP(this.truncate(operand, 36, true));
+                        opCode += operand;
                     }
 
                     sOperand = match[2];
@@ -1806,7 +1821,7 @@ class DebuggerPDP10 extends Debugger {
                         }
                     }
 
-                    var operand = this.parseExpression(sOperand, fQuiet);
+                    var operand = this.parseExpression(sOperand, aUndefined);
                     if (operand == undefined) {
                         opCode = -1;
                         break;
@@ -1860,7 +1875,7 @@ class DebuggerPDP10 extends Debugger {
             // }
         }
 
-        if (opCode < 0 && !fPrelim) {
+        if (opCode < 0 && !aUndefined) {
             this.println("unknown instruction: " + sOpcode + ' ' + sOperands);
         }
 
@@ -2676,8 +2691,8 @@ class DebuggerPDP10 extends Debugger {
             return true;
         }
 
-        var match = sOpcode.match(/^(['"]?)(.*\.klm|.*\.mac|.*\.html|.*\.txt)\1$/i);
-        if (match) {
+        var match = sOpcode.match(/^(['"]?)(.*?)(\.klm|\.mac|\.html|\.txt|)\1$/i);
+        if (match && (match[1] || match[3])) {
             var dbg = this;
             var cpu = this.cpu;
             dbgAddr = this.parseAddr(sAddr);
@@ -2685,9 +2700,11 @@ class DebuggerPDP10 extends Debugger {
                 dbg.println("assembly already in progress");
             }
             else {
-                var sFile = match[2];
+                var sFile = match[2] + match[3];
+                if (!match[3]) sOptions += 's';
                 var addrLoad = dbgAddr.addr;
-                var macro10 = this.macro10 = new Macro10(sFile, addrLoad, sOptions, dbg, function doneMacro10(nErrorCode, sURL) {
+                var macro10 = this.macro10 = new Macro10(dbg);
+                macro10.assembleFiles(sFile, addrLoad, sOptions, function doneMacro10(nErrorCode, sURL) {
                     if (!nErrorCode) {
                         /*
                          * NOTE: Most Debugger operations run in the context of doCommand(), which catches any exceptions;
@@ -3713,21 +3730,48 @@ class DebuggerPDP10 extends Debugger {
     }
 
     /**
-     * splitArgs(sCmd)
+     * splitArgs(sCmd, sDelim)
      *
      * @this {DebuggerPDP10}
      * @param {string} sCmd
+     * @param {string} [sDelim]
      * @return {Array.<string>}
      */
-    splitArgs(sCmd)
+    splitArgs(sCmd, sDelim = " ")
     {
-        var asArgs = sCmd.replace(/ +/g, ' ').split(' ');
+        var asArgs = [];
+        var chQuote = "";
+        var i = 0, iLast = 0;
+
+        while (i < sCmd.length) {
+            var ch = sCmd[i++];
+            if (chQuote) {
+                if (ch == chQuote) {
+                    chQuote = "";
+                    asArgs.push(sCmd.substr(iLast, i - iLast));
+                    iLast = i;
+                }
+                continue;
+            }
+            if (ch == '"' || ch == "'") {
+                chQuote = ch;
+                continue;
+            }
+            if (sDelim.indexOf(ch) >= 0) {
+                asArgs.push(sCmd.substr(iLast, i - iLast - 1));
+                iLast = i;
+            }
+        }
+        if (iLast < i) {
+            asArgs.push(sCmd.substr(iLast, i - iLast));
+        }
+
         asArgs[0] = asArgs[0].toLowerCase();
         if (asArgs && asArgs.length) {
             var s0 = asArgs[0];
             var ch0 = s0.charAt(0);
-            for (var i = 1; i < s0.length; i++) {
-                var ch = s0.charAt(i);
+            for (i = 1; i < s0.length; i++) {
+                ch = s0.charAt(i);
                 if (ch0 == '?' || ch0 == 'r' || ch < 'a' || ch > 'z') {
                     asArgs[0] = s0.substr(i);
                     asArgs.unshift(s0.substr(0, i));
@@ -4125,12 +4169,13 @@ if (DEBUGGER) {
         OV:     4,                              // single-bit "register" representing the Overflow flag
         C0:     5,                              // single-bit "register" representing the Carry 0 flag
         C1:     6,                              // single-bit "register" representing the Carry 1 flag
-        ND:     7,                              // single-bit "register" representing the No Divide flag
-        PD:     8,                              // single-bit "register" representing the Pushdown Overflow flag
+        BI:     7,                              // single-bit "register" representing the Byte Interrupt flag
+        ND:     8,                              // single-bit "register" representing the No Divide flag
+        PD:     9,                              // single-bit "register" representing the Pushdown Overflow flag
     };
 
     DebuggerPDP10.REGNAMES = [
-        "PC", "RA", "EA", "PS", "OV", "C0", "C1", "ND", "PD"
+        "PC", "RA", "EA", "PS", "OV", "C0", "C1", "BI", "ND", "PD"
     ];
 
     /*

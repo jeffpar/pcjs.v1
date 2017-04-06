@@ -257,7 +257,16 @@ PDP10.opFSC = function(op, ac)
  *
  * From the DEC PDP-10 System Reference Manual (May 1968), p. 2-16:
  *
- *      Increment the byte pointer in location E as explained [below].
+ *      Increment the byte pointer in location E as explained [below].  The pointer has the format:
+ *
+ *                          1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 3 3 3 3 3 3
+ *      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5
+ *      P P P P P P S S S S S S - I X X X X Y Y Y Y Y Y Y Y Y Y Y Y Y Y Y Y Y Y
+ *
+ *      where S is the size of the byte as a number of bits, and P is its position as the number of bits
+ *      remaining at the right of the byte in the word (eg if P is 3 the rightmost bit of the byte is bit 32
+ *      of the word).  The rest of the pointer is interpreted in the same way as in an instruction: I, X and Y
+ *      are used to calculate the address of the location that is the source or destination of the byte.
  *
  *      To facilitate processing a series of bytes, several of the byte instructions increment the
  *      pointer, ie, modify it so that it points to the next byte position in a set of memory locations.
@@ -277,9 +286,6 @@ PDP10.opFSC = function(op, ac)
  *      a byte of size 36 - P is loaded from position P, or the right 36 - P bits of the byte are deposited
  *      in position P.
  *
- * NOTE: Until I can conduct real-world testing, I'm assuming when they say "100 - S", DEC really meant "64 - S",
- * which is 100 [base 8], which makes much more sense, since P is limited to a range of 00-77 [base 8].
- *
  * @this {CPUStatePDP10}
  * @param {number} op
  * @param {number} ac
@@ -294,7 +300,7 @@ PDP10.opIBP = function(op, ac)
     if (p < 0) {
         inc++;
         p = 36 - s;
-        if (p < 0) p = 64 - s;      // see SPECIAL CONSIDERATIONS and NOTE above
+        if (p < 0) p = 100 - s; // see SPECIAL CONSIDERATIONS and NOTE above
     }
     /*
      * Since the documentation above makes clear that the effect of the increment (of w) extends past the Y
@@ -378,7 +384,7 @@ PDP10.opLDB = function(op, ac)
     }
     var p = (this.regBP / PDP10.OPCODE.P_SCALE) & PDP10.OPCODE.P_MASK;
     var s = (this.regBP >> PDP10.OPCODE.S_SHIFT) & PDP10.OPCODE.S_MASK;
-    if (p + s <= 32) {
+    if (p + s < 32) {
         /*
          * WARNING: When using JavaScript's 32-bit operators with values that could set bit 31 and produce a
          * negative value, it's critical to perform a final right-shift of 0, ensuring that the final result is
@@ -389,7 +395,7 @@ PDP10.opLDB = function(op, ac)
         /*
          * Regarding the SPECIAL CONSIDERATIONS above, even if the P ("shift") and/or S ("mask") values are
          * over-large, that should be fine, because nothing but additional zero bits will be included (provided
-         * our memory is working properly and didn't give us more than 36 bits).
+         * our memory is working properly and didn't give us more than 36 bits of unsigned data).
          */
         w = Math.trunc(w / Math.pow(2, p)) % Math.pow(2, s);
     }
@@ -2149,8 +2155,7 @@ PDP10.opEXCH = function(op, ac)
  *      is the final location being loaded.  Furthermore, the program cannot assume that AC is the same after the BLT
  *      as it was before.
  *
- * TODO: Determine the logic behind SIMH's bizarre treatment of the AC register when it's part of the memory
- * being transferred.
+ * TODO: Determine the logic behind SIMH's treatment of the AC register when it's part of the memory being transferred.
  *
  * @this {CPUStatePDP10}
  * @param {number} op
@@ -2158,23 +2163,31 @@ PDP10.opEXCH = function(op, ac)
  */
 PDP10.opBLT = function(op, ac)
 {
-    var fDone = false;
+    var fDone = false, fUpdate = false;
     var addrDst = this.readWord(ac);
     var addrSrc = (addrDst / PDP10.HALF_SHIFT)|0;
     addrDst &= PDP10.HALF_MASK;
     while (!fDone) {
         this.writeWord(addrDst, this.readWord(addrSrc));
-        if (addrDst == this.regEA) fDone = true;
-        addrSrc = (addrSrc + 1) & PDP10.HALF_MASK;
-        addrDst = (addrDst + 1) & PDP10.HALF_MASK;
-        if (!this.isRunning()) {
+        /*
+         * NOTE: The PDP-10 specs (especially the KA10 Reference Manual) are not very clear on the exit criteria:
+         * the transfer stops once AC left >= E, not AC left == E.  They are also not very clear on whether the addresses
+         * are incremented before or after the exit criteria is checked; however, the KA10 "DAKAM" diagnostic seems
+         * pretty adamant that, at least after a one-word BLT operation, the addresses should NOT be incremented.
+         */
+        if (!(fDone = (addrDst >= this.regEA))) {
+            addrSrc = (addrSrc + 1) & PDP10.HALF_MASK;
+            addrDst = (addrDst + 1) & PDP10.HALF_MASK;
+            fUpdate = true;
+        }
+        if (fDone || !this.isRunning()) {
             /*
-             * Since the CPU isn't currently running, the CPU is presumably being stepped, so we'll treat that the
-             * same as the "priority interrupt" condition described above, update the accumulator, rewind the PC, and leave.
+             * If the CPU isn't currently running, the CPU is presumably being stepped, so we'll treat that the
+             * same as the "priority interrupt" condition described above, update the addresses, rewind the PC, and leave.
              */
-            this.writeWord(ac, addrSrc * PDP10.HALF_SHIFT + addrDst);
+            if (fUpdate) this.writeWord(ac, addrSrc * PDP10.HALF_SHIFT + addrDst);
             if (!fDone) this.advancePC(-1);
-            fDone = true;
+            break;
         }
     }
 };
@@ -6253,8 +6266,7 @@ PDP10.doDIV = function(src, dst, ext)
         ext = (dst > PDP10.INT_MASK)? PDP10.WORD_MASK : 0;
     } else {
         var srcAbs = (src < PDP10.INT_LIMIT? src : PDP10.TWO_POW36 - src);
-        var dstAbs = (dst < PDP10.INT_LIMIT? dst : PDP10.TWO_POW36 - dst);
-        var extAbs = (ext < PDP10.INT_LIMIT? ext : PDP10.TWO_POW36 - ext - (dstAbs? 1 : 0));
+        var extAbs = (ext < PDP10.INT_LIMIT? ext : PDP10.TWO_POW36 - ext - (dst? 1 : 0));
         if (extAbs >= srcAbs) {
             this.regPS |= PDP10.PSFLAG.DCK | PDP10.PSFLAG.AROV;
             return -1;

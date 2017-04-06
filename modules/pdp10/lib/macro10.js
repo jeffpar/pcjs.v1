@@ -39,8 +39,6 @@ if (NODE) {
 /**
  * Elements of tblMacros.
  *
- * NOTE: The nLine property is not required; it's added for improved error reporting.
- *
  * @typedef {{
  *      name:(string),
  *      nOperand:(number),
@@ -55,8 +53,6 @@ var Mac;
 
 /**
  * Elements of tblSymbols.
- *
- * NOTE: The nLine property is not required; it's added for improved error reporting.
  *
  * @typedef {{
  *      name:(string),
@@ -95,65 +91,87 @@ var Scope;
 /**
  * @class Macro10
  * @property {string} sURL
- * @property {number} addrLoad
+ * @property {number|null} addrLoad
  * @property {string} sOptions
  * @property {DebuggerPDP10} dbg
- * @property {function(...)} done
+ * @property {function(...)|undefined} done
  * @property {number} iURL
- * @property {Array.<string>} asURLs
+ * @property {Array.<string>} aURLs
+ * @property {Array.<number>} anLines
  * @property {Array.<string>} asLines
  * @property {number|null|undefined} addrStart
+ * @unrestricted
  */
 class Macro10 {
     /**
-     * Macro10(sURL, addrLoad, sOptions, dbg, done)
+     * Macro10(dbg)
      *
      * A "mini" version of DEC's MACRO-10 assembler, with just enough features to support the handful
      * of DEC diagnostic source code files that we choose to throw at it.
-     *
-     * Requests the resource(s) specified by sURL; multiple resources can be requested by separating
-     * them with semicolons.
-     *
-     * The done() callback is called after the resource(s) have been loaded and parsed.  The caller
-     * must use other methods to obtain further results (eg, getImage(), getStart()).
-     *
-     * The callback includes a non-zero error code if there was an error (and the URL):
-     *
-     *      done(nErrorCode, sURL)
      *
      * We rely on the calling component (dbg) to provide a variety of helper services (eg, println(),
      * parseExpression(), etc).  This is NOT a subclass of Component, so Component services are not part
      * of this class.
      *
+     * @this {Macro10}
+     * @param {DebuggerPDP10} dbg (used to provide helper services to the Macro10 class)
+     */
+    constructor(dbg)
+    {
+        this.dbg = dbg;
+    }
+
+    /**
+     * init(addrLoad, sOptions, done)
+     *
+     * Initializes all instance properties.  Called by assembleFiles() and assembleString().
+     *
      * Supported options include:
      *
+     *      'd': leave all symbols in the debugger's variable table
      *      'p': print the preprocessed resource(s) without assembling them
      *      'l': print lines as they are parsed
+     *      's': treat the URL as a string and assemble it (assembleFiles() only)
+     *
+     * The done() callback is called after the resource(s) have been loaded (if necessary), parsed, and
+     * assembled.  The caller must use other methods to obtain further results (eg, getImage(), getStart()).
+     *
+     * The callback includes a non-zero error code if there was an error (and the URL):
+     *
+     *      done(nErrorCode, sURL)
      *
      * @this {Macro10}
-     * @param {string} sURL (the URL(s) of the resource to be assembled)
-     * @param {number|null} addrLoad (the absolute address to assemble the code at, if any)
-     * @param {string|null} sOptions (zero or more letter codes to control the assembly process)
-     * @param {DebuggerPDP10} dbg (used to provide helper services to the Macro10 class)
-     * @param {function(...)} done
+     * @param {number|null} [addrLoad] (the absolute address to assemble the code at, if any)
+     * @param {string|undefined} [sOptions] (zero or more letter codes to control the assembly process)
+     * @param {function(...)|undefined} [done]
      */
-    constructor(sURL, addrLoad, sOptions, dbg, done)
+    init(addrLoad, sOptions, done)
     {
-        this.sURL = sURL;
         this.addrLoad = addrLoad;
-        this.sOptions = sOptions || "";
-        this.dbg = dbg;
+        this.sOptions = (sOptions || "").toLowerCase();
         this.done = done;
 
-        /*
-         * The next set of properties may be updated by the assembly process and queried by the caller.
+        this.iURL = 0;
+        this.aURLs = [];
+
+        /**
+         * Number of lines per file.
+         *
+         * @type {Array.<number>}
          */
-        this.addrStart = null;
+        this.anLines = [];
+
+        /**
+         * Lines from all the resources.
+         *
+         * @type {Array.<string>}
+         */
+        this.asLines = [];
 
         if (MAXDEBUG) this.println("starting PCjs MACRO-10 Mini-Assembler...");
 
         /*
-         * Initialize all the tables that MACRO-10 uses.
+         * Initialize all the tables and other data structures that MACRO-10 uses.
          *
          * The Macros (tblMacros) and Symbols (tblSymbols) tables are fairly straightforward: they are
          * indexed by a macro or symbol name, and each element is a Mac or Sym object, respectively.
@@ -203,7 +221,7 @@ class Macro10 {
         this.aWords = [];               // filled in by the various genXXX() functions
 
         /**
-         * This sparse array is indexed by location, and each used entry contains an undefined symbol that
+         * This sparse array is indexed by location, and each used entry contains any undefined symbols that
          * must be evaluated to fully resolve the word at the corresponding location.  NOTE: There's no requirement
          * that the array be sparse; we could certainly fill each unused entry with null (ie, for locations that
          * don't require a fixup).
@@ -211,6 +229,13 @@ class Macro10 {
          * @type {Array.<string>}
          */
         this.aFixups = [];
+
+        /**
+         * This array parallels aFixups, providing context (ie, line numbers) for any fixups that we want to analyze.
+         *
+         * @type {Array.<number>}
+         */
+        this.aLineRefs = [];
 
         this.nLine = 0;
         this.nError = 0;
@@ -262,16 +287,63 @@ class Macro10 {
          */
         this.sASCII = "";
 
-        /**
-         * @type {Array.<string>}
-         */
-        this.asLines = [];
+        this.addrStart = null;
+    }
 
-        this.iURL = 0;
-        this.asURLs = sURL.split(';');
-        this.anLines = [];              // keeps track of the number of lines per file
+    /**
+     * assembleFiles(sURL, addrLoad, sOptions, done)
+     *
+     * Requests the resource(s) specified by sURL; multiple resources can be requested by separating
+     * them with semicolons.  The resources are requested and combined in the same order they are listed,
+     * and after the last resource has been received, they are assembled as a single unit.
+     *
+     * As a courtesy to the Debugger's doAssemble() function, we allow it to select between assembleFiles()
+     * and assembleString() by specifying an 's' option here, rather than having two separate code paths.
+     *
+     * @this {Macro10}
+     * @param {string} sURL (the URL(s) of the resource to be assembled)
+     * @param {number|null} [addrLoad] (the absolute address to assemble the code at, if any)
+     * @param {string|undefined} [sOptions] (zero or more letter codes to control the assembly process)
+     * @param {function(...)|undefined} [done]
+     */
+    assembleFiles(sURL, addrLoad, sOptions, done)
+    {
+        if (sOptions && sOptions.indexOf('s') >= 0) {
+            this.assembleString(sURL, addrLoad, sOptions, done);
+            return;
+        }
+
+        this.init(addrLoad, sOptions, done);
+
+        this.aURLs = sURL.split(';');
 
         this.loadNextResource();
+    }
+
+    /**
+     * assembleString(sText, addrLoad, sOptions, done)
+     *
+     * Assembles the given text.
+     *
+     * @this {Macro10}
+     * @param {string} sText
+     * @param {number|null} [addrLoad] (the absolute address to assemble the code at, if any)
+     * @param {string|undefined} [sOptions] (zero or more letter codes to control the assembly process)
+     * @param {function(...)|undefined} [done]
+     * @return {number}
+     */
+    assembleString(sText, addrLoad, sOptions, done)
+    {
+        this.init(addrLoad, sOptions, done);
+
+        this.asLines = sText.split(/(\r?\n)/);
+        this.anLines.push(this.asLines.length);
+
+        this.parseResources();
+
+        if (this.done) this.done(this.nError);
+
+        return this.nError;
     }
 
     /**
@@ -281,13 +353,14 @@ class Macro10 {
      */
     loadNextResource()
     {
-        if (this.iURL == this.asURLs.length) {
-            this.done(this.parseResources());
+        if (this.iURL == this.aURLs.length) {
+            this.parseResources();
+            if (this.done) this.done(this.nError);
             return;
         }
 
         var macro10 = this;
-        var sURL = this.asURLs[this.iURL];
+        var sURL = this.aURLs[this.iURL];
 
         this.println("loading " + Str.getBaseName(sURL));
 
@@ -301,7 +374,7 @@ class Macro10 {
 
         Web.getResource(sURL, null, true, function processMacro10(sFile, sResource, nErrorCode) {
             if (nErrorCode) {
-                macro10.done(nErrorCode, sFile);
+                if (macro10.done) macro10.done(nErrorCode, sFile);
                 return;
             }
             var sText = sResource;
@@ -396,6 +469,13 @@ class Macro10 {
         }
 
         var a = this.dbg.resetVariables();
+
+        /*
+         * Add predefined device codes
+         */
+        this.addSymbol("APR", 0);       // Priority Interrupt
+        this.addSymbol("PI",  4);       // Arithmetic Processor
+
         try {
             for (let i = 0; i < this.asLines.length; i += 2) {
 
@@ -434,104 +514,19 @@ class Macro10 {
             /*
              * Process all literals next.
              */
-            let nLocationLiterals = this.nLocation;
-
-            for (let i = 0; i < this.aLiterals.length; i++) {
-                /*
-                 * Apparently, the time has come to implement "literal collapsing"; I was treating it as just
-                 * a nice optimization, but it turns out that DEC has written tests that actually DEPEND on it:
-                 *
-                 *      C26300: HRRZI   [135531,,246642]    ;PRELOAD AC0 WITH 0,, LITERAL ADDRESS
-                 *              JRA     .+1                 ;*JRA SHOULD PLACE C(AC0) INTO AC0
-                 *              CAIE    [135531,,246642]    ;PASS IF JRA PLACED C(AC0) INTO AC0
-                 *              STOP
-                 *
-                 * If the HRRZI and CAIE instructions don't refer to the same exact literal, the test will fail.
-                 * For purposes of this particular test, the values they stuffed into the literals are essentially
-                 * gibberish, but the same literal may be used in another test where the values are significant.
-                 *
-                 * However, I'm still going to keep it simple.  In this example from p. 2-8 of the April 1978
-                 * MACRO-10 manual, I will NOT be attempting to collapse null words at the end of ASCIZ sequences
-                 * with other null words, especially if they were defined before the ASCIZ:
-                 *
-                 *      Literals having the same value are collapsed in MACRO's literal pool.
-                 *      Thus for the statements:
-                 *
-                 *              PUSH    P,[0]
-                 *              PUSH    P,[0]
-                 *              MOVEI   1,[ASCIZ /TEST1/]
-                 *
-                 *      the same address is shared by the two literals [0], and by the null word
-                 *      generated at the end of [ASCIZ /TEST1/].
-                 */
-                let lit = this.aLiterals[i];
-                /*
-                 * First things first: verify that the literal is one contiguous zero-based set of words (I'm not sure
-                 * how it couldn't be, but better safe than sorry).
-                 */
-                let aWords = [];
-                let nWords = 0;
-                lit.aWords.forEach(function(w, nLocation) {
-                    if (nLocation === aWords.length) aWords.push(w);
-                    nWords++;
-                });
-                if (nWords == aWords.length) {
-                    /*
-                     * So far, so good.  Now we'll simply brute-force-search our way through the existing set of
-                     * literals, looking for a complete match.
-                     */
-                    for (let nLocation = nLocationLiterals; nLocation + nWords <= this.nLocation; nLocation++) {
-                        let n;
-                        for (n = 0; n < nWords; n++) {
-                            /*
-                             * This check requires that the initial values of the words in the literals match AND that
-                             * their fixup expressions, if any, match as well.  Here again, MACRO-10 may be more aggressive
-                             * in either verifying fixup equality or evaluating any fixups that it can immediately, but
-                             * but I prefer to leave all fixup evaluation where it is (below), after all literals and then
-                             * all variables have been added to the output.
-                             */
-                            if (aWords[n] !== this.aWords[nLocation + n] || lit.aFixups[n] != this.aFixups[nLocation]) break;
-                        }
-                        if (n == nWords) {
-                            this.addSymbol(lit.name, nLocation, Macro10.SYMTYPE.LABEL);
-                            lit = null;
-                            break;
-                        }
-                    }
-                }
-                if (lit) {
-                    this.addSymbol(lit.name, this.nLocation, Macro10.SYMTYPE.LABEL);
-                    lit.aWords.forEach(function(w, nLocation) {
-                        macro10.genWord(w, lit.aFixups[nLocation]);
-                    });
-                }
-            }
+            this.doLiterals();
 
             /*
-             * Now add all variable definitions.
+             * Process all variables next.
              */
-            for (let i = 0; i < this.aVariables.length; i++) {
-                let name = this.aVariables[i];
-                let macro = this.tblMacros[name];
-                if (!macro) {
-                    /*
-                     * This is more of an assert(), because it should never happen, regardless of input.
-                     */
-                    this.error("missing definition for variable '" + name + "'");
-                    continue;
-                }
-                this.parseText(macro.sText);
-            }
+            this.doVariables();
 
             /*
              * And last but not least, perform all fixups.
              */
             this.aFixups.forEach(function processFixup(sValue, nLocation) {
-                let value = macro10.parseExpression(sValue, false, nLocation);
-                if (value === undefined) {
-                    macro10.error("unable to parse expression '" + sValue + "'");
-                    return;
-                }
+                let value = macro10.parseExpression(sValue, undefined, nLocation, macro10.aLineRefs[nLocation]);
+                if (value === undefined) return;
                 value += macro10.aWords[nLocation];
                 macro10.aWords[nLocation] = macro10.truncate(value, nLocation);
             });
@@ -540,7 +535,9 @@ class Macro10 {
             this.println(err.message);
             this.nError = -1;
         }
-        this.dbg.restoreVariables(a);
+
+        if (this.sOptions.indexOf('d') < 0) this.dbg.restoreVariables(a);
+
         return this.nError;
     }
 
@@ -556,22 +553,7 @@ class Macro10 {
      */
     parseLine(sLine, aParms, aValues, aDefaults)
     {
-        var i;
-        if (this.nMacroDef) {
-            if (this.nMacroDef == 1) {
-                i = sLine.indexOf(this.chMacroOpen);
-                if (i >= 0) {
-                    this.nMacroDef++;
-                    sLine = sLine.substr(i+1);
-                } else {
-                    this.error("expected " + this.sOperator + " definition in '" + sLine + "'");
-                }
-            }
-            if (this.nMacroDef > 1) {
-                sLine = this.appendMacro(sLine);
-            }
-            if (this.nMacroDef) return true;
-        }
+        var i, matchLine;
 
         if (this.chASCII != null) {
             sLine = this.defASCII(sLine);
@@ -581,19 +563,33 @@ class Macro10 {
         var sLabel, sOperator = "", sSeparator, sOperands, sRemainder;
 
         while (fParse) {
-            var matchLine = sLine.match(this.reLine);
+            matchLine = sLine.match(this.reLine);
             if (!matchLine || matchLine[5] && matchLine[5].slice(0, 1) != ';') {
                 this.error("failed to parse line '" + sLine + "'");
                 return false;
             }
             fParse = false;
             sOperator = matchLine[2].toUpperCase();
+
+            /*
+             * TODO: The following kludge needs to be fixed at some point.  The goal here is to prevent any
+             * of the caller's parameters from replacing any IRP/IRPC call parameters, but the goal is actually
+             * much bigger than that, because it's not just IRP/IRPC call parameters that must be left intact,
+             * but ANY macro call parameters; IRP/IRPC macros are just easier to pick out.  Unfortunately, as
+             * the code is currently structured, we won't know if we're dealing with any macro call parameters
+             * on this line until parseMacro() is called, below.
+             */
             if (sOperator == Macro10.PSEUDO_OP.IRP || sOperator == Macro10.PSEUDO_OP.IRPC) {
                 aParms = null;
             }
+
             if (aParms) {
                 for (var iParm = 0; iParm < aParms.length; iParm++) {
                     var sParm = aParms[iParm];
+
+                    var macroDef = this.tblMacros[this.sMacroDef];
+                    if (macroDef && macroDef.aParms.indexOf(sParm) >= 0) continue;
+
                     var sReplace = aValues[iParm] || aDefaults[iParm] || "";
                     var iSearch = 0;
                     var iLimit = sLine.length - matchLine[5].length;    // set the limit at the start of the comment, if any
@@ -616,6 +612,22 @@ class Macro10 {
                     }
                 }
                 aParms = null;
+            }
+            if (this.nMacroDef) {
+                if (this.nMacroDef == 1) {
+                    i = sLine.indexOf(this.chMacroOpen);
+                    if (i >= 0) {
+                        this.nMacroDef++;
+                        sLine = sLine.substr(i+1);
+                    } else {
+                        this.error("expected " + this.sOperator + " definition in '" + sLine + "'");
+                    }
+                }
+                if (this.nMacroDef > 1) {
+                    sLine = this.appendMacro(sLine);
+                    fParse = true;
+                }
+                if (this.nMacroDef) return true;
             }
         }
 
@@ -681,16 +693,28 @@ class Macro10 {
                 this.defBLOCK(sOperands);
                 break;
 
+            case Macro10.PSEUDO_OP.BYTE:
+                this.defBYTE(sOperands);
+                break;
+
             case Macro10.PSEUDO_OP.END:
                 this.defEND(sOperands);
                 break;
 
             case Macro10.PSEUDO_OP.EXP:
-                this.defEXP(sOperands);
+                this.defWord(sOperands);
+                break;
+
+            case Macro10.PSEUDO_OP.LIT:
+                this.doLiterals();
                 break;
 
             case Macro10.PSEUDO_OP.LOC:
                 this.defLocation(sOperands);
+                break;
+
+            case Macro10.PSEUDO_OP.VAR:
+                this.doVariables();
                 break;
 
             case Macro10.PSEUDO_OP.XWD:
@@ -698,10 +722,15 @@ class Macro10 {
                 break;
 
             case Macro10.PSEUDO_OP.DEFINE:
+            case Macro10.PSEUDO_OP.IF1:
             case Macro10.PSEUDO_OP.IFDEF:
+            case Macro10.PSEUDO_OP.IFDIF:
             case Macro10.PSEUDO_OP.IFE:
             case Macro10.PSEUDO_OP.IFG:
+            case Macro10.PSEUDO_OP.IFGE:
+            case Macro10.PSEUDO_OP.IFIDN:
             case Macro10.PSEUDO_OP.IFL:
+            case Macro10.PSEUDO_OP.IFLE:
             case Macro10.PSEUDO_OP.IFN:
             case Macro10.PSEUDO_OP.IFNDEF:
             case Macro10.PSEUDO_OP.IRP:
@@ -711,12 +740,17 @@ class Macro10 {
                 this.defMacro(sOperator, sRemainder);
                 break;
 
+            case Macro10.PSEUDO_OP.PURGE:
+                this.delSymbols(sOperands);
+                break;
+
             case Macro10.PSEUDO_OP.LALL:    // TODO
             case Macro10.PSEUDO_OP.LIST:    // TODO
             case Macro10.PSEUDO_OP.NOSYM:   // TODO
             case Macro10.PSEUDO_OP.PAGE:    // TODO
             case Macro10.PSEUDO_OP.SUBTTL:  // TODO
             case Macro10.PSEUDO_OP.TITLE:   // TODO
+            case Macro10.PSEUDO_OP.XALL:    // TODO
             case Macro10.PSEUDO_OP.XLIST:   // TODO
                 break;
 
@@ -731,8 +765,7 @@ class Macro10 {
     /**
      * parseLiteral(name, sText)
      *
-     * This is like parseText() except that we first set up a new scope, which includes new aWords and aFixups
-     * arrays.
+     * This is like parseText() except that we set up a new scope, including new aWords and aFixups arrays.
      *
      * @this {Macro10}
      * @param {string} name
@@ -797,7 +830,12 @@ class Macro10 {
                     this.popScope();
                     if (w !== undefined) {
                         this.aWords[nLocation] += (w & (PDP10.OPCODE.A_FIELD | PDP10.OPCODE.X_FIELD | PDP10.OPCODE.Y_FIELD));
-                        this.aWords[nLocation] |= (w & PDP10.OPCODE.I_FIELD);
+                        /*
+                         * We can't "OR" (|=) the I_FIELD bit into the target word, because it's a 36-bit value and bitwise
+                         * operators truncate to 32 bits, so we'll use addition, trusting that the field was initially zero.
+                         */
+                        this.dbg.assert(!(this.aWords[nLocation] & PDP10.OPCODE.I_FIELD));
+                        this.aWords[nLocation] += (w & PDP10.OPCODE.I_FIELD);
                         if (sFixup) {
                             if (!this.aFixups[nLocation]) {
                                 this.aFixups[nLocation] = sFixup;
@@ -836,6 +874,7 @@ class Macro10 {
 
         switch(sOperator) {
         case Macro10.PSEUDO_OP.IFE:
+        case Macro10.PSEUDO_OP.IFDIF:
         case Macro10.PSEUDO_OP.IFNDEF:
             if (!macro.nOperand) {
                 this.parseText(macro.sText);
@@ -848,14 +887,28 @@ class Macro10 {
             }
             break;
 
+        case Macro10.PSEUDO_OP.IFGE:
+            if (macro.nOperand >= 0) {
+                this.parseText(macro.sText);
+            }
+            break;
+
         case Macro10.PSEUDO_OP.IFL:
             if (macro.nOperand < 0) {
                 this.parseText(macro.sText);
             }
             break;
 
+        case Macro10.PSEUDO_OP.IFLE:
+            if (macro.nOperand <= 0) {
+                this.parseText(macro.sText);
+            }
+            break;
+
+        case Macro10.PSEUDO_OP.IF1:
         case Macro10.PSEUDO_OP.IFN:
         case Macro10.PSEUDO_OP.IFDEF:
+        case Macro10.PSEUDO_OP.IFIDN:
             if (macro.nOperand) {
                 this.parseText(macro.sText);
             }
@@ -955,6 +1008,9 @@ class Macro10 {
     /**
      * getExpression(sOperands, sDelim)
      *
+     * TODO: Add support for IFIDN, IFDIF, IFB and IFNB: if the first non-blank, non-tab character is
+     * a character other than '<', then that becomes the delimiter, allowing angle brackets in the string.
+     *
      * @this {Macro10}
      * @param {string} sOperands
      * @param {string} [sDelim] (eg, comma, closing parenthesis)
@@ -996,7 +1052,7 @@ class Macro10 {
     }
 
     /**
-     * parseExpression(sExp, fPass1, nLocation)
+     * parseExpression(sExp, aUndefined, nLocation, nLine)
      *
      * This is a wrapper around the Debugger's parseExpression() function to take care of some
      * additional requirements we have, such as interpreting a period as the current location and
@@ -1005,74 +1061,58 @@ class Macro10 {
      *
      * @this {Macro10}
      * @param {string} sExp
-     * @param {boolean|undefined} [fPass1]
+     * @param {Array} [aUndefined]
      * @param {number|undefined} [nLocation]
+     * @param {number|undefined} [nLine]
      * @return {number|undefined}
      */
-    parseExpression(sExp, fPass1, nLocation)
+    parseExpression(sExp, aUndefined, nLocation, nLine)
     {
-        var result;
+        var result = -1;
+
+        if (nLocation === undefined) {
+            nLocation = (this.nLocationScope >= 0? this.nLocationScope : this.nLocation);
+        }
+
         /*
-         * Check for the "double comma" syntax that MACRO-10 uses to express a 36-bit value as two 18-bit halves,
-         * and invoke ourselves recursively for each half.
+         * The SIXBIT (and presumably ASCII; not sure about ASCIZ) pseudo-ops can also be used in expressions
+         * (or at least assignments), so we check for those in the given expression and convert them to quoted
+         * sequences that the Debugger's parseExpression() understands.
          */
-        var match = sExp.match(/^([^,]*),,([^,]*)$/);
-        if (!match) {
-            if (nLocation === undefined) {
-                nLocation = (this.nLocationScope >= 0? this.nLocationScope : this.nLocation);
-            }
+        var sEval = sExp.replace(/SIXBIT\s*(\S)(.*?)\1/g, "'$2'").replace(/ASCII\s*(\S)(.*?)\1/g, '"$2"');
 
+        /*
+         * If this is NOT a first-pass call, then let's not waste time calling parseInstruction(); not only
+         * may it generate redundant error messages, but it shouldn't be necessary, because we should be down
+         * to fixup expressions.
+         */
+        if (aUndefined) {
+            var match;
+            var sOperator = "";
+            var sOperands = sEval;
+            if (match = sEval.match(/^([^\s]+)\s*(.*?)\s*$/)) {
+                sOperator = match[1];
+                sOperands = match[2];
+            }
+            result = this.dbg.parseInstruction(sOperator, sOperands, nLocation, aUndefined);
+        }
+
+        if (result < 0) {
             /*
-             * The SIXBIT (and presumably ASCII; not sure about ASCIZ) pseudo-ops can also be used in expressions
-             * (or at least assignments), so we check for those in the given expression and convert them to quoted
-             * sequences that the Debugger's parseExpression() understands.
+             * Check for the "period" syntax that MACRO-10 uses to represent the value of the current location.
+             * The Debugger's parseInstruction() method understands that syntax, but its parseExpression() method
+             * does not.
+             *
+             * Note that the Debugger's parseInstruction() replaces any period not PRECEDED by a decimal
+             * digit with the current address, because our Debuggers' only other interpretation of a period
+             * is as the suffix of a decimal integer, whereas MACRO-10's only other interpretation of a period
+             * is (I think) as the decimal point within a floating-point number, so here we only replace periods
+             * that are not FOLLOWED by a decimal digit.
              */
-            sExp = sExp.replace(/SIXBIT\s*(\S)(.*?)\1/g, "'$2'").replace(/ASCII\s*(\S)(.*?)\1/g, '"$2"');
-
-            /*
-             * If this is NOT a first-pass call, then let's not waste time calling parseInstruction(); not only
-             * may it generate redundant error messages, but it shouldn't be necessary, because we should be down
-             * to fixup expressions.
-             */
-            result = -1;
-            if (fPass1 !== false) {
-                var sOperator = "";
-                var sOperands = sExp;
-                if (match = sExp.match(/^([^\s]+)\s*(.*?)\s*$/)) {
-                    sOperator = match[1];
-                    sOperands = match[2];
-                }
-                result = this.dbg.parseInstruction(sOperator, sOperands, nLocation, fPass1, true);
-            }
-
-            if (result < 0) {
-                /*
-                 * Check for the "period" syntax that MACRO-10 uses to represent the value of the current location.
-                 * The Debugger's parseInstruction() method understands that syntax, but its parseExpression() method
-                 * does not.
-                 *
-                 * Note that the Debugger's parseInstruction() replaces any period not PRECEDED by a decimal
-                 * digit with the current address, because our Debuggers' only other interpretation of a period
-                 * is as the suffix of a decimal integer, whereas MACRO-10's only other interpretation of a period
-                 * is (I think) as the decimal point within a floating-point number, so here we only replace
-                 * periods that are not FOLLOWED by a decimal digit.
-                 */
-                if (fPass1 === false) fPass1 = undefined;
-                result = this.dbg.parseExpression(sExp.replace(/\.([^0-9]|$)/g, this.dbg.toStrBase(nLocation, -1) + "$1"), fPass1);
-                if (result === undefined) {
-                    this.error("unable to parse expression '" + sExp + "'");
-                }
-            }
-        } else {
-            var wLeft = match[1]? this.parseExpression(match[1], fPass1, nLocation) : 0;
-            if (wLeft !== undefined) {
-                var wRight = match[2]? this.parseExpression(match[2], fPass1, nLocation) : 0;
-                if (wRight !== undefined) {
-                    /*
-                     * NOTE: These must be combined as UNSIGNED values, so that's what we tell truncate() to produce.
-                     */
-                    result = this.dbg.truncate(wLeft, 18, true) * Math.pow(2, 18) + this.dbg.truncate(wRight, 18, true);
-                }
+            sEval = sEval.replace(/\.([^0-9]|$)/g, this.dbg.toStrBase(nLocation, -1) + "$1");
+            result = this.dbg.parseExpression(sEval, aUndefined);
+            if (result === undefined) {
+                this.error("unable to parse expression '" + sExp + "'", nLine);
             }
         }
         return result;
@@ -1149,13 +1189,13 @@ class Macro10 {
         var iURL = 0;
         while (nLine > this.anLines[iURL]) {
             nLine -= this.anLines[iURL];
-            if (iURL < this.asURLs.length - 1) {
+            if (iURL < this.aURLs.length - 1) {
                 iURL++;
             } else {
                 break;
             }
         }
-        return Str.getBaseName(this.asURLs[iURL] + " line " + nLine);
+        return Str.getBaseName(this.aURLs[iURL] + " line " + nLine);
     }
 
     /**
@@ -1487,25 +1527,40 @@ class Macro10 {
             /*
              * This must be a REPEAT or CONDITIONAL block.
              */
-            var sOperand = this.getExpression(sOperands);
-            if (!sOperand) {
-                this.error("missing " + sOperator + " expression '" + sOperands + "'");
-                return sOperands;
+            if (sOperator == Macro10.PSEUDO_OP.IF1) {
+                nOperand = 1;
+                if (sOperands[0] == ',') sOperands = sOperands.substr(1).trim();
             }
-            sOperands = sOperands.substr(sOperand.length + 1);
-            sOperand = sOperand.trim();
+            else {
+                var sOperand = this.getExpression(sOperands);
+                if (!sOperand) {
+                    this.error("missing " + sOperator + " expression '" + sOperands + "'");
+                    return sOperands;
+                }
+                sOperands = sOperands.substr(sOperand.length + 1);
+                sOperand = sOperand.trim();
+                if (sOperator == Macro10.PSEUDO_OP.IFDIF || sOperator == Macro10.PSEUDO_OP.IFIDN) {
+                    var sOperand2 = this.getExpression(sOperands);
+                    if (!sOperand2) {
+                        this.error("missing second " + sOperator + " expression '" + sOperands + "'");
+                        return sOperands;
+                    }
+                    sOperands = sOperands.substr(sOperand2.length + 1);
+                    sOperand2 = sOperand2.trim();
+                    nOperand = (sOperand == sOperand2)? 1 : 0;
+                }
+                if (sOperator == Macro10.PSEUDO_OP.IFDEF || sOperator == Macro10.PSEUDO_OP.IFNDEF) {
+                    nOperand = this.isDefined(sOperand)? 1 : 0;
+                } else {
+                    /*
+                     * The expression is either a repeat count or a condition.  Either way, we must be able to
+                     * resolve it now, so we don't set fPass1 (but that doesn't mean it's the second pass, either).
+                     */
+                    nOperand = this.parseExpression(sOperand) || 0;
+                }
+            }
             match = sOperands.match(/\s*(<|)([\s\S]*)/i);
             name = '?' + sOperator;
-
-            if (sOperator == Macro10.PSEUDO_OP.IFDEF || sOperator == Macro10.PSEUDO_OP.IFNDEF) {
-                nOperand = this.isDefined(sOperand)? 1 : 0;
-            } else {
-                /*
-                 * The expression is either a repeat count or a condition.  Either way, we must be able to
-                 * resolve it now, so we don't set fPass1 (but that doesn't mean it's the second pass, either).
-                 */
-                nOperand = this.parseExpression(sOperand) || 0;
-            }
             iMatch = 1;
         }
 
@@ -1571,22 +1626,22 @@ class Macro10 {
     {
         name = name.toUpperCase().substr(0, 6);
         if ((nType & Macro10.SYMTYPE.LABEL) && this.tblSymbols[name] !== undefined) {
-            this.error("label '" + name + "' redefined");
+            this.error("redefined label '" + name + "'");
             return;
         }
-        var sUndefined = null;
+        var sUndefined = undefined;
         if (typeof value == 'string') {
-            /*
-             * We now pass true to parseExpression() to allow at least one undefined symbol to exist in the expression,
-             * which we will record alongside the variable.
-             */
-            var v = this.parseExpression(value, true);
+            var aUndefined = [];
+            var v = this.parseExpression(value, aUndefined);
             if (v === undefined) {
-                this.error("parseExpression(" + value + ") failed");
+                this.error("invalid symbol '" + name + "': " + value);
                 return;
             }
+            if (aUndefined.length > 1) {
+                this.error("too many undefined symbols in '" + name + "': " + aUndefined.join());
+            }
             value = v;
-            sUndefined = this.dbg.sUndefined;
+            sUndefined = aUndefined[0];
         }
         var sym = this.tblSymbols[name];
         if (sym) {
@@ -1610,10 +1665,58 @@ class Macro10 {
     defBLOCK(sOperands)
     {
         var w = this.parseExpression(sOperands);
-        if (w !== undefined && this.dbg.sUndefined == null && w >= 0 && w <= 0o777777) {
+        if (w !== undefined && w >= 0 && w <= 0o777777) {
             this.nLocation += w;    // while (w--) this.genWord(0);
         } else {
             this.error("unrecognized BLOCK expression '" + sOperands + "'");
+        }
+    }
+
+    /**
+     * defBYTE()
+     *
+     * Processes the BYTE pseudo-op.
+     *
+     * @this {Macro10}
+     * @param {string} sOperands
+     */
+    defBYTE(sOperands)
+    {
+        var sOperand;
+        var nBits = 0, nValue = 0, nBitsRemaining = 36;
+
+        while (sOperand = this.getExpression(sOperands)) {
+            sOperands = sOperands.substr(sOperand.length).trim();
+            var sValue = sOperand;
+            var match = sOperand.match(/^\((.*)\)\s*(.*)$/);
+            if (match) {
+                if (match[1]) nBits = this.parseExpression("^D" + match[1]);
+                sValue = match[2];
+            }
+            if (!nBits) {
+                /*
+                 * According the the 1978 MACRO-10 spec, "If the byte size is 0 or is missing (empty parentheses), a zero word
+                 * is generated."  I'm not clear exactly on how to interpret this, so I'll make a simplistic assumption for now.
+                 */
+                this.genWord(0);
+                continue;
+            }
+            var v = sValue? this.parseExpression(sValue) : 0;
+            if (v === undefined || nBits < 0 || nBits > 36) {
+                this.error("unexpected BYTE operand: " + sOperand);
+                break;
+            }
+            v = this.dbg.truncate(v, nBits, true);
+            if (nBitsRemaining < nBits) {
+                this.genWord(nValue);
+                nValue = 0;
+                nBitsRemaining = 36;
+            }
+            nValue += v * Math.pow(2, nBitsRemaining - nBits);
+            nBitsRemaining -= nBits;
+        }
+        if (nBitsRemaining < 36) {
+            this.genWord(nValue);
         }
     }
 
@@ -1630,28 +1733,10 @@ class Macro10 {
         if (!sOperands) {
             this.addrStart = this.addrLoad;
         } else {
-            this.addrStart = this.parseExpression(sOperands, true);
+            this.addrStart = this.parseExpression(sOperands);
             if (this.addrStart === undefined) {
                 this.error("unrecognized END expression '" + sOperands + "'");
             }
-        }
-    }
-
-    /**
-     * defEXP()
-     *
-     * Processes the EXP pseudo-op.
-     *
-     * @this {Macro10}
-     * @param {string} sOperands
-     */
-    defEXP(sOperands)
-    {
-        var w = this.parseExpression(sOperands, true);
-        if (w !== undefined) {
-            this.genWord(w, this.dbg.sUndefined);
-        } else {
-            this.error("unrecognized EXP expression '" + sOperands + "'");
         }
     }
 
@@ -1673,15 +1758,15 @@ class Macro10 {
      *
      * Processes the XWD pseudo-op.
      *
-     * Since the XWD pseudo-op appears to be equivalent to two values separated by two commas, which defEXP() must also
-     * support, we can piggy-back on defExp().
+     * Since the XWD pseudo-op appears to be equivalent to two values separated by two commas, which defWord() must also
+     * support, we can piggy-back on defWord().
      *
      * @this {Macro10}
      * @param {string} sOperands
      */
     defXWD(sOperands)
     {
-        this.defEXP(sOperands.replace(",", ",,"));
+        this.defWord(sOperands.replace(",", ",,"));
     }
 
     /**
@@ -1689,20 +1774,146 @@ class Macro10 {
      *
      * @this {Macro10}
      * @param {string} sOperator
-     * @param {string} sSeparator
-     * @param {string} sOperands
+     * @param {string} [sSeparator]
+     * @param {string} [sOperands]
      */
-    defWord(sOperator, sSeparator, sOperands)
+    defWord(sOperator, sSeparator = "", sOperands = "")
     {
+        var aUndefined = [];
         var sExp = (sOperator + sSeparator + sOperands).trim();
-
-        var w = this.parseExpression(sExp, true);
-
+        var w = this.parseExpression(sExp, aUndefined);
         if (w !== undefined) {
-            this.genWord(w, this.dbg.sUndefined);
+            if (!aUndefined.length) {
+                this.genWord(w);
+            } else if (aUndefined.length == 1) {
+                this.genWord(w, aUndefined[0]);
+            }
+            else {
+                this.genWord(0, sExp);
+            }
         } else {
             this.error("unrecognized word expression '" + sExp + "'");
         }
+    }
+
+    /**
+     * delSymbols(sOperands)
+     *
+     * @this {Macro10}
+     * @param {string} sOperands
+     */
+    delSymbols(sOperands)
+    {
+        var aValues = this.getValues(sOperands);
+        for (var i = 0; i < aValues.length; i++) {
+            this.dbg.delVariable(aValues[i]);
+            delete this.tblSymbols[aValues[i]];
+        }
+    }
+
+    /**
+     * doLiterals()
+     *
+     * @this {Macro10}
+     */
+    doLiterals()
+    {
+        let nLocationLiterals = this.nLocation;
+
+        for (let i = 0; i < this.aLiterals.length; i++) {
+            /*
+             * Apparently, the time has come to implement "literal collapsing"; I was treating it as just
+             * a nice optimization, but it turns out that DEC has written tests that actually DEPEND on it:
+             *
+             *      C26300: HRRZI   [135531,,246642]    ;PRELOAD AC0 WITH 0,, LITERAL ADDRESS
+             *              JRA     .+1                 ;*JRA SHOULD PLACE C(AC0) INTO AC0
+             *              CAIE    [135531,,246642]    ;PASS IF JRA PLACED C(AC0) INTO AC0
+             *              STOP
+             *
+             * If the HRRZI and CAIE instructions don't refer to the same exact literal, the test will fail.
+             * For purposes of this particular test, the values they stuffed into the literals are essentially
+             * gibberish, but the same literal may be used in another test where the values are significant.
+             *
+             * However, I'm still going to keep it simple.  In this example from p. 2-8 of the April 1978
+             * MACRO-10 manual, I will NOT be attempting to collapse null words at the end of ASCIZ sequences
+             * with other null words, especially if they were defined before the ASCIZ:
+             *
+             *      Literals having the same value are collapsed in MACRO's literal pool.
+             *      Thus for the statements:
+             *
+             *              PUSH    P,[0]
+             *              PUSH    P,[0]
+             *              MOVEI   1,[ASCIZ /TEST1/]
+             *
+             *      the same address is shared by the two literals [0], and by the null word
+             *      generated at the end of [ASCIZ /TEST1/].
+             */
+            let lit = this.aLiterals[i];
+            /*
+             * First things first: verify that the literal is one contiguous zero-based set of words (I'm not sure
+             * how it couldn't be, but better safe than sorry).
+             */
+            let aWords = [];
+            let nWords = 0;
+            lit.aWords.forEach(function(w, nLocation) {
+                if (nLocation === aWords.length) aWords.push(w);
+                nWords++;
+            });
+            if (nWords == aWords.length) {
+                /*
+                 * So far, so good.  Now we'll simply brute-force-search our way through the existing set of
+                 * literals, looking for a complete match.
+                 */
+                for (let nLocation = nLocationLiterals; nLocation + nWords <= this.nLocation; nLocation++) {
+                    let n;
+                    for (n = 0; n < nWords; n++) {
+                        /*
+                         * This check requires that the initial values of the words in the literals match AND that
+                         * their fixup expressions, if any, match as well.  Here again, MACRO-10 may be more aggressive
+                         * in either verifying fixup equality or evaluating any fixups that it can immediately, but
+                         * but I prefer to leave all fixup evaluation where it is (below), after all literals and then
+                         * all variables have been added to the output.
+                         */
+                        if (aWords[n] !== this.aWords[nLocation + n] || lit.aFixups[n] != this.aFixups[nLocation]) break;
+                    }
+                    if (n == nWords) {
+                        this.addSymbol(lit.name, nLocation, Macro10.SYMTYPE.LABEL);
+                        lit = null;
+                        break;
+                    }
+                }
+            }
+            if (lit) {
+                var macro10 = this;
+                this.addSymbol(lit.name, this.nLocation, Macro10.SYMTYPE.LABEL);
+                lit.aWords.forEach(function(w, nLocation) {
+                    macro10.genWord(w, lit.aFixups[nLocation]);
+                });
+            }
+        }
+        this.aLiterals = [];
+    }
+
+    /**
+     * doVariables()
+     *
+     * @this {Macro10}
+     */
+    doVariables()
+    {
+        for (let i = 0; i < this.aVariables.length; i++) {
+            let name = this.aVariables[i];
+            let macro = this.tblMacros[name];
+            if (!macro) {
+                /*
+                 * This is more of an assert(), because it should never happen, regardless of input.
+                 */
+                this.error("missing definition for variable '" + name + "'");
+                continue;
+            }
+            this.parseText(macro.sText);
+        }
+        this.aVariables = [];
     }
 
     /**
@@ -1751,16 +1962,17 @@ class Macro10 {
     }
 
     /**
-     * genWord(value, sFixup)
+     * genWord(value, sUndefined)
      *
      * @this {Macro10}
      * @param {number} value (default value for the current location)
-     * @param {string|null|undefined} [sFixup] (optional fixup value to evaluate later)
+     * @param {string} [sUndefined] (optional fixup to evaluate later)
      */
-    genWord(value, sFixup)
+    genWord(value, sUndefined)
     {
         this.aWords[this.nLocation] = this.truncate(value);
-        if (sFixup != null) this.aFixups[this.nLocation] = sFixup;
+        if (sUndefined !== undefined) this.aFixups[this.nLocation] = sUndefined;
+        this.aLineRefs[this.nLocation] = this.nLine;
         this.nLocation++;
     }
 
@@ -1832,28 +2044,38 @@ Macro10.PSEUDO_OP = {
     ASCII:      "ASCII",
     ASCIZ:      "ASCIZ",
     BLOCK:      "BLOCK",
+    BYTE:       "BYTE",
     DEFINE:     "DEFINE",
     END:        "END",
     EXP:        "EXP",
+    IF1:        "IF1",
     IFDEF:      "IFDEF",
+    IFDIF:      "IFDIF",
     IFE:        "IFE",
     IFG:        "IFG",
+    IFGE:       "IFGE",
+    IFIDN:      "IFIDN",
     IFL:        "IFL",
+    IFLE:       "IFLE",
     IFN:        "IFN",
     IFNDEF:     "IFNDEF",
     IRP:        "IRP",
     IRPC:       "IRPC",
     LALL:       "LALL",
+    LIT:        "LIT",
     LITERAL:    "LITERAL",      // this is a pseudo-pseudo-op, for internal use only
     LIST:       "LIST",
     LOC:        "LOC",
     NOSYM:      "NOSYM",
     OPDEF:      "OPDEF",
     PAGE:       "PAGE",
+    PURGE:      "PURGE",
     REPEAT:     "REPEAT",
     SIXBIT:     "SIXBIT",
     SUBTTL:     "SUBTTL",
     TITLE:      "TITLE",
+    VAR:        "VAR",
+    XALL:       "XALL",
     XWD:        "XWD",
     XLIST:      "XLIST"
 };

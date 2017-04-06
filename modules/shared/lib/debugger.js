@@ -109,19 +109,6 @@ class Debugger extends Component
              */
             this.nBits = 32;
 
-            /*
-             * sUndefined is set to the last unknown variable that parseExpression() encounters, if if
-             * is called in "quiet mode"; the value used for the variable is zero.  This mode was added
-             * for components that need to support expressions containing "fixups" (ie, values that
-             * must be determined later).
-             *
-             * TODO: Only one unknown (fixup) per expression is supported, and we don't indicate what
-             * operation was performed with the value (callers generally assume addition).  If a call
-             * encounters more than one undefined value, it will revert to normal error reporting and
-             * return an undefined value for the entire expression.
-             */
-            this.sUndefined = null;
-
             this.achGroup = ['{','}'];
             this.achAddress = ['[',']'];
 
@@ -594,6 +581,9 @@ class Debugger extends Component
             case '||':
                 valNew = (val1 || val2? 1 : 0);
                 break;
+            case ',,':
+                valNew = this.truncate(val1, 18, true) * Math.pow(2, 18) + this.truncate(val2, 18, true);
+                break;
             case '_':
             case '^_':
                 valNew = val1;
@@ -625,7 +615,7 @@ class Debugger extends Component
     }
 
     /**
-     * parseArray(asValues, iValue, iLimit, nBase, fQuiet)
+     * parseArray(asValues, iValue, iLimit, nBase, aUndefined)
      *
      * parseExpression() takes a complete expression and divides it into array elements, where even elements
      * are values (which may be empty if two or more operators appear consecutively) and odd elements are operators.
@@ -643,10 +633,10 @@ class Debugger extends Component
      * @param {number} iValue
      * @param {number} iLimit
      * @param {number} nBase
-     * @param {boolean} [fQuiet]
+     * @param {Array|undefined} [aUndefined]
      * @return {number|undefined}
      */
-    parseArray(asValues, iValue, iLimit, nBase, fQuiet)
+    parseArray(asValues, iValue, iLimit, nBase, aUndefined)
     {
         var value;
         var sValue, sOp;
@@ -663,7 +653,7 @@ class Debugger extends Component
             sOp = (iValue < iLimit? asValues[iValue++] : "");
 
             if (sValue) {
-                v = this.parseValue(sValue, null, fQuiet, nUnary);
+                v = this.parseValue(sValue, null, aUndefined, nUnary);
             } else {
                 if (sOp == '{') {
                     var cOpen = 1;
@@ -677,7 +667,7 @@ class Debugger extends Component
                             if (!--cOpen) break;
                         }
                     }
-                    v = this.parseArray(asValues, iStart, iValue-1, this.nBase, fQuiet);
+                    v = this.parseArray(asValues, iStart, iValue-1, this.nBase, aUndefined);
                     if (v != null && nUnary) {
                         v = this.parseUnary(v, nUnary);
                     }
@@ -730,12 +720,12 @@ class Debugger extends Component
             }
 
             if (v === undefined) {
-                if (this.sUndefined == null && fQuiet) {
-                    this.sUndefined = sValue;
+                if (aUndefined) {
+                    aUndefined.push(sValue);
                     v = 0;
                 } else {
                     fError = true;
-                    fQuiet = !fQuiet;
+                    aUndefined = [];
                     break;
                 }
             }
@@ -786,7 +776,7 @@ class Debugger extends Component
         if (!fError) {
             value = aVals.pop();
             this.assert(!aVals.length);
-        } else if (fQuiet === false) {
+        } else if (!aUndefined) {
             this.println("parse error (" + (sValue || sOp) + ")");
         }
 
@@ -795,17 +785,16 @@ class Debugger extends Component
     }
 
     /**
-     * parseASCII(sExp, chDelim, nBits, cchMax, fQuiet)
+     * parseASCII(sExp, chDelim, nBits, cchMax)
      *
      * @this {Debugger}
      * @param {string} sExp
      * @param {string} chDelim
      * @param {number} nBits
      * @param {number} cchMax
-     * @param {boolean} [fQuiet] (true for quiet parsing)
-     * @return {string}
+     * @return {string|undefined}
      */
-    parseASCII(sExp, chDelim, nBits, cchMax, fQuiet)
+    parseASCII(sExp, chDelim, nBits, cchMax)
     {
         var i;
         while ((i = sExp.indexOf(chDelim)) >= 0) {
@@ -829,8 +818,8 @@ class Debugger extends Component
                 v = this.truncate(v * Math.pow(2, nBits) + c, nBits * cchMax, true);
             }
             if (cch >= 0) {
-                if (fQuiet === false) this.println("parse error (" + sExp + ")");
-                break;
+                this.println("parse error (" + chDelim + sExp + chDelim + ")");
+                return undefined;
             } else {
                 sExp = sExp.substr(0, i) + this.toStrBase(v, -1) + sExp.substr(j);
             }
@@ -858,15 +847,20 @@ class Debugger extends Component
      * predecessor is encountered, evaluate, and push the result back onto aVals.  Only selected unary
      * operators are supported (eg, negate and complement); no ternary operators like '?:' are supported.
      *
+     * fQuiet can be used to pass an array that collects any undefined variables that parseExpression()
+     * encounters; the value of an undefined variable is zero.  This mode was added for components that need
+     * to support expressions containing "fixups" (ie, values that must be determined later).
+     *
      * @this {Debugger}
      * @param {string|undefined} sExp
-     * @param {boolean} [fQuiet] (true for quiet parsing)
+     * @param {Array|undefined|boolean} [fQuiet]
      * @return {number|undefined} numeric value, or undefined if sExp contains any undefined or invalid values
      */
     parseExpression(sExp, fQuiet)
     {
         var value = undefined;
-        this.sUndefined = null;
+        var fPrint = (fQuiet === false);
+        var aUndefined = Array.isArray(fQuiet)? fQuiet : undefined;
 
         if (sExp) {
 
@@ -888,9 +882,9 @@ class Debugger extends Component
              * Quoted ASCII characters can have a numeric value, too, which must be converted now, to avoid any
              * conflicts with the operators below.
              */
-            sExp = this.parseASCII(sExp, '"', 7, 5, fQuiet);    // MACRO-10 packs up to 5 7-bit ASCII codes into a value
+            sExp = this.parseASCII(sExp, '"', 7, 5);    // MACRO-10 packs up to 5 7-bit ASCII codes into a value
             if (!sExp) return value;
-            sExp = this.parseASCII(sExp, "'", 6, 6, fQuiet);    // MACRO-10 packs up to 6 6-bit ASCII (SIXBIT) codes into a value
+            sExp = this.parseASCII(sExp, "'", 6, 6);    // MACRO-10 packs up to 6 6-bit ASCII (SIXBIT) codes into a value
             if (!sExp) return value;
 
             /*
@@ -928,11 +922,11 @@ class Debugger extends Component
              * to remove spaces entirely, because if an operator-less expression like "A B" was passed in, we would want
              * that to generate an error; if we converted it to "AB", evaluation might inadvertently succeed.
              */
-            var regExp = /({|}|\|\||&&|\||\^!|\^B|\^O|\^D|\^L|\^-|~|\^_|_|&|!=|!|==|>=|>>>|>>|>|<=|<<|<|-|\+|\^\/|\/|\*| )/;
+            var regExp = /({|}|\|\||&&|\||\^!|\^B|\^O|\^D|\^L|\^-|~|\^_|_|&|!=|!|==|>=|>>>|>>|>|<=|<<|<|-|\+|\^\/|\/|\*|,,| )/;
             sExp = sExp.replace(/(^|[^A-Z0-9$%.])([0-9]+)B/, "$1$2^_").replace(/\s+/g, ' ');
             var asValues = sExp.split(regExp);
-            value = this.parseArray(asValues, 0, asValues.length, this.nBase, fQuiet);
-            if (value !== undefined && fQuiet === false) {
+            value = this.parseArray(asValues, 0, asValues.length, this.nBase, aUndefined);
+            if (value !== undefined && fPrint) {
                 this.printValue(null, value);
             }
         }
@@ -1060,13 +1054,15 @@ class Debugger extends Component
      * @this {Debugger}
      * @param {string|undefined} sValue
      * @param {string|null} [sName] is the name of the value, if any
-     * @param {boolean} [fQuiet]
+     * @param {Array|undefined|boolean} [fQuiet]
      * @param {number} [nUnary] (0 for none, 1 for negate, 2 for complement, 3 for leading zeros)
      * @return {number|undefined} numeric value, or undefined if sValue is either undefined or invalid
      */
     parseValue(sValue, sName, fQuiet, nUnary = 0)
     {
         var value;
+        var aUndefined = Array.isArray(fQuiet)? fQuiet : undefined;
+
         if (sValue != null) {
             var iReg = this.getRegIndex(sValue);
             if (iReg >= 0) {
@@ -1076,28 +1072,32 @@ class Debugger extends Component
                 if (value != null) {
                     var sUndefined = this.getVariableFixup(sValue);
                     if (sUndefined) {
-                        if (!this.sUndefined) {
-                            this.sUndefined = sUndefined;
+                        if (aUndefined) {
+                            aUndefined.push(sUndefined);
                         } else {
-                            if (!fQuiet) {
-                                this.println(sValue + " has too many undefined values (" + sUndefined + ',' + this.sUndefined + ")");
-                                fQuiet = true;
+                            var valueUndefined = this.parseExpression(sUndefined, fQuiet);
+                            if (valueUndefined !== undefined) {
+                                value += valueUndefined;
+                            } else {
+                                if (!fQuiet) {
+                                    this.println("undefined " + (sName || "value") + ": " + sValue + " (" + sUndefined + ")");
+                                }
+                                value = undefined;
                             }
-                            value = undefined;
                         }
                     }
                 } else {
                     /*
                      * A feature of MACRO-10 is that any single-digit number is automatically interpreted as base-10.
                      */
-                    value = Str.parseInt(sValue, sValue.length > 1? this.nBase : 10);
+                    value = Str.parseInt(sValue, sValue.length > 1 || this.nBase > 10? this.nBase : 10);
                 }
             }
             if (value != null) {
                 value = this.truncate(this.parseUnary(value, nUnary));
             } else {
                 if (!fQuiet) {
-                    this.println("invalid " + (sName? sName : "value") + ": " + sValue);
+                    this.println("invalid " + (sName || "value") + ": " + sValue);
                 }
             }
         } else {
@@ -1169,13 +1169,17 @@ class Debugger extends Component
      */
     printVariable(sVar)
     {
-        if (sVar) {
-            return this.printValue(sVar, this.aVariables[sVar].value);
-        }
         var cVariables = 0;
-        for (sVar in this.aVariables) {
-            this.printValue(sVar, this.aVariables[sVar].value);
-            cVariables++;
+        if (this.aVariables) {
+            if (sVar) {
+                return this.printValue(sVar, this.aVariables[sVar] && this.aVariables[sVar].value);
+            }
+            var aVars = Object.keys(this.aVariables);
+            aVars.sort();
+            for (var i = 0; i < aVars.length; i++) {
+                this.printValue(aVars[i], this.aVariables[aVars[i]].value);
+                cVariables++;
+            }
         }
         return cVariables > 0;
     }
@@ -1200,6 +1204,10 @@ class Debugger extends Component
      */
     getVariable(sVar)
     {
+        if (this.aVariables[sVar]) {
+            return this.aVariables[sVar].value;
+        }
+        sVar = sVar.substr(0, 6);
         return this.aVariables[sVar] && this.aVariables[sVar].value;
     }
 
@@ -1233,7 +1241,7 @@ class Debugger extends Component
      * @this {Debugger}
      * @param {string} sVar
      * @param {number} value
-     * @param {string|null} [sUndefined]
+     * @param {string|undefined} [sUndefined]
      */
     setVariable(sVar, value, sUndefined)
     {
@@ -1317,6 +1325,7 @@ if (DEBUGGER) {
         '}':    20      // close grouped expression (converted from achGroup[1])
     };
     Debugger.aDECOpPrecedence = {
+        ',,':   1,      // high-word,,low-word
         '||':   5,      // logical OR
         '&&':   6,      // logical AND
         '!=':   10,     // inequality

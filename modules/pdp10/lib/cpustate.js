@@ -910,7 +910,7 @@ class CPUStatePDP10 extends CPUPDP10 {
                  * non-DEBUGGER builds.
                  */
                 if (DEBUGGER && (this.opFlags & PDP10.OPFLAG.DEBUGGER)) {
-                    if (this.dbg.checkInstruction(this.getPC(), nDebugState)) {
+                    if (this.dbg.checkInstruction(this.getXC(), nDebugState)) {
                         this.stopCPU();
                         break;
                     }
@@ -927,7 +927,7 @@ class CPUStatePDP10 extends CPUPDP10 {
                  */
                 if ((this.opFlags & (PDP10.OPFLAG.IRQ_MASK | PDP10.OPFLAG.WAIT)) /* && nDebugState >= 0 */) {
                     if (this.checkInterrupts()) {
-                        if ((this.opFlags & PDP10.OPFLAG.DEBUGGER) && this.dbg.checkInstruction(this.getPC(), nDebugState)) {
+                        if ((this.opFlags & PDP10.OPFLAG.DEBUGGER) && this.dbg.checkInstruction(this.getXC(), nDebugState)) {
                             this.stopCPU();
                             break;
                         }

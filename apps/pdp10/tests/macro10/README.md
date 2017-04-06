@@ -7,7 +7,7 @@ machines:
     type: pdp10
     config: /devices/pdp10/machine/ka10/test/debugger/machine.xml
     debugger: true
-    commands: a 100 /apps/pdp10/tests/macro10/TEXT.MAC
+    commands: a 100 TEXT.MAC; db 100 l4
 ---
 
 PDPjs MACRO-10 Mini-Assembler Tests
@@ -31,7 +31,6 @@ Assemble [TEXT.MAC](TEXT.MAC.txt):
 
 Verify the following results:
 
-	starting PCjs MACRO-10 Mini-Assembler...
 	loading TEXT.MAC
 	4 words loaded at 000100-000103
 	00=000000000000 01=000000000000 02=000000000000 03=000000000000 
