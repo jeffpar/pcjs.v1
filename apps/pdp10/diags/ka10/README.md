@@ -17,16 +17,16 @@ are provided below.
 I've also experimented with assembling these diagnostics from the original (unmodified) source files.  For example,
 you can go to the [DAKAK Diagnostic](dakak/) page and try the following command:
 
-	a 'dakakt.mac;../param.klm;../fixed.klm;dakakm.mac;../uuoerr.klm;../stor.klm'
+	a 'DAKAKT.MAC;../PARAM.KLM;../FIXED.KLM;DAKAKM.MAC;../UUOERR.KLM;../STOR.KLM'
 
 and while the MACRO-10 assembly process works:
 
-	loading dakakt.mac
-	loading param.klm
-	loading fixed.klm
-	loading dakakm.mac
-	loading uuoerr.klm
-	loading stor.klm
+	loading DAKAKT.MAC
+	loading PARAM.KLM
+	loading FIXED.KLM
+	loading DAKAKM.MAC
+	loading UUOERR.KLM
+	loading STOR.KLM
 	6301 words loaded at 000137-044630, start address 030000
 	00=000000000000 01=000000000000 02=000000000000 03=000000000000 
 	04=000000000000 05=000000000000 06=000000000000 07=000000000000 
@@ -39,8 +39,8 @@ there are additional modules that must be loaded into the machine as well, which
 to assemble the modified files that I've placed inside each diagnostic's folder.  For the [DAKAK Diagnostic](dakak/),
 that's **DAKAK.MAC**: 
 
-	>> a dakak.mac
-	loading dakak.mac
+	>> a DAKAK.MAC
+	loading DAKAK.MAC
 	5849 words loaded at 000137-044133, start address 030621
 	00=000000000000 01=000000000000 02=000000000000 03=000000000000 
 	04=000000000000 05=000000000000 06=000000000000 07=000000000000 

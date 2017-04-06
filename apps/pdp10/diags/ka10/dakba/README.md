@@ -7,7 +7,7 @@ machines:
     type: pdp10
     config: /devices/pdp10/machine/ka10/test/debugger/machine.xml
     debugger: true
-    commands: a dakba.mac
+    commands: a DAKBA.MAC
 ---
 
 PDP-10 KA10 Basic Instruction Reliability Test #1

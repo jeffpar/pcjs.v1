@@ -7,7 +7,7 @@ machines:
     type: pdp10
     config: /devices/pdp10/machine/ka10/test/debugger/machine.xml
     debugger: true
-    commands: a dakak.mac
+    commands: a DAKAK.MAC
 ---
 
 PDP-10 KA10 Basic Instruction Diagnostic #11
@@ -43,7 +43,7 @@ assemble it, and then load the binary image at the location specified in the fil
 
 To assemble the diagnostic using the original DEC source files:
 
-	a 'dakakt.mac;../param.klm;../fixed.klm;dakakm.mac;../uuoerr.klm;../stor.klm'
+	a 'DAKAKT.MAC;../PARAM.KLM;../FIXED.KLM;DAKAKM.MAC;../UUOERR.KLM;../STOR.KLM'
 
 The quotes (either single or double) are required to prevent the PDPjs Debugger from interpreting the filenames as
 separate commands, because a semicolon is the Debugger's normal command separator.
@@ -51,12 +51,12 @@ separate commands, because a semicolon is the Debugger's normal command separato
 If you want a machine to automatically assemble and load those files on startup, you can add the following machine configuration
 setting in the page's Front Matter:
 
-    commands: a &apos;dakakt.mac;../param.klm;../fixed.klm;dakakm.mac;../uuoerr.klm;../stor.klm&apos;
+    commands: a &apos;DAKAKT.MAC;../PARAM.KLM;../FIXED.KLM;DAKAKM.MAC;../UUOERR.KLM;../STOR.KLM&apos;
 
 However, in this case, you *must* use `&apos;` as the quoting sequence, because of the way these settings are encoded into
 JavaScript parameters; e.g.:
 
-	embedPDP10(...,'{commands:"a &apos;dakakt.mac;../param.klm;../fixed.klm;dakakm.mac;../uuoerr.klm;../stor.klm&apos;"}');
+	embedPDP10(...,'{commands:"a &apos;DAKAKT.MAC;../PARAM.KLM;../FIXED.KLM;DAKAKM.MAC;../UUOERR.KLM;../STOR.KLM&apos;"}');
 
 Issues
 ------
