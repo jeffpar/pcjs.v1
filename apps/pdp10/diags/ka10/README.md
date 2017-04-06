@@ -11,46 +11,8 @@ PCjs has archived selected KA10 diagnostic source files from the
 [PDP-10 KLAD Diagnostics Sources](http://pdp-10.trailing-edge.com/klad_sources/index.html) and turned them into
 stand-alone PDP-10 diagnostics, using the new PCjs [MACRO-10 Mini-Assembler](/modules/pdp10/lib/macro10.js).
 
-Complete lists of supported [diagnostics](#list-of-ka10-diagnostics) and [reliability tests](#list-of-ka10-reliability-tests)
-are provided below.
-
-I've also experimented with assembling these diagnostics from the original (unmodified) source files.  For example,
-you can go to the [DAKAK Diagnostic](dakak/) page and try the following command:
-
-	a 'DAKAKT.MAC;../PARAM.KLM;../FIXED.KLM;DAKAKM.MAC;../UUOERR.KLM;../STOR.KLM'
-
-and while the MACRO-10 assembly process works:
-
-	loading DAKAKT.MAC
-	loading PARAM.KLM
-	loading FIXED.KLM
-	loading DAKAKM.MAC
-	loading UUOERR.KLM
-	loading STOR.KLM
-	6301 words loaded at 000137-044630, start address 030000
-	00=000000000000 01=000000000000 02=000000000000 03=000000000000 
-	04=000000000000 05=000000000000 06=000000000000 07=000000000000 
-	10=000000000000 11=000000000000 12=000000000000 13=000000000000 
-	14=000000000000 15=000000000000 16=000000000000 17=000000000000 
-	PC=030000 RA=00000000 EA=000000 PS=000000 OV=0 C0=0 C1=0 ND=0 PD=0 
-	030000: 254020 027776  JRST    @27776
-
-there are additional modules that must be loaded into the machine as well, which are not yet supported.  So it's best
-to assemble the modified files that I've placed inside each diagnostic's folder.  For the [DAKAK Diagnostic](dakak/),
-that's **DAKAK.MAC**: 
-
-	>> a DAKAK.MAC
-	loading DAKAK.MAC
-	5849 words loaded at 000137-044133, start address 030621
-	00=000000000000 01=000000000000 02=000000000000 03=000000000000 
-	04=000000000000 05=000000000000 06=000000000000 07=000000000000 
-	10=000000000000 11=000000000000 12=000000000000 13=000000000000 
-	14=000000000000 15=000000000000 16=000000000000 17=000000000000 
-	PC=030621 RA=00000000 EA=000000 PS=000000 OV=0 C0=0 C1=0 ND=0 PD=0 
-	030621: 254000 030622  JRST    30622
-
-If the machine is able to run to the end of the diagnostic (which can be located by looking at the diagnostic's original
-MACRO-10 listing file) without stopping on an UUO opcode, then you can assume it passed.
+Lists of supported [diagnostics](#list-of-ka10-diagnostics) and [reliability tests](#list-of-ka10-reliability-tests)
+are provided below, as well as some [notes](#notes-on-ka10-diagnostics) on assembling the diagnostics. 
 
 List of KA10 Diagnostics
 ------------------------
@@ -135,7 +97,7 @@ so far.
 	- TESTS OF MULTIPY, INTERGER MULTIPLY, DIVIDE, INTERGER DIVIDE*
 - [KA10 Basic Instruction Diagnostic #12 (MAINDEC-10-DAKAL)](dakal/)
 	- TESTS THE MULTIPY, INTERGER MULIPLY, DIVIDE AND INTERGER DIVIDE INSTRUCTIONS*
-- [KA10 Basic Instruction Diagnostic #13 (MAINDEC-10-DAKAL)](dakam/)
+- [KA10 Basic Instruction Diagnostic #13 (MAINDEC-10-DAKAM)](dakam/)
 	- TESTS THE BYTE, BLOCK TRANSFER AND JFFO INSTRUCTIONS
 
 *Gotta love those multipy, interger muliply, and interger divide tests! -JP
@@ -143,8 +105,49 @@ so far.
 List of KA10 Reliability Tests
 ------------------------------
 
-Like the diagnostics above, the following list of KA10 Reliability Tests are simple those tests that have been archived and tested
-with PDPjs so far.
+Like the diagnostics above, the following list of KA10 Reliability Tests are simple those tests that have been
+archived and tested with PDPjs so far.
 
 - [KA10 Basic Instruction Reliability Test #1 (MAINDEC-10-DAKBA)](dakba/)
 	- COMPARES, SKIPS, EXCHANGES, BOOLE, ROTATES, TESTS
+
+Notes on KA10 Diagnostics
+-------------------------
+
+It's possible to assemble some of the above diagnostics from the original (unmodified) source files.  For example,
+you can go to the [DAKAK Diagnostic](dakak/) page and enter the following Debugger command:
+
+	a 'DAKAKT.MAC;../PARAM.KLM;../FIXED.KLM;DAKAKM.MAC;../UUOERR.KLM;../STOR.KLM'
+
+However, while the MACRO-10 assembly process appears to work:
+
+	loading DAKAKT.MAC
+	loading PARAM.KLM
+	loading FIXED.KLM
+	loading DAKAKM.MAC
+	loading UUOERR.KLM
+	loading STOR.KLM
+	6301 words loaded at 000137-044630, start address 030000
+	00=000000000000 01=000000000000 02=000000000000 03=000000000000 
+	04=000000000000 05=000000000000 06=000000000000 07=000000000000 
+	10=000000000000 11=000000000000 12=000000000000 13=000000000000 
+	14=000000000000 15=000000000000 16=000000000000 17=000000000000 
+	PC=030000 RA=00000000 EA=000000 PS=000000 OV=0 C0=0 C1=0 ND=0 PD=0 
+	030000: 254020 027776  JRST    @27776
+
+there are additional modules that must be loaded into the machine as well, which are not yet supported.  So it's best
+to assemble the modified files that have been placed inside each diagnostic's folder.  For the [DAKAK Diagnostic](dakak/),
+that's **DAKAK.MAC**: 
+
+	>> a DAKAK.MAC
+	loading DAKAK.MAC
+	5849 words loaded at 000137-044133, start address 030621
+	00=000000000000 01=000000000000 02=000000000000 03=000000000000 
+	04=000000000000 05=000000000000 06=000000000000 07=000000000000 
+	10=000000000000 11=000000000000 12=000000000000 13=000000000000 
+	14=000000000000 15=000000000000 16=000000000000 17=000000000000 
+	PC=030621 RA=00000000 EA=000000 PS=000000 OV=0 C0=0 C1=0 ND=0 PD=0 
+	030621: 254000 030622  JRST    30622
+
+If the machine is able to run to the end of the diagnostic (which can be located by looking at the diagnostic's original
+MACRO-10 listing file) without stopping on an UUO opcode, then the diagnostic likely succeeded.
