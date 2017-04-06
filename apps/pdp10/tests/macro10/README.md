@@ -31,7 +31,6 @@ Assemble [TEXT.MAC](TEXT.MAC.txt):
 
 Verify the following results:
 
-	starting PCjs MACRO-10 Mini-Assembler...
 	loading TEXT.MAC
 	4 words loaded at 000100-000103
 	00=000000000000 01=000000000000 02=000000000000 03=000000000000 
