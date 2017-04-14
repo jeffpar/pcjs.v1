@@ -60,9 +60,9 @@ and if we display the data as bits instead of bytes:
 	1 1 1 1 1 1 1 .     // 0xFE
 	1 . . . . . 1 .     // 0x82
 	1 . . . . . 1 .     // 0x82
-    . . . . . . . .     // 0x00
-    . . . . . . . .     // 0x00
-    . . . . . . . .     // 0x00
+	. . . . . . . .     // 0x00
+	. . . . . . . .     // 0x00
+	. . . . . . . .     // 0x00
 
 it should be clear how the shape of the character is defined.  However, the character generator ROM doesn't tell the whole story,
 because the VT100's display circuitry has a few additional tricks up its sleeve.
@@ -76,7 +76,7 @@ As page 4-52 of DEC's [VT100 Technical Manual (July 1982)](http://bitsavers.info
 explains:
 
 > Data, coming either from the screen RAM for scan 1 or the line buffer for scans 2 through 10, becomes part of an
-address	to a character generator ROM. (See Figure 4-6-4, Character Generator Example.)  The rest of the address comes
+address to a character generator ROM. (See Figure 4-6-4, Character Generator Example.)  The rest of the address comes
 from a scan counter in the DC012 control chip.  The scan counter addresses the ROM according to which of the ten scans
 is to be displayed.  The 4-bit scan counter skips over the other 6 possible addresses to the ROM, so the ROM contains
 data in only 10 out of 16 locations.  The output of the ROM is eight bits that represent the pattern of sequential
@@ -89,7 +89,7 @@ at page 4-76 of DEC's [VT100 Technical Manual (July 1982)](http://bitsavers.info
 you'll see the effect of the VT100's Dot Stretcher.  Here's how DEC illustrates it:
 
 	20 dots for 2 characters ("Ap") in 80-col mode
-    
+	
 	 0  . . . . . . . . . . . . . . . . . . . .
 	 1  . . . . 1 . . . . . . . . . . . . . . .
 	 2  . . . 1 . 1 . . . . . . . . . . . . . .
@@ -98,9 +98,9 @@ you'll see the effect of the VT100's Dot Stretcher.  Here's how DEC illustrates 
 	 5  . 1 1 1 1 1 1 1 . . . 1 1 . . . . 1 . .
 	 6  . 1 . . . . . 1 . . . 1 . 1 1 1 1 . . .
 	 7  . 1 . . . . . 1 . . . 1 . . . . . . . .
-     8  . . . . . . . . . . . 1 . . . . . . . .
-     9  . . . . . . . . . . . 1 . . . . . . . .
-
+	 8  . . . . . . . . . . . 1 . . . . . . . .
+	 9  . . . . . . . . . . . 1 . . . . . . . .
+	
 	Actual characters displayed after dot stretching
 	
 	 0  . . . . . . . . . . . . . . . . . . . .
