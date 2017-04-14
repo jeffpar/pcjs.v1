@@ -14,18 +14,18 @@ The combined contents of those ROMs have been stored as an 8Kb JSON image in [VT
 
 As Trammell Hudson's [VT100 Page](https://trmm.net/VT100) explains:
 
-	There are four 8316E ROM chips for the 8080 CPU on the logic board. Since they are custom mask ROMs,
-	Digital was able to have a different chip-select bit pattern and avoided having separate NOT gates on
-	the inputs.  Note that the schematic appears to be incorrect -- E56 is the low order, and E40 is the
-	high order address bits.
+> There are four 8316E ROM chips for the 8080 CPU on the logic board. Since they are custom mask ROMs,
+Digital was able to have a different chip-select bit pattern and avoided having separate NOT gates on
+the inputs.  Note that the schematic appears to be incorrect -- E56 is the low order, and E40 is the
+high order address bits.
 
 He then describes the memory map as follows:
 
-	ROM chip    CS1 (20)    A11/CS2 (18)    A12/CS3 (21)    Mapped address
-	E40         H           H               H               0x1800
-	E45         H           L               H               0x1000
-	E52         H           H               L               0x0800
-	E56         H           L               L               0x0000
+	ROM chip  CS1 (20)  A11/CS2 (18)  A12/CS3 (21)  Mapped address
+	E40       H         H             H             0x1800
+	E45       H         L             H             0x1000
+	E52       H         H             L             0x0800
+	E56       H         L             L             0x0000
 
 The above PCB chip locations correspond to the following [DEC ROMs](/devices/roms/dec/):
 
@@ -75,35 +75,47 @@ those characters to seamlessly connect with one another, so if the final bit in 
 As page 4-52 of DEC's [VT100 Technical Manual (July 1982)](http://bitsavers.informatik.uni-stuttgart.de/pdf/dec/terminal/vt100/EK-VT100-TM-003_VT100_Technical_Manual_Jul82.pdf)
 explains:
 
-	Data, coming either from the screen RAM for scan 1 or the line buffer for scans 2 through 10, becomes part of an
-	address	to a character generator ROM. (See Figure 4-6-4, Character Generator Example.)  The rest of the address comes
-	from a scan counter in the DC012 control chip.  The scan counter addresses the ROM according to which oftne ten scans
-	is to be displayed.  The 4-bit scan counter skips over the other 6 possible addresses to the ROM, so the ROM contains
-	data in only 10 out of 16 locations.  The output of the ROM is eight bits that represent the pattern of sequential
-	dots to be displayed for that character on that scan.  The eight bits enter the video shift register, a serializer
-	that converts the eiight parallel bits into a one-bit-wide stream.  An extra flip-flop stores the last bit so it can
-	be output to the stream two or three extra times (depending on line length) to fill the intercharacter space.
+> Data, coming either from the screen RAM for scan 1 or the line buffer for scans 2 through 10, becomes part of an
+address	to a character generator ROM. (See Figure 4-6-4, Character Generator Example.)  The rest of the address comes
+from a scan counter in the DC012 control chip.  The scan counter addresses the ROM according to which of the ten scans
+is to be displayed.  The 4-bit scan counter skips over the other 6 possible addresses to the ROM, so the ROM contains
+data in only 10 out of 16 locations.  The output of the ROM is eight bits that represent the pattern of sequential
+dots to be displayed for that character on that scan.  The eight bits enter the video shift register, a serializer
+that converts the eight parallel bits into a one-bit-wide stream.  An extra flip-flop stores the last bit so it can
+be output to the stream two or three extra times (depending on line length) to fill the intercharacter space.
 
 Also, VT100 circuitry includes a "Dot Stretcher" to make vertical lines appear as thick as horizontal lines.  If you look
 at page 4-76 of DEC's [VT100 Technical Manual (July 1982)](http://bitsavers.informatik.uni-stuttgart.de/pdf/dec/terminal/vt100/EK-VT100-TM-003_VT100_Technical_Manual_Jul82.pdf),
-you'll see the effect of the VT100's Dot Stretcher.  Here's a copy of DEC's illustration:
+you'll see the effect of the VT100's Dot Stretcher.  Here's how DEC illustrates it:
 
-	20 dots for 2 characters ("Ap") in 80-col mode      Actual characters displayed after dot stretching
+	20 dots for 2 characters ("Ap") in 80-col mode
     
-	 0  . . . . . . . . . . . . . . . . . . . .         0  . . . . . . . . . . . . . . . . . . . .
-	 1  . . . . 1 . . . . . . . . . . . . . . .         1  . . . . 1 1 . . . . . . . . . . . . . .
-	 2  . . . 1 . 1 . . . . . . . . . . . . . .         2  . . . 1 1 1 1 . . . . . . . . . . . . .
-	 3  . . 1 . . . 1 . . . . 1 . 1 1 1 1 . . .         3  . . 1 1 . . 1 1 . . . 1 1 1 1 1 1 1 . .
-	 4  . 1 . . . . . 1 . . . 1 1 . . . . 1 . .         4  . 1 1 . . . . 1 1 . . 1 1 1 . . . 1 1 .
-	 5  . 1 1 1 1 1 1 1 . . . 1 1 . . . . 1 . .         5  . 1 1 1 1 1 1 1 1 . . 1 1 1 . . . 1 1 .
-	 6  . 1 . . . . . 1 . . . 1 . 1 1 1 1 . . .         6  . 1 1 . . . . 1 1 . . 1 1 1 1 1 1 1 . .
-	 7  . 1 . . . . . 1 . . . 1 . . . . . . . .         7  . 1 1 . . . . 1 1 . . 1 1 . . . . . . .
-     8  . . . . . . . . . . . 1 . . . . . . . .         8  . . . . . . . . . . . 1 1 . . . . . . .
-     9  . . . . . . . . . . . 1 . . . . . . . .         9  . . . . . . . . . . . 1 1 . . . . . . .
+	 0  . . . . . . . . . . . . . . . . . . . .
+	 1  . . . . 1 . . . . . . . . . . . . . . .
+	 2  . . . 1 . 1 . . . . . . . . . . . . . .
+	 3  . . 1 . . . 1 . . . . 1 . 1 1 1 1 . . .
+	 4  . 1 . . . . . 1 . . . 1 1 . . . . 1 . .
+	 5  . 1 1 1 1 1 1 1 . . . 1 1 . . . . 1 . .
+	 6  . 1 . . . . . 1 . . . 1 . 1 1 1 1 . . .
+	 7  . 1 . . . . . 1 . . . 1 . . . . . . . .
+     8  . . . . . . . . . . . 1 . . . . . . . .
+     9  . . . . . . . . . . . 1 . . . . . . . .
 
-The PC8080 [Video](/modules/pc8080/lib/video.js) function *createFontVariation()* takes both the "dot replication" and "dot stretching"
-features into account (along with other parameters, such as underlining and reverse video) when converting the character generator ROM data
-into fonts.   
+	Actual characters displayed after dot stretching
+	
+	 0  . . . . . . . . . . . . . . . . . . . .
+	 1  . . . . 1 1 . . . . . . . . . . . . . .
+	 2  . . . 1 1 1 1 . . . . . . . . . . . . .
+	 3  . . 1 1 . . 1 1 . . . 1 1 1 1 1 1 1 . .
+	 4  . 1 1 . . . . 1 1 . . 1 1 1 . . . 1 1 .
+	 5  . 1 1 1 1 1 1 1 1 . . 1 1 1 . . . 1 1 .
+	 6  . 1 1 . . . . 1 1 . . 1 1 1 1 1 1 1 . .
+	 7  . 1 1 . . . . 1 1 . . 1 1 . . . . . . .
+	 8  . . . . . . . . . . . 1 1 . . . . . . .
+	 9  . . . . . . . . . . . 1 1 . . . . . . .
+
+The [PC8080 Video](/modules/pc8080/lib/video.js) *createFontVariation()* function takes both the "dot replication" and "dot stretching"
+features into account (along with underlining and reverse video parameters) when converting the character generator ROM data into fonts.   
 
 ### Disassembling the 8080 Firmware
 
