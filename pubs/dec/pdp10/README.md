@@ -15,7 +15,7 @@ PDP-10 Hardware Publications
 ----------------------------
 
 - [PDP-10 System Reference Manual (May 1968)](http://archive.pcjs.org/pubs/dec/pdp10/ka10/DEC-10-HGAA-D_PDP-10_System_Reference_Manual_May1968.pdf) [[Original PDF](http://bitsavers.trailing-edge.com/pdf/dec/pdp10/KA10/DEC-10-HGAA-D_PDP-10_System_Reference_Manual_May1968.pdf)]
-- [DECSYSTEM-10/DECSYSTEM-20 Processor Reference Manual (June 1982)](http://archive.pcjs.org/pubs/dec/pdp10/tops10/AA-H391A-TK_DECsystem-10_DECSYSTEM-20_Processor_Reference_Jun1982.pdf) [[Original PDF](http://bitsavers.org/pdf/dec/pdp10/TOPS10_softwareNotebooks/vol05/AA-H391A-TK_DECsystem-10_DECSYSTEM-20_Processor_Reference_Jun1982.pdf)]
+- [DECSYSTEM-10/DECSYSTEM-20 Processor Reference Manual (June 1982)](http://archive.pcjs.org/pubs/dec/pdp10/kl10/AA-H391A-TK_DECsystem-10_DECSYSTEM-20_Processor_Reference_Jun1982.pdf) [[Original PDF](http://bitsavers.org/pdf/dec/pdp10/TOPS10_softwareNotebooks/vol05/AA-H391A-TK_DECsystem-10_DECSYSTEM-20_Processor_Reference_Jun1982.pdf)]
 
 PDP-10 Software Publications
 ----------------------------

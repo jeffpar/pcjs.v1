@@ -7,12 +7,33 @@ permalink: /apps/pdp10/diags/ka10/
 PDP-10 KA10 Diagnostics
 -----------------------
 
-PCjs has archived selected KA10 diagnostic source files from the
+PCjs has archived selected files from the "KLAD Diagnostic Sources" located at the
 [PDP-10 KLAD Diagnostics Sources](http://pdp-10.trailing-edge.com/klad_sources/index.html) and turned them into
 stand-alone PDP-10 diagnostics, using the new PCjs [MACRO-10 Mini-Assembler](/modules/pdp10/lib/macro10.js).
 
 Lists of supported [diagnostics](#list-of-ka10-diagnostics) and [reliability tests](#list-of-ka10-reliability-tests)
 are provided below, as well as some [notes](#notes-on-ka10-diagnostics) on assembling the diagnostics. 
+
+All the files below presumably came from this "[23.15 Mbyte compressed tape image](http://pdp-10.trailing-edge.com/tapes/klad_sources.tap.bz2)"
+which is described on the [PDP-10 KLAD Diagnostics Sources](http://pdp-10.trailing-edge.com/klad_sources/index.html) page as:
+
+	Start of Saveset Diagnostics -- binaries and documentation on 
+    
+    strange monitor 0(0) APR#8210
+    
+    0 BPI 9-track 13-Dec-100 1:03:45 BACKUP 0(0) tape format 1
+    
+    Tape number 1
+
+The original 23.15 Mbyte file looked like this:
+
+    -rw-------@ 1 Jeff  staff  23148930 Feb  3  2002 klad_sources.tap.bz2
+
+and `bzip2 -d klad_sources.tap.bz2` produced this:
+
+    -rw-------@ 1 Jeff  staff  139719984 Feb  3  2002 klad_sources.tap
+
+
 
 List of KA10 Diagnostics
 ------------------------
