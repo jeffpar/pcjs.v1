@@ -2,7 +2,7 @@
 */
 /* $Id: vtape.txt,v 2.3 2001/11/10 21:24:21 klh Exp $
 */
-/*  Copyright © 1994-1999, 2001 Kenneth L. Harrenstien
+/*  Copyright Â© 1994-1999, 2001 Kenneth L. Harrenstien
 **  All Rights Reserved
 **
 **  This file is part of the KLH10 Distribution.  Use, modification, and
