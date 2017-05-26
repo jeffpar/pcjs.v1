@@ -7,5 +7,5 @@
 	<category>Operating System</category>
 	<author>IBM/Microsoft</author>
 	<releaseDate/>
-	<disk id="disk01" size="163840" chs="40:1:8" img="archive/PCDOS090.img" href="/disks/pcx86/dos/ibm/0.90/PCDOS090.json" md5="668dce23d681b02b9f43eec3c3834c78" md5json="db8d0dd00ee725e30e9dc011cfdb68dd"/>
+	<disk id="disk01" size="163840" chs="40:1:8" img="archive/PCDOS090.img" href="/disks/pcx86/dos/ibm/0.90/PCDOS090.json" md5="ee6aff11f396964e2420eab99d64da42" md5json="8a454476d5ce27578c72a4b0199a0d62"/>
 </manifest>

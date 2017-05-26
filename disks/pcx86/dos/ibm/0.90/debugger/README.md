@@ -1,26 +1,26 @@
 ---
 layout: page
-title: "PC-DOS 0.90 (with CGA and Debugger)"
+title: "PC-DOS 0.90 (with Debugger)"
 permalink: /disks/pcx86/dos/ibm/0.90/debugger/
 machines:
   - type: pcx86
     id: ibm5150-pcdos090
     debugger: true
-    config: /devices/pcx86/machine/5150/cga/256kb/debugger/machine.xml
+    config: /devices/pcx86/machine/5150/mda/256kb/debugger/machine.xml
     autoMount:
       A:
         path: /disks/pcx86/dos/ibm/0.90/PCDOS090.json
 ---
 
-PC-DOS 0.90 (with CGA and Debugger)
+PC-DOS 0.90 (with MDA and Debugger)
 -----------------------------------
 
 There was no PC-DOS 0.90 product *per se*.  It has been dubbed version 0.90 simply because it predates
 [PC-DOS 1.00](../1.00/) by several months.  More information about this preliminary version of PC-DOS can
 be found at the [OS/2 Museum](http://www.os2museum.com/).
 
-Below is an IBM PC (Model 5150) with an original IBM ROM BIOS and Color (CGA) Display that will boot PC-DOS 0.90.
-A similar configuration with [Monochrome Display](/disks/pcx86/dos/ibm/0.90/) is also available.
+Below is an IBM PC (Model 5150) with an original IBM ROM BIOS and Monochrome (MDA) Display that will boot PC-DOS 0.90.
+A similar configuration with [Color Display](/disks/pcx86/dos/ibm/0.90/) is also available.
 The machine is configured to run at 4.77Mhz, so the ROM BIOS memory test has been disabled,
 since a PC with 256Kb was rather slow to boot.
 
@@ -33,7 +33,9 @@ provided below.
 
 	 Volume in drive A has no label
 	 Directory of A:\
-
+	
+	IBMBIO   COM      2560 05-29-81  12:00a
+	IBMDOS   COM      5566 05-29-81  12:00a
 	COMMAND  COM      2576 05-29-81  12:00a
 	DEBUG    COM      5450 05-27-81  12:00a
 	TIME     COM       243 05-19-81  12:00a
@@ -49,7 +51,7 @@ provided below.
 	MOVBAS   COM       128 04-23-81  12:00a
 	BAS18    COM     11008 06-04-81  12:00a
 	BASICA   COM     14976 06-04-81  12:00a
-	AUTOEXEC BAT        24
+	AUTOEXEC BAK        24
 	SYS      COM       896 06-03-81  12:00a
 	BAS18A   COM     14976 06-04-81  12:00a
 	COMMENTS BAK      3560 06-05-81  12:00a
@@ -67,5 +69,5 @@ provided below.
 	RBAS     COM     32768 04-25-81  12:00a
 	THREED   BAS      3072
 	CUBE     DAT       402 04-30-81  12:00a
-	       33 file(s)     136332 bytes
+	       35 file(s)     144458 bytes
 	                        8192 bytes free
