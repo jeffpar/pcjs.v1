@@ -9,6 +9,7 @@ IBM PC-DOS
 
 Information is available for these versions of IBM PC-DOS:
 
+* [PC-DOS 0.90](0.90/) (1981)
 * [PC-DOS 1.00](1.00/) (1981)
 * [PC-DOS 1.10](1.10/) (1982)
 * [PC-DOS 2.00](2.00/) (1983)

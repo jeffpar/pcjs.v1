@@ -5,7 +5,7 @@ permalink: /disks/pcx86/dos/
 ---
 
 PC-DOS and MS-DOS
----
+-----------------
 
 Information is available for assorted versions of PC-DOS and MS-DOS from these vendors:
 

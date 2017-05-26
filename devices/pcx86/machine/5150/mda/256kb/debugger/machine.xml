@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.34.3/machine.xsl"?>
 <machine id="ibm5150" type="pcx86" border="1" pos="center" background="#FAEBD7">
-	<name pos="center">IBM PC (Model 5150), MDA, 64K, Debugger</name>
-	<computer id="pc-mda-64k" name="IBM PC"/>
-	<ram id="ramLow" addr="0x00000"/>
+	<name pos="center">IBM PC (Model 5150), MDA, 256K, Debugger</name>
+	<computer id="pc-mda-256k" name="IBM PC" resume="1"/>
+	<ram id="ramLow" addr="0x00000" test="false" comment="no memory test"/>
 	<rom id="romBASIC" addr="0xf6000" size="0x8000" file="/devices/pcx86/rom/5150/basic/BASIC100.json"/>
 	<rom id="romBIOS" addr="0xfe000" size="0x2000" file="/devices/pcx86/rom/5150/1981-04-24/PCBIOS-REV1.json"/>
 	<video ref="/devices/pcx86/video/ibm/mda/ibm-mda.xml"/>
 	<fdc ref="/disks/pcx86/compiled/library.xml"/>
 	<cpu id="cpu8088" model="8088" autostart="true"/>
-	<keyboard ref="/devices/pcx86/keyboard/us83-buttons-functions.xml"/>
+	<keyboard ref="/devices/pcx86/keyboard/us83-buttons-minimal.xml"/>
 	<debugger id="debugger"/>
 	<panel ref="/devices/pcx86/panel/wide.xml"/>
-	<chipset id="chipset" model="5150" sw1="01000001" sw2="11111000" pos="left" padLeft="8px" padBottom="8px">
+	<chipset id="chipset" model="5150" sw1="01000001" sw2="10011000" pos="left" padLeft="8px" padBottom="8px">
 		<control type="switches" label="SW1" binding="sw1" left="0px"/>
 		<control type="switches" label="SW2" binding="sw2" left="0px"/>
 		<control type="description" binding="swdesc" left="0px"/>
