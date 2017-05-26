@@ -7,7 +7,7 @@ redirect_from:
 ---
 
 IBM PC (Model 5150) Machines
----
+----------------------------
 
 Our IBM PC 5150 configurations include:
 

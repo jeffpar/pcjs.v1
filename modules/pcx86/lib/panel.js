@@ -50,7 +50,7 @@ if (NODE) {
  *  iBlock:     number,
  *  cBlocks:    number,
  *  type:       number
- * }}
+ * }} Region
  */
 var Region;
 

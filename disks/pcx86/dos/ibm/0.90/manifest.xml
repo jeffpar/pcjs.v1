@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.34.3/manifest.xsl"?>
+<manifest type="software">
+	<title>PC-DOS</title>
+	<version>0.90</version>
+	<type>DOS</type>
+	<category>Operating System</category>
+	<author>IBM/Microsoft</author>
+	<releaseDate/>
+	<disk id="disk01" size="163840" chs="40:1:8" img="archive/PCDOS090.img" href="/disks/pcx86/dos/ibm/0.90/PCDOS090.json" md5="668dce23d681b02b9f43eec3c3834c78" md5json="db8d0dd00ee725e30e9dc011cfdb68dd"/>
+</manifest>

@@ -12,7 +12,7 @@ machines:
 ---
 
 PC-DOS 1.00
----
+-----------
 
 The PCjs machine below is running PC-DOS 1.00.
 
