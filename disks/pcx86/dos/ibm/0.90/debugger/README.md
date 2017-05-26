@@ -17,7 +17,7 @@ PC-DOS 0.90 (with MDA and Debugger)
 
 There was no PC-DOS 0.90 product *per se*.  It has been dubbed version 0.90 simply because it predates
 [PC-DOS 1.00](../1.00/) by several months.  More information about this preliminary version of PC-DOS can
-be found at the [OS/2 Museum](http://www.os2museum.com/).
+be found at the [OS/2 Museum](http://www.os2museum.com/wp/pc-dos-1-0-but-not-quite/).
 
 Below is an IBM PC (Model 5150) with an original IBM ROM BIOS and Monochrome (MDA) Display that will boot PC-DOS 0.90.
 A similar configuration with [Color Display](/disks/pcx86/dos/ibm/0.90/) is also available.
