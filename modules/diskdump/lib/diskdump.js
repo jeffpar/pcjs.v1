@@ -541,14 +541,15 @@ DiskDump.aDefaultBPBs = [
     0x08, 0x00,                 // 0x16: sectors per FAT (8)
       //
       // Wikipedia (http://en.wikipedia.org/wiki/File_Allocation_Table#BIOS_Parameter_Block) implies everything past
-      // this point was introduced post-DOS 2.0.  I think that's wrong, because I just formatted a diskette with PC-DOS 2.0
-      // and it properly initialized the next 3 fields as well.  TODO: Investigate PC-DOS 2.0 BPB behavior.
+      // this point was introduced post-DOS 2.0.  However, DOS 2.0 merely said they were optional, and in fact, DOS 2.0
+      // FORMAT always initializes the next 3 words.  A 4th word, LARGE_SECS, was added in DOS 3.20 at offset 0x1E,
+      // and then in DOS 3.31, both HIDDEN_SECS and LARGE_SECS were widened from words to dwords.
       //
     0x11, 0x00,                 // 0x18: sectors per track (17)
     0x04, 0x00,                 // 0x1A: number of heads (4)
       //
-      // PC-DOS 2.0 actually stored 0x01, 0x00, 0x80, 0x00 here, so you can't always assume that anything past offset
-      // 0x1E is part of the BPB.  TODO: Investigate PC-DOS 2.0 BPB behavior.
+      // PC-DOS 2.0 actually stored 0x01, 0x00, 0x80, 0x00 here, so you can't rely on more than the first word.
+      // TODO: Investigate PC-DOS 2.0 BPB behavior (ie, what did the 0x80 mean)?
       //
     0x01, 0x00, 0x00, 0x00      // 0x1C: number of hidden sectors (always 0 for non-partitioned media)
   ]
@@ -2652,10 +2653,10 @@ DiskDump.prototype.convertToJSON = function()
         if (iBPB >= 0) {
             if (fBPBExists) {
                 /*
-                 * In deference to the PC-DOS 2.0 anomaly noted above (see "Investigate PC-DOS 2.0 BPB behavior" above),
-                 * we limit the following byte verification to the offset of LARGE_SECS, less two bytes.
+                 * In deference to the PC-DOS 2.0 BPB behavior discussed above, we stop our BPB verification
+                 * after the first word of HIDDEN_SECS.
                  */
-                for (i = DiskAPI.BPB.SECTOR_BYTES; i < DiskAPI.BPB.LARGE_SECS - 2; i++) {
+                for (i = DiskAPI.BPB.SECTOR_BYTES; i < DiskAPI.BPB.HIDDEN_SECS + 2; i++) {
                     var bDefault = DiskDump.aDefaultBPBs[iBPB][i];
                     var bActual = this.bufDisk.readUInt8(offBootSector + i);
                     if (bDefault != bActual) {

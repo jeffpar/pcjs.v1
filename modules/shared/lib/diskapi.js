@@ -89,8 +89,9 @@ DiskAPI.DISK_FORMATS = {
     1474560: [80,2,18,,0xF0],   // media type 0xF0: 80 cylinders, 2 heads (double-sided), 18 sectors/track, (2880 total sectors x 512 bytes/sector == 1474560)
     2949120: [80,2,36,,0xF0],   // media type 0xF0: 80 cylinders, 2 heads (double-sided), 36 sectors/track, (5760 total sectors x 512 bytes/sector == 2949120)
     /*
-     * The following are some common partition sizes, which we explicitly map to CHS values, since the MBR and/or BPB
-     * can mislead us when attempting to calculate total cylinders.
+     * The following are some common partition sizes, which we explicitly map to CHS values, since MBR/BPB values
+     * can mislead us when attempting to determine the exact disk geometry.  TODO: Investigate.  Is it possible that
+     * usable space on early hard disks was reduced to reserve the last cylinder for diagnostics, head parking, etc?
      */
     10618368:[306,4,17],        // PC XT 10Mb hard drive (type 3)
     21368320:[615,4,17],        // PC AT 20Mb hard drive (type 2)
@@ -152,7 +153,14 @@ DiskAPI.BOOT = {
 };
 
 /*
- * BIOS Parameter Block (BPB) offsets in DOS-compatible boot sectors (DOS 2.0 and up)
+ * BIOS Parameter Block (BPB) offsets in DOS-compatible boot sectors (DOS 2.x and up)
+ *
+ * NOTE: DOS 2.x OEM documentation says that the words starting at offset 0x018 (TRACK_SECS, TOTAL_HEADS, and HIDDEN_SECS)
+ * are optional, but even the DOS 2.0 FORMAT utility initializes all three of those words.  There may be some OEM media out
+ * there with BPBs that are only valid up to offset 0x018, but I've not run across any media like that.
+ *
+ * DOS 3.20 added LARGE_SECS, but unfortunately, it was added as a 2-byte value at offset 0x01E.  DOS 3.31 decided
+ * to make both HIDDEN_SECS and LARGE_SECS 4-byte values, which meant that LARGE_SECS had to move from 0x01E to 0x020.
  */
 DiskAPI.BPB = {
     SECTOR_BYTES:   0x00B,      // 2 bytes: bytes per sector (eg, 0x200 or 512)
@@ -165,8 +173,8 @@ DiskAPI.BPB = {
     FAT_SECS:       0x016,      // 2 bytes: sectors per FAT (eg, 1)
     TRACK_SECS:     0x018,      // 2 bytes: sectors per track (eg, 8)
     TOTAL_HEADS:    0x01A,      // 2 bytes: number of heads (eg, 1)
-    HIDDEN_SECS:    0x01C,      // 4 bytes: number of hidden sectors (always 0 for non-partitioned media)
-    LARGE_SECS:     0x020       // 4 bytes: number of sectors if TOTAL_SECS is zero (TODO: Verify the true extent of DOS 2.0 BPBs; they may have stopped with HIDDEN_SECS, which is what DiskDump assumes)
+    HIDDEN_SECS:    0x01C,      // 2 bytes (DOS 2.x) or 4 bytes (DOS 3.31 and up): number of hidden sectors (always 0 for non-partitioned media)
+    LARGE_SECS:     0x020       // 4 bytes (DOS 3.31 and up): number of sectors if TOTAL_SECS is zero
 };
 
 /*
