@@ -72,7 +72,7 @@ provided below.
 	       35 file(s)     144458 bytes
 	                        8192 bytes free
 
-The boot sector of the original PC-DOS 0.90 disk image contained:
+The boot sector of the original PC-DOS 0.90 disk image contained the following bytes:
 
 	00000000  eb 2f 14 00 00 00 60 00  20 37 2d 4d 61 79 2d 38  |./....`. 7-May-8|
 	00000010  31 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |1...............|
@@ -113,5 +113,6 @@ the following boot sector bytes will differ:
 	00000000  eb 2f 14 00 00 00 60 00  20 37 2d 00 02 01 01 00  |./....`. 7-.....|
 	00000010  02 40 00 40 01 fe 01 00  08 00 01 00 00 00 00 00  |.@.@............|
 
-This is simply a side-effect of *all* PCx86 disk images provided by the PCjs website: a BPB is automatically
-included in all disk images.  This ensures that your modern operating system will be able to mount the disk image.
+This is simply a side-effect of the [DiskDump](/modules/diskdump/) utility that's used to prepare disk images for the
+PCjs website.  It automatically adds a BPB to the boot sector if the BPB is missing or incorrect, making it easier for
+modern operating systems to mount the disk image.

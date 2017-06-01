@@ -413,12 +413,6 @@ DiskDump.PCJS_OEM   = "PCJS.ORG";
 /**
  * The BPBs that buildImage() currently supports; these BPBs should be in order of smallest to largest capacity,
  * to help ensure we don't select a disk format larger than necessary.
- *
- * TODO: For now, the code that chooses a default BPB is starting with #3 instead of #0, because Windows 95 (at least
- * when running under VMware) fails to read the contents of such disks correctly.  Whether that's my fault or Windows 95's
- * fault is still TBD (although it's probably mine -- perhaps 160Kb diskettes aren't supposed to have BPBs?)  The simple
- * work-around is to avoid creating 160Kb diskette images (and, to play it safe, I skip 180Kb and 320Kb as well, since
- * 360Kb was the most commonly used format after DOS 2.0 introduced it).
  */
 DiskDump.aDefaultBPBs = [
   [                             // define BPB for 160Kb diskette
@@ -1460,7 +1454,7 @@ DiskDump.prototype.validateTime = function(dateTime)
         /*
          * The year in a DOS modification date occupies 7 bits and is interpreted as a non-negative value (0-127)
          * that is added to the base year of 1980, so the range of valid years is 1980-2107.  However, it's worth
-         * nothing that in PC-DOS 2.0, I observed a date with the largest possible year value (127) displayed as
+         * noting that in PC-DOS 2.0, I observed a date with the largest possible year value (127) displayed as
          * "12-31-:7" (an ASCII ':' is the next highest character after '0').  While that DOES distinguish the year
          * 2007 from the year 2107, we probably shouldn't allow any year > 2099, to eliminate confusion.
          *
@@ -1496,7 +1490,7 @@ DiskDump.prototype.buildData = function(cb, abInit)
 {
     var ab = new Array(cb);
     for (var i = 0; i < cb; i++) {
-        ab[i] = (abInit && i < abInit.length? abInit[i] : 0);
+        ab[i] = abInit && abInit[i] || 0;
     }
     return ab;
 };
@@ -2329,14 +2323,23 @@ DiskDump.prototype.buildImageFromFiles = function(aFiles, done)
     var cRootEntries, cRootSectors, cTotalSectors, cSectorsPerTrack, cHeads, cDataSectors, cbAvail;
 
     /*
-     * Find or build a BPB with enough capacity, and at the same time, calculate all
-     * the other values we'll need, including total number of data sectors (cDataSectors).
+     * Find or build a BPB with enough capacity, and at the same time, calculate all the other values we'll need,
+     * including total number of data sectors (cDataSectors).
+     *
+     * TODO: For now, the code that chooses a default BPB is starting with #3 instead of #0, because Windows 95
+     * (at least when running under VMware) fails to read the contents of such disks correctly.  Whether that's my
+     * fault or Windows 95's fault is still TBD (although it's probably mine -- perhaps 160Kb diskettes aren't
+     * supposed to have BPBs?)  The simple work-around is to avoid creating 160Kb diskette images (and, to play it
+     * safe, I skip 180Kb and 320Kb as well, since 360Kb was the most commonly used format after DOS 2.0 introduced it).
      */
     for (var iBPB = 3; iBPB < DiskDump.aDefaultBPBs.length; iBPB++) {
         /*
+         * Use slice() to copy the default BPB, as a precaution (to avoid any changes to the default).
+         */
+        abBoot = DiskDump.aDefaultBPBs[iBPB].slice();
+        /*
          * If this BPB is for a hard drive but a disk size was not specified, skip it.
          */
-        abBoot = DiskDump.aDefaultBPBs[iBPB];
         if ((abBoot[0x15] == 0xF8) != (this.kbTarget >= 10000)) continue;
         cbSector = abBoot[0x0B] | (abBoot[0x0C] << 8);
         cSectorsPerCluster = abBoot[0x0D];
@@ -2384,7 +2387,7 @@ DiskDump.prototype.buildImageFromFiles = function(aFiles, done)
     this.bufDisk.fill(0);
 
     /*
-     * Output a Master Boot Record (MBR), if a hard drive image was requested
+     * Output a Master Boot Record (MBR), if a hard drive image was requested.
      */
     if (this.kbTarget >= 10000) {
         abSector = this.buildMBR(cHeads, cSectorsPerTrack, cbSector, cTotalSectors);
@@ -2392,10 +2395,10 @@ DiskDump.prototype.buildImageFromFiles = function(aFiles, done)
     }
 
     /*
-     * Output a boot sector
-     *
-     * NOTE: I don't put a [0x55,0xAA] signature at the end, since it's not actually bootable.
+     * Output a boot sector.
      */
+    abBoot[DiskAPI.BOOT.SIG_OFFSET] = 0x55;
+    abBoot[DiskAPI.BOOT.SIG_OFFSET + 1] = 0xAA;
     abSector = this.buildData(cbSector, abBoot);
     offDisk += this.copyData(offDisk, abSector);
 
@@ -2497,8 +2500,8 @@ DiskDump.prototype.convertToJSON = function()
         var cbDiskData = this.bufDisk.length;
 
         if (cbDiskData >= 3000000) {        // arbitrary threshold between diskette image sizes and hard drive image sizes
-            var wSig = this.bufDisk.readUInt16LE(0x1FE);
-            if (wSig == 0xAA55) {
+            var wSig = this.bufDisk.readUInt16LE(DiskAPI.BOOT.SIG_OFFSET);
+            if (wSig == DiskAPI.BOOT.SIGNATURE) {
                 /*
                  * In this case, the first sector should be an MBR; find the active partition entry,
                  * then read the LBA of the first partition sector to calculate the boot sector offset.
@@ -2642,13 +2645,22 @@ DiskDump.prototype.convertToJSON = function()
                     var bActual = this.bufDisk.readUInt8(offBootSector + i);
                     if (bDefault != bActual) {
                         DiskDump.logWarning("BPB byte " + str.toHexByte(i) + " default (" + str.toHexByte(bDefault) + ") does not match actual byte: " + str.toHexByte(bActual));
+                        fBPBExists = false;
                     }
                 }
             }
             else if (bByte0 == X86.OPCODE.JMPS && bByte1 >= 0x22) {
                 /*
                  * I'm going to stick my neck out here and slam a BPB into this disk image, since it doesn't appear
-                 * to have one, which should make it more "mountable" on modern operating systems.
+                 * to have one, which should make it more "mountable" on modern operating systems.  PC-DOS 1.x (and
+                 * the recently unearthed PC-DOS 0.x) are OK with this, because they don't put anything important in
+                 * the BPB byte range (0x00B-0x023), just a 9-byte date string (eg, " 7-May-81") at 0x008-0x010,
+                 * followed by zero bytes at 0x011-0x030.
+                 *
+                 * They DO, however, store important constants in the range later used as the 8-byte OEM string at
+                 * 0x003-0x00A.  For example, the word at 0x006 contains the starting segment for where to load
+                 * IBMBIO.COM and IBMDOS.COM.  Those same early boot sectors are also missing the traditional 0xAA55
+                 * signature at the end of the boot sector.
                  */
                 for (i = DiskAPI.BPB.SECTOR_BYTES; i < DiskAPI.BPB.LARGE_SECS+4; i++) {
                     this.bufDisk.writeUInt8(DiskDump.aDefaultBPBs[iBPB][i] || 0, offBootSector + i);
@@ -2666,6 +2678,14 @@ DiskDump.prototype.convertToJSON = function()
             }
             else {
                 DiskDump.logWarning("unrecognized boot sector: " + str.toHexByte(bByte0) + "," + str.toHexByte(bByte1));
+            }
+
+            if (fBPBExists) {
+                /*
+                 * Overwrite the OEM string with our own, so that people know how the image originated.  We do this
+                 * only for disks with pre-existing BPBs; it's not safe for older disks (and non-DOS disks, obviously).
+                 */
+                this.bufDisk.write(DiskDump.PCJS_OEM, DiskAPI.BOOT.OEM_STRING, DiskDump.PCJS_OEM.length);
             }
         }
 
@@ -3204,9 +3224,10 @@ DiskDump.prototype.convertToIMG = function()
                  */
                 var bByte0 = buf.readUInt8(DiskAPI.BOOT.JMP_OPCODE);
                 var cbSectorBPB = buf.readUInt16LE(DiskAPI.BPB.SECTOR_BYTES);
-                if ((bByte0 == X86.OPCODE.JMP || bByte0 == X86.OPCODE.JMPS) && cbSectorBPB == 512) {
+                var wSig = buf.readUInt16LE(DiskAPI.BOOT.SIG_OFFSET);
+                if ((bByte0 == X86.OPCODE.JMP || bByte0 == X86.OPCODE.JMPS) && cbSectorBPB == 512 && wSig == DiskAPI.BOOT.SIGNATURE) {
                     /*
-                     * Overwrite the OEM string with our own, so that people know how the image originated
+                     * Overwrite the OEM string with our own, so that people know how the image originated.
                      */
                     buf.write(DiskDump.PCJS_OEM, DiskAPI.BOOT.OEM_STRING, DiskDump.PCJS_OEM.length);
                 }

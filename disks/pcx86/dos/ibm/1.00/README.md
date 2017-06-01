@@ -21,7 +21,7 @@ The PCjs machine below is running PC-DOS 1.00.
 PC-DOS 1.00 was completed in August 1981 and announced at an IBM press conference on August 12, 1981, when IBM
 introduced the original IBM PC (Model 5150).
 
-PC-DOS 1.00 was released on one single-sided (160Kb) diskette.  A complete listing of all the files is shown below. 
+PC-DOS 1.00 was released on one single-sided (160Kb) diskette.  A complete listing of all the files is provided below. 
 
 ### Directory of PC-DOS 1.00 Diskette
 
