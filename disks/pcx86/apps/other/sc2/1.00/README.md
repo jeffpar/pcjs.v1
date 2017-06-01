@@ -1,0 +1,48 @@
+---
+layout: page
+title: SuperCalc2 1.00
+permalink: /disks/pcx86/apps/other/sc2/1.00/
+machines:
+  - type: pcx86
+    id: ibm5150-256kb
+    config: /devices/pcx86/machine/5150/cga/256kb/machine.xml
+    autoMount:
+      A:
+        path: /disks/pcx86/dos/ibm/2.00/PCDOS200-DISK1.json
+      B:
+        path: /disks/pcx86/apps/other/sc2/1.00/SC2_V100.json
+---
+
+SuperCalc2 v1.00
+-----------------
+
+{% include machine.html id="ibm5150-256kb" %}
+
+### Directory of SuperCalc2 v.100
+
+	 Volume in drive A has no label
+	 Directory of A:\
+
+	IBMBIO   COM     16369 12-30-85  12:00p
+	IBMDOS   COM     28477 12-30-85  12:00p
+	COMMAND  COM     23791 12-30-85  12:00p
+	SC2      COM     33664 04-15-83  12:00p
+	SC2      OVL     22272 04-15-83  12:00p
+	SC2      HLP     14080 04-15-83  12:00p
+	INSTALLS COM      7296 04-15-83  12:00p
+	BRKEVN   CAL      4096 04-15-83  12:00p
+	BUDGET   CAL      1280 04-15-83  12:00p
+	CHECKS   CAL      3328 04-15-83  12:00p
+	SAMPLE   CAL      5120 04-15-83  12:00p
+	TENMIN   CAL      1920 04-15-83  12:00p
+	SDI      COM     16256 04-15-83  12:00p
+	SDI      OVL     15744 04-15-83  12:00p
+	AUTO40   BAT       128 04-15-83  12:01p
+	AUTO40BW BAT       128 04-15-83  12:00p
+	AUTOBW   BAT       128 04-15-83  12:00p
+	AUTOEXEC BAT        17 08-11-85  12:00a
+	COLOR    COM        22 04-15-83  12:00p
+	MONO     COM        22 04-15-83  12:00p
+	MAINTAIN COM     13824 04-15-83  12:00p
+	       21 file(s)     207962 bytes
+	                      143360 bytes free

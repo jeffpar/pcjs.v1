@@ -38,7 +38,8 @@ computer diagnostics, programming tools, and more.
 * [MicroPro WordStar](apps/micropro/wordstar/)
 * [Microsoft Chart](apps/microsoft/chart/)
 * [Microsoft Word](apps/microsoft/word/)
-* [Sunny Hill Omniview](apps/sunnyhill/omniview/)
+* [Sorcim SuperCalc2](apps/other/sc2/)
+* [Sunny Hill Omniview](apps/other/omniview/)
 
 ### Games
 

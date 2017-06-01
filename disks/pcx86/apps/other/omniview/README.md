@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Omniview
-permalink: /disks/pcx86/apps/sunnyhill/omniview/
+permalink: /disks/pcx86/apps/other/omniview/
 ---
 
 Omniview
@@ -9,4 +9,4 @@ Omniview
 
 Information is available for these versions of Omniview:
 
-* [Omniview 386 4.30](4.30/)
+* [Omniview 386 v4.30](4.30/)
