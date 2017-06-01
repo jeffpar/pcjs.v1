@@ -18,7 +18,7 @@ SuperCalc2 v1.00
 
 {% include machine.html id="ibm5150-256kb" %}
 
-### Directory of SuperCalc2 v.100
+### Directory of SuperCalc2 v1.00
 
 	 Volume in drive A has no label
 	 Directory of A:\
