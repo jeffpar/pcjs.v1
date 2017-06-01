@@ -14,7 +14,7 @@
 		<control type="button" binding="reset">Reset</control>
 	</cpu>
 	<keyboard ref="/devices/pcx86/keyboard/us83-buttons-minimal.xml"/>
-	<hdc id="hdcXT" drives='[{name:"10Mb Hard Disk",type:3}]'>
+	<hdc id="hdcXT" drives='[{name:"10Mb Hard Disk",type:3,path:"/disks/pcx86/fixed/10mb/PCDOS200-EMPTY.json"}]'>
 		<control type="button" binding="saveHD0">Save HD</control>
 	</hdc>
 	<chipset id="chipset" model="5160" sw1="01001001"/>

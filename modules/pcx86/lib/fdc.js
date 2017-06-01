@@ -340,7 +340,8 @@ class FDC extends Component {
                     var drive = fdc.aDrives[iDriveSelected];
                     if (drive) {
                         /*
-                         * Note the similarity (and hence factoring opportunity) between this code and the HDC's "saveHD*" binding.
+                         * Note the similarity (and hence factoring opportunity) between this code and the HDC's
+                         * "saveHD*" binding.
                          */
                         var disk = drive.disk;
                         if (disk) {

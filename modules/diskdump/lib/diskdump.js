@@ -539,12 +539,17 @@ DiskDump.aDefaultBPBs = [
     0x03, 0x51,                 // 0x13: number of sectors (0x5103 or 20739; * 512 bytes/sector = 10,618,368 bytes = 10,369Kb = 10Mb)
     0xF8,                       // 0x15: media type (eg, 0xF8: hard drive w/FAT12)
     0x08, 0x00,                 // 0x16: sectors per FAT (8)
-    // Wikipedia (http://en.wikipedia.org/wiki/File_Allocation_Table#BIOS_Parameter_Block) implies everything past this point was introduced
-    // post-DOS 2.0.  I think that's wrong, because I just formatted a diskette with PC-DOS 2.0 and it properly initialized the next 3 fields as well.
+      //
+      // Wikipedia (http://en.wikipedia.org/wiki/File_Allocation_Table#BIOS_Parameter_Block) implies everything past
+      // this point was introduced post-DOS 2.0.  I think that's wrong, because I just formatted a diskette with PC-DOS 2.0
+      // and it properly initialized the next 3 fields as well.  TODO: Investigate PC-DOS 2.0 BPB behavior.
+      //
     0x11, 0x00,                 // 0x18: sectors per track (17)
     0x04, 0x00,                 // 0x1A: number of heads (4)
-    // PC-DOS 2.0 actually stored 0x01, 0x00, 0x80, 0x00 here, so you can't always assume that anything past offset 0x1E is part of the BPB;
-    // requires further investigation.
+      //
+      // PC-DOS 2.0 actually stored 0x01, 0x00, 0x80, 0x00 here, so you can't always assume that anything past offset
+      // 0x1E is part of the BPB.  TODO: Investigate PC-DOS 2.0 BPB behavior.
+      //
     0x01, 0x00, 0x00, 0x00      // 0x1C: number of hidden sectors (always 0 for non-partitioned media)
   ]
 ];
@@ -2488,7 +2493,9 @@ DiskDump.prototype.convertToJSON = function()
     }
 
     var json = null;
+    var fOptimize = true;                   // if true, leave out any properties that are defaults
     try {
+        var fMBR = false;
         var nHeads = 0;
         var nCylinders = 0;
         var nSectorsPerTrack = 0;
@@ -2510,6 +2517,7 @@ DiskDump.prototype.convertToJSON = function()
                     if (this.bufDisk.readUInt8(offEntry) >= 0x80) {
                         offBootSector = this.bufDisk.readUInt32LE(offEntry + 0x08) * cbSector;
                         cbDiskData = this.bufDisk.readUInt32LE(offEntry + 0x0C) * cbSector;
+                        fMBR = true;
                         break;
                     }
                 }
@@ -2568,22 +2576,25 @@ DiskDump.prototype.convertToJSON = function()
                 fBPBExists = true;
                 var bMediaTypeBPB = this.bufDisk.readUInt8(offBootSector + DiskAPI.BPB.MEDIA_TYPE);
                 var nSectorsTotalBPB = this.bufDisk.readUInt16LE(offBootSector + DiskAPI.BPB.TOTAL_SECS);
-
                 var nSectorsPerCylinderBPB = nSectorsPerTrackBPB * nHeadsBPB;
                 var nCylindersBPB = Math.floor(nSectorsTotalBPB / nSectorsPerCylinderBPB);
-
+                /*
+                 * TODO: Detect newer BPBs (ie, where the HIDDEN_SECS and LARGE_SECS fields are valid),
+                 * so that we can determine the true geometry of the disk, instead of having to rely on our
+                 * DISK_FORMATS table.
+                 */
                 if (diskFormat) {
                     if (nCylinders != nCylindersBPB) {
-                        DiskDump.logWarning("BPB cylinders (" + nCylindersBPB + ") do not match actual cylinders: " + nCylinders);
+                        DiskDump.logWarning("BPB cylinders (" + nCylindersBPB + ") do not match actual cylinders (" + nCylinders + ")");
                     }
                     if (nHeads != nHeadsBPB) {
-                        DiskDump.logWarning("BPB heads (" + nHeadsBPB + ") do not match actual heads: " + nHeads);
+                        DiskDump.logWarning("BPB heads (" + nHeadsBPB + ") do not match actual heads (" + nHeads + ")");
                     }
                     if (nSectorsPerTrack != nSectorsPerTrackBPB) {
-                        DiskDump.logWarning("BPB sectors/track (" + nSectorsPerTrackBPB + ") do not match actual sectors/track: " + nSectorsPerTrack);
+                        DiskDump.logWarning("BPB sectors/track (" + nSectorsPerTrackBPB + ") do not match actual sectors/track (" + nSectorsPerTrack + ")");
                     }
                     if (bMediaType && bMediaType != bMediaTypeBPB) {
-                        DiskDump.logWarning("BPB media type (" + bMediaTypeBPB + ") do not match actual media type: " + bMediaType);
+                        DiskDump.logWarning("BPB media type (" + bMediaTypeBPB + ") do not match actual media type (" + bMediaType + ")");
                     }
                 }
                 else {
@@ -2640,7 +2651,11 @@ DiskDump.prototype.convertToJSON = function()
         }
         if (iBPB >= 0) {
             if (fBPBExists) {
-                for (i = DiskAPI.BPB.SECTOR_BYTES; i < DiskAPI.BPB.LARGE_SECS; i++) {
+                /*
+                 * In deference to the PC-DOS 2.0 anomaly noted above (see "Investigate PC-DOS 2.0 BPB behavior" above),
+                 * we limit the following byte verification to the offset of LARGE_SECS, less two bytes.
+                 */
+                for (i = DiskAPI.BPB.SECTOR_BYTES; i < DiskAPI.BPB.LARGE_SECS - 2; i++) {
                     var bDefault = DiskDump.aDefaultBPBs[iBPB][i];
                     var bActual = this.bufDisk.readUInt8(offBootSector + i);
                     if (bDefault != bActual) {
@@ -2841,21 +2856,25 @@ DiskDump.prototype.convertToJSON = function()
 
                         bufSector = bufTrack.slice(offSector, offSector + cbSectorThisTrack);
 
-                        if (bMediaType && !iCylinder && !iHead && iSector == 2) {
+                        if (bMediaType && !iCylinder && !iHead && iSector == ((offBootSector/cbSector)|0) + 2) {
                             var bFATType = bufSector.readUInt8(0);
                             if (bMediaType != bFATType) {
-                                DiskDump.logWarning("wrong media type (" + str.toHexByte(bFATType) + ") in FAT, expected " + str.toHexByte(bMediaType));
+                                DiskDump.logWarning("media byte mismatch (" + str.toHexByte(bFATType) + ") in FAT, expected " + str.toHexByte(bMediaType));
                             }
                             bMediaType = 0;
                         }
 
                         if (this.fJSONNative) {
                             sector['sector'] = nSector;
-                            sector['length'] = cbSectorThisTrack;
+                            if (!fOptimize || cbSectorThisTrack != 512) {
+                                sector['length'] = cbSectorThisTrack;
+                            }
                         } else {
                             json += (iSector == 1? this.dumpLine(2, "{") : "");
                             json += this.dumpLine(0, '"sector":' + this.sJSONWhitespace + nSector + ",");
-                            json += this.dumpLine(0, '"length":' + this.sJSONWhitespace + cbSectorThisTrack + ",");
+                            if (!fOptimize || cbSectorThisTrack != 512) {
+                                json += this.dumpLine(0, '"length":' + this.sJSONWhitespace + cbSectorThisTrack + ",");
+                            }
                         }
 
                         var aTrim = this.trimSector(bufSector, cbSectorThisTrack);
@@ -2863,28 +2882,33 @@ DiskDump.prototype.convertToJSON = function()
                         var cbBuffer = cbSectorThisTrack;
                         if (dwPattern !== null) {
                             cbBuffer = aTrim[1];
-                            if (this.fJSONNative) {
-                                sector['pattern'] = dwPattern;
-                            } else {
-                                json += this.dumpLine(0, '"pattern":' + this.sJSONWhitespace + dwPattern + ",");
+                            if (!fOptimize || dwPattern) {
+                                if (this.fJSONNative) {
+                                    sector['pattern'] = dwPattern;
+                                } else {
+                                    json += this.dumpLine(0, '"pattern":' + this.sJSONWhitespace + dwPattern + ",");
+                                }
                             }
                         }
-
                         if (this.fJSONNative) {
-                            var dataSector = [];
-                            sector['data'] = dataSector;
-                            for (var off = 0; off < cbBuffer; off += 4) {
-                                dataSector.push(bufSector.readInt32LE(off));
+                            if (!fOptimize || cbBuffer) {
+                                var dataSector = [];
+                                sector['data'] = dataSector;
+                                for (var off = 0; off < cbBuffer; off += 4) {
+                                    dataSector.push(bufSector.readInt32LE(off));
+                                }
                             }
-                            aSectors[iSector-1] = sector;
+                            aSectors[iSector - 1] = sector;
                         } else {
-                            if (this.sFormat == DumpAPI.FORMAT.BYTES) {
-                                json += this.dumpBuffer("bytes", bufSector, cbBuffer, 1, offSector);
-                            } else {
-                                /*
-                                 * TODO: Assert that sFormat is FORMAT_JSON or FORMAT_DATA (both use the same dword format)
-                                 */
-                                json += this.dumpBuffer("data", bufSector, cbBuffer, 4, offSector);
+                            if (!fOptimize || cbBuffer) {
+                                if (this.sFormat == DumpAPI.FORMAT.BYTES) {
+                                    json += this.dumpBuffer("bytes", bufSector, cbBuffer, 1, offSector);
+                                } else {
+                                    /*
+                                     * TODO: Assert that sFormat is FORMAT_JSON or FORMAT_DATA (both use the same dword format)
+                                     */
+                                    json += this.dumpBuffer("data", bufSector, cbBuffer, 4, offSector);
+                                }
                             }
                             json += (iSector < nSectorsThisTrack? this.dumpLine(0, "},{") : this.dumpLine(-2, "}"));
                         }

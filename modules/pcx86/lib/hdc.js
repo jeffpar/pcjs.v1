@@ -134,11 +134,22 @@ class HDC extends Component {
                     var drive = hdc.aDrives && hdc.aDrives[iDrive];
                     if (drive && drive.disk) {
                         /*
-                         * Note the similarity (and hence factoring opportunity) between this code and the FDC's "saveDisk" binding.
+                         * Note the similarity (and hence factoring opportunity) between this code and the FDC's
+                         * "saveDisk" binding.
+                         *
+                         * One important difference between the FDC and the HDC is that an FDC may or may not contain
+                         * a disk, whereas an HDC always contains a disk.  However, the contents of an HDC's disk may
+                         * never have been initialized with the contents of an external disk image, and therefore the
+                         * disk's sDiskFile/sDiskPath properties may be undefined.  sDiskName should always be defined
+                         * though, defaulting to the name of the drive (eg, "10Mb Hard Disk").
                          */
                         var disk = drive.disk;
-                        if (DEBUG) hdc.println("saving disk " + disk.sDiskPath + "...");
-                        var sAlert = Web.downloadFile(disk.encodeAsBase64(), "octet-stream", true, disk.sDiskFile.replace(".json", ".img"));
+                        var sDiskName = disk.sDiskFile || disk.sDiskName;
+                        var i = sDiskName.lastIndexOf('.');
+                        if (i >= 0) sDiskName = sDiskName.substr(0, i);
+                        sDiskName += ".img";
+                        if (DEBUG) hdc.println("saving disk " + sDiskName + "...");
+                        var sAlert = Web.downloadFile(disk.encodeAsBase64(), "octet-stream", true, sDiskName);
                         Component.alertUser(sAlert);
                     } else {
                         hdc.notice("Hard drive " + iDrive + " is not available.");

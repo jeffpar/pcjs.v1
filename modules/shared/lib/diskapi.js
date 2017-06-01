@@ -89,8 +89,10 @@ DiskAPI.DISK_FORMATS = {
     1474560: [80,2,18,,0xF0],   // media type 0xF0: 80 cylinders, 2 heads (double-sided), 18 sectors/track, (2880 total sectors x 512 bytes/sector == 1474560)
     2949120: [80,2,36,,0xF0],   // media type 0xF0: 80 cylinders, 2 heads (double-sided), 36 sectors/track, (5760 total sectors x 512 bytes/sector == 2949120)
     /*
-     * The following are common early hard drive sizes, which we explicitly map to CHS values, since the BPB can mislead us when attempting to calculate total cylinders
+     * The following are some common partition sizes, which we explicitly map to CHS values, since the MBR and/or BPB
+     * can mislead us when attempting to calculate total cylinders.
      */
+    10618368:[306,4,17],        // PC XT 10Mb hard drive (type 3)
     21368320:[615,4,17],        // PC AT 20Mb hard drive (type 2)
     /*
      * Assorted DEC disk formats.
@@ -164,7 +166,7 @@ DiskAPI.BPB = {
     TRACK_SECS:     0x018,      // 2 bytes: sectors per track (eg, 8)
     TOTAL_HEADS:    0x01A,      // 2 bytes: number of heads (eg, 1)
     HIDDEN_SECS:    0x01C,      // 4 bytes: number of hidden sectors (always 0 for non-partitioned media)
-    LARGE_SECS:     0x020       // 4 bytes: number of sectors if TOTAL_SECS is zero
+    LARGE_SECS:     0x020       // 4 bytes: number of sectors if TOTAL_SECS is zero (TODO: Verify the true extent of DOS 2.0 BPBs; they may have stopped with HIDDEN_SECS, which is what DiskDump assumes)
 };
 
 /*
