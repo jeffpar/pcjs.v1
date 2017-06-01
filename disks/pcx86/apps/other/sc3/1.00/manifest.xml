@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.34.3/manifest.xsl"?>
+<manifest type="software">
+	<title>SuperCalc3</title>
+	<version>1.00</version>
+	<type>Spreadsheet</type>
+	<company>Sorcim</company>
+	<releaseDate>1983</releaseDate>
+	<machine href="/devices/pcx86/machine/5150/cga/256kb/machine.xml"/>
+	<disk id="disk01" size="368640" chs="40:2:9" img="archive/SC3_V100-SETUP.img" href="/disks/pcx86/apps/other/sc3/1.00/SC3_V100-SETUP.json" md5="90ff154b31c562e029ddd300798f54ee" md5json="7bd20b85fa4f566f75c3c1bb5282fec6">
+		<name>SuperCalc3 1.00 Setup</name>
+	</disk>
+	<disk id="disk02" size="368640" chs="40:2:9" img="archive/SC3_V100-UTILITY.img" href="/disks/pcx86/apps/other/sc3/1.00/SC3_V100-UTILITY.json" md5="9e167cb9fa21a8f5710f95dad66a5839" md5json="38834733e02493a390edd149a67d76f1">
+		<name>SuperCalc3 1.00 Utility</name>
+	</disk>
+</manifest>

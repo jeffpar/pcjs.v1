@@ -13,4 +13,4 @@ Information is available for applications from these vendors:
 * [Lotus](lotus/)
 * [MicroPro](micropro/)
 * [Microsoft](microsoft/)
-* [Other](other/)
+* [Other...](other/)

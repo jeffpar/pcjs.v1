@@ -381,6 +381,8 @@
 		<disk path="/disks/pcx86/apps/microsoft/winword/2.0c/WINWORD20-DISK6.json">Word for Windows 2.0c (Disk 6)</disk>
 		<disk path="/disks/pcx86/apps/other/omniview/4.30/OMNIVIEW386-430.json">Omniview 386 4.30</disk>
 		<disk path="/disks/pcx86/apps/other/sc2/1.00/SC2_V100.json">SuperCalc2 1.00</disk>
+		<disk path="/disks/pcx86/apps/other/sc3/1.00/SC3_V100-SETUP.json">SuperCalc3 1.00 Setup</disk>
+		<disk path="/disks/pcx86/apps/other/sc3/1.00/SC3_V100-UTILITY.json">SuperCalc3 1.00 Utility</disk>
 		<disk path="/disks/pcx86/tools/borland/pascal/3.00b/TURBO-PASCAL-300B.json">Borland Turbo Pascal 3.00B</disk>
 		<disk path="/disks/pcx86/tools/borland/pascal/3.01a/TURBO-PASCAL-301A.json">Borland Turbo Pascal 3.01A</disk>
 		<disk path="/disks/pcx86/tools/ibm/bascom/1.00/BASCOM100-DISK1.json">IBM BASIC Compiler 1.00 (Disk 1)</disk>
