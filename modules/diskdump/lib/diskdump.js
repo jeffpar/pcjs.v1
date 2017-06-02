@@ -527,6 +527,22 @@ DiskDump.aDefaultBPBs = [
     0x02, 0x00,                 // 0x1A: number of heads (2)
     0x00, 0x00, 0x00, 0x00      // 0x1C: number of hidden sectors (always 0 for non-partitioned media)
   ],
+    /*
+     * Here's some useful background information on a 10Mb PC XT fixed disk, partitioned with a single DOS partition.
+     *
+     * The BPB for a 10Mb "type 3" PC XT drive specifies 0x5103 or 20739 for TOTAL_SECS, which is the partition
+     * size in sectors (10,618,368 bytes), whereas the total disk size is 20808 sectors (10,653,696 bytes).  The partition
+     * is 69 sectors smaller than the disk because the first sector is reserved for the MBR and 68 sectors (the entire last
+     * cylinder) are reserved for diagnostics, head parking, etc.  This cylinder usage is confirmed by FDISK, which reports
+     * that 305 cylinders (not 306) are assigned to the DOS partition.
+     *
+     * That 69-sector overhead is NOT the overhead incurred by the FAT file system, which is the boot sector (1), FAT
+     * sectors (16), and root directory sectors (32), for a total of 49 sectors, leaving 20739 - 49 or 20690 sectors.
+     * However, free space is measured in clusters, not sectors, and the partition uses 8 sectors/cluster, leaving room
+     * for 2586.25 clusters.  Since a fractional cluster is not allowed, another 2 sectors are lost to FAT overhead,
+     * for a total of 51 sectors.  So actual free space is (20739 - 51) * 512, or 10,592,256 bytes -- which is exactly
+     * what is reported as the available space on a freshly formatted PC XT 10Mb fixed disk.
+     */
   [                             // define BPB for 10Mb hard drive
     0xEB, 0xFE, 0x90,           // 0x00: JMP instruction, following by 8-byte OEM signature
     0x50, 0x43, 0x4A, 0x53, 0x2E, 0x4F, 0x52, 0x47,     // PCJS_OEM
@@ -2496,7 +2512,6 @@ DiskDump.prototype.convertToJSON = function()
     var json = null;
     var fOptimize = true;                   // if true, leave out any properties that are defaults
     try {
-        var fMBR = false;
         var nHeads = 0;
         var nCylinders = 0;
         var nSectorsPerTrack = 0;
@@ -2505,7 +2520,7 @@ DiskDump.prototype.convertToJSON = function()
         var cbSector = 512;                 // default sector size
         var bMediaType = 0;
         var offBootSector = 0;
-        var cbDiskData = this.bufDisk.length;
+        var cbDiskData = this.bufDisk.length, cbPartition = cbDiskData;
 
         if (cbDiskData >= 3000000) {        // arbitrary threshold between diskette image sizes and hard drive image sizes
             var wSig = this.bufDisk.readUInt16LE(DiskAPI.BOOT.SIG_OFFSET);
@@ -2517,8 +2532,7 @@ DiskDump.prototype.convertToJSON = function()
                 for (var offEntry = 0x1BE; offEntry <= 0x1EE; offEntry += 0x10) {
                     if (this.bufDisk.readUInt8(offEntry) >= 0x80) {
                         offBootSector = this.bufDisk.readUInt32LE(offEntry + 0x08) * cbSector;
-                        cbDiskData = this.bufDisk.readUInt32LE(offEntry + 0x0C) * cbSector;
-                        fMBR = true;
+                        cbPartition = this.bufDisk.readUInt32LE(offEntry + 0x0C) * cbSector;
                         break;
                     }
                 }
@@ -2548,7 +2562,7 @@ DiskDump.prototype.convertToJSON = function()
          * image whose logical format doesn't agree with its physical structure.
          */
         var fXDFOutput = false;
-        var diskFormat = DiskAPI.DISK_FORMATS[cbDiskData];
+        var diskFormat = DiskAPI.GEOMETRIES[cbDiskData];
         if (diskFormat) {
             nCylinders = diskFormat[0];
             nHeads = diskFormat[1];
@@ -2579,11 +2593,7 @@ DiskDump.prototype.convertToJSON = function()
                 var nSectorsTotalBPB = this.bufDisk.readUInt16LE(offBootSector + DiskAPI.BPB.TOTAL_SECS);
                 var nSectorsPerCylinderBPB = nSectorsPerTrackBPB * nHeadsBPB;
                 var nCylindersBPB = Math.floor(nSectorsTotalBPB / nSectorsPerCylinderBPB);
-                /*
-                 * TODO: Detect newer BPBs (ie, where the HIDDEN_SECS and LARGE_SECS fields are valid),
-                 * so that we can determine the true geometry of the disk, instead of having to rely on our
-                 * DISK_FORMATS table.
-                 */
+
                 if (diskFormat) {
                     if (nCylinders != nCylindersBPB) {
                         DiskDump.logWarning("BPB cylinders (" + nCylindersBPB + ") do not match actual cylinders (" + nCylinders + ")");
@@ -2599,9 +2609,13 @@ DiskDump.prototype.convertToJSON = function()
                     }
                 }
                 else {
-                    nCylinders = nCylindersBPB;
                     nHeads = nHeadsBPB;
                     nSectorsPerTrack = nSectorsPerTrackBPB;
+                    nCylinders = cbDiskData / (nHeads * nSectorsPerTrack * cbSector);
+                    if (nCylinders != (nCylinders|0)) {
+                        DiskDump.logWarning("total cylinders (" + nCylinders + ") not a multiple of heads (" + nHeads + ") and sectors/track (" + nSectorsPerTrack + ")");
+                        nCylinders |= 0;
+                    }
                     bMediaType = bMediaTypeBPB;
                 }
 
@@ -2645,8 +2659,11 @@ DiskDump.prototype.convertToJSON = function()
         if (bMediaType) {
             for (i = 0; i < DiskDump.aDefaultBPBs.length; i++) {
                 if (DiskDump.aDefaultBPBs[i][DiskAPI.BPB.MEDIA_TYPE] == bMediaType) {
-                    iBPB = i;
-                    break;
+                    var cbDiskBPB = (DiskDump.aDefaultBPBs[i][DiskAPI.BPB.TOTAL_SECS] + (DiskDump.aDefaultBPBs[i][DiskAPI.BPB.TOTAL_SECS + 1] * 0x100)) * cbSector;
+                    if (cbDiskBPB == cbDiskData) {
+                        iBPB = i;
+                        break;
+                    }
                 }
             }
         }
@@ -2696,15 +2713,14 @@ DiskDump.prototype.convertToJSON = function()
                 DiskDump.logWarning("unrecognized boot sector: " + str.toHexByte(bByte0) + "," + str.toHexByte(bByte1));
             }
 
-            if (fBPBExists) {
-                /*
-                 * Overwrite the OEM string with our own, so that people know how the image originated.  We do this
-                 * only for disks with pre-existing BPBs; it's not safe for older disks (and non-DOS disks, obviously).
-                 */
-                this.bufDisk.write(DiskDump.PCJS_OEM, DiskAPI.BOOT.OEM_STRING, DiskDump.PCJS_OEM.length);
-            }
         }
-
+        if (fBPBExists) {
+            /*
+             * Overwrite the OEM string with our own, so that people know how the image originated.  We do this
+             * only for disks with pre-existing BPBs; it's not safe for pre-2.0 disks (and non-DOS disks, obviously).
+             */
+            this.bufDisk.write(DiskDump.PCJS_OEM, DiskAPI.BOOT.OEM_STRING + offBootSector, DiskDump.PCJS_OEM.length);
+        }
         if (!nHeads) {
             /*
              * Next, check for a DSK header (an old private format I used to use, which begins with either
