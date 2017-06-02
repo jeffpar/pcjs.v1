@@ -531,17 +531,35 @@ DiskDump.aDefaultBPBs = [
      * Here's some useful background information on a 10Mb PC XT fixed disk, partitioned with a single DOS partition.
      *
      * The BPB for a 10Mb "type 3" PC XT drive specifies 0x5103 or 20739 for TOTAL_SECS, which is the partition
-     * size in sectors (10,618,368 bytes), whereas the total disk size is 20808 sectors (10,653,696 bytes).  The partition
-     * is 69 sectors smaller than the disk because the first sector is reserved for the MBR and 68 sectors (the entire last
-     * cylinder) are reserved for diagnostics, head parking, etc.  This cylinder usage is confirmed by FDISK, which reports
-     * that 305 cylinders (not 306) are assigned to the DOS partition.
+     * size in sectors (10,618,368 bytes), whereas total disk size is 20808 sectors (10,653,696 bytes).  The partition
+     * is 69 sectors smaller than the disk because the first sector is reserved for the MBR and 68 sectors (the entire
+     * last cylinder) are reserved for diagnostics, head parking, etc.  This cylinder usage is confirmed by FDISK,
+     * which reports that 305 cylinders (not 306) are assigned to the DOS partition.
      *
-     * That 69-sector overhead is NOT the overhead incurred by the FAT file system, which is the boot sector (1), FAT
-     * sectors (16), and root directory sectors (32), for a total of 49 sectors, leaving 20739 - 49 or 20690 sectors.
-     * However, free space is measured in clusters, not sectors, and the partition uses 8 sectors/cluster, leaving room
-     * for 2586.25 clusters.  Since a fractional cluster is not allowed, another 2 sectors are lost to FAT overhead,
-     * for a total of 51 sectors.  So actual free space is (20739 - 51) * 512, or 10,592,256 bytes -- which is exactly
-     * what is reported as the available space on a freshly formatted PC XT 10Mb fixed disk.
+     * That 69-sector overhead is NOT the overhead incurred by the FAT file system.  That overhead is the boot sector
+     * (1), FAT sectors (2 * 8), and root directory sectors (32), for a total of 49 sectors, leaving 20739 - 49 or
+     * 20690 sectors.  However, free space is measured in clusters, not sectors, and the partition uses 8 sectors/cluster,
+     * leaving room for 2586.25 clusters.  Since a fractional cluster is not allowed, another 2 sectors are lost, for
+     * a total of 51 sectors of FAT overhead.  So actual free space is (20739 - 51) * 512, or 10,592,256 bytes -- which
+     * is exactly what is reported as the available space on a freshly formatted 10Mb PC XT fixed disk.
+     *
+     * Some sources on the internet (eg, http://www.wikiwand.com/en/Timeline_of_DOS_operating_systems) claim that the
+     * file system overhead for the XT's 10Mb disk is "50 sectors".  As they explain:
+     *
+     *      "The fixed disk has 10,618,880 bytes of raw space: 305 cylinders (the equivalent of tracks) × 2 platters
+     *      × 2 sides or heads per platter × 17 sectors per track = 20,740 sectors × 512 bytes per sector = 10,618,880
+     *      bytes...."
+     *
+     * and:
+     *
+     *      "With DOS the only partition, the combined overhead is 50 sectors leaving 10,592,256 bytes for user data:
+     *      DOS's FAT is eight sectors (16 sectors for two copies) + 32 sectors for the root directory, room for 512
+     *      directory entries + 2 sectors (one master and one DOS boot sector) = 50 sectors...."
+     *
+     * However, that's incorrect.  First, the disk has 306 cylinders, not 305.  Second, there are TWO overhead values:
+     * the overhead OUTSIDE the partition (69 sectors) and the overhead INSIDE the partition (51 sectors).  They failed
+     * to account for the reserved cylinder in the first calculation and the fractional cluster in the second calculation,
+     * and then they conflated the two values to produce a single (incorrect) result.
      */
   [                             // define BPB for 10Mb hard drive
     0xEB, 0xFE, 0x90,           // 0x00: JMP instruction, following by 8-byte OEM signature
