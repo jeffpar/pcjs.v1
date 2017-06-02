@@ -560,6 +560,9 @@ DiskDump.aDefaultBPBs = [
      * the overhead OUTSIDE the partition (69 sectors) and the overhead INSIDE the partition (51 sectors).  They failed
      * to account for the reserved cylinder in the first calculation and the fractional cluster in the second calculation,
      * and then they conflated the two values to produce a single (incorrect) result.
+     *
+     * Even if one were to assume that the disk had only 305 cylinders, that would only change the partitioning overhead
+     * to 1 sector; the file system overhead would still be 51 sectors.
      */
   [                             // define BPB for 10Mb hard drive
     0xEB, 0xFE, 0x90,           // 0x00: JMP instruction, following by 8-byte OEM signature
