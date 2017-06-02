@@ -6,19 +6,19 @@
 	<type>Tool</type>
 	<category>Assembler</category>
 	<author>Microsoft</author>
-	<disk id="disk01" size="368640" chs="40:2:9" img="private/MASM51-01510.img" href="/disks/pcx86/tools/microsoft/masm/5.10/MASM51-01510-DISK1.json" md5="8c46f2611b5098d2f638aa6588273902" md5json="a904cd2de02cceda1f5698ab3be03872">
+	<disk id="disk01" size="368640" chs="40:2:9" img="private/MASM51-01510-DISK1.img" href="/disks/pcx86/tools/microsoft/masm/5.10/MASM51-01510-DISK1.json" md5="8c46f2611b5098d2f638aa6588273902" md5json="a904cd2de02cceda1f5698ab3be03872">
 		<name>MS MASM 5.10 (Disk 1)</name>
 	</disk>
-	<disk id="disk02" size="368640" chs="40:2:9" img="private/MASM51-01511.img" href="/disks/pcx86/tools/microsoft/masm/5.10/MASM51-01511-DISK2.json" md5="25b6755b3e457d2926a8f9800214ec50" md5json="02825ec5dbef2d84a3b3a5f3bf3e5db7">
+	<disk id="disk02" size="368640" chs="40:2:9" img="private/MASM51-01511-DISK2.img" href="/disks/pcx86/tools/microsoft/masm/5.10/MASM51-01511-DISK2.json" md5="25b6755b3e457d2926a8f9800214ec50" md5json="02825ec5dbef2d84a3b3a5f3bf3e5db7">
 		<name>MS MASM 5.10 (Disk 2)</name>
 	</disk>
-	<disk id="disk03" size="368640" chs="40:2:9" img="private/MASM51-01512.img" href="/disks/pcx86/tools/microsoft/masm/5.10/MASM51-01512-DISK3.json" md5="678d0fde93715fe91099cb5cd07520ef" md5json="3026d309c8cc7a23c8f61c76395725c2">
+	<disk id="disk03" size="368640" chs="40:2:9" img="private/MASM51-01512-DISK3.img" href="/disks/pcx86/tools/microsoft/masm/5.10/MASM51-01512-DISK3.json" md5="678d0fde93715fe91099cb5cd07520ef" md5json="3026d309c8cc7a23c8f61c76395725c2">
 		<name>MS MASM 5.10 (Disk 3)</name>
 	</disk>
-	<disk id="disk04" size="368640" chs="40:2:9" img="private/MASM51-01514.img" href="/disks/pcx86/tools/microsoft/masm/5.10/MASM51-01514-DISK4.json" md5="d24dad958aeea9302c18378255ae0a58" md5json="67e169dbffb5d18d0eacab493a0eeae6">
+	<disk id="disk04" size="368640" chs="40:2:9" img="private/MASM51-01514-DISK4.img" href="/disks/pcx86/tools/microsoft/masm/5.10/MASM51-01514-DISK4.json" md5="d24dad958aeea9302c18378255ae0a58" md5json="67e169dbffb5d18d0eacab493a0eeae6">
 		<name>MS MASM 5.10 (Disk 4)</name>
 	</disk>
-	<disk id="disk05" size="1228800" chs="80:2:15" img="private/MASM51-03159.img" href="/disks/pcx86/tools/microsoft/masm/5.10/MASM51-03159-DISK5.json" md5="1012b8b4514bacd8394b3323449b74ed" md5json="71b5e6960fe21ea1b15b7cab90130aeb">
+	<disk id="disk05" size="1228800" chs="80:2:15" img="private/MASM51-03159-DISK5.img" href="/disks/pcx86/tools/microsoft/masm/5.10/MASM51-03159-DISK5.json" md5="1012b8b4514bacd8394b3323449b74ed" md5json="71b5e6960fe21ea1b15b7cab90130aeb">
 		<name>MS MASM 5.10 (Disk 5)</name>
 	</disk>
 	<disk id="disk06" size="368640" chs="40:2:9" img="private/MASM51A-UPDATE.img" href="/disks/pcx86/tools/microsoft/masm/5.10/MASM51A-UPDATE.json" md5="beedf43ecb504633c5ff2feb4efe848e" md5json="6d30bcbb4a3a156b88d519e2ea6d3ee3">
