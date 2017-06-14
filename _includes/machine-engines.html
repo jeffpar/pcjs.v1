@@ -23,6 +23,7 @@ The following optional machine properties will be added to the 'parms' property:
     'autoMount' (eg, {"A":{"name":"OS/2 FOOTBALL (v7.68.17)","path":"/disks/pc/os2/misc/football/FOOTBALL-76817.json"}})
     'autoPower' (eg, true)
     'autoStart' (eg, true)
+    'autoType' (eg, "8-10-81\r")
     'drives' (eg, '[{name:"68Mb Hard Disk",type:4,path:"http://archive.pcjs.org/disks/pc/fixed/68mb/win95.json"}]')
     'resume' (eg, "1")
     'state' (eg, "state.json")
@@ -83,6 +84,13 @@ of our Markdown or XML documents.  Examples: 'automount' becomes 'autoMount', 'a
   {% else %}
     {% assign machine_autoStart = "" %}
   {% endif %}
+  {% if machine.autotype != nil %}
+    {% capture machine_autoType %},autoType:"{{ machine.autotype }}"{% endcapture %}
+  {% elsif machine.autoType != nil %}
+    {% capture machine_autoType %},autoType:"{{ machine.autoType }}"{% endcapture %}
+  {% else %}
+    {% assign machine_autoType = "" %}
+  {% endif %}
   {% unless machine.config %}
     {% assign machine_config = "machine.xml" %}
   {% else %}
@@ -102,7 +110,7 @@ of our Markdown or XML documents.  Examples: 'automount' becomes 'autoMount', 'a
   {% else %}
     {% assign machine_template = machine.template %}
   {% endunless %}
-  {% capture machine_parms %}{{ site.left_brace }}autoMount:{{ machine_autoMount }}{{ machine_autoPower }}{{ machine_autoStart }}{{ machine_drives }},resume:"{{ machine.resume }}",state:"{{ machine.state }}",commands:"{{ machine.commands }}",messages:"{{ machine.messages }}",connection:"{{ machine.connection }}"{{ site.right_brace }}{% endcapture %}
+  {% capture machine_parms %}{{ site.left_brace }}autoMount:{{ machine_autoMount }}{{ machine_autoPower }}{{ machine_autoStart }}{{ machine_autoType }}{{ machine_drives }},resume:"{{ machine.resume }}",state:"{{ machine.state }}",commands:"{{ machine.commands }}",messages:"{{ machine.messages }}",connection:"{{ machine.connection }}"{{ site.right_brace }}{% endcapture %}
   {% if site.pcjs.compiled == true and machine.uncompiled != true %}
     {% capture machine_script %}<!--suppress BadExpressionStatementJS -->
       <script type="text/javascript" src="{{ site.baseurl }}/versions/{{ machine_app }}/{{ site.pcjs.version }}/{{ machine_file }}.js"></script>{% endcapture %}
