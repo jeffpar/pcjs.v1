@@ -593,7 +593,11 @@ DiskDump.aDefaultBPBs = [
 ];
 
 DiskDump.asExclusions = [".*", ".IMG"];
-DiskDump.asTextFileExts = [".MD", ".ME", ".ASM", ".BAS", ".TXT", ".XML"];
+/*
+ * NOTE: This list used to include .BAS files, but they aren't always ASCII, so that extension has been removed;
+ * also, a warning is now displayed whenever we replace line endings in *any* file being copied to a disk image.
+ */
+DiskDump.asTextFileExts = [".MD", ".ME", ".ASM", ".TXT", ".XML"];
 
 /*
  * Class methods
@@ -1682,11 +1686,12 @@ DiskDump.prototype.readDir = function(sDir, fRoot, done)
                             fileInfo.FILE_ATTR = DiskDump.ATTR_ARCHIVE;
                             fileInfo.FILE_SIZE = stats.size;
                             if (obj.isTextFile(fileInfo.FILE_NAME)) {
-                                fs.readFile(fileInfo.FILE_PATH, {encoding: "utf8"}, function doneReadDirEntry(err, s) {
+                                fs.readFile(fileInfo.FILE_PATH, {encoding: "utf8"}, function doneReadDirEntry(err, sData) {
                                     if (!err) {
-                                        s = s.replace(/\n/g, "\r\n").replace(/\r\r/g, "\r");
-                                        fileInfo.FILE_DATA = s;
-                                        fileInfo.FILE_SIZE = s.length;
+                                        sData = sData.replace(/\n/g, "\r\n").replace(/\r+/g, "\r");
+                                        console.log("warning: replaced line endings in " + fileInfo.FILE_NAME + " (size changed from " + fileInfo.FILE_SIZE + " to " + sData.length + " bytes)");
+                                        fileInfo.FILE_DATA = sData;
+                                        fileInfo.FILE_SIZE = sData.length;
                                     } else {
                                         if (!errSave) errSave = err;
                                     }
@@ -1814,7 +1819,8 @@ DiskDump.prototype.readPath = function(sPath, done)
                         if (obj.isTextFile(fileInfo.FILE_NAME)) {
                             DiskDump.readFile(sFilePath, "utf8", function doneReadPathEntry(err, sData) {
                                 if (!err) {
-                                    sData = sData.replace(/\n/g, "\r\n").replace(/\r\r/g, "\r");
+                                    sData = sData.replace(/\n/g, "\r\n").replace(/\r+/g, "\r");
+                                    console.log("warning: replaced line endings in " + fileInfo.FILE_NAME + " (size changed from " + fileInfo.FILE_SIZE + " to " + sData.length + " bytes)");
                                     fileInfo.FILE_DATA = sData;
                                     fileInfo.FILE_SIZE = sData.length;
                                     // obj.addManifestInfo(fileInfo);

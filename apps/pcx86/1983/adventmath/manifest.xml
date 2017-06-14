@@ -8,13 +8,13 @@
 	<author>Scott A. Harris</author>
 	<publisher>IBM</publisher>
 	<releaseDate>1983</releaseDate>
-	<machine href="/devices/pcx86/machine/5150/cga/64kb/debugger/machine.xml" state=""/>
-	<disk id="disk01" chs="40:2:9" dir="archive" href="/apps/pcx86/1983/adventmath/ADVENTMATH100.json" md5="d0a170815f29dc663bdb0dd7977efdb3" md5json="1ebcf9c7819f4516677722913d80b589">
+	<machine href="/devices/pcx86/machine/5150/cga/64kb/machine.xml" state=""/>
+	<disk id="disk01" chs="40:2:9" dir="archive" href="/apps/pcx86/1983/adventmath/ADVENTMATH100.json" md5="190e4fe6e282426456dd7a87a2dd9968" md5json="23281f38b2090eb74c8fd4b492a60a00">
 		<name>Adventures in Math (1983)</name>
-		<file size="17928" time="1983-08-11 12:00:12" attr="0x20" md5="0a60a8d64ce3d5013525a26a3347308d">ADVENTUR.BAS</file>
-		<file size="11445" time="1983-08-11 12:00:14" attr="0x20" md5="5ab9b1ea1455581fce8918b5bc37f439">CASTLE.BAS</file>
-		<file size="6131" time="1983-08-11 12:00:14" attr="0x20" md5="f2a8c7ab5ee4b365db1a60cfe931f25b">EXIT.BAS</file>
-		<file size="4819" time="1983-08-11 12:00:12" attr="0x20" md5="9e0c5b895390089def38a036c4ccc1f2">HELP.BAS</file>
+		<file size="18688" time="1983-08-11 12:00:12" attr="0x20" md5="79d17f58ca8232b7173b80dd05b13b70">ADVENTUR.BAS</file>
+		<file size="11904" time="1983-08-11 12:00:14" attr="0x20" md5="fb1ec8042448618b7bdf3ce996b1daa8">CASTLE.BAS</file>
+		<file size="6400" time="1983-08-11 12:00:14" attr="0x20" md5="7feeaf04c6af92f5e87e92f38968a30d">EXIT.BAS</file>
+		<file size="4992" time="1983-08-11 12:00:12" attr="0x20" md5="616d97ea117d076f9fce7fac1e259709">HELP.BAS</file>
 		<file size="1418" time="1983-08-11 12:00:16" attr="0x20" md5="523b0102729670e4ebec91ef4d9a90fb">MAZE1</file>
 		<file size="2179" time="1983-08-11 12:00:16" attr="0x20" md5="ca44b503f5507906dfeab5929eeaca30">MAZE2</file>
 		<file size="3892" time="1983-08-11 12:00:18" attr="0x20" md5="3889b95cf4a069dc6a552aa5286028b7">MAZE3</file>
