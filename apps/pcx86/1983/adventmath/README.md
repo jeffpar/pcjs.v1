@@ -11,6 +11,7 @@ machines:
         path: /disks/pcx86/dos/ibm/1.00/PCDOS100.json
       B:
         path: /apps/pcx86/1983/adventmath/ADVENTMATH100.json
+    keys: 8-10-81\rb:\ra:basica castle\r
 ---
 
 Adventures in Math (1983)
@@ -174,7 +175,7 @@ which boots PC-DOS 2.00 by default.  However, in the course of starting the game
 
 ![ADVENTMATH-CRASH](ADVENTMATH-CRASH.png)
 
-It appeared to run fine with 256Kb of RAM, but these were IBM's "System requirements" for the game:
+It appeared to run fine with 256Kb of RAM, but these were IBM's "System Requirements" for the game:
  
 > IBM Color Display, or a television
 
