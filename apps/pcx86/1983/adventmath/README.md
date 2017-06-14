@@ -178,7 +178,7 @@ It appeared to run fine with 256Kb of RAM, but these were IBM's "System requirem
  
 > IBM Color Display, or a television
 
-> 64Kb of memory for PC and PC XT, 128KB for PC*jr*
+> 64Kb of memory for PC and PC XT, 128KB for PCjr
 
 > One diskette drive
 
