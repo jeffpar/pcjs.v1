@@ -184,8 +184,7 @@ class HDC extends Component {
         else if (this.sDriveConfigs) {
             try {
                 /*
-                 * The most likely source of any exception will be right here, where we're parsing
-                 * the JSON-encoded drive data.
+                 * We must take care when parsing user-supplied JSON-encoded drive data.
                  */
                 this.aDriveConfigs = eval("(" + this.sDriveConfigs + ")");
                 /*

@@ -102,11 +102,12 @@
 		<manifest ref="/disks/pcx86/games/id/wolf3d/manifest.xml"/>
 		<manifest ref="/disks/pcx86/games/microsoft/flightsim/1982/manifest.xml"/>
 		<manifest ref="/disks/pcx86/games/microsoft/flightsim/1984/manifest.xml"/>
-		<manifest ref="/apps/pcx86/1981/visicalc/manifest.xml" disk="disk01"/>
-		<manifest ref="/apps/pcx86/1982/esuite/manifest.xml" disk="disk01"/>
-		<manifest ref="/apps/pcx86/1985/rogue/manifest.xml" disk="disk01"/>
-		<manifest ref="/apps/pcx86/1987/thinktank/manifest.xml" disk="disk01"/>
-		<manifest ref="/apps/pcx86/1992/moria/manifest.xml" disk="disk01"/>
+		<manifest ref="/apps/pcx86/1981/visicalc/manifest.xml"/>
+		<manifest ref="/apps/pcx86/1982/esuite/manifest.xml"/>
+		<manifest ref="/apps/pcx86/1983/adventmath/manifest.xml"/>
+		<manifest ref="/apps/pcx86/1985/rogue/manifest.xml"/>
+		<manifest ref="/apps/pcx86/1987/thinktank/manifest.xml"/>
+		<manifest ref="/apps/pcx86/1992/moria/manifest.xml"/>
 		<manifest ref="/pubs/pc/programming/manifest.xml"/>
 		<disk path="/tests/pcx86/vga/VGABIN.json">VGA Tests (Black Book)</disk>
 	</control>
