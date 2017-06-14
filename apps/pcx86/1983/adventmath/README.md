@@ -5,7 +5,7 @@ permalink: /apps/pcx86/1983/adventmath/
 machines:
   - type: pcx86
     id: ibm5150
-    config: /devices/pcx86/machine/5150/cga/64kb/machine.xml
+    config: /devices/pcx86/machine/5150/cga/256kb/machine.xml
     autoMount:
       B:
         path: /apps/pcx86/1983/adventmath/ADVENTMATH100.json
@@ -92,8 +92,8 @@ Another unexpected file is **BASICA.EXE** (54277 bytes) from 1999.  It seems unl
 *any* BASIC binary with this game, because DOS was a prerequisite, and at the time, all versions of DOS included BASIC.
 IBM's PC-DOS shipped with **BASICA.COM**, and OEM versions of DOS shipped with either **GWBASIC.EXE** or **BASIC.EXE**.
 
-The closest matching binary I'd seen up to this point was **BASICA.EXE** from COMPAQ DOS 1.12 (54304 bytes).
-And sure enough, examining the strings contained inside this **BASICA.EXE** revealed that it is a close relative:
+The closest matching binary I'd seen up to this point was **BASICA.EXE** from [COMPAQ DOS 1.12](/disks/pcx86/dos/compaq/1.12/)
+(54304 bytes).  And sure enough, examining the strings contained inside this **BASICA.EXE** revealed that it is a close relative:
 
 	The COMPAQ Personal Computer BASIC
 	Version 1.13
