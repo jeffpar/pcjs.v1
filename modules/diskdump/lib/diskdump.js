@@ -407,7 +407,7 @@ DiskDump.sUsage = "Usage: " + DiskDump.sAPIURL + "?" + DumpAPI.QUERY.PATH + "={u
  * PCJS_LABEL is our default label, used whenever a more suitable label (eg, the disk image's folder name)
  * is not available or not supplied, and PCJS_OEM is inserted into any DiskDump-generated diskette images.
  */
-DiskDump.PCJS_LABEL = "PCJSDISK";
+DiskDump.PCJS_LABEL = "PCJS.ORG";
 DiskDump.PCJS_OEM   = "PCJS.ORG";
 
 /**
@@ -431,26 +431,10 @@ DiskDump.aDefaultBPBs = [
     0x01, 0x00,                 // 0x1A: number of heads (1)
     0x00, 0x00, 0x00, 0x00      // 0x1C: number of hidden sectors (always 0 for non-partitioned media)
   ],
-  [                             // define BPB for 180Kb diskette
-    0xEB, 0xFE, 0x90,           // 0x00: JMP instruction, following by 8-byte OEM signature
-    0x50, 0x43, 0x4A, 0x53, 0x2E, 0x4F, 0x52, 0x47,     // PCJS_OEM
- // 0x49, 0x42, 0x4D, 0x20, 0x20, 0x31, 0x2E, 0x30,     // "IBM  1.0" (this is a fake OEM signature)
-    0x00, 0x02,                 // 0x0B: bytes per sector (0x200 or 512)
-    0x01,                       // 0x0D: sectors per cluster (1)
-    0x01, 0x00,                 // 0x0E: reserved sectors; ie, # sectors preceding the first FAT--usually just the boot sector (1)
-    0x02,                       // 0x10: FAT copies (2)
-    0x40, 0x00,                 // 0x11: root directory entries (0x40 or 64)  0x40 * 0x20 = 0x800 (1 sector is 0x200 bytes, total of 4 sectors)
-    0x68, 0x01,                 // 0x13: number of sectors (0x168 or 360)
-    0xFC,                       // 0x15: media type (eg, 0xFF: 320Kb, 0xFE: 160Kb, 0xFD: 360Kb, 0xFC: 180Kb)
-    0x02, 0x00,                 // 0x16: sectors per FAT (2)
-    0x09, 0x00,                 // 0x18: sectors per track (9)
-    0x01, 0x00,                 // 0x1A: number of heads (1)
-    0x00, 0x00, 0x00, 0x00      // 0x1C: number of hidden sectors (always 0 for non-partitioned media)
-  ],
   [                             // define BPB for 320Kb diskette
     0xEB, 0xFE, 0x90,           // 0x00: JMP instruction, following by 8-byte OEM signature
     0x50, 0x43, 0x4A, 0x53, 0x2E, 0x4F, 0x52, 0x47,     // PCJS_OEM
- // 0x49, 0x42, 0x4D, 0x20, 0x20, 0x32, 0x2E, 0x30,     // "IBM  2.0" (this is a real OEM signature)
+    // 0x49, 0x42, 0x4D, 0x20, 0x20, 0x31, 0x2E, 0x30,     // "IBM  1.0" (this is a real OEM signature)
     0x00, 0x02,                 // 0x0B: bytes per sector (0x200 or 512)
     0x02,                       // 0x0D: sectors per cluster (2)
     0x01, 0x00,                 // 0x0E: reserved sectors; ie, # sectors preceding the first FAT--usually just the boot sector (1)
@@ -461,6 +445,22 @@ DiskDump.aDefaultBPBs = [
     0x01, 0x00,                 // 0x16: sectors per FAT (1)
     0x08, 0x00,                 // 0x18: sectors per track (8)
     0x02, 0x00,                 // 0x1A: number of heads (2)
+    0x00, 0x00, 0x00, 0x00      // 0x1C: number of hidden sectors (always 0 for non-partitioned media)
+  ],
+  [                             // define BPB for 180Kb diskette
+    0xEB, 0xFE, 0x90,           // 0x00: JMP instruction, following by 8-byte OEM signature
+    0x50, 0x43, 0x4A, 0x53, 0x2E, 0x4F, 0x52, 0x47,     // PCJS_OEM
+ // 0x49, 0x42, 0x4D, 0x20, 0x20, 0x32, 0x2E, 0x30,     // "IBM  2.0" (this is a fake OEM signature)
+    0x00, 0x02,                 // 0x0B: bytes per sector (0x200 or 512)
+    0x01,                       // 0x0D: sectors per cluster (1)
+    0x01, 0x00,                 // 0x0E: reserved sectors; ie, # sectors preceding the first FAT--usually just the boot sector (1)
+    0x02,                       // 0x10: FAT copies (2)
+    0x40, 0x00,                 // 0x11: root directory entries (0x40 or 64)  0x40 * 0x20 = 0x800 (1 sector is 0x200 bytes, total of 4 sectors)
+    0x68, 0x01,                 // 0x13: number of sectors (0x168 or 360)
+    0xFC,                       // 0x15: media type (eg, 0xFF: 320Kb, 0xFE: 160Kb, 0xFD: 360Kb, 0xFC: 180Kb)
+    0x02, 0x00,                 // 0x16: sectors per FAT (2)
+    0x09, 0x00,                 // 0x18: sectors per track (9)
+    0x01, 0x00,                 // 0x1A: number of heads (1)
     0x00, 0x00, 0x00, 0x00      // 0x1C: number of hidden sectors (always 0 for non-partitioned media)
   ],
   [                             // define BPB for 360Kb diskette
@@ -1903,7 +1903,7 @@ DiskDump.prototype.buildVolLabel = function(sDir)
             }
         }
     }
-    if (!sVolume) {
+    if (!sVolume || sVolume.toLowerCase() == "archive" || sVolume.toLowerCase() == "disk") {
         sVolume = DiskDump.PCJS_LABEL;
     }
     if (sVolume && sVolume.length <= 11) {
@@ -2375,13 +2375,22 @@ DiskDump.prototype.buildImageFromFiles = function(aFiles, done)
      * Find or build a BPB with enough capacity, and at the same time, calculate all the other values we'll need,
      * including total number of data sectors (cDataSectors).
      *
-     * TODO: For now, the code that chooses a default BPB is starting with #3 instead of #0, because Windows 95
+     * TODO: For now, the code that chooses a default BPB starts with entry #3 instead of #0, because Windows 95
      * (at least when running under VMware) fails to read the contents of such disks correctly.  Whether that's my
      * fault or Windows 95's fault is still TBD (although it's probably mine -- perhaps 160Kb diskettes aren't
-     * supposed to have BPBs?)  The simple work-around is to avoid creating 160Kb diskette images (and, to play it
-     * safe, I skip 180Kb and 320Kb as well, since 360Kb was the most commonly used format after DOS 2.0 introduced it).
+     * supposed to have BPBs?)  The simple work-around is to avoid creating 160Kb diskette images used by PC-DOS 1.0.
+     * To play it safe, I also skip the 320Kb format (added for PC-DOS 1.1).  360Kb was the most commonly used format
+     * after PC-DOS 2.0 introduced it.  PC-DOS 2.0 also introduced 180Kb (a single-sided version of the 360Kb
+     * double-sided format), but it's less commonly used.
+     *
+     * UPDATE: I've undone the above change, because when creating a disk image for an old application like:
+     *
+     *      /apps/pcx86/1983/adventmath ["Adventures in Math" (1983)]
+     *
+     * it's important to create a disk image that will work with PC-DOS 1.0, which didn't understand 180Kb and 360Kb
+     * disk images.
      */
-    for (var iBPB = 3; iBPB < DiskDump.aDefaultBPBs.length; iBPB++) {
+    for (var iBPB = 0; iBPB < DiskDump.aDefaultBPBs.length; iBPB++) {
         /*
          * Use slice() to copy the default BPB, as a precaution (to avoid any changes to the default).
          */
