@@ -545,7 +545,7 @@ class Disk extends Component {
     {
         var disk;
         var cbDiskData = buffer? buffer.byteLength : 0;
-        var diskFormat = DiskAPI.DISK_FORMATS[cbDiskData];
+        var diskFormat = DiskAPI.GEOMETRIES[cbDiskData];
 
         if (diskFormat) {
             this.nCylinders = diskFormat[0];

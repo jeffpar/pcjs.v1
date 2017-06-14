@@ -69,44 +69,11 @@ var DiskAPI = {
 };
 
 /*
- * Common (supported) diskette formats
- *
- * For no particular reason that I can recall, each entry in DISK_FORMATS is an array of values in "CHS" order:
- *
- *      [# cylinders, # heads, # sectors/track, # bytes/sector, media type]
- *
- * If the 4th value is omitted, the sector size is assumed to be 512.  The order of these "geometric" values mirrors
- * the structure of our JSON-encoded disk images, which consist of an array of cylinders, each of which is an array of
- * heads, each of which is an array of sector objects.
- */
-DiskAPI.DISK_FORMATS = {
-    163840:  [40,1,8,,0xFE],    // media type 0xFE: 40 cylinders, 1 head (single-sided),   8 sectors/track, ( 320 total sectors x 512 bytes/sector ==  163840)
-    184320:  [40,1,9,,0xFC],    // media type 0xFC: 40 cylinders, 1 head (single-sided),   9 sectors/track, ( 360 total sectors x 512 bytes/sector ==  184320)
-    327680:  [40,2,8,,0xFF],    // media type 0xFF: 40 cylinders, 2 heads (double-sided),  8 sectors/track, ( 640 total sectors x 512 bytes/sector ==  327680)
-    368640:  [40,2,9,,0xFD],    // media type 0xFD: 40 cylinders, 2 heads (double-sided),  9 sectors/track, ( 720 total sectors x 512 bytes/sector ==  368640)
-    737280:  [80,2,9,,0xF9],    // media type 0xF9: 80 cylinders, 2 heads (double-sided),  9 sectors/track, (1440 total sectors x 512 bytes/sector ==  737280)
-    1228800: [80,2,15,,0xF9],   // media type 0xF9: 80 cylinders, 2 heads (double-sided), 15 sectors/track, (2400 total sectors x 512 bytes/sector == 1228800)
-    1474560: [80,2,18,,0xF0],   // media type 0xF0: 80 cylinders, 2 heads (double-sided), 18 sectors/track, (2880 total sectors x 512 bytes/sector == 1474560)
-    2949120: [80,2,36,,0xF0],   // media type 0xF0: 80 cylinders, 2 heads (double-sided), 36 sectors/track, (5760 total sectors x 512 bytes/sector == 2949120)
-    /*
-     * The following are common early hard drive sizes, which we explicitly map to CHS values, since the BPB can mislead us when attempting to calculate total cylinders
-     */
-    21368320:[615,4,17],        // PC AT 20Mb hard drive (type 2)
-    /*
-     * Assorted DEC disk formats.
-     */
-    256256:  [77, 1,26,128],    // RX01 single-platter diskette: 77 tracks, 1 head, 26 sectors/track, 128 bytes/sector, for a total of 256256 bytes
-    2494464: [203,2,12,512],    // RK03 single-platter disk cartridge: 203 tracks, 2 heads, 12 sectors/track, 512 bytes/sector, for a total of 2494464 bytes
-    5242880: [256,2,40,256],    // RL01K single-platter disk cartridge: 256 tracks, 2 heads, 40 sectors/track, 256 bytes/sector, for a total of 5242880 bytes
-    10485760:[512,2,40,256]     // RL02K single-platter disk cartridge: 512 tracks, 2 heads, 40 sectors/track, 256 bytes/sector, for a total of 10485760 bytes
-};
-
-/*
  * TODO: Eventually, our tools will need to support looking up disk formats by "model" rather than by raw disk size,
  * because obviously multiple disk geometries can yield the same raw disk size.  For each conflict that arises, I'll
  * probably create a fake (approximate) disk size entry above, and then create a mapping to that approximate size below.
  */
-DiskAPI.DISK_MODELS = {
+DiskAPI.MODELS = {
     "RL01": 5242880,
     "RL02": 10485760
 };
@@ -150,7 +117,14 @@ DiskAPI.BOOT = {
 };
 
 /*
- * BIOS Parameter Block (BPB) offsets in DOS-compatible boot sectors (DOS 2.0 and up)
+ * BIOS Parameter Block (BPB) offsets in DOS-compatible boot sectors (DOS 2.x and up)
+ *
+ * NOTE: DOS 2.x OEM documentation says that the words starting at offset 0x018 (TRACK_SECS, TOTAL_HEADS, and HIDDEN_SECS)
+ * are optional, but even the DOS 2.0 FORMAT utility initializes all three of those words.  There may be some OEM media out
+ * there with BPBs that are only valid up to offset 0x018, but I've not run across any media like that.
+ *
+ * DOS 3.20 added LARGE_SECS, but unfortunately, it was added as a 2-byte value at offset 0x01E.  DOS 3.31 decided
+ * to make both HIDDEN_SECS and LARGE_SECS 4-byte values, which meant that LARGE_SECS had to move from 0x01E to 0x020.
  */
 DiskAPI.BPB = {
     SECTOR_BYTES:   0x00B,      // 2 bytes: bytes per sector (eg, 0x200 or 512)
@@ -163,8 +137,43 @@ DiskAPI.BPB = {
     FAT_SECS:       0x016,      // 2 bytes: sectors per FAT (eg, 1)
     TRACK_SECS:     0x018,      // 2 bytes: sectors per track (eg, 8)
     TOTAL_HEADS:    0x01A,      // 2 bytes: number of heads (eg, 1)
-    HIDDEN_SECS:    0x01C,      // 4 bytes: number of hidden sectors (always 0 for non-partitioned media)
-    LARGE_SECS:     0x020       // 4 bytes: number of sectors if TOTAL_SECS is zero
+    HIDDEN_SECS:    0x01C,      // 2 bytes (DOS 2.x) or 4 bytes (DOS 3.31 and up): number of hidden sectors (always 0 for non-partitioned media)
+    LARGE_SECS:     0x020       // 4 bytes (DOS 3.31 and up): number of sectors if TOTAL_SECS is zero
+};
+
+/*
+ * Common (supported) diskette geometries.
+ *
+ * Each entry in GEOMETRIES is an array of values in "CHS" order:
+ *
+ *      [# cylinders, # heads, # sectors/track, # bytes/sector, media type]
+ *
+ * If the 4th value is omitted, the sector size is assumed to be 512.  The order of these "geometric" values mirrors
+ * the structure of our JSON-encoded disk images, which consist of an array of cylinders, each of which is an array of
+ * heads, each of which is an array of sector objects.
+ */
+DiskAPI.GEOMETRIES = {
+    163840:  [40,1,8,,0xFE],    // media type 0xFE: 40 cylinders, 1 head (single-sided),   8 sectors/track, ( 320 total sectors x 512 bytes/sector ==  163840)
+    184320:  [40,1,9,,0xFC],    // media type 0xFC: 40 cylinders, 1 head (single-sided),   9 sectors/track, ( 360 total sectors x 512 bytes/sector ==  184320)
+    327680:  [40,2,8,,0xFF],    // media type 0xFF: 40 cylinders, 2 heads (double-sided),  8 sectors/track, ( 640 total sectors x 512 bytes/sector ==  327680)
+    368640:  [40,2,9,,0xFD],    // media type 0xFD: 40 cylinders, 2 heads (double-sided),  9 sectors/track, ( 720 total sectors x 512 bytes/sector ==  368640)
+    737280:  [80,2,9,,0xF9],    // media type 0xF9: 80 cylinders, 2 heads (double-sided),  9 sectors/track, (1440 total sectors x 512 bytes/sector ==  737280)
+    1228800: [80,2,15,,0xF9],   // media type 0xF9: 80 cylinders, 2 heads (double-sided), 15 sectors/track, (2400 total sectors x 512 bytes/sector == 1228800)
+    1474560: [80,2,18,,0xF0],   // media type 0xF0: 80 cylinders, 2 heads (double-sided), 18 sectors/track, (2880 total sectors x 512 bytes/sector == 1474560)
+    2949120: [80,2,36,,0xF0],   // media type 0xF0: 80 cylinders, 2 heads (double-sided), 36 sectors/track, (5760 total sectors x 512 bytes/sector == 2949120)
+    /*
+     * The following are some common disk sizes and their CHS values, since missing or bogus MBR and/or BPB values
+     * might mislead us when attempting to determine the exact disk geometry.
+     */
+    10653696:[306,4,17],        // PC XT 10Mb hard drive (type 3)
+    21411840:[615,4,17],        // PC AT 20Mb hard drive (type 2)
+    /*
+     * Assorted DEC disk formats.
+     */
+    256256:  [77, 1,26,128],    // RX01 single-platter diskette: 77 tracks, 1 head, 26 sectors/track, 128 bytes/sector, for a total of 256256 bytes
+    2494464: [203,2,12,512],    // RK03 single-platter disk cartridge: 203 tracks, 2 heads, 12 sectors/track, 512 bytes/sector, for a total of 2494464 bytes
+    5242880: [256,2,40,256],    // RL01K single-platter disk cartridge: 256 tracks, 2 heads, 40 sectors/track, 256 bytes/sector, for a total of 5242880 bytes
+    10485760:[512,2,40,256]     // RL02K single-platter disk cartridge: 512 tracks, 2 heads, 40 sectors/track, 256 bytes/sector, for a total of 10485760 bytes
 };
 
 /*

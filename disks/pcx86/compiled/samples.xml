@@ -8,6 +8,7 @@
 		<disk path="/disks/pcx86/dos/ibm/2.00/PCDOS200-DISK2.json">PC-DOS 2.00 (Disk 2)</disk>
 		<disk path="/disks/pcx86/games/microsoft/adventure/ADVENTURE-1981.json">Microsoft Adventure</disk>
 		<disk path="/apps/pcx86/1981/visicalc/disk.json">VisiCalc (1981)</disk>
+		<disk path="/apps/pcx86/1983/adventmath/ADVENTMATH100.json">Adventures in Math (1983)</disk>
 	</control>
 	<control type="button" binding="loadDisk">Load</control>
 	<control type="button" binding="saveDisk" padRight="8px">Save</control>

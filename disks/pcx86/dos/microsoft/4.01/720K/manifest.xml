@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.34.3/manifest.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.35.0/manifest.xsl"?>
 <manifest type="software">
 	<title>MS-DOS</title>
 	<version>4.01</version>
@@ -8,12 +8,12 @@
 	<author>Microsoft</author>
 	<releaseDate>April 1989</releaseDate>
 	<disk id="disk01" size="737280" chs="80:2:9" img="archive/MSDOS401-DISK1.img" href="/disks/pcx86/dos/microsoft/4.01/720K/MSDOS401-DISK1.json" md5="fe6a8a6a3991839680fb0a2f137b337b" md5json="7905864b5a943d6cb4a4a2b37f6dfbe1">
-		<name>MS-DOS 4.01 (Disk 1)</name>
+		<name>MS-DOS 4.01 (720K Disk 1)</name>
 	</disk>
 	<disk id="disk02" size="737280" chs="80:2:9" img="archive/MSDOS401-DISK2.img" href="/disks/pcx86/dos/microsoft/4.01/720K/MSDOS401-DISK2.json" md5="1ed35cdf88463c632ee2d9fbb8d74da5" md5json="5f1741c90a5c046a97ae6b1b7f66f047">
-		<name>MS-DOS 4.01 (Disk 2)</name>
+		<name>MS-DOS 4.01 (720K Disk 2)</name>
 	</disk>
 	<disk id="disk03" size="737280" chs="80:2:9" img="archive/MSDOS401-DISK3.img" href="/disks/pcx86/dos/microsoft/4.01/720K/MSDOS401-DISK3.json" md5="14cb5d9021f313340cf015b18f88880f" md5json="840db50b36a24225bc044622dc3cb854">
-		<name>MS-DOS 4.01 (Disk 3)</name>
+		<name>MS-DOS 4.01 (720K Disk 3)</name>
 	</disk>
 </manifest>

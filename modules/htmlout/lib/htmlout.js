@@ -1702,18 +1702,24 @@ HTMLOut.prototype.getManifestXML = function(sToken, sIndent, aParms)
                                 sStateFile = match[2];
                             }
                         }
-                        if (sXMLFile) {
-                            obj.getMachineXML(sToken, sIndent, null, sXMLFile, sStateFile);
-                            return;
-                        }
+                        /*
+                         * Because it's common (and preferred, actually) to have a README.md file accompany a manifest,
+                         * and because README.md files offer the preferred way to embed machines, we no longer immediately
+                         * process any machine file specified by the manifest.  Instead, we pass along sXMLFile and
+                         * sStateFile to getMarkdownFile(), which it will use if no README.md exists.
+                         *
+                         *  if (sXMLFile) {
+                         *      obj.getMachineXML(sToken, sIndent, null, sXMLFile, sStateFile);
+                         *      return;
+                         *  }
+                         */
                     }
-
                     /*
                      * If we're still here, then there was either a problem reading the manifest XSL file,
-                     * or the manifest XML file didn't contain a machine reference.  For now, we fall back to
-                     * getMarkdownFile().
+                     * or the manifest XML file didn't contain a machine reference (or, as explained above, we
+                     * simply prefer to process README.md files first), so we fall back to getMarkdownFile().
                      */
-                    obj.getMarkdownFile(obj.sFile, sToken, sIndent, aParms);
+                    obj.getMarkdownFile(obj.sFile, sToken, sIndent, aParms, null, sXMLFile, sStateFile);
                 });
                 return;
             }
@@ -1727,7 +1733,7 @@ HTMLOut.prototype.getManifestXML = function(sToken, sIndent, aParms)
 };
 
 /**
- * getMarkdownFile(sFile, sToken, sIndent, aParms, sPrevious, sMachineFile)
+ * getMarkdownFile(sFile, sToken, sIndent, aParms, sPrevious, sXMLFile, sStateFile)
  *
  * If sFile exists in the current directory, open it, convert it, and prepare for replacement.
  *
@@ -1737,9 +1743,10 @@ HTMLOut.prototype.getManifestXML = function(sToken, sIndent, aParms)
  * @param {string} [sIndent]
  * @param {Array.<string>} [aParms]
  * @param {string|null} [sPrevious] is text, if any, that should precede the file
- * @param {string} [sMachineFile] name (if any) of machine.xml file already processed by the caller
+ * @param {string} [sXMLFile] name (if any) of a default machine.xml
+ * @param {string} [sStateFile] name (if any) of a default state file
  */
-HTMLOut.prototype.getMarkdownFile = function(sFile, sToken, sIndent, aParms, sPrevious, sMachineFile)
+HTMLOut.prototype.getMarkdownFile = function(sFile, sToken, sIndent, aParms, sPrevious, sXMLFile, sStateFile)
 {
     var obj = this;
 
@@ -1754,7 +1761,7 @@ HTMLOut.prototype.getMarkdownFile = function(sFile, sToken, sIndent, aParms, sPr
              */
             if (sFile.indexOf(sReadMeFile) >= 0) {
                 sFile = sFile.replace(sReadMeFile, sMachineMDFile);
-                obj.getMarkdownFile(sFile, sToken, sIndent, aParms, sPrevious, sMachineFile);
+                obj.getMarkdownFile(sFile, sToken, sIndent, aParms, sPrevious, sXMLFile, sStateFile);
                 return;
             }
             /*
@@ -1769,18 +1776,18 @@ HTMLOut.prototype.getMarkdownFile = function(sFile, sToken, sIndent, aParms, sPr
              * we now try some fallbacks, like checking for a "machine.xml" -- but only if sPrevious is not defined.
              */
             if (sToken) {
-                if (sPrevious !== undefined) {          // this means getMachineXML() called us, so it's the end of road
+                if (sPrevious != null) {                // this means getMachineXML() called us, so it's the end of road
                     obj.aTokens[sToken] = sPrevious;
                     obj.replaceTokens();
-                } else {
-                    obj.getMachineXML(sToken, sIndent); // we don't pass along aParms, because those are for Markdown files only
+                } else {                                // we don't pass along aParms, because those are for Markdown files only
+                    obj.getMachineXML(sToken, sIndent, null, sXMLFile, sStateFile);
                 }
             }
         } else {
-            var m = new MarkOut(s, sIndent, obj.req, aParms, obj.fDebug, sMachineFile, obj.sExt == "md");
+            var m = new MarkOut(s, sIndent, obj.req, aParms, obj.fDebug, sXMLFile, obj.sExt == "md");
             s = m.convertMD("    ").trim();
 
-            if (sMachineFile && m.hasMachines()) sPrevious = null;
+            if (sXMLFile && m.hasMachines()) sPrevious = null;
 
             /*
              * If the Markdown document begins with a heading, stuff that into the <title> tag;

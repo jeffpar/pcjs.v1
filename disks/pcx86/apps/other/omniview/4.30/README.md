@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Omniview 386 4.30
-permalink: /disks/pcx86/apps/sunnyhill/omniview/4.30/
+permalink: /disks/pcx86/apps/other/omniview/4.30/
 machines:
   - type: pcx86
     id: compaq386
@@ -10,7 +10,7 @@ machines:
       A:
         path: /disks/pcx86/dos/ibm/3.30/PCDOS330-DISK1-720K.json
       B:
-        path: /disks/pcx86/apps/sunnyhill/omniview/4.30/OMNIVIEW386-430.json
+        path: /disks/pcx86/apps/other/omniview/4.30/OMNIVIEW386-430.json
 ---
 
 Omniview 386 4.30

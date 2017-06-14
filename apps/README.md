@@ -9,17 +9,11 @@ permalink: /apps/
 Software Archives
 -----------------
 
-PCjs has archived selected software for the following machines:
+PCjs includes archives of selected software:
 
-* [IBM PC](pcx86/)
-* [Challenger 1P](c1p/)
-* [PDP-10](pdp10/) and [PDP-11](pdp11/)
-
-PCjs also includes a small collection of disk images in the [Disk Libraries](/disks/):
-
-* [IBM PC](/disks/pcx86/)
-* [Challenger 1P](/disks/c1p/)
-* [DEC](/disks/dec/)
+* IBM PC [Applications](pcx86/) and [Disk Library](/disks/pcx86/)
+* Challenger 1P [Applications](c1p/) and [Disk Library](/disks/c1p/)
+* DEC [PDP-10 Software](pdp10/), [PDP-11 Software](pdp11/), and [Disk Library](/disks/dec/)
 
 ---
 

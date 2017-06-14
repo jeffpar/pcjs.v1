@@ -153,7 +153,7 @@ class FDC extends Component {
          * We record any 'autoMount' object now, but we no longer parse it until initBus(), because the Computer's
          * getMachineParm() service may have an override for us.
          */
-        this.configMount = parmsFDC['autoMount'] || null;
+        this.configMount = this.parseConfig(parmsFDC['autoMount']);
 
         /*
          * This establishes "name" as the default; if we decide we'd prefer "none" to be the default (ie, the order
@@ -340,7 +340,8 @@ class FDC extends Component {
                     var drive = fdc.aDrives[iDriveSelected];
                     if (drive) {
                         /*
-                         * Note the similarity (and hence factoring opportunity) between this code and the HDC's "saveHD*" binding.
+                         * Note the similarity (and hence factoring opportunity) between this code and the HDC's
+                         * "saveHD*" binding.
                          */
                         var disk = drive.disk;
                         if (disk) {
@@ -420,23 +421,7 @@ class FDC extends Component {
         this.cmp = cmp;
 
         this.chipset = cmp.getMachineComponent("ChipSet");
-
-        this.configMount = this.cmp.getMachineParm('autoMount') || this.configMount;
-
-        if (this.configMount) {
-            if (typeof this.configMount == "string") {
-                try {
-                    /*
-                     * The most likely source of any exception will be right here, where we're parsing
-                     * the JSON-encoded diskette data.
-                     */
-                    this.configMount = eval("(" + this.configMount + ")");
-                } catch (e) {
-                    Component.error("FDC auto-mount error: " + e.message + " (" + this.configMount + ")");
-                    this.configMount = null;
-                }
-            }
-        }
+        this.parseConfig(this.cmp.getMachineParm('autoMount'), this.configMount);
 
         /*
          * If we didn't need auto-mount support, we could defer controller initialization until we received a powerUp() notification,
@@ -453,6 +438,39 @@ class FDC extends Component {
         this.addDiskette("Remote Disk", "??");
 
         if (!this.autoMount()) this.setReady();
+    }
+
+    /**
+     * parseConfig(config, configMerge)
+     *
+     * @this {FDC}
+     * @param {Object|string|undefined} config
+     * @param {Object} [configMerge]
+     * @return {Object}
+     */
+    parseConfig(config, configMerge)
+    {
+        if (config) {
+            if (typeof config == "string") {
+                try {
+                    /*
+                     * We must take care when parsing user-supplied JSON-encoded diskette data.
+                     */
+                    config = /** @type {Object} */ (eval("(" + config + ")"));
+                } catch (e) {
+                    Component.error("FDC auto-mount error: " + e.message + " (" + config + ")");
+                    config = {};
+                }
+            }
+        } else {
+            config = {};
+        }
+        if (configMerge) {
+            for (var drive in config) {
+                configMerge[drive] = config[drive];
+            }
+        }
+        return config;
     }
 
     /**
@@ -1066,26 +1084,24 @@ class FDC extends Component {
     autoMount(fRemount)
     {
         if (!fRemount) this.cAutoMount = 0;
-        if (this.configMount) {
-            for (var sDrive in this.configMount) {
-                var configDrive = this.configMount[sDrive];
-                var sDiskettePath = configDrive['path'] || "";
-                var sDisketteName = configDrive['name'] || this.findDiskette(sDiskettePath);
-                if (sDiskettePath && sDisketteName) {
-                    /*
-                     * WARNING: This conversion of drive letter to drive number, starting with A:, is very simplistic
-                     * and is not guaranteed to match the drive mapping that DOS ultimately uses.
-                     */
-                    var iDrive = sDrive.charCodeAt(0) - 0x41;
-                    if (iDrive >= 0 && iDrive < this.aDrives.length) {
-                        if (!this.loadDrive(iDrive, sDisketteName, sDiskettePath, true) && fRemount) {
-                            this.setReady(false);
-                        }
-                        continue;
+        for (var sDrive in this.configMount) {
+            var configDrive = this.configMount[sDrive];
+            var sDiskettePath = configDrive['path'] || "";
+            var sDisketteName = configDrive['name'] || this.findDiskette(sDiskettePath);
+            if (sDiskettePath && sDisketteName) {
+                /*
+                 * WARNING: This conversion of drive letter to drive number, starting with A:, is very simplistic
+                 * and is not guaranteed to match the drive mapping that DOS ultimately uses.
+                 */
+                var iDrive = sDrive.charCodeAt(0) - 0x41;
+                if (iDrive >= 0 && iDrive < this.aDrives.length) {
+                    if (!this.loadDrive(iDrive, sDisketteName, sDiskettePath, true) && fRemount) {
+                        this.setReady(false);
                     }
+                    continue;
                 }
-                this.notice("Incorrect auto-mount settings for drive " + sDrive + " (" + JSON.stringify(configDrive) + ")");
             }
+            this.notice("Incorrect auto-mount settings for drive " + sDrive + " (" + JSON.stringify(configDrive) + ")");
         }
         return !!this.cAutoMount;
     }

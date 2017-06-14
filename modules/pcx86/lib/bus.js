@@ -1070,7 +1070,9 @@ class Bus extends Component {
                     return file.getSymbol(bto.obj.offFile + off, fNearest);
                 }
                 if (!fSymbol || fNearest) {
-                    return bto.obj.idComponent + '+' + Str.toHexLong(bto.off + off);
+                    if (bto.obj.idComponent) {
+                        return bto.obj.idComponent + '+' + Str.toHexLong(bto.off + off);
+                    }
                 }
             }
         }

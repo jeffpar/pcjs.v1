@@ -1,62 +1,62 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.34.3/manifest.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.35.0/manifest.xsl"?>
 <manifest type="software">
 	<title>PC/IX 1.0</title>
-	<disk id="disk01" size="368640" chs="40:2:9" img="archive/01MAINT.RAW" href="/disks/pcx86/unix/ibm/pcix/1.0/01MAINT.json" md5="cdb2d803fc3b356f08f431612c23b152" md5json="e4ec579404d810b5e3ec08423b481553">
+	<disk id="disk01" size="368640" chs="40:2:9" img="archive/01MAINT.img" href="/disks/pcx86/unix/ibm/pcix/1.0/01MAINT.json" md5="cdb2d803fc3b356f08f431612c23b152" md5json="e4ec579404d810b5e3ec08423b481553">
 		<name>PC/IX 1.0 (MAINT)</name>
 	</disk>
-	<disk id="disk02" size="368640" chs="40:2:9" img="archive/02CORE1.RAW" href="/disks/pcx86/unix/ibm/pcix/1.0/02CORE1.json" md5="58cb9ec7749b939eee45455818a7392c" md5json="21b66ed023da7c1232312daeba87c936">
+	<disk id="disk02" size="368640" chs="40:2:9" img="archive/02CORE1.img" href="/disks/pcx86/unix/ibm/pcix/1.0/02CORE1.json" md5="58cb9ec7749b939eee45455818a7392c" md5json="21b66ed023da7c1232312daeba87c936">
 		<name>PC/IX 1.0 (CORE1)</name>
 	</disk>
-	<disk id="disk03" size="368640" chs="40:2:9" img="archive/03CORE2.RAW" href="/disks/pcx86/unix/ibm/pcix/1.0/03CORE2.json" md5="8c0d58cd081a2e01b157a8afe6415b0e" md5json="b5c45b543220ff6bd7ed4b36f639a544">
+	<disk id="disk03" size="368640" chs="40:2:9" img="archive/03CORE2.img" href="/disks/pcx86/unix/ibm/pcix/1.0/03CORE2.json" md5="8c0d58cd081a2e01b157a8afe6415b0e" md5json="b5c45b543220ff6bd7ed4b36f639a544">
 		<name>PC/IX 1.0 (CORE2)</name>
 	</disk>
-	<disk id="disk04" size="368640" chs="40:2:9" img="archive/04CORE3.RAW" href="/disks/pcx86/unix/ibm/pcix/1.0/04CORE3.json" md5="e3b361172a2135275ba06a0b0f10db7a" md5json="8c056760065ad76be626c863452a4d72">
+	<disk id="disk04" size="368640" chs="40:2:9" img="archive/04CORE3.img" href="/disks/pcx86/unix/ibm/pcix/1.0/04CORE3.json" md5="e3b361172a2135275ba06a0b0f10db7a" md5json="8c056760065ad76be626c863452a4d72">
 		<name>PC/IX 1.0 (CORE3)</name>
 	</disk>
-	<disk id="disk05" size="368640" chs="40:2:9" img="archive/05CORE4.RAW" href="/disks/pcx86/unix/ibm/pcix/1.0/05CORE4.json" md5="2bc59b3344e7fd0182b5d88589d6c9c6" md5json="09d7efa80f53bfec6b15ffd8aede6699">
+	<disk id="disk05" size="368640" chs="40:2:9" img="archive/05CORE4.img" href="/disks/pcx86/unix/ibm/pcix/1.0/05CORE4.json" md5="2bc59b3344e7fd0182b5d88589d6c9c6" md5json="09d7efa80f53bfec6b15ffd8aede6699">
 		<name>PC/IX 1.0 (CORE4)</name>
 	</disk>
-	<disk id="disk06" size="368640" chs="40:2:9" img="archive/06CORE5.RAW" href="/disks/pcx86/unix/ibm/pcix/1.0/06CORE5.json" md5="3593c152912ce65a9167e17cd46f91df" md5json="fbe5d117532d1ea7fbf34e69452204d6">
+	<disk id="disk06" size="368640" chs="40:2:9" img="archive/06CORE5.img" href="/disks/pcx86/unix/ibm/pcix/1.0/06CORE5.json" md5="3593c152912ce65a9167e17cd46f91df" md5json="fbe5d117532d1ea7fbf34e69452204d6">
 		<name>PC/IX 1.0 (CORE5)</name>
 	</disk>
-	<disk id="disk07" size="368640" chs="40:2:9" img="archive/07CORE6.RAW" href="/disks/pcx86/unix/ibm/pcix/1.0/07CORE6.json" md5="568eaae91842ddebd40d2682ee5de3e4" md5json="99e288a3337c1e3f44a6efd1a27f6981">
+	<disk id="disk07" size="368640" chs="40:2:9" img="archive/07CORE6.img" href="/disks/pcx86/unix/ibm/pcix/1.0/07CORE6.json" md5="568eaae91842ddebd40d2682ee5de3e4" md5json="99e288a3337c1e3f44a6efd1a27f6981">
 		<name>PC/IX 1.0 (CORE6)</name>
 	</disk>
-	<disk id="disk08" size="368640" chs="40:2:9" img="archive/08CORE7.RAW" href="/disks/pcx86/unix/ibm/pcix/1.0/08CORE7.json" md5="eeb5f56f127aec54248539768919ce09" md5json="d157ed870fb3d677ed2bd02e58e8868a">
+	<disk id="disk08" size="368640" chs="40:2:9" img="archive/08CORE7.img" href="/disks/pcx86/unix/ibm/pcix/1.0/08CORE7.json" md5="eeb5f56f127aec54248539768919ce09" md5json="d157ed870fb3d677ed2bd02e58e8868a">
 		<name>PC/IX 1.0 (CORE7)</name>
 	</disk>
-	<disk id="disk09" size="368640" chs="40:2:9" img="archive/09CORE8.RAW" href="/disks/pcx86/unix/ibm/pcix/1.0/09CORE8.json" md5="57d49eba02b41dc80265d91d6d25b687" md5json="cfc7313973ca55cc64f38268cd6607d2">
+	<disk id="disk09" size="368640" chs="40:2:9" img="archive/09CORE8.img" href="/disks/pcx86/unix/ibm/pcix/1.0/09CORE8.json" md5="57d49eba02b41dc80265d91d6d25b687" md5json="cfc7313973ca55cc64f38268cd6607d2">
 		<name>PC/IX 1.0 (CORE8)</name>
 	</disk>
-	<disk id="disk10" size="368640" chs="40:2:9" img="archive/10PROG1.RAW" href="/disks/pcx86/unix/ibm/pcix/1.0/10PROG1.json" md5="ef02a8a78bea0e75370f55164c1b5484" md5json="6ba9268949ec0a345f31b77418629fc2">
+	<disk id="disk10" size="368640" chs="40:2:9" img="archive/10PROG1.img" href="/disks/pcx86/unix/ibm/pcix/1.0/10PROG1.json" md5="ef02a8a78bea0e75370f55164c1b5484" md5json="6ba9268949ec0a345f31b77418629fc2">
 		<name>PC/IX 1.0 (PROG1)</name>
 	</disk>
-	<disk id="disk11" size="368640" chs="40:2:9" img="archive/11PROG2.RAW" href="/disks/pcx86/unix/ibm/pcix/1.0/11PROG2.json" md5="26f3ec7cc181f270ccfb29b74ec5183b" md5json="0ab8cb991c27ab8c40e6da6ef8bb093d">
+	<disk id="disk11" size="368640" chs="40:2:9" img="archive/11PROG2.img" href="/disks/pcx86/unix/ibm/pcix/1.0/11PROG2.json" md5="26f3ec7cc181f270ccfb29b74ec5183b" md5json="0ab8cb991c27ab8c40e6da6ef8bb093d">
 		<name>PC/IX 1.0 (PROG2)</name>
 	</disk>
-	<disk id="disk12" size="368640" chs="40:2:9" img="archive/12PROG3.RAW" href="/disks/pcx86/unix/ibm/pcix/1.0/12PROG3.json" md5="6ab29e48e829b4ef0d0720cbfdfd1f34" md5json="85fdf06532753cd5886a15691182f853">
+	<disk id="disk12" size="368640" chs="40:2:9" img="archive/12PROG3.img" href="/disks/pcx86/unix/ibm/pcix/1.0/12PROG3.json" md5="6ab29e48e829b4ef0d0720cbfdfd1f34" md5json="85fdf06532753cd5886a15691182f853">
 		<name>PC/IX 1.0 (PROG3)</name>
 	</disk>
-	<disk id="disk13" size="368640" chs="40:2:9" img="archive/13PROG4.RAW" href="/disks/pcx86/unix/ibm/pcix/1.0/13PROG4.json" md5="c0744e9563ec5e77b87811ed63857011" md5json="d8c30a82b901a18073b39777e54cfa03">
+	<disk id="disk13" size="368640" chs="40:2:9" img="archive/13PROG4.img" href="/disks/pcx86/unix/ibm/pcix/1.0/13PROG4.json" md5="c0744e9563ec5e77b87811ed63857011" md5json="d8c30a82b901a18073b39777e54cfa03">
 		<name>PC/IX 1.0 (PROG4)</name>
 	</disk>
-	<disk id="disk14" size="368640" chs="40:2:9" img="archive/14COMMS.RAW" href="/disks/pcx86/unix/ibm/pcix/1.0/14COMMS.json" md5="3fe3886418a75b459ad34d14d370556a" md5json="3b8df170d68b9707634f548385330114">
+	<disk id="disk14" size="368640" chs="40:2:9" img="archive/14COMMS.img" href="/disks/pcx86/unix/ibm/pcix/1.0/14COMMS.json" md5="3fe3886418a75b459ad34d14d370556a" md5json="3b8df170d68b9707634f548385330114">
 		<name>PC/IX 1.0 (COMMS)</name>
 	</disk>
-	<disk id="disk15" size="368640" chs="40:2:9" img="archive/15SCCS.RAW" href="/disks/pcx86/unix/ibm/pcix/1.0/15SCCS.json" md5="e4e520eea6a0386c7d23c3ddd2ab9d94" md5json="7fe21d54d0b0e583de1db093b757a316">
+	<disk id="disk15" size="368640" chs="40:2:9" img="archive/15SCCS.img" href="/disks/pcx86/unix/ibm/pcix/1.0/15SCCS.json" md5="e4e520eea6a0386c7d23c3ddd2ab9d94" md5json="7fe21d54d0b0e583de1db093b757a316">
 		<name>PC/IX 1.0 (SCCS)</name>
 	</disk>
-	<disk id="disk16" size="368640" chs="40:2:9" img="archive/16TEXT.RAW" href="/disks/pcx86/unix/ibm/pcix/1.0/16TEXT.json" md5="042980841f9832dada3a945144c02234" md5json="0d048a98d890488ab3a29d3125ce213a">
+	<disk id="disk16" size="368640" chs="40:2:9" img="archive/16TEXT.img" href="/disks/pcx86/unix/ibm/pcix/1.0/16TEXT.json" md5="042980841f9832dada3a945144c02234" md5json="0d048a98d890488ab3a29d3125ce213a">
 		<name>PC/IX 1.0 (TEXT)</name>
 	</disk>
-	<disk id="disk17" size="368640" chs="40:2:9" img="archive/17SPECIA.RAW" href="/disks/pcx86/unix/ibm/pcix/1.0/17SPECIA.json" md5="779e1b78a1b38ea64675982c7af148c9" md5json="4f31e5cafc29e87f1fe3b13cc11bdba2">
+	<disk id="disk17" size="368640" chs="40:2:9" img="archive/17SPECIA.img" href="/disks/pcx86/unix/ibm/pcix/1.0/17SPECIA.json" md5="779e1b78a1b38ea64675982c7af148c9" md5json="4f31e5cafc29e87f1fe3b13cc11bdba2">
 		<name>PC/IX 1.0 (SPECIA)</name>
 	</disk>
-	<disk id="disk18" size="368640" chs="40:2:9" img="archive/18GAMES.RAW" href="/disks/pcx86/unix/ibm/pcix/1.0/18GAMES.json" md5="185ca60912676ae2b22a6a4d2a59117a" md5json="085ba40619ddb8e584c41388dd6d56e3">
+	<disk id="disk18" size="368640" chs="40:2:9" img="archive/18GAMES.img" href="/disks/pcx86/unix/ibm/pcix/1.0/18GAMES.json" md5="185ca60912676ae2b22a6a4d2a59117a" md5json="085ba40619ddb8e584c41388dd6d56e3">
 		<name>PC/IX 1.0 (GAMES)</name>
 	</disk>
-	<disk id="disk19" size="368640" chs="40:2:9" img="archive/19ACCNT.RAW" href="/disks/pcx86/unix/ibm/pcix/1.0/19ACCNT.json" md5="d36b6f97ea5c15b3d579334358a5e718" md5json="254342ba6d231ee330f61768e462aded">
+	<disk id="disk19" size="368640" chs="40:2:9" img="archive/19ACCNT.img" href="/disks/pcx86/unix/ibm/pcix/1.0/19ACCNT.json" md5="d36b6f97ea5c15b3d579334358a5e718" md5json="254342ba6d231ee330f61768e462aded">
 		<name>PC/IX 1.0 (ACCNT)</name>
 	</disk>
 </manifest>

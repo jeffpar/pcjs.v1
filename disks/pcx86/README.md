@@ -5,7 +5,7 @@ permalink: /disks/pcx86/
 ---
 
 IBM PC Disk Library
----
+-------------------
 
 This [Disk Library](/disks/pcx86/library.xml) lists all the [Disk Manifests](#disk-manifests) in the
 [PCjs Project](/docs/about/) and makes those disks available to any [IBM PC Machine](/devices/pcx86/machine/)
@@ -38,7 +38,7 @@ computer diagnostics, programming tools, and more.
 * [MicroPro WordStar](apps/micropro/wordstar/)
 * [Microsoft Chart](apps/microsoft/chart/)
 * [Microsoft Word](apps/microsoft/word/)
-* [Sunny Hill Omniview](apps/sunnyhill/omniview/)
+* [Other...](apps/other/)
 
 ### Games
 

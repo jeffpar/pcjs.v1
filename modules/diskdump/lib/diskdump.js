@@ -407,18 +407,12 @@ DiskDump.sUsage = "Usage: " + DiskDump.sAPIURL + "?" + DumpAPI.QUERY.PATH + "={u
  * PCJS_LABEL is our default label, used whenever a more suitable label (eg, the disk image's folder name)
  * is not available or not supplied, and PCJS_OEM is inserted into any DiskDump-generated diskette images.
  */
-DiskDump.PCJS_LABEL = "PCJSDISK";
+DiskDump.PCJS_LABEL = "PCJS.ORG";
 DiskDump.PCJS_OEM   = "PCJS.ORG";
 
 /**
  * The BPBs that buildImage() currently supports; these BPBs should be in order of smallest to largest capacity,
  * to help ensure we don't select a disk format larger than necessary.
- *
- * TODO: For now, the code that chooses a default BPB is starting with #3 instead of #0, because Windows 95 (at least
- * when running under VMware) fails to read the contents of such disks correctly.  Whether that's my fault or Windows 95's
- * fault is still TBD (although it's probably mine -- perhaps 160Kb diskettes aren't supposed to have BPBs?)  The simple
- * work-around is to avoid creating 160Kb diskette images (and, to play it safe, I skip 180Kb and 320Kb as well, since
- * 360Kb was the most commonly used format after DOS 2.0 introduced it).
  */
 DiskDump.aDefaultBPBs = [
   [                             // define BPB for 160Kb diskette
@@ -437,26 +431,10 @@ DiskDump.aDefaultBPBs = [
     0x01, 0x00,                 // 0x1A: number of heads (1)
     0x00, 0x00, 0x00, 0x00      // 0x1C: number of hidden sectors (always 0 for non-partitioned media)
   ],
-  [                             // define BPB for 180Kb diskette
-    0xEB, 0xFE, 0x90,           // 0x00: JMP instruction, following by 8-byte OEM signature
-    0x50, 0x43, 0x4A, 0x53, 0x2E, 0x4F, 0x52, 0x47,     // PCJS_OEM
- // 0x49, 0x42, 0x4D, 0x20, 0x20, 0x31, 0x2E, 0x30,     // "IBM  1.0" (this is a fake OEM signature)
-    0x00, 0x02,                 // 0x0B: bytes per sector (0x200 or 512)
-    0x01,                       // 0x0D: sectors per cluster (1)
-    0x01, 0x00,                 // 0x0E: reserved sectors; ie, # sectors preceding the first FAT--usually just the boot sector (1)
-    0x02,                       // 0x10: FAT copies (2)
-    0x40, 0x00,                 // 0x11: root directory entries (0x40 or 64)  0x40 * 0x20 = 0x800 (1 sector is 0x200 bytes, total of 4 sectors)
-    0x68, 0x01,                 // 0x13: number of sectors (0x168 or 360)
-    0xFC,                       // 0x15: media type (eg, 0xFF: 320Kb, 0xFE: 160Kb, 0xFD: 360Kb, 0xFC: 180Kb)
-    0x02, 0x00,                 // 0x16: sectors per FAT (2)
-    0x09, 0x00,                 // 0x18: sectors per track (9)
-    0x01, 0x00,                 // 0x1A: number of heads (1)
-    0x00, 0x00, 0x00, 0x00      // 0x1C: number of hidden sectors (always 0 for non-partitioned media)
-  ],
   [                             // define BPB for 320Kb diskette
     0xEB, 0xFE, 0x90,           // 0x00: JMP instruction, following by 8-byte OEM signature
     0x50, 0x43, 0x4A, 0x53, 0x2E, 0x4F, 0x52, 0x47,     // PCJS_OEM
- // 0x49, 0x42, 0x4D, 0x20, 0x20, 0x32, 0x2E, 0x30,     // "IBM  2.0" (this is a real OEM signature)
+    // 0x49, 0x42, 0x4D, 0x20, 0x20, 0x31, 0x2E, 0x30,     // "IBM  1.0" (this is a real OEM signature)
     0x00, 0x02,                 // 0x0B: bytes per sector (0x200 or 512)
     0x02,                       // 0x0D: sectors per cluster (2)
     0x01, 0x00,                 // 0x0E: reserved sectors; ie, # sectors preceding the first FAT--usually just the boot sector (1)
@@ -467,6 +445,22 @@ DiskDump.aDefaultBPBs = [
     0x01, 0x00,                 // 0x16: sectors per FAT (1)
     0x08, 0x00,                 // 0x18: sectors per track (8)
     0x02, 0x00,                 // 0x1A: number of heads (2)
+    0x00, 0x00, 0x00, 0x00      // 0x1C: number of hidden sectors (always 0 for non-partitioned media)
+  ],
+  [                             // define BPB for 180Kb diskette
+    0xEB, 0xFE, 0x90,           // 0x00: JMP instruction, following by 8-byte OEM signature
+    0x50, 0x43, 0x4A, 0x53, 0x2E, 0x4F, 0x52, 0x47,     // PCJS_OEM
+ // 0x49, 0x42, 0x4D, 0x20, 0x20, 0x32, 0x2E, 0x30,     // "IBM  2.0" (this is a fake OEM signature)
+    0x00, 0x02,                 // 0x0B: bytes per sector (0x200 or 512)
+    0x01,                       // 0x0D: sectors per cluster (1)
+    0x01, 0x00,                 // 0x0E: reserved sectors; ie, # sectors preceding the first FAT--usually just the boot sector (1)
+    0x02,                       // 0x10: FAT copies (2)
+    0x40, 0x00,                 // 0x11: root directory entries (0x40 or 64)  0x40 * 0x20 = 0x800 (1 sector is 0x200 bytes, total of 4 sectors)
+    0x68, 0x01,                 // 0x13: number of sectors (0x168 or 360)
+    0xFC,                       // 0x15: media type (eg, 0xFF: 320Kb, 0xFE: 160Kb, 0xFD: 360Kb, 0xFC: 180Kb)
+    0x02, 0x00,                 // 0x16: sectors per FAT (2)
+    0x09, 0x00,                 // 0x18: sectors per track (9)
+    0x01, 0x00,                 // 0x1A: number of heads (1)
     0x00, 0x00, 0x00, 0x00      // 0x1C: number of hidden sectors (always 0 for non-partitioned media)
   ],
   [                             // define BPB for 360Kb diskette
@@ -533,6 +527,43 @@ DiskDump.aDefaultBPBs = [
     0x02, 0x00,                 // 0x1A: number of heads (2)
     0x00, 0x00, 0x00, 0x00      // 0x1C: number of hidden sectors (always 0 for non-partitioned media)
   ],
+    /*
+     * Here's some useful background information on a 10Mb PC XT fixed disk, partitioned with a single DOS partition.
+     *
+     * The BPB for a 10Mb "type 3" PC XT drive specifies 0x5103 or 20739 for TOTAL_SECS, which is the partition
+     * size in sectors (10,618,368 bytes), whereas total disk size is 20808 sectors (10,653,696 bytes).  The partition
+     * is 69 sectors smaller than the disk because the first sector is reserved for the MBR and 68 sectors (the entire
+     * last cylinder) are reserved for diagnostics, head parking, etc.  This cylinder usage is confirmed by FDISK,
+     * which reports that 305 cylinders (not 306) are assigned to the DOS partition.
+     *
+     * That 69-sector overhead is NOT the overhead incurred by the FAT file system.  That overhead is the boot sector
+     * (1), FAT sectors (2 * 8), and root directory sectors (32), for a total of 49 sectors, leaving 20739 - 49 or
+     * 20690 sectors.  However, free space is measured in clusters, not sectors, and the partition uses 8 sectors/cluster,
+     * leaving room for 2586.25 clusters.  Since a fractional cluster is not allowed, another 2 sectors are lost, for
+     * a total of 51 sectors of FAT overhead.  So actual free space is (20739 - 51) * 512, or 10,592,256 bytes -- which
+     * is exactly what is reported as the available space on a freshly formatted 10Mb PC XT fixed disk.
+     *
+     * Some sources on the internet (eg, http://www.wikiwand.com/en/Timeline_of_DOS_operating_systems) claim that the
+     * file system overhead for the XT's 10Mb disk is "50 sectors".  As they explain:
+     *
+     *      "The fixed disk has 10,618,880 bytes of raw space: 305 cylinders (the equivalent of tracks) × 2 platters
+     *      × 2 sides or heads per platter × 17 sectors per track = 20,740 sectors × 512 bytes per sector = 10,618,880
+     *      bytes...."
+     *
+     * and:
+     *
+     *      "With DOS the only partition, the combined overhead is 50 sectors leaving 10,592,256 bytes for user data:
+     *      DOS's FAT is eight sectors (16 sectors for two copies) + 32 sectors for the root directory, room for 512
+     *      directory entries + 2 sectors (one master and one DOS boot sector) = 50 sectors...."
+     *
+     * However, that's incorrect.  First, the disk has 306 cylinders, not 305.  Second, there are TWO overhead values:
+     * the overhead OUTSIDE the partition (69 sectors) and the overhead INSIDE the partition (51 sectors).  They failed
+     * to account for the reserved cylinder in the first calculation and the fractional cluster in the second calculation,
+     * and then they conflated the two values to produce a single (incorrect) result.
+     *
+     * Even if one were to assume that the disk had only 305 cylinders, that would only change the partitioning overhead
+     * to 1 sector; the file system overhead would still be 51 sectors.
+     */
   [                             // define BPB for 10Mb hard drive
     0xEB, 0xFE, 0x90,           // 0x00: JMP instruction, following by 8-byte OEM signature
     0x50, 0x43, 0x4A, 0x53, 0x2E, 0x4F, 0x52, 0x47,     // PCJS_OEM
@@ -545,18 +576,28 @@ DiskDump.aDefaultBPBs = [
     0x03, 0x51,                 // 0x13: number of sectors (0x5103 or 20739; * 512 bytes/sector = 10,618,368 bytes = 10,369Kb = 10Mb)
     0xF8,                       // 0x15: media type (eg, 0xF8: hard drive w/FAT12)
     0x08, 0x00,                 // 0x16: sectors per FAT (8)
-    // Wikipedia (http://en.wikipedia.org/wiki/File_Allocation_Table#BIOS_Parameter_Block) implies everything past this point was introduced
-    // post-DOS 2.0.  I think that's wrong, because I just formatted a diskette with PC-DOS 2.0 and it properly initialized the next 3 fields as well.
+      //
+      // Wikipedia (http://en.wikipedia.org/wiki/File_Allocation_Table#BIOS_Parameter_Block) implies everything past
+      // this point was introduced post-DOS 2.0.  However, DOS 2.0 merely said they were optional, and in fact, DOS 2.0
+      // FORMAT always initializes the next 3 words.  A 4th word, LARGE_SECS, was added in DOS 3.20 at offset 0x1E,
+      // and then in DOS 3.31, both HIDDEN_SECS and LARGE_SECS were widened from words to dwords.
+      //
     0x11, 0x00,                 // 0x18: sectors per track (17)
     0x04, 0x00,                 // 0x1A: number of heads (4)
-    // PC-DOS 2.0 actually stored 0x01, 0x00, 0x80, 0x00 here, so you can't always assume that anything past offset 0x1E is part of the BPB;
-    // requires further investigation.
+      //
+      // PC-DOS 2.0 actually stored 0x01, 0x00, 0x80, 0x00 here, so you can't rely on more than the first word.
+      // TODO: Investigate PC-DOS 2.0 BPB behavior (ie, what did the 0x80 mean)?
+      //
     0x01, 0x00, 0x00, 0x00      // 0x1C: number of hidden sectors (always 0 for non-partitioned media)
   ]
 ];
 
 DiskDump.asExclusions = [".*", ".IMG"];
-DiskDump.asTextFileExts = [".MD", ".ME", ".ASM", ".BAS", ".TXT", ".XML"];
+/*
+ * NOTE: This list used to include .BAS files, but they aren't always ASCII, so that extension has been removed;
+ * also, a warning is now displayed whenever we replace line endings in *any* file being copied to a disk image.
+ */
+DiskDump.asTextFileExts = [".MD", ".ME", ".ASM", ".TXT", ".XML"];
 
 /*
  * Class methods
@@ -1460,7 +1501,7 @@ DiskDump.prototype.validateTime = function(dateTime)
         /*
          * The year in a DOS modification date occupies 7 bits and is interpreted as a non-negative value (0-127)
          * that is added to the base year of 1980, so the range of valid years is 1980-2107.  However, it's worth
-         * nothing that in PC-DOS 2.0, I observed a date with the largest possible year value (127) displayed as
+         * noting that in PC-DOS 2.0, I observed a date with the largest possible year value (127) displayed as
          * "12-31-:7" (an ASCII ':' is the next highest character after '0').  While that DOES distinguish the year
          * 2007 from the year 2107, we probably shouldn't allow any year > 2099, to eliminate confusion.
          *
@@ -1496,7 +1537,7 @@ DiskDump.prototype.buildData = function(cb, abInit)
 {
     var ab = new Array(cb);
     for (var i = 0; i < cb; i++) {
-        ab[i] = (abInit && i < abInit.length? abInit[i] : 0);
+        ab[i] = abInit && abInit[i] || 0;
     }
     return ab;
 };
@@ -1645,11 +1686,12 @@ DiskDump.prototype.readDir = function(sDir, fRoot, done)
                             fileInfo.FILE_ATTR = DiskDump.ATTR_ARCHIVE;
                             fileInfo.FILE_SIZE = stats.size;
                             if (obj.isTextFile(fileInfo.FILE_NAME)) {
-                                fs.readFile(fileInfo.FILE_PATH, {encoding: "utf8"}, function doneReadDirEntry(err, s) {
+                                fs.readFile(fileInfo.FILE_PATH, {encoding: "utf8"}, function doneReadDirEntry(err, sData) {
                                     if (!err) {
-                                        s = s.replace(/\n/g, "\r\n").replace(/\r\r/g, "\r");
-                                        fileInfo.FILE_DATA = s;
-                                        fileInfo.FILE_SIZE = s.length;
+                                        sData = sData.replace(/\n/g, "\r\n").replace(/\r+/g, "\r");
+                                        console.log("warning: replaced line endings in " + fileInfo.FILE_NAME + " (size changed from " + fileInfo.FILE_SIZE + " to " + sData.length + " bytes)");
+                                        fileInfo.FILE_DATA = sData;
+                                        fileInfo.FILE_SIZE = sData.length;
                                     } else {
                                         if (!errSave) errSave = err;
                                     }
@@ -1777,7 +1819,8 @@ DiskDump.prototype.readPath = function(sPath, done)
                         if (obj.isTextFile(fileInfo.FILE_NAME)) {
                             DiskDump.readFile(sFilePath, "utf8", function doneReadPathEntry(err, sData) {
                                 if (!err) {
-                                    sData = sData.replace(/\n/g, "\r\n").replace(/\r\r/g, "\r");
+                                    sData = sData.replace(/\n/g, "\r\n").replace(/\r+/g, "\r");
+                                    console.log("warning: replaced line endings in " + fileInfo.FILE_NAME + " (size changed from " + fileInfo.FILE_SIZE + " to " + sData.length + " bytes)");
                                     fileInfo.FILE_DATA = sData;
                                     fileInfo.FILE_SIZE = sData.length;
                                     // obj.addManifestInfo(fileInfo);
@@ -1860,7 +1903,7 @@ DiskDump.prototype.buildVolLabel = function(sDir)
             }
         }
     }
-    if (!sVolume) {
+    if (!sVolume || sVolume.toLowerCase() == "archive" || sVolume.toLowerCase() == "disk") {
         sVolume = DiskDump.PCJS_LABEL;
     }
     if (sVolume && sVolume.length <= 11) {
@@ -2329,14 +2372,32 @@ DiskDump.prototype.buildImageFromFiles = function(aFiles, done)
     var cRootEntries, cRootSectors, cTotalSectors, cSectorsPerTrack, cHeads, cDataSectors, cbAvail;
 
     /*
-     * Find or build a BPB with enough capacity, and at the same time, calculate all
-     * the other values we'll need, including total number of data sectors (cDataSectors).
+     * Find or build a BPB with enough capacity, and at the same time, calculate all the other values we'll need,
+     * including total number of data sectors (cDataSectors).
+     *
+     * TODO: For now, the code that chooses a default BPB starts with entry #3 instead of #0, because Windows 95
+     * (at least when running under VMware) fails to read the contents of such disks correctly.  Whether that's my
+     * fault or Windows 95's fault is still TBD (although it's probably mine -- perhaps 160Kb diskettes aren't
+     * supposed to have BPBs?)  The simple work-around is to avoid creating 160Kb diskette images used by PC-DOS 1.0.
+     * To play it safe, I also skip the 320Kb format (added for PC-DOS 1.1).  360Kb was the most commonly used format
+     * after PC-DOS 2.0 introduced it.  PC-DOS 2.0 also introduced 180Kb (a single-sided version of the 360Kb
+     * double-sided format), but it's less commonly used.
+     *
+     * UPDATE: I've undone the above change, because when creating a disk image for an old application like:
+     *
+     *      /apps/pcx86/1983/adventmath ["Adventures in Math" (1983)]
+     *
+     * it's important to create a disk image that will work with PC-DOS 1.0, which didn't understand 180Kb and 360Kb
+     * disk images.
      */
-    for (var iBPB = 3; iBPB < DiskDump.aDefaultBPBs.length; iBPB++) {
+    for (var iBPB = 0; iBPB < DiskDump.aDefaultBPBs.length; iBPB++) {
+        /*
+         * Use slice() to copy the default BPB, as a precaution (to avoid any changes to the default).
+         */
+        abBoot = DiskDump.aDefaultBPBs[iBPB].slice();
         /*
          * If this BPB is for a hard drive but a disk size was not specified, skip it.
          */
-        abBoot = DiskDump.aDefaultBPBs[iBPB];
         if ((abBoot[0x15] == 0xF8) != (this.kbTarget >= 10000)) continue;
         cbSector = abBoot[0x0B] | (abBoot[0x0C] << 8);
         cSectorsPerCluster = abBoot[0x0D];
@@ -2384,7 +2445,7 @@ DiskDump.prototype.buildImageFromFiles = function(aFiles, done)
     this.bufDisk.fill(0);
 
     /*
-     * Output a Master Boot Record (MBR), if a hard drive image was requested
+     * Output a Master Boot Record (MBR), if a hard drive image was requested.
      */
     if (this.kbTarget >= 10000) {
         abSector = this.buildMBR(cHeads, cSectorsPerTrack, cbSector, cTotalSectors);
@@ -2392,10 +2453,10 @@ DiskDump.prototype.buildImageFromFiles = function(aFiles, done)
     }
 
     /*
-     * Output a boot sector
-     *
-     * NOTE: I don't put a [0x55,0xAA] signature at the end, since it's not actually bootable.
+     * Output a boot sector.
      */
+    abBoot[DiskAPI.BOOT.SIG_OFFSET] = 0x55;
+    abBoot[DiskAPI.BOOT.SIG_OFFSET + 1] = 0xAA;
     abSector = this.buildData(cbSector, abBoot);
     offDisk += this.copyData(offDisk, abSector);
 
@@ -2485,6 +2546,7 @@ DiskDump.prototype.convertToJSON = function()
     }
 
     var json = null;
+    var fOptimize = !this.fJSONComments;    // if true, leave out any properties that are defaults
     try {
         var nHeads = 0;
         var nCylinders = 0;
@@ -2494,11 +2556,11 @@ DiskDump.prototype.convertToJSON = function()
         var cbSector = 512;                 // default sector size
         var bMediaType = 0;
         var offBootSector = 0;
-        var cbDiskData = this.bufDisk.length;
+        var cbDiskData = this.bufDisk.length, cbPartition = cbDiskData;
 
         if (cbDiskData >= 3000000) {        // arbitrary threshold between diskette image sizes and hard drive image sizes
-            var wSig = this.bufDisk.readUInt16LE(0x1FE);
-            if (wSig == 0xAA55) {
+            var wSig = this.bufDisk.readUInt16LE(DiskAPI.BOOT.SIG_OFFSET);
+            if (wSig == DiskAPI.BOOT.SIGNATURE) {
                 /*
                  * In this case, the first sector should be an MBR; find the active partition entry,
                  * then read the LBA of the first partition sector to calculate the boot sector offset.
@@ -2506,7 +2568,7 @@ DiskDump.prototype.convertToJSON = function()
                 for (var offEntry = 0x1BE; offEntry <= 0x1EE; offEntry += 0x10) {
                     if (this.bufDisk.readUInt8(offEntry) >= 0x80) {
                         offBootSector = this.bufDisk.readUInt32LE(offEntry + 0x08) * cbSector;
-                        cbDiskData = this.bufDisk.readUInt32LE(offEntry + 0x0C) * cbSector;
+                        cbPartition = this.bufDisk.readUInt32LE(offEntry + 0x0C) * cbSector;
                         break;
                     }
                 }
@@ -2536,7 +2598,7 @@ DiskDump.prototype.convertToJSON = function()
          * image whose logical format doesn't agree with its physical structure.
          */
         var fXDFOutput = false;
-        var diskFormat = DiskAPI.DISK_FORMATS[cbDiskData];
+        var diskFormat = DiskAPI.GEOMETRIES[cbDiskData];
         if (diskFormat) {
             nCylinders = diskFormat[0];
             nHeads = diskFormat[1];
@@ -2565,28 +2627,31 @@ DiskDump.prototype.convertToJSON = function()
                 fBPBExists = true;
                 var bMediaTypeBPB = this.bufDisk.readUInt8(offBootSector + DiskAPI.BPB.MEDIA_TYPE);
                 var nSectorsTotalBPB = this.bufDisk.readUInt16LE(offBootSector + DiskAPI.BPB.TOTAL_SECS);
-
                 var nSectorsPerCylinderBPB = nSectorsPerTrackBPB * nHeadsBPB;
                 var nCylindersBPB = Math.floor(nSectorsTotalBPB / nSectorsPerCylinderBPB);
 
                 if (diskFormat) {
                     if (nCylinders != nCylindersBPB) {
-                        DiskDump.logWarning("BPB cylinders (" + nCylindersBPB + ") do not match actual cylinders: " + nCylinders);
+                        DiskDump.logWarning("BPB cylinders (" + nCylindersBPB + ") do not match actual cylinders (" + nCylinders + ")");
                     }
                     if (nHeads != nHeadsBPB) {
-                        DiskDump.logWarning("BPB heads (" + nHeadsBPB + ") do not match actual heads: " + nHeads);
+                        DiskDump.logWarning("BPB heads (" + nHeadsBPB + ") do not match actual heads (" + nHeads + ")");
                     }
                     if (nSectorsPerTrack != nSectorsPerTrackBPB) {
-                        DiskDump.logWarning("BPB sectors/track (" + nSectorsPerTrackBPB + ") do not match actual sectors/track: " + nSectorsPerTrack);
+                        DiskDump.logWarning("BPB sectors/track (" + nSectorsPerTrackBPB + ") do not match actual sectors/track (" + nSectorsPerTrack + ")");
                     }
                     if (bMediaType && bMediaType != bMediaTypeBPB) {
-                        DiskDump.logWarning("BPB media type (" + bMediaTypeBPB + ") do not match actual media type: " + bMediaType);
+                        DiskDump.logWarning("BPB media type (" + bMediaTypeBPB + ") do not match actual media type (" + bMediaType + ")");
                     }
                 }
                 else {
-                    nCylinders = nCylindersBPB;
                     nHeads = nHeadsBPB;
                     nSectorsPerTrack = nSectorsPerTrackBPB;
+                    nCylinders = cbDiskData / (nHeads * nSectorsPerTrack * cbSector);
+                    if (nCylinders != (nCylinders|0)) {
+                        DiskDump.logWarning("total cylinders (" + nCylinders + ") not a multiple of heads (" + nHeads + ") and sectors/track (" + nSectorsPerTrack + ")");
+                        nCylinders |= 0;
+                    }
                     bMediaType = bMediaTypeBPB;
                 }
 
@@ -2630,25 +2695,41 @@ DiskDump.prototype.convertToJSON = function()
         if (bMediaType) {
             for (i = 0; i < DiskDump.aDefaultBPBs.length; i++) {
                 if (DiskDump.aDefaultBPBs[i][DiskAPI.BPB.MEDIA_TYPE] == bMediaType) {
-                    iBPB = i;
-                    break;
+                    var cbDiskBPB = (DiskDump.aDefaultBPBs[i][DiskAPI.BPB.TOTAL_SECS] + (DiskDump.aDefaultBPBs[i][DiskAPI.BPB.TOTAL_SECS + 1] * 0x100)) * cbSector;
+                    if (cbDiskBPB == cbDiskData) {
+                        iBPB = i;
+                        break;
+                    }
                 }
             }
         }
         if (iBPB >= 0) {
             if (fBPBExists) {
-                for (i = DiskAPI.BPB.SECTOR_BYTES; i < DiskAPI.BPB.LARGE_SECS; i++) {
+                /*
+                 * In deference to the PC-DOS 2.0 BPB behavior discussed above, we stop our BPB verification
+                 * after the first word of HIDDEN_SECS.
+                 */
+                for (i = DiskAPI.BPB.SECTOR_BYTES; i < DiskAPI.BPB.HIDDEN_SECS + 2; i++) {
                     var bDefault = DiskDump.aDefaultBPBs[iBPB][i];
                     var bActual = this.bufDisk.readUInt8(offBootSector + i);
                     if (bDefault != bActual) {
                         DiskDump.logWarning("BPB byte " + str.toHexByte(i) + " default (" + str.toHexByte(bDefault) + ") does not match actual byte: " + str.toHexByte(bActual));
+                        fBPBExists = false;
                     }
                 }
             }
             else if (bByte0 == X86.OPCODE.JMPS && bByte1 >= 0x22) {
                 /*
                  * I'm going to stick my neck out here and slam a BPB into this disk image, since it doesn't appear
-                 * to have one, which should make it more "mountable" on modern operating systems.
+                 * to have one, which should make it more "mountable" on modern operating systems.  PC-DOS 1.x (and
+                 * the recently unearthed PC-DOS 0.x) are OK with this, because they don't put anything important in
+                 * the BPB byte range (0x00B-0x023), just a 9-byte date string (eg, " 7-May-81") at 0x008-0x010,
+                 * followed by zero bytes at 0x011-0x030.
+                 *
+                 * They DO, however, store important constants in the range later used as the 8-byte OEM string at
+                 * 0x003-0x00A.  For example, the word at 0x006 contains the starting segment for where to load
+                 * IBMBIO.COM and IBMDOS.COM.  Those same early boot sectors are also missing the traditional 0xAA55
+                 * signature at the end of the boot sector.
                  */
                 for (i = DiskAPI.BPB.SECTOR_BYTES; i < DiskAPI.BPB.LARGE_SECS+4; i++) {
                     this.bufDisk.writeUInt8(DiskDump.aDefaultBPBs[iBPB][i] || 0, offBootSector + i);
@@ -2667,8 +2748,15 @@ DiskDump.prototype.convertToJSON = function()
             else {
                 DiskDump.logWarning("unrecognized boot sector: " + str.toHexByte(bByte0) + "," + str.toHexByte(bByte1));
             }
-        }
 
+        }
+        if (fBPBExists) {
+            /*
+             * Overwrite the OEM string with our own, so that people know how the image originated.  We do this
+             * only for disks with pre-existing BPBs; it's not safe for pre-2.0 disks (and non-DOS disks, obviously).
+             */
+            this.bufDisk.write(DiskDump.PCJS_OEM, DiskAPI.BOOT.OEM_STRING + offBootSector, DiskDump.PCJS_OEM.length);
+        }
         if (!nHeads) {
             /*
              * Next, check for a DSK header (an old private format I used to use, which begins with either
@@ -2821,21 +2909,28 @@ DiskDump.prototype.convertToJSON = function()
 
                         bufSector = bufTrack.slice(offSector, offSector + cbSectorThisTrack);
 
-                        if (bMediaType && !iCylinder && !iHead && iSector == 2) {
+                        if (bMediaType && !iCylinder && !iHead && iSector == ((offBootSector/cbSector)|0) + 2) {
                             var bFATType = bufSector.readUInt8(0);
                             if (bMediaType != bFATType) {
-                                DiskDump.logWarning("wrong media type (" + str.toHexByte(bFATType) + ") in FAT, expected " + str.toHexByte(bMediaType));
+                                DiskDump.logWarning("media byte mismatch (" + str.toHexByte(bFATType) + ") in FAT, expected " + str.toHexByte(bMediaType));
                             }
                             bMediaType = 0;
                         }
 
+                        var preComma = (fOptimize? ',' : '');
+                        var postComma = (fOptimize? '' : ',');
+
                         if (this.fJSONNative) {
                             sector['sector'] = nSector;
-                            sector['length'] = cbSectorThisTrack;
+                            if (!fOptimize || cbSectorThisTrack != 512) {
+                                sector['length'] = cbSectorThisTrack;
+                            }
                         } else {
                             json += (iSector == 1? this.dumpLine(2, "{") : "");
-                            json += this.dumpLine(0, '"sector":' + this.sJSONWhitespace + nSector + ",");
-                            json += this.dumpLine(0, '"length":' + this.sJSONWhitespace + cbSectorThisTrack + ",");
+                            json += this.dumpLine(0, '"sector":' + this.sJSONWhitespace + nSector + postComma);
+                            if (!fOptimize || cbSectorThisTrack != 512) {
+                                json += preComma + this.dumpLine(0, '"length":' + this.sJSONWhitespace + cbSectorThisTrack + postComma);
+                            }
                         }
 
                         var aTrim = this.trimSector(bufSector, cbSectorThisTrack);
@@ -2843,28 +2938,33 @@ DiskDump.prototype.convertToJSON = function()
                         var cbBuffer = cbSectorThisTrack;
                         if (dwPattern !== null) {
                             cbBuffer = aTrim[1];
-                            if (this.fJSONNative) {
-                                sector['pattern'] = dwPattern;
-                            } else {
-                                json += this.dumpLine(0, '"pattern":' + this.sJSONWhitespace + dwPattern + ",");
+                            if (!fOptimize || dwPattern) {
+                                if (this.fJSONNative) {
+                                    sector['pattern'] = dwPattern;
+                                } else {
+                                    json += preComma + this.dumpLine(0, '"pattern":' + this.sJSONWhitespace + dwPattern + postComma);
+                                }
                             }
                         }
-
                         if (this.fJSONNative) {
-                            var dataSector = [];
-                            sector['data'] = dataSector;
-                            for (var off = 0; off < cbBuffer; off += 4) {
-                                dataSector.push(bufSector.readInt32LE(off));
+                            if (!fOptimize || cbBuffer) {
+                                var dataSector = [];
+                                sector['data'] = dataSector;
+                                for (var off = 0; off < cbBuffer; off += 4) {
+                                    dataSector.push(bufSector.readInt32LE(off));
+                                }
                             }
-                            aSectors[iSector-1] = sector;
+                            aSectors[iSector - 1] = sector;
                         } else {
-                            if (this.sFormat == DumpAPI.FORMAT.BYTES) {
-                                json += this.dumpBuffer("bytes", bufSector, cbBuffer, 1, offSector);
-                            } else {
-                                /*
-                                 * TODO: Assert that sFormat is FORMAT_JSON or FORMAT_DATA (both use the same dword format)
-                                 */
-                                json += this.dumpBuffer("data", bufSector, cbBuffer, 4, offSector);
+                            if (!fOptimize || cbBuffer) {
+                                if (this.sFormat == DumpAPI.FORMAT.BYTES) {
+                                    json += preComma + this.dumpBuffer("bytes", bufSector, cbBuffer, 1, offSector);
+                                } else {
+                                    /*
+                                     * TODO: Assert that sFormat is FORMAT_JSON or FORMAT_DATA (both use the same dword format)
+                                     */
+                                    json += preComma + this.dumpBuffer("data", bufSector, cbBuffer, 4, offSector);
+                                }
                             }
                             json += (iSector < nSectorsThisTrack? this.dumpLine(0, "},{") : this.dumpLine(-2, "}"));
                         }
@@ -3204,9 +3304,10 @@ DiskDump.prototype.convertToIMG = function()
                  */
                 var bByte0 = buf.readUInt8(DiskAPI.BOOT.JMP_OPCODE);
                 var cbSectorBPB = buf.readUInt16LE(DiskAPI.BPB.SECTOR_BYTES);
-                if ((bByte0 == X86.OPCODE.JMP || bByte0 == X86.OPCODE.JMPS) && cbSectorBPB == 512) {
+                var wSig = buf.readUInt16LE(DiskAPI.BOOT.SIG_OFFSET);
+                if ((bByte0 == X86.OPCODE.JMP || bByte0 == X86.OPCODE.JMPS) && cbSectorBPB == 512 && wSig == DiskAPI.BOOT.SIGNATURE) {
                     /*
-                     * Overwrite the OEM string with our own, so that people know how the image originated
+                     * Overwrite the OEM string with our own, so that people know how the image originated.
                      */
                     buf.write(DiskDump.PCJS_OEM, DiskAPI.BOOT.OEM_STRING, DiskDump.PCJS_OEM.length);
                 }

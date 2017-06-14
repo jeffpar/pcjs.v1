@@ -19,6 +19,7 @@ The PCjs machine below is running PC-DOS 1.10.
 {% include machine.html id="ibm5150-pcdos110" %}
 
 PC-DOS 1.10 was released in May 1982 on one single-sided (160Kb) diskette.  A complete listing of all the files
+is provided below.
 
 Also, in case you're wondering why 1920 + 6400 does not equal the "8704 bytes in 2 hidden files" reported by CHKDSK,
 that's because all CHKDSK byte totals are cluster-granular.  On a 160Kb diskette, 1 cluster equals 1 sector or 512

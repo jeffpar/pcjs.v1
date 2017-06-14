@@ -5,7 +5,7 @@ permalink: /disks/pcx86/dos/ibm/2.00/
 ---
 
 PC-DOS 2.00
----
+-----------
 
 PC-DOS 2.00 was released in March 1983.
 

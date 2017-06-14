@@ -453,6 +453,7 @@ MarkOut.prototype.convertMD = function(sIndent)
                         aOptions = aaOptions[iOption];
                         var sSpace = aOptions[1], sName = aOptions[2].toLowerCase(), sValue = aOptions[3];
                         if (sName == 'automount') sName = 'autoMount';  // for backward compatibility
+                        if (sName == 'autotype') sName = 'autoType';
                         if (!id && sName == 'id') {
                             id = sValue;
                         } else if (sName == 'autoMount') {

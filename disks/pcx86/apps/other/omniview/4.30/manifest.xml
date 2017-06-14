@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.34.3/manifest.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.35.0/manifest.xsl"?>
 <manifest type="software">
 	<title>Omniview 386</title>
 	<version>4.30</version>
@@ -7,7 +7,7 @@
 	<company>Sunny Hill</company>
 	<releaseDate>October 1991</releaseDate>
 	<machine href="/devices/pcx86/machine/compaq/deskpro386/vga/4096kb/machine.xml"/>
-	<disk id="disk01" size="737280" chs="80:2:9" dir="archive" href="/disks/pcx86/apps/sunnyhill/omniview/4.30/OMNIVIEW386-430.json" md5="176e332a49dc9a7f69d08aa64904c559" md5json="a19037b5bc8c1fc6896b50ed2a42fa5d">
+	<disk id="disk01" size="737280" chs="80:2:9" dir="archive" href="/disks/pcx86/apps/other/omniview/4.30/OMNIVIEW386-430.json" md5="176e332a49dc9a7f69d08aa64904c559" md5json="a19037b5bc8c1fc6896b50ed2a42fa5d">
 		<file size="4790" time="1992-01-07 09:25:54" attr="0x20" md5="e5621815315e1eac06bf326e82d06ea0">2</file>
 		<file size="4902" time="1992-01-14 08:56:44" attr="0x20" md5="54d8d2c00aaec70f1194cca1618518ef">3</file>
 		<file size="1691" time="1992-01-18 15:58:08" attr="0x20" md5="63f269a03c04522474d7af304515667d">AD</file>

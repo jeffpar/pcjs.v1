@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.34.3/manifest.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.35.0/manifest.xsl"?>
 <manifest type="software">
 	<title>PC-DOS</title>
 	<version>1.10</version>
@@ -7,5 +7,5 @@
 	<category>Operating System</category>
 	<author>IBM/Microsoft</author>
 	<releaseDate/>
-	<disk id="disk01" size="163840" chs="40:1:8" img="archive/PCDOS110.img" href="/disks/pcx86/dos/ibm/1.10/PCDOS110.json" md5="47bfb4371d28cd9e45fb1197f2a70c00" md5json="91086902e08148b50bd1ea1219192751"/>
+	<disk id="disk01" size="163840" chs="40:1:8" img="archive/PCDOS110.img" href="/disks/pcx86/dos/ibm/1.10/PCDOS110.json" md5="482f0559c88a798e8fb5af96b4868a98" md5json="24d352b2bfad3b146ca3189e2e8fcde0"/>
 </manifest>
