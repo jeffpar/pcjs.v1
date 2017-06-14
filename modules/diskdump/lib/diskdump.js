@@ -2531,7 +2531,7 @@ DiskDump.prototype.convertToJSON = function()
     }
 
     var json = null;
-    var fOptimize = true;                   // if true, leave out any properties that are defaults
+    var fOptimize = !this.fJSONComments;    // if true, leave out any properties that are defaults
     try {
         var nHeads = 0;
         var nCylinders = 0;
@@ -2902,6 +2902,9 @@ DiskDump.prototype.convertToJSON = function()
                             bMediaType = 0;
                         }
 
+                        var preComma = (fOptimize? ',' : '');
+                        var postComma = (fOptimize? '' : ',');
+
                         if (this.fJSONNative) {
                             sector['sector'] = nSector;
                             if (!fOptimize || cbSectorThisTrack != 512) {
@@ -2909,9 +2912,9 @@ DiskDump.prototype.convertToJSON = function()
                             }
                         } else {
                             json += (iSector == 1? this.dumpLine(2, "{") : "");
-                            json += this.dumpLine(0, '"sector":' + this.sJSONWhitespace + nSector + ",");
+                            json += this.dumpLine(0, '"sector":' + this.sJSONWhitespace + nSector + postComma);
                             if (!fOptimize || cbSectorThisTrack != 512) {
-                                json += this.dumpLine(0, '"length":' + this.sJSONWhitespace + cbSectorThisTrack + ",");
+                                json += preComma + this.dumpLine(0, '"length":' + this.sJSONWhitespace + cbSectorThisTrack + postComma);
                             }
                         }
 
@@ -2924,7 +2927,7 @@ DiskDump.prototype.convertToJSON = function()
                                 if (this.fJSONNative) {
                                     sector['pattern'] = dwPattern;
                                 } else {
-                                    json += this.dumpLine(0, '"pattern":' + this.sJSONWhitespace + dwPattern + ",");
+                                    json += preComma + this.dumpLine(0, '"pattern":' + this.sJSONWhitespace + dwPattern + postComma);
                                 }
                             }
                         }
@@ -2940,12 +2943,12 @@ DiskDump.prototype.convertToJSON = function()
                         } else {
                             if (!fOptimize || cbBuffer) {
                                 if (this.sFormat == DumpAPI.FORMAT.BYTES) {
-                                    json += this.dumpBuffer("bytes", bufSector, cbBuffer, 1, offSector);
+                                    json += preComma + this.dumpBuffer("bytes", bufSector, cbBuffer, 1, offSector);
                                 } else {
                                     /*
                                      * TODO: Assert that sFormat is FORMAT_JSON or FORMAT_DATA (both use the same dword format)
                                      */
-                                    json += this.dumpBuffer("data", bufSector, cbBuffer, 4, offSector);
+                                    json += preComma + this.dumpBuffer("data", bufSector, cbBuffer, 4, offSector);
                                 }
                             }
                             json += (iSector < nSectorsThisTrack? this.dumpLine(0, "},{") : this.dumpLine(-2, "}"));
