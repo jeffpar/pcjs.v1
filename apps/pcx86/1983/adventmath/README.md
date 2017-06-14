@@ -16,8 +16,8 @@ Adventures in Math (1983)
 
 {% include machine.html id="ibm5150" %}
 
-This game is available from the [Internet Archive](https://archive.org/details/msdos_Adventures_in_Math_1983);
-the contents of their ZIP archive contains:
+This game is available from the [Internet Archive](https://archive.org/details/msdos_Adventures_in_Math_1983).
+The contents of their ZIP archive contains:
 
 	-rwxr-xr-x@ 1 Jeff  staff  18688 Dec 24  1996 Adventur.bas
 	-rwxr-xr-x@ 1 Jeff  staff      0 Dec 24  1996 Adventures in Math (1983).ba1
@@ -72,8 +72,9 @@ And in the second ZIP file:
 	-rw-r--r--@ 1 Jeff  staff    369 Sep 17  1999 Topten
 	-rw-r--r--@ 1 Jeff  staff    170 Jan 22  2011 file_id.diz
 
-So we're going to start with the second ZIP file.  One oddity common to *all* these archives is the file
-"MONOCODE.000".  Dumping that file reveals:
+I decided to start with the contents of the second ZIP file.
+
+One strange file common to *all* these archives is **MONOCODE.000**.  Dumping that file reveals:
 
 	00000c60  20 4d 4f 4e 4f 50 4f 4c  59 20 69 73 20 61 20 72  | MONOPOLY is a r|
 	00000c70  65 67 69 73 74 65 72 65  64 20 74 72 61 64 65 6d  |egistered tradem|
@@ -85,28 +86,27 @@ So we're going to start with the second ZIP file.  One oddity common to *all* th
 	00000cd0  20 44 6f 6e 20 50 68 69  6c 6c 69 70 20 47 69 62  | Don Phillip Gib|
 	00000ce0  73 6f 6e 20 5b e8 96 7d  03 35 2e 31 b8 5d 00 50  |son [..}.5.1.].P|
 
-so it seems pretty clear that whoever created this disk had copied other unrelated (eg, MONOPOLY) game files to it,
-and if/when someone tried to clean it up later, they missed this file.  I've deleted it.
+So at some point, unrelated ("MONOPOLY") files were mingled with this game.  I deleted the file.
 
-Another oddity is "BASICA.EXE" (54277 bytes) from 1999.  It seems unlikely that IBM would have distributed *any*
-BASIC binary with this game, because DOS was a prerequisite, and all versions of DOS included BASIC.  IBM's PC-DOS
-shipped with "BASICA.COM", and OEM versions of DOS shipped with either "GWBASIC.EXE" or "BASIC.EXE".
+Another unexpected file is **BASICA.EXE** (54277 bytes) from 1999.  It seems unlikely that IBM would have distributed
+*any* BASIC binary with this game, because DOS was a prerequisite, and at the time, all versions of DOS included BASIC.
+IBM's PC-DOS shipped with **BASICA.COM**, and OEM versions of DOS shipped with either **GWBASIC.EXE** or **BASIC.EXE**.
 
-The closest binary I'd seen up to this point was "BASICA.EXE" from COMPAQ DOS 1.12 (54304 bytes).  And sure enough,
-this "BASICA.EXE" is a close relative, since it contains the strings:
+The closest matching binary I'd seen up to this point was **BASICA.EXE** from COMPAQ DOS 1.12 (54304 bytes).
+And sure enough, examining the strings contained inside this **BASICA.EXE** revealed that it is a close relative:
 
 	The COMPAQ Personal Computer BASIC
 	Version 1.13
 	(C) Copyright COMPAQ Computer Corp. 1983
 
-It's unlikely that IBM would have distributed a COMPAQ binary; if they had distributed any BASIC binary with this
-game at all, it would have been their own "BASICA.COM", and since that binary also requires IBM's ROM BASIC, a more
-generic BASIC binary was desirable.
+It's safe to say that IBM would not have distributed a COMPAQ binary; if IBM had distributed any BASIC binary at all,
+it would have been their own **BASICA.COM**.  Of course, the problem with IBM's **BASICA.COM** is that it also requires
+an IBM PC with ROM BASIC installed, which is why someone copied the COMPAQ version of BASIC (it has no ROM dependencies).
 
-I've deleted "BASICA.EXE".  The proper thing to do -- and what any purchaser of this game would have to do -- is
-boot a machine with a disk containing some version of BASIC and use that.
+Anyway, I've deleted **BASICA.EXE**.  The proper thing to do -- and what any purchaser of this game would have to do --
+is boot a machine with an appropriate version of DOS and use the BASIC binary included with DOS to run this game.
 
-Finally, there was "FILE_ID.DIZ":
+Finally, there was **FILE_ID.DIZ**:
 
 	Adventures in Math (1983)(IBM) [Educational].zip
 	Name:Adventures in Math
@@ -117,11 +117,11 @@ Finally, there was "FILE_ID.DIZ":
 	Publisher:IBM
 	Genre(s):Educational
 
-and "RUN.BAT":
+and **RUN.BAT**:
 
 	basica castle
 
-and "TOPTEN":
+and **TOPTEN**:
 
 	The Ultimate One,83519,LARGE,07-15-81
 	MathsWhiz,78613,LARGE,01-01-80
@@ -138,7 +138,7 @@ and "TOPTEN":
 	Z[z],55677,LARGE,07-24-81
 	[z],55197,LARGE,07-23-81
 
-Those files have been deleted as well, leaving 8 files dated "Aug 11 1983".  I created a disk image from the
-directory containing those files:
+All those files have been deleted as well, leaving 8 files dated "Aug 11 1983".  Next, I created a disk image from the
+directory containing just those files:
  
 	diskdump --dir=archive --format=json --output=ADVENTMATH100.json --manifest
