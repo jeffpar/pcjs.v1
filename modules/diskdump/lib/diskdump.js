@@ -434,7 +434,7 @@ DiskDump.aDefaultBPBs = [
   [                             // define BPB for 320Kb diskette
     0xEB, 0xFE, 0x90,           // 0x00: JMP instruction, following by 8-byte OEM signature
     0x50, 0x43, 0x4A, 0x53, 0x2E, 0x4F, 0x52, 0x47,     // PCJS_OEM
-    // 0x49, 0x42, 0x4D, 0x20, 0x20, 0x31, 0x2E, 0x30,     // "IBM  1.0" (this is a real OEM signature)
+ // 0x49, 0x42, 0x4D, 0x20, 0x20, 0x31, 0x2E, 0x30,     // "IBM  1.0" (this is a real OEM signature)
     0x00, 0x02,                 // 0x0B: bytes per sector (0x200 or 512)
     0x02,                       // 0x0D: sectors per cluster (2)
     0x01, 0x00,                 // 0x0E: reserved sectors; ie, # sectors preceding the first FAT--usually just the boot sector (1)
@@ -530,15 +530,15 @@ DiskDump.aDefaultBPBs = [
     /*
      * Here's some useful background information on a 10Mb PC XT fixed disk, partitioned with a single DOS partition.
      *
-     * The BPB for a 10Mb "type 3" PC XT drive specifies 0x5103 or 20739 for TOTAL_SECS, which is the partition
+     * The BPB for a 10Mb "type 3" PC XT hard disk specifies 0x5103 or 20739 for TOTAL_SECS, which is the partition
      * size in sectors (10,618,368 bytes), whereas total disk size is 20808 sectors (10,653,696 bytes).  The partition
      * is 69 sectors smaller than the disk because the first sector is reserved for the MBR and 68 sectors (the entire
      * last cylinder) are reserved for diagnostics, head parking, etc.  This cylinder usage is confirmed by FDISK,
      * which reports that 305 cylinders (not 306) are assigned to the DOS partition.
      *
-     * That 69-sector overhead is NOT the overhead incurred by the FAT file system.  That overhead is the boot sector
+     * That 69-sector overhead is NOT overhead incurred by the FAT file system.  The FAT overhead is the boot sector
      * (1), FAT sectors (2 * 8), and root directory sectors (32), for a total of 49 sectors, leaving 20739 - 49 or
-     * 20690 sectors.  However, free space is measured in clusters, not sectors, and the partition uses 8 sectors/cluster,
+     * 20690 sectors.  Moreover, free space is measured in clusters, not sectors, and the partition uses 8 sectors/cluster,
      * leaving room for 2586.25 clusters.  Since a fractional cluster is not allowed, another 2 sectors are lost, for
      * a total of 51 sectors of FAT overhead.  So actual free space is (20739 - 51) * 512, or 10,592,256 bytes -- which
      * is exactly what is reported as the available space on a freshly formatted 10Mb PC XT fixed disk.
@@ -562,7 +562,7 @@ DiskDump.aDefaultBPBs = [
      * and then they conflated the two values to produce a single (incorrect) result.
      *
      * Even if one were to assume that the disk had only 305 cylinders, that would only change the partitioning overhead
-     * to 1 sector; the file system overhead would still be 51 sectors.
+     * to 1 sector; the FAT file system overhead would still be 51 sectors.
      */
   [                             // define BPB for 10Mb hard drive
     0xEB, 0xFE, 0x90,           // 0x00: JMP instruction, following by 8-byte OEM signature
