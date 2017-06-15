@@ -35,6 +35,7 @@ if (NODE) {
     var Keys        = require("../../shared/lib/keys");
     var State       = require("../../shared/lib/state");
     var PCX86       = require("./defines");
+    var Interrupts  = require("./interrupts");
     var Messages    = require("./messages");
     var ChipSet     = require("./chipset");
     var CPU         = require("./cpu");
@@ -58,6 +59,8 @@ class Keyboard extends Component {
      *          "US83" (default)
      *          "US84"
      *          "US101"
+     *
+     *      autoType: string of keys to automatically inject when the machine is ready (undefined if none)
      *
      * Its main purpose is to receive binding requests for various keyboard events, and to use those events
      * to simulate the PC's keyboard hardware.
@@ -137,7 +140,14 @@ class Keyboard extends Component {
         this.msAutoRepeat   = 500;
         this.msNextRepeat   = 100;
         this.msAutoRelease  = 50;
-        this.msInjectDelay  = 300;          // number of milliseconds between injected keystrokes
+        this.msInjectDelay  = 150;          // number of milliseconds between injected keystrokes
+
+        /*
+         * autoType records the machine's specified autoType sequence, if any.  At the appropriate signal(s),
+         * autoType will be copied to autoInject, and injection will commence.
+         */
+        this.autoInject = null;
+        this.autoType = parmsKbd['autoType'];
 
         /*
          * HACK: We set fAllDown to false to ignore all down/up events for keys not explicitly marked as ONDOWN;
@@ -351,6 +361,26 @@ class Keyboard extends Component {
         this.cpu = cpu;
         this.dbg = dbg;
         this.chipset = cmp.getMachineComponent("ChipSet");
+        this.autoType = cmp.getMachineParm('autoType') || this.autoType;
+        cpu.addIntNotify(Interrupts.DOS, this.intDOS.bind(this));
+    }
+
+    /**
+     * intDOS()
+     *
+     * Monitors selected DOS interrupts for signals to initialize 'autoType' injection.
+     *
+     * @this {Keyboard}
+     * @param {number} addr
+     * @return {boolean} true to proceed with the INT 0x21 software interrupt, false to skip
+     */
+    intDOS(addr)
+    {
+        var AH = (this.cpu.regEAX >> 8) & 0xff;
+        if (AH == 0x0A) {
+            this.injectInit();
+        }
+        return true;
     }
 
     /**
@@ -726,6 +756,7 @@ class Keyboard extends Component {
         /*
          * Make sure the auto-injection buffer is empty (an injection could have been in progress on any reset after the first).
          */
+        this.autoInject = null;
         this.sInjectBuffer = "";
     }
 
@@ -834,6 +865,19 @@ class Keyboard extends Component {
     }
 
     /**
+     * injectInit()
+     *
+     * @this {Keyboard}
+     */
+    injectInit()
+    {
+        if (!this.autoInject && this.autoType) {
+            this.autoInject = this.autoType;
+            this.injectKeys(this.autoInject);
+        }
+    }
+
+    /**
      * injectKeys(sKeys, msDelay)
      *
      * @this {Keyboard}
@@ -857,15 +901,41 @@ class Keyboard extends Component {
      */
     injectKeysFromBuffer(msDelay)
     {
-        if (this.sInjectBuffer.length > 0) {
-            var ch = this.sInjectBuffer.charCodeAt(0);
+        var charCode = 0;
+        while (this.sInjectBuffer.length > 0 && !charCode) {
+            var ch = this.sInjectBuffer.charAt(0);
+            this.sInjectBuffer = this.sInjectBuffer.substr(1);
+            if (ch != '\\') {
+                charCode = ch.charCodeAt(0);
+            } else {
+                ch = this.sInjectBuffer.charAt(0);
+                this.sInjectBuffer = this.sInjectBuffer.substr(1);
+                switch (ch) {
+                case 'n':
+                    charCode = 0x0A;
+                    break;
+                case 'r':
+                    charCode = 0x0D;
+                    break;
+                case 't':
+                    charCode = 0x09;
+                    break;
+                default:
+                    if (ch >= '1' && ch <= '9') {
+                        msDelay = ch.charCodeAt(0) * 100;
+                        break;
+                    }
+                    charCode = ch.charCodeAt(0);
+                    break;
+                }
+            }
+        }
+        if (charCode) {
             /*
              * I could require all callers to supply CRs instead of LFs, but this is friendlier.
              */
-            if (ch == 0x0a) ch = 0x0d;
-
-            this.sInjectBuffer = this.sInjectBuffer.substr(1);
-            this.addActiveKey(ch, true);
+            if (charCode == 0x0A) charCode = 0x0D;
+            this.addActiveKey(charCode, true);
         }
         if (this.sInjectBuffer.length > 0) {
             setTimeout(function(kbd) {
@@ -1012,7 +1082,9 @@ class Keyboard extends Component {
      */
     addActiveKey(simCode, fPress)
     {
-        if (!Keyboard.SIMCODES[simCode]) {
+        var wCode = Keyboard.SIMCODES[simCode] || Keyboard.SIMCODES[simCode += Keys.KEYCODE.ONDOWN];
+
+        if (!wCode) {
             if (!COMPILED && this.messageEnabled(Messages.KEYS)) {
                 this.printMessage("addActiveKey(" + simCode + "," + (fPress? "press" : "down") + "): unrecognized", true);
             }
