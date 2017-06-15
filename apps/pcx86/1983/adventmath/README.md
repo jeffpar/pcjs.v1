@@ -193,14 +193,32 @@ which translates to:
 	b:                  [switch to drive B:]
 	a:basica castle     [run BASICA on drive A: and load CASTLE.BAS on drive B:]
 
-This is the preferred way of "demo'ing" software with PCjs: loading unmodified disk images using the minimum
-"system requirements" and automatically performing the same series of commands that the original owner of that
-hardware and software would have performed.
+This is one of the preferred methods of demonstrating software in PCjs: loading unmodified disk images into machines
+that match the system requirements as closely as possible, powering the machine, and then automatically executing
+the same series of commands that an owner of that hardware and software combination might have executed.
 
-An alternative approach, adopted by the Internet Archive, involves creating customized disk images and machine
-configurations for each application.  This offers some simplicity, because the software has been modified to work
-in a common configuration, but it becomes difficult if not impossible to isolate the original software distribution
-or run it in other machine configurations.
+The other preferred method is to use a machine state file, which restores the machine to a state where the software is
+already running.  This is the fastest approach, and it is useful when the software has an involved installation
+process, but it takes more effort to set up.  The [VisiCalc (1981)](/apps/pcx86/1981/visicalc/) demo operates this way,
+but it does so purely for convenience (and because it predates the "autoType" feature).
+
+An alternative approach, adopted by the Internet Archive, involves modified disk images (eg, with custom batch files)
+loaded into tightly coupled machine configurations.  While this approach offers ease of use, it's difficult for the
+user to download or inspect the software exactly as it was originally distributed, or to load the software into any
+machine configuration other than the "mystery" configuration chosen by the Internet Archive.
+
+The failure to archive software exactly as it was originally distributed, generally as one or more disk image (IMG)
+files along with scanned (PDF) copies of the documentation, is the most serious problem we collectively face.  I don't
+blame the Internet Archive, because in most cases, they're simply archiving what someone else archived before them,
+and those earlier "archivists" often didn't take the time to thoroughly preserve and document everything.
+
+On the other hand, the Internet Archive could do a better job of cataloging its holdings, recording the provenance of
+everything they have archived, maintaining a clear separation of original material from subsequent modifications (including
+any modifications created solely for ease of emulation), and providing more control over machine configurations.
+
+In addition, I would hope that anything the Internet Archive "archives" itself (ie, from original distribution media)
+is duplicated and preserved according to a *much* higher standard than any files, documents, etc, it has simply scraped
+from the Internet.
 
 References
 ----------
