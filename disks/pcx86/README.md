@@ -12,13 +12,13 @@ This [Disk Library](/disks/pcx86/library.xml) lists all the [Disk Manifests](#di
 in the project that uses the library.  Note that most machines use the *[compiled](/disks/pcx86/compiled/library.xml)*
 form of the library, to reduce machine load time.
 
-The summary below is not a complete list of everything in the library,
-just highlights.  For some of the disks, we have provided more information about the software, and in some cases,
+The summary below is not a complete list of everything in the library, just highlights.
+For some of the disks, we have provided more information about the software, and in some cases,
 machines that automatically run the software.  Ideally, everything in the library would also be listed below,
 and linked to a page that describes the software in more detail, along with a live demonstration of the software,
 but that's not yet a reality.
 
-For IBM PC application demos, see the [Application Archive](/apps/pcx86/), which focuses excusively on applications.
+For IBM PC application demos, see the [Application Archive](/apps/pcx86/), which focuses exclusively on applications.
 The [Disk Library](/disks/pcx86/library.xml) is a superset, including operating systems, application software,
 computer diagnostics, programming tools, and more.
 
@@ -57,6 +57,10 @@ computer diagnostics, programming tools, and more.
 
 * [PC Diagnostics](diags/)
 * [VGA "Black Book" Tests](/tests/pcx86/vga/)
+
+### Fixed Disks
+
+* [Assorted Fixed Disk Images](/disks/pcx86/fixed/) (eg, [10Mb](/disks/pcx86/fixed/10mb/) and [20Mb](/disks/pcx86/fixed/20mb/))
 
 ---
 
