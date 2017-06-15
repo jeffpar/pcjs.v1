@@ -47,30 +47,33 @@ something one could easily determine using the Internet Archive's own search eng
 
 ### Emulation Challenges
 
-There are also some fundamental problems with the Internet Archive's approach to emulation.  They load sets of files,
-along with custom batch files, into tightly coupled machine configurations, with no indication which files were part
-of the original software distribution, and no hardware details regarding their "mystery" machine configurations. 
+There are a few issues with the Internet Archive's approach to emulation that I'd like to discuss.  First, they load
+sets of files, along with custom batch files, into tightly coupled machine configurations, with no indication which
+files were part of the original software distribution, and no hardware details regarding their "mystery" machine
+configurations. 
 
-And the Internet Archive's overall "emulation experience" is often not very faithful.  Their rendering of
-"Adventures in Math" gives the impression that the game ran *much* faster than it actually ran on a 4.77Mhz IBM PC.
-While their emulator can be configured operate at different speeds, it's unclear which of their holdings have already
-been "tuned".  As a fallback, they do provide some user controls:
+Second, the Internet Archive's overall emulation experience doesn't represent the original hardware and software very
+accurately.  Their rendering of "Adventures in Math" gives the impression that the game ran *much* faster than it
+actually ran on a circa 1983 4.77Mhz IBM PC.  Their emulator can be configured operate at different speeds, but it's
+unclear which of their holdings have already been "tuned" and which have not.  "Adventures in Math" has not.
+
+As a fallback, they do provide some user controls:
 
 > "While the program is running, press CTRL-F11 to slow the program down. Pressing CTRL-F11 repeatedly will slow it
 down further, until the speed is more reasonable. (Pressing CTRL-F12 repeatedly will attempt to speed things up.)"
 
 but in general, the user has no idea what speed they have currently selected, or what the target speed should be.
-For users who simply want "to play the game," that may be fine, but an historian would probably prefer to see how the
+For users who simply want "to play the game," that may be fine, but historians would probably prefer to see how the
 game originally operated and how each screen was painstakingly rendered, to better understand both the original user
 experience and the challenges that early software developers faced.
 
 The failure to archive software exactly as it was originally distributed, generally as one or more disk image (IMG)
-files along with scanned (PDF) copies of the documentation, is the most serious problem we collectively face.  I don't
-blame the Internet Archive, because in most cases, they're simply archiving what someone else archived before them,
-and those earlier "archivists" often didn't take the time to thoroughly preserve and document everything.
+files along with scanned (PDF) copies of the documentation, is one of the most important problems we collectively face.
+I don't blame the Internet Archive, because in most cases, they're simply archiving what someone else archived before
+them, and those earlier "archivists" often didn't take the time to thoroughly preserve and document everything.
 
-On the other hand, the Internet Archive could do a better job of cataloging its holdings, recording the provenance of
-everything they have archived, maintaining a clear separation of original material from subsequent modifications
+On the other hand, the Internet Archive could probably do a better job cataloging its holdings, recording the provenance
+of everything they have archived, maintaining a clear separation of original material from subsequent modifications
 (including any modifications created solely for ease of emulation), providing more control over machine configurations,
 and enabling the use of third-party emulators -- like PCjs -- which may be able to perform a more faithful rendering
 of certain software packages.
