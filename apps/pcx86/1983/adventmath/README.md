@@ -194,46 +194,13 @@ which translates to:
 	a:basica castle     [run BASICA on drive A: and load CASTLE.BAS on drive B:]
 
 This is one of the preferred methods of demonstrating software in PCjs: loading unmodified disk images into machines
-that match the system requirements as closely as possible, powering the machine, and then automatically executing
-the same series of commands that an owner of that hardware and software combination might have executed.
+that match the software's system requirements as closely as possible, powering the machine, and then automatically
+executing a series of commands that an owner of that hardware and software combination would have likely executed.
 
 The other preferred method is to use a machine state file, which restores the machine to a state where the software is
 already running.  This is the fastest approach, and it is useful when the software has an involved installation
 process, but it takes more effort to set up.  The [VisiCalc (1981)](/apps/pcx86/1981/visicalc/) demo operates this way,
 but it does so purely for convenience (and because it predates the "autoType" feature).
-
-An alternative approach, adopted by the Internet Archive, involves modified disk images (eg, with custom batch files)
-loaded into tightly coupled machine configurations.  While this approach offers ease of use, it's difficult for the
-user to download or inspect the software exactly as it was originally distributed, or to load the software into any
-machine configuration other than the "mystery" configuration chosen by the Internet Archive. 
-
-Also, the Internet Archive's overall "emulation experience" is often not very faithful.  Their rendering of "Adventures
-in Math" gives the impression that the game ran *much* faster than it actually ran on a 4.77Mhz IBM PC.
-While the Internet Archive's emulator can be configured operate at different speeds, it's unclear which of their
-holdings have already been "tuned".  As a fallback, they do provide some user controls:
-
-> "While the program is running, press CTRL-F11 to slow the program down. Pressing CTRL-F11 repeatedly will slow it
-down further, until the speed is more reasonable. (Pressing CTRL-F12 repeatedly will attempt to speed things up.)"
-
-but in general, the user has no idea what speed they have currently selected, or what the target speed should be.
-For users who simply want "to play the game," that may be fine, but an historian would probably prefer to see how the
-game originally operated and how each screen was painstakingly rendered, to better understand both the original user
-experience and the challenges that early software developers faced.
-
-The failure to archive software exactly as it was originally distributed, generally as one or more disk image (IMG)
-files along with scanned (PDF) copies of the documentation, is the most serious problem we collectively face.  I don't
-blame the Internet Archive, because in most cases, they're simply archiving what someone else archived before them,
-and those earlier "archivists" often didn't take the time to thoroughly preserve and document everything.
-
-On the other hand, the Internet Archive could do a better job of cataloging its holdings, recording the provenance of
-everything they have archived, maintaining a clear separation of original material from subsequent modifications (including
-any modifications created solely for ease of emulation), providing more control over machine configurations, and
-enabling the use of third-party emulators -- like PCjs -- that may be able to do a better job running and rendering
-some software packages.
-
-In addition, I would hope that anything the Internet Archive "archives" itself (ie, from original distribution media)
-is duplicated and preserved according to a *much* higher standard than any files, documents, etc, it has simply scraped
-from the Internet.
 
 References
 ----------
