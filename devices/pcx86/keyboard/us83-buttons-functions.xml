@@ -13,4 +13,8 @@
 	<control type="button" binding="f8">F8</control>
 	<control type="button" binding="f9">F9</control>
 	<control type="button" binding="f10">F10</control>
+	<control type="button" binding="left">&#x2190;</control>
+	<control type="button" binding="up">&#x2191;</control>
+	<control type="button" binding="down">&#x2193;</control>
+	<control type="button" binding="right">&#x2192;</control>
 </keyboard>
