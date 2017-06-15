@@ -1360,6 +1360,11 @@ class Keyboard extends Component {
         var keyCode = event.keyCode;
 
         /*
+         * Let's stop any injection currently in progress...
+         */
+        this.sInjectBuffer = "";
+
+        /*
          * Although it would be nice to pay attention ONLY to these "up" and "down" events, and ignore "press"
          * events, iOS devices force us to process "press" events, because they don't give us shift-key events,
          * so we have to infer the shift state from the character code in the "press" event.
@@ -1499,6 +1504,11 @@ class Keyboard extends Component {
         event = event || window.event;
         var keyCode = event.which || event.keyCode;
 
+        /*
+         * Let's stop any injection currently in progress...
+         */
+        this.sInjectBuffer = "";
+
         if (this.fAllDown) {
             var simCode = this.checkActiveKey();
             if (simCode && this.isAlphaKey(simCode) && this.isAlphaKey(keyCode) && simCode != keyCode) {
@@ -1509,11 +1519,6 @@ class Keyboard extends Component {
                 keyCode = simCode;
             }
         }
-
-        /*
-         * Let's stop any injection currently in progress, too
-         */
-        this.sInjectBuffer = "";
 
         var fPass = !Keyboard.SIMCODES[keyCode] || !!(this.bitsState & Keyboard.STATE.CMD);
 
