@@ -9,14 +9,27 @@ permalink: /disks/pcx86/fixed/10mb/
 
 This folder contains the following 10Mb fixed disk images:
  
-* Empty formatted disk ([PCDOS200-EMPTY](PCDOS200-EMPTY.json))
-* PC-DOS 2.00 with Windows 1.01 for CGA ([PCDOS200-WIN101-CGA](pcdos200-win101-cga.xml))
-* PC-DOS 2.00 with Windows 1.01 for EGA ([PCDOS200-WIN101-EGA](pcdos200-win101-ega.xml))
+* [Empty formatted disk](PCDOS200-EMPTY.json)
+* [PC-DOS 2.00 with Windows 1.01 for CGA](PCDOS200-WIN101-CGA.json) ([XML](pcdos200-win101-cga.xml))
+* [PC-DOS 2.00 with Windows 1.01 for EGA](PCDOS200-WIN101-EGA.json) ([XML](pcdos200-win101-ega.xml))
 
-These disk images are used by various IBM PC XT [Model 5160](/devices/pcx86/machine/5160/) machine configurations.
+These disk images are used by various IBM PC XT [Model 5160](/devices/pcx86/machine/5160/) machine configurations,
+either directly:
 
-NOTE: The empty disk is *completely* empty.  It was partitioned with the PC-DOS 2.00 **FDISK** utility, allocating
-the entire disk to a single DOS partition, and then it was formatted with the PC-DOS 2.00 **FORMAT** utility.
+```xml
+<hdc id="hdcXT" drives='[{name:"10Mb Hard Drive",path:"/disks/pcx86/fixed/10mb/PCDOS200-WIN101-CGA.json",type:3}]'/>
+```
+
+or by reference:
+
+```xml
+<hdc ref="/disks/pcx86/fixed/10mb/pcdos200-win101-cga.xml"/>
+```
+
+### Notes Regarding 10Mb Disks
+
+The [Empty formatted disk](PCDOS200-EMPTY.json) is *completely* empty.  It was partitioned with the PC-DOS 2.00 **FDISK** utility,
+allocating the entire disk to a single DOS partition, and then it was formatted with the PC-DOS 2.00 **FORMAT** utility.
 Neither the **FORMAT** "/S" option nor the **SYS** command were used, so no system files were transferred, leaving
 the disk completely empty and non-bootable.
 
@@ -62,8 +75,8 @@ is not allowed, another 2 sectors are lost, bringing the total FAT file system o
 Thus, actual free space is (20739 - 51) * 512, or 10,592,256 bytes, which is exactly what DOS reports as the available
 space.
 
-Some sources on the internet (eg, http://www.wikiwand.com/en/Timeline_of_DOS_operating_systems) claim that the (FAT)
-file system overhead for the XT's 10Mb disk is "50 sectors".  As they explain:
+Some sources on the internet (eg, [http://www.wikiwand.com/en/Timeline_of_DOS_operating_systems](http://www.wikiwand.com/en/Timeline_of_DOS_operating_systems))
+claim that the FAT file system overhead for the XT's 10Mb disk is "50 sectors".  As they explain:
 
 	"The fixed disk has 10,618,880 bytes of raw space: 305 cylinders (the equivalent of tracks) × 2 platters
 	× 2 sides or heads per platter × 17 sectors per track = 20,740 sectors × 512 bytes per sector = 10,618,880
@@ -79,19 +92,3 @@ However, that's incorrect.  First, the disk has 306 cylinders, not 305.  Second,
 the overhead OUTSIDE the partition (69 sectors) and the overhead INSIDE the partition (51 sectors).  They failed
 to account for the reserved cylinder in the first calculation and the lost fractional cluster in the second
 calculation, and then they conflated the two values to produce a single (incorrect) result.
-
----
-
-To use one of these disks with another machine configuration, include:
-
-```xml
-<hdc id="hdcXT" drives='[{name:"10Mb Hard Drive",path:"/disks/pcx86/fixed/10mb/PCDOS200-WIN101-CGA.json",type:3}]'/>
-```
-
-in the *machine.xml* file.  Alternatively, you can include it by reference:
-
-```xml
-<hdc ref="/disks/pcx86/fixed/10mb/pcdos200-win101-cga.xml"/>
-```
-
-Of course, if your machine configuration file is on a different server, the *ref* path will likely be different.
