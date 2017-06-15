@@ -11,7 +11,7 @@ machines:
         path: /disks/pcx86/dos/ibm/1.00/PCDOS100.json
       B:
         path: /apps/pcx86/1983/adventmath/ADVENTMATH100.json
-    autoType: 8-10-81\rb:\ra:basica castle\r
+    autoType: 8-10-81\\rb:\\ra:basica castle\\r
 ---
 
 Adventures in Math (1983)
@@ -36,12 +36,12 @@ The contents of their ZIP archive contained:
 	-rwxr-xr-x@ 1 Jeff  staff     13 Dec 24  1996 Sn
 	-rwxr-xr-x@ 1 Jeff  staff    369 Dec 24  1996 Topten
 
-It's unfortunate that the archive did not contain a complete dump of the original "Adventures in Math" diskette.
-It's especially disturbing that all the files in the archive are dated "Dec 24 1996", calling into question which,
-if any, of these files are authentic.
+It was unfortunate that the archive did not contain a complete dump of the original "Adventures in Math"
+diskette, and that all the files in the archive were dated "Dec 24 1996", calling into question the authenticity
+of the files.
 
 After digging around a bit more on the Internet Archive, I discovered that
-[A Large Collection of DOS Collections](https://archive.org/details/large_dos_collection_2013_08) contains:
+[A Large Collection of DOS Collections](https://archive.org/details/large_dos_collection_2013_08) contained:
 
 - DOS Collection v0.7/DVD1/Adventures In Math (1983)(Ibm).zip
 - main torrent/1983/Adventures in Math (1983)(IBM) [Educational].zip
@@ -78,10 +78,10 @@ And in the second ZIP file:
 	-rw-r--r--@ 1 Jeff  staff    369 Sep 17  1999 Topten
 	-rw-r--r--@ 1 Jeff  staff    170 Jan 22  2011 file_id.diz
 
-I decided to start with the contents of the second ZIP file, since the timestamps of the most of the files
+I decided to start with the contents of the second ZIP file, since the timestamps of most of the files
 appeared to be legitimate.
 
-One strange file common to *all* these archives is **MONOCODE.000**.  Dumping that file revealed:
+One strange file common to *all* the archives was **MONOCODE.000**.  Dumping that file revealed:
 
 	00000c60  20 4d 4f 4e 4f 50 4f 4c  59 20 69 73 20 61 20 72  | MONOPOLY is a r|
 	00000c70  65 67 69 73 74 65 72 65  64 20 74 72 61 64 65 6d  |egistered tradem|
@@ -93,15 +93,14 @@ One strange file common to *all* these archives is **MONOCODE.000**.  Dumping th
 	00000cd0  20 44 6f 6e 20 50 68 69  6c 6c 69 70 20 47 69 62  | Don Phillip Gib|
 	00000ce0  73 6f 6e 20 5b e8 96 7d  03 35 2e 31 b8 5d 00 50  |son [..}.5.1.].P|
 
-So at some point, unrelated ("MONOPOLY") files were mingled with this game.  I deleted the file.
+So at some point, unrelated "MONOPOLY" files were mingled with this game.  I deleted **MONOCODE.000**.
 
-Another unexpected file is **BASICA.EXE** (54277 bytes) from 1999.  It seems unlikely that IBM would have distributed
+Another unexpected file was **BASICA.EXE** (54277 bytes) from 1999.  It seems unlikely that IBM would have distributed
 *any* BASIC binary with this game, because DOS was a prerequisite, and at the time, all versions of DOS included BASIC.
-IBM's PC-DOS shipped with **BASICA.COM**, and OEM versions of DOS shipped with either **GWBASIC.EXE** or **BASIC.EXE**.
+IBM's PC-DOS shipped with **BASICA.COM** and OEM versions of DOS shipped with either **GWBASIC.EXE** or **BASIC.EXE**.
 
 The closest matching binary I'd seen up to this point was **BASICA.EXE** from [COMPAQ DOS 1.12](/disks/pcx86/dos/compaq/1.12/)
-(54304 bytes).  And sure enough, examining the strings contained inside this **BASICA.EXE** revealed that it was a close
-relative:
+(54304 bytes).  And sure enough, dumping the strings inside this **BASICA.EXE** revealed that it was a close relative:
 
 	The COMPAQ Personal Computer BASIC
 	Version 1.13
@@ -109,11 +108,8 @@ relative:
 
 It's safe to say that IBM would not have distributed a COMPAQ binary; if IBM had distributed any BASIC binary at all,
 it would have been their own **BASICA.COM**.  Of course, the problem with IBM's **BASICA.COM** is that it also requires
-an IBM PC with ROM BASIC installed, which is why some people would have preferred the COMPAQ version: it has no ROM
-dependencies.
-
-Anyway, I've deleted **BASICA.EXE**.  The proper thing to do -- and what any purchaser of this game would have to do --
-is boot a machine with an appropriate version of DOS and use the BASIC binary included with DOS to run this game.
+an IBM PC with ROM BASIC installed, which is why some people would have preferred the COMPAQ binary: it had no ROM
+dependencies.  Anyway, I deleted **BASICA.EXE**.
 
 Finally, there was **FILE_ID.DIZ**:
 
@@ -147,13 +143,13 @@ and **TOPTEN**:
 	Z[z],55677,LARGE,07-24-81
 	[z],55197,LARGE,07-23-81
 
-All those files have been deleted as well, leaving 8 files dated "Aug 11 1983".  Next, I used the PCjs
-[DiskDump](/modules/diskdump/) utility to create a disk image from a directory ("archive/disk") containing just
+All those files were deleted as well, leaving 8 files dated "Aug 11 1983".  Next, I used the PCjs
+[DiskDump](/modules/diskdump/) utility to create a disk image from a directory ("archive/disk") containing
 those files:
  
 	diskdump --dir=archive/disk --format=json --output=ADVENTMATH100.json --manifest
 
-The resulting 160Kb disk image contains:
+Here's a directory listing of the resulting 160Kb disk image:
 
 	 Volume in drive A is PCJS    ORG
 	 Directory of  A:\
@@ -168,10 +164,10 @@ The resulting 160Kb disk image contains:
 	SN                 13   8-11-83  12:00p
 	        8 File(s)    108544 bytes free
 
-And this disk has now been added to the PCjs [IBM PC Disk Library](/disks/pcx86/) as "Adventures in Math (1983)".
+This disk has now been added to the PCjs [IBM PC Disk Library](/disks/pcx86/) as "Adventures in Math (1983)".
 
-I originally selected an [IBM PC (Model 5150, 64Kb) with Color Display](/devices/pcx86/machine/5150/cga/64kb/),
-which boots PC-DOS 2.00 by default.  However, in the course of starting the game, it would crash:
+To run the game, I originally selected an [IBM PC (Model 5150, 64Kb) with Color Display](/devices/pcx86/machine/5150/cga/64kb/),
+which boots PC-DOS 2.00 by default.  However, in the course of starting the game, it crashed:
 
 ![ADVENTMATH-CRASH](ADVENTMATH-CRASH.png)
 
@@ -183,9 +179,28 @@ It appeared to run fine with 256Kb of RAM, but these were IBM's "System Requirem
 
 > One diskette drive
 
-so I reconfigured the machine to boot PC-DOS 1.00, which required less RAM than PC-DOS 2.00, and that appeared to be
-sufficient.  Note that the game was released in October 1983, well after the March 1983 release of PC-DOS 2.00, so
-either it wasn't tested with PC-DOS 2.00 on a 64Kb machine, or the error is a PCjs anomaly. 
+so I reconfigured the machine to boot PC-DOS 1.00, which requires less RAM than PC-DOS 2.00, and that worked.
+Note that the game was released in October 1983, well after the March 1983 release of PC-DOS 2.00, so it should
+have been tested with PC-DOS 2.00 on a 64Kb machine, but perhaps it wasn't.
+
+The machine on this page is configured with the following "autoType" sequence:
+ 
+	autoType: 8-10-81\\rb:\\ra:basica castle\\r
+
+which translates to:
+
+	8-10-81             [enter an arbitrary date]
+	b:                  [switch to drive B:]
+	a:basica castle     [run BASICA on drive A: and load CASTLE.BAS on drive B:]
+
+This is one of the preferred methods of demonstrating software in PCjs: loading unmodified disk images into machines
+that match the software's system requirements as closely as possible, powering the machine, and then automatically
+executing a series of commands that an owner of that hardware and software combination would have likely executed.
+
+The other preferred method is to use a machine state file, which restores the machine to a state where the software is
+already running.  This is the fastest approach, and it is useful when the software has an involved installation
+process, but it takes more effort to set up.  The [VisiCalc (1981)](/apps/pcx86/1981/visicalc/) demo operates this way,
+but it does so purely for convenience (and because it predates the "autoType" feature).
 
 References
 ----------

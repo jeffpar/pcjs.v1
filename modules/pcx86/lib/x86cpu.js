@@ -1461,7 +1461,7 @@ class X86CPU extends CPU {
     /**
      * addIntNotify(nInt, fn)
      *
-     * Add an software interrupt notification handler to the CPU's list of such handlers.
+     * Add a software interrupt notification handler to the CPU's list of such handlers.
      *
      * TODO: Consider adding removeIntNotify().  Example use case: if the Debugger's intWindowsDebugger() function
      * detects that an INT 0x41 client is loaded, it would be quite happy to uninstall itself.

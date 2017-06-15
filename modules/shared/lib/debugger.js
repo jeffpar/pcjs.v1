@@ -905,8 +905,8 @@ class Debugger extends Component
              * And to avoid conflicts with MACRO-10 syntax, I've replaced the original mod operator ('%') with '^/'.
              *
              * The MACRO-10 binary shifting suffix ('B') is a bit more problematic, since a capital B can also appear
-             * inside symbols.  So I pre-scan for that suffix and replace all non-symbolic occurrences with an internal
-             * shift operator ('^_').
+             * inside symbols, or inside hex values.  So if the default base is NOT 16, then I pre-scan for that suffix
+             * and replace all non-symbolic occurrences with an internal shift operator ('^_').
              *
              * Note that Str.parseInt(), which parseValue() relies on, supports both the MACRO-10 base prefix overrides
              * and the binary shifting suffix ('B'), but since that suffix can also be a bracketed expression, we have to
@@ -923,7 +923,9 @@ class Debugger extends Component
              * that to generate an error; if we converted it to "AB", evaluation might inadvertently succeed.
              */
             var regExp = /({|}|\|\||&&|\||\^!|\^B|\^O|\^D|\^L|\^-|~|\^_|_|&|!=|!|==|>=|>>>|>>|>|<=|<<|<|-|\+|\^\/|\/|\*|,,| )/;
-            sExp = sExp.replace(/(^|[^A-Z0-9$%.])([0-9]+)B/, "$1$2^_").replace(/\s+/g, ' ');
+            if (this.nBase != 16) {
+                sExp = sExp.replace(/(^|[^A-Z0-9$%.])([0-9]+)B/, "$1$2^_").replace(/\s+/g, ' ');
+            }
             var asValues = sExp.split(regExp);
             value = this.parseArray(asValues, 0, asValues.length, this.nBase, aUndefined);
             if (value !== undefined && fPrint) {
