@@ -455,7 +455,12 @@ MarkOut.prototype.convertMD = function(sIndent)
                         if (sName == 'automount') sName = 'autoMount';  // for backward compatibility
                         if (sName == 'autotype') {
                             sName = 'autoType';
-                            sValue = sValue.replace(/\\/g, "&#92;");
+                            /*
+                             * To maintain parity with Jekyll, autoType sequences must continue to use double backslashes,
+                             * so my attempt to automatically "double" any backslashes in autoType sequences was for naught.
+                             *
+                             *      sValue = sValue.replace(/\\/g, "&#92;");
+                             */
                         }
                         if (!id && sName == 'id') {
                             id = sValue;
