@@ -24,7 +24,7 @@ The only copy of RatBas we've been able to locate is version 2.13 from a
 shareware CD-ROM titled "[PC-SIG Library Eighth Edition From PC-SIG (April 1990)](http://cd.textfiles.com/pcsig08/)"
 on [DISK0003](http://cd.textfiles.com/pcsig08/001_100/DISK0003/).
 
-We have archived it as [RatBas 2.13](#directory-listing-of-ratbas-213).  It has been loaded in drive B: in
+We have archived it as [RatBas 2.13](#directory-listing-of-ratbas-213).  It has been loaded into drive B: in
 the machine below.
 
 {% include machine.html id="ibm5150" %}
