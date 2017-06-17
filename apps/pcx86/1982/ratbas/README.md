@@ -11,6 +11,7 @@ machines:
         path: /disks/pcx86/dos/ibm/1.10/PCDOS110.json
       B:
         path: /apps/pcx86/1982/ratbas/RATBAS213.json
+    autoType: \r\rb:\rrt\r\xff\xf0test;\r
 ---
 
 RatBas (1982)
