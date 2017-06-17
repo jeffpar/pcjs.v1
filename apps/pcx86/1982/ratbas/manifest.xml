@@ -10,7 +10,7 @@
 	<publisher>Wells Fargo Investment Advisors</publisher>
 	<releaseDate>1982</releaseDate>
 	<machine href="/devices/pcx86/machine/5150/cga/256kb/machine.xml" state=""/>
-	<disk id="disk01" chs="40:1:8" dir="archive/ratbas213" href="/apps/pcx86/1982/ratbas/RATBAS213.json" md5="6652781f426964186ddb580dcd97a99a" md5json="e5106a311963fb7eefa8eefd401ce28c">
+	<disk id="disk01" chs="40:1:8" dir="archive/ratbas.213" href="/apps/pcx86/1982/ratbas/RATBAS213.json" md5="e7d98dd3d0de9121fbb56fb2af72d1c7" md5json="7bcaa7519192850f3186335860b41e81">
 		<name>RatBas 2.13</name>
 		<file size="980" time="1984-11-08 23:29:03" attr="0x20" md5="3b52aae896f7f61d6d13634783009a6f">CRC.TXT</file>
 		<file size="1536" time="1982-10-21 12:54:21" attr="0x20" md5="2860a82e8371c406bf3e17020f5baa8e">CRCK4.COM</file>

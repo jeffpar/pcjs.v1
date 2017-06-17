@@ -18,33 +18,36 @@ RatBas (1982)
 
 The RatBas Translator was a preprocessing utility created in 1982 by William F. Sharpe and Brent D. Weaver that
 could translate a structured dialect of BASIC into code compatible with IBM BASIC.  It was described extensively
-in a [PC Magazine (October 1982)](#article-from-pc-magazine-october-1982) article.
+in a [PC Magazine (October 1982)](#article-from-pc-magazine-october-1982) article.  NOTE: The article refers to
+the program as "RatBAS", but we use the distribution name "RatBas".
 
 The only copy of RatBas we've been able to locate is version 2.13 from a
 shareware CD-ROM titled "[PC-SIG Library Eighth Edition From PC-SIG (April 1990)](http://cd.textfiles.com/pcsig08/)"
 on [DISK0003](http://cd.textfiles.com/pcsig08/001_100/DISK0003/).
 
 We have archived it as [RatBas 2.13](#directory-listing-of-ratbas-213).  It has been loaded into drive B: in
-the machine below.
+the machine below, which is running [PC-DOS 1.10](/disks/pcx86/dos/ibm/1.10/), the most recent version of PC-DOS
+at the time of this RatBas release.
 
 {% include machine.html id="ibm5150" %}
 
 Directory Listing of RatBas 2.13
 --------------------------------
 
-	 Volume in drive A is RATBAS21   
-	 Directory of  A:\
+	 Volume in drive B is RATBAS  213
+	 Directory of B:\
 
-	CRC      TXT      980  11-08-84  11:29p
-	CRCK4    COM     1536  10-21-82  12:54p
-	RATBAS   TXT    30080   8-13-82   5:00p
-	RATBAS   UM      9856   8-09-82   5:00p
-	RT       EXE    35456  11-05-82   1:48a
-	RT       UM      3328  10-29-82   4:32a
-	SORT     INC      896  10-29-82   4:42a
-	TEST     BAS     5632  11-04-82   4:21p
-	TEST     RAT     2304  11-01-82   1:30a
-	        9 File(s)     68608 bytes free
+	CRC      TXT       980 11-08-84  11:29p
+	CRCK4    COM      1536 10-21-82  12:54p
+	RATBAS   TXT     30080 08-13-82   5:00p
+	RATBAS   UM       9856 08-09-82   5:00p
+	RT       EXE     35456 11-05-82   1:48a
+	RT       UM       3328 10-29-82   4:32a
+	SORT     INC       896 10-29-82   4:42a
+	TEST     BAS      5632 11-04-82   4:21p
+	TEST     RAT      2304 11-01-82   1:30a
+	        9 file(s)      90068 bytes
+	                       68608 bytes free
 
 Here's the output of CRCK4:
 
@@ -292,8 +295,8 @@ To solve this problem RatBAS includes an alternative IF structure.  The syntax i
 	            .
 	IFEND]
 
-The <condition> may be any expression that will evaluate to true or false; <statement> may be any legal BASIC
-(or RatBAS) statement.
+The &lt;condition&gt; may be any expression that will evaluate to true or false; &lt;statement&gt; may be any legal
+BASIC (or RatBAS) statement.
 
 Although not required, program readability is greatly enhanced if levels of logic are portrayed by indentation.
 
@@ -329,9 +332,9 @@ RatBAS provides an additional structure not present in BASIC.  Its syntax is:
 	               .
 	CEND]
 
-<lhs> may be anything that can be placed on the left side of the equality in an IF statement; <rhs> may be anything
-that can be placed on the right side of the equality.  Optionally, <rhs> may be composed of two or more such
-expressions, separated by commas.  If OTHERWISE) is omitted, an implicit OTHERWISE) with no statements is assumed.
+&lt;lhs&gt; may be anything that can be placed on the left side of the equality in an IF statement; &lt;rhs&gt; may be
+anything that can be placed on the right side of the equality.  Optionally, &lt;rhs&gt; may be composed of two or more
+such expressions, separated by commas.  If OTHERWISE) is omitted, an implicit OTHERWISE) with no statements is assumed.
 
 	CASE name$ OF]
 	   "Bill","BILL" :]
