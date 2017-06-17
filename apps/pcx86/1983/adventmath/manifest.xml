@@ -9,7 +9,7 @@
 	<publisher>IBM</publisher>
 	<releaseDate>1983</releaseDate>
 	<machine href="/devices/pcx86/machine/5150/cga/64kb/machine.xml" state=""/>
-	<disk id="disk01" chs="40:1:8" dir="archive/disk" href="/apps/pcx86/1983/adventmath/ADVENTMATH100.json" md5="034498ce8f504f33301d2e052f6aeb7e" md5json="9bf439a40013d38be5d88774854eed27">
+	<disk id="disk01" chs="40:1:8" dir="archive/adventmath" href="/apps/pcx86/1983/adventmath/ADVENTMATH100.json" md5="896676add6fedf5220f30084f40aebb1" md5json="3d69f485fcbfe0ac7f0af070c43f944f">
 		<name>Adventures in Math 1.00</name>
 		<file size="18688" time="1983-08-11 12:00:12" attr="0x20" md5="79d17f58ca8232b7173b80dd05b13b70">ADVENTUR.BAS</file>
 		<file size="11904" time="1983-08-11 12:00:14" attr="0x20" md5="fb1ec8042448618b7bdf3ce996b1daa8">CASTLE.BAS</file>
