@@ -252,6 +252,7 @@ class Keyboard extends Component {
                         return function onKeyboardBindingClick(event) {
                             if (!COMPILED && kbd.messageEnabled()) kbd.printMessage(sKey + " clicked", Messages.KEYS);
                             if (kbd.cmp) kbd.cmp.updateFocus();
+                            this.sInjectBuffer = "";                // actual key events should stop any injection currently in progress
                             kbd.updateShiftState(simCode, true);    // future-proofing if/when any LOCK keys are added to CLICKCODES
                             kbd.addActiveKey(simCode, true);
                         };
@@ -263,6 +264,7 @@ class Keyboard extends Component {
                     this.bindings[id] = control;
                     var fnDown = function(kbd, sKey, simCode) {
                         return function onKeyboardBindingDown(event) {
+                            this.sInjectBuffer = "";                // actual key events should stop any injection currently in progress
                             kbd.addActiveKey(simCode);
                         };
                     }(this, sBinding, Keyboard.SOFTCODES[sBinding]);
@@ -905,29 +907,21 @@ class Keyboard extends Component {
         while (this.sInjectBuffer.length > 0 && !charCode) {
             var ch = this.sInjectBuffer.charAt(0);
             this.sInjectBuffer = this.sInjectBuffer.substr(1);
-            if (ch != '\\') {
-                charCode = ch.charCodeAt(0);
-            } else {
-                ch = this.sInjectBuffer.charAt(0);
-                this.sInjectBuffer = this.sInjectBuffer.substr(1);
-                switch (ch) {
-                case 'n':
-                    charCode = 0x0A;
-                    break;
-                case 'r':
-                    charCode = 0x0D;
-                    break;
-                case 't':
-                    charCode = 0x09;
-                    break;
-                default:
-                    if (ch >= '1' && ch <= '9') {
-                        msDelay = ch.charCodeAt(0) * 100;
-                        break;
-                    }
-                    charCode = ch.charCodeAt(0);
-                    break;
-                }
+            charCode = ch.charCodeAt(0);
+            /*
+             * charCodes 0xF1-0xFF establish a new delay of 100-1500ms between keys; 0xF0 reverts to
+             * the default delay.  For example:
+             *
+             *      \r\rb:\rrt\r\xff\xf0test;\r
+             *
+             * performs two return key presses, then "b:" followed by return, "rt" followed by return,
+             * then a delay of 1500ms, then a reversion to the default delay (normally 150ms), followed
+             * by "test;" and return.
+             */
+            if (charCode >= 0xF0) {
+                msDelay = ((charCode - 0xF0) * 100) || this.msInjectDelay;
+                charCode = 0;
+                break;
             }
         }
         if (charCode) {
@@ -1359,10 +1353,7 @@ class Keyboard extends Component {
 
         var keyCode = event.keyCode;
 
-        /*
-         * Let's stop any injection currently in progress...
-         */
-        this.sInjectBuffer = "";
+        this.sInjectBuffer = "";        // actual key events should stop any injection currently in progress
 
         /*
          * Although it would be nice to pay attention ONLY to these "up" and "down" events, and ignore "press"
@@ -1504,10 +1495,7 @@ class Keyboard extends Component {
         event = event || window.event;
         var keyCode = event.which || event.keyCode;
 
-        /*
-         * Let's stop any injection currently in progress...
-         */
-        this.sInjectBuffer = "";
+        this.sInjectBuffer = "";        // actual key events should stop any injection currently in progress
 
         if (this.fAllDown) {
             var simCode = this.checkActiveKey();

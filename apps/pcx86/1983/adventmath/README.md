@@ -151,18 +151,19 @@ those files:
 
 Here's a directory listing of the resulting 160Kb disk image:
 
-	 Volume in drive A is PCJS    ORG
+	 Volume in drive A is ADVEMATH100
 	 Directory of  A:\
 
-	ADVENTUR BAS    18688   8-11-83  12:00p
-	CASTLE   BAS    11904   8-11-83  12:00p
-	EXIT     BAS     6400   8-11-83  12:00p
-	HELP     BAS     4992   8-11-83  12:00p
-	MAZE1            1418   8-11-83  12:00p
-	MAZE2            2179   8-11-83  12:00p
-	MAZE3            3892   8-11-83  12:00p
-	SN                 13   8-11-83  12:00p
-	        8 File(s)    108544 bytes free
+	ADVENTUR BAS     18688 08-11-83  12:00p
+	CASTLE   BAS     11904 08-11-83  12:00p
+	EXIT     BAS      6400 08-11-83  12:00p
+	HELP     BAS      4992 08-11-83  12:00p
+	MAZE1             1418 08-11-83  12:00p
+	MAZE2             2179 08-11-83  12:00p
+	MAZE3             3892 08-11-83  12:00p
+	SN                  13 08-11-83  12:00p
+	        8 file(s)      49486 bytes
+	                      108544 bytes free
 
 This disk has now been added to the PCjs [IBM PC Disk Library](/disks/pcx86/) as "Adventures in Math (1983)".
 

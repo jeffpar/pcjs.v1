@@ -407,7 +407,7 @@ DiskDump.sUsage = "Usage: " + DiskDump.sAPIURL + "?" + DumpAPI.QUERY.PATH + "={u
  * PCJS_LABEL is our default label, used whenever a more suitable label (eg, the disk image's folder name)
  * is not available or not supplied, and PCJS_OEM is inserted into any DiskDump-generated diskette images.
  */
-DiskDump.PCJS_LABEL = "PCJS.ORG";
+DiskDump.PCJS_LABEL = "PCJS";
 DiskDump.PCJS_OEM   = "PCJS.ORG";
 
 /**
@@ -1688,10 +1688,10 @@ DiskDump.prototype.readDir = function(sDir, fRoot, done)
                             if (obj.isTextFile(fileInfo.FILE_NAME)) {
                                 fs.readFile(fileInfo.FILE_PATH, {encoding: "utf8"}, function doneReadDirEntry(err, sData) {
                                     if (!err) {
-                                        sData = sData.replace(/\n/g, "\r\n").replace(/\r+/g, "\r");
-                                        console.log("warning: replaced line endings in " + fileInfo.FILE_NAME + " (size changed from " + fileInfo.FILE_SIZE + " to " + sData.length + " bytes)");
-                                        fileInfo.FILE_DATA = sData;
-                                        fileInfo.FILE_SIZE = sData.length;
+                                        var sNew = sData.replace(/\n/g, "\r\n").replace(/\r+/g, "\r");
+                                        if (sNew != sData) console.log("warning: replaced line endings in " + fileInfo.FILE_NAME + " (size changed from " + fileInfo.FILE_SIZE + " to " + sNew.length + " bytes)");
+                                        fileInfo.FILE_DATA = sNew;
+                                        fileInfo.FILE_SIZE = sNew.length;
                                     } else {
                                         if (!errSave) errSave = err;
                                     }
@@ -1819,10 +1819,10 @@ DiskDump.prototype.readPath = function(sPath, done)
                         if (obj.isTextFile(fileInfo.FILE_NAME)) {
                             DiskDump.readFile(sFilePath, "utf8", function doneReadPathEntry(err, sData) {
                                 if (!err) {
-                                    sData = sData.replace(/\n/g, "\r\n").replace(/\r+/g, "\r");
-                                    console.log("warning: replaced line endings in " + fileInfo.FILE_NAME + " (size changed from " + fileInfo.FILE_SIZE + " to " + sData.length + " bytes)");
-                                    fileInfo.FILE_DATA = sData;
-                                    fileInfo.FILE_SIZE = sData.length;
+                                    var sNew = sData.replace(/\n/g, "\r\n").replace(/\r+/g, "\r");
+                                    if (sNew != sData) console.log("warning: replaced line endings in " + fileInfo.FILE_NAME + " (size changed from " + fileInfo.FILE_SIZE + " to " + sNew.length + " bytes)");
+                                    fileInfo.FILE_DATA = sNew;
+                                    fileInfo.FILE_SIZE = sNew.length;
                                     // obj.addManifestInfo(fileInfo);
                                 } else {
                                     if (!errSave) errSave = err;
@@ -1892,6 +1892,10 @@ DiskDump.prototype.buildVolLabel = function(sDir)
     var fileInfo = null;
     if (sDir) {
         sVolume = path.basename(sDir);
+        /*
+         * UPDATE: This all seems overly restrictive.  I don't even remember what I was thinking
+         * here anymore.  Let's just build a frickin' label.
+         *
         if (sVolume == sVolume.toUpperCase()) {
             var i = sVolume.indexOf('-');
             if (i > 0) {
@@ -1902,11 +1906,17 @@ DiskDump.prototype.buildVolLabel = function(sDir)
                     sVolume = sVolume.substr(i+1);
             }
         }
+        */
     }
     if (!sVolume || sVolume.toLowerCase() == "archive" || sVolume.toLowerCase() == "disk") {
+        /*
+         * UPDATE: If I was lazy and just dumped all the files for this disk image into a folder
+         * generically named either "archive" or "disk", then let's give it more meaningful name for
+         * the outside world (ie, the name of this project).
+         */
         sVolume = DiskDump.PCJS_LABEL;
     }
-    if (sVolume && sVolume.length <= 11) {
+    if (sVolume) {
         fileInfo = {};
         fileInfo.FILE_NAME = this.buildName(sVolume);
         fileInfo.FILE_ATTR = DiskDump.ATTR_VOLUME;
@@ -1914,8 +1924,10 @@ DiskDump.prototype.buildVolLabel = function(sDir)
          * I used to initialize the volume label's date with a simple "new Date()", but because that results
          * in a different disk image every time we run DiskDump, I've opted for a hard-coded date/time (ie, the
          * day the IBM PC was introduced, August 12, 1981, with an arbitrary time of 12pm).
+         *
+         * UPDATE: I'm not sure I care about that anymore.  Time-stamping the created disk image seems more useful.
          */
-        fileInfo.FILE_TIME = fNormalize? new Date(1981, 7, 12, 12) : new Date();
+        fileInfo.FILE_TIME = /* fNormalize? new Date(1981, 7, 12, 12) : */ new Date();
         this.validateTime(fileInfo.FILE_TIME);
         fileInfo.FILE_SIZE = 0;
     }
