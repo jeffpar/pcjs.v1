@@ -1,13 +1,127 @@
 ---
 layout: page
-title: "RatBAS (1982)"
+title: "RatBas (1982)"
 permalink: /apps/pcx86/1982/ratbas/
+machines:
+  - type: pcx86
+    id: ibm5150
+    config: /devices/pcx86/machine/5150/cga/256kb/machine.xml
+    autoMount:
+      A:
+        path: /disks/pcx86/dos/ibm/1.10/PCDOS110.json
+      B:
+        path: /apps/pcx86/1982/ratbas/RATBAS213.json
 ---
 
-RatBAS (1982)
+RatBas (1982)
 -------------
 
-From **PC Magazine, Vol. 6 No. 1, p. 121**:
+The RatBas Translator was a preprocessing utility created in 1982 by William F. Sharpe and Brent D. Weaver that
+could translate a structured dialect of BASIC into code compatible with IBM BASIC.  It was described extensively
+in a [PC Magazine (October 1982)](#article-from-pc-magazine-october-1982) article.
+
+The only copy of RatBas we've been able to locate is version 2.13 from a
+shareware CD-ROM titled "[PC-SIG Library Eighth Edition From PC-SIG (April 1990)](http://cd.textfiles.com/pcsig08/)"
+on [DISK0003](http://cd.textfiles.com/pcsig08/001_100/DISK0003/).
+
+We have archived it as [RatBas 2.13](#directory-listing-of-ratbas-213).  It has been loaded in drive B: in
+the machine below.
+
+{% include machine.html id="ibm5150" %}
+
+Directory Listing of RatBas 2.13
+--------------------------------
+
+	 Volume in drive A is RATBAS21   
+	 Directory of  A:\
+
+	CRC      TXT      980  11-08-84  11:29p
+	CRCK4    COM     1536  10-21-82  12:54p
+	RATBAS   TXT    30080   8-13-82   5:00p
+	RATBAS   UM      9856   8-09-82   5:00p
+	RT       EXE    35456  11-05-82   1:48a
+	RT       UM      3328  10-29-82   4:32a
+	SORT     INC      896  10-29-82   4:42a
+	TEST     BAS     5632  11-04-82   4:21p
+	TEST     RAT     2304  11-01-82   1:30a
+	        9 File(s)     68608 bytes free
+
+Here's the output of CRCK4:
+
+	A>crck4 *.*
+
+	CRCK ver 4.2B (MS DOS VERSION )
+	CTL-S pauses, CTL-C aborts
+
+	--> FILE:  CRC     .TXT         CRC = 68 CF
+
+	--> FILE:  CRCK4   .COM         CRC = BD 22
+
+	--> FILE:  RATBAS  .TXT         CRC = 6A 87
+
+	--> FILE:  RATBAS  .UM          CRC = 17 C7
+
+	--> FILE:  RT      .EXE         CRC = BF 19
+
+	--> FILE:  RT      .UM          CRC = 93 83
+
+	--> FILE:  SORT    .INC         CRC = 9B 87
+
+	--> FILE:  TEST    .BAS         CRC = 53 49
+
+	--> FILE:  TEST    .RAT         CRC = 8E F9
+
+	 ---------------------> SUM OF CRCS = 78 A4
+
+	DONE
+
+The checksums match those in CRC.TXT, with the exception of the checksum for CRC.TXT itself:
+
+	PC-SIG Disk No. #3, version v1 
+	
+	The following is a list of the file checksums which should be produced by
+	the CRCK4 program on disk #9 (and others).  If the CRC numbers do not match
+	you may have a bad file.  To use type:  CRCK4 <filespec>
+	
+	CRCK4 output for this disk:
+	
+	
+	CRCK ver 4.2B (MS DOS VERSION )
+	CTL-S pauses, CTL-C aborts
+	
+	--> FILE:  RT      .EXE         CRC = BF 19
+	
+	--> FILE:  RT      .UM          CRC = 93 83
+	
+	--> FILE:  RATBAS  .UM          CRC = 17 C7
+	
+	--> FILE:  TEST    .RAT         CRC = 8E F9
+	
+	--> FILE:  SORT    .INC         CRC = 9B 87
+	
+	--> FILE:  TEST    .BAS         CRC = 53 49
+	
+	--> FILE:  RATBAS  .TXT         CRC = 6A 87
+	
+	--> FILE:  CRC     .TXT         CRC = AD 7E
+	
+	--> FILE:  CRCK4   .COM         CRC = BD 22
+	
+	 ---------------------> SUM OF CRCS = BD 53
+	
+	DONE
+	
+	These and other Public Domain and user-supported programs from:
+	
+	PC Software Interest Group
+	1125 Stewart Ct  Suite G
+	Sunnyvale, CA 94086
+	(408) 730-9291
+
+Article from PC Magazine (October 1982)
+---------------------------------------
+
+[Transcribed from the digital copy of PC Magazine archived at [books.google.com](https://books.google.com/books?id=WYnHD9WSWdAC&pg=RA2-PA121#v=onepage&q&f=false)]
 
 ### RatBAS BASICS
 
@@ -44,7 +158,7 @@ The dilemma facing the programmer is: select BASIC, with its many advantages but
 of the more modern languages.  The latter choice forfeits the opportunity to debug programs in a fully interpretive
 mode.
 
-Another alternative, however, is one that makes It possible to obtain the advantages of interpretive execution of BASIC
+Another alternative, however, is one that makes it possible to obtain the advantages of interpretive execution of BASIC
 and also write programs with good structure and at least some modularity.  The needed ingredient is a preprocessor.
 A preprocessor translates programs written in a modified language to equivalent programs written in the target language.
 The target language is MicroSoft BASIC, as implemented on the IBM Personal Computer.  The modified language is called

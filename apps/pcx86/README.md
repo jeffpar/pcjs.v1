@@ -11,6 +11,7 @@ Below are selected [PCx86](/docs/about/pcx86/) demos of classic IBM PC applicati
 
 * [VisiCalc (1981)](1981/visicalc/)
 * [Executive Suite (1982)](1982/esuite/)
+* [RatBas (1982)](1982/ratbas/)
 * [Adventures in Math (1983)](1983/adventmath/)
 * [Rogue (1985)](1985/rogue/)
 * [ThinkTank (1987)](1987/thinktank/)

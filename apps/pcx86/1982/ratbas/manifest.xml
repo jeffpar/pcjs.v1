@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.35.0/manifest.xsl"?>
+<manifest type="software">
+	<title>RatBas</title>
+	<version>2.13</version>
+	<type>Utility</type>
+	<category>Development</category>
+	<author>William F. Sharpe</author>
+	<author>Brent D. Weaver</author>
+	<publisher>Wells Fargo Investment Advisors</publisher>
+	<releaseDate>1982</releaseDate>
+	<machine href="/devices/pcx86/machine/5150/cga/256kb/machine.xml" state=""/>
+	<disk id="disk01" chs="40:1:8" dir="archive/ratbas213" href="/apps/pcx86/1982/ratbas/RATBAS213.json" md5="6652781f426964186ddb580dcd97a99a" md5json="e5106a311963fb7eefa8eefd401ce28c">
+		<name>RatBas 2.13</name>
+		<file size="980" time="1984-11-08 23:29:03" attr="0x20" md5="3b52aae896f7f61d6d13634783009a6f">CRC.TXT</file>
+		<file size="1536" time="1982-10-21 12:54:21" attr="0x20" md5="2860a82e8371c406bf3e17020f5baa8e">CRCK4.COM</file>
+		<file size="30080" time="1982-08-13 17:00:00" attr="0x20" md5="c6afd81bf92e5bae09c15a3529a6e434">RATBAS.TXT</file>
+		<file size="9856" time="1982-08-09 17:00:00" attr="0x20" md5="6730d6dffdb773611233d12461d9ae7e">RATBAS.UM</file>
+		<file size="35456" time="1982-11-05 01:48:26" attr="0x20" md5="27b0af12945aa2da5463c318d556a802">RT.EXE</file>
+		<file size="3328" time="1982-10-29 04:32:22" attr="0x20" md5="1ac5af2f30ff37c1d80ff6d20662f320">RT.UM</file>
+		<file size="896" time="1982-10-29 04:42:22" attr="0x20" md5="0db194b831c81fb56cdd03eb6f18c59e">SORT.INC</file>
+		<file size="5632" time="1982-11-04 16:21:05" attr="0x20" md5="0d22f6a4f7f10f3315f96abe017f9555">TEST.BAS</file>
+		<file size="2304" time="1982-11-01 01:30:22" attr="0x20" md5="97b079272b386e824186d44029d1c7e4">TEST.RAT</file>
+	</disk>
+</manifest>
