@@ -11,6 +11,8 @@ machines:
     autoMount:
       A:
         name: None
+      B:
+        name: None
 ---
 
 Microsoft Windows 95 (First Retail Release)

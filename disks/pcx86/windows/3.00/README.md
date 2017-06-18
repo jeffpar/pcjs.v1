@@ -10,6 +10,8 @@ machines:
     autoMount:
       A:
         name: None
+      B:
+        name: None
 ---
 
 Microsoft Windows 3.00

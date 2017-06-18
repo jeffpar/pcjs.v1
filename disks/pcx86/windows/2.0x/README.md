@@ -11,6 +11,8 @@ machines:
     autoMount:
       A:
         name: None
+      B:
+        name: None
 ---
 
 Microsoft Windows/386 2.0 existed as the following "point releases":
