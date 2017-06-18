@@ -9,7 +9,11 @@ machines:
     state: /disks/pcx86/windows/win95/4.00.950/deskpro386.json
     config: /devices/pcx86/machine/compaq/deskpro386/vga/4096kb/debugger/machine.xml
     drives: '[{name:"68Mb Hard Disk",type:4,path:"http://archive.pcjs.org/disks/pcx86/fixed/68mb/win95.json"}]'
-    autoMount: ''
+    autoMount:
+      A:
+        name: None
+      B:
+        name: None
 ---
 
 Microsoft Windows 95 (First Retail Release) with Debugger

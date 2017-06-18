@@ -8,7 +8,11 @@ machines:
     state: deskpro386.json
     config: /devices/pcx86/machine/compaq/deskpro386/vga/2048kb/machine.xml
     drives: '[{name:"20Mb Hard Disk",type:2,path:"http://archive.pcjs.org/disks/pcx86/fixed/20mb/COMPAQ310-WIN386201-VGA.json"}]'
-    autoMount: ''
+    autoMount:
+      A:
+        name: None
+      B:
+        name: None
 ---
 
 Microsoft Windows/386 2.0 existed as the following "point releases":
