@@ -465,10 +465,8 @@ class FDC extends Component {
         } else {
             config = {};
         }
-        if (configMerge) {
-            for (var drive in config) {
-                configMerge[drive] = config[drive];
-            }
+        for (var sDrive in config) {
+            if (configMerge) configMerge[sDrive] = config[sDrive];
         }
         return config;
     }
@@ -1087,21 +1085,21 @@ class FDC extends Component {
         for (var sDrive in this.configMount) {
             var configDrive = this.configMount[sDrive];
             var sDiskettePath = configDrive['path'] || "";
-            var sDisketteName = configDrive['name'] || this.findDiskette(sDiskettePath);
-            if (sDiskettePath && sDisketteName) {
+            if (sDiskettePath) {
                 /*
                  * WARNING: This conversion of drive letter to drive number, starting with A:, is very simplistic
                  * and is not guaranteed to match the drive mapping that DOS ultimately uses.
                  */
                 var iDrive = sDrive.charCodeAt(0) - 0x41;
                 if (iDrive >= 0 && iDrive < this.aDrives.length) {
+                    var sDisketteName = configDrive['name'] || this.findDiskette(sDiskettePath) || "Unknown";
                     if (!this.loadDrive(iDrive, sDisketteName, sDiskettePath, true) && fRemount) {
                         this.setReady(false);
                     }
                     continue;
                 }
+                this.notice("Incorrect auto-mount settings for drive " + sDrive + " (" + JSON.stringify(configDrive) + ")");
             }
-            this.notice("Incorrect auto-mount settings for drive " + sDrive + " (" + JSON.stringify(configDrive) + ")");
         }
         return !!this.cAutoMount;
     }

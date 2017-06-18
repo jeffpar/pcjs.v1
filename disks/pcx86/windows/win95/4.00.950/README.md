@@ -8,7 +8,9 @@ machines:
     state: deskpro386.json
     config: /devices/pcx86/machine/compaq/deskpro386/vga/4096kb/machine.xml
     drives: '[{name:"68Mb Hard Disk",type:4,path:"http://archive.pcjs.org/disks/pcx86/fixed/68mb/win95.json"}]'
-    autoMount: ''
+    autoMount:
+      A:
+        name: None
 ---
 
 Microsoft Windows 95 (First Retail Release)
