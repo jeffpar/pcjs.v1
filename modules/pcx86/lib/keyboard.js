@@ -252,7 +252,7 @@ class Keyboard extends Component {
                         return function onKeyboardBindingClick(event) {
                             if (!COMPILED && kbd.messageEnabled()) kbd.printMessage(sKey + " clicked", Messages.KEYS);
                             if (kbd.cmp) kbd.cmp.updateFocus();
-                            this.sInjectBuffer = "";                // actual key events should stop any injection currently in progress
+                            kbd.sInjectBuffer = "";                 // actual key events should stop any injection currently in progress
                             kbd.updateShiftState(simCode, true);    // future-proofing if/when any LOCK keys are added to CLICKCODES
                             kbd.addActiveKey(simCode, true);
                         };
@@ -264,7 +264,7 @@ class Keyboard extends Component {
                     this.bindings[id] = control;
                     var fnDown = function(kbd, sKey, simCode) {
                         return function onKeyboardBindingDown(event) {
-                            this.sInjectBuffer = "";                // actual key events should stop any injection currently in progress
+                            kbd.sInjectBuffer = "";                 // actual key events should stop any injection currently in progress
                             kbd.addActiveKey(simCode);
                         };
                     }(this, sBinding, Keyboard.SOFTCODES[sBinding]);
