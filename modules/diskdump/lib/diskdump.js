@@ -74,10 +74,10 @@ var logFile = null;
 
 /*
  * fNormalize attempts to enforce consistency across multiple dump requests, including the order of files within every
- * directory, the use of hard-coded volume label timestamps, etc.  And since I assume that normalization is a wonderful
- * thing, I don't provide any UI for turning it off.
+ * directory, the use of hard-coded volume label timestamps, replacement of line-endings in text files, etc.  And since
+ * I assume that normalization is a wonderful thing, I don't provide any UI for turning it off.
  */
-var fNormalize = true;
+var fNormalize = false;
 
 /**
  * BufferPF(init, start, end)
@@ -1577,8 +1577,10 @@ DiskDump.prototype.addManifestInfo = function(fileInfo)
  */
 DiskDump.prototype.isTextFile = function(sFileName)
 {
-    for (var i = 0; i < DiskDump.asTextFileExts.length; i++) {
-        if (str.endsWith(sFileName, DiskDump.asTextFileExts[i])) return true;
+    if (fNormalize) {
+        for (var i = 0; i < DiskDump.asTextFileExts.length; i++) {
+            if (str.endsWith(sFileName, DiskDump.asTextFileExts[i])) return true;
+        }
     }
     return false;
 };
@@ -1633,7 +1635,7 @@ DiskDump.prototype.readDir = function(sDir, fRoot, done)
          * file name order that I was originally seeing may have simply been due to out-of-order fs.stat()
          * calls, because I used to call addManifestInfo() in the callback.
          */
-        // if (fNormalize) asFiles.sort();
+        if (fNormalize) asFiles.sort();
 
         for (iFile = 0; iFile < asFiles.length; iFile++) {
             var sFileName = asFiles[iFile];
@@ -1927,7 +1929,7 @@ DiskDump.prototype.buildVolLabel = function(sDir)
          *
          * UPDATE: I'm not sure I care about that anymore.  Time-stamping the created disk image seems more useful.
          */
-        fileInfo.FILE_TIME = /* fNormalize? new Date(1981, 7, 12, 12) : */ new Date();
+        fileInfo.FILE_TIME = fNormalize? new Date(1981, 7, 12, 12) : new Date();
         this.validateTime(fileInfo.FILE_TIME);
         fileInfo.FILE_SIZE = 0;
     }
@@ -2247,31 +2249,27 @@ DiskDump.prototype.buildImage = function(fDir, done)
 };
 
 /**
- * calcFileSizes(aFiles)
- *
- * WARNING: Our "total data" calculation should be rounding up to the next cluster,
- * not the next sector, because data on the disk is cluster-granular, not sector-granular.
- * But we have a chicken-and-egg problem: we won't know the cluster size until we've
- * calculated total data and found a BPB we think will accommodate it.  So, the code below
- * will still have to be prepared for running out of disk space.  This is just a good estimate.
+ * calcFileSizes(aFiles, cSectorsPerCluster)
  *
  * @this {DiskDump}
  * @param {Array} aFiles
+ * @param {number} [cSectorsPerCluster] (default is 1)
  * @return {number} of bytes required for all files, including all subdirectories
  */
-DiskDump.prototype.calcFileSizes = function(aFiles)
+DiskDump.prototype.calcFileSizes = function(aFiles, cSectorsPerCluster)
 {
     var cbTotal = 0;
+    var cbCluster = (cSectorsPerCluster || 1) * 512;
     for (var iFile = 0; iFile < aFiles.length; iFile++) {
         var cb = aFiles[iFile].FILE_SIZE;
         var cbSubTotal = 0;
         if (cb < 0) {
             cb = (aFiles[iFile].FILE_DATA.length + 2) * 32;
-            cbSubTotal = this.calcFileSizes(aFiles[iFile].FILE_DATA);
+            cbSubTotal = this.calcFileSizes(aFiles[iFile].FILE_DATA, cSectorsPerCluster);
         }
         cbTotal += cb;
-        if ((cb %= 512)) {
-            cbTotal += 512 - cb;        // WARNING: rounding to next sector may not be enough (see above)
+        if ((cb %= cbCluster)) {
+            cbTotal += cbCluster - cb;
         }
         cbTotal += cbSubTotal;
     }
@@ -2370,6 +2368,12 @@ DiskDump.prototype.buildImageFromFiles = function(aFiles, done)
      */
     var cbMax = (this.kbTarget || 1440) * 1024;
     var nTargetSectors = (this.kbTarget? this.kbTarget * 2 : 0);
+
+    /*
+     * This initializes cbTotal assuming a "best case scenario" (ie, one sector per cluster); as soon as
+     * we find a BPB that will support that size, we recalculate cbTotal using that BPB's cluster size, and
+     * then we re-verify that that BPB will work.  If not, then we keep looking.
+     */
     var cbTotal = this.calcFileSizes(aFiles);
 
     if (fDebug) DiskDump.logConsole("total calculated size for " + aFiles.length + " files/folders: " + cbTotal + " bytes (" + str.toHex(cbTotal, 0, true) + ")");
@@ -2397,7 +2401,7 @@ DiskDump.prototype.buildImageFromFiles = function(aFiles, done)
      *
      * UPDATE: I've undone the above change, because when creating a disk image for an old application like:
      *
-     *      /apps/pcx86/1983/adventmath ["Adventures in Math" (1983)]
+     *      /apps/pcx86/1983/adventmath ["Adventures in Math (1983)"]
      *
      * it's important to create a disk image that will work with PC-DOS 1.0, which didn't understand 180Kb and 360Kb
      * disk images.
@@ -2423,7 +2427,17 @@ DiskDump.prototype.buildImageFromFiles = function(aFiles, done)
         cHeads = abBoot[0x1A] | (abBoot[0x1B] << 8);
         cDataSectors = cTotalSectors - cRootSectors - cFATs * cFATSectors + 1;
         cbAvail = cDataSectors * cbSector;
-        if (nTargetSectors && cTotalSectors == nTargetSectors || !nTargetSectors && cbTotal <= cbAvail) break;
+        if (!nTargetSectors) {
+            if (cbTotal <= cbAvail) {
+                var cb = this.calcFileSizes(aFiles, cSectorsPerCluster);
+                if (cb <= cbAvail) {
+                    cbTotal = cb;
+                    break;
+                }
+            }
+        } else {
+            if (cTotalSectors == nTargetSectors) break;
+        }
     }
 
     if (iBPB == DiskDump.aDefaultBPBs.length) {
