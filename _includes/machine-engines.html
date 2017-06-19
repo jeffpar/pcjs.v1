@@ -45,7 +45,12 @@ of our Markdown or XML documents.  Examples: 'automount' becomes 'autoMount', 'a
   {% else %}
     {% capture machine_app %}{{ machine_type }}{% endcapture %}
   {% endif %}
-  {% if machine.debugger %}
+  {% unless machine.config %}
+    {% assign machine_config = "machine.xml" %}
+  {% else %}
+    {% assign machine_config = machine.config %}
+  {% endunless %}
+  {% if machine.debugger or machine_config contains "debugger" %}
     {% capture machine_file %}{{ machine_type }}-dbg{% endcapture %}
     {% assign machine_debugger = true %}
   {% else %}
@@ -91,11 +96,6 @@ of our Markdown or XML documents.  Examples: 'automount' becomes 'autoMount', 'a
   {% else %}
     {% assign machine_autoType = "" %}
   {% endif %}
-  {% unless machine.config %}
-    {% assign machine_config = "machine.xml" %}
-  {% else %}
-    {% assign machine_config = machine.config %}
-  {% endunless %}
   {% if machine.drives != nil %}
     {% if machine.drives == "" %}
       {% assign machine_drives = ",drives:[]" %}
