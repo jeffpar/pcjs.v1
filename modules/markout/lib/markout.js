@@ -1198,10 +1198,11 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
         if (this.aMachineDefs[sMachineID]) {
             machine = this.aMachineDefs[sMachineID];
             sMachineType = machine['type'] || "PCx86";
+            sMachineXMLFile = machine['config'] || this.sMachineFile || "machine.xml";
+            if (sMachineXMLFile.indexOf("debugger") >= 0) machine['debugger'] = "true";
             sMachineOptions = ((sMachineType.indexOf("-dbg") > 0 || machine['debugger'] == "true")? "debugger" : "");
             if (machine['sticky']) sMachineOptions += (sMachineOptions? "," : "") + "sticky";
             sMachineType = sMachineType.replace("-dbg", "");
-            sMachineXMLFile = machine['config'] || this.sMachineFile || "machine.xml";
             sMachineXSLFile = machine['template'] || "";
             sMachineVersion = ((machine['uncompiled'] == "true")? "uncompiled" : "");
             sMachineParms = machine['parms'] || "";
