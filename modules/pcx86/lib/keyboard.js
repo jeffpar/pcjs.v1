@@ -736,30 +736,7 @@ class Keyboard extends Component {
                 break;
             }
         }
-
         this.initState();
-
-        /*
-         * The current (assumed) physical (and simulated) states of the various shift/lock keys.
-         *
-         * TODO: Determine how (or whether) we can query the browser's initial shift/lock key states.
-         */
-        this.bitsState = this.bitsStateSim = 0;
-
-        /*
-         * New scan codes are "pushed" onto abBuffer and then "shifted" off.
-         */
-        this.abBuffer = [];
-        this.fAdvance = true;
-
-        this.prevCharDown = 0;
-        this.prevKeyDown = 0;
-
-        /*
-         * Make sure the auto-injection buffer is empty (an injection could have been in progress on any reset after the first).
-         */
-        this.autoInject = null;
-        this.sInjectBuffer = "";
     }
 
     /**
@@ -801,10 +778,36 @@ class Keyboard extends Component {
     initState(data)
     {
         var i = 0;
-        if (data === undefined) data = [];
+        if (!data) {
+            data = [];
+            this.autoInject = null;
+        } else {
+            this.autoInject = this.autoType;
+        }
         this.fClock = this.fAdvance = data[i++];
         this.fData = data[i];
         this.bCmdPending = 0;       // when non-zero, a command is pending (eg, SET_LED or SET_RATE)
+
+        /*
+         * The current (assumed) physical (and simulated) states of the various shift/lock keys.
+         *
+         * TODO: Determine how (or whether) we can query the browser's initial shift/lock key states.
+         */
+        this.bitsState = this.bitsStateSim = 0;
+
+        /*
+         * New scan codes are "pushed" onto abBuffer and then "shifted" off.
+         */
+        this.abBuffer = [];
+        this.fAdvance = true;
+
+        this.prevCharDown = 0;
+        this.prevKeyDown = 0;
+
+        /*
+         * Make sure the auto-injection buffer is empty (an injection could have been in progress on any reset after the first).
+         */
+        this.sInjectBuffer = "";
         return true;
     }
 

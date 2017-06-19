@@ -144,10 +144,10 @@ and **TOPTEN**:
 	[z],55197,LARGE,07-23-81
 
 All those files were deleted as well, leaving 8 files dated "Aug 11 1983".  Next, I used the PCjs
-[DiskDump](/modules/diskdump/) utility to create a disk image from a directory ("archive/disk") containing
+[DiskDump](/modules/diskdump/) utility to create a disk image from a directory ("archive/advemath.100") containing
 those files:
  
-	diskdump --dir=archive/disk --format=json --output=ADVENTMATH100.json --manifest
+	diskdump --dir=archive/advemath.100 --format=json --output=ADVENTMATH100.json --manifest
 
 Here's a directory listing of the resulting 160Kb disk image:
 
