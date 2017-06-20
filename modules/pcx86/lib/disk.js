@@ -197,13 +197,17 @@ class Disk extends Component {
     {
         super("Disk", {'id': controller.idMachine + ".disk" + Str.toHex(++Disk.nDisks, 4)}, Messages.DISK);
 
+        this.controller = controller;
+
         /*
          * Route all non-Debugger messages (eg, notice() and println() calls) through
          * this.controller (eg, controller.notice() and controller.println()), because
          * the Computer component is unaware of any Disk objects and therefore will not
          * set up the usual overrides when a Control Panel is installed.
          */
-        this.controller = controller;
+        this.notice = controller.notice;
+        this.println = controller.println;
+
         this.cmp = controller.cmp;
         this.dbg = controller.dbg;
         this.drive = drive;
@@ -345,7 +349,7 @@ class Disk extends Component {
             }
             while ((response = this.findDirtySectors(false))) {
                 if ((nErrorCode = response[0])) {
-                    this.controller.notice('Unable to save "' + this.sDiskName + '" (error ' + nErrorCode + ')');
+                    this.notice('Unable to save "' + this.sDiskName + '" (error ' + nErrorCode + ')');
                     break;
                 }
             }
@@ -358,7 +362,7 @@ class Disk extends Component {
              * all diskettes to their original state) and discarding remote changes (which could leave the remote disk
              * in a bad state).
              */
-            if (!nErrorCode && fSave) this.controller.notice(this.sDiskName + " saved");
+            if (!nErrorCode && fSave) this.notice(this.sDiskName + " saved");
         }
         return true;
     }
@@ -527,7 +531,7 @@ class Disk extends Component {
                 }
             }
         }
-        return !!Web.getResource(sDiskURL, null, true, function(sURL, sResponse, nErrorCode) {
+        return !!Web.getResource(sDiskURL, null, true, function loadDone(sURL, sResponse, nErrorCode) {
             disk.doneLoad(sURL, sResponse, nErrorCode);
         });
     }
@@ -612,7 +616,7 @@ class Disk extends Component {
                 if (BACKTRACK || SYMBOLS) this.buildFileTable();
                 disk = this;
             } else {
-                this.controller.notice('Unable to connect to disk "' + this.sDiskPath + '" (error ' + nErrorCode + ': ' + sDiskData + ')', fPrintOnly);
+                this.notice('Unable to connect to disk "' + this.sDiskPath + '" (error ' + nErrorCode + ': ' + sDiskData + ')', fPrintOnly);
             }
         }
         else if (nErrorCode) {
@@ -623,7 +627,7 @@ class Disk extends Component {
              * that yet.  For now, we rely on the lack of a specific error (nErrorCode < 0), and suppress the
              * notify() alert if there's no specific error AND the computer is not powered up yet.
              */
-            this.controller.notice("Unable to load disk \"" + this.sDiskName + "\" (error " + nErrorCode + ": " + sURL + ")", fPrintOnly);
+            this.notice("Unable to load disk \"" + this.sDiskName + "\" (error " + nErrorCode + ": " + sURL + ")", fPrintOnly);
         } else {
             if (DEBUG && this.messageEnabled()) {
                 this.printMessage('doneLoad("' + this.sDiskPath + '")');
@@ -763,24 +767,30 @@ class Disk extends Component {
                                     var ab = sector['bytes'];
                                     if (ab === undefined || !ab.length) {
                                         /*
-                                         * It would be odd if there was neither a 'bytes' nor 'data' array; I'm just
-                                         * being paranoid.  It's more likely that the 'bytes' array is simply empty,
-                                         * in which case we need only create an empty 'data' array and turn the byte
-                                         * pattern, if any, into a dword pattern.
+                                         * If there is neither a 'bytes' nor 'data' array, then our job is simple:
+                                         * create an empty 'data' array; it will be filled in with the dword pattern
+                                         * as needed later.
+                                         *
+                                         * The only wrinkle is if there *is* a 'bytes' array but it's empty, in which
+                                         * case we must assume that the pattern was a byte pattern, so convert it to a
+                                         * dword pattern.
                                          */
-                                        adw = [];
-                                        this.assert((dwPattern & 0xff) == dwPattern);
-                                        dwPattern = sector['pattern'] = (dwPattern | (dwPattern << 8) | (dwPattern << 16) | (dwPattern << 24));
-                                        sector['data'] = adw;
-                                    } else {
+                                        sector['data'] = adw = [];
+                                        if (ab) {
+                                            this.assert((dwPattern & 0xff) == dwPattern);
+                                            sector['pattern'] = (dwPattern | (dwPattern << 8) | (dwPattern << 16) | (dwPattern << 24));
+                                        }
+                                    }
+                                    else {
                                         /*
                                          * To keep the conversion code simple, we'll do any necessary pattern-filling first,
                                          * to fully "inflate" the sector, eliminating the possibility of partial dwords and
                                          * saving any code downstream from dealing with byte-size patterns.
                                          */
                                         var cb = length << 2;
+                                        this.assert((dwPattern & 0xff) == dwPattern);
                                         for (var ib = ab.length; ib < cb; ib++) {
-                                            ab[ib] = dwPattern; // the pattern for byte-arrays was only a byte
+                                            ab[ib] = dwPattern;         // the pattern for byte-arrays was only a byte
                                         }
                                         this.fill(sector, ab, 0);
                                     }
@@ -2096,22 +2106,27 @@ class Disk extends Component {
                      */
                 }
                 /*
-                 * v1.01 failed to indicate an error if either one of these failure conditions occurred.  Although maybe that's
-                 * just as well, since v1.01 also failed to properly deal with situations where the user mounted different diskette(s)
-                 * prior to exiting (hopefully fixed in v1.02).
-                 */
-                else if (aDiskInfo[1] != null && this.dwChecksum != null && aDiskInfo[1] != this.dwChecksum) {
-                    sReason = "original checksum (" + aDiskInfo[1] + ") differs from current checksum (" + this.dwChecksum + ")";
-                    nChanges = -2;
-                }
-                /*
-                 * Checksum is more important than disk path, and for now, I want the flexibility to move disk images.
+                 * v1.01 failed to indicate an error if either one of these failure conditions occurred.  Although maybe
+                 * that's just as well, since v1.01 also failed to properly deal with situations where the user mounted
+                 * different diskette(s) prior to exiting (hopefully fixed in v1.02).
                  *
-                else if (aDiskInfo[0] != this.sDiskPath) {
-                    sReason = "original path '" + aDiskInfo[0] + "' differs from current path '" + this.sDiskPath + "'";
-                    nChanges = -1;
-                }
+                 * UPDATE: We also check aDiskInfo[0] first, because if it's null, then presumably there was no previous
+                 * disk, and I'd like the addition of a disk to a machine to not be fatal to the restoration process.
                  */
+                else if (aDiskInfo[0] != null) {
+                    if (aDiskInfo[1] != null && this.dwChecksum != null && aDiskInfo[1] != this.dwChecksum) {
+                        sReason = "original checksum (" + aDiskInfo[1] + ") differs from current checksum (" + this.dwChecksum + ")";
+                        nChanges = -2;
+                    }
+                    /*
+                     * Checksum is more important than disk path, and for now, I want the flexibility to move disk images.
+                     *
+                     *  else if (aDiskInfo[0] != this.sDiskPath) {
+                     *      sReason = "original path '" + aDiskInfo[0] + "' differs from current path '" + this.sDiskPath + "'";
+                     *      nChanges = -1;
+                     *  }
+                     */
+                }
             }
 
             if (!this.aDiskData.length) nChanges = -1;
@@ -2167,7 +2182,7 @@ class Disk extends Component {
              * We're suppressing checksum messages for the general public for now....
              */
             if (DEBUG || nChanges != -2) {
-                this.controller.notice("Unable to restore disk '" + this.sDiskName + ": " + sReason);
+                this.notice("Unable to restore disk '" + this.sDiskName + ": " + sReason);
             }
         } else {
             if (DEBUG && this.messageEnabled()) {
