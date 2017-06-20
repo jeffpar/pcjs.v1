@@ -8,11 +8,15 @@ machines:
     debugger: true
     config: /devices/pcx86/machine/5170/ega/2048kb/rev3/debugger/machine.xml
     drives: '[{name:"20Mb Hard Disk",type:2,path:"http://archive.pcjs.org/disks/pcx86/fixed/20mb/IBMOS210-EGA.json"}]'
-    automount: ''
+    automount:
+      A:
+        name: None
+      B:
+        name: None
 ---
 
 IBM OS/2 1.0
----
+------------
 
 IBM OS/2 1.0 was announced on April 2, 1987, finalized in October 1987, and released in December 1987.
 

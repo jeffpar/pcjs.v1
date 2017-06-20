@@ -10,7 +10,11 @@ machines:
     debugger: true
     config: /devices/pcx86/machine/5170/ega/2048kb/rev3/debugger/machine.xml
     drives: '[{name:"20Mb Hard Disk",type:2,path:"http://archive.pcjs.org/disks/pcx86/fixed/20mb/IBMOS210-EGA.json"}]'
-    automount: ''
+    automount:
+      A:
+        name: None
+      B:
+        name: None
 ---
 
 Just for fun (because I have a warped sense of fun), I decided to revisit some of the old OS/2 software I wrote
