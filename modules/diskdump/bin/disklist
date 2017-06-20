@@ -1,0 +1,117 @@
+/**
+ * @fileoverview Node command-line XML extraction tool
+ * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
+ * @version 1.0
+ * Created 2017-Jun-20
+ *
+ * Copyright © 2012-2017 Jeff Parsons <Jeff@pcjs.org>
+ *
+ * This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
+ *
+ * PCjs is free software: you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation, either version 3
+ * of the License, or (at your option) any later version.
+ *
+ * PCjs is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with PCjs.  If not,
+ * see <http://www.gnu.org/licenses/gpl.html>.
+ *
+ * You are required to include the above copyright notice in every modified copy of this work
+ * and to display that copyright notice when the software starts running; see COPYRIGHT in
+ * <http://pcjs.org/modules/shared/lib/defines.js>.
+ *
+ * Some PCjs files also attempt to load external resource files, such as character-image files,
+ * ROM files, and disk image files. Those external resource files are not considered part of PCjs
+ * for purposes of the GNU General Public License, and the author does not claim any copyright
+ * as to their contents.
+ */
+
+var fs = require("fs");
+
+/**
+ * println(s)
+ *
+ * @param {*} s
+ */
+function println(s)
+{
+    console.log(s);
+}
+
+function processManifest(sManifest)
+{
+    try {
+        var sXML = fs.readFileSync(sManifest, 'utf-8');
+    } catch(err) {
+        println("error: unable to read manifest: " + sManifest);
+        return;
+    }
+    var aMatchDisks = sXML.match(/<disk[^>]*>[\S\s]*?<\/disk>/g);
+    if (!aMatchDisks) {
+        println("warning: no disks found in: " + sManifest);
+        return;
+    }
+    for (var iDisk = 0; iDisk < aMatchDisks.length; iDisk++) {
+        var sDisk = aMatchDisks[iDisk];
+        var matchDir = sDisk.match(/dir="(.*?)"/);
+        var matchLink = sDisk.match(/href="(.*?)"/);
+        var matchDiskName = sDisk.match(/<name>(.*?)<\/name>/);
+        var aMatchFiles = sDisk.match(/<file[^>]*>[\S\s]*?<\/file>/g);
+        var sDiskName = matchDiskName && matchDiskName[1];
+        if (!aMatchFiles || !sDiskName) {
+            println("warning: no files in disk: " + sDiskName);
+            return;
+        }
+        println("### Directory of PCSIG08: " + sDiskName + "\n");
+        println("\t Volume in drive A " + (matchDiskName? ("is " + matchDiskName[1]) : "has no label"));
+        println("\t Directory of  A:\\\n\t");
+        for (var iFile = 0; iFile < aMatchFiles.length; iFile++) {
+            var sFile = aMatchFiles[iFile];
+            var matchSize = sFile.match(/size="([0-9]*)"/);
+            var matchTime = sFile.match(/time="([0-9][0-9][0-9][0-9])-([0-9][0-9])-([0-9][0-9]) ([0-9][0-9]):([0-9][0-9]):([0-9][0-9])"/);
+            var matchFileName = sFile.match(/>(.*?)</);
+            if (!matchSize || !matchTime || !matchFileName) {
+                println("warning: file entry #" + iFile + " incomplete");
+                return;
+            }
+            /*
+             * Here's our template, from PC-DOS 2.00:
+             *
+             *      COMMAND  COM    17664   3-08-83  12:00p
+             */
+            var sSize = matchSize[1];
+            var sTime = matchTime[1];
+            var sFileName = matchFileName[1].replace(/&amp;/g, "&");
+            var sBaseName = sFileName;
+            var sExtension = "";
+            var i = sFileName.lastIndexOf('.');
+            if (i >= 0) {
+                sBaseName = sFileName.substr(0, i);
+                sExtension = sFileName.substr(i + 1);
+            }
+            sBaseName = (sBaseName + "         ").substr(0, 9);
+            sExtension = (sExtension + "   ").substr(0, 3);
+            sSize = ("         " + sSize).slice(-9);
+            var iMonth = +matchTime[2];
+            var sDate = ("    " + iMonth).slice(-4) + '-' + matchTime[3] + '-' + matchTime[1].substr(2);
+            var iHour = +matchTime[4];
+            var sSuffix;
+            if (iHour < 12) {
+                sSuffix = "a";
+                if (!iHour) iHour = 12;
+            }
+            else {
+                sSuffix = "p";
+                if (iHour > 12) iHour -= 12;
+            }
+            var sTime = ("    " + iHour).slice(-4) + ':' + matchTime[5] + sSuffix;
+            println("\t" + sBaseName + sExtension + sSize + sDate + sTime);
+        }
+        println("");
+    }
+}
+
+processManifest("../../../disks/pcx86/shareware/pcsig08/manifest.xml");
