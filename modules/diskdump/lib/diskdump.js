@@ -74,10 +74,10 @@ var logFile = null;
 
 /*
  * fNormalize attempts to enforce consistency across multiple dump requests, including the order of files within every
- * directory, the use of hard-coded volume label timestamps, etc.  And since I assume that normalization is a wonderful
- * thing, I don't provide any UI for turning it off.
+ * directory, the use of hard-coded volume label timestamps, replacement of line-endings in text files, etc.  And since
+ * I assume that normalization is a wonderful thing, I don't provide any UI for turning it off.
  */
-var fNormalize = true;
+var fNormalize = false;
 
 /**
  * BufferPF(init, start, end)
@@ -961,13 +961,13 @@ DiskDump.updateManifest = function(disk, sManifestFile, sDiskPath, sOutputFile, 
     }
 
     if (!sIDDisk) {
-        for (i = 1; i < 1000; i++) {
+        for (i = 1; i < 10000; i++) {
             sIDDisk = i.toString();
             if (sIDDisk.length < 2) sIDDisk = '0' + sIDDisk;
             sIDDisk = "disk" + sIDDisk;
             if (sXML.indexOf(' id="' + sIDDisk + '"') < 0) break;
         }
-        if (i == 1000) {
+        if (i == 10000) {
             err = new Error("manifest already contains " + i + " disks");
         }
     }
@@ -1030,7 +1030,7 @@ DiskDump.updateManifest = function(disk, sManifestFile, sDiskPath, sOutputFile, 
                     sAttrs += ' dir="' + sDir + '"';
                 }
             }
-            sXMLDisk += '\t\t<file' + sAttrs + '>' + fileInfo.FILE_NAME + '</file>\n';
+            sXMLDisk += '\t\t<file' + sAttrs + '>' + fileInfo.FILE_NAME.replace(/&/g, "&amp;") + '</file>\n';
         }
         sXMLDisk += '\t</disk>\n';
         sXMLDisk = sXMLDisk.replace(/(<disk[^>]*)>\s*<\/disk>/, "$1/>");
@@ -1577,8 +1577,10 @@ DiskDump.prototype.addManifestInfo = function(fileInfo)
  */
 DiskDump.prototype.isTextFile = function(sFileName)
 {
-    for (var i = 0; i < DiskDump.asTextFileExts.length; i++) {
-        if (str.endsWith(sFileName, DiskDump.asTextFileExts[i])) return true;
+    if (fNormalize) {
+        for (var i = 0; i < DiskDump.asTextFileExts.length; i++) {
+            if (str.endsWith(sFileName, DiskDump.asTextFileExts[i])) return true;
+        }
     }
     return false;
 };
@@ -1633,7 +1635,7 @@ DiskDump.prototype.readDir = function(sDir, fRoot, done)
          * file name order that I was originally seeing may have simply been due to out-of-order fs.stat()
          * calls, because I used to call addManifestInfo() in the callback.
          */
-        // if (fNormalize) asFiles.sort();
+        if (fNormalize) asFiles.sort();
 
         for (iFile = 0; iFile < asFiles.length; iFile++) {
             var sFileName = asFiles[iFile];
@@ -1927,7 +1929,7 @@ DiskDump.prototype.buildVolLabel = function(sDir)
          *
          * UPDATE: I'm not sure I care about that anymore.  Time-stamping the created disk image seems more useful.
          */
-        fileInfo.FILE_TIME = /* fNormalize? new Date(1981, 7, 12, 12) : */ new Date();
+        fileInfo.FILE_TIME = fNormalize? new Date(1981, 7, 12, 12) : new Date();
         this.validateTime(fileInfo.FILE_TIME);
         fileInfo.FILE_SIZE = 0;
     }
@@ -2247,31 +2249,27 @@ DiskDump.prototype.buildImage = function(fDir, done)
 };
 
 /**
- * calcFileSizes(aFiles)
- *
- * WARNING: Our "total data" calculation should be rounding up to the next cluster,
- * not the next sector, because data on the disk is cluster-granular, not sector-granular.
- * But we have a chicken-and-egg problem: we won't know the cluster size until we've
- * calculated total data and found a BPB we think will accommodate it.  So, the code below
- * will still have to be prepared for running out of disk space.  This is just a good estimate.
+ * calcFileSizes(aFiles, cSectorsPerCluster)
  *
  * @this {DiskDump}
  * @param {Array} aFiles
+ * @param {number} [cSectorsPerCluster] (default is 1)
  * @return {number} of bytes required for all files, including all subdirectories
  */
-DiskDump.prototype.calcFileSizes = function(aFiles)
+DiskDump.prototype.calcFileSizes = function(aFiles, cSectorsPerCluster)
 {
     var cbTotal = 0;
+    var cbCluster = (cSectorsPerCluster || 1) * 512;
     for (var iFile = 0; iFile < aFiles.length; iFile++) {
         var cb = aFiles[iFile].FILE_SIZE;
         var cbSubTotal = 0;
         if (cb < 0) {
             cb = (aFiles[iFile].FILE_DATA.length + 2) * 32;
-            cbSubTotal = this.calcFileSizes(aFiles[iFile].FILE_DATA);
+            cbSubTotal = this.calcFileSizes(aFiles[iFile].FILE_DATA, cSectorsPerCluster);
         }
         cbTotal += cb;
-        if ((cb %= 512)) {
-            cbTotal += 512 - cb;        // WARNING: rounding to next sector may not be enough (see above)
+        if ((cb %= cbCluster)) {
+            cbTotal += cbCluster - cb;
         }
         cbTotal += cbSubTotal;
     }
@@ -2370,6 +2368,12 @@ DiskDump.prototype.buildImageFromFiles = function(aFiles, done)
      */
     var cbMax = (this.kbTarget || 1440) * 1024;
     var nTargetSectors = (this.kbTarget? this.kbTarget * 2 : 0);
+
+    /*
+     * This initializes cbTotal assuming a "best case scenario" (ie, one sector per cluster); as soon as
+     * we find a BPB that will support that size, we recalculate cbTotal using that BPB's cluster size, and
+     * then we re-verify that that BPB will work.  If not, then we keep looking.
+     */
     var cbTotal = this.calcFileSizes(aFiles);
 
     if (fDebug) DiskDump.logConsole("total calculated size for " + aFiles.length + " files/folders: " + cbTotal + " bytes (" + str.toHex(cbTotal, 0, true) + ")");
@@ -2397,43 +2401,48 @@ DiskDump.prototype.buildImageFromFiles = function(aFiles, done)
      *
      * UPDATE: I've undone the above change, because when creating a disk image for an old application like:
      *
-     *      /apps/pcx86/1983/adventmath ["Adventures in Math" (1983)]
+     *      /apps/pcx86/1983/adventmath ["Adventures in Math (1983)"]
      *
      * it's important to create a disk image that will work with PC-DOS 1.0, which didn't understand 180Kb and 360Kb
      * disk images.
      */
     for (var iBPB = 0; iBPB < DiskDump.aDefaultBPBs.length; iBPB++) {
         /*
-         * Use slice() to copy the default BPB, as a precaution (to avoid any changes to the default).
+         * Use slice() to copy the BPB, to ensure we don't alter the original.
          */
         abBoot = DiskDump.aDefaultBPBs[iBPB].slice();
         /*
          * If this BPB is for a hard drive but a disk size was not specified, skip it.
          */
-        if ((abBoot[0x15] == 0xF8) != (this.kbTarget >= 10000)) continue;
-        cbSector = abBoot[0x0B] | (abBoot[0x0C] << 8);
-        cSectorsPerCluster = abBoot[0x0D];
+        if ((abBoot[DiskAPI.BPB.MEDIA_TYPE] == DiskAPI.FAT.MEDIA_FIXED) != (this.kbTarget >= 10000)) continue;
+        cRootEntries = abBoot[DiskAPI.BPB.ROOT_DIRENTS] | (abBoot[DiskAPI.BPB.ROOT_DIRENTS + 1] << 8);
+        if (aFiles.length > cRootEntries) continue;
+        cbSector = abBoot[DiskAPI.BPB.SECTOR_BYTES] | (abBoot[DiskAPI.BPB.SECTOR_BYTES + 1] << 8);
+        cSectorsPerCluster = abBoot[DiskAPI.BPB.CLUSTER_SECS];
         cbCluster = cbSector * cSectorsPerCluster;
-        cFATs = abBoot[0x10];
-        cFATSectors = abBoot[0x16] | (abBoot[0x17] << 8);
-        cRootEntries = abBoot[0x11] | (abBoot[0x12] << 8);
-        cRootSectors = (((cRootEntries * 0x20) + cbSector - 1) / cbSector) | 0;
-        cTotalSectors = abBoot[0x13] | (abBoot[0x14] << 8);
-        cSectorsPerTrack = abBoot[0x18] | (abBoot[0x19] << 8);
-        cHeads = abBoot[0x1A] | (abBoot[0x1B] << 8);
-        cDataSectors = cTotalSectors - cRootSectors - cFATs * cFATSectors + 1;
+        cFATs = abBoot[DiskAPI.BPB.TOTAL_FATS];
+        cFATSectors = abBoot[DiskAPI.BPB.FAT_SECS] | (abBoot[DiskAPI.BPB.FAT_SECS + 1] << 8);
+        cRootSectors = (((cRootEntries * DiskAPI.DIRENT.LENGTH) + cbSector - 1) / cbSector) | 0;
+        cTotalSectors = abBoot[DiskAPI.BPB.TOTAL_SECS] | (abBoot[DiskAPI.BPB.TOTAL_SECS + 1] << 8);
+        cSectorsPerTrack = abBoot[DiskAPI.BPB.TRACK_SECS] | (abBoot[DiskAPI.BPB.TRACK_SECS + 1] << 8);
+        cHeads = abBoot[DiskAPI.BPB.TOTAL_HEADS] | (abBoot[DiskAPI.BPB.TOTAL_HEADS + 1] << 8);
+        cDataSectors = cTotalSectors - (cRootSectors + cFATs * cFATSectors + 1);
         cbAvail = cDataSectors * cbSector;
-        if (nTargetSectors && cTotalSectors == nTargetSectors || !nTargetSectors && cbTotal <= cbAvail) break;
+        if (!nTargetSectors) {
+            if (cbTotal <= cbAvail) {
+                var cb = this.calcFileSizes(aFiles, cSectorsPerCluster);
+                if (cb <= cbAvail) {
+                    cbTotal = cb;
+                    break;
+                }
+            }
+        } else {
+            if (cTotalSectors == nTargetSectors) break;
+        }
     }
 
     if (iBPB == DiskDump.aDefaultBPBs.length) {
-        err = new Error("file(s) too large for disk image (" + cbTotal + " vs. " + cbAvail + " bytes)");
-        done(err);
-        return false;
-    }
-
-    if (aFiles.length > cRootEntries) {
-        err = new Error("too many files for disk image (" + aFiles.length + " vs. " + cRootEntries + " max)");
+        err = new Error("too many file(s) for disk image (" + aFiles.length + " files, " + cbTotal + " bytes)");
         done(err);
         return false;
     }
@@ -2467,8 +2476,8 @@ DiskDump.prototype.buildImageFromFiles = function(aFiles, done)
     /*
      * Output a boot sector.
      */
-    abBoot[DiskAPI.BOOT.SIG_OFFSET] = 0x55;
-    abBoot[DiskAPI.BOOT.SIG_OFFSET + 1] = 0xAA;
+    abBoot[DiskAPI.BOOT.SIG_OFFSET] = DiskAPI.BOOT.SIGNATURE & 0xff;            // 0x55
+    abBoot[DiskAPI.BOOT.SIG_OFFSET + 1] = (DiskAPI.BOOT.SIGNATURE >> 8) & 0xff; // 0xAA
     abSector = this.buildData(cbSector, abBoot);
     offDisk += this.copyData(offDisk, abSector);
 
@@ -2479,7 +2488,7 @@ DiskDump.prototype.buildImageFromFiles = function(aFiles, done)
      * BPB at offset 0x15.  For old BPB-less diskettes, this is where you must look for the media type.
      */
     var abFAT = [];
-    this.buildFATEntry(abFAT, 0, abBoot[0x15] | 0xF00);
+    this.buildFATEntry(abFAT, 0, abBoot[DiskAPI.BPB.MEDIA_TYPE] | 0xF00);
     this.buildFATEntry(abFAT, 1, 0xFFF);
     this.buildFAT(abFAT, aFiles, 2, cbCluster);
 
@@ -2502,10 +2511,10 @@ DiskDump.prototype.buildImageFromFiles = function(aFiles, done)
      * PC-DOS 1.0 requires ALL unused directory entries to start with 0xE5; 0x00 isn't good enough,
      * so we must loop through all the remaining directory entries and zap them with 0xE5.
      */
-    var offRoot = cEntries * 32;
+    var offRoot = cEntries * DiskAPI.DIRENT.LENGTH;
     while (cEntries++ < cRootEntries) {
-        abRoot[offRoot] = 0xE5;
-        offRoot += 32;
+        abRoot[offRoot] = DiskAPI.DIRENT.INVALID;       // 0xE5
+        offRoot += DiskAPI.DIRENT.LENGTH;               // 0x20 (32)
     }
 
     /*

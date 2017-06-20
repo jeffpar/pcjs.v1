@@ -186,6 +186,7 @@ DiskAPI.FAT = {
     MEDIA_360KB:    0xFD,       // 5.25-inch, 2-sided,  9-sector, 40-track
     MEDIA_720KB:    0xF9,       //  3.5-inch, 2-sided,  9-sector, 80-track
     MEDIA_1200KB:   0xF9,       //  3.5-inch, 2-sided, 15-sector, 80-track
+    MEDIA_FIXED:    0xF8,       // fixed disk (aka hard drive)
     MEDIA_1440KB:   0xF0,       //  3.5-inch, 2-sided, 18-sector, 80-track
     MEDIA_2880KB:   0xF0        //  3.5-inch, 2-sided, 36-sector, 80-track
 };

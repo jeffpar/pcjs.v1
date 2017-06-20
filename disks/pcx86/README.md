@@ -46,6 +46,11 @@ computer diagnostics, programming tools, and more.
 * [Infocom Games](games/infocom/)
 * [Microsoft Games](games/microsoft/)
 
+### Shareware
+
+* [PC-SIG Library 8th Edition CD-ROM (April 1990)](shareware/pcsig08/)
+* [Other...](shareware/)
+
 ### Tools
 
 * [Borland Tools](tools/borland/)
