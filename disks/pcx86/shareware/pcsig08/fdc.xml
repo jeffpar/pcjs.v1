@@ -5,7 +5,7 @@
 		<manifest ref="/disks/pcx86/dos/ibm/1.00/manifest.xml"/>
 		<manifest ref="/disks/pcx86/dos/ibm/1.10/manifest.xml"/>
 		<manifest ref="/disks/pcx86/dos/ibm/2.00/manifest.xml"/>
-		<manifest ref="/disks/pcx86/shareware/pcsig08/manifest.xml"/>
+		<manifest ref="/disks/pcx86/shareware/pcsig08/disks/manifest.xml"/>
 	</control>
 	<control type="button" binding="loadDisk">Load</control>
 	<control type="button" binding="saveDisk" padRight="8px">Save</control>
