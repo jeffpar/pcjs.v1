@@ -961,13 +961,13 @@ DiskDump.updateManifest = function(disk, sManifestFile, sDiskPath, sOutputFile, 
     }
 
     if (!sIDDisk) {
-        for (i = 1; i < 1000; i++) {
+        for (i = 1; i < 10000; i++) {
             sIDDisk = i.toString();
             if (sIDDisk.length < 2) sIDDisk = '0' + sIDDisk;
             sIDDisk = "disk" + sIDDisk;
             if (sXML.indexOf(' id="' + sIDDisk + '"') < 0) break;
         }
-        if (i == 1000) {
+        if (i == 10000) {
             err = new Error("manifest already contains " + i + " disks");
         }
     }
@@ -2408,24 +2408,25 @@ DiskDump.prototype.buildImageFromFiles = function(aFiles, done)
      */
     for (var iBPB = 0; iBPB < DiskDump.aDefaultBPBs.length; iBPB++) {
         /*
-         * Use slice() to copy the default BPB, as a precaution (to avoid any changes to the default).
+         * Use slice() to copy the BPB, to ensure we don't alter the original.
          */
         abBoot = DiskDump.aDefaultBPBs[iBPB].slice();
         /*
          * If this BPB is for a hard drive but a disk size was not specified, skip it.
          */
-        if ((abBoot[0x15] == 0xF8) != (this.kbTarget >= 10000)) continue;
-        cbSector = abBoot[0x0B] | (abBoot[0x0C] << 8);
-        cSectorsPerCluster = abBoot[0x0D];
+        if ((abBoot[DiskAPI.BPB.MEDIA_TYPE] == DiskAPI.FAT.MEDIA_FIXED) != (this.kbTarget >= 10000)) continue;
+        cRootEntries = abBoot[DiskAPI.BPB.ROOT_DIRENTS] | (abBoot[DiskAPI.BPB.ROOT_DIRENTS + 1] << 8);
+        if (aFiles.length > cRootEntries) continue;
+        cbSector = abBoot[DiskAPI.BPB.SECTOR_BYTES] | (abBoot[DiskAPI.BPB.SECTOR_BYTES + 1] << 8);
+        cSectorsPerCluster = abBoot[DiskAPI.BPB.CLUSTER_SECS];
         cbCluster = cbSector * cSectorsPerCluster;
-        cFATs = abBoot[0x10];
-        cFATSectors = abBoot[0x16] | (abBoot[0x17] << 8);
-        cRootEntries = abBoot[0x11] | (abBoot[0x12] << 8);
-        cRootSectors = (((cRootEntries * 0x20) + cbSector - 1) / cbSector) | 0;
-        cTotalSectors = abBoot[0x13] | (abBoot[0x14] << 8);
-        cSectorsPerTrack = abBoot[0x18] | (abBoot[0x19] << 8);
-        cHeads = abBoot[0x1A] | (abBoot[0x1B] << 8);
-        cDataSectors = cTotalSectors - cRootSectors - cFATs * cFATSectors + 1;
+        cFATs = abBoot[DiskAPI.BPB.TOTAL_FATS];
+        cFATSectors = abBoot[DiskAPI.BPB.FAT_SECS] | (abBoot[DiskAPI.BPB.FAT_SECS + 1] << 8);
+        cRootSectors = (((cRootEntries * DiskAPI.DIRENT.LENGTH) + cbSector - 1) / cbSector) | 0;
+        cTotalSectors = abBoot[DiskAPI.BPB.TOTAL_SECS] | (abBoot[DiskAPI.BPB.TOTAL_SECS + 1] << 8);
+        cSectorsPerTrack = abBoot[DiskAPI.BPB.TRACK_SECS] | (abBoot[DiskAPI.BPB.TRACK_SECS + 1] << 8);
+        cHeads = abBoot[DiskAPI.BPB.TOTAL_HEADS] | (abBoot[DiskAPI.BPB.TOTAL_HEADS + 1] << 8);
+        cDataSectors = cTotalSectors - (cRootSectors + cFATs * cFATSectors + 1);
         cbAvail = cDataSectors * cbSector;
         if (!nTargetSectors) {
             if (cbTotal <= cbAvail) {
@@ -2441,13 +2442,7 @@ DiskDump.prototype.buildImageFromFiles = function(aFiles, done)
     }
 
     if (iBPB == DiskDump.aDefaultBPBs.length) {
-        err = new Error("file(s) too large for disk image (" + cbTotal + " vs. " + cbAvail + " bytes)");
-        done(err);
-        return false;
-    }
-
-    if (aFiles.length > cRootEntries) {
-        err = new Error("too many files for disk image (" + aFiles.length + " vs. " + cRootEntries + " max)");
+        err = new Error("too many file(s) for disk image (" + aFiles.length + " files, " + cbTotal + " bytes)");
         done(err);
         return false;
     }
@@ -2481,8 +2476,8 @@ DiskDump.prototype.buildImageFromFiles = function(aFiles, done)
     /*
      * Output a boot sector.
      */
-    abBoot[DiskAPI.BOOT.SIG_OFFSET] = 0x55;
-    abBoot[DiskAPI.BOOT.SIG_OFFSET + 1] = 0xAA;
+    abBoot[DiskAPI.BOOT.SIG_OFFSET] = DiskAPI.BOOT.SIGNATURE & 0xff;            // 0x55
+    abBoot[DiskAPI.BOOT.SIG_OFFSET + 1] = (DiskAPI.BOOT.SIGNATURE >> 8) & 0xff; // 0xAA
     abSector = this.buildData(cbSector, abBoot);
     offDisk += this.copyData(offDisk, abSector);
 
@@ -2493,7 +2488,7 @@ DiskDump.prototype.buildImageFromFiles = function(aFiles, done)
      * BPB at offset 0x15.  For old BPB-less diskettes, this is where you must look for the media type.
      */
     var abFAT = [];
-    this.buildFATEntry(abFAT, 0, abBoot[0x15] | 0xF00);
+    this.buildFATEntry(abFAT, 0, abBoot[DiskAPI.BPB.MEDIA_TYPE] | 0xF00);
     this.buildFATEntry(abFAT, 1, 0xFFF);
     this.buildFAT(abFAT, aFiles, 2, cbCluster);
 
@@ -2516,10 +2511,10 @@ DiskDump.prototype.buildImageFromFiles = function(aFiles, done)
      * PC-DOS 1.0 requires ALL unused directory entries to start with 0xE5; 0x00 isn't good enough,
      * so we must loop through all the remaining directory entries and zap them with 0xE5.
      */
-    var offRoot = cEntries * 32;
+    var offRoot = cEntries * DiskAPI.DIRENT.LENGTH;
     while (cEntries++ < cRootEntries) {
-        abRoot[offRoot] = 0xE5;
-        offRoot += 32;
+        abRoot[offRoot] = DiskAPI.DIRENT.INVALID;       // 0xE5
+        offRoot += DiskAPI.DIRENT.LENGTH;               // 0x20 (32)
     }
 
     /*
