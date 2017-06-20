@@ -1030,7 +1030,7 @@ DiskDump.updateManifest = function(disk, sManifestFile, sDiskPath, sOutputFile, 
                     sAttrs += ' dir="' + sDir + '"';
                 }
             }
-            sXMLDisk += '\t\t<file' + sAttrs + '>' + fileInfo.FILE_NAME + '</file>\n';
+            sXMLDisk += '\t\t<file' + sAttrs + '>' + fileInfo.FILE_NAME.replace(/&/g, "&amp;") + '</file>\n';
         }
         sXMLDisk += '\t</disk>\n';
         sXMLDisk = sXMLDisk.replace(/(<disk[^>]*)>\s*<\/disk>/, "$1/>");

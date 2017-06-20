@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fdc id="fdcNEC" automount='{A:{name:"PC-DOS 2.00 (Disk 1)",path:"/disks/pcx86/dos/ibm/2.00/PCDOS200-DISK1.json"}, B:{name:"PC-DOS 2.00 (Disk 2)",path:"/disks/pcx86/dos/ibm/2.00/PCDOS200-DISK2.json"}}' pos="left" padLeft="8px" padBottom="8px">
+	<control type="list" binding="listDrives"/>
+	<control type="list" binding="listDisks">
+		<manifest ref="/disks/pcx86/dos/ibm/1.00/manifest.xml"/>
+		<manifest ref="/disks/pcx86/dos/ibm/1.10/manifest.xml"/>
+		<manifest ref="/disks/pcx86/dos/ibm/2.00/manifest.xml"/>
+		<manifest ref="/disks/pcx86/shareware/pcsig08/manifest.xml"/>
+	</control>
+	<control type="button" binding="loadDisk">Load</control>
+	<control type="button" binding="saveDisk" padRight="8px">Save</control>
+	<control type="description" binding="descDisk" padRight="8px"/>
+	<control type="file" binding="mountDisk"/>
+</fdc>
