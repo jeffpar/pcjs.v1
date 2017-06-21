@@ -1,6 +1,8 @@
 ---
 layout: page
 title: Disk Libraries
+menu_title: Disks
+menu_order: 5
 permalink: /disks/
 ---
 
@@ -19,16 +21,21 @@ Additional selected software is available in the PCjs [Software Archives](/apps/
 
 ### PCx86 Disk Image Formats
 
-PCx86 works best with disk images in a **JSON** format, to save conversion time, so that's the only disk image format
-you'll find in the [PCjs Project](https://github.com/jeffpar/pcjs).
+PCx86 works best with disk images in a **JSON** format, to save conversion time, so that's the
+only disk format you'll find in the [PCjs Project](https://github.com/jeffpar/pcjs).
 
-If you're running the PCjs Node web server, you can convert any of our **JSON** disk images into an **IMG** file
-with the [DiskDump API](/api/v1/dump), by setting the *format* parameter set to `img` instead of `json`.  For example:
+There are several ways you can convert a PCjs **JSON** disk image back into a binary **IMG** file:
+
+- Load the desired disk into a PCjs machine and click the **Save** button
+- Use the [DiskDump API](/api/v1/dump) (available only in the [PCjs Node Web Server](/server.js))
+
+When using the [DiskDump API](/api/v1/dump), set the *format* parameter set to `img` instead of `json`.
+For example:
 
 	{{ site.url }}/api/v1/dump?disk=/disks/pcx86/dos/ibm/2.00/PCDOS200-DISK1.json&format=img
 
-As an added bonus, the PCjs Node web server automatically provides "onclick" handlers for all links to JSON-encoded disk
-images, automatically invoking the API for you.
+The [PCjs Node Web Server](/server.js) also generates "onclick" handlers for links to **JSON** disk
+images that automatically invoke the API for you.
 
-See [Creating PCx86-Compatible Disk Images](/docs/pcx86/#creating-pcx86-compatible-disk-images) in the
-[PCx86 Documentation](/docs/pcx86/) for more information about supported disks and formats.
+See [Creating PCx86-Compatible Disk Images](/docs/pcx86/#creating-pcx86-compatible-disk-images)
+in the [PCx86 Documentation](/docs/pcx86/) for more information about supported disks and formats.

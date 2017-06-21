@@ -1,8 +1,6 @@
 ---
 layout: page
 title: Software Archives
-menu_title: Software
-menu_order: 7
 permalink: /apps/
 ---
 
@@ -11,9 +9,16 @@ Software Archives
 
 PCjs includes archives of selected software:
 
-* IBM PC [Applications](pcx86/) and [Disk Library](/disks/pcx86/)
-* Challenger 1P [Applications](c1p/) and [Disk Library](/disks/c1p/)
-* DEC [PDP-10 Software](pdp10/), [PDP-11 Software](pdp11/), and [Disk Library](/disks/dec/)
+* [IBM PC Application Demos](pcx86/)
+* [Challenger 1P Applications](c1p/)
+* [DEC PDP-10 Tapes and Diagnostics](pdp10/)
+* [DEC PDP-11 Tapes and Diagnostics](pdp11/)
+
+You can also browse our software archives by disk:
+
+* [IBM PC Disk Library](/disks/pcx86/)
+* [Challenger 1P Disk Library](/disks/c1p/)
+* [DEC Disk Library](/disks/dec/)
 
 ---
 

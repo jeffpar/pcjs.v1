@@ -1,11 +1,11 @@
 ---
 layout: page
-title: IBM PC Application Archive
+title: IBM PC Application Demos
 permalink: /apps/pcx86/
 ---
 
-IBM PC Application Archive
----
+IBM PC Application Demos
+------------------------
 
 Below are selected [PCx86](/docs/about/pcx86/) demos of classic IBM PC applications:
 
