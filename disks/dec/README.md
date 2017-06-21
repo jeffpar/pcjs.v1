@@ -1,11 +1,11 @@
 ---
 layout: page
-title: DEC Disk Images
+title: DEC Disk Library
 permalink: /disks/dec/
 ---
 
-DEC Disk Images
----------------
+DEC Disk Library
+----------------
 
 The DEC disk images we have archived are organized by type: 
 

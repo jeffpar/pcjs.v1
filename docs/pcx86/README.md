@@ -173,7 +173,7 @@ All of the examples described above are available for [download](examples/).
 
 ### Creating PCx86-Compatible Disk Images
 
-If you have (or find) an IMG disk image file on a server, the PCjs web server provides a
+If you have (or find) an IMG disk image file on a server, the PCjs Node web server provides a
 [DiskDump API](/api/v1/dump) via endpoint "/api/v1/dump" that creates PCx86-compatible disks in JSON:
 	
 	{{ site.url }}/api/v1/dump?disk=(file|url)&format=json

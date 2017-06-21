@@ -5,7 +5,7 @@ permalink: /apps/c1p/
 ---
 
 Challenger 1P Applications
----
+--------------------------
 
 [C1Pjs](/docs/c1pjs/) runs Challenger 1P (C1P) applications written in:
 

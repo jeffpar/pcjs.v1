@@ -7,7 +7,7 @@ permalink: /disks/pcx86/
 IBM PC Disk Library
 -------------------
 
-This [Disk Library](/disks/pcx86/library.xml) lists all the [Disk Manifests](#disk-manifests) in the
+Our [IBM PC Disk Library](/disks/pcx86/library.xml) lists all the [Disk Manifests](#disk-manifests) in the
 [PCjs Project](/docs/about/) and makes those disks available to any [IBM PC Machine](/devices/pcx86/machine/)
 in the project that uses the library.  Note that most machines use the *[compiled](/disks/pcx86/compiled/library.xml)*
 form of the library, to reduce machine load time.
@@ -17,10 +17,6 @@ For some of the disks, we have provided more information about the software, and
 machines that automatically run the software.  Ideally, everything in the library would also be listed below,
 and linked to a page that describes the software in more detail, along with a live demonstration of the software,
 but that's not yet a reality.
-
-For IBM PC application demos, see the [Application Archive](/apps/pcx86/), which focuses exclusively on applications.
-The [Disk Library](/disks/pcx86/library.xml) is a superset, including operating systems, application software,
-computer diagnostics, programming tools, and more.
 
 ### Operating Systems
 
@@ -38,7 +34,18 @@ computer diagnostics, programming tools, and more.
 * [MicroPro WordStar](apps/micropro/wordstar/)
 * [Microsoft Chart](apps/microsoft/chart/)
 * [Microsoft Word](apps/microsoft/word/)
-* [Other...](apps/other/)
+* [More...](apps/other/)
+
+Additional applications for which we have created special "Demo Disks" include:
+
+* [VisiCalc (1981)](/apps/pcx86/1981/visicalc/)
+* [Executive Suite (1982)](/apps/pcx86/1982/esuite/)
+* [RatBas (1982)](/apps/pcx86/1982/ratbas/)
+* [Adventures in Math (1983)](/apps/pcx86/1983/adventmath/)
+* [Rogue (1985)](/apps/pcx86/1985/rogue/)
+* [ThinkTank (1987)](/apps/pcx86/1987/thinktank/)
+* [The Dungeons of Moria (1992)](/apps/pcx86/1992/moria/)
+* [More...](/apps/pcx86/)
 
 ### Games
 
@@ -49,14 +56,14 @@ computer diagnostics, programming tools, and more.
 ### Shareware
 
 * [PC-SIG Library 8th Edition CD-ROM (April 1990)](shareware/pcsig08/)
-* [Other...](shareware/)
+* [More...](shareware/)
 
 ### Tools
 
 * [Borland Tools](tools/borland/)
 * [IBM Tools](tools/ibm/)
 * [Microsoft Tools](tools/microsoft/)
-* [Other Tools](tools/misc/)
+* [More...](tools/misc/)
 
 ### Tests
 
