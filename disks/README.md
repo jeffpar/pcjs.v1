@@ -21,13 +21,17 @@ Additional selected software is available in the PCjs [Software Archives](/apps/
 
 ### PCx86 Disk Image Formats
 
-PCx86 works best with disk images in a **JSON** format, to save conversion time, so that's the
-only disk format you'll find in the [PCjs Project](https://github.com/jeffpar/pcjs).
+PCx86 works best with disk images in a **JSON** format, so that's the only disk format you'll
+find in the [PCjs Project](https://github.com/jeffpar/pcjs).
 
 There are several ways you can convert a PCjs **JSON** disk image back into a binary **IMG** file:
 
-- Load the desired disk into a PCjs machine and click the **Save** button
+- Load the disk into a PCjs machine and click the **Save** button
 - Use the [DiskDump API](/api/v1/dump) (available only in the [PCjs Node Web Server](/server.js))
+
+Note that whenever you **Save** a disk inside a PCjs machine, it is saved exactly as it exists
+at that point in time.  So, if you made any changes to the disk, those changes will be preserved
+in your saved copy.  Otherwise, the disk image should be an exact copy of the original PCjs disk.
 
 When using the [DiskDump API](/api/v1/dump), set the *format* parameter set to `img` instead of `json`.
 For example:

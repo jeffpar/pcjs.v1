@@ -9,14 +9,17 @@ IBM PC Disk Library
 
 Our [IBM PC Disk Library](/disks/pcx86/library.xml) lists all the [Disk Manifests](#disk-manifests) in the
 [PCjs Project](/docs/about/) and makes those disks available to any [IBM PC Machine](/devices/pcx86/machine/)
-in the project that uses the library.  Note that most machines use the *[compiled](/disks/pcx86/compiled/library.xml)*
-form of the library, to reduce machine load time.
+in the project that uses the library.
 
-The summary below is not a complete list of everything in the library, just highlights.
-For some of the disks, we have provided more information about the software, and in some cases,
-machines that automatically run the software.  Ideally, everything in the library would also be listed below,
-and linked to a page that describes the software in more detail, along with a live demonstration of the software,
-but that's not yet a reality.
+Whenever possible, PCjs archives copies of original distribution diskettes.  Exceptions include the application
+"Demo Disks" that we've created for our [IBM PC Application Demos](/apps/pcx86/).  PCjs may also make minor changes
+to a disk's boot sector, to ensure that all PCjs disk images can be mounted in modern operating systems.  This is
+documented, for example, in the description of the [PC-DOS 0.90](/disks/pcx86/dos/ibm/0.90/) disk.
+
+The summary below is not a complete list of everything in the library, just highlights.  For some of the disks,
+we have provided more information about the software, and in some cases, machines that automatically run the software.
+Ideally, everything in the library would also be listed below, and linked to a page that describes the software in
+more detail, along with a live demonstration of the software, but that's not yet a reality.
 
 ### Operating Systems
 
