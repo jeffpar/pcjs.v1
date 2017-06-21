@@ -11,10 +11,20 @@ machines:
         path: /disks/pcx86/dos/ibm/2.00/PCDOS200-DISK1.json
       B:
         path: /disks/pcx86/apps/ibm/topview/1.01/TOPVIEW101-PROGRAM.json
+    autoType: \r\rb:\rtv\r
 ---
 
 TopView 1.01
----
+------------
+
+NOTE: Even though we've made every effort to mark all PCjs pages as English, Google's Chrome web browser (v59)
+mistakenly thinks this page is in French and will attempt to translate it to English.  That translation process
+interferes with elements of the machine; for example, it may change the name of the first diskette drive from
+"A:" to "AT:".
+
+So, if you notice any rendering problems, check the top of your web browser, and if you see the message *This page
+has been translated from French to English*, click **Show Original**.  Ironically, the addition of these two
+paragraphs of English text will likely eliminate the problem.
 
 {% include machine.html id="ibm5160" %}
 

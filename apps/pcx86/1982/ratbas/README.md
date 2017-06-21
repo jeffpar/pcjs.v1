@@ -4,14 +4,14 @@ title: "RatBas (1982)"
 permalink: /apps/pcx86/1982/ratbas/
 machines:
   - type: pcx86
-    id: ibm5150
+    id: ibm5150-ratbas
     config: /devices/pcx86/machine/5150/cga/256kb/machine.xml
     autoMount:
       A:
         path: /disks/pcx86/dos/ibm/1.10/PCDOS110.json
       B:
         path: /apps/pcx86/1982/ratbas/RATBAS213.json
-    autoType: \\r\\rb:\\rrt\\r\\xff\\xf0test;\\r
+    autoType: \r\rb:\rrt\r\xff\xf0test;\r
 ---
 
 RatBas (1982)
@@ -30,7 +30,7 @@ We have archived it as [RatBas 2.13](#directory-listing-of-ratbas-213).  It has 
 the machine below, which is running [PC-DOS 1.10](/disks/pcx86/dos/ibm/1.10/), the most recent version of PC-DOS
 at the time of this RatBas release.
 
-{% include machine.html id="ibm5150" %}
+{% include machine.html id="ibm5150-ratbas" %}
 
 Directory Listing of RatBas 2.13
 --------------------------------

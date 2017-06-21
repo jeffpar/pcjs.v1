@@ -11,7 +11,7 @@ machines:
         path: /disks/pcx86/dos/ibm/1.00/PCDOS100.json
       B:
         path: /apps/pcx86/1983/adventmath/ADVENTMATH100.json
-    autoType: 8-10-81\\rb:\\ra:basica castle\\r
+    autoType: 8-10-81\rb:\ra:basica castle\r
 ---
 
 Adventures in Math (1983)
@@ -186,7 +186,7 @@ have been tested with PC-DOS 2.00 on a 64Kb machine, but perhaps it wasn't.
 
 The machine on this page is configured with the following "autoType" sequence:
  
-	autoType: 8-10-81\\rb:\\ra:basica castle\\r
+	autoType: 8-10-81\rb:\ra:basica castle\r
 
 which translates to:
 

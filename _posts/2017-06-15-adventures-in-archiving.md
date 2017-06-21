@@ -12,7 +12,7 @@ machines:
         path: /disks/pcx86/dos/ibm/1.00/PCDOS100.json
       B:
         path: /apps/pcx86/1983/adventmath/ADVENTMATH100.json
-    autoType: 8-10-81\\rb:\\ra:basica castle\\r
+    autoType: 8-10-81\rb:\ra:basica castle\r
 ---
 
 In October 1983, IBM released a game called "Adventures in Math", which apparently tried to make mathematics as

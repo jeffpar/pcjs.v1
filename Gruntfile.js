@@ -30,14 +30,14 @@
 
 /*
  * Overview
- * ---
+ * --------
  * Based on the specified version in package.json, we build a matching version folder in /versions
  * for each of the machine simulations; each of those folders in turn receives compiled versions of
  * the corresponding machine simulation scripts (c1p*.js and pc*.js), along with copies of both the
  * shared and machine-specific CSS and XSL stylesheets that the scripts rely on.
  *
  * Usage
- * ---
+ * -----
  *      grunt [task[:target] ...] [--rebuild]
  *
  * If no tasks are specified, the "default" task alias will be run.  If --rebuild is present,
@@ -53,7 +53,7 @@
  * it's also possible I didn't have it configured properly at the time.
  *
  * Utility Tasks
- * ---
+ * -------------
  *      grunt compile:      runs "closureCompiler" to produce compiled c1p*.js and pc*.js scripts
  *      grunt nocompile:    runs "concat" to produce uncompiled c1p*.js and pc*.js scripts
  *      grunt promote:      runs "replace" to promote all machine XML files to the current version
@@ -62,13 +62,13 @@
  * a final "grunt compile" (or "grunt --rebuild") and retest before pushing out a new release.
  *
  * The "manifester" Task
- * ---
+ * ---------------------
  * I added the "manifester" task to process manifest.xml files, which I use to record the existence
  * application archives.  "manifester" walks all the manifests and verifies that they're still valid,
  * and optionally fetches local copies of everything described.
  *
  * The "prepjs" Task
- * ---
+ * -----------------
  * I added the "prepjs" task to perform the same constant inlining that my old PHP script "inline.php"
  * used to do as part of the old "jsmachines.net" build process.  Unfortunately, Grunt appears to be
  * a real memory hog, and so "prepjs" had to be disabled until I could resolve that issue (see my notes
@@ -120,11 +120,11 @@ module.exports = function(grunt) {
      */
     var pkg = grunt.file.readJSON("package.json");
 
-    var tmpC1Pjs  = "./tmp/c1pjs/"  + pkg.version + "/c1p.js";
-    var tmpPCx86  = "./tmp/pcx86/"  + pkg.version + "/pcx86.js";
-    var tmpPC8080 = "./tmp/pc8080/" + pkg.version + "/pc8080.js";
-    var tmpPDP10  = "./tmp/pdpjs/"  + pkg.version + "/pdp10.js";
-    var tmpPDP11  = "./tmp/pdpjs/"  + pkg.version + "/pdp11.js";
+    var tmpC1Pjs  = "./versions/c1pjs/"  + pkg.version + "/c1p-uncompiled.js";
+    var tmpPCx86  = "./versions/pcx86/"  + pkg.version + "/pcx86-uncompiled.js";
+    var tmpPC8080 = "./versions/pc8080/" + pkg.version + "/pc8080-uncompiled.js";
+    var tmpPDP10  = "./versions/pdpjs/"  + pkg.version + "/pdp10-uncompiled.js";
+    var tmpPDP11  = "./versions/pdpjs/"  + pkg.version + "/pdp11-uncompiled.js";
 
     grunt.initConfig({
         pkg: pkg,               // pass the "package.json" object to initConfig() as a property, too
@@ -380,11 +380,11 @@ module.exports = function(grunt) {
                  * If/when that issue is fixed, this feature may be removed.
                  */
                 TEMPcompilerOpts: {
-                    // create_source_map: "./tmp/c1pjs/"  + pkg.version + "/c1p.map",
+                    create_source_map: "./versions/c1pjs/"  + pkg.version + "/c1p.map",
                     define: ["\"APPVERSION='" + pkg.version + "'\"", "DEBUGGER=false",
                              "\"SITEHOST='www.pcjs.org'\"", "COMPILED=true", "DEBUG=false"],
-                    // output_wrapper: "\"(function(){%output%})();//# sourceMappingURL=/tmp/c1pjs/" + pkg.version + "/c1p.map\""
-                    output_wrapper: "\"(function(){%output%})();\""
+                    output_wrapper: "\"(function(){%output%})();//# sourceMappingURL=/versions/c1pjs/" + pkg.version + "/c1p.map\""
+                 // output_wrapper: "\"(function(){%output%})();\""
                 },
                 // src: pkg.c1pJSFiles,
                 src: tmpC1Pjs,
@@ -392,11 +392,11 @@ module.exports = function(grunt) {
             },
             "c1p-dbg.js": {
                 TEMPcompilerOpts: {
-                    // create_source_map: "./tmp/c1pjs/"  + pkg.version + "/c1p-dbg.map",
+                    create_source_map: "./versions/c1pjs/"  + pkg.version + "/c1p-dbg.map",
                     define: ["\"APPVERSION='" + pkg.version + "'\"",
                              "\"SITEHOST='www.pcjs.org'\"", "COMPILED=true", "DEBUG=false"],
-                    // output_wrapper: "\"(function(){%output%})();//# sourceMappingURL=/tmp/c1pjs/" + pkg.version + "/c1p-dbg.map\""
-                    output_wrapper: "\"(function(){%output%})();\""
+                    output_wrapper: "\"(function(){%output%})();//# sourceMappingURL=/versions/c1pjs/" + pkg.version + "/c1p-dbg.map\""
+                 // output_wrapper: "\"(function(){%output%})();\""
                 },
                 // src: pkg.c1pJSFiles,
                 src: tmpC1Pjs,
@@ -404,11 +404,11 @@ module.exports = function(grunt) {
             },
             "pcx86.js": {
                 TEMPcompilerOpts: {
-                    // create_source_map: "./tmp/pcx86/"  + pkg.version + "/pcx86.map",
+                    create_source_map: "./versions/pcx86/"  + pkg.version + "/pcx86.map",
                     define: ["\"APPVERSION='" + pkg.version + "'\"", "DEBUGGER=false",
                              "\"SITEHOST='www.pcjs.org'\"", "COMPILED=true", "DEBUG=false", "BACKTRACK=false", "I386=true"],
-                    // output_wrapper: "\"(function(){%output%})();//# sourceMappingURL=/tmp/pcx86/" + pkg.version + "/pcx86.map\""
-                    output_wrapper: "\"(function(){%output%})();\""
+                    output_wrapper: "\"(function(){%output%})();//# sourceMappingURL=/versions/pcx86/" + pkg.version + "/pcx86.map\""
+                 // output_wrapper: "\"(function(){%output%})();\""
                 },
                 // src: pkg.pcX86Files,
                 src: tmpPCx86,
@@ -419,11 +419,11 @@ module.exports = function(grunt) {
                  * Technically, this is the one case we don't need to override the default 'define' settings, but maybe it's best to be explicit.
                  */
                 TEMPcompilerOpts: {
-                    // create_source_map: "./tmp/pcx86/"  + pkg.version + "/pcx86-dbg.map",
+                    create_source_map: "./versions/pcx86/"  + pkg.version + "/pcx86-dbg.map",
                     define: ["\"APPVERSION='" + pkg.version + "'\"",
                              "\"SITEHOST='www.pcjs.org'\"", "COMPILED=true", "DEBUG=false", "BACKTRACK=false", "I386=true"],
-                    // output_wrapper: "\"(function(){%output%})();//# sourceMappingURL=/tmp/pcx86/" + pkg.version + "/pcx86-dbg.map\""
-                    output_wrapper: "\"(function(){%output%})();\""
+                    output_wrapper: "\"(function(){%output%})();//# sourceMappingURL=/versions/pcx86/" + pkg.version + "/pcx86-dbg.map\""
+                 // output_wrapper: "\"(function(){%output%})();\""
                 },
                 // src: pkg.pcX86Files,
                 src: tmpPCx86,
@@ -431,11 +431,11 @@ module.exports = function(grunt) {
             },
             "pc8080.js": {
                 TEMPcompilerOpts: {
-                    // create_source_map: "./tmp/pc8080/"  + pkg.version + "/pc8080.map",
+                    create_source_map: "./versions/pc8080/"  + pkg.version + "/pc8080.map",
                     define: ["\"APPVERSION='" + pkg.version + "'\"",
                              "\"SITEHOST='www.pcjs.org'\"", "COMPILED=true", "DEBUG=false", "DEBUGGER=false"],
-                    // output_wrapper: "\"(function(){%output%})();//# sourceMappingURL=/tmp/pc8080/" + pkg.version + "/pc8080.map\""
-                    output_wrapper: "\"(function(){%output%})();\""
+                    output_wrapper: "\"(function(){%output%})();//# sourceMappingURL=/versions/pc8080/" + pkg.version + "/pc8080.map\""
+                 // output_wrapper: "\"(function(){%output%})();\""
                 },
                 // src: pkg.pc8080Files,
                 src: tmpPC8080,
@@ -446,11 +446,11 @@ module.exports = function(grunt) {
                  * Technically, this is the one case we don't need to override the default 'define' settings, but maybe it's best to be explicit.
                  */
                 TEMPcompilerOpts: {
-                    // create_source_map: "./tmp/pc8080/"  + pkg.version + "/pc8080-dbg.map",
+                    create_source_map: "./versions/pc8080/"  + pkg.version + "/pc8080-dbg.map",
                     define: ["\"APPVERSION='" + pkg.version + "'\"",
                              "\"SITEHOST='www.pcjs.org'\"", "COMPILED=true", "DEBUG=false", "DEBUGGER=true"],
-                    // output_wrapper: "\"(function(){%output%})();//# sourceMappingURL=/tmp/pc8080/" + pkg.version + "/pc8080-dbg.map\""
-                    output_wrapper: "\"(function(){%output%})();\""
+                    output_wrapper: "\"(function(){%output%})();//# sourceMappingURL=/versions/pc8080/" + pkg.version + "/pc8080-dbg.map\""
+                 // output_wrapper: "\"(function(){%output%})();\""
                 },
                 // src: pkg.pc8080Files,
                 src: tmpPC8080,
@@ -458,11 +458,11 @@ module.exports = function(grunt) {
             },
             "pdp10.js": {
                 TEMPcompilerOpts: {
-                    create_source_map: "./tmp/pdpjs/"  + pkg.version + "/pdp10.map",
+                    create_source_map: "./versions/pdpjs/"  + pkg.version + "/pdp10.map",
                     define: ["\"APPVERSION='" + pkg.version + "'\"",
                         "\"SITEHOST='www.pcjs.org'\"", "COMPILED=true", "DEBUG=false", "DEBUGGER=false"],
-                    output_wrapper: "\"(function(){%output%})();//# sourceMappingURL=/tmp/pdpjs/" + pkg.version + "/pdp10.map\""
-                    // output_wrapper: "\"(function(){%output%})();\""
+                    output_wrapper: "\"(function(){%output%})();//# sourceMappingURL=/versions/pdpjs/" + pkg.version + "/pdp10.map\""
+                 // output_wrapper: "\"(function(){%output%})();\""
                 },
                 // src: pkg.pdp10Files,
                 src: tmpPDP10,
@@ -473,11 +473,11 @@ module.exports = function(grunt) {
                  * Technically, this is the one case we don't need to override the default 'define' settings, but maybe it's best to be explicit.
                  */
                 TEMPcompilerOpts: {
-                    create_source_map: "./tmp/pdpjs/"  + pkg.version + "/pdp10-dbg.map",
+                    create_source_map: "./versions/pdpjs/"  + pkg.version + "/pdp10-dbg.map",
                     define: ["\"APPVERSION='" + pkg.version + "'\"",
                         "\"SITEHOST='www.pcjs.org'\"", "COMPILED=true", "DEBUG=false", "DEBUGGER=true"],
-                    output_wrapper: "\"(function(){%output%})();//# sourceMappingURL=/tmp/pdpjs/" + pkg.version + "/pdp10-dbg.map\""
-                    // output_wrapper: "\"(function(){%output%})();\""
+                    output_wrapper: "\"(function(){%output%})();//# sourceMappingURL=/versions/pdpjs/" + pkg.version + "/pdp10-dbg.map\""
+                 // output_wrapper: "\"(function(){%output%})();\""
                 },
                 // src: pkg.pdp10Files,
                 src: tmpPDP10,
@@ -485,11 +485,11 @@ module.exports = function(grunt) {
             },
             "pdp11.js": {
                 TEMPcompilerOpts: {
-                    create_source_map: "./tmp/pdpjs/"  + pkg.version + "/pdp11.map",
+                    create_source_map: "./versions/pdpjs/"  + pkg.version + "/pdp11.map",
                     define: ["\"APPVERSION='" + pkg.version + "'\"",
                              "\"SITEHOST='www.pcjs.org'\"", "COMPILED=true", "DEBUG=false", "DEBUGGER=false"],
-                    output_wrapper: "\"(function(){%output%})();//# sourceMappingURL=/tmp/pdpjs/" + pkg.version + "/pdp11.map\""
-                    // output_wrapper: "\"(function(){%output%})();\""
+                    output_wrapper: "\"(function(){%output%})();//# sourceMappingURL=/versions/pdpjs/" + pkg.version + "/pdp11.map\""
+                 // output_wrapper: "\"(function(){%output%})();\""
                 },
                 // src: pkg.pdp11Files,
                 src: tmpPDP11,
@@ -500,11 +500,11 @@ module.exports = function(grunt) {
                  * Technically, this is the one case we don't need to override the default 'define' settings, but maybe it's best to be explicit.
                  */
                 TEMPcompilerOpts: {
-                    create_source_map: "./tmp/pdpjs/"  + pkg.version + "/pdp11-dbg.map",
+                    create_source_map: "./versions/pdpjs/"  + pkg.version + "/pdp11-dbg.map",
                     define: ["\"APPVERSION='" + pkg.version + "'\"",
                              "\"SITEHOST='www.pcjs.org'\"", "COMPILED=true", "DEBUG=false", "DEBUGGER=true"],
-                    output_wrapper: "\"(function(){%output%})();//# sourceMappingURL=/tmp/pdpjs/" + pkg.version + "/pdp11-dbg.map\""
-                    // output_wrapper: "\"(function(){%output%})();\""
+                    output_wrapper: "\"(function(){%output%})();//# sourceMappingURL=/versions/pdpjs/" + pkg.version + "/pdp11-dbg.map\""
+                 // output_wrapper: "\"(function(){%output%})();\""
                 },
                 // src: pkg.pdp11Files,
                 src: tmpPDP11,
@@ -713,16 +713,16 @@ module.exports = function(grunt) {
         replace: {
             "fix-source-maps": {
                 src: [
-                    "./tmp/c1pjs/" + pkg.version + "/c1p*.map",
-                    "./tmp/pcx86/" + pkg.version + "/pc*.map",
-                    "./tmp/pcx8008/" + pkg.version + "/pc*.map",
-                    "./tmp/pdpjs/" + pkg.version + "/pdp*.map"
+                    "./versions/c1pjs/" + pkg.version + "/c1p*.map",
+                    "./versions/pcx86/" + pkg.version + "/pc*.map",
+                    "./versions/pcx8008/" + pkg.version + "/pc*.map",
+                    "./versions/pdpjs/" + pkg.version + "/pdp*.map"
                 ],
                 overwrite: true,
                 replacements: [
                     {
-                        from: /"sources":\s*\["\.\/tmp\//g,
-                        to: '"sources":["/tmp/'
+                        from: /"sources":\s*\["\.\/versions\//g,
+                        to: '"sources":["/versions/'
                     }
                 ]
             },
