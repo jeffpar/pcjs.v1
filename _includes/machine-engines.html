@@ -112,7 +112,7 @@ of our Markdown or XML documents.  Examples: 'automount' becomes 'autoMount', 'a
   {% endunless %}
   {% capture machine_parms %}{{ site.left_brace }}autoMount:{{ machine_autoMount }}{{ machine_autoPower }}{{ machine_autoStart }}{{ machine_autoType }}{{ machine_drives }},resume:"{{ machine.resume }}",state:"{{ machine.state }}",commands:"{{ machine.commands }}",messages:"{{ machine.messages }}",connection:"{{ machine.connection }}"{{ site.right_brace }}{% endcapture %}
   {% if site.pcjs.compiled == true and machine.uncompiled != true %}
-    {% capture machine_script %}<!--suppress BadExpressionStatementJS -->
+    {% capture machine_script %}
       <script type="text/javascript" src="{{ site.baseurl }}/versions/{{ machine_app }}/{{ site.pcjs.version }}/{{ machine_file }}.js"></script>{% endcapture %}
     {% unless machine_scripts contains machine_script %}
       {{ machine_script }}
