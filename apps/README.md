@@ -1,8 +1,6 @@
 ---
 layout: page
 title: Software Archives
-menu_title: Software
-menu_order: 7
 permalink: /apps/
 ---
 
