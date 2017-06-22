@@ -35,6 +35,7 @@
 if (typeof module != "undefined") {     // we can't simply test for NODE, since defines.js hasn't been loaded yet
     var fs      = require("fs");
     var path    = require("path");
+    var glob    = require("glob");
     var http    = require("http");
     var mkdirp  = require("mkdirp");
     var crypto  = require("crypto");
@@ -840,6 +841,12 @@ DiskDump.outputDisk = function(err, disk, sDiskPath, sOutputFile, fOverwrite, sM
                     if (disk.bufDisk) {
                         md5Disk = crypto.createHash('md5').update(disk.bufDisk.buf || disk.bufDisk).digest('hex');
                     }
+                    /*
+                     * Before calling updateManifest(), see if we have any aManifestInfo entries, and if not, see if
+                     * there's a folder that the original files have been "dumped" into, from which we can create those
+                     * entries...
+                     */
+                    disk.buildManifestInfo(sDiskPath);
                     fUnchanged = DiskDump.updateManifest(disk, disk.sManifestFile, sDiskPath, sOutputFile, true, sManifestTitle, md5Disk, md5JSON);
                 }
 
@@ -1018,7 +1025,7 @@ DiskDump.updateManifest = function(disk, sManifestFile, sDiskPath, sOutputFile, 
             var sAttrs = "";
             var fileInfo = disk.aManifestInfo[i];
             if (fileInfo.FILE_SIZE < 0) continue;       // ignore non-file entries
-            var sDir = path.dirname(fileInfo.FILE_PATH) + '/';
+            var sDir = path.dirname(fileInfo.FILE_PATH) + path.sep;
             if (sBaseDir === null) sBaseDir = sDir;
             sAttrs += ' size="' + fileInfo.FILE_SIZE + '"';
             sAttrs += ' time="' + usr.formatDate("Y-m-d H:i:s", fileInfo.FILE_TIME) + '"';
@@ -1569,6 +1576,36 @@ DiskDump.prototype.addManifestInfo = function(fileInfo)
 };
 
 /**
+ * buildManifestInfo(sImage)
+ *
+ * @this {DiskDump}
+ * @param {string} sImage
+ */
+DiskDump.prototype.buildManifestInfo = function(sImage)
+{
+    if (!this.aManifestInfo.length) {
+        var sDir = sImage.replace(/\.(img|json)/, "");
+        if (sDir != sImage) {
+            sDir = sDir + path.sep;
+            var asFiles = glob.sync(sDir + "**");
+            for (var i = 0; i < asFiles.length; i++) {
+                var sFile = asFiles[i];
+                var fileInfo = {};
+                fileInfo.FILE_PATH = sFile;
+                fileInfo.FILE_NAME = sFile.substr(sDir.length);
+                if (!fileInfo.FILE_NAME) continue;
+                var stats = fs.statSync(sFile);
+                fileInfo.FILE_ATTR = stats.isDirectory()? DiskDump.ATTR_SUBDIR : DiskDump.ATTR_ARCHIVE;
+                fileInfo.FILE_SIZE = stats.size;
+                fileInfo.FILE_TIME = stats.mtime;
+                this.validateTime(fileInfo.FILE_TIME);
+                this.addManifestInfo(fileInfo);
+            }
+        }
+    }
+};
+
+/**
  * isTextFile(sFileName)
  *
  * @this {DiskDump}
@@ -1743,7 +1780,7 @@ DiskDump.prototype.readPath = function(sPath, done)
     for (var iFile = 0; iFile < asFiles.length; iFile++) {
         fileInfo = {};
         var sFileName = asFiles[iFile];
-        var i = sFileName.lastIndexOf('/');
+        var i = sFileName.lastIndexOf(path.sep);
         if (i >= 0) {
             if (sFileName.indexOf("..") < 0) {
                 sDefaultPath = sFileName.substr(0, i);
