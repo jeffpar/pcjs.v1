@@ -74352,7 +74352,8 @@ class Computer extends Component {
                  */
                 if (!component.powerUp(data, fRepower) && data) {
 
-                    Component.error("Unable to restore state for " + component.type);
+                    component.notice("Unable to restore hardware state");
+
                     /*
                      * If this is a resume error for a machine that also has a predefined state
                      * AND we're not restoring from that state, then throw away the current state,
