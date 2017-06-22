@@ -45,9 +45,9 @@ Demos
 Some pre-configured machines are shown below, ready to run BASIC, DOS, Windows, OS/2, and other assorted software.
 
 {% include screenshot.html src="/apps/pcx86/1981/visicalc/thumbnail.jpg" width="200" height="120" title="IBM PC running VisiCalc" link="/apps/pcx86/1981/visicalc/" %}
-{% include screenshot.html src="/devices/pcx86/machine/5150/cga/64kb/donkey/thumbnail.jpg" width="200" height="120" title="IBM PC running DONKEY.BAS" link="/devices/pcx86/machine/5150/cga/64kb/donkey/" %}
+{% include screenshot.html src="/apps/pcx86/1981/donkey/thumbnail.jpg" width="200" height="120" title="IBM PC running DONKEY.BAS" link="/apps/pcx86/1981/donkey/" %}
 {% include screenshot.html src="/disks/pcx86/os2/ibm/1.0/thumbnail.jpg" width="200" height="120" title="IBM PC AT w/EGA, OS/2 1.0" link="/disks/pcx86/os2/ibm/1.0/" %}
-{% include screenshot.html src="/devices/pcx86/machine/5160/cga/256kb/win101/thumbnail.jpg" width="200" height="120" title="IBM PC XT w/CGA, Windows 1.01" link="/devices/pcx86/machine/5160/cga/256kb/win101/" %}
+{% include screenshot.html src="/disks/pcx86/windows/1.01/cga/thumbnail.jpg" width="200" height="120" title="IBM PC XT w/CGA, Windows 1.01" link="/disks/pcx86/windows/1.01/cga/" %}
 {% include screenshot.html src="/disks/pcx86/windows/1.01/thumbnail.jpg" width="200" height="120" title="IBM PC XT w/EGA, Windows 1.01" link="/disks/pcx86/windows/1.01/" %}
 {% include screenshot.html src="/disks/pcx86/windows/2.0x/thumbnail.jpg" width="200" height="120" title="COMPAQ DeskPro 386, Windows/386 2.01" link="/disks/pcx86/windows/2.0x/" %}
 {% include screenshot.html src="/disks/pcx86/windows/3.00/thumbnail.jpg" width="200" height="120" title="IBM PC AT w/EGA, Windows 3.00" link="/disks/pcx86/windows/3.00/" %}
