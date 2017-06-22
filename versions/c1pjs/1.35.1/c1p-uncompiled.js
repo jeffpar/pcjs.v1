@@ -2203,6 +2203,7 @@ class Component {
             busy:       false,
             busyCancel: false,
             powered:    false,
+            unloading:  false,
             error:      false
         };
 
@@ -2921,7 +2922,8 @@ class Component {
      * @this {Component}
      * @return {string}
      */
-    toString() {
+    toString()
+    {
         return (this.name? this.name : (this.id || this.type));
     }
 
@@ -2931,7 +2933,8 @@ class Component {
      * @this {Component}
      * @return {number} unique machine number
      */
-    getMachineNum() {
+    getMachineNum()
+    {
         var nMachine = 1;
         if (this.idMachine) {
             var aDigits = this.idMachine.match(/\d+/);
@@ -2953,7 +2956,8 @@ class Component {
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
-    setBinding(sHTMLType, sBinding, control, sValue) {
+    setBinding(sHTMLType, sBinding, control, sValue)
+    {
         switch (sBinding) {
         case "clear":
             if (!this.bindings[sBinding]) {
@@ -3026,7 +3030,8 @@ class Component {
      * @param {string} [s] is the message text
      * @param {string} [type] is the message type
      */
-    log(s, type) {
+    log(s, type)
+    {
         if (!COMPILED) {
             Component.log(s, type || this.id || this.type);
         }
@@ -3047,7 +3052,8 @@ class Component {
      * @param {boolean|number} f is the expression asserted to be true
      * @param {string} [s] is a description of the assertion to be displayed or logged on failure
      */
-    assert(f, s) {
+    assert(f, s)
+    {
         if (DEBUG) {
             if (!f) {
                 s = "assertion failure in " + (this.id || this.type) + (s? ": " + s : "");
@@ -3094,7 +3100,8 @@ class Component {
      * @param {string} [type] is the message type
      * @param {string} [id] is the caller's ID, if any
      */
-    println(s, type, id) {
+    println(s, type, id)
+    {
         Component.println(s, type, id || this.id);
     }
 
@@ -3106,7 +3113,8 @@ class Component {
      *
      * @param {string} s is the message text
      */
-    status(s) {
+    status(s)
+    {
         this.println(this.idComponent + ": " + s);
     }
 
@@ -3122,7 +3130,18 @@ class Component {
      * @param {boolean} [fPrintOnly]
      * @param {string} [id] is the caller's ID, if any
      */
-    notice(s, fPrintOnly, id) {
+    notice(s, fPrintOnly, id)
+    {
+        if (!fPrintOnly) {
+            /*
+             * See if the associated computer, if any, is "unloading"....
+             */
+            var computer = Component.getComponentByType("Computer", this.id);
+            if (computer && computer.flags.unloading) {
+                console.log("ignoring notice during unload: " + s);
+                return;
+            }
+        }
         Component.notice(s, fPrintOnly, id || this.type);
     }
 
@@ -3134,7 +3153,8 @@ class Component {
      * @this {Component}
      * @param {string} s describes a fatal error condition
      */
-    setError(s) {
+    setError(s)
+    {
         this.flags.error = true;
         this.notice(s);         // TODO: Any cases where we should still prefix this string with "Fatal error: "?
     }
@@ -3158,7 +3178,8 @@ class Component {
      * @this {Component}
      * @return {boolean} true if a fatal error condition exists, false if not
      */
-    isError() {
+    isError()
+    {
         if (this.flags.error) {
             this.println(this.toString() + " error");
             return true;
@@ -3179,7 +3200,8 @@ class Component {
      * @param {function()} [fnReady]
      * @return {boolean} true if the component is in a "ready" state, false if not
      */
-    isReady(fnReady) {
+    isReady(fnReady)
+    {
         if (fnReady) {
             if (this.flags.ready) {
                 fnReady();
@@ -3199,7 +3221,8 @@ class Component {
      * @this {Component}
      * @param {boolean} [fReady] is assumed to indicate "ready" unless EXPLICITLY set to false
      */
-    setReady(fReady) {
+    setReady(fReady)
+    {
         if (!this.flags.error) {
             this.flags.ready = (fReady !== false);
             if (this.flags.ready) {
@@ -3220,7 +3243,8 @@ class Component {
      * @param {boolean} [fCancel] is set to true to cancel a "busy" state
      * @return {boolean} true if "busy", false if not
      */
-    isBusy(fCancel) {
+    isBusy(fCancel)
+    {
         if (this.flags.busy) {
             if (fCancel) {
                 this.flags.busyCancel = true;
@@ -3240,7 +3264,8 @@ class Component {
      * @param {boolean} fBusy
      * @return {boolean}
      */
-    setBusy(fBusy) {
+    setBusy(fBusy)
+    {
         if (this.flags.busyCancel) {
             this.flags.busy = false;
             this.flags.busyCancel = false;
@@ -3262,7 +3287,8 @@ class Component {
      * @param {boolean} [fRepower] is true if this is "repower" notification
      * @return {boolean} true if successful, false if failure
      */
-    powerUp(data, fRepower) {
+    powerUp(data, fRepower)
+    {
         this.flags.powered = true;
         return true;
     }
@@ -3275,7 +3301,8 @@ class Component {
      * @param {boolean} [fShutdown]
      * @return {Object|boolean} component state if fSave; otherwise, true if successful, false if failure
      */
-    powerDown(fSave, fShutdown) {
+    powerDown(fSave, fShutdown)
+    {
         if (fShutdown) this.flags.powered = false;
         return true;
     }
@@ -3289,7 +3316,8 @@ class Component {
      * @param {number} [bitsMessage] is zero or more MESSAGE_* category flag(s)
      * @return {boolean} true if all specified message enabled, false if not
      */
-    messageEnabled(bitsMessage) {
+    messageEnabled(bitsMessage)
+    {
         if (DEBUGGER && this.dbg) {
             if (this === this.dbg) {
                 bitsMessage |= 0;
@@ -3313,7 +3341,8 @@ class Component {
      * @param {number|boolean} [bitsMessage] is zero or more MESSAGE_* category flag(s)
      * @param {boolean} [fAddress] is true to display the current address
      */
-    printMessage(sMessage, bitsMessage, fAddress) {
+    printMessage(sMessage, bitsMessage, fAddress)
+    {
         if (DEBUGGER && this.dbg) {
             if (bitsMessage === true || this.messageEnabled(bitsMessage | 0)) {
                 this.dbg.message(sMessage, fAddress);
@@ -3335,7 +3364,8 @@ class Component {
      * @param {number|null} [bIn] is the input value, if known, on an input operation
      * @param {number|boolean} [bitsMessage] is zero or more MESSAGE_* category flag(s)
      */
-    printMessageIO(port, bOut, addrFrom, name, bIn, bitsMessage) {
+    printMessageIO(port, bOut, addrFrom, name, bIn, bitsMessage)
+    {
         if (DEBUGGER && this.dbg) {
             if (bitsMessage === true) {
                 bitsMessage = 0;
