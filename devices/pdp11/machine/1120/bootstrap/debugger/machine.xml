@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pdpjs/1.35.0/machine.xsl"?>
-<machine id="test1120" type="pdp11" border="1" pos="center" background="#FAEBD7">
+<?xml-stylesheet type="text/xsl" href="/versions/pdpjs/1.35.1/machine.xsl"?>
+<machine id="test1120" type="pdp11" border="1" pos="center" background="default">
 	<name pos="center">PDP-11/20: 16Kb, Bootstrap Loader, Debugger</name>
 	<computer id="computer" busWidth="16"/>
 	<cpu id="cpu" model="1120" cycles="6666667"/>

@@ -14,6 +14,7 @@
 	<xsl:variable name="APPCLASS">c1pjs</xsl:variable>
 	<xsl:variable name="APPVERSION">1.x.x</xsl:variable>
 	<xsl:variable name="SITEHOST">www.pcjs.org</xsl:variable>
+	<xsl:variable name="BGNDCOLOR">#FAEBD7</xsl:variable>
 
 	<xsl:template name="componentStyles">
 		<link rel="stylesheet" type="text/css" href="/versions/{$APPCLASS}/{$APPVERSION}/components.css"/>
@@ -142,7 +143,10 @@
 		</xsl:variable>
 		<xsl:variable name="style">
 			<xsl:if test="$component = 'machine'">overflow:auto;width:100%;</xsl:if>
-			<xsl:if test="@background">background-color:<xsl:value-of select="@background"/>;</xsl:if>
+			<xsl:if test="@background">
+				<xsl:if test="@background = 'default'">background-color:<xsl:value-of select="$BGNDCOLOR"/>;</xsl:if>
+				<xsl:if test="@background != 'default'">background-color:<xsl:value-of select="@background"/>;</xsl:if>
+			</xsl:if>
 			<xsl:if test="@style"><xsl:value-of select="@style"/></xsl:if>
 		</xsl:variable>
 		<xsl:variable name="componentClass">

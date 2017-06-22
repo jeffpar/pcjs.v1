@@ -170,11 +170,11 @@ Embedding Screenshots with Jekyll
 
 I created screenshot.html in the **_includes** folder, so that I could do this:
 
-	{% include screenshot.html src="/devices/pcx86/machine/5150/cga/64kb/donkey/thumbnail.jpg" width="200" height="100" link="/devices/pcx86/machine/5150/cga/64kb/donkey/" title="IBM PC running DONKEY.BAS" %}
+	{% include screenshot.html src="/apps/pcx86/1981/donkey/thumbnail.jpg" width="200" height="100" link="/apps/pcx86/1981/donkey/" title="IBM PC running DONKEY.BAS" %}
 
 instead of this:
 
-	[<img src="/devices/pcx86/machine/5150/cga/64kb/donkey/thumbnail.jpg" width="200" height="100"/>](/devices/pcx86/machine/5150/cga/64kb/donkey/ "IBM PC running DONKEY.BAS")
+	[<img src="/apps/pcx86/1981/donkey/thumbnail.jpg" width="200" height="100"/>](/apps/pcx86/1981/donkey/ "IBM PC running DONKEY.BAS")
 
 The latter is better for pure Markdown environments, but the former enables Jekyll to properly style screenshots.
 

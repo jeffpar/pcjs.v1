@@ -9,6 +9,7 @@ IBM PC Application Demos
 
 Below are selected [PCx86](/docs/about/pcx86/) demos of classic IBM PC applications:
 
+* [DONKEY.BAS (1981)](1981/donkey/)
 * [VisiCalc (1981)](1981/visicalc/)
 * [Executive Suite (1982)](1982/esuite/)
 * [RatBas (1982)](1982/ratbas/)

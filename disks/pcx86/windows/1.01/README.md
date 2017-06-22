@@ -8,27 +8,26 @@ redirect_from:
   - /devices/pc/machine/5160/ega/640kb/win101/debugger/
   - /disks/pc/windows/1.01/
 machines:
-  - type: pcx86
-    id: ibm5160
-    state: ibm5160-ega.json
+  - id: ibm5160
+    type: pcx86
+    state: /disks/pcx86/windows/1.01/state.json
     config: /devices/pcx86/machine/5160/ega/640kb/machine.xml
     drives: '[{name:"10Mb Hard Disk",type:3,path:"/disks/pcx86/fixed/10mb/PCDOS200-WIN101-EGA.json"}]'
 ---
 
 Microsoft Windows 1.01
----
+----------------------
 
-Microsoft Windows 1.01, the first public version of Windows, was released on November 20, 1985.  It is shown
-here running on an IBM PC XT (Model 5160) with an EGA Display.
-
-You can also run [Windows 1.01 with a CGA Display](/devices/pcx86/machine/5160/cga/256kb/win101/).
-
-Directory listings of the five 360Kb distribution diskettes are provided [below](#directory-listings). 
+Microsoft Windows 1.01, the first public version of Windows, was released on November 20, 1985.
+It is shown here running on an IBM PC XT (Model 5160) with an EGA Display.  You can also run
+[Windows 1.01 with a CGA Display](cga/).
 
 {% include machine.html id="ibm5160" %}
 
+Directory listings of the five 360Kb distribution diskettes are provided [below](#directory-listings). 
+
 Directory Listings
----
+------------------
 
 ### Directory of Windows 1.01 (SETUP)
 

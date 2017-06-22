@@ -7,7 +7,7 @@ permalink: /docs/
 ---
 
 Documentation
----
+-------------
 
 Help is available for the following PCjs Machines:
 

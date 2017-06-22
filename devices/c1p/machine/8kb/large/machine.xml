@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/c1pjs/1.35.0/machine.xsl"?>
-<machine id="c1pLarge" type="c1p" border="1" pos="center" background="#FAEBD7" style="padding-bottom:8px">
+<?xml-stylesheet type="text/xsl" href="/versions/c1pjs/1.35.1/machine.xsl"?>
+<machine id="c1pLarge" type="c1p" border="1" pos="center" background="default" style="padding-bottom:8px">
 	<name pos="center">OSI Challenger 1P (circa 1978)</name>
 	<computer id="c1p" name="Challenger 1P">
 		<module type="cpu" refid="cpu6502" start="0x0000" end="0xffff"/>

@@ -35,6 +35,7 @@
 if (typeof module != "undefined") {     // we can't simply test for NODE, since defines.js hasn't been loaded yet
     var fs      = require("fs");
     var path    = require("path");
+    var glob    = require("glob");
     var http    = require("http");
     var mkdirp  = require("mkdirp");
     var crypto  = require("crypto");
@@ -840,6 +841,12 @@ DiskDump.outputDisk = function(err, disk, sDiskPath, sOutputFile, fOverwrite, sM
                     if (disk.bufDisk) {
                         md5Disk = crypto.createHash('md5').update(disk.bufDisk.buf || disk.bufDisk).digest('hex');
                     }
+                    /*
+                     * Before calling updateManifest(), see if we have any aManifestInfo entries, and if not, see if
+                     * there's a folder that the original files have been "dumped" into, from which we can create those
+                     * entries...
+                     */
+                    disk.buildManifestInfo(sDiskPath);
                     fUnchanged = DiskDump.updateManifest(disk, disk.sManifestFile, sDiskPath, sOutputFile, true, sManifestTitle, md5Disk, md5JSON);
                 }
 
@@ -992,7 +999,7 @@ DiskDump.updateManifest = function(disk, sManifestFile, sDiskPath, sOutputFile, 
         var size = 0, sCHS = "";
         if (disk.dataDisk) {
             sCHS = disk.dataDisk.length + ':' + disk.dataDisk[0].length + ':' + disk.dataDisk[0][0].length;
-            size = disk.dataDisk.length * disk.dataDisk[0].length * disk.dataDisk[0][0].length * disk.dataDisk[0][0][0].length;
+            size = disk.dataDisk.length * disk.dataDisk[0].length * disk.dataDisk[0][0].length * (disk.dataDisk[0][0][0].length || 512);
         }
         var sXMLDisk = '\t<disk id="' + sIDDisk + '"';
         sXMLDisk += (size? ' size="' + size + '"' : '');
@@ -1018,7 +1025,7 @@ DiskDump.updateManifest = function(disk, sManifestFile, sDiskPath, sOutputFile, 
             var sAttrs = "";
             var fileInfo = disk.aManifestInfo[i];
             if (fileInfo.FILE_SIZE < 0) continue;       // ignore non-file entries
-            var sDir = path.dirname(fileInfo.FILE_PATH) + '/';
+            var sDir = path.dirname(fileInfo.FILE_PATH) + path.sep;
             if (sBaseDir === null) sBaseDir = sDir;
             sAttrs += ' size="' + fileInfo.FILE_SIZE + '"';
             sAttrs += ' time="' + usr.formatDate("Y-m-d H:i:s", fileInfo.FILE_TIME) + '"';
@@ -1569,6 +1576,36 @@ DiskDump.prototype.addManifestInfo = function(fileInfo)
 };
 
 /**
+ * buildManifestInfo(sImage)
+ *
+ * @this {DiskDump}
+ * @param {string} sImage
+ */
+DiskDump.prototype.buildManifestInfo = function(sImage)
+{
+    if (!this.aManifestInfo.length) {
+        var sDir = sImage.replace(/\.(img|json)/, "");
+        if (sDir != sImage) {
+            sDir = sDir + path.sep;
+            var asFiles = glob.sync(sDir + "**");
+            for (var i = 0; i < asFiles.length; i++) {
+                var sFile = asFiles[i];
+                if (!sFile.substr(sDir.length)) continue;
+                var fileInfo = {};
+                fileInfo.FILE_PATH = sFile;
+                fileInfo.FILE_NAME = path.basename(sFile);
+                var stats = fs.statSync(sFile);
+                fileInfo.FILE_ATTR = stats.isDirectory()? DiskDump.ATTR_SUBDIR : DiskDump.ATTR_ARCHIVE;
+                fileInfo.FILE_SIZE = stats.size;
+                fileInfo.FILE_TIME = stats.mtime;
+                this.validateTime(fileInfo.FILE_TIME);
+                this.addManifestInfo(fileInfo);
+            }
+        }
+    }
+};
+
+/**
  * isTextFile(sFileName)
  *
  * @this {DiskDump}
@@ -1743,7 +1780,7 @@ DiskDump.prototype.readPath = function(sPath, done)
     for (var iFile = 0; iFile < asFiles.length; iFile++) {
         fileInfo = {};
         var sFileName = asFiles[iFile];
-        var i = sFileName.lastIndexOf('/');
+        var i = sFileName.lastIndexOf(path.sep);
         if (i >= 0) {
             if (sFileName.indexOf("..") < 0) {
                 sDefaultPath = sFileName.substr(0, i);
@@ -2755,6 +2792,7 @@ DiskDump.prototype.convertToJSON = function()
                 for (i = DiskAPI.BPB.SECTOR_BYTES; i < DiskAPI.BPB.LARGE_SECS+4; i++) {
                     this.bufDisk.writeUInt8(DiskDump.aDefaultBPBs[iBPB][i] || 0, offBootSector + i);
                 }
+                console.log("warning: BPB has been updated");
             }
             else if (bByte0 == 0xF6 && bByte1 == 0xF6) {
                 /*
@@ -2771,12 +2809,16 @@ DiskDump.prototype.convertToJSON = function()
             }
 
         }
-        if (fBPBExists) {
+        if (fBPBExists && this.bufDisk.readUInt16LE(offBootSector + DiskAPI.BOOT.SIG_OFFSET) == DiskAPI.BOOT.SIGNATURE) {
             /*
              * Overwrite the OEM string with our own, so that people know how the image originated.  We do this
              * only for disks with pre-existing BPBs; it's not safe for pre-2.0 disks (and non-DOS disks, obviously).
+             *
+             * The signature check is another pre-2.0 disk check, to avoid misinterpreting any BPB that we might have
+             * previously added ourselves as an original BPB.
              */
             this.bufDisk.write(DiskDump.PCJS_OEM, DiskAPI.BOOT.OEM_STRING + offBootSector, DiskDump.PCJS_OEM.length);
+            console.log("warning: OEM string has been updated");
         }
         if (!nHeads) {
             /*
@@ -3331,6 +3373,7 @@ DiskDump.prototype.convertToIMG = function()
                      * Overwrite the OEM string with our own, so that people know how the image originated.
                      */
                     buf.write(DiskDump.PCJS_OEM, DiskAPI.BOOT.OEM_STRING, DiskDump.PCJS_OEM.length);
+                    console.log("warning: OEM string has been updated");
                 }
             }
         } catch(err) {
