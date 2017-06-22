@@ -1360,7 +1360,7 @@ class Computer extends Component {
              * I used to bypass the prompt if this.resume == Computer.RESUME_AUTO, setting fSave to true automatically,
              * but that gives the user no means of resetting a resumable machine that contains errors in its resume state.
              */
-            var fSave = (/* this.resume == Computer.RESUME_AUTO || */ Component.confirmUser("Click OK to save changes to this " + PCX86.APPNAME + " machine.\n\nWARNING: If you CANCEL, all disk changes will be discarded."));
+            var fSave = (/* this.resume == Computer.RESUME_AUTO || */ this.flags.unloading || Component.confirmUser("Click OK to save changes to this " + PCX86.APPNAME + " machine.\n\nWARNING: If you CANCEL, all disk changes will be discarded."));
             this.powerOff(fSave, true);
             /*
              * Forcing the page to reload is an expedient option, but ugly. It's preferable to call powerOn()
