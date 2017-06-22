@@ -15,7 +15,7 @@ Browse these PCjs Disk Libraries:
 * [Challenger 1P](c1p/)
 * [DEC](dec/)
 
-Additional selected software is available in the PCjs [Application Demos](/apps/).
+Additional software is available in the [Application Archives](/apps/).
 
 ---
 
