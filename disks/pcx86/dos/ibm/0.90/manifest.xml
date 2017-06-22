@@ -30,6 +30,8 @@
 		<file size="1408" time="1981-04-12 23:00:00" attr="0x20">FCOMP.COM</file>
 		<file size="2048" time="1981-05-29 00:00:00" attr="0x20">FORMAT.COM</file>
 		<file size="483" time="1981-05-07 00:00:00" attr="0x20">HEX2BIN.COM</file>
+		<file size="2560" time="1981-05-29 00:00:00" attr="0x20">IBMBIO.COM</file>
+		<file size="5566" time="1981-05-29 00:00:00" attr="0x20">IBMDOS.COM</file>
 		<file size="768" time="1981-04-22 23:00:00" attr="0x20">KILO.BAS</file>
 		<file size="675" time="1980-01-01 00:00:02" attr="0x20">MODE.COM</file>
 		<file size="128" time="1981-04-22 23:00:00" attr="0x20">MOVBAS.COM</file>
