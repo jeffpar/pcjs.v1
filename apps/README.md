@@ -1,11 +1,8 @@
 ---
 layout: page
 title: Software Archives
-<<<<<<< HEAD
-=======
 menu_title: Apps
 menu_order: 2
->>>>>>> master
 permalink: /apps/
 ---
 
