@@ -7,5 +7,39 @@
 	<category>Operating System</category>
 	<author>IBM/Microsoft</author>
 	<releaseDate/>
-	<disk id="disk01" size="163840" chs="40:1:8" img="archive/PCDOS090.img" href="/disks/pcx86/dos/ibm/0.90/PCDOS090.json" md5="ee6aff11f396964e2420eab99d64da42" md5json="8a454476d5ce27578c72a4b0199a0d62"/>
+	<disk id="disk01" size="163840" chs="40:1:8" img="archive/PCDOS090.img" href="/disks/pcx86/dos/ibm/0.90/PCDOS090.json" md5="ee6aff11f396964e2420eab99d64da42" md5json="4b865ba5bf03d2b4f1ef2945c262ec46">
+		<file size="1792" time="1981-04-23 23:00:00" attr="0x20">20HAL.COM</file>
+		<file size="6389" time="1981-05-15 00:00:00" attr="0x20">ASM.COM</file>
+		<file size="24" time="1980-01-01 00:00:02" attr="0x20">AUTOEXEC.BAK</file>
+		<file size="11008" time="1981-06-04 00:00:00" attr="0x20">BAS18.COM</file>
+		<file size="14976" time="1981-06-04 00:00:00" attr="0x20">BAS18A.COM</file>
+		<file size="11008" time="1981-06-04 00:00:00" attr="0x20">BASIC.COM</file>
+		<file size="14976" time="1981-06-04 00:00:00" attr="0x20">BASICA.COM</file>
+		<file size="1224" time="1981-05-30 00:00:00" attr="0x20">CHKDSK.COM</file>
+		<file size="384" time="1981-06-01 00:00:00" attr="0x20">CIRCLE.MAC</file>
+		<file size="2576" time="1981-05-29 00:00:00" attr="0x20">COMMAND.COM</file>
+		<file size="3561" time="1981-06-05 00:00:00" attr="0x20">COMMENTS</file>
+		<file size="3560" time="1981-06-05 00:00:00" attr="0x20">COMMENTS.BAK</file>
+		<file size="256" time="1981-04-14 23:00:00" attr="0x20">COMP.COM</file>
+		<file size="3200" time="1981-04-14 23:00:00" attr="0x20">CONVERT.COM</file>
+		<file size="402" time="1981-04-30 00:00:00" attr="0x20">CUBE.DAT</file>
+		<file size="245" time="1981-05-20 00:00:00" attr="0x20">DATE.COM</file>
+		<file size="5450" time="1981-05-27 00:00:00" attr="0x20">DEBUG.COM</file>
+		<file size="1211" time="1981-06-04 00:00:00" attr="0x20">DISKCOPY.COM</file>
+		<file size="2231" time="1981-05-29 00:00:00" attr="0x20">EDLIN.COM</file>
+		<file size="1408" time="1981-04-12 23:00:00" attr="0x20">FCOMP.COM</file>
+		<file size="2048" time="1981-05-29 00:00:00" attr="0x20">FORMAT.COM</file>
+		<file size="483" time="1981-05-07 00:00:00" attr="0x20">HEX2BIN.COM</file>
+		<file size="768" time="1981-04-22 23:00:00" attr="0x20">KILO.BAS</file>
+		<file size="675" time="1980-01-01 00:00:02" attr="0x20">MODE.COM</file>
+		<file size="128" time="1981-04-22 23:00:00" attr="0x20">MOVBAS.COM</file>
+		<file size="32768" time="1981-04-24 23:00:00" attr="0x20">RBAS.COM</file>
+		<file size="1792" time="1981-06-01 00:00:00" attr="0x20">SHIPS.MAC</file>
+		<file size="5120" time="1981-05-22 00:00:00" attr="0x20">SPCWAR.BAS</file>
+		<file size="896" time="1981-06-03 00:00:00" attr="0x20">SYS.COM</file>
+		<file size="3072" time="1980-01-01 00:00:02" attr="0x20">THREED.BAS</file>
+		<file size="243" time="1981-05-19 00:00:00" attr="0x20">TIME.COM</file>
+		<file size="2432" time="1981-05-22 00:00:00" attr="0x20">TTY.ASC</file>
+		<file size="26" time="1981-04-23 23:00:00" attr="0x20">VCOPY.BAT</file>
+	</disk>
 </manifest>
