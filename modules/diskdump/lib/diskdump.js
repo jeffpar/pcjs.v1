@@ -999,7 +999,7 @@ DiskDump.updateManifest = function(disk, sManifestFile, sDiskPath, sOutputFile, 
         var size = 0, sCHS = "";
         if (disk.dataDisk) {
             sCHS = disk.dataDisk.length + ':' + disk.dataDisk[0].length + ':' + disk.dataDisk[0][0].length;
-            size = disk.dataDisk.length * disk.dataDisk[0].length * disk.dataDisk[0][0].length * disk.dataDisk[0][0][0].length;
+            size = disk.dataDisk.length * disk.dataDisk[0].length * disk.dataDisk[0][0].length * (disk.dataDisk[0][0][0].length || 512);
         }
         var sXMLDisk = '\t<disk id="' + sIDDisk + '"';
         sXMLDisk += (size? ' size="' + size + '"' : '');
@@ -1590,10 +1590,10 @@ DiskDump.prototype.buildManifestInfo = function(sImage)
             var asFiles = glob.sync(sDir + "**");
             for (var i = 0; i < asFiles.length; i++) {
                 var sFile = asFiles[i];
+                if (!sFile.substr(sDir.length)) continue;
                 var fileInfo = {};
                 fileInfo.FILE_PATH = sFile;
-                fileInfo.FILE_NAME = sFile.substr(sDir.length);
-                if (!fileInfo.FILE_NAME) continue;
+                fileInfo.FILE_NAME = path.basename(sFile);
                 var stats = fs.statSync(sFile);
                 fileInfo.FILE_ATTR = stats.isDirectory()? DiskDump.ATTR_SUBDIR : DiskDump.ATTR_ARCHIVE;
                 fileInfo.FILE_SIZE = stats.size;
