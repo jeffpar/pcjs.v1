@@ -1543,6 +1543,8 @@ class Computer8080 extends Component {
             var computer = /** @type {Computer8080} */ (Component.getComponentByType("Computer", parmsComputer['id']));
             if (computer) {
 
+                computer.flags.unloading = false;
+
                 if (DEBUG && computer.messageEnabled()) {
                     computer.printMessage("onShow(" + computer.fInitialized + "," + computer.flags.powered + ")");
                 }
@@ -1596,6 +1598,11 @@ class Computer8080 extends Component {
             var parmsComputer = Component.getComponentParms(eComputer);
             var computer = /** @type {Computer8080} */ (Component.getComponentByType("Computer", parmsComputer['id']));
             if (computer) {
+
+                /*
+                 * Added a new flag that Component functions (eg, notice()) should check before alerting the user.
+                 */
+                computer.flags.unloading = true;
 
                 if (DEBUG && computer.messageEnabled()) {
                     computer.printMessage("onExit(" + computer.flags.powered + ")");
