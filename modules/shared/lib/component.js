@@ -937,9 +937,11 @@ class Component {
                  * @param {string} s
                  * @param {boolean} [fPrintOnly]
                  * @param {string} [id]
+                 * @return {boolean}
                  */
                 this.notice = function noticePanel(s, fPrintOnly, id) {
                     this.println(s, this.idComponent);
+                    return true;
                 };
             }
             return true;
@@ -1060,6 +1062,7 @@ class Component {
      * @param {string} s is the message text
      * @param {boolean} [fPrintOnly]
      * @param {string} [id] is the caller's ID, if any
+     * @return {boolean}
      */
     notice(s, fPrintOnly, id)
     {
@@ -1070,10 +1073,11 @@ class Component {
             var computer = Component.getComponentByType("Computer", this.id);
             if (computer && computer.flags.unloading) {
                 console.log("ignoring notice during unload: " + s);
-                return;
+                return false;
             }
         }
         Component.notice(s, fPrintOnly, id || this.type);
+        return true;
     }
 
     /**

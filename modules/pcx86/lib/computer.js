@@ -680,28 +680,29 @@ class Computer extends Component {
                  */
                 if (!component.powerUp(data, fRepower) && data) {
 
-                    component.notice("Unable to restore hardware state");
-
-                    /*
-                     * If this is a resume error for a machine that also has a predefined state
-                     * AND we're not restoring from that state, then throw away the current state,
-                     * prevent any new state from being created, and then force a reload, which will
-                     * hopefully restore us to the functioning predefined state.
-                     *
-                     * TODO: Considering doing this in ALL cases, not just in situations where a
-                     * 'state' exists but we're not actually resuming from it.
-                     */
-                    if (this.sStatePath && !this.fStateData) {
-                        stateComputer.clear();
-                        this.resume = Computer.RESUME_NONE;
-                        Web.reloadPage();
-                    } else {
+                    if (component.notice("Unable to restore hardware state")) {
                         /*
-                         * In all other cases, we set fRestoreError, which should trigger a call to
-                         * powerReport() and then delete the offending state.
+                         * If this is a resume error for a machine that also has a predefined state
+                         * AND we're not restoring from that state, then throw away the current state,
+                         * prevent any new state from being created, and then force a reload, which will
+                         * hopefully restore us to the functioning predefined state.
+                         *
+                         * TODO: Considering doing this in ALL cases, not just in situations where a
+                         * 'state' exists but we're not actually resuming from it.
                          */
-                        this.fRestoreError = true;
+                        if (this.sStatePath && !this.fStateData) {
+                            stateComputer.clear();
+                            this.resume = Computer.RESUME_NONE;
+                            Web.reloadPage();
+                        } else {
+                            /*
+                             * In all other cases, we set fRestoreError, which should trigger a call to
+                             * powerReport() and then delete the offending state.
+                             */
+                            this.fRestoreError = true;
+                        }
                     }
+
                     /*
                      * Any failure triggers an automatic to call powerUp() again, without any state,
                      * in the hopes that the component can recover by performing a reset.
