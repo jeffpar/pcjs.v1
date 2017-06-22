@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.35.1/machine.xsl"?>
-<machine id="ibm5160" type="pcx86" border="1" pos="center" background="white">
+<machine id="ibm5160" type="pcx86" border="1" pos="center" background="default">
 	<name pos="center">IBM PC XT (Model 5160), MDA, 64K, 10Mb Drive</name>
 	<computer id="xt-mda-64k" name="IBM PC XT"/>
 	<cpu id="cpu8088" model="8088"/>
