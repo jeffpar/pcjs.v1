@@ -39,7 +39,7 @@ more detail, along with a live demonstration of the software, but that's not yet
 * [Microsoft Word](apps/microsoft/word/)
 * [More...](apps/other/)
 
-Additional applications for which we have created special "Demo Disks" include:
+Selected applications for which we have created "Demo Disks":
 
 * [VisiCalc (1981)](/apps/pcx86/1981/visicalc/)
 * [Executive Suite (1982)](/apps/pcx86/1982/esuite/)

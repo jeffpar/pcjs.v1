@@ -31,9 +31,10 @@
 			<div class="common-top-left">
 				<ul>
 					<li><a href="/">PCjs</a></li>
+					<li><a href="/apps/">Apps</a></li>
 					<li><a href="/devices/">Devices</a></li>
+					<li><a href="/disks/">Disks</a></li>
 					<li><a href="/docs/">Docs</a></li>
-					<li><a href="/apps/">Software</a></li>
 					<li><a href="/docs/about/">About</a></li>
 				</ul>
 			</div>

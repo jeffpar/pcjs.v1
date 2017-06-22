@@ -5,7 +5,7 @@ permalink: /devices/pcx86/machine/5160/
 ---
 
 IBM PC XT (Model 5160) Machines
----
+-------------------------------
 
 Our IBM PC XT 5160 configurations include:
 

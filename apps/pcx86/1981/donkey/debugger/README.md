@@ -1,15 +1,12 @@
 ---
 layout: page
-title: IBM PC (Model 5150, 64Kb, Color Display) running DONKEY.BAS
-permalink: /devices/pcx86/machine/5150/cga/64kb/donkey/
-redirect_from:
-  - /configs/pc/machines/5150/cga/64kb/donkey/
-  - /configs/pc/machines/5150/cga/64kb/donkey/machine.xml/
-  - /demos/pc/donkey/
-  - /devices/pc/machine/5150/cga/64kb/donkey/
+title: "DONKEY.BAS (1981) with Debugger"
+permalink: /apps/pcx86/1981/donkey/debugger/
 machines:
   - type: pcx86
     id: ibm5150
+    config: /devices/pcx86/machine/5150/cga/64kb/debugger/machine.xml
+    state: /apps/pcx86/1981/donkey/state.json
     autoMount:
       A:
         path: /disks/pcx86/dos/ibm/1.00/PCDOS100.json
@@ -17,8 +14,8 @@ machines:
         name: None
 ---
 
-IBM PC Running DONKEY.BAS
----
+IBM PC Running DONKEY.BAS (with Debugger)
+-----------------------------------------
 
 {% include machine.html id="ibm5150" %}
 
@@ -29,6 +26,3 @@ predefined state, with PC-DOS 1.0 already booted and DONKEY.BAS ready to run.
 And now that PCx86 automatically saves all your changes (subject to the limits of your browser's local
 storage), you can even close the browser in the middle of a game of DONKEY, and the next time you load
 this page, your progress (and the donkey) will be perfectly restored.
-
-For more control over this machine, try the [Control Panel](debugger/) configuration, featuring the
-built-in PCx86 Debugger.

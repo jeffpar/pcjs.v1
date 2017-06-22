@@ -59,7 +59,6 @@ other software.
 
 * [IBM PC (64Kb) with Monochrome Display](/devices/pcx86/machine/5150/mda/64kb/) ([Debugger](/devices/pcx86/machine/5150/mda/64kb/debugger/))
 * [IBM PC (64Kb) with Monochrome Display and Soft Keyboard (Debugger)](/devices/pcx86/machine/5150/mda/64kb/softkbd/)
-* [IBM PC (64Kb) with Color Display](/devices/pcx86/machine/5150/cga/64kb/donkey/) ([Debugger](/devices/pcx86/machine/5150/cga/64kb/donkey/debugger/))
 * [IBM PC (64Kb) with Color Display and Soft Keyboard](/devices/pcx86/machine/5150/cga/64kb/softkbd/)
 * [IBM PC (384Kb) with Color Display and Soft Keyboard (Debugger)](/devices/pcx86/machine/5150/cga/384kb/softkbd/)
 * [IBM PC (64Kb) with Dual Displays (Monochrome and Color)](/devices/pcx86/machine/5150/dual/64kb/)
@@ -68,16 +67,14 @@ other software.
 
 * [IBM PC XT (64Kb, 10Mb Drive) with Monochrome Display](/devices/pcx86/machine/5160/mda/64kb/softkbd/)
 * [IBM PC XT (256Kb, 10Mb Drive) with Monochrome Display](/devices/pcx86/machine/5160/mda/256kb/) ([Debugger](/devices/pcx86/machine/5160/mda/256kb/debugger/))
-* [IBM PC XT (256Kb, 10Mb Drive) with Color Display](/devices/pcx86/machine/5160/cga/256kb/demo/) ([Debugger](/devices/pcx86/machine/5160/cga/256kb/demo/debugger/))
+* [IBM PC XT (256Kb, 10Mb Drive) with Color Display](/devices/pcx86/machine/5160/cga/256kb/) ([Debugger](/devices/pcx86/machine/5160/cga/256kb/debugger/))
+* [IBM PC XT (256Kb, 10Mb Drive) Machine Array with CGA Displays](/devices/pcx86/machine/5160/cga/256kb/array/)
 * [IBM PC XT (256Kb, 10Mb Drive) with Color Display and Soft Keyboard (Debugger)](/devices/pcx86/machine/5160/cga/256kb/softkbd/)
-* [IBM PC XT (256Kb, 10Mb Drive) with Color Display running Windows 1.01](/devices/pcx86/machine/5160/cga/256kb/win101/) ([Debugger](/devices/pcx86/machine/5160/cga/256kb/win101/debugger/))
-* [IBM PC XT (256Kb, 10Mb Drive) with Color Display and Soft Keyboard (Debugger)](/devices/pcx86/machine/5160/cga/256kb/win101/softkbd/)
-* [IBM PC XT (512Kb, 10Mb Drive) with Color Display and Soft Keyboard (Debugger)](/devices/pcx86/machine/5160/cga/512kb/win101/softkbd/)
+* [IBM PC XT (512Kb, 10Mb Drive) with Color Display and Soft Keyboard (Debugger)](/devices/pcx86/machine/5160/cga/512kb/softkbd/)
 * [IBM PC XT (640Kb, 10Mb Drive) with Color Display](/devices/pcx86/machine/5160/cga/640kb/) ([Debugger](/devices/pcx86/machine/5160/cga/640kb/debugger/))
 * [IBM PC XT (640Kb, 10Mb Drive) with Color Display and Soft Keyboard (Debugger)](/devices/pcx86/machine/5160/cga/640kb/softkbd/)
 * [IBM PC XT (256Kb, 10Mb Drive) with EGA Display](/devices/pcx86/machine/5160/ega/256kb/) ([Debugger](/devices/pcx86/machine/5160/ega/256kb/debugger/))
 * [IBM PC XT (640Kb, 10Mb Drive) with EGA Display](/devices/pcx86/machine/5160/ega/640kb/) ([Debugger](/devices/pcx86/machine/5160/ega/640kb/debugger/))
-* [IBM PC XT (256Kb, 10Mb Drive) Machine Array with CGA Displays](/devices/pcx86/machine/5160/cga/256kb/array/)
 * [IBM PC XT (640Kb, 10Mb Drive) Machine Array with EGA Displays](/devices/pcx86/machine/5160/ega/640kb/array/)
 
 #### [IBM PC AT 5170 Machines](/devices/pcx86/machine/5170/)

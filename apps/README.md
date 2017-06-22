@@ -1,20 +1,22 @@
 ---
 layout: page
 title: Software Archives
+menu_title: Apps
+menu_order: 2
 permalink: /apps/
 ---
 
-Software Archives
+Application Demos
 -----------------
 
-PCjs includes archives of selected software:
+PCjs provides selected demos of archived software:
 
-* [IBM PC Application Demos](pcx86/)
+* [IBM PC Applications](pcx86/)
 * [Challenger 1P Applications](c1p/)
 * [DEC PDP-10 Tapes and Diagnostics](pdp10/)
 * [DEC PDP-11 Tapes and Diagnostics](pdp11/)
 
-You can also browse our software archives by disk:
+You can also browse our collection of archived disks:
 
 * [IBM PC Disk Library](/disks/pcx86/)
 * [Challenger 1P Disk Library](/disks/c1p/)
@@ -60,13 +62,16 @@ described by &lt;file&gt; entries in its [manifest](/apps/pcx86/1981/visicalc/ma
     <type>Application</type>
     <category>Productivity</category>
     <company>Software Arts</company>
-        <releaseDate>December 16, 1981</releaseDate>
+	<author href="http://www.bricklin.com/history/sai.htm">Dan Bricklin</author>
+	<author href="http://www.frankston.com/public/?name=ImplementingVisiCalc">Bob Frankston</author>
+    <releaseDate>December 16, 1981</releaseDate>
+	<license href="http://www.bricklin.com/history/vclicense.htm">Lotus Development</license>
     <machine href="/devices/pcx86/machine/5150/mda/64kb/machine.xml" state="/apps/pcx86/1981/visicalc/state.json"/>
-    <disk id="disk" dir="/apps/pcx86/1981/visicalc/bin/">
-        <file>VC.COM</file>
-        <file dir="../">README.md</file>
-        <link href="http://www.bricklin.com/history/vclicense.htm">VisiCalc License</link>
-    </disk>
+	<disk id="disk01" chs="40:1:8" dir="archive/visicalc.81" href="/apps/pcx86/1981/visicalc/VISICALC1981.json" md5="5b77efdfb86aa747edb49811db75021d" md5json="b1a45cb769cf04daa259263a92bacf16">
+		<name>VisiCalc (1981)</name>
+		<file size="27520" time="1981-12-16 23:00:00" attr="0x20" md5="28997dfedb2440c6054d8be835be8634">VC.COM</file>
+		<link href="http://www.bricklin.com/history/vclicense.htm">VisiCalc License</link>
+	</disk>
 </manifest>
 ```
 
@@ -102,7 +107,7 @@ have saved that JSON-encoded image as static file on the server, and then added 
 
 ```xml
 <manifest>
-    <disk id="disk01" dir="/apps/pcx86/1981/visicalc/archive/" href="/apps/pcx86/1981/visicalc/disk.json">
+	<disk id="disk01" chs="40:1:8" dir="archive/visicalc.81" href="/apps/pcx86/1981/visicalc/VISICALC1981.json" md5="5b77efdfb86aa747edb49811db75021d" md5json="b1a45cb769cf04daa259263a92bacf16">
         ...
     </disk>
 </manifest>
