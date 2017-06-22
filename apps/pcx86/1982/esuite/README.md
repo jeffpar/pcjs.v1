@@ -10,6 +10,6 @@ machines:
 ---
 
 Executive Suite (1982)
----
+----------------------
 
 {% include machine.html id="ibm5160" %}
