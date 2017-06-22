@@ -10,6 +10,11 @@ redirect_from:
 machines:
   - type: pcx86
     id: ibm5150
+    autoMount:
+      A:
+        path: /disks/pcx86/dos/ibm/1.00/PCDOS100.json
+      B:
+        name: None
 ---
 
 IBM PC Running DONKEY.BAS
