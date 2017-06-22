@@ -2792,6 +2792,7 @@ DiskDump.prototype.convertToJSON = function()
                 for (i = DiskAPI.BPB.SECTOR_BYTES; i < DiskAPI.BPB.LARGE_SECS+4; i++) {
                     this.bufDisk.writeUInt8(DiskDump.aDefaultBPBs[iBPB][i] || 0, offBootSector + i);
                 }
+                console.log("warning: BPB has been updated");
             }
             else if (bByte0 == 0xF6 && bByte1 == 0xF6) {
                 /*
@@ -2808,12 +2809,16 @@ DiskDump.prototype.convertToJSON = function()
             }
 
         }
-        if (fBPBExists) {
+        if (fBPBExists && this.bufDisk.readUInt16LE(offBootSector + DiskAPI.BOOT.SIG_OFFSET) == DiskAPI.BOOT.SIGNATURE) {
             /*
              * Overwrite the OEM string with our own, so that people know how the image originated.  We do this
              * only for disks with pre-existing BPBs; it's not safe for pre-2.0 disks (and non-DOS disks, obviously).
+             *
+             * The signature check is another pre-2.0 disk check, to avoid misinterpreting any BPB that we might have
+             * previously added ourselves as an original BPB.
              */
             this.bufDisk.write(DiskDump.PCJS_OEM, DiskAPI.BOOT.OEM_STRING + offBootSector, DiskDump.PCJS_OEM.length);
+            console.log("warning: OEM string has been updated");
         }
         if (!nHeads) {
             /*
@@ -3368,6 +3373,7 @@ DiskDump.prototype.convertToIMG = function()
                      * Overwrite the OEM string with our own, so that people know how the image originated.
                      */
                     buf.write(DiskDump.PCJS_OEM, DiskAPI.BOOT.OEM_STRING, DiskDump.PCJS_OEM.length);
+                    console.log("warning: OEM string has been updated");
                 }
             }
         } catch(err) {
