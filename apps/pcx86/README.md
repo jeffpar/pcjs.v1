@@ -7,18 +7,40 @@ permalink: /apps/pcx86/
 IBM PC Application Demos
 ------------------------
 
-Below are selected [PCx86](/docs/about/pcx86/) demos of classic IBM PC applications:
+Below are selected [PCx86](/docs/about/pcx86/) demos of classic IBM PC applications.  In many cases,
+we've had to create our own "Demo Disks", because copies of the original distribution disks are difficult
+to find, and in some cases (e.g., [Executive Suite](1982/esuite/)), the original disks were copy-protected,
+so we've been forced to use a "cracked" copy of the software instead.
 
-* [DONKEY.BAS (1981)](1981/donkey/)
-* [VisiCalc (1981)](1981/visicalc/)
-* [Executive Suite (1982)](1982/esuite/)
-* [RatBas (1982)](1982/ratbas/)
-* [Adventures in Math (1983)](1983/adventmath/)
-* [Rogue (1985)](1985/rogue/)
-* [ThinkTank (1987)](1987/thinktank/)
-* [The Dungeons of Moria (1992)](1992/moria/)
+### 1981
+
+* [DONKEY.BAS](1981/donkey/)
+* [VisiCalc](1981/visicalc/)
+
+### 1982
+
+* [Executive Suite](1982/esuite/)
+* [RatBas (v2.13)](1982/ratbas/)
+
+### 1983
+
+* [Adventures in Math (v1.00)](1983/adventmath/)
+
+### 1985
+
+* [Rogue](1985/rogue/)
+
+### 1987
+
+* [ThinkTank (v2.14)](1987/thinktank/)
+
+### 1992
+
+* [The Dungeons of Moria (v5.5)](1992/moria/)
 
 A list of all the software available to PCx86 machines can be found in the [IBM PC Disk Library](/disks/pcx86/).
+
+---
 
 ### Creating IBM PC Application Demos
 

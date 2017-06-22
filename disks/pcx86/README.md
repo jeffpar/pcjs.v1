@@ -7,14 +7,15 @@ permalink: /disks/pcx86/
 IBM PC Disk Library
 -------------------
 
-Our [IBM PC Disk Library](/disks/pcx86/library.xml) lists all the [Disk Manifests](#disk-manifests) in the
-[PCjs Project](/docs/about/) and makes those disks available to any [IBM PC Machine](/devices/pcx86/machine/)
-in the project that uses the library.
+The [IBM PC Disk Library](/disks/pcx86/library.xml) lists all of our [Disk Manifests](#disk-manifests)
+and makes those disks available to the project's [IBM PC Machines](/devices/pcx86/machine/).
 
 Whenever possible, PCjs archives copies of original distribution diskettes.  Exceptions include the application
-"Demo Disks" that we've created for our [IBM PC Application Demos](/apps/pcx86/).  PCjs may also make minor changes
-to a disk's boot sector, to ensure that all PCjs disk images can be mounted in modern operating systems.  This is
-documented, for example, in the description of the [PC-DOS 0.90](/disks/pcx86/dos/ibm/0.90/) disk.
+"Demo Disks" that we've created for our [IBM PC Application Demos](/apps/pcx86/).  PCjs may also makes minor changes
+to disk boot sectors, to make it easier to mount the disk images in modern operating systems.
+[macOS](http://www.apple.com/macos/) has built-in support for mounting *.IMG* disk images, and Windows can mount
+them with the help of third-party software like [OSFMount](http://www.osforensics.com/tools/mount-disk-images.html).
+See the description of the [PC-DOS 0.90](/disks/pcx86/dos/ibm/0.90/) disk for an example of boot sector modification.
 
 The summary below is not a complete list of everything in the library, just highlights.  For some of the disks,
 we have provided more information about the software, and in some cases, machines that automatically run the software.
@@ -39,15 +40,12 @@ more detail, along with a live demonstration of the software, but that's not yet
 * [Microsoft Word](apps/microsoft/word/)
 * [More...](apps/other/)
 
-Selected applications for which we have created "Demo Disks":
+### Application Demos
 
 * [VisiCalc (1981)](/apps/pcx86/1981/visicalc/)
 * [Executive Suite (1982)](/apps/pcx86/1982/esuite/)
-* [RatBas (1982)](/apps/pcx86/1982/ratbas/)
 * [Adventures in Math (1983)](/apps/pcx86/1983/adventmath/)
 * [Rogue (1985)](/apps/pcx86/1985/rogue/)
-* [ThinkTank (1987)](/apps/pcx86/1987/thinktank/)
-* [The Dungeons of Moria (1992)](/apps/pcx86/1992/moria/)
 * [More...](/apps/pcx86/)
 
 ### Games

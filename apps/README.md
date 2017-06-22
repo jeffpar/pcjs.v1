@@ -1,15 +1,15 @@
 ---
 layout: page
-title: Software Archives
+title: Application Archives
 menu_title: Apps
 menu_order: 2
 permalink: /apps/
 ---
 
-Application Demos
------------------
+Application Archives
+--------------------
 
-PCjs provides selected demos of archived software:
+PCjs provides a variety of archived software:
 
 * [IBM PC Applications](pcx86/)
 * [Challenger 1P Applications](c1p/)
