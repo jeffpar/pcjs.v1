@@ -12,6 +12,8 @@ we've had to create our own "Demo Disks", because copies of the original distrib
 to find, and in some cases (e.g., [Executive Suite](1982/esuite/)), the original disks were copy-protected,
 so we've been forced to use a "cracked" copy of the software instead.
 
+A list of all the software available to PCx86 machines can be found in the [IBM PC Disk Library](/disks/pcx86/).
+
 ### 1981
 
 * [DONKEY.BAS](1981/donkey/)
@@ -39,8 +41,6 @@ so we've been forced to use a "cracked" copy of the software instead.
 ### 1992
 
 * [The Dungeons of Moria v5.5](1992/moria/)
-
-A list of all the software available to PCx86 machines can be found in the [IBM PC Disk Library](/disks/pcx86/).
 
 ---
 
