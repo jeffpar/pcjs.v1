@@ -3,8 +3,9 @@ layout: page
 title: "IBM PC (Model 5150) running Planetfall"
 permalink: /disks/pcx86/games/infocom/planet/
 machines:
-  - type: pcx86
-    id: ibm5150-planet
+  - id: ibm5150-planet
+    type: pcx86
+    resume: 1
     config: /disks/pcx86/games/infocom/machine.xml
     autoMount:
       A:

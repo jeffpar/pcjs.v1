@@ -9,8 +9,9 @@ redirect_from:
   - /devices/pc/machine/5150/cga/64kb/donkey/
   - /devices/pcx86/machine/5150/cga/64kb/donkey/
 machines:
-  - type: pcx86
-    id: ibm5150-donkey
+  - id: ibm5150-donkey
+    type: pcx86
+    resume: 1
     config: /devices/pcx86/machine/5150/cga/64kb/machine.xml
     state: /apps/pcx86/1981/donkey/state.json
     autoMount:

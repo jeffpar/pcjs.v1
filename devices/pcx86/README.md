@@ -42,7 +42,7 @@ example:
 ```xml
 <machine id="ibm5150" class="pcx86" border="1" pos="center" background="#FAEBD7">
     <name pos="center">IBM PC (Model 5150) with Monochrome Display</name>
-    <computer id="pc-mda-64k" name="IBM PC" resume="1"/>
+    <computer id="pc-mda-64k" name="IBM PC"/>
     <ram id="ramLow" addr="0x00000"/>
     <rom id="romBASIC" addr="0xf6000" size="0x8000" file="/devices/pcx86/rom/5150/basic/BASIC100.json"/>
     <rom id="romBIOS" addr="0xfe000" size="0x2000" file="/devices/pcx86/rom/5150/1981-04-24/PCBIOS-REV1.json"/>

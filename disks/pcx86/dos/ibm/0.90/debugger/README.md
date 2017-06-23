@@ -7,6 +7,7 @@ machines:
     id: ibm5150-pcdos090
     debugger: true
     config: /devices/pcx86/machine/5150/mda/256kb/debugger/machine.xml
+    resume: 1
     autoMount:
       A:
         path: /disks/pcx86/dos/ibm/0.90/PCDOS090.json

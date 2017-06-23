@@ -6,6 +6,7 @@ machines:
   - type: pcx86
     id: ibm5150-visicalc
     config: /devices/pcx86/machine/5150/mda/64kb/machine.xml
+    resume: 1
     state: /apps/pcx86/1981/visicalc/state.json
     autoMount:
       A:
