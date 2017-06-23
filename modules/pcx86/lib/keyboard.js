@@ -447,15 +447,28 @@ class Keyboard extends Component {
                     sReplace = Usr.formatDate("h:i:s");
                     break;
                 default:
-                    this.notice("unrecognized autoType sequence: $" + match[1]);
-                    break;
+                    //
+                    // Let's just leave any unrecognized sequences alone....
+                    //
+                    // this.notice("unrecognized autoType sequence: $" + match[1]);
+                    // break;
+                    continue;
                 }
                 sKeys = sKeys.replace('$' + match[1], sReplace);
+                /*
+                 * Even though we did just modify the string that reSpecial is iterating over, we aren't
+                 * going to muck with lastIndex, because 1) the replacement strings are always longer than
+                 * original strings, and 2) any unrecognized sequences that we now leave in place would cause
+                 * us to loop indefinitely.  So, if you really want to do this, you will have to carefully
+                 * set lastIndex to the next unexamined character, not back to the beginning.
+                 *
+                 *      reSpecial.lastIndex = 0;
+                 */
             }
             /*
-             * Any lingering "$$" sequences are now converted to "$"; as discussed above, replace() interprets any
-             * "$$" in the replacement string as "$", so to the casual observer, it might not look like we're downsizing
-             * the dollar signs, but we actually are.
+             * Any lingering "$$" sequences are now converted to "$"; as discussed above, replace() interprets
+             * any "$$" in the replacement string as "$", so to the casual observer, it might not look like we're
+             * downsizing the dollar signs, but we actually are.
              */
             sKeys = sKeys.replace(/\$\$/g, "$$");
         }
