@@ -261,9 +261,12 @@ class Computer extends Component {
          * OVERRIDES everything; it overrides any 'state' Computer parameter AND it disables resume of any saved state in
          * localStorage (in other words, it prevents fAllowResume from being true, and forcing resume off).
          */
-        var fAllowResume;
-        var sState = this.getMachineParm('state') || (fAllowResume = true) && parmsComputer['state'];
-
+        var fAllowResume = false;
+        var sState = Web.getURLParm('state');
+        if (!sState) {
+            fAllowResume = true;
+            sState = this.getMachineParm('state', parmsComputer);
+        }
         if (sState) {
             sStatePath = this.sStatePath = sState;
             if (!fAllowResume) {

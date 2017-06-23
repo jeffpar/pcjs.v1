@@ -363,6 +363,7 @@ class Card {
             this.regCRTData = data[5];
             this.nCRTCRegs  = Card.CRTC.TOTAL_REGS;
             this.asCRTCRegs = DEBUGGER? Card.CRTC.REGS : [];
+            this.offStartAddr = ((this.regCRTData[Card.CRTC.START_ADDR_HI] << 8) + this.regCRTData[Card.CRTC.START_ADDR_LO])|0;
 
             if (nCard >= Video.CARD.EGA) {
                 this.nCRTCRegs = Card.CRTC.EGA.TOTAL_REGS;

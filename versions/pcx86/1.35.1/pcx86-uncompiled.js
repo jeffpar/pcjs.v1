@@ -46650,6 +46650,7 @@ class Card {
             this.regCRTData = data[5];
             this.nCRTCRegs  = Card.CRTC.TOTAL_REGS;
             this.asCRTCRegs = DEBUGGER? Card.CRTC.REGS : [];
+            this.offStartAddr = ((this.regCRTData[Card.CRTC.START_ADDR_HI] << 8) + this.regCRTData[Card.CRTC.START_ADDR_LO])|0;
 
             if (nCard >= Video.CARD.EGA) {
                 this.nCRTCRegs = Card.CRTC.EGA.TOTAL_REGS;
@@ -73937,9 +73938,12 @@ class Computer extends Component {
          * OVERRIDES everything; it overrides any 'state' Computer parameter AND it disables resume of any saved state in
          * localStorage (in other words, it prevents fAllowResume from being true, and forcing resume off).
          */
-        var fAllowResume;
-        var sState = this.getMachineParm('state') || (fAllowResume = true) && parmsComputer['state'];
-
+        var fAllowResume = false;
+        var sState = Web.getURLParm('state');
+        if (!sState) {
+            fAllowResume = true;
+            sState = this.getMachineParm('state', parmsComputer);
+        }
         if (sState) {
             sStatePath = this.sStatePath = sState;
             if (!fAllowResume) {
