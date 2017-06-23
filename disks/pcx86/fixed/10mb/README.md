@@ -5,11 +5,11 @@ permalink: /disks/pcx86/fixed/10mb/
 ---
 
 10Mb Hard Drive (Fixed Disk) Images
----
+-----------------------------------
 
 This folder contains the following 10Mb fixed disk images:
  
-* [Empty formatted disk](PCDOS200-EMPTY.json)
+* [Empty formatted disk](PCDOS200-EMPTY.json) ([XML](pcdos200-empty.xml))
 * [PC-DOS 2.00 with Windows 1.01 for CGA](PCDOS200-WIN101-CGA.json) ([XML](pcdos200-win101-cga.xml))
 * [PC-DOS 2.00 with Windows 1.01 for EGA](PCDOS200-WIN101-EGA.json) ([XML](pcdos200-win101-ega.xml))
 
@@ -28,10 +28,10 @@ or by reference:
 
 ### Notes Regarding 10Mb Disks
 
-The [Empty formatted disk](PCDOS200-EMPTY.json) is *completely* empty.  It was partitioned with the PC-DOS 2.00 **FDISK** utility,
-allocating the entire disk to a single DOS partition, and then it was formatted with the PC-DOS 2.00 **FORMAT** utility.
-Neither the **FORMAT** "/S" option nor the **SYS** command were used, so no system files were transferred, leaving
-the disk completely empty and non-bootable.
+The [Empty formatted disk](PCDOS200-EMPTY.json) is *completely* empty.  It was partitioned with the PC-DOS 2.00
+**FDISK** utility, allocating the entire disk to a single DOS partition, and then it was formatted with the PC-DOS 2.00
+**FORMAT** utility.  Neither the **FORMAT** "/S" option nor the **SYS** command were used, so no system files were
+transferred, leaving the disk completely empty and non-bootable.
 
 After formatting, PC-DOS 2.00 reports:
 
@@ -75,7 +75,7 @@ is not allowed, another 2 sectors are lost, bringing the total FAT file system o
 Thus, actual free space is (20739 - 51) * 512, or 10,592,256 bytes, which is exactly what DOS reports as the available
 space.
 
-Some sources on the internet (eg, [http://www.wikiwand.com/en/Timeline_of_DOS_operating_systems](http://www.wikiwand.com/en/Timeline_of_DOS_operating_systems))
+Some sources on the internet (eg,[http://www.wikiwand.com/en/Timeline_of_DOS_operating_systems](http://www.wikiwand.com/en/Timeline_of_DOS_operating_systems))
 claim that the FAT file system overhead for the XT's 10Mb disk is "50 sectors".  As they explain:
 
 	"The fixed disk has 10,618,880 bytes of raw space: 305 cylinders (the equivalent of tracks) × 2 platters

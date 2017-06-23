@@ -5,7 +5,7 @@ permalink: /disks/pcx86/dos/ibm/3.20/
 ---
 
 PC-DOS 3.20
----
+-----------
 
 PC-DOS 3.20 was first announced on March 18, 1986 and released later that year.
 

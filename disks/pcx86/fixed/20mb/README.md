@@ -5,7 +5,7 @@ permalink: /disks/pcx86/fixed/20mb/
 ---
 
 20Mb Hard Drive (Fixed Disk) Images
----
+-----------------------------------
 
 This folder contains the following 20Mb disk images:
  
