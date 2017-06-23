@@ -8,7 +8,7 @@ redirect_from:
   - /devices/pc/machine/5160/ega/640kb/win101/debugger/
   - /disks/pc/windows/1.01/
 machines:
-  - id: ibm5160
+  - id: ibm5160-ega-win101
     type: pcx86
     state: /disks/pcx86/windows/1.01/state.json
     config: /devices/pcx86/machine/5160/ega/640kb/machine.xml
@@ -22,7 +22,7 @@ Microsoft Windows 1.01, the first public version of Windows, was released on Nov
 It is shown here running on an IBM PC XT (Model 5160) with an EGA Display.  You can also run
 [Windows 1.01 with a CGA Display](cga/).
 
-{% include machine.html id="ibm5160" %}
+{% include machine.html id="ibm5160-ega-win101" %}
 
 Directory listings of the five 360Kb distribution diskettes are provided [below](#directory-listings). 
 

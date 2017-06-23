@@ -12,7 +12,7 @@ redirect_from:
   - /devices/pc/machine/5160/cga/256kb/win101/machine.xml/
   - /devices/pcx86/machine/5160/cga/256kb/win101/
 machines:
-  - id: ibm5160
+  - id: ibm5160-cga-win101
     type: pcx86
     state: /disks/pcx86/windows/1.01/cga/state.json
     config: /devices/pcx86/machine/5160/cga/256kb/machine.xml
@@ -26,7 +26,7 @@ Microsoft Windows 1.01 with CGA Display
 November 20, 1985.  It is shown here running on an IBM PC XT (Model 5160) with a CGA Display.  You can also run
 [Windows 1.01 with an EGA Display](/disks/pcx86/windows/1.01/).
 
-{% include machine.html id="ibm5160" %}
+{% include machine.html id="ibm5160-cga-win101" %}
 
 The above simulation is configured for a clock speed of 4.77Mhz, with 256Kb of RAM and a CGA Display,
 using the original IBM PC Model 5160 ROM BIOS and CGA font ROM.  Even though the CGA was a "Color Graphics Adapter,"
