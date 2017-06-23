@@ -20,11 +20,13 @@ so we've been forced to use a "cracked" copy of the software instead.
 ### 1982
 
 * [Executive Suite](1982/esuite/)
-* [RatBas (v2.13)](1982/ratbas/)
+* [RatBas v2.13](1982/ratbas/)
 
 ### 1983
 
-* [Adventures in Math (v1.00)](1983/adventmath/)
+* [Adventures in Math v1.00](1983/adventmath/)
+* [SuperCalc2 v1.00](/disks/pcx86/apps/other/sc2/1.00/)
+* [SuperCalc3 v1.00](/disks/pcx86/apps/other/sc3/1.00/)
 
 ### 1985
 
@@ -32,11 +34,11 @@ so we've been forced to use a "cracked" copy of the software instead.
 
 ### 1987
 
-* [ThinkTank (v2.14)](1987/thinktank/)
+* [ThinkTank v2.14](1987/thinktank/)
 
 ### 1992
 
-* [The Dungeons of Moria (v5.5)](1992/moria/)
+* [The Dungeons of Moria v5.5](1992/moria/)
 
 A list of all the software available to PCx86 machines can be found in the [IBM PC Disk Library](/disks/pcx86/).
 
