@@ -46650,6 +46650,7 @@ class Card {
             this.regCRTData = data[5];
             this.nCRTCRegs  = Card.CRTC.TOTAL_REGS;
             this.asCRTCRegs = DEBUGGER? Card.CRTC.REGS : [];
+            this.offStartAddr = ((this.regCRTData[Card.CRTC.START_ADDR_HI] << 8) + this.regCRTData[Card.CRTC.START_ADDR_LO])|0;
 
             if (nCard >= Video.CARD.EGA) {
                 this.nCRTCRegs = Card.CRTC.EGA.TOTAL_REGS;
@@ -73937,9 +73938,12 @@ class Computer extends Component {
          * OVERRIDES everything; it overrides any 'state' Computer parameter AND it disables resume of any saved state in
          * localStorage (in other words, it prevents fAllowResume from being true, and forcing resume off).
          */
-        var fAllowResume;
-        var sState = this.getMachineParm('state') || (fAllowResume = true) && parmsComputer['state'];
-
+        var fAllowResume = false;
+        var sState = Web.getURLParm('state');
+        if (!sState) {
+            fAllowResume = true;
+            sState = this.getMachineParm('state', parmsComputer);
+        }
         if (sState) {
             sStatePath = this.sStatePath = sState;
             if (!fAllowResume) {
@@ -74200,13 +74204,14 @@ class Computer extends Component {
                  */
                 this.stateFailSafe = new State(this, PCX86.APPVERSION, Computer.STATE_FAILSAFE);
                 if (this.stateFailSafe.load()) {
-                    this.powerReport(stateComputer);
-                    /*
-                     * We already know resume is something other than RESUME_NONE, so we'll go ahead and bump it
-                     * all the way to RESUME_PROMPT, so that the user will be prompted, and if the user declines to
-                     * restore, the state will be removed.
-                     */
-                    resume = Computer.RESUME_PROMPT;
+                    if (this.powerReport(stateComputer)) {
+                        /*
+                         * We already know resume is something other than RESUME_NONE, so we'll go ahead and bump it
+                         * all the way to RESUME_PROMPT, so that the user will be prompted, and if the user declines to
+                         * restore, the state will be removed.
+                         */
+                        resume = Computer.RESUME_PROMPT;
+                    }
                     /*
                      * To ensure that the set() below succeeds, we need to call unload(), otherwise it may fail
                      * with a "read only" error (eg, "TypeError: Cannot assign to read only property 'timestamp'").
@@ -74490,12 +74495,17 @@ class Computer extends Component {
      *
      * @this {Computer}
      * @param {State} stateComputer
+     * @return {boolean}
      */
     powerReport(stateComputer)
     {
-        if (Component.confirmUser("There may be a problem with your " + PCX86.APPNAME + " machine.\n\nTo help us diagnose it, click OK to send this " + PCX86.APPNAME + " machine state to http://" + SITEHOST + ".")) {
-            Web.sendReport(PCX86.APPNAME, PCX86.APPVERSION, this.url, this.getUserID(), ReportAPI.TYPE.BUG, stateComputer.toString());
+        if (!this.flags.unloading) {
+            if (Component.confirmUser("There may be a problem with your " + PCX86.APPNAME + " machine.\n\nTo help us diagnose it, click OK to send this " + PCX86.APPNAME + " machine state to http://" + SITEHOST + ".")) {
+                Web.sendReport(PCX86.APPNAME, PCX86.APPVERSION, this.url, this.getUserID(), ReportAPI.TYPE.BUG, stateComputer.toString());
+            }
+            return true;
         }
+        return false;
     }
 
     /**
