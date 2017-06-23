@@ -2049,7 +2049,7 @@ HTMLOut.prototype.addFilesToHTML = function(asFiles, sScriptEmbed)
                 sTextInsert += '\n' + sIndent + sScriptEmbed;
             }
             if (sTextInsert) {
-                this.sHTML = this.sHTML.replace(sText, sText + sTextInsert.replace(/\$/g, "$$$$"));
+                this.sHTML = str.replace(sText, sText + sTextInsert, this.sHTML);
             }
         }
         else {

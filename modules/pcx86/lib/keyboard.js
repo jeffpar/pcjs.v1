@@ -409,7 +409,9 @@ class Keyboard extends Component {
      *      $date:  converted to MM-DD-YYYY
      *      $time:  converted to HH:MM
      *
-     * If you want any of those sequences to be typed as-is, then you must specify two "$" (ie, "$$").
+     * If you want any of those sequences to be typed as-is, then you must specify two "$" (ie, "$$date").
+     * Pairs of dollar signs will be automatically converted to single dollar signs, and single dollar signs
+     * will be used as-is.
      *
      * WARNING: the JavaScript replace() function ALWAYS interprets "$" specially in replacement strings,
      * even when the search string is NOT a RegExp; specifically:
@@ -424,10 +426,13 @@ class Keyboard extends Component {
      * Since we build machine definitions on a page from a potentially indeterminate number of string replace()
      * operations, multiple dollar signs could eventually get reduced to a single dollar sign BEFORE we get here.
      *
-     * To compensate, I've attempted add replace(/\$/g, "$$$$") operations where currently needed; eg, in the
-     * markout.js convertMDMachineLinks() function, the htmlout.js addFilesToHTML() function, and the embed.js
-     * parseXML() function.  Unfortunately, this is something that will be extremely difficult to prevent from
-     * breaking down the road.  So, heads up to future me....
+     * To compensate, I've changed a few replace() methods, like MarkOut's convertMDMachineLinks() and HTMLOut's
+     * addFilesToHTML(), from the conventional string replace() to my own Str.replace(), and for situations like the
+     * embed.js parseXML() function, which needs to use a RegExp-style replace(), I've added a preliminary
+     * replace(/\$/g, "$$$$") to the replacement string.
+     *
+     * Unfortunately, this is something that will be extremely difficult to prevent from breaking down the road.
+     * So, heads up to future me....
      *
      * @this {Keyboard}
      * @param {string|undefined} sKeys

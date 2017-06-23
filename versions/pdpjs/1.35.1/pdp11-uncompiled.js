@@ -1178,6 +1178,40 @@ class Str {
     }
 
     /**
+     * replace(sFind, sReplace, s)
+     *
+     * The JavaScript replace() function ALWAYS interprets "$" specially in replacement strings, even when
+     * the search string is NOT a RegExp; specifically:
+     *
+     *      $$  Inserts a "$"
+     *      $&  Inserts the matched substring
+     *      $`  Inserts the portion of the string that precedes the matched substring
+     *      $'  Inserts the portion of the string that follows the matched substring
+     *      $n  Where n is a positive integer less than 100, inserts the nth parenthesized sub-match string,
+     *          provided the first argument was a RegExp object
+     *
+     * So, if a replacement string containing dollar signs passes through a series of replace() calls, untold
+     * problems could result.  Hence, this function, which simply uses the replacement string as-is.
+     *
+     * Similar to the JavaScript replace() method, this replaces only one occurrence (ie, the FIRST occurrence);
+     * it might be nice to add options to replace the LAST occurrence and/or ALL occurrences, but we'll revisit
+     * that later.
+     *
+     * @param {string} sFind
+     * @param {string} sReplace
+     * @param {string} s
+     * @return {string}
+     */
+    static replace(sFind, sReplace, s)
+    {
+        var i = s.indexOf(sFind);
+        if (i >= 0) {
+            s = s.substr(0, i) + sReplace + s.substr(i + sFind.length);
+        }
+        return s;
+    }
+
+    /**
      * replaceAll(sFind, sReplace, s)
      *
      * @param {string} sFind

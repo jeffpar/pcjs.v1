@@ -1178,6 +1178,40 @@ class Str {
     }
 
     /**
+     * replace(sFind, sReplace, s)
+     *
+     * The JavaScript replace() function ALWAYS interprets "$" specially in replacement strings, even when
+     * the search string is NOT a RegExp; specifically:
+     *
+     *      $$  Inserts a "$"
+     *      $&  Inserts the matched substring
+     *      $`  Inserts the portion of the string that precedes the matched substring
+     *      $'  Inserts the portion of the string that follows the matched substring
+     *      $n  Where n is a positive integer less than 100, inserts the nth parenthesized sub-match string,
+     *          provided the first argument was a RegExp object
+     *
+     * So, if a replacement string containing dollar signs passes through a series of replace() calls, untold
+     * problems could result.  Hence, this function, which simply uses the replacement string as-is.
+     *
+     * Similar to the JavaScript replace() method, this replaces only one occurrence (ie, the FIRST occurrence);
+     * it might be nice to add options to replace the LAST occurrence and/or ALL occurrences, but we'll revisit
+     * that later.
+     *
+     * @param {string} sFind
+     * @param {string} sReplace
+     * @param {string} s
+     * @return {string}
+     */
+    static replace(sFind, sReplace, s)
+    {
+        var i = s.indexOf(sFind);
+        if (i >= 0) {
+            s = s.substr(0, i) + sReplace + s.substr(i + sFind.length);
+        }
+        return s;
+    }
+
+    /**
      * replaceAll(sFind, sReplace, s)
      *
      * @param {string} sFind
@@ -44305,7 +44339,9 @@ class Keyboard extends Component {
      *      $date:  converted to MM-DD-YYYY
      *      $time:  converted to HH:MM
      *
-     * If you want any of those sequences to be typed as-is, then you must specify two "$" (ie, "$$").
+     * If you want any of those sequences to be typed as-is, then you must specify two "$" (ie, "$$date").
+     * Pairs of dollar signs will be automatically converted to single dollar signs, and single dollar signs
+     * will be used as-is.
      *
      * WARNING: the JavaScript replace() function ALWAYS interprets "$" specially in replacement strings,
      * even when the search string is NOT a RegExp; specifically:
@@ -44320,10 +44356,13 @@ class Keyboard extends Component {
      * Since we build machine definitions on a page from a potentially indeterminate number of string replace()
      * operations, multiple dollar signs could eventually get reduced to a single dollar sign BEFORE we get here.
      *
-     * To compensate, I've attempted add replace(/\$/g, "$$$$") operations where currently needed; eg, in the
-     * markout.js convertMDMachineLinks() function, the htmlout.js addFilesToHTML() function, and the embed.js
-     * parseXML() function.  Unfortunately, this is something that will be extremely difficult to prevent from
-     * breaking down the road.  So, heads up to future me....
+     * To compensate, I've changed a few replace() methods, like MarkOut's convertMDMachineLinks() and HTMLOut's
+     * addFilesToHTML(), from the conventional string replace() to my own Str.replace(), and for situations like the
+     * embed.js parseXML() function, which needs to use a RegExp-style replace(), I've added a preliminary
+     * replace(/\$/g, "$$$$") to the replacement string.
+     *
+     * Unfortunately, this is something that will be extremely difficult to prevent from breaking down the road.
+     * So, heads up to future me....
      *
      * @this {Keyboard}
      * @param {string|undefined} sKeys
