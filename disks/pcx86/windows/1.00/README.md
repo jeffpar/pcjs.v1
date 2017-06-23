@@ -1,16 +1,28 @@
 ---
 layout: page
-title: Microsoft Windows 1.00
+title: Microsoft Windows 1.0
 permalink: /disks/pcx86/windows/1.00/
+machines:
+  - id: ibm5160-ega-win100
+    type: pcx86
+    state: /disks/pcx86/windows/1.00/state.json
+    config: /devices/pcx86/machine/5160/ega/640kb/machine.xml
+    drives: '[{name:"10Mb Hard Disk",type:3,path:"/disks/pcx86/fixed/10mb/PCDOS310-WIN100-EGA.json"}]'
+    autoMount:
+      A:
+        path: /disks/pcx86/dos/ibm/3.10/PCDOS310-DISK1.json
+      B:
+        name: /disks/pcx86/dos/ibm/3.10/PCDOS310-DISK1.json
 ---
 
-Microsoft Windows 1.00 ("Premiere Edition")
----
+Microsoft Windows 1.0 ("Premiere Edition")
+------------------------------------------
 
-Windows 1.00 was not a public release.  Microsoft released these disks (dubbed the "Premiere Edition") to selected
-vendors, analysts, and members of the press in Summer 1985 to obtain feedback on the product.
+Windows 1.0 was not a public release.  Microsoft released these disks (dubbed the "Premiere Edition") to selected
+vendors, analysts, and members of the press in Summer 1985 to obtain feedback on the product.  [Windows 1.01](../1.01/)
+was the first public release.
 
-[Windows 1.01](../1.01/) was the first public release.
+{% include machine.html id="ibm5160-ega-win100" %}
 
 Directory listings of the four 360Kb distribution diskettes are provided below.
 

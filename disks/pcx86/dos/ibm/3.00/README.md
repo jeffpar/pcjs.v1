@@ -5,7 +5,7 @@ permalink: /disks/pcx86/dos/ibm/3.00/
 ---
 
 PC-DOS 3.00
----
+-----------
 
 PC-DOS 3.00 was announced on August 14, 1984 and released in September 1984.
 

@@ -9,7 +9,7 @@ Microsoft Windows
 
 Information is available for assorted versions of Microsoft Windows:
 
-* [Microsoft Windows 1.00](/disks/pcx86/windows/1.00/)
+* [Microsoft Windows 1.00 (Demo)](/disks/pcx86/windows/1.00/)
 * [Microsoft Windows 1.01 (Demo)](/disks/pcx86/windows/1.01/)
 * [Microsoft Windows 1.02](/disks/pcx86/windows/1.02/)
 * [Microsoft Windows 1.03](/disks/pcx86/windows/1.03/)

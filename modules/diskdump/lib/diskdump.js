@@ -2686,11 +2686,15 @@ DiskDump.prototype.convertToJSON = function()
                 var bMediaTypeBPB = this.bufDisk.readUInt8(offBootSector + DiskAPI.BPB.MEDIA_TYPE);
                 var nSectorsTotalBPB = this.bufDisk.readUInt16LE(offBootSector + DiskAPI.BPB.TOTAL_SECS);
                 var nSectorsPerCylinderBPB = nSectorsPerTrackBPB * nHeadsBPB;
-                var nCylindersBPB = Math.floor(nSectorsTotalBPB / nSectorsPerCylinderBPB);
+                var nSectorsHiddenBPB = this.bufDisk.readUInt16LE(offBootSector + DiskAPI.BPB.HIDDEN_SECS);
+                var nCylindersBPB = (nSectorsHiddenBPB + nSectorsTotalBPB) / nSectorsPerCylinderBPB;
 
                 if (diskFormat) {
                     if (nCylinders != nCylindersBPB) {
                         DiskDump.logWarning("BPB cylinders (" + nCylindersBPB + ") do not match actual cylinders (" + nCylinders + ")");
+                        if (nCylinders - nCylindersBPB == 1) {
+                            DiskDump.logWarning("the BIOS may have reserved the last cylinder for diagnostics");
+                        }
                     }
                     if (nHeads != nHeadsBPB) {
                         DiskDump.logWarning("BPB heads (" + nHeadsBPB + ") do not match actual heads (" + nHeads + ")");
