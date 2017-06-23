@@ -2,12 +2,13 @@
 layout: page
 permalink: /
 machines:
-  - type: pcx86
-    id: ibm5150
+  - id: ibm5150
+    type: pcx86
+    resume: 1
     name: "IBM PC (Model 5150) with Monochrome Display"
     config: /devices/pcx86/machine/5150/mda/64kb/machine.xml
-  - type: c1p
-    id: demoC1P
+  - id: demoC1P
+    type: c1p
     config: /devices/c1p/machine/8kb/large/machine.xml
 ---
 
@@ -16,7 +17,7 @@ one of several JavaScript Machines in the [PCjs Project](https://github.com/jeff
 includes:
 
 * [PCx86](/docs/pcx86/), an x86-based emulator of the [IBM PC and PC-compatibles](/devices/pcx86/machine/)
-* [PC8080](/modules/pc8080/), an 8080 machine emulator (e.g., [Space Invaders](/devices/pc8080/machine/invaders/) and the [VT100 Terminal](/devices/pc8080/machine/vt100/))
+* [PC8080](/modules/pc8080/), an 8080 machine emulator (see [Space Invaders](/devices/pc8080/machine/invaders/) and the [VT100 Terminal](/devices/pc8080/machine/vt100/))
 * [C1Pjs](/docs/c1pjs/), an emulation of the 6502-based [Ohio Scientific Challenger 1P](/devices/c1p/)
 * [PDPjs](/docs/pdpjs/), a set of machine emulation modules supporting the DEC [PDP-10](/devices/pdp10/machine/) and [PDP-11](/devices/pdp11/machine/)
 
