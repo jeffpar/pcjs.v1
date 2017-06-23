@@ -12,7 +12,7 @@ machines:
         path: /disks/pcx86/dos/ibm/1.00/PCDOS100.json
       B:
         path: /apps/pcx86/1981/visicalc/VISICALC1981.json
-    autoType: 8-10-81\rb:\rvc\r
+    autoType: $date\rb:\rvc\r
 ---
 
 VisiCalc (1981)

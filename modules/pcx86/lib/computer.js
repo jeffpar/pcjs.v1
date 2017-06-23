@@ -235,7 +235,7 @@ class Computer extends Component {
         }
 
         var sStatePath = null;
-        var sResume = parmsComputer['resume'];
+        var sResume = this.getMachineParm('resume');
         if (sResume !== undefined) {
             /*
              * Decide whether the 'resume' property is a number or the path of a state file to resume.
