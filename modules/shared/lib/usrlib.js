@@ -146,18 +146,23 @@ class Usr {
      * Supported identifiers in sFormat include:
      *
      *      a:  lowercase ante meridiem and post meridiem (am or pm)
-     *      d:  day of the month, 2 digits with leading zeros (01,...,31)
-     *      g:  hour in 12-hour format, without leading zeros (1,...,12)
-     *      i:  minutes, with leading zeros (00,...,59)
-     *      j:  day of the month, without leading zeros (1,...,31)
-     *      l:  day of the week ("Sunday",...,"Saturday")
-     *      m:  month, with leading zeros (01,...,12)
-     *      s:  seconds, with leading zeros (00,...,59)
-     *      F:  month ("January",...,"December")
-     *      H:  hour in 24-hour format, with leading zeros (00,...,23)
-     *      Y:  year (eg, 2014)
+     *      d:  day of the month, 2 digits with leading zeros (01,02,...,31)
+     *      D:  3-letter day of the week ("Sun","Mon",...,"Sat")
+     *      F:  month ("January","February",...,"December")
+     *      g:  hour in 12-hour format, without leading zeros (1,2,...,12)
+     *      h:  hour in 24-hour format, without leading zeros (0,1,...,23)
+     *      H:  hour in 24-hour format, with leading zeros (00,01,...,23)
+     *      i:  minutes, with leading zeros (00,01,...,59)
+     *      j:  day of the month, without leading zeros (1,2,...,31)
+     *      l:  day of the week ("Sunday","Monday",...,"Saturday")
+     *      m:  month, with leading zeros (01,02,...,12)
+     *      M:  3-letter month ("Jan","Feb",...,"Dec")
+     *      n:  month, without leading zeros (1,2,...,12)
+     *      s:  seconds, with leading zeros (00,01,...,59)
+     *      y:  2-digit year (eg, 14)
+     *      Y:  4-digit year (eg, 2014)
      *
-     * For more inspiration, see: http://php.net/manual/en/function.date.php
+     * For more inspiration, see: http://php.net/manual/en/function.date.php (of which we support ONLY a subset).
      */
     static formatDate(sFormat, date)
     {
@@ -175,8 +180,20 @@ class Usr {
             case 'd':
                 sDate += ('0' + iDay).slice(-2);
                 break;
+            case 'D':
+                sDate += Usr.asDays[date.getDay()].substr(0, 3);
+                break;
+            case 'F':
+                sDate += Usr.asMonths[iMonth - 1];
+                break;
             case 'g':
                 sDate += (!iHour ? 12 : (iHour > 12 ? iHour - 12 : iHour));
+                break;
+            case 'h':
+                sDate += iHour;
+                break;
+            case 'H':
+                sDate += ('0' + iHour).slice(-2);
                 break;
             case 'i':
                 sDate += ('0' + date.getMinutes()).slice(-2);
@@ -190,14 +207,17 @@ class Usr {
             case 'm':
                 sDate += ('0' + iMonth).slice(-2);
                 break;
+            case 'M':
+                sDate += Usr.asMonths[iMonth - 1].substr(0, 3);
+                break;
+            case 'n':
+                sDate += iMonth;
+                break;
             case 's':
                 sDate += ('0' + date.getSeconds()).slice(-2);
                 break;
-            case 'F':
-                sDate += Usr.asMonths[iMonth - 1];
-                break;
-            case 'H':
-                sDate += ('0' + iHour).slice(-2);
+            case 'y':
+                sDate += ("" + date.getFullYear()).slice(-2);
                 break;
             case 'Y':
                 sDate += date.getFullYear();
