@@ -11,6 +11,7 @@ machines:
         path: /disks/pcx86/dos/ibm/2.00/PCDOS200-DISK1.json
       B:
         path: /disks/pcx86/apps/other/sc3/1.00/SC3_V100-SETUP.json
+    autoType: $date\r$time\rb:\rsc3\r
 ---
 
 SuperCalc3 v1.00

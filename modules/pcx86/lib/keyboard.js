@@ -409,17 +409,30 @@ class Keyboard extends Component {
      *      $date:  converted to MM-DD-YYYY
      *      $time:  converted to HH:MM
      *
-     * If you want any of those sequences to be typed as-is, then you must specify two "$" (ie, "$$").
+     * If you want any of those sequences to be typed as-is, then you must specify two "$" (ie, "$$date").
+     * Pairs of dollar signs will be automatically converted to single dollar signs, and single dollar signs
+     * will be used as-is.
      *
-     * WARNING: the JavaScript replace() function ALWAYS interprets "$" specially in replacement strings, even when
-     * the search string is NOT a RegExp, and since we build machine definitions on a page from a potentially
-     * indeterminate number of string replace() operations, multiple dollar signs could eventually get reduced to a
-     * single dollar sign BEFORE we get here.
+     * WARNING: the JavaScript replace() function ALWAYS interprets "$" specially in replacement strings,
+     * even when the search string is NOT a RegExp; specifically:
      *
-     * To compensate, I've attempted add 'replace(/\$/g, "$$$$")' operations where currently needed; eg, in the
-     * markout.js convertMDMachineLinks() function, the htmlout.js addFilesToHTML() function, and the embed.js
-     * parseXML() function.  Unfortunately, this is something that will be extremely difficult to prevent from breaking
-     * down the road.  So, heads up to future me....
+     *      $$  Inserts a "$"
+     *      $&  Inserts the matched substring
+     *      $`  Inserts the portion of the string that precedes the matched substring
+     *      $'  Inserts the portion of the string that follows the matched substring
+     *      $n  Where n is a positive integer less than 100, inserts the nth parenthesized sub-match string,
+     *          provided the first argument was a RegExp object
+     *
+     * Since we build machine definitions on a page from a potentially indeterminate number of string replace()
+     * operations, multiple dollar signs could eventually get reduced to a single dollar sign BEFORE we get here.
+     *
+     * To compensate, I've changed a few replace() methods, like MarkOut's convertMDMachineLinks() and HTMLOut's
+     * addFilesToHTML(), from the conventional string replace() to my own Str.replace(), and for situations like the
+     * embed.js parseXML() function, which needs to use a RegExp-style replace(), I've added a preliminary
+     * replace(/\$/g, "$$$$") to the replacement string.
+     *
+     * Unfortunately, this is something that will be extremely difficult to prevent from breaking down the road.
+     * So, heads up to future me....
      *
      * @this {Keyboard}
      * @param {string|undefined} sKeys
@@ -439,11 +452,29 @@ class Keyboard extends Component {
                     sReplace = Usr.formatDate("h:i:s");
                     break;
                 default:
-                    this.notice("unrecognized autoType sequence: $" + match[1]);
-                    break;
+                    //
+                    // Let's just leave any unrecognized sequences alone....
+                    //
+                    // this.notice("unrecognized autoType sequence: $" + match[1]);
+                    // break;
+                    continue;
                 }
                 sKeys = sKeys.replace('$' + match[1], sReplace);
+                /*
+                 * Even though we did just modify the string that reSpecial is iterating over, we aren't
+                 * going to muck with lastIndex, because 1) the replacement strings are always longer than
+                 * original strings, and 2) any unrecognized sequences that we now leave in place would cause
+                 * us to loop indefinitely.  So, if you really want to do this, you will have to carefully
+                 * set lastIndex to the next unexamined character, not back to the beginning.
+                 *
+                 *      reSpecial.lastIndex = 0;
+                 */
             }
+            /*
+             * Any lingering "$$" sequences are now converted to "$"; as discussed above, replace() interprets
+             * any "$$" in the replacement string as "$", so to the casual observer, it might not look like we're
+             * downsizing the dollar signs, but we actually are.
+             */
             sKeys = sKeys.replace(/\$\$/g, "$$");
         }
         return sKeys;
