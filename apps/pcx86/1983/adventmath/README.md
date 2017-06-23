@@ -4,7 +4,7 @@ title: "Adventures in Math (1983)"
 permalink: /apps/pcx86/1983/adventmath/
 machines:
   - type: pcx86
-    id: ibm5150
+    id: ibm5150-adventmath
     config: /devices/pcx86/machine/5150/cga/64kb/machine.xml
     autoMount:
       A:
@@ -17,7 +17,7 @@ machines:
 Adventures in Math (1983)
 -------------------------
 
-{% include machine.html id="ibm5150" %}
+{% include machine.html id="ibm5150-adventmath" %}
 
 The files for this game were obtained from the [Internet Archive](https://archive.org/details/msdos_Adventures_in_Math_1983).
 The contents of their ZIP archive contained:

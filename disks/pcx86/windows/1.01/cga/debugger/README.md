@@ -7,7 +7,7 @@ redirect_from:
   - /devices/pcx86/machine/5160/cga/256kb/win101/debugger/
 machines:
   - type: pcx86
-    id: ibm5160
+    id: ibm5160-cga-win101
     debugger: true
     state: /disks/pcx86/windows/1.01/cga/state.json
     config: /devices/pcx86/machine/5160/cga/256kb/debugger/machine.xml
@@ -17,4 +17,4 @@ machines:
 Microsoft Windows 1.01 with CGA Display and Debugger
 ----------------------------------------------------
 
-{% include machine.html id="ibm5160" %}
+{% include machine.html id="ibm5160-cga-win101" %}
