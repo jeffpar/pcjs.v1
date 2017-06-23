@@ -155,6 +155,7 @@ function parseXML(sXML, sXMLFile, idMachine, sAppName, sAppClass, sParms, fResol
              * Until/unless that changes, components.xsl cannot be simplified as much as I might have hoped.
              */
             if (typeof resources == 'object') sURL = null;      // turn off URL inclusion if we have embedded resources
+            sParms = sParms.replace(/\$/g, "$$$$");
             sXML = sXML.replace(/(<machine[^>]*\sid=)(['"]).*?\2/, "$1$2" + idMachine + "$2" + (sParms? " parms='" + sParms + "'" : "") + (sURL? ' url="' + sURL + '"' : ''));
         }
 

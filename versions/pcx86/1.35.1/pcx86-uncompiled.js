@@ -1477,18 +1477,23 @@ class Usr {
      * Supported identifiers in sFormat include:
      *
      *      a:  lowercase ante meridiem and post meridiem (am or pm)
-     *      d:  day of the month, 2 digits with leading zeros (01,...,31)
-     *      g:  hour in 12-hour format, without leading zeros (1,...,12)
-     *      i:  minutes, with leading zeros (00,...,59)
-     *      j:  day of the month, without leading zeros (1,...,31)
-     *      l:  day of the week ("Sunday",...,"Saturday")
-     *      m:  month, with leading zeros (01,...,12)
-     *      s:  seconds, with leading zeros (00,...,59)
-     *      F:  month ("January",...,"December")
-     *      H:  hour in 24-hour format, with leading zeros (00,...,23)
-     *      Y:  year (eg, 2014)
+     *      d:  day of the month, 2 digits with leading zeros (01,02,...,31)
+     *      D:  3-letter day of the week ("Sun","Mon",...,"Sat")
+     *      F:  month ("January","February",...,"December")
+     *      g:  hour in 12-hour format, without leading zeros (1,2,...,12)
+     *      h:  hour in 24-hour format, without leading zeros (0,1,...,23)
+     *      H:  hour in 24-hour format, with leading zeros (00,01,...,23)
+     *      i:  minutes, with leading zeros (00,01,...,59)
+     *      j:  day of the month, without leading zeros (1,2,...,31)
+     *      l:  day of the week ("Sunday","Monday",...,"Saturday")
+     *      m:  month, with leading zeros (01,02,...,12)
+     *      M:  3-letter month ("Jan","Feb",...,"Dec")
+     *      n:  month, without leading zeros (1,2,...,12)
+     *      s:  seconds, with leading zeros (00,01,...,59)
+     *      y:  2-digit year (eg, 14)
+     *      Y:  4-digit year (eg, 2014)
      *
-     * For more inspiration, see: http://php.net/manual/en/function.date.php
+     * For more inspiration, see: http://php.net/manual/en/function.date.php (of which we support ONLY a subset).
      */
     static formatDate(sFormat, date)
     {
@@ -1506,8 +1511,20 @@ class Usr {
             case 'd':
                 sDate += ('0' + iDay).slice(-2);
                 break;
+            case 'D':
+                sDate += Usr.asDays[date.getDay()].substr(0, 3);
+                break;
+            case 'F':
+                sDate += Usr.asMonths[iMonth - 1];
+                break;
             case 'g':
                 sDate += (!iHour ? 12 : (iHour > 12 ? iHour - 12 : iHour));
+                break;
+            case 'h':
+                sDate += iHour;
+                break;
+            case 'H':
+                sDate += ('0' + iHour).slice(-2);
                 break;
             case 'i':
                 sDate += ('0' + date.getMinutes()).slice(-2);
@@ -1521,14 +1538,17 @@ class Usr {
             case 'm':
                 sDate += ('0' + iMonth).slice(-2);
                 break;
+            case 'M':
+                sDate += Usr.asMonths[iMonth - 1].substr(0, 3);
+                break;
+            case 'n':
+                sDate += iMonth;
+                break;
             case 's':
                 sDate += ('0' + date.getSeconds()).slice(-2);
                 break;
-            case 'F':
-                sDate += Usr.asMonths[iMonth - 1];
-                break;
-            case 'H':
-                sDate += ('0' + iHour).slice(-2);
+            case 'y':
+                sDate += ("" + date.getFullYear()).slice(-2);
                 break;
             case 'Y':
                 sDate += date.getFullYear();
@@ -2270,6 +2290,8 @@ class Web {
     /**
      * getURLParm(sParm)
      *
+     * First looks for sParm exactly as specified, then looks for the lower-case version.
+     *
      * @param {string} sParm
      * @return {string|undefined}
      */
@@ -2278,7 +2300,7 @@ class Web {
         if (!Web.parmsURL) {
             Web.parmsURL = Web.parseURLParms();
         }
-        return Web.parmsURL[sParm];
+        return Web.parmsURL[sParm] || Web.parmsURL[sParm.toLowerCase()];
     }
 
     /**
@@ -44276,6 +44298,54 @@ class Keyboard extends Component {
     }
 
     /**
+     * parseAutoType(sKeys)
+     *
+     * The following special sequences are recognized:
+     *
+     *      $date:  converted to MM-DD-YYYY
+     *      $time:  converted to HH:MM
+     *
+     * If you want any of those sequences to be typed as-is, then you must specify two "$" (ie, "$$").
+     *
+     * WARNING: the JavaScript replace() function ALWAYS interprets "$" specially in replacement strings, even when
+     * the search string is NOT a RegExp, and since we build machine definitions on a page from a potentially
+     * indeterminate number of string replace() operations, multiple dollar signs could eventually get reduced to a
+     * single dollar sign BEFORE we get here.
+     *
+     * To compensate, I've attempted add 'replace(/\$/g, "$$$$")' operations where currently needed; eg, in the
+     * markout.js convertMDMachineLinks() function, the htmlout.js addFilesToHTML() function, and the embed.js
+     * parseXML() function.  Unfortunately, this is something that will be extremely difficult to prevent from breaking
+     * down the road.  So, heads up to future me....
+     *
+     * @this {Keyboard}
+     * @param {string|undefined} sKeys
+     * @return {string|undefined}
+     */
+    parseAutoType(sKeys)
+    {
+        if (sKeys) {
+            var match, reSpecial = /(?:^|[^$])\$([a-z]+)/g;
+            while (match = reSpecial.exec(sKeys)) {
+                var sReplace = "";
+                switch (match[1]) {
+                case 'date':
+                    sReplace = Usr.formatDate("n-j-Y");
+                    break;
+                case 'time':
+                    sReplace = Usr.formatDate("h:i:s");
+                    break;
+                default:
+                    this.notice("unrecognized autoType sequence: $" + match[1]);
+                    break;
+                }
+                sKeys = sKeys.replace('$' + match[1], sReplace);
+            }
+            sKeys = sKeys.replace(/\$\$/g, "$$");
+        }
+        return sKeys;
+    }
+
+    /**
      * setModel(sModel)
      *
      * This breaks a model string (eg, "US83") into two parts: modelCountry (eg, "US") and modelKeys (eg, 83).
@@ -44657,7 +44727,7 @@ class Keyboard extends Component {
             data = [];
             this.autoInject = null;
         } else {
-            this.autoInject = this.autoType;
+            this.autoInject = this.parseAutoType(this.autoType);
         }
         this.fClock = this.fAdvance = data[i++];
         this.fData = data[i];
@@ -44752,7 +44822,7 @@ class Keyboard extends Component {
     injectInit()
     {
         if (!this.autoInject && this.autoType) {
-            this.autoInject = this.autoType;
+            this.autoInject = this.parseAutoType(this.autoType);
             this.injectKeys(this.autoInject);
         }
     }
@@ -74034,14 +74104,7 @@ class Computer extends Component {
      */
     getMachineParm(sParm, parmsComponent)
     {
-        /*
-         * When using getURLParm(), the check is allowed be a bit looser, because URL parameters are
-         * user-supplied, whereas most other parameters are developer-supplied.  Granted, a developer
-         * may also be sloppy and neglect to use correct case (eg, 'automount' instead of 'autoMount'),
-         * but there are limits to my paranoia.
-         */
-        var sParmLC = sParm.toLowerCase();
-        var value = Web.getURLParm(sParm) || Web.getURLParm(sParmLC);
+        var value = Web.getURLParm(sParm);
 
         if (value === undefined && this.parmsMachine) {
             value = this.parmsMachine[sParm];
@@ -75854,6 +75917,7 @@ function parseXML(sXML, sXMLFile, idMachine, sAppName, sAppClass, sParms, fResol
              * Until/unless that changes, components.xsl cannot be simplified as much as I might have hoped.
              */
             if (typeof resources == 'object') sURL = null;      // turn off URL inclusion if we have embedded resources
+            sParms = sParms.replace(/\$/g, "$$$$");
             sXML = sXML.replace(/(<machine[^>]*\sid=)(['"]).*?\2/, "$1$2" + idMachine + "$2" + (sParms? " parms='" + sParms + "'" : "") + (sURL? ' url="' + sURL + '"' : ''));
         }
 

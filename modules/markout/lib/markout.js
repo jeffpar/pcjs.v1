@@ -1202,7 +1202,7 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
             sMachineVersion = ((machine['uncompiled'] == "true")? "uncompiled" : "");
             sMachineParms = machine['parms'] || "";
             sReplacement = machine['name'] || "Embedded PC";
-            sReplacement = "[" + sReplacement + "](" + sMachineXMLFile + ' "' + sMachineType + '!' + sMachineID + '!' + sMachineXSLFile + '!!' + sMachineOptions + '!' + sMachineParms + '")';
+            sReplacement = "[" + sReplacement + "](" + sMachineXMLFile + ' "' + sMachineType + '!' + sMachineID + '!' + sMachineXSLFile + '!!' + sMachineOptions + '!' + sMachineParms.replace(/\$/g, "$$$$") + '")';
         }
         sBlock = sBlock.replace(aMatch[0].substr(1), sReplacement);
         reIncludes.lastIndex = 0;       // reset lastIndex, since we just modified the string that reIncludes is iterating over

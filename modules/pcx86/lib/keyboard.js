@@ -30,6 +30,7 @@
 
 if (NODE) {
     var Str         = require("../../shared/lib/strlib");
+    var Usr         = require("../../shared/lib/usrlib");
     var Web         = require("../../shared/lib/weblib");
     var Component   = require("../../shared/lib/component");
     var Keys        = require("../../shared/lib/keys");
@@ -398,6 +399,54 @@ class Keyboard extends Component {
     {
         this.fEscapeDisabled = fDisabled;
         if (fAllDown !== undefined) this.fAllDown = fAllDown;
+    }
+
+    /**
+     * parseAutoType(sKeys)
+     *
+     * The following special sequences are recognized:
+     *
+     *      $date:  converted to MM-DD-YYYY
+     *      $time:  converted to HH:MM
+     *
+     * If you want any of those sequences to be typed as-is, then you must specify two "$" (ie, "$$").
+     *
+     * WARNING: the JavaScript replace() function ALWAYS interprets "$" specially in replacement strings, even when
+     * the search string is NOT a RegExp, and since we build machine definitions on a page from a potentially
+     * indeterminate number of string replace() operations, multiple dollar signs could eventually get reduced to a
+     * single dollar sign BEFORE we get here.
+     *
+     * To compensate, I've attempted add 'replace(/\$/g, "$$$$")' operations where currently needed; eg, in the
+     * markout.js convertMDMachineLinks() function, the htmlout.js addFilesToHTML() function, and the embed.js
+     * parseXML() function.  Unfortunately, this is something that will be extremely difficult to prevent from breaking
+     * down the road.  So, heads up to future me....
+     *
+     * @this {Keyboard}
+     * @param {string|undefined} sKeys
+     * @return {string|undefined}
+     */
+    parseAutoType(sKeys)
+    {
+        if (sKeys) {
+            var match, reSpecial = /(?:^|[^$])\$([a-z]+)/g;
+            while (match = reSpecial.exec(sKeys)) {
+                var sReplace = "";
+                switch (match[1]) {
+                case 'date':
+                    sReplace = Usr.formatDate("n-j-Y");
+                    break;
+                case 'time':
+                    sReplace = Usr.formatDate("h:i:s");
+                    break;
+                default:
+                    this.notice("unrecognized autoType sequence: $" + match[1]);
+                    break;
+                }
+                sKeys = sKeys.replace('$' + match[1], sReplace);
+            }
+            sKeys = sKeys.replace(/\$\$/g, "$$");
+        }
+        return sKeys;
     }
 
     /**
@@ -782,7 +831,7 @@ class Keyboard extends Component {
             data = [];
             this.autoInject = null;
         } else {
-            this.autoInject = this.autoType;
+            this.autoInject = this.parseAutoType(this.autoType);
         }
         this.fClock = this.fAdvance = data[i++];
         this.fData = data[i];
@@ -877,7 +926,7 @@ class Keyboard extends Component {
     injectInit()
     {
         if (!this.autoInject && this.autoType) {
-            this.autoInject = this.autoType;
+            this.autoInject = this.parseAutoType(this.autoType);
             this.injectKeys(this.autoInject);
         }
     }

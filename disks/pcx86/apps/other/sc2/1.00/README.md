@@ -4,19 +4,20 @@ title: SuperCalc2 1.00
 permalink: /disks/pcx86/apps/other/sc2/1.00/
 machines:
   - type: pcx86
-    id: ibm5150-256kb
+    id: ibm5150-sc2
     config: /devices/pcx86/machine/5150/cga/256kb/machine.xml
     autoMount:
       A:
         path: /disks/pcx86/dos/ibm/2.00/PCDOS200-DISK1.json
       B:
         path: /disks/pcx86/apps/other/sc2/1.00/SC2_V100.json
+    autoType: $date\r$time\rb:\rsc2\r
 ---
 
 SuperCalc2 v1.00
------------------
+----------------
 
-{% include machine.html id="ibm5150-256kb" %}
+{% include machine.html id="ibm5150-sc2" %}
 
 ### Directory of SuperCalc2 v1.00
 

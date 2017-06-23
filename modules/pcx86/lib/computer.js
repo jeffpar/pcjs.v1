@@ -357,14 +357,7 @@ class Computer extends Component {
      */
     getMachineParm(sParm, parmsComponent)
     {
-        /*
-         * When using getURLParm(), the check is allowed be a bit looser, because URL parameters are
-         * user-supplied, whereas most other parameters are developer-supplied.  Granted, a developer
-         * may also be sloppy and neglect to use correct case (eg, 'automount' instead of 'autoMount'),
-         * but there are limits to my paranoia.
-         */
-        var sParmLC = sParm.toLowerCase();
-        var value = Web.getURLParm(sParm) || Web.getURLParm(sParmLC);
+        var value = Web.getURLParm(sParm);
 
         if (value === undefined && this.parmsMachine) {
             value = this.parmsMachine[sParm];

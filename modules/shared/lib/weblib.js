@@ -659,6 +659,8 @@ class Web {
     /**
      * getURLParm(sParm)
      *
+     * First looks for sParm exactly as specified, then looks for the lower-case version.
+     *
      * @param {string} sParm
      * @return {string|undefined}
      */
@@ -667,7 +669,7 @@ class Web {
         if (!Web.parmsURL) {
             Web.parmsURL = Web.parseURLParms();
         }
-        return Web.parmsURL[sParm];
+        return Web.parmsURL[sParm] || Web.parmsURL[sParm.toLowerCase()];
     }
 
     /**
