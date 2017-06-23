@@ -3,8 +3,9 @@ layout: page
 title: "DONKEY.BAS (1981) with Debugger"
 permalink: /apps/pcx86/1981/donkey/debugger/
 machines:
-  - type: pcx86
-    id: ibm5150-donkey
+  - id: ibm5150-donkey
+    type: pcx86
+    resume: 1
     config: /devices/pcx86/machine/5150/cga/64kb/debugger/machine.xml
     state: /apps/pcx86/1981/donkey/state.json
     autoMount:

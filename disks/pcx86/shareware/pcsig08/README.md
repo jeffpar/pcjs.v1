@@ -3,8 +3,9 @@ layout: page
 title: PC-SIG Library 8th Edition CD-ROM (April 1990)
 permalink: /disks/pcx86/shareware/pcsig08/
 machines:
-  - type: pcx86
-    id: ibm5150-pcsig08
+  - id: ibm5150-pcsig08
+    type: pcx86
+    resume: 1
     config: /disks/pcx86/shareware/pcsig08/machine.xml
     autoMount:
       A:

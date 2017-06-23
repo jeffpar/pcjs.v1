@@ -6,6 +6,7 @@ machines:
   - type: pcx86
     id: ibm5150-adventmath
     config: /devices/pcx86/machine/5150/cga/64kb/machine.xml
+    resume: 1
     autoMount:
       A:
         path: /disks/pcx86/dos/ibm/1.00/PCDOS100.json

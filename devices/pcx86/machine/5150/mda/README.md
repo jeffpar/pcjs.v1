@@ -5,9 +5,10 @@ permalink: /devices/pcx86/machine/5150/mda/
 redirect_from:
   - /configs/pc/machines/5150/mda/
 machines:
-  - type: pcx86
-    id: ibm5150
+  - id: ibm5150
+    type: pcx86
     config: /devices/pcx86/machine/5150/mda/64kb/machine.xml
+    resume: 1
 ---
 
 IBM PC with Monochrome (MDA) Display
