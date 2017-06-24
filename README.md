@@ -36,16 +36,20 @@ Some pre-configured machines are shown below, ready to run BASIC, DOS, Windows, 
 
 ![IBM PC running VisiCalc](/apps/pcx86/1981/visicalc/thumbnail.jpg "link:/apps/pcx86/1981/visicalc/:200:120")
 ![IBM PC running DONKEY.BAS](/apps/pcx86/1981/donkey/thumbnail.jpg "link:/apps/pcx86/1981/donkey/:200:120")
-![IBM PC AT w/EGA, OS/2 1.0](/disks/pcx86/os2/ibm/1.0/thumbnail.jpg "link:/disks/pcx86/os2/ibm/1.0/:200:120")
+![IBM PC XT w/EGA, Windows 1.0](/disks/pcx86/windows/1.00/thumbnail.jpg "link:/disks/pcx86/windows/1.00/:200:120")
 ![IBM PC XT w/CGA, Windows 1.01](/disks/pcx86/windows/1.01/cga/thumbnail.jpg "link:/disks/pcx86/windows/1.01/cga/:200:120")
 ![IBM PC XT w/EGA, Windows 1.01](/disks/pcx86/windows/1.01/thumbnail.jpg "link:/disks/pcx86/windows/1.01/:200:120")
+![IBM PC AT w/EGA, OS/2 1.0](/disks/pcx86/os2/ibm/1.0/thumbnail.jpg "link:/disks/pcx86/os2/ibm/1.0/:200:120")
 ![COMPAQ DeskPro 386, Windows/386](/disks/pcx86/windows/2.0x/thumbnail.jpg "link:/disks/pcx86/windows/2.0x/:200:120")
-![IBM PC AT w/EGA, Windows 3.00](/disks/pcx86/windows/3.00/thumbnail.jpg "link:/disks/pcx86/windows/3.00/:200:120")
-![IBM PC AT w/VGA, Windows 3.10](/disks/pcx86/windows/3.10/thumbnail.jpg "link:/disks/pcx86/windows/3.10/:200:120")
+![IBM PC AT w/EGA, Windows 3.0](/disks/pcx86/windows/3.00/thumbnail.jpg "link:/disks/pcx86/windows/3.00/:200:120")
+![IBM PC AT w/VGA, Windows 3.1](/disks/pcx86/windows/3.10/thumbnail.jpg "link:/disks/pcx86/windows/3.10/:200:120")
 ![COMPAQ DeskPro 386, Windows 95](/disks/pcx86/windows/win95/4.00.950/thumbnail.jpg "link:/disks/pcx86/windows/win95/4.00.950/:200:120")
 ![IBM PC w/MDA, CP/M-86](/disks/pcx86/cpm/1.1b/thumbnail.jpg "link:/disks/pcx86/cpm/1.1b/:200:120")
-![IBM PC w/MDA, Microsoft Adventure](/disks/pcx86/games/microsoft/adventure/thumbnail.jpg "link:/disks/pcx86/games/microsoft/adventure/:200:120")
-![IBM PC w/CGA, Zork I](/disks/pcx86/games/infocom/zork1/thumbnail.jpg "link:/disks/pcx86/games/infocom/zork1/:200:120")
+![Microsoft Adventure (1981)](/disks/pcx86/games/microsoft/adventure/thumbnail.jpg "link:/disks/pcx86/games/microsoft/adventure/:200:120")
+![Executive Suite (1982)](/apps/pcx86/1982/esuite/thumbnail.jpg "link:/apps/pcx86/1982/esuite/:200:120")
+![Zork I (1982)](/disks/pcx86/games/infocom/zork1/thumbnail.jpg "link:/disks/pcx86/games/infocom/zork1/:200:120")
+![Adventures in Math (1983)](/apps/pcx86/1983/adventmath/thumbnail.jpg "link:/apps/pcx86/1983/adventmath/:200:120")
+![Rogue (1985)](/apps/pcx86/1985/rogue/thumbnail.jpg "link:/apps/pcx86/1985/rogue/:200:120")
 
 There are many more [PCx86 Demos](/devices/pcx86/machine/#ready-to-run-app-demos), including an
 [IBM PC with Dual Displays](/devices/pcx86/machine/5150/dual/64kb/) demonstrating early multi-monitor support,

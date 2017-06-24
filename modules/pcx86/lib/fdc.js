@@ -1084,7 +1084,7 @@ class FDC extends Component {
         if (!fRemount) this.cAutoMount = 0;
         for (var sDrive in this.configMount) {
             var configDrive = this.configMount[sDrive];
-            var sDiskettePath = configDrive['path'] || "";
+            var sDiskettePath = configDrive['path'] || this.findDisketteByName(configDrive['name']);
             if (sDiskettePath) {
                 /*
                  * WARNING: This conversion of drive letter to drive number, starting with A:, is very simplistic
@@ -1092,7 +1092,7 @@ class FDC extends Component {
                  */
                 var iDrive = sDrive.charCodeAt(0) - 0x41;
                 if (iDrive >= 0 && iDrive < this.aDrives.length) {
-                    var sDisketteName = configDrive['name'] || this.findDiskette(sDiskettePath) || "Unknown";
+                    var sDisketteName = configDrive['name'] || this.findDisketteByPath(sDiskettePath) || "Unknown";
                     if (!this.loadDrive(iDrive, sDisketteName, sDiskettePath, true) && fRemount) {
                         this.setReady(false);
                     }
@@ -1361,7 +1361,7 @@ class FDC extends Component {
     }
 
     /**
-     * findDiskette(sPath)
+     * findDisketteByPath(sPath)
      *
      * This is used to deal with mount requests (eg, autoMount) that supply a path without a name;
      * if we can find the path in the "listDisks" control, then we return the associated disk name.
@@ -1370,7 +1370,7 @@ class FDC extends Component {
      * @param {string} sPath
      * @return {string|null}
      */
-    findDiskette(sPath)
+    findDisketteByPath(sPath)
     {
         var controlDisks = this.bindings["listDisks"];
         if (controlDisks && controlDisks.options) {
@@ -1380,6 +1380,30 @@ class FDC extends Component {
             }
         }
         return Str.getBaseName(sPath, true);
+    }
+
+    /**
+     * findDisketteByName(sName)
+     *
+     * This is used to deal with mount requests (eg, autoMount) that supply a name without a path;
+     * if we can find the name in the "listDisks" control, then we return the associated disk path.
+     *
+     * @this {FDC}
+     * @param {string|undefined} sName
+     * @return {string}
+     */
+    findDisketteByName(sName)
+    {
+        if (sName) {
+            var controlDisks = this.bindings["listDisks"];
+            if (controlDisks && controlDisks.options) {
+                for (var i = 0; i < controlDisks.options.length; i++) {
+                    var control = controlDisks.options[i];
+                    if (control.text == sName) return control.value;
+                }
+            }
+        }
+        return "";
     }
 
     /**
