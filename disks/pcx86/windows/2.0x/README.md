@@ -3,8 +3,8 @@ layout: page
 title: Microsoft Windows/386 2.0x
 permalink: /disks/pcx86/windows/2.0x/
 machines:
-  - type: pcx86
-    id: deskpro386
+  - id: deskpro386
+    type: pcx86
     state: deskpro386.json
     config: /devices/pcx86/machine/compaq/deskpro386/vga/2048kb/machine.xml
     drives: '[{name:"20Mb Hard Disk",type:2,path:"http://archive.pcjs.org/disks/pcx86/fixed/20mb/COMPAQ310-WIN386201-VGA.json"}]'
@@ -21,7 +21,7 @@ Microsoft Windows/386 2.0 existed as the following "point releases":
 * [Windows/386 2.03](#microsoft-windows386-203)
 
 Microsoft Windows/386 2.01
----
+--------------------------
 
 This Windows/386 release was finalized in September 1987, predating [Windows 2.03](/disks/pcx86/windows/2.03/)
 by several months.

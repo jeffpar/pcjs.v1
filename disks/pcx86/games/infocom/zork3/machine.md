@@ -13,6 +13,6 @@ machines:
 ---
 
 Zork III
----
+--------
 
 {% include machine.html id="ibm5150-zork3" %}

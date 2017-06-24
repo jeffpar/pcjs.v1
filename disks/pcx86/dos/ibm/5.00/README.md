@@ -3,17 +3,17 @@ layout: page
 title: PC-DOS 5.00
 permalink: /disks/pcx86/dos/ibm/5.00/
 machines:
-  - type: pcx86
-    id: ibm5170-pcdos500
+  - id: ibm5170-pcdos500
+    type: pcx86
     debugger: true
+    config: /devices/pcx86/machine/5170/ega/2048kb/rev3/debugger/machine.xml
     autoMount:
       A:
         path: /disks/pcx86/dos/ibm/5.00/PCDOS500-DISK1-720K.json
-    config: /devices/pcx86/machine/5170/ega/2048kb/rev3/debugger/machine.xml
 ---
 
 PC-DOS 5.00
----
+-----------
 
 PC-DOS 5.00 was released in June 1991.
 

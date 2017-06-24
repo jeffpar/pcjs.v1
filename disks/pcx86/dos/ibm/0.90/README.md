@@ -3,8 +3,8 @@ layout: page
 title: PC-DOS 0.90
 permalink: /disks/pcx86/dos/ibm/0.90/
 machines:
-  - type: pcx86
-    id: ibm5150-pcdos090
+  - id: ibm5150-pcdos090
+    type: pcx86
     config: /devices/pcx86/machine/5150/cga/256kb/machine.xml
     autoMount:
       A:

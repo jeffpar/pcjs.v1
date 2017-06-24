@@ -13,6 +13,6 @@ machines:
 ---
 
 The Hitchhiker's Guide to the Galaxy
----
+------------------------------------
 
 {% include machine.html id="ibm5150-hhiker" %}

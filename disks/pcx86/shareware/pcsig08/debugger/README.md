@@ -3,8 +3,8 @@ layout: page
 title: PC-SIG Library 8th Edition CD-ROM (April 1990) (with Debugger)
 permalink: /disks/pcx86/shareware/pcsig08/debugger/
 machines:
-  - type: pcx86
-    id: ibm5150-pcsig08
+  - id: ibm5150-pcsig08
+    type: pcx86
     config: /disks/pcx86/shareware/pcsig08/debugger/machine.xml
     autoMount:
       A:

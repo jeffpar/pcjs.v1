@@ -3,16 +3,16 @@ layout: page
 title: PC-DOS 7.00
 permalink: /disks/pcx86/dos/ibm/7.00/
 machines:
-  - type: pcx86
-    id: ibm5170-pcdos700
+  - id: ibm5170-pcdos700
+    type: pcx86
+    config: /devices/pcx86/machine/5170/ega/2048kb/rev3/machine.xml
     autoMount:
       A:
         path: /disks/pcx86/dos/ibm/7.00/PCDOS700-DISK1.json
-    config: /devices/pcx86/machine/5170/ega/2048kb/rev3/machine.xml
 ---
 
 PC-DOS 7.00
----
+-----------
 
 PC-DOS 7.00 was released in April 1995.  The disks used the [XDF Format](/blog/2014/10/28/).
 

@@ -8,15 +8,15 @@ machines:
   - id: deskpro386
     type: pcx86
     debugger: true
+    messages: warn
+    config: /devices/pcx86/machine/compaq/deskpro386/ega/4096kb/debugger/machine.xml
     autoMount:
       A:
         path: /disks/pcx86/os2/misc/football/FOOTBALL-76817.json
-    messages: warn
-    config: /devices/pcx86/machine/compaq/deskpro386/ega/4096kb/debugger/machine.xml
 ---
 
 OS/2 FOOTBALL Boot Disk (v7.68.17)
----
+----------------------------------
 
 This disk contained a prototype version of OS/2 from February 1987, code-named **FOOTBALL**
 (aka **PIGSKIN**).  It predated the completion of OS/2 1.0 by some eight months and was based on the

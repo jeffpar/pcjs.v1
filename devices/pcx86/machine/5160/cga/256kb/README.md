@@ -6,8 +6,8 @@ redirect_from:
   - /configs/pc/machines/5160/cga/256kb/
   - /configs/pc/machines/5160/cga/256kb/demo/
 machines:
-  - type: pcx86
-    id: ibm5160
+  - id: ibm5160
+    type: pcx86
 ---
 
 IBM PC XT (256Kb) with Color Display

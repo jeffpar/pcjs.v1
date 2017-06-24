@@ -3,8 +3,8 @@ layout: page
 title: SuperCalc2 1.00
 permalink: /disks/pcx86/apps/other/sc2/1.00/
 machines:
-  - type: pcx86
-    id: ibm5150-sc2
+  - id: ibm5150-sc2
+    type: pcx86
     config: /devices/pcx86/machine/5150/cga/256kb/machine.xml
     autoMount:
       A:

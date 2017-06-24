@@ -13,7 +13,7 @@ machines:
 ---
 
 OS/2 SIZZLE Boot Disk (v7.68.18 DEBUG)
----
+--------------------------------------
 
 This disk contained a *DEBUG* pre-1.0 version of OS/2 built on January 7, 1987, and
 it is largely identical to the [OS/2 SIZZLE Boot Disk (v7.68.18)](/disks/pcx86/os2/misc/cpdos/87007/), with

@@ -3,9 +3,9 @@ layout: page
 title: Build Your Own PC
 permalink: /devices/pcx86/machine/custom/
 machines:
-  - type: pcx86
+  - id: custom-pc
+    type: pcx86
     name: Custom PC
-    id: custom-pc
     uncompiled: true
     autoPower: false
 build: build-pc

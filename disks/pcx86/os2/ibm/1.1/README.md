@@ -3,8 +3,8 @@ layout: page
 title: IBM OS/2 1.1
 permalink: /disks/pcx86/os2/ibm/1.1/
 machines:
-  - type: pcx86
-    id: ibm5170
+  - id: ibm5170
+    type: pcx86
     debugger: true
     messages: fault
     config: /devices/pcx86/machine/5170/vga/4096kb/debugger/machine.xml

@@ -3,16 +3,16 @@ layout: page
 title: PC-DOS 6.10
 permalink: /disks/pcx86/dos/ibm/6.10/
 machines:
-  - type: pcx86
-    id: ibm5170-pcdos610
+  - id: ibm5170-pcdos610
+    type: pcx86
+    config: /devices/pcx86/machine/5170/ega/2048kb/rev3/machine.xml
     autoMount:
       A:
         path: /disks/pcx86/dos/ibm/6.10/PCDOS610-DISK1-1440K.json
-    config: /devices/pcx86/machine/5170/ega/2048kb/rev3/machine.xml
 ---
 
 PC-DOS 6.10
----
+-----------
 
 PC-DOS 6.10 was released in June 1993.
 

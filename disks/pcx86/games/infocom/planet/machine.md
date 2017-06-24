@@ -13,6 +13,6 @@ machines:
 ---
 
 Planetfall
----
+----------
 
 {% include machine.html id="ibm5150-planet" %}

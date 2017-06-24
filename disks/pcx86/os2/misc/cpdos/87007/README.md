@@ -13,7 +13,7 @@ machines:
 ---
 
 OS/2 SIZZLE Boot Disk (v7.68.18)
----
+--------------------------------
 
 This disk contained a pre-1.0 version of OS/2 built on January 7, 1987, which was based on an interim
 source code fork known as **SIZZLE**, the code-name for a collection of changes intended to improve overall

@@ -6,8 +6,8 @@ redirect_from:
   - /configs/pc/machines/5160/cga/256kb/demo/debugger/
   - /devices/pcx86/machine/5160/cga/256kb/demo/debugger/
 machines:
-  - type: pcx86
-    id: ibm5160
+  - id: ibm5160
+    type: pcx86
     debugger: true
 ---
 

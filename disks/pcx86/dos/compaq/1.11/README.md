@@ -3,8 +3,8 @@ layout: page
 title: COMPAQ MS-DOS 1.11
 permalink: /disks/pcx86/dos/compaq/1.11/
 machines:
-  - type: pcx86
-    id: ibm5150-compaq111
+  - id: ibm5150-compaq111
+    type: pcx86
     config: /devices/pcx86/machine/5150/mda/64kb/machine.xml
     resume: 1
     autoMount:
@@ -13,7 +13,7 @@ machines:
 ---
 
 COMPAQ MS-DOS 1.11
----
+------------------
 
 Released in 1983 by COMPAQ Computer Corp, this early version of MS-DOS displays the following messages on boot:
 

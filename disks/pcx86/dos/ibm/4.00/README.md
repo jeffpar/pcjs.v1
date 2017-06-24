@@ -3,16 +3,16 @@ layout: page
 title: PC-DOS 4.00
 permalink: /disks/pcx86/dos/ibm/4.00/
 machines:
-  - type: pcx86
-    id: ibm5170-pcdos400
+  - id: ibm5170-pcdos400
+    type: pcx86
+    config: /devices/pcx86/machine/5170/ega/2048kb/rev3/machine.xml
     autoMount:
       A:
         path: /disks/pcx86/dos/ibm/4.00/PCDOS400-DISK1.json
-    config: /devices/pcx86/machine/5170/ega/2048kb/rev3/machine.xml
 ---
 
 PC-DOS 4.00
----
+-----------
 
 PC-DOS 4.00 was released in July 1988. 
 

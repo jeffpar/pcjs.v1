@@ -3,8 +3,8 @@ layout: page
 title: Microsoft MS-DOS 3.20
 permalink: /disks/pcx86/dos/microsoft/3.20/
 machines:
-  - type: pcx86
-    id: ibm5170-msdos320
+  - id: ibm5170-msdos320
+    type: pcx86
     config: /devices/pcx86/machine/5170/ega/640kb/rev1/machine.xml
     autoMount:
       A:
@@ -13,7 +13,7 @@ machines:
 ---
 
 Microsoft MS-DOS 3.20
----
+---------------------
 
 The MS-DOS 3.20 disks in the PCjs collection are the only known non-OEM copies of that release
 available online.  All other known MS-DOS 3.20 disk images are OEM releases (eg, HP, Zenith, Data General,
@@ -23,8 +23,7 @@ Directory listings of the four 360Kb distribution diskettes are provided [below]
 
 {% include machine.html id="ibm5170-msdos320" %}
 
-Directory Listings
----
+### Directory Listings
 
 Disks 3 and 4 contained a printed date of `March 21, 1986` (see the photo below), which is consistent with
 the file timestamps (`2-14-86` and `3-14-86`) on those disks.  However, all the files on Disks 1 and 2 are
@@ -45,7 +44,7 @@ order.  As proof, the following data from Disk 1:
 	00013e00  72 70 20 31 39 38 31 2d  31 39 38 36 0d 0a 0d 0a  |rp 1981-1986....|
 
 matches the data listed at [16bitos.com](http://16bitos.com/320ms.htm), as do the MD5 checksums of IO.SYS,
-MSDODS.SYS and COMMAND.COM.
+MSDOS.SYS and COMMAND.COM.
 
 ### Directory of MS-DOS 3.20 (Disk 1)
 
@@ -122,7 +121,8 @@ MSDODS.SYS and COMMAND.COM.
 	        1 File(s)     56320 bytes free
 
 Surprisingly Bad Bug in MS-DOS 3.20
----
+-----------------------------------
+
 If you attempt to boot MS-DOS 3.20 on an [IBM PC Model 5150](/devices/pcx86/machine/5150/cga/384kb/softkbd/) (with either
 an MDA or CGA video card), the machine will appear to crash after printing the first character.
 
@@ -167,7 +167,7 @@ but that release apparently wasn't made available until almost a year later (MS-
 `5-01-87`).
 
 MS-DOS 3.20 Photos
----
+------------------
 
 Here's what one of the MS-DOS 3.20 diskettes looked like.
 

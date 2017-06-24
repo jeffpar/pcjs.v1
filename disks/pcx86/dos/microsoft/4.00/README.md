@@ -3,8 +3,8 @@ layout: page
 title: Microsoft MS-DOS 4.00
 permalink: /disks/pcx86/dos/microsoft/4.00/
 machines:
-  - type: pcx86
-    id: ibm5170-msdos400
+  - id: ibm5170-msdos400
+    type: pcx86
     config: /devices/pcx86/machine/5170/ega/640kb/rev1/machine.xml
     autoMount:
       A:
@@ -13,7 +13,7 @@ machines:
 ---
 
 Microsoft MS-DOS 4.00
----
+---------------------
 
 The PCjs machine below is running PC-DOS 4.00.
 
