@@ -5,12 +5,16 @@ date: 2015-09-21 11:00:00
 category: Windows 95
 permalink: /blog/2015/09/21/
 machines:
-  - type: pcx86
-    id: deskpro386
+  - id: deskpro386
+    type: pcx86
     state: /disks/pcx86/windows/win95/4.00.950/deskpro386.json
     config: /devices/pcx86/machine/compaq/deskpro386/vga/4096kb/machine.xml
     drives: '[{name:"68Mb Hard Disk",type:4,path:"http://archive.pcjs.org/disks/pcx86/fixed/68mb/win95.json"}]'
-    autoMount: ''
+    autoMount:
+      A:
+        name: None
+      B:
+        name: None
 ---
 
 Today, the last serious bug preventing a successful boot of Windows 95 was fixed.  I won't bore you with

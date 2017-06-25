@@ -3,8 +3,8 @@ layout: page
 title: "Adventures in Math (1983)"
 permalink: /apps/pcx86/1983/adventmath/
 machines:
-  - type: pcx86
-    id: ibm5150-adventmath
+  - id: ibm5150-adventmath
+    type: pcx86
     config: /devices/pcx86/machine/5150/cga/64kb/machine.xml
     resume: 1
     autoMount:

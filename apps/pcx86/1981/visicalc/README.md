@@ -3,8 +3,8 @@ layout: page
 title: "VisiCalc (1981)"
 permalink: /apps/pcx86/1981/visicalc/
 machines:
-  - type: pcx86
-    id: ibm5150-visicalc
+  - id: ibm5150-visicalc
+    type: pcx86
     config: /devices/pcx86/machine/5150/mda/64kb/machine.xml
     resume: 1
     state: /apps/pcx86/1981/visicalc/state.json

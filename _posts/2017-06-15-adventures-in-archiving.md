@@ -4,8 +4,8 @@ title: Adventures in Archiving
 date: 2017-06-15 22:00:00
 permalink: /blog/2017/06/15/
 machines:
-  - type: pcx86
-    id: ibm5150
+  - id: ibm5150
+    type: pcx86
     config: /devices/pcx86/machine/5150/cga/64kb/machine.xml
     autoMount:
       A:

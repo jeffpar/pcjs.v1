@@ -3,8 +3,8 @@ layout: page
 title: "RatBas (1982)"
 permalink: /apps/pcx86/1982/ratbas/
 machines:
-  - type: pcx86
-    id: ibm5150-ratbas
+  - id: ibm5150-ratbas
+    type: pcx86
     config: /devices/pcx86/machine/5150/cga/256kb/machine.xml
     autoMount:
       A:

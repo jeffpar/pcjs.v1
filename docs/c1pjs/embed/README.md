@@ -3,8 +3,8 @@ layout: page
 title: Embedding The C1Pjs Simulator
 permalink: /docs/c1pjs/embed/
 machines:
-  - type: c1p
-    id: c1p8kb
+  - id: c1p8kb
+    type: c1p
     config: /devices/c1p/machine/8kb/embed/machine.xml
 redirect_from:
   - /configs/c1p/embed/

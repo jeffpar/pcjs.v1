@@ -5,7 +5,7 @@ permalink: /devices/c1p/machine/8kb/
 ---
 
 Challenger 1P Machine Configurations with 8Kb
----
+---------------------------------------------
 
 Here are some sample C1P Machine Configurations with 8Kb:
 

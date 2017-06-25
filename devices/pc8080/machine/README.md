@@ -5,7 +5,7 @@ permalink: /devices/pc8080/machine/
 ---
 
 PC8080 Machine Configurations
----
+-----------------------------
 
 The following 8080-based machines are currently available:
 

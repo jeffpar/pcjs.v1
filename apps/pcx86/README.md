@@ -17,12 +17,14 @@ A list of all the software available to PCx86 machines can be found in the [IBM 
 ### 1981
 
 * [DONKEY.BAS](1981/donkey/)
+* [Microsoft Adventure](/disks/pcx86/games/microsoft/adventure/)
 * [VisiCalc](1981/visicalc/)
 
 ### 1982
 
 * [Executive Suite](1982/esuite/)
 * [RatBas v2.13](1982/ratbas/)
+* [Zork I](/disks/pcx86/games/infocom/zork1/)
 
 ### 1983
 

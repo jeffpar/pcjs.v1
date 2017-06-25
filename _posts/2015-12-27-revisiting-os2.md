@@ -5,8 +5,8 @@ date: 2015-12-27 11:00:00
 category: OS/2
 permalink: /blog/2015/12/27/
 machines:
-  - type: pcx86
-    id: ibm5170
+  - id: ibm5170
+    type: pcx86
     debugger: true
     config: /devices/pcx86/machine/5170/ega/2048kb/rev3/debugger/machine.xml
     drives: '[{name:"20Mb Hard Disk",type:2,path:"http://archive.pcjs.org/disks/pcx86/fixed/20mb/IBMOS210-EGA.json"}]'

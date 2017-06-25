@@ -4,8 +4,8 @@ title: The VT100 Terminal
 date: 2016-08-03 18:00:00
 permalink: /blog/2016/08/03/
 machines:
-  - type: pc8080
-    id: vt100
+  - id: vt100
+    type: pc8080
     config: /devices/pc8080/machine/vt100/machine.xml
 ---
 

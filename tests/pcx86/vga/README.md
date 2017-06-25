@@ -3,8 +3,8 @@ layout: page
 title: VGA "Black Book" Tests
 permalink: /tests/pcx86/vga/
 machines:
-  - type: pcx86
-    id: deskpro386
+  - id: deskpro386
+    type: pcx86
     debugger: true
     config: /devices/pcx86/machine/compaq/deskpro386/vga/2048kb/debugger/machine.xml
     autoMount:
@@ -15,7 +15,7 @@ machines:
 ---
 
 VGA "Black Book" Tests
----
+----------------------
 
 To aid in the development of PCjs VGA support, I've added some VGA tests to the project.
 For now, the only "tests" are samples taken directly from

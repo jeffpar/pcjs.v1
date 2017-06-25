@@ -3,13 +3,13 @@ layout: page
 title: PCx86 Documentation Examples
 permalink: /docs/pcx86/examples/
 machines:
-  - type: pcx86
-    id: example3
+  - id: example3
+    type: pcx86
     config: /docs/pcx86/examples/example3b.xml
 ---
 
 PCx86 Documentation Examples
----
+----------------------------
 
 This folder provides all the self-contained [PCx86](/docs/about/pcx86/) examples described in the
 [Documentation](/docs/pcx86/).

@@ -3,32 +3,32 @@ layout: page
 title: OSI Challenger 1P (8Kb) "Server Array"
 permalink: /devices/c1p/machine/8kb/array/
 machines:
-  - type: c1p
-    id: osi1
+  - id: osi1
+    type: c1p
     config: /devices/c1p/machine/8kb/small/machine.xml
-  - type: c1p
-    id: osi2
+  - id: osi2
+    type: c1p
     config: /devices/c1p/machine/8kb/small/machine.xml
-  - type: c1p
-    id: osi3
+  - id: osi3
+    type: c1p
     config: /devices/c1p/machine/8kb/small/machine.xml
-  - type: c1p
-    id: osi4
+  - id: osi4
+    type: c1p
     config: /devices/c1p/machine/8kb/small/machine.xml
-  - type: c1p
-    id: osi5
+  - id: osi5
+    type: c1p
     config: /devices/c1p/machine/8kb/small/machine.xml
-  - type: c1p
-    id: osi6
+  - id: osi6
+    type: c1p
     config: /devices/c1p/machine/8kb/small/machine.xml
-  - type: c1p
-    id: osi7
+  - id: osi7
+    type: c1p
     config: /devices/c1p/machine/8kb/small/machine.xml
-  - type: c1p
-    id: osi8
+  - id: osi8
+    type: c1p
     config: /devices/c1p/machine/8kb/small/machine.xml
-  - type: c1p
-    id: osi9
+  - id: osi9
+    type: c1p
     config: /devices/c1p/machine/8kb/small/machine.xml
 redirect_from:
   - /configs/c1p/machines/array/

@@ -3,28 +3,28 @@ layout: page
 title: PDP-11/70 "Server Array"
 permalink: /devices/pdp11/machine/1170/array/
 machines:
-  - type: pdp11
-    id: test1170a
+  - id: test1170-1
+    type: pdp11
     autoStart: true
     config: /devices/pdp11/machine/1170/panel/machine.xml
-  - type: pdp11
-    id: test1170b
+  - id: test1170-2
+    type: pdp11
     autoStart: true
     config: /devices/pdp11/machine/1170/panel/machine.xml
-  - type: pdp11
-    id: test1170c
+  - id: test1170-3
+    type: pdp11
     autoStart: true
     config: /devices/pdp11/machine/1170/panel/machine.xml
-  - type: pdp11
-    id: test1170d
+  - id: test1170-4
+    type: pdp11
     autoStart: true
     config: /devices/pdp11/machine/1170/panel/machine.xml
 ---
 
-{% include machine.html id="test1170a" %}
+{% include machine.html id="test1170-1" %}
 
-{% include machine.html id="test1170b" %}
+{% include machine.html id="test1170-2" %}
 
-{% include machine.html id="test1170c" %}
+{% include machine.html id="test1170-3" %}
 
-{% include machine.html id="test1170d" %}
+{% include machine.html id="test1170-4" %}
