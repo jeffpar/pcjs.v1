@@ -32,6 +32,8 @@ at the time of this RatBas release.
 
 {% include machine.html id="ibm5150-ratbas" %}
 
+For more classic PC software experiences, see the PCjs collection of [IBM PC Application Demos](/apps/pcx86/).
+
 Directory Listing of RatBas 2.13
 --------------------------------
 

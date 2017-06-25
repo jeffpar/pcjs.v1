@@ -13,3 +13,5 @@ The Dungeons of Moria (1992)
 ----------------------------
 
 {% include machine.html id="ibm5160-moria55" %}
+
+For more classic PC software experiences, see the PCjs collection of [IBM PC Application Demos](/apps/pcx86/).

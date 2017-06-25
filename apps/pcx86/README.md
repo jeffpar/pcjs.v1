@@ -29,11 +29,11 @@ A list of all the software available to PCx86 machines can be found in the [IBM 
 ### 1983
 
 * [Adventures in Math v1.00](1983/adventmath/)
+* [Planetfall](/disks/pcx86/games/infocom/planet/)
 * [SuperCalc2 v1.00](/disks/pcx86/apps/other/sc2/1.00/)
 * [SuperCalc3 v1.00](/disks/pcx86/apps/other/sc3/1.00/)
 * [Zork II](/disks/pcx86/games/infocom/zork2/)
 * [Zork III](/disks/pcx86/games/infocom/zork3/)
-* [Planetfall](/disks/pcx86/games/infocom/planet/)
 
 ### 1984
 

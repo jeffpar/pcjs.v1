@@ -14,3 +14,5 @@ Rogue (1985)
 ------------
 
 {% include machine.html id="ibm5160-rogue" %}
+
+For more classic PC software experiences, see the PCjs collection of [IBM PC Application Demos](/apps/pcx86/).
