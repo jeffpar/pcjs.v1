@@ -14,9 +14,9 @@ machines:
     config: /devices/pcx86/machine/5160/cga/640kb/softkbd/machine.xml
     autoMount:
       A:
-        path: /disks/pcx86/dos/microsoft/4.0M/MSDOS400M-DISK1.json
+        name: MS-DOS 4.0M (Disk 1)
       B:
-        path: /disks/pcx86/dos/microsoft/4.0M/MSDOS400M-DISK2.json
+        name: MS-DOS 4.0M (Disk 2)
 ---
 
 Multitasking MS-DOS 4.00

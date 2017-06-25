@@ -5,7 +5,7 @@ permalink: /disks/pcx86/dos/compaq/
 ---
 
 COMPAQ MS-DOS
----
+-------------
 
 Information is available for these versions of COMPAQ MS-DOS:
 

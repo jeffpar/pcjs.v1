@@ -5,7 +5,7 @@ permalink: /disks/pcx86/dos/microsoft/6.22/
 ---
 
 Microsoft MS-DOS 6.22
----
+---------------------
 
 Information is available for these Microsoft MS-DOS 6.22 distributions:
 

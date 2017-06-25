@@ -5,7 +5,7 @@ permalink: /disks/pcx86/dos/compaq/3.10/
 ---
 
 COMPAQ MS-DOS 3.10
----
+------------------
 
 This directory contains two different releases of COMPAQ MS-DOS 3.10:
 

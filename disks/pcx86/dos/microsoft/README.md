@@ -5,7 +5,7 @@ permalink: /disks/pcx86/dos/microsoft/
 ---
 
 Microsoft MS-DOS
----
+----------------
 
 Information is available for these versions of Microsoft MS-DOS:
 

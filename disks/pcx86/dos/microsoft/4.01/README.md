@@ -9,7 +9,6 @@ machines:
     autoMount:
       A:
         name: MS-DOS 4.01 (Disk 1)
-        path: /disks/pcx86/dos/microsoft/4.01/MSDOS401-DISK1.json
 ---
 
 Microsoft MS-DOS 4.01

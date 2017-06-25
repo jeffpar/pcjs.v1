@@ -5,7 +5,7 @@ permalink: /disks/pcx86/dos/microsoft/6.20/
 ---
 
 Microsoft MS-DOS 6.20
----
+---------------------
 
 Information is available for these Microsoft MS-DOS 6.20 distributions:
 

@@ -5,7 +5,7 @@ permalink: /disks/pcx86/dos/microsoft/5.00/720K/
 ---
 
 Microsoft MS-DOS 5.00 (720K Disks)
----
+----------------------------------
 
 ### Directory of MS-DOS 5.00 (720K Disk 1) 
 

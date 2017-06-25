@@ -5,7 +5,7 @@ permalink: /disks/pcx86/dos/microsoft/3.31/
 ---
 
 Microsoft MS-DOS 3.31
----
+---------------------
 
 ### Directory of MS-DOS 3.31 (1.44M Disk)
 

@@ -9,7 +9,6 @@ machines:
     autoMount:
       A:
         name: MS-DOS 3.20 (Disk 1)
-        path: /disks/pcx86/dos/microsoft/3.20/MSDOS320-DISK1.json
 ---
 
 Microsoft MS-DOS 3.20
