@@ -17,6 +17,8 @@ Zork III: The Dungeon Master
 
 {% include machine.html id="ibm5150-zork3" %}
 
+For more classic PC software experiences, see the PCjs collection of [IBM PC Application Demos](/apps/pcx86/).
+
 Related
 -------
 

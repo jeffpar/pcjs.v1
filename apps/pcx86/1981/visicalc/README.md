@@ -21,6 +21,8 @@ VisiCalc (1981)
 
 {% include machine.html id="ibm5150-visicalc" %}
 
+For more classic PC software experiences, see the PCjs collection of [IBM PC Application Demos](/apps/pcx86/).
+
 VisiCalc Reference
 ------------------
 

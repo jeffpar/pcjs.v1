@@ -17,6 +17,8 @@ Planetfall (1983)
 
 {% include machine.html id="ibm5150-planet" %}
 
+For more classic PC software experiences, see the PCjs collection of [IBM PC Application Demos](/apps/pcx86/).
+
 References
 ----------
 

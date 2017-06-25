@@ -16,6 +16,8 @@ Zork I: The Great Underground Empire
 
 {% include machine.html id="ibm5150-zork1" %}
 
+For more classic PC software experiences, see the PCjs collection of [IBM PC Application Demos](/apps/pcx86/).
+
 Related
 -------
 

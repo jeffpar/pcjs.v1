@@ -187,7 +187,7 @@ have been tested with PC-DOS 2.00 on a 64Kb machine, but perhaps it wasn't.
 
 The machine on this page is configured with the following "autoType" sequence:
  
-	autoType: 8-10-81\rb:\ra:basica castle\r
+	autoType: $date\rb:\ra:basica castle\r
 
 which translates to:
 
@@ -203,6 +203,8 @@ The other preferred method is to use a machine state file, which restores the ma
 already running.  This is the fastest approach, and it is useful when the software has an involved installation
 process, but it takes more effort to set up.  The [VisiCalc (1981)](/apps/pcx86/1981/visicalc/) demo operates this way,
 but it does so purely for convenience (and because it predates the "autoType" feature).
+
+For more classic PC software experiences, see the PCjs collection of [IBM PC Application Demos](/apps/pcx86/).
 
 References
 ----------
