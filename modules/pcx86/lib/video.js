@@ -2765,8 +2765,8 @@ class Video extends Component {
 
                 /*
                  * Using desktop mouse events to simulate touch events should only be enabled as needed.
-                 *
-                if (DEBUG) {
+                 */
+                if (MAXDEBUG) {
                     control.addEventListener(
                         'mousedown',
                         function onMouseDown(event) { video.onTouchStart(event); },
@@ -2783,7 +2783,6 @@ class Video extends Component {
                         false               // we'll specify false for the 'useCapture' parameter for now...
                     );
                 }
-                */
 
                 // this.log("touch events captured");
 
@@ -2940,27 +2939,47 @@ class Video extends Component {
 
         if (this.nTouchConfig == Video.TOUCH.KEYGRID) {
 
-            var xThird = (xTouch / (this.cxScreen / 3)) | 0;
-            var yThird = (yTouch / (this.cyScreen / 3)) | 0;
-
             /*
-             * At this point, xThird and yThird should both be one of 0, 1 or 2, indicating which horizontal and vertical
-             * third of the virtual screen the touch event occurred.
+             * We don't want to simulate a key on EVERY touch event; preferably, only touchstart or touchend.  And
+             * I probably would have preferred triggering key presses on touchend, so that if you decided to move
+             * your finger off-screen before releasing, you could avoid a key press, but sadly (as I've documented in
+             * the Mandelbot project; see https://github.com/jeffpar/mandelbot/blob/master/src/mandelbot.js),
+             * touchend doesn't reliably provide coordinates on all platforms, so we're going to go with touchstart.
              */
-            if (/* xThird == 1 && */ yThird != 1) {
-                if (!yThird) {
-                    this.kbd.addActiveKey(Keyboard.CLICKCODES.UP, true);
-                } else {
-                    this.kbd.addActiveKey(Keyboard.CLICKCODES.DOWN, true);
+            if (fStart) {
+
+                var xThird = (xTouch / (this.cxScreen / 3)) | 0;
+                var yThird = (yTouch / (this.cyScreen / 3)) | 0;
+
+                /*
+                 * At this point, xThird and yThird should both be one of 0, 1 or 2, indicating which horizontal and
+                 * vertical third of the virtual screen the touch event occurred.
+                 */
+                if (/* xThird == 1 && */ yThird != 1) {
+                    if (!yThird) {
+                        this.kbd.addActiveKey(Keyboard.CLICKCODES.UP, true);
+                    } else {
+                        this.kbd.addActiveKey(Keyboard.CLICKCODES.DOWN, true);
+                    }
+                } else if (/* yThird == 1 && */ xThird != 1) {
+                    if (!xThird) {
+                        this.kbd.addActiveKey(Keyboard.CLICKCODES.LEFT, true);
+                    } else {
+                        this.kbd.addActiveKey(Keyboard.CLICKCODES.RIGHT, true);
+                    }
                 }
-            } else if (/* yThird == 1 && */ xThird != 1) {
-                if (!xThird) {
-                    this.kbd.addActiveKey(Keyboard.CLICKCODES.LEFT, true);
-                } else {
-                    this.kbd.addActiveKey(Keyboard.CLICKCODES.RIGHT, true);
+                else {
+                    /*
+                     * Why simulate a SPACE if the tap is in the middle third of the screen?  Well, apparently I
+                     * didn't explain earlier that the WHOLE reason I originally added KEYGRID support (before it was
+                     * even called KEYGRID support) was to make the 1985 game "Rogue" (pcjs.org/apps/pcx86/1985/rogue)
+                     * more fun to play on an iPad, because arrows and spaces are the most commonly used keys.
+                     */
+                    this.kbd.addActiveKey(Keyboard.SIMCODE.SPACE, true);
                 }
             }
         } else {
+
             if (this.mouse) {
                 /*
                  * As long as fTouchDefault is false, we call preventDefault() on every touch event, to keep
