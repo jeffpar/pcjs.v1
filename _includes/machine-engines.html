@@ -3,14 +3,14 @@
 As discussed in /modules/markout/lib/markout.js, our Node web server recognizes the following machine properties
 in the Front Matter of our Markdown documents, for compatibility with the Jekyll web server:
 
-    'id' (eg, "ibm5150")
-    'name' (eg, "IBM PC (Model 5150) with Monochrome Display")
-    'type' (eg, "c1p", "pcx86", "pc8080", "pdp10", "pdp11")
-    'debugger' (default is false)
-    'config' (default is "machine.xml")
-    'template' (default is "machine.xsl")
-    'debug' (default is false; true enables asserts and is very slow)
-    'uncompiled' (default is false; true is useful for debugging but slow)
+    'id' (eg: ibm5150)
+    'name' (eg: "IBM PC (Model 5150) with Monochrome Display")
+    'type' (eg: c1p, pcx86, pc8080, pdp10, pdp11)
+    'debugger' (default: false)
+    'config' (default: machine.xml)
+    'template' (default: machine.xsl)
+    'debug' (default: false; true enables asserts and is much slower)
+    'uncompiled' (default: false; true is useful for debugging but slower)
     'parms' (stringified object that collects additional machine properties listed below)
 
 Note that if you want BACKTRACK support enabled in a machine, both 'debugger' and 'uncompiled' must be true.
@@ -20,16 +20,16 @@ may not work as desired.
 
 The following optional machine properties will be added to the 'parms' property:
 
-    'autoMount' (eg, {"A":{"name":"OS/2 FOOTBALL (v7.68.17)","path":"/disks/pc/os2/misc/football/FOOTBALL-76817.json"}})
-    'autoPower' (eg, true)
-    'autoStart' (eg, true)
-    'autoType' (eg, "8-10-81\\r")
-    'drives' (eg, '[{name:"68Mb Hard Disk",type:4,path:"http://archive.pcjs.org/disks/pc/fixed/68mb/win95.json"}]')
-    'resume' (eg, "1")
-    'state' (eg, "state.json")
+    'autoMount' (eg: {"A":{"name":"OS/2 FOOTBALL (v7.68.17)","path":"/disks/pc/os2/misc/football/FOOTBALL-76817.json"}})
+    'autoPower' (eg: true)
+    'autoStart' (eg: true)
+    'autoType' (eg: $date\r$time\r)
+    'drives' (eg: '[{name:"68Mb Hard Disk",type:4,path:"http://archive.pcjs.org/disks/pc/fixed/68mb/win95.json"}]')
+    'resume' (eg: 1)
+    'state' (eg: state.json)
     'commands' (debugger commands, if any)
-    'messages' (eg, "fault")
-    'connection' (eg, "serialPort->vt100a.serialPort")
+    'messages' (eg: fault)
+    'connection' (eg: serialPort->vt100a.serialPort)
 
 Finally, all our JavaScript components expect multi-word property names to use camelCase, so we automatically convert
 any lower-case forms to camelCase, both here and in markout.js and components.xsl, in case we've gotten sloppy in any
