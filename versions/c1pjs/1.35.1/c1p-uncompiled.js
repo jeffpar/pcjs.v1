@@ -2142,7 +2142,7 @@ Web.onPageEvent('onpageshow', function onPageShow() {
     Web.doPageEvent(Web.aPageEventHandlers['show']);
 });
 
-Web.onPageEvent(Web.isUserAgent("Opera") || Web.isUserAgent("iOS")? 'onunload' : 'onbeforeunload', function onPageUnload() {
+Web.onPageEvent(Web.isUserAgent("iOS")? 'onpagehide' : (Web.isUserAgent("Opera")? 'onunload' : 'onbeforeunload'), function onPageUnload() {
     Web.doPageEvent(Web.aPageEventHandlers['exit']);
 });
 
