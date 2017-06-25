@@ -5,7 +5,7 @@ permalink: /disks/pcx86/dos/microsoft/1.25/
 ---
 
 Microsoft MS-DOS 1.25
----
+---------------------
 
 There was no MS-DOS 1.25 product *per se*.  Instead, there were OEM releases of MS-DOS based on version 1.25,
 including:

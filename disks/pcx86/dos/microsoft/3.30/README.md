@@ -5,7 +5,7 @@ permalink: /disks/pcx86/dos/microsoft/3.30/
 ---
 
 Microsoft MS-DOS 3.30
----
+---------------------
 
 ### Directory of MS-DOS 3.30 (Disk 1)
 

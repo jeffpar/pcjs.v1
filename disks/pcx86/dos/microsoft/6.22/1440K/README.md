@@ -5,7 +5,7 @@ permalink: /disks/pcx86/dos/microsoft/6.22/1440K/
 ---
 
 Microsoft MS-DOS 6.22 (1.44M Disks)
----
+-----------------------------------
 
 ### Directory of MS-DOS 6.22 (1.44M Disk 1)
 

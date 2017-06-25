@@ -5,7 +5,7 @@ permalink: /disks/pcx86/dos/microsoft/5.00/
 ---
 
 Microsoft MS-DOS 5.00
----
+---------------------
 
 Information is available for these Microsoft MS-DOS 5.00 distributions:
 

@@ -5,7 +5,7 @@ permalink: /disks/pcx86/dos/microsoft/6.20/1200K/
 ---
 
 Microsoft MS-DOS 6.20 (1.2M Disks)
----
+----------------------------------
 
 ### Directory of MS-DOS 6.20 (1.2M Disk 1)
 

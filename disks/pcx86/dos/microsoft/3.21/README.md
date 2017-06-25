@@ -5,7 +5,7 @@ permalink: /disks/pcx86/dos/microsoft/3.21/
 ---
 
 Microsoft MS-DOS 3.21
----
+---------------------
 
 ### Directory of MS-DOS 3.21 (Disk 1)
 
