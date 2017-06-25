@@ -3,8 +3,8 @@ layout: page
 title: TopView 1.01
 permalink: /disks/pcx86/apps/ibm/topview/1.01/
 machines:
-  - type: pcx86
-    id: ibm5160
+  - id: ibm5160
+    type: pcx86
     config: /devices/pcx86/machine/5160/cga/640kb/machine.xml
     autoMount:
       A:

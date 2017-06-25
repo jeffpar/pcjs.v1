@@ -5,8 +5,8 @@ permalink: /devices/pc8080/machine/exerciser/
 redirect_from:
   - /devices/pc8080/machine/test/
 machines:
-  - type: pc8080
-    id: test8080
+  - id: test8080
+    type: pc8080
     debugger: true
 ---
 

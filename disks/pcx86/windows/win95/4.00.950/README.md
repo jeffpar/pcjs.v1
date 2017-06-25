@@ -3,8 +3,8 @@ layout: page
 title: Microsoft Windows 95 (First Retail Release)
 permalink: /disks/pcx86/windows/win95/4.00.950/
 machines:
-  - type: pcx86
-    id: deskpro386
+  - id: deskpro386
+    type: pcx86
     state: deskpro386.json
     config: /devices/pcx86/machine/compaq/deskpro386/vga/4096kb/machine.xml
     drives: '[{name:"68Mb Hard Disk",type:4,path:"http://archive.pcjs.org/disks/pcx86/fixed/68mb/win95.json"}]'
@@ -16,7 +16,7 @@ machines:
 ---
 
 Microsoft Windows 95 (First Retail Release)
----
+-------------------------------------------
 
 Windows 95 was the successor to Windows 3.1 and included a number of important new features:
 

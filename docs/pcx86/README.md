@@ -3,14 +3,14 @@ layout: page
 title: PCx86 Documentation
 permalink: /docs/pcx86/
 machines:
-  - type: pcx86
-    id: ibm5150
-    config: /devices/pcx86/machine/5150/mda/64kb/machine.xml
+  - id: ibm5150
+    type: pcx86
     resume: 1
+    config: /devices/pcx86/machine/5150/mda/64kb/machine.xml
 ---
 
 PCx86 Documentation
----
+-------------------
 
 [PCx86](/docs/about/pcx86/) is a full-featured [IBM PC and PC-compatible](/devices/pcx86/machine/) emulator written
 entirely in JavaScript.  It supports a variety of XT and AT class machines, with processors ranging from the 8088

@@ -3,8 +3,8 @@ layout: page
 title: "PC-DOS 0.90 (with Debugger)"
 permalink: /disks/pcx86/dos/ibm/0.90/debugger/
 machines:
-  - type: pcx86
-    id: ibm5150-pcdos090
+  - id: ibm5150-pcdos090
+    type: pcx86
     debugger: true
     config: /devices/pcx86/machine/5150/mda/256kb/debugger/machine.xml
     resume: 1

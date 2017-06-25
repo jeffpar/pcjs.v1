@@ -3,8 +3,8 @@ layout: page
 title: PC-DOS 1.00
 permalink: /disks/pcx86/dos/ibm/1.00/
 machines:
-  - type: pcx86
-    id: ibm5150-pcdos100
+  - id: ibm5150-pcdos100
+    type: pcx86
     config: /devices/pcx86/machine/5150/mda/64kb/machine.xml
     resume: 1
     autoMount:

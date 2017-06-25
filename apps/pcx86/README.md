@@ -17,18 +17,27 @@ A list of all the software available to PCx86 machines can be found in the [IBM 
 ### 1981
 
 * [DONKEY.BAS](1981/donkey/)
+* [Microsoft Adventure](/disks/pcx86/games/microsoft/adventure/)
 * [VisiCalc](1981/visicalc/)
 
 ### 1982
 
 * [Executive Suite](1982/esuite/)
 * [RatBas v2.13](1982/ratbas/)
+* [Zork I](/disks/pcx86/games/infocom/zork1/)
 
 ### 1983
 
 * [Adventures in Math v1.00](1983/adventmath/)
 * [SuperCalc2 v1.00](/disks/pcx86/apps/other/sc2/1.00/)
 * [SuperCalc3 v1.00](/disks/pcx86/apps/other/sc3/1.00/)
+* [Zork II](/disks/pcx86/games/infocom/zork2/)
+* [Zork III](/disks/pcx86/games/infocom/zork3/)
+* [Planetfall](/disks/pcx86/games/infocom/planet/)
+
+### 1984
+
+* [The Hitchhiker's Guide to the Galaxy](/disks/pcx86/games/infocom/hhiker/)
 
 ### 1985
 

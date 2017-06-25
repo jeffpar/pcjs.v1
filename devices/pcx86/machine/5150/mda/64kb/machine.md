@@ -7,8 +7,8 @@ redirect_from:
   - /configs/pc/machines/5150/mda/64kb/index.xml/
   - /configs/pc/machines/5150/mda/64kb/machine.xml/
 machines:
-  - type: pcx86
-    id: ibm5150
+  - id: ibm5150
+    type: pcx86
 ---
 
 {% include machine.html id="ibm5150" %}

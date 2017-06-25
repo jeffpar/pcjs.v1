@@ -5,8 +5,8 @@ date: 2015-01-28 11:00:00
 category: Control Panel
 permalink: /blog/2015/01/28/
 machines:
-  - type: pcx86
-    id: at-ega-1152k-rev3
+  - id: at-ega-1152k-rev3
+    type: pcx86
     debugger: true
     uncompiled: true
     config: /devices/pcx86/machine/5170/ega/1152kb/rev3/debugger/backtrack/machine.xml

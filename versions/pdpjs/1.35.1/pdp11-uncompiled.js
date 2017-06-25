@@ -2660,7 +2660,7 @@ Web.onPageEvent('onpageshow', function onPageShow() {
     Web.doPageEvent(Web.aPageEventHandlers['show']);
 });
 
-Web.onPageEvent(Web.isUserAgent("Opera") || Web.isUserAgent("iOS")? 'onunload' : 'onbeforeunload', function onPageUnload() {
+Web.onPageEvent(Web.isUserAgent("iOS")? 'onpagehide' : (Web.isUserAgent("Opera")? 'onunload' : 'onbeforeunload'), function onPageUnload() {
     Web.doPageEvent(Web.aPageEventHandlers['exit']);
 });
 
@@ -29947,15 +29947,17 @@ class ComputerPDP11 extends Component {
                     if (!data) {
                         /*
                          * This is a hack that makes it possible for a machine whose ID has been
-                         * supplemented with a suffix (a single letter or digit) to find object IDs
-                         * in states created from a machine without the suffix.
+                         * supplemented with a hyphenated numeric suffix to find object IDs in states
+                         * created from a machine without such a suffix.
                          *
                          * For example, if a state file was created from a machine with ID "ibm5160"
-                         * but the current machine is "ibm5160a", this attempts a second lookup with
+                         * but the current machine is "ibm5160-1", this attempts a second lookup with
                          * "ibm5160", enabling us to find objects that match the original machine ID
                          * (eg, "ibm5160.romEGA").
+                         *
+                         * See /devices/pcx86/machine/5160/ega/640kb/array/ for examples of this.
                          */
-                        data = stateComputer.get(component.id.replace(/[a-z0-9]\./i, '.'));
+                        data = stateComputer.get(component.id.replace(/-[0-9]+\./i, '.'));
                     }
                 }
 

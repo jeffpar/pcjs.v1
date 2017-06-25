@@ -7,8 +7,8 @@ redirect_from:
   - /configs/pc/machines/5160/cga/256kb/win101/softkbd/machine.xml/
   - /devices/pcx86/machine/5160/cga/256kb/win101/softkbd/
 machines:
-  - type: pcx86
-    id: ibm5160
+  - id: ibm5160
+    type: pcx86
     debugger: true
     state: /disks/pcx86/windows/1.01/cga/state.json
     config: /devices/pcx86/machine/5160/cga/256kb/softkbd/machine.xml

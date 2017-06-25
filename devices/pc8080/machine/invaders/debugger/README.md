@@ -3,8 +3,8 @@ layout: page
 title: Space Invaders (1978) with Debugger
 permalink: /devices/pc8080/machine/invaders/debugger/
 machines:
-  - type: pc8080
-    id: invaders
+  - id: invaders
+    type: pc8080
     debugger: true
 ---
 

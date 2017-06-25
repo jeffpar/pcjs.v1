@@ -6,8 +6,8 @@ redirect_from:
   - /configs/pc/machines/5170/ega/640kb/
   - /configs/pc/machines/5170/ega/640kb/rev1/
 machines:
-  - type: pcx86
-    id: ibm5170
+  - id: ibm5170
+    type: pcx86
 ---
 
 {% include machine.html id="ibm5170" %}

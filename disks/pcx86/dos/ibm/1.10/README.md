@@ -3,8 +3,8 @@ layout: page
 title: PC-DOS 1.10
 permalink: /disks/pcx86/dos/ibm/1.10/
 machines:
-  - type: pcx86
-    id: ibm5150-pcdos110
+  - id: ibm5150-pcdos110
+    type: pcx86
     config: /devices/pcx86/machine/5150/mda/64kb/machine.xml
     resume: 1
     autoMount:
@@ -13,7 +13,7 @@ machines:
 ---
 
 PC-DOS 1.10
----
+-----------
 
 The PCjs machine below is running PC-DOS 1.10.
 

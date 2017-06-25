@@ -3,13 +3,13 @@ layout: page
 title: Microsoft Windows 95 (Build 499)
 permalink: /disks/pcx86/windows/win95/4.00.499/
 machines:
-  - type: pcx86
-    id: deskpro386
+  - id: deskpro386
+    type: pcx86
     config: /devices/pcx86/machine/compaq/deskpro386/vga/4096kb/machine.xml
 ---
 
 Microsoft Windows 95 (Build 499)
----
+--------------------------------
 
 The PCjs Project was first to unearth this pre-release version of Windows 95 since its *extremely* limited
 test release back in June 1995.  It was one of the last (if not *the* last) test versions produced before

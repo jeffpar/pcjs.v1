@@ -31,7 +31,7 @@ computer hardware, help people understand how these early machines worked, make 
 machine configurations, and provide a platform for running and analyzing old computer software.
 
 Demos
----
+-----
 Some pre-configured machines are shown below, ready to run BASIC, DOS, Windows, OS/2, and other assorted software.
 
 ![IBM PC running VisiCalc](/apps/pcx86/1981/visicalc/thumbnail.jpg "link:/apps/pcx86/1981/visicalc/:200:120")
@@ -57,7 +57,7 @@ and multiple IBM PC XT machines running side-by-side with [CGA Displays](/device
 and [EGA Displays](/devices/pcx86/machine/5160/ega/640kb/array/).
 
 C1Pjs
----
+-----
 Below is the [OSI Challenger C1P](/docs/c1pjs/), another simulation in the PCjs Project.
 It simulates Ohio Scientific's 6502-based microcomputer, released in 1978.  More details about this simulation
 and the original machine are available in the [C1Pjs Documentation](/docs/c1pjs/).
@@ -69,7 +69,7 @@ and the original machine are available in the [C1Pjs Documentation](/docs/c1pjs/
 ---
 
 Developer Notes
----
+---------------
 
 The [PCjs repository](https://github.com/jeffpar/pcjs) on GitHub contains everything needed to run PCjs
 computer simulations.  All the PCjs emulators run in any modern web browser, with or without a web server,
@@ -242,7 +242,7 @@ flux as well; for example, *output_wrapper* support is documented in their
 [blog](https://developers.googleblog.com/2016/08/closure-compiler-in-javascript.html) but hasn't been implemented yet.
 
 Using PCjs
----
+----------
 
 ### From The Browser
 
@@ -263,12 +263,13 @@ pcjs.org home page ([index.md](https://github.com/jeffpar/pcjs/blob/gh-pages/ind
 	layout: page
 	permalink: /
 	machines:
-	  - type: pcx86
-	    id: ibm5150
+	  - id: ibm5150
+	    type: pcx86
+	    resume: 1
 	    name: "IBM PC (Model 5150) with Monochrome Display"
 	    config: /devices/pcx86/machine/5150/mda/64kb/machine.xml
-	  - type: c1p
-	    id: demoC1P
+	  - id: demoC1P
+	    type: c1p
 	    config: /devices/c1p/machine/8kb/large/machine.xml
 	---
 
@@ -325,7 +326,7 @@ I haven't decided whether I'll add support for JSON configuration files to the c
 to the server, or both.
 
 Debugging PCjs
----
+--------------
 
 NOTE: The following information assumes you're running Node as your local web server, not Jekyll.  You can certainly
 debug PCjs while running Jekyll (ideally with `--config _config.yml,_developer.yml`), using `http://localhost:4000/`
@@ -399,7 +400,7 @@ specified page; e.g.:
 More information about the *resume* attribute is available in the [documentation](/docs/pcx86/computer/#attributes).
 
 Updating PCjs
----
+-------------
 
 ### Developing
 
@@ -437,7 +438,7 @@ manually or with the Grunt "clean" task:
 <!--END:EXCLUDE-->
 
 License
----
+-------
 The [PCjs Project](https://github.com/jeffpar/pcjs) is now an open-source project on [GitHub](http://github.com/).
 All published portions are free for redistribution and/or modification under the terms of the
 [GNU General Public License](/LICENSE) as published by the Free Software Foundation, either version 3 of the License,
@@ -453,7 +454,7 @@ or computer that runs any version of this software.
 See [LICENSE](/LICENSE) for details.
 
 More Information
----
+----------------
 Learn more about the [PCjs Project](/docs/about/) and [PCx86](/docs/about/pcx86/).  To
 create your own PCx86 machines, see the [PCx86 Documentation](/docs/pcx86/) for details.
 

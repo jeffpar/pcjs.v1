@@ -5,10 +5,10 @@ permalink: /disks/pcx86/games/infocom/
 ---
 
 Infocom Games
----
+-------------
 
 * [The Hitchhiker's Guide to the Galaxy](hhiker/)
 * [Planetfall](planet/)
-* [Zork I](zork1/) ([Debugger](zork1/debugger/))
-* [Zork II](zork2/)
-* [Zork III](zork3/)
+* [Zork I: The Great Underground Empire](zork1/)
+* [Zork II: The Wizard of Frobozz](zork2/)
+* [Zork III: The Dungeon Master](zork3/)

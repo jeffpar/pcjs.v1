@@ -3,8 +3,8 @@ layout: page
 title: COMPAQ MS-DOS 2.12
 permalink: /disks/pcx86/dos/compaq/2.12/
 machines:
-  - type: pcx86
-    id: ibm5160-compaq212
+  - id: ibm5160-compaq212
+    type: pcx86
     config: /devices/pcx86/machine/5160/mda/256kb/machine.xml
     autoMount:
       A:
@@ -12,7 +12,7 @@ machines:
 ---
 
 COMPAQ MS-DOS 2.12
----
+------------------
 
 Released in 1984 by COMPAQ Computer Corp, this early version of MS-DOS displays the following messages on boot:
 

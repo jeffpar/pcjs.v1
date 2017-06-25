@@ -8,8 +8,8 @@ redirect_from:
   - /disks/pc/dos/microsoft/4.0M/
   - /videos/pcjs/
 machines:
-  - type: pcx86
-    id: ibm5160
+  - id: ibm5160
+    type: pcx86
     debugger: true
     config: /devices/pcx86/machine/5160/cga/640kb/softkbd/machine.xml
     autoMount:
@@ -20,7 +20,7 @@ machines:
 ---
 
 Multitasking MS-DOS 4.00
----
+------------------------
 
 These disk images contain the first unearthed copy of Microsoft's "multitasking" version of MS-DOS
 since its *extremely* limited release around late 1985 or early 1986.  They were were discovered by the

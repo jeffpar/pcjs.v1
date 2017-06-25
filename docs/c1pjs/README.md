@@ -3,8 +3,8 @@ layout: page
 title: C1Pjs Documentation
 permalink: /docs/c1pjs/
 machines:
-  - type: c1p-dbg
-    id: c1p8kb
+  - id: c1p8kb
+    type: c1p-dbg
     config: /devices/c1p/machine/8kb/large/debugger/machine.xml
 redirect_from:
   - /c1p/

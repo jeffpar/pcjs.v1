@@ -15,7 +15,7 @@ machines:
 ---
 
 OS/2 FOOTBALL Boot Disk (v4.41.00)
----
+----------------------------------
 
 This disk contained an updated version of [OS/2 FOOTBALL Boot Disk (v7.68.17)](/disks/pcx86/os2/misc/football/87058/).
 It was built in December 1987, using final OS/2 1.0 sources merged with assorted FOOTBALL changes, and although 

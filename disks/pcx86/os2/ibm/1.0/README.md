@@ -3,8 +3,8 @@ layout: page
 title: IBM OS/2 1.0
 permalink: /disks/pcx86/os2/ibm/1.0/
 machines:
-  - type: pcx86
-    id: ibm5170
+  - id: ibm5170
+    type: pcx86
     debugger: true
     config: /devices/pcx86/machine/5170/ega/2048kb/rev3/debugger/machine.xml
     drives: '[{name:"20Mb Hard Disk",type:2,path:"http://archive.pcjs.org/disks/pcx86/fixed/20mb/IBMOS210-EGA.json"}]'

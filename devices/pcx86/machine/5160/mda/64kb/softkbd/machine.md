@@ -5,8 +5,8 @@ permalink: /devices/pcx86/machine/5160/mda/64kb/softkbd/
 redirect_from:
   - /configs/pc/machines/5160/mda/64kb/softkbd/index.xml/
 machines:
-  - type: pcx86
-    id: ibm5160
+  - id: ibm5160
+    type: pcx86
     debugger: true
 ---
 

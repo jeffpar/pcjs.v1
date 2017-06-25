@@ -3,8 +3,8 @@ layout: page
 title: SuperCalc3 1.00
 permalink: /disks/pcx86/apps/other/sc3/1.00/
 machines:
-  - type: pcx86
-    id: ibm5160-sc3
+  - id: ibm5160-sc3
+    type: pcx86
     config: /devices/pcx86/machine/5160/cga/640kb/machine.xml
     autoMount:
       A:

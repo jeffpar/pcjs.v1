@@ -5,7 +5,7 @@ permalink: /devices/c1p/machine/
 ---
 
 Challenger 1P Machine Configurations
----
+------------------------------------
 
 Here are some sample C1P Machine Configurations:
 

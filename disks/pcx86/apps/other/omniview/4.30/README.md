@@ -3,8 +3,8 @@ layout: page
 title: Omniview 386 4.30
 permalink: /disks/pcx86/apps/other/omniview/4.30/
 machines:
-  - type: pcx86
-    id: compaq386
+  - id: compaq386
+    type: pcx86
     config: /devices/pcx86/machine/compaq/deskpro386/vga/4096kb/machine.xml
     autoMount:
       A:
@@ -14,7 +14,7 @@ machines:
 ---
 
 Omniview 386 4.30
----
+-----------------
 
 The COMPAQ DeskPro 386 machine below is recommended for Omniview 386 4.30.
 A [directory listing](#directory-of-omniview-386-430) is also provided.

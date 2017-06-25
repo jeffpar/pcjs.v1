@@ -5,8 +5,8 @@ date: 2015-01-17 11:00:00
 category: Features
 permalink: /blog/2015/01/17/
 machines:
-  - type: pcx86
-    id: at-ega-1152k-rev3
+  - id: at-ega-1152k-rev3
+    type: pcx86
     debugger: true
     uncompiled: true
     config: /devices/pcx86/machine/5170/ega/1152kb/rev3/debugger/machine.xml
