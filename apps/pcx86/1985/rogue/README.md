@@ -13,6 +13,19 @@ machines:
 Rogue (1985)
 ------------
 
+The machine below is running a 1985 DOS version of the text-based dungeon exploration game **Rogue**,
+developed at U.C. Berkeley around 1980 by Michael Toy and Glenn Wichman.  More information about the game
+can be found in an early [ROGUE.DOC](#rogue-doc).  In the game, **F1** list all the keyboard commands.
+
+This particular PCjs machine is configured with *KeyGrid* support, which means that for touch-enabled devices,
+the screen is logically divided into a 3x3 grid, and a tap in each of the 9 regions will be translated into one
+of the following keys:
+
+|   Home   |   Up      |   PgUp    |
+|:--------:|:---------:|:---------:|
+| **Left** | **Space** | **Right** |
+| **End**  | **Down**  | **PgDn**  |
+
 {% include machine.html id="ibm5160-rogue" %}
 
 For more classic PC software experiences, see the PCjs collection of [IBM PC Application Demos](/apps/pcx86/).
@@ -455,5 +468,5 @@ ROGUE.DOC
 References
 ----------
 
-[The roguelike archive](https://britzl.github.io/roguearchive/)
-[Moby Games: Rogue (DOS)](http://www.mobygames.com/game/dos/rogue)
+* [The roguelike archive](https://britzl.github.io/roguearchive/)
+* [Moby Games: Rogue (DOS)](http://www.mobygames.com/game/dos/rogue)
