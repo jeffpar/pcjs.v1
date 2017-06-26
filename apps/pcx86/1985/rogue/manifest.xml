@@ -2,7 +2,7 @@
 <?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.35.1/manifest.xsl"?>
 <manifest type="software">
 	<title>Rogue</title>
-	<version/>
+	<version>1.49</version>
 	<type>Game</type>
 	<category>ASCII Adventure</category>
 	<creator>Michael Toy</creator>
