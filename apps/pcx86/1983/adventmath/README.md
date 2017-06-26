@@ -100,24 +100,13 @@ Another unexpected file was **BASICA.EXE** (54277 bytes) from 1999.  It seems un
 *any* BASIC binary with this game, because DOS was a prerequisite, and at the time, all versions of DOS included BASIC.
 IBM's PC-DOS shipped with **BASICA.COM** and OEM versions of DOS shipped with either **GWBASIC.EXE** or **BASIC.EXE**.
 
-Curiously, the **BASICA.EXE** from [COMPAQ DOS 1.11](/disks/pcx86/dos/compaq/1.11/) is exactly 5 bytes smaller, and both
-files contain the following strings:
+Unsurprisingly, this **BASICA.EXE** is neither from 1999 nor from IBM.  It's virtually identical to the circa 1983
+**BASICA.EXE*** found in [COMPAQ DOS 1.11](/disks/pcx86/dos/compaq/1.11/), except that it is 5 bytes larger, due to the
+addition of "MsDos" at the end of the file.  It contains the following strings:
 
 	The COMPAQ Personal Computer BASIC
 	Version 1.13
 	(C) Copyright COMPAQ Computer Corp. 1983
-
-In fact, the only differences are in first few and last few bytes:
-
-	1c1
-	< 00000000  4d 5a 05 00 6b 00 00 00  20 00 7a 03 ff ff 00 00  |MZ..k... .z.....|
-	---
-	> 00000000  4d 5a 20 01 6a 00 00 00  20 00 00 00 ff ff 00 00  |MZ .j... .......|
-	3196,3197c3196
-	< 0000d400  4d 73 44 6f 73                                    |MsDos|
-	< 0000d405
-	---
-	> 0000d400
 
 It's safe to say that IBM would not have distributed a COMPAQ binary; if IBM had distributed any BASIC binary at all,
 it would have been their own **BASICA.COM**.  Of course, the problem with IBM's **BASICA.COM** is that it also requires
