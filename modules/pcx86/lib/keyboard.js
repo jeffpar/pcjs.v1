@@ -252,7 +252,7 @@ class Keyboard extends Component {
                     control.onclick = function(kbd, sKey, simCode) {
                         return function onKeyboardBindingClick(event) {
                             if (!COMPILED && kbd.messageEnabled()) kbd.printMessage(sKey + " clicked", Messages.KEYS);
-                            if (kbd.cmp) kbd.cmp.updateFocus();
+                            if (kbd.cmp) kbd.cmp.updateFocus(true);
                             kbd.sInjectBuffer = "";                 // actual key events should stop any injection currently in progress
                             kbd.updateShiftState(simCode, true);    // future-proofing if/when any LOCK keys are added to CLICKCODES
                             kbd.addActiveKey(simCode, true);
