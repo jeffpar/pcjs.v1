@@ -5,7 +5,7 @@ permalink: /disks/pcx86/games/infocom/zork1/debugger/
 machines:
   - id: ibm5150-zork1
     type: pcx86
-    debugger:true
+    debugger: true
 ---
 
 Zork I: The Great Underground Empire
