@@ -519,9 +519,9 @@ HTMLOut.filter = function(req, res, next)
                 HTMLOut.logError(err);
                 next();     // alternatively: res.status(404).send("Cannot GET " + req.path);
             } else {
-                sData = sData.replace(/^([ \t]*import\s+\S+\s+from\s+(['"]).*?\1;)/gm, "// $1");
+                sData = sData.replace(/^([ \t]*import\s+\S+\s+from\s+['"].*?['"];)/gm, "// $1");
                 sData = sData.replace(/^([ \t]*export\s+default\s+\S+;)/gm, "// $1");
-                sData = sData.replace(/^([ \t]*var\s+\S+\s*=\s*require\((['"]).*?\1\);)/gm, "// $1");
+                sData = sData.replace(/^([ \t]*var\s+\S+\s*=\s*require\(['"].*?['"]\);)/gm, "// $1");
                 sData = sData.replace(/^([ \t]*(if\s+\(NODE\)\s*|)module\.exports\s*=\s*\S+;)/gm, "// $1");
                 res.set("Content-Type", "application/javascript");
                 res.status(200).send(sData);
@@ -1643,7 +1643,7 @@ HTMLOut.prototype.getManifestXML = function(sToken, sIndent, aParms)
                                     }
 
                                     if (sNodeLink) {
-                                        if (str.endsWith(sNodeLink, ".json") && sNodeLink.indexOf("/disks/") === 0) {
+                                        if (str.endsWith(sNodeLink, ".json") && (!sNodeLink.indexOf("/apps/") || !sNodeLink.indexOf("/disks/"))) {
                                             sOnClick = obj.genOnClick(sNodeLink);
                                         }
                                         sNodeValue = '<a href="' + net.encodeURL(sNodeLink, obj.req, obj.fDebug) + '"' + sOnClick + '>' + sNodeValue + '</a>';

@@ -3216,7 +3216,7 @@ DiskDump.prototype.convertOSIDiskToJSON = function()
 };
 
 /**
- * convertToIMG()
+ * convertToIMG(fRaw)
  *
  * Converts the disk image data to a Buffer.
  *
@@ -3224,9 +3224,10 @@ DiskDump.prototype.convertOSIDiskToJSON = function()
  * disk images under /tmp, using a name based on a hash of the source path).
  *
  * @this {DiskDump}
+ * @param {boolean} [fRaw] (used by httpapi.js to get the underlying Buffer)
  * @return {Buffer|null} containing the disk image's raw data, or null if no data available (or parse error)
  */
-DiskDump.prototype.convertToIMG = function()
+DiskDump.prototype.convertToIMG = function(fRaw)
 {
     if (!this.bufDisk) {
 
@@ -3391,7 +3392,7 @@ DiskDump.prototype.convertToIMG = function()
 
         this.bufDisk = buf;
     }
-    return this.bufDisk;
+    return (fRaw && this.bufDisk instanceof BufferPF)? this.bufDisk.buf : this.bufDisk;
 };
 
 /**

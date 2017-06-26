@@ -715,7 +715,7 @@ HTTPAPI.processDumpAPI = function(req, res)
         if (sDisk.indexOf("..") < 0 || req.app.settings.port == 8088) {
 
             sFormat = req.query[DumpAPI.QUERY.FORMAT] || DumpAPI.FORMAT.JSON;
-            fComments = (req.query[DumpAPI.QUERY.COMMENTS]? true : false);
+            fComments = !!req.query[DumpAPI.QUERY.COMMENTS];
             var sSize = req.query[DumpAPI.QUERY.MBHD];
             if (sSize) {
                 sSize = (sSize * 1000).toString();
@@ -751,7 +751,7 @@ HTTPAPI.processDumpAPI = function(req, res)
         if (sFile.indexOf("..") < 0 || req.app.settings.port == 8088) {
 
             sFormat = req.query[DumpAPI.QUERY.FORMAT] || DumpAPI.FORMAT.JSON;
-            fComments = (req.query[DumpAPI.QUERY.COMMENTS]? true : false);
+            fComments = !!req.query[DumpAPI.QUERY.COMMENTS];
             var fDecimal;
             if (req.query[DumpAPI.QUERY.DECIMAL]) {
                 fDecimal = (req.query[DumpAPI.QUERY.DECIMAL] == "true");
@@ -793,7 +793,7 @@ HTTPAPI.dumpDisk = function(err, disk, res)
             sAttachment = path.basename(disk.sDiskPath);
             var i = sAttachment.lastIndexOf('.');
             if (i > 0) sAttachment = sAttachment.substring(0, i+1) + DumpAPI.FORMAT.IMG;
-            sResponse = disk.convertToIMG();
+            sResponse = disk.convertToIMG(true);
         } else {
             // res.charset = "utf-8";
             sMIMEType = "application/json; charset=utf-8";
