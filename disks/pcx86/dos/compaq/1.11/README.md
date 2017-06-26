@@ -70,7 +70,7 @@ A directory listing of the 320Kb diskette is provided [below](#directory-of-comp
 	       28 file(s)     256320 bytes
 	                       53248 bytes free
 
-The boot sector of the COMPAQ MS-DOS 1.11 disk image (COMPAQ-DOS111.img) contained the following bytes:
+The boot sector of the COMPAQ MS-DOS 1.11 disk image contains the following bytes:
 
 	00000000  fa bc e7 01 b8 c0 07 8e  d0 fb 8e d8 8e c0 33 c0  |..............3.|
 	00000010  cd 13 b8 01 02 bb 00 02  b9 04 00 33 d2 e8 8b 00  |...........3....|
@@ -105,29 +105,30 @@ The boot sector of the COMPAQ MS-DOS 1.11 disk image (COMPAQ-DOS111.img) contain
 	000001e0  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
 	000001f0  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
 
-Consequently, the disk could not be mounted by a modern operating system (e.g., macOS), because it lacked a proper
+Consequently, the disk cannot be mounted by a modern operating system (e.g., macOS), because it lacks a proper
 BPB at offset 0x000B.
 
-Using the *--forceBPB* option of the [DiskDump](/modules/diskdump/) utility, I was able to create a mountable disk
-image with the following boot sector modifications:
+One solution is to use the *--forceBPB* option of the [DiskDump](/modules/diskdump/) utility, which creates a
+mountable disk image with the following boot sector modifications:
 
 	00000000  eb fe 90 50 43 4a 53 2e  4f 52 47 00 02 02 01 00  |...PCJS.ORG.....|
 	00000010  02 70 00 80 02 ff 01 00  08 00 02 00 00 00 00 00  |.p..............|
 	00000020  00 00 00 00 00 8a 07 3c  24 74 0c 53 b4 0e bb 07  |.......<$t.S....|
 
-These modifications included:
+The following byte ranges are modified:
 
-- 0x0000-0x0002: 2-byte Intel JMP instruction followed by 1-byte Intel NOP
+- 0x0000-0x0002: 2-byte Intel x86 JMP instruction followed by 1-byte x86 NOP
 - 0x0003-0x000A: 8-byte OEM signature string (we use the fake "PCJS.ORG" OEM signature)
 - 0x000B-0x001D: 19-byte BPB describing a 320Kb diskette image with 8 sectors/track and 2 heads
 
-Ordinarily, only the 19-byte BPB would be required, but it turned out that macOS wouldn't mount the image file
-*unless* the boot sector also began with an Intel JMP instruction.  All known PC-DOS boot sectors begin with a JMP
-instruction, so these early OEM disk images were rather unusual.
+Ordinarily, only the 19-byte BPB would be required, but it turns out that macOS won't mount the disk image
+unless the boot sector *also* begins with an Intel x86 JMP instruction.  So the *--forceBPB* option updates all
+30 bytes at the beginning of the boot sector, making the disk image mountable, but also rendering it unbootable --
+which is OK if all you want to do is mount the image and copy files from it.
 
-Anyway, I changed the *--forceBPB* option to update all 30 bytes at the beginning of the boot sector, making the disk
-image mountable, but also rendering it unbootable.  But that was OK, because all I wanted to do with the image was mount
-it and copy its files.  The sequence of commands were:
+Here's a sample command sequence.  Note that *two* DiskDump commands are required, because BPB modification
+only happens when converting an IMG file to a JSON file; the second command converts the JSON file back into
+a separate IMG file, preserving the original.
 
 	diskdump --disk=COMPAQ-DOS111.img --format=json --output=COMPAQ-DOS111-BPB.json
 	warning: BPB has been updated
@@ -138,5 +139,13 @@ it and copy its files.  The sequence of commands were:
 	open COMPAQ-DOS111-BPB.img
 	mkdir COMPAQ-DOS111
 	cp -pr /Volumes/Untitled/ COMPAQ-DOS111
+
+Another curiosity regarding this disk are the BASIC files.  **BASIC.COM** and **BASICA.COM** are nothing more than
+tiny programs to load **BASICA.EXE**, a stand-alone version of BASIC that doesn't require any BASIC ROMs.  And
+**BASICA.EXE** reports a version number that differs from the DOS version: 
+
+	The COMPAQ Personal Computer BASIC
+	Version 1.13
+	(C) Copyright COMPAQ Computer Corp. 1983
 
 [Return to [COMPAQ MS-DOS Disks](/disks/pcx86/dos/compaq/)]
