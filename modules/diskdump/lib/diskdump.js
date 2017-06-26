@@ -343,6 +343,7 @@ function DiskDump(sDiskPath, asExclude, sFormat, fComments, sSize, sServerRoot, 
     this.sJSONWhitespace = (this.fJSONComments? " " : "");
     this.fXDFSupport = (argv && argv['xdf']);
     this.sLabel = (argv && argv['label']);
+    this.forceBPB = (argv && argv['forcebpb']);
 
     /*
      * The dump operation itself doesn't care about sManifestFile, but we DO need some indication
@@ -2780,7 +2781,7 @@ DiskDump.prototype.convertToJSON = function()
                     }
                 }
             }
-            else if (bByte0 == X86.OPCODE.JMPS && bByte1 >= 0x22) {
+            else if (bByte0 == X86.OPCODE.JMPS && bByte1 >= 0x22 || this.forceBPB) {
                 /*
                  * I'm going to stick my neck out here and slam a BPB into this disk image, since it doesn't appear
                  * to have one, which should make it more "mountable" on modern operating systems.  PC-DOS 1.x (and
@@ -2792,8 +2793,11 @@ DiskDump.prototype.convertToJSON = function()
                  * 0x003-0x00A.  For example, the word at 0x006 contains the starting segment for where to load
                  * IBMBIO.COM and IBMDOS.COM.  Those same early boot sectors are also missing the traditional 0xAA55
                  * signature at the end of the boot sector.
+                 *
+                 * However, if --forceBPB is specified, all those concerns go out the window: the goal is assumed to
+                 * be a mountable disk, not a bootable disk.  So the BPB copy starts at offset 0 instead of SECTOR_BYTES.
                  */
-                for (i = DiskAPI.BPB.SECTOR_BYTES; i < DiskAPI.BPB.LARGE_SECS+4; i++) {
+                for (i = this.forceBPB? 0 : DiskAPI.BPB.SECTOR_BYTES; i < DiskAPI.BPB.LARGE_SECS+4; i++) {
                     this.bufDisk.writeUInt8(DiskDump.aDefaultBPBs[iBPB][i] || 0, offBootSector + i);
                 }
                 console.log("warning: BPB has been updated");

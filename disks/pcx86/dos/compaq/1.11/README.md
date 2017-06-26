@@ -9,7 +9,9 @@ machines:
     resume: 1
     autoMount:
       A:
-        path: /disks/pcx86/dos/compaq/1.11/COMPAQ-DOS111.json
+        name: COMPAQ MS-DOS 1.11
+      B:
+        name: None
 ---
 
 COMPAQ MS-DOS 1.11
@@ -20,10 +22,11 @@ Released in 1983 by COMPAQ Computer Corp, this early version of MS-DOS displays 
 	The COMPAQ Personal Computer DOS
 	Version 1.11
 	
+	
 	(C) Copyright COMPAQ Computer Corp. 1982
 	(C) Copyright Microsoft 1981, 82
 
-A directory listing of the diskette is provided [below](#directory-of-compaq-ms-dos-111-diskette).
+A directory listing of the 320Kb diskette is provided [below](#directory-of-compaq-ms-dos-111-diskette).
 
 {% include machine.html id="ibm5150-compaq111" %}
 
@@ -66,5 +69,83 @@ A directory listing of the diskette is provided [below](#directory-of-compaq-ms-
 	Total files listed:
 	       28 file(s)     256320 bytes
 	                       53248 bytes free
+
+The boot sector of the COMPAQ MS-DOS 1.11 disk image contains the following bytes:
+
+	00000000  fa bc e7 01 b8 c0 07 8e  d0 fb 8e d8 8e c0 33 c0  |..............3.|
+	00000010  cd 13 b8 01 02 bb 00 02  b9 04 00 33 d2 e8 8b 00  |...........3....|
+	00000020  eb 1c bb da 00 8a 07 3c  24 74 0c 53 b4 0e bb 07  |.......<$t.S....|
+	00000030  00 cd 10 5b 43 eb ee 33  c0 cd 16 eb c3 c3 fc 8b  |...[C..3........|
+	00000040  f3 bf c4 00 b9 0b 00 f3  a6 75 d7 83 c6 15 b9 0b  |.........u......|
+	00000050  00 f3 a6 75 cd b8 01 02  bb 00 02 b9 02 00 33 d2  |...u..........3.|
+	00000060  e8 48 00 8a 27 80 fc fe  be 26 01 74 0a 80 fc ff  |.H..'....&.t....|
+	00000070  74 02 eb ae be 3c 01 b8  60 00 50 07 8b 04 33 db  |t....<..`.P...3.|
+	00000080  8b 4c 02 8b 54 04 e8 22  00 8b 44 06 03 5c 08 8b  |.L..T.."..D..\..|
+	00000090  4c 0a 8b 54 0c e8 13 00  8b 44 0e 03 5c 10 8b 4c  |L..T.....D..\..L|
+	000000a0  12 8b 54 14 e8 04 00 ff  2e 52 01 bf 05 00 57 50  |..T......R....WP|
+	000000b0  cd 13 72 03 58 58 c3 33  c0 cd 13 58 5f 4f 75 ee  |..r.XX.3...X_Ou.|
+	000000c0  58 e9 5e ff 49 4f 53 59  53 20 20 20 43 4f 4d 4d  |X.^.IOSYS   COMM|
+	000000d0  53 44 4f 53 20 20 20 43  4f 4d 0a 0d 4e 6f 6e 2d  |SDOS   COM..Non-|
+	000000e0  53 79 73 74 65 6d 20 64  69 73 6b 20 6f 72 20 64  |System disk or d|
+	000000f0  69 73 6b 20 65 72 72 6f  72 0a 0d 52 65 70 6c 61  |isk error..Repla|
+	00000100  63 65 20 61 6e 64 20 73  74 72 69 6b 65 20 61 6e  |ce and strike an|
+	00000110  79 20 6b 65 79 20 77 68  65 6e 20 72 65 61 64 79  |y key when ready|
+	00000120  0a 0d 24 47 41 53 01 02  08 00 00 00 08 02 00 02  |..$GAS..........|
+	00000130  01 01 00 00 08 02 00 10  01 02 00 00 06 02 03 00  |................|
+	00000140  00 01 08 02 00 0c 01 01  00 00 03 02 00 10 01 01  |................|
+	00000150  00 01 00 00 60 00 28 43  29 43 6f 70 79 72 69 67  |....`.(C)Copyrig|
+	00000160  68 74 20 43 4f 4d 50 41  51 20 43 6f 6d 70 75 74  |ht COMPAQ Comput|
+	00000170  65 72 20 43 6f 72 70 6f  72 61 74 69 6f 6e 20 31  |er Corporation 1|
+	00000180  39 38 32 00 00 00 00 00  00 00 00 00 00 00 00 00  |982.............|
+	00000190  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+	000001a0  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+	000001b0  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+	000001c0  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+	000001d0  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+	000001e0  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+	000001f0  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+
+Consequently, the disk cannot be mounted by a modern operating system (e.g., macOS), because it lacks a proper
+BPB at offset 0x000B.
+
+One solution is to use the *--forceBPB* option of the [DiskDump](/modules/diskdump/) utility, which creates a
+mountable disk image with the following boot sector modifications:
+
+	00000000  eb fe 90 50 43 4a 53 2e  4f 52 47 00 02 02 01 00  |...PCJS.ORG.....|
+	00000010  02 70 00 80 02 ff 01 00  08 00 02 00 00 00 00 00  |.p..............|
+	00000020  00 00 00 00 00 8a 07 3c  24 74 0c 53 b4 0e bb 07  |.......<$t.S....|
+
+The following byte ranges are modified:
+
+- 0x0000-0x0002: 2-byte Intel x86 JMP instruction followed by 1-byte x86 NOP
+- 0x0003-0x000A: 8-byte OEM signature string (we use the fake "PCJS.ORG" OEM signature)
+- 0x000B-0x001D: 19-byte BPB describing a 320Kb diskette image with 8 sectors/track and 2 heads
+
+Ordinarily, only the 19-byte BPB would be required, but it turns out that macOS won't mount the disk image
+unless the boot sector *also* begins with an Intel x86 JMP instruction.  So the *--forceBPB* option updates all
+30 bytes at the beginning of the boot sector, making the disk image mountable, but also rendering it unbootable --
+which is OK if all you want to do is mount the image and copy files from it.
+
+Here's a sample command sequence.  Note that *two* DiskDump commands are required, because BPB modification
+only happens when converting an IMG file to a JSON file; the second command converts the JSON file back into
+a separate IMG file, preserving the original.
+
+	diskdump --disk=COMPAQ-DOS111.img --format=json --output=COMPAQ-DOS111-BPB.json
+	warning: BPB has been updated
+	327680-byte disk image saved to COMPAQ-DOS111-BPB.json
+	diskdump --disk=COMPAQ-DOS111.json --format=img --output=COMPAQ-DOS111-BPB.img
+	327680-byte disk image saved to COMPAQ-DOS111-BPB.img
+	chmod -w COMPAQ-DOS111-BPB.img
+	open COMPAQ-DOS111-BPB.img
+	mkdir COMPAQ-DOS111
+	cp -pr /Volumes/Untitled/ COMPAQ-DOS111
+
+Another curiosity regarding this disk are the BASIC files.  **BASIC.COM** and **BASICA.COM** are nothing more than
+tiny programs to load **BASICA.EXE**, a stand-alone version of BASIC that doesn't require any BASIC ROMs.  And
+**BASICA.EXE** reports a version number that differs from the DOS version: 
+
+	The COMPAQ Personal Computer BASIC
+	Version 1.13
+	(C) Copyright COMPAQ Computer Corp. 1983
 
 [Return to [COMPAQ MS-DOS Disks](/disks/pcx86/dos/compaq/)]

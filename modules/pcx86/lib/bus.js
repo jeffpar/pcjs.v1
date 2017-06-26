@@ -1308,7 +1308,7 @@ class Bus extends Component {
             if (aNotify !== undefined) {
                 if (aNotify[0]) {
                     dataPort = aNotify[0](port, addrLIP);
-                    if (dataPort === undefined) {
+                    if (dataPort == null) {
                         dataPort = maskPort;
                     } else {
                         dataPort &= maskPort;

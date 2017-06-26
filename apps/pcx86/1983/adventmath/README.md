@@ -100,8 +100,9 @@ Another unexpected file was **BASICA.EXE** (54277 bytes) from 1999.  It seems un
 *any* BASIC binary with this game, because DOS was a prerequisite, and at the time, all versions of DOS included BASIC.
 IBM's PC-DOS shipped with **BASICA.COM** and OEM versions of DOS shipped with either **GWBASIC.EXE** or **BASIC.EXE**.
 
-The closest matching binary I'd seen up to this point was **BASICA.EXE** from [COMPAQ DOS 1.12](/disks/pcx86/dos/compaq/1.12/)
-(54304 bytes).  And sure enough, dumping the strings inside this **BASICA.EXE** revealed that it was a close relative:
+Unsurprisingly, this **BASICA.EXE** is neither from 1999 nor from IBM.  It's virtually identical to the circa 1983
+**BASICA.EXE*** found in [COMPAQ DOS 1.11](/disks/pcx86/dos/compaq/1.11/), except that it is 5 bytes larger, due to the
+addition of "MsDos" at the end of the file.  It contains the following strings:
 
 	The COMPAQ Personal Computer BASIC
 	Version 1.13

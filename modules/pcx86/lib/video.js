@@ -2955,28 +2955,7 @@ class Video extends Component {
                  * At this point, xThird and yThird should both be one of 0, 1 or 2, indicating which horizontal and
                  * vertical third of the virtual screen the touch event occurred.
                  */
-                if (/* xThird == 1 && */ yThird != 1) {
-                    if (!yThird) {
-                        this.kbd.addActiveKey(Keyboard.CLICKCODES.UP, true);
-                    } else {
-                        this.kbd.addActiveKey(Keyboard.CLICKCODES.DOWN, true);
-                    }
-                } else if (/* yThird == 1 && */ xThird != 1) {
-                    if (!xThird) {
-                        this.kbd.addActiveKey(Keyboard.CLICKCODES.LEFT, true);
-                    } else {
-                        this.kbd.addActiveKey(Keyboard.CLICKCODES.RIGHT, true);
-                    }
-                }
-                else {
-                    /*
-                     * Why simulate a SPACE if the tap is in the middle third of the screen?  Well, apparently I
-                     * didn't explain earlier that the WHOLE reason I originally added KEYGRID support (before it was
-                     * even called KEYGRID support) was to make the 1985 game "Rogue" (pcjs.org/apps/pcx86/1985/rogue)
-                     * more fun to play on an iPad, because arrows and spaces are the most commonly used keys.
-                     */
-                    this.kbd.addActiveKey(Keyboard.SIMCODE.SPACE, true);
-                }
+                this.kbd.addActiveKey(Video.KEYGRID[yThird][xThird], true);
             }
         } else {
 
@@ -3187,10 +3166,6 @@ class Video extends Component {
         this.buildFonts();
 
         this.nMode = null;
-        this.iCellCursor = -1;  // initially, there is no visible cursor cell
-        this.cBlinks = -1;      // initially, blinking is not active
-        this.cBlinkVisible = 0; // no visible blinking characters (yet)
-
         this.setMode(this.nModeDefault);
 
         if (this.cardActive.addrBuffer && fRandomize) {
@@ -3717,6 +3692,14 @@ class Video extends Component {
                     }
                 }
             }
+        }
+        if (!fRebuild) {
+            /*
+             * Perform some additional initialization common to both reset() and restore() sequences.
+             */
+            this.iCellCursor = -1;  // initially, there is no visible cursor cell
+            this.cBlinks = -1;      // initially, blinking is not active
+            this.cBlinkVisible = 0; // no visible blinking characters (yet)
         }
         return fChanges;
     }
@@ -6420,7 +6403,7 @@ class Video extends Component {
          * The IBM VGA ROM makes some hardware determinations based on how the CRTC controller responds when
          * the IO_SELECT bit in the Miscellaneous Output Register is cleared; normally, that would mean ports
          * 0x3B? are decoded and ports 0x3D? are ignored.  We didn't used to bother ignoring them, but the
-         * VGA ROM's logic requires it, so now we also check fActive.  However, we ignore only CTRC reads;
+         * VGA ROM's logic requires it, so now we also check fActive.  However, we ignore only CRTC reads;
          * we retain any writes in case that information proves useful later.
          *
          * Note that returning an undefined value now signals the Bus component to return whatever default value
@@ -7344,6 +7327,18 @@ Video.TOUCH = {
     KEYGRID:    1,
     MOUSE:      2
 };
+
+/*
+ * Why simulate a SPACE if the tap is in the middle third (center) of the screen?  Well, apparently
+ * I didn't explain earlier that the WHOLE reason I originally added KEYGRID support (before it was
+ * even called KEYGRID support) was to make the 1985 game "Rogue" (pcjs.org/apps/pcx86/1985/rogue)
+ * more fun to play on an iPad (the space-bar is a commonly required key).
+ */
+Video.KEYGRID = [
+    [Keyboard.SIMCODE.HOME, Keyboard.SIMCODE.UP,    Keyboard.SIMCODE.PGUP],
+    [Keyboard.SIMCODE.LEFT, Keyboard.SIMCODE.SPACE, Keyboard.SIMCODE.RIGHT],
+    [Keyboard.SIMCODE.END,  Keyboard.SIMCODE.DOWN,  Keyboard.SIMCODE.PGDN],
+];
 
 /*
  * Port input/output notification tables

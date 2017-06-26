@@ -41,9 +41,9 @@ The biggest challenge was isolating and recreating the original distribution sof
 details on the page I created for "[Adventures in Math](/apps/pcx86/1983/adventmath/)".
 
 In short, although the software is archived inside multiple ZIP archives at the [Internet Archive](https://archive.org/),
-none of them appeared to contain an un-mingled, un-modified, distribution-only copy of the original software.
-And discovering that the software was archived inside multiple ZIP archives was a purely accidental discovery, not
-something one could easily determine using the Internet Archive's own search engine.
+none of them appeared to contain an unmodified distribution copy of the original software.  And discovering that the
+software was archived inside multiple ZIP archives was a purely accidental discovery, not something one could easily
+determine using the Internet Archive's own search engine.
 
 ### Emulation Challenges
 
