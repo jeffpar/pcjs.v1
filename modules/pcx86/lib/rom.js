@@ -196,7 +196,7 @@ class ROM extends Component {
     doneLoad(sURL, sROMData, nErrorCode)
     {
         if (nErrorCode) {
-            this.notice("Unable to load system ROM (error " + nErrorCode + ": " + sURL + ")");
+            this.notice("Unable to load system ROM (error " + nErrorCode + ": " + sURL + ")", nErrorCode < 0);
             return;
         }
 
