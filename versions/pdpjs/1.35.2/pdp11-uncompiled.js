@@ -3134,7 +3134,7 @@ class Component {
     /**
      * Component.getComponentParms(element)
      *
-     * @param {Object} element from the DOM
+     * @param {HTMLElement} element from the DOM
      */
     static getComponentParms(element)
     {
@@ -3184,7 +3184,7 @@ class Component {
      * Component.bindComponentControls(component, element, sAppClass)
      *
      * @param {Component} component
-     * @param {Object} element from the DOM
+     * @param {HTMLElement} element from the DOM
      * @param {string} sAppClass
      */
     static bindComponentControls(component, element, sAppClass)
@@ -3233,7 +3233,7 @@ class Component {
      * TODO: This should probably be moved into weblib.js at some point, along with the control binding functions above,
      * to keep all the browser-related code together.
      *
-     * @param {Object} element from the DOM
+     * @param {HTMLDocument|HTMLElement|Node} element from the DOM
      * @param {string} sClass
      * @param {string} [sObjClass]
      * @return {Array|NodeList}
@@ -3526,7 +3526,7 @@ class Component {
      * @this {Component}
      * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "reset")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
@@ -5376,7 +5376,7 @@ class PanelPDP11 extends Component {
      * @this {PanelPDP11}
      * @param {string|null} sType is the type of the HTML control (eg, "button", "textarea", "register", "flag", "rled", etc)
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "reset")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */

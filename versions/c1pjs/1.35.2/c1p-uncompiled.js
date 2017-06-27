@@ -2616,7 +2616,7 @@ class Component {
     /**
      * Component.getComponentParms(element)
      *
-     * @param {Object} element from the DOM
+     * @param {HTMLElement} element from the DOM
      */
     static getComponentParms(element)
     {
@@ -2666,7 +2666,7 @@ class Component {
      * Component.bindComponentControls(component, element, sAppClass)
      *
      * @param {Component} component
-     * @param {Object} element from the DOM
+     * @param {HTMLElement} element from the DOM
      * @param {string} sAppClass
      */
     static bindComponentControls(component, element, sAppClass)
@@ -2715,7 +2715,7 @@ class Component {
      * TODO: This should probably be moved into weblib.js at some point, along with the control binding functions above,
      * to keep all the browser-related code together.
      *
-     * @param {Object} element from the DOM
+     * @param {HTMLDocument|HTMLElement|Node} element from the DOM
      * @param {string} sClass
      * @param {string} [sObjClass]
      * @return {Array|NodeList}
@@ -3008,7 +3008,7 @@ class Component {
      * @this {Component}
      * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "reset")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
@@ -3608,7 +3608,7 @@ class C1PPanel extends Component {
      * @this {C1PPanel}
      * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "reset")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
@@ -4164,7 +4164,7 @@ class C1PCPU extends Component {
      * @this {C1PCPU}
      * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "run")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
@@ -8206,7 +8206,7 @@ class C1PKeyboard extends Component {
      * @this {C1PKeyboard}
      * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "esc", "ctrl-c")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
@@ -9012,9 +9012,9 @@ class C1PVideo extends Component {
      *
      * @this {C1PVideo}
      * @param {Object} parmsVideo
-     * @param {Object} canvas
-     * @param {Object} context
-     * @param {Object} imgChars
+     * @param {HTMLCanvasElement} canvas
+     * @param {CanvasRenderingContext2D} context
+     * @param {HTMLImageElement} imgChars
      */
     constructor(parmsVideo, canvas, context, imgChars)
     {
@@ -9109,7 +9109,7 @@ class C1PVideo extends Component {
      * @this {C1PVideo}
      * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "refresh")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
@@ -9471,7 +9471,7 @@ class C1PVideo extends Component {
              * I've since settled on a better work-around in keyboard.js, so I've stopped worrying about how to make
              * "autocapitalize" work here.
              */
-            var eCanvas = document.createElement("canvas");
+            var eCanvas = /** @type {HTMLCanvasElement} */ (document.createElement("canvas"));
             if (eCanvas === undefined || !eCanvas.getContext) {
                 eVideo.innerHTML = "<br/>Missing &lt;canvas&gt; support. Please try a newer web browser.";
                 return;
@@ -9510,7 +9510,7 @@ class C1PVideo extends Component {
              *      document.createElement('img') would.
              */
             var imgCharSet = new Image();
-            var eContext = eCanvas.getContext("2d");
+            var eContext = /** @type {CanvasRenderingContext2D} */ (eCanvas.getContext("2d"));
             var video = new C1PVideo(parmsVideo, eCanvas, eContext, imgCharSet);
             imgCharSet.onload = function(video, sCharSet) {
                 return function() {
@@ -9608,7 +9608,7 @@ class C1PSerialPort extends Component {
      * @this {C1PSerialPort}
      * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "listSerial")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
@@ -9653,7 +9653,7 @@ class C1PSerialPort extends Component {
                     submit.disabled = !files.length;
                 });
 
-                control.onsubmit = function(event) {
+                control.addEventListener('submit', function(event) {
                     var file = event.currentTarget[1].files[0];
 
                     var reader = new FileReader();
@@ -9667,7 +9667,7 @@ class C1PSerialPort extends Component {
                      * Prevent reloading of web page after form submission
                      */
                     return false;
-                };
+                });
             }
             else {
                 if (DEBUG) this.log("Local file support not available");
@@ -10596,7 +10596,7 @@ class C1PDiskController extends Component {
     * @this {C1PDiskController}
     * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea")
     * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "listDisk")
-    * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+    * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
     * @param {string} [sValue] optional data value
     * @return {boolean} true if binding was successful, false if unrecognized binding request
     */
@@ -11669,7 +11669,7 @@ class C1PDebugger extends Component {
      * @this {C1PDebugger}
      * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "reset")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
@@ -13512,7 +13512,7 @@ class C1PComputer extends Component {
      * @this {C1PComputer}
      * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "reset")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */

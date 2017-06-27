@@ -3134,7 +3134,7 @@ class Component {
     /**
      * Component.getComponentParms(element)
      *
-     * @param {Object} element from the DOM
+     * @param {HTMLElement} element from the DOM
      */
     static getComponentParms(element)
     {
@@ -3184,7 +3184,7 @@ class Component {
      * Component.bindComponentControls(component, element, sAppClass)
      *
      * @param {Component} component
-     * @param {Object} element from the DOM
+     * @param {HTMLElement} element from the DOM
      * @param {string} sAppClass
      */
     static bindComponentControls(component, element, sAppClass)
@@ -3233,7 +3233,7 @@ class Component {
      * TODO: This should probably be moved into weblib.js at some point, along with the control binding functions above,
      * to keep all the browser-related code together.
      *
-     * @param {Object} element from the DOM
+     * @param {HTMLDocument|HTMLElement|Node} element from the DOM
      * @param {string} sClass
      * @param {string} [sObjClass]
      * @return {Array|NodeList}
@@ -3526,7 +3526,7 @@ class Component {
      * @this {Component}
      * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "reset")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
@@ -7412,7 +7412,7 @@ class Panel extends Component {
      * @this {Panel}
      * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "reset")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
@@ -7433,8 +7433,8 @@ class Panel extends Component {
             }
 
             if (fPanel) {
-                this.canvas = control;
-                this.context = this.canvas.getContext("2d");
+                this.canvas = /** @type {HTMLCanvasElement} */ (control);
+                this.context = /** @type {CanvasRenderingContext2D} */ (this.canvas.getContext("2d"));
 
                 /*
                  * Employ the same gross onresize() hack for IE9/IE10 that we had to use for the Video canvas
@@ -7445,7 +7445,7 @@ class Panel extends Component {
                             canvas.style.height = (((canvas.clientWidth * cy) / cx) | 0) + "px";
                         };
                     }(this.canvas, this.canvas.width, this.canvas.height);
-                    this.canvas.onresize();
+                    this.canvas.onresize(null);
                 }
 
                 this.xMem = this.yMem = 0;
@@ -43058,7 +43058,6 @@ class ROM extends Component {
          * Most ROMs are not aliased, in which case the 'alias' property should have the default value of null.
          */
         this.addrAlias = parmsROM['alias'];
-        this.sFilePath = parmsROM['file'];
 
         /*
          * The 'notify' property can now (as of v1.18.2) contain an array of parameters that the notified
@@ -43080,10 +43079,12 @@ class ROM extends Component {
                 this.idNotify = this.idNotify.substr(0, i);
             }
         }
-        if (this.sFilePath) {
-            var sFileURL = this.sFilePath;
-            var sFileName = Str.getBaseName(sFileURL);
-            if (DEBUG) this.log('load("' + sFileURL + '")');
+
+        this.sFileURL = this.sFilePath = parmsROM['file'];
+
+        if (this.sFileURL) {
+            var sFileName = Str.getBaseName(this.sFileURL);
+            if (DEBUG) this.log('load("' + this.sFileURL + '")');
             /*
              * If the selected ROM file has a ".json" extension, then we assume it's pre-converted
              * JSON-encoded ROM data, so we load it as-is; ditto for ROM files with a ".hex" extension.
@@ -43091,12 +43092,8 @@ class ROM extends Component {
              */
             var sFileExt = Str.getExtension(sFileName);
             if (sFileExt != DumpAPI.FORMAT.JSON && sFileExt != DumpAPI.FORMAT.HEX) {
-                sFileURL = Web.getHost() + DumpAPI.ENDPOINT + '?' + DumpAPI.QUERY.FILE + '=' + this.sFilePath + '&' + DumpAPI.QUERY.FORMAT + '=' + DumpAPI.FORMAT.BYTES + '&' + DumpAPI.QUERY.DECIMAL + '=true';
+                this.sFileURL = Web.getHost() + DumpAPI.ENDPOINT + '?' + DumpAPI.QUERY.FILE + '=' + this.sFilePath + '&' + DumpAPI.QUERY.FORMAT + '=' + DumpAPI.FORMAT.BYTES + '&' + DumpAPI.QUERY.DECIMAL + '=true';
             }
-            var rom = this;
-            Web.getResource(sFileURL, null, true, function(sURL, sResponse, nErrorCode) {
-                rom.doneLoad(sURL, sResponse, nErrorCode);
-            });
         }
     }
 
@@ -43111,10 +43108,17 @@ class ROM extends Component {
      */
     initBus(cmp, bus, cpu, dbg)
     {
+        var rom = this;
+        this.cmp = cmp;
         this.bus = bus;
         this.cpu = cpu;
         this.dbg = dbg;
-        this.copyROM();
+        if (this.sFileURL) {
+            this.cmp.setResourceStatus(this.sFileURL);
+            Web.getResource(this.sFileURL, null, true, function(sURL, sResponse, nErrorCode) {
+                rom.doneLoad(sURL, sResponse, nErrorCode);
+            });
+        }
     }
 
     /**
@@ -48607,10 +48611,10 @@ class Video extends Component {
      *
      * @this {Video}
      * @param {Object} parmsVideo
-     * @param {Object} [canvas]
-     * @param {Object} [context]
-     * @param {Object} [textarea]
-     * @param {Object} [container]
+     * @param {HTMLCanvasElement} [canvas]
+     * @param {CanvasRenderingContext2D} [context]
+     * @param {HTMLTextAreaElement} [textarea]
+     * @param {HTMLElement} [container]
      */
     constructor(parmsVideo, canvas, context, textarea, container)
     {
@@ -48667,7 +48671,7 @@ class Video extends Component {
 
         this.canvasScreen = canvas;
         this.contextScreen = context;
-        this.textareaScreen = textarea;
+        this.inputTextArea = textarea;
         this.inputScreen = textarea || canvas || null;
 
         /*
@@ -48908,7 +48912,7 @@ class Video extends Component {
             for (var s in this.bindings) {
                 if (s.indexOf("lock") > 0) this.kbd.setBinding("led", s, this.bindings[s]);
             }
-            this.kbd.setBinding(this.textareaScreen? "textarea" : "canvas", "screen", this.inputScreen);
+            this.kbd.setBinding(this.inputTextArea? "textarea" : "canvas", "screen", this.inputScreen);
         }
 
         this.bEGASwitches = 0x09;   // our default "switches" setting (see aEGAMonitorSwitches)
@@ -49021,6 +49025,19 @@ class Video extends Component {
     {
         this.mouse = mouse;
         return this.inputScreen;
+    }
+
+    /**
+     * getTextArea()
+     *
+     * This is an interface used by the Computer component, so that it can display resource status messages.
+     *
+     * @this {Video}
+     * @return {HTMLTextAreaElement|undefined}
+     */
+    getTextArea()
+    {
+        return this.inputTextArea;
     }
 
     /**
@@ -53127,7 +53144,7 @@ class Video extends Component {
             var eVideo = aeVideo[iVideo];
             var parmsVideo = Component.getComponentParms(eVideo);
 
-            var eCanvas = document.createElement("canvas");
+            var eCanvas = /** @type {HTMLCanvasElement} */ (document.createElement("canvas"));
             if (eCanvas === undefined || !eCanvas.getContext) {
                 eVideo.innerHTML = "<br/>Missing &lt;canvas&gt; support. Please try a newer web browser.";
                 return;
@@ -53160,7 +53177,7 @@ class Video extends Component {
                         eChild.style.height = (((eParent.clientWidth * cy) / cx) | 0) + "px";
                     };
                 }(eVideo, eCanvas, parmsVideo['screenWidth'], parmsVideo['screenHeight']);
-                eVideo.onresize();
+                eVideo.onresize(null);
             }
             /*
              * The following is a related hack that allows the user to force the screen to use a particular aspect
@@ -53223,7 +53240,7 @@ class Video extends Component {
              *
              * See this Chromium issue for more information: https://code.google.com/p/chromium/issues/detail?id=118639
              */
-            var eTextArea = document.createElement("textarea");
+            var eTextArea = /** @type {HTMLTextAreaElement} */ (document.createElement("textarea"));
 
             /*
              * As noted in keyboard.js, the keyboard on an iOS device tends to pop up with the SHIFT key depressed,
@@ -53248,7 +53265,7 @@ class Video extends Component {
             /*
              * Now we can create the Video object, record it, and wire it up to the associated document elements.
              */
-            var eContext = eCanvas.getContext("2d");
+            var eContext = /** @type {CanvasRenderingContext2D} */ (eCanvas.getContext("2d"));
             var video = new Video(parmsVideo, eCanvas, eContext, eTextArea /* || eInput */, eVideo);
 
             /*
@@ -74176,6 +74193,7 @@ class Computer extends Component {
     /**
      * getMachineID()
      *
+     * @this {Computer}
      * @return {string}
      */
     getMachineID()
@@ -74188,6 +74206,7 @@ class Computer extends Component {
      *
      * If no explicit machine parms were provided, then we check for 'parms' in the bundled resources (if any).
      *
+     * @this {Computer}
      * @param {Object} [parmsMachine]
      */
     setMachineParms(parmsMachine)
@@ -74215,6 +74234,7 @@ class Computer extends Component {
      * 'state' back to the caller (ie, the name of the resource), so that the caller will then attempt to load the 'state'
      * resource to obtain the actual state.
      *
+     * @this {Computer}
      * @param {string} sParm
      * @param {Object} [parmsComponent]
      * @return {string|undefined}
@@ -74238,6 +74258,7 @@ class Computer extends Component {
     /**
      * saveMachineParms()
      *
+     * @this {Computer}
      * @return {string|null}
      */
     saveMachineParms()
@@ -74248,11 +74269,34 @@ class Computer extends Component {
     /**
      * getUserID()
      *
+     * @this {Computer}
      * @return {string}
      */
     getUserID()
     {
         return this.sUserID || "";
+    }
+
+    /**
+     * setResourceStatus(sMessage)
+     *
+     * @this {Computer}
+     * @param {string} sMessage
+     */
+    setResourceStatus(sMessage)
+    {
+        // var video = this.aVideo[0];
+        // if (video) {
+        //     var eTextArea = video.getTextArea();
+        //     if (eTextArea) {
+        //         eTextArea.style.opacity = "1";
+        //         eTextArea.style.color = "#ffffff";
+        //         eTextArea.style.lineHeight = "1";
+        //         eTextArea.style.fontSize = "large";
+        //         eTextArea.style.background = "rgba(0, 0, 0, .5)";
+        //         eTextArea.value = sMessage;
+        //     }
+        // }
     }
 
     /**
@@ -75016,6 +75060,8 @@ class Computer extends Component {
 
     /**
      * resetUserID()
+     *
+     * @this {Computer}
      */
     resetUserID()
     {
@@ -75026,6 +75072,7 @@ class Computer extends Component {
     /**
      * queryUserID(fPrompt)
      *
+     * @this {Computer}
      * @param {boolean} [fPrompt]
      * @returns {string|null|undefined}
      */
@@ -75114,6 +75161,7 @@ class Computer extends Component {
     /**
      * saveServerState(sUserID, sState)
      *
+     * @this {Computer}
      * @param {string} sUserID
      * @param {string|null} sState
      */

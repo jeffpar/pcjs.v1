@@ -103,7 +103,7 @@ class C1PSerialPort extends Component {
      * @this {C1PSerialPort}
      * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "listSerial")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
@@ -148,7 +148,7 @@ class C1PSerialPort extends Component {
                     submit.disabled = !files.length;
                 });
 
-                control.onsubmit = function(event) {
+                control.addEventListener('submit', function(event) {
                     var file = event.currentTarget[1].files[0];
 
                     var reader = new FileReader();
@@ -162,7 +162,7 @@ class C1PSerialPort extends Component {
                      * Prevent reloading of web page after form submission
                      */
                     return false;
-                };
+                });
             }
             else {
                 if (DEBUG) this.log("Local file support not available");

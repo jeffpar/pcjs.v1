@@ -207,6 +207,7 @@
     opacity: 0;
     border: 0;
     padding: 0;
+    resize: none;
     line-height: 0;
 }
 .pcjs-reference {

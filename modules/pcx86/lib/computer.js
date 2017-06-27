@@ -312,6 +312,7 @@ class Computer extends Component {
     /**
      * getMachineID()
      *
+     * @this {Computer}
      * @return {string}
      */
     getMachineID()
@@ -324,6 +325,7 @@ class Computer extends Component {
      *
      * If no explicit machine parms were provided, then we check for 'parms' in the bundled resources (if any).
      *
+     * @this {Computer}
      * @param {Object} [parmsMachine]
      */
     setMachineParms(parmsMachine)
@@ -351,6 +353,7 @@ class Computer extends Component {
      * 'state' back to the caller (ie, the name of the resource), so that the caller will then attempt to load the 'state'
      * resource to obtain the actual state.
      *
+     * @this {Computer}
      * @param {string} sParm
      * @param {Object} [parmsComponent]
      * @return {string|undefined}
@@ -374,6 +377,7 @@ class Computer extends Component {
     /**
      * saveMachineParms()
      *
+     * @this {Computer}
      * @return {string|null}
      */
     saveMachineParms()
@@ -384,11 +388,34 @@ class Computer extends Component {
     /**
      * getUserID()
      *
+     * @this {Computer}
      * @return {string}
      */
     getUserID()
     {
         return this.sUserID || "";
+    }
+
+    /**
+     * setResourceStatus(sMessage)
+     *
+     * @this {Computer}
+     * @param {string} sMessage
+     */
+    setResourceStatus(sMessage)
+    {
+        // var video = this.aVideo[0];
+        // if (video) {
+        //     var eTextArea = video.getTextArea();
+        //     if (eTextArea) {
+        //         eTextArea.style.opacity = "1";
+        //         eTextArea.style.color = "#ffffff";
+        //         eTextArea.style.lineHeight = "1";
+        //         eTextArea.style.fontSize = "large";
+        //         eTextArea.style.background = "rgba(0, 0, 0, .5)";
+        //         eTextArea.value = sMessage;
+        //     }
+        // }
     }
 
     /**
@@ -1152,6 +1179,8 @@ class Computer extends Component {
 
     /**
      * resetUserID()
+     *
+     * @this {Computer}
      */
     resetUserID()
     {
@@ -1162,6 +1191,7 @@ class Computer extends Component {
     /**
      * queryUserID(fPrompt)
      *
+     * @this {Computer}
      * @param {boolean} [fPrompt]
      * @returns {string|null|undefined}
      */
@@ -1250,6 +1280,7 @@ class Computer extends Component {
     /**
      * saveServerState(sUserID, sState)
      *
+     * @this {Computer}
      * @param {string} sUserID
      * @param {string|null} sState
      */

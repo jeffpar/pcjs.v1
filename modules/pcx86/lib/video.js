@@ -2171,10 +2171,10 @@ class Video extends Component {
      *
      * @this {Video}
      * @param {Object} parmsVideo
-     * @param {Object} [canvas]
-     * @param {Object} [context]
-     * @param {Object} [textarea]
-     * @param {Object} [container]
+     * @param {HTMLCanvasElement} [canvas]
+     * @param {CanvasRenderingContext2D} [context]
+     * @param {HTMLTextAreaElement} [textarea]
+     * @param {HTMLElement} [container]
      */
     constructor(parmsVideo, canvas, context, textarea, container)
     {
@@ -2231,7 +2231,7 @@ class Video extends Component {
 
         this.canvasScreen = canvas;
         this.contextScreen = context;
-        this.textareaScreen = textarea;
+        this.inputTextArea = textarea;
         this.inputScreen = textarea || canvas || null;
 
         /*
@@ -2472,7 +2472,7 @@ class Video extends Component {
             for (var s in this.bindings) {
                 if (s.indexOf("lock") > 0) this.kbd.setBinding("led", s, this.bindings[s]);
             }
-            this.kbd.setBinding(this.textareaScreen? "textarea" : "canvas", "screen", this.inputScreen);
+            this.kbd.setBinding(this.inputTextArea? "textarea" : "canvas", "screen", this.inputScreen);
         }
 
         this.bEGASwitches = 0x09;   // our default "switches" setting (see aEGAMonitorSwitches)
@@ -2585,6 +2585,19 @@ class Video extends Component {
     {
         this.mouse = mouse;
         return this.inputScreen;
+    }
+
+    /**
+     * getTextArea()
+     *
+     * This is an interface used by the Computer component, so that it can display resource status messages.
+     *
+     * @this {Video}
+     * @return {HTMLTextAreaElement|undefined}
+     */
+    getTextArea()
+    {
+        return this.inputTextArea;
     }
 
     /**
@@ -6691,7 +6704,7 @@ class Video extends Component {
             var eVideo = aeVideo[iVideo];
             var parmsVideo = Component.getComponentParms(eVideo);
 
-            var eCanvas = document.createElement("canvas");
+            var eCanvas = /** @type {HTMLCanvasElement} */ (document.createElement("canvas"));
             if (eCanvas === undefined || !eCanvas.getContext) {
                 eVideo.innerHTML = "<br/>Missing &lt;canvas&gt; support. Please try a newer web browser.";
                 return;
@@ -6724,7 +6737,7 @@ class Video extends Component {
                         eChild.style.height = (((eParent.clientWidth * cy) / cx) | 0) + "px";
                     };
                 }(eVideo, eCanvas, parmsVideo['screenWidth'], parmsVideo['screenHeight']);
-                eVideo.onresize();
+                eVideo.onresize(null);
             }
             /*
              * The following is a related hack that allows the user to force the screen to use a particular aspect
@@ -6787,7 +6800,7 @@ class Video extends Component {
              *
              * See this Chromium issue for more information: https://code.google.com/p/chromium/issues/detail?id=118639
              */
-            var eTextArea = document.createElement("textarea");
+            var eTextArea = /** @type {HTMLTextAreaElement} */ (document.createElement("textarea"));
 
             /*
              * As noted in keyboard.js, the keyboard on an iOS device tends to pop up with the SHIFT key depressed,
@@ -6812,7 +6825,7 @@ class Video extends Component {
             /*
              * Now we can create the Video object, record it, and wire it up to the associated document elements.
              */
-            var eContext = eCanvas.getContext("2d");
+            var eContext = /** @type {CanvasRenderingContext2D} */ (eCanvas.getContext("2d"));
             var video = new Video(parmsVideo, eCanvas, eContext, eTextArea /* || eInput */, eVideo);
 
             /*

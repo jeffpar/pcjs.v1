@@ -212,6 +212,7 @@
     opacity: 0;
     border: 0;
     padding: 0;
+    resize: none;
     line-height: 0; /* try to prevent Safari on iOS from always displaying a blinking cursor */
 }
 .pcjs-reference {

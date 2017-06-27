@@ -226,7 +226,7 @@ class Panel extends Component {
      * @this {Panel}
      * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "reset")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
@@ -247,8 +247,8 @@ class Panel extends Component {
             }
 
             if (fPanel) {
-                this.canvas = control;
-                this.context = this.canvas.getContext("2d");
+                this.canvas = /** @type {HTMLCanvasElement} */ (control);
+                this.context = /** @type {CanvasRenderingContext2D} */ (this.canvas.getContext("2d"));
 
                 /*
                  * Employ the same gross onresize() hack for IE9/IE10 that we had to use for the Video canvas
@@ -259,7 +259,7 @@ class Panel extends Component {
                             canvas.style.height = (((canvas.clientWidth * cy) / cx) | 0) + "px";
                         };
                     }(this.canvas, this.canvas.width, this.canvas.height);
-                    this.canvas.onresize();
+                    this.canvas.onresize(null);
                 }
 
                 this.xMem = this.yMem = 0;
