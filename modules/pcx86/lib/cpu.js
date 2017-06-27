@@ -183,14 +183,15 @@ class CPU extends Component {
     }
 
     /**
-     * save()
+     * save(fRunning)
      *
      * This is a placeholder for save support (overridden by the X86CPU component).
      *
      * @this {CPU}
+     * @param {boolean} [fRunning]
      * @return {Object|null}
      */
-    save()
+    save(fRunning)
     {
         return null;
     }
@@ -271,7 +272,9 @@ class CPU extends Component {
          *
          *      this.flags.powered = false;
          */
-        return fSave? this.save() : true;
+        var fRunning = this.flags.running;
+        if (fShutdown) this.stopCPU();
+        return fSave? this.save(fRunning) : true;
     }
 
     /**
@@ -748,7 +751,7 @@ class CPU extends Component {
             /*
              * If we haven't reached 80% (0.8) of the current target speed, revert to a multiplier of one (1).
              */
-            if (this.aCounts.mhz / this.aCounts.mhzTarget < 0.8) {
+            if ((fUpdateFocus || this.flags.running) && this.aCounts.mhz / this.aCounts.mhzTarget < 0.8) {
                 nMultiplier = 1;
             } else {
                 fSuccess = true;

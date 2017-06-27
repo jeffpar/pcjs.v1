@@ -897,7 +897,6 @@ class Computer extends Component {
          * after they're no longer ready.
          */
         if (this.cpu && this.cpu.powerDown) {
-            if (fShutdown) this.cpu.stopCPU();
             data = this.cpu.powerDown(fSave, fShutdown);
             if (typeof data === "object") stateComputer.set(this.cpu.id, data);
             if (fShutdown) {

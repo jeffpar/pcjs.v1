@@ -11761,14 +11761,15 @@ class CPU extends Component {
     }
 
     /**
-     * save()
+     * save(fRunning)
      *
      * This is a placeholder for save support (overridden by the X86CPU component).
      *
      * @this {CPU}
+     * @param {boolean} [fRunning]
      * @return {Object|null}
      */
-    save()
+    save(fRunning)
     {
         return null;
     }
@@ -11849,7 +11850,9 @@ class CPU extends Component {
          *
          *      this.flags.powered = false;
          */
-        return fSave? this.save() : true;
+        var fRunning = this.flags.running;
+        if (fShutdown) this.stopCPU();
+        return fSave? this.save(fRunning) : true;
     }
 
     /**
@@ -12326,7 +12329,7 @@ class CPU extends Component {
             /*
              * If we haven't reached 80% (0.8) of the current target speed, revert to a multiplier of one (1).
              */
-            if (this.aCounts.mhz / this.aCounts.mhzTarget < 0.8) {
+            if ((fUpdateFocus || this.flags.running) && this.aCounts.mhz / this.aCounts.mhzTarget < 0.8) {
                 nMultiplier = 1;
             } else {
                 fSuccess = true;
@@ -16189,16 +16192,24 @@ class X86CPU extends CPU {
     }
 
     /**
-     * save()
+     * save(fRunning)
      *
      * This implements save support for the X86 component.
+     *
+     * NOTE: When the Computer starts issuing powerDown() calls, it always calls the CPU first, and the CPU's
+     * powerDown() handler has the added responsibility of:
+     *
+     *      1) recording whether or not the CPU is currently running
+     *      2) stopping the CPU if the powerDown is part of a shutDown
+     *      3) passing the original running state to us
      *
      * UPDATES: The current speed multiplier from getSpeed() is now saved in group #3, so that your speed is preserved.
      *
      * @this {X86CPU}
+     * @param {boolean} [fRunning]
      * @return {Object|null}
      */
-    save()
+    save(fRunning)
     {
         var state = new State(this);
         state.set(0, [this.regEAX, this.regEBX, this.regECX, this.regEDX, this.getSP(), this.regEBP, this.regESI, this.regEDI]);
@@ -16209,7 +16220,7 @@ class X86CPU extends CPU {
         }
         state.set(1, a);
         state.set(2, [this.segData.sName, this.segStack.sName, this.opFlags, this.opPrefixes, this.intFlags, this.regEA, this.regEAWrite]);
-        state.set(3, [0, this.nTotalCycles, this.getSpeed()]);
+        state.set(3, [0, this.nTotalCycles, this.getSpeed(), fRunning]);
         state.set(4, this.bus.saveMemory(this.isPagingEnabled()));
         return state.data();
     }
@@ -16281,7 +16292,10 @@ class X86CPU extends CPU {
 
         a = data[3];                // a[0] was previously nBurstDivisor (no longer used)
         this.nTotalCycles = a[1];
-        this.setSpeed(a[2]);        // if we're restoring an old state that doesn't contain a value from getSpeed(), that's OK; setSpeed() checks for an undefined value
+        this.setSpeed(a[2]);        // old states didn't contain a value from getSpeed(), but setSpeed() checks
+        if (a[3] != null) {         // less old states didn't preserve the original running state, so we must check it
+            this.flags.autoStart = a[3];
+        }
 
         return fRestored;
     }
@@ -74747,7 +74761,6 @@ class Computer extends Component {
          * after they're no longer ready.
          */
         if (this.cpu && this.cpu.powerDown) {
-            if (fShutdown) this.cpu.stopCPU();
             data = this.cpu.powerDown(fSave, fShutdown);
             if (typeof data === "object") stateComputer.set(this.cpu.id, data);
             if (fShutdown) {
