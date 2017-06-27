@@ -538,7 +538,7 @@ class Computer extends Component {
                 this.stateFailSafe.store();
 
                 var fValidate = this.resume && !this.fServerState;
-                if (resume == Computer.RESUME_AUTO || Component.confirmUser("Click OK to restore the previous " + PCX86.APPNAME + " machine state, or CANCEL to reset the machine.")) {
+                if (resume == Computer.RESUME_AUTO || Component.confirmUser("Click OK to restore the previous " + PCX86.APPNAME + " machine state.")) {
                     fRestore = stateComputer.parse();
                     if (fRestore) {
                         var sCode = stateComputer.get(UserAPI.RES.CODE);
@@ -809,6 +809,18 @@ class Computer extends Component {
 
     /**
      * powerReport(stateComputer)
+     *
+     * TODO: Ever since I migrated the PCjs website from a Node-based web server on AWS to a GitHub Pages-based site,
+     * the sendReport() API has been a bit-bucket.  To be honest though, even before that change, I never really had
+     * the time (or desire) to look through all the anonymous machine states that were being posted.  Most of them were
+     * probably due to the user switching away from a page before it finished loading anyway, leaving the machine in
+     * an incomplete state.  That said, there should be SOME automated way for people to share their machine states
+     * when there's a more serious problem -- not this misleading prompt.
+     *
+     * In the meantime, to help reduce those kind of useless alerts, there's the new 'unloading' flag.  However, I'm
+     * not sure how reliably that's being set, so additionally, the default 'resume' setting (RESUME_AUTO) tries to be
+     * MUCH more automatic now; this function, for example, shouldn't even be called now when RESUME_AUTO is in effect.
+     * Another 'resume' setting (eg, RESUME_PROMPT) must be selected instead.
      *
      * @this {Computer}
      * @param {State} stateComputer
@@ -1364,7 +1376,7 @@ class Computer extends Component {
              * I used to bypass the prompt if this.resume == Computer.RESUME_AUTO, setting fSave to true automatically,
              * but that gives the user no means of resetting a resumable machine that contains errors in its resume state.
              */
-            var fSave = (/* this.resume == Computer.RESUME_AUTO || */ this.flags.unloading || Component.confirmUser("Click OK to save changes to this " + PCX86.APPNAME + " machine.\n\nWARNING: If you CANCEL, all disk changes will be discarded."));
+            var fSave = (/* this.resume == Computer.RESUME_AUTO || */ this.flags.unloading || !Component.confirmUser("Click OK to reset this " + PCX86.APPNAME + " machine and discard all disk modifications."));
             this.powerOff(fSave, true);
             /*
              * Forcing the page to reload is an expedient option, but ugly. It's preferable to call powerOn()
