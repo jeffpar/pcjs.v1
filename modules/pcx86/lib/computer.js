@@ -519,12 +519,11 @@ class Computer extends Component {
                  * may have happened the last time around.
                  */
                 this.stateFailSafe = new State(this, PCX86.APPVERSION, Computer.STATE_FAILSAFE);
+
                 if (this.stateFailSafe.load()) {
-                    if (this.powerReport(stateComputer)) {
+                    if (resume != Computer.RESUME_AUTO && this.powerReport(stateComputer)) {
                         /*
-                         * We already know resume is something other than RESUME_NONE, so we'll go ahead and bump it
-                         * all the way to RESUME_PROMPT, so that the user will be prompted, and if the user declines to
-                         * restore, the state will be removed.
+                         * Prompt the user; if they decline to restore, the state will be removed.
                          */
                         resume = Computer.RESUME_PROMPT;
                     }
