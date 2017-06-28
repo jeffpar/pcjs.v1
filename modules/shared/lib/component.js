@@ -142,9 +142,6 @@ class Component {
         this.clearError();
         this.bitsMessage = bitsMessage || 0;
 
-        /** @type {Object|null} controlPrint is the HTML control, if any, that we can print to */
-        this.controlPrint = null;
-
         this.cmp = null;
         this.bus = null;
         this.cpu = null;
@@ -882,15 +879,17 @@ class Component {
      *
      * @this {Component}
      * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
-     * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "reset")
+     * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, 'print')
      * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
     setBinding(sHTMLType, sBinding, control, sValue)
     {
+        var controlTextArea = /** @type {HTMLTextAreaElement} */ (control);
+
         switch (sBinding) {
-        case "clear":
+        case 'clear':
             if (!this.bindings[sBinding]) {
                 this.bindings[sBinding] = control;
                 control.onclick = (function(component) {
@@ -902,36 +901,11 @@ class Component {
                 }(this));
             }
             return true;
-        case "print":
+        case 'print':
             if (!this.bindings[sBinding]) {
-                this.bindings[sBinding] = control;
-                /*
-                 * HACK: Save this particular HTML element so that the Debugger can access it, too
-                 */
-                this.controlPrint = control;
-                /*
-                 * This was added for Firefox (Safari automatically clears the <textarea> on a page reload,
-                 * but Firefox does not).
-                 */
-                control.value = "";
-                this.println = (function(control) {
-                    return function printPanel(s, type) {
-                        s = (type !== undefined? (type + ": ") : "") + (s || "");
-                        /*
-                         * Prevent the <textarea> from getting too large; otherwise, printing becomes slower and slower.
-                         */
-                        if (COMPILED) {
-                            if (control.value.length > 8192) {
-                                control.value = control.value.substr(control.value.length - 4096);
-                            }
-                        }
-                        control.value += s + "\n";
-                        control.scrollTop = control.scrollHeight;
-                        if (!COMPILED && window && window.console) console.log(s);
-                    };
-                }(control));
+                this.bindings[sBinding] = controlTextArea;
                 /**
-                 * Override this.notice() with a replacement function that eliminates the Component.alertUser() call
+                 * Override this.notice() with a replacement function that eliminates the Component.alertUser() call.
                  *
                  * @this {Component}
                  * @param {string} s
@@ -943,6 +917,40 @@ class Component {
                     this.println(s, this.idComponent);
                     return true;
                 };
+                /*
+                 * This was added for Firefox (Safari will clear the <textarea> on a page reload, but Firefox does not).
+                 */
+                controlTextArea.value = "";
+                this.print = (function(controlTextArea) {
+                    return function printPanel(s) {
+                        /*
+                         * Prevent the <textarea> from getting too large; otherwise, printing becomes slower and slower.
+                         */
+                        if (COMPILED) {
+                            if (controlTextArea.value.length > 8192) {
+                                controlTextArea.value = controlTextArea.value.substr(controlTextArea.value.length - 4096);
+                            }
+                        }
+                        controlTextArea.value += s;
+                        controlTextArea.scrollTop = controlTextArea.scrollHeight;
+                    };
+                }(controlTextArea));
+                this.println = (function(controlTextArea) {
+                    return function printlnPanel(s, type) {
+                        s = (type != null? (type + ": ") : "") + (s || "");
+                        /*
+                         * Prevent the <textarea> from getting too large; otherwise, printing becomes slower and slower.
+                         */
+                        if (COMPILED) {
+                            if (controlTextArea.value.length > 8192) {
+                                controlTextArea.value = controlTextArea.value.substr(controlTextArea.value.length - 4096);
+                            }
+                        }
+                        controlTextArea.value += s + "\n";
+                        controlTextArea.scrollTop = controlTextArea.scrollHeight;
+                        if (!COMPILED && window && window.console) console.log(s);
+                    };
+                }(controlTextArea));
             }
             return true;
         default:
@@ -1021,7 +1029,7 @@ class Component {
     }
 
     /**
-     * println(s, type)
+     * println(s, type, id)
      *
      * For non-diagnostic messages, which components may override to control the destination/appearance of their output.
      *

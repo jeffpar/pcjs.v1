@@ -325,14 +325,15 @@ class C1PComputer extends Component {
                 /*
                  * Iterate through all the other components and update their print methods if the Control Panel has provided overrides.
                  */
-                if (panel.controlPrint) {
+                var controlPrint = panel.bindings['print'];
+                if (controlPrint) {
                     var aComponents = Component.getComponents(parmsComputer['id']);
                     for (var iComponent = 0; iComponent < aComponents.length; iComponent++) {
                         component = aComponents[iComponent];
                         if (component == panel) continue;
                         component.notice = panel.notice;
+                        component.print = panel.print;
                         component.println = panel.println;
-                        component.controlPrint = panel.controlPrint;
                     }
                 }
             }

@@ -234,15 +234,6 @@ class CPU extends Component {
             if (DEBUGGER && this.dbg) {
                 this.dbg.init();
             } else {
-                /*
-                 * The Computer (this.cmp) knows if there's a Control Panel (this.cmp.panel), and the Control Panel
-                 * knows if there's a "print" control (this.cmp.panel.controlPrint), and if there IS a "print" control
-                 * but no debugger, the machine is probably misconfigured (most likely, the page simply neglected to
-                 * load the Debugger component).
-                 *
-                 * However, we don't actually need to check all that; it's always safe use println(), regardless whether
-                 * a Control Panel with a "print" control is present or not.
-                 */
                 this.println("No debugger detected");
             }
         }

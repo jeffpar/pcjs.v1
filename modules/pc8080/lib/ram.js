@@ -341,11 +341,7 @@ class RAM8080 extends Component {
      */
     writeCPMString(s)
     {
-        s = s.replace(/\r/g, '');
-        if (this.controlPrint) {
-            this.controlPrint.value += s;
-            this.controlPrint.scrollTop = this.controlPrint.scrollHeight;
-        }
+        this.print(s.replace(/\r/g, ''));
     }
 
     /**

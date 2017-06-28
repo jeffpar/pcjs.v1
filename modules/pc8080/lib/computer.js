@@ -177,9 +177,11 @@ class Computer8080 extends Component {
          */
         var iComponent, component;
         var aComponents = Component.getComponents(this.id);
-        this.panel = /** @type {Panel8080} */ (Component.getComponentByType("Panel", this.id));
 
-        if (this.panel && this.panel.controlPrint) {
+        this.panel = /** @type {Panel8080} */ (Component.getComponentByType("Panel", this.id));
+        this.controlPrint = this.panel && this.panel.bindings['print'];
+
+        if (this.controlPrint) {
             for (iComponent = 0; iComponent < aComponents.length; iComponent++) {
                 component = aComponents[iComponent];
                 /*
@@ -188,8 +190,8 @@ class Computer8080 extends Component {
                  * too darn convenient to slam those overrides into the components directly.
                  */
                 component.notice = this.panel.notice;
+                component.print = this.panel.print;
                 component.println = this.panel.println;
-                component.controlPrint = this.panel.controlPrint;
             }
         }
 
@@ -275,6 +277,18 @@ class Computer8080 extends Component {
          * Power on the computer, giving every component the opportunity to reset or restore itself.
          */
         if (!fSuspended && this.fAutoPower) this.wait(this.powerOn);
+    }
+
+    /**
+     * clearPanel()
+     *
+     * @this {Computer8080}
+     */
+    clearPanel()
+    {
+        if (this.controlPrint) {
+            this.controlPrint.value = "";
+        }
     }
 
     /**

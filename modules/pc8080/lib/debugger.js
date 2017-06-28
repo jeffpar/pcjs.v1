@@ -2566,10 +2566,7 @@ class Debugger8080 extends Debugger {
      */
     doClear(sCmd)
     {
-        /*
-         * TODO: There should be a clear() component method that the Control Panel overrides to perform this function.
-         */
-        if (this.controlPrint) this.controlPrint.value = "";
+        this.cmp.clearPanel();
     }
 
     /**

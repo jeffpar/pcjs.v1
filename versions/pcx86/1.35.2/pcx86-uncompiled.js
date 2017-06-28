@@ -2785,9 +2785,6 @@ class Component {
         this.clearError();
         this.bitsMessage = bitsMessage || 0;
 
-        /** @type {Object|null} controlPrint is the HTML control, if any, that we can print to */
-        this.controlPrint = null;
-
         this.cmp = null;
         this.bus = null;
         this.cpu = null;
@@ -3525,15 +3522,17 @@ class Component {
      *
      * @this {Component}
      * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
-     * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "reset")
+     * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, 'print')
      * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
     setBinding(sHTMLType, sBinding, control, sValue)
     {
+        var controlTextArea = /** @type {HTMLTextAreaElement} */ (control);
+
         switch (sBinding) {
-        case "clear":
+        case 'clear':
             if (!this.bindings[sBinding]) {
                 this.bindings[sBinding] = control;
                 control.onclick = (function(component) {
@@ -3545,36 +3544,11 @@ class Component {
                 }(this));
             }
             return true;
-        case "print":
+        case 'print':
             if (!this.bindings[sBinding]) {
-                this.bindings[sBinding] = control;
-                /*
-                 * HACK: Save this particular HTML element so that the Debugger can access it, too
-                 */
-                this.controlPrint = control;
-                /*
-                 * This was added for Firefox (Safari automatically clears the <textarea> on a page reload,
-                 * but Firefox does not).
-                 */
-                control.value = "";
-                this.println = (function(control) {
-                    return function printPanel(s, type) {
-                        s = (type !== undefined? (type + ": ") : "") + (s || "");
-                        /*
-                         * Prevent the <textarea> from getting too large; otherwise, printing becomes slower and slower.
-                         */
-                        if (COMPILED) {
-                            if (control.value.length > 8192) {
-                                control.value = control.value.substr(control.value.length - 4096);
-                            }
-                        }
-                        control.value += s + "\n";
-                        control.scrollTop = control.scrollHeight;
-                        if (!COMPILED && window && window.console) console.log(s);
-                    };
-                }(control));
+                this.bindings[sBinding] = controlTextArea;
                 /**
-                 * Override this.notice() with a replacement function that eliminates the Component.alertUser() call
+                 * Override this.notice() with a replacement function that eliminates the Component.alertUser() call.
                  *
                  * @this {Component}
                  * @param {string} s
@@ -3586,6 +3560,40 @@ class Component {
                     this.println(s, this.idComponent);
                     return true;
                 };
+                /*
+                 * This was added for Firefox (Safari will clear the <textarea> on a page reload, but Firefox does not).
+                 */
+                controlTextArea.value = "";
+                this.print = (function(controlTextArea) {
+                    return function printPanel(s) {
+                        /*
+                         * Prevent the <textarea> from getting too large; otherwise, printing becomes slower and slower.
+                         */
+                        if (COMPILED) {
+                            if (controlTextArea.value.length > 8192) {
+                                controlTextArea.value = controlTextArea.value.substr(controlTextArea.value.length - 4096);
+                            }
+                        }
+                        controlTextArea.value += s;
+                        controlTextArea.scrollTop = controlTextArea.scrollHeight;
+                    };
+                }(controlTextArea));
+                this.println = (function(controlTextArea) {
+                    return function printlnPanel(s, type) {
+                        s = (type != null? (type + ": ") : "") + (s || "");
+                        /*
+                         * Prevent the <textarea> from getting too large; otherwise, printing becomes slower and slower.
+                         */
+                        if (COMPILED) {
+                            if (controlTextArea.value.length > 8192) {
+                                controlTextArea.value = controlTextArea.value.substr(controlTextArea.value.length - 4096);
+                            }
+                        }
+                        controlTextArea.value += s + "\n";
+                        controlTextArea.scrollTop = controlTextArea.scrollHeight;
+                        if (!COMPILED && window && window.console) console.log(s);
+                    };
+                }(controlTextArea));
             }
             return true;
         default:
@@ -3664,7 +3672,7 @@ class Component {
     }
 
     /**
-     * println(s, type)
+     * println(s, type, id)
      *
      * For non-diagnostic messages, which components may override to control the destination/appearance of their output.
      *
@@ -11812,15 +11820,6 @@ class CPU extends Component {
             if (DEBUGGER && this.dbg) {
                 this.dbg.init();
             } else {
-                /*
-                 * The Computer (this.cmp) knows if there's a Control Panel (this.cmp.panel), and the Control Panel
-                 * knows if there's a "print" control (this.cmp.panel.controlPrint), and if there IS a "print" control
-                 * but no debugger, the machine is probably misconfigured (most likely, the page simply neglected to
-                 * load the Debugger component).
-                 *
-                 * However, we don't actually need to check all that; it's always safe use println(), regardless whether
-                 * a Control Panel with a "print" control is present or not.
-                 */
                 this.println("No debugger detected");
             }
         }
@@ -70851,10 +70850,7 @@ class DebuggerX86 extends Debugger {
      */
     doClear(sCmd)
     {
-        /*
-         * TODO: There should be a clear() component method that the Control Panel overrides to perform this function.
-         */
-        if (this.controlPrint) this.controlPrint.value = "";
+        this.cmp.clearPanel();
     }
 
     /**
@@ -74083,13 +74079,16 @@ class Computer extends Component {
         this.bus = new Bus({'id': this.idMachine + '.bus', 'busWidth': this.nBusWidth}, this.cpu, this.dbg);
 
         /*
-         * Iterate through all the components and connect them to the Control Panel, if any
+         * Iterate through all the components and override their notice() and println() methods so that their
+         * output can be rerouted to an Initialization Display or a Control Panel, if any.
          */
         var iComponent, component;
         var aComponents = Component.getComponents(this.id);
-        this.panel = /** @type {Panel} */ (Component.getComponentByType("Panel", this.id));
 
-        if (this.panel && this.panel.controlPrint) {
+        this.panel = /** @type {Panel} */ (Component.getComponentByType("Panel", this.id));
+        this.controlPrint = this.panel && this.panel.bindings['print'];
+
+        if (this.controlPrint) {
             for (iComponent = 0; iComponent < aComponents.length; iComponent++) {
                 component = aComponents[iComponent];
                 /*
@@ -74098,8 +74097,8 @@ class Computer extends Component {
                  * too darn convenient to slam those overrides into the components directly.
                  */
                 component.notice = this.panel.notice;
+                component.print = this.panel.print;
                 component.println = this.panel.println;
-                component.controlPrint = this.panel.controlPrint;
             }
         }
 
@@ -74188,6 +74187,18 @@ class Computer extends Component {
          * Power on the computer, giving every component the opportunity to reset or restore itself.
          */
         if (!fSuspended && this.fAutoPower) this.wait(this.powerOn);
+    }
+
+    /**
+     * clearPanel()
+     *
+     * @this {Computer}
+     */
+    clearPanel()
+    {
+        if (this.controlPrint) {
+            this.controlPrint.value = "";
+        }
     }
 
     /**

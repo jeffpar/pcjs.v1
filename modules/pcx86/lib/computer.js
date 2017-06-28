@@ -202,13 +202,16 @@ class Computer extends Component {
         this.bus = new Bus({'id': this.idMachine + '.bus', 'busWidth': this.nBusWidth}, this.cpu, this.dbg);
 
         /*
-         * Iterate through all the components and connect them to the Control Panel, if any
+         * Iterate through all the components and override their notice() and println() methods so that their
+         * output can be rerouted to an Initialization Display or a Control Panel, if any.
          */
         var iComponent, component;
         var aComponents = Component.getComponents(this.id);
-        this.panel = /** @type {Panel} */ (Component.getComponentByType("Panel", this.id));
 
-        if (this.panel && this.panel.controlPrint) {
+        this.panel = /** @type {Panel} */ (Component.getComponentByType("Panel", this.id));
+        this.controlPrint = this.panel && this.panel.bindings['print'];
+
+        if (this.controlPrint) {
             for (iComponent = 0; iComponent < aComponents.length; iComponent++) {
                 component = aComponents[iComponent];
                 /*
@@ -217,8 +220,8 @@ class Computer extends Component {
                  * too darn convenient to slam those overrides into the components directly.
                  */
                 component.notice = this.panel.notice;
+                component.print = this.panel.print;
                 component.println = this.panel.println;
-                component.controlPrint = this.panel.controlPrint;
             }
         }
 
@@ -307,6 +310,18 @@ class Computer extends Component {
          * Power on the computer, giving every component the opportunity to reset or restore itself.
          */
         if (!fSuspended && this.fAutoPower) this.wait(this.powerOn);
+    }
+
+    /**
+     * clearPanel()
+     *
+     * @this {Computer}
+     */
+    clearPanel()
+    {
+        if (this.controlPrint) {
+            this.controlPrint.value = "";
+        }
     }
 
     /**
