@@ -200,13 +200,20 @@ class FDC extends Component {
      * @this {FDC}
      * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "listDisks")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
     setBinding(sHTMLType, sBinding, control, sValue)
     {
         var fdc = this;
+        /*
+         * TODO: Making copies of control that are simply cast to different types seems silly, but it doesn't
+         * really cost anything and it's cleaner than doing a lot MORE type overrides inline.  However, it still
+         * doesn't solve all my problems: controlForm should really be cast as HTMLFormElement, but JavaScript
+         * inspections refuse to believe there's an 'onsubmit' property on an HTMLFormElement that I can override.
+         */
+        var controlForm = /** @type {Object} */ (control);
         var controlSelect = /** @type {HTMLSelectElement} */ (control);
 
         switch (sBinding) {
@@ -360,24 +367,24 @@ class FDC extends Component {
                 /*
                  * We could also simply hide the control; eg:
                  *
-                 *      control.style.display = "none";
+                 *      controlForm.style.display = "none";
                  *
                  * but removing the control altogether seems better.
                  */
-                control.parentNode.removeChild(/** @type {Node} */ (control));
+                controlForm.parentNode.removeChild(/** @type {Node} */ (controlForm));
                 return false;
             }
-            this.bindings[sBinding] = control;
+            this.bindings[sBinding] = controlForm;
             /*
              * Enable "Mount" button only if a file is actually selected
              */
-            control.onchange = function onChangeMountDisk() {
-                var fieldset = control.children[0];
+            controlForm.onchange = function onChangeMountDisk() {
+                var fieldset = controlForm.children[0];
                 var files = fieldset.children[0].files;
                 var submit = fieldset.children[1];
                 submit.disabled = !files.length;
             };
-            control.onsubmit = function onSubmitMountDisk(event) {
+            controlForm.onsubmit = function onSubmitMountDisk(event) {
                 var file = event.currentTarget[1].files[0];
                 if (file) {
                     var sDiskettePath = file.name;

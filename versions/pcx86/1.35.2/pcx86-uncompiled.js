@@ -12035,7 +12035,7 @@ class CPU extends Component {
      * @this {CPU}
      * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "run")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
@@ -17348,7 +17348,7 @@ class X86CPU extends CPU {
      * @this {X86CPU}
      * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "AX")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
@@ -37192,7 +37192,7 @@ class ChipSet extends Component {
      * @this {ChipSet}
      * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "sw1")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
@@ -38620,7 +38620,7 @@ class ChipSet extends Component {
      * getDIPSwitchControl(control)
      *
      * @this {ChipSet}
-     * @param {Object} control is an HTML control DOM object
+     * @param {HTMLElement} control is an HTML control DOM object
      * @return {boolean} true if the switch represented by e is "on", false if "off"
      */
     getDIPSwitchControl(control)
@@ -38632,7 +38632,7 @@ class ChipSet extends Component {
      * setDIPSwitchControl(control, f)
      *
      * @this {ChipSet}
-     * @param {Object} control is an HTML control DOM object
+     * @param {HTMLElement} control is an HTML control DOM object
      * @param {boolean} f is true if the switch represented by control should be "on", false if "off"
      */
     setDIPSwitchControl(control, f)
@@ -38646,7 +38646,7 @@ class ChipSet extends Component {
      * toggleDIPSwitchControl(control)
      *
      * @this {ChipSet}
-     * @param {Object} control is an HTML control DOM object
+     * @param {HTMLElement} control is an HTML control DOM object
      */
     toggleDIPSwitchControl(control)
     {
@@ -44116,7 +44116,7 @@ class Keyboard extends Component {
      * @this {Keyboard}
      * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "esc")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
@@ -44857,7 +44857,7 @@ class Keyboard extends Component {
      * setSoftKeyState(control, f)
      *
      * @this {Keyboard}
-     * @param {Object} control is an HTML control DOM object
+     * @param {HTMLElement} control is an HTML control DOM object
      * @param {boolean} f is true if the key represented by e should be "on", false if "off"
      */
     setSoftKeyState(control, f)
@@ -44975,7 +44975,7 @@ class Keyboard extends Component {
      * setLED(control, f)
      *
      * @this {Keyboard}
-     * @param {Object} control is an HTML control DOM object
+     * @param {HTMLElement} control is an HTML control DOM object
      * @param {boolean} f is true if the LED represented by control should be "on", false if "off"
      */
     setLED(control, f)
@@ -48943,7 +48943,7 @@ class Video extends Component {
      * @this {Video}
      * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "refresh")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
@@ -53992,7 +53992,7 @@ class ParallelPort extends Component {
      * @this {ParallelPort}
      * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "buffer")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
@@ -54550,7 +54550,7 @@ class SerialPort extends Component {
      * @this {SerialPort}
      * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "buffer")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
@@ -55735,7 +55735,7 @@ class Mouse extends Component {
      * IE9 is the oldest IE we support anyway (since versions prior to IE9 lack the necessary HTML5 support).
      *
      * @this {Mouse}
-     * @param {Object} control from the HTML DOM (eg, the control for the simulated screen)
+     * @param {HTMLElement} control from the HTML DOM (eg, the control for the simulated screen)
      * @return {boolean} true if event handlers were actually added, false if not
      */
     captureMouse(control)
@@ -55788,7 +55788,7 @@ class Mouse extends Component {
      * less code to leave them in place.
      *
      * @this {Mouse}
-     * @param {Object} control from the HTML DOM
+     * @param {HTMLElement} control from the HTML DOM
      * @return {boolean} true if event handlers were actually released, false if not
      */
     releaseMouse(control)
@@ -59165,13 +59165,20 @@ class FDC extends Component {
      * @this {FDC}
      * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "listDisks")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
     setBinding(sHTMLType, sBinding, control, sValue)
     {
         var fdc = this;
+        /*
+         * TODO: Making copies of control that are simply cast to different types seems silly, but it doesn't
+         * really cost anything and it's cleaner than doing a lot MORE type overrides inline.  However, it still
+         * doesn't solve all my problems: controlForm should really be cast as HTMLFormElement, but JavaScript
+         * inspections refuse to believe there's an 'onsubmit' property on an HTMLFormElement that I can override.
+         */
+        var controlForm = /** @type {Object} */ (control);
         var controlSelect = /** @type {HTMLSelectElement} */ (control);
 
         switch (sBinding) {
@@ -59325,24 +59332,24 @@ class FDC extends Component {
                 /*
                  * We could also simply hide the control; eg:
                  *
-                 *      control.style.display = "none";
+                 *      controlForm.style.display = "none";
                  *
                  * but removing the control altogether seems better.
                  */
-                control.parentNode.removeChild(/** @type {Node} */ (control));
+                controlForm.parentNode.removeChild(/** @type {Node} */ (controlForm));
                 return false;
             }
-            this.bindings[sBinding] = control;
+            this.bindings[sBinding] = controlForm;
             /*
              * Enable "Mount" button only if a file is actually selected
              */
-            control.onchange = function onChangeMountDisk() {
-                var fieldset = control.children[0];
+            controlForm.onchange = function onChangeMountDisk() {
+                var fieldset = controlForm.children[0];
                 var files = fieldset.children[0].files;
                 var submit = fieldset.children[1];
                 submit.disabled = !files.length;
             };
-            control.onsubmit = function onSubmitMountDisk(event) {
+            controlForm.onsubmit = function onSubmitMountDisk(event) {
                 var file = event.currentTarget[1].files[0];
                 if (file) {
                     var sDiskettePath = file.name;
@@ -61838,7 +61845,7 @@ class HDC extends Component {
      * @this {HDC}
      * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "listDisks")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
@@ -66984,7 +66991,7 @@ class DebuggerX86 extends Debugger {
      * @this {DebuggerX86}
      * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "debugInput")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
@@ -74963,7 +74970,7 @@ class Computer extends Component {
      * @this {Computer}
      * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "reset")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
