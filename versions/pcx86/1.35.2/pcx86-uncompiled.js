@@ -59172,12 +59172,12 @@ class FDC extends Component {
     setBinding(sHTMLType, sBinding, control, sValue)
     {
         var fdc = this;
+        var controlSelect = /** @type {HTMLSelectElement} */ (control);
 
         switch (sBinding) {
 
         case "listDisks":
-            this.bindings[sBinding] = control;
-
+            this.bindings[sBinding] = controlSelect;
             /*
              * Since binding is a one-time initialization operation, it's also the perfect time to
              * perform whatever sorting (if any) is indicated by the FDC component's "sortBy" property.
@@ -59200,8 +59200,8 @@ class FDC extends Component {
                  * we have a special function, displayDiskette(), that will be called at LEAST once during
                  * initialization, ensuring that selectedIndex is set correctly.
                  */
-                for (i = 0; i < control.options.length; i++)  {
-                    aOptions.push(control.options[i]);
+                for (i = 0; i < controlSelect.options.length; i++)  {
+                    aOptions.push(controlSelect.options[i]);
                 }
                 aOptions.sort(function(a, b) {
                     /*
@@ -59221,16 +59221,15 @@ class FDC extends Component {
                         /*
                          * TODO: Determine why this line blows up in IE8; are the properties of an options object not settable in IE8?
                          */
-                        control.options[i] = aOptions[i];
+                        controlSelect.options[i] = aOptions[i];
                     } catch(e) {
                         break;
                     }
                 }
             }
-
-            control.onchange = function onChangeListDisks(event) {
+            controlSelect.onchange = function onChangeListDisks(event) {
                 var controlDesc = fdc.bindings["descDisk"];
-                var controlOption = control.options[control.selectedIndex];
+                var controlOption = controlSelect.options[controlSelect.selectedIndex];
                 if (controlDesc && controlOption) {
                     var dataValue = {};
                     var sValue = controlOption.getAttribute("data-value");
@@ -59252,22 +59251,21 @@ class FDC extends Component {
 
         case "descDisk":
         case "listDrives":
-            this.bindings[sBinding] = control;
+            this.bindings[sBinding] = controlSelect;
             /*
              * I tried going with onclick instead of onchange, so that if you wanted to confirm what's
              * loaded in a particular drive, you could click the drive control without having to change it.
              * However, that doesn't seem to work for all browsers, so I've reverted to onchange.
              */
-            control.onchange = function onChangeListDrives(event) {
-                var iDrive = Str.parseInt(control.value, 10);
+            controlSelect.onchange = function onChangeListDrives(event) {
+                var iDrive = Str.parseInt(controlSelect.value, 10);
                 if (iDrive != null) fdc.displayDiskette(iDrive);
             };
             return true;
 
         case "loadDisk":
             this.bindings[sBinding] = control;
-
-            control.onclick = function onClickLoadDrive(event) {
+            control.onclick = function onClickLoadDisk(event) {
                 var controlDisks = fdc.bindings["listDisks"];
                 if (controlDisks) {
                     var sDisketteName = controlDisks.options[controlDisks.selectedIndex].text;
@@ -59295,10 +59293,8 @@ class FDC extends Component {
                 control.parentNode.removeChild(/** @type {Node} */ (control));
                 return false;
             }
-
             this.bindings[sBinding] = control;
-
-            control.onclick = function onClickSaveDrive(event) {
+            control.onclick = function onClickSaveDisk(event) {
                 var controlDrives = fdc.bindings["listDrives"];
                 if (controlDrives && controlDrives.options && fdc.aDrives) {
                     var iDriveSelected = Str.parseInt(controlDrives.value, 10) || 0;
@@ -59336,20 +59332,17 @@ class FDC extends Component {
                 control.parentNode.removeChild(/** @type {Node} */ (control));
                 return false;
             }
-
             this.bindings[sBinding] = control;
-
             /*
              * Enable "Mount" button only if a file is actually selected
              */
-            control.addEventListener('change', function() {
+            control.onchange = function onChangeMountDisk() {
                 var fieldset = control.children[0];
                 var files = fieldset.children[0].files;
                 var submit = fieldset.children[1];
                 submit.disabled = !files.length;
-            });
-
-            control.onsubmit = function(event) {
+            };
+            control.onsubmit = function onSubmitMountDisk(event) {
                 var file = event.currentTarget[1].files[0];
                 if (file) {
                     var sDiskettePath = file.name;
@@ -60112,7 +60105,7 @@ class FDC extends Component {
             if (DEBUG) this.println("loading disk " + sDiskettePath + "...");
 
             while (this.loadDrive(iDrive, sDisketteName, sDiskettePath, false, file) < 0) {
-                if (!window.confirm("Click OK to reload the original disk.\n(WARNING: All disk changes will be discarded)")) {
+                if (!window.confirm("Click OK to reload the original disk and discard any changes.")) {
                     return;
                 }
                 /*
@@ -60489,7 +60482,7 @@ class FDC extends Component {
     addDiskHistory(sDisketteName, sDiskettePath, disk)
     {
         var i;
-
+        //
         for (i = 0; i < this.aDiskHistory.length; i++) {
             if (this.aDiskHistory[i][1] == sDiskettePath) {
                 var nChanges = disk.restore(this.aDiskHistory[i][2]);
