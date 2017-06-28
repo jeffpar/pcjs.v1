@@ -133,6 +133,7 @@ class Component {
             ready:      false,
             busy:       false,
             busyCancel: false,
+            initDone:   false,
             powered:    false,
             unloading:  false,
             error:      false
@@ -243,7 +244,7 @@ class Component {
                     }
                     sElapsed = (Component.getTime() - Component.msStart) + "ms: ";
                 }
-                if (window && window.console) console.log(sElapsed + sMsg.replace(/\n/g, " "));
+                if (window && window.console) console.log(sElapsed + sMsg.replace(/\n/g, ' '));
             }
         }
     }
@@ -298,13 +299,15 @@ class Component {
      * @param {string} s is the message text
      * @param {boolean} [fPrintOnly]
      * @param {string} [id] is the caller's ID, if any
+     * @return {boolean}
      */
     static notice(s, fPrintOnly, id)
     {
         if (!COMPILED) {
-            Component.println(s, "notice", id);
+            Component.println(s, Component.TYPE.NOTICE, id);
         }
         if (!fPrintOnly) Component.alertUser((id? (id + ": ") : "") + s);
+        return true;
     }
 
     /**
@@ -315,7 +318,7 @@ class Component {
     static warning(s)
     {
         if (!COMPILED) {
-            Component.println(s, "warning");
+            Component.println(s, Component.TYPE.WARNING);
         }
         Component.alertUser(s);
     }
@@ -328,7 +331,7 @@ class Component {
     static error(s)
     {
         if (!COMPILED) {
-            Component.println(s, "error");
+            Component.println(s, Component.TYPE.ERROR);
         }
         Component.alertUser(s);
     }
@@ -376,6 +379,116 @@ class Component {
             sResponse = window.prompt(sPrompt, sDefault === undefined? "" : sDefault);
         }
         return sResponse;
+    }
+
+    /**
+     * Component.appendControl(control, sText)
+     *
+     * @param {Object} control
+     * @param {string} sText
+     */
+    static appendControl(control, sText)
+    {
+        control.value += sText;
+        /*
+         * Prevent the <textarea> from getting too large; otherwise, printing becomes slower and slower.
+         */
+        if (COMPILED) {
+            sText = control.value;
+            if (sText.length > 8192) control.value = sText.substr(sText.length - 4096);
+        }
+        control.scrollTop = control.scrollHeight;
+    }
+
+    /**
+     * Component.replaceControl(control, sSearch, sReplace)
+     *
+     * @param {Object} control
+     * @param {string} sSearch
+     * @param {string} sReplace
+     */
+    static replaceControl(control, sSearch, sReplace)
+    {
+        /*
+         * Prevent the <textarea> from getting too large; otherwise, printing becomes slower and slower.
+         */
+        var sText = control.value;
+        var i = sText.lastIndexOf(sSearch);
+        if (i < 0) {
+            sText += sSearch + '\n';
+        } else {
+            sText = sText.substr(0, i) + sReplace + sText.substr(i + sSearch.length);
+        }
+        if (COMPILED && sText.length > 8192) sText = sText.substr(sText.length - 4096);
+        control.value = sText;
+        control.scrollTop = control.scrollHeight;
+    }
+
+    /**
+     * Component.bindExternalControl(component, sControl, sBinding, sType)
+     *
+     * @param {Component} component
+     * @param {string} sControl
+     * @param {string} sBinding
+     * @param {string} [sType] is the external component type
+     */
+    static bindExternalControl(component, sControl, sBinding, sType)
+    {
+        if (sControl) {
+            if (sType === undefined) sType = "Panel";
+            var target = Component.getComponentByType(sType, component.id);
+            if (target) {
+                var eBinding = target.bindings[sControl];
+                if (eBinding) {
+                    component.setBinding(null, sBinding, eBinding);
+                }
+            }
+        }
+    }
+
+    /**
+     * Component.bindComponentControls(component, element, sAppClass)
+     *
+     * @param {Component} component
+     * @param {HTMLElement} element from the DOM
+     * @param {string} sAppClass
+     */
+    static bindComponentControls(component, element, sAppClass)
+    {
+        var aeControls = Component.getElementsByClass(element.parentNode, sAppClass + "-control");
+
+        for (var iControl = 0; iControl < aeControls.length; iControl++) {
+
+            var aeChildNodes = aeControls[iControl].childNodes;
+
+            for (var iNode = 0; iNode < aeChildNodes.length; iNode++) {
+                var control = aeChildNodes[iNode];
+                if (control.nodeType !== 1 /* document.ELEMENT_NODE */) {
+                    continue;
+                }
+                var sClass = control.getAttribute("class");
+                if (!sClass) continue;
+                var aClasses = sClass.split(" ");
+                for (var iClass = 0; iClass < aClasses.length; iClass++) {
+                    var parms;
+                    sClass = aClasses[iClass];
+                    switch (sClass) {
+                        case sAppClass + "-binding":
+                            parms = Component.getComponentParms(control);
+                            if (parms && parms['binding']) {
+                                component.setBinding(parms['type'], parms['binding'], control, parms['value']);
+                            } else if (!parms || parms['type'] != "description") {
+                                Component.log("Component '" + component.toString() + "' missing binding" + (parms? " for " + parms['type'] : ""), "warning");
+                            }
+                            iClass = aClasses.length;
+                            break;
+                        default:
+                            // if (DEBUG) Component.log("Component.bindComponentControls(" + component.toString() + "): unrecognized control class \"" + sClass + "\"", "warning");
+                            break;
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -510,73 +623,6 @@ class Component {
             }
         }
         return parms;
-    }
-
-    /**
-     * Component.bindExternalControl(component, sControl, sBinding, sType)
-     *
-     * @param {Component} component
-     * @param {string} sControl
-     * @param {string} sBinding
-     * @param {string} [sType] is the external component type
-     */
-    static bindExternalControl(component, sControl, sBinding, sType)
-    {
-        if (sControl) {
-            if (sType === undefined) sType = "Panel";
-            var target = Component.getComponentByType(sType, component.id);
-            if (target) {
-                var eBinding = target.bindings[sControl];
-                if (eBinding) {
-                    component.setBinding(null, sBinding, eBinding);
-                }
-            }
-        }
-    }
-
-    /**
-     * Component.bindComponentControls(component, element, sAppClass)
-     *
-     * @param {Component} component
-     * @param {HTMLElement} element from the DOM
-     * @param {string} sAppClass
-     */
-    static bindComponentControls(component, element, sAppClass)
-    {
-        var aeControls = Component.getElementsByClass(element.parentNode, sAppClass + "-control");
-
-        for (var iControl = 0; iControl < aeControls.length; iControl++) {
-
-            var aeChildNodes = aeControls[iControl].childNodes;
-
-            for (var iNode = 0; iNode < aeChildNodes.length; iNode++) {
-                var control = aeChildNodes[iNode];
-                if (control.nodeType !== 1 /* document.ELEMENT_NODE */) {
-                    continue;
-                }
-                var sClass = control.getAttribute("class");
-                if (!sClass) continue;
-                var aClasses = sClass.split(" ");
-                for (var iClass = 0; iClass < aClasses.length; iClass++) {
-                    var parms;
-                    sClass = aClasses[iClass];
-                    switch (sClass) {
-                        case sAppClass + "-binding":
-                            parms = Component.getComponentParms(control);
-                            if (parms && parms['binding']) {
-                                component.setBinding(parms['type'], parms['binding'], control, parms['value']);
-                            } else if (!parms || parms['type'] != "description") {
-                                Component.log("Component '" + component.toString() + "' missing binding" + (parms? " for " + parms['type'] : ""), "warning");
-                            }
-                            iClass = aClasses.length;
-                            break;
-                        default:
-                            // if (DEBUG) Component.log("Component.bindComponentControls(" + component.toString() + "): unrecognized control class \"" + sClass + "\"", "warning");
-                            break;
-                    }
-                }
-            }
-        }
     }
 
     /**
@@ -886,14 +932,12 @@ class Component {
      */
     setBinding(sHTMLType, sBinding, control, sValue)
     {
-        var controlTextArea = /** @type {HTMLTextAreaElement} */ (control);
-
         switch (sBinding) {
         case 'clear':
             if (!this.bindings[sBinding]) {
                 this.bindings[sBinding] = control;
                 control.onclick = (function(component) {
-                    return function clearPanel() {
+                    return function clearControl() {
                         if (component.bindings['print']) {
                             component.bindings['print'].value = "";
                         }
@@ -903,6 +947,7 @@ class Component {
             return true;
         case 'print':
             if (!this.bindings[sBinding]) {
+                var controlTextArea = /** @type {HTMLTextAreaElement} */ (control);
                 this.bindings[sBinding] = controlTextArea;
                 /**
                  * Override this.notice() with a replacement function that eliminates the Component.alertUser() call.
@@ -913,7 +958,7 @@ class Component {
                  * @param {string} [id]
                  * @return {boolean}
                  */
-                this.notice = function noticePanel(s, fPrintOnly, id) {
+                this.notice = function noticeControl(s, fPrintOnly, id) {
                     this.println(s, this.idComponent);
                     return true;
                 };
@@ -921,36 +966,20 @@ class Component {
                  * This was added for Firefox (Safari will clear the <textarea> on a page reload, but Firefox does not).
                  */
                 controlTextArea.value = "";
-                this.print = (function(controlTextArea) {
-                    return function printPanel(s) {
-                        /*
-                         * Prevent the <textarea> from getting too large; otherwise, printing becomes slower and slower.
-                         */
-                        if (COMPILED) {
-                            if (controlTextArea.value.length > 8192) {
-                                controlTextArea.value = controlTextArea.value.substr(controlTextArea.value.length - 4096);
-                            }
-                        }
-                        controlTextArea.value += s;
-                        controlTextArea.scrollTop = controlTextArea.scrollHeight;
+                this.print = function(control) {
+                    return function printControl(s) {
+                        Component.appendControl(control, s);
                     };
-                }(controlTextArea));
-                this.println = (function(controlTextArea) {
-                    return function printlnPanel(s, type) {
-                        s = (type != null? (type + ": ") : "") + (s || "");
-                        /*
-                         * Prevent the <textarea> from getting too large; otherwise, printing becomes slower and slower.
-                         */
-                        if (COMPILED) {
-                            if (controlTextArea.value.length > 8192) {
-                                controlTextArea.value = controlTextArea.value.substr(controlTextArea.value.length - 4096);
-                            }
+                }(controlTextArea);
+                this.println = function(component, control) {
+                    return function printlnControl(s, type, id) {
+                        if (DEBUG || type != Component.TYPE.PROGRESS) {
+                            s = (type != null? (type + ": ") : "") + (s || "");
+                            component.print(s + '\n');
                         }
-                        controlTextArea.value += s + "\n";
-                        controlTextArea.scrollTop = controlTextArea.scrollHeight;
-                        if (!COMPILED && window && window.console) console.log(s);
+                        if (!COMPILED && window && window.console) Component.println(s, type, id);
                     };
-                }(controlTextArea));
+                }(this, controlTextArea);
             }
             return true;
         default:
@@ -1029,6 +1058,27 @@ class Component {
     }
 
     /**
+     * print(s)
+     *
+     * For non-diagnostic messages, which components may override to control the destination/appearance of their output.
+     *
+     * Components using this.print() should wait until after their constructor has run to display any messages, because
+     * if a Control Panel has been loaded, its override will not take effect until its own constructor has run.
+     *
+     * @this {Component}
+     * @param {string} s
+     */
+    print(s)
+    {
+        var i = s.lastIndexOf('\n');
+        if (i >= 0) {
+            Component.println(s.substr(0, i));
+            s = s.substr(i + 1);
+        }
+        Component.printBuffer += s;
+    }
+
+    /**
      * println(s, type, id)
      *
      * For non-diagnostic messages, which components may override to control the destination/appearance of their output.
@@ -1043,7 +1093,8 @@ class Component {
      */
     println(s, type, id)
     {
-        Component.println(s, type, id || this.id);
+        Component.println(Component.printBuffer + s, type, id || this.id);
+        Component.printBuffer = "";
     }
 
     /**
@@ -1056,11 +1107,11 @@ class Component {
      */
     status(s)
     {
-        this.println(this.idComponent + ": " + s);
+        this.println(this.type + ": " + s);
     }
 
     /**
-     * notice(s, fPrintOnly)
+     * notice(s, fPrintOnly, id)
      *
      * notice() is like println() but implies a need for user notification, so we alert() as well; however, if this.println()
      * is overridden, this.notice will be replaced with a similar override, on the assumption that the override is taking care
@@ -1321,6 +1372,18 @@ class Component {
 }
 
 /*
+ * These are the standard TYPE values you can pass as the second argument to println(); in reality,
+ * you can pass anything you want, because they are just tacked onto the message as a prefix, with the
+ * exception of PROGRESS, which will suppress the message unless we're in DEBUG or INIT mode.
+ */
+Component.TYPE = {
+    NOTICE:     "notice",
+    WARNING:    "warning",
+    ERROR:      "error",
+    PROGRESS:   "progress"
+};
+
+/*
  * Every component created on the current page is recorded in this array (see Component.add()),
  * enabling any component to locate another component by ID (see Component.getComponentByID())
  * or by type (see Component.getComponentByType()).
@@ -1352,6 +1415,7 @@ Component.globalCommands = {
 Component.componentCommands = {
     'select':   Component.scriptSelect
 };
+Component.printBuffer = "";
 
 /*
  * The following polyfills provide ES5 functionality that's missing in older browsers (eg, IE8),

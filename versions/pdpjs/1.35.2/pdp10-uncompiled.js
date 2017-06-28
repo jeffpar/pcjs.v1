@@ -1592,7 +1592,7 @@ class Web {
     }
 
     /**
-     * getResource(sURL, dataPost, fAsync, done)
+     * getResource(sURL, dataPost, fAsync, done, progress)
      *
      * Request the specified resource (sURL), and once the request is complete, notify done().
      *
@@ -1615,9 +1615,10 @@ class Web {
      * @param {string|Object|null} [dataPost] for a POST request (default is a GET request)
      * @param {boolean} [fAsync] is true for an asynchronous request
      * @param {function(string,string,number)} [done]
+     * @param {function(number)} [progress]
      * @return {Array|null} Array containing [sResource, nErrorCode], or null if no response yet
      */
-    static getResource(sURL, dataPost, fAsync = false, done)
+    static getResource(sURL, dataPost, fAsync = false, done, progress)
     {
         var nErrorCode = 0, sResource = null, response = null;
 
@@ -1645,32 +1646,37 @@ class Web {
         if (fAsync) {
             xmlHTTP.onreadystatechange = function()
             {
-                if (xmlHTTP.readyState === 4) {
-                    /*
-                     * The following line was recommended for WebKit, as a work-around to prevent the handler firing multiple
-                     * times when debugging.  Unfortunately, that's not the only XMLHttpRequest problem that occurs when
-                     * debugging, so I think the WebKit problem is deeper than that.  When we have multiple XMLHttpRequests
-                     * pending, any debugging activity means most of them simply get dropped on floor, so what may actually be
-                     * happening are mis-notifications rather than redundant notifications.
-                     *
-                     *      xmlHTTP.onreadystatechange = undefined;
-                     */
-                    sResource = xmlHTTP.responseText;
-                    /*
-                     * The normal "success" case is an HTTP status code of 200, but when testing with files loaded
-                     * from the local file system (ie, when using the "file:" protocol), we have to be a bit more "flexible".
-                     */
-                    if (xmlHTTP.status == 200 || !xmlHTTP.status && sResource.length && Web.getHostProtocol() == "file:") {
-                        if (MAXDEBUG) Web.log("xmlHTTP.onreadystatechange(" + sURL + "): returned " + sResource.length + " bytes");
-                    }
-                    else {
-                        nErrorCode = xmlHTTP.status || -1;
-                        Web.log("xmlHTTP.onreadystatechange(" + sURL + "): error code " + nErrorCode);
-                    }
-                    if (done) done(sURL, sResource, nErrorCode);
+                if (xmlHTTP.readyState !== 4) {
+                    if (progress) progress(1);
+                    return;
                 }
+                /*
+                 * The following line was recommended for WebKit, as a work-around to prevent the handler firing multiple
+                 * times when debugging.  Unfortunately, that's not the only XMLHttpRequest problem that occurs when
+                 * debugging, so I think the WebKit problem is deeper than that.  When we have multiple XMLHttpRequests
+                 * pending, any debugging activity means most of them simply get dropped on floor, so what may actually be
+                 * happening are mis-notifications rather than redundant notifications.
+                 *
+                 *      xmlHTTP.onreadystatechange = undefined;
+                 */
+                sResource = xmlHTTP.responseText;
+                /*
+                 * The normal "success" case is an HTTP status code of 200, but when testing with files loaded
+                 * from the local file system (ie, when using the "file:" protocol), we have to be a bit more "flexible".
+                 */
+                if (xmlHTTP.status == 200 || !xmlHTTP.status && sResource.length && Web.getHostProtocol() == "file:") {
+                    if (MAXDEBUG) Web.log("xmlHTTP.onreadystatechange(" + sURL + "): returned " + sResource.length + " bytes");
+                }
+                else {
+                    nErrorCode = xmlHTTP.status || -1;
+                    Web.log("xmlHTTP.onreadystatechange(" + sURL + "): error code " + nErrorCode);
+                }
+                if (progress) progress(2);
+                if (done) done(sURL, sResource, nErrorCode);
             };
         }
+
+        if (progress) progress(0);
 
         if (dataPost && typeof dataPost == "object") {
             var sDataPost = "";
@@ -2548,6 +2554,7 @@ class Component {
             ready:      false,
             busy:       false,
             busyCancel: false,
+            initDone:   false,
             powered:    false,
             unloading:  false,
             error:      false
@@ -2556,9 +2563,6 @@ class Component {
         this.fnReady = null;
         this.clearError();
         this.bitsMessage = bitsMessage || 0;
-
-        /** @type {Object|null} controlPrint is the HTML control, if any, that we can print to */
-        this.controlPrint = null;
 
         this.cmp = null;
         this.bus = null;
@@ -2661,7 +2665,7 @@ class Component {
                     }
                     sElapsed = (Component.getTime() - Component.msStart) + "ms: ";
                 }
-                if (window && window.console) console.log(sElapsed + sMsg.replace(/\n/g, " "));
+                if (window && window.console) console.log(sElapsed + sMsg.replace(/\n/g, ' '));
             }
         }
     }
@@ -2716,13 +2720,15 @@ class Component {
      * @param {string} s is the message text
      * @param {boolean} [fPrintOnly]
      * @param {string} [id] is the caller's ID, if any
+     * @return {boolean}
      */
     static notice(s, fPrintOnly, id)
     {
         if (!COMPILED) {
-            Component.println(s, "notice", id);
+            Component.println(s, Component.TYPE.NOTICE, id);
         }
         if (!fPrintOnly) Component.alertUser((id? (id + ": ") : "") + s);
+        return true;
     }
 
     /**
@@ -2733,7 +2739,7 @@ class Component {
     static warning(s)
     {
         if (!COMPILED) {
-            Component.println(s, "warning");
+            Component.println(s, Component.TYPE.WARNING);
         }
         Component.alertUser(s);
     }
@@ -2746,7 +2752,7 @@ class Component {
     static error(s)
     {
         if (!COMPILED) {
-            Component.println(s, "error");
+            Component.println(s, Component.TYPE.ERROR);
         }
         Component.alertUser(s);
     }
@@ -2794,6 +2800,116 @@ class Component {
             sResponse = window.prompt(sPrompt, sDefault === undefined? "" : sDefault);
         }
         return sResponse;
+    }
+
+    /**
+     * Component.appendControl(control, sText)
+     *
+     * @param {Object} control
+     * @param {string} sText
+     */
+    static appendControl(control, sText)
+    {
+        control.value += sText;
+        /*
+         * Prevent the <textarea> from getting too large; otherwise, printing becomes slower and slower.
+         */
+        if (COMPILED) {
+            sText = control.value;
+            if (sText.length > 8192) control.value = sText.substr(sText.length - 4096);
+        }
+        control.scrollTop = control.scrollHeight;
+    }
+
+    /**
+     * Component.replaceControl(control, sSearch, sReplace)
+     *
+     * @param {Object} control
+     * @param {string} sSearch
+     * @param {string} sReplace
+     */
+    static replaceControl(control, sSearch, sReplace)
+    {
+        /*
+         * Prevent the <textarea> from getting too large; otherwise, printing becomes slower and slower.
+         */
+        var sText = control.value;
+        var i = sText.lastIndexOf(sSearch);
+        if (i < 0) {
+            sText += sSearch + '\n';
+        } else {
+            sText = sText.substr(0, i) + sReplace + sText.substr(i + sSearch.length);
+        }
+        if (COMPILED && sText.length > 8192) sText = sText.substr(sText.length - 4096);
+        control.value = sText;
+        control.scrollTop = control.scrollHeight;
+    }
+
+    /**
+     * Component.bindExternalControl(component, sControl, sBinding, sType)
+     *
+     * @param {Component} component
+     * @param {string} sControl
+     * @param {string} sBinding
+     * @param {string} [sType] is the external component type
+     */
+    static bindExternalControl(component, sControl, sBinding, sType)
+    {
+        if (sControl) {
+            if (sType === undefined) sType = "Panel";
+            var target = Component.getComponentByType(sType, component.id);
+            if (target) {
+                var eBinding = target.bindings[sControl];
+                if (eBinding) {
+                    component.setBinding(null, sBinding, eBinding);
+                }
+            }
+        }
+    }
+
+    /**
+     * Component.bindComponentControls(component, element, sAppClass)
+     *
+     * @param {Component} component
+     * @param {HTMLElement} element from the DOM
+     * @param {string} sAppClass
+     */
+    static bindComponentControls(component, element, sAppClass)
+    {
+        var aeControls = Component.getElementsByClass(element.parentNode, sAppClass + "-control");
+
+        for (var iControl = 0; iControl < aeControls.length; iControl++) {
+
+            var aeChildNodes = aeControls[iControl].childNodes;
+
+            for (var iNode = 0; iNode < aeChildNodes.length; iNode++) {
+                var control = aeChildNodes[iNode];
+                if (control.nodeType !== 1 /* document.ELEMENT_NODE */) {
+                    continue;
+                }
+                var sClass = control.getAttribute("class");
+                if (!sClass) continue;
+                var aClasses = sClass.split(" ");
+                for (var iClass = 0; iClass < aClasses.length; iClass++) {
+                    var parms;
+                    sClass = aClasses[iClass];
+                    switch (sClass) {
+                        case sAppClass + "-binding":
+                            parms = Component.getComponentParms(control);
+                            if (parms && parms['binding']) {
+                                component.setBinding(parms['type'], parms['binding'], control, parms['value']);
+                            } else if (!parms || parms['type'] != "description") {
+                                Component.log("Component '" + component.toString() + "' missing binding" + (parms? " for " + parms['type'] : ""), "warning");
+                            }
+                            iClass = aClasses.length;
+                            break;
+                        default:
+                            // if (DEBUG) Component.log("Component.bindComponentControls(" + component.toString() + "): unrecognized control class \"" + sClass + "\"", "warning");
+                            break;
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -2928,73 +3044,6 @@ class Component {
             }
         }
         return parms;
-    }
-
-    /**
-     * Component.bindExternalControl(component, sControl, sBinding, sType)
-     *
-     * @param {Component} component
-     * @param {string} sControl
-     * @param {string} sBinding
-     * @param {string} [sType] is the external component type
-     */
-    static bindExternalControl(component, sControl, sBinding, sType)
-    {
-        if (sControl) {
-            if (sType === undefined) sType = "Panel";
-            var target = Component.getComponentByType(sType, component.id);
-            if (target) {
-                var eBinding = target.bindings[sControl];
-                if (eBinding) {
-                    component.setBinding(null, sBinding, eBinding);
-                }
-            }
-        }
-    }
-
-    /**
-     * Component.bindComponentControls(component, element, sAppClass)
-     *
-     * @param {Component} component
-     * @param {HTMLElement} element from the DOM
-     * @param {string} sAppClass
-     */
-    static bindComponentControls(component, element, sAppClass)
-    {
-        var aeControls = Component.getElementsByClass(element.parentNode, sAppClass + "-control");
-
-        for (var iControl = 0; iControl < aeControls.length; iControl++) {
-
-            var aeChildNodes = aeControls[iControl].childNodes;
-
-            for (var iNode = 0; iNode < aeChildNodes.length; iNode++) {
-                var control = aeChildNodes[iNode];
-                if (control.nodeType !== 1 /* document.ELEMENT_NODE */) {
-                    continue;
-                }
-                var sClass = control.getAttribute("class");
-                if (!sClass) continue;
-                var aClasses = sClass.split(" ");
-                for (var iClass = 0; iClass < aClasses.length; iClass++) {
-                    var parms;
-                    sClass = aClasses[iClass];
-                    switch (sClass) {
-                        case sAppClass + "-binding":
-                            parms = Component.getComponentParms(control);
-                            if (parms && parms['binding']) {
-                                component.setBinding(parms['type'], parms['binding'], control, parms['value']);
-                            } else if (!parms || parms['type'] != "description") {
-                                Component.log("Component '" + component.toString() + "' missing binding" + (parms? " for " + parms['type'] : ""), "warning");
-                            }
-                            iClass = aClasses.length;
-                            break;
-                        default:
-                            // if (DEBUG) Component.log("Component.bindComponentControls(" + component.toString() + "): unrecognized control class \"" + sClass + "\"", "warning");
-                            break;
-                    }
-                }
-            }
-        }
     }
 
     /**
@@ -3297,7 +3346,7 @@ class Component {
      *
      * @this {Component}
      * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
-     * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "reset")
+     * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, 'print')
      * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
@@ -3305,11 +3354,11 @@ class Component {
     setBinding(sHTMLType, sBinding, control, sValue)
     {
         switch (sBinding) {
-        case "clear":
+        case 'clear':
             if (!this.bindings[sBinding]) {
                 this.bindings[sBinding] = control;
                 control.onclick = (function(component) {
-                    return function clearPanel() {
+                    return function clearControl() {
                         if (component.bindings['print']) {
                             component.bindings['print'].value = "";
                         }
@@ -3317,36 +3366,12 @@ class Component {
                 }(this));
             }
             return true;
-        case "print":
+        case 'print':
             if (!this.bindings[sBinding]) {
-                this.bindings[sBinding] = control;
-                /*
-                 * HACK: Save this particular HTML element so that the Debugger can access it, too
-                 */
-                this.controlPrint = control;
-                /*
-                 * This was added for Firefox (Safari automatically clears the <textarea> on a page reload,
-                 * but Firefox does not).
-                 */
-                control.value = "";
-                this.println = (function(control) {
-                    return function printPanel(s, type) {
-                        s = (type !== undefined? (type + ": ") : "") + (s || "");
-                        /*
-                         * Prevent the <textarea> from getting too large; otherwise, printing becomes slower and slower.
-                         */
-                        if (COMPILED) {
-                            if (control.value.length > 8192) {
-                                control.value = control.value.substr(control.value.length - 4096);
-                            }
-                        }
-                        control.value += s + "\n";
-                        control.scrollTop = control.scrollHeight;
-                        if (!COMPILED && window && window.console) console.log(s);
-                    };
-                }(control));
+                var controlTextArea = /** @type {HTMLTextAreaElement} */ (control);
+                this.bindings[sBinding] = controlTextArea;
                 /**
-                 * Override this.notice() with a replacement function that eliminates the Component.alertUser() call
+                 * Override this.notice() with a replacement function that eliminates the Component.alertUser() call.
                  *
                  * @this {Component}
                  * @param {string} s
@@ -3354,10 +3379,28 @@ class Component {
                  * @param {string} [id]
                  * @return {boolean}
                  */
-                this.notice = function noticePanel(s, fPrintOnly, id) {
+                this.notice = function noticeControl(s, fPrintOnly, id) {
                     this.println(s, this.idComponent);
                     return true;
                 };
+                /*
+                 * This was added for Firefox (Safari will clear the <textarea> on a page reload, but Firefox does not).
+                 */
+                controlTextArea.value = "";
+                this.print = function(control) {
+                    return function printControl(s) {
+                        Component.appendControl(control, s);
+                    };
+                }(controlTextArea);
+                this.println = function(component, control) {
+                    return function printlnControl(s, type, id) {
+                        if (DEBUG || type != Component.TYPE.PROGRESS) {
+                            s = (type != null? (type + ": ") : "") + (s || "");
+                            component.print(s + '\n');
+                        }
+                        if (!COMPILED && window && window.console) Component.println(s, type, id);
+                    };
+                }(this, controlTextArea);
             }
             return true;
         default:
@@ -3436,7 +3479,28 @@ class Component {
     }
 
     /**
-     * println(s, type)
+     * print(s)
+     *
+     * For non-diagnostic messages, which components may override to control the destination/appearance of their output.
+     *
+     * Components using this.print() should wait until after their constructor has run to display any messages, because
+     * if a Control Panel has been loaded, its override will not take effect until its own constructor has run.
+     *
+     * @this {Component}
+     * @param {string} s
+     */
+    print(s)
+    {
+        var i = s.lastIndexOf('\n');
+        if (i >= 0) {
+            Component.println(s.substr(0, i));
+            s = s.substr(i + 1);
+        }
+        Component.printBuffer += s;
+    }
+
+    /**
+     * println(s, type, id)
      *
      * For non-diagnostic messages, which components may override to control the destination/appearance of their output.
      *
@@ -3450,7 +3514,8 @@ class Component {
      */
     println(s, type, id)
     {
-        Component.println(s, type, id || this.id);
+        Component.println(Component.printBuffer + s, type, id || this.id);
+        Component.printBuffer = "";
     }
 
     /**
@@ -3463,11 +3528,11 @@ class Component {
      */
     status(s)
     {
-        this.println(this.idComponent + ": " + s);
+        this.println(this.type + ": " + s);
     }
 
     /**
-     * notice(s, fPrintOnly)
+     * notice(s, fPrintOnly, id)
      *
      * notice() is like println() but implies a need for user notification, so we alert() as well; however, if this.println()
      * is overridden, this.notice will be replaced with a similar override, on the assumption that the override is taking care
@@ -3728,6 +3793,18 @@ class Component {
 }
 
 /*
+ * These are the standard TYPE values you can pass as the second argument to println(); in reality,
+ * you can pass anything you want, because they are just tacked onto the message as a prefix, with the
+ * exception of PROGRESS, which will suppress the message unless we're in DEBUG or INIT mode.
+ */
+Component.TYPE = {
+    NOTICE:     "notice",
+    WARNING:    "warning",
+    ERROR:      "error",
+    PROGRESS:   "progress"
+};
+
+/*
  * Every component created on the current page is recorded in this array (see Component.add()),
  * enabling any component to locate another component by ID (see Component.getComponentByID())
  * or by type (see Component.getComponentByType()).
@@ -3759,6 +3836,7 @@ Component.globalCommands = {
 Component.componentCommands = {
     'select':   Component.scriptSelect
 };
+Component.printBuffer = "";
 
 /*
  * The following polyfills provide ES5 functionality that's missing in older browsers (eg, IE8),
@@ -6943,15 +7021,6 @@ class CPUPDP10 extends Component {
             if (DEBUGGER && this.dbg) {
                 this.dbg.init(this.flags.autoStart);
             } else {
-                /*
-                 * The Computer (this.cmp) knows if there's a Control Panel (this.panel), and the Control Panel
-                 * knows if there's a "print" control (this.panel.controlPrint), and if there IS a "print" control
-                 * but no debugger, the machine is probably misconfigured (most likely, the page simply neglected to
-                 * load the Debugger component).
-                 *
-                 * However, we don't actually need to check all that; it's always safe use println(), regardless whether
-                 * a Control Panel with a "print" control is present or not.
-                 */
                 this.status("No debugger detected");
             }
             if (!this.flags.autoStart) {
@@ -21933,10 +22002,7 @@ class DebuggerPDP10 extends Debugger {
      */
     doClear(sCmd)
     {
-        /*
-         * TODO: There should be a clear() component method that the Control Panel overrides to perform this function.
-         */
-        if (this.controlPrint) this.controlPrint.value = "";
+        this.cmp.clearPanel();
     }
 
     /**
@@ -25549,6 +25615,7 @@ class ComputerPDP10 extends Component {
      * function (if it has one--it's optional).  We call the CPU's powerUp() function last,
      * so that the CPU is assured that all other components are ready and "powered".
      *
+     * @this {ComputerPDP10}
      * @param {Object} parmsComputer
      * @param {Object} [parmsMachine]
      * @param {boolean} [fSuspended]
@@ -25615,9 +25682,11 @@ class ComputerPDP10 extends Component {
          */
         var iComponent, component;
         var aComponents = Component.getComponents(this.id);
-        this.panel = /** @type {PanelPDP10} */ (Component.getComponentByType("Panel", this.id));
 
-        if (this.panel && this.panel.controlPrint) {
+        this.panel = /** @type {PanelPDP10} */ (Component.getComponentByType("Panel", this.id));
+        this.controlPrint = this.panel && this.panel.bindings['print'];
+
+        if (this.controlPrint) {
             for (iComponent = 0; iComponent < aComponents.length; iComponent++) {
                 component = aComponents[iComponent];
                 /*
@@ -25626,8 +25695,8 @@ class ComputerPDP10 extends Component {
                  * too darn convenient to slam those overrides into the components directly.
                  */
                 component.notice = this.panel.notice;
+                component.print = this.panel.print;
                 component.println = this.panel.println;
-                component.controlPrint = this.panel.controlPrint;
             }
         }
 
@@ -25714,8 +25783,21 @@ class ComputerPDP10 extends Component {
     }
 
     /**
+     * clearPanel()
+     *
+     * @this {ComputerPDP10}
+     */
+    clearPanel()
+    {
+        if (this.controlPrint) {
+            this.controlPrint.value = "";
+        }
+    }
+
+    /**
      * getMachineID()
      *
+     * @this {ComputerPDP10}
      * @return {string}
      */
     getMachineID()
@@ -25728,6 +25810,7 @@ class ComputerPDP10 extends Component {
      *
      * If no explicit machine parms were provided, then we check for 'parms' in the bundled resources (if any).
      *
+     * @this {ComputerPDP10}
      * @param {Object} [parmsMachine]
      */
     setMachineParms(parmsMachine)
@@ -25759,6 +25842,7 @@ class ComputerPDP10 extends Component {
      * (eg, Str.TYPES.NUMBER) is used, the return value will be that type; unfortunately, every caller
      * must coerce their own return value.
      *
+     * @this {ComputerPDP10}
      * @param {string} sParm
      * @param {Object|null} [parmsComponent]
      * @param {number} [type] (from Str.TYPES)
@@ -25796,6 +25880,7 @@ class ComputerPDP10 extends Component {
     /**
      * saveMachineParms()
      *
+     * @this {ComputerPDP10}
      * @return {string|null}
      */
     saveMachineParms()
@@ -25806,6 +25891,7 @@ class ComputerPDP10 extends Component {
     /**
      * getUserID()
      *
+     * @this {ComputerPDP10}
      * @return {string}
      */
     getUserID()
@@ -26612,6 +26698,8 @@ class ComputerPDP10 extends Component {
 
     /**
      * resetUserID()
+     *
+     * @this {ComputerPDP10}
      */
     resetUserID()
     {
@@ -26622,6 +26710,7 @@ class ComputerPDP10 extends Component {
     /**
      * queryUserID(fPrompt)
      *
+     * @this {ComputerPDP10}
      * @param {boolean} [fPrompt]
      * @returns {string|null|undefined}
      */
@@ -26710,6 +26799,7 @@ class ComputerPDP10 extends Component {
     /**
      * saveServerState(sUserID, sState)
      *
+     * @this {ComputerPDP10}
      * @param {string} sUserID
      * @param {string|null} sState
      */

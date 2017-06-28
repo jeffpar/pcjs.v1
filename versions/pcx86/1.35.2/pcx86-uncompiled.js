@@ -1820,7 +1820,7 @@ class Web {
     }
 
     /**
-     * getResource(sURL, dataPost, fAsync, done)
+     * getResource(sURL, dataPost, fAsync, done, progress)
      *
      * Request the specified resource (sURL), and once the request is complete, notify done().
      *
@@ -1843,9 +1843,10 @@ class Web {
      * @param {string|Object|null} [dataPost] for a POST request (default is a GET request)
      * @param {boolean} [fAsync] is true for an asynchronous request
      * @param {function(string,string,number)} [done]
+     * @param {function(number)} [progress]
      * @return {Array|null} Array containing [sResource, nErrorCode], or null if no response yet
      */
-    static getResource(sURL, dataPost, fAsync = false, done)
+    static getResource(sURL, dataPost, fAsync = false, done, progress)
     {
         var nErrorCode = 0, sResource = null, response = null;
 
@@ -1873,32 +1874,37 @@ class Web {
         if (fAsync) {
             xmlHTTP.onreadystatechange = function()
             {
-                if (xmlHTTP.readyState === 4) {
-                    /*
-                     * The following line was recommended for WebKit, as a work-around to prevent the handler firing multiple
-                     * times when debugging.  Unfortunately, that's not the only XMLHttpRequest problem that occurs when
-                     * debugging, so I think the WebKit problem is deeper than that.  When we have multiple XMLHttpRequests
-                     * pending, any debugging activity means most of them simply get dropped on floor, so what may actually be
-                     * happening are mis-notifications rather than redundant notifications.
-                     *
-                     *      xmlHTTP.onreadystatechange = undefined;
-                     */
-                    sResource = xmlHTTP.responseText;
-                    /*
-                     * The normal "success" case is an HTTP status code of 200, but when testing with files loaded
-                     * from the local file system (ie, when using the "file:" protocol), we have to be a bit more "flexible".
-                     */
-                    if (xmlHTTP.status == 200 || !xmlHTTP.status && sResource.length && Web.getHostProtocol() == "file:") {
-                        if (MAXDEBUG) Web.log("xmlHTTP.onreadystatechange(" + sURL + "): returned " + sResource.length + " bytes");
-                    }
-                    else {
-                        nErrorCode = xmlHTTP.status || -1;
-                        Web.log("xmlHTTP.onreadystatechange(" + sURL + "): error code " + nErrorCode);
-                    }
-                    if (done) done(sURL, sResource, nErrorCode);
+                if (xmlHTTP.readyState !== 4) {
+                    if (progress) progress(1);
+                    return;
                 }
+                /*
+                 * The following line was recommended for WebKit, as a work-around to prevent the handler firing multiple
+                 * times when debugging.  Unfortunately, that's not the only XMLHttpRequest problem that occurs when
+                 * debugging, so I think the WebKit problem is deeper than that.  When we have multiple XMLHttpRequests
+                 * pending, any debugging activity means most of them simply get dropped on floor, so what may actually be
+                 * happening are mis-notifications rather than redundant notifications.
+                 *
+                 *      xmlHTTP.onreadystatechange = undefined;
+                 */
+                sResource = xmlHTTP.responseText;
+                /*
+                 * The normal "success" case is an HTTP status code of 200, but when testing with files loaded
+                 * from the local file system (ie, when using the "file:" protocol), we have to be a bit more "flexible".
+                 */
+                if (xmlHTTP.status == 200 || !xmlHTTP.status && sResource.length && Web.getHostProtocol() == "file:") {
+                    if (MAXDEBUG) Web.log("xmlHTTP.onreadystatechange(" + sURL + "): returned " + sResource.length + " bytes");
+                }
+                else {
+                    nErrorCode = xmlHTTP.status || -1;
+                    Web.log("xmlHTTP.onreadystatechange(" + sURL + "): error code " + nErrorCode);
+                }
+                if (progress) progress(2);
+                if (done) done(sURL, sResource, nErrorCode);
             };
         }
+
+        if (progress) progress(0);
 
         if (dataPost && typeof dataPost == "object") {
             var sDataPost = "";
@@ -2776,6 +2782,7 @@ class Component {
             ready:      false,
             busy:       false,
             busyCancel: false,
+            initDone:   false,
             powered:    false,
             unloading:  false,
             error:      false
@@ -2886,7 +2893,7 @@ class Component {
                     }
                     sElapsed = (Component.getTime() - Component.msStart) + "ms: ";
                 }
-                if (window && window.console) console.log(sElapsed + sMsg.replace(/\n/g, " "));
+                if (window && window.console) console.log(sElapsed + sMsg.replace(/\n/g, ' '));
             }
         }
     }
@@ -2941,13 +2948,15 @@ class Component {
      * @param {string} s is the message text
      * @param {boolean} [fPrintOnly]
      * @param {string} [id] is the caller's ID, if any
+     * @return {boolean}
      */
     static notice(s, fPrintOnly, id)
     {
         if (!COMPILED) {
-            Component.println(s, "notice", id);
+            Component.println(s, Component.TYPE.NOTICE, id);
         }
         if (!fPrintOnly) Component.alertUser((id? (id + ": ") : "") + s);
+        return true;
     }
 
     /**
@@ -2958,7 +2967,7 @@ class Component {
     static warning(s)
     {
         if (!COMPILED) {
-            Component.println(s, "warning");
+            Component.println(s, Component.TYPE.WARNING);
         }
         Component.alertUser(s);
     }
@@ -2971,7 +2980,7 @@ class Component {
     static error(s)
     {
         if (!COMPILED) {
-            Component.println(s, "error");
+            Component.println(s, Component.TYPE.ERROR);
         }
         Component.alertUser(s);
     }
@@ -3019,6 +3028,116 @@ class Component {
             sResponse = window.prompt(sPrompt, sDefault === undefined? "" : sDefault);
         }
         return sResponse;
+    }
+
+    /**
+     * Component.appendControl(control, sText)
+     *
+     * @param {Object} control
+     * @param {string} sText
+     */
+    static appendControl(control, sText)
+    {
+        control.value += sText;
+        /*
+         * Prevent the <textarea> from getting too large; otherwise, printing becomes slower and slower.
+         */
+        if (COMPILED) {
+            sText = control.value;
+            if (sText.length > 8192) control.value = sText.substr(sText.length - 4096);
+        }
+        control.scrollTop = control.scrollHeight;
+    }
+
+    /**
+     * Component.replaceControl(control, sSearch, sReplace)
+     *
+     * @param {Object} control
+     * @param {string} sSearch
+     * @param {string} sReplace
+     */
+    static replaceControl(control, sSearch, sReplace)
+    {
+        /*
+         * Prevent the <textarea> from getting too large; otherwise, printing becomes slower and slower.
+         */
+        var sText = control.value;
+        var i = sText.lastIndexOf(sSearch);
+        if (i < 0) {
+            sText += sSearch + '\n';
+        } else {
+            sText = sText.substr(0, i) + sReplace + sText.substr(i + sSearch.length);
+        }
+        if (COMPILED && sText.length > 8192) sText = sText.substr(sText.length - 4096);
+        control.value = sText;
+        control.scrollTop = control.scrollHeight;
+    }
+
+    /**
+     * Component.bindExternalControl(component, sControl, sBinding, sType)
+     *
+     * @param {Component} component
+     * @param {string} sControl
+     * @param {string} sBinding
+     * @param {string} [sType] is the external component type
+     */
+    static bindExternalControl(component, sControl, sBinding, sType)
+    {
+        if (sControl) {
+            if (sType === undefined) sType = "Panel";
+            var target = Component.getComponentByType(sType, component.id);
+            if (target) {
+                var eBinding = target.bindings[sControl];
+                if (eBinding) {
+                    component.setBinding(null, sBinding, eBinding);
+                }
+            }
+        }
+    }
+
+    /**
+     * Component.bindComponentControls(component, element, sAppClass)
+     *
+     * @param {Component} component
+     * @param {HTMLElement} element from the DOM
+     * @param {string} sAppClass
+     */
+    static bindComponentControls(component, element, sAppClass)
+    {
+        var aeControls = Component.getElementsByClass(element.parentNode, sAppClass + "-control");
+
+        for (var iControl = 0; iControl < aeControls.length; iControl++) {
+
+            var aeChildNodes = aeControls[iControl].childNodes;
+
+            for (var iNode = 0; iNode < aeChildNodes.length; iNode++) {
+                var control = aeChildNodes[iNode];
+                if (control.nodeType !== 1 /* document.ELEMENT_NODE */) {
+                    continue;
+                }
+                var sClass = control.getAttribute("class");
+                if (!sClass) continue;
+                var aClasses = sClass.split(" ");
+                for (var iClass = 0; iClass < aClasses.length; iClass++) {
+                    var parms;
+                    sClass = aClasses[iClass];
+                    switch (sClass) {
+                        case sAppClass + "-binding":
+                            parms = Component.getComponentParms(control);
+                            if (parms && parms['binding']) {
+                                component.setBinding(parms['type'], parms['binding'], control, parms['value']);
+                            } else if (!parms || parms['type'] != "description") {
+                                Component.log("Component '" + component.toString() + "' missing binding" + (parms? " for " + parms['type'] : ""), "warning");
+                            }
+                            iClass = aClasses.length;
+                            break;
+                        default:
+                            // if (DEBUG) Component.log("Component.bindComponentControls(" + component.toString() + "): unrecognized control class \"" + sClass + "\"", "warning");
+                            break;
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -3153,73 +3272,6 @@ class Component {
             }
         }
         return parms;
-    }
-
-    /**
-     * Component.bindExternalControl(component, sControl, sBinding, sType)
-     *
-     * @param {Component} component
-     * @param {string} sControl
-     * @param {string} sBinding
-     * @param {string} [sType] is the external component type
-     */
-    static bindExternalControl(component, sControl, sBinding, sType)
-    {
-        if (sControl) {
-            if (sType === undefined) sType = "Panel";
-            var target = Component.getComponentByType(sType, component.id);
-            if (target) {
-                var eBinding = target.bindings[sControl];
-                if (eBinding) {
-                    component.setBinding(null, sBinding, eBinding);
-                }
-            }
-        }
-    }
-
-    /**
-     * Component.bindComponentControls(component, element, sAppClass)
-     *
-     * @param {Component} component
-     * @param {HTMLElement} element from the DOM
-     * @param {string} sAppClass
-     */
-    static bindComponentControls(component, element, sAppClass)
-    {
-        var aeControls = Component.getElementsByClass(element.parentNode, sAppClass + "-control");
-
-        for (var iControl = 0; iControl < aeControls.length; iControl++) {
-
-            var aeChildNodes = aeControls[iControl].childNodes;
-
-            for (var iNode = 0; iNode < aeChildNodes.length; iNode++) {
-                var control = aeChildNodes[iNode];
-                if (control.nodeType !== 1 /* document.ELEMENT_NODE */) {
-                    continue;
-                }
-                var sClass = control.getAttribute("class");
-                if (!sClass) continue;
-                var aClasses = sClass.split(" ");
-                for (var iClass = 0; iClass < aClasses.length; iClass++) {
-                    var parms;
-                    sClass = aClasses[iClass];
-                    switch (sClass) {
-                        case sAppClass + "-binding":
-                            parms = Component.getComponentParms(control);
-                            if (parms && parms['binding']) {
-                                component.setBinding(parms['type'], parms['binding'], control, parms['value']);
-                            } else if (!parms || parms['type'] != "description") {
-                                Component.log("Component '" + component.toString() + "' missing binding" + (parms? " for " + parms['type'] : ""), "warning");
-                            }
-                            iClass = aClasses.length;
-                            break;
-                        default:
-                            // if (DEBUG) Component.log("Component.bindComponentControls(" + component.toString() + "): unrecognized control class \"" + sClass + "\"", "warning");
-                            break;
-                    }
-                }
-            }
-        }
     }
 
     /**
@@ -3529,14 +3581,12 @@ class Component {
      */
     setBinding(sHTMLType, sBinding, control, sValue)
     {
-        var controlTextArea = /** @type {HTMLTextAreaElement} */ (control);
-
         switch (sBinding) {
         case 'clear':
             if (!this.bindings[sBinding]) {
                 this.bindings[sBinding] = control;
                 control.onclick = (function(component) {
-                    return function clearPanel() {
+                    return function clearControl() {
                         if (component.bindings['print']) {
                             component.bindings['print'].value = "";
                         }
@@ -3546,6 +3596,7 @@ class Component {
             return true;
         case 'print':
             if (!this.bindings[sBinding]) {
+                var controlTextArea = /** @type {HTMLTextAreaElement} */ (control);
                 this.bindings[sBinding] = controlTextArea;
                 /**
                  * Override this.notice() with a replacement function that eliminates the Component.alertUser() call.
@@ -3556,7 +3607,7 @@ class Component {
                  * @param {string} [id]
                  * @return {boolean}
                  */
-                this.notice = function noticePanel(s, fPrintOnly, id) {
+                this.notice = function noticeControl(s, fPrintOnly, id) {
                     this.println(s, this.idComponent);
                     return true;
                 };
@@ -3564,36 +3615,20 @@ class Component {
                  * This was added for Firefox (Safari will clear the <textarea> on a page reload, but Firefox does not).
                  */
                 controlTextArea.value = "";
-                this.print = (function(controlTextArea) {
-                    return function printPanel(s) {
-                        /*
-                         * Prevent the <textarea> from getting too large; otherwise, printing becomes slower and slower.
-                         */
-                        if (COMPILED) {
-                            if (controlTextArea.value.length > 8192) {
-                                controlTextArea.value = controlTextArea.value.substr(controlTextArea.value.length - 4096);
-                            }
-                        }
-                        controlTextArea.value += s;
-                        controlTextArea.scrollTop = controlTextArea.scrollHeight;
+                this.print = function(control) {
+                    return function printControl(s) {
+                        Component.appendControl(control, s);
                     };
-                }(controlTextArea));
-                this.println = (function(controlTextArea) {
-                    return function printlnPanel(s, type) {
-                        s = (type != null? (type + ": ") : "") + (s || "");
-                        /*
-                         * Prevent the <textarea> from getting too large; otherwise, printing becomes slower and slower.
-                         */
-                        if (COMPILED) {
-                            if (controlTextArea.value.length > 8192) {
-                                controlTextArea.value = controlTextArea.value.substr(controlTextArea.value.length - 4096);
-                            }
+                }(controlTextArea);
+                this.println = function(component, control) {
+                    return function printlnControl(s, type, id) {
+                        if (DEBUG || type != Component.TYPE.PROGRESS) {
+                            s = (type != null? (type + ": ") : "") + (s || "");
+                            component.print(s + '\n');
                         }
-                        controlTextArea.value += s + "\n";
-                        controlTextArea.scrollTop = controlTextArea.scrollHeight;
-                        if (!COMPILED && window && window.console) console.log(s);
+                        if (!COMPILED && window && window.console) Component.println(s, type, id);
                     };
-                }(controlTextArea));
+                }(this, controlTextArea);
             }
             return true;
         default:
@@ -3672,6 +3707,27 @@ class Component {
     }
 
     /**
+     * print(s)
+     *
+     * For non-diagnostic messages, which components may override to control the destination/appearance of their output.
+     *
+     * Components using this.print() should wait until after their constructor has run to display any messages, because
+     * if a Control Panel has been loaded, its override will not take effect until its own constructor has run.
+     *
+     * @this {Component}
+     * @param {string} s
+     */
+    print(s)
+    {
+        var i = s.lastIndexOf('\n');
+        if (i >= 0) {
+            Component.println(s.substr(0, i));
+            s = s.substr(i + 1);
+        }
+        Component.printBuffer += s;
+    }
+
+    /**
      * println(s, type, id)
      *
      * For non-diagnostic messages, which components may override to control the destination/appearance of their output.
@@ -3686,7 +3742,8 @@ class Component {
      */
     println(s, type, id)
     {
-        Component.println(s, type, id || this.id);
+        Component.println(Component.printBuffer + s, type, id || this.id);
+        Component.printBuffer = "";
     }
 
     /**
@@ -3699,11 +3756,11 @@ class Component {
      */
     status(s)
     {
-        this.println(this.idComponent + ": " + s);
+        this.println(this.type + ": " + s);
     }
 
     /**
-     * notice(s, fPrintOnly)
+     * notice(s, fPrintOnly, id)
      *
      * notice() is like println() but implies a need for user notification, so we alert() as well; however, if this.println()
      * is overridden, this.notice will be replaced with a similar override, on the assumption that the override is taking care
@@ -3964,6 +4021,18 @@ class Component {
 }
 
 /*
+ * These are the standard TYPE values you can pass as the second argument to println(); in reality,
+ * you can pass anything you want, because they are just tacked onto the message as a prefix, with the
+ * exception of PROGRESS, which will suppress the message unless we're in DEBUG or INIT mode.
+ */
+Component.TYPE = {
+    NOTICE:     "notice",
+    WARNING:    "warning",
+    ERROR:      "error",
+    PROGRESS:   "progress"
+};
+
+/*
  * Every component created on the current page is recorded in this array (see Component.add()),
  * enabling any component to locate another component by ID (see Component.getComponentByID())
  * or by type (see Component.getComponentByType()).
@@ -3995,6 +4064,7 @@ Component.globalCommands = {
 Component.componentCommands = {
     'select':   Component.scriptSelect
 };
+Component.printBuffer = "";
 
 /*
  * The following polyfills provide ES5 functionality that's missing in older browsers (eg, IE8),
@@ -43113,9 +43183,11 @@ class ROM extends Component {
         this.cpu = cpu;
         this.dbg = dbg;
         if (this.sFileURL) {
-            this.cmp.setResourceStatus(this.sFileURL);
+            var sProgress = "Loading " + this.sFileURL + "...";
             Web.getResource(this.sFileURL, null, true, function(sURL, sResponse, nErrorCode) {
                 rom.doneLoad(sURL, sResponse, nErrorCode);
+            }, function(nState) {
+                rom.println(sProgress, Component.TYPE.PROGRESS);
             });
         }
     }
@@ -53138,21 +53210,21 @@ class Video extends Component {
      */
     static init()
     {
-        var aeVideo = Component.getElementsByClass(document, PCX86.APPCLASS, "video");
-        for (var iVideo = 0; iVideo < aeVideo.length; iVideo++) {
-            var eVideo = aeVideo[iVideo];
-            var parmsVideo = Component.getComponentParms(eVideo);
+        var aElement = Component.getElementsByClass(document, PCX86.APPCLASS, "video");
+        for (var iVideo = 0; iVideo < aElement.length; iVideo++) {
+            var element = aElement[iVideo];
+            var parmsVideo = Component.getComponentParms(element);
 
-            var eCanvas = /** @type {HTMLCanvasElement} */ (document.createElement("canvas"));
-            if (eCanvas === undefined || !eCanvas.getContext) {
-                eVideo.innerHTML = "<br/>Missing &lt;canvas&gt; support. Please try a newer web browser.";
+            var canvas = /** @type {HTMLCanvasElement} */ (document.createElement("canvas"));
+            if (canvas === undefined || !canvas.getContext) {
+                element.innerHTML = "<br/>Missing &lt;canvas&gt; support. Please try a newer web browser.";
                 return;
             }
 
-            eCanvas.setAttribute("class", "pcjs-canvas");
-            eCanvas.setAttribute("width", parmsVideo['screenWidth']);
-            eCanvas.setAttribute("height", parmsVideo['screenHeight']);
-            eCanvas.style.backgroundColor = parmsVideo['screenColor'];
+            canvas.setAttribute("class", "pcjs-canvas");
+            canvas.setAttribute("width", parmsVideo['screenWidth']);
+            canvas.setAttribute("height", parmsVideo['screenHeight']);
+            canvas.style.backgroundColor = parmsVideo['screenColor'];
 
             /*
              * The "contenteditable" attribute on a canvas element NOTICEABLY slows down canvas drawing on
@@ -53160,7 +53232,7 @@ class Video extends Component {
              * up; click on the canvas, and drawing slows down).  So the "transparent textarea hack" that we
              * once employed as only a work-around for Android devices is now our default.
              *
-             *      eCanvas.setAttribute("contenteditable", "true");
+             *      canvas.setAttribute("contenteditable", "true");
              *
              * HACK: A canvas style of "auto" provides for excellent responsive canvas scaling in EVERY browser
              * except IE9/IE10, so I recalculate the appropriate CSS height every time the parent DIV is resized;
@@ -53169,14 +53241,14 @@ class Video extends Component {
              * The other reason it's good to keep this particular hack limited to IE9/IE10 is that most other
              * browsers don't actually support an 'onresize' handler on anything but the window object.
              */
-            eCanvas.style.height = "auto";
+            canvas.style.height = "auto";
             if (Web.getUserAgent().indexOf("MSIE") >= 0) {
-                eVideo.onresize = function(eParent, eChild, cx, cy) {
+                element.onresize = function(eParent, eChild, cx, cy) {
                     return function onResizeVideo() {
                         eChild.style.height = (((eParent.clientWidth * cy) / cx) | 0) + "px";
                     };
-                }(eVideo, eCanvas, parmsVideo['screenWidth'], parmsVideo['screenHeight']);
-                eVideo.onresize(null);
+                }(element, canvas, parmsVideo['screenWidth'], parmsVideo['screenHeight']);
+                element.onresize(null);
             }
             /*
              * The following is a related hack that allows the user to force the screen to use a particular aspect
@@ -53206,10 +53278,10 @@ class Video extends Component {
                          */
                         eChild.style.height = ((eParent.clientWidth / aspectRatio)|0) + "px";
                     };
-                }(eVideo, eCanvas, aspect));
+                }(element, canvas, aspect));
                 window['onresize']();
             }
-            eVideo.appendChild(eCanvas);
+            element.appendChild(canvas);
 
             /*
              * HACK: Android-based browsers, like the Silk (Amazon) browser and Chrome for Android, don't honor the
@@ -53232,14 +53304,14 @@ class Video extends Component {
              * clearly see the overlaid semi-transparent input field, but none of the input characters were passed along,
              * with the exception of the "Go" (Enter) key.
              *
-             *      var eInput = document.createElement("input");
-             *      eInput.setAttribute("type", "password");
-             *      eInput.setAttribute("style", "position:absolute; left:0; top:0; width:100%; height:100%; opacity:0.5");
-             *      eVideo.appendChild(eInput);
+             *      var input = document.createElement("input");
+             *      input.setAttribute("type", "password");
+             *      input.setAttribute("style", "position:absolute; left:0; top:0; width:100%; height:100%; opacity:0.5");
+             *      element.appendChild(input);
              *
              * See this Chromium issue for more information: https://code.google.com/p/chromium/issues/detail?id=118639
              */
-            var eTextArea = /** @type {HTMLTextAreaElement} */ (document.createElement("textarea"));
+            var textarea = /** @type {HTMLTextAreaElement} */ (document.createElement("textarea"));
 
             /*
              * As noted in keyboard.js, the keyboard on an iOS device tends to pop up with the SHIFT key depressed,
@@ -53247,8 +53319,8 @@ class Video extends Component {
              * these "auto" attributes will help.
              */
             if (Web.isUserAgent("iOS")) {
-                eTextArea.setAttribute("autocapitalize", "off");
-                eTextArea.setAttribute("autocorrect", "off");
+                textarea.setAttribute("autocapitalize", "off");
+                textarea.setAttribute("autocorrect", "off");
                 /*
                  * One of the problems on iOS devices is that after a soft-key control is clicked, we need to give
                  * focus back to the above textarea, usually by calling cmp.updateFocus(), but in doing so, iOS may
@@ -53257,21 +53329,21 @@ class Video extends Component {
                  * Googling reveals that another way to prevent those jarring unintentional zooms is to simply set the
                  * font-size of the text control to 16px.  So that's what we do.
                  */
-                eTextArea.style.fontSize = "16px";
+                textarea.style.fontSize = "16px";
             }
-            eVideo.appendChild(eTextArea);
+            element.appendChild(textarea);
 
             /*
              * Now we can create the Video object, record it, and wire it up to the associated document elements.
              */
-            var eContext = /** @type {CanvasRenderingContext2D} */ (eCanvas.getContext("2d"));
-            var video = new Video(parmsVideo, eCanvas, eContext, eTextArea /* || eInput */, eVideo);
+            var context = /** @type {CanvasRenderingContext2D} */ (canvas.getContext("2d"));
+            var video = new Video(parmsVideo, canvas, context, textarea /* || input */, element);
 
             /*
              * Bind any video-specific controls (eg, the Refresh button). There are no essential controls, however;
              * even the "Refresh" button is just a diagnostic tool, to ensure that the screen contents are up-to-date.
              */
-            Component.bindComponentControls(video, eVideo, PCX86.APPCLASS);
+            Component.bindComponentControls(video, element, PCX86.APPCLASS);
         }
     }
 }
@@ -56627,8 +56699,11 @@ class Disk extends Component {
                 }
             }
         }
+        var sProgress = "Loading " + sDiskURL + "...";
         return !!Web.getResource(sDiskURL, null, true, function loadDone(sURL, sResponse, nErrorCode) {
             disk.doneLoad(sURL, sResponse, nErrorCode);
+        }, function(nState) {
+            disk.println(sProgress, Component.TYPE.PROGRESS);
         });
     }
 
@@ -74020,8 +74095,7 @@ class Computer extends Component {
     {
         super("Computer", parmsComputer, Messages.COMPUTER);
 
-        this.flags.powered = false;
-
+        var cmp = this;
         this.setMachineParms(parmsMachine);
 
         this.fAutoPower = this.getMachineParm('autoPower', parmsComputer);
@@ -74079,28 +74153,39 @@ class Computer extends Component {
         this.bus = new Bus({'id': this.idMachine + '.bus', 'busWidth': this.nBusWidth}, this.cpu, this.dbg);
 
         /*
-         * Iterate through all the components and override their notice() and println() methods so that their
-         * output can be rerouted to an Initialization Display or a Control Panel, if any.
+         * Iterate through all the components and override their notice() and println() methods so
+         * that their output can be rerouted to an Initialization Display or a Control Panel, if any.
          */
         var iComponent, component;
         var aComponents = Component.getComponents(this.id);
 
         this.panel = /** @type {Panel} */ (Component.getComponentByType("Panel", this.id));
-        this.controlPrint = this.panel && this.panel.bindings['print'];
+        this.controlPanel = this.panel && this.panel.bindings['print'];
 
-        if (this.controlPrint) {
-            for (iComponent = 0; iComponent < aComponents.length; iComponent++) {
-                component = aComponents[iComponent];
-                /*
-                 * I can think of many "cleaner" ways for the Control Panel component to pass its
-                 * notice(), println(), etc, overrides on to all the other components, but it's just
-                 * too darn convenient to slam those overrides into the components directly.
-                 */
-                component.notice = this.panel.notice;
-                component.print = this.panel.print;
-                component.println = this.panel.println;
-            }
+        this.noticeComputer = this.notice;
+        this.printComputer = this.print;
+        this.printlnComputer = this.println;
+        if (this.controlPanel) {
+            this.noticeComputer = this.panel.notice;
+            this.printComputer = this.panel.print;
+            this.printlnComputer = this.panel.println;
         }
+        for (iComponent = 0; iComponent < aComponents.length; iComponent++) {
+            component = aComponents[iComponent];
+            component.notice = function noticeComputer(s, fPrintOnly, id) {
+                cmp.outputDiagnostics(s);
+                return cmp.noticeComputer.call(this, s, fPrintOnly, id);
+            }.bind(component);
+            component.print = function printComputer(s) {
+                return cmp.printComputer.call(this, s);
+            }.bind(component);
+            component.println = function printlnComputer(s, type, id) {
+                cmp.outputDiagnostics(s, type);
+                return cmp.printlnComputer.call(this, s, type, id);
+            }.bind(component);
+        }
+        this.cDiagnosticScreens = 0;
+        if (!this.controlPanel) this.enableDiagnostics();
 
         this.println(PCX86.APPNAME + " v" + (XMLVERSION || PCX86.APPVERSION) + "\n" + COPYRIGHT + "\n" + LICENSE);
 
@@ -74175,7 +74260,6 @@ class Computer extends Component {
         if (!sStatePath) {
             this.setReady();
         } else {
-            var cmp = this;
             Web.getResource(sStatePath, null, true, function(sURL, sResource, nErrorCode) {
                 cmp.doneLoad(sURL, sResource, nErrorCode);
             });
@@ -74196,8 +74280,73 @@ class Computer extends Component {
      */
     clearPanel()
     {
-        if (this.controlPrint) {
-            this.controlPrint.value = "";
+        if (this.controlPanel) {
+            this.controlPanel.value = "";
+        }
+    }
+
+    /**
+     * enableDiagnostics()
+     *
+     * @this {Computer}
+     */
+    enableDiagnostics()
+    {
+        for (var i = 0; i < this.aVideo.length; i++) {
+            var video = this.aVideo[i];
+            if (video) {
+                var control = video.getTextArea();
+                if (control) {
+                    control.style.opacity = "1";
+                    control.style.lineHeight = "1";
+                    this.cDiagnosticScreens++;
+                }
+            }
+        }
+    }
+
+    /**
+     * disableDiagnostics()
+     *
+     * @this {Computer}
+     */
+    disableDiagnostics()
+    {
+        for (var i = 0; i < this.aVideo.length; i++) {
+            var video = this.aVideo[i];
+            if (video) {
+                var control = video.getTextArea();
+                if (control) {
+                    control.style.opacity = "0";
+                    control.style.lineHeight = "0";
+                }
+            }
+        }
+        this.cDiagnosticScreens = 0;
+    }
+
+    /**
+     * outputDiagnostics(sMessage, sType)
+     *
+     * @this {Computer}
+     * @param {string} sMessage
+     * @param {string} [sType]
+     */
+    outputDiagnostics(sMessage, sType)
+    {
+        if (!this.cDiagnosticScreens) return;
+        for (var i = 0; i < this.aVideo.length; i++) {
+            var video = this.aVideo[i];
+            if (video) {
+                var control = video.getTextArea();
+                if (control) {
+                    if (sType != Component.TYPE.PROGRESS || sMessage.slice(-3) != "...") {
+                        Component.appendControl(control, sMessage + '\n');
+                    } else {
+                        Component.replaceControl(control, sMessage, sMessage + '.');
+                    }
+                }
+            }
         }
     }
 
@@ -74286,28 +74435,6 @@ class Computer extends Component {
     getUserID()
     {
         return this.sUserID || "";
-    }
-
-    /**
-     * setResourceStatus(sMessage)
-     *
-     * @this {Computer}
-     * @param {string} sMessage
-     */
-    setResourceStatus(sMessage)
-    {
-        // var video = this.aVideo[0];
-        // if (video) {
-        //     var eTextArea = video.getTextArea();
-        //     if (eTextArea) {
-        //         eTextArea.style.opacity = "1";
-        //         eTextArea.style.color = "#ffffff";
-        //         eTextArea.style.lineHeight = "1";
-        //         eTextArea.style.fontSize = "large";
-        //         eTextArea.style.background = "rgba(0, 0, 0, .5)";
-        //         eTextArea.value = sMessage;
-        //     }
-        // }
     }
 
     /**
@@ -74636,6 +74763,8 @@ class Computer extends Component {
                 }
             }
 
+            component.flags.initDone = true;
+
             if (!fRepower && component.comment) {
                 var asComments = component.comment.split("|");
                 for (var i = 0; i < asComments.length; i++) {
@@ -74664,7 +74793,11 @@ class Computer extends Component {
             this.printMessage("Computer.donePowerOn(): redundant");
         }
 
-        this.fInitialized = true;
+        if (!this.flags.initDone) {
+            this.disableDiagnostics();
+            this.flags.initDone = true;
+        }
+
         this.flags.powered = true;
         var controlPower = this.bindings["power"];
         if (controlPower) controlPower.textContent = "Shutdown";
@@ -75513,10 +75646,10 @@ class Computer extends Component {
                 computer.flags.unloading = false;
 
                 if (DEBUG && computer.messageEnabled()) {
-                    computer.printMessage("onShow(" + computer.fInitialized + "," + computer.flags.powered + ")");
+                    computer.printMessage("onShow(" + computer.flags.initDone + "," + computer.flags.powered + ")");
                 }
 
-                if (computer.fInitialized && !computer.flags.powered) {
+                if (computer.flags.initDone && !computer.flags.powered) {
                     /**
                      * Repower the computer, notifying every component to continue running as-is.
                      */

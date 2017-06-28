@@ -141,9 +141,11 @@ class ROM extends Component {
         this.cpu = cpu;
         this.dbg = dbg;
         if (this.sFileURL) {
-            this.cmp.setResourceStatus(this.sFileURL);
+            var sProgress = "Loading " + this.sFileURL + "...";
             Web.getResource(this.sFileURL, null, true, function(sURL, sResponse, nErrorCode) {
                 rom.doneLoad(sURL, sResponse, nErrorCode);
+            }, function(nState) {
+                rom.println(sProgress, Component.TYPE.PROGRESS);
             });
         }
     }
