@@ -3090,7 +3090,7 @@ class Component {
                  * @return {boolean}
                  */
                 this.notice = function noticeControl(s, fPrintOnly, id) {
-                    this.println(s, this.idComponent);
+                    this.println(s, this.type);
                     return true;
                 };
                 /*
@@ -3234,7 +3234,7 @@ class Component {
     /**
      * status(s)
      *
-     * status() is like println() but it also includes information about the component (ie, the component ID),
+     * status() is like println() but it also includes information about the component (ie, the component type),
      * which is why there is no corresponding Component.status() function.
      *
      * @param {string} s is the message text
