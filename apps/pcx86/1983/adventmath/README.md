@@ -18,6 +18,9 @@ machines:
 Adventures in Math (1983)
 -------------------------
 
+To start "Adventures in Math" (if it doesn't start automatically), either press the **Reset** button or, at the DOS
+prompt, switch to drive B: and run "A:BASICA CASTLE".
+
 {% include machine.html id="ibm5150-adventmath" %}
 
 The files for this game were obtained from the [Internet Archive](https://archive.org/details/msdos_Adventures_in_Math_1983).
@@ -101,8 +104,8 @@ Another unexpected file was **BASICA.EXE** (54277 bytes) from 1999.  It seems un
 IBM's PC-DOS shipped with **BASICA.COM** and OEM versions of DOS shipped with either **GWBASIC.EXE** or **BASIC.EXE**.
 
 Unsurprisingly, this **BASICA.EXE** is neither from 1999 nor from IBM.  It's virtually identical to the circa 1983
-**BASICA.EXE*** found in [COMPAQ DOS 1.11](/disks/pcx86/dos/compaq/1.11/), except that it is 5 bytes larger, due to the
-addition of "MsDos" at the end of the file.  It contains the following strings:
+**BASICA.EXE** found in [COMPAQ DOS 1.11](/disks/pcx86/dos/compaq/1.11/), and it's 5 bytes larger only because the
+string "MsDos" was appended to the file.  They both contain the following strings:
 
 	The COMPAQ Personal Computer BASIC
 	Version 1.13
