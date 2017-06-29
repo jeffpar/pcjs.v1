@@ -18,8 +18,8 @@ machines:
 PC-DOS 1.00
 -----------
 
-PC-DOS 1.00 was completed in August 1981 and announced at an IBM press conference on August 12, 1981, when IBM
-introduced the original IBM PC (Model 5150).
+PC-DOS 1.00 was completed in August 1981 and announced at an IBM press conference on August 12, 1981,
+when IBM introduced the original IBM PC (Model 5150).
 
 To learn how to use PC-DOS 1.00, see the [Documentation](/pubs/pc/software/dos/PCDOS100/).
 
