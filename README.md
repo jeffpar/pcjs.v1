@@ -160,8 +160,8 @@ To install Jekyll for use with PCjs:
 
  1. Install Ruby (on OS X, it should already be installed)
  2. Install Bundler (on OS X, run `sudo gem install bundler`)
- 3. Checkout the `gh-pages` branch, since only that branch contains all the Jekyll-related files
- 4. Create a `Gemfile` containing `gem 'github-pages'` (this is already checked in)
+ 3. Checkout the *gh-pages* branch, since only that branch contains all the Jekyll-related files
+ 4. Create a **Gemfile** containing `gem 'github-pages'` (this is already checked in)
  5. Run `bundle install` (GitHub Pages alternatively suggests: `bundle exec jekyll build --safe`)
  6. Run `bundle exec jekyll serve` to start the web server
 
@@ -171,14 +171,14 @@ Some useful Jekyll server options include:
 
 	bundle exec jekyll serve --host=0.0.0.0 --config _config.yml,_developer.yml
 	
-The `--host` option makes it possible to access the web server from other devices on your local network;
-for example, you may want to run PCjs on your iPhone, iPad, or other wireless device.  And by adding `_developer.yml`,
-you can override the Jekyll configuration defaults in `_config.yml`.  Using development (non-production) settings in
-`_developer.yml` is analogous to running the Node web server with certain development options; see
+The *--host* option makes it possible to access the web server from other devices on your local network;
+for example, you may want to run PCjs on your iPhone, iPad, or other wireless device.  And by adding **_developer.yml**,
+you can override the Jekyll configuration defaults in **_config.yml**.  Using development (non-production) settings in
+**_developer.yml** is analogous to running the Node web server with certain development options; see
 [Debugging PCjs](#debugging-pcjs).
 
 GitHub Pages says you can run `jekyll serve` instead of `bundle exec jekyll serve`, but with the addition of
-more gems to `Gemfile` (eg, `jekyll-sitemap`), running `jekyll serve` may trigger dependency errors on some systems.
+more gems to **Gemfile** (eg, "jekyll-sitemap"), running `jekyll serve` may trigger dependency errors on some systems.
 `bundle exec jekyll serve` should always work.
 
 Don't see any YML files in the root of your project?  You probably forgot to switch to the
@@ -198,7 +198,7 @@ However, in order to build and test PCjs modifications, you'll want to use [Grun
 Grunt tasks defined by [Gruntfile.js](Gruntfile.js).
 
 Although Grunt was installed locally when you ran `npm install`, you'll also want to install the command-line
-interface to Grunt. You can install that locally as well, but it's recommended you install it globally with `-g`;
+interface to Grunt. You can install that locally as well, but it's recommended you install it globally with *-g*;
 OS X users may also need to preface this command with `sudo`:
 
 	npm install grunt-cli -g
@@ -249,7 +249,7 @@ Here's what I installed to get Gulp working:
 	npm install --save-dev gulp gulp-concat gulp-rename gulp-replace gulp-header gulp-foreach gulp-wrapper run-sequence
 	npm install --save-dev google-closure-compiler-js
 
-Running `gulp` should build a new `pcx86.js` in the [versions](/versions/) directory.  However,
+Running `gulp` should build a new **pcx86.js** in the [versions](/versions/) directory.  However,
 you should consider Gulp support (and anything built with Gulp) as **experimental** until further notice.
 The [JavaScript-based Closure Compiler](https://github.com/google/closure-compiler-js) is in a state of
 flux as well; for example, *output_wrapper* support is documented in their
@@ -354,8 +354,8 @@ you can start the server with some additional options; eg:
 
 	node server.js --logging --console --debug
 	
-The `--logging` option will create a [node.log](/logs/) that records all the HTTP requests, `--debug`
-will generate additional debug-only messages (which will also be logged if `--logging` is enabled), and `--console`
+The *--logging* option will create a [node.log](/logs/) that records all the HTTP requests, *--debug*
+will generate additional debug-only messages (which will also be logged if *--logging* is enabled), and *--console*
 will replicate any messages to your console as well.
 
 If you want server.js to use a different port (the default is 8088), set PORT in your environment before starting
@@ -363,7 +363,7 @@ the server:
 
 	export PORT=80
 	
-or add `--port` to your command-line:
+or add *--port* to your command-line:
 
 	node server.js --logging --console --debug --port=80
 
@@ -376,7 +376,7 @@ PCjs emulators much easier to debug, albeit much slower:
 
 	http://localhost:8088/?gort=debug
 
-The "gort=debug" command is unnecessary if the server is started with `--debug`; the server always serves uncompiled
+The "gort=debug" command is unnecessary if the server is started with *--debug*; the server always serves uncompiled
 files when running in debug mode.
 
 Conversely, if the server is in debug mode but you want to test a compiled version of PCx86, use:

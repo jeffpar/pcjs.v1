@@ -383,11 +383,16 @@ MarkOut.prototype.convertMD = function(sIndent)
     var sMD = this.sMD;
 
     /*
-     * Convert any escaped asterisks, square brackets, etc, to their HTML-entity equivalents,
+     * Convert any escaped asterisks, square brackets, etc, to their HTML entity equivalents,
      * as a convenient way of avoiding parsing problems later.  We also take this opportunity
      * to replace any \r\n sequences with \n.
+     *
+     * UPDATE: I've moved the HTML entity replacement into convertMDBlock(), AFTER we check for
+     * code blocks and call escapeHTML(), because otherwise we run into entity "double-encoding"
+     * problems.  Hopefully, the aforementioned "parsing problems" don't rear their head before then.
      */
-    sMD = str.replaceArray(MarkOut.aHTMLEntities, sMD).replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+    sMD = sMD.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+    // sMD = str.replaceArray(MarkOut.aHTMLEntities, sMD).replace(/\r\n/g, "\n").replace(/\r/g, "\n");
 
     /*
      * Before performing the original comment-elimination step, a new step has been added that
@@ -402,7 +407,7 @@ MarkOut.prototype.convertMD = function(sIndent)
      * triple-dash-style comments.
      */
     if (!this.fDebug) {
-        sMD = sMD.replace(/\{%\s*if\s+page\.developer\s*%}[\s\S]*?{%\s*endif\s*%}\s*/g, "");
+        sMD = sMD.replace(/{%\s*if\s+page\.developer\s*%}[\s\S]*?{%\s*endif\s*%}\s*/g, "");
         sMD = sMD.replace(/[ \t]*<!--+\s*begin:exclude\s*-+->[\s\S]*?<!--+\s*end:exclude\s*-+->[\r\n]*/gi, "");
     }
 
@@ -418,7 +423,7 @@ MarkOut.prototype.convertMD = function(sIndent)
      * the lack of JavaScript support for the "s" (aka "dotall" or "multiline") option that enables
      * "." to match newlines.
      */
-    sMD = sMD.replace(/\{%\s*comment\s*%}[\s\S]*?{%\s*endcomment\s*%}\s*/g, "");
+    sMD = sMD.replace(/{%\s*comment\s*%}[\s\S]*?{%\s*endcomment\s*%}\s*/g, "");
     sMD = sMD.replace(/<!--[\s\S]*?-->/g, "");
 
     /*
@@ -601,7 +606,7 @@ MarkOut.prototype.convertMD = function(sIndent)
      * you want the second paragraph to appear as a code block, it must be indented TWICE (by 8 spaces
      * or 2 tabs).  That behavior should fall out of this hack as well.
      */
-    var re = /(^|\n)(  ? ?)([*+-]|[0-9]+\.)([^\n]*\n)([ \t]+[^\n]*\n|\n)+([ \t]+[^\n]+)/g;
+    var re = /(^|\n)( {1,2} ?)([*+-]|[0-9]+\.)([^\n]*\n)([ \t]+[^\n]*\n|\n)+([ \t]+[^\n]+)/g;
     //noinspection UnnecessaryLocalVariableJS
     var sMDOrig = sMD;
     while ((aMatch = re.exec(sMDOrig))) {
@@ -742,9 +747,9 @@ MarkOut.prototype.convertMDBlock = function(sBlock, sIndent)
      * No other conversions should occur in such a block, so we don't "fall into" the other conversions.
      */
     var aMatch;
-    var re = /^((^|\n)(    |\t)([^\n]*))+$/;
+    var re = /^((^|\n)( {4}|\t)([^\n]*))+$/;
     if ((aMatch = re.exec(sBlock))) {
-        var sUndented = aMatch[0].replace(/(^|\n)(    |\t)([^\n]*)/g, "$1$3");
+        var sUndented = aMatch[0].replace(/(^|\n)( {4}|\t)([^\n]*)/g, "$1$3");
         sBlock = sBlock.replace(aMatch[0], "<pre><code>" + str.escapeHTML(sUndented.replace(/\t/g, "    ")) + "</code></pre>");
         sHTML += this.sIndent + sBlock + "\n";
         return sHTML;
@@ -771,8 +776,8 @@ MarkOut.prototype.convertMDBlock = function(sBlock, sIndent)
      * treated as literal; we translate those to HTML entity "&#96;" to prevent them from being
      * detected as part of a "single-backtick" sequence below.
      *
-     * Note that we also do the entity replacement AFTER calling htmlspecialchars(), because
-     * our implementation of htmlspecialchars() isn't smart enough to avoid the "double-encoding"
+     * Note that we also do entity replacement AFTER calling escapeHTML(), our simplified version
+     * of PHP's htmlspecialchars(), because it isn't smart enough to avoid the "double-encoding"
      * problem (ie, translating the leading "&" of an entity into yet another "&amp;" entity).
      */
     var sBlockOrig = sBlock;
@@ -791,10 +796,17 @@ MarkOut.prototype.convertMDBlock = function(sBlock, sIndent)
     }
 
     /*
+     * As mentioned at the top of convertMD(), the Markdown escape-sequence-to-HTML-entity conversion
+     * has been moved here, after we've dealt with code blocks and escapeHTML() operations, in an effort
+     * to avoid HTML entity "double-encoding" issues.
+     */
+    sBlock = str.replaceArray(MarkOut.aHTMLEntities, sBlock);
+
+    /*
      * Per markdown syntax: "When you do want to insert a <br /> break tag using Markdown,
      * you end a line with two or more spaces, then type return."
      */
-    sBlock = sBlock.replace(/  +\n/g, "<br/>\n" + this.sIndent);
+    sBlock = sBlock.replace(/ {2,}\n/g, "<br/>\n" + this.sIndent);
 
     /*
      * If the block looks like a list, convertMDList() will convert it; if not, then it will wrap the
@@ -890,10 +902,10 @@ MarkOut.prototype.convertMDList = function(sBlock, sIndent)
              * If this list item contains one or more lines indented by 4 or more spaces (or 1 or more tabs)
              * then we need to strip them, so that they can be parsed as a sub-list.
              */
-            re = /((^|\n)(    |\t)([^\n]*))+/;
+            re = /((^|\n)( {4}|\t)([^\n]*))+/;
             if ((aMatch = re.exec(sListItem))) {
                 // if (this.fDebug) sList += this.encodeComment("subList", aMatch[0]);
-                var sSubList = aMatch[0].replace(/(^|\n)(    |\t)([^\n]*)/g, "$1$3").replace(/\n\t\n/g, "\n\n");
+                var sSubList = aMatch[0].replace(/(^|\n)( {4}|\t)([^\n]*)/g, "$1$3").replace(/\n\t\n/g, "\n\n");
                 if (sSubList.charAt(0) == "\n") sSubList = sSubList.substr(1);
                 sListItem = str.replaceAll(aMatch[0], "\n" + this.sIndent + this.convertMDBlocks(sSubList, sIndent).trim() + "\n" + this.sIndent, sListItem);
             } else {
@@ -971,8 +983,8 @@ MarkOut.prototype.convertMDLinks = function(sBlock)
      * page's Front Matter; however, unless/until we start using Node again to host the public site,
      * that's low priority.
      */
-    sBlock = sBlock.replace(/([^\t])\{([{%]).*?\2}/g, "$1");
-    sBlock = sBlock.replace(/(\{)([{%])(.*?\2})/g, "<pre><code>$1$2$3</code></pre>");
+    sBlock = sBlock.replace(/([^\t]){([{%]).*?\2}/g, "$1");
+    sBlock = sBlock.replace(/({)([{%])(.*?\2})/g, "<pre><code>$1$2$3</code></pre>");
 
     var aMatch;
     var re = /\[([^\[\]]*)]\((.*?)(?:\s*"(.*?)"\)|\))/g;
@@ -1023,7 +1035,7 @@ MarkOut.prototype.convertMDImageLinks = function(sBlock, sIndent)
      * (in case this Markdown file is part of a Jekyll installation) and convert them to Markdown-style links.
      */
     var aMatch;
-    var reIncludes = /\{%\s*include\s+screenshot\.html\s+(.*?)\s*%}/g;
+    var reIncludes = /{%\s*include\s+screenshot\.html\s+(.*?)\s*%}/g;
 
     while ((aMatch = reIncludes.exec(sBlock))) {
         var option, aOptions = {};
@@ -1211,7 +1223,7 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
     /*
      * Ditto for any Liquid-style machine build links.
      */
-    sBlock = sBlock.replace(/\{%\s*include\s+machine-build\.html\s+id=(["'])(.*?)\1\s*%}/g, '<div class="buildpc" id=$1$2$1></div>');
+    sBlock = sBlock.replace(/{%\s*include\s+machine-build\.html\s+id=(["'])(.*?)\1\s*%}/g, '<div class="buildpc" id=$1$2$1></div>');
 
     /*
      * Start looking for Markdown-style machine links now...
@@ -1288,7 +1300,7 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
     /*
      * Last but not least, see if there are any Liquid-style machine command links that need to be converted.
      */
-    reIncludes = /([ \t]*)\{%\s*include\s+machine-command\.html\s+(.*?)\s*%}/g;
+    reIncludes = /([ \t]*){%\s*include\s+machine-command\.html\s+(.*?)\s*%}/g;
 
     var findParm = function(aParms, sParm) {
         sParm += '=';
