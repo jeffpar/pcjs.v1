@@ -9,6 +9,8 @@ machines:
     autoMount:
       A:
         path: /disks/pcx86/dos/ibm/0.90/PCDOS090.json
+      B:
+        name: None
 ---
 
 PC-DOS 0.90
@@ -19,9 +21,8 @@ There was no PC-DOS 0.90 product *per se*.  It has been dubbed version 0.90 simp
 be found at the [OS/2 Museum](http://www.os2museum.com/wp/pc-dos-1-0-but-not-quite/).
 
 Below is an IBM PC (Model 5150) with an original IBM ROM BIOS and Color (CGA) Display that will boot PC-DOS 0.90.
-A similar configuration with [Monochrome Display and Debugger](debugger/) is also available.
-The machine is configured to run at 4.77Mhz, so the ROM BIOS memory test has been disabled,
-since a PC with 256Kb was rather slow to boot.
+The machine is configured to run at 4.77Mhz, so the ROM BIOS memory test has been disabled, since a PC with 256Kb
+was rather slow to boot.  A similar configuration with [Monochrome Display and Debugger](debugger/) is also available.
 
 {% include machine.html id="ibm5150-pcdos090" %}
 

@@ -9,6 +9,8 @@ machines:
     autoMount:
       A:
         path: /disks/pcx86/dos/ibm/4.00/PCDOS400-DISK1.json
+      B:
+        name: None
 ---
 
 PC-DOS 4.00
