@@ -12,7 +12,7 @@ machines:
         path: /disks/pcx86/dos/ibm/1.00/PCDOS100.json
       B:
         path: /apps/pcx86/1983/adventmath/ADVENTMATH100.json
-    autoType: $date\rb:\ra:basica castle\r
+    autoType: $date\rB:\rA:BASICA CASTLE\r
 ---
 
 Adventures in Math (1983)
@@ -22,6 +22,9 @@ To start "Adventures in Math" (if it doesn't start automatically), either press 
 prompt, switch to drive B: and run "A:BASICA CASTLE".
 
 {% include machine.html id="ibm5150-adventmath" %}
+
+Adventures in Archiving
+-----------------------
 
 The files for this game were obtained from the [Internet Archive](https://archive.org/details/msdos_Adventures_in_Math_1983).
 The contents of their ZIP archive contained:
@@ -40,9 +43,8 @@ The contents of their ZIP archive contained:
 	-rwxr-xr-x@ 1 Jeff  staff     13 Dec 24  1996 Sn
 	-rwxr-xr-x@ 1 Jeff  staff    369 Dec 24  1996 Topten
 
-It was unfortunate that the archive did not contain a complete dump of the original "Adventures in Math"
-diskette, and that all the files in the archive were dated "Dec 24 1996", calling into question the authenticity
-of the files.
+Unfortunately, that archive did not contain a complete dump of the original "Adventures in Math" diskette, and all
+the files in the archive were dated "Dec 24 1996", making their authenticity questionable.
 
 After digging around a bit more on the Internet Archive, I discovered that
 [A Large Collection of DOS Collections](https://archive.org/details/large_dos_collection_2013_08) contained:
@@ -191,13 +193,13 @@ have been tested with PC-DOS 2.00 on a 64Kb machine, but perhaps it wasn't.
 
 The machine on this page is configured with the following "autoType" sequence:
  
-	autoType: $date\rb:\ra:basica castle\r
+	autoType: $date\rB:\rA:BASICA CASTLE\r
 
 which translates to:
 
 	<today's data>      [enter an arbitrary date]
-	b:                  [switch to drive B:]
-	a:basica castle     [run BASICA on drive A: and load CASTLE.BAS on drive B:]
+	B:                  [switch to drive B:]
+	A:BASICA CASTLE     [run BASICA on drive A: and load CASTLE.BAS on drive B:]
 
 This is one of the preferred methods of demonstrating software in PCjs: loading unmodified disk images into machines
 that match the software's system requirements as closely as possible, powering the machine, and then automatically
@@ -213,4 +215,5 @@ For more classic PC software experiences, see the PCjs collection of [IBM PC App
 References
 ----------
 
-[MobyGames](http://www.mobygames.com/game/dos/adventures-in-math)
+* [MobyGames](http://www.mobygames.com/game/dos/adventures-in-math)
+* [Internet Archive](https://archive.org/details/msdos_Adventures_in_Math_1983)
