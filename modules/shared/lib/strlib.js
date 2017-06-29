@@ -506,7 +506,7 @@ class Str {
     }
 
     /**
-     * replace(sFind, sReplace, s)
+     * replace(sSearch, sReplace, s)
      *
      * The JavaScript replace() function ALWAYS interprets "$" specially in replacement strings, even when
      * the search string is NOT a RegExp; specifically:
@@ -521,36 +521,36 @@ class Str {
      * So, if a replacement string containing dollar signs passes through a series of replace() calls, untold
      * problems could result.  Hence, this function, which simply uses the replacement string as-is.
      *
-     * Similar to the JavaScript replace() method, this replaces only one occurrence (ie, the FIRST occurrence);
-     * it might be nice to add options to replace the LAST occurrence and/or ALL occurrences, but we'll revisit
-     * that later.
+     * Similar to the JavaScript replace() method (when sSearch is a string), this replaces only ONE occurrence
+     * (ie, the FIRST occurrence); it might be nice to add options to replace the LAST occurrence and/or ALL
+     * occurrences, but we'll revisit that later.
      *
-     * @param {string} sFind
+     * @param {string} sSearch
      * @param {string} sReplace
      * @param {string} s
      * @return {string}
      */
-    static replace(sFind, sReplace, s)
+    static replace(sSearch, sReplace, s)
     {
-        var i = s.indexOf(sFind);
+        var i = s.indexOf(sSearch);
         if (i >= 0) {
-            s = s.substr(0, i) + sReplace + s.substr(i + sFind.length);
+            s = s.substr(0, i) + sReplace + s.substr(i + sSearch.length);
         }
         return s;
     }
 
     /**
-     * replaceAll(sFind, sReplace, s)
+     * replaceAll(sSearch, sReplace, s)
      *
-     * @param {string} sFind
+     * @param {string} sSearch
      * @param {string} sReplace
      * @param {string} s
      * @return {string}
      */
-    static replaceAll(sFind, sReplace, s)
+    static replaceAll(sSearch, sReplace, s)
     {
         var a = {};
-        a[sFind] = sReplace;
+        a[sSearch] = sReplace;
         return Str.replaceArray(a, s);
     }
 
