@@ -1887,10 +1887,10 @@ class C1PDebugger extends Component {
                 return;
             if (!DEBUG && (addrEnd - addr) > 0x100) {
                 /*
-                 * Limiting the amount of disassembled code to 1 page in non-DEBUG builds is partly to
-                 * prevent the user from wedging their browser, but also a recognition that, in non-DEBUG builds,
-                 * Component.println() also keeps its output buffer truncated to 8K, which is only enough for
-                 * about 2 pages of disassembled code anyway.
+                 * Limiting the amount of disassembled code to one "memory page" in non-DEBUG builds is partly
+                 * to prevent the user from wedging their browser, but also a recognition that, in non-DEBUG builds,
+                 * the println() output buffer is truncated to 8K, which is only enough for about two pages of
+                 * disassembled code anyway.
                  */
                 this.println("range too large");
                 return;

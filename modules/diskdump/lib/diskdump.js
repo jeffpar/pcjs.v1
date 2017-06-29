@@ -343,7 +343,7 @@ function DiskDump(sDiskPath, asExclude, sFormat, fComments, sSize, sServerRoot, 
     this.sJSONWhitespace = (this.fJSONComments? " " : "");
     this.fXDFSupport = (argv && argv['xdf']);
     this.sLabel = (argv && argv['label']);
-    this.forceBPB = (argv && argv['forcebpb']);
+    this.forceBPB = (argv && argv['forceBPB']);
 
     /*
      * The dump operation itself doesn't care about sManifestFile, but we DO need some indication

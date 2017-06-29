@@ -272,13 +272,33 @@ class Component {
     }
 
     /**
+     * Component.print(s)
+     *
+     * Components that inherit from this class should use this.print(), rather than Component.print(), because
+     * if a Control Panel is loaded, it will override only the instance method, not the class method (overriding the
+     * class method would improperly affect any other machines loaded on the same page).
+     *
+     * @this {Component}
+     * @param {string} s
+     */
+    static print(s)
+    {
+        if (!COMPILED) {
+            var i = s.lastIndexOf('\n');
+            if (i >= 0) {
+                Component.println(s.substr(0, i));
+                s = s.substr(i + 1);
+            }
+            Component.printBuffer += s;
+        }
+    }
+
+    /**
      * Component.println(s, type, id)
      *
-     * For non-diagnostic messages, which components may override to control the destination/appearance of their output.
-     *
-     * Components that inherit from this class should use the instance method, this.println(), rather than Component.println(),
-     * because if a Control Panel is loaded, it will override only the instance method, not the class method (overriding the class
-     * method would improperly affect any other machines loaded on the same page).
+     * Components that inherit from this class should use this.println(), rather than Component.println(), because
+     * if a Control Panel is loaded, it will override only the instance method, not the class method (overriding the
+     * class method would improperly affect any other machines loaded on the same page).
      *
      * @param {string} [s] is the message text
      * @param {string} [type] is the message type
@@ -287,7 +307,9 @@ class Component {
     static println(s, type, id)
     {
         if (!COMPILED) {
+            s = Component.printBuffer + (s || "");
             Component.log((id? (id + ": ") : "") + (s? ("\"" + s + "\"") : ""), type);
+            Component.printBuffer = "";
         }
     }
 
@@ -409,9 +431,6 @@ class Component {
      */
     static replaceControl(control, sSearch, sReplace)
     {
-        /*
-         * Prevent the <textarea> from getting too large; otherwise, printing becomes slower and slower.
-         */
         var sText = control.value;
         var i = sText.lastIndexOf(sSearch);
         if (i < 0) {
@@ -419,6 +438,9 @@ class Component {
         } else {
             sText = sText.substr(0, i) + sReplace + sText.substr(i + sSearch.length);
         }
+        /*
+         * Prevent the <textarea> from getting too large; otherwise, printing becomes slower and slower.
+         */
         if (COMPILED && sText.length > 8192) sText = sText.substr(sText.length - 4096);
         control.value = sText;
         control.scrollTop = control.scrollHeight;
@@ -683,7 +705,7 @@ class Component {
      *                      ^J  ^M  ^K  ^I  ^H  ^L
      *
      * To support any other non-printable 8-bit character, such as ESC, you should use \xXX, where XX
-     * is the ASCII code in hex.  For ESC, that would \x1B.
+     * is the ASCII code in hex.  For ESC, that would be \x1B.
      *
      * @param {string} sScript
      * @return {Array}
@@ -781,7 +803,7 @@ class Component {
              * instead, but it's a bit too confusing mingling script output in a window that
              * already mingles Debugger and machine output.
              */
-            Component.println('script: ' + aTokens.join(' '));
+            Component.println(aTokens.join(' '), Component.TYPE.SCRIPT);
 
             var fnCallReady = null;
             if (Component.asyncCommands.indexOf(sCommand) >= 0) {
@@ -1063,8 +1085,6 @@ class Component {
     /**
      * print(s)
      *
-     * For non-diagnostic messages, which components may override to control the destination/appearance of their output.
-     *
      * Components using this.print() should wait until after their constructor has run to display any messages, because
      * if a Control Panel has been loaded, its override will not take effect until its own constructor has run.
      *
@@ -1073,18 +1093,11 @@ class Component {
      */
     print(s)
     {
-        var i = s.lastIndexOf('\n');
-        if (i >= 0) {
-            Component.println(s.substr(0, i));
-            s = s.substr(i + 1);
-        }
-        Component.printBuffer += s;
+        Component.print(s);
     }
 
     /**
      * println(s, type, id)
-     *
-     * For non-diagnostic messages, which components may override to control the destination/appearance of their output.
      *
      * Components using this.println() should wait until after their constructor has run to display any messages, because
      * if a Control Panel has been loaded, its override will not take effect until its own constructor has run.
@@ -1096,8 +1109,7 @@ class Component {
      */
     println(s, type, id)
     {
-        Component.println(Component.printBuffer + s, type, id || this.id);
-        Component.printBuffer = "";
+        Component.println(s, type, id || this.id);
     }
 
     /**
@@ -1375,15 +1387,16 @@ class Component {
 }
 
 /*
- * These are the standard TYPE values you can pass as the second argument to println(); in reality,
- * you can pass anything you want, because they are just tacked onto the message as a prefix, with the
- * exception of PROGRESS, which will suppress the message unless we're in DEBUG or INIT mode.
+ * These are the standard TYPE values you can pass as an optional argument to println(); in reality,
+ * you can pass anything you want, because they are simply prepended to the message, although PROGRESS
+ * messages may also be merged with earlier similar messages to keep the output buffer under control.
  */
 Component.TYPE = {
-    NOTICE:     "notice",
-    WARNING:    "warning",
     ERROR:      "error",
-    PROGRESS:   "progress"
+    NOTICE:     "notice",
+    PROGRESS:   "progress",
+    SCRIPT:     "script",
+    WARNING:    "warning"
 };
 
 /*

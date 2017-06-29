@@ -7,8 +7,7 @@
 ;   Additional post-processing performed by the PCjs TextOut module
 ;   All post-processing, comments, etc., copyright © 2012-2017 Jeff Parsons <Jeff@pcjs.org>
 ;
-;   This file is part of PCjs, which is part of the JavaScript Machines Project (aka JSMachines)
-;   at <http://jsmachines.net/> and <http://pcjs.org/>.
+;   This file is part of PCjs, a computer emulation software project at <http://pcjs.org/>.
 ;
 ;   PCjs is free software: you can redistribute it and/or modify it under the terms of the
 ;   GNU General Public License as published by the Free Software Foundation, either version 3
