@@ -351,7 +351,7 @@ class Mouse extends Component {
      * IE9 is the oldest IE we support anyway (since versions prior to IE9 lack the necessary HTML5 support).
      *
      * @this {Mouse}
-     * @param {Object} control from the HTML DOM (eg, the control for the simulated screen)
+     * @param {HTMLElement} control from the HTML DOM (eg, the control for the simulated screen)
      * @return {boolean} true if event handlers were actually added, false if not
      */
     captureMouse(control)
@@ -404,7 +404,7 @@ class Mouse extends Component {
      * less code to leave them in place.
      *
      * @this {Mouse}
-     * @param {Object} control from the HTML DOM
+     * @param {HTMLElement} control from the HTML DOM
      * @return {boolean} true if event handlers were actually released, false if not
      */
     releaseMouse(control)

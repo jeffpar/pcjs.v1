@@ -2171,10 +2171,10 @@ class Video extends Component {
      *
      * @this {Video}
      * @param {Object} parmsVideo
-     * @param {Object} [canvas]
-     * @param {Object} [context]
-     * @param {Object} [textarea]
-     * @param {Object} [container]
+     * @param {HTMLCanvasElement} [canvas]
+     * @param {CanvasRenderingContext2D} [context]
+     * @param {HTMLTextAreaElement} [textarea]
+     * @param {HTMLElement} [container]
      */
     constructor(parmsVideo, canvas, context, textarea, container)
     {
@@ -2231,7 +2231,7 @@ class Video extends Component {
 
         this.canvasScreen = canvas;
         this.contextScreen = context;
-        this.textareaScreen = textarea;
+        this.inputTextArea = textarea;
         this.inputScreen = textarea || canvas || null;
 
         /*
@@ -2385,15 +2385,13 @@ class Video extends Component {
          *  }
          */
 
-        var sFileURL = parmsVideo['fontROM'];
-        if (sFileURL) {
-            var sFileExt = Str.getExtension(sFileURL);
+        this.sFileURL = parmsVideo['fontROM'];
+
+        if (this.sFileURL) {
+            var sFileExt = Str.getExtension(this.sFileURL);
             if (sFileExt != "json") {
-                sFileURL = Web.getHost() + DumpAPI.ENDPOINT + '?' + DumpAPI.QUERY.FILE + '=' + sFileURL + '&' + DumpAPI.QUERY.FORMAT + '=' + DumpAPI.FORMAT.BYTES;
+                this.sFileURL = Web.getHost() + DumpAPI.ENDPOINT + '?' + DumpAPI.QUERY.FILE + '=' + this.sFileURL + '&' + DumpAPI.QUERY.FORMAT + '=' + DumpAPI.FORMAT.BYTES;
             }
-            Web.getResource(sFileURL, null, true, function(sURL, sResponse, nErrorCode) {
-                video.doneLoad(sURL, sResponse, nErrorCode);
-            });
         }
     }
 
@@ -2411,6 +2409,8 @@ class Video extends Component {
      */
     initBus(cmp, bus, cpu, dbg)
     {
+        var video = this;
+
         this.bus = bus;
         this.cpu = cpu;
         this.dbg = dbg;
@@ -2457,7 +2457,6 @@ class Video extends Component {
         }
 
         if (DEBUGGER && dbg) {
-            var video = this;
             dbg.messageDump(Messages.VIDEO, function onDumpVideo(asArgs) {
                 video.dumpVideo(asArgs);
             });
@@ -2472,7 +2471,7 @@ class Video extends Component {
             for (var s in this.bindings) {
                 if (s.indexOf("lock") > 0) this.kbd.setBinding("led", s, this.bindings[s]);
             }
-            this.kbd.setBinding(this.textareaScreen? "textarea" : "canvas", "screen", this.inputScreen);
+            this.kbd.setBinding(this.inputTextArea? "textarea" : "canvas", "screen", this.inputScreen);
         }
 
         this.bEGASwitches = 0x09;   // our default "switches" setting (see aEGAMonitorSwitches)
@@ -2495,6 +2494,15 @@ class Video extends Component {
         else if (this.sTouchScreen == "keygrid") {
             if (this.kbd) this.captureTouch(Video.TOUCH.KEYGRID);
         }
+
+        if (this.sFileURL) {
+            var sProgress = "Loading " + this.sFileURL + "...";
+            Web.getResource(this.sFileURL, null, true, function(sURL, sResponse, nErrorCode) {
+                video.doneLoad(sURL, sResponse, nErrorCode);
+            }, function(nState) {
+                video.println(sProgress, Component.TYPE.PROGRESS);
+            });
+        }
     }
 
     /**
@@ -2503,7 +2511,7 @@ class Video extends Component {
      * @this {Video}
      * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "refresh")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
@@ -2585,6 +2593,19 @@ class Video extends Component {
     {
         this.mouse = mouse;
         return this.inputScreen;
+    }
+
+    /**
+     * getTextArea()
+     *
+     * This is an interface used by the Computer component, so that it can display resource status messages.
+     *
+     * @this {Video}
+     * @return {HTMLTextAreaElement|undefined}
+     */
+    getTextArea()
+    {
+        return this.inputTextArea;
     }
 
     /**
@@ -6686,21 +6707,21 @@ class Video extends Component {
      */
     static init()
     {
-        var aeVideo = Component.getElementsByClass(document, PCX86.APPCLASS, "video");
-        for (var iVideo = 0; iVideo < aeVideo.length; iVideo++) {
-            var eVideo = aeVideo[iVideo];
-            var parmsVideo = Component.getComponentParms(eVideo);
+        var aElement = Component.getElementsByClass(document, PCX86.APPCLASS, "video");
+        for (var iVideo = 0; iVideo < aElement.length; iVideo++) {
+            var element = aElement[iVideo];
+            var parmsVideo = Component.getComponentParms(element);
 
-            var eCanvas = document.createElement("canvas");
-            if (eCanvas === undefined || !eCanvas.getContext) {
-                eVideo.innerHTML = "<br/>Missing &lt;canvas&gt; support. Please try a newer web browser.";
+            var canvas = /** @type {HTMLCanvasElement} */ (document.createElement("canvas"));
+            if (canvas === undefined || !canvas.getContext) {
+                element.innerHTML = "<br/>Missing &lt;canvas&gt; support. Please try a newer web browser.";
                 return;
             }
 
-            eCanvas.setAttribute("class", "pcjs-canvas");
-            eCanvas.setAttribute("width", parmsVideo['screenWidth']);
-            eCanvas.setAttribute("height", parmsVideo['screenHeight']);
-            eCanvas.style.backgroundColor = parmsVideo['screenColor'];
+            canvas.setAttribute("class", "pcjs-canvas");
+            canvas.setAttribute("width", parmsVideo['screenWidth']);
+            canvas.setAttribute("height", parmsVideo['screenHeight']);
+            canvas.style.backgroundColor = parmsVideo['screenColor'];
 
             /*
              * The "contenteditable" attribute on a canvas element NOTICEABLY slows down canvas drawing on
@@ -6708,7 +6729,7 @@ class Video extends Component {
              * up; click on the canvas, and drawing slows down).  So the "transparent textarea hack" that we
              * once employed as only a work-around for Android devices is now our default.
              *
-             *      eCanvas.setAttribute("contenteditable", "true");
+             *      canvas.setAttribute("contenteditable", "true");
              *
              * HACK: A canvas style of "auto" provides for excellent responsive canvas scaling in EVERY browser
              * except IE9/IE10, so I recalculate the appropriate CSS height every time the parent DIV is resized;
@@ -6717,14 +6738,14 @@ class Video extends Component {
              * The other reason it's good to keep this particular hack limited to IE9/IE10 is that most other
              * browsers don't actually support an 'onresize' handler on anything but the window object.
              */
-            eCanvas.style.height = "auto";
+            canvas.style.height = "auto";
             if (Web.getUserAgent().indexOf("MSIE") >= 0) {
-                eVideo.onresize = function(eParent, eChild, cx, cy) {
+                element.onresize = function(eParent, eChild, cx, cy) {
                     return function onResizeVideo() {
                         eChild.style.height = (((eParent.clientWidth * cy) / cx) | 0) + "px";
                     };
-                }(eVideo, eCanvas, parmsVideo['screenWidth'], parmsVideo['screenHeight']);
-                eVideo.onresize();
+                }(element, canvas, parmsVideo['screenWidth'], parmsVideo['screenHeight']);
+                element.onresize(null);
             }
             /*
              * The following is a related hack that allows the user to force the screen to use a particular aspect
@@ -6754,10 +6775,10 @@ class Video extends Component {
                          */
                         eChild.style.height = ((eParent.clientWidth / aspectRatio)|0) + "px";
                     };
-                }(eVideo, eCanvas, aspect));
+                }(element, canvas, aspect));
                 window['onresize']();
             }
-            eVideo.appendChild(eCanvas);
+            element.appendChild(canvas);
 
             /*
              * HACK: Android-based browsers, like the Silk (Amazon) browser and Chrome for Android, don't honor the
@@ -6780,14 +6801,14 @@ class Video extends Component {
              * clearly see the overlaid semi-transparent input field, but none of the input characters were passed along,
              * with the exception of the "Go" (Enter) key.
              *
-             *      var eInput = document.createElement("input");
-             *      eInput.setAttribute("type", "password");
-             *      eInput.setAttribute("style", "position:absolute; left:0; top:0; width:100%; height:100%; opacity:0.5");
-             *      eVideo.appendChild(eInput);
+             *      var input = document.createElement("input");
+             *      input.setAttribute("type", "password");
+             *      input.setAttribute("style", "position:absolute; left:0; top:0; width:100%; height:100%; opacity:0.5");
+             *      element.appendChild(input);
              *
              * See this Chromium issue for more information: https://code.google.com/p/chromium/issues/detail?id=118639
              */
-            var eTextArea = document.createElement("textarea");
+            var textarea = /** @type {HTMLTextAreaElement} */ (document.createElement("textarea"));
 
             /*
              * As noted in keyboard.js, the keyboard on an iOS device tends to pop up with the SHIFT key depressed,
@@ -6795,8 +6816,8 @@ class Video extends Component {
              * these "auto" attributes will help.
              */
             if (Web.isUserAgent("iOS")) {
-                eTextArea.setAttribute("autocapitalize", "off");
-                eTextArea.setAttribute("autocorrect", "off");
+                textarea.setAttribute("autocapitalize", "off");
+                textarea.setAttribute("autocorrect", "off");
                 /*
                  * One of the problems on iOS devices is that after a soft-key control is clicked, we need to give
                  * focus back to the above textarea, usually by calling cmp.updateFocus(), but in doing so, iOS may
@@ -6805,21 +6826,21 @@ class Video extends Component {
                  * Googling reveals that another way to prevent those jarring unintentional zooms is to simply set the
                  * font-size of the text control to 16px.  So that's what we do.
                  */
-                eTextArea.style.fontSize = "16px";
+                textarea.style.fontSize = "16px";
             }
-            eVideo.appendChild(eTextArea);
+            element.appendChild(textarea);
 
             /*
              * Now we can create the Video object, record it, and wire it up to the associated document elements.
              */
-            var eContext = eCanvas.getContext("2d");
-            var video = new Video(parmsVideo, eCanvas, eContext, eTextArea /* || eInput */, eVideo);
+            var context = /** @type {CanvasRenderingContext2D} */ (canvas.getContext("2d"));
+            var video = new Video(parmsVideo, canvas, context, textarea /* || input */, element);
 
             /*
              * Bind any video-specific controls (eg, the Refresh button). There are no essential controls, however;
              * even the "Refresh" button is just a diagnostic tool, to ensure that the screen contents are up-to-date.
              */
-            Component.bindComponentControls(video, eVideo, PCX86.APPCLASS);
+            Component.bindComponentControls(video, element, PCX86.APPCLASS);
         }
     }
 }

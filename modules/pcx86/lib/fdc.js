@@ -200,19 +200,26 @@ class FDC extends Component {
      * @this {FDC}
      * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "listDisks")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
     setBinding(sHTMLType, sBinding, control, sValue)
     {
         var fdc = this;
+        /*
+         * TODO: Making copies of control that are simply cast to different types seems silly, but it doesn't
+         * really cost anything and it's cleaner than doing a lot MORE type overrides inline.  However, it still
+         * doesn't solve all my problems: controlForm should really be cast as HTMLFormElement, but JavaScript
+         * inspections refuse to believe there's an 'onsubmit' property on an HTMLFormElement that I can override.
+         */
+        var controlForm = /** @type {Object} */ (control);
+        var controlSelect = /** @type {HTMLSelectElement} */ (control);
 
         switch (sBinding) {
 
         case "listDisks":
-            this.bindings[sBinding] = control;
-
+            this.bindings[sBinding] = controlSelect;
             /*
              * Since binding is a one-time initialization operation, it's also the perfect time to
              * perform whatever sorting (if any) is indicated by the FDC component's "sortBy" property.
@@ -235,8 +242,8 @@ class FDC extends Component {
                  * we have a special function, displayDiskette(), that will be called at LEAST once during
                  * initialization, ensuring that selectedIndex is set correctly.
                  */
-                for (i = 0; i < control.options.length; i++)  {
-                    aOptions.push(control.options[i]);
+                for (i = 0; i < controlSelect.options.length; i++)  {
+                    aOptions.push(controlSelect.options[i]);
                 }
                 aOptions.sort(function(a, b) {
                     /*
@@ -256,16 +263,15 @@ class FDC extends Component {
                         /*
                          * TODO: Determine why this line blows up in IE8; are the properties of an options object not settable in IE8?
                          */
-                        control.options[i] = aOptions[i];
+                        controlSelect.options[i] = aOptions[i];
                     } catch(e) {
                         break;
                     }
                 }
             }
-
-            control.onchange = function onChangeListDisks(event) {
+            controlSelect.onchange = function onChangeListDisks(event) {
                 var controlDesc = fdc.bindings["descDisk"];
-                var controlOption = control.options[control.selectedIndex];
+                var controlOption = controlSelect.options[controlSelect.selectedIndex];
                 if (controlDesc && controlOption) {
                     var dataValue = {};
                     var sValue = controlOption.getAttribute("data-value");
@@ -287,22 +293,21 @@ class FDC extends Component {
 
         case "descDisk":
         case "listDrives":
-            this.bindings[sBinding] = control;
+            this.bindings[sBinding] = controlSelect;
             /*
              * I tried going with onclick instead of onchange, so that if you wanted to confirm what's
              * loaded in a particular drive, you could click the drive control without having to change it.
              * However, that doesn't seem to work for all browsers, so I've reverted to onchange.
              */
-            control.onchange = function onChangeListDrives(event) {
-                var iDrive = Str.parseInt(control.value, 10);
+            controlSelect.onchange = function onChangeListDrives(event) {
+                var iDrive = Str.parseInt(controlSelect.value, 10);
                 if (iDrive != null) fdc.displayDiskette(iDrive);
             };
             return true;
 
         case "loadDisk":
             this.bindings[sBinding] = control;
-
-            control.onclick = function onClickLoadDrive(event) {
+            control.onclick = function onClickLoadDisk(event) {
                 var controlDisks = fdc.bindings["listDisks"];
                 if (controlDisks) {
                     var sDisketteName = controlDisks.options[controlDisks.selectedIndex].text;
@@ -330,10 +335,8 @@ class FDC extends Component {
                 control.parentNode.removeChild(/** @type {Node} */ (control));
                 return false;
             }
-
             this.bindings[sBinding] = control;
-
-            control.onclick = function onClickSaveDrive(event) {
+            control.onclick = function onClickSaveDisk(event) {
                 var controlDrives = fdc.bindings["listDrives"];
                 if (controlDrives && controlDrives.options && fdc.aDrives) {
                     var iDriveSelected = Str.parseInt(controlDrives.value, 10) || 0;
@@ -364,27 +367,24 @@ class FDC extends Component {
                 /*
                  * We could also simply hide the control; eg:
                  *
-                 *      control.style.display = "none";
+                 *      controlForm.style.display = "none";
                  *
                  * but removing the control altogether seems better.
                  */
-                control.parentNode.removeChild(/** @type {Node} */ (control));
+                controlForm.parentNode.removeChild(/** @type {Node} */ (controlForm));
                 return false;
             }
-
-            this.bindings[sBinding] = control;
-
+            this.bindings[sBinding] = controlForm;
             /*
              * Enable "Mount" button only if a file is actually selected
              */
-            control.addEventListener('change', function() {
-                var fieldset = control.children[0];
+            controlForm.onchange = function onChangeMountDisk() {
+                var fieldset = controlForm.children[0];
                 var files = fieldset.children[0].files;
                 var submit = fieldset.children[1];
                 submit.disabled = !files.length;
-            });
-
-            control.onsubmit = function(event) {
+            };
+            controlForm.onsubmit = function onSubmitMountDisk(event) {
                 var file = event.currentTarget[1].files[0];
                 if (file) {
                     var sDiskettePath = file.name;
@@ -1147,7 +1147,7 @@ class FDC extends Component {
             if (DEBUG) this.println("loading disk " + sDiskettePath + "...");
 
             while (this.loadDrive(iDrive, sDisketteName, sDiskettePath, false, file) < 0) {
-                if (!window.confirm("Click OK to reload the original disk.\n(WARNING: All disk changes will be discarded)")) {
+                if (!window.confirm("Click OK to reload the original disk and discard any changes.")) {
                     return;
                 }
                 /*
@@ -1524,7 +1524,7 @@ class FDC extends Component {
     addDiskHistory(sDisketteName, sDiskettePath, disk)
     {
         var i;
-        this.assert(!!sDiskettePath);
+        // this.assert(!!sDiskettePath);
         for (i = 0; i < this.aDiskHistory.length; i++) {
             if (this.aDiskHistory[i][1] == sDiskettePath) {
                 var nChanges = disk.restore(this.aDiskHistory[i][2]);

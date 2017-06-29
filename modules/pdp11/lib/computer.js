@@ -98,6 +98,7 @@ class ComputerPDP11 extends Component {
      * function (if it has one--it's optional).  We call the CPU's powerUp() function last,
      * so that the CPU is assured that all other components are ready and "powered".
      *
+     * @this {ComputerPDP11}
      * @param {Object} parmsComputer
      * @param {Object} [parmsMachine]
      * @param {boolean} [fSuspended]
@@ -164,9 +165,11 @@ class ComputerPDP11 extends Component {
          */
         var iComponent, component;
         var aComponents = Component.getComponents(this.id);
-        this.panel = /** @type {PanelPDP11} */ (Component.getComponentByType("Panel", this.id));
 
-        if (this.panel && this.panel.controlPrint) {
+        this.panel = /** @type {PanelPDP11} */ (Component.getComponentByType("Panel", this.id));
+        this.controlPrint = this.panel && this.panel.bindings['print'];
+
+        if (this.controlPrint) {
             for (iComponent = 0; iComponent < aComponents.length; iComponent++) {
                 component = aComponents[iComponent];
                 /*
@@ -175,8 +178,8 @@ class ComputerPDP11 extends Component {
                  * too darn convenient to slam those overrides into the components directly.
                  */
                 component.notice = this.panel.notice;
+                component.print = this.panel.print;
                 component.println = this.panel.println;
-                component.controlPrint = this.panel.controlPrint;
             }
         }
 
@@ -267,8 +270,21 @@ class ComputerPDP11 extends Component {
     }
 
     /**
+     * clearPanel()
+     *
+     * @this {ComputerPDP11}
+     */
+    clearPanel()
+    {
+        if (this.controlPrint) {
+            this.controlPrint.value = "";
+        }
+    }
+
+    /**
      * getMachineID()
      *
+     * @this {ComputerPDP11}
      * @return {string}
      */
     getMachineID()
@@ -281,6 +297,7 @@ class ComputerPDP11 extends Component {
      *
      * If no explicit machine parms were provided, then we check for 'parms' in the bundled resources (if any).
      *
+     * @this {ComputerPDP11}
      * @param {Object} [parmsMachine]
      */
     setMachineParms(parmsMachine)
@@ -312,6 +329,7 @@ class ComputerPDP11 extends Component {
      * (eg, Str.TYPES.NUMBER) is used, the return value will be that type; unfortunately, every caller
      * must coerce their own return value.
      *
+     * @this {ComputerPDP11}
      * @param {string} sParm
      * @param {Object|null} [parmsComponent]
      * @param {number} [type] (from Str.TYPES)
@@ -349,6 +367,7 @@ class ComputerPDP11 extends Component {
     /**
      * saveMachineParms()
      *
+     * @this {ComputerPDP11}
      * @return {string|null}
      */
     saveMachineParms()
@@ -359,6 +378,7 @@ class ComputerPDP11 extends Component {
     /**
      * getUserID()
      *
+     * @this {ComputerPDP11}
      * @return {string}
      */
     getUserID()
@@ -1167,6 +1187,8 @@ class ComputerPDP11 extends Component {
 
     /**
      * resetUserID()
+     *
+     * @this {ComputerPDP11}
      */
     resetUserID()
     {
@@ -1177,6 +1199,7 @@ class ComputerPDP11 extends Component {
     /**
      * queryUserID(fPrompt)
      *
+     * @this {ComputerPDP11}
      * @param {boolean} [fPrompt]
      * @returns {string|null|undefined}
      */
@@ -1265,6 +1288,7 @@ class ComputerPDP11 extends Component {
     /**
      * saveServerState(sUserID, sState)
      *
+     * @this {ComputerPDP11}
      * @param {string} sUserID
      * @param {string|null} sState
      */

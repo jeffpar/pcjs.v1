@@ -190,7 +190,7 @@ class ChipSet extends Component {
      * @this {ChipSet}
      * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "sw1")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
@@ -1618,7 +1618,7 @@ class ChipSet extends Component {
      * getDIPSwitchControl(control)
      *
      * @this {ChipSet}
-     * @param {Object} control is an HTML control DOM object
+     * @param {HTMLElement} control is an HTML control DOM object
      * @return {boolean} true if the switch represented by e is "on", false if "off"
      */
     getDIPSwitchControl(control)
@@ -1630,7 +1630,7 @@ class ChipSet extends Component {
      * setDIPSwitchControl(control, f)
      *
      * @this {ChipSet}
-     * @param {Object} control is an HTML control DOM object
+     * @param {HTMLElement} control is an HTML control DOM object
      * @param {boolean} f is true if the switch represented by control should be "on", false if "off"
      */
     setDIPSwitchControl(control, f)
@@ -1644,7 +1644,7 @@ class ChipSet extends Component {
      * toggleDIPSwitchControl(control)
      *
      * @this {ChipSet}
-     * @param {Object} control is an HTML control DOM object
+     * @param {HTMLElement} control is an HTML control DOM object
      */
     toggleDIPSwitchControl(control)
     {

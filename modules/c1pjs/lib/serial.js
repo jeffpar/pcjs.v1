@@ -120,7 +120,7 @@ class C1PSerialPort extends Component {
         case "loadSerial":
             this.bindings[sBinding] = control;
 
-            control.onclick = function(event) {
+            control.onclick = function onClickLoadSerial(event) {
                 if (serial.bindings["listSerial"]) {
                     var sFile = serial.bindings["listSerial"].value;
                     // serial.println("loading " + sFile + "...");
@@ -137,18 +137,16 @@ class C1PSerialPort extends Component {
              */
             if (!Web.isMobile() && window && 'FileReader' in window) {
                 this.bindings[sBinding] = control;
-
                 /*
                  * Enable "Mount" button only if a file is actually selected
                  */
-                control.addEventListener('change', function() {
+                control.onchange = function onChangeMountSerial() {
                     var fieldset = control.children[0];
                     var files = fieldset.children[0].files;
                     var submit = fieldset.children[1];
                     submit.disabled = !files.length;
-                });
-
-                control.onsubmit = function(event) {
+                };
+                control.onsubmit = function onSubmitMountSerial(event) {
                     var file = event.currentTarget[1].files[0];
 
                     var reader = new FileReader();

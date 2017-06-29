@@ -143,8 +143,7 @@ class Computer extends Component {
     {
         super("Computer", parmsComputer, Messages.COMPUTER);
 
-        this.flags.powered = false;
-
+        var cmp = this;
         this.setMachineParms(parmsMachine);
 
         this.fAutoPower = this.getMachineParm('autoPower', parmsComputer);
@@ -202,25 +201,39 @@ class Computer extends Component {
         this.bus = new Bus({'id': this.idMachine + '.bus', 'busWidth': this.nBusWidth}, this.cpu, this.dbg);
 
         /*
-         * Iterate through all the components and connect them to the Control Panel, if any
+         * Iterate through all the components and override their notice() and println() methods so
+         * that their output can be rerouted to an Initialization Display or a Control Panel, if any.
          */
         var iComponent, component;
         var aComponents = Component.getComponents(this.id);
-        this.panel = /** @type {Panel} */ (Component.getComponentByType("Panel", this.id));
 
-        if (this.panel && this.panel.controlPrint) {
-            for (iComponent = 0; iComponent < aComponents.length; iComponent++) {
-                component = aComponents[iComponent];
-                /*
-                 * I can think of many "cleaner" ways for the Control Panel component to pass its
-                 * notice(), println(), etc, overrides on to all the other components, but it's just
-                 * too darn convenient to slam those overrides into the components directly.
-                 */
-                component.notice = this.panel.notice;
-                component.println = this.panel.println;
-                component.controlPrint = this.panel.controlPrint;
-            }
+        this.panel = /** @type {Panel} */ (Component.getComponentByType("Panel", this.id));
+        this.controlPanel = this.panel && this.panel.bindings['print'];
+
+        this.noticeComputer = this.notice;
+        this.printComputer = this.print;
+        this.printlnComputer = this.println;
+        if (this.controlPanel) {
+            this.noticeComputer = this.panel.notice;
+            this.printComputer = this.panel.print;
+            this.printlnComputer = this.panel.println;
         }
+        for (iComponent = 0; iComponent < aComponents.length; iComponent++) {
+            component = aComponents[iComponent];
+            component.notice = function noticeComputer(s, fPrintOnly, id) {
+                cmp.outputDiagnostics(s);
+                return cmp.noticeComputer.call(this, s, fPrintOnly, id);
+            }.bind(component);
+            component.print = function printComputer(s) {
+                return cmp.printComputer.call(this, s);
+            }.bind(component);
+            component.println = function printlnComputer(s, type, id) {
+                cmp.outputDiagnostics(s, type);
+                return cmp.printlnComputer.call(this, s, type, id);
+            }.bind(component);
+        }
+        this.cDiagnosticScreens = 0;
+        if (!this.controlPanel) this.enableDiagnostics();
 
         this.println(PCX86.APPNAME + " v" + (XMLVERSION || PCX86.APPVERSION) + "\n" + COPYRIGHT + "\n" + LICENSE);
 
@@ -292,12 +305,16 @@ class Computer extends Component {
             if (sStatePath) this.fServerState = true;
         }
 
-        if (!sStatePath) {
+        this.sStateURL = sStatePath;
+
+        if (!this.sStateURL) {
             this.setReady();
         } else {
-            var cmp = this;
-            Web.getResource(sStatePath, null, true, function(sURL, sResource, nErrorCode) {
+            var sProgress = "Loading " + this.sStateURL + "...";
+            Web.getResource(this.sStateURL, null, true, function(sURL, sResource, nErrorCode) {
                 cmp.doneLoad(sURL, sResource, nErrorCode);
+            }, function(nState) {
+                cmp.println(sProgress, Component.TYPE.PROGRESS);
             });
         }
 
@@ -310,8 +327,87 @@ class Computer extends Component {
     }
 
     /**
+     * clearPanel()
+     *
+     * @this {Computer}
+     */
+    clearPanel()
+    {
+        if (this.controlPanel) {
+            this.controlPanel.value = "";
+        }
+    }
+
+    /**
+     * enableDiagnostics()
+     *
+     * @this {Computer}
+     */
+    enableDiagnostics()
+    {
+        for (var i = 0; i < this.aVideo.length; i++) {
+            var video = this.aVideo[i];
+            if (video) {
+                var control = video.getTextArea();
+                if (control) {
+                    control.style.opacity = "1";
+                    control.style.lineHeight = "1";
+                    this.cDiagnosticScreens++;
+                }
+            }
+        }
+    }
+
+    /**
+     * disableDiagnostics()
+     *
+     * @this {Computer}
+     */
+    disableDiagnostics()
+    {
+        for (var i = 0; i < this.aVideo.length; i++) {
+            var video = this.aVideo[i];
+            if (video) {
+                var control = video.getTextArea();
+                if (control) {
+                    control.style.opacity = "0";
+                    control.style.lineHeight = "0";
+                    control.value = "";
+                }
+            }
+        }
+        this.cDiagnosticScreens = 0;
+    }
+
+    /**
+     * outputDiagnostics(sMessage, sType)
+     *
+     * @this {Computer}
+     * @param {string} sMessage
+     * @param {string} [sType]
+     */
+    outputDiagnostics(sMessage, sType)
+    {
+        if (!this.cDiagnosticScreens) return;
+        for (var i = 0; i < this.aVideo.length; i++) {
+            var video = this.aVideo[i];
+            if (video) {
+                var control = video.getTextArea();
+                if (control) {
+                    if (sType != Component.TYPE.PROGRESS || sMessage.slice(-3) != "...") {
+                        Component.appendControl(control, sMessage + '\n');
+                    } else {
+                        Component.replaceControl(control, sMessage, sMessage + '.');
+                    }
+                }
+            }
+        }
+    }
+
+    /**
      * getMachineID()
      *
+     * @this {Computer}
      * @return {string}
      */
     getMachineID()
@@ -324,6 +420,7 @@ class Computer extends Component {
      *
      * If no explicit machine parms were provided, then we check for 'parms' in the bundled resources (if any).
      *
+     * @this {Computer}
      * @param {Object} [parmsMachine]
      */
     setMachineParms(parmsMachine)
@@ -351,6 +448,7 @@ class Computer extends Component {
      * 'state' back to the caller (ie, the name of the resource), so that the caller will then attempt to load the 'state'
      * resource to obtain the actual state.
      *
+     * @this {Computer}
      * @param {string} sParm
      * @param {Object} [parmsComponent]
      * @return {string|undefined}
@@ -374,6 +472,7 @@ class Computer extends Component {
     /**
      * saveMachineParms()
      *
+     * @this {Computer}
      * @return {string|null}
      */
     saveMachineParms()
@@ -384,6 +483,7 @@ class Computer extends Component {
     /**
      * getUserID()
      *
+     * @this {Computer}
      * @return {string}
      */
     getUserID()
@@ -717,6 +817,8 @@ class Computer extends Component {
                 }
             }
 
+            component.flags.initDone = true;
+
             if (!fRepower && component.comment) {
                 var asComments = component.comment.split("|");
                 for (var i = 0; i < asComments.length; i++) {
@@ -745,7 +847,11 @@ class Computer extends Component {
             this.printMessage("Computer.donePowerOn(): redundant");
         }
 
-        this.fInitialized = true;
+        if (!this.flags.initDone) {
+            this.disableDiagnostics();
+            this.flags.initDone = true;
+        }
+
         this.flags.powered = true;
         var controlPower = this.bindings["power"];
         if (controlPower) controlPower.textContent = "Shutdown";
@@ -897,7 +1003,6 @@ class Computer extends Component {
          * after they're no longer ready.
          */
         if (this.cpu && this.cpu.powerDown) {
-            if (fShutdown) this.cpu.stopCPU();
             data = this.cpu.powerDown(fSave, fShutdown);
             if (typeof data === "object") stateComputer.set(this.cpu.id, data);
             if (fShutdown) {
@@ -1063,7 +1168,7 @@ class Computer extends Component {
      * @this {Computer}
      * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "reset")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
@@ -1153,6 +1258,8 @@ class Computer extends Component {
 
     /**
      * resetUserID()
+     *
+     * @this {Computer}
      */
     resetUserID()
     {
@@ -1163,6 +1270,7 @@ class Computer extends Component {
     /**
      * queryUserID(fPrompt)
      *
+     * @this {Computer}
      * @param {boolean} [fPrompt]
      * @returns {string|null|undefined}
      */
@@ -1251,6 +1359,7 @@ class Computer extends Component {
     /**
      * saveServerState(sUserID, sState)
      *
+     * @this {Computer}
      * @param {string} sUserID
      * @param {string|null} sState
      */
@@ -1591,10 +1700,10 @@ class Computer extends Component {
                 computer.flags.unloading = false;
 
                 if (DEBUG && computer.messageEnabled()) {
-                    computer.printMessage("onShow(" + computer.fInitialized + "," + computer.flags.powered + ")");
+                    computer.printMessage("onShow(" + computer.flags.initDone + "," + computer.flags.powered + ")");
                 }
 
-                if (computer.fInitialized && !computer.flags.powered) {
+                if (computer.flags.initDone && !computer.flags.powered) {
                     /**
                      * Repower the computer, notifying every component to continue running as-is.
                      */

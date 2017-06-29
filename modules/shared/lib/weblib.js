@@ -145,7 +145,7 @@ class Web {
     }
 
     /**
-     * getResource(sURL, dataPost, fAsync, done)
+     * getResource(sURL, dataPost, fAsync, done, progress)
      *
      * Request the specified resource (sURL), and once the request is complete, notify done().
      *
@@ -168,9 +168,10 @@ class Web {
      * @param {string|Object|null} [dataPost] for a POST request (default is a GET request)
      * @param {boolean} [fAsync] is true for an asynchronous request
      * @param {function(string,string,number)} [done]
+     * @param {function(number)} [progress]
      * @return {Array|null} Array containing [sResource, nErrorCode], or null if no response yet
      */
-    static getResource(sURL, dataPost, fAsync = false, done)
+    static getResource(sURL, dataPost, fAsync = false, done, progress)
     {
         var nErrorCode = 0, sResource = null, response = null;
 
@@ -208,32 +209,37 @@ class Web {
         if (fAsync) {
             xmlHTTP.onreadystatechange = function()
             {
-                if (xmlHTTP.readyState === 4) {
-                    /*
-                     * The following line was recommended for WebKit, as a work-around to prevent the handler firing multiple
-                     * times when debugging.  Unfortunately, that's not the only XMLHttpRequest problem that occurs when
-                     * debugging, so I think the WebKit problem is deeper than that.  When we have multiple XMLHttpRequests
-                     * pending, any debugging activity means most of them simply get dropped on floor, so what may actually be
-                     * happening are mis-notifications rather than redundant notifications.
-                     *
-                     *      xmlHTTP.onreadystatechange = undefined;
-                     */
-                    sResource = xmlHTTP.responseText;
-                    /*
-                     * The normal "success" case is an HTTP status code of 200, but when testing with files loaded
-                     * from the local file system (ie, when using the "file:" protocol), we have to be a bit more "flexible".
-                     */
-                    if (xmlHTTP.status == 200 || !xmlHTTP.status && sResource.length && Web.getHostProtocol() == "file:") {
-                        if (MAXDEBUG) Web.log("xmlHTTP.onreadystatechange(" + sURL + "): returned " + sResource.length + " bytes");
-                    }
-                    else {
-                        nErrorCode = xmlHTTP.status || -1;
-                        Web.log("xmlHTTP.onreadystatechange(" + sURL + "): error code " + nErrorCode);
-                    }
-                    if (done) done(sURL, sResource, nErrorCode);
+                if (xmlHTTP.readyState !== 4) {
+                    if (progress) progress(1);
+                    return;
                 }
+                /*
+                 * The following line was recommended for WebKit, as a work-around to prevent the handler firing multiple
+                 * times when debugging.  Unfortunately, that's not the only XMLHttpRequest problem that occurs when
+                 * debugging, so I think the WebKit problem is deeper than that.  When we have multiple XMLHttpRequests
+                 * pending, any debugging activity means most of them simply get dropped on floor, so what may actually be
+                 * happening are mis-notifications rather than redundant notifications.
+                 *
+                 *      xmlHTTP.onreadystatechange = undefined;
+                 */
+                sResource = xmlHTTP.responseText;
+                /*
+                 * The normal "success" case is an HTTP status code of 200, but when testing with files loaded
+                 * from the local file system (ie, when using the "file:" protocol), we have to be a bit more "flexible".
+                 */
+                if (xmlHTTP.status == 200 || !xmlHTTP.status && sResource.length && Web.getHostProtocol() == "file:") {
+                    if (MAXDEBUG) Web.log("xmlHTTP.onreadystatechange(" + sURL + "): returned " + sResource.length + " bytes");
+                }
+                else {
+                    nErrorCode = xmlHTTP.status || -1;
+                    Web.log("xmlHTTP.onreadystatechange(" + sURL + "): error code " + nErrorCode);
+                }
+                if (progress) progress(2);
+                if (done) done(sURL, sResource, nErrorCode);
             };
         }
+
+        if (progress) progress(0);
 
         if (dataPost && typeof dataPost == "object") {
             var sDataPost = "";

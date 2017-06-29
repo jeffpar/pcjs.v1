@@ -531,8 +531,11 @@ class Disk extends Component {
                 }
             }
         }
+        var sProgress = "Loading " + sDiskURL + "...";
         return !!Web.getResource(sDiskURL, null, true, function loadDone(sURL, sResponse, nErrorCode) {
             disk.doneLoad(sURL, sResponse, nErrorCode);
+        }, function(nState) {
+            disk.println(sProgress, Component.TYPE.PROGRESS);
         });
     }
 

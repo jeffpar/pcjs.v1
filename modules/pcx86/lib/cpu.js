@@ -183,14 +183,15 @@ class CPU extends Component {
     }
 
     /**
-     * save()
+     * save(fRunning)
      *
      * This is a placeholder for save support (overridden by the X86CPU component).
      *
      * @this {CPU}
+     * @param {boolean} [fRunning]
      * @return {Object|null}
      */
-    save()
+    save(fRunning)
     {
         return null;
     }
@@ -233,15 +234,6 @@ class CPU extends Component {
             if (DEBUGGER && this.dbg) {
                 this.dbg.init();
             } else {
-                /*
-                 * The Computer (this.cmp) knows if there's a Control Panel (this.cmp.panel), and the Control Panel
-                 * knows if there's a "print" control (this.cmp.panel.controlPrint), and if there IS a "print" control
-                 * but no debugger, the machine is probably misconfigured (most likely, the page simply neglected to
-                 * load the Debugger component).
-                 *
-                 * However, we don't actually need to check all that; it's always safe use println(), regardless whether
-                 * a Control Panel with a "print" control is present or not.
-                 */
                 this.println("No debugger detected");
             }
         }
@@ -271,7 +263,9 @@ class CPU extends Component {
          *
          *      this.flags.powered = false;
          */
-        return fSave? this.save() : true;
+        var fRunning = this.flags.running;
+        if (fShutdown) this.stopCPU();
+        return fSave? this.save(fRunning) : true;
     }
 
     /**
@@ -454,7 +448,7 @@ class CPU extends Component {
      * @this {CPU}
      * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "run")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
@@ -748,7 +742,7 @@ class CPU extends Component {
             /*
              * If we haven't reached 80% (0.8) of the current target speed, revert to a multiplier of one (1).
              */
-            if (this.aCounts.mhz / this.aCounts.mhzTarget < 0.8) {
+            if ((fUpdateFocus || this.flags.running) && this.aCounts.mhz / this.aCounts.mhzTarget < 0.8) {
                 nMultiplier = 1;
             } else {
                 fSuccess = true;

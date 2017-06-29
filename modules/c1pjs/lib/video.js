@@ -121,9 +121,9 @@ class C1PVideo extends Component {
      *
      * @this {C1PVideo}
      * @param {Object} parmsVideo
-     * @param {Object} canvas
-     * @param {Object} context
-     * @param {Object} imgChars
+     * @param {HTMLCanvasElement} canvas
+     * @param {CanvasRenderingContext2D} context
+     * @param {HTMLImageElement} imgChars
      */
     constructor(parmsVideo, canvas, context, imgChars)
     {
@@ -218,7 +218,7 @@ class C1PVideo extends Component {
      * @this {C1PVideo}
      * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "refresh")
-     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @param {string} [sValue] optional data value
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
@@ -580,7 +580,7 @@ class C1PVideo extends Component {
              * I've since settled on a better work-around in keyboard.js, so I've stopped worrying about how to make
              * "autocapitalize" work here.
              */
-            var eCanvas = document.createElement("canvas");
+            var eCanvas = /** @type {HTMLCanvasElement} */ (document.createElement("canvas"));
             if (eCanvas === undefined || !eCanvas.getContext) {
                 eVideo.innerHTML = "<br/>Missing &lt;canvas&gt; support. Please try a newer web browser.";
                 return;
@@ -619,7 +619,7 @@ class C1PVideo extends Component {
              *      document.createElement('img') would.
              */
             var imgCharSet = new Image();
-            var eContext = eCanvas.getContext("2d");
+            var eContext = /** @type {CanvasRenderingContext2D} */ (eCanvas.getContext("2d"));
             var video = new C1PVideo(parmsVideo, eCanvas, eContext, imgCharSet);
             imgCharSet.onload = function(video, sCharSet) {
                 return function() {

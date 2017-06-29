@@ -85,7 +85,6 @@ class ROM extends Component {
          * Most ROMs are not aliased, in which case the 'alias' property should have the default value of null.
          */
         this.addrAlias = parmsROM['alias'];
-        this.sFilePath = parmsROM['file'];
 
         /*
          * The 'notify' property can now (as of v1.18.2) contain an array of parameters that the notified
@@ -107,10 +106,12 @@ class ROM extends Component {
                 this.idNotify = this.idNotify.substr(0, i);
             }
         }
-        if (this.sFilePath) {
-            var sFileURL = this.sFilePath;
-            var sFileName = Str.getBaseName(sFileURL);
-            if (DEBUG) this.log('load("' + sFileURL + '")');
+
+        this.sFileURL = this.sFilePath = parmsROM['file'];
+
+        if (this.sFileURL) {
+            var sFileName = Str.getBaseName(this.sFileURL);
+            if (DEBUG) this.log('load("' + this.sFileURL + '")');
             /*
              * If the selected ROM file has a ".json" extension, then we assume it's pre-converted
              * JSON-encoded ROM data, so we load it as-is; ditto for ROM files with a ".hex" extension.
@@ -118,12 +119,8 @@ class ROM extends Component {
              */
             var sFileExt = Str.getExtension(sFileName);
             if (sFileExt != DumpAPI.FORMAT.JSON && sFileExt != DumpAPI.FORMAT.HEX) {
-                sFileURL = Web.getHost() + DumpAPI.ENDPOINT + '?' + DumpAPI.QUERY.FILE + '=' + this.sFilePath + '&' + DumpAPI.QUERY.FORMAT + '=' + DumpAPI.FORMAT.BYTES + '&' + DumpAPI.QUERY.DECIMAL + '=true';
+                this.sFileURL = Web.getHost() + DumpAPI.ENDPOINT + '?' + DumpAPI.QUERY.FILE + '=' + this.sFilePath + '&' + DumpAPI.QUERY.FORMAT + '=' + DumpAPI.FORMAT.BYTES + '&' + DumpAPI.QUERY.DECIMAL + '=true';
             }
-            var rom = this;
-            Web.getResource(sFileURL, null, true, function(sURL, sResponse, nErrorCode) {
-                rom.doneLoad(sURL, sResponse, nErrorCode);
-            });
         }
     }
 
@@ -138,10 +135,20 @@ class ROM extends Component {
      */
     initBus(cmp, bus, cpu, dbg)
     {
+        this.cmp = cmp;
         this.bus = bus;
         this.cpu = cpu;
         this.dbg = dbg;
-        this.copyROM();
+
+        if (this.sFileURL) {
+            var rom = this;
+            var sProgress = "Loading " + this.sFileURL + "...";
+            Web.getResource(this.sFileURL, null, true, function(sURL, sResponse, nErrorCode) {
+                rom.doneLoad(sURL, sResponse, nErrorCode);
+            }, function(nState) {
+                rom.println(sProgress, Component.TYPE.PROGRESS);
+            });
+        }
     }
 
     /**

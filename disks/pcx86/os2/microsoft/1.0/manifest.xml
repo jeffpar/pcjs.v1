@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.35.1/manifest.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.35.2/manifest.xsl"?>
 <manifest type="software">
 	<title>MS OS/2 1.0</title>
 	<disk id="disk01" size="1228800" chs="80:2:15" img="archive/MSOS210-INSTALL.img" href="/disks/pcx86/os2/microsoft/1.0/MSOS210-INSTALL.json" md5="3a11b6f40af5872e3be4293773eb0169" md5json="dbd169c61900c937be8b0dc557e1c14f">
