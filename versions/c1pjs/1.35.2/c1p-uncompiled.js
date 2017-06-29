@@ -660,7 +660,7 @@ class Str {
     }
 
     /**
-     * replace(sFind, sReplace, s)
+     * replace(sSearch, sReplace, s)
      *
      * The JavaScript replace() function ALWAYS interprets "$" specially in replacement strings, even when
      * the search string is NOT a RegExp; specifically:
@@ -675,36 +675,36 @@ class Str {
      * So, if a replacement string containing dollar signs passes through a series of replace() calls, untold
      * problems could result.  Hence, this function, which simply uses the replacement string as-is.
      *
-     * Similar to the JavaScript replace() method, this replaces only one occurrence (ie, the FIRST occurrence);
-     * it might be nice to add options to replace the LAST occurrence and/or ALL occurrences, but we'll revisit
-     * that later.
+     * Similar to the JavaScript replace() method (when sSearch is a string), this replaces only ONE occurrence
+     * (ie, the FIRST occurrence); it might be nice to add options to replace the LAST occurrence and/or ALL
+     * occurrences, but we'll revisit that later.
      *
-     * @param {string} sFind
+     * @param {string} sSearch
      * @param {string} sReplace
      * @param {string} s
      * @return {string}
      */
-    static replace(sFind, sReplace, s)
+    static replace(sSearch, sReplace, s)
     {
-        var i = s.indexOf(sFind);
+        var i = s.indexOf(sSearch);
         if (i >= 0) {
-            s = s.substr(0, i) + sReplace + s.substr(i + sFind.length);
+            s = s.substr(0, i) + sReplace + s.substr(i + sSearch.length);
         }
         return s;
     }
 
     /**
-     * replaceAll(sFind, sReplace, s)
+     * replaceAll(sSearch, sReplace, s)
      *
-     * @param {string} sFind
+     * @param {string} sSearch
      * @param {string} sReplace
      * @param {string} s
      * @return {string}
      */
-    static replaceAll(sFind, sReplace, s)
+    static replaceAll(sSearch, sReplace, s)
     {
         var a = {};
-        a[sFind] = sReplace;
+        a[sSearch] = sReplace;
         return Str.replaceArray(a, s);
     }
 
@@ -2403,13 +2403,33 @@ class Component {
     }
 
     /**
+     * Component.print(s)
+     *
+     * Components that inherit from this class should use this.print(), rather than Component.print(), because
+     * if a Control Panel is loaded, it will override only the instance method, not the class method (overriding the
+     * class method would improperly affect any other machines loaded on the same page).
+     *
+     * @this {Component}
+     * @param {string} s
+     */
+    static print(s)
+    {
+        if (!COMPILED) {
+            var i = s.lastIndexOf('\n');
+            if (i >= 0) {
+                Component.println(s.substr(0, i));
+                s = s.substr(i + 1);
+            }
+            Component.printBuffer += s;
+        }
+    }
+
+    /**
      * Component.println(s, type, id)
      *
-     * For non-diagnostic messages, which components may override to control the destination/appearance of their output.
-     *
-     * Components that inherit from this class should use the instance method, this.println(), rather than Component.println(),
-     * because if a Control Panel is loaded, it will override only the instance method, not the class method (overriding the class
-     * method would improperly affect any other machines loaded on the same page).
+     * Components that inherit from this class should use this.println(), rather than Component.println(), because
+     * if a Control Panel is loaded, it will override only the instance method, not the class method (overriding the
+     * class method would improperly affect any other machines loaded on the same page).
      *
      * @param {string} [s] is the message text
      * @param {string} [type] is the message type
@@ -2418,7 +2438,9 @@ class Component {
     static println(s, type, id)
     {
         if (!COMPILED) {
+            s = Component.printBuffer + (s || "");
             Component.log((id? (id + ": ") : "") + (s? ("\"" + s + "\"") : ""), type);
+            Component.printBuffer = "";
         }
     }
 
@@ -2540,9 +2562,6 @@ class Component {
      */
     static replaceControl(control, sSearch, sReplace)
     {
-        /*
-         * Prevent the <textarea> from getting too large; otherwise, printing becomes slower and slower.
-         */
         var sText = control.value;
         var i = sText.lastIndexOf(sSearch);
         if (i < 0) {
@@ -2550,6 +2569,9 @@ class Component {
         } else {
             sText = sText.substr(0, i) + sReplace + sText.substr(i + sSearch.length);
         }
+        /*
+         * Prevent the <textarea> from getting too large; otherwise, printing becomes slower and slower.
+         */
         if (COMPILED && sText.length > 8192) sText = sText.substr(sText.length - 4096);
         control.value = sText;
         control.scrollTop = control.scrollHeight;
@@ -2814,7 +2836,7 @@ class Component {
      *                      ^J  ^M  ^K  ^I  ^H  ^L
      *
      * To support any other non-printable 8-bit character, such as ESC, you should use \xXX, where XX
-     * is the ASCII code in hex.  For ESC, that would \x1B.
+     * is the ASCII code in hex.  For ESC, that would be \x1B.
      *
      * @param {string} sScript
      * @return {Array}
@@ -2912,7 +2934,7 @@ class Component {
              * instead, but it's a bit too confusing mingling script output in a window that
              * already mingles Debugger and machine output.
              */
-            Component.println('script: ' + aTokens.join(' '));
+            Component.println(aTokens.join(' '), Component.TYPE.SCRIPT);
 
             var fnCallReady = null;
             if (Component.asyncCommands.indexOf(sCommand) >= 0) {
@@ -3194,8 +3216,6 @@ class Component {
     /**
      * print(s)
      *
-     * For non-diagnostic messages, which components may override to control the destination/appearance of their output.
-     *
      * Components using this.print() should wait until after their constructor has run to display any messages, because
      * if a Control Panel has been loaded, its override will not take effect until its own constructor has run.
      *
@@ -3204,18 +3224,11 @@ class Component {
      */
     print(s)
     {
-        var i = s.lastIndexOf('\n');
-        if (i >= 0) {
-            Component.println(s.substr(0, i));
-            s = s.substr(i + 1);
-        }
-        Component.printBuffer += s;
+        Component.print(s);
     }
 
     /**
      * println(s, type, id)
-     *
-     * For non-diagnostic messages, which components may override to control the destination/appearance of their output.
      *
      * Components using this.println() should wait until after their constructor has run to display any messages, because
      * if a Control Panel has been loaded, its override will not take effect until its own constructor has run.
@@ -3227,8 +3240,7 @@ class Component {
      */
     println(s, type, id)
     {
-        Component.println(Component.printBuffer + s, type, id || this.id);
-        Component.printBuffer = "";
+        Component.println(s, type, id || this.id);
     }
 
     /**
@@ -3506,15 +3518,16 @@ class Component {
 }
 
 /*
- * These are the standard TYPE values you can pass as the second argument to println(); in reality,
- * you can pass anything you want, because they are just tacked onto the message as a prefix, with the
- * exception of PROGRESS, which will suppress the message unless we're in DEBUG or INIT mode.
+ * These are the standard TYPE values you can pass as an optional argument to println(); in reality,
+ * you can pass anything you want, because they are simply prepended to the message, although PROGRESS
+ * messages may also be merged with earlier similar messages to keep the output buffer under control.
  */
 Component.TYPE = {
-    NOTICE:     "notice",
-    WARNING:    "warning",
     ERROR:      "error",
-    PROGRESS:   "progress"
+    NOTICE:     "notice",
+    PROGRESS:   "progress",
+    SCRIPT:     "script",
+    WARNING:    "warning"
 };
 
 /*
@@ -13138,10 +13151,10 @@ class C1PDebugger extends Component {
                 return;
             if (!DEBUG && (addrEnd - addr) > 0x100) {
                 /*
-                 * Limiting the amount of disassembled code to 1 page in non-DEBUG builds is partly to
-                 * prevent the user from wedging their browser, but also a recognition that, in non-DEBUG builds,
-                 * Component.println() also keeps its output buffer truncated to 8K, which is only enough for
-                 * about 2 pages of disassembled code anyway.
+                 * Limiting the amount of disassembled code to one "memory page" in non-DEBUG builds is partly
+                 * to prevent the user from wedging their browser, but also a recognition that, in non-DEBUG builds,
+                 * the println() output buffer is truncated to 8K, which is only enough for about two pages of
+                 * disassembled code anyway.
                  */
                 this.println("range too large");
                 return;
