@@ -195,18 +195,18 @@ The machine on this page is configured with the following "autoType" sequence:
 
 which translates to:
 
-	8-10-81             [enter an arbitrary date]
+	<today's data>      [enter an arbitrary date]
 	b:                  [switch to drive B:]
 	a:basica castle     [run BASICA on drive A: and load CASTLE.BAS on drive B:]
 
 This is one of the preferred methods of demonstrating software in PCjs: loading unmodified disk images into machines
 that match the software's system requirements as closely as possible, powering the machine, and then automatically
-executing a series of commands that an owner of that hardware and software combination would have likely executed.
+executing a series of commands that that hardware and software combination would have required.
 
-The other preferred method is to use a machine state file, which restores the machine to a state where the software is
-already running.  This is the fastest approach, and it is useful when the software has an involved installation
-process, but it takes more effort to set up.  The [VisiCalc (1981)](/apps/pcx86/1981/visicalc/) demo operates this way,
-but it does so purely for convenience (and because it predates the "autoType" feature).
+The other preferred method is to use a machine state file, which restores the machine to a state where the software
+is already running.  That's the quickest method for starting the software, and it's useful when the software has an
+involved installation process, but it takes more effort to set up.  The [VisiCalc (1981)](/apps/pcx86/1981/visicalc/)
+demo is configured that way, but that's purely a matter of convenience -- and because it predates the "autoType" feature.
 
 For more classic PC software experiences, see the PCjs collection of [IBM PC Application Demos](/apps/pcx86/).
 
