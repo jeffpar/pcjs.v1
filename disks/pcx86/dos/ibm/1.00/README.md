@@ -83,10 +83,6 @@ A number of people have already delved into the guts of the PC-DOS 1.00 boot sec
 * [Reverse-Engineering DOS 1.0 – Part 1: The Boot Sector (May 7, 2009 by Michael Steil)](http://www.pagetable.com/?p=165)
 * [The Boot Sector of IBM® Personal Computer™ DOS Version 1.00 (August 2, 2005 by Daniel B. Sedory)](http://thestarman.pcministry.com/DOS/ibm100/Boot.htm)
 
-I've been familiar with the DOS boot sector code for a long time as well.  In fact, back in the early 1990's, while
-working at Microsoft, I made a number of modifications to the boot sector for Windows 95.  But more on that another
-day.
-
 Let's start with Michael Steil's well-written reverse-engineered source code (designed for **NASM**, not **ASM** or **MASM**),
 because it includes lots of commentary, allowing the boot sector to more or less speak for itself:
 
