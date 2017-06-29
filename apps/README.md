@@ -22,7 +22,7 @@ You can also browse our collection of archived disks:
 * [Challenger 1P Disk Library](/disks/c1p/)
 * [DEC Disk Library](/disks/dec/)
 
-{% include_relative pcx86/apps.md %}
+{% include_relative pcx86/README.md %}
 
 ---
 

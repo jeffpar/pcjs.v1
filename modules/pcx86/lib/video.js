@@ -2385,15 +2385,13 @@ class Video extends Component {
          *  }
          */
 
-        var sFileURL = parmsVideo['fontROM'];
-        if (sFileURL) {
-            var sFileExt = Str.getExtension(sFileURL);
+        this.sFileURL = parmsVideo['fontROM'];
+
+        if (this.sFileURL) {
+            var sFileExt = Str.getExtension(this.sFileURL);
             if (sFileExt != "json") {
-                sFileURL = Web.getHost() + DumpAPI.ENDPOINT + '?' + DumpAPI.QUERY.FILE + '=' + sFileURL + '&' + DumpAPI.QUERY.FORMAT + '=' + DumpAPI.FORMAT.BYTES;
+                this.sFileURL = Web.getHost() + DumpAPI.ENDPOINT + '?' + DumpAPI.QUERY.FILE + '=' + this.sFileURL + '&' + DumpAPI.QUERY.FORMAT + '=' + DumpAPI.FORMAT.BYTES;
             }
-            Web.getResource(sFileURL, null, true, function(sURL, sResponse, nErrorCode) {
-                video.doneLoad(sURL, sResponse, nErrorCode);
-            });
         }
     }
 
@@ -2411,6 +2409,8 @@ class Video extends Component {
      */
     initBus(cmp, bus, cpu, dbg)
     {
+        var video = this;
+
         this.bus = bus;
         this.cpu = cpu;
         this.dbg = dbg;
@@ -2457,7 +2457,6 @@ class Video extends Component {
         }
 
         if (DEBUGGER && dbg) {
-            var video = this;
             dbg.messageDump(Messages.VIDEO, function onDumpVideo(asArgs) {
                 video.dumpVideo(asArgs);
             });
@@ -2494,6 +2493,15 @@ class Video extends Component {
         }
         else if (this.sTouchScreen == "keygrid") {
             if (this.kbd) this.captureTouch(Video.TOUCH.KEYGRID);
+        }
+
+        if (this.sFileURL) {
+            var sProgress = "Loading " + this.sFileURL + "...";
+            Web.getResource(this.sFileURL, null, true, function(sURL, sResponse, nErrorCode) {
+                video.doneLoad(sURL, sResponse, nErrorCode);
+            }, function(nState) {
+                video.println(sProgress, Component.TYPE.PROGRESS);
+            });
         }
     }
 

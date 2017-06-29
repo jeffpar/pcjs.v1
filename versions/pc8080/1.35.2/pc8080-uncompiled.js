@@ -3394,9 +3394,12 @@ class Component {
                 }(controlTextArea);
                 this.println = function(component, control) {
                     return function printlnControl(s, type, id) {
-                        if (DEBUG || type != Component.TYPE.PROGRESS) {
-                            s = (type != null? (type + ": ") : "") + (s || "");
-                            component.print(s + '\n');
+                        if (!s) s = "";
+                        if (type != Component.TYPE.PROGRESS || s.slice(-3) != "...") {
+                            if (type) s = type + ": " + s;
+                            Component.appendControl(control, s + '\n');
+                        } else {
+                            Component.replaceControl(control, s, s + '.');
                         }
                         if (!COMPILED && window && window.console) Component.println(s, type, id);
                     };

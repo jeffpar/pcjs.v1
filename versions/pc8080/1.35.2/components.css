@@ -204,10 +204,13 @@
     top: 0;
     width: 100%;
     height: 100%;
-    opacity: 0;
     border: 0;
     padding: 0;
     resize: none;
+    color: white;
+    font-size: medium;
+    background: rgba(0, 0, 0, .5);
+    opacity: 0;
     line-height: 0;
 }
 .pcjs-reference {

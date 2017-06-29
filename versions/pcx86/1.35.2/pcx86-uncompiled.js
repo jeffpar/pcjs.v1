@@ -3622,9 +3622,12 @@ class Component {
                 }(controlTextArea);
                 this.println = function(component, control) {
                     return function printlnControl(s, type, id) {
-                        if (DEBUG || type != Component.TYPE.PROGRESS) {
-                            s = (type != null? (type + ": ") : "") + (s || "");
-                            component.print(s + '\n');
+                        if (!s) s = "";
+                        if (type != Component.TYPE.PROGRESS || s.slice(-3) != "...") {
+                            if (type) s = type + ": " + s;
+                            Component.appendControl(control, s + '\n');
+                        } else {
+                            Component.replaceControl(control, s, s + '.');
                         }
                         if (!COMPILED && window && window.console) Component.println(s, type, id);
                     };
@@ -43177,12 +43180,13 @@ class ROM extends Component {
      */
     initBus(cmp, bus, cpu, dbg)
     {
-        var rom = this;
         this.cmp = cmp;
         this.bus = bus;
         this.cpu = cpu;
         this.dbg = dbg;
+
         if (this.sFileURL) {
+            var rom = this;
             var sProgress = "Loading " + this.sFileURL + "...";
             Web.getResource(this.sFileURL, null, true, function(sURL, sResponse, nErrorCode) {
                 rom.doneLoad(sURL, sResponse, nErrorCode);
@@ -48896,15 +48900,13 @@ class Video extends Component {
          *  }
          */
 
-        var sFileURL = parmsVideo['fontROM'];
-        if (sFileURL) {
-            var sFileExt = Str.getExtension(sFileURL);
+        this.sFileURL = parmsVideo['fontROM'];
+
+        if (this.sFileURL) {
+            var sFileExt = Str.getExtension(this.sFileURL);
             if (sFileExt != "json") {
-                sFileURL = Web.getHost() + DumpAPI.ENDPOINT + '?' + DumpAPI.QUERY.FILE + '=' + sFileURL + '&' + DumpAPI.QUERY.FORMAT + '=' + DumpAPI.FORMAT.BYTES;
+                this.sFileURL = Web.getHost() + DumpAPI.ENDPOINT + '?' + DumpAPI.QUERY.FILE + '=' + this.sFileURL + '&' + DumpAPI.QUERY.FORMAT + '=' + DumpAPI.FORMAT.BYTES;
             }
-            Web.getResource(sFileURL, null, true, function(sURL, sResponse, nErrorCode) {
-                video.doneLoad(sURL, sResponse, nErrorCode);
-            });
         }
     }
 
@@ -48922,6 +48924,8 @@ class Video extends Component {
      */
     initBus(cmp, bus, cpu, dbg)
     {
+        var video = this;
+
         this.bus = bus;
         this.cpu = cpu;
         this.dbg = dbg;
@@ -48968,7 +48972,6 @@ class Video extends Component {
         }
 
         if (DEBUGGER && dbg) {
-            var video = this;
             dbg.messageDump(Messages.VIDEO, function onDumpVideo(asArgs) {
                 video.dumpVideo(asArgs);
             });
@@ -49005,6 +49008,15 @@ class Video extends Component {
         }
         else if (this.sTouchScreen == "keygrid") {
             if (this.kbd) this.captureTouch(Video.TOUCH.KEYGRID);
+        }
+
+        if (this.sFileURL) {
+            var sProgress = "Loading " + this.sFileURL + "...";
+            Web.getResource(this.sFileURL, null, true, function(sURL, sResponse, nErrorCode) {
+                video.doneLoad(sURL, sResponse, nErrorCode);
+            }, function(nState) {
+                video.println(sProgress, Component.TYPE.PROGRESS);
+            });
         }
     }
 
@@ -74257,11 +74269,16 @@ class Computer extends Component {
             if (sStatePath) this.fServerState = true;
         }
 
-        if (!sStatePath) {
+        this.sStateURL = sStatePath;
+
+        if (!this.sStateURL) {
             this.setReady();
         } else {
-            Web.getResource(sStatePath, null, true, function(sURL, sResource, nErrorCode) {
+            var sProgress = "Loading " + this.sStateURL + "...";
+            Web.getResource(this.sStateURL, null, true, function(sURL, sResource, nErrorCode) {
                 cmp.doneLoad(sURL, sResource, nErrorCode);
+            }, function(nState) {
+                cmp.println(sProgress, Component.TYPE.PROGRESS);
             });
         }
 
@@ -74319,6 +74336,7 @@ class Computer extends Component {
                 if (control) {
                     control.style.opacity = "0";
                     control.style.lineHeight = "0";
+                    control.value = "";
                 }
             }
         }

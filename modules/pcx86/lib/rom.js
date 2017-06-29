@@ -135,12 +135,13 @@ class ROM extends Component {
      */
     initBus(cmp, bus, cpu, dbg)
     {
-        var rom = this;
         this.cmp = cmp;
         this.bus = bus;
         this.cpu = cpu;
         this.dbg = dbg;
+
         if (this.sFileURL) {
+            var rom = this;
             var sProgress = "Loading " + this.sFileURL + "...";
             Web.getResource(this.sFileURL, null, true, function(sURL, sResponse, nErrorCode) {
                 rom.doneLoad(sURL, sResponse, nErrorCode);

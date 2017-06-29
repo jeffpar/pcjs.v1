@@ -305,11 +305,16 @@ class Computer extends Component {
             if (sStatePath) this.fServerState = true;
         }
 
-        if (!sStatePath) {
+        this.sStateURL = sStatePath;
+
+        if (!this.sStateURL) {
             this.setReady();
         } else {
-            Web.getResource(sStatePath, null, true, function(sURL, sResource, nErrorCode) {
+            var sProgress = "Loading " + this.sStateURL + "...";
+            Web.getResource(this.sStateURL, null, true, function(sURL, sResource, nErrorCode) {
                 cmp.doneLoad(sURL, sResource, nErrorCode);
+            }, function(nState) {
+                cmp.println(sProgress, Component.TYPE.PROGRESS);
             });
         }
 
@@ -367,6 +372,7 @@ class Computer extends Component {
                 if (control) {
                     control.style.opacity = "0";
                     control.style.lineHeight = "0";
+                    control.value = "";
                 }
             }
         }
