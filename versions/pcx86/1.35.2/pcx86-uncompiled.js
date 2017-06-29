@@ -75449,6 +75449,12 @@ class Computer extends Component {
         if (!this.flags.powered || this.nPowerChange) return;
 
         /*
+         * Whether or not we autoStart on reset should depend at least in part on whether we were running originally.
+         */
+        if (this.cpu) {
+            this.cpu.flags.autoStart = this.cpu.flags.running;
+        }
+        /*
          * If this is a "resumable" machine (and it's not using a predefined state), then we overload the reset
          * operation to offer an explicit "save or discard" option first.  This is currently the only UI we offer to
          * discard a machine's state, including any disk changes.  The traditional "reset" operation is still available

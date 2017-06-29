@@ -20,9 +20,11 @@ PC-DOS 1.00
 
 PC-DOS 1.00 was completed in August 1981 and announced at an IBM press conference on August 12, 1981, when IBM
 introduced the original IBM PC (Model 5150).
-PC-DOS 1.00 was released on one single-sided (160Kb) diskette.  To learn more, see the
-[Directory Listing](#directory-of-pc-dos-100-diskette) and [PC-DOS 1.00 Boot Sector](#pc-dos-100-boot-sector)
-below.
+
+To learn how to use PC-DOS 1.00, see the [Documentation](/pubs/pc/software/dos/PCDOS100/).
+
+To learn more about this single-sided (160Kb) diskette, see the
+[Directory Listing](#directory-of-pc-dos-100-diskette) and [Boot Sector](#pc-dos-100-boot-sector) below.
 
 {% include machine.html id="ibm5150-pcdos100" %}
 
@@ -75,8 +77,7 @@ CHKDSK reports:
 	      160256 bytes total disk space
 	        6144 bytes remain available
 
-PC-DOS 1.00 Boot Sector
------------------------
+### PC-DOS 1.00 Boot Sector
 
 A number of people have already delved into the guts of the PC-DOS 1.00 boot sector, including:
 
@@ -439,8 +440,7 @@ And finally, `IBMBIO_COM` (0x7D76) and `IBMDOS_COM` (0x7D82):
 	&7D78  6D 62 69 6F 20 20 63 6F-6D B0 69 62 6D 64 6F 73  mbio  com.ibmdos
 	&7D88  20 20 63 6F 6D B0 C9 00-00 00 00 00 00 00 00 00    com...........
 
-Additional Information From [PC DOS Retro](https://sites.google.com/site/pcdosretro/doshist)
---------------------------------------------------------------------------------------------
+### Additional Information From [PC DOS Retro](https://sites.google.com/site/pcdosretro/doshist)
 
 - distributed on 1 160KB floppy disk
 - initial release (equivalent to 86-DOS 1.14)
@@ -469,5 +469,3 @@ Additional Information From [PC DOS Retro](https://sites.google.com/site/pcdosre
 - INT 27h terminate and stay resident (implemented in COMMAND.COM)
 - CP/M CALL 0 interface (executes INT 20h)
 - CP/M CALL 5 interface supporting INT 21h functions 00h-24h
-
-See [PC-DOS 1.00 Documentation](/pubs/pc/software/dos/PCDOS100/) for more information.

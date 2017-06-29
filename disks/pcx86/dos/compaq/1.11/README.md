@@ -5,7 +5,7 @@ permalink: /disks/pcx86/dos/compaq/1.11/
 machines:
   - id: ibm5150-compaq111
     type: pcx86
-    config: /devices/pcx86/machine/5150/mda/64kb/machine.xml
+    config: /devices/pcx86/machine/5150/mda/64kb/debugger/machine.xml
     resume: 1
     autoMount:
       A:
@@ -18,7 +18,7 @@ machines:
 COMPAQ MS-DOS 1.11
 ------------------
 
-Released in 1983 by COMPAQ Computer Corp, this early version of MS-DOS displays the following messages on boot:
+Released in 1983 by COMPAQ Computer Corp, this early version of MS-DOS displays on startup:
 
 	The COMPAQ Personal Computer DOS
 	Version 1.11
@@ -27,7 +27,8 @@ Released in 1983 by COMPAQ Computer Corp, this early version of MS-DOS displays 
 	(C) Copyright COMPAQ Computer Corp. 1982
 	(C) Copyright Microsoft 1981, 82
 
-A directory listing of the 320Kb diskette is provided [below](#directory-of-compaq-ms-dos-111-diskette).
+To learn more about this double-sided 320Kb diskette, see the
+[Directory Listing](#directory-of-compaq-ms-dos-111-diskette) and [Boot Sector](#compaq-ms-dos-110-boot-sector) below.
 
 {% include machine.html id="ibm5150-compaq111" %}
 
@@ -71,6 +72,16 @@ A directory listing of the 320Kb diskette is provided [below](#directory-of-comp
 	       28 file(s)     256320 bytes
 	                       53248 bytes free
 
+One curiosity regarding this disk are the BASIC files.  **BASIC.COM** and **BASICA.COM** are nothing more than
+tiny programs to load **BASICA.EXE**, a stand-alone version of BASIC that doesn't require any BASIC ROMs.  And
+**BASICA.EXE** reports a version number that differs from the DOS version: 
+
+	The COMPAQ Personal Computer BASIC
+	Version 1.13
+	(C) Copyright COMPAQ Computer Corp. 1983
+
+### COMPAQ MS-DOS 1.11 Boot Sector
+
 The boot sector of the COMPAQ MS-DOS 1.11 disk image contains the following bytes:
 
 	00000000  fa bc e7 01 b8 c0 07 8e  d0 fb 8e d8 8e c0 33 c0  |..............3.|
@@ -106,32 +117,40 @@ The boot sector of the COMPAQ MS-DOS 1.11 disk image contains the following byte
 	000001e0  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
 	000001f0  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
 
-Consequently, the disk cannot be mounted by a modern operating system (e.g., macOS), because it lacks a proper
+Note that the disk cannot be mounted by a modern operating system (e.g., macOS), because it lacks a proper
 BPB at offset 0x000B.
 
-One solution is to use the *--forceBPB* option of the [DiskDump](/modules/diskdump/) utility, which creates a
-mountable disk image with the following boot sector modifications:
+To resolve the mounting problem, one solution is to use the [DiskDump](/modules/diskdump/) utility's *--forceBPB*
+option, which creates a mountable disk image by making the following boot sector modifications:
 
 	00000000  eb fe 90 50 43 4a 53 2e  4f 52 47 00 02 02 01 00  |...PCJS.ORG.....|
 	00000010  02 70 00 80 02 ff 01 00  08 00 02 00 00 00 00 00  |.p..............|
 	00000020  00 00 00 00 00 8a 07 3c  24 74 0c 53 b4 0e bb 07  |.......<$t.S....|
 
-The following byte ranges are modified:
+The following (hex) byte ranges are modified:
 
-- 0x0000-0x0002: 2-byte Intel x86 JMP instruction followed by 1-byte x86 NOP
-- 0x0003-0x000A: 8-byte OEM signature string (we use the fake "PCJS.ORG" OEM signature)
-- 0x000B-0x001D: 19-byte BPB describing a 320Kb diskette image with 8 sectors/track and 2 heads
+- 0000-0002: 2-byte Intel x86 JMP instruction followed by 1-byte x86 NOP
+- 0003-000A: 8-byte OEM signature string (we use the fake "PCJS.ORG" OEM signature)
+- 000B-001D: 19-byte BPB describing a 320Kb diskette image with 8 sectors/track and 2 heads
 
 Ordinarily, only the 19-byte BPB would be required, but it turns out that macOS won't mount the disk image
 unless the boot sector *also* begins with an Intel x86 JMP instruction.  So the *--forceBPB* option updates all
 30 bytes at the beginning of the boot sector, making the disk image mountable, but also rendering it unbootable --
 which is OK if all you want to do is mount the image and copy files from it.
 
-Here's a sample command sequence.  Note that *two* DiskDump commands are required, because BPB modification
-only happens when converting an IMG file to a JSON file; the second command converts the JSON file back into
-a separate IMG file, preserving the original.
+One common misconception is that the last word of a mountable boot sector must also contain 0xAA55 (ie, the low
+byte at offset 0x1FE must be 0x55 and the high byte at offset 0x1FF must be 0xAA).  This claim is often backed up
+by pointing out that some (newer) ROMs will not boot from a disk if that signature is missing.
 
-	diskdump --disk=COMPAQ-DOS111.img --format=json --output=COMPAQ-DOS111-BPB.json
+However, that evidence is misleading, because those ROMs check only *hard disk* boot sectors for the 0xAA55 signature,
+not diskettes.  Which makes sense, because hard disk support didn't exist in DOS until version 2.0 -- the same version
+of DOS that also introduced BPBs and boot sector signatures.
+
+Here's how you can use [DiskDump](/modules/diskdump/) to a mountable disk.  Note that *two* DiskDump commands are
+required, because BPB modification only happens when converting an IMG file to a JSON file; the second DiskDump command
+converts the modified JSON back into an IMG file.
+
+	diskdump --disk=COMPAQ-DOS111.img --format=json --forceBPB --output=COMPAQ-DOS111-BPB.json
 	warning: BPB has been updated
 	327680-byte disk image saved to COMPAQ-DOS111-BPB.json
 	diskdump --disk=COMPAQ-DOS111.json --format=img --output=COMPAQ-DOS111-BPB.img
@@ -140,13 +159,5 @@ a separate IMG file, preserving the original.
 	open COMPAQ-DOS111-BPB.img
 	mkdir COMPAQ-DOS111
 	cp -pr /Volumes/Untitled/ COMPAQ-DOS111
-
-Another curiosity regarding this disk are the BASIC files.  **BASIC.COM** and **BASICA.COM** are nothing more than
-tiny programs to load **BASICA.EXE**, a stand-alone version of BASIC that doesn't require any BASIC ROMs.  And
-**BASICA.EXE** reports a version number that differs from the DOS version: 
-
-	The COMPAQ Personal Computer BASIC
-	Version 1.13
-	(C) Copyright COMPAQ Computer Corp. 1983
 
 [Return to [COMPAQ MS-DOS Disks](/disks/pcx86/dos/compaq/)]
