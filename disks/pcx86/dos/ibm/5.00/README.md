@@ -10,6 +10,8 @@ machines:
     autoMount:
       A:
         path: /disks/pcx86/dos/ibm/5.00/PCDOS500-DISK1-720K.json
+      B:
+        name: None
 ---
 
 PC-DOS 5.00

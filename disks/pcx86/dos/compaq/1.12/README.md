@@ -10,6 +10,9 @@ machines:
     autoMount:
       A:
         path: /disks/pcx86/dos/compaq/1.12/COMPAQ-DOS112.json
+      B:
+        name: None
+    autoType: $date\r$time\r
 ---
 
 COMPAQ MS-DOS 1.12

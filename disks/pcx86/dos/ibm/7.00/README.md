@@ -9,6 +9,8 @@ machines:
     autoMount:
       A:
         path: /disks/pcx86/dos/ibm/7.00/PCDOS700-DISK1.json
+      B:
+        name: None
 ---
 
 PC-DOS 7.00

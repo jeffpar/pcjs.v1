@@ -12,6 +12,7 @@ machines:
         name: COMPAQ MS-DOS 1.11
       B:
         name: None
+    autoType: $date\r$time\r
 ---
 
 COMPAQ MS-DOS 1.11

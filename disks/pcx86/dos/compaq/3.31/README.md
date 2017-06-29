@@ -5,7 +5,7 @@ permalink: /disks/pcx86/dos/compaq/3.31/
 ---
 
 COMPAQ MS-DOS 3.31
----
+------------------
 
 Released in 1988 by COMPAQ Computer Corp, this version of MS-DOS displays the following messages on boot:
 

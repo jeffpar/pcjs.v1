@@ -10,6 +10,9 @@ machines:
     autoMount:
       A:
         path: /disks/pcx86/dos/ibm/1.10/PCDOS110.json
+      B:
+        name: None
+    autoType: $date\r$time\r
 ---
 
 PC-DOS 1.10

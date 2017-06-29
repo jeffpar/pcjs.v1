@@ -9,6 +9,8 @@ machines:
     autoMount:
       A:
         path: /disks/pcx86/dos/ibm/6.10/PCDOS610-DISK1-1440K.json
+      B:
+        name: None
 ---
 
 PC-DOS 6.10
