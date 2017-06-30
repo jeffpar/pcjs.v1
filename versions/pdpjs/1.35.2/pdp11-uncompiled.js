@@ -246,7 +246,7 @@ DiskAPI.GEOMETRIES = {
 };
 
 /*
- * Media descriptor bytes for DOS-compatible FAT-formatted disks (stored in the first byte of the FAT)
+ * Media ID (descriptor) bytes for DOS-compatible FAT-formatted disks (stored in the first byte of the FAT)
  */
 DiskAPI.FAT = {
     MEDIA_160KB:    0xFE,       // 5.25-inch, 1-sided,  8-sector, 40-track

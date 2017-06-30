@@ -138,7 +138,7 @@ because it includes lots of commentary, allowing the boot sector to more or less
 	                pop     ax              ; remaining sectors
 	                call    add_si_sectors  ; bx += si*512
 	                sub     ax, si          ; remaining -= read
-	                jz      done                ; none left
+	                jz      done            ; none left
 	                inc     ch              ; next track
 	                mov     cl, 1           ; start at sector 1
 	                mov     si, 8           ; read up to 8 sectors
