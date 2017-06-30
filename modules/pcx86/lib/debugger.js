@@ -4761,9 +4761,9 @@ class DebuggerX86 extends Debugger {
     /**
      * doDump(asArgs)
      *
-     * The length parameter is interpreted as a number of bytes, in hex, which we convert to the appropriate number
-     * of lines, because we always display whole lines.  If the length is omitted/undefined, it defaults to 0x80 (128.)
-     * bytes, which normally translates to 8 lines.
+     * The length parameter is interpreted as a number of bytes (in hex, by default).
+     * If the length is omitted/undefined, it defaults to 0x80 (128.) bytes, which normally
+     * translates to 8 lines of data.
      *
      * @this {DebuggerX86}
      * @param {Array.<string>} asArgs (formerly sCmd, [sAddr], [sLen] and [sBytes])
