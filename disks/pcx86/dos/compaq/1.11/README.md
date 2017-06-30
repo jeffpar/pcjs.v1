@@ -133,17 +133,45 @@ look at the code, using the PCjs Debugger to stop at the first instruction:
 	&0000:7C01 BCE701          MOV      SP,01E7
 	&0000:7C04 B8C007          MOV      AX,07C0
 	&0000:7C07 8ED0            MOV      SS,AX
-	&0000:7C09 FB              STI     
+	&0000:7C09 FB              STI
+	     ;
+	     ; At this point, the stack has been set to an unused region INSIDE the boot sector, because
+	     ; 07C0:01E7 is the same as 0000:7C00+01E7 or 0000:7DE7.  This puts a fairly low limit on stack
+	     ; usage: as more stack is used, the COMPAQ copyright string will be trashed first, then boot
+	     ; sector data, then boot sector code.
+	     ;
+	     ; Curiously, the value 01E7 is also stored at 07C0:01E7.  Also curious is the choice of an ODD
+	     ; address for the stack (although, for the 8088, this presumably didn't affect performance).
+	     ;
 	&0000:7C0A 8ED8            MOV      DS,AX
 	&0000:7C0C 8EC0            MOV      ES,AX
-	&0000:7C0E 33C0            XOR      AX,AX
+	    ;
+	    ; All of DS:0, ES:0, and SS:0 now point to the beginning of the boot sector, as does CS:7C00.
+	    ;
+	&0000:7C0E 33C0            XOR      AX,AX           ; perform a disk reset
 	&0000:7C10 CD13            INT      13
+	    ;
+	    ; Read 1 sector (the 4th sector, which is the first sector of the directory) into memory immediately
+	    ; above the boot sector (07C0:0200).
+	    ;
 	&0000:7C12 B80102          MOV      AX,0201
 	&0000:7C15 BB0002          MOV      BX,0200
 	&0000:7C18 B90400          MOV      CX,0004
 	&0000:7C1B 33D2            XOR      DX,DX
-	&0000:7C1D E88B00          CALL     7CAB
+	&0000:7C1D E88B00          CALL     7CAB            ; call DISK_IO
 	&0000:7C20 EB1C            JMP      7C3E
+	    ;
+	    ; ERROR: print error message and start over.
+	    ;
+	    ; Setting DS:BX to 07C0:00DA references the same memory as CS:7CDA:
+	    ;
+	    ;   >> db cs:7cda cs:7d22
+        ;   &0000:7CDA  0A 0D 4E 6F 6E 2D 53 79-73 74 65 6D 20 64 69 73  ..Non-System dis
+        ;   &0000:7CEA  6B 20 6F 72 20 64 69 73-6B 20 65 72 72 6F 72 0A  k or disk error.
+        ;   &0000:7CFA  0D 52 65 70 6C 61 63 65-20 61 6E 64 20 73 74 72  .Replace and str
+        ;   &0000:7D0A  69 6B 65 20 61 6E 79 20-6B 65 79 20 77 68 65 6E  ike any key when
+        ;   &0000:7D1A  20 72 65 61 64 79 0A 0D-24                        ready..$
+	    ;
 	&0000:7C22 BBDA00          MOV      BX,00DA
 	&0000:7C25 8A07            MOV      AL,[BX]
 	&0000:7C27 3C24            CMP      AL,24
@@ -157,25 +185,54 @@ look at the code, using the PCjs Debugger to stop at the first instruction:
 	&0000:7C35 EBEE            JMP      7C25
 	&0000:7C37 33C0            XOR      AX,AX
 	&0000:7C39 CD16            INT      16
-	&0000:7C3B EBC3            JMP      7C00
-	&0000:7C3D C3              RET     
+	&0000:7C3B EBC3            JMP      7C00            ; start over
+	&0000:7C3D C3              RET                      ; unreachable RET?
+	     
 	&0000:7C3E FC              CLD     
 	&0000:7C3F 8BF3            MOV      SI,BX
-	&0000:7C41 BFC400          MOV      DI,00C4
+	&0000:7C41 BFC400          MOV      DI,00C4         ; ES:DI -> 7C0:C4 (aka 0:7CC4)
 	&0000:7C44 B90B00          MOV      CX,000B
 	&0000:7C47 F3              REPZ    
 	&0000:7C48 A6              CMPSB   
-	&0000:7C49 75D7            JNZ      7C22
+	&0000:7C49 75D7            JNZ      7C22            ; if first DIRENTRY was not "IOSYS.COM", jump to ERROR
 	&0000:7C4B 83C615          ADD      SI,0015
 	&0000:7C4E B90B00          MOV      CX,000B
 	&0000:7C51 F3              REPZ    
 	&0000:7C52 A6              CMPSB   
-	&0000:7C53 75CD            JNZ      7C22
+	&0000:7C53 75CD            JNZ      7C22            ; if second DIRENTRY was not "IOSYS.COM", jump to ERROR
 	&0000:7C55 B80102          MOV      AX,0201
 	&0000:7C58 BB0002          MOV      BX,0200
 	&0000:7C5B B90200          MOV      CX,0002
 	&0000:7C5E 33D2            XOR      DX,DX
-	&0000:7C60 E84800          CALL     7CAB
+	&0000:7C60 E84800          CALL     7CAB            ; call DISK_IO to read 1st FAT sector
+	    ;
+	    ; At this point, the directory sector is gone, and all this code did with it was verify the names of
+	    ; the first two entries.  It did not examine or record their starting cluster numbers.  And in the FAT
+	    ; sector just read, only one byte (the first byte) will be examined next: the media ID byte. 
+	    ;
+	    ; Further reading will rely on on two hard-coded tables inside the boot sector: one table at DS:126 (CS:7D26)
+	    ; if the FAT media ID byte is 0xFE (160Kb diskette), or another table at DS:13C (CS:7D3C) if the FAT media ID
+	    ; byte is 0xFF (320Kb diskette).  If the FAT media ID byte is neither, off to ERROR we go.
+	    ;
+	    ; Here's the table for the 160Kb diskette:
+	    ;
+	    ;   >> dw cs:7d26 l11.
+        ;   &0000:7D26  0201  0008  0000  0208  0200  0101  0000  0208   ................
+        ;   &0000:7D36  1000  0201  0000                                 ......
+	    ;
+	    ; and here's the table for the 320Kb diskette:
+	    ;
+	    ;   >> dw cs:7d3c l11.
+        ;   &0000:7D3C  0206  0003  0100  0208  0C00  0101  0000  0203   ................
+        ;   &0000:7D4C  1000  0101  0100                                 ......
+	    ;
+	    ; These tables are then followed by a DWORD jump address:
+	    ;
+	    ;   >> dw cs:7d52 l2
+        ;   &0000:7D52  0000  0060                                       ..`.
+        ;
+        ; which means that the "JMP FAR [0152]" instruction will jump to 60:0 after the reads are complete.
+        ;
 	&0000:7C63 8A27            MOV      AH,[BX]
 	&0000:7C65 80FCFE          CMP      AH,FE
 	&0000:7C68 BE2601          MOV      SI,0126
@@ -203,6 +260,9 @@ look at the code, using the PCjs Debugger to stop at the first instruction:
 	&0000:7CA1 8B5414          MOV      DX,[SI+14]
 	&0000:7CA4 E80400          CALL     7CAB
 	&0000:7CA7 FF2E5201        JMP      FAR [0152]
+		;
+		; DISK_IO: read AL sector(s) identified by the CHS values in CX:DX into ES:BX, using DI as a retry counter.
+		;
 	&0000:7CAB BF0500          MOV      DI,0005
 	&0000:7CAE 57              PUSH     DI
 	&0000:7CAF 50              PUSH     AX
@@ -216,9 +276,10 @@ look at the code, using the PCjs Debugger to stop at the first instruction:
 	&0000:7CBB 58              POP      AX
 	&0000:7CBC 5F              POP      DI
 	&0000:7CBD 4F              DEC      DI
-	&0000:7CBE 75EE            JNZ      7CAE
-	&0000:7CC0 58              POP      AX
-	&0000:7CC1 E95EFF          JMP      7C22
+	&0000:7CBE 75EE            JNZ      7CAE                                            
+	&0000:7CC0 58              POP      AX              ; retry count exhausted
+	&0000:7CC1 E95EFF          JMP      7C22            ; jump to PRINT function
+	
 	>> db 7cc4 l13c
 	&7CC4  49 4F 53 59 53 20 20 20-43 4F 4D 4D 53 44 4F 53  IOSYS   COMMSDOS
 	&7CD4  20 20 20 43 4F 4D 0A 0D-4E 6F 6E 2D 53 79 73 74     COM..Non-Syst
@@ -240,6 +301,10 @@ look at the code, using the PCjs Debugger to stop at the first instruction:
 	&7DD4  00 00 00 00 00 00 00 00-00 00 00 00 00 00 00 00  ................
 	&7DE4  00 00 00 E7 01 00 00 00-00 00 00 00 00 00 00 00  ................
 	&7DF4  00 00 00 00 00 00 00 00-00 00 00 00
+
+In terms of raw code (90 instructions), it's shorter than the PC-DOS 1.00 boot sector (99 instructions),
+even though it supports twice as many disk formats.  This is because it uses tables to describe both the
+different disk formats *and* the discrete read operations, relieving the code from dealing with track boundaries.
 
 ### Mounting the COMPAQ MS-DOS 1.11 Diskette
 
@@ -279,11 +344,15 @@ converts the modified JSON back into an IMG file.
 	diskdump --disk=COMPAQ-DOS111.img --format=json --forceBPB --output=COMPAQ-DOS111-BPB.json
 	warning: BPB has been updated
 	327680-byte disk image saved to COMPAQ-DOS111-BPB.json
+	
 	diskdump --disk=COMPAQ-DOS111-BPB.json --format=img --output=COMPAQ-DOS111-BPB.img
 	327680-byte disk image saved to COMPAQ-DOS111-BPB.img
+
+The next series of commands make the image read-only (otherwise, macOS may create hidden files inside the image after
+mounting it), mount the image as `/Volumes/Untitled`, and then copy the contents of the image to a folder named `Disk`:
+
 	chmod -w COMPAQ-DOS111-BPB.img
 	open COMPAQ-DOS111-BPB.img
-	mkdir COMPAQ-DOS111
-	cp -pr /Volumes/Untitled/ COMPAQ-DOS111
+	cp -pr /Volumes/Untitled Disk
 
 [Return to [COMPAQ MS-DOS Disks](/disks/pcx86/dos/compaq/)]

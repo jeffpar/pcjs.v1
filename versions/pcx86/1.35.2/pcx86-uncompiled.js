@@ -246,7 +246,7 @@ DiskAPI.GEOMETRIES = {
 };
 
 /*
- * Media descriptor bytes for DOS-compatible FAT-formatted disks (stored in the first byte of the FAT)
+ * Media ID (descriptor) bytes for DOS-compatible FAT-formatted disks (stored in the first byte of the FAT)
  */
 DiskAPI.FAT = {
     MEDIA_160KB:    0xFE,       // 5.25-inch, 1-sided,  8-sector, 40-track
@@ -9319,7 +9319,7 @@ class Bus extends Component {
                 }
                 if (!fSymbol || fNearest) {
                     if (bto.obj.idComponent) {
-                        return bto.obj.idComponent + '+' + Str.toHexLong(bto.off + off);
+                        return bto.obj.idComponent + '+' + Str.toHex(bto.off + off, 0, true);
                     }
                 }
             }
@@ -66361,9 +66361,9 @@ class DebuggerX86 extends Debugger {
              * Finally, for TEMPORARY breakpoint addresses, we set fTempBreak to true, so that they can be
              * automatically cleared when they're hit.
              */
-            this.dbgAddrNextCode = this.newAddr();
-            this.dbgAddrNextData = this.newAddr();
-            this.dbgAddrAssemble = this.newAddr();
+            this.dbgAddrNextCode = this.newAddr(0, 0);
+            this.dbgAddrNextData = this.newAddr(0, 0);
+            this.dbgAddrAssemble = this.newAddr(0, 0);
 
             /*
              * aSymbolTable is an array of SymbolTable objects, one per ROM or other chunk of address space,
@@ -68138,7 +68138,7 @@ class DebuggerX86 extends Debugger {
     }
 
     /**
-     * dumpHistory(sPrev, sLines)
+     * dumpHistory(sPrev, sLines, sComment)
      *
      * If sLines is not a number, it can be a instruction filter.  However, for the moment, the only
      * supported filter is "call", which filters the history buffer for all CALL and RET instructions
@@ -68147,8 +68147,9 @@ class DebuggerX86 extends Debugger {
      * @this {DebuggerX86}
      * @param {string} [sPrev] is a (decimal) number of instructions to rewind to (default is 10)
      * @param {string} [sLines] is a (decimal) number of instructions to print (default is, again, 10)
+     * @param {string} [sComment] (should be either "history" or "cycles"; default is "history")
      */
-    dumpHistory(sPrev, sLines)
+    dumpHistory(sPrev, sLines, sComment = "history")
     {
         var sMore = "";
         var cHistory = 0;
@@ -68216,10 +68217,8 @@ class DebuggerX86 extends Debugger {
                  */
                 var dbgAddrNew = this.newAddr(dbgAddr.off, dbgAddr.sel, dbgAddr.addr, dbgAddr.type, dbgAddr.fData32, dbgAddr.fAddr32);
 
-                var sComment = "history";
                 var nSequence = nPrev--;
-                if (DEBUG && dbgAddr.cycleCount != null) {
-                    sComment = "cycles";
+                if (dbgAddr.cycleCount != null && sComment == "cycles") {
                     nSequence = dbgAddr.cycleCount;
                 }
 
@@ -69089,9 +69088,11 @@ class DebuggerX86 extends Debugger {
     {
         var state = new State(this);
         state.set(0, this.packAddr(this.dbgAddrNextCode));
-        state.set(1, this.packAddr(this.dbgAddrAssemble));
-        state.set(2, [this.aPrevCmds, this.fAssemble, this.bitsMessage]);
-        state.set(3, this.aSymbolTable);
+        state.set(1, this.packAddr(this.dbgAddrNextData));
+        state.set(2, this.packAddr(this.dbgAddrAssemble));
+        state.set(3, [this.aPrevCmds, this.fAssemble, this.bitsMessage]);
+        state.set(4, this.aSymbolTable);
+        state.set(5, [this.aBreakExec, this.aBreakRead, this.aBreakWrite]);
         return state.data();
     }
 
@@ -69107,15 +69108,27 @@ class DebuggerX86 extends Debugger {
     restore(data)
     {
         var i = 0;
-        if (data[2] !== undefined) {
-            this.dbgAddrNextCode = this.unpackAddr(data[i++]);
-            this.dbgAddrAssemble = this.unpackAddr(data[i++]);
+        if (data[i]) this.dbgAddrNextCode = this.unpackAddr(data[i++]);
+        /*
+         * dbgAddrNextData wasn't saved until there were at least 6 elements, hence the check for data[5] instead of data[i]
+         */
+        if (data[5]) this.dbgAddrNextData = this.unpackAddr(data[i++]);
+        if (data[i]) this.dbgAddrAssemble = this.unpackAddr(data[i++]);
+        if (data[i]) {
             this.aPrevCmds = data[i][0];
             if (typeof this.aPrevCmds == "string") this.aPrevCmds = [this.aPrevCmds];
             this.fAssemble = data[i][1];
             this.bitsMessage |= data[i][2];     // keep our current message bits set, and simply "add" any extra bits defined by the saved state
+            i++;
         }
-        if (data[3]) this.aSymbolTable = data[3];
+        if (data[i]) {
+            this.aSymbolTable = data[i++];
+        }
+        if (data[i]) {
+            this.restoreBreakpoints(this.aBreakExec, data[i][0]);
+            this.restoreBreakpoints(this.aBreakRead, data[i][1]);
+            this.restoreBreakpoints(this.aBreakWrite, data[i][2]);
+        }
         return true;
     }
 
@@ -69272,7 +69285,7 @@ class DebuggerX86 extends Debugger {
                 this.aaOpcodeCounts[bOpcode][1]++;
                 var dbgAddr = this.aOpcodeHistory[this.iOpcodeHistory];
                 this.setAddr(dbgAddr, cpu.getIP(), cpu.getCS());
-                if (DEBUG) dbgAddr.cycleCount = cpu.getCycles();
+                dbgAddr.cycleCount = cpu.getCycles();
                 if (++this.iOpcodeHistory == this.aOpcodeHistory.length) this.iOpcodeHistory = 0;
             }
         }
@@ -69403,7 +69416,7 @@ class DebuggerX86 extends Debugger {
     }
 
     /**
-     * addBreakpoint(aBreak, dbgAddr, fTempBreak)
+     * addBreakpoint(aBreak, dbgAddr, fTempBreak, fQuiet)
      *
      * In case you haven't already figured this out, all our breakpoint commands use the address
      * to identify a breakpoint, not an incrementally assigned breakpoint index like other debuggers;
@@ -69427,9 +69440,10 @@ class DebuggerX86 extends Debugger {
      * @param {Array} aBreak
      * @param {DbgAddrX86} dbgAddr
      * @param {boolean} [fTempBreak]
+     * @param {boolean} [fQuiet]
      * @return {boolean} true if breakpoint added, false if already exists
      */
-    addBreakpoint(aBreak, dbgAddr, fTempBreak)
+    addBreakpoint(aBreak, dbgAddr, fTempBreak, fQuiet)
     {
         var fSuccess = true;
 
@@ -69471,7 +69485,7 @@ class DebuggerX86 extends Debugger {
                 dbgAddr.fTempBreak = true;
             }
             else {
-                this.printBreakpoint(aBreak, aBreak.length-1, "set");
+                if (!fQuiet) this.printBreakpoint(aBreak, aBreak.length-1, "set");
                 this.historyInit();
             }
         }
@@ -69556,6 +69570,22 @@ class DebuggerX86 extends Debugger {
     {
         var dbgAddr = aBreak[i];
         this.println(aBreak[0] + ' ' + this.toHexAddr(dbgAddr) + (sAction? (' ' + sAction) : (dbgAddr.sCmd? (' "' + dbgAddr.sCmd + '"') : '')));
+    }
+
+    /**
+     * restoreBreakpoints(aBreak, aDbgAddr)
+     *
+     * @this {DebuggerX86}
+     * @param {Array} aBreak
+     * @param {Array} aDbgAddr
+     */
+    restoreBreakpoints(aBreak, aDbgAddr)
+    {
+        if (aDbgAddr[0] != aBreak[0]) return;
+        for (var i = 1; i < aDbgAddr.length; i++) {
+            var dbgAddr = aDbgAddr[i];
+            this.addBreakpoint(aBreak, dbgAddr, dbgAddr.fTempBreak, true);
+        }
     }
 
     /**
@@ -70956,9 +70986,8 @@ class DebuggerX86 extends Debugger {
     /**
      * doDump(asArgs)
      *
-     * The length parameter is interpreted as a number of bytes, in hex, which we convert to the appropriate number
-     * of lines, because we always display whole lines.  If the length is omitted/undefined, it defaults to 0x80 (128.)
-     * bytes, which normally translates to 8 lines.
+     * For memory dumps, the second parameter (sLen) is interpreted as a length (by default, in hex)
+     * only if it contains an 'l' prefix; otherwise it's interpreted as an ending address (inclusive).
      *
      * @this {DebuggerX86}
      * @param {Array.<string>} asArgs (formerly sCmd, [sAddr], [sLen] and [sBytes])
@@ -71073,12 +71102,10 @@ class DebuggerX86 extends Debugger {
                 }
             }
             if (!sAddr) sCmd = this.sCmdDumpPrev || "db";
-        } else {
-            this.sCmdDumpPrev = sCmd;
         }
 
         if (sCmd == "dh") {
-            this.dumpHistory(sAddr, sLen);
+            this.dumpHistory(sAddr, sLen, sBytes);
             return;
         }
 
@@ -71095,16 +71122,27 @@ class DebuggerX86 extends Debugger {
             return;
         }
 
+        if (sCmd[1] && "bwd".indexOf(sCmd[1]) < 0) {
+            this.println("unrecognized dump command");
+            return;
+        }
+
+        this.sCmdDumpPrev = sCmd;
+
         var dbgAddr = this.parseAddr(sAddr);
         if (!dbgAddr || dbgAddr.sel == null && dbgAddr.addr == null) return;
 
-        var len = 0;                            // 0 is not a default; it triggers the appropriate default below
+        var len = 0;
         if (sLen) {
             if (sLen.charAt(0) == 'l') {
                 sLen = sLen.substr(1) || sBytes;
+                len = this.parseValue(sLen);
+            } else {
+                var dbgAddrEnd = this.parseAddr(sLen);
+                if (!dbgAddrEnd) return;
+                len = dbgAddrEnd.off - dbgAddr.off + 1;
             }
-            len = this.parseValue(sLen) >>> 0;  // negative lengths not allowed
-            if (len > 0x10000) len = 0x10000;   // prevent bad user (or variable) input from producing excessive output
+            if (len < 0 || len > 0x10000) len = 0;
         }
 
         var sDump = "";
@@ -71133,7 +71171,7 @@ class DebuggerX86 extends Debugger {
                 cb--;
             }
             if (sDump) sDump += '\n';
-            sDump += sAddr + "  " + sData + ((i == 0)? (' ' + sChars) : "");
+            sDump += sAddr + "  " + sData + Str.pad(sChars, sChars.length + i * 3 + 1, true);
         }
 
         if (sDump) this.println(sDump);
