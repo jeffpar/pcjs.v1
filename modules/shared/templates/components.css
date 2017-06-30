@@ -213,6 +213,7 @@
     padding: 0;
     resize: none;
     color: white;
+    font-family: Monaco, "Lucida Console", monospace;
     font-size: medium;
     background: rgba(0, 0, 0, .5);
     opacity: 0;
