@@ -279,7 +279,7 @@ converts the modified JSON back into an IMG file.
 	diskdump --disk=COMPAQ-DOS111.img --format=json --forceBPB --output=COMPAQ-DOS111-BPB.json
 	warning: BPB has been updated
 	327680-byte disk image saved to COMPAQ-DOS111-BPB.json
-	diskdump --disk=COMPAQ-DOS111.json --format=img --output=COMPAQ-DOS111-BPB.img
+	diskdump --disk=COMPAQ-DOS111-BPB.json --format=img --output=COMPAQ-DOS111-BPB.img
 	327680-byte disk image saved to COMPAQ-DOS111-BPB.img
 	chmod -w COMPAQ-DOS111-BPB.img
 	open COMPAQ-DOS111-BPB.img
