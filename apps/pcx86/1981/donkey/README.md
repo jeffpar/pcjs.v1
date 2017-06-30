@@ -19,6 +19,7 @@ machines:
         path: /disks/pcx86/dos/ibm/1.00/PCDOS100.json
       B:
         name: None
+    autoType: $date\rbasica donkey\r
 ---
 
 IBM PC Running DONKEY.BAS
