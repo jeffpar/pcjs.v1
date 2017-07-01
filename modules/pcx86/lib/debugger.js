@@ -6289,16 +6289,15 @@ class DebuggerX86 extends Debugger {
             var dbgAddrEnd = this.parseAddr(sAddrEnd, true);
             if (!dbgAddrEnd || dbgAddrEnd.off < dbgAddr.off) return;
 
-            cb = dbgAddrEnd.off - dbgAddr.off;
-            if (!DEBUG && cb > 0x100) {
-                /*
-                 * Limiting the amount of disassembled code to 256 bytes in non-DEBUG builds is partly to
-                 * prevent the user from wedging the browser by dumping too many lines, but also a recognition
-                 * that, in non-DEBUG builds, this.println() keeps print output buffer truncated to 8Kb anyway.
-                 */
-                this.println("range too large");
-                return;
-            }
+            /*
+             * We now +1 the count to make the ending address inclusive (just like the dump command).
+             */
+            cb = dbgAddrEnd.off - dbgAddr.off + 1;
+            if (cb < 0) cb = 1;
+            /*
+             * Limiting the amount of disassembled code to 4K helps prevent the user from wedging the browser.
+             */
+            if (cb > 0x1000) cb = 0x1000;
             n = -1;
         }
 

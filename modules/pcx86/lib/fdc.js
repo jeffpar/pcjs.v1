@@ -1148,6 +1148,7 @@ class FDC extends Component {
 
             while (this.loadDrive(iDrive, sDisketteName, sDiskettePath, false, file) < 0) {
                 if (!window.confirm("Click OK to reload the original disk and discard any changes.")) {
+                    if (DEBUG) this.println("load cancelled");
                     return;
                 }
                 /*

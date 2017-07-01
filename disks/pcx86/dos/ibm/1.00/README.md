@@ -256,7 +256,7 @@ because it includes lots of commentary, allowing the boot sector to more or less
 	
 	;-----------------------------------------------------------------------------
 
-Using the PCjs Debugger, we can view the code above in its native environment:
+Using the PCjs Debugger, we can examine the boot sector in its native environment:
 
 	bp &0000:7C00 hit
 	stopped
