@@ -74,7 +74,7 @@ size of IBMDOS.COM is 6656, so the total number of bytes consumed by those two f
 
 ### PC-DOS 1.10 Boot Sector
 
-The boot sector of the PC-DOS 1.11 disk image contains the following bytes:
+The boot sector of the PC-DOS 1.10 disk image contains the following bytes:
 
 	00000000  eb 27 90 08 00 14 00 00  00 00 00 00 00 00 00 00  |.'..............|
 	00000010  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
@@ -124,6 +124,11 @@ a 320Kb diskette is allocated a larger root directory (7 sectors instead of 4), 
 out to sector #3 and head #1.  The total number of sectors to read (0x14) remains the same as PC-DOS 1.00, but that
 value is now stored at offset 0x0005 (0x7C05) instead of 0x0002 (0x7C02).
 
+Interestingly, the [COMPAQ MS-DOS 1.11 Boot Sector](/disks/pcx86/dos/compaq/1.11/#compaq-ms-dos-111-boot-sector)
+is completely different from all PC-DOS 1.x boot sectors.  The COMPAQ boot sector supports both 160Kb and 320Kb
+formats with less code and without requiring "patches", although that flexibility did require reading the first
+FAT sector, which PC-DOS 1.x boot sectors did not do.
+
 Using the PCjs Debugger, we can examine the boot sector in its native environment:
 
 	bp &0000:7C00 hit
@@ -131,6 +136,46 @@ Using the PCjs Debugger, we can examine the boot sector in its native environmen
 	AX=0000 BX=7C00 CX=0004 DX=0000 SP=0100 BP=E4B7 SI=0000 DI=0044 
 	SS=0030 DS=0040 ES=0000 PS=F296 V0 D0 I1 T0 S1 Z0 A1 P1 C0 
 	&0000:7C00 EB27            JMP      7C29
+	
+	>> db 7c00 l200
+	&0000:7C00  EB 27 90 08 00 14 00 00-00 00 00 00 02 01 01 00  .'..............
+	&0000:7C10  02 40 00 40 01 FE 01 00-08 00 01 00 00 00 00 00  .@.@............
+	&0000:7C20  00 00 00 00 00 00 00 CD-19 FA 8C C8 8E D8 33 D2  ..............3.
+	&0000:7C30  8E D2 BC 00 7C FB B8 60-00 8E D8 8E C0 33 D2 8B  ....|..`.....3..
+	&0000:7C40  C2 CD 13 72 69 E8 85 00-72 DD 2E 83 3E 03 7C 08  ...ri...r...>.|.
+	&0000:7C50  74 06 2E C6 06 64 7D 02-BB 00 00 2E 8B 0E 03 7C  t....d}........|
+	&0000:7C60  51 B0 09 2A C1 B4 00 8B-F0 56 33 D2 33 C0 8A C5  Q..*.....V3.3...
+	&0000:7C70  2E F6 36 64 7D 8A E8 8A-F4 8B C6 B4 02 CD 13 72  ..6d}..........r
+	&0000:7C80  2D 5E 59 2E 29 36 05 7C-74 1F 8B C6 2E F7 26 65  -^Y.)6.|t.....&e
+	&0000:7C90  7D 03 D8 FE C5 B1 01 51-BE 08 00 2E 3B 36 05 7C  }......Q....;6.|
+	&0000:7CA0  7C 05 2E 8B 36 05 7C EB-C0 EA 00 00 60 00 BE 67  |...6.|.....`..g
+	&0000:7CB0  7D E8 02 00 EB FE 32 FF-2E AC 24 7F 74 0B 56 B4  }.....2...$t.V.
+	&0000:7CC0  0E BB 07 00 CD 10 5E EB-EF C3 E9 33 FF BB 00 00  ......^....3....
+	&0000:7CD0  B9 04 00 B8 01 02 CD 13-1E 72 33 8C C8 8E D8 BF  .........r3.....
+	&0000:7CE0  00 00 B9 0B 00 26 80 0D-20 26 80 4D 20 20 47 E2  .....&.. &.M  G.
+	&0000:7CF0  F4 BF 00 00 BE 8B 7D B9-0B 00 FC F3 A6 75 0F BF  ......}......u..
+	&0000:7D00  20 00 BE 97 7D B9 0B 00-F3 A6 75 02 1F C3 BE 1B   ...}.....u.....
+	&0000:7D10  7D E8 A2 FF B4 00 CD 16-1F F9 C3 0D 0A 4E 6F 6E  }............Non
+	&0000:7D20  2D 53 79 73 74 65 6D 20-64 69 73 6B 20 6F 72 20  -System disk or 
+	&0000:7D30  64 69 73 6B 20 65 72 72-6F 72 0D 0A 52 65 70 6C  disk error..Repl
+	&0000:7D40  61 63 65 20 61 6E 64 20-73 74 72 69 6B 65 20 61  ace and strike a
+	&0000:7D50  6E 79 20 6B 65 79 20 77-68 65 6E 20 72 65 61 64  ny key when read
+	&0000:7D60  79 0D 0A 00 01 00 02 0D-0A 44 69 73 6B 20 42 6F  y........Disk Bo
+	&0000:7D70  6F 74 20 66 61 69 6C 75-72 65 0D 0A 00 4D 69 63  ot failure...Mic
+	&0000:7D80  72 6F 73 6F 66 74 2C 49-6E 63 20 69 62 6D 62 69  rosoft,Inc ibmbi
+	&0000:7D90  6F 20 20 63 6F 6D 30 69-62 6D 64 6F 73 20 20 63  o  com0ibmdos  c
+	&0000:7DA0  6F 6D 30 05 C6 06 77 2F-FF 83 7E FC 00 75 0B 80  om0...w/..~..u..
+	&0000:7DB0  7E F7 3B 75 05 C6 06 76-2F FF 89 EC 5D CA 04 00  ~.;u...v/...]...
+	&0000:7DC0  00 00 00 00 00 00 00 00-00 00 00 00 00 00 00 00  ................
+	&0000:7DD0  00 00 00 00 00 00 00 00-00 00 00 00 00 00 00 00  ................
+	&0000:7DE0  00 00 00 00 00 00 00 00-00 00 00 00 00 00 00 00  ................
+	&0000:7DF0  00 00 00 00 00 00 00 00-00 00 00 00 00 00 00 00  ................
+	
+NOTE: PCjs adds a BPB to the boot sector, which is why the first 32 bytes of the boot sector
+appear slightly different from the original [dump](#pc-dos-110-boot-sector) above.  The addition of
+a BPB makes the disk image mountable by modern operating systems and does not otherwise affect the
+operation of the boot sector or any of the code below.
+
 	>> tr
 	AX=0000 BX=7C00 CX=0004 DX=0000 SP=0100 BP=E4B7 SI=0000 DI=0044 
 	SS=0030 DS=0040 ES=0000 PS=F296 V0 D0 I1 T0 S1 Z0 A1 P1 C0 
