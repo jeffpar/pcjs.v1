@@ -302,9 +302,15 @@ look at the code, using the PCjs Debugger to stop at the first instruction:
 	&7DE4  00 00 00 E7 01 00 00 00-00 00 00 00 00 00 00 00  ................
 	&7DF4  00 00 00 00 00 00 00 00-00 00 00 00
 
-In terms of raw code (90 instructions), it's shorter than the PC-DOS 1.00 boot sector (99 instructions),
-even though it supports twice as many disk formats.  This is because it uses tables to describe both the
-different disk formats *and* the discrete read operations, relieving the code from dealing with track boundaries.
+In terms of raw code (90 instructions), it's shorter than both the
+[PC-DOS 1.00 Boot Sector](/disks/pcx86/dos/ibm/1.00/#pc-dos-100-boot-sector) (99 instructions) and
+[PC-DOS 1.10 Boot Sector](/disks/pcx86/dos/ibm/1.10/#pc-dos-110-boot-sector) (116 instructions),
+because it uses tables to describe both the different disk formats *and* the discrete read operations,
+relieving the code from dealing with head and track size calculations.
+
+It's arguably an improvement over the [PC-DOS 1.10 Boot Sector](/disks/pcx86/dos/ibm/1.10/#pc-dos-110-boot-sector),
+because it didn't need to be altered to support both 160Kb and 320Kb diskettes.  On the other hand, that flexibility
+also makes it slightly slower to boot, because it must read the first FAT sector to determine the diskette format. 
 
 ### Mounting the COMPAQ MS-DOS 1.11 Diskette
 

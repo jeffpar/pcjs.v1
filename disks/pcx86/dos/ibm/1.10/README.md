@@ -5,7 +5,7 @@ permalink: /disks/pcx86/dos/ibm/1.10/
 machines:
   - id: ibm5150-pcdos110
     type: pcx86
-    config: /devices/pcx86/machine/5150/mda/64kb/machine.xml
+    config: /devices/pcx86/machine/5150/mda/64kb/debugger/machine.xml
     resume: 1
     autoMount:
       A:
@@ -108,6 +108,155 @@ The boot sector of the PC-DOS 1.11 disk image contains the following bytes:
 	000001d0  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
 	000001e0  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
 	000001f0  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+
+This is also the boot sector as it appears on any other single-sided 160Kb diskette formatted by PC-DOS 1.10.
+However, PC-DOS 1.10 added supported for a second format: double-sided 320Kb diskettes.  And on those larger diskettes,
+the boot sector is slightly different:
+
+	1c1
+	< 00000000  eb 27 90 08 00 14 00 00  00 00 00 00 00 00 00 00  |.'..............|
+	---
+	> 00000000  eb 27 90 03 01 14 00 00  00 00 00 00 00 00 00 00  |.'..............|
+
+The bytes at offset 0x0003 (0x7C03 when the boot sector is loaded into memory) contain the initial sector
+and head numbers of IBMBIO.COM.  On a 160Kb diskette, the first data sector is at sector #8 and head #0, but since
+a 320Kb diskette is allocated a larger root directory (7 sectors instead of 4), that pushes the first data sector
+out to sector #3 and head #1.  The total number of sectors to read (0x14) remains the same as PC-DOS 1.00, but that
+value is now stored at offset 0x0005 (0x7C05) instead of 0x0002 (0x7C02).
+
+Using the PCjs Debugger, we can examine the boot sector in its native environment:
+
+	bp &0000:7C00 hit
+	stopped
+	AX=0000 BX=7C00 CX=0004 DX=0000 SP=0100 BP=E4B7 SI=0000 DI=0044 
+	SS=0030 DS=0040 ES=0000 PS=F296 V0 D0 I1 T0 S1 Z0 A1 P1 C0 
+	&0000:7C00 EB27            JMP      7C29
+	>> tr
+	AX=0000 BX=7C00 CX=0004 DX=0000 SP=0100 BP=E4B7 SI=0000 DI=0044 
+	SS=0030 DS=0040 ES=0000 PS=F296 V0 D0 I1 T0 S1 Z0 A1 P1 C0 
+	&0000:7C29 FA              CLI                          ;cycles=15
+	>> u 7c2a 7d1a
+	&0000:7C2A 8CC8            MOV      AX,CS
+	&0000:7C2C 8ED8            MOV      DS,AX
+	&0000:7C2E 33D2            XOR      DX,DX
+	&0000:7C30 8ED2            MOV      SS,DX
+	&0000:7C32 BC007C          MOV      SP,7C00
+	&0000:7C35 FB              STI     
+	&0000:7C36 B86000          MOV      AX,0060
+	&0000:7C39 8ED8            MOV      DS,AX
+	&0000:7C3B 8EC0            MOV      ES,AX
+	&0000:7C3D 33D2            XOR      DX,DX
+	&0000:7C3F 8BC2            MOV      AX,DX
+	&0000:7C41 CD13            INT      13
+	&0000:7C43 7269            JC       7CAE
+	&0000:7C45 E88500          CALL     7CCD
+	&0000:7C48 72DD            JC       7C27
+	&0000:7C4A 2E              CS:     
+	&0000:7C4B 833E037C08      CMP      [7C03],0008
+	&0000:7C50 7406            JZ       7C58
+	&0000:7C52 2E              CS:     
+	&0000:7C53 C606647D02      MOV      [7D64],02
+	&0000:7C58 BB0000          MOV      BX,0000
+	&0000:7C5B 2E              CS:     
+	&0000:7C5C 8B0E037C        MOV      CX,[7C03]
+	&0000:7C60 51              PUSH     CX
+	&0000:7C61 B009            MOV      AL,09
+	&0000:7C63 2AC1            SUB      AL,CL
+	&0000:7C65 B400            MOV      AH,00
+	&0000:7C67 8BF0            MOV      SI,AX
+	&0000:7C69 56              PUSH     SI
+	&0000:7C6A 33D2            XOR      DX,DX
+	&0000:7C6C 33C0            XOR      AX,AX
+	&0000:7C6E 8AC5            MOV      AL,CH
+	&0000:7C70 2E              CS:     
+	&0000:7C71 F636647D        DIV      BYTE [7D64]
+	&0000:7C75 8AE8            MOV      CH,AL
+	&0000:7C77 8AF4            MOV      DH,AH
+	&0000:7C79 8BC6            MOV      AX,SI
+	&0000:7C7B B402            MOV      AH,02
+	&0000:7C7D CD13            INT      13
+	&0000:7C7F 722D            JC       7CAE
+	&0000:7C81 5E              POP      SI
+	&0000:7C82 59              POP      CX
+	&0000:7C83 2E              CS:     
+	&0000:7C84 2936057C        SUB      [7C05],SI
+	&0000:7C88 741F            JZ       7CA9
+	&0000:7C8A 8BC6            MOV      AX,SI
+	&0000:7C8C 2E              CS:     
+	&0000:7C8D F726657D        MUL      WORD [7D65]
+	&0000:7C91 03D8            ADD      BX,AX
+	&0000:7C93 FEC5            INC      CH
+	&0000:7C95 B101            MOV      CL,01
+	&0000:7C97 51              PUSH     CX
+	&0000:7C98 BE0800          MOV      SI,0008
+	&0000:7C9B 2E              CS:     
+	&0000:7C9C 3B36057C        CMP      SI,[7C05]
+	&0000:7CA0 7C05            JL       7CA7
+	&0000:7CA2 2E              CS:     
+	&0000:7CA3 8B36057C        MOV      SI,[7C05]
+	&0000:7CA7 EBC0            JMP      7C69
+	&0000:7CA9 EA00006000      JMP      &0060:0000
+	&0000:7CAE BE677D          MOV      SI,7D67
+	&0000:7CB1 E80200          CALL     7CB6
+	&0000:7CB4 EBFE            JMP      7CB4
+	
+The next chunk of code is similar to `disk_error` in the [PC-DOS 1.00 Boot Sector](/disks/pcx86/dos/ibm/1.00/#pc-dos-100-boot-sector):
+
+	&0000:7CB6 32FF            XOR      BH,BH
+	&0000:7CB8 2E              CS:     
+	&0000:7CB9 AC              LODSB   
+	&0000:7CBA 247F            AND      AL,7F
+	&0000:7CBC 740B            JZ       7CC9
+	&0000:7CBE 56              PUSH     SI
+	&0000:7CBF B40E            MOV      AH,0E
+	&0000:7CC1 BB0700          MOV      BX,0007
+	&0000:7CC4 CD10            INT      10
+	&0000:7CC6 5E              POP      SI
+	&0000:7CC7 EBEF            JMP      7CB8
+	&0000:7CC9 C3              RET     
+	&0000:7CCA E933FF          JMP      7C00
+
+The next chunk of code is identical to `check_sys_files` in the [PC-DOS 1.00 Boot Sector](/disks/pcx86/dos/ibm/1.00/#pc-dos-100-boot-sector):
+
+	&0000:7CCD BB0000          MOV      BX,0000
+	&0000:7CD0 B90400          MOV      CX,0004
+	&0000:7CD3 B80102          MOV      AX,0201
+	&0000:7CD6 CD13            INT      13
+	&0000:7CD8 1E              PUSH     DS
+	&0000:7CD9 7233            JC       7D0E
+	&0000:7CDB 8CC8            MOV      AX,CS
+	&0000:7CDD 8ED8            MOV      DS,AX
+	&0000:7CDF BF0000          MOV      DI,0000
+	&0000:7CE2 B90B00          MOV      CX,000B
+	&0000:7CE5 26              ES:     
+	&0000:7CE6 800D20          OR       [DI],20
+	&0000:7CE9 26              ES:     
+	&0000:7CEA 804D2020        OR       [DI+20],20
+	&0000:7CEE 47              INC      DI
+	&0000:7CEF E2F4            LOOP     7CE5
+	&0000:7CF1 BF0000          MOV      DI,0000
+	&0000:7CF4 BE8B7D          MOV      SI,7D8B
+	&0000:7CF7 B90B00          MOV      CX,000B
+	&0000:7CFA FC              CLD     
+	&0000:7CFB F3              REPZ    
+	&0000:7CFC A6              CMPSB   
+	&0000:7CFD 750F            JNZ      7D0E
+	&0000:7CFF BF2000          MOV      DI,0020
+	&0000:7D02 BE977D          MOV      SI,7D97
+	&0000:7D05 B90B00          MOV      CX,000B
+	&0000:7D08 F3              REPZ    
+	&0000:7D09 A6              CMPSB   
+	&0000:7D0A 7502            JNZ      7D0E
+	&0000:7D0C 1F              POP      DS
+	&0000:7D0D C3              RET
+	     
+	&0000:7D0E BE1B7D          MOV      SI,7D1B
+	&0000:7D11 E8A2FF          CALL     7CB6
+	&0000:7D14 B400            MOV      AH,00
+	&0000:7D16 CD16            INT      16
+	&0000:7D18 1F              POP      DS
+	&0000:7D19 F9              STC     
+	&0000:7D1A C3              RET     
 
 ### Additional Information From [PC DOS Retro](https://sites.google.com/site/pcdosretro/doshist)
 

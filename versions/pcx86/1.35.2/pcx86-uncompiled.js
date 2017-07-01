@@ -58010,6 +58010,12 @@ class Disk extends Component {
                 for (i = 0; i < track.length; i++) {
                     track[i] = this.initSector(null, iCylinder, iHead, i + 1, drive.nBytes, 0);
                 }
+                /*
+                 * TODO: This is more dodginess, because we can't be certain that every cylinder on the disk
+                 * will receive the same "expanded" treatment, but functions like getSector() rely on instance
+                 * properties (eg, this.nHeads), on the assumption that the disk's geometry is homogeneous.
+                 */
+                if (this.nHeads <= iHead) this.nHeads = iHead + 1;
             }
             if (track) {
                 for (i = 0; i < track.length; i++) {
@@ -58052,6 +58058,12 @@ class Disk extends Component {
                  */
                 if (!sector && drive.bFormatting && drive.bSector == 9) {
                     sector = track[i] = this.initSector(null, iCylinder, iHead, drive.bSector, drive.nBytes, 0);
+                    /*
+                     * TODO: This is more dodginess, because we can't be certain that every track on the disk
+                     * will receive the same "expanded" treatment, but functions like getSector() rely on instance
+                     * properties (eg, this.nSectors), on the assumption that the disk's geometry is homogeneous.
+                     */
+                    if (this.nSectors < drive.bSector) this.nSectors = drive.bSector;
                 }
             }
         }
@@ -60212,6 +60224,7 @@ class FDC extends Component {
 
             while (this.loadDrive(iDrive, sDisketteName, sDiskettePath, false, file) < 0) {
                 if (!window.confirm("Click OK to reload the original disk and discard any changes.")) {
+                    if (DEBUG) this.println("load cancelled");
                     return;
                 }
                 /*
@@ -72484,16 +72497,15 @@ class DebuggerX86 extends Debugger {
             var dbgAddrEnd = this.parseAddr(sAddrEnd, true);
             if (!dbgAddrEnd || dbgAddrEnd.off < dbgAddr.off) return;
 
-            cb = dbgAddrEnd.off - dbgAddr.off;
-            if (!DEBUG && cb > 0x100) {
-                /*
-                 * Limiting the amount of disassembled code to 256 bytes in non-DEBUG builds is partly to
-                 * prevent the user from wedging the browser by dumping too many lines, but also a recognition
-                 * that, in non-DEBUG builds, this.println() keeps print output buffer truncated to 8Kb anyway.
-                 */
-                this.println("range too large");
-                return;
-            }
+            /*
+             * We now +1 the count to make the ending address inclusive (just like the dump command).
+             */
+            cb = dbgAddrEnd.off - dbgAddr.off + 1;
+            if (cb < 0) cb = 1;
+            /*
+             * Limiting the amount of disassembled code to 4K helps prevent the user from wedging the browser.
+             */
+            if (cb > 0x1000) cb = 0x1000;
             n = -1;
         }
 
