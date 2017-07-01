@@ -1817,6 +1817,12 @@ class Disk extends Component {
                 for (i = 0; i < track.length; i++) {
                     track[i] = this.initSector(null, iCylinder, iHead, i + 1, drive.nBytes, 0);
                 }
+                /*
+                 * TODO: This is more dodginess, because we can't be certain that every cylinder on the disk
+                 * will receive the same "expanded" treatment, but functions like getSector() rely on instance
+                 * properties (eg, this.nHeads), on the assumption that the disk's geometry is homogeneous.
+                 */
+                if (this.nHeads <= iHead) this.nHeads = iHead + 1;
             }
             if (track) {
                 for (i = 0; i < track.length; i++) {
@@ -1859,6 +1865,12 @@ class Disk extends Component {
                  */
                 if (!sector && drive.bFormatting && drive.bSector == 9) {
                     sector = track[i] = this.initSector(null, iCylinder, iHead, drive.bSector, drive.nBytes, 0);
+                    /*
+                     * TODO: This is more dodginess, because we can't be certain that every track on the disk
+                     * will receive the same "expanded" treatment, but functions like getSector() rely on instance
+                     * properties (eg, this.nSectors), on the assumption that the disk's geometry is homogeneous.
+                     */
+                    if (this.nSectors < drive.bSector) this.nSectors = drive.bSector;
                 }
             }
         }

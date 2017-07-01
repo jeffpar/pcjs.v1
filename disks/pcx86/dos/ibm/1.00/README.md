@@ -19,12 +19,11 @@ PC-DOS 1.00
 -----------
 
 PC-DOS 1.00 was completed in August 1981 and announced at an IBM press conference on August 12, 1981,
-when IBM introduced the original IBM PC (Model 5150).
+when IBM introduced the original IBM PC (Model 5150).  It was released on one single-sided (160Kb) diskette.
+The disk's [Directory Listing](#directory-of-pc-dos-100-diskette) and [Boot Sector](#pc-dos-100-boot-sector)
+are shown below.
 
 To learn how to use PC-DOS 1.00, see the [Documentation](/pubs/pc/software/dos/PCDOS100/).
-
-To learn more about this single-sided (160Kb) diskette, see the
-[Directory Listing](#directory-of-pc-dos-100-diskette) and [Boot Sector](#pc-dos-100-boot-sector) below.
 
 {% include machine.html id="ibm5150-pcdos100" %}
 
@@ -78,6 +77,41 @@ CHKDSK reports:
 	        6144 bytes remain available
 
 ### PC-DOS 1.00 Boot Sector
+
+The boot sector of the PC-DOS 1.00 disk image contains the following bytes:
+
+	00000000  eb 2f 14 00 00 00 60 00  20 37 2d 4d 61 79 2d 38  |./....`. 7-May-8|
+	00000010  31 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |1...............|
+	00000020  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+	00000030  00 fa 8c c8 8e d8 ba 00  00 8e d2 bc 00 7c fb a1  |.............|..|
+	00000040  06 7c 8e d8 8e c0 ba 00  00 8b c2 cd 13 72 41 e8  |.|...........rA.|
+	00000050  58 00 72 fb 2e 8b 0e 02  7c 51 bb 00 00 33 d2 b9  |X.r.....|Q...3..|
+	00000060  08 00 be 01 00 56 b0 01  b4 02 cd 13 72 22 5e 58  |.....V......r"^X|
+	00000070  e8 e7 00 2b c6 74 14 fe  c5 b1 01 be 08 00 3b c6  |...+.t........;.|
+	00000080  73 04 8b f0 eb 01 96 56  50 eb dd 2e ff 2e 04 7c  |s......VP......||
+	00000090  be 44 7d b8 42 7d 50 32  ff ac 24 7f 74 0b 56 b4  |.D}.B}P2..$.t.V.|
+	000000a0  0e bb 07 00 cd 10 5e eb  f0 c3 bb 00 00 b9 04 00  |......^.........|
+	000000b0  b8 01 02 cd 13 1e 72 34  8c c8 8e d8 bf 00 00 b9  |......r4........|
+	000000c0  0b 00 26 80 0d 20 26 80  8d 20 00 20 47 e2 f3 bf  |..&.. &.. . G...|
+	000000d0  00 00 be 76 7d b9 0b 00  fc f3 a6 75 0f bf 20 00  |...v}......u.. .|
+	000000e0  be 82 7d b9 0b 00 f3 a6  75 02 1f c3 be f9 7c e8  |..}.....u.....|.|
+	000000f0  a5 ff b4 00 cd 16 1f f9  c3 0d 0a 4e 6f 6e 2d 53  |...........Non-S|
+	00000100  79 73 74 65 6d 20 64 69  73 6b 20 6f 72 20 64 69  |ystem disk or di|
+	00000110  73 6b 20 65 72 72 6f f2  0d 0a 52 65 70 6c 61 63  |sk erro...Replac|
+	00000120  65 20 61 6e 64 20 73 74  72 69 6b 65 20 61 6e 79  |e and strike any|
+	00000130  20 6b 65 79 20 77 68 65  6e 20 72 65 61 64 f9 0d  | key when read..|
+	00000140  0a 00 cd 18 0d 0a 44 69  73 6b 20 42 6f 6f 74 20  |......Disk Boot |
+	00000150  66 61 69 6c 75 72 e5 0d  0a 00 50 52 8b c6 bf 00  |failur....PR....|
+	00000160  02 f7 e7 03 d8 5a 58 c3  52 6f 62 65 72 74 20 4f  |.....ZX.Robert O|
+	00000170  27 52 65 61 72 20 69 62  6d 62 69 6f 20 20 63 6f  |'Rear ibmbio  co|
+	00000180  6d b0 69 62 6d 64 6f 73  20 20 63 6f 6d b0 c9 00  |m.ibmdos  com...|
+	00000190  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+	000001a0  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+	000001b0  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+	000001c0  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+	000001d0  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+	000001e0  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+	000001f0  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
 
 A number of people have already delved into the guts of the PC-DOS 1.00 boot sector, including:
 
@@ -257,7 +291,7 @@ because it includes lots of commentary, allowing the boot sector to more or less
 	
 	;-----------------------------------------------------------------------------
 
-Using the PCjs Debugger, we can view the code above in its native environment:
+Using the PCjs Debugger, we can examine the boot sector in its native environment:
 
 	bp &0000:7C00 hit
 	stopped
@@ -266,46 +300,43 @@ Using the PCjs Debugger, we can view the code above in its native environment:
 	&0000:7C00 EB2F            JMP      7C31
 
 	>> db 7c00 l200
-	&7C00  EB 2F 14 00 00 00 60 00-20 37 2D 4D 61 79 2D 38  ./....`. 7-May-8
-    &7C10  31 00 00 00 00 00 00 00-00 00 00 00 00 00 00 00  1...............
-	&7C20  00 00 00 00 00 00 00 00-00 00 00 00 00 00 00 00  ................
-	&7C30  00 FA 8C C8 8E D8 BA 00-00 8E D2 BC 00 7C FB A1  .............|..
-	&7C40  06 7C 8E D8 8E C0 BA 00-00 8B C2 CD 13 72 41 E8  .|...........rA.
-	&7C50  58 00 72 FB 2E 8B 0E 02-7C 51 BB 00 00 33 D2 B9  X.r.....|Q...3..
-	&7C60  08 00 BE 01 00 56 B0 01-B4 02 CD 13 72 22 5E 58  .....V......r"^X
-	&7C70  E8 E7 00 2B C6 74 14 FE-C5 B1 01 BE 08 00 3B C6  ...+.t........;.
-	&7C80  73 04 8B F0 EB 01 96 56-50 EB DD 2E FF 2E 04 7C  s......VP......|
-	&7C90  BE 44 7D B8 42 7D 50 32-FF AC 24 7F 74 0B 56 B4  .D}.B}P2..$t.V.
-	&7CA0  0E BB 07 00 CD 10 5E EB-F0 C3 BB 00 00 B9 04 00  ......^.........
-	&7CB0  B8 01 02 CD 13 1E 72 34-8C C8 8E D8 BF 00 00 B9  ......r4........
-	&7CC0  0B 00 26 80 0D 20 26 80-8D 20 00 20 47 E2 F3 BF  ..&.. &.. . G...
-	&7CD0  00 00 BE 76 7D B9 0B 00-FC F3 A6 75 0F BF 20 00  ...v}......u.. .
-	&7CE0  BE 82 7D B9 0B 00 F3 A6-75 02 1F C3 BE F9 7C E8  ..}.....u.....|.
-	&7CF0  A5 FF B4 00 CD 16 1F F9-C3 0D 0A 4E 6F 6E 2D 53  ...........Non-S
-	&7D00  79 73 74 65 6D 20 64 69-73 6B 20 6F 72 20 64 69  ystem disk or di
-	&7D10  73 6B 20 65 72 72 6F F2-0D 0A 52 65 70 6C 61 63  sk erro...Replac
-	&7D20  65 20 61 6E 64 20 73 74-72 69 6B 65 20 61 6E 79  e and strike any
-	&7D30  20 6B 65 79 20 77 68 65-6E 20 72 65 61 64 F9 0D   key when read..
-	&7D40  0A 00 CD 18 0D 0A 44 69-73 6B 20 42 6F 6F 74 20  ......Disk Boot 
-	&7D50  66 61 69 6C 75 72 E5 0D-0A 00 50 52 8B C6 BF 00  failur....PR....
-	&7D60  02 F7 E7 03 D8 5A 58 C3-52 6F 62 65 72 74 20 4F  .....ZX.Robert O
-	&7D70  27 52 65 61 72 20 69 62-6D 62 69 6F 20 20 63 6F  'Rear ibmbio  co
-	&7D80  6D B0 69 62 6D 64 6F 73-20 20 63 6F 6D B0 C9 00  m.ibmdos  com...
-	&7D90  00 00 00 00 00 00 00 00-00 00 00 00 00 00 00 00  ................
-	&7DA0  00 00 00 00 00 00 00 00-00 00 00 00 00 00 00 00  ................
-	&7DB0  00 00 00 00 00 00 00 00-00 00 00 00 00 00 00 00  ................
-	&7DC0  00 00 00 00 00 00 00 00-00 00 00 00 00 00 00 00  ................
-	&7DD0  00 00 00 00 00 00 00 00-00 00 00 00 00 00 00 00  ................
-	&7DE0  00 00 00 00 00 00 00 00-00 00 00 00 00 00 00 00  ................
-	&7DF0  00 00 00 00 00 00 00 00-00 00 00 00 00 00 00 00  ................
+	&0000:7C00  EB 2F 14 00 00 00 60 00-20 37 2D 00 02 01 01 00  ./....`. 7-.....
+	&0000:7C10  02 40 00 40 01 FE 01 00-08 00 01 00 00 00 00 00  .@.@............
+	&0000:7C20  00 00 00 00 00 00 00 00-00 00 00 00 00 00 00 00  ................
+	&0000:7C30  00 FA 8C C8 8E D8 BA 00-00 8E D2 BC 00 7C FB A1  .............|..
+	&0000:7C40  06 7C 8E D8 8E C0 BA 00-00 8B C2 CD 13 72 41 E8  .|...........rA.
+	&0000:7C50  58 00 72 FB 2E 8B 0E 02-7C 51 BB 00 00 33 D2 B9  X.r.....|Q...3..
+	&0000:7C60  08 00 BE 01 00 56 B0 01-B4 02 CD 13 72 22 5E 58  .....V......r"^X
+	&0000:7C70  E8 E7 00 2B C6 74 14 FE-C5 B1 01 BE 08 00 3B C6  ...+.t........;.
+	&0000:7C80  73 04 8B F0 EB 01 96 56-50 EB DD 2E FF 2E 04 7C  s......VP......|
+	&0000:7C90  BE 44 7D B8 42 7D 50 32-FF AC 24 7F 74 0B 56 B4  .D}.B}P2..$t.V.
+	&0000:7CA0  0E BB 07 00 CD 10 5E EB-F0 C3 BB 00 00 B9 04 00  ......^.........
+	&0000:7CB0  B8 01 02 CD 13 1E 72 34-8C C8 8E D8 BF 00 00 B9  ......r4........
+	&0000:7CC0  0B 00 26 80 0D 20 26 80-8D 20 00 20 47 E2 F3 BF  ..&.. &.. . G...
+	&0000:7CD0  00 00 BE 76 7D B9 0B 00-FC F3 A6 75 0F BF 20 00  ...v}......u.. .
+	&0000:7CE0  BE 82 7D B9 0B 00 F3 A6-75 02 1F C3 BE F9 7C E8  ..}.....u.....|.
+	&0000:7CF0  A5 FF B4 00 CD 16 1F F9-C3 0D 0A 4E 6F 6E 2D 53  ...........Non-S
+	&0000:7D00  79 73 74 65 6D 20 64 69-73 6B 20 6F 72 20 64 69  ystem disk or di
+	&0000:7D10  73 6B 20 65 72 72 6F F2-0D 0A 52 65 70 6C 61 63  sk erro...Replac
+	&0000:7D20  65 20 61 6E 64 20 73 74-72 69 6B 65 20 61 6E 79  e and strike any
+	&0000:7D30  20 6B 65 79 20 77 68 65-6E 20 72 65 61 64 F9 0D   key when read..
+	&0000:7D40  0A 00 CD 18 0D 0A 44 69-73 6B 20 42 6F 6F 74 20  ......Disk Boot 
+	&0000:7D50  66 61 69 6C 75 72 E5 0D-0A 00 50 52 8B C6 BF 00  failur....PR....
+	&0000:7D60  02 F7 E7 03 D8 5A 58 C3-52 6F 62 65 72 74 20 4F  .....ZX.Robert O
+	&0000:7D70  27 52 65 61 72 20 69 62-6D 62 69 6F 20 20 63 6F  'Rear ibmbio  co
+	&0000:7D80  6D B0 69 62 6D 64 6F 73-20 20 63 6F 6D B0 C9 00  m.ibmdos  com...
+	&0000:7D90  00 00 00 00 00 00 00 00-00 00 00 00 00 00 00 00  ................
+	&0000:7DA0  00 00 00 00 00 00 00 00-00 00 00 00 00 00 00 00  ................
+	&0000:7DB0  00 00 00 00 00 00 00 00-00 00 00 00 00 00 00 00  ................
+	&0000:7DC0  00 00 00 00 00 00 00 00-00 00 00 00 00 00 00 00  ................
+	&0000:7DD0  00 00 00 00 00 00 00 00-00 00 00 00 00 00 00 00  ................
+	&0000:7DE0  00 00 00 00 00 00 00 00-00 00 00 00 00 00 00 00  ................
+	&0000:7DF0  00 00 00 00 00 00 00 00-00 00 00 00 00 00 00 00  ................
 
-NOTE: When PCjs adds a BPB to the boot sector, the first 32 bytes will actually look like:
-
-	&7C00  EB 2F 14 00 00 00 60 00-20 37 2D 00 02 01 01 00  ./....`. 7-.....
-	&7C10  02 40 00 40 01 FE 01 00-08 00 01 00 00 00 00 00  .@.@............
-
-The addition of a BPB makes the disk image mountable by modern operating systems and does not
-otherwise affect the operation of the boot sector or any of the code below.
+NOTE: PCjs adds a BPB to the boot sector, which is why the first 32 bytes of the boot sector
+appear slightly different from the original [dump](#pc-dos-100-boot-sector) above.  The addition of
+a BPB makes the disk image mountable by modern operating systems and does not otherwise affect the
+operation of the boot sector or any of the code below.
 
 First, let's disassemble the code from `start` (0x7C31):
 
@@ -439,6 +470,11 @@ And finally, `IBMBIO_COM` (0x7D76) and `IBMDOS_COM` (0x7D82):
 	&7D68  52 6F 62 65 72 74 20 4F-27 52 65 61 72 20 69 62  Robert O'Rear ib
 	&7D78  6D 62 69 6F 20 20 63 6F-6D B0 69 62 6D 64 6F 73  mbio  com.ibmdos
 	&7D88  20 20 63 6F 6D B0 C9 00-00 00 00 00 00 00 00 00    com...........
+
+Interestingly, the [COMPAQ MS-DOS 1.11 Boot Sector](/disks/pcx86/dos/compaq/1.11/#compaq-ms-dos-111-boot-sector)
+is completely different from all PC-DOS 1.x boot sectors.  The COMPAQ boot sector supports both 160Kb and 320Kb
+formats with less code and without requiring "patches", although that flexibility did require reading the first
+FAT sector, which PC-DOS 1.x boot sectors did not do.
 
 ### Additional Information From [PC DOS Retro](https://sites.google.com/site/pcdosretro/doshist)
 
