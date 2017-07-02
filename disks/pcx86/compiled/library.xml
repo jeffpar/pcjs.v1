@@ -387,6 +387,10 @@
 		<disk path="/disks/pcx86/tools/borland/pascal/3.01a/TURBO-PASCAL-301A.json">Borland Turbo Pascal 3.01A</disk>
 		<disk path="/disks/pcx86/tools/ibm/bascom/1.00/BASCOM100-DISK1.json">IBM BASIC Compiler 1.00 (Disk 1)</disk>
 		<disk path="/disks/pcx86/tools/ibm/bascom/1.00/BASCOM100-DISK2.json">IBM BASIC Compiler 1.00 (Disk 2)</disk>
+		<disk path="/disks/pcx86/tools/logitech/modula2/1.10/LOGITECH-MODULA2-DISK1-SYSTEM.json">Modula-2/86 1.10 System (Disk 1)</disk>
+		<disk path="/disks/pcx86/tools/logitech/modula2/1.10/LOGITECH-MODULA2-DISK2-COMPILER.json">Modula-2/86 1.10 Compiler (Disk 2)</disk>
+		<disk path="/disks/pcx86/tools/logitech/modula2/1.10/LOGITECH-MODULA2-DISK3-LINKER.json">Modula-2/86 1.10 Linker (Disk 3)</disk>
+		<disk path="/disks/pcx86/tools/logitech/modula2/1.10/LOGITECH-MODULA2-DISK4-DEBUGGER.json">Modula-2/86 1.10 Debugger (Disk 4)</disk>
 		<disk path="/disks/pcx86/tools/microsoft/basic/BASCOM536.json">MS BASIC (Compiler v5.36)</disk>
 		<disk path="/disks/pcx86/tools/microsoft/basic/QUICKBASIC-DISK1.json">MS BASIC (QuickBASIC v2.0)</disk>
 		<disk path="/disks/pcx86/tools/microsoft/c/2.03/MSC203-INSTALLED.json">MS C 2.03 (Installed)</disk>
@@ -509,6 +513,7 @@
 		<disk path="/disks/pcx86/games/id/wolf3d/1WOLF14.json">Wolfenstein 3D 1.4</disk>
 		<disk path="/disks/pcx86/games/microsoft/flightsim/1982/FLIGHTSIM-1982.json">MS Flight Simulator (1982)</disk>
 		<disk path="/disks/pcx86/games/microsoft/flightsim/1984/FLIGHTSIM-1984.json">MS Flight Simulator (1984)</disk>
+		<disk path="/disks/pcx86/shareware/pctj/PCTJ1086.json">PC Tech Journal (Oct 86)</disk>
 		<disk path="/apps/pcx86/1981/visicalc/VISICALC1981.json">VisiCalc (1981)</disk>
 		<disk path="/apps/pcx86/1982/esuite/disk.json">Executive Suite (1982)</disk>
 		<disk path="/apps/pcx86/1982/ratbas/RATBAS213.json">RatBas 2.13</disk>

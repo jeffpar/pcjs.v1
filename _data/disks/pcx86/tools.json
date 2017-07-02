@@ -1,0 +1,23 @@
+[
+  {
+    "title": "Modula-2/86",
+    "version": "1.10",
+    "type": "Utility",
+    "category": "Compiler",
+    "authors": [],
+    "company": "Logitech, Inc.",
+    "releaseDate": "December 10, 1984",
+    "serialNumber": "M86M5I-001-02092",
+    "description": "",
+    "references": [],
+    "sources": [
+      {
+        "site": "VETUSWARE",
+        "desc": "Logitech Modula 2/86 Compiler 2/86",
+        "page": "http://vetusware.com/download/Logitech%20Modula%20286%20Compiler%20286/?id=8794",
+        "file": "http://vetusware.com/output/crjraqyo/Modula2.zip",
+        "copy": "/disks/pcx86/tools/logitech/modula2/archive/"
+      }
+    ]
+  }
+]

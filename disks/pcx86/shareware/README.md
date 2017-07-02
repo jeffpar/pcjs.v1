@@ -8,4 +8,4 @@ Shareware Disks
 ---------------
 
 - [PC-SIG Library 8th Edition CD-ROM (April 1990)](/disks/pcx86/shareware/pcsig08/)
-
+- [PC Tech Journal](/disks/pcx86/shareware/pctj/)

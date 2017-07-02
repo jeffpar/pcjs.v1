@@ -5,7 +5,7 @@ permalink: /disks/pcx86/tools/microsoft/c/2.03/
 ---
 
 Microsoft C Compiler 2.03
----
+-------------------------
 
 We do not have an original distribution disk for Microsoft C Compiler 2.03.  It included the following files.
 

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.35.2/manifest.xsl"?>
+<manifest type="software">
+	<title>Modula-2/86</title>
+	<version>1.10</version>
+	<type>Utility</type>
+	<category>Compiler</category>
+	<author>Logitech</author>
+	<releaseDate>December 10, 1984</releaseDate>
+	<disk id="disk01" size="368640" chs="40:2:9" img="archive/LOGITECH-MODULA2-DISK1-SYSTEM.img" href="/disks/pcx86/tools/logitech/modula2/1.10/LOGITECH-MODULA2-DISK1-SYSTEM.json" md5="53bd4195a261c73e82681d2e2a23dc8a" md5json="6f3e72ec1e951398eafcdd4e28ff89d7">
+		<name>Modula-2/86 1.10 System (Disk 1)</name>
+	</disk>
+	<disk id="disk02" size="368640" chs="40:2:9" img="archive/LOGITECH-MODULA2-DISK2-COMPILER.img" href="/disks/pcx86/tools/logitech/modula2/1.10/LOGITECH-MODULA2-DISK2-COMPILER.json" md5="24988fcfa378ca8bb0e57cf39ed2f134" md5json="e7386c5d85a857e88bac20ab5e5baa2b">
+		<name>Modula-2/86 1.10 Compiler (Disk 2)</name>
+	</disk>
+	<disk id="disk03" size="368640" chs="40:2:9" img="archive/LOGITECH-MODULA2-DISK3-LINKER.img" href="/disks/pcx86/tools/logitech/modula2/1.10/LOGITECH-MODULA2-DISK3-LINKER.json" md5="08b42645e093196448b4a0b54f08092a" md5json="adbfe6d1707091df5c37740a2d730be0">
+		<name>Modula-2/86 1.10 Linker (Disk 3)</name>
+	</disk>
+	<disk id="disk04" size="368640" chs="40:2:9" img="archive/LOGITECH-MODULA2-DISK4-DEBUGGER.img" href="/disks/pcx86/tools/logitech/modula2/1.10/LOGITECH-MODULA2-DISK4-DEBUGGER.json" md5="ece369d133dc9060d9708a2392edd1f9" md5json="417d650ebfca3cd758ad32a99a7b950c">
+		<name>Modula-2/86 1.10 Debugger (Disk 4)</name>
+	</disk>
+</manifest>

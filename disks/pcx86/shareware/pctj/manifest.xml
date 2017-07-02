@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.35.2/manifest.xsl"?>
+<manifest type="software">
+	<title>PC Tech Journal</title>
+	<disk id="disk01" size="163840" chs="40:1:8" dir="archive/PCTJ1086" href="/disks/pcx86/shareware/pctj/PCTJ1086.json" md5="6b82b28da22b4283c9779182b1764ff4" md5json="28b6fdc6a7b4772bd2f103efb8d5faba">
+		<name>PC Tech Journal (Oct 86)</name>
+		<file size="106" time="1986-07-22 21:38:48" attr="0x20" md5="69da18c606c9418e1a651a3c897da51d">DOTTIME.DEF</file>
+		<file size="3449" time="1986-07-22 21:56:06" attr="0x20" md5="3ecf09670f2b6d2935940e3b324c815b">DOTTIME.MOD</file>
+		<file size="601" time="1986-07-21 22:50:28" attr="0x20" md5="0c87cc92dff88f52eedf2988c2880b00">DRAWPOLY.DEF</file>
+		<file size="1949" time="1986-07-21 22:47:48" attr="0x20" md5="13ffc90b7a8b3713c23f361f9d156815">DRAWPOLY.MOD</file>
+		<file size="8677" time="1986-06-28 06:29:48" attr="0x20" md5="e993883a1f1d53e376a32a64c3532428">EDITBLCK</file>
+		<file size="795" time="1986-08-15 15:50:14" attr="0x20" md5="131901cb21c9a3d50bce4e5aa10ff1e2">EGAMAKE.BAT</file>
+		<file size="50080" time="1986-10-01 10:27:12" attr="0x20" md5="3fa976e479815ea69b9bd9ef5a3facd3">EGATEST.EXE</file>
+		<file size="13694" time="1986-08-15 15:44:04" attr="0x20" md5="8acffaee0ce71224b2f574114d88a283">EGATEST.MOD</file>
+		<file size="327" time="1986-07-21 22:18:52" attr="0x20" md5="d541e84ab6fd5d43e7ff99c7914cfc72">FONTBUMP.DEF</file>
+		<file size="4444" time="1986-08-15 15:56:02" attr="0x20" md5="e14295d565e7d23de8bba9f172966a47">FONTBUMP.MOD</file>
+		<file size="781" time="1986-08-15 15:58:04" attr="0x20" md5="42796a8ee4bf77cd2470a9c713e25c09">INFO</file>
+		<file size="4975" time="1986-08-15 15:47:38" attr="0x20" md5="09cdfe58504289da0ffad3b4ac52028f">LOWEGA.DEF</file>
+		<file size="28255" time="1986-10-01 14:44:32" attr="0x20" md5="6a23c5b6f5502b92fe1debba0719f041">LOWEGA.MOD</file>
+		<file size="809" time="1986-06-11 10:28:50" attr="0x20" md5="7dfcbdcc9a879e1947329dc32fa9544e">OPCODES.DEF</file>
+		<file size="49" time="1986-06-11 10:17:38" attr="0x20" md5="0ad4d1570d6a389817b56fd6036b5c1a">OPCODES.MOD</file>
+		<file size="3584" time="1986-06-01 21:48:46" attr="0x20" md5="8ff0f7edd6aef6dad9757696adddfec7">OTHRFONT.DAT</file>
+		<file size="545" time="1986-07-21 22:51:34" attr="0x20" md5="3874d39e15a5a935142de1ad9456a586">PAUSES.DEF</file>
+		<file size="1636" time="1986-07-21 23:15:30" attr="0x20" md5="537288bef2121fa2e20bc8307df24210">PAUSES.MOD</file>
+		<file size="294" time="1986-06-01 10:36:50" attr="0x20" md5="eaadaa2de0c3e9106dfc3a2c4ef9c44b">POINTLIB.DEF</file>
+		<file size="350" time="1986-06-01 10:38:28" attr="0x20" md5="779764ec235da589a0d9637c1bae04f3">POINTLIB.MOD</file>
+	</disk>
+</manifest>
