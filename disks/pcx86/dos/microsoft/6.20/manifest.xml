@@ -3,8 +3,8 @@
 <manifest type="software">
 	<title>MS-DOS</title>
 	<version>6.20</version>
-	<type>DOS</type>
-	<category>Operating System</category>
+	<type>Operating System</type>
+	<category>DOS</category>
 	<author>Microsoft</author>
 	<releaseDate/>
 	<disk id="disk01" size="1228800" chs="80:2:15" img="archive/1200K/MSDOS620-DISK1.img" href="http://archive.pcjs.org/disks/pcx86/dos/microsoft/6.20/1200K/MSDOS620-DISK1.json" md5="8f81a9c809526c963942209df8b7b381" md5json="a7199ea013d50681c102eb80d07c1b1a">

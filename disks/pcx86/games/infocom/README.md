@@ -8,6 +8,7 @@ Infocom Games
 -------------
 
 * [The Hitchhiker's Guide to the Galaxy](hhiker/)
+* [Leather Goddesses of Phobos](phobos/)
 * [Planetfall](planet/)
 * [Zork I: The Great Underground Empire](zork1/)
 * [Zork II: The Wizard of Frobozz](zork2/)

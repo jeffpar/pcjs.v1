@@ -3,8 +3,8 @@
 <manifest type="software">
 	<title>MS-DOS</title>
 	<version>3.31</version>
-	<type>DOS</type>
-	<category>Operating System</category>
+	<type>Operating System</type>
+	<category>DOS</category>
 	<author>Microsoft/COMPAQ</author>
 	<releaseDate/>
 	<disk id="disk01" size="737280" chs="80:2:9" img="archive/COMPAQ-DOS331-DISK1.img" href="/disks/pcx86/dos/compaq/3.31/COMPAQ-DOS331-DISK1.json" md5="a2e8c19e0c712b7865d71b4b85b15f7b" md5json="56928a71999a13d3bcdff895ff222ef6">

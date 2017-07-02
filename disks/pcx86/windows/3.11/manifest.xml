@@ -3,8 +3,8 @@
 <manifest type="software">
 	<title>Windows for Workgroups</title>
 	<version>3.11</version>
-	<type>Windows</type>
-	<category>Operating System</category>
+	<type>Operating System</type>
+	<category>Windows</category>
 	<author>Microsoft</author>
 	<releaseDate/>
 	<disk id="disk01" size="1474560" chs="80:2:18" img="archive/WFW311_DISK1.img" href="http://archive.pcjs.org/disks/pcx86/windows/3.11/WFW311_DISK1.json" md5="441c21aa8998d750615117bef7ad44d3" md5json="9a129babdd1bbb643f2ea50a056a0569">

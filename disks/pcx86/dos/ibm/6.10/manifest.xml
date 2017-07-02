@@ -3,8 +3,8 @@
 <manifest type="software">
 	<title>PC-DOS</title>
 	<version>6.10</version>
-	<type>DOS</type>
-	<category>Operating System</category>
+	<type>Operating System</type>
+	<category>DOS</category>
 	<author>IBM/Microsoft</author>
 	<releaseDate/>
 	<disk id="disk01" size="1474560" chs="80:2:18" img="archive/PCDOS610-DISK1-1440K.img" href="/disks/pcx86/dos/ibm/6.10/PCDOS610-DISK1-1440K.json" md5="1352a89386e537fdf17e45bc9e059e46" md5json="c1411e57a01e0b28acc4f05c70cb6e01">

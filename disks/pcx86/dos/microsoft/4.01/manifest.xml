@@ -3,8 +3,8 @@
 <manifest type="software">
 	<title>MS-DOS</title>
 	<version>4.01</version>
-	<type>DOS</type>
-	<category>Operating System</category>
+	<type>Operating System</type>
+	<category>DOS</category>
 	<author>Microsoft</author>
 	<releaseDate>April 1989</releaseDate>
 	<source url="http://www.hampa.ch/pub/software/DOS/DOS/MS-DOS%204.01%20360K.7z"/>

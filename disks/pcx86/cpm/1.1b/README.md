@@ -9,6 +9,6 @@ machines:
 ---
 
 CP/M-86 1.1B
----
+------------
 
 {% include machine.html id="ibm5150" %}

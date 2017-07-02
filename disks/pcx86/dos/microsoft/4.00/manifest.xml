@@ -3,8 +3,8 @@
 <manifest type="software">
 	<title>MS-DOS</title>
 	<version>4.00</version>
-	<type>DOS</type>
-	<category>Operating System</category>
+	<type>Operating System</type>
+	<category>DOS</category>
 	<author>Microsoft</author>
 	<releaseDate>October 1988</releaseDate>
 	<disk id="disk01" size="368640" chs="40:2:9" img="archive/MSDOS400-DISK1.img" href="http://archive.pcjs.org/disks/pcx86/dos/microsoft/4.00/MSDOS400-DISK1.json" md5="df21fae3375ec155a6ccffb25e0a8633" md5json="9364eb72b88a464ba288afd1b6163274">
