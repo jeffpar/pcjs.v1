@@ -7,31 +7,31 @@
 	<category>DOS</category>
 	<author>Microsoft</author>
 	<releaseDate/>
-	<disk id="disk01" size="1228800" chs="80:2:15" img="archive/1200K/MSDOS620-DISK1.img" href="http://archive.pcjs.org/disks/pcx86/dos/microsoft/6.20/1200K/MSDOS620-DISK1.json" md5="8f81a9c809526c963942209df8b7b381" md5json="a7199ea013d50681c102eb80d07c1b1a">
+	<disk id="disk01" size="1228800" chs="80:2:15" img="archive/1200K/MSDOS620-DISK1.img" href="/disks/pcx86/dos/microsoft/6.20/1200K/MSDOS620-DISK1.json" md5="8f81a9c809526c963942209df8b7b381" md5json="a7199ea013d50681c102eb80d07c1b1a">
 		<name>MS-DOS 6.20 (1.2M Disk 1)</name>
 	</disk>
-	<disk id="disk02" size="1228800" chs="80:2:15" img="archive/1200K/MSDOS620-DISK2.img" href="http://archive.pcjs.org/disks/pcx86/dos/microsoft/6.20/1200K/MSDOS620-DISK2.json" md5="72699a962691daefb043bd607eaee00d" md5json="1010ee9cd34e9e5c3f316f761e67acea">
+	<disk id="disk02" size="1228800" chs="80:2:15" img="archive/1200K/MSDOS620-DISK2.img" href="/disks/pcx86/dos/microsoft/6.20/1200K/MSDOS620-DISK2.json" md5="72699a962691daefb043bd607eaee00d" md5json="1010ee9cd34e9e5c3f316f761e67acea">
 		<name>MS-DOS 6.20 (1.2M Disk 2)</name>
 	</disk>
-	<disk id="disk03" size="1228800" chs="80:2:15" img="archive/1200K/MSDOS620-DISK3.img" href="http://archive.pcjs.org/disks/pcx86/dos/microsoft/6.20/1200K/MSDOS620-DISK3.json" md5="860d12e370e7e5f91ba7f8477836c7e7" md5json="210a8fe8889662f7ba593aa8083bf9e0">
+	<disk id="disk03" size="1228800" chs="80:2:15" img="archive/1200K/MSDOS620-DISK3.img" href="/disks/pcx86/dos/microsoft/6.20/1200K/MSDOS620-DISK3.json" md5="860d12e370e7e5f91ba7f8477836c7e7" md5json="210a8fe8889662f7ba593aa8083bf9e0">
 		<name>MS-DOS 6.20 (1.2M Disk 3)</name>
 	</disk>
-	<disk id="disk04" size="1228800" chs="80:2:15" img="archive/1200K/MSDOS620-DISK4.img" href="http://archive.pcjs.org/disks/pcx86/dos/microsoft/6.20/1200K/MSDOS620-DISK4.json" md5="23e453709a0df2c4cf30a3bd2141000d" md5json="4fb36406d14b7e4f5d87b368b2a00a4c">
+	<disk id="disk04" size="1228800" chs="80:2:15" img="archive/1200K/MSDOS620-DISK4.img" href="/disks/pcx86/dos/microsoft/6.20/1200K/MSDOS620-DISK4.json" md5="23e453709a0df2c4cf30a3bd2141000d" md5json="4fb36406d14b7e4f5d87b368b2a00a4c">
 		<name>MS-DOS 6.20 (1.2M Disk 4)</name>
 	</disk>
-	<disk id="disk05" size="1228800" chs="80:2:15" img="archive/1200K/MSDOS620-SUPPDISK.img" href="http://archive.pcjs.org/disks/pcx86/dos/microsoft/6.20/1200K/MSDOS620-SUPPDISK.json" md5="46a6ba5c08e33d48a2e8489f04f921e2" md5json="cd9442813cf6f7915c28e80f3d3f87f0">
+	<disk id="disk05" size="1228800" chs="80:2:15" img="archive/1200K/MSDOS620-SUPPDISK.img" href="/disks/pcx86/dos/microsoft/6.20/1200K/MSDOS620-SUPPDISK.json" md5="46a6ba5c08e33d48a2e8489f04f921e2" md5json="cd9442813cf6f7915c28e80f3d3f87f0">
 		<name>MS-DOS 6.20 (1.2M Supp Disk)</name>
 	</disk>
-	<disk id="disk06" size="1474560" chs="80:2:18" img="archive/1440K/MSDOS620-DISK1.img" href="http://archive.pcjs.org/disks/pcx86/dos/microsoft/6.20/1440K/MSDOS620-DISK1.json" md5="6c2f2b925c579a8ec1370a5437664e22" md5json="881f9fbc3a13a4ca6f65078813265cc2">
+	<disk id="disk06" size="1474560" chs="80:2:18" img="archive/1440K/MSDOS620-DISK1.img" href="/disks/pcx86/dos/microsoft/6.20/1440K/MSDOS620-DISK1.json" md5="6c2f2b925c579a8ec1370a5437664e22" md5json="881f9fbc3a13a4ca6f65078813265cc2">
 		<name>MS-DOS 6.20 (1.44M Disk 1)</name>
 	</disk>
-	<disk id="disk07" size="1474560" chs="80:2:18" img="archive/1440K/MSDOS620-DISK2.img" href="http://archive.pcjs.org/disks/pcx86/dos/microsoft/6.20/1440K/MSDOS620-DISK2.json" md5="c00bd16ac2dc64595c37904e13cbcb15" md5json="d4d7d41602e51735b0ce82e75fbb2f67">
+	<disk id="disk07" size="1474560" chs="80:2:18" img="archive/1440K/MSDOS620-DISK2.img" href="/disks/pcx86/dos/microsoft/6.20/1440K/MSDOS620-DISK2.json" md5="c00bd16ac2dc64595c37904e13cbcb15" md5json="d4d7d41602e51735b0ce82e75fbb2f67">
 		<name>MS-DOS 6.20 (1.44M Disk 2)</name>
 	</disk>
-	<disk id="disk08" size="1474560" chs="80:2:18" img="archive/1440K/MSDOS620-DISK3.img" href="http://archive.pcjs.org/disks/pcx86/dos/microsoft/6.20/1440K/MSDOS620-DISK3.json" md5="77d893e7d8d6b169ba8dc2ae20b4d45d" md5json="bae95753ac07e2e7f8103bde5b5e0858">
+	<disk id="disk08" size="1474560" chs="80:2:18" img="archive/1440K/MSDOS620-DISK3.img" href="/disks/pcx86/dos/microsoft/6.20/1440K/MSDOS620-DISK3.json" md5="77d893e7d8d6b169ba8dc2ae20b4d45d" md5json="bae95753ac07e2e7f8103bde5b5e0858">
 		<name>MS-DOS 6.20 (1.44M Disk 3)</name>
 	</disk>
-	<disk id="disk09" size="1474560" chs="80:2:18" img="archive/1440K/MSDOS620-SUPPDISK.img" href="http://archive.pcjs.org/disks/pcx86/dos/microsoft/6.20/1440K/MSDOS620-SUPPDISK.json" md5="58d88a6f4f5b79c681745d39f1b18da1" md5json="9d9b8fda0b4b67605dfbef55e34d44d6">
+	<disk id="disk09" size="1474560" chs="80:2:18" img="archive/1440K/MSDOS620-SUPPDISK.img" href="/disks/pcx86/dos/microsoft/6.20/1440K/MSDOS620-SUPPDISK.json" md5="58d88a6f4f5b79c681745d39f1b18da1" md5json="9d9b8fda0b4b67605dfbef55e34d44d6">
 		<name>MS-DOS 6.20 (1.44M Supp Disk)</name>
 	</disk>
 </manifest>
