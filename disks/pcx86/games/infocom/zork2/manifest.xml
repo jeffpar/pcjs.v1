@@ -6,7 +6,7 @@
 	<type>Game</type>
 	<category>Text Adventure</category>
 	<author>Infocom</author>
-	<releaseDate/>
+	<releaseDate>1983</releaseDate>
 	<machine href="/disks/pcx86/games/infocom/machine.xml"/>
 	<disk id="disk01" href="/disks/pcx86/games/infocom/zork2/ZORK2-READONLY.json" md5="6e7de3627c62747ee0f5832aecad579e" md5json="fae9022e4cb5da794916b332ec8a55c3"/>
 </manifest>
