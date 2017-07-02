@@ -1290,7 +1290,6 @@ class FDC extends Component {
              * of a local disk image, it will map all such disks to "Local Disk", and any attempt to "Mount" such
              * a disk, will essentially result in a "Disk not found" error.
              */
-
             this.addDiskHistory(sDisketteName, sDiskettePath, disk);
 
             /*
