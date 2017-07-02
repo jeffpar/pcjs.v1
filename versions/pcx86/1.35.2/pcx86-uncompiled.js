@@ -60168,7 +60168,7 @@ class FDC extends Component {
                  */
                 var iDrive = sDrive.charCodeAt(0) - 0x41;
                 if (iDrive >= 0 && iDrive < this.aDrives.length) {
-                    var sDisketteName = configDrive['name'] || this.findDisketteByPath(sDiskettePath) || "Unknown";
+                    var sDisketteName = configDrive['name'] || this.findDisketteByPath(sDiskettePath) || Str.getBaseName(sDiskettePath, true);
                     if (!this.loadDrive(iDrive, sDisketteName, sDiskettePath, true) && fRemount) {
                         this.setReady(false);
                     }
@@ -60347,6 +60347,14 @@ class FDC extends Component {
             drive.sDiskettePath = sDiskettePath;
 
             /*
+             * Since we allow a diskette image to be auto-mounted even if it isn't in the machine's list of disks,
+             * let's add it to the list now, since the disk apparently exists.
+             */
+            if (!this.findDisketteByPath(sDiskettePath)) {
+                this.addDiskette(sDisketteName, sDiskettePath);
+            }
+
+            /*
              * Adding local disk image names to the disk list seems like a nice idea, but it's too confusing,
              * because then it looks like the "Mount" button should be able to (re)load them, and that can NEVER
              * happen, for security reasons; local disk images can ONLY be loaded via the "Mount" button after
@@ -60456,7 +60464,7 @@ class FDC extends Component {
                 if (control.value == sPath) return control.text;
             }
         }
-        return Str.getBaseName(sPath, true);
+        return null;
     }
 
     /**
