@@ -3,8 +3,8 @@
 <manifest type="software">
 	<title>Windows 95 (RTM)</title>
 	<version>4.00.950</version>
-	<type>Windows</type>
-	<category>Operating System</category>
+	<type>Operating System</type>
+	<category>Windows</category>
 	<author>Microsoft</author>
 	<releaseDate>August 24, 1995</releaseDate>
 	<disk id="disk00" size="1474560" chs="80:2:18" img="../archive/4.00.950/WIN95-BOOT.img" href="http://archive.pcjs.org/disks/pcx86/windows/win95/4.00.950/WIN95-BOOT.json" md5="666f0f99b650468aaba0eb4ca17d519d" md5json="abe8b98d12847534c56dbd66cc1d32cc">

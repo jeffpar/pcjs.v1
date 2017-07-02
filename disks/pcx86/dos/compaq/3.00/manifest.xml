@@ -3,8 +3,8 @@
 <manifest type="software">
 	<title>MS-DOS</title>
 	<version>3.00</version>
-	<type>DOS</type>
-	<category>Operating System</category>
+	<type>Operating System</type>
+	<category>DOS</category>
 	<author>Microsoft/COMPAQ</author>
 	<releaseDate/>
 	<source href="http://os2museum.com">os2museum.com</source>

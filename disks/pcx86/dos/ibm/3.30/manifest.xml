@@ -3,8 +3,8 @@
 <manifest type="software">
 	<title>PC-DOS</title>
 	<version>3.30</version>
-	<type>DOS</type>
-	<category>Operating System</category>
+	<type>Operating System</type>
+	<category>DOS</category>
 	<author>IBM/Microsoft</author>
 	<releaseDate/>
 	<disk id="disk01" size="368640" chs="40:2:9" img="archive/PCDOS330-DISK1.img" href="/disks/pcx86/dos/ibm/3.30/PCDOS330-DISK1.json" md5="12dd70c60e57ce97b4e5aabd0f05c71a" md5json="91e4986390ea0f96ce17d4d476e0c747">

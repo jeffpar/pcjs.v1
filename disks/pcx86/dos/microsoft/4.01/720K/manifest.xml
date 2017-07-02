@@ -3,8 +3,8 @@
 <manifest type="software">
 	<title>MS-DOS</title>
 	<version>4.01</version>
-	<type>DOS</type>
-	<category>Operating System</category>
+	<type>Operating System</type>
+	<category>DOS</category>
 	<author>Microsoft</author>
 	<releaseDate>April 1989</releaseDate>
 	<disk id="disk01" size="737280" chs="80:2:9" img="archive/MSDOS401-DISK1.img" href="/disks/pcx86/dos/microsoft/4.01/720K/MSDOS401-DISK1.json" md5="fe6a8a6a3991839680fb0a2f137b337b" md5json="7905864b5a943d6cb4a4a2b37f6dfbe1">

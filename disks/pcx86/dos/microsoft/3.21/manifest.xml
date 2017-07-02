@@ -3,8 +3,8 @@
 <manifest type="software">
 	<title>MS-DOS</title>
 	<version>3.21</version>
-	<type>DOS</type>
-	<category>Operating System</category>
+	<type>Operating System</type>
+	<category>DOS</category>
 	<author>Microsoft</author>
 	<releaseDate>May 1, 1987</releaseDate>
 	<disk id="disk01" size="368640" chs="40:2:9" img="archive/MSDOS321-DISK1.img" href="http://archive.pcjs.org/disks/pcx86/dos/microsoft/3.21/MSDOS321-DISK1.json" md5="251b00fc091a252d655a3bc447eb330b" md5json="92c4a838698bef22ab51528d69636bbd">

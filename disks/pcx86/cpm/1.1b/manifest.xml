@@ -3,8 +3,8 @@
 <manifest type="software">
 	<title>CP/M-86</title>
 	<version>1.1B</version>
-	<type>OS</type>
-	<category>Operating System</category>
+	<type>Operating System</type>
+	<category>CP/M</category>
 	<author href="http://en.wikipedia.org/wiki/Digital_Research">Digital Research</author>
 	<publisher href="http://en.wikipedia.org/wiki/Eagle_Computer">Eagle Computer</publisher>
 	<releaseDate>May 20, 1983</releaseDate>
