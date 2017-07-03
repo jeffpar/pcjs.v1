@@ -3,8 +3,9 @@
 <manifest type="software">
 	<title>MS BASIC</title>
 	<version/>
-	<type>Tool</type>
-	<category>BASIC Compiler</category>
+	<type>Utility</type>
+	<category>Compiler</category>
+	<language>BASIC</language>
 	<author>Microsoft</author>
 	<releaseDate/>
 	<disk id="disk01" size="368640" chs="40:2:9" img="archive/BASCOM536.img" href="/disks/pcx86/tools/microsoft/basic/BASCOM536.json" md5="9f60598a1c85ffac3639611a3e94e83d" md5json="b60517d447af09c48928621b65e7fff2">

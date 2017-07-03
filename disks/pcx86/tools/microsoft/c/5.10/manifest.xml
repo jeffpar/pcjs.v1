@@ -3,8 +3,9 @@
 <manifest type="software">
 	<title>Microsoft C Compiler</title>
 	<version>5.10</version>
-	<type>Tool</type>
-	<category>C Compiler</category>
+	<type>Utility</type>
+	<category>Compiler</category>
+	<language>C</language>
 	<author>Microsoft</author>
 	<releaseDate/>
 	<disk id="disk01" size="368640" chs="40:2:9" img="archive/MSC510-01521-SETUP.img" href="/disks/pcx86/tools/microsoft/c/5.10/MSC510-01521-SETUP.json" md5="21547d67ab62554d443d334ffff2ba0f" md5json="0d3e20b28a7b9f2e43fef5a9de9c7662">

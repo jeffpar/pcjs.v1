@@ -3,8 +3,9 @@
 <manifest type="software">
 	<title>Microsoft Macro Assembler</title>
 	<version>6.11</version>
-	<type>Tool</type>
+	<type>Utility</type>
 	<category>Assembler</category>
+	<language>x86</language>
 	<author>Microsoft</author>
 	<disk id="disk01" size="1474560" chs="80:2:18" img="archive/MASM611-DISK1.img" href="/disks/pcx86/tools/microsoft/masm/6.11/MASM611-DISK1.json" md5="02497c7dadcf4f98b0c487df8aaff995" md5json="bc50632cc41cf7e285f9cbd37c86cf57">
 		<name>MS MASM 6.11 (Disk 1)</name>

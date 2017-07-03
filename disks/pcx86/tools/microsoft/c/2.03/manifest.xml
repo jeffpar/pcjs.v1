@@ -3,8 +3,9 @@
 <manifest type="software">
 	<title>Microsoft C Compiler</title>
 	<version>2.03</version>
-	<type>Tool</type>
-	<category>C Compiler</category>
+	<type>Utility</type>
+	<category>Compiler</category>
+	<language>C</language>
 	<author>Microsoft</author>
 	<releaseDate/>
 	<disk id="disk01" size="368640" chs="40:2:9" img="archive/MSC203-INSTALLED.img" href="/disks/pcx86/tools/microsoft/c/2.03/MSC203-INSTALLED.json" md5="f8f7538eda49de2920d15992b058970b" md5json="b4d6e083db716ad11f931076cfd80ba5">

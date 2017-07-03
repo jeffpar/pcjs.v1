@@ -3,39 +3,39 @@
 <manifest type="software">
 	<title>Windows SDK 3.00</title>
 	<disk id="disk01" size="737280" chs="80:2:9" img="archive/WIN30SDK_DISK01.img" href="/disks/pcx86/tools/microsoft/windows/sdk/3.00/WIN30SDK_DISK01.json" md5="3eb1f6df549dd454b65fb869a606e010" md5json="6a85939ac71c91d76b9fe39407464de2">
-		<name>Windows SDK 3.00 (720K Disk 1)</name>
+		<name>Windows SDK 3.00 (720K Disk 01)</name>
 		<desc>Development Tools 1 (For DOS Systems) Version 3.0</desc>
 	</disk>
 	<disk id="disk02" size="737280" chs="80:2:9" img="archive/WIN30SDK_DISK02.img" href="/disks/pcx86/tools/microsoft/windows/sdk/3.00/WIN30SDK_DISK02.json" md5="022e5517696403d7b3186bc7820178ad" md5json="f7ae92fbc95bfe2ac2e636b5bb0ce560">
-		<name>Windows SDK 3.00 (720K Disk 2)</name>
+		<name>Windows SDK 3.00 (720K Disk 02)</name>
 		<desc>Development Tools 2/Debug Tools 1</desc>
 	</disk>
 	<disk id="disk03" size="737280" chs="80:2:9" img="archive/WIN30SDK_DISK03.img" href="/disks/pcx86/tools/microsoft/windows/sdk/3.00/WIN30SDK_DISK03.json" md5="3eb2998642caf9130ec3892bdc3d4352" md5json="86b2cd50f0d3c667b98121280685a846">
-		<name>Windows SDK 3.00 (720K Disk 3)</name>
+		<name>Windows SDK 3.00 (720K Disk 03)</name>
 		<desc>Debug Tools 2/Debug Files 1</desc>
 	</disk>
 	<disk id="disk04" size="737280" chs="80:2:9" img="archive/WIN30SDK_DISK04.img" href="/disks/pcx86/tools/microsoft/windows/sdk/3.00/WIN30SDK_DISK04.json" md5="c78b913d3efb2a5c5772b4fba9887b4b" md5json="9a4387825e90e44a91a06cf78eb8363a">
-		<name>Windows SDK 3.00 (720K Disk 4)</name>
+		<name>Windows SDK 3.00 (720K Disk 04)</name>
 		<desc>Debug Files 2</desc>
 	</disk>
 	<disk id="disk05" size="737280" chs="80:2:9" img="archive/WIN30SDK_DISK05.img" href="/disks/pcx86/tools/microsoft/windows/sdk/3.00/WIN30SDK_DISK05.json" md5="d517a1a44a430c8810ed2288df4ba632" md5json="a2fdbe2095c9d5ba231d20e390a1430c">
-		<name>Windows SDK 3.00 (720K Disk 5)</name>
+		<name>Windows SDK 3.00 (720K Disk 05)</name>
 		<desc>Link Libraries 1</desc>
 	</disk>
 	<disk id="disk06" size="737280" chs="80:2:9" img="archive/WIN30SDK_DISK06.img" href="/disks/pcx86/tools/microsoft/windows/sdk/3.00/WIN30SDK_DISK06.json" md5="8b87da4b4a7fe1a622c76674f31c040a" md5json="effb20a06c0ab1430e75d2dd4926a34f">
-		<name>Windows SDK 3.00 (720K Disk 6)</name>
+		<name>Windows SDK 3.00 (720K Disk 06)</name>
 		<desc>Link Libraries 2</desc>
 	</disk>
 	<disk id="disk07" size="737280" chs="80:2:9" img="archive/WIN30SDK_DISK07.img" href="/disks/pcx86/tools/microsoft/windows/sdk/3.00/WIN30SDK_DISK07.json" md5="74f81df9020939a4b3e37608515112e0" md5json="79bcb8864e7dfc7abb4f216534a782fc">
-		<name>Windows SDK 3.00 (720K Disk 7)</name>
+		<name>Windows SDK 3.00 (720K Disk 07)</name>
 		<desc>Include Files/Sample Source Code 1</desc>
 	</disk>
 	<disk id="disk08" size="737280" chs="80:2:9" img="archive/WIN30SDK_DISK08.img" href="/disks/pcx86/tools/microsoft/windows/sdk/3.00/WIN30SDK_DISK08.json" md5="77d391c5e2462e446ad6780cf86a7b82" md5json="c89d7af1e40471dbfe6b795869696bd2">
-		<name>Windows SDK 3.00 (720K Disk 8)</name>
+		<name>Windows SDK 3.00 (720K Disk 08)</name>
 		<desc>Sample Source Code 2</desc>
 	</disk>
 	<disk id="disk09" size="737280" chs="80:2:9" img="archive/WIN30SDK_DISK09.img" href="/disks/pcx86/tools/microsoft/windows/sdk/3.00/WIN30SDK_DISK09.json" md5="945af52c2a962ea4b6c7b3a5487975be" md5json="89012754bdbb154d73050ff320828803">
-		<name>Windows SDK 3.00 (720K Disk 9)</name>
+		<name>Windows SDK 3.00 (720K Disk 09)</name>
 		<desc>Online Reference (Advisor Format)</desc>
 	</disk>
 	<disk id="disk10" size="737280" chs="80:2:9" img="archive/WIN30SDK_DISK10.img" href="/disks/pcx86/tools/microsoft/windows/sdk/3.00/WIN30SDK_DISK10.json" md5="3782fc9ba62e8c438bc51177403ec5f4" md5json="5e77eed658cc6032d0d01377d280921c">

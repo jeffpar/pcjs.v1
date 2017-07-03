@@ -3,8 +3,9 @@
 <manifest type="software">
 	<title>Microsoft C Compiler</title>
 	<version>4.00</version>
-	<type>Tool</type>
-	<category>C Compiler</category>
+	<type>Utility</type>
+	<category>Compiler</category>
+	<language>C</language>
 	<author>Microsoft</author>
 	<releaseDate/>
 	<disk id="disk01" size="368640" chs="40:2:9" img="archive/MSC-048014-400-DISK1-COMPILER.img" href="/disks/pcx86/tools/microsoft/c/4.00/MSC-048014-400-DISK1-COMPILER.json" md5="a8fdf772092a56892889637977480e53" md5json="f8e9c3d2bb3d20c20441a80a36ad2d3f">

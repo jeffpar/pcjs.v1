@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.35.2/machine.xsl"?>
 <machine id="ibm5160" type="pcx86" border="1" width="980px" pos="center" background="default">
-	<name pos="center">IBM PC XT (Model 5160), CGA, 640K, 10Mb Drive</name>
+	<name pos="center">IBM PC XT (Model 5160), CGA, 640K, 10Mb Drive (Formatted)</name>
 	<computer id="xt-cga-640k" name="IBM PC XT"/>
 	<cpu id="cpu8088" model="8088" autostart="true"/>
 	<ram id="ramLow" addr="0x00000" test="false" size="0xa0000" comment="0xa0000 (640Kb) size overrides SW1|ROM BIOS memory test has been disabled"/>
@@ -13,9 +13,7 @@
 	<keyboard ref="/devices/pcx86/keyboard/us83-buttons-minimal.xml"/>
 	<debugger id="debugger"/>
 	<panel ref="/devices/pcx86/panel/wide.xml"/>
-	<hdc id="hdcXT" drives='[{name:"10Mb Hard Disk",type:3,path:"/disks/pcx86/fixed/10mb/PCDOS200-EMPTY.json"}]'>
-		<control type="button" binding="saveHD0">Save HD</control>
-	</hdc>
+	<hdc ref="/disks/pcx86/fixed/10mb/pcdos200-empty.xml"/>
 	<chipset id="chipset" model="5160" sw1="01001001" pos="left" padLeft="8px" padBottom="8px">
 		<control type="switches" label="SW1" binding="sw1" left="0px"/>
 		<control type="description" binding="swdesc" left="0px"/>

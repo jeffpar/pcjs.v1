@@ -76,6 +76,7 @@
 		<manifest ref="/disks/pcx86/tools/borland/pascal/3.00b/manifest.xml"/>
 		<manifest ref="/disks/pcx86/tools/borland/pascal/3.01a/manifest.xml"/>
 		<manifest ref="/disks/pcx86/tools/ibm/bascom/1.00/manifest.xml"/>
+		<manifest ref="/disks/pcx86/tools/logitech/modula2/1.10/manifest.xml"/>
 		<manifest ref="/disks/pcx86/tools/microsoft/basic/manifest.xml"/>
 		<manifest ref="/disks/pcx86/tools/microsoft/c/2.03/manifest.xml"/>
 		<manifest ref="/disks/pcx86/tools/microsoft/c/3.00/manifest.xml"/>
@@ -102,6 +103,7 @@
 		<manifest ref="/disks/pcx86/games/id/wolf3d/manifest.xml"/>
 		<manifest ref="/disks/pcx86/games/microsoft/flightsim/1982/manifest.xml"/>
 		<manifest ref="/disks/pcx86/games/microsoft/flightsim/1984/manifest.xml"/>
+		<manifest ref="/disks/pcx86/shareware/pctj/manifest.xml"/>
 		<manifest ref="/apps/pcx86/1981/visicalc/manifest.xml"/>
 		<manifest ref="/apps/pcx86/1982/esuite/manifest.xml"/>
 		<manifest ref="/apps/pcx86/1982/ratbas/manifest.xml"/>
