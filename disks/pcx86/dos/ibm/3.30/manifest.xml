@@ -14,6 +14,6 @@
 		<name>PC-DOS 3.30 (Disk 2)</name>
 	</disk>
 	<disk id="disk03" size="737280" chs="80:2:9" img="archive/PCDOS330-DISK1-720K.img" href="/disks/pcx86/dos/ibm/3.30/PCDOS330-DISK1-720K.json" md5="497c26a4a8316806902f3a51a6ceb2be" md5json="0995b031d5b9e1bf5bf82fb9540440e1">
-		<name>PC-DOS 3.30 (720K Disk)</name>
+		<name>PC-DOS 3.30 (720K)</name>
 	</disk>
 </manifest>
