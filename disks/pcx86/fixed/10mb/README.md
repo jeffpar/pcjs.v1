@@ -7,28 +7,30 @@ permalink: /disks/pcx86/fixed/10mb/
 10Mb Hard Drive (Fixed Disk) Images
 -----------------------------------
 
-This folder contains the following 10Mb fixed disk images:
+This folder contains the following 10Mb fixed disk configurations:
  
-* [Empty formatted disk](PCDOS200-EMPTY.json) ([XML](pcdos200-empty.xml))
-* [PC-DOS 2.00 with Windows 1.01 for CGA](PCDOS200-WIN101-CGA.json) ([XML](pcdos200-win101-cga.xml))
-* [PC-DOS 2.00 with Windows 1.01 for EGA](PCDOS200-WIN101-EGA.json) ([XML](pcdos200-win101-ega.xml))
+* [Unformatted Disk](unformatted.xml)
+* [PC-DOS 2.00 Formatted Disk (Empty)](pcdos200-empty.xml)
+* [PC-DOS 2.00 with Windows 1.01 for CGA](pcdos200-win101-cga.xml)
+* [PC-DOS 2.00 with Windows 1.01 for EGA](pcdos200-win101-ega.xml)
+* [MS-DOS 3.20 with Microsoft C 4.00](msdos320-c400.xml)
 
 These disk images are used by various IBM PC XT [Model 5160](/devices/pcx86/machine/5160/) machine configurations,
 either directly:
 
 ```xml
-<hdc id="hdcXT" drives='[{name:"10Mb Hard Drive",path:"/disks/pcx86/fixed/10mb/PCDOS200-WIN101-CGA.json",type:3}]'/>
+<hdc id="hdcXT" drives='[{name:"10Mb Hard Disk",type:3}]'/>
 ```
 
 or by reference:
 
 ```xml
-<hdc ref="/disks/pcx86/fixed/10mb/pcdos200-win101-cga.xml"/>
+<hdc ref="/disks/pcx86/fixed/10mb/unformatted.xml"/>
 ```
 
 ### Notes Regarding 10Mb Disks
 
-The [Empty formatted disk](PCDOS200-EMPTY.json) is *completely* empty.  It was partitioned with the PC-DOS 2.00
+The [PC-DOS 2.00 Formatted Disk (Empty)](pcdos200-empty.xml) is *completely* empty.  It was partitioned with the PC-DOS 2.00
 **FDISK** utility, allocating the entire disk to a single DOS partition, and then it was formatted with the PC-DOS 2.00
 **FORMAT** utility.  Neither the **FORMAT** "/S" option nor the **SYS** command were used, so no system files were
 transferred, leaving the disk completely empty and non-bootable.
