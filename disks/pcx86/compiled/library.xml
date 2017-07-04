@@ -387,6 +387,9 @@
 		<disk path="/disks/pcx86/tools/borland/pascal/3.01a/TURBO-PASCAL-301A.json">Borland Turbo Pascal 3.01A</disk>
 		<disk path="/disks/pcx86/tools/ibm/bascom/1.00/BASCOM100-DISK1.json">IBM BASIC Compiler 1.00 (Disk 1)</disk>
 		<disk path="/disks/pcx86/tools/ibm/bascom/1.00/BASCOM100-DISK2.json">IBM BASIC Compiler 1.00 (Disk 2)</disk>
+		<disk path="/disks/pcx86/tools/logitech/modula2/1.00/LOGITECH-MODULA2-DISK1-SYSTEM.json">Modula-2/86 1.00 (1-System)</disk>
+		<disk path="/disks/pcx86/tools/logitech/modula2/1.00/LOGITECH-MODULA2-DISK2-LINKER.json">Modula-2/86 1.00 (2-Linker)</disk>
+		<disk path="/disks/pcx86/tools/logitech/modula2/1.00/LOGITECH-MODULA2-DISK3-COMPILER.json">Modula-2/86 1.00 (3-Compiler)</disk>
 		<disk path="/disks/pcx86/tools/logitech/modula2/1.10/LOGITECH-MODULA2-DISK1-SYSTEM.json">Modula-2/86 1.10 (1-System)</disk>
 		<disk path="/disks/pcx86/tools/logitech/modula2/1.10/LOGITECH-MODULA2-DISK2-COMPILER.json">Modula-2/86 1.10 (2-Compiler)</disk>
 		<disk path="/disks/pcx86/tools/logitech/modula2/1.10/LOGITECH-MODULA2-DISK3-LINKER.json">Modula-2/86 1.10 (3-Linker)</disk>

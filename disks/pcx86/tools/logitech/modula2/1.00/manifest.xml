@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.35.2/manifest.xsl"?>
+<manifest type="software">
+	<title>Modula-2/86</title>
+	<version>1.00</version>
+	<type>Utility</type>
+	<category>Compiler</category>
+	<language>Modula-2</language>
+	<author>Logitech</author>
+	<releaseDate>1984</releaseDate>
+	<disk id="disk01" size="327680" chs="40:2:8" dir="archive/DISK1" href="/disks/pcx86/tools/logitech/modula2/1.00/LOGITECH-MODULA2-DISK1-SYSTEM.json" md5="e55ecfd5c556521899446b7b6ede04a9" md5json="e93fe5a6f7a80e7267c70cc4591a189f">
+		<name>Modula-2/86 1.00 (1-System)</name>
+		<file size="814" time="1984-02-09 11:20:26" attr="0x20" md5="af2e50d0582871bd916a0444b3a7754c">ASCII.DEF</file>
+		<file size="1536" time="1984-02-08 13:48:52" attr="0x20" md5="b820486edd35c70a502af7b22816effc">CARDINAL.DEF</file>
+		<file size="1660" time="1984-02-29 10:08:46" attr="0x20" md5="cc7d00b3a6120edef45e09b45a761fd5">COMP.LNK</file>
+		<file size="3072" time="1984-02-28 14:02:14" attr="0x20" md5="17b1a3e515d6133630ffd2d4bf93d77b">COMP.MAP</file>
+		<file size="4008" time="1984-02-24 00:49:26" attr="0x20" md5="b7038e8e73d517feb1b03729cef5dfb9">COMPFILE.LNK</file>
+		<file size="7168" time="1984-02-08 13:52:12" attr="0x20" md5="abd09a508e1ff4723fa2acc1609c6a11">COMPPARA.DEF</file>
+		<file size="384" time="1984-01-26 01:28:14" attr="0x20" md5="76e3fb4f5b257d63f26845843b2f7e58">COMPPARA.LNK</file>
+		<file size="7027" time="1984-02-27 09:59:40" attr="0x20" md5="7bf5434ccafbacf34c86caf5cdcfd58e">COMPPARA.MOD</file>
+		<file size="1152" time="1984-01-17 01:50:42" attr="0x20" md5="67ba1ce28ad10e791cb3183ee35173cc">COMPPARA.SYM</file>
+		<file size="1408" time="1984-02-08 13:53:12" attr="0x20" md5="f2481fb224d5f804f1eb4c8861396b95">CONVERSI.DEF</file>
+		<file size="1660" time="1984-02-29 10:21:56" attr="0x20" md5="26eeeafdceefbd6432fde416394dcb26">DBUG.LNK</file>
+		<file size="2432" time="1984-02-08 13:54:16" attr="0x20" md5="14cf4e5cbb768cfc37e68ae5683f1a90">DISKDIRE.DEF</file>
+		<file size="1056" time="1984-02-09 11:24:40" attr="0x20" md5="9c936836851970778c7759d9cd0594d7">DISKFILE.DEF</file>
+		<file size="804" time="1984-02-09 11:23:54" attr="0x20" md5="db6a8f53beb05759f440efa3d67dc789">DISPLAY.DEF</file>
+		<file size="2551" time="1984-02-27 09:33:56" attr="0x20" md5="34934eb9e8deccab9c6d94c6bed9400b">DISPLAY.MOD</file>
+		<file size="182" time="1984-02-01 11:39:50" attr="0x20" md5="094529cf02f9f93d4f3b171c2fa87d21">EXAMP1.MOD</file>
+		<file size="1642" time="1984-01-29 08:46:18" attr="0x20" md5="6fb02f9757f6d3535445b098958130cf">EXAMP2.MOD</file>
+		<file size="508" time="1984-02-09 11:25:28" attr="0x20" md5="c2a3adb37a43f3561ba37888b96b0777">FILEMESS.DEF</file>
+		<file size="975" time="1984-02-09 11:25:50" attr="0x20" md5="b5fdc77e05dd8e51bd604c7fd9e3b5ba">FILENAME.DEF</file>
+		<file size="14257" time="1984-02-09 11:26:22" attr="0x20" md5="4de811f8ba0d43557b1dcd7a0e3a8168">FILESYST.DEF</file>
+		<file size="4875" time="1984-02-09 11:33:04" attr="0x20" md5="bba265201d75653b122961ac5b0a930c">INOUT.DEF</file>
+		<file size="335" time="1984-02-24 09:56:58" attr="0x20" md5="87bb98467c57cfe2430df46e482bc249">INSTALL0.BAT</file>
+		<file size="271" time="1984-01-27 11:14:24" attr="0x20" md5="aefdb94176e395d84e12f2cca59b5635">INSTALL1.BAT</file>
+		<file size="30" time="1984-02-19 21:55:40" attr="0x20" md5="6b3425eea74ee9f028a7f2dac2083b1f">INSTALL2.BAT</file>
+		<file size="789" time="1984-02-28 05:45:50" attr="0x20" md5="72bcda775dc98fb7c7ef1bb9a9c15f78">INSTALLX.BAT</file>
+		<file size="723" time="1984-02-09 11:29:42" attr="0x20" md5="b3eeb876cad49435bbfabc2d3c3aaf18">KEYBOARD.DEF</file>
+		<file size="3713" time="1984-02-28 13:38:20" attr="0x20" md5="f7ea8e45a75ac68f6d292855818d10cb">KEYBOARD.MOD</file>
+		<file size="1660" time="1984-02-29 10:15:20" attr="0x20" md5="124f768d6efecaee1ef876dce4ba86a3">LINK.LNK</file>
+		<file size="11664" time="1984-02-27 09:51:24" attr="0x20" md5="fb48a5e18dded7820927d8e31684b03f">LOADER.ASM</file>
+		<file size="7936" time="1984-02-29 11:45:42" attr="0x20" md5="cb6aebb027c0bb09dc232d85252f6408">M2.EXE</file>
+		<file size="256" time="1983-01-18 01:59:26" attr="0x20" md5="be1c64b54613fd7c0a70c85f610f09b1">M2COMP.LNK</file>
+		<file size="1025" time="1984-02-09 11:32:28" attr="0x20" md5="e261c25c9bbc8093c02982ac618b2481">MATHLIB0.DEF</file>
+		<file size="3061" time="1984-02-09 11:34:36" attr="0x20" md5="7506fffd971040f6b179bb0f49a03c00">NUMBERCO.DEF</file>
+		<file size="1926" time="1984-02-09 11:35:06" attr="0x20" md5="9346533f22648cbdb03bba1bf4a7f6ac">OPTIONS.DEF</file>
+		<file size="8437" time="1984-02-27 09:46:40" attr="0x20" md5="ac6a49ed246c05ed436f6aca98a837ad">PMD.ASM</file>
+		<file size="2195" time="1984-02-09 11:32:36" attr="0x20" md5="2c5e01c9fbd5abd6daaaed7463f73fe4">PROCESSE.DEF</file>
+		<file size="3328" time="1980-01-01 00:19:24" attr="0x20" md5="f20b1ae048177070a92d913aadbb250b">PROCESSE.MOD</file>
+		<file size="396" time="1984-02-09 11:35:36" attr="0x20" md5="bfb9dec77b8fb0b57b03137318efba78">PROGMESS.DEF</file>
+		<file size="3094" time="1984-02-09 11:39:06" attr="0x20" md5="18ca164fcc56dee4af57113e389f54d7">PROGRAM.DEF</file>
+		<file size="5766" time="1984-02-27 17:18:56" attr="0x20" md5="3eac4c1d6043a742266b05963f93473d">PUBLIC.LNK</file>
+		<file size="1078" time="1984-02-09 11:43:32" attr="0x20" md5="f1eb77196426a12929da82ddc7224230">REALINOU.DEF</file>
+		<file size="2696" time="1984-02-09 11:39:20" attr="0x20" md5="76346ad9b18c8a35968521b54d4f2bd5">RS232COD.DEF</file>
+		<file size="10316" time="1984-02-27 09:30:40" attr="0x20" md5="f3347427cd910d8f91fd67573736c51c">RS232COD.MOD</file>
+		<file size="2612" time="1984-02-09 11:40:34" attr="0x20" md5="9882206e2cf859f0d017391629520027">RS232INT.DEF</file>
+		<file size="9734" time="1984-02-27 09:32:58" attr="0x20" md5="de81b00d6f07398c7bf865ffa8d3877a">RS232INT.MOD</file>
+		<file size="1837" time="1984-02-09 11:41:24" attr="0x20" md5="32183343145654e60bd0e5b9b427dd8c">RS232POL.DEF</file>
+		<file size="7125" time="1984-02-27 09:33:26" attr="0x20" md5="b20f25388fb8b2b6770594bc1478fc66">RS232POL.MOD</file>
+		<file size="19909" time="1984-02-27 09:48:48" attr="0x20" md5="8587eff4575e49d8c82dca27691a3380">RTS.ASM</file>
+		<file size="6900" time="1984-02-29 11:31:46" attr="0x20" md5="143c35af54b61638ad51fd8110123798">RTS.INC</file>
+		<file size="31143" time="1984-02-29 11:26:50" attr="0x20" md5="df4e9e6066330ee31f548861d2babe30">SERVICES.ASM</file>
+		<file size="1520" time="1984-02-09 11:44:22" attr="0x20" md5="1dd5960b835ae0fb157ea228d08214a6">STORAGE.DEF</file>
+		<file size="3032" time="1984-02-09 11:46:16" attr="0x20" md5="f0b39987b1f8603c646b666ca15b5158">STRINGS.DEF</file>
+		<file size="6230" time="1984-02-27 11:50:00" attr="0x20" md5="b34dcdb761dfc2f4e6ad3dbf52d6d82d">SYSTEM.DEF</file>
+		<file size="3565" time="1984-02-09 11:47:12" attr="0x20" md5="4fc3f1ebe35559921311959068af4b29">TERMBASE.DEF</file>
+		<file size="1946" time="1984-02-09 11:47:38" attr="0x20" md5="af587eab5a2a99c905b595eb34465b25">TERMINAL.DEF</file>
+		<file size="22048" time="1984-02-27 09:54:10" attr="0x20" md5="fdd8d52486f46a25254a9eb9be09a011">TRANSFER.ASM</file>
+	</disk>
+	<disk id="disk02" size="368640" chs="40:2:9" dir="archive/DISK2" href="/disks/pcx86/tools/logitech/modula2/1.00/LOGITECH-MODULA2-DISK2-LINKER.json" md5="8c3a90086588825e54290cfe292aa5ca" md5json="63fea98adef15354e5c1e7e77ad7553b">
+		<name>Modula-2/86 1.00 (2-Linker)</name>
+		<file size="128" time="1984-03-02 01:43:46" attr="0x20" md5="28781646af2531c0122f98fe42f4432c">ASCII.LNK</file>
+		<file size="256" time="1984-03-02 01:43:46" attr="0x20" md5="7c9ad022a1a16e0687cccd32ab5b60d2">ASCII.REF</file>
+		<file size="2560" time="1984-03-02 01:57:00" attr="0x20" md5="ec1e57acb3ad44cdff32b3edffd28b47">CARDINAL.LNK</file>
+		<file size="2560" time="1984-03-02 01:57:00" attr="0x20" md5="7a3900c675afe7d4fba84db586b0b368">CARDINAL.REF</file>
+		<file size="1024" time="1984-03-02 01:58:58" attr="0x20" md5="a8e4756550bdeebd78fb5a5bda931823">CONVERSI.LNK</file>
+		<file size="1024" time="1984-03-02 01:58:58" attr="0x20" md5="d3366b054e197e8d7f2cbd1c97b4a8ef">CONVERSI.REF</file>
+		<file size="26624" time="1984-02-29 21:25:04" attr="0x20" md5="f92ca93f07ac63de3b1dd96c05eef8e2">DBUG.LOD</file>
+		<file size="750" time="1984-02-24 00:51:24" attr="0x20" md5="efe51582ae3f339006e43a981c1ca8a1">DISKDIRE.LNK</file>
+		<file size="1070" time="1984-02-24 00:51:24" attr="0x20" md5="f9b96839b670c4d65d866cde528ce45a">DISKDIRE.REF</file>
+		<file size="5868" time="1984-02-24 00:33:28" attr="0x20" md5="65d9b21d79221764649d78f182e5019a">DISKFILE.LNK</file>
+		<file size="7024" time="1984-02-24 00:33:28" attr="0x20" md5="898e1eef976753bf8e8c9fb40b4a47e3">DISKFILE.REF</file>
+		<file size="256" time="1984-03-02 01:49:54" attr="0x20" md5="820e33e62f56b9e52f8897ed64cc24dd">DISPLAY.LNK</file>
+		<file size="384" time="1984-03-02 01:49:54" attr="0x20" md5="0049ec258a53e2471735da88eac0c732">DISPLAY.REF</file>
+		<file size="1024" time="1984-03-02 02:10:58" attr="0x20" md5="6c5dc001b59515248cf9edcb2b469ab3">FILEMESS.LNK</file>
+		<file size="2048" time="1984-03-02 02:10:56" attr="0x20" md5="06a697761d3a0e5bbfef12f7552b7134">FILEMESS.REF</file>
+		<file size="2812" time="1984-02-24 00:57:34" attr="0x20" md5="9413c6d4822fdfed34e9ca0f2f390ac4">FILENAME.LNK</file>
+		<file size="4444" time="1984-02-24 00:57:34" attr="0x20" md5="aa56e309a007cd17c6c2ed5705d6b8ee">FILENAME.REF</file>
+		<file size="7018" time="1984-02-23 00:21:26" attr="0x20" md5="94ec86b03d257acdcde24b4ed18c68eb">FILESYST.LNK</file>
+		<file size="7778" time="1984-02-23 00:21:24" attr="0x20" md5="48590a2a98aa1adeff0ca73f0efe09f7">FILESYST.REF</file>
+		<file size="4114" time="1984-02-28 13:20:02" attr="0x20" md5="f92c69b845de2df51c6f85d601ba8325">INOUT.LNK</file>
+		<file size="4030" time="1984-02-28 13:20:02" attr="0x20" md5="baa0a21298ae525df697677bf6af84d7">INOUT.REF</file>
+		<file size="628" time="1984-02-28 13:40:10" attr="0x20" md5="a500e6660e6339b4047aa730238f0e34">KEYBOARD.LNK</file>
+		<file size="1730" time="1984-02-28 13:40:10" attr="0x20" md5="50f864cd11fe6398df88a5f7a92bb461">KEYBOARD.REF</file>
+		<file size="26170" time="1984-02-29 21:17:52" attr="0x20" md5="027ca70451e20505046e0a15f50ef928">LINK.LOD</file>
+		<file size="82958" time="1984-02-29 12:12:18" attr="0x20" md5="5c09c9c902ac5fdef7254c6484d8bb23">M2DBUG.LOD</file>
+		<file size="39986" time="1984-02-24 03:49:00" attr="0x20" md5="e96841e46990c7a9be39e70c0da04f7e">M2LINK.LOD</file>
+		<file size="2560" time="1984-02-02 01:06:20" attr="0x20" md5="0cf793cfd543219251c726023d92403b">MATHLIB0.LNK</file>
+		<file size="3968" time="1984-02-02 01:06:20" attr="0x20" md5="6467875c4fa3046f747daf07136c4410">MATHLIB0.REF</file>
+		<file size="1482" time="1984-02-27 12:07:54" attr="0x20" md5="8ece613f140c141701f89714db70a97e">NUMBERCO.LNK</file>
+		<file size="1626" time="1984-02-27 12:07:52" attr="0x20" md5="9fb5f90dddb77492f617753135d88e5e">NUMBERCO.REF</file>
+		<file size="1254" time="1984-02-24 00:54:26" attr="0x20" md5="68e797583260401656122878cc3dd047">OPTIONS.LNK</file>
+		<file size="2328" time="1984-02-24 00:54:26" attr="0x20" md5="61b84b7abf5e8f58e2da187fd02b14c8">OPTIONS.REF</file>
+		<file size="1536" time="1984-02-02 01:08:02" attr="0x20" md5="e002a41111dba28d99937f5f0a199163">PROCESSE.LNK</file>
+		<file size="1024" time="1984-02-02 01:08:02" attr="0x20" md5="8c4acf0b30687da1c2115e548303fb4d">PROCESSE.REF</file>
+		<file size="2048" time="1984-03-02 02:42:38" attr="0x20" md5="fc642ece4c7a1921ab2687f5d6b08533">PROGMESS.LNK</file>
+		<file size="1536" time="1984-03-02 02:42:38" attr="0x20" md5="c30cccc58fa970201d308792cdd5aaa3">PROGMESS.REF</file>
+		<file size="6414" time="1984-02-29 13:37:50" attr="0x20" md5="eab4023b51008ceb083df8be56dd9509">PROGRAM.LNK</file>
+		<file size="8508" time="1984-02-29 13:38:04" attr="0x20" md5="c25a2e8d8b426edd8990e1f19b777b1a">PROGRAM.REF</file>
+		<file size="5120" time="1984-02-02 01:02:42" attr="0x20" md5="089db847ef5c785b24cdc10843f327aa">REALINOU.LNK</file>
+		<file size="5504" time="1984-02-02 01:02:42" attr="0x20" md5="30554af5d46ed7c4c971237d4d8fa12d">REALINOU.REF</file>
+		<file size="1536" time="1984-02-02 00:05:42" attr="0x20" md5="9228006372acdc8e8461c34fa856a4ad">RS232COD.LNK</file>
+		<file size="2176" time="1984-02-02 00:05:42" attr="0x20" md5="6c6811ef954031cf3dccb4b094d8d64d">RS232COD.REF</file>
+		<file size="1536" time="1984-02-02 00:02:42" attr="0x20" md5="f16f1067941a2755e540776d8d813cb1">RS232INT.LNK</file>
+		<file size="2176" time="1984-02-02 00:02:42" attr="0x20" md5="aef9d56cf3949a0c7f3988f4df9d2bb2">RS232INT.REF</file>
+		<file size="1024" time="1984-02-02 01:09:44" attr="0x20" md5="17603f6f8e9534c67e8c7e60295d5246">RS232POL.LNK</file>
+		<file size="1024" time="1984-02-02 01:09:44" attr="0x20" md5="67adcaa695ec462e4073947ede25e263">RS232POL.REF</file>
+		<file size="2560" time="1984-01-07 01:18:30" attr="0x20" md5="b5899daf3c92da32ef6e6467cb263e60">STORAGE.LNK</file>
+		<file size="3200" time="1984-01-07 01:18:30" attr="0x20" md5="ba704cde2ecc4b46aa1cb17ccf35cb7c">STORAGE.REF</file>
+		<file size="1612" time="1984-02-27 12:04:30" attr="0x20" md5="f7539ab10aa1acca71138e69a43fb6f0">STRINGS.LNK</file>
+		<file size="1550" time="1984-02-27 12:04:30" attr="0x20" md5="136810ddded2e651582280f4bd203a1c">STRINGS.REF</file>
+		<file size="1356" time="1984-02-24 01:06:14" attr="0x20" md5="e82ba2014f6152b32f8895c330ba39ce">SYSTEM.LNK</file>
+		<file size="2298" time="1984-02-24 01:06:12" attr="0x20" md5="27b6c3ece351452045d0cf68e12e60aa">SYSTEM.REF</file>
+		<file size="1356" time="1984-02-24 01:11:02" attr="0x20" md5="9f4859a2b3db781f660c04057ef86c93">TERMBASE.LNK</file>
+		<file size="2406" time="1984-02-24 01:11:02" attr="0x20" md5="447a130a72740503fe2cdecafcf3af79">TERMBASE.REF</file>
+		<file size="976" time="1984-02-24 01:03:42" attr="0x20" md5="2b7004f7c80efa7974182fc11c16b309">TERMINAL.LNK</file>
+		<file size="1998" time="1984-02-24 01:03:42" attr="0x20" md5="284a376f69be75b8447d78a2f54f1449">TERMINAL.REF</file>
+	</disk>
+	<disk id="disk03" size="368640" chs="40:2:9" dir="archive/DISK3" href="/disks/pcx86/tools/logitech/modula2/1.00/LOGITECH-MODULA2-DISK3-COMPILER.json" md5="9cf8b8b6f1c6523ccac1a0fee957516c" md5json="11d1a5572e3c7150c06b475315459e84">
+		<name>Modula-2/86 1.00 (3-Compiler)</name>
+		<file size="768" time="1980-01-01 00:12:22" attr="0x20" md5="c4e77a756caaa30c9ea0bb87f01a2cb2">ASCII.SYM</file>
+		<file size="256" time="1983-12-08 02:30:26" attr="0x20" md5="f7d7ecc14819205f1a2c9af9a5541278">CARDINAL.SYM</file>
+		<file size="26170" time="1984-02-29 21:10:52" attr="0x20" md5="4f1c038f4f8047aa75cf80a463a57285">COMP.LOD</file>
+		<file size="384" time="1983-12-08 02:30:40" attr="0x20" md5="560bca852aff4fe24d2d1e39d45a1202">CONVERSI.SYM</file>
+		<file size="512" time="1980-01-01 12:14:46" attr="0x20" md5="310d2bdd53af142b6cf66bbee5ad7e5d">DISKDIRE.SYM</file>
+		<file size="1536" time="1980-01-01 12:13:32" attr="0x20" md5="77198b3cc2ea2254cb2b9d3d17c62805">DISKFILE.SYM</file>
+		<file size="128" time="1980-01-01 00:12:48" attr="0x20" md5="d8b494d3a286cb04271aa2c4c4931ddb">DISPLAY.SYM</file>
+		<file size="384" time="1980-01-01 05:48:20" attr="0x20" md5="386f402f56298c9034777ecec14ca61d">FILEMESS.SYM</file>
+		<file size="256" time="1980-01-01 04:02:16" attr="0x20" md5="dda6a7fe363a34c46f9d08575574ed4a">FILENAME.SYM</file>
+		<file size="2560" time="1980-01-01 12:06:46" attr="0x20" md5="b06d7824a458febbd2ca6134f1052e72">FILESYST.SYM</file>
+		<file size="17362" time="1980-01-01 01:02:22" attr="0x20" md5="55114ac7878db3ac0558b97658ee5d8f">INIT.LOD</file>
+		<file size="2048" time="1980-01-01 01:15:10" attr="0x20" md5="8441187aad9b5b9e577c6c9f5aaf6ee7">INOUT.SYM</file>
+		<file size="128" time="1983-12-07 10:24:52" attr="0x20" md5="876e2e66abc40dc02e31efeaea35f289">KEYBOARD.SYM</file>
+		<file size="20608" time="1984-02-12 00:37:58" attr="0x20" md5="bafd09341e783e8332c73ec8ea04108a">LISTER.LOD</file>
+		<file size="10196" time="1984-02-24 01:40:42" attr="0x20" md5="6ebf3e536516706c7447ce45f3b940aa">M2COMP.LOD</file>
+		<file size="384" time="1980-01-01 00:03:24" attr="0x20" md5="81d7cb6aab277d3529db14f97fd69844">MATHLIB0.SYM</file>
+		<file size="640" time="1983-12-01 02:07:26" attr="0x20" md5="08d4f6ea2b4c9604b8e559103c8a0382">NUMBERCO.SYM</file>
+		<file size="384" time="1980-01-01 04:24:00" attr="0x20" md5="cd0aa9dfaf84a947a8362e7dc0a006dd">OPTIONS.SYM</file>
+		<file size="50942" time="1984-02-24 01:51:30" attr="0x20" md5="678300e1b1faab9e2189a0bbcaf0bf05">PASS1.LOD</file>
+		<file size="37632" time="1984-02-12 00:43:20" attr="0x20" md5="828392044a5c5d7fce9bbf31180500ee">PASS2.LOD</file>
+		<file size="42496" time="1984-02-12 00:45:50" attr="0x20" md5="d2999434702543af64fa92178ddba8a9">PASS3.LOD</file>
+		<file size="106066" time="1984-02-29 16:20:24" attr="0x20" md5="8f42073606d7c56e55f6e7171b18a7f8">PASS4.LOD</file>
+		<file size="256" time="1983-12-08 02:39:32" attr="0x20" md5="17706eb3715bee573408767496b60b7b">PROCESSE.SYM</file>
+		<file size="1024" time="1983-12-08 01:15:10" attr="0x20" md5="3307fba8ac19b17e6d6364dee9fece06">PROGMESS.SYM</file>
+		<file size="1024" time="1980-01-01 00:44:24" attr="0x20" md5="0ff85ca227150bcca81c5913a5022725">PROGRAM.SYM</file>
+		<file size="256" time="1980-01-01 00:03:46" attr="0x20" md5="2bc68ed6de6d860359c5229dd1a3a12d">REALINOU.SYM</file>
+		<file size="384" time="1980-01-01 00:15:32" attr="0x20" md5="9e59fcf0b845957f5ceb54bb97affa40">RS232COD.SYM</file>
+		<file size="384" time="1980-01-01 00:15:38" attr="0x20" md5="afd9fd3b06fa2d1aace3f484eb9fedb6">RS232INT.SYM</file>
+		<file size="256" time="1980-01-01 00:15:42" attr="0x20" md5="59b25dd42b55779fbd1eac395f07acb2">RS232POL.SYM</file>
+		<file size="384" time="1980-01-01 00:15:46" attr="0x20" md5="a7f406a477460e579914831665b38a49">STORAGE.SYM</file>
+		<file size="512" time="1983-12-01 02:52:26" attr="0x20" md5="42c43b044582affc1979e6938cbe778d">STRINGS.SYM</file>
+		<file size="6656" time="1984-02-12 00:38:28" attr="0x20" md5="c0f6a4f005b2e535c4fb6a1a1d453bd5">SYMFILE.LOD</file>
+		<file size="2560" time="1984-01-26 00:15:24" attr="0x20" md5="b779649d7a82820e0274bcddbd4297e2">SYSTEM.SYM</file>
+		<file size="512" time="1983-12-07 09:52:48" attr="0x20" md5="f97b01fb5fd67708d4623b8872b64ee5">TERMBASE.SYM</file>
+		<file size="384" time="1980-01-01 05:09:02" attr="0x20" md5="94af6eb091050cb5b1f04c81f6c0cfe1">TERMINAL.SYM</file>
+	</disk>
+</manifest>

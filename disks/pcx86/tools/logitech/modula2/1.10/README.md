@@ -1,13 +1,13 @@
 ---
 layout: page
-title: Modula-2/86 Compiler 1.10
+title: Logitech Modula-2/86 Compiler 1.10
 permalink: /disks/pcx86/tools/logitech/modula2/1.10/
 ---
 
-Modula-2/86 Compiler 1.10
--------------------------
+Logitech Modula-2/86 Compiler 1.10
+----------------------------------
 
-### Directory of Modula-2/86 1.10 System (Disk 1)
+### Directory of Modula-2/86 1.10 (1-System)
 
 	 Volume in drive A has no label
 	 Directory of A:\
@@ -78,7 +78,7 @@ Modula-2/86 Compiler 1.10
 	       63 file(s)     312465 bytes
 	                       18432 bytes free
 
-### Directory of Modula-2/86 1.10 Compiler (Disk 2)
+### Directory of Modula-2/86 1.10 (2-Compiler)
 
 	 Volume in drive A has no label
 	 Directory of A:\
@@ -126,7 +126,7 @@ Modula-2/86 Compiler 1.10
 	       40 file(s)     319034 bytes
 	                       20480 bytes free
 
-### Directory of Modula-2/86 1.10 Linker (Disk 3)
+### Directory of Modula-2/86 1.10 (3-Linker)
 
 	 Volume in drive A has no label
 	 Directory of A:\
@@ -174,7 +174,7 @@ Modula-2/86 Compiler 1.10
 	       40 file(s)     146226 bytes
 	                      194560 bytes free
 
-### Directory of Modula-2/86 1.10 Debugger (Disk 4)
+### Directory of Modula-2/86 1.10 (4-Debugger)
 
 	 Volume in drive A has no label
 	 Directory of A:\

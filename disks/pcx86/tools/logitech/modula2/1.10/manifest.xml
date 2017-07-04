@@ -5,6 +5,7 @@
 	<version>1.10</version>
 	<type>Utility</type>
 	<category>Compiler</category>
+	<language>Modula-2</language>
 	<author>Logitech</author>
 	<releaseDate>December 10, 1984</releaseDate>
 	<disk id="disk01" size="368640" chs="40:2:9" img="archive/LOGITECH-MODULA2-DISK1-SYSTEM.img" href="/disks/pcx86/tools/logitech/modula2/1.10/LOGITECH-MODULA2-DISK1-SYSTEM.json" md5="53bd4195a261c73e82681d2e2a23dc8a" md5json="6f3e72ec1e951398eafcdd4e28ff89d7">
