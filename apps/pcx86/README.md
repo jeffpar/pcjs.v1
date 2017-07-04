@@ -31,6 +31,7 @@ A list of all the software available to PCx86 machines can be found in the [IBM 
 
 ### 1984
 
+* [Logitech Modula-2/86 Compiler v1.10](/apps/pcx86/1984/modula2/)
 * [The Hitchhiker's Guide to the Galaxy](/disks/pcx86/games/infocom/hhiker/)
 
 ### 1985

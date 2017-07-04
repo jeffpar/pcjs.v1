@@ -32,6 +32,6 @@
 		<name>MS-DOS 6.22 (1.44M Disk 3)</name>
 	</disk>
 	<disk id="disk09" size="1474560" chs="80:2:18" img="archive/1440K/MSDOS622-SUPPDISK.img" href="/disks/pcx86/dos/microsoft/6.22/1440K/MSDOS622-SUPPDISK.json" md5="4bde87e229f814f3e252ced5f3f6196a" md5json="6f1ee04cc8433b73d3936b3694d0dedb">
-		<name>MS-DOS 6.22 (1.44M Supp Disk)</name>
+		<name>MS-DOS 6.22 (1.44M Supp)</name>
 	</disk>
 </manifest>
