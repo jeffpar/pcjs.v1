@@ -8,7 +8,7 @@
 	<author>Lotus</author>
 	<releaseDate/>
 	<disk id="disk01" size="368640" chs="40:2:9" img="archive/123-DISK1-SYSTEM-PATCHED.img" href="/disks/pcx86/apps/lotus/123/1.0a/123-DISK1-SYSTEM-PATCHED.json" md5="02b4711a30c8100415026c38e542ddc3" md5json="a6440e2e7c766cca184708a969213d00">
-		<name>Lotus 1-2-3 1.0a (System)</name>
+		<name>Lotus 1-2-3 1.0a (1-System)</name>
 		<file size="256" time="1983-07-01 02:23:00" attr="0x20">123.CNF</file>
 		<file size="89984" time="1984-08-17 16:59:30" attr="0x20">123.EXE</file>
 		<file size="113416" time="1983-07-01 02:23:00" attr="0x20">123.HLP</file>
@@ -22,7 +22,7 @@
 		<file size="5294" time="1983-07-01 02:23:00" attr="0x20">TD.DRV</file>
 	</disk>
 	<disk id="disk02" size="368640" chs="40:2:9" img="archive/123-DISK2-UTILITY.img" href="/disks/pcx86/apps/lotus/123/1.0a/123-DISK2-UTILITY.json" md5="3f76942627e958a5495656f0332c88a4" md5json="7bc7de246155e26a41f844bf0d993067">
-		<name>Lotus 1-2-3 1.0a (Utility)</name>
+		<name>Lotus 1-2-3 1.0a (2-Utility)</name>
 		<file size="1036" time="1983-07-01 01:23:00" attr="0x20">B&amp;W.BAT</file>
 		<file size="1036" time="1983-07-01 01:23:00" attr="0x20">BOTH.BAT</file>
 		<file size="1036" time="1983-07-01 01:23:00" attr="0x20">COLOR.BAT</file>
@@ -58,7 +58,7 @@
 		<file size="14336" time="1983-07-01 01:23:00" attr="0x20">WKSDIF.EXE</file>
 	</disk>
 	<disk id="disk03" size="368640" chs="40:2:9" img="archive/123-DISK3-GRAPH.img" href="/disks/pcx86/apps/lotus/123/1.0a/123-DISK3-GRAPH.json" md5="f7169659ec0f1f7666390fe2bc9c6f46" md5json="844c406a7534242cdaf2898bfa43b40a">
-		<name>Lotus 1-2-3 1.0a (Graph)</name>
+		<name>Lotus 1-2-3 1.0a (3-Graph)</name>
 		<file size="3597" time="1983-07-01 01:23:00" attr="0x20">BLOCK1.FON</file>
 		<file size="6593" time="1983-07-01 01:23:00" attr="0x20">BLOCK2.FON</file>
 		<file size="2139" time="1983-07-01 01:23:00" attr="0x20">GD.DRV</file>
@@ -81,7 +81,7 @@
 		<file size="5294" time="1983-07-01 01:23:00" attr="0x20">TD.DRV</file>
 	</disk>
 	<disk id="disk04" size="368640" chs="40:2:9" img="archive/123-DISK4-TUTORIAL.img" href="/disks/pcx86/apps/lotus/123/1.0a/123-DISK4-TUTORIAL.json" md5="532be253f5efd4c43b1c72551eb005dd" md5json="bc32e9675734b2986f1bd25559163fe4">
-		<name>Lotus 1-2-3 1.0a (Tutorial)</name>
+		<name>Lotus 1-2-3 1.0a (4-Tutorial)</name>
 		<file size="2139" time="1983-07-01 01:23:00" attr="0x20">GD.DRV</file>
 		<file size="352" time="1983-07-01 01:23:00" attr="0x20">KB.DRV</file>
 		<file size="2944" time="1983-07-01 01:23:00" attr="0x20">LESNA_1.WKS</file>
