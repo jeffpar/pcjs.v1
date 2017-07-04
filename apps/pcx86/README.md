@@ -38,6 +38,10 @@ A list of all the software available to PCx86 machines can be found in the [IBM 
 
 * [Rogue](/apps/pcx86/1985/rogue/)
 
+### 1986
+
+* [Leather Goddesses of Phobos](/disks/pcx86/games/infocom/phobos/)
+
 ### 1987
 
 * [ThinkTank v2.14](/apps/pcx86/1987/thinktank/)
