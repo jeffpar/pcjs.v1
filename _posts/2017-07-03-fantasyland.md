@@ -61,7 +61,7 @@ $25 (via PayPal) to the first person to find a copy and contact me, just to make
 So, given that **FantasyLand** is currently unattainable, I turned my attention to Cockerham's own **EGATEST**.
 
 The [October 1986](http://www.pcjs.org/pubs/pc/magazines/pctj/PCTJ-1986-10/) issue contains the **EGATEST** program listing,
-starting on [Page 64](http://www.pcjs.org/modules/shared/templates/pdf.html?url=/pubs/pc/magazines/pctj/PCTJ-1986-10/pages/PCTJ-1986-10%2052.pdf&page=52&total=228),
+starting on [Page 64](http://www.pcjs.org/modules/shared/templates/pdf.html?url=/pubs/pc/magazines/pctj/PCTJ-1986-10/pages/PCTJ-1986-10%2068.pdf&page=68&total=228),
 but who wants to type in all that code?  And while the issue -- like all our archived publications -- has been OCR'ed,
 there's always a significant number of errors in the Optical Character Recognition process.
 
