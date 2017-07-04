@@ -24,12 +24,12 @@ more detail, along with a live demonstration of the software, but that's not yet
 
 ### Operating Systems
 
-* [DOS](dos/)
-* [OS/2](os2/)
-* [Windows](windows/)
 * [CP/M-86](cpm/)
+* [DOS](dos/)
 * [MINIX](minix/)
+* [OS/2](os2/)
 * [Unix](unix/)
+* [Windows](windows/)
 
 ### Applications
 
@@ -57,6 +57,7 @@ more detail, along with a live demonstration of the software, but that's not yet
 ### Shareware
 
 * [PC-SIG Library 8th Edition CD-ROM (April 1990)](shareware/pcsig08/)
+* [PC Tech Journal](shareware/pctj/)
 * [More...](shareware/)
 
 ### Tools
