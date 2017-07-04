@@ -2768,26 +2768,32 @@ DiskDump.prototype.convertToJSON = function()
                 }
             }
         }
+        var nLogicalSectorsPerTrack = nSectorsPerTrack;
         if (iBPB >= 0) {
+            /*
+             * Sometimes we come across a physical 360Kb disk image that contains a logical 320Kb image (and similarly,
+             * a physical 180Kb disk image that contains a logical 160Kb disk image), presumably because it was possible
+             * for someone to take a diskette formatted with 9 sectors/track and then use FORMAT or DISKCOPY to create
+             * a smaller file system on it (ie, using only 8 sectors/track).
+             */
+            if (!bMediaIDBPB) bMediaIDBPB = this.bufDisk.readUInt8(offBootSector + 512);
+            if (iBPB >= 2 && bMediaIDBPB == DiskAPI.FAT.MEDIA_320KB && bMediaID == DiskAPI.FAT.MEDIA_360KB || bMediaIDBPB == DiskAPI.FAT.MEDIA_160KB && bMediaID == DiskAPI.FAT.MEDIA_180KB) {
+                iBPB -= 2;
+                bMediaID = DiskDump.aDefaultBPBs[iBPB][DiskAPI.BPB.MEDIA_ID];
+                nLogicalSectorsPerTrack = DiskDump.aDefaultBPBs[iBPB][DiskAPI.BPB.TRACK_SECS];
+                DiskDump.logWarning("shrinking track size to " + nLogicalSectorsPerTrack + " sectors/track");
+            }
             if (fBPBExists) {
                 /*
                  * In deference to the PC-DOS 2.0 BPB behavior discussed above, we stop our BPB verification
                  * after the first word of HIDDEN_SECS.
-                 *
-                 * Also, we permit a physical 360Kb disk image to contain a logical 320Kb image (and similarly, a physical
-                 * 180Kb disk image to contain a logical 160Kb disk image), because it was entirely possible for someone to
-                 * take a diskette formatted with 9 sectors/track and "DISKCOPY" another disk with only 8 sectors/track onto it.
-                 * When we imaged the physical disk, we likely read all readable sectors, regardless of whether the file system
-                 * contained within used them all or not.
                  */
-                if ((bMediaIDBPB != DiskAPI.FAT.MEDIA_320KB || bMediaID != DiskAPI.FAT.MEDIA_360KB) && (bMediaIDBPB != DiskAPI.FAT.MEDIA_160KB || bMediaID != DiskAPI.FAT.MEDIA_180KB)) {
-                    for (i = DiskAPI.BPB.SECTOR_BYTES; i < DiskAPI.BPB.HIDDEN_SECS + 2; i++) {
-                        var bDefault = DiskDump.aDefaultBPBs[iBPB][i];
-                        var bActual = this.bufDisk.readUInt8(offBootSector + i);
-                        if (bDefault != bActual) {
-                            DiskDump.logWarning("BPB byte " + str.toHexByte(i) + " default (" + str.toHexByte(bDefault) + ") does not match actual byte: " + str.toHexByte(bActual));
-                            fBPBExists = false;
-                        }
+                for (i = DiskAPI.BPB.SECTOR_BYTES; i < DiskAPI.BPB.HIDDEN_SECS + 2; i++) {
+                    var bDefault = DiskDump.aDefaultBPBs[iBPB][i];
+                    var bActual = this.bufDisk.readUInt8(offBootSector + i);
+                    if (bDefault != bActual) {
+                        DiskDump.logWarning("BPB byte " + str.toHexByte(i) + " default (" + str.toHexByte(bDefault) + ") does not match actual byte: " + str.toHexByte(bActual));
+                        fBPBExists = false;
                     }
                 }
             }
@@ -2806,19 +2812,7 @@ DiskDump.prototype.convertToJSON = function()
                  *
                  * However, if --forceBPB is specified, all those concerns go out the window: the goal is assumed to
                  * be a mountable disk, not a bootable disk.  So the BPB copy starts at offset 0 instead of SECTOR_BYTES.
-                 *
-                 * And again, we must also deal with a physical 360Kb disk image containing a logical 320Kb image (and
-                 * similarly, a physical 180Kb disk image containing a logical 160Kb disk image).  So we check the FAT ID
-                 * byte to make sure we're using a BPB that matches the logical disk image.
                  */
-                bMediaIDBPB = this.bufDisk.readUInt8(offBootSector + 512);
-                if (bMediaIDBPB == DiskAPI.FAT.MEDIA_320KB && bMediaID == DiskAPI.FAT.MEDIA_360KB) {
-                    if (iBPB == 3) iBPB = 1;
-                }
-                else if (bMediaIDBPB == DiskAPI.FAT.MEDIA_160KB && bMediaID == DiskAPI.FAT.MEDIA_180KB) {
-                    if (iBPB == 2) iBPB = 0;
-                }
-                bMediaID = DiskDump.aDefaultBPBs[iBPB][DiskAPI.BPB.MEDIA_ID];
                 for (i = this.forceBPB? 0 : DiskAPI.BPB.SECTOR_BYTES; i < DiskAPI.BPB.LARGE_SECS+4; i++) {
                     this.bufDisk.writeUInt8(DiskDump.aDefaultBPBs[iBPB][i] || 0, offBootSector + i);
                 }
@@ -2878,13 +2872,13 @@ DiskDump.prototype.convertToJSON = function()
                     cbSector = cbSectorDSK;
                     nHeads = this.bufDisk.readUInt8(offBootSector + 0x01);
                     nCylinders = this.bufDisk.readUInt16LE(offBootSector + 0x02);
-                    nSectorsPerTrack= this.bufDisk.readUInt16LE(offBootSector + 0x04);
+                    nLogicalSectorsPerTrack = nSectorsPerTrack = this.bufDisk.readUInt16LE(offBootSector + 0x04);
                     var nTracks = nHeads * nCylinders;
                     cbTrack = nSectorsPerTrack * cbSector;
                     offTrack = 0x08;
                     if (!cbTrack) {
                         for (iTrack = 0; iTrack < nTracks; iTrack++) {
-                            nSectorsPerTrack = this.bufDisk.readUInt16LE(offTrack);
+                            nLogicalSectorsPerTrack = nSectorsPerTrack = this.bufDisk.readUInt16LE(offTrack);
                             cbSectorDSK = this.bufDisk.readUInt16LE(offTrack+2);
                             cbTrack = nSectorsPerTrack * cbSectorDSK;
                             offSector = this.bufDisk.readUInt32LE(offTrack+4);
@@ -2923,7 +2917,7 @@ DiskDump.prototype.convertToJSON = function()
 
                     if (aTracks.length) {
                         var aTrack = aTracks[iTrack++];
-                        nSectorsPerTrack = aTrack[0];
+                        nLogicalSectorsPerTrack = nSectorsPerTrack = aTrack[0];
                         cbSector = aTrack[1];
                         bufTrack = aTrack[2];
                         cbTrack = nSectorsPerTrack * cbSector;
@@ -2933,7 +2927,7 @@ DiskDump.prototype.convertToJSON = function()
 
                     var aSectors;
                     if (this.fJSONNative) {
-                        aSectors = new Array(nSectorsPerTrack);
+                        aSectors = new Array(nLogicalSectorsPerTrack);
                         aHeads[iHead] = aSectors;
                     } else {
                         json += this.dumpLine(2, "[", "head:" + this.sJSONWhitespace + iHead + ", track:" + this.sJSONWhitespace + iCylinder);
@@ -2947,7 +2941,7 @@ DiskDump.prototype.convertToJSON = function()
                      * be unnecessary.
                      */
                     var cbSectorThisTrack = cbSector;
-                    var nSectorsThisTrack = nSectorsPerTrack;
+                    var nSectorsThisTrack = nLogicalSectorsPerTrack;
 
                     /*
                      * Notes regarding XDF track layouts, from http://forum.kryoflux.com/viewtopic.php?f=3&t=234:
