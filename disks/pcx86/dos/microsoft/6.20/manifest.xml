@@ -20,7 +20,7 @@
 		<name>MS-DOS 6.20 (1.2M Disk 4)</name>
 	</disk>
 	<disk id="disk05" size="1228800" chs="80:2:15" img="archive/1200K/MSDOS620-SUPPDISK.img" href="/disks/pcx86/dos/microsoft/6.20/1200K/MSDOS620-SUPPDISK.json" md5="46a6ba5c08e33d48a2e8489f04f921e2" md5json="cd9442813cf6f7915c28e80f3d3f87f0">
-		<name>MS-DOS 6.20 (1.2M Supp Disk)</name>
+		<name>MS-DOS 6.20 (1.2M Supp)</name>
 	</disk>
 	<disk id="disk06" size="1474560" chs="80:2:18" img="archive/1440K/MSDOS620-DISK1.img" href="/disks/pcx86/dos/microsoft/6.20/1440K/MSDOS620-DISK1.json" md5="6c2f2b925c579a8ec1370a5437664e22" md5json="881f9fbc3a13a4ca6f65078813265cc2">
 		<name>MS-DOS 6.20 (1.44M Disk 1)</name>
@@ -32,6 +32,6 @@
 		<name>MS-DOS 6.20 (1.44M Disk 3)</name>
 	</disk>
 	<disk id="disk09" size="1474560" chs="80:2:18" img="archive/1440K/MSDOS620-SUPPDISK.img" href="/disks/pcx86/dos/microsoft/6.20/1440K/MSDOS620-SUPPDISK.json" md5="58d88a6f4f5b79c681745d39f1b18da1" md5json="9d9b8fda0b4b67605dfbef55e34d44d6">
-		<name>MS-DOS 6.20 (1.44M Supp Disk)</name>
+		<name>MS-DOS 6.20 (1.44M Supp)</name>
 	</disk>
 </manifest>

@@ -9,6 +9,6 @@
 		<name>MS OS/2 1.0 (1.2M Program)</name>
 	</disk>
 	<disk id="disk03" size="1228800" chs="80:2:15" img="archive/MSOS210-SUPP.img" href="/disks/pcx86/os2/microsoft/1.0/MSOS210-SUPP.json" md5="317da1f82fa43b1b7677afc71996fac0" md5json="b74f49b57e45c7cb9d56b1b6a57281f6">
-		<name>MS OS/2 1.0 (1.2M Supplemental)</name>
+		<name>MS OS/2 1.0 (1.2M Supp)</name>
 	</disk>
 </manifest>

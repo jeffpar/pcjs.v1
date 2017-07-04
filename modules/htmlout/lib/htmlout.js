@@ -1095,7 +1095,12 @@ HTMLOut.prototype.getDirList = function(sToken, sIndent, aParms)
                 var match = re.exec(asFiles[i]);
                 if (match) asFiles[i] = "///".substr(0, 4 - match[1].length) + asFiles[i];
             }
-            asFiles.sort();
+
+            if (path.basename(obj.sPath) != "blog") {
+                asFiles.sort();
+            } else {
+                asFiles.sort(function(a, b) {return a < b? 1 : -1;});
+            }
 
             for (var iFile = 0; iFile < asFiles.length; iFile++) {
                 var sBaseName = asFiles[iFile].replace(/\//g, "");
