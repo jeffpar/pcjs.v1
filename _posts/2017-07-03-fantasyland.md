@@ -102,12 +102,12 @@ I've not diagnosed yet.  Also, the only version of the Logitech Modula-2/86 Comp
 far is version 1.10.  Cockerham doesn't mention what version of the compiler he used, but it may well have been a
 newer version, since that article was published almost two years after version 1.10 was released.
 
-Also, I'm at a bit of a disadvantage with Modula-2 itself: I've never written anything in Modula-2, I've never used
+I'm also at a bit of a disadvantage with Modula-2 itself: I've never written anything in Modula-2, I've never used
 any Logitech compilers before now, and the closest documentation I've been able to locate is the
 [Logitech Modula-2/86 v1.0 Manual](http://bitsavers.informatik.uni-stuttgart.de/pdf/logitech/modula-2/Logitech_Modula-2_86_1.0_Feb84.pdf)
 (ie, the previous version).
 
-On the other hand, maybe I'm trying too hard, because Cockerham also provided the final binary as well: **EGATEST.EXE**.
+On the other hand, maybe I'm trying too hard, because Cockerham provided the final binary as well: **EGATEST.EXE**.
 
 How well does it work?  I must confess, I don't know, because I'm too chicken to try it right now.  I know my EGA
 simulation, while good, is far from perfect, so before I dive into these tests, I want to make sure I have enough time
