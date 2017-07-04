@@ -4,6 +4,7 @@ title: IBM PC Machine Configurations
 permalink: /devices/pcx86/machine/
 redirect_from:
   - /configs/pc/machines/
+  - /devices/pc/machine/
 ---
 
 IBM PC Machine Configurations
@@ -31,6 +32,7 @@ Machines from our [IBM PC Application Archive](/apps/pcx86/):
 * [Rogue (1985)](/apps/pcx86/1985/rogue/)
 * [ThinkTank (1987)](/apps/pcx86/1987/thinktank/)
 * [The Dungeons of Moria (1992)](/apps/pcx86/1992/moria/)
+* [More...](/apps/pcx86/)
 
 ### Ready-To-Boot Disk Demos
 

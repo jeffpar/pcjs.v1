@@ -2,6 +2,8 @@
 layout: page
 title: "Microsoft Adventure (1981)"
 permalink: /disks/pcx86/games/microsoft/adventure/
+redirect_from:
+  - /disks/pc/games/microsoft/adventure/
 machines:
   - id: ibm5150
     type: pcx86
