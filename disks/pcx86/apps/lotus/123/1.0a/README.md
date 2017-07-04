@@ -5,9 +5,9 @@ permalink: /disks/pcx86/apps/lotus/123/1.0a/
 ---
 
 Lotus 1-2-3 1.0a
----
+----------------
 
-### Directory of Lotus 1-2-3 (System)
+### Directory of Lotus 1-2-3 1.0a (System-PATCHED)
 
 	 Volume in drive A has no label
 
@@ -30,7 +30,7 @@ Lotus 1-2-3 1.0a
 	       11 file(s)     244155 bytes
 	                       72704 bytes free
 
-### Directory of Lotus 1-2-3 (Utility)
+### Directory of Lotus 1-2-3 1.0a (Utility)
 
 	 Volume in drive A has no label
 
@@ -75,7 +75,7 @@ Lotus 1-2-3 1.0a
 	       33 file(s)     185587 bytes
 	                      116736 bytes free
 
-### Directory of Lotus 1-2-3 (Graph)
+### Directory of Lotus 1-2-3 1.0a (Graph)
 
 	 Volume in drive A has no label
 
@@ -107,7 +107,7 @@ Lotus 1-2-3 1.0a
 	       20 file(s)     204350 bytes
 	                      108544 bytes free
 
-### Directory of Lotus 1-2-3 (Tutorial)
+### Directory of Lotus 1-2-3 1.0a (Tutorial)
 
 	 Volume in drive A has no label
 

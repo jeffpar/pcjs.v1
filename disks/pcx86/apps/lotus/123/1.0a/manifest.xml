@@ -7,16 +7,102 @@
 	<category>Productivity</category>
 	<author>Lotus</author>
 	<releaseDate/>
-	<disk id="disk01" size="368640" chs="40:2:9" img="archive/123-DISK1-SYSTEM.img" href="/disks/pcx86/apps/lotus/123/1.0a/123-DISK1-SYSTEM.json" md5="36aa0babe09470801636d9acb6a6d127" md5json="10202c5c7ac7a719e86464f29d14ae7f">
-		<name>Lotus 1-2-3 (System)</name>
+	<disk id="disk01" size="368640" chs="40:2:9" img="archive/123-DISK1-SYSTEM-PATCHED.img" href="/disks/pcx86/apps/lotus/123/1.0a/123-DISK1-SYSTEM-PATCHED.json" md5="02b4711a30c8100415026c38e542ddc3" md5json="a6440e2e7c766cca184708a969213d00">
+		<name>Lotus 1-2-3 1.0a (System)</name>
+		<file size="256" time="1983-07-01 02:23:00" attr="0x20">123.CNF</file>
+		<file size="89984" time="1984-08-17 16:59:30" attr="0x20">123.EXE</file>
+		<file size="113416" time="1983-07-01 02:23:00" attr="0x20">123.HLP</file>
+		<file size="2139" time="1983-07-01 02:23:00" attr="0x20">GD.DRV</file>
+		<file size="4736" time="1983-10-20 13:00:00" attr="0x20">IBMBIO.COM</file>
+		<file size="17024" time="1983-10-20 13:00:00" attr="0x20">IBMDOS.COM</file>
+		<file size="352" time="1983-07-01 02:23:00" attr="0x20">KB.DRV</file>
+		<file size="481" time="1983-07-01 02:23:00" attr="0x20">LOTUS.COM</file>
+		<file size="10144" time="1983-07-01 02:23:00" attr="0x20">LTSLOAD.COM</file>
+		<file size="329" time="1983-07-01 02:23:00" attr="0x20">PR.DRV</file>
+		<file size="5294" time="1983-07-01 02:23:00" attr="0x20">TD.DRV</file>
 	</disk>
-	<disk id="disk02" size="368640" chs="40:2:9" img="archive/123-DISK2-UTILITY.img" href="/disks/pcx86/apps/lotus/123/1.0a/123-DISK2-UTILITY.json" md5="7c44429e0572cc9b5ccb69cd158d107e" md5json="6b6bb5326cd2a24370acdf9df9800d1a">
-		<name>Lotus 1-2-3 (Utility)</name>
+	<disk id="disk02" size="368640" chs="40:2:9" img="archive/123-DISK2-UTILITY.img" href="/disks/pcx86/apps/lotus/123/1.0a/123-DISK2-UTILITY.json" md5="3f76942627e958a5495656f0332c88a4" md5json="7bc7de246155e26a41f844bf0d993067">
+		<name>Lotus 1-2-3 1.0a (Utility)</name>
+		<file size="1036" time="1983-07-01 01:23:00" attr="0x20">B&amp;W.BAT</file>
+		<file size="1036" time="1983-07-01 01:23:00" attr="0x20">BOTH.BAT</file>
+		<file size="1036" time="1983-07-01 01:23:00" attr="0x20">COLOR.BAT</file>
+		<file size="1036" time="1983-07-01 01:23:00" attr="0x20">COMPAQ.BAT</file>
+		<file size="3837" time="1983-07-01 01:23:00" attr="0x20">CONTINUE.BAT</file>
+		<file size="745" time="1983-07-01 01:23:00" attr="0x20">CPQ0TD.DRV</file>
+		<file size="16000" time="1983-07-01 01:23:00" attr="0x20">DBFWKS.EXE</file>
+		<file size="18304" time="1983-07-01 01:23:00" attr="0x20">DIFWKS.EXE</file>
+		<file size="17706" time="1983-07-01 01:23:00" attr="0x20">FILEMGR.COM</file>
+		<file size="1195" time="1983-07-01 01:23:00" attr="0x20">FIXDOS.COM</file>
+		<file size="2139" time="1983-07-01 01:23:00" attr="0x20">GD.DRV</file>
+		<file size="1036" time="1983-07-01 01:23:00" attr="0x20">HERCULES.BAT</file>
+		<file size="5294" time="1983-07-01 01:23:00" attr="0x20">IBM0B&amp;W.DRV</file>
+		<file size="5294" time="1983-07-01 01:23:00" attr="0x20">IBM0COLO.DRV</file>
+		<file size="5293" time="1983-07-01 01:23:00" attr="0x20">IBM0HERC.DRV</file>
+		<file size="745" time="1983-07-01 01:23:00" attr="0x20">IBM0MONO.DRV</file>
+		<file size="2139" time="1983-07-01 01:23:00" attr="0x20">IBM1G1.DRV</file>
+		<file size="2139" time="1983-07-01 01:23:00" attr="0x20">IBM1G2.DRV</file>
+		<file size="2080" time="1983-07-01 01:23:00" attr="0x20">IBM1HERC.DRV</file>
+		<file size="352" time="1983-07-01 01:23:00" attr="0x20">IBM2KB.DRV</file>
+		<file size="329" time="1983-07-01 01:23:00" attr="0x20">IBM3PR.DRV</file>
+		<file size="1920" time="1983-06-02 17:21:46" attr="0x20">IBMBIO.COM</file>
+		<file size="6400" time="1983-06-02 17:21:48" attr="0x20">IBMDOS.COM</file>
+		<file size="352" time="1983-07-01 01:23:00" attr="0x20">KB.DRV</file>
+		<file size="481" time="1983-07-01 01:23:00" attr="0x20">LOTUS.COM</file>
+		<file size="10144" time="1983-07-01 01:23:00" attr="0x20">LTSLOAD.COM</file>
+		<file size="1021" time="1983-07-01 01:23:00" attr="0x20">MONO.BAT</file>
+		<file size="329" time="1983-07-01 01:23:00" attr="0x20">PR.DRV</file>
+		<file size="5294" time="1983-07-01 01:23:00" attr="0x20">TD.DRV</file>
+		<file size="20187" time="1983-07-01 01:23:00" attr="0x20">TRANSLAT.COM</file>
+		<file size="20224" time="1983-07-01 01:23:00" attr="0x20">VCWKS.EXE</file>
+		<file size="16128" time="1983-07-01 01:23:00" attr="0x20">WKSDBF.EXE</file>
+		<file size="14336" time="1983-07-01 01:23:00" attr="0x20">WKSDIF.EXE</file>
 	</disk>
-	<disk id="disk03" size="368640" chs="40:2:9" img="archive/123-DISK3-GRAPH.img" href="/disks/pcx86/apps/lotus/123/1.0a/123-DISK3-GRAPH.json" md5="2f65d1d69f1b048c91373cf616f7b6b4" md5json="137b97e95889983d01e0922a379f2f50">
-		<name>Lotus 1-2-3 (Graph)</name>
+	<disk id="disk03" size="368640" chs="40:2:9" img="archive/123-DISK3-GRAPH.img" href="/disks/pcx86/apps/lotus/123/1.0a/123-DISK3-GRAPH.json" md5="f7169659ec0f1f7666390fe2bc9c6f46" md5json="844c406a7534242cdaf2898bfa43b40a">
+		<name>Lotus 1-2-3 1.0a (Graph)</name>
+		<file size="3597" time="1983-07-01 01:23:00" attr="0x20">BLOCK1.FON</file>
+		<file size="6593" time="1983-07-01 01:23:00" attr="0x20">BLOCK2.FON</file>
+		<file size="2139" time="1983-07-01 01:23:00" attr="0x20">GD.DRV</file>
+		<file size="384" time="1983-07-01 01:23:00" attr="0x20">GRAPH.CNF</file>
+		<file size="62080" time="1983-07-01 01:23:00" attr="0x20">GRAPH.EXE</file>
+		<file size="20747" time="1983-07-01 01:23:00" attr="0x20">GRAPH.HLP</file>
+		<file size="1920" time="1983-06-02 17:21:16" attr="0x20">IBMBIO.COM</file>
+		<file size="6400" time="1983-06-02 17:21:18" attr="0x20">IBMDOS.COM</file>
+		<file size="6507" time="1983-07-01 01:23:00" attr="0x20">ITALIC1.FON</file>
+		<file size="9076" time="1983-07-01 01:23:00" attr="0x20">ITALIC2.FON</file>
+		<file size="352" time="1983-07-01 01:23:00" attr="0x20">KB.DRV</file>
+		<file size="481" time="1983-07-01 01:23:00" attr="0x20">LOTUS.COM</file>
+		<file size="40889" time="1983-07-01 01:23:00" attr="0x20">LOTUS.DLB</file>
+		<file size="10144" time="1983-07-01 01:23:00" attr="0x20">LTSLOAD.COM</file>
+		<file size="329" time="1983-07-01 01:23:00" attr="0x20">PR.DRV</file>
+		<file size="4744" time="1983-07-01 01:23:00" attr="0x20">ROMAN1.FON</file>
+		<file size="9117" time="1983-07-01 01:23:00" attr="0x20">ROMAN2.FON</file>
+		<file size="5831" time="1983-07-01 01:23:00" attr="0x20">SCRIPT1.FON</file>
+		<file size="7726" time="1983-07-01 01:23:00" attr="0x20">SCRIPT2.FON</file>
+		<file size="5294" time="1983-07-01 01:23:00" attr="0x20">TD.DRV</file>
 	</disk>
-	<disk id="disk04" size="368640" chs="40:2:9" img="archive/123-DISK4-TUTORIAL.img" href="/disks/pcx86/apps/lotus/123/1.0a/123-DISK4-TUTORIAL.json" md5="279acec5509aa07d3217789ce78eb622" md5json="4074f85008a692ca0ab37658506b6c82">
-		<name>Lotus 1-2-3 (Tutorial)</name>
+	<disk id="disk04" size="368640" chs="40:2:9" img="archive/123-DISK4-TUTORIAL.img" href="/disks/pcx86/apps/lotus/123/1.0a/123-DISK4-TUTORIAL.json" md5="532be253f5efd4c43b1c72551eb005dd" md5json="bc32e9675734b2986f1bd25559163fe4">
+		<name>Lotus 1-2-3 1.0a (Tutorial)</name>
+		<file size="2139" time="1983-07-01 01:23:00" attr="0x20">GD.DRV</file>
+		<file size="352" time="1983-07-01 01:23:00" attr="0x20">KB.DRV</file>
+		<file size="2944" time="1983-07-01 01:23:00" attr="0x20">LESNA_1.WKS</file>
+		<file size="1792" time="1983-07-01 01:23:00" attr="0x20">LESNA_2.WKS</file>
+		<file size="2816" time="1983-07-01 01:23:00" attr="0x20">LESNB_1.WKS</file>
+		<file size="2944" time="1983-07-01 01:23:00" attr="0x20">LESNC_1.WKS</file>
+		<file size="2560" time="1983-07-01 01:23:00" attr="0x20">LESND_1.WKS</file>
+		<file size="4224" time="1983-07-01 01:23:00" attr="0x20">LESNE_1.WKS</file>
+		<file size="4224" time="1983-07-01 01:23:00" attr="0x20">LESNF_1.WKS</file>
+		<file size="3456" time="1983-07-01 01:23:00" attr="0x20">LESNF_2.WKS</file>
+		<file size="329" time="1983-07-01 01:23:00" attr="0x20">PR.DRV</file>
+		<file size="5294" time="1983-07-01 01:23:00" attr="0x20">TD.DRV</file>
+		<file size="486" time="1983-07-01 01:23:00" attr="0x20">TUT0.TUT</file>
+		<file size="32356" time="1983-07-01 01:23:00" attr="0x20">TUTA.TUT</file>
+		<file size="19569" time="1983-07-01 01:23:00" attr="0x20">TUTB.TUT</file>
+		<file size="14548" time="1983-07-01 01:23:00" attr="0x20">TUTC.TUT</file>
+		<file size="24200" time="1983-07-01 01:23:00" attr="0x20">TUTD.TUT</file>
+		<file size="25061" time="1983-07-01 01:23:00" attr="0x20">TUTE.TUT</file>
+		<file size="21448" time="1983-07-01 01:23:00" attr="0x20">TUTF.TUT</file>
+		<file size="256" time="1983-07-01 01:23:00" attr="0x20">TUTOR.CNF</file>
+		<file size="108800" time="1983-07-01 01:23:00" attr="0x20">TUTOR.EXE</file>
+		<file size="4804" time="1983-07-01 01:23:00" attr="0x20">TUTOR.HLP</file>
 	</disk>
 </manifest>

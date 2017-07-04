@@ -133,7 +133,7 @@ DiskAPI.BPB = {
     TOTAL_FATS:     0x010,      // 1 byte: FAT copies (eg, 2)
     ROOT_DIRENTS:   0x011,      // 2 bytes: root directory entries (eg, 0x40 or 64) 0x40 * 0x20 = 0x800 (1 sector is 0x200 bytes, total of 4 sectors)
     TOTAL_SECS:     0x013,      // 2 bytes: number of sectors (eg, 0x140 or 320); if zero, refer to LARGE_SECS
-    MEDIA_TYPE:     0x015,      // 1 byte: media type (see DiskAPI.FAT.MEDIA_*)
+    MEDIA_ID:       0x015,      // 1 byte: media ID (see DiskAPI.FAT.MEDIA_*); should also match the first byte of the FAT (aka FAT ID)
     FAT_SECS:       0x016,      // 2 bytes: sectors per FAT (eg, 1)
     TRACK_SECS:     0x018,      // 2 bytes: sectors per track (eg, 8)
     TOTAL_HEADS:    0x01A,      // 2 bytes: number of heads (eg, 1)
@@ -146,21 +146,21 @@ DiskAPI.BPB = {
  *
  * Each entry in GEOMETRIES is an array of values in "CHS" order:
  *
- *      [# cylinders, # heads, # sectors/track, # bytes/sector, media type]
+ *      [# cylinders, # heads, # sectors/track, # bytes/sector, media ID]
  *
  * If the 4th value is omitted, the sector size is assumed to be 512.  The order of these "geometric" values mirrors
  * the structure of our JSON-encoded disk images, which consist of an array of cylinders, each of which is an array of
  * heads, each of which is an array of sector objects.
  */
 DiskAPI.GEOMETRIES = {
-    163840:  [40,1,8,,0xFE],    // media type 0xFE: 40 cylinders, 1 head (single-sided),   8 sectors/track, ( 320 total sectors x 512 bytes/sector ==  163840)
-    184320:  [40,1,9,,0xFC],    // media type 0xFC: 40 cylinders, 1 head (single-sided),   9 sectors/track, ( 360 total sectors x 512 bytes/sector ==  184320)
-    327680:  [40,2,8,,0xFF],    // media type 0xFF: 40 cylinders, 2 heads (double-sided),  8 sectors/track, ( 640 total sectors x 512 bytes/sector ==  327680)
-    368640:  [40,2,9,,0xFD],    // media type 0xFD: 40 cylinders, 2 heads (double-sided),  9 sectors/track, ( 720 total sectors x 512 bytes/sector ==  368640)
-    737280:  [80,2,9,,0xF9],    // media type 0xF9: 80 cylinders, 2 heads (double-sided),  9 sectors/track, (1440 total sectors x 512 bytes/sector ==  737280)
-    1228800: [80,2,15,,0xF9],   // media type 0xF9: 80 cylinders, 2 heads (double-sided), 15 sectors/track, (2400 total sectors x 512 bytes/sector == 1228800)
-    1474560: [80,2,18,,0xF0],   // media type 0xF0: 80 cylinders, 2 heads (double-sided), 18 sectors/track, (2880 total sectors x 512 bytes/sector == 1474560)
-    2949120: [80,2,36,,0xF0],   // media type 0xF0: 80 cylinders, 2 heads (double-sided), 36 sectors/track, (5760 total sectors x 512 bytes/sector == 2949120)
+    163840:  [40,1,8,,0xFE],    // media ID 0xFE: 40 cylinders, 1 head (single-sided),   8 sectors/track, ( 320 total sectors x 512 bytes/sector ==  163840)
+    184320:  [40,1,9,,0xFC],    // media ID 0xFC: 40 cylinders, 1 head (single-sided),   9 sectors/track, ( 360 total sectors x 512 bytes/sector ==  184320)
+    327680:  [40,2,8,,0xFF],    // media ID 0xFF: 40 cylinders, 2 heads (double-sided),  8 sectors/track, ( 640 total sectors x 512 bytes/sector ==  327680)
+    368640:  [40,2,9,,0xFD],    // media ID 0xFD: 40 cylinders, 2 heads (double-sided),  9 sectors/track, ( 720 total sectors x 512 bytes/sector ==  368640)
+    737280:  [80,2,9,,0xF9],    // media ID 0xF9: 80 cylinders, 2 heads (double-sided),  9 sectors/track, (1440 total sectors x 512 bytes/sector ==  737280)
+    1228800: [80,2,15,,0xF9],   // media ID 0xF9: 80 cylinders, 2 heads (double-sided), 15 sectors/track, (2400 total sectors x 512 bytes/sector == 1228800)
+    1474560: [80,2,18,,0xF0],   // media ID 0xF0: 80 cylinders, 2 heads (double-sided), 18 sectors/track, (2880 total sectors x 512 bytes/sector == 1474560)
+    2949120: [80,2,36,,0xF0],   // media ID 0xF0: 80 cylinders, 2 heads (double-sided), 36 sectors/track, (5760 total sectors x 512 bytes/sector == 2949120)
     /*
      * The following are some common disk sizes and their CHS values, since missing or bogus MBR and/or BPB values
      * might mislead us when attempting to determine the exact disk geometry.
