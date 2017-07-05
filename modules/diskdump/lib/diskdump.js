@@ -1005,6 +1005,8 @@ DiskDump.updateManifest = function(disk, sManifestFile, sDiskPath, sOutputFile, 
         var sXMLDisk = '\t<disk id="' + sIDDisk + '"';
         sXMLDisk += (size? ' size="' + size + '"' : '');
         sXMLDisk += (sCHS? ' chs="' + sCHS + '"' : '');
+        i = sDiskPath.indexOf("archive/");
+        if (i >= 0) sDiskPath = sDiskPath.substr(i);
         sXMLDisk += (sParm? ' ' + sParm + '="' + sDiskPath + '"' : '');
         sXMLDisk += ' href="' + sOutputFile + '"' + (md5Disk? ' md5="' + md5Disk + '"' : '') + (md5JSON? ' md5json="' + md5JSON + '"' : '') + '>\n';
 
@@ -1729,7 +1731,7 @@ DiskDump.prototype.readDir = function(sDir, fRoot, done)
                                 fs.readFile(fileInfo.FILE_PATH, {encoding: "utf8"}, function doneReadDirEntry(err, sData) {
                                     if (!err) {
                                         var sNew = sData.replace(/\n/g, "\r\n").replace(/\r+/g, "\r");
-                                        if (sNew != sData) console.log("warning: replaced line endings in " + fileInfo.FILE_NAME + " (size changed from " + fileInfo.FILE_SIZE + " to " + sNew.length + " bytes)");
+                                        if (sNew != sData) DiskDump.logWarning("replaced line endings in " + fileInfo.FILE_NAME + " (size changed from " + fileInfo.FILE_SIZE + " to " + sNew.length + " bytes)");
                                         fileInfo.FILE_DATA = sNew;
                                         fileInfo.FILE_SIZE = sNew.length;
                                     } else {
@@ -1860,7 +1862,7 @@ DiskDump.prototype.readPath = function(sPath, done)
                             DiskDump.readFile(sFilePath, "utf8", function doneReadPathEntry(err, sData) {
                                 if (!err) {
                                     var sNew = sData.replace(/\n/g, "\r\n").replace(/\r+/g, "\r");
-                                    if (sNew != sData) console.log("warning: replaced line endings in " + fileInfo.FILE_NAME + " (size changed from " + fileInfo.FILE_SIZE + " to " + sNew.length + " bytes)");
+                                    if (sNew != sData) DiskDump.logWarning("replaced line endings in " + fileInfo.FILE_NAME + " (size changed from " + fileInfo.FILE_SIZE + " to " + sNew.length + " bytes)");
                                     fileInfo.FILE_DATA = sNew;
                                     fileInfo.FILE_SIZE = sNew.length;
                                     // obj.addManifestInfo(fileInfo);
@@ -2816,7 +2818,7 @@ DiskDump.prototype.convertToJSON = function()
                 for (i = this.forceBPB? 0 : DiskAPI.BPB.SECTOR_BYTES; i < DiskAPI.BPB.LARGE_SECS+4; i++) {
                     this.bufDisk.writeUInt8(DiskDump.aDefaultBPBs[iBPB][i] || 0, offBootSector + i);
                 }
-                console.log("warning: BPB has been updated");
+                DiskDump.logWarning("BPB has been updated");
             }
             else if (bByte0 == 0xF6 && bByte1 == 0xF6) {
                 /*
@@ -2842,7 +2844,7 @@ DiskDump.prototype.convertToJSON = function()
              * previously added ourselves as an original BPB.
              */
             this.bufDisk.write(DiskDump.PCJS_OEM, DiskAPI.BOOT.OEM_STRING + offBootSector, DiskDump.PCJS_OEM.length);
-            console.log("warning: OEM string has been updated");
+            DiskDump.logWarning("OEM string has been updated");
         }
         if (!nHeads) {
             /*
@@ -3385,22 +3387,24 @@ DiskDump.prototype.convertToIMG = function(fRaw)
              * Since there's no way (and rightly so) of setting fDebug via the API, I've added the check for
              * fJSONComments as another way of disabling "branding" via the API; requesting an IMG file with comments
              * is otherwise a nonsensical request.
+             *
+             * UPDATE: This code has been disabled, since we do a better job of this on the conversion *to* JSON now.
              */
-            if (!fDebug && !this.fJSONComments && buf.length < 3000000) {   // arbitrary size threshold between diskette images and hard drive images
-                /*
-                 * Mimic the BPB test in convertToJSON(), because we don't want to blast an OEM string into non-DOS diskette images
-                 */
-                var bByte0 = buf.readUInt8(DiskAPI.BOOT.JMP_OPCODE);
-                var cbSectorBPB = buf.readUInt16LE(DiskAPI.BPB.SECTOR_BYTES);
-                var wSig = buf.readUInt16LE(DiskAPI.BOOT.SIG_OFFSET);
-                if ((bByte0 == X86.OPCODE.JMP || bByte0 == X86.OPCODE.JMPS) && cbSectorBPB == 512 && wSig == DiskAPI.BOOT.SIGNATURE) {
-                    /*
-                     * Overwrite the OEM string with our own, so that people know how the image originated.
-                     */
-                    buf.write(DiskDump.PCJS_OEM, DiskAPI.BOOT.OEM_STRING, DiskDump.PCJS_OEM.length);
-                    console.log("warning: OEM string has been updated");
-                }
-            }
+            // if (!fDebug && !this.fJSONComments && buf.length < 3000000) {   // arbitrary size threshold between diskette images and hard drive images
+            //     /*
+            //      * Mimic the BPB test in convertToJSON(), because we don't want to blast an OEM string into non-DOS diskette images
+            //      */
+            //     var bByte0 = buf.readUInt8(DiskAPI.BOOT.JMP_OPCODE);
+            //     var cbSectorBPB = buf.readUInt16LE(DiskAPI.BPB.SECTOR_BYTES);
+            //     var wSig = buf.readUInt16LE(DiskAPI.BOOT.SIG_OFFSET);
+            //     if ((bByte0 == X86.OPCODE.JMP || bByte0 == X86.OPCODE.JMPS) && cbSectorBPB == 512 && wSig == DiskAPI.BOOT.SIGNATURE) {
+            //         /*
+            //          * Overwrite the OEM string with our own, so that people know how the image originated.
+            //          */
+            //         buf.write(DiskDump.PCJS_OEM, DiskAPI.BOOT.OEM_STRING, DiskDump.PCJS_OEM.length);
+            //         DiskDump.logWarning("OEM string has been updated");
+            //     }
+            // }
         } catch(err) {
             DiskDump.logError(err);
             return null;

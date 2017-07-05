@@ -7,28 +7,222 @@
 	<category>Word Processor</category>
 	<author>Microsoft</author>
 	<releaseDate/>
-	<disk id="disk01" size="368640" chs="40:2:9" img="archive/WORD31-DISK1-PROGRAM.img" href="/disks/pcx86/apps/microsoft/word/3.1/WORD31-DISK1-PROGRAM.json" md5="1c370c3abc240dbd20d87af6cd0902e2" md5json="f5db259c42fcb1e8236c23a4cc9f263e">
+	<disk id="disk01" size="368640" chs="40:2:9" img="archive/WORD31-DISK1-PROGRAM.img" href="/disks/pcx86/apps/microsoft/word/3.1/WORD31-DISK1-PROGRAM.json" md5="813bcaaab825a0ba677afe54af9d7ad5" md5json="de4bcd840dc34c1877ea3745f913cab2">
 		<name>MS Word 3.1 (Disk 1)</name>
+		<file size="24072" time="1986-10-23 17:54:46" attr="0x20">HYPH.DAT</file>
+		<file size="59153" time="1986-10-23 17:54:46" attr="0x20">MW.HLP</file>
+		<file size="220112" time="1986-10-23 17:54:48" attr="0x20">MW.PGM</file>
+		<file size="852" time="1986-10-23 17:54:48" attr="0x20">TTY.PRD</file>
+		<file size="50546" time="1986-10-23 17:54:48" attr="0x20">WORD.COM</file>
+		<file size="369" time="1986-10-23 17:54:48" attr="0x20">WORD.PIF</file>
 	</disk>
-	<disk id="disk02" size="368640" chs="40:2:9" img="archive/WORD31-DISK2-SPELL.img" href="/disks/pcx86/apps/microsoft/word/3.1/WORD31-DISK2-SPELL.json" md5="9353352b7cffb1a7cf7aa39c5a68a827" md5json="135ce767ba56423ce09f59f1b20944d0">
+	<disk id="disk02" size="368640" chs="40:2:9" img="archive/WORD31-DISK2-SPELL.img" href="/disks/pcx86/apps/microsoft/word/3.1/WORD31-DISK2-SPELL.json" md5="409bb76dd8ad4068f78001d7b26ddfda" md5json="aea635c7d04326bbf273d9001000532e">
 		<name>MS Word 3.1 (Disk 2)</name>
+		<file size="2926" time="1986-10-16 14:38:02" attr="0x20">ANAGRAM.COM</file>
+		<file size="34944" time="1986-10-16 14:38:02" attr="0x20">CONVERTD.EXE</file>
+		<file size="5888" time="1986-10-16 14:38:02" attr="0x20">HIGHFREQ.CMP</file>
+		<file size="3560" time="1986-10-16 14:38:04" attr="0x20">LOOKUP.COM</file>
+		<file size="212352" time="1986-10-16 14:38:04" attr="0x20">MAINDICT.CMP</file>
+		<file size="6932" time="1986-10-16 14:38:04" attr="0x20">MARKFIX.COM</file>
+		<file size="6690" time="1986-10-16 14:38:06" attr="0x20">PROOF.COM</file>
+		<file size="18606" time="1986-10-16 14:38:06" attr="0x20">SPELL.COM</file>
+		<file size="9728" time="1986-10-16 14:38:06" attr="0x20">SPELL.HLP</file>
+		<file size="2176" time="1986-10-16 14:38:06" attr="0x20">TYPOS.DOC</file>
+		<file size="2585" time="1986-10-16 14:38:06" attr="0x20">WC.COM</file>
+		<file size="2844" time="1986-10-16 14:38:08" attr="0x20">WORDFIND.COM</file>
+		<file size="6598" time="1986-10-16 14:38:08" attr="0x20">WORDFREQ.COM</file>
 	</disk>
-	<disk id="disk03" size="368640" chs="40:2:9" img="archive/WORD31-DISK3-THESAURUS.img" href="/disks/pcx86/apps/microsoft/word/3.1/WORD31-DISK3-THESAURUS.json" md5="a27129a4549ac43e15dcffb39deb1e12" md5json="bb110081bc34da49b408c5593c561595">
+	<disk id="disk03" size="368640" chs="40:2:9" img="archive/WORD31-DISK3-THESAURUS.img" href="/disks/pcx86/apps/microsoft/word/3.1/WORD31-DISK3-THESAURUS.json" md5="90244da2abce6d64d4a9f06df4db9354" md5json="f761c4b4defbc8ea753491dfbd8e21bb">
 		<name>MS Word 3.1 (Disk 3)</name>
+		<file size="325440" time="1986-10-16 14:37:28" attr="0x20">WFBG.SYN</file>
 	</disk>
-	<disk id="disk04" size="368640" chs="40:2:9" img="archive/WORD31-DISK4-UTILITIES.img" href="/disks/pcx86/apps/microsoft/word/3.1/WORD31-DISK4-UTILITIES.json" md5="3b11d6096006d3a5020183b95414c2b9" md5json="33273f2eb4c4e5e47984f9f57361df28">
+	<disk id="disk04" size="368640" chs="40:2:9" img="archive/WORD31-DISK4-UTILITIES.img" href="/disks/pcx86/apps/microsoft/word/3.1/WORD31-DISK4-UTILITIES.json" md5="e51a203b9a37e2ae2f6f2d32f07becbf" md5json="054d494769b3f33ececc316039a7e86d">
 		<name>MS Word 3.1 (Disk 4)</name>
+		<file size="8272" time="1986-10-17 11:50:18" attr="0x20">ALPS2000.PRD</file>
+		<file size="965" time="1986-10-17 11:50:18" attr="0x20">ASTTURBO.INI</file>
+		<file size="5377" time="1986-10-17 11:50:18" attr="0x20">ASTTURBO.PRD</file>
+		<file size="966" time="1986-10-17 11:50:20" attr="0x20">ASTURBOL.INI</file>
+		<file size="5377" time="1986-10-17 11:50:20" attr="0x20">ASTURBOL.PRD</file>
+		<file size="4887" time="1986-10-17 11:50:20" attr="0x20">CANON.PRD</file>
+		<file size="39552" time="1986-10-17 11:50:20" attr="0x20">CONVWS.EXE</file>
+		<file size="8247" time="1986-10-17 11:50:22" attr="0x20">DECLN03.PRD</file>
+		<file size="1152" time="1986-10-17 11:50:22" attr="0x20">FULL.STY</file>
+		<file size="29146" time="1986-10-17 11:50:22" attr="0x20">MAKEPRD.EXE</file>
+		<file size="11458" time="1986-10-17 11:50:22" attr="0x20">MOUSE.SYS</file>
+		<file size="1152" time="1986-10-17 11:50:22" attr="0x20">OUTLINE.STY</file>
+		<file size="7680" time="1986-10-17 17:50:06" attr="0x20">README.DOC</file>
+		<file size="10752" time="1986-10-17 17:53:40" attr="0x20">RF-WORD.DOC</file>
+		<file size="21466" time="1986-10-17 11:50:24" attr="0x20">RFTOWORD.EXE</file>
+		<file size="1152" time="1986-10-17 11:50:24" attr="0x20">SEMI.STY</file>
+		<file size="65264" time="1986-10-17 11:50:24" attr="0x20">SETUP.EXE</file>
+		<file size="369" time="1986-10-17 11:50:24" attr="0x20">WORD.PIF</file>
+		<file size="24474" time="1986-10-17 11:50:26" attr="0x20">WORDTORF.EXE</file>
+		<file size="9806" time="1986-10-17 11:50:26" attr="0x20">X4045DLL.EXE</file>
+		<file size="32775" time="1986-10-17 11:50:26" attr="0x20">X4045DLL.PRD</file>
+		<file size="9778" time="1986-10-17 11:50:28" attr="0x20">X4045DLP.EXE</file>
+		<file size="32775" time="1986-10-17 11:50:28" attr="0x20">X4045DLP.PRD</file>
 	</disk>
-	<disk id="disk05" size="368640" chs="40:2:9" img="archive/WORD31-DISK5-PRINTER.img" href="/disks/pcx86/apps/microsoft/word/3.1/WORD31-DISK5-PRINTER.json" md5="52b513f65a38135d12b4a88c4442898b" md5json="689fcd827cda42d97bca383b40af912c">
+	<disk id="disk05" size="368640" chs="40:2:9" img="archive/WORD31-DISK5-PRINTER.img" href="/disks/pcx86/apps/microsoft/word/3.1/WORD31-DISK5-PRINTER.json" md5="292bb6529b70562580b1a7d9afdea383" md5json="7723d3c559f953fbf22cc2d3d4d28c22">
 		<name>MS Word 3.1 (Disk 5)</name>
+		<file size="1368" time="1986-10-17 11:47:20" attr="0x20">ANDX60CS.PRD</file>
+		<file size="1248" time="1986-10-17 11:47:20" attr="0x20">ANDX60DP.PRD</file>
+		<file size="5178" time="1986-10-17 11:47:20" attr="0x20">ANDX60LT.PRD</file>
+		<file size="2238" time="1986-10-17 11:47:20" attr="0x20">ANDX6500.PRD</file>
+		<file size="2144" time="1986-10-17 11:47:20" attr="0x20">ANDX9625.PRD</file>
+		<file size="7410" time="1986-10-17 11:47:22" attr="0x20">ANDX9725.PRD</file>
+		<file size="7740" time="1986-10-17 11:47:12" attr="0x20">APPLAND.INI</file>
+		<file size="16068" time="1986-10-17 11:47:22" attr="0x20">APPLAND.PRD</file>
+		<file size="7740" time="1986-10-17 11:47:24" attr="0x20">APPLASER.INI</file>
+		<file size="16068" time="1986-10-17 11:47:24" attr="0x20">APPLASER.PRD</file>
+		<file size="2072" time="1986-10-17 11:47:24" attr="0x20">BL45LQ.PRD</file>
+		<file size="2964" time="1986-10-17 11:47:24" attr="0x20">BROM1509.PRD</file>
+		<file size="3042" time="1986-10-17 11:47:24" attr="0x20">BROTBPI.PRD</file>
+		<file size="2360" time="1986-10-17 11:47:26" attr="0x20">BROTHER.PRD</file>
+		<file size="2306" time="1986-10-17 11:47:26" attr="0x20">BROTWIN5.PRD</file>
+		<file size="2868" time="1986-10-17 11:47:26" attr="0x20">BRSP1000.PRD</file>
+		<file size="949" time="1986-10-17 11:47:26" attr="0x20">CMP2100.PRD</file>
+		<file size="2408" time="1986-10-17 11:47:26" attr="0x20">D620.PRD</file>
+		<file size="2596" time="1986-10-17 11:47:28" attr="0x20">D630.PRD</file>
+		<file size="2626" time="1986-10-17 11:47:28" attr="0x20">D630A.PRD</file>
+		<file size="2300" time="1986-10-17 11:47:28" attr="0x20">D630ECS.PRD</file>
+		<file size="1818" time="1986-10-17 11:47:28" attr="0x20">DELTA.PRD</file>
+		<file size="2948" time="1986-10-17 11:47:28" attr="0x20">DMP130.PRD</file>
+		<file size="1591" time="1986-10-17 11:47:30" attr="0x20">DMP200.PRD</file>
+		<file size="1783" time="1986-10-17 11:47:30" attr="0x20">DMP2100.PRD</file>
+		<file size="2503" time="1986-10-17 11:47:30" attr="0x20">DMP2100P.PRD</file>
+		<file size="2552" time="1986-10-17 11:47:30" attr="0x20">DMP2200.PRD</file>
+		<file size="1575" time="1986-10-17 11:47:30" attr="0x20">DMP400.PRD</file>
+		<file size="1581" time="1986-10-17 11:47:30" attr="0x20">DMP430.PRD</file>
+		<file size="2530" time="1986-10-17 11:47:30" attr="0x20">DP32.PRD</file>
+		<file size="1666" time="1986-10-17 11:47:30" attr="0x20">DWII.PRD</file>
+		<file size="1666" time="1986-10-17 11:47:32" attr="0x20">DWIIB.PRD</file>
+		<file size="1216" time="1986-10-17 11:47:32" attr="0x20">DWP220.PRD</file>
+		<file size="1664" time="1986-10-17 11:47:32" attr="0x20">DWP510.PRD</file>
+		<file size="1669" time="1986-10-17 11:47:32" attr="0x20">DWP510SF.PRD</file>
+		<file size="11248" time="1986-10-17 11:47:32" attr="0x20">EPSONEX.PRD</file>
+		<file size="2722" time="1986-10-17 11:47:32" attr="0x20">EPSONFX.PRD</file>
+		<file size="2722" time="1986-10-17 11:47:32" attr="0x20">EPSONFXQ.PRD</file>
+		<file size="7825" time="1986-10-17 11:47:32" attr="0x20">EPSONJX.PRD</file>
+		<file size="3092" time="1986-10-17 11:47:32" attr="0x20">EPSONLQ.PRD</file>
+		<file size="2462" time="1986-10-17 11:47:32" attr="0x20">EPSONLX.PRD</file>
+		<file size="1208" time="1986-10-17 11:47:34" attr="0x20">EPSONMX.PRD</file>
+		<file size="1558" time="1986-10-17 11:47:34" attr="0x20">EPSONMXG.PRD</file>
+		<file size="1788" time="1986-10-17 11:47:34" attr="0x20">EPSONRX.PRD</file>
+		<file size="3092" time="1986-10-17 11:47:34" attr="0x20">EPSONSQ.PRD</file>
+		<file size="1546" time="1986-10-17 11:47:34" attr="0x20">GRAFTRAX.PRD</file>
+		<file size="5294" time="1986-10-17 11:47:34" attr="0x20">HP2934A.PRD</file>
+		<file size="8834" time="1986-10-17 11:47:34" attr="0x20">HPDWNR8L.EXE</file>
+		<file size="19512" time="1986-10-17 11:47:34" attr="0x20">HPDWNR8L.PRD</file>
+		<file size="8834" time="1986-10-17 11:47:34" attr="0x20">HPDWNR8P.EXE</file>
+		<file size="19512" time="1986-10-17 11:47:36" attr="0x20">HPDWNR8P.PRD</file>
+		<file size="8834" time="1986-10-17 11:47:36" attr="0x20">HPDWNSFL.EXE</file>
+		<file size="10296" time="1986-10-17 11:47:36" attr="0x20">HPDWNSFL.PRD</file>
+		<file size="8834" time="1986-10-17 11:47:36" attr="0x20">HPDWNSFP.EXE</file>
+		<file size="10296" time="1986-10-17 11:47:36" attr="0x20">HPDWNSFP.PRD</file>
+		<file size="4133" time="1986-10-17 11:47:36" attr="0x20">HPFORMSP.PRD</file>
+		<file size="1245" time="1986-10-17 11:47:36" attr="0x20">HPLASCR.PRD</file>
+		<file size="1345" time="1986-10-17 11:47:36" attr="0x20">HPLASCR2.PRD</file>
+		<file size="2151" time="1986-10-17 11:47:36" attr="0x20">HPLASINT.PRD</file>
+		<file size="5939" time="1986-10-17 11:47:36" attr="0x20">HPLASLAN.PRD</file>
+		<file size="1467" time="1986-10-17 11:47:38" attr="0x20">HPLASLCR.PRD</file>
+		<file size="1340" time="1986-10-17 11:47:38" attr="0x20">HPLASLG.PRD</file>
+		<file size="1802" time="1986-10-17 11:47:38" attr="0x20">HPLASLPR.PRD</file>
+		<file size="9724" time="1986-10-17 11:47:38" attr="0x20">HPLASMS.PRD</file>
+		<file size="1340" time="1986-10-17 11:47:38" attr="0x20">HPLASPR.PRD</file>
+		<file size="3334" time="1986-10-17 11:47:38" attr="0x20">HPLASPS.PRD</file>
+		<file size="3874" time="1986-10-17 11:47:38" attr="0x20">HPLASRMN.PRD</file>
+		<file size="2948" time="1986-10-17 11:47:38" attr="0x20">HPLASTAX.PRD</file>
+		<file size="1739" time="1986-10-17 11:47:38" attr="0x20">HPLSMATH.PRD</file>
+		<file size="1340" time="1986-10-17 11:47:40" attr="0x20">HPLSMEMO.PRD</file>
+		<file size="1753" time="1986-10-17 11:47:40" attr="0x20">HPLSOCRA.PRD</file>
+		<file size="2087" time="1986-10-17 11:47:40" attr="0x20">HPLSOCRB.PRD</file>
+		<file size="2706" time="1986-10-17 11:47:40" attr="0x20">HPLSRMN2.PRD</file>
+		<file size="4946" time="1986-10-17 11:47:40" attr="0x20">HPMTHTMS.PRD</file>
+		<file size="1345" time="1986-10-17 11:47:40" attr="0x20">HPPCCOUR.PRD</file>
+		<file size="4992" time="1986-10-17 17:43:06" attr="0x20">PRINTERS.DOC</file>
 	</disk>
-	<disk id="disk06" size="368640" chs="40:2:9" img="archive/WORD31-DISK6-PRINTER.img" href="/disks/pcx86/apps/microsoft/word/3.1/WORD31-DISK6-PRINTER.json" md5="48724973d58cf7202912ddaf5dde8a9a" md5json="b32dad034f454f8d16a5e0ded6c80e56">
+	<disk id="disk06" size="368640" chs="40:2:9" img="archive/WORD31-DISK6-PRINTER.img" href="/disks/pcx86/apps/microsoft/word/3.1/WORD31-DISK6-PRINTER.json" md5="c14f7fbdb6d0e015d2fa7a65bb93af77" md5json="4329ce17756296edf71eb8afd7449a40">
 		<name>MS Word 3.1 (Disk 6)</name>
+		<file size="14436" time="1986-10-16 14:16:50" attr="0x20">CORONA.PRD</file>
+		<file size="1569" time="1986-10-16 14:16:50" attr="0x20">HPQUIET.PRD</file>
+		<file size="1004" time="1986-10-16 14:16:50" attr="0x20">HPTHINK.PRD</file>
+		<file size="4709" time="1986-10-16 14:16:52" attr="0x20">IBMCLRLQ.PRD</file>
+		<file size="4706" time="1986-10-16 14:16:52" attr="0x20">IBMCOLOR.PRD</file>
+		<file size="1228" time="1986-10-16 14:16:52" attr="0x20">IBMGRAPH.PRD</file>
+		<file size="1418" time="1986-10-16 14:16:52" attr="0x20">IBMPRO.PRD</file>
+		<file size="2708" time="1986-10-16 14:16:54" attr="0x20">IBMPROXL.PRD</file>
+		<file size="1697" time="1986-10-16 14:16:54" attr="0x20">IBMQUIET.PRD</file>
+		<file size="1613" time="1986-10-16 14:16:54" attr="0x20">IBMWHEEL.PRD</file>
+		<file size="2616" time="1986-10-16 14:16:56" attr="0x20">ITOHF10.PRD</file>
+		<file size="2396" time="1986-10-16 14:16:56" attr="0x20">ITOHPJR.PRD</file>
+		<file size="2091" time="1986-10-16 14:16:56" attr="0x20">ITOHSTAR.PRD</file>
+		<file size="3296" time="1986-10-16 14:16:56" attr="0x20">LQ800.PRD</file>
+		<file size="5988" time="1986-10-16 14:16:56" attr="0x20">LQ800IDM.PRD</file>
+		<file size="1226" time="1986-10-16 14:16:58" attr="0x20">MSPRINT.PRD</file>
+		<file size="1899" time="1986-10-16 14:16:58" attr="0x20">MT1X.PRD</file>
+		<file size="1558" time="1986-10-16 14:16:58" attr="0x20">MT80.PRD</file>
+		<file size="3993" time="1986-10-16 14:16:58" attr="0x20">NCR6416.PRD</file>
+		<file size="2730" time="1986-10-16 14:16:58" attr="0x20">NEC3550.PRD</file>
+		<file size="2646" time="1986-10-16 14:17:00" attr="0x20">NEC7710.PRD</file>
+		<file size="4271" time="1986-10-16 14:17:00" attr="0x20">NECP2.PRD</file>
+		<file size="5164" time="1986-10-16 14:17:00" attr="0x20">NECP5.PRD</file>
+		<file size="10822" time="1986-10-16 14:17:00" attr="0x20">NECP5XL.PRD</file>
+		<file size="1712" time="1986-10-16 14:17:00" attr="0x20">OKI192.PRD</file>
+		<file size="3762" time="1986-10-16 14:17:00" attr="0x20">OKI192PS.PRD</file>
+		<file size="1691" time="1986-10-16 14:17:00" attr="0x20">OKI2410.PRD</file>
+		<file size="11907" time="1986-10-16 14:17:02" attr="0x20">OKI292.PRD</file>
+		<file size="1641" time="1986-10-16 14:17:02" attr="0x20">OKI92.PRD</file>
+		<file size="4839" time="1986-10-16 14:17:02" attr="0x20">OKILASER.PRD</file>
+		<file size="1335" time="1986-10-16 14:17:02" attr="0x20">OKILSLAN.PRD</file>
+		<file size="6398" time="1986-10-16 14:17:04" attr="0x20">PAGEDL.EXE</file>
+		<file size="5058" time="1986-10-16 14:17:04" attr="0x20">PAGEDL.PRD</file>
+		<file size="2041" time="1986-10-16 14:17:04" attr="0x20">PAGEMDRN.PRD</file>
+		<file size="2256" time="1986-10-16 14:17:04" attr="0x20">PAGEPS.PRD</file>
+		<file size="2205" time="1986-10-16 14:17:04" attr="0x20">PAGERMN.PRD</file>
+		<file size="3600" time="1986-10-16 14:17:04" attr="0x20">PAGESNRN.PRD</file>
+		<file size="852" time="1986-10-16 14:17:04" attr="0x20">PLAIN.PRD</file>
+		<file size="7383" time="1986-10-16 14:17:04" attr="0x20">QMSGRAFX.PRD</file>
+		<file size="3181" time="1986-10-16 14:17:04" attr="0x20">QMSKISS.PRD</file>
+		<file size="9254" time="1986-10-16 14:17:06" attr="0x20">QMSLAN.EXE</file>
+		<file size="11731" time="1986-10-16 14:17:06" attr="0x20">QMSLAN.PRD</file>
+		<file size="5858" time="1986-10-16 14:17:06" attr="0x20">QMSLEGAL.PRD</file>
+		<file size="5826" time="1986-10-16 14:17:06" attr="0x20">QMSOFFC1.PRD</file>
+		<file size="5812" time="1986-10-16 14:17:06" attr="0x20">QMSOFFC2.PRD</file>
+		<file size="9080" time="1986-10-16 14:17:06" attr="0x20">QMSPOR.EXE</file>
+		<file size="11656" time="1986-10-16 14:17:06" attr="0x20">QMSPOR.PRD</file>
+		<file size="2671" time="1986-10-16 14:17:06" attr="0x20">QUADLASR.PRD</file>
+		<file size="2136" time="1986-10-16 14:17:06" attr="0x20">QUME11.PRD</file>
+		<file size="1862" time="1986-10-16 14:17:08" attr="0x20">RADIX.PRD</file>
+		<file size="1658" time="1986-10-16 14:17:08" attr="0x20">RICOH.PRD</file>
+		<file size="2044" time="1986-10-16 14:17:08" attr="0x20">SREXP.PRD</file>
+		<file size="1556" time="1986-10-16 14:17:08" attr="0x20">TI850.PRD</file>
+		<file size="11104" time="1986-10-16 14:17:08" attr="0x20">TI855Q.PRD</file>
+		<file size="18160" time="1986-10-16 14:17:08" attr="0x20">TI857Q.PRD</file>
+		<file size="1363" time="1986-10-16 14:17:08" attr="0x20">TOSH1340.PRD</file>
+		<file size="1597" time="1986-10-16 14:17:08" attr="0x20">TOSH1351.PRD</file>
+		<file size="2382" time="1986-10-16 14:17:08" attr="0x20">TOSHP351.PRD</file>
+		<file size="852" time="1986-10-16 14:17:08" attr="0x20">TTY.PRD</file>
+		<file size="1178" time="1986-10-16 14:17:10" attr="0x20">TTYBS.PRD</file>
+		<file size="852" time="1986-10-16 14:17:10" attr="0x20">TTYFF.PRD</file>
+		<file size="2362" time="1986-10-16 14:17:10" attr="0x20">TTYWHEEL.PRD</file>
+		<file size="2532" time="1986-10-16 14:17:10" attr="0x20">TWIN5DM.PRD</file>
+		<file size="8005" time="1986-10-16 14:17:10" attr="0x20">X2700.PRD</file>
+		<file size="32775" time="1986-10-16 14:17:10" attr="0x20">X4045.PRD</file>
 	</disk>
-	<disk id="disk07" size="368640" chs="40:2:9" img="archive/WORD31-DISK7-LEARNMOU.img" href="/disks/pcx86/apps/microsoft/word/3.1/WORD31-DISK7-LEARNMOU.json" md5="cc25608720e3e64573007612e9c39b1f" md5json="25c30ded5aa26f7c75c527baa95c8f2c">
+	<disk id="disk07" size="368640" chs="40:2:9" img="archive/WORD31-DISK7-LEARNMOU.img" href="/disks/pcx86/apps/microsoft/word/3.1/WORD31-DISK7-LEARNMOU.json" md5="28b0f4e5f5a91155197d01df366487f8" md5json="6d35180d256d56b79ffb6d0bd6b743fb">
 		<name>MS Word 3.1 (Disk 7)</name>
+		<file size="33266" time="1986-10-16 14:25:34" attr="0x20">LEARN.COM</file>
+		<file size="48096" time="1986-10-16 14:25:34" attr="0x20">LW.PGM</file>
+		<file size="171099" time="1986-10-16 14:25:36" attr="0x20">MOUSELES.CTX</file>
+		<file size="56206" time="1986-10-16 14:25:36" attr="0x20">MOUSELES.SCN</file>
+		<file size="46406" time="1986-10-16 14:25:36" attr="0x20">MOUSELES.SOB</file>
 	</disk>
-	<disk id="disk08" size="368640" chs="40:2:9" img="archive/WORD31-DISK8-LEARNKBD.img" href="/disks/pcx86/apps/microsoft/word/3.1/WORD31-DISK8-LEARNKBD.json" md5="6627c0b21995fe62f169f402f251a2d2" md5json="be5c00c96fed397648b76a19f0dbced6">
+	<disk id="disk08" size="368640" chs="40:2:9" img="archive/WORD31-DISK8-LEARNKBD.img" href="/disks/pcx86/apps/microsoft/word/3.1/WORD31-DISK8-LEARNKBD.json" md5="c5857a1d57aa3fd6611dc0c5ce5e74dc" md5json="012f644cfb0ae2a8622b57c81c8c4259">
 		<name>MS Word 3.1 (Disk 8)</name>
+		<file size="174464" time="1986-10-16 14:26:28" attr="0x20">KEYBDLES.CTX</file>
+		<file size="53423" time="1986-10-16 14:26:28" attr="0x20">KEYBDLES.SCN</file>
+		<file size="49323" time="1986-10-16 14:26:28" attr="0x20">KEYBDLES.SOB</file>
+		<file size="33266" time="1986-10-16 14:26:30" attr="0x20">LEARN.COM</file>
+		<file size="48096" time="1986-10-16 14:26:30" attr="0x20">LW.PGM</file>
 	</disk>
 </manifest>

@@ -7,5 +7,28 @@
 	<company>Sorcim</company>
 	<releaseDate>1983</releaseDate>
 	<machine href="/devices/pcx86/machine/5150/cga/256kb/machine.xml"/>
-	<disk id="disk01" size="368640" chs="40:2:9" img="archive/SC2_V100.img" href="/disks/pcx86/apps/other/sc2/1.00/SC2_V100.json" md5="4da1b7d9befe0055899e5384459c22c3" md5json="a25e9f0831d68a11740f724bf25a079a"/>
+	<disk id="disk01" size="368640" chs="40:2:9" img="archive/SC2_V100.img" href="/disks/pcx86/apps/other/sc2/1.00/SC2_V100.json" md5="4da1b7d9befe0055899e5384459c22c3" md5json="248f34bb01fb61a65844212346902e6f">
+		<name>SuperCalc2 1.00</name>
+		<file size="128" time="1983-04-15 11:01:14" attr="0x20">AUTO40.BAT</file>
+		<file size="128" time="1983-04-15 11:00:18" attr="0x20">AUTO40BW.BAT</file>
+		<file size="128" time="1983-04-15 11:00:30" attr="0x20">AUTOBW.BAT</file>
+		<file size="17" time="1985-08-11 00:00:56" attr="0x20">AUTOEXEC.BAT</file>
+		<file size="4096" time="1983-04-15 11:00:36" attr="0x20">BRKEVN.CAL</file>
+		<file size="1280" time="1983-04-15 11:00:48" attr="0x20">BUDGET.CAL</file>
+		<file size="3328" time="1983-04-15 11:00:18" attr="0x20">CHECKS.CAL</file>
+		<file size="22" time="1983-04-15 11:00:54" attr="0x20">COLOR.COM</file>
+		<file size="23791" time="1985-12-30 11:00:00" attr="0x20">COMMAND.COM</file>
+		<file size="16369" time="1985-12-30 11:00:00" attr="0x20">IBMBIO.COM</file>
+		<file size="28477" time="1985-12-30 11:00:00" attr="0x20">IBMDOS.COM</file>
+		<file size="7296" time="1983-04-15 11:00:58" attr="0x20">INSTALLS.COM</file>
+		<file size="13824" time="1983-04-15 11:00:42" attr="0x20">MAINTAIN.COM</file>
+		<file size="22" time="1983-04-15 11:00:28" attr="0x20">MONO.COM</file>
+		<file size="5120" time="1983-04-15 11:00:30" attr="0x20">SAMPLE.CAL</file>
+		<file size="33664" time="1983-04-15 11:00:18" attr="0x20">SC2.COM</file>
+		<file size="14080" time="1983-04-15 11:00:44" attr="0x20">SC2.HLP</file>
+		<file size="22272" time="1983-04-15 11:00:32" attr="0x20">SC2.OVL</file>
+		<file size="16256" time="1983-04-15 11:00:56" attr="0x20">SDI.COM</file>
+		<file size="15744" time="1983-04-15 11:00:24" attr="0x20">SDI.OVL</file>
+		<file size="1920" time="1983-04-15 11:00:42" attr="0x20">TENMIN.CAL</file>
+	</disk>
 </manifest>
