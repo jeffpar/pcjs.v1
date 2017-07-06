@@ -25,7 +25,24 @@
 
 		I would much rather post copies of original distribution disks here, but this is all we've currently got.
 	</notes>
-	<disk id="disk01" size="368640" chs="40:2:9" img="archive/CHART202.img" href="/disks/pcx86/apps/microsoft/chart/2.02/CHART202.json" md5="cc155799da50666f6233a21d1d81fe6e" md5json="bd8a3be09c88ee917b3d7f02f0add7a9">
+	<disk id="disk01" size="368640" chs="40:2:9" img="archive/CHART202.img" href="/disks/pcx86/apps/microsoft/chart/2.02/CHART202.json" md5="cc155799da50666f6233a21d1d81fe6e" md5json="f4e4b6d5d296b748e55ff978f37ff651">
 		<name>MS Chart 2.02 (Unofficial)</name>
+		<file size="1724" time="1986-05-23 12:00:00" attr="0x20">CENSUS</file>
+		<file size="43858" time="1986-05-23 12:00:00" attr="0x20">CHART.COM</file>
+		<file size="369" time="1986-05-23 12:00:00" attr="0x20">CHART.PIF</file>
+		<file size="16229" time="1987-03-16 09:14:48" attr="0x20">COMMAND.COM</file>
+		<file size="3609" time="1986-05-23 12:00:00" attr="0x20">EXAMPLE1.MC</file>
+		<file size="2543" time="1986-05-23 12:00:00" attr="0x20">EXAMPLE2.MC</file>
+		<file size="4149" time="1986-05-23 12:00:00" attr="0x20">EXAMPLE3.MC</file>
+		<file size="214" time="1986-05-23 12:00:00" attr="0x20">FONTLIST</file>
+		<file size="3303" time="1987-03-16 09:14:04" attr="0x20">HP7475A.GPD</file>
+		<file size="7321" time="1984-07-17 12:00:00" attr="0x20">IBMBIO.COM</file>
+		<file size="17092" time="1984-08-28 12:00:08" attr="0x20">IBMDOS.COM</file>
+		<file size="98784" time="1986-05-23 12:00:00" attr="0x20">MC.COD</file>
+		<file size="22960" time="1986-05-23 12:00:00" attr="0x20">MC.DAT</file>
+		<file size="67628" time="1986-05-23 12:00:00" attr="0x20">MC.HLP</file>
+		<file size="183" time="2015-03-28 12:20:52" attr="0x20">MC.INI</file>
+		<file size="44848" time="1986-05-23 12:00:00" attr="0x20">MC.SYS</file>
+		<file size="1146" time="1987-03-17 09:06:56" attr="0x20">PARKS</file>
 	</disk>
 </manifest>

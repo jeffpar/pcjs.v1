@@ -5,7 +5,7 @@ permalink: /disks/pcx86/apps/microsoft/chart/2.02/
 ---
 
 Microsoft Chart 2.02
----
+--------------------
 
 NOTE: The Microsoft Chart 2.02 disk below is *not* an original distribution disk.
 

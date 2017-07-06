@@ -5,7 +5,7 @@ permalink: /disks/pcx86/apps/lotus/
 ---
 
 Lotus Applications
----
+------------------
 
 Information is available for these Lotus applications:
 

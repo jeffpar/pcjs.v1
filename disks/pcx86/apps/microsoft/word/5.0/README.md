@@ -5,7 +5,7 @@ permalink: /disks/pcx86/apps/microsoft/word/5.0/
 ---
 
 Microsoft Word 5.0
----
+------------------
 
 ### Directory of MS Word 5.0 (Program 1)
 

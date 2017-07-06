@@ -427,7 +427,7 @@ DiskDump.aDefaultBPBs = [
     0x02,                       // 0x10: FAT copies (2)
     0x40, 0x00,                 // 0x11: root directory entries (0x40 or 64)  0x40 * 0x20 = 0x800 (1 sector is 0x200 bytes, total of 4 sectors)
     0x40, 0x01,                 // 0x13: number of sectors (0x140 or 320)
-    0xFE,                       // 0x15: media type (eg, 0xFF: 320Kb, 0xFE: 160Kb, 0xFD: 360Kb, 0xFC: 180Kb)
+    0xFE,                       // 0x15: media ID (eg, 0xFF: 320Kb, 0xFE: 160Kb, 0xFD: 360Kb, 0xFC: 180Kb)
     0x01, 0x00,                 // 0x16: sectors per FAT (1)
     0x08, 0x00,                 // 0x18: sectors per track (8)
     0x01, 0x00,                 // 0x1A: number of heads (1)
@@ -443,7 +443,7 @@ DiskDump.aDefaultBPBs = [
     0x02,                       // 0x10: FAT copies (2)
     0x70, 0x00,                 // 0x11: root directory entries (0x70 or 112)  0x70 * 0x20 = 0xE00 (1 sector is 0x200 bytes, total of 7 sectors)
     0x80, 0x02,                 // 0x13: number of sectors (0x280 or 640)
-    0xFF,                       // 0x15: media type (eg, 0xFF: 320Kb, 0xFE: 160Kb, 0xFD: 360Kb, 0xFC: 180Kb)
+    0xFF,                       // 0x15: media ID (eg, 0xFF: 320Kb, 0xFE: 160Kb, 0xFD: 360Kb, 0xFC: 180Kb)
     0x01, 0x00,                 // 0x16: sectors per FAT (1)
     0x08, 0x00,                 // 0x18: sectors per track (8)
     0x02, 0x00,                 // 0x1A: number of heads (2)
@@ -459,7 +459,7 @@ DiskDump.aDefaultBPBs = [
     0x02,                       // 0x10: FAT copies (2)
     0x40, 0x00,                 // 0x11: root directory entries (0x40 or 64)  0x40 * 0x20 = 0x800 (1 sector is 0x200 bytes, total of 4 sectors)
     0x68, 0x01,                 // 0x13: number of sectors (0x168 or 360)
-    0xFC,                       // 0x15: media type (eg, 0xFF: 320Kb, 0xFE: 160Kb, 0xFD: 360Kb, 0xFC: 180Kb)
+    0xFC,                       // 0x15: media ID (eg, 0xFF: 320Kb, 0xFE: 160Kb, 0xFD: 360Kb, 0xFC: 180Kb)
     0x02, 0x00,                 // 0x16: sectors per FAT (2)
     0x09, 0x00,                 // 0x18: sectors per track (9)
     0x01, 0x00,                 // 0x1A: number of heads (1)
@@ -475,7 +475,7 @@ DiskDump.aDefaultBPBs = [
     0x02,                       // 0x10: FAT copies (2)
     0x70, 0x00,                 // 0x11: root directory entries (0x70 or 112)  0x70 * 0x20 = 0xE00 (1 sector is 0x200 bytes, total of 7 sectors)
     0xD0, 0x02,                 // 0x13: number of sectors (0x2D0 or 720)
-    0xFD,                       // 0x15: media type (eg, 0xFF: 320Kb, 0xFE: 160Kb, 0xFD: 360Kb, 0xFC: 180Kb)
+    0xFD,                       // 0x15: media ID (eg, 0xFF: 320Kb, 0xFE: 160Kb, 0xFD: 360Kb, 0xFC: 180Kb)
     0x02, 0x00,                 // 0x16: sectors per FAT (2)
     0x09, 0x00,                 // 0x18: sectors per track (9)
     0x02, 0x00,                 // 0x1A: number of heads (2)
@@ -491,7 +491,7 @@ DiskDump.aDefaultBPBs = [
     0x02,                       // 0x10: FAT copies (2)
     0x70, 0x00,                 // 0x11: root directory entries (0x70 or 112)  0x70 * 0x20 = 0xE00 (1 sector is 0x200 bytes, total of 7 sectors)
     0xA0, 0x05,                 // 0x13: number of sectors (0x5A0 or 1440)
-    0xF9,                       // 0x15: media type
+    0xF9,                       // 0x15: media ID
     0x03, 0x00,                 // 0x16: sectors per FAT (3)
     0x09, 0x00,                 // 0x18: sectors per track (9)
     0x02, 0x00,                 // 0x1A: number of heads (2)
@@ -507,7 +507,7 @@ DiskDump.aDefaultBPBs = [
     0x02,                       // 0x10: FAT copies (2)
     0xE0, 0x00,                 // 0x11: root directory entries (0xe0 or 224)  0xe0 * 0x20 = 0x1c00 (1 sector is 0x200 bytes, total of 14 sectors)
     0x60, 0x09,                 // 0x13: number of sectors (0x960 or 2400)
-    0xF9,                       // 0x15: media type (0xF9 was used for 1228800-byte diskettes, and later for 737280-byte diskettes)
+    0xF9,                       // 0x15: media ID (0xF9 was used for 1228800-byte diskettes, and later for 737280-byte diskettes)
     0x07, 0x00,                 // 0x16: sectors per FAT (7)
     0x0f, 0x00,                 // 0x18: sectors per track (15)
     0x02, 0x00,                 // 0x1A: number of heads (2)
@@ -523,7 +523,7 @@ DiskDump.aDefaultBPBs = [
     0x02,                       // 0x10: FAT copies (2)
     0xE0, 0x00,                 // 0x11: root directory entries (0xe0 or 224)  0xe0 * 0x20 = 0x1c00 (1 sector is 0x200 bytes, total of 14 sectors)
     0x40, 0x0B,                 // 0x13: number of sectors (0xb40 or 2880)
-    0xF0,                       // 0x15: media type (0xF0 was used for 1474560-byte diskettes)
+    0xF0,                       // 0x15: media ID (0xF0 was used for 1474560-byte diskettes)
     0x09, 0x00,                 // 0x16: sectors per FAT (9)
     0x12, 0x00,                 // 0x18: sectors per track (18)
     0x02, 0x00,                 // 0x1A: number of heads (2)
@@ -576,7 +576,7 @@ DiskDump.aDefaultBPBs = [
     0x02,                       // 0x10: FAT copies (2)
     0x00, 0x02,                 // 0x11: root directory entries (0x200 or 512)  0x200 * 0x20 = 0x4000 (1 sector is 0x200 bytes, total of 0x20 or 32 sectors)
     0x03, 0x51,                 // 0x13: number of sectors (0x5103 or 20739; * 512 bytes/sector = 10,618,368 bytes = 10,369Kb = 10Mb)
-    0xF8,                       // 0x15: media type (eg, 0xF8: hard drive w/FAT12)
+    0xF8,                       // 0x15: media ID (eg, 0xF8: hard drive w/FAT12)
     0x08, 0x00,                 // 0x16: sectors per FAT (8)
       //
       // Wikipedia (http://en.wikipedia.org/wiki/File_Allocation_Table#BIOS_Parameter_Block) implies everything past
@@ -861,7 +861,7 @@ DiskDump.outputDisk = function(err, disk, sDiskPath, sOutputFile, fOverwrite, sM
                             var sDirName = path.dirname(sOutputFile);
                             if (!fs.existsSync(sDirName)) mkdirp.sync(sDirName);
                             fs.writeFileSync(sOutputFile, data.buf || data);
-                            DiskDump.logConsole(cbDisk + "-byte disk image saved to " + sOutputFile);
+                            DiskDump.logConsole(cbDisk + "-byte disk image saved as " + sOutputFile);
                         }
                     }
                 } catch(e) {
@@ -1005,6 +1005,8 @@ DiskDump.updateManifest = function(disk, sManifestFile, sDiskPath, sOutputFile, 
         var sXMLDisk = '\t<disk id="' + sIDDisk + '"';
         sXMLDisk += (size? ' size="' + size + '"' : '');
         sXMLDisk += (sCHS? ' chs="' + sCHS + '"' : '');
+        i = sDiskPath.indexOf("archive/");
+        if (i >= 0) sDiskPath = sDiskPath.substr(i);
         sXMLDisk += (sParm? ' ' + sParm + '="' + sDiskPath + '"' : '');
         sXMLDisk += ' href="' + sOutputFile + '"' + (md5Disk? ' md5="' + md5Disk + '"' : '') + (md5JSON? ' md5json="' + md5JSON + '"' : '') + '>\n';
 
@@ -1729,7 +1731,7 @@ DiskDump.prototype.readDir = function(sDir, fRoot, done)
                                 fs.readFile(fileInfo.FILE_PATH, {encoding: "utf8"}, function doneReadDirEntry(err, sData) {
                                     if (!err) {
                                         var sNew = sData.replace(/\n/g, "\r\n").replace(/\r+/g, "\r");
-                                        if (sNew != sData) console.log("warning: replaced line endings in " + fileInfo.FILE_NAME + " (size changed from " + fileInfo.FILE_SIZE + " to " + sNew.length + " bytes)");
+                                        if (sNew != sData) DiskDump.logWarning("replaced line endings in " + fileInfo.FILE_NAME + " (size changed from " + fileInfo.FILE_SIZE + " to " + sNew.length + " bytes)");
                                         fileInfo.FILE_DATA = sNew;
                                         fileInfo.FILE_SIZE = sNew.length;
                                     } else {
@@ -1860,7 +1862,7 @@ DiskDump.prototype.readPath = function(sPath, done)
                             DiskDump.readFile(sFilePath, "utf8", function doneReadPathEntry(err, sData) {
                                 if (!err) {
                                     var sNew = sData.replace(/\n/g, "\r\n").replace(/\r+/g, "\r");
-                                    if (sNew != sData) console.log("warning: replaced line endings in " + fileInfo.FILE_NAME + " (size changed from " + fileInfo.FILE_SIZE + " to " + sNew.length + " bytes)");
+                                    if (sNew != sData) DiskDump.logWarning("replaced line endings in " + fileInfo.FILE_NAME + " (size changed from " + fileInfo.FILE_SIZE + " to " + sNew.length + " bytes)");
                                     fileInfo.FILE_DATA = sNew;
                                     fileInfo.FILE_SIZE = sNew.length;
                                     // obj.addManifestInfo(fileInfo);
@@ -2452,7 +2454,7 @@ DiskDump.prototype.buildImageFromFiles = function(aFiles, done)
         /*
          * If this BPB is for a hard drive but a disk size was not specified, skip it.
          */
-        if ((abBoot[DiskAPI.BPB.MEDIA_TYPE] == DiskAPI.FAT.MEDIA_FIXED) != (this.kbTarget >= 10000)) continue;
+        if ((abBoot[DiskAPI.BPB.MEDIA_ID] == DiskAPI.FAT.MEDIA_FIXED) != (this.kbTarget >= 10000)) continue;
         cRootEntries = abBoot[DiskAPI.BPB.ROOT_DIRENTS] | (abBoot[DiskAPI.BPB.ROOT_DIRENTS + 1] << 8);
         if (aFiles.length > cRootEntries) continue;
         cbSector = abBoot[DiskAPI.BPB.SECTOR_BYTES] | (abBoot[DiskAPI.BPB.SECTOR_BYTES + 1] << 8);
@@ -2522,11 +2524,11 @@ DiskDump.prototype.buildImageFromFiles = function(aFiles, done)
     /*
      * Build the FAT, noting the starting cluster number that each file will use along the way.
      *
-     * Also, notice that the first byte of the FAT is the "media type" byte that's replicated in the
-     * BPB at offset 0x15.  For old BPB-less diskettes, this is where you must look for the media type.
+     * Also, notice that the first byte of the FAT is the "media ID" byte that's replicated in the
+     * BPB at offset 0x15.  For old BPB-less diskettes, this is where you must look for the media ID.
      */
     var abFAT = [];
-    this.buildFATEntry(abFAT, 0, abBoot[DiskAPI.BPB.MEDIA_TYPE] | 0xF00);
+    this.buildFATEntry(abFAT, 0, abBoot[DiskAPI.BPB.MEDIA_ID] | 0xF00);
     this.buildFATEntry(abFAT, 1, 0xFFF);
     this.buildFAT(abFAT, aFiles, 2, cbCluster);
 
@@ -2613,7 +2615,7 @@ DiskDump.prototype.convertToJSON = function()
         var aTracks = [];                   // track array (used only for disk images with track tables)
         var iTrack, cbTrack, offTrack, bufTrack, bufSector;
         var cbSector = 512;                 // default sector size
-        var bMediaType = 0;
+        var bMediaID = 0;
         var offBootSector = 0;
         var cbDiskData = this.bufDisk.length, cbPartition = cbDiskData;
 
@@ -2663,7 +2665,7 @@ DiskDump.prototype.convertToJSON = function()
             nHeads = diskFormat[1];
             nSectorsPerTrack = diskFormat[2];
             cbSector = diskFormat[3] || cbSector;
-            bMediaType = diskFormat[4] || bMediaType;
+            bMediaID = diskFormat[4] || bMediaID;
         }
 
         /*
@@ -2675,7 +2677,8 @@ DiskDump.prototype.convertToJSON = function()
          * size.  I also check the first byte for an Intel JMP opcode (0xEB is JMP with a 1-byte displacement, and
          * 0xE9 is JMP with a 2-byte displacement).  What else?
          */
-        var fBPBExists = false;
+        var fBPBExists = false, bMediaIDBPB = 0;
+
         if ((bByte0 == X86.OPCODE.JMP || bByte0 == X86.OPCODE.JMPS) && cbSectorBPB == cbSector) {
 
             var nHeadsBPB = this.bufDisk.readUInt16LE(offBootSector + DiskAPI.BPB.TOTAL_HEADS);
@@ -2684,27 +2687,28 @@ DiskDump.prototype.convertToJSON = function()
             if (nHeadsBPB && nSectorsPerTrackBPB) {
 
                 fBPBExists = true;
-                var bMediaTypeBPB = this.bufDisk.readUInt8(offBootSector + DiskAPI.BPB.MEDIA_TYPE);
+                bMediaIDBPB = this.bufDisk.readUInt8(offBootSector + DiskAPI.BPB.MEDIA_ID);
+
                 var nSectorsTotalBPB = this.bufDisk.readUInt16LE(offBootSector + DiskAPI.BPB.TOTAL_SECS);
                 var nSectorsPerCylinderBPB = nSectorsPerTrackBPB * nHeadsBPB;
                 var nSectorsHiddenBPB = this.bufDisk.readUInt16LE(offBootSector + DiskAPI.BPB.HIDDEN_SECS);
                 var nCylindersBPB = (nSectorsHiddenBPB + nSectorsTotalBPB) / nSectorsPerCylinderBPB;
 
                 if (diskFormat) {
+                    if (bMediaID && bMediaID != bMediaIDBPB) {
+                        DiskDump.logWarning("BPB media ID (" + str.toHexByte(bMediaIDBPB) + ") do not match physical media ID (" + str.toHexByte(bMediaID) + ")");
+                    }
                     if (nCylinders != nCylindersBPB) {
-                        DiskDump.logWarning("BPB cylinders (" + nCylindersBPB + ") do not match actual cylinders (" + nCylinders + ")");
+                        DiskDump.logWarning("BPB cylinders (" + nCylindersBPB + ") do not match physical cylinders (" + nCylinders + ")");
                         if (nCylinders - nCylindersBPB == 1) {
                             DiskDump.logWarning("the BIOS may have reserved the last cylinder for diagnostics");
                         }
                     }
                     if (nHeads != nHeadsBPB) {
-                        DiskDump.logWarning("BPB heads (" + nHeadsBPB + ") do not match actual heads (" + nHeads + ")");
+                        DiskDump.logWarning("BPB heads (" + nHeadsBPB + ") do not match physical heads (" + nHeads + ")");
                     }
                     if (nSectorsPerTrack != nSectorsPerTrackBPB) {
-                        DiskDump.logWarning("BPB sectors/track (" + nSectorsPerTrackBPB + ") do not match actual sectors/track (" + nSectorsPerTrack + ")");
-                    }
-                    if (bMediaType && bMediaType != bMediaTypeBPB) {
-                        DiskDump.logWarning("BPB media type (" + bMediaTypeBPB + ") do not match actual media type (" + bMediaType + ")");
+                        DiskDump.logWarning("BPB sectors/track (" + nSectorsPerTrackBPB + ") do not match physical sectors/track (" + nSectorsPerTrack + ")");
                     }
                 }
                 else {
@@ -2715,7 +2719,7 @@ DiskDump.prototype.convertToJSON = function()
                         DiskDump.logWarning("total cylinders (" + nCylinders + ") not a multiple of heads (" + nHeads + ") and sectors/track (" + nSectorsPerTrack + ")");
                         nCylinders |= 0;
                     }
-                    bMediaType = bMediaTypeBPB;
+                    bMediaID = bMediaIDBPB;
                 }
 
                 /*
@@ -2755,9 +2759,9 @@ DiskDump.prototype.convertToJSON = function()
          * Let's see if we can find a corresponding BPB in our table of default BPBs.
          */
         var i, iBPB = -1;
-        if (bMediaType) {
+        if (bMediaID) {
             for (i = 0; i < DiskDump.aDefaultBPBs.length; i++) {
-                if (DiskDump.aDefaultBPBs[i][DiskAPI.BPB.MEDIA_TYPE] == bMediaType) {
+                if (DiskDump.aDefaultBPBs[i][DiskAPI.BPB.MEDIA_ID] == bMediaID) {
                     var cbDiskBPB = (DiskDump.aDefaultBPBs[i][DiskAPI.BPB.TOTAL_SECS] + (DiskDump.aDefaultBPBs[i][DiskAPI.BPB.TOTAL_SECS + 1] * 0x100)) * cbSector;
                     if (cbDiskBPB == cbDiskData) {
                         iBPB = i;
@@ -2766,7 +2770,21 @@ DiskDump.prototype.convertToJSON = function()
                 }
             }
         }
+        var nLogicalSectorsPerTrack = nSectorsPerTrack;
         if (iBPB >= 0) {
+            /*
+             * Sometimes we come across a physical 360Kb disk image that contains a logical 320Kb image (and similarly,
+             * a physical 180Kb disk image that contains a logical 160Kb disk image), presumably because it was possible
+             * for someone to take a diskette formatted with 9 sectors/track and then use FORMAT or DISKCOPY to create
+             * a smaller file system on it (ie, using only 8 sectors/track).
+             */
+            if (!bMediaIDBPB) bMediaIDBPB = this.bufDisk.readUInt8(offBootSector + 512);
+            if (iBPB >= 2 && bMediaIDBPB == DiskAPI.FAT.MEDIA_320KB && bMediaID == DiskAPI.FAT.MEDIA_360KB || bMediaIDBPB == DiskAPI.FAT.MEDIA_160KB && bMediaID == DiskAPI.FAT.MEDIA_180KB) {
+                iBPB -= 2;
+                bMediaID = DiskDump.aDefaultBPBs[iBPB][DiskAPI.BPB.MEDIA_ID];
+                nLogicalSectorsPerTrack = DiskDump.aDefaultBPBs[iBPB][DiskAPI.BPB.TRACK_SECS];
+                DiskDump.logWarning("shrinking track size to " + nLogicalSectorsPerTrack + " sectors/track");
+            }
             if (fBPBExists) {
                 /*
                  * In deference to the PC-DOS 2.0 BPB behavior discussed above, we stop our BPB verification
@@ -2800,14 +2818,14 @@ DiskDump.prototype.convertToJSON = function()
                 for (i = this.forceBPB? 0 : DiskAPI.BPB.SECTOR_BYTES; i < DiskAPI.BPB.LARGE_SECS+4; i++) {
                     this.bufDisk.writeUInt8(DiskDump.aDefaultBPBs[iBPB][i] || 0, offBootSector + i);
                 }
-                console.log("warning: BPB has been updated");
+                DiskDump.logWarning("BPB has been updated");
             }
             else if (bByte0 == 0xF6 && bByte1 == 0xF6) {
                 /*
                  * WARNING: I've added this "0xF6" hack expressly to fix boot sectors that may have been zapped by an
                  * inadvertent reformat, or...?
                  */
-                DiskDump.logWarning("repairing damaged boot sector with BPB for media type " + str.toHexByte(bMediaType));
+                DiskDump.logWarning("repairing damaged boot sector with BPB for media ID " + str.toHexByte(bMediaID));
                 for (i = 0; i < DiskAPI.BPB.LARGE_SECS+4; i++) {
                     this.bufDisk.writeUInt8(DiskDump.aDefaultBPBs[iBPB][i] || 0, offBootSector + i);
                 }
@@ -2817,7 +2835,7 @@ DiskDump.prototype.convertToJSON = function()
             }
 
         }
-        if (fBPBExists && this.bufDisk.readUInt16LE(offBootSector + DiskAPI.BOOT.SIG_OFFSET) == DiskAPI.BOOT.SIGNATURE) {
+        if (fBPBExists && this.bufDisk.readUInt16LE(offBootSector + DiskAPI.BOOT.SIG_OFFSET) == DiskAPI.BOOT.SIGNATURE || this.forceBPB) {
             /*
              * Overwrite the OEM string with our own, so that people know how the image originated.  We do this
              * only for disks with pre-existing BPBs; it's not safe for pre-2.0 disks (and non-DOS disks, obviously).
@@ -2826,7 +2844,7 @@ DiskDump.prototype.convertToJSON = function()
              * previously added ourselves as an original BPB.
              */
             this.bufDisk.write(DiskDump.PCJS_OEM, DiskAPI.BOOT.OEM_STRING + offBootSector, DiskDump.PCJS_OEM.length);
-            console.log("warning: OEM string has been updated");
+            DiskDump.logWarning("OEM string has been updated");
         }
         if (!nHeads) {
             /*
@@ -2856,13 +2874,13 @@ DiskDump.prototype.convertToJSON = function()
                     cbSector = cbSectorDSK;
                     nHeads = this.bufDisk.readUInt8(offBootSector + 0x01);
                     nCylinders = this.bufDisk.readUInt16LE(offBootSector + 0x02);
-                    nSectorsPerTrack= this.bufDisk.readUInt16LE(offBootSector + 0x04);
+                    nLogicalSectorsPerTrack = nSectorsPerTrack = this.bufDisk.readUInt16LE(offBootSector + 0x04);
                     var nTracks = nHeads * nCylinders;
                     cbTrack = nSectorsPerTrack * cbSector;
                     offTrack = 0x08;
                     if (!cbTrack) {
                         for (iTrack = 0; iTrack < nTracks; iTrack++) {
-                            nSectorsPerTrack = this.bufDisk.readUInt16LE(offTrack);
+                            nLogicalSectorsPerTrack = nSectorsPerTrack = this.bufDisk.readUInt16LE(offTrack);
                             cbSectorDSK = this.bufDisk.readUInt16LE(offTrack+2);
                             cbTrack = nSectorsPerTrack * cbSectorDSK;
                             offSector = this.bufDisk.readUInt32LE(offTrack+4);
@@ -2901,7 +2919,7 @@ DiskDump.prototype.convertToJSON = function()
 
                     if (aTracks.length) {
                         var aTrack = aTracks[iTrack++];
-                        nSectorsPerTrack = aTrack[0];
+                        nLogicalSectorsPerTrack = nSectorsPerTrack = aTrack[0];
                         cbSector = aTrack[1];
                         bufTrack = aTrack[2];
                         cbTrack = nSectorsPerTrack * cbSector;
@@ -2911,7 +2929,7 @@ DiskDump.prototype.convertToJSON = function()
 
                     var aSectors;
                     if (this.fJSONNative) {
-                        aSectors = new Array(nSectorsPerTrack);
+                        aSectors = new Array(nLogicalSectorsPerTrack);
                         aHeads[iHead] = aSectors;
                     } else {
                         json += this.dumpLine(2, "[", "head:" + this.sJSONWhitespace + iHead + ", track:" + this.sJSONWhitespace + iCylinder);
@@ -2925,7 +2943,7 @@ DiskDump.prototype.convertToJSON = function()
                      * be unnecessary.
                      */
                     var cbSectorThisTrack = cbSector;
-                    var nSectorsThisTrack = nSectorsPerTrack;
+                    var nSectorsThisTrack = nLogicalSectorsPerTrack;
 
                     /*
                      * Notes regarding XDF track layouts, from http://forum.kryoflux.com/viewtopic.php?f=3&t=234:
@@ -2980,12 +2998,12 @@ DiskDump.prototype.convertToJSON = function()
 
                         bufSector = bufTrack.slice(offSector, offSector + cbSectorThisTrack);
 
-                        if (bMediaType && !iCylinder && !iHead && iSector == ((offBootSector/cbSector)|0) + 2) {
-                            var bFATType = bufSector.readUInt8(0);
-                            if (bMediaType != bFATType) {
-                                DiskDump.logWarning("media byte mismatch (" + str.toHexByte(bFATType) + ") in FAT, expected " + str.toHexByte(bMediaType));
+                        if (bMediaID && !iCylinder && !iHead && iSector == ((offBootSector/cbSector)|0) + 2) {
+                            var bFATID = bufSector.readUInt8(0);
+                            if (bMediaID != bFATID) {
+                                DiskDump.logWarning("FAT ID (" + str.toHexByte(bFATID) + ") does not match physical media ID (" + str.toHexByte(bMediaID) + ")");
                             }
-                            bMediaType = 0;
+                            bMediaID = 0;
                         }
 
                         var preComma = (fOptimize? ',' : '');
@@ -3369,22 +3387,24 @@ DiskDump.prototype.convertToIMG = function(fRaw)
              * Since there's no way (and rightly so) of setting fDebug via the API, I've added the check for
              * fJSONComments as another way of disabling "branding" via the API; requesting an IMG file with comments
              * is otherwise a nonsensical request.
+             *
+             * UPDATE: This code has been disabled, since we do a better job of this on the conversion *to* JSON now.
              */
-            if (!fDebug && !this.fJSONComments && buf.length < 3000000) {   // arbitrary size threshold between diskette images and hard drive images
-                /*
-                 * Mimic the BPB test in convertToJSON(), because we don't want to blast an OEM string into non-DOS diskette images
-                 */
-                var bByte0 = buf.readUInt8(DiskAPI.BOOT.JMP_OPCODE);
-                var cbSectorBPB = buf.readUInt16LE(DiskAPI.BPB.SECTOR_BYTES);
-                var wSig = buf.readUInt16LE(DiskAPI.BOOT.SIG_OFFSET);
-                if ((bByte0 == X86.OPCODE.JMP || bByte0 == X86.OPCODE.JMPS) && cbSectorBPB == 512 && wSig == DiskAPI.BOOT.SIGNATURE) {
-                    /*
-                     * Overwrite the OEM string with our own, so that people know how the image originated.
-                     */
-                    buf.write(DiskDump.PCJS_OEM, DiskAPI.BOOT.OEM_STRING, DiskDump.PCJS_OEM.length);
-                    console.log("warning: OEM string has been updated");
-                }
-            }
+            // if (!fDebug && !this.fJSONComments && buf.length < 3000000) {   // arbitrary size threshold between diskette images and hard drive images
+            //     /*
+            //      * Mimic the BPB test in convertToJSON(), because we don't want to blast an OEM string into non-DOS diskette images
+            //      */
+            //     var bByte0 = buf.readUInt8(DiskAPI.BOOT.JMP_OPCODE);
+            //     var cbSectorBPB = buf.readUInt16LE(DiskAPI.BPB.SECTOR_BYTES);
+            //     var wSig = buf.readUInt16LE(DiskAPI.BOOT.SIG_OFFSET);
+            //     if ((bByte0 == X86.OPCODE.JMP || bByte0 == X86.OPCODE.JMPS) && cbSectorBPB == 512 && wSig == DiskAPI.BOOT.SIGNATURE) {
+            //         /*
+            //          * Overwrite the OEM string with our own, so that people know how the image originated.
+            //          */
+            //         buf.write(DiskDump.PCJS_OEM, DiskAPI.BOOT.OEM_STRING, DiskDump.PCJS_OEM.length);
+            //         DiskDump.logWarning("OEM string has been updated");
+            //     }
+            // }
         } catch(err) {
             DiskDump.logError(err);
             return null;

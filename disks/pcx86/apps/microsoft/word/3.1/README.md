@@ -5,7 +5,7 @@ permalink: /disks/pcx86/apps/microsoft/word/3.1/
 ---
 
 Microsoft Word 3.1
----
+------------------
 
 ### Directory of MS Word 3.1 (Disk 1)
 

@@ -62,7 +62,7 @@
 		<manifest ref="/disks/pcx86/unix/microport/system-v/2.3/manifest.xml"/>
 		<manifest ref="/disks/pcx86/unix/sco/xenix/8086/2.1.3/manifest.xml"/>
 		<manifest ref="/disks/pcx86/apps/ibm/topview/1.01/manifest.xml"/>
-		<manifest ref="/disks/pcx86/apps/lotus/123/1.0a/manifest.xml"/>
+		<manifest ref="/disks/pcx86/apps/lotus/123/1as/manifest.xml"/>
 		<manifest ref="/disks/pcx86/apps/micropro/wordstar/3.30/manifest.xml"/>
 		<manifest ref="/disks/pcx86/apps/micropro/wordstar/4.00/manifest.xml"/>
 		<manifest ref="/disks/pcx86/apps/microsoft/chart/2.02/manifest.xml"/>
@@ -76,6 +76,7 @@
 		<manifest ref="/disks/pcx86/tools/borland/pascal/3.00b/manifest.xml"/>
 		<manifest ref="/disks/pcx86/tools/borland/pascal/3.01a/manifest.xml"/>
 		<manifest ref="/disks/pcx86/tools/ibm/bascom/1.00/manifest.xml"/>
+		<manifest ref="/disks/pcx86/tools/logitech/modula2/1.00/manifest.xml"/>
 		<manifest ref="/disks/pcx86/tools/logitech/modula2/1.10/manifest.xml"/>
 		<manifest ref="/disks/pcx86/tools/microsoft/basic/manifest.xml"/>
 		<manifest ref="/disks/pcx86/tools/microsoft/c/2.03/manifest.xml"/>
