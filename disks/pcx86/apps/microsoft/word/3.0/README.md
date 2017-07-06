@@ -5,7 +5,7 @@ permalink: /disks/pcx86/apps/microsoft/word/3.0/
 ---
 
 Microsoft Word 3.0
----
+------------------
 
 ### Directory of MS Word 3.0 (Disk 1)
 

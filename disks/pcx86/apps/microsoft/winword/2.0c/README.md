@@ -5,7 +5,7 @@ permalink: /disks/pcx86/apps/microsoft/winword/2.0c/
 ---
 
 Microsoft Word for Windows 2.0c
----
+-------------------------------
 
 ### Directory of Word for Windows 2.0c (Disk 1)
 

@@ -1,13 +1,23 @@
 ---
 layout: page
-title: Lotus 1-2-3 1.0a
-permalink: /disks/pcx86/apps/lotus/123/1.0a/
+title: "Lotus 1-2-3 Release 1A*"
+permalink: /disks/pcx86/apps/lotus/123/1as/
+machines:
+  - id: ibm5150-123
+    type: pcx86
+    config: /devices/pcx86/machine/5150/cga/256kb/machine.xml
+    autoMount:
+      B:
+        path: /disks/pcx86/apps/lotus/123/1as/123-DISK1-SYSTEM-PATCHED.json
+    autoType: $date\r$time\rb:\r123\r
 ---
 
-Lotus 1-2-3 1.0a
-----------------
+Lotus 1-2-3 Release 1A*
+-----------------------
 
-### Directory of Lotus 1-2-3 1.0a (System-PATCHED)
+{% include machine.html id="ibm5150-123" %}
+
+### Directory of Lotus 1-2-3 1A* (1-System) (PATCHED)
 
 	 Volume in drive A has no label
 
@@ -30,7 +40,7 @@ Lotus 1-2-3 1.0a
 	       11 file(s)     244155 bytes
 	                       72704 bytes free
 
-### Directory of Lotus 1-2-3 1.0a (Utility)
+### Directory of Lotus 1-2-3 1A* (2-Utility)
 
 	 Volume in drive A has no label
 
@@ -75,7 +85,7 @@ Lotus 1-2-3 1.0a
 	       33 file(s)     185587 bytes
 	                      116736 bytes free
 
-### Directory of Lotus 1-2-3 1.0a (Graph)
+### Directory of Lotus 1-2-3 1A* (3-Graph)
 
 	 Volume in drive A has no label
 
@@ -107,7 +117,7 @@ Lotus 1-2-3 1.0a
 	       20 file(s)     204350 bytes
 	                      108544 bytes free
 
-### Directory of Lotus 1-2-3 1.0a (Tutorial)
+### Directory of Lotus 1-2-3 1A* (4-Tutorial)
 
 	 Volume in drive A has no label
 

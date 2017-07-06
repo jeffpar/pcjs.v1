@@ -2,13 +2,13 @@
 <?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.35.2/manifest.xsl"?>
 <manifest type="software">
 	<title>1-2-3</title>
-	<version>1.0a</version>
+	<version>1A*</version>
 	<type>Application</type>
 	<category>Productivity</category>
 	<author>Lotus</author>
 	<releaseDate/>
-	<disk id="disk01" size="327680" chs="40:2:8" img="archive/123-DISK1-SYSTEM-PATCHED.img" href="/disks/pcx86/apps/lotus/123/1.0a/123-DISK1-SYSTEM-PATCHED.json" md5="02b4711a30c8100415026c38e542ddc3" md5json="67bd239caae3fe973447efd7d11fef70">
-		<name>Lotus 1-2-3 1.0a (1-System)</name>
+	<disk id="disk01" size="327680" chs="40:2:8" img="archive/123-DISK1-SYSTEM-PATCHED.img" href="/disks/pcx86/apps/lotus/123/1as/123-DISK1-SYSTEM-PATCHED.json" md5="02b4711a30c8100415026c38e542ddc3" md5json="67bd239caae3fe973447efd7d11fef70">
+		<name>Lotus 1-2-3 1A* (1-System)</name>
 		<file size="256" time="1983-07-01 01:23:00" attr="0x20">123.CNF</file>
 		<file size="89984" time="1984-08-17 15:59:30" attr="0x20">123.EXE</file>
 		<file size="113416" time="1983-07-01 01:23:00" attr="0x20">123.HLP</file>
@@ -21,8 +21,8 @@
 		<file size="329" time="1983-07-01 01:23:00" attr="0x20">PR.DRV</file>
 		<file size="5294" time="1983-07-01 01:23:00" attr="0x20">TD.DRV</file>
 	</disk>
-	<disk id="disk02" size="327680" chs="40:2:8" img="archive/123-DISK2-UTILITY.img" href="/disks/pcx86/apps/lotus/123/1.0a/123-DISK2-UTILITY.json" md5="778ab4aff0523785d95b3810535da908" md5json="59ff13976cfd2b06fee550925b6a49b4">
-		<name>Lotus 1-2-3 1.0a (2-Utility)</name>
+	<disk id="disk02" size="327680" chs="40:2:8" img="archive/123-DISK2-UTILITY.img" href="/disks/pcx86/apps/lotus/123/1as/123-DISK2-UTILITY.json" md5="778ab4aff0523785d95b3810535da908" md5json="59ff13976cfd2b06fee550925b6a49b4">
+		<name>Lotus 1-2-3 1A* (2-Utility)</name>
 		<file size="1036" time="1983-07-01 01:23:00" attr="0x20">B&amp;W.BAT</file>
 		<file size="1036" time="1983-07-01 01:23:00" attr="0x20">BOTH.BAT</file>
 		<file size="1036" time="1983-07-01 01:23:00" attr="0x20">COLOR.BAT</file>
@@ -57,8 +57,8 @@
 		<file size="16128" time="1983-07-01 01:23:00" attr="0x20">WKSDBF.EXE</file>
 		<file size="14336" time="1983-07-01 01:23:00" attr="0x20">WKSDIF.EXE</file>
 	</disk>
-	<disk id="disk03" size="327680" chs="40:2:8" img="archive/123-DISK3-GRAPH.img" href="/disks/pcx86/apps/lotus/123/1.0a/123-DISK3-GRAPH.json" md5="406c8ff08851970abb542c5ab831a2a2" md5json="53eefc746e7010922e55dab8de3423e8">
-		<name>Lotus 1-2-3 1.0a (3-Graph)</name>
+	<disk id="disk03" size="327680" chs="40:2:8" img="archive/123-DISK3-GRAPH.img" href="/disks/pcx86/apps/lotus/123/1as/123-DISK3-GRAPH.json" md5="406c8ff08851970abb542c5ab831a2a2" md5json="53eefc746e7010922e55dab8de3423e8">
+		<name>Lotus 1-2-3 1A* (3-Graph)</name>
 		<file size="3597" time="1983-07-01 01:23:00" attr="0x20">BLOCK1.FON</file>
 		<file size="6593" time="1983-07-01 01:23:00" attr="0x20">BLOCK2.FON</file>
 		<file size="2139" time="1983-07-01 01:23:00" attr="0x20">GD.DRV</file>
@@ -80,8 +80,8 @@
 		<file size="7726" time="1983-07-01 01:23:00" attr="0x20">SCRIPT2.FON</file>
 		<file size="5294" time="1983-07-01 01:23:00" attr="0x20">TD.DRV</file>
 	</disk>
-	<disk id="disk04" size="327680" chs="40:2:8" img="archive/123-DISK4-TUTORIAL.img" href="/disks/pcx86/apps/lotus/123/1.0a/123-DISK4-TUTORIAL.json" md5="299e654703e1bc80a2b3af57558f6fb9" md5json="45ad8090442cc82ca62feadbb71628f8">
-		<name>Lotus 1-2-3 1.0a (4-Tutorial)</name>
+	<disk id="disk04" size="327680" chs="40:2:8" img="archive/123-DISK4-TUTORIAL.img" href="/disks/pcx86/apps/lotus/123/1as/123-DISK4-TUTORIAL.json" md5="299e654703e1bc80a2b3af57558f6fb9" md5json="45ad8090442cc82ca62feadbb71628f8">
+		<name>Lotus 1-2-3 1A* (4-Tutorial)</name>
 		<file size="2139" time="1983-07-01 01:23:00" attr="0x20">GD.DRV</file>
 		<file size="352" time="1983-07-01 01:23:00" attr="0x20">KB.DRV</file>
 		<file size="2944" time="1983-07-01 01:23:00" attr="0x20">LESNA_1.WKS</file>
