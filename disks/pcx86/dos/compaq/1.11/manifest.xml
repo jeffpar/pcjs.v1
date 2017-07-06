@@ -7,7 +7,35 @@
 	<category>DOS</category>
 	<author>Microsoft/COMPAQ</author>
 	<releaseDate/>
-	<disk id="disk01" size="327680" chs="40:2:8" img="archive/COMPAQ-DOS111.img" href="/disks/pcx86/dos/compaq/1.11/COMPAQ-DOS111.json" md5="a18fd39ab120b1ece3c30a9906d50976" md5json="ca1a04e465a5090cc477c71bc30330d2">
+	<disk id="disk01" size="327680" chs="40:2:8" img="archive/COMPAQ-DOS111.img" href="/disks/pcx86/dos/compaq/1.11/COMPAQ-DOS111.json" md5="a18fd39ab120b1ece3c30a9906d50976" md5json="9dc3da5d22b9c3ce9f122f6c3574d5e1">
 		<name>COMPAQ MS-DOS 1.11</name>
+		<file size="549" time="1983-05-13 12:00:00" attr="0x20">BASIC.COM</file>
+		<file size="547" time="1983-05-13 12:00:00" attr="0x20">BASICA.COM</file>
+		<file size="54272" time="1983-05-13 12:00:00" attr="0x20">BASICA.EXE</file>
+		<file size="1720" time="1983-05-13 12:00:00" attr="0x20">CHKDSK.COM</file>
+		<file size="4959" time="1983-05-13 12:00:00" attr="0x20">COMMAND.COM</file>
+		<file size="1484" time="1983-05-13 12:00:00" attr="0x20">COMP.COM</file>
+		<file size="6619" time="1983-05-13 12:00:00" attr="0x20">DEBUG.COM</file>
+		<file size="7808" time="1983-05-13 12:00:00" attr="0x20">DEMO.BAS</file>
+		<file size="14" time="1983-05-13 12:00:00" attr="0x20">DEMO.BAT</file>
+		<file size="17920" time="1983-05-13 12:00:00" attr="0x20">DEMO1.BAS</file>
+		<file size="17792" time="1983-05-13 12:00:00" attr="0x20">DEMO2.BAS</file>
+		<file size="21120" time="1983-05-13 12:00:00" attr="0x20">DEMO3.BAS</file>
+		<file size="6528" time="1983-05-13 12:00:00" attr="0x20">DEMO4.BAS</file>
+		<file size="1291" time="1983-05-13 12:00:00" attr="0x20">DISKCOMP.COM</file>
+		<file size="1812" time="1983-05-13 12:00:00" attr="0x20">DISKCOPY.COM</file>
+		<file size="2432" time="1983-05-13 12:00:00" attr="0x20">EDLIN.COM</file>
+		<file size="1280" time="1983-05-13 12:00:00" attr="0x20">EXE2BIN.EXE</file>
+		<file size="3296" time="1983-05-13 12:00:00" attr="0x20">FORMAT.COM</file>
+		<file size="384" time="1983-05-13 12:00:00" attr="0x20">INTEREST.BAS</file>
+		<file size="1998" time="1983-05-13 12:00:00" attr="0x20">IOSYS.COM</file>
+		<file size="16128" time="1983-05-13 12:00:00" attr="0x20">JUGGLER.DAT</file>
+		<file size="41856" time="1983-05-13 12:00:00" attr="0x20">LINK.EXE</file>
+		<file size="1800" time="1983-05-13 12:00:00" attr="0x20">MODE.COM</file>
+		<file size="6136" time="1983-05-13 12:00:00" attr="0x20">MSDOS.COM</file>
+		<file size="645" time="1983-05-13 12:00:00" attr="0x20">SYS.COM</file>
+		<file size="18560" time="1983-05-13 12:00:00" attr="0x20">TEST.EXE</file>
+		<file size="16128" time="1983-05-13 12:00:00" attr="0x20">USA.DAT</file>
+		<file size="1242" time="1983-05-13 12:00:00" attr="0x20">WORDS</file>
 	</disk>
 </manifest>

@@ -7,16 +7,62 @@
 	<category>DOS</category>
 	<author>Microsoft</author>
 	<releaseDate>July 7, 1986</releaseDate>
-	<disk id="disk01" size="368640" chs="40:2:9" img="archive/MSDOS320-DISK1.img" href="/disks/pcx86/dos/microsoft/3.20/MSDOS320-DISK1.json" md5="5d5d9c79890228fce53ab9d191e94e77" md5json="3d9263e37cba3ca91b917ae4af5c8056">
+	<disk id="disk01" size="368640" chs="40:2:9" img="archive/MSDOS320-DISK1.img" href="/disks/pcx86/dos/microsoft/3.20/MSDOS320-DISK1.json" md5="cd4f74f65a26b5afe345b9fcbea67bc8" md5json="d971528ef9934967decc2dc9ac13b590">
 		<name>MS-DOS 3.20 (Disk 1)</name>
+		<file size="1651" time="1986-07-07 12:00:00" attr="0x20">ANSI.SYS</file>
+		<file size="1725" time="1986-07-07 12:00:00" attr="0x20">APPEND.COM</file>
+		<file size="1523" time="1986-07-07 12:00:00" attr="0x20">ASSIGN.COM</file>
+		<file size="8234" time="1986-07-07 12:00:00" attr="0x20">ATTRIB.EXE</file>
+		<file size="9680" time="1986-07-07 12:00:00" attr="0x20">CHKDSK.EXE</file>
+		<file size="23612" time="1986-07-07 12:00:00" attr="0x20">COMMAND.COM</file>
+		<file size="3808" time="1986-07-07 12:00:00" attr="0x20">DISKCOMP.EXE</file>
+		<file size="4096" time="1986-07-07 12:00:00" attr="0x20">DISKCOPY.EXE</file>
+		<file size="1102" time="1986-07-07 12:00:00" attr="0x20">DRIVER.SYS</file>
+		<file size="7356" time="1986-07-07 12:00:00" attr="0x20">EDLIN.EXE</file>
+		<file size="3050" time="1986-07-07 12:00:00" attr="0x20">EXE2BIN.EXE</file>
+		<file size="14558" time="1986-07-07 12:00:00" attr="0x20">FC.EXE</file>
+		<file size="16830" time="1986-07-07 12:00:00" attr="0x20">FDISK.EXE</file>
+		<file size="6403" time="1986-07-07 12:00:00" attr="0x20">FIND.EXE</file>
+		<file size="11005" time="1986-07-07 12:00:00" attr="0x20">FORMAT.EXE</file>
+		<file size="8210" time="1986-07-07 12:00:00" attr="0x20">GRAFTABL.EXE</file>
+		<file size="13170" time="1986-07-07 12:00:00" attr="0x20">GRAPHICS.EXE</file>
+		<file size="16138" time="1986-07-07 12:00:00" attr="0x20">IO.SYS</file>
+		<file size="9012" time="1986-07-07 12:00:00" attr="0x20">JOIN.EXE</file>
+		<file size="2886" time="1986-07-07 12:00:00" attr="0x20">KEYBDV.EXE</file>
+		<file size="2948" time="1986-07-07 12:00:00" attr="0x20">KEYBFR.EXE</file>
+		<file size="2940" time="1986-07-07 12:00:00" attr="0x20">KEYBGR.EXE</file>
+		<file size="2892" time="1986-07-07 12:00:00" attr="0x20">KEYBIT.EXE</file>
+		<file size="2983" time="1986-07-07 12:00:00" attr="0x20">KEYBSP.EXE</file>
+		<file size="2886" time="1986-07-07 12:00:00" attr="0x20">KEYBUK.EXE</file>
+		<file size="2750" time="1986-07-07 12:00:00" attr="0x20">LABEL.EXE</file>
+		<file size="13928" time="1986-07-07 12:00:00" attr="0x20">MODE.EXE</file>
+		<file size="282" time="1986-07-07 12:00:00" attr="0x20">MORE.COM</file>
+		<file size="28480" time="1986-07-07 12:00:00" attr="0x20">MSDOS.SYS</file>
+		<file size="8824" time="1986-07-07 12:00:00" attr="0x20">PRINT.EXE</file>
+		<file size="6462" time="1986-07-07 12:00:00" attr="0x20">RAMDRIVE.SYS</file>
+		<file size="4145" time="1986-07-07 12:00:00" attr="0x20">RECOVER.EXE</file>
+		<file size="4852" time="1986-07-07 12:00:00" attr="0x20">REPLACE.EXE</file>
+		<file size="1898" time="1986-07-07 12:00:00" attr="0x20">SORT.EXE</file>
+		<file size="9898" time="1986-07-07 12:00:00" attr="0x20">SUBST.EXE</file>
+		<file size="4607" time="1986-07-07 12:00:00" attr="0x20">SYS.COM</file>
 	</disk>
-	<disk id="disk02" size="368640" chs="40:2:9" img="archive/MSDOS320-DISK2.img" href="/disks/pcx86/dos/microsoft/3.20/MSDOS320-DISK2.json" md5="06a2613a1630f27c67955d47880dfaeb" md5json="60e59a2fd61c16a16c57ad8a7a696fcd">
+	<disk id="disk02" size="368640" chs="40:2:9" img="archive/MSDOS320-DISK2.img" href="/disks/pcx86/dos/microsoft/3.20/MSDOS320-DISK2.json" md5="6a8bdc091afecf5a7e9b405ed355426d" md5json="71bd62df8dd1a4249f6b6a465286ad02">
 		<name>MS-DOS 3.20 (Disk 2)</name>
+		<file size="23404" time="1986-07-07 12:00:00" attr="0x20">BACKUP.EXE</file>
+		<file size="15647" time="1986-07-07 12:00:00" attr="0x20">DEBUG.EXE</file>
+		<file size="78864" time="1986-07-07 12:00:00" attr="0x20">GWBASIC.EXE</file>
+		<file size="43988" time="1986-07-07 12:00:00" attr="0x20">LINK.EXE</file>
+		<file size="21750" time="1986-07-07 12:00:00" attr="0x20">RESTORE.EXE</file>
+		<file size="8544" time="1986-07-07 12:00:00" attr="0x20">SHARE.EXE</file>
+		<file size="8588" time="1986-07-07 12:00:00" attr="0x20">TREE.EXE</file>
+		<file size="5396" time="1986-07-07 12:00:00" attr="0x20">XCOPY.EXE</file>
 	</disk>
-	<disk id="disk03" size="368640" chs="40:2:9" img="archive/MSDOS320-DISK3-PROGREF1.img" href="/disks/pcx86/dos/microsoft/3.20/MSDOS320-DISK3-PROGREF1.json" md5="40031b4ebd53f2c84d58aea4a37e84c1" md5json="f39a377cb8938660aab2ee46c27f331b">
+	<disk id="disk03" size="368640" chs="40:2:9" img="archive/MSDOS320-DISK3-PROGREF1.img" href="/disks/pcx86/dos/microsoft/3.20/MSDOS320-DISK3-PROGREF1.json" md5="4396a4d5961eb694e4e930b131312879" md5json="952422bb9e6ff50d3e9a24075a07ec2a">
 		<name>MS-DOS 3.20 (ProgRef 1)</name>
+		<file size="357451" time="1986-02-13 23:00:12" attr="0x20">PROGREF1.DOC</file>
 	</disk>
-	<disk id="disk04" size="368640" chs="40:2:9" img="archive/MSDOS320-DISK4-PROGREF2.img" href="/disks/pcx86/dos/microsoft/3.20/MSDOS320-DISK4-PROGREF2.json" md5="0818c0e1aa3bc50d3dbbfa075f0f9863" md5json="3e05a10152efe4ff2a8ee9206132fe52">
+	<disk id="disk04" size="368640" chs="40:2:9" img="archive/MSDOS320-DISK4-PROGREF2.img" href="/disks/pcx86/dos/microsoft/3.20/MSDOS320-DISK4-PROGREF2.json" md5="9038d50015cf218eebe875ccf1813d23" md5json="d4d9d4309572242de0d9397dffe8462d">
 		<name>MS-DOS 3.20 (ProgRef 2)</name>
+		<file size="305536" time="1986-03-14 08:44:38" attr="0x20">PROGREF2.DOC</file>
 	</disk>
 </manifest>

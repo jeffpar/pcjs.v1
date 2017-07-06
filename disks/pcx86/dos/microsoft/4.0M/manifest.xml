@@ -7,11 +7,63 @@
 	<category>DOS</category>
 	<author>Microsoft</author>
 	<releaseDate/>
-	<disk id="disk01" size="368640" chs="40:2:9" img="private/MSDOS400M-DISK1.img" href="/disks/pcx86/dos/microsoft/4.0M/MSDOS400M-DISK1.json" md5="6349c61a7c74b0872a918d130c8080a4" md5json="e9db9a543fc26b5fc6c7c03586eb05b2">
+	<disk id="disk01" size="368640" chs="40:2:9" img="private/MSDOS400M-DISK1.img" href="/disks/pcx86/dos/microsoft/4.0M/MSDOS400M-DISK1.json" md5="cdc573d01ebb1c0360754cfbf0186146" md5json="a34830e3346c51eea8072f3f28ebc34d">
 		<name>MS-DOS 4.0M (Disk 1)</name>
+		<file size="2535" time="1985-11-26 21:49:42" attr="0x20">ANSI.SYS</file>
+		<file size="62" time="2013-03-09 23:01:30" attr="0x20">AUTOEXEC.BAT</file>
+		<file size="612" time="2013-03-09 23:08:02" attr="0x10">BIN</file>
+		<file size="5344" time="1985-11-26 22:03:22" attr="0x20" dir="BIN/">ASSIGN.EXE</file>
+		<file size="9280" time="1985-11-26 22:03:34" attr="0x20" dir="BIN/">CHKDSK.EXE</file>
+		<file size="37488" time="1986-02-24 10:42:32" attr="0x20" dir="BIN/">COMMAND.COM</file>
+		<file size="4504" time="1985-11-26 22:03:42" attr="0x20" dir="BIN/">DISKCOPY.EXE</file>
+		<file size="369" time="1985-07-15 21:28:06" attr="0x20" dir="BIN/">DISKCOPY.PIF</file>
+		<file size="16294" time="1985-11-26 22:03:50" attr="0x20" dir="BIN/">FDISK.EXE</file>
+		<file size="8897" time="1985-11-26 10:57:30" attr="0x20" dir="BIN/">FORMAT.EXE</file>
+		<file size="9060" time="1985-11-26 22:04:14" attr="0x20" dir="BIN/">JOIN.EXE</file>
+		<file size="11554" time="1985-11-26 22:04:28" attr="0x20" dir="BIN/">MODE.EXE</file>
+		<file size="5700" time="1985-11-26 22:04:58" attr="0x20" dir="BIN/">SM.EXE</file>
+		<file size="369" time="1985-09-11 10:26:22" attr="0x20" dir="BIN/">SM.PIF</file>
+		<file size="8400" time="1985-11-26 22:05:06" attr="0x20" dir="BIN/">SUBST.EXE</file>
+		<file size="1247" time="1985-11-26 11:31:14" attr="0x20" dir="BIN/">SWAPPER.DOC</file>
+		<file size="2816" time="1985-11-26 21:49:46" attr="0x20" dir="BIN/">SWAPPER.EXE</file>
+		<file size="369" time="1985-09-20 14:28:34" attr="0x20" dir="BIN/">SWAPPER.PIF</file>
+		<file size="3693" time="1985-11-26 10:55:14" attr="0x20" dir="BIN/">SYS.EXE</file>
+		<file size="2325" time="1985-11-26 21:49:44" attr="0x20">COM.SYS</file>
+		<file size="37488" time="1985-11-26 21:49:22" attr="0x20">COMMAND.COM</file>
+		<file size="58" time="2013-03-09 23:07:16" attr="0x20">CONFIG.SYS</file>
+		<file size="7599" time="1985-11-26 21:49:24" attr="0x20">EGA.SYS</file>
+		<file size="3580" time="1985-11-26 21:49:22" attr="0x20">HE_DAEM.EXE</file>
+		<file size="369" time="1985-09-20 14:27:28" attr="0x20">HE_DAEM.PIF</file>
+		<file size="23962" time="1985-11-26 21:49:22" attr="0x20">IBMBIO.COM</file>
+		<file size="62080" time="1985-11-26 21:49:22" attr="0x20">IBMDOS.COM</file>
+		<file size="1870" time="1985-11-26 22:04:38" attr="0x20">POPUP.EXE</file>
+		<file size="369" time="1985-09-20 14:28:56" attr="0x20">POPUP.PIF</file>
+		<file size="6466" time="1985-11-26 21:49:42" attr="0x20">RAMDRIVE.SYS</file>
+		<file size="56" time="2013-03-09 23:01:52" attr="0x20">README.TXT</file>
 	</disk>
-	<disk id="disk02" size="368640" chs="40:2:9" img="private/MSDOS400M-DISK2.img" href="/disks/pcx86/dos/microsoft/4.0M/MSDOS400M-DISK2.json" md5="37c5bbad4ff5bcc0b6394dbdb8f9e918" md5json="b1bff9bd059994ef8f3937664b4f917d">
+	<disk id="disk02" size="368640" chs="40:2:9" img="private/MSDOS400M-DISK2.img" href="/disks/pcx86/dos/microsoft/4.0M/MSDOS400M-DISK2.json" md5="6ef19f4e59b2758f98299eeca18075ba" md5json="e4c7186cdf1cefcb1342601d5ce2a507">
 		<name>MS-DOS 4.0M (Disk 2)</name>
+		<file size="2508" time="1985-11-26 22:03:24" attr="0x20">APPEND.EXE</file>
+		<file size="6410" time="1985-11-26 22:03:28" attr="0x20">ATTRIB.EXE</file>
+		<file size="21304" time="1985-11-26 22:03:30" attr="0x20">BACKUP.EXE</file>
+		<file size="7044" time="1985-11-26 22:03:44" attr="0x20">EDLIN.EXE</file>
+		<file size="2585" time="1985-11-26 22:03:48" attr="0x20">FC.EXE</file>
+		<file size="6363" time="1985-11-26 22:03:54" attr="0x20">FIND.EXE</file>
+		<file size="2784" time="1985-09-27 08:35:58" attr="0x20">KEYBDV.EXE</file>
+		<file size="2846" time="1985-11-26 22:04:02" attr="0x20">KEYBFR.EXE</file>
+		<file size="2838" time="1985-11-26 22:04:04" attr="0x20">KEYBGR.EXE</file>
+		<file size="2790" time="1985-11-26 22:04:08" attr="0x20">KEYBIT.EXE</file>
+		<file size="2881" time="1985-11-26 22:04:10" attr="0x20">KEYBSP.EXE</file>
+		<file size="2784" time="1985-11-26 22:04:06" attr="0x20">KEYBUK.EXE</file>
+		<file size="9830" time="1985-11-26 22:04:18" attr="0x20">LABEL.EXE</file>
+		<file size="52604" time="1985-11-26 22:04:24" attr="0x20">LINK4.EXE</file>
+		<file size="938" time="1985-11-26 22:04:32" attr="0x20">MORE.EXE</file>
+		<file size="32366" time="1985-11-26 22:04:36" attr="0x20">PIFEDIT.EXE</file>
+		<file size="9444" time="1985-11-26 22:04:40" attr="0x20">PRINT.EXE</file>
+		<file size="6312" time="1985-11-26 22:04:44" attr="0x20">QUEUER.EXE</file>
+		<file size="3953" time="1985-11-26 22:04:46" attr="0x20">RECOVER.EXE</file>
+		<file size="19756" time="1985-11-26 22:04:54" attr="0x20">RESTORE.EXE</file>
+		<file size="1632" time="1985-11-26 22:05:02" attr="0x20">SORT.EXE</file>
 	</disk>
 	<other id="disk03" size="368640" chs="40:2:9" img="private/MSDOS400M-DISK2-UNPATCHED.img" href="/disks/pcx86/dos/microsoft/4.0M/MSDOS400M-DISK2-UNPATCHED.json" md5="ef8d829d5ac38765640ad646fb386950" md5json="e6be9bbd90139fc3ef3739a95f32b664">
 		<name>Disk 2 with unpatched LINK.EXE</name>

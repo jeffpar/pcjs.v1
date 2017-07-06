@@ -7,10 +7,49 @@
 	<category>DOS</category>
 	<author>IBM/Microsoft</author>
 	<releaseDate/>
-	<disk id="disk01" size="184320" chs="40:1:9" img="archive/PCDOS200-DISK1.img" href="/disks/pcx86/dos/ibm/2.00/PCDOS200-DISK1.json" md5="d57ceef82122790d1c0ff7bebc12f90a" md5json="2507c02da6cbafe9a94a35cbdd993be2">
+	<disk id="disk01" size="184320" chs="40:1:9" img="archive/PCDOS200-DISK1.img" href="/disks/pcx86/dos/ibm/2.00/PCDOS200-DISK1.json" md5="4f3c59b73b6b9bf319ef2085b0063a02" md5json="3c4d27a06b98a0b3c22e9fb7ab1c75c6">
 		<name>PC-DOS 2.00 (Disk 1)</name>
+		<file size="1664" time="1983-03-08 11:00:00" attr="0x20">ANSI.SYS</file>
+		<file size="896" time="1983-03-08 11:00:00" attr="0x20">ASSIGN.COM</file>
+		<file size="3687" time="1983-03-08 11:00:00" attr="0x20">BACKUP.COM</file>
+		<file size="16256" time="1983-03-08 11:00:00" attr="0x20">BASIC.COM</file>
+		<file size="25984" time="1983-03-08 11:00:00" attr="0x20">BASICA.COM</file>
+		<file size="6400" time="1983-03-08 11:00:00" attr="0x20">CHKDSK.COM</file>
+		<file size="17664" time="1983-03-08 11:00:00" attr="0x20">COMMAND.COM</file>
+		<file size="2523" time="1983-03-08 11:00:00" attr="0x20">COMP.COM</file>
+		<file size="2074" time="1983-03-08 11:00:00" attr="0x20">DISKCOMP.COM</file>
+		<file size="2444" time="1983-03-08 11:00:00" attr="0x20">DISKCOPY.COM</file>
+		<file size="4608" time="1983-03-08 11:00:00" attr="0x20">EDLIN.COM</file>
+		<file size="6177" time="1983-03-08 11:00:00" attr="0x20">FDISK.COM</file>
+		<file size="5888" time="1983-03-08 11:00:00" attr="0x20">FIND.EXE</file>
+		<file size="6016" time="1983-03-08 11:00:00" attr="0x20">FORMAT.COM</file>
+		<file size="789" time="1983-03-08 11:00:00" attr="0x20">GRAPHICS.COM</file>
+		<file size="4608" time="1983-03-08 11:00:00" attr="0x20">IBMBIO.COM</file>
+		<file size="17152" time="1983-03-08 11:00:00" attr="0x20">IBMDOS.COM</file>
+		<file size="3139" time="1983-03-08 11:00:00" attr="0x20">MODE.COM</file>
+		<file size="384" time="1983-03-08 11:00:00" attr="0x20">MORE.COM</file>
+		<file size="4608" time="1983-03-08 11:00:00" attr="0x20">PRINT.COM</file>
+		<file size="2304" time="1983-03-08 11:00:00" attr="0x20">RECOVER.COM</file>
+		<file size="4003" time="1983-03-08 11:00:00" attr="0x20">RESTORE.COM</file>
+		<file size="1280" time="1983-03-08 11:00:00" attr="0x20">SORT.EXE</file>
+		<file size="1408" time="1983-03-08 11:00:00" attr="0x20">SYS.COM</file>
+		<file size="1513" time="1983-03-08 11:00:00" attr="0x20">TREE.COM</file>
 	</disk>
-	<disk id="disk02" size="184320" chs="40:1:9" img="archive/PCDOS200-DISK2.img" href="/disks/pcx86/dos/ibm/2.00/PCDOS200-DISK2.json" md5="1c7aac53c78446992f8821cf42d04c4a" md5json="b66e296319c1f97990b596b1aa376d39">
+	<disk id="disk02" size="184320" chs="40:1:9" img="archive/PCDOS200-DISK2.img" href="/disks/pcx86/dos/ibm/2.00/PCDOS200-DISK2.json" md5="13af0ccfe0156dc9ec6e2b6c0b6cd095" md5json="63749186aa71e3f40192f845e9a40c34">
 		<name>PC-DOS 2.00 (Disk 2)</name>
+		<file size="1920" time="1983-03-08 11:00:00" attr="0x20">ART.BAS</file>
+		<file size="2048" time="1983-03-08 11:00:00" attr="0x20">BALL.BAS</file>
+		<file size="1664" time="1983-03-08 11:00:00" attr="0x20">CIRCLE.BAS</file>
+		<file size="1536" time="1983-03-08 11:00:00" attr="0x20">COLORBAR.BAS</file>
+		<file size="4352" time="1983-03-08 11:00:00" attr="0x20">COMM.BAS</file>
+		<file size="11904" time="1983-03-08 11:00:00" attr="0x20">DEBUG.COM</file>
+		<file size="3584" time="1983-03-08 11:00:00" attr="0x20">DONKEY.BAS</file>
+		<file size="1664" time="1983-03-08 11:00:00" attr="0x20">EXE2BIN.EXE</file>
+		<file size="39936" time="1983-03-08 11:00:00" attr="0x20">LINK.EXE</file>
+		<file size="6272" time="1983-03-08 11:00:00" attr="0x20">MORTGAGE.BAS</file>
+		<file size="8704" time="1983-03-08 11:00:00" attr="0x20">MUSIC.BAS</file>
+		<file size="2304" time="1983-03-08 11:00:00" attr="0x20">PIECHART.BAS</file>
+		<file size="2304" time="1983-03-08 11:00:00" attr="0x20">SAMPLES.BAS</file>
+		<file size="1920" time="1983-03-08 11:00:00" attr="0x20">SPACE.BAS</file>
 	</disk>
 </manifest>
