@@ -7,22 +7,113 @@
 	<category>DOS</category>
 	<author>Microsoft</author>
 	<releaseDate>October 1988</releaseDate>
-	<disk id="disk01" size="368640" chs="40:2:9" img="archive/MSDOS400-DISK1.img" href="/disks/pcx86/dos/microsoft/4.00/MSDOS400-DISK1.json" md5="df21fae3375ec155a6ccffb25e0a8633" md5json="9364eb72b88a464ba288afd1b6163274">
+	<disk id="disk01" size="368640" chs="40:2:9" img="archive/MSDOS400-DISK1.img" href="/disks/pcx86/dos/microsoft/4.00/MSDOS400-DISK1.json" md5="717c57e65734de6d6097c5aaf9c30bd9" md5json="48ea5de3d06e69c29aaa4d852828d1c5">
 		<name>MS-DOS 4.00 (Disk 1)</name>
+		<file size="39" time="1988-10-06 00:00:08" attr="0x20">AUTOEXEC.BAT</file>
+		<file size="37556" time="1988-10-06 00:00:08" attr="0x20">COMMAND.COM</file>
+		<file size="96" time="1988-10-06 00:00:08" attr="0x20">CONFIG.SYS</file>
+		<file size="12806" time="1988-10-06 00:00:08" attr="0x20">COUNTRY.SYS</file>
+		<file size="10396" time="1988-10-06 00:00:08" attr="0x20">DISKCOPY.COM</file>
+		<file size="15692" time="1988-10-06 00:00:08" attr="0x20">DISPLAY.SYS</file>
+		<file size="60935" time="1988-10-06 00:00:08" attr="0x20">FDISK.EXE</file>
+		<file size="22859" time="1988-10-06 00:00:08" attr="0x20">FORMAT.COM</file>
+		<file size="33321" time="1988-10-06 00:00:02" attr="0x20">IO.SYS</file>
+		<file size="14727" time="1988-10-06 00:00:08" attr="0x20">KEYB.COM</file>
+		<file size="23328" time="1988-10-06 00:00:08" attr="0x20">KEYBOARD.SYS</file>
+		<file size="37376" time="1988-10-06 00:00:02" attr="0x20">MSDOS.SYS</file>
+		<file size="19415" time="1988-10-06 00:00:08" attr="0x20">REPLACE.EXE</file>
+		<file size="3642" time="1988-10-06 00:00:08" attr="0x20">SELECT.COM</file>
+		<file size="28695" time="1988-10-06 00:00:08" attr="0x20">SELECT.HLP</file>
+		<file size="1329" time="1988-10-06 00:00:08" attr="0x20">SELECT.PRT</file>
+		<file size="11456" time="1988-10-06 00:00:08" attr="0x20">SYS.COM</file>
 	</disk>
-	<disk id="disk02" size="368640" chs="40:2:9" img="archive/MSDOS400-DISK2.img" href="/disks/pcx86/dos/microsoft/4.00/MSDOS400-DISK2.json" md5="88bfc0863f0e65da54fd98320d7d97ab" md5json="37d8620c2a2a529ce1246b0b8cc2aab3">
+	<disk id="disk02" size="368640" chs="40:2:9" img="archive/MSDOS400-DISK2.img" href="/disks/pcx86/dos/microsoft/4.00/MSDOS400-DISK2.json" md5="ca51dc623aaa1f1953e58e6f65a6df41" md5json="529596508d4e08d776a2785a631dc9bc">
 		<name>MS-DOS 4.00 (Disk 2)</name>
+		<file size="5753" time="1988-10-06 00:00:08" attr="0x20">ASSIGN.COM</file>
+		<file size="18263" time="1988-10-06 00:00:08" attr="0x20">ATTRIB.EXE</file>
+		<file size="17787" time="1988-10-06 00:00:08" attr="0x20">CHKDSK.COM</file>
+		<file size="37556" time="1988-10-06 00:00:08" attr="0x20">COMMAND.COM</file>
+		<file size="9459" time="1988-10-06 00:00:08" attr="0x20">COMP.COM</file>
+		<file size="21574" time="1988-10-06 00:00:08" attr="0x20">DEBUG.COM</file>
+		<file size="9857" time="1988-10-06 00:00:08" attr="0x20">DISKCOMP.COM</file>
+		<file size="14069" time="1988-10-06 00:00:08" attr="0x20">EDLIN.COM</file>
+		<file size="15807" time="1988-10-06 00:00:08" attr="0x20">FC.EXE</file>
+		<file size="11129" time="1988-10-06 00:00:08" attr="0x20">FILESYS.EXE</file>
+		<file size="5941" time="1988-10-06 00:00:08" attr="0x20">FIND.EXE</file>
+		<file size="21739" time="1988-10-06 00:00:02" attr="0x20">IFSFUNC.EXE</file>
+		<file size="17813" time="1988-10-06 00:00:08" attr="0x20">JOIN.EXE</file>
+		<file size="4458" time="1988-10-06 00:00:08" attr="0x20">LABEL.COM</file>
+		<file size="20005" time="1988-10-06 00:00:08" attr="0x20">MEM.EXE</file>
+		<file size="2134" time="1988-10-06 00:00:08" attr="0x20">MORE.COM</file>
+		<file size="13424" time="1988-10-06 00:00:08" attr="0x20">SHARE.EXE</file>
+		<file size="5882" time="1988-10-06 00:00:08" attr="0x20">SORT.EXE</file>
+		<file size="18467" time="1988-10-06 00:00:08" attr="0x20">SUBST.EXE</file>
+		<file size="6302" time="1988-10-06 00:00:08" attr="0x20">TREE.COM</file>
+		<file size="17055" time="1988-10-06 00:00:08" attr="0x20">XCOPY.EXE</file>
 	</disk>
-	<disk id="disk03" size="368640" chs="40:2:9" img="archive/MSDOS400-DISK3.img" href="/disks/pcx86/dos/microsoft/4.00/MSDOS400-DISK3.json" md5="d3cec5205295e28190d64250f2fff670" md5json="cd7f1340a8c45f71794e8812a2a8e287">
+	<disk id="disk03" size="368640" chs="40:2:9" img="archive/MSDOS400-DISK3.img" href="/disks/pcx86/dos/microsoft/4.00/MSDOS400-DISK3.json" md5="7467c2d44173bd1a75d09f815e94229b" md5json="8d24d2cfce620bded064efba3e203213">
 		<name>MS-DOS 4.00 (Disk 3)</name>
+		<file size="37556" time="1988-10-06 00:00:08" attr="0x20">COMMAND.COM</file>
+		<file size="87776" time="1988-10-06 00:00:02" attr="0x20">EMM386.SYS</file>
+		<file size="7963" time="1988-10-06 00:00:08" attr="0x20">EXE2BIN.EXE</file>
+		<file size="80608" time="1988-10-06 00:00:08" attr="0x20">GWBASIC.EXE</file>
+		<file size="43988" time="1988-10-06 00:00:02" attr="0x20">LINK.EXE</file>
+		<file size="14131" time="1988-10-06 00:00:08" attr="0x20">PRINT.COM</file>
+		<file size="8235" time="1988-10-06 00:00:08" attr="0x20">RAMDRIVE.SYS</file>
+		<file size="10224" time="1988-10-06 00:00:08" attr="0x20">SMARTDRV.SYS</file>
+		<file size="29211" time="1988-10-06 00:00:08" attr="0x20">XMA2EMS.SYS</file>
 	</disk>
-	<disk id="disk04" size="368640" chs="40:2:9" img="archive/MSDOS400-DISK4.img" href="/disks/pcx86/dos/microsoft/4.00/MSDOS400-DISK4.json" md5="09e68c48357543b79bd21c856e3d72c0" md5json="9e50dca3ad47a0155b4d4565948c906c">
+	<disk id="disk04" size="368640" chs="40:2:9" img="archive/MSDOS400-DISK4.img" href="/disks/pcx86/dos/microsoft/4.00/MSDOS400-DISK4.json" md5="855e9975ce186cc24da5d6e039a17dcf" md5json="1ccbb32cff7a692e18189d21a4ee9f1f">
 		<name>MS-DOS 4.00 (Disk 4)</name>
+		<file size="6404" time="1988-10-06 00:00:08" attr="0x20">4201.CPI</file>
+		<file size="720" time="1988-10-06 00:00:08" attr="0x20">4208.CPI</file>
+		<file size="370" time="1988-10-06 00:00:08" attr="0x20">5202.CPI</file>
+		<file size="9105" time="1988-10-06 00:00:08" attr="0x20">ANSI.SYS</file>
+		<file size="11154" time="1988-10-06 00:00:08" attr="0x20">APPEND.EXE</file>
+		<file size="37556" time="1988-10-06 00:00:08" attr="0x20">COMMAND.COM</file>
+		<file size="12806" time="1988-10-06 00:00:08" attr="0x20">COUNTRY.SYS</file>
+		<file size="15692" time="1988-10-06 00:00:08" attr="0x20">DISPLAY.SYS</file>
+		<file size="5241" time="1988-10-06 00:00:08" attr="0x20">DRIVER.SYS</file>
+		<file size="16702" time="1988-10-06 00:00:08" attr="0x20">FASTOPEN.EXE</file>
+		<file size="10239" time="1988-10-06 00:00:08" attr="0x20">GRAFTABL.COM</file>
+		<file size="16693" time="1988-10-06 00:00:08" attr="0x20">GRAPHICS.COM</file>
+		<file size="9397" time="1988-10-06 00:00:08" attr="0x20">GRAPHICS.PRO</file>
+		<file size="6261" time="1988-10-06 00:00:08" attr="0x20">HIMEM.SYS</file>
+		<file size="33321" time="1988-10-06 00:00:02" attr="0x20">IO.SYS</file>
+		<file size="14727" time="1988-10-06 00:00:08" attr="0x20">KEYB.COM</file>
+		<file size="23328" time="1988-10-06 00:00:08" attr="0x20">KEYBOARD.SYS</file>
+		<file size="22960" time="1988-10-06 00:00:08" attr="0x20">MODE.COM</file>
+		<file size="37376" time="1988-10-06 00:00:02" attr="0x20">MSDOS.SYS</file>
+		<file size="6878" time="1988-10-06 00:00:08" attr="0x20">NLSFUNC.EXE</file>
+		<file size="18914" time="1988-10-06 00:00:08" attr="0x20">PRINTER.SYS</file>
+		<file size="8235" time="1988-10-06 00:00:08" attr="0x20">RAMDRIVE.SYS</file>
+		<file size="14148" time="1988-10-12 21:13:00" attr="0x20">README.TXT</file>
+		<file size="10588" time="1988-10-06 00:00:08" attr="0x20">RECOVER.COM</file>
 	</disk>
-	<disk id="disk05" size="368640" chs="40:2:9" img="archive/MSDOS400-DISK5.img" href="/disks/pcx86/dos/microsoft/4.00/MSDOS400-DISK5.json" md5="1f88a4f7de2e9f2cb9b88c03dbc2e848" md5json="3ca4ae554d5a73f79c64c6e8c51f3c1d">
+	<disk id="disk05" size="368640" chs="40:2:9" img="archive/MSDOS400-DISK5.img" href="/disks/pcx86/dos/microsoft/4.00/MSDOS400-DISK5.json" md5="9306e60e4bed6dcb7576ff94ae66f466" md5json="8a84641e481de8ab430bf8abee024839">
 		<name>MS-DOS 4.00 (Disk 5)</name>
+		<file size="36880" time="1988-10-06 00:00:08" attr="0x20">BACKUP.COM</file>
+		<file size="49068" time="1988-10-06 00:00:08" attr="0x20">EGA.CPI</file>
+		<file size="22859" time="1988-10-06 00:00:08" attr="0x20">FORMAT.COM</file>
+		<file size="10703" time="1988-10-06 00:00:08" attr="0x20">LCD.CPI</file>
+		<file size="22960" time="1988-10-06 00:00:08" attr="0x20">MODE.COM</file>
+		<file size="36946" time="1988-10-06 00:00:08" attr="0x20">RESTORE.COM</file>
+		<file size="22999" time="1988-10-06 00:00:08" attr="0x20">SELECT.DAT</file>
+		<file size="95107" time="1988-10-06 00:00:08" attr="0x20">SELECT.EXE</file>
+		<file size="29211" time="1988-10-06 00:00:08" attr="0x20">XMA2EMS.SYS</file>
 	</disk>
-	<disk id="disk06" size="368640" chs="40:2:9" img="archive/MSDOS400-DISK6.img" href="/disks/pcx86/dos/microsoft/4.00/MSDOS400-DISK6.json" md5="739de673db09d5c2f2da2c2d0f2ba306" md5json="76a7e3a18a71d25ebc16176cca691bac">
+	<disk id="disk06" size="368640" chs="40:2:9" img="archive/MSDOS400-DISK6.img" href="/disks/pcx86/dos/microsoft/4.00/MSDOS400-DISK6.json" md5="de0d0b332d9ef57711b10c9c855c004d" md5json="3afe3af205d62df01788d76161083c54">
 		<name>MS-DOS 4.00 (Disk 6)</name>
+		<file size="17787" time="1988-10-06 00:00:08" attr="0x20">CHKDSK.COM</file>
+		<file size="37556" time="1988-10-06 00:00:08" attr="0x20">COMMAND.COM</file>
+		<file size="10396" time="1988-10-06 00:00:08" attr="0x20">DISKCOPY.COM</file>
+		<file size="6660" time="1988-10-06 00:00:08" attr="0x20">DOSUTIL.MEU</file>
+		<file size="263" time="1988-10-06 00:00:08" attr="0x20">PCIBMDRV.MOS</file>
+		<file size="14131" time="1988-10-06 00:00:08" attr="0x20">PRINT.COM</file>
+		<file size="4406" time="1988-10-06 00:00:08" attr="0x20">SHELL.CLR</file>
+		<file size="66527" time="1988-10-06 00:00:08" attr="0x20">SHELL.HLP</file>
+		<file size="4588" time="1988-10-06 00:00:08" attr="0x20">SHELL.MEU</file>
+		<file size="3894" time="1988-10-06 00:00:08" attr="0x20">SHELLB.COM</file>
+		<file size="153855" time="1988-10-06 00:00:08" attr="0x20">SHELLC.EXE</file>
 	</disk>
 </manifest>
