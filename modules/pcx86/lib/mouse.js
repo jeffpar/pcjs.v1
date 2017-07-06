@@ -437,32 +437,23 @@ class Mouse extends Component {
             this.clickMouse(event.button, fDown);
         } else {
             /*
-             * MouseEvent objects contain, among other things, the following properties:
-             *
-             *      clientX
-             *      clientY
-             *
-             * I've selected the above properties because they're widely supported, not because I need
-             * client-area coordinates.  In fact, layerX and layerY are probably closer to what I really want,
-             * but I don't think they're available in all browsers.  screenX and screenY would work as well.
-             *
-             * This is because all we care about are deltas.  We record clientX and clientY (as xMouse and yMouse)
+             * All we really care about are deltas.  We record screenX and screenY (as xMouse and yMouse)
              * merely to calculate xDelta and yDelta.
              */
             var xDelta, yDelta;
             if (this.xMouse < 0 || this.yMouse < 0) {
-                this.xMouse = event.clientX;
-                this.yMouse = event.clientY;
+                this.xMouse = event.screenX;
+                this.yMouse = event.screenY;
             }
             if (this.fLocked) {
                 xDelta = event['movementX'] || event['mozMovementX'] || event['webkitMovementX'] || 0;
                 yDelta = event['movementY'] || event['mozMovementY'] || event['webkitMovementY'] || 0;
             } else {
-                xDelta = event.clientX - this.xMouse;
-                yDelta = event.clientY - this.yMouse;
+                xDelta = event.screenX - this.xMouse;
+                yDelta = event.screenY - this.yMouse;
             }
-            this.xMouse = event.clientX;
-            this.yMouse = event.clientY;
+            this.xMouse = event.screenX;
+            this.yMouse = event.screenY;
             this.moveMouse(xDelta, yDelta, this.xMouse, this.yMouse);
         }
     }
@@ -513,6 +504,9 @@ class Mouse extends Component {
     {
         if (this.isActive()) {
             if (xDelta || yDelta) {
+                if (this.messageEnabled(Messages.MOUSE)) {
+                    this.printMessage("moveMouse(" + xDelta + "," + yDelta + ")");
+                }
                 /*
                  * As sendPacket() indicates, any x and y coordinates we supply are for diagnostic purposes only.
                  * sendPacket() only cares about the xDelta and yDelta properties we provide above, which it then zeroes
