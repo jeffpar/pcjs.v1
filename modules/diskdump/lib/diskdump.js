@@ -75,8 +75,8 @@ var logFile = null;
 
 /*
  * fNormalize attempts to enforce consistency across multiple dump requests, including the order of files within every
- * directory, the use of hard-coded volume label timestamps, replacement of line-endings in text files, etc.  And since
- * I assume that normalization is a wonderful thing, I don't provide any UI for turning it off.
+ * directory, the use of hard-coded volume label timestamps, replacement of line-endings in text files, etc.  It can
+ * turned on here or with the experimental "--normalize" command-line option.
  */
 var fNormalize = false;
 
@@ -344,6 +344,7 @@ function DiskDump(sDiskPath, asExclude, sFormat, fComments, sSize, sServerRoot, 
     this.fXDFSupport = (argv && argv['xdf']);
     this.sLabel = (argv && argv['label']);
     this.forceBPB = (argv && argv['forceBPB']);
+    this.fNormalize = fNormalize || (argv && argv['normalize']);
 
     /*
      * The dump operation itself doesn't care about sManifestFile, but we DO need some indication
@@ -1617,7 +1618,7 @@ DiskDump.prototype.buildManifestInfo = function(sImage)
  */
 DiskDump.prototype.isTextFile = function(sFileName)
 {
-    if (fNormalize) {
+    if (this.fNormalize) {
         for (var i = 0; i < DiskDump.asTextFileExts.length; i++) {
             if (str.endsWith(sFileName, DiskDump.asTextFileExts[i])) return true;
         }
@@ -1675,7 +1676,7 @@ DiskDump.prototype.readDir = function(sDir, fRoot, done)
          * file name order that I was originally seeing may have simply been due to out-of-order fs.stat()
          * calls, because I used to call addManifestInfo() in the callback.
          */
-        if (fNormalize) asFiles.sort();
+        if (obj.fNormalize) asFiles.sort();
 
         for (iFile = 0; iFile < asFiles.length; iFile++) {
             var sFileName = asFiles[iFile];
@@ -1969,7 +1970,7 @@ DiskDump.prototype.buildVolLabel = function(sDir)
          *
          * UPDATE: I'm not sure I care about that anymore.  Time-stamping the created disk image seems more useful.
          */
-        fileInfo.FILE_TIME = fNormalize? new Date(1981, 7, 12, 12) : new Date();
+        fileInfo.FILE_TIME = /* this.fNormalize? new Date(1981, 7, 12, 12) : */ new Date();
         this.validateTime(fileInfo.FILE_TIME);
         fileInfo.FILE_SIZE = 0;
     }

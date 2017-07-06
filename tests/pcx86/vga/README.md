@@ -105,7 +105,7 @@ built from the sources in this directory:
 
 The "VGA Tests (Black Book)" disk image (VGABIN) was built with this command:
 
-	diskdump --dir=bin --format=json --output=VGABIN.json
+	diskdump --dir=bin --format=json --output=VGABIN.json --normalize
 
 Alternatively, if *path* refers to a directory (ending with a slash) instead of a disk image, the PCjs client will ask
 the PCjs web server to enumerate the contents of that directory and send back a JSON-encoded disk image containing all
@@ -116,11 +116,11 @@ burden on the server, it's best to do this only when running PCjs from a local P
 <disk path="/tests/pcx86/vga/">VGA Tests (Black Book)</disk>
 ```
 
-One advantage of using [DiskDump](/modules/diskdump/) is that it automatically converts linefeeds in known text files
-(including ASM files) into DOS-compatible CR/LF sequences.
+One advantage of using [DiskDump](/modules/diskdump/) with *--normalize* is that it automatically converts linefeeds
+in known text files (including ASM files) into DOS-compatible CR/LF sequences.
 
 VGA "Black Book" Test Machine
----
+-----------------------------
 
 The [Compaq DeskPro 386](/devices/pcx86/machine/compaq/deskpro386/vga/2048kb/) machine below loads the
 "VGA Tests (Black Book)" disk from the PCjs [Library](/disks/pcx86/library.xml) disk collection into Drive B.
