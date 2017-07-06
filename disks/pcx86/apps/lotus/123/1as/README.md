@@ -197,3 +197,6 @@ When `DEBUG` is used to examine our `123.EXE`:
 
 This confirms that 1) `C3 (RET)` has been stored at the specified location, and 2) the remnants of a `MOV CX,0002`
 instruction still reside there.
+
+WARNING: LOTUS apparently released other **1A*** `123.EXE` binaries, with the same size and date, but with rearranged
+contents.  This may have been an attempt on their part to defeat a universal patch.
