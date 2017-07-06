@@ -71134,7 +71134,7 @@ class DebuggerX86 extends Debugger {
             return;
         }
 
-        if (sCmd[1] && "bwd".indexOf(sCmd[1]) < 0) {
+        if (sCmd[1] && "abwd".indexOf(sCmd[1]) < 0) {
             this.println("unrecognized dump command");
             return;
         }
@@ -71158,20 +71158,22 @@ class DebuggerX86 extends Debugger {
         }
 
         var sDump = "";
+        var fASCII = false;
         var size = (sCmd == "dd"? 4 : (sCmd == "dw"? 2 : 1));
         var cb = (size * len) || 128;
         var cLines = ((cb + 15) >> 4) || 1;
-
+        var cbLine = (size == 4? 16 : this.nBase);  // the base also happens to be a reasonable number of bytes/line
+        if (sCmd[1] == 'a') {
+            fASCII = true;
+            cLines = 25;
+            cbLine = 160;
+            cb = cLines * cbLine;
+        }
         while (cLines-- && cb > 0) {
             var data = 0, iByte = 0, i;
             var sData = "", sChars = "";
             sAddr = this.toHexAddr(dbgAddr);
-            /*
-             * It's just coincidence that we want to dump 8 bytes per line when using base 8 and 16 bytes
-             * per line when using base 16, because octal requires more digits.
-             */
-            var nBytes = (size == 4? 16 : this.nBase);
-            for (i = nBytes; i > 0 && cb > 0; i--) {
+            for (i = cbLine; i > 0 && cb > 0; i--) {
                 var b = this.getByte(dbgAddr, 1);
                 data |= (b << (iByte++ << 3));
                 if (iByte == size) {
@@ -71179,14 +71181,17 @@ class DebuggerX86 extends Debugger {
                     sData += (size == 1? (i == 9? '-' : ' ') : "  ");
                     data = iByte = 0;
                 }
-                sChars += (b >= 32 && b < 128? String.fromCharCode(b) : '.');
+                sChars += (b >= 32 && b < 128? String.fromCharCode(b) : (fASCII? '' : '.'));
                 cb--;
             }
             if (sDump) sDump += '\n';
-            sDump += sAddr + "  " + sData + Str.pad(sChars, sChars.length + i * 3 + 1, true);
+            if (fASCII) {
+                sDump += sChars;
+            } else {
+                sDump += sAddr + "  " + sData + Str.pad(sChars, sChars.length + i * 3 + 1, true);
+            }
         }
-
-        if (sDump) this.println(sDump);
+        if (sDump) this.println(sDump.replace(/\s*$/, ""));
         this.dbgAddrNextData = dbgAddr;
     }
 
