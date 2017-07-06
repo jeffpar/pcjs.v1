@@ -11,16 +11,20 @@ machines:
 CP/M-86 1.1B (Eagle Computer)
 -----------------------------
 
-This is an OEM version of CP/M-86 by Eagle Computer.  On boot, it reports:
+This is an OEM version of CP/M-86 by Eagle Computer.  On startup, it reports:
 
 	Eagle CP/M-86 Ver 1.1B 05/20/83                                                 
 
 The PCjs Disk Archives include the two Eagle Computer distribution diskettes, along with two related disks from our
-private collection that contain [Useful CP/M-86 Utilities](#useful-cpm-86-utilities).
+private collection that contain [Useful CP/M-86 Utilities](#useful-cpm-86-utilities).  [Directory Listings](#directory-listings)
+are provided below.
 
 {% include machine.html id="ibm5150" %}
 
 This machine is also available with a [Debugger](debugger/).
+
+Directory Listings
+------------------
 
 ### Directory of CP/M-86 (Disk 1)
 
