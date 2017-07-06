@@ -9,4 +9,4 @@ Lotus 1-2-3
 
 Information is available for these versions of [Lotus 1-2-3](https://en.wikipedia.org/wiki/Lotus_1-2-3):
 
-* [Lotus 1-2-3 1.0A*](1as/)
+* [Lotus 1-2-3 1A*](1as/)

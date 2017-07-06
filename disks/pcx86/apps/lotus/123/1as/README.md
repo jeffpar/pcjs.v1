@@ -2,6 +2,8 @@
 layout: page
 title: "Lotus 1-2-3 Release 1A*"
 permalink: /disks/pcx86/apps/lotus/123/1as/
+redirect_from:
+  - /disks/pcx86/apps/lotus/123/1.0a/
 machines:
   - id: ibm5150-123
     type: pcx86
@@ -14,6 +16,12 @@ machines:
 
 Lotus 1-2-3 Release 1A*
 -----------------------
+
+This version of 1-2-3 is known as **1A***, which differs from the original **1A** version.  The **1A** release
+contained files dated `6-07-83`, whereas this release contains files dated `7-01-83`.
+
+The PCjs **1A*** System disk does not include any copy-protection.  Instead, the disk contains a patched copy of `123.EXE`
+which bypasses the usual copy-protection tests.  Details regarding the [patch](#patch-details) are provided below.
 
 {% include machine.html id="ibm5150-123" %}
 
@@ -150,3 +158,42 @@ Lotus 1-2-3 Release 1A*
 	Total files listed:
 	       22 file(s)     284602 bytes
 	                       25600 bytes free
+
+### Patch Details
+
+The `123.EXE` binary on our patched System disk appears to match the criteria described in
+the "unprotection" document [LOTUS.TXT](https://www.pcorner.com/list/UNP/UNPROT-1.ZIP/LOTUS.TXT/):
+
+	There is another version of Lotus 123 also called Release 1A
+	but with a different copy-protection technique. It can be
+	identified by an "*" that displays on the first screen under
+	the "s" in the word "Release"
+	                                     Release 1A
+	                                          *
+	
+	To unprotect this version so it can be run on a hard disk
+	without requiring the SYSTEM DISK in drive A, do the following:
+	
+	1. RENAME   123.EXE    123.XYZ
+	2. DEBUG    123.XYZ
+	3. Type     U AB8C     press ENTER
+	    You should see  MOV  CX,0002
+	    if you don't, something is different and this won't work.
+	4. Type     E AB8C C3     press ENTER
+	5. Type     W
+	6. Type     Q
+	7. RENAME   123.XYZ   123.EXE
+	
+	That's it. It will now run from any drive. As always, this patch
+	is provided so that honest people don't have to suffer the
+	inconvienences imposed upon them by software manufacturers.
+
+When `DEBUG` is used to examine our `123.EXE`:
+
+	-U AB8C
+	08F1:AB8C C3          RET
+	08F1:AB8D 0200        ADD     AL,[BX+SI]
+	...
+
+This confirms that 1) `C3 (RET)` has been stored at the specified location, and 2) the remnants of a `MOV CX,0002`
+instruction still reside there.
