@@ -8,6 +8,8 @@
 		<disk path="/disks/pcx86/empty/EMPTY-1440K.json">Empty Diskette (1.44M)</disk>
 		<disk path="/disks/pcx86/cpm/1.1b/CPM86-DISK1.json">CP/M-86 (Disk 1)</disk>
 		<disk path="/disks/pcx86/cpm/1.1b/CPM86-DISK2.json">CP/M-86 (Disk 2)</disk>
+		<disk path="/disks/pcx86/cpm/1.1b/CPM86-DISK1-PCJS.json">CP/M-86 (PCjs Disk 1)</disk>
+		<disk path="/disks/pcx86/cpm/1.1b/CPM86-DISK2-PCJS.json">CP/M-86 (PCjs Disk 2)</disk>
 		<disk path="/disks/pcx86/diags/ibm/1.02/5150_ADVDIAG_102.json">IBM PC Diagnostics 1.02</disk>
 		<disk path="/disks/pcx86/diags/ibm/2.20/5150_5155_5160_ADVDIAG_220.json">IBM PC Diagnostics 2.20</disk>
 		<disk path="/disks/pcx86/diags/ibm/2.07/5170_ADVDIAG_207.json">IBM PC AT Diagnostics 2.07</disk>
