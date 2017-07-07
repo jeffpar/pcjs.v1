@@ -7,28 +7,233 @@
 	<category>DOS</category>
 	<author>Microsoft</author>
 	<releaseDate/>
-	<disk id="disk01" size="368640" chs="40:2:9" img="360K/archive/MSDOS500-DISK1.img" href="/disks/pcx86/dos/microsoft/5.00/360K/MSDOS500-DISK1.json" md5="7e9745c5f029d3b6d212ea807af63fef" md5json="0cec25b697c02062df948eb2a54c7cd0">
+	<disk id="disk01" size="368640" chs="40:2:9" img="360K/archive/MSDOS500-DISK1.img" href="/disks/pcx86/dos/microsoft/5.00/360K/MSDOS500-DISK1.json" md5="3f19a16e260f7e36039bc5fc840f061b" md5json="9ea2f92de185d75bceceb56eeef5f132">
 		<name>MS-DOS 5.00 (360K Disk 1)</name>
+		<file size="36" time="1991-04-09 05:00:00" attr="0x20">AUTOEXEC.BAT</file>
+		<file size="47845" time="1991-04-09 05:00:00" attr="0x20">COMMAND.COM</file>
+		<file size="13" time="1991-04-09 05:00:00" attr="0x20">CONFIG.SYS</file>
+		<file size="17069" time="1991-04-09 05:00:00" attr="0x20">COUNTRY.SYS</file>
+		<file size="716" time="1991-04-09 05:00:00" attr="0x20">CV.COM</file>
+		<file size="4107" time="1991-04-09 05:00:00" attr="0x20">EGA.SY_</file>
+		<file size="32911" time="1991-04-09 05:00:00" attr="0x20">FORMAT.COM</file>
+		<file size="33430" time="1991-04-09 05:00:00" attr="0x20">IO.SYS</file>
+		<file size="14986" time="1991-04-09 05:00:00" attr="0x20">KEYB.COM</file>
+		<file size="34697" time="1991-04-09 05:00:00" attr="0x20">KEYBOARD.SYS</file>
+		<file size="37394" time="1991-04-09 05:00:00" attr="0x20">MSDOS.SYS</file>
+		<file size="7052" time="1991-04-09 05:00:00" attr="0x20">NLSFUNC.EXE</file>
+		<file size="452" time="1991-04-09 05:00:00" attr="0x20">README.1ST</file>
+		<file size="73412" time="1991-04-09 05:00:00" attr="0x20">SETUP.EXE</file>
+		<file size="2186" time="1991-04-09 05:00:00" attr="0x20">SETUP.INI</file>
+		<file size="29211" time="1989-04-07 00:00:02" attr="0x20">XMA2EMS.SYS</file>
 	</disk>
-	<disk id="disk02" size="368640" chs="40:2:9" img="360K/archive/MSDOS500-DISK2.img" href="/disks/pcx86/dos/microsoft/5.00/360K/MSDOS500-DISK2.json" md5="3dc6fa07e08b09b1559955cb7c91cbde" md5json="477635397d1ce6de3dcf2b6f58f032cf">
+	<disk id="disk02" size="368640" chs="40:2:9" img="360K/archive/MSDOS500-DISK2.img" href="/disks/pcx86/dos/microsoft/5.00/360K/MSDOS500-DISK2.json" md5="8f72dfcf89d26b0a2f6859f3d747d22f" md5json="01f2d8a82ef4b76e0ecf2a4fadefca8c">
 		<name>MS-DOS 5.00 (360K Disk 2)</name>
+		<file size="7185" time="1991-04-09 05:00:00" attr="0x20">ANSI.SY_</file>
+		<file size="16898" time="1991-04-09 05:00:00" attr="0x20">DEBUG.EX_</file>
+		<file size="11186" time="1991-04-09 05:00:00" attr="0x20">DISPLAY.SY_</file>
+		<file size="10441" time="1991-04-09 05:00:00" attr="0x20">EDLIN.EX_</file>
+		<file size="19714" time="1991-04-09 05:00:00" attr="0x20">EGA.CP_</file>
+		<file size="47585" time="1991-04-09 05:00:00" attr="0x20">EMM386.EX_</file>
+		<file size="8927" time="1991-04-09 05:00:00" attr="0x20">FASTOPEN.EX_</file>
+		<file size="57224" time="1991-04-09 05:00:00" attr="0x20">FDISK.EXE</file>
+		<file size="7894" time="1991-04-09 05:00:00" attr="0x20">HIMEM.SY_</file>
+		<file size="29726" time="1991-04-09 05:00:00" attr="0x20">MEM.EX_</file>
+		<file size="12781" time="1991-04-09 05:00:00" attr="0x20">MIRROR.CO_</file>
+		<file size="16834" time="1991-04-09 05:00:00" attr="0x20">MODE.CO_</file>
+		<file size="3765" time="1991-04-09 05:00:00" attr="0x20">RAMDRIVE.SY_</file>
+		<file size="7476" time="1991-04-09 05:00:00" attr="0x20">SETVER.EX_</file>
+		<file size="9312" time="1991-04-09 05:00:00" attr="0x20">SHARE.EX_</file>
+		<file size="6295" time="1991-04-09 05:00:00" attr="0x20">SMARTDRV.SY_</file>
+		<file size="9672" time="1991-04-09 05:00:00" attr="0x20">SYS.CO_</file>
+		<file size="9391" time="1991-04-09 05:00:00" attr="0x20">UNDELETE.EX_</file>
+		<file size="18576" time="1991-04-09 05:00:00" attr="0x20">UNFORMAT.COM</file>
+		<file size="11868" time="1991-04-09 05:00:00" attr="0x20">XCOPY.EX_</file>
 	</disk>
-	<disk id="disk03" size="368640" chs="40:2:9" img="360K/archive/MSDOS500-DISK3.img" href="/disks/pcx86/dos/microsoft/5.00/360K/MSDOS500-DISK3.json" md5="adcfcbcf89f3f11f3b98040f702ff42b" md5json="d6c6000cc3723045a314a35aa47ff17d">
+	<disk id="disk03" size="368640" chs="40:2:9" img="360K/archive/MSDOS500-DISK3.img" href="/disks/pcx86/dos/microsoft/5.00/360K/MSDOS500-DISK3.json" md5="d355f5aa0c10f73f212f543cae695b99" md5json="2b298426c50af3db034d8152baff8de1">
 		<name>MS-DOS 5.00 (360K Disk 3)</name>
+		<file size="8723" time="1991-04-09 05:00:00" attr="0x20">APPNOTES.TXT</file>
+		<file size="1768" time="1991-04-09 05:00:00" attr="0x20">CGA.GR_</file>
+		<file size="3330" time="1991-04-09 05:00:00" attr="0x20">CGA.IN_</file>
+		<file size="6920" time="1991-04-09 05:00:00" attr="0x20">CGA.VI_</file>
+		<file size="2844" time="1991-04-09 05:00:00" attr="0x20">DOSHELP.HL_</file>
+		<file size="4730" time="1991-04-09 05:00:00" attr="0x20">DOSKEY.CO_</file>
+		<file size="2231" time="1991-04-09 05:00:00" attr="0x20">DOSSHELL.CO_</file>
+		<file size="155854" time="1991-04-09 05:00:00" attr="0x20">DOSSHELL.EX_</file>
+		<file size="54344" time="1991-04-09 05:00:00" attr="0x20">DOSSHELL.HL_</file>
+		<file size="15486" time="1991-04-09 05:00:00" attr="0x20">DOSSWAP.EX_</file>
+		<file size="17419" time="1991-04-09 05:00:00" attr="0x20">EDIT.HL_</file>
+		<file size="2729" time="1991-04-09 05:00:00" attr="0x20">EGA.GR_</file>
+		<file size="3333" time="1991-04-09 05:00:00" attr="0x20">EGA.IN_</file>
+		<file size="7012" time="1991-04-09 05:00:00" attr="0x20">EGA.VI_</file>
+		<file size="2564" time="1991-04-09 05:00:00" attr="0x20">EGAMONO.GR_</file>
+		<file size="8534" time="1991-04-09 05:00:00" attr="0x20">HELP.EX_</file>
+		<file size="1809" time="1991-04-09 05:00:00" attr="0x20">HERC.GR_</file>
+		<file size="6998" time="1991-04-09 05:00:00" attr="0x20">HERC.VI_</file>
+		<file size="301" time="1991-04-09 05:00:00" attr="0x20">MONO.GR_</file>
+		<file size="2990" time="1991-04-09 05:00:00" attr="0x20">MONO.IN_</file>
+		<file size="2427" time="1991-04-09 05:00:00" attr="0x20">PACKING.LST</file>
+		<file size="11061" time="1991-04-09 05:00:00" attr="0x20">PRINT.EX_</file>
+		<file size="7536" time="1991-04-09 05:00:00" attr="0x20">RECOVER.EX_</file>
+		<file size="3593" time="1991-04-09 05:00:00" attr="0x20">VGA.GR_</file>
+		<file size="7236" time="1991-04-09 05:00:00" attr="0x20">VGA.VI_</file>
+		<file size="3605" time="1991-04-09 05:00:00" attr="0x20">VGAMONO.GR_</file>
 	</disk>
-	<disk id="disk04" size="368640" chs="40:2:9" img="360K/archive/MSDOS500-DISK4.img" href="/disks/pcx86/dos/microsoft/5.00/360K/MSDOS500-DISK4.json" md5="424a3f240db1e6f5123702e2e418b4c3" md5json="2179d909243e8c102c0b6275b9d7c003">
+	<disk id="disk04" size="368640" chs="40:2:9" img="360K/archive/MSDOS500-DISK4.img" href="/disks/pcx86/dos/microsoft/5.00/360K/MSDOS500-DISK4.json" md5="a4740d4feff3c6b8791c6ec4afc1f4f3" md5json="495219e1d48dc0294cfbe82ac5c0a0b2">
 		<name>MS-DOS 5.00 (360K Disk 4)</name>
+		<file size="413" time="1991-04-09 05:00:00" attr="0x20">EDIT.COM</file>
+		<file size="14942" time="1991-04-09 05:00:00" attr="0x20">MONEY.BA_</file>
+		<file size="4444" time="1991-04-09 05:00:00" attr="0x20">MSHERC.CO_</file>
+		<file size="213223" time="1991-04-09 05:00:00" attr="0x20">QBASIC.EX_</file>
+		<file size="123120" time="1991-04-09 05:00:00" attr="0x20">QBASIC.HL_</file>
 	</disk>
-	<disk id="disk05" size="368640" chs="40:2:9" img="360K/archive/MSDOS500-DISK5.img" href="/disks/pcx86/dos/microsoft/5.00/360K/MSDOS500-DISK5.json" md5="1cab22f71e27374c5d23cae01930a01e" md5json="9203b7234a7262fad8207e0dc4052a82">
+	<disk id="disk05" size="368640" chs="40:2:9" img="360K/archive/MSDOS500-DISK5.img" href="/disks/pcx86/dos/microsoft/5.00/360K/MSDOS500-DISK5.json" md5="07c4c7eb08872a65df8921eef0f4a344" md5json="3bfa3c44919a6de6ef0b6ce62dfa6e31">
 		<name>MS-DOS 5.00 (360K Disk 5)</name>
+		<file size="2605" time="1991-04-09 05:00:00" attr="0x20">4201.CP_</file>
+		<file size="368" time="1991-04-09 05:00:00" attr="0x20">4208.CP_</file>
+		<file size="261" time="1991-04-09 05:00:00" attr="0x20">5202.CP_</file>
+		<file size="8475" time="1991-04-09 05:00:00" attr="0x20">APPEND.EX_</file>
+		<file size="5219" time="1991-04-09 05:00:00" attr="0x20">ASSIGN.CO_</file>
+		<file size="11801" time="1991-04-09 05:00:00" attr="0x20">ATTRIB.EX_</file>
+		<file size="25727" time="1991-04-09 05:00:00" attr="0x20">BACKUP.EX_</file>
+		<file size="12705" time="1991-04-09 05:00:00" attr="0x20">CHKDSK.EX_</file>
+		<file size="10513" time="1991-04-09 05:00:00" attr="0x20">COMP.EX_</file>
+		<file size="7661" time="1991-04-09 05:00:00" attr="0x20">DISKCOMP.CO_</file>
+		<file size="8396" time="1991-04-09 05:00:00" attr="0x20">DISKCOPY.CO_</file>
+		<file size="4577" time="1991-04-09 05:00:00" attr="0x20">DRIVER.SY_</file>
+		<file size="6886" time="1991-04-09 05:00:00" attr="0x20">EXE2BIN.EX_</file>
+		<file size="14563" time="1991-04-09 05:00:00" attr="0x20">EXPAND.EXE</file>
+		<file size="13505" time="1991-04-09 05:00:00" attr="0x20">FC.EX_</file>
+		<file size="5560" time="1991-04-09 05:00:00" attr="0x20">FIND.EX_</file>
+		<file size="11991" time="1991-04-09 05:00:00" attr="0x20">GORILLA.BA_</file>
+		<file size="6903" time="1991-04-09 05:00:00" attr="0x20">GRAFTABL.CO_</file>
+		<file size="12909" time="1991-04-09 05:00:00" attr="0x20">GRAPHICS.CO_</file>
+		<file size="4866" time="1991-04-09 05:00:00" attr="0x20">GRAPHICS.PR_</file>
+		<file size="13902" time="1991-04-09 05:00:00" attr="0x20">JOIN.EX_</file>
+		<file size="6929" time="1991-04-09 05:00:00" attr="0x20">LABEL.EX_</file>
+		<file size="3470" time="1991-04-09 05:00:00" attr="0x20">LCD.CP_</file>
+		<file size="704" time="1991-04-09 05:00:00" attr="0x20">LOADFIX.CO_</file>
+		<file size="2319" time="1991-04-09 05:00:00" attr="0x20">MORE.CO_</file>
+		<file size="8266" time="1991-04-09 05:00:00" attr="0x20">NIBBLES.BA_</file>
+		<file size="12457" time="1991-04-09 05:00:00" attr="0x20">PRINTER.SY_</file>
+		<file size="13739" time="1991-04-09 05:00:00" attr="0x20">README.TXT</file>
+		<file size="5026" time="1991-04-09 05:00:00" attr="0x20">REMLINE.BA_</file>
+		<file size="14417" time="1991-04-09 05:00:00" attr="0x20">REPLACE.EX_</file>
+		<file size="26085" time="1991-04-09 05:00:00" attr="0x20">RESTORE.EX_</file>
+		<file size="4996" time="1991-04-09 05:00:00" attr="0x20">SORT.EX_</file>
+		<file size="14495" time="1991-04-09 05:00:00" attr="0x20">SUBST.EX_</file>
+		<file size="5445" time="1991-04-09 05:00:00" attr="0x20">TREE.CO_</file>
+		<file size="3214" time="1991-04-09 05:00:00" attr="0x20">WINA20.38_</file>
 	</disk>
-	<disk id="disk06" size="737280" chs="80:2:9" img="720K/archive/MSDOS500-DISK1.img" href="/disks/pcx86/dos/microsoft/5.00/720K/MSDOS500-DISK1.json" md5="637b4c237b2932eb2ba5661ef6758162" md5json="a2e79fb22adc034ed5fe638301120608">
+	<disk id="disk06" size="737280" chs="80:2:9" img="720K/archive/MSDOS500-DISK1.img" href="/disks/pcx86/dos/microsoft/5.00/720K/MSDOS500-DISK1.json" md5="b31e7d14b2719fd7c3f3837a6b1e8127" md5json="73205f34d2f70cbafd3406dc5c43b43a">
 		<name>MS-DOS 5.00 (720K Disk 1)</name>
+		<file size="7305" time="1991-11-11 04:00:02" attr="0x20">8514.VI_</file>
+		<file size="7185" time="1991-11-11 04:00:02" attr="0x20">ANSI.SY_</file>
+		<file size="36" time="1991-11-11 04:00:02" attr="0x20">AUTOEXEC.BAT</file>
+		<file size="47845" time="1991-11-11 04:00:02" attr="0x20">COMMAND.COM</file>
+		<file size="13" time="1991-11-11 04:00:02" attr="0x20">CONFIG.SYS</file>
+		<file size="17069" time="1991-11-11 04:00:02" attr="0x20">COUNTRY.SYS</file>
+		<file size="716" time="1991-11-11 04:00:02" attr="0x20">CV.COM</file>
+		<file size="16898" time="1991-11-11 04:00:02" attr="0x20">DEBUG.EX_</file>
+		<file size="11186" time="1991-11-11 04:00:02" attr="0x20">DISPLAY.SY_</file>
+		<file size="4730" time="1991-11-11 04:00:02" attr="0x20">DOSKEY.CO_</file>
+		<file size="10441" time="1991-11-11 04:00:02" attr="0x20">EDLIN.EX_</file>
+		<file size="19714" time="1991-11-11 04:00:02" attr="0x20">EGA.CP_</file>
+		<file size="4107" time="1991-11-11 04:00:02" attr="0x20">EGA.SY_</file>
+		<file size="47605" time="1991-11-11 04:00:02" attr="0x20">EMM386.EX_</file>
+		<file size="8927" time="1991-11-11 04:00:02" attr="0x20">FASTOPEN.EX_</file>
+		<file size="57224" time="1991-11-11 04:00:02" attr="0x20">FDISK.EXE</file>
+		<file size="33087" time="1991-11-11 04:00:02" attr="0x20">FORMAT.COM</file>
+		<file size="7916" time="1991-11-11 04:00:02" attr="0x20">HIMEM.SY_</file>
+		<file size="33430" time="1991-11-11 04:00:02" attr="0x20">IO.SYS</file>
+		<file size="14986" time="1991-11-11 04:00:02" attr="0x20">KEYB.COM</file>
+		<file size="34697" time="1991-11-11 04:00:02" attr="0x20">KEYBOARD.SYS</file>
+		<file size="29726" time="1991-11-11 04:00:02" attr="0x20">MEM.EX_</file>
+		<file size="12811" time="1991-11-11 04:00:02" attr="0x20">MIRROR.CO_</file>
+		<file size="16834" time="1991-11-11 04:00:02" attr="0x20">MODE.CO_</file>
+		<file size="37394" time="1991-11-11 04:00:02" attr="0x20">MSDOS.SYS</file>
+		<file size="7052" time="1991-11-11 04:00:02" attr="0x20">NLSFUNC.EXE</file>
+		<file size="3765" time="1991-11-11 04:00:02" attr="0x20">RAMDRIVE.SY_</file>
+		<file size="452" time="1991-11-11 04:00:02" attr="0x20">README.1ST</file>
+		<file size="73860" time="1991-11-11 04:00:02" attr="0x20">SETUP.EXE</file>
+		<file size="2054" time="1991-11-11 04:00:02" attr="0x20">SETUP.INI</file>
+		<file size="7448" time="1991-11-11 04:00:02" attr="0x20">SETVER.EX_</file>
+		<file size="9312" time="1991-11-11 04:00:02" attr="0x20">SHARE.EX_</file>
+		<file size="6295" time="1991-11-11 04:00:02" attr="0x20">SMARTDRV.SY_</file>
+		<file size="9672" time="1991-11-11 04:00:02" attr="0x20">SYS.CO_</file>
+		<file size="9399" time="1991-11-11 04:00:02" attr="0x20">UNDELETE.EX_</file>
+		<file size="18576" time="1991-11-11 04:00:02" attr="0x20">UNFORMAT.COM</file>
+		<file size="11879" time="1991-11-11 04:00:02" attr="0x20">XCOPY.EX_</file>
 	</disk>
-	<disk id="disk07" size="737280" chs="80:2:9" img="720K/archive/MSDOS500-DISK2.img" href="/disks/pcx86/dos/microsoft/5.00/720K/MSDOS500-DISK2.json" md5="03ee29d66e84650165dfd97c304b9f3a" md5json="f0ac77b0fce97c1635f99c9f443a6b7b">
+	<disk id="disk07" size="737280" chs="80:2:9" img="720K/archive/MSDOS500-DISK2.img" href="/disks/pcx86/dos/microsoft/5.00/720K/MSDOS500-DISK2.json" md5="89fc84cb7333136ccaad7db0de57514a" md5json="c7ca2278d40484d6669e51c0f71f75bd">
 		<name>MS-DOS 5.00 (720K Disk 2)</name>
+		<file size="8369" time="1991-11-11 04:00:02" attr="0x20">APPNOTES.TXT</file>
+		<file size="1768" time="1991-11-11 04:00:02" attr="0x20">CGA.GR_</file>
+		<file size="3330" time="1991-11-11 04:00:02" attr="0x20">CGA.IN_</file>
+		<file size="6920" time="1991-11-11 04:00:02" attr="0x20">CGA.VI_</file>
+		<file size="2844" time="1991-11-11 04:00:02" attr="0x20">DOSHELP.HL_</file>
+		<file size="2231" time="1991-11-11 04:00:02" attr="0x20">DOSSHELL.CO_</file>
+		<file size="156431" time="1991-11-11 04:00:02" attr="0x20">DOSSHELL.EX_</file>
+		<file size="54344" time="1991-11-11 04:00:02" attr="0x20">DOSSHELL.HL_</file>
+		<file size="15492" time="1991-11-11 04:00:02" attr="0x20">DOSSWAP.EX_</file>
+		<file size="413" time="1991-11-11 04:00:02" attr="0x20">EDIT.COM</file>
+		<file size="17419" time="1991-11-11 04:00:02" attr="0x20">EDIT.HL_</file>
+		<file size="2729" time="1991-11-11 04:00:02" attr="0x20">EGA.GR_</file>
+		<file size="3333" time="1991-11-11 04:00:02" attr="0x20">EGA.IN_</file>
+		<file size="7012" time="1991-11-11 04:00:02" attr="0x20">EGA.VI_</file>
+		<file size="2564" time="1991-11-11 04:00:02" attr="0x20">EGAMONO.GR_</file>
+		<file size="8534" time="1991-11-11 04:00:02" attr="0x20">HELP.EX_</file>
+		<file size="1809" time="1991-11-11 04:00:02" attr="0x20">HERC.GR_</file>
+		<file size="6998" time="1991-11-11 04:00:02" attr="0x20">HERC.VI_</file>
+		<file size="14942" time="1991-11-11 04:00:02" attr="0x20">MONEY.BA_</file>
+		<file size="301" time="1991-11-11 04:00:02" attr="0x20">MONO.GR_</file>
+		<file size="2990" time="1991-11-11 04:00:02" attr="0x20">MONO.IN_</file>
+		<file size="4444" time="1991-11-11 04:00:02" attr="0x20">MSHERC.CO_</file>
+		<file size="2404" time="1991-11-11 04:00:02" attr="0x20">PACKING.LST</file>
+		<file size="11061" time="1991-11-11 04:00:02" attr="0x20">PRINT.EX_</file>
+		<file size="213222" time="1991-11-11 04:00:02" attr="0x20">QBASIC.EX_</file>
+		<file size="123120" time="1991-11-11 04:00:02" attr="0x20">QBASIC.HL_</file>
+		<file size="7561" time="1991-11-11 04:00:02" attr="0x20">RECOVER.EX_</file>
+		<file size="3593" time="1991-11-11 04:00:02" attr="0x20">VGA.GR_</file>
+		<file size="7236" time="1991-11-11 04:00:02" attr="0x20">VGA.VI_</file>
+		<file size="3605" time="1991-11-11 04:00:02" attr="0x20">VGAMONO.GR_</file>
 	</disk>
-	<disk id="disk08" size="737280" chs="80:2:9" img="720K/archive/MSDOS500-DISK3.img" href="/disks/pcx86/dos/microsoft/5.00/720K/MSDOS500-DISK3.json" md5="6864241d46bbf1f92383f0840f432f62" md5json="b0f3292650a2e82066af42583d0bb297">
+	<disk id="disk08" size="737280" chs="80:2:9" img="720K/archive/MSDOS500-DISK3.img" href="/disks/pcx86/dos/microsoft/5.00/720K/MSDOS500-DISK3.json" md5="c5def8a2ebc913030a736e9e87a543f8" md5json="79bc677c0877d8e0ad898c55de237d61">
 		<name>MS-DOS 5.00 (720K Disk 3)</name>
+		<file size="2605" time="1991-11-11 04:00:02" attr="0x20">4201.CP_</file>
+		<file size="368" time="1991-11-11 04:00:02" attr="0x20">4208.CP_</file>
+		<file size="261" time="1991-11-11 04:00:02" attr="0x20">5202.CP_</file>
+		<file size="8475" time="1991-11-11 04:00:02" attr="0x20">APPEND.EX_</file>
+		<file size="5219" time="1991-11-11 04:00:02" attr="0x20">ASSIGN.CO_</file>
+		<file size="11801" time="1991-11-11 04:00:02" attr="0x20">ATTRIB.EX_</file>
+		<file size="25727" time="1991-11-11 04:00:02" attr="0x20">BACKUP.EX_</file>
+		<file size="12703" time="1991-11-11 04:00:02" attr="0x20">CHKDSK.EX_</file>
+		<file size="10513" time="1991-11-11 04:00:02" attr="0x20">COMP.EX_</file>
+		<file size="7656" time="1991-11-11 04:00:02" attr="0x20">DISKCOMP.CO_</file>
+		<file size="8449" time="1991-11-11 04:00:02" attr="0x20">DISKCOPY.CO_</file>
+		<file size="4577" time="1991-11-11 04:00:02" attr="0x20">DRIVER.SY_</file>
+		<file size="6886" time="1991-11-11 04:00:02" attr="0x20">EXE2BIN.EX_</file>
+		<file size="16885" time="1991-11-11 04:00:02" attr="0x20">EXPAND.EXE</file>
+		<file size="13505" time="1991-11-11 04:00:02" attr="0x20">FC.EX_</file>
+		<file size="5560" time="1991-11-11 04:00:02" attr="0x20">FIND.EX_</file>
+		<file size="11991" time="1991-11-11 04:00:02" attr="0x20">GORILLA.BA_</file>
+		<file size="6903" time="1991-11-11 04:00:02" attr="0x20">GRAFTABL.CO_</file>
+		<file size="12909" time="1991-11-11 04:00:02" attr="0x20">GRAPHICS.CO_</file>
+		<file size="4866" time="1991-11-11 04:00:02" attr="0x20">GRAPHICS.PR_</file>
+		<file size="13902" time="1991-11-11 04:00:02" attr="0x20">JOIN.EX_</file>
+		<file size="6929" time="1991-11-11 04:00:02" attr="0x20">LABEL.EX_</file>
+		<file size="3470" time="1991-11-11 04:00:02" attr="0x20">LCD.CP_</file>
+		<file size="704" time="1991-11-11 04:00:02" attr="0x20">LOADFIX.CO_</file>
+		<file size="2319" time="1991-11-11 04:00:02" attr="0x20">MORE.CO_</file>
+		<file size="8266" time="1991-11-11 04:00:02" attr="0x20">NIBBLES.BA_</file>
+		<file size="12457" time="1991-11-11 04:00:02" attr="0x20">PRINTER.SY_</file>
+		<file size="236" time="1991-11-11 04:00:02" attr="0x20">PRINTFIX.COM</file>
+		<file size="10858" time="1991-11-11 04:00:02" attr="0x20">README.TXT</file>
+		<file size="5026" time="1991-11-11 04:00:02" attr="0x20">REMLINE.BA_</file>
+		<file size="14417" time="1991-11-11 04:00:02" attr="0x20">REPLACE.EX_</file>
+		<file size="26085" time="1991-11-11 04:00:02" attr="0x20">RESTORE.EX_</file>
+		<file size="4996" time="1991-11-11 04:00:02" attr="0x20">SORT.EX_</file>
+		<file size="14495" time="1991-11-11 04:00:02" attr="0x20">SUBST.EX_</file>
+		<file size="5445" time="1991-11-11 04:00:02" attr="0x20">TREE.CO_</file>
+		<file size="3214" time="1991-11-11 04:00:02" attr="0x20">WINA20.38_</file>
 	</disk>
 </manifest>

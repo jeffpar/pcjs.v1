@@ -1006,8 +1006,8 @@ DiskDump.updateManifest = function(disk, sManifestFile, sDiskPath, sOutputFile, 
         var sXMLDisk = '\t<disk id="' + sIDDisk + '"';
         sXMLDisk += (size? ' size="' + size + '"' : '');
         sXMLDisk += (sCHS? ' chs="' + sCHS + '"' : '');
-        i = sDiskPath.indexOf("archive/");
-        if (i >= 0) sDiskPath = sDiskPath.substr(i);
+        // i = sDiskPath.indexOf("archive/");
+        // if (i >= 0) sDiskPath = sDiskPath.substr(i);
         sXMLDisk += (sParm? ' ' + sParm + '="' + sDiskPath + '"' : '');
         sXMLDisk += ' href="' + sOutputFile + '"' + (md5Disk? ' md5="' + md5Disk + '"' : '') + (md5JSON? ' md5json="' + md5JSON + '"' : '') + '>\n';
 
