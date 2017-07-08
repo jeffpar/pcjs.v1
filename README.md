@@ -36,6 +36,9 @@ The [JavaScript Machine](/devices/pcx86/machine/5150/mda/64kb/) above uses [PCx8
 configurations, featuring the built-in PCx86 Debugger.  For even greater control, build your own PC. The
 [PCx86 Documentation](/docs/pcx86/) will help you get started.
 
+* [COMPAQ EGA](ega/)
+* [COMPAQ VGA](vga/)
+
 PCx86 has steadily evolved to support more classic x86-based machines, including the IBM PC XT, the 80286-based IBM PC AT,
 and the 80386-based COMPAQ DeskPro 386.  PCx86 fully supports the original machine ROMs, video cards, etc, and all
 machines run at their original speeds.
