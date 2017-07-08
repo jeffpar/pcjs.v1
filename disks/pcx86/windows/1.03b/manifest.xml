@@ -2,22 +2,201 @@
 <?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.35.2/manifest.xsl"?>
 <manifest type="software">
 	<title>Microsoft Windows 1.03b</title>
-	<disk id="disk01" size="368640" chs="40:2:9" img="archive/WIN103-DISK1-SETUP.img" href="/disks/pcx86/windows/1.03b/WIN103-DISK1-SETUP.json" md5="5a6beaf2d8b6087a4019cc0185224f6c" md5json="7415f38d28c12e3f6dabd43edc814970">
+	<disk id="disk01" size="368640" chs="40:2:9" img="archive/WIN103-DISK1-SETUP.img" href="/disks/pcx86/windows/1.03b/WIN103-DISK1-SETUP.json" md5="569455dfa4bf33f45d04a58e86cce135" md5json="0f64fa2c27f4b6a8f5ac3506a21acd16">
 		<name>Windows 1.03b (SETUP)</name>
+		<file size="15776" time="1986-05-23 17:22:58" attr="0x20">ATTDC.DRV</file>
+		<file size="17824" time="1986-05-23 14:23:10" attr="0x20">ATTDEB.DRV</file>
+		<file size="3903" time="1986-05-22 16:21:26" attr="0x20">ATTKBD.DRV</file>
+		<file size="2305" time="1986-05-22 14:30:10" attr="0x20">ATTMOUSE.DRV</file>
+		<file size="13008" time="1986-06-24 20:39:30" attr="0x20">CGA.DRV</file>
+		<file size="4860" time="1986-05-22 09:01:04" attr="0x20">COMM.DRV</file>
+		<file size="4649" time="1986-07-20 17:28:26" attr="0x20">DENMARK.DRV</file>
+		<file size="13952" time="1986-06-24 20:35:48" attr="0x20">EGAHIBW.DRV</file>
+		<file size="17536" time="1986-06-24 20:47:16" attr="0x20">EGAHIRES.DRV</file>
+		<file size="15648" time="1986-06-24 20:46:20" attr="0x20">EGALORES.DRV</file>
+		<file size="13952" time="1986-06-24 20:36:38" attr="0x20">EGAMONO.DRV</file>
+		<file size="12874" time="1985-07-30 17:33:12" attr="0x20">EMM.AT</file>
+		<file size="12898" time="1985-07-30 17:15:28" attr="0x20">EMM.PC</file>
+		<file size="7952" time="1986-07-29 16:42:46" attr="0x20">FONTS400.FON</file>
+		<file size="4773" time="1986-07-20 17:27:22" attr="0x20">FRANCE.DRV</file>
+		<file size="1961" time="1986-05-22 10:48:34" attr="0x20">FTG.DRV</file>
+		<file size="15216" time="1985-12-19 21:25:50" attr="0x20">GENIUS.DRV</file>
+		<file size="4758" time="1986-07-20 17:27:50" attr="0x20">GERMANY.DRV</file>
+		<file size="15776" time="1986-06-24 20:41:24" attr="0x20">HERCULES.DRV</file>
+		<file size="7472" time="1986-07-29 16:42:34" attr="0x20">HIFONTS.FON</file>
+		<file size="4027" time="1986-07-20 17:27:40" attr="0x20">ITALY.DRV</file>
+		<file size="2114" time="1986-05-22 10:35:24" attr="0x20">JOYMOUSE.DRV</file>
+		<file size="34063" time="1986-08-06 14:59:44" attr="0x20">KERNEL.EXE</file>
+		<file size="372" time="1986-06-11 11:23:36" attr="0x20">LASRHARD.TXT</file>
+		<file size="372" time="1986-06-11 11:22:36" attr="0x20">LASRSOFT.TXT</file>
+		<file size="2661" time="1986-05-02 17:47:00" attr="0x20">LMOUSE.DRV</file>
+		<file size="5552" time="1986-07-29 16:42:24" attr="0x20">LOFONTS.FON</file>
+		<file size="2438" time="1986-05-22 10:41:00" attr="0x20">LPC.DRV</file>
+		<file size="3358" time="1986-08-21 17:15:48" attr="0x20">MOUSE.DRV</file>
+		<file size="1966" time="1986-05-22 10:45:16" attr="0x20">MSMOUSE1.DRV</file>
+		<file size="1966" time="1986-05-22 10:45:36" attr="0x20">MSMOUSE2.DRV</file>
+		<file size="1592" time="1986-05-22 10:42:06" attr="0x20">NOMOUSE.DRV</file>
+		<file size="4649" time="1986-07-20 17:28:16" attr="0x20">NORWAY.DRV</file>
+		<file size="6680" time="1986-08-01 05:59:02" attr="0x20">RAMDRIVE.SYS</file>
+		<file size="36676" time="1986-06-30 17:57:30" attr="0x20">SETUP.EXE</file>
+		<file size="8" time="1986-08-11 11:59:50" attr="0x20">SETUP.LBL</file>
+		<file size="5853" time="1986-05-22 11:49:16" attr="0x20">SOUND.DRV</file>
+		<file size="4630" time="1986-07-20 17:27:58" attr="0x20">SPAIN.DRV</file>
+		<file size="4649" time="1986-07-20 17:28:08" attr="0x20">SWEDEN.DRV</file>
+		<file size="2663" time="1986-07-09 15:15:06" attr="0x20">SYSTEM.DRV</file>
+		<file size="4009" time="1986-07-20 17:27:32" attr="0x20">UK.DRV</file>
+		<file size="4005" time="1986-07-20 17:27:14" attr="0x20">USA.DRV</file>
+		<file size="47" time="1986-08-11 12:02:32" attr="0x20">WRITE.DAT</file>
 	</disk>
-	<disk id="disk02" size="368640" chs="40:2:9" img="archive/WIN103-DISK2-BUILD.img" href="/disks/pcx86/windows/1.03b/WIN103-DISK2-BUILD.json" md5="319541af40a266e3ed5a8a9c962635d3" md5json="e994d34dd173581a91467b6c6164c345">
+	<disk id="disk02" size="368640" chs="40:2:9" img="archive/WIN103-DISK2-BUILD.img" href="/disks/pcx86/windows/1.03b/WIN103-DISK2-BUILD.json" md5="c38f994ae50a840ee2359dbc51783567" md5json="f3a952a0d1aea6d66f70573e47b48de6">
 		<name>Windows 1.03b (BUILD)</name>
+		<file size="1307" time="1986-02-22 09:34:02" attr="0x20">ATTDC.GRB</file>
+		<file size="2916" time="1986-05-28 11:30:52" attr="0x20">ATTDC.LGO</file>
+		<file size="12" time="1986-05-23 13:11:54" attr="0x20">ATTDEB.GRB</file>
+		<file size="3095" time="1986-05-28 11:31:24" attr="0x20">ATTDEB.LGO</file>
+		<file size="8" time="1986-08-11 12:02:54" attr="0x20">BUILD.LBL</file>
+		<file size="1403" time="1986-07-16 23:07:08" attr="0x20">CGA.GRB</file>
+		<file size="2937" time="1986-08-11 11:41:00" attr="0x20">CGA.LGO</file>
+		<file size="15" time="1985-07-24 13:55:06" attr="0x20">EGAHIBW.GRB</file>
+		<file size="9" time="1985-06-27 12:29:22" attr="0x20">EGAHIBW.LGO</file>
+		<file size="15" time="1985-07-24 13:55:06" attr="0x20">EGAHIRES.GRB</file>
+		<file size="9" time="1985-06-27 12:29:22" attr="0x20">EGAHIRES.LGO</file>
+		<file size="1266" time="1986-07-16 23:07:30" attr="0x20">EGALORES.GRB</file>
+		<file size="9" time="1985-06-27 12:29:22" attr="0x20">EGALORES.LGO</file>
+		<file size="1114" time="1986-07-16 23:07:44" attr="0x20">EGAMONO.GRB</file>
+		<file size="2936" time="1986-08-11 11:41:48" attr="0x20">EGAMONO.LGO</file>
+		<file size="92638" time="1986-07-11 15:23:38" attr="0x20">GDI.EXE</file>
+		<file size="9" time="1986-07-29 15:55:28" attr="0x20">GENIUS.GRB</file>
+		<file size="9" time="1985-06-27 12:29:22" attr="0x20">GENIUS.LGO</file>
+		<file size="1303" time="1986-07-16 23:07:20" attr="0x20">HERCULES.GRB</file>
+		<file size="3060" time="1986-08-11 11:41:28" attr="0x20">HERCULES.LGO</file>
+		<file size="43104" time="1986-06-09 16:57:32" attr="0x20">MSDOS.EXE</file>
+		<file size="6242" time="1986-06-23 14:32:56" attr="0x20">MSDOSD.EXE</file>
+		<file size="13264" time="1986-06-30 18:09:14" attr="0x20">SPOOLER.EXE</file>
+		<file size="122432" time="1986-08-24 15:57:02" attr="0x20">USER.EXE</file>
+		<file size="1936" time="1985-11-12 15:13:46" attr="0x20">WIN.CNF</file>
+		<file size="2093" time="1986-05-22 13:50:36" attr="0x20">WIN.INI</file>
+		<file size="19824" time="1986-08-01 03:16:58" attr="0x20">WINOLDAP.MOD</file>
 	</disk>
-	<disk id="disk03" size="368640" chs="40:2:9" img="archive/WIN103-DISK3-UTILITY.img" href="/disks/pcx86/windows/1.03b/WIN103-DISK3-UTILITY.json" md5="44e1e5cc1ff3a43f7f3590e7b5c634a8" md5json="babc785e32b088f474740f804b74e6f4">
+	<disk id="disk03" size="368640" chs="40:2:9" img="archive/WIN103-DISK3-UTILITY.img" href="/disks/pcx86/windows/1.03b/WIN103-DISK3-UTILITY.json" md5="a888a832e19afb98cd4b4367f27011c1" md5json="c16f34bac7fd9e31e6323b2d17e6077b">
 		<name>Windows 1.03b (UTILITY)</name>
+		<file size="12016" time="1986-05-22 10:58:02" attr="0x20">CITOH.DRV</file>
+		<file size="14352" time="1986-05-22 11:07:52" attr="0x20">EPSON.DRV</file>
+		<file size="12176" time="1986-05-22 12:18:46" attr="0x20">EPSONMX.DRV</file>
+		<file size="16336" time="1986-07-29 14:20:16" attr="0x20">HP7470A.DRV</file>
+		<file size="18960" time="1986-07-29 14:14:04" attr="0x20">HP7475A.DRV</file>
+		<file size="20384" time="1986-07-29 13:50:46" attr="0x20">HP7550A.DRV</file>
+		<file size="21504" time="1986-08-06 12:52:30" attr="0x20">HPLASER.DRV</file>
+		<file size="22864" time="1986-08-06 13:06:20" attr="0x20">HPLASERP.DRV</file>
+		<file size="12288" time="1986-05-22 12:28:42" attr="0x20">IBMGRX.DRV</file>
+		<file size="14544" time="1986-05-22 12:39:26" attr="0x20">LQ1500.DRV</file>
+		<file size="22512" time="1986-05-22 10:23:24" attr="0x20">NEC3550.DRV</file>
+		<file size="12304" time="1986-05-22 12:49:58" attr="0x20">NECP2.DRV</file>
+		<file size="12416" time="1986-05-22 12:59:40" attr="0x20">OKI92.DRV</file>
+		<file size="56224" time="1986-08-13 10:26:48" attr="0x20">PSCRIPT.DRV</file>
+		<file size="148" time="1986-07-21 14:22:50" attr="0x20">README.DOC</file>
+		<file size="14848" time="1986-05-22 11:17:26" attr="0x20">SG10.DRV</file>
+		<file size="12128" time="1986-07-10 12:00:06" attr="0x20">THINKJET.DRV</file>
+		<file size="11584" time="1986-05-22 13:09:20" attr="0x20">TI850.DRV</file>
+		<file size="12432" time="1986-05-22 11:27:22" attr="0x20">TOSH.DRV</file>
+		<file size="4800" time="1986-07-10 13:52:20" attr="0x20">TTY.DRV</file>
+		<file size="11" time="1986-08-14 20:41:06" attr="0x20">UTILITY.LBL</file>
+		<file size="21024" time="1986-08-14 20:05:26" attr="0x20">XER4020.DRV</file>
 	</disk>
-	<disk id="disk04" size="368640" chs="40:2:9" img="archive/WIN103-DISK4-FONT.img" href="/disks/pcx86/windows/1.03b/WIN103-DISK4-FONT.json" md5="9054b8c1da0034f2c87d989b2f87c5b3" md5json="1388bc02c9251f53dfa9ef7878d3a817">
+	<disk id="disk04" size="368640" chs="40:2:9" img="archive/WIN103-DISK4-FONT.img" href="/disks/pcx86/windows/1.03b/WIN103-DISK4-FONT.json" md5="1b5cd601b72e65ea01c0d41ef5fc573e" md5json="c29d5575662ccad9004a85ffed512a09">
 		<name>Windows 1.03b (FONT)</name>
+		<file size="8720" time="1986-07-29 16:43:18" attr="0x20">COURA.FON</file>
+		<file size="12304" time="1986-07-29 16:43:30" attr="0x20">COURB.FON</file>
+		<file size="8784" time="1986-07-29 16:43:40" attr="0x20">COURC.FON</file>
+		<file size="15136" time="1986-07-29 16:43:54" attr="0x20">COURD.FON</file>
+		<file size="7" time="1986-08-11 12:08:40" attr="0x20">FONT.LBL</file>
+		<file size="27056" time="1986-07-29 16:44:48" attr="0x20">HELVA.FON</file>
+		<file size="37680" time="1986-07-29 16:45:04" attr="0x20">HELVB.FON</file>
+		<file size="26624" time="1986-07-29 16:45:20" attr="0x20">HELVC.FON</file>
+		<file size="45600" time="1986-07-29 16:45:38" attr="0x20">HELVD.FON</file>
+		<file size="7584" time="1986-07-09 17:18:12" attr="0x20">MODERN.FON</file>
+		<file size="11120" time="1986-07-09 17:19:14" attr="0x20">ROMAN.FON</file>
+		<file size="10304" time="1986-07-09 17:18:44" attr="0x20">SCRIPT.FON</file>
+		<file size="26256" time="1986-07-29 16:46:32" attr="0x20">TMSRA.FON</file>
+		<file size="36240" time="1986-07-29 16:46:50" attr="0x20">TMSRB.FON</file>
+		<file size="25824" time="1986-07-29 16:47:06" attr="0x20">TMSRC.FON</file>
+		<file size="45200" time="1986-07-29 16:47:24" attr="0x20">TMSRD.FON</file>
 	</disk>
-	<disk id="disk05" size="368640" chs="40:2:9" img="archive/WIN103-DISK5-APPS.img" href="/disks/pcx86/windows/1.03b/WIN103-DISK5-APPS.json" md5="cccf53de1ffd4ff3346a7f13abf740b0" md5json="7485d50f897205c68efef8c1835a9fd9">
+	<disk id="disk05" size="368640" chs="40:2:9" img="archive/WIN103-DISK5-APPS.img" href="/disks/pcx86/windows/1.03b/WIN103-DISK5-APPS.json" md5="0993a1ebd16f1abaf40c0b8c0f17c74a" md5json="8a0c7802ae6bbee1569dc88e47cb6859">
 		<name>Windows 1.03b (APPS)</name>
+		<file size="42" time="1985-06-04 09:07:36" attr="0x20">ABC.TXT</file>
+		<file size="25008" time="1986-05-22 04:33:36" attr="0x20">CALC.EXE</file>
+		<file size="37552" time="1986-05-22 07:55:48" attr="0x20">CALENDAR.EXE</file>
+		<file size="36992" time="1986-05-22 04:23:40" attr="0x20">CARDFILE.EXE</file>
+		<file size="9712" time="1986-05-22 06:17:52" attr="0x20">CLIPBRD.EXE</file>
+		<file size="7984" time="1986-05-22 06:08:08" attr="0x20">CLOCK.EXE</file>
+		<file size="52704" time="1986-08-14 16:13:12" attr="0x20">CONTROL.EXE</file>
+		<file size="493" time="1985-10-25 13:02:04" attr="0x20">DOTHIS.TXT</file>
+		<file size="18736" time="1986-05-22 06:28:22" attr="0x20">NOTEPAD.EXE</file>
+		<file size="90176" time="1986-07-10 18:28:20" attr="0x20">PAINT.EXE</file>
+		<file size="14864" time="1986-05-22 04:28:28" attr="0x20">REVERSI.EXE</file>
+		<file size="47344" time="1986-06-12 11:22:48" attr="0x20">TERMINAL.EXE</file>
 	</disk>
-	<disk id="disk06" size="368640" chs="40:2:9" img="archive/WIN103-DISK6-PROGRAM.img" href="/disks/pcx86/windows/1.03b/WIN103-DISK6-PROGRAM.json" md5="24d6a39611931808f6749fea9f26dd90" md5json="dc8d539b7f07ea6786982fdaa5e72521">
+	<disk id="disk06" size="368640" chs="40:2:9" img="archive/WIN103-DISK6-PROGRAM.img" href="/disks/pcx86/windows/1.03b/WIN103-DISK6-PROGRAM.json" md5="3b0d234453516beaffa5c07cdf60f53d" md5json="b5adf29c78200eef7b7e32293a1e218f">
 		<name>Windows 1.03b (PROGRAM)</name>
+		<file size="1938" time="1986-08-11 12:12:36" attr="0x10">PIF</file>
+		<file size="369" time="1985-10-26 12:58:54" attr="0x20" dir="PIF/">123-2.PIF</file>
+		<file size="369" time="1985-10-26 12:57:10" attr="0x20" dir="PIF/">123.PIF</file>
+		<file size="369" time="1985-10-14 18:02:56" attr="0x20" dir="PIF/">BASIC.PIF</file>
+		<file size="369" time="1985-10-14 18:03:34" attr="0x20" dir="PIF/">BASICA.PIF</file>
+		<file size="369" time="1985-09-18 11:09:52" attr="0x20" dir="PIF/">CHART.PIF</file>
+		<file size="369" time="1985-06-26 14:39:34" attr="0x20" dir="PIF/">CLOUT.PIF</file>
+		<file size="369" time="1985-09-18 11:16:08" attr="0x20" dir="PIF/">DBASE.PIF</file>
+		<file size="369" time="1985-09-18 11:16:38" attr="0x20" dir="PIF/">DBASE2.PIF</file>
+		<file size="369" time="1985-09-18 11:17:08" attr="0x20" dir="PIF/">DBASE3.PIF</file>
+		<file size="369" time="1985-09-18 11:18:24" attr="0x20" dir="PIF/">DW2PG.PIF</file>
+		<file size="369" time="1985-09-18 11:19:12" attr="0x20" dir="PIF/">DW3PG.PIF</file>
+		<file size="369" time="1985-09-18 11:28:06" attr="0x20" dir="PIF/">FILE.PIF</file>
+		<file size="369" time="1986-07-16 12:21:24" attr="0x20" dir="PIF/">FW.PIF</file>
+		<file size="369" time="1985-09-18 11:29:16" attr="0x20" dir="PIF/">FWC.PIF</file>
+		<file size="369" time="1985-09-18 11:30:54" attr="0x20" dir="PIF/">FWT.PIF</file>
+		<file size="369" time="1985-09-18 11:31:56" attr="0x20" dir="PIF/">GRAPH.PIF</file>
+		<file size="369" time="1980-01-03 15:23:04" attr="0x20" dir="PIF/">HTPM.PIF</file>
+		<file size="369" time="1985-09-18 11:44:08" attr="0x20" dir="PIF/">IBMFILE.PIF</file>
+		<file size="369" time="1985-09-18 11:45:32" attr="0x20" dir="PIF/">IBMGRAPH.PIF</file>
+		<file size="369" time="1980-01-03 14:12:22" attr="0x20" dir="PIF/">IBMREPRT.PIF</file>
+		<file size="369" time="1980-01-03 14:23:52" attr="0x20" dir="PIF/">IBMWRITE.PIF</file>
+		<file size="369" time="1985-10-26 12:58:12" attr="0x20" dir="PIF/">LOTUS.PIF</file>
+		<file size="369" time="1985-10-26 13:17:36" attr="0x20" dir="PIF/">LOTUS2.PIF</file>
+		<file size="369" time="1985-09-18 11:35:38" attr="0x20" dir="PIF/">MP.PIF</file>
+		<file size="369" time="1985-12-18 12:09:28" attr="0x20" dir="PIF/">MSACCESS.PIF</file>
+		<file size="369" time="1985-09-24 10:39:20" attr="0x20" dir="PIF/">PC-DRAW.PIF</file>
+		<file size="369" time="1986-05-01 16:45:04" attr="0x20" dir="PIF/">PE.PIF</file>
+		<file size="369" time="1980-01-03 14:36:54" attr="0x20" dir="PIF/">PFSACCES.PIF</file>
+		<file size="28528" time="1986-05-22 06:35:22" attr="0x20" dir="PIF/">PIFEDIT.EXE</file>
+		<file size="369" time="1985-09-18 11:49:46" attr="0x20" dir="PIF/">PLAN.PIF</file>
+		<file size="369" time="1985-09-18 11:50:40" attr="0x20" dir="PIF/">PROEDIT.PIF</file>
+		<file size="369" time="1985-09-18 11:51:22" attr="0x20" dir="PIF/">PROJ.PIF</file>
+		<file size="369" time="1985-09-18 11:52:54" attr="0x20" dir="PIF/">PROJM.PIF</file>
+		<file size="369" time="1986-08-08 11:35:26" attr="0x20" dir="PIF/">QB.PIF</file>
+		<file size="369" time="1985-11-07 16:16:54" attr="0x20" dir="PIF/">RB5000.PIF</file>
+		<file size="369" time="1985-09-18 12:02:48" attr="0x20" dir="PIF/">RBASE.PIF</file>
+		<file size="369" time="1985-09-18 12:03:22" attr="0x20" dir="PIF/">REPORT.PIF</file>
+		<file size="369" time="1985-09-18 12:04:28" attr="0x20" dir="PIF/">RG.PIF</file>
+		<file size="369" time="1985-09-18 12:05:06" attr="0x20" dir="PIF/">SC3.PIF</file>
+		<file size="369" time="1985-09-18 12:06:44" attr="0x20" dir="PIF/">SCOM.PIF</file>
+		<file size="369" time="1985-09-18 12:06:22" attr="0x20" dir="PIF/">SCOMII.PIF</file>
+		<file size="369" time="1985-09-19 11:53:26" attr="0x20" dir="PIF/">SPELL.PIF</file>
+		<file size="369" time="1985-08-27 06:37:10" attr="0x20" dir="PIF/">SYMPHACC.PIF</file>
+		<file size="369" time="1985-09-18 12:13:06" attr="0x20" dir="PIF/">SYMPHONY.PIF</file>
+		<file size="369" time="1985-09-18 12:13:40" attr="0x20" dir="PIF/">TURBO.PIF</file>
+		<file size="369" time="1980-01-03 14:45:34" attr="0x20" dir="PIF/">VX.PIF</file>
+		<file size="369" time="1985-11-01 12:06:20" attr="0x20" dir="PIF/">WORD.PIF</file>
+		<file size="369" time="1985-11-01 12:08:00" attr="0x20" dir="PIF/">WORDEGA.PIF</file>
+		<file size="369" time="1985-09-18 12:18:42" attr="0x20" dir="PIF/">WP.PIF</file>
+		<file size="369" time="1985-08-06 16:48:38" attr="0x20" dir="PIF/">WRDPERF.PIF</file>
+		<file size="369" time="1985-09-18 12:19:42" attr="0x20" dir="PIF/">WRITE.PIF</file>
+		<file size="369" time="1985-09-18 12:20:34" attr="0x20" dir="PIF/">WS.PIF</file>
+		<file size="369" time="1986-08-08 17:29:26" attr="0x20" dir="PIF/">WS2.PIF</file>
+		<file size="369" time="1985-09-18 12:21:42" attr="0x20" dir="PIF/">XTALK.PIF</file>
+		<file size="369" time="1980-01-03 12:31:14" attr="0x20" dir="PIF/">XYWRITE.PIF</file>
+		<file size="2944" time="1985-09-09 15:04:14" attr="0x20">PRACTICE.WRI</file>
+		<file size="11196" time="1986-08-01 14:21:04" attr="0x20">README.TXT</file>
+		<file size="192176" time="1986-07-22 11:36:42" attr="0x20">WRITE.EXE</file>
 	</disk>
 </manifest>

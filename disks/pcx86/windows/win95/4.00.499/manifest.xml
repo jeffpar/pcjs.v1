@@ -2,43 +2,72 @@
 <?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.35.2/manifest.xsl"?>
 <manifest type="software">
 	<title>Windows 95 (Build 499)</title>
-	<disk id="disk01" size="1474560" chs="80:2:18" img="archive/WIN95-DISK01.img" href="/disks/pcx86/windows/win95/4.00.499/WIN95-DISK01.json" md5="732d1cb011be22d1beda31f4dcd8ea56" md5json="6fa3bc43a08502be56bcf765c2470c35">
+	<disk id="disk01" size="1474560" chs="80:2:18" img="archive/WIN95-DISK01.img" href="/disks/pcx86/windows/win95/4.00.499/WIN95-DISK01.json" md5="ed568ad39cb447c40184c3ead9a84c86" md5json="a5846d059b45f937d3fcf905703c1fdb">
 		<name>Windows 95 (Build 499 Disk 01)</name>
+		<file size="496" time="1995-06-16 04:00:00" attr="0x20">DELTEMP.COM</file>
+		<file size="72246" time="1995-06-16 04:00:00" attr="0x20">DOSSETUP.BIN</file>
+		<file size="46656" time="1995-06-16 04:00:00" attr="0x20">EXTRACT.EXE</file>
+		<file size="441906" time="1995-06-16 04:00:00" attr="0x20">MINI.CAB</file>
+		<file size="484352" time="1995-06-16 04:00:00" attr="0x20">PRECOPY1.CAB</file>
+		<file size="5722" time="1995-06-16 04:00:00" attr="0x20">README.TXT</file>
+		<file size="920" time="1995-06-16 04:00:00" attr="0x20">SAVE32.COM</file>
+		<file size="138359" time="1995-06-16 04:00:00" attr="0x20">SCANDISK.EXE</file>
+		<file size="995" time="1995-06-16 04:00:00" attr="0x20">SCANDISK.PIF</file>
+		<file size="4438" time="1995-06-16 04:00:00" attr="0x20">SCANPROG.EXE</file>
+		<file size="5184" time="1995-06-16 04:00:00" attr="0x20">SETUP.EXE</file>
+		<file size="33095" time="1995-06-16 04:00:00" attr="0x20">SETUP.TXT</file>
+		<file size="45145" time="1995-06-16 04:00:00" attr="0x20">SMARTDRV.EXE</file>
+		<file size="537" time="1995-06-16 04:00:00" attr="0x20">WB16OFF.EXE</file>
+		<file size="158832" time="1995-06-16 04:00:00" attr="0x20">WINSETUP.BIN</file>
+		<file size="14144" time="1995-06-16 04:00:00" attr="0x20">XMSMMGR.EXE</file>
 	</disk>
-	<disk id="disk02" size="1720320" chs="80:2:21" img="archive/WIN95-DISK02.img" href="/disks/pcx86/windows/win95/4.00.499/WIN95-DISK02.json" md5="3c4ff0741307c736fd956447b82db041" md5json="5688fde3e3f978e4d31127b118383f79">
+	<disk id="disk02" size="1720320" chs="80:2:21" img="archive/WIN95-DISK02.img" href="/disks/pcx86/windows/win95/4.00.499/WIN95-DISK02.json" md5="82d138f0e5ca2c1307a6eb76a54f0a7a" md5json="0651a9f5895ccb2b55bf063caf5ff8b1">
 		<name>Windows 95 (Build 499 Disk 02)</name>
+		<file size="1044102" time="1995-06-16 04:00:00" attr="0x20">PRECOPY2.CAB</file>
+		<file size="655360" time="1995-06-16 04:00:00" attr="0x20">WIN95_02.CAB</file>
 	</disk>
-	<disk id="disk03" size="1720320" chs="80:2:21" img="archive/WIN95-DISK03.img" href="/disks/pcx86/windows/win95/4.00.499/WIN95-DISK03.json" md5="7c635a4d309ecc182db99dd3e6642bac" md5json="939be24d14aff97578200c8429ca4a05">
+	<disk id="disk03" size="1720320" chs="80:2:21" img="archive/WIN95-DISK03.img" href="/disks/pcx86/windows/win95/4.00.499/WIN95-DISK03.json" md5="e748dae1dda3c5a7dcc16375b712fb6f" md5json="cf0a8641a4be616737b8e56eb1ccfeb5">
 		<name>Windows 95 (Build 499 Disk 03)</name>
+		<file size="1716224" time="1995-06-16 04:00:00" attr="0x20">WIN95_03.CAB</file>
 	</disk>
-	<disk id="disk04" size="1720320" chs="80:2:21" img="archive/WIN95-DISK04.img" href="/disks/pcx86/windows/win95/4.00.499/WIN95-DISK04.json" md5="59e781f887857883108d3e0a4ea338bc" md5json="4f62253c0731ac0d87d6cdbdc218a921">
+	<disk id="disk04" size="1720320" chs="80:2:21" img="archive/WIN95-DISK04.img" href="/disks/pcx86/windows/win95/4.00.499/WIN95-DISK04.json" md5="f29d8eaec873712348ad4c238644d09d" md5json="5d0c37f589ccd9d27e03fe70913a1e42">
 		<name>Windows 95 (Build 499 Disk 04)</name>
+		<file size="1716224" time="1995-06-16 04:00:00" attr="0x20">WIN95_04.CAB</file>
 	</disk>
-	<disk id="disk05" size="1720320" chs="80:2:21" img="archive/WIN95-DISK05.img" href="/disks/pcx86/windows/win95/4.00.499/WIN95-DISK05.json" md5="4866930efb5198e6e9c9ea6958989547" md5json="e9b2b53575ee7ca1546be36f9c36d143">
+	<disk id="disk05" size="1720320" chs="80:2:21" img="archive/WIN95-DISK05.img" href="/disks/pcx86/windows/win95/4.00.499/WIN95-DISK05.json" md5="9b041882225343560bcd6148acfb7a6e" md5json="2d4f5f5956507f7080ee4d88b7ecad29">
 		<name>Windows 95 (Build 499 Disk 05)</name>
+		<file size="1716224" time="1995-06-16 04:00:00" attr="0x20">WIN95_05.CAB</file>
 	</disk>
-	<disk id="disk06" size="1720320" chs="80:2:21" img="archive/WIN95-DISK06.img" href="/disks/pcx86/windows/win95/4.00.499/WIN95-DISK06.json" md5="99d60c50db21206908d569db0d859f5d" md5json="48aa2717c9cbcc46639cef839eed5378">
+	<disk id="disk06" size="1720320" chs="80:2:21" img="archive/WIN95-DISK06.img" href="/disks/pcx86/windows/win95/4.00.499/WIN95-DISK06.json" md5="4b964427dd2516cd31393dddd479ffb6" md5json="be65480cc0e703fb3c8c75e16737ac64">
 		<name>Windows 95 (Build 499 Disk 06)</name>
+		<file size="1716224" time="1995-06-16 04:00:00" attr="0x20">WIN95_06.CAB</file>
 	</disk>
-	<disk id="disk07" size="1720320" chs="80:2:21" img="archive/WIN95-DISK07.img" href="/disks/pcx86/windows/win95/4.00.499/WIN95-DISK07.json" md5="c4eb6a910b5310427e3099c079c62261" md5json="75f2d3b963e81c1b37c725f350971562">
+	<disk id="disk07" size="1720320" chs="80:2:21" img="archive/WIN95-DISK07.img" href="/disks/pcx86/windows/win95/4.00.499/WIN95-DISK07.json" md5="2b39027d4fe08815272a87fd968e5639" md5json="79d0fa8c315d2dda3d63a8fddf54ecae">
 		<name>Windows 95 (Build 499 Disk 07)</name>
+		<file size="1716224" time="1995-06-16 04:00:00" attr="0x20">WIN95_07.CAB</file>
 	</disk>
-	<disk id="disk08" size="1720320" chs="80:2:21" img="archive/WIN95-DISK08.img" href="/disks/pcx86/windows/win95/4.00.499/WIN95-DISK08.json" md5="d6ba0299f3f02851ac2cc44ed54dbcc3" md5json="2b89cfd0f05934bdc4cca15064f0d7d4">
+	<disk id="disk08" size="1720320" chs="80:2:21" img="archive/WIN95-DISK08.img" href="/disks/pcx86/windows/win95/4.00.499/WIN95-DISK08.json" md5="d8a7bff75a2959e69cd99a801b816d5d" md5json="8f58f21bcfe862533671cee74d74a0b0">
 		<name>Windows 95 (Build 499 Disk 08)</name>
+		<file size="1716224" time="1995-06-16 04:00:00" attr="0x20">WIN95_08.CAB</file>
 	</disk>
-	<disk id="disk09" size="1720320" chs="80:2:21" img="archive/WIN95-DISK09.img" href="/disks/pcx86/windows/win95/4.00.499/WIN95-DISK09.json" md5="308387d3c51e837fd7869a7b0b44a3cb" md5json="4a86ce9737eb664450c351fb274f940c">
+	<disk id="disk09" size="1720320" chs="80:2:21" img="archive/WIN95-DISK09.img" href="/disks/pcx86/windows/win95/4.00.499/WIN95-DISK09.json" md5="0aa4cbb5678eb5093cd2060363b9362d" md5json="58f0e209d7c520ba533c40c1b11f2701">
 		<name>Windows 95 (Build 499 Disk 09)</name>
+		<file size="1716224" time="1995-06-16 04:00:00" attr="0x20">WIN95_09.CAB</file>
 	</disk>
-	<disk id="disk10" size="1720320" chs="80:2:21" img="archive/WIN95-DISK10.img" href="/disks/pcx86/windows/win95/4.00.499/WIN95-DISK10.json" md5="1cc5e299dfb83dd555227ad9546393fe" md5json="dbee2d4261d25c235f01278fded36a0b">
+	<disk id="disk10" size="1720320" chs="80:2:21" img="archive/WIN95-DISK10.img" href="/disks/pcx86/windows/win95/4.00.499/WIN95-DISK10.json" md5="1b63c5a16e9276ec9ecac9abb854efd7" md5json="89decb301cd0f60eef854f89c46342df">
 		<name>Windows 95 (Build 499 Disk 10)</name>
+		<file size="1716224" time="1995-06-16 04:00:00" attr="0x20">WIN95_10.CAB</file>
 	</disk>
-	<disk id="disk11" size="1720320" chs="80:2:21" img="archive/WIN95-DISK11.img" href="/disks/pcx86/windows/win95/4.00.499/WIN95-DISK11.json" md5="abe21872967030c77c4b1c5acc330944" md5json="40d23db1b9fd26cb728854aaf3a1d4f8">
+	<disk id="disk11" size="1720320" chs="80:2:21" img="archive/WIN95-DISK11.img" href="/disks/pcx86/windows/win95/4.00.499/WIN95-DISK11.json" md5="4c867aaedc76109aea6f004cef0658c5" md5json="dff5ff690f9cfcad682ff22b53e09f1a">
 		<name>Windows 95 (Build 499 Disk 11)</name>
+		<file size="1716224" time="1995-06-16 04:00:00" attr="0x20">WIN95_11.CAB</file>
 	</disk>
-	<disk id="disk12" size="1720320" chs="80:2:21" img="archive/WIN95-DISK12.img" href="/disks/pcx86/windows/win95/4.00.499/WIN95-DISK12.json" md5="55a8eabe146455de6d724912608c4dae" md5json="f609a685c6a4e98447193a969d342a10">
+	<disk id="disk12" size="1720320" chs="80:2:21" img="archive/WIN95-DISK12.img" href="/disks/pcx86/windows/win95/4.00.499/WIN95-DISK12.json" md5="6cb9c360cfbfca009919f5ed629731ff" md5json="acdeee33d8580c1e27dd40a570bfd943">
 		<name>Windows 95 (Build 499 Disk 12)</name>
+		<file size="1716224" time="1995-06-16 04:00:00" attr="0x20">WIN95_12.CAB</file>
 	</disk>
-	<disk id="disk13" size="1720320" chs="80:2:21" img="archive/WIN95-DISK13.img" href="/disks/pcx86/windows/win95/4.00.499/WIN95-DISK13.json" md5="9842dbeabf3b7dc98ee727467c81cef6" md5json="4de833b8106fa20db8b760c2c2633123">
+	<disk id="disk13" size="1720320" chs="80:2:21" img="archive/WIN95-DISK13.img" href="/disks/pcx86/windows/win95/4.00.499/WIN95-DISK13.json" md5="7873da489b2472b7fdf43eb294fac921" md5json="16a735a92bf4eafeb0c7855a5249bf9f">
 		<name>Windows 95 (Build 499 Disk 13)</name>
+		<file size="957828" time="1995-06-16 04:00:00" attr="0x20">WIN95_13.CAB</file>
 	</disk>
 </manifest>

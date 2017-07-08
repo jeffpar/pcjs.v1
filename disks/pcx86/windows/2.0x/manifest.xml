@@ -2,28 +2,373 @@
 <?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.35.2/manifest.xsl"?>
 <manifest type="software">
 	<title>Microsoft Windows/386 2.0x</title>
-	<disk id="disk01" size="1228800" chs="80:2:15" img="archive/WIN201-386-DISK1.img" href="/disks/pcx86/windows/2.0x/WIN201-386-DISK1.json" md5="aaea821752eaacbe2a531f1759544b64" md5json="eff7921e9448285acfc82b8fcf472831">
+	<disk id="disk01" size="1228800" chs="80:2:15" img="archive/WIN201-386-DISK1.img" href="/disks/pcx86/windows/2.0x/WIN201-386-DISK1.json" md5="5c658a8fb45bf1c5796e22bc1d27a297" md5json="b345bd672ac8d4fed02f6bec9d682c5f">
 		<name>Windows/386 2.01 (Disk 1)</name>
+		<file size="2574" time="1987-09-06 16:54:16" attr="0x20">386LOGO.LGD</file>
+		<file size="121921" time="1987-09-08 06:44:22" attr="0x20">CGA.386</file>
+		<file size="30524" time="1987-09-07 18:26:46" attr="0x20">CGA.3EX</file>
+		<file size="26496" time="1987-09-03 11:56:00" attr="0x20">CGA.DRV</file>
+		<file size="5335" time="1987-09-06 18:52:04" attr="0x20">CGA.GRB</file>
+		<file size="468" time="1987-08-06 16:48:10" attr="0x20">CGA.LGO</file>
+		<file size="6544" time="1987-09-03 15:36:38" attr="0x20">CGA40.FON</file>
+		<file size="4512" time="1987-09-03 15:36:40" attr="0x20">CGA80.FON</file>
+		<file size="5372" time="1987-08-21 11:27:04" attr="0x20">COMM.DRV</file>
+		<file size="369" time="1987-09-04 15:10:42" attr="0x20">COMMANDE.PIF</file>
+		<file size="369" time="1987-09-04 15:10:54" attr="0x20">COMMANDF.PIF</file>
+		<file size="369" time="1987-09-04 15:11:04" attr="0x20">COMMANDW.PIF</file>
+		<file size="29360" time="1987-09-03 11:58:56" attr="0x20">COMPAQ.DRV</file>
+		<file size="4728" time="1987-08-26 10:58:50" attr="0x20">DENMARK.DRV</file>
+		<file size="137810" time="1987-09-06 18:29:44" attr="0x20">EGA.386</file>
+		<file size="30716" time="1987-09-07 18:24:58" attr="0x20">EGA.3EX</file>
+		<file size="7727" time="1987-09-06 18:35:10" attr="0x20">EGA.GRB</file>
+		<file size="8576" time="1987-09-03 15:36:40" attr="0x20">EGA40.FON</file>
+		<file size="5520" time="1987-09-03 15:36:42" attr="0x20">EGA80.FON</file>
+		<file size="34256" time="1987-09-03 12:09:10" attr="0x20">EGAHIRES.DRV</file>
+		<file size="5280" time="1987-08-24 12:34:24" attr="0x20">FONT40.FON</file>
+		<file size="5792" time="1987-08-24 12:34:26" attr="0x20">FONT40US.FON</file>
+		<file size="4608" time="1987-08-24 12:34:28" attr="0x20">FONTHI.FON</file>
+		<file size="4528" time="1987-08-24 12:34:30" attr="0x20">FONTHIUS.FON</file>
+		<file size="4160" time="1987-08-24 12:34:32" attr="0x20">FONTLO.FON</file>
+		<file size="4528" time="1987-08-24 12:34:34" attr="0x20">FONTLOUS.FON</file>
+		<file size="5728" time="1987-08-24 12:34:40" attr="0x20">FONTSQ.FON</file>
+		<file size="5536" time="1987-08-24 12:34:40" attr="0x20">FONTSQUS.FON</file>
+		<file size="4836" time="1987-08-26 10:59:02" attr="0x20">FRANCE.DRV</file>
+		<file size="99110" time="1987-09-07 13:35:20" attr="0x20">GDI.EXE</file>
+		<file size="4825" time="1987-08-26 10:59:12" attr="0x20">GERMANY.DRV</file>
+		<file size="33776" time="1987-09-03 11:47:02" attr="0x20">IBMPS250.DRV</file>
+		<file size="5420" time="1987-09-06 18:52:32" attr="0x20">IDC.GRB</file>
+		<file size="4102" time="1987-08-26 10:59:22" attr="0x20">ITALY.DRV</file>
+		<file size="54000" time="1987-09-07 22:16:28" attr="0x20">KERNEL.EXE</file>
+		<file size="3603" time="1987-08-30 00:30:10" attr="0x20">MOUSE.DRV</file>
+		<file size="45696" time="1987-09-06 19:03:02" attr="0x20">MSDOS.EXE</file>
+		<file size="6404" time="1987-08-28 04:38:36" attr="0x20">MSDOSD.EXE</file>
+		<file size="1581" time="1987-08-30 00:29:12" attr="0x20">NOMOUSE.DRV</file>
+		<file size="4728" time="1987-08-26 10:59:38" attr="0x20">NORWAY.DRV</file>
+		<file size="39919" time="1987-09-04 20:18:50" attr="0x20">SETUP.EXE</file>
+		<file size="16436" time="1987-09-07 17:16:32" attr="0x20">SETUP.INF</file>
+		<file size="5854" time="1987-08-06 16:41:58" attr="0x20">SOUND.DRV</file>
+		<file size="4705" time="1987-08-26 10:59:46" attr="0x20">SPAIN.DRV</file>
+		<file size="14512" time="1987-09-04 15:26:28" attr="0x20">SPOOLER.EXE</file>
+		<file size="4728" time="1987-08-26 10:59:56" attr="0x20">SWEDEN.DRV</file>
+		<file size="2829" time="1987-08-06 16:42:04" attr="0x20">SYSTEM.DRV</file>
+		<file size="4084" time="1987-08-06 16:42:14" attr="0x20">UK.DRV</file>
+		<file size="4080" time="1987-08-26 11:00:04" attr="0x20">USA.DRV</file>
+		<file size="152272" time="1987-09-07 16:18:10" attr="0x20">USER.EXE</file>
+		<file size="8337" time="1987-09-06 18:35:44" attr="0x20">VGA.GRB</file>
+		<file size="33776" time="1987-09-03 14:07:52" attr="0x20">VGA450.DRV</file>
+		<file size="3472" time="1987-09-02 17:32:40" attr="0x20">WIN.CNF</file>
+		<file size="2821" time="1987-09-06 19:41:34" attr="0x20">WIN.INI</file>
+		<file size="31312" time="1987-09-06 18:34:36" attr="0x20">WINOLDAP.MOD</file>
 	</disk>
-	<disk id="disk02" size="1228800" chs="80:2:15" img="archive/WIN201-386-DISK2.img" href="/disks/pcx86/windows/2.0x/WIN201-386-DISK2.json" md5="d9485cd87c4f5105a422ff08dd36c632" md5json="8ad3e08dee126f1ab9cf48fb1e58b4ef">
+	<disk id="disk02" size="1228800" chs="80:2:15" img="archive/WIN201-386-DISK2.img" href="/disks/pcx86/windows/2.0x/WIN201-386-DISK2.json" md5="5661ab85c9b672b30d8ad603f53d6aed" md5json="f7ab105b4b2bb86fab9de4f4fd214e31">
 		<name>Windows/386 2.01 (Disk 2)</name>
+		<file size="14144" time="1987-08-24 12:34:08" attr="0x20">COURA.FON</file>
+		<file size="19088" time="1987-08-24 12:34:10" attr="0x20">COURB.FON</file>
+		<file size="13040" time="1987-08-24 12:34:12" attr="0x20">COURC.FON</file>
+		<file size="21328" time="1987-08-24 12:34:14" attr="0x20">COURD.FON</file>
+		<file size="23808" time="1987-08-24 12:34:18" attr="0x20">COURE.FON</file>
+		<file size="15136" time="1987-08-25 19:39:12" attr="0x20">EPSON.DRV</file>
+		<file size="12752" time="1987-08-25 19:39:18" attr="0x20">EPSONMX.DRV</file>
+		<file size="565" time="1987-08-25 15:48:36" attr="0x20">HARDWARE.TXT</file>
+		<file size="36768" time="1987-08-24 12:34:44" attr="0x20">HELVA.FON</file>
+		<file size="50880" time="1987-08-30 10:57:00" attr="0x20">HELVB.FON</file>
+		<file size="38960" time="1987-08-24 12:34:52" attr="0x20">HELVC.FON</file>
+		<file size="58144" time="1987-08-24 12:34:56" attr="0x20">HELVD.FON</file>
+		<file size="64672" time="1987-08-30 10:57:56" attr="0x20">HELVE.FON</file>
+		<file size="16336" time="1986-07-29 14:20:16" attr="0x20">HP7470A.DRV</file>
+		<file size="99968" time="1987-09-05 12:10:22" attr="0x20">HPPCL.DRV</file>
+		<file size="5852" time="1987-08-12 17:49:32" attr="0x20">HPREADME.TXT</file>
+		<file size="13024" time="1987-01-26 11:48:26" attr="0x20">IBMCOLOR.DRV</file>
+		<file size="12560" time="1987-08-25 19:39:26" attr="0x20">IBMGRX.DRV</file>
+		<file size="15328" time="1987-08-25 19:39:32" attr="0x20">LQ1500.DRV</file>
+		<file size="7584" time="1987-08-24 12:35:10" attr="0x20">MODERN.FON</file>
+		<file size="25648" time="1987-08-06 16:41:40" attr="0x20">NEC24PIN.DRV</file>
+		<file size="12304" time="1987-04-02 10:30:42" attr="0x20">NECP2.DRV</file>
+		<file size="22349" time="1987-08-30 00:28:44" attr="0x20">NEWFON.EXE</file>
+		<file size="24966" time="1987-08-06 16:34:48" attr="0x20">PCLPFM.EXE</file>
+		<file size="369" time="1987-08-10 12:00:56" attr="0x20">PCLPFM.PIF</file>
+		<file size="127520" time="1987-09-05 12:19:02" attr="0x20">PSCRIPT.DRV</file>
+		<file size="18841" time="1987-08-25 15:50:28" attr="0x20">PSPREP.TXT</file>
+		<file size="7047" time="1987-08-12 17:49:16" attr="0x20">PSREADME.TXT</file>
+		<file size="8225" time="1987-09-03 10:11:34" attr="0x20">RAMDRIVE.SYS</file>
+		<file size="11120" time="1987-08-24 12:35:36" attr="0x20">ROMAN.FON</file>
+		<file size="10304" time="1987-08-24 12:35:40" attr="0x20">SCRIPT.FON</file>
+		<file size="17696" time="1987-09-01 08:43:42" attr="0x20">SMARTDRV.SYS</file>
+		<file size="1341" time="1987-08-12 17:50:36" attr="0x20">SOFTFONT.INI</file>
+		<file size="409" time="1987-08-25 15:47:46" attr="0x20">SOFTWARE.TXT</file>
+		<file size="12768" time="1987-07-31 06:59:16" attr="0x20">THINKJET.DRV</file>
+		<file size="12128" time="1987-08-25 19:39:52" attr="0x20">TI850.DRV</file>
+		<file size="35392" time="1987-08-24 12:35:44" attr="0x20">TMSRA.FON</file>
+		<file size="45936" time="1987-08-30 10:58:42" attr="0x20">TMSRB.FON</file>
+		<file size="37824" time="1987-08-24 12:35:52" attr="0x20">TMSRC.FON</file>
+		<file size="57184" time="1987-08-24 12:35:56" attr="0x20">TMSRD.FON</file>
+		<file size="58304" time="1987-08-30 10:59:38" attr="0x20">TMSRE.FON</file>
+		<file size="12992" time="1987-08-25 19:39:56" attr="0x20">TOSH.DRV</file>
+		<file size="5600" time="1987-09-04 23:37:42" attr="0x20">TTY.DRV</file>
 	</disk>
-	<disk id="disk03" size="1228800" chs="80:2:15" img="archive/WIN201-386-DISK3.img" href="/disks/pcx86/windows/2.0x/WIN201-386-DISK3.json" md5="c86d1e160cf1264eaada78141518165a" md5json="1b84ea3f03318efc2fc7f1b3791dce0a">
+	<disk id="disk03" size="1228800" chs="80:2:15" img="archive/WIN201-386-DISK3.img" href="/disks/pcx86/windows/2.0x/WIN201-386-DISK3.json" md5="e04b5da43a6230a240974022455e2e8d" md5json="8e6ad93933e9533ec13d7ec341648888">
 		<name>Windows/386 2.01 (Disk 3)</name>
+		<file size="42" time="1987-08-14 10:56:38" attr="0x20">ABC.TXT</file>
+		<file size="27856" time="1987-09-04 15:42:28" attr="0x20">CALC.EXE</file>
+		<file size="38400" time="1987-09-04 11:08:14" attr="0x20">CALENDAR.EXE</file>
+		<file size="38672" time="1987-09-04 11:09:28" attr="0x20">CARDFILE.EXE</file>
+		<file size="10608" time="1987-09-04 11:10:14" attr="0x20">CLIPBRD.EXE</file>
+		<file size="8960" time="1987-09-04 11:11:00" attr="0x20">CLOCK.EXE</file>
+		<file size="56960" time="1987-09-04 11:12:30" attr="0x20">CONTROL.EXE</file>
+		<file size="493" time="1987-08-14 10:56:44" attr="0x20">DOTHIS.TXT</file>
+		<file size="19072" time="1987-09-04 11:13:38" attr="0x20">NOTEPAD.EXE</file>
+		<file size="92800" time="1987-09-06 19:29:02" attr="0x20">PAINT.EXE</file>
+		<file size="1768" time="1987-09-07 22:26:08" attr="0x10">PIF</file>
+		<file size="369" time="1987-09-04 13:47:38" attr="0x20" dir="PIF/">123-1A.PIF</file>
+		<file size="369" time="1987-09-04 13:47:38" attr="0x20" dir="PIF/">123.PIF</file>
+		<file size="369" time="1987-09-04 13:47:38" attr="0x20" dir="PIF/">BASIC.PIF</file>
+		<file size="369" time="1987-09-04 13:47:38" attr="0x20" dir="PIF/">BASICA.PIF</file>
+		<file size="369" time="1987-09-04 13:47:40" attr="0x20" dir="PIF/">CHART.PIF</file>
+		<file size="369" time="1987-09-04 13:47:40" attr="0x20" dir="PIF/">CLOUT.PIF</file>
+		<file size="369" time="1987-09-04 13:47:40" attr="0x20" dir="PIF/">DBASE.PIF</file>
+		<file size="369" time="1987-09-04 13:47:40" attr="0x20" dir="PIF/">DBASE2.PIF</file>
+		<file size="369" time="1987-09-04 13:47:42" attr="0x20" dir="PIF/">DBASE3.PIF</file>
+		<file size="369" time="1987-09-04 13:47:42" attr="0x20" dir="PIF/">DW2PG.PIF</file>
+		<file size="369" time="1987-09-04 13:47:42" attr="0x20" dir="PIF/">DW3PG.PIF</file>
+		<file size="369" time="1987-09-04 13:47:42" attr="0x20" dir="PIF/">FILE.PIF</file>
+		<file size="369" time="1987-09-04 13:47:42" attr="0x20" dir="PIF/">FW.PIF</file>
+		<file size="369" time="1987-09-04 13:47:44" attr="0x20" dir="PIF/">FWC.PIF</file>
+		<file size="369" time="1987-09-04 13:47:44" attr="0x20" dir="PIF/">FWT.PIF</file>
+		<file size="369" time="1987-09-04 13:47:44" attr="0x20" dir="PIF/">GRAPH.PIF</file>
+		<file size="369" time="1987-09-04 13:47:44" attr="0x20" dir="PIF/">HTPM.PIF</file>
+		<file size="369" time="1987-09-04 13:47:46" attr="0x20" dir="PIF/">IBMFILE.PIF</file>
+		<file size="369" time="1987-09-04 13:47:46" attr="0x20" dir="PIF/">IBMGRAPH.PIF</file>
+		<file size="369" time="1987-09-04 13:47:46" attr="0x20" dir="PIF/">IBMREPRT.PIF</file>
+		<file size="369" time="1987-09-04 13:47:46" attr="0x20" dir="PIF/">IBMWRITE.PIF</file>
+		<file size="369" time="1987-09-04 13:47:48" attr="0x20" dir="PIF/">LOTUS.PIF</file>
+		<file size="369" time="1987-09-04 13:47:48" attr="0x20" dir="PIF/">LOTUS2.PIF</file>
+		<file size="369" time="1987-09-04 13:47:48" attr="0x20" dir="PIF/">MP.PIF</file>
+		<file size="369" time="1987-09-04 13:47:48" attr="0x20" dir="PIF/">MSACCESS.PIF</file>
+		<file size="369" time="1987-09-04 13:47:48" attr="0x20" dir="PIF/">PC-DRAW.PIF</file>
+		<file size="369" time="1987-09-04 13:47:50" attr="0x20" dir="PIF/">PFSACCES.PIF</file>
+		<file size="369" time="1987-09-04 13:47:50" attr="0x20" dir="PIF/">PLAN.PIF</file>
+		<file size="369" time="1987-09-04 13:47:50" attr="0x20" dir="PIF/">PROJ.PIF</file>
+		<file size="369" time="1987-09-04 13:47:50" attr="0x20" dir="PIF/">PROJM.PIF</file>
+		<file size="369" time="1987-09-04 13:47:52" attr="0x20" dir="PIF/">QB.PIF</file>
+		<file size="369" time="1987-09-04 13:47:52" attr="0x20" dir="PIF/">RB5000.PIF</file>
+		<file size="369" time="1987-09-04 13:47:52" attr="0x20" dir="PIF/">RBASE.PIF</file>
+		<file size="369" time="1987-09-04 13:47:54" attr="0x20" dir="PIF/">REPORT.PIF</file>
+		<file size="369" time="1987-09-04 13:47:54" attr="0x20" dir="PIF/">SC3.PIF</file>
+		<file size="369" time="1987-09-04 13:47:54" attr="0x20" dir="PIF/">SCOM.PIF</file>
+		<file size="369" time="1987-09-04 13:47:54" attr="0x20" dir="PIF/">SCOMII.PIF</file>
+		<file size="369" time="1987-09-04 13:47:54" attr="0x20" dir="PIF/">SPELL.PIF</file>
+		<file size="369" time="1987-09-04 13:47:56" attr="0x20" dir="PIF/">SYMPHACC.PIF</file>
+		<file size="369" time="1987-09-04 13:47:56" attr="0x20" dir="PIF/">SYMPHONY.PIF</file>
+		<file size="369" time="1987-09-04 13:47:56" attr="0x20" dir="PIF/">TURBO.PIF</file>
+		<file size="369" time="1987-09-04 13:47:56" attr="0x20" dir="PIF/">VX.PIF</file>
+		<file size="369" time="1987-09-04 13:47:56" attr="0x20" dir="PIF/">WORD.PIF</file>
+		<file size="369" time="1987-09-04 13:47:58" attr="0x20" dir="PIF/">WP.PIF</file>
+		<file size="369" time="1987-09-04 13:47:58" attr="0x20" dir="PIF/">WRDPERF.PIF</file>
+		<file size="369" time="1987-09-04 13:47:58" attr="0x20" dir="PIF/">WRITE.PIF</file>
+		<file size="369" time="1987-09-04 13:47:58" attr="0x20" dir="PIF/">WS.PIF</file>
+		<file size="369" time="1987-09-04 13:48:00" attr="0x20" dir="PIF/">WS2.PIF</file>
+		<file size="369" time="1987-09-04 13:48:00" attr="0x20" dir="PIF/">XTALK.PIF</file>
+		<file size="369" time="1987-09-04 13:48:00" attr="0x20" dir="PIF/">XYWRITE.PIF</file>
+		<file size="26464" time="1987-08-25 19:26:36" attr="0x20">PIFEDIT.EXE</file>
+		<file size="2944" time="1987-08-14 10:56:48" attr="0x20">PRACTICE.WRI</file>
+		<file size="19508" time="1987-09-06 17:20:56" attr="0x20">README.TXT</file>
+		<file size="15760" time="1987-09-01 01:55:34" attr="0x20">REVERSI.EXE</file>
+		<file size="48240" time="1987-09-04 11:17:18" attr="0x20">TERMINAL.EXE</file>
+		<file size="212432" time="1987-09-04 19:12:16" attr="0x20">WRITE.EXE</file>
 	</disk>
-	<disk id="disk04" size="737280" chs="80:2:9" img="archive/WIN203-386-DISK1.img" href="/disks/pcx86/windows/2.0x/WIN203-386-DISK1.json" md5="d484cde3645932cf14bf01905286b2ed" md5json="c179cef758b566779118703ef5ed2c38">
+	<disk id="disk04" size="737280" chs="80:2:9" img="archive/WIN203-386-DISK1.img" href="/disks/pcx86/windows/2.0x/WIN203-386-DISK1.json" md5="92c8c84a6b18a9e446c5522fac686b58" md5json="38ecce2d1d9e6395263450009919a9a9">
 		<name>Windows/386 2.03 (SETUP)</name>
+		<file size="2574" time="1987-11-14 15:06:56" attr="0x20">386LOGO.LGD</file>
+		<file size="28736" time="1987-11-12 12:12:00" attr="0x20">ATTDC.DRV</file>
+		<file size="24784" time="1987-11-12 12:11:44" attr="0x20">CGA.DRV</file>
+		<file size="468" time="1987-11-12 12:12:06" attr="0x20">CGA.LGO</file>
+		<file size="4396" time="1987-11-12 12:19:32" attr="0x20">COMM.DRV</file>
+		<file size="28144" time="1987-11-12 12:11:48" attr="0x20">COMPAQ.DRV</file>
+		<file size="33040" time="1987-11-12 12:11:56" attr="0x20">EGAHIRES.DRV</file>
+		<file size="4608" time="1987-11-12 12:25:06" attr="0x20">FONTHI.FON</file>
+		<file size="4528" time="1987-11-12 12:25:10" attr="0x20">FONTHIUS.FON</file>
+		<file size="4160" time="1987-11-12 12:21:32" attr="0x20">FONTLO.FON</file>
+		<file size="4528" time="1987-11-12 12:21:34" attr="0x20">FONTLOUS.FON</file>
+		<file size="5728" time="1987-11-12 12:25:18" attr="0x20">FONTSQ.FON</file>
+		<file size="5536" time="1987-11-12 12:25:22" attr="0x20">FONTSQUS.FON</file>
+		<file size="101706" time="1987-11-15 09:03:34" attr="0x20">GDI.EXE</file>
+		<file size="4410" time="1987-10-19 18:27:54" attr="0x20">HPMOUSE.DRV</file>
+		<file size="32720" time="1987-11-12 12:24:56" attr="0x20">IBMPS250.DRV</file>
+		<file size="56960" time="1987-11-15 22:07:02" attr="0x20">KERNEL.EXE</file>
+		<file size="3298" time="1987-11-12 12:27:06" attr="0x20">LMOUSE.DRV</file>
+		<file size="3667" time="1987-11-12 12:24:44" attr="0x20">MOUSE.DRV</file>
+		<file size="46224" time="1987-11-12 12:29:00" attr="0x20">MSDOS.EXE</file>
+		<file size="6490" time="1987-11-12 12:27:32" attr="0x20">MSDOSD.EXE</file>
+		<file size="2014" time="1987-11-12 12:09:42" attr="0x20">MSMOUSE1.DRV</file>
+		<file size="2014" time="1987-11-12 12:10:02" attr="0x20">MSMOUSE2.DRV</file>
+		<file size="1245" time="1987-11-12 12:24:46" attr="0x20">NOMOUSE.DRV</file>
+		<file size="44039" time="1987-11-13 20:45:50" attr="0x20">SETUP.EXE</file>
+		<file size="23300" time="1987-12-01 14:21:28" attr="0x20">SETUP.INF</file>
+		<file size="5309" time="1987-11-12 12:25:04" attr="0x20">SOUND.DRV</file>
+		<file size="14640" time="1987-11-12 12:29:04" attr="0x20">SPOOLER.EXE</file>
+		<file size="2725" time="1987-11-12 12:25:12" attr="0x20">SYSTEM.DRV</file>
+		<file size="3836" time="1987-11-12 12:28:46" attr="0x20">USA.DRV</file>
+		<file size="154688" time="1987-11-15 19:25:22" attr="0x20">USER.EXE</file>
+		<file size="33776" time="1987-11-12 12:11:52" attr="0x20">VGA450.DRV</file>
+		<file size="3952" time="1987-11-15 21:55:50" attr="0x20">WIN.CNF</file>
+		<file size="3196" time="1987-11-15 16:31:00" attr="0x20">WIN.INI</file>
 	</disk>
-	<disk id="disk05" size="737280" chs="80:2:9" img="archive/WIN203-386-DISK2.img" href="/disks/pcx86/windows/2.0x/WIN203-386-DISK2.json" md5="dae1a30defe29636bc7a58460012e9e7" md5json="dcc99c8ee1a895af0b7236a92378e96f">
+	<disk id="disk05" size="737280" chs="80:2:9" img="archive/WIN203-386-DISK2.img" href="/disks/pcx86/windows/2.0x/WIN203-386-DISK2.json" md5="b9254d9c71cb69e94ab366778a7ec05b" md5json="cd17e42ae4d750e77ba920f08d9a4437">
 		<name>Windows/386 2.03 (UTILITY)</name>
+		<file size="121775" time="1988-01-13 20:50:48" attr="0x20">CGA.386</file>
+		<file size="34236" time="1988-01-14 13:17:22" attr="0x20">CGA.3EX</file>
+		<file size="5518" time="1987-11-14 14:27:08" attr="0x20">CGA.GRB</file>
+		<file size="6544" time="1987-11-15 20:01:26" attr="0x20">CGA40.FON</file>
+		<file size="4512" time="1987-11-15 20:01:32" attr="0x20">CGA80.FON</file>
+		<file size="369" time="1987-09-10 11:12:36" attr="0x20">COMMANDE.PIF</file>
+		<file size="369" time="1987-09-10 11:12:50" attr="0x20">COMMANDF.PIF</file>
+		<file size="369" time="1987-09-10 11:13:06" attr="0x20">COMMANDW.PIF</file>
+		<file size="139568" time="1988-01-13 20:33:40" attr="0x20">EGA.386</file>
+		<file size="34460" time="1988-01-14 13:14:36" attr="0x20">EGA.3EX</file>
+		<file size="7979" time="1987-11-15 19:40:40" attr="0x20">EGA.GRB</file>
+		<file size="8576" time="1987-11-15 20:01:14" attr="0x20">EGA40.FON</file>
+		<file size="5520" time="1987-11-15 20:01:20" attr="0x20">EGA80.FON</file>
+		<file size="5552" time="1987-11-05 12:45:16" attr="0x20">FONTSQCA.FON</file>
+		<file size="5552" time="1987-11-05 12:57:52" attr="0x20">FONTSQES.FON</file>
+		<file size="5552" time="1987-11-05 12:57:20" attr="0x20">FONTSQNO.FON</file>
+		<file size="5552" time="1987-11-05 12:57:36" attr="0x20">FONTSQPO.FON</file>
+		<file size="5603" time="1987-11-14 14:27:36" attr="0x20">IDC.GRB</file>
+		<file size="7385" time="1987-11-13 14:36:08" attr="0x20">KBDBE.DRV</file>
+		<file size="7661" time="1987-11-13 14:36:02" attr="0x20">KBDCA.DRV</file>
+		<file size="7161" time="1987-11-13 14:36:34" attr="0x20">KBDDA.DRV</file>
+		<file size="8079" time="1987-11-13 14:36:24" attr="0x20">KBDES.DRV</file>
+		<file size="7289" time="1987-11-13 14:36:06" attr="0x20">KBDFR.DRV</file>
+		<file size="7177" time="1987-11-13 14:36:30" attr="0x20">KBDFS.DRV</file>
+		<file size="7209" time="1987-11-13 14:36:12" attr="0x20">KBDGR.DRV</file>
+		<file size="6991" time="1987-11-13 14:36:00" attr="0x20">KBDIT.DRV</file>
+		<file size="7129" time="1987-11-13 14:35:56" attr="0x20">KBDNE.DRV</file>
+		<file size="7161" time="1987-11-13 14:36:36" attr="0x20">KBDNO.DRV</file>
+		<file size="6747" time="1987-11-13 14:36:28" attr="0x20">KBDPO.DRV</file>
+		<file size="7433" time="1987-11-13 14:36:18" attr="0x20">KBDSF.DRV</file>
+		<file size="7409" time="1987-11-13 14:36:16" attr="0x20">KBDSG.DRV</file>
+		<file size="7519" time="1987-11-13 14:36:22" attr="0x20">KBDSP.DRV</file>
+		<file size="6885" time="1987-11-13 14:35:54" attr="0x20">KBDUK.DRV</file>
+		<file size="6677" time="1987-11-13 14:35:50" attr="0x20">KBDUS.DRV</file>
+		<file size="33231" time="1987-11-12 12:27:36" attr="0x20">NEWFON.EXE</file>
+		<file size="8225" time="1987-11-12 12:29:12" attr="0x20">RAMDRIVE.SYS</file>
+		<file size="7776" time="1987-11-16 03:19:04" attr="0x20">RAMDRIVE.TXT</file>
+		<file size="10082" time="1987-11-12 12:19:28" attr="0x20">SMARTDRV.SYS</file>
+		<file size="8589" time="1987-11-15 19:41:12" attr="0x20">VGA.GRB</file>
+		<file size="31120" time="1987-11-15 19:40:02" attr="0x20">WINOLDAP.MOD</file>
 	</disk>
-	<disk id="disk06" size="737280" chs="80:2:9" img="archive/WIN203-386-DISK3.img" href="/disks/pcx86/windows/2.0x/WIN203-386-DISK3.json" md5="6343a6aa3779be3abbfe23d72e3fa529" md5json="de20b76902d42143098b15221363ad67">
+	<disk id="disk06" size="737280" chs="80:2:9" img="archive/WIN203-386-DISK3.img" href="/disks/pcx86/windows/2.0x/WIN203-386-DISK3.json" md5="1c1e9e4cf7b285bd07a542e2ccc934ae" md5json="c6b8d0abc7b981d4b0f1fe2d362946fb">
 		<name>Windows/386 2.03 (FONTS)</name>
+		<file size="14144" time="1987-11-12 12:22:54" attr="0x20">COURA.FON</file>
+		<file size="19088" time="1987-11-12 12:23:36" attr="0x20">COURB.FON</file>
+		<file size="13040" time="1987-11-12 12:24:22" attr="0x20">COURC.FON</file>
+		<file size="21328" time="1987-11-12 12:24:34" attr="0x20">COURD.FON</file>
+		<file size="23808" time="1987-11-12 12:24:40" attr="0x20">COURE.FON</file>
+		<file size="36768" time="1987-11-12 12:25:28" attr="0x20">HELVA.FON</file>
+		<file size="50880" time="1987-11-12 12:25:40" attr="0x20">HELVB.FON</file>
+		<file size="38960" time="1987-11-12 12:25:48" attr="0x20">HELVC.FON</file>
+		<file size="58144" time="1987-11-12 12:26:00" attr="0x20">HELVD.FON</file>
+		<file size="64784" time="1987-11-12 12:26:14" attr="0x20">HELVE.FON</file>
+		<file size="7584" time="1987-11-12 12:26:50" attr="0x20">MODERN.FON</file>
+		<file size="11120" time="1987-11-12 12:27:10" attr="0x20">ROMAN.FON</file>
+		<file size="10304" time="1987-11-12 12:27:20" attr="0x20">SCRIPT.FON</file>
+		<file size="35392" time="1987-11-12 12:27:28" attr="0x20">TMSRA.FON</file>
+		<file size="45936" time="1987-11-12 12:27:48" attr="0x20">TMSRB.FON</file>
+		<file size="37824" time="1987-11-12 12:27:54" attr="0x20">TMSRC.FON</file>
+		<file size="57184" time="1987-11-12 12:28:02" attr="0x20">TMSRD.FON</file>
+		<file size="58304" time="1987-11-12 12:28:12" attr="0x20">TMSRE.FON</file>
 	</disk>
-	<disk id="disk07" size="737280" chs="80:2:9" img="archive/WIN203-386-DISK4.img" href="/disks/pcx86/windows/2.0x/WIN203-386-DISK4.json" md5="2c3c30e304b0975b7afec51bfbaa216a" md5json="5f6a7441d7d575386e2d4f621deccd38">
+	<disk id="disk07" size="737280" chs="80:2:9" img="archive/WIN203-386-DISK4.img" href="/disks/pcx86/windows/2.0x/WIN203-386-DISK4.json" md5="a0bed8c3d0c422a1d0277f505d09352e" md5json="ec3b70cf696c83f6d817c6c4d575b322">
 		<name>Windows/386 2.03 (PROGRAM)</name>
+		<file size="42" time="1987-08-14 10:56:38" attr="0x20">ABC.TXT</file>
+		<file size="4866" time="1987-11-13 20:29:56" attr="0x20">ATTOLI.TXT</file>
+		<file size="28000" time="1987-11-12 12:21:30" attr="0x20">CALC.EXE</file>
+		<file size="38896" time="1987-11-12 12:22:48" attr="0x20">CALENDAR.EXE</file>
+		<file size="39264" time="1987-11-12 12:23:30" attr="0x20">CARDFILE.EXE</file>
+		<file size="10800" time="1987-11-12 12:26:20" attr="0x20">CLIPBRD.EXE</file>
+		<file size="8960" time="1987-11-12 12:27:04" attr="0x20">CLOCK.EXE</file>
+		<file size="57216" time="1987-11-12 12:23:44" attr="0x20">CONTROL.EXE</file>
+		<file size="5712" time="1987-11-12 12:10:42" attr="0x20">CVTPAINT.EXE</file>
+		<file size="493" time="1987-08-14 10:56:44" attr="0x20">DOTHIS.TXT</file>
+		<file size="19072" time="1987-11-12 12:28:26" attr="0x20">NOTEPAD.EXE</file>
+		<file size="93280" time="1987-11-12 12:23:06" attr="0x20">PAINT.EXE</file>
+		<file size="1462" time="1987-11-16 02:03:32" attr="0x10">PIF</file>
+		<file size="369" time="1987-11-14 09:20:24" attr="0x20" dir="PIF/">123.PIF</file>
+		<file size="369" time="1987-11-14 09:20:24" attr="0x20" dir="PIF/">ACCESS.PIF</file>
+		<file size="369" time="1987-11-14 09:20:24" attr="0x20" dir="PIF/">BASIC.PIF</file>
+		<file size="369" time="1987-11-14 09:20:24" attr="0x20" dir="PIF/">BASICA.PIF</file>
+		<file size="369" time="1987-11-14 09:20:24" attr="0x20" dir="PIF/">BOOKS.PIF</file>
+		<file size="369" time="1987-11-14 09:20:24" attr="0x20" dir="PIF/">CHART.PIF</file>
+		<file size="369" time="1987-11-14 09:20:24" attr="0x20" dir="PIF/">CLOUT.PIF</file>
+		<file size="369" time="1987-11-14 09:20:24" attr="0x20" dir="PIF/">DBASE.PIF</file>
+		<file size="369" time="1987-11-16 00:40:40" attr="0x20" dir="PIF/">DW3PG.PIF</file>
+		<file size="369" time="1987-11-14 09:20:24" attr="0x20" dir="PIF/">EDITOR.PIF</file>
+		<file size="369" time="1987-11-14 09:20:24" attr="0x20" dir="PIF/">FILE.PIF</file>
+		<file size="369" time="1987-11-14 09:20:24" attr="0x20" dir="PIF/">FL.PIF</file>
+		<file size="369" time="1987-11-14 09:20:24" attr="0x20" dir="PIF/">FW.PIF</file>
+		<file size="369" time="1987-11-14 09:20:24" attr="0x20" dir="PIF/">GRAPH.PIF</file>
+		<file size="369" time="1987-11-14 09:20:24" attr="0x20" dir="PIF/">HTPM.PIF</file>
+		<file size="369" time="1987-11-14 09:20:24" attr="0x20" dir="PIF/">LOTUS.PIF</file>
+		<file size="369" time="1987-11-14 09:20:24" attr="0x20" dir="PIF/">MP.PIF</file>
+		<file size="369" time="1987-11-14 09:20:24" attr="0x20" dir="PIF/">PCLPFM.PIF</file>
+		<file size="369" time="1987-11-14 09:20:24" attr="0x20" dir="PIF/">PE2.PIF</file>
+		<file size="369" time="1987-11-14 09:20:24" attr="0x20" dir="PIF/">PFSACCES.PIF</file>
+		<file size="369" time="1987-11-14 09:20:24" attr="0x20" dir="PIF/">PLAN.PIF</file>
+		<file size="369" time="1987-11-14 09:20:24" attr="0x20" dir="PIF/">PROEDIT.PIF</file>
+		<file size="369" time="1987-11-14 09:20:24" attr="0x20" dir="PIF/">PROJ.PIF</file>
+		<file size="369" time="1987-11-16 00:41:16" attr="0x20" dir="PIF/">QB.PIF</file>
+		<file size="369" time="1987-11-14 09:20:24" attr="0x20" dir="PIF/">RB5000.PIF</file>
+		<file size="369" time="1987-11-14 09:20:24" attr="0x20" dir="PIF/">RBASE.PIF</file>
+		<file size="369" time="1987-11-14 09:20:24" attr="0x20" dir="PIF/">READY.PIF</file>
+		<file size="369" time="1987-11-14 09:20:24" attr="0x20" dir="PIF/">REPORT.PIF</file>
+		<file size="369" time="1987-11-14 09:20:24" attr="0x20" dir="PIF/">SC4.PIF</file>
+		<file size="369" time="1987-11-16 00:41:26" attr="0x20" dir="PIF/">SCOM.PIF</file>
+		<file size="369" time="1987-11-14 09:20:24" attr="0x20" dir="PIF/">SK.PIF</file>
+		<file size="369" time="1987-11-14 09:20:24" attr="0x20" dir="PIF/">SPELL.PIF</file>
+		<file size="369" time="1987-11-14 09:20:24" attr="0x20" dir="PIF/">SYMPHONY.PIF</file>
+		<file size="369" time="1987-11-15 21:39:24" attr="0x20" dir="PIF/">TURBO.PIF</file>
+		<file size="369" time="1987-11-14 09:20:24" attr="0x20" dir="PIF/">VW3.PIF</file>
+		<file size="369" time="1987-11-14 09:20:24" attr="0x20" dir="PIF/">WORD.PIF</file>
+		<file size="369" time="1987-11-14 09:20:24" attr="0x20" dir="PIF/">WORKS.PIF</file>
+		<file size="369" time="1987-11-14 09:20:24" attr="0x20" dir="PIF/">WRDPERF.PIF</file>
+		<file size="369" time="1987-11-14 09:20:24" attr="0x20" dir="PIF/">WRITE.PIF</file>
+		<file size="369" time="1987-11-14 09:20:24" attr="0x20" dir="PIF/">WS2.PIF</file>
+		<file size="369" time="1987-11-14 09:20:24" attr="0x20" dir="PIF/">XTALK.PIF</file>
+		<file size="26464" time="1987-09-10 17:39:50" attr="0x20">PIFEDIT.EXE</file>
+		<file size="2944" time="1987-08-14 10:56:48" attr="0x20">PRACTICE.WRI</file>
+		<file size="29091" time="1987-11-15 02:00:28" attr="0x20">README.TXT</file>
+		<file size="15552" time="1987-11-12 12:28:42" attr="0x20">REVERSI.EXE</file>
+		<file size="48640" time="1987-11-12 12:28:52" attr="0x20">TERMINAL.EXE</file>
+		<file size="212528" time="1987-11-12 12:21:58" attr="0x20">WRITE.EXE</file>
 	</disk>
-	<disk id="disk08" size="737280" chs="80:2:9" img="archive/WIN203-386-DISK5.img" href="/disks/pcx86/windows/2.0x/WIN203-386-DISK5.json" md5="fb6306edc770b6e31e1e19acd83e2f5c" md5json="4d76254a33d283d355e1698864218793">
+	<disk id="disk08" size="737280" chs="80:2:9" img="archive/WIN203-386-DISK5.img" href="/disks/pcx86/windows/2.0x/WIN203-386-DISK5.json" md5="cfc75368bdc7b7196be2319158ea67f9" md5json="93965dd127be90aa206be019fffa3951">
 		<name>Windows/386 2.03 (UTILITY 2)</name>
+		<file size="14208" time="1987-11-12 12:09:54" attr="0x20">CITOH.DRV</file>
+		<file size="28752" time="1987-11-10 09:47:30" attr="0x20">DM600.DRV</file>
+		<file size="17168" time="1987-11-12 12:25:02" attr="0x20">EPSON.DRV</file>
+		<file size="47616" time="1987-11-12 12:12:04" attr="0x20">EPSONLQ2.DRV</file>
+		<file size="14240" time="1987-11-12 12:27:56" attr="0x20">EPSONMX.DRV</file>
+		<file size="565" time="1987-08-20 01:14:46" attr="0x20">HARDWARE.TXT</file>
+		<file size="100592" time="1987-11-12 12:22:34" attr="0x20">HPPCL.DRV</file>
+		<file size="62560" time="1987-11-12 12:10:50" attr="0x20">HPPLOT.DRV</file>
+		<file size="14144" time="1987-11-12 12:28:06" attr="0x20">IBMCOLOR.DRV</file>
+		<file size="14512" time="1987-11-12 12:28:24" attr="0x20">IBMGRX.DRV</file>
+		<file size="14352" time="1987-11-12 12:28:30" attr="0x20">NECP2.DRV</file>
+		<file size="34048" time="1987-11-10 09:49:32" attr="0x20">OLIPRINT.DRV</file>
+		<file size="24966" time="1987-11-12 12:27:42" attr="0x20">PCLPFM.EXE</file>
+		<file size="32944" time="1987-11-12 12:10:38" attr="0x20">PROPRINT.DRV</file>
+		<file size="121184" time="1987-11-12 12:23:24" attr="0x20">PSCRIPT.DRV</file>
+		<file size="18841" time="1987-08-24 23:02:40" attr="0x20">PSPREP.TXT</file>
+		<file size="1060" time="1987-11-16 02:40:42" attr="0x20">READMEEP.TXT</file>
+		<file size="9550" time="1987-11-16 02:40:42" attr="0x20">READMEHP.TXT</file>
+		<file size="1087" time="1987-11-16 02:40:42" attr="0x20">READMEPL.TXT</file>
+		<file size="975" time="1987-11-16 02:40:44" attr="0x20">READMEPR.TXT</file>
+		<file size="9196" time="1987-11-16 02:40:44" attr="0x20">READMEPS.TXT</file>
+		<file size="1341" time="1987-01-12 11:31:36" attr="0x20">SOFTFONT.INI</file>
+		<file size="409" time="1987-08-19 18:43:08" attr="0x20">SOFTWARE.TXT</file>
+		<file size="13296" time="1987-11-12 17:49:46" attr="0x20">THINKJET.DRV</file>
+		<file size="12816" time="1987-11-12 12:28:32" attr="0x20">TI850.DRV</file>
+		<file size="14480" time="1987-11-12 12:28:38" attr="0x20">TOSH.DRV</file>
+		<file size="6224" time="1987-11-12 12:24:48" attr="0x20">TTY.DRV</file>
+		<file size="22032" time="1987-11-12 12:21:26" attr="0x20">XER4020.DRV</file>
 	</disk>
 </manifest>

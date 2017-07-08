@@ -2,7 +2,26 @@
 <?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.35.2/manifest.xsl"?>
 <manifest type="software">
 	<title>Windows COMM Driver (Source)</title>
-	<disk id="disk01" size="368640" chs="40:2:9" img="archive/WINCOMM.img" href="/disks/pcx86/windows/wincomm/WINCOMM.json" md5="4aa07d1ff8a88b1bac0828d0f5b74fac" md5json="fd0dc74b471044add2b2338a889bd602">
+	<disk id="disk01" size="368640" chs="40:2:9" img="archive/WINCOMM.img" href="/disks/pcx86/windows/wincomm/WINCOMM.json" md5="a3a1edb104e149fea3572c20d0f12987" md5json="6ba0862c845c9ff38bef2f6bc0e94340">
 		<name>WINCOMM</name>
+		<file size="680" time="1986-02-03 12:29:52" attr="0x10">COMM</file>
+		<file size="10941" time="1985-06-24 22:38:32" attr="0x20" dir="COMM/">CCOM.ASM</file>
+		<file size="995" time="1985-10-23 14:49:26" attr="0x20" dir="COMM/">CCOM.OBJ</file>
+		<file size="13308" time="1985-06-17 11:17:06" attr="0x20" dir="COMM/">CMACROS.INC</file>
+		<file size="26508" time="1985-10-31 13:43:04" attr="0x20" dir="COMM/">COMDEV.C</file>
+		<file size="14113" time="1985-09-27 11:53:34" attr="0x20" dir="COMM/">COMDEV.H</file>
+		<file size="7610" time="1985-09-28 21:32:42" attr="0x20" dir="COMM/">COMDEV.INC</file>
+		<file size="1072" time="1985-10-31 10:53:48" attr="0x20" dir="COMM/">COMDEVI.H</file>
+		<file size="295" time="1986-02-03 12:28:30" attr="0x20" dir="COMM/">COMM</file>
+		<file size="37" time="1985-07-30 16:01:56" attr="0x20" dir="COMM/">COMM.CNF</file>
+		<file size="662" time="1985-10-30 17:46:06" attr="0x20" dir="COMM/">COMM.DEF</file>
+		<file size="1536" time="1985-10-23 14:48:36" attr="0x20" dir="COMM/">COMM.LIB</file>
+		<file size="67" time="1985-10-30 17:46:28" attr="0x20" dir="COMM/">COMM.LNK</file>
+		<file size="2470" time="1985-06-23 18:50:30" attr="0x20" dir="COMM/">COMTEST.C</file>
+		<file size="64849" time="1985-11-12 09:32:58" attr="0x20" dir="COMM/">IBMCOM.ASM</file>
+		<file size="6960" time="1985-11-12 15:55:12" attr="0x20" dir="COMM/">IBMCOM.OBJ</file>
+		<file size="30673" time="1985-10-30 15:09:16" attr="0x20" dir="COMM/">IBMCOM1.ASM</file>
+		<file size="18288" time="1985-11-08 09:42:12" attr="0x20" dir="COMM/">IBMINT.ASM</file>
+		<file size="3597" time="1985-09-10 13:25:52" attr="0x20" dir="COMM/">INS8250.INC</file>
 	</disk>
 </manifest>

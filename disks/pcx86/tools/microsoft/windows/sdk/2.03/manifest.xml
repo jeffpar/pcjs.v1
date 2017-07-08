@@ -3,13 +3,295 @@
 <manifest type="software">
 	<title>Windows SDK 2.03</title>
 	<source href="http://os2museum.com">os2museum.com</source>
-	<disk id="disk01" size="1228800" chs="80:2:15" img="archive/WINSDK203-DISK1-DEV.img" href="/disks/pcx86/tools/microsoft/windows/sdk/2.03/WINSDK203-DISK1-DEV.json" md5="2b12ea1df1c9fe241a2416a8b0a0ac94" md5json="2c3ca8667ca2ac4c5ded3f3c6b36b701">
+	<disk id="disk01" size="1228800" chs="80:2:15" img="archive/WINSDK203-DISK1-DEV.img" href="/disks/pcx86/tools/microsoft/windows/sdk/2.03/WINSDK203-DISK1-DEV.json" md5="240f27dbf30a4e1378f99e506597793b" md5json="566d69f1e342369c85786c908d8e97cd">
 		<name>Windows SDK 2.03 (1200K Disk 1)</name>
+		<file size="476" time="1988-01-28 23:00:58" attr="0x10">DEBUG</file>
+		<file size="104186" time="1988-01-28 23:00:02" attr="0x20" dir="DEBUG/">GDI.EXE</file>
+		<file size="5364" time="1988-01-28 23:00:02" attr="0x20" dir="DEBUG/">GDI.SYM</file>
+		<file size="67536" time="1988-01-28 23:00:02" attr="0x20" dir="DEBUG/">KERNEL.EXE</file>
+		<file size="2516" time="1988-01-28 23:00:02" attr="0x20" dir="DEBUG/">KERNEL.SYM</file>
+		<file size="44039" time="1988-01-28 23:00:02" attr="0x20" dir="DEBUG/">SETUP.EXE</file>
+		<file size="4" time="1988-01-28 23:00:02" attr="0x20" dir="DEBUG/">SETUP.INF</file>
+		<file size="12236" time="1988-01-28 23:00:02" attr="0x20" dir="DEBUG/">SETUP20.INF</file>
+		<file size="14188" time="1988-01-28 23:00:02" attr="0x20" dir="DEBUG/">SETUP386.INF</file>
+		<file size="155232" time="1988-01-28 23:00:02" attr="0x20" dir="DEBUG/">USER.EXE</file>
+		<file size="6308" time="1988-01-28 23:00:02" attr="0x20" dir="DEBUG/">USER.SYM</file>
+		<file size="3952" time="1988-01-28 23:00:02" attr="0x20" dir="DEBUG/">WIN.CNF</file>
+		<file size="3196" time="1988-01-28 23:00:02" attr="0x20" dir="DEBUG/">WIN.INI</file>
+		<file size="138" time="1988-01-28 23:00:02" attr="0x20">FONTS.ASM</file>
+		<file size="87" time="1988-01-28 23:00:02" attr="0x20">FONTS.OBJ</file>
+		<file size="238" time="1988-01-28 23:00:58" attr="0x10">INC</file>
+		<file size="17144" time="1988-01-28 23:00:02" attr="0x20" dir="INC/">CMACROS.INC</file>
+		<file size="2118" time="1988-01-28 23:00:02" attr="0x20" dir="INC/">DDE.H</file>
+		<file size="5177" time="1988-01-28 23:00:02" attr="0x20" dir="INC/">STYLE.H</file>
+		<file size="88141" time="1988-01-28 23:00:02" attr="0x20" dir="INC/">WINDOWS.H</file>
+		<file size="15542" time="1988-01-28 23:00:02" attr="0x20" dir="INC/">WINDOWS.INC</file>
+		<file size="578" time="1988-01-28 23:00:58" attr="0x10">LIB</file>
+		<file size="72653" time="1988-01-28 23:00:02" attr="0x20" dir="LIB/">CLIBW.LIB</file>
+		<file size="18321" time="1988-01-28 23:00:02" attr="0x20" dir="LIB/">CWINLIBC.LIB</file>
+		<file size="212" time="1988-01-28 23:00:02" attr="0x20" dir="LIB/">LIBCAW.BLD</file>
+		<file size="251" time="1988-01-28 23:00:02" attr="0x20" dir="LIB/">LIBCEW50.BLD</file>
+		<file size="251" time="1988-01-28 23:00:02" attr="0x20" dir="LIB/">LIBCEW51.BLD</file>
+		<file size="72653" time="1988-01-28 23:00:02" attr="0x20" dir="LIB/">LLIBW.LIB</file>
+		<file size="18833" time="1988-01-28 23:00:02" attr="0x20" dir="LIB/">LWINLIBC.LIB</file>
+		<file size="72659" time="1988-01-28 23:00:02" attr="0x20" dir="LIB/">MLIBW.LIB</file>
+		<file size="18839" time="1988-01-28 23:00:02" attr="0x20" dir="LIB/">MWINLIBC.LIB</file>
+		<file size="82441" time="1988-01-28 23:00:02" attr="0x20" dir="LIB/">PASLIBW.LIB</file>
+		<file size="72655" time="1988-01-28 23:00:02" attr="0x20" dir="LIB/">SLIBW.LIB</file>
+		<file size="18323" time="1988-01-28 23:00:02" attr="0x20" dir="LIB/">SWINLIBC.LIB</file>
+		<file size="154" time="1988-01-28 23:00:02" attr="0x20" dir="LIB/">WFPSIG.OBJ</file>
+		<file size="1055" time="1988-01-28 23:00:02" attr="0x20" dir="LIB/">WIN87EM.LIB</file>
+		<file size="44" time="1988-01-28 23:00:02" attr="0x20" dir="LIB/">__FPMATH.OBJ</file>
+		<file size="1122" time="1988-01-28 23:00:02" attr="0x20">MKDEBUG.BAT</file>
+		<file size="170" time="1988-01-28 23:00:58" attr="0x10">NODEBUG</file>
+		<file size="4996" time="1988-01-28 23:00:02" attr="0x20" dir="NODEBUG/">GDI.SYM</file>
+		<file size="2532" time="1988-01-28 23:00:02" attr="0x20" dir="NODEBUG/">KERNEL.SYM</file>
+		<file size="6292" time="1988-01-28 23:00:02" attr="0x20" dir="NODEBUG/">USER.SYM</file>
+		<file size="64768" time="1988-01-28 23:00:02" attr="0x20">UPDATE.WRI</file>
+		<file size="11440" time="1988-01-28 23:00:02" attr="0x20">WIN87EM.EXE</file>
+		<file size="570" time="1988-01-28 23:00:02" attr="0x20">WINSTUB.EXE</file>
 	</disk>
-	<disk id="disk02" size="1228800" chs="80:2:15" img="archive/WINSDK203-DISK2-UTILS.img" href="/disks/pcx86/tools/microsoft/windows/sdk/2.03/WINSDK203-DISK2-UTILS.json" md5="08b54542ecbaaef811c59cdfea209d29" md5json="57dae4a40161dfe4133856f603291be1">
+	<disk id="disk02" size="1228800" chs="80:2:15" img="archive/WINSDK203-DISK2-UTILS.img" href="/disks/pcx86/tools/microsoft/windows/sdk/2.03/WINSDK203-DISK2-UTILS.json" md5="26c488c8ccb704cd9014d67ef6edd61d" md5json="73de97be43a6c903d64e33864ada848a">
 		<name>Windows SDK 2.03 (1200K Disk 2)</name>
+		<file size="374" time="1988-01-28 23:00:58" attr="0x10">BINAPPS</file>
+		<file size="29822" time="1988-01-28 23:00:02" attr="0x20" dir="BINAPPS/">EXEHDR.EXE</file>
+		<file size="30166" time="1988-01-28 23:00:02" attr="0x20" dir="BINAPPS/">IMPLIB.EXE</file>
+		<file size="35211" time="1988-01-28 23:00:02" attr="0x20" dir="BINAPPS/">LIB.EXE</file>
+		<file size="107920" time="1988-01-28 23:00:02" attr="0x20" dir="BINAPPS/">LINK4.EXE</file>
+		<file size="24187" time="1988-01-28 23:00:02" attr="0x20" dir="BINAPPS/">MAKE.EXE</file>
+		<file size="48663" time="1988-01-28 23:00:02" attr="0x20" dir="BINAPPS/">MAPSYM.EXE</file>
+		<file size="37835" time="1988-01-28 23:00:02" attr="0x20" dir="BINAPPS/">RC.EXE</file>
+		<file size="31864" time="1988-01-28 23:00:02" attr="0x20" dir="BINAPPS/">RCPP.EXE</file>
+		<file size="43593" time="1988-01-28 23:00:02" attr="0x20" dir="BINAPPS/">SYMDEB.EXE</file>
+		<file size="39366" time="1988-01-28 23:00:02" attr="0x20">INSTALL.EXE</file>
+		<file size="885" time="1988-01-28 23:00:02" attr="0x20">MKDEBUG.BAT</file>
+		<file size="5504" time="1988-01-28 23:00:02" attr="0x20">README.WRI</file>
+		<file size="374" time="1988-01-28 23:00:58" attr="0x10">WINAPPS</file>
+		<file size="3515" time="1988-01-28 23:00:02" attr="0x20" dir="WINAPPS/">ATRM1111.FNT</file>
+		<file size="56480" time="1988-01-28 23:00:02" attr="0x20" dir="WINAPPS/">DIALOG.EXE</file>
+		<file size="35520" time="1988-01-28 23:00:02" attr="0x20" dir="WINAPPS/">FONTEDIT.EXE</file>
+		<file size="22912" time="1988-01-28 23:00:02" attr="0x20" dir="WINAPPS/">HEAPWALK.EXE</file>
+		<file size="3077" time="1988-01-28 23:00:02" attr="0x20" dir="WINAPPS/">HOOK.EXE</file>
+		<file size="37040" time="1988-01-28 23:00:02" attr="0x20" dir="WINAPPS/">ICONEDIT.EXE</file>
+		<file size="8560" time="1988-01-28 23:00:02" attr="0x20" dir="WINAPPS/">SHAKER.EXE</file>
+		<file size="8208" time="1988-01-28 23:00:02" attr="0x20" dir="WINAPPS/">SNAP.EXE</file>
+		<file size="20160" time="1988-01-28 23:00:02" attr="0x20" dir="WINAPPS/">SPY.EXE</file>
 	</disk>
-	<disk id="disk03" size="1228800" chs="80:2:15" img="archive/WINSDK203-DISK3-SAMPLES.img" href="/disks/pcx86/tools/microsoft/windows/sdk/2.03/WINSDK203-DISK3-SAMPLES.json" md5="5f321a19ede652a4433cc3a1a38dd7a6" md5json="29066646b6b591ae57dad9dcfcf4c17d">
+	<disk id="disk03" size="1228800" chs="80:2:15" img="archive/WINSDK203-DISK3-SAMPLES.img" href="/disks/pcx86/tools/microsoft/windows/sdk/2.03/WINSDK203-DISK3-SAMPLES.json" md5="98f2223c381352a07e084276c787be60" md5json="b6e27801a68741c7c690d6614e64de13">
 		<name>Windows SDK 2.03 (1200K Disk 3)</name>
+		<file size="918" time="1988-01-28 23:00:58" attr="0x10">CARDFILE</file>
+		<file size="1770" time="1988-01-28 23:00:02" attr="0x20" dir="CARDFILE/">CARDFILE</file>
+		<file size="633" time="1988-01-28 23:00:02" attr="0x20" dir="CARDFILE/">CARDFILE.DEF</file>
+		<file size="1038" time="1988-01-28 23:00:02" attr="0x20" dir="CARDFILE/">CARDFILE.ICO</file>
+		<file size="324" time="1988-01-28 23:00:02" attr="0x20" dir="CARDFILE/">CARDFILE.LNK</file>
+		<file size="10281" time="1988-01-28 23:00:02" attr="0x20" dir="CARDFILE/">CARDFILE.RC</file>
+		<file size="6845" time="1988-01-28 23:00:02" attr="0x20" dir="CARDFILE/">INBITMAP.C</file>
+		<file size="6068" time="1988-01-28 23:00:02" attr="0x20" dir="CARDFILE/">INCARD.C</file>
+		<file size="4932" time="1988-01-28 23:00:02" attr="0x20" dir="CARDFILE/">INCLIP.C</file>
+		<file size="14461" time="1988-01-28 23:00:02" attr="0x20" dir="CARDFILE/">INDB.C</file>
+		<file size="5066" time="1988-01-28 23:00:02" attr="0x20" dir="CARDFILE/">INDEX.C</file>
+		<file size="6097" time="1988-01-28 23:00:02" attr="0x20" dir="CARDFILE/">INDEX.H</file>
+		<file size="5141" time="1988-01-28 23:00:02" attr="0x20" dir="CARDFILE/">INDIAL.C</file>
+		<file size="2337" time="1988-01-28 23:00:02" attr="0x20" dir="CARDFILE/">INDOS.ASM</file>
+		<file size="1288" time="1988-01-28 23:00:02" attr="0x20" dir="CARDFILE/">INDOS2.ASM</file>
+		<file size="15945" time="1988-01-28 23:00:02" attr="0x20" dir="CARDFILE/">INFILE.C</file>
+		<file size="4429" time="1988-01-28 23:00:02" attr="0x20" dir="CARDFILE/">INFIND.C</file>
+		<file size="19339" time="1988-01-28 23:00:02" attr="0x20" dir="CARDFILE/">ININPUT.C</file>
+		<file size="8694" time="1988-01-28 23:00:02" attr="0x20" dir="CARDFILE/">INNEW.C</file>
+		<file size="4858" time="1988-01-28 23:00:02" attr="0x20" dir="CARDFILE/">INOPEN.C</file>
+		<file size="7109" time="1988-01-28 23:00:02" attr="0x20" dir="CARDFILE/">INPAINT.C</file>
+		<file size="10300" time="1988-01-28 23:00:02" attr="0x20" dir="CARDFILE/">INPRINT.C</file>
+		<file size="1932" time="1988-01-28 23:00:02" attr="0x20" dir="CARDFILE/">INRES.C</file>
+		<file size="4894" time="1988-01-28 23:00:02" attr="0x20" dir="CARDFILE/">INSCROLL.C</file>
+		<file size="6293" time="1988-01-28 23:00:02" attr="0x20" dir="CARDFILE/">INTEXT.C</file>
+		<file size="2284" time="1988-01-28 23:00:02" attr="0x20" dir="CARDFILE/">WINEXP.H</file>
+		<file size="374" time="1988-01-28 23:00:58" attr="0x10">CLOCK</file>
+		<file size="474" time="1988-01-28 23:00:02" attr="0x20" dir="CLOCK/">CLOCK</file>
+		<file size="16488" time="1988-01-28 23:00:02" attr="0x20" dir="CLOCK/">CLOCK.C</file>
+		<file size="217" time="1988-01-28 23:00:02" attr="0x20" dir="CLOCK/">CLOCK.DEF</file>
+		<file size="672" time="1988-01-28 23:00:02" attr="0x20" dir="CLOCK/">CLOCK.DLG</file>
+		<file size="138" time="1988-01-28 23:00:02" attr="0x20" dir="CLOCK/">CLOCK.H</file>
+		<file size="1038" time="1988-01-28 23:00:02" attr="0x20" dir="CLOCK/">CLOCK.ICO</file>
+		<file size="343" time="1988-01-28 23:00:02" attr="0x20" dir="CLOCK/">CLOCK.RC</file>
+		<file size="1604" time="1988-01-28 23:00:02" attr="0x20" dir="CLOCK/">CLOCKDAT.ASM</file>
+		<file size="853" time="1988-01-28 23:00:02" attr="0x20" dir="CLOCK/">GETTIME.ASM</file>
+		<file size="306" time="1988-01-28 23:00:58" attr="0x10">HELLO</file>
+		<file size="388" time="1988-01-28 23:00:02" attr="0x20" dir="HELLO/">HELLO</file>
+		<file size="5184" time="1988-01-28 23:00:02" attr="0x20" dir="HELLO/">HELLO.C</file>
+		<file size="227" time="1988-01-28 23:00:02" attr="0x20" dir="HELLO/">HELLO.DEF</file>
+		<file size="208" time="1988-01-28 23:00:02" attr="0x20" dir="HELLO/">HELLO.H</file>
+		<file size="1038" time="1988-01-28 23:00:02" attr="0x20" dir="HELLO/">HELLO.ICO</file>
+		<file size="670" time="1988-01-28 23:00:02" attr="0x20" dir="HELLO/">HELLO.RC</file>
+		<file size="5177" time="1988-01-28 23:00:02" attr="0x20" dir="HELLO/">STYLE.H</file>
+		<file size="646" time="1988-01-28 23:00:58" attr="0x10">LEARNING</file>
+		<file size="442" time="1988-01-28 23:00:58" attr="0x10" dir="LEARNING/">BITMAPS</file>
+		<file size="285" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/BITMAPS/">BITMAP</file>
+		<file size="17412" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/BITMAPS/">BITMAP.C</file>
+		<file size="240" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/BITMAPS/">BITMAP.DEF</file>
+		<file size="8560" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/BITMAPS/">BITMAP.EXE</file>
+		<file size="753" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/BITMAPS/">BITMAP.H</file>
+		<file size="738" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/BITMAPS/">BITMAP.RC</file>
+		<file size="700" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/BITMAPS/">CAT.BMP</file>
+		<file size="628" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/BITMAPS/">DOG.BMP</file>
+		<file size="1541" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/BITMAPS/">SELECT.EXE</file>
+		<file size="817" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/BITMAPS/">SELECT.H</file>
+		<file size="1024" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/BITMAPS/">SELECT.LIB</file>
+		<file size="374" time="1988-01-28 23:00:58" attr="0x10" dir="LEARNING/">CLIPBITS</file>
+		<file size="302" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/CLIPBITS/">CLIPBIT</file>
+		<file size="9832" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/CLIPBITS/">CLIPBIT.C</file>
+		<file size="724" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/CLIPBITS/">CLIPBIT.DEF</file>
+		<file size="5760" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/CLIPBITS/">CLIPBIT.EXE</file>
+		<file size="604" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/CLIPBITS/">CLIPBIT.H</file>
+		<file size="1337" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/CLIPBITS/">CLIPBIT.RC</file>
+		<file size="1541" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/CLIPBITS/">SELECT.EXE</file>
+		<file size="817" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/CLIPBITS/">SELECT.H</file>
+		<file size="1024" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/CLIPBITS/">SELECT.LIB</file>
+		<file size="272" time="1988-01-28 23:00:58" attr="0x10" dir="LEARNING/">CLIPTEXT</file>
+		<file size="297" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/CLIPTEXT/">CLIPTEXT</file>
+		<file size="8068" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/CLIPTEXT/">CLIPTEXT.C</file>
+		<file size="609" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/CLIPTEXT/">CLIPTEXT.DEF</file>
+		<file size="5760" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/CLIPTEXT/">CLIPTEXT.EXE</file>
+		<file size="658" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/CLIPTEXT/">CLIPTEXT.H</file>
+		<file size="1330" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/CLIPTEXT/">CLIPTEXT.RC</file>
+		<file size="306" time="1988-01-28 23:00:58" attr="0x10" dir="LEARNING/">CURSORS</file>
+		<file size="270" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/CURSORS/">BULLSEYE.CUR</file>
+		<file size="263" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/CURSORS/">CURSOR</file>
+		<file size="10906" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/CURSORS/">CURSOR.C</file>
+		<file size="239" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/CURSORS/">CURSOR.DEF</file>
+		<file size="17952" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/CURSORS/">CURSOR.EXE</file>
+		<file size="211" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/CURSORS/">CURSOR.H</file>
+		<file size="369" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/CURSORS/">CURSOR.RC</file>
+		<file size="272" time="1988-01-28 23:00:58" attr="0x10" dir="LEARNING/">EDITCNTL</file>
+		<file size="297" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/EDITCNTL/">EDITCNTL</file>
+		<file size="5813" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/EDITCNTL/">EDITCNTL.C</file>
+		<file size="227" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/EDITCNTL/">EDITCNTL.DEF</file>
+		<file size="5232" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/EDITCNTL/">EDITCNTL.EXE</file>
+		<file size="651" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/EDITCNTL/">EDITCNTL.H</file>
+		<file size="1229" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/EDITCNTL/">EDITCNTL.RC</file>
+		<file size="272" time="1988-01-28 23:00:58" attr="0x10" dir="LEARNING/">EDITFILE</file>
+		<file size="297" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/EDITFILE/">EDITFILE</file>
+		<file size="25828" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/EDITFILE/">EDITFILE.C</file>
+		<file size="331" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/EDITFILE/">EDITFILE.DEF</file>
+		<file size="15376" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/EDITFILE/">EDITFILE.EXE</file>
+		<file size="1272" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/EDITFILE/">EDITFILE.H</file>
+		<file size="2009" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/EDITFILE/">EDITFILE.RC</file>
+		<file size="272" time="1988-01-28 23:00:58" attr="0x10" dir="LEARNING/">EDITMENU</file>
+		<file size="297" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/EDITMENU/">EDITMENU</file>
+		<file size="5241" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/EDITMENU/">EDITMENU.C</file>
+		<file size="241" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/EDITMENU/">EDITMENU.DEF</file>
+		<file size="5232" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/EDITMENU/">EDITMENU.EXE</file>
+		<file size="603" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/EDITMENU/">EDITMENU.H</file>
+		<file size="1229" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/EDITMENU/">EDITMENU.RC</file>
+		<file size="272" time="1988-01-28 23:00:58" attr="0x10" dir="LEARNING/">FILEMENU</file>
+		<file size="297" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/FILEMENU/">FILEMENU</file>
+		<file size="4455" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/FILEMENU/">FILEMENU.C</file>
+		<file size="241" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/FILEMENU/">FILEMENU.DEF</file>
+		<file size="4544" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/FILEMENU/">FILEMENU.EXE</file>
+		<file size="426" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/FILEMENU/">FILEMENU.H</file>
+		<file size="700" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/FILEMENU/">FILEMENU.RC</file>
+		<file size="272" time="1988-01-28 23:00:58" attr="0x10" dir="LEARNING/">FILEOPEN</file>
+		<file size="297" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/FILEOPEN/">FILEOPEN</file>
+		<file size="15708" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/FILEOPEN/">FILEOPEN.C</file>
+		<file size="263" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/FILEOPEN/">FILEOPEN.DEF</file>
+		<file size="6512" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/FILEOPEN/">FILEOPEN.EXE</file>
+		<file size="1055" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/FILEOPEN/">FILEOPEN.H</file>
+		<file size="1650" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/FILEOPEN/">FILEOPEN.RC</file>
+		<file size="272" time="1988-01-28 23:00:58" attr="0x10" dir="LEARNING/">GENERIC</file>
+		<file size="1078" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/GENERIC/">GENERIC</file>
+		<file size="9269" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/GENERIC/">GENERIC.C</file>
+		<file size="733" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/GENERIC/">GENERIC.DEF</file>
+		<file size="4432" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/GENERIC/">GENERIC.EXE</file>
+		<file size="213" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/GENERIC/">GENERIC.H</file>
+		<file size="346" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/GENERIC/">GENERIC.RC</file>
+		<file size="306" time="1988-01-28 23:00:58" attr="0x10" dir="LEARNING/">ICONS</file>
+		<file size="238" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/ICONS/">ICON</file>
+		<file size="4519" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/ICONS/">ICON.C</file>
+		<file size="660" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/ICONS/">ICON.DEF</file>
+		<file size="5472" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/ICONS/">ICON.EXE</file>
+		<file size="207" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/ICONS/">ICON.H</file>
+		<file size="1038" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/ICONS/">ICON.ICO</file>
+		<file size="407" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/ICONS/">ICON.RC</file>
+		<file size="272" time="1988-01-28 23:00:58" attr="0x10" dir="LEARNING/">INPUT</file>
+		<file size="286" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/INPUT/">INPUT</file>
+		<file size="9781" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/INPUT/">INPUT.C</file>
+		<file size="263" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/INPUT/">INPUT.DEF</file>
+		<file size="9248" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/INPUT/">INPUT.EXE</file>
+		<file size="209" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/INPUT/">INPUT.H</file>
+		<file size="342" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/INPUT/">INPUT.RC</file>
+		<file size="374" time="1988-01-28 23:00:58" attr="0x10" dir="LEARNING/">MEMORY</file>
+		<file size="635" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/MEMORY/">MEMORY</file>
+		<file size="424" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/MEMORY/">MEMORY.DEF</file>
+		<file size="5968" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/MEMORY/">MEMORY.EXE</file>
+		<file size="294" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/MEMORY/">MEMORY.H</file>
+		<file size="344" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/MEMORY/">MEMORY.RC</file>
+		<file size="1107" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/MEMORY/">MEMORY1.C</file>
+		<file size="1073" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/MEMORY/">MEMORY2.C</file>
+		<file size="1198" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/MEMORY/">MEMORY3.C</file>
+		<file size="769" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/MEMORY/">MEMORY4.C</file>
+		<file size="272" time="1988-01-28 23:00:58" attr="0x10" dir="LEARNING/">OUTPUT</file>
+		<file size="263" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/OUTPUT/">OUTPUT</file>
+		<file size="8252" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/OUTPUT/">OUTPUT.C</file>
+		<file size="237" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/OUTPUT/">OUTPUT.DEF</file>
+		<file size="5488" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/OUTPUT/">OUTPUT.EXE</file>
+		<file size="211" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/OUTPUT/">OUTPUT.H</file>
+		<file size="344" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/OUTPUT/">OUTPUT.RC</file>
+		<file size="272" time="1988-01-28 23:00:58" attr="0x10" dir="LEARNING/">PRNTFILE</file>
+		<file size="297" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/PRNTFILE/">PRNTFILE</file>
+		<file size="27293" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/PRNTFILE/">PRNTFILE.C</file>
+		<file size="863" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/PRNTFILE/">PRNTFILE.DEF</file>
+		<file size="16608" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/PRNTFILE/">PRNTFILE.EXE</file>
+		<file size="1383" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/PRNTFILE/">PRNTFILE.H</file>
+		<file size="2369" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/PRNTFILE/">PRNTFILE.RC</file>
+		<file size="476" time="1988-01-28 23:00:58" attr="0x10" dir="LEARNING/">SELECT</file>
+		<file size="420" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/SELECT/">DEMO</file>
+		<file size="6968" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/SELECT/">DEMO.C</file>
+		<file size="361" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/SELECT/">DEMO.DEF</file>
+		<file size="5008" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/SELECT/">DEMO.EXE</file>
+		<file size="287" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/SELECT/">DEMO.H</file>
+		<file size="547" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/SELECT/">DEMO.RC</file>
+		<file size="216" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/SELECT/">SELECT</file>
+		<file size="4775" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/SELECT/">SELECT.C</file>
+		<file size="146" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/SELECT/">SELECT.DEF</file>
+		<file size="1541" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/SELECT/">SELECT.EXE</file>
+		<file size="817" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/SELECT/">SELECT.H</file>
+		<file size="1024" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/SELECT/">SELECT.LIB</file>
+		<file size="340" time="1988-01-28 23:00:58" attr="0x10" dir="LEARNING/">SHOWFONT</file>
+		<file size="9808" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/SHOWFONT/">CFONT.C</file>
+		<file size="369" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/SHOWFONT/">SHOWFONT</file>
+		<file size="48242" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/SHOWFONT/">SHOWFONT.C</file>
+		<file size="472" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/SHOWFONT/">SHOWFONT.DEF</file>
+		<file size="23056" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/SHOWFONT/">SHOWFONT.EXE</file>
+		<file size="5064" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/SHOWFONT/">SHOWFONT.H</file>
+		<file size="1038" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/SHOWFONT/">SHOWFONT.ICO</file>
+		<file size="10871" time="1988-01-28 23:00:02" attr="0x20" dir="LEARNING/SHOWFONT/">SHOWFONT.RC</file>
+		<file size="340" time="1988-01-28 23:00:58" attr="0x10">MUZZLE</file>
+		<file size="266" time="1988-01-28 23:00:02" attr="0x20" dir="MUZZLE/">MUZZLE</file>
+		<file size="78" time="1988-01-28 23:00:02" attr="0x20" dir="MUZZLE/">MUZZLE.CUR</file>
+		<file size="228" time="1988-01-28 23:00:02" attr="0x20" dir="MUZZLE/">MUZZLE.DEF</file>
+		<file size="1038" time="1988-01-28 23:00:02" attr="0x20" dir="MUZZLE/">MUZZLE.ICO</file>
+		<file size="1795" time="1988-01-28 23:00:02" attr="0x20" dir="MUZZLE/">MUZZLE.INC</file>
+		<file size="28802" time="1988-01-28 23:00:02" attr="0x20" dir="MUZZLE/">MUZZLE.PAS</file>
+		<file size="707" time="1988-01-28 23:00:02" attr="0x20" dir="MUZZLE/">MUZZLE.RC</file>
+		<file size="146598" time="1988-01-28 23:00:02" attr="0x20" dir="MUZZLE/">WINDOWS.INC</file>
+		<file size="340" time="1988-01-28 23:00:58" attr="0x10">SHAPES</file>
+		<file size="1060" time="1988-01-28 23:00:02" attr="0x20" dir="SHAPES/">SHAPES</file>
+		<file size="7672" time="1988-01-28 23:00:02" attr="0x20" dir="SHAPES/">SHAPES.C</file>
+		<file size="257" time="1988-01-28 23:00:02" attr="0x20" dir="SHAPES/">SHAPES.DEF</file>
+		<file size="1344" time="1988-01-28 23:00:02" attr="0x20" dir="SHAPES/">SHAPES.DOC</file>
+		<file size="320" time="1988-01-28 23:00:02" attr="0x20" dir="SHAPES/">SHAPES.H</file>
+		<file size="1038" time="1988-01-28 23:00:02" attr="0x20" dir="SHAPES/">SHAPES.ICO</file>
+		<file size="1106" time="1988-01-28 23:00:02" attr="0x20" dir="SHAPES/">SHAPES.RC</file>
+		<file size="5177" time="1988-01-28 23:00:02" attr="0x20" dir="SHAPES/">STYLE.H</file>
+		<file size="340" time="1988-01-28 23:00:58" attr="0x10">TEMPLATE</file>
+		<file size="4743" time="1988-01-28 23:00:02" attr="0x20" dir="TEMPLATE/">TEMPINIT.C</file>
+		<file size="627" time="1988-01-28 23:00:02" attr="0x20" dir="TEMPLATE/">TEMPLATE</file>
+		<file size="703" time="1988-01-28 23:00:02" attr="0x20" dir="TEMPLATE/">TEMPLATE.DEF</file>
+		<file size="3954" time="1988-01-28 23:00:02" attr="0x20" dir="TEMPLATE/">TEMPLATE.H</file>
+		<file size="1038" time="1988-01-28 23:00:02" attr="0x20" dir="TEMPLATE/">TEMPLATE.ICO</file>
+		<file size="3560" time="1988-01-28 23:00:02" attr="0x20" dir="TEMPLATE/">TEMPLATE.RC</file>
+		<file size="19927" time="1988-01-28 23:00:02" attr="0x20" dir="TEMPLATE/">TEMPNRES.C</file>
+		<file size="8983" time="1988-01-28 23:00:02" attr="0x20" dir="TEMPLATE/">TEMPRES.C</file>
+		<file size="102" time="1988-01-28 23:00:58" attr="0x10">USER</file>
+		<file size="19259" time="1988-01-28 23:00:02" attr="0x20" dir="USER/">WINDWP.C</file>
 	</disk>
 </manifest>
