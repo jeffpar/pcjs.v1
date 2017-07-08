@@ -15,6 +15,33 @@ I'm not sure if PC Tech Journal regularly (or *ever*) distributed their software
 archived them in monthly ZIP files, but obviously someone did, because you can find a bunch of ZIP archives at
 "[THE PROGRAMMER'S CORNER BBS ARCHIVE FROM THE PAST](https://www.pcorner.com/list/MAG)".
 
+Of particular interest is the "[Best Of](#directory-of-pc-tech-journal-best-of)" collection, a diskette that we had
+to recreate from multiple ZIP archives.  It includes this note from the magazine's editors:
+
+	              THE BEST OF PC TECH JOURNAL DISKETTE
+	              ------------------------------------
+	
+	This disk is a compilation of programs that have appeared in PC
+	Tech Journal over the years.  The diskette will spare you the
+	task of typing long listings from the magazine, thus leaving you
+	with time for more productive uses of the material published in
+	PC Tech Journal.
+	
+	The diskette contains two subdirectories, UTILITY and HPMETRIC,
+	in which you will find the programs.  Each directory also
+	includes the file CONTENTS, which identifies each program and
+	provides a reference to the issue of PC Tech Journal in which it
+	first appeared.  The CONTENTS files are in ASCII text format
+	suitable for TYPEing or PRINTing.  The file WARRANTY contains the
+	limited warranty and copyright notice. 
+	
+	Thank you for subscribing to PC Tech Journal.  We hope this
+	diskette and your future issues of the PC Tech Journal will be a
+	valuable and useful addition to your library.
+	
+	Julie Anderson                          Will Fastie
+	Editor                                  Editorial Director
+
 We've gone through those ZIP archives, filtered out the duplicates, organized them chronologically, and then put
 their contents onto diskette images that you can easily "Load" and "Save" to and from a PCjs machine.
 
@@ -456,6 +483,7 @@ over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  Thanks.
 	EPSON    COM       281 11-05-87  10:40a
 	FIXCURS  COM        29 11-02-87   9:24a
 	GRAPHICS EXE      7066 06-30-87  12:48p
+	HPMETRIC     <DIR>     07-08-17   3:17p
 	KEYBECHO COM     11154 05-01-87   1:34p
 	KEYBINFO COM      2449 05-01-87   1:41p
 	MACHINE  COM       200 11-02-87  10:50a
@@ -475,9 +503,62 @@ over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  Thanks.
 	TAD      COM       104 10-01-84  10:10a
 	TECHLINE           615 12-02-87   5:05p
 	UNDRLN   COM       132 11-09-87  10:58a
+	UTILITY      <DIR>     07-08-17   3:13p
 	VDEL     COM       404 11-05-87  11:04a
 	WARRANTY          1404 05-26-89   4:49p
 	WHERE    EXE      7552 01-01-80  12:24a
 	XMEM     COM      1332 10-06-85   7:36p
-	       40 file(s)     314122 bytes
-	                       24576 bytes free
+	       42 file(s)     314122 bytes
+
+	Directory of A:\HPMETRIC
+
+	.            <DIR>     07-08-17   3:17p
+	..           <DIR>     07-08-17   3:17p
+	COMPLEX  EXE      7066 06-30-87  12:47p
+	CONTENTS HP        851 12-02-87   3:33p
+	DOWNLD   EXE      8000 06-30-87  12:48p
+	GRAPHICS EXE      7066 06-30-87  12:48p
+	MACRO    EXE      8430 07-02-87   4:09p
+	PAGESIZE EXE      7808 06-30-87  12:47p
+	PUSHPOP  EXE      7126 06-30-87  12:47p
+	RESOLUT  EXE     19864 06-30-87  12:46p
+	       10 file(s)      66211 bytes
+
+	Directory of A:\UTILITY
+
+	.            <DIR>     07-08-17   3:13p
+	..           <DIR>     07-08-17   3:13p
+	ASKDEMO  BAT       466 11-02-87   9:47a
+	ASKKEY   COM        39 11-02-87   9:35a
+	ATBIOS   COM     13947 11-06-86   6:06p
+	ATPERF   EXE     95924 01-23-87   1:51p
+	AUTOTEST EXE     16000 07-13-84   5:48p
+	BUSPERF  EXE     62310 11-16-86   6:25p
+	CONTENTS UTI      5286 12-02-87   3:54p
+	CPUID    COM      2944 11-19-87   1:26p
+	DISKTEST EXE     15616 07-17-84  12:44p
+	DUMBTERM EXE      5328 11-04-87  10:47a
+	EMMSTAT  EXE      1741 11-02-87  10:26a
+	EPSON    COM       281 11-05-87   9:40a
+	FIXCURS  COM        29 11-02-87   8:24a
+	KEYBECHO COM     11154 05-01-87   1:34p
+	KEYBINFO COM      2449 05-01-87   1:41p
+	MACHINE  COM       200 11-02-87   9:50a
+	MATHCHIP COM       113 11-04-87  12:50p
+	MATHSWIT COM       105 11-04-87  12:53p
+	NDPTYPE  COM       230 11-19-87   1:08p
+	PRTSC    COM       110 11-04-87  12:45p
+	SETALARM COM       514 11-02-87   8:12a
+	SETKEY   COM       190 11-05-87   9:46a
+	SETRTC   BAT        81 10-30-87  12:29p
+	SUPEREN  COM       211 11-02-87   9:56a
+	TAD      COM       104 10-01-84  10:10a
+	UNDRLN   COM       132 11-09-87   9:58a
+	VDEL     COM       404 11-05-87  10:04a
+	WHERE    EXE      7552 01-01-80  12:00a
+	XMEM     COM      1332 10-06-85   7:36p
+	       31 file(s)     244792 bytes
+
+	Total files listed:
+	       83 file(s)     625125 bytes
+	                      566272 bytes free

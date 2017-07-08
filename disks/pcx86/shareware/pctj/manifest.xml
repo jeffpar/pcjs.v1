@@ -220,7 +220,7 @@
 		<file size="380" time="1988-05-25 14:56:54" attr="0x20" md5="26a8154802b764a838c211a21db84c64">_NETBIOS.C</file>
 		<file size="1639" time="1988-05-25 14:56:56" attr="0x20" md5="404bd8cc7d2e2190f18e8ff6db171fd6">_NETLOCK.ASM</file>
 	</disk>
-	<disk id="disk15" size="737280" chs="80:2:9" dir="archive/PCTJ8809" href="/disks/pcx86/shareware/pctj/PCTJ8809.json" md5="b0e1d9ff8211ac84b8b5a7bd3378d53e" md5json="f799fe56344cab48de8115f6aae0a5da">
+	<disk id="disk15" size="1228800" chs="80:2:15" dir="archive/PCTJ8809" href="/disks/pcx86/shareware/pctj/PCTJ8809.json" md5="9eebd3d6b388d82520ab26953f4abaf7" md5json="0c1912c38dc0e37d5b521656132a1a59">
 		<name>PC Tech Journal (1988-09)</name>
 		<file size="4096" time="1988-09-09 00:46:16" attr="0x20" md5="e13d778280e62faad89de76f726da772">ALR25386.TIM</file>
 		<file size="4096" time="1988-09-09 00:46:50" attr="0x20" md5="beca19245334cb1b5cb96ea6f8c16635">COM286.TIM</file>
@@ -287,7 +287,7 @@
 		<file size="7056" time="1988-11-08 14:19:02" attr="0x20" md5="f25ed3d86c21dfecadf3cfbf29ff5015">DB386.ASM</file>
 		<file size="698" time="1988-11-09 08:47:50" attr="0x20" md5="54ccab588d57c4a3f6090ac9396a1ce6">DB386.COM</file>
 	</disk>
-	<disk id="disk19" size="368640" chs="40:2:9" dir="archive/PCTJBEST" href="/disks/pcx86/shareware/pctj/PCTJBEST.json" md5="cd79a4a109db75c88175611d07ca7ba2" md5json="b569d523367d2d7e77080256532f335c">
+	<disk id="disk19" size="1228800" chs="80:2:15" dir="archive/PCTJBEST" href="/disks/pcx86/shareware/pctj/PCTJBEST.json" md5="ec017991754938344444b13aba2ba393" md5json="63d2044a7feb2e1dffefaa8574ed4a36">
 		<name>PC Tech Journal (Best Of)</name>
 		<file size="466" time="1987-11-02 10:47:18" attr="0x20" md5="ea1fa4e5dc81d7d04ce8778315f70bb3">ASKDEMO.BAT</file>
 		<file size="39" time="1987-11-02 10:35:54" attr="0x20" md5="75be9e7dd6f0177da3459843530a1a8f">ASKKEY.COM</file>
@@ -329,5 +329,42 @@
 		<file size="1404" time="1989-05-26 16:49:28" attr="0x20" md5="0c161ce16641c52a342264dcf1c6bff5">WARRANTY</file>
 		<file size="7552" time="1980-01-01 00:24:32" attr="0x20" md5="e4b10b9b53ba88a75577afff5b066036">WHERE.EXE</file>
 		<file size="1332" time="1985-10-06 19:36:02" attr="0x20" md5="1308a7a326a9bf2273346381563fd4fc">XMEM.COM</file>
+		<file size="7066" time="1987-06-30 12:47:32" attr="0x20" md5="673ffb1e4037aa3e94a7372176d148ea" dir="HPMETRIC/">COMPLEX.EXE</file>
+		<file size="851" time="1987-12-02 15:33:50" attr="0x20" md5="63cc23be0467a0746ef857fd89195e68" dir="HPMETRIC/">CONTENTS.HP</file>
+		<file size="8000" time="1987-06-30 12:48:48" attr="0x20" md5="5f537def15452053ad47ce37f3db7e25" dir="HPMETRIC/">DOWNLD.EXE</file>
+		<file size="7066" time="1987-06-30 12:48:20" attr="0x20" md5="dfdf78ccb309f9bae453b781a487a30a" dir="HPMETRIC/">GRAPHICS.EXE</file>
+		<file size="8430" time="1987-07-02 16:09:08" attr="0x20" md5="fa8e860bb7ec7b25c726d2272e21bee2" dir="HPMETRIC/">MACRO.EXE</file>
+		<file size="7808" time="1987-06-30 12:47:52" attr="0x20" md5="59a3d10f2dbec064b7f364423b9223fe" dir="HPMETRIC/">PAGESIZE.EXE</file>
+		<file size="7126" time="1987-06-30 12:47:02" attr="0x20" md5="e35e3a34daacdf5186b8510f5e79d7ea" dir="HPMETRIC/">PUSHPOP.EXE</file>
+		<file size="19864" time="1987-06-30 12:46:24" attr="0x20" md5="dc1bac62670c7913d3aff8c0ad8b5d47" dir="HPMETRIC/">RESOLUT.EXE</file>
+		<file size="466" time="1987-11-02 09:47:18" attr="0x20" md5="ea1fa4e5dc81d7d04ce8778315f70bb3" dir="UTILITY/">ASKDEMO.BAT</file>
+		<file size="39" time="1987-11-02 09:35:54" attr="0x20" md5="75be9e7dd6f0177da3459843530a1a8f" dir="UTILITY/">ASKKEY.COM</file>
+		<file size="13947" time="1986-11-06 18:06:22" attr="0x20" md5="a8e1ac3aad84e0048d6dc3d7ccbb73a9" dir="UTILITY/">ATBIOS.COM</file>
+		<file size="95924" time="1987-01-23 13:51:26" attr="0x20" md5="9b5a0bfb4cc53e0b0997acb3518b657c" dir="UTILITY/">ATPERF.EXE</file>
+		<file size="16000" time="1984-07-13 17:48:22" attr="0x20" md5="de68520b1d532d4b74009c104b56cc6a" dir="UTILITY/">AUTOTEST.EXE</file>
+		<file size="62310" time="1986-11-16 18:25:02" attr="0x20" md5="36863faa92c86ee8ea7a929dc870b5ac" dir="UTILITY/">BUSPERF.EXE</file>
+		<file size="5286" time="1987-12-02 15:54:06" attr="0x20" md5="c267ae6a68d86c4d4ca4a210d2bc2988" dir="UTILITY/">CONTENTS.UTI</file>
+		<file size="2944" time="1987-11-19 13:26:36" attr="0x20" md5="e2db99bc8bbe614f5e47da8ffa7017e5" dir="UTILITY/">CPUID.COM</file>
+		<file size="15616" time="1984-07-17 12:44:28" attr="0x20" md5="9638d224b913c02baf701e2d7731e2b7" dir="UTILITY/">DISKTEST.EXE</file>
+		<file size="5328" time="1987-11-04 10:47:32" attr="0x20" md5="4629c324379bda2ceddf324ab2620dd4" dir="UTILITY/">DUMBTERM.EXE</file>
+		<file size="1741" time="1987-11-02 10:26:44" attr="0x20" md5="8ab9865f90625b241ce012751d7200d4" dir="UTILITY/">EMMSTAT.EXE</file>
+		<file size="281" time="1987-11-05 09:40:18" attr="0x20" md5="c4804ccdd631c38f04ba31bbcb55e953" dir="UTILITY/">EPSON.COM</file>
+		<file size="29" time="1987-11-02 08:24:10" attr="0x20" md5="4d4a1a7bcd438204da66bc99c2c47831" dir="UTILITY/">FIXCURS.COM</file>
+		<file size="11154" time="1987-05-01 13:34:48" attr="0x20" md5="648098030f58b6999d7bd6b4b625b491" dir="UTILITY/">KEYBECHO.COM</file>
+		<file size="2449" time="1987-05-01 13:41:24" attr="0x20" md5="1de6981b2bb64334999b48fdb464dbbe" dir="UTILITY/">KEYBINFO.COM</file>
+		<file size="200" time="1987-11-02 09:50:46" attr="0x20" md5="d15cadac95e02992df1d7a9a83d0717f" dir="UTILITY/">MACHINE.COM</file>
+		<file size="113" time="1987-11-04 12:50:32" attr="0x20" md5="e50b70798b8d0283b3125cf3d19bf985" dir="UTILITY/">MATHCHIP.COM</file>
+		<file size="105" time="1987-11-04 12:53:36" attr="0x20" md5="2afdb92a2d3d01e3a3f788bb7f7c178f" dir="UTILITY/">MATHSWIT.COM</file>
+		<file size="230" time="1987-11-19 13:08:36" attr="0x20" md5="93c3a783ca37b2cdba0c375a13d3179d" dir="UTILITY/">NDPTYPE.COM</file>
+		<file size="110" time="1987-11-04 12:45:50" attr="0x20" md5="eb35c57e4a133cee5c1af2862e73cabc" dir="UTILITY/">PRTSC.COM</file>
+		<file size="514" time="1987-11-02 08:12:52" attr="0x20" md5="6c3d15b4870d7795d4b155bbe1efbdae" dir="UTILITY/">SETALARM.COM</file>
+		<file size="190" time="1987-11-05 09:46:24" attr="0x20" md5="87e6ba847f4a641213531de42e366a4b" dir="UTILITY/">SETKEY.COM</file>
+		<file size="81" time="1987-10-30 12:29:02" attr="0x20" md5="b50b877bb39868348d662fb9141d0b04" dir="UTILITY/">SETRTC.BAT</file>
+		<file size="211" time="1987-11-02 09:56:28" attr="0x20" md5="48383ce5abbdb212980402dd625e988b" dir="UTILITY/">SUPEREN.COM</file>
+		<file size="104" time="1984-10-01 10:10:24" attr="0x20" md5="3cead670d1504368f43cc2bc780017ef" dir="UTILITY/">TAD.COM</file>
+		<file size="132" time="1987-11-09 09:58:40" attr="0x20" md5="ff249a0d23d95870b6035b37acb1a928" dir="UTILITY/">UNDRLN.COM</file>
+		<file size="404" time="1987-11-05 10:04:12" attr="0x20" md5="c8fb04b06a10f374fa7e61f0975deced" dir="UTILITY/">VDEL.COM</file>
+		<file size="7552" time="1980-01-01 00:00:02" attr="0x20" md5="e4b10b9b53ba88a75577afff5b066036" dir="UTILITY/">WHERE.EXE</file>
+		<file size="1332" time="1985-10-06 19:36:02" attr="0x20" md5="1308a7a326a9bf2273346381563fd4fc" dir="UTILITY/">XMEM.COM</file>
 	</disk>
 </manifest>

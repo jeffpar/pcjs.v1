@@ -482,22 +482,6 @@ DiskDump.aDefaultBPBs = [
     0x02, 0x00,                 // 0x1A: number of heads (2)
     0x00, 0x00, 0x00, 0x00      // 0x1C: number of hidden sectors (always 0 for non-partitioned media)
   ],
-  [                             // define BPB for 720Kb diskette
-    0xEB, 0xFE, 0x90,           // 0x00: JMP instruction, following by 8-byte OEM signature
-    0x50, 0x43, 0x4A, 0x53, 0x2E, 0x4F, 0x52, 0x47,     // PCJS_OEM
- // 0x49, 0x42, 0x4D, 0x20, 0x20, 0x35, 0x2E, 0x30,     // "IBM  5.0" (this is a real OEM signature)
-    0x00, 0x02,                 // 0x0B: bytes per sector (0x200 or 512)
-    0x02,                       // 0x0D: sectors per cluster (2)
-    0x01, 0x00,                 // 0x0E: reserved sectors; ie, # sectors preceding the first FAT--usually just the boot sector (1)
-    0x02,                       // 0x10: FAT copies (2)
-    0x70, 0x00,                 // 0x11: root directory entries (0x70 or 112)  0x70 * 0x20 = 0xE00 (1 sector is 0x200 bytes, total of 7 sectors)
-    0xA0, 0x05,                 // 0x13: number of sectors (0x5A0 or 1440)
-    0xF9,                       // 0x15: media ID
-    0x03, 0x00,                 // 0x16: sectors per FAT (3)
-    0x09, 0x00,                 // 0x18: sectors per track (9)
-    0x02, 0x00,                 // 0x1A: number of heads (2)
-    0x00, 0x00, 0x00, 0x00      // 0x1C: number of hidden sectors (always 0 for non-partitioned media)
-  ],
   [                             // define BPB for 1.2Mb diskette
     0xEB, 0xFE, 0x90,           // 0x00: JMP instruction, following by 8-byte OEM signature
     0x50, 0x43, 0x4A, 0x53, 0x2E, 0x4F, 0x52, 0x47,     // PCJS_OEM
@@ -511,6 +495,22 @@ DiskDump.aDefaultBPBs = [
     0xF9,                       // 0x15: media ID (0xF9 was used for 1228800-byte diskettes, and later for 737280-byte diskettes)
     0x07, 0x00,                 // 0x16: sectors per FAT (7)
     0x0f, 0x00,                 // 0x18: sectors per track (15)
+    0x02, 0x00,                 // 0x1A: number of heads (2)
+    0x00, 0x00, 0x00, 0x00      // 0x1C: number of hidden sectors (always 0 for non-partitioned media)
+  ],
+  [                             // define BPB for 720Kb diskette
+    0xEB, 0xFE, 0x90,           // 0x00: JMP instruction, following by 8-byte OEM signature
+    0x50, 0x43, 0x4A, 0x53, 0x2E, 0x4F, 0x52, 0x47,     // PCJS_OEM
+    // 0x49, 0x42, 0x4D, 0x20, 0x20, 0x35, 0x2E, 0x30,     // "IBM  5.0" (this is a real OEM signature)
+    0x00, 0x02,                 // 0x0B: bytes per sector (0x200 or 512)
+    0x02,                       // 0x0D: sectors per cluster (2)
+    0x01, 0x00,                 // 0x0E: reserved sectors; ie, # sectors preceding the first FAT--usually just the boot sector (1)
+    0x02,                       // 0x10: FAT copies (2)
+    0x70, 0x00,                 // 0x11: root directory entries (0x70 or 112)  0x70 * 0x20 = 0xE00 (1 sector is 0x200 bytes, total of 7 sectors)
+    0xA0, 0x05,                 // 0x13: number of sectors (0x5A0 or 1440)
+    0xF9,                       // 0x15: media ID
+    0x03, 0x00,                 // 0x16: sectors per FAT (3)
+    0x09, 0x00,                 // 0x18: sectors per track (9)
     0x02, 0x00,                 // 0x1A: number of heads (2)
     0x00, 0x00, 0x00, 0x00      // 0x1C: number of hidden sectors (always 0 for non-partitioned media)
   ],
