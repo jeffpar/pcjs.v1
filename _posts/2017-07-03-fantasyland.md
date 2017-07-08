@@ -26,7 +26,7 @@ I actually wanted to do that several years ago, when I first added EGA support t
 IBM PC), because Cockerham described two rigorous tests of EGA hardware compatibility that I would have liked to try:
 
 - **FantasyLand**, an EGA demo written by IBM in 1984
-- [EGATEST](/disks/pcx86/shareware/pctj/#directory-of-pc-tech-journal-oct-86), a program written by Cockerham himself in Modula-2
+- [EGATEST](/disks/pcx86/shareware/pctj/#directory-of-pc-tech-journal-1986-10), a program written by Cockerham himself in Modula-2
 
 Cockerham describes **FantasyLand**:
 
@@ -94,7 +94,7 @@ and in that archive, a file named [PCTJ1086.ZIP](https://www.pcorner.com/list/MA
 contain all of Cockerham's EGATEST files.
 
 I've transferred the contents of that ZIP archive to a PCx86 diskette image named
-"[PC Tech Journal (Oct 86)](/disks/pcx86/shareware/pctj/#directory-of-pc-tech-journal-oct-86)", which we can now
+"[PC Tech Journal (1986-10)](/disks/pcx86/shareware/pctj/#directory-of-pc-tech-journal-1986-10)", which we can now
 load into the machine below, and then run "EGAMAKE.BAT" to rebuild the entire program.
 
 Unfortunately, as of this writing, while the code *mostly* compiles, it encounters a few errors along the way that
@@ -151,8 +151,8 @@ exactly what I've done "below the fold".
 	&028C:14AD 2E              CS:     
 	&028C:14AE 8F068005        POP      WORD [0580]
 	running
-	Loading /disks/pcx86/shareware/pctj/PCTJ1086.json.......
-	FDC: Mounted diskette "PC Tech Journal (Oct 86)" in drive A
+	Loading /disks/pcx86/shareware/pctj/PCTJ8610.json.......
+	FDC: Mounted diskette "PC Tech Journal (1986-10)" in drive A
 	
 	C:\>mkdir egatest
 	

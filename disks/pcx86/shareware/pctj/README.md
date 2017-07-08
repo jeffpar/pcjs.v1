@@ -7,9 +7,9 @@ permalink: /disks/pcx86/shareware/pctj/
 PC Tech Journal Disks
 ---------------------
 
-### Directory of PC Tech Journal (Oct 86)
+### Directory of PC Tech Journal (1986-10)
 
-	 Volume in drive A is PCTJ1086   
+	 Volume in drive A is PCTJ8610   
 	 Directory of A:\
 
 	DOTTIME  DEF       106 07-22-86   9:38p
