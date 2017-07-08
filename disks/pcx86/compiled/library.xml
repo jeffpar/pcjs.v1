@@ -536,6 +536,7 @@
 		<disk path="/disks/pcx86/shareware/pctj/PCTJ8811.json">PC Tech Journal (1988-11)</disk>
 		<disk path="/disks/pcx86/shareware/pctj/PCTJ8812.json">PC Tech Journal (1988-12)</disk>
 		<disk path="/disks/pcx86/shareware/pctj/PCTJ8901.json">PC Tech Journal (1989-01)</disk>
+		<disk path="/disks/pcx86/shareware/pctj/PCTBENCH.json">PC Tech Journal (Benchmarks)</disk>
 		<disk path="/disks/pcx86/shareware/pctj/PCTJBEST.json">PC Tech Journal (Best Of)</disk>
 		<disk path="/apps/pcx86/1981/visicalc/VISICALC1981.json">VisiCalc (1981)</disk>
 		<disk path="/apps/pcx86/1982/esuite/disk.json">Executive Suite (1982)</disk>

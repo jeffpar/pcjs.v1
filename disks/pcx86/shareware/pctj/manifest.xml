@@ -232,6 +232,45 @@
 		<file size="7056" time="1988-11-08 14:19:02" attr="0x20" md5="f25ed3d86c21dfecadf3cfbf29ff5015">DB386.ASM</file>
 		<file size="698" time="1988-11-09 08:47:50" attr="0x20" md5="54ccab588d57c4a3f6090ac9396a1ce6">DB386.COM</file>
 	</disk>
+	<disk id="disk20" size="1228800" chs="80:2:15" dir="archive/PCTBENCH" href="/disks/pcx86/shareware/pctj/PCTBENCH.json" md5="1cdd985b20d72cbf33fb3f7bd1acf6e9" md5json="d51776d352de4e415d09fafd6719e0c9">
+		<name>PC Tech Journal (Benchmarks)</name>
+		<file size="4096" time="1988-09-09 00:46:16" attr="0x20" md5="e13d778280e62faad89de76f726da772">ALR25386.TIM</file>
+		<file size="4096" time="1988-09-09 00:46:50" attr="0x20" md5="beca19245334cb1b5cb96ea6f8c16635">COM286.TIM</file>
+		<file size="4096" time="1988-09-09 00:50:58" attr="0x20" md5="91d2c2b833991dac94eed5cc9149da61">COM386.TIM</file>
+		<file size="4096" time="1988-09-09 00:51:42" attr="0x20" md5="58230a4a54e9ac0226cd7067cf715077">COM38620.TIM</file>
+		<file size="4096" time="1988-09-09 00:52:08" attr="0x20" md5="d2d173fdddf39a394aa4865f995e6713">COM38625.TIM</file>
+		<file size="4096" time="1988-09-09 00:53:00" attr="0x20" md5="4579c8ed279b443bd3f5247f1c26f07a">COMP386.TIM</file>
+		<file size="4096" time="1988-09-09 00:53:32" attr="0x20" md5="a280ccc213792332fceeaf011cbc74ef">COMPIII.TIM</file>
+		<file size="4096" time="1988-09-19 21:29:32" attr="0x20" md5="f01bae1903b5b97370406713af87a2f9">CURRENT.TIM</file>
+		<file size="4096" time="1988-09-09 00:54:14" attr="0x20" md5="7c585049abbb1d0ec97ff1cc831b4822">EVE38625.TIM</file>
+		<file size="46796" time="1988-09-09 17:24:14" attr="0x20" md5="8e01138e0bc5fc16ce71891ed0b4d7ea">HLANALYZ.EXE</file>
+		<file size="35788" time="1988-09-09 17:23:50" attr="0x20" md5="77b306ee2bb1803efa555d5cb19a6814">HLBENCH.EXE</file>
+		<file size="4001" time="1988-09-05 20:25:36" attr="0x20" md5="c66cdd04e01e0ef85ac0aecde4898eff">HLBENCH.SCT</file>
+		<file size="33680" time="1988-09-09 17:23:30" attr="0x20" md5="de14a749a22bce91e734173e5c278a4f">HLDESC.EXE</file>
+		<file size="22123" time="1988-09-09 17:23:44" attr="0x20" md5="75a6ebc033cd2369f831b6d15521254c">HLDISK.EXE</file>
+		<file size="52396" time="1988-09-09 17:23:36" attr="0x20" md5="5dd2478666fc4831eb031e243e0c295a">HLFLOAT.EXE</file>
+		<file size="55722" time="1988-09-09 17:24:08" attr="0x20" md5="bd49d5b7fb5c59570d4cc9a20980e300">HLGRAPH.EXE</file>
+		<file size="4414" time="1988-09-09 18:10:48" attr="0x20" md5="42f14a4ff6e76166aec11a72df8c79d9">HLHELP.TXT</file>
+		<file size="17453" time="1988-09-09 17:24:12" attr="0x20" md5="8099694f1d2cdcc96d757c847a03746d">HLSORT.EXE</file>
+		<file size="28160" time="1988-09-09 17:24:12" attr="0x20" md5="c1c452d107bada5bb8111eb88d703daa">HLSTART.EXE</file>
+		<file size="4001" time="1988-09-09 00:09:10" attr="0x20" md5="3b9a1fc83d793e1b3f47f55cef04662d">HLSTART.SCT</file>
+		<file size="30196" time="1988-09-09 17:23:40" attr="0x20" md5="c9d8ea006634e956bffe1f0703d9a288">HLTEXT.EXE</file>
+		<file size="32448" time="1988-09-09 17:23:54" attr="0x20" md5="abff9c2ef4bb2598649320e95d98d845">HLWINDOW.EXE</file>
+		<file size="4096" time="1988-09-09 00:55:38" attr="0x20" md5="9645618a7a329f6b0e2f439dcb22aeb3">IBM50021.TIM</file>
+		<file size="4096" time="1988-09-09 00:56:02" attr="0x20" md5="f81ae5835a681487ef9056431770b757">IBM60041.TIM</file>
+		<file size="4096" time="1988-09-09 00:56:30" attr="0x20" md5="a036f8029365e71cde18ca9dff4ca239">IBM70A21.TIM</file>
+		<file size="4096" time="1988-09-09 00:56:54" attr="0x20" md5="dc9b142b17f9ef916e0c04474852e295">IBM80071.TIM</file>
+		<file size="4096" time="1988-09-09 00:57:16" attr="0x20" md5="f712f027729138027527e1d6844432ab">IBM80111.TIM</file>
+		<file size="4096" time="1988-09-09 00:57:46" attr="0x20" md5="934a3597064355d48db84bfa4eb9aca4">IBMAT339.TIM</file>
+		<file size="6749" time="1988-03-07 05:10:00" attr="0x20" md5="5783e6889f584038f480e07a280655e2">MSHERC.COM</file>
+		<file size="56" time="1988-09-19 21:23:24" attr="0x20" md5="fb94a79a34c4bdebb3cc5f460d7df042">MSHERC.MSG</file>
+		<file size="49" time="1988-09-09 01:00:36" attr="0x20" md5="e946981aa7b609d33b7951da1320a628">PCTECH.BAT</file>
+		<file size="2908" time="1988-09-09 17:35:32" attr="0x20" md5="99d6c4c6ee69d98fee5be44ffb20eae3">READ.ME</file>
+		<file size="7912" time="1988-09-09 15:30:34" attr="0x20" md5="bbfbe2622a7acfc19b6c59b27388f432">TJ640200.PCX</file>
+		<file size="11699" time="1988-09-09 10:09:10" attr="0x20" md5="5c91f9ddea09ce911442589a59d7cabf">TJ640350.PCX</file>
+		<file size="14909" time="1988-09-09 16:36:28" attr="0x20" md5="b1abfdfa7d140c6ee81af3f506c798bc">TJ640480.PCX</file>
+		<file size="14" time="1988-09-07 18:29:40" attr="0x20" md5="3c982d76849cc6ebce001ea914672a05">XREF.TXT</file>
+	</disk>
 	<disk id="disk19" size="1228800" chs="80:2:15" dir="archive/PCTJBEST" href="/disks/pcx86/shareware/pctj/PCTJBEST.json" md5="ec017991754938344444b13aba2ba393" md5json="63d2044a7feb2e1dffefaa8574ed4a36">
 		<name>PC Tech Journal (Best Of)</name>
 		<file size="466" time="1987-11-02 10:47:18" attr="0x20" md5="ea1fa4e5dc81d7d04ce8778315f70bb3">ASKDEMO.BAT</file>

@@ -391,6 +391,51 @@ over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  Thanks.
 	        2 file(s)       7754 bytes
 	                      152064 bytes free
 
+### Directory of PC Tech Journal (Benchmarks)
+
+	 Volume in drive A is PCTBENCH   
+
+	Directory of A:\
+
+	ALR25386 TIM      4096 09-09-88  12:46a
+	COM286   TIM      4096 09-09-88  12:46a
+	COM386   TIM      4096 09-09-88  12:50a
+	COM38620 TIM      4096 09-09-88  12:51a
+	COM38625 TIM      4096 09-09-88  12:52a
+	COMP386  TIM      4096 09-09-88  12:53a
+	COMPIII  TIM      4096 09-09-88  12:53a
+	CURRENT  TIM      4096 09-19-88   9:29p
+	EVE38625 TIM      4096 09-09-88  12:54a
+	HLANALYZ EXE     46796 09-09-88   5:24p
+	HLBENCH  EXE     35788 09-09-88   5:23p
+	HLBENCH  SCT      4001 09-05-88   8:25p
+	HLDESC   EXE     33680 09-09-88   5:23p
+	HLDISK   EXE     22123 09-09-88   5:23p
+	HLFLOAT  EXE     52396 09-09-88   5:23p
+	HLGRAPH  EXE     55722 09-09-88   5:24p
+	HLHELP   TXT      4414 09-09-88   6:10p
+	HLSORT   EXE     17453 09-09-88   5:24p
+	HLSTART  EXE     28160 09-09-88   5:24p
+	HLSTART  SCT      4001 09-09-88  12:09a
+	HLTEXT   EXE     30196 09-09-88   5:23p
+	HLWINDOW EXE     32448 09-09-88   5:23p
+	IBM50021 TIM      4096 09-09-88  12:55a
+	IBM60041 TIM      4096 09-09-88  12:56a
+	IBM70A21 TIM      4096 09-09-88  12:56a
+	IBM80071 TIM      4096 09-09-88  12:56a
+	IBM80111 TIM      4096 09-09-88  12:57a
+	IBMAT339 TIM      4096 09-09-88  12:57a
+	MSHERC   COM      6749 03-07-88   5:10a
+	MSHERC   MSG        56 09-19-88   9:23p
+	PCTECH   BAT        49 09-09-88   1:00a
+	READ     ME       2908 09-09-88   5:35p
+	TJ640200 PCX      7912 09-09-88   3:30p
+	TJ640350 PCX     11699 09-09-88  10:09a
+	TJ640480 PCX     14909 09-09-88   4:36p
+	XREF     TXT        14 09-07-88   6:29p
+	       36 file(s)     472914 bytes
+	                      735744 bytes free
+
 ### Directory of PC Tech Journal (Best Of)
 
 	 Volume in drive A is PCTJBEST   
