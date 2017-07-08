@@ -83,7 +83,7 @@
 		<file size="6734" time="1986-12-08 15:20:36" attr="0x20" md5="fd0f8a802c47b04f781ab9b70e10a673">TONE.EXE</file>
 		<file size="30" time="1986-12-04 17:43:32" attr="0x20" md5="aeb91d54c471e0c17727b92e30821949">TOOLS.INI</file>
 	</disk>
-	<disk id="disk06" size="163840" chs="40:1:8" dir="archive/PCTJ8706" href="/disks/pcx86/shareware/pctj/PCTJ8706.json" md5="f30f136714fde61451da6143ff85be03" md5json="d504ae7616b0c5628ce6496253441a89">
+	<disk id="disk06" size="163840" chs="40:1:8" dir="archive/PCTJ8706" href="/disks/pcx86/shareware/pctj/PCTJ8706.json" md5="91b1567dad67a43bd1bcb2aedbe35103" md5json="08f2c2142c616275c231bfb21edc530e">
 		<name>PC Tech Journal (1987-06)</name>
 		<file size="471" time="1987-04-21 13:26:20" attr="0x20" md5="0a7ed295618914ef53e56196799128ee">ASKDEMO.BAT</file>
 		<file size="1813" time="1987-04-21 13:28:30" attr="0x20" md5="43b7b1d1bebe7106f628d2ad896f4d4e">ASKKEY.ASM</file>
@@ -96,19 +96,8 @@
 		<file size="678" time="1987-04-06 10:27:38" attr="0x20" md5="1c54d83243e4f4139e19b829faa04e91">PERFORM.F77</file>
 		<file size="191" time="1987-06-05 14:20:42" attr="0x20" md5="d9797eee87fb49d5bc0ff42991ebe9ce">README.TXT</file>
 		<file size="716" time="1987-04-02 14:48:58" attr="0x20" md5="e9b39392628f110323b7283ea546464a">SYNTH1.F77</file>
-		<file size="471" time="1987-04-21 13:26:20" attr="0x20" md5="0a7ed295618914ef53e56196799128ee" dir="PCTJ8706/">ASKDEMO.BAT</file>
-		<file size="1813" time="1987-04-21 13:28:30" attr="0x20" md5="43b7b1d1bebe7106f628d2ad896f4d4e" dir="PCTJ8706/">ASKKEY.ASM</file>
-		<file size="503" time="1987-04-02 14:48:40" attr="0x20" md5="cf6579b2a5471acfa7e38b34ecdd2996" dir="PCTJ8706/">BIGARRAY.F77</file>
-		<file size="503" time="1987-04-02 14:50:06" attr="0x20" md5="f2657db440efb709357e76156614da3a" dir="PCTJ8706/">BIGERROR.F77</file>
-		<file size="13758" time="1987-03-19 12:59:32" attr="0x20" md5="3091c236447fdcad5e84beeef427d201" dir="PCTJ8706/">DRAWCHAR.COM</file>
-		<file size="6925" time="1987-04-23 13:18:40" attr="0x20" md5="77a79d95a20ba86b78dc5bb5546dad10" dir="PCTJ8706/">DRAWCHAR.PAS</file>
-		<file size="500" time="1987-04-02 14:50:44" attr="0x20" md5="d6b569cc6f71df9ee16380410c7738f1" dir="PCTJ8706/">ITERATE.F77</file>
-		<file size="11" time="1987-04-02 14:51:10" attr="0x20" md5="ec3dc94314604a3a972a4b4538cbdf66" dir="PCTJ8706/">MINIMUM.F77</file>
-		<file size="678" time="1987-04-06 10:27:38" attr="0x20" md5="1c54d83243e4f4139e19b829faa04e91" dir="PCTJ8706/">PERFORM.F77</file>
-		<file size="191" time="1987-06-05 14:20:42" attr="0x20" md5="d9797eee87fb49d5bc0ff42991ebe9ce" dir="PCTJ8706/">README.TXT</file>
-		<file size="716" time="1987-04-02 14:48:58" attr="0x20" md5="e9b39392628f110323b7283ea546464a" dir="PCTJ8706/">SYNTH1.F77</file>
 	</disk>
-	<disk id="disk07" size="163840" chs="40:1:8" dir="archive/PCTJ8707" href="/disks/pcx86/shareware/pctj/PCTJ8707.json" md5="d8eb9a9b986606ff76bbf98bc3a71b81" md5json="f06ff3c2c604700c8a09539ef373b482">
+	<disk id="disk07" size="163840" chs="40:1:8" dir="archive/PCTJ8707" href="/disks/pcx86/shareware/pctj/PCTJ8707.json" md5="8ba0b50bf002bf985ba47f1783661592" md5json="d9f7b9df0b13c06dc26ecb044b924630">
 		<name>PC Tech Journal (1987-07)</name>
 		<file size="12321" time="1987-05-28 14:01:12" attr="0x20" md5="03e09413f53e7c9997918441ae75ac86">ATKEY.ASM</file>
 		<file size="1382" time="1987-05-27 16:07:20" attr="0x20" md5="c1f2b1413db7e4ef083cb15ccfddd3d5">DSPYINFO.C</file>
@@ -123,19 +112,6 @@
 		<file size="382" time="1987-05-27 16:09:06" attr="0x20" md5="b3d1b8bc1726fef642d3a0ea250781be">TO_MONO.C</file>
 		<file size="2009" time="1987-02-16 10:35:10" attr="0x20" md5="9db996d935e0eb76bf87ecc20bfa766d">USE_EGA.C</file>
 		<file size="429" time="1987-04-06 15:47:22" attr="0x20" md5="af04babffeb296e9740c7b7ff11aa1d0">USE_EGA.MK</file>
-		<file size="12321" time="1987-05-28 14:01:12" attr="0x20" md5="03e09413f53e7c9997918441ae75ac86" dir="PCTJ8707/">ATKEY.ASM</file>
-		<file size="1382" time="1987-05-27 16:07:20" attr="0x20" md5="c1f2b1413db7e4ef083cb15ccfddd3d5" dir="PCTJ8707/">DSPYINFO.C</file>
-		<file size="377" time="1987-04-06 13:19:00" attr="0x20" md5="64719ed5966cc08c1c5892cad66e69cd" dir="PCTJ8707/">DSPYINFO.MK</file>
-		<file size="1027" time="1987-02-16 10:11:04" attr="0x20" md5="78ceb21bb633770bd2dd7dab3aae3728" dir="PCTJ8707/">EGA_INFO.C</file>
-		<file size="979" time="1987-05-02 19:17:48" attr="0x20" md5="919005b68a398cfea6692fbbad1ed7a3" dir="PCTJ8707/">ENHANKB.ASM</file>
-		<file size="433" time="1987-05-27 16:05:28" attr="0x20" md5="63320242db4c070a58e44ffa0c1aea81" dir="PCTJ8707/">GETSTATE.C</file>
-		<file size="846" time="1987-05-27 16:05:00" attr="0x20" md5="45617ef9a92784b42f79de7e9e2ae863" dir="PCTJ8707/">MEMCHK.C</file>
-		<file size="539" time="1987-05-27 16:07:56" attr="0x20" md5="0d6853dd3d1c70caeff09bc97ae10d7b" dir="PCTJ8707/">SETVMODE.C</file>
-		<file size="55" time="1987-02-14 06:24:00" attr="0x20" md5="a4c75a4ad505491283db25c06fdf0637" dir="PCTJ8707/">TOOLS.INI</file>
-		<file size="447" time="1987-05-27 16:08:26" attr="0x20" md5="96c27efc52920bd38f339c26e3a0a709" dir="PCTJ8707/">TO_COLOR.C</file>
-		<file size="382" time="1987-05-27 16:09:06" attr="0x20" md5="b3d1b8bc1726fef642d3a0ea250781be" dir="PCTJ8707/">TO_MONO.C</file>
-		<file size="2009" time="1987-02-16 10:35:10" attr="0x20" md5="9db996d935e0eb76bf87ecc20bfa766d" dir="PCTJ8707/">USE_EGA.C</file>
-		<file size="429" time="1987-04-06 15:47:22" attr="0x20" md5="af04babffeb296e9740c7b7ff11aa1d0" dir="PCTJ8707/">USE_EGA.MK</file>
 	</disk>
 	<disk id="disk08" size="163840" chs="40:1:8" dir="archive/PCTJ8710" href="/disks/pcx86/shareware/pctj/PCTJ8710.json" md5="3b0fbea72ae336dec5452cbcf4929dbf" md5json="9a3732693e15a6a7c1c79e364d0b61fb">
 		<name>PC Tech Journal (1987-10)</name>

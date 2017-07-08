@@ -168,32 +168,14 @@ over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  Thanks.
 	DRAWCHAR PAS      6925 04-23-87   1:18p
 	ITERATE  F77       500 04-02-87   2:50p
 	MINIMUM  F77        11 04-02-87   2:51p
-	PCTJ8706     <DIR>     07-07-17   6:40p
 	PERFORM  F77       678 04-06-87  10:27a
 	README   TXT       191 06-05-87   2:20p
 	SYNTH1   F77       716 04-02-87   2:48p
-	       12 file(s)      26069 bytes
-
-	Directory of A:\PCTJ8706
-
-	.            <DIR>     07-07-17   6:40p
-	..           <DIR>     07-07-17   6:40p
-	ASKDEMO  BAT       471 04-21-87   1:26p
-	ASKKEY   ASM      1813 04-21-87   1:28p
-	BIGARRAY F77       503 04-02-87   2:48p
-	BIGERROR F77       503 04-02-87   2:50p
-	DRAWCHAR COM     13758 03-19-87  12:59p
-	DRAWCHAR PAS      6925 04-23-87   1:18p
-	ITERATE  F77       500 04-02-87   2:50p
-	MINIMUM  F77        11 04-02-87   2:51p
-	PERFORM  F77       678 04-06-87  10:27a
-	README   TXT       191 06-05-87   2:20p
-	SYNTH1   F77       716 04-02-87   2:48p
-	       13 file(s)      26069 bytes
+	       11 file(s)      26069 bytes
 
 	Total files listed:
-	       25 file(s)      52138 bytes
-	                      103424 bytes free
+	       11 file(s)      26069 bytes
+	                      132096 bytes free
 
 ### Directory of PC Tech Journal (1987-07)
 
@@ -208,37 +190,17 @@ over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  Thanks.
 	ENHANKB  ASM       979 05-02-87   7:17p
 	GETSTATE C         433 05-27-87   4:05p
 	MEMCHK   C         846 05-27-87   4:05p
-	PCTJ8707     <DIR>     07-07-17   6:40p
 	SETVMODE C         539 05-27-87   4:07p
 	TOOLS    INI        55 02-14-87   6:24a
 	TO_COLOR C         447 05-27-87   4:08p
 	TO_MONO  C         382 05-27-87   4:09p
 	USE_EGA  C        2009 02-16-87  10:35a
 	USE_EGA  MK        429 04-06-87   3:47p
-	       14 file(s)      21226 bytes
-
-	Directory of A:\PCTJ8707
-
-	.            <DIR>     07-07-17   6:40p
-	..           <DIR>     07-07-17   6:40p
-	ATKEY    ASM     12321 05-28-87   2:01p
-	DSPYINFO C        1382 05-27-87   4:07p
-	DSPYINFO MK        377 04-06-87   1:19p
-	EGA_INFO C        1027 02-16-87  10:11a
-	ENHANKB  ASM       979 05-02-87   7:17p
-	GETSTATE C         433 05-27-87   4:05p
-	MEMCHK   C         846 05-27-87   4:05p
-	SETVMODE C         539 05-27-87   4:07p
-	TOOLS    INI        55 02-14-87   6:24a
-	TO_COLOR C         447 05-27-87   4:08p
-	TO_MONO  C         382 05-27-87   4:09p
-	USE_EGA  C        2009 02-16-87  10:35a
-	USE_EGA  MK        429 04-06-87   3:47p
-	       15 file(s)      21226 bytes
+	       13 file(s)      21226 bytes
 
 	Total files listed:
-	       29 file(s)      42452 bytes
-	                      111616 bytes free
+	       13 file(s)      21226 bytes
+	                      136192 bytes free
 
 ### Directory of PC Tech Journal (1987-10)
 
@@ -365,57 +327,26 @@ over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  Thanks.
 
 	Directory of A:\
 
-	ALR25386 TIM      4096 09-09-88  12:46a
-	COM286   TIM      4096 09-09-88  12:46a
-	COM386   TIM      4096 09-09-88  12:50a
-	COM38620 TIM      4096 09-09-88  12:51a
-	COM38625 TIM      4096 09-09-88  12:52a
-	COMP386  TIM      4096 09-09-88  12:53a
-	COMPIII  TIM      4096 09-09-88  12:53a
-	CURRENT  TIM      4096 09-19-88   9:29p
-	EVE38625 TIM      4096 09-09-88  12:54a
-	HLANALYZ EXE     46796 09-09-88   5:24p
-	HLBENCH  EXE     35788 09-09-88   5:23p
-	HLBENCH  SCT      4001 09-05-88   8:25p
-	HLDESC   EXE     33680 09-09-88   5:23p
-	HLDISK   EXE     22123 09-09-88   5:23p
-	HLFLOAT  EXE     52396 09-09-88   5:23p
-	HLGRAPH  EXE     55722 09-09-88   5:24p
-	HLHELP   TXT      4414 09-09-88   6:10p
-	HLSORT   EXE     17453 09-09-88   5:24p
-	HLSTART  EXE     28160 09-09-88   5:24p
-	HLSTART  SCT      4001 09-09-88  12:09a
-	HLTEXT   EXE     30196 09-09-88   5:23p
-	HLWINDOW EXE     32448 09-09-88   5:23p
-	IBM50021 TIM      4096 09-09-88  12:55a
-	IBM60041 TIM      4096 09-09-88  12:56a
-	IBM70A21 TIM      4096 09-09-88  12:56a
-	IBM80071 TIM      4096 09-09-88  12:56a
-	IBM80111 TIM      4096 09-09-88  12:57a
-	IBMAT339 TIM      4096 09-09-88  12:57a
-	MSHERC   COM      6749 03-07-88   5:10a
-	MSHERC   MSG        56 09-19-88   9:23p
-	PCTECH   BAT        49 09-09-88   1:00a
-	PCTJ8809     <DIR>     07-07-17   6:40p
-	READ     ME       2908 09-09-88   5:35p
-	TJ640200 PCX      7912 09-09-88   3:30p
-	TJ640350 PCX     11699 09-09-88  10:09a
-	TJ640480 PCX     14909 09-09-88   4:36p
-	XREF     TXT        14 09-07-88   6:29p
-	       37 file(s)     472914 bytes
-
-	Directory of A:\PCTJ8809
-
-	.            <DIR>     07-07-17   6:40p
-	..           <DIR>     07-07-17   6:40p
 	ASKSYS   ASM      4348 09-15-88   1:46p
 	ASKSYS   COM      1316 07-15-88   1:37p
-	OS2LINK  ZIP      3484 03-01-89   9:03p
-	        5 file(s)       9148 bytes
+	OS2LINK      <DIR>     07-08-17   3:53p
+	        3 file(s)       5664 bytes
+
+	Directory of A:\OS2LINK
+
+	.            <DIR>     07-08-17   3:53p
+	..           <DIR>     07-08-17   3:53p
+	DLLENTRY ASM       469 07-13-88   9:49a
+	DYNOTE   C         835 07-19-88   4:07p
+	DYNOTE   DEF       422 07-06-88   4:15p
+	DYNSCALE C        2587 07-22-88  11:25a
+	DYNSCALE DEF       244 07-19-88   4:02p
+	MKDLL    CMD       308 07-19-88   3:59p
+	        8 file(s)       4865 bytes
 
 	Total files listed:
-	       42 file(s)     482062 bytes
-	                      234496 bytes free
+	       11 file(s)      10529 bytes
+	                      147456 bytes free
 
 ### Directory of PC Tech Journal (1988-11)
 
