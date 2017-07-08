@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.35.2/manifest.xsl"?>
 <manifest type="software">
-	<title>Microsoft Adventure</title>
-	<version>1.00</version>
+	<title>Microsoft Text Adventure</title>
+	<version>1.03</version>
 	<type>Game</type>
 	<category>Text Adventure</category>
 	<publisher>Microsoft</publisher>
