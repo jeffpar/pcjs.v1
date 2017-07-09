@@ -43,7 +43,7 @@ to recreate from multiple ZIP archives.  It includes this note from the magazine
 	Editor                                  Editorial Director
 
 We've gone through those ZIP archives, filtered out the duplicates, organized them chronologically, and then put
-their contents onto diskette images that you can easily "Load" and "Save" to and from a PCjs machine.
+their contents onto diskette images that you can easily "Load" and "Save" in any PCjs machine.
 
 Looking at the dates alone, you can tell that this collection is woefully incomplete, but perhaps more will surface
 over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  Thanks.

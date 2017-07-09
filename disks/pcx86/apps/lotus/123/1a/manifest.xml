@@ -7,17 +7,23 @@
 	<category>Productivity</category>
 	<author>Lotus</author>
 	<releaseDate/>
-	<disk id="disk01" size="327680" chs="40:2:8" img="archive/123-DISK1-SYSTEM.img" href="/disks/pcx86/apps/lotus/123/1a/123-DISK1-SYSTEM.json" md5="0596bc988965243f5b3292e33a96db2c" md5json="fe4b331bc0b2af1aa5c907925ca03bda">
+	<disk id="disk01" size="327680" chs="40:2:8" img="archive/123-DISK1-SYSTEM-PATCHED.img" href="/disks/pcx86/apps/lotus/123/1a/123-DISK1-SYSTEM-PATCHED.json" md5="1617990f841df43fd60f83680e1d5add" md5json="f1e05791c6681a61e675bfc8ca264bee">
 		<name>Lotus 1-2-3 1A (1-System)</name>
 		<file size="256" time="1983-06-07 01:23:00" attr="0x20">123.CNF</file>
-		<file size="89856" time="1983-06-07 01:23:00" attr="0x20">123.EXE</file>
+		<file size="89856" time="2017-07-09 09:18:44" attr="0x20">123.EXE</file>
 		<file size="113416" time="1983-06-07 01:23:00" attr="0x20">123.HLP</file>
+		<file size="89856" time="1983-06-07 01:23:00" attr="0x20">123.OLD</file>
 		<file size="20" time="1983-06-07 01:23:00" attr="0x20">AUTOEXEC.BAT</file>
+		<file size="2139" time="1983-06-07 01:23:00" attr="0x20">GD.DRV</file>
 		<file size="1920" time="1983-06-02 17:20:44" attr="0x20">IBMBIO.COM</file>
 		<file size="6400" time="1983-06-02 17:20:46" attr="0x20">IBMDOS.COM</file>
+		<file size="5294" time="1983-06-07 01:23:00" attr="0x20">ID.DRV</file>
 		<file size="870" time="1983-06-07 01:23:00" attr="0x20">INSTALL.BAT</file>
+		<file size="352" time="1983-06-07 01:23:00" attr="0x20">KB.DRV</file>
 		<file size="481" time="1983-06-07 01:23:00" attr="0x20">LOTUS.COM</file>
 		<file size="10144" time="1983-06-07 01:23:00" attr="0x20">LTSLOAD.COM</file>
+		<file size="329" time="1983-06-07 01:23:00" attr="0x20">PR.DRV</file>
+		<file size="5294" time="1983-06-07 01:23:00" attr="0x20">TD.DRV</file>
 	</disk>
 	<disk id="disk02" size="327680" chs="40:2:8" img="archive/123-DISK2-UTILITY.img" href="/disks/pcx86/apps/lotus/123/1a/123-DISK2-UTILITY.json" md5="c3c31ed1a0d94f79f2bcd9d09763e4c6" md5json="5130d8818ea68573d73be603f5b7d08c">
 		<name>Lotus 1-2-3 1A (2-Utility)</name>
