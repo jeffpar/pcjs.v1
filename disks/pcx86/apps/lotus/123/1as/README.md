@@ -5,7 +5,7 @@ permalink: /disks/pcx86/apps/lotus/123/1as/
 redirect_from:
   - /disks/pcx86/apps/lotus/123/1.0a/
 machines:
-  - id: ibm5150-123
+  - id: ibm5150-123-1as
     type: pcx86
     config: /devices/pcx86/machine/5150/cga/256kb/machine.xml
     autoMount:
@@ -23,7 +23,7 @@ contained files dated `6-07-83`, whereas this release contains files dated `7-01
 The PCjs **1A*** System disk does not include any copy-protection.  Instead, the disk contains a patched copy of `123.EXE`
 which bypasses the usual copy-protection tests.  Details regarding the [patch](#patch-details) are provided below.
 
-{% include machine.html id="ibm5150-123" %}
+{% include machine.html id="ibm5150-123-1as" %}
 
 ### Directory of Lotus 1-2-3 1A* (1-System) (PATCHED)
 
