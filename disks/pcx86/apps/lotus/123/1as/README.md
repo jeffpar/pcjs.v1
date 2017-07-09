@@ -17,9 +17,9 @@ machines:
 Lotus 1-2-3 Release 1A*
 -----------------------
 
-This version of 1-2-3 is known as **Release 1A***, which differs from the original
-[Release 1A](/disks/pcx86/apps/lotus/123/1a/).  **Release 1A** contained files dated `6-07-83`,
-whereas this release contained files dated `7-01-83`.
+This version of 1-2-3 is known as **Release 1A\***, which differs from the original
+[Release 1A](/disks/pcx86/apps/lotus/123/1a/).  This version contained files dated `7-01-83`,
+whereas [Release 1A](/disks/pcx86/apps/lotus/123/1a/) contained files dated `6-07-83`.
 
 Unlike the [Release 1A](/disks/pcx86/apps/lotus/123/1a/) disks, these disk images are from the private PCjs disk
 collection, and (aside from the [Copy-Protection Patch](#copy-protection-patch)) we believe they are authentic copies
@@ -151,7 +151,7 @@ of the original distribution disks.
 
 ### Copy-Protection Patch
 
-The PCjs **Release 1A*** System disk does not include any copy-protection features.  Instead, the disk contains a
+The PCjs **Release 1A\*** System disk does not include any copy-protection features.  Instead, the disk contains a
 patched copy of `123.EXE` which bypasses the usual copy-protection tests.  The patch is described in
 the "unprotection" document [LOTUS.TXT](https://www.pcorner.com/list/UNP/UNPROT-1.ZIP/LOTUS.TXT/):
 
@@ -189,5 +189,5 @@ When `DEBUG` is used to examine our `123.EXE`:
 This confirms that 1) `C3 (RET)` has been stored at the specified location, and 2) the remnants of a `MOV CX,0002`
 instruction still reside there.
 
-WARNING: LOTUS apparently released other **1A*** `123.EXE` binaries, with the same size and date, but with rearranged
+WARNING: LOTUS apparently released other **1A\*** `123.EXE` binaries, with the same size and date, but with rearranged
 contents.  This may have been an attempt on their part to defeat a universal patch.
