@@ -4,15 +4,16 @@ title: Adventures in Archiving
 date: 2017-06-15 22:00:00
 permalink: /blog/2017/06/15/
 machines:
-  - id: ibm5150
+  - id: ibm5150-adventmath
     type: pcx86
     config: /devices/pcx86/machine/5150/cga/64kb/machine.xml
+    resume: 1
     autoMount:
       A:
         path: /disks/pcx86/dos/ibm/1.00/PCDOS100.json
       B:
         path: /apps/pcx86/1983/adventmath/ADVENTMATH100.json
-    autoType: 8-10-81\rb:\ra:basica castle\r
+    autoType: $date\rB:\rA:BASICA CASTLE\r
 ---
 
 In October 1983, IBM released a game called "Adventures in Math", which apparently tried to make mathematics as
@@ -34,7 +35,7 @@ fact, I invite you to play it in BOTH places, and let me know what you think.
 A word of warning: this is NOT a great game.  I find it interesting only as an example of the challenges we face
 archiving and emulating old software.
 
-{% include machine.html id="ibm5150" %}
+{% include machine.html id="ibm5150-adventmath" %}
 
 Hosting the software on the PCjs website was more tedious than I'd expected, but that wasn't due to technical issues.
 The biggest challenge was isolating and recreating the original distribution software.  You can find all the gory
