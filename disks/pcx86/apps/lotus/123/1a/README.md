@@ -15,16 +15,14 @@ machines:
 Lotus 1-2-3 Release 1A
 ----------------------
 
-This version of 1-2-3 is known as **1A**, which differs from the later [1A* Release](/disks/pcx86/apps/lotus/123/1as/).
-This version contained files dated `6-07-83`, whereas the **1A*** Release contained files dated `7-01-83`.
-
-The PCjs **1A** System disk does not include any copy-protection.  Instead, the disk contains a patched copy of `123.EXE`
-which bypasses the usual copy-protection tests.  Details regarding the [patch](#patch-details) are provided below.
+This version of 1-2-3 is known as **Release 1A**, which differs from the later
+[Release 1A*](/disks/pcx86/apps/lotus/123/1as/).  This version contained files dated `6-07-83`,
+whereas **Release 1A*** contained files dated `7-01-83`.
 
 WARNING: These disk images are not originals.  We've tried to recreate the System Disk as it was originally
-distributed (aside from the [patch](#patch-details)), but the other disks we've left as we found them: original Lotus
-1-2-3 files dated `6-07-83` along with a mixture of PC-DOS 1.10 and PC-DOS 2.10 binaries (eg, `COMMAND.COM`, `DISKCOPY.COM`,
-`DISKCOMP.COM`, etc.)
+distributed (aside from the [Copy-Protection Patch](#copy-protection-patch)), but the other disks we've left as we found
+them: original Lotus 1-2-3 files dated `6-07-83` along with a mixture of PC-DOS 1.10 and PC-DOS 2.10 binaries (eg,
+`COMMAND.COM`, `DISKCOPY.COM`, `DISKCOMP.COM`, etc.)
 
 {% include machine.html id="ibm5150-123-1a" %}
 
@@ -166,9 +164,10 @@ distributed (aside from the [patch](#patch-details)), but the other disks we've 
 	       27 file(s)     304201 bytes
 	                        5120 bytes free
 
-### Patch Details
+### Copy-Protection Patch
 
-The `123.EXE` binary on our System disk has been modified according to the "unprotection" document
+The PCjs **Release 1A** System disk does not include any copy-protection.  Instead, the disk contains a patched copy
+of `123.EXE` which bypasses the usual copy-protection tests.  The patch is described in the "unprotection" document
 [LOTUS.TXT](https://www.pcorner.com/list/UNP/UNPROT-1.ZIP/LOTUS.TXT/):
 
 	1. Rename 123.EXE 123.XYZ

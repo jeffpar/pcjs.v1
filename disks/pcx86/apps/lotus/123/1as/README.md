@@ -17,11 +17,13 @@ machines:
 Lotus 1-2-3 Release 1A*
 -----------------------
 
-This version of 1-2-3 is known as **1A***, which differs from the original [1A Release](/disks/pcx86/apps/lotus/123/1a/).
-The **1A** release contained files dated `6-07-83`, whereas this release contained files dated `7-01-83`.
+This version of 1-2-3 is known as **Release 1A***, which differs from the original
+[Release 1A](/disks/pcx86/apps/lotus/123/1a/).  **Release 1A** contained files dated `6-07-83`,
+whereas this release contained files dated `7-01-83`.
 
-The PCjs **1A*** System disk does not include any copy-protection.  Instead, the disk contains a patched copy of `123.EXE`
-which bypasses the usual copy-protection tests.  Details regarding the [patch](#patch-details) are provided below.
+Unlike the [Release 1A](/disks/pcx86/apps/lotus/123/1a/) disks, these disk images are from the private PCjs disk
+collection, and (aside from the [Copy-Protection Patch](#copy-protection-patch)) we believe they are authentic copies
+of the original distribution disks.
 
 {% include machine.html id="ibm5150-123-1as" %}
 
@@ -147,9 +149,10 @@ which bypasses the usual copy-protection tests.  Details regarding the [patch](#
 	       22 file(s)     284602 bytes
 	                       25600 bytes free
 
-### Patch Details
+### Copy-Protection Patch
 
-The `123.EXE` binary on our patched System disk appears to match the criteria described in
+The PCjs **Release 1A*** System disk does not include any copy-protection features.  Instead, the disk contains a
+patched copy of `123.EXE` which bypasses the usual copy-protection tests.  The patch is described in
 the "unprotection" document [LOTUS.TXT](https://www.pcorner.com/list/UNP/UNPROT-1.ZIP/LOTUS.TXT/):
 
 	There is another version of Lotus 123 also called Release 1A
