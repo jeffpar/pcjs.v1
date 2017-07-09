@@ -1549,7 +1549,7 @@
 		<file size="1125" time="1991-03-25 15:16:16" attr="0x20" md5="7d2d5205a594c6387c2649b9da0451d6">UNIQUE.PAS</file>
 		<file size="4744" time="1991-03-25 15:12:16" attr="0x20" md5="6ee8d475d05ca9765315cdbdf41407eb">WHATCLR.ZIP</file>
 	</disk>
-	<disk id="disk87" size="163840" chs="40:1:8" dir="archive/VOL10N09" href="/disks/pcx86/shareware/pcmag/VOL10N09.json" md5="d7ca4e63e2abadba0f037e34dcbb1fc2" md5json="ce248bcb1c384a027e8a579ae1e4f0ab">
+	<disk id="disk87" size="163840" chs="40:1:8" dir="archive/VOL10N09" href="/disks/pcx86/shareware/pcmag/VOL10N09.json" md5="79d7610b5c3f271f8d7c2b9da95268c8" md5json="f81b3811c72ed6f16af057da301a30fc">
 		<name>PC Magazine (Vol. 10 No. 09)</name>
 		<file size="4651" time="1991-02-13 09:39:58" attr="0x20" md5="4dfa56644e68194b7efac3085e878f22">2DIR.C</file>
 		<file size="22074" time="1990-10-28 11:09:32" attr="0x20" md5="b82718534b968e0a0dfd306fd850ee0b">2DIR.EXE</file>
