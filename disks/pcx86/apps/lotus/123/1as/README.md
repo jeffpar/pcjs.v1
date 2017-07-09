@@ -17,8 +17,8 @@ machines:
 Lotus 1-2-3 Release 1A*
 -----------------------
 
-This version of 1-2-3 is known as **1A***, which differs from the original **1A** version.  The **1A** release
-contained files dated `6-07-83`, whereas this release contains files dated `7-01-83`.
+This version of 1-2-3 is known as **1A***, which differs from the original [1A Release](/disks/pcx86/apps/lotus/123/1a/).
+The **1A** release contained files dated `6-07-83`, whereas this release contained files dated `7-01-83`.
 
 The PCjs **1A*** System disk does not include any copy-protection.  Instead, the disk contains a patched copy of `123.EXE`
 which bypasses the usual copy-protection tests.  Details regarding the [patch](#patch-details) are provided below.
@@ -42,9 +42,6 @@ which bypasses the usual copy-protection tests.  Details regarding the [patch](#
 	GD       DRV      2139 07-01-83   1:23a
 	KB       DRV       352 07-01-83   1:23a
 	PR       DRV       329 07-01-83   1:23a
-	       11 file(s)     244155 bytes
-
-	Total files listed:
 	       11 file(s)     244155 bytes
 	                       72704 bytes free
 
@@ -88,9 +85,6 @@ which bypasses the usual copy-protection tests.  Details regarding the [patch](#
 	KB       DRV       352 07-01-83   1:23a
 	PR       DRV       329 07-01-83   1:23a
 	       33 file(s)     185587 bytes
-
-	Total files listed:
-	       33 file(s)     185587 bytes
 	                      116736 bytes free
 
 ### Directory of Lotus 1-2-3 1A* (3-Graph)
@@ -119,9 +113,6 @@ which bypasses the usual copy-protection tests.  Details regarding the [patch](#
 	GD       DRV      2139 07-01-83   1:23a
 	KB       DRV       352 07-01-83   1:23a
 	PR       DRV       329 07-01-83   1:23a
-	       20 file(s)     204350 bytes
-
-	Total files listed:
 	       20 file(s)     204350 bytes
 	                      108544 bytes free
 
@@ -153,9 +144,6 @@ which bypasses the usual copy-protection tests.  Details regarding the [patch](#
 	GD       DRV      2139 07-01-83   1:23a
 	KB       DRV       352 07-01-83   1:23a
 	PR       DRV       329 07-01-83   1:23a
-	       22 file(s)     284602 bytes
-
-	Total files listed:
 	       22 file(s)     284602 bytes
 	                       25600 bytes free
 
