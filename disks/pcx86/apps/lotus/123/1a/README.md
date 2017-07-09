@@ -16,8 +16,8 @@ Lotus 1-2-3 Release 1A
 ----------------------
 
 This version of 1-2-3 is known as **Release 1A**, which differs from the later
-[Release 1A*](/disks/pcx86/apps/lotus/123/1as/).  This version contained files dated `6-07-83`,
-whereas **Release 1A*** contained files dated `7-01-83`.
+[Release 1A\*](/disks/pcx86/apps/lotus/123/1as/).  This version contained files dated `6-07-83`,
+whereas [Release 1A\*](/disks/pcx86/apps/lotus/123/1as/) contained files dated `7-01-83`.
 
 WARNING: These disk images are not originals.  We've tried to recreate the System Disk as it was originally
 distributed (aside from the [Copy-Protection Patch](#copy-protection-patch)), but the other disks we've left as we found
