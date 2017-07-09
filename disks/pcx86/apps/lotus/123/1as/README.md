@@ -22,7 +22,7 @@ This version of 1-2-3 is known as **Release 1A\***, which differs from the origi
 whereas [Release 1A](/disks/pcx86/apps/lotus/123/1a/) contained files dated `6-07-83`.
 
 Unlike the [Release 1A](/disks/pcx86/apps/lotus/123/1a/) disks, these disk images are from the private PCjs disk
-collection, and (aside from the [Copy-Protection Patch](#copy-protection-patch)) we believe they are authentic copies
+collection, and aside from the [Copy-Protection Patch](#copy-protection-patch), we believe they are authentic copies
 of the original distribution disks.
 
 {% include machine.html id="ibm5150-123-1as" %}

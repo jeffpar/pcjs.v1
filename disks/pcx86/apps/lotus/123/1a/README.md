@@ -20,9 +20,9 @@ This version of 1-2-3 is known as **Release 1A**, which differs from the later
 whereas [Release 1A\*](/disks/pcx86/apps/lotus/123/1as/) contained files dated `7-01-83`.
 
 WARNING: These disk images are not originals.  We've tried to recreate the System Disk as it was originally
-distributed (aside from the [Copy-Protection Patch](#copy-protection-patch)), but the other disks we've left as we found
-them: original Lotus 1-2-3 files dated `6-07-83` along with a mixture of PC-DOS 1.10 and PC-DOS 2.10 binaries (eg,
-`COMMAND.COM`, `DISKCOPY.COM`, `DISKCOMP.COM`, etc.)
+distributed (aside from the [Copy-Protection Patch](#copy-protection-patch)), but the other disks have been left
+as we found them: original Lotus 1-2-3 files dated `6-07-83` along with a random mixture of PC-DOS 1.10 and
+PC-DOS 2.10 binaries (eg, `COMMAND.COM`, `DISKCOPY.COM`, `DISKCOMP.COM`, etc.)
 
 {% include machine.html id="ibm5150-123-1a" %}
 
@@ -179,7 +179,7 @@ of `123.EXE` which bypasses the usual copy-protection tests.  The patch is descr
 	7. type  Q
 	8. Rename 123.XYZ 123.EXE
 
-The following hexdump confirms the precise location of the patch in the `123.EXE` binary: 
+The following hexdump `diff` confirms the precise differences between the original `123.EXE` and the patched copy: 
 
 	2698c2698
 	< 0000aaa0  02 b0 01 1e 07 8d 1e 92  06 cd 13 80 fc 02 75 01  |..............u.|
