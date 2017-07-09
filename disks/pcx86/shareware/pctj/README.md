@@ -13,7 +13,7 @@ dial-up service and download them for free (aside from any long-distance phone c
 
 I'm not sure if PC Tech Journal regularly (or *ever*) distributed their software collections on diskette, or
 archived them in monthly ZIP files, but obviously someone did, because you can find a bunch of ZIP archives at
-"[THE PROGRAMMER'S CORNER BBS ARCHIVE FROM THE PAST](https://www.pcorner.com/list/MAG)".
+"[THE PROGRAMMER'S CORNER: BBS ARCHIVE FROM THE PAST](https://www.pcorner.com/list/MAG)".
 
 Of particular interest is the "[Best Of](#directory-of-pc-tech-journal-best-of)" collection, a diskette that we had
 to recreate from multiple ZIP archives.  It includes this note from the magazine's editors:
@@ -43,7 +43,7 @@ to recreate from multiple ZIP archives.  It includes this note from the magazine
 	Editor                                  Editorial Director
 
 We've gone through those ZIP archives, filtered out the duplicates, organized them chronologically, and then put
-their contents onto diskette images that you can easily "Load" and "Save" in any PCjs machine.
+their contents onto diskette images that you can easily "Load" and "Save" in any [PCjs Machine](devices/pcx86/machine/).
 
 Looking at the dates alone, you can tell that this collection is woefully incomplete, but perhaps more will surface
 over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  Thanks.
