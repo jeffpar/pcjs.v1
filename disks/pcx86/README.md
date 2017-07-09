@@ -59,7 +59,8 @@ more detail, along with a live demonstration of the software, but that's not yet
 ### Shareware
 
 * [PC-SIG Library 8th Edition CD-ROM (April 1990)](shareware/pcsig08/)
-* [PC Tech Journal](shareware/pctj/)
+* [PC Magazine (Vols. 6-14)](shareware/pcmag/)
+* [PC Tech Journal (1985-1989)](shareware/pctj/)
 * [More...](shareware/)
 
 ### Tools
