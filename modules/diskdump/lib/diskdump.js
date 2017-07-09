@@ -75,7 +75,7 @@ var logFile = null;
 
 /*
  * fNormalize attempts to enforce consistency across multiple dump requests, including the order of files within every
- * directory, the use of hard-coded volume label timestamps, replacement of line-endings in text files, etc.  It can
+ * directory, the use of hard-coded volume label timestamps, replacement of line-endings in text files, etc.  It can be
  * turned on here or with the experimental "--normalize" command-line option.
  */
 var fNormalize = false;
