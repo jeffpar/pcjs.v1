@@ -7,7 +7,15 @@
 	<category>Assembler</category>
 	<language>x86</language>
 	<author>Microsoft</author>
-	<disk id="disk01" size="368640" chs="40:2:9" img="archive/MASM-016014-300.img" href="/disks/pcx86/tools/microsoft/masm/3.00/MASM-016014-300.json" md5="e8cb83495b3a6a119d52f9dfb162df43" md5json="25d4434228fc98757e9b5efec1fa3850">
+	<disk id="disk01" size="368640" chs="40:2:9" img="archive/MASM-016014-300.img" href="/disks/pcx86/tools/microsoft/masm/3.00/MASM-016014-300.json" md5="4051aa0ca1d19c1e30623b8aac9d3e74" md5json="c7ed72242b137fca677c25e0e77021b8">
 		<name>MS MASM 3.00</name>
+		<file size="10544" time="1984-11-21 13:51:20" attr="0x20">CREF.EXE</file>
+		<file size="24138" time="1984-10-31 15:57:24" attr="0x20">LIB.EXE</file>
+		<file size="41114" time="1984-11-14 13:48:18" attr="0x20">LINK.EXE</file>
+		<file size="18675" time="1984-08-13 01:24:48" attr="0x20">MAKE.EXE</file>
+		<file size="17290" time="1984-11-09 15:22:42" attr="0x20">MAPSYM.EXE</file>
+		<file size="77362" time="1984-11-21 13:49:36" attr="0x20">MASM.EXE</file>
+		<file size="4085" time="1984-12-07 13:30:46" attr="0x20">README.DOC</file>
+		<file size="27136" time="1984-12-07 12:39:20" attr="0x20">SYMDEB.EXE</file>
 	</disk>
 </manifest>

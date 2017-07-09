@@ -2,7 +2,46 @@
 <?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.35.2/manifest.xsl"?>
 <manifest type="software">
 	<title>Borland Turbo Pascal</title>
-	<disk id="disk01" size="368640" chs="40:2:9" img="archive/TURBO-PASCAL-300B.img" href="/disks/pcx86/tools/borland/pascal/3.00b/TURBO-PASCAL-300B.json" md5="b1243614e885cb2a16047cff1adcb00b" md5json="672b78ada3c22756676b71fdf83c23af">
+	<disk id="disk01" size="368640" chs="40:2:9" img="archive/TURBO-PASCAL-300B.img" href="/disks/pcx86/tools/borland/pascal/3.00b/TURBO-PASCAL-300B.json" md5="b1314fb4c9cc69fe5a6cd22c376acc1f" md5json="0873dd191eb20e2f1d4a92647d0979b8">
 		<name>Borland Turbo Pascal 3.00B</name>
+		<file size="10585" time="1980-01-01 00:53:04" attr="0x20">ACCESS.BOX</file>
+		<file size="10747" time="1985-03-18 14:34:30" attr="0x20">ACCESS3.BOX</file>
+		<file size="3968" time="1980-01-01 00:00:02" attr="0x20">ADDKEY.BOX</file>
+		<file size="3590" time="1985-03-18 16:15:58" attr="0x20">ART.PAS</file>
+		<file size="12160" time="1980-01-01 00:00:02" attr="0x20">BTREE.INC</file>
+		<file size="3741" time="1984-07-03 09:32:06" attr="0x20">BTREE.PAS</file>
+		<file size="4803" time="1985-03-01 02:35:36" attr="0x20">CALC.HLP</file>
+		<file size="34469" time="1985-03-18 14:18:58" attr="0x20">CALC.PAS</file>
+		<file size="11760" time="1985-03-01 02:35:54" attr="0x20">CALCDEMO.MCS</file>
+		<file size="780" time="1985-03-01 02:36:28" attr="0x20">CALCMAIN.PAS</file>
+		<file size="636" time="1985-03-18 18:05:38" attr="0x20">CMDLIN.PAS</file>
+		<file size="4152" time="1985-03-18 14:26:06" attr="0x20">COLOR.PAS</file>
+		<file size="7700" time="1984-06-24 21:32:20" attr="0x20">CUSTOMER.DTA</file>
+		<file size="6400" time="1980-01-01 00:00:02" attr="0x20">DELKEY.BOX</file>
+		<file size="2468" time="1985-03-18 18:12:20" attr="0x20">DIRECT.PAS</file>
+		<file size="1309" time="1980-01-01 06:28:06" attr="0x20">DOSFCALL.DOC</file>
+		<file size="1758" time="1980-01-01 07:14:54" attr="0x20">EXTERNAL.DOC</file>
+		<file size="5504" time="1980-01-01 00:00:02" attr="0x20">GETKEY.BOX</file>
+		<file size="25879" time="1984-06-26 15:23:52" attr="0x20">GINST.COD</file>
+		<file size="12704" time="1984-06-26 14:45:40" attr="0x20">GINST.COM</file>
+		<file size="3725" time="1984-04-21 10:31:34" attr="0x20">GINST.DTA</file>
+		<file size="2176" time="1984-06-24 12:08:04" attr="0x20">GINST.MSG</file>
+		<file size="5134" time="1985-03-01 02:33:10" attr="0x20">GRAPH.BIN</file>
+		<file size="3328" time="1985-03-01 02:38:08" attr="0x20">GRAPH.P</file>
+		<file size="11264" time="1984-07-25 16:49:30" attr="0x20">INSTALL.DOC</file>
+		<file size="1303" time="1980-01-01 06:33:08" attr="0x20">INTRPTCL.DOC</file>
+		<file size="5444" time="2013-03-06 10:42:20" attr="0x20">LISTER.PAS</file>
+		<file size="13086" time="1985-03-21 08:59:52" attr="0x20">READ.ME</file>
+		<file size="14976" time="1980-01-01 00:00:02" attr="0x20">SORT.BOX</file>
+		<file size="1345" time="1984-06-26 10:26:12" attr="0x20">SORT1.PAS</file>
+		<file size="3078" time="1984-06-26 12:14:46" attr="0x20">SORT2.PAS</file>
+		<file size="2451" time="1985-03-18 16:27:32" attr="0x20">SOUND.PAS</file>
+		<file size="4100" time="1984-06-25 05:48:24" attr="0x20">STOCK.DTA</file>
+		<file size="29954" time="1985-03-01 02:38:22" attr="0x20">TINST.COM</file>
+		<file size="4224" time="1985-03-05 01:27:36" attr="0x20">TINST.MSG</file>
+		<file size="39552" time="1986-01-06 18:08:50" attr="0x20">TURBO.COM</file>
+		<file size="1536" time="1985-03-01 02:33:20" attr="0x20">TURBO.MSG</file>
+		<file size="7326" time="1985-03-18 13:33:20" attr="0x20">TURTLE.PAS</file>
+		<file size="3084" time="1985-03-18 16:21:44" attr="0x20">WINDOW.PAS</file>
 	</disk>
 </manifest>

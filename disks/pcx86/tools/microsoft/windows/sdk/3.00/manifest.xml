@@ -2,44 +2,432 @@
 <?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.35.2/manifest.xsl"?>
 <manifest type="software">
 	<title>Windows SDK 3.00</title>
-	<disk id="disk01" size="737280" chs="80:2:9" img="archive/WIN30SDK_DISK01.img" href="/disks/pcx86/tools/microsoft/windows/sdk/3.00/WIN30SDK_DISK01.json" md5="3eb1f6df549dd454b65fb869a606e010" md5json="6a85939ac71c91d76b9fe39407464de2">
+	<disk id="disk01" size="737280" chs="80:2:9" img="archive/WIN30SDK_DISK01.img" href="/disks/pcx86/tools/microsoft/windows/sdk/3.00/WIN30SDK_DISK01.json" md5="865a8cf0692dc9ecdf6c8e74b3430884" md5json="655d088776b3826728d89e89cef5c50c">
 		<name>Windows SDK 3.00 (720K Disk 01)</name>
-		<desc>Development Tools 1 (For DOS Systems) Version 3.0</desc>
+		<file size="83691" time="1990-06-01 03:00:00" attr="0x20">INSTALL.EXE</file>
+		<file size="15885" time="1990-06-01 03:00:00" attr="0x20">INSTALL.INF</file>
+		<file size="49661" time="1990-06-01 03:00:00" attr="0x20">LIB.EXE</file>
+		<file size="8193" time="1990-06-01 03:00:00" attr="0x20">README.TXT</file>
+		<file size="374" time="1990-06-05 20:59:10" attr="0x10">RESTOOLS</file>
+		<file size="6446" time="1990-06-01 03:00:00" attr="0x20" dir="RESTOOLS/">ATRM1111.FNT</file>
+		<file size="96720" time="1990-06-01 03:00:00" attr="0x20" dir="RESTOOLS/">DIALOG.EXE</file>
+		<file size="62672" time="1990-06-01 03:00:00" attr="0x20" dir="RESTOOLS/">FONTEDIT.EXE</file>
+		<file size="165334" time="1990-06-01 03:00:00" attr="0x20" dir="RESTOOLS/">HC.EXE</file>
+		<file size="57805" time="1990-06-01 03:00:00" attr="0x20" dir="RESTOOLS/">RC.EXE</file>
+		<file size="14393" time="1990-06-01 03:00:00" attr="0x20" dir="RESTOOLS/">RCPP.ERR</file>
+		<file size="129907" time="1990-06-01 03:00:00" attr="0x20" dir="RESTOOLS/">RCPP.EXE</file>
+		<file size="92" time="1990-06-01 03:00:00" attr="0x20" dir="RESTOOLS/">SDKPAINT.DAT</file>
+		<file size="5461" time="1990-06-01 03:00:00" attr="0x20" dir="RESTOOLS/">VGASYS.FNT</file>
 	</disk>
-	<disk id="disk02" size="737280" chs="80:2:9" img="archive/WIN30SDK_DISK02.img" href="/disks/pcx86/tools/microsoft/windows/sdk/3.00/WIN30SDK_DISK02.json" md5="022e5517696403d7b3186bc7820178ad" md5json="f7ae92fbc95bfe2ac2e636b5bb0ce560">
+	<disk id="disk02" size="737280" chs="80:2:9" img="archive/WIN30SDK_DISK02.img" href="/disks/pcx86/tools/microsoft/windows/sdk/3.00/WIN30SDK_DISK02.json" md5="6429f8c0146b060f7081216217029820" md5json="3ec17477a4530cddf8bc0c4c58591b09">
 		<name>Windows SDK 3.00 (720K Disk 02)</name>
-		<desc>Development Tools 2/Debug Tools 1</desc>
+		<file size="340" time="1990-06-01 08:55:56" attr="0x10">ANALYSIS</file>
+		<file size="36304" time="1990-06-01 03:00:00" attr="0x20" dir="ANALYSIS/">HEAPWALK.EXE</file>
+		<file size="5120" time="1990-06-01 03:00:00" attr="0x20" dir="ANALYSIS/">HOOK.DLL</file>
+		<file size="4898" time="1990-06-01 03:00:00" attr="0x20" dir="ANALYSIS/">PROF.COM</file>
+		<file size="9936" time="1990-06-01 03:00:00" attr="0x20" dir="ANALYSIS/">SHAKER.EXE</file>
+		<file size="36348" time="1990-06-01 03:00:00" attr="0x20" dir="ANALYSIS/">SHOWHITS.EXE</file>
+		<file size="26624" time="1990-06-01 03:00:00" attr="0x20" dir="ANALYSIS/">SPY.EXE</file>
+		<file size="27901" time="1990-06-01 03:00:00" attr="0x20" dir="ANALYSIS/">SWAP.EXE</file>
+		<file size="5424" time="1990-06-01 03:00:00" attr="0x20" dir="ANALYSIS/">VPROD.386</file>
+		<file size="204" time="1990-06-01 08:55:40" attr="0x10">CONVERT</file>
+		<file size="21093" time="1990-06-01 03:00:00" attr="0x20" dir="CONVERT/">COMPRESS.EXE</file>
+		<file size="22801" time="1990-06-01 03:00:00" attr="0x20" dir="CONVERT/">CONVBMP.EXE</file>
+		<file size="18515" time="1990-06-01 03:00:00" attr="0x20" dir="CONVERT/">EXPAND.EXE</file>
+		<file size="21751" time="1990-06-01 03:00:00" attr="0x20" dir="CONVERT/">MARK.EXE</file>
+		<file size="340" time="1990-06-01 08:56:24" attr="0x10">DBGTOOLS</file>
+		<file size="219555" time="1990-06-01 03:00:00" attr="0x20" dir="DBGTOOLS/">CVW.HLP</file>
+		<file size="23" time="1990-06-01 03:00:00" attr="0x20" dir="DBGTOOLS/">D2N.BAT</file>
+		<file size="33529" time="1990-06-01 03:00:00" attr="0x20" dir="DBGTOOLS/">MAPSYM.EXE</file>
+		<file size="23" time="1990-06-01 03:00:00" attr="0x20" dir="DBGTOOLS/">N2D.BAT</file>
+		<file size="4789" time="1990-06-01 03:00:00" attr="0x20" dir="DBGTOOLS/">SWITCH.BAT</file>
+		<file size="44573" time="1990-06-01 03:00:00" attr="0x20" dir="DBGTOOLS/">SYMDEB.EXE</file>
+		<file size="5233" time="1990-06-01 03:00:00" attr="0x20" dir="DBGTOOLS/">WINDEBUG.386</file>
+		<file size="12800" time="1990-06-01 03:00:00" attr="0x20" dir="DBGTOOLS/">WINDEBUG.DLL</file>
+		<file size="170" time="1990-06-01 08:55:24" attr="0x10">RESTOOLS</file>
+		<file size="105216" time="1990-06-01 03:00:00" attr="0x20" dir="RESTOOLS/">SDKPAINT.EXE</file>
+		<file size="10178" time="1990-06-01 03:00:00" attr="0x20" dir="RESTOOLS/">SDKTOOLS.GRP</file>
+		<file size="6224" time="1990-06-01 03:00:00" attr="0x20" dir="RESTOOLS/">ZOOMIN.EXE</file>
 	</disk>
-	<disk id="disk03" size="737280" chs="80:2:9" img="archive/WIN30SDK_DISK03.img" href="/disks/pcx86/tools/microsoft/windows/sdk/3.00/WIN30SDK_DISK03.json" md5="3eb2998642caf9130ec3892bdc3d4352" md5json="86b2cd50f0d3c667b98121280685a846">
+	<disk id="disk03" size="737280" chs="80:2:9" img="archive/WIN30SDK_DISK03.img" href="/disks/pcx86/tools/microsoft/windows/sdk/3.00/WIN30SDK_DISK03.json" md5="816e657c01fd7b5e8e432ba2c8d34c1c" md5json="008b33c78bccc01adf2c3dbde4ca3f59">
 		<name>Windows SDK 3.00 (720K Disk 03)</name>
-		<desc>Debug Tools 2/Debug Files 1</desc>
+		<file size="136" time="1990-06-01 08:58:48" attr="0x10">DBGTOOLS</file>
+		<file size="390192" time="1990-06-01 03:00:00" attr="0x20" dir="DBGTOOLS/">CVW.EXE</file>
+		<file size="70822" time="1990-06-01 03:00:00" attr="0x20" dir="DBGTOOLS/">WDEB386.EXE</file>
+		<file size="136" time="1990-06-01 08:59:36" attr="0x10">DEBUG</file>
+		<file size="159762" time="1990-06-01 03:00:00" attr="0x20" dir="DEBUG/">GDI.EXE</file>
+		<file size="88346" time="1990-06-01 03:00:00" attr="0x20" dir="DEBUG/">KRNL286.EXE</file>
 	</disk>
-	<disk id="disk04" size="737280" chs="80:2:9" img="archive/WIN30SDK_DISK04.img" href="/disks/pcx86/tools/microsoft/windows/sdk/3.00/WIN30SDK_DISK04.json" md5="c78b913d3efb2a5c5772b4fba9887b4b" md5json="9a4387825e90e44a91a06cf78eb8363a">
+	<disk id="disk04" size="737280" chs="80:2:9" img="archive/WIN30SDK_DISK04.img" href="/disks/pcx86/tools/microsoft/windows/sdk/3.00/WIN30SDK_DISK04.json" md5="e2ea543caa10aa7482fcb976351733b2" md5json="8f9c086ba96d08c0ff80c235683a833f">
 		<name>Windows SDK 3.00 (720K Disk 04)</name>
-		<desc>Debug Files 2</desc>
+		<file size="340" time="1990-06-01 09:02:38" attr="0x10">DEBUG</file>
+		<file size="4004" time="1990-06-01 03:00:00" attr="0x20" dir="DEBUG/">GDI.SYM</file>
+		<file size="80320" time="1990-06-01 03:00:00" attr="0x20" dir="DEBUG/">KERNEL.EXE</file>
+		<file size="2212" time="1990-06-01 03:00:00" attr="0x20" dir="DEBUG/">KERNEL.SYM</file>
+		<file size="2212" time="1990-06-01 03:00:00" attr="0x20" dir="DEBUG/">KRNL286.SYM</file>
+		<file size="90318" time="1990-06-01 03:00:00" attr="0x20" dir="DEBUG/">KRNL386.EXE</file>
+		<file size="2212" time="1990-06-01 03:00:00" attr="0x20" dir="DEBUG/">KRNL386.SYM</file>
+		<file size="271609" time="1990-06-01 03:00:00" attr="0x20" dir="DEBUG/">USER.EXE</file>
+		<file size="6756" time="1990-06-01 03:00:00" attr="0x20" dir="DEBUG/">USER.SYM</file>
+		<file size="238" time="1990-06-01 09:03:36" attr="0x10">NODEBUG</file>
+		<file size="4004" time="1990-06-01 03:00:00" attr="0x20" dir="NODEBUG/">GDI.SYM</file>
+		<file size="2228" time="1990-06-01 03:00:00" attr="0x20" dir="NODEBUG/">KERNEL.SYM</file>
+		<file size="2228" time="1990-06-01 03:00:00" attr="0x20" dir="NODEBUG/">KRNL286.SYM</file>
+		<file size="2228" time="1990-06-01 03:00:00" attr="0x20" dir="NODEBUG/">KRNL386.SYM</file>
+		<file size="6756" time="1990-06-01 03:00:00" attr="0x20" dir="NODEBUG/">USER.SYM</file>
+		<file size="136" time="1990-06-01 09:03:56" attr="0x10">SKERNEL</file>
+		<file size="81008" time="1990-06-01 03:00:00" attr="0x20" dir="SKERNEL/">SKERNEL.EXE</file>
+		<file size="2212" time="1990-06-01 03:00:00" attr="0x20" dir="SKERNEL/">SKERNEL.SYM</file>
+		<file size="72272" time="1990-06-01 03:00:00" attr="0x20">VGA.DRV</file>
+		<file size="102" time="1990-06-01 09:03:52" attr="0x10">WINSTUB</file>
+		<file size="610" time="1990-06-01 03:00:00" attr="0x20" dir="WINSTUB/">WINSTUB.EXE</file>
 	</disk>
-	<disk id="disk05" size="737280" chs="80:2:9" img="archive/WIN30SDK_DISK05.img" href="/disks/pcx86/tools/microsoft/windows/sdk/3.00/WIN30SDK_DISK05.json" md5="d517a1a44a430c8810ed2288df4ba632" md5json="a2fdbe2095c9d5ba231d20e390a1430c">
+	<disk id="disk05" size="737280" chs="80:2:9" img="archive/WIN30SDK_DISK05.img" href="/disks/pcx86/tools/microsoft/windows/sdk/3.00/WIN30SDK_DISK05.json" md5="42478a907a5c04aff4c7be2e76ef41f5" md5json="087afe62f678feee3e10c0b744457758">
 		<name>Windows SDK 3.00 (720K Disk 05)</name>
-		<desc>Link Libraries 1</desc>
+		<file size="476" time="1990-06-01 09:05:16" attr="0x10">CLIB</file>
+		<file size="541" time="1990-06-01 03:00:00" attr="0x20" dir="CLIB/">DLLCW.BAT</file>
+		<file size="373" time="1990-06-01 03:00:00" attr="0x20" dir="CLIB/">LIBCW.BAT</file>
+		<file size="21033" time="1990-06-01 03:00:00" attr="0x20" dir="CLIB/">LIBH.LIB</file>
+		<file size="12945" time="1990-06-01 03:00:00" attr="0x20" dir="CLIB/">MDLLCW0.LIB</file>
+		<file size="97851" time="1990-06-01 03:00:00" attr="0x20" dir="CLIB/">MLIBCW.LIB</file>
+		<file size="61597" time="1990-06-01 03:00:00" attr="0x20" dir="CLIB/">MLIBFAW.LIB</file>
+		<file size="75173" time="1990-06-01 03:00:00" attr="0x20" dir="CLIB/">MLIBFPW.LIB</file>
+		<file size="12945" time="1990-06-01 03:00:00" attr="0x20" dir="CLIB/">SDLLCW0.LIB</file>
+		<file size="95803" time="1990-06-01 03:00:00" attr="0x20" dir="CLIB/">SLIBCW.LIB</file>
+		<file size="59549" time="1990-06-01 03:00:00" attr="0x20" dir="CLIB/">SLIBFAW.LIB</file>
+		<file size="72613" time="1990-06-01 03:00:00" attr="0x20" dir="CLIB/">SLIBFPW.LIB</file>
+		<file size="639" time="1990-06-01 03:00:00" attr="0x20" dir="CLIB/">WINCDLL.BLD</file>
+		<file size="476" time="1990-06-01 09:06:26" attr="0x10">WLIB</file>
+		<file size="2071" time="1990-06-01 03:00:00" attr="0x20" dir="WLIB/">CNOCRT.LIB</file>
+		<file size="1559" time="1990-06-01 03:00:00" attr="0x20" dir="WLIB/">CNOCRTD.LIB</file>
+		<file size="2454" time="1990-06-01 03:00:00" attr="0x20" dir="WLIB/">LIBENTRY.ASM</file>
+		<file size="240" time="1990-06-01 03:00:00" attr="0x20" dir="WLIB/">LIBENTRY.OBJ</file>
+		<file size="89601" time="1990-06-01 03:00:00" attr="0x20" dir="WLIB/">LIBW.LIB</file>
+		<file size="2071" time="1990-06-01 03:00:00" attr="0x20" dir="WLIB/">LNOCRT.LIB</file>
+		<file size="1559" time="1990-06-01 03:00:00" attr="0x20" dir="WLIB/">LNOCRTD.LIB</file>
+		<file size="2071" time="1990-06-01 03:00:00" attr="0x20" dir="WLIB/">MNOCRT.LIB</file>
+		<file size="1559" time="1990-06-01 03:00:00" attr="0x20" dir="WLIB/">MNOCRTD.LIB</file>
+		<file size="2071" time="1990-06-01 03:00:00" attr="0x20" dir="WLIB/">SNOCRT.LIB</file>
+		<file size="1559" time="1990-06-01 03:00:00" attr="0x20" dir="WLIB/">SNOCRTD.LIB</file>
+		<file size="1577" time="1990-06-01 03:00:00" attr="0x20" dir="WLIB/">WIN87EM.LIB</file>
 	</disk>
-	<disk id="disk06" size="737280" chs="80:2:9" img="archive/WIN30SDK_DISK06.img" href="/disks/pcx86/tools/microsoft/windows/sdk/3.00/WIN30SDK_DISK06.json" md5="8b87da4b4a7fe1a622c76674f31c040a" md5json="effb20a06c0ab1430e75d2dd4926a34f">
+	<disk id="disk06" size="737280" chs="80:2:9" img="archive/WIN30SDK_DISK06.img" href="/disks/pcx86/tools/microsoft/windows/sdk/3.00/WIN30SDK_DISK06.json" md5="bcfe69c767e4ca10744d3e7ee1d46278" md5json="7d51c6427e17be9e811c5905cc4f4e1e">
 		<name>Windows SDK 3.00 (720K Disk 06)</name>
-		<desc>Link Libraries 2</desc>
+		<file size="340" time="1990-06-01 12:45:16" attr="0x10">CLIB</file>
+		<file size="13457" time="1990-06-01 03:00:00" attr="0x20" dir="CLIB/">CDLLCW0.LIB</file>
+		<file size="100935" time="1990-06-01 03:00:00" attr="0x20" dir="CLIB/">CLIBCW.LIB</file>
+		<file size="60061" time="1990-06-01 03:00:00" attr="0x20" dir="CLIB/">CLIBFAW.LIB</file>
+		<file size="73637" time="1990-06-01 03:00:00" attr="0x20" dir="CLIB/">CLIBFPW.LIB</file>
+		<file size="13457" time="1990-06-01 03:00:00" attr="0x20" dir="CLIB/">LDLLCW0.LIB</file>
+		<file size="102983" time="1990-06-01 03:00:00" attr="0x20" dir="CLIB/">LLIBCW.LIB</file>
+		<file size="62621" time="1990-06-01 03:00:00" attr="0x20" dir="CLIB/">LLIBFAW.LIB</file>
+		<file size="77221" time="1990-06-01 03:00:00" attr="0x20" dir="CLIB/">LLIBFPW.LIB</file>
+		<file size="6321" time="1990-06-01 03:00:00" attr="0x20">NETAPI.TXT</file>
+		<file size="22144" time="1990-06-01 03:00:00" attr="0x20">PWBINFO.WRI</file>
+		<file size="58624" time="1990-06-01 03:00:00" attr="0x20">README.WRI</file>
+		<file size="29539" time="1990-06-01 03:00:00" attr="0x20">TIPS.TXT</file>
+		<file size="170" time="1990-06-01 12:46:20" attr="0x10">WINMEM32</file>
+		<file size="4672" time="1990-06-01 03:00:00" attr="0x20" dir="WINMEM32/">WINMEM32.DLL</file>
+		<file size="837" time="1990-06-01 03:00:00" attr="0x20" dir="WINMEM32/">WINMEM32.H</file>
+		<file size="1536" time="1990-06-01 03:00:00" attr="0x20" dir="WINMEM32/">WINMEM32.LIB</file>
 	</disk>
-	<disk id="disk07" size="737280" chs="80:2:9" img="archive/WIN30SDK_DISK07.img" href="/disks/pcx86/tools/microsoft/windows/sdk/3.00/WIN30SDK_DISK07.json" md5="74f81df9020939a4b3e37608515112e0" md5json="79bcb8864e7dfc7abb4f216534a782fc">
+	<disk id="disk07" size="737280" chs="80:2:9" img="archive/WIN30SDK_DISK07.img" href="/disks/pcx86/tools/microsoft/windows/sdk/3.00/WIN30SDK_DISK07.json" md5="85c3d4456cf910f612fdae8b22e4e0b2" md5json="803195e0c1d085cb0b098f375ada45be">
 		<name>Windows SDK 3.00 (720K Disk 07)</name>
-		<desc>Include Files/Sample Source Code 1</desc>
+		<file size="408" time="1990-06-01 09:15:20" attr="0x10">BITMAP</file>
+		<file size="325" time="1990-06-01 03:00:00" attr="0x20" dir="BITMAP/">BITMAP</file>
+		<file size="16848" time="1990-06-01 03:00:00" attr="0x20" dir="BITMAP/">BITMAP.C</file>
+		<file size="289" time="1990-06-01 03:00:00" attr="0x20" dir="BITMAP/">BITMAP.DEF</file>
+		<file size="775" time="1990-06-01 03:00:00" attr="0x20" dir="BITMAP/">BITMAP.H</file>
+		<file size="945" time="1990-06-01 03:00:00" attr="0x20" dir="BITMAP/">BITMAP.RC</file>
+		<file size="662" time="1990-06-01 03:00:00" attr="0x20" dir="BITMAP/">CAT.BMP</file>
+		<file size="662" time="1990-06-01 03:00:00" attr="0x20" dir="BITMAP/">DOG.BMP</file>
+		<file size="3072" time="1990-06-01 03:00:00" attr="0x20" dir="BITMAP/">SELECT.DLL</file>
+		<file size="817" time="1990-06-01 03:00:00" attr="0x20" dir="BITMAP/">SELECT.H</file>
+		<file size="1024" time="1990-06-01 03:00:00" attr="0x20" dir="BITMAP/">SELECT.LIB</file>
+		<file size="1020" time="1990-06-01 09:16:34" attr="0x10">CINC</file>
+		<file size="594" time="1990-06-01 03:00:00" attr="0x20" dir="CINC/">ASSERT.H</file>
+		<file size="4577" time="1990-06-01 03:00:00" attr="0x20" dir="CINC/">BIOS.H</file>
+		<file size="1043" time="1990-06-01 03:00:00" attr="0x20" dir="CINC/">CONIO.H</file>
+		<file size="2979" time="1990-06-01 03:00:00" attr="0x20" dir="CINC/">CTYPE.H</file>
+		<file size="892" time="1990-06-01 03:00:00" attr="0x20" dir="CINC/">DIRECT.H</file>
+		<file size="5550" time="1990-06-01 03:00:00" attr="0x20" dir="CINC/">DOS.H</file>
+		<file size="1428" time="1990-06-01 03:00:00" attr="0x20" dir="CINC/">ERRNO.H</file>
+		<file size="1126" time="1990-06-01 03:00:00" attr="0x20" dir="CINC/">FCNTL.H</file>
+		<file size="4911" time="1990-06-01 03:00:00" attr="0x20" dir="CINC/">FLOAT.H</file>
+		<file size="1512" time="1990-06-01 03:00:00" attr="0x20" dir="CINC/">IO.H</file>
+		<file size="1326" time="1990-06-01 03:00:00" attr="0x20" dir="CINC/">LIMITS.H</file>
+		<file size="1519" time="1990-06-01 03:00:00" attr="0x20" dir="CINC/">LOCALE.H</file>
+		<file size="4112" time="1990-06-01 03:00:00" attr="0x20" dir="CINC/">MALLOC.H</file>
+		<file size="7881" time="1990-06-01 03:00:00" attr="0x20" dir="CINC/">MATH.H</file>
+		<file size="1628" time="1990-06-01 03:00:00" attr="0x20" dir="CINC/">MEMORY.H</file>
+		<file size="2881" time="1990-06-01 03:00:00" attr="0x20" dir="CINC/">PROCESS.H</file>
+		<file size="1159" time="1990-06-01 03:00:00" attr="0x20" dir="CINC/">SEARCH.H</file>
+		<file size="822" time="1990-06-01 03:00:00" attr="0x20" dir="CINC/">SETJMP.H</file>
+		<file size="450" time="1990-06-01 03:00:00" attr="0x20" dir="CINC/">SHARE.H</file>
+		<file size="2019" time="1990-06-01 03:00:00" attr="0x20" dir="CINC/">SIGNAL.H</file>
+		<file size="894" time="1990-06-01 03:00:00" attr="0x20" dir="CINC/">STDARG.H</file>
+		<file size="1254" time="1990-06-01 03:00:00" attr="0x20" dir="CINC/">STDDEF.H</file>
+		<file size="6432" time="1990-06-01 03:00:00" attr="0x20" dir="CINC/">STDIO.H</file>
+		<file size="6641" time="1990-06-01 03:00:00" attr="0x20" dir="CINC/">STDLIB.H</file>
+		<file size="4975" time="1990-06-01 03:00:00" attr="0x20" dir="CINC/">STRING.H</file>
+		<file size="238" time="1990-06-01 09:16:36" attr="0x10" dir="CINC/">SYS</file>
+		<file size="468" time="1990-06-01 03:00:00" attr="0x20" dir="CINC/SYS/">LOCKING.H</file>
+		<file size="1330" time="1990-06-01 03:00:00" attr="0x20" dir="CINC/SYS/">STAT.H</file>
+		<file size="827" time="1990-06-01 03:00:00" attr="0x20" dir="CINC/SYS/">TIMEB.H</file>
+		<file size="734" time="1990-06-01 03:00:00" attr="0x20" dir="CINC/SYS/">TYPES.H</file>
+		<file size="968" time="1990-06-01 03:00:00" attr="0x20" dir="CINC/SYS/">UTIME.H</file>
+		<file size="3119" time="1990-06-01 03:00:00" attr="0x20" dir="CINC/">TIME.H</file>
+		<file size="922" time="1990-06-01 03:00:00" attr="0x20" dir="CINC/">VARARGS.H</file>
+		<file size="238" time="1990-06-01 09:15:44" attr="0x10">CLIPTEXT</file>
+		<file size="333" time="1990-06-01 03:00:00" attr="0x20" dir="CLIPTEXT/">CLIPTEXT</file>
+		<file size="13123" time="1990-06-01 03:00:00" attr="0x20" dir="CLIPTEXT/">CLIPTEXT.C</file>
+		<file size="292" time="1990-06-01 03:00:00" attr="0x20" dir="CLIPTEXT/">CLIPTEXT.DEF</file>
+		<file size="657" time="1990-06-01 03:00:00" attr="0x20" dir="CLIPTEXT/">CLIPTEXT.H</file>
+		<file size="1569" time="1990-06-01 03:00:00" attr="0x20" dir="CLIPTEXT/">CLIPTEXT.RC</file>
+		<file size="442" time="1990-06-01 09:13:06" attr="0x10">CLOCK</file>
+		<file size="495" time="1990-06-01 03:00:00" attr="0x20" dir="CLOCK/">CLOCK</file>
+		<file size="33858" time="1990-06-01 03:00:00" attr="0x20" dir="CLOCK/">CLOCK.C</file>
+		<file size="277" time="1990-06-01 03:00:00" attr="0x20" dir="CLOCK/">CLOCK.DEF</file>
+		<file size="689" time="1990-06-01 03:00:00" attr="0x20" dir="CLOCK/">CLOCK.DLG</file>
+		<file size="2272" time="1990-06-01 03:00:00" attr="0x20" dir="CLOCK/">CLOCK.H</file>
+		<file size="766" time="1990-06-01 03:00:00" attr="0x20" dir="CLOCK/">CLOCK.ICO</file>
+		<file size="343" time="1990-06-01 03:00:00" attr="0x20" dir="CLOCK/">CLOCK.RC</file>
+		<file size="1604" time="1990-06-01 03:00:00" attr="0x20" dir="CLOCK/">CLOCKDAT.ASM</file>
+		<file size="295" time="1990-06-01 03:00:00" attr="0x20" dir="CLOCK/">CLOCKDAT.OBJ</file>
+		<file size="853" time="1990-06-01 03:00:00" attr="0x20" dir="CLOCK/">GETTIME.ASM</file>
+		<file size="153" time="1990-06-01 03:00:00" attr="0x20" dir="CLOCK/">GETTIME.OBJ</file>
+		<file size="272" time="1990-06-01 09:14:06" attr="0x10">CURSOR</file>
+		<file size="326" time="1990-06-01 03:00:00" attr="0x20" dir="CURSOR/">BULLSEYE.CUR</file>
+		<file size="319" time="1990-06-01 03:00:00" attr="0x20" dir="CURSOR/">CURSOR</file>
+		<file size="14693" time="1990-06-01 03:00:00" attr="0x20" dir="CURSOR/">CURSOR.C</file>
+		<file size="292" time="1990-06-01 03:00:00" attr="0x20" dir="CURSOR/">CURSOR.DEF</file>
+		<file size="248" time="1990-06-01 03:00:00" attr="0x20" dir="CURSOR/">CURSOR.H</file>
+		<file size="573" time="1990-06-01 03:00:00" attr="0x20" dir="CURSOR/">CURSOR.RC</file>
+		<file size="646" time="1990-06-01 09:13:26" attr="0x10">DDE</file>
+		<file size="21555" time="1990-06-01 03:00:00" attr="0x20" dir="DDE/">CLIDATA.C</file>
+		<file size="20784" time="1990-06-01 03:00:00" attr="0x20" dir="DDE/">CLIDDE.C</file>
+		<file size="558" time="1990-06-01 03:00:00" attr="0x20" dir="DDE/">CLIENT</file>
+		<file size="25021" time="1990-06-01 03:00:00" attr="0x20" dir="DDE/">CLIENT.C</file>
+		<file size="536" time="1990-06-01 03:00:00" attr="0x20" dir="DDE/">CLIENT.DEF</file>
+		<file size="6610" time="1990-06-01 03:00:00" attr="0x20" dir="DDE/">CLIENT.DLG</file>
+		<file size="2050" time="1990-06-01 03:00:00" attr="0x20" dir="DDE/">CLIENT.H</file>
+		<file size="1050" time="1990-06-01 03:00:00" attr="0x20" dir="DDE/">CLIENT.RC</file>
+		<file size="644" time="1990-06-01 03:00:00" attr="0x20" dir="DDE/">CLIRES.H</file>
+		<file size="16533" time="1990-06-01 03:00:00" attr="0x20" dir="DDE/">SERVDATA.C</file>
+		<file size="17100" time="1990-06-01 03:00:00" attr="0x20" dir="DDE/">SERVDDE.C</file>
+		<file size="559" time="1990-06-01 03:00:00" attr="0x20" dir="DDE/">SERVER</file>
+		<file size="10165" time="1990-06-01 03:00:00" attr="0x20" dir="DDE/">SERVER.C</file>
+		<file size="304" time="1990-06-01 03:00:00" attr="0x20" dir="DDE/">SERVER.DEF</file>
+		<file size="1661" time="1990-06-01 03:00:00" attr="0x20" dir="DDE/">SERVER.H</file>
+		<file size="743" time="1990-06-01 03:00:00" attr="0x20" dir="DDE/">SERVER.RC</file>
+		<file size="132" time="1990-06-01 03:00:00" attr="0x20" dir="DDE/">SERVRES.H</file>
+		<file size="136" time="1990-06-01 09:15:14" attr="0x10">DEFPROCS</file>
+		<file size="6495" time="1990-06-01 03:00:00" attr="0x20" dir="DEFPROCS/">DEFDLG.C</file>
+		<file size="14878" time="1990-06-01 03:00:00" attr="0x20" dir="DEFPROCS/">DEFWND.C</file>
+		<file size="238" time="1990-06-01 09:14:18" attr="0x10">EDITCNTL</file>
+		<file size="332" time="1990-06-01 03:00:00" attr="0x20" dir="EDITCNTL/">EDITCNTL</file>
+		<file size="7444" time="1990-06-01 03:00:00" attr="0x20" dir="EDITCNTL/">EDITCNTL.C</file>
+		<file size="292" time="1990-06-01 03:00:00" attr="0x20" dir="EDITCNTL/">EDITCNTL.DEF</file>
+		<file size="692" time="1990-06-01 03:00:00" attr="0x20" dir="EDITCNTL/">EDITCNTL.H</file>
+		<file size="1426" time="1990-06-01 03:00:00" attr="0x20" dir="EDITCNTL/">EDITCNTL.RC</file>
+		<file size="238" time="1990-06-01 09:14:28" attr="0x10">EDITFILE</file>
+		<file size="332" time="1990-06-01 03:00:00" attr="0x20" dir="EDITFILE/">EDITFILE</file>
+		<file size="32082" time="1990-06-01 03:00:00" attr="0x20" dir="EDITFILE/">EDITFILE.C</file>
+		<file size="354" time="1990-06-01 03:00:00" attr="0x20" dir="EDITFILE/">EDITFILE.DEF</file>
+		<file size="1269" time="1990-06-01 03:00:00" attr="0x20" dir="EDITFILE/">EDITFILE.H</file>
+		<file size="2444" time="1990-06-01 03:00:00" attr="0x20" dir="EDITFILE/">EDITFILE.RC</file>
+		<file size="238" time="1990-06-01 09:14:40" attr="0x10">EDITMENU</file>
+		<file size="332" time="1990-06-01 03:00:00" attr="0x20" dir="EDITMENU/">EDITMENU</file>
+		<file size="6170" time="1990-06-01 03:00:00" attr="0x20" dir="EDITMENU/">EDITMENU.C</file>
+		<file size="280" time="1990-06-01 03:00:00" attr="0x20" dir="EDITMENU/">EDITMENU.DEF</file>
+		<file size="632" time="1990-06-01 03:00:00" attr="0x20" dir="EDITMENU/">EDITMENU.H</file>
+		<file size="1426" time="1990-06-01 03:00:00" attr="0x20" dir="EDITMENU/">EDITMENU.RC</file>
+		<file size="238" time="1990-06-01 09:15:02" attr="0x10">FILEOPEN</file>
+		<file size="332" time="1990-06-01 03:00:00" attr="0x20" dir="FILEOPEN/">FILEOPEN</file>
+		<file size="15288" time="1990-06-01 03:00:00" attr="0x20" dir="FILEOPEN/">FILEOPEN.C</file>
+		<file size="299" time="1990-06-01 03:00:00" attr="0x20" dir="FILEOPEN/">FILEOPEN.DEF</file>
+		<file size="1003" time="1990-06-01 03:00:00" attr="0x20" dir="FILEOPEN/">FILEOPEN.H</file>
+		<file size="2020" time="1990-06-01 03:00:00" attr="0x20" dir="FILEOPEN/">FILEOPEN.RC</file>
+		<file size="238" time="1990-06-01 09:14:50" attr="0x10">GENERIC</file>
+		<file size="1090" time="1990-06-01 03:00:00" attr="0x20" dir="GENERIC/">GENERIC</file>
+		<file size="11059" time="1990-06-01 03:00:00" attr="0x20" dir="GENERIC/">GENERIC.C</file>
+		<file size="826" time="1990-06-01 03:00:00" attr="0x20" dir="GENERIC/">GENERIC.DEF</file>
+		<file size="248" time="1990-06-01 03:00:00" attr="0x20" dir="GENERIC/">GENERIC.H</file>
+		<file size="545" time="1990-06-01 03:00:00" attr="0x20" dir="GENERIC/">GENERIC.RC</file>
+		<file size="272" time="1990-06-01 09:15:58" attr="0x10">INC</file>
+		<file size="17114" time="1990-06-01 03:00:00" attr="0x20" dir="INC/">CMACROS.INC</file>
+		<file size="2641" time="1990-06-01 03:00:00" attr="0x20" dir="INC/">CUSTCNTL.H</file>
+		<file size="3588" time="1990-06-01 03:00:00" attr="0x20" dir="INC/">DDE.H</file>
+		<file size="4857" time="1990-06-01 03:00:00" attr="0x20" dir="INC/">DRIVINIT.H</file>
+		<file size="108580" time="1990-06-01 03:00:00" attr="0x20" dir="INC/">WINDOWS.H</file>
+		<file size="58084" time="1990-06-01 03:00:00" attr="0x20" dir="INC/">WINDOWS.INC</file>
 	</disk>
-	<disk id="disk08" size="737280" chs="80:2:9" img="archive/WIN30SDK_DISK08.img" href="/disks/pcx86/tools/microsoft/windows/sdk/3.00/WIN30SDK_DISK08.json" md5="77d391c5e2462e446ad6780cf86a7b82" md5json="c89d7af1e40471dbfe6b795869696bd2">
+	<disk id="disk08" size="737280" chs="80:2:9" img="archive/WIN30SDK_DISK08.img" href="/disks/pcx86/tools/microsoft/windows/sdk/3.00/WIN30SDK_DISK08.json" md5="9bda452f91c8309e888595ac6ba6d1e5" md5json="5786414e2d7431b22b523a1fe7a807b7">
 		<name>Windows SDK 3.00 (720K Disk 08)</name>
-		<desc>Sample Source Code 2</desc>
+		<file size="816" time="1990-06-01 09:25:54" attr="0x10">HELPEX</file>
+		<file size="342" time="1990-06-01 03:00:00" attr="0x20" dir="HELPEX/">BULLET.BMP</file>
+		<file size="122" time="1990-06-01 03:00:00" attr="0x20" dir="HELPEX/">CHKBOFF.BMP</file>
+		<file size="122" time="1990-06-01 03:00:00" attr="0x20" dir="HELPEX/">CHKBON.BMP</file>
+		<file size="1014" time="1990-06-01 03:00:00" attr="0x20" dir="HELPEX/">CODEC.BMP</file>
+		<file size="822" time="1990-06-01 03:00:00" attr="0x20" dir="HELPEX/">CONTINUE.BMP</file>
+		<file size="822" time="1990-06-01 03:00:00" attr="0x20" dir="HELPEX/">DONE.BMP</file>
+		<file size="326" time="1990-06-01 03:00:00" attr="0x20" dir="HELPEX/">HELP.CUR</file>
+		<file size="346" time="1990-06-01 03:00:00" attr="0x20" dir="HELPEX/">HELPEX</file>
+		<file size="13317" time="1990-06-01 03:00:00" attr="0x20" dir="HELPEX/">HELPEX.C</file>
+		<file size="255" time="1990-06-01 03:00:00" attr="0x20" dir="HELPEX/">HELPEX.DEF</file>
+		<file size="323" time="1990-06-01 03:00:00" attr="0x20" dir="HELPEX/">HELPEX.DLG</file>
+		<file size="814" time="1990-06-01 03:00:00" attr="0x20" dir="HELPEX/">HELPEX.H</file>
+		<file size="706" time="1990-06-01 03:00:00" attr="0x20" dir="HELPEX/">HELPEX.HPJ</file>
+		<file size="1407" time="1990-06-01 03:00:00" attr="0x20" dir="HELPEX/">HELPEX.RC</file>
+		<file size="35554" time="1990-06-01 03:00:00" attr="0x20" dir="HELPEX/">HELPEX.RTF</file>
+		<file size="178" time="1990-06-01 03:00:00" attr="0x20" dir="HELPEX/">HELPICON.BMP</file>
+		<file size="595" time="1990-06-01 03:00:00" attr="0x20" dir="HELPEX/">HELPIDS.H</file>
+		<file size="14030" time="1990-06-01 03:00:00" attr="0x20" dir="HELPEX/">KEYS.RTF</file>
+		<file size="146" time="1990-06-01 03:00:00" attr="0x20" dir="HELPEX/">MAX2ICON.BMP</file>
+		<file size="194" time="1990-06-01 03:00:00" attr="0x20" dir="HELPEX/">MOUSE.BMP</file>
+		<file size="1981" time="1990-06-01 03:00:00" attr="0x20" dir="HELPEX/">TERMS.RTF</file>
+		<file size="438" time="1990-06-01 03:00:00" attr="0x20" dir="HELPEX/">WINWORD.BMP</file>
+		<file size="272" time="1990-06-01 09:25:38" attr="0x10">ICON</file>
+		<file size="271" time="1990-06-01 03:00:00" attr="0x20" dir="ICON/">ICON</file>
+		<file size="4727" time="1990-06-01 03:00:00" attr="0x20" dir="ICON/">ICON.C</file>
+		<file size="288" time="1990-06-01 03:00:00" attr="0x20" dir="ICON/">ICON.DEF</file>
+		<file size="248" time="1990-06-01 03:00:00" attr="0x20" dir="ICON/">ICON.H</file>
+		<file size="564" time="1990-06-01 03:00:00" attr="0x20" dir="ICON/">ICON.RC</file>
+		<file size="1718" time="1990-06-01 03:00:00" attr="0x20" dir="ICON/">MYICON.ICO</file>
+		<file size="238" time="1990-06-01 09:21:12" attr="0x10">INPUT</file>
+		<file size="281" time="1990-06-01 03:00:00" attr="0x20" dir="INPUT/">INPUT</file>
+		<file size="11691" time="1990-06-01 03:00:00" attr="0x20" dir="INPUT/">INPUT.C</file>
+		<file size="277" time="1990-06-01 03:00:00" attr="0x20" dir="INPUT/">INPUT.DEF</file>
+		<file size="248" time="1990-06-01 03:00:00" attr="0x20" dir="INPUT/">INPUT.H</file>
+		<file size="469" time="1990-06-01 03:00:00" attr="0x20" dir="INPUT/">INPUT.RC</file>
+		<file size="340" time="1990-06-01 09:21:20" attr="0x10">MEMORY</file>
+		<file size="666" time="1990-06-01 03:00:00" attr="0x20" dir="MEMORY/">MEMORY</file>
+		<file size="464" time="1990-06-01 03:00:00" attr="0x20" dir="MEMORY/">MEMORY.DEF</file>
+		<file size="324" time="1990-06-01 03:00:00" attr="0x20" dir="MEMORY/">MEMORY.H</file>
+		<file size="541" time="1990-06-01 03:00:00" attr="0x20" dir="MEMORY/">MEMORY.RC</file>
+		<file size="825" time="1990-06-01 03:00:00" attr="0x20" dir="MEMORY/">MEMORY1.C</file>
+		<file size="1688" time="1990-06-01 03:00:00" attr="0x20" dir="MEMORY/">MEMORY2.C</file>
+		<file size="1067" time="1990-06-01 03:00:00" attr="0x20" dir="MEMORY/">MEMORY3.C</file>
+		<file size="800" time="1990-06-01 03:00:00" attr="0x20" dir="MEMORY/">MEMORY4.C</file>
+		<file size="374" time="1990-06-01 09:21:32" attr="0x10">MENU</file>
+		<file size="544" time="1990-06-01 03:00:00" attr="0x20" dir="MENU/">CHECKOFF.BMP</file>
+		<file size="544" time="1990-06-01 03:00:00" attr="0x20" dir="MENU/">CHECKON.BMP</file>
+		<file size="261" time="1990-06-01 03:00:00" attr="0x20" dir="MENU/">MENU</file>
+		<file size="20929" time="1990-06-01 03:00:00" attr="0x20" dir="MENU/">MENU.C</file>
+		<file size="225" time="1990-06-01 03:00:00" attr="0x20" dir="MENU/">MENU.DEF</file>
+		<file size="282" time="1990-06-01 03:00:00" attr="0x20" dir="MENU/">MENU.DLG</file>
+		<file size="1349" time="1990-06-01 03:00:00" attr="0x20" dir="MENU/">MENU.H</file>
+		<file size="766" time="1990-06-01 03:00:00" attr="0x20" dir="MENU/">MENU.ICO</file>
+		<file size="2343" time="1990-06-01 03:00:00" attr="0x20" dir="MENU/">MENU.RC</file>
+		<file size="544" time="1990-06-01 09:21:48" attr="0x10">MULTIPAD</file>
+		<file size="766" time="1990-06-01 03:00:00" attr="0x20" dir="MULTIPAD/">MP300.ICO</file>
+		<file size="15586" time="1990-06-01 03:00:00" attr="0x20" dir="MULTIPAD/">MPFILE.C</file>
+		<file size="7839" time="1990-06-01 03:00:00" attr="0x20" dir="MULTIPAD/">MPFIND.C</file>
+		<file size="4116" time="1990-06-01 03:00:00" attr="0x20" dir="MULTIPAD/">MPINIT.C</file>
+		<file size="8556" time="1990-06-01 03:00:00" attr="0x20" dir="MULTIPAD/">MPOPEN.C</file>
+		<file size="12154" time="1990-06-01 03:00:00" attr="0x20" dir="MULTIPAD/">MPPRINT.C</file>
+		<file size="722" time="1990-06-01 03:00:00" attr="0x20" dir="MULTIPAD/">MULTIPAD</file>
+		<file size="26809" time="1990-06-01 03:00:00" attr="0x20" dir="MULTIPAD/">MULTIPAD.C</file>
+		<file size="611" time="1990-06-01 03:00:00" attr="0x20" dir="MULTIPAD/">MULTIPAD.DEF</file>
+		<file size="4614" time="1990-06-01 03:00:00" attr="0x20" dir="MULTIPAD/">MULTIPAD.DLG</file>
+		<file size="4991" time="1990-06-01 03:00:00" attr="0x20" dir="MULTIPAD/">MULTIPAD.H</file>
+		<file size="111" time="1990-06-01 03:00:00" attr="0x20" dir="MULTIPAD/">MULTIPAD.LNK</file>
+		<file size="3870" time="1990-06-01 03:00:00" attr="0x20" dir="MULTIPAD/">MULTIPAD.RC</file>
+		<file size="766" time="1990-06-01 03:00:00" attr="0x20" dir="MULTIPAD/">NOTE300.ICO</file>
+		<file size="272" time="1990-06-01 09:22:18" attr="0x10">MYPAL</file>
+		<file size="285" time="1990-06-01 03:00:00" attr="0x20" dir="MYPAL/">MYPAL</file>
+		<file size="16137" time="1990-06-01 03:00:00" attr="0x20" dir="MYPAL/">MYPAL.C</file>
+		<file size="207" time="1990-06-01 03:00:00" attr="0x20" dir="MYPAL/">MYPAL.DEF</file>
+		<file size="249" time="1990-06-01 03:00:00" attr="0x20" dir="MYPAL/">MYPAL.H</file>
+		<file size="766" time="1990-06-01 03:00:00" attr="0x20" dir="MYPAL/">MYPAL.ICO</file>
+		<file size="22" time="1990-06-01 03:00:00" attr="0x20" dir="MYPAL/">MYPAL.RC</file>
+		<file size="238" time="1990-06-01 09:22:30" attr="0x10">OUTPUT</file>
+		<file size="298" time="1990-06-01 03:00:00" attr="0x20" dir="OUTPUT/">OUTPUT</file>
+		<file size="13587" time="1990-06-01 03:00:00" attr="0x20" dir="OUTPUT/">OUTPUT.C</file>
+		<file size="290" time="1990-06-01 03:00:00" attr="0x20" dir="OUTPUT/">OUTPUT.DEF</file>
+		<file size="248" time="1990-06-01 03:00:00" attr="0x20" dir="OUTPUT/">OUTPUT.H</file>
+		<file size="541" time="1990-06-01 03:00:00" attr="0x20" dir="OUTPUT/">OUTPUT.RC</file>
+		<file size="340" time="1990-06-01 09:22:42" attr="0x10">OWNCOMBO</file>
+		<file size="319" time="1990-06-01 03:00:00" attr="0x20" dir="OWNCOMBO/">OWNCOMBO</file>
+		<file size="26297" time="1990-06-01 03:00:00" attr="0x20" dir="OWNCOMBO/">OWNCOMBO.C</file>
+		<file size="312" time="1990-06-01 03:00:00" attr="0x20" dir="OWNCOMBO/">OWNCOMBO.DEF</file>
+		<file size="3690" time="1990-06-01 03:00:00" attr="0x20" dir="OWNCOMBO/">OWNCOMBO.DLG</file>
+		<file size="1607" time="1990-06-01 03:00:00" attr="0x20" dir="OWNCOMBO/">OWNCOMBO.H</file>
+		<file size="766" time="1990-06-01 03:00:00" attr="0x20" dir="OWNCOMBO/">OWNCOMBO.ICO</file>
+		<file size="932" time="1990-06-01 03:00:00" attr="0x20" dir="OWNCOMBO/">OWNCOMBO.RC</file>
+		<file size="1891" time="1990-06-01 03:00:00" attr="0x20" dir="OWNCOMBO/">README.TXT</file>
+		<file size="238" time="1990-06-01 09:22:58" attr="0x10">PRNTFILE</file>
+		<file size="334" time="1990-06-01 03:00:00" attr="0x20" dir="PRNTFILE/">PRNTFILE</file>
+		<file size="40067" time="1990-06-01 03:00:00" attr="0x20" dir="PRNTFILE/">PRNTFILE.C</file>
+		<file size="541" time="1990-06-01 03:00:00" attr="0x20" dir="PRNTFILE/">PRNTFILE.DEF</file>
+		<file size="1392" time="1990-06-01 03:00:00" attr="0x20" dir="PRNTFILE/">PRNTFILE.H</file>
+		<file size="2813" time="1990-06-01 03:00:00" attr="0x20" dir="PRNTFILE/">PRNTFILE.RC</file>
+		<file size="340" time="1990-06-01 09:23:12" attr="0x10">RAINBOW</file>
+		<file size="2454" time="1990-06-01 03:00:00" attr="0x20" dir="RAINBOW/">LIBENTRY.ASM</file>
+		<file size="240" time="1990-06-01 03:00:00" attr="0x20" dir="RAINBOW/">LIBENTRY.OBJ</file>
+		<file size="430" time="1990-06-01 03:00:00" attr="0x20" dir="RAINBOW/">RAINBOW</file>
+		<file size="24329" time="1990-06-01 03:00:00" attr="0x20" dir="RAINBOW/">RAINBOW.C</file>
+		<file size="318" time="1990-06-01 03:00:00" attr="0x20" dir="RAINBOW/">RAINBOW.DEF</file>
+		<file size="688" time="1990-06-01 03:00:00" attr="0x20" dir="RAINBOW/">RAINBOW.DLG</file>
+		<file size="497" time="1990-06-01 03:00:00" attr="0x20" dir="RAINBOW/">RAINBOW.H</file>
+		<file size="801" time="1990-06-01 03:00:00" attr="0x20" dir="RAINBOW/">RAINBOW.RC</file>
+		<file size="442" time="1990-06-01 09:23:30" attr="0x10">SELECT</file>
+		<file size="289" time="1990-06-01 03:00:00" attr="0x20" dir="SELECT/">DEMO</file>
+		<file size="6941" time="1990-06-01 03:00:00" attr="0x20" dir="SELECT/">DEMO.C</file>
+		<file size="302" time="1990-06-01 03:00:00" attr="0x20" dir="SELECT/">DEMO.DEF</file>
+		<file size="287" time="1990-06-01 03:00:00" attr="0x20" dir="SELECT/">DEMO.H</file>
+		<file size="652" time="1990-06-01 03:00:00" attr="0x20" dir="SELECT/">DEMO.RC</file>
+		<file size="2454" time="1990-06-01 03:00:00" attr="0x20" dir="SELECT/">LIBENTRY.ASM</file>
+		<file size="240" time="1990-06-01 03:00:00" attr="0x20" dir="SELECT/">LIBENTRY.OBJ</file>
+		<file size="332" time="1990-06-01 03:00:00" attr="0x20" dir="SELECT/">SELECT</file>
+		<file size="6544" time="1990-06-01 03:00:00" attr="0x20" dir="SELECT/">SELECT.C</file>
+		<file size="283" time="1990-06-01 03:00:00" attr="0x20" dir="SELECT/">SELECT.DEF</file>
+		<file size="817" time="1990-06-01 03:00:00" attr="0x20" dir="SELECT/">SELECT.H</file>
+		<file size="578" time="1990-06-01 09:23:54" attr="0x10">SHOWDIB</file>
+		<file size="25921" time="1990-06-01 03:00:00" attr="0x20" dir="SHOWDIB/">DIB.C</file>
+		<file size="14657" time="1990-06-01 03:00:00" attr="0x20" dir="SHOWDIB/">DLGOPEN.C</file>
+		<file size="4516" time="1990-06-01 03:00:00" attr="0x20" dir="SHOWDIB/">DLGOPEN.DLG</file>
+		<file size="2547" time="1990-06-01 03:00:00" attr="0x20" dir="SHOWDIB/">DLGOPENA.ASM</file>
+		<file size="562" time="1990-06-01 03:00:00" attr="0x20" dir="SHOWDIB/">DLGOPENA.OBJ</file>
+		<file size="28130" time="1990-06-01 03:00:00" attr="0x20" dir="SHOWDIB/">DRAWDIB.C</file>
+		<file size="5830" time="1990-06-01 03:00:00" attr="0x20" dir="SHOWDIB/">PRINT.C</file>
+		<file size="359" time="1990-06-01 03:00:00" attr="0x20" dir="SHOWDIB/">PRINT.DLG</file>
+		<file size="937" time="1990-06-01 03:00:00" attr="0x20" dir="SHOWDIB/">SHOWDIB</file>
+		<file size="29534" time="1990-06-01 03:00:00" attr="0x20" dir="SHOWDIB/">SHOWDIB.C</file>
+		<file size="360" time="1990-06-01 03:00:00" attr="0x20" dir="SHOWDIB/">SHOWDIB.DEF</file>
+		<file size="5513" time="1990-06-01 03:00:00" attr="0x20" dir="SHOWDIB/">SHOWDIB.DLG</file>
+		<file size="9358" time="1990-06-01 03:00:00" attr="0x20" dir="SHOWDIB/">SHOWDIB.H</file>
+		<file size="766" time="1990-06-01 03:00:00" attr="0x20" dir="SHOWDIB/">SHOWDIB.ICO</file>
+		<file size="1381" time="1990-06-01 03:00:00" attr="0x20" dir="SHOWDIB/">SHOWDIB.RC</file>
+		<file size="306" time="1990-06-01 09:24:40" attr="0x10">SHOWFONT</file>
+		<file size="9808" time="1990-06-01 03:00:00" attr="0x20" dir="SHOWFONT/">CFONT.C</file>
+		<file size="421" time="1990-06-01 03:00:00" attr="0x20" dir="SHOWFONT/">SHOWFONT</file>
+		<file size="48193" time="1990-06-01 03:00:00" attr="0x20" dir="SHOWFONT/">SHOWFONT.C</file>
+		<file size="525" time="1990-06-01 03:00:00" attr="0x20" dir="SHOWFONT/">SHOWFONT.DEF</file>
+		<file size="5064" time="1990-06-01 03:00:00" attr="0x20" dir="SHOWFONT/">SHOWFONT.H</file>
+		<file size="1064" time="1990-06-01 03:00:00" attr="0x20" dir="SHOWFONT/">SHOWFONT.ICO</file>
+		<file size="10925" time="1990-06-01 03:00:00" attr="0x20" dir="SHOWFONT/">SHOWFONT.RC</file>
+		<file size="442" time="1990-06-01 09:25:06" attr="0x10">TTY</file>
+		<file size="337" time="1990-06-01 03:00:00" attr="0x20" dir="TTY/">TTY</file>
+		<file size="16830" time="1990-06-01 03:00:00" attr="0x20" dir="TTY/">TTY.C</file>
+		<file size="314" time="1990-06-01 03:00:00" attr="0x20" dir="TTY/">TTY.DEF</file>
+		<file size="2756" time="1990-06-01 03:00:00" attr="0x20" dir="TTY/">TTY.DLG</file>
+		<file size="795" time="1990-06-01 03:00:00" attr="0x20" dir="TTY/">TTY.H</file>
+		<file size="766" time="1990-06-01 03:00:00" attr="0x20" dir="TTY/">TTY.ICO</file>
+		<file size="1239" time="1990-06-01 03:00:00" attr="0x20" dir="TTY/">TTY.RC</file>
+		<file size="3451" time="1990-06-01 03:00:00" attr="0x20" dir="TTY/">TTY.TXT</file>
+		<file size="16310" time="1990-06-01 03:00:00" attr="0x20" dir="TTY/">WSTDIO.C</file>
+		<file size="240" time="1990-06-01 03:00:00" attr="0x20" dir="TTY/">WSTDIO.H</file>
+		<file size="5410" time="1990-06-01 03:00:00" attr="0x20" dir="TTY/">WSTDIO.TXT</file>
 	</disk>
-	<disk id="disk09" size="737280" chs="80:2:9" img="archive/WIN30SDK_DISK09.img" href="/disks/pcx86/tools/microsoft/windows/sdk/3.00/WIN30SDK_DISK09.json" md5="945af52c2a962ea4b6c7b3a5487975be" md5json="89012754bdbb154d73050ff320828803">
+	<disk id="disk09" size="737280" chs="80:2:9" img="archive/WIN30SDK_DISK09.img" href="/disks/pcx86/tools/microsoft/windows/sdk/3.00/WIN30SDK_DISK09.json" md5="23d923f1f69ce71d398c1b9750d5717d" md5json="ee9a136836cf40e36ed43dc4517509bc">
 		<name>Windows SDK 3.00 (720K Disk 09)</name>
-		<desc>Online Reference (Advisor Format)</desc>
+		<file size="102" time="1990-06-01 09:31:22" attr="0x10">HELPADV</file>
+		<file size="688486" time="1990-06-01 03:00:00" attr="0x20" dir="HELPADV/">SDKADV.HL$</file>
 	</disk>
-	<disk id="disk10" size="737280" chs="80:2:9" img="archive/WIN30SDK_DISK10.img" href="/disks/pcx86/tools/microsoft/windows/sdk/3.00/WIN30SDK_DISK10.json" md5="3782fc9ba62e8c438bc51177403ec5f4" md5json="5e77eed658cc6032d0d01377d280921c">
+	<disk id="disk10" size="737280" chs="80:2:9" img="archive/WIN30SDK_DISK10.img" href="/disks/pcx86/tools/microsoft/windows/sdk/3.00/WIN30SDK_DISK10.json" md5="3e0cea404a88c2079fe660542ed02e5f" md5json="39fbadc7c8308f797d3c757ab9c6c612">
 		<name>Windows SDK 3.00 (720K Disk 10)</name>
-		<desc>Online Reference (Windows Help Format)</desc>
+		<file size="102" time="1990-06-01 09:32:56" attr="0x10">HELPWIN</file>
+		<file size="685389" time="1990-06-01 03:00:00" attr="0x20" dir="HELPWIN/">SDKWIN.HL$</file>
 	</disk>
 </manifest>

@@ -7,10 +7,56 @@
 	<category>Assembler</category>
 	<language>x86</language>
 	<author>Microsoft</author>
-	<disk id="disk01" size="368640" chs="40:2:9" img="archive/MASM500-DISK1.img" href="/disks/pcx86/tools/microsoft/masm/5.00/MASM500-DISK1.json" md5="d7b9d6fec1ae8f2b75ae2a174dd5e9b4" md5json="7d1985d28e48a51b2f8cf34f9d4586f0">
+	<disk id="disk01" size="368640" chs="40:2:9" img="archive/MASM500-DISK1.img" href="/disks/pcx86/tools/microsoft/masm/5.00/MASM500-DISK1.json" md5="db3a2c11a48bd66f684ee8258af9c6ca" md5json="a251bf02f169d53d5e026e87295ed228">
 		<name>MS MASM 5.00 (Disk 1)</name>
+		<file size="15830" time="1987-07-31 00:00:00" attr="0x20">CREF.EXE</file>
+		<file size="9499" time="1987-07-31 00:00:00" attr="0x20">ERROUT.EXE</file>
+		<file size="12149" time="1987-07-31 00:00:00" attr="0x20">EXEMOD.EXE</file>
+		<file size="32150" time="1987-07-31 00:00:00" attr="0x20">LIB.EXE</file>
+		<file size="64982" time="1987-07-31 00:00:00" attr="0x20">LINK.EXE</file>
+		<file size="24199" time="1987-07-31 00:00:00" attr="0x20">MAKE.EXE</file>
+		<file size="103175" time="1987-07-31 00:00:00" attr="0x20">MASM.EXE</file>
+		<file size="442" time="1987-07-31 00:04:10" attr="0x10">MIXED</file>
+		<file size="1138" time="1987-07-31 00:00:00" attr="0x20" dir="MIXED/">BA.ASM</file>
+		<file size="545" time="1987-07-31 00:00:00" attr="0x20" dir="MIXED/">BAMAIN.BAS</file>
+		<file size="298" time="1987-07-31 00:00:00" attr="0x20" dir="MIXED/">CA.ASM</file>
+		<file size="111" time="1987-07-31 00:00:00" attr="0x20" dir="MIXED/">CAMAIN.C</file>
+		<file size="426" time="1987-07-31 00:00:00" attr="0x20" dir="MIXED/">FA.ASM</file>
+		<file size="190" time="1987-07-31 00:00:00" attr="0x20" dir="MIXED/">FAMAIN.FOR</file>
+		<file size="9085" time="1987-07-31 00:00:00" attr="0x20" dir="MIXED/">MIXED.DOC</file>
+		<file size="6238" time="1987-07-31 00:00:00" attr="0x20" dir="MIXED/">MIXED.INC</file>
+		<file size="388" time="1987-07-31 00:00:00" attr="0x20" dir="MIXED/">PA.ASM</file>
+		<file size="164" time="1987-07-31 00:00:00" attr="0x20" dir="MIXED/">PAMAIN.PAS</file>
+		<file size="1982" time="1987-07-31 00:00:00" attr="0x20" dir="MIXED/">POWER2.ASM</file>
+		<file size="1045" time="1987-07-31 00:00:00" attr="0x20">PACKING.LST</file>
+		<file size="9103" time="1987-07-31 00:00:00" attr="0x20">README.DOC</file>
+		<file size="2975" time="1987-07-31 00:00:00" attr="0x20">RUNME.BAT</file>
+		<file size="10601" time="1987-07-31 00:00:00" attr="0x20">SETENV.EXE</file>
+		<file size="7287" time="1987-07-31 00:00:00" attr="0x20">SETUP.BAT</file>
+		<file size="2130" time="1987-07-31 00:00:00" attr="0x20">SETUP2.BAT</file>
+		<file size="2040" time="1987-07-31 00:00:00" attr="0x20">SHOW.EXE</file>
+		<file size="23280" time="1987-07-31 00:00:00" attr="0x20">WHAT.ASM</file>
+		<file size="3170" time="1987-07-31 00:00:00" attr="0x20">WHAT.EXE</file>
 	</disk>
-	<disk id="disk02" size="368640" chs="40:2:9" img="archive/MASM500-DISK2.img" href="/disks/pcx86/tools/microsoft/masm/5.00/MASM500-DISK2.json" md5="a8e7f967353b27d732727ce3fde6cca2" md5json="045e55d45ee9d46940a6efc41371dcbc">
+	<disk id="disk02" size="368640" chs="40:2:9" img="archive/MASM500-DISK2.img" href="/disks/pcx86/tools/microsoft/masm/5.00/MASM500-DISK2.json" md5="90c23b2c12c6d3e5f0002f7091738480" md5json="a794324b6b5c779ce2b01429f16dfcf5">
 		<name>MS MASM 5.00 (Disk 2)</name>
+		<file size="2302" time="1987-07-31 00:00:00" attr="0x20">BIOS.INC</file>
+		<file size="218018" time="1987-07-31 00:00:00" attr="0x20">CV.EXE</file>
+		<file size="18348" time="1987-07-31 00:00:00" attr="0x20">CV.HLP</file>
+		<file size="4851" time="1987-07-31 00:00:00" attr="0x20">DEMO.BAT</file>
+		<file size="7516" time="1987-07-31 00:00:00" attr="0x20">DOS.INC</file>
+		<file size="14723" time="1987-07-31 00:00:00" attr="0x20">EXEPACK.EXE</file>
+		<file size="7407" time="1987-07-31 00:00:00" attr="0x20">E_AUTO.CV</file>
+		<file size="17983" time="1987-07-31 00:00:00" attr="0x20">MACRO.DOC</file>
+		<file size="13793" time="1987-07-31 00:00:00" attr="0x20">MOUSE.SYS</file>
+		<file size="570" time="1987-07-31 00:00:00" attr="0x20">M_AUTO.CV</file>
+		<file size="11192" time="1987-07-31 00:00:00" attr="0x20">PAGER.ASM</file>
+		<file size="16" time="1987-07-31 00:00:00" attr="0x20">Q_AUTO.CV</file>
+		<file size="2975" time="1987-07-31 00:00:00" attr="0x20">RUNME.BAT</file>
+		<file size="8944" time="1987-07-31 00:00:00" attr="0x20">SHOW.ASM</file>
+		<file size="5511" time="1987-07-31 00:00:00" attr="0x20">SHOW.EXE</file>
+		<file size="5152" time="1987-07-31 00:00:00" attr="0x20">U_AUTO.CV</file>
+		<file size="3170" time="1987-07-31 00:00:00" attr="0x20">WHAT.EXE</file>
+		<file size="9639" time="1987-07-31 00:00:00" attr="0x20">W_AUTO.CV</file>
 	</disk>
 </manifest>

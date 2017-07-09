@@ -7,13 +7,75 @@
 	<category>Compiler</category>
 	<language>C</language>
 	<author>Microsoft</author>
-	<disk id="disk01" size="368640" chs="40:2:9" img="archive/Disk01.img" href="/disks/pcx86/tools/microsoft/c/3.00/MSC300-DISK1.json" md5="a0b93852becb007f825c2183ac93f84a" md5json="7169f9af4f401ba21f80c99838da440f">
+	<disk id="disk01" size="368640" chs="40:2:9" img="archive/MSC300-DISK1.img" href="/disks/pcx86/tools/microsoft/c/3.00/MSC300-DISK1.json" md5="bb018ee7eaf8a79c5bd792eccb4f0115" md5json="7e46b10a03198268aa9050990b583df3">
 		<name>MS C 3.00 (Disk 1)</name>
+		<file size="27044" time="1985-02-18 12:16:28" attr="0x20">CL.EXE</file>
+		<file size="27100" time="1985-02-18 12:16:52" attr="0x20">MSC.EXE</file>
+		<file size="32182" time="1985-02-21 14:12:20" attr="0x20">P0.EXE</file>
+		<file size="74770" time="1985-02-21 14:27:58" attr="0x20">P1.EXE</file>
+		<file size="113714" time="1985-02-21 14:16:26" attr="0x20">P2.EXE</file>
+		<file size="69412" time="1985-02-14 16:37:12" attr="0x20">P3.EXE</file>
+		<file size="13183" time="1985-02-15 17:41:18" attr="0x20">README.DOC</file>
 	</disk>
-	<disk id="disk02" size="368640" chs="40:2:9" img="archive/Disk02.img" href="/disks/pcx86/tools/microsoft/c/3.00/MSC300-DISK2.json" md5="c9e999a6a9099f60dc1cf1561acfc7a5" md5json="68abb3dc8088441939d845cb94bf067e">
+	<disk id="disk02" size="368640" chs="40:2:9" img="archive/MSC300-DISK2.img" href="/disks/pcx86/tools/microsoft/c/3.00/MSC300-DISK2.json" md5="45f64425fec26b2e29943641a5160b5d" md5json="322b671df95b85816f09dc4834f871ee">
 		<name>MS C 3.00 (Disk 2)</name>
+		<file size="419" time="1984-12-29 10:07:40" attr="0x20">DEMO.C</file>
+		<file size="816" time="2010-02-21 15:25:56" attr="0x10">INCLUDE</file>
+		<file size="330" time="1985-01-24 07:36:54" attr="0x20" dir="INCLUDE/">ASSERT.H</file>
+		<file size="662" time="1985-01-24 07:37:08" attr="0x20" dir="INCLUDE/">CONIO.H</file>
+		<file size="1982" time="1985-01-17 09:06:32" attr="0x20" dir="INCLUDE/">CTYPE.H</file>
+		<file size="527" time="1985-01-24 07:37:16" attr="0x20" dir="INCLUDE/">DIRECT.H</file>
+		<file size="1763" time="1985-02-15 14:49:46" attr="0x20" dir="INCLUDE/">DOS.H</file>
+		<file size="1196" time="1985-01-24 07:37:34" attr="0x20" dir="INCLUDE/">ERRNO.H</file>
+		<file size="683" time="1985-01-24 07:37:42" attr="0x20" dir="INCLUDE/">FCNTL.H</file>
+		<file size="992" time="1985-01-24 07:37:48" attr="0x20" dir="INCLUDE/">IO.H</file>
+		<file size="585" time="1985-01-24 07:38:02" attr="0x20" dir="INCLUDE/">MALLOC.H</file>
+		<file size="2727" time="1985-01-24 07:38:20" attr="0x20" dir="INCLUDE/">MATH.H</file>
+		<file size="791" time="1985-02-12 16:31:02" attr="0x20" dir="INCLUDE/">MEMORY.H</file>
+		<file size="1103" time="1985-01-24 07:38:30" attr="0x20" dir="INCLUDE/">PROCESS.H</file>
+		<file size="540" time="1985-01-24 07:38:58" attr="0x20" dir="INCLUDE/">SEARCH.H</file>
+		<file size="821" time="1985-01-24 07:38:50" attr="0x20" dir="INCLUDE/">SETJMP.H</file>
+		<file size="328" time="1985-01-24 07:39:54" attr="0x20" dir="INCLUDE/">SHARE.H</file>
+		<file size="609" time="1985-01-24 07:40:00" attr="0x20" dir="INCLUDE/">SIGNAL.H</file>
+		<file size="2393" time="1985-01-15 16:45:56" attr="0x20" dir="INCLUDE/">STDIO.H</file>
+		<file size="2017" time="1985-01-24 07:38:44" attr="0x20" dir="INCLUDE/">STDLIB.H</file>
+		<file size="1293" time="1985-02-21 15:25:56" attr="0x20" dir="INCLUDE/">STRING.H</file>
+		<file size="238" time="2010-02-21 15:25:56" attr="0x10" dir="INCLUDE/">SYS</file>
+		<file size="304" time="1985-01-24 07:35:36" attr="0x20" dir="INCLUDE/SYS/">LOCKING.H</file>
+		<file size="1028" time="1985-01-24 07:35:48" attr="0x20" dir="INCLUDE/SYS/">STAT.H</file>
+		<file size="430" time="1985-01-24 07:36:04" attr="0x20" dir="INCLUDE/SYS/">TIMEB.H</file>
+		<file size="453" time="1985-01-24 07:35:54" attr="0x20" dir="INCLUDE/SYS/">TYPES.H</file>
+		<file size="680" time="1985-01-24 07:36:14" attr="0x20" dir="INCLUDE/SYS/">UTIME.H</file>
+		<file size="1098" time="1985-01-24 07:39:20" attr="0x20" dir="INCLUDE/">TIME.H</file>
+		<file size="1726" time="1985-01-24 07:39:28" attr="0x20" dir="INCLUDE/">V2TOV3.H</file>
+		<file size="544" time="2010-02-21 15:25:56" attr="0x10">LIB</file>
+		<file size="4096" time="1985-02-07 15:31:06" attr="0x20" dir="LIB/">87.LIB</file>
+		<file size="122" time="1984-12-11 19:46:22" attr="0x20" dir="LIB/">BINMODE.OBJ</file>
+		<file size="15360" time="1985-02-07 15:31:00" attr="0x20" dir="LIB/">EM.LIB</file>
+		<file size="13562" time="1985-02-07 14:56:28" attr="0x20" dir="LIB/">EMOEM.ASM</file>
+		<file size="537" time="1985-01-30 08:15:34" attr="0x20" dir="LIB/">LSETARGV.OBJ</file>
+		<file size="442" time="1985-01-22 13:15:18" attr="0x20" dir="LIB/">LVARSTCK.OBJ</file>
+		<file size="89600" time="1985-02-19 12:43:48" attr="0x20" dir="LIB/">MLIBC.LIB</file>
+		<file size="29696" time="1985-02-19 21:19:22" attr="0x20" dir="LIB/">MLIBFP.LIB</file>
+		<file size="515" time="1985-01-30 08:15:28" attr="0x20" dir="LIB/">MSETARGV.OBJ</file>
+		<file size="474" time="1985-02-21 14:00:28" attr="0x20" dir="LIB/">MVARSTCK.OBJ</file>
+		<file size="88064" time="1985-02-19 12:41:28" attr="0x20" dir="LIB/">SLIBC.LIB</file>
+		<file size="28672" time="1985-02-19 21:15:18" attr="0x20" dir="LIB/">SLIBFP.LIB</file>
+		<file size="500" time="1985-01-30 08:15:24" attr="0x20" dir="LIB/">SSETARGV.OBJ</file>
+		<file size="474" time="1985-02-21 13:59:48" attr="0x20" dir="LIB/">SVARSTCK.OBJ</file>
+		<file size="838" time="1984-12-16 13:14:00" attr="0x20">SIEVE.C</file>
 	</disk>
-	<disk id="disk03" size="368640" chs="40:2:9" img="archive/Disk03.img" href="/disks/pcx86/tools/microsoft/c/3.00/MSC300-DISK3.json" md5="6911b115aca0dbe549f3d80fcff55e0e" md5json="42dcc33d866ac9203a36ad62e6a318b7">
+	<disk id="disk03" size="368640" chs="40:2:9" img="archive/MSC300-DISK3.img" href="/disks/pcx86/tools/microsoft/c/3.00/MSC300-DISK3.json" md5="94d4844927c8a60fb8b603e2f991bff7" md5json="26db82ac4bbffe09260d667e08b4630d">
 		<name>MS C 3.00 (Disk 3)</name>
+		<file size="11160" time="1985-02-05 15:12:42" attr="0x20">EXEMOD.EXE</file>
+		<file size="8400" time="1985-02-14 14:15:34" attr="0x20">EXEPACK.EXE</file>
+		<file size="238" time="2010-02-21 15:25:56" attr="0x10">LIB</file>
+		<file size="24138" time="1984-10-31 14:57:24" attr="0x20">LIB.EXE</file>
+		<file size="97792" time="1985-02-19 12:46:22" attr="0x20" dir="LIB/">LLIBC.LIB</file>
+		<file size="40448" time="1985-02-20 02:00:04" attr="0x20" dir="LIB/">LLIBFA.LIB</file>
+		<file size="30208" time="1985-02-19 21:23:04" attr="0x20" dir="LIB/">LLIBFP.LIB</file>
+		<file size="39936" time="1985-02-20 02:00:16" attr="0x20" dir="LIB/">MLIBFA.LIB</file>
+		<file size="39424" time="1985-02-20 02:00:10" attr="0x20" dir="LIB/">SLIBFA.LIB</file>
+		<file size="41322" time="1985-01-17 15:05:36" attr="0x20">LINK.EXE</file>
 	</disk>
 </manifest>

@@ -7,22 +7,119 @@
 	<category>Assembler</category>
 	<language>x86</language>
 	<author>Microsoft</author>
-	<disk id="disk01" size="368640" chs="40:2:9" img="private/MASM51-01510-DISK1.img" href="/disks/pcx86/tools/microsoft/masm/5.10/MASM51-01510-DISK1.json" md5="8c46f2611b5098d2f638aa6588273902" md5json="a904cd2de02cceda1f5698ab3be03872">
+	<disk id="disk01" size="368640" chs="40:2:9" img="private/MASM51-01510-DISK1.img" href="/disks/pcx86/tools/microsoft/masm/5.10/MASM51-01510-DISK1.json" md5="729e44f570e41d3b9e9d2cc95129b198" md5json="b8d9f983e8b87435203faf10799cdcf1">
 		<name>MS MASM 5.10 (Disk 1)</name>
+		<file size="28427" time="1988-02-01 12:00:00" attr="0x20">CREF.EXE</file>
+		<file size="110703" time="1988-02-01 12:00:00" attr="0x20">MASM.EXE</file>
+		<file size="442" time="1988-02-01 12:00:22" attr="0x10">MIXED</file>
+		<file size="1138" time="1988-02-01 12:00:00" attr="0x20" dir="MIXED/">BA.ASM</file>
+		<file size="567" time="1988-02-01 12:00:00" attr="0x20" dir="MIXED/">BAMAIN.BAS</file>
+		<file size="298" time="1988-02-01 12:00:00" attr="0x20" dir="MIXED/">CA.ASM</file>
+		<file size="111" time="1988-02-01 12:00:00" attr="0x20" dir="MIXED/">CAMAIN.C</file>
+		<file size="426" time="1988-02-01 12:00:00" attr="0x20" dir="MIXED/">FA.ASM</file>
+		<file size="190" time="1988-02-01 12:00:00" attr="0x20" dir="MIXED/">FAMAIN.FOR</file>
+		<file size="9107" time="1988-02-01 12:00:00" attr="0x20" dir="MIXED/">MIXED.DOC</file>
+		<file size="3179" time="1988-02-01 12:00:00" attr="0x20" dir="MIXED/">MIXED.INC</file>
+		<file size="388" time="1988-02-01 12:00:00" attr="0x20" dir="MIXED/">PA.ASM</file>
+		<file size="164" time="1988-02-01 12:00:00" attr="0x20" dir="MIXED/">PAMAIN.PAS</file>
+		<file size="2065" time="1988-02-01 12:00:00" attr="0x20" dir="MIXED/">POWER2.ASM</file>
+		<file size="5170" time="1988-02-01 12:00:00" attr="0x20">PACKING.LST</file>
+		<file size="39353" time="1988-02-01 12:00:00" attr="0x20">README.DOC</file>
+		<file size="31701" time="1988-02-01 12:00:00" attr="0x20">RUNME.EXE</file>
+		<file size="33" time="1988-02-01 12:00:00" attr="0x20">SETUP.BAT</file>
+		<file size="7353" time="1988-02-01 12:00:00" attr="0x20">SETUP.SUS</file>
+		<file size="4964" time="1988-02-01 12:00:00" attr="0x20">SHOW.EXE</file>
 	</disk>
-	<disk id="disk02" size="368640" chs="40:2:9" img="private/MASM51-01511-DISK2.img" href="/disks/pcx86/tools/microsoft/masm/5.10/MASM51-01511-DISK2.json" md5="25b6755b3e457d2926a8f9800214ec50" md5json="02825ec5dbef2d84a3b3a5f3bf3e5db7">
+	<disk id="disk02" size="368640" chs="40:2:9" img="private/MASM51-01511-DISK2.img" href="/disks/pcx86/tools/microsoft/masm/5.10/MASM51-01511-DISK2.json" md5="28221e0540d940ec090325a27e85f245" md5json="e5272abe7d2257ec8005d26709a79e54">
 		<name>MS MASM 5.10 (Disk 2)</name>
+		<file size="49400" time="1988-02-01 12:00:00" attr="0x20">CVPACK.EXE</file>
+		<file size="10729" time="1988-02-01 12:00:00" attr="0x20">ERROUT.EXE</file>
+		<file size="29942" time="1988-02-01 12:00:00" attr="0x20">EXEHDR.EXE</file>
+		<file size="11765" time="1988-02-01 12:00:00" attr="0x20">EXEMOD.EXE</file>
+		<file size="14803" time="1988-02-01 12:00:00" attr="0x20">EXEPACK.EXE</file>
+		<file size="49661" time="1988-02-01 12:00:00" attr="0x20">LIB.EXE</file>
+		<file size="65475" time="1988-02-01 12:00:00" attr="0x20">LINK.EXE</file>
+		<file size="38613" time="1988-02-01 12:00:00" attr="0x20">MAKE.EXE</file>
+		<file size="14551" time="1988-02-01 12:00:00" attr="0x20">MOUSE.COM</file>
+		<file size="10313" time="1988-02-01 12:00:00" attr="0x20">SETENV.EXE</file>
 	</disk>
-	<disk id="disk03" size="368640" chs="40:2:9" img="private/MASM51-01512-DISK3.img" href="/disks/pcx86/tools/microsoft/masm/5.10/MASM51-01512-DISK3.json" md5="678d0fde93715fe91099cb5cd07520ef" md5json="3026d309c8cc7a23c8f61c76395725c2">
+	<disk id="disk03" size="368640" chs="40:2:9" img="private/MASM51-01512-DISK3.img" href="/disks/pcx86/tools/microsoft/masm/5.10/MASM51-01512-DISK3.json" md5="b3c429500e5a809122cc337532f39f3d" md5json="824688fc738e0044dbd2bf2db61f0fae">
 		<name>MS MASM 5.10 (Disk 3)</name>
+		<file size="2302" time="1988-02-01 12:00:00" attr="0x20">BIOS.INC</file>
+		<file size="232896" time="1988-02-01 12:00:00" attr="0x20">CV.EXE</file>
+		<file size="21552" time="1988-02-01 12:00:00" attr="0x20">CV.HLP</file>
+		<file size="14725" time="1988-02-01 12:00:00" attr="0x20">DEMO.EXE</file>
+		<file size="9862" time="1988-02-01 12:00:00" attr="0x20">DOS.INC</file>
+		<file size="7409" time="1988-02-01 12:00:00" attr="0x20">E_AUTO.CV</file>
+		<file size="17983" time="1988-02-01 12:00:00" attr="0x20">MACRO.DOC</file>
+		<file size="570" time="1988-02-01 12:00:00" attr="0x20">M_AUTO.CV</file>
+		<file size="11192" time="1988-02-01 12:00:00" attr="0x20">PAGERR.ASM</file>
+		<file size="16" time="1988-02-01 12:00:00" attr="0x20">Q_AUTO.CV</file>
+		<file size="3680" time="1988-02-01 12:00:00" attr="0x20">SETUP.SUS</file>
+		<file size="8944" time="1988-02-01 12:00:00" attr="0x20">SHOWR.ASM</file>
+		<file size="5419" time="1988-02-01 12:00:00" attr="0x20">SHOWR.EXE</file>
+		<file size="5153" time="1988-02-01 12:00:00" attr="0x20">U_AUTO.CV</file>
+		<file size="9641" time="1988-02-01 12:00:00" attr="0x20">W_AUTO.CV</file>
 	</disk>
-	<disk id="disk04" size="368640" chs="40:2:9" img="private/MASM51-01514-DISK4.img" href="/disks/pcx86/tools/microsoft/masm/5.10/MASM51-01514-DISK4.json" md5="d24dad958aeea9302c18378255ae0a58" md5json="67e169dbffb5d18d0eacab493a0eeae6">
+	<disk id="disk04" size="368640" chs="40:2:9" img="private/MASM51-01514-DISK4.img" href="/disks/pcx86/tools/microsoft/masm/5.10/MASM51-01514-DISK4.json" md5="290d56cd6cfad116a46fd605ceb790b9" md5json="0fda2647df5f1dacd1aca3e49395ae02">
 		<name>MS MASM 5.10 (Disk 4)</name>
+		<file size="31233" time="1988-02-01 12:00:00" attr="0x20">CALLTREE.EXE</file>
+		<file size="19351" time="1988-02-01 12:00:00" attr="0x20">ECH.EXE</file>
+		<file size="32220" time="1988-02-01 12:00:00" attr="0x20">EXP.EXE</file>
+		<file size="272" time="1988-02-01 12:00:12" attr="0x10">EXT</file>
+		<file size="15877" time="1988-02-01 12:00:00" attr="0x20" dir="EXT/">EXT.DOC</file>
+		<file size="8730" time="1988-02-01 12:00:00" attr="0x20" dir="EXT/">EXT.H</file>
+		<file size="1893" time="1988-02-01 12:00:00" attr="0x20" dir="EXT/">EXTHDR.OBJ</file>
+		<file size="2021" time="1988-02-01 12:00:00" attr="0x20" dir="EXT/">EXTHDRP.OBJ</file>
+		<file size="2457" time="1988-02-01 12:00:00" attr="0x20" dir="EXT/">SKEL.C</file>
+		<file size="211" time="1988-02-01 12:00:00" attr="0x20" dir="EXT/">SKEL.DEF</file>
+		<file size="690" time="1988-02-01 12:00:00" attr="0x20">FIXSHIFT.COM</file>
+		<file size="238" time="1988-02-01 12:00:06" attr="0x10">INI</file>
+		<file size="2094" time="1988-02-01 12:00:00" attr="0x20" dir="INI/">BRIEF.INI</file>
+		<file size="978" time="1988-02-01 12:00:00" attr="0x20" dir="INI/">EPSILON.INI</file>
+		<file size="1058" time="1988-02-01 12:00:00" attr="0x20" dir="INI/">QUICK.INI</file>
+		<file size="2609" time="1988-02-01 12:00:00" attr="0x20" dir="INI/">WS.DLL</file>
+		<file size="2084" time="1988-02-01 12:00:00" attr="0x20" dir="INI/">WS.ZXT</file>
+		<file size="94821" time="1988-02-01 12:00:00" attr="0x20">M.EXE</file>
+		<file size="31915" time="1988-02-01 12:00:00" attr="0x20">MEGREP.EXE</file>
+		<file size="24884" time="1988-02-01 12:00:00" attr="0x20">RM.EXE</file>
+		<file size="30046" time="1988-02-01 12:00:00" attr="0x20">UNDEL.EXE</file>
 	</disk>
-	<disk id="disk05" size="1228800" chs="80:2:15" img="private/MASM51-03159-DISK5.img" href="/disks/pcx86/tools/microsoft/masm/5.10/MASM51-03159-DISK5.json" md5="1012b8b4514bacd8394b3323449b74ed" md5json="71b5e6960fe21ea1b15b7cab90130aeb">
+	<disk id="disk05" size="1228800" chs="80:2:15" img="private/MASM51-03159-DISK5.img" href="/disks/pcx86/tools/microsoft/masm/5.10/MASM51-03159-DISK5.json" md5="c61288bc2b6dd6445ddd54bce1479c51" md5json="ce36d0d09785bb5d44470a113462bf26">
 		<name>MS MASM 5.10 (Disk 5)</name>
+		<file size="81408" time="1988-02-01 12:00:00" attr="0x20">API.LIB</file>
+		<file size="105" time="1988-02-01 12:00:00" attr="0x20">APILMR.OBJ</file>
+		<file size="36946" time="1988-02-01 12:00:00" attr="0x20">BIND.EXE</file>
+		<file size="768" time="1988-02-01 12:00:00" attr="0x20">BSE.INC</file>
+		<file size="17479" time="1988-02-01 12:00:00" attr="0x20">BSEDOS.INC</file>
+		<file size="6723" time="1988-02-01 12:00:00" attr="0x20">BSEERR.INC</file>
+		<file size="10693" time="1988-02-01 12:00:00" attr="0x20">BSESUB.INC</file>
+		<file size="222505" time="1988-02-01 12:00:00" attr="0x20">CVP.EXE</file>
+		<file size="21552" time="1988-02-01 12:00:00" attr="0x20">CVP.HLP</file>
+		<file size="29184" time="1988-02-01 12:00:00" attr="0x20">DOSCALLS.LIB</file>
+		<file size="9299" time="1988-02-01 12:00:00" attr="0x20">EXEC.EXE</file>
+		<file size="88929" time="1988-02-01 12:00:00" attr="0x20">ILINK.EXE</file>
+		<file size="30166" time="1988-02-01 12:00:00" attr="0x20">IMPLIB.EXE</file>
+		<file size="117001" time="1988-02-01 12:00:00" attr="0x20">LINK.EXE</file>
+		<file size="2054" time="1988-02-01 12:00:00" attr="0x20">MAKESHOW.BAT</file>
+		<file size="1991" time="1988-02-01 12:00:00" attr="0x20">MAKESHOW.CMD</file>
+		<file size="124712" time="1988-02-01 12:00:00" attr="0x20">MASM.EXE</file>
+		<file size="97063" time="1988-02-01 12:00:00" attr="0x20">MEP.EXE</file>
+		<file size="33751" time="1988-02-01 12:00:00" attr="0x20">OS2.DOC</file>
+		<file size="391" time="1988-02-01 12:00:00" attr="0x20">OS2.INC</file>
+		<file size="5119" time="1988-02-01 12:00:00" attr="0x20">OS2DEF.INC</file>
+		<file size="1069" time="1988-02-01 12:00:00" attr="0x20">OS2PATCH.EXE</file>
+		<file size="11504" time="1988-02-01 12:00:00" attr="0x20">PAGERP.ASM</file>
+		<file size="188" time="1988-02-01 12:00:00" attr="0x20">PTRACE87.PAT</file>
+		<file size="379" time="1988-02-01 12:00:00" attr="0x20">SHOW</file>
+		<file size="15079" time="1988-02-01 12:00:00" attr="0x20">SHOWP.ASM</file>
+		<file size="18" time="1988-02-01 12:00:00" attr="0x20">SHOWS.DEF</file>
 	</disk>
-	<disk id="disk06" size="368640" chs="40:2:9" img="private/MASM51A-UPDATE.img" href="/disks/pcx86/tools/microsoft/masm/5.10/MASM51A-UPDATE.json" md5="beedf43ecb504633c5ff2feb4efe848e" md5json="6d30bcbb4a3a156b88d519e2ea6d3ee3">
+	<disk id="disk06" size="368640" chs="40:2:9" img="private/MASM51A-UPDATE.img" href="/disks/pcx86/tools/microsoft/masm/5.10/MASM51A-UPDATE.json" md5="5048f31119457f3d6a46018e93f5c8b9" md5json="e27a58274843028ea62c7dabed142d5b">
 		<name>MS MASM 5.10A (Update)</name>
+		<file size="102" time="1990-03-19 11:15:40" attr="0x10">BINB</file>
+		<file size="124448" time="1989-01-16 10:11:18" attr="0x20" dir="BINB/">MASM.EXE</file>
+		<file size="110937" time="1989-01-16 10:16:52" attr="0x20">MASM.EXE</file>
+		<file size="3951" time="1990-03-10 15:06:28" attr="0x20">README.DOC</file>
 	</disk>
 </manifest>

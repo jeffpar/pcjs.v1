@@ -75,8 +75,8 @@ var logFile = null;
 
 /*
  * fNormalize attempts to enforce consistency across multiple dump requests, including the order of files within every
- * directory, the use of hard-coded volume label timestamps, replacement of line-endings in text files, etc.  And since
- * I assume that normalization is a wonderful thing, I don't provide any UI for turning it off.
+ * directory, the use of hard-coded volume label timestamps, replacement of line-endings in text files, etc.  It can
+ * turned on here or with the experimental "--normalize" command-line option.
  */
 var fNormalize = false;
 
@@ -344,6 +344,7 @@ function DiskDump(sDiskPath, asExclude, sFormat, fComments, sSize, sServerRoot, 
     this.fXDFSupport = (argv && argv['xdf']);
     this.sLabel = (argv && argv['label']);
     this.forceBPB = (argv && argv['forceBPB']);
+    this.fNormalize = fNormalize || (argv && argv['normalize']);
 
     /*
      * The dump operation itself doesn't care about sManifestFile, but we DO need some indication
@@ -481,22 +482,6 @@ DiskDump.aDefaultBPBs = [
     0x02, 0x00,                 // 0x1A: number of heads (2)
     0x00, 0x00, 0x00, 0x00      // 0x1C: number of hidden sectors (always 0 for non-partitioned media)
   ],
-  [                             // define BPB for 720Kb diskette
-    0xEB, 0xFE, 0x90,           // 0x00: JMP instruction, following by 8-byte OEM signature
-    0x50, 0x43, 0x4A, 0x53, 0x2E, 0x4F, 0x52, 0x47,     // PCJS_OEM
- // 0x49, 0x42, 0x4D, 0x20, 0x20, 0x35, 0x2E, 0x30,     // "IBM  5.0" (this is a real OEM signature)
-    0x00, 0x02,                 // 0x0B: bytes per sector (0x200 or 512)
-    0x02,                       // 0x0D: sectors per cluster (2)
-    0x01, 0x00,                 // 0x0E: reserved sectors; ie, # sectors preceding the first FAT--usually just the boot sector (1)
-    0x02,                       // 0x10: FAT copies (2)
-    0x70, 0x00,                 // 0x11: root directory entries (0x70 or 112)  0x70 * 0x20 = 0xE00 (1 sector is 0x200 bytes, total of 7 sectors)
-    0xA0, 0x05,                 // 0x13: number of sectors (0x5A0 or 1440)
-    0xF9,                       // 0x15: media ID
-    0x03, 0x00,                 // 0x16: sectors per FAT (3)
-    0x09, 0x00,                 // 0x18: sectors per track (9)
-    0x02, 0x00,                 // 0x1A: number of heads (2)
-    0x00, 0x00, 0x00, 0x00      // 0x1C: number of hidden sectors (always 0 for non-partitioned media)
-  ],
   [                             // define BPB for 1.2Mb diskette
     0xEB, 0xFE, 0x90,           // 0x00: JMP instruction, following by 8-byte OEM signature
     0x50, 0x43, 0x4A, 0x53, 0x2E, 0x4F, 0x52, 0x47,     // PCJS_OEM
@@ -510,6 +495,22 @@ DiskDump.aDefaultBPBs = [
     0xF9,                       // 0x15: media ID (0xF9 was used for 1228800-byte diskettes, and later for 737280-byte diskettes)
     0x07, 0x00,                 // 0x16: sectors per FAT (7)
     0x0f, 0x00,                 // 0x18: sectors per track (15)
+    0x02, 0x00,                 // 0x1A: number of heads (2)
+    0x00, 0x00, 0x00, 0x00      // 0x1C: number of hidden sectors (always 0 for non-partitioned media)
+  ],
+  [                             // define BPB for 720Kb diskette
+    0xEB, 0xFE, 0x90,           // 0x00: JMP instruction, following by 8-byte OEM signature
+    0x50, 0x43, 0x4A, 0x53, 0x2E, 0x4F, 0x52, 0x47,     // PCJS_OEM
+    // 0x49, 0x42, 0x4D, 0x20, 0x20, 0x35, 0x2E, 0x30,     // "IBM  5.0" (this is a real OEM signature)
+    0x00, 0x02,                 // 0x0B: bytes per sector (0x200 or 512)
+    0x02,                       // 0x0D: sectors per cluster (2)
+    0x01, 0x00,                 // 0x0E: reserved sectors; ie, # sectors preceding the first FAT--usually just the boot sector (1)
+    0x02,                       // 0x10: FAT copies (2)
+    0x70, 0x00,                 // 0x11: root directory entries (0x70 or 112)  0x70 * 0x20 = 0xE00 (1 sector is 0x200 bytes, total of 7 sectors)
+    0xA0, 0x05,                 // 0x13: number of sectors (0x5A0 or 1440)
+    0xF9,                       // 0x15: media ID
+    0x03, 0x00,                 // 0x16: sectors per FAT (3)
+    0x09, 0x00,                 // 0x18: sectors per track (9)
     0x02, 0x00,                 // 0x1A: number of heads (2)
     0x00, 0x00, 0x00, 0x00      // 0x1C: number of hidden sectors (always 0 for non-partitioned media)
   ],
@@ -1005,8 +1006,8 @@ DiskDump.updateManifest = function(disk, sManifestFile, sDiskPath, sOutputFile, 
         var sXMLDisk = '\t<disk id="' + sIDDisk + '"';
         sXMLDisk += (size? ' size="' + size + '"' : '');
         sXMLDisk += (sCHS? ' chs="' + sCHS + '"' : '');
-        i = sDiskPath.indexOf("archive/");
-        if (i >= 0) sDiskPath = sDiskPath.substr(i);
+        // i = sDiskPath.indexOf("archive/");
+        // if (i >= 0) sDiskPath = sDiskPath.substr(i);
         sXMLDisk += (sParm? ' ' + sParm + '="' + sDiskPath + '"' : '');
         sXMLDisk += ' href="' + sOutputFile + '"' + (md5Disk? ' md5="' + md5Disk + '"' : '') + (md5JSON? ' md5json="' + md5JSON + '"' : '') + '>\n';
 
@@ -1617,7 +1618,7 @@ DiskDump.prototype.buildManifestInfo = function(sImage)
  */
 DiskDump.prototype.isTextFile = function(sFileName)
 {
-    if (fNormalize) {
+    if (this.fNormalize) {
         for (var i = 0; i < DiskDump.asTextFileExts.length; i++) {
             if (str.endsWith(sFileName, DiskDump.asTextFileExts[i])) return true;
         }
@@ -1675,7 +1676,7 @@ DiskDump.prototype.readDir = function(sDir, fRoot, done)
          * file name order that I was originally seeing may have simply been due to out-of-order fs.stat()
          * calls, because I used to call addManifestInfo() in the callback.
          */
-        if (fNormalize) asFiles.sort();
+        if (obj.fNormalize) asFiles.sort();
 
         for (iFile = 0; iFile < asFiles.length; iFile++) {
             var sFileName = asFiles[iFile];
@@ -1969,7 +1970,7 @@ DiskDump.prototype.buildVolLabel = function(sDir)
          *
          * UPDATE: I'm not sure I care about that anymore.  Time-stamping the created disk image seems more useful.
          */
-        fileInfo.FILE_TIME = fNormalize? new Date(1981, 7, 12, 12) : new Date();
+        fileInfo.FILE_TIME = /* this.fNormalize? new Date(1981, 7, 12, 12) : */ new Date();
         this.validateTime(fileInfo.FILE_TIME);
         fileInfo.FILE_SIZE = 0;
     }

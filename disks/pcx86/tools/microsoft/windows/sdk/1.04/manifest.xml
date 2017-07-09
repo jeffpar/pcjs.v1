@@ -3,25 +3,205 @@
 <manifest type="software">
 	<title>Windows SDK 1.04</title>
 	<source href="http://os2museum.com">os2museum.com</source>
-	<disk id="disk01" size="368640" chs="40:2:9" img="archive/WINSDK104-DISK1-UTILS1.img" href="/disks/pcx86/tools/microsoft/windows/sdk/1.04/WINSDK104-DISK1-UTILS1.json" md5="024a5199c2e7cd7b3229be967f892c41" md5json="a0c5e7cb0f8befb1a1bf7fcf0400220e">
+	<disk id="disk01" size="368640" chs="40:2:9" img="archive/WINSDK104-DISK1-UTILS1.img" href="/disks/pcx86/tools/microsoft/windows/sdk/1.04/WINSDK104-DISK1-UTILS1.json" md5="4b815623e768ae782282a907fa294a3a" md5json="0eb32b812a81b7370e69119881ecfcfd">
 		<name>Windows SDK 1.04 (UTIL 1)</name>
+		<file size="32896" time="1986-06-11 08:43:52" attr="0x20">EXEHDR.EXE</file>
+		<file size="16128" time="1985-03-21 11:38:28" attr="0x20">IMPLIB.EXE</file>
+		<file size="29359" time="1986-06-27 04:00:06" attr="0x20">LIB.EXE</file>
+		<file size="60006" time="1986-07-18 04:00:08" attr="0x20">LINK4.EXE</file>
+		<file size="23418" time="1986-06-27 04:00:08" attr="0x20">MAKE.EXE</file>
+		<file size="48990" time="1986-08-27 14:10:02" attr="0x20">MAPSYM.EXE</file>
+		<file size="35304" time="1986-09-15 12:08:22" attr="0x20">RC.EXE</file>
+		<file size="31864" time="1984-12-20 09:54:46" attr="0x20">RCPP.EXE</file>
+		<file size="41269" time="1986-08-27 14:14:24" attr="0x20">SYMDEB.EXE</file>
+		<file size="570" time="1986-09-15 11:58:20" attr="0x20">WINSTUB.EXE</file>
 	</disk>
-	<disk id="disk02" size="368640" chs="40:2:9" img="archive/WINSDK104-DISK2-UTILS2.img" href="/disks/pcx86/tools/microsoft/windows/sdk/1.04/WINSDK104-DISK2-UTILS2.json" md5="4f5b15a83e132beb5066991ca408e6da" md5json="69ba8b679c678bd2ac8f3bb66108d28a">
+	<disk id="disk02" size="368640" chs="40:2:9" img="archive/WINSDK104-DISK2-UTILS2.img" href="/disks/pcx86/tools/microsoft/windows/sdk/1.04/WINSDK104-DISK2-UTILS2.json" md5="bc265c9d78da336397376f30a19102bb" md5json="b08fef30d506d7d1a6723d646e34eca8">
 		<name>Windows SDK 1.04 (UTIL 2)</name>
+		<file size="1760" time="1987-04-22 15:09:52" attr="0x20">104_NEWS.TXT</file>
+		<file size="3515" time="1986-10-09 14:21:52" attr="0x20">ATRM1111.FNT</file>
+		<file size="51264" time="1987-03-25 20:03:36" attr="0x20">DIALOG.EXE</file>
+		<file size="2688" time="1987-04-22 15:48:14" attr="0x20">FILELIST.TXT</file>
+		<file size="28992" time="1987-04-07 15:19:26" attr="0x20">FONTEDIT.EXE</file>
+		<file size="138" time="1986-03-07 12:31:04" attr="0x20">FONTS.ASM</file>
+		<file size="78" time="1987-04-06 12:09:14" attr="0x20">FONTS.OBJ</file>
+		<file size="14384" time="1986-09-26 18:42:26" attr="0x20">HEAPWALK.EXE</file>
+		<file size="19280" time="1986-09-24 18:16:12" attr="0x20">ICONEDIT.EXE</file>
+		<file size="3171" time="1987-04-16 11:26:18" attr="0x20">INSTALL.BAT</file>
+		<file size="2116" time="1986-10-09 16:59:12" attr="0x20">MKDEBUG.BAT</file>
+		<file size="17860" time="1987-04-22 15:12:20" attr="0x20">README.TXT</file>
+		<file size="6512" time="1986-09-26 17:53:10" attr="0x20">SHAKER.EXE</file>
+		<file size="2832" time="1986-09-30 17:56:12" attr="0x20">SLAPJR.EXE</file>
+		<file size="90439" time="1986-10-09 14:01:32" attr="0x20">UPDATE.TXT</file>
 	</disk>
-	<disk id="disk03" size="368640" chs="40:2:9" img="archive/WINSDK104-DISK3-LIBC.img" href="/disks/pcx86/tools/microsoft/windows/sdk/1.04/WINSDK104-DISK3-LIBC.json" md5="5e4f3c6a37a678d27988cff7cf006314" md5json="95dc9a7aa789f513940f838392a2f0aa">
+	<disk id="disk03" size="368640" chs="40:2:9" img="archive/WINSDK104-DISK3-LIBC.img" href="/disks/pcx86/tools/microsoft/windows/sdk/1.04/WINSDK104-DISK3-LIBC.json" md5="0aabef0cf632759922395ad0fa14560c" md5json="a1e69e301221b8749e49ea66b2fd46b0">
 		<name>Windows SDK 1.04 (LIB C)</name>
+		<file size="136" time="1987-04-22 16:30:42" attr="0x10">INC</file>
+		<file size="4905" time="1986-10-10 13:47:14" attr="0x20" dir="INC/">STYLE.H</file>
+		<file size="80591" time="1987-04-06 11:31:48" attr="0x20" dir="INC/">WINDOWS.H</file>
+		<file size="340" time="1987-04-22 16:30:42" attr="0x10">LIB</file>
+		<file size="51200" time="1986-07-18 04:00:04" attr="0x20" dir="LIB/">CLIBW.LIB</file>
+		<file size="14336" time="1986-07-18 04:00:06" attr="0x20" dir="LIB/">CWINLIBC.LIB</file>
+		<file size="51200" time="1986-07-18 04:00:08" attr="0x20" dir="LIB/">LLIBW.LIB</file>
+		<file size="14848" time="1986-07-18 04:00:08" attr="0x20" dir="LIB/">LWINLIBC.LIB</file>
+		<file size="51200" time="1986-07-18 04:00:08" attr="0x20" dir="LIB/">MLIBW.LIB</file>
+		<file size="14848" time="1986-07-18 04:00:10" attr="0x20" dir="LIB/">MWINLIBC.LIB</file>
+		<file size="51200" time="1986-07-18 04:00:10" attr="0x20" dir="LIB/">SLIBW.LIB</file>
+		<file size="14336" time="1986-07-18 04:00:10" attr="0x20" dir="LIB/">SWINLIBC.LIB</file>
 	</disk>
-	<disk id="disk04" size="368640" chs="40:2:9" img="archive/WINSDK104-DISK4-LIBPASCAL.img" href="/disks/pcx86/tools/microsoft/windows/sdk/1.04/WINSDK104-DISK4-LIBPASCAL.json" md5="fb85f6f592d1cc86a32b0ba2d73a119e" md5json="b351efad60af93ae63adac74a8e123d7">
+	<disk id="disk04" size="368640" chs="40:2:9" img="archive/WINSDK104-DISK4-LIBPASCAL.img" href="/disks/pcx86/tools/microsoft/windows/sdk/1.04/WINSDK104-DISK4-LIBPASCAL.json" md5="7481cdab0276b0502e8b47e5cc63ae94" md5json="d620c078848f9ca39ebfd1dbb1a25b84">
 		<name>Windows SDK 1.04 (LIB PASCAL)</name>
+		<file size="119" time="1986-10-09 14:57:10" attr="0x20">103PATCH.BAT</file>
+		<file size="13308" time="1985-06-17 11:17:06" attr="0x20">CMACROS.INC</file>
+		<file size="306" time="1987-04-22 16:34:44" attr="0x10">MUZZLE</file>
+		<file size="262" time="1986-09-30 17:13:14" attr="0x20" dir="MUZZLE/">MUZZLE</file>
+		<file size="78" time="1986-08-29 11:26:48" attr="0x20" dir="MUZZLE/">MUZZLE.CUR</file>
+		<file size="228" time="1986-08-29 11:26:48" attr="0x20" dir="MUZZLE/">MUZZLE.DEF</file>
+		<file size="1038" time="1986-08-29 11:26:48" attr="0x20" dir="MUZZLE/">MUZZLE.ICO</file>
+		<file size="1757" time="1986-08-29 11:26:46" attr="0x20" dir="MUZZLE/">MUZZLE.INC</file>
+		<file size="28947" time="1986-08-29 11:27:02" attr="0x20" dir="MUZZLE/">MUZZLE.PAS</file>
+		<file size="707" time="1986-08-29 11:26:46" attr="0x20" dir="MUZZLE/">MUZZLE.RC</file>
+		<file size="72704" time="1986-08-29 11:27:04" attr="0x20">PASCAL.LIB</file>
+		<file size="56832" time="1986-09-30 18:16:12" attr="0x20">PASLIBW.LIB</file>
+		<file size="125659" time="1987-03-18 11:51:48" attr="0x20">WINDOWS.INC</file>
 	</disk>
-	<disk id="disk05" size="368640" chs="40:2:9" img="archive/WINSDK104-DISK5-SYMBOLS.img" href="/disks/pcx86/tools/microsoft/windows/sdk/1.04/WINSDK104-DISK5-SYMBOLS.json" md5="4374882b81732d20795db86c6b1173d1" md5json="0b80f7fe03f4f46a2812ec1e6ad331d9">
+	<disk id="disk05" size="368640" chs="40:2:9" img="archive/WINSDK104-DISK5-SYMBOLS.img" href="/disks/pcx86/tools/microsoft/windows/sdk/1.04/WINSDK104-DISK5-SYMBOLS.json" md5="c811eec47892c53be5570b5f1a103b66" md5json="c57174432f221bf80c8fab34df3bd6be">
 		<name>Windows SDK 1.04 (SYMBOLS)</name>
+		<file size="272" time="1987-04-22 16:36:42" attr="0x10">DEBUG</file>
+		<file size="95614" time="1987-04-09 13:11:14" attr="0x20" dir="DEBUG/">GDI.EXE</file>
+		<file size="9556" time="1987-04-09 13:11:16" attr="0x20" dir="DEBUG/">GDI.SYM</file>
+		<file size="42064" time="1987-04-07 17:41:40" attr="0x20" dir="DEBUG/">KERNEL.EXE</file>
+		<file size="5908" time="1987-04-07 17:41:42" attr="0x20" dir="DEBUG/">KERNEL.SYM</file>
+		<file size="122960" time="1987-04-08 20:17:24" attr="0x20" dir="DEBUG/">USER.EXE</file>
+		<file size="19060" time="1987-04-08 20:17:18" attr="0x20" dir="DEBUG/">USER.SYM</file>
+		<file size="170" time="1987-04-22 16:36:42" attr="0x10">NODEBUG</file>
+		<file size="9540" time="1987-04-09 11:40:20" attr="0x20" dir="NODEBUG/">GDI.SYM</file>
+		<file size="5588" time="1987-04-07 17:40:34" attr="0x20" dir="NODEBUG/">KERNEL.SYM</file>
+		<file size="19060" time="1987-04-08 20:19:26" attr="0x20" dir="NODEBUG/">USER.SYM</file>
 	</disk>
-	<disk id="disk06" size="368640" chs="40:2:9" img="archive/WINSDK104-DISK6-SAMPLES1.img" href="/disks/pcx86/tools/microsoft/windows/sdk/1.04/WINSDK104-DISK6-SAMPLES1.json" md5="64d97724b6901ba5a8b9f6fb579a8ff4" md5json="3764e9e04a21f12cadc46df78a5cca93">
+	<disk id="disk06" size="368640" chs="40:2:9" img="archive/WINSDK104-DISK6-SAMPLES1.img" href="/disks/pcx86/tools/microsoft/windows/sdk/1.04/WINSDK104-DISK6-SAMPLES1.json" md5="418d938361b283a07ac41c98dab74b77" md5json="68a45b79c016bbba9d1c779261377837">
 		<name>Windows SDK 1.04 (SAMPLE1)</name>
+		<file size="952" time="1987-04-22 16:37:46" attr="0x10">CARDFILE</file>
+		<file size="1348" time="1986-09-30 13:09:04" attr="0x20" dir="CARDFILE/">ASMSUBS.ASM</file>
+		<file size="1657" time="1986-09-30 13:09:10" attr="0x20" dir="CARDFILE/">CARDFILE</file>
+		<file size="669" time="1986-09-30 13:09:14" attr="0x20" dir="CARDFILE/">CARDFILE.DEF</file>
+		<file size="5511" time="1986-09-30 13:09:18" attr="0x20" dir="CARDFILE/">CARDFILE.H</file>
+		<file size="1038" time="1986-09-30 13:09:20" attr="0x20" dir="CARDFILE/">CARDFILE.ICO</file>
+		<file size="335" time="1986-09-30 13:09:24" attr="0x20" dir="CARDFILE/">CARDFILE.LNK</file>
+		<file size="9635" time="1986-09-30 13:09:30" attr="0x20" dir="CARDFILE/">CARDFILE.RC</file>
+		<file size="6784" time="1986-09-30 13:09:38" attr="0x20" dir="CARDFILE/">CFBITMAP.C</file>
+		<file size="9523" time="1986-09-30 13:09:48" attr="0x20" dir="CARDFILE/">CFCARD.C</file>
+		<file size="6039" time="1986-09-30 13:09:56" attr="0x20" dir="CARDFILE/">CFCLIP.C</file>
+		<file size="7973" time="1986-09-30 13:10:02" attr="0x20" dir="CARDFILE/">CFDATA.C</file>
+		<file size="19343" time="1986-09-30 13:10:12" attr="0x20" dir="CARDFILE/">CFDB.C</file>
+		<file size="7297" time="1986-09-30 13:10:20" attr="0x20" dir="CARDFILE/">CFDIAL.C</file>
+		<file size="5569" time="1986-09-30 13:10:26" attr="0x20" dir="CARDFILE/">CFDOS.ASM</file>
+		<file size="23224" time="1986-09-30 13:10:46" attr="0x20" dir="CARDFILE/">CFFILE.C</file>
+		<file size="5577" time="1986-09-30 13:10:56" attr="0x20" dir="CARDFILE/">CFFIND.C</file>
+		<file size="28612" time="1986-09-30 13:11:30" attr="0x20" dir="CARDFILE/">CFINPUT.C</file>
+		<file size="8647" time="1986-09-30 13:11:36" attr="0x20" dir="CARDFILE/">CFMAIN.C</file>
+		<file size="8028" time="1986-09-30 13:11:40" attr="0x20" dir="CARDFILE/">CFNEW.C</file>
+		<file size="6497" time="1986-09-30 13:11:54" attr="0x20" dir="CARDFILE/">CFOPEN.C</file>
+		<file size="11334" time="1986-09-30 13:12:12" attr="0x20" dir="CARDFILE/">CFPAINT.C</file>
+		<file size="15410" time="1986-09-30 13:12:26" attr="0x20" dir="CARDFILE/">CFPRINT.C</file>
+		<file size="2740" time="1986-09-30 13:12:30" attr="0x20" dir="CARDFILE/">CFRES.C</file>
+		<file size="5943" time="1986-09-30 13:12:36" attr="0x20" dir="CARDFILE/">CFSCROLL.C</file>
+		<file size="7167" time="1986-09-30 13:12:46" attr="0x20" dir="CARDFILE/">CFTEXT.C</file>
+		<file size="6057" time="1986-09-30 13:12:52" attr="0x20" dir="CARDFILE/">DECLARE.H</file>
+		<file size="272" time="1987-04-22 16:37:44" attr="0x10">FONTTEST</file>
+		<file size="450" time="1986-09-11 10:48:28" attr="0x20" dir="FONTTEST/">FONTTEST</file>
+		<file size="10848" time="1986-08-20 13:41:06" attr="0x20" dir="FONTTEST/">FONTTEST.C</file>
+		<file size="279" time="1986-02-26 16:35:56" attr="0x20" dir="FONTTEST/">FONTTEST.DEF</file>
+		<file size="915" time="1986-02-26 16:35:54" attr="0x20" dir="FONTTEST/">FONTTEST.H</file>
+		<file size="1038" time="1986-03-18 22:13:50" attr="0x20" dir="FONTTEST/">FONTTEST.ICO</file>
+		<file size="3506" time="1986-08-20 14:00:56" attr="0x20" dir="FONTTEST/">FONTTEST.RC</file>
+		<file size="272" time="1987-04-22 16:37:40" attr="0x10">HELLO</file>
+		<file size="388" time="1986-09-11 16:04:30" attr="0x20" dir="HELLO/">HELLO</file>
+		<file size="5181" time="1986-09-11 16:04:40" attr="0x20" dir="HELLO/">HELLO.C</file>
+		<file size="227" time="1986-09-11 16:07:56" attr="0x20" dir="HELLO/">HELLO.DEF</file>
+		<file size="208" time="1986-09-11 16:04:46" attr="0x20" dir="HELLO/">HELLO.H</file>
+		<file size="1038" time="1986-03-18 22:54:44" attr="0x20" dir="HELLO/">HELLO.ICO</file>
+		<file size="682" time="1986-09-11 16:04:50" attr="0x20" dir="HELLO/">HELLO.RC</file>
+		<file size="272" time="1987-04-22 16:37:42" attr="0x10">SHAPES</file>
+		<file size="417" time="1986-08-19 17:06:20" attr="0x20" dir="SHAPES/">SHAPES</file>
+		<file size="7664" time="1986-08-19 17:06:38" attr="0x20" dir="SHAPES/">SHAPES.C</file>
+		<file size="257" time="1986-02-26 16:36:56" attr="0x20" dir="SHAPES/">SHAPES.DEF</file>
+		<file size="320" time="1986-02-26 16:36:52" attr="0x20" dir="SHAPES/">SHAPES.H</file>
+		<file size="1038" time="1986-03-18 22:23:12" attr="0x20" dir="SHAPES/">SHAPES.ICO</file>
+		<file size="1137" time="1986-08-20 16:08:02" attr="0x20" dir="SHAPES/">SHAPES.RC</file>
+		<file size="340" time="1987-04-22 16:37:44" attr="0x10">TEMPLATE</file>
+		<file size="4745" time="1986-08-20 16:29:12" attr="0x20" dir="TEMPLATE/">TEMPINIT.C</file>
+		<file size="667" time="1986-08-20 16:29:24" attr="0x20" dir="TEMPLATE/">TEMPLATE</file>
+		<file size="703" time="1986-02-26 16:09:56" attr="0x20" dir="TEMPLATE/">TEMPLATE.DEF</file>
+		<file size="3954" time="1986-08-20 16:30:06" attr="0x20" dir="TEMPLATE/">TEMPLATE.H</file>
+		<file size="1038" time="1986-03-18 18:07:52" attr="0x20" dir="TEMPLATE/">TEMPLATE.ICO</file>
+		<file size="3593" time="1986-08-20 16:30:16" attr="0x20" dir="TEMPLATE/">TEMPLATE.RC</file>
+		<file size="19929" time="1986-08-20 16:30:30" attr="0x20" dir="TEMPLATE/">TEMPNRES.C</file>
+		<file size="8985" time="1986-08-20 16:30:40" attr="0x20" dir="TEMPLATE/">TEMPRES.C</file>
+		<file size="272" time="1987-04-22 16:37:42" attr="0x10">TRACK</file>
+		<file size="411" time="1986-08-19 17:00:28" attr="0x20" dir="TRACK/">TRACK</file>
+		<file size="9584" time="1986-08-19 17:00:42" attr="0x20" dir="TRACK/">TRACK.C</file>
+		<file size="251" time="1986-02-26 16:37:26" attr="0x20" dir="TRACK/">TRACK.DEF</file>
+		<file size="320" time="1986-02-26 16:37:46" attr="0x20" dir="TRACK/">TRACK.H</file>
+		<file size="1038" time="1986-03-18 22:33:48" attr="0x20" dir="TRACK/">TRACK.ICO</file>
+		<file size="1147" time="1986-08-20 16:04:46" attr="0x20" dir="TRACK/">TRACK.RC</file>
+		<file size="272" time="1987-04-22 16:37:40" attr="0x10">TYPE</file>
+		<file size="380" time="1986-09-29 09:41:44" attr="0x20" dir="TYPE/">TYPE</file>
+		<file size="8586" time="1986-09-29 09:41:52" attr="0x20" dir="TYPE/">TYPE.C</file>
+		<file size="287" time="1986-09-29 09:42:22" attr="0x20" dir="TYPE/">TYPE.DEF</file>
+		<file size="264" time="1986-09-29 09:42:26" attr="0x20" dir="TYPE/">TYPE.H</file>
+		<file size="1038" time="1986-03-18 19:52:32" attr="0x20" dir="TYPE/">TYPE.ICO</file>
+		<file size="693" time="1986-09-29 09:42:30" attr="0x20" dir="TYPE/">TYPE.RC</file>
 	</disk>
-	<disk id="disk07" size="368640" chs="40:2:9" img="archive/WINSDK104-DISK7-SAMPLES2.img" href="/disks/pcx86/tools/microsoft/windows/sdk/1.04/WINSDK104-DISK7-SAMPLES2.json" md5="36449cea8c1a67cac15a48e087dd4f87" md5json="98b3e860907e7a7423dff301c036eaf2">
+	<disk id="disk07" size="368640" chs="40:2:9" img="archive/WINSDK104-DISK7-SAMPLES2.img" href="/disks/pcx86/tools/microsoft/windows/sdk/1.04/WINSDK104-DISK7-SAMPLES2.json" md5="d33090f371e20291668e9f1300e1a73b" md5json="53dbd0b0a8b05d3e499392bc482d0a61">
 		<name>Windows SDK 1.04 (SAMPLE2)</name>
+		<file size="340" time="1987-04-22 16:40:58" attr="0x10">CLOCK</file>
+		<file size="770" time="1986-09-15 10:36:38" attr="0x20" dir="CLOCK/">CLOCK</file>
+		<file size="15735" time="1986-09-15 10:36:48" attr="0x20" dir="CLOCK/">CLOCK.C</file>
+		<file size="217" time="1986-09-15 10:36:54" attr="0x20" dir="CLOCK/">CLOCK.DEF</file>
+		<file size="167" time="1986-09-15 10:37:06" attr="0x20" dir="CLOCK/">CLOCK.H</file>
+		<file size="1038" time="1986-09-15 10:37:14" attr="0x20" dir="CLOCK/">CLOCK.ICO</file>
+		<file size="905" time="1986-09-15 10:37:24" attr="0x20" dir="CLOCK/">CLOCK.RC</file>
+		<file size="1604" time="1986-09-15 10:37:34" attr="0x20" dir="CLOCK/">CLOCKDAT.ASM</file>
+		<file size="582" time="1986-09-15 10:37:48" attr="0x20" dir="CLOCK/">GETTIME.ASM</file>
+		<file size="272" time="1987-04-22 16:40:58" attr="0x10">MAPMODES</file>
+		<file size="455" time="1986-09-12 11:28:06" attr="0x20" dir="MAPMODES/">MAPMODES</file>
+		<file size="18464" time="1986-09-12 11:28:22" attr="0x20" dir="MAPMODES/">MAPMODES.C</file>
+		<file size="288" time="1986-09-12 11:32:00" attr="0x20" dir="MAPMODES/">MAPMODES.DEF</file>
+		<file size="1287" time="1986-09-12 11:32:36" attr="0x20" dir="MAPMODES/">MAPMODES.H</file>
+		<file size="1038" time="1986-09-12 11:32:40" attr="0x20" dir="MAPMODES/">MAPMODES.ICO</file>
+		<file size="2841" time="1986-09-12 11:32:46" attr="0x20" dir="MAPMODES/">MAPMODES.RC</file>
+		<file size="544" time="1987-04-22 16:41:00" attr="0x10">MOTION</file>
+		<file size="1152" time="1986-08-29 14:40:38" attr="0x20" dir="MOTION/">MOTION</file>
+		<file size="4968" time="1986-02-26 15:43:42" attr="0x20" dir="MOTION/">MOTION.C</file>
+		<file size="585" time="1986-09-11 15:37:50" attr="0x20" dir="MOTION/">MOTION.DEF</file>
+		<file size="711" time="1986-02-26 15:43:38" attr="0x20" dir="MOTION/">MOTION.H</file>
+		<file size="1038" time="1986-03-15 08:58:26" attr="0x20" dir="MOTION/">MOTION.ICO</file>
+		<file size="104" time="1986-08-29 14:40:50" attr="0x20" dir="MOTION/">MOTION.LNK</file>
+		<file size="1256" time="1986-08-29 14:40:54" attr="0x20" dir="MOTION/">MOTION.RC</file>
+		<file size="206" time="1986-02-26 15:43:46" attr="0x20" dir="MOTION/">MOTION1.C</file>
+		<file size="206" time="1986-02-26 15:43:48" attr="0x20" dir="MOTION/">MOTION2.C</file>
+		<file size="1352" time="1986-02-26 15:43:46" attr="0x20" dir="MOTION/">MOTIONI.C</file>
+		<file size="116" time="1986-02-26 15:43:32" attr="0x20" dir="MOTION/">MOTLIB1.C</file>
+		<file size="146" time="1986-09-11 15:37:58" attr="0x20" dir="MOTION/">MOTLIB1.DEF</file>
+		<file size="116" time="1986-02-26 15:43:34" attr="0x20" dir="MOTION/">MOTLIB2.C</file>
+		<file size="146" time="1986-09-11 15:38:08" attr="0x20" dir="MOTION/">MOTLIB2.DEF</file>
+		<file size="476" time="1987-04-22 16:41:00" attr="0x10">SAMPLE</file>
+		<file size="1852" time="1986-09-18 09:42:12" attr="0x20" dir="SAMPLE/">DECLARE.H</file>
+		<file size="12030" time="1986-09-18 09:42:30" attr="0x20" dir="SAMPLE/">DLGOPEN.C</file>
+		<file size="10209" time="1986-09-18 09:42:28" attr="0x20" dir="SAMPLE/">DLGSAVE.C</file>
+		<file size="15224" time="1986-09-18 09:42:26" attr="0x20" dir="SAMPLE/">PRINT.C</file>
+		<file size="657" time="1986-09-18 09:42:46" attr="0x20" dir="SAMPLE/">SAMPLE</file>
+		<file size="10157" time="1986-09-18 09:42:32" attr="0x20" dir="SAMPLE/">SAMPLE.C</file>
+		<file size="437" time="1986-09-18 09:43:06" attr="0x20" dir="SAMPLE/">SAMPLE.DEF</file>
+		<file size="1427" time="1986-09-18 09:43:12" attr="0x20" dir="SAMPLE/">SAMPLE.H</file>
+		<file size="1038" time="1986-09-18 09:43:36" attr="0x20" dir="SAMPLE/">SAMPLE.ICO</file>
+		<file size="103" time="1986-09-18 09:43:48" attr="0x20" dir="SAMPLE/">SAMPLE.LNK</file>
+		<file size="2880" time="1986-09-18 09:43:54" attr="0x20" dir="SAMPLE/">SAMPLE.RC</file>
+		<file size="1605" time="1986-09-18 09:44:04" attr="0x20" dir="SAMPLE/">TOOLS.ASM</file>
+		<file size="102" time="1987-04-22 16:41:02" attr="0x10">TERMINAL</file>
+		<file size="8655" time="1986-03-25 09:37:46" attr="0x20" dir="TERMINAL/">COMM.C</file>
+		<file size="102" time="1987-04-22 16:41:02" attr="0x10">USER</file>
+		<file size="8597" time="1985-10-18 11:09:02" attr="0x20" dir="USER/">WINDWP.C</file>
 	</disk>
 </manifest>

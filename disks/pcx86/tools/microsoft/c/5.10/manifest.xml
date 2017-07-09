@@ -8,37 +8,231 @@
 	<language>C</language>
 	<author>Microsoft</author>
 	<releaseDate/>
-	<disk id="disk01" size="368640" chs="40:2:9" img="archive/MSC510-01521-SETUP.img" href="/disks/pcx86/tools/microsoft/c/5.10/MSC510-01521-SETUP.json" md5="21547d67ab62554d443d334ffff2ba0f" md5json="0d3e20b28a7b9f2e43fef5a9de9c7662">
+	<disk id="disk01" size="368640" chs="40:2:9" img="archive/MSC510-01521-SETUP.img" href="/disks/pcx86/tools/microsoft/c/5.10/MSC510-01521-SETUP.json" md5="0b37a4971c5a700757cf22cdaeda18cd" md5json="3ce3cf98f595b4c4c657b5af030ac8f4">
 		<name>MS C 5.10 (SETUP)</name>
+		<file size="114521" time="1988-03-07 04:10:00" attr="0x20">C1.EXE</file>
+		<file size="3272" time="1988-03-07 04:10:00" attr="0x20">C23.ERR</file>
+		<file size="2276" time="1988-03-07 04:10:00" attr="0x20">CL.ERR</file>
+		<file size="31329" time="1988-03-07 04:10:00" attr="0x20">CL.EXE</file>
+		<file size="2169" time="1988-03-07 04:10:00" attr="0x20">CL.HLP</file>
+		<file size="7817" time="1988-03-07 04:10:00" attr="0x20">PACKING.LST</file>
+		<file size="53046" time="1988-03-07 04:10:00" attr="0x20">README.DOC</file>
+		<file size="11917" time="1988-03-07 04:10:00" attr="0x20">SETUP.DOC</file>
+		<file size="83253" time="1988-03-07 04:10:00" attr="0x20">SETUP.EXE</file>
+		<file size="15432" time="1988-03-07 04:10:00" attr="0x20">UTILITY.DOC</file>
 	</disk>
-	<disk id="disk02" size="368640" chs="40:2:9" img="archive/MSC510-01522-COMPILER1.img" href="/disks/pcx86/tools/microsoft/c/5.10/MSC510-01522-COMPILER1.json" md5="4462a071bec19b48a7b2f80eb3c04aa5" md5json="72abc81ab3f99a343534be14ce488197">
+	<disk id="disk02" size="368640" chs="40:2:9" img="archive/MSC510-01522-COMPILER1.img" href="/disks/pcx86/tools/microsoft/c/5.10/MSC510-01522-COMPILER1.json" md5="79d7c8b14a28cea9b3e4c2b3693899f0" md5json="756765ea807e53cf25e543824b97675b">
 		<name>MS C 5.10 (COMPILER1)</name>
+		<file size="14393" time="1988-03-07 04:10:00" attr="0x20">C1.ERR</file>
+		<file size="149303" time="1988-03-07 04:10:00" attr="0x20">C1L.EXE</file>
+		<file size="125221" time="1988-03-07 04:10:00" attr="0x20">C3.EXE</file>
+		<file size="17293" time="1988-03-07 04:10:00" attr="0x20">ERRMSG.DOC</file>
+		<file size="16254" time="1988-03-07 04:10:00" attr="0x20">FPEXCEPT.DOC</file>
+		<file size="306" time="1988-03-07 04:10:00" attr="0x10">PATCH</file>
+		<file size="2169" time="1988-03-07 04:10:00" attr="0x20" dir="PATCH/">PATCH320.DOC</file>
+		<file size="3937" time="1988-03-07 04:10:00" attr="0x20" dir="PATCH/">PATCH87.DOC</file>
+		<file size="4206" time="1988-03-07 04:10:00" attr="0x20" dir="PATCH/">PATCH87.EXE</file>
+		<file size="543" time="1988-03-07 04:10:00" attr="0x20" dir="PATCH/">RMRHS.EXE</file>
+		<file size="543" time="1988-03-07 04:10:00" attr="0x20" dir="PATCH/">SETRHS.EXE</file>
+		<file size="94" time="1988-03-07 04:10:00" attr="0x20" dir="PATCH/">STKPAT.BAT</file>
+		<file size="30" time="1988-03-07 04:10:00" attr="0x20" dir="PATCH/">STKPAT.SCR</file>
 	</disk>
-	<disk id="disk03" size="368640" chs="40:2:9" img="archive/MSC510-01523-COMPILER2.img" href="/disks/pcx86/tools/microsoft/c/5.10/MSC510-01523-COMPILER2.json" md5="504698691b8261fc596c74298439c2aa" md5json="b1587ea799977cb3518c6d8a249531de">
+	<disk id="disk03" size="368640" chs="40:2:9" img="archive/MSC510-01523-COMPILER2.img" href="/disks/pcx86/tools/microsoft/c/5.10/MSC510-01523-COMPILER2.json" md5="48a227f1b99e0dcba0e4528875ad9cc3" md5json="91022f2f1ee31e358edafd23c2f2f67a">
 		<name>MS C 5.10 (COMPILER2)</name>
+		<file size="202919" time="1988-03-07 04:10:00" attr="0x20">C2.EXE</file>
+		<file size="21552" time="1988-03-07 04:10:00" attr="0x20">CV.HLP</file>
+		<file size="688" time="1988-03-07 04:10:00" attr="0x20">FIXSHIFT.COM</file>
+		<file size="6749" time="1988-03-07 04:10:00" attr="0x20">MSHERC.COM</file>
+		<file size="50649" time="1988-03-07 04:10:00" attr="0x20">QC.HLP</file>
+		<file size="12047" time="1988-03-07 04:10:00" attr="0x20">QLIB.DOC</file>
+		<file size="24557" time="1988-03-07 04:10:00" attr="0x20">QLIB.EXE</file>
+		<file size="2905" time="1988-03-07 04:10:00" attr="0x20">QLIB.INI</file>
+		<file size="10870" time="1988-03-07 04:10:00" attr="0x20">SETENV.EXE</file>
 	</disk>
-	<disk id="disk04" size="368640" chs="40:2:9" img="archive/MSC510-01524-UTILITIES1.img" href="/disks/pcx86/tools/microsoft/c/5.10/MSC510-01524-UTILITIES1.json" md5="18dccc021b7c1b899c62ae9260004c9e" md5json="34aec876b974ac800b9c70a26e21d707">
+	<disk id="disk04" size="368640" chs="40:2:9" img="archive/MSC510-01524-UTILITIES1.img" href="/disks/pcx86/tools/microsoft/c/5.10/MSC510-01524-UTILITIES1.json" md5="fbb7de0e8f73b449a9d4993539cdd2f8" md5json="8a50c8f3a9dd1eef692e67333566991d">
 		<name>MS C 5.10 (UTILITY1)</name>
+		<file size="38897" time="1988-03-07 04:10:00" attr="0x20">CVPACK.EXE</file>
+		<file size="10729" time="1988-03-07 04:10:00" attr="0x20">ERROUT.EXE</file>
+		<file size="9299" time="1988-03-07 04:10:00" attr="0x20">EXEC.EXE</file>
+		<file size="18043" time="1988-03-07 04:10:00" attr="0x20">EXEHDR.EXE</file>
+		<file size="12336" time="1988-03-07 04:10:00" attr="0x20">EXEMOD.EXE</file>
+		<file size="14803" time="1988-03-07 04:10:00" attr="0x20">EXEPACK.EXE</file>
+		<file size="43593" time="1988-03-07 04:10:00" attr="0x20">ILINK.EXE</file>
+		<file size="34895" time="1988-03-07 04:10:00" attr="0x20">LIB.EXE</file>
+		<file size="23675" time="1988-03-07 04:10:00" attr="0x20">MAKE.EXE</file>
+		<file size="14545" time="1988-03-07 04:10:00" attr="0x20">MOUSE.COM</file>
+		<file size="28931" time="1988-03-07 04:10:00" attr="0x20">README.QC</file>
 	</disk>
-	<disk id="disk05" size="368640" chs="40:2:9" img="archive/MSC510-01525-UTILITIES2.img" href="/disks/pcx86/tools/microsoft/c/5.10/MSC510-01525-UTILITIES2.json" md5="600de9fab0df7cc12848917a5c8bd52c" md5json="f71f0e81a0a9a74fbef2872ab68d665b">
+	<disk id="disk05" size="368640" chs="40:2:9" img="archive/MSC510-01525-UTILITIES2.img" href="/disks/pcx86/tools/microsoft/c/5.10/MSC510-01525-UTILITIES2.json" md5="6e05cf74625f7d829e77b585df0b4a08" md5json="41cf4e78b99eac425230d95a61d4a3cf">
 		<name>MS C 5.10 (UTILITY2)</name>
+		<file size="19391" time="1988-03-07 04:10:00" attr="0x20">CALLTREE.EXE</file>
+		<file size="8270" time="1988-03-07 04:10:00" attr="0x20">ECH.EXE</file>
+		<file size="15409" time="1988-03-07 04:10:00" attr="0x20">EXP.EXE</file>
+		<file size="238" time="1988-03-07 04:10:02" attr="0x10">EXT</file>
+		<file size="15877" time="1988-03-07 04:10:00" attr="0x20" dir="EXT/">EXT.DOC</file>
+		<file size="8730" time="1988-03-07 04:10:00" attr="0x20" dir="EXT/">EXT.H</file>
+		<file size="1893" time="1988-03-07 04:10:00" attr="0x20" dir="EXT/">EXTHDR.OBJ</file>
+		<file size="2457" time="1988-03-07 04:10:00" attr="0x20" dir="EXT/">SKEL.C</file>
+		<file size="2084" time="1988-03-07 04:10:00" attr="0x20" dir="EXT/">WS.ZXT</file>
+		<file size="170" time="1988-03-07 04:10:04" attr="0x10">INI</file>
+		<file size="2094" time="1988-03-07 04:10:00" attr="0x20" dir="INI/">BRIEF.INI</file>
+		<file size="978" time="1988-03-07 04:10:00" attr="0x20" dir="INI/">EPSILON.INI</file>
+		<file size="1058" time="1988-03-07 04:10:00" attr="0x20" dir="INI/">QUICK.INI</file>
+		<file size="94821" time="1988-03-07 04:10:00" attr="0x20">M.EXE</file>
+		<file size="20741" time="1988-03-07 04:10:00" attr="0x20">MEGREP.EXE</file>
+		<file size="12424" time="1988-03-07 04:10:00" attr="0x20">RM.EXE</file>
+		<file size="17003" time="1988-03-07 04:10:00" attr="0x20">UNDEL.EXE</file>
 	</disk>
-	<disk id="disk06" size="368640" chs="40:2:9" img="archive/MSC510-01526-INCLUDE.img" href="/disks/pcx86/tools/microsoft/c/5.10/MSC510-01526-INCLUDE.json" md5="99bab9e13817b43149dd9e075a41ebdf" md5json="67491982b6e84ab0cc8dcccb3ee4883c">
+	<disk id="disk06" size="368640" chs="40:2:9" img="archive/MSC510-01526-INCLUDE.img" href="/disks/pcx86/tools/microsoft/c/5.10/MSC510-01526-INCLUDE.json" md5="1f27ab51116769555cd79d6d4dbfca7f" md5json="cee89c3069441847e464211405260118">
 		<name>MS C 5.10 (INCLUDE)</name>
+		<file size="127" time="1988-03-07 04:10:00" attr="0x20">BINMODE.OBJ</file>
+		<file size="1020" time="1988-03-07 04:10:06" attr="0x10">INCLUDE</file>
+		<file size="699" time="1988-03-07 04:10:00" attr="0x20" dir="INCLUDE/">ASSERT.H</file>
+		<file size="4866" time="1988-03-07 04:10:00" attr="0x20" dir="INCLUDE/">BIOS.H</file>
+		<file size="952" time="1988-03-07 04:10:00" attr="0x20" dir="INCLUDE/">CONIO.H</file>
+		<file size="2465" time="1988-03-07 04:10:00" attr="0x20" dir="INCLUDE/">CTYPE.H</file>
+		<file size="690" time="1988-03-07 04:10:00" attr="0x20" dir="INCLUDE/">DIRECT.H</file>
+		<file size="5917" time="1988-03-07 04:10:00" attr="0x20" dir="INCLUDE/">DOS.H</file>
+		<file size="1283" time="1988-03-07 04:10:00" attr="0x20" dir="INCLUDE/">ERRNO.H</file>
+		<file size="1255" time="1988-03-07 04:10:00" attr="0x20" dir="INCLUDE/">FCNTL.H</file>
+		<file size="6011" time="1988-03-07 04:10:00" attr="0x20" dir="INCLUDE/">FLOAT.H</file>
+		<file size="7480" time="1988-03-07 04:10:00" attr="0x20" dir="INCLUDE/">GRAPH.H</file>
+		<file size="1294" time="1988-03-07 04:10:00" attr="0x20" dir="INCLUDE/">IO.H</file>
+		<file size="1553" time="1988-03-07 04:10:00" attr="0x20" dir="INCLUDE/">LIMITS.H</file>
+		<file size="3097" time="1988-03-07 04:10:00" attr="0x20" dir="INCLUDE/">MALLOC.H</file>
+		<file size="3324" time="1988-03-07 04:10:00" attr="0x20" dir="INCLUDE/">MATH.H</file>
+		<file size="1065" time="1988-03-07 04:10:00" attr="0x20" dir="INCLUDE/">MEMORY.H</file>
+		<file size="1988" time="1988-03-07 04:10:00" attr="0x20" dir="INCLUDE/">PROCESS.H</file>
+		<file size="1025" time="1988-03-07 04:10:00" attr="0x20" dir="INCLUDE/">SEARCH.H</file>
+		<file size="907" time="1988-03-07 04:10:00" attr="0x20" dir="INCLUDE/">SETJMP.H</file>
+		<file size="554" time="1988-03-07 04:10:00" attr="0x20" dir="INCLUDE/">SHARE.H</file>
+		<file size="1905" time="1988-03-07 04:10:00" attr="0x20" dir="INCLUDE/">SIGNAL.H</file>
+		<file size="614" time="1988-03-07 04:10:00" attr="0x20" dir="INCLUDE/">STDARG.H</file>
+		<file size="1100" time="1988-03-07 04:10:00" attr="0x20" dir="INCLUDE/">STDDEF.H</file>
+		<file size="4500" time="1988-03-07 04:10:00" attr="0x20" dir="INCLUDE/">STDIO.H</file>
+		<file size="4900" time="1988-03-07 04:10:00" attr="0x20" dir="INCLUDE/">STDLIB.H</file>
+		<file size="2209" time="1988-03-07 04:10:00" attr="0x20" dir="INCLUDE/">STRING.H</file>
+		<file size="238" time="1988-03-07 04:10:08" attr="0x10" dir="INCLUDE/">SYS</file>
+		<file size="573" time="1988-03-07 04:10:00" attr="0x20" dir="INCLUDE/SYS/">LOCKING.H</file>
+		<file size="1497" time="1988-03-07 04:10:00" attr="0x20" dir="INCLUDE/SYS/">STAT.H</file>
+		<file size="844" time="1988-03-07 04:10:00" attr="0x20" dir="INCLUDE/SYS/">TIMEB.H</file>
+		<file size="849" time="1988-03-07 04:10:00" attr="0x20" dir="INCLUDE/SYS/">TYPES.H</file>
+		<file size="1061" time="1988-03-07 04:10:00" attr="0x20" dir="INCLUDE/SYS/">UTIME.H</file>
+		<file size="2342" time="1988-03-07 04:10:00" attr="0x20" dir="INCLUDE/">TIME.H</file>
+		<file size="642" time="1988-03-07 04:10:00" attr="0x20" dir="INCLUDE/">VARARGS.H</file>
+		<file size="14209" time="1988-03-07 04:10:00" attr="0x20">LIBH.LIB</file>
+		<file size="7917" time="1988-03-07 04:10:00" attr="0x20">QUICKLIB.OBJ</file>
+		<file size="143" time="1988-03-07 04:10:00" attr="0x20">SETARGV.OBJ</file>
+		<file size="340" time="1988-03-07 04:10:10" attr="0x10">SOURCE</file>
+		<file size="44796" time="1988-03-07 04:10:00" attr="0x20" dir="SOURCE/">CFLOW.C</file>
+		<file size="3764" time="1988-03-07 04:10:00" attr="0x20" dir="SOURCE/">CFLOW.DOC</file>
+		<file size="419" time="1988-03-07 04:10:00" attr="0x20" dir="SOURCE/">DEMO.C</file>
+		<file size="12129" time="1988-03-07 04:10:00" attr="0x20" dir="SOURCE/">EMOEM.ASM</file>
+		<file size="20907" time="1988-03-07 04:10:00" attr="0x20" dir="SOURCE/">GRDEMO.C</file>
+		<file size="843" time="1988-03-07 04:10:00" attr="0x20" dir="SOURCE/">SAMPLES.DOC</file>
+		<file size="788" time="1988-03-07 04:10:00" attr="0x20" dir="SOURCE/">SIEVE.C</file>
+		<file size="25399" time="1988-03-07 04:10:00" attr="0x20" dir="SOURCE/">SORTDEMO.C</file>
+		<file size="714" time="1988-03-07 04:10:00" attr="0x10">STARTUP</file>
+		<file size="784" time="1988-03-07 04:10:00" attr="0x20" dir="STARTUP/">BRKCTL.INC</file>
+		<file size="2044" time="1988-03-07 04:10:00" attr="0x20" dir="STARTUP/">CHKSTK.ASM</file>
+		<file size="3524" time="1988-03-07 04:10:00" attr="0x20" dir="STARTUP/">CHKSUM.ASM</file>
+		<file size="12066" time="1988-03-07 04:10:00" attr="0x20" dir="STARTUP/">CMACROS.INC</file>
+		<file size="2223" time="1988-03-07 04:10:00" attr="0x20" dir="STARTUP/">CRT0FP.ASM</file>
+		<file size="374" time="1988-03-07 04:10:02" attr="0x10" dir="STARTUP/">DOS</file>
+		<file size="7612" time="1988-03-07 04:10:00" attr="0x20" dir="STARTUP/DOS/">CRT0.ASM</file>
+		<file size="14175" time="1988-03-07 04:10:00" attr="0x20" dir="STARTUP/DOS/">CRT0DAT.ASM</file>
+		<file size="2840" time="1988-03-07 04:10:00" attr="0x20" dir="STARTUP/DOS/">CRT0MSG.ASM</file>
+		<file size="1337" time="1988-03-07 04:10:00" attr="0x20" dir="STARTUP/DOS/">EXECMSG.ASM</file>
+		<file size="3010" time="1988-03-07 04:10:00" attr="0x20" dir="STARTUP/DOS/">NMSGHDR.ASM</file>
+		<file size="149" time="1988-03-07 04:10:00" attr="0x20" dir="STARTUP/DOS/">NULBODY.LNK</file>
+		<file size="2825" time="1988-03-07 04:10:00" attr="0x20" dir="STARTUP/DOS/">STDALLOC.ASM</file>
+		<file size="13852" time="1988-03-07 04:10:00" attr="0x20" dir="STARTUP/DOS/">STDARGV.ASM</file>
+		<file size="3780" time="1988-03-07 04:10:00" attr="0x20" dir="STARTUP/DOS/">STDENVP.ASM</file>
+		<file size="1027" time="1988-03-07 04:10:00" attr="0x20" dir="STARTUP/">FILE2.H</file>
+		<file size="2429" time="1988-03-07 04:10:00" attr="0x20" dir="STARTUP/">FMSGHDR.ASM</file>
+		<file size="4148" time="1988-03-07 04:10:00" attr="0x20" dir="STARTUP/">MAKEFILE</file>
+		<file size="6849" time="1988-03-07 04:10:00" attr="0x20" dir="STARTUP/">MSDOS.H</file>
+		<file size="6181" time="1988-03-07 04:10:00" attr="0x20" dir="STARTUP/">MSDOS.INC</file>
+		<file size="13" time="1988-03-07 04:10:00" attr="0x20" dir="STARTUP/">NULBODY.C</file>
+		<file size="3199" time="1988-03-07 04:10:00" attr="0x20" dir="STARTUP/">README.DOC</file>
+		<file size="922" time="1988-03-07 04:10:00" attr="0x20" dir="STARTUP/">REGISTER.H</file>
+		<file size="971" time="1988-03-07 04:10:00" attr="0x20" dir="STARTUP/">SETARGV.ASM</file>
+		<file size="1663" time="1988-03-07 04:10:00" attr="0x20" dir="STARTUP/">STARTUP.BAT</file>
+		<file size="503" time="1988-03-07 04:10:00" attr="0x20" dir="STARTUP/">VERSION.INC</file>
+		<file size="7182" time="1988-03-07 04:10:00" attr="0x20" dir="STARTUP/">WILD.C</file>
+		<file size="1691" time="1988-03-07 04:10:00" attr="0x20" dir="STARTUP/">_FILE.C</file>
 	</disk>
-	<disk id="disk07" size="368640" chs="40:2:9" img="archive/MSC510-01527-LIBSM.img" href="/disks/pcx86/tools/microsoft/c/5.10/MSC510-01527-LIBSM.json" md5="b1b767f74c3d81a1c2e4c6e70a8ec3a3" md5json="0caffcab25635b1248c227d2408de2d3">
+	<disk id="disk07" size="368640" chs="40:2:9" img="archive/MSC510-01527-LIBSM.img" href="/disks/pcx86/tools/microsoft/c/5.10/MSC510-01527-LIBSM.json" md5="da2c26eb7b5cd6694d9fd100e2bf6bf8" md5json="c6d1bc1506e7d30e5ef15d108a22d683">
 		<name>MS C 5.10 (LIBSM)</name>
+		<file size="133071" time="1988-03-07 04:10:00" attr="0x20">MLIBCR.LIB</file>
+		<file size="46601" time="1988-03-07 04:10:00" attr="0x20">MLIBFA.LIB</file>
+		<file size="507" time="1988-03-07 04:10:00" attr="0x20">MVARSTCK.OBJ</file>
+		<file size="132047" time="1988-03-07 04:10:00" attr="0x20">SLIBCR.LIB</file>
+		<file size="46089" time="1988-03-07 04:10:00" attr="0x20">SLIBFA.LIB</file>
+		<file size="507" time="1988-03-07 04:10:00" attr="0x20">SVARSTCK.OBJ</file>
 	</disk>
-	<disk id="disk08" size="368640" chs="40:2:9" img="archive/MSC510-01528-LIBLC.img" href="/disks/pcx86/tools/microsoft/c/5.10/MSC510-01528-LIBLC.json" md5="719d3a3b1347bf6c60ed61dbc678268a" md5json="9bf3d457ef92b1db8f639e58765b00e8">
+	<disk id="disk08" size="368640" chs="40:2:9" img="archive/MSC510-01528-LIBLC.img" href="/disks/pcx86/tools/microsoft/c/5.10/MSC510-01528-LIBLC.json" md5="17c6b1081273ea6c3fab80da5bdc29d2" md5json="0b11818ff502ab7326e1e5bff470fa93">
 		<name>MS C 5.10 (LIBLC)</name>
+		<file size="141301" time="1988-03-07 04:10:00" attr="0x20">CLIBCR.LIB</file>
+		<file size="487" time="1988-03-07 04:10:00" attr="0x20">CVARSTCK.OBJ</file>
+		<file size="142837" time="1988-03-07 04:10:00" attr="0x20">LLIBCR.LIB</file>
+		<file size="47625" time="1988-03-07 04:10:00" attr="0x20">LLIBFA.LIB</file>
+		<file size="487" time="1988-03-07 04:10:00" attr="0x20">LVARSTCK.OBJ</file>
 	</disk>
-	<disk id="disk09" size="368640" chs="40:2:9" img="archive/MSC510-01529-LIBFP.img" href="/disks/pcx86/tools/microsoft/c/5.10/MSC510-01529-LIBFP.json" md5="f3011c9a833a97d0deec012cfc7854a6" md5json="a003d8283d6e89d8b701d4f39b68a11d">
+	<disk id="disk09" size="368640" chs="40:2:9" img="archive/MSC510-01529-LIBFP.img" href="/disks/pcx86/tools/microsoft/c/5.10/MSC510-01529-LIBFP.json" md5="9343a05e9002e03bbb0584c20d085a27" md5json="57a77d16146d5e16e5303252707e1c9a">
 		<name>MS C 5.10 (LIBFP)</name>
+		<file size="4121" time="1988-03-07 04:10:00" attr="0x20">87.LIB</file>
+		<file size="47113" time="1988-03-07 04:10:00" attr="0x20">CLIBFA.LIB</file>
+		<file size="38307" time="1988-03-07 04:10:00" attr="0x20">CLIBFP.LIB</file>
+		<file size="16921" time="1988-03-07 04:10:00" attr="0x20">EM.LIB</file>
+		<file size="170" time="1988-03-07 04:10:00" attr="0x10">FORTRAN</file>
+		<file size="3107" time="1988-03-07 04:10:00" attr="0x20" dir="FORTRAN/">F4COMPAT.BAT</file>
+		<file size="544" time="1988-03-07 04:10:00" attr="0x20" dir="FORTRAN/">LDBGMSG.OBJ</file>
+		<file size="540" time="1988-03-07 04:10:00" attr="0x20" dir="FORTRAN/">MDBGMSG.OBJ</file>
+		<file size="59357" time="1988-03-07 04:10:00" attr="0x20">GRAPHICS.LIB</file>
+		<file size="65539" time="1988-03-07 04:10:00" attr="0x20">LINK.EXE</file>
+		<file size="39331" time="1988-03-07 04:10:00" attr="0x20">LLIBFP.LIB</file>
+		<file size="38305" time="1988-03-07 04:10:00" attr="0x20">MLIBFP.LIB</file>
+		<file size="37281" time="1988-03-07 04:10:00" attr="0x20">SLIBFP.LIB</file>
 	</disk>
-	<disk id="disk10" size="368640" chs="40:2:9" img="archive/MSC510-01532-CODEVIEW.img" href="/disks/pcx86/tools/microsoft/c/5.10/MSC510-01532-CODEVIEW.json" md5="88969c8bf0a29b45c1b1ea061208d7e8" md5json="931749112c9680137dfe096ab455f3b3">
+	<disk id="disk10" size="368640" chs="40:2:9" img="archive/MSC510-01532-CODEVIEW.img" href="/disks/pcx86/tools/microsoft/c/5.10/MSC510-01532-CODEVIEW.json" md5="fcc6fb3834bbb11448ffb62876848670" md5json="e8312f12b257b170157d01d95db8e461">
 		<name>MS C 5.10 (CODEVIEW)</name>
+		<file size="232896" time="1988-03-07 04:10:00" attr="0x20">CV.EXE</file>
+		<file size="1054" time="1988-03-07 04:10:02" attr="0x10">SAMPLE</file>
+		<file size="133" time="1988-03-07 04:10:00" attr="0x20" dir="SAMPLE/">ADAPT.BAT</file>
+		<file size="12928" time="1988-03-07 04:10:00" attr="0x20" dir="SAMPLE/">CODEVIEW.DOC</file>
+		<file size="3571" time="1988-03-07 04:10:00" attr="0x20" dir="SAMPLE/">C_AUTO.CV</file>
+		<file size="254" time="1988-03-07 04:10:00" attr="0x20" dir="SAMPLE/">DEMOB.BAT</file>
+		<file size="6788" time="1988-03-07 04:10:00" attr="0x20" dir="SAMPLE/">E_AUTO.CV</file>
+		<file size="14713" time="1988-03-07 04:10:00" attr="0x20" dir="SAMPLE/">LIFE.C</file>
+		<file size="33237" time="1988-03-07 04:10:00" attr="0x20" dir="SAMPLE/">LIFE.EXE</file>
+		<file size="5282" time="1988-03-07 04:10:00" attr="0x20" dir="SAMPLE/">LIFE.R</file>
+		<file size="336" time="1988-03-07 04:10:00" attr="0x20" dir="SAMPLE/">LIFEB.BAT</file>
+		<file size="402" time="1988-03-07 04:10:00" attr="0x20" dir="SAMPLE/">LIFEEB.BAT</file>
+		<file size="13272" time="1988-03-07 04:10:00" attr="0x20" dir="SAMPLE/">L_AUTO.CV</file>
+		<file size="550" time="1988-03-07 04:10:00" attr="0x20" dir="SAMPLE/">MENU.BAT</file>
+		<file size="733" time="1988-03-07 04:10:00" attr="0x20" dir="SAMPLE/">M_AUTO.CV</file>
+		<file size="15" time="1988-03-07 04:10:00" attr="0x20" dir="SAMPLE/">Q_AUTO.CV</file>
+		<file size="124" time="1988-03-07 04:10:00" attr="0x20" dir="SAMPLE/">RESPOND.COM</file>
+		<file size="230" time="1988-03-07 04:10:00" attr="0x20" dir="SAMPLE/">S1.@@@</file>
+		<file size="926" time="1988-03-07 04:10:00" attr="0x20" dir="SAMPLE/">S12.@@@</file>
+		<file size="368" time="1988-03-07 04:10:00" attr="0x20" dir="SAMPLE/">S13.@@@</file>
+		<file size="520" time="1988-03-07 04:10:00" attr="0x20" dir="SAMPLE/">S14.@@@</file>
+		<file size="752" time="1988-03-07 04:10:00" attr="0x20" dir="SAMPLE/">S2.@@@</file>
+		<file size="276" time="1988-03-07 04:10:00" attr="0x20" dir="SAMPLE/">S3.@@@</file>
+		<file size="354" time="1988-03-07 04:10:00" attr="0x20" dir="SAMPLE/">S4.@@@</file>
+		<file size="554" time="1988-03-07 04:10:00" attr="0x20" dir="SAMPLE/">S5.@@@</file>
+		<file size="432" time="1988-03-07 04:10:00" attr="0x20" dir="SAMPLE/">S6.@@@</file>
+		<file size="427" time="1988-03-07 04:10:00" attr="0x20" dir="SAMPLE/">S7.@@@</file>
+		<file size="479" time="1988-03-07 04:10:00" attr="0x20" dir="SAMPLE/">S8.@@@</file>
+		<file size="865" time="1988-03-07 04:10:00" attr="0x20" dir="SAMPLE/">S9.@@@</file>
+		<file size="1059" time="1988-03-07 04:10:00" attr="0x20" dir="SAMPLE/">SAMPLE.BAT</file>
+		<file size="9091" time="1988-03-07 04:10:00" attr="0x20" dir="SAMPLE/">S_AUTO.CV</file>
 	</disk>
-	<disk id="disk11" size="368640" chs="40:2:9" img="archive/MSC510-01534-QUICKC.img" href="/disks/pcx86/tools/microsoft/c/5.10/MSC510-01534-QUICKC.json" md5="45dee7951aeeb9fd85d58c785224ea5e" md5json="e1f7c2e339a9d00354070d6b8f5b74ad">
+	<disk id="disk11" size="368640" chs="40:2:9" img="archive/MSC510-01534-QUICKC.img" href="/disks/pcx86/tools/microsoft/c/5.10/MSC510-01534-QUICKC.json" md5="53611bf05c15a6209b3c8b4cb01e898f" md5json="9e9d61492b870483d384a216347c1f0b">
 		<name>MS C 5.10 (QUICKC)</name>
+		<file size="326656" time="1988-03-07 04:10:00" attr="0x20">QC.EXE</file>
+		<file size="28065" time="1988-03-07 04:10:00" attr="0x20">QCL.EXE</file>
+		<file size="1456" time="1988-03-07 04:10:00" attr="0x20">QCL.HLP</file>
 	</disk>
 </manifest>

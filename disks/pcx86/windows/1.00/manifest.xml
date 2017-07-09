@@ -2,16 +2,130 @@
 <?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.35.2/manifest.xsl"?>
 <manifest type="software">
 	<title>Microsoft Windows 1.00</title>
-	<disk id="disk01" size="368640" chs="40:2:9" img="archive/WIN100-DISK1.img" href="/disks/pcx86/windows/1.00/WIN100-DISK1.json" md5="99d1a20c7748b336d5cd532be05f7abd" md5json="853e3ce165ebd97a0cad4310aadfcf22">
+	<disk id="disk01" size="368640" chs="40:2:9" img="archive/WIN100-DISK1.img" href="/disks/pcx86/windows/1.00/WIN100-DISK1.json" md5="0fbc0a88183b67fc2a15e554933c6df3" md5json="499c89da7482263c0691052bfd10d530">
 		<name>Windows 1.00 (SETUP)</name>
+		<file size="13024" time="1985-07-19 13:37:28" attr="0x20">CGA.EXE</file>
+		<file size="4242" time="1985-07-18 12:43:56" attr="0x20">COMM.EXE</file>
+		<file size="13968" time="1985-07-12 12:07:38" attr="0x20">EGAHIBW.EXE</file>
+		<file size="17552" time="1985-07-12 12:12:58" attr="0x20">EGAHIRES.EXE</file>
+		<file size="15664" time="1985-07-12 12:12:24" attr="0x20">EGALORES.EXE</file>
+		<file size="13968" time="1985-07-12 12:08:06" attr="0x20">EGAMONO.EXE</file>
+		<file size="15792" time="1985-07-12 12:09:58" attr="0x20">HERCULES.EXE</file>
+		<file size="7456" time="1985-07-24 11:27:54" attr="0x20">HIFONTS.EXE</file>
+		<file size="33328" time="1985-07-30 16:41:24" attr="0x20">KERNEL.EXE</file>
+		<file size="3325" time="1985-07-29 12:04:34" attr="0x20">KEYBUS.EXE</file>
+		<file size="5536" time="1985-07-24 11:27:40" attr="0x20">LOFONTS.EXE</file>
+		<file size="3232" time="1985-06-20 17:27:20" attr="0x20">MOUSE.EXE</file>
+		<file size="2319" time="1985-06-20 17:24:30" attr="0x20">MSMOUSE1.EXE</file>
+		<file size="2319" time="1985-06-20 17:24:38" attr="0x20">MSMOUSE2.EXE</file>
+		<file size="1592" time="1985-06-11 09:35:10" attr="0x20">NOMOUSE.EXE</file>
+		<file size="24394" time="1985-07-17 16:08:20" attr="0x20">SETUP.EXE</file>
+		<file size="33444" time="1985-07-12 12:22:46" attr="0x20">SETUP.SCR</file>
+		<file size="5853" time="1985-06-10 14:09:22" attr="0x20">SOUND.EXE</file>
+		<file size="2399" time="1985-07-22 14:09:30" attr="0x20">SYSTEM.EXE</file>
 	</disk>
-	<disk id="disk02" size="368640" chs="40:2:9" img="archive/WIN100-DISK2.img" href="/disks/pcx86/windows/1.00/WIN100-DISK2.json" md5="99c6060fcbcff2ae155665c25af25ea5" md5json="67d56cdf535ee52b9bb03775179acc5a">
+	<disk id="disk02" size="368640" chs="40:2:9" img="archive/WIN100-DISK2.img" href="/disks/pcx86/windows/1.00/WIN100-DISK2.json" md5="fdd3fa1e639515bc7df7a56cd73e4180" md5json="b8145fae1f3d04bc1a3aec030bd8a164">
 		<name>Windows 1.00 (BUILD)</name>
+		<file size="1241" time="1985-07-23 15:14:52" attr="0x20">CGA.GRB</file>
+		<file size="2935" time="1985-06-25 14:32:42" attr="0x20">CGA.LGO</file>
+		<file size="1138" time="1985-07-23 15:32:28" attr="0x20">EGAHIBW.GRB</file>
+		<file size="9" time="1985-06-27 12:29:22" attr="0x20">EGAHIBW.LGO</file>
+		<file size="1138" time="1985-07-23 15:32:28" attr="0x20">EGAHIRES.GRB</file>
+		<file size="9" time="1985-06-27 12:29:22" attr="0x20">EGAHIRES.LGO</file>
+		<file size="1138" time="1985-07-23 15:32:28" attr="0x20">EGALORES.GRB</file>
+		<file size="9" time="1985-06-27 12:29:22" attr="0x20">EGALORES.LGO</file>
+		<file size="1004" time="1985-07-23 15:32:52" attr="0x20">EGAMONO.GRB</file>
+		<file size="2934" time="1985-06-25 14:34:02" attr="0x20">EGAMONO.LGO</file>
+		<file size="95540" time="1985-07-22 10:50:10" attr="0x20">GDI.EXE</file>
+		<file size="1170" time="1985-07-23 15:32:08" attr="0x20">HERCULES.GRB</file>
+		<file size="3058" time="1985-06-25 14:33:28" attr="0x20">HERCULES.LGO</file>
+		<file size="37568" time="1985-07-23 12:38:10" attr="0x20">MSDOS.EXE</file>
+		<file size="10416" time="1985-06-10 13:52:26" attr="0x20">MSDOSD.EXE</file>
+		<file size="118464" time="1985-07-29 17:15:22" attr="0x20">USER.EXE</file>
+		<file size="1856" time="1985-07-23 09:50:34" attr="0x20">WIN.CNF</file>
+		<file size="656" time="1985-07-25 14:55:14" attr="0x20">WIN.INI</file>
+		<file size="18464" time="1985-07-26 16:05:54" attr="0x20">WINOLDAP.MOD</file>
 	</disk>
-	<disk id="disk03" size="368640" chs="40:2:9" img="archive/WIN100-DISK3.img" href="/disks/pcx86/windows/1.00/WIN100-DISK3.json" md5="f83948c8e84f41219ed84f8f4b11e35b" md5json="547c944c77db92dbb679d045e329ea9b">
+	<disk id="disk03" size="368640" chs="40:2:9" img="archive/WIN100-DISK3.img" href="/disks/pcx86/windows/1.00/WIN100-DISK3.json" md5="d0a764ddef4de0807a6b602669c38ae8" md5json="24b5ea20ec43a22b034b90b1d4e4835c">
 		<name>Windows 1.00 (UTILITY)</name>
+		<file size="5680" time="1985-07-24 17:57:50" attr="0x20">CITOH.EXE</file>
+		<file size="42896" time="1985-07-24 11:29:44" attr="0x20">COUR.EXE</file>
+		<file size="5760" time="1985-07-24 17:31:26" attr="0x20">EPSON.EXE</file>
+		<file size="37376" time="1985-07-24 11:28:20" attr="0x20">HELV.EXE</file>
+		<file size="5680" time="1985-07-24 17:38:18" attr="0x20">IBMGRX.EXE</file>
+		<file size="13056" time="1985-07-24 13:36:02" attr="0x20">NEC3550.EXE</file>
+		<file size="5680" time="1985-07-24 17:44:14" attr="0x20">OKI92.EXE</file>
+		<file size="1870" time="1985-07-02 09:52:56" attr="0x10">PIF</file>
+		<file size="369" time="1980-01-03 14:08:52" attr="0x20" dir="PIF/">123.PIF</file>
+		<file size="369" time="1985-07-23 11:23:58" attr="0x20" dir="PIF/">ACCESS.PIF</file>
+		<file size="369" time="1980-01-03 14:33:10" attr="0x20" dir="PIF/">BASCOM.PIF</file>
+		<file size="369" time="1985-06-05 13:04:00" attr="0x20" dir="PIF/">BASIC.PIF</file>
+		<file size="369" time="1985-06-05 13:04:12" attr="0x20" dir="PIF/">BASICA.PIF</file>
+		<file size="369" time="1980-01-03 14:32:46" attr="0x20" dir="PIF/">BASRUN.PIF</file>
+		<file size="369" time="1980-01-03 14:30:46" attr="0x20" dir="PIF/">CHART.PIF</file>
+		<file size="369" time="1985-02-19 13:17:12" attr="0x20" dir="PIF/">CONVERT.PIF</file>
+		<file size="369" time="1985-02-19 13:18:04" attr="0x20" dir="PIF/">CONVERTD.PIF</file>
+		<file size="369" time="1980-01-04 15:15:42" attr="0x20" dir="PIF/">DBASE.PIF</file>
+		<file size="369" time="1980-01-04 15:15:16" attr="0x20" dir="PIF/">DBASE2.PIF</file>
+		<file size="369" time="1980-01-04 15:16:00" attr="0x20" dir="PIF/">DBASE3.PIF</file>
+		<file size="369" time="1980-01-03 12:28:40" attr="0x20" dir="PIF/">DW2PG.PIF</file>
+		<file size="369" time="1980-01-03 09:43:20" attr="0x20" dir="PIF/">DW3PG.PIF</file>
+		<file size="369" time="1980-01-03 14:27:10" attr="0x20" dir="PIF/">FILE.PIF</file>
+		<file size="369" time="1980-01-03 14:28:54" attr="0x20" dir="PIF/">FW.PIF</file>
+		<file size="369" time="1980-01-03 14:29:14" attr="0x20" dir="PIF/">FWC.PIF</file>
+		<file size="369" time="1985-02-19 13:19:58" attr="0x20" dir="PIF/">FWT.PIF</file>
+		<file size="369" time="1980-01-03 14:22:16" attr="0x20" dir="PIF/">GRAPH.PIF</file>
+		<file size="369" time="1980-01-03 14:11:32" attr="0x20" dir="PIF/">INSTALL.PIF</file>
+		<file size="369" time="1985-06-07 12:01:14" attr="0x20" dir="PIF/">LOTUS.PIF</file>
+		<file size="369" time="1980-01-03 14:30:10" attr="0x20" dir="PIF/">MP.PIF</file>
+		<file size="369" time="1980-01-03 14:20:36" attr="0x20" dir="PIF/">MP40.PIF</file>
+		<file size="369" time="1980-01-03 14:20:58" attr="0x20" dir="PIF/">MP80.PIF</file>
+		<file size="369" time="1980-01-03 14:36:28" attr="0x20" dir="PIF/">PE.PIF</file>
+		<file size="369" time="1980-01-03 14:36:54" attr="0x20" dir="PIF/">PFSACCES.PIF</file>
+		<file size="369" time="1980-01-01 00:22:12" attr="0x20" dir="PIF/">PFSFILE.PIF</file>
+		<file size="369" time="1980-01-03 14:22:16" attr="0x20" dir="PIF/">PFSGRAPH.PIF</file>
+		<file size="369" time="1980-01-01 00:00:02" attr="0x20" dir="PIF/">PFSREPRT.PIF</file>
+		<file size="369" time="1985-04-15 16:10:12" attr="0x20" dir="PIF/">PLAN.PIF</file>
+		<file size="369" time="1980-01-03 14:34:56" attr="0x20" dir="PIF/">PROEDIT.PIF</file>
+		<file size="369" time="1980-01-03 14:42:52" attr="0x20" dir="PIF/">PROJ.PIF</file>
+		<file size="369" time="1980-01-03 14:42:22" attr="0x20" dir="PIF/">PROJM.PIF</file>
+		<file size="369" time="1980-01-03 11:13:38" attr="0x20" dir="PIF/">RB5000.PIF</file>
+		<file size="369" time="1980-01-03 14:12:22" attr="0x20" dir="PIF/">REPORT.PIF</file>
+		<file size="369" time="1985-02-19 13:12:16" attr="0x20" dir="PIF/">RG.PIF</file>
+		<file size="369" time="1980-01-04 10:26:02" attr="0x20" dir="PIF/">SC.PIF</file>
+		<file size="369" time="1985-07-09 12:29:00" attr="0x20" dir="PIF/">SC3.PIF</file>
+		<file size="369" time="1985-03-06 14:16:26" attr="0x20" dir="PIF/">SCOM.PIF</file>
+		<file size="369" time="1985-07-25 14:14:04" attr="0x20" dir="PIF/">SCOMII.PIF</file>
+		<file size="369" time="1985-06-18 15:45:18" attr="0x20" dir="PIF/">SPELL.PIF</file>
+		<file size="369" time="1980-01-03 13:19:50" attr="0x20" dir="PIF/">SYMPHONY.PIF</file>
+		<file size="369" time="1980-01-03 14:36:08" attr="0x20" dir="PIF/">TK.PIF</file>
+		<file size="369" time="1985-04-11 14:34:06" attr="0x20" dir="PIF/">TURBO.PIF</file>
+		<file size="369" time="1985-04-11 14:35:04" attr="0x20" dir="PIF/">TURBOBCD.PIF</file>
+		<file size="369" time="1985-04-11 14:34:36" attr="0x20" dir="PIF/">TURBO_87.PIF</file>
+		<file size="369" time="1980-01-03 10:45:00" attr="0x20" dir="PIF/">WORD.PIF</file>
+		<file size="369" time="1985-06-12 12:16:36" attr="0x20" dir="PIF/">WP.PIF</file>
+		<file size="369" time="1985-06-05 15:06:36" attr="0x20" dir="PIF/">WRDPERF.PIF</file>
+		<file size="369" time="1980-01-03 14:23:52" attr="0x20" dir="PIF/">WRITE.PIF</file>
+		<file size="369" time="1985-06-18 18:08:50" attr="0x20" dir="PIF/">WS.PIF</file>
+		<file size="369" time="1985-06-18 18:31:08" attr="0x20" dir="PIF/">WS2000.PIF</file>
+		<file size="369" time="1980-01-03 15:29:12" attr="0x20" dir="PIF/">XTALK.PIF</file>
+		<file size="6459" time="1985-07-12 16:42:46" attr="0x20">RAMDRIVE.SYS</file>
 	</disk>
-	<disk id="disk04" size="368640" chs="40:2:9" img="archive/WIN100-DISK4.img" href="/disks/pcx86/windows/1.00/WIN100-DISK4.json" md5="ad9b053fae3447d92ef9798a5a7d2dad" md5json="3638b7cfaf44f732d75a2b5c84965d9f">
+	<disk id="disk04" size="368640" chs="40:2:9" img="archive/WIN100-DISK4.img" href="/disks/pcx86/windows/1.00/WIN100-DISK4.json" md5="cac7ad268389be69ae350a5e577187a2" md5json="4ef510c9c5968e73089b578730d76857">
 		<name>Windows 1.00 (APPS)</name>
+		<file size="42" time="1985-06-04 09:07:36" attr="0x20">ABC.TXT</file>
+		<file size="24352" time="1985-07-11 15:43:16" attr="0x20">CALC.EXE</file>
+		<file size="33824" time="1985-07-29 21:53:40" attr="0x20">CALENDAR.EXE</file>
+		<file size="32160" time="1985-07-22 15:30:58" attr="0x20">CARDFILE.EXE</file>
+		<file size="9488" time="1985-07-18 06:07:42" attr="0x20">CLIPBRD.EXE</file>
+		<file size="7808" time="1985-07-15 17:12:34" attr="0x20">CLOCK.EXE</file>
+		<file size="42848" time="1985-07-24 14:58:00" attr="0x20">CONTROL.EXE</file>
+		<file size="394" time="1985-06-07 08:18:04" attr="0x20">DOTHIS.TXT</file>
+		<file size="15328" time="1985-07-19 10:59:34" attr="0x20">NOTEPAD.EXE</file>
+		<file size="100304" time="1985-07-23 16:23:26" attr="0x20">PAINT.EXE</file>
+		<file size="10752" time="1985-07-22 12:53:56" attr="0x20">PIFEDIT.EXE</file>
+		<file size="14848" time="1985-06-25 00:38:16" attr="0x20">REVERSI.EXE</file>
+		<file size="12000" time="1985-07-19 19:40:52" attr="0x20">SPOOLER.EXE</file>
+		<file size="39712" time="1985-07-30 13:58:10" attr="0x20">TERMINAL.EXE</file>
 	</disk>
 </manifest>

@@ -2,11 +2,12 @@
 <fdc id="fdcNEC" automount='{A: {name: "Zork I", path: "/disks/pcx86/games/infocom/zork1/ZORK1-READONLY.json"}}' padLeft="8px" padBottom="8px" pos="left">
 	<control type="list" binding="listDrives"/>
 	<control type="list" binding="listDisks">
-		<manifest ref="/disks/pcx86/games/infocom/hhiker/manifest.xml" disk="*"/>
-		<manifest ref="/disks/pcx86/games/infocom/planet/manifest.xml" disk="*"/>
-		<manifest ref="/disks/pcx86/games/infocom/zork1/manifest.xml" disk="*"/>
-		<manifest ref="/disks/pcx86/games/infocom/zork2/manifest.xml" disk="*"/>
-		<manifest ref="/disks/pcx86/games/infocom/zork3/manifest.xml" disk="*"/>
+		<manifest ref="/disks/pcx86/games/infocom/hhiker/manifest.xml"/>
+		<manifest ref="/disks/pcx86/games/infocom/phobos/manifest.xml"/>
+		<manifest ref="/disks/pcx86/games/infocom/planet/manifest.xml"/>
+		<manifest ref="/disks/pcx86/games/infocom/zork1/manifest.xml"/>
+		<manifest ref="/disks/pcx86/games/infocom/zork2/manifest.xml"/>
+		<manifest ref="/disks/pcx86/games/infocom/zork3/manifest.xml"/>
 	</control>
 	<control type="button" binding="loadDisk" padRight="8px">Load</control>
 	<control type="description" binding="descDisk" padRight="8px"/>
