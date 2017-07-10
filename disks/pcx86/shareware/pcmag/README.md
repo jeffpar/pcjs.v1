@@ -10,7 +10,7 @@ PC Magazine Disks
 To build the following collection, we started with the ZIP archives at
 "[THE PROGRAMMER'S CORNER: BBS ARCHIVE FROM THE PAST](https://www.pcorner.com/list/MAG)".
 We filtered out the duplicates, organized them chronologically, and then put their contents onto diskette
-images that you can easily "Load" and "Save" in any [PCjs Machine](devices/pcx86/machine/).
+images that you can easily "Load" and "Save" in any [PCjs Machine](/devices/pcx86/machine/).
 In fact, if you click on the name of any diskette in the headings below, a machine should automatically launch
 with that diskette loaded in drive B.
 
@@ -32,6 +32,8 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        7 file(s)      68810 bytes
 	                       90112 bytes free
 
+> PC Magazine (Vol. 06 No. 08) is available at the Internet Archive as "[PC Mag 1987-04-28](https://archive.org/details/PC-Mag-1987-04-28)".
+
 ### Directory of [PC Magazine (Vol. 06 No. 09)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 06 No. 09%29"%7D%7D)
 
 	 Volume in drive A is VOL06N09   
@@ -45,6 +47,8 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	DRAW     COM      1589 02-05-87   1:34p
 	        6 file(s)      56031 bytes
 	                      102912 bytes free
+
+> PC Magazine (Vol. 06 No. 09) is available at the Internet Archive as "[PC Mag 1987-05-12](https://archive.org/details/PC-Mag-1987-05-12)".
 
 ### Directory of [PC Magazine (Vol. 06 No. 10)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 06 No. 10%29"%7D%7D)
 

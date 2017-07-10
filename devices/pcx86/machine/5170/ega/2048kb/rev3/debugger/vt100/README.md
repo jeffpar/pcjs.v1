@@ -8,7 +8,7 @@ machines:
     debugger: true
     autoStart: true
     connection: com2->vt100.serialPort
-    config: /devices/pcx86/machine/5170/ega/2048kb/rev3/debugger/machine.xml
+    config: /devices/pcx86/machine/5170/ega/2048kb/rev3/debugger/vt100/machine.xml
   - id: vt100
     type: pc8080
     debugger: true
@@ -21,6 +21,8 @@ IBM PC AT with VT100 Terminal and Dual Debuggers
 ------------------------------------------------
 
 Demonstration of a [IBM PC AT with VT100 Terminal](../../vt100/) connected via COM2, with Debuggers attached.
+
+Use the DOS command `CTTY COM2` to use the VT100 for console operations.  `CTTY CON` will return control to the PC.
 
 {% include machine.html id="ibm5170" %}
 

@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /**
  * @fileoverview Node command-line XML extraction tool
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
