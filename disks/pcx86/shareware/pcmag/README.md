@@ -15,7 +15,7 @@ images that you can easily "Load" and "Save" in any [PCjs Machine](devices/pcx86
 Looking at the volume numbers alone, you can tell that this collection is woefully incomplete, but perhaps more
 will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  Thanks.
 
-### Directory of [PC Magazine (Vol. 06 No. 08)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 06 No. 08%29"}})
+### Directory of [PC Magazine (Vol. 06 No. 08)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 06 No. 08%29"%7D%7D)
 
 	 Volume in drive A is VOL06N08   
 	 Directory of A:\
@@ -30,7 +30,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        7 file(s)      68810 bytes
 	                       90112 bytes free
 
-### Directory of [PC Magazine (Vol. 06 No. 09)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 06 No. 09%29"}})
+### Directory of [PC Magazine (Vol. 06 No. 09)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 06 No. 09%29"%7D%7D)
 
 	 Volume in drive A is VOL06N09   
 	 Directory of A:\
@@ -44,7 +44,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        6 file(s)      56031 bytes
 	                      102912 bytes free
 
-### Directory of [PC Magazine (Vol. 06 No. 10)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 06 No. 10%29"}})
+### Directory of [PC Magazine (Vol. 06 No. 10)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 06 No. 10%29"%7D%7D)
 
 	 Volume in drive A is VOL06N10   
 	 Directory of A:\
@@ -60,7 +60,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        8 file(s)     134521 bytes
 	                       24064 bytes free
 
-### Directory of [PC Magazine (Vol. 06 No. 11)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 06 No. 11%29"}})
+### Directory of [PC Magazine (Vol. 06 No. 11)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 06 No. 11%29"%7D%7D)
 
 	 Volume in drive A is VOL06N11   
 	 Directory of A:\
@@ -71,7 +71,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        3 file(s)      37864 bytes
 	                      121856 bytes free
 
-### Directory of [PC Magazine (Vol. 06 No. 12)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 06 No. 12%29"}})
+### Directory of [PC Magazine (Vol. 06 No. 12)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 06 No. 12%29"%7D%7D)
 
 	 Volume in drive A is VOL06N12   
 	 Directory of A:\
@@ -85,7 +85,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        6 file(s)      97791 bytes
 	                       60928 bytes free
 
-### Directory of [PC Magazine (Vol. 06 No. 13)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 06 No. 13%29"}})
+### Directory of [PC Magazine (Vol. 06 No. 13)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 06 No. 13%29"%7D%7D)
 
 	 Volume in drive A is VOL06N13   
 	 Directory of A:\
@@ -99,7 +99,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        6 file(s)      52343 bytes
 	                      106496 bytes free
 
-### Directory of [PC Magazine (Vol. 06 No. 14)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 06 No. 14%29"}})
+### Directory of [PC Magazine (Vol. 06 No. 14)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 06 No. 14%29"%7D%7D)
 
 	 Volume in drive A is VOL06N14   
 	 Directory of A:\
@@ -119,7 +119,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       12 file(s)     141228 bytes
 	                       15360 bytes free
 
-### Directory of [PC Magazine (Vol. 06 No. 15)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 06 No. 15%29"}})
+### Directory of [PC Magazine (Vol. 06 No. 15)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 06 No. 15%29"%7D%7D)
 
 	 Volume in drive A is VOL06N15   
 	 Directory of A:\
@@ -136,7 +136,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        9 file(s)     110332 bytes
 	                       47616 bytes free
 
-### Directory of [PC Magazine (Vol. 06 No. 16)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 06 No. 16%29"}})
+### Directory of [PC Magazine (Vol. 06 No. 16)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 06 No. 16%29"%7D%7D)
 
 	 Volume in drive A is VOL06N16   
 	 Directory of A:\
@@ -150,7 +150,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        6 file(s)     169288 bytes
 	                      149504 bytes free
 
-### Directory of [PC Magazine (Vol. 06 No. 17)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 06 No. 17%29"}})
+### Directory of [PC Magazine (Vol. 06 No. 17)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 06 No. 17%29"%7D%7D)
 
 	 Volume in drive A is VOL06N17   
 	 Directory of A:\
@@ -170,7 +170,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       12 file(s)     146498 bytes
 	                        9728 bytes free
 
-### Directory of [PC Magazine (Vol. 06 No. 18)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 06 No. 18%29"}})
+### Directory of [PC Magazine (Vol. 06 No. 18)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 06 No. 18%29"%7D%7D)
 
 	 Volume in drive A is VOL06N18   
 	 Directory of A:\
@@ -181,7 +181,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        3 file(s)      43629 bytes
 	                      115712 bytes free
 
-### Directory of [PC Magazine (Vol. 06 No. 19)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 06 No. 19%29"}})
+### Directory of [PC Magazine (Vol. 06 No. 19)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 06 No. 19%29"%7D%7D)
 
 	 Volume in drive A is VOL06N19   
 	 Directory of A:\
@@ -198,7 +198,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        9 file(s)      66555 bytes
 	                       91136 bytes free
 
-### Directory of [PC Magazine (Vol. 06 No. 20)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 06 No. 20%29"}})
+### Directory of [PC Magazine (Vol. 06 No. 20)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 06 No. 20%29"%7D%7D)
 
 	 Volume in drive A is VOL06N20   
 	 Directory of A:\
@@ -240,7 +240,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       34 file(s)     289174 bytes
 	                       16384 bytes free
 
-### Directory of [PC Magazine (Vol. 06 No. 21)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 06 No. 21%29"}})
+### Directory of [PC Magazine (Vol. 06 No. 21)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 06 No. 21%29"%7D%7D)
 
 	 Volume in drive A is VOL06N21   
 	 Directory of A:\
@@ -255,7 +255,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        7 file(s)     131899 bytes
 	                       26624 bytes free
 
-### Directory of [PC Magazine (Vol. 06 No. 22)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 06 No. 22%29"}})
+### Directory of [PC Magazine (Vol. 06 No. 22)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 06 No. 22%29"%7D%7D)
 
 	 Volume in drive A is VOL06N22   
 	 Directory of A:\
@@ -267,7 +267,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        4 file(s)      41353 bytes
 	                      117760 bytes free
 
-### Directory of [PC Magazine (Vol. 07 No. 01)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 07 No. 01%29"}})
+### Directory of [PC Magazine (Vol. 07 No. 01)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 07 No. 01%29"%7D%7D)
 
 	 Volume in drive A is VOL07N01   
 	 Directory of A:\
@@ -283,7 +283,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        8 file(s)      86758 bytes
 	                       71168 bytes free
 
-### Directory of [PC Magazine (Vol. 07 No. 02)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 07 No. 02%29"}})
+### Directory of [PC Magazine (Vol. 07 No. 02)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 07 No. 02%29"%7D%7D)
 
 	 Volume in drive A is VOL07N02   
 	 Directory of A:\
@@ -299,7 +299,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        8 file(s)     134442 bytes
 	                       23040 bytes free
 
-### Directory of [PC Magazine (Vol. 07 No. 03)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 07 No. 03%29"}})
+### Directory of [PC Magazine (Vol. 07 No. 03)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 07 No. 03%29"%7D%7D)
 
 	 Volume in drive A is VOL07N03   
 	 Directory of A:\
@@ -313,7 +313,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        6 file(s)      46015 bytes
 	                      112128 bytes free
 
-### Directory of [PC Magazine (Vol. 07 No. 05)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 07 No. 05%29"}})
+### Directory of [PC Magazine (Vol. 07 No. 05)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 07 No. 05%29"%7D%7D)
 
 	 Volume in drive A is VOL07N05   
 	 Directory of A:\
@@ -326,7 +326,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        5 file(s)      82716 bytes
 	                       76800 bytes free
 
-### Directory of [PC Magazine (Vol. 07 No. 06)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 07 No. 06%29"}})
+### Directory of [PC Magazine (Vol. 07 No. 06)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 07 No. 06%29"%7D%7D)
 
 	 Volume in drive A is VOL07N06   
 	 Directory of A:\
@@ -342,7 +342,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        8 file(s)      15501 bytes
 	                      142848 bytes free
 
-### Directory of [PC Magazine (Vol. 07 No. 07)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 07 No. 07%29"}})
+### Directory of [PC Magazine (Vol. 07 No. 07)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 07 No. 07%29"%7D%7D)
 
 	 Volume in drive A is VOL07N07   
 	 Directory of A:\
@@ -355,7 +355,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        5 file(s)      53741 bytes
 	                      105472 bytes free
 
-### Directory of [PC Magazine (Vol. 07 No. 08)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 07 No. 08%29"}})
+### Directory of [PC Magazine (Vol. 07 No. 08)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 07 No. 08%29"%7D%7D)
 
 	 Volume in drive A is VOL07N08   
 	 Directory of A:\
@@ -375,7 +375,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       12 file(s)      57219 bytes
 	                      101376 bytes free
 
-### Directory of [PC Magazine (Vol. 07 No. 09)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 07 No. 09%29"}})
+### Directory of [PC Magazine (Vol. 07 No. 09)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 07 No. 09%29"%7D%7D)
 
 	 Volume in drive A is VOL07N09   
 	 Directory of A:\
@@ -395,7 +395,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       12 file(s)      70284 bytes
 	                       87552 bytes free
 
-### Directory of [PC Magazine (Vol. 07 No. 10)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 07 No. 10%29"}})
+### Directory of [PC Magazine (Vol. 07 No. 10)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 07 No. 10%29"%7D%7D)
 
 	 Volume in drive A is VOL07N10   
 	 Directory of A:\
@@ -417,7 +417,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       14 file(s)      49489 bytes
 	                      107520 bytes free
 
-### Directory of [PC Magazine (Vol. 07 No. 12)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 07 No. 12%29"}})
+### Directory of [PC Magazine (Vol. 07 No. 12)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 07 No. 12%29"%7D%7D)
 
 	 Volume in drive A is VOL07N12   
 	 Directory of A:\
@@ -439,7 +439,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       14 file(s)      95181 bytes
 	                       60928 bytes free
 
-### Directory of [PC Magazine (Vol. 07 No. 13)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 07 No. 13%29"}})
+### Directory of [PC Magazine (Vol. 07 No. 13)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 07 No. 13%29"%7D%7D)
 
 	 Volume in drive A is VOL07N13   
 	 Directory of A:\
@@ -464,7 +464,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       17 file(s)      71210 bytes
 	                       83968 bytes free
 
-### Directory of [PC Magazine (Vol. 07 No. 14)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 07 No. 14%29"}})
+### Directory of [PC Magazine (Vol. 07 No. 14)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 07 No. 14%29"%7D%7D)
 
 	 Volume in drive A is VOL07N14   
 	 Directory of A:\
@@ -498,7 +498,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       26 file(s)      94867 bytes
 	                       59904 bytes free
 
-### Directory of [PC Magazine (Vol. 07 No. 15)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 07 No. 15%29"}})
+### Directory of [PC Magazine (Vol. 07 No. 15)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 07 No. 15%29"%7D%7D)
 
 	 Volume in drive A is VOL07N15   
 	 Directory of A:\
@@ -524,7 +524,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       18 file(s)     139985 bytes
 	                       15360 bytes free
 
-### Directory of [PC Magazine (Vol. 07 No. 16)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 07 No. 16%29"}})
+### Directory of [PC Magazine (Vol. 07 No. 16)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 07 No. 16%29"%7D%7D)
 
 	 Volume in drive A is VOL07N16   
 	 Directory of A:\
@@ -551,7 +551,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       19 file(s)      94417 bytes
 	                       59904 bytes free
 
-### Directory of [PC Magazine (Vol. 07 No. 17)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 07 No. 17%29"}})
+### Directory of [PC Magazine (Vol. 07 No. 17)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 07 No. 17%29"%7D%7D)
 
 	 Volume in drive A is VOL07N17   
 	 Directory of A:\
@@ -570,7 +570,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       11 file(s)     120989 bytes
 	                       36864 bytes free
 
-### Directory of [PC Magazine (Vol. 07 No. 18)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 07 No. 18%29"}})
+### Directory of [PC Magazine (Vol. 07 No. 18)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 07 No. 18%29"%7D%7D)
 
 	 Volume in drive A is VOL07N18   
 	 Directory of A:\
@@ -599,7 +599,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       21 file(s)      98028 bytes
 	                       56320 bytes free
 
-### Directory of [PC Magazine (Vol. 07 No. 19)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 07 No. 19%29"}})
+### Directory of [PC Magazine (Vol. 07 No. 19)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 07 No. 19%29"%7D%7D)
 
 	 Volume in drive A is VOL07N19   
 	 Directory of A:\
@@ -622,7 +622,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       15 file(s)      91303 bytes
 	                       65536 bytes free
 
-### Directory of [PC Magazine (Vol. 07 No. 20)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 07 No. 20%29"}})
+### Directory of [PC Magazine (Vol. 07 No. 20)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 07 No. 20%29"%7D%7D)
 
 	 Volume in drive A is VOL07N20   
 	 Directory of A:\
@@ -642,7 +642,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       12 file(s)      71322 bytes
 	                       85504 bytes free
 
-### Directory of [PC Magazine (Vol. 07 No. 21)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 07 No. 21%29"}})
+### Directory of [PC Magazine (Vol. 07 No. 21)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 07 No. 21%29"%7D%7D)
 
 	 Volume in drive A is VOL07N21   
 	 Directory of A:\
@@ -671,7 +671,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       21 file(s)     148651 bytes
 	                        5632 bytes free
 
-### Directory of [PC Magazine (Vol. 07 No. 22)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 07 No. 22%29"}})
+### Directory of [PC Magazine (Vol. 07 No. 22)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 07 No. 22%29"%7D%7D)
 
 	 Volume in drive A is VOL07N22   
 	 Directory of A:\
@@ -697,7 +697,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       18 file(s)     104457 bytes
 	                       50176 bytes free
 
-### Directory of [PC Magazine (Vol. 08 No. 01)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 08 No. 01%29"}})
+### Directory of [PC Magazine (Vol. 08 No. 01)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 08 No. 01%29"%7D%7D)
 
 	 Volume in drive A is VOL08N01   
 	 Directory of A:\
@@ -721,7 +721,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       16 file(s)      84557 bytes
 	                       72192 bytes free
 
-### Directory of [PC Magazine (Vol. 08 No. 02)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 08 No. 02%29"}})
+### Directory of [PC Magazine (Vol. 08 No. 02)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 08 No. 02%29"%7D%7D)
 
 	 Volume in drive A is VOL08N02   
 	 Directory of A:\
@@ -743,7 +743,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       14 file(s)     117368 bytes
 	                       38400 bytes free
 
-### Directory of [PC Magazine (Vol. 08 No. 03)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 08 No. 03%29"}})
+### Directory of [PC Magazine (Vol. 08 No. 03)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 08 No. 03%29"%7D%7D)
 
 	 Volume in drive A is VOL08N03   
 	 Directory of A:\
@@ -766,7 +766,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       15 file(s)      70536 bytes
 	                       85504 bytes free
 
-### Directory of [PC Magazine (Vol. 08 No. 04)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 08 No. 04%29"}})
+### Directory of [PC Magazine (Vol. 08 No. 04)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 08 No. 04%29"%7D%7D)
 
 	 Volume in drive A is VOL08N04   
 	 Directory of A:\
@@ -789,7 +789,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       15 file(s)     124257 bytes
 	                       31744 bytes free
 
-### Directory of [PC Magazine (Vol. 08 No. 05)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 08 No. 05%29"}})
+### Directory of [PC Magazine (Vol. 08 No. 05)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 08 No. 05%29"%7D%7D)
 
 	 Volume in drive A is VOL08N05   
 	 Directory of A:\
@@ -816,7 +816,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       19 file(s)      49030 bytes
 	                      105984 bytes free
 
-### Directory of [PC Magazine (Vol. 08 No. 06)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 08 No. 06%29"}})
+### Directory of [PC Magazine (Vol. 08 No. 06)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 08 No. 06%29"%7D%7D)
 
 	 Volume in drive A is VOL08N06   
 	 Directory of A:\
@@ -850,7 +850,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       26 file(s)      80366 bytes
 	                       73216 bytes free
 
-### Directory of [PC Magazine (Vol. 08 No. 07)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 08 No. 07%29"}})
+### Directory of [PC Magazine (Vol. 08 No. 07)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 08 No. 07%29"%7D%7D)
 
 	 Volume in drive A is VOL08N07   
 	 Directory of A:\
@@ -876,7 +876,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       18 file(s)      86160 bytes
 	                       68608 bytes free
 
-### Directory of [PC Magazine (Vol. 08 No. 08)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 08 No. 08%29"}})
+### Directory of [PC Magazine (Vol. 08 No. 08)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 08 No. 08%29"%7D%7D)
 
 	 Volume in drive A is VOL08N08   
 	 Directory of A:\
@@ -897,7 +897,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       13 file(s)      56091 bytes
 	                      101376 bytes free
 
-### Directory of [PC Magazine (Vol. 08 No. 09)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 08 No. 09%29"}})
+### Directory of [PC Magazine (Vol. 08 No. 09)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 08 No. 09%29"%7D%7D)
 
 	 Volume in drive A is VOL08N09   
 	 Directory of A:\
@@ -925,7 +925,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       20 file(s)     128580 bytes
 	                       26112 bytes free
 
-### Directory of [PC Magazine (Vol. 08 No. 10)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 08 No. 10%29"}})
+### Directory of [PC Magazine (Vol. 08 No. 10)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 08 No. 10%29"%7D%7D)
 
 	 Volume in drive A is VOL08N10   
 	 Directory of A:\
@@ -941,7 +941,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        8 file(s)      63927 bytes
 	                       94208 bytes free
 
-### Directory of [PC Magazine (Vol. 08 No. 11)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 08 No. 11%29"}})
+### Directory of [PC Magazine (Vol. 08 No. 11)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 08 No. 11%29"%7D%7D)
 
 	 Volume in drive A is VOL08N11   
 	 Directory of A:\
@@ -964,7 +964,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       15 file(s)      40901 bytes
 	                      115200 bytes free
 
-### Directory of [PC Magazine (Vol. 08 No. 12)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 08 No. 12%29"}})
+### Directory of [PC Magazine (Vol. 08 No. 12)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 08 No. 12%29"%7D%7D)
 
 	 Volume in drive A is VOL08N12   
 	 Directory of A:\
@@ -993,7 +993,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       21 file(s)     154018 bytes
 	                           0 bytes free
 
-### Directory of [PC Magazine (Vol. 08 No. 13)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 08 No. 13%29"}})
+### Directory of [PC Magazine (Vol. 08 No. 13)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 08 No. 13%29"%7D%7D)
 
 	 Volume in drive A is VOL08N13   
 	 Directory of A:\
@@ -1013,7 +1013,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       12 file(s)      51103 bytes
 	                      106496 bytes free
 
-### Directory of [PC Magazine (Vol. 08 No. 14)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 08 No. 14%29"}})
+### Directory of [PC Magazine (Vol. 08 No. 14)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 08 No. 14%29"%7D%7D)
 
 	 Volume in drive A is VOL08N14   
 	 Directory of A:\
@@ -1033,7 +1033,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       12 file(s)      63082 bytes
 	                       93696 bytes free
 
-### Directory of [PC Magazine (Vol. 08 No. 15)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 08 No. 15%29"}})
+### Directory of [PC Magazine (Vol. 08 No. 15)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 08 No. 15%29"%7D%7D)
 
 	 Volume in drive A is VOL08N15   
 	 Directory of A:\
@@ -1057,7 +1057,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       16 file(s)     144548 bytes
 	                       12288 bytes free
 
-### Directory of [PC Magazine (Vol. 08 No. 16)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 08 No. 16%29"}})
+### Directory of [PC Magazine (Vol. 08 No. 16)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 08 No. 16%29"%7D%7D)
 
 	 Volume in drive A is VOL08N16   
 	 Directory of A:\
@@ -1086,7 +1086,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       21 file(s)     148340 bytes
 	                        6144 bytes free
 
-### Directory of [PC Magazine (Vol. 08 No. 17)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 08 No. 17%29"}})
+### Directory of [PC Magazine (Vol. 08 No. 17)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 08 No. 17%29"%7D%7D)
 
 	 Volume in drive A is VOL08N17   
 	 Directory of A:\
@@ -1110,7 +1110,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       16 file(s)      74530 bytes
 	                       80896 bytes free
 
-### Directory of [PC Magazine (Vol. 08 No. 18)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 08 No. 18%29"}})
+### Directory of [PC Magazine (Vol. 08 No. 18)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 08 No. 18%29"%7D%7D)
 
 	 Volume in drive A is VOL08N18   
 	 Directory of A:\
@@ -1142,7 +1142,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       24 file(s)     228598 bytes
 	                       82944 bytes free
 
-### Directory of [PC Magazine (Vol. 08 No. 19)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 08 No. 19%29"}})
+### Directory of [PC Magazine (Vol. 08 No. 19)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 08 No. 19%29"%7D%7D)
 
 	 Volume in drive A is VOL08N19   
 	 Directory of A:\
@@ -1174,7 +1174,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       24 file(s)     121128 bytes
 	                       31232 bytes free
 
-### Directory of [PC Magazine (Vol. 08 No. 20)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 08 No. 20%29"}})
+### Directory of [PC Magazine (Vol. 08 No. 20)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 08 No. 20%29"%7D%7D)
 
 	 Volume in drive A is VOL08N20   
 	 Directory of A:\
@@ -1207,7 +1207,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       25 file(s)      64579 bytes
 	                       89088 bytes free
 
-### Directory of [PC Magazine (Vol. 08 No. 21)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 08 No. 21%29"}})
+### Directory of [PC Magazine (Vol. 08 No. 21)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 08 No. 21%29"%7D%7D)
 
 	 Volume in drive A is VOL08N21   
 	 Directory of A:\
@@ -1236,7 +1236,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       21 file(s)     138901 bytes
 	                       15360 bytes free
 
-### Directory of [PC Magazine (Vol. 08 No. 22)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 08 No. 22%29"}})
+### Directory of [PC Magazine (Vol. 08 No. 22)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 08 No. 22%29"%7D%7D)
 
 	 Volume in drive A is VOL08N22   
 	 Directory of A:\
@@ -1263,7 +1263,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       19 file(s)     128108 bytes
 	                       27648 bytes free
 
-### Directory of [PC Magazine (Vol. 09 No. 01)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 09 No. 01%29"}})
+### Directory of [PC Magazine (Vol. 09 No. 01)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 09 No. 01%29"%7D%7D)
 
 	 Volume in drive A is VOL09N01   
 	 Directory of A:\
@@ -1285,7 +1285,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       14 file(s)     100543 bytes
 	                       55296 bytes free
 
-### Directory of [PC Magazine (Vol. 09 No. 02)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 09 No. 02%29"}})
+### Directory of [PC Magazine (Vol. 09 No. 02)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 09 No. 02%29"%7D%7D)
 
 	 Volume in drive A is VOL09N02   
 	 Directory of A:\
@@ -1314,7 +1314,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       21 file(s)     176950 bytes
 	                      134144 bytes free
 
-### Directory of [PC Magazine (Vol. 09 No. 03)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 09 No. 03%29"}})
+### Directory of [PC Magazine (Vol. 09 No. 03)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 09 No. 03%29"%7D%7D)
 
 	 Volume in drive A is VOL09N03   
 	 Directory of A:\
@@ -1369,7 +1369,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       47 file(s)     522179 bytes
 	                      680448 bytes free
 
-### Directory of [PC Magazine (Vol. 09 No. 04)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 09 No. 04%29"}})
+### Directory of [PC Magazine (Vol. 09 No. 04)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 09 No. 04%29"%7D%7D)
 
 	 Volume in drive A is VOL09N04   
 	 Directory of A:\
@@ -1389,7 +1389,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       12 file(s)     246425 bytes
 	                       71680 bytes free
 
-### Directory of [PC Magazine (Vol. 09 No. 05)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 09 No. 05%29"}})
+### Directory of [PC Magazine (Vol. 09 No. 05)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 09 No. 05%29"%7D%7D)
 
 	 Volume in drive A is VOL09N05   
 	 Directory of A:\
@@ -1404,7 +1404,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        7 file(s)      32526 bytes
 	                      125440 bytes free
 
-### Directory of [PC Magazine (Vol. 09 No. 06)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 09 No. 06%29"}})
+### Directory of [PC Magazine (Vol. 09 No. 06)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 09 No. 06%29"%7D%7D)
 
 	 Volume in drive A is VOL09N06   
 	 Directory of A:\
@@ -1421,7 +1421,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        9 file(s)     277534 bytes
 	                       39936 bytes free
 
-### Directory of [PC Magazine (Vol. 09 No. 07)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 09 No. 07%29"}})
+### Directory of [PC Magazine (Vol. 09 No. 07)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 09 No. 07%29"%7D%7D)
 
 	 Volume in drive A is VOL09N07   
 	 Directory of A:\
@@ -1441,7 +1441,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       12 file(s)     108564 bytes
 	                       49152 bytes free
 
-### Directory of [PC Magazine (Vol. 09 No. 08)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 09 No. 08%29"}})
+### Directory of [PC Magazine (Vol. 09 No. 08)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 09 No. 08%29"%7D%7D)
 
 	 Volume in drive A is VOL09N08   
 	 Directory of A:\
@@ -1464,7 +1464,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       15 file(s)      96957 bytes
 	                       58368 bytes free
 
-### Directory of [PC Magazine (Vol. 09 No. 09)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 09 No. 09%29"}})
+### Directory of [PC Magazine (Vol. 09 No. 09)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 09 No. 09%29"%7D%7D)
 
 	 Volume in drive A is VOL09N09   
 	 Directory of A:\
@@ -1495,7 +1495,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       23 file(s)     143610 bytes
 	                       10240 bytes free
 
-### Directory of [PC Magazine (Vol. 09 No. 10)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 09 No. 10%29"}})
+### Directory of [PC Magazine (Vol. 09 No. 10)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 09 No. 10%29"%7D%7D)
 
 	 Volume in drive A is VOL09N10   
 	 Directory of A:\
@@ -1513,7 +1513,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       10 file(s)     190658 bytes
 	                      124928 bytes free
 
-### Directory of [PC Magazine (Vol. 09 No. 11)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 09 No. 11%29"}})
+### Directory of [PC Magazine (Vol. 09 No. 11)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 09 No. 11%29"%7D%7D)
 
 	 Volume in drive A is VOL09N11   
 	 Directory of A:\
@@ -1532,7 +1532,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       11 file(s)      81608 bytes
 	                       76288 bytes free
 
-### Directory of [PC Magazine (Vol. 09 No. 12)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 09 No. 12%29"}})
+### Directory of [PC Magazine (Vol. 09 No. 12)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 09 No. 12%29"%7D%7D)
 
 	 Volume in drive A is VOL09N12   
 	 Directory of A:\
@@ -1552,7 +1552,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       12 file(s)      82443 bytes
 	                       74752 bytes free
 
-### Directory of [PC Magazine (Vol. 09 No. 13)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 09 No. 13%29"}})
+### Directory of [PC Magazine (Vol. 09 No. 13)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 09 No. 13%29"%7D%7D)
 
 	 Volume in drive A is VOL09N13   
 	 Directory of A:\
@@ -1569,7 +1569,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        9 file(s)      88457 bytes
 	                       70144 bytes free
 
-### Directory of [PC Magazine (Vol. 09 No. 14)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 09 No. 14%29"}})
+### Directory of [PC Magazine (Vol. 09 No. 14)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 09 No. 14%29"%7D%7D)
 
 	 Volume in drive A is VOL09N14   
 	 Directory of A:\
@@ -1588,7 +1588,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       11 file(s)      73094 bytes
 	                       83456 bytes free
 
-### Directory of [PC Magazine (Vol. 09 No. 15)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 09 No. 15%29"}})
+### Directory of [PC Magazine (Vol. 09 No. 15)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 09 No. 15%29"%7D%7D)
 
 	 Volume in drive A is VOL09N15   
 	 Directory of A:\
@@ -1607,7 +1607,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       11 file(s)     110977 bytes
 	                       46080 bytes free
 
-### Directory of [PC Magazine (Vol. 09 No. 16)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 09 No. 16%29"}})
+### Directory of [PC Magazine (Vol. 09 No. 16)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 09 No. 16%29"%7D%7D)
 
 	 Volume in drive A is VOL09N16   
 	 Directory of A:\
@@ -1641,7 +1641,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       26 file(s)     237823 bytes
 	                       69632 bytes free
 
-### Directory of [PC Magazine (Vol. 09 No. 17)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 09 No. 17%29"}})
+### Directory of [PC Magazine (Vol. 09 No. 17)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 09 No. 17%29"%7D%7D)
 
 	 Volume in drive A is VOL09N17   
 	 Directory of A:\
@@ -1661,7 +1661,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       12 file(s)      78015 bytes
 	                       78848 bytes free
 
-### Directory of [PC Magazine (Vol. 09 No. 19)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 09 No. 19%29"}})
+### Directory of [PC Magazine (Vol. 09 No. 19)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 09 No. 19%29"%7D%7D)
 
 	 Volume in drive A is VOL09N19   
 	 Directory of A:\
@@ -1679,7 +1679,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       10 file(s)      83809 bytes
 	                       74240 bytes free
 
-### Directory of [PC Magazine (Vol. 09 No. 20)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 09 No. 20%29"}})
+### Directory of [PC Magazine (Vol. 09 No. 20)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 09 No. 20%29"%7D%7D)
 
 	 Volume in drive A is VOL09N20   
 	 Directory of A:\
@@ -1707,7 +1707,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       20 file(s)     221499 bytes
 	                       91136 bytes free
 
-### Directory of [PC Magazine (Vol. 09 No. 21)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 09 No. 21%29"}})
+### Directory of [PC Magazine (Vol. 09 No. 21)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 09 No. 21%29"%7D%7D)
 
 	 Volume in drive A is VOL09N21   
 	 Directory of A:\
@@ -1779,7 +1779,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       64 file(s)     510633 bytes
 	                      678912 bytes free
 
-### Directory of [PC Magazine (Vol. 09 No. 22)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 09 No. 22%29"}})
+### Directory of [PC Magazine (Vol. 09 No. 22)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 09 No. 22%29"%7D%7D)
 
 	 Volume in drive A is VOL09N22   
 	 Directory of A:\
@@ -1802,7 +1802,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       15 file(s)      96172 bytes
 	                       60416 bytes free
 
-### Directory of [PC Magazine (Vol. 10 No. 01)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 10 No. 01%29"}})
+### Directory of [PC Magazine (Vol. 10 No. 01)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 10 No. 01%29"%7D%7D)
 
 	 Volume in drive A is VOL10N01   
 	 Directory of A:\
@@ -1829,7 +1829,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       19 file(s)     256828 bytes
 	                       54272 bytes free
 
-### Directory of [PC Magazine (Vol. 10 No. 02)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 10 No. 02%29"}})
+### Directory of [PC Magazine (Vol. 10 No. 02)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 10 No. 02%29"%7D%7D)
 
 	 Volume in drive A is VOL10N02   
 	 Directory of A:\
@@ -1848,7 +1848,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       11 file(s)     145604 bytes
 	                       11264 bytes free
 
-### Directory of [PC Magazine (Vol. 10 No. 03)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 10 No. 03%29"}})
+### Directory of [PC Magazine (Vol. 10 No. 03)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 10 No. 03%29"%7D%7D)
 
 	 Volume in drive A is VOL10N03   
 	 Directory of A:\
@@ -1867,7 +1867,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       11 file(s)     112885 bytes
 	                       45056 bytes free
 
-### Directory of [PC Magazine (Vol. 10 No. 04)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 10 No. 04%29"}})
+### Directory of [PC Magazine (Vol. 10 No. 04)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 10 No. 04%29"%7D%7D)
 
 	 Volume in drive A is VOL10N04   
 	 Directory of A:\
@@ -1885,7 +1885,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       10 file(s)      67703 bytes
 	                       89600 bytes free
 
-### Directory of [PC Magazine (Vol. 10 No. 05)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 10 No. 05%29"}})
+### Directory of [PC Magazine (Vol. 10 No. 05)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 10 No. 05%29"%7D%7D)
 
 	 Volume in drive A is VOL10N05   
 	 Directory of A:\
@@ -1905,7 +1905,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       12 file(s)     158672 bytes
 	                      156672 bytes free
 
-### Directory of [PC Magazine (Vol. 10 No. 06)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 10 No. 06%29"}})
+### Directory of [PC Magazine (Vol. 10 No. 06)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 10 No. 06%29"%7D%7D)
 
 	 Volume in drive A is VOL10N06   
 	 Directory of A:\
@@ -1951,7 +1951,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       38 file(s)     372512 bytes
 	                      832000 bytes free
 
-### Directory of [PC Magazine (Vol. 10 No. 07)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 10 No. 07%29"}})
+### Directory of [PC Magazine (Vol. 10 No. 07)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 10 No. 07%29"%7D%7D)
 
 	 Volume in drive A is VOL10N07   
 	 Directory of A:\
@@ -1969,7 +1969,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       10 file(s)      51769 bytes
 	                      105984 bytes free
 
-### Directory of [PC Magazine (Vol. 10 No. 08)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 10 No. 08%29"}})
+### Directory of [PC Magazine (Vol. 10 No. 08)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 10 No. 08%29"%7D%7D)
 
 	 Volume in drive A is VOL10N08   
 	 Directory of A:\
@@ -1992,7 +1992,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       15 file(s)      99932 bytes
 	                       55808 bytes free
 
-### Directory of [PC Magazine (Vol. 10 No. 09)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 10 No. 09%29"}})
+### Directory of [PC Magazine (Vol. 10 No. 09)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 10 No. 09%29"%7D%7D)
 
 	 Volume in drive A is VOL10N09   
 	 Directory of A:\
@@ -2010,7 +2010,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       10 file(s)      80922 bytes
 	                       75776 bytes free
 
-### Directory of [PC Magazine (Vol. 10 No. 10)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 10 No. 10%29"}})
+### Directory of [PC Magazine (Vol. 10 No. 10)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 10 No. 10%29"%7D%7D)
 
 	 Volume in drive A is VOL10N10   
 	 Directory of A:\
@@ -2048,7 +2048,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       30 file(s)     170473 bytes
 	                      135168 bytes free
 
-### Directory of [PC Magazine (Vol. 10 No. 11)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 10 No. 11%29"}})
+### Directory of [PC Magazine (Vol. 10 No. 11)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 10 No. 11%29"%7D%7D)
 
 	 Volume in drive A is VOL10N11   
 	 Directory of A:\
@@ -2072,7 +2072,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       16 file(s)     124352 bytes
 	                       32256 bytes free
 
-### Directory of [PC Magazine (Vol. 10 No. 12)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 10 No. 12%29"}})
+### Directory of [PC Magazine (Vol. 10 No. 12)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 10 No. 12%29"%7D%7D)
 
 	 Volume in drive A is VOL10N12   
 	 Directory of A:\
@@ -2121,7 +2121,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       41 file(s)     186945 bytes
 	                      113664 bytes free
 
-### Directory of [PC Magazine (Vol. 10 No. 13)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 10 No. 13%29"}})
+### Directory of [PC Magazine (Vol. 10 No. 13)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 10 No. 13%29"%7D%7D)
 
 	 Volume in drive A is VOL10N13   
 	 Directory of A:\
@@ -2140,7 +2140,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       11 file(s)     139030 bytes
 	                       18432 bytes free
 
-### Directory of [PC Magazine (Vol. 10 No. 14)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 10 No. 14%29"}})
+### Directory of [PC Magazine (Vol. 10 No. 14)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 10 No. 14%29"%7D%7D)
 
 	 Volume in drive A is VOL10N14   
 	 Directory of A:\
@@ -2164,7 +2164,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       16 file(s)     246029 bytes
 	                       68608 bytes free
 
-### Directory of [PC Magazine (Vol. 10 No. 15)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 10 No. 15%29"}})
+### Directory of [PC Magazine (Vol. 10 No. 15)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 10 No. 15%29"%7D%7D)
 
 	 Volume in drive A is VOL10N15   
 	 Directory of A:\
@@ -2191,7 +2191,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       19 file(s)     134949 bytes
 	                       19968 bytes free
 
-### Directory of [PC Magazine (Vol. 10 No. 16)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 10 No. 16%29"}})
+### Directory of [PC Magazine (Vol. 10 No. 16)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 10 No. 16%29"%7D%7D)
 
 	 Volume in drive A is VOL10N16   
 	 Directory of A:\
@@ -2222,7 +2222,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       23 file(s)     140471 bytes
 	                       13312 bytes free
 
-### Directory of [PC Magazine (Vol. 10 No. 17)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 10 No. 17%29"}})
+### Directory of [PC Magazine (Vol. 10 No. 17)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 10 No. 17%29"%7D%7D)
 
 	 Volume in drive A is VOL10N17   
 	 Directory of A:\
@@ -2248,7 +2248,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       18 file(s)      94066 bytes
 	                       61440 bytes free
 
-### Directory of [PC Magazine (Vol. 10 No. 18)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 10 No. 18%29"}})
+### Directory of [PC Magazine (Vol. 10 No. 18)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 10 No. 18%29"%7D%7D)
 
 	 Volume in drive A is VOL10N18   
 	 Directory of A:\
@@ -2284,7 +2284,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       28 file(s)      63642 bytes
 	                       90112 bytes free
 
-### Directory of [PC Magazine (Vol. 10 No. 19)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 10 No. 19%29"}})
+### Directory of [PC Magazine (Vol. 10 No. 19)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 10 No. 19%29"%7D%7D)
 
 	 Volume in drive A is VOL10N19   
 	 Directory of A:\
@@ -2313,7 +2313,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       21 file(s)     238875 bytes
 	                       72704 bytes free
 
-### Directory of [PC Magazine (Vol. 10 No. 20)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 10 No. 20%29"}})
+### Directory of [PC Magazine (Vol. 10 No. 20)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 10 No. 20%29"%7D%7D)
 
 	 Volume in drive A is VOL10N20   
 	 Directory of A:\
@@ -2337,7 +2337,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       16 file(s)      54528 bytes
 	                      101888 bytes free
 
-### Directory of [PC Magazine (Vol. 10 No. 21)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 10 No. 21%29"}})
+### Directory of [PC Magazine (Vol. 10 No. 21)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 10 No. 21%29"%7D%7D)
 
 	 Volume in drive A is VOL10N21   
 	 Directory of A:\
@@ -2358,7 +2358,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       13 file(s)      53806 bytes
 	                      102400 bytes free
 
-### Directory of [PC Magazine (Vol. 10 No. 22)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 10 No. 22%29"}})
+### Directory of [PC Magazine (Vol. 10 No. 22)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 10 No. 22%29"%7D%7D)
 
 	 Volume in drive A is VOL10N22   
 	 Directory of A:\
@@ -2380,7 +2380,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       14 file(s)     107842 bytes
 	                       49152 bytes free
 
-### Directory of [PC Magazine (Vol. 11 No. 01)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 11 No. 01%29"}})
+### Directory of [PC Magazine (Vol. 11 No. 01)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 11 No. 01%29"%7D%7D)
 
 	 Volume in drive A is VOL11N01   
 	 Directory of A:\
@@ -2394,7 +2394,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        6 file(s)      78331 bytes
 	                       80896 bytes free
 
-### Directory of [PC Magazine (Vol. 11 No. 02)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 11 No. 02%29"}})
+### Directory of [PC Magazine (Vol. 11 No. 02)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 11 No. 02%29"%7D%7D)
 
 	 Volume in drive A is VOL11N02   
 	 Directory of A:\
@@ -2434,7 +2434,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       32 file(s)     456889 bytes
 	                      749056 bytes free
 
-### Directory of [PC Magazine (Vol. 11 No. 03)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 11 No. 03%29"}})
+### Directory of [PC Magazine (Vol. 11 No. 03)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 11 No. 03%29"%7D%7D)
 
 	 Volume in drive A is VOL11N03   
 	 Directory of A:\
@@ -2448,7 +2448,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        6 file(s)      34463 bytes
 	                      124416 bytes free
 
-### Directory of [PC Magazine (Vol. 11 No. 04)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 11 No. 04%29"}})
+### Directory of [PC Magazine (Vol. 11 No. 04)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 11 No. 04%29"%7D%7D)
 
 	 Volume in drive A is VOL11N04   
 	 Directory of A:\
@@ -2463,7 +2463,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        7 file(s)     141319 bytes
 	                       17408 bytes free
 
-### Directory of [PC Magazine (Vol. 11 No. 05)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 11 No. 05%29"}})
+### Directory of [PC Magazine (Vol. 11 No. 05)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 11 No. 05%29"%7D%7D)
 
 	 Volume in drive A is VOL11N05   
 	 Directory of A:\
@@ -2512,7 +2512,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       41 file(s)     121398 bytes
 	                       29184 bytes free
 
-### Directory of [PC Magazine (Vol. 11 No. 06)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 11 No. 06%29"}})
+### Directory of [PC Magazine (Vol. 11 No. 06)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 11 No. 06%29"%7D%7D)
 
 	 Volume in drive A is VOL11N06   
 	 Directory of A:\
@@ -2547,7 +2547,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       27 file(s)     146151 bytes
 	                        8704 bytes free
 
-### Directory of [PC Magazine (Vol. 11 No. 07)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 11 No. 07%29"}})
+### Directory of [PC Magazine (Vol. 11 No. 07)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 11 No. 07%29"%7D%7D)
 
 	 Volume in drive A is VOL11N07   
 	 Directory of A:\
@@ -2574,7 +2574,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       19 file(s)     138555 bytes
 	                       17920 bytes free
 
-### Directory of [PC Magazine (Vol. 11 No. 08)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 11 No. 08%29"}})
+### Directory of [PC Magazine (Vol. 11 No. 08)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 11 No. 08%29"%7D%7D)
 
 	 Volume in drive A is VOL11N08   
 	 Directory of A:\
@@ -2604,7 +2604,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       22 file(s)     142850 bytes
 	                       11776 bytes free
 
-### Directory of [PC Magazine (Vol. 11 No. 09)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 11 No. 09%29"}})
+### Directory of [PC Magazine (Vol. 11 No. 09)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 11 No. 09%29"%7D%7D)
 
 	 Volume in drive A is VOL11N09   
 	 Directory of A:\
@@ -2658,7 +2658,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       46 file(s)     681476 bytes
 	                      521728 bytes free
 
-### Directory of [PC Magazine (Vol. 11 No. 10)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 11 No. 10%29"}})
+### Directory of [PC Magazine (Vol. 11 No. 10)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 11 No. 10%29"%7D%7D)
 
 	 Volume in drive A is VOL11N10   
 	 Directory of A:\
@@ -2677,7 +2677,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       11 file(s)      39790 bytes
 	                      116736 bytes free
 
-### Directory of [PC Magazine (Vol. 11 No. 11)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 11 No. 11%29"}})
+### Directory of [PC Magazine (Vol. 11 No. 11)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 11 No. 11%29"%7D%7D)
 
 	 Volume in drive A is VOL11N11   
 	 Directory of A:\
@@ -2742,7 +2742,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       57 file(s)     338728 bytes
 	                      860672 bytes free
 
-### Directory of [PC Magazine (Vol. 11 No. 12)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 11 No. 12%29"}})
+### Directory of [PC Magazine (Vol. 11 No. 12)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 11 No. 12%29"%7D%7D)
 
 	 Volume in drive A is VOL11N12   
 	 Directory of A:\
@@ -2786,7 +2786,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       36 file(s)     182124 bytes
 	                      118784 bytes free
 
-### Directory of [PC Magazine (Vol. 11 No. 13)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 11 No. 13%29"}})
+### Directory of [PC Magazine (Vol. 11 No. 13)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 11 No. 13%29"%7D%7D)
 
 	 Volume in drive A is VOL11N13   
 	 Directory of A:\
@@ -2808,7 +2808,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       14 file(s)     105295 bytes
 	                       51200 bytes free
 
-### Directory of [PC Magazine (Vol. 11 No. 14)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 11 No. 14%29"}})
+### Directory of [PC Magazine (Vol. 11 No. 14)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 11 No. 14%29"%7D%7D)
 
 	 Volume in drive A is VOL11N14   
 	 Directory of A:\
@@ -2882,7 +2882,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       66 file(s)     346683 bytes
 	                      850432 bytes free
 
-### Directory of [PC Magazine (Vol. 11 No. 15)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 11 No. 15%29"}})
+### Directory of [PC Magazine (Vol. 11 No. 15)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 11 No. 15%29"%7D%7D)
 
 	 Volume in drive A is VOL11N15   
 	 Directory of A:\
@@ -2926,7 +2926,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       36 file(s)     194019 bytes
 	                      106496 bytes free
 
-### Directory of [PC Magazine (Vol. 11 No. 16)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 11 No. 16%29"}})
+### Directory of [PC Magazine (Vol. 11 No. 16)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 11 No. 16%29"%7D%7D)
 
 	 Volume in drive A is VOL11N16   
 	 Directory of A:\
@@ -2943,7 +2943,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        9 file(s)      68367 bytes
 	                       89600 bytes free
 
-### Directory of [PC Magazine (Vol. 11 No. 17)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 11 No. 17%29"}})
+### Directory of [PC Magazine (Vol. 11 No. 17)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 11 No. 17%29"%7D%7D)
 
 	 Volume in drive A is VOL11N17   
 	 Directory of A:\
@@ -2957,7 +2957,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        6 file(s)      80168 bytes
 	                       78336 bytes free
 
-### Directory of [PC Magazine (Vol. 11 No. 18)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 11 No. 18%29"}})
+### Directory of [PC Magazine (Vol. 11 No. 18)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 11 No. 18%29"%7D%7D)
 
 	 Volume in drive A is VOL11N18   
 	 Directory of A:\
@@ -3007,7 +3007,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       42 file(s)     262535 bytes
 	                       37888 bytes free
 
-### Directory of [PC Magazine (Vol. 11 No. 19)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 11 No. 19%29"}})
+### Directory of [PC Magazine (Vol. 11 No. 19)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 11 No. 19%29"%7D%7D)
 
 	 Volume in drive A is VOL11N19   
 	 Directory of A:\
@@ -3095,7 +3095,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       80 file(s)     600713 bytes
 	                      593920 bytes free
 
-### Directory of [PC Magazine (Vol. 11 No. 20)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 11 No. 20%29"}})
+### Directory of [PC Magazine (Vol. 11 No. 20)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 11 No. 20%29"%7D%7D)
 
 	 Volume in drive A is VOL11N20   
 	 Directory of A:\
@@ -3149,7 +3149,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       46 file(s)     420494 bytes
 	                      781824 bytes free
 
-### Directory of [PC Magazine (Vol. 11 No. 21)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 11 No. 21%29"}})
+### Directory of [PC Magazine (Vol. 11 No. 21)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 11 No. 21%29"%7D%7D)
 
 	 Volume in drive A is VOL11N21   
 	 Directory of A:\
@@ -3185,7 +3185,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       28 file(s)     210087 bytes
 	                       97280 bytes free
 
-### Directory of [PC Magazine (Vol. 11 No. 22)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 11 No. 22%29"}})
+### Directory of [PC Magazine (Vol. 11 No. 22)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 11 No. 22%29"%7D%7D)
 
 	 Volume in drive A is VOL11N22   
 	 Directory of A:\
@@ -3202,7 +3202,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        9 file(s)     112629 bytes
 	                       45056 bytes free
 
-### Directory of [PC Magazine (Vol. 12 No. 01)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 12 No. 01%29"}})
+### Directory of [PC Magazine (Vol. 12 No. 01)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 12 No. 01%29"%7D%7D)
 
 	 Volume in drive A is VOL12N01   
 	 Directory of A:\
@@ -3220,7 +3220,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       10 file(s)     117042 bytes
 	                       39936 bytes free
 
-### Directory of [PC Magazine (Vol. 12 No. 02)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 12 No. 02%29"}})
+### Directory of [PC Magazine (Vol. 12 No. 02)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 12 No. 02%29"%7D%7D)
 
 	 Volume in drive A is VOL12N02   
 	 Directory of A:\
@@ -3252,7 +3252,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       24 file(s)     171274 bytes
 	                      138240 bytes free
 
-### Directory of [PC Magazine (Vol. 12 No. 03)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 12 No. 03%29"}})
+### Directory of [PC Magazine (Vol. 12 No. 03)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 12 No. 03%29"%7D%7D)
 
 	 Volume in drive A is VOL12N03   
 	 Directory of A:\
@@ -3288,7 +3288,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       28 file(s)     213692 bytes
 	                       91136 bytes free
 
-### Directory of [PC Magazine (Vol. 12 No. 04)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 12 No. 04%29"}})
+### Directory of [PC Magazine (Vol. 12 No. 04)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 12 No. 04%29"%7D%7D)
 
 	 Volume in drive A is VOL12N04   
 	 Directory of A:\
@@ -3302,7 +3302,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        6 file(s)      74065 bytes
 	                       84992 bytes free
 
-### Directory of [PC Magazine (Vol. 12 No. 05)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 12 No. 05%29"}})
+### Directory of [PC Magazine (Vol. 12 No. 05)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 12 No. 05%29"%7D%7D)
 
 	 Volume in drive A is VOL12N05   
 	 Directory of A:\
@@ -3316,7 +3316,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        6 file(s)      52593 bytes
 	                      105472 bytes free
 
-### Directory of [PC Magazine (Vol. 12 No. 06)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 12 No. 06%29"}})
+### Directory of [PC Magazine (Vol. 12 No. 06)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 12 No. 06%29"%7D%7D)
 
 	 Volume in drive A is VOL12N06   
 	 Directory of A:\
@@ -3331,7 +3331,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        7 file(s)      67099 bytes
 	                       91648 bytes free
 
-### Directory of [PC Magazine (Vol. 12 No. 07)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 12 No. 07%29"}})
+### Directory of [PC Magazine (Vol. 12 No. 07)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 12 No. 07%29"%7D%7D)
 
 	 Volume in drive A is VOL12N07   
 	 Directory of A:\
@@ -3347,7 +3347,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        8 file(s)      89058 bytes
 	                       68608 bytes free
 
-### Directory of [PC Magazine (Vol. 12 No. 08)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 12 No. 08%29"}})
+### Directory of [PC Magazine (Vol. 12 No. 08)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 12 No. 08%29"%7D%7D)
 
 	 Volume in drive A is VOL12N08   
 	 Directory of A:\
@@ -3362,7 +3362,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        7 file(s)     166789 bytes
 	                      151552 bytes free
 
-### Directory of [PC Magazine (Vol. 12 No. 09)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 12 No. 09%29"}})
+### Directory of [PC Magazine (Vol. 12 No. 09)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 12 No. 09%29"%7D%7D)
 
 	 Volume in drive A is VOL12N09   
 	 Directory of A:\
@@ -3408,7 +3408,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       38 file(s)     219368 bytes
 	                       79872 bytes free
 
-### Directory of [PC Magazine (Vol. 12 No. 10)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 12 No. 10%29"}})
+### Directory of [PC Magazine (Vol. 12 No. 10)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 12 No. 10%29"%7D%7D)
 
 	 Volume in drive A is VOL12N10   
 	 Directory of A:\
@@ -3437,7 +3437,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       21 file(s)     133377 bytes
 	                       20480 bytes free
 
-### Directory of [PC Magazine (Vol. 12 No. 11)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 12 No. 11%29"}})
+### Directory of [PC Magazine (Vol. 12 No. 11)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 12 No. 11%29"%7D%7D)
 
 	 Volume in drive A is VOL12N11   
 	 Directory of A:\
@@ -3453,7 +3453,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        8 file(s)     219691 bytes
 	                       99328 bytes free
 
-### Directory of [PC Magazine (Vol. 12 No. 12)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 12 No. 12%29"}})
+### Directory of [PC Magazine (Vol. 12 No. 12)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 12 No. 12%29"%7D%7D)
 
 	 Volume in drive A is VOL12N12   
 	 Directory of A:\
@@ -3471,7 +3471,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       10 file(s)      96945 bytes
 	                       60416 bytes free
 
-### Directory of [PC Magazine (Vol. 12 No. 13)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 12 No. 13%29"}})
+### Directory of [PC Magazine (Vol. 12 No. 13)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 12 No. 13%29"%7D%7D)
 
 	 Volume in drive A is VOL12N13   
 	 Directory of A:\
@@ -3485,7 +3485,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        6 file(s)     102757 bytes
 	                       55808 bytes free
 
-### Directory of [PC Magazine (Vol. 12 No. 14)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 12 No. 14%29"}})
+### Directory of [PC Magazine (Vol. 12 No. 14)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 12 No. 14%29"%7D%7D)
 
 	 Volume in drive A is VOL12N14   
 	 Directory of A:\
@@ -3498,7 +3498,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        5 file(s)     144207 bytes
 	                       15360 bytes free
 
-### Directory of [PC Magazine (Vol. 12 No. 15)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 12 No. 15%29"}})
+### Directory of [PC Magazine (Vol. 12 No. 15)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 12 No. 15%29"%7D%7D)
 
 	 Volume in drive A is VOL12N15   
 	 Directory of A:\
@@ -3512,7 +3512,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        6 file(s)     218069 bytes
 	                      102400 bytes free
 
-### Directory of [PC Magazine (Vol. 12 No. 16)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 12 No. 16%29"}})
+### Directory of [PC Magazine (Vol. 12 No. 16)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 12 No. 16%29"%7D%7D)
 
 	 Volume in drive A is VOL12N16   
 	 Directory of A:\
@@ -3526,7 +3526,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        6 file(s)      97880 bytes
 	                       60928 bytes free
 
-### Directory of [PC Magazine (Vol. 12 No. 17)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 12 No. 17%29"}})
+### Directory of [PC Magazine (Vol. 12 No. 17)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 12 No. 17%29"%7D%7D)
 
 	 Volume in drive A is VOL12N17   
 	 Directory of A:\
@@ -3540,7 +3540,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        6 file(s)      79054 bytes
 	                       79872 bytes free
 
-### Directory of [PC Magazine (Vol. 12 No. 18)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 12 No. 18%29"}})
+### Directory of [PC Magazine (Vol. 12 No. 18)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 12 No. 18%29"%7D%7D)
 
 	 Volume in drive A is VOL12N18   
 	 Directory of A:\
@@ -3554,7 +3554,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        6 file(s)    1274597 bytes
 	                      181760 bytes free
 
-### Directory of [PC Magazine (Vol. 12 No. 19)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 12 No. 19%29"}})
+### Directory of [PC Magazine (Vol. 12 No. 19)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 12 No. 19%29"%7D%7D)
 
 	 Volume in drive A is VOL12N19   
 	 Directory of A:\
@@ -3567,7 +3567,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        5 file(s)      96379 bytes
 	                       61952 bytes free
 
-### Directory of [PC Magazine (Vol. 12 No. 20)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 12 No. 20%29"}})
+### Directory of [PC Magazine (Vol. 12 No. 20)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 12 No. 20%29"%7D%7D)
 
 	 Volume in drive A is VOL12N20   
 	 Directory of A:\
@@ -3581,7 +3581,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        6 file(s)      87580 bytes
 	                       71168 bytes free
 
-### Directory of [PC Magazine (Vol. 12 No. 21)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 12 No. 21%29"}})
+### Directory of [PC Magazine (Vol. 12 No. 21)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 12 No. 21%29"%7D%7D)
 
 	 Volume in drive A is VOL12N21   
 	 Directory of A:\
@@ -3594,7 +3594,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        5 file(s)      77293 bytes
 	                       81920 bytes free
 
-### Directory of [PC Magazine (Vol. 12 No. 22)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 12 No. 22%29"}})
+### Directory of [PC Magazine (Vol. 12 No. 22)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 12 No. 22%29"%7D%7D)
 
 	 Volume in drive A is VOL12N22   
 	 Directory of A:\
@@ -3608,7 +3608,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        6 file(s)      72576 bytes
 	                       86016 bytes free
 
-### Directory of [PC Magazine (Vol. 13 No. 01)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 13 No. 01%29"}})
+### Directory of [PC Magazine (Vol. 13 No. 01)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 13 No. 01%29"%7D%7D)
 
 	 Volume in drive A is VOL13N01   
 	 Directory of A:\
@@ -3622,7 +3622,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        6 file(s)      86693 bytes
 	                       72192 bytes free
 
-### Directory of [PC Magazine (Vol. 13 No. 02)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 13 No. 02%29"}})
+### Directory of [PC Magazine (Vol. 13 No. 02)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 13 No. 02%29"%7D%7D)
 
 	 Volume in drive A is VOL13N02   
 	 Directory of A:\
@@ -3635,7 +3635,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        5 file(s)      58203 bytes
 	                      100864 bytes free
 
-### Directory of [PC Magazine (Vol. 13 No. 03)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 13 No. 03%29"}})
+### Directory of [PC Magazine (Vol. 13 No. 03)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 13 No. 03%29"%7D%7D)
 
 	 Volume in drive A is VOL13N03   
 	 Directory of A:\
@@ -3651,7 +3651,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        8 file(s)     240097 bytes
 	                       77824 bytes free
 
-### Directory of [PC Magazine (Vol. 13 No. 04)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 13 No. 04%29"}})
+### Directory of [PC Magazine (Vol. 13 No. 04)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 13 No. 04%29"%7D%7D)
 
 	 Volume in drive A is VOL13N04   
 	 Directory of A:\
@@ -3664,7 +3664,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        5 file(s)     150566 bytes
 	                        8192 bytes free
 
-### Directory of [PC Magazine (Vol. 13 No. 05)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 13 No. 05%29"}})
+### Directory of [PC Magazine (Vol. 13 No. 05)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 13 No. 05%29"%7D%7D)
 
 	 Volume in drive A is VOL13N05   
 	 Directory of A:\
@@ -3679,7 +3679,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        7 file(s)     122971 bytes
 	                       35328 bytes free
 
-### Directory of [PC Magazine (Vol. 13 No. 06)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 13 No. 06%29"}})
+### Directory of [PC Magazine (Vol. 13 No. 06)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 13 No. 06%29"%7D%7D)
 
 	 Volume in drive A is VOL13N06   
 	 Directory of A:\
@@ -3690,7 +3690,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        3 file(s)     116441 bytes
 	                       42496 bytes free
 
-### Directory of [PC Magazine (Vol. 13 No. 07)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 13 No. 07%29"}})
+### Directory of [PC Magazine (Vol. 13 No. 07)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 13 No. 07%29"%7D%7D)
 
 	 Volume in drive A is VOL13N07   
 	 Directory of A:\
@@ -3705,7 +3705,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        7 file(s)     134499 bytes
 	                       23552 bytes free
 
-### Directory of [PC Magazine (Vol. 13 No. 08)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 13 No. 08%29"}})
+### Directory of [PC Magazine (Vol. 13 No. 08)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 13 No. 08%29"%7D%7D)
 
 	 Volume in drive A is VOL13N08   
 	 Directory of A:\
@@ -3719,7 +3719,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        6 file(s)     304997 bytes
 	                       14336 bytes free
 
-### Directory of [PC Magazine (Vol. 13 No. 09)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 13 No. 09%29"}})
+### Directory of [PC Magazine (Vol. 13 No. 09)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 13 No. 09%29"%7D%7D)
 
 	 Volume in drive A is VOL13N09   
 	 Directory of A:\
@@ -3735,7 +3735,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        8 file(s)     112705 bytes
 	                       46592 bytes free
 
-### Directory of [PC Magazine (Vol. 13 No. 10)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 13 No. 10%29"}})
+### Directory of [PC Magazine (Vol. 13 No. 10)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 13 No. 10%29"%7D%7D)
 
 	 Volume in drive A is VOL13N10   
 	 Directory of A:\
@@ -3747,7 +3747,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        4 file(s)      65400 bytes
 	                       93696 bytes free
 
-### Directory of [PC Magazine (Vol. 13 No. 11)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 13 No. 11%29"}})
+### Directory of [PC Magazine (Vol. 13 No. 11)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 13 No. 11%29"%7D%7D)
 
 	 Volume in drive A is VOL13N11   
 	 Directory of A:\
@@ -3757,7 +3757,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        2 file(s)      42469 bytes
 	                      117248 bytes free
 
-### Directory of [PC Magazine (Vol. 13 No. 12)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 13 No. 12%29"}})
+### Directory of [PC Magazine (Vol. 13 No. 12)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 13 No. 12%29"%7D%7D)
 
 	 Volume in drive A is VOL13N12   
 	 Directory of A:\
@@ -3768,7 +3768,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        3 file(s)     132146 bytes
 	                       27136 bytes free
 
-### Directory of [PC Magazine (Vol. 13 No. 13)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 13 No. 13%29"}})
+### Directory of [PC Magazine (Vol. 13 No. 13)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 13 No. 13%29"%7D%7D)
 
 	 Volume in drive A is VOL13N13   
 	 Directory of A:\
@@ -3782,7 +3782,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        6 file(s)     138109 bytes
 	                       20480 bytes free
 
-### Directory of [PC Magazine (Vol. 13 No. 14)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 13 No. 14%29"}})
+### Directory of [PC Magazine (Vol. 13 No. 14)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 13 No. 14%29"%7D%7D)
 
 	 Volume in drive A is VOL13N14   
 	 Directory of A:\
@@ -3795,7 +3795,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        5 file(s)      71100 bytes
 	                       88576 bytes free
 
-### Directory of [PC Magazine (Vol. 13 No. 15)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 13 No. 15%29"}})
+### Directory of [PC Magazine (Vol. 13 No. 15)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 13 No. 15%29"%7D%7D)
 
 	 Volume in drive A is VOL13N15   
 	 Directory of A:\
@@ -3808,7 +3808,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        5 file(s)      63993 bytes
 	                       94208 bytes free
 
-### Directory of [PC Magazine (Vol. 13 No. 16)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 13 No. 16%29"}})
+### Directory of [PC Magazine (Vol. 13 No. 16)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 13 No. 16%29"%7D%7D)
 
 	 Volume in drive A is VOL13N16   
 	 Directory of A:\
@@ -3820,7 +3820,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        4 file(s)      76330 bytes
 	                       83456 bytes free
 
-### Directory of [PC Magazine (Vol. 13 No. 17)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 13 No. 17%29"}})
+### Directory of [PC Magazine (Vol. 13 No. 17)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 13 No. 17%29"%7D%7D)
 
 	 Volume in drive A is VOL13N17   
 	 Directory of A:\
@@ -3837,7 +3837,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        9 file(s)      50258 bytes
 	                      108032 bytes free
 
-### Directory of [PC Magazine (Vol. 13 No. 18)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 13 No. 18%29"}})
+### Directory of [PC Magazine (Vol. 13 No. 18)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 13 No. 18%29"%7D%7D)
 
 	 Volume in drive A is VOL13N18   
 	 Directory of A:\
@@ -3850,7 +3850,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        5 file(s)      50579 bytes
 	                      108032 bytes free
 
-### Directory of [PC Magazine (Vol. 13 No. 19)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 13 No. 19%29"}})
+### Directory of [PC Magazine (Vol. 13 No. 19)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 13 No. 19%29"%7D%7D)
 
 	 Volume in drive A is VOL13N19   
 	 Directory of A:\
@@ -3866,7 +3866,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        8 file(s)      82530 bytes
 	                       75776 bytes free
 
-### Directory of [PC Magazine (Vol. 13 No. 20)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 13 No. 20%29"}})
+### Directory of [PC Magazine (Vol. 13 No. 20)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 13 No. 20%29"%7D%7D)
 
 	 Volume in drive A is VOL13N20   
 	 Directory of A:\
@@ -3879,7 +3879,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        5 file(s)      47640 bytes
 	                      111104 bytes free
 
-### Directory of [PC Magazine (Vol. 13 No. 21)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 13 No. 21%29"}})
+### Directory of [PC Magazine (Vol. 13 No. 21)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 13 No. 21%29"%7D%7D)
 
 	 Volume in drive A is VOL13N21   
 	 Directory of A:\
@@ -3893,7 +3893,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        6 file(s)     112653 bytes
 	                       45568 bytes free
 
-### Directory of [PC Magazine (Vol. 13 No. 22)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 13 No. 22%29"}})
+### Directory of [PC Magazine (Vol. 13 No. 22)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 13 No. 22%29"%7D%7D)
 
 	 Volume in drive A is VOL13N22   
 	 Directory of A:\
@@ -3906,7 +3906,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        5 file(s)      46613 bytes
 	                      112128 bytes free
 
-### Directory of [PC Magazine (Vol. 14 No. 01)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 14 No. 01%29"}})
+### Directory of [PC Magazine (Vol. 14 No. 01)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 14 No. 01%29"%7D%7D)
 
 	 Volume in drive A is VOL14N01   
 	 Directory of A:\
@@ -3920,7 +3920,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        6 file(s)      13490 bytes
 	                      144896 bytes free
 
-### Directory of [PC Magazine (Vol. 14 No. 02)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 14 No. 02%29"}})
+### Directory of [PC Magazine (Vol. 14 No. 02)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 14 No. 02%29"%7D%7D)
 
 	 Volume in drive A is VOL14N02   
 	 Directory of A:\
@@ -3933,7 +3933,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        5 file(s)      35236 bytes
 	                      123904 bytes free
 
-### Directory of [PC Magazine (Vol. 14 No. 03)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 14 No. 03%29"}})
+### Directory of [PC Magazine (Vol. 14 No. 03)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 14 No. 03%29"%7D%7D)
 
 	 Volume in drive A is VOL14N03   
 	 Directory of A:\
@@ -3948,7 +3948,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        7 file(s)     175856 bytes
 	                      142336 bytes free
 
-### Directory of [PC Magazine (Vol. 14 No. 04)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 14 No. 04%29"}})
+### Directory of [PC Magazine (Vol. 14 No. 04)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 14 No. 04%29"%7D%7D)
 
 	 Volume in drive A is VOL14N04   
 	 Directory of A:\
@@ -3963,7 +3963,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        7 file(s)     102377 bytes
 	                       56832 bytes free
 
-### Directory of [PC Magazine (Vol. 14 No. 05)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 14 No. 05%29"}})
+### Directory of [PC Magazine (Vol. 14 No. 05)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 14 No. 05%29"%7D%7D)
 
 	 Volume in drive A is VOL14N05   
 	 Directory of A:\
@@ -3982,7 +3982,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	       11 file(s)      97933 bytes
 	                       59904 bytes free
 
-### Directory of [PC Magazine (Vol. 14 No. 06)](/devices/pcx86/machine/5160/ega/640kb/?autoMount={"B":{"name":"PC Magazine %28Vol. 14 No. 06%29"}})
+### Directory of [PC Magazine (Vol. 14 No. 06)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 14 No. 06%29"%7D%7D)
 
 	 Volume in drive A is VOL14N06   
 	 Directory of A:\
