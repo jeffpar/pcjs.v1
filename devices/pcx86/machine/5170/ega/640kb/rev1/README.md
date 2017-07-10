@@ -10,4 +10,7 @@ machines:
     type: pcx86
 ---
 
+IBM PC AT with 640Kb RAM and EGA Display
+----------------------------------------
+
 {% include machine.html id="ibm5170" %}

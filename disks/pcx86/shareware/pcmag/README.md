@@ -10,7 +10,7 @@ PC Magazine Disks
 To build the following collection, we started with the ZIP archives at
 "[THE PROGRAMMER'S CORNER: BBS ARCHIVE FROM THE PAST](https://www.pcorner.com/list/MAG)".
 We filtered out the duplicates, organized them chronologically, and then put their contents onto diskette
-images that you can easily "Load" and "Save" in any [PCjs Machine](devices/pcx86/machine/).
+images that you can easily "Load" and "Save" in any [PCjs Machine](/devices/pcx86/machine/).
 In fact, if you click on the name of any diskette in the headings below, a machine should automatically launch
 with that diskette loaded in drive B.
 

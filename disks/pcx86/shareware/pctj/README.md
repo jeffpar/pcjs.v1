@@ -43,12 +43,14 @@ to recreate from multiple ZIP archives.  It includes this note from the magazine
 	Editor                                  Editorial Director
 
 We've gone through those ZIP archives, filtered out the duplicates, organized them chronologically, and then put
-their contents onto diskette images that you can easily "Load" and "Save" in any [PCjs Machine](devices/pcx86/machine/).
+their contents onto diskette images that you can easily "Load" and "Save" in any [PCjs Machine](/devices/pcx86/machine/).
+In fact, if you click on the name of any diskette in the headings below, a machine should automatically launch
+with that diskette loaded in drive B.
 
 Looking at the dates alone, you can tell that this collection is woefully incomplete, but perhaps more will surface
 over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  Thanks.
 
-### Directory of PC Tech Journal (1985-12)
+### Directory of [PC Tech Journal (1985-12)](/devices/pcx86/machine/5170/ega/640kb/rev1/?autoMount=%7B"B":%7B"name":"PC Tech Journal %281985-12%29"%7D%7D)
 
 	 Volume in drive A is PCTJ8512   
 	 Directory of A:\
@@ -66,7 +68,7 @@ over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  Thanks.
 	       10 file(s)      22913 bytes
 	                      134656 bytes free
 
-### Directory of PC Tech Journal (1986-03)
+### Directory of [PC Tech Journal (1986-03)](/devices/pcx86/machine/5170/ega/640kb/rev1/?autoMount=%7B"B":%7B"name":"PC Tech Journal %281986-03%29"%7D%7D)
 
 	 Volume in drive A is PCTJ8603   
 	 Directory of A:\
@@ -82,7 +84,7 @@ over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  Thanks.
 	        8 file(s)      30132 bytes
 	                      127488 bytes free
 
-### Directory of PC Tech Journal (1986-10)
+### Directory of [PC Tech Journal (1986-10)](/devices/pcx86/machine/5170/ega/640kb/rev1/?autoMount=%7B"B":%7B"name":"PC Tech Journal %281986-10%29"%7D%7D)
 
 	 Volume in drive A is PCTJ8610   
 	 Directory of A:\
@@ -110,7 +112,7 @@ over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  Thanks.
 	       20 file(s)     125400 bytes
 	                       30208 bytes free
 
-### Directory of PC Tech Journal (1986-12)
+### Directory of [PC Tech Journal (1986-12)](/devices/pcx86/machine/5170/ega/640kb/rev1/?autoMount=%7B"B":%7B"name":"PC Tech Journal %281986-12%29"%7D%7D)
 
 	 Volume in drive A is PCTJ8612   
 	 Directory of A:\
@@ -120,7 +122,7 @@ over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  Thanks.
 	        2 file(s)      11668 bytes
 	                      147968 bytes free
 
-### Directory of PC Tech Journal (1987-02)
+### Directory of [PC Tech Journal (1987-02)](/devices/pcx86/machine/5170/ega/640kb/rev1/?autoMount=%7B"B":%7B"name":"PC Tech Journal %281987-02%29"%7D%7D)
 
 	 Volume in drive A is PCTJ8702   
 	 Directory of A:\
@@ -154,7 +156,7 @@ over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  Thanks.
 	       26 file(s)     131172 bytes
 	                       23040 bytes free
 
-### Directory of PC Tech Journal (1987-06)
+### Directory of [PC Tech Journal (1987-06)](/devices/pcx86/machine/5170/ega/640kb/rev1/?autoMount=%7B"B":%7B"name":"PC Tech Journal %281987-06%29"%7D%7D)
 
 	 Volume in drive A is PCTJ8706   
 
@@ -177,7 +179,7 @@ over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  Thanks.
 	       11 file(s)      26069 bytes
 	                      132096 bytes free
 
-### Directory of PC Tech Journal (1987-07)
+### Directory of [PC Tech Journal (1987-07)](/devices/pcx86/machine/5170/ega/640kb/rev1/?autoMount=%7B"B":%7B"name":"PC Tech Journal %281987-07%29"%7D%7D)
 
 	 Volume in drive A is PCTJ8707   
 
@@ -202,7 +204,7 @@ over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  Thanks.
 	       13 file(s)      21226 bytes
 	                      136192 bytes free
 
-### Directory of PC Tech Journal (1987-10)
+### Directory of [PC Tech Journal (1987-10)](/devices/pcx86/machine/5170/ega/640kb/rev1/?autoMount=%7B"B":%7B"name":"PC Tech Journal %281987-10%29"%7D%7D)
 
 	 Volume in drive A is PCTJ8710   
 
@@ -220,7 +222,7 @@ over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  Thanks.
 	        9 file(s)      47379 bytes
 	                      110080 bytes free
 
-### Directory of PC Tech Journal (1987-11)
+### Directory of [PC Tech Journal (1987-11)](/devices/pcx86/machine/5170/ega/640kb/rev1/?autoMount=%7B"B":%7B"name":"PC Tech Journal %281987-11%29"%7D%7D)
 
 	 Volume in drive A is PCTJ8711   
 	 Directory of A:\
@@ -232,7 +234,7 @@ over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  Thanks.
 	        4 file(s)      12349 bytes
 	                      146944 bytes free
 
-### Directory of PC Tech Journal (1988-04)
+### Directory of [PC Tech Journal (1988-04)](/devices/pcx86/machine/5170/ega/640kb/rev1/?autoMount=%7B"B":%7B"name":"PC Tech Journal %281988-04%29"%7D%7D)
 
 	 Volume in drive A is PCTJ8804   
 	 Directory of A:\
@@ -250,7 +252,7 @@ over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  Thanks.
 	       10 file(s)      48016 bytes
 	                      109568 bytes free
 
-### Directory of PC Tech Journal (1988-05)
+### Directory of [PC Tech Journal (1988-05)](/devices/pcx86/machine/5170/ega/640kb/rev1/?autoMount=%7B"B":%7B"name":"PC Tech Journal %281988-05%29"%7D%7D)
 
 	 Volume in drive A is PCTJ8805   
 	 Directory of A:\
@@ -275,7 +277,7 @@ over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  Thanks.
 	       17 file(s)     167280 bytes
 	                      144384 bytes free
 
-### Directory of PC Tech Journal (1988-06)
+### Directory of [PC Tech Journal (1988-06)](/devices/pcx86/machine/5170/ega/640kb/rev1/?autoMount=%7B"B":%7B"name":"PC Tech Journal %281988-06%29"%7D%7D)
 
 	 Volume in drive A is PCTJ8806   
 	 Directory of A:\
@@ -289,7 +291,7 @@ over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  Thanks.
 	        6 file(s)      74692 bytes
 	                       83968 bytes free
 
-### Directory of PC Tech Journal (1988-07)
+### Directory of [PC Tech Journal (1988-07)](/devices/pcx86/machine/5170/ega/640kb/rev1/?autoMount=%7B"B":%7B"name":"PC Tech Journal %281988-07%29"%7D%7D)
 
 	 Volume in drive A is PCTJ8807   
 	 Directory of A:\
@@ -304,7 +306,7 @@ over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  Thanks.
 	        7 file(s)      78053 bytes
 	                       79872 bytes free
 
-### Directory of PC Tech Journal (1988-08)
+### Directory of [PC Tech Journal (1988-08)](/devices/pcx86/machine/5170/ega/640kb/rev1/?autoMount=%7B"B":%7B"name":"PC Tech Journal %281988-08%29"%7D%7D)
 
 	 Volume in drive A is PCTJ8808   
 	 Directory of A:\
@@ -321,7 +323,7 @@ over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  Thanks.
 	        9 file(s)      86690 bytes
 	                       71168 bytes free
 
-### Directory of PC Tech Journal (1988-09)
+### Directory of [PC Tech Journal (1988-09)](/devices/pcx86/machine/5170/ega/640kb/rev1/?autoMount=%7B"B":%7B"name":"PC Tech Journal %281988-09%29"%7D%7D)
 
 	 Volume in drive A is PCTJ8809   
 
@@ -348,7 +350,7 @@ over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  Thanks.
 	       11 file(s)      10529 bytes
 	                      147456 bytes free
 
-### Directory of PC Tech Journal (1988-11)
+### Directory of [PC Tech Journal (1988-11)](/devices/pcx86/machine/5170/ega/640kb/rev1/?autoMount=%7B"B":%7B"name":"PC Tech Journal %281988-11%29"%7D%7D)
 
 	 Volume in drive A is PCTJ8811   
 
@@ -369,7 +371,7 @@ over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  Thanks.
 	       12 file(s)      92715 bytes
 	                       64512 bytes free
 
-### Directory of PC Tech Journal (1988-12)
+### Directory of [PC Tech Journal (1988-12)](/devices/pcx86/machine/5170/ega/640kb/rev1/?autoMount=%7B"B":%7B"name":"PC Tech Journal %281988-12%29"%7D%7D)
 
 	 Volume in drive A is PCTJ8812   
 
@@ -380,7 +382,7 @@ over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  Thanks.
 	        2 file(s)      11408 bytes
 	                      148480 bytes free
 
-### Directory of PC Tech Journal (1989-01)
+### Directory of [PC Tech Journal (1989-01)](/devices/pcx86/machine/5170/ega/640kb/rev1/?autoMount=%7B"B":%7B"name":"PC Tech Journal %281989-01%29"%7D%7D)
 
 	 Volume in drive A is PCTJ8901   
 
@@ -391,7 +393,7 @@ over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  Thanks.
 	        2 file(s)       7754 bytes
 	                      152064 bytes free
 
-### Directory of PC Tech Journal (Benchmarks)
+### Directory of [PC Tech Journal (Benchmarks)](/devices/pcx86/machine/5170/ega/640kb/rev1/?autoMount=%7B"B":%7B"name":"PC Tech Journal %28Benchmarks%29"%7D%7D)
 
 	 Volume in drive A is PCTBENCH   
 
@@ -436,7 +438,7 @@ over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  Thanks.
 	       36 file(s)     472914 bytes
 	                      735744 bytes free
 
-### Directory of PC Tech Journal (Best Of)
+### Directory of [PC Tech Journal (Best Of)](/devices/pcx86/machine/5170/ega/640kb/rev1/?autoMount=%7B"B":%7B"name":"PC Tech Journal %28Best Of%29"%7D%7D)
 
 	 Volume in drive A is PCTJBEST   
 
