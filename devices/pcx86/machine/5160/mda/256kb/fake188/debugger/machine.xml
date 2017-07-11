@@ -9,7 +9,7 @@
 	<rom id="romBASIC" addr="0xf6000" size="0x8000" file="/devices/pcx86/rom/5160/basic/BASIC110.json"/>
 	<rom id="romBIOS" addr="0xfe000" size="0x2000" file="/devices/pcx86/rom/5160/1982-11-08/XTBIOS-REV1.json"/>
 	<video ref="/devices/pcx86/video/ibm/mda/ibm-mda.xml"/>
-	<fdc id="fdcNEC" pos="left" padLeft="8px" padBottom="8px" automount='{A:{name:"PC-DOS 2.00 (Disk 1)",path:"/disks/pcx86/dos/ibm/2.00/PCDOS200-DISK1.json"}, B:{name:"Executive Suite (1982)",path:"/apps/pcx86/1982/esuite/disk.json"}}'>
+	<fdc id="fdcNEC" pos="left" padLeft="8px" padBottom="8px" autoMount='{A:{name:"PC-DOS 2.00 (Disk 1)",path:"/disks/pcx86/dos/ibm/2.00/PCDOS200-DISK1.json"}, B:{name:"Executive Suite (1982)",path:"/apps/pcx86/1982/esuite/disk.json"}}'>
 		<control type="list" binding="listDrives"/>
 		<control type="list" binding="listDisks">
 			<manifest ref="/disks/pcx86/dos/ibm/1.00/manifest.xml" disk="*"/>

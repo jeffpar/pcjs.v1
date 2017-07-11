@@ -2,6 +2,12 @@
 layout: page
 title: PC Magazine Disks
 permalink: /disks/pcx86/shareware/pcmag/
+machines:
+  - id: ibm5150-pcmag
+    type: pcx86
+    resume: 1
+    config: /devices/pcx86/machine/5160/ega/640kb/machine.xml
+    autoType: $date\r$time\r
 ---
 
 PC Magazine Disks
@@ -16,6 +22,8 @@ with that diskette loaded in drive B.
 
 Looking at the volume numbers alone, you can tell that this collection is woefully incomplete, but perhaps more
 will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  Thanks.
+
+{% include machine.html id="ibm5150-pcmag" %}
 
 ### Directory of [PC Magazine (Vol. 06 No. 08)](/devices/pcx86/machine/5160/ega/640kb/?autoMount=%7B"B":%7B"name":"PC Magazine %28Vol. 06 No. 08%29"%7D%7D)
 

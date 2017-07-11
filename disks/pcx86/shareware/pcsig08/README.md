@@ -7,11 +7,7 @@ machines:
     type: pcx86
     resume: 1
     config: /disks/pcx86/shareware/pcsig08/machine.xml
-    autoMount:
-      A:
-        path: /disks/pcx86/dos/ibm/3.30/PCDOS330-DISK1.json
-      B:
-        path: /disks/pcx86/dos/ibm/3.30/PCDOS330-DISK2.json
+    autoType: $date\r$time\r
 ---
 
 PC-SIG Library 8th Edition CD-ROM (April 1990)
