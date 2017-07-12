@@ -61946,6 +61946,13 @@ class HDC extends Component {
         this.fATC = (parmsHDC['type'] == "at");
 
         /*
+         * Support for local disk images is currently limited to desktop browsers with FileReader support;
+         * when this flag is set, setBinding() allows local disk bindings and informs initBus() to update the
+         * "listDisks" binding accordingly.
+         */
+        this.fLocalDisks = (!Web.isMobile() && window && 'FileReader' in window);
+
+        /*
          * The remainder of HDC initialization now takes place in our initBus() handler.
          */
     }
@@ -61968,6 +61975,23 @@ class HDC extends Component {
 
         case "saveHD0":
         case "saveHD1":
+            /*
+             * Yes, technically, this feature does not require "Local disk support" (which is really a reference
+             * to FileReader support), but since fLocalDisks is also false for all mobile devices, and since there
+             * is an "orthogonality" to disabling both features in tandem, let's just let it slide, OK?
+             */
+            if (!this.fLocalDisks) {
+                if (DEBUG) this.log("Local disk support not available");
+                /*
+                 * We could also simply hide the control; eg:
+                 *
+                 *      control.style.display = "none";
+                 *
+                 * but removing the control altogether seems better.
+                 */
+                control.parentNode.removeChild(/** @type {Node} */ (control));
+                return false;
+            }
             this.bindings[sBinding] = control;
             control.onclick = function(iDrive) {
                 return function onClickSaveDrive(event) {
