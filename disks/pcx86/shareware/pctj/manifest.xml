@@ -2,7 +2,7 @@
 <?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.35.2/manifest.xsl"?>
 <manifest type="software">
 	<title>PC Tech Journal Diskettes</title>
-	<disk id="disk01" size="163840" chs="40:1:8" dir="archive/PCTJ8512" href="/disks/pcx86/shareware/pctj/PCTJ8512.json" md5="cf9e657a00ff80c049103c2b916c6039" md5json="c127f27e1f71822032e75016948b1f97">
+	<disk id="disk01" size="163840" chs="40:1:8" dir="archive/PCTJ8512" href="/disks/pcx86/shareware/pctj/disks/PCTJ8512.json" md5="cf9e657a00ff80c049103c2b916c6039" md5json="c127f27e1f71822032e75016948b1f97">
 		<name>PC Tech Journal (1985-12)</name>
 		<file size="1034" time="1985-09-23 14:22:48" attr="0x20" md5="a5e81153184a3f401ebe2a6797ea5005">AUTH.PER</file>
 		<file size="640" time="1985-11-26 16:23:50" attr="0x20" md5="e2c562eadccf9a9b9b422798aa31b289">BENCHMRK.LSP</file>
@@ -15,7 +15,7 @@
 		<file size="1673" time="1985-10-15 14:18:48" attr="0x20" md5="c9c820793d8b1cd3598f3f1c84187626">M_AUTH.PER</file>
 		<file size="445" time="1985-12-09 09:25:12" attr="0x20" md5="3953a62a68de56e3678e1b4d47b1de8a">PARSER.PRO</file>
 	</disk>
-	<disk id="disk02" size="163840" chs="40:1:8" dir="archive/PCTJ8603" href="/disks/pcx86/shareware/pctj/PCTJ8603.json" md5="ac31801f8f8fe940d58d6bd1bfb85765" md5json="bea6568bd412adab9251c17b80ad8ca4">
+	<disk id="disk02" size="163840" chs="40:1:8" dir="archive/PCTJ8603" href="/disks/pcx86/shareware/pctj/disks/PCTJ8603.json" md5="ac31801f8f8fe940d58d6bd1bfb85765" md5json="bea6568bd412adab9251c17b80ad8ca4">
 		<name>PC Tech Journal (1986-03)</name>
 		<file size="2856" time="1986-04-11 10:24:32" attr="0x20" md5="56fd9b9c1047abeb05a24ef1076feae1">DOS4AH.ASM</file>
 		<file size="58" time="1986-04-11 10:25:10" attr="0x20" md5="5ee84f056c539eb8573b3ed7af50a644">DOS4AH.COM</file>
@@ -26,7 +26,7 @@
 		<file size="5021" time="1986-07-26 11:46:52" attr="0x20" md5="4a23d79e76d23a0df137e8047c2bf9bd">SPMMLIB.PAS</file>
 		<file size="4688" time="1985-12-13 09:35:52" attr="0x20" md5="7f4247261f255791893f3649693e7d2d">TJOS.ASM</file>
 	</disk>
-	<disk id="disk03" size="163840" chs="40:1:8" dir="archive/PCTJ8610" href="/disks/pcx86/shareware/pctj/PCTJ8610.json" md5="abb4dd36d1173b514011eef08eb4c67f" md5json="99c43e7eef4c59ec8a4ddc6f54ad09ec">
+	<disk id="disk03" size="163840" chs="40:1:8" dir="archive/PCTJ8610" href="/disks/pcx86/shareware/pctj/disks/PCTJ8610.json" md5="abb4dd36d1173b514011eef08eb4c67f" md5json="99c43e7eef4c59ec8a4ddc6f54ad09ec">
 		<name>PC Tech Journal (1986-10)</name>
 		<file size="106" time="1986-07-22 21:38:48" attr="0x20" md5="69da18c606c9418e1a651a3c897da51d">DOTTIME.DEF</file>
 		<file size="3449" time="1986-07-22 21:56:06" attr="0x20" md5="3ecf09670f2b6d2935940e3b324c815b">DOTTIME.MOD</file>
@@ -49,12 +49,12 @@
 		<file size="294" time="1986-06-01 10:36:50" attr="0x20" md5="eaadaa2de0c3e9106dfc3a2c4ef9c44b">POINTLIB.DEF</file>
 		<file size="350" time="1986-06-01 10:38:28" attr="0x20" md5="779764ec235da589a0d9637c1bae04f3">POINTLIB.MOD</file>
 	</disk>
-	<disk id="disk04" size="163840" chs="40:1:8" dir="archive/PCTJ8612" href="/disks/pcx86/shareware/pctj/PCTJ8612.json" md5="e3074844ebc880ba4c9507bc2a6f8273" md5json="d1498fcb30ae1408a0d81185d52854ce">
+	<disk id="disk04" size="163840" chs="40:1:8" dir="archive/PCTJ8612" href="/disks/pcx86/shareware/pctj/disks/PCTJ8612.json" md5="e3074844ebc880ba4c9507bc2a6f8273" md5json="d1498fcb30ae1408a0d81185d52854ce">
 		<name>PC Tech Journal (1986-12)</name>
 		<file size="8985" time="1986-10-22 13:45:20" attr="0x20" md5="6ceb043b705b517b853ae6ab50dedc22">JUMPSRCH.PAS</file>
 		<file size="2683" time="1986-08-20 14:41:52" attr="0x20" md5="478079228b1cf544fde3918495ca04f0">ROREADER.PAS</file>
 	</disk>
-	<disk id="disk05" size="163840" chs="40:1:8" dir="archive/PCTJ8702" href="/disks/pcx86/shareware/pctj/PCTJ8702.json" md5="357e92eece1ec3950c919deb654c7f03" md5json="22dc75b0c3c26a9b74d613ac9017659f">
+	<disk id="disk05" size="163840" chs="40:1:8" dir="archive/PCTJ8702" href="/disks/pcx86/shareware/pctj/disks/PCTJ8702.json" md5="357e92eece1ec3950c919deb654c7f03" md5json="22dc75b0c3c26a9b74d613ac9017659f">
 		<name>PC Tech Journal (1987-02)</name>
 		<file size="1078" time="1986-11-25 13:59:56" attr="0x20" md5="0ddeff7a36614924e1e764b1be36bda6">BUSPERF.C</file>
 		<file size="62310" time="1986-11-16 19:25:02" attr="0x20" md5="36863faa92c86ee8ea7a929dc870b5ac">BUSPERF.EXE</file>
@@ -83,7 +83,7 @@
 		<file size="6734" time="1986-12-08 15:20:36" attr="0x20" md5="fd0f8a802c47b04f781ab9b70e10a673">TONE.EXE</file>
 		<file size="30" time="1986-12-04 17:43:32" attr="0x20" md5="aeb91d54c471e0c17727b92e30821949">TOOLS.INI</file>
 	</disk>
-	<disk id="disk06" size="163840" chs="40:1:8" dir="archive/PCTJ8706" href="/disks/pcx86/shareware/pctj/PCTJ8706.json" md5="91b1567dad67a43bd1bcb2aedbe35103" md5json="08f2c2142c616275c231bfb21edc530e">
+	<disk id="disk06" size="163840" chs="40:1:8" dir="archive/PCTJ8706" href="/disks/pcx86/shareware/pctj/disks/PCTJ8706.json" md5="91b1567dad67a43bd1bcb2aedbe35103" md5json="08f2c2142c616275c231bfb21edc530e">
 		<name>PC Tech Journal (1987-06)</name>
 		<file size="471" time="1987-04-21 13:26:20" attr="0x20" md5="0a7ed295618914ef53e56196799128ee">ASKDEMO.BAT</file>
 		<file size="1813" time="1987-04-21 13:28:30" attr="0x20" md5="43b7b1d1bebe7106f628d2ad896f4d4e">ASKKEY.ASM</file>
@@ -97,7 +97,7 @@
 		<file size="191" time="1987-06-05 14:20:42" attr="0x20" md5="d9797eee87fb49d5bc0ff42991ebe9ce">README.TXT</file>
 		<file size="716" time="1987-04-02 14:48:58" attr="0x20" md5="e9b39392628f110323b7283ea546464a">SYNTH1.F77</file>
 	</disk>
-	<disk id="disk07" size="163840" chs="40:1:8" dir="archive/PCTJ8707" href="/disks/pcx86/shareware/pctj/PCTJ8707.json" md5="8ba0b50bf002bf985ba47f1783661592" md5json="d9f7b9df0b13c06dc26ecb044b924630">
+	<disk id="disk07" size="163840" chs="40:1:8" dir="archive/PCTJ8707" href="/disks/pcx86/shareware/pctj/disks/PCTJ8707.json" md5="8ba0b50bf002bf985ba47f1783661592" md5json="d9f7b9df0b13c06dc26ecb044b924630">
 		<name>PC Tech Journal (1987-07)</name>
 		<file size="12321" time="1987-05-28 14:01:12" attr="0x20" md5="03e09413f53e7c9997918441ae75ac86">ATKEY.ASM</file>
 		<file size="1382" time="1987-05-27 16:07:20" attr="0x20" md5="c1f2b1413db7e4ef083cb15ccfddd3d5">DSPYINFO.C</file>
@@ -113,7 +113,7 @@
 		<file size="2009" time="1987-02-16 10:35:10" attr="0x20" md5="9db996d935e0eb76bf87ecc20bfa766d">USE_EGA.C</file>
 		<file size="429" time="1987-04-06 15:47:22" attr="0x20" md5="af04babffeb296e9740c7b7ff11aa1d0">USE_EGA.MK</file>
 	</disk>
-	<disk id="disk08" size="163840" chs="40:1:8" dir="archive/PCTJ8710" href="/disks/pcx86/shareware/pctj/PCTJ8710.json" md5="3b0fbea72ae336dec5452cbcf4929dbf" md5json="9a3732693e15a6a7c1c79e364d0b61fb">
+	<disk id="disk08" size="163840" chs="40:1:8" dir="archive/PCTJ8710" href="/disks/pcx86/shareware/pctj/disks/PCTJ8710.json" md5="3b0fbea72ae336dec5452cbcf4929dbf" md5json="9a3732693e15a6a7c1c79e364d0b61fb">
 		<name>PC Tech Journal (1987-10)</name>
 		<file size="4423" time="1987-04-04 22:34:34" attr="0x20" md5="cc03dbef7548b70e33e2aa37f08708e8">HERCDEMO.C</file>
 		<file size="8250" time="1987-04-04 22:46:52" attr="0x20" md5="d6c97bd9aab1c731f96d0bc5c7d76f6c">HERCDEMO.EXE</file>
@@ -125,14 +125,14 @@
 		<file size="1691" time="1987-03-26 12:00:00" attr="0x20" md5="c1ad13ece5b10fd961ec5f3e9037ca45">MEMMGR.H</file>
 		<file size="3274" time="1987-03-26 12:00:00" attr="0x20" md5="9c3f87934b2ace69bcdfe2053c1695b1">MEMMGR.RC</file>
 	</disk>
-	<disk id="disk09" size="163840" chs="40:1:8" dir="archive/PCTJ8711" href="/disks/pcx86/shareware/pctj/PCTJ8711.json" md5="05a6c0e5d72c09c296c959f41bcfa15c" md5json="06c22bd9f8ebf76d286b7d1fc3fe8a0b">
+	<disk id="disk09" size="163840" chs="40:1:8" dir="archive/PCTJ8711" href="/disks/pcx86/shareware/pctj/disks/PCTJ8711.json" md5="05a6c0e5d72c09c296c959f41bcfa15c" md5json="06c22bd9f8ebf76d286b7d1fc3fe8a0b">
 		<name>PC Tech Journal (1987-11)</name>
 		<file size="2657" time="1987-09-09 07:55:28" attr="0x20" md5="1728cf7aa8097e35c55b182ead372a91">BOX1.C</file>
 		<file size="3367" time="1987-09-09 07:56:42" attr="0x20" md5="7bfcdb039fcfe31d82fdffc0a2ad80fc">BOX2.C</file>
 		<file size="4091" time="1987-09-09 07:58:12" attr="0x20" md5="e7f2cbef25e9d29b0f594c32c73bed17">BOX3.C</file>
 		<file size="2234" time="1987-09-18 16:22:08" attr="0x20" md5="da5c9a05a561761a1c3bc03ac7528de9">CPUTYPE.ASM</file>
 	</disk>
-	<disk id="disk10" size="163840" chs="40:1:8" dir="archive/PCTJ8804" href="/disks/pcx86/shareware/pctj/PCTJ8804.json" md5="ee9c372b3a3c87a3e8802d9261c3027a" md5json="810d35190801c844deef345b59f44bd1">
+	<disk id="disk10" size="163840" chs="40:1:8" dir="archive/PCTJ8804" href="/disks/pcx86/shareware/pctj/disks/PCTJ8804.json" md5="ee9c372b3a3c87a3e8802d9261c3027a" md5json="810d35190801c844deef345b59f44bd1">
 		<name>PC Tech Journal (1988-04)</name>
 		<file size="14288" time="1988-03-23 16:00:00" attr="0x20" md5="f176fd9c1b3a9760fa49e9d9ba865992">ACCURACY.EXE</file>
 		<file size="12983" time="1988-03-23 16:00:00" attr="0x20" md5="2e96912585cefa705961b14c35658778">ACCURACY.PAS</file>
@@ -145,7 +145,7 @@
 		<file size="2569" time="1988-02-09 09:34:26" attr="0x20" md5="9b178ce6566eebfe197cb619da8b73fb">POS_READ.C1</file>
 		<file size="2359" time="1988-03-23 04:00:00" attr="0x20" md5="d1bbf62a1832b11352297916b8a38ffe">SAMPUNIT.PAS</file>
 	</disk>
-	<disk id="disk11" size="327680" chs="40:2:8" dir="archive/PCTJ8805" href="/disks/pcx86/shareware/pctj/PCTJ8805.json" md5="4698e44c1997345dd84e0a2000f838cf" md5json="f754253d88833e3b1523bd8ef507f856">
+	<disk id="disk11" size="327680" chs="40:2:8" dir="archive/PCTJ8805" href="/disks/pcx86/shareware/pctj/disks/PCTJ8805.json" md5="4698e44c1997345dd84e0a2000f838cf" md5json="f754253d88833e3b1523bd8ef507f856">
 		<name>PC Tech Journal (1988-05)</name>
 		<file size="6556" time="1988-03-24 10:30:14" attr="0x20" md5="0cf46b87fcb62374f610109029b02405">8514DEMO.C</file>
 		<file size="8528" time="1988-03-14 15:10:40" attr="0x20" md5="1af741252e3428fd93845117c67d920a">8514DEMO.EXE</file>
@@ -165,7 +165,7 @@
 		<file size="63593" time="1988-03-14 16:28:20" attr="0x20" md5="5cf69791e21081062f5a80d66849a39c">VGALOAD.ASM</file>
 		<file size="3338" time="1988-03-14 16:30:06" attr="0x20" md5="513799f4070e54022af930861779df45">VGALOAD.COM</file>
 	</disk>
-	<disk id="disk12" size="163840" chs="40:1:8" dir="archive/PCTJ8806" href="/disks/pcx86/shareware/pctj/PCTJ8806.json" md5="4e9d22b344bd9f414e4ea9779c3c215d" md5json="c25e19935c03599b360b6185f23c3179">
+	<disk id="disk12" size="163840" chs="40:1:8" dir="archive/PCTJ8806" href="/disks/pcx86/shareware/pctj/disks/PCTJ8806.json" md5="4e9d22b344bd9f414e4ea9779c3c215d" md5json="c25e19935c03599b360b6185f23c3179">
 		<name>PC Tech Journal (1988-06)</name>
 		<file size="2093" time="1988-04-13 09:30:52" attr="0x20" md5="f0313ca933fb253b9f7a324574c33f6f">FAMDEMO.ASM</file>
 		<file size="7331" time="1988-04-28 08:59:54" attr="0x20" md5="29841a337926826bdff447413de80c8c">LANPERF.C</file>
@@ -174,7 +174,7 @@
 		<file size="7433" time="1988-04-10 21:58:44" attr="0x20" md5="c911d751cfa73629cc02b54744bbfea9">LPTEST.ASM</file>
 		<file size="8965" time="1988-04-25 16:56:56" attr="0x20" md5="bc46bcfce4fc9afd165d1d496c06c19a">OPTBENCH.C</file>
 	</disk>
-	<disk id="disk13" size="163840" chs="40:1:8" dir="archive/PCTJ8807" href="/disks/pcx86/shareware/pctj/PCTJ8807.json" md5="a38718836a8d7e88cb5e773c6b14820e" md5json="251dfcc5be34ae946f2f8d34cb122460">
+	<disk id="disk13" size="163840" chs="40:1:8" dir="archive/PCTJ8807" href="/disks/pcx86/shareware/pctj/disks/PCTJ8807.json" md5="a38718836a8d7e88cb5e773c6b14820e" md5json="251dfcc5be34ae946f2f8d34cb122460">
 		<name>PC Tech Journal (1988-07)</name>
 		<file size="16290" time="1988-04-17 16:23:16" attr="0x20" md5="505f0687e910b763645d4cb56296ae8f">EDINVENT.APC</file>
 		<file size="21568" time="1988-04-17 15:59:14" attr="0x20" md5="962ab5e378cd77bc0660063e5b590e20">EDINVENT.API</file>
@@ -184,7 +184,7 @@
 		<file size="1176" time="1988-05-13 14:43:32" attr="0x20" md5="0adfa491a6c171eadcf376eff202fb5c">OS2NLOK.DEV</file>
 		<file size="147" time="1988-07-27 09:47:06" attr="0x20" md5="fc41a9431c1ac8c0c15c51ed2cf10ca1">README</file>
 	</disk>
-	<disk id="disk14" size="163840" chs="40:1:8" dir="archive/PCTJ8808" href="/disks/pcx86/shareware/pctj/PCTJ8808.json" md5="7829f4678dc57a48a52da80a19e29d26" md5json="db44767e27c89d14d24b9230f53f1338">
+	<disk id="disk14" size="163840" chs="40:1:8" dir="archive/PCTJ8808" href="/disks/pcx86/shareware/pctj/disks/PCTJ8808.json" md5="7829f4678dc57a48a52da80a19e29d26" md5json="db44767e27c89d14d24b9230f53f1338">
 		<name>PC Tech Journal (1988-08)</name>
 		<file size="10493" time="1988-05-25 14:56:50" attr="0x20" md5="7173a2c951609ac03d9d1c58fc98c0a1">NBLIB.C</file>
 		<file size="6475" time="1988-05-28 21:19:52" attr="0x20" md5="6ec53941a9ac6bdb996542f3660c4102">NBRECV.C</file>
@@ -196,7 +196,7 @@
 		<file size="380" time="1988-05-25 14:56:54" attr="0x20" md5="26a8154802b764a838c211a21db84c64">_NETBIOS.C</file>
 		<file size="1639" time="1988-05-25 14:56:56" attr="0x20" md5="404bd8cc7d2e2190f18e8ff6db171fd6">_NETLOCK.ASM</file>
 	</disk>
-	<disk id="disk15" size="163840" chs="40:1:8" dir="archive/PCTJ8809" href="/disks/pcx86/shareware/pctj/PCTJ8809.json" md5="2af4fd4190ab6a6c2ac34f48495e9d6b" md5json="36f780a878b169215789e8381dfde567">
+	<disk id="disk15" size="163840" chs="40:1:8" dir="archive/PCTJ8809" href="/disks/pcx86/shareware/pctj/disks/PCTJ8809.json" md5="2af4fd4190ab6a6c2ac34f48495e9d6b" md5json="36f780a878b169215789e8381dfde567">
 		<name>PC Tech Journal (1988-09)</name>
 		<file size="4348" time="1988-09-15 13:46:38" attr="0x20" md5="56bec4f1ead8c0580a7357c01539ef71">ASKSYS.ASM</file>
 		<file size="1316" time="1988-07-15 13:37:34" attr="0x20" md5="21b4e248101a473fc725b4244a0f0800">ASKSYS.COM</file>
@@ -207,7 +207,7 @@
 		<file size="244" time="1988-07-19 16:02:56" attr="0x20" md5="e1d61e6521764a1847b5f80bb2cd272c" dir="OS2LINK/">DYNSCALE.DEF</file>
 		<file size="308" time="1988-07-19 15:59:50" attr="0x20" md5="e3c9915b360ed02167d567bc02e907d4" dir="OS2LINK/">MKDLL.CMD</file>
 	</disk>
-	<disk id="disk16" size="163840" chs="40:1:8" dir="archive/PCTJ8811" href="/disks/pcx86/shareware/pctj/PCTJ8811.json" md5="060b55b4d963af4ea1848c9831f17d5a" md5json="2316a55ab36b735d13264b8cce4ae71a">
+	<disk id="disk16" size="163840" chs="40:1:8" dir="archive/PCTJ8811" href="/disks/pcx86/shareware/pctj/disks/PCTJ8811.json" md5="060b55b4d963af4ea1848c9831f17d5a" md5json="2316a55ab36b735d13264b8cce4ae71a">
 		<name>PC Tech Journal (1988-11)</name>
 		<file size="1141" time="1988-09-06 11:23:04" attr="0x20" md5="796aabb8bd20a98a9df928889b40b444">GETCRTCR.ASM</file>
 		<file size="681" time="1988-09-06 11:23:38" attr="0x20" md5="afc80515a01996dc0e45dee846820a11">INCSTRTA.C</file>
@@ -222,17 +222,17 @@
 		<file size="2020" time="1988-12-12 09:24:44" attr="0x20" md5="a88b651805c5381ab9480939e3e444bf">VGAZOOM.COM</file>
 		<file size="15800" time="1988-09-14 16:00:02" attr="0x20" md5="d5ee2f575869080e69e4e8c045eae49d">VGAZOOM2.ASM</file>
 	</disk>
-	<disk id="disk17" size="163840" chs="40:1:8" dir="archive/PCTJ8812" href="/disks/pcx86/shareware/pctj/PCTJ8812.json" md5="742473ab6fbb5f6499fd7a985055ea16" md5json="ad488bfb05392240abfe1e0710b1e922">
+	<disk id="disk17" size="163840" chs="40:1:8" dir="archive/PCTJ8812" href="/disks/pcx86/shareware/pctj/disks/PCTJ8812.json" md5="742473ab6fbb5f6499fd7a985055ea16" md5json="ad488bfb05392240abfe1e0710b1e922">
 		<name>PC Tech Journal (1988-12)</name>
 		<file size="5878" time="1988-10-17 13:08:36" attr="0x20" md5="a7dc1fb5b91cc3b2cdf2e84b9271dda5">QDEMO1.C</file>
 		<file size="5530" time="1988-10-17 13:08:38" attr="0x20" md5="c719ceeb62acb72b334c0285187a6143">QDEMO2.C</file>
 	</disk>
-	<disk id="disk18" size="163840" chs="40:1:8" dir="archive/PCTJ8901" href="/disks/pcx86/shareware/pctj/PCTJ8901.json" md5="a4e180d032c7a390a3879cb4f5b44e96" md5json="b183408f6b36cb988e2f4bf97d232696">
+	<disk id="disk18" size="163840" chs="40:1:8" dir="archive/PCTJ8901" href="/disks/pcx86/shareware/pctj/disks/PCTJ8901.json" md5="a4e180d032c7a390a3879cb4f5b44e96" md5json="b183408f6b36cb988e2f4bf97d232696">
 		<name>PC Tech Journal (1989-01)</name>
 		<file size="7056" time="1988-11-08 14:19:02" attr="0x20" md5="f25ed3d86c21dfecadf3cfbf29ff5015">DB386.ASM</file>
 		<file size="698" time="1988-11-09 08:47:50" attr="0x20" md5="54ccab588d57c4a3f6090ac9396a1ce6">DB386.COM</file>
 	</disk>
-	<disk id="disk20" size="1228800" chs="80:2:15" dir="archive/PCTBENCH" href="/disks/pcx86/shareware/pctj/PCTBENCH.json" md5="1cdd985b20d72cbf33fb3f7bd1acf6e9" md5json="d51776d352de4e415d09fafd6719e0c9">
+	<disk id="disk20" size="1228800" chs="80:2:15" dir="archive/PCTBENCH" href="/disks/pcx86/shareware/pctj/disks/PCTBENCH.json" md5="1cdd985b20d72cbf33fb3f7bd1acf6e9" md5json="d51776d352de4e415d09fafd6719e0c9">
 		<name>PC Tech Journal (Benchmarks)</name>
 		<file size="4096" time="1988-09-09 00:46:16" attr="0x20" md5="e13d778280e62faad89de76f726da772">ALR25386.TIM</file>
 		<file size="4096" time="1988-09-09 00:46:50" attr="0x20" md5="beca19245334cb1b5cb96ea6f8c16635">COM286.TIM</file>
@@ -271,7 +271,7 @@
 		<file size="14909" time="1988-09-09 16:36:28" attr="0x20" md5="b1abfdfa7d140c6ee81af3f506c798bc">TJ640480.PCX</file>
 		<file size="14" time="1988-09-07 18:29:40" attr="0x20" md5="3c982d76849cc6ebce001ea914672a05">XREF.TXT</file>
 	</disk>
-	<disk id="disk19" size="1228800" chs="80:2:15" dir="archive/PCTJBEST" href="/disks/pcx86/shareware/pctj/PCTJBEST.json" md5="ec017991754938344444b13aba2ba393" md5json="63d2044a7feb2e1dffefaa8574ed4a36">
+	<disk id="disk19" size="1228800" chs="80:2:15" dir="archive/PCTJBEST" href="/disks/pcx86/shareware/pctj/disks/PCTJBEST.json" md5="ec017991754938344444b13aba2ba393" md5json="63d2044a7feb2e1dffefaa8574ed4a36">
 		<name>PC Tech Journal (Best Of)</name>
 		<file size="466" time="1987-11-02 10:47:18" attr="0x20" md5="ea1fa4e5dc81d7d04ce8778315f70bb3">ASKDEMO.BAT</file>
 		<file size="39" time="1987-11-02 10:35:54" attr="0x20" md5="75be9e7dd6f0177da3459843530a1a8f">ASKKEY.COM</file>
