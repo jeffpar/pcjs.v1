@@ -1,22 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<fdc id="fdcNEC" autoMount='{A:{name:"PC-DOS 3.20 (Disk 1)",path:"/disks/pcx86/dos/ibm/3.20/PCDOS320-DISK1.json"}, B:{name:"PC-DOS 3.20 (Disk 2)",path:"/disks/pcx86/dos/ibm/3.20/PCDOS320-DISK2.json"}}' pos="left" padLeft="8px" padBottom="8px">
+<fdc id="fdcNEC" pos="left" padLeft="8px" padBottom="8px">
 	<control type="list" binding="listDrives"/>
 	<control type="list" binding="listDisks">
-		<disk path="/disks/pcx86/dos/ibm/1.00/PCDOS100.json">PC-DOS 1.00</disk>
-		<disk path="/disks/pcx86/dos/ibm/1.10/PCDOS110.json">PC-DOS 1.10</disk>
-		<disk path="/disks/pcx86/dos/ibm/2.00/PCDOS200-DISK1.json">PC-DOS 2.00 (Disk 1)</disk>
-		<disk path="/disks/pcx86/dos/ibm/2.00/PCDOS200-DISK2.json">PC-DOS 2.00 (Disk 2)</disk>
-		<disk path="/disks/pcx86/dos/ibm/2.10/PCDOS210-DISK1.json">PC-DOS 2.10 (Disk 1)</disk>
-		<disk path="/disks/pcx86/dos/ibm/2.10/PCDOS210-DISK2.json">PC-DOS 2.10 (Disk 2)</disk>
-		<disk path="/disks/pcx86/dos/ibm/3.00/PCDOS300-DISK1.json">PC-DOS 3.00 (Disk 1)</disk>
-		<disk path="/disks/pcx86/dos/ibm/3.00/PCDOS300-DISK2.json">PC-DOS 3.00 (Disk 2)</disk>
-		<disk path="/disks/pcx86/dos/ibm/3.10/PCDOS310-DISK1.json">PC-DOS 3.10 (Disk 1)</disk>
-		<disk path="/disks/pcx86/dos/ibm/3.10/PCDOS310-DISK2.json">PC-DOS 3.10 (Disk 2)</disk>
-		<disk path="/disks/pcx86/dos/ibm/3.20/PCDOS320-DISK1.json">PC-DOS 3.20 (Disk 1)</disk>
-		<disk path="/disks/pcx86/dos/ibm/3.20/PCDOS320-DISK2.json">PC-DOS 3.20 (Disk 2)</disk>
-		<disk path="/disks/pcx86/dos/ibm/3.30/PCDOS330-DISK1.json">PC-DOS 3.30 (Disk 1)</disk>
-		<disk path="/disks/pcx86/dos/ibm/3.30/PCDOS330-DISK2.json">PC-DOS 3.30 (Disk 2)</disk>
-		<disk path="/disks/pcx86/dos/ibm/3.30/PCDOS330-DISK1-720K.json">PC-DOS 3.30 (720K)</disk>
+		<disk path="/disks/pcx86/dos/microsoft/3.20/MSDOS320-DISK1.json">MS-DOS 3.20 (Disk 1)</disk>
+		<disk path="/disks/pcx86/dos/microsoft/3.20/MSDOS320-DISK2.json">MS-DOS 3.20 (Disk 2)</disk>
+		<disk path="/disks/pcx86/dos/microsoft/3.20/MSDOS320-DISK3-PROGREF1.json">MS-DOS 3.20 (ProgRef 1)</disk>
+		<disk path="/disks/pcx86/dos/microsoft/3.20/MSDOS320-DISK4-PROGREF2.json">MS-DOS 3.20 (ProgRef 2)</disk>
 		<disk path="http://archive.pcjs.org/disks/pcx86/shareware/pcsig08/disks/DISK0001.json">PCSIG08: DISK0001</disk>
 		<disk path="http://archive.pcjs.org/disks/pcx86/shareware/pcsig08/disks/DISK0002.json">PCSIG08: DISK0002</disk>
 		<disk path="http://archive.pcjs.org/disks/pcx86/shareware/pcsig08/disks/DISK0003.json">PCSIG08: DISK0003</disk>

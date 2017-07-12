@@ -1,15 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<fdc id="fdcNEC" autoMount='{A:{name:"PC-DOS 3.20 (Disk 1)",path:"/disks/pcx86/dos/ibm/3.20/PCDOS320-DISK1.json"}, B:{name:"PC-DOS 3.20 (Disk 2)",path:"/disks/pcx86/dos/ibm/3.20/PCDOS320-DISK2.json"}}' pos="left" padLeft="8px" padBottom="8px">
+<fdc id="fdcNEC" pos="left" padLeft="8px" padBottom="8px">
 	<control type="list" binding="listDrives"/>
 	<control type="list" binding="listDisks">
-		<manifest ref="/disks/pcx86/dos/ibm/1.00/manifest.xml"/>
-		<manifest ref="/disks/pcx86/dos/ibm/1.10/manifest.xml"/>
-		<manifest ref="/disks/pcx86/dos/ibm/2.00/manifest.xml"/>
-		<manifest ref="/disks/pcx86/dos/ibm/2.10/manifest.xml"/>
-		<manifest ref="/disks/pcx86/dos/ibm/3.00/manifest.xml"/>
-		<manifest ref="/disks/pcx86/dos/ibm/3.10/manifest.xml"/>
-		<manifest ref="/disks/pcx86/dos/ibm/3.20/manifest.xml"/>
-		<manifest ref="/disks/pcx86/dos/ibm/3.30/manifest.xml"/>
+		<manifest ref="/disks/pcx86/dos/microsoft/3.20/manifest.xml"/>
 		<manifest ref="/disks/pcx86/shareware/pcsig08/manifest.xml"/>
 	</control>
 	<control type="button" binding="loadDisk">Load</control>

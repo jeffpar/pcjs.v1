@@ -3,11 +3,9 @@ layout: page
 title: PC-SIG Library 8th Edition CD-ROM (April 1990)
 permalink: /disks/pcx86/shareware/pcsig08/
 machines:
-  - id: ibm5150-pcsig08
+  - id: pcsig08
     type: pcx86
     resume: 1
-    config: /disks/pcx86/shareware/pcsig08/machine.xml
-    autoType: $date\r$time\r
 ---
 
 PC-SIG Library 8th Edition CD-ROM (April 1990)
@@ -18,7 +16,7 @@ The directory listings were generated from the folder's [manifest](manifest.xml)
 [disklist](/modules/diskdump/bin/disklist), a custom PCjs JavaScript utility.  The same machine is also available
 [with the PCjs Debugger](debugger/).
 
-{% include machine.html id="ibm5150-pcsig08" %}
+{% include machine.html id="pcsig08" %}
 
 ### Directory of PCSIG08: DISK0001
 
