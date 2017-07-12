@@ -2134,6 +2134,7 @@ class Video extends Component {
      *      screenWidth: width of the screen canvas, in pixels
      *      screenHeight: height of the screen canvas, in pixels
      *      screenColor: background color of the screen canvas (default is black)
+     *      flicker: 1 enables screen flicker, 0 disables (default is 0)
      *      scale: true for font scaling, false (default) to center the display on the screen
      *      charCols: number of character columns
      *      charRows: number of character rows
@@ -2235,6 +2236,20 @@ class Video extends Component {
         this.inputScreen = textarea || canvas || null;
 
         /*
+         * We now ensure that a colorScreen property is always set (to "black" if nothing else), and
+         * set BOTH the canvas element's AND the container element's backgroundColor to match that color.
+         *
+         * This gives us option of doing "cute" things like flipping the canvas element's opacity from
+         * 1 to 0 briefly, alternately revealing and hiding the underlying container element, to simulate
+         * screen "flicker".
+         */
+        this.colorScreen = parmsVideo['screenColor'] || "black";
+        this.opacityFlicker = (1 - (parmsVideo['flicker'] || 0)).toString();
+        this.fOpacityReduced = false;
+        if (canvas) canvas.style.backgroundColor = this.colorScreen;
+        if (container) container.style.backgroundColor = this.colorScreen;
+
+        /*
          * Support for disabling (or, less commonly, enabling) image smoothing, which all browsers
          * seem to support now (well, OK, I still have to test the latest MS Edge browser), despite
          * it still being labelled "experimental technology".  Let's hope the browsers standardize
@@ -2313,10 +2328,10 @@ class Video extends Component {
          * is exasperating; browsers can't agree on 'full' or 'Full, 'request' or 'Request', 'screen' or 'Screen', and
          * while some browsers honor other browser prefixes, most browsers don't.
          */
-        this.container = container;
-        if (this.container) {
-            this.container.doFullScreen = container['requestFullscreen'] || container['msRequestFullscreen'] || container['mozRequestFullScreen'] || container['webkitRequestFullscreen'];
-            if (this.container.doFullScreen) {
+        this.doFullScreen = null;
+        if ((this.container = container)) {
+            this.doFullScreen = container['requestFullscreen'] || container['msRequestFullscreen'] || container['mozRequestFullScreen'] || container['webkitRequestFullscreen'];
+            if (this.doFullScreen) {
                 for (i = 0; i < asWebPrefixes.length; i++) {
                     sEvent = asWebPrefixes[i] + 'fullscreenchange';
                     if ('on' + sEvent in document) {
@@ -2532,10 +2547,10 @@ class Video extends Component {
             switch (sBinding) {
 
             case "fullScreen":
-                if (this.container && this.container.doFullScreen) {
+                if (this.doFullScreen) {
                     control.onclick = function onClickFullScreen() {
                         if (DEBUG) video.printMessage("fullScreen()");
-                        video.doFullScreen();
+                        video.goFullScreen();
                     };
                 } else {
                     if (DEBUG) this.log("FullScreen API not available");
@@ -2609,16 +2624,16 @@ class Video extends Component {
     }
 
     /**
-     * doFullScreen()
+     * goFullScreen()
      *
      * @this {Video}
      * @return {boolean} true if request successful, false if not (eg, failed OR not supported)
      */
-    doFullScreen()
+    goFullScreen()
     {
         var fSuccess = false;
         if (this.container) {
-            if (this.container.doFullScreen) {
+            if (this.doFullScreen) {
                 /*
                  * Styling the container with a width of "100%" and a height of "auto" works great when the aspect ratio
                  * of our virtual screen is at least roughly equivalent to the physical screen's aspect ratio, but now that
@@ -2668,8 +2683,8 @@ class Video extends Component {
                     this.canvasScreen.style.display = "block";
                     this.canvasScreen.style.margin = "auto";
                 }
-                this.container.style.backgroundColor = "black";
-                this.container.doFullScreen();
+                this.container.style.backgroundColor = this.colorScreen;
+                this.doFullScreen();
                 fSuccess = true;
             }
             this.setFocus();
@@ -4621,6 +4636,28 @@ class Video extends Component {
                 } else {
                     nMode = ((card.regMode & Card.CGA.MODE.HIRES_BW)? Video.MODE.CGA_640X200 : Video.MODE.CGA_320X200_BW);
                     if (!(card.regMode & Card.CGA.MODE.BW_SEL)) nMode -= 1;
+                }
+                if (this.fOpacityReduced) {
+                    this.canvasScreen.style.opacity = "1";
+                    this.fOpacityReduced = false;
+                }
+            }
+            else {
+                /*
+                 * This code is responsible for simulating flicker on a CGA screen.  Note that we have to also
+                 * call yieldCPU() to ensure that the browser "comes up for air" and honors the new opacity, otherwise
+                 * you'll see very intermittent flicker (which is actually more annoying than regular flicker, believe
+                 * it or not).
+                 *
+                 * You also have the option of setting opacityFlicker to something greater than zero (eg, "0.5") to
+                 * make the flicker less obtrusive; in fact, that might be more faithful to the persistence of a CGA
+                 * screen's phosphor.  The downside is that if the VIDEO_ENABLE bit is ever turned for off a "long time",
+                 * then you'll be treated to a very unnatural persistence effect.
+                 */
+                if (!this.fOpacityReduced && +this.opacityFlicker < 1) {
+                    this.fOpacityReduced = true;
+                    this.canvasScreen.style.opacity = this.opacityFlicker;
+                    this.cpu.yieldCPU();
                 }
             }
         }
@@ -6721,7 +6758,6 @@ class Video extends Component {
             canvas.setAttribute("class", "pcjs-canvas");
             canvas.setAttribute("width", parmsVideo['screenWidth']);
             canvas.setAttribute("height", parmsVideo['screenHeight']);
-            canvas.style.backgroundColor = parmsVideo['screenColor'];
 
             /*
              * The "contenteditable" attribute on a canvas element NOTICEABLY slows down canvas drawing on
