@@ -9,11 +9,10 @@ machines:
     autoType: $date\r$time\r
 ---
 
-PC-SIG Library 8th Edition CD-ROM (April 1990)
-----------------------------------------------
+PC-SIG Library 8th Edition CD-ROM (with Debugger)
+-------------------------------------------------
 
 The machine below has access to all 2,121 diskette images from the PC-SIG Library 8th Edition CD-ROM (April 1990).
-
 The same machine is also available [without the PCjs Debugger](../).
 
 {% include machine.html id="ibm5150-pcsig08" %}

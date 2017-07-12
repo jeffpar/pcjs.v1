@@ -7,6 +7,9 @@ machines:
     type: pcx86
     resume: 1
     config: /devices/pcx86/machine/5160/ega/640kb/machine.xml
+    autoMount:
+      B:
+        name: PC Magazine (Vol. 06 No. 08)
     autoType: $date\r$time\r
 ---
 
@@ -18,7 +21,7 @@ To build the following collection, we started with the ZIP archives at
 We filtered out the duplicates, organized them chronologically, and then put their contents onto diskette
 images that you can easily "Load" and "Save" in any [PCjs Machine](/devices/pcx86/machine/).
 In fact, if you click on the name of any diskette in the headings below, a machine should automatically launch
-with that diskette loaded in drive B.
+with that diskette loaded in drive B.  The machine below is also available [with the PCjs Debugger](debugger/).
 
 Looking at the volume numbers alone, you can tell that this collection is woefully incomplete, but perhaps more
 will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  Thanks.
