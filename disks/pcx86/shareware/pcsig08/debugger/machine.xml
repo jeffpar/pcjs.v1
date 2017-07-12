@@ -3,7 +3,7 @@
 <machine id="ibm5150" type="pcx86" border="1" pos="center" background="default">
 	<name pos="center">IBM PC (Model 5150), CGA, 256K</name>
 	<computer id="pc-cga-256k" name="IBM PC"/>
-	<cpu id="cpu8088" model="8088"/>
+	<cpu id="cpu8088" model="8088" autoStart="true"/>
 	<ram id="ramLow" addr="0x00000" test="false" comment="no memory test"/>
 	<rom id="romBASIC" addr="0xf6000" size="0x8000" file="/devices/pcx86/rom/5150/basic/BASIC100.json"/>
 	<rom id="romBIOS" addr="0xfe000" size="0x2000" file="/devices/pcx86/rom/5150/1981-04-24/PCBIOS-REV1.json"/>

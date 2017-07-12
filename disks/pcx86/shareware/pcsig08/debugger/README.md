@@ -6,6 +6,7 @@ machines:
   - id: ibm5150-pcsig08
     type: pcx86
     config: /disks/pcx86/shareware/pcsig08/debugger/machine.xml
+    autoType: $date\r$time\r
 ---
 
 PC-SIG Library 8th Edition CD-ROM (April 1990)
