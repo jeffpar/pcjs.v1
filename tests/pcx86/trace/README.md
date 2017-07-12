@@ -38,12 +38,12 @@ Operation
 ---
 
 To load TRACE.COM and TRACE.TXT onto a virtual disk image that PCjs can access, you can add an
-"automount" setting to your PCjs <fdc> configuration that will dynamically generate a fresh disk image
+"autoMount" setting to your PCjs <fdc> configuration that will dynamically generate a fresh disk image
 every time the machine is loaded, via the DiskDump API.  This is useful when you're constantly
 generating new test results:
 
 ```xml
-<fdc id="fdcNEC" automount='{B:{name:"Trace Tests",path:"/tests/pcx86/trace/trace.com;trace.txt"}}'/>
+<fdc id="fdcNEC" autoMount='{B:{name:"Trace Tests",path:"/tests/pcx86/trace/trace.com;trace.txt"}}'/>
 ```
 
 Alternatively, if you want to run the tests in another virtual PC environment (eg, VMware Fusion),

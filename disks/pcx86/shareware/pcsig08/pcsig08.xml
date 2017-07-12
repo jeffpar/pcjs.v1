@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fdc id="fdcNEC" pos="left" padLeft="8px" padBottom="8px">
+	<control type="list" binding="listDrives"/>
+	<control type="list" binding="listDisks">
+		<manifest ref="/disks/pcx86/dos/microsoft/3.20/manifest.xml"/>
+		<manifest ref="/disks/pcx86/shareware/pcsig08/manifest.xml"/>
+	</control>
+	<control type="button" binding="loadDisk">Load</control>
+	<control type="button" binding="saveDisk" padRight="8px">Save</control>
+	<control type="description" binding="descDisk" padRight="8px"/>
+	<control type="file" binding="mountDisk"/>
+</fdc>

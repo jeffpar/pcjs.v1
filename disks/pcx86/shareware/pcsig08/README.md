@@ -3,15 +3,9 @@ layout: page
 title: PC-SIG Library 8th Edition CD-ROM (April 1990)
 permalink: /disks/pcx86/shareware/pcsig08/
 machines:
-  - id: ibm5150-pcsig08
+  - id: pcsig08
     type: pcx86
     resume: 1
-    config: /disks/pcx86/shareware/pcsig08/machine.xml
-    autoMount:
-      A:
-        path: /disks/pcx86/dos/ibm/3.30/PCDOS330-DISK1.json
-      B:
-        path: /disks/pcx86/dos/ibm/3.30/PCDOS330-DISK2.json
 ---
 
 PC-SIG Library 8th Edition CD-ROM (April 1990)
@@ -19,11 +13,10 @@ PC-SIG Library 8th Edition CD-ROM (April 1990)
 
 The machine below has access to all 2,121 diskette images from the PC-SIG Library 8th Edition CD-ROM (April 1990).
 The directory listings were generated from the folder's [manifest](manifest.xml) using
-[disklist](/modules/diskdump/bin/disklist), a custom PCjs JavaScript utility.
+[disklist](/modules/diskdump/bin/disklist), a custom PCjs JavaScript utility.  The same machine is also available
+[with the PCjs Debugger](debugger/).
 
-The same machine is also available [with the PCjs Debugger](debugger/).
-
-{% include machine.html id="ibm5150-pcsig08" %}
+{% include machine.html id="pcsig08" %}
 
 ### Directory of PCSIG08: DISK0001
 

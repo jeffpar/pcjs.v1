@@ -9,7 +9,7 @@ machines:
     messages: fault
     config: /devices/pcx86/machine/5170/vga/4096kb/debugger/machine.xml
     drives: '[{name:"20Mb Hard Disk",type:2,path:"/disks/pcx86/fixed/20mb/IBMOS211-VGA.json"}]'
-    automount:
+    autoMount:
       A:
         name: None
       B:

@@ -764,7 +764,7 @@
 		<xsl:variable name="componentFile"><xsl:value-of select="$rootDir"/><xsl:value-of select="@ref"/></xsl:variable>
 		<xsl:apply-templates select="document($componentFile)/device">
 			<xsl:with-param name="machine" select="$machine"/>
-			<xsl:with-param name="mount" select="@automount"/>
+			<xsl:with-param name="mount"><xsl:if test="@autoMount"><xsl:value-of select="@autoMount"/></xsl:if><xsl:if test="@automount"><xsl:value-of select="@automount"/></xsl:if></xsl:with-param>
 		</xsl:apply-templates>
 	</xsl:template>
 
@@ -937,7 +937,7 @@
 		<xsl:variable name="componentFile"><xsl:value-of select="$rootDir"/><xsl:value-of select="@ref"/></xsl:variable>
 		<xsl:apply-templates select="document($componentFile)/fdc">
 			<xsl:with-param name="machine" select="$machine"/>
-			<xsl:with-param name="mount" select="@automount"/>
+			<xsl:with-param name="mount"><xsl:if test="@autoMount"><xsl:value-of select="@autoMount"/></xsl:if><xsl:if test="@automount"><xsl:value-of select="@automount"/></xsl:if></xsl:with-param>
 		</xsl:apply-templates>
 	</xsl:template>
 

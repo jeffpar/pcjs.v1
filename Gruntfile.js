@@ -644,7 +644,7 @@ module.exports = function(grunt) {
                 files: [
                     {
                         cwd: "disks/pcx86/",
-                        src: ["library.xml", "samples.xml", "private/library.xml"],
+                        src: ["library.xml", "samples.xml", "shareware/pcsig08/pcsig08.xml", "private/library.xml"],
                         dest: "disks/pcx86/compiled/",
                         expand: true
                     }
@@ -671,10 +671,11 @@ module.exports = function(grunt) {
                             var sFile = matchManifest[2];
                             var sManifest = grunt.file.read(path.join('.', sFile));
                             if (!sManifest) continue;
-                            var sDefaultName = "", match;
-                            match = sManifest.match(/<title.*?>(.*?)<\/title>/);
+                            var sPrefix = "", sDefaultName = "Unknown", match;
+                            match = sManifest.match(/<title(?: prefix="(.*?)"|)[^>]*>(.*?)<\/title>/);
                             if (match) {
-                                sDefaultName += match[1];
+                                sPrefix = match[1];
+                                sDefaultName = match[2];
                                 match = sManifest.match(/<version.*?>(.*?)<\/version>/);
                                 if (match) sDefaultName += ' ' + match[1];
                             }
@@ -688,7 +689,7 @@ module.exports = function(grunt) {
                             while ((matchDisk = reDisk.exec(sManifest))) {
                                 if (sDisks) sDisks += "\n";
                                 var matchName = matchDisk[2].match(/<name.*?>(.*?)<\/name>/);
-                                var sName = matchName && matchName[1] || sDefaultName;
+                                var sName = matchName? ((sPrefix? sPrefix + ": " : "") + matchName[1]) : sDefaultName;
                                 sDisks += matchManifest[1] + "<disk path=\"" + matchDisk[1] + "\">" + sName + "</disk>";
                             }
                             content = content.replace(matchManifest[0], sDisks);
