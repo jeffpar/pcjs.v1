@@ -27823,16 +27823,16 @@ function resolveXML(sXML, display, done)
                      * Iterate over all the attributes in the "referring" XML tag (sRefAttrs)
                      */
                     var matchAttr;
-                    var reAttr = /( [a-z]+=)(['"])(.*?)\2/g;
+                    var reAttr = /( [a-z]+=)(['"])(.*?)\2/gi;
                     while ((matchAttr = reAttr.exec(sRefAttrs))) {
-                        if (sXMLNewTag.indexOf(matchAttr[1]) < 0) {
+                        if (sXMLNewTag.toLowerCase().indexOf(matchAttr[1].toLowerCase()) < 0) {
                             /*
-                             * This is the append case
+                             * This is the append case....
                              */
                             sXMLNewTag = sXMLNewTag.replace(">", matchAttr[0] + ">");
                         } else {
                             /*
-                             * This is the overwrite case
+                             * This is the overwrite case....
                              */
                             sXMLNewTag = sXMLNewTag.replace(new RegExp(matchAttr[1] + "(['\"])(.*?)\\1"), matchAttr[0]);
                         }

@@ -671,8 +671,8 @@ module.exports = function(grunt) {
                             var sFile = matchManifest[2];
                             var sManifest = grunt.file.read(path.join('.', sFile));
                             if (!sManifest) continue;
-                            var sPrefix = "", sDefaultName = "", match;
-                            match = sManifest.match(/<title(?: prefix="(.*?)"|(;?))[^>]*>(.*?)<\/title>/);
+                            var sPrefix = "", sDefaultName = "Unknown", match;
+                            match = sManifest.match(/<title(?: prefix="(.*?)"|)[^>]*>(.*?)<\/title>/);
                             if (match) {
                                 sPrefix = match[1];
                                 sDefaultName = match[2];

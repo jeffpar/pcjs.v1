@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<fdc id="fdcNEC" automount='{A:{name:"PC-DOS 2.00 (Disk 1)",path:"/disks/pcx86/dos/ibm/2.00/PCDOS200-DISK1.json"}, B:{name:"PC-DOS 2.00 (Disk 2)",path:"/disks/pcx86/dos/ibm/2.00/PCDOS200-DISK2.json"}}' pos="left" padLeft="8px" padBottom="8px">
+<fdc id="fdcNEC" autoMount='{A:{name:"PC-DOS 2.00 (Disk 1)",path:"/disks/pcx86/dos/ibm/2.00/PCDOS200-DISK1.json"}, B:{name:"PC-DOS 2.00 (Disk 2)",path:"/disks/pcx86/dos/ibm/2.00/PCDOS200-DISK2.json"}}' pos="left" padLeft="8px" padBottom="8px">
 	<control type="list" binding="listDrives"/>
 	<control type="list" binding="listDisks">
 		<disk path="/disks/pcx86/empty/EMPTY-360K.json">Empty Diskette (360K)</disk>

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<fdc id="fdcNEC" autoMount='{A:{name:"PC-DOS 3.30 (Disk 1)",path:"/disks/pcx86/dos/ibm/3.30/PCDOS330-DISK1.json"}, B:{name:"PC-DOS 3.30 (Disk 2)",path:"/disks/pcx86/dos/ibm/3.30/PCDOS330-DISK2.json"}}' pos="left" padLeft="8px" padBottom="8px">
+<fdc id="fdcNEC" autoMount='{A:{name:"PC-DOS 3.20 (Disk 1)",path:"/disks/pcx86/dos/ibm/3.20/PCDOS320-DISK1.json"}, B:{name:"PC-DOS 3.20 (Disk 2)",path:"/disks/pcx86/dos/ibm/3.20/PCDOS320-DISK2.json"}}' pos="left" padLeft="8px" padBottom="8px">
 	<control type="list" binding="listDrives"/>
 	<control type="list" binding="listDisks">
-		<disk path="/disks/pcx86/dos/ibm/1.00/PCDOS100.json"> 1.00</disk>
-		<disk path="/disks/pcx86/dos/ibm/1.10/PCDOS110.json"> 1.10</disk>
+		<disk path="/disks/pcx86/dos/ibm/1.00/PCDOS100.json">PC-DOS 1.00</disk>
+		<disk path="/disks/pcx86/dos/ibm/1.10/PCDOS110.json">PC-DOS 1.10</disk>
 		<disk path="/disks/pcx86/dos/ibm/2.00/PCDOS200-DISK1.json">PC-DOS 2.00 (Disk 1)</disk>
 		<disk path="/disks/pcx86/dos/ibm/2.00/PCDOS200-DISK2.json">PC-DOS 2.00 (Disk 2)</disk>
 		<disk path="/disks/pcx86/dos/ibm/2.10/PCDOS210-DISK1.json">PC-DOS 2.10 (Disk 1)</disk>

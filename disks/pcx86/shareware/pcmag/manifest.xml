@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.35.2/manifest.xsl"?>
 <manifest type="software">
-	<title prefix="PCMAG">PC Magazine Diskettes</title>
+	<title>PC Magazine Diskettes</title>
 	<disk id="disk01" size="163840" chs="40:1:8" dir="archive/VOL06N08" href="/disks/pcx86/shareware/pcmag/VOL06N08.json" md5="d75cf2d16d104ebd61843cc67dd6ac88" md5json="46bc9c75178d3119f0f85b8611bd52c8">
 		<name>PC Magazine (Vol. 06 No. 08)</name>
 		<file size="21860" time="1987-01-30 12:08:26" attr="0x20" md5="553b1524370b985201768fd8980b94f0">PLAY.ASM</file>
