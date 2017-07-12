@@ -2,7 +2,7 @@
 <?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.35.2/manifest.xsl"?>
 <manifest type="software">
 	<title>PC Magazine Diskettes</title>
-	<disk id="disk01" size="163840" chs="40:1:8" dir="archive/VOL06N08" href="/disks/pcx86/shareware/pcmag/VOL06N08.json" md5="d75cf2d16d104ebd61843cc67dd6ac88" md5json="46bc9c75178d3119f0f85b8611bd52c8">
+	<disk id="disk01" size="163840" chs="40:1:8" dir="archive/VOL06N08" href="/disks/pcx86/shareware/pcmag/disks/VOL06N08.json" md5="d75cf2d16d104ebd61843cc67dd6ac88" md5json="46bc9c75178d3119f0f85b8611bd52c8">
 		<name>PC Magazine (Vol. 06 No. 08)</name>
 		<file size="21860" time="1987-01-30 12:08:26" attr="0x20" md5="553b1524370b985201768fd8980b94f0">PLAY.ASM</file>
 		<file size="8480" time="1987-01-30 14:57:08" attr="0x20" md5="5dcec605d1f6a0b45f6162da8e032124">PLAY.BAS</file>
@@ -12,7 +12,7 @@
 		<file size="1793" time="1987-01-20 14:55:32" attr="0x20" md5="4607fe11e68d5f5e770129bc31c69502">STATUS.COM</file>
 		<file size="1951" time="1987-04-06 12:24:36" attr="0x20" md5="b53c2abf5194ccc1e36af0f7b883186d">STING.DAT</file>
 	</disk>
-	<disk id="disk02" size="163840" chs="40:1:8" dir="archive/VOL06N09" href="/disks/pcx86/shareware/pcmag/VOL06N09.json" md5="90780407b640850c2360cc6a823e074c" md5json="3aa4547aa03a775660fab5ba5907ff67">
+	<disk id="disk02" size="163840" chs="40:1:8" dir="archive/VOL06N09" href="/disks/pcx86/shareware/pcmag/disks/VOL06N09.json" md5="90780407b640850c2360cc6a823e074c" md5json="3aa4547aa03a775660fab5ba5907ff67">
 		<name>PC Magazine (Vol. 06 No. 09)</name>
 		<file size="968" time="1987-04-03 17:27:48" attr="0x20" md5="fc1314dce88f4bf1ad4a7a69cce74076">BLOAD.SCR</file>
 		<file size="981" time="1987-04-03 17:27:14" attr="0x20" md5="8d19182357a56d27d3d8f6392069c501">BSAVE.SCR</file>
@@ -21,7 +21,7 @@
 		<file size="15124" time="1987-02-17 10:03:58" attr="0x20" md5="34107af8abb619366f9efc77328b67a4">DRAW.BAS</file>
 		<file size="1589" time="1987-02-05 13:34:50" attr="0x20" md5="a6fa80e0be476f4c7fb88c41d931a9a6">DRAW.COM</file>
 	</disk>
-	<disk id="disk03" size="163840" chs="40:1:8" dir="archive/VOL06N10" href="/disks/pcx86/shareware/pcmag/VOL06N10.json" md5="901a93960fe28418b51e340137ad1bba" md5json="38c5ef56ed43ca59c30cb955a2a33684">
+	<disk id="disk03" size="163840" chs="40:1:8" dir="archive/VOL06N10" href="/disks/pcx86/shareware/pcmag/disks/VOL06N10.json" md5="901a93960fe28418b51e340137ad1bba" md5json="38c5ef56ed43ca59c30cb955a2a33684">
 		<name>PC Magazine (Vol. 06 No. 10)</name>
 		<file size="1402" time="1987-04-14 13:49:26" attr="0x20" md5="cdfce6f620e362328672f61dfe977d83">DOS.BAR</file>
 		<file size="3059" time="1987-04-14 13:48:02" attr="0x20" md5="1a7d8db78bc987ba04fe77a50858ecb4">DOS.BDF</file>
@@ -32,13 +32,13 @@
 		<file size="19147" time="1987-05-07 10:45:46" attr="0x20" md5="125943d794d67bde0ed6b09a4f17860e">SLASHBAR.BAS</file>
 		<file size="2025" time="1987-05-07 10:43:42" attr="0x20" md5="07071c941dae8d28898142e4276d75f8">SLASHBAR.COM</file>
 	</disk>
-	<disk id="disk04" size="163840" chs="40:1:8" dir="archive/VOL06N11" href="/disks/pcx86/shareware/pcmag/VOL06N11.json" md5="85da21834e069e5901109fdf11df3695" md5json="59d8dd0f59f255e263bc59d7899a99b5">
+	<disk id="disk04" size="163840" chs="40:1:8" dir="archive/VOL06N11" href="/disks/pcx86/shareware/pcmag/disks/VOL06N11.json" md5="85da21834e069e5901109fdf11df3695" md5json="59d8dd0f59f255e263bc59d7899a99b5">
 		<name>PC Magazine (Vol. 06 No. 11)</name>
 		<file size="24546" time="1987-03-23 19:40:14" attr="0x20" md5="7a48f62365eb40a29236ced6c4ee0252">REPEATS.ASM</file>
 		<file size="12065" time="1987-03-23 19:48:12" attr="0x20" md5="c9440a45974b787d4207adbfd60dc2af">REPEATS.BAS</file>
 		<file size="1253" time="1987-03-11 17:19:36" attr="0x20" md5="d08bc97a61995981c8d5d9781805b8a1">REPEATS.COM</file>
 	</disk>
-	<disk id="disk05" size="163840" chs="40:1:8" dir="archive/VOL06N12" href="/disks/pcx86/shareware/pcmag/VOL06N12.json" md5="8ac3b75ab7717b13b625a26c19d7100c" md5json="504a5595ff0e27ab4d3166050df12750">
+	<disk id="disk05" size="163840" chs="40:1:8" dir="archive/VOL06N12" href="/disks/pcx86/shareware/pcmag/disks/VOL06N12.json" md5="8ac3b75ab7717b13b625a26c19d7100c" md5json="504a5595ff0e27ab4d3166050df12750">
 		<name>PC Magazine (Vol. 06 No. 12)</name>
 		<file size="40652" time="1987-03-31 08:09:46" attr="0x20" md5="b961a6d3fc41b9a885e86fbc28bda745">REMINDER.ASM</file>
 		<file size="16227" time="1987-03-31 12:48:42" attr="0x20" md5="c82d4af560dbc6f100019f99ce337071">REMINDER.BAS</file>
@@ -47,7 +47,7 @@
 		<file size="11701" time="1987-03-30 08:54:50" attr="0x20" md5="5b41f2fff89d4814dd454e9418e41219">SPECTRUM.BAS</file>
 		<file size="1211" time="1987-03-30 08:53:18" attr="0x20" md5="6534d8e0268629dd3a990b7f26abfd10">SPECTRUM.COM</file>
 	</disk>
-	<disk id="disk06" size="163840" chs="40:1:8" dir="archive/VOL06N13" href="/disks/pcx86/shareware/pcmag/VOL06N13.json" md5="d080562b3556cc04daeef7216ad98571" md5json="2e6e1c0041c3e63ee5c2df4c87dac900">
+	<disk id="disk06" size="163840" chs="40:1:8" dir="archive/VOL06N13" href="/disks/pcx86/shareware/pcmag/disks/VOL06N13.json" md5="d080562b3556cc04daeef7216ad98571" md5json="2e6e1c0041c3e63ee5c2df4c87dac900">
 		<name>PC Magazine (Vol. 06 No. 13)</name>
 		<file size="6498" time="1987-04-14 09:09:32" attr="0x20" md5="1be29e079080a3f7fd87c7ec752f618e">MOUSEKEY.ASM</file>
 		<file size="3158" time="1987-04-14 09:11:56" attr="0x20" md5="d874c7e93347b4757ed166ce2171f410">MOUSEKEY.BAS</file>
@@ -56,7 +56,7 @@
 		<file size="15270" time="1987-04-29 08:41:50" attr="0x20" md5="1ba09bffcb2437322be507657abc3f65">PAD.BAS</file>
 		<file size="1432" time="1987-06-17 14:21:12" attr="0x20" md5="8174bb9f2ccd1907ef30dfaa29038490">PAD.COM</file>
 	</disk>
-	<disk id="disk07" size="163840" chs="40:1:8" dir="archive/VOL06N14" href="/disks/pcx86/shareware/pcmag/VOL06N14.json" md5="e6d13b14b6a1b9373fb6eb070e2ca75b" md5json="f4abf1300a678a0f27021b5700c2b67e">
+	<disk id="disk07" size="163840" chs="40:1:8" dir="archive/VOL06N14" href="/disks/pcx86/shareware/pcmag/disks/VOL06N14.json" md5="e6d13b14b6a1b9373fb6eb070e2ca75b" md5json="f4abf1300a678a0f27021b5700c2b67e">
 		<name>PC Magazine (Vol. 06 No. 14)</name>
 		<file size="64997" time="1987-05-14 16:58:22" attr="0x20" md5="cea883f369957e216a29683f03a2af2a">DR.ASM</file>
 		<file size="31399" time="1987-05-15 08:14:02" attr="0x20" md5="615871368969a4e6bc19b86e4ce15e6a">DR.BAS</file>
@@ -71,7 +71,7 @@
 		<file size="5636" time="1987-04-30 12:46:02" attr="0x20" md5="608871d58b3666f1ffcc47b3c02c4f08">REMOVE.BAS</file>
 		<file size="545" time="1987-04-30 09:35:12" attr="0x20" md5="e86fb8f495b92d55cc471cc518babd8b">REMOVE.COM</file>
 	</disk>
-	<disk id="disk08" size="163840" chs="40:1:8" dir="archive/VOL06N15" href="/disks/pcx86/shareware/pcmag/VOL06N15.json" md5="33aa8c9ce2f9b9b0ca83e5084f95830e" md5json="1f0c16c17c853df476b7fce7a7e742dc">
+	<disk id="disk08" size="163840" chs="40:1:8" dir="archive/VOL06N15" href="/disks/pcx86/shareware/pcmag/disks/VOL06N15.json" md5="33aa8c9ce2f9b9b0ca83e5084f95830e" md5json="1f0c16c17c853df476b7fce7a7e742dc">
 		<name>PC Magazine (Vol. 06 No. 15)</name>
 		<file size="37344" time="1987-05-19 07:58:54" attr="0x20" md5="97aabb06832028d416d41bf365a7a94d">DIRNOTES.ASM</file>
 		<file size="16154" time="1987-05-19 08:06:18" attr="0x20" md5="de18cd4733132bc7237bc0fb0af25d3e">DIRNOTES.BAS</file>
@@ -83,7 +83,7 @@
 		<file size="1859" time="1987-07-28 19:06:52" attr="0x20" md5="f51ae9acf467d001f81fb90871922918">KBTEST.BAS</file>
 		<file size="129" time="1987-05-26 10:03:28" attr="0x20" md5="6d02a05f0c7191aea8300b5a0a7d049e">KBTEST.COM</file>
 	</disk>
-	<disk id="disk09" size="327680" chs="40:2:8" dir="archive/VOL06N16" href="/disks/pcx86/shareware/pcmag/VOL06N16.json" md5="f429d0f74e28f72a27406874129082dd" md5json="36fffe33a5e889d1146cef0e250696fe">
+	<disk id="disk09" size="327680" chs="40:2:8" dir="archive/VOL06N16" href="/disks/pcx86/shareware/pcmag/disks/VOL06N16.json" md5="f429d0f74e28f72a27406874129082dd" md5json="36fffe33a5e889d1146cef0e250696fe">
 		<name>PC Magazine (Vol. 06 No. 16)</name>
 		<file size="29760" time="1987-01-11 14:06:58" attr="0x20" md5="635f1e9b1b9b80d4087ca2f578b3267c">KBX.ASM</file>
 		<file size="11638" time="1987-08-11 15:37:22" attr="0x20" md5="46d7582b1b9204c0d01fe9cb8b1a0572">KBX.BAS</file>
@@ -92,7 +92,7 @@
 		<file size="39595" time="1987-08-11 15:31:58" attr="0x20" md5="040a3921317d8d8c1bb1b491f5efe8e7">RN.BAS</file>
 		<file size="4272" time="1987-08-11 15:32:44" attr="0x20" md5="2f23fa413bcf4aeb4f35177979d8ac4b">RN.COM</file>
 	</disk>
-	<disk id="disk10" size="163840" chs="40:1:8" dir="archive/VOL06N17" href="/disks/pcx86/shareware/pcmag/VOL06N17.json" md5="600edea5079fea9c3aa4b1bc4f05b931" md5json="87b3164b3565ba535c512d60980817f1">
+	<disk id="disk10" size="163840" chs="40:1:8" dir="archive/VOL06N17" href="/disks/pcx86/shareware/pcmag/disks/VOL06N17.json" md5="600edea5079fea9c3aa4b1bc4f05b931" md5json="87b3164b3565ba535c512d60980817f1">
 		<name>PC Magazine (Vol. 06 No. 17)</name>
 		<file size="92742" time="1987-07-27 15:15:28" attr="0x20" md5="01b5ca0460c3c2c57e1a1e9453df434b">CARDFILE.ASM</file>
 		<file size="36540" time="1987-09-04 16:54:16" attr="0x20" md5="c9b991e470a0a31f0eeb2b6ce523f9bd">CARDFILE.BAS</file>
@@ -107,13 +107,13 @@
 		<file size="241" time="1987-09-09 15:38:38" attr="0x20" md5="563a0e1630cc3de9d981983b8ea3d303">QP-TURBO.BAS</file>
 		<file size="108" time="1987-09-09 15:52:52" attr="0x20" md5="350c16e734258a003e2446fe4b0c1c7d">QP-TURBO.COM</file>
 	</disk>
-	<disk id="disk11" size="163840" chs="40:1:8" dir="archive/VOL06N18" href="/disks/pcx86/shareware/pcmag/VOL06N18.json" md5="36de47a11dc90327b9d594dbfd548d47" md5json="0a26c8772366ea34f5090362e915ee2b">
+	<disk id="disk11" size="163840" chs="40:1:8" dir="archive/VOL06N18" href="/disks/pcx86/shareware/pcmag/disks/VOL06N18.json" md5="36de47a11dc90327b9d594dbfd548d47" md5json="0a26c8772366ea34f5090362e915ee2b">
 		<name>PC Magazine (Vol. 06 No. 18)</name>
 		<file size="26321" time="1987-09-01 13:14:32" attr="0x20" md5="71e973fc32e3c1c27f3f25e7caea2acc">SNIPPER.ASM</file>
 		<file size="15660" time="1987-09-17 14:57:26" attr="0x20" md5="d1ec76fa3c1def29b8417cea82bdab45">SNIPPER.BAS</file>
 		<file size="1648" time="1987-09-17 14:58:40" attr="0x20" md5="7ad00cba8f0c08621e8420b6fd69d4a0">SNIPPER.COM</file>
 	</disk>
-	<disk id="disk12" size="163840" chs="40:1:8" dir="archive/VOL06N19" href="/disks/pcx86/shareware/pcmag/VOL06N19.json" md5="e59899d3e2f3180bf4149812687d1859" md5json="0921d00700f69c3433a3abd63e4ef174">
+	<disk id="disk12" size="163840" chs="40:1:8" dir="archive/VOL06N19" href="/disks/pcx86/shareware/pcmag/disks/VOL06N19.json" md5="e59899d3e2f3180bf4149812687d1859" md5json="0921d00700f69c3433a3abd63e4ef174">
 		<name>PC Magazine (Vol. 06 No. 19)</name>
 		<file size="22803" time="1987-08-21 13:23:14" attr="0x20" md5="dd65ca784b1d6adf17695e73a7ab8445">CTYPE.ASM</file>
 		<file size="12079" time="1987-09-23 12:13:16" attr="0x20" md5="95eb6b9290ab044f50e22e1e9780dac9">CTYPE.BAS</file>
@@ -125,7 +125,7 @@
 		<file size="719" time="1987-08-10 22:42:54" attr="0x20" md5="36f4f3ef26b2d7122056b82fb32b31a2">SHOWVECT.SCR</file>
 		<file size="15" time="1986-12-04 13:21:48" attr="0x20" md5="1ad6752803b84a21d122aceb325e118f">SPEEDUP.COM</file>
 	</disk>
-	<disk id="disk13" size="327680" chs="40:2:8" dir="archive/VOL06N20" href="/disks/pcx86/shareware/pcmag/VOL06N20.json" md5="69fbccdade7b6f9ea63564d161c6c9b9" md5json="4398c1daa99c8ecf8384f48b80e7064d">
+	<disk id="disk13" size="327680" chs="40:2:8" dir="archive/VOL06N20" href="/disks/pcx86/shareware/pcmag/disks/VOL06N20.json" md5="69fbccdade7b6f9ea63564d161c6c9b9" md5json="4398c1daa99c8ecf8384f48b80e7064d">
 		<name>PC Magazine (Vol. 06 No. 20)</name>
 		<file size="18442" time="1987-01-10 19:52:14" attr="0x20" md5="27a4170de9c414bb4cfc291288263cb8">CALCPRF.COM</file>
 		<file size="12610" time="1986-12-14 15:23:44" attr="0x20" md5="20d601ecbdce2b9c2ecbf837d319d43e">CALCPRF.PAS</file>
@@ -162,7 +162,7 @@
 		<file size="22527" time="1986-10-06 14:56:18" attr="0x20" md5="1b4988cc5726b11bf8aab2761fc6c525">UNINLINE.PAS</file>
 		<file size="7166" time="1986-10-06 18:39:26" attr="0x20" md5="bb8849c6fda80c89b25ba10a20d1b8f9">UNPARS.INC</file>
 	</disk>
-	<disk id="disk14" size="163840" chs="40:1:8" dir="archive/VOL06N21" href="/disks/pcx86/shareware/pcmag/VOL06N21.json" md5="95f61d88b803f5c74cb975225065c140" md5json="c4fbadb47d1573ecae289fd4dc15bd90">
+	<disk id="disk14" size="163840" chs="40:1:8" dir="archive/VOL06N21" href="/disks/pcx86/shareware/pcmag/disks/VOL06N21.json" md5="95f61d88b803f5c74cb975225065c140" md5json="c4fbadb47d1573ecae289fd4dc15bd90">
 		<name>PC Magazine (Vol. 06 No. 21)</name>
 		<file size="79894" time="1987-10-26 14:26:38" attr="0x20" md5="1c1e20b90a6cbf3adadd570fe1edc33c">CO.ASM</file>
 		<file size="37039" time="1987-10-26 14:32:24" attr="0x20" md5="41cb4892027969420fafc3f8c1cda4cd">CO.BAS</file>
@@ -172,14 +172,14 @@
 		<file size="1961" time="1987-10-26 15:13:40" attr="0x20" md5="8fb897782058e3cc2b6b6f2671833f0f">SUBPROG1.BAS</file>
 		<file size="2530" time="1987-10-26 15:14:30" attr="0x20" md5="7bba2ab756ebdd394544450cd756d2a3">SUBPROG2.BAS</file>
 	</disk>
-	<disk id="disk15" size="163840" chs="40:1:8" dir="archive/VOL06N22" href="/disks/pcx86/shareware/pcmag/VOL06N22.json" md5="198e04929602628b10457f260e95ca4f" md5json="2479620bda0bff5e7d94fe113d52a0cb">
+	<disk id="disk15" size="163840" chs="40:1:8" dir="archive/VOL06N22" href="/disks/pcx86/shareware/pcmag/disks/VOL06N22.json" md5="198e04929602628b10457f260e95ca4f" md5json="2479620bda0bff5e7d94fe113d52a0cb">
 		<name>PC Magazine (Vol. 06 No. 22)</name>
 		<file size="24551" time="1987-09-24 11:13:06" attr="0x20" md5="b553606234b9a17b71d510d7df65189b">PRN2FILE.ASM</file>
 		<file size="13326" time="1987-11-10 13:23:42" attr="0x20" md5="4f62269f149cf44bc678950fa2eb8bda">PRN2FILE.BAS</file>
 		<file size="1386" time="1987-11-10 13:23:22" attr="0x20" md5="205ca15c9262beac0da56d2867e3d890">PRN2FILE.COM</file>
 		<file size="2090" time="1987-11-16 13:48:32" attr="0x20" md5="50922d689010dbfa09daeae04453ddd0">PRN2FILE.DOC</file>
 	</disk>
-	<disk id="disk16" size="163840" chs="40:1:8" dir="archive/VOL07N01" href="/disks/pcx86/shareware/pcmag/VOL07N01.json" md5="bf3edb46864660d2b34691035cb920f2" md5json="be4c8de38cca99e9c41b647aab16262c">
+	<disk id="disk16" size="163840" chs="40:1:8" dir="archive/VOL07N01" href="/disks/pcx86/shareware/pcmag/disks/VOL07N01.json" md5="bf3edb46864660d2b34691035cb920f2" md5json="be4c8de38cca99e9c41b647aab16262c">
 		<name>PC Magazine (Vol. 07 No. 01)</name>
 		<file size="22356" time="1987-10-30 14:25:14" attr="0x20" md5="ed0f8ca19631b09aae6d9d3d608b487f">CAPTURE.ASM</file>
 		<file size="7336" time="1987-10-28 14:18:04" attr="0x20" md5="15a9daebe351cb94c59966e02fcecaee">CAPTURE.BAS</file>
@@ -190,7 +190,7 @@
 		<file size="1848" time="1987-10-02 10:37:00" attr="0x20" md5="cd3e5c0908fb2d344f3159e507b6171d">HELP.COM</file>
 		<file size="2178" time="1987-11-16 14:02:08" attr="0x20" md5="441390d974432f23f9fcb749b1db5924">HELP.DOC</file>
 	</disk>
-	<disk id="disk17" size="163840" chs="40:1:8" dir="archive/VOL07N02" href="/disks/pcx86/shareware/pcmag/VOL07N02.json" md5="a511e74dbbc23cb93ba9d120c7e6e314" md5json="798ae1871cd181105f9baaff7c1d75a7">
+	<disk id="disk17" size="163840" chs="40:1:8" dir="archive/VOL07N02" href="/disks/pcx86/shareware/pcmag/disks/VOL07N02.json" md5="a511e74dbbc23cb93ba9d120c7e6e314" md5json="798ae1871cd181105f9baaff7c1d75a7">
 		<name>PC Magazine (Vol. 07 No. 02)</name>
 		<file size="4363" time="1987-12-14 10:49:48" attr="0x20" md5="8850edbd8fa78bbf62da5cde69c285fa">MODENV.ASM</file>
 		<file size="1353" time="1987-12-14 10:49:04" attr="0x20" md5="4729a46be9f4684d2112886f88a49876">MODENV.C</file>
@@ -201,7 +201,7 @@
 		<file size="7495" time="1987-12-14 10:51:08" attr="0x20" md5="ac09a26e294757513071b1278d8cfdc0">PUTENV.ASM</file>
 		<file size="19546" time="1987-12-08 14:08:10" attr="0x20" md5="e99f6e18dec96489e40d9f8693851bc6">TP4.FIG</file>
 	</disk>
-	<disk id="disk18" size="163840" chs="40:1:8" dir="archive/VOL07N03" href="/disks/pcx86/shareware/pcmag/VOL07N03.json" md5="641d17b6147375d489bb54dcd84247c3" md5json="da530084f75619c4fbd510f13f9c6b7e">
+	<disk id="disk18" size="163840" chs="40:1:8" dir="archive/VOL07N03" href="/disks/pcx86/shareware/pcmag/disks/VOL07N03.json" md5="641d17b6147375d489bb54dcd84247c3" md5json="da530084f75619c4fbd510f13f9c6b7e">
 		<name>PC Magazine (Vol. 07 No. 03)</name>
 		<file size="5130" time="1987-09-24 14:26:14" attr="0x20" md5="eb01883d6d9ad45d3704998db8aa596e">LANDPAGE</file>
 		<file size="5809" time="1987-09-24 14:23:32" attr="0x20" md5="70c1693b033c85c2f418a30aa95dad00">PORTPAGE</file>
@@ -210,7 +210,7 @@
 		<file size="1053" time="1988-02-16 00:00:00" attr="0x20" md5="9779d19f4f99cb1e178c134382d6a894">RUN.COM</file>
 		<file size="1806" time="1987-12-23 14:40:38" attr="0x20" md5="4e6a09092de751e38651921d3b79548f">RUN.DOC</file>
 	</disk>
-	<disk id="disk19" size="163840" chs="40:1:8" dir="archive/VOL07N05" href="/disks/pcx86/shareware/pcmag/VOL07N05.json" md5="4717eee8dee835eabb47e4a7072a9e16" md5json="3ceecceb57626b829ca756c7a84f40ad">
+	<disk id="disk19" size="163840" chs="40:1:8" dir="archive/VOL07N05" href="/disks/pcx86/shareware/pcmag/disks/VOL07N05.json" md5="4717eee8dee835eabb47e4a7072a9e16" md5json="3ceecceb57626b829ca756c7a84f40ad">
 		<name>PC Magazine (Vol. 07 No. 05)</name>
 		<file size="53664" time="1988-03-15 12:00:00" attr="0x20" md5="dfa2d844bae035d20fcd5d8d1d5a0674">ASPRN.ASM</file>
 		<file size="21788" time="1988-03-15 12:00:00" attr="0x20" md5="e45176649a56379b11afeb541dbd91b6">ASPRN.BAS</file>
@@ -218,7 +218,7 @@
 		<file size="2425" time="1988-03-15 12:00:00" attr="0x20" md5="1d6d17cbccad2ba20c4da5217e7d1bf7">ASPRN.DOC</file>
 		<file size="2519" time="1989-03-01 20:55:30" attr="0x20" md5="c40270448d2d01a1ccda320e476f8270">PP705.ZIP</file>
 	</disk>
-	<disk id="disk20" size="163840" chs="40:1:8" dir="archive/VOL07N06" href="/disks/pcx86/shareware/pcmag/VOL07N06.json" md5="248a09431472b9efe288102512da8220" md5json="2acde2d0b822ebc715f596f75f476d3a">
+	<disk id="disk20" size="163840" chs="40:1:8" dir="archive/VOL07N06" href="/disks/pcx86/shareware/pcmag/disks/VOL07N06.json" md5="248a09431472b9efe288102512da8220" md5json="2acde2d0b822ebc715f596f75f476d3a">
 		<name>PC Magazine (Vol. 07 No. 06)</name>
 		<file size="2548" time="1988-03-29 00:00:00" attr="0x20" md5="4c91b856c388022e09da566b50a258ba">ALPHSOUP.C</file>
 		<file size="2674" time="1988-03-29 00:00:00" attr="0x20" md5="fb2dd0ca869c32f89c63ea61cb21ed5d">CALC.COM</file>
@@ -229,7 +229,7 @@
 		<file size="2413" time="1988-03-29 00:00:00" attr="0x20" md5="68a51fa3c995331f2c5ca0faf15256f4">PORTPAGE</file>
 		<file size="2793" time="1988-03-29 00:00:00" attr="0x20" md5="b42414beff1493f2845693aaa713c7f1">QUADRANT.C</file>
 	</disk>
-	<disk id="disk21" size="163840" chs="40:1:8" dir="archive/VOL07N07" href="/disks/pcx86/shareware/pcmag/VOL07N07.json" md5="e6ddbbb67193653aa3435ba42133ca9a" md5json="156f85bb2abd928c194a0a3d0b36460d">
+	<disk id="disk21" size="163840" chs="40:1:8" dir="archive/VOL07N07" href="/disks/pcx86/shareware/pcmag/disks/VOL07N07.json" md5="e6ddbbb67193653aa3435ba42133ca9a" md5json="156f85bb2abd928c194a0a3d0b36460d">
 		<name>PC Magazine (Vol. 07 No. 07)</name>
 		<file size="10813" time="1989-03-01 20:55:22" attr="0x20" md5="67849a0fed87f1887552307a393e5e99">PP707.ZIP</file>
 		<file size="30485" time="1988-04-12 00:00:00" attr="0x20" md5="2d764a7f67d8e9cc2fb6837f5273ed74">TOUCH.ASM</file>
@@ -237,7 +237,7 @@
 		<file size="1021" time="1988-04-12 00:00:00" attr="0x20" md5="1614d27c408567c1d7dd7d6cc0f49b71">TOUCH.COM</file>
 		<file size="1460" time="1988-04-12 00:00:00" attr="0x20" md5="40fdbb88420c655dbcdfb57d32b5125a">TOUCH.DOC</file>
 	</disk>
-	<disk id="disk22" size="163840" chs="40:1:8" dir="archive/VOL07N08" href="/disks/pcx86/shareware/pcmag/VOL07N08.json" md5="2926124e10617b8ed13a5fa8a45dd22a" md5json="d76c27878eb04647c11261142e4242a3">
+	<disk id="disk22" size="163840" chs="40:1:8" dir="archive/VOL07N08" href="/disks/pcx86/shareware/pcmag/disks/VOL07N08.json" md5="2926124e10617b8ed13a5fa8a45dd22a" md5json="d76c27878eb04647c11261142e4242a3">
 		<name>PC Magazine (Vol. 07 No. 08)</name>
 		<file size="2017" time="1988-04-26 00:00:00" attr="0x20" md5="4a5866ee8d63d012d2ac5f67bad4abc7">BITTEST.C</file>
 		<file size="2398" time="1988-04-26 00:00:00" attr="0x20" md5="8135422ca89d6652c3ad182aaa7eabdd">MEM512.ASM</file>
@@ -252,7 +252,7 @@
 		<file size="1072" time="1988-04-26 00:00:00" attr="0x20" md5="15f1c43fc750e66a43a6018e19d2da73">WAKEUP.EXE</file>
 		<file size="980" time="1988-04-26 00:00:00" attr="0x20" md5="d5c2f93e74b75dceb34cf3f03d9d12cb">WARMBOOT.BAS</file>
 	</disk>
-	<disk id="disk23" size="163840" chs="40:1:8" dir="archive/VOL07N09" href="/disks/pcx86/shareware/pcmag/VOL07N09.json" md5="5369a04525ea3835f807cdac6faff129" md5json="4bc33c3c583505e753f37472d252b21d">
+	<disk id="disk23" size="163840" chs="40:1:8" dir="archive/VOL07N09" href="/disks/pcx86/shareware/pcmag/disks/VOL07N09.json" md5="5369a04525ea3835f807cdac6faff129" md5json="4bc33c3c583505e753f37472d252b21d">
 		<name>PC Magazine (Vol. 07 No. 09)</name>
 		<file size="11331" time="1988-05-17 00:00:00" attr="0x20" md5="74a5c292f4262bc92e01782a46f6da5d">DUMP.ASM</file>
 		<file size="6923" time="1988-05-17 00:00:00" attr="0x20" md5="b3428ec440692647a953bf8264e19434">DUMP.BAS</file>
@@ -267,7 +267,7 @@
 		<file size="1799" time="1988-05-17 00:00:00" attr="0x20" md5="5a5747a8e3f2c7fbdf52499609db5cec">TRYTD.C</file>
 		<file size="2046" time="1988-03-29 11:14:26" attr="0x20" md5="fa91cc985000275debe873d640741029">WRITE.PAS</file>
 	</disk>
-	<disk id="disk24" size="163840" chs="40:1:8" dir="archive/VOL07N10" href="/disks/pcx86/shareware/pcmag/VOL07N10.json" md5="e5534f48edcc5b9833a892325f62e785" md5json="b08a57663d968b4a3ba90bffcf0605cd">
+	<disk id="disk24" size="163840" chs="40:1:8" dir="archive/VOL07N10" href="/disks/pcx86/shareware/pcmag/disks/VOL07N10.json" md5="e5534f48edcc5b9833a892325f62e785" md5json="b08a57663d968b4a3ba90bffcf0605cd">
 		<name>PC Magazine (Vol. 07 No. 10)</name>
 		<file size="4070" time="1988-05-31 00:00:00" attr="0x20" md5="62a1e786c2866b73c8aa2cbf6eab8c4e">INFO.ASM</file>
 		<file size="1560" time="1988-05-31 00:00:00" attr="0x20" md5="7c67b7c6237724cf3a35e15526ce2b28">INFO.BAS</file>
@@ -284,7 +284,7 @@
 		<file size="1954" time="1988-05-31 00:00:00" attr="0x20" md5="292a53197ad560588fb22d53962e850b">TOGGLE.DOC</file>
 		<file size="4052" time="1988-05-31 00:00:00" attr="0x20" md5="fe99e30e7dfb14c62c35a079e5ca8c2a">TRYTD.ASM</file>
 	</disk>
-	<disk id="disk25" size="163840" chs="40:1:8" dir="archive/VOL07N12" href="/disks/pcx86/shareware/pcmag/VOL07N12.json" md5="886deba1c49530a288c78fd6435be4dd" md5json="110bad408b0c0aff4492be03df1bdbc4">
+	<disk id="disk25" size="163840" chs="40:1:8" dir="archive/VOL07N12" href="/disks/pcx86/shareware/pcmag/disks/VOL07N12.json" md5="886deba1c49530a288c78fd6435be4dd" md5json="110bad408b0c0aff4492be03df1bdbc4">
 		<name>PC Magazine (Vol. 07 No. 12)</name>
 		<file size="20549" time="1988-06-28 00:00:00" attr="0x20" md5="819be1e9f4b8b58f682b5a1751bd792d">ALLKEYS.ASM</file>
 		<file size="5179" time="1988-06-28 00:00:00" attr="0x20" md5="78bec92abc0eef5dc9743abbc3cca5bb">ALLKEYS.BAS</file>
@@ -301,7 +301,7 @@
 		<file size="2191" time="1988-04-28 09:55:08" attr="0x20" md5="f43107a8bf069f053d5567165fca800b">SEEKTEXT.PAS</file>
 		<file size="2241" time="1988-03-18 14:18:22" attr="0x20" md5="f80a27e4d850f96e279b4fb118255641">TRYSTD.C</file>
 	</disk>
-	<disk id="disk26" size="163840" chs="40:1:8" dir="archive/VOL07N13" href="/disks/pcx86/shareware/pcmag/VOL07N13.json" md5="111fade972bbd0b89bb259d0466359c3" md5json="76d3b2bba0d3d76c569628b8ad4144a4">
+	<disk id="disk26" size="163840" chs="40:1:8" dir="archive/VOL07N13" href="/disks/pcx86/shareware/pcmag/disks/VOL07N13.json" md5="111fade972bbd0b89bb259d0466359c3" md5json="76d3b2bba0d3d76c569628b8ad4144a4">
 		<name>PC Magazine (Vol. 07 No. 13)</name>
 		<file size="318" time="1988-06-06 13:41:52" attr="0x20" md5="553a4a7836516742cf14be035905991c">ARCNODE.BAS</file>
 		<file size="5292" time="1988-05-18 10:15:02" attr="0x20" md5="347ca56c3bb116dcfe88eb2c156ae3d5">COPROCES.PAS</file>
@@ -321,7 +321,7 @@
 		<file size="1211" time="1988-06-06 13:29:56" attr="0x20" md5="e3ee5e8dc4282adc8ea131245925b29e">TRYQFN.EXE</file>
 		<file size="357" time="1988-06-06 13:29:42" attr="0x20" md5="745b9d2633fc2ee3ec17da9c188ddd04">TRYQFN.OBJ</file>
 	</disk>
-	<disk id="disk27" size="163840" chs="40:1:8" dir="archive/VOL07N14" href="/disks/pcx86/shareware/pcmag/VOL07N14.json" md5="2ee7efe941d1a12143804bc1acc9bb53" md5json="2a0dc19c50cea15d61ce71c647f41e7c">
+	<disk id="disk27" size="163840" chs="40:1:8" dir="archive/VOL07N14" href="/disks/pcx86/shareware/pcmag/disks/VOL07N14.json" md5="2ee7efe941d1a12143804bc1acc9bb53" md5json="2a0dc19c50cea15d61ce71c647f41e7c">
 		<name>PC Magazine (Vol. 07 No. 14)</name>
 		<file size="2626" time="1988-06-30 10:40:30" attr="0x20" md5="63a9d718efb3d70b921388a3bdfabf01">BOUNCE.BAS</file>
 		<file size="384" time="1988-04-09 16:41:48" attr="0x20" md5="75406dca1b2a395655899fec5c627e57">BOXES2</file>
@@ -350,7 +350,7 @@
 		<file size="552" time="1988-06-30 12:22:10" attr="0x20" md5="5d250d0a53d759692863dcdf675872b6">RETRNDEM.BAT</file>
 		<file size="972" time="1988-04-25 08:52:02" attr="0x20" md5="e71d5af7924a7e3bc0ea7ccc2d779ad0">TRYQFN.C</file>
 	</disk>
-	<disk id="disk28" size="163840" chs="40:1:8" dir="archive/VOL07N15" href="/disks/pcx86/shareware/pcmag/VOL07N15.json" md5="a36344714d48337cfab397b1fa7ecc1e" md5json="916b726df66802e11693aa4aae8e8cf3">
+	<disk id="disk28" size="163840" chs="40:1:8" dir="archive/VOL07N15" href="/disks/pcx86/shareware/pcmag/disks/VOL07N15.json" md5="a36344714d48337cfab397b1fa7ecc1e" md5json="916b726df66802e11693aa4aae8e8cf3">
 		<name>PC Magazine (Vol. 07 No. 15)</name>
 		<file size="9376" time="1989-03-01 20:52:24" attr="0x20" md5="acf8b4f3603d6d032deaffdde231ef35">BOXES3.ZIP</file>
 		<file size="3792" time="1988-07-25 14:38:28" attr="0x20" md5="f2f248035fbdb13297ee0775bcf1d65f">CONVERTR.PAS</file>
@@ -371,7 +371,7 @@
 		<file size="1686" time="1988-05-24 11:03:14" attr="0x20" md5="e9ed35b363808f1e45067276db318e70">TRYQSORT.C</file>
 		<file size="8711" time="1988-05-27 17:33:34" attr="0x20" md5="d25627bb422cea12aa9e4a322b368cd7">TRYQSORT.EXE</file>
 	</disk>
-	<disk id="disk29" size="163840" chs="40:1:8" dir="archive/VOL07N16" href="/disks/pcx86/shareware/pcmag/VOL07N16.json" md5="51021feb82c3085f0b252d871307a46c" md5json="a59dc4ee96ddd140bd5a3eb3b17f1e75">
+	<disk id="disk29" size="163840" chs="40:1:8" dir="archive/VOL07N16" href="/disks/pcx86/shareware/pcmag/disks/VOL07N16.json" md5="51021feb82c3085f0b252d871307a46c" md5json="a59dc4ee96ddd140bd5a3eb3b17f1e75">
 		<name>PC Magazine (Vol. 07 No. 16)</name>
 		<file size="9376" time="1989-03-01 21:00:56" attr="0x20" md5="acf8b4f3603d6d032deaffdde231ef35">BOXES3.ZIP</file>
 		<file size="140" time="1988-08-16 08:33:46" attr="0x20" md5="61cfe315e54442eab42ad6ec92becd27">EXAMPLE.BAT</file>
@@ -393,7 +393,7 @@
 		<file size="6844" time="1988-09-27 00:00:00" attr="0x20" md5="a2c609a5d5ebd8edfef60831494c2620">TRYQSI.ASM</file>
 		<file size="1152" time="1988-09-27 00:00:00" attr="0x20" md5="98c309e3c9af0a2c1895146fb75dc877">TRYQSI.EXE</file>
 	</disk>
-	<disk id="disk30" size="163840" chs="40:1:8" dir="archive/VOL07N17" href="/disks/pcx86/shareware/pcmag/VOL07N17.json" md5="d26ff7e68a088cc4474ff285d4c411f1" md5json="f7ed62225e04b0b021f6a036d95dcbb9">
+	<disk id="disk30" size="163840" chs="40:1:8" dir="archive/VOL07N17" href="/disks/pcx86/shareware/pcmag/disks/VOL07N17.json" md5="d26ff7e68a088cc4474ff285d4c411f1" md5json="f7ed62225e04b0b021f6a036d95dcbb9">
 		<name>PC Magazine (Vol. 07 No. 17)</name>
 		<file size="55450" time="1988-10-11 00:00:00" attr="0x20" md5="67b50ee117d2e438bb9ac70ea4bfc308">DCACHE.ASM</file>
 		<file size="10901" time="1988-10-11 00:00:00" attr="0x20" md5="347c523251653267a9b4548fe0f5a664">DCACHE.BAS</file>
@@ -407,7 +407,7 @@
 		<file size="307" time="1988-06-23 13:39:24" attr="0x20" md5="fa6c1b541410ccb789d21a40fc9b1561">NEWVAL.FOR</file>
 		<file size="15635" time="1988-08-30 16:41:32" attr="0x20" md5="ee0139d36e91e4257ab1a75fe2bfb175">PP717.ARC</file>
 	</disk>
-	<disk id="disk31" size="163840" chs="40:1:8" dir="archive/VOL07N18" href="/disks/pcx86/shareware/pcmag/VOL07N18.json" md5="f84c78c26d9a1771c607b85bf36afce9" md5json="d24ca888f7e4e6c83d4b65b2f7c4527f">
+	<disk id="disk31" size="163840" chs="40:1:8" dir="archive/VOL07N18" href="/disks/pcx86/shareware/pcmag/disks/VOL07N18.json" md5="f84c78c26d9a1771c607b85bf36afce9" md5json="d24ca888f7e4e6c83d4b65b2f7c4527f">
 		<name>PC Magazine (Vol. 07 No. 18)</name>
 		<file size="6682" time="1989-03-01 21:02:02" attr="0x20" md5="6f783aefa979b683a5190c5ab6d7ff57">ASC2PS.ZIP</file>
 		<file size="1245" time="1989-03-01 21:02:02" attr="0x20" md5="9098d853a70d7b6251d9a984e85eb9cd">ASC2PSD.ZIP</file>
@@ -431,7 +431,7 @@
 		<file size="2121" time="1988-09-19 14:45:54" attr="0x20" md5="118506d454b67b9d08b3838f9ee09de7">XPANDISK.DOC</file>
 		<file size="1876" time="1988-10-31 00:00:00" attr="0x20" md5="11dd1d5985813e3f44c288cb96ca3add">XPANDISK.SYS</file>
 	</disk>
-	<disk id="disk32" size="163840" chs="40:1:8" dir="archive/VOL07N19" href="/disks/pcx86/shareware/pcmag/VOL07N19.json" md5="385a8d4943e1b58bda89f384cf749e2e" md5json="98a3647cc811507cf8e6d6c8130a2827">
+	<disk id="disk32" size="163840" chs="40:1:8" dir="archive/VOL07N19" href="/disks/pcx86/shareware/pcmag/disks/VOL07N19.json" md5="385a8d4943e1b58bda89f384cf749e2e" md5json="98a3647cc811507cf8e6d6c8130a2827">
 		<name>PC Magazine (Vol. 07 No. 19)</name>
 		<file size="5122" time="1989-03-01 21:08:48" attr="0x20" md5="e79df1ac8b1422671d23e8688e87942c">ENV719.ZIP</file>
 		<file size="406" time="1988-06-24 10:41:14" attr="0x20" md5="3746699cc1a623aabd1adde79e0e6b2b">FORMFD.FOR</file>
@@ -449,7 +449,7 @@
 		<file size="334" time="1988-10-11 09:41:06" attr="0x20" md5="677a8c9093097b7c1d45337c2e54d04f">WIPE.BAT</file>
 		<file size="437" time="1988-10-11 09:42:06" attr="0x20" md5="e7b34530f5d6ec210a16de6d512f66fd">WIPE2.BAT</file>
 	</disk>
-	<disk id="disk33" size="163840" chs="40:1:8" dir="archive/VOL07N20" href="/disks/pcx86/shareware/pcmag/VOL07N20.json" md5="f7351a1815a5db9f69c85b7f98884ae4" md5json="e233ef50d4cb20899cea0c72ae4fb2ed">
+	<disk id="disk33" size="163840" chs="40:1:8" dir="archive/VOL07N20" href="/disks/pcx86/shareware/pcmag/disks/VOL07N20.json" md5="f7351a1815a5db9f69c85b7f98884ae4" md5json="e233ef50d4cb20899cea0c72ae4fb2ed">
 		<name>PC Magazine (Vol. 07 No. 20)</name>
 		<file size="601" time="1988-08-22 12:09:06" attr="0x20" md5="80eaa13bc060a68d54391453f5d1dbd8">BAT_CASE.BAT</file>
 		<file size="2491" time="1988-07-14 09:53:30" attr="0x20" md5="e96501ac669f5aebbd263097c3204277">BIGGER.PAS</file>
@@ -464,7 +464,7 @@
 		<file size="6620" time="1989-03-01 21:15:34" attr="0x20" md5="24f45a8dee9ae8d016b536bef72fad0f">PP720.ZIP</file>
 		<file size="1293" time="1988-07-14 10:15:56" attr="0x20" md5="91d2748a600dc24f126e8de012a95922">VIDEODEM.PAS</file>
 	</disk>
-	<disk id="disk34" size="163840" chs="40:1:8" dir="archive/VOL07N21" href="/disks/pcx86/shareware/pcmag/VOL07N21.json" md5="ca8a3f5cfabbc39718bede6d5aca0da4" md5json="d22a7079f2f757cda8761cf8c8c53b09">
+	<disk id="disk34" size="163840" chs="40:1:8" dir="archive/VOL07N21" href="/disks/pcx86/shareware/pcmag/disks/VOL07N21.json" md5="ca8a3f5cfabbc39718bede6d5aca0da4" md5json="d22a7079f2f757cda8761cf8c8c53b09">
 		<name>PC Magazine (Vol. 07 No. 21)</name>
 		<file size="24" time="1988-07-16 10:39:56" attr="0x20" md5="29edf8654c910e5c80249bb6a2100102">ANSI.COM</file>
 		<file size="233" time="1988-09-01 10:27:52" attr="0x20" md5="3ab8f97fe49ff0afc06e13e0bc8b1061">ANSIBOX.BAT</file>
@@ -488,7 +488,7 @@
 		<file size="33851" time="1988-08-24 08:24:00" attr="0x20" md5="5d588889159f79be2fd5a48a43a91040">WRITE123.EXE</file>
 		<file size="741" time="1988-11-03 15:15:14" attr="0x20" md5="3457c725be025558b7675b3465ec3be1">WS4XLATE.C</file>
 	</disk>
-	<disk id="disk35" size="163840" chs="40:1:8" dir="archive/VOL07N22" href="/disks/pcx86/shareware/pcmag/VOL07N22.json" md5="78967b02cfecbd7d7d957ea7df22e367" md5json="261af1e9b30f894625f59d616847f948">
+	<disk id="disk35" size="163840" chs="40:1:8" dir="archive/VOL07N22" href="/disks/pcx86/shareware/pcmag/disks/VOL07N22.json" md5="78967b02cfecbd7d7d957ea7df22e367" md5json="261af1e9b30f894625f59d616847f948">
 		<name>PC Magazine (Vol. 07 No. 22)</name>
 		<file size="146" time="1988-07-22 12:41:24" attr="0x20" md5="fa4488d05640f1c603ca51613b8f1136">BREAK.BAS</file>
 		<file size="12" time="1988-07-27 13:25:30" attr="0x20" md5="61f905576bb3c5d491f4c04ff6bc0eb7">DO_CRLF.COM</file>
@@ -509,7 +509,7 @@
 		<file size="3687" time="1988-10-06 15:02:02" attr="0x20" md5="cbba3afd264b618f80435fb222d1f2fe">SHOWARGS.ARC</file>
 		<file size="3666" time="1988-11-21 10:31:46" attr="0x20" md5="8f63aacd30dda44b8a1b00c6211a54c9">SIDEWRIT.BAS</file>
 	</disk>
-	<disk id="disk36" size="163840" chs="40:1:8" dir="archive/VOL08N01" href="/disks/pcx86/shareware/pcmag/VOL08N01.json" md5="0ff5ef70fa6e7529d30d046a7142296a" md5json="0e2c8031fca9c6d7258655b264294c1b">
+	<disk id="disk36" size="163840" chs="40:1:8" dir="archive/VOL08N01" href="/disks/pcx86/shareware/pcmag/disks/VOL08N01.json" md5="0ff5ef70fa6e7529d30d046a7142296a" md5json="0e2c8031fca9c6d7258655b264294c1b">
 		<name>PC Magazine (Vol. 08 No. 01)</name>
 		<file size="50166" time="1989-01-17 00:00:00" attr="0x20" md5="3d68f0338dbfc30125cf96712e2745d8">BCOPY.ASM</file>
 		<file size="12279" time="1989-01-17 00:00:00" attr="0x20" md5="cf12771136ecf32017084516dd13c705">BCOPY.BAS</file>
@@ -528,7 +528,7 @@
 		<file size="2383" time="1988-10-06 13:05:40" attr="0x20" md5="6afe98f376b13712258c957544c5af8c">NOISE.PAS</file>
 		<file size="550" time="1988-09-18 14:02:52" attr="0x20" md5="e6389f74e13692721d311e54555246c6">VOLUME.BAT</file>
 	</disk>
-	<disk id="disk37" size="163840" chs="40:1:8" dir="archive/VOL08N02" href="/disks/pcx86/shareware/pcmag/VOL08N02.json" md5="41eb0e5ff705889ee2fbe107cfd9964a" md5json="d203d055eb09872502dc941d4ccbd02d">
+	<disk id="disk37" size="163840" chs="40:1:8" dir="archive/VOL08N02" href="/disks/pcx86/shareware/pcmag/disks/VOL08N02.json" md5="41eb0e5ff705889ee2fbe107cfd9964a" md5json="d203d055eb09872502dc941d4ccbd02d">
 		<name>PC Magazine (Vol. 08 No. 02)</name>
 		<file size="64145" time="1988-10-27 12:56:38" attr="0x20" md5="7a3042f914a70a60382615c9e883c45a">ANSI.ASM</file>
 		<file size="15519" time="1988-10-27 12:56:46" attr="0x20" md5="ddee1f1765b2ba868055660674f8c67e">ANSI.BAS</file>
@@ -545,7 +545,7 @@
 		<file size="275" time="1988-07-13 14:36:24" attr="0x20" md5="903d5a7eaaafaa4d57e6489fdcb9809a">TYPE.BAS</file>
 		<file size="610" time="1988-07-13 14:26:22" attr="0x20" md5="a422768b5a4667794550656ace27c75c">USED.C</file>
 	</disk>
-	<disk id="disk38" size="163840" chs="40:1:8" dir="archive/VOL08N03" href="/disks/pcx86/shareware/pcmag/VOL08N03.json" md5="f0aeb434d1ed02f82730b696b465c88a" md5json="a2ac6b9945cf362aff70c6cafd991941">
+	<disk id="disk38" size="163840" chs="40:1:8" dir="archive/VOL08N03" href="/disks/pcx86/shareware/pcmag/disks/VOL08N03.json" md5="f0aeb434d1ed02f82730b696b465c88a" md5json="a2ac6b9945cf362aff70c6cafd991941">
 		<name>PC Magazine (Vol. 08 No. 03)</name>
 		<file size="69" time="1988-10-05 18:25:06" attr="0x20" md5="4c5fc50e5c8354ac38985db086f57282">CURRENT.BAT</file>
 		<file size="211" time="1988-10-06 10:56:56" attr="0x20" md5="18bb8dad381982db2b55d6b80a1d6537">DOCLIST.BAT</file>
@@ -563,7 +563,7 @@
 		<file size="457" time="1988-10-06 12:55:40" attr="0x20" md5="11a731c0085185f5c78da96f12962aab">WHATEVER.EX1</file>
 		<file size="520" time="1988-10-06 12:56:06" attr="0x20" md5="7700989050840c6b4d1e3542e3e9bcf1">WHATEVER.EX2</file>
 	</disk>
-	<disk id="disk39" size="163840" chs="40:1:8" dir="archive/VOL08N04" href="/disks/pcx86/shareware/pcmag/VOL08N04.json" md5="8fb2a919854de02565311eb850199801" md5json="0b6997295ef6918c0848c42ba5e47b90">
+	<disk id="disk39" size="163840" chs="40:1:8" dir="archive/VOL08N04" href="/disks/pcx86/shareware/pcmag/disks/VOL08N04.json" md5="8fb2a919854de02565311eb850199801" md5json="0b6997295ef6918c0848c42ba5e47b90">
 		<name>PC Magazine (Vol. 08 No. 04)</name>
 		<file size="403" time="1989-01-20 12:14:00" attr="0x20" md5="b6d5e29fd4cd4a4f0271d55336d6c856">CHKUSER.BAT</file>
 		<file size="492" time="1988-09-30 14:56:26" attr="0x20" md5="2121d5a38ab7aaffb112d8091d40899b">FILMATCH.BAT</file>
@@ -581,7 +581,7 @@
 		<file size="3999" time="1988-12-07 12:17:34" attr="0x20" md5="46019b29127bfcfb4ff7df7362d9eb89">ZCOPY.COM</file>
 		<file size="2403" time="1989-01-23 11:48:04" attr="0x20" md5="7ccf16962fb9054a13ae50f665961562">ZCOPY.DOC</file>
 	</disk>
-	<disk id="disk40" size="163840" chs="40:1:8" dir="archive/VOL08N05" href="/disks/pcx86/shareware/pcmag/VOL08N05.json" md5="c743194d02bda0d4a6421c1044e7b8bb" md5json="b27ec254ab5bac0cdb84ad2198e7ed2b">
+	<disk id="disk40" size="163840" chs="40:1:8" dir="archive/VOL08N05" href="/disks/pcx86/shareware/pcmag/disks/VOL08N05.json" md5="c743194d02bda0d4a6421c1044e7b8bb" md5json="b27ec254ab5bac0cdb84ad2198e7ed2b">
 		<name>PC Magazine (Vol. 08 No. 05)</name>
 		<file size="293" time="1989-02-06 15:09:24" attr="0x20" md5="637b1029c9ba1de59f0e0a0e5e5bfa1d">AUTOEXEC.BAT</file>
 		<file size="827" time="1989-02-06 15:37:22" attr="0x20" md5="b0c0ee84cc3275b933544b5438e5d836">BINARY.PAS</file>
@@ -603,7 +603,7 @@
 		<file size="971" time="1989-02-06 15:12:04" attr="0x20" md5="2d69b2157d721ac30220299d645d7331">SORT.BAS</file>
 		<file size="5557" time="1988-12-12 11:10:04" attr="0x20" md5="440c3780af3c65b6cd65366d12681f1c">TYPEFILE.ASM</file>
 	</disk>
-	<disk id="disk41" size="163840" chs="40:1:8" dir="archive/VOL08N06" href="/disks/pcx86/shareware/pcmag/VOL08N06.json" md5="d2f1213718a182b653de62846c8e1c02" md5json="d7c9aae947de4d00e193e9fac9a408cf">
+	<disk id="disk41" size="163840" chs="40:1:8" dir="archive/VOL08N06" href="/disks/pcx86/shareware/pcmag/disks/VOL08N06.json" md5="d2f1213718a182b653de62846c8e1c02" md5json="d7c9aae947de4d00e193e9fac9a408cf">
 		<name>PC Magazine (Vol. 08 No. 06)</name>
 		<file size="4404" time="1988-12-05 12:22:12" attr="0x20" md5="cc77ed2dce1836c61b573ca92b79ac5e">BSEARCH.ASM</file>
 		<file size="52" time="1988-10-17 20:43:58" attr="0x20" md5="da33be6e192750582fece90581e8925c">DBCONVRT.MAC</file>
@@ -632,7 +632,7 @@
 		<file size="6979" time="1988-12-05 12:23:20" attr="0x20" md5="505cac468eaba91eb89eb0da8e2262c0">TRYBSRCH.ASM</file>
 		<file size="1177" time="1988-07-15 08:36:52" attr="0x20" md5="25bffa9d28f0ecb63e016484539a2375">WC.C</file>
 	</disk>
-	<disk id="disk42" size="163840" chs="40:1:8" dir="archive/VOL08N07" href="/disks/pcx86/shareware/pcmag/VOL08N07.json" md5="5fef7a5664b6ed6863d6d72778886ffb" md5json="b7ad646aebe55c26180470f3dd0c28b5">
+	<disk id="disk42" size="163840" chs="40:1:8" dir="archive/VOL08N07" href="/disks/pcx86/shareware/pcmag/disks/VOL08N07.json" md5="5fef7a5664b6ed6863d6d72778886ffb" md5json="b7ad646aebe55c26180470f3dd0c28b5">
 		<name>PC Magazine (Vol. 08 No. 07)</name>
 		<file size="2992" time="1988-10-14 11:44:56" attr="0x20" md5="3270efd5bc0d09eeada8ef09960f0ea3">ALIGN.EXE</file>
 		<file size="518" time="1988-10-14 11:44:52" attr="0x20" md5="197263595310df6f78fbc9c58f5050fc">ALIGN.PAS</file>
@@ -653,7 +653,7 @@
 		<file size="202" time="1988-09-25 13:43:34" attr="0x20" md5="ab84c8c8dcf813719720467db45f4c17">STRING2.BAS</file>
 		<file size="4015" time="1988-11-27 23:59:52" attr="0x20" md5="4323856eef3c21f8ad571d5abdd06c69">TIMELINE.SUB</file>
 	</disk>
-	<disk id="disk43" size="163840" chs="40:1:8" dir="archive/VOL08N08" href="/disks/pcx86/shareware/pcmag/VOL08N08.json" md5="d049e3ff28f86ad40270889d6698c673" md5json="c6f32c663a2b52e7b911fc7386a90931">
+	<disk id="disk43" size="163840" chs="40:1:8" dir="archive/VOL08N08" href="/disks/pcx86/shareware/pcmag/disks/VOL08N08.json" md5="d049e3ff28f86ad40270889d6698c673" md5json="c6f32c663a2b52e7b911fc7386a90931">
 		<name>PC Magazine (Vol. 08 No. 08)</name>
 		<file size="386" time="1988-09-25 14:37:02" attr="0x20" md5="9e304e1859dda2048e6751bcac726d33">COLORS.BAS</file>
 		<file size="190" time="1988-12-06 16:30:06" attr="0x20" md5="394720cbb781cc57585166328a6b3390">CTTYNUL.BAT</file>
@@ -669,7 +669,7 @@
 		<file size="4465" time="1988-12-20 09:57:04" attr="0x20" md5="1838ff1389b0b6462d9583d2a4fb9b70">SRCHHASH.C</file>
 		<file size="185" time="1989-03-20 09:42:12" attr="0x20" md5="f19bbef58ce546358f7c61a18349175f">SUPRSHFT.BAT</file>
 	</disk>
-	<disk id="disk44" size="163840" chs="40:1:8" dir="archive/VOL08N09" href="/disks/pcx86/shareware/pcmag/VOL08N09.json" md5="dcd9bf3e0a58c93b84af02338c2428ac" md5json="4f118bf21dbe497c41330ebbf5b4d08f">
+	<disk id="disk44" size="163840" chs="40:1:8" dir="archive/VOL08N09" href="/disks/pcx86/shareware/pcmag/disks/VOL08N09.json" md5="dcd9bf3e0a58c93b84af02338c2428ac" md5json="4f118bf21dbe497c41330ebbf5b4d08f">
 		<name>PC Magazine (Vol. 08 No. 09)</name>
 		<file size="425" time="1988-12-06 18:51:56" attr="0x20" md5="dd63c3cc0b636b5304f31cab8e615f9f">ANSIMODE.BAT</file>
 		<file size="653" time="1988-11-22 14:42:52" attr="0x20" md5="f0923862d084a40291c0de2600fd2ca5">CALC.BAT</file>
@@ -692,7 +692,7 @@
 		<file size="1653" time="1989-01-31 10:47:14" attr="0x20" md5="9a6a180f5d8d98145abc4f2fb91f2fa8">SPLIT.COM</file>
 		<file size="455" time="1988-10-28 10:11:16" attr="0x20" md5="94319efeaaa4158309ca6ed6ffd86496">SUBSTDOT.BAT</file>
 	</disk>
-	<disk id="disk45" size="163840" chs="40:1:8" dir="archive/VOL08N10" href="/disks/pcx86/shareware/pcmag/VOL08N10.json" md5="b8bebf89115e46633faacfd5c67ae335" md5json="bbee45efde872e553a62d6c8614e300c">
+	<disk id="disk45" size="163840" chs="40:1:8" dir="archive/VOL08N10" href="/disks/pcx86/shareware/pcmag/disks/VOL08N10.json" md5="b8bebf89115e46633faacfd5c67ae335" md5json="bbee45efde872e553a62d6c8614e300c">
 		<name>PC Magazine (Vol. 08 No. 10)</name>
 		<file size="443" time="1988-10-26 14:04:38" attr="0x20" md5="24eae52b0ed67f3e2fde112e849e0c34">DE.BAT</file>
 		<file size="257" time="1988-10-28 10:26:58" attr="0x20" md5="6c18fa4292fd2c7524b6b2be1107f760">DEL.BAT</file>
@@ -703,7 +703,7 @@
 		<file size="3833" time="1989-04-24 11:14:50" attr="0x20" md5="6effd0bb5cdc362b7d6926ef32a055d3">SETUP2.DOC</file>
 		<file size="199" time="1988-10-26 14:04:50" attr="0x20" md5="39f0cbe475e87b4240d97b00f486f664">UNDE.BAT</file>
 	</disk>
-	<disk id="disk46" size="163840" chs="40:1:8" dir="archive/VOL08N11" href="/disks/pcx86/shareware/pcmag/VOL08N11.json" md5="6a04f876a14425c4a9a88d4387b7f626" md5json="6393f9a72716d5afc912f7efbf0ec131">
+	<disk id="disk46" size="163840" chs="40:1:8" dir="archive/VOL08N11" href="/disks/pcx86/shareware/pcmag/disks/VOL08N11.json" md5="6a04f876a14425c4a9a88d4387b7f626" md5json="6393f9a72716d5afc912f7efbf0ec131">
 		<name>PC Magazine (Vol. 08 No. 11)</name>
 		<file size="3695" time="1989-03-14 18:35:02" attr="0x20" md5="b3980a1711025fd94f04ba77639bf7fa">COLOR.ASM</file>
 		<file size="7094" time="1989-03-09 15:54:36" attr="0x20" md5="f7d27bee688ce8642f1993e5f97e2689">COLOR.BAS</file>
@@ -721,7 +721,7 @@
 		<file size="488" time="1988-12-17 12:07:48" attr="0x20" md5="1161fd39b74700ef050c0759c2792641">VOLTEST.BAT</file>
 		<file size="4506" time="1989-02-20 17:50:56" attr="0x20" md5="7a9c333d2d84abe9437fdfa11098ff2b">WINTEST.PRG</file>
 	</disk>
-	<disk id="disk47" size="163840" chs="40:1:8" dir="archive/VOL08N12" href="/disks/pcx86/shareware/pcmag/VOL08N12.json" md5="028826e863db46d1f6914aabe4bca9d2" md5json="70950d58dbd40a9cbb2c5a53402d4644">
+	<disk id="disk47" size="163840" chs="40:1:8" dir="archive/VOL08N12" href="/disks/pcx86/shareware/pcmag/disks/VOL08N12.json" md5="028826e863db46d1f6914aabe4bca9d2" md5json="70950d58dbd40a9cbb2c5a53402d4644">
 		<name>PC Magazine (Vol. 08 No. 12)</name>
 		<file size="590" time="1988-11-02 13:11:04" attr="0x20" md5="54e5848699fe90b243b83879c599dacb">CHECK.BAT</file>
 		<file size="76816" time="1989-02-13 14:37:44" attr="0x20" md5="d051caabceaf190039f2f84052c073ff">EMS40.ASM</file>
@@ -745,7 +745,7 @@
 		<file size="229" time="1988-12-06 16:32:06" attr="0x20" md5="7b946770c4a84961ab801c0787200745">TURNDEMO.BAT</file>
 		<file size="28124" time="1989-02-13 10:58:42" attr="0x20" md5="67e69010621579a9f3ff67f556ccb8a5">XMSDISK.ASM</file>
 	</disk>
-	<disk id="disk48" size="163840" chs="40:1:8" dir="archive/VOL08N13" href="/disks/pcx86/shareware/pcmag/VOL08N13.json" md5="e4326c3621db6dad615073c817e48e88" md5json="745633bddfb7a53dff109c49d253748c">
+	<disk id="disk48" size="163840" chs="40:1:8" dir="archive/VOL08N13" href="/disks/pcx86/shareware/pcmag/disks/VOL08N13.json" md5="e4326c3621db6dad615073c817e48e88" md5json="745633bddfb7a53dff109c49d253748c">
 		<name>PC Magazine (Vol. 08 No. 13)</name>
 		<file size="298" time="1988-12-28 14:47:04" attr="0x20" md5="9a8b27350a51080112d9f2b800a93697">BATHELP.BAT</file>
 		<file size="22333" time="1989-01-29 21:51:08" attr="0x20" md5="9391793be4079a881719ea34e8e88ffe">CONVERT.ASM</file>
@@ -760,7 +760,7 @@
 		<file size="327" time="1989-02-27 14:25:22" attr="0x20" md5="f8a244b4faefb03089632062f1e5ae2e">WARMBOOT.BAT</file>
 		<file size="2314" time="1989-06-02 09:36:26" attr="0x20" md5="eace7b51de5e8b532f018eab07126165">WINDOWS.C</file>
 	</disk>
-	<disk id="disk49" size="163840" chs="40:1:8" dir="archive/VOL08N14" href="/disks/pcx86/shareware/pcmag/VOL08N14.json" md5="74e2fe9064f7e96d542f15119ffbeac0" md5json="fedab288a34865fc5d153970560cf379">
+	<disk id="disk49" size="163840" chs="40:1:8" dir="archive/VOL08N14" href="/disks/pcx86/shareware/pcmag/disks/VOL08N14.json" md5="74e2fe9064f7e96d542f15119ffbeac0" md5json="fedab288a34865fc5d153970560cf379">
 		<name>PC Magazine (Vol. 08 No. 14)</name>
 		<file size="95" time="1989-01-30 16:18:46" attr="0x20" md5="1022f530373d5a83f7103b952f0cb635">ALTT.WPM</file>
 		<file size="83" time="1989-01-30 16:26:44" attr="0x20" md5="ec9156573c0b310d3e8ea824fbeaf387">ALTU.WPM</file>
@@ -775,7 +775,7 @@
 		<file size="1363" time="1989-06-25 12:22:44" attr="0x20" md5="b7e1ae903eb995fd57e39baa14e65217">RUN.BAT</file>
 		<file size="1664" time="1989-06-25 12:31:02" attr="0x20" md5="c6a0c2d601cd67b2d595cef0e666b002">SLOWFAST.PAS</file>
 	</disk>
-	<disk id="disk50" size="163840" chs="40:1:8" dir="archive/VOL08N15" href="/disks/pcx86/shareware/pcmag/VOL08N15.json" md5="48eba4e00681b7f699fc51df53d06222" md5json="59ced7b110eef7992ffe12852213464c">
+	<disk id="disk50" size="163840" chs="40:1:8" dir="archive/VOL08N15" href="/disks/pcx86/shareware/pcmag/disks/VOL08N15.json" md5="48eba4e00681b7f699fc51df53d06222" md5json="59ced7b110eef7992ffe12852213464c">
 		<name>PC Magazine (Vol. 08 No. 15)</name>
 		<file size="2786" time="1988-10-06 15:01:24" attr="0x20" md5="205d96ff0aff0eff8ec292604c5eb93f">ARGC.ASM</file>
 		<file size="5067" time="1988-10-06 15:01:38" attr="0x20" md5="c302509a8ee5a209f39a2eb0ca4a5843">ARGV.ASM</file>
@@ -794,7 +794,7 @@
 		<file size="1536" time="1989-08-28 14:00:16" attr="0x20" md5="fe17b9f0dac46ca46695b134892d20cb">WRITEVAR.C</file>
 		<file size="1024" time="1989-08-28 13:41:08" attr="0x20" md5="e911614e4162d932f382e6e3e14f50f1">XCOPY1.BAT</file>
 	</disk>
-	<disk id="disk51" size="163840" chs="40:1:8" dir="archive/VOL08N16" href="/disks/pcx86/shareware/pcmag/VOL08N16.json" md5="d4ae7a7a01a1a745c1a17c0445dbacbd" md5json="b2cfa6e4ebaf65861db4758d89dd8df2">
+	<disk id="disk51" size="163840" chs="40:1:8" dir="archive/VOL08N16" href="/disks/pcx86/shareware/pcmag/disks/VOL08N16.json" md5="d4ae7a7a01a1a745c1a17c0445dbacbd" md5json="b2cfa6e4ebaf65861db4758d89dd8df2">
 		<name>PC Magazine (Vol. 08 No. 16)</name>
 		<file size="2168" time="1989-03-01 19:16:16" attr="0x20" md5="5ca67280fbef98b65390d0daddcc2fbd">AUTOSAVE.WK1</file>
 		<file size="176" time="1989-08-11 13:13:58" attr="0x20" md5="da8d88ae64a31c0d0dfcf7c1a323cfb3">CHKGLOSS.BAT</file>
@@ -818,7 +818,7 @@
 		<file size="288" time="1989-08-11 15:20:10" attr="0x20" md5="eb2608e22f1acb1717b148648b2ed5f0">TOA.BAT</file>
 		<file size="1691" time="1988-11-22 15:56:06" attr="0x20" md5="9db36ab8eb95ea09ab44482fd3ab6fad">WIPE.BAT</file>
 	</disk>
-	<disk id="disk52" size="163840" chs="40:1:8" dir="archive/VOL08N17" href="/disks/pcx86/shareware/pcmag/VOL08N17.json" md5="60641b7a1930a856fc7c50973e4a5325" md5json="593773c5d6b326c41f30328274e61603">
+	<disk id="disk52" size="163840" chs="40:1:8" dir="archive/VOL08N17" href="/disks/pcx86/shareware/pcmag/disks/VOL08N17.json" md5="60641b7a1930a856fc7c50973e4a5325" md5json="593773c5d6b326c41f30328274e61603">
 		<name>PC Magazine (Vol. 08 No. 17)</name>
 		<file size="800" time="1989-08-29 12:04:56" attr="0x20" md5="6e34936485a4f1e7074fc0b52d1f54a8">ALPHACOL.PAS</file>
 		<file size="816" time="1989-08-29 12:05:36" attr="0x20" md5="83b80ac28b790f0d61bd6c28142bce98">BAT_CASE.BAT</file>
@@ -837,7 +837,7 @@
 		<file size="8281" time="1989-05-23 19:41:18" attr="0x20" md5="85f68d4cde43246709e28351f67e2f1b">OS2TERM.EXE</file>
 		<file size="8101" time="1989-08-16 16:18:38" attr="0x20" md5="c9b3d2b122821700235f961cf0ee532b">PF2.ARC</file>
 	</disk>
-	<disk id="disk53" size="327680" chs="40:2:8" dir="archive/VOL08N18" href="/disks/pcx86/shareware/pcmag/VOL08N18.json" md5="41f56eecc5f7ddd59ff434ee797d92d3" md5json="5bcb9d2294f990fa0fccd8d9cc37fbea">
+	<disk id="disk53" size="327680" chs="40:2:8" dir="archive/VOL08N18" href="/disks/pcx86/shareware/pcmag/disks/VOL08N18.json" md5="41f56eecc5f7ddd59ff434ee797d92d3" md5json="5bcb9d2294f990fa0fccd8d9cc37fbea">
 		<name>PC Magazine (Vol. 08 No. 18)</name>
 		<file size="2265" time="1989-09-18 15:19:56" attr="0x20" md5="fae53abea040b4322ab6b82a4e00ef00">ARGC.ASM</file>
 		<file size="4713" time="1989-09-18 09:51:20" attr="0x20" md5="6c766ca37644c63a08e805757fdeac3a">ARGV.ASM</file>
@@ -864,7 +864,7 @@
 		<file size="523" time="1989-09-18 15:03:42" attr="0x20" md5="de115646f4042e3915670d618aa1ceea">SUBTEST2.BAT</file>
 		<file size="1158" time="1989-09-18 15:17:10" attr="0x20" md5="b1b6cdafedfec4fe902093d7aa91d685">VARMAC.WPM</file>
 	</disk>
-	<disk id="disk54" size="163840" chs="40:1:8" dir="archive/VOL08N19" href="/disks/pcx86/shareware/pcmag/VOL08N19.json" md5="216b09ca00d26e7045af2308ffcc80bf" md5json="a184a27c2156e6632c96ee9b2e737a45">
+	<disk id="disk54" size="163840" chs="40:1:8" dir="archive/VOL08N19" href="/disks/pcx86/shareware/pcmag/disks/VOL08N19.json" md5="216b09ca00d26e7045af2308ffcc80bf" md5json="a184a27c2156e6632c96ee9b2e737a45">
 		<name>PC Magazine (Vol. 08 No. 19)</name>
 		<file size="40949" time="1989-10-03 20:53:14" attr="0x20" md5="9ee8878cbb281e7d67c6eb99efb40e86">1STCLASS.ASM</file>
 		<file size="17788" time="1989-10-02 13:53:40" attr="0x20" md5="a99f3da2942755e8195d377fc3852d2d">1STCLASS.BAS</file>
@@ -891,7 +891,7 @@
 		<file size="617" time="1989-10-04 13:07:30" attr="0x20" md5="3c850b578ac6c7514e32e7700ee4acbf">TEMPLATE.MBX</file>
 		<file size="619" time="1989-10-04 13:07:42" attr="0x20" md5="b19071d551391d33a4457b123001dd2a">TYMNET.TMP</file>
 	</disk>
-	<disk id="disk55" size="163840" chs="40:1:8" dir="archive/VOL08N20" href="/disks/pcx86/shareware/pcmag/VOL08N20.json" md5="ac67797c0e05773ce94cd82dd2c14354" md5json="8246a075a55e56a5917fa5b41f2df1ee">
+	<disk id="disk55" size="163840" chs="40:1:8" dir="archive/VOL08N20" href="/disks/pcx86/shareware/pcmag/disks/VOL08N20.json" md5="ac67797c0e05773ce94cd82dd2c14354" md5json="8246a075a55e56a5917fa5b41f2df1ee">
 		<name>PC Magazine (Vol. 08 No. 20)</name>
 		<file size="659" time="1989-10-18 16:02:08" attr="0x20" md5="289357a503c2f0c7fc3d1d2401f31b25">CONSTRUC.PAS</file>
 		<file size="9" time="1989-10-20 09:20:40" attr="0x20" md5="94e69690da1e79d80cf48f58c9facecd">CURSOR.COM</file>
@@ -919,7 +919,7 @@
 		<file size="2874" time="1989-10-18 16:02:34" attr="0x20" md5="0cdfda70cbe62b61355622d65788eb75">SHUFFLE.C</file>
 		<file size="33" time="1989-10-20 09:20:08" attr="0x20" md5="7962da86bff6cf4be76dc7977e212982">WAIT10.COM</file>
 	</disk>
-	<disk id="disk56" size="163840" chs="40:1:8" dir="archive/VOL08N21" href="/disks/pcx86/shareware/pcmag/VOL08N21.json" md5="5bd695dd7302c06cfa0cf6ed3b8afb89" md5json="06ba069e74d90cef7406aeef8bb273bc">
+	<disk id="disk56" size="163840" chs="40:1:8" dir="archive/VOL08N21" href="/disks/pcx86/shareware/pcmag/disks/VOL08N21.json" md5="5bd695dd7302c06cfa0cf6ed3b8afb89" md5json="06ba069e74d90cef7406aeef8bb273bc">
 		<name>PC Magazine (Vol. 08 No. 21)</name>
 		<file size="2571" time="1989-04-04 11:08:02" attr="0x20" md5="b1be121fd994a90ed4a9c892edada6cf">CASE.WK1</file>
 		<file size="680" time="1988-12-20 14:49:24" attr="0x20" md5="429f71b1e93476c8a4002ec7fe8e7990">CHG.BAT</file>
@@ -943,7 +943,7 @@
 		<file size="1344" time="1989-10-31 13:31:30" attr="0x20" md5="8ac161b1cd7c2dc1c5609b2908342ebf">TRIGDEMO.PAS</file>
 		<file size="136" time="1988-12-20 14:33:54" attr="0x20" md5="ea8082901a2e45940e4350f1793949c4">UPCASE.BAT</file>
 	</disk>
-	<disk id="disk57" size="163840" chs="40:1:8" dir="archive/VOL08N22" href="/disks/pcx86/shareware/pcmag/VOL08N22.json" md5="d04efd11d3a3871fc4ecaacb5564318d" md5json="6da86a4e628970eef5bf3b893bc87431">
+	<disk id="disk57" size="163840" chs="40:1:8" dir="archive/VOL08N22" href="/disks/pcx86/shareware/pcmag/disks/VOL08N22.json" md5="d04efd11d3a3871fc4ecaacb5564318d" md5json="6da86a4e628970eef5bf3b893bc87431">
 		<name>PC Magazine (Vol. 08 No. 22)</name>
 		<file size="80264" time="1989-09-28 16:52:16" attr="0x20" md5="bf8a5355fe75d2a4ce1b8dac55016efb">ALIAS.ASM</file>
 		<file size="25644" time="1989-11-10 09:24:38" attr="0x20" md5="4bbddfe797baafa0d3c87828e8cdd69b">ALIAS.BAS</file>
@@ -965,7 +965,7 @@
 		<file size="315" time="1989-11-10 11:50:56" attr="0x20" md5="89b8935f2e211cc1fb3ea2a95a0b9146">TEENY.ASM</file>
 		<file size="758" time="1989-02-28 13:36:14" attr="0x20" md5="b28e3c1753d80e79a9a2aa12ca09a0ce">UNIQUE.WPM</file>
 	</disk>
-	<disk id="disk58" size="163840" chs="40:1:8" dir="archive/VOL09N01" href="/disks/pcx86/shareware/pcmag/VOL09N01.json" md5="dd9ab086a7d66ce535e974b8baf4c5eb" md5json="cf4ff2b751976795606c238331216361">
+	<disk id="disk58" size="163840" chs="40:1:8" dir="archive/VOL09N01" href="/disks/pcx86/shareware/pcmag/disks/VOL09N01.json" md5="dd9ab086a7d66ce535e974b8baf4c5eb" md5json="cf4ff2b751976795606c238331216361">
 		<name>PC Magazine (Vol. 09 No. 01)</name>
 		<file size="1616" time="1989-11-27 10:49:48" attr="0x20" md5="e2a83f4bd0db9cb569279146c2fe444e">ATDT.BAT</file>
 		<file size="67" time="1989-11-27 12:47:04" attr="0x20" md5="29f32c0d32a8af295a7a4000f2390e0e">BB.BAT</file>
@@ -982,7 +982,7 @@
 		<file size="6339" time="1989-09-26 17:29:06" attr="0x20" md5="a95db9a775f5f78aed6ac8223ef077e7">TRYDIMUL.ASM</file>
 		<file size="456" time="1989-11-27 10:51:08" attr="0x20" md5="7b61df194dc19d16fcc5ed636d9e84f9">XB.BAT</file>
 	</disk>
-	<disk id="disk59" size="327680" chs="40:2:8" dir="archive/VOL09N02" href="/disks/pcx86/shareware/pcmag/VOL09N02.json" md5="736740317c8d104937fd1e537419136d" md5json="f91297ea16fde72dea3c09711c8b6288">
+	<disk id="disk59" size="327680" chs="40:2:8" dir="archive/VOL09N02" href="/disks/pcx86/shareware/pcmag/disks/VOL09N02.json" md5="736740317c8d104937fd1e537419136d" md5json="f91297ea16fde72dea3c09711c8b6288">
 		<name>PC Magazine (Vol. 09 No. 02)</name>
 		<file size="65" time="1989-12-12 11:23:42" attr="0x20" md5="23fb813851239f5b59a3dcd4b4e099d6">ANSWER.SCR</file>
 		<file size="92110" time="1989-12-10 13:47:06" attr="0x20" md5="083cdea75d526be662d820acef4c5a4e">BATCHMAN.ASM</file>
@@ -1006,7 +1006,7 @@
 		<file size="592" time="1989-08-31 11:38:58" attr="0x20" md5="62bd805c0294b87d35aa1d2f4111c849">SUBROUTN.BAT</file>
 		<file size="482" time="1989-08-31 11:38:56" attr="0x20" md5="fe5acbec653a82f78dceefaf41d7f070">SYNONYMS.BAT</file>
 	</disk>
-	<disk id="disk60" size="1228800" chs="80:2:15" dir="archive/VOL09N03" href="/disks/pcx86/shareware/pcmag/VOL09N03.json" md5="f8838de32780a3da9b76b8fb80dc91d8" md5json="598e40206f94226ab63b234be519afc0">
+	<disk id="disk60" size="1228800" chs="80:2:15" dir="archive/VOL09N03" href="/disks/pcx86/shareware/pcmag/disks/VOL09N03.json" md5="f8838de32780a3da9b76b8fb80dc91d8" md5json="598e40206f94226ab63b234be519afc0">
 		<name>PC Magazine (Vol. 09 No. 03)</name>
 		<file size="1345" time="1989-02-05 09:33:24" attr="0x20" md5="f2d451283f1eaa8f84d7c36a6848611b">ALTG.WPM</file>
 		<file size="74773" time="1990-01-05 16:16:42" attr="0x20" md5="6c5216d2f012da9f275f1f7f3e7e4703">CFCOMP.ASM</file>
@@ -1056,7 +1056,7 @@
 		<file size="20796" time="1990-01-05 16:26:14" attr="0x20" md5="a4cc0b5b0c5bea84773093136c0ccd13">XALL.ASM</file>
 		<file size="969" time="1989-11-28 23:33:24" attr="0x20" md5="7fc663dab5594fc2623d3d0c005818fa">XALL.COM</file>
 	</disk>
-	<disk id="disk61" size="327680" chs="40:2:8" dir="archive/VOL09N04" href="/disks/pcx86/shareware/pcmag/VOL09N04.json" md5="fb7b94a3f63f81c8fb1d15d5a48a6f18" md5json="7e4f2c1a9ebbe42a28ebc6f5ef175591">
+	<disk id="disk61" size="327680" chs="40:2:8" dir="archive/VOL09N04" href="/disks/pcx86/shareware/pcmag/disks/VOL09N04.json" md5="fb7b94a3f63f81c8fb1d15d5a48a6f18" md5json="7e4f2c1a9ebbe42a28ebc6f5ef175591">
 		<name>PC Magazine (Vol. 09 No. 04)</name>
 		<file size="3018" time="1990-01-22 13:49:10" attr="0x20" md5="79154d43bf93ae3520c684d580a0f962">BANK.PAS</file>
 		<file size="773" time="1990-01-22 13:45:14" attr="0x20" md5="913b7201a544d9221cfb06548404e581">HELLO.PAS</file>
@@ -1071,7 +1071,7 @@
 		<file size="1008" time="1990-01-22 13:47:10" attr="0x20" md5="671824374859da06c36100a8ef2efc49">USEHELP.PAS</file>
 		<file size="225212" time="1990-01-22 16:02:06" attr="0x20" md5="2392f59f6d8c91c2b46c8bfc36eb911e">VPOKER.ARC</file>
 	</disk>
-	<disk id="disk62" size="163840" chs="40:1:8" dir="archive/VOL09N05" href="/disks/pcx86/shareware/pcmag/VOL09N05.json" md5="5ebed300da42dc7541f169426f7e1cab" md5json="87efa089d3ff82263590fd2549d5175e">
+	<disk id="disk62" size="163840" chs="40:1:8" dir="archive/VOL09N05" href="/disks/pcx86/shareware/pcmag/disks/VOL09N05.json" md5="5ebed300da42dc7541f169426f7e1cab" md5json="87efa089d3ff82263590fd2549d5175e">
 		<name>PC Magazine (Vol. 09 No. 05)</name>
 		<file size="4348" time="1989-03-24 11:21:56" attr="0x20" md5="1aa6942978bf326e930b0d02b6162cb6">ANSIHERE.ASM</file>
 		<file size="153" time="1989-11-06 15:33:26" attr="0x20" md5="a0d122252c3585de629c015a254f7d98">ANSIHERE.COM</file>
@@ -1081,7 +1081,7 @@
 		<file size="394" time="1989-04-27 10:11:44" attr="0x20" md5="ce84294e932f431d04c514919027f4c6">NEEDANSI.BAT</file>
 		<file size="26189" time="1990-02-07 10:12:54" attr="0x20" md5="9cc84ac6268b5c0282c35a5fde92a86c">PP905.ARC</file>
 	</disk>
-	<disk id="disk63" size="327680" chs="40:2:8" dir="archive/VOL09N06" href="/disks/pcx86/shareware/pcmag/VOL09N06.json" md5="b43eba4adb390903313ab5816155f1d4" md5json="70f48a21295873ca3293208e655d1bc5">
+	<disk id="disk63" size="327680" chs="40:2:8" dir="archive/VOL09N06" href="/disks/pcx86/shareware/pcmag/disks/VOL09N06.json" md5="b43eba4adb390903313ab5816155f1d4" md5json="70f48a21295873ca3293208e655d1bc5">
 		<name>PC Magazine (Vol. 09 No. 06)</name>
 		<file size="375" time="1989-10-20 19:45:54" attr="0x20" md5="089600bfc98b6f91ea78eab310e2966f">PRINTCAL.DEF</file>
 		<file size="16256" time="1989-11-05 21:51:22" attr="0x20" md5="6e371838de70f385f550b92c73e569e8">PRINTCAL.EXE</file>
@@ -1093,7 +1093,7 @@
 		<file size="17824" time="1989-12-12 05:29:28" attr="0x20" md5="c6b924586fb7010bb536a3e6772c6f56">SCHEDULE.COM</file>
 		<file size="5943" time="1990-02-26 09:16:26" attr="0x20" md5="6aa624f38e206ec4eb8680893f8fa7a4">SCHEDULE.DOC</file>
 	</disk>
-	<disk id="disk64" size="163840" chs="40:1:8" dir="archive/VOL09N07" href="/disks/pcx86/shareware/pcmag/VOL09N07.json" md5="ef48479f5b7c07af232b3fb8883cf9c1" md5json="4e5d62d0c598ed10d38aad5766a8d705">
+	<disk id="disk64" size="163840" chs="40:1:8" dir="archive/VOL09N07" href="/disks/pcx86/shareware/pcmag/disks/VOL09N07.json" md5="ef48479f5b7c07af232b3fb8883cf9c1" md5json="4e5d62d0c598ed10d38aad5766a8d705">
 		<name>PC Magazine (Vol. 09 No. 07)</name>
 		<file size="823" time="1990-02-23 10:11:36" attr="0x20" md5="0a80a143b1c5a9331a9eacecf17f8fc1">B.DEF</file>
 		<file size="3377" time="1990-02-23 10:25:24" attr="0x20" md5="99bc6ccf282cb6c3f21115e8bcc87011">COMINPUT.FNC</file>
@@ -1108,7 +1108,7 @@
 		<file size="30225" time="1990-03-07 20:31:08" attr="0x20" md5="750d0aaf55570421252e04c7b8d6205a">PCACCESS.BAS</file>
 		<file size="7636" time="1990-03-09 09:18:44" attr="0x20" md5="9d86b8f21df80be0ae1986970de993f6">PCACCESS.DOC</file>
 	</disk>
-	<disk id="disk65" size="163840" chs="40:1:8" dir="archive/VOL09N08" href="/disks/pcx86/shareware/pcmag/VOL09N08.json" md5="05f9eb20558d4304e7c634163c04473d" md5json="25576103c701af93d999e5be673c354b">
+	<disk id="disk65" size="163840" chs="40:1:8" dir="archive/VOL09N08" href="/disks/pcx86/shareware/pcmag/disks/VOL09N08.json" md5="05f9eb20558d4304e7c634163c04473d" md5json="25576103c701af93d999e5be673c354b">
 		<name>PC Magazine (Vol. 09 No. 08)</name>
 		<file size="2485" time="1989-12-14 11:56:32" attr="0x20" md5="753f124f1c479c5020e65bf65060b283">EDITDEMO.C</file>
 		<file size="10608" time="1990-01-16 13:29:30" attr="0x20" md5="acc7c409344cf8448d725efc4ce3026f">KBBUFFER.ASM</file>
@@ -1126,7 +1126,7 @@
 		<file size="1165" time="1990-01-16 13:28:06" attr="0x20" md5="3519dbae65272da6ae428c2ce410a5ae">TYPEFAST.COM</file>
 		<file size="2595" time="1990-03-22 11:05:26" attr="0x20" md5="cea4aadb6942c5ff79893f524269e95d">TYPEFAST.DOC</file>
 	</disk>
-	<disk id="disk66" size="163840" chs="40:1:8" dir="archive/VOL09N09" href="/disks/pcx86/shareware/pcmag/VOL09N09.json" md5="6531f6fef42ad562d4eb674aa3cb0b6e" md5json="f7023f8b10bf176f6bc76e23eed3d9d1">
+	<disk id="disk66" size="163840" chs="40:1:8" dir="archive/VOL09N09" href="/disks/pcx86/shareware/pcmag/disks/VOL09N09.json" md5="6531f6fef42ad562d4eb674aa3cb0b6e" md5json="f7023f8b10bf176f6bc76e23eed3d9d1">
 		<name>PC Magazine (Vol. 09 No. 09)</name>
 		<file size="1664" time="1990-02-09 17:08:16" attr="0x20" md5="d427c99b232615221d9e0e632a73f66f">123.PAN</file>
 		<file size="148" time="1990-02-13 03:22:54" attr="0x20" md5="9bf4189825d848cc15814ce8daf07e60">FECHA.WPM</file>
@@ -1152,7 +1152,7 @@
 		<file size="190" time="1990-04-03 11:31:58" attr="0x20" md5="5fe1c3c1788e9ba18562a118023d53fe">WHEREIS.DEF</file>
 		<file size="263" time="1990-04-03 11:32:22" attr="0x20" md5="c76b78b26d929c5fea77f52f671cf975">WHEREIS.MAK</file>
 	</disk>
-	<disk id="disk67" size="327680" chs="40:2:8" dir="archive/VOL09N10" href="/disks/pcx86/shareware/pcmag/VOL09N10.json" md5="344cd725e83b7c33cdc6d0b5ec4f3758" md5json="0c02f0ae5c2f88740c38dc24243c0bbd">
+	<disk id="disk67" size="327680" chs="40:2:8" dir="archive/VOL09N10" href="/disks/pcx86/shareware/pcmag/disks/VOL09N10.json" md5="344cd725e83b7c33cdc6d0b5ec4f3758" md5json="0c02f0ae5c2f88740c38dc24243c0bbd">
 		<name>PC Magazine (Vol. 09 No. 10)</name>
 		<file size="43507" time="1990-01-27 09:18:28" attr="0x20" md5="2393aa79c8eaebd1a46e0d7ec2058c1c">COMPUTE.ASM</file>
 		<file size="13737" time="1990-03-09 11:44:44" attr="0x20" md5="04471084a520d5c95f285738b402441d">COMPUTE.BAS</file>
@@ -1165,7 +1165,7 @@
 		<file size="77" time="1990-04-04 14:46:20" attr="0x20" md5="a88f8bd9217fad736234d8ea7c06c6f7">PRSTAT.COM</file>
 		<file size="9339" time="1990-04-27 22:54:26" attr="0x20" md5="f7202d629af7036450b233bf865571f6">THREADS1.ZIP</file>
 	</disk>
-	<disk id="disk68" size="163840" chs="40:1:8" dir="archive/VOL09N11" href="/disks/pcx86/shareware/pcmag/VOL09N11.json" md5="20284febc483cb825750857605b16578" md5json="9b80b12e2e26e1ee6a521c7d91b449b4">
+	<disk id="disk68" size="163840" chs="40:1:8" dir="archive/VOL09N11" href="/disks/pcx86/shareware/pcmag/disks/VOL09N11.json" md5="20284febc483cb825750857605b16578" md5json="9b80b12e2e26e1ee6a521c7d91b449b4">
 		<name>PC Magazine (Vol. 09 No. 11)</name>
 		<file size="47109" time="1990-05-08 14:08:22" attr="0x20" md5="d00b062c8ccf21e145f26e80271ed15b">MEMMAP.BAS</file>
 		<file size="2159" time="1990-05-08 15:41:46" attr="0x20" md5="726f8f7b23617f9e6ae38027c79fb3ee">MEMMAP.DOC</file>
@@ -1179,7 +1179,7 @@
 		<file size="5025" time="1990-01-28 20:42:58" attr="0x20" md5="ecba71e4c84be8018dccf2c393540f37">THREADS2.EXE</file>
 		<file size="301" time="1990-05-08 15:37:40" attr="0x20" md5="a3d9aad241ae246f44d5c1ab8463e839">THREADS2.MAK</file>
 	</disk>
-	<disk id="disk69" size="163840" chs="40:1:8" dir="archive/VOL09N12" href="/disks/pcx86/shareware/pcmag/VOL09N12.json" md5="be914342376485fbc9d7a3d86ccaa0d0" md5json="23516ca20853034547af5dd91b669d3b">
+	<disk id="disk69" size="163840" chs="40:1:8" dir="archive/VOL09N12" href="/disks/pcx86/shareware/pcmag/disks/VOL09N12.json" md5="be914342376485fbc9d7a3d86ccaa0d0" md5json="23516ca20853034547af5dd91b669d3b">
 		<name>PC Magazine (Vol. 09 No. 12)</name>
 		<file size="701" time="1990-05-23 12:43:18" attr="0x20" md5="9345f36941c13d097700db2066e0a201">D.BAT</file>
 		<file size="319" time="1990-05-23 12:43:36" attr="0x20" md5="34dd2ec65dde7f607bacc14dc87edb17">D2.BAT</file>
@@ -1194,7 +1194,7 @@
 		<file size="6987" time="1990-02-27 15:38:24" attr="0x20" md5="d4ef12952aec5b6e1fe84e215f855bfd">THREADS3.EXE</file>
 		<file size="299" time="1990-05-23 09:18:56" attr="0x20" md5="f214f4442290d41cae25ebd1fea25791">THREADS3.MAK</file>
 	</disk>
-	<disk id="disk70" size="163840" chs="40:1:8" dir="archive/VOL09N13" href="/disks/pcx86/shareware/pcmag/VOL09N13.json" md5="59b3cc0726d3b1e0d59f00dfb19de73d" md5json="1d6ac033e030df7622bc64473c578713">
+	<disk id="disk70" size="163840" chs="40:1:8" dir="archive/VOL09N13" href="/disks/pcx86/shareware/pcmag/disks/VOL09N13.json" md5="59b3cc0726d3b1e0d59f00dfb19de73d" md5json="1d6ac033e030df7622bc64473c578713">
 		<name>PC Magazine (Vol. 09 No. 13)</name>
 		<file size="6247" time="1990-04-03 11:12:50" attr="0x20" md5="228d77b71393a04a785fd3ac31662741">ACTMENU.PRG</file>
 		<file size="461" time="1989-11-06 12:25:08" attr="0x20" md5="38c7fc4d1bb80da312a68d0b1c256472">GLUE.WPM</file>
@@ -1206,7 +1206,7 @@
 		<file size="0" time="1990-06-06 15:01:54" attr="0x20">WIPEMEM.SCR</file>
 		<file size="0" time="1990-06-07 13:10:02" attr="0x20">YESNO.PRG</file>
 	</disk>
-	<disk id="disk71" size="163840" chs="40:1:8" dir="archive/VOL09N14" href="/disks/pcx86/shareware/pcmag/VOL09N14.json" md5="cc305fb9f21fd6edac5a590b5e81530b" md5json="e742627029892768acaa7acbf6e3be3d">
+	<disk id="disk71" size="163840" chs="40:1:8" dir="archive/VOL09N14" href="/disks/pcx86/shareware/pcmag/disks/VOL09N14.json" md5="cc305fb9f21fd6edac5a590b5e81530b" md5json="e742627029892768acaa7acbf6e3be3d">
 		<name>PC Magazine (Vol. 09 No. 14)</name>
 		<file size="1778" time="1989-08-29 18:54:30" attr="0x20" md5="a37b5c6219cc3a7e7763e93bfc56fa7d">BAR.WPM</file>
 		<file size="43677" time="1990-07-03 11:43:30" attr="0x20" md5="a10a033054add9d02df4a15e050bd210">BAT2EXEC.ZIP</file>
@@ -1220,7 +1220,7 @@
 		<file size="12334" time="1990-03-27 13:23:20" attr="0x20" md5="dff01af36a5f87ec6201536f4af2ee00">WC.EXE</file>
 		<file size="640" time="1990-07-03 10:56:48" attr="0x20" md5="8fcb051b4345e993a24b829f175e4ad0">ZIPNGO.BAT</file>
 	</disk>
-	<disk id="disk72" size="163840" chs="40:1:8" dir="archive/VOL09N15" href="/disks/pcx86/shareware/pcmag/VOL09N15.json" md5="40e0ca34bbcf2088bf03bf8b9c9ace43" md5json="135e9a42b92e9a31409f0a1e4c1666ed">
+	<disk id="disk72" size="163840" chs="40:1:8" dir="archive/VOL09N15" href="/disks/pcx86/shareware/pcmag/disks/VOL09N15.json" md5="40e0ca34bbcf2088bf03bf8b9c9ace43" md5json="135e9a42b92e9a31409f0a1e4c1666ed">
 		<name>PC Magazine (Vol. 09 No. 15)</name>
 		<file size="650" time="1990-05-02 21:58:28" attr="0x20" md5="b49603497c0662b007d84a3460edf113">ALTP.WPM</file>
 		<file size="71615" time="1990-07-01 17:47:08" attr="0x20" md5="26d8280f2c00273aa5a6008721a376e7">CONCEAL.ASM</file>
@@ -1234,7 +1234,7 @@
 		<file size="40" time="1988-12-06 18:56:12" attr="0x20" md5="f4d189b2f911dcc980e7393238d288db">ONPATH3.BAT</file>
 		<file size="273" time="1990-05-30 14:15:18" attr="0x20" md5="e868582d1227300a3b6cde77cd4fa9b1">PARTABLE.SCR</file>
 	</disk>
-	<disk id="disk73" size="327680" chs="40:2:8" dir="archive/VOL09N16" href="/disks/pcx86/shareware/pcmag/VOL09N16.json" md5="6b1aabd7aabc99db98270040d6092b10" md5json="5f30177e0e017f5f02fc8d0e88414fe9">
+	<disk id="disk73" size="327680" chs="40:2:8" dir="archive/VOL09N16" href="/disks/pcx86/shareware/pcmag/disks/VOL09N16.json" md5="6b1aabd7aabc99db98270040d6092b10" md5json="5f30177e0e017f5f02fc8d0e88414fe9">
 		<name>PC Magazine (Vol. 09 No. 16)</name>
 		<file size="971" time="1989-09-07 20:47:26" attr="0x20" md5="001bf2e1aab1167c08e1e83c37ed1aa5">ASCII.INC</file>
 		<file size="981" time="1990-06-18 10:49:18" attr="0x20" md5="f03aba99d2bddfa7ec7e2e5c58f4f94f">BOXES.PST</file>
@@ -1263,7 +1263,7 @@
 		<file size="2056" time="1989-09-06 16:34:22" attr="0x20" md5="538ef6205908ffecdd6a917fc8cfc447">SYSLOCK.SCR</file>
 		<file size="15451" time="1990-04-29 08:54:54" attr="0x20" md5="8e9ee7e36e80b56c9e4c1a976eb2d746">UTL.ASM</file>
 	</disk>
-	<disk id="disk74" size="163840" chs="40:1:8" dir="archive/VOL09N17" href="/disks/pcx86/shareware/pcmag/VOL09N17.json" md5="f3608ed4f739ca084381b510063e0481" md5json="48d71fb244f37ddc1bcfecb35f49421b">
+	<disk id="disk74" size="163840" chs="40:1:8" dir="archive/VOL09N17" href="/disks/pcx86/shareware/pcmag/disks/VOL09N17.json" md5="f3608ed4f739ca084381b510063e0481" md5json="48d71fb244f37ddc1bcfecb35f49421b">
 		<name>PC Magazine (Vol. 09 No. 17)</name>
 		<file size="174" time="1990-08-29 11:02:16" attr="0x20" md5="e5d0f19f1fdecaea3387b90dc098da58">CHKDSK.BAT</file>
 		<file size="447" time="1990-06-27 00:36:02" attr="0x20" md5="3963575f2cc5a81d039ab1b032414f53">COUNT.WPM</file>
@@ -1278,7 +1278,7 @@
 		<file size="155" time="1990-04-19 15:46:56" attr="0x20" md5="b7a4badc1a07286bf6940e635d20fbc0">WHATNDP.COM</file>
 		<file size="1741" time="1990-08-29 10:50:22" attr="0x20" md5="8b43776b6d5503ec872b828072710076">WHATNDP.SCR</file>
 	</disk>
-	<disk id="disk75" size="163840" chs="40:1:8" dir="archive/VOL09N19" href="/disks/pcx86/shareware/pcmag/VOL09N19.json" md5="e0ba59b3a4c64a56e0a3915cdc84cc7d" md5json="cf32dcddfec9125d744fab90b6f3e93a">
+	<disk id="disk75" size="163840" chs="40:1:8" dir="archive/VOL09N19" href="/disks/pcx86/shareware/pcmag/disks/VOL09N19.json" md5="e0ba59b3a4c64a56e0a3915cdc84cc7d" md5json="cf32dcddfec9125d744fab90b6f3e93a">
 		<name>PC Magazine (Vol. 09 No. 19)</name>
 		<file size="321" time="1990-08-13 16:56:00" attr="0x20" md5="b01a042690ef7e6bb2a7f363898fead6">ALTZ.WPM</file>
 		<file size="948" time="1990-10-08 10:30:44" attr="0x20" md5="48d863ce04c020f256bc21350dfca91e">FIELDLEN.PRG</file>
@@ -1291,7 +1291,7 @@
 		<file size="30208" time="1990-10-05 11:09:54" attr="0x20" md5="713a1890d3e2f9450c57be695deb201a">WSMOOTH.EXE</file>
 		<file size="27630" time="1990-10-08 11:49:08" attr="0x20" md5="d4b8bc2ea34ba41bb489b0f90297b469">WSMSRC.ARC</file>
 	</disk>
-	<disk id="disk76" size="327680" chs="40:2:8" dir="archive/VOL09N20" href="/disks/pcx86/shareware/pcmag/VOL09N20.json" md5="79b91764134c7bdbac2a497176693ead" md5json="765ba29f85da90e233e10806d2542a30">
+	<disk id="disk76" size="327680" chs="40:2:8" dir="archive/VOL09N20" href="/disks/pcx86/shareware/pcmag/disks/VOL09N20.json" md5="79b91764134c7bdbac2a497176693ead" md5json="765ba29f85da90e233e10806d2542a30">
 		<name>PC Magazine (Vol. 09 No. 20)</name>
 		<file size="2604" time="1990-08-28 11:01:06" attr="0x20" md5="4045bf872d6a780b1ab1d4844939df3c">ALTP2.WPM</file>
 		<file size="62" time="1989-09-05 10:06:02" attr="0x20" md5="c1a58f5edfb4627d0de902ac2a6665a5">DRVRDY.COM</file>
@@ -1314,7 +1314,7 @@
 		<file size="4030" time="1990-10-19 08:11:24" attr="0x20" md5="9ff10d7ae307bf18a26308d796e25907">XVI_UD2.XTS</file>
 		<file size="1791" time="1990-10-19 08:10:50" attr="0x20" md5="9ae3fd9394a631e40f9ca0b54b4c8b14">XVI_UD3.XTS</file>
 	</disk>
-	<disk id="disk77" size="1228800" chs="80:2:15" dir="archive/VOL09N21" href="/disks/pcx86/shareware/pcmag/VOL09N21.json" md5="c4ec0d696adfebf9c56bdeb3c94c3423" md5json="a9faa28731d13253be2a68b1d791e0d9">
+	<disk id="disk77" size="1228800" chs="80:2:15" dir="archive/VOL09N21" href="/disks/pcx86/shareware/pcmag/disks/VOL09N21.json" md5="c4ec0d696adfebf9c56bdeb3c94c3423" md5json="a9faa28731d13253be2a68b1d791e0d9">
 		<name>PC Magazine (Vol. 09 No. 21)</name>
 		<file size="51" time="1990-09-24 01:00:00" attr="0x20" md5="ecfee04b29daabd7d2e0a7d8e701f6a3">AMAZON.PAL</file>
 		<file size="51" time="1990-09-24 01:00:00" attr="0x20" md5="11b38a32f90bf7933d2689b4ca08d8a0">ARCTIC.PAL</file>
@@ -1381,7 +1381,7 @@
 		<file size="51" time="1990-09-24 01:00:00" attr="0x20" md5="45092ed1427d5c4837978d1b5b8c2589">WACKY.PAL</file>
 		<file size="51" time="1990-09-24 01:00:00" attr="0x20" md5="7994c2cc4d60a1730ce38a6c5f532879">WESTERN.PAL</file>
 	</disk>
-	<disk id="disk78" size="163840" chs="40:1:8" dir="archive/VOL09N22" href="/disks/pcx86/shareware/pcmag/VOL09N22.json" md5="eb929c812a3cb6d9ca6e0871e28efa96" md5json="ac258181318189500eca77983b158331">
+	<disk id="disk78" size="163840" chs="40:1:8" dir="archive/VOL09N22" href="/disks/pcx86/shareware/pcmag/disks/VOL09N22.json" md5="eb929c812a3cb6d9ca6e0871e28efa96" md5json="ac258181318189500eca77983b158331">
 		<name>PC Magazine (Vol. 09 No. 22)</name>
 		<file size="2104" time="1990-12-03 12:50:52" attr="0x20" md5="d27185a9bc177f970512e40641ef0c1e">ALTV.WPM</file>
 		<file size="3680" time="1990-12-03 12:52:14" attr="0x20" md5="e96cc1fc10abe1fb05c36c16277f8bf3">CTRTEXT.WK1</file>
@@ -1399,7 +1399,7 @@
 		<file size="1274" time="1990-11-21 13:58:46" attr="0x20" md5="358d8d812f14686501494adc2e2f53f7">WINWHERE.DOC</file>
 		<file size="20992" time="1990-10-15 08:55:22" attr="0x20" md5="16b9981dff1445d695548439574f1437">WINWHERE.EXE</file>
 	</disk>
-	<disk id="disk79" size="327680" chs="40:2:8" dir="archive/VOL10N01" href="/disks/pcx86/shareware/pcmag/VOL10N01.json" md5="31a120f92571e345a1e5fab196ac22b2" md5json="454fac69caf945862b85c8939d5b13a7">
+	<disk id="disk79" size="327680" chs="40:2:8" dir="archive/VOL10N01" href="/disks/pcx86/shareware/pcmag/disks/VOL10N01.json" md5="31a120f92571e345a1e5fab196ac22b2" md5json="454fac69caf945862b85c8939d5b13a7">
 		<name>PC Magazine (Vol. 10 No. 01)</name>
 		<file size="92" time="1989-10-26 10:28:00" attr="0x20" md5="35e3cc779d1cb4bd8cb535a4cc93d75d">A.BAT</file>
 		<file size="6384" time="1990-10-07 13:28:46" attr="0x20" md5="0b83115c107233596382409547cc2193">BIOSDATA.EXE</file>
@@ -1421,7 +1421,7 @@
 		<file size="2620" time="1990-12-04 12:26:28" attr="0x20" md5="64e97286c65bdd83c3ae693565bf2694">PCSPOOL.DOC</file>
 		<file size="610" time="1990-10-08 17:36:54" attr="0x20" md5="e147e98f9e4e53cd472956cddc8e1272">STATUS.BAT</file>
 	</disk>
-	<disk id="disk80" size="163840" chs="40:1:8" dir="archive/VOL10N02" href="/disks/pcx86/shareware/pcmag/VOL10N02.json" md5="ec5e69e07336cf8d6d7b555d99d07db4" md5json="5c7abf14ffd4bd15e52848d227ca8e7b">
+	<disk id="disk80" size="163840" chs="40:1:8" dir="archive/VOL10N02" href="/disks/pcx86/shareware/pcmag/disks/VOL10N02.json" md5="ec5e69e07336cf8d6d7b555d99d07db4" md5json="5c7abf14ffd4bd15e52848d227ca8e7b">
 		<name>PC Magazine (Vol. 10 No. 02)</name>
 		<file size="1812" time="1990-10-23 19:56:40" attr="0x20" md5="067d76377afbf4ec3597b4a65a62a12f">DATE.WK1</file>
 		<file size="1885" time="1990-10-23 19:55:40" attr="0x20" md5="050727bc354a0d390b9be283b609295d">DATE2.WK1</file>
@@ -1435,7 +1435,7 @@
 		<file size="2901" time="1990-12-21 13:18:06" attr="0x20" md5="d3a0c148eb7c01d6983a788a1449885f">TRAKLOG.WK1</file>
 		<file size="3231" time="1990-10-23 22:44:46" attr="0x20" md5="626b26fc16e0f3040b591f8f8e5e9d27">TRAKLOG2.WK1</file>
 	</disk>
-	<disk id="disk81" size="163840" chs="40:1:8" dir="archive/VOL10N03" href="/disks/pcx86/shareware/pcmag/VOL10N03.json" md5="4a10de5664a80815700924c935d52eda" md5json="0b55ba3154f23bcb7adb2527bf21a820">
+	<disk id="disk81" size="163840" chs="40:1:8" dir="archive/VOL10N03" href="/disks/pcx86/shareware/pcmag/disks/VOL10N03.json" md5="4a10de5664a80815700924c935d52eda" md5json="0b55ba3154f23bcb7adb2527bf21a820">
 		<name>PC Magazine (Vol. 10 No. 03)</name>
 		<file size="6356" time="1991-01-11 20:15:48" attr="0x20" md5="a72af3e9bf8cf65f98079dae6f09a004">CLRCUBE.ZIP</file>
 		<file size="982" time="1991-01-03 15:08:08" attr="0x20" md5="0142f8120b3c45ea6bb13b8098a1406f">FILENAME.WFW</file>
@@ -1449,7 +1449,7 @@
 		<file size="1530" time="1990-11-04 22:00:16" attr="0x20" md5="5d02c04712a8451ba3376bb3333230e1">XLWSPEC.XLM</file>
 		<file size="1647" time="1991-01-03 15:13:22" attr="0x20" md5="d61f5533df821adf86e6bd838689e249">XLWSPEC2.XLM</file>
 	</disk>
-	<disk id="disk82" size="163840" chs="40:1:8" dir="archive/VOL10N04" href="/disks/pcx86/shareware/pcmag/VOL10N04.json" md5="90154802f84ee4f4594ad1adb78c7bd5" md5json="740ad56798bc6a6be9a05eb3a883480c">
+	<disk id="disk82" size="163840" chs="40:1:8" dir="archive/VOL10N04" href="/disks/pcx86/shareware/pcmag/disks/VOL10N04.json" md5="90154802f84ee4f4594ad1adb78c7bd5" md5json="740ad56798bc6a6be9a05eb3a883480c">
 		<name>PC Magazine (Vol. 10 No. 04)</name>
 		<file size="162" time="1989-11-21 12:40:08" attr="0x20" md5="dc456b059f49b80609a7efc2bcc06e21">------.BAT</file>
 		<file size="87" time="1989-11-22 09:49:52" attr="0x20" md5="d13720cf4714ee304a5b67d8c8bb9897">CHEKCHEK.BAT</file>
@@ -1462,7 +1462,7 @@
 		<file size="141" time="1990-08-28 10:06:16" attr="0x20" md5="7b413924724217ad00e11962eb24621e">WHATCPU2.COM</file>
 		<file size="777" time="1990-08-28 10:06:02" attr="0x20" md5="69c379a3d8d7d5dc90d5106602b8408a">WHATCPU2.SCR</file>
 	</disk>
-	<disk id="disk83" size="327680" chs="40:2:8" dir="archive/VOL10N05" href="/disks/pcx86/shareware/pcmag/VOL10N05.json" md5="0810c5739785af8bb079af56bac2f863" md5json="8e9ac04054e8332d33572eb1dac2601d">
+	<disk id="disk83" size="327680" chs="40:2:8" dir="archive/VOL10N05" href="/disks/pcx86/shareware/pcmag/disks/VOL10N05.json" md5="0810c5739785af8bb079af56bac2f863" md5json="8e9ac04054e8332d33572eb1dac2601d">
 		<name>PC Magazine (Vol. 10 No. 05)</name>
 		<file size="109864" time="1991-02-07 00:00:02" attr="0x20" md5="75ce22295606d722e9b7b1ab88c33355">2BOTH.ZIP</file>
 		<file size="2062" time="1990-12-05 16:42:04" attr="0x20" md5="6193c1f1eb270844ab77568f3ad7ce37">ALTD.WPM</file>
@@ -1477,7 +1477,7 @@
 		<file size="21" time="1989-12-04 12:27:40" attr="0x20" md5="baa7a9684d491bb6a7279ba96aeef81f">VGA28.COM</file>
 		<file size="276" time="1989-12-04 12:26:00" attr="0x20" md5="35004570658ad7d973371d4e53064a2e">VGA28.SCR</file>
 	</disk>
-	<disk id="disk84" size="1228800" chs="80:2:15" dir="archive/VOL10N06" href="/disks/pcx86/shareware/pcmag/VOL10N06.json" md5="5b32220994ea944d31f4036562078e43" md5json="2a168866039f783736281678e2fa27b4">
+	<disk id="disk84" size="1228800" chs="80:2:15" dir="archive/VOL10N06" href="/disks/pcx86/shareware/pcmag/disks/VOL10N06.json" md5="5b32220994ea944d31f4036562078e43" md5json="2a168866039f783736281678e2fa27b4">
 		<name>PC Magazine (Vol. 10 No. 06)</name>
 		<file size="8347" time="1990-12-04 21:32:44" attr="0x20" md5="b442bfeb0e79df61095bccb1c4a54932">BOUNCE.C</file>
 		<file size="409" time="1990-11-20 15:11:14" attr="0x20" md5="3b97753c553e99728b66ef64b3801943">BOUNCE.DEF</file>
@@ -1518,7 +1518,7 @@
 		<file size="3038" time="1991-02-19 14:34:04" attr="0x20" md5="1cde4000f31a8b088daa7448e246b58b">XBUF.C</file>
 		<file size="269" time="1991-02-19 14:33:32" attr="0x20" md5="74a5ab2ac1db943a4cc05d200b867c66">XBUF.H</file>
 	</disk>
-	<disk id="disk85" size="163840" chs="40:1:8" dir="archive/VOL10N07" href="/disks/pcx86/shareware/pcmag/VOL10N07.json" md5="2004eff28015304dd71034514b43e394" md5json="7289fea77be9e24821dc8d1bc958bcba">
+	<disk id="disk85" size="163840" chs="40:1:8" dir="archive/VOL10N07" href="/disks/pcx86/shareware/pcmag/disks/VOL10N07.json" md5="2004eff28015304dd71034514b43e394" md5json="7289fea77be9e24821dc8d1bc958bcba">
 		<name>PC Magazine (Vol. 10 No. 07)</name>
 		<file size="2699" time="1991-03-04 14:46:12" attr="0x20" md5="fae63df0fcb8ac79cc1d4ab726853a72">ATTRIB.TXT</file>
 		<file size="3458" time="1991-03-04 14:47:38" attr="0x20" md5="8d49d5ccf9c5bb7494279717b7219beb">ECHO.PAS</file>
@@ -1531,7 +1531,7 @@
 		<file size="2755" time="1991-01-09 14:36:28" attr="0x20" md5="6677df5d644ac6b8d49ffc20c67c92f2">TILE.XLM</file>
 		<file size="5142" time="1991-03-04 14:21:08" attr="0x20" md5="0b1602f5178eee9cdf4fe96348840b32">UNIQUE.ZIP</file>
 	</disk>
-	<disk id="disk86" size="163840" chs="40:1:8" dir="archive/VOL10N08" href="/disks/pcx86/shareware/pcmag/VOL10N08.json" md5="e0a15e4663ef6085fd0047e5d041fd6b" md5json="9380a47717826a502e22a4c1d77b6eac">
+	<disk id="disk86" size="163840" chs="40:1:8" dir="archive/VOL10N08" href="/disks/pcx86/shareware/pcmag/disks/VOL10N08.json" md5="e0a15e4663ef6085fd0047e5d041fd6b" md5json="9380a47717826a502e22a4c1d77b6eac">
 		<name>PC Magazine (Vol. 10 No. 08)</name>
 		<file size="5342" time="1991-01-04 15:42:56" attr="0x20" md5="161634970034b4e53342320bd8de9705">BALLGAME.C</file>
 		<file size="22184" time="1990-10-26 23:23:08" attr="0x20" md5="67d9c5c6cfc92d8d6c24d99796c4bec5">BALLGAME.EXE</file>
@@ -1549,7 +1549,7 @@
 		<file size="1125" time="1991-03-25 15:16:16" attr="0x20" md5="7d2d5205a594c6387c2649b9da0451d6">UNIQUE.PAS</file>
 		<file size="4744" time="1991-03-25 15:12:16" attr="0x20" md5="6ee8d475d05ca9765315cdbdf41407eb">WHATCLR.ZIP</file>
 	</disk>
-	<disk id="disk87" size="163840" chs="40:1:8" dir="archive/VOL10N09" href="/disks/pcx86/shareware/pcmag/VOL10N09.json" md5="79d7610b5c3f271f8d7c2b9da95268c8" md5json="f81b3811c72ed6f16af057da301a30fc">
+	<disk id="disk87" size="163840" chs="40:1:8" dir="archive/VOL10N09" href="/disks/pcx86/shareware/pcmag/disks/VOL10N09.json" md5="79d7610b5c3f271f8d7c2b9da95268c8" md5json="f81b3811c72ed6f16af057da301a30fc">
 		<name>PC Magazine (Vol. 10 No. 09)</name>
 		<file size="4651" time="1991-02-13 09:39:58" attr="0x20" md5="4dfa56644e68194b7efac3085e878f22">2DIR.C</file>
 		<file size="22074" time="1990-10-28 11:09:32" attr="0x20" md5="b82718534b968e0a0dfd306fd850ee0b">2DIR.EXE</file>
@@ -1562,7 +1562,7 @@
 		<file size="1060" time="1990-12-11 15:20:40" attr="0x20" md5="06ea01bd62c574ba2263a288fde5c472">TIME.WPM</file>
 		<file size="39526" time="1991-04-25 10:15:34" attr="0x20" md5="f69f57f1fccade5a087fd211a9c58578">WINSAVER.ZIP</file>
 	</disk>
-	<disk id="disk88" size="327680" chs="40:2:8" dir="archive/VOL10N10" href="/disks/pcx86/shareware/pcmag/VOL10N10.json" md5="4803c638685ff4b8665a02d07e83b2e0" md5json="754bb085beac96842b44b403ac82d281">
+	<disk id="disk88" size="327680" chs="40:2:8" dir="archive/VOL10N10" href="/disks/pcx86/shareware/pcmag/disks/VOL10N10.json" md5="4803c638685ff4b8665a02d07e83b2e0" md5json="754bb085beac96842b44b403ac82d281">
 		<name>PC Magazine (Vol. 10 No. 10)</name>
 		<file size="143" time="1991-01-08 08:49:12" attr="0x20" md5="6c7d27890fb345bbcb908544856e0ade">ANSIPROM.BAT</file>
 		<file size="13293" time="1991-02-26 16:56:36" attr="0x20" md5="39a955e8bfbd93a9c5d68ddb8125752e">BROWSE.C</file>
@@ -1595,7 +1595,7 @@
 		<file size="2043" time="1991-02-19 14:51:06" attr="0x20" md5="f86d50d15a12b6e9a08a3ffc6501699b">REL3FIX.WK1</file>
 		<file size="951" time="1991-04-29 14:13:50" attr="0x20" md5="8c9872faaa523931198b02a4c202807f">TEST.PRG</file>
 	</disk>
-	<disk id="disk89" size="163840" chs="40:1:8" dir="archive/VOL10N11" href="/disks/pcx86/shareware/pcmag/VOL10N11.json" md5="d200b25a7f7b37806fdc5bd12c81b917" md5json="1c4c639e4cbc4af74c8b06dcaf8f67a8">
+	<disk id="disk89" size="163840" chs="40:1:8" dir="archive/VOL10N11" href="/disks/pcx86/shareware/pcmag/disks/VOL10N11.json" md5="d200b25a7f7b37806fdc5bd12c81b917" md5json="1c4c639e4cbc4af74c8b06dcaf8f67a8">
 		<name>PC Magazine (Vol. 10 No. 11)</name>
 		<file size="1514" time="1991-03-22 15:35:34" attr="0x20" md5="6e636ea76969da9dd57599c1a239ccaf">ALTR.WPM</file>
 		<file size="1891" time="1991-02-20 22:00:56" attr="0x20" md5="b78d950354cf1ce371e784d015b6cf2a">ALTS.WPM</file>
@@ -1614,7 +1614,7 @@
 		<file size="2521" time="1991-04-13 20:58:10" attr="0x20" md5="79a1cb5034de5600082e6b2162c45510">WINMEM.C</file>
 		<file size="8192" time="1991-04-13 20:51:38" attr="0x20" md5="1b31725d38018c645a89f1cc2bdb960f">WINMEM.EXE</file>
 	</disk>
-	<disk id="disk90" size="327680" chs="40:2:8" dir="archive/VOL10N12" href="/disks/pcx86/shareware/pcmag/VOL10N12.json" md5="5a384ceb7c9e73cd7bd35c8464d21e60" md5json="ad5455ae1899cfe0cacaea4e0092f5a3">
+	<disk id="disk90" size="327680" chs="40:2:8" dir="archive/VOL10N12" href="/disks/pcx86/shareware/pcmag/disks/VOL10N12.json" md5="5a384ceb7c9e73cd7bd35c8464d21e60" md5json="ad5455ae1899cfe0cacaea4e0092f5a3">
 		<name>PC Magazine (Vol. 10 No. 12)</name>
 		<file size="287" time="1991-05-30 10:38:20" attr="0x20" md5="505f0ed4a2aef5ad0a0064f891a72f0d">2.BAT</file>
 		<file size="74" time="1991-05-30 10:38:26" attr="0x20" md5="5d88a23a097d25dc745a6b7ad54af477">CLERSTAK.BAT</file>
@@ -1658,7 +1658,7 @@
 		<file size="1253" time="1991-05-07 01:00:00" attr="0x20" md5="52d21e378dca745ef02de8e52026ec14">WINEXT.RC</file>
 		<file size="4124" time="1991-05-07 01:00:00" attr="0x20" md5="fe43fd06dbf1d55ce445a63a2af3176a">WINEXT.RES</file>
 	</disk>
-	<disk id="disk91" size="163840" chs="40:1:8" dir="archive/VOL10N13" href="/disks/pcx86/shareware/pcmag/VOL10N13.json" md5="e01529a96f2ffd3c93cc8bc35ece8b85" md5json="d402a91312283857cb314c0ab6bd5cb3">
+	<disk id="disk91" size="163840" chs="40:1:8" dir="archive/VOL10N13" href="/disks/pcx86/shareware/pcmag/disks/VOL10N13.json" md5="e01529a96f2ffd3c93cc8bc35ece8b85" md5json="d402a91312283857cb314c0ab6bd5cb3">
 		<name>PC Magazine (Vol. 10 No. 13)</name>
 		<file size="2417" time="1991-03-20 20:01:14" attr="0x20" md5="b684a2b861eec0abd339f53626df4a15">DELABEL.WK1</file>
 		<file size="741" time="1991-06-10 13:45:02" attr="0x20" md5="63d03294a6a5ceedf9196d7960311424">DIBDATA.ADD</file>
@@ -1672,7 +1672,7 @@
 		<file size="5548" time="1991-06-10 18:01:52" attr="0x20" md5="74f522d83d52d302865e3a6a6a5e43e5">PROMPTYN.PRG</file>
 		<file size="2264" time="1991-03-20 18:33:20" attr="0x20" md5="c6c89c67aaea4237f0462d811c1062d5">SPACEOUT.WK1</file>
 	</disk>
-	<disk id="disk92" size="327680" chs="40:2:8" dir="archive/VOL10N14" href="/disks/pcx86/shareware/pcmag/VOL10N14.json" md5="567eb660f5a58cfd85f629f7c1cdca09" md5json="9890837c1d2f108746eac4c44385a456">
+	<disk id="disk92" size="327680" chs="40:2:8" dir="archive/VOL10N14" href="/disks/pcx86/shareware/pcmag/disks/VOL10N14.json" md5="567eb660f5a58cfd85f629f7c1cdca09" md5json="9890837c1d2f108746eac4c44385a456">
 		<name>PC Magazine (Vol. 10 No. 14)</name>
 		<file size="12542" time="1991-04-08 09:38:26" attr="0x20" md5="85c82dd6a83bfcf388b7cab141b17771">CALENDAR.WPM</file>
 		<file size="135" time="1991-02-04 10:01:22" attr="0x20" md5="130e8676a61f7e0c4e8bb47198938a01">DEB2SCR.COM</file>
@@ -1691,7 +1691,7 @@
 		<file size="11213" time="1991-05-13 14:38:48" attr="0x20" md5="b5f78f8892b2e8cef44b459d0c020f7c">WINCOLOR.RC</file>
 		<file size="4295" time="1991-05-13 14:40:16" attr="0x20" md5="6ddfe3494cbdee914c5bf8c02225ac43">WINCOLOR.RES</file>
 	</disk>
-	<disk id="disk93" size="163840" chs="40:1:8" dir="archive/VOL10N15" href="/disks/pcx86/shareware/pcmag/VOL10N15.json" md5="6411e17b97a0bbdcafeb29adf9582059" md5json="fc2cffe3802c35ce1e6c0d7cd752e2ca">
+	<disk id="disk93" size="163840" chs="40:1:8" dir="archive/VOL10N15" href="/disks/pcx86/shareware/pcmag/disks/VOL10N15.json" md5="6411e17b97a0bbdcafeb29adf9582059" md5json="fc2cffe3802c35ce1e6c0d7cd752e2ca">
 		<name>PC Magazine (Vol. 10 No. 15)</name>
 		<file size="1590" time="1991-08-09 10:17:54" attr="0x20" md5="ea87e8078c8a8fc7c274903c44e6d0d6">CAPIT.BAT</file>
 		<file size="1396" time="1991-08-09 10:18:10" attr="0x20" md5="3b0d13601f6a6617d0c45f9dd5adae81">CHANCODE.WPM</file>
@@ -1713,7 +1713,7 @@
 		<file size="2201" time="1991-07-30 14:31:54" attr="0x20" md5="50b83c0f24a3948921904a205d48ab76">VECTORS.CPP</file>
 		<file size="805" time="1991-07-30 14:31:38" attr="0x20" md5="ee171a6928e5b26c11463db513671ee2">VECTORS.H</file>
 	</disk>
-	<disk id="disk94" size="163840" chs="40:1:8" dir="archive/VOL10N16" href="/disks/pcx86/shareware/pcmag/VOL10N16.json" md5="aeacd37d1327e023e802298e46f34a26" md5json="9f0d2ba635bedf9685aad08e35212071">
+	<disk id="disk94" size="163840" chs="40:1:8" dir="archive/VOL10N16" href="/disks/pcx86/shareware/pcmag/disks/VOL10N16.json" md5="aeacd37d1327e023e802298e46f34a26" md5json="9f0d2ba635bedf9685aad08e35212071">
 		<name>PC Magazine (Vol. 10 No. 16)</name>
 		<file size="1380" time="1991-08-26 11:40:46" attr="0x20" md5="78ab7c2a87d3e59f99c7a5e4ebb860ab">ATSAY</file>
 		<file size="7650" time="1991-08-26 13:52:26" attr="0x20" md5="ad97f6ab912df85f3044e0daae18c6d3">CALC.PAS</file>
@@ -1739,7 +1739,7 @@
 		<file size="58300" time="1991-06-11 10:39:54" attr="0x20" md5="3c712de04d4e05a23e3e5631360b1d24">TRYPOINT.EXE</file>
 		<file size="1123" time="1991-08-27 15:02:58" attr="0x20" md5="df9783f8c9a0939baa121eb403640487">TRYPUT.PRG</file>
 	</disk>
-	<disk id="disk95" size="163840" chs="40:1:8" dir="archive/VOL10N17" href="/disks/pcx86/shareware/pcmag/VOL10N17.json" md5="a13ade056bb727ede90435658421d100" md5json="911c3722e717d48f6a96e44aa4ab1d71">
+	<disk id="disk95" size="163840" chs="40:1:8" dir="archive/VOL10N17" href="/disks/pcx86/shareware/pcmag/disks/VOL10N17.json" md5="a13ade056bb727ede90435658421d100" md5json="911c3722e717d48f6a96e44aa4ab1d71">
 		<name>PC Magazine (Vol. 10 No. 17)</name>
 		<file size="1099" time="1991-07-11 12:59:28" attr="0x20" md5="aa91a59fe4cedce590c4768d9f9f4c06">ALTC.WPM</file>
 		<file size="1388" time="1991-09-12 09:50:52" attr="0x20" md5="5216002c530cedfdde18f0096c86610c">ALTKEY.BAS</file>
@@ -1760,7 +1760,7 @@
 		<file size="1295" time="1991-09-12 09:47:56" attr="0x20" md5="5cb44519d25e5e97d01a757cd0b620a0">TITLEBAR</file>
 		<file size="1799" time="1991-09-12 12:25:48" attr="0x20" md5="b6c818d4e0732c257bca3f0aba2ba6b1">WINVER.ZIP</file>
 	</disk>
-	<disk id="disk96" size="163840" chs="40:1:8" dir="archive/VOL10N18" href="/disks/pcx86/shareware/pcmag/VOL10N18.json" md5="87a570b7be278ad269de5f03f670c0ab" md5json="d541935a9051a909d26a1ade784c2701">
+	<disk id="disk96" size="163840" chs="40:1:8" dir="archive/VOL10N18" href="/disks/pcx86/shareware/pcmag/disks/VOL10N18.json" md5="87a570b7be278ad269de5f03f670c0ab" md5json="d541935a9051a909d26a1ade784c2701">
 		<name>PC Magazine (Vol. 10 No. 18)</name>
 		<file size="3072" time="1991-09-11 11:10:24" attr="0x20" md5="70eeb432bb030de7176c0dbbff2e1a7c">CFGSAVE.DLL</file>
 		<file size="2683" time="1991-10-01 15:42:44" attr="0x20" md5="7c629d9cf447b1083eba9db7e5dba630">CFGSAVE.DOC</file>
@@ -1791,7 +1791,7 @@
 		<file size="3897" time="1991-09-24 15:34:52" attr="0x20" md5="db7c714e3f6529deb30f77bf91ebf1b6">SYSMETS</file>
 		<file size="906" time="1991-09-24 15:35:04" attr="0x20" md5="5bdf07309ebdbd9cff910e254e9eaee7">TOOLBOOK.1</file>
 	</disk>
-	<disk id="disk97" size="327680" chs="40:2:8" dir="archive/VOL10N19" href="/disks/pcx86/shareware/pcmag/VOL10N19.json" md5="a22884b30f6542090ab5aadb447cb743" md5json="112c90cb00cb269f6003cb01e1a5a30a">
+	<disk id="disk97" size="327680" chs="40:2:8" dir="archive/VOL10N19" href="/disks/pcx86/shareware/pcmag/disks/VOL10N19.json" md5="a22884b30f6542090ab5aadb447cb743" md5json="112c90cb00cb269f6003cb01e1a5a30a">
 		<name>PC Magazine (Vol. 10 No. 19)</name>
 		<file size="5117" time="1991-10-15 10:47:26" attr="0x20" md5="1450acde8b0ac43fde143ef2340d8fa6">BIGCOPY.C</file>
 		<file size="13218" time="1991-08-16 13:34:30" attr="0x20" md5="97663264dcffbe910d96f5f7c27aa773">BIGCOPY.EXE</file>
@@ -1815,7 +1815,7 @@
 		<file size="6953" time="1991-10-15 10:50:02" attr="0x20" md5="abbf91819bafbfe19ed0d344af5fc51d">WINFSR.C</file>
 		<file size="5408" time="1991-07-29 00:10:00" attr="0x20" md5="6ec0099d4bdcafe36312a55143b19f2c">WINFSR.EXE</file>
 	</disk>
-	<disk id="disk98" size="163840" chs="40:1:8" dir="archive/VOL10N20" href="/disks/pcx86/shareware/pcmag/VOL10N20.json" md5="e2efdd468dba474bb52618710ed72bf5" md5json="a1d492e22cbd47d386b791fb8f20a339">
+	<disk id="disk98" size="163840" chs="40:1:8" dir="archive/VOL10N20" href="/disks/pcx86/shareware/pcmag/disks/VOL10N20.json" md5="e2efdd468dba474bb52618710ed72bf5" md5json="a1d492e22cbd47d386b791fb8f20a339">
 		<name>PC Magazine (Vol. 10 No. 20)</name>
 		<file size="3182" time="1991-10-18 16:43:30" attr="0x20" md5="961798c6342f9e62d20e4e5e1a65e0b2">ALLPR.WK1</file>
 		<file size="3599" time="1991-10-18 16:43:58" attr="0x20" md5="3aa1e243e540aa8f7775fc887910182d">ALLPR2.WK1</file>
@@ -1834,7 +1834,7 @@
 		<file size="9472" time="1991-10-01 07:54:36" attr="0x20" md5="e567f55c7c6930435e1697764040ef47">WVSP.EXE</file>
 		<file size="1338" time="1991-10-21 23:32:56" attr="0x20" md5="83e310a0a20445199122765f14130a09">WVSP.PAS</file>
 	</disk>
-	<disk id="disk99" size="163840" chs="40:1:8" dir="archive/VOL10N21" href="/disks/pcx86/shareware/pcmag/VOL10N21.json" md5="3374d7ab5cce423945df4b415a2c55d1" md5json="20e423b83f78cfe1c34739a0ffa2799c">
+	<disk id="disk99" size="163840" chs="40:1:8" dir="archive/VOL10N21" href="/disks/pcx86/shareware/pcmag/disks/VOL10N21.json" md5="3374d7ab5cce423945df4b415a2c55d1" md5json="20e423b83f78cfe1c34739a0ffa2799c">
 		<name>PC Magazine (Vol. 10 No. 21)</name>
 		<file size="2966" time="1991-08-27 23:17:48" attr="0x20" md5="4da063bb859b18b8a79bbf05331d330d">ALTF.WPM</file>
 		<file size="2492" time="1991-10-31 16:24:24" attr="0x20" md5="314b3527b1eb4b9346c0a5ca89f51bc8">CKDATE.ASM</file>
@@ -1850,7 +1850,7 @@
 		<file size="2114" time="1991-06-08 12:02:34" attr="0x20" md5="116c3df52c14ea523cd5da86a537828b">RAND2.WK1</file>
 		<file size="516" time="1991-11-01 16:38:52" attr="0x20" md5="d0d95dd652022e4ac12144c98dda8766">REBOOT.ZIP</file>
 	</disk>
-	<disk id="disk100" size="163840" chs="40:1:8" dir="archive/VOL10N22" href="/disks/pcx86/shareware/pcmag/VOL10N22.json" md5="db80df062c65a256801fdeb288868207" md5json="d639d2ed67488dd0e57e5b5994aa2b59">
+	<disk id="disk100" size="163840" chs="40:1:8" dir="archive/VOL10N22" href="/disks/pcx86/shareware/pcmag/disks/VOL10N22.json" md5="db80df062c65a256801fdeb288868207" md5json="d639d2ed67488dd0e57e5b5994aa2b59">
 		<name>PC Magazine (Vol. 10 No. 22)</name>
 		<file size="1221" time="1991-07-19 16:24:22" attr="0x20" md5="4462112996e353b021b7f0cde0ea4bea">CDISK.PRG</file>
 		<file size="442" time="1991-11-25 11:27:30" attr="0x20" md5="c0b491e668243875da66d60879e05462">CHANGED.BAT</file>
@@ -1867,7 +1867,7 @@
 		<file size="5341" time="1991-11-25 18:03:48" attr="0x20" md5="e76709dd2db7cbbb1126465cccbc2d32">STATIC2.ZIP</file>
 		<file size="58495" time="1991-11-25 17:53:28" attr="0x20" md5="4d044385fa3a647a829fb2db0126d354">WINNAV.ZIP</file>
 	</disk>
-	<disk id="disk101" size="163840" chs="40:1:8" dir="archive/VOL11N01" href="/disks/pcx86/shareware/pcmag/VOL11N01.json" md5="e4eea8ad843a5e86e501cd54d17739ef" md5json="3448237c5acfc17464be16a2125e2f4e">
+	<disk id="disk101" size="163840" chs="40:1:8" dir="archive/VOL11N01" href="/disks/pcx86/shareware/pcmag/disks/VOL11N01.json" md5="e4eea8ad843a5e86e501cd54d17739ef" md5json="3448237c5acfc17464be16a2125e2f4e">
 		<name>PC Magazine (Vol. 11 No. 01)</name>
 		<file size="2461" time="1991-08-29 14:51:04" attr="0x20" md5="7bd50af14eda9793f38e5e82e9ca323d">ABOUT.PRG</file>
 		<file size="9075" time="1991-12-10 15:44:34" attr="0x20" md5="79264cf7f0205fe7ce00ef3d343b52fe">INKEY.ZIP</file>
@@ -1876,7 +1876,7 @@
 		<file size="27741" time="1991-12-16 16:01:52" attr="0x20" md5="2fb3d52db12efaa2305c68ac58abcd5f">TRACKR.ZIP</file>
 		<file size="431" time="1991-12-10 12:42:14" attr="0x20" md5="2218aefe823c35d396a14a1f8a33edaf">WCTEST.BAT</file>
 	</disk>
-	<disk id="disk102" size="1228800" chs="80:2:15" dir="archive/VOL11N02" href="/disks/pcx86/shareware/pcmag/VOL11N02.json" md5="cab80894c1a6edd20217a24911986f1d" md5json="863f9bbe5ec2c419481787c6c797aebb">
+	<disk id="disk102" size="1228800" chs="80:2:15" dir="archive/VOL11N02" href="/disks/pcx86/shareware/pcmag/disks/VOL11N02.json" md5="cab80894c1a6edd20217a24911986f1d" md5json="863f9bbe5ec2c419481787c6c797aebb">
 		<name>PC Magazine (Vol. 11 No. 02)</name>
 		<file size="414" time="1991-12-31 14:19:12" attr="0x20" md5="9c609cc69992e046811deffa57608236">ANSRGET.BAT</file>
 		<file size="277" time="1991-09-17 19:43:34" attr="0x20" md5="57ac12ad1aa2cc5153903b8906c9f307">BRUCE&amp;ME.MCI</file>
@@ -1911,7 +1911,7 @@
 		<file size="94073" time="1992-01-02 10:28:32" attr="0x20" md5="a53e82cbdd24e6f903b8adb02813eef0">ZCOPY.ASM</file>
 		<file size="4286" time="1992-01-02 10:41:14" attr="0x20" md5="2b41866e34f42aa56cc27edaa95b44e1">ZCOPY.COM</file>
 	</disk>
-	<disk id="disk103" size="163840" chs="40:1:8" dir="archive/VOL11N03" href="/disks/pcx86/shareware/pcmag/VOL11N03.json" md5="a2ed67ac9df2e52e7b92507603c3ccbd" md5json="8b5d63f2323589e43e8bbd31c626e17a">
+	<disk id="disk103" size="163840" chs="40:1:8" dir="archive/VOL11N03" href="/disks/pcx86/shareware/pcmag/disks/VOL11N03.json" md5="a2ed67ac9df2e52e7b92507603c3ccbd" md5json="8b5d63f2323589e43e8bbd31c626e17a">
 		<name>PC Magazine (Vol. 11 No. 03)</name>
 		<file size="3033" time="1992-01-14 12:33:10" attr="0x20" md5="dc5fbf566c8b259a6ba15c7912c86d0b">386STEP.ZIP</file>
 		<file size="23567" time="1992-01-14 12:15:12" attr="0x20" md5="569e158ff9cf5fb55b2f30ad44e0b1c8">ADDIT.ZIP</file>
@@ -1920,7 +1920,7 @@
 		<file size="1782" time="1992-01-14 12:42:28" attr="0x20" md5="d11d8cde80389186167a5efaabcf810e">PRREADY.C</file>
 		<file size="4083" time="1992-01-14 12:42:50" attr="0x20" md5="c1a13743b143d0b6015db3ee5b7dc459">QBMENU.BAS</file>
 	</disk>
-	<disk id="disk104" size="163840" chs="40:1:8" dir="archive/VOL11N04" href="/disks/pcx86/shareware/pcmag/VOL11N04.json" md5="df90f792aae518b955774bff45189c38" md5json="c33c482665dc6c5db5506e094fed188b">
+	<disk id="disk104" size="163840" chs="40:1:8" dir="archive/VOL11N04" href="/disks/pcx86/shareware/pcmag/disks/VOL11N04.json" md5="df90f792aae518b955774bff45189c38" md5json="c33c482665dc6c5db5506e094fed188b">
 		<name>PC Magazine (Vol. 11 No. 04)</name>
 		<file size="21605" time="1992-01-31 18:49:40" attr="0x20" md5="c491053a94dde05405c1b57424f233bf">ADDSYN.ZIP</file>
 		<file size="22054" time="1992-01-31 19:10:20" attr="0x20" md5="c55d4e5d3b5c10ad7be4c5cff7a1095c">DEM123.ZIP</file>
@@ -1930,7 +1930,7 @@
 		<file size="92302" time="1992-02-06 16:06:32" attr="0x20" md5="cc9d03978f72359a9e9593ec8a181ca5">SHOWDU.ZIP</file>
 		<file size="1000" time="1991-03-28 16:45:42" attr="0x20" md5="4db11b7472936c2902d4de937230e991">UPDATE.BAS</file>
 	</disk>
-	<disk id="disk105" size="163840" chs="40:1:8" dir="archive/VOL11N05" href="/disks/pcx86/shareware/pcmag/VOL11N05.json" md5="6907bfc0b4fa1f44e51bc519279299ff" md5json="eec160ef2e378046653ab3119df73acb">
+	<disk id="disk105" size="163840" chs="40:1:8" dir="archive/VOL11N05" href="/disks/pcx86/shareware/pcmag/disks/VOL11N05.json" md5="6907bfc0b4fa1f44e51bc519279299ff" md5json="eec160ef2e378046653ab3119df73acb">
 		<name>PC Magazine (Vol. 11 No. 05)</name>
 		<file size="4096" time="1991-10-01 20:24:42" attr="0x20" md5="87a505a8b8cd0ef12b65f68eaa0bf88a">DD.DB</file>
 		<file size="2323" time="1991-10-02 14:19:10" attr="0x20" md5="d8f01508bdf2a390acfba1b389ad8751">DD.R1</file>
@@ -1974,7 +1974,7 @@
 		<file size="326" time="1991-11-21 03:27:20" attr="0x20" md5="2b23342ad1c10d2db56496ba10597ed9">WINPTRA.CUR</file>
 		<file size="326" time="1991-11-21 03:25:46" attr="0x20" md5="53be18938c0b57ff2f6e7402764d357d">WINPTRB.CUR</file>
 	</disk>
-	<disk id="disk106" size="163840" chs="40:1:8" dir="archive/VOL11N06" href="/disks/pcx86/shareware/pcmag/VOL11N06.json" md5="39f385c5371c6b1f559934df130cb949" md5json="9e1d2d2dd41581a33bdb701755917cc7">
+	<disk id="disk106" size="163840" chs="40:1:8" dir="archive/VOL11N06" href="/disks/pcx86/shareware/pcmag/disks/VOL11N06.json" md5="39f385c5371c6b1f559934df130cb949" md5json="9e1d2d2dd41581a33bdb701755917cc7">
 		<name>PC Magazine (Vol. 11 No. 06)</name>
 		<file size="311" time="1991-08-27 12:18:04" attr="0x20" md5="4305d70ef1de0bbc800ddc56fe06f554">2.BAT</file>
 		<file size="1019" time="1991-12-25 01:05:08" attr="0x20" md5="df121074c240b7b1acf137d5194fc875">ALTDIR.WPM</file>
@@ -2004,7 +2004,7 @@
 		<file size="3985" time="1992-02-25 13:22:06" attr="0x20" md5="1405032fdd203dc3b9d4eadd28fbe4db">TIMEDA.XLM</file>
 		<file size="5049" time="1991-10-06 19:28:54" attr="0x20" md5="e71dc41e72f94566447efd685d9e803e">TRYALT.PRG</file>
 	</disk>
-	<disk id="disk107" size="163840" chs="40:1:8" dir="archive/VOL11N07" href="/disks/pcx86/shareware/pcmag/VOL11N07.json" md5="a085c61d7db6ec7162c99dfa04b66a21" md5json="6ed2ad5d8b4d3a6facedce8da6103e27">
+	<disk id="disk107" size="163840" chs="40:1:8" dir="archive/VOL11N07" href="/disks/pcx86/shareware/pcmag/disks/VOL11N07.json" md5="a085c61d7db6ec7162c99dfa04b66a21" md5json="6ed2ad5d8b4d3a6facedce8da6103e27">
 		<name>PC Magazine (Vol. 11 No. 07)</name>
 		<file size="6144" time="1992-01-03 15:30:28" attr="0x20" md5="d59fafa3c1ad3d217c55090e6e34d393">BACHTO.EXE</file>
 		<file size="409" time="1991-12-26 19:52:44" attr="0x20" md5="5cdbc284ff4e5a06bb1a458d3130acf6">BACHTOCC.BCP</file>
@@ -2026,7 +2026,7 @@
 		<file size="8448" time="1992-01-06 14:04:42" attr="0x20" md5="ff789bbbf96754f91c7fcae1912f8471">SWTEST.EXE</file>
 		<file size="773" time="1992-01-05 15:02:04" attr="0x20" md5="85b11509be29d6912917b17cbbd744c9">SWTEST.PAS</file>
 	</disk>
-	<disk id="disk108" size="163840" chs="40:1:8" dir="archive/VOL11N08" href="/disks/pcx86/shareware/pcmag/VOL11N08.json" md5="b42817dcd1b56df5bd225c0bd348a710" md5json="21f8c36ec4f86a7e09d709d6ef2efeca">
+	<disk id="disk108" size="163840" chs="40:1:8" dir="archive/VOL11N08" href="/disks/pcx86/shareware/pcmag/disks/VOL11N08.json" md5="b42817dcd1b56df5bd225c0bd348a710" md5json="21f8c36ec4f86a7e09d709d6ef2efeca">
 		<name>PC Magazine (Vol. 11 No. 08)</name>
 		<file size="141" time="1991-10-28 15:58:32" attr="0x20" md5="3ab9dda1555cb8ebe926a5cd86ebeb72">CDMACR.BAT</file>
 		<file size="618" time="1992-02-02 17:58:34" attr="0x20" md5="5093fbbed04ea8991d1351b7ce0746eb">DEMO7</file>
@@ -2051,7 +2051,7 @@
 		<file size="1660" time="1992-03-24 18:28:12" attr="0x20" md5="7b38debb76c49493f08eb1b671419d54">WPRINT.DOC</file>
 		<file size="23040" time="1992-02-13 06:03:20" attr="0x20" md5="2e3a8d91091592fbdacb7ff4bf0adaac">WPRINT.EXE</file>
 	</disk>
-	<disk id="disk109" size="1228800" chs="80:2:15" dir="archive/VOL11N09" href="/disks/pcx86/shareware/pcmag/VOL11N09.json" md5="1747dc67f661cbb73a8c3e9243f63047" md5json="3f0ec7c52ace707b656ef0a2332fa5c9">
+	<disk id="disk109" size="1228800" chs="80:2:15" dir="archive/VOL11N09" href="/disks/pcx86/shareware/pcmag/disks/VOL11N09.json" md5="1747dc67f661cbb73a8c3e9243f63047" md5json="3f0ec7c52ace707b656ef0a2332fa5c9">
 		<name>PC Magazine (Vol. 11 No. 09)</name>
 		<file size="17925" time="1992-03-29 23:06:40" attr="0x20" md5="1a028ad0129f85a4dfe93817e1fcab7e">BASCII.ASM</file>
 		<file size="59303" time="1992-03-29 23:00:12" attr="0x20" md5="a25182c29ebe1ea452162616e46743c0">BBPLUS.ASM</file>
@@ -2100,7 +2100,7 @@
 		<file size="3146" time="1992-01-26 13:57:14" attr="0x20" md5="288e4b48673314209a0c4936527aa1f6">SPCCHK.SPX</file>
 		<file size="991" time="1992-04-01 17:41:00" attr="0x20" md5="dfed054646f56002560934eef4e8eb1c">ZIFFNET.BDS</file>
 	</disk>
-	<disk id="disk110" size="163840" chs="40:1:8" dir="archive/VOL11N10" href="/disks/pcx86/shareware/pcmag/VOL11N10.json" md5="9590826d082489488464c878ae5f464d" md5json="a40fc66f992a94e5e1b47b99658843ac">
+	<disk id="disk110" size="163840" chs="40:1:8" dir="archive/VOL11N10" href="/disks/pcx86/shareware/pcmag/disks/VOL11N10.json" md5="9590826d082489488464c878ae5f464d" md5json="a40fc66f992a94e5e1b47b99658843ac">
 		<name>PC Magazine (Vol. 11 No. 10)</name>
 		<file size="1028" time="1991-03-29 08:09:12" attr="0x20" md5="dd3aa0635c42a248938ace3ff7e405fa">BINARY.BAS</file>
 		<file size="15176" time="1992-05-04 11:54:48" attr="0x20" md5="4f1248bf160eef2d2c8995003bbbafdf">DLGDEMO.ZIP</file>
@@ -2114,7 +2114,7 @@
 		<file size="137" time="1991-10-02 15:56:08" attr="0x20" md5="a8e73bcde8f59c1218c8a75b4af43801">WIN.BAT</file>
 		<file size="7079" time="1992-02-26 01:00:00" attr="0x20" md5="b0195a925c6edfa71d595fd3e02553f6">WINMOD.ZIP</file>
 	</disk>
-	<disk id="disk111" size="1228800" chs="80:2:15" dir="archive/VOL11N11" href="/disks/pcx86/shareware/pcmag/VOL11N11.json" md5="f51c708d886cea904a4741439f3a0e2e" md5json="3e5615029bbcf6e61c67c7106c66e459">
+	<disk id="disk111" size="1228800" chs="80:2:15" dir="archive/VOL11N11" href="/disks/pcx86/shareware/pcmag/disks/VOL11N11.json" md5="f51c708d886cea904a4741439f3a0e2e" md5json="3e5615029bbcf6e61c67c7106c66e459">
 		<name>PC Magazine (Vol. 11 No. 11)</name>
 		<file size="2481" time="1991-10-04 15:30:32" attr="0x20" md5="69bad7ff83a42e1d1cdd50d3aa24a7be">BINSCH.SC</file>
 		<file size="795" time="1991-11-14 20:24:42" attr="0x20" md5="39018aac62e05dbc7a764f3072b9278d">BOMEOM.PRG</file>
@@ -2174,7 +2174,7 @@
 		<file size="382" time="1992-05-19 16:03:26" attr="0x20" md5="8436a9db523f7c639217c3ea1a079404">WINEPILO</file>
 		<file size="467" time="1992-05-19 16:03:48" attr="0x20" md5="d8a55e60e0cd336e9df4fbbd8b1c79c4">WINPROLO</file>
 	</disk>
-	<disk id="disk112" size="327680" chs="40:2:8" dir="archive/VOL11N12" href="/disks/pcx86/shareware/pcmag/VOL11N12.json" md5="1589950221074c7d007d1d2ab6e9e13a" md5json="17c2df92902a9fc579cd3a1a6648afdd">
+	<disk id="disk112" size="327680" chs="40:2:8" dir="archive/VOL11N12" href="/disks/pcx86/shareware/pcmag/disks/VOL11N12.json" md5="1589950221074c7d007d1d2ab6e9e13a" md5json="17c2df92902a9fc579cd3a1a6648afdd">
 		<name>PC Magazine (Vol. 11 No. 12)</name>
 		<file size="1968" time="1989-02-02 23:42:30" attr="0x20" md5="be0160ead92176e07b1d0fb40e38fb6e">ASCII.I</file>
 		<file size="5408" time="1986-09-02 12:25:00" attr="0x20" md5="a12c49399c6a4c34fab1346a53d00930">CHARASCI.C</file>
@@ -2213,7 +2213,7 @@
 		<file size="3194" time="1992-06-01 12:00:36" attr="0x20" md5="5421233201befc6f96a95d4159af7abf">WINSTART.DOC</file>
 		<file size="12122" time="1992-02-20 13:34:28" attr="0x20" md5="00a4dcf42f8c93da4ebd7f08dee6b746">WINSTART.EXE</file>
 	</disk>
-	<disk id="disk113" size="163840" chs="40:1:8" dir="archive/VOL11N13" href="/disks/pcx86/shareware/pcmag/VOL11N13.json" md5="ff6596a3e662dbc49ba15c3badc7be2e" md5json="a4af61ed346c8362db6c26347f8221d9">
+	<disk id="disk113" size="163840" chs="40:1:8" dir="archive/VOL11N13" href="/disks/pcx86/shareware/pcmag/disks/VOL11N13.json" md5="ff6596a3e662dbc49ba15c3badc7be2e" md5json="a4af61ed346c8362db6c26347f8221d9">
 		<name>PC Magazine (Vol. 11 No. 13)</name>
 		<file size="2871" time="1991-11-22 16:54:06" attr="0x20" md5="83aff913118dd09e5c4d7f7b893cb7a9">ADD.BAT</file>
 		<file size="703" time="1992-02-23 20:39:20" attr="0x20" md5="c196a4610470a241d7d0780bd18d9ea9">COMPR.SC</file>
@@ -2230,7 +2230,7 @@
 		<file size="315" time="1991-07-17 17:33:54" attr="0x20" md5="c9d7e2c32bae8ffa1f08b4fb241e1561">STIME2.PRG</file>
 		<file size="2010" time="1992-01-25 12:42:20" attr="0x20" md5="1d822fbe12cdd3e8c77a11b5baaec797">STRBRK.BAS</file>
 	</disk>
-	<disk id="disk114" size="1228800" chs="80:2:15" dir="archive/VOL11N14" href="/disks/pcx86/shareware/pcmag/VOL11N14.json" md5="0174f4e793af08a0598f34f17ebf6561" md5json="34a409658571b22213905ec58aa750ea">
+	<disk id="disk114" size="1228800" chs="80:2:15" dir="archive/VOL11N14" href="/disks/pcx86/shareware/pcmag/disks/VOL11N14.json" md5="0174f4e793af08a0598f34f17ebf6561" md5json="34a409658571b22213905ec58aa750ea">
 		<name>PC Magazine (Vol. 11 No. 14)</name>
 		<file size="4134" time="1992-03-16 12:31:02" attr="0x20" md5="29d6c83777c9cc645392e34bf78ec228">ARRAYMGR.H</file>
 		<file size="8956" time="1992-05-13 09:43:28" attr="0x20" md5="b1205fe042ecd3aaf17daca05a20f5fc">BADAPP.C</file>
@@ -2299,7 +2299,7 @@
 		<file size="372" time="1992-03-27 13:19:56" attr="0x20" md5="4cf1cded60308e6372c3942135e8a34c">WINMSG.H</file>
 		<file size="241" time="1992-02-10 10:04:30" attr="0x20" md5="f18de72e6b46fe541e6c60660ad7dbe7">WNAPMSGS.H</file>
 	</disk>
-	<disk id="disk115" size="327680" chs="40:2:8" dir="archive/VOL11N15" href="/disks/pcx86/shareware/pcmag/VOL11N15.json" md5="0d2fa387deba8ae1503e87b881fb554e" md5json="aa4a903ea4c4d7423fcf235056d54954">
+	<disk id="disk115" size="327680" chs="40:2:8" dir="archive/VOL11N15" href="/disks/pcx86/shareware/pcmag/disks/VOL11N15.json" md5="0d2fa387deba8ae1503e87b881fb554e" md5json="aa4a903ea4c4d7423fcf235056d54954">
 		<name>PC Magazine (Vol. 11 No. 15)</name>
 		<file size="91" time="1992-05-19 10:21:26" attr="0x20" md5="39640add52b1f0bd2c9583f87b0a1381">CLIPRUN.BAT</file>
 		<file size="3495" time="1992-05-19 01:49:02" attr="0x20" md5="e5e4ae5444c1d21c0ed316be4f2af975">CLIPSRV1.C</file>
@@ -2338,7 +2338,7 @@
 		<file size="5395" time="1992-05-25 07:44:38" attr="0x20" md5="7d26ada768fca6e01638b87095537343">WINCLIP.C</file>
 		<file size="1730" time="1991-12-17 12:23:54" attr="0x20" md5="11e91d9330a2e22ce69961e521bd9257">WINCLIP.H</file>
 	</disk>
-	<disk id="disk116" size="163840" chs="40:1:8" dir="archive/VOL11N16" href="/disks/pcx86/shareware/pcmag/VOL11N16.json" md5="391c268d47dc6a9f52acd08bc67e1153" md5json="93dd86f9257944d8765bb1aa5760b8df">
+	<disk id="disk116" size="163840" chs="40:1:8" dir="archive/VOL11N16" href="/disks/pcx86/shareware/pcmag/disks/VOL11N16.json" md5="391c268d47dc6a9f52acd08bc67e1153" md5json="93dd86f9257944d8765bb1aa5760b8df">
 		<name>PC Magazine (Vol. 11 No. 16)</name>
 		<file size="17569" time="1992-06-21 22:22:54" attr="0x20" md5="53594bcb502dcf327d58781799694b3c">BADAPP3.EXE</file>
 		<file size="29275" time="1992-08-14 12:18:10" attr="0x20" md5="ad3e7d2462c6fe731ce1339f41310b4d">CLIP3.ZIP</file>
@@ -2350,7 +2350,7 @@
 		<file size="3008" time="1992-09-01 16:15:50" attr="0x20" md5="9f5375f7009b5cbae068f7d7928253ac">START2.WK1</file>
 		<file size="11874" time="1992-08-31 21:26:50" attr="0x20" md5="ee8b9601584b17cb3001f18cc6531fc6">TOTOP.ZIP</file>
 	</disk>
-	<disk id="disk117" size="163840" chs="40:1:8" dir="archive/VOL11N17" href="/disks/pcx86/shareware/pcmag/VOL11N17.json" md5="b4500c62e0708fab970b3ebae08d2c72" md5json="cbf67ede70e12625a4cc3353181e0bbe">
+	<disk id="disk117" size="163840" chs="40:1:8" dir="archive/VOL11N17" href="/disks/pcx86/shareware/pcmag/disks/VOL11N17.json" md5="b4500c62e0708fab970b3ebae08d2c72" md5json="cbf67ede70e12625a4cc3353181e0bbe">
 		<name>PC Magazine (Vol. 11 No. 17)</name>
 		<file size="42314" time="1992-09-24 12:19:34" attr="0x20" md5="827a5fe9bd5346333e383d6c3cf17a67">BUGS.ZIP</file>
 		<file size="11762" time="1992-09-17 21:11:16" attr="0x20" md5="e96a78727b0b85666b78a179e1d51f33">MIDPLA.ZIP</file>
@@ -2359,7 +2359,7 @@
 		<file size="2577" time="1992-09-17 21:13:28" attr="0x20" md5="fc01c2fc72ed94b928a54f786d433104">SAVENO.ZIP</file>
 		<file size="14118" time="1992-09-17 10:43:26" attr="0x20" md5="59d91b92fa2a2c8768bf3aa014e6880f">WINAPP.ZIP</file>
 	</disk>
-	<disk id="disk118" size="327680" chs="40:2:8" dir="archive/VOL11N18" href="/disks/pcx86/shareware/pcmag/VOL11N18.json" md5="c54550ae6529dead14c8fb7972b77cdf" md5json="edfcca99d3989c1bec272750fed24783">
+	<disk id="disk118" size="327680" chs="40:2:8" dir="archive/VOL11N18" href="/disks/pcx86/shareware/pcmag/disks/VOL11N18.json" md5="c54550ae6529dead14c8fb7972b77cdf" md5json="edfcca99d3989c1bec272750fed24783">
 		<name>PC Magazine (Vol. 11 No. 18)</name>
 		<file size="22" time="1992-02-14 16:39:28" attr="0x20" md5="63cb32527e268fb43ad263b50ebe9221">ALTPAUSE.COM</file>
 		<file size="468" time="1992-02-14 16:45:30" attr="0x20" md5="103c30becf318aa737fcc0fd60ae1a4f">ALTPAUSE.DBA</file>
@@ -2404,7 +2404,7 @@
 		<file size="911" time="1992-10-27 00:00:00" attr="0x20" md5="4442c109931040432ae4cf64fd2aadc6">WTIME.RC</file>
 		<file size="20051" time="1992-10-27 00:00:00" attr="0x20" md5="adf25292bbb4d6f97c8767952108b17e">WTIME.RTF</file>
 	</disk>
-	<disk id="disk119" size="1228800" chs="80:2:15" dir="archive/VOL11N19" href="/disks/pcx86/shareware/pcmag/VOL11N19.json" md5="d1adc3055ec90ac70ed501890d36da0a" md5json="4ed7409ccfa091b8128dbb5e1f2c4b6a">
+	<disk id="disk119" size="1228800" chs="80:2:15" dir="archive/VOL11N19" href="/disks/pcx86/shareware/pcmag/disks/VOL11N19.json" md5="d1adc3055ec90ac70ed501890d36da0a" md5json="4ed7409ccfa091b8128dbb5e1f2c4b6a">
 		<name>PC Magazine (Vol. 11 No. 19)</name>
 		<file size="1366" time="1992-06-14 20:24:48" attr="0x20" md5="deed2ad3afc496e2699fdf7b6fee2414">1101.BMP</file>
 		<file size="1366" time="1992-06-21 16:04:10" attr="0x20" md5="414e04dbda1008a0463fa84734152e94">1102.BMP</file>
@@ -2487,7 +2487,7 @@
 		<file size="3265" time="1992-07-27 00:14:22" attr="0x20" md5="92d90aa64584d868a74c63e6f89d9dd3">UTEST2.PAS</file>
 		<file size="1325" time="1992-06-30 22:23:12" attr="0x20" md5="82a20a51dc86a442f15ba923863642c0">XTRA31.PAS</file>
 	</disk>
-	<disk id="disk120" size="1228800" chs="80:2:15" dir="archive/VOL11N20" href="/disks/pcx86/shareware/pcmag/VOL11N20.json" md5="4503ecf8e1bacae9b1dce75569e921e9" md5json="5a00fa50ebf16379e1ffbdbe043ce744">
+	<disk id="disk120" size="1228800" chs="80:2:15" dir="archive/VOL11N20" href="/disks/pcx86/shareware/pcmag/disks/VOL11N20.json" md5="4503ecf8e1bacae9b1dce75569e921e9" md5json="5a00fa50ebf16379e1ffbdbe043ce744">
 		<name>PC Magazine (Vol. 11 No. 20)</name>
 		<file size="117776" time="1992-09-05 16:01:46" attr="0x20" md5="2300ee64a4b199e4e0f5c380013bb1ef">BCDEMO.EXE</file>
 		<file size="478" time="1992-10-28 17:45:28" attr="0x20" md5="9dacf53738fd2396e43c47700492277e">BOOT4.BAT</file>
@@ -2536,7 +2536,7 @@
 		<file size="523" time="1992-10-28 17:47:50" attr="0x20" md5="dd4619fa99cbe99611e127fe2a1c1315">WINCHE.SCR</file>
 		<file size="350" time="1992-10-28 18:03:56" attr="0x20" md5="c2bb3eba31fdd4cbcf47b8f78fa0086d">WINTES.BAT</file>
 	</disk>
-	<disk id="disk121" size="327680" chs="40:2:8" dir="archive/VOL11N21" href="/disks/pcx86/shareware/pcmag/VOL11N21.json" md5="8fb9e93b453bd5526d79ed01f15b48f3" md5json="96b59c728f42c960c2d5b1760de2608e">
+	<disk id="disk121" size="327680" chs="40:2:8" dir="archive/VOL11N21" href="/disks/pcx86/shareware/pcmag/disks/VOL11N21.json" md5="8fb9e93b453bd5526d79ed01f15b48f3" md5json="96b59c728f42c960c2d5b1760de2608e">
 		<name>PC Magazine (Vol. 11 No. 21)</name>
 		<file size="537" time="1992-02-21 16:08:48" attr="0x20" md5="6de09b575baebc289c446308d5f21317">ALTPAUSE.SCR</file>
 		<file size="91" time="1992-02-22 11:01:36" attr="0x20" md5="3810bbb2f98acef1a36155c45273de5c">ALTPAUSE.SYS</file>
@@ -2567,7 +2567,7 @@
 		<file size="18515" time="1992-11-08 22:37:10" attr="0x20" md5="8ddc131f0b9ee0b6c339966acd790d8e">SUPPORT.INC</file>
 		<file size="1659" time="1992-08-27 16:07:04" attr="0x20" md5="5621e8114d90580d7bd501fad7da9daa">VLABEL.WK1</file>
 	</disk>
-	<disk id="disk122" size="163840" chs="40:1:8" dir="archive/VOL11N22" href="/disks/pcx86/shareware/pcmag/VOL11N22.json" md5="8a0a01da929c828447eb9cb23e509af4" md5json="42920923885e60bd351964c49d325b33">
+	<disk id="disk122" size="163840" chs="40:1:8" dir="archive/VOL11N22" href="/disks/pcx86/shareware/pcmag/disks/VOL11N22.json" md5="8a0a01da929c828447eb9cb23e509af4" md5json="42920923885e60bd351964c49d325b33">
 		<name>PC Magazine (Vol. 11 No. 22)</name>
 		<file size="1490" time="1992-11-25 21:40:56" attr="0x20" md5="1d02e3d3edbbdf2fb16a786babda48f9">DVORAK.ZIP</file>
 		<file size="3710" time="1992-11-25 21:39:32" attr="0x20" md5="ce05a68a39bc245beff8394b3eb8e3e7">HDLOCK.ZIP</file>
@@ -2579,7 +2579,7 @@
 		<file size="82478" time="1992-11-29 17:24:28" attr="0x20" md5="0f7f48df18793c19c9b9d95b73dae868">STRINGS.ZIP</file>
 		<file size="6389" time="1992-11-25 21:42:38" attr="0x20" md5="da0084f5403877053fb601c443a7e59f">VARARG.ZIP</file>
 	</disk>
-	<disk id="disk123" size="163840" chs="40:1:8" dir="archive/VOL12N01" href="/disks/pcx86/shareware/pcmag/VOL12N01.json" md5="d8d68b25b83a9b51b5e99f4dd48eb214" md5json="0478fb12b3c7d764e142dfcbde0f00e8">
+	<disk id="disk123" size="163840" chs="40:1:8" dir="archive/VOL12N01" href="/disks/pcx86/shareware/pcmag/disks/VOL12N01.json" md5="d8d68b25b83a9b51b5e99f4dd48eb214" md5json="0478fb12b3c7d764e142dfcbde0f00e8">
 		<name>PC Magazine (Vol. 12 No. 01)</name>
 		<file size="313" time="1992-07-14 14:45:42" attr="0x20" md5="f3426d408dfc48e90e5861ed5b245bf7">COUNT.BAT</file>
 		<file size="333" time="1992-07-14 15:24:50" attr="0x20" md5="a98632b7f7c9a6f9389c4c740c43ab3b">COUNT1.BAT</file>
@@ -2592,7 +2592,7 @@
 		<file size="32336" time="1992-12-17 12:08:14" attr="0x20" md5="64c6713cb47898116f435188fd84b92d">SYSMO2.ZIP</file>
 		<file size="39499" time="1992-12-08 17:29:36" attr="0x20" md5="d618d3dd1586b5a987caf4e744f0e982">WINTID.ZIP</file>
 	</disk>
-	<disk id="disk124" size="327680" chs="40:2:8" dir="archive/VOL12N02" href="/disks/pcx86/shareware/pcmag/VOL12N02.json" md5="57c0fa324e0728c1c7edc0441f5e2a95" md5json="3f98f4f380d11d17b2aaa59ae0a093e5">
+	<disk id="disk124" size="327680" chs="40:2:8" dir="archive/VOL12N02" href="/disks/pcx86/shareware/pcmag/disks/VOL12N02.json" md5="57c0fa324e0728c1c7edc0441f5e2a95" md5json="3f98f4f380d11d17b2aaa59ae0a093e5">
 		<name>PC Magazine (Vol. 12 No. 02)</name>
 		<file size="9628" time="1992-12-30 19:09:36" attr="0x20" md5="9dcf283b650109d5b2158c3e43d51e73">BITFONTS.C</file>
 		<file size="238" time="1992-12-30 19:10:58" attr="0x20" md5="ab79311cc013cd72f20eda92118098a9">BITFONTS.DEF</file>
@@ -2619,7 +2619,7 @@
 		<file size="720" time="1992-10-29 02:52:36" attr="0x20" md5="786320947f8181d5ce008ecb49a9c464">PROCMON.RC</file>
 		<file size="1884" time="1992-10-06 15:41:40" attr="0x20" md5="57c93bc783efc1f14152f9eea9e34029">SEEGRF.WK1</file>
 	</disk>
-	<disk id="disk125" size="327680" chs="40:2:8" dir="archive/VOL12N03" href="/disks/pcx86/shareware/pcmag/VOL12N03.json" md5="f8039004c1171bf714007ab935593cc9" md5json="e02c8d5653954cb44c89a4dc35a6e9e9">
+	<disk id="disk125" size="327680" chs="40:2:8" dir="archive/VOL12N03" href="/disks/pcx86/shareware/pcmag/disks/VOL12N03.json" md5="f8039004c1171bf714007ab935593cc9" md5json="e02c8d5653954cb44c89a4dc35a6e9e9">
 		<name>PC Magazine (Vol. 12 No. 03)</name>
 		<file size="5413" time="1992-10-30 10:01:32" attr="0x20" md5="1a65e47a145bd41f7f31efbf865c4f76">BITFONT2.C</file>
 		<file size="241" time="1992-10-30 10:01:42" attr="0x20" md5="7abf465d3b280bb1dd09b98c8e47d3af">BITFONT2.DEF</file>
@@ -2650,7 +2650,7 @@
 		<file size="4315" time="1992-08-28 07:00:48" attr="0x20" md5="07b7673f57315c530c75a5cafd00be07">SYSICONS.EXE</file>
 		<file size="178" time="1992-07-28 11:29:20" attr="0x20" md5="5de9bf534a6d0dd4bbdc3423da244f78">TODAY.BAS</file>
 	</disk>
-	<disk id="disk126" size="163840" chs="40:1:8" dir="archive/VOL12N04" href="/disks/pcx86/shareware/pcmag/VOL12N04.json" md5="0be7df75463e8af31b356f10cabbae34" md5json="14842ebc05e6889bbb94df8d593b3af9">
+	<disk id="disk126" size="163840" chs="40:1:8" dir="archive/VOL12N04" href="/disks/pcx86/shareware/pcmag/disks/VOL12N04.json" md5="0be7df75463e8af31b356f10cabbae34" md5json="14842ebc05e6889bbb94df8d593b3af9">
 		<name>PC Magazine (Vol. 12 No. 04)</name>
 		<file size="60145" time="1993-01-26 14:59:58" attr="0x20" md5="5531d1faf9e00dfd1e0311b27b7b8c7e">DEFRAG.ZIP</file>
 		<file size="5008" time="1993-01-26 13:14:56" attr="0x20" md5="e8c086a3477fa71828d0e93a7c91571d">ENLAB.ZIP</file>
@@ -2659,7 +2659,7 @@
 		<file size="3935" time="1993-01-26 13:16:50" attr="0x20" md5="334b949145a6ad5e1e62bb857e435be4">SETVER.ZIP</file>
 		<file size="796" time="1993-01-26 13:14:40" attr="0x20" md5="bb4eabe6506b995f516ba9a0448aeca5">SPLIT.ZIP</file>
 	</disk>
-	<disk id="disk127" size="163840" chs="40:1:8" dir="archive/VOL12N05" href="/disks/pcx86/shareware/pcmag/VOL12N05.json" md5="ddc8e6de4ec4712202cb08911519969c" md5json="9f8dd8728109509ae88e838426b7a5ea">
+	<disk id="disk127" size="163840" chs="40:1:8" dir="archive/VOL12N05" href="/disks/pcx86/shareware/pcmag/disks/VOL12N05.json" md5="ddc8e6de4ec4712202cb08911519969c" md5json="9f8dd8728109509ae88e838426b7a5ea">
 		<name>PC Magazine (Vol. 12 No. 05)</name>
 		<file size="619" time="1992-09-14 21:58:00" attr="0x20" md5="e2995d7a043f86d785d1645ca3cc7ab5">DAYSUF.SC</file>
 		<file size="14479" time="1993-02-11 14:36:14" attr="0x20" md5="0540cea9435667fd2d755cadb979fe25">JUSTIF.ZIP</file>
@@ -2668,7 +2668,7 @@
 		<file size="29705" time="1993-02-11 13:04:24" attr="0x20" md5="ae95ee57d3f17ee762c9e7ccba23669e">PC-SET.ZIP</file>
 		<file size="1915" time="1992-10-26 18:54:54" attr="0x20" md5="85f219d8acf833f8c0033002fd53d8b7">SSDIR.WK1</file>
 	</disk>
-	<disk id="disk128" size="163840" chs="40:1:8" dir="archive/VOL12N06" href="/disks/pcx86/shareware/pcmag/VOL12N06.json" md5="677ae74321730adbf0a6a1bc91571057" md5json="278ce2907e3135e4c44bb4ec8d5fb028">
+	<disk id="disk128" size="163840" chs="40:1:8" dir="archive/VOL12N06" href="/disks/pcx86/shareware/pcmag/disks/VOL12N06.json" md5="677ae74321730adbf0a6a1bc91571057" md5json="278ce2907e3135e4c44bb4ec8d5fb028">
 		<name>PC Magazine (Vol. 12 No. 06)</name>
 		<file size="603" time="1992-08-14 14:35:32" attr="0x20" md5="4a5771fc4d5b5a5834a37ddf3e9fcdb3">BOMEOM.SC</file>
 		<file size="13267" time="1993-03-03 12:41:16" attr="0x20" md5="efd204fa929ef8a34166197dd8ac08ae">BOOT2C.ZIP</file>
@@ -2678,7 +2678,7 @@
 		<file size="929" time="1993-03-03 11:07:04" attr="0x20" md5="e3296e7b6a347c16e6564fdb67f0898d">GETLEN.ZIP</file>
 		<file size="18131" time="1993-02-26 15:01:24" attr="0x20" md5="ae7c16bf4a5652980123091b016ce166">OUTFON.ZIP</file>
 	</disk>
-	<disk id="disk129" size="163840" chs="40:1:8" dir="archive/VOL12N07" href="/disks/pcx86/shareware/pcmag/VOL12N07.json" md5="49713192c105afbb492fb2e16ad1fb54" md5json="30a43e70d23d6225601ddd99364bd189">
+	<disk id="disk129" size="163840" chs="40:1:8" dir="archive/VOL12N07" href="/disks/pcx86/shareware/pcmag/disks/VOL12N07.json" md5="49713192c105afbb492fb2e16ad1fb54" md5json="30a43e70d23d6225601ddd99364bd189">
 		<name>PC Magazine (Vol. 12 No. 07)</name>
 		<file size="872" time="1993-03-11 17:20:34" attr="0x20" md5="04e0bec725ad4295dbb9c8823f8d6d9d">DELKEY.SC</file>
 		<file size="9985" time="1993-03-11 17:15:14" attr="0x20" md5="ec5f7825cdd633544ea2b8db895fcbf1">EMBOSS.XLM</file>
@@ -2689,7 +2689,7 @@
 		<file size="25206" time="1993-03-25 22:50:42" attr="0x20" md5="7cdb9008197fd10ec821216a0730f77c">WINAPP.ZIP</file>
 		<file size="2213" time="1993-03-12 15:31:42" attr="0x20" md5="8abfac3d05439b41576df5c2c365f69a">WITH.ZIP</file>
 	</disk>
-	<disk id="disk130" size="327680" chs="40:2:8" dir="archive/VOL12N08" href="/disks/pcx86/shareware/pcmag/VOL12N08.json" md5="6ff49da4eb85daf25fed4820710f4225" md5json="d627b2ddee4cac8f1d1a13cb15e5afc6">
+	<disk id="disk130" size="327680" chs="40:2:8" dir="archive/VOL12N08" href="/disks/pcx86/shareware/pcmag/disks/VOL12N08.json" md5="6ff49da4eb85daf25fed4820710f4225" md5json="d627b2ddee4cac8f1d1a13cb15e5afc6">
 		<name>PC Magazine (Vol. 12 No. 08)</name>
 		<file size="372" time="1993-04-02 19:00:46" attr="0x20" md5="fdc4c30799b96de8ccd64e1b275c5261">ASK.ZIP</file>
 		<file size="2946" time="1993-04-02 19:00:14" attr="0x20" md5="3c70eef034fb3fbe045c8fbb4bd24ce1">ENV.ZIP</file>
@@ -2699,7 +2699,7 @@
 		<file size="475" time="1993-04-02 14:44:58" attr="0x20" md5="2ea4d703d81d8bc7585349f4ac101896">SUMQTY.SC</file>
 		<file size="85370" time="1993-04-07 17:09:58" attr="0x20" md5="afd8b49ea7badbae17fbbbc54c5f4cf2">WINCMD.ZIP</file>
 	</disk>
-	<disk id="disk131" size="327680" chs="40:2:8" dir="archive/VOL12N09" href="/disks/pcx86/shareware/pcmag/VOL12N09.json" md5="926879e3f0bc62718234de1d00bea976" md5json="fb0828909af365d8d0ab0b719023beca">
+	<disk id="disk131" size="327680" chs="40:2:8" dir="archive/VOL12N09" href="/disks/pcx86/shareware/pcmag/disks/VOL12N09.json" md5="926879e3f0bc62718234de1d00bea976" md5json="fb0828909af365d8d0ab0b719023beca">
 		<name>PC Magazine (Vol. 12 No. 09)</name>
 		<file size="3057" time="1993-02-21 12:55:26" attr="0x20" md5="31e7eb1352852aa859f5c6d6555d63e9">BROPIK.PRG</file>
 		<file size="4205" time="1993-04-24 21:07:00" attr="0x20" md5="507fcd246e53a0c63af58450c680e132">CONTENTS.DOC</file>
@@ -2740,7 +2740,7 @@
 		<file size="7674" time="1993-04-24 21:06:46" attr="0x20" md5="d32c024f153e0f1e4979ea96569ee4f5">TECHINFO.RTF</file>
 		<file size="2217" time="1993-02-18 11:42:44" attr="0x20" md5="8ab0e24ec9136af26c097df241c26567">WINFUN.BAS</file>
 	</disk>
-	<disk id="disk132" size="163840" chs="40:1:8" dir="archive/VOL12N10" href="/disks/pcx86/shareware/pcmag/VOL12N10.json" md5="58bf523403d5a70542ea58c74b30c4e1" md5json="11342fba62f5eb1f70a4b6b0e10e2847">
+	<disk id="disk132" size="163840" chs="40:1:8" dir="archive/VOL12N10" href="/disks/pcx86/shareware/pcmag/disks/VOL12N10.json" md5="58bf523403d5a70542ea58c74b30c4e1" md5json="11342fba62f5eb1f70a4b6b0e10e2847">
 		<name>PC Magazine (Vol. 12 No. 10)</name>
 		<file size="1554" time="1993-03-17 13:14:56" attr="0x20" md5="e3586b2007c8754c6dca34fe7acdc6f8">ENDJOIN.C</file>
 		<file size="15925" time="1993-03-17 13:16:00" attr="0x20" md5="e0fea3e1f5ba9523fb2b6052de9231d3">ENDJOIN.EXE</file>
@@ -2764,7 +2764,7 @@
 		<file size="13232" time="1993-04-26 23:17:14" attr="0x20" md5="7d7084d7c8418d4ea343fbd92a3502d2">WCLIB.WCL</file>
 		<file size="19383" time="1993-04-26 23:21:52" attr="0x20" md5="bf426b4f70bb825243985d874f0c069c">WCLIBC.ZIP</file>
 	</disk>
-	<disk id="disk133" size="327680" chs="40:2:8" dir="archive/VOL12N11" href="/disks/pcx86/shareware/pcmag/VOL12N11.json" md5="a2d4889624e9efc9c02c4e7d95e2b5ed" md5json="07ca35d231ea38277b2061ad4cdc4b04">
+	<disk id="disk133" size="327680" chs="40:2:8" dir="archive/VOL12N11" href="/disks/pcx86/shareware/pcmag/disks/VOL12N11.json" md5="a2d4889624e9efc9c02c4e7d95e2b5ed" md5json="07ca35d231ea38277b2061ad4cdc4b04">
 		<name>PC Magazine (Vol. 12 No. 11)</name>
 		<file size="73693" time="1993-05-11 09:52:42" attr="0x20" md5="d3b5823d2a68dff01f81a19309b9a088">ABOUT.ZIP</file>
 		<file size="67279" time="1993-05-13 14:48:20" attr="0x20" md5="32008c7de394fc6716368b7253d36ae6">ANIMAT.ZIP</file>
@@ -2775,7 +2775,7 @@
 		<file size="3496" time="1993-05-13 14:22:32" attr="0x20" md5="dfc1c8ffc17d25e153c9d926e3f37012">RETRIE.ZIP</file>
 		<file size="630" time="1993-05-11 16:35:48" attr="0x20" md5="e3483dfb70cfefc26c66278c88973324">VCOPY2.BAT</file>
 	</disk>
-	<disk id="disk134" size="163840" chs="40:1:8" dir="archive/VOL12N12" href="/disks/pcx86/shareware/pcmag/VOL12N12.json" md5="f1ea6177a78f342ba519cf0a7041c22d" md5json="1750cdb2172adf77e2c633f1f8caa49b">
+	<disk id="disk134" size="163840" chs="40:1:8" dir="archive/VOL12N12" href="/disks/pcx86/shareware/pcmag/disks/VOL12N12.json" md5="f1ea6177a78f342ba519cf0a7041c22d" md5json="1750cdb2172adf77e2c633f1f8caa49b">
 		<name>PC Magazine (Vol. 12 No. 12)</name>
 		<file size="3988" time="1993-03-26 13:02:38" attr="0x20" md5="15391bfab8bf5f2f3981448d5277a8f1">EVAL.C</file>
 		<file size="26420" time="1993-03-26 13:04:24" attr="0x20" md5="d2461f2c8e31523724efdd71e1badbef">EVAL.EXE</file>
@@ -2788,7 +2788,7 @@
 		<file size="20" time="1992-10-07 15:34:02" attr="0x20" md5="4c7d07f0eee22da3d84809e7815a328b">PRNXECHO.COM</file>
 		<file size="3414" time="1993-02-20 14:41:58" attr="0x20" md5="076bbbb154f6be320f02bdf8c30da61c">PRTSCR.PRG</file>
 	</disk>
-	<disk id="disk135" size="163840" chs="40:1:8" dir="archive/VOL12N13" href="/disks/pcx86/shareware/pcmag/VOL12N13.json" md5="78150724d9feba62153d7cf58ebcd021" md5json="d0e7f30936e34d74f0f2b3616380892f">
+	<disk id="disk135" size="163840" chs="40:1:8" dir="archive/VOL12N13" href="/disks/pcx86/shareware/pcmag/disks/VOL12N13.json" md5="78150724d9feba62153d7cf58ebcd021" md5json="d0e7f30936e34d74f0f2b3616380892f">
 		<name>PC Magazine (Vol. 12 No. 13)</name>
 		<file size="54683" time="1993-06-23 19:45:16" attr="0x20" md5="4c77e1966779f88c375a3a91188f1508">EXELOO.ZIP</file>
 		<file size="30978" time="1993-06-16 13:44:46" attr="0x20" md5="5edf3f35ea0d9f021c6cdab1ad5b93fb">FIND.ZIP</file>
@@ -2797,7 +2797,7 @@
 		<file size="9506" time="1993-06-16 16:40:42" attr="0x20" md5="a364c62daf6694f2a2ffb14d36c84068">SHUTDN.ZIP</file>
 		<file size="1263" time="1992-12-07 16:18:24" attr="0x20" md5="931a7510d56514fc166a085f3cb12cad">WIPEDE.BAT</file>
 	</disk>
-	<disk id="disk136" size="163840" chs="40:1:8" dir="archive/VOL12N14" href="/disks/pcx86/shareware/pcmag/VOL12N14.json" md5="e10f759b4e3199d00026bd42c376b008" md5json="0694cd37e550c85df710a112476b0280">
+	<disk id="disk136" size="163840" chs="40:1:8" dir="archive/VOL12N14" href="/disks/pcx86/shareware/pcmag/disks/VOL12N14.json" md5="e10f759b4e3199d00026bd42c376b008" md5json="0694cd37e550c85df710a112476b0280">
 		<name>PC Magazine (Vol. 12 No. 14)</name>
 		<file size="21982" time="1993-07-16 19:21:30" attr="0x20" md5="81815e96382a5f3be8fbacea5af363fd">BEEP.ZIP</file>
 		<file size="1401" time="1993-07-19 17:06:32" attr="0x20" md5="9109cec11ebce134201ab329c188ce2f">COMMEN.ZIP</file>
@@ -2805,7 +2805,7 @@
 		<file size="76695" time="1993-07-22 17:57:44" attr="0x20" md5="f0dd110e50a50f88acb9a6fdd2986ca3">DEMOAP.ZIP</file>
 		<file size="43219" time="1993-07-16 19:18:16" attr="0x20" md5="b6e3f3a70c0cded29b1fa3be0b99df17">FINDEX.ZIP</file>
 	</disk>
-	<disk id="disk137" size="327680" chs="40:2:8" dir="archive/VOL12N15" href="/disks/pcx86/shareware/pcmag/VOL12N15.json" md5="00b310a1c4aa0046034d2f186ed228ba" md5json="252fa6185442fc503a087a229c2dfca5">
+	<disk id="disk137" size="327680" chs="40:2:8" dir="archive/VOL12N15" href="/disks/pcx86/shareware/pcmag/disks/VOL12N15.json" md5="00b310a1c4aa0046034d2f186ed228ba" md5json="252fa6185442fc503a087a229c2dfca5">
 		<name>PC Magazine (Vol. 12 No. 15)</name>
 		<file size="75420" time="1993-09-28 00:01:00" attr="0x20" md5="408f17ab0c527067d8305a9e6e7b864d">BTNGO.ZIP</file>
 		<file size="15264" time="1993-05-18 15:07:06" attr="0x20" md5="6eb0ae7c75d99054a937848151aa0668">BUILDM.ZIP</file>
@@ -2814,7 +2814,7 @@
 		<file size="33579" time="1993-06-03 13:12:58" attr="0x20" md5="4e17bc8d7c8d7370bd07a51b67f5befc">MULTI.ZIP</file>
 		<file size="1343" time="1992-12-02 11:02:24" attr="0x20" md5="1c85d92ee30931e59d0db5859ad9e22e">TRASH.BAT</file>
 	</disk>
-	<disk id="disk138" size="163840" chs="40:1:8" dir="archive/VOL12N16" href="/disks/pcx86/shareware/pcmag/VOL12N16.json" md5="a7e4fa5250a458298cd36db4534a48dc" md5json="b47ead45f10c8274accbec986bc72463">
+	<disk id="disk138" size="163840" chs="40:1:8" dir="archive/VOL12N16" href="/disks/pcx86/shareware/pcmag/disks/VOL12N16.json" md5="a7e4fa5250a458298cd36db4534a48dc" md5json="b47ead45f10c8274accbec986bc72463">
 		<name>PC Magazine (Vol. 12 No. 16)</name>
 		<file size="47836" time="1993-08-25 11:29:50" attr="0x20" md5="79d0957f849803be3ecd409b4cdd2bbf">FINDIR.ZIP</file>
 		<file size="1285" time="1992-12-16 10:25:38" attr="0x20" md5="9140d6df611fc6c02034586ecee1b1b3">PE.BAT</file>
@@ -2823,7 +2823,7 @@
 		<file size="9097" time="1993-08-25 11:31:32" attr="0x20" md5="e469838d6562a5eb3eea67eedc22cf6c">XMS.ZIP</file>
 		<file size="311" time="1993-08-25 14:12:10" attr="0x20" md5="76b206fb439b7399d766ee6c772fd024">YESNO.BAT</file>
 	</disk>
-	<disk id="disk139" size="163840" chs="40:1:8" dir="archive/VOL12N17" href="/disks/pcx86/shareware/pcmag/VOL12N17.json" md5="86be4bbf08cf80d09db7538b99bf18b9" md5json="1be7813a683544263426d0106daf3832">
+	<disk id="disk139" size="163840" chs="40:1:8" dir="archive/VOL12N17" href="/disks/pcx86/shareware/pcmag/disks/VOL12N17.json" md5="86be4bbf08cf80d09db7538b99bf18b9" md5json="1be7813a683544263426d0106daf3832">
 		<name>PC Magazine (Vol. 12 No. 17)</name>
 		<file size="37504" time="1993-09-11 18:36:38" attr="0x20" md5="3e7a41fb11a2cc1cc2c5f03ab5ca8699">BIGJOB.ZIP</file>
 		<file size="494" time="1993-06-24 16:40:38" attr="0x20" md5="4422b3b2ff3ec26b843ffb30c753dffa">CLOSPA.SCT</file>
@@ -2832,7 +2832,7 @@
 		<file size="696" time="1993-09-07 16:08:46" attr="0x20" md5="95f58c1e00a3e173cfa4c9feeaa90f50">JKEYDE.PRG</file>
 		<file size="1263" time="1993-01-19 15:33:02" attr="0x20" md5="162666f97d4eefc46a9e9b201fe238be">SLIM2.WPM</file>
 	</disk>
-	<disk id="disk140" size="1474560" chs="80:2:18" dir="archive/VOL12N18" href="/disks/pcx86/shareware/pcmag/VOL12N18.json" md5="5f971112b0100b52d18f3137b1782610" md5json="c12470e26a7a5bde9d3b214ff9370e6e">
+	<disk id="disk140" size="1474560" chs="80:2:18" dir="archive/VOL12N18" href="/disks/pcx86/shareware/pcmag/disks/VOL12N18.json" md5="5f971112b0100b52d18f3137b1782610" md5json="c12470e26a7a5bde9d3b214ff9370e6e">
 		<name>PC Magazine (Vol. 12 No. 18)</name>
 		<file size="3533" time="1993-06-06 17:18:16" attr="0x20" md5="6c75062ca619af87ce73a94587c8fc0a">ALTADD.WK1</file>
 		<file size="1230" time="1993-09-29 17:57:36" attr="0x20" md5="9256fe775930808c20276d60ce9bb52e">ECHO.ZIP</file>
@@ -2841,7 +2841,7 @@
 		<file size="16674" time="1993-09-29 19:20:22" attr="0x20" md5="f8d6bbeffbfc2fc3e4404c7ef050c755">FONSRC.ZIP</file>
 		<file size="29353" time="1993-09-28 17:38:24" attr="0x20" md5="14a0269f282476d46083459299608ba9">METER.ZIP</file>
 	</disk>
-	<disk id="disk141" size="163840" chs="40:1:8" dir="archive/VOL12N19" href="/disks/pcx86/shareware/pcmag/VOL12N19.json" md5="11aafc128ae964b00b7fc1d3937a5734" md5json="d45a309654d97e12560529b1648115b6">
+	<disk id="disk141" size="163840" chs="40:1:8" dir="archive/VOL12N19" href="/disks/pcx86/shareware/pcmag/disks/VOL12N19.json" md5="11aafc128ae964b00b7fc1d3937a5734" md5json="d45a309654d97e12560529b1648115b6">
 		<name>PC Magazine (Vol. 12 No. 19)</name>
 		<file size="2053" time="1993-01-10 11:27:38" attr="0x20" md5="60db53b29327720300a53088e6215d00">BLINDE.BAS</file>
 		<file size="19584" time="1993-10-12 11:54:18" attr="0x20" md5="6ce6a2420ed3b8ce65a95d3c487a9898">DRVLOA.ZIP</file>
@@ -2849,7 +2849,7 @@
 		<file size="1158" time="1993-10-11 14:44:18" attr="0x20" md5="ec887d4e4eed2851377938be2b70326f">LIST.ZIP</file>
 		<file size="38020" time="1993-10-11 15:07:16" attr="0x20" md5="f5ca93f169c9fa922ef7d5838863e610">UNI.ZIP</file>
 	</disk>
-	<disk id="disk142" size="163840" chs="40:1:8" dir="archive/VOL12N20" href="/disks/pcx86/shareware/pcmag/VOL12N20.json" md5="e1f934008639df94d1b1de9455107d34" md5json="50c69f5a6b3dde47fb0554b1323143e5">
+	<disk id="disk142" size="163840" chs="40:1:8" dir="archive/VOL12N20" href="/disks/pcx86/shareware/pcmag/disks/VOL12N20.json" md5="e1f934008639df94d1b1de9455107d34" md5json="50c69f5a6b3dde47fb0554b1323143e5">
 		<name>PC Magazine (Vol. 12 No. 20)</name>
 		<file size="67971" time="1993-10-27 12:49:00" attr="0x20" md5="ecdaa52c10155908c3f940c1edf76eb9">AEDIT.ZIP</file>
 		<file size="6067" time="1993-06-12 14:09:44" attr="0x20" md5="3afc3e95d806e0d5fdd278a7fea51020">DELAYT.ZIP</file>
@@ -2858,7 +2858,7 @@
 		<file size="598" time="1993-02-22 10:12:12" attr="0x20" md5="dc8d3fe98a897b6d1fa03de47aa4a88a">MENUS.ZIP</file>
 		<file size="7451" time="1993-09-02 10:22:20" attr="0x20" md5="5ef3e953773cf57f19b5d83a543e533e">UNICHA.ZIP</file>
 	</disk>
-	<disk id="disk143" size="163840" chs="40:1:8" dir="archive/VOL12N21" href="/disks/pcx86/shareware/pcmag/VOL12N21.json" md5="a87039ca16916b44ca6372e33524fcfa" md5json="8cb9896cf27761377a32741909911a5a">
+	<disk id="disk143" size="163840" chs="40:1:8" dir="archive/VOL12N21" href="/disks/pcx86/shareware/pcmag/disks/VOL12N21.json" md5="a87039ca16916b44ca6372e33524fcfa" md5json="8cb9896cf27761377a32741909911a5a">
 		<name>PC Magazine (Vol. 12 No. 21)</name>
 		<file size="925" time="1993-11-15 18:22:54" attr="0x20" md5="83ca626302afb16bfe53c3c973c29210">BOOTTI.ZIP</file>
 		<file size="52995" time="1993-11-15 18:21:12" attr="0x20" md5="385f42ec4b314b19ae738fa000f05527">MONTOR.ZIP</file>
@@ -2866,7 +2866,7 @@
 		<file size="989" time="1993-11-15 18:47:58" attr="0x20" md5="cce40df6bc37dbb2546cce806806978d">SEQPRT.ZIP</file>
 		<file size="21664" time="1993-11-15 18:25:32" attr="0x20" md5="48e1e0491a628676d811a8d0945b1961">UNITYP.ZIP</file>
 	</disk>
-	<disk id="disk144" size="163840" chs="40:1:8" dir="archive/VOL12N22" href="/disks/pcx86/shareware/pcmag/VOL12N22.json" md5="699dfd63f940862d6f1e3aeeb96944fb" md5json="390ece0a62afb048070f5be36f0f4496">
+	<disk id="disk144" size="163840" chs="40:1:8" dir="archive/VOL12N22" href="/disks/pcx86/shareware/pcmag/disks/VOL12N22.json" md5="699dfd63f940862d6f1e3aeeb96944fb" md5json="390ece0a62afb048070f5be36f0f4496">
 		<name>PC Magazine (Vol. 12 No. 22)</name>
 		<file size="740" time="1993-11-30 15:43:30" attr="0x20" md5="a68c98878edd79d2ad06f477a16a4dd2">D2JUL.ZIP</file>
 		<file size="51109" time="1993-11-30 14:57:00" attr="0x20" md5="4b20af80d8888d64867a9a8125cc747c">DLLACC.ZIP</file>
@@ -2875,7 +2875,7 @@
 		<file size="11809" time="1993-11-29 19:03:16" attr="0x20" md5="66dd7880f16158b5ec1821ea8ec192a3">QPATH.ZIP</file>
 		<file size="6796" time="1993-11-30 15:35:58" attr="0x20" md5="6f22447d42ee1dfb731573ef94429a90">WINASM.ZIP</file>
 	</disk>
-	<disk id="disk145" size="163840" chs="40:1:8" dir="archive/VOL13N01" href="/disks/pcx86/shareware/pcmag/VOL13N01.json" md5="738da3efc43e295dd71fd757029dc016" md5json="77f83cc81eaf1a3628297fea334cb92b">
+	<disk id="disk145" size="163840" chs="40:1:8" dir="archive/VOL13N01" href="/disks/pcx86/shareware/pcmag/disks/VOL13N01.json" md5="738da3efc43e295dd71fd757029dc016" md5json="77f83cc81eaf1a3628297fea334cb92b">
 		<name>PC Magazine (Vol. 13 No. 01)</name>
 		<file size="795" time="1993-12-07 15:19:10" attr="0x20" md5="32e2b78a34e24f4e1d406592a11da7ab">CDD.BAT</file>
 		<file size="5550" time="1993-12-08 18:17:28" attr="0x20" md5="dd32c8add0269cdeb14f61688d6c0a54">INTLOO.ZIP</file>
@@ -2884,7 +2884,7 @@
 		<file size="64241" time="1993-12-09 16:08:38" attr="0x20" md5="3f3d94d2ce5d961b469fe8728c23bd9c">PCDZ.EXE</file>
 		<file size="1133" time="1993-12-07 15:21:44" attr="0x20" md5="3226774b36bab4a8645872204114a7cc">SLOWIT.ZIP</file>
 	</disk>
-	<disk id="disk146" size="163840" chs="40:1:8" dir="archive/VOL13N02" href="/disks/pcx86/shareware/pcmag/VOL13N02.json" md5="77038d161ec67316b7db5c6a96c20a23" md5json="9a8e43538edc02a169c294db5a194b7b">
+	<disk id="disk146" size="163840" chs="40:1:8" dir="archive/VOL13N02" href="/disks/pcx86/shareware/pcmag/disks/VOL13N02.json" md5="77038d161ec67316b7db5c6a96c20a23" md5json="9a8e43538edc02a169c294db5a194b7b">
 		<name>PC Magazine (Vol. 13 No. 02)</name>
 		<file size="844" time="1993-12-28 13:12:12" attr="0x20" md5="d69f589e8669e3d4bfa6ac9b31b5d291">CK.ZIP</file>
 		<file size="20512" time="1993-12-28 12:39:40" attr="0x20" md5="19b82dedee350853fe59d04ee31c402c">COSUSE.ZIP</file>
@@ -2892,7 +2892,7 @@
 		<file size="677" time="1993-12-28 13:12:56" attr="0x20" md5="5276c526dc411b3a32d1c9d76c0789bf">UMB.ZIP</file>
 		<file size="3970" time="1993-06-21 11:59:28" attr="0x20" md5="91ed6c1d5d4fe0e41d5b6e540be5e3a5">WINCLIP.BAS</file>
 	</disk>
-	<disk id="disk147" size="327680" chs="40:2:8" dir="archive/VOL13N03" href="/disks/pcx86/shareware/pcmag/VOL13N03.json" md5="3351f481a0956e9619ac3b203ba21d4b" md5json="d168ae8aa21a0eb4d7765b809e18caec">
+	<disk id="disk147" size="327680" chs="40:2:8" dir="archive/VOL13N03" href="/disks/pcx86/shareware/pcmag/disks/VOL13N03.json" md5="3351f481a0956e9619ac3b203ba21d4b" md5json="d168ae8aa21a0eb4d7765b809e18caec">
 		<name>PC Magazine (Vol. 13 No. 03)</name>
 		<file size="37506" time="1994-01-18 12:38:38" attr="0x20" md5="3126e5653dde08c932b8c7fe09ed01ed">BRUSH.ZIP</file>
 		<file size="146930" time="1994-01-18 12:34:50" attr="0x20" md5="c385b311a4f9488362f61d193dcfad13">DIALOG.ZIP</file>
@@ -2903,7 +2903,7 @@
 		<file size="482" time="1994-01-18 12:59:42" attr="0x20" md5="3862062d7b39e9fca8de80a483bbf28d">TESTVA.ZIP</file>
 		<file size="49265" time="1994-01-18 11:30:22" attr="0x20" md5="0f69d7e1f80ddc8e946e06d7d96e03fa">VULCAN.ZIP</file>
 	</disk>
-	<disk id="disk148" size="163840" chs="40:1:8" dir="archive/VOL13N04" href="/disks/pcx86/shareware/pcmag/VOL13N04.json" md5="40027a22baa4e16a20471689d4ee85af" md5json="49171927b90fe32a813a75a6d898512c">
+	<disk id="disk148" size="163840" chs="40:1:8" dir="archive/VOL13N04" href="/disks/pcx86/shareware/pcmag/disks/VOL13N04.json" md5="40027a22baa4e16a20471689d4ee85af" md5json="49171927b90fe32a813a75a6d898512c">
 		<name>PC Magazine (Vol. 13 No. 04)</name>
 		<file size="9938" time="1994-01-13 12:37:42" attr="0x20" md5="9ebf1c18c6e0bfa74ad1c83623a67c93">CONFIX.ZIP</file>
 		<file size="1986" time="1994-01-13 13:36:28" attr="0x20" md5="0bb204253dd8c45698fc13a1892a07e4">DATER.ZIP</file>
@@ -2911,7 +2911,7 @@
 		<file size="4807" time="1994-01-13 13:38:00" attr="0x20" md5="b91b99981c91c8074151e9483d8cb16f">VIDTES.ZIP</file>
 		<file size="94776" time="1994-01-13 14:41:54" attr="0x20" md5="9fb3e51e3b9b1fa2fd5199cf0c1be5a8">WINAPI.ZIP</file>
 	</disk>
-	<disk id="disk149" size="163840" chs="40:1:8" dir="archive/VOL13N05" href="/disks/pcx86/shareware/pcmag/VOL13N05.json" md5="312dbc699c4c1d40de59a676016c78fd" md5json="2d6438c336da9d9d63234a13bcbdc994">
+	<disk id="disk149" size="163840" chs="40:1:8" dir="archive/VOL13N05" href="/disks/pcx86/shareware/pcmag/disks/VOL13N05.json" md5="312dbc699c4c1d40de59a676016c78fd" md5json="2d6438c336da9d9d63234a13bcbdc994">
 		<name>PC Magazine (Vol. 13 No. 05)</name>
 		<file size="1072" time="1994-02-09 15:56:24" attr="0x20" md5="b25f7accfe767679e7a640f872f84bf6">COUNT.ZIP</file>
 		<file size="1296" time="1993-12-09 16:05:06" attr="0x20" md5="054876736d510ff9b675badd98e88451">NDY2.PRG</file>
@@ -2921,13 +2921,13 @@
 		<file size="74408" time="1994-02-14 13:47:20" attr="0x20" md5="36f42325d31672f80728a2f7b7aaab36">THINDI.ZIP</file>
 		<file size="4325" time="1993-11-05 16:29:18" attr="0x20" md5="18a7cdf92918a2118c6979daa33c74b1">TMTOGG.ZIP</file>
 	</disk>
-	<disk id="disk150" size="163840" chs="40:1:8" dir="archive/VOL13N06" href="/disks/pcx86/shareware/pcmag/VOL13N06.json" md5="fbc0cd5efac143a669af6da0790a5d94" md5json="6dc3856d76bb01973f8d97463a699c6f">
+	<disk id="disk150" size="163840" chs="40:1:8" dir="archive/VOL13N06" href="/disks/pcx86/shareware/pcmag/disks/VOL13N06.json" md5="fbc0cd5efac143a669af6da0790a5d94" md5json="6dc3856d76bb01973f8d97463a699c6f">
 		<name>PC Magazine (Vol. 13 No. 06)</name>
 		<file size="91147" time="1994-03-04 12:55:30" attr="0x20" md5="640f091391f1d368472de532279895b9">EXITWI.ZIP</file>
 		<file size="16935" time="1994-03-04 12:01:58" attr="0x20" md5="cfd450e5f6e3901718146f1fcde7649b">UPDATE.ZIP</file>
 		<file size="8359" time="1994-03-04 13:12:00" attr="0x20" md5="b05ef52ee1324680d85c9814fd46e3b4">WINVER.ZIP</file>
 	</disk>
-	<disk id="disk151" size="163840" chs="40:1:8" dir="archive/VOL13N07" href="/disks/pcx86/shareware/pcmag/VOL13N07.json" md5="f57eca5de7757d94897a3bfb1b726764" md5json="7f916d2d26477475ea9dee367911f54d">
+	<disk id="disk151" size="163840" chs="40:1:8" dir="archive/VOL13N07" href="/disks/pcx86/shareware/pcmag/disks/VOL13N07.json" md5="f57eca5de7757d94897a3bfb1b726764" md5json="7f916d2d26477475ea9dee367911f54d">
 		<name>PC Magazine (Vol. 13 No. 07)</name>
 		<file size="3846" time="1994-03-23 16:01:32" attr="0x20" md5="8b6cd56a35aa39867954b4d8db9e0078">DIALIT.ZIP</file>
 		<file size="499" time="1994-03-24 11:00:46" attr="0x20" md5="85ff4ff181e81055524fe98e8096792c">DOCTRA.ZIP</file>
@@ -2937,7 +2937,7 @@
 		<file size="2050" time="1994-03-14 14:01:50" attr="0x20" md5="0850ebc808b9b6bdbcca117e07b7a7c0">REQUIR.ZIP</file>
 		<file size="1144" time="1994-03-14 17:53:06" attr="0x20" md5="b87cba649a951c637d20679b4e744ae5">TESTCM.ZIP</file>
 	</disk>
-	<disk id="disk152" size="327680" chs="40:2:8" dir="archive/VOL13N08" href="/disks/pcx86/shareware/pcmag/VOL13N08.json" md5="c56a448667b66f56a0c215eb6c005306" md5json="2fa49de48f76bfe1130b4fdcab8e652e">
+	<disk id="disk152" size="327680" chs="40:2:8" dir="archive/VOL13N08" href="/disks/pcx86/shareware/pcmag/disks/VOL13N08.json" md5="c56a448667b66f56a0c215eb6c005306" md5json="2fa49de48f76bfe1130b4fdcab8e652e">
 		<name>PC Magazine (Vol. 13 No. 08)</name>
 		<file size="244280" time="1994-03-31 17:45:40" attr="0x20" md5="0a29485d6c13be4d893487ed2db2d676">DISKP.ZIP</file>
 		<file size="2516" time="1994-03-28 16:33:40" attr="0x20" md5="4625a760b982db96da9972a0e7951155">DISKPI.DOC</file>
@@ -2946,7 +2946,7 @@
 		<file size="1125" time="1994-03-23 15:56:06" attr="0x20" md5="e88710456160b2775af0490188221608">MAXWIN.SC</file>
 		<file size="1550" time="1994-03-23 15:53:16" attr="0x20" md5="79d8392e74be7fc0952151324d17c615">NAME.ZIP</file>
 	</disk>
-	<disk id="disk153" size="163840" chs="40:1:8" dir="archive/VOL13N09" href="/disks/pcx86/shareware/pcmag/VOL13N09.json" md5="f397bc37d739f2f4964e63404997022d" md5json="13246210ea171fae83d619aa34b59854">
+	<disk id="disk153" size="163840" chs="40:1:8" dir="archive/VOL13N09" href="/disks/pcx86/shareware/pcmag/disks/VOL13N09.json" md5="f397bc37d739f2f4964e63404997022d" md5json="13246210ea171fae83d619aa34b59854">
 		<name>PC Magazine (Vol. 13 No. 09)</name>
 		<file size="5922" time="1994-04-12 19:05:12" attr="0x20" md5="b4bf749f0074158333634db766efc99c">CDXCOD.ZIP</file>
 		<file size="2468" time="1994-03-28 16:39:04" attr="0x20" md5="7552d1821cc45974b48ffcbfccaed360">INIBAK.DOC</file>
@@ -2957,25 +2957,25 @@
 		<file size="833" time="1994-03-26 16:41:48" attr="0x20" md5="21bf070f1c6f33ea9439bcc99ee06135">TSRMEM.ZIP</file>
 		<file size="7490" time="1994-02-11 10:19:22" attr="0x20" md5="43fe3d0e005e2c867364275a933f7169">VM.EXE</file>
 	</disk>
-	<disk id="disk154" size="163840" chs="40:1:8" dir="archive/VOL13N10" href="/disks/pcx86/shareware/pcmag/VOL13N10.json" md5="278ec25ddb294273122e5ae1a08ca9a0" md5json="94c43f7804901afe99d12e8afe1c5f84">
+	<disk id="disk154" size="163840" chs="40:1:8" dir="archive/VOL13N10" href="/disks/pcx86/shareware/pcmag/disks/VOL13N10.json" md5="278ec25ddb294273122e5ae1a08ca9a0" md5json="94c43f7804901afe99d12e8afe1c5f84">
 		<name>PC Magazine (Vol. 13 No. 10)</name>
 		<file size="1138" time="1994-05-01 15:42:48" attr="0x20" md5="721935a1db51ed46bda49002317a4f6b">REVER.ZIP</file>
 		<file size="59927" time="1994-05-01 15:38:10" attr="0x20" md5="7e626ad7cb25291393065765e4fac8fc">SWITC.ZIP</file>
 		<file size="2871" time="1994-05-01 15:29:06" attr="0x20" md5="dddc3484ab72f5906196fa7125f02143">VTUTOR.ZIP</file>
 		<file size="1464" time="1994-05-01 15:28:02" attr="0x20" md5="63e8edbabf8d05477b00a5e797b83262">XFLT.ZIP</file>
 	</disk>
-	<disk id="disk155" size="163840" chs="40:1:8" dir="archive/VOL13N11" href="/disks/pcx86/shareware/pcmag/VOL13N11.json" md5="bd12590bcb526c0811e462e9f1a49210" md5json="8f3b6aaa93d8b823d48e040d039da3bd">
+	<disk id="disk155" size="163840" chs="40:1:8" dir="archive/VOL13N11" href="/disks/pcx86/shareware/pcmag/disks/VOL13N11.json" md5="bd12590bcb526c0811e462e9f1a49210" md5json="8f3b6aaa93d8b823d48e040d039da3bd">
 		<name>PC Magazine (Vol. 13 No. 11)</name>
 		<file size="7901" time="1994-05-09 15:15:14" attr="0x20" md5="083026bd27e5a8128780923dba567793">ATOTOL.ZIP</file>
 		<file size="34568" time="1994-05-24 07:13:52" attr="0x20" md5="a95a217d0bc2ddfc9c0bb3f3020ebd4e">WINPRN.ZIP</file>
 	</disk>
-	<disk id="disk156" size="163840" chs="40:1:8" dir="archive/VOL13N12" href="/disks/pcx86/shareware/pcmag/VOL13N12.json" md5="ba223239f293e1cf6294b770e63391fd" md5json="79f54573ca1cbc6f6aafa8c2230804de">
+	<disk id="disk156" size="163840" chs="40:1:8" dir="archive/VOL13N12" href="/disks/pcx86/shareware/pcmag/disks/VOL13N12.json" md5="ba223239f293e1cf6294b770e63391fd" md5json="79f54573ca1cbc6f6aafa8c2230804de">
 		<name>PC Magazine (Vol. 13 No. 12)</name>
 		<file size="97332" time="1994-06-07 07:09:34" attr="0x20" md5="524b75f17171f340f9d497d0767e3b91">EZFONT.ZIP</file>
 		<file size="34286" time="1994-06-08 12:59:04" attr="0x20" md5="bb1a7b3f43ab4179942ceb523bd465d6">WCL2.ZIP</file>
 		<file size="528" time="1994-06-07 07:08:46" attr="0x20" md5="43f14839e93ed9b5b4667486b3ee4e72">WPHEAD.ZIP</file>
 	</disk>
-	<disk id="disk157" size="163840" chs="40:1:8" dir="archive/VOL13N13" href="/disks/pcx86/shareware/pcmag/VOL13N13.json" md5="acabd35afcb74d60edbe712653f50353" md5json="a54517db1d4b817f5046a000c65effbe">
+	<disk id="disk157" size="163840" chs="40:1:8" dir="archive/VOL13N13" href="/disks/pcx86/shareware/pcmag/disks/VOL13N13.json" md5="acabd35afcb74d60edbe712653f50353" md5json="a54517db1d4b817f5046a000c65effbe">
 		<name>PC Magazine (Vol. 13 No. 13)</name>
 		<file size="1740" time="1994-06-23 09:57:34" attr="0x20" md5="d3c877e6c14c6c93fa23f7243ea5e332">ENVSIZ.ZIP</file>
 		<file size="98991" time="1994-06-23 10:03:02" attr="0x20" md5="84f41c2b7a4852ab36b2e076fdd60c46">FONTNT.ZIP</file>
@@ -2984,7 +2984,7 @@
 		<file size="1193" time="1994-06-23 10:35:22" attr="0x20" md5="45c0a611b2a3898b7137a175dbd6df4f">VIGENC.BAS</file>
 		<file size="26369" time="1994-06-23 09:49:38" attr="0x20" md5="2456ba9bf213b804762486474eade3c3">WINCRY.ZIP</file>
 	</disk>
-	<disk id="disk158" size="163840" chs="40:1:8" dir="archive/VOL13N14" href="/disks/pcx86/shareware/pcmag/VOL13N14.json" md5="0b5ae1c482045b5647c17ab1d34fa019" md5json="f6e1a4c2e7461e34256cdbb10d399c47">
+	<disk id="disk158" size="163840" chs="40:1:8" dir="archive/VOL13N14" href="/disks/pcx86/shareware/pcmag/disks/VOL13N14.json" md5="0b5ae1c482045b5647c17ab1d34fa019" md5json="f6e1a4c2e7461e34256cdbb10d399c47">
 		<name>PC Magazine (Vol. 13 No. 14)</name>
 		<file size="6118" time="1994-07-22 23:36:32" attr="0x20" md5="68e3c0a0fe3311783e451e8947c44fc8">EMF1.ZIP</file>
 		<file size="815" time="1994-07-22 23:36:30" attr="0x20" md5="201f81b4d22ab283df401ff730264cbc">LAPNAP.ZIP</file>
@@ -2992,7 +2992,7 @@
 		<file size="60901" time="1994-07-22 23:36:30" attr="0x20" md5="aad6ead28be7d7cdb4314f7536e821f1">QUIKCO.ZIP</file>
 		<file size="1509" time="1994-03-21 07:37:34" attr="0x20" md5="72f30968790a3a16aa8f984957e3ef9c">STACKMON.COM</file>
 	</disk>
-	<disk id="disk159" size="163840" chs="40:1:8" dir="archive/VOL13N15" href="/disks/pcx86/shareware/pcmag/VOL13N15.json" md5="2dff8075c178a3f833bc5cefd5cf5cb2" md5json="ff44516b7c8f74326ce0cfa6963af490">
+	<disk id="disk159" size="163840" chs="40:1:8" dir="archive/VOL13N15" href="/disks/pcx86/shareware/pcmag/disks/VOL13N15.json" md5="2dff8075c178a3f833bc5cefd5cf5cb2" md5json="ff44516b7c8f74326ce0cfa6963af490">
 		<name>PC Magazine (Vol. 13 No. 15)</name>
 		<file size="30477" time="1994-08-15 22:31:10" attr="0x20" md5="cbb7357aff79c1581febd2f9d51fed38">ALLPAP.ZIP</file>
 		<file size="1033" time="1994-08-15 21:55:00" attr="0x20" md5="9ec31dd46fb872418a1b20dffcbe2730">CAPITA.ZIP</file>
@@ -3000,14 +3000,14 @@
 		<file size="6205" time="1994-08-15 22:12:12" attr="0x20" md5="a51dc3760d4579effe0b06d943abe8eb">EMF2.ZIP</file>
 		<file size="1681" time="1994-08-15 21:57:12" attr="0x20" md5="b474998479ab43a1794c2ce511e96f30">KTODAY.SC</file>
 	</disk>
-	<disk id="disk160" size="163840" chs="40:1:8" dir="archive/VOL13N16" href="/disks/pcx86/shareware/pcmag/VOL13N16.json" md5="1edfc3a62a38c72d462dffbe71a4f482" md5json="ededca3fb4b84b1c39ca55802ad5cea5">
+	<disk id="disk160" size="163840" chs="40:1:8" dir="archive/VOL13N16" href="/disks/pcx86/shareware/pcmag/disks/VOL13N16.json" md5="1edfc3a62a38c72d462dffbe71a4f482" md5json="ededca3fb4b84b1c39ca55802ad5cea5">
 		<name>PC Magazine (Vol. 13 No. 16)</name>
 		<file size="387" time="1994-08-23 19:03:38" attr="0x20" md5="6c5ba903624fb9e7fa7888e1515f5376">AUTOPA.BAT</file>
 		<file size="74531" time="1994-08-23 17:49:50" attr="0x20" md5="ba01fe7b7561ce38e0e09fe7adaf3a79">MYGRPS.ZIP</file>
 		<file size="951" time="1994-08-24 10:22:22" attr="0x20" md5="70b192801dc3ee6a6f1ec5327894c676">P.ZIP</file>
 		<file size="461" time="1994-08-23 19:04:44" attr="0x20" md5="18791b9360ccc566d586a966e5ad90d9">TOOLTP.XLS</file>
 	</disk>
-	<disk id="disk161" size="163840" chs="40:1:8" dir="archive/VOL13N17" href="/disks/pcx86/shareware/pcmag/VOL13N17.json" md5="0dad9a9a1db6410831a4df2f7becec81" md5json="ad449eb2fb737fb62f0c566b39313fbe">
+	<disk id="disk161" size="163840" chs="40:1:8" dir="archive/VOL13N17" href="/disks/pcx86/shareware/pcmag/disks/VOL13N17.json" md5="0dad9a9a1db6410831a4df2f7becec81" md5json="ad449eb2fb737fb62f0c566b39313fbe">
 		<name>PC Magazine (Vol. 13 No. 17)</name>
 		<file size="6263" time="1994-09-17 19:01:12" attr="0x20" md5="1eb1322c2be12555ae046797d5d4a457">CDXCOD.ZIP</file>
 		<file size="12878" time="1994-09-17 19:05:30" attr="0x20" md5="1558ae3c35f7c425d539cb427e4bdb47">EMF3.ZIP</file>
@@ -3019,7 +3019,7 @@
 		<file size="1507" time="1994-09-17 17:00:14" attr="0x20" md5="668c6aaa48dbfa3a19a233bcce5832dc">WIPEZ.ZIP</file>
 		<file size="20367" time="1994-09-17 16:55:30" attr="0x20" md5="7851d734d9132eff832884e23f08705f">WPNTR.ZIP</file>
 	</disk>
-	<disk id="disk162" size="163840" chs="40:1:8" dir="archive/VOL13N18" href="/disks/pcx86/shareware/pcmag/VOL13N18.json" md5="1d552a33e9afcf709437803c47453e51" md5json="4b35d7f5f33ca286e5705f43ba2c9652">
+	<disk id="disk162" size="163840" chs="40:1:8" dir="archive/VOL13N18" href="/disks/pcx86/shareware/pcmag/disks/VOL13N18.json" md5="1d552a33e9afcf709437803c47453e51" md5json="4b35d7f5f33ca286e5705f43ba2c9652">
 		<name>PC Magazine (Vol. 13 No. 18)</name>
 		<file size="542" time="1994-10-03 03:27:42" attr="0x20" md5="3ab7866f7cd2dee898552154d2abd0c8">ALTPMO.ZIP</file>
 		<file size="1133" time="1994-10-07 03:27:52" attr="0x20" md5="d0dc7076919b1aeec40f334575cd3bfe">AUDIO.ZIP</file>
@@ -3027,7 +3027,7 @@
 		<file size="21217" time="1994-10-02 03:28:40" attr="0x20" md5="20af1e4de1b3452ab626ab54041171cf">PASTE.ZIP</file>
 		<file size="7209" time="1994-10-03 03:28:52" attr="0x20" md5="1200900852c58ac440e66c7ea25e03be">SNDPAS.ZIP</file>
 	</disk>
-	<disk id="disk163" size="163840" chs="40:1:8" dir="archive/VOL13N19" href="/disks/pcx86/shareware/pcmag/VOL13N19.json" md5="6b37f2fa0be8cc3ff7035c5e91de702c" md5json="6ddb1544613da6424232fbbf1a16612d">
+	<disk id="disk163" size="163840" chs="40:1:8" dir="archive/VOL13N19" href="/disks/pcx86/shareware/pcmag/disks/VOL13N19.json" md5="6b37f2fa0be8cc3ff7035c5e91de702c" md5json="6ddb1544613da6424232fbbf1a16612d">
 		<name>PC Magazine (Vol. 13 No. 19)</name>
 		<file size="4884" time="1994-07-18 15:21:16" attr="0x20" md5="5e5bf012a48d2a07e0a5926f8d4ed47b">DELDLG.ASC</file>
 		<file size="780" time="1994-10-25 07:04:22" attr="0x20" md5="cea64b65707044e3e8540f179e1cd796">DRV.ZIP</file>
@@ -3038,7 +3038,7 @@
 		<file size="5376" time="1991-10-14 09:15:28" attr="0x20" md5="6a03a89ae1706a2a4064519cdcc3e603">SERIAL.EXE</file>
 		<file size="18944" time="1994-08-09 21:26:48" attr="0x20" md5="586f641d63f225b0611cdbb50fd41a67">WDPERM.XLS</file>
 	</disk>
-	<disk id="disk164" size="163840" chs="40:1:8" dir="archive/VOL13N20" href="/disks/pcx86/shareware/pcmag/VOL13N20.json" md5="3dd59ecc0eedd5686e26314bcbee1fca" md5json="162d0f17274e678b98ec7c405652a4f5">
+	<disk id="disk164" size="163840" chs="40:1:8" dir="archive/VOL13N20" href="/disks/pcx86/shareware/pcmag/disks/VOL13N20.json" md5="3dd59ecc0eedd5686e26314bcbee1fca" md5json="162d0f17274e678b98ec7c405652a4f5">
 		<name>PC Magazine (Vol. 13 No. 20)</name>
 		<file size="2824" time="1994-08-24 21:31:26" attr="0x20" md5="df802c461530b1de344d899d16776bbe">CONTAI.ZIP</file>
 		<file size="474" time="1994-11-02 17:56:00" attr="0x20" md5="c51b28dbfe6588f5eb997ad0db27dcf1">FIXPAR.BAT</file>
@@ -3046,7 +3046,7 @@
 		<file size="34990" time="1994-10-25 12:50:20" attr="0x20" md5="1337496fd9abc38cd8e1cc11d18c37f8">PCMKEY.ZIP</file>
 		<file size="1556" time="1994-08-08 07:26:54" attr="0x20" md5="5f8ae3d288864603f241c1f96e797d98">STACKC.ZIP</file>
 	</disk>
-	<disk id="disk165" size="163840" chs="40:1:8" dir="archive/VOL13N21" href="/disks/pcx86/shareware/pcmag/VOL13N21.json" md5="30b85e9ef762d107e09eca6aac627dce" md5json="37479e8d2f32aa4f2efe7d69e968cd57">
+	<disk id="disk165" size="163840" chs="40:1:8" dir="archive/VOL13N21" href="/disks/pcx86/shareware/pcmag/disks/VOL13N21.json" md5="30b85e9ef762d107e09eca6aac627dce" md5json="37479e8d2f32aa4f2efe7d69e968cd57">
 		<name>PC Magazine (Vol. 13 No. 21)</name>
 		<file size="1110" time="1994-11-14 11:01:22" attr="0x20" md5="217d2f0ff32771fd485d643782a3ae45">AVHELP.ZIP</file>
 		<file size="1419" time="1994-11-14 11:09:40" attr="0x20" md5="551ac3a04ecafbf560bb50674955c173">BLT.ZIP</file>
@@ -3055,7 +3055,7 @@
 		<file size="62077" time="1994-09-12 13:18:58" attr="0x20" md5="4a484f0b0f8596a593b555964f725b97">FDDLLS.ZIP</file>
 		<file size="233" time="1994-11-14 10:52:16" attr="0x20" md5="e6c94057eb7d77ae9bab3075c5bb04ac">LDTEMP.DOC</file>
 	</disk>
-	<disk id="disk166" size="163840" chs="40:1:8" dir="archive/VOL13N22" href="/disks/pcx86/shareware/pcmag/VOL13N22.json" md5="e03f2505bb240388f045487e42c8e65a" md5json="125292f00156c2f8605796e7599e4d9e">
+	<disk id="disk166" size="163840" chs="40:1:8" dir="archive/VOL13N22" href="/disks/pcx86/shareware/pcmag/disks/VOL13N22.json" md5="e03f2505bb240388f045487e42c8e65a" md5json="125292f00156c2f8605796e7599e4d9e">
 		<name>PC Magazine (Vol. 13 No. 22)</name>
 		<file size="2042" time="1994-11-30 16:07:00" attr="0x20" md5="f1c1256b0564bfb73e8731a58538efbd">GENCRT.PRG</file>
 		<file size="38420" time="1994-11-30 15:49:18" attr="0x20" md5="63bb352052c222251f74fd2ea1468e4b">SCHED.ZIP</file>
@@ -3063,7 +3063,7 @@
 		<file size="540" time="1994-11-30 16:03:52" attr="0x20" md5="620f54f34c9cfd0d4184fb13573d17ac">VPRTSC.ZIP</file>
 		<file size="926" time="1994-11-30 15:56:18" attr="0x20" md5="78e28c4a31f7ddb075ea83d2c1fb5c46">WORDSC.ZIP</file>
 	</disk>
-	<disk id="disk167" size="163840" chs="40:1:8" dir="archive/VOL14N01" href="/disks/pcx86/shareware/pcmag/VOL14N01.json" md5="ab1a2fa6f1dc262179cb6e4df61ce37e" md5json="f9be148c98f50b9a116b39ec5f84d894">
+	<disk id="disk167" size="163840" chs="40:1:8" dir="archive/VOL14N01" href="/disks/pcx86/shareware/pcmag/disks/VOL14N01.json" md5="ab1a2fa6f1dc262179cb6e4df61ce37e" md5json="f9be148c98f50b9a116b39ec5f84d894">
 		<name>PC Magazine (Vol. 14 No. 01)</name>
 		<file size="656" time="1994-09-14 13:09:38" attr="0x20" md5="9d5c2c98cf892cc689e607a5656dfb3e">1PROG.ZIP</file>
 		<file size="60" time="1994-09-14 10:37:58" attr="0x20" md5="7301f57299ae6bd3785c06836afa798e">CDD.BAT</file>
@@ -3072,7 +3072,7 @@
 		<file size="328" time="1994-12-12 11:12:00" attr="0x20" md5="1a367e5732b784fce2c40c3d4e9b39a3">TILE.ZIP</file>
 		<file size="633" time="1994-06-13 13:18:48" attr="0x20" md5="62cc760db6b6a341e4ee484f4e45e8e8">TRYCOLOR.BAT</file>
 	</disk>
-	<disk id="disk168" size="163840" chs="40:1:8" dir="archive/VOL14N02" href="/disks/pcx86/shareware/pcmag/VOL14N02.json" md5="fc4b98a55936d15b581a3b6e1ea5f3e5" md5json="2c55783124cf8f00d6b6a4b31e6c5923">
+	<disk id="disk168" size="163840" chs="40:1:8" dir="archive/VOL14N02" href="/disks/pcx86/shareware/pcmag/disks/VOL14N02.json" md5="fc4b98a55936d15b581a3b6e1ea5f3e5" md5json="2c55783124cf8f00d6b6a4b31e6c5923">
 		<name>PC Magazine (Vol. 14 No. 02)</name>
 		<file size="301" time="1994-12-29 13:27:52" attr="0x20" md5="2e47a6a4693a8300cc438fad902bd53a">DATETI.BAT</file>
 		<file size="367" time="1994-12-29 13:28:16" attr="0x20" md5="6f57b5c318407c9c86a5459bf8963011">ONCEAD.BAT</file>
@@ -3080,7 +3080,7 @@
 		<file size="199" time="1980-01-01 12:05:48" attr="0x20" md5="a803649e63aa94c938a8c96996a32e1a">TPCREAD.ME</file>
 		<file size="2294" time="1994-12-29 13:24:14" attr="0x20" md5="a1e67f6fb2eab1e807f7438885837f0f">WHATCP.ZIP</file>
 	</disk>
-	<disk id="disk169" size="327680" chs="40:2:8" dir="archive/VOL14N03" href="/disks/pcx86/shareware/pcmag/VOL14N03.json" md5="b00d817604849b3ef560b5b57b8293ae" md5json="cf0794f294c634e8a1c3680649a487a5">
+	<disk id="disk169" size="327680" chs="40:2:8" dir="archive/VOL14N03" href="/disks/pcx86/shareware/pcmag/disks/VOL14N03.json" md5="b00d817604849b3ef560b5b57b8293ae" md5json="cf0794f294c634e8a1c3680649a487a5">
 		<name>PC Magazine (Vol. 14 No. 03)</name>
 		<file size="61" time="1994-09-27 09:16:14" attr="0x20" md5="3463b4d8c30a138ab1e080ec4ead0078">CLEARE.BAT</file>
 		<file size="1409" time="1995-01-09 10:37:44" attr="0x20" md5="c3e6b8b6abe241af7cdfe6c142cf6699">RTF.ZIP</file>
@@ -3090,7 +3090,7 @@
 		<file size="60764" time="1994-11-03 05:29:52" attr="0x20" md5="bc3a5152fed091dfcd2d611977091147">TAPECS.ZIP</file>
 		<file size="199" time="1980-01-01 12:05:48" attr="0x20" md5="a803649e63aa94c938a8c96996a32e1a">TPCREAD.ME</file>
 	</disk>
-	<disk id="disk170" size="163840" chs="40:1:8" dir="archive/VOL14N04" href="/disks/pcx86/shareware/pcmag/VOL14N04.json" md5="e24c9d93636c5965cc296d007dcd7a59" md5json="9ddb9f4badb83e7ac18c0ddc78661cb5">
+	<disk id="disk170" size="163840" chs="40:1:8" dir="archive/VOL14N04" href="/disks/pcx86/shareware/pcmag/disks/VOL14N04.json" md5="e24c9d93636c5965cc296d007dcd7a59" md5json="9ddb9f4badb83e7ac18c0ddc78661cb5">
 		<name>PC Magazine (Vol. 14 No. 04)</name>
 		<file size="498" time="1995-01-14 16:24:00" attr="0x20" md5="f7b4411f2c01c0265817fa78fac3de98">AUTOPA.BAT</file>
 		<file size="59778" time="1995-01-20 17:37:58" attr="0x20" md5="f095506f22a60006271e576e97f50c65">BUTTON.ZIP</file>
@@ -3100,7 +3100,7 @@
 		<file size="191" time="1994-09-06 09:19:52" attr="0x20" md5="e6efa407dee77e9266e8241c6d6efebf">TESTCO.BAT</file>
 		<file size="199" time="1980-01-01 12:05:48" attr="0x20" md5="a803649e63aa94c938a8c96996a32e1a">TPCREAD.ME</file>
 	</disk>
-	<disk id="disk171" size="163840" chs="40:1:8" dir="archive/VOL14N05" href="/disks/pcx86/shareware/pcmag/VOL14N05.json" md5="67157adfabbb4c95c9a0487599f5dcc5" md5json="7638727d4b85d2babc5b440273df350c">
+	<disk id="disk171" size="163840" chs="40:1:8" dir="archive/VOL14N05" href="/disks/pcx86/shareware/pcmag/disks/VOL14N05.json" md5="67157adfabbb4c95c9a0487599f5dcc5" md5json="7638727d4b85d2babc5b440273df350c">
 		<name>PC Magazine (Vol. 14 No. 05)</name>
 		<file size="818" time="1994-12-02 17:01:04" attr="0x20" md5="7e7c0af8a3b1957e75c5bbeb19046a69">BLUEBO.TXT</file>
 		<file size="35915" time="1995-02-12 11:31:26" attr="0x20" md5="ce6e1564a95c3a644b8895762ba7350f">DEFEDI.ZIP</file>
@@ -3114,7 +3114,7 @@
 		<file size="575" time="1995-02-11 16:47:56" attr="0x20" md5="c705ebc4eed0f20a33d6b1877dfb485c">ULCASE.ZIP</file>
 		<file size="4959" time="1994-11-03 16:49:06" attr="0x20" md5="a39a822fb7e0e6a426ccf07efff81d2a">VP.EXE</file>
 	</disk>
-	<disk id="disk172" size="163840" chs="40:1:8" dir="archive/VOL14N06" href="/disks/pcx86/shareware/pcmag/VOL14N06.json" md5="94794de5b4df484e74f77c7f8e557bfa" md5json="e2e6e0fcf4fee1a6d7c91132941e61c0">
+	<disk id="disk172" size="163840" chs="40:1:8" dir="archive/VOL14N06" href="/disks/pcx86/shareware/pcmag/disks/VOL14N06.json" md5="94794de5b4df484e74f77c7f8e557bfa" md5json="e2e6e0fcf4fee1a6d7c91132941e61c0">
 		<name>PC Magazine (Vol. 14 No. 06)</name>
 		<file size="24339" time="1995-01-12 14:17:42" attr="0x20" md5="3d72f25af6848dadfaeb5395d79368f2">1MBF.ZIP</file>
 		<file size="402" time="1994-09-07 15:20:06" attr="0x20" md5="f559b99db8862f6dc1c25aeec3968c6d">DCOUNT.BAT</file>
