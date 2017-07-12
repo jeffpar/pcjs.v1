@@ -47,7 +47,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 
 {% include machine-command.html type='button' label='Load Disk' machine='pcmag' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Magazine (Vol. 06 No. 08)"; loadDisk FDC' %}
 
-> PC Magazine (Vol. 06 No. 08) is available at the Internet Archive as "[PC Mag 1987-04-28](https://archive.org/details/PC-Mag-1987-04-28)".
+NOTE: PC Magazine (Vol. 06 No. 08) is available at the Internet Archive as "[PC Mag 1987-04-28](https://archive.org/details/PC-Mag-1987-04-28)".
 
 ### Directory of PC Magazine (Vol. 06 No. 09)
 
@@ -65,7 +65,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 
 {% include machine-command.html type='button' label='Load Disk' machine='pcmag' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Magazine (Vol. 06 No. 09)"; loadDisk FDC' %}
 
-> PC Magazine (Vol. 06 No. 09) is available at the Internet Archive as "[PC Mag 1987-05-12](https://archive.org/details/PC-Mag-1987-05-12)".
+NOTE: PC Magazine (Vol. 06 No. 09) is available at the Internet Archive as "[PC Mag 1987-05-12](https://archive.org/details/PC-Mag-1987-05-12)".
 
 ### Directory of PC Magazine (Vol. 06 No. 10)
 
