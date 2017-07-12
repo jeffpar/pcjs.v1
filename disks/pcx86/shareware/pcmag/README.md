@@ -45,7 +45,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        7 file(s)      68810 bytes
 	                       90112 bytes free
 
-> {% include machine-command.html type='button' label='Load Disk' machine='pcmag' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Magazine (Vol. 06 No. 08)"; loadDisk FDC' %}
+{% include machine-command.html type='button' label='Load Disk' machine='pcmag' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Magazine (Vol. 06 No. 08)"; loadDisk FDC' %}
 
 > PC Magazine (Vol. 06 No. 08) is available at the Internet Archive as "[PC Mag 1987-04-28](https://archive.org/details/PC-Mag-1987-04-28)".
 
@@ -63,7 +63,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        6 file(s)      56031 bytes
 	                      102912 bytes free
 
-> {% include machine-command.html type='button' label='Load Disk' machine='pcmag' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Magazine (Vol. 06 No. 09)"; loadDisk FDC' %}
+{% include machine-command.html type='button' label='Load Disk' machine='pcmag' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Magazine (Vol. 06 No. 09)"; loadDisk FDC' %}
 
 > PC Magazine (Vol. 06 No. 09) is available at the Internet Archive as "[PC Mag 1987-05-12](https://archive.org/details/PC-Mag-1987-05-12)".
 
@@ -83,7 +83,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        8 file(s)     134521 bytes
 	                       24064 bytes free
 
-> {% include machine-command.html type='button' label='Load Disk' machine='pcmag' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Magazine (Vol. 06 No. 10)"; loadDisk FDC' %}
+{% include machine-command.html type='button' label='Load Disk' machine='pcmag' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Magazine (Vol. 06 No. 10)"; loadDisk FDC' %}
 
 ### Directory of PC Magazine (Vol. 06 No. 11)
 
@@ -96,7 +96,7 @@ will surface over time.  [Let us know](mailto:Jeff@pcjs.org) if you find more.  
 	        3 file(s)      37864 bytes
 	                      121856 bytes free
 
-> {% include machine-command.html type='button' label='Load Disk' machine='pcmag' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Magazine (Vol. 06 No. 11)"; loadDisk FDC' %}
+{% include machine-command.html type='button' label='Load Disk' machine='pcmag' command='script' value='select FDC listDrives "A:"; select FDC listDisks "PC Magazine (Vol. 06 No. 11)"; loadDisk FDC' %}
 
 ### Directory of PC Magazine (Vol. 06 No. 12)
 
