@@ -192,6 +192,10 @@ class FDC extends Component {
          * settings that determine the number of drives and their characteristics (eg, 40-track vs. 80-track),
          * which it can then pass on to initDrive().
          */
+
+        this['exports'] = {
+            'loadDisk': this.loadSelectedDisk
+        };
     }
 
     /**
@@ -308,12 +312,7 @@ class FDC extends Component {
         case "loadDisk":
             this.bindings[sBinding] = control;
             control.onclick = function onClickLoadDisk(event) {
-                var controlDisks = fdc.bindings["listDisks"];
-                if (controlDisks) {
-                    var sDisketteName = controlDisks.options[controlDisks.selectedIndex].text;
-                    var sDiskettePath = controlDisks.value;
-                    fdc.loadSelectedDrive(sDisketteName, sDiskettePath);
-                }
+                fdc.loadSelectedDisk();
             };
             return true;
 
@@ -1105,12 +1104,30 @@ class FDC extends Component {
     }
 
     /**
+     * loadSelectedDisk()
+     *
+     * @this {FDC}
+     * @return {boolean}
+     */
+    loadSelectedDisk()
+    {
+        var controlDisks = this.bindings["listDisks"];
+        if (controlDisks) {
+            var sDisketteName = controlDisks.options[controlDisks.selectedIndex].text;
+            var sDiskettePath = controlDisks.value;
+            return this.loadSelectedDrive(sDisketteName, sDiskettePath);
+        }
+        return false;
+    }
+
+    /**
      * loadSelectedDrive(sDisketteName, sDiskettePath, file)
      *
      * @this {FDC}
      * @param {string} sDisketteName
      * @param {string} sDiskettePath
      * @param {File} [file] is set if there's an associated File object
+     * @return {boolean}
      */
     loadSelectedDrive(sDisketteName, sDiskettePath, file)
     {
@@ -1120,12 +1137,12 @@ class FDC extends Component {
 
             if (!sDiskettePath) {
                 this.unloadDrive(iDrive);
-                return;
+                return true;
             }
 
             if (sDiskettePath == "?") {
                 this.notice('Use "Choose File" and "Mount" to select and load a local disk.');
-                return;
+                return false;
             }
 
             /*
@@ -1139,7 +1156,7 @@ class FDC extends Component {
              */
             if (sDiskettePath == "??") {
                 sDiskettePath = window.prompt("Enter the URL of a remote disk image.", "") || "";
-                if (!sDiskettePath) return;
+                if (!sDiskettePath) return false;
                 sDisketteName = Str.getBaseName(sDiskettePath);
                 if (DEBUG) this.println("Attempting to load " + sDiskettePath + " as \"" + sDisketteName + "\"");
             }
@@ -1147,7 +1164,7 @@ class FDC extends Component {
             while (this.loadDrive(iDrive, sDisketteName, sDiskettePath, false, file) < 0) {
                 if (!window.confirm("Click OK to reload the original disk and discard any changes.")) {
                     if (DEBUG) this.println("load cancelled");
-                    return;
+                    return false;
                 }
                 /*
                  * So here's the story: loadDrive() returned true, which it does ONLY if the specified disk is already
@@ -1160,9 +1177,10 @@ class FDC extends Component {
                 this.removeDiskHistory(sDisketteName, sDiskettePath);
                 this.unloadDrive(iDrive, false, true);
             }
-            return;
+            return true;
         }
         this.notice("Unable to load the selected drive");
+        return false;
     }
 
     /**
