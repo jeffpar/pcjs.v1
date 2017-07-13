@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.36.0/manifest.xsl"?>
+<manifest type="software">
+	<title>FlickerFree</title>
+	<version>1.0</version>
+	<type>Utility</type>
+	<category>Enhancement</category>
+	<author>Steve Gibson</author>
+	<releaseDate>1986</releaseDate>
+	<disk id="disk01" size="184320" chs="40:1:9" img="archive/FLICKERFREE.img" href="/disks/pcx86/tools/other/flickerfree/FLICKERFREE.json" md5="f4d6055fa14adffc754c2fadee04ac82" md5json="b9f60250d63a162c2b65c884c4bcba40">
+		<file size="22330" time="1986-03-31 23:00:00" attr="0x20">FF.COM</file>
+		<file size="3590" time="1986-03-31 23:00:00" attr="0x20">FFIX.COM</file>
+		<file size="14610" time="1986-03-31 23:00:00" attr="0x20">FF_HIST</file>
+		<file size="5438" time="1986-03-31 23:00:00" attr="0x20">FPA.COM</file>
+		<file size="859" time="1986-03-31 23:00:00" attr="0x20">README</file>
+	</disk>
+</manifest>

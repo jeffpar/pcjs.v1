@@ -7,7 +7,7 @@ redirect_from:
 ---
 
 Microsoft Languages
----
+-------------------
 
 * Microsoft BASIC
 * [Microsoft C Compilers](/disks/pcx86/tools/microsoft/c/)
@@ -15,13 +15,13 @@ Microsoft Languages
 * [Microsoft Mouse](/disks/pcx86/tools/microsoft/mouse/)
 
 Microsoft Development Kits
----
+--------------------------
 
 * [Microsoft OS/2 Development Kits](/disks/pcx86/tools/microsoft/os2/)
 * [Microsoft Windows Development Kits](/disks/pcx86/tools/microsoft/windows/)
 
 Microsoft Languages Newsletters
----
+-------------------------------
 
 Below are all the "Microsoft Languages NewsLetters" that Microsoft published in
 [PC Tech Journal](/pubs/pc/magazines/pctj/), before they decided to focus exclusively

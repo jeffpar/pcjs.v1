@@ -68,7 +68,7 @@ more detail, along with a live demonstration of the software, but that's not yet
 * [Borland Tools](tools/borland/)
 * [IBM Tools](tools/ibm/)
 * [Microsoft Tools](tools/microsoft/)
-* [More...](tools/misc/)
+* [More...](tools/other/)
 
 ### Tests
 
