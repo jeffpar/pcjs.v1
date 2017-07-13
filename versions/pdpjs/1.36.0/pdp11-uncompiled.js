@@ -6943,12 +6943,14 @@ class BusPDP11 extends Component {
     {
         var fClean = true;
         var iBlock = addr >>> this.nBlockShift;
+        var sizeBlock = this.nBlockSize - (addr & this.nBlockLimit);
         while (size > 0 && iBlock < this.aBusBlocks.length) {
             if (this.aBusBlocks[iBlock].fDirty) {
                 this.aBusBlocks[iBlock].fDirty = fClean = false;
                 this.aBusBlocks[iBlock].fDirtyEver = true;
             }
-            size -= this.nBlockSize;
+            size -= sizeBlock;
+            sizeBlock = this.nBlockSize;
             iBlock++;
         }
         return fClean;
