@@ -120,15 +120,15 @@ if (NODE) {
  *
  *           2. The minimum positive pulse width of the HSYNC output must be four character clock units.
  *
- *           3. Register R5, Horizontal Sync End [HRETRACE_END], must be programmed such that the HSYNC
+ *           3. Register R5, Horizontal Sync End [HREND], must be programmed such that the HSYNC
  *              output goes to a logic 0 a minimum of one character clock time before the 'horizontal display enable'
  *              signal goes to a logical 1.
  *
- *           4. Register R16, Vsync Start [VRETRACE_START], must be a minimum of one horizontal scan line greater
- *              than register R18 [VDISP_END].  Register R18 defines where the 'vertical display enable' signal ends.
+ *           4. Register R16, Vsync Start [VRSTART], must be a minimum of one horizontal scan line greater
+ *              than register R18 [VDEND].  Register R18 defines where the 'vertical display enable' signal ends.
  *
  *     When bit 5 of the Attribute Mode Control register equals 1, a successful line compare (see Line Compare
- *     [LINE_COMPARE] register) in the CRT Controller forces the output of the PEL Panning register to 0's until Vsync
+ *     [LINECOMP] register) in the CRT Controller forces the output of the PEL Panning register to 0's until Vsync
  *     occurs.  When Vsync occurs, the output returns to the programmed value.  This allows the portion of the screen
  *     indicated by the Line Compare register to be operated on by the PEL Panning register.
  *
@@ -220,30 +220,30 @@ if (NODE) {
  *
  *      BIOSMODE:                   0x01 0x01 0x03 0x03 0x04 0x04 0x06 0x0D 0x0E 0x10 0x12 0x13
  *      CRTC[0x00]: HTOTAL          0x2D 0x2D 0x5F 0x5F 0x2D 0x2D 0x5F 0x2D 0x5F 0x5F 0x5F 0x5F
- *      CRTC[0x01]: HDISP_END       0x27 0x27 0x4F 0x4F 0x27 0x27 0x4F 0x27 0x4F 0x4F 0x4F 0x4F
- *      CRTC[0x02]: HBLANK_START    0x28 0x28 0x50 0x50 0x28 0x28 0x50 0x28 0x50 0x50 0x50 0x50
- *      CRTC[0x03]: HBLANK_END      0x90 0x90 0x82 0x82 0x90 0x90 0x82 0x90 0x82 0x82 0x82 0x82
- *      CRTC[0x04]: HRETRACE_START  0x2B 0x2B 0x55 0x55 0x2B 0x2B 0x54 0x2B 0x54 0x54 0x54 0x54
- *      CRTC[0x05]: HRETRACE_END    0xA0 0xA0 0x81 0x81 0x80 0x80 0x80 0x80 0x80 0x80 0x80 0x80
+ *      CRTC[0x01]: HDEND           0x27 0x27 0x4F 0x4F 0x27 0x27 0x4F 0x27 0x4F 0x4F 0x4F 0x4F
+ *      CRTC[0x02]: HBSTART         0x28 0x28 0x50 0x50 0x28 0x28 0x50 0x28 0x50 0x50 0x50 0x50
+ *      CRTC[0x03]: HBEND           0x90 0x90 0x82 0x82 0x90 0x90 0x82 0x90 0x82 0x82 0x82 0x82
+ *      CRTC[0x04]: HRSTART         0x2B 0x2B 0x55 0x55 0x2B 0x2B 0x54 0x2B 0x54 0x54 0x54 0x54
+ *      CRTC[0x05]: HREND           0xA0 0xA0 0x81 0x81 0x80 0x80 0x80 0x80 0x80 0x80 0x80 0x80
  *      CRTC[0x06]: VTOTAL          0xBF 0xBF 0xBF 0xBF 0xBF 0xBF 0xBF 0xBF 0xBF 0xBF 0x0B 0xBF
  *      CRTC[0x07]: OVERFLOW        0x1F 0x1F 0x1F 0x1F 0x1F 0x1F 0x1F 0x1F 0x1F 0x1F 0x3E 0x1F
- *      CRTC[0x08]: PRESET_ROW      0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
- *      CRTC[0x09]: MAX_SCAN        0x4F 0x4F 0x4F 0x4F 0xC1 0xC1 0xC1 0xC0 0xC0 0x40 0x40 0x41
- *      CRTC[0x0A]: CURSOR_START    0x0D 0x0D 0x0D 0x0D 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
- *      CRTC[0x0B]: CURSOR_END      0x0E 0x0E 0x0E 0x0E 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
- *      CRTC[0x0C]: START_ADDR_HI   0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
- *      CRTC[0x0D]: START_ADDR_LO   0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
- *      CRTC[0x0E]: CURSOR_ADDR_HI  0x01 0x01 0x01 0x01 0x01 0x01 0x01 0x01 0x01 0x01 0x01 0x00
- *      CRTC[0x0F]: CURSOR_ADDR_LO  0x19 0x19 0x41 0x41 0x19 0x19 0x41 0x19 0x41 0x41 0xE1 0xA2
- *      CRTC[0x10]: VRETRACE_START  0x9C 0x9C 0x9C 0x9C 0x9C 0x9C 0x9C 0x9C 0x9C 0x83 0xEA 0x9C
- *      CRTC[0x11]: VRETRACE_END    0x8E 0x8E 0x8E 0x8E 0x8E 0x8E 0x8E 0x8E 0x8E 0x85 0x8C 0x8E
- *      CRTC[0x12]: VDISP_END       0x8F 0x8F 0x8F 0x8F 0x8F 0x8F 0x8F 0x8F 0x8F 0x5D 0xDF 0x8F
+ *      CRTC[0x08]: PRESCAN         0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+ *      CRTC[0x09]: MAXSCAN         0x4F 0x4F 0x4F 0x4F 0xC1 0xC1 0xC1 0xC0 0xC0 0x40 0x40 0x41
+ *      CRTC[0x0A]: CURSTART        0x0D 0x0D 0x0D 0x0D 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+ *      CRTC[0x0B]: CUREND          0x0E 0x0E 0x0E 0x0E 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+ *      CRTC[0x0C]: STARTHIGH       0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+ *      CRTC[0x0D]: STARTLOW        0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+ *      CRTC[0x0E]: CURHIGH         0x01 0x01 0x01 0x01 0x01 0x01 0x01 0x01 0x01 0x01 0x01 0x00
+ *      CRTC[0x0F]: CURLOW          0x19 0x19 0x41 0x41 0x19 0x19 0x41 0x19 0x41 0x41 0xE1 0xA2
+ *      CRTC[0x10]: VRSTART         0x9C 0x9C 0x9C 0x9C 0x9C 0x9C 0x9C 0x9C 0x9C 0x83 0xEA 0x9C
+ *      CRTC[0x11]: VREND           0x8E 0x8E 0x8E 0x8E 0x8E 0x8E 0x8E 0x8E 0x8E 0x85 0x8C 0x8E
+ *      CRTC[0x12]: VDEND           0x8F 0x8F 0x8F 0x8F 0x8F 0x8F 0x8F 0x8F 0x8F 0x5D 0xDF 0x8F
  *      CRTC[0x13]: OFFSET          0x14 0x14 0x28 0x28 0x14 0x14 0x28 0x14 0x28 0x28 0x28 0x28
  *      CRTC[0x14]: UNDERLINE       0x1F 0x1F 0x1F 0x1F 0x00 0x00 0x00 0x00 0x00 0x0F 0x00 0x40
- *      CRTC[0x15]: VBLANK_START    0x96 0x96 0x96 0x96 0x96 0x96 0x96 0x96 0x96 0x63 0xE7 0x96
- *      CRTC[0x16]: VBLANK_END      0xB9 0xB9 0xB9 0xB9 0xB9 0xB9 0xB9 0xB9 0xB9 0xBA 0x04 0xB9
- *      CRTC[0x17]: MODE_CTRL       0xA3 0xA3 0xA3 0xA3 0xA2 0xA2 0xC2 0xE3 0xE3 0xE3 0xE3 0xA3
- *      CRTC[0x18]: LINE_COMPARE    0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF
+ *      CRTC[0x15]: VBSTART         0x96 0x96 0x96 0x96 0x96 0x96 0x96 0x96 0x96 0x63 0xE7 0x96
+ *      CRTC[0x16]: VBEND           0xB9 0xB9 0xB9 0xB9 0xB9 0xB9 0xB9 0xB9 0xB9 0xBA 0x04 0xB9
+ *      CRTC[0x17]: MODECTRL        0xA3 0xA3 0xA3 0xA3 0xA2 0xA2 0xC2 0xE3 0xE3 0xE3 0xE3 0xA3
+ *      CRTC[0x18]: LINECOMP        0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF
  *       GRC[0x00]: SRESET          0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
  *       GRC[0x01]: ESRESET         0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
  *       GRC[0x02]: COLORCMP        0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
@@ -363,7 +363,7 @@ class Card {
             this.regCRTData = data[5];
             this.nCRTCRegs  = Card.CRTC.TOTAL_REGS;
             this.asCRTCRegs = DEBUGGER? Card.CRTC.REGS : [];
-            this.offStartAddr = ((this.regCRTData[Card.CRTC.START_ADDR_HI] << 8) + this.regCRTData[Card.CRTC.START_ADDR_LO])|0;
+            this.offStartAddr = ((this.regCRTData[Card.CRTC.STARTHIGH] & Card.CRTCMASKS[Card.CRTC.STARTHIGH]) << 8) | this.regCRTData[Card.CRTC.STARTLOW];
 
             if (nCard >= Video.CARD.EGA) {
                 this.nCRTCRegs = Card.CRTC.EGA.TOTAL_REGS;
@@ -524,7 +524,7 @@ class Card {
         this.nSetMapBits    = data[22];
         this.nColorCompare  = data[23];
         this.nColorDontCare = data[24];
-        this.offStartAddr   = data[25];     // this is the last CRTC start address latched from CRTC.START_ADDR_HI,CRTC.START_ADDR_LO
+        this.offStartAddr   = data[25];     // this is the last CRTC start address latched from CRTC.STARTHIGH,CRTC.STARTLOW
 
         this.nVertPeriods = this.nVertPeriodsStartAddr = 0;
 
@@ -919,30 +919,30 @@ class Card {
                 bOvrflowBit8 = Card.CRTC.EGA.OVERFLOW.VTOTAL_BIT8;          // 0x01
                 if (this.nCard == Video.CARD.VGA) bOvrflowBit9 = Card.CRTC.EGA.OVERFLOW.VTOTAL_BIT9;
                 break;
-            case Card.CRTC.EGA.CURSOR_START.INDX:   // 0x0A
-                if (this.nCard == Video.CARD.EGA) bOvrflowBit8 = Card.CRTC.EGA.OVERFLOW.CURSOR_START_BIT8;
+            case Card.CRTC.EGA.CURSTART.INDX:       // 0x0A
+                if (this.nCard == Video.CARD.EGA) bOvrflowBit8 = Card.CRTC.EGA.OVERFLOW.CURSTART_BIT8;
                 break;
-            case Card.CRTC.EGA.VRETRACE_START:      // 0x10
-                bOvrflowBit8 = Card.CRTC.EGA.OVERFLOW.VRETRACE_START_BIT8;  // 0x04
-                if (this.nCard == Video.CARD.VGA) bOvrflowBit9 = Card.CRTC.EGA.OVERFLOW.VRETRACE_START_BIT9;
+            case Card.CRTC.EGA.VRSTART:             // 0x10
+                bOvrflowBit8 = Card.CRTC.EGA.OVERFLOW.VRSTART_BIT8;         // 0x04
+                if (this.nCard == Video.CARD.VGA) bOvrflowBit9 = Card.CRTC.EGA.OVERFLOW.VRSTART_BIT9;
                 break;
-            case Card.CRTC.EGA.VDISP_END:           // 0x12
-                bOvrflowBit8 = Card.CRTC.EGA.OVERFLOW.VDISP_END_BIT8;       // 0x02
-                if (this.nCard == Video.CARD.VGA) bOvrflowBit9 = Card.CRTC.EGA.OVERFLOW.VDISP_END_BIT9;
+            case Card.CRTC.EGA.VDEND:               // 0x12
+                bOvrflowBit8 = Card.CRTC.EGA.OVERFLOW.VDEND_BIT8;           // 0x02
+                if (this.nCard == Video.CARD.VGA) bOvrflowBit9 = Card.CRTC.EGA.OVERFLOW.VDEND_BIT9;
                 break;
-            case Card.CRTC.EGA.VBLANK_START:        // 0x15
-                bOvrflowBit8 = Card.CRTC.EGA.OVERFLOW.VBLANK_START_BIT8;    // 0x08
-                if (this.nCard == Video.CARD.VGA) bMaxScanBit9 = Card.CRTC.EGA.MAX_SCAN.VBLANK_START_BIT9;
+            case Card.CRTC.EGA.VBSTART:             // 0x15
+                bOvrflowBit8 = Card.CRTC.EGA.OVERFLOW.VBSTART_BIT8;         // 0x08
+                if (this.nCard == Video.CARD.VGA) bMaxScanBit9 = Card.CRTC.EGA.MAXSCAN.VBSTART_BIT9;
                 break;
-            case Card.CRTC.EGA.LINE_COMPARE:        // 0x18
-                bOvrflowBit8 = Card.CRTC.EGA.OVERFLOW.LINE_COMPARE_BIT8;    // 0x10
-                if (this.nCard == Video.CARD.VGA) bMaxScanBit9 = Card.CRTC.EGA.MAX_SCAN.LINE_COMPARE_BIT9;
+            case Card.CRTC.EGA.LINECOMP:            // 0x18
+                bOvrflowBit8 = Card.CRTC.EGA.OVERFLOW.LINECOMP_BIT8;        // 0x10
+                if (this.nCard == Video.CARD.VGA) bMaxScanBit9 = Card.CRTC.EGA.MAXSCAN.LINECOMP_BIT9;
                 break;
             }
             if (bOvrflowBit8) {
                 reg |= ((this.regCRTData[Card.CRTC.EGA.OVERFLOW.INDX] & bOvrflowBit8)? 0x100 : 0);
                 reg |= ((this.regCRTData[Card.CRTC.EGA.OVERFLOW.INDX] & bOvrflowBit9)? 0x200 : 0);
-                reg |= ((this.regCRTData[Card.CRTC.EGA.MAX_SCAN.INDX] & bMaxScanBit9)? 0x200 : 0);
+                reg |= ((this.regCRTData[Card.CRTC.EGA.MAXSCAN.INDX] & bMaxScanBit9)? 0x200 : 0);
             }
         }
         return reg;
@@ -1037,101 +1037,90 @@ Card.CGA = {
 /*
  * Common CRT hardware registers (ports 0x3B4/0x3B5 or 0x3D4/0x3D5)
  *
- * NOTE: In this implementation, because we have to make at least two of the registers readable (CURSOR_ADDR_HI and CURSOR_ADDR_LO),
- * we end up making ALL the registers readable, otherwise we would have to explicitly block any register marked write-only.  I don't
- * think making the CRT registers fully readable presents any serious compatibility issues, and it actually offers some benefits
- * (eg, improved debugging).
+ * NOTE: In this implementation, because we have to make at least two of the registers readable (CURHIGH and CURLOW),
+ * we end up making ALL the registers readable, otherwise we would have to explicitly block any register marked write-only.
+ * I don't think making the CRT registers fully readable presents any serious compatibility issues, and it actually offers
+ * some benefits (eg, improved debugging).
  *
  * However, some things are broken: the (readable) light pen registers on the EGA are overloaded as (writable) vertical retrace
  * registers, so the vertical retrace registers cannot actually be read that way.  I'm sure the VGA solved that problem, but I haven't
  * looked into it yet.
  */
 Card.CRTC = {
-    HTOTAL:                 0x00,
-    HDISP:                  0x01,
-    HSYNC_POS:              0x02,
-    HSYNC_WIDTH:            0x03,
-    VTOTAL:                 0x04,
-    VTOTAL_ADJ:             0x05,
-    VDISP_TOTAL:            0x06,
-    VSYNC_POS:              0x07,
-    INTERLACE_POS:          0x08,
-    MAX_SCAN: {
-        INDX:               0x09,
-        MASK:               0x1F
-    },
-    CURSOR_START: {
-        INDX:               0x0A,
-        MASK:               0x1F,
-        /*
-         * I don't entirely understand these cursor blink control bits.  Here's what the MC6845 datasheet says:
-         *
-         *      Bit 5 is the blink timing control.  When bit 5 is low, the blink frequency is 1/16 of the vertical field rate,
-         *      and when bit 5 is high, the blink frequency is 1/32 of the vertical field rate.  Bit 6 is used to enable a blink.
-         */
-        BLINKON:            0x00,       // (supposedly, 0x04 has the same effect as 0x00)
-        BLINKOFF:           0x20,       // if blinking is disabled, the cursor is effectively hidden
-        BLINKFAST:          0x60        // default is 1/16 of the frame rate; this switches to 1/32 of the frame rate
-    },
-    CURSOR_END: {
-        INDX:               0x0B,
-        MASK:               0x1F
-    },
-    START_ADDR_HI:          0x0C,
-    START_ADDR_LO:          0x0D,
-    CURSOR_ADDR_HI:         0x0E,
-    CURSOR_ADDR_LO:         0x0F,
-    LIGHT_PEN_HI:           0x10,
-    LIGHT_PEN_LO:           0x11,
+    HTOTAL:                 0x00,       // Horizontal Total
+    HDISP:                  0x01,       // Horizontal Displayed
+    HSPOS:                  0x02,       // Horizontal Sync Position
+    HSWIDTH:                0x03,       // Horizontal Sync Width
+    VTOTAL:                 0x04,       // Vertical Total
+    VTOTADJ:                0x05,       // Vertical Total Adjust
+    VDISP:                  0x06,       // Vertical Displayed
+    VSPOS:                  0x07,       // Vertical Sync Position
+    ILMODE:                 0x08,       // Interlace Mode
+    MAXSCAN:                0x09,       // Max Scan Line Address
+    CURSTART:               0x0A,       // Cursor Start
+    /*
+     * I don't entirely understand the cursor blink control bits.  Here's what the MC6845 datasheet says:
+     *
+     *      Bit 5 is the blink timing control.  When bit 5 is low, the blink frequency is 1/16 of the vertical field rate,
+     *      and when bit 5 is high, the blink frequency is 1/32 of the vertical field rate.  Bit 6 is used to enable a blink.
+     */
+    CURSTART_SLMASK:        0x1F,       // Scan Line Mask
+    CURSTART_BLINKON:       0x00,       // (supposedly, 0x04 has the same effect as 0x00)
+    CURSTART_BLINKOFF:      0x20,       // if blinking is disabled, the cursor is effectively hidden
+    CURSTART_BLINKFAST:     0x60,       // default is 1/16 of the frame rate; this switches to 1/32 of the frame rate
+    CUREND:                 0x0B,
+    STARTHIGH:              0x0C,
+    STARTLOW:               0x0D,
+    CURHIGH:                0x0E,
+    CURLOW:                 0x0F,
+    PENHIGH:                0x10,
+    PENLOW:                 0x11,
     TOTAL_REGS:             0x12,       // total CRT registers on MDA/CGA
     EGA: {
-        HDISP_END:          0x01,
-        HBLANK_START:       0x02,
-        HBLANK_END:         0x03,
-        HRETRACE_START:     0x04,
-        HRETRACE_END:       0x05,
+        HDEND:              0x01,
+        HBSTART:            0x02,
+        HBEND:              0x03,
+        HRSTART:            0x04,
+        HREND:              0x05,
         VTOTAL:             0x06,
         OVERFLOW: {
-            INDX:               0x07,
-            VTOTAL_BIT8:        0x01,   // bit 8 of register 0x06
-            VDISP_END_BIT8:     0x02,   // bit 8 of register 0x12
-            VRETRACE_START_BIT8:0x04,   // bit 8 of register 0x10
-            VBLANK_START_BIT8:  0x08,   // bit 8 of register 0x15
-            LINE_COMPARE_BIT8:  0x10,   // bit 8 of register 0x18
-            CURSOR_START_BIT8:  0x20,   // bit 8 of register 0x0A (EGA only)
-            VTOTAL_BIT9:        0x20,   // bit 9 of register 0x06 (VGA only)
-            VDISP_END_BIT9:     0x40,   // bit 9 of register 0x12 (VGA only, unused on EGA)
-            VRETRACE_START_BIT9:0x80    // bit 9 of register 0x10 (VGA only, unused on EGA)
+            INDX:           0x07,
+            VTOTAL_BIT8:    0x01,       // bit 8 of register 0x06
+            VDEND_BIT8:     0x02,       // bit 8 of register 0x12
+            VRSTART_BIT8:   0x04,       // bit 8 of register 0x10
+            VBSTART_BIT8:   0x08,       // bit 8 of register 0x15
+            LINECOMP_BIT8:  0x10,       // bit 8 of register 0x18
+            CURSTART_BIT8:  0x20,       // bit 8 of register 0x0A (EGA only)
+            VTOTAL_BIT9:    0x20,       // bit 9 of register 0x06 (VGA only)
+            VDEND_BIT9:     0x40,       // bit 9 of register 0x12 (VGA only, unused on EGA)
+            VRSTART_BIT9:   0x80        // bit 9 of register 0x10 (VGA only, unused on EGA)
         },
-        PRESET_SCAN:        0x08,
+        PRESCAN:            0x08,
         /*
          * NOTE: EGA/VGA CRTC registers 0x09-0x0F are the same as the MDA/CGA CRTC registers defined above
          */
-        MAX_SCAN: {
-            INDX:               0x09,
-            SCAN_LINE:          0x1f,
-            VBLANK_START_BIT9:  0x20,   // (VGA only)
-            LINE_COMPARE_BIT9:  0x40,   // (VGA only)
-            CONVERT400:         0x80    // 200-to-400 scan-line conversion is in effect (VGA only)
+        MAXSCAN: {
+            INDX:           0x09,
+            SLMASK:         0x1F,       // Scan Line Mask
+            VBSTART_BIT9:   0x20,       // (VGA only)
+            LINECOMP_BIT9:  0x40,       // (VGA only)
+            CONVERT400:     0x80        // 200-to-400 scan-line conversion is in effect (VGA only)
         },
-        CURSOR_START: {
+        CURSTART: {
             INDX:           0x0A,
-            MASK:           0x1F,
+            SLMASK:         0x1F,
             BLINKON:        0x00,       // (VGA only; supposedly, 0x04 has the same effect as 0x00)
             BLINKOFF:       0x20,       // if blinking is disabled, the cursor is effectively hidden (VGA only)
             BLINKFAST:      0x60        // default is 1/16 of the frame rate; this switches to 1/32 of the frame rate (VGA only)
         },
-        CURSOR_END: {
-            INDX:           0x0B,
-            MASK:           0x1F
-        },
-        START_ADDR_HI:      0x0C,
-        START_ADDR_LO:      0x0D,
-        CURSOR_ADDR_HI:     0x0E,
-        CURSOR_ADDR_LO:     0x0F,
-        VRETRACE_START:     0x10,
-        VRETRACE_END:       0x11,
-        VDISP_END:          0x12,
+        CUREND:             0x0B,
+        STARTHIGH:          0x0C,
+        STARTLOW:           0x0D,
+        CURHIGH:            0x0E,
+        CURLOW:             0x0F,
+        VRSTART:            0x10,
+        VREND:              0x11,
+        VDEND:              0x12,
         /*
          * The OFFSET register (bits 0-7) specifies the logical line width of the screen.  The starting memory address
          * for the next character row is larger than the current character row by two or four times this amount.
@@ -1141,38 +1130,60 @@ Card.CRTC = {
         OFFSET:             0x13,
         UNDERLINE: {
             INDX:           0x14,
-            ROWSCAN:        0x1f,
-            COUNTBY4:       0x20,       // (VGA only)
+            ROWSCAN:        0x1F,
+            COUNT_BY_4:     0x20,       // (VGA only)
             DWORD:          0x40        // (VGA only)
         },
-        VBLANK_START:       0x15,
-        VBLANK_END:         0x16,
-        MODE_CTRL: {
+        VBSTART:            0x15,
+        VBEND:              0x16,
+        MODECTRL: {
             INDX:           0x17,
             COMPAT_MODE:    0x01,       // Compatibility Mode Support (CGA A13 control)
             SEL_ROW_SCAN:   0x02,       // Select Row Scan Counter
             SEL_HRETRACE:   0x04,       // Horizontal Retrace Select
-            COUNTBY2:       0x08,       // Count By Two
+            COUNT_BY_2:     0x08,       // Count By Two
             OUTPUT_CTRL:    0x10,       // Output Control
             ADDR_WRAP:      0x20,       // Address Wrap (in Word mode, 1 maps A15 to A0 and 0 maps A13; use the latter when only 64Kb is installed)
             BYTE_MODE:      0x40,       // Byte Mode (1 selects Byte Mode; 0 selects Word Mode)
             HARD_RESET:     0x80        // Hardware Reset
         },
-        LINE_COMPARE:       0x18,
+        LINECOMP:           0x18,
         TOTAL_REGS:         0x19        // total CRT registers on EGA/VGA
-    },
-    ADDR_HI_MASK:           0x3F
+    }
+};
+
+Card.CRTCMASKS = {
+    [Card.CRTC.HTOTAL]:     0xFF,       // R0
+    [Card.CRTC.HDISP]:      0xFF,       // R1
+    [Card.CRTC.HSPOS]:      0xFF,       // R2
+    [Card.CRTC.HSWIDTH]:    0x0F,       // R3
+    [Card.CRTC.VTOTAL]:     0x7F,       // R4
+    [Card.CRTC.VTOTADJ]:    0x1F,       // R5
+    [Card.CRTC.VDISP]:      0x7F,       // R6
+    [Card.CRTC.VSPOS]:      0x7F,       // R7
+    [Card.CRTC.ILMODE]:     0x03,       // R8
+    [Card.CRTC.MAXSCAN]:    0x1F,       // R9
+    [Card.CRTC.CURSTART]:   0x7F,       // R10
+    [Card.CRTC.CUREND]:     0x1F,       // R11
+    [Card.CRTC.STARTHIGH]:  0x3F,       // R12
+    [Card.CRTC.STARTLOW]:   0xFF,       // R13
+    [Card.CRTC.CURHIGH]:    0x3F,       // R14
+    [Card.CRTC.CURLOW]:     0xFF,       // R15
+    [Card.CRTC.PENHIGH]:    0x3F,       // R16
+    [Card.CRTC.PENLOW]:     0xFF        // R17
 };
 
 if (DEBUGGER) {
-    Card.CRTC.REGS      = ["HTOTAL","HDISP","HSYNC_POS","HSYNC_WIDTH","VTOTAL","VTOTAL_ADJ",
-        "VDISP","VSYNC_POS","INTERLACE_POS","MAX_SCAN","CURSOR_START","CURSOR_END",
-        "START_ADDR_HI","START_ADDR_LO","CURSOR_ADDR_HI","CURSOR_ADDR_LO","LIGHT_PEN_HI","LIGHT_PEN_LO"];
+    Card.CRTC.REGS = [
+        "HTOTAL","HDISP","HSPOS","HSWIDTH","VTOTAL","VTOTADJ",
+        "VDISP","VSPOS","ILMODE","MAXSCAN","CURSTART","CUREND",
+        "STARTHIGH","STARTLOW","CURHIGH","CURLOW","PENHIGH","PENLOW"];
 
-    Card.CRTC.EGA_REGS  = ["HTOTAL","HDISP_END","HBLANK_START","HBLANK_END","HRETRACE_START","HRETRACE_END",
-        "VTOTAL","OVERFLOW","PRESET_SCAN","MAX_SCAN","CURSOR_START","CURSOR_END",
-        "START_ADDR_HI","START_ADDR_LO","CURSOR_ADDR_HI","CURSOR_ADDR_LO","VRETRACE_START","VRETRACE_END",
-        "VDISP_END","OFFSET","UNDERLINE","VBLANK_START","VBLANK_END","MODE_CTRL","LINE_COMPARE"];
+    Card.CRTC.EGA_REGS = [
+        "HTOTAL","HDEND","HBSTART","HBEND","HRSTART","HREND",
+        "VTOTAL","OVERFLOW","PRESCAN","MAXSCAN","CURSTART","CUREND",
+        "STARTHIGH","STARTLOW","CURHIGH","CURLOW","VRSTART","VREND",
+        "VDEND","OFFSET","UNDERLINE","VBSTART","VBEND","MODECTRL","LINECOMP"];
 }
 
 /*
@@ -1535,9 +1546,9 @@ if (DEBUGGER) Card.GRC.REGS = ["SRESET","ESRESET","COLORCMP","DATAROT","READMAP"
  * The "EVENODD" functions deal with the EGA's default text-mode addressing, where EVEN addresses are mapped to
  * plane 0 (and 2) and ODD addresses are mapped to plane 1 (and 3).  This occurs when SEQ.MEMMODE.SEQUENTIAL is
  * clear (and GRC.MODE.EVENODD is set), turning address bit 0 (A0) into a "plane select" bit.  Whether A0 is also
- * used as a memory address bit depends on CRTC.MODE_CTRL.BYTE_MODE: if it's set, then we're in "Byte Mode" and A0 is
- * used as-is; if it's clear, then we're in "Word Mode", and either A15 (when CRTC.MODE_CTRL.ADDR_WRAP is set) or A13
- * (when CRTC.MODE_CTRL.ADDR_WRAP is clear, typically when only 64Kb of EGA memory is installed) is substituted for A0.
+ * used as a memory address bit depends on CRTC.MODECTRL.BYTE_MODE: if it's set, then we're in "Byte Mode" and A0 is
+ * used as-is; if it's clear, then we're in "Word Mode", and either A15 (when CRTC.MODECTRL.ADDR_WRAP is set) or A13
+ * (when CRTC.MODECTRL.ADDR_WRAP is clear, typically when only 64Kb of EGA memory is installed) is substituted for A0.
  *
  * Note that A13 remains clear until addresses reach 8K, at which point we've spanned 32Kb of EGA memory, so it makes
  * sense to propagate A13 to A0 at that point, so that the next 8K of addresses start using ODD instead of EVEN bytes,
@@ -3948,7 +3959,7 @@ class Video extends Component {
      * of the hardware cursor have been modified, and any of iCellCursor, yCursor or cyCursor have been modified as a result.
      *
      * Note that the cursor always blinks when it's ON; it can only be turned OFF, moved off-screen, or its rate set to half
-     * the normal blink rate (by default, it blinks at the normal blink rate).  Bits 5-6 of the CRTC.CURSOR_START register can
+     * the normal blink rate (by default, it blinks at the normal blink rate).  Bits 5-6 of the CRTC.CURSTART register can
      * be set as follows:
      *
      *    00: Cursor blinks at normal blink rate
@@ -4002,13 +4013,13 @@ class Video extends Component {
      * visibility of the cursor (more than these, actually, but I'm going to limit my initial support to standard
      * ROM BIOS controller settings):
      *
-     *      CRTC.MAX_SCAN
-     *      CRTC.CURSOR_START
-     *      CRTC.CURSOR_END
-     *      CRTC.START_ADDR_HI
-     *      CRTC.START_ADDR_LO
-     *      CRTC.CURSOR_ADDR_HI
-     *      CRTC.CURSOR_ADDR_LO
+     *      CRTC.MAXSCAN
+     *      CRTC.CURSTART
+     *      CRTC.CUREND
+     *      CRTC.STARTHIGH
+     *      CRTC.STARTLOW
+     *      CRTC.CURHIGH
+     *      CRTC.CURLOW
      *
      * @this {Video}
      * @return {boolean} true if the cursor is visible, false if not
@@ -4020,15 +4031,15 @@ class Video extends Component {
          */
         if (!this.nFont) return false;
 
-        for (var i = Card.CRTC.CURSOR_START.INDX; i <= Card.CRTC.CURSOR_ADDR_LO; i++) {
+        for (var i = Card.CRTC.CURSTART; i <= Card.CRTC.CURLOW; i++) {
             if (this.cardActive.regCRTData[i] == null)
                 return false;
         }
 
-        var bCursorFlags = this.cardActive.regCRTData[Card.CRTC.CURSOR_START.INDX];
-        var bCursorStart = bCursorFlags & Card.CRTC.CURSOR_START.MASK;
-        var bCursorEnd = this.cardActive.regCRTData[Card.CRTC.CURSOR_END.INDX] & Card.CRTC.CURSOR_END.MASK;
-        var bCursorMax = this.cardActive.regCRTData[Card.CRTC.MAX_SCAN.INDX] & Card.CRTC.MAX_SCAN.MASK;
+        var bCursorFlags = this.cardActive.regCRTData[Card.CRTC.CURSTART];
+        var bCursorStart = bCursorFlags & Card.CRTC.CURSTART_SLMASK;
+        var bCursorEnd = this.cardActive.regCRTData[Card.CRTC.CUREND] & Card.CRTCMASKS[Card.CRTC.CUREND];
+        var bCursorMax = this.cardActive.regCRTData[Card.CRTC.MAXSCAN] & Card.CRTCMASKS[Card.CRTC.MAXSCAN];
 
         /*
          * HACK: The original EGA BIOS has a cursor emulation bug when 43-line mode is enabled, so we attempt to detect
@@ -4041,14 +4052,14 @@ class Video extends Component {
         }
 
         /*
-         * One way of disabling the cursor is to set bit 5 (Card.CRTC.CURSOR_START.BLINKOFF) of the CRTC.CURSOR_START flags;
+         * One way of disabling the cursor is to set bit 5 (Card.CRTC.CURSTART_BLINKOFF) of the CRTC.CURSTART flags;
          * another way is setting bCursorStart > bCursorEnd (unless it's an EGA, in which case we must actually draw a
          * "split block" cursor instead).
          *
          * TODO: Verify whether the second test (bCursorStart > bCursorMax) should also result in a hidden cursor;
          * ThinkTank sets both start and end values to 0x0f, which doesn't make sense on a CGA, where the max is 0x07.
          */
-        if ((bCursorFlags & Card.CRTC.CURSOR_START.BLINKOFF) || bCursorStart > bCursorEnd && !fEGAHack || bCursorStart > bCursorMax) {
+        if ((bCursorFlags & Card.CRTC.CURSTART_BLINKOFF) || bCursorStart > bCursorEnd && !fEGAHack || bCursorStart > bCursorMax) {
             this.removeCursor();
             return false;
         }
@@ -4056,7 +4067,8 @@ class Video extends Component {
         /*
          * The most compatible way of disabling the cursor is to simply move the cursor to an off-screen position.
          */
-        var iCellCursor = (this.cardActive.regCRTData[Card.CRTC.CURSOR_ADDR_LO] + ((this.cardActive.regCRTData[Card.CRTC.CURSOR_ADDR_HI] & Card.CRTC.ADDR_HI_MASK) << 8));
+        var iCellCursor = this.cardActive.regCRTData[Card.CRTC.CURLOW];
+        iCellCursor |= (this.cardActive.regCRTData[Card.CRTC.CURHIGH] & Card.CRTCMASKS[Card.CRTC.CURHIGH]) << 8;
         if (this.iCellCursor != iCellCursor) {
             if (MAXDEBUG && this.messageEnabled()) {
                 this.printMessage("checkCursor(): cursor moved from " + this.iCellCursor + " to " + iCellCursor);
@@ -4306,17 +4318,17 @@ class Video extends Component {
                  * then we'll need to load another MDA font variation, because we only load the 9x14 font for MDA.
                  */
                 if (this.cardActive === this.cardEGA && this.nFont == Video.FONT.CGA) {
-                    if ((this.cardEGA.regCRTData[Card.CRTC.EGA.MAX_SCAN.INDX] & Card.CRTC.EGA.MAX_SCAN.SCAN_LINE) == 7) {
+                    if ((this.cardEGA.regCRTData[Card.CRTC.EGA.MAXSCAN.INDX] & Card.CRTC.EGA.MAXSCAN.SLMASK) == 7) {
                         /*
                          * Vertical resolution of 350 divided by 8 (ie, scan lines 0-7) yields 43 whole rows.
                          */
-                        this.nRows = this.cardEGA.getCRTCReg(Card.CRTC.EGA.VDISP_END) < 350? 43 : 50;
+                        this.nRows = this.cardEGA.getCRTCReg(Card.CRTC.EGA.VDEND) < 350? 43 : 50;
                     }
                     /*
                      * Since we can also be called before any hardware registers have been initialized,
                      * it may be best to not perform the following test (which is why it's commented out).
                      */
-                    else /* if (this.cardEGA.regCRTData[Card.CRTC.EGA.MAX_SCAN.INDX] == 13) */ {
+                    else /* if (this.cardEGA.regCRTData[Card.CRTC.EGA.MAXSCAN.INDX] == 13) */ {
                         /*
                          * Vertical resolution of 350 divided by 14 (ie, scan lines 0-13) yields exactly 25 rows.
                          *
@@ -4561,8 +4573,8 @@ class Video extends Component {
                     }
 
                     var nCRTCVertTotal = card.getCRTCReg(Card.CRTC.EGA.VTOTAL);
-                    var nCRTCMaxScan = card.regCRTData[Card.CRTC.EGA.MAX_SCAN.INDX];
-                    var nCRTCModeCtrl = card.regCRTData[Card.CRTC.EGA.MODE_CTRL.INDX];
+                    var nCRTCMaxScan = card.regCRTData[Card.CRTC.EGA.MAXSCAN.INDX];
+                    var nCRTCModeCtrl = card.regCRTData[Card.CRTC.EGA.MODECTRL.INDX];
 
                     var fSEQDotClock = (card.regSEQData[Card.SEQ.CLOCKING.INDX] & Card.SEQ.CLOCKING.DOTCLOCK);
 
@@ -4575,7 +4587,7 @@ class Video extends Component {
                              */
                             nMode -= (fSEQDotClock? 2 : 0);
                         }
-                        else if (card.addrBuffer != 0xA0000 && !fTextGraphicsHybrid && !(nCRTCModeCtrl & Card.CRTC.EGA.MODE_CTRL.COMPAT_MODE)) {
+                        else if (card.addrBuffer != 0xA0000 && !fTextGraphicsHybrid && !(nCRTCModeCtrl & Card.CRTC.EGA.MODECTRL.COMPAT_MODE)) {
                             /*
                              * Here's where we handle CGA graphics modes; since nMode will have been assigned a
                              * default of either 0x02 or 0x03, convert that to either 0x05 or 0x04 if we're in a
@@ -4595,23 +4607,23 @@ class Video extends Component {
                              * mode 0x0D or 0x0E, else if VGA resolution is set, select either mode 0x11 or 0x12.
                              */
                             if (card.regGRCData[Card.GRC.MODE.INDX] & Card.GRC.MODE.COLOR256) {
-                                if (nCRTCMaxScan & Card.CRTC.EGA.MAX_SCAN.SCAN_LINE) {
+                                if (nCRTCMaxScan & Card.CRTC.EGA.MAXSCAN.SLMASK) {
                                     /*
-                                     * NOTE: Technically, VDISP_END is one of those CRTC registers that should be read using
+                                     * NOTE: Technically, VDEND is one of those CRTC registers that should be read using
                                      * card.getCRTCReg(), because there are overflow bits (8 and 9).  However, all known modes
                                      * always SET bit 8 and CLEAR bit 9, so examining only bits 0-7 is sorta OK.
                                      */
-                                    if (card.regCRTData[Card.CRTC.EGA.VDISP_END] <= 0x8F) {
+                                    if (card.regCRTData[Card.CRTC.EGA.VDEND] <= 0x8F) {
                                         nMode = Video.MODE.VGA_320X200;
                                     }
-                                    else { /* (card.regCRTData[Card.CRTC.EGA.VDISP_END] == 0xDF) */
+                                    else { /* (card.regCRTData[Card.CRTC.EGA.VDEND] == 0xDF) */
                                         nMode = Video.MODE.VGA_320X240;
                                     }
                                 } else {
                                     nMode = Video.MODE.VGA_320X400;
                                 }
                             }
-                            else if ((nCRTCMaxScan & Card.CRTC.EGA.MAX_SCAN.CONVERT400) || nCRTCVertTotal < 350) {
+                            else if ((nCRTCMaxScan & Card.CRTC.EGA.MAXSCAN.CONVERT400) || nCRTCVertTotal < 350) {
                                 nMode = (fSEQDotClock? Video.MODE.EGA_320X200 : Video.MODE.EGA_640X200);
                             } else if (nCRTCVertTotal >= 480) {
                                 nMode = (this.nMonitorType == ChipSet.MONITOR.MONO? Video.MODE.VGA_640X480_MONO : Video.MODE.VGA_640X480);
@@ -4632,10 +4644,14 @@ class Video extends Component {
                  */
                 if (!(card.regMode & Card.CGA.MODE.GRAPHIC_SEL)) {
                     nMode = ((card.regMode & Card.CGA.MODE._80X25)? Video.MODE.CGA_80X25 : Video.MODE.CGA_40X25);
-                    if (card.regMode & Card.CGA.MODE.BW_SEL) nMode -= 1;
+                    if (card.regMode & Card.CGA.MODE.BW_SEL) {
+                        nMode -= 1;
+                    }
                 } else {
                     nMode = ((card.regMode & Card.CGA.MODE.HIRES_BW)? Video.MODE.CGA_640X200 : Video.MODE.CGA_320X200_BW);
-                    if (!(card.regMode & Card.CGA.MODE.BW_SEL)) nMode -= 1;
+                    if (!(card.regMode & Card.CGA.MODE.BW_SEL)) {
+                        nMode -= 1;
+                    }
                 }
                 if (this.fOpacityReduced) {
                     this.canvasScreen.style.opacity = "1";
@@ -4950,7 +4966,7 @@ class Video extends Component {
      * @this {Video}
      * @param {boolean} [fForce] is used by setMode() to reset the cell cache and force a redraw
      */
-    updateScreen(fForce)
+    updateScreen(fForce = false)
     {
         /*
          * The Computer component maintains the fPowered setting on our behalf, so we use it.
@@ -5027,7 +5043,7 @@ class Video extends Component {
         }
 
         /*
-         * HACK: The CRTC's START_ADDR_HI and START_ADDR_LO registers are supposed to be "latched" into
+         * HACK: The CRTC's STARTHIGH and STARTLOW registers are supposed to be "latched" into
          * offStartAddr ONLY at the start of every VRETRACE interval; this is an attempt to honor that behavior,
          * but unfortunately, updateScreen() is currently called at the CPU's discretion, not necessarily in
          * sync with nCyclesVertPeriod.  As a result, we must rely on other criteria, like the number of vertical
@@ -5042,7 +5058,8 @@ class Video extends Component {
             /*
              * PARANOIA: Don't call invalidateCache() unless the address we're about to "latch" actually changed.
              */
-            var offStartAddr = ((card.regCRTData[Card.CRTC.START_ADDR_HI] << 8) + card.regCRTData[Card.CRTC.START_ADDR_LO])|0;
+            var offStartAddr = card.regCRTData[Card.CRTC.STARTLOW];
+            offStartAddr |= (card.regCRTData[Card.CRTC.STARTHIGH] & Card.CRTCMASKS[Card.CRTC.STARTHIGH]) << 8;
             if (card.offStartAddr !== offStartAddr) {
                 card.offStartAddr = offStartAddr;
                 this.invalidateCache();
@@ -5050,18 +5067,15 @@ class Video extends Component {
             card.nVertPeriodsStartAddr = 0;
         }
 
-        var offScreen = card.offStartAddr;
-
         /*
          * Any screen (aka "page") offset must be doubled for text modes, due to the attribute bytes.
          * TODO: Come up with a more robust method of deciding when any screen offset should be doubled.
          */
-        if (this.nFont) offScreen <<= 1;
-
+        var offScreen = card.offStartAddr << (this.nFont? 1 : 0);
         addrScreen += offScreen;
         var cbScreen = this.cbScreen;
 
-        if (this.nCard >= Video.CARD.EGA && card.regCRTData[Card.CRTC.EGA.OFFSET] && (card.regCRTData[Card.CRTC.EGA.OFFSET] << 1) != card.regCRTData[Card.CRTC.EGA.HDISP_END] + 1) {
+        if (this.nCard >= Video.CARD.EGA && card.regCRTData[Card.CRTC.EGA.OFFSET] && (card.regCRTData[Card.CRTC.EGA.OFFSET] << 1) != card.regCRTData[Card.CRTC.EGA.HDEND] + 1) {
             /*
              * Pre-EGA, the extent of visible screen memory (cbScreen) was derived from nCols * nRows, but since
              * then, the logical width of screen memory (nColsLogical) can differ from the visible width (nCols).
@@ -5069,7 +5083,7 @@ class Video extends Component {
              * cbScreen was computed (but without any CGA-related padding considerations).
              *
              * TODO: I'm taking a lot of shortcuts in this calculation (eg, relying on nFont to detect text modes,
-             * ignoring MODE_CTRL.BYTE_MODE, etc); generalize this someday.  In addition, dividing the total number of
+             * ignoring MODECTRL.BYTE_MODE, etc); generalize this someday.  In addition, dividing the total number of
              * cells by nCellsPerWord yields total WORDS, not BYTES, so we need to double cbScreen -- EXCEPT that the
              * notion of cell has a slightly different meaning for EGA and VGA-specific modes.  nCellsPerWord should
              * not be overloaded like that.
@@ -5079,16 +5093,57 @@ class Video extends Component {
             if (this.nMode <= Video.MODE.MDA_80X25) cbScreen <<= 1;
         }
 
-        if (addrScreen + cbScreen > addrScreenLimit) {
-            cbScreen = addrScreenLimit - addrScreen;
-            if (cbScreen < 0) cbScreen = 0;
-        }
-
         /*
-         * addrScreenLimit was initially the limit of the entire video buffer, but we now adjust it
-         * to the limit of what's visible, since that's all we want to draw.
+         * If the amount of data (cbScreen) we need to display goes beyond the end of the screen buffer
+         * (addrScreenLimit), then the assumption is that we will have to do a second update operation that
+         * wraps around to addrBuffer.
          */
-        addrScreenLimit = addrScreen + cbScreen;
+        var addrScreenWrap = 0, cbScreenWrap = 0;
+        if (addrScreen + cbScreen > addrScreenLimit) {
+            /*
+             * There are two possibilities here: addrScreen itself is at or beyond addrScreenLimit, or just a
+             * portion of cbScreen goes beyond the limit.  We'll deal with the first case first.
+             */
+            cbScreenWrap = cbScreen;
+            if (addrScreen >= addrScreenLimit) {
+                addrScreenWrap = addrBuffer + (addrScreen - addrScreenLimit);
+                cbScreen = 0;
+            } else {
+                addrScreenWrap = addrBuffer;
+                cbScreen = addrScreenLimit - addrScreen;
+                cbScreenWrap -= cbScreen;
+            }
+        }
+        var iCellCursor = this.iCellCursor - (offScreen >> 1);
+        var cCells = this.updateScreenCells(addrBuffer, addrScreen, cbScreen, iCell, iCellCursor, nCells, fForce, fBlinkUpdate);
+        if (cbScreenWrap) {
+            iCell += cCells;
+            cCells += this.updateScreenCells(addrBuffer, addrScreenWrap, cbScreenWrap, iCell, iCellCursor, nCells, fForce, fBlinkUpdate);
+        }
+        if (cCells) {
+            this.fCellCacheValid = true;
+        }
+    }
+
+    /**
+     * updateScreenCells(addrBuffer, addrScreen, cbScreen, iCell, iCellCursor, nCells, fForce, fBlinkUpdate)
+     *
+     * @this {Video}
+     * @param {number} addrBuffer
+     * @param {number} addrScreen
+     * @param {number} cbScreen
+     * @param {number} iCell
+     * @param {number} iCellCursor
+     * @param {number} nCells
+     * @param {boolean} fForce
+     * @param {boolean} fBlinkUpdate
+     * @return {number} (number of cells processed)
+     */
+    updateScreenCells(addrBuffer, addrScreen, cbScreen, iCell, iCellCursor, nCells, fForce, fBlinkUpdate)
+    {
+        var cCells = cbScreen >> 1;
+        if (cCells > nCells) cCells = nCells;
+        var addrScreenLimit = addrScreen + cbScreen;
 
         /*
          * This next bit of code can be completely disabled if we discover problems with the dirty
@@ -5106,20 +5161,19 @@ class Video extends Component {
          * of all blinking character locations, but all those optimizations are saved for a rainy day.
          */
         if (!fForce && this.fCellCacheValid && this.bus.cleanMemory(addrScreen, cbScreen)) {
-            if (!fBlinkUpdate) return;
+            if (!fBlinkUpdate) {
+                return cCells;
+            }
             if (!this.cBlinkVisible) {
                 /*
-                 * Note that since iCellCursor is a cell-based (not byte-based) index, we must subtract
-                 * offStartAddr, which is also cell-based; subtracting offScreen would not be appropriate,
-                 * as it has already been converted to a byte-based offset (remember that in text modes,
-                 * cell are words, not bytes).
+                 * iCellCursor may be negative if the cursor is hidden or if it's not on the visible screen.
                  */
-                iCell = this.iCellCursor - card.offStartAddr;
-                /*
-                 * Note that iCellCursor may have already been negative (-1 hides the cursor), and
-                 * since offStartAddr should never be negative, we only need one iCell underflow check.
-                 */
-                if (iCell < 0) return;
+                iCellCursor -= iCell;
+                if (iCellCursor < 0) {
+                    return cCells;
+                }
+                addrScreen += (iCellCursor << 1);
+                iCell += iCellCursor;
                 nCells = iCell + 1;
             }
             // else if (this.cBlinks & 0x1) return;
@@ -5139,34 +5193,35 @@ class Video extends Component {
             /*
              * All CGA graphics modes have the goofy split-buffer layout, hence the simple test above.
              */
-            this.updateScreenGraphicsCGA(addrScreen, addrScreenLimit);
+            cCells = this.updateScreenGraphicsCGA(addrScreen, addrScreenLimit);
         }
         else if (!this.fColor256) {
             /*
              * All EGA graphics modes are taken care of here, including all 16-color VGA graphics modes.
              */
-            this.updateScreenGraphicsEGA(addrBuffer, addrScreen, addrScreenLimit);
+            cCells = this.updateScreenGraphicsEGA(addrBuffer, addrScreen, addrScreenLimit);
         }
         else {
             /*
              * Finally, all 256-color VGA modes are processed here.
              */
-            this.updateScreenGraphicsVGA(addrBuffer, addrScreen, addrScreenLimit);
+            cCells = this.updateScreenGraphicsVGA(addrBuffer, addrScreen, addrScreenLimit);
         }
+        return cCells;
     }
 
     /**
      * updateScreenText(addrScreen, addrScreenLimit, iCell, nCells)
      *
-     * @param addrScreen
-     * @param addrScreenLimit
-     * @param iCell
-     * @param nCells
+     * @this {Video}
+     * @param {number} addrScreen
+     * @param {number} addrScreenLimit
+     * @param {number} iCell
+     * @param {number} nCells
+     * @return {number} (number of cells processed)
      */
     updateScreenText(addrScreen, addrScreenLimit, iCell, nCells)
     {
-        var addr, data, cUpdated = 0;
-
         /*
          * If MDA.MODE.BLINK_ENABLE is set and a cell's blink bit is set, then if (cBlinks & 0x2) != 0,
          * we want the foreground element of the cell to be drawn; otherwise we don't.  So every 16-bit
@@ -5177,11 +5232,10 @@ class Video extends Component {
          * If MDA.MODE.BLINK_ENABLE is clear, then we always set ATTRS.DRAW_FGND and never mask the blink
          * bit in a cell's attributes bits, since it's actually an intensity bit in that case.
          */
-        this.cBlinkVisible = 0;
+        var cCells = 0, cUpdated = 0;
         var dataBlink = 0;
         var dataDraw = (Video.ATTRS.DRAW_FGND << 8);
         var dataMask = 0xfffff;
-
         var fBlinkEnable = (this.cardActive.regMode & Card.MDA.MODE.BLINK_ENABLE);
         if (this.nCard >= Video.CARD.EGA) {
             fBlinkEnable = (this.cardActive.regATCData[Card.ATC.MODE.INDX] & Card.ATC.MODE.BLINK_ENABLE);
@@ -5199,9 +5253,9 @@ class Video extends Component {
             if (!(this.cBlinks & 0x2)) dataMask &= ~dataDraw;
         }
 
-        addr = addrScreen + (iCell << 1);
-        while (addr < addrScreenLimit && iCell < nCells) {
-            data = this.bus.getShortDirect(addr);
+        this.cBlinkVisible = 0;
+        while (addrScreen < addrScreenLimit && iCell < nCells) {
+            var data = this.bus.getShortDirect(addrScreen);
             data |= dataDraw;
             if (data & dataBlink) {
                 this.cBlinkVisible++;
@@ -5214,45 +5268,64 @@ class Video extends Component {
             if (!this.fCellCacheValid || data !== this.aCellCache[iCell]) {
                 var col = iCell % this.nCols;
                 var row = (iCell / this.nCols)|0;
+                /*
+                 * The following code is useful for setting a breakpoint (on the non-destructive "cUpdated |= 0" line)
+                 * when debugging the "FlickerFree" utility while doing a series of "DIR" listings on the screen.  When
+                 * unusual data gets rendered past column 40, we've caught the utility clearing memory revealed by a
+                 * scroll.
+                 *
+                 *      if (col > 40 && data != 106272) {
+                 *          cUpdated |= 0;
+                 *      }
+                 *
+                 * TODO: How do we prevent that data from being displayed until the code has finished clearing it?
+                 * One trick would be to extend the current CPU burst slightly every time the STATUS register is read
+                 * with the RETRACE bit set, since it's only at the end of those bursts that we do other things like
+                 * update timers, update the screen, etc.
+                 *
+                 * FYI, to see what that "FlickerFree" code looks like, see the inCardStatus() function.
+                 */
                 this.updateChar(col, row, data, this.contextBuffer);
                 this.aCellCache[iCell] = data;
                 cUpdated++;
             }
-            addr += 2;
+            addrScreen += 2;
+            cCells++;
             iCell++;
         }
-
-        this.fCellCacheValid = true;
 
         if (cUpdated && this.contextBuffer) {
             this.contextScreen.drawImage(this.canvasBuffer, 0, 0, this.cxBuffer, this.cyBuffer, this.xScreenOffset, this.yScreenOffset, this.cxScreenOffset, this.cyScreenOffset);
         }
+        return cCells;
     }
 
     /**
      * updateScreenGraphicsCGA(addrScreen, addrScreenLimit)
      *
-     * @param addrScreen
-     * @param addrScreenLimit
+     * @this {Video}
+     * @param {number} addrScreen
+     * @param {number} addrScreenLimit
+     * @return {number} (number of cells processed)
      */
     updateScreenGraphicsCGA(addrScreen, addrScreenLimit)
     {
-        var addr, data;
-
         /*
          * This is the CGA graphics-mode update case, where cells are pixels spread across two halves of the buffer.
          */
-        addr = addrScreen;
-        this.cBlinkVisible = 0;
+        var cCells = (addrScreenLimit - addrScreen) >> 1;
         var iCell = 0, nPixelsPerCell = this.nCellsPerWord;
+        var addr = addrScreen;
         var wPixelMask = (nPixelsPerCell == 16? 0x10000 : 0x30000);
         var nPixelShift = (nPixelsPerCell == 16? 1 : 2);
         var aPixelColors = this.getCardColors(nPixelShift);
 
         var x = 0, y = 0;
         var xDirty = this.nCols, xMaxDirty = 0, yDirty = this.nRows, yMaxDirty = 0;
+
+        this.cBlinkVisible = 0;
         while (addr < addrScreenLimit) {
-            data = this.bus.getShortDirect(addr);
+            var data = this.bus.getShortDirect(addr);
             this.assert(iCell < this.aCellCache.length);
             if (this.fCellCacheValid && data === this.aCellCache[iCell]) {
                 x += nPixelsPerCell;
@@ -5283,8 +5356,6 @@ class Video extends Component {
             }
         }
 
-        this.fCellCacheValid = true;
-
         /*
          * Instead of blasting the ENTIRE imageBuffer into contextBuffer, and then blasting the ENTIRE
          * canvasBuffer onto contextScreen, even for the smallest change, let's try to be a bit smarter about
@@ -5311,6 +5382,7 @@ class Video extends Component {
              */
             this.contextScreen.drawImage(this.canvasBuffer, 0, 0, this.nCols, this.nRows, 0, 0, this.cxScreen, this.cyScreen);
         }
+        return cCells;
     }
 
     /**
@@ -5318,34 +5390,34 @@ class Video extends Component {
      *
      * TODO: Add support for blinking graphics (ATC.MODE.BLINK_ENABLE)
      *
+     * @this {Video}
      * @param {number} addrBuffer
      * @param {number} addrScreen
      * @param {number} addrScreenLimit
+     * @return {number} (number of cells processed)
      */
     updateScreenGraphicsEGA(addrBuffer, addrScreen, addrScreenLimit)
     {
-        var addr, data;
-
-        addr = addrScreen;
-        this.cBlinkVisible = 0;
-
         var iCell = 0;
+        var cCells = addrScreenLimit - addrScreen;
+        var addr = addrScreen;
         var aPixelColors = this.getCardColors();
         var adwMemory = this.cardActive.adwMemory;
 
         var x = 0, y = 0;
         var xDirty = this.nCols, xMaxDirty = 0, yDirty = this.nRows, yMaxDirty = 0;
-
         var iPixelFirst = this.cardActive.regATCData[Card.ATC.HPAN.INDX] & Card.ATC.HPAN.SHIFT_LEFT;
+
         /*
          * TODO: What should happen if the card is programmed such that nColsLogical is LESS THAN nCols?
          */
         var nRowAdjust = (this.nColsLogical > this.nCols? ((this.nColsLogical - this.nCols - iPixelFirst) >> 3) : 0);
 
+        this.cBlinkVisible = 0;
         while (addr < addrScreenLimit) {
             var idw = addr++ - addrBuffer;
             this.assert(idw >= 0 && idw < adwMemory.length);
-            data = adwMemory[idw];
+            var data = adwMemory[idw];
 
             /*
              * Figure out how many visible pixels this data represents; usually 8, unless panning is being used.
@@ -5418,7 +5490,7 @@ class Video extends Component {
             }
         }
 
-        if (!iPixelFirst) this.fCellCacheValid = true;
+        if (iPixelFirst) cCells = 0;    // zero the cell count to inhibit setting fCellCacheValid
 
         /*
          * For a fascinating discussion of the best way to update the screen canvas at this point, see updateScreenGraphicsCGA().
@@ -5429,6 +5501,7 @@ class Video extends Component {
             this.contextBuffer.putImageData(this.imageBuffer, 0, 0, xDirty, yDirty, cxDirty, cyDirty);
             this.contextScreen.drawImage(this.canvasBuffer, 0, 0, this.nCols, this.nRows, 0, 0, this.cxScreen, this.cyScreen);
         }
+        return cCells;
     }
 
     /**
@@ -5442,35 +5515,35 @@ class Video extends Component {
      *
      * TODO: Add support for blinking graphics (ATC.MODE.BLINK_ENABLE)
      *
+     * @this {Video}
      * @param {number} addrBuffer
      * @param {number} addrScreen
      * @param {number} addrScreenLimit
+     * @return {number} (number of cells processed)
      */
     updateScreenGraphicsVGA(addrBuffer, addrScreen, addrScreenLimit)
     {
-        var addr, data;
-
-        addr = addrScreen;
-        this.cBlinkVisible = 0;
-
         var iCell = 0;
+        var cCells = addrScreenLimit - addrScreen;
+        var addr = addrScreen;
         var aPixelColors = this.getCardColors(8);
         var adwMemory = this.cardActive.adwMemory;
 
         var x = 0, y = 0;
         var xDirty = this.nCols, xMaxDirty = 0, yDirty = this.nRows, yMaxDirty = 0;
-
         var cbInc = (this.cardActive.regSEQData[Card.SEQ.MEMMODE.INDX] & Card.SEQ.MEMMODE.CHAIN4)? 4 : 1;
         var iPixelFirst = this.cardActive.regATCData[Card.ATC.HPAN.INDX] & Card.ATC.HPAN.SHIFT_LEFT;
+
         /*
          * TODO: What should happen if the card is programmed such that nColsLogical is LESS THAN nCols?
          */
         var nRowAdjust = (this.nColsLogical > this.nCols? ((this.nColsLogical - this.nCols - iPixelFirst) >> 3) : 0);
 
+        this.cBlinkVisible = 0;
         while (addr < addrScreenLimit) {
             var idw = addr - addrBuffer;
             this.assert(idw >= 0 && idw < adwMemory.length);
-            data = adwMemory[idw];
+            var data = adwMemory[idw];
 
             /*
              * Figure out how many visible pixels this data represents; usually 4, unless panning is being used.
@@ -5514,7 +5587,7 @@ class Video extends Component {
             }
         }
 
-        if (!iPixelFirst) this.fCellCacheValid = true;
+        if (iPixelFirst) cCells = 0;    // zero the cell count to inhibit setting fCellCacheValid
 
         /*
          * For a fascinating discussion of the best way to update the screen canvas at this point, see updateScreenGraphicsCGA().
@@ -5525,6 +5598,7 @@ class Video extends Component {
             this.contextBuffer.putImageData(this.imageBuffer, 0, 0, xDirty, yDirty, cxDirty, cyDirty);
             this.contextScreen.drawImage(this.canvasBuffer, 0, 0, this.nCols, this.nRows, 0, 0, this.cxScreen, this.cyScreen);
         }
+        return cCells;
     }
 
     /**
@@ -5538,19 +5612,15 @@ class Video extends Component {
      */
     getRetraceBits(card)
     {
-        var b = 0;
-
         /*
          * NOTE: The CGA bits CGA.STATUS.RETRACE (0x01) and CGA.STATUS.VRETRACE (0x08) match the EGA definitions,
          * and they also correspond to the MDA bits MDA.STATUS.HDRIVE (0x01) and MDA.STATUS.BWVIDEO (0x08); I'm not sure
          * why the MDA uses different designations, but the bits appear to serve the same purpose.
          *
-         * TODO: Decide whether this more faithful emulation of the retrace bits should be extended to the MDA/CGA, too;
-         * doing so might slow down the BIOS scroll code a bit, though.
-         *
          * TODO: Verify that when a saved machine state is restored, both the CPU's cycle count AND the card's nInitCycles
          * are properly restored.  It's probably not a big deal, but details like that bother me.
          */
+        var b = 0;
         var nCycles = this.cpu.getCycles();
         var nElapsedCycles = nCycles - card.nInitCycles;
         if (nElapsedCycles < 0) {           // perhaps the CPU decided to reset its cycle count?
@@ -5566,21 +5636,6 @@ class Video extends Component {
          * so we compute that now.
          */
         card.nVertPeriods = (nElapsedCycles / card.nCyclesVertPeriod)|0;
-        /*
-         * The number of CPU cycles that remain in the current vertical period is all we USED to keep track of, since
-         * keeping track of the total number of cycles since the card was initialized can result in an extremely large
-         * delta after a while.
-         *
-         *      card.nInitCycles = nCycles - nCyclesVertRemain;
-         *
-         * HOWEVER, now that we're calling getRetraceBits() more frequently (ie, for internal retrace checks), resetting
-         * nInitCycles in this fashion alters the horizontal period too much, causing grief in ROM BIOS code that requires
-         * strict horizontal retrace times.  Also, the CPU reserves the right to occasionally reset its own cycle count.
-         * A final complication is that nVertPeriods would no longer be accurate if we constantly reduced nInitCycles.
-         *
-         * None of those are insurmountable problems, but the simple solution is to never reduce nInitCycles (well, except
-         * when forced to by a reduction in the CPU's cycle count).
-         */
         return b;
     }
 
@@ -5792,7 +5847,8 @@ class Video extends Component {
              *
              * PARANOIA: Don't call invalidateCache() unless the start address we just "latched" actually changed.
              */
-            var offStartAddr = ((card.regCRTData[Card.CRTC.START_ADDR_HI] << 8) + card.regCRTData[Card.CRTC.START_ADDR_LO])|0;
+            var offStartAddr = card.regCRTData[Card.CRTC.STARTLOW];
+            offStartAddr |= (card.regCRTData[Card.CRTC.STARTHIGH] & Card.CRTCMASKS[Card.CRTC.STARTHIGH]) << 8;
             if (card.offStartAddr != offStartAddr) {
                 card.offStartAddr = offStartAddr;
                 this.invalidateCache();
@@ -6535,43 +6591,37 @@ class Video extends Component {
                 }
                 card.regCRTData[card.regCRTIndx] = bOut;
             }
-            if (card.regCRTIndx == Card.CRTC.START_ADDR_HI || card.regCRTIndx == Card.CRTC.START_ADDR_LO) {
+            if (card.regCRTIndx == Card.CRTC.STARTHIGH || card.regCRTIndx == Card.CRTC.STARTLOW) {
                 /*
-                 * HACK: offStartAddr is supposed to be "latched" ONLY at the start of every VRETRACE interval,
-                 * but the best we can currently do is latch it during retrace; beyond that, all we can do is snap
-                 * the vertical period count and latch it later, in updateScreen(), once the count has advanced.
+                 * Both STARTHIGH and STARTLOW are supposed to be latched at the start of every VRETRACE interval.
+                 * However, since we don't have an interrupt that tells us exactly when that occurs, we used to latch
+                 * them now, whenever either one was written during any RETRACE interval.  Unfortunately, one problem
+                 * with that approach is that we might latch only *one* of the registers, depending on timing.
+                 *
+                 * So now, we still call getRetraceBits(card), but only to recalculate the card's nVertPeriods value,
+                 * which we then snapshot in card.nVertPeriodsStartAddr.
                  */
-                if (this.getRetraceBits(card) & Card.CGA.STATUS.RETRACE) {
-                    /*
-                     * PARANOIA: Don't call invalidateCache() unless the address we're about to "latch" actually changed.
-                     */
-                    var offStartAddr = ((card.regCRTData[Card.CRTC.START_ADDR_HI] << 8) + card.regCRTData[Card.CRTC.START_ADDR_LO])|0;
-                    if (card.offStartAddr !== offStartAddr) {
-                        card.offStartAddr = offStartAddr;
-                        this.invalidateCache();
-                    }
-                } else if (!card.nVertPeriodsStartAddr) {
-                    card.nVertPeriodsStartAddr = card.nVertPeriods;
-                }
+                this.getRetraceBits(card);
+                card.nVertPeriodsStartAddr = card.nVertPeriods;
             }
             /*
              * During mode changes on the EGA, all the CRTC regs are typically programmed in sequence,
-             * and if that's all that's happening with Card.CRTC.MAX_SCAN.INDX, then we don't want to treat
+             * and if that's all that's happening with Card.CRTC.MAXSCAN, then we don't want to treat
              * it special; let the mode change be detected normally (eg, when the GRC regs are written later).
              *
-             * On the other hand, if this was an out-of-sequence write to Card.CRTC.MAX_SCAN.INDX, then
+             * On the other hand, if this was an out-of-sequence write to Card.CRTC.MAXSCAN, then
              * yes, we want to force setMode() to call setDimensions(), which is key to setting the proper
              * number of screen rows.
              *
              * The second part of the check is required to promptly detect a switch to "Mode X"; if we assume
              * that anyone switching to "Mode X" will first switch to mode 0x13, then it's a given that they
-             * must reprogram the VDISP_END register, and that they will probably change it from 0x8F to 0xDF.
+             * must reprogram the VDEND register, and that they will probably change it from 0x8F to 0xDF.
              *
              * Originally, I wasn't going to check specifically for 0xDF, to help catch other "Mode X" variations,
              * but if I don't, then some spurious mode changes are triggered (eg, when Windows 1.0 switches from
              * CGA graphics mode 0x06 to an EGA graphics mode).
              */
-            if (card.regCRTIndx == Card.CRTC.MAX_SCAN.INDX && card.regCRTPrev != Card.CRTC.MAX_SCAN.INDX-1 || card.regCRTIndx == Card.CRTC.EGA.VDISP_END && bOut == 0xDF) {
+            if (card.regCRTIndx == Card.CRTC.MAXSCAN && card.regCRTPrev != Card.CRTC.MAXSCAN-1 || card.regCRTIndx == Card.CRTC.EGA.VDEND && bOut == 0xDF) {
                 this.checkMode(true);
             }
             this.checkCursor();
@@ -6667,12 +6717,31 @@ class Video extends Component {
              * bits 0 and 3 on every read.
              *
              * Also, according to http://www.seasip.info/VintagePC/mda.html, on an MDA, bits 7-4 are always ON and
-             * bits 2-1 are always OFF, hence the "OR" of 0xf0.
+             * bits 2-1 are always OFF, hence the "OR" of 0xF0.
              *
-             * TODO: Decide whether to preserve the bits from getRetraceBits() on the MDA/CGA; we're continuing
-             * to do a simple toggle, partly on the theory that that may speed up the CGA BIOS scroll code a bit.
+             * Alternatively, I *could* use the retrace bits from getRetraceBits() as-is:
+             *
+             *      b |= 0xF0;
+             *
+             * but doing so hurts the performance of code like this in the "FlickerFree" utility:
+             *
+             *      &0600:079A EC              IN       AL,DX
+             *      &0600:079B D0E8            SHR      AL,1
+             *      &0600:079D 72FB            JC       079A
+             *      &0600:079F FA              CLI
+             *      &0600:07A0 EC              IN       AL,DX
+             *      &0600:07A1 D0E8            SHR      AL,1
+             *      &0600:07A3 73FB            JNC      07A0
+             *      &0600:07A5 8BC3            MOV      AX,BX
+             *      &0600:07A7 AB              STOSW
+             *      &0600:07A8 FB              STI
+             *      &0600:07A9 E2EF            LOOP     079A
+             *
+             * which, oddly, appears to want to write only ONE word to video memory per retrace interval.  Sticking
+             * with our older, cruder, toggling code, makes that code run faster and reduce the odds that you'll see
+             * old data on appear on the screen before the above code has the chance to store new data over it.
              */
-            b = (card.regStatus ^= (Card.CGA.STATUS.RETRACE | Card.CGA.STATUS.VRETRACE)) | 0xf0;
+            b = (card.regStatus ^= (Card.CGA.STATUS.RETRACE | Card.CGA.STATUS.VRETRACE)) | 0xF0;
         }
 
         card.regStatus = b;
