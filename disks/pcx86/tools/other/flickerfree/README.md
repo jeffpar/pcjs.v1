@@ -10,11 +10,27 @@ machines:
       B:
         name: FlickerFree 1.0
     autoStart: true
-    autoType: $date\r$time\rb:\rdir\r\xff\xf5ff\r\rfpa\rYff_hist\r\r
+    autoType: $date\r$time\rdir\r\xff\xf1b:\rdir\r\xff\xf5ff\r\rfpa\rYff_hist\r\r
 ---
 
 FlickerFree 1.0
 ---------------
+
+FlickerFree was a DOS utility created by Steve Gibson in 1986 that improved common IBM PC display operations.
+It was reviewed by Peter Norton in the
+[July 1986 Issue of PC Magazine](https://books.google.com/books?id=5hdeC0k_JHwC&lpg=PP1&pg=PA73#v=onepage&q&f=false),
+who described it as "the most fascinating software I've seen for some time."  He goes on to say:
+
+> FlickerFree is a memory-resident program that solves several problems that muck up display screens: snow,
+flicker, and lack of speed.  The original IBM Color/Graphics Adapter was cursed with an ugly "snow" effect
+whenever programs wrote directly to the display memory (unless the programs used time-consuming desnowing
+operations).  Fortunately, newer display adapters, such as Compaq's nifty built-in adapter, don’t suffer
+from snow, but they do sometimes suffer from an even greater pain-in-the-eye: screen flickers when information
+is scrolled.  And all the screens, even with the IBM monochrome adapter, often function much more slowly
+than they should.
+
+The demo machine below is configured as an IBM PC (Model 5150) with a CGA and 256Kb of RAM.  It will automatically
+load FlickerFree (`FF.COM`) and then run the companion FlickerFree Performance Analyzer (`FPA.COM`).
 
 {% include machine.html id="ibm5150" %}
 

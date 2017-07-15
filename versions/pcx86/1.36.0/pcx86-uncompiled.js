@@ -48799,7 +48799,7 @@ class Video extends Component {
          * screen "flicker".
          */
         this.colorScreen = parmsVideo['screenColor'] || "black";
-        this.opacityFlicker = (1 - (parmsVideo['flicker'] || 0)).toString();
+        this.opacityFlicker = (1 - (Web.getURLParm('flicker') || parmsVideo['flicker'] || 0)).toString();
         this.fOpacityReduced = false;
         if (canvas) canvas.style.backgroundColor = this.colorScreen;
         if (container) container.style.backgroundColor = this.colorScreen;
@@ -53402,7 +53402,7 @@ class Video extends Component {
              * until we figure out a better UI.  And note that we use our Web.onPageEvent() helper function to make
              * sure we don't trample any other 'onresize' handler(s) attached to the window object.
              */
-            var aspect = +(parmsVideo['aspect'] || Web.getURLParm('aspect'));
+            var aspect = +(Web.getURLParm('aspect') || parmsVideo['aspect']);
             /*
              * No 'aspect' parameter yields NaN, which is falsey, and anything else must satisfy my arbitrary
              * constraints of 0.3 <= aspect <= 3.33, to prevent any useless (or worse, browser-blowing) results.
