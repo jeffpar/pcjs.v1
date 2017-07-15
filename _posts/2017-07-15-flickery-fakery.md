@@ -7,7 +7,7 @@ permalink: /blog/2017/07/15/
 
 For years, one of my pet peeves about PC emulators has been their obsession with raw speed, and how hard they
 try to squeeze every last drop of performance out of their instruction execution loop, on the assumption that
-everyone wants an an 8088 that runs at, say, 500Mhz, as opposed to the 4.77Mhz of the original IBM PC.
+everyone wants an 8088 that runs at, say, 500Mhz, as opposed to the stately 4.77Mhz of the original IBM PC.
 
 And sure, it might be nice if that [Lotus 1-2-3](/disks/pcx86/apps/lotus/123/1as/) spreadsheet recalculated instantly,
 instead of the several seconds that it originally took.  But most of the time, such a dramatic difference in speed is
@@ -17,12 +17,12 @@ no idea what just scrolled off the top of the screen.  And many games become unp
 run on *machines of the day*, not machines of the future running hundreds of times faster.
 
 Emulators like [DOSBox](https://github.com/Henne/dosbox-svn), which has since been ported to
-[EM-DOSBOX](https://github.com/dreamlayers/em-dosbox) for the [Internet Archive's](https://archive.org)
+[EM-DOSBox](https://github.com/dreamlayers/em-dosbox) for the [Internet Archive's](https://archive.org)
 [MS-DOS Collection](https://archive.org/details/softwarelibrary_msdos), do offer some crude controls to "throttle"
 the emulated CPU's speed, but they provide no feedback: you don't know what the current speed is or what the target
-speed should be.  Even a "professional" emulator like Oracle's [VirtualBox](https://www.virtualbox.org/) offers
-only very limited speed control: a processor "Execution Cap" that's defined as a percentage, which turns out to be
-much too granular to recreate any particular CPU speed.
+speed should be.  Even professional emulators like Oracle's [VirtualBox](https://www.virtualbox.org/) offer
+only very limited speed controls, such as a processor "Execution Cap", which is defined as a percentage of the
+emulator's maximum speed (whatever that may be), and which is too granular to recreate any specific CPU speed.
 
 ### Visual Veracity
 
