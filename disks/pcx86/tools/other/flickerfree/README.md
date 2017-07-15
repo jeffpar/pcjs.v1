@@ -10,6 +10,7 @@ machines:
       B:
         name: FlickerFree 1.0
     autoStart: true
+    autoType: $date\r$time\rb:\rdir\r\xff\xf5ff\r\rfpa\rYff_hist\r\r
 ---
 
 FlickerFree 1.0
