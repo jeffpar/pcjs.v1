@@ -345,12 +345,14 @@ class Bus extends Component {
     {
         var fClean = true;
         var iBlock = addr >>> this.nBlockShift;
+        var sizeBlock = this.nBlockSize - (addr & this.nBlockLimit);
         while (size > 0 && iBlock < this.aMemBlocks.length) {
             if (this.aMemBlocks[iBlock].fDirty) {
                 this.aMemBlocks[iBlock].fDirty = fClean = false;
                 this.aMemBlocks[iBlock].fDirtyEver = true;
             }
-            size -= this.nBlockSize;
+            size -= sizeBlock;
+            sizeBlock = this.nBlockSize;
             iBlock++;
         }
         return fClean;

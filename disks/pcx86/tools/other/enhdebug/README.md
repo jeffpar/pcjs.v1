@@ -1,11 +1,11 @@
 ---
 layout: page
-title: Enhanced DEBUG for PC DOS and MS-DOS
-permalink: /disks/pcx86/tools/misc/enhdebug/
+title: Enhanced DEBUG for PC-DOS and MS-DOS
+permalink: /disks/pcx86/tools/other/enhdebug/
 ---
 
-Enhanced DEBUG for PC DOS and MS-DOS
----
+Enhanced DEBUG for PC-DOS and MS-DOS
+------------------------------------
 
 The [PC DOS Retro](https://sites.google.com/site/pcdosretro/) website has documentation for
 [Enhanced DEBUG](https://sites.google.com/site/pcdosretro/enhdebug).

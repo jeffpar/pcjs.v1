@@ -172,7 +172,7 @@ MS-DOS 3.20 Photos
 
 Here's what one of the MS-DOS 3.20 diskettes looked like.
 
-> ![MS-DOS 3.20 Programmer's Reference](MSDOS320-DISK3-PROGREF1-thumb.jpg "link:MSDOS320-DISK3-PROGREF1.jpg:nogallery")
+> [![MS-DOS 3.20 Programmer's Reference](MSDOS320-DISK3-PROGREF1-thumb.jpg)](MSDOS320-DISK3-PROGREF1.jpg)
 
 And the box, courtesy of [www.oldcomputermuseum.com](http://www.oldcomputermuseum.com/os/msdos_3.2.html).
 
