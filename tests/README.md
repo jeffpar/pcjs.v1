@@ -5,6 +5,6 @@ permalink: /tests/
 ---
 
 Test Resources
----
+--------------
 
-An assortment of [PC Tests](pc/) is available.
+An assortment of [PCx86 Tests](pcx86/) is available.

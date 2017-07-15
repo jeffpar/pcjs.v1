@@ -363,9 +363,11 @@ class Card {
             this.regCRTData = data[5];
             this.nCRTCRegs  = Card.CRTC.TOTAL_REGS;
             this.asCRTCRegs = DEBUGGER? Card.CRTC.REGS : [];
-            this.offStartAddr = ((this.regCRTData[Card.CRTC.STARTHIGH] & Card.CRTCMASKS[Card.CRTC.STARTHIGH]) << 8) | this.regCRTData[Card.CRTC.STARTLOW];
+            this.offStartAddr = this.regCRTData[Card.CRTC.STARTLOW] | (this.regCRTData[Card.CRTC.STARTHIGH] << 8);
+            this.addrMaskHigh = 0x3F;       // card-specific mask for the high (bits 8 and up) of CRTC address registers
 
             if (nCard >= Video.CARD.EGA) {
+                this.addrMaskHigh = 0xFF;
                 this.nCRTCRegs = Card.CRTC.EGA.TOTAL_REGS;
                 this.asCRTCRegs = DEBUGGER? Card.CRTC.EGA_REGS : [];
                 this.initEGA(data[6], nMonitorType);
@@ -913,35 +915,35 @@ class Card {
     {
         var reg = this.regCRTData[iReg];
         if (reg != null && this.nCard >= Video.CARD.EGA) {
-            var bOvrflowBit8 = 0, bOvrflowBit9 = 0, bMaxScanBit9 = 0;
+            var bOverflowBit8 = 0, bOverflowBit9 = 0, bMaxScanBit9 = 0;
             switch(iReg) {
             case Card.CRTC.EGA.VTOTAL:              // 0x06
-                bOvrflowBit8 = Card.CRTC.EGA.OVERFLOW.VTOTAL_BIT8;          // 0x01
-                if (this.nCard == Video.CARD.VGA) bOvrflowBit9 = Card.CRTC.EGA.OVERFLOW.VTOTAL_BIT9;
+                bOverflowBit8 = Card.CRTC.EGA.OVERFLOW.VTOTAL_BIT8;         // 0x01
+                if (this.nCard == Video.CARD.VGA) bOverflowBit9 = Card.CRTC.EGA.OVERFLOW.VTOTAL_BIT9;
                 break;
             case Card.CRTC.EGA.CURSTART.INDX:       // 0x0A
-                if (this.nCard == Video.CARD.EGA) bOvrflowBit8 = Card.CRTC.EGA.OVERFLOW.CURSTART_BIT8;
+                if (this.nCard == Video.CARD.EGA) bOverflowBit8 = Card.CRTC.EGA.OVERFLOW.CURSTART_BIT8;
                 break;
             case Card.CRTC.EGA.VRSTART:             // 0x10
-                bOvrflowBit8 = Card.CRTC.EGA.OVERFLOW.VRSTART_BIT8;         // 0x04
-                if (this.nCard == Video.CARD.VGA) bOvrflowBit9 = Card.CRTC.EGA.OVERFLOW.VRSTART_BIT9;
+                bOverflowBit8 = Card.CRTC.EGA.OVERFLOW.VRSTART_BIT8;        // 0x04
+                if (this.nCard == Video.CARD.VGA) bOverflowBit9 = Card.CRTC.EGA.OVERFLOW.VRSTART_BIT9;
                 break;
             case Card.CRTC.EGA.VDEND:               // 0x12
-                bOvrflowBit8 = Card.CRTC.EGA.OVERFLOW.VDEND_BIT8;           // 0x02
-                if (this.nCard == Video.CARD.VGA) bOvrflowBit9 = Card.CRTC.EGA.OVERFLOW.VDEND_BIT9;
+                bOverflowBit8 = Card.CRTC.EGA.OVERFLOW.VDEND_BIT8;          // 0x02
+                if (this.nCard == Video.CARD.VGA) bOverflowBit9 = Card.CRTC.EGA.OVERFLOW.VDEND_BIT9;
                 break;
             case Card.CRTC.EGA.VBSTART:             // 0x15
-                bOvrflowBit8 = Card.CRTC.EGA.OVERFLOW.VBSTART_BIT8;         // 0x08
+                bOverflowBit8 = Card.CRTC.EGA.OVERFLOW.VBSTART_BIT8;        // 0x08
                 if (this.nCard == Video.CARD.VGA) bMaxScanBit9 = Card.CRTC.EGA.MAXSCAN.VBSTART_BIT9;
                 break;
             case Card.CRTC.EGA.LINECOMP:            // 0x18
-                bOvrflowBit8 = Card.CRTC.EGA.OVERFLOW.LINECOMP_BIT8;        // 0x10
+                bOverflowBit8 = Card.CRTC.EGA.OVERFLOW.LINECOMP_BIT8;       // 0x10
                 if (this.nCard == Video.CARD.VGA) bMaxScanBit9 = Card.CRTC.EGA.MAXSCAN.LINECOMP_BIT9;
                 break;
             }
-            if (bOvrflowBit8) {
-                reg |= ((this.regCRTData[Card.CRTC.EGA.OVERFLOW.INDX] & bOvrflowBit8)? 0x100 : 0);
-                reg |= ((this.regCRTData[Card.CRTC.EGA.OVERFLOW.INDX] & bOvrflowBit9)? 0x200 : 0);
+            if (bOverflowBit8) {
+                reg |= ((this.regCRTData[Card.CRTC.EGA.OVERFLOW.INDX] & bOverflowBit8)? 0x100 : 0);
+                reg |= ((this.regCRTData[Card.CRTC.EGA.OVERFLOW.INDX] & bOverflowBit9)? 0x200 : 0);
                 reg |= ((this.regCRTData[Card.CRTC.EGA.MAXSCAN.INDX] & bMaxScanBit9)? 0x200 : 0);
             }
         }
@@ -1152,6 +1154,18 @@ Card.CRTC = {
     }
 };
 
+/*
+ * TODO: These mask tables need to be card-specific.  For example, the STARTHIGH and CURHIGH registers used to be
+ * limited to 0x3F, because the MC6845 controller used with the original MDA and CGA cards was limited to 16Kb of RAM,
+ * whereas later cards like the EGA and VGA had anywhere from 64Kb to 256Kb, so all the bits of those registers were
+ * significant.  Currently, I'm doing very little masking, which means most CRTC registers are treated as full 8-bit
+ * registers (and fully readable as well), which might cause some compatibility problems for any MDA/CGA apps that
+ * were sloppy about how they programmed registers.
+ *
+ * I do make an exception, however, in the case of STARTHIGH and CURHIGH, due to the way the MC6845 controller wraps
+ * addresses around to the beginning of the buffer, because that seems like a high-risk case.  See the card-specific
+ * variable addrMaskHigh.
+ */
 Card.CRTCMASKS = {
     [Card.CRTC.HTOTAL]:     0xFF,       // R0
     [Card.CRTC.HDISP]:      0xFF,       // R1
@@ -4068,7 +4082,7 @@ class Video extends Component {
          * The most compatible way of disabling the cursor is to simply move the cursor to an off-screen position.
          */
         var iCellCursor = this.cardActive.regCRTData[Card.CRTC.CURLOW];
-        iCellCursor |= (this.cardActive.regCRTData[Card.CRTC.CURHIGH] & Card.CRTCMASKS[Card.CRTC.CURHIGH]) << 8;
+        iCellCursor |= (this.cardActive.regCRTData[Card.CRTC.CURHIGH] & this.cardActive.addrMaskHigh) << 8;
         if (this.iCellCursor != iCellCursor) {
             if (MAXDEBUG && this.messageEnabled()) {
                 this.printMessage("checkCursor(): cursor moved from " + this.iCellCursor + " to " + iCellCursor);
@@ -5043,8 +5057,8 @@ class Video extends Component {
         }
 
         /*
-         * HACK: The CRTC's STARTHIGH and STARTLOW registers are supposed to be "latched" into
-         * offStartAddr ONLY at the start of every VRETRACE interval; this is an attempt to honor that behavior,
+         * HACK: The CRTC's STARTHIGH and STARTLOW registers are supposed to be "latched" into offStartAddr
+         * ONLY at the start of every VRETRACE interval; this is an attempt to honor that behavior,
          * but unfortunately, updateScreen() is currently called at the CPU's discretion, not necessarily in
          * sync with nCyclesVertPeriod.  As a result, we must rely on other criteria, like the number of vertical
          * periods that have elapsed since the last CRTC write, writes to the ATC (see outATC()), etc.
@@ -5059,7 +5073,7 @@ class Video extends Component {
              * PARANOIA: Don't call invalidateCache() unless the address we're about to "latch" actually changed.
              */
             var offStartAddr = card.regCRTData[Card.CRTC.STARTLOW];
-            offStartAddr |= (card.regCRTData[Card.CRTC.STARTHIGH] & Card.CRTCMASKS[Card.CRTC.STARTHIGH]) << 8;
+            offStartAddr |= (card.regCRTData[Card.CRTC.STARTHIGH] & card.addrMaskHigh) << 8;
             if (card.offStartAddr !== offStartAddr) {
                 card.offStartAddr = offStartAddr;
                 this.invalidateCache();
@@ -5848,7 +5862,7 @@ class Video extends Component {
              * PARANOIA: Don't call invalidateCache() unless the start address we just "latched" actually changed.
              */
             var offStartAddr = card.regCRTData[Card.CRTC.STARTLOW];
-            offStartAddr |= (card.regCRTData[Card.CRTC.STARTHIGH] & Card.CRTCMASKS[Card.CRTC.STARTHIGH]) << 8;
+            offStartAddr |= (card.regCRTData[Card.CRTC.STARTHIGH] & card.addrMaskHigh) << 8;
             if (card.offStartAddr != offStartAddr) {
                 card.offStartAddr = offStartAddr;
                 this.invalidateCache();
