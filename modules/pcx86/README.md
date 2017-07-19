@@ -5,10 +5,11 @@ permalink: /modules/pcx86/
 ---
 
 IBM PC Emulation Module (PCx86)
-===
+===============================
 
 Overview
----
+--------
+
 PCx86 is the IBM PC emulation module powering all our [IBM PC Machines](/devices/pcx86/machine/).
 
 This module divides PC functionality into variety of logical and visual components.
@@ -84,7 +85,7 @@ referencing other components.  Device components should define an initBus() noti
 *Computer* component will call after it has created/initialized the *Bus* component.
 
 Features
----
+--------
 
 [List of major existing features goes here]
 
