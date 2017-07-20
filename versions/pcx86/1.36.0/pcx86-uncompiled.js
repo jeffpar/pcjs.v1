@@ -18305,7 +18305,7 @@ class X86CPU extends CPU {
          * if the result is negative, we need only be concerned if the signs of both numbers are the same
          * (ie, the sign of their XOR'ed union is positive).
          */
-        if (((regLSP - this.regLSPLimitLow)|0) < 0 && (this.regLSPLimitLow ^ regLSP) >= 0) {
+        if (((regLSP - this.regLSPLimitLow)|0) < 0 && (this.regLSPLimitLow ^ this.regLSP) >= 0) {
             /*
              * There's no such thing as an SS fault on the 8086/8088, and I'm assuming that, on newer
              * processors, when the stack segment limit is set to the maximum, it's OK for the stack to wrap.
@@ -18366,7 +18366,7 @@ class X86CPU extends CPU {
          * if the result is negative, we need only be concerned if the signs of both numbers are the same
          * (ie, the sign of their XOR'ed union is positive).
          */
-        if (((regLSP - this.regLSPLimitLow)|0) < 0 && (this.regLSPLimitLow ^ regLSP) >= 0) {
+        if (((regLSP - this.regLSPLimitLow)|0) < 0 && (this.regLSPLimitLow ^ this.regLSP) >= 0) {
             /*
              * There's no such thing as an SS fault on the 8086/8088, and I'm assuming that, on newer
              * processors, when the stack segment limit is set to the maximum, it's OK for the stack to wrap.
