@@ -18248,30 +18248,58 @@ class X86CPU extends CPU {
         var w = this.getWord(this.regLSP);
 
         this.regLSP = (this.regLSP + (I386? this.sizeData : 2))|0;
-
         /*
          * Properly comparing regLSP to regLSPLimit would normally require coercing both to unsigned
-         * (ie, floating-point) values.  But instead, we do a subtraction, (regLSPLimit - regLSP), and
-         * if the result is negative, we need only be concerned if the signs of both numbers are the same
-         * (ie, the sign of their XOR'ed union is positive).
+         * (ie, floating-point) values.  But instead, we subtract them, and if the delta is negative,
+         * we need only be concerned if the signs of both numbers are the same (ie, the sign of their
+         * XOR'ed union is positive).
          *
          * TODO: I'm combining the old 8088 address-wrap check with the new segment-limit check,
          * even though the correct time to do the latter is immediately BEFORE the fetch, not AFTER;
          * I'm working around this for now by applying a -1 fudge factor to the fault check below.
          */
-        var off = ((this.regLSPLimit - this.regLSP)|0);
-        if (off < 0 && (this.regLSPLimit ^ this.regLSP) >= 0) {
+        var delta = (this.regLSPLimit - this.regLSP)|0;
+        if (delta < 0 && (this.regLSPLimit ^ this.regLSP) >= 0) {
             /*
-             * There's no such thing as an SS fault on the 8086/8088, and I'm assuming that, on newer
-             * processors, when the stack segment limit is set to the maximum, it's OK for the stack to wrap.
+             * There's no such thing as an SS fault on the 8086/8088, and in fact, we have to support the
+             * operation even when the address straddles the wrap boundary; other emulators tend to barf on
+             * a wrap, usually because they're running in V86 mode instead of real mode.
              */
-            if (this.model <= X86.MODEL_8088 || !this.segSS.fExpDown && this.segSS.limit == this.segSS.maskAddr || this.segSS.fExpDown && !this.segSS.limit) {
+            if (this.model <= X86.MODEL_8088) {
                 this.setSP((this.regLSP - this.segSS.base) & this.segSS.maskAddr);
-            } else if (off < -1) {          // fudge factor
-                X86.helpFault.call(this, X86.EXCEPTION.SS_FAULT, 0);
+                if (delta < -1) {
+                    w = (w & 0xff) | (this.getByte(this.regLSP - 1) << 8);
+                }
+            }
+            else {
+                /*
+                 * I'm assuming that, on newer processors, when the stack segment limit is set to the maximum,
+                 * it's OK for the stack to wrap, unless the new address is straddling the wrap boundary (ie, when
+                 * delta is < 0 and > -sizeData).
+                 */
+                if (!this.segSS.fExpDown && this.segSS.limit == this.segSS.maskAddr || this.segSS.fExpDown && !this.segSS.limit) {
+                    this.setSP((this.regLSP - this.segSS.base) & this.segSS.maskAddr);
+                } else if (delta < -1) {            // fudge factor
+                    X86.helpFault.call(this, X86.EXCEPTION.SS_FAULT, 0);
+                }
             }
         }
         return w;
+    }
+
+    /**
+     * pushWord(w)
+     *
+     * NOTE: pushWord() used to do a simplfied version of pushData(), and while that might have made the emulator
+     * slightly faster, it was woefully duplicative.  Let's trust the combination of the Closure Compiler and the
+     * JavaScript engines to automatically inline instead.
+     *
+     * @this {X86CPU}
+     * @param {number} w is the word (16-bit) value to push at current SP; SP decreased by 2 or 4
+     */
+    pushWord(w)
+    {
+        this.pushData(w, I386? this.sizeData : 2);
     }
 
     /**
@@ -18359,21 +18387,6 @@ class X86CPU extends CPU {
          * pushWord() operation, relieving them from having to snapshot this.regLSP into this.opLSP needlessly.
          */
         this.regLSP = regLSP;
-    }
-
-    /**
-     * pushWord(w)
-     *
-     * NOTE: pushWord() used to do a simplfied version of pushData(), and while that might have made the emulator
-     * slightly faster, it was woefully duplicative.  Let's trust the combination of the Closure Compiler and the
-     * JavaScript engines to automatically inline instead.
-     *
-     * @this {X86CPU}
-     * @param {number} w is the word (16-bit) value to push at current SP; SP decreased by 2 or 4
-     */
-    pushWord(w)
-    {
-        this.pushData(w, I386? this.sizeData : 2);
     }
 
     /**
