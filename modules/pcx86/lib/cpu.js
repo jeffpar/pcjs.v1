@@ -472,11 +472,20 @@ class CPU extends Component {
         case "run":
             this.bindings[sBinding] = control;
             control.onclick = function onClickRun() {
+                var fRunning = cpu.flags.running;
                 if (!cpu.cmp || !cpu.cmp.checkPower()) return;
-                if (!cpu.flags.running)
-                    cpu.runCPU(true);
-                else
-                    cpu.stopCPU(true);
+                /*
+                 * We snapped the CPU's running flag before calling checkPower() because there are rare (REPOWER)
+                 * situations where checkPower() will have started the CPU as well.  So toggle the CPU state ONLY
+                 * if the running flag remains unchanged.
+                 */
+                if (fRunning == cpu.flags.running) {
+                    if (!cpu.flags.running) {
+                        cpu.runCPU(true);
+                    } else {
+                        cpu.stopCPU(true);
+                    }
+                }
             };
             fBound = true;
             break;

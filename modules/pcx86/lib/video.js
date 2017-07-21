@@ -2353,10 +2353,10 @@ class Video extends Component {
          * is exasperating; browsers can't agree on 'full' or 'Full, 'request' or 'Request', 'screen' or 'Screen', and
          * while some browsers honor other browser prefixes, most browsers don't.
          */
-        this.doFullScreen = null;
-        if ((this.container = container)) {
-            this.doFullScreen = container['requestFullscreen'] || container['msRequestFullscreen'] || container['mozRequestFullScreen'] || container['webkitRequestFullscreen'];
-            if (this.doFullScreen) {
+        this.container = container;
+        if (this.container) {
+            this.container.doFullScreen = container['requestFullscreen'] || container['msRequestFullscreen'] || container['mozRequestFullScreen'] || container['webkitRequestFullscreen'];
+            if (this.container.doFullScreen) {
                 for (i = 0; i < asWebPrefixes.length; i++) {
                     sEvent = asWebPrefixes[i] + 'fullscreenchange';
                     if ('on' + sEvent in document) {
@@ -2572,7 +2572,7 @@ class Video extends Component {
             switch (sBinding) {
 
             case "fullScreen":
-                if (this.doFullScreen) {
+                if (this.container && this.container.doFullScreen) {
                     control.onclick = function onClickFullScreen() {
                         if (DEBUG) video.printMessage("fullScreen()");
                         video.goFullScreen();
@@ -2658,7 +2658,7 @@ class Video extends Component {
     {
         var fSuccess = false;
         if (this.container) {
-            if (this.doFullScreen) {
+            if (this.container.doFullScreen) {
                 /*
                  * Styling the container with a width of "100%" and a height of "auto" works great when the aspect ratio
                  * of our virtual screen is at least roughly equivalent to the physical screen's aspect ratio, but now that
@@ -2709,7 +2709,7 @@ class Video extends Component {
                     this.canvasScreen.style.margin = "auto";
                 }
                 this.container.style.backgroundColor = this.colorScreen;
-                this.doFullScreen();
+                this.container.doFullScreen();
                 fSuccess = true;
             }
             this.setFocus();

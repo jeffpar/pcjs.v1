@@ -8,7 +8,7 @@ redirect_from:
 ---
 
 IBM PC Machine Configurations
----
+-----------------------------
 
 PCjs supports these early [IBM PC Machines](#ibm-pc-machines):
 

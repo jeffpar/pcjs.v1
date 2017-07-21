@@ -893,6 +893,28 @@ class Computer extends Component {
      */
     checkPower()
     {
+        if (this.flags.unloading) {
+            /*
+             * We happen to know that we're currently only called by the CPU's onClickRun() function, so
+             * if the unloading flag is set, then we've somehow gotten into a weird state where the machine
+             * thinks it's being (or has been) unloaded by the browser, but in fact, it has not.
+             *
+             * The only time I've seen this happen is when the user clicks a link on a page that the browser
+             * decided to treat as a download operation, instead of loading a new page.  The proper way to
+             * resolve that confusion is to set the "download" attribute on the link (which will prevent the
+             * page's "onbeforeunload" handler from being called in the first place), but we cannot guarantee
+             * that all such links will have their "download" attribute properly set.
+             *
+             * Hence, this code: we do the same thing that the show() function does, which is to attempt a
+             * REPOWER operation.  If that doesn't result in the powered flag getting turned back on, well,
+             * then we're probably screwed.
+             */
+            this.flags.unloading = false;
+            if (this.flags.initDone && !this.flags.powered) {
+                this.powerOn(Computer.RESUME_REPOWER);
+            }
+        }
+
         if (this.flags.powered) return true;
 
         var component = null, iComponent;
@@ -1703,6 +1725,9 @@ class Computer extends Component {
             var computer = /** @type {Computer} */ (Component.getComponentByType("Computer", parmsComputer['id']));
             if (computer) {
 
+                /*
+                 * Clear new flag that Component functions (eg, notice()) should check before alerting the user.
+                 */
                 computer.flags.unloading = false;
 
                 if (DEBUG && computer.messageEnabled()) {
@@ -1710,7 +1735,7 @@ class Computer extends Component {
                 }
 
                 if (computer.flags.initDone && !computer.flags.powered) {
-                    /**
+                    /*
                      * Repower the computer, notifying every component to continue running as-is.
                      */
                     computer.powerOn(Computer.RESUME_REPOWER);
@@ -1755,7 +1780,7 @@ class Computer extends Component {
             if (computer) {
 
                 /*
-                 * Added a new flag that Component functions (eg, notice()) should check before alerting the user.
+                 * Set new flag that Component functions (eg, notice()) should check before alerting the user.
                  */
                 computer.flags.unloading = true;
 

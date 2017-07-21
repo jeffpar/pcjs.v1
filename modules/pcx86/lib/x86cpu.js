@@ -3777,140 +3777,141 @@ class X86CPU extends CPU {
     popWord()
     {
         var w = this.getWord(this.regLSP);
-
         this.regLSP = (this.regLSP + (I386? this.sizeData : 2))|0;
-
         /*
-         * Properly comparing regLSP to regLSPLimit would normally require coercing both to unsigned
-         * (ie, floating-point) values.  But instead, we do a subtraction, (regLSPLimit - regLSP), and
-         * if the result is negative, we need only be concerned if the signs of both numbers are the same
-         * (ie, the sign of their XOR'ed union is positive).
-         *
-         * TODO: I'm combining the old 8088 address-wrap check with the new segment-limit check,
-         * even though the correct time to do the latter is immediately BEFORE the fetch, not AFTER;
-         * I'm working around this for now by applying a -1 fudge factor to the fault check below.
+         * Comparing regLSP to regLSPLimit requires coercing both to unsigned (ie, floating-point) values.
+         * If we didn't, when we subtracted a 32-bit value like 0x1 from a 32-bit limit like 0xFFFFFFF0 (-16),
+         * we would have a negative result, even though the value was well below the limit.
          */
-        var off = ((this.regLSPLimit - this.regLSP)|0);
-        if (off < 0 && (this.regLSPLimit ^ this.regLSP) >= 0) {
+        var delta = (this.regLSPLimit >>> 0) - (this.regLSP >>> 0);
+        if (delta < 0) {
             /*
-             * There's no such thing as an SS fault on the 8086/8088, and I'm assuming that, on newer
-             * processors, when the stack segment limit is set to the maximum, it's OK for the stack to wrap.
+             * There's no such thing as an SS fault on the 8086/8088, and in fact, we have to support the
+             * operation even when the address straddles the wrap boundary; other emulators tend to barf on
+             * a wrap, usually because they're running in V86 mode instead of real mode.
              */
-            if (this.model <= X86.MODEL_8088 || !this.segSS.fExpDown && this.segSS.limit == this.segSS.maskAddr || this.segSS.fExpDown && !this.segSS.limit) {
+            if (this.model <= X86.MODEL_8088) {
                 this.setSP((this.regLSP - this.segSS.base) & this.segSS.maskAddr);
-            } else if (off < -1) {          // fudge factor
-                X86.helpFault.call(this, X86.EXCEPTION.SS_FAULT, 0);
+                if (delta < -1) {
+                    w = (w & 0xff) | (this.getByte(this.regLSP - 1) << 8);
+                }
+            }
+            else {
+                /*
+                 * I'm assuming that, on newer processors, when the stack segment limit is set to the maximum,
+                 * it's OK for the stack to wrap, unless the new address is straddling the wrap boundary (ie, when
+                 * delta is < 0 and > -sizeData).
+                 */
+                if (!this.segSS.fExpDown && this.segSS.limit == this.segSS.maskAddr || this.segSS.fExpDown && !this.segSS.limit) {
+                    this.setSP((this.regLSP - this.segSS.base) & this.segSS.maskAddr);
+                } else {
+                    /*
+                     * TODO: I'm combining the old 8088 address-wrap check with the new segment-limit check, even though the
+                     * correct time to do the latter is immediately BEFORE the fetch, not AFTER; I'm working around this for now
+                     * by applying a -1 fudge factor to the following fault check.
+                     */
+                    if (delta < -1) {
+                        X86.helpFault.call(this, X86.EXCEPTION.SS_FAULT, 0);
+                    }
+                }
             }
         }
         return w;
     }
 
     /**
-     * pushData(d, width, size)
-     *
-     * This function serves two very limited purposes: 1) the ability to push data according to a previous
-     * operand size (width), and 2) the ability to write fewer bytes than the width if necessary (size).
-     *
-     * The former occurs when a 32-bit code segment performs a 16:32 call to a 16-bit code segment; after the
-     * new 16-bit code segment is loaded (and possible stack switch occurs), the return address (both segment
-     * and offset) must still be pushed as 32-bit values.
-     *
-     * The latter occurs with segment register pushes.  When a 32-bit operand size is in effect (ie, width is 4),
-     * only the low 16 bits should be written (size must be 2).  For all other kinds of pushes, width and size are
-     * impliedly the same.
-     *
-     * @this {X86CPU}
-     * @param {number} d is the data to push at current SP; SP decreased by size
-     * @param {number} width is the width of the data to push, in bytes (must be either 2 or 4)
-     * @param {number} size is the size of the data to push, in bytes (must be 1, 2, or 4, and <= width)
-     */
-    pushData(d, width, size)
-    {
-        this.assert((width == 2 || width == 4) && (size > 0 && size <= width));
-
-        var regLSP = (this.regLSP - width)|0;
-
-        /*
-         * Properly comparing regLSP to regLSPLimitLow would normally require coercing both to unsigned
-         * (ie, floating-point) values.  But instead, we do a subtraction, (regLSP - regLSPLimitLow), and
-         * if the result is negative, we need only be concerned if the signs of both numbers are the same
-         * (ie, the sign of their XOR'ed union is positive).
-         */
-        if (((regLSP - this.regLSPLimitLow)|0) < 0 && (this.regLSPLimitLow ^ regLSP) >= 0) {
-            /*
-             * There's no such thing as an SS fault on the 8086/8088, and I'm assuming that, on newer
-             * processors, when the stack segment limit is set to the maximum, it's OK for the stack to wrap.
-             */
-            if (this.model <= X86.MODEL_8088 || !this.segSS.fExpDown && this.segSS.limit == this.segSS.maskAddr || this.segSS.fExpDown && !this.segSS.limit) {
-                this.setSP((regLSP - this.segSS.base) & this.segSS.maskAddr);
-                regLSP = this.regLSP;
-            } else {
-                X86.helpFault.call(this, X86.EXCEPTION.SS_FAULT, 0);
-            }
-        }
-
-        switch(size) {
-        case 1:
-            this.setByte(regLSP, d);
-            break;
-        case 2:
-            this.setShort(regLSP, d);
-            break;
-        case 4:
-            this.setLong(regLSP, d);
-            break;
-        default:
-            this.assert(false);
-            break;
-        }
-
-        /*
-         * We update this.regLSP at the end to make life simpler for opcode handlers that perform only one
-         * pushWord() operation, relieving them from having to snapshot this.regLSP into this.opLSP needlessly.
-         */
-        this.regLSP = regLSP;
-    }
-
-    /**
      * pushWord(w)
+     *
+     * NOTE: pushWord() used to do a simplified version of pushData(), and while that might have made the emulator
+     * slightly faster, it was woefully duplicative.  Let's trust the combination of the Closure Compiler and the
+     * JavaScript engines to automatically inline instead.
      *
      * @this {X86CPU}
      * @param {number} w is the word (16-bit) value to push at current SP; SP decreased by 2 or 4
      */
     pushWord(w)
     {
-        /*
-         * This assertion is no longer valid, now that we've fixed opPUSH8() to use getIPDisp() instead of getIPByte(),
-         * thus sign-extending the byte as appropriate.  And since sign-extension necessarily affects the entire 32-bit
-         * value, this assertion could fail when dataMask is 16 bits.
-         *
-         *      this.assert((w & this.maskData) == w);
-         *
-         * setWord() calls setShort() or setLong() as appropriate, and setShort() truncates incoming values, so the fact
-         * that any incoming signed values will not be truncated to 16 bits should not be a concern.
-         */
-        var regLSP = (this.regLSP - (I386? this.sizeData : 2))|0;
+        this.pushData(w, I386? this.sizeData : 2);
+    }
 
+    /**
+     * pushData(data, width, size)
+     *
+     * The size parameter serves two very limited purposes: 1) the ability to push data according to a previous
+     * operand size, and 2) the ability to write fewer bytes than the width if necessary.
+     *
+     * The former occurs when a 32-bit code segment performs a 16:32 call to a 16-bit code segment; after the
+     * new 16-bit code segment is loaded (and possible stack switch occurs), the return address (both segment
+     * and offset) must still be pushed as 32-bit values.
+     *
+     * The latter occurs with segment register pushes.  When a 32-bit operand size is in effect (ie, width is 4),
+     * only the low 16 bits should be written (size must be 2).
+     *
+     * For all other kinds of pushes, width and size are impliedly the same.
+     *
+     * @this {X86CPU}
+     * @param {number} data is the data to push at current SP; SP decreased by size
+     * @param {number} width is the width of the data to push, in bytes (must be either 2 or 4)
+     * @param {number} [size] is the size of the data to push, in bytes (must be 1, 2, or 4, and <= width)
+     */
+    pushData(data, width, size = width)
+    {
+        this.assert((width == 2 || width == 4) && (size > 0 && size <= width));
+
+        var regLSP = (this.regLSP - width)|0;
         /*
-         * Properly comparing regLSP to regLSPLimitLow would normally require coercing both to unsigned
-         * (ie, floating-point) values.  But instead, we do a subtraction, (regLSP - regLSPLimitLow), and
-         * if the result is negative, we need only be concerned if the signs of both numbers are the same
-         * (ie, the sign of their XOR'ed union is positive).
+         * Comparing regLSP to regLSPLimitLow requires coercing both to unsigned (ie, floating-point) values.
+         * If we didn't, when we subtracted a 32-bit limit like 0xFFFFFFF0 (-16) from a 32-bit value like 0x1,
+         * we would have a positive result, even though the value was well below the limit.
          */
-        if (((regLSP - this.regLSPLimitLow)|0) < 0 && (this.regLSPLimitLow ^ regLSP) >= 0) {
+        var delta = (regLSP >>> 0) - (this.regLSPLimitLow >>> 0);
+        if (delta < 0) {
             /*
-             * There's no such thing as an SS fault on the 8086/8088, and I'm assuming that, on newer
-             * processors, when the stack segment limit is set to the maximum, it's OK for the stack to wrap.
+             * There's no such thing as an SS fault on the 8086/8088, and in fact, we have to support the
+             * operation even when the address straddles the wrap boundary (ie, when delta is -1); other
+             * emulators tend to barf on a wrap, usually because they're running in V86 mode instead of real mode.
              */
-            if (this.model <= X86.MODEL_8088 || !this.segSS.fExpDown && this.segSS.limit == this.segSS.maskAddr || this.segSS.fExpDown && !this.segSS.limit) {
+            if (this.model <= X86.MODEL_8088) {
+                if (delta == -1) {
+                    this.setByte(regLSP + 1, data >> 8);
+                    this.setSP((regLSP - this.segSS.base) & this.segSS.maskAddr);
+                    this.setByte(this.regLSP, data);
+                    return;
+                }
+                this.assert(!this.segSS.fExpDown && this.segSS.limit == this.segSS.maskAddr);
+            }
+            /*
+             * I'm assuming that, on newer processors, when the stack segment limit is set to the maximum,
+             * it's OK for the stack to wrap, unless the new address is straddling the wrap boundary (ie, when
+             * delta is < 0 and > -width).
+             */
+            if (!this.segSS.fExpDown && this.segSS.limit == this.segSS.maskAddr || this.segSS.fExpDown && !this.segSS.limit) {
+                if (delta < 0 && delta > -width) {
+                    X86.helpFault.call(this, X86.EXCEPTION.SS_FAULT, 0);
+                    return;
+                }
                 this.setSP((regLSP - this.segSS.base) & this.segSS.maskAddr);
                 regLSP = this.regLSP;
             } else {
                 X86.helpFault.call(this, X86.EXCEPTION.SS_FAULT, 0);
+                return;
             }
         }
 
-        this.setWord(regLSP, w);
+        switch(size) {
+        case 1:
+            this.setByte(regLSP, data);
+            break;
+        case 2:
+            this.setShort(regLSP, data);
+            break;
+        case 4:
+            this.setLong(regLSP, data);
+            break;
+        default:
+            this.assert(false);
+            break;
+        }
 
         /*
          * We update this.regLSP at the end to make life simpler for opcode handlers that perform only one

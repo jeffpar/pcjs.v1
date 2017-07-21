@@ -5,7 +5,7 @@ permalink: /modules/pcx86/bin/
 ---
 
 Running PCx86 From The Command-Line
----
+-----------------------------------
 
 In this *bin* directory, run:
 
@@ -26,15 +26,19 @@ The following output should appear:
 	PCx86 v1.x.x
 	Copyright © 2012-2017 Jeff Parsons <Jeff@pcjs.org>
 	License: GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+	warning: Machine component type 'HDC' not found
+	warning: Machine component type 'Mouse' not found
 	ibm5150.pc-mda-64k object created
-	PCx86> bus: 8Kb ROM at 000FE000
-	bus: 32Kb ROM at 000F6000
-	bus: 576Kb RAM at 00000000
-	bus: 4Kb VIDEO at 000B0000
+	PCx86> Bus: 8Kb ROM at 000FE000
+	Bus: 32Kb ROM at 000F6000
+	notice: Mounted diskette "PC-DOS 2.00 (Disk 1)" in drive A
+	notice: Mounted diskette "PC-DOS 2.00 (Disk 2)" in drive B
+	Bus: 576Kb RAM at 0000
+	Bus: 4Kb VIDEO at 000B0000
 	Type ? for help with PCx86 Debugger commands
 	AX=0000 BX=0000 CX=0000 DX=0000 SP=0000 BP=0000 SI=0000 DI=0000 
 	SS=0000 DS=0000 ES=0000 PS=F002 V0 D0 I0 T0 S0 Z0 A0 P0 C0 
-	&FFFF:0000 EA5BE000F0      JMP      &F000:E05B (romBIOS+0x0000005B)
+	&FFFF:0000 EA5BE000F0      JMP      &F000:E05B (romBIOS+0x005B)
 
 Start the machine with a `g` command:
 
