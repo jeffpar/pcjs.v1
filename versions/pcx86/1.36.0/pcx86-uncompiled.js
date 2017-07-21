@@ -18246,20 +18246,14 @@ class X86CPU extends CPU {
     popWord()
     {
         var w = this.getWord(this.regLSP);
-
         this.regLSP = (this.regLSP + (I386? this.sizeData : 2))|0;
         /*
-         * Properly comparing regLSP to regLSPLimit would normally require coercing both to unsigned
-         * (ie, floating-point) values.  But instead, we subtract them, and if the delta is negative,
-         * we need only be concerned if the signs of both numbers are the same (ie, the sign of their
-         * XOR'ed union is positive).
-         *
-         * TODO: I'm combining the old 8088 address-wrap check with the new segment-limit check,
-         * even though the correct time to do the latter is immediately BEFORE the fetch, not AFTER;
-         * I'm working around this for now by applying a -1 fudge factor to the fault check below.
+         * Comparing regLSP to regLSPLimit requires coercing both to unsigned (ie, floating-point) values.
+         * If we didn't, when we subtracted a 32-bit value like 0x1 from a 32-bit limit like 0xFFFFFFF0 (-16),
+         * we would have a negative result, even though the value was well below the limit.
          */
-        var delta = (this.regLSPLimit - this.regLSP)|0;
-        if (delta < 0 && (this.regLSPLimit ^ this.regLSP) >= 0) {
+        var delta = (this.regLSPLimit >>> 0) - (this.regLSP >>> 0);
+        if (delta < 0) {
             /*
              * There's no such thing as an SS fault on the 8086/8088, and in fact, we have to support the
              * operation even when the address straddles the wrap boundary; other emulators tend to barf on
@@ -18279,8 +18273,15 @@ class X86CPU extends CPU {
                  */
                 if (!this.segSS.fExpDown && this.segSS.limit == this.segSS.maskAddr || this.segSS.fExpDown && !this.segSS.limit) {
                     this.setSP((this.regLSP - this.segSS.base) & this.segSS.maskAddr);
-                } else if (delta < -1) {            // fudge factor
-                    X86.helpFault.call(this, X86.EXCEPTION.SS_FAULT, 0);
+                } else {
+                    /*
+                     * TODO: I'm combining the old 8088 address-wrap check with the new segment-limit check, even though the
+                     * correct time to do the latter is immediately BEFORE the fetch, not AFTER; I'm working around this for now
+                     * by applying a -1 fudge factor to the following fault check.
+                     */
+                    if (delta < -1) {
+                        X86.helpFault.call(this, X86.EXCEPTION.SS_FAULT, 0);
+                    }
                 }
             }
         }
@@ -18290,7 +18291,7 @@ class X86CPU extends CPU {
     /**
      * pushWord(w)
      *
-     * NOTE: pushWord() used to do a simplfied version of pushData(), and while that might have made the emulator
+     * NOTE: pushWord() used to do a simplified version of pushData(), and while that might have made the emulator
      * slightly faster, it was woefully duplicative.  Let's trust the combination of the Closure Compiler and the
      * JavaScript engines to automatically inline instead.
      *
@@ -18328,13 +18329,12 @@ class X86CPU extends CPU {
 
         var regLSP = (this.regLSP - width)|0;
         /*
-         * Properly comparing regLSP to regLSPLimitLow would normally require coercing both to unsigned
-         * (ie, floating-point) values.  But instead, we subtract them, and if the delta is negative,
-         * we need only be concerned if the signs of the original numbers are the same (ie, the sign of
-         * their XOR'ed union is positive).
+         * Comparing regLSP to regLSPLimitLow requires coercing both to unsigned (ie, floating-point) values.
+         * If we didn't, when we subtracted a 32-bit limit like 0xFFFFFFF0 (-16) from a 32-bit value like 0x1,
+         * we would have a positive result, even though the value was well below the limit.
          */
-        var delta = (regLSP - this.regLSPLimitLow)|0;
-        if (delta < 0 && (this.regLSPLimitLow ^ this.regLSP) >= 0) {
+        var delta = (regLSP >>> 0) - (this.regLSPLimitLow >>> 0);
+        if (delta < 0) {
             /*
              * There's no such thing as an SS fault on the 8086/8088, and in fact, we have to support the
              * operation even when the address straddles the wrap boundary (ie, when delta is -1); other
@@ -48893,10 +48893,10 @@ class Video extends Component {
          * is exasperating; browsers can't agree on 'full' or 'Full, 'request' or 'Request', 'screen' or 'Screen', and
          * while some browsers honor other browser prefixes, most browsers don't.
          */
-        this.doFullScreen = null;
-        if ((this.container = container)) {
-            this.doFullScreen = container['requestFullscreen'] || container['msRequestFullscreen'] || container['mozRequestFullScreen'] || container['webkitRequestFullscreen'];
-            if (this.doFullScreen) {
+        this.container = container;
+        if (this.container) {
+            this.container.doFullScreen = container['requestFullscreen'] || container['msRequestFullscreen'] || container['mozRequestFullScreen'] || container['webkitRequestFullscreen'];
+            if (this.container.doFullScreen) {
                 for (i = 0; i < asWebPrefixes.length; i++) {
                     sEvent = asWebPrefixes[i] + 'fullscreenchange';
                     if ('on' + sEvent in document) {
@@ -49112,7 +49112,7 @@ class Video extends Component {
             switch (sBinding) {
 
             case "fullScreen":
-                if (this.doFullScreen) {
+                if (this.container && this.container.doFullScreen) {
                     control.onclick = function onClickFullScreen() {
                         if (DEBUG) video.printMessage("fullScreen()");
                         video.goFullScreen();
@@ -49198,7 +49198,7 @@ class Video extends Component {
     {
         var fSuccess = false;
         if (this.container) {
-            if (this.doFullScreen) {
+            if (this.container.doFullScreen) {
                 /*
                  * Styling the container with a width of "100%" and a height of "auto" works great when the aspect ratio
                  * of our virtual screen is at least roughly equivalent to the physical screen's aspect ratio, but now that
@@ -49249,7 +49249,7 @@ class Video extends Component {
                     this.canvasScreen.style.margin = "auto";
                 }
                 this.container.style.backgroundColor = this.colorScreen;
-                this.doFullScreen();
+                this.container.doFullScreen();
                 fSuccess = true;
             }
             this.setFocus();
