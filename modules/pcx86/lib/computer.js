@@ -350,6 +350,11 @@ class Computer extends Component {
             if (video) {
                 var control = video.getTextArea();
                 if (control) {
+                    /*
+                     * By default, the Video textarea overlay has opacity and lineHeight styles set to "0"
+                     * to make the overall textarea and its blinking caret invisible (respectively), so in order
+                     * to use it as a diagnostic display, we must temporarily set both those styles to "1".
+                     */
                     control.style.opacity = "1";
                     control.style.lineHeight = "1";
                     this.cDiagnosticScreens++;
@@ -370,8 +375,20 @@ class Computer extends Component {
             if (video) {
                 var control = video.getTextArea();
                 if (control) {
+                    var agent = Web.getUserAgent();
+                    /*
+                     * Return the Video textarea overlay's opacity and lineHeight styles to their original values.
+                     */
                     control.style.opacity = "0";
                     control.style.lineHeight = "0";
+                    /*
+                     * Setting lineHeight in IE isn't sufficient to hide the caret; we must also set fontSize to "0",
+                     * and we make the change IE-specific because it can have weird side-effects in other browsers (eg,
+                     * it makes Safari on iOS over-zoom whenever the textarea receives focus).  And making it IE-specific
+                     * is, as usual, harder than it should be, because IE11 stopped identifying itself as "MSIE", hence
+                     * the additional "Trident" check.
+                     */
+                    if (agent.indexOf("MSIE") >= 0 || agent.indexOf("Trident") >= 0) control.style.fontSize = "0";
                     control.value = "";
                 }
             }
