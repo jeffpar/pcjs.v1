@@ -8574,7 +8574,9 @@ class Bus extends Component {
              */
             this.cpu.flushPageBlocks();
             if (!this.cpu.isRunning()) {        // allocation messages at "run time" are bit too much
-                this.status(Math.floor(size / 1024) + "Kb " + Memory.TYPE.NAMES[type] + " at " + Str.toHex(addr));
+                var kb = (size / 1024)|0;
+                var sb = kb? (kb + "Kb ") : (size + " bytes ");
+                this.status(sb + Memory.TYPE.NAMES[type] + " at " + Str.toHex(addr));
             }
             return true;
         }
@@ -18245,8 +18247,9 @@ class X86CPU extends CPU {
      */
     popWord()
     {
-        var w = this.getWord(this.regLSP);
-        this.regLSP = (this.regLSP + (I386? this.sizeData : 2))|0;
+        var data = this.getWord(this.regLSP);
+        var width = I386? this.sizeData : 2;
+        this.regLSP = (this.regLSP + width)|0;
         /*
          * Comparing regLSP to regLSPLimit requires coercing both to unsigned (ie, floating-point) values.
          * If we didn't, when we subtracted a 32-bit value like 0x1 from a 32-bit limit like 0xFFFFFFF0 (-16),
@@ -18262,30 +18265,27 @@ class X86CPU extends CPU {
             if (this.model <= X86.MODEL_8088) {
                 this.setSP((this.regLSP - this.segSS.base) & this.segSS.maskAddr);
                 if (delta < -1) {
-                    w = (w & 0xff) | (this.getByte(this.regLSP - 1) << 8);
+                    data = (data & 0xff) | (this.getByte(this.regLSP - 1) << 8);
                 }
             }
             else {
                 /*
                  * I'm assuming that, on newer processors, when the stack segment limit is set to the maximum,
                  * it's OK for the stack to wrap, unless the new address is straddling the wrap boundary (ie, when
-                 * delta is < 0 and > -sizeData).
+                 * delta is < -1).
+                 *
+                 * NOTE: This combines the old 8088 address-wrap check with the new segment-limit check, even though
+                 * the correct time to do the latter is immediately BEFORE the fetch, not AFTER.
                  */
-                if (!this.segSS.fExpDown && this.segSS.limit == this.segSS.maskAddr || this.segSS.fExpDown && !this.segSS.limit) {
+                if (delta < -1) {
+                    X86.helpFault.call(this, X86.EXCEPTION.SS_FAULT, 0);
+                }
+                else if (!this.segSS.fExpDown && this.segSS.limit == this.segSS.maskAddr || this.segSS.fExpDown && !this.segSS.limit) {
                     this.setSP((this.regLSP - this.segSS.base) & this.segSS.maskAddr);
-                } else {
-                    /*
-                     * TODO: I'm combining the old 8088 address-wrap check with the new segment-limit check, even though the
-                     * correct time to do the latter is immediately BEFORE the fetch, not AFTER; I'm working around this for now
-                     * by applying a -1 fudge factor to the following fault check.
-                     */
-                    if (delta < -1) {
-                        X86.helpFault.call(this, X86.EXCEPTION.SS_FAULT, 0);
-                    }
                 }
             }
         }
-        return w;
+        return data;
     }
 
     /**
@@ -18355,7 +18355,7 @@ class X86CPU extends CPU {
              * delta is < 0 and > -width).
              */
             if (!this.segSS.fExpDown && this.segSS.limit == this.segSS.maskAddr || this.segSS.fExpDown && !this.segSS.limit) {
-                if (delta < 0 && delta > -width) {
+                if (delta > -width) {
                     X86.helpFault.call(this, X86.EXCEPTION.SS_FAULT, 0);
                     return;
                 }
@@ -59087,13 +59087,13 @@ class FileInfo {
                         }
                     }
                     if (!sSymbol && entryNearest) {
-                        sSymbol = this.sModule + '!' + entryNearest[1] + "+" + Str.toHexWord(cbNearest);
+                        sSymbol = this.sModule + '!' + entryNearest[1] + "+" + Str.toHex(cbNearest, 0, true);
                     }
                     break;
                 }
             }
         }
-        return sSymbol || this.sName + '+' + Str.toHexLong(off);
+        return sSymbol || this.sName + '+' + Str.toHex(off, 0, true);
     }
 }
 

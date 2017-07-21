@@ -2769,13 +2769,13 @@ class FileInfo {
                         }
                     }
                     if (!sSymbol && entryNearest) {
-                        sSymbol = this.sModule + '!' + entryNearest[1] + "+" + Str.toHexWord(cbNearest);
+                        sSymbol = this.sModule + '!' + entryNearest[1] + "+" + Str.toHex(cbNearest, 0, true);
                     }
                     break;
                 }
             }
         }
-        return sSymbol || this.sName + '+' + Str.toHexLong(off);
+        return sSymbol || this.sName + '+' + Str.toHex(off, 0, true);
     }
 }
 
