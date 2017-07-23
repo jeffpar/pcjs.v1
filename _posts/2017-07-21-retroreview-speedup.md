@@ -1,6 +1,6 @@
 ---
 layout: post
-title: RetroReview: SPEEDUP
+title: "RetroReview: SPEEDUP"
 date: 2017-07-21 10:00:00
 permalink: /blog/2017/07/21/
 machines:
