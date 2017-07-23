@@ -5,7 +5,7 @@ permalink: /pubs/pc/reference/intel/80286/real_mode/
 ---
 
 Intel 80286 CPU: Real Mode Emulation
----
+------------------------------------
 
 [The following information is from an undated 15-page Intel document titled "Undocumented iAPX 286 Test Instruction",
 pp. 4-12]
@@ -148,7 +148,7 @@ cache base and limit loaded by [LOADALL](../loadall/) is used to generate physic
 The WAIT instructions required by the 8087 before ESC instructions can be safely executed by the 80287.
 
 Discrepancies from an iAPX 86/88 Using Emulation
----
+------------------------------------------------
 
 An 80286 cannot exactly emulate an 8086/88 in all possible cases. Most differences are due to the extra protection
 checks made in the 80286 which are not made in the 8086/88. The discrepancies listed here are minor enough that very
@@ -250,7 +250,7 @@ few programs will be affected.
  RCR instructions are not restartable if their memory-based operand is in a write-protected segment.
 
 Extending the Address Space of Current iAPX 86 Software
----
+-------------------------------------------------------
 
 Current iAPX 86 real mode programs can use the extended address space of the iAPX 286 in a limited manner.
 To address the extended memory, [LOADALL](../loadall/) must be used to load the descriptor cache with an base address
@@ -285,7 +285,7 @@ A semaphore must be placed around software that writes into the [LOADALL](../loa
 the software can execute [LOADALL](../loadall/) without interruption.
 
 Mixing Real Mode and Protected Mode
----
+-----------------------------------
 
 The 80286 can alternate between real mode and protected mode. Some programs could be executed in real mode in the
 bottom megabyte of memory, while others execute in protected mode in the upper 15 Mbytes of memory. An external OR

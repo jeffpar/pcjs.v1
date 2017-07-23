@@ -492,6 +492,8 @@ MarkOut.prototype.convertMD = function(sIndent)
                                     cProps = 0;
                                 } else {
                                     if (cProps++) sValue += ',';
+                                    var match = sPropValue.match(/^"(.*)"$/);
+                                    if (match) sPropValue = match[1];
                                     sValue += '"' + sPropName + '":"' + sPropValue + '"';
                                 }
                             }

@@ -83,8 +83,8 @@ class X86Seg {
         this.maskData = this.maskAddr = 0xffff;
 
         this.loadV86 = this.loadReal;
-        this.checkReadV86 = this.checkReadReal;
-        this.checkWriteV86 = this.checkWriteReal;
+        this.checkReadV86 = this.checkReadWriteReal;
+        this.checkWriteV86 = this.checkReadWriteReal;
 
         /*
          * Preallocated object for "probed" segment loads
@@ -109,14 +109,20 @@ class X86Seg {
          *
          * loadIDT() sets fCall to true unconditionally in protected-mode (fCall has no meaning in real-mode).
          */
-        if (this.id == 1) {     // X86Seg.ID.CODE (don't use until it's defined, or the Closure Compiler won't inline it)
+        if (this.id == 1 /* X86Seg.ID.CODE */) {        // don't use X86Seg.ID.CODE until it's defined, or the Closure Compiler won't inline it
             this.offIP = 0;
             this.fCall = null;
             this.fStackSwitch = false;
             this.awParms = new Array(32);
             this.aCallBreaks = [];
         }
+
         this.updateMode(true, fProt);
+
+        if (this.id == 0 /* X86Seg.ID.NULL */) {
+            this.checkRead = this.checkReadWriteNone;
+            this.checkWrite = this.checkReadWriteNone;
+        }
     }
 
     /**
@@ -301,34 +307,39 @@ class X86Seg {
     }
 
     /**
-     * checkReadReal(off, cb)
-     *
-     * TODO: Invoke X86.helpFault.call(this.cpu, X86.EXCEPTION.GP_FAULT) if off+cb is beyond offMax on 80186 and up;
-     * also, determine whether helpFault() call should include an error code, since this is happening in real-mode.
+     * checkReadWriteNone(off, cb)
      *
      * @this {X86Seg}
      * @param {number} off is a segment-relative offset
      * @param {number} cb is number of bytes to check (1, 2 or 4)
-     * @return {number} corresponding linear address if valid, or X86.ADDR_INVALID if error (TODO: No error conditions yet)
+     * @return {number} corresponding linear address
      */
-    checkReadReal(off, cb)
+    checkReadWriteNone(off, cb)
     {
         return (this.base + off)|0;
     }
 
     /**
-     * checkWriteReal(off, cb)
-     *
-     * TODO: Invoke X86.helpFault.call(this.cpu, X86.EXCEPTION.GP_FAULT) if off+cb is beyond offMax on 80186 and up;
-     * also, determine whether helpFault() call should include an error code, since this is happening in real-mode.
+     * checkReadWriteReal(off, cb)
      *
      * @this {X86Seg}
      * @param {number} off is a segment-relative offset
      * @param {number} cb is number of bytes to check (1, 2 or 4)
-     * @return {number} corresponding linear address if valid, or X86.ADDR_INVALID if error (TODO: No error conditions yet)
+     * @return {number} corresponding linear address
      */
-    checkWriteReal(off, cb)
+    checkReadWriteReal(off, cb)
     {
+        /*
+         * Since off could be a 32-bit value with the sign bit (bit 31) set, we must convert
+         * it to an unsigned value using ">>>"; offMax was already converted at segment load time.
+         */
+        if ((off >>> 0) + cb > this.offMax) {
+            if (this.cpu.model <= X86.MODEL_8088) {
+                this.cpu.opFlags |= X86.OPFLAG.WRAP;
+            } else {
+                X86.helpFault.call(this.cpu, X86.EXCEPTION.GP_FAULT);
+            }
+        }
         return (this.base + off)|0;
     }
 
@@ -1542,8 +1553,8 @@ class X86Seg {
          */
         this.load = this.loadReal;
         this.loadIDT = this.loadIDTReal;
-        this.checkRead = this.checkReadReal;
-        this.checkWrite = this.checkWriteReal;
+        this.checkRead = this.checkReadWriteReal;
+        this.checkWrite = this.checkReadWriteReal;
         this.cpl = this.dpl = 0;
         this.addrDesc = X86.ADDR_INVALID;
         this.fStackSwitch = false;
