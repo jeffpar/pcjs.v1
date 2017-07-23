@@ -54719,6 +54719,7 @@ class SerialPort extends Component {
          */
         this.tabSize = parmsSerial['tabSize'];
         this.charBOL = parmsSerial['charBOL'];
+        this.charPrev = 0;
         this.iLogicalCol = 0;
 
         this.bMSRInit = SerialPort.MSR.CTS | SerialPort.MSR.DSR;
@@ -55183,6 +55184,15 @@ class SerialPort extends Component {
     inIIR(port, addrFrom)
     {
         var b = this.bIIR;
+        /*
+         * TODO: Based on how BASIC.COM polls this register repeatedly in its serial ISR, it's clear that we
+         * should maintain a separate set of "trigger" bits for each of the four possible interrupt conditions,
+         * and that updateIRR() should test-and-clear each of those trigger bits in priority order, updating the
+         * IIR register as appropriate.  Then we could simply call updateIRR() here to set the next interrupt
+         * condition, if any.  As things stand now, another interrupt won't occur until another explicit
+         * "triggering" call to updateIRR() is issued, so we have to set the NO_INT bit here every time.
+         */
+        this.bIIR |= SerialPort.IIR.NO_INT;
         this.printMessageIO(port, null, addrFrom, "IIR", b);
         return b;
     }
@@ -55266,6 +55276,7 @@ class SerialPort extends Component {
             this.bLSR &= ~(SerialPort.LSR.THRE | SerialPort.LSR.TSRE);
             if (this.transmitByte(bOut)) {
                 this.bLSR |= (SerialPort.LSR.THRE | SerialPort.LSR.TSRE);
+                this.updateIRR();
                 /*
                  * QUESTION: Does this mean we should also flush/zero bTHR?
                  */
@@ -55344,8 +55355,14 @@ class SerialPort extends Component {
     updateIRR()
     {
         var bIIR = -1;
+        /*
+         * We check all the interrupt conditions in priority order.  TODO: Add INT_LSR.
+         */
         if ((this.bLSR & SerialPort.LSR.DR) && (this.bIER & SerialPort.IER.RBR_AVAIL)) {
             bIIR = SerialPort.IIR.INT_RBR;
+        }
+        else if ((this.bLSR & SerialPort.LSR.THRE) && (this.bIER & SerialPort.IER.THR_EMPTY)) {
+            bIIR = SerialPort.IIR.INT_THR;
         }
         else if ((this.bMSR & (SerialPort.MSR.DCTS | SerialPort.MSR.DDSR)) && (this.bIER & SerialPort.IER.MSR_DELTA)) {
             bIIR = SerialPort.IIR.INT_MSR;
@@ -55355,7 +55372,7 @@ class SerialPort extends Component {
             this.bIIR |= bIIR;
             /*
              * TODO: Remove this arbitrary 100-instruction delay once we've added support for baud rate throttling
-             * (see TODO above regarding baud rate).
+             * (see notes above regarding baud rate).
              */
             if (this.chipset && this.nIRQ) this.chipset.setIRR(this.nIRQ, 100);
         } else {
@@ -55403,11 +55420,19 @@ class SerialPort extends Component {
                     nChars = tabSize - (this.iLogicalCol % tabSize);
                     if (this.tabSize) s = Str.pad("", nChars);
                 }
-                if (this.charBOL && !this.iLogicalCol && nChars) s = String.fromCharCode(this.charBOL) + s;
+                if (!this.iLogicalCol && nChars) {
+                    /*
+                     * When BASIC.COM outputs a listing to a serial port, it ends every line with a CR (0x0D)
+                     * but no LF (0x0A), which seems a bit odd.  We fix that here.
+                     */
+                    if (this.charPrev != 0x0A) s = "\n" + s;
+                    if (this.charBOL) s = String.fromCharCode(this.charBOL) + s;
+                }
                 this.controlIOBuffer.value += s;
                 this.controlIOBuffer.scrollTop = this.controlIOBuffer.scrollHeight;
                 this.iLogicalCol += nChars;
             }
+            this.charPrev = b;
             fTransmitted = true;
         }
         else if (this.consoleOutput != null) {
@@ -70165,7 +70190,7 @@ class DebuggerX86 extends Debugger {
         }
 
         if (sComment && fComplete) {
-            sLine = Str.pad(sLine, dbgAddrIns.fAddr32? 74 : 56) + ';' + sComment;
+            sLine = Str.pad(sLine, dbgAddrIns.fAddr32? 74 : 62) + ';' + sComment;
             if (!this.cpu.flags.checksum) {
                 sLine += (nSequence != null? '=' + nSequence.toString() : "");
             } else {
