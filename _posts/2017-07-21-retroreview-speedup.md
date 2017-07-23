@@ -208,9 +208,23 @@ head settling times are rarely simulated.  As I suggested in my [last blog post]
 degree of authenticity that all emulators should strive for, and PCjs emulators are no exception to that rule -- I
 just haven't gotten around to it yet.
 
+### "IBM Updates DOS to 1.10"
+
+In the very next issue of PC Magazine (August 1982), there's an article titled
+"[IBM Updates DOS to 1.10](https://books.google.com/books?id=WYnHD9WSWdAC&lpg=PA110&ots=QlUklzAI8s&dq=pc%20magazine%20%22IBM%20Updates%20DOS%20To%201.10%22&pg=PA111#v=onepage&q&f=false)"
+which includes a section on disk I/O performance and the fate of `SPEEDUP`:
+
+> The speed of the disk I/O has been increased.  Although IBM has not published any specific figures,
+improvement in disk access appears to be 100 percent. Using the format command as a baseline, DOS version 1.0
+formatted a single-sided diskette in 34 seconds, while DOS 1.10 formatted a single-sided diskette in 19 seconds,
+including the time necessary to provide improved specification printout upon completion of the format process.
+
+> SPEEDUP.COM, a patch to DOS 1.0 that performed the same function, is no longer needed in DOS 1.10, and any
+attempt to use it in the new DOS will result in program errors or unpredictable results.
+
 ### Epilogue
 
-There were some nice side benefits to debugging the problems introduced by `SPEEDUP`.
+There were some nice side benefits to debugging the problems uncovered by `SPEEDUP`.
 
 First, when attempting to `LIST` a BASIC program to a serial port, I discovered that BASIC depends on the port
 generating a "Transmitter Holding Register Empty" interrupt after outputting each byte, and that I had never actually
