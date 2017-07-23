@@ -2,7 +2,7 @@
 /* @author Jeff Parsons (@jeffpar)
    @website http://www.pcjs.org/
    @created 2013-05-05
-   @modified 2014-03-12
+   @modified 2017-07-21
    @license http://www.gnu.org/licenses/gpl.html
  */
 
@@ -217,7 +217,7 @@
     font-size: medium;
     background: rgba(0, 0, 0, .5);
     opacity: 0;
-    line-height: 0; /* try to prevent Safari on iOS from always displaying a blinking cursor */
+    line-height: 0; /* try to prevent Safari on iOS from always displaying a blinking caret */
 }
 .pcjs-reference {
     float: left;

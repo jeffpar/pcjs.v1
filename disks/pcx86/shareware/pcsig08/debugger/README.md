@@ -5,6 +5,7 @@ permalink: /disks/pcx86/shareware/pcsig08/debugger/
 machines:
   - id: pcsig08
     type: pcx86
+    resume: 1
     debugger: true
     autoStart: true
 ---

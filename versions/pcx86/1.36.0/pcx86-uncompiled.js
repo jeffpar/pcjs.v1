@@ -3707,11 +3707,11 @@ class Component {
                      * Why do we throw an Error only to immediately catch and ignore it?  Simply to give
                      * any IDE the opportunity to inspect the application's state.  Even when the IDE has
                      * control, you should still be able to invoke Debugger commands from the IDE's REPL,
-                     * using the '$' global function that the Debugger constructor defines; eg:
+                     * using the global function that the Debugger constructor defines; eg:
                      *
-                     *      $('r')
-                     *      $('dw 0:0')
-                     *      $('h')
+                     *      pcx86('r')
+                     *      pcx86('dw 0:0')
+                     *      pcx86('h')
                      *      ...
                      *
                      * If you have no desire to stop on assertions, consider this a no-op.  However, another
@@ -8574,7 +8574,9 @@ class Bus extends Component {
              */
             this.cpu.flushPageBlocks();
             if (!this.cpu.isRunning()) {        // allocation messages at "run time" are bit too much
-                this.status(Math.floor(size / 1024) + "Kb " + Memory.TYPE.NAMES[type] + " at " + Str.toHex(addr));
+                var kb = (size / 1024)|0;
+                var sb = kb? (kb + "Kb ") : (size + " bytes ");
+                this.status(sb + Memory.TYPE.NAMES[type] + " at " + Str.toHex(addr));
             }
             return true;
         }
@@ -18245,8 +18247,9 @@ class X86CPU extends CPU {
      */
     popWord()
     {
-        var w = this.getWord(this.regLSP);
-        this.regLSP = (this.regLSP + (I386? this.sizeData : 2))|0;
+        var data = this.getWord(this.regLSP);
+        var width = I386? this.sizeData : 2;
+        this.regLSP = (this.regLSP + width)|0;
         /*
          * Comparing regLSP to regLSPLimit requires coercing both to unsigned (ie, floating-point) values.
          * If we didn't, when we subtracted a 32-bit value like 0x1 from a 32-bit limit like 0xFFFFFFF0 (-16),
@@ -18262,30 +18265,27 @@ class X86CPU extends CPU {
             if (this.model <= X86.MODEL_8088) {
                 this.setSP((this.regLSP - this.segSS.base) & this.segSS.maskAddr);
                 if (delta < -1) {
-                    w = (w & 0xff) | (this.getByte(this.regLSP - 1) << 8);
+                    data = (data & 0xff) | (this.getByte(this.regLSP - 1) << 8);
                 }
             }
             else {
                 /*
                  * I'm assuming that, on newer processors, when the stack segment limit is set to the maximum,
                  * it's OK for the stack to wrap, unless the new address is straddling the wrap boundary (ie, when
-                 * delta is < 0 and > -sizeData).
+                 * delta is < -1).
+                 *
+                 * NOTE: This combines the old 8088 address-wrap check with the new segment-limit check, even though
+                 * the correct time to do the latter is immediately BEFORE the fetch, not AFTER.
                  */
-                if (!this.segSS.fExpDown && this.segSS.limit == this.segSS.maskAddr || this.segSS.fExpDown && !this.segSS.limit) {
+                if (delta < -1) {
+                    X86.helpFault.call(this, X86.EXCEPTION.SS_FAULT, 0);
+                }
+                else if (!this.segSS.fExpDown && this.segSS.limit == this.segSS.maskAddr || this.segSS.fExpDown && !this.segSS.limit) {
                     this.setSP((this.regLSP - this.segSS.base) & this.segSS.maskAddr);
-                } else {
-                    /*
-                     * TODO: I'm combining the old 8088 address-wrap check with the new segment-limit check, even though the
-                     * correct time to do the latter is immediately BEFORE the fetch, not AFTER; I'm working around this for now
-                     * by applying a -1 fudge factor to the following fault check.
-                     */
-                    if (delta < -1) {
-                        X86.helpFault.call(this, X86.EXCEPTION.SS_FAULT, 0);
-                    }
                 }
             }
         }
-        return w;
+        return data;
     }
 
     /**
@@ -18355,7 +18355,7 @@ class X86CPU extends CPU {
              * delta is < 0 and > -width).
              */
             if (!this.segSS.fExpDown && this.segSS.limit == this.segSS.maskAddr || this.segSS.fExpDown && !this.segSS.limit) {
-                if (delta < 0 && delta > -width) {
+                if (delta > -width) {
                     X86.helpFault.call(this, X86.EXCEPTION.SS_FAULT, 0);
                     return;
                 }
@@ -54719,6 +54719,7 @@ class SerialPort extends Component {
          */
         this.tabSize = parmsSerial['tabSize'];
         this.charBOL = parmsSerial['charBOL'];
+        this.charPrev = 0;
         this.iLogicalCol = 0;
 
         this.bMSRInit = SerialPort.MSR.CTS | SerialPort.MSR.DSR;
@@ -55183,6 +55184,15 @@ class SerialPort extends Component {
     inIIR(port, addrFrom)
     {
         var b = this.bIIR;
+        /*
+         * TODO: Based on how BASIC.COM polls this register repeatedly in its serial ISR, it's clear that we
+         * should maintain a separate set of "trigger" bits for each of the four possible interrupt conditions,
+         * and that updateIRR() should test-and-clear each of those trigger bits in priority order, updating the
+         * IIR register as appropriate.  Then we could simply call updateIRR() here to set the next interrupt
+         * condition, if any.  As things stand now, another interrupt won't occur until another explicit
+         * "triggering" call to updateIRR() is issued, so we have to set the NO_INT bit here every time.
+         */
+        this.bIIR |= SerialPort.IIR.NO_INT;
         this.printMessageIO(port, null, addrFrom, "IIR", b);
         return b;
     }
@@ -55266,6 +55276,7 @@ class SerialPort extends Component {
             this.bLSR &= ~(SerialPort.LSR.THRE | SerialPort.LSR.TSRE);
             if (this.transmitByte(bOut)) {
                 this.bLSR |= (SerialPort.LSR.THRE | SerialPort.LSR.TSRE);
+                this.updateIRR();
                 /*
                  * QUESTION: Does this mean we should also flush/zero bTHR?
                  */
@@ -55344,8 +55355,14 @@ class SerialPort extends Component {
     updateIRR()
     {
         var bIIR = -1;
+        /*
+         * We check all the interrupt conditions in priority order.  TODO: Add INT_LSR.
+         */
         if ((this.bLSR & SerialPort.LSR.DR) && (this.bIER & SerialPort.IER.RBR_AVAIL)) {
             bIIR = SerialPort.IIR.INT_RBR;
+        }
+        else if ((this.bLSR & SerialPort.LSR.THRE) && (this.bIER & SerialPort.IER.THR_EMPTY)) {
+            bIIR = SerialPort.IIR.INT_THR;
         }
         else if ((this.bMSR & (SerialPort.MSR.DCTS | SerialPort.MSR.DDSR)) && (this.bIER & SerialPort.IER.MSR_DELTA)) {
             bIIR = SerialPort.IIR.INT_MSR;
@@ -55355,7 +55372,7 @@ class SerialPort extends Component {
             this.bIIR |= bIIR;
             /*
              * TODO: Remove this arbitrary 100-instruction delay once we've added support for baud rate throttling
-             * (see TODO above regarding baud rate).
+             * (see notes above regarding baud rate).
              */
             if (this.chipset && this.nIRQ) this.chipset.setIRR(this.nIRQ, 100);
         } else {
@@ -55403,11 +55420,19 @@ class SerialPort extends Component {
                     nChars = tabSize - (this.iLogicalCol % tabSize);
                     if (this.tabSize) s = Str.pad("", nChars);
                 }
-                if (this.charBOL && !this.iLogicalCol && nChars) s = String.fromCharCode(this.charBOL) + s;
+                if (!this.iLogicalCol && nChars) {
+                    /*
+                     * When BASIC.COM outputs a listing to a serial port, it ends every line with a CR (0x0D)
+                     * but no LF (0x0A), which seems a bit odd.  We fix that here.
+                     */
+                    if (this.charPrev != 0x0A) s = "\n" + s;
+                    if (this.charBOL) s = String.fromCharCode(this.charBOL) + s;
+                }
                 this.controlIOBuffer.value += s;
                 this.controlIOBuffer.scrollTop = this.controlIOBuffer.scrollHeight;
                 this.iLogicalCol += nChars;
             }
+            this.charPrev = b;
             fTransmitted = true;
         }
         else if (this.consoleOutput != null) {
@@ -59087,13 +59112,13 @@ class FileInfo {
                         }
                     }
                     if (!sSymbol && entryNearest) {
-                        sSymbol = this.sModule + '!' + entryNearest[1] + "+" + Str.toHexWord(cbNearest);
+                        sSymbol = this.sModule + '!' + entryNearest[1] + "+" + Str.toHex(cbNearest, 0, true);
                     }
                     break;
                 }
             }
         }
-        return sSymbol || this.sName + '+' + Str.toHexLong(off);
+        return sSymbol || this.sName + '+' + Str.toHex(off, 0, true);
     }
 }
 
@@ -70165,7 +70190,7 @@ class DebuggerX86 extends Debugger {
         }
 
         if (sComment && fComplete) {
-            sLine = Str.pad(sLine, dbgAddrIns.fAddr32? 74 : 56) + ';' + sComment;
+            sLine = Str.pad(sLine, dbgAddrIns.fAddr32? 74 : 62) + ';' + sComment;
             if (!this.cpu.flags.checksum) {
                 sLine += (nSequence != null? '=' + nSequence.toString() : "");
             } else {
@@ -74554,6 +74579,11 @@ class Computer extends Component {
             if (video) {
                 var control = video.getTextArea();
                 if (control) {
+                    /*
+                     * By default, the Video textarea overlay has opacity and lineHeight styles set to "0"
+                     * to make the overall textarea and its blinking caret invisible (respectively), so in order
+                     * to use it as a diagnostic display, we must temporarily set both those styles to "1".
+                     */
                     control.style.opacity = "1";
                     control.style.lineHeight = "1";
                     this.cDiagnosticScreens++;
@@ -74574,8 +74604,20 @@ class Computer extends Component {
             if (video) {
                 var control = video.getTextArea();
                 if (control) {
+                    var agent = Web.getUserAgent();
+                    /*
+                     * Return the Video textarea overlay's opacity and lineHeight styles to their original values.
+                     */
                     control.style.opacity = "0";
                     control.style.lineHeight = "0";
+                    /*
+                     * Setting lineHeight in IE isn't sufficient to hide the caret; we must also set fontSize to "0",
+                     * and we make the change IE-specific because it can have weird side-effects in other browsers (eg,
+                     * it makes Safari on iOS over-zoom whenever the textarea receives focus).  And making it IE-specific
+                     * is, as usual, harder than it should be, because IE11 stopped identifying itself as "MSIE", hence
+                     * the additional "Trident" check.
+                     */
+                    if (agent.indexOf("MSIE") >= 0 || agent.indexOf("Trident") >= 0) control.style.fontSize = "0";
                     control.value = "";
                 }
             }

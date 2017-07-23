@@ -1058,11 +1058,11 @@ class Component {
                      * Why do we throw an Error only to immediately catch and ignore it?  Simply to give
                      * any IDE the opportunity to inspect the application's state.  Even when the IDE has
                      * control, you should still be able to invoke Debugger commands from the IDE's REPL,
-                     * using the '$' global function that the Debugger constructor defines; eg:
+                     * using the global function that the Debugger constructor defines; eg:
                      *
-                     *      $('r')
-                     *      $('dw 0:0')
-                     *      $('h')
+                     *      pcx86('r')
+                     *      pcx86('dw 0:0')
+                     *      pcx86('h')
                      *      ...
                      *
                      * If you have no desire to stop on assertions, consider this a no-op.  However, another

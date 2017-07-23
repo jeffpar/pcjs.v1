@@ -3785,7 +3785,7 @@ class DebuggerX86 extends Debugger {
         }
 
         if (sComment && fComplete) {
-            sLine = Str.pad(sLine, dbgAddrIns.fAddr32? 74 : 56) + ';' + sComment;
+            sLine = Str.pad(sLine, dbgAddrIns.fAddr32? 74 : 62) + ';' + sComment;
             if (!this.cpu.flags.checksum) {
                 sLine += (nSequence != null? '=' + nSequence.toString() : "");
             } else {
