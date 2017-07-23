@@ -1,11 +1,11 @@
 ---
 layout: post
-title: Flickery Fakery
+title: Flicker Fakery
 date: 2017-07-15 10:00:00
 permalink: /blog/2017/07/15/
 ---
 
-For years, one of my pet peeves about PC emulators has been their obsession with raw speed, and how hard they
+One of my long-standing pet peeves about PC emulators has been their obsession with raw speed, and how hard they
 try to squeeze every last drop of performance out of their instruction execution loop, on the assumption that
 everyone wants an 8088 that runs at, say, 500Mhz, as opposed to the stately 4.77Mhz of the original IBM PC.
 
