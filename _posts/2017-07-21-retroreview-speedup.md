@@ -205,8 +205,8 @@ any foreseeable problems to future generations, because we've got more important
 And on PC-DOS 1.00, does `SPEEDUP` actually speed things up?  In the real world, it presumably did, but in
 the world of emulation, there isn't any measurable difference, because hardware features like stepping rates and
 head settling times are rarely simulated.  As I suggested in my [last blog post](/blog/2017/07/15/), this is a
-degree of authenticity that all emulators should strive for, and PCjs is no exception to that rule -- I just haven't
-gotten around to it yet.
+degree of authenticity that all emulators should strive for, and PCjs emulators are no exception to that rule -- I
+just haven't gotten around to it yet.
 
 ### Epilogue
 
@@ -220,25 +220,27 @@ implemented, along with the proper queuing of all *four* possible types of seria
 
 NOTE: Serial I/O from DOS (ie, redirection to or from a COM port) already worked because DOS performs polled I/O
 rather than interrupt-driven I/O.  Additionally, when DOS terminates a line, it outputs both CR (0Dh) and LF (0Ah)
-bytes, whereas BASIC outputs only CR; so, when a machine uses a &lt;textarea&gt; control for serial I/O, we
-automatically convert transform stand-alone CR bytes into LF bytes. 
+bytes, whereas BASIC outputs only CR; so, when a machine uses a &lt;textarea&gt; control for serial I/O, PCx86
+automatically adds an LF after any stand-alone CR. 
 
 Second, when `SPEEDUP` crashed on newer versions of DOS, an invalid stack pointer would be loaded, and I noticed
 that I had neglected to fully implement stack wrap-around on 8086/8088 processors; specifically, in the case where the
 stack pointer is *odd*.
 
-Normally, when the stack pointer is *even*, it will smoothly auto-decrement from 0000h to FFFEh or auto-increment
-from FFFEh to 0000h.  However, when the stack pointer is *odd* and it reaches 0001h, the next PUSH on a 8086/8088 must
-automatically store the high byte at 0000h and the low byte at FFFFh; similarly, when the stack pointer is FFFFh,
-the next POP must fetch the low byte from FFFFh and the high byte from 0000h.
+Normally, when the stack pointer is *even*, it will cross the stack segment's 64Kb boundary without incident, smoothly
+auto-decrementing from 0000h to FFFEh or auto-incrementing from FFFEh to 0000h.  However, when the stack pointer is
+*odd* and it reaches 0001h, the next PUSH on an 8088 must automatically store the high byte at 0000h and the low
+byte at FFFFh; similarly, when the stack pointer is FFFFh, the next POP must fetch the low byte from FFFFh and the high
+byte from 0000h.
 
-Most emulators simulating an 8086/8088 in real-mode actually use V86-mode, which doesn't support stack operands that
-wrap around the top of the stack segment; V86-mode will throw an exception, and the machine is toast.  PCjs makes more
-of an effort simulate real-mode, so any PUSH or POP should work smoothly, regardless whether the stack pointer is even
-or odd.
+Most emulators simulating an 8086/8088 (aka real-mode) actually use V86-mode, which doesn't support stack operands that
+straddle the top of the stack segment; V86-mode will throw an exception, and the machine is toast.
 
-PCjs is still far from perfect.  For example, instruction fetches that cross a 64K boundary are supposed to wrap around
-to 0000h as well.  That's not implemented yet, but stay tuned.
+PCx86 makes more of an effort simulate real-mode, so any PUSH or POP should work properly, regardless whether the stack
+pointer is even or odd.  In fact, the same is true for any real-mode 16-bit access across a 64Kb boundary, stack-based
+or otherwise.  PCx86 will even execute real-mode instructions that wrap around a 64Kb boundary.
+
+PCx86 does it all (except when it doesn't)!
 
 *[@jeffpar](http://twitter.com/jeffpar)*  
 *Jul 21, 2017*

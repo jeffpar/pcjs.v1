@@ -3776,7 +3776,7 @@ class DebuggerX86 extends Debugger {
             } while (dbgAddrIns.addr != dbgAddr.addr);
         }
 
-        sLine += Str.pad(sBytes, dbgAddrIns.fAddr32? 24 : 16);
+        sLine += Str.pad(sBytes, dbgAddrIns.fAddr32? 25 : 17);
         sLine += Str.pad(sOpcode, 8);
         if (sOperands) sLine += ' ' + sOperands;
 

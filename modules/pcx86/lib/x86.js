@@ -428,6 +428,7 @@ var X86 = {
         NOREAD:     0x0001,     // disable memory reads for the remainder of the current instruction
         NOWRITE:    0x0002,     // disable memory writes for the remainder of the current instruction
         NOINTR:     0x0004,     // a segreg has been set, or a prefix, or an STI (delay INTR acknowledgement)
+        WRAP:       0x0008,     // a segment wrap-around has occurred (relevant to 8086/8088 only)
         SEG:        0x0010,     // segment override
         LOCK:       0x0020,     // lock prefix
         REPZ:       0x0040,     // repeat while Z (NOTE: this value MUST match PS.ZF; see opCMPSb/opCMPSw/opSCASb/opSCASw)

@@ -4689,6 +4689,7 @@ var X86 = {
         NOREAD:     0x0001,     // disable memory reads for the remainder of the current instruction
         NOWRITE:    0x0002,     // disable memory writes for the remainder of the current instruction
         NOINTR:     0x0004,     // a segreg has been set, or a prefix, or an STI (delay INTR acknowledgement)
+        WRAP:       0x0008,     // a segment wrap-around has occurred (relevant to 8086/8088 only)
         SEG:        0x0010,     // segment override
         LOCK:       0x0020,     // lock prefix
         REPZ:       0x0040,     // repeat while Z (NOTE: this value MUST match PS.ZF; see opCMPSb/opCMPSw/opSCASb/opSCASw)
@@ -12899,8 +12900,8 @@ class X86Seg {
         this.maskData = this.maskAddr = 0xffff;
 
         this.loadV86 = this.loadReal;
-        this.checkReadV86 = this.checkReadReal;
-        this.checkWriteV86 = this.checkWriteReal;
+        this.checkReadV86 = this.checkReadWriteReal;
+        this.checkWriteV86 = this.checkReadWriteReal;
 
         /*
          * Preallocated object for "probed" segment loads
@@ -12925,14 +12926,20 @@ class X86Seg {
          *
          * loadIDT() sets fCall to true unconditionally in protected-mode (fCall has no meaning in real-mode).
          */
-        if (this.id == 1) {     // X86Seg.ID.CODE (don't use until it's defined, or the Closure Compiler won't inline it)
+        if (this.id == 1 /* X86Seg.ID.CODE */) {        // don't use X86Seg.ID.CODE until it's defined, or the Closure Compiler won't inline it
             this.offIP = 0;
             this.fCall = null;
             this.fStackSwitch = false;
             this.awParms = new Array(32);
             this.aCallBreaks = [];
         }
+
         this.updateMode(true, fProt);
+
+        if (this.id == 0 /* X86Seg.ID.NULL */) {
+            this.checkRead = this.checkReadWriteNone;
+            this.checkWrite = this.checkReadWriteNone;
+        }
     }
 
     /**
@@ -13117,34 +13124,39 @@ class X86Seg {
     }
 
     /**
-     * checkReadReal(off, cb)
-     *
-     * TODO: Invoke X86.helpFault.call(this.cpu, X86.EXCEPTION.GP_FAULT) if off+cb is beyond offMax on 80186 and up;
-     * also, determine whether helpFault() call should include an error code, since this is happening in real-mode.
+     * checkReadWriteNone(off, cb)
      *
      * @this {X86Seg}
      * @param {number} off is a segment-relative offset
      * @param {number} cb is number of bytes to check (1, 2 or 4)
-     * @return {number} corresponding linear address if valid, or X86.ADDR_INVALID if error (TODO: No error conditions yet)
+     * @return {number} corresponding linear address
      */
-    checkReadReal(off, cb)
+    checkReadWriteNone(off, cb)
     {
         return (this.base + off)|0;
     }
 
     /**
-     * checkWriteReal(off, cb)
-     *
-     * TODO: Invoke X86.helpFault.call(this.cpu, X86.EXCEPTION.GP_FAULT) if off+cb is beyond offMax on 80186 and up;
-     * also, determine whether helpFault() call should include an error code, since this is happening in real-mode.
+     * checkReadWriteReal(off, cb)
      *
      * @this {X86Seg}
      * @param {number} off is a segment-relative offset
      * @param {number} cb is number of bytes to check (1, 2 or 4)
-     * @return {number} corresponding linear address if valid, or X86.ADDR_INVALID if error (TODO: No error conditions yet)
+     * @return {number} corresponding linear address
      */
-    checkWriteReal(off, cb)
+    checkReadWriteReal(off, cb)
     {
+        /*
+         * Since off could be a 32-bit value with the sign bit (bit 31) set, we must convert
+         * it to an unsigned value using ">>>"; offMax was already converted at segment load time.
+         */
+        if ((off >>> 0) + cb > this.offMax) {
+            if (this.cpu.model <= X86.MODEL_8088) {
+                this.cpu.opFlags |= X86.OPFLAG.WRAP;
+            } else {
+                X86.helpFault.call(this.cpu, X86.EXCEPTION.GP_FAULT);
+            }
+        }
         return (this.base + off)|0;
     }
 
@@ -14358,8 +14370,8 @@ class X86Seg {
          */
         this.load = this.loadReal;
         this.loadIDT = this.loadIDTReal;
-        this.checkRead = this.checkReadReal;
-        this.checkWrite = this.checkWriteReal;
+        this.checkRead = this.checkReadWriteReal;
+        this.checkWrite = this.checkReadWriteReal;
         this.cpl = this.dpl = 0;
         this.addrDesc = X86.ADDR_INVALID;
         this.fStackSwitch = false;
@@ -16737,11 +16749,12 @@ class X86CPU extends CPU {
         var newLIP = (this.regLIP >>> 0) + inc;
         if (newLIP > this.regLIPMax) {
             /*
-             * There's no such thing as a GP fault on the 8086/8088, and I'm assuming that,
-             * on newer processors, when the segment limit is the maximum, it's OK for IP to wrap.
+             * There's no such thing as a GP fault on the 8086/8088, and I'm now assuming that,
+             * on newer processors, all attempts to fetch opcodes beyond the limit trigger a fault.
              */
-            if (this.model <= X86.MODEL_8088 || this.segCS.limit == this.segCS.maskAddr) {
+            if (this.model <= X86.MODEL_8088 /* || this.segCS.limit == this.segCS.maskAddr */) {
                 newLIP = this.segCS.base + ((newLIP - this.regLIPMax) & (I386? this.maskData : 0xffff));
+                if (inc == 2) this.opFlags |= X86.OPFLAG.WRAP;
             } else {
                 X86.helpFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
             }
@@ -17797,15 +17810,25 @@ class X86CPU extends CPU {
      * @this {X86CPU}
      * @param {X86Seg} seg register (eg, segDS)
      * @param {number} off is a segment-relative offset
-     * @return {number} word (16-bit) value at that address
+     * @return {number} word (16-bit or 32-bit) value at that address
      */
     getEAWord(seg, off)
     {
+        var w;
         this.segEA = seg;
         this.offEA = off & (I386? this.maskAddr : 0xffff);
         this.regEA = seg.checkRead(this.offEA, (I386? this.sizeData : 2));
-        if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
-        var w = this.getWord(this.regEA);
+        if (this.opFlags & (X86.OPFLAG.NOREAD | X86.OPFLAG.WRAP)) {
+            if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
+            /*
+             * The WRAP flag must have been set by checkReadReal(), so we also know that we're dealing with
+             * a 16-bit read, which allows us to make some simplifications here.
+             */
+            w = this.getByte(this.regEA) | (this.getByte(seg.checkRead(0, 1)) << 8);
+        }
+        else {
+            w = this.getWord(this.regEA);
+        }
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiMem0;
             this.backTrack.btiEAHi = this.backTrack.btiMem1;
@@ -17822,11 +17845,22 @@ class X86CPU extends CPU {
      */
     getEAShortData(off)
     {
+        var w;
         this.segEA = this.segData;
         this.offEA = off & (I386? this.maskAddr : 0xffff);
         this.regEA = this.segEA.checkRead(this.offEA, 2);
-        if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
-        var w = this.getShort(this.regEA);
+        if (this.opFlags & (X86.OPFLAG.NOREAD | X86.OPFLAG.WRAP)) {
+            if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
+            /*
+             * The WRAP flag must have been set by checkReadReal(), so we also know that we're dealing with
+             * a 16-bit read, which allows us to make some simplifications here.
+             */
+            w = this.getByte(this.regEA) | (this.getByte(this.segEA.checkRead(0, 1)) << 8);
+            this.opFlags &= ~X86.OPFLAG.WRAP;
+        }
+        else {
+            w = this.getShort(this.regEA);
+        }
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiMem0;
             this.backTrack.btiEAHi = this.backTrack.btiMem1;
@@ -17843,11 +17877,22 @@ class X86CPU extends CPU {
      */
     getEAShortStack(off)
     {
+        var w;
         this.segEA = this.segStack;
         this.offEA = off & (I386? this.maskAddr : 0xffff);
         this.regEA = this.segEA.checkRead(this.offEA, 2);
-        if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
-        var w = this.getShort(this.regEA);
+        if (this.opFlags & (X86.OPFLAG.NOREAD | X86.OPFLAG.WRAP)) {
+            if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
+            /*
+             * The WRAP flag must have been set by checkReadReal(), so we also know that we're dealing with
+             * a 16-bit read, which allows us to make some simplifications here.
+             */
+            w = this.getByte(this.regEA) | (this.getByte(this.segEA.checkRead(0, 1)) << 8);
+            this.opFlags &= ~X86.OPFLAG.WRAP;
+        }
+        else {
+            w = this.getShort(this.regEA);
+        }
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiMem0;
             this.backTrack.btiEAHi = this.backTrack.btiMem1;
@@ -17923,7 +17968,19 @@ class X86CPU extends CPU {
             this.backTrack.btiMem0 = this.backTrack.btiEALo;
             this.backTrack.btiMem1 = this.backTrack.btiEAHi;
         }
-        this.setShort(this.segEA.checkWrite(this.offEA, 2), w);
+        var addr = this.segEA.checkWrite(this.offEA, 2);
+        if (this.opFlags & X86.OPFLAG.WRAP) {
+            /*
+             * The WRAP flag must have been set by checkWriteReal(), so we also know that we're dealing with
+             * a 16-bit write, which allows us to make some simplifications here.
+             */
+            this.setByte(addr, w);
+            this.setByte(this.segEA.checkWrite(0, 1), w >> 8);
+            this.opFlags &= ~X86.OPFLAG.WRAP;
+        }
+        else {
+            this.setShort(addr, w);
+        }
     }
 
     /**
@@ -17955,10 +18012,18 @@ class X86CPU extends CPU {
             this.backTrack.btiMem0 = this.backTrack.btiEALo;
             this.backTrack.btiMem1 = this.backTrack.btiEAHi;
         }
-        if (!I386) {
-            this.setShort(this.segEA.checkWrite(this.offEA, 2), w);
-        } else {
-            this.setWord(this.segEA.checkWrite(this.offEA, this.sizeData), w);
+        var addr = this.segEA.checkWrite(this.offEA, this.sizeData);
+        if (this.opFlags & X86.OPFLAG.WRAP) {
+            /*
+             * The WRAP flag must have been set by checkWriteReal(), so we also know that we're dealing with
+             * a 16-bit write, which allows us to make some simplifications here.
+             */
+            this.setByte(addr, w);
+            this.setByte(this.segEA.checkWrite(0, 1), w >> 8);
+            this.opFlags &= ~X86.OPFLAG.WRAP;
+        }
+        else {
+            this.setWord(addr, w);
         }
     }
 
@@ -17989,11 +18054,20 @@ class X86CPU extends CPU {
      */
     getSOWord(seg, off)
     {
-        if (!I386) {
-            return this.getShort(seg.checkRead(off, 2));
-        } else {
-            return this.getWord(seg.checkRead(off, this.sizeData));
+        var w;
+        var addr = seg.checkRead(off, this.sizeData);
+        if (this.opFlags & X86.OPFLAG.WRAP) {
+            /*
+             * The WRAP flag must have been set by checkReadReal(), so we also know that we're dealing with
+             * a 16-bit read, which allows us to make some simplifications here.
+             */
+            w = this.getByte(addr) | (this.getByte(seg.checkRead(0, 1)) << 8);
+            this.opFlags &= ~X86.OPFLAG.WRAP;
         }
+        else {
+            w = this.getWord(addr);
+        }
+        return w;
     }
 
     /**
@@ -18023,10 +18097,18 @@ class X86CPU extends CPU {
      */
     setSOWord(seg, off, w)
     {
-        if (!I386) {
-            this.setShort(seg.checkWrite(off, 2), w);
-        } else {
-            this.setWord(seg.checkWrite(off, this.sizeData), w);
+        var addr = seg.checkWrite(off, this.sizeData);
+        if (this.opFlags & X86.OPFLAG.WRAP) {
+            /*
+             * The WRAP flag must have been set by checkWriteReal(), so we also know that we're dealing with
+             * a 16-bit write, which allows us to make some simplifications here.
+             */
+            this.setByte(addr, w);
+            this.setByte(seg.checkWrite(0, 1), w >> 8);
+            this.opFlags &= ~X86.OPFLAG.WRAP;
+        }
+        else {
+            this.setWord(addr, w);
         }
     }
 
@@ -18167,8 +18249,20 @@ class X86CPU extends CPU {
      */
     getIPShort()
     {
+        var w;
         var newLIP = this.checkIP(2);
-        var w = (PREFETCH? this.getShortPrefetch() : this.getShort(this.regLIP));
+        if (PREFETCH) {
+            w = this.getShortPrefetch();
+        } else if (!(this.opFlags & X86.OPFLAG.WRAP)) {
+            w = this.getShort(this.regLIP);
+        } else {
+            /*
+             * The WRAP flag must have been set by checkIP(2), so we also know that we're dealing with
+             * a 16-bit read, which allows us to make some simplifications here.
+             */
+            w = this.getByte(this.regLIP) | (this.getByte(newLIP - 1) << 8);
+            this.opFlags &= ~X86.OPFLAG.WRAP;
+        }
         if (BACKTRACK) {
             this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMem0);
             this.bus.updateBackTrackCode(this.regLIP + 1, this.backTrack.btiMem1);
@@ -18185,8 +18279,20 @@ class X86CPU extends CPU {
      */
     getIPAddr()
     {
+        var w;
         var newLIP = this.checkIP(this.sizeAddr);
-        var w = (PREFETCH? this.getAddr() : this.getAddr(this.regLIP));
+        if (PREFETCH) {
+            w = this.getAddr();
+        } else if (!(this.opFlags & X86.OPFLAG.WRAP)) {
+            w = this.getAddr(this.regLIP);
+        } else {
+            /*
+             * The WRAP flag must have been set by checkIP(), so we also know that we're dealing with
+             * a 16-bit read, which allows us to make some simplifications here.
+             */
+            w = this.getByte(this.regLIP) | (this.getByte(newLIP - 1) << 8);
+            this.opFlags &= ~X86.OPFLAG.WRAP;
+        }
         if (BACKTRACK) {
             this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMem0);
             this.bus.updateBackTrackCode(this.regLIP + 1, this.backTrack.btiMem1);
@@ -18203,8 +18309,20 @@ class X86CPU extends CPU {
      */
     getIPWord()
     {
+        var w;
         var newLIP = this.checkIP(this.sizeData);
-        var w = (PREFETCH? this.getWordPrefetch() : this.getWord(this.regLIP));
+        if (PREFETCH) {
+            w = this.getWordPrefetch();
+        } else if (!(this.opFlags & X86.OPFLAG.WRAP)) {
+            w = this.getWord(this.regLIP);
+        } else {
+            /*
+             * The WRAP flag must have been set by checkIP(), so we also know that we're dealing with
+             * a 16-bit read, which allows us to make some simplifications here.
+             */
+            w = this.getByte(this.regLIP) | (this.getByte(newLIP - 1) << 8);
+            this.opFlags &= ~X86.OPFLAG.WRAP;
+        }
         if (BACKTRACK) {
             this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMem0);
             this.bus.updateBackTrackCode(this.regLIP + 1, this.backTrack.btiMem1);
@@ -70181,7 +70299,7 @@ class DebuggerX86 extends Debugger {
             } while (dbgAddrIns.addr != dbgAddr.addr);
         }
 
-        sLine += Str.pad(sBytes, dbgAddrIns.fAddr32? 24 : 16);
+        sLine += Str.pad(sBytes, dbgAddrIns.fAddr32? 25 : 17);
         sLine += Str.pad(sOpcode, 8);
         if (sOperands) sLine += ' ' + sOperands;
 
