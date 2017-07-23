@@ -10,9 +10,9 @@ machines:
     config: /disks/pcx86/shareware/pcsig08/debugger/machine.xml
     autoMount:
       A:
-        name: PC-DOS 1.00
+        name: "PC-DOS 1.00"
       B:
-        name: PCSIG08: DISK0011
+        name: "PCSIG08: DISK0011"
 ---
 
 While browsing the June/July 1982 issue of PC Magazine (Vol. 1, No. 3), I found the following
