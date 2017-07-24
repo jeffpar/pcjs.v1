@@ -3174,7 +3174,7 @@
 		<file size="418" time="1985-01-12 20:57:24" attr="0x20">WHERE.COM</file>
 		<file size="910" time="1986-05-15 17:12:38" attr="0x20">XDEL.COM</file>
 	</disk>
-	<disk id="disk174" size="368640" chs="40:2:9" dir="../../private/GRP001/PCMAG-UTIL-VOL2/root" href="/disks/pcx86/shareware/pcmag/disks/PCMAG-UTIL-VOL2.json" md5="ae06945b325eec182ee5c7841a79ce88" md5json="408ef8bfd700300110158d86c3ac2e12">
+	<disk id="disk174" size="368640" chs="40:2:9" dir="../../private/GRP001/PCMAG-UTIL-VOL2/PCMAGV2" href="/disks/pcx86/shareware/pcmag/disks/PCMAG-UTIL-VOL2.json" md5="de1994746e64edeb52fa246617234cae" md5json="db53e5ac490ee0c28e2afc343768ebf8">
 		<name>PC Magazine Utils Vol2</name>
 		<file size="1712" time="1987-07-06 12:30:28" attr="0x20" md5="d38ae3104dc326e87ae09467ba021fd7">APPBK.COM</file>
 		<file size="1169" time="1986-12-02 13:59:08" attr="0x20" md5="c4f2b94c260b054886ee3a717aa36462">ASC.COM</file>
