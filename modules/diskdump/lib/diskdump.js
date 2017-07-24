@@ -1015,7 +1015,7 @@ DiskDump.updateManifest = function(disk, sManifestFile, sDiskPath, sOutputFile, 
         if (sMatchDisk && (match = sMatchDisk.match(/<name>([^>]*)<\/name>/))) {
             sName = match[1];
         }
-        if (!sName && sXML.indexOf("\n\t<name>") < 0) {
+        if (!sName && sXML.indexOf("\n\t<title>") < 0) {
             sName = str.getBaseName(sOutputFile, true).toUpperCase();
         }
         if (sName) {
@@ -1887,13 +1887,14 @@ DiskDump.prototype.readPath = function(sPath, done)
 };
 
 /**
- * buildName(sFile)
+ * buildName(sFile, fLabel)
  *
  * @this {DiskDump}
  * @param {string} sFile is the basename of a file
+ * @param {boolean} [fLabel]
  * @return {string} containing a corresponding FAT-compatible filename
  */
-DiskDump.prototype.buildName = function(sFile)
+DiskDump.prototype.buildName = function(sFile, fLabel)
 {
     var sName = sFile.toUpperCase();
     var iExt = sName.lastIndexOf('.');
@@ -1901,6 +1902,8 @@ DiskDump.prototype.buildName = function(sFile)
     if (iExt >= 0) {
         sExt = sName.substr(iExt+1);
         sName = sName.substr(0, iExt);
+    } else if (fLabel && sName.length > 8) {
+        sExt = sName.substr(8);
     }
     sName = sName.substr(0, 8).trim();
     sExt = sExt.substr(0, 3).trim();
@@ -1950,18 +1953,19 @@ DiskDump.prototype.buildVolLabel = function(sDir)
             }
         }
         */
+        sVolume = sVolume.toLowerCase();
     }
-    if (!sVolume || sVolume.toLowerCase() == "archive" || sVolume.toLowerCase() == "disk") {
+    if (!sVolume || sVolume == "archive" || sVolume == "disk" || sVolume == "root") {
         /*
-         * UPDATE: If I was lazy and just dumped all the files for this disk image into a folder
-         * generically named either "archive" or "disk", then let's give it more meaningful name for
-         * the outside world (ie, the name of this project).
+         * UPDATE: If I dumped all the files for this disk image into a folder generically named
+         * "archive" or "disk" or "root", then let's give it more meaningful name for the outside world
+         * (ie, the name of the project).
          */
         sVolume = DiskDump.PCJS_LABEL;
     }
     if (sVolume) {
         fileInfo = {};
-        fileInfo.FILE_NAME = this.buildName(sVolume);
+        fileInfo.FILE_NAME = this.buildName(sVolume, true);
         fileInfo.FILE_ATTR = DiskDump.ATTR_VOLUME;
         /*
          * I used to initialize the volume label's date with a simple "new Date()", but because that results
