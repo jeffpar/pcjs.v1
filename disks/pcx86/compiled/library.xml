@@ -695,6 +695,8 @@
 		<disk path="/disks/pcx86/shareware/pcmag/disks/VOL14N04.json">PC Magazine (Vol. 14 No. 04)</disk>
 		<disk path="/disks/pcx86/shareware/pcmag/disks/VOL14N05.json">PC Magazine (Vol. 14 No. 05)</disk>
 		<disk path="/disks/pcx86/shareware/pcmag/disks/VOL14N06.json">PC Magazine (Vol. 14 No. 06)</disk>
+		<disk path="/disks/pcx86/shareware/pcmag/disks/PCMAG-UTIL-VOL1-1986.json">PC Magazine Utils Vol1</disk>
+		<disk path="/disks/pcx86/shareware/pcmag/disks/PCMAG-UTIL-VOL2.json">PC Magazine Utils Vol2</disk>
 		<disk path="/disks/pcx86/shareware/pctj/disks/PCTJ8512.json">PC Tech Journal (1985-12)</disk>
 		<disk path="/disks/pcx86/shareware/pctj/disks/PCTJ8603.json">PC Tech Journal (1986-03)</disk>
 		<disk path="/disks/pcx86/shareware/pctj/disks/PCTJ8610.json">PC Tech Journal (1986-10)</disk>
