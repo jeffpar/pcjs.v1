@@ -3412,7 +3412,7 @@ class Component {
      * Component.processScript(idMachine, sScript)
      *
      * @param {string} idMachine
-     * @param {string} sScript
+     * @param {string} [sScript]
      * @return {boolean}
      */
     static processScript(idMachine, sScript)
@@ -3497,7 +3497,7 @@ class Component {
             }
 
             if (!fSuccess) {
-                Component.alertUser("Script error: " + sCommand + (fnCommand? " failed" : " unrecognized"));
+                Component.alertUser("Script error: '" + sCommand + (fnCommand? " failed" : " unrecognized"));
                 break;
             }
         }
@@ -44315,6 +44315,8 @@ class Keyboard extends Component {
          */
         this.autoInject = null;
         this.autoType = parmsKbd['autoType'];
+        this.fDOSReady = false;
+        this.fnDOSReady = this.fnInjectReady = null;
 
         /*
          * HACK: We set fAllDown to false to ignore all down/up events for keys not explicitly marked as ONDOWN;
@@ -44324,6 +44326,11 @@ class Keyboard extends Component {
          * keyboards and web browsers is more work than I can take on right now.  TODO: Dig into this some day.
          */
         this.fAllDown = false;
+
+        this['exports'] = {
+            'type':         this.injectKeys,
+            'wait':         this.waitReady
+        };
 
         this.setReady();
     }
@@ -44547,7 +44554,13 @@ class Keyboard extends Component {
     {
         var AH = (this.cpu.regEAX >> 8) & 0xff;
         if (AH == 0x0A) {
-            this.injectInit();
+            this.fDOSReady = true;
+            if (this.fnDOSReady) {
+                this.fnDOSReady();
+                this.fnDOSReady = null;
+            } else {
+                this.injectInit(this.autoType);
+            }
         }
         return true;
     }
@@ -44568,7 +44581,7 @@ class Keyboard extends Component {
     }
 
     /**
-     * parseAutoType(sKeys)
+     * parseKeys(sKeys)
      *
      * The following special sequences are recognized:
      *
@@ -44604,7 +44617,7 @@ class Keyboard extends Component {
      * @param {string|undefined} sKeys
      * @return {string|undefined}
      */
-    parseAutoType(sKeys)
+    parseKeys(sKeys)
     {
         if (sKeys) {
             var match, reSpecial = /(?:^|[^$])\$([a-z]+)/g;
@@ -45028,7 +45041,7 @@ class Keyboard extends Component {
             data = [];
             this.autoInject = null;
         } else {
-            this.autoInject = this.parseAutoType(this.autoType);
+            this.autoInject = this.autoType;
         }
         this.fClock = this.fAdvance = data[i++];
         this.fData = data[i];
@@ -45054,6 +45067,7 @@ class Keyboard extends Component {
          * Make sure the auto-injection buffer is empty (an injection could have been in progress on any reset after the first).
          */
         this.sInjectBuffer = "";
+
         return true;
     }
 
@@ -45116,16 +45130,19 @@ class Keyboard extends Component {
     }
 
     /**
-     * injectInit()
+     * injectInit(sKeys)
      *
      * @this {Keyboard}
+     * @param {string|undefined} sKeys
+     * @return {boolean}
      */
-    injectInit()
+    injectInit(sKeys)
     {
-        if (!this.autoInject && this.autoType) {
-            this.autoInject = this.parseAutoType(this.autoType);
-            this.injectKeys(this.autoInject);
+        if (!this.autoInject && sKeys) {
+            this.autoInject = sKeys;
+            return this.injectKeys(this.autoInject);
         }
+        return false;
     }
 
     /**
@@ -45134,14 +45151,17 @@ class Keyboard extends Component {
      * @this {Keyboard}
      * @param {string|undefined} sKeys
      * @param {number} [msDelay] is an optional injection delay (default is msInjectDelay)
+     * @return {boolean}
      */
     injectKeys(sKeys, msDelay)
     {
         if (sKeys && !this.sInjectBuffer) {
-            this.sInjectBuffer = sKeys;
+            this.sInjectBuffer = this.parseKeys(sKeys);
             if (!COMPILED) this.log("injectKeys(" + this.sInjectBuffer.split("\n").join("\\n") + ")");
             this.injectKeysFromBuffer(msDelay || this.msInjectDelay);
+            return true;
         }
+        return false;
     }
 
     /**
@@ -45180,13 +45200,50 @@ class Keyboard extends Component {
             if (charCode == 0x0A) charCode = 0x0D;
             this.addActiveKey(charCode, true);
         }
-        if (this.sInjectBuffer.length > 0) {
+        if (!this.sInjectBuffer.length) {
+            if (this.fnInjectReady) {
+                this.fnInjectReady();
+                this.fnInjectReady = null;
+            }
+        } else {
             setTimeout(function(kbd) {
                 return function onInjectKeyTimeout() {
                     kbd.injectKeysFromBuffer(msDelay);
                 };
             }(this), msDelay);
         }
+    }
+
+    /**
+     * waitReady(fnCallReady, sOption)
+     *
+     * @this {Keyboard}
+     * @param {function()|null} fnCallReady
+     * @param {string} [sOption]
+     * @return {boolean} false if wait required, true otherwise
+     */
+    waitReady(fnCallReady, sOption)
+    {
+        var fReady = false;
+
+        switch(sOption) {
+        case "DOS":
+            if (this.fDOSReady) {
+                fReady = true;
+            } else {
+                this.fnDOSReady = fnCallReady;
+            }
+            break;
+
+        default:
+            if (!this.sInjectBuffer.length) {
+                fReady = true;
+            } else {
+                this.fnInjectReady = fnCallReady;
+            }
+            break;
+        }
+        return fReady;
     }
 
     /**
@@ -59548,7 +59605,8 @@ class FDC extends Component {
          */
 
         this['exports'] = {
-            'loadDisk': this.loadSelectedDisk
+            'loadDisk':     this.loadSelectedDisk,
+            'wait':         this.waitDrives
         };
     }
 
@@ -59628,24 +59686,7 @@ class FDC extends Component {
                 }
             }
             controlSelect.onchange = function onChangeListDisks(event) {
-                var controlDesc = fdc.bindings["descDisk"];
-                var controlOption = controlSelect.options[controlSelect.selectedIndex];
-                if (controlDesc && controlOption) {
-                    var dataValue = {};
-                    var sValue = controlOption.getAttribute("data-value");
-                    if (sValue) {
-                        try {
-                            dataValue = eval("(" + sValue + ")");
-                        } catch (e) {
-                            Component.error("FDC option error: " + e.message);
-                        }
-                    }
-                    var sHTML = dataValue['desc'];
-                    if (sHTML === undefined) sHTML = "";
-                    var sHRef = dataValue['href'];
-                    if (sHRef !== undefined) sHTML = "<a href=\"" + sHRef + "\" target=\"_blank\">" + sHTML + "</a>";
-                    controlDesc.innerHTML = sHTML;
-                }
+                fdc.updateSelectedDiskette();
             };
             return true;
 
@@ -60103,6 +60144,7 @@ class FDC extends Component {
 
         drive.iDrive = iDrive;
         drive.fBusy = drive.fLocal = false;
+        drive.fnCallReady = null;
 
         if (data === undefined) {
             /*
@@ -60460,6 +60502,9 @@ class FDC extends Component {
     /**
      * loadSelectedDisk()
      *
+     * NOTE: Since this can be called via script command (eg, 'loadDisk FDC'), additional parameters can be
+     * passed; use the arguments array to access them if necessary.
+     *
      * @this {FDC}
      * @return {boolean}
      */
@@ -60685,7 +60730,7 @@ class FDC extends Component {
              * WARNING: This conversion of drive number to drive letter, starting with A:, is very simplistic
              * and will not match the drive mappings that DOS ultimately uses (ie, for drives beyond B:).
              */
-            this.notice("Mounted diskette \"" + sDisketteName + "\" in drive " + String.fromCharCode(0x41 + drive.iDrive), drive.fAutoMount || fAutoMount);
+            if (!drive.fnCallReady) this.notice("Mounted diskette \"" + sDisketteName + "\" in drive " + String.fromCharCode(0x41 + drive.iDrive), drive.fAutoMount || fAutoMount);
 
             /*
              * Update the drive's current media parameters to match the disk's.
@@ -60710,6 +60755,11 @@ class FDC extends Component {
         }
 
         this.displayDiskette(drive.iDrive);
+
+        if (drive.fnCallReady) {
+            drive.fnCallReady();
+            drive.fnCallReady = null;
+        }
     }
 
     /**
@@ -60833,6 +60883,53 @@ class FDC extends Component {
                 }
             }
         }
+    }
+
+    /**
+     * updateSelectedDiskette()
+     *
+     * @this {FDC}
+     */
+    updateSelectedDiskette()
+    {
+        var control = this.bindings["listDisks"];
+        var controlDesc = this.bindings["descDisk"];
+        var controlOption = control.options[control.selectedIndex];
+        if (controlDesc && controlOption) {
+            var dataValue = {};
+            var sValue = controlOption.getAttribute("data-value");
+            if (sValue) {
+                try {
+                    dataValue = eval("(" + sValue + ")");
+                } catch (e) {
+                    Component.error(this.type + " option error: " + e.message);
+                }
+            }
+            var sHTML = dataValue['desc'];
+            if (sHTML === undefined) sHTML = "";
+            var sHRef = dataValue['href'];
+            if (sHRef !== undefined) sHTML = "<a href=\"" + sHRef + "\" target=\"_blank\">" + sHTML + "</a>";
+            controlDesc.innerHTML = sHTML;
+        }
+    }
+
+    /**
+     * waitDrives(fnCallReady)
+     *
+     * @this {FDC}
+     * @param {function()|null} fnCallReady
+     * @return {boolean} false if wait required, true otherwise
+     */
+    waitDrives(fnCallReady)
+    {
+        for (var iDrive = 0; iDrive < this.aDrives.length; iDrive++) {
+            var drive = this.aDrives[iDrive];
+            if (drive && drive.fBusy) {
+                if (!drive.fnCallReady) drive.fnCallReady = fnCallReady;
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -75257,6 +75354,8 @@ class Computer extends Component {
         }
 
         this.nPowerChange = 0;
+
+        Component.processScript(this.idMachine, this.getMachineParm('autoScript'));
     }
 
     /**
@@ -77165,15 +77264,47 @@ function findMachineComponent(idMachine, sType)
 }
 
 /**
- * processMachineScript(idMachine, sScript)
+ * commandMachine(control, fSingle, idMachine, sComponent, sCommand, sValue)
  *
+ * Use Component methods to find the requested component for a specific machine, and if the component is found,
+ * then check its 'exports' table for an entry matching the specified command string, and if an entry is found, then
+ * the corresponding function is called with the specified data.
+ *
+ * @param {Object} control
+ * @param {boolean} fSingle
  * @param {string} idMachine
- * @param {string} sScript
+ * @param {string} sComponent
+ * @param {string} sCommand
+ * @param {string} [sValue]
  * @return {boolean}
  */
-function processMachineScript(idMachine, sScript)
+function commandMachine(control, fSingle, idMachine, sComponent, sCommand, sValue)
 {
-    return Component.processScript(idMachine, sScript);
+    if (sCommand == "script") {
+        if (Component.processScript(idMachine, sValue)) {
+            if (fSingle) control.disabled = true;
+            return true;
+        }
+        return false;
+    }
+    if (sComponent) {
+        var component = Component.getComponentByType(sComponent, idMachine + ".machine");
+        if (component) {
+            var exports = component['exports'];
+            if (exports) {
+                var fnCommand = exports[sCommand];
+                if (fnCommand) {
+                    if (fnCommand.call(component, sValue)) {
+                        if (fSingle) control.disabled = true;
+                        return true;
+                    }
+                    return false;
+                }
+            }
+        }
+    }
+    console.log("unimplemented: commandMachine('" + idMachine + "','" + sComponent + "','" + sCommand + "','" + sValue + "')");
+    return false;
 }
 
 /**
@@ -77197,8 +77328,7 @@ if (APPNAME == "PDPjs") {
     window['embedPDP11']  = embedPDP11;
 }
 
-window['findMachineComponent'] = findMachineComponent;
-window['processMachineScript'] = processMachineScript;
+window['commandMachine'] = commandMachine;
 
 window['enableEvents'] = Web.enablePageEvents;
 window['sendEvent']    = Web.sendPageEvent;

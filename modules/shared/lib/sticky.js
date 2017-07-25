@@ -88,59 +88,6 @@ function addStickyMachine(idMachine, sPosition)
 }
 
 /**
- * commandMachine(control, fSingle, idMachine, sComponent, sCommand, sValue)
- *
- * Note that this script is not compiled into any of the machines, since "sticky machines" are feature of the PCjs
- * website rather than of the machines.  And since the machines are compiled, all their code and data is completely
- * opaque to us, except for those functions explicitly exported by embed.js.
- *
- * So now, in addition to the functions for embedding machines on a webpage, embed.js includes a few new functions:
- *
- *      findMachineComponent()
- *      processMachineScript()
- *
- * which uses existing Component methods to find the requested component for a specific machine, and if the
- * component is found, then its 'exports' table is checked for an entry matching the specified command string, and if
- * an entry is found, then the corresponding function is called with the specified data.
- *
- * @param {Object} control
- * @param {boolean} fSingle
- * @param {string} idMachine
- * @param {string} sComponent
- * @param {string} sCommand
- * @param {string} [sValue]
- * @return {boolean}
- */
-function commandMachine(control, fSingle, idMachine, sComponent, sCommand, sValue)
-{
-    if (sCommand == "script" && window.processMachineScript) {
-        if (window.processMachineScript(idMachine, sValue)) {
-            if (fSingle) control.disabled = true;
-            return true;
-        }
-        return false;
-    }
-    if (sComponent && window.findMachineComponent) {
-        var component = window.findMachineComponent(idMachine, sComponent);
-        if (component) {
-            var exports = component['exports'];
-            if (exports) {
-                var fnCommand = exports[sCommand];
-                if (fnCommand) {
-                    if (fnCommand.call(component, sValue)) {
-                        if (fSingle) control.disabled = true;
-                        return true;
-                    }
-                    return false;
-                }
-            }
-        }
-    }
-    console.log("unimplemented: commandMachine('" + idMachine + "','" + sComponent + "','" + sCommand + "','" + sValue + "')");
-    return false;
-}
-
-/**
  * findTop(obj)
  *
  * @param {Object} obj

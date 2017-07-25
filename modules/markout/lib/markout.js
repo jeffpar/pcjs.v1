@@ -114,7 +114,7 @@ function MarkOut(sMD, sIndent, req, aParms, fDebug, sMachineFile, fAutoHeading)
     this.aMachines = [];    // this keeps track of embedded machines on the page
     this.buildOptions = {}; // this keeps track of any build options specified on the page
     this.aMachineDefs = {}; // this keeps track of any machine definitions at the top of the file (as part of any Jekyll "Front Matter")
-    this.aCommandDefs = {}; // this keeps track of any command definitions at the top of the file (as part of any Jekyll "Front Matter")
+    this.aScriptDefs = {};  // this keeps track of any script definitions at the top of the file (as part of any Jekyll "Front Matter")
 }
 
 /*
@@ -440,6 +440,24 @@ MarkOut.prototype.convertMD = function(sIndent)
             sMD = sMD.replace(aMatch[0], "");
 
             /*
+             * Extract script definitions first, if any, from the Front Matter.
+             */
+            var aScriptDefs = aMatch[1].match(/\nscripts:([\s\S]*?)\n([^\s]|$)/);
+            if (aScriptDefs) {
+                var reScript = /[ \t]+([a-z0-9$@_-]+):\s*\|/gi;
+                var aScripts = aScriptDefs[1].split(reScript);
+                /*
+                 * Since the preceding RegExp contains a capture group (representing the name of the script),
+                 * it will be "spliced" into the split results.  So, aScripts[0] will be whatever characters precede
+                 * the first command (which we can ignore), followed by the first script name, followed by one or more
+                 * command lines, followed by the second script name, followed by one or more command lines, and so on.
+                 */
+                for (var iScript = 1; iScript < aScripts.length; iScript += 2) {
+                    this.aScriptDefs[aScripts[iScript]] = aScripts[iScript+1].replace(/\n[ \t]*/g, " ").trim().replace(/"/g, "&quot;");
+                }
+            }
+
+            /*
              * Extract machine definitions, if any, from the Front Matter.
              */
             var aSubMatch;
@@ -448,7 +466,7 @@ MarkOut.prototype.convertMD = function(sIndent)
                 var asMachines = aMachineDefs[1].split(/\n[ \t]+-\s*/);
                 for (var iMachine = 0; iMachine < asMachines.length; iMachine++) {
                     if (!asMachines[iMachine]) continue;
-                    var id = null, iProp, sProp;
+                    var id = null, iProp, sProp, sValue;
                     var aOptions, aaOptions = [], machine = {};
                     var reOption = /([ \t]*)([^\s]+):[ \t]*([^\n]*)/g;
                     while (aOptions = reOption.exec(asMachines[iMachine])) {
@@ -456,15 +474,16 @@ MarkOut.prototype.convertMD = function(sIndent)
                     }
                     for (var iOption = 0; iOption < aaOptions.length; iOption++) {
                         aOptions = aaOptions[iOption];
-                        var sSpace = aOptions[1], sName = aOptions[2].toLowerCase(), sValue = aOptions[3];
-                        if (sName == 'automount') sName = 'autoMount';  // for backward compatibility
-                        if (sName == 'autotype') {
-                            sName = 'autoType';
+                        var sSpace = aOptions[1];
+                        sProp = aOptions[2];
+                        sValue = aOptions[3];
+                        if (sProp == 'automount') sProp = 'autoMount';  // for backward compatibility
+                        if (sProp == 'autoType' || sProp == 'autoScript') {
                             sValue = sValue.replace(/\\/g, "&#92;");    // automatically "double" any backslashes
                         }
-                        if (!id && sName == 'id') {
+                        if (!id && sProp == 'id') {
                             id = sValue;
-                        } else if (sName == 'autoMount') {
+                        } else if (sProp == 'autoMount') {
                             /*
                              * I take a simplistic approach to parsing the object definition associated with "autoMount",
                              * because I know it only consists of 1 or more drive letters, each of which may be followed
@@ -501,7 +520,7 @@ MarkOut.prototype.convertMD = function(sIndent)
                             sValue += '}';
                             iOption = iProp - 1;
                         }
-                        machine[sName] = sValue;
+                        machine[sProp] = sValue;
                     }
                     /*
                      * Any "non-reserved" properties are now merged into the 'parms' property; 'autoMount'
@@ -515,7 +534,17 @@ MarkOut.prototype.convertMD = function(sIndent)
                                 machine['parms'] += MarkOut.aFMBooleanMachineProps[sProp] + ':' + machine[sProp] + ',';
                                 continue;
                             }
-                            machine['parms'] += sProp + ':"' + machine[sProp] + '",';
+                            sValue = machine[sProp];
+                            if (sProp == "autoScript") {
+                                sValue = this.aScriptDefs[sValue] || sValue;
+                                /*
+                                 * Don't try to optimize out the second replace(); it's not there simply to replace
+                                 * the single backslashes that were added to all &quot; entities.  It's there to escape
+                                 * ALL backslashes in the string (ie, the ones we just added, and any others).
+                                 */
+                                sValue = sValue.replace(/(&quot;)/g, "\\$1").replace(/\\/g, "\\\\");
+                            }
+                            machine['parms'] += sProp + ':"' + sValue + '",';
                         }
                     }
                     var sDrives = machine['drives'];
@@ -532,21 +561,6 @@ MarkOut.prototype.convertMD = function(sIndent)
                     }
                     machine['parms'] += 'autoMount:' + (machine['autoMount'] || "null") + ',drives:' + (sDrives || "null") + '}';
                     if (id) this.aMachineDefs[id] = machine;
-                }
-            }
-
-            var aCommandDefs = aMatch[1].match(/\ncommands:([\s\S]*?)\n([^\s]|$)/);
-            if (aCommandDefs) {
-                var reCommand = /[ \t]+([a-z0-9$@_-]+):\s*\|/gi;
-                var aCommands = aCommandDefs[1].split(reCommand);
-                /*
-                 * Since the preceding RegExp contains a capture group (representing the name of the command),
-                 * it will be "spliced" into the split results.  So, aCommands[0] will be whatever characters precede
-                 * the first command (which we can ignore), followed by the first command name, followed by one or more
-                 * command lines, followed by the second command name, followed by one or more command lines, and so on.
-                 */
-                for (var iCommand = 1; iCommand < aCommands.length; iCommand += 2) {
-                    this.aCommandDefs[aCommands[iCommand]] = aCommands[iCommand+1].replace(/\n[ \t]*/g, " ").trim().replace(/"/g, "&quot;");
                 }
             }
 
@@ -1331,8 +1345,8 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
         if (this.aMachineDefs[sMachineID]) {
             var sCommand = findParm(aParms, 'command');
             var sValue = findParm(aParms, 'value');
-            if (this.aCommandDefs[sCommand]) {
-                sValue = this.aCommandDefs[sCommand];
+            if (this.aScriptDefs[sCommand]) {
+                sValue = this.aScriptDefs[sCommand];
                 sCommand = "script";
             } else if (sValue) {
                 sValue = sValue.replace(/"/g, "&quot;");

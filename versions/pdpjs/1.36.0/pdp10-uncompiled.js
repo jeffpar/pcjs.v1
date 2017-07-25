@@ -3184,7 +3184,7 @@ class Component {
      * Component.processScript(idMachine, sScript)
      *
      * @param {string} idMachine
-     * @param {string} sScript
+     * @param {string} [sScript]
      * @return {boolean}
      */
     static processScript(idMachine, sScript)
@@ -3269,7 +3269,7 @@ class Component {
             }
 
             if (!fSuccess) {
-                Component.alertUser("Script error: " + sCommand + (fnCommand? " failed" : " unrecognized"));
+                Component.alertUser("Script error: '" + sCommand + (fnCommand? " failed" : " unrecognized"));
                 break;
             }
         }
@@ -28166,15 +28166,47 @@ function findMachineComponent(idMachine, sType)
 }
 
 /**
- * processMachineScript(idMachine, sScript)
+ * commandMachine(control, fSingle, idMachine, sComponent, sCommand, sValue)
  *
+ * Use Component methods to find the requested component for a specific machine, and if the component is found,
+ * then check its 'exports' table for an entry matching the specified command string, and if an entry is found, then
+ * the corresponding function is called with the specified data.
+ *
+ * @param {Object} control
+ * @param {boolean} fSingle
  * @param {string} idMachine
- * @param {string} sScript
+ * @param {string} sComponent
+ * @param {string} sCommand
+ * @param {string} [sValue]
  * @return {boolean}
  */
-function processMachineScript(idMachine, sScript)
+function commandMachine(control, fSingle, idMachine, sComponent, sCommand, sValue)
 {
-    return Component.processScript(idMachine, sScript);
+    if (sCommand == "script") {
+        if (Component.processScript(idMachine, sValue)) {
+            if (fSingle) control.disabled = true;
+            return true;
+        }
+        return false;
+    }
+    if (sComponent) {
+        var component = Component.getComponentByType(sComponent, idMachine + ".machine");
+        if (component) {
+            var exports = component['exports'];
+            if (exports) {
+                var fnCommand = exports[sCommand];
+                if (fnCommand) {
+                    if (fnCommand.call(component, sValue)) {
+                        if (fSingle) control.disabled = true;
+                        return true;
+                    }
+                    return false;
+                }
+            }
+        }
+    }
+    console.log("unimplemented: commandMachine('" + idMachine + "','" + sComponent + "','" + sCommand + "','" + sValue + "')");
+    return false;
 }
 
 /**
@@ -28198,8 +28230,7 @@ if (APPNAME == "PDPjs") {
     window['embedPDP11']  = embedPDP11;
 }
 
-window['findMachineComponent'] = findMachineComponent;
-window['processMachineScript'] = processMachineScript;
+window['commandMachine'] = commandMachine;
 
 window['enableEvents'] = Web.enablePageEvents;
 window['sendEvent']    = Web.sendPageEvent;

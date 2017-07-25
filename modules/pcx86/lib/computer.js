@@ -900,6 +900,8 @@ class Computer extends Component {
         }
 
         this.nPowerChange = 0;
+
+        Component.processScript(this.idMachine, this.getMachineParm('autoScript'));
     }
 
     /**
