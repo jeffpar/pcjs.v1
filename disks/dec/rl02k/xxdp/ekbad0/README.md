@@ -9,7 +9,7 @@ machines:
     debugger: true
     autoStart: true
     sticky: top
-scripts:
+machineScripts:
   runEKBAD0: |
     selectDrive RL11 RL0;
     select RL11 listDisks "XXDP+ Diagnostics";

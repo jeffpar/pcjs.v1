@@ -12,7 +12,7 @@ machines:
       RL0:
         path: http://archive.pcjs.org/disks/dec/rl02k/RL02K-XXDP.json
     sticky: top
-scripts:
+machineScripts:
   runEKBAD0: |
     selectDrive RL11 RL0;
     select RL11 listDisks "XXDP+ Diagnostics";

@@ -22,6 +22,7 @@ The following optional machine properties will be added to the 'parms' property:
 
     'autoMount' (eg: {"A":{"name":"OS/2 FOOTBALL (v7.68.17)","path":"/disks/pc/os2/misc/football/FOOTBALL-76817.json"}})
     'autoPower' (eg: true)
+    'autoScript' (eg, type Keyboard "$date\r$time\r")
     'autoStart' (eg: true)
     'autoType' (eg: $date\r$time\r)
     'drives' (eg: '[{name:"68Mb Hard Disk",type:4,path:"http://archive.pcjs.org/disks/pc/fixed/68mb/win95.json"}]')
@@ -30,10 +31,6 @@ The following optional machine properties will be added to the 'parms' property:
     'commands' (debugger commands, if any)
     'messages' (eg: fault)
     'connection' (eg: serialPort->vt100a.serialPort)
-
-Finally, all our JavaScript components expect multi-word property names to use camelCase, so we automatically convert
-any lower-case forms to camelCase, both here and in markout.js and components.xsl, in case we've gotten sloppy in any
-of our Markdown or XML documents.  Examples: 'automount' becomes 'autoMount', 'autopower' becomes 'autoPower', etc.
 
 {% endcomment %}
 {% for machine in page.machines %}
@@ -62,36 +59,27 @@ of our Markdown or XML documents.  Examples: 'automount' becomes 'autoMount', 'a
     {% endif %}
   {% endif %}
   {% capture machine_embed %}embed{{ machine_type | upcase | replace:"X86","x86" }}{% endcapture %}
-  {% if machine.automount != nil %}
-    {% if machine.automount == "" %}
-      {% assign machine_autoMount = "{}" %}
-    {% else %}
-      {% capture machine_autoMount %}{{ machine.automount|jsonify }}{% endcapture %}
-    {% endif %}
+  {% if machine.autoMount == "" %}
+    {% assign machine_autoMount = "{}" %}
   {% else %}
-    {% if machine.autoMount == "" %}
-      {% assign machine_autoMount = "{}" %}
-    {% else %}
-      {% capture machine_autoMount %}{{ machine.autoMount|jsonify }}{% endcapture %}
-    {% endif %}
+    {% capture machine_autoMount %}{{ machine.autoMount|jsonify }}{% endcapture %}
   {% endif %}
-  {% if machine.autopower != nil %}
-    {% capture machine_autoPower %},autoPower:{{ machine.autopower }}{% endcapture %}
-  {% elsif machine.autoPower != nil %}
+  {% if machine.autoPower != nil %}
     {% capture machine_autoPower %},autoPower:{{ machine.autoPower }}{% endcapture %}
   {% else %}
     {% assign machine_autoPower = "" %}
   {% endif %}
-  {% if machine.autostart != nil %}
-    {% capture machine_autoStart %},autoStart:{{ machine.autostart }}{% endcapture %}
-  {% elsif machine.autoStart != nil %}
+  {% if machine.autoScript != nil %}
+    {% capture machine_autoScript %},autoScript:"{{ page.machineScripts[machine.autoScript] | strip_newlines | replace:'"':"\\\\&quot;" | replace:"\r":"\\\\r" | replace:"\n":"\\\\n" | replace:"\t":"\\\\t" | replace:"\x":"\\\\x" }}"{% endcapture %}
+  {% else %}
+    {% assign machine_autoScript = "" %}
+  {% endif %}
+  {% if machine.autoStart != nil %}
     {% capture machine_autoStart %},autoStart:{{ machine.autoStart }}{% endcapture %}
   {% else %}
     {% assign machine_autoStart = "" %}
   {% endif %}
-  {% if machine.autotype != nil %}
-    {% capture machine_autoType %},autoType:"{{ machine.autotype | replace:"\r":"\\\\r" | replace:"\n":"\\\\n" | replace:"\t":"\\\\t" | replace:"\x":"\\\\x" }}"{% endcapture %}
-  {% elsif machine.autoType != nil %}
+  {% if machine.autoType != nil %}
     {% capture machine_autoType %},autoType:"{{ machine.autoType | replace:"\r":"\\\\r" | replace:"\n":"\\\\n" | replace:"\t":"\\\\t" | replace:"\x":"\\\\x" }}"{% endcapture %}
   {% else %}
     {% assign machine_autoType = "" %}
@@ -110,25 +98,25 @@ of our Markdown or XML documents.  Examples: 'automount' becomes 'autoMount', 'a
   {% else %}
     {% assign machine_template = machine.template %}
   {% endunless %}
-  {% capture machine_parms %}{{ site.left_brace }}autoMount:{{ machine_autoMount }}{{ machine_autoPower }}{{ machine_autoStart }}{{ machine_autoType }}{{ machine_drives }},resume:"{{ machine.resume }}",state:"{{ machine.state }}",commands:"{{ machine.commands }}",messages:"{{ machine.messages }}",connection:"{{ machine.connection }}"{{ site.right_brace }}{% endcapture %}
+  {% capture machine_parms %}{{ site.left_brace }}autoMount:{{ machine_autoMount }}{{ machine_autoPower }}{{ machine_autoScript }}{{ machine_autoStart }}{{ machine_autoType }}{{ machine_drives }},resume:"{{ machine.resume }}",state:"{{ machine.state }}",commands:"{{ machine.commands }}",messages:"{{ machine.messages }}",connection:"{{ machine.connection }}"{{ site.right_brace }}{% endcapture %}
   {% if site.pcjs.compiled == true and machine.uncompiled != true %}
-    {% capture machine_script %}
+    {% capture page_script %}
       <script type="text/javascript" src="{{ site.baseurl }}/versions/{{ machine_app }}/{{ site.pcjs.version }}/{{ machine_file }}.js"></script>{% endcapture %}
-    {% unless machine_scripts contains machine_script %}
-      {{ machine_script }}
+    {% unless page_scripts contains page_script %}
+      {{ page_script }}
     {% endunless %}
-    {% capture machine_scripts %}{{ machine_scripts }}{{ machine_script }}{% endcapture %}
+    {% capture page_scripts %}{{ page_scripts }}{{ page_script }}{% endcapture %}
     {% if machine_template == "" %}
       {% capture machine_template %}{{ site.baseurl }}/versions/{{ machine_app }}/{{ site.pcjs.version }}/components.xsl{% endcapture %}
     {% endif %}
   {% else %}
     {% capture machine_file_uncompiled %}{{ machine_file | remove:"-dbg" | append:"-uncompiled" }}{% endcapture %}
-    {% capture machine_script %}
+    {% capture page_script %}
       <script type="text/javascript" src="{{ site.baseurl }}/versions/{{ machine_app }}/{{ site.pcjs.version }}/{{ machine_file_uncompiled }}.js"></script>{% endcapture %}
-    {% unless machine_scripts contains machine_script %}
-      {{ machine_script }}
+    {% unless page_scripts contains page_script %}
+      {{ page_script }}
     {% endunless %}
-    {% capture machine_scripts %}{{ machine_scripts }}{{ machine_script }}{% endcapture %}
+    {% capture page_scripts %}{{ page_scripts }}{{ page_script }}{% endcapture %}
     {% if machine_template == "" %}
       {% capture machine_template %}{{ site.baseurl }}/versions/{{ machine_app }}/{{ site.pcjs.version }}/components.xsl{% endcapture %}
     {% endif %}
@@ -152,21 +140,21 @@ of our Markdown or XML documents.  Examples: 'automount' becomes 'autoMount', 'a
       {% if machine_type == "pdp11" %}{% assign array_scripts = site.pcjs.pdp11_scripts %}{% endif %}
       {% for script in array_scripts %}
         {% if script != "/modules/shared/lib/nodebug.js" or machine.debug != true and site.pcjs.debug != true %}
-          {% capture machine_script %}<script type="text/javascript" src="{{ site.baseurl }}{{ script }}"></script>{% endcapture %}
-          {% unless machine_scripts contains machine_script %}
-            {{ machine_script }}
+          {% capture page_script %}<script type="text/javascript" src="{{ site.baseurl }}{{ script }}"></script>{% endcapture %}
+          {% unless page_scripts contains page_script %}
+            {{ page_script }}
             {% if script contains "shared/lib/defines.js" %}
               {% if site.pcjs.private %}
-                {{ machine_script | replace:"defines.js","private.js" }}
+                {{ page_script | replace:"defines.js","private.js" }}
               {% endif %}
             {% endif %}
             {% if script contains "js/lib/defines.js" %}
               {% if machine_debugger != true %}
-                {{ machine_script | replace:"defines.js","nodebugger.js" }}
+                {{ page_script | replace:"defines.js","nodebugger.js" }}
               {% endif %}
             {% endif %}
           {% endunless %}
-          {% capture machine_scripts %}{{ machine_scripts }}{{ machine_script }}{% endcapture %}
+          {% capture page_scripts %}{{ page_scripts }}{{ page_script }}{% endcapture %}
         {% endif %}
       {% endfor %}
       {% if machine_template == "" %}
