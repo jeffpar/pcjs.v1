@@ -81,6 +81,7 @@ class DriveController extends Component {
      *
      *      autoMount: one or more JSON-encoded objects, each containing 'name' and 'path' properties
      *
+     * @this {DriveController}
      * @param {string} type
      * @param {Object} parms
      * @param {number} bitsMessage
@@ -123,10 +124,10 @@ class DriveController extends Component {
         this.irq = null;
 
         this['exports'] = {
-            'bootDisk': this.bootSelectedDisk,
-            'loadDisk': this.loadSelectedDrive,
-            'selectDrive': this.selectDrive,
-            'wait': this.waitDrives
+            'bootDisk':     this.bootSelectedDisk,
+            'loadDisk':     this.loadSelectedDisk,
+            'selectDrive':  this.selectDrive,
+            'wait':         this.waitDrives
         };
     }
 
@@ -194,7 +195,7 @@ class DriveController extends Component {
         case "loadDisk":
             this.bindings[sBinding] = control;
             control.onclick = function onClickLoadDrive(event) {
-                dc.loadSelectedDrive();
+                dc.loadSelectedDisk();
             };
             return true;
 
@@ -281,7 +282,7 @@ class DriveController extends Component {
                 if (file) {
                     var sDiskPath = file.name;
                     var sDiskName = Str.getBaseName(sDiskPath, true);
-                    dc.loadSelectedDrive(sDiskName, sDiskPath, file);
+                    dc.loadSelectedDisk(sDiskName, sDiskPath, file);
                 }
                 /*
                  * Prevent reloading of web page after form submission
@@ -543,7 +544,7 @@ class DriveController extends Component {
         drive.iHeadBoot = configDrive[i++];
         drive.iSectorBoot = configDrive[i++];
         drive.cbSectorBoot = configDrive[i++];
-        drive.status = configDrive[i++];
+        drive.status = configDrive[i];
 
         /*
          * The next group of properties are set by various controller command sequences.
@@ -723,7 +724,7 @@ class DriveController extends Component {
     }
 
     /**
-     * loadSelectedDrive(sDiskName, sDiskPath, file)
+     * loadSelectedDisk(sDiskName, sDiskPath, file)
      *
      * @this {DriveController}
      * @param {string} [sDiskName]
@@ -731,7 +732,7 @@ class DriveController extends Component {
      * @param {File} [file] is set if there's an associated File object
      * @return {boolean}
      */
-    loadSelectedDrive(sDiskName, sDiskPath, file)
+    loadSelectedDisk(sDiskName, sDiskPath, file)
     {
         if (!sDiskName && !sDiskPath) {
             var controlDisks = this.bindings["listDisks"];
@@ -836,7 +837,7 @@ class DriveController extends Component {
         this.unloadDrive(iDrive, true);
         drive.fLocal = true;
         var disk = new DiskPDP11(this, drive, DiskAPI.MODE.PRELOAD);
-        this.finishLoadDrive(drive, disk, sDiskName, sDiskPath, true);
+        this.doneLoadDrive(drive, disk, sDiskName, sDiskPath, true);
     }
 
     /**
@@ -875,7 +876,7 @@ class DriveController extends Component {
                 }
                 drive.fLocal = !!file;
                 var disk = new DiskPDP11(this, drive, DiskAPI.MODE.PRELOAD);
-                if (disk.load(sDiskName, sDiskPath, file, this.finishLoadDrive)) {
+                if (disk.load(sDiskName, sDiskPath, file, this.doneLoadDrive)) {
                     nResult++;
                 }
             }
@@ -884,7 +885,7 @@ class DriveController extends Component {
     }
 
     /**
-     * finishLoadDrive(drive, disk, sDiskName, sDiskPath, fAutoMount)
+     * doneLoadDrive(drive, disk, sDiskName, sDiskPath, fAutoMount)
      *
      * The disk parameter is set if the disk was successfully loaded, null if not.
      *
@@ -895,7 +896,7 @@ class DriveController extends Component {
      * @param {string} sDiskPath
      * @param {boolean} [fAutoMount]
      */
-    finishLoadDrive(drive, disk, sDiskName, sDiskPath, fAutoMount)
+    doneLoadDrive(drive, disk, sDiskName, sDiskPath, fAutoMount)
     {
         drive.fBusy = false;
 

@@ -159,6 +159,11 @@ class Keyboard extends Component {
          */
         this.fAllDown = false;
 
+        this['exports'] = {
+            'type':         this.injectKeys,
+            'wait':         this.waitReady
+        };
+
         this.setReady();
     }
 
@@ -380,9 +385,7 @@ class Keyboard extends Component {
     intDOS(addr)
     {
         var AH = (this.cpu.regEAX >> 8) & 0xff;
-        if (AH == 0x0A) {
-            this.injectInit();
-        }
+        if (AH == 0x0A) this.injectInit(this.autoType);
         return true;
     }
 
@@ -402,7 +405,7 @@ class Keyboard extends Component {
     }
 
     /**
-     * parseAutoType(sKeys)
+     * parseKeys(sKeys)
      *
      * The following special sequences are recognized:
      *
@@ -438,7 +441,7 @@ class Keyboard extends Component {
      * @param {string|undefined} sKeys
      * @return {string|undefined}
      */
-    parseAutoType(sKeys)
+    parseKeys(sKeys)
     {
         if (sKeys) {
             var match, reSpecial = /(?:^|[^$])\$([a-z]+)/g;
@@ -862,7 +865,7 @@ class Keyboard extends Component {
             data = [];
             this.autoInject = null;
         } else {
-            this.autoInject = this.parseAutoType(this.autoType);
+            this.autoInject = this.autoType;
         }
         this.fClock = this.fAdvance = data[i++];
         this.fData = data[i];
@@ -888,6 +891,8 @@ class Keyboard extends Component {
          * Make sure the auto-injection buffer is empty (an injection could have been in progress on any reset after the first).
          */
         this.sInjectBuffer = "";
+        this.fnCallReady = null;
+
         return true;
     }
 
@@ -950,16 +955,19 @@ class Keyboard extends Component {
     }
 
     /**
-     * injectInit()
+     * injectInit(sKeys)
      *
      * @this {Keyboard}
+     * @param {string|undefined} sKeys
+     * @return {boolean}
      */
-    injectInit()
+    injectInit(sKeys)
     {
-        if (!this.autoInject && this.autoType) {
-            this.autoInject = this.parseAutoType(this.autoType);
-            this.injectKeys(this.autoInject);
+        if (!this.autoInject && sKeys) {
+            this.autoInject = sKeys;
+            return this.injectKeys(this.autoInject);
         }
+        return false;
     }
 
     /**
@@ -968,14 +976,17 @@ class Keyboard extends Component {
      * @this {Keyboard}
      * @param {string|undefined} sKeys
      * @param {number} [msDelay] is an optional injection delay (default is msInjectDelay)
+     * @return {boolean}
      */
     injectKeys(sKeys, msDelay)
     {
         if (sKeys && !this.sInjectBuffer) {
-            this.sInjectBuffer = sKeys;
+            this.sInjectBuffer = this.parseKeys(sKeys);
             if (!COMPILED) this.log("injectKeys(" + this.sInjectBuffer.split("\n").join("\\n") + ")");
             this.injectKeysFromBuffer(msDelay || this.msInjectDelay);
+            return true;
         }
+        return false;
     }
 
     /**
@@ -1014,13 +1025,34 @@ class Keyboard extends Component {
             if (charCode == 0x0A) charCode = 0x0D;
             this.addActiveKey(charCode, true);
         }
-        if (this.sInjectBuffer.length > 0) {
+        if (!this.sInjectBuffer.length) {
+            if (this.fnCallReady) {
+                this.fnCallReady();
+                this.fnCallReady = null;
+            }
+        } else {
             setTimeout(function(kbd) {
                 return function onInjectKeyTimeout() {
                     kbd.injectKeysFromBuffer(msDelay);
                 };
             }(this), msDelay);
         }
+    }
+
+    /**
+     * waitReady(fnCallReady)
+     *
+     * @this {Keyboard}
+     * @param {function()|null} fnCallReady
+     * @return {boolean} false if wait required, true otherwise
+     */
+    waitReady(fnCallReady)
+    {
+        if (this.sInjectBuffer.length > 0) {
+            if (!this.fnCallReady) this.fnCallReady = fnCallReady;
+            return false;
+        }
+        return true;
     }
 
     /**

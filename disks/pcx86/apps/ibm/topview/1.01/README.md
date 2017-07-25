@@ -11,7 +11,16 @@ machines:
         path: /disks/pcx86/dos/ibm/2.00/PCDOS200-DISK1.json
       B:
         path: /disks/pcx86/apps/ibm/topview/1.01/TOPVIEW101-PROGRAM.json
-    autoType: \r\rb:\rtv\r
+commands:
+  autoRun: |
+    type Keyboard "$date\r$time\r";
+    wait Keyboard;
+    sleep 1000;
+    select FDC listDrives "A:";
+    select FDC listDisks "MS Mouse 5.00 (System)";
+    loadDisk FDC;
+    wait FDC;
+    type Keyboard "MOUSE\r";
 ---
 
 TopView 1.01
@@ -27,6 +36,8 @@ has been translated from French to English*, click **Show Original**.  Ironicall
 paragraphs of English text will likely eliminate the problem.
 
 {% include machine.html id="ibm5160" %}
+
+Click this button: {% include machine-command.html type='button' label='Load' machine='ibm5160' command='autoRun' %}
 
 ### Directory of TopView 1.01 (Program)
 

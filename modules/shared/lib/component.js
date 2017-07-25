@@ -763,7 +763,7 @@ class Component {
      * Component.processScript(idMachine, sScript)
      *
      * @param {string} idMachine
-     * @param {string} sScript
+     * @param {string} [sScript]
      * @return {boolean}
      */
     static processScript(idMachine, sScript)
@@ -848,7 +848,7 @@ class Component {
             }
 
             if (!fSuccess) {
-                Component.alertUser("Script error: " + sCommand + (fnCommand? " failed" : " unrecognized"));
+                Component.alertUser("Script error: '" + sCommand + "' command " + (fnCommand? " failed" : " unrecognized"));
                 break;
             }
         }

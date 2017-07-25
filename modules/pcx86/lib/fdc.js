@@ -194,7 +194,8 @@ class FDC extends Component {
          */
 
         this['exports'] = {
-            'loadDisk': this.loadSelectedDisk
+            'loadDisk':     this.loadSelectedDisk,
+            'wait':         this.waitDrives
         };
     }
 
@@ -274,24 +275,7 @@ class FDC extends Component {
                 }
             }
             controlSelect.onchange = function onChangeListDisks(event) {
-                var controlDesc = fdc.bindings["descDisk"];
-                var controlOption = controlSelect.options[controlSelect.selectedIndex];
-                if (controlDesc && controlOption) {
-                    var dataValue = {};
-                    var sValue = controlOption.getAttribute("data-value");
-                    if (sValue) {
-                        try {
-                            dataValue = eval("(" + sValue + ")");
-                        } catch (e) {
-                            Component.error("FDC option error: " + e.message);
-                        }
-                    }
-                    var sHTML = dataValue['desc'];
-                    if (sHTML === undefined) sHTML = "";
-                    var sHRef = dataValue['href'];
-                    if (sHRef !== undefined) sHTML = "<a href=\"" + sHRef + "\" target=\"_blank\">" + sHTML + "</a>";
-                    controlDesc.innerHTML = sHTML;
-                }
+                fdc.updateSelectedDiskette();
             };
             return true;
 
@@ -749,6 +733,7 @@ class FDC extends Component {
 
         drive.iDrive = iDrive;
         drive.fBusy = drive.fLocal = false;
+        drive.fnCallReady = null;
 
         if (data === undefined) {
             /*
@@ -1106,6 +1091,9 @@ class FDC extends Component {
     /**
      * loadSelectedDisk()
      *
+     * NOTE: Since this can be called via script command (eg, 'loadDisk FDC'), additional parameters can be
+     * passed; use the arguments array to access them if necessary.
+     *
      * @this {FDC}
      * @return {boolean}
      */
@@ -1331,7 +1319,7 @@ class FDC extends Component {
              * WARNING: This conversion of drive number to drive letter, starting with A:, is very simplistic
              * and will not match the drive mappings that DOS ultimately uses (ie, for drives beyond B:).
              */
-            this.notice("Mounted diskette \"" + sDisketteName + "\" in drive " + String.fromCharCode(0x41 + drive.iDrive), drive.fAutoMount || fAutoMount);
+            if (!drive.fnCallReady) this.notice("Mounted diskette \"" + sDisketteName + "\" in drive " + String.fromCharCode(0x41 + drive.iDrive), drive.fAutoMount || fAutoMount);
 
             /*
              * Update the drive's current media parameters to match the disk's.
@@ -1356,6 +1344,11 @@ class FDC extends Component {
         }
 
         this.displayDiskette(drive.iDrive);
+
+        if (drive.fnCallReady) {
+            drive.fnCallReady();
+            drive.fnCallReady = null;
+        }
     }
 
     /**
@@ -1479,6 +1472,53 @@ class FDC extends Component {
                 }
             }
         }
+    }
+
+    /**
+     * updateSelectedDiskette()
+     *
+     * @this {FDC}
+     */
+    updateSelectedDiskette()
+    {
+        var control = this.bindings["listDisks"];
+        var controlDesc = this.bindings["descDisk"];
+        var controlOption = control.options[control.selectedIndex];
+        if (controlDesc && controlOption) {
+            var dataValue = {};
+            var sValue = controlOption.getAttribute("data-value");
+            if (sValue) {
+                try {
+                    dataValue = eval("(" + sValue + ")");
+                } catch (e) {
+                    Component.error(this.type + " option error: " + e.message);
+                }
+            }
+            var sHTML = dataValue['desc'];
+            if (sHTML === undefined) sHTML = "";
+            var sHRef = dataValue['href'];
+            if (sHRef !== undefined) sHTML = "<a href=\"" + sHRef + "\" target=\"_blank\">" + sHTML + "</a>";
+            controlDesc.innerHTML = sHTML;
+        }
+    }
+
+    /**
+     * waitDrives(fnCallReady)
+     *
+     * @this {FDC}
+     * @param {function()|null} fnCallReady
+     * @return {boolean} false if wait required, true otherwise
+     */
+    waitDrives(fnCallReady)
+    {
+        for (var iDrive = 0; iDrive < this.aDrives.length; iDrive++) {
+            var drive = this.aDrives[iDrive];
+            if (drive && drive.fBusy) {
+                if (!drive.fnCallReady) drive.fnCallReady = fnCallReady;
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
