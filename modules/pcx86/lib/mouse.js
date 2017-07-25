@@ -78,9 +78,8 @@ class Mouse extends Component {
         super("Mouse", parmsMouse, Messages.MOUSE);
 
         this.idAdapter = parmsMouse['serial'];
-        if (this.idAdapter) {
-            this.sAdapterType = "SerialPort";
-        }
+        if (this.idAdapter) this.sAdapterType = "SerialPort";
+        this.scale = parmsMouse['scaleMouse'];
         this.setActive(false);
         this.fCaptured = this.fLocked = false;
 
@@ -108,6 +107,7 @@ class Mouse extends Component {
         this.bus = bus;
         this.cpu = cpu;
         this.dbg = dbg;
+        this.scale = cmp.getMachineParm('scaleMouse') || this.scale;
         /*
          * Attach the Video component to the CPU, so that the CPU can periodically update
          * the video display via updateVideo(), as cycles permit.
@@ -503,17 +503,27 @@ class Mouse extends Component {
     moveMouse(xDelta, yDelta, xDiag, yDiag)
     {
         if (this.isActive()) {
-            if (xDelta || yDelta) {
+            /*
+             * I would prefer to simply say "Math.round(xDelta * this.scale)", but JavaScript's round() function
+             * rounds negative numbers toward +infinity if the fraction is exactly 0.5.  All positive numbers are
+             * rounded correctly, so we convert the value to positive and restore its sign afterward.  Additionally,
+             * if the scaling factor turns a non-zero value into zero, we restore the value to its smallest legal
+             * non-zero value (thanks to Math.sign() again).  This ensures that tiniest movement of the physical
+             * mouse always results in at least the tiniest movement of the virtual mouse.
+             */
+            var xScaled = (Math.round(Math.abs(xDelta) * this.scale) * Math.sign(xDelta)) || Math.sign(xDelta);
+            var yScaled = (Math.round(Math.abs(yDelta) * this.scale) * Math.sign(yDelta)) || Math.sign(yDelta);
+            if (xScaled || yScaled) {
                 if (this.messageEnabled(Messages.MOUSE)) {
-                    this.printMessage("moveMouse(" + xDelta + "," + yDelta + ")");
+                    this.printMessage("moveMouse(" + xScaled + "," + yScaled + ")");
                 }
                 /*
                  * As sendPacket() indicates, any x and y coordinates we supply are for diagnostic purposes only.
                  * sendPacket() only cares about the xDelta and yDelta properties we provide above, which it then zeroes
                  * on completion.
                  */
-                this.xDelta = xDelta;
-                this.yDelta = yDelta;
+                this.xDelta = xScaled;
+                this.yDelta = yScaled;
                 this.sendPacket(null, xDiag, yDiag);
             }
         }

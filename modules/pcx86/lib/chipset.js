@@ -60,7 +60,7 @@ class ChipSet extends Component {
      *      scaleTimers:    true to divide timer cycle counts by the CPU's cycle multiplier (default is false)
      *      floppies:       array of floppy drive sizes in Kb (default is "[360, 360]" if no sw1 value provided)
      *      monitor:        none|tv|color|mono|ega|vga (if no sw1 value provided, default is "ega" for 5170, "mono" otherwise)
-     *      rtcDate:        optional RTC date/time (in GMT) to use on reset; use the ISO 8601 format; eg: "2014-10-01T08:00:00"
+     *      dateRTC:        optional RTC date/time (in GMT) to use on reset; use the ISO 8601 format; eg: "2014-10-01T08:00:00"
      *
      * As support for IBM-compatible machines grows, we should refrain from adding new model strings (eg, "att6300")
      * and corresponding model checks, and instead add more ChipSet configuration properties, such as:
@@ -143,7 +143,7 @@ class ChipSet extends Component {
         }
 
         this.fScaleTimers = parmsChipSet['scaleTimers'] || false;
-        this.sRTCDate = parmsChipSet['rtcDate'];
+        this.sDateRTC = parmsChipSet['dateRTC'];
 
         /*
          * Here, I'm finally getting around to trying the Web Audio API.  Fortunately, based on what little I know about
@@ -429,7 +429,7 @@ class ChipSet extends Component {
                 this.abCMOSData = new Array(ChipSet.CMOS.ADDR.TOTAL);
             }
 
-            this.initRTCTime(this.sRTCDate);
+            this.initRTCTime(this.sDateRTC);
 
             /*
              * initCMOSData() will initialize a variety of "legacy" CMOS bytes, but it will NOT overwrite any memory
