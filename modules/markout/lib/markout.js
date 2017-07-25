@@ -442,7 +442,7 @@ MarkOut.prototype.convertMD = function(sIndent)
             /*
              * Extract script definitions first, if any, from the Front Matter.
              */
-            var aScriptDefs = aMatch[1].match(/\nscripts:([\s\S]*?)\n([^\s]|$)/);
+            var aScriptDefs = aMatch[1].match(/\nmachineScripts:([\s\S]*?)\n([^\s]|$)/);
             if (aScriptDefs) {
                 var reScript = /[ \t]+([a-z0-9$@_-]+):\s*\|/gi;
                 var aScripts = aScriptDefs[1].split(reScript);

@@ -12,7 +12,7 @@ machines:
       B:
         path: /disks/pcx86/apps/ibm/topview/1.01/TOPVIEW101-PROGRAM.json
     autoScript: startTV
-scripts:
+machineScripts:
   startTV: |
     wait Keyboard DOS;
     type Keyboard "$date\r$time\r";
