@@ -149,6 +149,8 @@ class Keyboard extends Component {
          */
         this.autoInject = null;
         this.autoType = parmsKbd['autoType'];
+        this.fDOSReady = false;
+        this.fnDOSReady = this.fnInjectReady = null;
 
         /*
          * HACK: We set fAllDown to false to ignore all down/up events for keys not explicitly marked as ONDOWN;
@@ -385,7 +387,15 @@ class Keyboard extends Component {
     intDOS(addr)
     {
         var AH = (this.cpu.regEAX >> 8) & 0xff;
-        if (AH == 0x0A) this.injectInit(this.autoType);
+        if (AH == 0x0A) {
+            this.fDOSReady = true;
+            if (this.fnDOSReady) {
+                this.fnDOSReady();
+                this.fnDOSReady = null;
+            } else {
+                this.injectInit(this.autoType);
+            }
+        }
         return true;
     }
 
@@ -891,7 +901,6 @@ class Keyboard extends Component {
          * Make sure the auto-injection buffer is empty (an injection could have been in progress on any reset after the first).
          */
         this.sInjectBuffer = "";
-        this.fnCallReady = null;
 
         return true;
     }
@@ -1026,9 +1035,9 @@ class Keyboard extends Component {
             this.addActiveKey(charCode, true);
         }
         if (!this.sInjectBuffer.length) {
-            if (this.fnCallReady) {
-                this.fnCallReady();
-                this.fnCallReady = null;
+            if (this.fnInjectReady) {
+                this.fnInjectReady();
+                this.fnInjectReady = null;
             }
         } else {
             setTimeout(function(kbd) {
@@ -1040,19 +1049,35 @@ class Keyboard extends Component {
     }
 
     /**
-     * waitReady(fnCallReady)
+     * waitReady(fnCallReady, sOption)
      *
      * @this {Keyboard}
      * @param {function()|null} fnCallReady
+     * @param {string} [sOption]
      * @return {boolean} false if wait required, true otherwise
      */
-    waitReady(fnCallReady)
+    waitReady(fnCallReady, sOption)
     {
-        if (this.sInjectBuffer.length > 0) {
-            if (!this.fnCallReady) this.fnCallReady = fnCallReady;
-            return false;
+        var fReady = false;
+
+        switch(sOption) {
+        case "DOS":
+            if (this.fDOSReady) {
+                fReady = true;
+            } else {
+                this.fnDOSReady = fnCallReady;
+            }
+            break;
+
+        default:
+            if (!this.sInjectBuffer.length) {
+                fReady = true;
+            } else {
+                this.fnInjectReady = fnCallReady;
+            }
+            break;
         }
-        return true;
+        return fReady;
     }
 
     /**

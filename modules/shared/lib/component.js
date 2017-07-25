@@ -848,7 +848,7 @@ class Component {
             }
 
             if (!fSuccess) {
-                Component.alertUser("Script error: '" + sCommand + "' command " + (fnCommand? " failed" : " unrecognized"));
+                Component.alertUser("Script error: '" + sCommand + (fnCommand? " failed" : " unrecognized"));
                 break;
             }
         }

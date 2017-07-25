@@ -5,14 +5,16 @@ permalink: /disks/pcx86/apps/ibm/topview/1.01/
 machines:
   - id: ibm5160
     type: pcx86
-    config: /devices/pcx86/machine/5160/cga/640kb/machine.xml
+    config: /devices/pcx86/machine/5160/cga/640kb/debugger/machine.xml
     autoMount:
       A:
         path: /disks/pcx86/dos/ibm/2.00/PCDOS200-DISK1.json
       B:
         path: /disks/pcx86/apps/ibm/topview/1.01/TOPVIEW101-PROGRAM.json
-commands:
-  autoRun: |
+    autoScript: startTV
+scripts:
+  startTV: |
+    wait Keyboard DOS;
     type Keyboard "$date\r$time\r";
     wait Keyboard;
     sleep 1000;
@@ -21,6 +23,8 @@ commands:
     loadDisk FDC;
     wait FDC;
     type Keyboard "MOUSE\r";
+    sleep 5000;
+    type Keyboard "B:\rTV\r";
 ---
 
 TopView 1.01
@@ -37,7 +41,7 @@ paragraphs of English text will likely eliminate the problem.
 
 {% include machine.html id="ibm5160" %}
 
-Click this button: {% include machine-command.html type='button' label='Load' machine='ibm5160' command='autoRun' %}
+To manually start TopView: {% include machine-command.html type='button' label='Load' machine='ibm5160' command='startTV' %}
 
 ### Directory of TopView 1.01 (Program)
 
