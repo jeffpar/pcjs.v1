@@ -5,16 +5,18 @@ permalink: /docs/pcx86/chipset/
 ---
 
 PCx86 ChipSet Component
----
+-----------------------
 
 Format
----
+------
+
 ```xml
 <chipset>...</chipset>
 ```
 
 Purpose
----
+-------
+
 Creates an instance of the ChipSet component, which includes support for the following internal components:
 
 * 8237 Direct Memory Access (DMA) Controller
@@ -24,7 +26,8 @@ Creates an instance of the ChipSet component, which includes support for the fol
 * Speaker (sound requires [webkitAudioContext](http://www.w3.org/TR/webaudio/) support in the web browser)
 
 Attributes
----
+----------
+
  * *model* (required)
 
 	The IBM PC model number to simulate (must be 5150, 5160 or 5170).
@@ -62,7 +65,7 @@ Attributes
 
 	*true* (default) to enable sound, assuming the browser supports **webkitAudioContext**, or *false* to disable sound.
 
- * *scaletimers* (optional)
+ * *scaleTimers* (optional)
 
 	*false* (default) to update timers in sync with CPU speed, *true* to scale timer updates to match real-world time.
 
@@ -81,16 +84,17 @@ Attributes
 	* "mono"
 	* "ega"
 
- * *rtcdate* (optional)
+ * *dateRTC* (optional)
 
-	Allows a specific startup date and time (model 5170 only); the *rtcdate* string must be of the form:
+	Allows a specific startup date and time (model 5170 only); the *dateRTC* string must be of the form:
 	
 		yyyy-mm-ddThh:mm:ss
 
  * Also supports the attributes of *[Component](/docs/pcx86/component/)*.
 
 Bindings
----
+--------
+
  * *sw1*
 
 	For use with a control of type *switches*, which creates a &lt;div&gt; that the ChipSet will use to display the current settings of the SW1 switch block.
@@ -104,13 +108,15 @@ Bindings
 	For use with a control of type *descriptions*, which creates a &lt;div&gt; that the ChipSet will use to display a text description of the selected DIP switch settings.
 
 Example
----
+-------
+
 ```xml
 <chipset id="chipset" model="5150" sw1="01000001" sw2="11110000"/>
 ```
 
 Output
----
+------
+
 ```html
 <div id="..." class="pc-chipset pc-component">
     <div class="pc-container">

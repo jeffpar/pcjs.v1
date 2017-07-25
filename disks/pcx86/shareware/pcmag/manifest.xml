@@ -3123,4 +3123,112 @@
 		<file size="199" time="1980-01-01 12:05:48" attr="0x20" md5="a803649e63aa94c938a8c96996a32e1a">TPCREAD.ME</file>
 		<file size="1006" time="1994-11-22 12:12:46" attr="0x20" md5="ca546df5117a35deb4818122f17d786e">WPROMP.BAT</file>
 	</disk>
+	<disk id="disk173" size="327680" chs="40:2:8" img="../../private/GRP001/PCMAG-UTIL-VOL1-1986/PCMAG-UTIL-VOL1-1986.img" href="/disks/pcx86/shareware/pcmag/disks/PCMAG-UTIL-VOL1-1986.json" md5="6ec57c799fdbef4088b85f689c4e64bc" md5json="92b85956d627f37913d2efb350ac7ad5">
+		<name>PC Magazine Utils Vol1</name>
+		<file size="640" time="1986-07-10 08:21:00" attr="0x20">ATSIZE.COM</file>
+		<file size="627" time="1986-03-17 13:46:00" attr="0x20">ATTR.COM</file>
+		<file size="14" time="1986-08-01 15:01:44" attr="0x20">AUTOEXEC.BAT</file>
+		<file size="1392" time="1980-01-02 00:46:02" attr="0x20">BAC.COM</file>
+		<file size="2048" time="1986-08-01 17:10:06" attr="0x20">BOOTSCRN</file>
+		<file size="958" time="1986-01-02 02:54:20" attr="0x20">BROWSE.COM</file>
+		<file size="391" time="1986-08-01 14:39:18" attr="0x20">COLORSET.COM</file>
+		<file size="796" time="1985-09-05 15:39:54" attr="0x20">DDIR.COM</file>
+		<file size="657" time="1980-01-01 00:00:02" attr="0x20">DELZ.COM</file>
+		<file size="1005" time="1986-01-31 13:45:40" attr="0x20">DISKSCAN.COM</file>
+		<file size="177" time="1986-06-05 10:58:46" attr="0x20">DOORS.COM</file>
+		<file size="616" time="1980-01-01 06:01:22" attr="0x20">DOS-EDIT.COM</file>
+		<file size="343" time="1986-06-05 10:54:06" attr="0x20">FREE.COM</file>
+		<file size="12288" time="1986-08-11 13:21:16" attr="0x20">IBMBIO.COM</file>
+		<file size="28672" time="1986-08-11 13:21:22" attr="0x20">IBMDOS.COM</file>
+		<file size="8992" time="1985-05-01 18:03:32" attr="0x20">KEEPER.BAS</file>
+		<file size="3148" time="1986-07-18 06:37:54" attr="0x20">KEEPER.COM</file>
+		<file size="536" time="1985-09-17 12:07:52" attr="0x20">KEY-FAKE.COM</file>
+		<file size="517" time="1986-06-05 11:18:26" attr="0x20">LOCATE.COM</file>
+		<file size="340" time="1980-01-01 00:00:02" attr="0x20">LOCK.COM</file>
+		<file size="20" time="1985-03-05 12:32:34" attr="0x20">LPTPORT.COM</file>
+		<file size="96921" time="1986-08-11 11:10:00" attr="0x20">MANUAL</file>
+		<file size="528" time="1985-09-05 16:43:34" attr="0x20">MONOGRAF.DRV</file>
+		<file size="430" time="1985-03-05 12:11:54" attr="0x20">MOVE.COM</file>
+		<file size="736" time="1986-02-14 08:38:16" attr="0x20">NO.COM</file>
+		<file size="1054" time="1984-12-19 11:56:52" attr="0x20">NPAD.COM</file>
+		<file size="5257" time="1986-08-07 23:17:08" attr="0x20">ONEKEY.BAS</file>
+		<file size="658" time="1986-03-03 13:13:56" attr="0x20">POPDIR.COM</file>
+		<file size="1819" time="1985-03-14 13:16:00" attr="0x20">PR.COM</file>
+		<file size="256" time="1985-06-27 18:17:02" attr="0x20">PRSWAP.COM</file>
+		<file size="724" time="1986-03-03 10:05:04" attr="0x20">PUSHDIR.COM</file>
+		<file size="273" time="1986-07-25 10:24:12" attr="0x20">QUICKEYS.COM</file>
+		<file size="1071" time="1984-11-28 09:07:44" attr="0x20">RED.COM</file>
+		<file size="1139" time="1986-01-23 09:35:24" attr="0x20">RENDIR.COM</file>
+		<file size="13" time="1985-03-30 15:33:26" attr="0x20">SCROLL.COM</file>
+		<file size="27546" time="1986-08-01 00:00:06" attr="0x20">SETUP.ASM</file>
+		<file size="3132" time="1986-04-14 11:22:48" attr="0x20">SETUP.COM</file>
+		<file size="640" time="1980-01-02 03:54:26" attr="0x20">SIZE.COM</file>
+		<file size="6005" time="1986-08-11 08:18:26" attr="0x20">SNAPSHOT.BAS</file>
+		<file size="409" time="1986-02-06 16:33:58" attr="0x20">STATLINE.COM</file>
+		<file size="591" time="1986-06-05 10:59:08" attr="0x20">SWEEP.COM</file>
+		<file size="2067" time="1985-03-05 11:56:18" attr="0x20">UNDEL.COM</file>
+		<file size="340" time="1980-01-01 00:00:02" attr="0x20">UNLOCK.COM</file>
+		<file size="512" time="1985-07-31 17:24:36" attr="0x20">VTREE.COM</file>
+		<file size="754" time="1985-05-26 13:27:14" attr="0x20">WAITASEC.COM</file>
+		<file size="2176" time="1986-08-01 17:07:58" attr="0x20">WELCOME</file>
+		<file size="418" time="1985-01-12 20:57:24" attr="0x20">WHERE.COM</file>
+		<file size="910" time="1986-05-15 17:12:38" attr="0x20">XDEL.COM</file>
+	</disk>
+	<disk id="disk174" size="368640" chs="40:2:9" dir="../../private/GRP001/PCMAG-UTIL-VOL2/PCMAGV2" href="/disks/pcx86/shareware/pcmag/disks/PCMAG-UTIL-VOL2.json" md5="de1994746e64edeb52fa246617234cae" md5json="db53e5ac490ee0c28e2afc343768ebf8">
+		<name>PC Magazine Utils Vol2</name>
+		<file size="1712" time="1987-07-06 12:30:28" attr="0x20" md5="d38ae3104dc326e87ae09467ba021fd7">APPBK.COM</file>
+		<file size="1169" time="1986-12-02 13:59:08" attr="0x20" md5="c4f2b94c260b054886ee3a717aa36462">ASC.COM</file>
+		<file size="64" time="1987-07-02 03:57:34" attr="0x20" md5="34490f0e994d3cf5957054d05e1451e5">BLOAD.COM</file>
+		<file size="2048" time="1987-07-09 17:04:20" attr="0x20" md5="97f98e0ae7e5f0f547c6c9cefb8b5a6d">BOOTSCRN</file>
+		<file size="1088" time="1987-07-09 17:58:22" attr="0x20" md5="2e4c51d7b03b33091d787614153a2dc0">BROWSE2.COM</file>
+		<file size="66" time="1987-07-02 03:57:46" attr="0x20" md5="8e519757288ef0cbe9e364bbcdfb5a3b">BSAVE.COM</file>
+		<file size="737" time="1987-02-25 17:38:40" attr="0x20" md5="a48bd0c3d722569a79ca4875e943d87a">CHANGE.COM</file>
+		<file size="1266" time="1987-03-17 07:00:26" attr="0x20" md5="72fa1a0d5dc1f7c6fadf6a6512cdc716">COPYSAFE.COM</file>
+		<file size="66" time="1987-06-30 11:38:40" attr="0x20" md5="5ec06d2532a74290794ab9ee57f0fde3">CS.COM</file>
+		<file size="880" time="1986-10-31 10:33:10" attr="0x20" md5="3077ef45f552f0d47be8f6628adb2935">DIRCOMP.COM</file>
+		<file size="1987" time="1987-01-14 08:02:06" attr="0x20" md5="ab63da2116072f8295ba16f87a1de315">DIREX.COM</file>
+		<file size="1403" time="1987-01-30 09:34:26" attr="0x20" md5="1267339bf0d6fdd82436ed8b3e05714f">DISKPREP.COM</file>
+		<file size="1402" time="1987-04-14 13:49:26" attr="0x20" md5="cdfce6f620e362328672f61dfe977d83">DOS.BAR</file>
+		<file size="3059" time="1987-04-14 13:48:02" attr="0x20" md5="1a7d8db78bc987ba04fe77a50858ecb4">DOS.BDF</file>
+		<file size="1589" time="1987-02-05 12:34:50" attr="0x20" md5="a6fa80e0be476f4c7fb88c41d931a9a6">DRAW.COM</file>
+		<file size="2109" time="1987-08-06 11:23:52" attr="0x20" md5="0d2787ef4c3b23539a2d46face281832">DRAW.DAT</file>
+		<file size="76" time="1987-07-06 17:49:28" attr="0x20" md5="3b0a25c309a2533993f5079f7a49826a">EGA12.COM</file>
+		<file size="40" time="1987-07-06 17:50:50" attr="0x20" md5="6294a4d66fb3bf3fa142a9d764b7096f">EGA25.COM</file>
+		<file size="82" time="1987-07-06 17:52:18" attr="0x20" md5="84d7a0b73278275f7624aeb92ab3a464">EGA35.COM</file>
+		<file size="40" time="1987-07-06 17:53:26" attr="0x20" md5="8242360ad6bb5019833b049d432ec140">EGA43.COM</file>
+		<file size="80" time="1987-07-06 17:54:06" attr="0x20" md5="da9cc01c241b07c499a08f50b276c752">EGA50.COM</file>
+		<file size="43" time="1980-01-01 00:04:50" attr="0x20" md5="daa497d3ff2a187c541b4e7dc0be1b44">EGA512.COM</file>
+		<file size="40" time="1987-07-04 16:45:30" attr="0x20" md5="1d2d928edaf163328252beb21a994f0f">EGACOLOR.COM</file>
+		<file size="43" time="1987-07-04 16:45:48" attr="0x20" md5="01acec2ac1a9f3af3ff461e246840c41">EGACOSET.COM</file>
+		<file size="89" time="1986-07-11 01:02:32" attr="0x20" md5="ac4bec3e9df2f345fb673ade84f43292">EGAITAL.COM</file>
+		<file size="87" time="1986-07-10 04:03:52" attr="0x20" md5="435c6ab92b0b09798edce151c2920c5f">EGAMODE.COM</file>
+		<file size="58" time="1986-07-30 07:02:42" attr="0x20" md5="dd408b9e13c6f00e3f52bff2c04a02a9">EGAPAGE.COM</file>
+		<file size="129" time="1987-07-06 12:35:52" attr="0x20" md5="b402835fdc5e72e1395306d19786347f">EGAPALET.COM</file>
+		<file size="8" time="1987-07-05 18:34:16" attr="0x20" md5="f9a9fd23c98b16aceef6d00ac325a71e">EGAPRTSC.COM</file>
+		<file size="497" time="1986-10-03 12:01:44" attr="0x20" md5="f9912a21560c730dc57ab5e73e73766d">FREEZE.COM</file>
+		<file size="7" time="1987-07-02 04:03:20" attr="0x20" md5="27be3e0f4a2417c4c76bd0d209ffb5e9">HIGHRES.COM</file>
+		<file size="7" time="1987-07-02 04:03:10" attr="0x20" md5="133642abac0064fa29ad9cb9d56b9023">LOWRES.COM</file>
+		<file size="2079" time="1987-03-23 11:23:28" attr="0x20" md5="1327fb0a40dbcc14ae160efc89c83a09">MAKEBAR.COM</file>
+		<file size="96364" time="1989-02-18 15:59:08" attr="0x20" md5="0dd72f7d1c955c541cfaf5ddefe70752">MANUAL2</file>
+		<file size="2529" time="1987-04-03 16:45:58" attr="0x20" md5="42f025938ec76ceee8b7a0e113c12cda">MOVIE.DAT</file>
+		<file size="816" time="1987-01-15 11:53:24" attr="0x20" md5="b6aac5ec20229baa53145e6b79d98589">PARSE.COM</file>
+		<file size="1120" time="1989-06-09 13:37:38" attr="0x20" md5="c25c8a5166ab83ebea4048bd38540c6c">PCMAG2.COM</file>
+		<file size="112112" time="1989-06-09 13:37:38" attr="0x20" md5="358831850e89a29af6334ac7f891b0a5">PCMAG2.OVL</file>
+		<file size="27008" time="1989-06-09 13:36:36" attr="0x20" md5="7694fcb32b00ca6607caeff7cf576f20">PCMAGNDX.COM</file>
+		<file size="861" time="1987-07-06 08:49:32" attr="0x20" md5="513603bb1a4d007e239744a21c3d63b3">PLAY.COM</file>
+		<file size="326" time="1987-01-11 21:08:56" attr="0x20" md5="e5ac39ebbcb264478c5dccb0b4fbddd2">PLAY.DAT</file>
+		<file size="873" time="1986-07-28 08:53:40" attr="0x20" md5="d73b0993c162ff96fcd724d3b1656233">POP-CAL.COM</file>
+		<file size="13599" time="1989-09-06 11:50:46" attr="0x20" md5="1829c56d9778e422b569a3bcd930e3fb">README</file>
+		<file size="1253" time="1987-03-11 16:19:36" attr="0x20" md5="d08bc97a61995981c8d5d9781805b8a1">REPEATS.COM</file>
+		<file size="1040" time="1986-11-17 21:12:02" attr="0x20" md5="917f1d9d9fc1073e82c0abb36c2376fe">SCANDIR.COM</file>
+		<file size="1287" time="1986-11-21 07:08:54" attr="0x20" md5="5bbbdcebd1f47857164fe0278d07a30e">SEARCH.COM</file>
+		<file size="2027" time="1987-07-06 18:15:10" attr="0x20" md5="2462587ab2ead0129ace5decd58c8fd5">SLASHBAR.COM</file>
+		<file size="1214" time="1987-07-06 10:21:02" attr="0x20" md5="e07fe76b5c946df31b65d81e844d0fc3">SPECTRUM.COM</file>
+		<file size="1793" time="1987-01-20 13:55:32" attr="0x20" md5="4607fe11e68d5f5e770129bc31c69502">STATUS.COM</file>
+		<file size="1951" time="1987-04-06 12:24:36" attr="0x20" md5="b53c2abf5194ccc1e36af0f7b883186d">STING.DAT</file>
+		<file size="628" time="1987-02-25 20:47:36" attr="0x20" md5="df2759c420d116b5c436a143a5fdd720">SUGGEST.COM</file>
+		<file size="736" time="1986-11-13 08:54:06" attr="0x20" md5="238587dc56be4d36efaabb94f7db203e">TIMEKEY.COM</file>
+		<file size="1070" time="1987-07-06 09:09:46" attr="0x20" md5="98f14157e440ba6c96fbc0197656da11">VISITYPE.COM</file>
+		<file size="1396" time="1987-04-13 08:51:18" attr="0x20" md5="e727a357748211aa479ceeccd36910fe">XDIR.COM</file>
+	</disk>
 </manifest>

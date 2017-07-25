@@ -6,7 +6,7 @@
 	<ram id="ramLow" addr="0x00000" test="false"/>
 	<rom id="romBASIC" addr="0xf6000" size="0x8000" file="/devices/pcx86/rom/5150/basic/BASIC100.json"/>
 	<rom id="romBIOS"  addr="0xfe000" size="0x2000" file="/devices/pcx86/rom/5150/1981-04-24/PCBIOS-REV1.json"/>
-	<video ref="/devices/pcx86/video/ibm/cga/ibm-cga.xml"/>
+	<video ref="/devices/pcx86/video/ibm/cga/ibm-cga.xml" flicker="0"/>
 	<fdc ref="/disks/pcx86/games/infocom/disks.xml"/>
 	<cpu id="cpu8088" model="8088" autostart="true" pos="left" padLeft="8px" padBottom="8px">
 		<control type="button" binding="run">Run</control>

@@ -728,8 +728,9 @@
 				<xsl:otherwise>true</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
-		<xsl:variable name="scaletimers">
+		<xsl:variable name="scaleTimers">
 			<xsl:choose>
+				<xsl:when test="@scaleTimers"><xsl:value-of select="@scaleTimers"/></xsl:when>
 				<xsl:when test="@scaletimers"><xsl:value-of select="@scaletimers"/></xsl:when>
 				<xsl:otherwise>false</xsl:otherwise>
 			</xsl:choose>
@@ -746,16 +747,18 @@
 				<xsl:otherwise/>
 			</xsl:choose>
 		</xsl:variable>
-		<xsl:variable name="rtcdate">
+		<xsl:variable name="dateRTC">
 			<xsl:choose>
+				<xsl:when test="@dateRTC"><xsl:value-of select="@dateRTC"/></xsl:when>
 				<xsl:when test="@rtcdate"><xsl:value-of select="@rtcdate"/></xsl:when>
+				<xsl:when test="@rtcDate"><xsl:value-of select="@rtcDate"/></xsl:when>
 				<xsl:otherwise/>
 			</xsl:choose>
 		</xsl:variable>
 		<xsl:call-template name="component">
 			<xsl:with-param name="machine" select="$machine"/>
 			<xsl:with-param name="class">chipset</xsl:with-param>
-			<xsl:with-param name="parms">,model:'<xsl:value-of select="$model"/>',scaleTimers:<xsl:value-of select="$scaletimers"/>,sw1:'<xsl:value-of select="$sw1"/>',sw2:'<xsl:value-of select="$sw2"/>',sound:<xsl:value-of select="$sound"/>,floppies:<xsl:value-of select="$floppies"/>,monitor:'<xsl:value-of select="$monitor"/>',rtcDate:'<xsl:value-of select="$rtcdate"/>'</xsl:with-param>
+			<xsl:with-param name="parms">,model:'<xsl:value-of select="$model"/>',scaleTimers:<xsl:value-of select="$scaleTimers"/>,sw1:'<xsl:value-of select="$sw1"/>',sw2:'<xsl:value-of select="$sw2"/>',sound:<xsl:value-of select="$sound"/>,floppies:<xsl:value-of select="$floppies"/>,monitor:'<xsl:value-of select="$monitor"/>',dateRTC:'<xsl:value-of select="$dateRTC"/>'</xsl:with-param>
 		</xsl:call-template>
 	</xsl:template>
 
@@ -925,10 +928,16 @@
 				<xsl:otherwise/>
 			</xsl:choose>
 		</xsl:variable>
+		<xsl:variable name="scaleMouse">
+			<xsl:choose>
+				<xsl:when test="@scaleMouse"><xsl:value-of select="@scaleMouse"/></xsl:when>
+				<xsl:otherwise>1</xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
 		<xsl:call-template name="component">
 			<xsl:with-param name="machine" select="$machine"/>
 			<xsl:with-param name="class">mouse</xsl:with-param>
-			<xsl:with-param name="parms">,serial:'<xsl:value-of select="$serial"/>'</xsl:with-param>
+			<xsl:with-param name="parms">,serial:'<xsl:value-of select="$serial"/>',scaleMouse:<xsl:value-of select="$scaleMouse"/></xsl:with-param>
 		</xsl:call-template>
 	</xsl:template>
 
