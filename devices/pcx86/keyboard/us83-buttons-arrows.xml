@@ -6,4 +6,9 @@
 	<control type="button" binding="up">&#x2191;</control>
 	<control type="button" binding="down">&#x2193;</control>
 	<control type="button" binding="right">&#x2192;</control>
+	<control type="button" binding="num-home">Home</control>
+	<control type="button" binding="num-end">End</control>
+	<control type="button" binding="num-pgup">PgUp</control>
+	<control type="button" binding="num-pgdn">PgDn</control>
+	<control type="button" binding="alt">Alt</control>
 </keyboard>

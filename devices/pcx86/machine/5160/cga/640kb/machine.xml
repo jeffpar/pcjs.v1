@@ -13,7 +13,7 @@
 		<control type="button" binding="run">Run</control>
 		<control type="button" binding="reset">Reset</control>
 	</cpu>
-	<keyboard ref="/devices/pcx86/keyboard/us83-buttons-minimal.xml"/>
+	<keyboard ref="/devices/pcx86/keyboard/us83-buttons-arrows.xml"/>
 	<hdc ref="/disks/pcx86/fixed/10mb/pcdos200-empty.xml"/>
 	<chipset id="chipset" model="5160" sw1="01001001"/>
 	<serial id="com1" adapter="1"/>

@@ -228,7 +228,8 @@ class Keyboard extends Component {
             case "caps-lock":
                 this.bindings[id] = control;
                 control.onclick = function onClickCapsLock(event) {
-                    if (kbd.cmp) kbd.cmp.updateFocus();
+                    event.preventDefault();                 // preventDefault() is necessary...
+                    if (kbd.cmp) kbd.cmp.updateFocus();     // ...for the updateFocus() call to actually work
                     return kbd.toggleCapsLock();
                 };
                 return true;
@@ -236,7 +237,8 @@ class Keyboard extends Component {
             case "num-lock":
                 this.bindings[id] = control;
                 control.onclick = function onClickNumLock(event) {
-                    if (kbd.cmp) kbd.cmp.updateFocus();
+                    event.preventDefault();                 // preventDefault() is necessary...
+                    if (kbd.cmp) kbd.cmp.updateFocus();     // ...for the updateFocus() call to actually work
                     return kbd.toggleNumLock();
                 };
                 return true;
@@ -244,7 +246,8 @@ class Keyboard extends Component {
             case "scroll-lock":
                 this.bindings[id] = control;
                 control.onclick = function onClickScrollLock(event) {
-                    if (kbd.cmp) kbd.cmp.updateFocus();
+                    event.preventDefault();                 // preventDefault() is necessary...
+                    if (kbd.cmp) kbd.cmp.updateFocus();     // ...for the updateFocus() call to actually work
                     return kbd.toggleScrollLock();
                 };
                 return true;
@@ -259,8 +262,9 @@ class Keyboard extends Component {
                     control.onclick = function(kbd, sKey, simCode) {
                         return function onKeyboardBindingClick(event) {
                             if (!COMPILED && kbd.messageEnabled()) kbd.printMessage(sKey + " clicked", Messages.KEYS);
-                            if (kbd.cmp) kbd.cmp.updateFocus(true);
-                            kbd.sInjectBuffer = "";                 // actual key events should stop any injection currently in progress
+                            event.preventDefault();                 // preventDefault() is necessary...
+                            if (kbd.cmp) kbd.cmp.updateFocus();     // ...for the updateFocus() call to actually work
+                            kbd.sInjectBuffer = "";                 // key events should stop any injection currently in progress
                             kbd.updateShiftState(simCode, true);    // future-proofing if/when any LOCK keys are added to CLICKCODES
                             kbd.addActiveKey(simCode, true);
                         };
@@ -272,7 +276,9 @@ class Keyboard extends Component {
                     this.bindings[id] = control;
                     var fnDown = function(kbd, sKey, simCode) {
                         return function onKeyboardBindingDown(event) {
-                            kbd.sInjectBuffer = "";                 // actual key events should stop any injection currently in progress
+                            event.preventDefault();                 // preventDefault() is necessary...
+                            if (kbd.cmp) kbd.cmp.updateFocus();     // ...for the updateFocus() call to actually work
+                            kbd.sInjectBuffer = "";                 // key events should stop any injection currently in progress
                             kbd.addActiveKey(simCode);
                         };
                     }(this, sBinding, Keyboard.SOFTCODES[sBinding]);
@@ -298,7 +304,8 @@ class Keyboard extends Component {
                      */
                     this.bindings[id] = control;
                     control.onclick = function onClickTest(event) {
-                        if (kbd.cmp) kbd.cmp.updateFocus();
+                        event.preventDefault();                 // preventDefault() is necessary...
+                        if (kbd.cmp) kbd.cmp.updateFocus();     // ...for the updateFocus() call to actually work
                         return kbd.injectKeys(sValue);
                     };
                     return true;
@@ -392,6 +399,7 @@ class Keyboard extends Component {
             if (this.fnDOSReady) {
                 this.fnDOSReady();
                 this.fnDOSReady = null;
+                this.fDOSReady = false;
             } else {
                 this.injectInit(this.autoType);
             }
@@ -1493,7 +1501,8 @@ class Keyboard extends Component {
 
         var keyCode = event.keyCode;
 
-        this.sInjectBuffer = "";        // actual key events should stop any injection currently in progress
+        this.sInjectBuffer = "";                        // actual key events should stop any injection in progress
+        Component.processScript(this.idMachine);        // and any script, too
 
         /*
          * Although it would be nice to pay attention ONLY to these "up" and "down" events, and ignore "press"
