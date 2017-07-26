@@ -5,15 +5,18 @@ permalink: /disks/pcx86/apps/ibm/topview/1.01/
 machines:
   - id: ibm5160
     type: pcx86
-    config: /devices/pcx86/machine/5160/cga/640kb/debugger/machine.xml
+    config: /devices/pcx86/machine/5160/cga/640kb/machine.xml
     autoMount:
       A:
         path: /disks/pcx86/dos/ibm/2.00/PCDOS200-DISK1.json
       B:
         path: /disks/pcx86/apps/ibm/topview/1.01/TOPVIEW101-PROGRAM.json
-    autoScript: startTV
+    autoScript: startKbd
 machineScripts:
-  startTV: |
+  startKbd: |
+    wait Keyboard DOS;
+    type Keyboard "$date\r$time\rB:\rTV\r";
+  startMouse: |
     wait Keyboard DOS;
     type Keyboard "$date\r$time\r";
     wait Keyboard;
@@ -30,18 +33,29 @@ machineScripts:
 TopView 1.01
 ------------
 
-NOTE: Even though we've made every effort to mark all PCjs pages as English, Google's Chrome web browser (v59)
-mistakenly thinks this page is in French and will attempt to translate it to English.  That translation process
-interferes with elements of the machine; for example, it may change the name of the first diskette drive from
-"A:" to "AT:".
+From IBM's [August 14, 1984 Announcement Letter](http://www-01.ibm.com/common/ssi/ShowDoc.wss?docURL=/common/ssi/rep_ca/2/897/ENUS284-282/index.html&lang=en&request_locale=en):
 
-So, if you notice any rendering problems, check the top of your web browser, and if you see the message *This page
-has been translated from French to English*, click **Show Original**.  Ironically, the addition of these two
-paragraphs of English text will likely eliminate the problem.
+> The IBM Personal Computer TopView program and TopView Programmer's ToolKit provide windowing capability with
+concurrent execution of multiple applications.
+
+> Highlights:
+
+> - Windowing capability provided.
+> - Concurrent execution of multiple applications (multitasking) allowed.
+> - A user-supplied 'mouse' as a pointing device.
+> - Both text and graphics applications allowed.
+> - User may cut/copy and paste between windows.
+> - Interactive tutorial and HELP text included.
+
+The machine below is configured to automatically start TopView 1.01 on top of PC-DOS 2.00.  No mouse driver is loaded,
+so you must use TopView's "Keyboard Mouse" support: arrow keys move the cursor and **Home**, **PgUp**, and **Alt**
+act as mouse buttons.
 
 {% include machine.html id="ibm5160" %}
 
+{% comment %}
 To manually start TopView: {% include machine-command.html type='button' label='Load' machine='ibm5160' command='startTV' %}
+{% endcomment %}
 
 ### Directory of TopView 1.01 (Program)
 

@@ -2901,7 +2901,11 @@ class Component {
     {
         var fSuccess = false;
         idMachine += ".machine";
-        if (typeof sScript == "string" && !Component.commands[idMachine]) {
+        if (!sScript) {
+            delete Component.commands[idMachine];
+            fSuccess = true;
+        }
+        else if (typeof sScript == "string" && !Component.commands[idMachine]) {
             fSuccess = true;
             Component.commands[idMachine] = Component.getScriptCommands(sScript);
             if (!Component.processCommands(idMachine)) {
