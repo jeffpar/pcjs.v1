@@ -1160,7 +1160,7 @@ class Computer extends Component {
      *
      * Notify all (other) components with a start() method that the CPU has started.
      *
-     * Note that we're called by runCPU(), which is why we exclude the CPU component,
+     * Note that we're called by startCPU(), which is why we exclude the CPU component,
      * as well as ourselves.
      *
      * @this {Computer}
@@ -1184,7 +1184,7 @@ class Computer extends Component {
      *
      * Notify all (other) components with a stop() method that the CPU has stopped.
      *
-     * Note that we're called by runCPU(), which is why we exclude the CPU component,
+     * Note that we're called by stopCPU(), which is why we exclude the CPU component,
      * as well as ourselves.
      *
      * @this {Computer}

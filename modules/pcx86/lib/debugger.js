@@ -2695,16 +2695,17 @@ class DebuggerX86 extends Debugger {
     }
 
     /**
-     * runCPU(fUpdateFocus)
+     * startCPU(fUpdateFocus, fQuiet)
      *
      * @this {DebuggerX86}
      * @param {boolean} [fUpdateFocus] is true to update focus
+     * @param {boolean} [fQuiet]
      * @return {boolean} true if run request successful, false if not
      */
-    runCPU(fUpdateFocus)
+    startCPU(fUpdateFocus, fQuiet)
     {
-        if (!this.isCPUAvail()) return false;
-        this.cpu.runCPU(fUpdateFocus);
+        if (!this.checkCPU(fQuiet)) return false;
+        this.cpu.startCPU(fUpdateFocus);
         return true;
     }
 
@@ -2719,7 +2720,7 @@ class DebuggerX86 extends Debugger {
      */
     stepCPU(nCycles, fRegs, fUpdateCPU)
     {
-        if (!this.isCPUAvail()) return false;
+        if (!this.checkCPU()) return false;
 
         this.nCycles = 0;
         do {
@@ -2731,6 +2732,9 @@ class DebuggerX86 extends Debugger {
                  */
                 if (this.checksEnabled()) this.checkInstruction(this.cpu.regLIP, 0);
             }
+            /*
+             * For our typically tiny bursts (usually single instructions), mimic what runCPU() does.
+             */
             try {
                 var nCyclesStep = this.cpu.stepCPU(nCycles);
                 if (nCyclesStep > 0) {
@@ -2750,7 +2754,7 @@ class DebuggerX86 extends Debugger {
         } while (this.cpu.opFlags & X86.OPFLAG_PREFIXES);
 
         /*
-         * Because we called cpu.stepCPU() and not cpu.runCPU(), we must nudge the cpu's update code,
+         * Because we called cpu.stepCPU() and not cpu.startCPU(), we must nudge the cpu's update code,
          * and then update our own state.  Normally, the only time fUpdateCPU will be false is when doTrace()
          * is calling us in a loop, in which case it will perform its own updateCPU() when it's done.
          */
@@ -2795,23 +2799,20 @@ class DebuggerX86 extends Debugger {
     }
 
     /**
-     * isCPUAvail()
+     * checkCPU(fQuiet)
      *
      * Make sure the CPU is ready (finished initializing), not busy (already running), and not in an error state.
      *
      * @this {DebuggerX86}
+     * @param {boolean} [fQuiet]
      * @return {boolean}
      */
-    isCPUAvail()
+    checkCPU(fQuiet)
     {
-        if (!this.cpu)
+        if (!this.cpu || !this.cpu.isReady() || !this.cpu.isPowered() || this.cpu.isRunning()) {
+            if (!fQuiet) this.println("cpu busy or unavailable, command ignored");
             return false;
-        if (!this.cpu.isReady())
-            return false;
-        if (!this.cpu.isPowered())
-            return false;
-        if (this.cpu.isBusy())
-            return false;
+        }
         return !this.cpu.isError();
     }
 
@@ -5928,7 +5929,7 @@ class DebuggerX86 extends Debugger {
             this.parseAddrOptions(dbgAddr, sOptions);
             this.setTempBreakpoint(dbgAddr);
         }
-        if (!this.runCPU(true)) {
+        if (!this.startCPU(true)) {
             if (!fQuiet) this.println("cpu busy or unavailable, run command ignored");
         }
     }
@@ -6052,7 +6053,7 @@ class DebuggerX86 extends Debugger {
 
             if (this.nStep) {
                 this.setTempBreakpoint(dbgAddr);
-                if (!this.runCPU()) {
+                if (!this.startCPU()) {
                     if (this.cmp) this.cmp.updateFocus();
                     this.nStep = 0;
                 }

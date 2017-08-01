@@ -956,7 +956,10 @@ class CPU8080 extends Component {
                  * timeout we're about to set.  The simplest way to resolve that is to immediately call endBurst()
                  * and bias the above cycle timeout by the number of cycles that the burst executed.
                  */
-                this.aTimers[iTimer][0] = nCycles + this.endBurst();
+                if (this.flags.running) {
+                    nCycles += this.endBurst();
+                }
+                this.aTimers[iTimer][0] = nCycles;
             }
         }
         return nCycles;
@@ -971,7 +974,7 @@ class CPU8080 extends Component {
      */
     getMSCycles(ms)
     {
-        return (this.nCyclesPerSecond * this.nCyclesMultiplier) / 1000 * ms;
+        return ((this.nCyclesPerSecond * this.nCyclesMultiplier) / 1000 * ms)|0;
     }
 
     /**
@@ -987,6 +990,7 @@ class CPU8080 extends Component {
     {
         for (var i = this.aTimers.length - 1; i >= 0; i--) {
             var timer = this.aTimers[i];
+            this.assert(!isNaN(timer[0]));
             if (timer[0] < 0) continue;
             if (nCycles > timer[0]) {
                 nCycles = timer[0];
@@ -1009,6 +1013,7 @@ class CPU8080 extends Component {
     {
         for (var i = this.aTimers.length - 1; i >= 0; i--) {
             var timer = this.aTimers[i];
+            this.assert(!isNaN(timer[0]));
             if (timer[0] < 0) continue;
             timer[0] -= nCycles;
             if (timer[0] <= 0) {
