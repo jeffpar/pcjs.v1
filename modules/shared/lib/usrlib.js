@@ -100,12 +100,7 @@ class Usr {
      */
     static getTimestamp()
     {
-        var date = new Date();
-        var padNum = function(n)
-        {
-            return (n < 10 ? "0" : "") + n;
-        };
-        return date.getFullYear() + "-" + padNum(date.getMonth() + 1) + "-" + padNum(date.getDate()) + " " + padNum(date.getHours()) + ":" + padNum(date.getMinutes()) + ":" + padNum(date.getSeconds());
+        return Usr.formatDate("Y-m-d H:i:s");
     }
 
     /**

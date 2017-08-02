@@ -65,8 +65,8 @@ class ChipSet extends Component {
      * As support for IBM-compatible machines grows, we should refrain from adding new model strings (eg, "att6300")
      * and corresponding model checks, and instead add more ChipSet configuration properties, such as:
      *
-     *      pit1port:       0x48 to enable PIT1 at base port 0x48 (as used by COMPAQ_DESKPRO386); default to undefined
-     *      kbdchip:        8041 to select 8041 emulation (eg, for ATT_6300); default to 8255 for MODEL_5150/MODEL_5160, 8042 for MODEL_5170
+     *      portPIT1:       0x48 to enable PIT1 at base port 0x48 (as used by COMPAQ_DESKPRO386); default to undefined
+     *      chipKBD:        8041 to select 8041 emulation (eg, for ATT_6300); default to 8255 for MODEL_5150/MODEL_5160, 8042 for MODEL_5170
      *
      * @this {ChipSet}
      * @param {Object} parmsChipSet
@@ -1063,7 +1063,7 @@ class ChipSet extends Component {
     /**
      * start()
      *
-     * Notification from the CPU that it's starting.
+     * Notification from the Computer that it's starting.
      *
      * @this {ChipSet}
      */
@@ -1078,7 +1078,7 @@ class ChipSet extends Component {
     /**
      * stop()
      *
-     * Notification from the CPU that it's stopping.
+     * Notification from the Computer that it's stopping.
      *
      * @this {ChipSet}
      */
@@ -3394,11 +3394,11 @@ class ChipSet extends Component {
              * break any code (eg, the ROM BIOS diagnostics) that assumes that the timers are ticking once every 4 cycles
              * (or more like every 5 cycles on a 6Mhz 80286).
              *
-             * So, when using a machine with the ChipSet "scaletimers" property set, make sure you reset the machine's
+             * So, when using a machine with the ChipSet "scaleTimers" property set, make sure you reset the machine's
              * speed prior to rebooting, otherwise you're likely to see ROM BIOS errors.  Ditto for any application code
              * that makes similar assumptions about the relationship between CPU and timer speeds.
              *
-             * In general, you're probably better off NOT using the "scaletimers" property, and simply allowing the timers
+             * In general, you're probably better off NOT using the "scaleTimers" property, and simply allowing the timers
              * to tick faster as you increase CPU speed (which is why fScaleTimers defaults to false).
              */
             var nCycles = this.cpu.getCycles(this.fScaleTimers);
