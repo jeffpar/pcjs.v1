@@ -244,7 +244,8 @@ class Component {
                     }
                     sElapsed = (Component.getTime() - Component.msStart) + "ms: ";
                 }
-                if (window && window.console) console.log(sElapsed + sMsg.replace(/\n/g, ' '));
+                sMsg = sMsg.replace(/\r/g, '\\r').replace(/\n/g, ' ');
+                if (window && window.console) console.log(sElapsed + sMsg);
             }
         }
     }

@@ -947,12 +947,7 @@ class Usr {
      */
     static getTimestamp()
     {
-        var date = new Date();
-        var padNum = function(n)
-        {
-            return (n < 10 ? "0" : "") + n;
-        };
-        return date.getFullYear() + "-" + padNum(date.getMonth() + 1) + "-" + padNum(date.getDate()) + " " + padNum(date.getHours()) + ":" + padNum(date.getMinutes()) + ":" + padNum(date.getSeconds());
+        return Usr.formatDate("Y-m-d H:i:s");
     }
 
     /**
@@ -1810,6 +1805,45 @@ class Web {
     }
 
     /**
+     * findProperty(obj, sProp, sSuffix)
+     *
+     * If both sProp and sSuffix are set, then any browser-specific prefixes are inserted between sProp and sSuffix,
+     * and if a match is found, it is returned without sProp.
+     *
+     * For example, if findProperty(document, 'on', 'fullscreenchange') discovers that 'onwebkitfullscreenchange' exists,
+     * it will return 'webkitfullscreenchange', in preparation for an addEventListener() call.
+     *
+     * More commonly, sSuffix is not used, so whatever property is found is returned as-is.
+     *
+     * @param {Object|null|undefined} obj
+     * @param {string} sProp
+     * @param {string} [sSuffix]
+     * @return {string|null}
+     */
+    static findProperty(obj, sProp, sSuffix)
+    {
+        if (obj) {
+            for (var i = 0; i < Web.asBrowserPrefixes.length; i++) {
+                var sName = Web.asBrowserPrefixes[i];
+                if (sSuffix) {
+                    sName += sSuffix;
+                    var sEvent = sProp + sName;
+                    if (sEvent in obj) return sName;
+                } else {
+                    if (!sName) {
+                        sName = sProp[0].toLowerCase();
+                    } else {
+                        sName += sProp[0].toUpperCase();
+                    }
+                    sName += sProp.substr(1);
+                    if (sName in obj) return sName;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
      * getURLParm(sParm)
      *
      * First looks for sParm exactly as specified, then looks for the lower-case version.
@@ -2118,6 +2152,8 @@ Web.aPageEventHandlers = {
     'exit': []                  // list of window 'onunload' handlers (although we prefer to use 'onbeforeunload' if possible)
 };
 
+Web.asBrowserPrefixes = ['', 'moz', 'ms', 'webkit'];
+
 Web.fPageLoaded = false;        // set once the page's first 'onload' event has occurred
 Web.fPageShowed = false;        // set once the page's first 'onpageshow' event has occurred
 Web.fPageEventsEnabled = true;  // default is true, set to false (or true) by enablePageEvents()
@@ -2375,7 +2411,8 @@ class Component {
                     }
                     sElapsed = (Component.getTime() - Component.msStart) + "ms: ";
                 }
-                if (window && window.console) console.log(sElapsed + sMsg.replace(/\n/g, ' '));
+                sMsg = sMsg.replace(/\r/g, '\\r').replace(/\n/g, ' ');
+                if (window && window.console) console.log(sElapsed + sMsg);
             }
         }
     }

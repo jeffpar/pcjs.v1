@@ -2929,7 +2929,8 @@ class Component {
                     }
                     sElapsed = (Component.getTime() - Component.msStart) + "ms: ";
                 }
-                if (window && window.console) console.log(sElapsed + sMsg.replace(/\n/g, ' '));
+                sMsg = sMsg.replace(/\r/g, '\\r').replace(/\n/g, ' ');
+                if (window && window.console) console.log(sElapsed + sMsg);
             }
         }
     }
@@ -45397,7 +45398,7 @@ class Keyboard extends Component {
     {
         if (sKeys && !this.sInjectBuffer) {
             this.sInjectBuffer = this.parseKeys(sKeys);
-            if (!COMPILED) this.log("injectKeys(" + this.sInjectBuffer.split("\n").join("\\n") + ")");
+            if (!COMPILED) this.log("injectKeys(\"" + this.sInjectBuffer.split("\n").join("\\n") + "\")");
             this.injectKeysFromBuffer(msDelay || this.msInjectDelay);
             return true;
         }
