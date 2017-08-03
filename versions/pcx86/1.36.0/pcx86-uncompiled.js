@@ -75430,11 +75430,8 @@ class Computer extends Component {
                  * Object or a string), but components are supposed to store only Objects, so if a
                  * string comes back, something went wrong.  By explicitly eliminating "string" data,
                  * the Closure Compiler stops complaining that we might be passing strings to our
-                 * powerUp() functions (even though we know we're not).
-                 *
-                 * TODO: Determine if there's some way to coerce the Closure Compiler into treating
-                 * data as Object or null, without having to include this runtime check.  An assert
-                 * would be a good idea, but this is overkill.
+                 * powerUp() functions (even though we know we're not).  We could also add @type
+                 * overrides to the data assignments, but this seems like a useful runtime check.
                  */
                 if (typeof data === "string") data = null;
 
