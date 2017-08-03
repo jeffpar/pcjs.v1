@@ -11,7 +11,7 @@ machines:
         path: /disks/pcx86/dos/ibm/2.00/PCDOS200-DISK1.json
       B:
         path: /disks/pcx86/apps/ibm/topview/1.10/TOPVIEW110.json
-    autoType: \r\rb:\rtv\r
+    autoType: $date\r$time\rB:\rSETUP\r\xff\xff\xffy \r1\r
 ---
 
 TopView 1.10 (With Debugger)

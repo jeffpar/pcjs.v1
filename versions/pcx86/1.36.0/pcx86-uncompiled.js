@@ -72747,7 +72747,6 @@ class DebuggerX86 extends Debugger {
      */
     doRun(sCmd, sAddr, sOptions, fQuiet)
     {
-
         if (sCmd == "gt") {
             this.fIgnoreNextCheckFault = true;
         }

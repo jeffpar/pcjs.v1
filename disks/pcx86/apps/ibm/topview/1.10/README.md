@@ -11,11 +11,18 @@ machines:
         path: /disks/pcx86/dos/ibm/2.00/PCDOS200-DISK1.json
       B:
         path: /disks/pcx86/apps/ibm/topview/1.10/TOPVIEW110.json
-    autoType: \r\rb:\rtv\r
+    autoType: $date\r$time\rB:\rSETUP\r\xff\xff\xffy \r1\r
 ---
 
 TopView 1.10
 ------------
+
+The machine below is configured to automatically start TopView 1.10 on top of PC-DOS 2.00.  No mouse driver is loaded,
+so you must use TopView's "Keyboard Mouse" support: arrow keys move the cursor and **Home**, **PgUp**, and **Alt**
+act as mouse buttons.  The machine is also available with the [PCjs Debugger](debugger/).
+
+While TopView 1.01 ran with Keyboard support enabled "out of the box," TopView 1.10 appears to require some configuration,
+which is why the `SETUP` batch file is run first.
 
 NOTE: This disk image is from the PCjs disk collection.  Presumably, as in [TopView 1.01](../1.01/), there was a
 second (Tutorial) disk, but we don't have a copy of it.  The machine below is also available with the [PCjs Debugger](debugger/).
