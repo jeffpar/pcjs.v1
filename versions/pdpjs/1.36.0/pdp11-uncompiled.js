@@ -2349,7 +2349,7 @@ class Web {
                     if (sEvent in obj) return sName;
                 } else {
                     if (!sName) {
-                        sName = sProp[0].toLowerCase();
+                        sName = sProp[0];
                     } else {
                         sName += sProp[0].toUpperCase();
                     }

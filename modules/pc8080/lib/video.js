@@ -103,9 +103,8 @@ class Video8080 extends Component {
     {
         super("Video", parmsVideo, Messages8080.VIDEO);
 
-        var video = this;
+        var video = this, sProp, sEvent;
         this.fGecko = Web.isUserAgent("Gecko/");
-        var i, sEvent, asWebPrefixes = ['', 'moz', 'ms', 'webkit'];
 
         this.cxScreen = parmsVideo['screenWidth'];
         this.cyScreen = parmsVideo['screenHeight'];
@@ -176,18 +175,8 @@ class Video8080 extends Component {
         var sSmoothing = Web.getURLParm('smoothing');
         if (sSmoothing) fSmoothing = (sSmoothing == "true");
         if (fSmoothing != null) {
-            for (i = 0; i < asWebPrefixes.length; i++) {
-                sEvent = asWebPrefixes[i];
-                if (!sEvent) {
-                    sEvent = 'imageSmoothingEnabled';
-                } else {
-                    sEvent += 'ImageSmoothingEnabled';
-                }
-                if (this.contextScreen[sEvent] !== undefined) {
-                    this.contextScreen[sEvent] = fSmoothing;
-                    break;
-                }
-            }
+            sProp = Web.findProperty(this.contextScreen, 'imageSmoothingEnabled');
+            if (sProp) this.contextScreen[sProp] = fSmoothing;
         }
 
         this.rotateScreen = parmsVideo['screenRotate'];
@@ -210,33 +199,27 @@ class Video8080 extends Component {
 
         /*
          * Here's the gross code to handle full-screen support across all supported browsers.  The lack of standards
-         * is exasperating; browsers can't agree on 'full' or 'Full, 'request' or 'Request', 'screen' or 'Screen', and
-         * while some browsers honor other browser prefixes, most browsers don't.
+         * is exasperating; browsers can't agree on 'Fullscreen' (most common) or 'FullScreen' (least common), and while
+         * some browsers honor other browser prefixes, most don't.  Event handlers tend to be more consistent (ie, all
+         * lower-case).
          */
         this.container = container;
         if (this.container) {
-            this.container.doFullScreen = container['requestFullscreen'] || container['msRequestFullscreen'] || container['mozRequestFullScreen'] || container['webkitRequestFullscreen'];
-            if (this.container.doFullScreen) {
-                for (i = 0; i < asWebPrefixes.length; i++) {
-                    sEvent = asWebPrefixes[i] + 'fullscreenchange';
-                    if ('on' + sEvent in document) {
-                        var onFullScreenChange = function() {
-                            var fFullScreen = (document['fullscreenElement'] || document['msFullscreenElement'] || document['mozFullScreenElement'] || document['webkitFullscreenElement']);
-                            video.notifyFullScreen(!!fFullScreen);
-                        };
-                        document.addEventListener(sEvent, onFullScreenChange, false);
-                        break;
-                    }
+            sProp = Web.findProperty(container, 'requestFullscreen') || Web.findProperty(container, 'requestFullScreen');
+            if (sProp) {
+                this.container.doFullScreen = container[sProp];
+                sEvent = Web.findProperty(document, 'on', 'fullscreenchange');
+                if (sEvent) {
+                    var sFullScreen = Web.findProperty(document, 'fullscreenElement') || Web.findProperty(document, 'fullScreenElement');
+                    document.addEventListener(sEvent, function onFullScreenChange() {
+                        video.notifyFullScreen(!!sFullScreen);
+                    }, false);
                 }
-                for (i = 0; i < asWebPrefixes.length; i++) {
-                    sEvent = asWebPrefixes[i] + 'fullscreenerror';
-                    if ('on' + sEvent in document) {
-                        var onFullScreenError = function() {
-                            video.notifyFullScreen(null);
-                        };
-                        document.addEventListener(sEvent, onFullScreenError, false);
-                        break;
-                    }
+                sEvent = Web.findProperty(document, 'on', 'fullscreenerror');
+                if (sEvent) {
+                    document.addEventListener(sEvent, function onFullScreenError() {
+                        video.notifyFullScreen(null);
+                    }, false);
                 }
             }
         }

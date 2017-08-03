@@ -2349,7 +2349,7 @@ class Web {
                     if (sEvent in obj) return sName;
                 } else {
                     if (!sName) {
-                        sName = sProp[0].toLowerCase();
+                        sName = sProp[0];
                     } else {
                         sName += sProp[0].toUpperCase();
                     }
@@ -49335,12 +49335,14 @@ class Video extends Component {
             this.inputScreen.lockPointer = (sProp = Web.findProperty(this.inputScreen, 'requestPointerLock')) && this.inputScreen[sProp];
             this.inputScreen.unlockPointer = (sProp = Web.findProperty(this.inputScreen, 'exitPointerLock')) && this.inputScreen[sProp];
             if (this.inputScreen.lockPointer) {
-                var sPointerLock = Web.findProperty(document, 'pointerLockElement');
                 sEvent = Web.findProperty(document, 'on', 'pointerlockchange');
-                if (sEvent) document.addEventListener(sEvent, function onPointerLockChange() {
-                    var fLocked = !!(sPointerLock && document[sPointerLock] === video.inputScreen);
-                    video.notifyPointerLocked(fLocked);
-                }, false);
+                if (sEvent) {
+                    var sPointerLock = Web.findProperty(document, 'pointerLockElement');
+                    document.addEventListener(sEvent, function onPointerLockChange() {
+                        var fLocked = !!(sPointerLock && document[sPointerLock] === video.inputScreen);
+                        video.notifyPointerLocked(fLocked);
+                    }, false);
+                }
             }
         }
 
