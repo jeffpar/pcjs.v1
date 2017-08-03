@@ -769,7 +769,7 @@ class Computer extends Component {
                          * "ibm5160", enabling us to find objects that match the original machine ID
                          * (eg, "ibm5160.romEGA").
                          *
-                         * See /devices/pcx86/machine/5160/ega/640kb/array/ for examples of this.
+                         * See /devices/pcx86/machine/5160/ega/640kb/array for examples of this.
                          */
                         data = stateComputer.get(component.id.replace(/-[0-9]+\./i, '.'));
                     }

@@ -18,7 +18,7 @@ TopView 1.10
 ------------
 
 NOTE: This disk image is from the PCjs disk collection.  Presumably, as in [TopView 1.01](../1.01/), there was a
-second (Tutorial) disk, but we don't have a copy of it.
+second (Tutorial) disk, but we don't have a copy of it.  The machine below is also available with the [PCjs Debugger](debugger/).
 
 {% include machine.html id="ibm5160" %}
 

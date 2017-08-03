@@ -12931,15 +12931,16 @@ class CPU extends Component {
      * For use by any component that wants to start the CPU.
      *
      * @param {boolean} [fUpdateFocus]
+     * @param {boolean} [fQuiet]
      * @return {boolean}
      */
-    startCPU(fUpdateFocus)
+    startCPU(fUpdateFocus, fQuiet)
     {
         if (this.isError()) {
             return false;
         }
         if (this.flags.running) {
-            this.println(this.toString() + " busy");
+            if (!fQuiet) this.println(this.toString() + " busy");
             return false;
         }
         /*
@@ -69527,15 +69528,16 @@ class DebuggerX86 extends Debugger {
      * startCPU(fUpdateFocus, fQuiet)
      *
      * @this {DebuggerX86}
-     * @param {boolean} [fUpdateFocus] is true to update focus
+     * @param {boolean} [fUpdateFocus]
      * @param {boolean} [fQuiet]
      * @return {boolean} true if run request successful, false if not
      */
     startCPU(fUpdateFocus, fQuiet)
     {
-        if (!this.checkCPU(fQuiet)) return false;
-        this.cpu.startCPU(fUpdateFocus);
-        return true;
+        if (this.checkCPU(fQuiet)) {
+            return this.cpu.startCPU(fUpdateFocus, fQuiet);
+        }
+        return false;
     }
 
     /**
@@ -69598,10 +69600,11 @@ class DebuggerX86 extends Debugger {
      *
      * @this {DebuggerX86}
      * @param {boolean} [fComplete]
+     * @return {boolean}
      */
     stopCPU(fComplete)
     {
-        if (this.cpu) this.cpu.stopCPU(fComplete);
+        return this.cpu && this.cpu.stopCPU(fComplete) || false;
     }
 
     /**
@@ -71918,15 +71921,10 @@ class DebuggerX86 extends Debugger {
      */
     doHalt(fQuiet)
     {
-        var sMsg;
-        if (this.flags.running) {
-            sMsg = "halting";
-            this.stopCPU();
-        } else {
+        if (!this.stopCPU()) {
             if (this.isBusy(true)) return;
-            sMsg = "already halted";
+            if (!fQuiet) this.println("already halted");
         }
-        if (!fQuiet) this.println(sMsg);
     }
 
     /**
@@ -72749,6 +72747,7 @@ class DebuggerX86 extends Debugger {
      */
     doRun(sCmd, sAddr, sOptions, fQuiet)
     {
+
         if (sCmd == "gt") {
             this.fIgnoreNextCheckFault = true;
         }
@@ -72758,9 +72757,7 @@ class DebuggerX86 extends Debugger {
             this.parseAddrOptions(dbgAddr, sOptions);
             this.setTempBreakpoint(dbgAddr);
         }
-        if (!this.startCPU(true)) {
-            if (!fQuiet) this.println("cpu busy or unavailable, run command ignored");
-        }
+        this.startCPU(true, fQuiet);
     }
 
     /**
@@ -75423,7 +75420,7 @@ class Computer extends Component {
                          * "ibm5160", enabling us to find objects that match the original machine ID
                          * (eg, "ibm5160.romEGA").
                          *
-                         * See /devices/pcx86/machine/5160/ega/640kb/array/ for examples of this.
+                         * See /devices/pcx86/machine/5160/ega/640kb/array for examples of this.
                          */
                         data = stateComputer.get(component.id.replace(/-[0-9]+\./i, '.'));
                     }

@@ -2698,15 +2698,16 @@ class DebuggerX86 extends Debugger {
      * startCPU(fUpdateFocus, fQuiet)
      *
      * @this {DebuggerX86}
-     * @param {boolean} [fUpdateFocus] is true to update focus
+     * @param {boolean} [fUpdateFocus]
      * @param {boolean} [fQuiet]
      * @return {boolean} true if run request successful, false if not
      */
     startCPU(fUpdateFocus, fQuiet)
     {
-        if (!this.checkCPU(fQuiet)) return false;
-        this.cpu.startCPU(fUpdateFocus);
-        return true;
+        if (this.checkCPU(fQuiet)) {
+            return this.cpu.startCPU(fUpdateFocus, fQuiet);
+        }
+        return false;
     }
 
     /**
@@ -2769,10 +2770,11 @@ class DebuggerX86 extends Debugger {
      *
      * @this {DebuggerX86}
      * @param {boolean} [fComplete]
+     * @return {boolean}
      */
     stopCPU(fComplete)
     {
-        if (this.cpu) this.cpu.stopCPU(fComplete);
+        return this.cpu && this.cpu.stopCPU(fComplete) || false;
     }
 
     /**
@@ -5089,15 +5091,10 @@ class DebuggerX86 extends Debugger {
      */
     doHalt(fQuiet)
     {
-        var sMsg;
-        if (this.flags.running) {
-            sMsg = "halting";
-            this.stopCPU();
-        } else {
+        if (!this.stopCPU()) {
             if (this.isBusy(true)) return;
-            sMsg = "already halted";
+            if (!fQuiet) this.println("already halted");
         }
-        if (!fQuiet) this.println(sMsg);
     }
 
     /**
@@ -5929,9 +5926,7 @@ class DebuggerX86 extends Debugger {
             this.parseAddrOptions(dbgAddr, sOptions);
             this.setTempBreakpoint(dbgAddr);
         }
-        if (!this.startCPU(true)) {
-            if (!fQuiet) this.println("cpu busy or unavailable, run command ignored");
-        }
+        this.startCPU(true, fQuiet);
     }
 
     /**

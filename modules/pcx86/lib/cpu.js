@@ -1213,15 +1213,16 @@ class CPU extends Component {
      * For use by any component that wants to start the CPU.
      *
      * @param {boolean} [fUpdateFocus]
+     * @param {boolean} [fQuiet]
      * @return {boolean}
      */
-    startCPU(fUpdateFocus)
+    startCPU(fUpdateFocus, fQuiet)
     {
         if (this.isError()) {
             return false;
         }
         if (this.flags.running) {
-            this.println(this.toString() + " busy");
+            if (!fQuiet) this.println(this.toString() + " busy");
             return false;
         }
         /*
