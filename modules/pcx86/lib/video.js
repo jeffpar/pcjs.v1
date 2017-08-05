@@ -2177,7 +2177,7 @@ class Video extends Component {
      * the port level, and whenever reset() is called.  setMode() also invokes updateScreen(true),
      * which forces reallocation of our internal buffer (aCellCache) that mirrors the video buffer.
      *
-     * The CPU periodically calls updateVideo(), which in turn calls updateScreen() for each Video
+     * Our initBus() handler defines a timer that periodically calls updateScreen() for each Video
      * instance.  These updates should occur at a rate of 60 times/second, to update any blinking
      * elements (the cursor and any cells with the blink attribute), to compare/update the contents
      * of our internal buffer with the video buffer, and to render any differences between the two
@@ -2506,6 +2506,8 @@ class Video extends Component {
                 video.println(sProgress, Component.TYPE.PROGRESS);
             });
         }
+
+        this.cpu.addTimer(function() { video.updateScreen(); }, 1000 / Video.UPDATES_PER_SECOND);
     }
 
     /**
@@ -3958,7 +3960,7 @@ class Video extends Component {
                 this.cBlinks = 0;
                 /*
                  * At this point, we can either fire up our own timer (doBlink), or rely on updateScreen()
-                 * being called by the CPU at regular bursts (eg, CPU.VIDEO_UPDATES_PER_SECOND = 60) and advance
+                 * being called by the CPU at regular bursts (eg, Video.UPDATES_PER_SECOND = 60) and advance
                  * cBlinks at the start of updateScreen() accordingly.
                  *
                  * doBlink() wants to increment cBlinks every 266ms.  On the other hand, if updateScreen() is being
@@ -4969,7 +4971,7 @@ class Video extends Component {
         }
         else {
             /*
-             * This should never happen, but since updateScreen() is also called by CPU.updateVideo(),
+             * This should never happen, but since updateScreen() is also called by Computer.updateStatus(),
              * better safe than sorry.
              */
             if (this.aCellCache === undefined) return;
@@ -4977,7 +4979,7 @@ class Video extends Component {
 
         /*
          * If cBlinks is "enabled" (ie, >= 0), then advance it once every 16 updateScreen() calls
-         * (assuming an updateScreen() frequency of 60 per second; see CPU.VIDEO_UPDATES_PER_SECOND).
+         * (assuming an updateScreen() frequency of 60 per second; see Video.UPDATES_PER_SECOND).
          *
          * We assume that the CPU is calling us whenever fForce is undefined.
          */
@@ -6972,6 +6974,8 @@ Video.MODE = {
      */
     UNKNOWN:            0xFF
 };
+
+Video.UPDATES_PER_SECOND = 60;
 
 /*
  * Supported Fonts

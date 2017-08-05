@@ -188,7 +188,7 @@ class Computer extends Component {
         this.dbg = /** @type {DebuggerX86} */ (Component.getComponentByType("Debugger", this.id));
 
         /*
-         * Enumerate all Video components for future updateVideo() calls.
+         * Enumerate all the Video components for diagnostic displays, focus changes, and updateStatus() calls.
          */
         this.aVideo = [];
         for (var video = null; (video = this.getMachineComponent("Video", video));) {
@@ -201,8 +201,8 @@ class Computer extends Component {
         this.bus = new Bus({'id': this.idMachine + '.bus', 'busWidth': this.nBusWidth}, this.cpu, this.dbg);
 
         /*
-         * Iterate through all the components and override their notice() and println() methods so
-         * that their output can be rerouted to an Initialization Display or a Control Panel, if any.
+         * Iterate through all the components and override their notice() and println() methods
+         * so that their output can be rerouted to a Diagnostic Display or Control Panel, if any.
          */
         var iComponent, component;
         var aComponents = Component.getComponents(this.id);
@@ -246,6 +246,12 @@ class Computer extends Component {
             component = aComponents[iComponent];
             if (component.initBus) component.initBus(this, this.bus, this.cpu, this.dbg);
         }
+
+        /*
+         * This timer replaces the CPU's old dedicated STATUS_UPDATES_PER_SECOND logic; periodic updateStatus()
+         * calls are now our own responsibility.
+         */
+        this.cpu.addTimer(function() { cmp.updateStatus(); }, 1000 / Computer.UPDATES_PER_SECOND);
 
         var sStatePath = null;
         var sResume = this.getMachineParm('resume');
@@ -1650,23 +1656,9 @@ class Computer extends Component {
          */
         if (this.cpu) this.cpu.updateStatus(fForce);
         if (this.panel) this.panel.updateStatus(fForce);
-    }
-
-    /**
-     * updateVideo(fForce)
-     *
-     * Any high-frequency updates should be performed here.  Avoid DOM updates, since updateVideo() can be called up to
-     * 60 times per second (see VIDEO_UPDATES_PER_SECOND).
-     *
-     * @this {Computer}
-     * @param {boolean} [fForce] (true to force a video update)
-     */
-    updateVideo(fForce)
-    {
         for (var i = 0; i < this.aVideo.length; i++) {
             this.aVideo[i].updateScreen(fForce);
         }
-        if (this.panel) this.panel.updateAnimation();
     }
 
     /**
@@ -1835,6 +1827,8 @@ Computer.RESUME_NONE     =  0;  // default (no resume)
 Computer.RESUME_AUTO     =  1;  // automatically save/restore state
 Computer.RESUME_PROMPT   =  2;  // automatically save but conditionally restore (WARNING: if restore is declined, any state is discarded)
 Computer.RESUME_DELETE   =  3;  // same as RESUME_PROMPT but discards ALL machines states whenever ANY machine restore is declined (undocumented)
+
+Computer.UPDATES_PER_SECOND = 2;
 
 /*
  * Initialize every Computer on the page.

@@ -4203,11 +4203,8 @@ class X86CPU extends CPU {
     /**
      * updateStatus(fForce)
      *
-     * This provides periodic Control Panel updates (eg, a few times per second; see STATUS_UPDATES_PER_SECOND).
+     * This provides periodic Control Panel updates (eg, a few times per second; see Computer.UPDATES_PER_SECOND).
      * this is where we take care of any DOM updates (eg, register values) while the CPU is running.
-     *
-     * Any high-frequency updates should be performed in updateVideo(), which should avoid DOM updates, since updateVideo()
-     * can be called up to 60 times per second (see VIDEO_UPDATES_PER_SECOND).
      *
      * @this {X86CPU}
      * @param {boolean} [fForce] (true will display registers even if the CPU is running and "live" registers are not enabled)

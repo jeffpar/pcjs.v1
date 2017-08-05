@@ -7532,10 +7532,32 @@ class Panel extends Component {
         this.lockMouse = -1;
         this.fMouseDown = false;
         this.xMouse = this.yMouse = -1;
+        this.timer = -1;
         if (BACKTRACK) {
             this.busInfo = null;
             this.fBackTrack = false;
         }
+    }
+
+    /**
+     * initBus(cmp, bus, cpu, dbg)
+     *
+     * @this {Panel}
+     * @param {Computer} cmp
+     * @param {Bus} bus
+     * @param {X86CPU} cpu
+     * @param {DebuggerX86} dbg
+     */
+    initBus(cmp, bus, cpu, dbg)
+    {
+        var panel = this;
+
+        this.cmp = cmp;
+        this.bus = bus;
+        this.cpu = cpu;
+        this.dbg = dbg;
+        this.kbd = cmp.getMachineComponent("Keyboard");
+        this.startTimer();
     }
 
     /**
@@ -7632,6 +7654,7 @@ class Panel extends Component {
                 );
 
                 this.fRedraw = true;
+                this.startTimer();
                 return true;
             }
         }
@@ -7639,21 +7662,23 @@ class Panel extends Component {
     }
 
     /**
-     * initBus(cmp, bus, cpu, dbg)
+     * startTimer()
      *
      * @this {Panel}
-     * @param {Computer} cmp
-     * @param {Bus} bus
-     * @param {X86CPU} cpu
-     * @param {DebuggerX86} dbg
      */
-    initBus(cmp, bus, cpu, dbg)
+    startTimer()
     {
-        this.cmp = cmp;
-        this.bus = bus;
-        this.cpu = cpu;
-        this.dbg = dbg;
-        this.kbd = cmp.getMachineComponent("Keyboard");
+        /*
+         * This timer replaces the CPU's old dedicated VIDEO_UPDATES_PER_SECOND logic, which periodically called
+         * the Computer's updateVideo() function, which in turn called us; periodic updateAnimation() calls are now
+         * our own responsibility.
+         */
+        if (this.timer < 0 && this.canvas && this.cpu) {
+            var panel = this;
+            this.timer = this.cpu.addTimer(function() {
+                panel.updateAnimation();
+            }, 1000 / Panel.UPDATES_PER_SECOND);
+        }
     }
 
     /**
@@ -8314,6 +8339,8 @@ Panel.REGION = {
     BTMOD_SHIFT:    15,
     TYPE_SHIFT:     16
 };
+
+Panel.UPDATES_PER_SECOND = 10;
 
 /*
  * Initialize every Panel module on the page.
@@ -12289,19 +12316,14 @@ class CPU extends Component {
      * is driven by the following values:
      *
      *      CPU.YIELDS_PER_SECOND (eg, 30)
-     *      CPU.VIDEO_UPDATES_PER_SECOND (eg, 60)
-     *      CPU.STATUS_UPDATES_PER_SECOND (eg, 5)
      *
      * The largest of the above values forces the size of the burst to its smallest value.  Let's say that
      * largest value is 30.  Assuming nCyclesPerSecond is 1,000,000, that results in bursts of 33,333 cycles.
      *
-     * At the end of each burst, we subtract burst cycles from yield, video, and status cycle "threshold"
-     * counters. Whenever the "next yield" cycle counter goes to (or below) zero, we compare elapsed time
-     * to the time we expected the virtual hardware to take (eg, 1000ms/50 or 20ms), and if we still have time
-     * remaining, we sleep the remaining time (or 0ms if there's no remaining time), and then restart runCPU().
-     *
-     * Similarly, whenever the "next video update" cycle counter goes to (or below) zero, we call updateVideo(),
-     * and whenever the "next status update" cycle counter goes to (or below) zero, we call updateStatus().
+     * At the end of each burst, we subtract the burst cycle counter from the yield cycle "threshold" counter.
+     * Whenever the "next yield" cycle counter goes to (or below) zero, we compare elapsed time to the time we
+     * expected the virtual hardware to take (eg, 1000ms/50 or 20ms), and if we still have time remaining,
+     * we sleep the remaining time (or 0ms if there's no remaining time), and then restart runCPU().
      *
      * @this {CPU}
      * @param {boolean} [fRecalc] is true if the caller wants to recalculate thresholds based on the most recent
@@ -12309,36 +12331,19 @@ class CPU extends Component {
      */
     calcCycles(fRecalc)
     {
-        /*
-         * Calculate the most cycles we're allowed to execute in a single "burst"
-         */
-        var nMostUpdatesPerSecond = CPU.YIELDS_PER_SECOND;
-        if (nMostUpdatesPerSecond < CPU.VIDEO_UPDATES_PER_SECOND) nMostUpdatesPerSecond = CPU.VIDEO_UPDATES_PER_SECOND;
-        if (nMostUpdatesPerSecond < CPU.STATUS_UPDATES_PER_SECOND) nMostUpdatesPerSecond = CPU.STATUS_UPDATES_PER_SECOND;
-
-        /*
-         * Calculate cycle "per" values for the yield, video update, and status update cycle counters
-         */
         var vMultiplier = 1;
         if (fRecalc) {
             if (this.aCounts.nCyclesMultiplier > 1 && this.aCounts.mhz) {
                 vMultiplier = (this.aCounts.mhz / this.aCounts.mhzDefault);
             }
         }
-
         this.aCounts.msPerYield = Math.round(1000 / CPU.YIELDS_PER_SECOND);
-        this.aCounts.nCyclesPerBurst = Math.floor(this.aCounts.nCyclesPerSecond / nMostUpdatesPerSecond * vMultiplier);
         this.aCounts.nCyclesPerYield = Math.floor(this.aCounts.nCyclesPerSecond / CPU.YIELDS_PER_SECOND * vMultiplier);
-        this.aCounts.nCyclesPerVideoUpdate = Math.floor(this.aCounts.nCyclesPerSecond / CPU.VIDEO_UPDATES_PER_SECOND * vMultiplier);
-        this.aCounts.nCyclesPerStatusUpdate = Math.floor(this.aCounts.nCyclesPerSecond / CPU.STATUS_UPDATES_PER_SECOND * vMultiplier);
-
         /*
-         * And initialize "next" yield, video update, and status update cycle "threshold" counters to those "per" values
+         * Initialize "next" yield update cycle threshold counters to those "per" values
          */
         if (!fRecalc) {
             this.aCounts.nCyclesNextYield = this.aCounts.nCyclesPerYield;
-            this.aCounts.nCyclesNextVideoUpdate = this.aCounts.nCyclesPerVideoUpdate;
-            this.aCounts.nCyclesNextStatusUpdate = this.aCounts.nCyclesPerStatusUpdate;
         }
         this.aCounts.nCyclesRecalc = 0;
     }
@@ -12656,15 +12661,21 @@ class CPU extends Component {
     }
 
     /**
-     * addTimer(callBack)
+     * addTimer(callBack, ms)
      *
-     * Components that want to have timers that periodically fire after some number of milliseconds call
-     * addTimer() to create the timer, and then setTimer() every time they want to arm it.  There is currently
+     * Components that want to have timers that fire after some number of milliseconds call addTimer() to create
+     * the timer, and then setTimer() when they want to arm it.  Alternatively, they can specify an automatic timeout
+     * value (in milliseconds) to have the timer fire automatically at regular intervals.  There is currently
      * no removeTimer() because these are generally used for the entire lifetime of a component.
      *
-     * Internally, each timer entry is a preallocated Array with two entries: a cycle countdown in element [0]
-     * and a callback function in element [1].  A timer is initially dormant; dormant timers have a countdown
-     * value of -1 (although any negative number will suffice) and active timers have a non-negative value.
+     * Internally, each timer entry is a preallocated Array with three entries:
+     *
+     *      [0]: countdown value, in cycles
+     *      [1]: automatic setTimer value, if any, in milliseconds
+     *      [2]: callback function
+     *
+     * A timer is initially dormant; dormant timers have a countdown value of -1 (although any negative number
+     * will suffice) and active timers have a non-negative value.
      *
      * Why not use JavaScript's setTimeout() instead?  Good question.  For a good answer, see setTimer() below.
      *
@@ -12675,12 +12686,14 @@ class CPU extends Component {
      *
      * @this {CPU}
      * @param {function()} callBack
+     * @param {number} [ms] (if set, enables automatic setTimer calls)
      * @return {number} timer index
      */
-    addTimer(callBack)
+    addTimer(callBack, ms = -1)
     {
         var iTimer = this.aTimers.length;
-        this.aTimers.push([-1, callBack]);
+        this.aTimers.push([-1, ms, callBack]);
+        if (ms >= 0) this.setTimer(iTimer, ms);
         return iTimer;
     }
 
@@ -12709,7 +12722,8 @@ class CPU extends Component {
     {
         var nCycles = -1;
         if (iTimer >= 0 && iTimer < this.aTimers.length) {
-            if (fReset || this.aTimers[iTimer][0] < 0) {
+            var timer = this.aTimers[iTimer];
+            if (fReset || timer[0] < 0) {
                 nCycles = this.getMSCycles(ms);
                 /*
                  * We must now confront the following problem: if the CPU is currently executing a burst of cycles,
@@ -12720,7 +12734,7 @@ class CPU extends Component {
                 if (this.flags.running) {
                     nCycles += this.endBurst();
                 }
-                this.aTimers[iTimer][0] = nCycles;
+                timer[0] = nCycles;
             }
         }
         return nCycles;
@@ -12749,8 +12763,8 @@ class CPU extends Component {
      */
     getBurstCycles(nCycles)
     {
-        for (var i = this.aTimers.length - 1; i >= 0; i--) {
-            var timer = this.aTimers[i];
+        for (var iTimer = this.aTimers.length - 1; iTimer >= 0; iTimer--) {
+            var timer = this.aTimers[iTimer];
 
             if (timer[0] < 0) continue;
             if (nCycles > timer[0]) {
@@ -12769,9 +12783,9 @@ class CPU extends Component {
     saveTimers()
     {
         var aTimerCycles = [];
-        for (var i = 0; i < this.aTimers.length; i++) {
-            var timer = this.aTimers[i];
-            aTimerCycles.push(timer[0]);
+        for (var iTimer = 0; iTimer < this.aTimers.length; iTimer++) {
+            var timer = this.aTimers[iTimer];
+            aTimerCycles.push([timer[0], timer[1]]);
         }
         return aTimerCycles;
     }
@@ -12785,9 +12799,10 @@ class CPU extends Component {
     restoreTimers(aTimerCycles)
     {
 
-        for (var i = 0; i < this.aTimers.length && i < aTimerCycles.length; i++) {
-            var timer = this.aTimers[i];
-            timer[0] = aTimerCycles[i];
+        for (var iTimer = 0; iTimer < this.aTimers.length && iTimer < aTimerCycles.length; iTimer++) {
+            var timer = this.aTimers[iTimer];
+            timer[0] = aTimerCycles[iTimer][0];
+            timer[1] = aTimerCycles[iTimer][1];
         }
     }
 
@@ -12803,14 +12818,15 @@ class CPU extends Component {
      */
     updateTimers(nCycles)
     {
-        for (var i = this.aTimers.length - 1; i >= 0; i--) {
-            var timer = this.aTimers[i];
+        for (var iTimer = this.aTimers.length - 1; iTimer >= 0; iTimer--) {
+            var timer = this.aTimers[iTimer];
 
             if (timer[0] < 0) continue;
             timer[0] -= nCycles;
             if (timer[0] <= 0) {
                 timer[0] = -1;      // zero is technically an "active" value, so ensure the timer is dormant now
-                timer[1]();         // safe to invoke the callback function now
+                timer[2]();         // safe to invoke the callback function now
+                if (timer[1] >= 0) this.setTimer(iTimer, timer[1]);
             }
         }
     }
@@ -12851,7 +12867,7 @@ class CPU extends Component {
                  * HIGH as nCyclesPerYield, but it may be significantly less.  getBurstCycles() will adjust
                  * nCycles downward if any CPU timers need to fire during the next burst.
                  */
-                var nCycles = (this.flags.checksum? 1 : this.aCounts.nCyclesPerBurst);
+                var nCycles = this.getBurstCycles(this.flags.checksum? 1 : this.aCounts.nCyclesPerYield);
 
                 if (this.chipset) {
                     this.chipset.updateAllTimers();
@@ -12894,18 +12910,6 @@ class CPU extends Component {
                  * Update any/all timers, firing those whose cycle countdowns have reached (or dropped below) zero.
                  */
                 this.updateTimers(nCycles);
-
-                this.aCounts.nCyclesNextVideoUpdate -= nCycles;
-                if (this.aCounts.nCyclesNextVideoUpdate <= 0) {
-                    this.aCounts.nCyclesNextVideoUpdate += this.aCounts.nCyclesPerVideoUpdate;
-                    if (this.cmp) this.cmp.updateVideo();
-                }
-
-                this.aCounts.nCyclesNextStatusUpdate -= nCycles;
-                if (this.aCounts.nCyclesNextStatusUpdate <= 0) {
-                    this.aCounts.nCyclesNextStatusUpdate += this.aCounts.nCyclesPerStatusUpdate;
-                    if (this.cmp) this.cmp.updateStatus();
-                }
 
                 this.aCounts.nCyclesNextYield -= nCycles;
                 if (this.aCounts.nCyclesNextYield <= 0) {
@@ -13020,12 +13024,11 @@ class CPU extends Component {
      * provides the old behavior.
      *
      * @this {CPU}
-     * @param {boolean} [fForce] (true to force a video update; used by the Debugger)
+     * @param {boolean} [fForce] (true to force a Computer update; used by the Debugger)
      */
     updateCPU(fForce)
     {
         if (this.cmp) {
-            this.cmp.updateVideo(fForce);
             this.cmp.updateStatus(fForce);
         }
     }
@@ -13059,20 +13062,14 @@ class CPU extends Component {
  * calcCycles(), which uses the nCyclesPerSecond passed to the constructor as a starting
  * point and computes the following variables:
  *
- *      this.aCounts.nCyclesPerYield         (this.aCounts.nCyclesPerSecond / CPU.YIELDS_PER_SECOND)
- *      this.aCounts.nCyclesPerVideoUpdate   (this.aCounts.nCyclesPerSecond / CPU.VIDEO_UPDATES_PER_SECOND)
- *      this.aCounts.nCyclesPerStatusUpdate  (this.aCounts.nCyclesPerSecond / CPU.STATUS_UPDATES_PER_SECOND)
+ *      this.aCounts.nCyclesPerYield = (this.aCounts.nCyclesPerSecond / CPU.YIELDS_PER_SECOND)
  *
  * The above variables are also multiplied by any cycle multiplier in effect, via setSpeed(),
  * and then they're used to initialize another set of variables for each runCPU() iteration:
  *
- *      this.aCounts.nCyclesNextYield        <= this.aCounts.nCyclesPerYield
- *      this.aCounts.nCyclesNextVideoUpdate  <= this.aCounts.nCyclesPerVideoUpdate
- *      this.aCounts.nCyclesNextStatusUpdate <= this.aCounts.nCyclesPerStatusUpdate
+ *      this.aCounts.nCyclesNextYield <= this.aCounts.nCyclesPerYield
  */
-CPU.YIELDS_PER_SECOND         = 30;
-CPU.VIDEO_UPDATES_PER_SECOND  = 60;     // WARNING: if you change this, beware of side-effects in the Video component
-CPU.STATUS_UPDATES_PER_SECOND = 2;
+CPU.YIELDS_PER_SECOND   = 30;
 
 CPU.BUTTONS = ["power", "reset"];
 
@@ -18918,11 +18915,8 @@ class X86CPU extends CPU {
     /**
      * updateStatus(fForce)
      *
-     * This provides periodic Control Panel updates (eg, a few times per second; see STATUS_UPDATES_PER_SECOND).
+     * This provides periodic Control Panel updates (eg, a few times per second; see Computer.UPDATES_PER_SECOND).
      * this is where we take care of any DOM updates (eg, register values) while the CPU is running.
-     *
-     * Any high-frequency updates should be performed in updateVideo(), which should avoid DOM updates, since updateVideo()
-     * can be called up to 60 times per second (see VIDEO_UPDATES_PER_SECOND).
      *
      * @this {X86CPU}
      * @param {boolean} [fForce] (true will display registers even if the CPU is running and "live" registers are not enabled)
@@ -49135,7 +49129,7 @@ class Video extends Component {
      * the port level, and whenever reset() is called.  setMode() also invokes updateScreen(true),
      * which forces reallocation of our internal buffer (aCellCache) that mirrors the video buffer.
      *
-     * The CPU periodically calls updateVideo(), which in turn calls updateScreen() for each Video
+     * Our initBus() handler defines a timer that periodically calls updateScreen() for each Video
      * instance.  These updates should occur at a rate of 60 times/second, to update any blinking
      * elements (the cursor and any cells with the blink attribute), to compare/update the contents
      * of our internal buffer with the video buffer, and to render any differences between the two
@@ -49464,6 +49458,8 @@ class Video extends Component {
                 video.println(sProgress, Component.TYPE.PROGRESS);
             });
         }
+
+        this.cpu.addTimer(function() { video.updateScreen(); }, 1000 / Video.UPDATES_PER_SECOND);
     }
 
     /**
@@ -50916,7 +50912,7 @@ class Video extends Component {
                 this.cBlinks = 0;
                 /*
                  * At this point, we can either fire up our own timer (doBlink), or rely on updateScreen()
-                 * being called by the CPU at regular bursts (eg, CPU.VIDEO_UPDATES_PER_SECOND = 60) and advance
+                 * being called by the CPU at regular bursts (eg, Video.UPDATES_PER_SECOND = 60) and advance
                  * cBlinks at the start of updateScreen() accordingly.
                  *
                  * doBlink() wants to increment cBlinks every 266ms.  On the other hand, if updateScreen() is being
@@ -51927,7 +51923,7 @@ class Video extends Component {
         }
         else {
             /*
-             * This should never happen, but since updateScreen() is also called by CPU.updateVideo(),
+             * This should never happen, but since updateScreen() is also called by Computer.updateStatus(),
              * better safe than sorry.
              */
             if (this.aCellCache === undefined) return;
@@ -51935,7 +51931,7 @@ class Video extends Component {
 
         /*
          * If cBlinks is "enabled" (ie, >= 0), then advance it once every 16 updateScreen() calls
-         * (assuming an updateScreen() frequency of 60 per second; see CPU.VIDEO_UPDATES_PER_SECOND).
+         * (assuming an updateScreen() frequency of 60 per second; see Video.UPDATES_PER_SECOND).
          *
          * We assume that the CPU is calling us whenever fForce is undefined.
          */
@@ -53930,6 +53926,8 @@ Video.MODE = {
      */
     UNKNOWN:            0xFF
 };
+
+Video.UPDATES_PER_SECOND = 60;
 
 /*
  * Supported Fonts
@@ -56095,7 +56093,6 @@ class Mouse extends Component {
         this.scale = parmsMouse['scaleMouse'];
         this.setActive(false);
         this.fCaptured = this.fLocked = false;
-
         /*
          * Initially, no video devices, and therefore no input devices, are attached.  initBus() will update aVideo,
          * and powerUp() will update aInput.
@@ -56122,8 +56119,7 @@ class Mouse extends Component {
         this.dbg = dbg;
         this.scale = cmp.getMachineParm('scaleMouse') || this.scale;
         /*
-         * Attach the Video component to the CPU, so that the CPU can periodically update
-         * the video display via updateVideo(), as cycles permit.
+         * Enumerate all the Video components that we may need to interact with.
          */
         for (var video = null; (video = cmp.getMachineComponent("Video", video));) {
             this.aVideo.push(video);
@@ -56432,7 +56428,7 @@ class Mouse extends Component {
      * processMouseEvent(event, fDown)
      *
      * @this {Mouse}
-     * @param {Object} event object from a 'mousemove', 'mousedown' or 'mouseup' event (specifically, a MouseEvent object)
+     * @param {Object} event object from a 'mousemove', 'mousedown' or 'mouseup' event (ie, a MouseEvent object)
      * @param {boolean} [fDown] (undefined if neither a down nor up event)
      */
     processMouseEvent(event, fDown)
@@ -71966,10 +71962,7 @@ class DebuggerX86 extends Debugger {
     {
         if (DEBUG) {
             this.println("msPerYield: " + this.cpu.aCounts.msPerYield);
-            this.println("nCyclesPerBurst: " + this.cpu.aCounts.nCyclesPerBurst);
             this.println("nCyclesPerYield: " + this.cpu.aCounts.nCyclesPerYield);
-            this.println("nCyclesPerVideoUpdate: " + this.cpu.aCounts.nCyclesPerVideoUpdate);
-            this.println("nCyclesPerStatusUpdate: " + this.cpu.aCounts.nCyclesPerStatusUpdate);
             return true;
         }
         return false;
@@ -74840,7 +74833,7 @@ class Computer extends Component {
         this.dbg = /** @type {DebuggerX86} */ (Component.getComponentByType("Debugger", this.id));
 
         /*
-         * Enumerate all Video components for future updateVideo() calls.
+         * Enumerate all the Video components for diagnostic displays, focus changes, and updateStatus() calls.
          */
         this.aVideo = [];
         for (var video = null; (video = this.getMachineComponent("Video", video));) {
@@ -74853,8 +74846,8 @@ class Computer extends Component {
         this.bus = new Bus({'id': this.idMachine + '.bus', 'busWidth': this.nBusWidth}, this.cpu, this.dbg);
 
         /*
-         * Iterate through all the components and override their notice() and println() methods so
-         * that their output can be rerouted to an Initialization Display or a Control Panel, if any.
+         * Iterate through all the components and override their notice() and println() methods
+         * so that their output can be rerouted to a Diagnostic Display or Control Panel, if any.
          */
         var iComponent, component;
         var aComponents = Component.getComponents(this.id);
@@ -74898,6 +74891,12 @@ class Computer extends Component {
             component = aComponents[iComponent];
             if (component.initBus) component.initBus(this, this.bus, this.cpu, this.dbg);
         }
+
+        /*
+         * This timer replaces the CPU's old dedicated STATUS_UPDATES_PER_SECOND logic; periodic updateStatus()
+         * calls are now our own responsibility.
+         */
+        this.cpu.addTimer(function() { cmp.updateStatus(); }, 1000 / Computer.UPDATES_PER_SECOND);
 
         var sStatePath = null;
         var sResume = this.getMachineParm('resume');
@@ -76302,23 +76301,9 @@ class Computer extends Component {
          */
         if (this.cpu) this.cpu.updateStatus(fForce);
         if (this.panel) this.panel.updateStatus(fForce);
-    }
-
-    /**
-     * updateVideo(fForce)
-     *
-     * Any high-frequency updates should be performed here.  Avoid DOM updates, since updateVideo() can be called up to
-     * 60 times per second (see VIDEO_UPDATES_PER_SECOND).
-     *
-     * @this {Computer}
-     * @param {boolean} [fForce] (true to force a video update)
-     */
-    updateVideo(fForce)
-    {
         for (var i = 0; i < this.aVideo.length; i++) {
             this.aVideo[i].updateScreen(fForce);
         }
-        if (this.panel) this.panel.updateAnimation();
     }
 
     /**
@@ -76487,6 +76472,8 @@ Computer.RESUME_NONE     =  0;  // default (no resume)
 Computer.RESUME_AUTO     =  1;  // automatically save/restore state
 Computer.RESUME_PROMPT   =  2;  // automatically save but conditionally restore (WARNING: if restore is declined, any state is discarded)
 Computer.RESUME_DELETE   =  3;  // same as RESUME_PROMPT but discards ALL machines states whenever ANY machine restore is declined (undocumented)
+
+Computer.UPDATES_PER_SECOND = 2;
 
 /*
  * Initialize every Computer on the page.

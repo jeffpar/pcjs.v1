@@ -5134,10 +5134,7 @@ class DebuggerX86 extends Debugger {
     {
         if (DEBUG) {
             this.println("msPerYield: " + this.cpu.aCounts.msPerYield);
-            this.println("nCyclesPerBurst: " + this.cpu.aCounts.nCyclesPerBurst);
             this.println("nCyclesPerYield: " + this.cpu.aCounts.nCyclesPerYield);
-            this.println("nCyclesPerVideoUpdate: " + this.cpu.aCounts.nCyclesPerVideoUpdate);
-            this.println("nCyclesPerStatusUpdate: " + this.cpu.aCounts.nCyclesPerStatusUpdate);
             return true;
         }
         return false;

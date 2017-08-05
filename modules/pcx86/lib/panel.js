@@ -210,10 +210,32 @@ class Panel extends Component {
         this.lockMouse = -1;
         this.fMouseDown = false;
         this.xMouse = this.yMouse = -1;
+        this.timer = -1;
         if (BACKTRACK) {
             this.busInfo = null;
             this.fBackTrack = false;
         }
+    }
+
+    /**
+     * initBus(cmp, bus, cpu, dbg)
+     *
+     * @this {Panel}
+     * @param {Computer} cmp
+     * @param {Bus} bus
+     * @param {X86CPU} cpu
+     * @param {DebuggerX86} dbg
+     */
+    initBus(cmp, bus, cpu, dbg)
+    {
+        var panel = this;
+
+        this.cmp = cmp;
+        this.bus = bus;
+        this.cpu = cpu;
+        this.dbg = dbg;
+        this.kbd = cmp.getMachineComponent("Keyboard");
+        this.startTimer();
     }
 
     /**
@@ -310,6 +332,7 @@ class Panel extends Component {
                 );
 
                 this.fRedraw = true;
+                this.startTimer();
                 return true;
             }
         }
@@ -317,21 +340,23 @@ class Panel extends Component {
     }
 
     /**
-     * initBus(cmp, bus, cpu, dbg)
+     * startTimer()
      *
      * @this {Panel}
-     * @param {Computer} cmp
-     * @param {Bus} bus
-     * @param {X86CPU} cpu
-     * @param {DebuggerX86} dbg
      */
-    initBus(cmp, bus, cpu, dbg)
+    startTimer()
     {
-        this.cmp = cmp;
-        this.bus = bus;
-        this.cpu = cpu;
-        this.dbg = dbg;
-        this.kbd = cmp.getMachineComponent("Keyboard");
+        /*
+         * This timer replaces the CPU's old dedicated VIDEO_UPDATES_PER_SECOND logic, which periodically called
+         * the Computer's updateVideo() function, which in turn called us; periodic updateAnimation() calls are now
+         * our own responsibility.
+         */
+        if (this.timer < 0 && this.canvas && this.cpu) {
+            var panel = this;
+            this.timer = this.cpu.addTimer(function() {
+                panel.updateAnimation();
+            }, 1000 / Panel.UPDATES_PER_SECOND);
+        }
     }
 
     /**
@@ -992,6 +1017,8 @@ Panel.REGION = {
     BTMOD_SHIFT:    15,
     TYPE_SHIFT:     16
 };
+
+Panel.UPDATES_PER_SECOND = 10;
 
 /*
  * Initialize every Panel module on the page.
