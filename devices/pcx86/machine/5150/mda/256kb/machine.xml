@@ -11,6 +11,7 @@
 	<cpu id="cpu8088" model="8088" autostart="true" pos="left" padLeft="8px" padBottom="8px">
 		<control type="button" binding="run">Run</control>
 		<control type="button" binding="reset">Reset</control>
+		<control type="button" binding="setSpeed">Speed</control>
 	</cpu>
 	<keyboard ref="/devices/pcx86/keyboard/us83-buttons-minimal.xml"/>
 	<chipset id="chipset" model="5150" sw1="01000001" sw2="10011000"/>

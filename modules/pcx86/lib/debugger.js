@@ -3793,7 +3793,7 @@ class DebuggerX86 extends Debugger {
                 sLine += (nSequence != null? '=' + nSequence.toString() : "");
             } else {
                 var nCycles = this.cpu.getCycles();
-                sLine += "cycles=" + nCycles.toString() + " cs=" + Str.toHex(this.cpu.aCounts.nChecksum);
+                sLine += "cycles=" + nCycles.toString() + " cs=" + Str.toHex(this.cpu.counts.nChecksum);
             }
         }
 
@@ -5133,8 +5133,8 @@ class DebuggerX86 extends Debugger {
     doInfo(asArgs)
     {
         if (DEBUG) {
-            this.println("msPerYield: " + this.cpu.aCounts.msPerYield);
-            this.println("nCyclesPerYield: " + this.cpu.aCounts.nCyclesPerYield);
+            this.println("msPerYield: " + this.cpu.counts.msPerYield);
+            this.println("nCyclesPerYield: " + this.cpu.counts.nCyclesPerYield);
             return true;
         }
         return false;
@@ -5543,13 +5543,13 @@ class DebuggerX86 extends Debugger {
             if (asArgs[3] !== undefined) nCycles = +asArgs[3];          // warning: decimal instead of hex conversion
             switch (asArgs[2]) {
                 case "int":
-                    this.cpu.aCounts.nCyclesChecksumInterval = nCycles;
+                    this.cpu.counts.nCyclesChecksumInterval = nCycles;
                     break;
                 case "start":
-                    this.cpu.aCounts.nCyclesChecksumStart = nCycles;
+                    this.cpu.counts.nCyclesChecksumStart = nCycles;
                     break;
                 case "stop":
-                    this.cpu.aCounts.nCyclesChecksumStop = nCycles;
+                    this.cpu.counts.nCyclesChecksumStop = nCycles;
                     break;
                 default:
                     this.println("unknown cs option");

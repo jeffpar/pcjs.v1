@@ -342,18 +342,17 @@ class Panel extends Component {
     /**
      * startTimer()
      *
+     * This timer replaces the CPU's old dedicated VIDEO_UPDATES_PER_SECOND logic, which periodically called
+     * the Computer's updateVideo() function, which in turn called us; periodic updateAnimation() calls are now
+     * our own responsibility.
+     *
      * @this {Panel}
      */
     startTimer()
     {
-        /*
-         * This timer replaces the CPU's old dedicated VIDEO_UPDATES_PER_SECOND logic, which periodically called
-         * the Computer's updateVideo() function, which in turn called us; periodic updateAnimation() calls are now
-         * our own responsibility.
-         */
         if (this.timer < 0 && this.canvas && this.cpu) {
             var panel = this;
-            this.timer = this.cpu.addTimer(function() {
+            this.timer = this.cpu.addTimer(this.id, function() {
                 panel.updateAnimation();
             }, 1000 / Panel.UPDATES_PER_SECOND);
         }

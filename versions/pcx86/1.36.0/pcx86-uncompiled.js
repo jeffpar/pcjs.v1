@@ -7664,18 +7664,17 @@ class Panel extends Component {
     /**
      * startTimer()
      *
+     * This timer replaces the CPU's old dedicated VIDEO_UPDATES_PER_SECOND logic, which periodically called
+     * the Computer's updateVideo() function, which in turn called us; periodic updateAnimation() calls are now
+     * our own responsibility.
+     *
      * @this {Panel}
      */
     startTimer()
     {
-        /*
-         * This timer replaces the CPU's old dedicated VIDEO_UPDATES_PER_SECOND logic, which periodically called
-         * the Computer's updateVideo() function, which in turn called us; periodic updateAnimation() calls are now
-         * our own responsibility.
-         */
         if (this.timer < 0 && this.canvas && this.cpu) {
             var panel = this;
-            this.timer = this.cpu.addTimer(function() {
+            this.timer = this.cpu.addTimer(this.id, function() {
                 panel.updateAnimation();
             }, 1000 / Panel.UPDATES_PER_SECOND);
         }
@@ -11827,26 +11826,27 @@ class CPU extends Component {
 
         var nMultiplier = parmsCPU['multiplier'] || 1;
 
-        this.aCounts = {};
-        this.aCounts.nCyclesPerSecond = nCycles;
+        this.counts = {};
+        this.counts.nBaseCyclesPerSecond = nCycles;
 
         /*
-         * nCyclesMultiplier replaces the old "speed" variable (0, 1, 2) and eliminates the need for
-         * the constants (SPEED_SLOW, SPEED_FAST and SPEED_MAX).  The UI simply doubles the multiplier
-         * until we've exceeded the host's speed limit and then starts the multiplier over at 1.
+         * nTargetMultiplier replaces the old "speed" variable (0, 1, 2) and eliminates the need for
+         * the constants (SPEED_SLOW, SPEED_FAST and SPEED_MAX).  The UI simply doubles the target multiplier
+         * until we've exceeded the host's speed limit (ie, the current value is unable to reach the target),
+         * at which point we reset the target back to the default.
          */
-        this.aCounts.nCyclesMultiplier = nMultiplier;
-        this.aCounts.mhzDefault = Math.round(this.aCounts.nCyclesPerSecond / 10000) / 100;
+        this.counts.nBaseMultiplier = this.counts.nCurrentMultiplier = this.counts.nTargetMultiplier = nMultiplier;
+
         /*
          * TODO: Take care of this with an initial setSpeed() call instead?
          */
-        this.aCounts.mhzTarget = this.aCounts.mhzDefault * this.aCounts.nCyclesMultiplier;
+        this.counts.mhzBase = Math.round(this.counts.nBaseCyclesPerSecond / 10000) / 100;
+        this.counts.mhzCurrent = this.counts.mhzTarget = this.counts.mhzBase * this.counts.nTargetMultiplier;
 
         /*
-         * We add a number of flags to the set initialized by Component
+         * We add a number of flags to those initialized by Component.
          */
-        this.flags.running = false;
-        this.flags.starting = false;
+        this.flags.starting = this.flags.running = this.flags.yield = false;
         this.flags.autoStart = parmsCPU['autoStart'];
 
         /*
@@ -11864,10 +11864,10 @@ class CPU extends Component {
          * and call resetChecksum().
          */
         this.flags.checksum = false;
-        this.aCounts.nChecksum = this.aCounts.nCyclesChecksumNext = 0;
-        this.aCounts.nCyclesChecksumStart = parmsCPU["csStart"];
-        this.aCounts.nCyclesChecksumInterval = parmsCPU["csInterval"];
-        this.aCounts.nCyclesChecksumStop = parmsCPU["csStop"];
+        this.counts.nChecksum = this.counts.nCyclesChecksumNext = 0;
+        this.counts.nCyclesChecksumStart = parmsCPU["csStart"];
+        this.counts.nCyclesChecksumInterval = parmsCPU["csInterval"];
+        this.counts.nCyclesChecksumStop = parmsCPU["csStop"];
 
         /*
          * Array of countdown timers managed by addTimer() and setTimer().
@@ -11877,8 +11877,6 @@ class CPU extends Component {
         this.aTimers = [];
 
         this.onRunTimeout = this.runCPU.bind(this); // function onRunTimeout() { cpu.runCPU(); };
-
-        this.setReady();
     }
 
     /**
@@ -11918,6 +11916,10 @@ class CPU extends Component {
         if (sAutoStart != null) {
             this.flags.autoStart = (sAutoStart == "true"? true : (sAutoStart  == "false"? false : !!sAutoStart));
         }
+
+        this.timerYield = cpu.addTimer(this.id, function() {
+            cpu.flags.yield = true;
+        }, 1000 / CPU.YIELDS_PER_SECOND);
 
         this.setReady();
     }
@@ -12095,13 +12097,13 @@ class CPU extends Component {
      */
     resetChecksum()
     {
-        if (this.aCounts.nCyclesChecksumStart === undefined) this.aCounts.nCyclesChecksumStart = 0;
-        if (this.aCounts.nCyclesChecksumInterval === undefined) this.aCounts.nCyclesChecksumInterval = -1;
-        if (this.aCounts.nCyclesChecksumStop === undefined) this.aCounts.nCyclesChecksumStop = -1;
-        this.flags.checksum = (this.aCounts.nCyclesChecksumStart >= 0 && this.aCounts.nCyclesChecksumInterval > 0);
+        if (this.counts.nCyclesChecksumStart === undefined) this.counts.nCyclesChecksumStart = 0;
+        if (this.counts.nCyclesChecksumInterval === undefined) this.counts.nCyclesChecksumInterval = -1;
+        if (this.counts.nCyclesChecksumStop === undefined) this.counts.nCyclesChecksumStop = -1;
+        this.flags.checksum = (this.counts.nCyclesChecksumStart >= 0 && this.counts.nCyclesChecksumInterval > 0);
         if (this.flags.checksum) {
-            this.aCounts.nChecksum = 0;
-            this.aCounts.nCyclesChecksumNext = this.aCounts.nCyclesChecksumStart - this.nTotalCycles;
+            this.counts.nChecksum = 0;
+            this.counts.nCyclesChecksumNext = this.counts.nCyclesChecksumStart - this.nTotalCycles;
             /*
              *  this.aCounts.nCyclesChecksumNext = this.aCounts.nCyclesChecksumStart + this.aCounts.nCyclesChecksumInterval -
              *      (this.nTotalCycles % this.aCounts.nCyclesChecksumInterval);
@@ -12129,15 +12131,15 @@ class CPU extends Component {
              * Get a 32-bit summation of the current CPU state and add it to our running 32-bit checksum
              */
             var fDisplay = false;
-            this.aCounts.nChecksum = (this.aCounts.nChecksum + this.getChecksum())|0;
-            this.aCounts.nCyclesChecksumNext -= nCycles;
-            if (this.aCounts.nCyclesChecksumNext <= 0) {
-                this.aCounts.nCyclesChecksumNext += this.aCounts.nCyclesChecksumInterval;
+            this.counts.nChecksum = (this.counts.nChecksum + this.getChecksum())|0;
+            this.counts.nCyclesChecksumNext -= nCycles;
+            if (this.counts.nCyclesChecksumNext <= 0) {
+                this.counts.nCyclesChecksumNext += this.counts.nCyclesChecksumInterval;
                 fDisplay = true;
             }
-            if (this.aCounts.nCyclesChecksumStop >= 0) {
-                if (this.aCounts.nCyclesChecksumStop <= this.getCycles()) {
-                    this.aCounts.nCyclesChecksumInterval = this.aCounts.nCyclesChecksumStop = -1;
+            if (this.counts.nCyclesChecksumStop >= 0) {
+                if (this.counts.nCyclesChecksumStop <= this.getCycles()) {
+                    this.counts.nCyclesChecksumInterval = this.counts.nCyclesChecksumStop = -1;
                     this.resetChecksum();
                     this.stopCPU();
                     fDisplay = true;
@@ -12158,7 +12160,7 @@ class CPU extends Component {
      */
     displayChecksum()
     {
-        this.println(this.getCycles() + " cycles: " + "checksum=" + Str.toHex(this.aCounts.nChecksum));
+        this.println(this.getCycles() + " cycles: " + "checksum=" + Str.toHex(this.counts.nChecksum));
     }
 
     /**
@@ -12251,7 +12253,7 @@ class CPU extends Component {
         case "setSpeed":
             this.bindings[sBinding] = control;
             control.onclick = function onClickSetSpeed() {
-                cpu.setSpeed(cpu.aCounts.nCyclesMultiplier << 1, true);
+                cpu.setSpeed(cpu.counts.nTargetMultiplier << 1, true);
             };
             control.textContent = this.getSpeedTarget();
             fBound = true;
@@ -12266,9 +12268,7 @@ class CPU extends Component {
     /**
      * setBurstCycles(nCycles)
      *
-     * This function is used by the ChipSet component whenever a very low timer count is set,
-     * in anticipation of the timer requiring an update sooner than the normal nCyclesPerYield
-     * period in runCPU() would normally provide.
+     * This function is used by the ChipSet component whenever a very low timer count is set.
      *
      * @this {CPU}
      * @param {number} nCycles is the target number of cycles to drop the current burst to
@@ -12286,7 +12286,6 @@ class CPU extends Component {
              * TODO: If the delta is negative, we could simply ignore the request, but we must first carefully
              * consider the impact on the ChipSet timers.
              */
-            // if (DEBUG) this.nSnapCycles -= nDelta;
             this.nStepCycles -= nDelta;
             this.nBurstCycles -= nDelta;
             return true;
@@ -12310,42 +12309,17 @@ class CPU extends Component {
     }
 
     /**
-     * calcCycles(fRecalc)
+     * calcCycles()
      *
-     * Calculate the number of cycles to process for each "burst" of CPU activity.  The size of a burst
-     * is driven by the following values:
-     *
-     *      CPU.YIELDS_PER_SECOND (eg, 30)
-     *
-     * The largest of the above values forces the size of the burst to its smallest value.  Let's say that
-     * largest value is 30.  Assuming nCyclesPerSecond is 1,000,000, that results in bursts of 33,333 cycles.
-     *
-     * At the end of each burst, we subtract the burst cycle counter from the yield cycle "threshold" counter.
-     * Whenever the "next yield" cycle counter goes to (or below) zero, we compare elapsed time to the time we
-     * expected the virtual hardware to take (eg, 1000ms/50 or 20ms), and if we still have time remaining,
-     * we sleep the remaining time (or 0ms if there's no remaining time), and then restart runCPU().
+     * Calculate the maximum number of cycles we should attempt to process before the next yield.
      *
      * @this {CPU}
-     * @param {boolean} [fRecalc] is true if the caller wants to recalculate thresholds based on the most recent
-     * speed calculation (see calcSpeed).
      */
-    calcCycles(fRecalc)
+    calcCycles()
     {
-        var vMultiplier = 1;
-        if (fRecalc) {
-            if (this.aCounts.nCyclesMultiplier > 1 && this.aCounts.mhz) {
-                vMultiplier = (this.aCounts.mhz / this.aCounts.mhzDefault);
-            }
-        }
-        this.aCounts.msPerYield = Math.round(1000 / CPU.YIELDS_PER_SECOND);
-        this.aCounts.nCyclesPerYield = Math.floor(this.aCounts.nCyclesPerSecond / CPU.YIELDS_PER_SECOND * vMultiplier);
-        /*
-         * Initialize "next" yield update cycle threshold counters to those "per" values
-         */
-        if (!fRecalc) {
-            this.aCounts.nCyclesNextYield = this.aCounts.nCyclesPerYield;
-        }
-        this.aCounts.nCyclesRecalc = 0;
+        this.counts.nCurrentMultiplier = ((this.counts.mhzCurrent / this.counts.mhzBase)|0) || this.counts.nTargetMultiplier;
+        this.counts.msPerYield = Math.round(1000 / CPU.YIELDS_PER_SECOND);
+        this.counts.nCyclesPerYield = Math.floor(this.counts.nBaseCyclesPerSecond / CPU.YIELDS_PER_SECOND * this.counts.nCurrentMultiplier);
     }
 
     /**
@@ -12368,11 +12342,11 @@ class CPU extends Component {
     getCycles(fScaled)
     {
         var nCycles = this.nTotalCycles + this.nRunCycles + this.nBurstCycles - this.nStepCycles;
-        if (fScaled && this.aCounts.nCyclesMultiplier > 1 && this.aCounts.mhz > this.aCounts.mhzDefault) {
+        if (fScaled && this.counts.nTargetMultiplier > 1 && this.counts.mhzCurrent > this.counts.mhzBase) {
             /*
              * We could scale the current cycle count by the current effective speed (this.aCounts.mhz); eg:
              *
-             *      nCycles = Math.round(nCycles / (this.aCounts.mhz / this.aCounts.mhzDefault));
+             *      nCycles = Math.round(nCycles / (this.aCounts.mhz / this.aCounts.mhzBase));
              *
              * but that speed will fluctuate somewhat: large fluctuations at first, but increasingly smaller
              * fluctuations after each burst of instructions that runCPU() executes.
@@ -12387,22 +12361,35 @@ class CPU extends Component {
              * interface allows any value, as does the CPU "multiplier" parmsCPU property (from the machine's
              * XML file).
              */
-            nCycles = Math.round(nCycles / this.aCounts.nCyclesMultiplier);
+            nCycles = Math.round(nCycles / this.counts.nTargetMultiplier);
         }
         return nCycles;
     }
 
     /**
-     * getCyclesPerSecond()
+     * getBaseCyclesPerSecond()
      *
-     * This returns the CPU's "base" speed (ie, the original cycles per second defined for the machine)
+     * This returns the CPU's base speed (ie, the original cycles per second defined for the machine)
      *
      * @this {CPU}
      * @return {number}
      */
-    getCyclesPerSecond()
+    getBaseCyclesPerSecond()
     {
-        return this.aCounts.nCyclesPerSecond;
+        return this.counts.nBaseCyclesPerSecond;
+    }
+
+    /**
+     * getCurrentCyclesPerSecond()
+     *
+     * This returns the CPU's current speed (ie, the actual cycles per second, according the current multiplier)
+     *
+     * @this {CPU}
+     * @return {number}
+     */
+    getCurrentCyclesPerSecond()
+    {
+        return (this.counts.nBaseCyclesPerSecond * this.counts.nCurrentMultiplier)|0;
     }
 
     /**
@@ -12416,10 +12403,10 @@ class CPU extends Component {
      */
     resetCycles()
     {
-        this.aCounts.mhz = 0;
+        this.counts.mhzCurrent = 0;
         this.nTotalCycles = this.nRunCycles = this.nBurstCycles = this.nStepCycles = 0;
         this.resetChecksum();
-        this.setSpeed(1);
+        this.setSpeed(this.counts.nBaseMultiplier);
     }
 
     /**
@@ -12430,7 +12417,7 @@ class CPU extends Component {
      */
     getSpeed()
     {
-        return this.aCounts.nCyclesMultiplier;
+        return this.counts.nTargetMultiplier;
     }
 
     /**
@@ -12441,10 +12428,7 @@ class CPU extends Component {
      */
     getSpeedCurrent()
     {
-        /*
-         * TODO: Has toFixed() been "fixed" in all browsers (eg, IE) to return a rounded value now?
-         */
-        return ((this.flags.running && this.aCounts.mhz)? (this.aCounts.mhz.toFixed(2) + "Mhz") : "Stopped");
+        return ((this.flags.running && this.counts.mhzCurrent)? (this.counts.mhzCurrent.toFixed(2) + "Mhz") : "Stopped");
     }
 
     /**
@@ -12455,19 +12439,14 @@ class CPU extends Component {
      */
     getSpeedTarget()
     {
-        /*
-         * TODO: Has toFixed() been "fixed" in all browsers (eg, IE) to return a rounded value now?
-         */
-        return this.aCounts.mhzTarget.toFixed(2) + "Mhz";
+        return this.counts.mhzTarget.toFixed(2) + "Mhz";
     }
 
     /**
      * setSpeed(nMultiplier, fUpdateFocus)
      *
-     * NOTE: This used to return the target speed, in mhz, but no callers appear to care at this point.
-     *
      * @this {CPU}
-     * @param {number} [nMultiplier] is the new proposed multiplier (reverts to 1 if the target was too high)
+     * @param {number} [nMultiplier] is the new proposed multiplier (reverts to default if target was too high)
      * @param {boolean} [fUpdateFocus] is true to update Computer focus
      * @return {boolean} true if successful, false if not
      *
@@ -12480,17 +12459,18 @@ class CPU extends Component {
         var fSuccess = false;
         if (nMultiplier !== undefined) {
             /*
-             * If we haven't reached 80% (0.8) of the current target speed, revert to a multiplier of one (1).
+             * If we haven't reached 80% (0.8) of the current target speed, revert to the default multiplier.
              */
-            if ((fUpdateFocus || this.flags.running) && this.aCounts.mhz / this.aCounts.mhzTarget < 0.8) {
-                nMultiplier = 1;
+            if ((fUpdateFocus || this.flags.running) && this.counts.mhzCurrent / this.counts.mhzTarget < 0.8) {
+                this.counts.mhzCurrent = 0;
+                nMultiplier = this.counts.nBaseMultiplier;
             } else {
                 fSuccess = true;
             }
-            this.aCounts.nCyclesMultiplier = nMultiplier;
-            var mhz = this.aCounts.mhzDefault * this.aCounts.nCyclesMultiplier;
-            if (this.aCounts.mhzTarget != mhz) {
-                this.aCounts.mhzTarget = mhz;
+            this.counts.nTargetMultiplier = nMultiplier;
+            var mhzTarget = this.counts.mhzBase * this.counts.nTargetMultiplier;
+            if (this.counts.mhzTarget != mhzTarget) {
+                this.counts.mhzTarget = mhzTarget;
                 var sSpeed = this.getSpeedTarget();
                 var controlSpeed = this.bindings["setSpeed"];
                 if (controlSpeed) controlSpeed.textContent = sSpeed;
@@ -12500,9 +12480,10 @@ class CPU extends Component {
         }
         this.addCycles(this.nRunCycles);
         this.nRunCycles = 0;
-        this.aCounts.msStartRun = Usr.getTime();
-        this.aCounts.msEndThisRun = 0;
-        this.calcCycles();
+        this.counts.msStartRun = Usr.getTime();
+        this.counts.msEndThisRun = 0;
+        this.calcCycles();      // calculate a new value for the current cycle multiplier
+        this.resetTimers();     // and then update all the fixed-period timers using the new cycle multiplier
         return fSuccess;
     }
 
@@ -12516,7 +12497,7 @@ class CPU extends Component {
     calcSpeed(nCycles, msElapsed)
     {
         if (msElapsed) {
-            this.aCounts.mhz = Math.round(nCycles / (msElapsed * 10)) / 100;
+            this.counts.mhzCurrent = Math.round(nCycles / (msElapsed * 10)) / 100;
             if (msElapsed >= 86400000) {
                 this.nTotalCycles = 0;
                 if (this.chipset) this.chipset.updateAllTimers(true);
@@ -12532,11 +12513,10 @@ class CPU extends Component {
      */
     calcStartTime()
     {
-        if (this.aCounts.nCyclesRecalc >= this.aCounts.nCyclesPerSecond) {
-            this.calcCycles(true);
-        }
-        this.aCounts.nCyclesThisRun = 0;
-        this.aCounts.msStartThisRun = Usr.getTime();
+        this.calcCycles();
+
+        this.counts.nCyclesThisRun = 0;
+        this.counts.msStartThisRun = Usr.getTime();
 
         /*
          * Try to detect situations where the browser may have throttled us, such as when the user switches
@@ -12563,19 +12543,19 @@ class CPU extends Component {
          * to hit its target speed, since you would expect any instruction that displays a message to be an
          * EXTREMELY slow instruction.
          */
-        if (this.aCounts.msEndThisRun) {
-            var msDelta = this.aCounts.msStartThisRun - this.aCounts.msEndThisRun;
-            if (msDelta > this.aCounts.msPerYield) {
+        if (this.counts.msEndThisRun) {
+            var msDelta = this.counts.msStartThisRun - this.counts.msEndThisRun;
+            if (msDelta > this.counts.msPerYield) {
                 if (MAXDEBUG) this.println("large time delay: " + msDelta + "ms");
-                this.aCounts.msStartRun += msDelta;
+                this.counts.msStartRun += msDelta;
                 /*
                  * Bumping msStartRun forward should NEVER cause it to exceed msStartThisRun; however, just
                  * in case, I make absolutely sure it cannot happen, since doing so could result in negative
                  * speed calculations.
                  */
 
-                if (this.aCounts.msStartRun > this.aCounts.msStartThisRun) {
-                    this.aCounts.msStartRun = this.aCounts.msStartThisRun;
+                if (this.counts.msStartRun > this.counts.msStartThisRun) {
+                    this.counts.msStartRun = this.counts.msStartThisRun;
                 }
             }
         }
@@ -12589,20 +12569,20 @@ class CPU extends Component {
      */
     calcRemainingTime()
     {
-        this.aCounts.msEndThisRun = Usr.getTime();
+        this.counts.msEndThisRun = Usr.getTime();
 
-        var msYield = this.aCounts.msPerYield;
-        if (this.aCounts.nCyclesThisRun) {
+        var msYield = this.counts.msPerYield;
+        if (this.counts.nCyclesThisRun) {
             /*
              * Normally, we would assume we executed a full quota of work over msPerYield, but since the CPU
              * now has the option of calling yieldCPU(), that might not be true.  If nCyclesThisRun is correct, then
              * the ratio of nCyclesThisRun/nCyclesPerYield should represent the percentage of work we performed,
              * and so applying that percentage to msPerYield should give us a better estimate of work vs. time.
              */
-            msYield = Math.round(msYield * this.aCounts.nCyclesThisRun / this.aCounts.nCyclesPerYield);
+            msYield = Math.round(msYield * this.counts.nCyclesThisRun / this.counts.nCyclesPerYield);
         }
 
-        var msElapsedThisRun = this.aCounts.msEndThisRun - this.aCounts.msStartThisRun;
+        var msElapsedThisRun = this.counts.msEndThisRun - this.counts.msStartThisRun;
         var msRemainsThisRun = msYield - msElapsedThisRun;
 
         /*
@@ -12612,56 +12592,43 @@ class CPU extends Component {
          *      msElapsed = msElapsedThisRun;
          *
          * but it seems preferable to use longer time periods and hopefully get a more accurate speed.
-         *
-         * Also, if msRemainsThisRun >= 0 && this.aCounts.nCyclesMultiplier == 1, we could pass these results instead:
-         *
-         *      nCycles = this.aCounts.nCyclesThisRun;
-         *      msElapsed = this.aCounts.msPerYield;
-         *
-         * to insure that we display a smooth, constant N Mhz.  But for now, I prefer seeing any fluctuations.
          */
         var nCycles = this.nRunCycles;
-        var msElapsed = this.aCounts.msEndThisRun - this.aCounts.msStartRun;
+        var msElapsed = this.counts.msEndThisRun - this.counts.msStartRun;
 
-        if (MAXDEBUG && msRemainsThisRun < 0 && this.aCounts.nCyclesMultiplier > 1) {
+        if (MAXDEBUG && msRemainsThisRun < 0 && this.counts.nTargetMultiplier > 1) {
             this.println("warning: updates @" + msElapsedThisRun + "ms (prefer " + Math.round(msYield) + "ms)");
         }
 
         this.calcSpeed(nCycles, msElapsed);
 
-        if (msRemainsThisRun < 0 || this.aCounts.mhz < this.aCounts.mhzTarget) {
+        if (msRemainsThisRun < 0 || this.counts.mhzCurrent < this.counts.mhzTarget) {
             /*
              * Try "throwing out" the effects of large anomalies, by moving the overall run start time up;
              * ordinarily, this should only happen when the someone is using an external Debugger or some other
              * tool or feature that is interfering with our overall execution.
              */
             if (msRemainsThisRun < -1000) {
-                this.aCounts.msStartRun -= msRemainsThisRun;
+                this.counts.msStartRun -= msRemainsThisRun;
             }
             /*
              * If the last burst took MORE time than we allotted (ie, it's taking more than 1 second to simulate
-             * nCyclesPerSecond), all we can do is yield for as little time as possible (ie, 0ms) and hope that the
+             * nCyclesActual), all we can do is yield for as little time as possible (ie, 0ms) and hope that the
              * simulation is at least usable.
              */
             msRemainsThisRun = 0;
         }
 
-        /*
-         * Last but not least, update nCyclesRecalc, so that when runCPU() starts up again and calls calcStartTime(),
-         * it'll be ready to decide if calcCycles() should be called again.
-         */
-        this.aCounts.nCyclesRecalc += this.aCounts.nCyclesThisRun;
-
         if (DEBUG && this.messageEnabled(Messages.LOG) && msRemainsThisRun) {
-            this.log("calcRemainingTime: " + msRemainsThisRun + "ms to sleep after " + this.aCounts.msEndThisRun + "ms");
+            this.log("calcRemainingTime: " + msRemainsThisRun + "ms to sleep after " + this.counts.msEndThisRun + "ms");
         }
 
-        this.aCounts.msEndThisRun += msRemainsThisRun;
+        this.counts.msEndThisRun += msRemainsThisRun;
         return msRemainsThisRun;
     }
 
     /**
-     * addTimer(callBack, ms)
+     * addTimer(id, callBack, ms)
      *
      * Components that want to have timers that fire after some number of milliseconds call addTimer() to create
      * the timer, and then setTimer() when they want to arm it.  Alternatively, they can specify an automatic timeout
@@ -12679,22 +12646,34 @@ class CPU extends Component {
      *
      * Why not use JavaScript's setTimeout() instead?  Good question.  For a good answer, see setTimer() below.
      *
-     * TODO: Consider making the addTimer() and setTimer() interfaces more like the addIRQ() and setIRQ()
-     * interfaces (which return the underlying object instead of an array index) and maintaining a separate list
-     * of active timers, in order of highest to lowest cycle countdown values, as this could speed up
-     * getBurstCycles() and updateTimers() functions ever so slightly.
-     *
      * @this {CPU}
+     * @param {string} id
      * @param {function()} callBack
      * @param {number} [ms] (if set, enables automatic setTimer calls)
      * @return {number} timer index
      */
-    addTimer(callBack, ms = -1)
+    addTimer(id, callBack, ms = -1)
     {
         var iTimer = this.aTimers.length;
-        this.aTimers.push([-1, ms, callBack]);
+        this.aTimers.push([id, -1, ms, callBack]);
         if (ms >= 0) this.setTimer(iTimer, ms);
         return iTimer;
+    }
+
+    /**
+     * findTimer(id)
+     *
+     * @this {CPU}
+     * @param {string} id
+     * @return {Array|null}
+     */
+    findTimer(id)
+    {
+        for (var iTimer = 0; iTimer < this.aTimers.length; iTimer++) {
+            var timer = this.aTimers[iTimer];
+            if (timer[0] == id) return timer;
+        }
+        return null;
     }
 
     /**
@@ -12723,7 +12702,7 @@ class CPU extends Component {
         var nCycles = -1;
         if (iTimer >= 0 && iTimer < this.aTimers.length) {
             var timer = this.aTimers[iTimer];
-            if (fReset || timer[0] < 0) {
+            if (fReset || timer[1] < 0) {
                 nCycles = this.getMSCycles(ms);
                 /*
                  * We must now confront the following problem: if the CPU is currently executing a burst of cycles,
@@ -12734,10 +12713,39 @@ class CPU extends Component {
                 if (this.flags.running) {
                     nCycles += this.endBurst();
                 }
-                timer[0] = nCycles;
+                timer[1] = nCycles;
             }
         }
         return nCycles;
+    }
+
+    /**
+     * setTimerCycles(iTimer, nCycles)
+     *
+     * A cycle-based version of setTimer(), used to help wean components off of functions like setBurstCycles().
+     *
+     * @this {CPU}
+     * @param {number} iTimer
+     * @param {number} nCycles
+     * @return {boolean}
+     */
+    setTimerCycles(iTimer, nCycles)
+    {
+        if (iTimer >= 0 && iTimer < this.aTimers.length) {
+            var timer = this.aTimers[iTimer];
+            /*
+             * We must now confront the following problem: if the CPU is currently executing a burst of cycles,
+             * the number of cycles it has executed in that burst so far must NOT be charged against the cycle
+             * timeout we're about to set.  The simplest way to resolve that is to immediately call endBurst()
+             * and bias the cycle timeout by the number of cycles that the burst executed.
+             */
+            if (this.flags.running) {
+                nCycles += this.endBurst();
+            }
+            timer[1] = nCycles;
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -12749,26 +12757,24 @@ class CPU extends Component {
      */
     getMSCycles(ms)
     {
-        return ((this.aCounts.nCyclesPerSecond * this.aCounts.nCyclesMultiplier) / 1000 * ms)|0;
+        return ((this.counts.nBaseCyclesPerSecond * this.counts.nCurrentMultiplier) / 1000 * ms)|0;
     }
 
     /**
      * getBurstCycles(nCycles)
      *
-     * Used by runCPU() to get min(nCycles,[timer cycle counts])
-     *
      * @this {CPU}
-     * @param {number} nCycles (number of cycles about to execute)
-     * @return {number} (either nCycles or less if a timer needs to fire)
+     * @param {number} nCycles (maximum number of cycles to execute)
+     * @return {number}
      */
     getBurstCycles(nCycles)
     {
         for (var iTimer = this.aTimers.length - 1; iTimer >= 0; iTimer--) {
             var timer = this.aTimers[iTimer];
 
-            if (timer[0] < 0) continue;
-            if (nCycles > timer[0]) {
-                nCycles = timer[0];
+            if (timer[1] < 0) continue;
+            if (nCycles > timer[1]) {
+                nCycles = timer[1];
             }
         }
         return nCycles;
@@ -12778,31 +12784,50 @@ class CPU extends Component {
      * saveTimers()
      *
      * @this {CPU}
-     * @return {Array.<number>}
+     * @return {Array}
      */
     saveTimers()
     {
-        var aTimerCycles = [];
+        var aTimerStates = [];
         for (var iTimer = 0; iTimer < this.aTimers.length; iTimer++) {
             var timer = this.aTimers[iTimer];
-            aTimerCycles.push([timer[0], timer[1]]);
+            aTimerStates.push([timer[0], timer[1], timer[2]]);
         }
-        return aTimerCycles;
+        return aTimerStates;
     }
 
     /**
-     * restoreTimers(aTimerCycles)
+     * restoreTimers(aTimerStates)
      *
      * @this {CPU}
-     * @param {Array.<number>} aTimerCycles
+     * @param {Array} aTimerStates
      */
-    restoreTimers(aTimerCycles)
+    restoreTimers(aTimerStates)
     {
+        for (var iTimerState = 0; iTimerState < aTimerStates.length; iTimerState++) {
+            var state = aTimerStates[iTimerState];
+            var timer = this.findTimer(state[0]);
+            if (timer) {
+                timer[1] = state[1];
+                timer[2] = state[2];
+            }
+        }
+    }
 
-        for (var iTimer = 0; iTimer < this.aTimers.length && iTimer < aTimerCycles.length; iTimer++) {
+    /**
+     * resetTimers()
+     *
+     * When the target CPU speed multiplier is altered, it's a good idea to run through all the timers that
+     * have a fixed millisecond period and re-arm them, because the timers are using cycle counts that were based
+     * on a previous multiplier.
+     *
+     * @this {CPU}
+     */
+    resetTimers()
+    {
+        for (var iTimer = this.aTimers.length - 1; iTimer >= 0; iTimer--) {
             var timer = this.aTimers[iTimer];
-            timer[0] = aTimerCycles[iTimer][0];
-            timer[1] = aTimerCycles[iTimer][1];
+            if (timer[2] >= 0) this.setTimer(iTimer, timer[2], true);
         }
     }
 
@@ -12821,12 +12846,12 @@ class CPU extends Component {
         for (var iTimer = this.aTimers.length - 1; iTimer >= 0; iTimer--) {
             var timer = this.aTimers[iTimer];
 
-            if (timer[0] < 0) continue;
-            timer[0] -= nCycles;
-            if (timer[0] <= 0) {
-                timer[0] = -1;      // zero is technically an "active" value, so ensure the timer is dormant now
-                timer[2]();         // safe to invoke the callback function now
-                if (timer[1] >= 0) this.setTimer(iTimer, timer[1]);
+            if (timer[1] < 0) continue;
+            timer[1] -= nCycles;
+            if (timer[1] <= 0) {
+                timer[1] = -1;      // zero is technically an "active" value, so ensure the timer is dormant now
+                timer[3]();         // safe to invoke the callback function now
+                if (timer[2] >= 0) this.setTimer(iTimer, timer[2]);
             }
         }
     }
@@ -12856,18 +12881,19 @@ class CPU extends Component {
         if (!this.flags.running) return;
 
         /*
-         *  calcStartTime() initializes the cycle counter and timestamp for this runCPU() invocation, and optionally
-         *  recalculates the the maximum number of cycles for each burst if the nCyclesRecalc threshold has been reached.
+         *  calcStartTime() initializes the cycle counter and timestamp for this runCPU() invocation.
          */
         this.calcStartTime();
+
         try {
+            this.flags.yield = false;
             do {
                 /*
-                 * nCycles is how many cycles we WANT to run on each iteration of stepCPU(), and may be as
-                 * HIGH as nCyclesPerYield, but it may be significantly less.  getBurstCycles() will adjust
-                 * nCycles downward if any CPU timers need to fire during the next burst.
+                 * getBurstCycles() tells us how many cycles to execute as a burst.  The answer will always
+                 * be less than getCurrentCyclesPerSecond(), because at the very least, our own timer fires more than
+                 * once per second.
                  */
-                var nCycles = this.getBurstCycles(this.flags.checksum? 1 : this.aCounts.nCyclesPerYield);
+                var nCycles = this.getBurstCycles(this.flags.checksum? 1 : this.getCurrentCyclesPerSecond());
 
                 if (this.chipset) {
                     this.chipset.updateAllTimers();
@@ -12899,24 +12925,19 @@ class CPU extends Component {
                  */
                 nCycles = this.endBurst(true);
 
-                /*
+                /*z
                  * Add nCycles to nCyclesThisRun, as well as nRunCycles (the cycle count since the CPU started).
                  */
-                this.aCounts.nCyclesThisRun += nCycles;
+                this.counts.nCyclesThisRun += nCycles;
                 this.nRunCycles += nCycles;
                 this.updateChecksum(nCycles);
 
                 /*
-                 * Update any/all timers, firing those whose cycle countdowns have reached (or dropped below) zero.
+                 * Update all timers, firing those whose cycle countdowns have reached (or dropped below) zero.
                  */
                 this.updateTimers(nCycles);
 
-                this.aCounts.nCyclesNextYield -= nCycles;
-                if (this.aCounts.nCyclesNextYield <= 0) {
-                    this.aCounts.nCyclesNextYield += this.aCounts.nCyclesPerYield;
-                    break;
-                }
-            } while (this.flags.running);
+            } while (this.flags.running && !this.flags.yield);
         }
         catch (e) {
             this.stopCPU();
@@ -12949,9 +12970,8 @@ class CPU extends Component {
         }
         /*
          *  setSpeed() without a speed parameter leaves the selected speed in place, but also resets the
-         *  cycle counter and timestamp for the current series of runCPU() calls, calculates the maximum number
-         *  of cycles for each burst based on the last known effective CPU speed, and resets the nCyclesRecalc
-         *  threshold counter.
+         *  cycle counter and timestamp for the current series of runCPU() calls, and calculates the maximum number
+         *  of cycles for each burst based on the last known effective CPU speed.
          */
         this.setSpeed();
         this.flags.running = true;
@@ -12962,7 +12982,7 @@ class CPU extends Component {
         if (this.cmp) {
             this.cmp.updateStatus(true);
             if (fUpdateFocus) this.cmp.updateFocus(true);
-            this.cmp.start(this.aCounts.msStartRun, this.getCycles());
+            this.cmp.start(this.counts.msStartRun, this.getCycles());
         }
         setTimeout(this.onRunTimeout, 0);
         return true;
@@ -12986,9 +13006,6 @@ class CPU extends Component {
      * stopCPU(fComplete)
      *
      * For use by any component that wants to stop the CPU.
-     *
-     * This similar to yieldCPU(), but it doesn't need to zero nCyclesNextYield to break out of runCPU();
-     * it simply needs to clear fRunning (well, "simply" may be oversimplifying a bit....)
      *
      * @this {CPU}
      * @param {boolean} [fComplete]
@@ -13043,9 +13060,8 @@ class CPU extends Component {
      */
     yieldCPU()
     {
-        this.endBurst();                    // this will break us out of stepCPU()
-        this.aCounts.nCyclesNextYield = 0;  // this will break us out of runCPU(), once we break out of stepCPU()
-        // if (DEBUG) this.nSnapCycles = this.nBurstCycles;
+        this.endBurst();
+        this.flags.yield = true;
         /*
          * The Debugger calls yieldCPU() after every message() to ensure browser responsiveness, but it looks
          * odd for those messages to show CPU state changes but for the CPU's own status display to not (ditto
@@ -13055,21 +13071,7 @@ class CPU extends Component {
     }
 }
 
-/*
- * Constants that control the frequency at which various updates should occur.
- *
- * These values do NOT control the simulation directly.  Instead, they are used by
- * calcCycles(), which uses the nCyclesPerSecond passed to the constructor as a starting
- * point and computes the following variables:
- *
- *      this.aCounts.nCyclesPerYield = (this.aCounts.nCyclesPerSecond / CPU.YIELDS_PER_SECOND)
- *
- * The above variables are also multiplied by any cycle multiplier in effect, via setSpeed(),
- * and then they're used to initialize another set of variables for each runCPU() iteration:
- *
- *      this.aCounts.nCyclesNextYield <= this.aCounts.nCyclesPerYield
- */
-CPU.YIELDS_PER_SECOND   = 30;
+CPU.YIELDS_PER_SECOND = 30;
 
 CPU.BUTTONS = ["power", "reset"];
 
@@ -14798,9 +14800,9 @@ class X86CPU extends CPU {
      */
     constructor(parmsCPU)
     {
+        var nCyclesDefault;
         var model = +parmsCPU['model'] || X86.MODEL_8088;
 
-        var nCyclesDefault = 0;
         switch(model) {
         case X86.MODEL_8088:
         default:
@@ -37625,7 +37627,73 @@ class ChipSet extends Component {
          * HDC calls setCMOSDriveType() or RAM calls addCMOSMemory()), the CMOS will be ready to take their calls.
          */
         this.reset(true);
+    }
 
+    /**
+     * initBus(cmp, bus, cpu, dbg)
+     *
+     * @this {ChipSet}
+     * @param {Computer} cmp
+     * @param {Bus} bus
+     * @param {X86CPU} cpu
+     * @param {DebuggerX86} dbg
+     */
+    initBus(cmp, bus, cpu, dbg)
+    {
+        this.bus = bus;
+        this.cpu = cpu;
+        this.dbg = dbg;
+        this.cmp = cmp;
+
+        this.fpu = cmp.getMachineComponent("FPU");
+        this.setDIPSwitches(ChipSet.SWITCH_TYPE.FPU, this.fpu?1:0, true);
+
+        this.kbd = cmp.getMachineComponent("Keyboard");
+
+        /*
+         * This divisor is invariant, so we calculate it as soon as we're able to query the CPU's base speed.
+         */
+        this.nTicksDivisor = (cpu.getBaseCyclesPerSecond() / ChipSet.TIMER_TICKS_PER_SEC);
+
+        bus.addPortInputTable(this, ChipSet.aPortInput);
+        bus.addPortOutputTable(this, ChipSet.aPortOutput);
+
+        if (this.model < ChipSet.MODEL_5170) {
+            if (this.model != ChipSet.MODEL_ATT_6300) {
+                bus.addPortInputTable(this, ChipSet.aPortInput5150);
+                bus.addPortOutputTable(this, ChipSet.aPortOutput5150);
+            } else {
+                bus.addPortInputTable(this, ChipSet.aPortInput6300);
+                bus.addPortOutputTable(this, ChipSet.aPortOutput6300);
+            }
+        } else {
+            bus.addPortInputTable(this, ChipSet.aPortInput5170);
+            bus.addPortOutputTable(this, ChipSet.aPortOutput5170);
+            if (DESKPRO386 && (this.model|0) == ChipSet.MODEL_COMPAQ_DESKPRO386) {
+                bus.addPortInputTable(this, ChipSet.aPortInputDeskPro386);
+                bus.addPortOutputTable(this, ChipSet.aPortOutputDeskPro386);
+            }
+        }
+        if (DEBUGGER) {
+            if (dbg) {
+                var chipset = this;
+                /*
+                 * TODO: Add more "dumpers" (eg, for DMA, RTC, 8042, etc)
+                 */
+                dbg.messageDump(Messages.PIC, function onDumpPIC() {
+                    chipset.dumpPIC();
+                });
+                dbg.messageDump(Messages.TIMER, function onDumpTimer(asArgs) {
+                    chipset.dumpTimer(asArgs);
+                });
+                if (this.model >= ChipSet.MODEL_5170) {
+                    dbg.messageDump(Messages.CMOS, function onDumpCMOS() {
+                        chipset.dumpCMOS();
+                    });
+                }
+            }
+            cpu.addIntNotify(Interrupts.RTC, this.intBIOSRTC.bind(this));
+        }
         this.setReady();
     }
 
@@ -37664,70 +37732,6 @@ class ChipSet extends Component {
             break;
         }
         return false;
-    }
-
-    /**
-     * initBus(cmp, bus, cpu, dbg)
-     *
-     * @this {ChipSet}
-     * @param {Computer} cmp
-     * @param {Bus} bus
-     * @param {X86CPU} cpu
-     * @param {DebuggerX86} dbg
-     */
-    initBus(cmp, bus, cpu, dbg)
-    {
-        this.bus = bus;
-        this.cpu = cpu;
-        this.dbg = dbg;
-        this.cmp = cmp;
-
-        this.fpu = cmp.getMachineComponent("FPU");
-        this.setDIPSwitches(ChipSet.SWITCH_TYPE.FPU, this.fpu?1:0, true);
-
-        this.kbd = cmp.getMachineComponent("Keyboard");
-
-        /*
-         * This divisor is invariant, so we calculate it as soon as we're able to query the CPU's base speed.
-         */
-        this.nTicksDivisor = (cpu.getCyclesPerSecond() / ChipSet.TIMER_TICKS_PER_SEC);
-
-        bus.addPortInputTable(this, ChipSet.aPortInput);
-        bus.addPortOutputTable(this, ChipSet.aPortOutput);
-        if (this.model < ChipSet.MODEL_5170) {
-            if (this.model != ChipSet.MODEL_ATT_6300) {
-                bus.addPortInputTable(this, ChipSet.aPortInput5150);
-                bus.addPortOutputTable(this, ChipSet.aPortOutput5150);
-            } else {
-                bus.addPortInputTable(this, ChipSet.aPortInput6300);
-                bus.addPortOutputTable(this, ChipSet.aPortOutput6300);
-            }
-        } else {
-            bus.addPortInputTable(this, ChipSet.aPortInput5170);
-            bus.addPortOutputTable(this, ChipSet.aPortOutput5170);
-            if (DESKPRO386 && (this.model|0) == ChipSet.MODEL_COMPAQ_DESKPRO386) {
-                bus.addPortInputTable(this, ChipSet.aPortInputDeskPro386);
-                bus.addPortOutputTable(this, ChipSet.aPortOutputDeskPro386);
-            }
-        }
-        if (DEBUGGER) {
-            if (dbg) {
-                var chipset = this;
-                /*
-                 * TODO: Add more "dumpers" (eg, for DMA, RTC, 8042, etc)
-                 */
-                dbg.messageDump(Messages.PIC, function onDumpPIC() {
-                    chipset.dumpPIC();
-                });
-                dbg.messageDump(Messages.TIMER, function onDumpTimer(asArgs) {
-                    chipset.dumpTimer(asArgs);
-                });
-                dbg.messageDump(Messages.CMOS, function onDumpCMOS() {
-                    chipset.dumpCMOS();
-                });
-            }
-            cpu.addIntNotify(Interrupts.RTC, this.intBIOSRTC.bind(this));
-        }
     }
 
     /**
@@ -38079,7 +38083,7 @@ class ChipSet extends Component {
     {
         this.nRTCCyclesLastUpdate = this.cpu.getCycles(this.fScaleTimers);
         this.nRTCPeriodsPerSecond = 1024;
-        this.nRTCCyclesPerPeriod = Math.floor(this.cpu.getCyclesPerSecond() / this.nRTCPeriodsPerSecond);
+        this.nRTCCyclesPerPeriod = Math.floor(this.cpu.getBaseCyclesPerSecond() / this.nRTCPeriodsPerSecond);
         this.setRTCCycleLimit();
     }
 
@@ -38117,16 +38121,15 @@ class ChipSet extends Component {
     }
 
     /**
-     * setRTCCycleLimit(nCycles)
+     * setRTCCycleLimit()
      *
      * This should be called when PIE becomes set in STATUSB (and whenever PF is cleared in STATUSC while PIE is still set).
      *
      * @this {ChipSet}
-     * @param {number} [nCycles]
      */
-    setRTCCycleLimit(nCycles)
+    setRTCCycleLimit()
     {
-        if (nCycles === undefined) nCycles = this.nRTCCyclesPerPeriod;
+        var nCycles = this.nRTCCyclesPerPeriod;
         this.nRTCCyclesNextUpdate = this.cpu.getCycles(this.fScaleTimers) + nCycles;
         if (this.abCMOSData[ChipSet.CMOS.ADDR.STATUSB] & ChipSet.CMOS.STATUSB.PIE) {
             this.cpu.setBurstCycles(nCycles);
@@ -38140,7 +38143,7 @@ class ChipSet extends Component {
      */
     updateRTCTime()
     {
-        var nCyclesPerSecond = this.cpu.getCyclesPerSecond();
+        var nCyclesPerSecond = this.cpu.getBaseCyclesPerSecond();
         var nCyclesUpdate = this.cpu.getCycles(this.fScaleTimers);
 
         /*
@@ -40857,7 +40860,7 @@ class ChipSet extends Component {
              * For the original MODEL_5170, the number of cycles per tick is approximately 6,000,000 / 1,193,181,
              * or 5.028575, so we can no longer always divide cycles by 4 with a simple right-shift by 2.  The proper
              * divisor (eg, 4 for MODEL_5150 and MODEL_5160, 5 for MODEL_5170, etc) is nTicksDivisor, which initBus()
-             * calculates using the base CPU speed returned by cpu.getCyclesPerSecond().
+             * calculates using the base CPU speed returned by cpu.getBaseCyclesPerSecond().
              */
             var ticksElapsed = ((nCycles - timer.nCyclesStart) / this.nTicksDivisor) | 0;
 
@@ -47327,8 +47330,8 @@ class Card {
 
             var monitorSpecs = Video.monitorSpecs[nMonitorType] || Video.monitorSpecs[ChipSet.MONITOR.MONO];
 
-            var nCyclesPerSecond = video.cpu.getCyclesPerSecond();      // eg, 4772727
-            this.nCyclesHorzPeriod = (nCyclesPerSecond / monitorSpecs.nHorzPeriodsPerSec)|0;
+            var nCyclesDefault = video.cpu.getBaseCyclesPerSecond();    // eg, 4772727
+            this.nCyclesHorzPeriod = (nCyclesDefault / monitorSpecs.nHorzPeriodsPerSec)|0;
             this.nCyclesHorzActive = (this.nCyclesHorzPeriod * monitorSpecs.percentHorzActive / 100)|0;
             this.nCyclesVertPeriod = (this.nCyclesHorzPeriod * monitorSpecs.nHorzPeriodsPerFrame)|0;
             this.nCyclesVertActive = (this.nCyclesVertPeriod * monitorSpecs.percentVertActive / 100)|0;
@@ -49459,7 +49462,9 @@ class Video extends Component {
             });
         }
 
-        this.cpu.addTimer(function() { video.updateScreen(); }, 1000 / Video.UPDATES_PER_SECOND);
+        this.cpu.addTimer(this.id, function() {
+            video.updateScreen();
+        }, 1000 / Video.UPDATES_PER_SECOND);
     }
 
     /**
@@ -54029,8 +54034,8 @@ Video.MODEL = {
  *
  * From these monitor specs, we calculate the following values for a given Card:
  *
- *      nCyclesPerSecond = cpu.getCyclesPerSecond();      // eg, 4772727
- *      nCyclesHorzPeriod = (nCyclesPerSecond / monitorSpecs.nHorzPeriodsPerSec) | 0;
+ *      nCyclesDefault = cpu.getBaseCyclesPerSecond();          // eg, 4772727
+ *      nCyclesHorzPeriod = (nCyclesDefault / monitorSpecs.nHorzPeriodsPerSec) | 0;
  *      nCyclesHorzActive = (nCyclesHorzPeriod * monitorSpecs.percentHorzActive / 100) | 0;
  *      nCyclesVertPeriod = nCyclesHorzPeriod * monitorSpecs.nHorzPeriodsPerFrame;
  *      nCyclesVertActive = (nCyclesVertPeriod * monitorSpecs.percentVertActive / 100) | 0;
@@ -70621,7 +70626,7 @@ class DebuggerX86 extends Debugger {
                 sLine += (nSequence != null? '=' + nSequence.toString() : "");
             } else {
                 var nCycles = this.cpu.getCycles();
-                sLine += "cycles=" + nCycles.toString() + " cs=" + Str.toHex(this.cpu.aCounts.nChecksum);
+                sLine += "cycles=" + nCycles.toString() + " cs=" + Str.toHex(this.cpu.counts.nChecksum);
             }
         }
 
@@ -71961,8 +71966,8 @@ class DebuggerX86 extends Debugger {
     doInfo(asArgs)
     {
         if (DEBUG) {
-            this.println("msPerYield: " + this.cpu.aCounts.msPerYield);
-            this.println("nCyclesPerYield: " + this.cpu.aCounts.nCyclesPerYield);
+            this.println("msPerYield: " + this.cpu.counts.msPerYield);
+            this.println("nCyclesPerYield: " + this.cpu.counts.nCyclesPerYield);
             return true;
         }
         return false;
@@ -72371,13 +72376,13 @@ class DebuggerX86 extends Debugger {
             if (asArgs[3] !== undefined) nCycles = +asArgs[3];          // warning: decimal instead of hex conversion
             switch (asArgs[2]) {
                 case "int":
-                    this.cpu.aCounts.nCyclesChecksumInterval = nCycles;
+                    this.cpu.counts.nCyclesChecksumInterval = nCycles;
                     break;
                 case "start":
-                    this.cpu.aCounts.nCyclesChecksumStart = nCycles;
+                    this.cpu.counts.nCyclesChecksumStart = nCycles;
                     break;
                 case "stop":
-                    this.cpu.aCounts.nCyclesChecksumStop = nCycles;
+                    this.cpu.counts.nCyclesChecksumStop = nCycles;
                     break;
                 default:
                     this.println("unknown cs option");
@@ -74896,7 +74901,7 @@ class Computer extends Component {
          * This timer replaces the CPU's old dedicated STATUS_UPDATES_PER_SECOND logic; periodic updateStatus()
          * calls are now our own responsibility.
          */
-        this.cpu.addTimer(function() { cmp.updateStatus(); }, 1000 / Computer.UPDATES_PER_SECOND);
+        this.cpu.addTimer(this.id, function() { cmp.updateStatus(); }, 1000 / Computer.UPDATES_PER_SECOND);
 
         var sStatePath = null;
         var sResume = this.getMachineParm('resume');

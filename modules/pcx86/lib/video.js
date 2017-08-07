@@ -375,8 +375,8 @@ class Card {
 
             var monitorSpecs = Video.monitorSpecs[nMonitorType] || Video.monitorSpecs[ChipSet.MONITOR.MONO];
 
-            var nCyclesPerSecond = video.cpu.getCyclesPerSecond();      // eg, 4772727
-            this.nCyclesHorzPeriod = (nCyclesPerSecond / monitorSpecs.nHorzPeriodsPerSec)|0;
+            var nCyclesDefault = video.cpu.getBaseCyclesPerSecond();    // eg, 4772727
+            this.nCyclesHorzPeriod = (nCyclesDefault / monitorSpecs.nHorzPeriodsPerSec)|0;
             this.nCyclesHorzActive = (this.nCyclesHorzPeriod * monitorSpecs.percentHorzActive / 100)|0;
             this.nCyclesVertPeriod = (this.nCyclesHorzPeriod * monitorSpecs.nHorzPeriodsPerFrame)|0;
             this.nCyclesVertActive = (this.nCyclesVertPeriod * monitorSpecs.percentVertActive / 100)|0;
@@ -2507,7 +2507,9 @@ class Video extends Component {
             });
         }
 
-        this.cpu.addTimer(function() { video.updateScreen(); }, 1000 / Video.UPDATES_PER_SECOND);
+        this.cpu.addTimer(this.id, function() {
+            video.updateScreen();
+        }, 1000 / Video.UPDATES_PER_SECOND);
     }
 
     /**
@@ -7077,8 +7079,8 @@ Video.MODEL = {
  *
  * From these monitor specs, we calculate the following values for a given Card:
  *
- *      nCyclesPerSecond = cpu.getCyclesPerSecond();      // eg, 4772727
- *      nCyclesHorzPeriod = (nCyclesPerSecond / monitorSpecs.nHorzPeriodsPerSec) | 0;
+ *      nCyclesDefault = cpu.getBaseCyclesPerSecond();          // eg, 4772727
+ *      nCyclesHorzPeriod = (nCyclesDefault / monitorSpecs.nHorzPeriodsPerSec) | 0;
  *      nCyclesHorzActive = (nCyclesHorzPeriod * monitorSpecs.percentHorzActive / 100) | 0;
  *      nCyclesVertPeriod = nCyclesHorzPeriod * monitorSpecs.nHorzPeriodsPerFrame;
  *      nCyclesVertActive = (nCyclesVertPeriod * monitorSpecs.percentVertActive / 100) | 0;

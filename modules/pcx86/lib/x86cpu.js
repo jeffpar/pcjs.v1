@@ -86,9 +86,9 @@ class X86CPU extends CPU {
      */
     constructor(parmsCPU)
     {
+        var nCyclesDefault;
         var model = +parmsCPU['model'] || X86.MODEL_8088;
 
-        var nCyclesDefault = 0;
         switch(model) {
         case X86.MODEL_8088:
         default:
