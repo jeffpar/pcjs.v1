@@ -11837,9 +11837,6 @@ class CPU extends Component {
          */
         this.counts.nBaseMultiplier = this.counts.nCurrentMultiplier = this.counts.nTargetMultiplier = nMultiplier;
 
-        /*
-         * TODO: Take care of this with an initial setSpeed() call instead?
-         */
         this.counts.mhzBase = Math.round(this.counts.nBaseCyclesPerSecond / 10000) / 100;
         this.counts.mhzCurrent = this.counts.mhzTarget = this.counts.mhzBase * this.counts.nTargetMultiplier;
 
@@ -12105,8 +12102,8 @@ class CPU extends Component {
             this.counts.nChecksum = 0;
             this.counts.nCyclesChecksumNext = this.counts.nCyclesChecksumStart - this.nTotalCycles;
             /*
-             *  this.aCounts.nCyclesChecksumNext = this.aCounts.nCyclesChecksumStart + this.aCounts.nCyclesChecksumInterval -
-             *      (this.nTotalCycles % this.aCounts.nCyclesChecksumInterval);
+             *  this.counts.nCyclesChecksumNext = this.counts.nCyclesChecksumStart + this.counts.nCyclesChecksumInterval -
+             *      (this.nTotalCycles % this.counts.nCyclesChecksumInterval);
              */
             return true;
         }
@@ -12317,9 +12314,11 @@ class CPU extends Component {
      */
     calcCycles()
     {
-        this.counts.nCurrentMultiplier = ((this.counts.mhzCurrent / this.counts.mhzBase)|0) || this.counts.nTargetMultiplier;
+        var nMultiplier = (this.counts.mhzCurrent / this.counts.mhzBase)|0;
+        if (!nMultiplier || nMultiplier > this.counts.nTargetMultiplier) nMultiplier = this.counts.nTargetMultiplier;
         this.counts.msPerYield = Math.round(1000 / CPU.YIELDS_PER_SECOND);
-        this.counts.nCyclesPerYield = Math.floor(this.counts.nBaseCyclesPerSecond / CPU.YIELDS_PER_SECOND * this.counts.nCurrentMultiplier);
+        this.counts.nCyclesPerYield = Math.floor(this.counts.nBaseCyclesPerSecond / CPU.YIELDS_PER_SECOND * nMultiplier);
+        this.counts.nCurrentMultiplier = nMultiplier;
     }
 
     /**
@@ -12344,9 +12343,9 @@ class CPU extends Component {
         var nCycles = this.nTotalCycles + this.nRunCycles + this.nBurstCycles - this.nStepCycles;
         if (fScaled && this.counts.nTargetMultiplier > 1 && this.counts.mhzCurrent > this.counts.mhzBase) {
             /*
-             * We could scale the current cycle count by the current effective speed (this.aCounts.mhz); eg:
+             * We could scale the current cycle count by the current speed (this.counts.mhzCurrent); eg:
              *
-             *      nCycles = Math.round(nCycles / (this.aCounts.mhz / this.aCounts.mhzBase));
+             *      nCycles = Math.round(nCycles / (this.counts.mhzCurrent / this.counts.mhzBase));
              *
              * but that speed will fluctuate somewhat: large fluctuations at first, but increasingly smaller
              * fluctuations after each burst of instructions that runCPU() executes.
@@ -12403,7 +12402,6 @@ class CPU extends Component {
      */
     resetCycles()
     {
-        this.counts.mhzCurrent = 0;
         this.nTotalCycles = this.nRunCycles = this.nBurstCycles = this.nStepCycles = 0;
         this.resetChecksum();
         this.setSpeed(this.counts.nBaseMultiplier);
@@ -12456,17 +12454,16 @@ class CPU extends Component {
      */
     setSpeed(nMultiplier, fUpdateFocus)
     {
-        var fSuccess = false;
+        var fSuccess = true;
         if (nMultiplier !== undefined) {
             /*
              * If we haven't reached 80% (0.8) of the current target speed, revert to the default multiplier.
              */
-            if ((fUpdateFocus || this.flags.running) && this.counts.mhzCurrent / this.counts.mhzTarget < 0.8) {
-                this.counts.mhzCurrent = 0;
+            if (this.counts.mhzCurrent > 0 && this.counts.mhzCurrent / this.counts.mhzTarget < 0.8) {
                 nMultiplier = this.counts.nBaseMultiplier;
-            } else {
-                fSuccess = true;
+                fSuccess = false;
             }
+            this.counts.mhzCurrent = 0;
             this.counts.nTargetMultiplier = nMultiplier;
             var mhzTarget = this.counts.mhzBase * this.counts.nTargetMultiplier;
             if (this.counts.mhzTarget != mhzTarget) {
@@ -12480,8 +12477,7 @@ class CPU extends Component {
         }
         this.addCycles(this.nRunCycles);
         this.nRunCycles = 0;
-        this.counts.msStartRun = Usr.getTime();
-        this.counts.msEndThisRun = 0;
+        this.counts.msStartRun = this.counts.msEndThisRun = 0;
         this.calcCycles();      // calculate a new value for the current cycle multiplier
         this.resetTimers();     // and then update all the fixed-period timers using the new cycle multiplier
         return fSuccess;
@@ -12517,6 +12513,7 @@ class CPU extends Component {
 
         this.counts.nCyclesThisRun = 0;
         this.counts.msStartThisRun = Usr.getTime();
+        if (!this.counts.msStartRun) this.counts.msStartRun = this.counts.msStartThisRun;
 
         /*
          * Try to detect situations where the browser may have throttled us, such as when the user switches
@@ -12588,7 +12585,7 @@ class CPU extends Component {
         /*
          * We could pass only "this run" results to calcSpeed():
          *
-         *      nCycles = this.aCounts.nCyclesThisRun;
+         *      nCycles = this.counts.nCyclesThisRun;
          *      msElapsed = msElapsedThisRun;
          *
          * but it seems preferable to use longer time periods and hopefully get a more accurate speed.
@@ -12925,7 +12922,7 @@ class CPU extends Component {
                  */
                 nCycles = this.endBurst(true);
 
-                /*z
+                /*
                  * Add nCycles to nCyclesThisRun, as well as nRunCycles (the cycle count since the CPU started).
                  */
                 this.counts.nCyclesThisRun += nCycles;
@@ -13024,6 +13021,7 @@ class CPU extends Component {
             if (controlRun) controlRun.textContent = "Run";
             if (this.cmp) {
                 this.cmp.stop(Component.getTime(), this.getCycles());
+                this.cmp.updateStatus(true);
             }
             if (!this.dbg) this.status("Stopped");
             fStopped = true;
@@ -15599,7 +15597,6 @@ class X86CPU extends CPU {
      */
     reset()
     {
-        if (this.flags.running) this.stopCPU();
         this.resetRegs();
         this.resetCycles();
         this.clearError();      // clear any fatal error/exception that setError() may have flagged
@@ -69707,14 +69704,8 @@ class DebuggerX86 extends Debugger {
         this.sMessagePrev = null;
         this.nCycles = 0;
         this.dbgAddrNextCode = this.newAddr(this.cpu.getIP(), this.cpu.getCS());
-        /*
-         * fRunning is set by start() and cleared by stop().  In addition, we clear
-         * it here, so that if the CPU is reset while running, we can prevent stop()
-         * from unnecessarily dumping the CPU state.
-         */
-        this.flags.running = false;
         this.clearTempBreakpoint();
-        if (!fQuiet) this.updateStatus();
+        if (!fQuiet && !this.flags.running) this.updateStatus();
     }
 
     /**
@@ -75791,10 +75782,6 @@ class Computer extends Component {
     reset()
     {
         if (this.bus && this.bus.reset) {
-            /*
-             * TODO: Why does WebStorm think that this.bus.type is undefined? The base class (Component)
-             * constructor defines it.
-             */
             this.printMessage("Resetting " + this.bus.type);
             this.bus.reset();
         }
