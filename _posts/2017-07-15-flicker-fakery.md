@@ -37,9 +37,9 @@ of apps.  But many emulators don't bother with:
 
 And last, and maybe also least, **FLICKERING**.
 
-Yes, the beloved flicker of the original IBM Color Graphics Adapter, or CGA.  And I'm not talking about the
+Yes, the beloved flicker of the original IBM Color Graphics Adapter (CGA).  And I'm not talking about the
 barely perceptible flicker produced by the CGA monitor's 60Hz refresh rate.  That flicker was tolerable.  In fact,
-many people who didn't need either color or graphics would opt for IBM's Monochrome Display Adapter, or MDA, because
+many people who didn't need either color or graphics would opt for IBM's Monochrome Display Adapter (MDA), because
 the green phosphor of IBM's monochrome monitor had such high persistence that the 60Hz refresh rate was virtually
 imperceptible.
 
