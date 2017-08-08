@@ -2447,7 +2447,7 @@ if (DEBUGGER) {
                 sLine += (nSequence != null? '=' + nSequence.toString() : "");
             } else {
                 var nCycles = this.cpu.getCycles();
-                sLine += "cycles=" + nCycles.toString() + " cs=" + str.toHex(this.cpu.aCounts.nChecksum);
+                sLine += "cycles=" + nCycles.toString() + " cs=" + str.toHex(this.cpu.counts.nChecksum);
             }
         }
         return sLine;
@@ -3328,11 +3328,11 @@ if (DEBUGGER) {
     Debugger6502.prototype.doInfo = function(asArgs)
     {
         if (DEBUG) {
-            this.println("msPerYield: " + this.cpu.aCounts.msPerYield);
-            this.println("nCyclesPerBurst: " + this.cpu.aCounts.nCyclesPerBurst);
-            this.println("nCyclesPerYield: " + this.cpu.aCounts.nCyclesPerYield);
-            this.println("nCyclesPerVideoUpdate: " + this.cpu.aCounts.nCyclesPerVideoUpdate);
-            this.println("nCyclesPerStatusUpdate: " + this.cpu.aCounts.nCyclesPerStatusUpdate);
+            this.println("msPerYield: " + this.cpu.counts.msPerYield);
+            this.println("nCyclesPerBurst: " + this.cpu.counts.nCyclesPerBurst);
+            this.println("nCyclesPerYield: " + this.cpu.counts.nCyclesPerYield);
+            this.println("nCyclesPerVideoUpdate: " + this.cpu.counts.nCyclesPerVideoUpdate);
+            this.println("nCyclesPerStatusUpdate: " + this.cpu.counts.nCyclesPerStatusUpdate);
             return true;
         }
         return false;
@@ -3557,13 +3557,13 @@ if (DEBUGGER) {
             if (asArgs[3] !== undefined) nCycles = +asArgs[3];          // warning: decimal instead of hex conversion
             switch (asArgs[2]) {
                 case "int":
-                    this.cpu.aCounts.nCyclesChecksumInterval = nCycles;
+                    this.cpu.counts.nCyclesChecksumInterval = nCycles;
                     break;
                 case "start":
-                    this.cpu.aCounts.nCyclesChecksumStart = nCycles;
+                    this.cpu.counts.nCyclesChecksumStart = nCycles;
                     break;
                 case "stop":
-                    this.cpu.aCounts.nCyclesChecksumStop = nCycles;
+                    this.cpu.counts.nCyclesChecksumStop = nCycles;
                     break;
                 default:
                     this.println("unknown cs option");

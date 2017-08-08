@@ -273,8 +273,7 @@ class CPUPDP11 extends Component {
              * context, a machine without focus is like a day without sunshine, but in reality, focus should only be
              * forced when the user takes some other machine-related action.
              */
-            this.startCPU();
-            return true;
+            return this.startCPU();
         }
         return false;
     }

@@ -999,7 +999,7 @@ class Keyboard extends Component {
     {
         if (sKeys && !this.sInjectBuffer) {
             this.sInjectBuffer = this.parseKeys(sKeys);
-            if (!COMPILED) this.log("injectKeys(" + this.sInjectBuffer.split("\n").join("\\n") + ")");
+            if (!COMPILED) this.log("injectKeys(\"" + this.sInjectBuffer.split("\n").join("\\n") + "\")");
             this.injectKeysFromBuffer(msDelay || this.msInjectDelay);
             return true;
         }

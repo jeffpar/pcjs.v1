@@ -188,7 +188,7 @@ class Computer extends Component {
         this.dbg = /** @type {DebuggerX86} */ (Component.getComponentByType("Debugger", this.id));
 
         /*
-         * Enumerate all Video components for future updateVideo() calls.
+         * Enumerate all the Video components for diagnostic displays, focus changes, and updateStatus() calls.
          */
         this.aVideo = [];
         for (var video = null; (video = this.getMachineComponent("Video", video));) {
@@ -201,8 +201,8 @@ class Computer extends Component {
         this.bus = new Bus({'id': this.idMachine + '.bus', 'busWidth': this.nBusWidth}, this.cpu, this.dbg);
 
         /*
-         * Iterate through all the components and override their notice() and println() methods so
-         * that their output can be rerouted to an Initialization Display or a Control Panel, if any.
+         * Iterate through all the components and override their notice() and println() methods
+         * so that their output can be rerouted to a Diagnostic Display or Control Panel, if any.
          */
         var iComponent, component;
         var aComponents = Component.getComponents(this.id);
@@ -246,6 +246,12 @@ class Computer extends Component {
             component = aComponents[iComponent];
             if (component.initBus) component.initBus(this, this.bus, this.cpu, this.dbg);
         }
+
+        /*
+         * This timer replaces the CPU's old dedicated STATUS_UPDATES_PER_SECOND logic; periodic updateStatus()
+         * calls are now our own responsibility.
+         */
+        this.cpu.addTimer(this.id, function() { cmp.updateStatus(); }, 1000 / Computer.UPDATES_PER_SECOND);
 
         var sStatePath = null;
         var sResume = this.getMachineParm('resume');
@@ -769,7 +775,7 @@ class Computer extends Component {
                          * "ibm5160", enabling us to find objects that match the original machine ID
                          * (eg, "ibm5160.romEGA").
                          *
-                         * See /devices/pcx86/machine/5160/ega/640kb/array/ for examples of this.
+                         * See /devices/pcx86/machine/5160/ega/640kb/array for examples of this.
                          */
                         data = stateComputer.get(component.id.replace(/-[0-9]+\./i, '.'));
                     }
@@ -780,11 +786,8 @@ class Computer extends Component {
                  * Object or a string), but components are supposed to store only Objects, so if a
                  * string comes back, something went wrong.  By explicitly eliminating "string" data,
                  * the Closure Compiler stops complaining that we might be passing strings to our
-                 * powerUp() functions (even though we know we're not).
-                 *
-                 * TODO: Determine if there's some way to coerce the Closure Compiler into treating
-                 * data as Object or null, without having to include this runtime check.  An assert
-                 * would be a good idea, but this is overkill.
+                 * powerUp() functions (even though we know we're not).  We could also add @type
+                 * overrides to the data assignments, but this seems like a useful runtime check.
                  */
                 if (typeof data === "string") data = null;
 
@@ -1138,10 +1141,6 @@ class Computer extends Component {
     reset()
     {
         if (this.bus && this.bus.reset) {
-            /*
-             * TODO: Why does WebStorm think that this.bus.type is undefined? The base class (Component)
-             * constructor defines it.
-             */
             this.printMessage("Resetting " + this.bus.type);
             this.bus.reset();
         }
@@ -1160,7 +1159,7 @@ class Computer extends Component {
      *
      * Notify all (other) components with a start() method that the CPU has started.
      *
-     * Note that we're called by runCPU(), which is why we exclude the CPU component,
+     * Note that we're called by startCPU(), which is why we exclude the CPU component,
      * as well as ourselves.
      *
      * @this {Computer}
@@ -1184,7 +1183,7 @@ class Computer extends Component {
      *
      * Notify all (other) components with a stop() method that the CPU has stopped.
      *
-     * Note that we're called by runCPU(), which is why we exclude the CPU component,
+     * Note that we're called by stopCPU(), which is why we exclude the CPU component,
      * as well as ourselves.
      *
      * @this {Computer}
@@ -1653,23 +1652,9 @@ class Computer extends Component {
          */
         if (this.cpu) this.cpu.updateStatus(fForce);
         if (this.panel) this.panel.updateStatus(fForce);
-    }
-
-    /**
-     * updateVideo(fForce)
-     *
-     * Any high-frequency updates should be performed here.  Avoid DOM updates, since updateVideo() can be called up to
-     * 60 times per second (see VIDEO_UPDATES_PER_SECOND).
-     *
-     * @this {Computer}
-     * @param {boolean} [fForce] (true to force a video update)
-     */
-    updateVideo(fForce)
-    {
         for (var i = 0; i < this.aVideo.length; i++) {
             this.aVideo[i].updateScreen(fForce);
         }
-        if (this.panel) this.panel.updateAnimation();
     }
 
     /**
@@ -1838,6 +1823,8 @@ Computer.RESUME_NONE     =  0;  // default (no resume)
 Computer.RESUME_AUTO     =  1;  // automatically save/restore state
 Computer.RESUME_PROMPT   =  2;  // automatically save but conditionally restore (WARNING: if restore is declined, any state is discarded)
 Computer.RESUME_DELETE   =  3;  // same as RESUME_PROMPT but discards ALL machines states whenever ANY machine restore is declined (undocumented)
+
+Computer.UPDATES_PER_SECOND = 2;
 
 /*
  * Initialize every Computer on the page.

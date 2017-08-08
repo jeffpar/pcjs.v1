@@ -2695,17 +2695,19 @@ class DebuggerX86 extends Debugger {
     }
 
     /**
-     * runCPU(fUpdateFocus)
+     * startCPU(fUpdateFocus, fQuiet)
      *
      * @this {DebuggerX86}
-     * @param {boolean} [fUpdateFocus] is true to update focus
+     * @param {boolean} [fUpdateFocus]
+     * @param {boolean} [fQuiet]
      * @return {boolean} true if run request successful, false if not
      */
-    runCPU(fUpdateFocus)
+    startCPU(fUpdateFocus, fQuiet)
     {
-        if (!this.isCPUAvail()) return false;
-        this.cpu.runCPU(fUpdateFocus);
-        return true;
+        if (this.checkCPU(fQuiet)) {
+            return this.cpu.startCPU(fUpdateFocus, fQuiet);
+        }
+        return false;
     }
 
     /**
@@ -2719,7 +2721,7 @@ class DebuggerX86 extends Debugger {
      */
     stepCPU(nCycles, fRegs, fUpdateCPU)
     {
-        if (!this.isCPUAvail()) return false;
+        if (!this.checkCPU()) return false;
 
         this.nCycles = 0;
         do {
@@ -2731,6 +2733,9 @@ class DebuggerX86 extends Debugger {
                  */
                 if (this.checksEnabled()) this.checkInstruction(this.cpu.regLIP, 0);
             }
+            /*
+             * For our typically tiny bursts (usually single instructions), mimic what runCPU() does.
+             */
             try {
                 var nCyclesStep = this.cpu.stepCPU(nCycles);
                 if (nCyclesStep > 0) {
@@ -2750,7 +2755,7 @@ class DebuggerX86 extends Debugger {
         } while (this.cpu.opFlags & X86.OPFLAG_PREFIXES);
 
         /*
-         * Because we called cpu.stepCPU() and not cpu.runCPU(), we must nudge the cpu's update code,
+         * Because we called cpu.stepCPU() and not cpu.startCPU(), we must nudge the cpu's update code,
          * and then update our own state.  Normally, the only time fUpdateCPU will be false is when doTrace()
          * is calling us in a loop, in which case it will perform its own updateCPU() when it's done.
          */
@@ -2765,10 +2770,11 @@ class DebuggerX86 extends Debugger {
      *
      * @this {DebuggerX86}
      * @param {boolean} [fComplete]
+     * @return {boolean}
      */
     stopCPU(fComplete)
     {
-        if (this.cpu) this.cpu.stopCPU(fComplete);
+        return this.cpu && this.cpu.stopCPU(fComplete) || false;
     }
 
     /**
@@ -2795,23 +2801,20 @@ class DebuggerX86 extends Debugger {
     }
 
     /**
-     * isCPUAvail()
+     * checkCPU(fQuiet)
      *
      * Make sure the CPU is ready (finished initializing), not busy (already running), and not in an error state.
      *
      * @this {DebuggerX86}
+     * @param {boolean} [fQuiet]
      * @return {boolean}
      */
-    isCPUAvail()
+    checkCPU(fQuiet)
     {
-        if (!this.cpu)
+        if (!this.cpu || !this.cpu.isReady() || !this.cpu.isPowered() || this.cpu.isRunning()) {
+            if (!fQuiet) this.println("cpu busy or unavailable, command ignored");
             return false;
-        if (!this.cpu.isReady())
-            return false;
-        if (!this.cpu.isPowered())
-            return false;
-        if (this.cpu.isBusy())
-            return false;
+        }
         return !this.cpu.isError();
     }
 
@@ -2871,14 +2874,8 @@ class DebuggerX86 extends Debugger {
         this.sMessagePrev = null;
         this.nCycles = 0;
         this.dbgAddrNextCode = this.newAddr(this.cpu.getIP(), this.cpu.getCS());
-        /*
-         * fRunning is set by start() and cleared by stop().  In addition, we clear
-         * it here, so that if the CPU is reset while running, we can prevent stop()
-         * from unnecessarily dumping the CPU state.
-         */
-        this.flags.running = false;
         this.clearTempBreakpoint();
-        if (!fQuiet) this.updateStatus();
+        if (!fQuiet && !this.flags.running) this.updateStatus();
     }
 
     /**
@@ -3790,7 +3787,7 @@ class DebuggerX86 extends Debugger {
                 sLine += (nSequence != null? '=' + nSequence.toString() : "");
             } else {
                 var nCycles = this.cpu.getCycles();
-                sLine += "cycles=" + nCycles.toString() + " cs=" + Str.toHex(this.cpu.aCounts.nChecksum);
+                sLine += "cycles=" + nCycles.toString() + " cs=" + Str.toHex(this.cpu.counts.nChecksum);
             }
         }
 
@@ -5088,15 +5085,10 @@ class DebuggerX86 extends Debugger {
      */
     doHalt(fQuiet)
     {
-        var sMsg;
-        if (this.flags.running) {
-            sMsg = "halting";
-            this.stopCPU();
-        } else {
+        if (!this.stopCPU()) {
             if (this.isBusy(true)) return;
-            sMsg = "already halted";
+            if (!fQuiet) this.println("already halted");
         }
-        if (!fQuiet) this.println(sMsg);
     }
 
     /**
@@ -5135,11 +5127,8 @@ class DebuggerX86 extends Debugger {
     doInfo(asArgs)
     {
         if (DEBUG) {
-            this.println("msPerYield: " + this.cpu.aCounts.msPerYield);
-            this.println("nCyclesPerBurst: " + this.cpu.aCounts.nCyclesPerBurst);
-            this.println("nCyclesPerYield: " + this.cpu.aCounts.nCyclesPerYield);
-            this.println("nCyclesPerVideoUpdate: " + this.cpu.aCounts.nCyclesPerVideoUpdate);
-            this.println("nCyclesPerStatusUpdate: " + this.cpu.aCounts.nCyclesPerStatusUpdate);
+            this.println("msPerYield: " + this.cpu.counts.msPerYield);
+            this.println("nCyclesPerYield: " + this.cpu.counts.nCyclesPerYield);
             return true;
         }
         return false;
@@ -5548,13 +5537,13 @@ class DebuggerX86 extends Debugger {
             if (asArgs[3] !== undefined) nCycles = +asArgs[3];          // warning: decimal instead of hex conversion
             switch (asArgs[2]) {
                 case "int":
-                    this.cpu.aCounts.nCyclesChecksumInterval = nCycles;
+                    this.cpu.counts.nCyclesChecksumInterval = nCycles;
                     break;
                 case "start":
-                    this.cpu.aCounts.nCyclesChecksumStart = nCycles;
+                    this.cpu.counts.nCyclesChecksumStart = nCycles;
                     break;
                 case "stop":
-                    this.cpu.aCounts.nCyclesChecksumStop = nCycles;
+                    this.cpu.counts.nCyclesChecksumStop = nCycles;
                     break;
                 default:
                     this.println("unknown cs option");
@@ -5928,9 +5917,7 @@ class DebuggerX86 extends Debugger {
             this.parseAddrOptions(dbgAddr, sOptions);
             this.setTempBreakpoint(dbgAddr);
         }
-        if (!this.runCPU(true)) {
-            if (!fQuiet) this.println("cpu busy or unavailable, run command ignored");
-        }
+        this.startCPU(true, fQuiet);
     }
 
     /**
@@ -6052,7 +6039,7 @@ class DebuggerX86 extends Debugger {
 
             if (this.nStep) {
                 this.setTempBreakpoint(dbgAddr);
-                if (!this.runCPU()) {
+                if (!this.startCPU()) {
                     if (this.cmp) this.cmp.updateFocus();
                     this.nStep = 0;
                 }

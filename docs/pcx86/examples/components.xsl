@@ -14,12 +14,12 @@
 	<xsl:variable name="CSSCLASS">pcjs</xsl:variable>
 	<xsl:variable name="APPCLASS">pcx86</xsl:variable>
 	<xsl:variable name="APPNAME">PCx86</xsl:variable>
-	<xsl:variable name="APPVERSION">1.36.0</xsl:variable>
+	<xsl:variable name="APPVERSION">1.36.1</xsl:variable>
 	<xsl:variable name="SITEHOST">www.pcjs.org</xsl:variable>
 	<xsl:variable name="BGNDCOLOR">#FAEBD7</xsl:variable>
 
 	<xsl:template name="componentStyles">
-		<link rel="stylesheet" type="text/css" href="/versions/pcx86/1.36.0/components.css"/>
+		<link rel="stylesheet" type="text/css" href="/versions/pcx86/1.36.1/components.css"/>
 	</xsl:template>
 
 	<xsl:template name="componentScripts">
@@ -931,7 +931,7 @@
 		<xsl:variable name="scaleMouse">
 			<xsl:choose>
 				<xsl:when test="@scaleMouse"><xsl:value-of select="@scaleMouse"/></xsl:when>
-				<xsl:otherwise>1</xsl:otherwise>
+				<xsl:otherwise>0.5</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
 		<xsl:call-template name="component">

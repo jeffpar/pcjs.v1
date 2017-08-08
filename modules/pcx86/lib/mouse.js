@@ -82,7 +82,6 @@ class Mouse extends Component {
         this.scale = parmsMouse['scaleMouse'];
         this.setActive(false);
         this.fCaptured = this.fLocked = false;
-
         /*
          * Initially, no video devices, and therefore no input devices, are attached.  initBus() will update aVideo,
          * and powerUp() will update aInput.
@@ -109,8 +108,7 @@ class Mouse extends Component {
         this.dbg = dbg;
         this.scale = cmp.getMachineParm('scaleMouse') || this.scale;
         /*
-         * Attach the Video component to the CPU, so that the CPU can periodically update
-         * the video display via updateVideo(), as cycles permit.
+         * Enumerate all the Video components that we may need to interact with.
          */
         for (var video = null; (video = cmp.getMachineComponent("Video", video));) {
             this.aVideo.push(video);
@@ -419,7 +417,7 @@ class Mouse extends Component {
      * processMouseEvent(event, fDown)
      *
      * @this {Mouse}
-     * @param {Object} event object from a 'mousemove', 'mousedown' or 'mouseup' event (specifically, a MouseEvent object)
+     * @param {Object} event object from a 'mousemove', 'mousedown' or 'mouseup' event (ie, a MouseEvent object)
      * @param {boolean} [fDown] (undefined if neither a down nor up event)
      */
     processMouseEvent(event, fDown)

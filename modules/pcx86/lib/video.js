@@ -375,8 +375,8 @@ class Card {
 
             var monitorSpecs = Video.monitorSpecs[nMonitorType] || Video.monitorSpecs[ChipSet.MONITOR.MONO];
 
-            var nCyclesPerSecond = video.cpu.getCyclesPerSecond();      // eg, 4772727
-            this.nCyclesHorzPeriod = (nCyclesPerSecond / monitorSpecs.nHorzPeriodsPerSec)|0;
+            var nCyclesDefault = video.cpu.getBaseCyclesPerSecond();    // eg, 4772727
+            this.nCyclesHorzPeriod = (nCyclesDefault / monitorSpecs.nHorzPeriodsPerSec)|0;
             this.nCyclesHorzActive = (this.nCyclesHorzPeriod * monitorSpecs.percentHorzActive / 100)|0;
             this.nCyclesVertPeriod = (this.nCyclesHorzPeriod * monitorSpecs.nHorzPeriodsPerFrame)|0;
             this.nCyclesVertActive = (this.nCyclesVertPeriod * monitorSpecs.percentVertActive / 100)|0;
@@ -2177,7 +2177,7 @@ class Video extends Component {
      * the port level, and whenever reset() is called.  setMode() also invokes updateScreen(true),
      * which forces reallocation of our internal buffer (aCellCache) that mirrors the video buffer.
      *
-     * The CPU periodically calls updateVideo(), which in turn calls updateScreen() for each Video
+     * Our initBus() handler defines a timer that periodically calls updateScreen() for each Video
      * instance.  These updates should occur at a rate of 60 times/second, to update any blinking
      * elements (the cursor and any cells with the blink attribute), to compare/update the contents
      * of our internal buffer with the video buffer, and to render any differences between the two
@@ -2206,9 +2206,8 @@ class Video extends Component {
     {
         super("Video", parmsVideo, Messages.VIDEO);
 
-        var video = this;
+        var video = this, sProp, sEvent;
         this.fGecko = Web.isUserAgent("Gecko/");
-        var i, sEvent, asWebPrefixes = ['', 'moz', 'ms', 'webkit'];
 
         /*
          * This records the model specified (eg, "mda", "cga", "ega", "vga" or "" if none specified);
@@ -2285,18 +2284,8 @@ class Video extends Component {
         var sSmoothing = Web.getURLParm('smoothing');
         if (sSmoothing) fSmoothing = (sSmoothing == "true");
         if (fSmoothing != null) {
-            for (i = 0; i < asWebPrefixes.length; i++) {
-                sEvent = asWebPrefixes[i];
-                if (!sEvent) {
-                    sEvent = 'imageSmoothingEnabled';
-                } else {
-                    sEvent += 'ImageSmoothingEnabled';
-                }
-                if (this.contextScreen[sEvent] !== undefined) {
-                    this.contextScreen[sEvent] = fSmoothing;
-                    break;
-                }
-            }
+            sProp = Web.findProperty(this.contextScreen, 'imageSmoothingEnabled');
+            if (sProp) this.contextScreen[sProp] = fSmoothing;
         }
 
         /*
@@ -2350,42 +2339,33 @@ class Video extends Component {
 
         /*
          * Here's the gross code to handle full-screen support across all supported browsers.  The lack of standards
-         * is exasperating; browsers can't agree on 'full' or 'Full, 'request' or 'Request', 'screen' or 'Screen', and
-         * while some browsers honor other browser prefixes, most browsers don't.
+         * is exasperating; browsers can't agree on 'Fullscreen' (most common) or 'FullScreen' (least common), and while
+         * some browsers honor other browser prefixes, most don't.  Event handlers tend to be more consistent (ie, all
+         * lower-case).
          */
         this.container = container;
         if (this.container) {
-            this.container.doFullScreen = container['requestFullscreen'] || container['msRequestFullscreen'] || container['mozRequestFullScreen'] || container['webkitRequestFullscreen'];
-            if (this.container.doFullScreen) {
-                for (i = 0; i < asWebPrefixes.length; i++) {
-                    sEvent = asWebPrefixes[i] + 'fullscreenchange';
-                    if ('on' + sEvent in document) {
-                        var onFullScreenChange = function() {
-                            var fFullScreen = (document['fullscreenElement'] || document['msFullscreenElement'] || document['mozFullScreenElement'] || document['webkitFullscreenElement']);
-                            video.notifyFullScreen(!!fFullScreen);
-                        };
-                        document.addEventListener(sEvent, onFullScreenChange, false);
-                        break;
-                    }
+            sProp = Web.findProperty(container, 'requestFullscreen') || Web.findProperty(container, 'requestFullScreen');
+            if (sProp) {
+                this.container.doFullScreen = container[sProp];
+                sEvent = Web.findProperty(document, 'on', 'fullscreenchange');
+                if (sEvent) {
+                    var sFullScreen = Web.findProperty(document, 'fullscreenElement') || Web.findProperty(document, 'fullScreenElement');
+                    document.addEventListener(sEvent, function onFullScreenChange() {
+                        video.notifyFullScreen(!!sFullScreen);
+                    }, false);
                 }
-                for (i = 0; i < asWebPrefixes.length; i++) {
-                    sEvent = asWebPrefixes[i] + 'fullscreenerror';
-                    if ('on' + sEvent in document) {
-                        var onFullScreenError = function() {
-                            video.notifyFullScreen(null);
-                        };
-                        document.addEventListener(sEvent, onFullScreenError, false);
-                        break;
-                    }
+                sEvent = Web.findProperty(document, 'on', 'fullscreenerror');
+                if (sEvent) {
+                    document.addEventListener(sEvent, function onFullScreenError() {
+                        video.notifyFullScreen(null);
+                    }, false);
                 }
             }
         }
 
         /*
          * More gross code to handle pointer-locking support across all supported browsers.
-         *
-         * TODO: Consider "upgrading" this code to use the same asWebPrefixes array as above, especially once Microsoft
-         * finally releases a browser that supports pointer-locking (post-Windows 10?)
          */
         if (this.inputScreen) {
             this.inputScreen.onfocus = function onFocusScreen() {
@@ -2394,36 +2374,19 @@ class Video extends Component {
             this.inputScreen.onblur = function onBlurScreen() {
                 return video.onFocusChange(false);
             };
-            this.inputScreen.lockPointer = this.inputScreen['requestPointerLock'] || this.inputScreen['mozRequestPointerLock'] || this.inputScreen['webkitRequestPointerLock'];
-            this.inputScreen.unlockPointer = this.inputScreen['exitPointerLock'] || this.inputScreen['mozExitPointerLock'] || this.inputScreen['webkitExitPointerLock'];
+            this.inputScreen.lockPointer = (sProp = Web.findProperty(this.inputScreen, 'requestPointerLock')) && this.inputScreen[sProp];
+            this.inputScreen.unlockPointer = (sProp = Web.findProperty(this.inputScreen, 'exitPointerLock')) && this.inputScreen[sProp];
             if (this.inputScreen.lockPointer) {
-                var onPointerLockChange = function() {
-                    var fLocked = (
-                        document['pointerLockElement'] === video.inputScreen ||
-                        document['mozPointerLockElement'] === video.inputScreen ||
-                        document['webkitPointerLockElement'] === video.inputScreen);
-                    video.notifyPointerLocked(fLocked);
-                };
-                if ('onpointerlockchange' in document) {
-                    document.addEventListener('pointerlockchange', onPointerLockChange, false);
-                } else if ('onmozpointerlockchange' in document) {
-                    document.addEventListener('mozpointerlockchange', onPointerLockChange, false);
-                } else if ('onwebkitpointerlockchange' in document) {
-                    document.addEventListener('webkitpointerlockchange', onPointerLockChange, false);
+                sEvent = Web.findProperty(document, 'on', 'pointerlockchange');
+                if (sEvent) {
+                    var sPointerLock = Web.findProperty(document, 'pointerLockElement');
+                    document.addEventListener(sEvent, function onPointerLockChange() {
+                        var fLocked = !!(sPointerLock && document[sPointerLock] === video.inputScreen);
+                        video.notifyPointerLocked(fLocked);
+                    }, false);
                 }
             }
         }
-
-        /*
-         * As far as overall image quality of scaled fonts, these options don't seem necessary for Safari (and
-         * don't have any discernible effect anyway). Turning 'webkitImageSmoothingEnabled' off DOES have an effect
-         * on Chrome, but it's not really a positive effect overall, so I'm leaving these off for now.
-         *
-         *  if (this.contextScreen) {
-         *      this.contextScreen['mozImageSmoothingEnabled'] = false;
-         *      this.contextScreen['webkitImageSmoothingEnabled'] = false;
-         *  }
-         */
 
         this.sFileURL = parmsVideo['fontROM'];
 
@@ -2543,6 +2506,10 @@ class Video extends Component {
                 video.println(sProgress, Component.TYPE.PROGRESS);
             });
         }
+
+        this.cpu.addTimer(this.id, function() {
+            video.updateScreen();
+        }, 1000 / Video.UPDATES_PER_SECOND);
     }
 
     /**
@@ -2688,7 +2655,10 @@ class Video extends Component {
                     this.container.style.height = sHeight;
                 } else {
                     /*
-                     * Sadly, the above code doesn't work for Firefox, because as http://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Using_full_screen_mode
+                     * Sadly, the above code doesn't work for Firefox, because as:
+                     *
+                     *      http://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Using_full_screen_mode
+                     *
                      * explains:
                      *
                      *      'It's worth noting a key difference here between the Gecko and WebKit implementations at this time:
@@ -3898,13 +3868,6 @@ class Video extends Component {
         canvasFont.height = (font.cyCell << 4);
         var contextFont = canvasFont.getContext("2d");
 
-        /*
-         * See notes above regarding ImageSmoothingEnabled....
-         *
-         contextFont['mozImageSmoothingEnabled'] = false;
-         contextFont['webkitImageSmoothingEnabled'] = false;
-         */
-
         var iChar, x, y;
         var cyLimit = (cyChar < 8 || !offSplit)? cyChar : 8;
         var imageChar = contextFont.createImageData(font.cxCell, font.cyCell);
@@ -3999,7 +3962,7 @@ class Video extends Component {
                 this.cBlinks = 0;
                 /*
                  * At this point, we can either fire up our own timer (doBlink), or rely on updateScreen()
-                 * being called by the CPU at regular bursts (eg, CPU.VIDEO_UPDATES_PER_SECOND = 60) and advance
+                 * being called by the CPU at regular bursts (eg, Video.UPDATES_PER_SECOND = 60) and advance
                  * cBlinks at the start of updateScreen() accordingly.
                  *
                  * doBlink() wants to increment cBlinks every 266ms.  On the other hand, if updateScreen() is being
@@ -5010,7 +4973,7 @@ class Video extends Component {
         }
         else {
             /*
-             * This should never happen, but since updateScreen() is also called by CPU.updateVideo(),
+             * This should never happen, but since updateScreen() is also called by Computer.updateStatus(),
              * better safe than sorry.
              */
             if (this.aCellCache === undefined) return;
@@ -5018,7 +4981,7 @@ class Video extends Component {
 
         /*
          * If cBlinks is "enabled" (ie, >= 0), then advance it once every 16 updateScreen() calls
-         * (assuming an updateScreen() frequency of 60 per second; see CPU.VIDEO_UPDATES_PER_SECOND).
+         * (assuming an updateScreen() frequency of 60 per second; see Video.UPDATES_PER_SECOND).
          *
          * We assume that the CPU is calling us whenever fForce is undefined.
          */
@@ -7014,6 +6977,8 @@ Video.MODE = {
     UNKNOWN:            0xFF
 };
 
+Video.UPDATES_PER_SECOND = 60;
+
 /*
  * Supported Fonts
  *
@@ -7114,8 +7079,8 @@ Video.MODEL = {
  *
  * From these monitor specs, we calculate the following values for a given Card:
  *
- *      nCyclesPerSecond = cpu.getCyclesPerSecond();      // eg, 4772727
- *      nCyclesHorzPeriod = (nCyclesPerSecond / monitorSpecs.nHorzPeriodsPerSec) | 0;
+ *      nCyclesDefault = cpu.getBaseCyclesPerSecond();          // eg, 4772727
+ *      nCyclesHorzPeriod = (nCyclesDefault / monitorSpecs.nHorzPeriodsPerSec) | 0;
  *      nCyclesHorzActive = (nCyclesHorzPeriod * monitorSpecs.percentHorzActive / 100) | 0;
  *      nCyclesVertPeriod = nCyclesHorzPeriod * monitorSpecs.nHorzPeriodsPerFrame;
  *      nCyclesVertActive = (nCyclesVertPeriod * monitorSpecs.percentVertActive / 100) | 0;

@@ -86,9 +86,9 @@ class X86CPU extends CPU {
      */
     constructor(parmsCPU)
     {
+        var nCyclesDefault;
         var model = +parmsCPU['model'] || X86.MODEL_8088;
 
-        var nCyclesDefault = 0;
         switch(model) {
         case X86.MODEL_8088:
         default:
@@ -885,7 +885,6 @@ class X86CPU extends CPU {
      */
     reset()
     {
-        if (this.flags.running) this.stopCPU();
         this.resetRegs();
         this.resetCycles();
         this.clearError();      // clear any fatal error/exception that setError() may have flagged
@@ -1847,7 +1846,7 @@ class X86CPU extends CPU {
         }
         state.set(1, a);
         state.set(2, [this.segData.sName, this.segStack.sName, this.opFlags, this.opPrefixes, this.intFlags, this.regEA, this.regEAWrite]);
-        state.set(3, [0, this.nTotalCycles, this.getSpeed(), fRunning]);
+        state.set(3, [0, this.nTotalCycles, this.getSpeed(), fRunning, this.saveTimers()]);
         state.set(4, this.bus.saveMemory(this.isPagingEnabled()));
         return state.data();
     }
@@ -1914,16 +1913,18 @@ class X86CPU extends CPU {
         this.opFlags = a[2];
         this.opPrefixes = a[3];
         this.intFlags = a[4];
-        this.regEA = a[5];
-        this.regEAWrite = a[6];     // save/restore of last EA calculation(s) isn't strictly necessary, but they may be of some interest to, say, the Debugger
+        this.regEA = a[5];          // save/restore of last EA calculation(s) isn't strictly necessary,
+        this.regEAWrite = a[6];     // but they may be of some interest to, say, the Debugger
 
-        a = data[3];                // a[0] was previously nBurstDivisor (no longer used)
-        this.nTotalCycles = a[1];
+        a = data[3];
+        this.nTotalCycles = a[1];   // a[0] was previously nBurstDivisor (no longer used)
         this.setSpeed(a[2]);        // old states didn't contain a value from getSpeed(), but setSpeed() checks
         if (a[3] != null) {         // less old states didn't preserve the original running state, so we must check it
             this.flags.autoStart = a[3];
         }
-
+        if (a[4] != null) {
+            this.restoreTimers(a[4]);
+        }
         return fRestored;
     }
 
@@ -4201,11 +4202,8 @@ class X86CPU extends CPU {
     /**
      * updateStatus(fForce)
      *
-     * This provides periodic Control Panel updates (eg, a few times per second; see STATUS_UPDATES_PER_SECOND).
+     * This provides periodic Control Panel updates (eg, a few times per second; see Computer.UPDATES_PER_SECOND).
      * this is where we take care of any DOM updates (eg, register values) while the CPU is running.
-     *
-     * Any high-frequency updates should be performed in updateVideo(), which should avoid DOM updates, since updateVideo()
-     * can be called up to 60 times per second (see VIDEO_UPDATES_PER_SECOND).
      *
      * @this {X86CPU}
      * @param {boolean} [fForce] (true will display registers even if the CPU is running and "live" registers are not enabled)

@@ -49,7 +49,7 @@ concurrent execution of multiple applications.
 
 The machine below is configured to automatically start TopView 1.01 on top of PC-DOS 2.00.  No mouse driver is loaded,
 so you must use TopView's "Keyboard Mouse" support: arrow keys move the cursor and **Home**, **PgUp**, and **Alt**
-act as mouse buttons.
+act as mouse buttons.  The machine is also available with the [PCjs Debugger](debugger/).
 
 {% include machine.html id="ibm5160" %}
 

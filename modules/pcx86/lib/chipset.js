@@ -65,8 +65,8 @@ class ChipSet extends Component {
      * As support for IBM-compatible machines grows, we should refrain from adding new model strings (eg, "att6300")
      * and corresponding model checks, and instead add more ChipSet configuration properties, such as:
      *
-     *      pit1port:       0x48 to enable PIT1 at base port 0x48 (as used by COMPAQ_DESKPRO386); default to undefined
-     *      kbdchip:        8041 to select 8041 emulation (eg, for ATT_6300); default to 8255 for MODEL_5150/MODEL_5160, 8042 for MODEL_5170
+     *      portPIT1:       0x48 to enable PIT1 at base port 0x48 (as used by COMPAQ_DESKPRO386); default to undefined
+     *      chipKBD:        8041 to select 8041 emulation (eg, for ATT_6300); default to 8255 for MODEL_5150/MODEL_5160, 8042 for MODEL_5170
      *
      * @this {ChipSet}
      * @param {Object} parmsChipSet
@@ -180,7 +180,73 @@ class ChipSet extends Component {
          * HDC calls setCMOSDriveType() or RAM calls addCMOSMemory()), the CMOS will be ready to take their calls.
          */
         this.reset(true);
+    }
 
+    /**
+     * initBus(cmp, bus, cpu, dbg)
+     *
+     * @this {ChipSet}
+     * @param {Computer} cmp
+     * @param {Bus} bus
+     * @param {X86CPU} cpu
+     * @param {DebuggerX86} dbg
+     */
+    initBus(cmp, bus, cpu, dbg)
+    {
+        this.bus = bus;
+        this.cpu = cpu;
+        this.dbg = dbg;
+        this.cmp = cmp;
+
+        this.fpu = cmp.getMachineComponent("FPU");
+        this.setDIPSwitches(ChipSet.SWITCH_TYPE.FPU, this.fpu?1:0, true);
+
+        this.kbd = cmp.getMachineComponent("Keyboard");
+
+        /*
+         * This divisor is invariant, so we calculate it as soon as we're able to query the CPU's base speed.
+         */
+        this.nTicksDivisor = (cpu.getBaseCyclesPerSecond() / ChipSet.TIMER_TICKS_PER_SEC);
+
+        bus.addPortInputTable(this, ChipSet.aPortInput);
+        bus.addPortOutputTable(this, ChipSet.aPortOutput);
+
+        if (this.model < ChipSet.MODEL_5170) {
+            if (this.model != ChipSet.MODEL_ATT_6300) {
+                bus.addPortInputTable(this, ChipSet.aPortInput5150);
+                bus.addPortOutputTable(this, ChipSet.aPortOutput5150);
+            } else {
+                bus.addPortInputTable(this, ChipSet.aPortInput6300);
+                bus.addPortOutputTable(this, ChipSet.aPortOutput6300);
+            }
+        } else {
+            bus.addPortInputTable(this, ChipSet.aPortInput5170);
+            bus.addPortOutputTable(this, ChipSet.aPortOutput5170);
+            if (DESKPRO386 && (this.model|0) == ChipSet.MODEL_COMPAQ_DESKPRO386) {
+                bus.addPortInputTable(this, ChipSet.aPortInputDeskPro386);
+                bus.addPortOutputTable(this, ChipSet.aPortOutputDeskPro386);
+            }
+        }
+        if (DEBUGGER) {
+            if (dbg) {
+                var chipset = this;
+                /*
+                 * TODO: Add more "dumpers" (eg, for DMA, RTC, 8042, etc)
+                 */
+                dbg.messageDump(Messages.PIC, function onDumpPIC() {
+                    chipset.dumpPIC();
+                });
+                dbg.messageDump(Messages.TIMER, function onDumpTimer(asArgs) {
+                    chipset.dumpTimer(asArgs);
+                });
+                if (this.model >= ChipSet.MODEL_5170) {
+                    dbg.messageDump(Messages.CMOS, function onDumpCMOS() {
+                        chipset.dumpCMOS();
+                    });
+                }
+            }
+            cpu.addIntNotify(Interrupts.RTC, this.intBIOSRTC.bind(this));
+        }
         this.setReady();
     }
 
@@ -219,70 +285,6 @@ class ChipSet extends Component {
             break;
         }
         return false;
-    }
-
-    /**
-     * initBus(cmp, bus, cpu, dbg)
-     *
-     * @this {ChipSet}
-     * @param {Computer} cmp
-     * @param {Bus} bus
-     * @param {X86CPU} cpu
-     * @param {DebuggerX86} dbg
-     */
-    initBus(cmp, bus, cpu, dbg)
-    {
-        this.bus = bus;
-        this.cpu = cpu;
-        this.dbg = dbg;
-        this.cmp = cmp;
-
-        this.fpu = cmp.getMachineComponent("FPU");
-        this.setDIPSwitches(ChipSet.SWITCH_TYPE.FPU, this.fpu?1:0, true);
-
-        this.kbd = cmp.getMachineComponent("Keyboard");
-
-        /*
-         * This divisor is invariant, so we calculate it as soon as we're able to query the CPU's base speed.
-         */
-        this.nTicksDivisor = (cpu.getCyclesPerSecond() / ChipSet.TIMER_TICKS_PER_SEC);
-
-        bus.addPortInputTable(this, ChipSet.aPortInput);
-        bus.addPortOutputTable(this, ChipSet.aPortOutput);
-        if (this.model < ChipSet.MODEL_5170) {
-            if (this.model != ChipSet.MODEL_ATT_6300) {
-                bus.addPortInputTable(this, ChipSet.aPortInput5150);
-                bus.addPortOutputTable(this, ChipSet.aPortOutput5150);
-            } else {
-                bus.addPortInputTable(this, ChipSet.aPortInput6300);
-                bus.addPortOutputTable(this, ChipSet.aPortOutput6300);
-            }
-        } else {
-            bus.addPortInputTable(this, ChipSet.aPortInput5170);
-            bus.addPortOutputTable(this, ChipSet.aPortOutput5170);
-            if (DESKPRO386 && (this.model|0) == ChipSet.MODEL_COMPAQ_DESKPRO386) {
-                bus.addPortInputTable(this, ChipSet.aPortInputDeskPro386);
-                bus.addPortOutputTable(this, ChipSet.aPortOutputDeskPro386);
-            }
-        }
-        if (DEBUGGER) {
-            if (dbg) {
-                var chipset = this;
-                /*
-                 * TODO: Add more "dumpers" (eg, for DMA, RTC, 8042, etc)
-                 */
-                dbg.messageDump(Messages.PIC, function onDumpPIC() {
-                    chipset.dumpPIC();
-                });
-                dbg.messageDump(Messages.TIMER, function onDumpTimer(asArgs) {
-                    chipset.dumpTimer(asArgs);
-                });
-                dbg.messageDump(Messages.CMOS, function onDumpCMOS() {
-                    chipset.dumpCMOS();
-                });
-            }
-            cpu.addIntNotify(Interrupts.RTC, this.intBIOSRTC.bind(this));
-        }
     }
 
     /**
@@ -634,7 +636,7 @@ class ChipSet extends Component {
     {
         this.nRTCCyclesLastUpdate = this.cpu.getCycles(this.fScaleTimers);
         this.nRTCPeriodsPerSecond = 1024;
-        this.nRTCCyclesPerPeriod = Math.floor(this.cpu.getCyclesPerSecond() / this.nRTCPeriodsPerSecond);
+        this.nRTCCyclesPerPeriod = Math.floor(this.cpu.getBaseCyclesPerSecond() / this.nRTCPeriodsPerSecond);
         this.setRTCCycleLimit();
     }
 
@@ -672,16 +674,15 @@ class ChipSet extends Component {
     }
 
     /**
-     * setRTCCycleLimit(nCycles)
+     * setRTCCycleLimit()
      *
      * This should be called when PIE becomes set in STATUSB (and whenever PF is cleared in STATUSC while PIE is still set).
      *
      * @this {ChipSet}
-     * @param {number} [nCycles]
      */
-    setRTCCycleLimit(nCycles)
+    setRTCCycleLimit()
     {
-        if (nCycles === undefined) nCycles = this.nRTCCyclesPerPeriod;
+        var nCycles = this.nRTCCyclesPerPeriod;
         this.nRTCCyclesNextUpdate = this.cpu.getCycles(this.fScaleTimers) + nCycles;
         if (this.abCMOSData[ChipSet.CMOS.ADDR.STATUSB] & ChipSet.CMOS.STATUSB.PIE) {
             this.cpu.setBurstCycles(nCycles);
@@ -695,7 +696,7 @@ class ChipSet extends Component {
      */
     updateRTCTime()
     {
-        var nCyclesPerSecond = this.cpu.getCyclesPerSecond();
+        var nCyclesPerSecond = this.cpu.getBaseCyclesPerSecond();
         var nCyclesUpdate = this.cpu.getCycles(this.fScaleTimers);
 
         /*
@@ -1063,7 +1064,7 @@ class ChipSet extends Component {
     /**
      * start()
      *
-     * Notification from the CPU that it's starting.
+     * Notification from the Computer that it's starting.
      *
      * @this {ChipSet}
      */
@@ -1078,7 +1079,7 @@ class ChipSet extends Component {
     /**
      * stop()
      *
-     * Notification from the CPU that it's stopping.
+     * Notification from the Computer that it's stopping.
      *
      * @this {ChipSet}
      */
@@ -3394,11 +3395,11 @@ class ChipSet extends Component {
              * break any code (eg, the ROM BIOS diagnostics) that assumes that the timers are ticking once every 4 cycles
              * (or more like every 5 cycles on a 6Mhz 80286).
              *
-             * So, when using a machine with the ChipSet "scaletimers" property set, make sure you reset the machine's
+             * So, when using a machine with the ChipSet "scaleTimers" property set, make sure you reset the machine's
              * speed prior to rebooting, otherwise you're likely to see ROM BIOS errors.  Ditto for any application code
              * that makes similar assumptions about the relationship between CPU and timer speeds.
              *
-             * In general, you're probably better off NOT using the "scaletimers" property, and simply allowing the timers
+             * In general, you're probably better off NOT using the "scaleTimers" property, and simply allowing the timers
              * to tick faster as you increase CPU speed (which is why fScaleTimers defaults to false).
              */
             var nCycles = this.cpu.getCycles(this.fScaleTimers);
@@ -3412,7 +3413,7 @@ class ChipSet extends Component {
              * For the original MODEL_5170, the number of cycles per tick is approximately 6,000,000 / 1,193,181,
              * or 5.028575, so we can no longer always divide cycles by 4 with a simple right-shift by 2.  The proper
              * divisor (eg, 4 for MODEL_5150 and MODEL_5160, 5 for MODEL_5170, etc) is nTicksDivisor, which initBus()
-             * calculates using the base CPU speed returned by cpu.getCyclesPerSecond().
+             * calculates using the base CPU speed returned by cpu.getBaseCyclesPerSecond().
              */
             var ticksElapsed = ((nCycles - timer.nCyclesStart) / this.nTicksDivisor) | 0;
 

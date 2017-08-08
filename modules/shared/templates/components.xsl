@@ -933,7 +933,7 @@
 		<xsl:variable name="scaleMouse">
 			<xsl:choose>
 				<xsl:when test="@scaleMouse"><xsl:value-of select="@scaleMouse"/></xsl:when>
-				<xsl:otherwise>1</xsl:otherwise>
+				<xsl:otherwise>0.5</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
 		<xsl:call-template name="component">
