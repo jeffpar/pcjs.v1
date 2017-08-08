@@ -885,7 +885,6 @@ class X86CPU extends CPU {
      */
     reset()
     {
-        if (this.flags.running) this.stopCPU();
         this.resetRegs();
         this.resetCycles();
         this.clearError();      // clear any fatal error/exception that setError() may have flagged

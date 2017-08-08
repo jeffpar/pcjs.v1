@@ -2874,14 +2874,8 @@ class DebuggerX86 extends Debugger {
         this.sMessagePrev = null;
         this.nCycles = 0;
         this.dbgAddrNextCode = this.newAddr(this.cpu.getIP(), this.cpu.getCS());
-        /*
-         * fRunning is set by start() and cleared by stop().  In addition, we clear
-         * it here, so that if the CPU is reset while running, we can prevent stop()
-         * from unnecessarily dumping the CPU state.
-         */
-        this.flags.running = false;
         this.clearTempBreakpoint();
-        if (!fQuiet) this.updateStatus();
+        if (!fQuiet && !this.flags.running) this.updateStatus();
     }
 
     /**

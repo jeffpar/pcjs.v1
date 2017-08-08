@@ -1141,10 +1141,6 @@ class Computer extends Component {
     reset()
     {
         if (this.bus && this.bus.reset) {
-            /*
-             * TODO: Why does WebStorm think that this.bus.type is undefined? The base class (Component)
-             * constructor defines it.
-             */
             this.printMessage("Resetting " + this.bus.type);
             this.bus.reset();
         }
