@@ -12318,7 +12318,9 @@ class CPU extends Component {
     calcCycles()
     {
         var nMultiplier = this.counts.mhzCurrent / this.counts.mhzBase;
-        if (!nMultiplier || nMultiplier > this.counts.nTargetMultiplier) nMultiplier = this.counts.nTargetMultiplier;
+        if (!nMultiplier || nMultiplier > this.counts.nTargetMultiplier) {
+            nMultiplier = this.counts.nTargetMultiplier;
+        }
         this.counts.msPerYield = Math.round(1000 / CPU.YIELDS_PER_SECOND);
         this.counts.nCyclesPerYield = Math.floor(this.counts.nBaseCyclesPerSecond / CPU.YIELDS_PER_SECOND * nMultiplier);
         this.counts.nCurrentMultiplier = nMultiplier;
@@ -46055,6 +46057,8 @@ class Keyboard extends Component {
 
         this.sInjectBuffer = "";        // actual key events should stop any injection currently in progress
 
+        this.cmp.notifyKbdEvent(event);
+
         if (this.fAllDown) {
             var simCode = this.checkActiveKey();
             if (simCode && this.isAlphaKey(simCode) && this.isAlphaKey(keyCode) && simCode != keyCode) {
@@ -47011,6 +47015,7 @@ Web.onInit(Keyboard.init);
 
 /*
  * MDA/CGA Support
+ * ---------------
  *
  * Since there's a lot of similarity between the MDA and CGA (eg, their text-mode video buffer
  * format, and their use of the 6845 CRT controller), since the MDA ROM contains the fonts used
@@ -47048,10 +47053,9 @@ Web.onInit(Keyboard.init);
  * TODO: Whenever there are borders, they should be filled with the CGA's overscan colors.  However,
  * in the case of graphics modes (and text modes whenever font scaling is enabled), we don't reserve
  * any space for borders, so if borders are important, explicit border support will be required.
- */
-
-/*
+ *
  * EGA Support
+ * -----------
  *
  * EGA support piggy-backs on the existing MDA/CGA support.  All the existing MDA/CGA port handlers
  * now refer to either cardMono or cardColor (instead of directly to cardMDA or cardCGA), enabling
@@ -47070,10 +47074,9 @@ Web.onInit(Keyboard.init);
  * control certain assumptions about the virtual display's capabilities (ie, Color Display vs. Enhanced
  * Color Display).  P3 can switch all the I/O ports from 0x3nn to 0x2nn; the default is 0x3nn, and
  * that's the only port range the EGA ROM supports as well.
- */
-
-/*
+ *
  * VGA Support
+ * -----------
  *
  * More will be said here about PCjs VGA support later.  But first, a word from IBM: "Video Graphics Array [VGA]
  * Programming Considerations":
@@ -49133,6 +49136,7 @@ class Video extends Component {
      *      fontROM: path to .rom file (or a JSON representation) containing the character set
      *      touchScreen: string specifying desired touch-screen support (default is none)
      *      autoLock: true to (attempt to) auto-lock the mouse to the canvas (default is false)
+     *      randomize: 1 enables screen randomization, 0 disables (default is 1)
      *
      * An EGA/VGA may specify the following additional properties:
      *
@@ -49187,6 +49191,8 @@ class Video extends Component {
         this.nCard = aModelDefaults[0];
         this.cbMemory = parmsVideo['memory'] || 0;  // zero means fallback to the cardSpec's default size
         this.sSwitches = parmsVideo['switches'];
+        this.nRandomize = parmsVideo['randomize'];
+        if (this.nRandomize == null) this.nRandomize = 1;
 
         /*
          * powerUp() uses the default mode ONLY if ChipSet doesn't give us a default.
@@ -49385,6 +49391,9 @@ class Video extends Component {
         this.cpu = cpu;
         this.dbg = dbg;
 
+        var nRandomize = +cmp.getMachineParm('randomize');
+        if (nRandomize >= 0 && nRandomize <= 1) this.nRandomize = nRandomize;
+
         /*
          * nCard will be undefined if no model was explicitly set (whereas this.nCard is ALWAYS defined).
          */
@@ -49555,15 +49564,15 @@ class Video extends Component {
     }
 
     /**
-     * getInput()
+     * getScreen()
      *
-     * This is an interface used by the Mouse component, so that it can invoke capture/release mouse events from the screen element.
+     * This is an interface used by the Mouse component, so that it can capture mouse events from the screen.
      *
      * @this {Video}
      * @param {Mouse} [mouse]
      * @return {Object|undefined}
      */
-    getInput(mouse)
+    getScreen(mouse)
     {
         this.mouse = mouse;
         return this.inputScreen;
@@ -50094,7 +50103,6 @@ class Video extends Component {
      */
     reset()
     {
-        var fRandomize = true;
         var nMonitorType = ChipSet.MONITOR.NONE;
 
         /*
@@ -50143,7 +50151,6 @@ class Video extends Component {
 
         if (this.nMonitorType !== nMonitorType) {
             this.nMonitorType = nMonitorType;
-            fRandomize = true;
         }
 
         this.cardActive = null;
@@ -50166,7 +50173,7 @@ class Video extends Component {
         this.nMode = null;
         this.setMode(this.nModeDefault);
 
-        if (this.cardActive.addrBuffer && fRandomize) {
+        if (this.cardActive.addrBuffer && this.nRandomize) {
             /*
              * On the initial power-on, we initialize the video buffer to random characters, as a way of testing
              * whether our font(s) were successfully loaded.  It's assumed that our default display mode is a text mode,
@@ -56106,11 +56113,11 @@ class Mouse extends Component {
         this.setActive(false);
         this.fCaptured = this.fLocked = false;
         /*
-         * Initially, no video devices, and therefore no input devices, are attached.  initBus() will update aVideo,
-         * and powerUp() will update aInput.
+         * Initially, no video devices, and therefore no screens, are attached.  initBus() will update aVideo,
+         * and powerUp() will update aScreens.
          */
         this.aVideo = [];
-        this.aInput = [];
+        this.aScreens = [];
         this.setReady();
     }
 
@@ -56206,10 +56213,10 @@ class Mouse extends Component {
                     }
                 }
                 if (this.componentAdapter) {
-                    this.aInput = [];       // ensure the input device array is empty before (re)filling it
+                    this.aScreens = [];     // ensure the screen array is empty before (re)filling it
                     for (var i = 0; i < this.aVideo.length; i++) {
-                        var input = this.aVideo[i].getInput(this);
-                        if (input) this.aInput.push(input);
+                        var screen = this.aVideo[i].getScreen(this);
+                        if (screen) this.aScreens.push(screen);
                     }
                 } else {
                     Component.warning(this.id + ": " + this.sAdapterType + " " + this.idAdapter + " unavailable");
@@ -56345,8 +56352,8 @@ class Mouse extends Component {
     captureAll()
     {
         if (!this.fCaptured) {
-            for (var i = 0; i < this.aInput.length; i++) {
-                if (this.captureMouse(this.aInput[i])) this.fCaptured = true;
+            for (var i = 0; i < this.aScreens.length; i++) {
+                if (this.captureMouse(this.aScreens[i])) this.fCaptured = true;
             }
         }
     }
@@ -56359,8 +56366,8 @@ class Mouse extends Component {
     releaseAll()
     {
         if (this.fCaptured) {
-            for (var i = 0; i < this.aInput.length; i++) {
-                if (this.releaseMouse(this.aInput[i])) this.fCaptured = false;
+            for (var i = 0; i < this.aScreens.length; i++) {
+                if (this.releaseMouse(this.aScreens[i])) this.fCaptured = false;
             }
         }
     }
@@ -56448,7 +56455,7 @@ class Mouse extends Component {
         if (fDown !== undefined) {
             if (this.fLocked === false) {
                 /*
-                 * If there's no support for automatic pointer locking in the Video component, then notifyPointerActive()
+                 * If there's no support for automatic pointer locking in the Video component, notifyPointerActive()
                  * will return false, and we will set fLocked to null, ensuring that we never attempt this again.
                  */
                 if (!this.aVideo.length || !this.aVideo[0].notifyPointerActive(true)) {
@@ -74781,6 +74788,8 @@ class Computer extends Component {
      *
      *      url: the location of the machine XML file
      *
+     *      diagnostics: 0 for none, 1 for normal diagnostics, and 2 for diagnostics with prompting
+     *
      * If a predefined state is supplied AND it's successfully loaded, then resume behavior
      * defaults to '1' (ie, resume enabled without prompting).
      *
@@ -74811,6 +74820,8 @@ class Computer extends Component {
         this.setMachineParms(parmsMachine);
 
         this.fAutoPower = this.getMachineParm('autoPower', parmsComputer);
+        this.nDiagnostics = +this.getMachineParm('diagnostics', parmsComputer);
+        if (!(this.nDiagnostics >= 0 && this.nDiagnostics <= 2)) this.nDiagnostics = 1;
 
         /*
          * nPowerChange is 0 while the power state is stable, 1 while power is transitioning
@@ -74882,6 +74893,7 @@ class Computer extends Component {
             this.printComputer = this.panel.print;
             this.printlnComputer = this.panel.println;
         }
+
         for (iComponent = 0; iComponent < aComponents.length; iComponent++) {
             component = aComponents[iComponent];
             component.notice = function noticeComputer(s, fPrintOnly, id) {
@@ -74896,8 +74908,11 @@ class Computer extends Component {
                 return cmp.printlnComputer.call(this, s, type, id);
             }.bind(component);
         }
+
         this.cDiagnosticScreens = 0;
-        if (!this.controlPanel) this.enableDiagnostics();
+        if (!this.controlPanel && this.nDiagnostics) {
+            this.enableDiagnostics();
+        }
 
         this.println(PCX86.APPNAME + " v" + (XMLVERSION || PCX86.APPVERSION) + "\n" + COPYRIGHT + "\n" + LICENSE);
 
@@ -75015,19 +75030,21 @@ class Computer extends Component {
      */
     enableDiagnostics()
     {
-        for (var i = 0; i < this.aVideo.length; i++) {
-            var video = this.aVideo[i];
-            if (video) {
-                var control = video.getTextArea();
-                if (control) {
-                    /*
-                     * By default, the Video textarea overlay has opacity and lineHeight styles set to "0"
-                     * to make the overall textarea and its blinking caret invisible (respectively), so in order
-                     * to use it as a diagnostic display, we must temporarily set both those styles to "1".
-                     */
-                    control.style.opacity = "1";
-                    control.style.lineHeight = "1";
-                    this.cDiagnosticScreens++;
+        if (!this.cDiagnosticScreens) {
+            for (var i = 0; i < this.aVideo.length; i++) {
+                var video = this.aVideo[i];
+                if (video) {
+                    var control = video.getTextArea();
+                    if (control) {
+                        /*
+                         * By default, the Video textarea overlay has opacity and lineHeight styles set to "0"
+                         * to make the overall textarea and its blinking caret invisible (respectively), so in order
+                         * to use it as a diagnostic display, we must temporarily set both those styles to "1".
+                         */
+                        control.style.opacity = "1";
+                        control.style.lineHeight = "1";
+                        this.cDiagnosticScreens++;
+                    }
                 }
             }
         }
@@ -75037,33 +75054,43 @@ class Computer extends Component {
      * disableDiagnostics()
      *
      * @this {Computer}
+     * @return {boolean} (true if diagnostics were, or already are, disabled; false if they remain disabled)
      */
     disableDiagnostics()
     {
-        for (var i = 0; i < this.aVideo.length; i++) {
-            var video = this.aVideo[i];
-            if (video) {
-                var control = video.getTextArea();
-                if (control) {
-                    var agent = Web.getUserAgent();
-                    /*
-                     * Return the Video textarea overlay's opacity and lineHeight styles to their original values.
-                     */
-                    control.style.opacity = "0";
-                    control.style.lineHeight = "0";
-                    /*
-                     * Setting lineHeight in IE isn't sufficient to hide the caret; we must also set fontSize to "0",
-                     * and we make the change IE-specific because it can have weird side-effects in other browsers (eg,
-                     * it makes Safari on iOS over-zoom whenever the textarea receives focus).  And making it IE-specific
-                     * is, as usual, harder than it should be, because IE11 stopped identifying itself as "MSIE", hence
-                     * the additional "Trident" check.
-                     */
-                    if (agent.indexOf("MSIE") >= 0 || agent.indexOf("Trident") >= 0) control.style.fontSize = "0";
-                    control.value = "";
+        if (this.cDiagnosticScreens) {
+            if (this.nDiagnostics == 2) {
+                this.nDiagnostics++;
+                this.println("Press any key to continue...");
+                return false;
+            }
+            for (var i = 0; i < this.aVideo.length; i++) {
+                var video = this.aVideo[i];
+                if (video) {
+                    var control = video.getTextArea();
+                    if (control) {
+                        var agent = Web.getUserAgent();
+                        /*
+                         * Return the Video textarea overlay's opacity and lineHeight styles to their original values.
+                         */
+                        control.style.opacity = "0";
+                        control.style.lineHeight = "0";
+                        /*
+                         * Setting lineHeight in IE isn't sufficient to hide the caret; we must also set fontSize to "0",
+                         * and we make the change IE-specific because it can have weird side-effects in other browsers (eg,
+                         * it makes Safari on iOS over-zoom whenever the textarea receives focus).  And making it IE-specific
+                         * is, as usual, harder than it should be, because IE11 stopped identifying itself as "MSIE", hence
+                         * the additional "Trident" check.
+                         */
+                        if (agent.indexOf("MSIE") >= 0 || agent.indexOf("Trident") >= 0) control.style.fontSize = "0";
+                        control.value = "";
+                    }
                 }
             }
+            this.cDiagnosticScreens = 0;
         }
-        this.cDiagnosticScreens = 0;
+        this.nDiagnostics = 0;
+        return true;
     }
 
     /**
@@ -75075,19 +75102,36 @@ class Computer extends Component {
      */
     outputDiagnostics(sMessage, sType)
     {
-        if (!this.cDiagnosticScreens) return;
-        for (var i = 0; i < this.aVideo.length; i++) {
-            var video = this.aVideo[i];
-            if (video) {
-                var control = video.getTextArea();
-                if (control) {
-                    if (sType != Component.TYPE.PROGRESS || sMessage.slice(-3) != "...") {
-                        Component.appendControl(control, sMessage + '\n');
-                    } else {
-                        Component.replaceControl(control, sMessage, sMessage + '.');
+        if (this.cDiagnosticScreens) {
+            for (var i = 0; i < this.aVideo.length; i++) {
+                var video = this.aVideo[i];
+                if (video) {
+                    var control = video.getTextArea();
+                    if (control) {
+                        if (sType != Component.TYPE.PROGRESS || sMessage.slice(-3) != "...") {
+                            Component.appendControl(control, sMessage + '\n');
+                        } else {
+                            Component.replaceControl(control, sMessage, sMessage + '.');
+                        }
                     }
                 }
             }
+        }
+    }
+
+    /**
+     * notifyKbdEvent(event)
+     *
+     * This is called by the Keyboard component for all key presses, and it is effectively a no-op except
+     * in the one special case where disableDiagnostics() has delayed powerOn until a key is pressed.
+     *
+     * @this {Computer}
+     */
+    notifyKbdEvent(event)
+    {
+        if (this.nDiagnostics == 3) {
+            this.nDiagnostics++;
+            this.setReady();
         }
     }
 
@@ -75523,22 +75567,27 @@ class Computer extends Component {
      */
     donePowerOn(aParms)
     {
-        var stateComputer = aParms[0];
-        var fRepower = (aParms[1] < 0);
-        var fRestore = aParms[2];
+        if (!this.flags.initDone) {
+            if (!this.disableDiagnostics()) {
+                this.setReady(false);
+                this.wait(this.donePowerOn, aParms);
+                return;
+            }
+            this.flags.initDone = true;
+        }
 
         if (DEBUG && this.flags.powered && this.messageEnabled()) {
             this.printMessage("Computer.donePowerOn(): redundant");
         }
 
-        if (!this.flags.initDone) {
-            this.disableDiagnostics();
-            this.flags.initDone = true;
-        }
+        var stateComputer = aParms[0];
+        var fRepower = (aParms[1] < 0);
+        var fRestore = aParms[2];
 
-        this.flags.powered = true;
         var controlPower = this.bindings["power"];
         if (controlPower) controlPower.textContent = "Shutdown";
+
+        this.flags.powered = true;
 
         /*
          * Once we get to this point, we're guaranteed that all components are ready, so it's safe to power the CPU;
