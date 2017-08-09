@@ -117,6 +117,8 @@ class Computer extends Component {
      *
      *      url: the location of the machine XML file
      *
+     *      diagnostics: 0 for none, 1 for normal diagnostics, and 2 for diagnostics with prompting
+     *
      * If a predefined state is supplied AND it's successfully loaded, then resume behavior
      * defaults to '1' (ie, resume enabled without prompting).
      *
@@ -147,6 +149,8 @@ class Computer extends Component {
         this.setMachineParms(parmsMachine);
 
         this.fAutoPower = this.getMachineParm('autoPower', parmsComputer);
+        this.nDiagnostics = +this.getMachineParm('diagnostics', parmsComputer);
+        if (!(this.nDiagnostics >= 0 && this.nDiagnostics <= 2)) this.nDiagnostics = 1;
 
         /*
          * nPowerChange is 0 while the power state is stable, 1 while power is transitioning
@@ -218,6 +222,7 @@ class Computer extends Component {
             this.printComputer = this.panel.print;
             this.printlnComputer = this.panel.println;
         }
+
         for (iComponent = 0; iComponent < aComponents.length; iComponent++) {
             component = aComponents[iComponent];
             component.notice = function noticeComputer(s, fPrintOnly, id) {
@@ -232,8 +237,11 @@ class Computer extends Component {
                 return cmp.printlnComputer.call(this, s, type, id);
             }.bind(component);
         }
+
         this.cDiagnosticScreens = 0;
-        if (!this.controlPanel) this.enableDiagnostics();
+        if (!this.controlPanel && this.nDiagnostics) {
+            this.enableDiagnostics();
+        }
 
         this.println(PCX86.APPNAME + " v" + (XMLVERSION || PCX86.APPVERSION) + "\n" + COPYRIGHT + "\n" + LICENSE);
 
@@ -351,19 +359,21 @@ class Computer extends Component {
      */
     enableDiagnostics()
     {
-        for (var i = 0; i < this.aVideo.length; i++) {
-            var video = this.aVideo[i];
-            if (video) {
-                var control = video.getTextArea();
-                if (control) {
-                    /*
-                     * By default, the Video textarea overlay has opacity and lineHeight styles set to "0"
-                     * to make the overall textarea and its blinking caret invisible (respectively), so in order
-                     * to use it as a diagnostic display, we must temporarily set both those styles to "1".
-                     */
-                    control.style.opacity = "1";
-                    control.style.lineHeight = "1";
-                    this.cDiagnosticScreens++;
+        if (!this.cDiagnosticScreens) {
+            for (var i = 0; i < this.aVideo.length; i++) {
+                var video = this.aVideo[i];
+                if (video) {
+                    var control = video.getTextArea();
+                    if (control) {
+                        /*
+                         * By default, the Video textarea overlay has opacity and lineHeight styles set to "0"
+                         * to make the overall textarea and its blinking caret invisible (respectively), so in order
+                         * to use it as a diagnostic display, we must temporarily set both those styles to "1".
+                         */
+                        control.style.opacity = "1";
+                        control.style.lineHeight = "1";
+                        this.cDiagnosticScreens++;
+                    }
                 }
             }
         }
@@ -373,33 +383,43 @@ class Computer extends Component {
      * disableDiagnostics()
      *
      * @this {Computer}
+     * @return {boolean} (true if diagnostics were, or already are, disabled; false if they remain disabled)
      */
     disableDiagnostics()
     {
-        for (var i = 0; i < this.aVideo.length; i++) {
-            var video = this.aVideo[i];
-            if (video) {
-                var control = video.getTextArea();
-                if (control) {
-                    var agent = Web.getUserAgent();
-                    /*
-                     * Return the Video textarea overlay's opacity and lineHeight styles to their original values.
-                     */
-                    control.style.opacity = "0";
-                    control.style.lineHeight = "0";
-                    /*
-                     * Setting lineHeight in IE isn't sufficient to hide the caret; we must also set fontSize to "0",
-                     * and we make the change IE-specific because it can have weird side-effects in other browsers (eg,
-                     * it makes Safari on iOS over-zoom whenever the textarea receives focus).  And making it IE-specific
-                     * is, as usual, harder than it should be, because IE11 stopped identifying itself as "MSIE", hence
-                     * the additional "Trident" check.
-                     */
-                    if (agent.indexOf("MSIE") >= 0 || agent.indexOf("Trident") >= 0) control.style.fontSize = "0";
-                    control.value = "";
+        if (this.cDiagnosticScreens) {
+            if (this.nDiagnostics == 2) {
+                this.nDiagnostics++;
+                this.println("Press any key to continue...");
+                return false;
+            }
+            for (var i = 0; i < this.aVideo.length; i++) {
+                var video = this.aVideo[i];
+                if (video) {
+                    var control = video.getTextArea();
+                    if (control) {
+                        var agent = Web.getUserAgent();
+                        /*
+                         * Return the Video textarea overlay's opacity and lineHeight styles to their original values.
+                         */
+                        control.style.opacity = "0";
+                        control.style.lineHeight = "0";
+                        /*
+                         * Setting lineHeight in IE isn't sufficient to hide the caret; we must also set fontSize to "0",
+                         * and we make the change IE-specific because it can have weird side-effects in other browsers (eg,
+                         * it makes Safari on iOS over-zoom whenever the textarea receives focus).  And making it IE-specific
+                         * is, as usual, harder than it should be, because IE11 stopped identifying itself as "MSIE", hence
+                         * the additional "Trident" check.
+                         */
+                        if (agent.indexOf("MSIE") >= 0 || agent.indexOf("Trident") >= 0) control.style.fontSize = "0";
+                        control.value = "";
+                    }
                 }
             }
+            this.cDiagnosticScreens = 0;
         }
-        this.cDiagnosticScreens = 0;
+        this.nDiagnostics = 0;
+        return true;
     }
 
     /**
@@ -411,19 +431,36 @@ class Computer extends Component {
      */
     outputDiagnostics(sMessage, sType)
     {
-        if (!this.cDiagnosticScreens) return;
-        for (var i = 0; i < this.aVideo.length; i++) {
-            var video = this.aVideo[i];
-            if (video) {
-                var control = video.getTextArea();
-                if (control) {
-                    if (sType != Component.TYPE.PROGRESS || sMessage.slice(-3) != "...") {
-                        Component.appendControl(control, sMessage + '\n');
-                    } else {
-                        Component.replaceControl(control, sMessage, sMessage + '.');
+        if (this.cDiagnosticScreens) {
+            for (var i = 0; i < this.aVideo.length; i++) {
+                var video = this.aVideo[i];
+                if (video) {
+                    var control = video.getTextArea();
+                    if (control) {
+                        if (sType != Component.TYPE.PROGRESS || sMessage.slice(-3) != "...") {
+                            Component.appendControl(control, sMessage + '\n');
+                        } else {
+                            Component.replaceControl(control, sMessage, sMessage + '.');
+                        }
                     }
                 }
             }
+        }
+    }
+
+    /**
+     * notifyKbdEvent(event)
+     *
+     * This is called by the Keyboard component for all key presses, and it is effectively a no-op except
+     * in the one special case where disableDiagnostics() has delayed powerOn until a key is pressed.
+     *
+     * @this {Computer}
+     */
+    notifyKbdEvent(event)
+    {
+        if (this.nDiagnostics == 3) {
+            this.nDiagnostics++;
+            this.setReady();
         }
     }
 
@@ -859,22 +896,27 @@ class Computer extends Component {
      */
     donePowerOn(aParms)
     {
-        var stateComputer = aParms[0];
-        var fRepower = (aParms[1] < 0);
-        var fRestore = aParms[2];
+        if (!this.flags.initDone) {
+            if (!this.disableDiagnostics()) {
+                this.setReady(false);
+                this.wait(this.donePowerOn, aParms);
+                return;
+            }
+            this.flags.initDone = true;
+        }
 
         if (DEBUG && this.flags.powered && this.messageEnabled()) {
             this.printMessage("Computer.donePowerOn(): redundant");
         }
 
-        if (!this.flags.initDone) {
-            this.disableDiagnostics();
-            this.flags.initDone = true;
-        }
+        var stateComputer = aParms[0];
+        var fRepower = (aParms[1] < 0);
+        var fRestore = aParms[2];
 
-        this.flags.powered = true;
         var controlPower = this.bindings["power"];
         if (controlPower) controlPower.textContent = "Shutdown";
+
+        this.flags.powered = true;
 
         /*
          * Once we get to this point, we're guaranteed that all components are ready, so it's safe to power the CPU;

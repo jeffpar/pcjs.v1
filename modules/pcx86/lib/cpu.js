@@ -571,7 +571,9 @@ class CPU extends Component {
     calcCycles()
     {
         var nMultiplier = this.counts.mhzCurrent / this.counts.mhzBase;
-        if (!nMultiplier || nMultiplier > this.counts.nTargetMultiplier) nMultiplier = this.counts.nTargetMultiplier;
+        if (!nMultiplier || nMultiplier > this.counts.nTargetMultiplier) {
+            nMultiplier = this.counts.nTargetMultiplier;
+        }
         this.counts.msPerYield = Math.round(1000 / CPU.YIELDS_PER_SECOND);
         this.counts.nCyclesPerYield = Math.floor(this.counts.nBaseCyclesPerSecond / CPU.YIELDS_PER_SECOND * nMultiplier);
         this.counts.nCurrentMultiplier = nMultiplier;

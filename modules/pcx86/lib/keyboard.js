@@ -1647,6 +1647,8 @@ class Keyboard extends Component {
 
         this.sInjectBuffer = "";        // actual key events should stop any injection currently in progress
 
+        this.cmp.notifyKbdEvent(event);
+
         if (this.fAllDown) {
             var simCode = this.checkActiveKey();
             if (simCode && this.isAlphaKey(simCode) && this.isAlphaKey(keyCode) && simCode != keyCode) {
