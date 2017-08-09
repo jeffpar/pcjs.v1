@@ -38,28 +38,28 @@ if (NODE) {
     var ChipSet     = require("./chipset");
 }
 
-/*
- * class SerialPort
- * property {number} iAdapter
- * property {number} portBase
- * property {number} nIRQ
- * property {Object} controlIOBuffer is a DOM element bound to the port (for rudimentary output; see transmitByte())
+/**
+ * SerialPort class
  *
- * NOTE: This class declaration started as a way of informing the code inspector of the controlIOBuffer property,
- * which remained undefined until a setBinding() call set it later, but I've since decided that explicitly
+ * The class property declarations below started as a way of informing the code inspector of the controlIOBuffer
+ * property, which remained undefined until a setBinding() call set it later, but I've since decided that explicitly
  * initializing such properties in the constructor is a better way to go -- even though it's more code -- because
  * JavaScript compilers are supposed to be happier when the underlying object structures aren't constantly changing.
  *
  * Besides, I'm not sure I want to get into documenting every property this way, for this or any/every other class,
  * let alone getting into which ones should be considered private or protected, because PCjs isn't really a library
  * for third-party apps.
- */
-
-/**
- * TODO: The Closure Compiler treats ES6 classes as 'struct' rather than 'dict' by default,
- * which would force us to declare all class properties in the constructor, as well as prevent
- * us from defining any named properties.  So, for now, we mark all our classes as 'unrestricted'.
  *
+ * TODO: The Closure Compiler treats ES6 classes as 'struct' rather than 'dict' by default, which would force us
+ * to declare all class properties in the constructor, as well as prevent us from defining any named properties.
+ * So, for now, we mark all our classes as 'unrestricted'.
+ *
+ * @class SerialPort
+ * @property {number} iAdapter
+ * @property {number} portBase
+ * @property {number} nIRQ
+ * @property {string|null} consoleOutput
+ * @property {Object} controlIOBuffer (DOM element bound to the port for rudimentary output; see transmitByte())
  * @unrestricted
  */
 class SerialPort extends Component {
@@ -75,19 +75,18 @@ class SerialPort extends Component {
      *      tabSize: set to a non-zero number to convert tabs to spaces (applies only to output to
      *      the above binding); default is 0 (no conversion)
      *
-     * In the future, we may support 'port' and 'irq' properties that allow the machine to define a
-     * non-standard serial port configuration, instead of only our pre-defined 'adapter' configurations.
+     * In the future, we may support 'port' and 'irq' properties that allow the machine to define a non-standard
+     * serial port configuration, instead of only our pre-defined 'adapter' configurations.
      *
-     * NOTE: Since the XSL file defines 'adapter' as a number, not a string, there's no need to use
-     * parseInt(), and as an added benefit, we don't need to worry about whether a hex or decimal format
-     * was used.
+     * NOTE: Since the XSL file defines 'adapter' as a number, not a string, there's no need to use parseInt(),
+     * and as an added benefit, we don't need to worry about whether a hex or decimal format was used.
      *
-     * This hard-coded approach mimics the original IBM PC Asynchronous Adapter configuration, which
-     * contained a pair of "shunt modules" that allowed the user to select a port address of either
-     * 0x3F8 ("Primary") or 0x2F8 ("Secondary").
+     * This hard-coded approach mimics the original IBM PC Asynchronous Adapter configuration, which contained a
+     * pair of "shunt modules" that allowed the user to select a port address of either 0x3F8 ("Primary") or 0x2F8
+     * ("Secondary").
      *
-     * DOS typically names the Primary adapter "COM1" and the Secondary adapter "COM2", but I prefer
-     * to stick to adapter numbers, since not all operating systems follow those naming conventions.
+     * DOS typically names the Primary adapter "COM1" and the Secondary adapter "COM2", but I prefer to stick to
+     * adapter numbers, since not all operating systems follow those naming conventions.
      *
      * @this {SerialPort}
      * @param {Object} parmsSerial

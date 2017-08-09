@@ -55010,6 +55010,12 @@ Web.onInit(ParallelPort.init);
  * which would force us to declare all class properties in the constructor, as well as prevent
  * us from defining any named properties.  So, for now, we mark all our classes as 'unrestricted'.
  *
+ * @class SerialPort
+ * @property {number} iAdapter
+ * @property {number} portBase
+ * @property {number} nIRQ
+ * @property {string|null} consoleOutput
+ * @property {Object} controlIOBuffer (DOM element bound to the port for rudimentary output; see transmitByte())
  * @unrestricted
  */
 class SerialPort extends Component {
