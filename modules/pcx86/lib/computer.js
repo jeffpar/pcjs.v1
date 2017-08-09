@@ -383,7 +383,7 @@ class Computer extends Component {
      * disableDiagnostics()
      *
      * @this {Computer}
-     * @return {boolean} (true if diagnostics were, or already are, disabled; false if they remain disabled)
+     * @return {boolean} (true if diagnostics were, or already are, disabled; false if they remain enabled)
      */
     disableDiagnostics()
     {
