@@ -905,22 +905,23 @@ class DebuggerX86 extends Debugger {
         switch (sBinding) {
 
         case "debugInput":
-            this.bindings[sBinding] = control;
-            this.controlDebug = control;
+            var controlInput = /** @type {HTMLInputElement} */ (control);
+            this.bindings[sBinding] = controlInput;
+            this.controlDebug = controlInput;
             /*
              * For halted machines, this is fine, but for auto-start machines, it can be annoying.
              *
-             *      control.focus();
+             *      controlInput.focus();
              */
-            control.onkeydown = function onKeyDownDebugInput(event) {
+            controlInput.onkeydown = function onKeyDownDebugInput(event) {
                 var sCmd;
                 if (event.keyCode == Keys.KEYCODE.CR) {
-                    sCmd = control.value;
-                    control.value = "";
+                    sCmd = controlInput.value;
+                    controlInput.value = "";
                     dbg.doCommands(sCmd, true);
                 }
                 else if (event.keyCode == Keys.KEYCODE.ESC) {
-                    control.value = sCmd = "";
+                    controlInput.value = sCmd = "";
                 }
                 else {
                     if (event.keyCode == Keys.KEYCODE.UP) {
@@ -931,8 +932,8 @@ class DebuggerX86 extends Debugger {
                     }
                     if (sCmd != null) {
                         var cch = sCmd.length;
-                        control.value = sCmd;
-                        control.setSelectionRange(cch, cch);
+                        controlInput.value = sCmd;
+                        controlInput.setSelectionRange(cch, cch);
                     }
                 }
                 if (sCmd != null && event.preventDefault) event.preventDefault();

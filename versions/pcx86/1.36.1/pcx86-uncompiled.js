@@ -44595,6 +44595,7 @@ class Keyboard extends Component {
          */
         var kbd = this;
         var id = sHTMLType + '-' + sBinding;
+        var controlText = /** @type {HTMLTextAreaElement} */ (control);
 
         if (this.bindings[id] === undefined) {
             switch (sBinding) {
@@ -44608,13 +44609,13 @@ class Keyboard extends Component {
                  *
                  *      this.bindings[id] = control;
                  */
-                control.onkeydown = function onKeyDown(event) {
+                controlText.onkeydown = function onKeyDown(event) {
                     return kbd.onKeyDown(event, true);
                 };
-                control.onkeypress = function onKeyPressKbd(event) {
+                controlText.onkeypress = function onKeyPressKbd(event) {
                     return kbd.onKeyPress(event);
                 };
-                control.onkeyup = function onKeyUp(event) {
+                controlText.onkeyup = function onKeyUp(event) {
                     return kbd.onKeyDown(event, false);
                 };
                 return true;
@@ -44652,8 +44653,8 @@ class Keyboard extends Component {
                  */
                 var sCode = sBinding.toUpperCase().replace(/-/g, '_');
                 if (Keyboard.CLICKCODES[sCode] !== undefined && sHTMLType == "button") {
-                    this.bindings[id] = control;
-                    control.onclick = function(kbd, sKey, simCode) {
+                    this.bindings[id] = controlText;
+                    controlText.onclick = function(kbd, sKey, simCode) {
                         return function onKeyboardBindingClick(event) {
                             if (!COMPILED && kbd.messageEnabled()) kbd.printMessage(sKey + " clicked", Messages.KEYS);
                             event.preventDefault();                 // preventDefault() is necessary...
@@ -44667,7 +44668,7 @@ class Keyboard extends Component {
                 }
                 else if (Keyboard.SOFTCODES[sBinding] !== undefined) {
                     this.cSoftCodes++;
-                    this.bindings[id] = control;
+                    this.bindings[id] = controlText;
                     var fnDown = function(kbd, sKey, simCode) {
                         return function onKeyboardBindingDown(event) {
                             event.preventDefault();                 // preventDefault() is necessary...
@@ -44682,11 +44683,11 @@ class Keyboard extends Component {
                         };
                     }(this, sBinding, Keyboard.SOFTCODES[sBinding]);
                     if ('ontouchstart' in window) {
-                        control.ontouchstart = fnDown;
-                        control.ontouchend = fnUp;
+                        controlText.ontouchstart = fnDown;
+                        controlText.ontouchend = fnUp;
                     } else {
-                        control.onmousedown = fnDown;
-                        control.onmouseup = control.onmouseout = fnUp;
+                        controlText.onmousedown = fnDown;
+                        controlText.onmouseup = controlText.onmouseout = fnUp;
                     }
                     return true;
                 }
@@ -48266,7 +48267,7 @@ Card.FEAT_CTRL = {
  */
 Card.MISC = {
     PORT_WRITE:             0x3C2,      // write port address (EGA and VGA)
-    PORT_READ:              0x3CC,      // read port addresss (VGA only)
+    PORT_READ:              0x3CC,      // read port address (VGA only)
     IO_SELECT:              0x01,       // 0 sets CRT ports to 0x3Bn, 1 sets CRT ports to 0x3Dn
     ENABLE_RAM:             0x02,       // 0 disables video RAM, 1 enables
     CLOCK_SELECT:           0x0C,       // 0x0: 14Mhz I/O clock, 0x4: 16Mhz on-board clock, 0x8: external clock, 0xC: unused
@@ -54988,34 +54989,28 @@ Web.onInit(ParallelPort.init);
  */
 
 
-/*
- * class SerialPort
- * property {number} iAdapter
- * property {number} portBase
- * property {number} nIRQ
- * property {Object} controlIOBuffer is a DOM element bound to the port (for rudimentary output; see transmitByte())
+/**
+ * SerialPort class
  *
- * NOTE: This class declaration started as a way of informing the code inspector of the controlIOBuffer property,
- * which remained undefined until a setBinding() call set it later, but I've since decided that explicitly
+ * The class property declarations below started as a way of informing the code inspector of the controlIOBuffer
+ * property, which remained undefined until a setBinding() call set it later, but I've since decided that explicitly
  * initializing such properties in the constructor is a better way to go -- even though it's more code -- because
  * JavaScript compilers are supposed to be happier when the underlying object structures aren't constantly changing.
  *
  * Besides, I'm not sure I want to get into documenting every property this way, for this or any/every other class,
  * let alone getting into which ones should be considered private or protected, because PCjs isn't really a library
  * for third-party apps.
- */
-
-/**
- * TODO: The Closure Compiler treats ES6 classes as 'struct' rather than 'dict' by default,
- * which would force us to declare all class properties in the constructor, as well as prevent
- * us from defining any named properties.  So, for now, we mark all our classes as 'unrestricted'.
+ *
+ * TODO: The Closure Compiler treats ES6 classes as 'struct' rather than 'dict' by default, which would force us
+ * to declare all class properties in the constructor, as well as prevent us from defining any named properties.
+ * So, for now, we mark all our classes as 'unrestricted'.
  *
  * @class SerialPort
  * @property {number} iAdapter
  * @property {number} portBase
  * @property {number} nIRQ
  * @property {string|null} consoleOutput
- * @property {Object} controlIOBuffer (DOM element bound to the port for rudimentary output; see transmitByte())
+ * @property {HTMLTextAreaElement} controlIOBuffer (DOM element bound to the port for rudimentary output; see transmitByte())
  * @unrestricted
  */
 class SerialPort extends Component {
@@ -55031,19 +55026,18 @@ class SerialPort extends Component {
      *      tabSize: set to a non-zero number to convert tabs to spaces (applies only to output to
      *      the above binding); default is 0 (no conversion)
      *
-     * In the future, we may support 'port' and 'irq' properties that allow the machine to define a
-     * non-standard serial port configuration, instead of only our pre-defined 'adapter' configurations.
+     * In the future, we may support 'port' and 'irq' properties that allow the machine to define a non-standard
+     * serial port configuration, instead of only our pre-defined 'adapter' configurations.
      *
-     * NOTE: Since the XSL file defines 'adapter' as a number, not a string, there's no need to use
-     * parseInt(), and as an added benefit, we don't need to worry about whether a hex or decimal format
-     * was used.
+     * NOTE: Since the XSL file defines 'adapter' as a number, not a string, there's no need to use parseInt(),
+     * and as an added benefit, we don't need to worry about whether a hex or decimal format was used.
      *
-     * This hard-coded approach mimics the original IBM PC Asynchronous Adapter configuration, which
-     * contained a pair of "shunt modules" that allowed the user to select a port address of either
-     * 0x3F8 ("Primary") or 0x2F8 ("Secondary").
+     * This hard-coded approach mimics the original IBM PC Asynchronous Adapter configuration, which contained a
+     * pair of "shunt modules" that allowed the user to select a port address of either 0x3F8 ("Primary") or 0x2F8
+     * ("Secondary").
      *
-     * DOS typically names the Primary adapter "COM1" and the Secondary adapter "COM2", but I prefer
-     * to stick to adapter numbers, since not all operating systems follow those naming conventions.
+     * DOS typically names the Primary adapter "COM1" and the Secondary adapter "COM2", but I prefer to stick to
+     * adapter numbers, since not all operating systems follow those naming conventions.
      *
      * @this {SerialPort}
      * @param {Object} parmsSerial
@@ -55071,8 +55065,6 @@ class SerialPort extends Component {
          * consoleOutput becomes a string that records serial port output if the 'binding' property is set to the
          * reserved name "console".  Nothing is written to the console, however, until a linefeed (0x0A) is output
          * or the string length reaches a threshold (currently, 1024 characters).
-         *
-         * @type {string|null}
          */
         this.consoleOutput = null;
 
@@ -55087,8 +55079,6 @@ class SerialPort extends Component {
          * serial input, DOS *transmits* the appropriate characters back to the terminal via COM2.
          *
          * As a result, controlIOBuffer only needs to be updated by the transmitByte() function.
-         *
-         * @type {Object}
          */
         this.controlIOBuffer = null;
 
@@ -55171,13 +55161,13 @@ class SerialPort extends Component {
 
         switch (sBinding) {
         case SerialPort.sIOBuffer:
-            this.bindings[sBinding] = this.controlIOBuffer = control;
+            this.bindings[sBinding] = this.controlIOBuffer = /** @type {HTMLTextAreaElement} */ (control);
 
             /*
              * By establishing an onkeypress handler here, we make it possible for DOS commands like
              * "CTTY COM1" to more or less work (use "CTTY CON" to restore control to the DOS console).
              */
-            control.onkeydown = function onKeyDown(event) {
+            this.controlIOBuffer.onkeydown = function onKeyDown(event) {
                 /*
                  * This is required in addition to onkeypress, because it's the only way to prevent
                  * BACKSPACE (keyCode 8) from being interpreted by the browser as a "Back" operation;
@@ -55199,7 +55189,7 @@ class SerialPort extends Component {
                 return true;
             };
 
-            control.onkeypress = function onKeyPress(event) {
+            this.controlIOBuffer.onkeypress = function onKeyPress(event) {
                 /*
                  * Browser-independent keyCode extraction; refer to onKeyPress() and the other key event
                  * handlers in keyboard.js.
@@ -55223,7 +55213,7 @@ class SerialPort extends Component {
              * itself no longer needs the "readonly" attribute; we primarily need to remove it for iOS browsers,
              * so that the soft keyboard will activate, but it shouldn't hurt to remove the attribute for all browsers.
              */
-            control.removeAttribute("readonly");
+            this.controlIOBuffer.removeAttribute("readonly");
 
             return true;
 
@@ -67741,22 +67731,23 @@ class DebuggerX86 extends Debugger {
         switch (sBinding) {
 
         case "debugInput":
-            this.bindings[sBinding] = control;
-            this.controlDebug = control;
+            var controlInput = /** @type {HTMLInputElement} */ (control);
+            this.bindings[sBinding] = controlInput;
+            this.controlDebug = controlInput;
             /*
              * For halted machines, this is fine, but for auto-start machines, it can be annoying.
              *
-             *      control.focus();
+             *      controlInput.focus();
              */
-            control.onkeydown = function onKeyDownDebugInput(event) {
+            controlInput.onkeydown = function onKeyDownDebugInput(event) {
                 var sCmd;
                 if (event.keyCode == Keys.KEYCODE.CR) {
-                    sCmd = control.value;
-                    control.value = "";
+                    sCmd = controlInput.value;
+                    controlInput.value = "";
                     dbg.doCommands(sCmd, true);
                 }
                 else if (event.keyCode == Keys.KEYCODE.ESC) {
-                    control.value = sCmd = "";
+                    controlInput.value = sCmd = "";
                 }
                 else {
                     if (event.keyCode == Keys.KEYCODE.UP) {
@@ -67767,8 +67758,8 @@ class DebuggerX86 extends Debugger {
                     }
                     if (sCmd != null) {
                         var cch = sCmd.length;
-                        control.value = sCmd;
-                        control.setSelectionRange(cch, cch);
+                        controlInput.value = sCmd;
+                        controlInput.setSelectionRange(cch, cch);
                     }
                 }
                 if (sCmd != null && event.preventDefault) event.preventDefault();

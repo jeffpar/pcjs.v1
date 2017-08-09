@@ -59,7 +59,7 @@ if (NODE) {
  * @property {number} portBase
  * @property {number} nIRQ
  * @property {string|null} consoleOutput
- * @property {Object} controlIOBuffer (DOM element bound to the port for rudimentary output; see transmitByte())
+ * @property {HTMLTextAreaElement} controlIOBuffer (DOM element bound to the port for rudimentary output; see transmitByte())
  * @unrestricted
  */
 class SerialPort extends Component {
@@ -114,8 +114,6 @@ class SerialPort extends Component {
          * consoleOutput becomes a string that records serial port output if the 'binding' property is set to the
          * reserved name "console".  Nothing is written to the console, however, until a linefeed (0x0A) is output
          * or the string length reaches a threshold (currently, 1024 characters).
-         *
-         * @type {string|null}
          */
         this.consoleOutput = null;
 
@@ -130,8 +128,6 @@ class SerialPort extends Component {
          * serial input, DOS *transmits* the appropriate characters back to the terminal via COM2.
          *
          * As a result, controlIOBuffer only needs to be updated by the transmitByte() function.
-         *
-         * @type {Object}
          */
         this.controlIOBuffer = null;
 
@@ -214,13 +210,13 @@ class SerialPort extends Component {
 
         switch (sBinding) {
         case SerialPort.sIOBuffer:
-            this.bindings[sBinding] = this.controlIOBuffer = control;
+            this.bindings[sBinding] = this.controlIOBuffer = /** @type {HTMLTextAreaElement} */ (control);
 
             /*
              * By establishing an onkeypress handler here, we make it possible for DOS commands like
              * "CTTY COM1" to more or less work (use "CTTY CON" to restore control to the DOS console).
              */
-            control.onkeydown = function onKeyDown(event) {
+            this.controlIOBuffer.onkeydown = function onKeyDown(event) {
                 /*
                  * This is required in addition to onkeypress, because it's the only way to prevent
                  * BACKSPACE (keyCode 8) from being interpreted by the browser as a "Back" operation;
@@ -242,7 +238,7 @@ class SerialPort extends Component {
                 return true;
             };
 
-            control.onkeypress = function onKeyPress(event) {
+            this.controlIOBuffer.onkeypress = function onKeyPress(event) {
                 /*
                  * Browser-independent keyCode extraction; refer to onKeyPress() and the other key event
                  * handlers in keyboard.js.
@@ -266,7 +262,7 @@ class SerialPort extends Component {
              * itself no longer needs the "readonly" attribute; we primarily need to remove it for iOS browsers,
              * so that the soft keyboard will activate, but it shouldn't hurt to remove the attribute for all browsers.
              */
-            control.removeAttribute("readonly");
+            this.controlIOBuffer.removeAttribute("readonly");
 
             return true;
 
