@@ -201,6 +201,7 @@ class Keyboard extends Component {
          */
         var kbd = this;
         var id = sHTMLType + '-' + sBinding;
+        var controlText = /** @type {HTMLTextAreaElement} */ (control);
 
         if (this.bindings[id] === undefined) {
             switch (sBinding) {
@@ -214,13 +215,13 @@ class Keyboard extends Component {
                  *
                  *      this.bindings[id] = control;
                  */
-                control.onkeydown = function onKeyDown(event) {
+                controlText.onkeydown = function onKeyDown(event) {
                     return kbd.onKeyDown(event, true);
                 };
-                control.onkeypress = function onKeyPressKbd(event) {
+                controlText.onkeypress = function onKeyPressKbd(event) {
                     return kbd.onKeyPress(event);
                 };
-                control.onkeyup = function onKeyUp(event) {
+                controlText.onkeyup = function onKeyUp(event) {
                     return kbd.onKeyDown(event, false);
                 };
                 return true;
@@ -258,8 +259,8 @@ class Keyboard extends Component {
                  */
                 var sCode = sBinding.toUpperCase().replace(/-/g, '_');
                 if (Keyboard.CLICKCODES[sCode] !== undefined && sHTMLType == "button") {
-                    this.bindings[id] = control;
-                    control.onclick = function(kbd, sKey, simCode) {
+                    this.bindings[id] = controlText;
+                    controlText.onclick = function(kbd, sKey, simCode) {
                         return function onKeyboardBindingClick(event) {
                             if (!COMPILED && kbd.messageEnabled()) kbd.printMessage(sKey + " clicked", Messages.KEYS);
                             event.preventDefault();                 // preventDefault() is necessary...
@@ -273,7 +274,7 @@ class Keyboard extends Component {
                 }
                 else if (Keyboard.SOFTCODES[sBinding] !== undefined) {
                     this.cSoftCodes++;
-                    this.bindings[id] = control;
+                    this.bindings[id] = controlText;
                     var fnDown = function(kbd, sKey, simCode) {
                         return function onKeyboardBindingDown(event) {
                             event.preventDefault();                 // preventDefault() is necessary...
@@ -288,11 +289,11 @@ class Keyboard extends Component {
                         };
                     }(this, sBinding, Keyboard.SOFTCODES[sBinding]);
                     if ('ontouchstart' in window) {
-                        control.ontouchstart = fnDown;
-                        control.ontouchend = fnUp;
+                        controlText.ontouchstart = fnDown;
+                        controlText.ontouchend = fnUp;
                     } else {
-                        control.onmousedown = fnDown;
-                        control.onmouseup = control.onmouseout = fnUp;
+                        controlText.onmousedown = fnDown;
+                        controlText.onmouseup = controlText.onmouseout = fnUp;
                     }
                     return true;
                 }

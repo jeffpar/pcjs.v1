@@ -4139,9 +4139,8 @@ var Messages8080 = {
     SERIAL:     0x00800000,
     SPEAKER:    0x02000000,
     COMPUTER:   0x04000000,
-    LOG:        0x10000000,
-    WARN:       0x20000000,
-    BUFFER:     0x40000000,
+    LOG:        0x20000000,
+    WARN:       0x40000000,
     HALT:       0x80000000|0
 };
 
@@ -4174,16 +4173,15 @@ Messages8080.CATEGORIES = {
     "serial":   Messages8080.SERIAL,
     "speaker":  Messages8080.SPEAKER,
     "computer": Messages8080.COMPUTER,
-    "log":      Messages8080.LOG,
-    "warn":     Messages8080.WARN,
     /*
      * Now we turn to message actions rather than message types; for example, setting "halt"
      * on or off doesn't enable "halt" messages, but rather halts the CPU on any message above.
      *
-     * Similarly, "m buffer on" turns on message buffering, deferring the display of all messages
-     * until "m buffer off" is issued.
+     * Similarly, "m log on" turns on message logging, deferring the display of all messages
+     * until "m log off" is issued.
      */
-    "buffer":   Messages8080.BUFFER,
+    "log":      Messages8080.LOG,
+    "warn":     Messages8080.WARN,
     "halt":     Messages8080.HALT
 };
 
@@ -7124,8 +7122,8 @@ class CPU8080 extends Component {
          */
         this.nCyclesRecalc += this.nCyclesThisRun;
 
-        if (DEBUG && this.messageEnabled(Messages8080.LOG) && msRemainsThisRun) {
-            this.log("calcRemainingTime: " + msRemainsThisRun + "ms to sleep after " + this.msEndThisRun + "ms");
+        if (DEBUG && this.messageEnabled(Messages8080.CPU) && msRemainsThisRun) {
+            this.printMessage("calcRemainingTime: " + msRemainsThisRun + "ms to sleep after " + this.msEndThisRun + "ms");
         }
 
         this.msEndThisRun += msRemainsThisRun;
@@ -18682,8 +18680,8 @@ class Debugger8080 extends Debugger {
             this.sInitCommands = parmsDbg['commands'];
 
             /*
-             * Make it easier to access Debugger8080 commands from an external REPL (eg, the WebStorm
-             * "live" console window); eg:
+             * Make it easier to access Debugger commands from an external REPL, like the WebStorm "live" console
+             * window; eg:
              *
              *      pc8080('r')
              *      pc8080('dw 0:0')
@@ -19296,7 +19294,7 @@ class Debugger8080 extends Debugger {
         this.dbg = this;
         this.bitsMessage = this.bitsWarning = Messages8080.WARN;
         this.sMessagePrev = null;
-        this.aMessageBuffer = [];
+        this.aMessageLog = [];
         /*
          * Internally, we use "key" instead of "keys", since the latter is a method on JavasScript objects,
          * but externally, we allow the user to specify "keys"; "kbd" is also allowed as shorthand for "keyboard".
@@ -19543,8 +19541,8 @@ class Debugger8080 extends Debugger {
             sMessage += " at " + this.toHexAddr(this.newAddr(this.cpu.getPC()));
         }
 
-        if (this.bitsMessage & Messages8080.BUFFER) {
-            this.aMessageBuffer.push(sMessage);
+        if (this.bitsMessage & Messages8080.LOG) {
+            this.aMessageLog.push(sMessage);
             return;
         }
 
@@ -21562,11 +21560,11 @@ class Debugger8080 extends Debugger {
                 else if (asArgs[2] == "off") {
                     this.bitsMessage &= ~bitsMessage;
                     fCriteria = false;
-                    if (bitsMessage == Messages8080.BUFFER) {
-                        for (var i = 0; i < this.aMessageBuffer.length; i++) {
-                            this.println(this.aMessageBuffer[i]);
+                    if (bitsMessage == Messages8080.LOG) {
+                        for (var i = 0; i < this.aMessageLog.length; i++) {
+                            this.println(this.aMessageLog[i]);
                         }
-                        this.aMessageBuffer = [];
+                        this.aMessageLog = [];
                     }
                 }
             }

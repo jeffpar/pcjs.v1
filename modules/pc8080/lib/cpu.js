@@ -891,8 +891,8 @@ class CPU8080 extends Component {
          */
         this.nCyclesRecalc += this.nCyclesThisRun;
 
-        if (DEBUG && this.messageEnabled(Messages8080.LOG) && msRemainsThisRun) {
-            this.log("calcRemainingTime: " + msRemainsThisRun + "ms to sleep after " + this.msEndThisRun + "ms");
+        if (DEBUG && this.messageEnabled(Messages8080.CPU) && msRemainsThisRun) {
+            this.printMessage("calcRemainingTime: " + msRemainsThisRun + "ms to sleep after " + this.msEndThisRun + "ms");
         }
 
         this.msEndThisRun += msRemainsThisRun;

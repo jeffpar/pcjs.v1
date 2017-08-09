@@ -55,9 +55,8 @@ var MessagesPDP11 = {
     TIMER:      0x00200000,
     SPEAKER:    0x01000000,
     COMPUTER:   0x02000000,
-    LOG:        0x10000000,
-    WARN:       0x20000000,
-    BUFFER:     0x40000000,
+    LOG:        0x20000000,
+    WARN:       0x40000000,
     HALT:       0x80000000|0
 };
 
@@ -102,16 +101,15 @@ MessagesPDP11.CATEGORIES = {
     "timer":    MessagesPDP11.TIMER,
     "speaker":  MessagesPDP11.SPEAKER,
     "computer": MessagesPDP11.COMPUTER,
-    "log":      MessagesPDP11.LOG,
-    "warn":     MessagesPDP11.WARN,
     /*
      * Now we turn to message actions rather than message types; for example, setting "halt"
      * on or off doesn't enable "halt" messages, but rather halts the CPU on any message above.
      *
-     * Similarly, "m buffer on" turns on message buffering, deferring the display of all messages
-     * until "m buffer off" is issued.
+     * Similarly, "m log on" turns on message logging, deferring the display of all messages
+     * until "m log off" is issued.
      */
-    "buffer":   MessagesPDP11.BUFFER,
+    "log":      MessagesPDP11.LOG,
+    "warn":     MessagesPDP11.WARN,
     "halt":     MessagesPDP11.HALT
 };
 

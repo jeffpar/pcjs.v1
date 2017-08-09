@@ -7345,12 +7345,15 @@ Messages.CATEGORIES = {
     "computer": Messages.COMPUTER,
     "dos":      Messages.DOS,
     "data":     Messages.DATA,
-    "log":      Messages.LOG,
-    "warn":     Messages.WARN,
     /*
      * Now we turn to message actions rather than message types; for example, setting "halt"
      * on or off doesn't enable "halt" messages, but rather halts the CPU on any message above.
+     *
+     * Similarly, "m log on" turns on message logging, deferring the display of all messages
+     * until "m log off" is issued.
      */
+    "log":      Messages.LOG,
+    "warn":     Messages.WARN,
     "halt":     Messages.HALT
 };
 
@@ -12314,7 +12317,7 @@ class CPU extends Component {
      */
     calcCycles()
     {
-        var nMultiplier = (this.counts.mhzCurrent / this.counts.mhzBase)|0;
+        var nMultiplier = this.counts.mhzCurrent / this.counts.mhzBase;
         if (!nMultiplier || nMultiplier > this.counts.nTargetMultiplier) nMultiplier = this.counts.nTargetMultiplier;
         this.counts.msPerYield = Math.round(1000 / CPU.YIELDS_PER_SECOND);
         this.counts.nCyclesPerYield = Math.floor(this.counts.nBaseCyclesPerSecond / CPU.YIELDS_PER_SECOND * nMultiplier);
@@ -12457,9 +12460,9 @@ class CPU extends Component {
         var fSuccess = true;
         if (nMultiplier !== undefined) {
             /*
-             * If we haven't reached 80% (0.8) of the current target speed, revert to the default multiplier.
+             * If we haven't reached 90% (0.9) of the current target speed, revert to the default multiplier.
              */
-            if (this.counts.mhzCurrent > 0 && this.counts.mhzCurrent / this.counts.mhzTarget < 0.8) {
+            if (this.counts.mhzCurrent > 0 && this.counts.mhzCurrent < this.counts.mhzTarget * 0.9) {
                 nMultiplier = this.counts.nBaseMultiplier;
                 fSuccess = false;
             }
@@ -12599,7 +12602,7 @@ class CPU extends Component {
 
         this.calcSpeed(nCycles, msElapsed);
 
-        if (msRemainsThisRun < 0 || this.counts.mhzCurrent < this.counts.mhzTarget) {
+        if (msRemainsThisRun < 0) {
             /*
              * Try "throwing out" the effects of large anomalies, by moving the overall run start time up;
              * ordinarily, this should only happen when the someone is using an external Debugger or some other
@@ -12610,14 +12613,17 @@ class CPU extends Component {
             }
             /*
              * If the last burst took MORE time than we allotted (ie, it's taking more than 1 second to simulate
-             * nCyclesActual), all we can do is yield for as little time as possible (ie, 0ms) and hope that the
-             * simulation is at least usable.
+             * nBaseCyclesPerSecond), all we can do is yield for as little time as possible (ie, 0ms) and hope
+             * that the simulation is at least usable.
              */
             msRemainsThisRun = 0;
         }
+        else if (this.counts.mhzCurrent < this.counts.mhzTarget) {
+            msRemainsThisRun = 0;
+        }
 
-        if (DEBUG && this.messageEnabled(Messages.LOG) && msRemainsThisRun) {
-            this.log("calcRemainingTime: " + msRemainsThisRun + "ms to sleep after " + this.counts.msEndThisRun + "ms");
+        if (DEBUG && this.messageEnabled(Messages.CPU)) {
+            this.printMessage("calcRemainingTime: sleep " + msRemainsThisRun + "ms after " + (this.counts.msEndThisRun - this.counts.msStartThisRun) + "ms burst");
         }
 
         this.counts.msEndThisRun += msRemainsThisRun;
@@ -12846,9 +12852,17 @@ class CPU extends Component {
             if (timer[1] < 0) continue;
             timer[1] -= nCycles;
             if (timer[1] <= 0) {
+                if (DEBUG && this.messageEnabled(Messages.CPU)) {
+                    this.printMessage("updateTimer(" + nCycles + "): firing " + timer[0] + " with only " + (timer[1] + nCycles) + " cycles left");
+                }
                 timer[1] = -1;      // zero is technically an "active" value, so ensure the timer is dormant now
                 timer[3]();         // safe to invoke the callback function now
-                if (timer[2] >= 0) this.setTimer(iTimer, timer[2]);
+                if (timer[2] >= 0) {
+                    this.setTimer(iTimer, timer[2]);
+                    if (DEBUG && this.messageEnabled(Messages.CPU)) {
+                        this.printMessage("updateTimer(" + nCycles + "): rearming " + timer[0] + " for " + timer[2] + "ms (" + timer[1] + " cycles)");
+                    }
+                }
             }
         }
     }
@@ -44595,6 +44609,7 @@ class Keyboard extends Component {
          */
         var kbd = this;
         var id = sHTMLType + '-' + sBinding;
+        var controlText = /** @type {HTMLTextAreaElement} */ (control);
 
         if (this.bindings[id] === undefined) {
             switch (sBinding) {
@@ -44608,13 +44623,13 @@ class Keyboard extends Component {
                  *
                  *      this.bindings[id] = control;
                  */
-                control.onkeydown = function onKeyDown(event) {
+                controlText.onkeydown = function onKeyDown(event) {
                     return kbd.onKeyDown(event, true);
                 };
-                control.onkeypress = function onKeyPressKbd(event) {
+                controlText.onkeypress = function onKeyPressKbd(event) {
                     return kbd.onKeyPress(event);
                 };
-                control.onkeyup = function onKeyUp(event) {
+                controlText.onkeyup = function onKeyUp(event) {
                     return kbd.onKeyDown(event, false);
                 };
                 return true;
@@ -44652,8 +44667,8 @@ class Keyboard extends Component {
                  */
                 var sCode = sBinding.toUpperCase().replace(/-/g, '_');
                 if (Keyboard.CLICKCODES[sCode] !== undefined && sHTMLType == "button") {
-                    this.bindings[id] = control;
-                    control.onclick = function(kbd, sKey, simCode) {
+                    this.bindings[id] = controlText;
+                    controlText.onclick = function(kbd, sKey, simCode) {
                         return function onKeyboardBindingClick(event) {
                             if (!COMPILED && kbd.messageEnabled()) kbd.printMessage(sKey + " clicked", Messages.KEYS);
                             event.preventDefault();                 // preventDefault() is necessary...
@@ -44667,7 +44682,7 @@ class Keyboard extends Component {
                 }
                 else if (Keyboard.SOFTCODES[sBinding] !== undefined) {
                     this.cSoftCodes++;
-                    this.bindings[id] = control;
+                    this.bindings[id] = controlText;
                     var fnDown = function(kbd, sKey, simCode) {
                         return function onKeyboardBindingDown(event) {
                             event.preventDefault();                 // preventDefault() is necessary...
@@ -44682,11 +44697,11 @@ class Keyboard extends Component {
                         };
                     }(this, sBinding, Keyboard.SOFTCODES[sBinding]);
                     if ('ontouchstart' in window) {
-                        control.ontouchstart = fnDown;
-                        control.ontouchend = fnUp;
+                        controlText.ontouchstart = fnDown;
+                        controlText.ontouchend = fnUp;
                     } else {
-                        control.onmousedown = fnDown;
-                        control.onmouseup = control.onmouseout = fnUp;
+                        controlText.onmousedown = fnDown;
+                        controlText.onmouseup = controlText.onmouseout = fnUp;
                     }
                     return true;
                 }
@@ -48266,7 +48281,7 @@ Card.FEAT_CTRL = {
  */
 Card.MISC = {
     PORT_WRITE:             0x3C2,      // write port address (EGA and VGA)
-    PORT_READ:              0x3CC,      // read port addresss (VGA only)
+    PORT_READ:              0x3CC,      // read port address (VGA only)
     IO_SELECT:              0x01,       // 0 sets CRT ports to 0x3Bn, 1 sets CRT ports to 0x3Dn
     ENABLE_RAM:             0x02,       // 0 disables video RAM, 1 enables
     CLOCK_SELECT:           0x0C,       // 0x0: 14Mhz I/O clock, 0x4: 16Mhz on-board clock, 0x8: external clock, 0xC: unused
@@ -54988,28 +55003,28 @@ Web.onInit(ParallelPort.init);
  */
 
 
-/*
- * class SerialPort
- * property {number} iAdapter
- * property {number} portBase
- * property {number} nIRQ
- * property {Object} controlIOBuffer is a DOM element bound to the port (for rudimentary output; see transmitByte())
+/**
+ * SerialPort class
  *
- * NOTE: This class declaration started as a way of informing the code inspector of the controlIOBuffer property,
- * which remained undefined until a setBinding() call set it later, but I've since decided that explicitly
+ * The class property declarations below started as a way of informing the code inspector of the controlIOBuffer
+ * property, which remained undefined until a setBinding() call set it later, but I've since decided that explicitly
  * initializing such properties in the constructor is a better way to go -- even though it's more code -- because
  * JavaScript compilers are supposed to be happier when the underlying object structures aren't constantly changing.
  *
  * Besides, I'm not sure I want to get into documenting every property this way, for this or any/every other class,
  * let alone getting into which ones should be considered private or protected, because PCjs isn't really a library
  * for third-party apps.
- */
-
-/**
- * TODO: The Closure Compiler treats ES6 classes as 'struct' rather than 'dict' by default,
- * which would force us to declare all class properties in the constructor, as well as prevent
- * us from defining any named properties.  So, for now, we mark all our classes as 'unrestricted'.
  *
+ * TODO: The Closure Compiler treats ES6 classes as 'struct' rather than 'dict' by default, which would force us
+ * to declare all class properties in the constructor, as well as prevent us from defining any named properties.
+ * So, for now, we mark all our classes as 'unrestricted'.
+ *
+ * @class SerialPort
+ * @property {number} iAdapter
+ * @property {number} portBase
+ * @property {number} nIRQ
+ * @property {string|null} consoleOutput
+ * @property {HTMLTextAreaElement} controlIOBuffer (DOM element bound to the port for rudimentary output; see transmitByte())
  * @unrestricted
  */
 class SerialPort extends Component {
@@ -55025,19 +55040,18 @@ class SerialPort extends Component {
      *      tabSize: set to a non-zero number to convert tabs to spaces (applies only to output to
      *      the above binding); default is 0 (no conversion)
      *
-     * In the future, we may support 'port' and 'irq' properties that allow the machine to define a
-     * non-standard serial port configuration, instead of only our pre-defined 'adapter' configurations.
+     * In the future, we may support 'port' and 'irq' properties that allow the machine to define a non-standard
+     * serial port configuration, instead of only our pre-defined 'adapter' configurations.
      *
-     * NOTE: Since the XSL file defines 'adapter' as a number, not a string, there's no need to use
-     * parseInt(), and as an added benefit, we don't need to worry about whether a hex or decimal format
-     * was used.
+     * NOTE: Since the XSL file defines 'adapter' as a number, not a string, there's no need to use parseInt(),
+     * and as an added benefit, we don't need to worry about whether a hex or decimal format was used.
      *
-     * This hard-coded approach mimics the original IBM PC Asynchronous Adapter configuration, which
-     * contained a pair of "shunt modules" that allowed the user to select a port address of either
-     * 0x3F8 ("Primary") or 0x2F8 ("Secondary").
+     * This hard-coded approach mimics the original IBM PC Asynchronous Adapter configuration, which contained a
+     * pair of "shunt modules" that allowed the user to select a port address of either 0x3F8 ("Primary") or 0x2F8
+     * ("Secondary").
      *
-     * DOS typically names the Primary adapter "COM1" and the Secondary adapter "COM2", but I prefer
-     * to stick to adapter numbers, since not all operating systems follow those naming conventions.
+     * DOS typically names the Primary adapter "COM1" and the Secondary adapter "COM2", but I prefer to stick to
+     * adapter numbers, since not all operating systems follow those naming conventions.
      *
      * @this {SerialPort}
      * @param {Object} parmsSerial
@@ -55065,8 +55079,6 @@ class SerialPort extends Component {
          * consoleOutput becomes a string that records serial port output if the 'binding' property is set to the
          * reserved name "console".  Nothing is written to the console, however, until a linefeed (0x0A) is output
          * or the string length reaches a threshold (currently, 1024 characters).
-         *
-         * @type {string|null}
          */
         this.consoleOutput = null;
 
@@ -55081,8 +55093,6 @@ class SerialPort extends Component {
          * serial input, DOS *transmits* the appropriate characters back to the terminal via COM2.
          *
          * As a result, controlIOBuffer only needs to be updated by the transmitByte() function.
-         *
-         * @type {Object}
          */
         this.controlIOBuffer = null;
 
@@ -55165,13 +55175,13 @@ class SerialPort extends Component {
 
         switch (sBinding) {
         case SerialPort.sIOBuffer:
-            this.bindings[sBinding] = this.controlIOBuffer = control;
+            this.bindings[sBinding] = this.controlIOBuffer = /** @type {HTMLTextAreaElement} */ (control);
 
             /*
              * By establishing an onkeypress handler here, we make it possible for DOS commands like
              * "CTTY COM1" to more or less work (use "CTTY CON" to restore control to the DOS console).
              */
-            control.onkeydown = function onKeyDown(event) {
+            this.controlIOBuffer.onkeydown = function onKeyDown(event) {
                 /*
                  * This is required in addition to onkeypress, because it's the only way to prevent
                  * BACKSPACE (keyCode 8) from being interpreted by the browser as a "Back" operation;
@@ -55193,7 +55203,7 @@ class SerialPort extends Component {
                 return true;
             };
 
-            control.onkeypress = function onKeyPress(event) {
+            this.controlIOBuffer.onkeypress = function onKeyPress(event) {
                 /*
                  * Browser-independent keyCode extraction; refer to onKeyPress() and the other key event
                  * handlers in keyboard.js.
@@ -55217,7 +55227,7 @@ class SerialPort extends Component {
              * itself no longer needs the "readonly" attribute; we primarily need to remove it for iOS browsers,
              * so that the soft keyboard will activate, but it shouldn't hurt to remove the attribute for all browsers.
              */
-            control.removeAttribute("readonly");
+            this.controlIOBuffer.removeAttribute("readonly");
 
             return true;
 
@@ -55287,7 +55297,7 @@ class SerialPort extends Component {
                     if (this.connection) {
                         var exports = this.connection['exports'];
                         if (exports) {
-                            var fnConnect = exports['connect'];
+                            var fnConnect = /** @function */ (exports['connect']);
                             if (fnConnect) fnConnect.call(this.connection, this.fNullModem);
                             this.sendData = exports['receiveData'];
                             if (this.sendData) {
@@ -67054,8 +67064,8 @@ class DebuggerX86 extends Debugger {
             this.sInitCommands = parmsDbg['commands'];
 
             /*
-             * Make it easier to access Debugger commands from an external REPL (eg, the WebStorm
-             * "live" console window); eg:
+             * Make it easier to access Debugger commands from an external REPL, like the WebStorm "live" console
+             * window; eg:
              *
              *      pcx86('r')
              *      pcx86('dw 0:0')
@@ -67735,22 +67745,23 @@ class DebuggerX86 extends Debugger {
         switch (sBinding) {
 
         case "debugInput":
-            this.bindings[sBinding] = control;
-            this.controlDebug = control;
+            var controlInput = /** @type {HTMLInputElement} */ (control);
+            this.bindings[sBinding] = controlInput;
+            this.controlDebug = controlInput;
             /*
              * For halted machines, this is fine, but for auto-start machines, it can be annoying.
              *
-             *      control.focus();
+             *      controlInput.focus();
              */
-            control.onkeydown = function onKeyDownDebugInput(event) {
+            controlInput.onkeydown = function onKeyDownDebugInput(event) {
                 var sCmd;
                 if (event.keyCode == Keys.KEYCODE.CR) {
-                    sCmd = control.value;
-                    control.value = "";
+                    sCmd = controlInput.value;
+                    controlInput.value = "";
                     dbg.doCommands(sCmd, true);
                 }
                 else if (event.keyCode == Keys.KEYCODE.ESC) {
-                    control.value = sCmd = "";
+                    controlInput.value = sCmd = "";
                 }
                 else {
                     if (event.keyCode == Keys.KEYCODE.UP) {
@@ -67761,8 +67772,8 @@ class DebuggerX86 extends Debugger {
                     }
                     if (sCmd != null) {
                         var cch = sCmd.length;
-                        control.value = sCmd;
-                        control.setSelectionRange(cch, cch);
+                        controlInput.value = sCmd;
+                        controlInput.setSelectionRange(cch, cch);
                     }
                 }
                 if (sCmd != null && event.preventDefault) event.preventDefault();
@@ -68983,6 +68994,7 @@ class DebuggerX86 extends Debugger {
         this.dbg = this;
         this.bitsMessage = this.bitsWarning = Messages.WARN;
         this.sMessagePrev = null;
+        this.aMessageLog = [];
         /*
          * Internally, we use "key" instead of "keys", since the latter is a method on JavasScript objects,
          * but externally, we allow the user to specify "keys"; "kbd" is also allowed as shorthand for "keyboard".
@@ -69329,6 +69341,11 @@ class DebuggerX86 extends Debugger {
     {
         if (fAddress) {
             sMessage += " at " + this.toHexAddr(this.newAddr(this.cpu.getIP(), this.cpu.getCS())) + " (%" + Str.toHex(this.cpu.regLIP) + ")";
+        }
+
+        if (this.bitsMessage & Messages.LOG) {
+            this.aMessageLog.push(sMessage);
+            return;
         }
 
         if (this.sMessagePrev && sMessage == this.sMessagePrev) return;
@@ -72271,6 +72288,12 @@ class DebuggerX86 extends Debugger {
                 else if (asArgs[2] == "off") {
                     this.bitsMessage &= ~bitsMessage;
                     fCriteria = false;
+                    if (bitsMessage == Messages.LOG) {
+                        for (var i = 0; i < this.aMessageLog.length; i++) {
+                            this.println(this.aMessageLog[i]);
+                        }
+                        this.aMessageLog = [];
+                    }
                 }
             }
         }

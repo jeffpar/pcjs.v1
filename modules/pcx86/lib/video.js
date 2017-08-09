@@ -1314,7 +1314,7 @@ Card.FEAT_CTRL = {
  */
 Card.MISC = {
     PORT_WRITE:             0x3C2,      // write port address (EGA and VGA)
-    PORT_READ:              0x3CC,      // read port addresss (VGA only)
+    PORT_READ:              0x3CC,      // read port address (VGA only)
     IO_SELECT:              0x01,       // 0 sets CRT ports to 0x3Bn, 1 sets CRT ports to 0x3Dn
     ENABLE_RAM:             0x02,       // 0 disables video RAM, 1 enables
     CLOCK_SELECT:           0x0C,       // 0x0: 14Mhz I/O clock, 0x4: 16Mhz on-board clock, 0x8: external clock, 0xC: unused
