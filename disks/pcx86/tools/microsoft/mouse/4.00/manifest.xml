@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.36.1/manifest.xsl"?>
+<manifest type="software">
+	<title>MS Mouse</title>
+	<version>4.00</version>
+	<type>Driver</type>
+	<category>Mouse</category>
+	<author>Microsoft</author>
+	<releaseDate>1985</releaseDate>
+	<disk id="disk01" size="368640" chs="40:2:9" img="archive/MSMOUSE-000099-400-DISK1-SYSTEM.img" href="/disks/pcx86/tools/microsoft/mouse/4.00/MSMOUSE-000099-400-DISK1-SYSTEM.json" md5="ddfd85e6da9bbcc4bd9163d67d277180" md5json="aed8dde824e85858ec8a04841602ba3c">
+		<name>MS Mouse 4.00 (SYSTEM)</name>
+		<file size="3356" time="1985-05-01 12:00:00" attr="0x20">123.DEF</file>
+		<file size="1024" time="1985-05-01 12:00:00" attr="0x20">123.MNU</file>
+		<file size="15224" time="1985-05-01 12:00:00" attr="0x20">ATT.DEV</file>
+		<file size="17" time="1985-05-01 12:00:00" attr="0x20">AUTOEXEC.BAT</file>
+		<file size="15425" time="1985-05-01 12:00:00" attr="0x20">EGA.DEV</file>
+		<file size="48" time="1985-05-01 12:00:00" attr="0x20">FRZSUB.BAS</file>
+		<file size="2736" time="1985-05-01 12:00:00" attr="0x20">GTCO.EXE</file>
+		<file size="8022" time="1985-05-01 12:00:00" attr="0x20">HOKUSAI.PCX</file>
+		<file size="10210" time="1985-05-01 12:00:00" attr="0x20">HOUSE.PCX</file>
+		<file size="14964" time="1985-05-01 12:00:00" attr="0x20">IBM.DEV</file>
+		<file size="2095" time="1985-05-01 12:00:00" attr="0x20">LIFE.EXE</file>
+		<file size="25180" time="1985-05-01 12:00:00" attr="0x20">MAKEMENU.EXE</file>
+		<file size="2434" time="1985-05-01 12:00:00" attr="0x20">MENU.COM</file>
+		<file size="7099" time="1985-05-01 12:00:00" attr="0x20">MOUSE.COM</file>
+		<file size="2560" time="1985-05-01 12:00:00" attr="0x20">MOUSE.LIB</file>
+		<file size="7326" time="1985-05-01 12:00:00" attr="0x20">MOUSE.SYS</file>
+		<file size="7712" time="1985-05-01 12:00:00" attr="0x20">MPIBM.DEF</file>
+		<file size="1664" time="1985-05-01 12:00:00" attr="0x20">MPIBM.MNU</file>
+		<file size="7705" time="1985-05-01 12:00:00" attr="0x20">MPMS.DEF</file>
+		<file size="1664" time="1985-05-01 12:00:00" attr="0x20">MPMS.MNU</file>
+		<file size="12270" time="1985-05-01 12:00:00" attr="0x20">NOTEPAD.COM</file>
+		<file size="25960" time="1985-05-01 12:00:00" attr="0x20">NP.COD</file>
+		<file size="8522" time="1985-05-01 12:00:00" attr="0x20">NP.DAT</file>
+		<file size="17641" time="1985-05-01 12:00:00" attr="0x20">NP.HLP</file>
+		<file size="9536" time="1985-05-01 12:00:00" attr="0x20">PIANO.BAS</file>
+		<file size="33044" time="1985-05-01 12:00:00" attr="0x20">PIANO.EXE</file>
+		<file size="15393" time="1985-05-01 12:00:00" attr="0x20">PLN.DEV</file>
+		<file size="15918" time="1985-05-01 12:00:00" attr="0x20">README.DOC</file>
+		<file size="16990" time="1985-05-01 12:00:00" attr="0x20">SETCOLOR.EXE</file>
+		<file size="39" time="1985-05-01 12:00:00" attr="0x20">SETMODE.COM</file>
+		<file size="3718" time="1985-05-01 12:00:00" attr="0x20">SLIDES.BAS</file>
+		<file size="2752" time="1985-05-01 12:00:00" attr="0x20">SUM1201.EXE</file>
+		<file size="2752" time="1985-05-01 12:00:00" attr="0x20">SUM961.EXE</file>
+		<file size="7977" time="1985-05-01 12:00:00" attr="0x20">VC.DEF</file>
+		<file size="2560" time="1985-05-01 12:00:00" attr="0x20">VC.MNU</file>
+		<file size="13560" time="1985-05-01 12:00:00" attr="0x20">WS.DEF</file>
+		<file size="4608" time="1985-05-01 12:00:00" attr="0x20">WS.MNU</file>
+	</disk>
+	<disk id="disk02" size="368640" chs="40:2:9" img="archive/MSMOUSE-000099-400-DISK2-PROGRAM.img" href="/disks/pcx86/tools/microsoft/mouse/4.00/MSMOUSE-000099-400-DISK2-PROGRAM.json" md5="39f948afa5894e9d2379b920a737fcbe" md5json="ee908fe2950238c591f6ba7f4cfe4fae">
+		<name>MS Mouse 4.00 (PROGRAM)</name>
+		<file size="5" time="1985-05-01 12:00:00" attr="0x20">AUTOEXEC.BAT</file>
+		<file size="1154" time="1985-05-01 12:00:00" attr="0x20">BIT5X7.FNT</file>
+		<file size="1282" time="1985-05-01 12:00:00" attr="0x20">BIT5X8.FNT</file>
+		<file size="2306" time="1985-05-01 12:00:00" attr="0x20">BIT8X8.FNT</file>
+		<file size="7426" time="1985-05-01 12:00:00" attr="0x20">BIT9X14.FNT</file>
+		<file size="1878" time="1985-05-01 12:00:00" attr="0x20">BITMICR.FNT</file>
+		<file size="1866" time="1985-05-01 12:00:00" attr="0x20">BITPEIG.FNT</file>
+		<file size="2789" time="1985-05-01 12:00:00" attr="0x20">CARDS.DAT</file>
+		<file size="3058" time="1985-05-01 12:00:00" attr="0x20">COMPUTER.FNT</file>
+		<file size="459" time="1985-05-01 12:00:00" attr="0x20">DDEVICE.DAT</file>
+		<file size="1156" time="1985-05-01 12:00:00" attr="0x20">DEF16.PAL</file>
+		<file size="1156" time="1985-05-01 12:00:00" attr="0x20">DEF2.PAL</file>
+		<file size="1156" time="1985-05-01 12:00:00" attr="0x20">DEF4.PAL</file>
+		<file size="3038" time="1985-05-01 12:00:00" attr="0x20">EURO.FNT</file>
+		<file size="22136" time="1985-05-01 12:00:00" attr="0x20">FRIEZE.TPL</file>
+		<file size="15410" time="1985-05-01 12:00:00" attr="0x20">FRIEZE1.TPL</file>
+		<file size="5729" time="1985-05-01 12:00:00" attr="0x20">GREEK.FNT</file>
+		<file size="5789" time="1985-05-01 12:00:00" attr="0x20">LTROMAN.FNT</file>
+		<file size="9108" time="1985-05-01 12:00:00" attr="0x20">OENGLISH.FNT</file>
+		<file size="37" time="1985-05-01 12:00:00" attr="0x20">PAINT.BAT</file>
+		<file size="1026" time="1985-05-01 12:00:00" attr="0x20">PAL16.PAL</file>
+		<file size="1026" time="1985-05-01 12:00:00" attr="0x20">PAL2.PAL</file>
+		<file size="1026" time="1985-05-01 12:00:00" attr="0x20">PAL4.PAL</file>
+		<file size="72396" time="1985-05-01 12:00:00" attr="0x20">PBRUSH.EXE</file>
+		<file size="67414" time="1985-05-01 12:00:00" attr="0x20">PBRUSH1.EXE</file>
+		<file size="27523" time="1985-05-01 12:00:00" attr="0x20">PCINSTAL.EXE</file>
+		<file size="950" time="1985-05-01 12:00:00" attr="0x20">PRINTERS.DAT</file>
+		<file size="148" time="1985-05-01 12:00:00" attr="0x20">PSETUP.DAT</file>
+		<file size="8001" time="1985-05-01 12:00:00" attr="0x20">ROMAN.FNT</file>
+		<file size="5928" time="1985-05-01 12:00:00" attr="0x20">SANSERIF.FNT</file>
+		<file size="6578" time="1985-05-01 12:00:00" attr="0x20">SCRIPT.FNT</file>
+	</disk>
+</manifest>

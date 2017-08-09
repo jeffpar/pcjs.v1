@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.36.1/manifest.xsl"?>
+<manifest type="software">
+	<title>MS Mouse</title>
+	<version>6.xx</version>
+	<type>Driver</type>
+	<category>Mouse</category>
+	<author>Microsoft</author>
+	<releaseDate>1988</releaseDate>
+	<disk id="disk01" size="368640" chs="40:2:9" img="archive/MSMOUSE-056199-100-DISK-SETUP.img" href="/disks/pcx86/tools/microsoft/mouse/6.00/MSMOUSE-614-SETUP.json" md5="218c5189e94d7987a5d513d94535c7c3" md5json="bb86a89a00c03e376e4de01ddc0a6647">
+		<name>MS Mouse 6.14 (SETUP)</name>
+		<file size="19858" time="1988-01-15 11:00:16" attr="0x20">CPANEL.COM</file>
+		<file size="8787" time="1988-01-15 11:00:18" attr="0x20">DEFAULT.COM</file>
+		<file size="8224" time="1988-01-15 11:00:18" attr="0x20">DEMO.EXE</file>
+		<file size="27888" time="1988-01-15 11:00:18" attr="0x20">DEMOM.COM</file>
+		<file size="21899" time="1988-01-15 11:00:18" attr="0x20">EAGLE.PCX</file>
+		<file size="2540" time="1988-01-15 11:00:18" attr="0x20">MENU.COM</file>
+		<file size="14551" time="1988-01-15 11:00:20" attr="0x20">MOUSE.COM</file>
+		<file size="14394" time="1988-01-15 11:00:20" attr="0x20">MOUSE.SYS</file>
+		<file size="5529" time="1988-01-15 11:00:20" attr="0x20">MREADME.DOC</file>
+		<file size="23936" time="1988-01-15 11:00:20" attr="0x20">MS.PGM</file>
+		<file size="36899" time="1988-01-15 11:00:20" attr="0x20">MSETUP.COM</file>
+		<file size="5396" time="1988-01-15 11:00:22" attr="0x20">PBREADME.DOC</file>
+		<file size="126096" time="1988-01-15 11:00:22" attr="0x20">PBRUSH.EXE</file>
+		<file size="26707" time="1988-01-15 11:00:22" attr="0x20">PIANO.EXE</file>
+		<file size="3368" time="1988-01-15 11:00:22" attr="0x20">STARTLES.CTX</file>
+		<file size="1157" time="1988-01-15 11:00:22" attr="0x20">STARTLES.SCN</file>
+		<file size="978" time="1988-01-15 11:00:22" attr="0x20">STARTLES.SOB</file>
+	</disk>
+	<disk id="disk02" size="368640" chs="40:2:9" img="archive/MSMOUSE-624-SETUP.img" href="/disks/pcx86/tools/microsoft/mouse/6.00/MSMOUSE-624-SETUP.json" md5="143ae874a898bc945891fe8b9a007491" md5json="7aa71659917bf709c4688895b870a818">
+		<name>MS Mouse 6.24 (SETUP)</name>
+		<file size="2318" time="1988-08-01 00:00:02" attr="0x20">COMSP.EXE</file>
+		<file size="19858" time="1988-08-01 00:00:02" attr="0x20">CPANEL.COM</file>
+		<file size="782" time="1988-08-01 00:00:02" attr="0x20">DEMO.BAT</file>
+		<file size="27888" time="1988-08-01 00:00:02" attr="0x20">DEMOM.COM</file>
+		<file size="45" time="1988-08-01 00:00:02" attr="0x20">DISKS.COM</file>
+		<file size="2540" time="1988-08-01 00:00:02" attr="0x20">MENU.COM</file>
+		<file size="40010" time="1988-08-01 00:00:02" attr="0x20">MENUREAD.ME</file>
+		<file size="14668" time="1988-08-01 00:00:02" attr="0x20">MOUSE.COM</file>
+		<file size="3358" time="1988-08-01 00:00:02" attr="0x20">MOUSE.DRV</file>
+		<file size="14511" time="1988-08-01 00:00:02" attr="0x20">MOUSE.SYS</file>
+		<file size="4302" time="1988-08-01 00:00:02" attr="0x20">MREADME.DOC</file>
+		<file size="23936" time="1988-08-01 00:00:02" attr="0x20">MS.PGM</file>
+		<file size="16640" time="1988-08-01 00:00:02" attr="0x20">MS123.COM</file>
+		<file size="36899" time="1988-08-01 00:00:02" attr="0x20">MSETUP.COM</file>
+		<file size="11575" time="1988-08-01 00:00:02" attr="0x20">MSMM2.COM</file>
+		<file size="11478" time="1988-08-01 00:00:02" attr="0x20">MSPF.COM</file>
+		<file size="15184" time="1988-08-01 00:00:02" attr="0x20">MSPLAN.COM</file>
+		<file size="13342" time="1988-08-01 00:00:02" attr="0x20">MSPW2.COM</file>
+		<file size="20580" time="1988-08-01 00:00:02" attr="0x20">MSSC4.COM</file>
+		<file size="19200" time="1988-08-01 00:00:02" attr="0x20">MSWS.COM</file>
+		<file size="12360" time="1988-08-01 00:00:02" attr="0x20">MSWS5.COM</file>
+		<file size="26707" time="1988-08-01 00:00:02" attr="0x20">PIANO.EXE</file>
+		<file size="3368" time="1988-08-01 00:00:02" attr="0x20">STARTLES.CTX</file>
+		<file size="1157" time="1988-08-01 00:00:02" attr="0x20">STARTLES.SCN</file>
+		<file size="978" time="1988-08-01 00:00:02" attr="0x20">STARTLES.SOB</file>
+	</disk>
+	<disk id="disk03" size="368640" chs="40:2:9" img="archive/MSMOUSE-624-PROGRAM.img" href="/disks/pcx86/tools/microsoft/mouse/6.00/MSMOUSE-624-PROGRAM.json" md5="342f3a3dd6e302500dda1b9d6ec29ec7" md5json="0ec6ff82f5de68047b740e305ecc8604">
+		<name>MS Mouse 6.24 (PROGRAM)</name>
+		<file size="7426" time="1988-08-01 00:00:02" attr="0x20">BIT16X14.FNT</file>
+		<file size="8450" time="1988-08-01 00:00:02" attr="0x20">BIT16X16.FNT</file>
+		<file size="3856" time="1988-08-01 00:00:02" attr="0x20">BIT8X14.FNT</file>
+		<file size="4354" time="1988-08-01 00:00:02" attr="0x20">BIT8X16.FNT</file>
+		<file size="2314" time="1988-08-01 00:00:02" attr="0x20">BIT8X8.FNT</file>
+		<file size="1156" time="1988-08-01 00:00:02" attr="0x20">DEF16.PAL</file>
+		<file size="1156" time="1988-08-01 00:00:02" attr="0x20">DEF2.PAL</file>
+		<file size="1156" time="1988-08-01 00:00:02" attr="0x20">DEF256.PAL</file>
+		<file size="1156" time="1988-08-01 00:00:02" attr="0x20">DEF4.PAL</file>
+		<file size="41600" time="1988-08-01 00:00:02" attr="0x20">FRIEZE.COM</file>
+		<file size="1156" time="1988-08-01 00:00:02" attr="0x20">GRAY16.PAL</file>
+		<file size="2071" time="1988-08-01 00:00:02" attr="0x20">HBIOS.COM</file>
+		<file size="24124" time="1988-08-01 00:00:02" attr="0x20">MSSYM.COM</file>
+		<file size="32576" time="1988-08-01 00:00:02" attr="0x20">MSWP4.COM</file>
+		<file size="39086" time="1988-08-01 00:00:02" attr="0x20">MSWP5.COM</file>
+		<file size="1601" time="1988-08-01 00:00:02" attr="0x20">P322.ICO</file>
+		<file size="2829" time="1988-08-01 00:00:02" attr="0x20">P3228.ICO</file>
+		<file size="1652" time="1988-08-01 00:00:02" attr="0x20">P642.ICO</file>
+		<file size="3232" time="1988-08-01 00:00:02" attr="0x20">P643.ICO</file>
+		<file size="3383" time="1988-08-01 00:00:02" attr="0x20">P644.ICO</file>
+		<file size="4115" time="1988-08-01 00:00:02" attr="0x20">P6448.ICO</file>
+		<file size="3391" time="1988-08-01 00:00:02" attr="0x20">P723.ICO</file>
+		<file size="136727" time="1988-08-01 00:00:02" attr="0x20">PBRUSH.EXE</file>
+		<file size="1299" time="1988-08-01 00:00:02" attr="0x20">PBRUSH.OVL</file>
+		<file size="1919" time="1988-08-01 00:00:02" attr="0x20">PBRUSH1.OVL</file>
+		<file size="4557" time="1988-08-01 00:00:02" attr="0x20">PBRUSH2.OVL</file>
+		<file size="8001" time="1988-08-01 00:00:02" attr="0x20">ROMAN.FNT</file>
+	</disk>
+	<disk id="disk04" size="368640" chs="40:2:9" img="archive/MSMOUSE-624-UTILITIES.img" href="/disks/pcx86/tools/microsoft/mouse/6.00/MSMOUSE-624-UTILITIES.json" md5="143b1c0e4e0bfce69361c94bafd7e09e" md5json="1c29b6818f42e7356133da7b43c09912">
+		<name>MS Mouse 6.24 (UTILITIES)</name>
+		<file size="1857" time="1988-08-01 00:00:02" attr="0x20">ATT.DEV</file>
+		<file size="1282" time="1988-08-01 00:00:02" attr="0x20">BIT5X8.FNT</file>
+		<file size="7426" time="1988-08-01 00:00:02" attr="0x20">BIT9X14.FNT</file>
+		<file size="809" time="1988-08-01 00:00:02" attr="0x20">CARDS.DAT</file>
+		<file size="593" time="1988-08-01 00:00:02" attr="0x20">CN1.DEV</file>
+		<file size="1083" time="1988-08-01 00:00:02" attr="0x20">CN8.DEV</file>
+		<file size="1646" time="1988-08-01 00:00:02" attr="0x20">CNQ.DEV</file>
+		<file size="3058" time="1988-08-01 00:00:02" attr="0x20">COMPUTER.FNT</file>
+		<file size="60407" time="1988-08-01 00:00:02" attr="0x20">CONVERT.EXE</file>
+		<file size="40923" time="1988-08-01 00:00:02" attr="0x20">DRIVE1</file>
+		<file size="40160" time="1988-08-01 00:00:02" attr="0x20">DRIVE2</file>
+		<file size="39541" time="1988-08-01 00:00:02" attr="0x20">DRIVE8</file>
+		<file size="1419" time="1988-08-01 00:00:02" attr="0x20">EGA.DEV</file>
+		<file size="826" time="1988-08-01 00:00:02" attr="0x20">EPSONFX.PDV</file>
+		<file size="825" time="1988-08-01 00:00:02" attr="0x20">EPSONFXW.PDV</file>
+		<file size="1022" time="1988-08-01 00:00:02" attr="0x20">EPSONJX.PDV</file>
+		<file size="1021" time="1988-08-01 00:00:02" attr="0x20">EPSONJXW.PDV</file>
+		<file size="662" time="1988-08-01 00:00:02" attr="0x20">EPSONLP.PDV</file>
+		<file size="874" time="1988-08-01 00:00:02" attr="0x20">EPSONLQ.PDV</file>
+		<file size="873" time="1988-08-01 00:00:02" attr="0x20">EPSONLQW.PDV</file>
+		<file size="806" time="1988-08-01 00:00:02" attr="0x20">EPSONMX.PDV</file>
+		<file size="805" time="1988-08-01 00:00:02" attr="0x20">EPSONMXW.PDV</file>
+		<file size="3038" time="1988-08-01 00:00:02" attr="0x20">EURO.FNT</file>
+		<file size="5729" time="1988-08-01 00:00:02" attr="0x20">GREEK.FNT</file>
+		<file size="694" time="1988-08-01 00:00:02" attr="0x20">HER.DEV</file>
+		<file size="674" time="1988-08-01 00:00:02" attr="0x20">HP300.PDV</file>
+		<file size="644" time="1988-08-01 00:00:02" attr="0x20">HPLASER.PDV</file>
+		<file size="717" time="1988-08-01 00:00:02" attr="0x20">IBM.DEV</file>
+		<file size="1000" time="1988-08-01 00:00:02" attr="0x20">IBMCOLOR.PDV</file>
+		<file size="723" time="1988-08-01 00:00:02" attr="0x20">IBMJET.PDV</file>
+		<file size="731" time="1988-08-01 00:00:02" attr="0x20">IBMQW2.PDV</file>
+		<file size="5789" time="1988-08-01 00:00:02" attr="0x20">LTROMAN.FNT</file>
+		<file size="220" time="1988-08-01 00:00:02" attr="0x20">MSCVERT.OVL</file>
+		<file size="898" time="1988-08-01 00:00:02" attr="0x20">MSCVERT1.OVL</file>
+		<file size="148" time="1988-08-01 00:00:02" attr="0x20">MSCVERT2.OVL</file>
+		<file size="11195" time="1988-08-01 00:00:02" attr="0x20">MSDB3.COM</file>
+		<file size="8946" time="1988-08-01 00:00:02" attr="0x20">MSMENU.COM</file>
+		<file size="987" time="1988-08-01 00:00:02" attr="0x20">NEC.PDV</file>
+		<file size="9108" time="1988-08-01 00:00:02" attr="0x20">OENGLISH.FNT</file>
+		<file size="730" time="1988-08-01 00:00:02" attr="0x20">OKI190.PDV</file>
+		<file size="729" time="1988-08-01 00:00:02" attr="0x20">OKI190W.PDV</file>
+		<file size="727" time="1988-08-01 00:00:02" attr="0x20">OKI290BW.PDV</file>
+		<file size="812" time="1988-08-01 00:00:02" attr="0x20">OKI290W.PDV</file>
+		<file size="743" time="1988-08-01 00:00:02" attr="0x20">OKI84S2W.PDV</file>
+		<file size="728" time="1988-08-01 00:00:02" attr="0x20">OKI90W.PDV</file>
+		<file size="944" time="1988-08-01 00:00:02" attr="0x20">OKICOLOR.PDV</file>
+		<file size="820" time="1988-08-01 00:00:02" attr="0x20">OKIMATE.PDV</file>
+		<file size="12213" time="1988-08-01 00:00:02" attr="0x20">PBREADME.DOC</file>
+		<file size="26253" time="1988-08-01 00:00:02" attr="0x20">PBSETUP.EXE</file>
+		<file size="2314" time="1988-08-01 00:00:02" attr="0x20">PBSETUP.MSG</file>
+		<file size="16587" time="1988-08-01 00:00:02" attr="0x20">PBSETUP.SCR</file>
+		<file size="1624" time="1988-08-01 00:00:02" attr="0x20">PRINTERS.DAT</file>
+		<file size="5928" time="1988-08-01 00:00:02" attr="0x20">SANSERIF.FNT</file>
+		<file size="6578" time="1988-08-01 00:00:02" attr="0x20">SCRIPT.FNT</file>
+		<file size="644" time="1988-08-01 00:00:02" attr="0x20">THINKJET.PDV</file>
+		<file size="831" time="1988-08-01 00:00:02" attr="0x20">TI855.PDV</file>
+		<file size="1023" time="1988-08-01 00:00:02" attr="0x20">TOSHBW.PDV</file>
+		<file size="1022" time="1988-08-01 00:00:02" attr="0x20">TOSHBWW.PDV</file>
+		<file size="1154" time="1988-08-01 00:00:02" attr="0x20">TOSHCW.PDV</file>
+		<file size="1164" time="1988-08-01 00:00:02" attr="0x20">TWO.DEV</file>
+	</disk>
+</manifest>
