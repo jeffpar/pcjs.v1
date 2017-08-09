@@ -449,19 +449,24 @@ class Computer extends Component {
     }
 
     /**
-     * notifyKbdEvent(event)
+     * notifyKbdEvent(event, fDown)
      *
      * This is called by the Keyboard component for all key presses, and it is effectively a no-op except
      * in the one special case where disableDiagnostics() has delayed powerOn until a key is pressed.
      *
      * @this {Computer}
+     * @param {Object} [event]
+     * @param {boolean} [fDown] is true for a keyDown event, false for a keyUp event
+     * @return {boolean} (true if diagnostics disabled, false if enabled -- at the time of the call)
      */
-    notifyKbdEvent(event)
+    notifyKbdEvent(event, fDown)
     {
+        var nDiagnostics = this.nDiagnostics;
         if (this.nDiagnostics == 3) {
             this.nDiagnostics++;
-            this.setReady();
+            this.setReady();    // this may trigger a call to disableDiagnostics(), which is why we snapshot nDiagnostics
         }
+        return !nDiagnostics;
     }
 
     /**

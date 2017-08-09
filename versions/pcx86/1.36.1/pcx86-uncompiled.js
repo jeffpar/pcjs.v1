@@ -45909,8 +45909,11 @@ class Keyboard extends Component {
         var fPass = true;
         var fPress = false;
         var fIgnore = false;
-
         var keyCode = event.keyCode;
+
+        if (!this.cmp.notifyKbdEvent(event, fDown)) {
+            return false;
+        }
 
         this.sInjectBuffer = "";                        // actual key events should stop any injection in progress
         Component.processScript(this.idMachine);        // and any script, too
@@ -46055,9 +46058,11 @@ class Keyboard extends Component {
         event = event || window.event;
         var keyCode = event.which || event.keyCode;
 
-        this.sInjectBuffer = "";        // actual key events should stop any injection currently in progress
+        if (!this.cmp.notifyKbdEvent(event)) {
+            return false;
+        }
 
-        this.cmp.notifyKbdEvent(event);
+        this.sInjectBuffer = "";        // actual key events should stop any injection currently in progress
 
         if (this.fAllDown) {
             var simCode = this.checkActiveKey();
@@ -75054,7 +75059,7 @@ class Computer extends Component {
      * disableDiagnostics()
      *
      * @this {Computer}
-     * @return {boolean} (true if diagnostics were, or already are, disabled; false if they remain disabled)
+     * @return {boolean} (true if diagnostics were, or already are, disabled; false if they remain enabled)
      */
     disableDiagnostics()
     {
@@ -75120,19 +75125,24 @@ class Computer extends Component {
     }
 
     /**
-     * notifyKbdEvent(event)
+     * notifyKbdEvent(event, fDown)
      *
      * This is called by the Keyboard component for all key presses, and it is effectively a no-op except
      * in the one special case where disableDiagnostics() has delayed powerOn until a key is pressed.
      *
      * @this {Computer}
+     * @param {Object} [event]
+     * @param {boolean} [fDown] is true for a keyDown event, false for a keyUp event
+     * @return {boolean} (true if diagnostics disabled, false if enabled -- at the time of the call)
      */
-    notifyKbdEvent(event)
+    notifyKbdEvent(event, fDown)
     {
+        var nDiagnostics = this.nDiagnostics;
         if (this.nDiagnostics == 3) {
             this.nDiagnostics++;
-            this.setReady();
+            this.setReady();    // this may trigger a call to disableDiagnostics(), which is why we snapshot nDiagnostics
         }
+        return !nDiagnostics;
     }
 
     /**
