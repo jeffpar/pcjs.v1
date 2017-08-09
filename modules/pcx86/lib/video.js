@@ -44,6 +44,7 @@ if (NODE) {
 
 /*
  * MDA/CGA Support
+ * ---------------
  *
  * Since there's a lot of similarity between the MDA and CGA (eg, their text-mode video buffer
  * format, and their use of the 6845 CRT controller), since the MDA ROM contains the fonts used
@@ -81,10 +82,9 @@ if (NODE) {
  * TODO: Whenever there are borders, they should be filled with the CGA's overscan colors.  However,
  * in the case of graphics modes (and text modes whenever font scaling is enabled), we don't reserve
  * any space for borders, so if borders are important, explicit border support will be required.
- */
-
-/*
+ *
  * EGA Support
+ * -----------
  *
  * EGA support piggy-backs on the existing MDA/CGA support.  All the existing MDA/CGA port handlers
  * now refer to either cardMono or cardColor (instead of directly to cardMDA or cardCGA), enabling
@@ -103,10 +103,9 @@ if (NODE) {
  * control certain assumptions about the virtual display's capabilities (ie, Color Display vs. Enhanced
  * Color Display).  P3 can switch all the I/O ports from 0x3nn to 0x2nn; the default is 0x3nn, and
  * that's the only port range the EGA ROM supports as well.
- */
-
-/*
+ *
  * VGA Support
+ * -----------
  *
  * More will be said here about PCjs VGA support later.  But first, a word from IBM: "Video Graphics Array [VGA]
  * Programming Considerations":
@@ -2166,6 +2165,7 @@ class Video extends Component {
      *      fontROM: path to .rom file (or a JSON representation) containing the character set
      *      touchScreen: string specifying desired touch-screen support (default is none)
      *      autoLock: true to (attempt to) auto-lock the mouse to the canvas (default is false)
+     *      randomize: 1 enables screen randomization, 0 disables (default is 1)
      *
      * An EGA/VGA may specify the following additional properties:
      *
@@ -2220,6 +2220,8 @@ class Video extends Component {
         this.nCard = aModelDefaults[0];
         this.cbMemory = parmsVideo['memory'] || 0;  // zero means fallback to the cardSpec's default size
         this.sSwitches = parmsVideo['switches'];
+        this.nRandomize = parmsVideo['randomize'];
+        if (this.nRandomize == null) this.nRandomize = 1;
 
         /*
          * powerUp() uses the default mode ONLY if ChipSet doesn't give us a default.
@@ -2418,6 +2420,9 @@ class Video extends Component {
         this.cpu = cpu;
         this.dbg = dbg;
 
+        var nRandomize = +cmp.getMachineParm('randomize');
+        if (nRandomize >= 0 && nRandomize <= 1) this.nRandomize = nRandomize;
+
         /*
          * nCard will be undefined if no model was explicitly set (whereas this.nCard is ALWAYS defined).
          */
@@ -2588,15 +2593,15 @@ class Video extends Component {
     }
 
     /**
-     * getInput()
+     * getScreen()
      *
-     * This is an interface used by the Mouse component, so that it can invoke capture/release mouse events from the screen element.
+     * This is an interface used by the Mouse component, so that it can capture mouse events from the screen.
      *
      * @this {Video}
      * @param {Mouse} [mouse]
      * @return {Object|undefined}
      */
-    getInput(mouse)
+    getScreen(mouse)
     {
         this.mouse = mouse;
         return this.inputScreen;
@@ -3127,7 +3132,6 @@ class Video extends Component {
      */
     reset()
     {
-        var fRandomize = true;
         var nMonitorType = ChipSet.MONITOR.NONE;
 
         /*
@@ -3176,7 +3180,6 @@ class Video extends Component {
 
         if (this.nMonitorType !== nMonitorType) {
             this.nMonitorType = nMonitorType;
-            fRandomize = true;
         }
 
         this.cardActive = null;
@@ -3199,7 +3202,7 @@ class Video extends Component {
         this.nMode = null;
         this.setMode(this.nModeDefault);
 
-        if (this.cardActive.addrBuffer && fRandomize) {
+        if (this.cardActive.addrBuffer && this.nRandomize) {
             /*
              * On the initial power-on, we initialize the video buffer to random characters, as a way of testing
              * whether our font(s) were successfully loaded.  It's assumed that our default display mode is a text mode,

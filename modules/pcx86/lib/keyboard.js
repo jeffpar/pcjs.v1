@@ -1499,8 +1499,11 @@ class Keyboard extends Component {
         var fPass = true;
         var fPress = false;
         var fIgnore = false;
-
         var keyCode = event.keyCode;
+
+        if (!this.cmp.notifyKbdEvent(event, fDown)) {
+            return false;
+        }
 
         this.sInjectBuffer = "";                        // actual key events should stop any injection in progress
         Component.processScript(this.idMachine);        // and any script, too
@@ -1644,6 +1647,10 @@ class Keyboard extends Component {
     {
         event = event || window.event;
         var keyCode = event.which || event.keyCode;
+
+        if (!this.cmp.notifyKbdEvent(event)) {
+            return false;
+        }
 
         this.sInjectBuffer = "";        // actual key events should stop any injection currently in progress
 

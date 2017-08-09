@@ -83,11 +83,11 @@ class Mouse extends Component {
         this.setActive(false);
         this.fCaptured = this.fLocked = false;
         /*
-         * Initially, no video devices, and therefore no input devices, are attached.  initBus() will update aVideo,
-         * and powerUp() will update aInput.
+         * Initially, no video devices, and therefore no screens, are attached.  initBus() will update aVideo,
+         * and powerUp() will update aScreens.
          */
         this.aVideo = [];
-        this.aInput = [];
+        this.aScreens = [];
         this.setReady();
     }
 
@@ -183,10 +183,10 @@ class Mouse extends Component {
                     }
                 }
                 if (this.componentAdapter) {
-                    this.aInput = [];       // ensure the input device array is empty before (re)filling it
+                    this.aScreens = [];     // ensure the screen array is empty before (re)filling it
                     for (var i = 0; i < this.aVideo.length; i++) {
-                        var input = this.aVideo[i].getInput(this);
-                        if (input) this.aInput.push(input);
+                        var screen = this.aVideo[i].getScreen(this);
+                        if (screen) this.aScreens.push(screen);
                     }
                 } else {
                     Component.warning(this.id + ": " + this.sAdapterType + " " + this.idAdapter + " unavailable");
@@ -322,8 +322,8 @@ class Mouse extends Component {
     captureAll()
     {
         if (!this.fCaptured) {
-            for (var i = 0; i < this.aInput.length; i++) {
-                if (this.captureMouse(this.aInput[i])) this.fCaptured = true;
+            for (var i = 0; i < this.aScreens.length; i++) {
+                if (this.captureMouse(this.aScreens[i])) this.fCaptured = true;
             }
         }
     }
@@ -336,8 +336,8 @@ class Mouse extends Component {
     releaseAll()
     {
         if (this.fCaptured) {
-            for (var i = 0; i < this.aInput.length; i++) {
-                if (this.releaseMouse(this.aInput[i])) this.fCaptured = false;
+            for (var i = 0; i < this.aScreens.length; i++) {
+                if (this.releaseMouse(this.aScreens[i])) this.fCaptured = false;
             }
         }
     }
@@ -425,7 +425,7 @@ class Mouse extends Component {
         if (fDown !== undefined) {
             if (this.fLocked === false) {
                 /*
-                 * If there's no support for automatic pointer locking in the Video component, then notifyPointerActive()
+                 * If there's no support for automatic pointer locking in the Video component, notifyPointerActive()
                  * will return false, and we will set fLocked to null, ensuring that we never attempt this again.
                  */
                 if (!this.aVideo.length || !this.aVideo[0].notifyPointerActive(true)) {
