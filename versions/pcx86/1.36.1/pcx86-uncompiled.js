@@ -7345,12 +7345,15 @@ Messages.CATEGORIES = {
     "computer": Messages.COMPUTER,
     "dos":      Messages.DOS,
     "data":     Messages.DATA,
-    "log":      Messages.LOG,
-    "warn":     Messages.WARN,
     /*
      * Now we turn to message actions rather than message types; for example, setting "halt"
      * on or off doesn't enable "halt" messages, but rather halts the CPU on any message above.
+     *
+     * Similarly, "m log on" turns on message logging, deferring the display of all messages
+     * until "m log off" is issued.
      */
+    "log":      Messages.LOG,
+    "warn":     Messages.WARN,
     "halt":     Messages.HALT
 };
 
@@ -12314,7 +12317,7 @@ class CPU extends Component {
      */
     calcCycles()
     {
-        var nMultiplier = (this.counts.mhzCurrent / this.counts.mhzBase)|0;
+        var nMultiplier = this.counts.mhzCurrent / this.counts.mhzBase;
         if (!nMultiplier || nMultiplier > this.counts.nTargetMultiplier) nMultiplier = this.counts.nTargetMultiplier;
         this.counts.msPerYield = Math.round(1000 / CPU.YIELDS_PER_SECOND);
         this.counts.nCyclesPerYield = Math.floor(this.counts.nBaseCyclesPerSecond / CPU.YIELDS_PER_SECOND * nMultiplier);
@@ -12457,9 +12460,9 @@ class CPU extends Component {
         var fSuccess = true;
         if (nMultiplier !== undefined) {
             /*
-             * If we haven't reached 80% (0.8) of the current target speed, revert to the default multiplier.
+             * If we haven't reached 90% (0.9) of the current target speed, revert to the default multiplier.
              */
-            if (this.counts.mhzCurrent > 0 && this.counts.mhzCurrent / this.counts.mhzTarget < 0.8) {
+            if (this.counts.mhzCurrent > 0 && this.counts.mhzCurrent < this.counts.mhzTarget * 0.9) {
                 nMultiplier = this.counts.nBaseMultiplier;
                 fSuccess = false;
             }
@@ -12599,7 +12602,7 @@ class CPU extends Component {
 
         this.calcSpeed(nCycles, msElapsed);
 
-        if (msRemainsThisRun < 0 || this.counts.mhzCurrent < this.counts.mhzTarget) {
+        if (msRemainsThisRun < 0) {
             /*
              * Try "throwing out" the effects of large anomalies, by moving the overall run start time up;
              * ordinarily, this should only happen when the someone is using an external Debugger or some other
@@ -12610,14 +12613,17 @@ class CPU extends Component {
             }
             /*
              * If the last burst took MORE time than we allotted (ie, it's taking more than 1 second to simulate
-             * nCyclesActual), all we can do is yield for as little time as possible (ie, 0ms) and hope that the
-             * simulation is at least usable.
+             * nBaseCyclesPerSecond), all we can do is yield for as little time as possible (ie, 0ms) and hope
+             * that the simulation is at least usable.
              */
             msRemainsThisRun = 0;
         }
+        else if (this.counts.mhzCurrent < this.counts.mhzTarget) {
+            msRemainsThisRun = 0;
+        }
 
-        if (DEBUG && this.messageEnabled(Messages.LOG) && msRemainsThisRun) {
-            this.log("calcRemainingTime: " + msRemainsThisRun + "ms to sleep after " + this.counts.msEndThisRun + "ms");
+        if (DEBUG && this.messageEnabled(Messages.CPU)) {
+            this.printMessage("calcRemainingTime: sleep " + msRemainsThisRun + "ms after " + (this.counts.msEndThisRun - this.counts.msStartThisRun) + "ms burst");
         }
 
         this.counts.msEndThisRun += msRemainsThisRun;
@@ -12846,9 +12852,17 @@ class CPU extends Component {
             if (timer[1] < 0) continue;
             timer[1] -= nCycles;
             if (timer[1] <= 0) {
+                if (DEBUG && this.messageEnabled(Messages.CPU)) {
+                    this.printMessage("updateTimer(" + nCycles + "): firing " + timer[0] + " with only " + (timer[1] + nCycles) + " cycles left");
+                }
                 timer[1] = -1;      // zero is technically an "active" value, so ensure the timer is dormant now
                 timer[3]();         // safe to invoke the callback function now
-                if (timer[2] >= 0) this.setTimer(iTimer, timer[2]);
+                if (timer[2] >= 0) {
+                    this.setTimer(iTimer, timer[2]);
+                    if (DEBUG && this.messageEnabled(Messages.CPU)) {
+                        this.printMessage("updateTimer(" + nCycles + "): rearming " + timer[0] + " for " + timer[2] + "ms (" + timer[1] + " cycles)");
+                    }
+                }
             }
         }
     }
@@ -55283,7 +55297,7 @@ class SerialPort extends Component {
                     if (this.connection) {
                         var exports = this.connection['exports'];
                         if (exports) {
-                            var fnConnect = exports['connect'];
+                            var fnConnect = /** @function */ (exports['connect']);
                             if (fnConnect) fnConnect.call(this.connection, this.fNullModem);
                             this.sendData = exports['receiveData'];
                             if (this.sendData) {
@@ -67050,8 +67064,8 @@ class DebuggerX86 extends Debugger {
             this.sInitCommands = parmsDbg['commands'];
 
             /*
-             * Make it easier to access Debugger commands from an external REPL (eg, the WebStorm
-             * "live" console window); eg:
+             * Make it easier to access Debugger commands from an external REPL, like the WebStorm "live" console
+             * window; eg:
              *
              *      pcx86('r')
              *      pcx86('dw 0:0')
@@ -68980,6 +68994,7 @@ class DebuggerX86 extends Debugger {
         this.dbg = this;
         this.bitsMessage = this.bitsWarning = Messages.WARN;
         this.sMessagePrev = null;
+        this.aMessageLog = [];
         /*
          * Internally, we use "key" instead of "keys", since the latter is a method on JavasScript objects,
          * but externally, we allow the user to specify "keys"; "kbd" is also allowed as shorthand for "keyboard".
@@ -69326,6 +69341,11 @@ class DebuggerX86 extends Debugger {
     {
         if (fAddress) {
             sMessage += " at " + this.toHexAddr(this.newAddr(this.cpu.getIP(), this.cpu.getCS())) + " (%" + Str.toHex(this.cpu.regLIP) + ")";
+        }
+
+        if (this.bitsMessage & Messages.LOG) {
+            this.aMessageLog.push(sMessage);
+            return;
         }
 
         if (this.sMessagePrev && sMessage == this.sMessagePrev) return;
@@ -72268,6 +72288,12 @@ class DebuggerX86 extends Debugger {
                 else if (asArgs[2] == "off") {
                     this.bitsMessage &= ~bitsMessage;
                     fCriteria = false;
+                    if (bitsMessage == Messages.LOG) {
+                        for (var i = 0; i < this.aMessageLog.length; i++) {
+                            this.println(this.aMessageLog[i]);
+                        }
+                        this.aMessageLog = [];
+                    }
                 }
             }
         }

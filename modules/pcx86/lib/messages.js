@@ -107,12 +107,15 @@ Messages.CATEGORIES = {
     "computer": Messages.COMPUTER,
     "dos":      Messages.DOS,
     "data":     Messages.DATA,
-    "log":      Messages.LOG,
-    "warn":     Messages.WARN,
     /*
      * Now we turn to message actions rather than message types; for example, setting "halt"
      * on or off doesn't enable "halt" messages, but rather halts the CPU on any message above.
+     *
+     * Similarly, "m log on" turns on message logging, deferring the display of all messages
+     * until "m log off" is issued.
      */
+    "log":      Messages.LOG,
+    "warn":     Messages.WARN,
     "halt":     Messages.HALT
 };
 

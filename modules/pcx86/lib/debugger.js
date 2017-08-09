@@ -224,8 +224,8 @@ class DebuggerX86 extends Debugger {
             this.sInitCommands = parmsDbg['commands'];
 
             /*
-             * Make it easier to access Debugger commands from an external REPL (eg, the WebStorm
-             * "live" console window); eg:
+             * Make it easier to access Debugger commands from an external REPL, like the WebStorm "live" console
+             * window; eg:
              *
              *      pcx86('r')
              *      pcx86('dw 0:0')
@@ -2154,6 +2154,7 @@ class DebuggerX86 extends Debugger {
         this.dbg = this;
         this.bitsMessage = this.bitsWarning = Messages.WARN;
         this.sMessagePrev = null;
+        this.aMessageLog = [];
         /*
          * Internally, we use "key" instead of "keys", since the latter is a method on JavasScript objects,
          * but externally, we allow the user to specify "keys"; "kbd" is also allowed as shorthand for "keyboard".
@@ -2500,6 +2501,11 @@ class DebuggerX86 extends Debugger {
     {
         if (fAddress) {
             sMessage += " at " + this.toHexAddr(this.newAddr(this.cpu.getIP(), this.cpu.getCS())) + " (%" + Str.toHex(this.cpu.regLIP) + ")";
+        }
+
+        if (this.bitsMessage & Messages.LOG) {
+            this.aMessageLog.push(sMessage);
+            return;
         }
 
         if (this.sMessagePrev && sMessage == this.sMessagePrev) return;
@@ -5442,6 +5448,12 @@ class DebuggerX86 extends Debugger {
                 else if (asArgs[2] == "off") {
                     this.bitsMessage &= ~bitsMessage;
                     fCriteria = false;
+                    if (bitsMessage == Messages.LOG) {
+                        for (var i = 0; i < this.aMessageLog.length; i++) {
+                            this.println(this.aMessageLog[i]);
+                        }
+                        this.aMessageLog = [];
+                    }
                 }
             }
         }

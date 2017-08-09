@@ -570,7 +570,7 @@ class CPU extends Component {
      */
     calcCycles()
     {
-        var nMultiplier = (this.counts.mhzCurrent / this.counts.mhzBase)|0;
+        var nMultiplier = this.counts.mhzCurrent / this.counts.mhzBase;
         if (!nMultiplier || nMultiplier > this.counts.nTargetMultiplier) nMultiplier = this.counts.nTargetMultiplier;
         this.counts.msPerYield = Math.round(1000 / CPU.YIELDS_PER_SECOND);
         this.counts.nCyclesPerYield = Math.floor(this.counts.nBaseCyclesPerSecond / CPU.YIELDS_PER_SECOND * nMultiplier);
@@ -713,9 +713,9 @@ class CPU extends Component {
         var fSuccess = true;
         if (nMultiplier !== undefined) {
             /*
-             * If we haven't reached 80% (0.8) of the current target speed, revert to the default multiplier.
+             * If we haven't reached 90% (0.9) of the current target speed, revert to the default multiplier.
              */
-            if (this.counts.mhzCurrent > 0 && this.counts.mhzCurrent / this.counts.mhzTarget < 0.8) {
+            if (this.counts.mhzCurrent > 0 && this.counts.mhzCurrent < this.counts.mhzTarget * 0.9) {
                 nMultiplier = this.counts.nBaseMultiplier;
                 fSuccess = false;
             }
@@ -855,7 +855,7 @@ class CPU extends Component {
 
         this.calcSpeed(nCycles, msElapsed);
 
-        if (msRemainsThisRun < 0 || this.counts.mhzCurrent < this.counts.mhzTarget) {
+        if (msRemainsThisRun < 0) {
             /*
              * Try "throwing out" the effects of large anomalies, by moving the overall run start time up;
              * ordinarily, this should only happen when the someone is using an external Debugger or some other
@@ -866,14 +866,17 @@ class CPU extends Component {
             }
             /*
              * If the last burst took MORE time than we allotted (ie, it's taking more than 1 second to simulate
-             * nCyclesActual), all we can do is yield for as little time as possible (ie, 0ms) and hope that the
-             * simulation is at least usable.
+             * nBaseCyclesPerSecond), all we can do is yield for as little time as possible (ie, 0ms) and hope
+             * that the simulation is at least usable.
              */
             msRemainsThisRun = 0;
         }
+        else if (this.counts.mhzCurrent < this.counts.mhzTarget) {
+            msRemainsThisRun = 0;
+        }
 
-        if (DEBUG && this.messageEnabled(Messages.LOG) && msRemainsThisRun) {
-            this.log("calcRemainingTime: " + msRemainsThisRun + "ms to sleep after " + this.counts.msEndThisRun + "ms");
+        if (DEBUG && this.messageEnabled(Messages.CPU)) {
+            this.printMessage("calcRemainingTime: sleep " + msRemainsThisRun + "ms after " + (this.counts.msEndThisRun - this.counts.msStartThisRun) + "ms burst");
         }
 
         this.counts.msEndThisRun += msRemainsThisRun;
@@ -1102,9 +1105,17 @@ class CPU extends Component {
             if (timer[1] < 0) continue;
             timer[1] -= nCycles;
             if (timer[1] <= 0) {
+                if (DEBUG && this.messageEnabled(Messages.CPU)) {
+                    this.printMessage("updateTimer(" + nCycles + "): firing " + timer[0] + " with only " + (timer[1] + nCycles) + " cycles left");
+                }
                 timer[1] = -1;      // zero is technically an "active" value, so ensure the timer is dormant now
                 timer[3]();         // safe to invoke the callback function now
-                if (timer[2] >= 0) this.setTimer(iTimer, timer[2]);
+                if (timer[2] >= 0) {
+                    this.setTimer(iTimer, timer[2]);
+                    if (DEBUG && this.messageEnabled(Messages.CPU)) {
+                        this.printMessage("updateTimer(" + nCycles + "): rearming " + timer[0] + " for " + timer[2] + "ms (" + timer[1] + " cycles)");
+                    }
+                }
             }
         }
     }

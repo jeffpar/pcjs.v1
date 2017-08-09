@@ -157,7 +157,7 @@ class DebuggerPDP11 extends Debugger {
             this.afnDumpers = {};
             this.bitsMessage = this.bitsWarning = 0;
             this.sMessagePrev = null;
-            this.aMessageBuffer = [];
+            this.aMessageLog = [];
             this.messageInit(parmsDbg['messages']);
             this.sInitCommands = parmsDbg['commands'];
 
@@ -847,7 +847,7 @@ class DebuggerPDP11 extends Debugger {
         this.dbg = this;
         this.bitsMessage = this.bitsWarning = MessagesPDP11.WARN;
         this.sMessagePrev = null;
-        this.aMessageBuffer = [];
+        this.aMessageLog = [];
         /*
          * Internally, we use "key" instead of "keys", since the latter is a method on JavasScript objects,
          * but externally, we allow the user to specify "keys"; "kbd" is also allowed as shorthand for "keyboard".
@@ -1014,8 +1014,8 @@ class DebuggerPDP11 extends Debugger {
         if (this.sMessagePrev && sMessage == this.sMessagePrev) return;
         this.sMessagePrev = sMessage;
 
-        if (this.bitsMessage & MessagesPDP11.BUFFER) {
-            this.aMessageBuffer.push(sMessage);
+        if (this.bitsMessage & MessagesPDP11.LOG) {
+            this.aMessageLog.push(sMessage);
             return;
         }
 
@@ -3203,12 +3203,12 @@ class DebuggerPDP11 extends Debugger {
                 else if (asArgs[2] == "off") {
                     this.bitsMessage &= ~bitsMessage;
                     fCriteria = false;
-                    if (bitsMessage == MessagesPDP11.BUFFER) {
-                        var i = this.aMessageBuffer.length >= 1000? this.aMessageBuffer.length - 1000 : 0;
-                        while (i < this.aMessageBuffer.length) {
-                            this.println(this.aMessageBuffer[i++]);
+                    if (bitsMessage == MessagesPDP11.LOG) {
+                        var i = this.aMessageLog.length >= 1000? this.aMessageLog.length - 1000 : 0;
+                        while (i < this.aMessageLog.length) {
+                            this.println(this.aMessageLog[i++]);
                         }
-                        this.aMessageBuffer = [];
+                        this.aMessageLog = [];
                     }
                 }
             }

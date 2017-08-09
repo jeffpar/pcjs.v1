@@ -5176,9 +5176,8 @@ var MessagesPDP11 = {
     TIMER:      0x00200000,
     SPEAKER:    0x01000000,
     COMPUTER:   0x02000000,
-    LOG:        0x10000000,
-    WARN:       0x20000000,
-    BUFFER:     0x40000000,
+    LOG:        0x20000000,
+    WARN:       0x40000000,
     HALT:       0x80000000|0
 };
 
@@ -5223,16 +5222,15 @@ MessagesPDP11.CATEGORIES = {
     "timer":    MessagesPDP11.TIMER,
     "speaker":  MessagesPDP11.SPEAKER,
     "computer": MessagesPDP11.COMPUTER,
-    "log":      MessagesPDP11.LOG,
-    "warn":     MessagesPDP11.WARN,
     /*
      * Now we turn to message actions rather than message types; for example, setting "halt"
      * on or off doesn't enable "halt" messages, but rather halts the CPU on any message above.
      *
-     * Similarly, "m buffer on" turns on message buffering, deferring the display of all messages
-     * until "m buffer off" is issued.
+     * Similarly, "m log on" turns on message logging, deferring the display of all messages
+     * until "m log off" is issued.
      */
-    "buffer":   MessagesPDP11.BUFFER,
+    "log":      MessagesPDP11.LOG,
+    "warn":     MessagesPDP11.WARN,
     "halt":     MessagesPDP11.HALT
 };
 
@@ -25304,7 +25302,7 @@ class DebuggerPDP11 extends Debugger {
             this.afnDumpers = {};
             this.bitsMessage = this.bitsWarning = 0;
             this.sMessagePrev = null;
-            this.aMessageBuffer = [];
+            this.aMessageLog = [];
             this.messageInit(parmsDbg['messages']);
             this.sInitCommands = parmsDbg['commands'];
 
@@ -25994,7 +25992,7 @@ class DebuggerPDP11 extends Debugger {
         this.dbg = this;
         this.bitsMessage = this.bitsWarning = MessagesPDP11.WARN;
         this.sMessagePrev = null;
-        this.aMessageBuffer = [];
+        this.aMessageLog = [];
         /*
          * Internally, we use "key" instead of "keys", since the latter is a method on JavasScript objects,
          * but externally, we allow the user to specify "keys"; "kbd" is also allowed as shorthand for "keyboard".
@@ -26161,8 +26159,8 @@ class DebuggerPDP11 extends Debugger {
         if (this.sMessagePrev && sMessage == this.sMessagePrev) return;
         this.sMessagePrev = sMessage;
 
-        if (this.bitsMessage & MessagesPDP11.BUFFER) {
-            this.aMessageBuffer.push(sMessage);
+        if (this.bitsMessage & MessagesPDP11.LOG) {
+            this.aMessageLog.push(sMessage);
             return;
         }
 
@@ -28350,12 +28348,12 @@ class DebuggerPDP11 extends Debugger {
                 else if (asArgs[2] == "off") {
                     this.bitsMessage &= ~bitsMessage;
                     fCriteria = false;
-                    if (bitsMessage == MessagesPDP11.BUFFER) {
-                        var i = this.aMessageBuffer.length >= 1000? this.aMessageBuffer.length - 1000 : 0;
-                        while (i < this.aMessageBuffer.length) {
-                            this.println(this.aMessageBuffer[i++]);
+                    if (bitsMessage == MessagesPDP11.LOG) {
+                        var i = this.aMessageLog.length >= 1000? this.aMessageLog.length - 1000 : 0;
+                        while (i < this.aMessageLog.length) {
+                            this.println(this.aMessageLog[i++]);
                         }
-                        this.aMessageBuffer = [];
+                        this.aMessageLog = [];
                     }
                 }
             }
