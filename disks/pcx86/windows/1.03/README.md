@@ -5,7 +5,7 @@ permalink: /disks/pcx86/windows/1.03/
 ---
 
 Microsoft Windows 1.03
----
+----------------------
 
 Windows 1.03 was released in August 1986.
 
@@ -15,7 +15,7 @@ It's been noted on [WinWorld](https://winworldpc.com/product/windows-10/103) tha
 been found with `USER.EXE` dated either `05-22-86` *or* `08-24-86`.  The latter is available here as
 [Windows 1.03b](../1.03b/).
 
-These disks were dumped from the PCjs private collection.  Differences include: 
+These PCjs disk images are from our private collection.  Differences include: 
 
 * `USER.EXE` below is dated `05-22-86` (in [Windows 1.03b](../1.03b/), it is dated `08-24-86`)
 * `MOUSE.DRV` below is dated `07-02-86` (in [Windows 1.03b](../1.03b/), it is dated `08-21-86`)
