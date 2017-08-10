@@ -1,11 +1,11 @@
 ---
 layout: page
 title: MicroPro WordStar
-permalink: /disks/pcx86/apps/micropro/wordstar/
+permalink: /disks/pcx86/apps/other/wordstar/
 ---
 
 MicroPro WordStar
----
+-----------------
 
 Information is available for these versions of [WordStar](https://en.wikipedia.org/wiki/WordStar):
 

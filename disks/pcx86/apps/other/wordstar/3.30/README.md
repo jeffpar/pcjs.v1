@@ -1,11 +1,11 @@
 ---
 layout: page
 title: MicroPro WordStar 3.30
-permalink: /disks/pcx86/apps/micropro/wordstar/3.30/
+permalink: /disks/pcx86/apps/other/wordstar/3.30/
 ---
 
 MicroPro WordStar 3.30
----
+----------------------
 
 Directory listings of the five 160Kb distribution diskettes are provided below.
 

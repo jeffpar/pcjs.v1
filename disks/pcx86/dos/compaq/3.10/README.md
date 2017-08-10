@@ -22,7 +22,7 @@ More information about CEMM is available at the [OS/2 Museum](http://www.os2muse
 ---
 
 COMPAQ MS-DOS 3.10 (10-31-86)
----
+-----------------------------
 
 Released in 1986 by COMPAQ Computer Corp, this version of MS-DOS displays the following messages on boot:
 
@@ -187,9 +187,9 @@ Directory listings of the two 360Kb distribution diskettes are provided below.
 ---
 
 COMPAQ MS-DOS 3.10 (12-17-85)
----
+-----------------------------
 
-This older 1985 release of COMPAQ MS-DOS 3.10 is from a 1.2Mb disk in the PCjs private collection.  Since this disk
+This older 1985 release of COMPAQ MS-DOS 3.10 is from a 1.2Mb disk in our private collection.  Since this disk
 was created for personal use, it also contains files unrelated to COMPAQ MS-DOS 3.10.  A directory listing is provided
 [below](#directory-of-compaq-ms-dos-310-personal-disk).
 

@@ -5,11 +5,17 @@ permalink: /disks/pcx86/tools/microsoft/mouse/5.00/
 ---
 
 Microsoft Mouse 5.00
----
+--------------------
 
-Directory listings of the two 360Kb distribution diskettes are provided below.
+The following PCjs diskette images come from our private disk collection, and they include additional files
+that were probably not on the original Microsoft distribution disks.
 
-### Directory of MS Mouse 5.00 (System)
+In particular, the [MS Mouse 5.00 (PROGRAM)](#directory-of-ms-mouse-500-program) diskette contains a `MOUSE6`
+subdirectory with a mouse driver that displays:
+
+	--- Installing Microsoft MOUSE    Device Driver v6.b4 test ---
+
+### Directory of MS Mouse 5.00 (SYSTEM)
 
 	 Volume in drive A has no label
 
@@ -63,7 +69,7 @@ Directory listings of the two 360Kb distribution diskettes are provided below.
 	       42 file(s)     340916 bytes
 	                           0 bytes free
 
-### Directory of MS Mouse 5.00 (Program)
+### Directory of MS Mouse 5.00 (PROGRAM)
 
 	 Volume in drive A has no label
 

@@ -6,9 +6,9 @@
 	<type>Driver</type>
 	<category>Mouse</category>
 	<author>Microsoft</author>
-	<releaseDate/>
+	<releaseDate>1986</releaseDate>
 	<disk id="disk01" size="368640" chs="40:2:9" img="archive/MSMOUSE-000199-500-DISK1-SYSTEM.img" href="/disks/pcx86/tools/microsoft/mouse/5.00/MSMOUSE-000199-500-DISK1-SYSTEM.json" md5="af5da604818610eca63efebd98f4b144" md5json="d5205e371d11efeeed450ab8b86ee427">
-		<name>MS Mouse 5.00 (System)</name>
+		<name>MS Mouse 5.00 (SYSTEM)</name>
 		<file size="3356" time="1985-05-01 12:00:00" attr="0x20">123.DEF</file>
 		<file size="1024" time="1985-05-01 12:00:00" attr="0x20">123.MNU</file>
 		<file size="954" time="1985-09-12 15:54:58" attr="0x20">ATT.DEV</file>
@@ -53,7 +53,7 @@
 		<file size="4608" time="1985-05-01 12:00:00" attr="0x20">WS.MNU</file>
 	</disk>
 	<disk id="disk02" size="368640" chs="40:2:9" img="archive/MSMOUSE-000199-500-DISK2-PROGRAM.img" href="/disks/pcx86/tools/microsoft/mouse/5.00/MSMOUSE-000199-500-DISK2-PROGRAM.json" md5="55ce3f44b636c255e1ac919595767301" md5json="601703005d16f07ed28a31c18e31ca07">
-		<name>MS Mouse 5.00 (Program)</name>
+		<name>MS Mouse 5.00 (PROGRAM)</name>
 		<file size="5" time="1985-04-12 13:57:06" attr="0x20">AUTOEXEC.BAT</file>
 		<file size="7426" time="1985-08-30 13:43:10" attr="0x20">BIT16X14.FNT</file>
 		<file size="8450" time="1985-08-30 13:43:22" attr="0x20">BIT16X16.FNT</file>
