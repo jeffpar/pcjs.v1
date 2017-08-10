@@ -37,7 +37,6 @@ more detail, along with a live demonstration of the software, but that's not yet
 
 * [IBM TopView](apps/ibm/topview/)
 * [Lotus 1-2-3](apps/lotus/123/)
-* [MicroPro WordStar](apps/micropro/wordstar/)
 * [Microsoft Chart](apps/microsoft/chart/)
 * [Microsoft Word](apps/microsoft/word/)
 * [More...](apps/other/)
