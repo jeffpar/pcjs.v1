@@ -1,11 +1,11 @@
 ---
 layout: page
 title: MicroPro WordStar 4.00
-permalink: /disks/pcx86/apps/micropro/wordstar/4.00/
+permalink: /disks/pcx86/apps/other/wordstar/4.00/
 ---
 
 MicroPro WordStar 4.00
----
+----------------------
 
 Directory listings of the six 360Kb distribution diskettes are provided below.
 

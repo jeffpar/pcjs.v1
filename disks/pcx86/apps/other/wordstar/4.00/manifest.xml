@@ -2,7 +2,7 @@
 <?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.36.1/manifest.xsl"?>
 <manifest type="software">
 	<title>WordStar 4.00</title>
-	<disk id="disk01" size="368640" chs="40:2:9" img="archive/WS400-DISK1-INST.img" href="/disks/pcx86/apps/micropro/wordstar/4.00/WS400-DISK1-INST.json" md5="8cf777671c3bc3bd6abe79c796cb7c11" md5json="4f8fcd191a091c2b17cf43807df4873f">
+	<disk id="disk01" size="368640" chs="40:2:9" img="archive/WS400-DISK1-INST.img" href="/disks/pcx86/apps/other/wordstar/4.00/WS400-DISK1-INST.json" md5="8cf777671c3bc3bd6abe79c796cb7c11" md5json="4f8fcd191a091c2b17cf43807df4873f">
 		<name>WordStar 4.00 (INSTALL)</name>
 		<file size="82176" time="1987-02-16 11:00:04" attr="0x20">PATCH.LST</file>
 		<file size="5632" time="1987-02-16 11:00:04" attr="0x20">PRINT.TST</file>
@@ -13,7 +13,7 @@
 		<file size="66560" time="1987-02-16 11:00:04" attr="0x20">WSCHANGE.EXE</file>
 		<file size="45331" time="1987-02-16 11:00:04" attr="0x20">WSCHANGE.OVR</file>
 	</disk>
-	<disk id="disk02" size="368640" chs="40:2:9" img="archive/WS400-DISK2-PROG.img" href="/disks/pcx86/apps/micropro/wordstar/4.00/WS400-DISK2-PROG.json" md5="02e8485cb167acc191c434e192ecb661" md5json="16522ae7cd4211213a1e80fee73c6cdd">
+	<disk id="disk02" size="368640" chs="40:2:9" img="archive/WS400-DISK2-PROG.img" href="/disks/pcx86/apps/other/wordstar/4.00/WS400-DISK2-PROG.json" md5="02e8485cb167acc191c434e192ecb661" md5json="16522ae7cd4211213a1e80fee73c6cdd">
 		<name>WordStar 4.00 (PROGRAM)</name>
 		<file size="384" time="1987-02-14 11:00:06" attr="0x20">BOX</file>
 		<file size="128" time="1987-02-14 11:00:06" attr="0x20">CHAPTER1.DOC</file>
@@ -36,13 +36,13 @@
 		<file size="512" time="1987-02-14 11:00:06" attr="0x20">WSSHORT.OVR</file>
 		<file size="23520" time="1987-02-14 11:00:06" attr="0x20">WSSPELL.OVR</file>
 	</disk>
-	<disk id="disk03" size="368640" chs="40:2:9" img="archive/WS400-DISK3-DICT.img" href="/disks/pcx86/apps/micropro/wordstar/4.00/WS400-DISK3-DICT.json" md5="1ad7851fd7a10c1c089e384d7d914bbc" md5json="8c07cd56292f38ac25af075657489d34">
+	<disk id="disk03" size="368640" chs="40:2:9" img="archive/WS400-DISK3-DICT.img" href="/disks/pcx86/apps/other/wordstar/4.00/WS400-DISK3-DICT.json" md5="1ad7851fd7a10c1c089e384d7d914bbc" md5json="8c07cd56292f38ac25af075657489d34">
 		<name>WordStar 4.00 (DICTIONARY)</name>
 		<file size="25600" time="1986-12-30 12:04:42" attr="0x20">INTERNAL.DCT</file>
 		<file size="277504" time="1986-12-30 12:04:42" attr="0x20">MAIN.DCT</file>
 		<file size="10" time="1986-12-30 12:04:42" attr="0x20">PERSONAL.DCT</file>
 	</disk>
-	<disk id="disk04" size="368640" chs="40:2:9" img="archive/WS400-DISK4-TUTOR.img" href="/disks/pcx86/apps/micropro/wordstar/4.00/WS400-DISK4-TUTOR.json" md5="1c2bcc4fe93aee9e1bf847850b79cd1e" md5json="c62214a3104daea9b12cb04c9d5b0899">
+	<disk id="disk04" size="368640" chs="40:2:9" img="archive/WS400-DISK4-TUTOR.img" href="/disks/pcx86/apps/other/wordstar/4.00/WS400-DISK4-TUTOR.json" md5="1c2bcc4fe93aee9e1bf847850b79cd1e" md5json="c62214a3104daea9b12cb04c9d5b0899">
 		<name>WordStar 4.00 (TUTOR)</name>
 		<file size="81024" time="1987-01-15 13:43:44" attr="0x20">EXPLORE.OVR</file>
 		<file size="76160" time="1987-01-15 13:43:26" attr="0x20">FEARNOT.OVR</file>
@@ -51,14 +51,14 @@
 		<file size="73520" time="1986-12-22 10:59:32" attr="0x20">TEACHME.EXE</file>
 		<file size="8576" time="1987-01-15 13:43:10" attr="0x20">WORDSTAR.OVR</file>
 	</disk>
-	<disk id="disk05" size="368640" chs="40:2:9" img="archive/WS400-DISK5-WORDFINDER1.img" href="/disks/pcx86/apps/micropro/wordstar/4.00/WS400-DISK5-WORDFINDER1.json" md5="8633f5161355f0e6ccfd7df43efadf73" md5json="737a89999678d99cad1c863e7d9e0094">
+	<disk id="disk05" size="368640" chs="40:2:9" img="archive/WS400-DISK5-WORDFINDER1.img" href="/disks/pcx86/apps/other/wordstar/4.00/WS400-DISK5-WORDFINDER1.json" md5="8633f5161355f0e6ccfd7df43efadf73" md5json="737a89999678d99cad1c863e7d9e0094">
 		<name>WordStar 4.00 (WORD FINDER1)</name>
 		<file size="32881" time="1987-01-21 11:16:04" attr="0x20">WF.EXE</file>
 		<file size="28716" time="1987-01-21 11:16:04" attr="0x20">WFINSTAL.EXE</file>
 		<file size="5196" time="1987-01-21 11:16:04" attr="0x20">WFSCREEN.EXE</file>
 		<file size="163247" time="1987-01-21 11:16:04" attr="0x20">WFSM.SYN</file>
 	</disk>
-	<disk id="disk06" size="368640" chs="40:2:9" img="archive/WS400-DISK6-WORDFINDER2.img" href="/disks/pcx86/apps/micropro/wordstar/4.00/WS400-DISK6-WORDFINDER2.json" md5="ee3457dd7b3fba34826d315772cf681e" md5json="1123d8f9be1287738af4f58d6c471798">
+	<disk id="disk06" size="368640" chs="40:2:9" img="archive/WS400-DISK6-WORDFINDER2.img" href="/disks/pcx86/apps/other/wordstar/4.00/WS400-DISK6-WORDFINDER2.json" md5="ee3457dd7b3fba34826d315772cf681e" md5json="1123d8f9be1287738af4f58d6c471798">
 		<name>WordStar 4.00 (WORD FINDER2)</name>
 		<file size="325330" time="1987-01-15 07:12:28" attr="0x20">WFBG.SYN</file>
 	</disk>

@@ -40079,7 +40079,7 @@ class ChipSet extends Component {
                     this.checkIRR();
                 } else {
                     if (DEBUG && this.messageEnabled(Messages.PIC | Messages.WARN)) {
-                        this.printMessage("outPIC" + iPIC + '(' + Str.toHexByte(pic.port) + "): unexpected EOI command, IRQ " + nIRQ + " not in service", true, true);
+                        this.printMessage("outPIC" + iPIC + '(' + Str.toHexByte(pic.port) + "): unexpected EOI for IRQ " + nIRQ, true, true);
                         if (MAXDEBUG) this.dbg.stopCPU();
                     }
                 }
@@ -40088,7 +40088,7 @@ class ChipSet extends Component {
                  */
                 if (bOCW2 & ChipSet.PIC_LO.OCW2_SET_ROTAUTO) {
                     if (this.messageEnabled(/*Messages.PIC | */Messages.WARN)) {
-                        this.printMessage("PIC" + iPIC + '(' + Str.toHexByte(pic.port) + "): unsupported OCW2 rotate command " + Str.toHexByte(bOut), true, true);
+                        this.printMessage("PIC" + iPIC + '(' + Str.toHexByte(pic.port) + "): unsupported OCW2 rotate " + Str.toHexByte(bOut), true, true);
                     }
                 }
             }
@@ -40103,7 +40103,7 @@ class ChipSet extends Component {
                  * TODO: Remaining commands to support: ChipSet.PIC_LO.OCW2_SET_ROTAUTO and ChipSet.PIC_LO.OCW2_CLR_ROTAUTO
                  */
                 if (this.messageEnabled(/*Messages.PIC | */Messages.WARN)) {
-                    this.printMessage("PIC" + iPIC + '(' + Str.toHexByte(pic.port) + "): unsupported OCW2 automatic EOI command " + Str.toHexByte(bOut), true, true);
+                    this.printMessage("PIC" + iPIC + '(' + Str.toHexByte(pic.port) + "): unsupported OCW2 automatic EOI " + Str.toHexByte(bOut), true, true);
                 }
             }
         } else {
@@ -40115,7 +40115,7 @@ class ChipSet extends Component {
              */
             if (bOut & (ChipSet.PIC_LO.OCW3_POLL_CMD | ChipSet.PIC_LO.OCW3_SMM_CMD)) {
                 if (this.messageEnabled(/*Messages.PIC | */Messages.WARN)) {
-                    this.printMessage("PIC" + iPIC + '(' + Str.toHexByte(pic.port) + "): unsupported OCW3 command " + Str.toHexByte(bOut), true, true);
+                    this.printMessage("PIC" + iPIC + '(' + Str.toHexByte(pic.port) + "): unsupported OCW3 " + Str.toHexByte(bOut), true, true);
                 }
             }
             pic.bOCW3 = bOut;

@@ -9,6 +9,9 @@ Other IBM PC Applications
 
 The following applications have been archived for use with PCjs:
 
+* [dBase II](dbase2/)
+* [dBase III](dbase3/)
 * [Omniview](omniview/)
 * [SuperCalc2](sc2/)
 * [SuperCalc3](sc3/)
+* [WordStar](wordstar/)
