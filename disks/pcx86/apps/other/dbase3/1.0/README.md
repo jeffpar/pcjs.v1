@@ -7,30 +7,38 @@ permalink: /disks/pcx86/apps/other/dbase3/1.0/
 dBASE III v1.0
 --------------
 
-The first two PCjs disks shown below:
+Two of the PCjs disks shown below:
 
-- [dBASE III 1.0 (Unlocked)](#directory-of-dbase-iii-10-unlocked)
+- [dBASE III 1.0 (Patched)](#directory-of-dbase-iii-10-patched)
 - [dBASE III 1.0 (Samples)](#directory-of-dbase-iii-10-samples)
 
-are from our private collection and should be exact copies of the original dBASE III v1.0 distribution disks, with
-the exception of `DBASE.EXE`, which has been patched to eliminate copy-protection checks.  If possible, details on that
-patch will be provided at a later date.
+are from our private collection and should be exact copies of the original dBASE III v1.0 distribution disks, with the
+exception of `DBASE.EXE`, which was patched to eliminate copy-protection checks.  Details of that patch are available
+in our collection of [Personal Documents of Dubious Historical Interest](/docs/personal/#dbase-iii-copy-protection),
+along with this [blog post](/blog/2017/08/11/).
 
-The other disks:
+Also, for completeness, the original `DBASE.EXE` has been recreated by "unpatching" it and saving it on the
+[Locked](#directory-of-dbase-iii-10-locked) disk image.  However, we don't have the original distribution disk, which
+would include additional copy-protection characteristics, so running the original (locked) version of `DBASE.EXE` will
+immediately fail with:
+
+	Unauthorized Duplicate
+
+Another variation of the dBASE III disks come from the [WinWorld](https://winworldpc.com/product/dbase/iii-v10) archive:
 
 - [dBASE III 1.0 (Disk 1)](#directory-of-dbase-iii-10-disk-1)
 - [dBASE III 1.0 (Disk 2)](#directory-of-dbase-iii-10-disk-2)
 
-come from [WinWorld](https://winworldpc.com/product/dbase/iii-v10).  With the exception of `DBASE.EXE`, the files on
-the "Disk 1" image match the files on our "Unlocked" disk; the newer dates probably reflect a subsequent change in the
-copy-protection code.  However, the "Disk 2" image contains more files than our "Samples" disk, and WinWorld's README
-admits that:
+and, with the exception of `DBASE.EXE`, the files on [Disk 1](#directory-of-dbase-iii-10-disk-1) match the files on our
+[Patched](#directory-of-dbase-iii-10-patched) disk; the newer dates probably just reflect an update by Vault Corporation
+to the copy-protection code in `DBASE.EXE`.  However, [Disk 2](#directory-of-dbase-iii-10-disk-2) contains more files
+than our [Samples](#directory-of-dbase-iii-10-samples) disk, and WinWorld's README admits that:
 
 	Some of the sample programs have been run/changed.
 
-so overall, the PCjs disks may be more authentic.
+so overall, the disks from our private collection may be more authentic.
 
-### Directory of dBASE III 1.0 (Unlocked)
+### Directory of dBASE III 1.0 (Patched)
 
 	 Volume in drive A has no label
 	 Directory of  A:\
@@ -104,6 +112,19 @@ so overall, the PCjs disks may be more authentic.
 	PAYBILLS PRG     9472   6-15-84   4:44p
 	PAYROLL  PRG    13056   6-15-84   4:50p
 	       55 File(s)     75776 bytes free
+
+### Directory of dBASE III 1.0 (Locked)
+
+	 Volume in drive A has no label
+	 Directory of  A:\
+	
+	DBASE    EXE   112720   8-11-17   9:51a
+	DBASE    OVL   147456   6-26-84   5:36p
+	HELP     DBS    53760   6-26-84   5:36p
+	ASSIST   HLP    15223   6-26-84   5:37p
+	READ     ME      4224   6-26-84   5:37p
+	CONFIG   SYS       22   6-26-84   5:37p
+	        6 File(s)     15360 bytes free
 
 ### Directory of dBASE III 1.0 (Disk 1)
 

@@ -384,7 +384,8 @@
 		<disk path="/disks/pcx86/apps/other/dbase2/2.4/DBII-240-SCED.json">dBASE II 2.4 (EDITOR)</disk>
 		<disk path="/disks/pcx86/apps/other/dbase3/1.0/DBIII-100-DISK1.json">dBASE III 1.0 (Disk 1)</disk>
 		<disk path="/disks/pcx86/apps/other/dbase3/1.0/DBIII-100-DISK2.json">dBASE III 1.0 (Disk 2)</disk>
-		<disk path="/disks/pcx86/apps/other/dbase3/1.0/DBIII-100-UNLOCKED.json">dBASE III 1.0 (Unlocked)</disk>
+		<disk path="/disks/pcx86/apps/other/dbase3/1.0/DBIII-100-LOCKED.json">dBASE III 1.0 (Locked)</disk>
+		<disk path="/disks/pcx86/apps/other/dbase3/1.0/DBIII-100-PATCHED.json">dBASE III 1.0 (Patched)</disk>
 		<disk path="/disks/pcx86/apps/other/dbase3/1.0/DBIII-100-SAMPLES.json">dBASE III 1.0 (Samples)</disk>
 		<disk path="/disks/pcx86/apps/other/omniview/4.30/OMNIVIEW386-430.json">Omniview 386 4.30</disk>
 		<disk path="/disks/pcx86/apps/other/sc2/1.00/SC2_V100.json">SuperCalc2 1.00</disk>
