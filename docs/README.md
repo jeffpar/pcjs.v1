@@ -9,27 +9,18 @@ permalink: /docs/
 Documentation
 -------------
 
-Help is available for the following PCjs Machines:
+If you want to know how to configure PCjs machines, here's what's been written so far:
 
 * [C1Pjs](/docs/c1pjs/)
 * [PCx86](/docs/pcx86/)
 
-{% if site.developer %}
-
-Instruction documentation is also available:
-
-* [x86 Instructions](/docs/x86/)
-* [6502 Instructions](/docs/6502/)
-
-{% endif %}
-
-Our [Publication Archive](/pubs/) covers the following platforms:
+For general historical interest, the project includes a [Publication Archive](/pubs/) that covers:
 
 * [IBM PCs and Compatibles](/pubs/pc/)
 * [Digital Equipment Corporation (DEC)](/pubs/dec/)
 * [Ohio Scientific's 6502-based Challenger 1P](/pubs/c1p/)
 
-For example, the [IBM PC](/pubs/pc/) section of the [Publication Archive](/pubs/) includes:
+For example, the [IBM PCs and Compatibles](/pubs/pc/) section of the [Publication Archive](/pubs/) includes:
 
 * [CPU Documents](/pubs/pc/reference/intel/)
 * [Datasheets](/pubs/pc/datasheets/)
@@ -37,6 +28,22 @@ For example, the [IBM PC](/pubs/pc/) section of the [Publication Archive](/pubs/
 * [Programming Guides](/pubs/pc/programming/)
 * [Reference Manuals](/pubs/pc/reference/)
 * [Software User and Development Guides](/pubs/pc/software/) (eg, [DOS](/pubs/pc/software/dos/), [OS/2](/pubs/pc/software/os2/), [Windows](/pubs/pc/software/windows/))
+
+{% if site.developer %}
+
+Eventually, the project would also like to provide summaries of all supported CPU instructions; e.g.:
+
+* [x86 Instructions](/docs/x86/)
+* [6502 Instructions](/docs/6502/)
+
+{% endif %}
+
+Finally, here's an eclectic collection of personal documents, ranging from early PC debugging notes to old program
+listings and more:
+
+* [Personal Documents of Dubious Historical Interest](/docs/personal/)
+
+---
 
 [<img src="http://archive.pcjs.org/pubs/pc/datasheets/thumbs/8088-CPU.jpg" width="200" height="260" alt= "8088 CPU"/>](/pubs/pc/datasheets/)
 [<img src="http://archive.pcjs.org/pubs/pc/magazines/byte/BYTE-1975-11/thumbs/BYTE-1975-11 1.jpeg" width="200" height="260" alt= "Byte Magazine"/>](/pubs/pc/magazines/byte/)

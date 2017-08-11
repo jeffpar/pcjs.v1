@@ -13,7 +13,7 @@ The first two PCjs disks shown below:
 - [dBASE III 1.0 (Samples)](#directory-of-dbase-iii-10-samples)
 
 are from our private collection and should be exact copies of the original dBASE III v1.0 distribution disks, with
-the exception of `DBASE.EXE`, which has been patched to eliminate copy-protection checks.  If possible, details on that
+the exception of `DBASE.EXE`, which was patched to eliminate copy-protection checks.  If possible, details on that
 patch will be provided at a later date.
 
 The other disks:
@@ -22,9 +22,9 @@ The other disks:
 - [dBASE III 1.0 (Disk 2)](#directory-of-dbase-iii-10-disk-2)
 
 come from [WinWorld](https://winworldpc.com/product/dbase/iii-v10).  With the exception of `DBASE.EXE`, the files on
-the "Disk 1" image match the files on our "Unlocked" disk; the newer dates probably reflect a subsequent change in the
-copy-protection code.  However, the "Disk 2" image contains more files than our "Samples" disk, and WinWorld's README
-admits that:
+the "Disk 1" image match the files on our "Unlocked" disk; the newer dates probably only reflect when Ashton-Tate and/or
+Vault Corporation updated the copy-protection code in `DBASE.EXE`.  However, the "Disk 2" image contains more files
+than our "Samples" disk, and WinWorld's README admits that:
 
 	Some of the sample programs have been run/changed.
 
