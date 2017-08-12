@@ -2503,6 +2503,15 @@ class Video extends Component {
             if (this.kbd) this.captureTouch(Video.TOUCH.KEYGRID);
         }
 
+        /*
+         * If no touch support was required or requested, we still want to do some minimal touch event processing;
+         * eg, notifying the ChipSet component whenever a touchstart occurs, so that it can enable audio in response
+         * to a user action on iOS devices.
+         */
+        if (!this.nTouchConfig) {
+            this.captureTouch(Video.TOUCH.DEFAULT);
+        }
+
         if (this.sFileURL) {
             var sProgress = "Loading " + this.sFileURL + "...";
             Web.getResource(this.sFileURL, null, true, function(sURL, sResponse, nErrorCode) {
@@ -2783,16 +2792,25 @@ class Video extends Component {
         if (control) {
             var video = this;
             if (!this.nTouchConfig) {
+
+                this.nTouchConfig = nTouchConfig;
+
                 control.addEventListener(
                     'touchstart',
                     function onTouchStart(event) { video.onTouchStart(event); },
                     false                   // we'll specify false for the 'useCapture' parameter for now...
                 );
+
+                if (nTouchConfig == Video.TOUCH.DEFAULT) {
+                    return;
+                }
+
                 control.addEventListener(
                     'touchmove',
                     function onTouchMove(event) { video.onTouchMove(event); },
                     true
                 );
+
                 control.addEventListener(
                     'touchend',
                     function onTouchEnd(event) { video.onTouchEnd(event); },
@@ -2822,7 +2840,6 @@ class Video extends Component {
 
                 // this.log("touch events captured");
 
-                this.nTouchConfig = nTouchConfig;
                 this.xTouch = this.yTouch = this.timeTouch = -1;
 
                 /*
@@ -2879,6 +2896,8 @@ class Video extends Component {
     onTouchStart(event)
     {
         if (DEBUG) this.printMessage("onTouchStart()");
+        this.chipset.startAudio(event);
+        if (this.nTouchConfig == Video.TOUCH.DEFAULT) return;
         this.processTouchEvent(event, true);
     }
 
@@ -7432,8 +7451,9 @@ Video.cardSpecs[Video.CARD.VGA] = ["VGA", Card.CGA.CRTC.INDX.PORT, 0xB8000, 0x04
  */
 Video.TOUCH = {
     NONE:       0,
-    KEYGRID:    1,
-    MOUSE:      2
+    DEFAULT:    1,
+    KEYGRID:    2,
+    MOUSE:      3
 };
 
 /*

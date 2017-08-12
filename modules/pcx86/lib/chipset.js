@@ -56,7 +56,7 @@ class ChipSet extends Component {
      *      model:          eg, "5150", "5160", "5170", "deskpro386" (should be a member of ChipSet.MODELS)
      *      sw1:            8-character binary string representing the SW1 DIP switches (SW1[1-8]); see Switches Overview
      *      sw2:            8-character binary string representing the SW2 DIP switches (SW2[1-8]) (MODEL_5150 only)
-     *      sound:          true to enable (experimental) sound support (default); false to disable
+     *      sound:          true (or non-zero) to enable sounds (default), false (or 0) to disable; number used as initial gain
      *      scaleTimers:    true to divide timer cycle counts by the CPU's cycle multiplier (default is false)
      *      floppies:       array of floppy drive sizes in Kb (default is "[360, 360]" if no sw1 value provided)
      *      monitor:        none|tv|color|mono|ega|vga (if no sw1 value provided, default is "ega" for 5170, "mono" otherwise)
@@ -150,10 +150,15 @@ class ChipSet extends Component {
          * I know about sound generation, using the API to make the same noises as the IBM PC speaker seems
          * straightforward.
          *
-         * To start, we create an audio context, unless the 'sound' parameter has been explicitly set to false.
+         * To start, we create an audio context, unless the 'sound' parameter has been explicitly set to false
+         * or 0; the boolean value true (along with any illegal number) now defaults to 0.5 instead of 1.0.
          */
         this.fSpeaker = false;
-        if (parmsChipSet['sound']) {
+        this.gainInit = parmsChipSet['sound'];
+        if (this.gainInit) {
+            if (typeof this.gainInit != "number" || this.gainInit < 0 || this.gainInit > 1) {
+                this.gainInit = 0.5;
+            }
             this.classAudio = this.contextAudio = null;
             if (window) {
                 this.classAudio = window['AudioContext'] || window['webkitAudioContext'];
@@ -191,9 +196,15 @@ class ChipSet extends Component {
         this.cmp = cmp;
 
         this.fpu = cmp.getMachineComponent("FPU");
-        this.setDIPSwitches(ChipSet.SWITCH_TYPE.FPU, this.fpu?1:0, true);
+        this.setDIPSwitches(ChipSet.SWITCH_TYPE.FPU, this.fpu? 1 : 0, true);
 
         this.kbd = cmp.getMachineComponent("Keyboard");
+
+        var gain = cmp.getMachineParm("sound");
+        if (gain != null) {
+            var gainValue = +gain || 0;
+            this.gainInit = (gain == "true" || gainValue < 0 || gainValue > 1? 0.5 : gainValue);
+        }
 
         /*
          * This divisor is invariant, so we calculate it as soon as we're able to query the CPU's base speed.
@@ -4585,43 +4596,74 @@ class ChipSet extends Component {
     setSpeaker(fOn)
     {
         if (this.contextAudio) {
-            try {
-                if (fOn !== undefined) {
-                    this.fSpeaker = fOn;
-                } else {
-                    fOn = !!(this.fSpeaker && this.cpu && this.cpu.isRunning());
-                }
-                var freq = Math.round(ChipSet.TIMER_TICKS_PER_SEC / this.getTimerInit(ChipSet.PIT0.TIMER2));
+            if (fOn !== undefined) {
+                this.fSpeaker = fOn;
+            } else {
+                fOn = !!(this.fSpeaker && this.cpu && this.cpu.isRunning());
+            }
+            var freq = Math.round(ChipSet.TIMER_TICKS_PER_SEC / this.getTimerInit(ChipSet.PIT0.TIMER2));
+            if (freq < 20 || freq > 20000) {
                 /*
-                 * Treat frequencies outside the normal hearing range (below 20hz or above 20Khz) as a clever attempt
-                 * to turn sound off; we have to explicitly turn the sound off in those cases, to prevent the Audio API
-                 * from "easing" the audio to the target frequency and creating odd sound effects.
+                 * Treat frequencies outside the normal hearing range (below 20hz or above 20Khz) as a clever
+                 * attempt to turn sound off.
                  */
-                if (freq < 20 || freq > 20000) fOn = false;
-                if (fOn) {
-                    if (!this.oscillatorAudio) {
-                        this.oscillatorAudio = this.contextAudio['createOscillator']();
-                        this.gainAudio = this.contextAudio['createGain']();
-                        this.oscillatorAudio['connect'](this.gainAudio);
-                        this.gainAudio['connect'](this.contextAudio['destination']);
-                        this.oscillatorAudio['frequency']['value'] = freq;
-                        this.oscillatorAudio['type'] = "square";
-                        this.oscillatorAudio['start'](0);
-                    }
-                    this.oscillatorAudio['frequency']['value'] = freq;
-                    this.gainAudio['gain']['value'] = 1;
-                    if (this.messageEnabled(Messages.SPEAKER)) this.printMessage("speaker on at  " + freq + "hz", true);
-                } else if (this.oscillatorAudio) {
-                    this.gainAudio['gain']['value'] = 0;
-                    if (this.messageEnabled(Messages.SPEAKER)) this.printMessage("speaker off at " + freq + "hz", true);
-                }
-            } catch(e) {
-                this.notice("AudioContext exception: " + e.message);
-                this.contextAudio = null;
+                fOn = false;
+            }
+            if (fOn && this.startAudio()) {
+                /*
+                 * Instead of setting the frequency's 'value' property directly, as we used to do, we use the
+                 * setValueAtTime() method, with a time of zero, as a work-around to avoid the "easing" (aka
+                 * "de-zippering") of the frequency that browsers like to do.  Supposedly de-zippering is an
+                 * attempt to avoid "pops" if the frequency is altered while the wave is still rising or falling.
+                 * We'll see.
+                 */
+                this.oscillatorAudio['frequency']['setValueAtTime'](freq, 0);
+                this.gainAudio['gain']['value'] = this.gainInit;
+                if (this.messageEnabled(Messages.SPEAKER)) this.printMessage("speaker on at  " + freq + "hz", true);
+            } else if (this.gainAudio) {
+                this.gainAudio['gain']['value'] = 0;
+                if (this.messageEnabled(Messages.SPEAKER)) this.printMessage("speaker off at " + freq + "hz", true);
             }
         } else if (fOn) {
             this.printMessage("BEEP", Messages.SPEAKER);
         }
+    }
+
+    /**
+     * startAudio(event)
+     *
+     * @this {ChipSet}
+     * @param {Event} [event] object from a 'touch' event, if any
+     * @return {boolean}
+     */
+    startAudio(event)
+    {
+        if (this.contextAudio) {
+            /*
+             * NOTE: If the machine happened to enable its speaker *before* the user generated an event
+             * (eg, touchstart) that resulted in a call here, then we're too late -- at least as far as iOS
+             * devices are concerned, because those devices require the oscillator's start() method to be
+             * called in the context of a user-initiated event.
+             *
+             * One possible corrective solution would be to simply recreate the oscillator and gain objects
+             * every time we're called with an event object, but I'm not prepared to go that far yet....
+             */
+            if (this.oscillatorAudio) return true;
+            try {
+                this.oscillatorAudio = this.contextAudio['createOscillator']();
+                this.gainAudio = this.contextAudio['createGain']();
+                this.oscillatorAudio['connect'](this.gainAudio);
+                this.gainAudio['connect'](this.contextAudio['destination']);
+                this.gainAudio['gain']['value'] = 0;
+                this.oscillatorAudio['type'] = "square";
+                this.oscillatorAudio['start'](0);
+                return true;
+            } catch(e) {
+                this.notice("AudioContext exception: " + e.message);
+                this.contextAudio = null;
+            }
+        }
+        return false;
     }
 
     /**
