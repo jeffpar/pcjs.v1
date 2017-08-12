@@ -37516,7 +37516,7 @@ class ChipSet extends Component {
      *      model:          eg, "5150", "5160", "5170", "deskpro386" (should be a member of ChipSet.MODELS)
      *      sw1:            8-character binary string representing the SW1 DIP switches (SW1[1-8]); see Switches Overview
      *      sw2:            8-character binary string representing the SW2 DIP switches (SW2[1-8]) (MODEL_5150 only)
-     *      sound:          true to enable (experimental) sound support (default); false to disable
+     *      sound:          true (or non-zero) to enable sounds (default), false (or 0) to disable; number used as initial volume
      *      scaleTimers:    true to divide timer cycle counts by the CPU's cycle multiplier (default is false)
      *      floppies:       array of floppy drive sizes in Kb (default is "[360, 360]" if no sw1 value provided)
      *      monitor:        none|tv|color|mono|ega|vga (if no sw1 value provided, default is "ega" for 5170, "mono" otherwise)
@@ -37606,22 +37606,18 @@ class ChipSet extends Component {
         this.sDateRTC = parmsChipSet['dateRTC'];
 
         /*
-         * Here, I'm finally getting around to trying the Web Audio API.  Fortunately, based on what little I know about
-         * sound generation, using the API to make the same noises as the IBM PC speaker seems straightforward.
+         * Here, I'm finally getting around to trying the Web Audio API.  Fortunately, based on what little
+         * I know about sound generation, using the API to make the same noises as the IBM PC speaker seems
+         * straightforward.
          *
-         * To start, we create an audio context, unless the 'sound' parameter has been explicitly set to false.
-         *
-         * From:
-         *
-         *      http://developer.apple.com/library/safari/#documentation/AudioVideo/Conceptual/Using_HTML5_Audio_Video/PlayingandSynthesizingSounds/PlayingandSynthesizingSounds.html
-         *
-         * "Similar to how HTML5 canvas requires a context on which lines and curves are drawn, Web Audio requires an audio context
-         *  on which sounds are played and manipulated. This context will be the parent object of further audio objects to come....
-         *  Your audio context is typically created when your page initializes and should be long-lived. You can play multiple sounds
-         *  coming from multiple sources within the same context, so it is unnecessary to create more than one audio context per page."
+         * To start, we create an audio context, unless the 'sound' parameter has been explicitly set to false
+         * or 0; the boolean value true (along with any illegal number) now defaults to 0.5 instead of 1.0.
          */
-        this.fSpeaker = false;
-        if (parmsChipSet['sound']) {
+        this.fSpeaker = this.fUserSound = false;
+        this.volumeInit = 0;
+        var sound = parmsChipSet['sound'];
+        if (sound) {
+            this.volumeInit = (typeof sound != "number" || sound < 0 || sound > 1)? 0.5 : sound;
             this.classAudio = this.contextAudio = null;
             if (window) {
                 this.classAudio = window['AudioContext'] || window['webkitAudioContext'];
@@ -37659,9 +37655,15 @@ class ChipSet extends Component {
         this.cmp = cmp;
 
         this.fpu = cmp.getMachineComponent("FPU");
-        this.setDIPSwitches(ChipSet.SWITCH_TYPE.FPU, this.fpu?1:0, true);
+        this.setDIPSwitches(ChipSet.SWITCH_TYPE.FPU, this.fpu? 1 : 0, true);
 
         this.kbd = cmp.getMachineComponent("Keyboard");
+
+        var sound = cmp.getMachineParm("sound");
+        if (sound != null) {
+            var volume = +sound || 0;
+            this.volumeInit = (sound == "true" || volume < 0 || volume > 1? 0.5 : volume);
+        }
 
         /*
          * This divisor is invariant, so we calculate it as soon as we're able to query the CPU's base speed.
@@ -42053,60 +42055,90 @@ class ChipSet extends Component {
     setSpeaker(fOn)
     {
         if (this.contextAudio) {
-            try {
-                if (fOn !== undefined) {
-                    this.fSpeaker = fOn;
-                } else {
-                    fOn = !!(this.fSpeaker && this.cpu && this.cpu.isRunning());
-                }
-                var freq = Math.round(ChipSet.TIMER_TICKS_PER_SEC / this.getTimerInit(ChipSet.PIT0.TIMER2));
+            if (fOn !== undefined) {
+                this.fSpeaker = fOn;
+            } else {
+                fOn = !!(this.fSpeaker && this.cpu && this.cpu.isRunning());
+            }
+            var freq = Math.round(ChipSet.TIMER_TICKS_PER_SEC / this.getTimerInit(ChipSet.PIT0.TIMER2));
+            if (freq < 20 || freq > 20000) {
                 /*
-                 * Treat frequencies outside the normal hearing range (below 20hz or above 20Khz) as a clever attempt
-                 * to turn sound off; we have to explicitly turn the sound off in those cases, to prevent the Audio API
-                 * from "easing" the audio to the target frequency and creating odd sound effects.
+                 * Treat frequencies outside the normal hearing range (below 20hz or above 20Khz) as a clever
+                 * attempt to turn sound off.
                  */
-                if (freq < 20 || freq > 20000) fOn = false;
-                if (fOn) {
-                    if (this.sourceAudio) {
-                        this.sourceAudio['frequency']['value'] = freq;
-                        if (this.messageEnabled(Messages.SPEAKER)) this.printMessage("speaker set to " + freq + "hz", true);
-                    } else {
-                        this.sourceAudio = this.contextAudio['createOscillator']();
-                        if (this.sourceAudio) {
-                            if (typeof this.sourceAudio['type'] == "number") {
-                                this.sourceAudio['type'] = 1;   // deprecated: 0: "sine", 1: "square", 2: "sawtooth", 3: "triangle"
-                            } else {
-                                this.sourceAudio['type'] = "square";
-                            }
-                            this.sourceAudio['connect'](this.contextAudio['destination']);
-                            this.sourceAudio['frequency']['value'] = freq;
-                            if ('start' in this.sourceAudio) {
-                                this.sourceAudio['start'](0);
-                            } else {
-                                this.sourceAudio['noteOn'](0);  // deprecated: this.sourceAudio['noteOn'](0)
-                            }
-                            if (this.messageEnabled(Messages.SPEAKER)) this.printMessage("speaker on at  " + freq + "hz", true);
-                        }
-                    }
-                } else {
-                    if (this.sourceAudio) {
-                        if ('stop' in this.sourceAudio) {
-                            this.sourceAudio['stop'](0);
-                        } else {
-                            this.sourceAudio['noteOff'](0);     // deprecated: this.sourceAudio['noteOff'](0)
-                        }
-                        this.sourceAudio['disconnect']();       // QUESTION: is this automatic following a stop(), since this particular source cannot be started again?
-                        delete this.sourceAudio;                // QUESTION: ditto?
-                        if (this.messageEnabled(Messages.SPEAKER)) this.printMessage("speaker off at " + freq + "hz", true);
-                    }
+                fOn = false;
+            }
+            if (fOn && this.startAudio()) {
+                /*
+                 * Instead of setting the frequency's 'value' property directly, as we used to do, we use the
+                 * setValueAtTime() method, with a time of zero, as a work-around to avoid the "easing" (aka
+                 * "de-zippering") of the frequency that browsers like to do.  Supposedly de-zippering is an
+                 * attempt to avoid "pops" if the frequency is altered while the wave is still rising or falling.
+                 * We'll see.
+                 */
+                this.oscillatorAudio['frequency']['setValueAtTime'](freq, 0);
+                this.volumeAudio['gain']['value'] = this.volumeInit;
+                if (this.messageEnabled(Messages.SPEAKER)) this.printMessage("speaker on at  " + freq + "hz", true);
+            } else if (this.volumeAudio) {
+                this.volumeAudio['gain']['value'] = 0;
+                if (this.messageEnabled(Messages.SPEAKER)) this.printMessage("speaker off at " + freq + "hz", true);
+            }
+        } else if (fOn) {
+            this.printMessage("BEEP", Messages.SPEAKER);
+        }
+    }
+
+    /**
+     * startAudio(event)
+     *
+     * NOTE: We currently use named properties rather than "dot" properties to access all the AudioContext
+     * properties and methods, because we don't have any built-in declarations or externs for them, so neither
+     * WebStorm nor the Closure Compiler recognize them.  We could live with the WebStorm inspection warnings,
+     * but we definitely can't have the Closure Compiler renaming any of the properties -- and since it
+     * automatically converts them all to "dot" properties, there's no incentive for us to do anything more.
+     *
+     * @this {ChipSet}
+     * @param {Event} [event] object from a 'touch' event, if any
+     * @return {boolean}
+     */
+    startAudio(event)
+    {
+        if (this.contextAudio) {
+            /*
+             * NOTE: If the machine happened to enable its speaker *before* the user generated an event
+             * (eg, touchstart) that resulted in a call here, then we're too late -- at least as far as iOS
+             * devices are concerned, because those devices require the oscillator's start() method to be
+             * called in the context of a user-initiated event.
+             *
+             * So, for the benefit of iOS devices, when we finally receive a user-generated call, we will
+             * simply recreate the oscillator.  This is a one-time work-around for the life of the machine.
+             *
+             * TODO: Consider adding a "Sound On/Off" button to all machines (probably in the top right corner,
+             * where "Full Screen" and "Lock Pointer" buttons typically appear), at least on iOS devices.
+             */
+            if (event) {
+                if (this.fUserSound) return true;
+                this.oscillatorAudio = null;
+                this.fUserSound = true;
+            }
+            if (this.oscillatorAudio) return true;
+            try {
+                this.oscillatorAudio = this.contextAudio['createOscillator']();
+                if ('start' in this.oscillatorAudio) {  // early versions of Web Audio used noteOn() instead of start()
+                    this.volumeAudio = this.contextAudio['createGain']();
+                    this.oscillatorAudio['connect'](this.volumeAudio);
+                    this.volumeAudio['connect'](this.contextAudio['destination']);
+                    this.volumeAudio['gain']['value'] = 0;
+                    this.oscillatorAudio['type'] = "square";
+                    this.oscillatorAudio['start'](0);
+                    return true;
                 }
             } catch(e) {
                 this.notice("AudioContext exception: " + e.message);
                 this.contextAudio = null;
             }
-        } else if (fOn) {
-            this.printMessage("BEEP", Messages.SPEAKER);
         }
+        return false;
     }
 
     /**
@@ -49479,6 +49511,15 @@ class Video extends Component {
             if (this.kbd) this.captureTouch(Video.TOUCH.KEYGRID);
         }
 
+        /*
+         * If no touch support was required or requested, we still want to do some minimal touch event processing;
+         * eg, notifying the ChipSet component whenever a touchstart occurs, so that it can enable audio in response
+         * to a user action on iOS devices.
+         */
+        if (!this.nTouchConfig) {
+            this.captureTouch(Video.TOUCH.DEFAULT);
+        }
+
         if (this.sFileURL) {
             var sProgress = "Loading " + this.sFileURL + "...";
             Web.getResource(this.sFileURL, null, true, function(sURL, sResponse, nErrorCode) {
@@ -49759,16 +49800,25 @@ class Video extends Component {
         if (control) {
             var video = this;
             if (!this.nTouchConfig) {
+
+                this.nTouchConfig = nTouchConfig;
+
                 control.addEventListener(
                     'touchstart',
                     function onTouchStart(event) { video.onTouchStart(event); },
                     false                   // we'll specify false for the 'useCapture' parameter for now...
                 );
+
+                if (nTouchConfig == Video.TOUCH.DEFAULT) {
+                    return;
+                }
+
                 control.addEventListener(
                     'touchmove',
                     function onTouchMove(event) { video.onTouchMove(event); },
                     true
                 );
+
                 control.addEventListener(
                     'touchend',
                     function onTouchEnd(event) { video.onTouchEnd(event); },
@@ -49798,7 +49848,6 @@ class Video extends Component {
 
                 // this.log("touch events captured");
 
-                this.nTouchConfig = nTouchConfig;
                 this.xTouch = this.yTouch = this.timeTouch = -1;
 
                 /*
@@ -49855,6 +49904,8 @@ class Video extends Component {
     onTouchStart(event)
     {
         if (DEBUG) this.printMessage("onTouchStart()");
+        this.chipset.startAudio(event);
+        if (this.nTouchConfig == Video.TOUCH.DEFAULT) return;
         this.processTouchEvent(event, true);
     }
 
@@ -54408,8 +54459,9 @@ Video.cardSpecs[Video.CARD.VGA] = ["VGA", Card.CGA.CRTC.INDX.PORT, 0xB8000, 0x04
  */
 Video.TOUCH = {
     NONE:       0,
-    KEYGRID:    1,
-    MOUSE:      2
+    DEFAULT:    1,
+    KEYGRID:    2,
+    MOUSE:      3
 };
 
 /*
