@@ -146,19 +146,11 @@ class ChipSet extends Component {
         this.sDateRTC = parmsChipSet['dateRTC'];
 
         /*
-         * Here, I'm finally getting around to trying the Web Audio API.  Fortunately, based on what little I know about
-         * sound generation, using the API to make the same noises as the IBM PC speaker seems straightforward.
+         * Here, I'm finally getting around to trying the Web Audio API.  Fortunately, based on what little
+         * I know about sound generation, using the API to make the same noises as the IBM PC speaker seems
+         * straightforward.
          *
          * To start, we create an audio context, unless the 'sound' parameter has been explicitly set to false.
-         *
-         * From:
-         *
-         *      http://developer.apple.com/library/safari/#documentation/AudioVideo/Conceptual/Using_HTML5_Audio_Video/PlayingandSynthesizingSounds/PlayingandSynthesizingSounds.html
-         *
-         * "Similar to how HTML5 canvas requires a context on which lines and curves are drawn, Web Audio requires an audio context
-         *  on which sounds are played and manipulated. This context will be the parent object of further audio objects to come....
-         *  Your audio context is typically created when your page initializes and should be long-lived. You can play multiple sounds
-         *  coming from multiple sources within the same context, so it is unnecessary to create more than one audio context per page."
          */
         this.fSpeaker = false;
         if (parmsChipSet['sound']) {
@@ -4607,38 +4599,21 @@ class ChipSet extends Component {
                  */
                 if (freq < 20 || freq > 20000) fOn = false;
                 if (fOn) {
-                    if (this.sourceAudio) {
-                        this.sourceAudio['frequency']['value'] = freq;
-                        if (this.messageEnabled(Messages.SPEAKER)) this.printMessage("speaker set to " + freq + "hz", true);
-                    } else {
-                        this.sourceAudio = this.contextAudio['createOscillator']();
-                        if (this.sourceAudio) {
-                            if (typeof this.sourceAudio['type'] == "number") {
-                                this.sourceAudio['type'] = 1;   // deprecated: 0: "sine", 1: "square", 2: "sawtooth", 3: "triangle"
-                            } else {
-                                this.sourceAudio['type'] = "square";
-                            }
-                            this.sourceAudio['connect'](this.contextAudio['destination']);
-                            this.sourceAudio['frequency']['value'] = freq;
-                            if ('start' in this.sourceAudio) {
-                                this.sourceAudio['start'](0);
-                            } else {
-                                this.sourceAudio['noteOn'](0);  // deprecated: this.sourceAudio['noteOn'](0)
-                            }
-                            if (this.messageEnabled(Messages.SPEAKER)) this.printMessage("speaker on at  " + freq + "hz", true);
-                        }
+                    if (!this.oscillatorAudio) {
+                        this.oscillatorAudio = this.contextAudio['createOscillator']();
+                        this.gainAudio = this.contextAudio['createGain']();
+                        this.oscillatorAudio['connect'](this.gainAudio);
+                        this.gainAudio['connect'](this.contextAudio['destination']);
+                        this.oscillatorAudio['frequency']['value'] = freq;
+                        this.oscillatorAudio['type'] = "square";
+                        this.oscillatorAudio['start'](0);
                     }
-                } else {
-                    if (this.sourceAudio) {
-                        if ('stop' in this.sourceAudio) {
-                            this.sourceAudio['stop'](0);
-                        } else {
-                            this.sourceAudio['noteOff'](0);     // deprecated: this.sourceAudio['noteOff'](0)
-                        }
-                        this.sourceAudio['disconnect']();       // QUESTION: is this automatic following a stop(), since this particular source cannot be started again?
-                        delete this.sourceAudio;                // QUESTION: ditto?
-                        if (this.messageEnabled(Messages.SPEAKER)) this.printMessage("speaker off at " + freq + "hz", true);
-                    }
+                    this.oscillatorAudio['frequency']['value'] = freq;
+                    this.gainAudio['gain']['value'] = 1;
+                    if (this.messageEnabled(Messages.SPEAKER)) this.printMessage("speaker on at  " + freq + "hz", true);
+                } else if (this.oscillatorAudio) {
+                    this.gainAudio['gain']['value'] = 0;
+                    if (this.messageEnabled(Messages.SPEAKER)) this.printMessage("speaker off at " + freq + "hz", true);
                 }
             } catch(e) {
                 this.notice("AudioContext exception: " + e.message);
