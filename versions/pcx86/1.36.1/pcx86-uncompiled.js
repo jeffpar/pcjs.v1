@@ -37613,7 +37613,7 @@ class ChipSet extends Component {
          * To start, we create an audio context, unless the 'sound' parameter has been explicitly set to false
          * or 0; the boolean value true (along with any illegal number) now defaults to 0.5 instead of 1.0.
          */
-        this.fSpeaker = false;
+        this.fSpeaker = this.fUserSound = false;
         this.volumeInit = 0;
         var sound = parmsChipSet['sound'];
         if (sound) {
@@ -42091,6 +42091,12 @@ class ChipSet extends Component {
     /**
      * startAudio(event)
      *
+     * NOTE: We currently use named properties rather than "dot" properties to access all the AudioContext
+     * properties and methods, because we don't have any built-in declarations or externs for them, so neither
+     * WebStorm nor the Closure Compiler recognize them.  We could live with the WebStorm inspection warnings,
+     * but we definitely can't have the Closure Compiler renaming any of the properties -- and since it
+     * automatically converts them all to "dot" properties, there's no incentive for us to do anything more.
+     *
      * @this {ChipSet}
      * @param {Event} [event] object from a 'touch' event, if any
      * @return {boolean}
@@ -42104,27 +42110,29 @@ class ChipSet extends Component {
              * devices are concerned, because those devices require the oscillator's start() method to be
              * called in the context of a user-initiated event.
              *
-             * One possible corrective solution would be to simply recreate the oscillator and gain objects
-             * every time we're called with an event object, but I'm not prepared to go that far yet....
+             * So, for the benefit of iOS devices, when we finally receive a user-generated call, we will
+             * simply recreate the oscillator.  This is a one-time work-around for the life of the machine.
+             *
+             * TODO: Consider adding a "Sound On/Off" button to all machines (probably in the top right corner,
+             * where "Full Screen" and "Lock Pointer" buttons typically appear), at least on iOS devices.
              */
+            if (event) {
+                if (this.fUserSound) return true;
+                this.oscillatorAudio = null;
+                this.fUserSound = true;
+            }
             if (this.oscillatorAudio) return true;
             try {
                 this.oscillatorAudio = this.contextAudio['createOscillator']();
-                this.volumeAudio = this.contextAudio['createGain']();
-                this.oscillatorAudio['connect'](this.volumeAudio);
-                this.volumeAudio['connect'](this.contextAudio['destination']);
-                this.volumeAudio['gain']['value'] = 0;
-                if (typeof this.oscillatorAudio['type'] == "number") {
-                    this.oscillatorAudio['type'] = 1;   // deprecated (0: "sine", 1: "square", 2: "sawtooth", 3: "triangle")
-                } else {
+                if ('start' in this.oscillatorAudio) {  // early versions of Web Audio used noteOn() instead of start()
+                    this.volumeAudio = this.contextAudio['createGain']();
+                    this.oscillatorAudio['connect'](this.volumeAudio);
+                    this.volumeAudio['connect'](this.contextAudio['destination']);
+                    this.volumeAudio['gain']['value'] = 0;
                     this.oscillatorAudio['type'] = "square";
-                }
-                if ('start' in this.oscillatorAudio) {
                     this.oscillatorAudio['start'](0);
-                } else {
-                    this.oscillatorAudio['noteOn'](0);  // deprecated
+                    return true;
                 }
-                return true;
             } catch(e) {
                 this.notice("AudioContext exception: " + e.message);
                 this.contextAudio = null;
