@@ -37516,7 +37516,7 @@ class ChipSet extends Component {
      *      model:          eg, "5150", "5160", "5170", "deskpro386" (should be a member of ChipSet.MODELS)
      *      sw1:            8-character binary string representing the SW1 DIP switches (SW1[1-8]); see Switches Overview
      *      sw2:            8-character binary string representing the SW2 DIP switches (SW2[1-8]) (MODEL_5150 only)
-     *      sound:          true (or non-zero) to enable sounds (default), false (or 0) to disable; number used as initial gain
+     *      sound:          true (or non-zero) to enable sounds (default), false (or 0) to disable; number used as initial volume
      *      scaleTimers:    true to divide timer cycle counts by the CPU's cycle multiplier (default is false)
      *      floppies:       array of floppy drive sizes in Kb (default is "[360, 360]" if no sw1 value provided)
      *      monitor:        none|tv|color|mono|ega|vga (if no sw1 value provided, default is "ega" for 5170, "mono" otherwise)
@@ -37614,11 +37614,10 @@ class ChipSet extends Component {
          * or 0; the boolean value true (along with any illegal number) now defaults to 0.5 instead of 1.0.
          */
         this.fSpeaker = false;
-        this.gainInit = parmsChipSet['sound'];
-        if (this.gainInit) {
-            if (typeof this.gainInit != "number" || this.gainInit < 0 || this.gainInit > 1) {
-                this.gainInit = 0.5;
-            }
+        this.volumeInit = 0;
+        var sound = parmsChipSet['sound'];
+        if (sound) {
+            this.volumeInit = (typeof sound != "number" || sound < 0 || sound > 1)? 0.5 : sound;
             this.classAudio = this.contextAudio = null;
             if (window) {
                 this.classAudio = window['AudioContext'] || window['webkitAudioContext'];
@@ -37660,10 +37659,10 @@ class ChipSet extends Component {
 
         this.kbd = cmp.getMachineComponent("Keyboard");
 
-        var gain = cmp.getMachineParm("sound");
-        if (gain != null) {
-            var gainValue = +gain || 0;
-            this.gainInit = (gain == "true" || gainValue < 0 || gainValue > 1? 0.5 : gainValue);
+        var sound = cmp.getMachineParm("sound");
+        if (sound != null) {
+            var volume = +sound || 0;
+            this.volumeInit = (sound == "true" || volume < 0 || volume > 1? 0.5 : volume);
         }
 
         /*
@@ -42078,10 +42077,10 @@ class ChipSet extends Component {
                  * We'll see.
                  */
                 this.oscillatorAudio['frequency']['setValueAtTime'](freq, 0);
-                this.gainAudio['gain']['value'] = this.gainInit;
+                this.volumeAudio['gain']['value'] = this.volumeInit;
                 if (this.messageEnabled(Messages.SPEAKER)) this.printMessage("speaker on at  " + freq + "hz", true);
-            } else if (this.gainAudio) {
-                this.gainAudio['gain']['value'] = 0;
+            } else if (this.volumeAudio) {
+                this.volumeAudio['gain']['value'] = 0;
                 if (this.messageEnabled(Messages.SPEAKER)) this.printMessage("speaker off at " + freq + "hz", true);
             }
         } else if (fOn) {
@@ -42111,12 +42110,20 @@ class ChipSet extends Component {
             if (this.oscillatorAudio) return true;
             try {
                 this.oscillatorAudio = this.contextAudio['createOscillator']();
-                this.gainAudio = this.contextAudio['createGain']();
-                this.oscillatorAudio['connect'](this.gainAudio);
-                this.gainAudio['connect'](this.contextAudio['destination']);
-                this.gainAudio['gain']['value'] = 0;
-                this.oscillatorAudio['type'] = "square";
-                this.oscillatorAudio['start'](0);
+                this.volumeAudio = this.contextAudio['createGain']();
+                this.oscillatorAudio['connect'](this.volumeAudio);
+                this.volumeAudio['connect'](this.contextAudio['destination']);
+                this.volumeAudio['gain']['value'] = 0;
+                if (typeof this.oscillatorAudio['type'] == "number") {
+                    this.oscillatorAudio['type'] = 1;   // deprecated (0: "sine", 1: "square", 2: "sawtooth", 3: "triangle")
+                } else {
+                    this.oscillatorAudio['type'] = "square";
+                }
+                if ('start' in this.oscillatorAudio) {
+                    this.oscillatorAudio['start'](0);
+                } else {
+                    this.oscillatorAudio['noteOn'](0);  // deprecated
+                }
                 return true;
             } catch(e) {
                 this.notice("AudioContext exception: " + e.message);
