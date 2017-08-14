@@ -12710,10 +12710,10 @@ class CPU extends Component {
             if (fReset || timer[1] < 0) {
                 nCycles = this.getMSCycles(ms);
                 /*
-                 * We must now confront the following problem: if the CPU is currently executing a burst of cycles,
-                 * the number of cycles it has executed in that burst so far must NOT be charged against the cycle
-                 * timeout we're about to set.  The simplest way to resolve that is to immediately call endBurst()
-                 * and bias the cycle timeout by the number of cycles that the burst executed.
+                 * If the CPU is currently executing a burst of cycles, the number of cycles it has executed in
+                 * that burst so far must NOT be charged against the cycle timeout we're about to set.  The simplest
+                 * way to resolve that is to immediately call endBurst() and bias the cycle timeout by the number
+                 * of cycles that the burst executed.
                  */
                 if (this.flags.running) {
                     nCycles += this.endBurst();
@@ -12739,10 +12739,10 @@ class CPU extends Component {
         if (iTimer >= 0 && iTimer < this.aTimers.length) {
             var timer = this.aTimers[iTimer];
             /*
-             * We must now confront the following problem: if the CPU is currently executing a burst of cycles,
-             * the number of cycles it has executed in that burst so far must NOT be charged against the cycle
-             * timeout we're about to set.  The simplest way to resolve that is to immediately call endBurst()
-             * and bias the cycle timeout by the number of cycles that the burst executed.
+             * If the CPU is currently executing a burst of cycles, the number of cycles it has executed in
+             * that burst so far must NOT be charged against the cycle timeout we're about to set.  The simplest
+             * way to resolve that is to immediately call endBurst() and bias the cycle timeout by the number
+             * of cycles that the burst executed.
              */
             if (this.flags.running) {
                 nCycles += this.endBurst();
@@ -12870,17 +12870,17 @@ class CPU extends Component {
     }
 
     /**
-     * endBurst(fReset)
+     * endBurst()
      *
      * @this {CPU}
-     * @param {boolean} [fReset]
      * @return {number} (number of cycles executed in the most recent burst)
      */
-    endBurst(fReset)
+    endBurst()
     {
-        var nCycles = this.nBurstCycles -= this.nStepCycles;
-        this.nStepCycles = 0;
-        if (fReset) this.nBurstCycles = 0;
+        var nCycles = this.nBurstCycles - this.nStepCycles;
+        this.nBurstCycles = this.nStepCycles = 0;
+        this.counts.nCyclesThisRun += nCycles;
+        this.nRunCycles += nCycles;
         return nCycles;
     }
 
@@ -12936,19 +12936,13 @@ class CPU extends Component {
                 /*
                  * Terminate the burst, returning the number of cycles that stepCPU() actually ran.
                  */
-                nCycles = this.endBurst(true);
-
-                /*
-                 * Add nCycles to nCyclesThisRun, as well as nRunCycles (the cycle count since the CPU started).
-                 */
-                this.counts.nCyclesThisRun += nCycles;
-                this.nRunCycles += nCycles;
-                this.updateChecksum(nCycles);
+                nCycles = this.endBurst();
 
                 /*
                  * Update all timers, firing those whose cycle countdowns have reached (or dropped below) zero.
                  */
                 this.updateTimers(nCycles);
+                this.updateChecksum(nCycles);
 
             } while (this.flags.running && !this.flags.yield);
         }
@@ -13074,7 +13068,6 @@ class CPU extends Component {
      */
     yieldCPU()
     {
-        this.endBurst();
         this.flags.yield = true;
         /*
          * The Debugger calls yieldCPU() after every message() to ensure browser responsiveness, but it looks
