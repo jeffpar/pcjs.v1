@@ -53,6 +53,14 @@
 		<disk path="/disks/pcx86/dos/ibm/7.00/PCDOS700-DISK5.json">PC-DOS 7.00 (Disk 5)</disk>
 		<disk path="/disks/pcx86/dos/ibm/7.00/PCDOS700-1200K.json">PC-DOS 7.00 (1.2M Boot)</disk>
 		<disk path="/disks/pcx86/dos/ibm/7.00/PCDOS700-1440K.json">PC-DOS 7.00 (1.44M Boot)</disk>
+		<disk path="/disks/pcx86/dos/microsoft/2.00/MSDOS200-BIN-DISK1.json">MS-DOS 2.00 (Binary Disk 1)</disk>
+		<disk path="/disks/pcx86/dos/microsoft/2.00/MSDOS200-BIN-DISK2.json">MS-DOS 2.00 (Binary Disk 2)</disk>
+		<disk path="/disks/pcx86/dos/microsoft/2.00/MSDOS200-SRC-DISK1.json">MS-DOS 2.00 (Source Disk 1)</disk>
+		<disk path="/disks/pcx86/dos/microsoft/2.00/MSDOS200-SRC-DISK2.json">MS-DOS 2.00 (Source Disk 2)</disk>
+		<disk path="/disks/pcx86/dos/microsoft/2.00/MSDOS200-SRC-DISK3.json">MS-DOS 2.00 (Source Disk 3)</disk>
+		<disk path="/disks/pcx86/dos/microsoft/2.00/MSDOS200-SRC-DISK4.json">MS-DOS 2.00 (Source Disk 4)</disk>
+		<disk path="/disks/pcx86/dos/microsoft/2.00/MSDOS200-SRC-DISK5.json">MS-DOS 2.00 (Source Disk 5)</disk>
+		<disk path="/disks/pcx86/dos/microsoft/2.00/MSDOS200-SRC-DISK6.json">MS-DOS 2.00 (Source Disk 6)</disk>
 		<disk path="/disks/pcx86/dos/microsoft/3.20/MSDOS320-DISK1.json">MS-DOS 3.20 (Disk 1)</disk>
 		<disk path="/disks/pcx86/dos/microsoft/3.20/MSDOS320-DISK2.json">MS-DOS 3.20 (Disk 2)</disk>
 		<disk path="/disks/pcx86/dos/microsoft/3.20/MSDOS320-DISK3-PROGREF1.json">MS-DOS 3.20 (ProgRef 1)</disk>
