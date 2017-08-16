@@ -12,13 +12,18 @@ including:
 
 * [COMPAQ MS-DOS 2.12](/disks/pcx86/dos/compaq/2.12/)
 
-On March 25, 2014, the source code upon which OEMs based their MS-DOS 2.0x and 2.1x releases was made available to
-the public by the [Computer History Museum](http://www.computerhistory.org/atchm/microsoft-ms-dos-early-source-code/),
+MS-DOS 2.00 Source Code
+-----------------------
+
+On March 25, 2014, the source code upon which OEMs based their MS-DOS 2.x releases was made available to the
+public by the [Computer History Museum](http://www.computerhistory.org/atchm/microsoft-ms-dos-early-source-code/),
 with the permission of Microsoft.
+
+![MS-DOS 2.00](MSDOS200-DISKS.jpg)
 
 For reasons known only to the Computer History Museum, the precise contents of the five diskettes donated to the
 museum remain a mystery.  Instead, the museum released a ZIP archive with the contents of the diskettes divided into
-two folders (`v20object` and `v20source`), with no clear indication which files came from which disk, why some files
+two folders, `v20object` and `v20source`, with no clear indication which files came from which disk, why some files
 were renamed (and what the original names were), and what (if anything) was omitted.
 
 We have divided the contents of the `v20object` folder into two 320Kb "binary" disk images and the contents of the
