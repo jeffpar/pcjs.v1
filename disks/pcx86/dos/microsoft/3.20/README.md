@@ -176,4 +176,4 @@ Here's what one of the MS-DOS 3.20 diskettes looked like.
 
 And the box, courtesy of [www.oldcomputermuseum.com](http://www.oldcomputermuseum.com/os/msdos_3.2.html).
 
-> ![MS-DOS 3.20 Box](http://www.oldcomputermuseum.com/os/os_files/msdos_3.2.jpg)
+> ![MS-DOS 3.20 Box](MSDOS320-BOX.jpg)
