@@ -77354,6 +77354,7 @@ function embedMachine(sAppName, sAppClass, sVersion, idMachine, sXMLFile, sXSLFi
                  */
                 var sAppFolder = sAppClass;
                 if (DEBUG || sVersion == "1.x.x") {
+                    if (sAppClass != "c1pjs") sAppFolder = "shared";
                     sXSLFile = "/modules/" + sAppFolder + "/templates/components.xsl";
                 } else {
                     if (sAppClass.substr(0, 3) == "pdp") sAppFolder = "pdpjs";
