@@ -51,7 +51,7 @@ function savePC(idMachine, sPCJSFile, callback)
         var sParms = cmp.saveMachineParms();
         if (!sPCJSFile) {
             if (DEBUG) {
-                sPCJSFile = "/tmp/pcx86/" + (XMLVERSION || APPVERSION) + "/pcx86.js"
+                sPCJSFile = "/versions/pcx86/" + (XMLVERSION || APPVERSION) + "/pcx86-uncompiled.js"
             } else {
                 sPCJSFile = "/versions/pcx86/" + (XMLVERSION || APPVERSION) + "/pcx86" + (dbg? "-dbg" : "") + ".js";
             }
@@ -127,6 +127,10 @@ function downloadPC(sURL, sCSS, nErrorCode, aMachineInfo)
      *
      *      --output_wrapper "(function(){%output%})();"
      *
+     * NOTE: There may also be a source map comment appended to the script, which we now ignore; eg:
+     *
+     *      //# sourceMappingURL=/versions/pcx86/1.36.1/pcx86.map
+     *
      * Immediately inside that wrapping, we want to embed all the specified machine's resources, using:
      *
      *      var resources = {"xml": "...", "xsl": "...", ...};
@@ -134,7 +138,7 @@ function downloadPC(sURL, sCSS, nErrorCode, aMachineInfo)
      * Note that the "resources" variable has been added to our externs.js, to prevent it from being renamed
      * by the Closure Compiler.
      */
-    matchScript = sPCJS.match(/^(\s*\(function\(\)\{)([\s\S]*)(}\)\(\);\s*)$/);
+    matchScript = sPCJS.match(/^(\s*\(function\(\)\{)([\s\S]*)(}\)\(\);)/);
     if (!matchScript) {
         /*
          * If the match failed, we assume that a DEBUG (uncompiled) script is being used,
@@ -143,7 +147,8 @@ function downloadPC(sURL, sCSS, nErrorCode, aMachineInfo)
         if (DEBUG) {
             matchScript = [sPCJS, "", sPCJS, ""];
         } else {
-            sPCJS = "";
+            Component.alertUser("Unsupported script");
+            return;
         }
     }
 
