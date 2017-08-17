@@ -31,6 +31,7 @@ will be added over time.
 	       13 File(s)     35840 bytes free
 
 > NOTES: This was originally an MS-DOS 3.20 Distribution Disk (Disk 2 of 2) which I had subsequently modified for
-personal use.  Presumably to make more room on the disk, I had moved a few MS-DOS 3.20 files to Disk 1 (ie, BACKUP.EXE,
+personal use.  Presumably to make more room on the disk, I had moved off a few MS-DOS 3.20 files (BACKUP.EXE,
 RESTORE.EXE, SHARE.EXE, TREE.EXE, and XCOPY.EXE), updated DEBUG.EXE, added MASM.EXE (v4.00), and then included
-a few of my own files (eg, PCPAL.EXE and HDISK.ASM). *--@jeffpar*
+a few files of my own (eg, PCPAL.EXE and HDISK.ASM).  FYI, this particular copy of PCPAL.EXE was saved with **Alt-Esc**
+configured as the activation key sequence. *--@jeffpar*
