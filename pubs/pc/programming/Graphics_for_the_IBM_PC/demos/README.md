@@ -12,7 +12,7 @@ machines:
 ---
 
 Selected Live Demos from [Graphics for the IBM PC](../)
----
+-------------------------------------------------------
 
 All of the machine demos below are halted by default.  Click the machine's **Run** button to start it running.
 
