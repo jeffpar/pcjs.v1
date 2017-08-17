@@ -745,6 +745,7 @@
 		<disk path="/disks/pcx86/shareware/pctj/disks/PCTJ8901.json">PC Tech Journal (1989-01)</disk>
 		<disk path="/disks/pcx86/shareware/pctj/disks/PCTBENCH.json">PC Tech Journal (Benchmarks)</disk>
 		<disk path="/disks/pcx86/shareware/pctj/disks/PCTJBEST.json">PC Tech Journal (Best Of)</disk>
+		<disk path="/disks/pcx86/personal/JEFFPAR-DISK001.json">JEFFPAR DISK001</disk>
 		<disk path="/apps/pcx86/1981/visicalc/VISICALC1981.json">VisiCalc (1981)</disk>
 		<disk path="/apps/pcx86/1982/esuite/disk.json">Executive Suite (1982)</disk>
 		<disk path="/apps/pcx86/1982/ratbas/RATBAS213.json">RatBas 2.13</disk>
