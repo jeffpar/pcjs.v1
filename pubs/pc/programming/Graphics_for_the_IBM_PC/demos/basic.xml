@@ -6,7 +6,7 @@
 		<manifest ref="/disks/pcx86/dos/ibm/1.10/manifest.xml" disk="*"/>
 		<manifest ref="/disks/pcx86/dos/ibm/2.00/manifest.xml" disk="*"/>
 		<manifest ref="/disks/pcx86/games/microsoft/adventure/manifest.xml" disk="*"/>
-		<manifest ref="/apps/pc/1981/visicalc/manifest.xml" disk="*"/>
+		<manifest ref="/apps/pcx86/1981/visicalc/manifest.xml" disk="*"/>
 		<disk path="/pubs/pc/programming/Graphics_for_the_IBM_PC/programs/disk.json">BASIC Programs</disk>
 	</control>
 	<control type="button" binding="loadDisk" padRight="8px">Load</control>
