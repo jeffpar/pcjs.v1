@@ -893,11 +893,12 @@ class CPU extends Component {
      * value (in milliseconds) to have the timer fire automatically at regular intervals.  There is currently
      * no removeTimer() because these are generally used for the entire lifetime of a component.
      *
-     * Internally, each timer entry is a preallocated Array with three entries:
+     * Internally, each timer entry is a preallocated Array with the following entries:
      *
-     *      [0]: countdown value, in cycles
-     *      [1]: automatic setTimer value, if any, in milliseconds
-     *      [2]: callback function
+     *      [0]: timer ID
+     *      [1]: countdown value, in cycles
+     *      [2]: automatic setTimer value, if any, in milliseconds
+     *      [3]: callback function
      *
      * A timer is initially dormant; dormant timers have a countdown value of -1 (although any negative number
      * will suffice) and active timers have a non-negative value.

@@ -416,7 +416,7 @@ class Video8080 extends Component {
         }
 
         var video = this;
-        this.timerUpdateNext = this.cpu.addTimer(function() {
+        this.timerUpdateNext = this.cpu.addTimer(this.id, function() {
             video.updateScreen();
         });
         this.cpu.setTimer(this.timerUpdateNext, this.getRefreshTime());

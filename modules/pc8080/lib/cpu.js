@@ -900,27 +900,53 @@ class CPU8080 extends Component {
     }
 
     /**
-     * addTimer(callBack)
+     * addTimer(id, callBack, ms)
      *
-     * Components that want to have timers that periodically fire after some number of milliseconds call
-     * addTimer() to create the timer, and then setTimer() every time they want to arm it.  There is currently
+     * Components that want to have timers that fire after some number of milliseconds call addTimer() to create
+     * the timer, and then setTimer() when they want to arm it.  Alternatively, they can specify an automatic timeout
+     * value (in milliseconds) to have the timer fire automatically at regular intervals.  There is currently
      * no removeTimer() because these are generally used for the entire lifetime of a component.
      *
-     * Internally, each timer entry is a preallocated Array with two entries: a cycle countdown in element [0]
-     * and a callback function in element [1].  A timer is initially dormant; dormant timers have a countdown
-     * value of -1 (although any negative number will suffice) and active timers have a non-negative value.
+     * Internally, each timer entry is a preallocated Array with the following entries:
+     *
+     *      [0]: timer ID
+     *      [1]: countdown value, in cycles
+     *      [2]: automatic setTimer value, if any, in milliseconds
+     *      [3]: callback function
+     *
+     * A timer is initially dormant; dormant timers have a countdown value of -1 (although any negative number
+     * will suffice) and active timers have a non-negative value.
      *
      * Why not use JavaScript's setTimeout() instead?  Good question.  For a good answer, see setTimer() below.
      *
      * @this {CPU8080}
+     * @param {string} id
      * @param {function()} callBack
+     * @param {number} [ms] (if set, enables automatic setTimer calls)
      * @return {number} timer index
      */
-    addTimer(callBack)
+    addTimer(id, callBack, ms = -1)
     {
         var iTimer = this.aTimers.length;
-        this.aTimers.push([-1, callBack]);
+        this.aTimers.push([id, -1, ms, callBack]);
+        if (ms >= 0) this.setTimer(iTimer, ms);
         return iTimer;
+    }
+
+    /**
+     * findTimer(id)
+     *
+     * @this {CPU8080}
+     * @param {string} id
+     * @return {Array|null}
+     */
+    findTimer(id)
+    {
+        for (var iTimer = 0; iTimer < this.aTimers.length; iTimer++) {
+            var timer = this.aTimers[iTimer];
+            if (timer[0] == id) return timer;
+        }
+        return null;
     }
 
     /**
@@ -948,18 +974,19 @@ class CPU8080 extends Component {
     {
         var nCycles = -1;
         if (iTimer >= 0 && iTimer < this.aTimers.length) {
-            if (fReset || this.aTimers[iTimer][0] < 0) {
+            var timer = this.aTimers[iTimer];
+            if (fReset || timer[1] < 0) {
                 nCycles = this.getMSCycles(ms);
                 /*
-                 * We must now confront the following problem: if the CPU is currently executing a burst of cycles,
-                 * the number of cycles it has executed in that burst so far must NOT be charged against the cycle
-                 * timeout we're about to set.  The simplest way to resolve that is to immediately call endBurst()
-                 * and bias the above cycle timeout by the number of cycles that the burst executed.
+                 * If the CPU is currently executing a burst of cycles, the number of cycles it has executed in
+                 * that burst so far must NOT be charged against the cycle timeout we're about to set.  The simplest
+                 * way to resolve that is to immediately call endBurst() and bias the cycle timeout by the number
+                 * of cycles that the burst executed.
                  */
                 if (this.flags.running) {
                     nCycles += this.endBurst();
                 }
-                this.aTimers[iTimer][0] = nCycles;
+                timer[1] = nCycles;
             }
         }
         return nCycles;
@@ -988,12 +1015,12 @@ class CPU8080 extends Component {
      */
     getBurstCycles(nCycles)
     {
-        for (var i = this.aTimers.length - 1; i >= 0; i--) {
-            var timer = this.aTimers[i];
-            this.assert(!isNaN(timer[0]));
-            if (timer[0] < 0) continue;
-            if (nCycles > timer[0]) {
-                nCycles = timer[0];
+        for (var iTimer = this.aTimers.length - 1; iTimer >= 0; iTimer--) {
+            var timer = this.aTimers[iTimer];
+            this.assert(!isNaN(timer[1]));
+            if (timer[1] < 0) continue;
+            if (nCycles > timer[1]) {
+                nCycles = timer[1];
             }
         }
         return nCycles;
@@ -1011,14 +1038,23 @@ class CPU8080 extends Component {
      */
     updateTimers(nCycles)
     {
-        for (var i = this.aTimers.length - 1; i >= 0; i--) {
-            var timer = this.aTimers[i];
-            this.assert(!isNaN(timer[0]));
-            if (timer[0] < 0) continue;
-            timer[0] -= nCycles;
-            if (timer[0] <= 0) {
-                timer[0] = -1;      // zero is technically an "active" value, so ensure the timer is dormant now
-                timer[1]();         // safe to invoke the callback function now
+        for (var iTimer = this.aTimers.length - 1; iTimer >= 0; iTimer--) {
+            var timer = this.aTimers[iTimer];
+            this.assert(!isNaN(timer[1]));
+            if (timer[1] < 0) continue;
+            timer[1] -= nCycles;
+            if (timer[1] <= 0) {
+                if (DEBUG && this.messageEnabled(Messages8080.CPU)) {
+                    this.printMessage("updateTimer(" + nCycles + "): firing " + timer[0] + " with only " + (timer[1] + nCycles) + " cycles left");
+                }
+                timer[1] = -1;      // zero is technically an "active" value, so ensure the timer is dormant now
+                timer[3]();         // safe to invoke the callback function now
+                if (timer[2] >= 0) {
+                    this.setTimer(iTimer, timer[2]);
+                    if (DEBUG && this.messageEnabled(Messages8080.CPU)) {
+                        this.printMessage("updateTimer(" + nCycles + "): rearming " + timer[0] + " for " + timer[2] + "ms (" + timer[1] + " cycles)");
+                    }
+                }
             }
         }
     }
