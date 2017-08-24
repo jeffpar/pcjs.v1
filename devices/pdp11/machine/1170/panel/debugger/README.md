@@ -33,7 +33,7 @@ For more full-featured PDP-11/70 machines that also include a Debugger, see:
 Toggle-Ins
 ----------
 
-As DEC notes in the [PDP-11/70 Maintenance Service Guide](http://archive.pcjs.org/pubs/dec/pdp11/1170/PDP1170_Maintenance_Service_Guide_Apr88.pdf),
+As DEC notes in the [PDP-11/70 Maintenance Service Guide](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/dec/pdp11/1170/PDP1170_Maintenance_Service_Guide_Apr88.pdf),
 Chapter 4: "There are several useful toggle-ins that are probably not very well known."  Excerpts are provided below.  If you're
 not sure how to "toggle in" code using a Front Panel, check out [Front Panel Basics](/devices/pdp11/panel/1170/#front-panel-basics).
 

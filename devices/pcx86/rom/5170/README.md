@@ -45,18 +45,18 @@ From [http://minuszerodegrees.net/bios/BIOS_5170_10JAN84_6MHZ.zip](http://minusz
 
 The JSON-encoded ROM image that PCjs uses was created using the *FileDump* command-line *merge* option:
 
-	filedump --file=http://archive.pcjs.org/devices/pcx86/rom/5170/BIOS_5170_10JAN84_U27_6181028_27256_6MHZ.BIN --merge=http://archive.pcjs.org/devices/pcx86/rom/5170/BIOS_5170_10JAN84_U47_6181029_27256_6MHZ.BIN --output=ATBIOS-REV1.json --overwrite
+	filedump --file=https://s3-us-west-2.amazonaws.com/archive.pcjs.org/devices/pcx86/rom/5170/BIOS_5170_10JAN84_U27_6181028_27256_6MHZ.BIN --merge=https://s3-us-west-2.amazonaws.com/archive.pcjs.org/devices/pcx86/rom/5170/BIOS_5170_10JAN84_U47_6181029_27256_6MHZ.BIN --output=ATBIOS-REV1.json --overwrite
 	
 Since a MAP file ([ATBIOS-REV1.map](1984-01-10/ATBIOS-REV1.map)) exists as well, it is automatically appended to the JSON file
 ([ATBIOS-REV1.json](1984-01-10/ATBIOS-REV1.json)) when using a ROM input file (or JSON output file) with a matching filename.
 
-It is also possible to create a merged binary ROM image ([ATBIOS-REV1.rom](http://archive.pcjs.org/devices/pcx86/rom/5170/ATBIOS-REV1.rom))
+It is also possible to create a merged binary ROM image ([ATBIOS-REV1.rom](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/devices/pcx86/rom/5170/ATBIOS-REV1.rom))
 by adding *--format=rom* to the command-line (the default is *--format=json*).
 
 These operations can only be performed using the *FileDump* command-line interface; the *FileDump* API does not support
 either the *merge* option or the appending of MAP data.  For the moment, the API can only dump unadorned ROM images; eg:
 
-	http://localhost:8088/api/v1/dump/?file=http://archive.pcjs.org/devices/pcx86/rom/5170/ATBIOS-REV1.rom
+	http://localhost:8088/api/v1/dump/?file=https://s3-us-west-2.amazonaws.com/archive.pcjs.org/devices/pcx86/rom/5170/ATBIOS-REV1.rom
 
 ---
 
@@ -89,7 +89,7 @@ From [http://minuszerodegrees.net/bios/BIOS_5170_10JUN85_6MHZ.zip](http://minusz
 
 The JSON-encoded ROM image that PCjs uses was created using the *FileDump* command-line *merge* option:
 
-	filedump --file=http://archive.pcjs.org/devices/pcx86/rom/5170/BIOS_5170_10JUN85_U27_6480090_27256.BIN --merge=http://archive.pcjs.org/devices/pcx86/rom/5170/BIOS_5170_10JUN85_U47_6480091_27256.BIN --output=ATBIOS-REV2.json --overwrite
+	filedump --file=https://s3-us-west-2.amazonaws.com/archive.pcjs.org/devices/pcx86/rom/5170/BIOS_5170_10JUN85_U27_6480090_27256.BIN --merge=https://s3-us-west-2.amazonaws.com/archive.pcjs.org/devices/pcx86/rom/5170/BIOS_5170_10JUN85_U47_6480091_27256.BIN --output=ATBIOS-REV2.json --overwrite
 
 ---
 
@@ -125,4 +125,4 @@ From [http://minuszerodegrees.net/bios/BIOS_5170_15NOV85_8MHZ_VARIATION_2.zip](h
 
 The JSON-encoded ROM image that PCjs uses was created using the *FileDump* command-line *merge* option:
 
-	filedump --file=http://archive.pcjs.org/devices/pcx86/rom/5170/BIOS_5170_15NOV85_U27_61X9266_27256.BIN --merge=http://archive.pcjs.org/devices/pcx86/rom/5170/BIOS_5170_15NOV85_U47_61X9265_27256.BIN --output=ATBIOS-REV3.json --overwrite
+	filedump --file=https://s3-us-west-2.amazonaws.com/archive.pcjs.org/devices/pcx86/rom/5170/BIOS_5170_15NOV85_U27_61X9266_27256.BIN --merge=https://s3-us-west-2.amazonaws.com/archive.pcjs.org/devices/pcx86/rom/5170/BIOS_5170_15NOV85_U47_61X9265_27256.BIN --output=ATBIOS-REV3.json --overwrite

@@ -16,7 +16,7 @@ Use this [PDP-11/70](/devices/pdp11/machine/1170/panel/debugger/) to see the [PD
 Front Panel Basics
 ------------------
 
-From the [PDP-11/70 Handbook (1979)](http://archive.pcjs.org/pubs/dec/pdp11/1170/PDP1170_Handbook_1979.pdf), Chapter 10,
+From the [PDP-11/70 Handbook (1979)](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/dec/pdp11/1170/PDP1170_Handbook_1979.pdf), Chapter 10,
 p. 325:
 
 > ### CONSOLE OPERATION

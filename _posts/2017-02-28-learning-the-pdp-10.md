@@ -11,7 +11,7 @@ the [PDP-10](https://en.wikipedia.org/wiki/PDP-10#Cancellation_and_influence).
 
 Having never used a real DEC PDP-10, I've had a steep learning curve creating a [PDP-10 Emulator](/modules/pdp10/).
 So far, the only [PDP-10 Hardware Documentation](/pubs/dec/pdp10/) I've read (or rather, skimmed) is the
-[PDP-10 System Reference Manual (1968)](http://archive.pcjs.org/pubs/dec/pdp10/ka10/DEC-10-HGAA-D_PDP-10_System_Reference_Manual_May1968.pdf).
+[PDP-10 System Reference Manual (1968)](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/dec/pdp10/ka10/DEC-10-HGAA-D_PDP-10_System_Reference_Manual_May1968.pdf).
 
 To make it easier to create and run some simple [PDP-10 Opcode Tests](/apps/pdp10/tests/opcodes/), most of my initial development
 efforts have centered on the built-in PDP-10 Debugger.  In addition to the usual disassembler capabilities, I've also included

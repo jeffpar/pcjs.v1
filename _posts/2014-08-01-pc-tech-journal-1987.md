@@ -9,7 +9,7 @@ permalink: /blog/2014/08/01/
 As part of an ongoing effort to make classic PC technical literature more accessible, I just finished
 scanning and posting the 12 issues of [PC Tech Journal](/pubs/pc/magazines/pctj/) from 1987.
 
-![PC Tech Journal, Jan 1987](http://archive.pcjs.org/pubs/pc/magazines/pctj/PCTJ-1987-01/thumbs/PCTJ-1987-01 1.jpeg "link:/pubs/pc/magazines/pctj/PCTJ-1987-01/:200:260")
+![PC Tech Journal, Jan 1987](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/magazines/pctj/PCTJ-1987-01/thumbs/PCTJ-1987-01 1.jpeg "link:/pubs/pc/magazines/pctj/PCTJ-1987-01/:200:260")
 
 Future PC Tech Journal postings will include:
 

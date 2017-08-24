@@ -10,7 +10,7 @@ machines:
     autoStart: true
     autoMount:
       RL0:
-        path: http://archive.pcjs.org/disks/dec/rl02k/RL02K-XXDP.json
+        path: https://s3-us-west-2.amazonaws.com/archive.pcjs.org/disks/dec/rl02k/RL02K-XXDP.json
     sticky: top
 machineScripts:
   runEKBAD0: |

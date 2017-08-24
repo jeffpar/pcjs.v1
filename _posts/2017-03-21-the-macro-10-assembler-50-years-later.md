@@ -141,7 +141,7 @@ it's a right-shift.  Here are some examples:
 	>> print -1B70
 	0o000000000001  1.
 
-And as the [MACRO-10 Assembler Programmer's Reference Manual (June 1972)](http://archive.pcjs.org/pubs/dec/pdp10/tops10/Macro_Assembler_Reference_Manual-Jun72.pdf),
+And as the [MACRO-10 Assembler Programmer's Reference Manual (June 1972)](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/dec/pdp10/tops10/Macro_Assembler_Reference_Manual-Jun72.pdf),
 p. 1-17, points out, all of the following "binary shifting" expressions are equivalent:
 
 	>> print 10B32
@@ -220,7 +220,7 @@ and processing them at the end of the first pass.  Well, since ZZ is a symbol th
 became clear that I needed to process literals immediately.  This meant creating a separate assembly scope while processing each
 literal; in fact, it meant a stack of scopes, in case literals contained nested literals.
 
-As the [MACRO-10 Assembler Programmer's Reference Manual (April 1978)](http://archive.pcjs.org/pubs/dec/pdp10/tops10/Macro_Assembler_Reference_Manual-Apr78.pdf)
+As the [MACRO-10 Assembler Programmer's Reference Manual (April 1978)](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/dec/pdp10/tops10/Macro_Assembler_Reference_Manual-Apr78.pdf)
 explains:
 
 	A literal can include any term, symbol, expression, or statement, but

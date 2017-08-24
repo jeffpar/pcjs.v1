@@ -18,7 +18,7 @@ however, even though it identifies itself as a 1987 issue, the editorial index o
 October 1986, so "technically" it should be considered a late 1986 issue.  It is officially Vol. 4, No. 13, which,
 numerically, puts it squarely between the December 1986 and January 1987 issues.
 
-[<img src="http://archive.pcjs.org/pubs/pc/magazines/pctj/PCTJ-1983-07/thumbs/PCTJ-1983-07 1.jpeg" width="200" height="260" alt="PC Tech Journal, July-August 1983"/>](/pubs/pc/magazines/pctj/)
+[<img src="https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/magazines/pctj/PCTJ-1983-07/thumbs/PCTJ-1983-07 1.jpeg" width="200" height="260" alt="PC Tech Journal, July-August 1983"/>](/pubs/pc/magazines/pctj/)
 
 Happy reading!
 

@@ -18,11 +18,11 @@ information (errata, disks, etc) is provided where available.
 * *Programmer's Guide to the EGA, VGA, and Super VGA Cards* (3rd Edition) by Richard F. Ferraro
 * *Programming the 8086 and 8088* by James W. Coffron
 * *Programming the 80386* by John H. Crawford and Patrick P. Gelsinger
-* *[The 8086 Book](http://archive.pcjs.org/pubs/pc/programming/The_8086_Book/The_8086_Book.pdf)* by Russell Rector and George Alexy
+* *[The 8086 Book](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/programming/The_8086_Book/The_8086_Book.pdf)* by Russell Rector and George Alexy
 * *The Zen of Assembly Language* by Michael Abrash
 * *[The Undocumented PC](The_Undocumented_PC/)* (2nd Edition) by Frank van Gilluwe
 * *[Undocumented DOS](Undocumented_DOS/)* (2nd Edition) by Schulman, Brown, Maxey, Michels, Kyle
 * *[Undocumented Windows](Undocumented_Windows/)* (Covers Windows 3.1 and 3.0) by Schulman, Maxey, Pietrek
 
-[<img src="http://archive.pcjs.org/pubs/pc/programming/thumbs/The_8086_Book.jpg" width="200" height="260" alt="The 8086 Book"/>](http://archive.pcjs.org/pubs/pc/programming/The_8086_Book/The_8086_Book.pdf)
-[<img src="http://archive.pcjs.org/pubs/pc/programming/Graphics_for_the_IBM_PC/thumbs/Graphics_for_the_IBM_PC 1.jpeg" width="200" height="260" alt="Graphics for the IBM PC"/>](Graphics_for_the_IBM_PC/)
+[<img src="https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/programming/thumbs/The_8086_Book.jpg" width="200" height="260" alt="The 8086 Book"/>](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/programming/The_8086_Book/The_8086_Book.pdf)
+[<img src="https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/programming/Graphics_for_the_IBM_PC/thumbs/Graphics_for_the_IBM_PC 1.jpeg" width="200" height="260" alt="Graphics for the IBM PC"/>](Graphics_for_the_IBM_PC/)

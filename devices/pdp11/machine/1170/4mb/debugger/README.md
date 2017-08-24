@@ -9,7 +9,7 @@ machines:
     autoStart: true
     autoMount:
       RL0:
-        path: http://archive.pcjs.org/disks/dec/rl01k/RL01K-RSTS-V70.json
+        path: https://s3-us-west-2.amazonaws.com/archive.pcjs.org/disks/dec/rl01k/RL01K-RSTS-V70.json
 ---
 
 {% include machine.html id="test1170" %}

@@ -10,7 +10,7 @@ machines:
     autoStart: true
     autoMount:
       RL0:
-        path: http://archive.pcjs.org/disks/dec/rl01k/RL01K-RSTS-V70.json
+        path: https://s3-us-west-2.amazonaws.com/archive.pcjs.org/disks/dec/rl01k/RL01K-RSTS-V70.json
 ---
 
 This machine is ready to boot [RSTS/E v7.0](/disks/dec/rl01k/rstsv70/) ("BOOT RL0").

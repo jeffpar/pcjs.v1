@@ -7,7 +7,7 @@ permalink: /blog/2016/11/13/
 
 Last week, I ran PDPjs through a series of early [PDP-11 Paper Tape Diagnostics](/apps/pdp11/tapes/diags/).
 These tests were originally released in 1970 and are documented in such DEC publications as the
-[MAINDEC USER REFERENCE MANUAL](http://archive.pcjs.org/pubs/dec/pdp11/diags/MAINDEC-11-DZQAB-B-D_User_Reference_Manual_Oct73.pdf)
+[MAINDEC USER REFERENCE MANUAL](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/dec/pdp11/diags/MAINDEC-11-DZQAB-B-D_User_Reference_Manual_Oct73.pdf)
 (October 1973).
 
 [Tests 1-12](/apps/pdp11/tapes/diags/#tests-1-12) (MAINDEC-11-D0AA-PB through MAINDEC-11-D0LA-PB)
