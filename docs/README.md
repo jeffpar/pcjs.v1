@@ -9,7 +9,7 @@ permalink: /docs/
 Documentation
 -------------
 
-If you want to know how to configure PCjs machines, here's what's been written so far:
+To learn how to create and configure PCjs machines, here's what the project has so far:
 
 * [C1Pjs](/docs/c1pjs/)
 * [PCx86](/docs/pcx86/)

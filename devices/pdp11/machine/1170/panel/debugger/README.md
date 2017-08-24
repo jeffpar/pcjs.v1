@@ -11,7 +11,7 @@ machines:
 ---
 
 PDP-11/70 with 256Kb, Front Panel, and Debugger
----
+-----------------------------------------------
 
 The machine below is a PDP-11/70 with a stripped-down interface that includes our stylized Front Panel and
 a "teletype" I/O window connected to the PDP-11/70's serial port.  The I/O window is shared with the built-in
@@ -406,7 +406,7 @@ being used as scratch RAM.
 As the **Maintenance Service Guide** goes on to say:
 
 	The program should halt when all of memory is cleared. If it doesn't halt, examine the CPU error,
-	Memory system error	and HI/LO error address registers to determine the cause.  Trap catchers can be
+	Memory system error and HI/LO error address registers to determine the cause.  Trap catchers can be
 	used by depositing 200 in KIPAR 0 (17772340) instead of zero, and setting up vector locations with
 	their address + 2 and the Vector + 2 with a 0 (halt).
 	
