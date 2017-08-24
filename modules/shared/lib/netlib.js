@@ -120,7 +120,10 @@ class Net {
             if (!fDebug) {
                 if (sURL.match(/^[^:?]*archive\//)) {
                     if (sURL.charAt(0) != '/') sURL = path.join(req.path, sURL);
-                    sURL = "http://archive.pcjs.org" + sURL.replace("/archive/", "/");
+                    /*
+                     * NOTE: "http://archive.pcjs.org" is now "https://s3-us-west-2.amazonaws.com/archive.pcjs.org"
+                     */
+                    sURL = "https://s3-us-west-2.amazonaws.com/archive.pcjs.org" + sURL.replace("/archive/", "/");
                 }
             }
             /*

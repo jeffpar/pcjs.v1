@@ -183,13 +183,13 @@ If you have (or find) an IMG disk image file on a server, the PCjs Node web serv
 
 For example, let's say you found a disk image online, such as:
 
-	http://archive.pcjs.org/disks/pcx86/dos/ibm/1.00/PCDOS100.img
+	https://s3-us-west-2.amazonaws.com/archive.pcjs.org/disks/pcx86/dos/ibm/1.00/PCDOS100.img
 
 To convert it to a PCx86-compatible JSON format, issue the following
-[request](/api/v1/dump?disk=http://archive.pcjs.org/disks/pcx86/dos/ibm/1.00/PCDOS100.img&format=json),
+[request](/api/v1/dump?disk=https://s3-us-west-2.amazonaws.com/archive.pcjs.org/disks/pcx86/dos/ibm/1.00/PCDOS100.img&format=json),
 save the resulting JSON file to a folder on your server, and then update your machine XML file(s) to use that file.
 
-	{{ site.url }}/api/v1/dump?disk=http://archive.pcjs.org/disks/pcx86/dos/ibm/1.00/PCDOS100.img&format=json
+	{{ site.url }}/api/v1/dump?disk=https://s3-us-west-2.amazonaws.com/archive.pcjs.org/disks/pcx86/dos/ibm/1.00/PCDOS100.img&format=json
 
 If necessary, you can also reverse the process and convert a JSON disk image back into an IMG file, with the
 this [request](/api/v1/dump?disk=http://www.pcjs.org/disks/pcx86/dos/ibm/1.00/PCDOS100.json&format=img):

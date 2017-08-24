@@ -56,6 +56,6 @@ The symbol information in the MAP file will be automatically converted and appen
 
 The PCjs server's Dump API can be used as well:
 
-	http://www.pcjs.org/api/v1/dump?file=http://archive.pcjs.org/devices/pcx86/video/ibm/vga/1986-10-27/ibm-vga.rom&format=bytes&decimal=true
+	http://www.pcjs.org/api/v1/dump?file=https://s3-us-west-2.amazonaws.com/archive.pcjs.org/devices/pcx86/video/ibm/vga/1986-10-27/ibm-vga.rom&format=bytes&decimal=true
 
 The disassembled contents of the 1986-10-27 ROM from the IBM PS/2 Display Adapter is available [here](1986-10-27/ibm-vga.asm).

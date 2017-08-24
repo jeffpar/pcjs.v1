@@ -29,7 +29,7 @@ We have archived an assortment of [DEC Paper Tape Diagnostics](diags/).
 Paper Tape Software (circa 1970)
 --------------------------------
 
-As documented in the [PDP-11/20 Handbook (1971)](http://archive.pcjs.org/pubs/dec/pdp11/1120/PDP1120_Handbook_1971.pdf),
+As documented in the [PDP-11/20 Handbook (1971)](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/dec/pdp11/1120/PDP1120_Handbook_1971.pdf),
 p. 155, "PAPER TAPE SOFTWARE", the following software was available on paper tape:
 
 - [PAL-11A ASSEMBLER](pal11a/)
@@ -42,7 +42,7 @@ p. 155, "PAPER TAPE SOFTWARE", the following software was available on paper tap
 - [IOX](iox/) (PDP-11 Input/Output eXecutive)
 - [PDP-11 BASIC](basic/) (Beginners All-purpose Symbolic Instruction Code)
 
-There was a separate DEC publication, [PDP-11 Paper Tape Software Handbook](http://archive.pcjs.org/pubs/dec/pdp11/other/PDP11_Paper_Tape_Software_Handbook_1976.pdf),
+There was a separate DEC publication, [PDP-11 Paper Tape Software Handbook](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/dec/pdp11/other/PDP11_Paper_Tape_Software_Handbook_1976.pdf),
 that described all of the above software in greater detail, and it included some programs that the 1971 Handbook listed under
 "Disk Operating System" instead of "Paper Tape System", such as:
 

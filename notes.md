@@ -111,7 +111,7 @@ For magazines (eg, BYTE), change:
 
 to:
 
-	[<img src="http://archive.pcjs.org/pubs/pc/magazines/BYTE/$2" width="$4" height="$5" alt= "$1"/>](http://archive.pcjs.org/pubs/pc/magazines/BYTE/$3)
+	[<img src="https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/magazines/BYTE/$2" width="$4" height="$5" alt= "$1"/>](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/magazines/BYTE/$3)
 
 
 Jekyll "Cheat Sheet"

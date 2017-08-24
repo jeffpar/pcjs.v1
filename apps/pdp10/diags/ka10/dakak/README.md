@@ -27,13 +27,13 @@ Information regarding this diagnostic includes:
 - [History](#dakakhst)
 - [Source Code](#dakakmac)
 - [MACRO-10 Listing](DAKAK.LST.txt)
-- [Additional Information](http://archive.pcjs.org/apps/pdp10/diags/ka10/dakak/DAKAK.SEQ.txt)
+- [Additional Information](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/apps/pdp10/diags/ka10/dakak/DAKAK.SEQ.txt)
 
 {% include machine.html id="testka10" %}
 
 The Debugger's assemble ("a") command can be used to test the new built-in
 [MACRO-10 Mini-Assembler](/modules/pdp10/lib/macro10.js), which supports a subset
-of the [MACRO-10](http://archive.pcjs.org/pubs/dec/pdp10/tops10/02_1973AsmRef_macro.pdf) assembly language.
+of the [MACRO-10](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/dec/pdp10/tops10/02_1973AsmRef_macro.pdf) assembly language.
 This command:
 
 	a DAKAK.MAC
@@ -81,7 +81,7 @@ As noted in [cpuops.js](/modules/pdp10/lib/cpuops.js), in the *doMUL()* function
 
 	05=000000000001 06=000000000000
 
-> The answer can be found in the [DECSYSTEM-10 and DECSYSTEM-20 Processor Reference Manual (June 1982)](http://archive.pcjs.org/pubs/dec/pdp10/kl10/AA-H391A-TK_DECsystem-10_DECSYSTEM-20_Processor_Reference_Jun1982.pdf),
+> The answer can be found in the [DECSYSTEM-10 and DECSYSTEM-20 Processor Reference Manual (June 1982)](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/dec/pdp10/kl10/AA-H391A-TK_DECsystem-10_DECSYSTEM-20_Processor_Reference_Jun1982.pdf),
 in the description of the MUL instruction:
 
 	CAUTION: In the KA10, an AC operand of 2^35 is treated as though it were +2^35, producing the

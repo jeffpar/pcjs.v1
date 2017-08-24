@@ -8,7 +8,7 @@ EKBBF0: 11/70 CPU DIAGNOSTIC (PART 2)
 -------------------------------------
 
 From the
-[PDP-11 Diagnostic Handbook (1988)](http://archive.pcjs.org/pubs/dec/pdp11/diags/PDP11_DiagnosticHandbook_1988.pdf),
+[PDP-11 Diagnostic Handbook (1988)](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/dec/pdp11/diags/PDP11_DiagnosticHandbook_1988.pdf),
 p. 1-7:
 
 	11/70 CPU DIAGNOSTIC PART 2
@@ -96,7 +96,7 @@ After setting a breakpoint at 020646 and then dumping the instruction history bu
 	020646: 104241                 EMT   241
 
 The closest we have to a source code listing of the EKBBF0 diagnostic comes from some
-[scanned microfiche](http://archive.pcjs.org/pubs/dec/pdp11/diags/AC-7966F-MC_CEKBBF0_1170_CPU_2_May80.pdf)
+[scanned microfiche](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/dec/pdp11/diags/AC-7966F-MC_CEKBBF0_1170_CPU_2_May80.pdf)
 on [bitsavers.org](http://bitsavers.trailing-edge.com/pdf/dec/pdp11/microfiche/ftp.j-hoppe.de/bw/gh/) for:
 
 	PRODUCT CODE: AC-7966F-MC

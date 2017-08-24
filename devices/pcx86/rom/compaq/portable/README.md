@@ -9,7 +9,7 @@ Compaq Portable Computer ROMs
 
 The oldest COMPAQ Portable Computer ROM I have is an 8Kb [Rev C ROM](100666-001-REVC.json) from a REV D system board.
 
-[<img src="http://archive.pcjs.org/pubs/pc/reference/compaq/images/COMPAQ_Portable_System_Board.jpg" alt="Compaq Portable System Board REV D"/>](http://archive.pcjs.org/pubs/pc/reference/compaq/images/COMPAQ_Portable_System_Board-FULL.jpg)
+[<img src="https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/reference/compaq/images/COMPAQ_Portable_System_Board.jpg" alt="Compaq Portable System Board REV D"/>](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/reference/compaq/images/COMPAQ_Portable_System_Board-FULL.jpg)
 
 Printed on the back of the system board:
 
@@ -25,7 +25,7 @@ my board contains two.  Do the contents of the second ROM show up in a different
 I'm someday able to power and test this board, I may never know.
 
 Some clues can be found in this
-[COMPAQ Portable/Plus Maintenance Guide (Excerpt)](http://archive.pcjs.org/pubs/pc/reference/compaq/portable/Compaq_Portable_Plus_Support_Discontinued.pdf).
+[COMPAQ Portable/Plus Maintenance Guide (Excerpt)](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/reference/compaq/portable/Compaq_Portable_Plus_Support_Discontinued.pdf).
 Older (REV B) system boards apparently *did* require 2 ROMs, at locations U40 and U47.  REV C and later system boards
 required only 1 (REV C or later) ROM at location U40.
 

@@ -26,7 +26,7 @@ EKBAD0: 11/70 CPU DIAGNOSTIC (PART 1)
 -------------------------------------
 
 From the
-[PDP-11 Diagnostic Handbook (1988)](http://archive.pcjs.org/pubs/dec/pdp11/diags/PDP11_DiagnosticHandbook_1988.pdf),
+[PDP-11 Diagnostic Handbook (1988)](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/dec/pdp11/diags/PDP11_DiagnosticHandbook_1988.pdf),
 p. 1-6:
 
 	11/70 CPU DIAGNOSTIC PART 1
@@ -62,7 +62,7 @@ p. 1-6:
 	    SW00 = 1 skip operator intervention testing
 
 The closest we have to a source code listing of the EKBAD0 diagnostic comes from some
-[scanned microfiche](http://archive.pcjs.org/pubs/dec/pdp11/diags/AC-7962D-MC_CEKBAD0_1170_CPU_1_May80.pdf)
+[scanned microfiche](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/dec/pdp11/diags/AC-7962D-MC_CEKBAD0_1170_CPU_1_May80.pdf)
 on [bitsavers.org](http://bitsavers.trailing-edge.com/pdf/dec/pdp11/microfiche/ftp.j-hoppe.de/bw/gh/) for:
 
 	PRODUCT CODE: AC-7962D-MC

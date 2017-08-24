@@ -40,7 +40,7 @@ Give it a try!
 
 ### MMU Relocation Test
 
-From DEC's [PDP-11/70 Maintenance Service Guide](http://archive.pcjs.org/pubs/dec/pdp11/1170/PDP1170_Maintenance_Service_Guide_Apr88.pdf),
+From DEC's [PDP-11/70 Maintenance Service Guide](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/dec/pdp11/1170/PDP1170_Maintenance_Service_Guide_Apr88.pdf),
 Chapter 4:
 
 	Use the following toggle-in to verify the correct operation of Memory Management Relocation.

@@ -17,7 +17,7 @@ Use this [PDP-11/45](/devices/pdp11/machine/1145/panel/debugger/) to see the
 Front Panel Basics
 ------------------
 
-From the [PDP-11/45 Handbook (1973)](http://archive.pcjs.org/pubs/dec/pdp11/1145/PDP1145_Handbook_1973.pdf),
+From the [PDP-11/45 Handbook (1973)](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/dec/pdp11/1145/PDP1145_Handbook_1973.pdf),
 Chapter 8, p. 195:
 
 > ### THE SYSTEM OPERATOR'S CONSOLE

@@ -165,7 +165,7 @@ Here's a sample run, from a macOS Terminal window:
 	License: GPL version 3 or later <http://gnu.org/licenses/gpl.html>
 	Portions adapted from the PDP-11/70 Emulator v1.4 by Paul Nankervis <paulnank@hotmail.com>
 	bus: 256Kb RAM at 000000
-	Net.getResource("http://archive.pcjs.org/disks/dec/rk03/RK03-XXDP.json"): unimplemented
+	Net.getResource("https://s3-us-west-2.amazonaws.com/archive.pcjs.org/disks/dec/rk03/RK03-XXDP.json"): unimplemented
 	notice: Unable to load disk "RK03-XXDP" (error -1: RK03-XXDP.json)
 	Computer object created: test1170.computer
 	console connected to machine (alt-r for REPL prompt, alt-x to exit)

@@ -45,5 +45,5 @@ used to control the device, such as choosing which tape should be "loaded" into 
 </device>
 ```
 
-For details about the PC11 hardware, we relied upon the [PDP-11 Peripherals Handbook (1976)](http://archive.pcjs.org/pubs/dec/pdp11/other/PDP11_Peripherals_Handbook_1976.pdf),
+For details about the PC11 hardware, we relied upon the [PDP-11 Peripherals Handbook (1976)](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/dec/pdp11/other/PDP11_Peripherals_Handbook_1976.pdf),
 p. 4-376 (p. 408 of the PDF).
