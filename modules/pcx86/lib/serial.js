@@ -72,8 +72,11 @@ class SerialPort extends Component {
      *
      *      binding: name of a control (based on its "binding" attribute) to bind to this port's I/O
      *
-     *      tabSize: set to a non-zero number to convert tabs to spaces (applies only to output to
-     *      the above binding); default is 0 (no conversion)
+     *      tabSize: a non-zero number specifies the tab-stop multiple to use for automatic tab-to-space
+     *      conversion; it applies only to the above binding, and the default is 0 (no tab conversion)
+     *
+     *      charBOL: a non-zero number specifies the ASCII code of a character to display at the beginning
+     *      of every line; it applies only to the above binding, and the default is 0 (no BOL character)
      *
      * In the future, we may support 'port' and 'irq' properties that allow the machine to define a non-standard
      * serial port configuration, instead of only our pre-defined 'adapter' configurations.
@@ -136,11 +139,12 @@ class SerialPort extends Component {
          * being echoed via transmitByte(), maintain a logical column position, and convert any tabs into the appropriate
          * number of spaces.
          *
-         * charBOL, if nonzero, is a character to automatically output at the beginning of every line.  This probably
-         * isn't generally useful; I use it internally to preformat serial output.
+         * Another controlIOBuffer feature is charBOL, which, if nonzero, specifies a character to automatically output
+         * at the beginning of every line.  This probably isn't generally useful; I use it internally to preformat serial
+         * output.
          */
-        this.tabSize = parmsSerial['tabSize'];
-        this.charBOL = parmsSerial['charBOL'];
+        this.tabSize = parmsSerial['tabSize'] || 0;
+        this.charBOL = parmsSerial['charBOL'] || 0;
         this.charPrev = 0;
         this.iLogicalCol = 0;
 
@@ -288,6 +292,14 @@ class SerialPort extends Component {
         this.cpu = cpu;
         this.dbg = dbg;
 
+        var serial = this;
+        this.timerReceiveNext = this.cpu.addTimer(this.id + ".receive", function() {
+            serial.receiveData();
+        });
+        this.timerTransmitNext = this.cpu.addTimer(this.id + ".transmit", function() {
+            serial.transmitData();
+        });
+
         this.chipset = cmp.getMachineComponent("ChipSet");
 
         bus.addPortInputTable(this, SerialPort.aPortInput, this.portBase);
@@ -309,7 +321,7 @@ class SerialPort extends Component {
      *
      * For now, we're not going to worry about communication in the other direction, because when the target component
      * performs its own initConnection(), it will find our receiveData() and receiveStatus() functions, at which point
-     * communication in both directions should be established, and the circle of life complete.
+     * communication in both directions should be established, and the circle of life is complete.
      *
      * For added robustness, if the target machine initializes much more slowly than we do, and our connection attempt
      * fails, that's OK, because when it finally initializes, its initConnection() will call our initConnection();
@@ -499,28 +511,48 @@ class SerialPort extends Component {
     }
 
     /**
+     * getBaudTimeout()
+     *
+     * The 16-bit Divisor Latch is stored in wDL.  If we take the frequency value 1843200 and divide it by wDL*128,
+     * we get the maximum number of bytes per second that the SerialPort interface should generate.  For example,
+     * if a baud rate of 1200 is being used, the divisor will be 0x60 (96), so we calculate 1843200/(96*128) = 150,
+     * which means there should be a 1000ms/150 or 6.667ms delay between bytes delivered.
+     *
+     * @this {SerialPort}
+     * @return {number} (number of milliseconds per byte)
+     */
+    getBaudTimeout()
+    {
+        var nBytesPerSecond = 1843200 / ((this.wDL || 1) << 7);
+        return (1000 / nBytesPerSecond)|0;
+    }
+
+    /**
      * receiveData(data)
      *
      * This replaces the old sendRBR() function, which expected an Array of bytes.  We still support that,
      * but in order to support connections with other SerialPort components (ie, the PC8080 SerialPort), we
-     * have added support for numbers and strings as well.
+     * have added support for numbers and strings as well.  If no data is specified at all, then all we do is
+     * "clock" any remaining data into the receiver.
      *
      * @this {SerialPort}
-     * @param {number|string|Array} data
+     * @param {number|string|Array} [data]
      * @return {boolean} true if received, false if not
      */
     receiveData(data)
     {
-        if (typeof data == "number") {
-            this.abReceive.push(data);
-        }
-        else if (typeof data == "string") {
-            for (var i = 0; i < data.length; i++) {
-                this.abReceive.push(data.charCodeAt(i));
+        if (data != null) {
+            if (typeof data == "number") {
+                this.abReceive.push(data);
             }
-        }
-        else {
-            this.abReceive = this.abReceive.concat(data);
+            else if (typeof data == "string") {
+                for (var i = 0; i < data.length; i++) {
+                    this.abReceive.push(data.charCodeAt(i));
+                }
+            }
+            else {
+                this.abReceive = this.abReceive.concat(data);
+            }
         }
         this.advanceRBR();
         return true;                // for now, return true regardless, since we're buffering everything anyway
@@ -529,9 +561,9 @@ class SerialPort extends Component {
     /**
      * receiveStatus(pins)
      *
-     * NOTE: Prior to the addition of this interface, the CTS and DSR bits were initialized set and remained set for the life
-     * of the machine.  It is entirely appropriate that this is the only way those bits can be changed, because they represent
-     * external control signals.
+     * NOTE: Prior to the addition of this interface, the CTS and DSR bits were initialized set and remained set
+     * for the life of the machine.  It is entirely appropriate that this is the only way those bits can be changed,
+     * because they represent external control signals.
      *
      * @this {SerialPort}
      * @param {number} pins
@@ -559,6 +591,9 @@ class SerialPort extends Component {
         if (this.abReceive.length > 0 && !(this.bLSR & SerialPort.LSR.DR)) {
             this.bRBR = this.abReceive.shift();
             this.bLSR |= SerialPort.LSR.DR;
+            if (this.abReceive.length && this.cpu) {
+                this.cpu.setTimer(this.timerReceiveNext, this.getBaudTimeout());
+            }
         }
         this.updateIRR();
     }
@@ -697,7 +732,16 @@ class SerialPort extends Component {
             this.bTHR = bOut;
             this.bLSR &= ~(SerialPort.LSR.THRE | SerialPort.LSR.TSRE);
             if (this.transmitByte(bOut)) {
-                this.bLSR |= (SerialPort.LSR.THRE | SerialPort.LSR.TSRE);
+                /*
+                 * If we're transmitting to a virtual device that has no measurable delay, this code may set the
+                 * transmitter empty bits too quickly:
+                 *
+                 *      this.bLSR |= (SerialPort.LSR.THRE | SerialPort.LSR.TSRE);
+                 *
+                 * A better solution is to arm a timer based on the baud rate, and clear the above bits when that
+                 * timer fires.
+                 */
+                if (this.cpu) this.cpu.setTimer(this.timerTransmitNext, this.getBaudTimeout());
                 this.updateIRR();
                 /*
                  * QUESTION: Does this mean we should also flush/zero bTHR?
@@ -793,8 +837,24 @@ class SerialPort extends Component {
             this.bIIR &= ~(SerialPort.IIR.NO_INT | SerialPort.IIR.INT_BITS);
             this.bIIR |= bIIR;
             /*
-             * TODO: Remove this arbitrary 100-instruction delay once we've added support for baud rate throttling
-             * (see notes above regarding baud rate).
+             * I still throttle SerialPort interrupts by passing a hard-coded delay of 100 instructions to setIRR(),
+             * even though we are now (theoretically) honoring the programmed baud rate.  The setIRR() delay does not
+             * ensure any particular baud rate, it simply gives the underlying Interrupt Service Routine (ISR) some
+             * breathing room.
+             *
+             * The Microsoft Windows 1.01 serial mouse driver ISR issues an EOI before it has safely exited, presumably
+             * relying on the fact that a 1200 baud serial device would not normally interrupt frequently enough to
+             * blow the stack.  However, in PCx86, all you have to do is remove the delay below and enable Debugger
+             * messages on every serial interrupt and mouse event, eg:
+             *
+             *      m serial on;m pic on;m mouse on
+             *
+             * to slow the machine down to the point where serial mouse interrupts overwhelm the ISR.  The Debugger
+             * messages display the current stack pointer, which you can watch drop to zero and then wrap around, no
+             * doubt trampling lots of code and data along the way.
+             *
+             * This problem could also occur without being forced by the Debugger; eg, if your physical machine's mouse
+             * was configured for a high interrupt rate, and your browser generated mouse events at a comparable rate.
              */
             if (this.chipset && this.nIRQ) this.chipset.setIRR(this.nIRQ, 100);
         } else {
@@ -872,6 +932,18 @@ class SerialPort extends Component {
     }
 
     /**
+     * transmitData()
+     *
+     * Helper for clocking transmitted data at the expected baud rate.
+     *
+     * @this {SerialPort}
+     */
+    transmitData()
+    {
+        this.bLSR |= (SerialPort.LSR.THRE | SerialPort.LSR.TSRE);
+    }
+
+    /**
      * SerialPort.init()
      *
      * This function operates on every HTML element of class "serial", extracting the
@@ -937,34 +1009,6 @@ SerialPort.THR = {REG: 0};              // Transmitter Holding Register (write)
 SerialPort.DL_DEFAULT       = 0x180;    // we select an arbitrary default Divisor Latch equivalent to 300 baud
 
 /*
- * The divisor is stored in wDL.  If we take the frequency value 1843200 and divide it by wDL*128, we get the
- * maximum number of bytes per second that the SerialPort interface should generate.  For example, if a baud
- * rate of 1200 is being used, the divisor will be 0x60 (96), so we calculate 1843200/(96*128) = 150, which means
- * there should be a 1000ms/150 or 6.667ms delay between bytes delivered.
- *
- * TODO: Enforce that delay.  However, the delay should be converted from real-world milliseconds to the
- * appropriate number of CPU cycles we can pass to setBurstCycles().  This will also require the CPU to call
- * us at the start of each burst, to see if advanceRBR() has more data to deliver.  For now, I'm throttling
- * SerialPort interrupts by passing a hard-coded delay to setIRR().  The setIRR() delay does not ensure any
- * particular baud rate, it simply gives the underlying Interrupt Service Routine (ISR) some breathing room.
- *
- * The Microsoft Windows 1.01 serial mouse driver ISR issues an EOI before it has safely exited, presumably
- * relying on the fact that a 1200 baud serial device would not normally interrupt frequently enough to blow
- * the stack.  However, in PCx86, all you have to do is enable Debugger messages on every serial interrupt
- * and mouse event, eg:
- *
- *      m serial on;m pic on;m mouse on
- *
- * to slow the machine down to the point where serial mouse interrupts overwhelm the ISR.  The Debugger messages
- * display the current stack pointer, which you can watch drop to zero and then wrap around, no doubt trampling
- * lots of code and data along the way.
- *
- * This problem could also occur without being forced by the Debugger; eg, if your physical machine's mouse was
- * configured for a high interrupt rate, and your browser generated mouse events at a comparable rate, then you
- * could blow the simulation's stack.
- */
-
-/*
  * Receiver Buffer Register (RBR.REG, offset 0; eg, 0x3F8 or 0x2F8) on read, Transmitter Holding Register on write
  */
 SerialPort.RBR = {REG: 0};              // (read)
@@ -1028,8 +1072,9 @@ SerialPort.MCR.UNUSED       = 0xE0;     // always zero
 /*
  * Line Status Register (LSR.REG, offset 5; eg, 0x3FD or 0x2FD)
  *
- * NOTE: I've seen different specs for the LSR_TSRE.  I'm following the IBM Tech Ref's lead here, but the data sheet I have calls it TEMT
- * instead of TSRE, and claims that it is set whenever BOTH the THR and TSR are empty, and clear whenever EITHER the THR or TSR contain data.
+ * NOTE: I've seen different specs for the LSR_TSRE.  I'm following the IBM Tech Ref's lead here, but the data sheet
+ * I have calls it TEMT instead of TSRE, and claims that it is set whenever BOTH the THR and TSR are empty, and clear
+ * whenever EITHER the THR or TSR contain data.
  */
 SerialPort.LSR = {};
 SerialPort.LSR.REG          = 5;        // Line Status Register

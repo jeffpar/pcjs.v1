@@ -330,10 +330,10 @@ class SerialPort8080 extends Component {
         this.dbg = dbg;
 
         var serial = this;
-        this.timerReceiveNext = this.cpu.addTimer(function() {
+        this.timerReceiveNext = this.cpu.addTimer(this.id + ".receive", function() {
             serial.receiveData();
         });
-        this.timerTransmitNext = this.cpu.addTimer(function() {
+        this.timerTransmitNext = this.cpu.addTimer(this.id + ".transmit", function() {
             serial.transmitData();
         });
 
@@ -540,8 +540,8 @@ class SerialPort8080 extends Component {
         var nBits = ((this.bMode & SerialPort8080.UART8251.MODE.DATA_BITS) >> 2) + 6;   // includes an extra +1 for start bit
         if (this.bMode & SerialPort8080.UART8251.MODE.PARITY_ENABLE) nBits++;
         nBits += ((((this.bMode & SerialPort8080.UART8251.MODE.STOP_BITS) >> 6) + 1) >> 1);
-        var nBytesPerSecond = Math.round(nBaud / nBits);
-        return 1000 / nBytesPerSecond;
+        var nBytesPerSecond = nBaud / nBits;
+        return (1000 / nBytesPerSecond)|0;
     }
 
     /**
@@ -637,10 +637,8 @@ class SerialPort8080 extends Component {
             }
         }
 
-        if (this.sendData) {
-            if (this.sendData.call(this.connection, b)) {
-                fTransmitted = true;
-            }
+        if (this.sendData && this.sendData.call(this.connection, b)) {
+            fTransmitted = true;
         }
 
         if (this.echoByte(b)) {
@@ -657,6 +655,10 @@ class SerialPort8080 extends Component {
      *
      * When timerTransmitNext fires, we have honored the programmed XMIT_RATE period, so we can
      * set XMIT_READY (and XMIT_EMPTY), which signals the firmware that another byte can be transmitted.
+     *
+     * The sData parameter is not used when we're called via the timer; it's an optional parameter used by
+     * the Keyboard component to deliver data pasted via the clipboard, and is currently only useful when
+     * the SerialPort is connected to another machine.  TODO: Define a separate interface for that feature.
      *
      * @this {SerialPort8080}
      * @param {string} [sData]

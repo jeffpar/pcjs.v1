@@ -9,7 +9,7 @@ machines:
     type: pcx86
     state: deskpro386.json
     config: /devices/pcx86/machine/compaq/deskpro386/vga/4096kb/machine.xml
-    drives: '[{name:"68Mb Hard Disk",type:4,path:"http://archive.pcjs.org/disks/pcx86/fixed/68mb/win95.json"}]'
+    drives: '[{name:"68Mb Hard Disk",type:4,path:"https://s3-us-west-2.amazonaws.com/archive.pcjs.org/disks/pcx86/fixed/68mb/win95.json"}]'
     autoMount:
       A:
         name: None

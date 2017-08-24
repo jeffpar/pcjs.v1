@@ -343,8 +343,8 @@ class Panel extends Component {
      * startTimer()
      *
      * This timer replaces the CPU's old dedicated VIDEO_UPDATES_PER_SECOND logic, which periodically called
-     * the Computer's updateVideo() function, which in turn called us; periodic updateAnimation() calls are now
-     * our own responsibility.
+     * the Computer's updateVideo() function, which in turn called our updateAnimation() function; periodic
+     * animation updates are now our own responsibility.
      *
      * @this {Panel}
      */

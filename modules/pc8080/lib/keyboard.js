@@ -271,7 +271,7 @@ class Keyboard8080 extends Component {
         this.dbg = dbg;     // NOTE: The "dbg" property must be set for the message functions to work
 
         var kbd = this;
-        this.timerReleaseKeys = this.cpu.addTimer(function() {
+        this.timerReleaseKeys = this.cpu.addTimer(this.id, function() {
             kbd.checkSoftKeysToRelease();
         });
 
