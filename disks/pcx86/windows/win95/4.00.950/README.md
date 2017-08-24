@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Microsoft Windows 95 (First Retail Release)
+title: "Microsoft Windows 95: First Retail Release"
 permalink: /disks/pcx86/windows/win95/4.00.950/
 redirect_from:
   - /disks/pc/windows/win95/4.00.950/
@@ -17,8 +17,8 @@ machines:
         name: None
 ---
 
-Microsoft Windows 95 (First Retail Release)
--------------------------------------------
+Microsoft Windows 95: First Retail Release
+------------------------------------------
 
 Windows 95 was the successor to Windows 3.1 and included a number of important new features:
 
