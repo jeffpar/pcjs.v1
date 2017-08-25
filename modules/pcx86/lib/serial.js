@@ -70,7 +70,10 @@ class SerialPort extends Component {
      *
      *      adapter: 1 (port 0x3F8) or 2 (port 0x2F8); 0 if not defined
      *
-     *      binding: name of a control (based on its "binding" attribute) to bind to this port's I/O
+     *      binding: name of a control (based on its "binding" attribute) to bind to this port's I/O;
+     *      as a special case, it can be set to "console" to direct all output to the component's default
+     *      println() handler (eg, the Control Panel's "print" control, if any, or console.log() if using
+     *      a DEBUG or non-COMPILED machine)
      *
      *      tabSize: a non-zero number specifies the tab-stop multiple to use for automatic tab-to-space
      *      conversion; it applies only to the above binding, and the default is 0 (no tab conversion)
@@ -731,22 +734,23 @@ class SerialPort extends Component {
         } else {
             this.bTHR = bOut;
             this.bLSR &= ~(SerialPort.LSR.THRE | SerialPort.LSR.TSRE);
-            if (this.transmitByte(bOut)) {
-                /*
-                 * If we're transmitting to a virtual device that has no measurable delay, this code may set the
-                 * transmitter empty bits too quickly:
-                 *
-                 *      this.bLSR |= (SerialPort.LSR.THRE | SerialPort.LSR.TSRE);
-                 *
-                 * A better solution is to arm a timer based on the baud rate, and clear the above bits when that
-                 * timer fires.
-                 */
-                if (this.cpu) this.cpu.setTimer(this.timerTransmitNext, this.getBaudTimeout());
-                this.updateIRR();
-                /*
-                 * QUESTION: Does this mean we should also flush/zero bTHR?
-                 */
-            }
+            /*
+             * If transmitByte() returned success, we used to immediately re-set the transmitter empty bits:
+             *
+             *      this.bLSR |= (SerialPort.LSR.THRE | SerialPort.LSR.TSRE);
+             *
+             * But when we're connected to a virtual device that has no measurable delay, that sets the bits
+             * too quickly.  We now arm a timer based on the programmed baud rate, and set the above bits only
+             * when that timer fires.
+             *
+             * Additionally, we no longer care if transmitByte() succeeds, because whether or not a connected
+             * device or component received the data is irrelevant to the internal mechanics of the serial port.
+             *
+             * TODO: Determine if we should also flush/zero bTHR after transmission.
+             */
+            this.transmitByte(bOut);
+            if (this.cpu) this.cpu.setTimer(this.timerTransmitNext, this.getBaudTimeout());
+            this.updateIRR();
         }
     }
 
