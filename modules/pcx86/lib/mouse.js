@@ -53,7 +53,7 @@ class Mouse extends Component {
      *
      *      adapter: 1 (primary) or 2 (secondary); 0 if not defined
      *
-     *      binding: name of a corresponding device component (implies type is "serial")
+     *      binding: name of a corresponding device component (implies type="serial")
      *
      *      scaleMouse: a floating-point number used to scale incoming mouse coordinates; the default is 0.5
      *
@@ -62,15 +62,23 @@ class Mouse extends Component {
      *      type: one of "bus", "inport", or "serial"; the default is "serial" if serial or binding properties are set
      *
      * The first version of this component supported ONLY emulation of the original Microsoft serial mouse,
-     * so a valid serial component ID using the 'serial' property was required.  Now, using the 'type' property,
+     * so a valid SerialPort component ID using the 'serial' property was required.  Now, using the 'type' property,
      * it's possible to enable support for other types of mouse hardware (eg, 'bus' for the original Microsoft
      * Bus Mouse interface or 'inport' for the Microsoft InPort Mouse interface).  The 'adapter' property is used
      * only when the selected type supports different configurations (eg, primary vs. secondary InPort adapters).
      *
-     * If either the original 'serial' property or the new 'binding' property is set, then serial communication
-     * will be established with the specified SerialPort component, requesting access to the corresponding serial
-     * component ID.  If the SerialPort component is not installed and/or the specified serial component ID is not
-     * present, a configuration error will be reported.
+     * If the 'type' property is set to "serial" (or 'type' is not set and either the original 'serial' property
+     * or the new 'binding' property is set), then serial communication will be established with the specified
+     * SerialPort component, requesting access to the corresponding serial component ID.  If the SerialPort component
+     * is not installed and/or the specified serial component ID is not present, a configuration error will be reported.
+     *
+     * To recap, the following machine XML syntax is still supported:
+     *
+     *      <mouse serial="com2"/>
+     *
+     * but going forward, you should stop using the serial attribute and use syntax like this instead:
+     *
+     *      <mouse type="serial" binding="com2"/>
      *
      * @this {Mouse}
      * @param {Object} parmsMouse
@@ -866,6 +874,9 @@ Mouse.INPORT = {
         MODE:       0x07        // InPort Mode Register
     },
     DATA: {
+        /*
+         * The internal register read or written via this port is determined by the value written to ADDR.PORT
+         */
         PORT:       0x23D,
         STATUS:     {           // InPort Status Register (0)
             B3:     0x01,       // Status button 3
@@ -880,16 +891,14 @@ Mouse.INPORT = {
         MODE: {                 // InPort Mode Register (7)
             HOLD:   0x20        // hold the status for reading
         }
-        /*
-         * The internal register read or written via this port is determined by the value written to ADDR.PORT
-         */
     },
     ID: {
+        /*
+         * The initial read returns the Chip ID; alternate reads return a byte containing the InPort revision number
+         * in the low nibble and the InPort version number in the high nibble.
+         */
         PORT:       0x23E,
         CHIP:       0xDE        // InPort Chip ID
-        /*
-         * Alternate reads return a byte containing InPort revision number in low nibble, version number in high nibble
-         */
     },
     TEST: {
         PORT:       0x23F
