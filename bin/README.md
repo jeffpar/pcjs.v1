@@ -1,14 +1,15 @@
 Build Tools
----
+-----------
+
 This is where all the server-side PHP code used to reside.  I've since deleted that code from the project,
-because it's all been ported to JavaScript as a collection of [Node Modules](/modules/); e.g.:
+because it's all been ported to a collection of [JavaScript Modules](/modules/); e.g.:
 
 - [HTMLOut](/modules/htmlout/)
 - [MarkOut](/modules/markout/)
 - [DiskDump](/modules/diskdump/)
 - [FileDump](/modules/filedump/)
 
-All that remains here is the version of Google's Closure Compiler (and its associated [README](README)) used
+All that remains here is the version of Google's Closure Compiler (and its associated [README](compiler.md)) used
 to build the client-side JavaScript files -- not because I have any attachment to this particular version, but because
 updating requires a lot of testing, and I don't really have a regression test suite yet.  Besides, every newer
 version of the Closure Compiler I've tried this year (2014) has resulted in slightly *slower* overall performance,
