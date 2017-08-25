@@ -1004,70 +1004,74 @@ SerialPort.sIOBuffer = "buffer";
  *      0x0002      56000       2.86%
  *      0x0001      128000
  */
-SerialPort.DLL = {REG: 0};              // Divisor Latch LSB (only when SerialPort.LCR.DLAB is set)
-SerialPort.THR = {REG: 0};              // Transmitter Holding Register (write)
-SerialPort.DL_DEFAULT       = 0x180;    // we select an arbitrary default Divisor Latch equivalent to 300 baud
+SerialPort.DLL = {REG: 0};      // Divisor Latch LSB (only when SerialPort.LCR.DLAB is set)
+SerialPort.THR = {REG: 0};      // Transmitter Holding Register (write)
+SerialPort.DL_DEFAULT = 0x180;  // we select an arbitrary default Divisor Latch equivalent to 300 baud
 
 /*
  * Receiver Buffer Register (RBR.REG, offset 0; eg, 0x3F8 or 0x2F8) on read, Transmitter Holding Register on write
  */
-SerialPort.RBR = {REG: 0};              // (read)
+SerialPort.RBR = {REG: 0};      // (read)
 
 /*
  * Interrupt Enable Register (IER.REG, offset 1; eg, 0x3F9 or 0x2F9)
  */
-SerialPort.IER = {};
-SerialPort.IER.REG          = 1;        // Interrupt Enable Register
-SerialPort.IER.RBR_AVAIL    = 0x01;
-SerialPort.IER.THR_EMPTY    = 0x02;
-SerialPort.IER.LSR_DELTA    = 0x04;
-SerialPort.IER.MSR_DELTA    = 0x08;
-SerialPort.IER.UNUSED       = 0xF0;     // always zero
+SerialPort.IER = {
+    REG:            1,          // Interrupt Enable Register
+    RBR_AVAIL:      0x01,
+    THR_EMPTY:      0x02,
+    LSR_DELTA:      0x04,
+    MSR_DELTA:      0x08,
+    UNUSED:         0xF0        // always zero
+};
 
-SerialPort.DLM = {REG: 1};              // Divisor Latch MSB (only when SerialPort.LCR.DLAB is set)
+SerialPort.DLM = {REG: 1};      // Divisor Latch MSB (only when SerialPort.LCR.DLAB is set)
 
 /*
  * Interrupt ID Register (IIR.REG, offset 2; eg, 0x3FA or 0x2FA)
  *
  * All interrupt conditions cleared by reading the corresponding register (or, in the case of IRR_INT_THR, writing a new value to THR.REG)
  */
-SerialPort.IIR = {};
-SerialPort.IIR.REG          = 2;        // Interrupt ID Register (read-only)
-SerialPort.IIR.NO_INT       = 0x01;
-SerialPort.IIR.INT_LSR      = 0x06;     // Line Status (highest priority: Overrun error, Parity error, Framing error, or Break Interrupt)
-SerialPort.IIR.INT_RBR      = 0x04;     // Receiver Data Available
-SerialPort.IIR.INT_THR      = 0x02;     // Transmitter Holding Register Empty
-SerialPort.IIR.INT_MSR      = 0x00;     // Modem Status Register (lowest priority: Clear To Send, Data Set Ready, Ring Indicator, or Data Carrier Detect)
-SerialPort.IIR.INT_BITS     = 0x06;
-SerialPort.IIR.UNUSED       = 0xF8;     // always zero (the ROM BIOS relies on these bits "floating to 1" when no SerialPort is present)
+SerialPort.IIR = {
+    REG:            2,          // Interrupt ID Register (read-only)
+    NO_INT:         0x01,
+    INT_LSR:        0x06,       // Line Status (highest priority: Overrun error, Parity error, Framing error, or Break Interrupt)
+    INT_RBR:        0x04,       // Receiver Data Available
+    INT_THR:        0x02,       // Transmitter Holding Register Empty
+    INT_MSR:        0x00,       // Modem Status Register (lowest priority: Clear To Send, Data Set Ready, Ring Indicator, or Data Carrier Detect)
+    INT_BITS:       0x06,
+    UNUSED:         0xF8        // always zero (the ROM BIOS relies on these bits "floating to 1" when no SerialPort is present)
+};
 
 /*
  * Line Control Register (LCR.REG, offset 3; eg, 0x3FB or 0x2FB)
  */
-SerialPort.LCR = {};
-SerialPort.LCR.REG          = 3;        // Line Control Register
-SerialPort.LCR.DATA_5BITS   = 0x00;
-SerialPort.LCR.DATA_6BITS   = 0x01;
-SerialPort.LCR.DATA_7BITS   = 0x02;
-SerialPort.LCR.DATA_8BITS   = 0x03;
-SerialPort.LCR.STOP_BITS    = 0x04;     // clear: 1 stop bit; set: 1.5 stop bits for LCR_DATA_5BITS, 2 stop bits for all other data lengths
-SerialPort.LCR.PARITY_BIT   = 0x08;     // if set, a parity bit is inserted/expected between the last data bit and the first stop bit; no parity bit if clear
-SerialPort.LCR.PARITY_EVEN  = 0x10;     // if set, even parity is selected (ie, the parity bit insures an even number of set bits); if clear, odd parity
-SerialPort.LCR.PARITY_STICK = 0x20;     // if set, parity bit is transmitted inverted; if clear, parity bit is transmitted normally
-SerialPort.LCR.BREAK        = 0x40;     // if set, serial output (SOUT) signal is forced to logical 0 for the duration
-SerialPort.LCR.DLAB         = 0x80;     // Divisor Latch Access Bit; if set, DLL.REG and DLM.REG can be read or written
+SerialPort.LCR = {
+    REG:            3,          // Line Control Register
+    DATA_5BITS:     0x00,
+    DATA_6BITS:     0x01,
+    DATA_7BITS:     0x02,
+    DATA_8BITS:     0x03,
+    STOP_BITS:      0x04,       // clear: 1 stop bit; set: 1.5 stop bits for LCR_DATA_5BITS, 2 stop bits for all other data lengths
+    PARITY_BIT:     0x08,       // if set, a parity bit is inserted/expected between the last data bit and the first stop bit; no parity bit if clear
+    PARITY_EVEN:    0x10,       // if set, even parity is selected (ie, the parity bit insures an even number of set bits); if clear, odd parity
+    PARITY_STICK:   0x20,       // if set, parity bit is transmitted inverted; if clear, parity bit is transmitted normally
+    BREAK:          0x40,       // if set, serial output (SOUT) signal is forced to logical 0 for the duration
+    DLAB:           0x80        // Divisor Latch Access Bit; if set, DLL.REG and DLM.REG can be read or written
+};
 
 /*
  * Modem Control Register (MCR.REG, offset 4; eg, 0x3FC or 0x2FC)
  */
-SerialPort.MCR = {};
-SerialPort.MCR.REG          = 4;        // Modem Control Register
-SerialPort.MCR.DTR          = 0x01;     // when set, DTR goes high, indicating ready to establish link (looped back to DSR in loop-back mode)
-SerialPort.MCR.RTS          = 0x02;     // when set, RTS goes high, indicating ready to exchange data (looped back to CTS in loop-back mode)
-SerialPort.MCR.OUT1         = 0x04;     // when set, OUT1 goes high (looped back to RI in loop-back mode)
-SerialPort.MCR.OUT2         = 0x08;     // when set, OUT2 goes high (looped back to RLSD in loop-back mode)
-SerialPort.MCR.LOOPBACK     = 0x10;     // when set, enables loop-back mode
-SerialPort.MCR.UNUSED       = 0xE0;     // always zero
+SerialPort.MCR = {
+    REG:            4,          // Modem Control Register
+    DTR:            0x01,       // when set, DTR goes high, indicating ready to establish link (looped back to DSR in loop-back mode)
+    RTS:            0x02,       // when set, RTS goes high, indicating ready to exchange data (looped back to CTS in loop-back mode)
+    OUT1:           0x04,       // when set, OUT1 goes high (looped back to RI in loop-back mode)
+    OUT2:           0x08,       // when set, OUT2 goes high (looped back to RLSD in loop-back mode)
+    LOOPBACK:       0x10,       // when set, enables loop-back mode
+    UNUSED:         0xE0        // always zero
+};
 
 /*
  * Line Status Register (LSR.REG, offset 5; eg, 0x3FD or 0x2FD)
@@ -1076,30 +1080,32 @@ SerialPort.MCR.UNUSED       = 0xE0;     // always zero
  * I have calls it TEMT instead of TSRE, and claims that it is set whenever BOTH the THR and TSR are empty, and clear
  * whenever EITHER the THR or TSR contain data.
  */
-SerialPort.LSR = {};
-SerialPort.LSR.REG          = 5;        // Line Status Register
-SerialPort.LSR.DR           = 0x01;     // Data Ready (set when new data in RBR.REG; cleared when RBR.REG read)
-SerialPort.LSR.OE           = 0x02;     // Overrun Error (set when new data arrives in RBR.REG before previous data read; cleared when LSR.REG read)
-SerialPort.LSR.PE           = 0x04;     // Parity Error (set when new data has incorrect parity; cleared when LSR.REG read)
-SerialPort.LSR.FE           = 0x08;     // Framing Error (set when new data has invalid stop bit; cleared when LSR.REG read)
-SerialPort.LSR.BI           = 0x10;     // Break Interrupt (set when new data exceeded normal transmission time; cleared LSR.REG when read)
-SerialPort.LSR.THRE         = 0x20;     // Transmitter Holding Register Empty (set when UART ready to accept new data; cleared when THR.REG written)
-SerialPort.LSR.TSRE         = 0x40;     // Transmitter Shift Register Empty (set when the TSR is empty; cleared when the THR is transferred to the TSR)
-SerialPort.LSR.UNUSED       = 0x80;     // always zero
+SerialPort.LSR = {
+    REG:            5,          // Line Status Register
+    DR:             0x01,       // Data Ready (set when new data in RBR.REG; cleared when RBR.REG read)
+    OE:             0x02,       // Overrun Error (set when new data arrives in RBR.REG before previous data read; cleared when LSR.REG read)
+    PE:             0x04,       // Parity Error (set when new data has incorrect parity; cleared when LSR.REG read)
+    FE:             0x08,       // Framing Error (set when new data has invalid stop bit; cleared when LSR.REG read)
+    BI:             0x10,       // Break Interrupt (set when new data exceeded normal transmission time; cleared LSR.REG when read)
+    THRE:           0x20,       // Transmitter Holding Register Empty (set when UART ready to accept new data; cleared when THR.REG written)
+    TSRE:           0x40,       // Transmitter Shift Register Empty (set when the TSR is empty; cleared when the THR is transferred to the TSR)
+    UNUSED:         0x80        // always zero
+};
 
 /*
  * Modem Status Register (MSR.REG, offset 6; eg, 0x3FE or 0x2FE)
  */
-SerialPort.MSR = {};
-SerialPort.MSR.REG          = 6;        // Modem Status Register
-SerialPort.MSR.DCTS         = 0x01;     // when set, CTS (Clear To Send) has changed since last read
-SerialPort.MSR.DDSR         = 0x02;     // when set, DSR (Data Set Ready) has changed since last read
-SerialPort.MSR.TERI         = 0x04;     // when set, TERI (Trailing Edge Ring Indicator) indicates RI has changed from 1 to 0
-SerialPort.MSR.DRLSD        = 0x08;     // when set, RLSD (Received Line Signal Detector) has changed
-SerialPort.MSR.CTS          = 0x10;     // when set, the modem or data set is ready to exchange data (complement of the Clear To Send input signal)
-SerialPort.MSR.DSR          = 0x20;     // when set, the modem or data set is ready to establish link (complement of the Data Set Ready input signal)
-SerialPort.MSR.RI           = 0x40;     // complement of the RI (Ring Indicator) input
-SerialPort.MSR.RLSD         = 0x80;     // complement of the RLSD (Received Line Signal Detect) input
+SerialPort.MSR = {
+    REG:            6,          // Modem Status Register
+    DCTS:           0x01,       // when set, CTS (Clear To Send) has changed since last read
+    DDSR:           0x02,       // when set, DSR (Data Set Ready) has changed since last read
+    TERI:           0x04,       // when set, TERI (Trailing Edge Ring Indicator) indicates RI has changed from 1 to 0
+    DRLSD:          0x08,       // when set, RLSD (Received Line Signal Detector) has changed
+    CTS:            0x10,       // when set, the modem or data set is ready to exchange data (complement of the Clear To Send input signal)
+    DSR:            0x20,       // when set, the modem or data set is ready to establish link (complement of the Data Set Ready input signal)
+    RI:             0x40,       // complement of the RI (Ring Indicator) input
+    RLSD:           0x80        // complement of the RLSD (Received Line Signal Detect) input
+};
 
 /*
  * Scratch Register (SCR.REG, offset 7; eg, 0x3FF or 0x2FF)
