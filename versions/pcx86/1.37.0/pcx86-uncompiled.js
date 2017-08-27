@@ -56333,8 +56333,9 @@ class Mouse extends Component {
                              * However, syncMouse() seems unnecessary, given that SerialPort initializes its MCR to an "inactive"
                              * state, and even when restoring a previous state, if we've done our job properly, both SerialPort
                              * and Mouse should be restored in sync, making any explicit attempt at sync'ing unnecessary (or so I hope).
+                             *
+                             *      this.componentDevice.syncMouse();
                              */
-                            // this.componentDevice.syncMouse();
                             break;
                         }
                     }
@@ -57145,7 +57146,7 @@ Web.onInit(Mouse.init);
  *      6) writing data to a sector: write()
  *      7) save disk deltas: save()
  *      8) restore disk deltas: restore()
- *      9) converting disk contents: toJSON()
+ *      9) converting disk contents: convertToJSON()
  *
  *  More functionality may be factored out of the FDC and HDC components later and moved here, to
  *  further reduce some of the duplication between them, but the above functionality is a good start.
@@ -59308,10 +59309,11 @@ class Disk extends Component {
     }
 
     /**
-     * toJSON()
+     * convertToJSON(fFormatted)
      *
      * We perform some RegExp massaging on the JSON data to eliminate unnecessary properties
-     * (eg, 'length' values of 512, 'pattern' values of 0, since those are defaults).
+     * (eg, 'length' values of 512, 'pattern' values of 0, and empty 'data' arrays, since those
+     * are defaults).
      *
      * In addition, we first check every sector to see if it can be "deflated".  Sectors that were
      * initially "deflated" should remain that way unless/until they were modified, so technically,
@@ -59319,9 +59321,10 @@ class Disk extends Component {
      * so it doesn't hurt to check every sector.
      *
      * @this {Disk}
+     * @param {boolean} [fFormatted]
      * @return {string} containing the entire disk image as JSON-encoded data
      */
-    toJSON()
+    convertToJSON(fFormatted)
     {
         var s, pba = 0, sector, sectorLast;
 
@@ -59341,9 +59344,9 @@ class Disk extends Component {
         });
 
         /*
-         * Eliminate unnecessary default properties (eg, 'length' values of 512, 'pattern' values of 0).
+         * Eliminate unnecessary default properties (eg, 'length' values of 512, 'pattern' values of 0, etc).
          */
-        s = s.replace(/,"length":512/gm, "").replace(/,"pattern":0/gm, "");
+        s = s.replace(/,"length":512/g, "").replace(/,"pattern":0/g, "").replace(/,"data":\[]/g, "");
 
         /*
          * I don't really want to strip quotes from disk image property names, since I would have to put them
@@ -59352,19 +59355,20 @@ class Disk extends Component {
          * easily be stripped out, by virtue of their being the only quoted properties left.  We then "requote"
          * all the property names that remain.
          */
-        s = s.replace(/"(sector|length|data|pattern)":/gm, "$1:");
+        s = s.replace(/"(sector|length|data|pattern)":/g, "$1:");
 
         /*
          * The next line will remove any other numeric or boolean properties that were added at runtime, although
          * they may have completely different ("minified") names if the code has been compiled.
          */
-        s = s.replace(/,"[^"]*":([0-9]+|true|false)/gm, "");
-        s = s.replace(/(sector|length|data|pattern):/gm, "\"$1\":");
+        s = s.replace(/,"[^"]*":([0-9]+|true|false)/g, "");
+        s = s.replace(/(sector|length|data|pattern):/g, "\"$1\":");
 
         /*
-         * Last but not least, insert line breaks after every object definition, to ease the pain on text editors.
+         * Last but not least, insert line breaks after every object definition, to improve human readability
+         * (but only if the caller asks for it).
          */
-        s = s.replace(/([\]}]),/gm, "$1,\n");
+        if (fFormatted) s = s.replace(/([\]}]),/g, "$1,\n");
         return s;
     }
 
@@ -62867,9 +62871,9 @@ class HDC extends Component {
      * HDC supports the following component-specific properties:
      *
      *      drives: an array of driveConfig objects, each containing 'name', 'path', 'size' and 'type' properties
-     *      type:   either 'xt' (for the PC XT Xebec controller) or 'at' (for the PC AT Western Digital controller)
+     *      type:   either 'XT' (for the PC XT Xebec controller) or 'AT' (for the PC AT Western Digital controller)
      *
-     * The 'type' parameter defaults to 'xt'.  All ports for the PC XT controller are referred to as XTC ports,
+     * The 'type' parameter defaults to 'XT'.  All ports for the PC XT controller are referred to as XTC ports,
      * and similarly, all PC AT controller ports are referred to as ATC ports.
      *
      * If 'path' is empty, a scratch disk image is created; otherwise, we make a note of the path, but we will NOT
@@ -62910,7 +62914,8 @@ class HDC extends Component {
          * defaults.  For example, the default XT drive type is 3 (for a 10Mb disk drive), whereas the default
          * AT drive type is 2 (for a 20Mb disk drive).
          */
-        this.fATC = (parmsHDC['type'] == "at");
+        var sType = parmsHDC['type'];
+        this.fATC = sType && sType.toUpperCase() == "AT" || false;
 
         /*
          * Support for local disk images is currently limited to desktop browsers with FileReader support;
@@ -72556,7 +72561,7 @@ class DebuggerX86 extends Debugger {
                          * get "inflated" with use.  See the dump() method in the Disk component for more details.
                          */
                         this.doClear();
-                        this.println(drive.disk.toJSON());
+                        this.println(drive.disk.convertToJSON());
                         return;
                     }
                     if (dc.seekDrive(drive, iSector, nSectors)) {

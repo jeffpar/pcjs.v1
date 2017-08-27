@@ -39,7 +39,7 @@
  *      6) writing data to a sector: write()
  *      7) save disk deltas: save()
  *      8) restore disk deltas: restore()
- *      9) converting disk contents: toJSON()
+ *      9) converting disk contents: convertToJSON()
  *
  *  More functionality may be factored out of the disk controller components later and moved here,
  *  to further reduce some of the duplication between them, but the above functionality is a good start.
@@ -1110,7 +1110,7 @@ class DiskPDP11 extends Component {
     }
 
     /**
-     * toJSON()
+     * convertToJSON(fFormatted)
      *
      * We perform some RegExp massaging on the JSON data to eliminate unnecessary properties
      * (eg, 'length' values of 512, 'pattern' values of 0, since those are defaults).
@@ -1121,9 +1121,10 @@ class DiskPDP11 extends Component {
      * so it doesn't hurt to check every sector.
      *
      * @this {DiskPDP11}
+     * @param {boolean} [fFormatted]
      * @return {string} containing the entire disk image as JSON-encoded data
      */
-    toJSON()
+    convertToJSON(fFormatted)
     {
         var s, pba = 0, sector, sectorLast;
 
@@ -1145,7 +1146,7 @@ class DiskPDP11 extends Component {
         /*
          * Eliminate unnecessary default properties (eg, 'length' values of 512, 'pattern' values of 0).
          */
-        s = s.replace(/,"length":512/gm, "").replace(/,"pattern":0/gm, "");
+        s = s.replace(/,"length":512/g, "").replace(/,"pattern":0/g, "");
 
         /*
          * I don't really want to strip quotes from disk image property names, since I would have to put them
@@ -1154,19 +1155,20 @@ class DiskPDP11 extends Component {
          * easily be stripped out, by virtue of their being the only quoted properties left.  We then "requote"
          * all the property names that remain.
          */
-        s = s.replace(/"(sector|length|data|pattern)":/gm, "$1:");
+        s = s.replace(/"(sector|length|data|pattern)":/g, "$1:");
 
         /*
          * The next line will remove any other numeric or boolean properties that were added at runtime, although
          * they may have completely different ("minified") names if the code has been compiled.
          */
-        s = s.replace(/,"[^"]*":([0-9]+|true|false)/gm, "");
-        s = s.replace(/(sector|length|data|pattern):/gm, "\"$1\":");
+        s = s.replace(/,"[^"]*":([0-9]+|true|false)/g, "");
+        s = s.replace(/(sector|length|data|pattern):/g, "\"$1\":");
 
         /*
-         * Last but not least, insert line breaks after every object definition, to ease the pain on text editors.
+         * Last but not least, insert line breaks after every object definition, to improve human readability
+         * (but only if the caller asks for it).
          */
-        s = s.replace(/([\]}]),/gm, "$1,\n");
+        if (fFormatted) s = s.replace(/([\]}]),/g, "$1,\n");
         return s;
     }
 

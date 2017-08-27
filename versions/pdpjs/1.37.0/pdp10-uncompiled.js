@@ -21009,7 +21009,7 @@ class DebuggerPDP10 extends Debugger {
                          *
                          * Which means that an instruction like this (where AC is zero):
                          *
-                         *        8839	037653	205 00 0 00 400000 		MOVSI	AC,(1B<^O<AC>>)	;INITIALIZE AC
+                         *        8839  037653  205 00 0 00 400000      MOVSI   AC,(1B<^O<AC>>) ;INITIALIZE AC
                          *
                          * produces an instruction that does NOT use indexing at all, even though it is coded as such.  So my
                          * simplistic masking of the index operand with PDP10.OPCODE.X_MASK, while logical, was completely wrong:
@@ -21063,7 +21063,7 @@ class DebuggerPDP10 extends Debugger {
                     /*
                      * I came across what I believe is a typo in the DEC "DAKAC" diagnostic:
                      *
-                     *      CAME	[0,-1]		;PASS TEST IF C(AC)=0,,-1
+                     *      CAME    [0,-1]      ;PASS TEST IF C(AC)=0,,-1
                      *
                      * Based on the comment, it's clear what they really meant was either "[0,,-1]" or "[XWD 0,-1]".
                      * However, they still got the desired result, which means when the assembler parses an mnemonic-less

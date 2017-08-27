@@ -1010,7 +1010,7 @@
 		<xsl:variable name="type">
 			<xsl:choose>
 				<xsl:when test="@type"><xsl:value-of select="@type"/></xsl:when>
-				<xsl:otherwise>xt</xsl:otherwise>
+				<xsl:otherwise>XT</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
 		<xsl:call-template name="component">

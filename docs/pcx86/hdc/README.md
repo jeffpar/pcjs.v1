@@ -5,16 +5,18 @@ permalink: /docs/pcx86/hdc/
 ---
 
 PCx86 Hard Drive Controller (HDC) Component
----
+-------------------------------------------
 
 Format
----
+------
+
 ```xml
 <hdc>...</hdc>
 ```
 
 Purpose
----
+-------
+
 Creates an instance of the Hard Drive Controller (HDC) component. The HDC is responsible for:
 
 - Automatically loading fixed disk image files at boot;
@@ -26,7 +28,8 @@ The first such drive was a 10Mb 5.25-inch drive containing two platters and 4 he
 for a total of 1224 tracks, with 17 sectors/track and 512 bytes/sector.
 
 Attributes
----
+----------
+
  * *drives* (required)
  
 	This is an array definition, with one array entry per fixed disk. Each entry is a drive object definition,
@@ -41,35 +44,38 @@ Attributes
  
 	Should be set to one of:
 	
-	 * *'xt'*: PC XT Xebec controller emulation
-	 * *'at'*: PC AT Western Digital controller emulation
+	 * *'XT'*: PC XT Xebec controller emulation
+	 * *'AT'*: PC AT Western Digital controller emulation
 	
 	Also, make sure the appropriate ROM is installed.
 	
-	For the Xebec (*'xt'*) controller, you should install the Xebec ROM; eg:
+	For the Xebec (*'XT'*) controller, you should install the Xebec ROM; eg:
 	
 		<rom id="romHDC" addr="0xc8000" size="0x2000" file="/devices/pcx86/hdc/ibm-xebec-1982.json"/>
 
-	For the Western Digital (*'at'*) controller, use a Model 5170 (or newer) ROM module; eg:
+	For the Western Digital (*'AT'*) controller, use a Model 5170 (or newer) ROM module; eg:
 
 		<rom id="romBIOS" addr="0xf0000" size="0x10000" alias="0xff0000" file="/devices/pcx86/rom/5170/1984-01-10/1984-01-10.json"/>
 
-	The default *type* setting is *'xt'*.
+	The default *type* setting is *'XT'*.
 
  * Also supports the attributes of *[Component](/docs/pcx86/component/)*.
 
 Bindings
----
+--------
+
 This component has no bindings. Fixed disks cannot be loaded or unloaded once the machine is "powered".
 
 Example
----
+-------
+
 ```xml
 <hdc id="hdcXT" drives="[{name:'10Mb Hard Drive',type:3}]"/>
 ```
 
 Output
----
+------
+
 ```html
 <div id="..." class="pc-hdc pc-component">
     <div class="pc-container">

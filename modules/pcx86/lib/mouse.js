@@ -195,8 +195,9 @@ class Mouse extends Component {
                              * However, syncMouse() seems unnecessary, given that SerialPort initializes its MCR to an "inactive"
                              * state, and even when restoring a previous state, if we've done our job properly, both SerialPort
                              * and Mouse should be restored in sync, making any explicit attempt at sync'ing unnecessary (or so I hope).
+                             *
+                             *      this.componentDevice.syncMouse();
                              */
-                            // this.componentDevice.syncMouse();
                             break;
                         }
                     }
