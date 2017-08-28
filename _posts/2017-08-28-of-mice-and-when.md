@@ -53,7 +53,6 @@ different programming interfaces.  They used the same range of ports by default 
 InPort chip added a number of registers that could only be accessed by first writing a register number to the card's
 "Address" port (0x23C) and then reading or writing that register through the card's "Data" port (0x23D).
 
-
 ---
 
 This post barely scratches the surface of the evolution of the Microsoft Mouse, the various shapes and sizes of mice
