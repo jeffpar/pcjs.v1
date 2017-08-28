@@ -14,12 +14,12 @@
 	<xsl:variable name="CSSCLASS">pcjs</xsl:variable>
 	<xsl:variable name="APPCLASS">pcx86</xsl:variable>
 	<xsl:variable name="APPNAME">PCx86</xsl:variable>
-	<xsl:variable name="APPVERSION">1.36.2</xsl:variable>
+	<xsl:variable name="APPVERSION">1.37.0</xsl:variable>
 	<xsl:variable name="SITEHOST">www.pcjs.org</xsl:variable>
 	<xsl:variable name="BGNDCOLOR">#FAEBD7</xsl:variable>
 
 	<xsl:template name="componentStyles">
-		<link rel="stylesheet" type="text/css" href="/versions/pcx86/1.36.2/components.css"/>
+		<link rel="stylesheet" type="text/css" href="/versions/pcx86/1.37.0/components.css"/>
 	</xsl:template>
 
 	<xsl:template name="componentScripts">
@@ -922,9 +922,21 @@
 
 	<xsl:template match="mouse[not(@ref)]">
 		<xsl:param name="machine" select="''"/>
-		<xsl:variable name="serial">
+		<xsl:variable name="adapter">
 			<xsl:choose>
-				<xsl:when test="@serial"><xsl:value-of select="@serial"/></xsl:when>
+				<xsl:when test="@adapter"><xsl:value-of select="@adapter"/></xsl:when>
+				<xsl:otherwise>0</xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
+		<xsl:variable name="binding">
+			<xsl:choose>
+				<xsl:when test="@binding"><xsl:value-of select="@binding"/></xsl:when>
+				<xsl:otherwise/>
+			</xsl:choose>
+		</xsl:variable>
+		<xsl:variable name="type">
+			<xsl:choose>
+				<xsl:when test="@type"><xsl:value-of select="@type"/></xsl:when>
 				<xsl:otherwise/>
 			</xsl:choose>
 		</xsl:variable>
@@ -934,10 +946,16 @@
 				<xsl:otherwise>0.5</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
+		<xsl:variable name="serial">
+			<xsl:choose>
+				<xsl:when test="@serial"><xsl:value-of select="@serial"/></xsl:when>
+				<xsl:otherwise/>
+			</xsl:choose>
+		</xsl:variable>
 		<xsl:call-template name="component">
 			<xsl:with-param name="machine" select="$machine"/>
 			<xsl:with-param name="class">mouse</xsl:with-param>
-			<xsl:with-param name="parms">,serial:'<xsl:value-of select="$serial"/>',scaleMouse:<xsl:value-of select="$scaleMouse"/></xsl:with-param>
+			<xsl:with-param name="parms">,adapter:<xsl:value-of select="$adapter"/>,binding:'<xsl:value-of select="$binding"/>',type:'<xsl:value-of select="$type"/>',scaleMouse:<xsl:value-of select="$scaleMouse"/>,serial:'<xsl:value-of select="$serial"/>'</xsl:with-param>
 		</xsl:call-template>
 	</xsl:template>
 
@@ -990,7 +1008,7 @@
 		<xsl:variable name="type">
 			<xsl:choose>
 				<xsl:when test="@type"><xsl:value-of select="@type"/></xsl:when>
-				<xsl:otherwise>xt</xsl:otherwise>
+				<xsl:otherwise>XT</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
 		<xsl:call-template name="component">

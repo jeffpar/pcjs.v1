@@ -60,9 +60,9 @@ class HDC extends Component {
      * HDC supports the following component-specific properties:
      *
      *      drives: an array of driveConfig objects, each containing 'name', 'path', 'size' and 'type' properties
-     *      type:   either 'xt' (for the PC XT Xebec controller) or 'at' (for the PC AT Western Digital controller)
+     *      type:   either 'XT' (for the PC XT Xebec controller) or 'AT' (for the PC AT Western Digital controller)
      *
-     * The 'type' parameter defaults to 'xt'.  All ports for the PC XT controller are referred to as XTC ports,
+     * The 'type' parameter defaults to 'XT'.  All ports for the PC XT controller are referred to as XTC ports,
      * and similarly, all PC AT controller ports are referred to as ATC ports.
      *
      * If 'path' is empty, a scratch disk image is created; otherwise, we make a note of the path, but we will NOT
@@ -103,7 +103,8 @@ class HDC extends Component {
          * defaults.  For example, the default XT drive type is 3 (for a 10Mb disk drive), whereas the default
          * AT drive type is 2 (for a 20Mb disk drive).
          */
-        this.fATC = (parmsHDC['type'] == "at");
+        var sType = parmsHDC['type'];
+        this.fATC = sType && sType.toUpperCase() == "AT" || false;
 
         /*
          * Support for local disk images is currently limited to desktop browsers with FileReader support;

@@ -51,24 +51,34 @@ class Mouse extends Component {
      *
      * The Mouse component has the following component-specific (parmsMouse) properties:
      *
-     *      serial: the ID of the corresponding serial component
+     *      adapter: 1 (primary) or 2 (secondary); 0 if not defined
      *
-     * Since the first version of this component supports ONLY emulation of the original Microsoft
-     * serial mouse, a valid serial component ID is required.  It's possible that future versions
-     * of this component may support other types of simulated hardware (eg, the Microsoft InPort
-     * bus mouse adapter), or a virtual driver interface that would eliminate the need for any
-     * intermediate hardware simulation (at the expense of writing an intermediate software layer or
-     * virtual driver for each supported operating system).  However, those possibilities are extremely
-     * unlikely in the near term.
+     *      binding: name of a corresponding device component (implies type="serial")
      *
-     * If the 'serial' property is specified, then communication will be established with the
-     * SerialPort component, requesting access to the corresponding serial component ID.  If the
-     * SerialPort component is not installed and/or the specified serial component ID is not present,
-     * a configuration error will be reported.
+     *      scaleMouse: a floating-point number used to scale incoming mouse coordinates; the default is 0.5
      *
-     * TODO: Just out of curiosity, verify that the Microsoft Bus Mouse used ports 0x23D and 0x23F,
-     * because I saw Windows v1.01 probing those ports immediately prior to probing COM2 (and then COM1)
-     * for a serial mouse.
+     *      serial: the ID of a corresponding serial component (used in lieu of type="serial" and binding="ID")
+     *
+     *      type: one of "bus", "inport", or "serial"; the default is "serial" if serial or binding properties are set
+     *
+     * The first version of this component supported ONLY emulation of the original Microsoft serial mouse,
+     * so a valid SerialPort component ID using the 'serial' property was required.  Now, using the 'type' property,
+     * it's possible to enable support for other types of mouse hardware (eg, 'bus' for the original Microsoft
+     * Bus Mouse interface or 'inport' for the Microsoft InPort Mouse interface).  The 'adapter' property is used
+     * only when the selected type supports different configurations (eg, primary vs. secondary InPort adapters).
+     *
+     * If the 'type' property is set to "serial" (or 'type' is not set and either the original 'serial' property
+     * or the new 'binding' property is set), then serial communication will be established with the specified
+     * SerialPort component, requesting access to the corresponding serial component ID.  If the SerialPort component
+     * is not installed and/or the specified serial component ID is not present, a configuration error will be reported.
+     *
+     * To recap, the following machine XML syntax is still supported:
+     *
+     *      <mouse serial="com2"/>
+     *
+     * but going forward, you should stop using the serial attribute and use syntax like this instead:
+     *
+     *      <mouse type="serial" binding="com2"/>
      *
      * @this {Mouse}
      * @param {Object} parmsMouse
@@ -77,18 +87,22 @@ class Mouse extends Component {
     {
         super("Mouse", parmsMouse, Messages.MOUSE);
 
-        this.idAdapter = parmsMouse['serial'];
-        if (this.idAdapter) this.sAdapterType = "SerialPort";
+        this.iAdapter = parmsMouse['adapter'] || 0;
+        this.idDevice = parmsMouse['serial'] || parmsMouse['binding'];
+        this.sType = parmsMouse['type'] || (this.idDevice? Mouse.TYPE.SERIAL : Mouse.TYPE.BUS);
+        this.typeDevice = (this.sType == Mouse.TYPE.SERIAL? "SerialPort" : null);
+        this.componentDevice = null;
+
         this.scale = parmsMouse['scaleMouse'];
         this.setActive(false);
-        this.fCaptured = this.fLocked = false;
+        this.fActive = this.fCaptured = this.fLocked = false;
+
         /*
          * Initially, no video devices, and therefore no screens, are attached.  initBus() will update aVideo,
          * and powerUp() will update aScreens.
          */
         this.aVideo = [];
         this.aScreens = [];
-        this.setReady();
     }
 
     /**
@@ -113,6 +127,11 @@ class Mouse extends Component {
         for (var video = null; (video = cmp.getMachineComponent("Video", video));) {
             this.aVideo.push(video);
         }
+        if (this.sType == Mouse.TYPE.BUS) {
+            bus.addPortInputTable(this, Mouse.aBusInput, Mouse.BUS.DATA.PORT);
+            bus.addPortOutputTable(this, Mouse.aBusOutput, Mouse.BUS.DATA.PORT);
+        }
+        this.setReady();
     }
 
     /**
@@ -161,35 +180,36 @@ class Mouse extends Component {
             } else {
                 if (!this.restore(data)) return false;
             }
-            if (this.sAdapterType && !this.componentAdapter) {
-                var componentAdapter = null;
-                while ((componentAdapter = this.cmp.getMachineComponent(this.sAdapterType, componentAdapter))) {
-                    if (componentAdapter.attachMouse) {
-                        this.componentAdapter = componentAdapter.attachMouse(this.idAdapter, this, this.receiveStatus);
-                        if (this.componentAdapter) {
+            if (this.typeDevice && !this.componentDevice) {
+                var componentDevice = null;
+                while ((componentDevice = this.cmp.getMachineComponent(this.typeDevice, componentDevice))) {
+                    if (componentDevice.attachMouse) {
+                        this.componentDevice = componentDevice.attachMouse(this.idDevice, this, this.receiveStatus);
+                        if (this.componentDevice) {
                             /*
                              * It's possible that the SerialPort we've just attached to might want to bring us "up to speed"
-                             * on the adapter's state, which is why I envisioned a subsequent syncMouse() call.  And you would
-                             * want to do that as a separate call, not as part of attachMouse(), because componentAdapter
+                             * on the device's state, which is why I envisioned a subsequent syncMouse() call.  And you would
+                             * want to do that as a separate call, not as part of attachMouse(), because componentDevice
                              * isn't set until attachMouse() returns.
                              *
                              * However, syncMouse() seems unnecessary, given that SerialPort initializes its MCR to an "inactive"
                              * state, and even when restoring a previous state, if we've done our job properly, both SerialPort
                              * and Mouse should be restored in sync, making any explicit attempt at sync'ing unnecessary (or so I hope).
+                             *
+                             *      this.componentDevice.syncMouse();
                              */
-                            // this.componentAdapter.syncMouse();
                             break;
                         }
                     }
                 }
-                if (this.componentAdapter) {
+                if (this.componentDevice) {
                     this.aScreens = [];     // ensure the screen array is empty before (re)filling it
                     for (var i = 0; i < this.aVideo.length; i++) {
                         var screen = this.aVideo[i].getScreen(this);
                         if (screen) this.aScreens.push(screen);
                     }
                 } else {
-                    Component.warning(this.id + ": " + this.sAdapterType + " " + this.idAdapter + " unavailable");
+                    Component.warning(this.id + ": " + this.typeDevice + " " + this.idDevice + " unavailable");
                 }
             }
             if (this.fActive) {
@@ -552,7 +572,7 @@ class Mouse extends Component {
         if (this.messageEnabled(Messages.SERIAL)) {
             this.printMessage((sDiag? (sDiag + ": ") : "") + (yDiag !== undefined? ("mouse (" + xDiag + "," + yDiag + "): ") : "") + "serial packet [" + Str.toHexByte(b1) + "," + Str.toHexByte(b2) + "," + Str.toHexByte(b3) + "]", 0, true);
         }
-        this.componentAdapter.receiveData([b1, b2, b3]);
+        this.componentDevice.receiveData([b1, b2, b3]);
         this.xDelta = this.yDelta = 0;
     }
 
@@ -563,7 +583,7 @@ class Mouse extends Component {
      *
      * During normal serial mouse operation, both RTS and DTR must be "positive".
      *
-     * Setting RTS "negative" for 100ms resets the mouse.  Toggling DTR requests an identification byte (ID_SERIAL).
+     * Setting RTS "negative" for 100ms resets the mouse.  Toggling DTR requests an identification byte (SERIAL.ID).
      *
      * NOTES: The above 3rd-party information notwithstanding, I've observed that Windows v1.01 initially writes 0x01
      * to the MCR (DTR on, RTS off), spins in a loop that reads the RBR (probably to avoid a bogus identification byte
@@ -606,11 +626,11 @@ class Mouse extends Component {
                      * its failure to properly terminate-and-stay-resident when its initial INT 0x33 reset returns an error,
                      * I'm not in the mood to give it the benefit of the doubt.
                      *
-                     * So, anyway, I solve the terminate-and-stay-resident bug in MOUSE.COM v8.20 by feeding it *two* ID_SERIAL
+                     * So, anyway, I solve the terminate-and-stay-resident bug in MOUSE.COM v8.20 by feeding it *two* SERIAL.ID
                      * bytes on a reset.  This doesn't seem to adversely affect serial mouse emulation for Windows 1.01, so
                      * I'm calling this good enough for now.
                      */
-                    this.componentAdapter.receiveData([Mouse.ID_SERIAL, Mouse.ID_SERIAL]);
+                    this.componentDevice.receiveData([Mouse.SERIAL.ID, Mouse.SERIAL.ID]);
                     this.printMessage("serial mouse ID sent");
                 }
                 this.captureAll();
@@ -639,6 +659,118 @@ class Mouse extends Component {
     }
 
     /**
+     * inBusData(port, addrFrom)
+     *
+     * @this {Mouse}
+     * @param {number} port (eg, 0x23C)
+     * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
+     * @return {number} simulated port value
+     */
+    inBusData(port, addrFrom)
+    {
+        var b = 0;
+        this.printMessageIO(port, null, addrFrom, "DATA", b);
+        return b;
+    }
+
+    /**
+     * inBusTPPI(port, addrFrom)
+     *
+     * @this {Mouse}
+     * @param {number} port (eg, 0x23D)
+     * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
+     * @return {number} simulated port value
+     */
+    inBusTPPI(port, addrFrom)
+    {
+        var b = 0;
+        this.printMessageIO(port, null, addrFrom, "TPPI", b);
+        return b;
+    }
+
+    /**
+     * inBusCtrl(port, addrFrom)
+     *
+     * @this {Mouse}
+     * @param {number} port (eg, 0x23E)
+     * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
+     * @return {number} simulated port value
+     */
+    inBusCtrl(port, addrFrom)
+    {
+        var b = 0;
+        this.printMessageIO(port, null, addrFrom, "CTRL", b);
+        return b;
+    }
+
+    /**
+     * inBusCPPI(port, addrFrom)
+     *
+     * @this {Mouse}
+     * @param {number} port (eg, 0x23F)
+     * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
+     * @return {number} simulated port value
+     */
+    inBusCPPI(port, addrFrom)
+    {
+        var b = 0;
+        this.printMessageIO(port, null, addrFrom, "CPPI", b);
+        return b;
+    }
+
+    /**
+     * outBusData(port, bOut, addrFrom)
+     *
+     * @this {Mouse}
+     * @param {number} port (eg, 0x23C)
+     * @param {number} bOut
+     * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
+     */
+    outBusData(port, bOut, addrFrom)
+    {
+        this.printMessageIO(port, bOut, addrFrom, "DATA");
+    }
+
+    /**
+     * outBusTPPI(port, bOut, addrFrom)
+     *
+     * @this {Mouse}
+     * @param {number} port (eg, 0x23D)
+     * @param {number} bOut
+     * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
+     */
+    outBusTPPI(port, bOut, addrFrom)
+    {
+        this.printMessageIO(port, bOut, addrFrom, "TPPI");
+    }
+
+    /**
+     * outBusCtrl(port, bOut, addrFrom)
+     *
+     * @this {Mouse}
+     * @param {number} port (eg, 0x23E)
+     * @param {number} bOut
+     * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
+     */
+    outBusCtrl(port, bOut, addrFrom)
+    {
+        this.printMessageIO(port, bOut, addrFrom, "CTRL");
+    }
+
+    /**
+     * outBusCPPI(port, bOut, addrFrom)
+     *
+     * @this {Mouse}
+     * @param {number} port (eg, 0x23F)
+     * @param {number} bOut
+     * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
+     */
+    outBusCPPI(port, bOut, addrFrom)
+    {
+        this.printMessageIO(port, bOut, addrFrom, "CPPI");
+    }
+
+    /**
      * Mouse.init()
      *
      * This function operates on every HTML element of class "mouse", extracting the
@@ -657,6 +789,122 @@ class Mouse extends Component {
         }
     }
 }
+
+Mouse.TYPE = {
+    BUS:        "bus",
+    INPORT:     "inport",
+    SERIAL:     "serial"
+};
+
+Mouse.BUTTON = {
+    LEFT:   0,
+    RIGHT:  2
+};
+
+/*
+ * The Microsoft Bus Mouse supported only one base address: 0x23C.
+ *
+ * NOTE: Windows v1.01 probes ports 0x23D and 0x23F immediately prior to probing COM2 (and then COM1)
+ * for a serial mouse.
+ */
+Mouse.BUS = {
+    DATA: {                     // Mouse Data Register
+        PORT:       0x23C
+    },
+    TPPI: {                     // 8255 (PPI) Test Register
+        PORT:       0x23D
+    },
+    CTRL: {                     // Mouse Control Register
+        PORT:       0x23E
+    },
+    CPPI: {                     // 8255 (PPI) Control Register
+        PORT:       0x23F
+    }
+};
+
+Mouse.aBusInput = {
+    0x0:    Mouse.prototype.inBusData,
+    0x1:    Mouse.prototype.inBusTPPI,
+    0x2:    Mouse.prototype.inBusCtrl,
+    0x3:    Mouse.prototype.inBusCPPI
+};
+
+Mouse.aBusOutput = {
+    0x0:    Mouse.prototype.outBusData,
+    0x1:    Mouse.prototype.outBusTPPI,
+    0x2:    Mouse.prototype.outBusCtrl,
+    0x3:    Mouse.prototype.outBusCPPI
+};
+
+/*
+ * The retail Microsoft InPort card supported two base addresses, 0x23C and 0x238, through the primary and
+ * secondary jumpers, respectively.  However, OEMs may have had InPorts on other base addresses.
+ *
+ * Here's a typical InPort Mouse detection sequence:
+ *
+ *      S = IN(Mouse.INPORT.ID.PORT)
+ *      ...
+ *      VERIFY THAT S EQUALS Mouse.INPORT.ID.CHIP
+ *      T = IN(Mouse.INPORT.ID.PORT)
+ *      ...
+ *      VERIFY ADDITIONAL PAIRS OF READS RETURN MATCHING S AND T VALUES
+ *
+ * Here's a typical InPort Mouse interrupt sequence:
+ *
+ *      OUT(Mouse.INPORT.ADDR.PORT, Mouse.INPORT.ADDR.MODE)
+ *      OUT(Mouse.INPORT.DATA.PORT, IN(Mouse.INPORT.DATA.PORT) | Mouse.INPORT.DATA.MODE.HOLD)
+ *      ...
+ *      OUT(Mouse.INPORT.ADDR.PORT, Mouse.INPORT.ADDR.X)
+ *      X = IN(Mouse.INPORT.DATA.PORT)
+ *      OUT(Mouse.INPORT.ADDR.PORT, Mouse.INPORT.ADDR.Y)
+ *      Y = IN(Mouse.INPORT.DATA.PORT)
+ *      OUT(Mouse.INPORT.ADDR.PORT, Mouse.INPORT.ADDR.STATUS)
+ *      B = IN(Mouse.INPORT.DATA.PORT) & (Mouse.INPORT.DATA.STATUS.B1 | Mouse.INPORT.DATA.STATUS.B2 | Mouse.INPORT.DATA.STATUS.B3)
+ *      ...
+ *      OUT(Mouse.INPORT.ADDR.PORT, Mouse.INPORT.ADDR.MODE)
+ *      OUT(Mouse.INPORT.DATA.PORT, IN(Mouse.INPORT.DATA.PORT) & ~Mouse.INPORT.DATA.MODE.HOLD)
+ */
+Mouse.INPORT = {
+    ADDR: {
+        PORT:       0x23C,
+        STATUS:     0x00,       // InPort Status Register
+        X:          0x01,       // InPort X Movement Register
+        Y:          0x02,       // InPort Y Movement Register
+        ISTAT:      0x05,       // InPort Interface Status Register
+        ICTRL:      0x06,       // InPort Interface Control Register
+        MODE:       0x07        // InPort Mode Register
+    },
+    DATA: {
+        /*
+         * The internal register read or written via this port is determined by the value written to ADDR.PORT
+         */
+        PORT:       0x23D,
+        STATUS:     {           // InPort Status Register (0)
+            B3:     0x01,       // Status button 3
+            B2:     0x02,       // Status button 2
+            B1:     0x04,       // Status button 1
+            DB3:    0x08,       // Delta button 3
+            DB2:    0x10,       // Delta button 2
+            DB1:    0x20,       // Delta button 1
+            MOVE:   0x40,       // Movement
+            PACKET: 0x80        // Packet complete
+        },
+        MODE: {                 // InPort Mode Register (7)
+            HOLD:   0x20        // hold the status for reading
+        }
+    },
+    ID: {
+        /*
+         * The initial read returns the Chip ID; alternate reads return a byte containing the InPort revision number
+         * in the low nibble and the InPort version number in the high nibble.
+         */
+        PORT:       0x23E,
+        CHIP:       0xDE        // InPort Chip ID
+    },
+    TEST: {
+        PORT:       0x23F
+    }
+};
 
 /*
  * From http://paulbourke.net/dataformats/serialmouse:
@@ -733,12 +981,8 @@ class Mouse extends Component {
  *      The high order bit of each byte (D7) is ignored. Bit D6 indicates the start of an event, which allows the software to
  *      synchronize with the mouse.
  */
-
-Mouse.ID_SERIAL = 0x4D;
-
-Mouse.BUTTON = {
-    LEFT:   0,
-    RIGHT:  2
+Mouse.SERIAL = {
+    ID:     0x4D
 };
 
 /*

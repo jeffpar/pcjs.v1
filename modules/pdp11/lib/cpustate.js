@@ -2094,14 +2094,14 @@ class CPUStatePDP11 extends CPUPDP11 {
      * combination of the mode and whether the register is the Program Counter (R7).
      *
      * The eight modes are:-
-     * 	    0   R           no valid virtual address
-     * 	    1   (R)         operand from I/D depending if R = 7
-     * 	    2   (R)+        operand from I/D depending if R = 7
-     * 	    3   @(R)+       address from I/D depending if R = 7 and operand from D space
-     * 	    4   -(R)        operand from I/D depending if R = 7
-     * 	    5   @-(R)       address from I/D depending if R = 7 and operand from D space
-     * 	    6   x(R)        x from I space but operand from D space
-     * 	    7   @x(R)       x from I space but address and operand from D space
+     *      0   R           no valid virtual address
+     *      1   (R)         operand from I/D depending if R = 7
+     *      2   (R)+        operand from I/D depending if R = 7
+     *      3   @(R)+       address from I/D depending if R = 7 and operand from D space
+     *      4   -(R)        operand from I/D depending if R = 7
+     *      5   @-(R)       address from I/D depending if R = 7 and operand from D space
+     *      6   x(R)        x from I space but operand from D space
+     *      7   @x(R)       x from I space but address and operand from D space
      *
      * Also need to keep MMR1 updated as this stores which registers have been
      * incremented and decremented so that the OS can reset and restart an instruction

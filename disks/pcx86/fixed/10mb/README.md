@@ -7,25 +7,46 @@ permalink: /disks/pcx86/fixed/10mb/
 10Mb Hard Drive (Fixed Disk) Images
 -----------------------------------
 
-This folder contains the following 10Mb fixed disk configurations:
+This folder contains a variety of 10Mb (PC XT Type 3) fixed disk configurations:
  
 * [Unformatted Disk](unformatted.xml)
 * [PC-DOS 2.00 Formatted Disk (Empty)](pcdos200-empty.xml)
 * [PC-DOS 2.00 with Windows 1.01 for CGA](pcdos200-win101-cga.xml)
 * [PC-DOS 2.00 with Windows 1.01 for EGA](pcdos200-win101-ega.xml)
-* [MS-DOS 3.20 with Microsoft C 4.00](msdos320-c400.xml)
+* [MS-DOS 3.20 with Microsoft C 4.00](msdos320-c400-xt.xml)
 
-These disk images are used by various IBM PC XT [Model 5160](/devices/pcx86/machine/5160/) machine configurations,
-either directly:
+These XML disk configurations are used to load fixed disk images into various IBM PC XT
+[Model 5160](/devices/pcx86/machine/5160/) machine configurations.
+
+For example, a PC XT machine using this HDC XML reference:
 
 ```xml
-<hdc id="hdcXT" drives='[{name:"10Mb Hard Disk",type:3}]'/>
+<hdc ref="/disks/pcx86/fixed/10mb/msdos320-c400-xt.xml"/>
 ```
 
-or by reference:
+will load the following PC XT controller configuration and disk image:
 
 ```xml
-<hdc ref="/disks/pcx86/fixed/10mb/unformatted.xml"/>
+<hdc id="hdcXT" type="XT" drives='[{name:"10Mb Hard Disk",type:3,path:"/disks/pcx86/fixed/10mb/MSDOS320-C400.json"}]'/>
+```
+
+Some of the 10Mb disk images have also been pre-configured for use in PC AT configurations:
+ 
+* [MS-DOS 3.20 with Microsoft C 4.00 (PC AT Drive Type 1)](msdos320-c400-at.xml)
+
+The configuration must set the HDC's controller type to "AT" and select an appropriate AT
+drive type.  So, whereas the XT drive type for a 10Mb disk was 3, the corresponding AT drive type is 1.
+
+So, a PC AT machine using this HDC XML reference:
+
+```xml
+<hdc ref="/disks/pcx86/fixed/10mb/msdos320-c400-at.xml"/>
+```
+
+will load the following PC AT controller configuration and disk image:
+
+```xml
+<hdc id="hdcAT" type="AT" drives='[{name:"10Mb Hard Disk",type:1,path:"/disks/pcx86/fixed/10mb/MSDOS320-C400.json"}]'/>
 ```
 
 ### Notes Regarding 10Mb Disks

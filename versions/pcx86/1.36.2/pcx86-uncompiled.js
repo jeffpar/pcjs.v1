@@ -55095,7 +55095,10 @@ class SerialPort extends Component {
      *
      *      adapter: 1 (port 0x3F8) or 2 (port 0x2F8); 0 if not defined
      *
-     *      binding: name of a control (based on its "binding" attribute) to bind to this port's I/O
+     *      binding: name of a control (based on its "binding" attribute) to bind to this port's I/O;
+     *      as a special case, it can be set to "console" to direct all output to the component's default
+     *      println() handler (eg, the Control Panel's "print" control, if any, or console.log() if using
+     *      a DEBUG or non-COMPILED machine)
      *
      *      tabSize: a non-zero number specifies the tab-stop multiple to use for automatic tab-to-space
      *      conversion; it applies only to the above binding, and the default is 0 (no tab conversion)
@@ -55756,22 +55759,23 @@ class SerialPort extends Component {
         } else {
             this.bTHR = bOut;
             this.bLSR &= ~(SerialPort.LSR.THRE | SerialPort.LSR.TSRE);
-            if (this.transmitByte(bOut)) {
-                /*
-                 * If we're transmitting to a virtual device that has no measurable delay, this code may set the
-                 * transmitter empty bits too quickly:
-                 *
-                 *      this.bLSR |= (SerialPort.LSR.THRE | SerialPort.LSR.TSRE);
-                 *
-                 * A better solution is to arm a timer based on the baud rate, and clear the above bits when that
-                 * timer fires.
-                 */
-                if (this.cpu) this.cpu.setTimer(this.timerTransmitNext, this.getBaudTimeout());
-                this.updateIRR();
-                /*
-                 * QUESTION: Does this mean we should also flush/zero bTHR?
-                 */
-            }
+            /*
+             * If transmitByte() returned success, we used to immediately re-set the transmitter empty bits:
+             *
+             *      this.bLSR |= (SerialPort.LSR.THRE | SerialPort.LSR.TSRE);
+             *
+             * But when we're connected to a virtual device that has no measurable delay, that sets the bits
+             * too quickly.  We now arm a timer based on the programmed baud rate, and set the above bits only
+             * when that timer fires.
+             *
+             * Additionally, we no longer care if transmitByte() succeeds, because whether or not a connected
+             * device or component received the data is irrelevant to the internal mechanics of the serial port.
+             *
+             * TODO: Determine if we should also flush/zero bTHR after transmission.
+             */
+            this.transmitByte(bOut);
+            if (this.cpu) this.cpu.setTimer(this.timerTransmitNext, this.getBaudTimeout());
+            this.updateIRR();
         }
     }
 
@@ -56029,70 +56033,74 @@ SerialPort.sIOBuffer = "buffer";
  *      0x0002      56000       2.86%
  *      0x0001      128000
  */
-SerialPort.DLL = {REG: 0};              // Divisor Latch LSB (only when SerialPort.LCR.DLAB is set)
-SerialPort.THR = {REG: 0};              // Transmitter Holding Register (write)
-SerialPort.DL_DEFAULT       = 0x180;    // we select an arbitrary default Divisor Latch equivalent to 300 baud
+SerialPort.DLL = {REG: 0};      // Divisor Latch LSB (only when SerialPort.LCR.DLAB is set)
+SerialPort.THR = {REG: 0};      // Transmitter Holding Register (write)
+SerialPort.DL_DEFAULT = 0x180;  // we select an arbitrary default Divisor Latch equivalent to 300 baud
 
 /*
  * Receiver Buffer Register (RBR.REG, offset 0; eg, 0x3F8 or 0x2F8) on read, Transmitter Holding Register on write
  */
-SerialPort.RBR = {REG: 0};              // (read)
+SerialPort.RBR = {REG: 0};      // (read)
 
 /*
  * Interrupt Enable Register (IER.REG, offset 1; eg, 0x3F9 or 0x2F9)
  */
-SerialPort.IER = {};
-SerialPort.IER.REG          = 1;        // Interrupt Enable Register
-SerialPort.IER.RBR_AVAIL    = 0x01;
-SerialPort.IER.THR_EMPTY    = 0x02;
-SerialPort.IER.LSR_DELTA    = 0x04;
-SerialPort.IER.MSR_DELTA    = 0x08;
-SerialPort.IER.UNUSED       = 0xF0;     // always zero
+SerialPort.IER = {
+    REG:            1,          // Interrupt Enable Register
+    RBR_AVAIL:      0x01,
+    THR_EMPTY:      0x02,
+    LSR_DELTA:      0x04,
+    MSR_DELTA:      0x08,
+    UNUSED:         0xF0        // always zero
+};
 
-SerialPort.DLM = {REG: 1};              // Divisor Latch MSB (only when SerialPort.LCR.DLAB is set)
+SerialPort.DLM = {REG: 1};      // Divisor Latch MSB (only when SerialPort.LCR.DLAB is set)
 
 /*
  * Interrupt ID Register (IIR.REG, offset 2; eg, 0x3FA or 0x2FA)
  *
  * All interrupt conditions cleared by reading the corresponding register (or, in the case of IRR_INT_THR, writing a new value to THR.REG)
  */
-SerialPort.IIR = {};
-SerialPort.IIR.REG          = 2;        // Interrupt ID Register (read-only)
-SerialPort.IIR.NO_INT       = 0x01;
-SerialPort.IIR.INT_LSR      = 0x06;     // Line Status (highest priority: Overrun error, Parity error, Framing error, or Break Interrupt)
-SerialPort.IIR.INT_RBR      = 0x04;     // Receiver Data Available
-SerialPort.IIR.INT_THR      = 0x02;     // Transmitter Holding Register Empty
-SerialPort.IIR.INT_MSR      = 0x00;     // Modem Status Register (lowest priority: Clear To Send, Data Set Ready, Ring Indicator, or Data Carrier Detect)
-SerialPort.IIR.INT_BITS     = 0x06;
-SerialPort.IIR.UNUSED       = 0xF8;     // always zero (the ROM BIOS relies on these bits "floating to 1" when no SerialPort is present)
+SerialPort.IIR = {
+    REG:            2,          // Interrupt ID Register (read-only)
+    NO_INT:         0x01,
+    INT_LSR:        0x06,       // Line Status (highest priority: Overrun error, Parity error, Framing error, or Break Interrupt)
+    INT_RBR:        0x04,       // Receiver Data Available
+    INT_THR:        0x02,       // Transmitter Holding Register Empty
+    INT_MSR:        0x00,       // Modem Status Register (lowest priority: Clear To Send, Data Set Ready, Ring Indicator, or Data Carrier Detect)
+    INT_BITS:       0x06,
+    UNUSED:         0xF8        // always zero (the ROM BIOS relies on these bits "floating to 1" when no SerialPort is present)
+};
 
 /*
  * Line Control Register (LCR.REG, offset 3; eg, 0x3FB or 0x2FB)
  */
-SerialPort.LCR = {};
-SerialPort.LCR.REG          = 3;        // Line Control Register
-SerialPort.LCR.DATA_5BITS   = 0x00;
-SerialPort.LCR.DATA_6BITS   = 0x01;
-SerialPort.LCR.DATA_7BITS   = 0x02;
-SerialPort.LCR.DATA_8BITS   = 0x03;
-SerialPort.LCR.STOP_BITS    = 0x04;     // clear: 1 stop bit; set: 1.5 stop bits for LCR_DATA_5BITS, 2 stop bits for all other data lengths
-SerialPort.LCR.PARITY_BIT   = 0x08;     // if set, a parity bit is inserted/expected between the last data bit and the first stop bit; no parity bit if clear
-SerialPort.LCR.PARITY_EVEN  = 0x10;     // if set, even parity is selected (ie, the parity bit insures an even number of set bits); if clear, odd parity
-SerialPort.LCR.PARITY_STICK = 0x20;     // if set, parity bit is transmitted inverted; if clear, parity bit is transmitted normally
-SerialPort.LCR.BREAK        = 0x40;     // if set, serial output (SOUT) signal is forced to logical 0 for the duration
-SerialPort.LCR.DLAB         = 0x80;     // Divisor Latch Access Bit; if set, DLL.REG and DLM.REG can be read or written
+SerialPort.LCR = {
+    REG:            3,          // Line Control Register
+    DATA_5BITS:     0x00,
+    DATA_6BITS:     0x01,
+    DATA_7BITS:     0x02,
+    DATA_8BITS:     0x03,
+    STOP_BITS:      0x04,       // clear: 1 stop bit; set: 1.5 stop bits for LCR_DATA_5BITS, 2 stop bits for all other data lengths
+    PARITY_BIT:     0x08,       // if set, a parity bit is inserted/expected between the last data bit and the first stop bit; no parity bit if clear
+    PARITY_EVEN:    0x10,       // if set, even parity is selected (ie, the parity bit insures an even number of set bits); if clear, odd parity
+    PARITY_STICK:   0x20,       // if set, parity bit is transmitted inverted; if clear, parity bit is transmitted normally
+    BREAK:          0x40,       // if set, serial output (SOUT) signal is forced to logical 0 for the duration
+    DLAB:           0x80        // Divisor Latch Access Bit; if set, DLL.REG and DLM.REG can be read or written
+};
 
 /*
  * Modem Control Register (MCR.REG, offset 4; eg, 0x3FC or 0x2FC)
  */
-SerialPort.MCR = {};
-SerialPort.MCR.REG          = 4;        // Modem Control Register
-SerialPort.MCR.DTR          = 0x01;     // when set, DTR goes high, indicating ready to establish link (looped back to DSR in loop-back mode)
-SerialPort.MCR.RTS          = 0x02;     // when set, RTS goes high, indicating ready to exchange data (looped back to CTS in loop-back mode)
-SerialPort.MCR.OUT1         = 0x04;     // when set, OUT1 goes high (looped back to RI in loop-back mode)
-SerialPort.MCR.OUT2         = 0x08;     // when set, OUT2 goes high (looped back to RLSD in loop-back mode)
-SerialPort.MCR.LOOPBACK     = 0x10;     // when set, enables loop-back mode
-SerialPort.MCR.UNUSED       = 0xE0;     // always zero
+SerialPort.MCR = {
+    REG:            4,          // Modem Control Register
+    DTR:            0x01,       // when set, DTR goes high, indicating ready to establish link (looped back to DSR in loop-back mode)
+    RTS:            0x02,       // when set, RTS goes high, indicating ready to exchange data (looped back to CTS in loop-back mode)
+    OUT1:           0x04,       // when set, OUT1 goes high (looped back to RI in loop-back mode)
+    OUT2:           0x08,       // when set, OUT2 goes high (looped back to RLSD in loop-back mode)
+    LOOPBACK:       0x10,       // when set, enables loop-back mode
+    UNUSED:         0xE0        // always zero
+};
 
 /*
  * Line Status Register (LSR.REG, offset 5; eg, 0x3FD or 0x2FD)
@@ -56101,30 +56109,32 @@ SerialPort.MCR.UNUSED       = 0xE0;     // always zero
  * I have calls it TEMT instead of TSRE, and claims that it is set whenever BOTH the THR and TSR are empty, and clear
  * whenever EITHER the THR or TSR contain data.
  */
-SerialPort.LSR = {};
-SerialPort.LSR.REG          = 5;        // Line Status Register
-SerialPort.LSR.DR           = 0x01;     // Data Ready (set when new data in RBR.REG; cleared when RBR.REG read)
-SerialPort.LSR.OE           = 0x02;     // Overrun Error (set when new data arrives in RBR.REG before previous data read; cleared when LSR.REG read)
-SerialPort.LSR.PE           = 0x04;     // Parity Error (set when new data has incorrect parity; cleared when LSR.REG read)
-SerialPort.LSR.FE           = 0x08;     // Framing Error (set when new data has invalid stop bit; cleared when LSR.REG read)
-SerialPort.LSR.BI           = 0x10;     // Break Interrupt (set when new data exceeded normal transmission time; cleared LSR.REG when read)
-SerialPort.LSR.THRE         = 0x20;     // Transmitter Holding Register Empty (set when UART ready to accept new data; cleared when THR.REG written)
-SerialPort.LSR.TSRE         = 0x40;     // Transmitter Shift Register Empty (set when the TSR is empty; cleared when the THR is transferred to the TSR)
-SerialPort.LSR.UNUSED       = 0x80;     // always zero
+SerialPort.LSR = {
+    REG:            5,          // Line Status Register
+    DR:             0x01,       // Data Ready (set when new data in RBR.REG; cleared when RBR.REG read)
+    OE:             0x02,       // Overrun Error (set when new data arrives in RBR.REG before previous data read; cleared when LSR.REG read)
+    PE:             0x04,       // Parity Error (set when new data has incorrect parity; cleared when LSR.REG read)
+    FE:             0x08,       // Framing Error (set when new data has invalid stop bit; cleared when LSR.REG read)
+    BI:             0x10,       // Break Interrupt (set when new data exceeded normal transmission time; cleared LSR.REG when read)
+    THRE:           0x20,       // Transmitter Holding Register Empty (set when UART ready to accept new data; cleared when THR.REG written)
+    TSRE:           0x40,       // Transmitter Shift Register Empty (set when the TSR is empty; cleared when the THR is transferred to the TSR)
+    UNUSED:         0x80        // always zero
+};
 
 /*
  * Modem Status Register (MSR.REG, offset 6; eg, 0x3FE or 0x2FE)
  */
-SerialPort.MSR = {};
-SerialPort.MSR.REG          = 6;        // Modem Status Register
-SerialPort.MSR.DCTS         = 0x01;     // when set, CTS (Clear To Send) has changed since last read
-SerialPort.MSR.DDSR         = 0x02;     // when set, DSR (Data Set Ready) has changed since last read
-SerialPort.MSR.TERI         = 0x04;     // when set, TERI (Trailing Edge Ring Indicator) indicates RI has changed from 1 to 0
-SerialPort.MSR.DRLSD        = 0x08;     // when set, RLSD (Received Line Signal Detector) has changed
-SerialPort.MSR.CTS          = 0x10;     // when set, the modem or data set is ready to exchange data (complement of the Clear To Send input signal)
-SerialPort.MSR.DSR          = 0x20;     // when set, the modem or data set is ready to establish link (complement of the Data Set Ready input signal)
-SerialPort.MSR.RI           = 0x40;     // complement of the RI (Ring Indicator) input
-SerialPort.MSR.RLSD         = 0x80;     // complement of the RLSD (Received Line Signal Detect) input
+SerialPort.MSR = {
+    REG:            6,          // Modem Status Register
+    DCTS:           0x01,       // when set, CTS (Clear To Send) has changed since last read
+    DDSR:           0x02,       // when set, DSR (Data Set Ready) has changed since last read
+    TERI:           0x04,       // when set, TERI (Trailing Edge Ring Indicator) indicates RI has changed from 1 to 0
+    DRLSD:          0x08,       // when set, RLSD (Received Line Signal Detector) has changed
+    CTS:            0x10,       // when set, the modem or data set is ready to exchange data (complement of the Clear To Send input signal)
+    DSR:            0x20,       // when set, the modem or data set is ready to establish link (complement of the Data Set Ready input signal)
+    RI:             0x40,       // complement of the RI (Ring Indicator) input
+    RLSD:           0x80        // complement of the RLSD (Received Line Signal Detect) input
+};
 
 /*
  * Scratch Register (SCR.REG, offset 7; eg, 0x3FF or 0x2FF)
@@ -56179,24 +56189,26 @@ class Mouse extends Component {
      *
      * The Mouse component has the following component-specific (parmsMouse) properties:
      *
-     *      serial: the ID of the corresponding serial component
+     *      adapter: 1 (primary) or 2 (secondary); 0 if not defined
      *
-     * Since the first version of this component supports ONLY emulation of the original Microsoft
-     * serial mouse, a valid serial component ID is required.  It's possible that future versions
-     * of this component may support other types of simulated hardware (eg, the Microsoft InPort
-     * bus mouse adapter), or a virtual driver interface that would eliminate the need for any
-     * intermediate hardware simulation (at the expense of writing an intermediate software layer or
-     * virtual driver for each supported operating system).  However, those possibilities are extremely
-     * unlikely in the near term.
+     *      binding: name of a corresponding device component (implies type is "serial")
      *
-     * If the 'serial' property is specified, then communication will be established with the
-     * SerialPort component, requesting access to the corresponding serial component ID.  If the
-     * SerialPort component is not installed and/or the specified serial component ID is not present,
-     * a configuration error will be reported.
+     *      scaleMouse: a floating-point number used to scale incoming mouse coordinates; the default is 0.5
      *
-     * TODO: Just out of curiosity, verify that the Microsoft Bus Mouse used ports 0x23D and 0x23F,
-     * because I saw Windows v1.01 probing those ports immediately prior to probing COM2 (and then COM1)
-     * for a serial mouse.
+     *      serial: the ID of a corresponding serial component (used in lieu of type="serial" and binding="ID")
+     *
+     *      type: one of "bus", "inport", or "serial"; the default is "serial" if serial or binding properties are set
+     *
+     * The first version of this component supported ONLY emulation of the original Microsoft serial mouse,
+     * so a valid serial component ID using the 'serial' property was required.  Now, using the 'type' property,
+     * it's possible to enable support for other types of mouse hardware (eg, 'bus' for the original Microsoft
+     * Bus Mouse interface or 'inport' for the Microsoft InPort Mouse interface).  The 'adapter' property is used
+     * only when the selected type supports different configurations (eg, primary vs. secondary InPort adapters).
+     *
+     * If either the original 'serial' property or the new 'binding' property is set, then serial communication
+     * will be established with the specified SerialPort component, requesting access to the corresponding serial
+     * component ID.  If the SerialPort component is not installed and/or the specified serial component ID is not
+     * present, a configuration error will be reported.
      *
      * @this {Mouse}
      * @param {Object} parmsMouse
@@ -56205,18 +56217,22 @@ class Mouse extends Component {
     {
         super("Mouse", parmsMouse, Messages.MOUSE);
 
-        this.idAdapter = parmsMouse['serial'];
-        if (this.idAdapter) this.sAdapterType = "SerialPort";
+        this.iAdapter = parmsMouse['adapter'] || 0;
+        this.idDevice = parmsMouse['serial'] || parmsMouse['binding'];
+        this.sType = parmsMouse['type'] || (this.idDevice? Mouse.TYPE.SERIAL : Mouse.TYPE.BUS);
+        this.typeDevice = (this.sType == Mouse.TYPE.SERIAL? "SerialPort" : null);
+        this.componentDevice = null;
+
         this.scale = parmsMouse['scaleMouse'];
         this.setActive(false);
-        this.fCaptured = this.fLocked = false;
+        this.fActive = this.fCaptured = this.fLocked = false;
+
         /*
          * Initially, no video devices, and therefore no screens, are attached.  initBus() will update aVideo,
          * and powerUp() will update aScreens.
          */
         this.aVideo = [];
         this.aScreens = [];
-        this.setReady();
     }
 
     /**
@@ -56241,6 +56257,11 @@ class Mouse extends Component {
         for (var video = null; (video = cmp.getMachineComponent("Video", video));) {
             this.aVideo.push(video);
         }
+        if (this.sType == Mouse.TYPE.BUS) {
+            bus.addPortInputTable(this, Mouse.aBusInput, Mouse.BUS.DATA.PORT);
+            bus.addPortOutputTable(this, Mouse.aBusOutput, Mouse.BUS.DATA.PORT);
+        }
+        this.setReady();
     }
 
     /**
@@ -56289,35 +56310,35 @@ class Mouse extends Component {
             } else {
                 if (!this.restore(data)) return false;
             }
-            if (this.sAdapterType && !this.componentAdapter) {
-                var componentAdapter = null;
-                while ((componentAdapter = this.cmp.getMachineComponent(this.sAdapterType, componentAdapter))) {
-                    if (componentAdapter.attachMouse) {
-                        this.componentAdapter = componentAdapter.attachMouse(this.idAdapter, this, this.receiveStatus);
-                        if (this.componentAdapter) {
+            if (this.typeDevice && !this.componentDevice) {
+                var componentDevice = null;
+                while ((componentDevice = this.cmp.getMachineComponent(this.typeDevice, componentDevice))) {
+                    if (componentDevice.attachMouse) {
+                        this.componentDevice = componentDevice.attachMouse(this.idDevice, this, this.receiveStatus);
+                        if (this.componentDevice) {
                             /*
                              * It's possible that the SerialPort we've just attached to might want to bring us "up to speed"
-                             * on the adapter's state, which is why I envisioned a subsequent syncMouse() call.  And you would
-                             * want to do that as a separate call, not as part of attachMouse(), because componentAdapter
+                             * on the device's state, which is why I envisioned a subsequent syncMouse() call.  And you would
+                             * want to do that as a separate call, not as part of attachMouse(), because componentDevice
                              * isn't set until attachMouse() returns.
                              *
                              * However, syncMouse() seems unnecessary, given that SerialPort initializes its MCR to an "inactive"
                              * state, and even when restoring a previous state, if we've done our job properly, both SerialPort
                              * and Mouse should be restored in sync, making any explicit attempt at sync'ing unnecessary (or so I hope).
                              */
-                            // this.componentAdapter.syncMouse();
+                            // this.componentDevice.syncMouse();
                             break;
                         }
                     }
                 }
-                if (this.componentAdapter) {
+                if (this.componentDevice) {
                     this.aScreens = [];     // ensure the screen array is empty before (re)filling it
                     for (var i = 0; i < this.aVideo.length; i++) {
                         var screen = this.aVideo[i].getScreen(this);
                         if (screen) this.aScreens.push(screen);
                     }
                 } else {
-                    Component.warning(this.id + ": " + this.sAdapterType + " " + this.idAdapter + " unavailable");
+                    Component.warning(this.id + ": " + this.typeDevice + " " + this.idDevice + " unavailable");
                 }
             }
             if (this.fActive) {
@@ -56680,7 +56701,7 @@ class Mouse extends Component {
         if (this.messageEnabled(Messages.SERIAL)) {
             this.printMessage((sDiag? (sDiag + ": ") : "") + (yDiag !== undefined? ("mouse (" + xDiag + "," + yDiag + "): ") : "") + "serial packet [" + Str.toHexByte(b1) + "," + Str.toHexByte(b2) + "," + Str.toHexByte(b3) + "]", 0, true);
         }
-        this.componentAdapter.receiveData([b1, b2, b3]);
+        this.componentDevice.receiveData([b1, b2, b3]);
         this.xDelta = this.yDelta = 0;
     }
 
@@ -56691,7 +56712,7 @@ class Mouse extends Component {
      *
      * During normal serial mouse operation, both RTS and DTR must be "positive".
      *
-     * Setting RTS "negative" for 100ms resets the mouse.  Toggling DTR requests an identification byte (ID_SERIAL).
+     * Setting RTS "negative" for 100ms resets the mouse.  Toggling DTR requests an identification byte (SERIAL.ID).
      *
      * NOTES: The above 3rd-party information notwithstanding, I've observed that Windows v1.01 initially writes 0x01
      * to the MCR (DTR on, RTS off), spins in a loop that reads the RBR (probably to avoid a bogus identification byte
@@ -56734,11 +56755,11 @@ class Mouse extends Component {
                      * its failure to properly terminate-and-stay-resident when its initial INT 0x33 reset returns an error,
                      * I'm not in the mood to give it the benefit of the doubt.
                      *
-                     * So, anyway, I solve the terminate-and-stay-resident bug in MOUSE.COM v8.20 by feeding it *two* ID_SERIAL
+                     * So, anyway, I solve the terminate-and-stay-resident bug in MOUSE.COM v8.20 by feeding it *two* SERIAL.ID
                      * bytes on a reset.  This doesn't seem to adversely affect serial mouse emulation for Windows 1.01, so
                      * I'm calling this good enough for now.
                      */
-                    this.componentAdapter.receiveData([Mouse.ID_SERIAL, Mouse.ID_SERIAL]);
+                    this.componentDevice.receiveData([Mouse.SERIAL.ID, Mouse.SERIAL.ID]);
                     this.printMessage("serial mouse ID sent");
                 }
                 this.captureAll();
@@ -56767,6 +56788,118 @@ class Mouse extends Component {
     }
 
     /**
+     * inBusData(port, addrFrom)
+     *
+     * @this {Mouse}
+     * @param {number} port (eg, 0x23C)
+     * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
+     * @return {number} simulated port value
+     */
+    inBusData(port, addrFrom)
+    {
+        var b = 0;
+        this.printMessageIO(port, null, addrFrom, "DATA", b);
+        return b;
+    }
+
+    /**
+     * inBusTPPI(port, addrFrom)
+     *
+     * @this {Mouse}
+     * @param {number} port (eg, 0x23D)
+     * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
+     * @return {number} simulated port value
+     */
+    inBusTPPI(port, addrFrom)
+    {
+        var b = 0;
+        this.printMessageIO(port, null, addrFrom, "TPPI", b);
+        return b;
+    }
+
+    /**
+     * inBusCtrl(port, addrFrom)
+     *
+     * @this {Mouse}
+     * @param {number} port (eg, 0x23E)
+     * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
+     * @return {number} simulated port value
+     */
+    inBusCtrl(port, addrFrom)
+    {
+        var b = 0;
+        this.printMessageIO(port, null, addrFrom, "CTRL", b);
+        return b;
+    }
+
+    /**
+     * inBusCPPI(port, addrFrom)
+     *
+     * @this {Mouse}
+     * @param {number} port (eg, 0x23F)
+     * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
+     * @return {number} simulated port value
+     */
+    inBusCPPI(port, addrFrom)
+    {
+        var b = 0;
+        this.printMessageIO(port, null, addrFrom, "CPPI", b);
+        return b;
+    }
+
+    /**
+     * outBusData(port, bOut, addrFrom)
+     *
+     * @this {Mouse}
+     * @param {number} port (eg, 0x23C)
+     * @param {number} bOut
+     * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
+     */
+    outBusData(port, bOut, addrFrom)
+    {
+        this.printMessageIO(port, bOut, addrFrom, "DATA");
+    }
+
+    /**
+     * outBusTPPI(port, bOut, addrFrom)
+     *
+     * @this {Mouse}
+     * @param {number} port (eg, 0x23D)
+     * @param {number} bOut
+     * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
+     */
+    outBusTPPI(port, bOut, addrFrom)
+    {
+        this.printMessageIO(port, bOut, addrFrom, "TPPI");
+    }
+
+    /**
+     * outBusCtrl(port, bOut, addrFrom)
+     *
+     * @this {Mouse}
+     * @param {number} port (eg, 0x23E)
+     * @param {number} bOut
+     * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
+     */
+    outBusCtrl(port, bOut, addrFrom)
+    {
+        this.printMessageIO(port, bOut, addrFrom, "CTRL");
+    }
+
+    /**
+     * outBusCPPI(port, bOut, addrFrom)
+     *
+     * @this {Mouse}
+     * @param {number} port (eg, 0x23F)
+     * @param {number} bOut
+     * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
+     */
+    outBusCPPI(port, bOut, addrFrom)
+    {
+        this.printMessageIO(port, bOut, addrFrom, "CPPI");
+    }
+
+    /**
      * Mouse.init()
      *
      * This function operates on every HTML element of class "mouse", extracting the
@@ -56785,6 +56918,121 @@ class Mouse extends Component {
         }
     }
 }
+
+Mouse.TYPE = {
+    BUS:        "bus",
+    INPORT:     "inport",
+    SERIAL:     "serial"
+};
+
+Mouse.BUTTON = {
+    LEFT:   0,
+    RIGHT:  2
+};
+
+/*
+ * The Microsoft Bus Mouse supported only one base address: 0x23C.
+ *
+ * NOTE: Windows v1.01 probes ports 0x23D and 0x23F immediately prior to probing COM2 (and then COM1)
+ * for a serial mouse.
+ */
+Mouse.BUS = {
+    DATA: {                     // Mouse Data Register
+        PORT:       0x23C
+    },
+    TPPI: {                     // 8255 (PPI) Test Register
+        PORT:       0x23D
+    },
+    CTRL: {                     // Mouse Control Register
+        PORT:       0x23E
+    },
+    CPPI: {                     // 8255 (PPI) Control Register
+        PORT:       0x23F
+    }
+};
+
+Mouse.aBusInput = {
+    0x0:    Mouse.prototype.inBusData,
+    0x1:    Mouse.prototype.inBusTPPI,
+    0x2:    Mouse.prototype.inBusCtrl,
+    0x3:    Mouse.prototype.inBusCPPI
+};
+
+Mouse.aBusOutput = {
+    0x0:    Mouse.prototype.outBusData,
+    0x1:    Mouse.prototype.outBusTPPI,
+    0x2:    Mouse.prototype.outBusCtrl,
+    0x3:    Mouse.prototype.outBusCPPI
+};
+
+/*
+ * The retail Microsoft InPort card supported two base addresses, 0x23C and 0x238, through the primary and
+ * secondary jumpers, respectively.  However, OEMs may have had InPorts on other base addresses.
+ *
+ * Here's a typical InPort Mouse detection sequence:
+ *
+ *      S = IN(Mouse.INPORT.ID.PORT)
+ *      ...
+ *      VERIFY THAT S EQUALS Mouse.INPORT.ID.CHIP
+ *      T = IN(Mouse.INPORT.ID.PORT)
+ *      ...
+ *      VERIFY ADDITIONAL PAIRS OF READS RETURN MATCHING S AND T VALUES
+ *
+ * Here's a typical InPort Mouse interrupt sequence:
+ *
+ *      OUT(Mouse.INPORT.ADDR.PORT, Mouse.INPORT.ADDR.MODE)
+ *      OUT(Mouse.INPORT.DATA.PORT, IN(Mouse.INPORT.DATA.PORT) | Mouse.INPORT.DATA.MODE.HOLD)
+ *      ...
+ *      OUT(Mouse.INPORT.ADDR.PORT, Mouse.INPORT.ADDR.X)
+ *      X = IN(Mouse.INPORT.DATA.PORT)
+ *      OUT(Mouse.INPORT.ADDR.PORT, Mouse.INPORT.ADDR.Y)
+ *      Y = IN(Mouse.INPORT.DATA.PORT)
+ *      OUT(Mouse.INPORT.ADDR.PORT, Mouse.INPORT.ADDR.STATUS)
+ *      B = IN(Mouse.INPORT.DATA.PORT) & (Mouse.INPORT.DATA.STATUS.B1 | Mouse.INPORT.DATA.STATUS.B2 | Mouse.INPORT.DATA.STATUS.B3)
+ *      ...
+ *      OUT(Mouse.INPORT.ADDR.PORT, Mouse.INPORT.ADDR.MODE)
+ *      OUT(Mouse.INPORT.DATA.PORT, IN(Mouse.INPORT.DATA.PORT) & ~Mouse.INPORT.DATA.MODE.HOLD)
+ */
+Mouse.INPORT = {
+    ADDR: {
+        PORT:       0x23C,
+        STATUS:     0x00,       // InPort Status Register
+        X:          0x01,       // InPort X Movement Register
+        Y:          0x02,       // InPort Y Movement Register
+        ISTAT:      0x05,       // InPort Interface Status Register
+        ICTRL:      0x06,       // InPort Interface Control Register
+        MODE:       0x07        // InPort Mode Register
+    },
+    DATA: {
+        PORT:       0x23D,
+        STATUS:     {           // InPort Status Register (0)
+            B3:     0x01,       // Status button 3
+            B2:     0x02,       // Status button 2
+            B1:     0x04,       // Status button 1
+            DB3:    0x08,       // Delta button 3
+            DB2:    0x10,       // Delta button 2
+            DB1:    0x20,       // Delta button 1
+            MOVE:   0x40,       // Movement
+            PACKET: 0x80        // Packet complete
+        },
+        MODE: {                 // InPort Mode Register (7)
+            HOLD:   0x20        // hold the status for reading
+        }
+        /*
+         * The internal register read or written via this port is determined by the value written to ADDR.PORT
+         */
+    },
+    ID: {
+        PORT:       0x23E,
+        CHIP:       0xDE        // InPort Chip ID
+        /*
+         * Alternate reads return a byte containing InPort revision number in low nibble, version number in high nibble
+         */
+    },
+    TEST: {
+        PORT:       0x23F
+    }
+};
 
 /*
  * From http://paulbourke.net/dataformats/serialmouse:
@@ -56861,12 +57109,8 @@ class Mouse extends Component {
  *      The high order bit of each byte (D7) is ignored. Bit D6 indicates the start of an event, which allows the software to
  *      synchronize with the mouse.
  */
-
-Mouse.ID_SERIAL = 0x4D;
-
-Mouse.BUTTON = {
-    LEFT:   0,
-    RIGHT:  2
+Mouse.SERIAL = {
+    ID:     0x4D
 };
 
 /*

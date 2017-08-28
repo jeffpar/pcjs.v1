@@ -5358,7 +5358,7 @@ class DebuggerX86 extends Debugger {
                          * get "inflated" with use.  See the dump() method in the Disk component for more details.
                          */
                         this.doClear();
-                        this.println(drive.disk.toJSON());
+                        this.println(drive.disk.convertToJSON());
                         return;
                     }
                     if (dc.seekDrive(drive, iSector, nSectors)) {
