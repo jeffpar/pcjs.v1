@@ -9,6 +9,7 @@ machines:
 redirect_from:
   - /configs/c1p/embed/
   - /demos/c1p/embed.html
+  - /docs/c1pjs/embed/
 ---
 
 Embedding The C1Pjs Simulator
