@@ -4,6 +4,8 @@ title: About PCjs
 menu_title: About
 menu_order: 9
 permalink: /pubs/about/
+redirect_from:
+  - /docs/about/
 ---
 
 ## About PCjs

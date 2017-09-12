@@ -9,6 +9,7 @@ machines:
 redirect_from:
   - /c1p/
   - /c1pjs/
+  - /docs/c1pjs/
 ---
 
 C1Pjs Documentation
