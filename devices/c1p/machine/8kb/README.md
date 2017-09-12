@@ -14,4 +14,4 @@ Here are some sample C1P Machine Configurations with 8Kb:
 * [8kb with Large Display w/Additional Software](all/) (with [Debugger](all/debugger/))
 * [8kb "Server Array" Demo](array/)
 
-See the [Documentation](/docs/c1pjs/) for details on the operation of C1Pjs.
+See the [Documentation](/pubs/c1pjs/) for details on the operation of C1Pjs.

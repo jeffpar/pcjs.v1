@@ -5,9 +5,9 @@ permalink: /devices/pc8080/panel/
 ---
 
 8080-Based Control Panels
----
+-------------------------
 
-[Control Panels](/docs/pcx86/panel/) are XML files that define layouts for Debugger-related controls.
+[Control Panels](/pubs/pcx86/panel/) are XML files that define layouts for Debugger-related controls.
 
 The following 8080-based control panel configuration files are currently available:
 

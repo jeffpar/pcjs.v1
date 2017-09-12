@@ -46,7 +46,7 @@ All the browsers I've tested so far (Chrome, Firefox, and Safari) support a
 which eliminates much of the fuzziness that would occur when copying pixels from the lower-resolution *buffer* canvas
 to the higher-resolution *screen* canvas.
 
-So I've added a new [Video](/docs/pcx86/video/) property named *smoothing* that can be set to "true" or "false",
+So I've added a new [Video](/pubs/pcx86/video/) property named *smoothing* that can be set to "true" or "false",
 and I've set it to "false" for most machines in the project.  If *smoothing* is not set, your browser continues to
 use its default interpolation method.
 
@@ -66,7 +66,7 @@ while the right one does not.
 Aspect Ratio
 ---
 
-The *smoothing* property joins another recent [Video](/docs/pcx86/video/) property, *aspect*, that was added in a
+The *smoothing* property joins another recent [Video](/pubs/pcx86/video/) property, *aspect*, that was added in a
 [release](https://github.com/jeffpar/pcjs/releases/tag/v1.21.5) last month.
 
 To recap, aspect ratio is display width divided by display height, but the choice of aspect ratio is complicated by

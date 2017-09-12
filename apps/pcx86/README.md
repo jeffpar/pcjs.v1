@@ -1,7 +1,7 @@
 IBM PC Application Demos
 ------------------------
 
-Below are selected [PCx86](/docs/about/pcx86/) demos of classic IBM PC applications.  In many cases,
+Below are selected [PCx86](/pubs/about/pcx86/) demos of classic IBM PC applications.  In many cases,
 we've had to create our own "Demo Disks", because copies of the original distribution disks are difficult
 to find, and in some cases (e.g., [Executive Suite](/apps/pcx86/1982/esuite/)), the original disks were
 copy-protected, so we've been forced to use a "cracked" copy of the software instead.

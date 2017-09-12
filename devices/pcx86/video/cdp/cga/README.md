@@ -5,7 +5,7 @@ permalink: /devices/pcx86/video/cdp/cga/
 ---
 
 Columbia Data Products Color Graphics Adapter (CGA)
----
+---------------------------------------------------
 
 We don't have a Columbia Data Products CGA card, so we cannot say to what extent it may differ from
 an IBM CGA card (if at all).  All we have is what's believed to be a copy of their CGA character ROM,
@@ -13,7 +13,7 @@ and it is *identical* the CGA portion of the [IBM CGA](/devices/pcx86/video/ibm/
 
 ### Columbia Data Products CGA Configurations
 
-The easiest way for a machine to include an CGA *[Video](/docs/pcx86/video/)* component in its XML configuration file
+The easiest way for a machine to include an CGA *[Video](/pubs/pcx86/video/)* component in its XML configuration file
 is to reference the project's predefined CGA configuration file, using the *ref* attribute; eg:
 
 ```xml
