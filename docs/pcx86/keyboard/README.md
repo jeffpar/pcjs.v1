@@ -5,21 +5,24 @@ permalink: /docs/pcx86/keyboard/
 ---
 
 PCx86 Keyboard Component
----
+------------------------
 
 Format
----
+------
+
 ```xml
 <keyboard>...</keyboard>
 ```
 
 Purpose
----
+-------
+
 Creates an instance of the Keyboard component, which maps JavaScript key events (or other control events) to
 IBM PC keyboard scan codes.
 
 Attributes
----
+----------
+
 * *model* (optional)
 	* us83: US keyboard with 83-key layout (default)
 	* us84: US keyboard with 84-key layout
@@ -28,7 +31,8 @@ Attributes
 Also supports the attributes of *[Component](/docs/pcx86/component/)*.
 
 Bindings
----
+--------
+
  *	*esc*, *ctrl-c*, *ctrl-alt-del*, *left-arrow*, *up-arrow*, *right-arrow*, *down-arrow*, *f1*, *f2*, *f3*, *f4*, *f5*, *f6*, *f7*, *f8*, *f9*, *f10*, ...
 
 	For use with a control of type button (or other control that supports the "onclick" event), to simulate the
@@ -42,7 +46,8 @@ element to them, so they are generally unavailable for other components to use.
 for the specified model.
 
 Example
----
+-------
+
 ```xml
 <keyboard id="keyboard" model="us83"/>
 ```
@@ -51,7 +56,8 @@ See [/devices/pcx86/keyboard/us83-softkeys.xml](/devices/pcx86/keyboard/us83-sof
 complete "soft keyboard".
 
 Output
----
+------
+
 ```html
 <div id="..." class="pc-keyboard pc-component">
     <div class="pc-container">
