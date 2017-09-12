@@ -59,7 +59,7 @@ Models 319 and 339 were introduced in April 1986:
 	- Enhanced 101-key keyboard
 
 IBM PC AT 5170 Configuration Options
----
+------------------------------------
 
 The IBM PC AT 5170 doesn't have DIP switches like previous models, but it still has a few switches and jumpers.
 
@@ -103,7 +103,7 @@ it cannot be changed by the user.
 ---
 
 IBM PC AT 5170 (Models 68 and 99) Announcement
----
+----------------------------------------------
 
 The following details come from a [copy](http://www.minuszerodegrees.net/misc/IBM%20PC%20AT%205170%20announcement%20letter.txt)
 of IBM's PC AT Announcement Letter, dated August 14, 1984.

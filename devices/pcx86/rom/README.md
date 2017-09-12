@@ -5,7 +5,7 @@ permalink: /devices/pcx86/rom/
 ---
 
 IBM PC ROMs
----
+-----------
 
 ROMs are added to machines by including one *[ROM](/pubs/pcx86/rom/)* component in the machine XML configuration file
 for each ROM in the machine; eg:

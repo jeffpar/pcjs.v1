@@ -8,4 +8,5 @@ Challenger 1P Publications
 --------------------------
 
 * [Data Sheets](datasheets/)
+* [Programming Guides/Samples](programming/)
 * [Technical Reference Manuals](techref/)

@@ -45,8 +45,8 @@ Read [About PCx86](/pubs/about/pcx86/) to learn more about its history, features
 ### Migrating to Node
 
 The PCjs web server was originally written in PHP and hosted by [DreamHost](https://www.dreamhost.com/) as
-[jsmachines.net](http://jsmachines.net/), but in 2014, it was migrated to a [Node.js](http://nodejs.org) web server
-and hosted by [Amazon Web Services](https://aws.amazon.com/elasticbeanstalk/) as [pcjs.org](http://www.pcjs.org/).
+[jsmachines.net](http://jsmachines.net/), but in 2014, it was migrated to a [Node.js](http://nodejs.org) web server and
+hosted by [Amazon Web Services](https://aws.amazon.com/elasticbeanstalk/) as [{{ site.pcjs.domain }}]({{ site.url }}/).
 
 The goals included:
 
@@ -61,15 +61,16 @@ including extensions to the link syntax that make it easy to embed PCjs machines
 
 ### Migrating to GitHub Pages
 
-To simplify hosting requirements, the PCjs Project was migrated to [GitHub Pages](https://pages.github.com/) in late 2015.
-The project still includes the original Node-based web server, which is useful for development and debugging, but for
-production sites (including [pcjs.org](http://www.pcjs.org/)), using Jekyll to generate a static copy of the project for
-the web is the preferred solution.
+To simplify hosting requirements, the PCjs Project was migrated to [GitHub Pages](https://pages.github.com/) in late
+2015.  The project still includes the original Node-based web server, which is useful for development and debugging,
+but for production sites (including [{{ site.pcjs.domain }}]({{ site.url }}/)), using Jekyll to generate a static copy
+of the project for the web is the preferred solution.
 
 ---
 
 License
----
+-------
+
 The [PCjs Project](https://github.com/jeffpar/pcjs) is now an open-source project on [GitHub](http://github.com/).
 All published portions are free for redistribution and/or modification under the terms of the
 [GNU General Public License](/LICENSE) as published by the Free Software Foundation, either version 3 of the License,
@@ -85,6 +86,7 @@ or computer that runs any version of this software.
 See [LICENSE](/LICENSE) for details.
 
 More Information
----
+----------------
+
 If you have questions or run into any problems, feel free to [tweet](http://twitter.com/jeffpar) or
 [email](mailto:Jeff@pcjs.org).
