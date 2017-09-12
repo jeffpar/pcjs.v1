@@ -5,13 +5,13 @@ permalink: /pubs/pc/reference/intel/8086/
 ---
 
 Intel 8086/8088 CPU Information
----
+-------------------------------
 
 We do not have any official Intel documentation of 8086/8088 errata, but the following are well-known "features"
 of those CPUs.
 
 8086 Errata
----
+-----------
 
 ### Interrupts Following MOV SS,xxx and POP SS Instructions May Corrupt Memory
 
@@ -54,7 +54,7 @@ If you're not sure your assembler will output the `REP` and `ES:` overrides in t
 generate the override bytes manually, using **DB** or a similar assembler directive.
 
 8086 Undocumented Instructions
----
+------------------------------
 
 Some of the following information is courtesy of the [OS/2 Museum](http://www.os2museum.com/wp/undocumented-8086-opcodes/).
 
@@ -98,17 +98,17 @@ On the 8086/8088/80186/80188, values 0-3 were treated the same as values 4-7, an
 Starting with the 80186, opcodes 0xC0 and 0xC1 were reused for new shift and rotate instruction groups,
 and opcodes 0xC8 and 0xC9 became the `ENTER` and `LEAVE` instructions.
 
-### [AAM](/docs/x86/ops/AAM/) (0xD4)
+### [AAM](/pubs/x86/ops/AAM/) (0xD4)
 
 While AAM is documented, it has undocumented features (eg, its ability to divide by values other than 10,
-and its effect on the flags).  See the [AAM](/docs/x86/ops/AAM/) instruction for details.
+and its effect on the flags).  See the [AAM](/pubs/x86/ops/AAM/) instruction for details.
 
-### [AAD](/docs/x86/ops/AAD/) (0xD5)
+### [AAD](/pubs/x86/ops/AAD/) (0xD5)
 
 While AAD is documented, it has undocumented features (eg, its ability to multiply by values other than 10,
-and its effect on the flags).  See the [AAD](/docs/x86/ops/AAD/) instruction for details.
+and its effect on the flags).  See the [AAD](/pubs/x86/ops/AAD/) instruction for details.
 
-### [SALC](/docs/x86/ops/SALC/) (0xD6)
+### [SALC](/pubs/x86/ops/SALC/) (0xD6)
 
 Performs an operation equivalent to `SBB AL,AL`, but without modifying any flags.  In other words, AL will be set to
 0xFF or 0x00, depending on whether CF is set or clear.  This instruction exists on all later x86 CPUs, but for some
@@ -119,9 +119,9 @@ reason, it has never been documented.  Also known as **SETALC**.
 It is believed that 0xF1 decodes identically to 0xF0 (the `LOCK` prefix).
 
 On newer processors, 0xF1 is an undocumented instruction usually called `ICEBP` or `INT1`.  See the
-[ICEBP](/docs/x86/ops/ICEBP/) instruction for details.
+[ICEBP](/pubs/x86/ops/ICEBP/) instruction for details.
 
 Assorted Publications
----
+---------------------
 
 * TBD

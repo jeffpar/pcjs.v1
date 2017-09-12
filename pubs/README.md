@@ -1,31 +1,53 @@
 ---
 layout: page
-title: Publication Archive
+title: Documentation and Publication Archive
+menu_title: Docs
+menu_order: 7
 permalink: /pubs/
+redirect_from:
+  - /docs/
 ---
 
-Publication Archive
+Documentation and Publication Archive
+-------------------------------------
+
+Preliminary documentation is available for the following PCjs machines:
+
+* [C1Pjs](/pubs/c1pjs/)
+* [PCx86](/pubs/pcx86/)
+
+For general historical interest, the project includes a [Publication Archive](/pubs/) that covers:
+
+* [IBM PCs and Compatibles](/pubs/pc/)
+	* [CPU Documents](/pubs/pc/reference/intel/)
+	* [Datasheets](/pubs/pc/datasheets/)
+	* [Magazines](/pubs/pc/magazines/)
+	* [Programming Guides](/pubs/pc/programming/)
+	* [Reference Manuals](/pubs/pc/reference/)
+	* [Software User and Development Guides](/pubs/pc/software/) (eg, [DOS](/pubs/pc/software/dos/), [OS/2](/pubs/pc/software/os2/), [Windows](/pubs/pc/software/windows/))
+* [Digital Equipment Corporation (DEC)](/pubs/dec/)
+	* [PDP-11](/pubs/dec/pdp11/)
+	* [VT100](/pubs/dec/vt100/)
+* [Ohio Scientific's 6502-based Challenger 1P](/pubs/c1p/)
+	* [Datasheets](/pubs/c1p/datasheets/)
+	* [Programming Guides/Samples](/pubs/c1p/programming/)
+	* [Reference Manuals](/pubs/c1p/techref/)
+
+{% if site.developer %}
+
+Eventually, the project may also provide summaries of all supported CPU instructions; e.g.:
+
+* [x86 Instructions](/pubs/x86/)
+* [6502 Instructions](/pubs/6502/)
+
+{% endif %}
+
+Finally, here's an eclectic collection of personal documents, ranging from early PC debugging notes to old program
+listings and more:
+
+* [Personal Documents of Dubious Historical Interest](/pubs/personal/)
+
 ---
-
-[IBM PCs and Compatibles](/pubs/pc/)
-
-* [CPU Documents](/pubs/pc/reference/intel/)
-* [Datasheets](/pubs/pc/datasheets/)
-* [Magazines](/pubs/pc/magazines/)
-* [Programming Guides](/pubs/pc/programming/)
-* [Reference Manuals](/pubs/pc/reference/)
-* [Software User and Development Guides](/pubs/pc/software/) (eg, [DOS](/pubs/pc/software/dos/), [OS/2](/pubs/pc/software/os2/), [Windows](/pubs/pc/software/windows/))
-
-[Digital Equipment Corporation (DEC)](/pubs/dec/)
-
-* [PDP-11](/pubs/dec/pdp11/)
-* [VT100](/pubs/dec/vt100/)
-
-[Ohio Scientific's 6502-based Challenger 1P](/pubs/c1p/)
-
-* [Datasheets](/pubs/c1p/datasheets/)
-* [Programming Guides/Samples](/pubs/c1p/programming/)
-* [Reference Manuals](/pubs/c1p/techref/)
 
 [<img src="https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/datasheets/thumbs/8088-CPU.jpg" width="200" height="260" alt= "8088 CPU"/>](pc/datasheets/)
 [<img src="https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/magazines/byte/BYTE-1975-11/thumbs/BYTE-1975-11 1.jpeg" width="200" height="260" alt= "Byte Magazine"/>](pc/magazines/byte/)

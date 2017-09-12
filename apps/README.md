@@ -80,7 +80,7 @@ described by &lt;file&gt; entries in its [manifest](/apps/pcx86/1981/visicalc/ma
 Since this [manifest](/apps/pcx86/1981/visicalc/manifest.xml) also contains a &lt;machine&gt; entry,
 the default manifest stylesheet will automatically load and launch the associated
 [PCjs machine](/devices/pcx86/machine/5150/mda/64kb/machine.xml).  The machine will boot or resume according
-to its own &lt;[computer](/docs/pcx86/computer/)&gt; settings, unless the manifest overrides the machine's
+to its own &lt;[computer](/pubs/pcx86/computer/)&gt; settings, unless the manifest overrides the machine's
 default state with its own *state* setting; eg:
 
 ```xml

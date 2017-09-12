@@ -14,22 +14,22 @@ All our [IBM PC Machines](machine/) are built from a collection of devices, incl
 
 * [ChipSets](chipset/)
 * [Control Panels](panel/)
-* [CPUs](/docs/pcx86/cpu/)
-* [Debugger](/docs/pcx86/debugger/)
-* [Floppy Drive Controller](/docs/pcx86/fdc/)
-* [Hard Drive Controller](/docs/pcx86/hdc/)
+* [CPUs](/pubs/pcx86/cpu/)
+* [Debugger](/pubs/pcx86/debugger/)
+* [Floppy Drive Controller](/pubs/pcx86/fdc/)
+* [Hard Drive Controller](/pubs/pcx86/hdc/)
 * [Keyboard](keyboard/)
 * [Machines](machine/)
-* [Mouse](/docs/pcx86/mouse/)
-* [RAM](/docs/pcx86/ram/)
+* [Mouse](/pubs/pcx86/mouse/)
+* [RAM](/pubs/pcx86/ram/)
 * [ROMs](rom/)
-* [Parallel Port](/docs/pcx86/parallel/)
-* [Serial Port](/docs/pcx86/serial/)
+* [Parallel Port](/pubs/pcx86/parallel/)
+* [Serial Port](/pubs/pcx86/serial/)
 * [Video Adapters](video/)
 
 Each of those devices can be configured in multiple ways, and some support external UI controls.
 
-For example, the IBM PC *[Keyboard](/docs/pcx86/keyboard/)* component supports different keyboard models
+For example, the IBM PC *[Keyboard](/pubs/pcx86/keyboard/)* component supports different keyboard models
 (eg, 83-key, 84-key, 101-key), and each of those models can also be configured to have dedicated buttons for
 selected key combinations, or even entire keyboard layouts.
 
@@ -59,7 +59,7 @@ example:
 ```
 
 In this example, all the devices are fully configured within the machine XML file, except for the
-*[Video](/docs/pcx86/video/)* ([XML](/devices/pcx86/video/ibm/mda/ibm-mda.xml)),
-*[Floppy Drive Controller](/docs/pcx86/fdc/)* ([XML](/disks/pcx86/compiled/samples.xml)), and
-*[Keyboard](/docs/pcx86/keyboard/)* ([XML](/devices/pcx86/keyboard/us83-buttons-arrows.xml)) components,
+*[Video](/pubs/pcx86/video/)* ([XML](/devices/pcx86/video/ibm/mda/ibm-mda.xml)),
+*[Floppy Drive Controller](/pubs/pcx86/fdc/)* ([XML](/disks/pcx86/compiled/samples.xml)), and
+*[Keyboard](/pubs/pcx86/keyboard/)* ([XML](/devices/pcx86/keyboard/us83-buttons-arrows.xml)) components,
 which refer to separate XML configuration files.

@@ -81,14 +81,14 @@ more detail, along with a live demonstration of the software, but that's not yet
 ---
 
 Disk Manifests
----
+--------------
 
 Typically, all the distribution disks for a single version of a piece of software are placed in a single
 folder, along with a **manifest.xml** file containing metadata about the software and a list of the individual
 disks.  This is generally referred to as a [Software Manifest](/apps/), but in the context of the Disk Library,
 it's simply known as a Disk Manifest.
 
-A Disk Manifest can then be added to a *[Floppy Drive Controller (FDC)](/docs/pcx86/fdc/)* configuration file,
+A Disk Manifest can then be added to a *[Floppy Drive Controller (FDC)](/pubs/pcx86/fdc/)* configuration file,
 making all its disks available to any machine loading that particular configuration file.
 
 A simple FDC configuration file, such as [samples.xml](samples.xml), *could* contain individual &lt;disk&gt;
