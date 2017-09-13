@@ -5,7 +5,7 @@ permalink: /disks/pcx86/diags/ibm/
 ---
 
 IBM PC Diagnostics
----
+------------------
 
 Information is available for these IBM PC diagnostics:
 

@@ -8,8 +8,8 @@
 	<language>BASIC</language>
 	<author>Microsoft</author>
 	<releaseDate/>
-	<disk id="disk01" size="368640" chs="40:2:9" img="archive/BASCOM536.img" href="/disks/pcx86/tools/microsoft/basic/BASCOM536.json" md5="090d3cd5962f4d1a5ecc661f3b4f9ac6" md5json="239ae79f135a09f357511bc4d68a811f">
-		<name>MS BASIC (Compiler v5.36)</name>
+	<disk id="disk01" size="368640" chs="40:2:9" img="compiler/5.36/archive/BASCOM536.img" href="/disks/pcx86/tools/microsoft/basic/compiler/5.36/BASCOM536.json" md5="090d3cd5962f4d1a5ecc661f3b4f9ac6" md5json="239ae79f135a09f357511bc4d68a811f">
+		<name>MS BASIC Compiler 5.36</name>
 		<file size="35" time="1985-03-22 00:00:02" attr="0x20">B.CNF</file>
 		<file size="26746" time="1985-03-22 00:00:02" attr="0x20">B.DEF</file>
 		<file size="39936" time="1984-04-24 11:00:00" attr="0x20">BASCOM.COM</file>
@@ -31,9 +31,96 @@
 		<file size="35632" time="1985-03-22 00:00:06" attr="0x20">SAMPLE.COM</file>
 		<file size="94128" time="1985-03-22 00:00:06" attr="0x20">SAMPLE.MOD</file>
 	</disk>
-	<disk id="disk02" size="368640" chs="40:2:9" img="archive/QUICKBASIC-DISK1.img" href="/disks/pcx86/tools/microsoft/basic/QUICKBASIC-DISK1.json" md5="5b588a33ec187636a1bb40b736ff1591" md5json="669a94e1824675662f6b647be362ec77">
-		<name>MS BASIC (QuickBASIC v2.0)</name>
+	<disk id="disk02" size="368640" chs="40:2:9" img="quickbasic/2.00/archive/QUICKBASIC200.img" href="/disks/pcx86/tools/microsoft/basic/quickbasic/2.00/QUICKBASIC200.json" md5="5b588a33ec187636a1bb40b736ff1591" md5json="669a94e1824675662f6b647be362ec77">
+		<name>MS QuickBASIC 2.00</name>
 		<file size="176128" time="1986-06-13 10:55:40" attr="0x20">BCOM20.LIB</file>
 		<file size="186256" time="1986-06-16 14:47:34" attr="0x20">QB.EXE</file>
+	</disk>
+	<disk id="disk03" size="1228800" chs="80:2:15" dir="quickbasic/4.50/archive/DISK1" href="/disks/pcx86/tools/microsoft/basic/quickbasic/4.50/QUICKBASIC450-DISK1.json" md5="1b2f791b27abfa9f9c6f5b13e5405ee9" md5json="c99c0d93bc2ccc1a93155e39ee954e92">
+		<file size="83456" time="1990-08-20 11:00:00" attr="0x20" md5="bd6468bf744b2126aeb9985d7dfc3981">BC.EX$</file>
+		<file size="22560" time="1990-08-20 11:00:00" attr="0x20" md5="de6ccd3c8b908ea66b5a2092ea9f2346">BX.PGM</file>
+		<file size="1037" time="1990-08-20 11:00:00" attr="0x20" md5="4d492b17cb7cd4baccfbf9a2bd78443e">DEMO1.BA$</file>
+		<file size="970" time="1990-08-20 11:00:00" attr="0x20" md5="dda6d465d568a5eb850744e768fb4cfa">DEMO2.BA$</file>
+		<file size="947" time="1990-08-20 11:00:00" attr="0x20" md5="3cfb5fa2cae0854fb9f9e7c4bad71800">DEMO3.BA$</file>
+		<file size="29264" time="1990-08-20 11:00:00" attr="0x20" md5="7ed663d4c1abfbf76d0480f5f7f67bc1">LEARN.COM</file>
+		<file size="369" time="1990-08-20 11:00:00" attr="0x20" md5="0fef064ae5b56b3ef5f7118227d09124">LEARN.PIF</file>
+		<file size="48331" time="1990-08-20 11:00:00" attr="0x20" md5="11b450758feb5e34f670c85f4dba3cef">LINK.EX$</file>
+		<file size="12068" time="1990-08-20 11:00:00" attr="0x20" md5="bd698725173ffcae04318a3fe0fece09">PACKING.LST</file>
+		<file size="792" time="1990-08-20 11:00:00" attr="0x20" md5="1ba15d688a4ad4042cad15d33787b142">QB.BI$</file>
+		<file size="225655" time="1990-08-20 11:00:00" attr="0x20" md5="fa99636d6d52f3c13da0f83fac8a9d68">QB.EX$</file>
+		<file size="115" time="1990-08-20 11:00:00" attr="0x20" md5="e42da3c6dcd413ddffe89a7a3d192443">QB.PI$</file>
+		<file size="67635" time="1990-08-20 11:00:00" attr="0x20" md5="ce32d26457da20f3b362fd6fdb6ad797">QB45QCK.HL$</file>
+		<file size="24547" time="1990-08-20 11:00:00" attr="0x20" md5="cb2f003e8ad80d99f038a0d3bc4ad04c">QBCBT.CTX</file>
+		<file size="8610" time="1990-08-20 11:00:00" attr="0x20" md5="3e556d1bc509e20b4ca42e12880e8445">QBCBT.SCN</file>
+		<file size="8930" time="1990-08-20 11:00:00" attr="0x20" md5="5cf1faf2dfde2abb482e63eadc5373a6">QBCBT.SOB</file>
+		<file size="16553" time="1990-08-20 11:00:00" attr="0x20" md5="bf947a567c3b25b55e6dbd99901c715c">QCARDS.BA$</file>
+		<file size="1274" time="1990-08-20 11:00:00" attr="0x20" md5="50b385ee8697f8f61215b9b93d7e8e05">QCARDS.DA$</file>
+		<file size="20025" time="1990-08-20 11:00:00" attr="0x20" md5="a4e64cbff2244b55ad6118d557d4d71a">README.DOC</file>
+		<file size="1023" time="1990-08-20 11:00:00" attr="0x20" md5="ddad87965389f81f62223844af511f67">READTHIS.NOW</file>
+		<file size="5996" time="1990-08-20 11:00:00" attr="0x20" md5="1cfb6d00f75d14197003eedfaa09cf6e">REMLINE.BA$</file>
+		<file size="59689" time="1990-08-20 11:00:00" attr="0x20" md5="90ff48d7d522003d50c263d62e7fde4d">SETUP.EXE</file>
+		<file size="10830" time="1990-08-20 11:00:00" attr="0x20" md5="cc352e06755ee34268aad924e5e7f03b">SORTDEMO.BA$</file>
+		<file size="13525" time="1990-08-20 11:00:00" attr="0x20" md5="0f41fe5baefb64b4f11b3695fdef4ea8">TORUS.BA$</file>
+		<file size="1615" time="1990-08-20 11:00:00" attr="0x20" md5="56b27f7ca82f7be4917e0d4f822510ac" dir="EXAMPLES/">BALLPSET.BA$</file>
+		<file size="1111" time="1990-08-20 11:00:00" attr="0x20" md5="1fc031ed19e17bad634484a919637353" dir="EXAMPLES/">BALLXOR.BA$</file>
+		<file size="2582" time="1990-08-20 11:00:00" attr="0x20" md5="d4a688be00fed005d7992a567937aa0a" dir="EXAMPLES/">BAR.BA$</file>
+		<file size="2437" time="1990-08-20 11:00:00" attr="0x20" md5="76e776c87265f68ea05575cae25d84da" dir="EXAMPLES/">CAL.BA$</file>
+		<file size="882" time="1990-08-20 11:00:00" attr="0x20" md5="82247562f6c823259b5b6e0b58d7caf6" dir="EXAMPLES/">CHECK.BA$</file>
+		<file size="763" time="1990-08-20 11:00:00" attr="0x20" md5="4c7ca7901bc7b671cbec842e4a8aaaf7" dir="EXAMPLES/">COLORS.BA$</file>
+		<file size="1831" time="1990-08-20 11:00:00" attr="0x20" md5="5396144d89364e1e7bd0a7c1d8b796f7" dir="EXAMPLES/">CRLF.BA$</file>
+		<file size="536" time="1990-08-20 11:00:00" attr="0x20" md5="38daaacce0c2e03e0a9d55319c038c60" dir="EXAMPLES/">CUBE.BA$</file>
+		<file size="2462" time="1990-08-20 11:00:00" attr="0x20" md5="2e94f83b00ded830caf6b228bf4802cf" dir="EXAMPLES/">EDPAT.BA$</file>
+		<file size="1188" time="1990-08-20 11:00:00" attr="0x20" md5="e4b6d76484d5ffeef532d3357fcb098f" dir="EXAMPLES/">ENTAB.BA$</file>
+		<file size="1347" time="1990-08-20 11:00:00" attr="0x20" md5="5af3ef6a8c456dfcf74ed926569bd984" dir="EXAMPLES/">FILERR.BA$</file>
+		<file size="1340" time="1990-08-20 11:00:00" attr="0x20" md5="96366b98aabf334aafaeeeade7bbcbc2" dir="EXAMPLES/">FLPT.BA$</file>
+		<file size="3863" time="1990-08-20 11:00:00" attr="0x20" md5="c4c84297d92ef4ae17d3e191ff65ceda" dir="EXAMPLES/">INDEX.BA$</file>
+		<file size="2612" time="1990-08-20 11:00:00" attr="0x20" md5="ee254e17614c97dfcdf40baada39e4b4" dir="EXAMPLES/">MANDEL.BA$</file>
+		<file size="818" time="1990-08-20 11:00:00" attr="0x20" md5="50d9109170ed0515c2d45c38ec1ad31b" dir="EXAMPLES/">PALETTE.BA$</file>
+		<file size="789" time="1990-08-20 11:00:00" attr="0x20" md5="86beb0c440eb7f518774ecc50c55f002" dir="EXAMPLES/">PLOTTER.BA$</file>
+		<file size="1510" time="1990-08-20 11:00:00" attr="0x20" md5="0974a78f1d4b356aa8c7400254706dcf" dir="EXAMPLES/">QLBDUMP.BA$</file>
+		<file size="996" time="1990-08-20 11:00:00" attr="0x20" md5="d611116c719134667c2b72fed11d7678" dir="EXAMPLES/">SEARCH.BA$</file>
+		<file size="660" time="1990-08-20 11:00:00" attr="0x20" md5="cc736b46d8da499edd9230d6152fadf0" dir="EXAMPLES/">SINEWAVE.BA$</file>
+		<file size="610" time="1990-08-20 11:00:00" attr="0x20" md5="ac4e74da8aabcd21739842aa4037d155" dir="EXAMPLES/">STRTONUM.BA$</file>
+		<file size="1184" time="1990-08-20 11:00:00" attr="0x20" md5="f78e211a95cc6fee4e83251da23c0887" dir="EXAMPLES/">TERMINAL.BA$</file>
+		<file size="745" time="1990-08-20 11:00:00" attr="0x20" md5="9d9f41d789a3c551fdfc16492e476b91" dir="EXAMPLES/">TOKEN.BA$</file>
+		<file size="2091" time="1990-08-20 11:00:00" attr="0x20" md5="511d2f16b072c5af5bc60535c6cbe5e4" dir="EXAMPLES/">WHEREIS.BA$</file>
+	</disk>
+	<disk id="disk04" size="1228800" chs="80:2:15" dir="quickbasic/4.50/archive/DISK2" href="/disks/pcx86/tools/microsoft/basic/quickbasic/4.50/QUICKBASIC450-DISK2.json" md5="f1c8bb6db4e9bb0e248f85e182792d19" md5json="dc87eec362febbe54fd66fc2d296c585">
+		<file size="149360" time="1990-08-20 11:00:00" attr="0x20" md5="6434d321dd2c772526b8630c54fe3a17">BCOM45.LI$</file>
+		<file size="15009" time="1990-08-20 11:00:00" attr="0x20" md5="7ad44bb77824a5bdb33a5f452e1af4d8">BQLB45.LI$</file>
+		<file size="64969" time="1990-08-20 11:00:00" attr="0x20" md5="faa929ac8436bd8ca4584b700d7f40ef">BRUN45.EX$</file>
+		<file size="15782" time="1990-08-20 11:00:00" attr="0x20" md5="e97c17a9a8e43c64fbe41cbe8e134b2a">BRUN45.LI$</file>
+		<file size="621" time="1990-08-20 11:00:00" attr="0x20" md5="234a660631d2f54d8418be69e2be526a">FIXSHIFT.CO$</file>
+		<file size="25375" time="1990-08-20 11:00:00" attr="0x20" md5="089021dd9e8502eb0cd81c05113f16c2">LIB.EX$</file>
+		<file size="10839" time="1990-08-20 11:00:00" attr="0x20" md5="41b242546901ecec188afd4ca354ea19">MOUSE.CO$</file>
+		<file size="4277" time="1990-08-20 11:00:00" attr="0x20" md5="c737fc2086b13f11acfe4eec3ab77159">MSHERC.CO$</file>
+		<file size="2257" time="1990-08-20 11:00:00" attr="0x20" md5="c54ae4cbfb1df70ff7ce2551d798c20d">NOEM.OB$</file>
+		<file size="3205" time="1990-08-20 11:00:00" attr="0x20" md5="5cdb4ea1f8315b150c6601a929c394e3">PATCH87.EX$</file>
+		<file size="1057" time="1990-08-20 11:00:00" attr="0x20" md5="bd82e0149ae56e0d0def2ce0cafe16c8">QB.LI$</file>
+		<file size="4567" time="1990-08-20 11:00:00" attr="0x20" md5="6c16248cb7fa2cae79d498ab39276c47">QB.QL$</file>
+		<file size="318871" time="1990-08-20 11:00:00" attr="0x20" md5="d11d7bd686ba889d70cb8a575375dce9">QB45ADVR.HL$</file>
+		<file size="47135" time="1990-08-20 11:00:00" attr="0x20" md5="8cf8e1a7dcc286664a1fd090034ec948">QB45ENER.HL$</file>
+		<file size="355" time="1990-08-20 11:00:00" attr="0x20" md5="29302eb5b9497a0fe21c64c7360c3cce">SMALLERR.OB$</file>
+		<file size="22003" time="1990-08-20 11:00:00" attr="0x20" md5="f7a6baf04aefd1ecb6234215f38e848d">UNPACK.EXE</file>
+		<file size="1126" time="1990-08-20 11:00:00" attr="0x20" md5="5babf97b1f40c0ae1d40b72176c8fca8" dir="ADVR_EX/">CALL_EX.BA$</file>
+		<file size="567" time="1990-08-20 11:00:00" attr="0x20" md5="b1ded48c5b552890414b04f9198c58d8" dir="ADVR_EX/">CHR_EX.BA$</file>
+		<file size="1013" time="1990-08-20 11:00:00" attr="0x20" md5="763491707cead895a272c0d7ae4e9eb1" dir="ADVR_EX/">CMD_EX.BA$</file>
+		<file size="381" time="1990-08-20 11:00:00" attr="0x20" md5="391fd4da8cc073f0febbedd426ad2d34" dir="ADVR_EX/">COM1_EX.BA$</file>
+		<file size="302" time="1990-08-20 11:00:00" attr="0x20" md5="91a3ad708cb21f777b24cab049317ade" dir="ADVR_EX/">COM2_EX.BA$</file>
+		<file size="466" time="1990-08-20 11:00:00" attr="0x20" md5="b556705150a5a9b670908af9786ce456" dir="ADVR_EX/">CSR_EX.BA$</file>
+		<file size="545" time="1990-08-20 11:00:00" attr="0x20" md5="eac0eb80c1865bc9fb67dff8112adac4" dir="ADVR_EX/">DECL_EX.BA$</file>
+		<file size="233" time="1990-08-20 11:00:00" attr="0x20" md5="4e7e62ca7a9b1e96992efbf12ac156d0" dir="ADVR_EX/">DEFFN_EX.BA$</file>
+		<file size="609" time="1990-08-20 11:00:00" attr="0x20" md5="20db189eb9104809b9fcecf930d2ad07" dir="ADVR_EX/">DEFSG_EX.BA$</file>
+		<file size="675" time="1990-08-20 11:00:00" attr="0x20" md5="64885950402292ca8fbd4fed5c043ab1" dir="ADVR_EX/">DRAW_EX.BA$</file>
+		<file size="291" time="1990-08-20 11:00:00" attr="0x20" md5="68dcf8b2d73b61e1cffc8037def046b6" dir="ADVR_EX/">FUNC_EX.BA$</file>
+		<file size="698" time="1990-08-20 11:00:00" attr="0x20" md5="edfd67c36e8f935eb8ef7d11c29182bf" dir="ADVR_EX/">OUT_EX.BA$</file>
+		<file size="543" time="1990-08-20 11:00:00" attr="0x20" md5="249664c7b5759cf482656b5d7197aa8a" dir="ADVR_EX/">SHARE_EX.BA$</file>
+		<file size="831" time="1990-08-20 11:00:00" attr="0x20" md5="b17afd84c11a692d3a7b255a8dccf4f7" dir="ADVR_EX/">SHELL_EX.BA$</file>
+		<file size="631" time="1990-08-20 11:00:00" attr="0x20" md5="f571d3a297437521eeb1bb786737978c" dir="ADVR_EX/">STAT_EX.BA$</file>
+		<file size="324" time="1990-08-20 11:00:00" attr="0x20" md5="84521a5a200f148d4e88add31e18e662" dir="ADVR_EX/">SUB_EX.BA$</file>
+		<file size="988" time="1990-08-20 11:00:00" attr="0x20" md5="6776da4cc65095ad67917e21a886f4b8" dir="ADVR_EX/">TYPE_EX.BA$</file>
+		<file size="282" time="1990-08-20 11:00:00" attr="0x20" md5="9efc7199539767f01de13440ab38264f" dir="ADVR_EX/">UBO_EX.BA$</file>
+		<file size="594" time="1990-08-20 11:00:00" attr="0x20" md5="176343614ca1867c56286b3a47458cba" dir="ADVR_EX/">UCASE_EX.BA$</file>
+		<file size="566" time="1990-08-20 11:00:00" attr="0x20" md5="359734448747cd1a4147dd9aae9e4523" dir="ADVR_EX/">WINDO_EX.BA$</file>
 	</disk>
 </manifest>

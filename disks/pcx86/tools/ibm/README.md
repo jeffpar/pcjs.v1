@@ -1,11 +1,10 @@
 ---
 layout: page
-title: IBM Diagnostics and Tools 
+title: IBM Languages and Utilities 
 permalink: /disks/pcx86/tools/ibm/
 ---
 
-IBM Diagnostics and Tools
----
+IBM Languages and Utilities
+---------------------------
 
-* [IBM PC Diagnostics](/disks/pcx86/diags/ibm/)
 * [IBM BASIC Compilers](/disks/pcx86/tools/ibm/bascom/)

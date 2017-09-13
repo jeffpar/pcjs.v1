@@ -5,7 +5,7 @@ permalink: /disks/pcx86/tools/ibm/bascom/1.00/
 ---
 
 IBM BASIC Compiler 1.00
----
+-----------------------
 
 ### Directory of IBM BASIC Compiler 1.00 (Disk 1)
 
