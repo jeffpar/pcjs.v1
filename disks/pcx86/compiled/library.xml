@@ -423,8 +423,8 @@
 		<disk path="/disks/pcx86/tools/logitech/modula2/1.10/LOGITECH-MODULA2-DISK4-DEBUGGER.json">Modula-2/86 1.10 (4-Debugger)</disk>
 		<disk path="/disks/pcx86/tools/microsoft/basic/compiler/5.36/BASCOM536.json">MS BASIC Compiler 5.36</disk>
 		<disk path="/disks/pcx86/tools/microsoft/basic/quickbasic/2.00/QUICKBASIC200.json">MS QuickBASIC 2.00</disk>
-		<disk path="/disks/pcx86/tools/microsoft/basic/quickbasic/4.50/QUICKBASIC450-DISK1.json">MS BASIC</disk>
-		<disk path="/disks/pcx86/tools/microsoft/basic/quickbasic/4.50/QUICKBASIC450-DISK2.json">MS BASIC</disk>
+		<disk path="/disks/pcx86/tools/microsoft/basic/quickbasic/4.50/QUICKBASIC450-DISK1.json">MS QuickBASIC 4.50 (Disk 1)</disk>
+		<disk path="/disks/pcx86/tools/microsoft/basic/quickbasic/4.50/QUICKBASIC450-DISK2.json">MS QuickBASIC 4.50 (Disk 2)</disk>
 		<disk path="/disks/pcx86/tools/microsoft/c/2.03/MSC203-INSTALLED.json">MS C 2.03 (Installed)</disk>
 		<disk path="/disks/pcx86/tools/microsoft/c/3.00/MSC300-DISK1.json">MS C 3.00 (Disk 1)</disk>
 		<disk path="/disks/pcx86/tools/microsoft/c/3.00/MSC300-DISK2.json">MS C 3.00 (Disk 2)</disk>

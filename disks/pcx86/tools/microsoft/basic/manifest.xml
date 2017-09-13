@@ -37,6 +37,7 @@
 		<file size="186256" time="1986-06-16 14:47:34" attr="0x20">QB.EXE</file>
 	</disk>
 	<disk id="disk03" size="1228800" chs="80:2:15" dir="quickbasic/4.50/archive/DISK1" href="/disks/pcx86/tools/microsoft/basic/quickbasic/4.50/QUICKBASIC450-DISK1.json" md5="1b2f791b27abfa9f9c6f5b13e5405ee9" md5json="c99c0d93bc2ccc1a93155e39ee954e92">
+		<name>MS QuickBASIC 4.50 (Disk 1)</name>
 		<file size="83456" time="1990-08-20 11:00:00" attr="0x20" md5="bd6468bf744b2126aeb9985d7dfc3981">BC.EX$</file>
 		<file size="22560" time="1990-08-20 11:00:00" attr="0x20" md5="de6ccd3c8b908ea66b5a2092ea9f2346">BX.PGM</file>
 		<file size="1037" time="1990-08-20 11:00:00" attr="0x20" md5="4d492b17cb7cd4baccfbf9a2bd78443e">DEMO1.BA$</file>
@@ -86,6 +87,7 @@
 		<file size="2091" time="1990-08-20 11:00:00" attr="0x20" md5="511d2f16b072c5af5bc60535c6cbe5e4" dir="EXAMPLES/">WHEREIS.BA$</file>
 	</disk>
 	<disk id="disk04" size="1228800" chs="80:2:15" dir="quickbasic/4.50/archive/DISK2" href="/disks/pcx86/tools/microsoft/basic/quickbasic/4.50/QUICKBASIC450-DISK2.json" md5="f1c8bb6db4e9bb0e248f85e182792d19" md5json="dc87eec362febbe54fd66fc2d296c585">
+		<name>MS QuickBASIC 4.50 (Disk 2)</name>
 		<file size="149360" time="1990-08-20 11:00:00" attr="0x20" md5="6434d321dd2c772526b8630c54fe3a17">BCOM45.LI$</file>
 		<file size="15009" time="1990-08-20 11:00:00" attr="0x20" md5="7ad44bb77824a5bdb33a5f452e1af4d8">BQLB45.LI$</file>
 		<file size="64969" time="1990-08-20 11:00:00" attr="0x20" md5="faa929ac8436bd8ca4584b700d7f40ef">BRUN45.EX$</file>
