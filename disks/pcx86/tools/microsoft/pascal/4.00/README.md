@@ -7,6 +7,15 @@ permalink: /disks/pcx86/tools/microsoft/pascal/4.00/
 Microsoft Pascal Compiler 4.00
 ------------------------------
 
+We do not have copies of the original distribution disks, but using the archive
+[Microsoft Pascal.ver.4.00.English.zip](http://vetusware.com/download/Microsoft%20Pascal%20Compiler%204.0/?id=11015)
+and the disk contents described in PACKING.LST, we were able to recreate the nine original 360Kb disk images.  All that
+was missing from the archive was the contents of the PATCH32 directory on Disk 9, which we were able to retrieve from the
+PATCH directory of the COMPILER1 disk from the [Microsoft C Compiler 5.10 for DOS and OS/2](/disks/pcx86/tools/microsoft/c/5.10-os2/).
+
+Directory Listings
+------------------
+
 ### Directory of MS Pascal 4.00 (Disk 1)
 
 	 Volume in drive A is DISK1
@@ -150,50 +159,68 @@ Microsoft Pascal Compiler 4.00
 
 ### Directory of MS Pascal 4.00 (Disk 9)
 
-	 Volume in drive A is DISK9
-	 Directory of  A:\
-	
-	BRKCTL   INC      784   2-09-88  11:08p
-	CHKSTK   ASM     2044   2-21-88   7:54p
-	CHKSUM   ASM     3524   2-09-88  11:09p
-	CMACROS  INC    12066   2-09-88  11:08p
-	CRT0FP   ASM     2223   2-09-88  11:09p
-	FMSGHDR  ASM     2429   2-09-88  11:09p
-	MAKEFILE         4148   2-21-88   7:50p
-	MSDOS    H       6849   2-09-88  11:10p
-	MSDOS    INC     6181   2-21-88   7:53p
-	NULBODY  C         13   2-09-88  11:10p
-	README   DOC    48065   4-29-88  11:30a
-	REGISTER H        922   2-09-88  11:10p
-	SETARGV  ASM      971   2-09-88  11:09p
-	STARTUP  BAT     1663   1-27-88   5:57p
-	VERSION  INC      503   2-09-88  11:08p
-	WILD     C       7182   2-09-88  11:09p
-	CRT0     ASM     7612   2-09-88  11:09p
-	CRT0DAT  ASM    14175   2-09-88  11:09p
-	CRT0MSG  ASM     2840   2-09-88  11:09p
-	EXECMSG  ASM     1337   2-09-88  11:09p
-	NMSGHDR  ASM     3010   2-24-88   4:37p
-	NULBODY  LNK      149   2-21-88   7:51p
-	STDALLOC ASM     2825   2-09-88  11:09p
-	STDARGV  ASM    13852   2-09-88  11:09p
-	STDENVP  ASM     3780   2-21-88   7:54p
-	CRT0     ASM    10312   2-21-88   7:54p
-	CRT0DAT  ASM    10496   2-09-88  11:09p
-	CRT0MSG  ASM     2891   2-09-88  11:09p
-	EXECMSG  ASM     2231   2-17-88   9:49a
-	NMSGHDR  ASM     3486   2-09-88  11:10p
-	NULBODY  LNK      168   2-21-88   7:51p
-	STDALLOC ASM     3245   2-09-88  11:10p
-	STDARGV  ASM    13623   2-09-88  11:10p
-	STDENVP  ASM     5362   2-21-88   7:54p
-	OS2PATCH DOC     1401   3-07-88   4:10a
-	OS2PATCH EXE     1069   3-07-88   4:10a
-	PATCH320 DOC     2169   3-07-88   4:10a
-	PATCH87  DOC     3937   3-07-88   4:10a
-	PATCH87  EXE     4206   3-07-88   4:10a
-	PTRACE87 PAT      188   3-07-88   4:10a
-	RMRHS    EXE      543   3-07-88   4:10a
-	SETRHS   EXE      543   3-07-88   4:10a
-	STKPAT   BAT       94   3-07-88   4:10a
-	STKPAT   SCR       30   3-07-88   4:10a
+	 Volume in drive A is DISK9      
+	 Directory of A:\
+
+	BRKCTL   INC       784  2-09-88  11:08p
+	CHKSTK   ASM      2044  2-21-88   7:54p
+	CHKSUM   ASM      3524  2-09-88  11:09p
+	CMACROS  INC     12066  2-09-88  11:08p
+	CRT0FP   ASM      2223  2-09-88  11:09p
+	DOS          <DIR>      8-26-02   6:40p
+	FMSGHDR  ASM      2429  2-09-88  11:09p
+	MAKEFILE          4148  2-21-88   7:50p
+	MSDOS    H        6849  2-09-88  11:10p
+	MSDOS    INC      6181  2-21-88   7:53p
+	NULBODY  C          13  2-09-88  11:10p
+	OS2          <DIR>      8-26-02   6:40p
+	PATCH32      <DIR>      9-13-17   1:04p
+	README   DOC     48065  4-29-88  11:30a
+	REGISTER H         922  2-09-88  11:10p
+	SETARGV  ASM       971  2-09-88  11:09p
+	STARTUP  BAT      1663  1-27-88   5:57p
+	VERSION  INC       503  2-09-88  11:08p
+	WILD     C        7182  2-09-88  11:09p
+
+	 Directory of A:\DOS
+
+	.            <DIR>      8-26-02   6:40p
+	..           <DIR>      8-26-02   6:40p
+	CRT0     ASM      7612  2-09-88  11:09p
+	CRT0DAT  ASM     14175  2-09-88  11:09p
+	CRT0MSG  ASM      2840  2-09-88  11:09p
+	EXECMSG  ASM      1337  2-09-88  11:09p
+	NMSGHDR  ASM      3010  2-24-88   4:37p
+	NULBODY  LNK       149  2-21-88   7:51p
+	STDALLOC ASM      2825  2-09-88  11:09p
+	STDARGV  ASM     13852  2-09-88  11:09p
+	STDENVP  ASM      3780  2-21-88   7:54p
+
+	 Directory of A:\OS2
+
+	.            <DIR>      8-26-02   6:40p
+	..           <DIR>      8-26-02   6:40p
+	CRT0     ASM     10312  2-21-88   7:54p
+	CRT0DAT  ASM     10496  2-09-88  11:09p
+	CRT0MSG  ASM      2891  2-09-88  11:09p
+	EXECMSG  ASM      2231  2-17-88   9:49a
+	NMSGHDR  ASM      3486  2-09-88  11:10p
+	NULBODY  LNK       168  2-21-88   7:51p
+	STDALLOC ASM      3245  2-09-88  11:10p
+	STDARGV  ASM     13623  2-09-88  11:10p
+	STDENVP  ASM      5362  2-21-88   7:54p
+
+	 Directory of A:\PATCH32
+
+	.            <DIR>      9-13-17   1:04p
+	..           <DIR>      9-13-17   1:04p
+	OS2PATCH DOC      1401  3-07-88   4:10a
+	OS2PATCH EXE      1069  3-07-88   4:10a
+	PATCH320 DOC      2169  3-07-88   4:10a
+	PATCH87  DOC      3937  3-07-88   4:10a
+	PATCH87  EXE      4206  3-07-88   4:10a
+	PTRACE87 PAT       188  3-07-88   4:10a
+	RMRHS    EXE       543  3-07-88   4:10a
+	SETRHS   EXE       543  3-07-88   4:10a
+	STKPAT   BAT        94  3-07-88   4:10a
+	STKPAT   SCR        30  3-07-88   4:10a
