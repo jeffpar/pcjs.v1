@@ -10,15 +10,16 @@ Microsoft Languages
 -------------------
 
 * Microsoft BASIC
-* [Microsoft C Compilers](/disks/pcx86/tools/microsoft/c/)
-* [Microsoft Macro Assemblers](/disks/pcx86/tools/microsoft/masm/)
-* [Microsoft Mouse](/disks/pcx86/tools/microsoft/mouse/)
+* [Microsoft C Compiler](c/)
+* [Microsoft Macro Assembler](masm/)
+* [Microsoft Mouse](mouse/)
+* [Microsoft Pascal](pascal/)
 
 Microsoft Development Kits
 --------------------------
 
-* [Microsoft OS/2 Development Kits](/disks/pcx86/tools/microsoft/os2/)
-* [Microsoft Windows Development Kits](/disks/pcx86/tools/microsoft/windows/)
+* [Microsoft OS/2 Development Kits](os2/)
+* [Microsoft Windows Development Kits](windows/)
 
 Microsoft Languages Newsletters
 -------------------------------

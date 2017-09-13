@@ -66,7 +66,7 @@ function processManifest(sManifest)
             println("warning: no files in disk: " + sDiskName);
             return;
         }
-        println("### Directory of PCSIG08: " + sDiskName + "\n");
+        println("### Directory of " + sDiskName + "\n");
         println("\t Volume in drive A " + (matchDiskName? ("is " + matchDiskName[1]) : "has no label"));
         println("\t Directory of  A:\\\n\t");
         for (var iFile = 0; iFile < aMatchFiles.length; iFile++) {
@@ -115,4 +115,4 @@ function processManifest(sManifest)
     }
 }
 
-processManifest("../../../disks/pcx86/shareware/pcsig08/manifest.xml");
+processManifest("../../../disks/pcx86/tools/microsoft/pascal/4.00/manifest.xml");
