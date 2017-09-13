@@ -8,7 +8,7 @@ redirect_from:
 ---
 
 IBM PC Device Configurations
----
+----------------------------
 
 All our [IBM PC Machines](machine/) are built from a collection of devices, including:
 
