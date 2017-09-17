@@ -103,6 +103,8 @@
 		<manifest ref="/disks/pcx86/tools/microsoft/mouse/5.00/manifest.xml"/>
 		<manifest ref="/disks/pcx86/tools/microsoft/mouse/6.00/manifest.xml"/>
 		<manifest ref="/disks/pcx86/tools/microsoft/os2/sdk/1.02/manifest.xml"/>
+		<manifest ref="/disks/pcx86/tools/microsoft/pascal/3.31/manifest.xml"/>
+		<manifest ref="/disks/pcx86/tools/microsoft/pascal/4.00/manifest.xml"/>
 		<manifest ref="/disks/pcx86/tools/microsoft/windows/sdk/1.01/manifest.xml"/>
 		<manifest ref="/disks/pcx86/tools/microsoft/windows/sdk/1.03/manifest.xml"/>
 		<manifest ref="/disks/pcx86/tools/microsoft/windows/sdk/1.04/manifest.xml"/>

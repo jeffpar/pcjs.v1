@@ -12,7 +12,7 @@
 		<control type="button" binding="esc">ESC</control>
 		<control type="button" binding="ctrl-c">CTRL-C</control>
 	</keyboard>
-	<cpu id="cpu8088" model="8088" autostart="false" pos="left" padLeft="8px">
+	<cpu id="cpu8088" model="8088" autostart="true" pos="left" padLeft="8px">
 		<control type="button" binding="run">Run</control>
 		<control type="button" binding="setSpeed">Fast</control>
 		<control type="description" binding="speed" padLeft="8px">Stopped</control>

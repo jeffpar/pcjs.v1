@@ -10,8 +10,7 @@
 	<xsl:output doctype-system="about:legacy-compat" method="html"/>
 
 	<xsl:include href="common.xsl"/>
-	<!-- There is no "shared" components.xsl, so we just pick one to eliminate IDE inspection warnings -->
-	<xsl:include href="../../pcjs/templates/components.xsl"/>
+	<xsl:include href="../../shared/templates/components.xsl"/>
 
 	<xsl:template match="/manifest[@type = 'document']">
 		<html lang="en">

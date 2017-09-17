@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Microsoft Languages and Tools
+title: Microsoft Languages and Utilities
 permalink: /disks/pcx86/tools/microsoft/
 redirect_from:
   - /disks/pc/tools/microsoft/
@@ -9,16 +9,21 @@ redirect_from:
 Microsoft Languages
 -------------------
 
-* Microsoft BASIC
-* [Microsoft C Compilers](/disks/pcx86/tools/microsoft/c/)
-* [Microsoft Macro Assemblers](/disks/pcx86/tools/microsoft/masm/)
-* [Microsoft Mouse](/disks/pcx86/tools/microsoft/mouse/)
+* [Microsoft BASIC](basic/)
+* [Microsoft C Compiler](c/)
+* [Microsoft Macro Assembler](masm/)
+* [Microsoft Pascal](pascal/)
+
+Microsoft Utilities
+-------------------
+
+* [Microsoft Mouse](mouse/)
 
 Microsoft Development Kits
 --------------------------
 
-* [Microsoft OS/2 Development Kits](/disks/pcx86/tools/microsoft/os2/)
-* [Microsoft Windows Development Kits](/disks/pcx86/tools/microsoft/windows/)
+* [Microsoft OS/2 Development Kits](os2/)
+* [Microsoft Windows Development Kits](windows/)
 
 Microsoft Languages Newsletters
 -------------------------------

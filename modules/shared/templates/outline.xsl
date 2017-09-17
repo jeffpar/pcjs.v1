@@ -11,7 +11,6 @@
 
 	<xsl:include href="common.xsl"/>
 	<xsl:include href="document.xsl"/>
-	<!-- There is no "shared" components.xsl, so we just pick one to eliminate IDE inspection warnings -->
 	<xsl:include href="../../shared/templates/components.xsl"/>
 
 	<xsl:template match="/outline">

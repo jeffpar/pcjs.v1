@@ -630,7 +630,7 @@ module.exports = function(grunt) {
                     {
                         cwd: "versions/pcx86/<%= pkg.version %>/",
                         src: ["pcx86.js", "pcx86-dbg.js", "components.css", "components.xsl"],
-                        dest: "docs/pcx86/examples/",
+                        dest: "pubs/pcx86/examples/",
                         expand: true
                     }
                 ],
@@ -706,7 +706,7 @@ module.exports = function(grunt) {
                 args: []
             },
             "zip-examples": {
-                options: {cwd: "docs/pcx86/examples"},
+                options: {cwd: "pubs/pcx86/examples"},
                 cmd: "./zip.sh",
                 args: ["v" + pkg.version + ".zip"]
             }

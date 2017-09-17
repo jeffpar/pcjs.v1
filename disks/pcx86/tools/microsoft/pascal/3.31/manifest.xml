@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.37.0/manifest.xsl"?>
+<manifest type="software">
+	<title>MS Pascal</title>
+	<version>3.31</version>
+	<type>Utility</type>
+	<category>Compiler</category>
+	<language>Pascal</language>
+	<author>Microsoft</author>
+	<releaseDate/>
+	<disk id="disk01" size="368640" chs="40:2:9" img="archive/PASCAL331-DISK1.img" href="/disks/pcx86/tools/microsoft/pascal/3.31/PASCAL331-DISK1.json" md5="4ec33b6c723ee7d416659b6d39fdaeed" md5json="3a7d2fca8d221715ad0e2ad89f7b07ca">
+		<name>MS Pascal 3.31 (Disk 1)</name>
+		<file size="97162" time="1985-09-27 15:29:32" attr="0x20">PAS1.EXE</file>
+		<file size="112080" time="1985-09-27 17:06:42" attr="0x20">PAS2.EXE</file>
+		<file size="27030" time="1985-03-26 19:03:02" attr="0x20">PAS3.EXE</file>
+		<file size="79872" time="1985-09-26 10:03:58" attr="0x20">PASCAL.LIB</file>
+		<file size="26390" time="1985-10-10 14:52:56" attr="0x20">README.DOC</file>
+	</disk>
+	<disk id="disk02" size="368640" chs="40:2:9" img="archive/PASCAL331-DISK2.img" href="/disks/pcx86/tools/microsoft/pascal/3.31/PASCAL331-DISK2.json" md5="a89d2d9a1096dd36d0a4d8c623446d38" md5json="da757366f900abfe27e7947f832611d0">
+		<name>MS Pascal 3.31 (Disk 2)</name>
+		<file size="29184" time="1985-08-23 01:18:46" attr="0x20">8087.LIB</file>
+		<file size="39424" time="1985-08-23 01:19:20" attr="0x20">ALTMATH.LIB</file>
+		<file size="13824" time="1985-08-23 10:36:16" attr="0x20">CEXEC.LIB</file>
+		<file size="27648" time="1985-08-23 01:19:44" attr="0x20">DECMATH.LIB</file>
+		<file size="1309" time="1985-03-03 14:06:06" attr="0x20">DEMOEXEC.PAS</file>
+		<file size="11485" time="1985-09-02 13:24:38" attr="0x20">EMOEM.ASM</file>
+		<file size="11038" time="1985-08-30 11:59:28" attr="0x20">EXEMOD.EXE</file>
+		<file size="10854" time="1985-08-30 11:46:52" attr="0x20">EXEPACK.EXE</file>
+		<file size="3472" time="1985-01-25 16:22:28" attr="0x20">FINK</file>
+		<file size="4361" time="1985-01-25 16:22:48" attr="0x20">FINKXU</file>
+		<file size="5482" time="1985-01-25 16:22:08" attr="0x20">FINU</file>
+		<file size="28716" time="1985-10-02 12:26:34" attr="0x20">LIB.EXE</file>
+		<file size="43716" time="1985-10-02 12:26:34" attr="0x20">LINK.EXE</file>
+		<file size="442" time="1985-03-04 17:54:58" attr="0x20">LVARSTCK.OBJ</file>
+		<file size="40448" time="1985-08-23 01:18:18" attr="0x20">MATH.LIB</file>
+		<file size="586" time="1985-01-25 16:23:30" attr="0x20">NULE6.OBJ</file>
+		<file size="4223" time="1985-03-03 14:03:06" attr="0x20">PASEXEC.INC</file>
+		<file size="770" time="1983-12-10 12:11:50" attr="0x20">PRIMES.PAS</file>
+		<file size="2097" time="1983-12-10 12:11:48" attr="0x20">SORT.PAS</file>
+	</disk>
+</manifest>

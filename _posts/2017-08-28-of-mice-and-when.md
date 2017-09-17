@@ -39,8 +39,8 @@ Even this Wikipedia article on the [Microsoft Mouse](https://en.wikipedia.org/wi
 > The initial version featured an InPort ISA interface, requiring a Microsoft bus card to be installed in the computer.
 
 The first Microsoft Mouse, introduced in 1983, was available in Serial and Bus versions.  The Serial version required
-a serial port using a DB-25 connector, while the Bus version came with a small ISA card that connected to the mouse
-with a smaller DE-9 connector.  For more details (with pictures), check out this 2014 article on
+a serial port and used a (female) DB-25 connector, while the Bus version came with a small ISA card that the mouse
+plugged into using a (male) DE-9 connector.  For more details (with pictures), check out this 2014 article on
 [The Original Microsoft Mouse](https://communities.intel.com/docs/DOC-22714). 
 
 Fast-forward to 1986, when Microsoft announced the InPort chip.  As of May 9, 1986, all of its "Bus" mice were

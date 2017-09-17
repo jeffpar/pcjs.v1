@@ -5,7 +5,7 @@ permalink: /disks/pcx86/tools/microsoft/c/5.10-os2/
 ---
 
 Microsoft C Compiler 5.10 for DOS and OS/2
----
+------------------------------------------
 
 NOTE: These disks are referred to internally as version **5.10-OS/2**, because Microsoft released the 5.10
 C compiler in two different packages: this 14-disk set with files for both DOS and OS/2, and a smaller 11-disk

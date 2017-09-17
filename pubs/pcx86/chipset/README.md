@@ -17,13 +17,13 @@ Format
 Purpose
 -------
 
-Creates an instance of the ChipSet component, which includes support for the following internal components:
+Creates an instance of the ChipSet component, which includes support for the following hardware:
 
 * 8237 Direct Memory Access (DMA) Controller
 * 8259 Programmable Interrupt Controller (PIC)
 * 8253 Programmable Interval Timers (PIT)
 * 8255 Programmable Peripheral Interface (PPI)
-* Speaker (sound requires [webkitAudioContext](http://www.w3.org/TR/webaudio/) support in the web browser)
+* Speaker (sound requires [AudioContext](http://www.w3.org/TR/webaudio/) support in the web browser)
 
 Attributes
 ----------
@@ -63,7 +63,7 @@ Attributes
 
  * *sound* (optional)
 
-	*true* (default) to enable sound, assuming the browser supports **webkitAudioContext**, or *false* to disable sound.
+	*true* (default) to enable sound, assuming the browser supports **AudioContext**, or *false* to disable sound.
 
  * *scaleTimers* (optional)
 
