@@ -570,10 +570,10 @@ class ChipSet extends Component {
         } else {
             if (iRTC == ChipSet.CMOS.ADDR.STATUSA) {
                 /*
-                 * HACK: Perform a mindless toggling of the "Update-In-Progress" bit, so that it's flipped
-                 * on the next read; this makes the MODEL_5170 BIOS ("POST2_RTCUP") happy.
+                 * Make sure that the "Update-In-Progress" bit we set in updateRTCTime() doesn't stay set for
+                 * more than one read.
                  */
-                this.abCMOSData[iRTC] ^= ChipSet.CMOS.STATUSA.UIP;
+                this.abCMOSData[iRTC] &= ~ChipSet.CMOS.STATUSA.UIP;
             }
         }
         return b;
@@ -800,6 +800,14 @@ class ChipSet extends Component {
                     }
                 }
             }
+
+            /*
+             * Obviously, setting the "Update-In-Progress" bit now might seem rather pointless, since we just
+             * updated the RTC "atomically" as far as the machine is concerned; however, the bit must be set at
+             * at some point, in order to make the MODEL_5170 BIOS ("POST2_RTCUP") happy.
+             */
+            this.abCMOSData[ChipSet.CMOS.ADDR.STATUSA] |= ChipSet.CMOS.STATUSA.UIP;
+
             this.abCMOSData[ChipSet.CMOS.ADDR.STATUSC] |= ChipSet.CMOS.STATUSC.UF;
             if (this.abCMOSData[ChipSet.CMOS.ADDR.STATUSB] & ChipSet.CMOS.STATUSB.UIE) {
                 this.abCMOSData[ChipSet.CMOS.ADDR.STATUSC] |= ChipSet.CMOS.STATUSC.IRQF;
@@ -1509,7 +1517,7 @@ class ChipSet extends Component {
                     return ChipSet.CMOS.FDRIVE.FD1440;
                 }
             }
-            this.assert(false);  // we should never get here (else something is out of out sync)
+            this.assert(false);  // we should never get here (else something is out of sync)
         }
         return ChipSet.CMOS.FDRIVE.NONE;
     }
@@ -1530,7 +1538,7 @@ class ChipSet extends Component {
             if (iDrive < this.aFloppyDrives.length) {
                 return this.aFloppyDrives[iDrive];
             }
-            this.assert(false);  // we should never get here (else something is out of out sync)
+            this.assert(false);  // we should never get here (else something is out of sync)
         }
         return 0;
     }
