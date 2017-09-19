@@ -28,7 +28,7 @@ Attributes
 	* us84: US keyboard with 84-key layout
 	* us101: US keyboard with 101-key layout
 	
-Also supports the attributes of *[Component](/docs/pcx86/component/)*.
+Also supports the attributes of *[Component](../component/)*.
 
 Bindings
 --------

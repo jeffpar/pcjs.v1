@@ -44,7 +44,7 @@ Attributes
 
 	One of "serial", "bus", or "inport"; the default is "serial" if either *serial* or *binding* are set
 
- * Also supports the attributes of *[Component](/docs/pcx86/component/)*.
+ * Also supports the attributes of *[Component](../component/)*.
 
 Bindings
 --------

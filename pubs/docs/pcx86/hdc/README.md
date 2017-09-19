@@ -59,7 +59,7 @@ Attributes
 
 	The default *type* setting is *'XT'*.
 
- * Also supports the attributes of *[Component](/docs/pcx86/component/)*.
+ * Also supports the attributes of *[Component](../component/)*.
 
 Bindings
 --------

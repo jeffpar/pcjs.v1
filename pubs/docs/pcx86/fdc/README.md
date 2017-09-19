@@ -35,7 +35,7 @@ Attributes
 	
 		'{A: {name: "PC-DOS 1.0", path: "pcdos-1.00.json"}}'
 		
-Also supports the attributes of *[Component](/docs/pcx86/component/)*.
+Also supports the attributes of *[Component](../component/)*.
 
 Bindings
 --------
@@ -44,7 +44,7 @@ Bindings
  
 	For use with a control of type *list*. The list will be populated automatically with a series of &lt;option&gt;
 	elements based on the number of floppy drives, as determined by the SW1 settings obtained from the
-	*[ChipSet](/docs/pcx86/chipset/)* component.
+	*[ChipSet](../chipset/)* component.
 	
  * *listDisks*
  

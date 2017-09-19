@@ -36,7 +36,7 @@ Attributes
 	* This can be set to "true" or "false" to explicitly control whether or not the machine starts running automatically.
 	If this parameter is omitted, the machine will autostart only if no Debugger component is included and no **Run** button is defined.
 
-Also supports the attributes of *[Component](/docs/pcx86/component/)*. The *id* attribute is optional, since machines
+Also supports the attributes of *[Component](../component/)*. The *id* attribute is optional, since machines
 currently support only one CPU component.
 
 Bindings
@@ -46,7 +46,7 @@ Bindings
 	* For use with a control of type *button*, to start/stop the CPU.
 * *reset*
 	* For use with a control of type *button*, to reset the CPU. This binding actually belongs to the
-	*[Computer](/docs/pcx86/computer/)* component, because every component is reset, but the CPU offers the binding
+	*[Computer](../computer/)* component, because every component is reset, but the CPU offers the binding
 	for convenience.
 * *speed*
 	* For use with any control with an *textContent* property, to display the current CPU speed.

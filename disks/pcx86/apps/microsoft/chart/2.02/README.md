@@ -22,7 +22,7 @@ clear it's really worth the effort.  To start, the IBMBIO.COM, IBMDOS.COM and CO
 their own MS-DOS disk image and archived appropriately.  A search for the rest of the SPERRY OEM distribution files
 should also be conducted.
 
-### Directory of MS Chart 2.02 (Unofficial)
+### Directory of MS Chart 2.02 (Modified)
 
 	 Volume in drive A has no label
 

@@ -349,7 +349,11 @@
 		<disk path="/disks/pcx86/apps/lotus/123/1as/123-DISK2-UTILITY.json">Lotus 1-2-3 1A* (2-Utility)</disk>
 		<disk path="/disks/pcx86/apps/lotus/123/1as/123-DISK3-GRAPH.json">Lotus 1-2-3 1A* (3-Graph)</disk>
 		<disk path="/disks/pcx86/apps/lotus/123/1as/123-DISK4-TUTORIAL.json">Lotus 1-2-3 1A* (4-Tutorial)</disk>
-		<disk path="/disks/pcx86/apps/microsoft/chart/2.02/CHART202.json">MS Chart 2.02 (Unofficial)</disk>
+		<disk path="/disks/pcx86/apps/microsoft/chart/2.02/CHART202.json">MS Chart 2.02 (Modified)</disk>
+		<disk path="/disks/pcx86/apps/microsoft/multiplan/1.06/MULTIPLAN106.json">MS Multiplan 1.06 (Modified)</disk>
+		<disk path="/disks/pcx86/apps/microsoft/multiplan/2.00/MULTIPLAN200.json">MS Multiplan 2.00 (Modified)</disk>
+		<disk path="/disks/pcx86/apps/microsoft/multiplan/2.01/MULTIPLAN201-INSTALL.json">MS Multiplan 2.01 (INSTALL)</disk>
+		<disk path="/disks/pcx86/apps/microsoft/multiplan/2.01/MULTIPLAN201-PROGRAM.json">MS Multiplan 2.01 (PROGRAM)</disk>
 		<disk path="/disks/pcx86/apps/microsoft/word/3.0/WORD30-DISK1-PROGRAM.json">MS Word 3.0 (Disk 1)</disk>
 		<disk path="/disks/pcx86/apps/microsoft/word/3.0/WORD30-DISK2-SPELL.json">MS Word 3.0 (Disk 2)</disk>
 		<disk path="/disks/pcx86/apps/microsoft/word/3.0/WORD30-DISK3-UTILITIES.json">MS Word 3.0 (Disk 3)</disk>
