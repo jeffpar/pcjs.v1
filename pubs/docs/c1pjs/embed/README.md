@@ -12,7 +12,7 @@ redirect_from:
 ---
 
 Embedding The C1Pjs Simulator
----
+-----------------------------
 
 {% include machine.html id="c1p8kb" %}
 
@@ -36,7 +36,8 @@ Otherwise, read on to learn how embedding works, and how you can create your own
 its appearance.
 
 Step 1: Create a machine definition XML file
----
+--------------------------------------------
+
 You need an XML file that defines a Challenger configuration, listing all the components it will contain and where
 they will be mapped into the address space.
 
@@ -92,7 +93,8 @@ Want to embed *multiple* simulators on a single page? No problem. Each **&lt;mac
 a unique *id* attribute. Take a look at [array.xml](/devices/c1p/machine/8kb/array/) for an example.
 
 Step 2: Make sure you have all the necessary resource files
----
+-----------------------------------------------------------
+
 In the above XML file, the ROM and Video components refer to additional resources:
 
 - 8K BASIC ROM image @ http://www.pcjs.org/devices/c1p/rom/basic-gcpatch.hex
@@ -126,7 +128,8 @@ such as samples.xml:
 ```
 
 Step 3: Add the C1Pjs Simulator to your web page
----
+------------------------------------------------
+
 Somewhere on your page, you need to add the following **&lt;script&gt;** element:
 
 ```html
@@ -158,7 +161,8 @@ paste it into your machine definition file, inside a pair of **&lt;panel *id*="p
 elements, or link to it using a single **&lt;panel/&gt;** element with the *ref* attribute.
 
 Step 4: Activate the C1Pjs Simulator
----
+------------------------------------
+
 Add the following to your page's **&lt;body&gt;** element:
 
 ```html
@@ -174,7 +178,8 @@ The **embedC1P()** function accepts three parameters:
 parameter and use the default [XML stylesheet](/versions/c1pjs/1.34.0/components.xsl).
 
 Step 5: Enjoy!
----
+--------------
+
 All I ask is that any page that embeds the simulator also includes attribution, such as: 
 
 > [PCjs](http://pcjs.org) © 2012-2017 by [Jeff Parsons](mailto:Jeff@pcjs.org) ([@jeffpar](http://twitter.com/jeffpar))

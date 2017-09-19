@@ -14,8 +14,8 @@ adventures in PC debugging: decoding and disabling [dBASE III Copy-Protection](#
 
 ### dBASE III Copy-Protection
 
-* [dBASE III Debugging Notes](/docs/personal/1984-09-16--DBASE_III_DEBUG.pdf)
-* [dBASE III Patching Procedure](/docs/personal/1984-09-25--DBASE_III_PATCH.pdf)
+* [dBASE III Debugging Notes](1984-09-16--DBASE_III_DEBUG.pdf)
+* [dBASE III Patching Procedure](1984-09-25--DBASE_III_PATCH.pdf)
 
 NOTE: Copies of the [dBASE III](/disks/pcx86/apps/other/dbase3/1.0/) disks can be found in our [IBM PC Disk Library](/disks/pcx86/).
 
