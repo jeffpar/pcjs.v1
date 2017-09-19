@@ -115,7 +115,7 @@ Some notes:
 	<script type="text/javascript">embedPC("ibm5150","machine.xml","components.xsl","{state:null}");</script>
 	```
 
-While the [PCx86 Documentation](/pubs/pcx86/) explains how to create a *new* machine, by writing your own machine
+While the [PCx86 Documentation](/docs/pcx86/) explains how to create a *new* machine, by writing your own machine
 XML file and manually copying all the other pieces, the new **Save Machine** feature is the best way to save
 any *existing* IBM PC and embed it on any other website.
 

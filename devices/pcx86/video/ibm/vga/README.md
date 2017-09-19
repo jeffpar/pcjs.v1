@@ -9,7 +9,7 @@ IBM Video Graphics Array (VGA)
 
 ### IBM VGA Configurations
 
-The easiest way for a machine to include an VGA *[Video](/pubs/pcx86/video/)* component in its XML configuration file
+The easiest way for a machine to include an VGA *[Video](/docs/pcx86/video/)* component in its XML configuration file
 is to reference one of the project's VGA configuration files, using the *ref* attribute; eg:
 
 ```xml

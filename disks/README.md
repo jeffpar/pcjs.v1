@@ -41,5 +41,5 @@ For example:
 The [PCjs Node Web Server](/server.js) also generates "onclick" handlers for links to **JSON** disk
 images that automatically invoke the API for you.
 
-See [Creating PCx86-Compatible Disk Images](/pubs/pcx86/#creating-pcx86-compatible-disk-images)
-in the [PCx86 Documentation](/pubs/pcx86/) for more information about supported disks and formats.
+See [Creating PCx86-Compatible Disk Images](/docs/pcx86/#creating-pcx86-compatible-disk-images)
+in the [PCx86 Documentation](/docs/pcx86/) for more information about supported disks and formats.

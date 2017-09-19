@@ -7,7 +7,7 @@ permalink: /devices/pcx86/video/
 IBM PC Video Adapters
 ---------------------
 
-Video adapters are added to machines by including a *[Video](/pubs/pcx86/video/)* component in the machine XML
+Video adapters are added to machines by including a *[Video](/docs/pcx86/video/)* component in the machine XML
 configuration file.
 
 See the following [IBM PC Video Configurations](ibm/):
