@@ -9,7 +9,7 @@ IBM Enhanced Graphics Adapter (EGA)
 
 ### IBM EGA Configurations
 
-The easiest way for a machine to include an EGA *[Video](/pubs/pcx86/video/)* component in its XML configuration file
+The easiest way for a machine to include an EGA *[Video](/docs/pcx86/video/)* component in its XML configuration file
 is to reference one of the project's predefined EGA configuration files, using the *ref* attribute; eg:
 
 ```xml

@@ -1,20 +1,11 @@
 ---
 layout: page
-title: Documentation and Publication Archive
-menu_title: Docs
-menu_order: 7
+title: Publication Archive
 permalink: /pubs/
-redirect_from:
-  - /docs/
 ---
 
-Documentation and Publication Archive
--------------------------------------
-
-Preliminary documentation is available for the following PCjs machines:
-
-* [C1Pjs](c1pjs/)
-* [PCx86](pcx86/)
+Publication Archive
+-------------------
 
 For general historical interest, the project includes a Publication Archive that covers:
 
@@ -33,20 +24,6 @@ For general historical interest, the project includes a Publication Archive that
 	* [Datasheets](c1p/datasheets/)
 	* [Programming Guides/Samples](c1p/programming/)
 	* [Reference Manuals](c1p/techref/)
-
-{% if site.developer %}
-
-Eventually, the project may also provide summaries of all supported CPU instructions; e.g.:
-
-* [x86 Instructions](x86/)
-* [6502 Instructions](6502/)
-
-{% endif %}
-
-Finally, we have an eclectic collection of personal documents, ranging from early PC debugging notes to old program
-listings and more:
-
-* [Personal Documents of Dubious Historical Interest](personal/)
 
 ---
 

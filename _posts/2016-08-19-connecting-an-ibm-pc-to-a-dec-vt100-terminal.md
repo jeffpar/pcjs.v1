@@ -69,7 +69,7 @@ and then embed the machines in the post, each with a single line:
 	{% include machine.html id="vt100" %}
 {% endraw %}
 
-For people rolling their own web pages, [the basics](/pubs/pcx86/) haven't changed, and adding a serial connection merely
+For people rolling their own web pages, [the basics](/docs/pcx86/) haven't changed, and adding a serial connection merely
 requires adding a *connection* property (eg, `connection:"com2->vt100.serialPort"`) to the *parms* parameter passed to the
 *embedPCx86()* interface.  A similar property (eg, `connection:"serialPort->ibm5170.com2"`) must also be added to the *parms*
 passed to *embedPC8080()*.

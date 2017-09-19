@@ -11,7 +11,7 @@ are simple XML files that describe a piece of software (an application, an opera
 link to a PCjs machine configuration capable of running the software, along with a "ready-to-run" machine state file.
 Conversely, a PCjs machine XML file can refer back to the manifest, to obtain a list of disk images.
 
-Here are some [Demos](/apps/pc/) of "ready-to-run" apps on [PCjs](/pubs/about/). 
+Here are some [Demos](/apps/pc/) of "ready-to-run" apps on [PCjs](/docs/about/). 
 
 There have been lots of server-side changes recently, including API improvements that make it easy (well, *easier*)
 to dynamically create diskette images from a list of files, or even an entire folder (including all subfolders),

@@ -9,7 +9,7 @@ IBM Monochrome Display Adapter (MDA)
 
 ### IBM MDA Configurations
 
-The easiest way for a machine to include an MDA *[Video](/pubs/pcx86/video/)* component in its XML configuration file
+The easiest way for a machine to include an MDA *[Video](/docs/pcx86/video/)* component in its XML configuration file
 is to reference one of the project's predefined MDA configuration files, using the *ref* attribute; eg:
 
 ```xml

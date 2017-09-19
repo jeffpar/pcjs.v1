@@ -98,17 +98,17 @@ On the 8086/8088/80186/80188, values 0-3 were treated the same as values 4-7, an
 Starting with the 80186, opcodes 0xC0 and 0xC1 were reused for new shift and rotate instruction groups,
 and opcodes 0xC8 and 0xC9 became the `ENTER` and `LEAVE` instructions.
 
-### [AAM](/pubs/x86/ops/AAM/) (0xD4)
+### [AAM](/docs/x86/ops/AAM/) (0xD4)
 
 While AAM is documented, it has undocumented features (eg, its ability to divide by values other than 10,
-and its effect on the flags).  See the [AAM](/pubs/x86/ops/AAM/) instruction for details.
+and its effect on the flags).  See the [AAM](/docs/x86/ops/AAM/) instruction for details.
 
-### [AAD](/pubs/x86/ops/AAD/) (0xD5)
+### [AAD](/docs/x86/ops/AAD/) (0xD5)
 
 While AAD is documented, it has undocumented features (eg, its ability to multiply by values other than 10,
-and its effect on the flags).  See the [AAD](/pubs/x86/ops/AAD/) instruction for details.
+and its effect on the flags).  See the [AAD](/docs/x86/ops/AAD/) instruction for details.
 
-### [SALC](/pubs/x86/ops/SALC/) (0xD6)
+### [SALC](/docs/x86/ops/SALC/) (0xD6)
 
 Performs an operation equivalent to `SBB AL,AL`, but without modifying any flags.  In other words, AL will be set to
 0xFF or 0x00, depending on whether CF is set or clear.  This instruction exists on all later x86 CPUs, but for some
@@ -119,7 +119,7 @@ reason, it has never been documented.  Also known as **SETALC**.
 It is believed that 0xF1 decodes identically to 0xF0 (the `LOCK` prefix).
 
 On newer processors, 0xF1 is an undocumented instruction usually called `ICEBP` or `INT1`.  See the
-[ICEBP](/pubs/x86/ops/ICEBP/) instruction for details.
+[ICEBP](/docs/x86/ops/ICEBP/) instruction for details.
 
 Assorted Publications
 ---------------------
