@@ -5,8 +5,8 @@ permalink: /disks/pcx86/apps/other/omniview/
 ---
 
 Omniview
----
+--------
 
-Information is available for these versions of Omniview:
+Information is available for the following versions of Omniview.
 
 * [Omniview 386 v4.30](4.30/)

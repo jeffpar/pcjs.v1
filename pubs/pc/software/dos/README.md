@@ -5,7 +5,7 @@ permalink: /pubs/pc/software/dos/
 ---
 
 IBM PC-DOS Manuals
----
+------------------
 
 * [IBM PC Disk Operating System v1.00](PCDOS100/)
 * [IBM PC Disk Operating System v1.10](PCDOS110/)
