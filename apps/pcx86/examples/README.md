@@ -1,15 +1,17 @@
 ---
 layout: page
-title: PCx86 Documentation Examples
-permalink: /docs/pcx86/examples/
+title: PCx86 Examples
+permalink: /apps/pcx86/examples/
+redirect_from:
+  - /docs/pcx86/examples/
 machines:
   - id: example3
     type: pcx86
-    config: /docs/pcx86/examples/example3b.xml
+    config: /apps/pcx86/examples/example3b.xml
 ---
 
-PCx86 Documentation Examples
-----------------------------
+PCx86 Examples
+--------------
 
 This folder provides all the self-contained [PCx86](/docs/about/pcx86/) examples described in the
 [Documentation](/docs/pcx86/).
@@ -33,4 +35,4 @@ Have fun!
 
 {% include machine.html id="example3" %}
 
-[Return to [PCx86 Documentation](..)]
+[Return to [PCx86 Documentation](/docs/pcx86/)]

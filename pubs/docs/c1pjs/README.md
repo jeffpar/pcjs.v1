@@ -1,7 +1,7 @@
 ---
 layout: page
 title: C1Pjs Documentation
-permalink: /pubs/c1pjs/
+permalink: /docs/c1pjs/
 machines:
   - id: c1p8kb
     type: c1p-dbg
@@ -9,11 +9,10 @@ machines:
 redirect_from:
   - /c1p/
   - /c1pjs/
-  - /docs/c1pjs/
 ---
 
 C1Pjs Documentation
----
+-------------------
 
 C1Pjs is a JavaScript simulation of the Challenger 1P, an 8-bit 6502-based microcomputer
 manufactured by Ohio Scientific in 1978.  The base configuration included an 8Kb BASIC-in-ROM from Microsoft

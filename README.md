@@ -87,7 +87,7 @@ Developer Notes
 
 The [PCjs repository](https://github.com/jeffpar/pcjs) on GitHub contains everything needed to run PCjs
 computer simulations.  All the PCjs emulators run in any modern web browser, with or without a web server,
-and examples are provided for both [local](/docs/pcx86/examples/) and [remote](http://www.pcjs.org/) operation.
+and examples are provided for both [local](/apps/pcx86/examples/) and [remote](http://www.pcjs.org/) operation.
 
 The project includes:
 
@@ -103,7 +103,7 @@ JavaScript files to your browser will work.  However, instructions for doing tha
 In fact, you can run PCjs simulations without a web server at all, using the "file:" protocol instead of "http:".
 However, most of the machine configurations require additional resource files (ROMs, disk images, etc), which are
 included in the project, but unless all the resource files are moved into a single directory (as they are in these
-[Demos](/docs/pcx86/examples/)), your browser will probably be unable to load all of them, due to security restrictions.
+[Examples](/apps/pcx86/examples/)), your browser will probably be unable to load all of them, due to security restrictions.
 Using the bundled web server is the preferred solution.
 
 The project includes a large selection of disk images, and a powerful [DiskDump](modules/diskdump/) utility that

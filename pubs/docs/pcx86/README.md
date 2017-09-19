@@ -20,8 +20,8 @@ through the 80386.  The PCjs website provides a variety of "stock" configuration
 at their original clock speed, or you can create your own, by mixing, matching, and reconfiguring any of the PCx86
 components listed below.
 
-After you've read the Documentation, check out the [Examples](examples/), browse the [Source Code](/modules/pcx86/),
-and experiment!
+After you've read the Documentation, check out the [Examples](/apps/pcx86/examples/),
+browse the [Source Code](/modules/pcx86/), and experiment!
 
 {% include machine.html id="ibm5150" %}
 
@@ -77,7 +77,7 @@ Here's a simple machine XML definition that's more useful:
 </machine>
 ```
 
-[Example 1](examples/example1.html) shows the [XML](examples/example1.xml) in action.
+[Example 1](/apps/pcx86/examples/example1.html) shows the [XML](/apps/pcx86/examples/example1.xml) in action.
 
 Machine definitions can also include visual elements.  For example, we can include a **Run** button with the CPU component.
 Note that as soon as the machine is ready and the CPU starts running, the **Run** button will change to **Halt**.
@@ -111,7 +111,7 @@ disks at will, we'll include some UI controls.
 </machine>
 ```
 
-[Example 2](examples/example2.html) shows the updated [XML](examples/example2.xml) in action.
+[Example 2](/apps/pcx86/examples/example2.html) shows the updated [XML](/apps/pcx86/examples/example2.xml) in action.
 
 ### Loading Machine XML Files
 
@@ -126,7 +126,7 @@ Inside a web page, add a &lt;div&gt; to contain the machine, load the *pcx86.js*
 </script>
 ```
 
-In fact, this is exactly what we did in [Example 2](examples/example2.html).
+In fact, this is exactly what we did in [Example 2](/apps/pcx86/examples/example2.html).
 
 *embedPCx86()* accepts 4 parameters:
 
@@ -158,7 +158,7 @@ To create a configuration that includes the PCx86 Debugger, you need to:
 - Add debugger controls to the Control Panel, such as Run, Step, Reset, etc;
 - Change your web page to load *pcx86-dbg.js* instead of *pcx86.js*.
 
-Take a look at [Example 3A](examples/example3a.html) ([XML](examples/example3a.xml)).
+Take a look at [Example 3A](/apps/pcx86/examples/example3a.html) ([XML](/apps/pcx86/examples/example3a.xml)).
 
 The debugger gives you access to more capabilities than mere debugging. For example, you can use the **load**
 command to load diskette sectors into memory ("l [addr] [drive #] ...") or the **dump** command to dump an entire
@@ -166,13 +166,13 @@ diskette as JSON ("d disk [drive #]").  You can also **halt** a machine ("h") an
 ("d state"). You can save that state in a .json file, and then use that state to initialize a new machine (as long as
 it uses the same machine *id*).
 
-In fact, [Example 3B](examples/example3b.html) ([XML](examples/example3b.xml))
-does just that, using JSON dumps created from [Example 3A](examples/example3a.html) after starting VisiCalc.
+In fact, [Example 3B](/apps/pcx86/examples/example3b.html) ([XML](/apps/pcx86/examples/example3b.xml))
+does just that, using JSON dumps created from [Example 3A](/apps/pcx86/examples/example3a.html) after starting VisiCalc.
 See the *state* property on the [Computer](computer/) component for more information on state files.
 
 ### Running PCx86 On Your Own Server
 			
-All of the examples described above are available for [download](examples/).
+All of the examples described above are available for [download](/apps/pcx86/examples/).
 
 ### Creating PCx86-Compatible Disk Images
 
