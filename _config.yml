@@ -8,8 +8,8 @@ description: >
   (up through the 80386), C1Pjs for the 6502-based Ohio Scientific Challenger 1P, PC8080 for 8080-based machines
   such as Space Invaders and the DEC VT100 Terminal, and PDPjs with support for PDP-10 and PDP-11 machines.
   PCjs also provides an archive of selected historical PC software, publications, and reference materials.
-baseurl: ""                 # "/pcjs" when using http://jeffpar.github.io or "" when using http://www.pcjs.org 
-url: "http://www.pcjs.org"  # "http://jeffpar.github.io" or "http://www.pcjs.org"
+baseurl: "/pcjs"                 # "/pcjs" when using http://jeffpar.github.io or "" when using http://www.pcjs.org
+url: "http://jeffpar.github.io"  # "http://jeffpar.github.io" or "http://www.pcjs.org"
 twitter_username: jeffpar
 github_username:  jeffpar
 
