@@ -1,7 +1,12 @@
 developer: true
 baseurl: ""
 url: "http://localhost:4000"
+#
+# In the following pcjs section, setting "compiled: false" works only for pages with a single machine,
+# because the uncompiled scripts use shared classes that can only be instantiated once on a page (unless
+# they're compiled and/or wrapped inside a function).
+#
 pcjs:
-  compiled: false
+  compiled: true
   debug: false
   private: true
