@@ -74,13 +74,3 @@ none       |   0   |     8    |     8    |     3     |     4     |     3
 ---
 
 Source: PC Magazine "Programmer's Technical Reference: The Processor and Coprocessor," by Robert L. Hummel.
-
----
-
-### PCjs Code
-
-{% highlight javascript linenos %}
-
-{% include_relative pcjs/opAAA.js %}
-
-{% endhighlight %}
