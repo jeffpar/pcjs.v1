@@ -54,7 +54,7 @@ act as mouse buttons.  The machine is also available with the [PCjs Debugger](de
 {% include machine.html id="ibm5160" %}
 
 {% comment %}
-To manually start TopView: {% include machine-command.html type='button' label='Load' machine='ibm5160' command='startTV' %}
+To manually start TopView: {% include machine-command.html type='button' label='Load' machine='ibm5160' command='startKbd' %}
 {% endcomment %}
 
 ### Directory of TopView 1.01 (Program)

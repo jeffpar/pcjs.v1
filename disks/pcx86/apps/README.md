@@ -7,7 +7,7 @@ permalink: /disks/pcx86/apps/
 PC Applications
 ---
 
-Information is available for applications from these vendors:
+Information is available for applications from the following vendors.
 
 * [IBM](ibm/)
 * [Lotus](lotus/)

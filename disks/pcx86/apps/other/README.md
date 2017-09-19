@@ -7,7 +7,7 @@ permalink: /disks/pcx86/apps/other/
 Other IBM PC Applications
 -------------------------
 
-The following applications have been archived for use with PCjs:
+The following applications have been archived for use with PCjs.
 
 * [dBase II](dbase2/)
 * [dBase III](dbase3/)

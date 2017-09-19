@@ -5,18 +5,19 @@ permalink: /pubs/pc/software/
 ---
 
 PC Software User Guides
----
+-----------------------
 
-* [PC-DOS Manuals](dos/)
+* [Application Manuals](apps/)
+* [DOS Manuals](dos/)
 
 PC Software Development Guides
----
+------------------------------
 
 * [OS/2 Software Guides](os2/)
 * [Windows Software Guides](windows/)
 
 PC Software Tool Guides
----
+-----------------------
 
 * [Microsoft Tool Guides](tools/microsoft/)
 
