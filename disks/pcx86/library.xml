@@ -67,6 +67,9 @@
 		<manifest ref="/disks/pcx86/apps/lotus/123/1a/manifest.xml"/>
 		<manifest ref="/disks/pcx86/apps/lotus/123/1as/manifest.xml"/>
 		<manifest ref="/disks/pcx86/apps/microsoft/chart/2.02/manifest.xml"/>
+		<manifest ref="/disks/pcx86/apps/microsoft/multiplan/1.06/manifest.xml"/>
+		<manifest ref="/disks/pcx86/apps/microsoft/multiplan/2.00/manifest.xml"/>
+		<manifest ref="/disks/pcx86/apps/microsoft/multiplan/2.01/manifest.xml"/>
 		<manifest ref="/disks/pcx86/apps/microsoft/word/3.0/manifest.xml"/>
 		<manifest ref="/disks/pcx86/apps/microsoft/word/3.1/manifest.xml"/>
 		<manifest ref="/disks/pcx86/apps/microsoft/word/5.0/manifest.xml"/>

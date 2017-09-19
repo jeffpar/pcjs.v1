@@ -33,7 +33,7 @@ Attributes
 	* "cga" (Color Graphics Adapter)
 	* "ega" (Enhanced Graphics Adapter)
 
-	If *model* is not set, the SW1 switch block settings from the [ChipSet](/docs/pcx86/chipset/) component will
+	If *model* is not set, the SW1 switch block settings from the [ChipSet](../chipset/) component will
 	determine the video model to use ("mda" or "cga" only).
 	
  *  *screenWidth*, *screenHeight* (required)
@@ -66,7 +66,7 @@ Attributes
 	true enables HTML5 canvas image smoothing, false disables it (if not specified, the browser's default is used);
 	can also be present as a URL parameter.
 	
-Also supports the attributes of *[Component](/docs/pcx86/component/)*.
+Also supports the attributes of *[Component](../component/)*.
 
 Bindings
 --------

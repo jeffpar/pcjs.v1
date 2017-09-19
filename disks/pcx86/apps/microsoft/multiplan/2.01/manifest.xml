@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.37.0/manifest.xsl"?>
+<manifest type="software">
+	<title>Microsoft Multiplan</title>
+	<version>2.01</version>
+	<type>Application</type>
+	<category>Productivity</category>
+	<author>Microsoft</author>
+	<releaseDate date="1986-02-10">Feb 10, 1986</releaseDate>
+	<disk id="disk01" size="327680" chs="40:2:8" dir="archive/INSTALL" href="/disks/pcx86/apps/microsoft/multiplan/2.01/MULTIPLAN201-INSTALL.json" md5="3468ed28477c187beb561c9c26b9be46" md5json="a7b7bc8ad6e3078aac2700a58ae0d47d">
+		<name>MS Multiplan 2.01 (INSTALL)</name>
+		<file size="34944" time="1986-02-10 12:00:00" attr="0x20" md5="17ff4b7824527bd49159515719f673c2">CONVERTD.EXE</file>
+		<file size="19808" time="1987-01-05 16:24:44" attr="0x20" md5="64215461b053c281547429b80b5d6372">IBMSETUP.COM</file>
+		<file size="6934" time="1986-02-10 12:00:00" attr="0x20" md5="4aa53c9928a3741c5a8b8501f8da1b53">INSTALL.COM</file>
+		<file size="48145" time="1986-02-10 12:00:00" attr="0x20" md5="aa416d9c20dd0f10aaa8a9e39ac4b599">INSTALL.DAT</file>
+		<file size="14876" time="1986-02-10 12:00:00" attr="0x20" md5="978a8e974f8201a210676d3d1dffacda">INSTALL.MSG</file>
+		<file size="37498" time="1986-02-10 12:00:00" attr="0x20" md5="bebaac7e49370dac10a78fefc6a1fc9b">INSTALL.OVL</file>
+		<file size="128" time="1986-02-10 12:00:00" attr="0x20" md5="d77bc7ca0b9bc69297ba8ccfbbf3a97e">INSTALL.SPC</file>
+		<file size="12040" time="1986-02-10 12:00:00" attr="0x20" md5="b75422e7569d92c2dd4fd45dbf814483">PATCH21.EXE</file>
+	</disk>
+	<disk id="disk02" size="327680" chs="40:2:8" dir="archive/PROGRAM" href="/disks/pcx86/apps/microsoft/multiplan/2.01/MULTIPLAN201-PROGRAM.json" md5="ecaabd751a559ab3c4429744e653fe08" md5json="cfc37910ce64da43e3a9850d0423f93d">
+		<name>MS Multiplan 2.01 (PROGRAM)</name>
+		<file size="7184" time="1986-02-10 12:00:04" attr="0x20" md5="03bf23d7409ac5ef95b150698c79318f">AMOR.MOD</file>
+		<file size="7480" time="1986-02-10 12:00:04" attr="0x20" md5="973a7181ee022ef69fa2aeac2330f436">DEPREC.MOD</file>
+		<file size="928" time="1986-02-10 12:00:04" attr="0x20" md5="17435bb9638892537b7d061793c02f7f">LINKMC.COM</file>
+		<file size="7067" time="1986-02-10 12:00:04" attr="0x20" md5="d3a3c2d253d9e665bbad088928d38d26">MOUSE.COM</file>
+		<file size="7294" time="1986-02-10 12:00:06" attr="0x20" md5="c4c58b3e206473912c28bab5f91856b4">MOUSE.SYS</file>
+		<file size="46464" time="1986-02-10 12:00:06" attr="0x20" md5="eaebdb1e6182360e29dde5632a266264">MP.COD</file>
+		<file size="25010" time="1993-07-24 00:32:20" attr="0x20" md5="1204b8a8a5b9db7026bc3ea97ffea52a">MP.COM</file>
+		<file size="60368" time="1986-02-10 12:00:06" attr="0x20" md5="7670db3fc167c5d09f8f2a4a4bd386fc">MP.HLP</file>
+		<file size="122" time="1993-07-24 00:32:36" attr="0x20" md5="f37e0ec23058e827735e23f688fc8ccd">MP.INI</file>
+		<file size="369" time="1986-02-10 12:00:06" attr="0x20" md5="a078d18f51b8cab0d6f5ff632abde31c">MP.PIF</file>
+		<file size="73344" time="1986-02-10 12:00:06" attr="0x20" md5="9695877242011ac16d8bbca50cb189cb">MP.SYS</file>
+		<file size="12392" time="1986-02-10 12:00:06" attr="0x20" md5="b49aefbf3bfd8b8e191514daa3645395">MP40.DAT</file>
+		<file size="12400" time="1986-02-10 12:00:06" attr="0x20" md5="3069d179966a1f6404a600fd395e15c3">MP80.DAT</file>
+		<file size="369" time="1986-02-10 12:00:06" attr="0x20" md5="b4c2d1459680cb12f872a2c7be76e8a7">MPWIN.PIF</file>
+		<file size="5754" time="1986-02-10 12:00:06" attr="0x20" md5="11721bacf6d94dbe4182a6eb69cf7792">PRICE.MOD</file>
+		<file size="2983" time="1986-02-10 12:00:06" attr="0x20" md5="38ff64d308038d996590bbbe7fe2027d">READ.ME</file>
+		<file size="7345" time="1986-02-10 12:00:06" attr="0x20" md5="356f53919612be10a4da095c921e2111">STARTUP.MOD</file>
+	</disk>
+</manifest>

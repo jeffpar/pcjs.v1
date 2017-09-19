@@ -90,7 +90,7 @@ Attributes
 	
 		yyyy-mm-ddThh:mm:ss
 
- * Also supports the attributes of *[Component](/docs/pcx86/component/)*.
+ * Also supports the attributes of *[Component](../component/)*.
 
 Bindings
 --------

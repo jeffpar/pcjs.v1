@@ -33,7 +33,7 @@ Attributes
 	For example, if you've defined a Control Panel with a &lt;textarea&gt; control bound to "print", specifying a
 	binding of "print" for the Parallel Port component will bind its port to the same control.
 	
-Also supports the attributes of *[Component](/docs/pcx86/component/)*.
+Also supports the attributes of *[Component](../component/)*.
 
 Bindings
 --------

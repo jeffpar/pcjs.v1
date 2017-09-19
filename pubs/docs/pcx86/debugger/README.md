@@ -26,7 +26,7 @@ Attributes
 	* One or more message categories to enable, separated by |. By default, all message categories are disabled.
 	See the Debugger's "m" command for a current list of message categories.
 
-Also supports the attributes of *[Component](/docs/pcx86/component/)*. The *id* attribute is optional, since machines
+Also supports the attributes of *[Component](../component/)*. The *id* attribute is optional, since machines
 currently support only one Debugger component.
 
 Bindings

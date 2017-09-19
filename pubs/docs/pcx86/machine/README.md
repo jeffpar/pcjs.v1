@@ -19,7 +19,7 @@ Purpose
 
 Container for a complete machine definition.
 
-Machines are components that contain other components. See [Component](/docs/pcx86/component/) for more details.
+Machines are components that contain other components. See [Component](../component/) for more details.
 
 Attributes
 ----------
@@ -28,7 +28,7 @@ Attributes
  
 	For PCx86 machines, this must be set to "pcx86", indicating the machine belongs to the PCx86 application.
 	
- * Also supports the attributes of [Component](/docs/pcx86/component/). The *id* attribute is optional for a machine,
+ * Also supports the attributes of [Component](../component/). The *id* attribute is optional for a machine,
 unless there is more than one machine on a page, in which case each machine must have a unique *id*.
 
 Bindings

@@ -36,11 +36,11 @@ Attributes
 	
  * *notify* (optional)
  
-	The *id* of a component to notify when *file* has been loaded. For example, the *[Video](/docs/pcx86/video/)*
+	The *id* of a component to notify when *file* has been loaded. For example, the *[Video](../video/)*
 	component may need to know when an external video ROM has been loaded. Any component can load its own files,
 	including ROM image files, but it's simpler to use the ROM component and request notification.
 	
-Also supports the attributes of *[Component](/docs/pcx86/component/)*.
+Also supports the attributes of *[Component](../component/)*.
 
 Bindings
 --------

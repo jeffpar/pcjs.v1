@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.37.0/manifest.xsl"?>
+<manifest type="software">
+	<title>Microsoft Multiplan</title>
+	<version>1.06</version>
+	<type>Application</type>
+	<category>Productivity</category>
+	<author>Microsoft</author>
+	<releaseDate date="1983-02-28">Feb 28, 1983</releaseDate>
+	<disk id="disk01" size="368640" chs="40:2:9" img="archive/MULTIPLAN106.img" href="/disks/pcx86/apps/microsoft/multiplan/1.06/MULTIPLAN106.json" md5="262d9169a64b30f73ecfdfad72ac2680" md5json="a006da508422a0255a8aabc445f56564">
+		<name>MS Multiplan 1.06 (Modified)</name>
+		<file size="17792" time="1983-10-20 12:00:00" attr="0x20">COMMAND.COM</file>
+		<file size="4736" time="1983-10-20 12:00:00" attr="0x20">IBMBIO.COM</file>
+		<file size="17024" time="1983-10-20 12:00:00" attr="0x20">IBMDOS.COM</file>
+		<file size="8441" time="1984-11-01 18:20:06" attr="0x20">MP.COM</file>
+		<file size="41000" time="1983-02-28 17:30:18" attr="0x20">MP.HLP</file>
+		<file size="20488" time="1983-02-28 17:26:26" attr="0x20">MP.LOD</file>
+		<file size="24130" time="1983-02-28 17:27:50" attr="0x20">MP.SYS</file>
+		<file size="6364" time="1983-02-28 17:28:14" attr="0x20">MP40.DAT</file>
+		<file size="6314" time="1983-03-01 09:01:24" attr="0x20">MP80.DAT</file>
+		<file size="7424" time="1983-02-28 17:45:28" attr="0x20">MPBARE.COM</file>
+	</disk>
+</manifest>
