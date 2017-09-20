@@ -11,4 +11,4 @@ PDP-10 Device Configurations
  
 * [Control Panels](panel/)
 
-Test machines include a [PDP-10 (Model KA10) with Debugger](/devices/pdp11/machine/ka10/panel/debugger/).
+Test machines include a [PDP-10 (Model KA10) with Debugger](/devices/pdp10/machine/ka10/test/debugger/).

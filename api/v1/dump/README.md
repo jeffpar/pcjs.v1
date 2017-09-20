@@ -15,11 +15,11 @@ scripts: # the following list of scripts should mirror what /modules/diskdump/li
 ---
 
 PCjs DiskDump and FileDump API
-===
+------------------------------
 
-The PCjs [DiskDump](/modules/diskdump/) and [FileDump](/modules/filedump/) API are not fully supported
-by the current PCjs web server.  When [pcjs.org](http://www.pcjs.org/) switched from a Node-based web server running on
-[Amazon Web Services](https://aws.amazon.com/elasticbeanstalk/) to [GitHub Pages](https://pages.github.com/),
+The PCjs [DiskDump](/modules/diskdump/) and [FileDump](/modules/filedump/) API are not fully supported by the
+current PCjs web server.  When [pcjs.org](http://www.pcjs.org/) switched from a Node-based web server running
+on [Amazon Web Services](https://aws.amazon.com/elasticbeanstalk/) to [GitHub Pages](https://pages.github.com/),
 the original server-side API had to be abandoned.
 
 However, we're working on a client-side replacement of the API that will run
