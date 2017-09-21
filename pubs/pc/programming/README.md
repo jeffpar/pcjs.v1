@@ -5,7 +5,7 @@ permalink: /pubs/pc/programming/
 ---
 
 PC Programming Guides
----
+---------------------
 
 The following is a list of programming guides that were useful during the development of PCjs.  Additional
 information (errata, disks, etc) is provided where available.

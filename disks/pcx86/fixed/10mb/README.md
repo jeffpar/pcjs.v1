@@ -51,54 +51,55 @@ will load the following PC AT controller configuration and disk image:
 
 ### Notes Regarding 10Mb Disks
 
-The [PC-DOS 2.00 Formatted Disk (Empty)](pcdos200-empty.xml) is *completely* empty.  It was partitioned with the PC-DOS 2.00
-**FDISK** utility, allocating the entire disk to a single DOS partition, and then it was formatted with the PC-DOS 2.00
-**FORMAT** utility.  Neither the **FORMAT** "/S" option nor the **SYS** command were used, so no system files were
-transferred, leaving the disk completely empty and non-bootable.
+The [PC-DOS 2.00 Formatted Disk (Empty)](pcdos200-empty.xml) is *completely* empty.  It was partitioned with the PC-DOS
+2.00 **FDISK** utility, allocating the entire disk to a single DOS partition, and then it was formatted with the PC-DOS
+2.00 **FORMAT** utility.  Neither the **FORMAT** "/S" option nor the **SYS** command were used, so no system files were
+transferred, leaving the disk completely empty and unbootable.
 
 After formatting, PC-DOS 2.00 reports:
 
 	10592256 bytes total disk space
 	10592256 bytes available on disk
 
-As explained in the [DiskDump source code](/modules/diskdump/lib/diskdump.js), in its description of the 10Mb
+As explained in our [DiskDump source code](/modules/diskdump/lib/diskdump.js), in its description of the 10Mb
 BPB, a 10Mb "Type 3" PC XT fixed disk contains:
 
 	306 cylinders
 	4 heads
 	17 sectors/track
 
-for a total of 20808 sectors or 10,653,696 bytes.  However, as p.1-179 of the PC XT Technical Reference Manual
+for a total of 20808 sectors or 10,653,696 bytes.  However, as page 1-179 of the PC XT Technical Reference Manual
 (April 1983) notes:
 
 	WARNING: The last cylinder on the fixed disk drive is reserved for diagnostic use.
     Diagnostic write tests will destroy any data on this cylinder.
 
-And this is confirmed by the PC XT BIOS, p.A-94, in the code for the "GET PARAMETERS (AH = 8)" function:
+And this is confirmed by the PC XT BIOS, page A-94, in the code for the "GET PARAMETERS (AH = 8)" function:
 
 	C800:03B2 268B07        MOV     AX,ES:[BX]      ; MAX NUMBER OF CYLINDERS
 	C800:03B5 2D0200        SUB     AX,2            ; ADJUST FOR 0-N AND RESERVE LAST TRACK
 
 By "RESERVE LAST TRACK", they really meant "RESERVE LAST CYLINDER", because 68 (not 17) sectors are reserved at
 the end of the disk.  In addition, the first sector of the disk is reserved for the Master Boot Record (MBR), so there
-are a total of 69 reserved sectors.  (20808 - 69) = 20739 or 0x5103, which is exactly what's stored in the "total
-sectors" field of the disk's BPB, yielding a total partition size of 10,618,368 bytes.
+are a total of 69 reserved sectors.  20808 - 69 = 20739 sectors (0x5103), which is exactly what's stored in the
+"total sectors" field of the disk's BPB, yielding a total partition size of 10,618,368 bytes.
 
 However, that 69-sector overhead is not the end of the story.  There is also overhead incurred by the FAT file system,
 which, in this case, consists of:
 
-- Boot sector (1)
+- DOS Boot sector (1)
 - FAT sectors (2 * 8 = 16)
 - Root directory sectors (32)
 
-for a total of 49 sectors, leaving (20739 - 49) = 20690 sectors.  Moreover, free space is measured in clusters,
+for a total of 49 sectors, leaving 20739 - 49 = 20690 sectors.  Moreover, free space is measured in clusters,
 not sectors, and the partition uses 8 sectors/cluster, leaving room for 2586.25 clusters.  Since a fractional cluster
 is not allowed, another 2 sectors are lost, bringing the total FAT file system overhead to 51 sectors.
  
 Thus, actual free space is (20739 - 51) * 512, or 10,592,256 bytes, which is exactly what DOS reports as the available
 space.
 
-Some sources on the internet (eg,[http://www.wikiwand.com/en/Timeline_of_DOS_operating_systems](http://www.wikiwand.com/en/Timeline_of_DOS_operating_systems))
+Some sources on the internet (eg,
+[http://www.wikiwand.com/en/Timeline_of_DOS_operating_systems](http://www.wikiwand.com/en/Timeline_of_DOS_operating_systems))
 claim that the FAT file system overhead for the XT's 10Mb disk is "50 sectors".  As they explain:
 
 	"The fixed disk has 10,618,880 bytes of raw space: 305 cylinders (the equivalent of tracks) × 2 platters
