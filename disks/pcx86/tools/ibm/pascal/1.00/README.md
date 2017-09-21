@@ -26,10 +26,51 @@ properly.  Given this dependency, it's odd that IBM didn't simply distribute the
 Pascal disk; there was certainly room for it, so it wouldn't have cost anything, and it would have reduced the risk
 of using a newer and potentially incompatible linker.
 
+NOTE: We do not have copies of the three original distribution disks.  However, based on information in IBM's Pascal
+Compiler documentation, we were able to recreate the contents of the disks.  The file dates were arbitrarily selected
+from the August 1981 time frame.
+
 ### Directory of IBM Pascal 1.00 (Disk 1)
+
+	 Volume in drive A is PAS1       
+	 Directory of  A:\
+
+	ENTX6S   ASM     8320   8-31-81  12:00p
+	FILKQQ   INC     5347   8-31-81  12:00p
+	FILUQQ   INC     1513   8-31-81  12:00p
+	PAS1     EXE    81408   8-31-81  12:00p
+	PASKEY           2816   8-31-81  12:00p
+	        5 File(s)     59904 bytes free
 
 ### Directory of IBM Pascal 1.00 (Disk 2)
 
+	 Volume in drive A is PAS2       
+	 Directory of  A:\
+
+	PAS2     EXE    99200   8-31-81  12:00p
+	        1 File(s)     60928 bytes free
+
 ### Directory of IBM Pascal 1.00 (Disk 3)
 
+	 Volume in drive A is PAS3       
+	 Directory of  A:\
+
+	PASCAL             50   8-31-81  12:00p
+	PASCAL   LIB    83456   8-31-81  12:00p
+	        2 File(s)     76288 bytes free
+
 ### Directory of IBM Pascal 1.00 (Combined)
+
+	 Volume in drive A is PASCAL100  
+	 Directory of  A:\
+
+	PAS1     EXE    81408   8-31-81  12:00p
+	PASKEY           2816   8-31-81  12:00p
+	ENTX6S   ASM     8320   8-31-81  12:00p
+	FILKQQ   INC     5347   8-31-81  12:00p
+	FILUQQ   INC     1513   8-31-81  12:00p
+	PAS2     EXE    99200   8-31-81  12:00p
+	PASCAL             50   8-31-81  12:00p
+	PASCAL   LIB    83456   8-31-81  12:00p
+	LINK     EXE    43264   8-04-81
+	        9 File(s)     31744 bytes free
