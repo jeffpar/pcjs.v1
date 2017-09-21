@@ -1,0 +1,2539 @@
+CHAPTER 3     THE PC ROM BIOS
+
+ Programming Technical Reference - IBM
+ Copyright 1988, Dave Williams
+
+Interrupt  10h  Video I/O - services to handle video output
+(0:0040h)       The ROM video routines in the original PC BIOS are designed for
+                use with the Color Graphics Adapter and incorporate code to test
+                for the horizontal retrace before writing. The check is
+                performed no matter what actual display adapter is installed.
+                The ROM character table for the first 128 characters is located
+                at 0FA6Eh in the PC. Int 01Fh can be used to point to a second
+                table of 128 characters.
+                 CS, SS, DS, ES, BX, CX, DX are preserved during call. All
+                others are destroyed.
+
+Function 00h    Determine or Set Video State
+entry   AH      00h     set video mode
+        AL      display mode:                    CGA|PCjr|MDA|MCGA|EGA|VGA|8514
+                00h     40x25 B/W text           CGA|PCjr|   |    |EGA|   |
+  16 color      01h     40x25 color text         CGA|PCjr|   |    |EGA|   |
+                02h     80x25 B/W text           CGA|PCjr|   |    |EGA|   |
+  16 color      03h     80x25 color text         CGA|PCjr|   |    |EGA|VGA|
+  4 color       04h     320x200 color graphics   CGA|PCjr|   |    |EGA|   |
+  4 tone gray   05h     320x200 B/W graphics     CGA|PCjr|   |    |EGA|   |
+  2 color       06h     640x200 B/W graphics     CGA|PCjr|   |    |EGA|   |
+  monochrome    07h     80x25 monochrome text       |    |MDA|    |EGA|   |
+  16 color      08h     160x200 color graphics   CGA|PCjr|   |    |   |   |
+  16 color      09h     320x200 color graphics      |PCjr|   |    |   |VGA|
+  4 color       0Ah     640x200 color graphics      |PCjr|   |    |   |   |
+     N/A        0Bh     BIOS font load              |    |   |    |EGA|VGA|
+     N/A        0Ch     BIOS font load              |    |   |    |EGA|VGA|
+  16 color      0Dh     320x200 graphics            |    |   |    |EGA|VGA|
+  16 color      0Eh     640x200 graphics            |    |   |    |EGA|VGA|
+  monochrome    0Fh     640x350 graphics            |    |   |    |EGA|VGA|
+  16 & 64 color 10h     640x350 color hi-res        |    |   |    |EGA|VGA|
+  2 color       11h     640x480 graphics            |    |   |MCGA|   |VGA|
+  16 color      12h     640x480 graphics            |    |   |    |   |VGA|
+  256 color     13h     320x200 graphics            |    |   |MCGA|   |VGA|8514
+                14h-20h used by EGA and VGA graphics modes
+                18h     132x44 8x8 char mono        | Tseng Labs EVA
+                19h     132x25 8x14 char mono       | Tseng Labs EVA
+                1Ah     132x28 8x13 char mono       | Tseng Labs EVA
+ monochrome     21h     Hercules Graphics, Graphics Page 1
+ monochrome     22h     Hercules Graphics, Graphics Page 2
+                22h     132x44                      | Tseng, Ahead
+                23h     132x25                      | Tseng Labs EVA
+                        132x25                      | Ahead Systems EGA2001
+                        132x25                      | ATI EGA Wonder
+                24h     132x28                      | Tseng Labs EVA
+                25h     80x60  640x480              | Tseng Labs EVA
+ 16 color               640x480                     | VEGA VGA
+                26h     80x60                       | Tseng Labs EVA
+                        80x60   640x480             | Ahead Systems EGA2001
+ 16 color       27h     720x512                     | VEGA VGA
+ monochrome             132x25                      | ATI EGA Wonder
+                28h     unknown                     | VEGA VGA
+ 16 color       29h     800x600                     | VEGA VGA
+ 256 color      2Dh     640x350                     | VEGA VGA
+ 256 color      2Eh     640x480                     | VEGA VGA
+ 256 color      2Fh     720x512                     | VEGA VGA
+ 256 color      30h     800x600                     | VEGA VGA
+                        unknown                     | AT&T 6300
+ 16 color       36h     960x720                     | VEGA VGA
+ 16 color       37h     1024x768                    | VEGA VGA
+ monochrome             132x44                      | ATI EGA Wonder
+ 2 color        40h     640x400                     | AT&T 6300
+                        80x43                       | VEGA VGA
+ 16 color       41h     640x200                     | AT&T 6300
+                        132x25                      | VEGA VGA
+ 16 color       42h     640x400                     | AT&T 6300
+                        132x43                      | VEGA VGA
+                43h     unsupported 640x200 of 640x400 viewport  AT&T 6300
+                        80x60                       | VEGA VGA
+                44h     disable VDC and DEB output  | AT&T 6300
+                        100x60                      | VEGA VGA
+                48h     80x50   640x400             | AT&T 6300
+                4Dh     120x25                      | VEGA VGA
+                4Eh     120x43                      | VEGA VGA
+                4Fh     132x25                      | VEGA VGA
+ monochrome     50h     132x25                      | Ahead Systems EGA2001
+ 16 color               640x480                     | Paradise EGA-480
+ monochrome             80x43                       | VEGA VGA
+                        640x480 mono?               | Taxan 565 EGA
+                51h     80x30                       | Paradise EGA-480
+ monochrome             132x25                      | VEGA VGA
+                        640x480 ?                   | ATI EGA Wonder
+ monochrome     52h     132x44                      | Ahead Systems EGA2001
+ monochrome             132x43                      | VEGA VGA
+                        752x410 ?                   | ATI EGA Wonder
+                53h     800x560 ?                   | ATI EGA Wonder
+                54h     132x43                      | Paradise EGA-480
+ 16 color               132x43                      | Paradise VGA
+ 16 color               132x43                      | Paradise VGA on multisync
+                        132x43                      | Taxan 565 EGA
+                55h     132x25                      | Paradise EGA-480
+ 16 color               132x25                      | Paradise VGA
+ 16 color               132x25                      | Paradise VGA on multisync
+                        132x25                      | Taxan 565 EGA
+                56h     132x43                      | NSI Smart EGA+
+                        132x43                      | Paradise VGA
+                        132x43                      | Paradise VGA on multisync
+ monochrome             132x43                      | Taxan 565 EGA
+                57h     132x25                      | NSI Smart EGA+
+                        132x25                      | Paradise VGA
+                        132x25                      | Paradise VGA on multisync
+ monochrome             132x25                      | Taxan 565 EGA
+                58h     100x75   800x600 16/256k    | Paradise VGA
+                59h     100x75   800x600            | Paradise VGA
+                5Eh     640x400                     | Paradise VGA,VEGA VGA
+                5Fh     640x480                     | Paradise VGA
+                60h     80x???   ???x400            |  Corona/Cordata BIOS v4.10+
+                        752x410                     | VEGA VGA
+                60h     400 line graphics+80 col text |(Corona/Cordata)
+                61h     400 line graphics           | Corona/Cordata BIOS v4.10+
+                        720x540                     | VEGA VGA
+                62h     800x600                     | VEGA VGA
+ 16 color       71h     100x35 800x600              | NSI Smart EGA+
+                74h     640x400 graphics            | Toshiba 3100
+                82h     80x25 B&W                   | AT&T VDC overlay mode *
+                83h     80x25                       | AT&T VDC overlay mode *
+                86h     640x200 B&W                 | AT&T VDC overlay mode *
+                C0h     640x400   2/prog pallet     | AT&T VDC overlay mode *
+                C4h     disable output              | AT&T VDC overlay mode *
+                D0h     640x400                     | DEC VAXmate AT&T mode
+                unknown 640x225                     | Z-100
+                unknown 640x400                     | Z-100
+
+note 1) If the high bit in AL is set, the display buffer is not cleared when a
+        new mode is selected. This may be used to mix modes on the display;
+        for example, characters of two difference sizes might be displayed
+     2) Modes 8-10 are available on the PCjr, Tandy 1000, and PS/2
+     3) IBM claims 100% software and hardware emulation of the CGA with the
+        MCGA chipset. All registers may be read and written as CGA. All
+        characters are double-scanned to give 80x25 with 400 line resolution.
+        The attributes for setting border color may be set on MCGA, but the
+        borders will remain the default color (they cannot actually be set)
+     4) The IBM Color Graphics Adapter (CGA) is too slow for the screen to
+        be updated before the vertical retrace of the monitor is completed.
+        If the video RAM is addressed directly, the screen will have "snow"
+        or interference. IBM's default is to turn the adapter off when it is
+        being updated, ie "flickering" when the display is scrolled.
+     5) The vertical retrace signal may be ignored when using the MCGA adapter.
+        The MCGA will not generate snow when written to. There is no flicker
+        with the MCGA.
+     6) The PCjr Video Gate Array uses a user-defined block of main system RAM
+        from 4 to 32k in size instead of having dedicated memory for the
+        display. Vertical retrace may be ignored when writing to the PCjr.
+        There is no flicker with the PCjr display.
+     7) The Hercules Graphics Card has 750x348 resolution
+     8) The Hercules Graphics Card takes 32k beginning at B:000 (same as MDA)
+     9) The CGA, MCGA, and VGA adapters use hardware address B:800
+    10) The BIOS clears the screen when the mode is set or reset.
+    11) For AT&T VDC overlay modes, BL contains the DEB mode, which may be 06h,
+        40h, or 44h
+
+
+Function 01h    Set Cursor Type - set the size of the cursor or turn it off
+entry   AH      01h
+        CH      bit values:
+                bits 0-4  top line for cursor in character cell
+                bits 5-6  blink attribute
+                          00    normal
+                          01    invisible (no cursor)
+                          10    slow      (not used on original IBM PC)
+                          11    fast
+        CL      bit values:
+                bits 0-4  bottom line for cursor in character cell
+return  none
+note 1) The ROM BIOS default cursors are:  start    end
+                     monochrome mode 07h:    11     12
+                      text modes 00h-03h:     6      7
+     2) The blinking in text mode is caused by hardware and cannot be turned
+        off, though some kludges can temporarily fake a nonblinking cursor
+     3) The cursor is automatically turned off in graphics mode
+     4) Another method of turning off the cursor in text mode is to position it
+        to a nondisplayable address, such as (X,Y)=(0,25)
+     5) Buggy on EGA systems - BIOS remaps cursor shape in 43 line modes, but
+        returns unmapped cursor shape
+
+
+Function 02h    Set Cursor Position - reposition the cursor to (X,Y)
+entry   AH      02h
+        BH      video page
+                00h     graphics mode
+                03h     modes 2 and 3
+                07h     modes 0 and 1
+        DH      row    (Y=0-24)
+        DL      column (X=0-79 or 0-39)
+return  none
+note 1) (0,0) is upper left corner of the screen
+
+
+Function 03h    Read Cursor Position - return the position of the cursor
+entry   AH      03h
+        BH      page number
+                00h     in graphics modes
+                03h     in modes 2 & 3
+                07h     in modes 0 & 1
+return  CH      top line for cursor    (bits 4-0)
+        CL      bottom line for cursor (bits 4-0)
+        DH      row number    (Y=0-24)
+        DL      column number (X=0-79 or 0-39)
+
+
+Function 04h    Read Light Pen - fetch light pen information
+entry   AH      04h
+return  AH      00h     light pen not triggered
+        AH      01h     light pen is triggered, values in resgisters
+        BX      pixel column               (X=0-319 or 0-639)  graphics mode
+        CH      raster line                (Y=0-199)        old graphics modes
+        CX      (EGA) raster line (0-nnn)                   new graphics modes
+        DH      row of current position    (Y=0-24)            text mode
+        DL      column of current position (X=0-79 or 0-39)    text mode
+note    Not supported on PS/2
+
+
+Function 05h    Select Active Page - set page number for services 6 and 7
+entry   AH      05h
+        AL      number of new active page
+                0-7     modes 00h and 01h (CGA)
+                0-3     modes 02h and 03h (CGA)
+                0-7     modes 02h and 03h (EGA)
+                0-7     mode 0Dh (EGA)
+                0-3     mode 0Eh (EGA)
+                0-1     mode 0Fh (EGA)
+                0-1     mode 10h (EGA)
+for PCjr only:
+        AL      80h to read CRT/CPU page registers
+                81h to set CPU page register to value in BL
+                82h to set CRT page register to value in BH
+                83h to set both CPU and page registers
+                    (and Corona/Cordata BIOS v4.10+)
+        BH      CRT page number for subfunctions 82h and 83h
+        BL      CPU page register for subfunctions 81h and 83h
+return  standard PC  none
+        PCjr         if called with AH bit 7=1 then
+                     BH      CRT page register
+                     BL      CPU page register
+        DX      segment of graphics bitmap buffer (video modes 60h,61h; AL0Fh)
+note 1) Mono adapter has only one display page
+     2) CGA has four 80x25 text pages or eight 40x25 text pages
+     3) A separate cursor is maintained for each display page
+     4) Switching between pages does not affect their contents
+     5) Higher page numbers indicate higher memory positions
+
+
+Function 06h    Scroll Page Up - scroll up or clear a display "window"
+entry   AH      06h
+        AL      number of lines blanked at bottom of page
+                0 = blank entire window
+        BH      attributes to be used on blank line
+        CH      row    (Y) of upper left corner or window
+        CL      column (X) of upper left corner of window
+        DH      row    (Y) of lower right corner of window
+        DL      column (X) of lower right corner of window
+return  none
+note 1) Push BP before scrolling, pop after
+     2) If in CGA text mode, affects current page only
+
+
+Function 07h    Scroll Page Down - scroll down or clear a display "window"
+entry   AH      07h
+        AL      number of lines to be blanked at top of page
+                0 = blank entire window
+        BH      attributes to be used on blank line
+        CH      row    (Y) of upper left corner or window
+        CL      column (X) of upper left corner of window
+        DH      row    (Y) of lower right corner of window
+        DL      column (X) of lower right corner of window
+return  none
+note 1) Push BP before scrolling, pop after
+     2) If in CGA text mode, affects current page only
+
+
+Function 08h    Read Character Attribute - of character at current cursor pos.
+entry   AH      08h
+        BH      display page number - text mode
+return  AH      character attribute - text mode
+        AL      ASCII code of character at current cursor position
+
+
+Function  09h   Write Character and Attribute - at current cursor position
+entry   AH      09h
+        AL      ASCII code of character to display
+        BH      display page number - text mode
+        BL      attribute/color of character
+        CX      number of characters to write
+return  none
+note 1) CX should not exceed actual rows availible, or results may be erratic
+     2) Setting CX to zero will cause runaway
+     3) All values of AL result in some sort of display; the various control
+        characters are not recognized as special and do not change the current
+        cursor position
+     4) Does not change cursor position when called - the cursor must be
+        advanced with int 10 function 0Ah.
+     5) If used to write characters in graphics mode with bit 7 of AH set to 1
+        the character will by XORed with the current display contents.
+     6) In graphics mode the bit patterns for ASCII character codes 80h-0FFh
+        are obtained from a table. On the standard PC and AT, the location is at
+        interrupt vector 01Fh (0000:007C). For ASCII characters 00h-07Fh, the
+        table is at an address in ROM. On the PCjr the table is at interrupt
+        vector 44h (0000:00110) and is in addressable RAM (may be replaced by
+        the user)
+     7) All characters are displayed, including CR, LF, and BS
+
+
+Function 0Ah    Write Character - display character(s) (use current attribute)
+entry   AH      0Ah
+        AL      ASCII code of character to display
+        BH      display page - text mode
+        BL      color of character (graphics mode, PCjr only)
+        CX      number of times to write character
+return  none
+note 1) CX should not exceed actual rows availible, or results may be erratic
+     2) All values of AL result in some sort of display; the various control
+        characters are not recognized as special and do not change the current
+        cursor position
+     3) If used to write characters in graphics mode with bit 7 of AH set to 1
+        the character will by XORed with the current display contents.
+     4) In graphics mode the bit patterns for ASCII character codes 80h-0FFh
+        are obtained from a table. On the standard PC and AT, the location is at
+        interrupt vector 01Fh (0000:007C). For ASCII characters 00h-07Fh, the
+        table is at an address in ROM. On the PCjr the table is at interrupt
+        vector 44h (0000:00110) and is in addressable RAM (may be replaced by
+        the user)
+     5) In EGA in graphics modes, replication count in CX works correctly only
+        if all characters written are contained on the same row
+     6) All characters are displayed, including CR, LF, and BS
+
+
+Function 0Bh    Set Color Palette - set palette for graphics or text border
+entry   AH      0Bh
+        BH      00h     select border (text mode)
+        BL      color 0-15, 16-31 for high-intensity characters
+        BH      01h     set graphics palette with value in BL
+ (CGA)  BL      0       green/red/yellow
+                1       cyan/magenta/white
+ (EGA) (graphics modes)
+        BH      0
+        BL      has border color (0-15) & high intensity bkgr'd color (16-31)
+        BH      1
+        BL      contains palette being selected (0-1)
+return  none
+note 1) Valid in CGA mode 04h, PCjr modes 06h, 08h-0Ah
+     2) Although the registers in the MCGA may be set as if to change the
+        border, the MCGA will not display a border no matter what register
+        settings are used.
+
+
+Function 0Ch    Write Dot - plot one graphics pixel
+entry   AH      0Ch
+        AL      dot color code  (0/1 in mode 6, 0-3 in modes 4 and 5)
+                (set bit 7 to XOR the dot with current color)
+                0-3 mode 04h, 05h
+                0-1 mode 06h
+        BH      page number (ignored if adapter supports only one page)
+        CX      column (X=0000h - 027Fh)
+                (0 - 319 in modes 4,5,13,  0 - 639 in modes 6,14,15,16)
+        DX      row    (Y=0000h - 00C7h) (0 - 199 CGA)
+return  none
+note    Video graphics modes 4-6 only
+
+
+Function 0Dh    Read Dot - determine the color of one graphics pixel
+entry   AH      0Dh
+        CX      column (X=0000h - 027Fh)  (0-319 or 639)
+        DX      row    (Y=0000h - 00C7h)  (0-199)
+return  AL      color of dot
+note    Only valid in graphics mode
+
+
+Function 0Eh    Write TTY - write one character and update cursor. Also handles
+                CR (0Dh), beep (07h), backspace (10h), and scrolling
+entry   AH      0Eh
+        AL      ASCII code of character to be written
+        BH      page number (text)
+        BL      foreground color (video modes 6 & 7 only) (graphics)
+return  none
+note 1) The ASCII codes for bell, backspace, carriage return, and linefeed are
+        recognized and appropriate action taken. All other characters are
+        written to the screen and the cursor is advanced to the next position
+     2) Text can be written to any CGA page regardless of current active page
+     3) Automatic linewrap and scrolling are provided through this function
+     4) This is the function used by the DOS CON console driver.
+     5) This function does not explicitly allow the use of attributes to the
+        characters written. Attributes may be provided by first writing an ASCII
+        27h (blank) with the desired attributes using function 09h, then
+        overwriting with the actual character using this function. While clumsy
+        this allows use of the linewrap and scrolling services provided by
+        this function
+
+
+Function 0Fh    Return Current Video State - mode and size of the screen
+entry   AH      0Fh
+return  AH      number of character columns on screen
+        AL      mode currently set (see AH=00h for display mode codes)
+        BH      current active display page
+note    If mode was set with bit 7 set ("no blanking"), the returned mode will
+        also have bit 7 set
+
+
+Function 10h    Set Palette Registers
+                PCjr, Tandy 1000, EGA, MCGA, VGA
+entry   AH      10h
+        AL      00h     set individual palette register
+                01h     set border color palette register
+                02h     set all palette registers and overscan
+                03h     toggle blink/intensity bit           (EGA, MCGA, VGA)
+                04h     unknown
+                05h     unknown
+                06h     unknown
+                07h     read individual palette register                 (VGA)
+                08h     read overscan (order color)                      (VGA)
+                09h     read all palette registers and overscan register (VGA)
+                10h     set individual video DAC color register    (MCGA, VGA)
+                11h     unknown
+                12h     set block of video DAC color registers     (MCGA, VGA)
+                13h     set video DAC color page                         (VGA)
+                14h     unknown
+                15h     read individual video DAC color register   (MCGA, VGA)
+                16h     unknown
+                17h     read block of video DAC color registers    (MCGA, VGA)
+                18h     unknown
+                19h     unknown
+                1Ah     read video DAC color-page state                  (VGA)
+                1Bh     perform gray-scale summing                       (VGA)
+        BH      color value
+        BL      if AL=00h       palette register to set (00h-0Fh)
+                if AL=03h       0       to enable intensity
+                                1       to enable blinking
+        ES:DX   if AL=02h       pointer to 16-byte table of register values
+                                followed by the overscan value:
+                                bytes 0-15     values for palette registers 0-15
+                                byte 16        value for border register
+return  none
+note    DAC is Digital to Analog Convertor circuit in MCGA/VGA chips
+
+
+Function 11h    Character Generator Routine (EGA and after)
+entry   AH      11h
+                The following functions will cause a mode set, completely
+                resetting the video environment, but without clearing the video
+                buffer.
+                AL      00h, 10h  load user-specified patterns
+                        ES:BP   pointer to user table
+                        CX      count of patterns to store
+                        DX      character offset into map 2 block
+                        BL      block to load in map 2
+                        BH      number of bytes per character pattern
+                AL      01h, 11h  load ROM monochrome patterns (8 by 14)
+                        BL      block to load
+                AL      02h, 12h  load ROM 8 by 8 double-dot patterns
+                        BL      block to load
+                AL      03h       set block specifier
+                        BL      block specifier
+                AL      04h       load 8x16 text characters (MCGA, VGA)
+                AL      14h       set 8x16 text characters (MCGA, VGA)
+                The routines called with AL=1x are designed to be called only
+                immediately after a mode set and are similar to the routines
+                called with AL=0x, except that:
+                        Page 0 must be active.
+                        Bytes/character is recalculated.
+                        Max character rows is recalculated.
+                        CRT buffer length is recalculated.
+                        CRTC registers are reprogrammed as follows:
+                        reg09h    bytes/char-1; max scan line (mode 7 only)
+                        reg0Ah    bytes/char-2; cursor start
+                        reg0Bh    0           ; cursor end
+                        reg12h    ((rows+1)*(bytes/char))-1
+                                              ; vertical display end
+                        reg14h    bytes/char  ; underline loc
+                                  (*** BUG: should be 1 less ***)
+                The following functions are meant to be called only after a
+                mode set:
+                AL      20h     user 8 by 8 graphics characters (INT 1FH)
+                                ES:BP = pointer to user table
+                AL      21h     user graphics characters
+                        ES:BP   pointer to user table
+                        CX      bytes per character
+                        BL      row specifier
+                                0       user set - DL = number of rows
+                                1       14 rows
+                                2       25 rows
+                                3       43 rows
+                AL      22h     ROM 8 by 14 set
+                        BL      row specifier
+                AL      23h     ROM 8 by 8 double dot
+                        BL      row specifier
+                AL      24h     load 8x16 graphics characters (MCGA, VGA)
+                AL      30h     return information
+                        BH      pointer specifier
+                                0       int 1Fh pointer
+                                1       int 44h pointer
+                                2       ROM 8 by 14 character font pointer
+                                3       ROM 8 by 8 double dot font pointer
+                                4       ROM 8 by 8 DD font (top half)
+                                5       ROM text alternate (9 by 14) pointer
+return  ES:BP   specified pointer value
+        CX      bytes/character
+        DL      character rows on screen
+
+
+
+Function 12h    Alternate Select (EGA and after)
+entry   AH      12h
+        AL      00h     unknown
+                01h     unknown
+                02h     select 400 line mode                            (VGA)
+        BL      10h     return EGA information
+                20h     select alternate print screen routine
+                30h     select vertical resolution for text modes       (VGA)
+                31h     enable/disable default palette loading    (MCGA, VGA)
+                32h     enable/disable video addressing           (MCGA, VGA)
+                33h     enable/disable default gray scale summing (MCGA, VGA)
+                34h     enable/diable text cursor emulation             (VGA)
+                35h     display-switch interface
+return  BH      00h     if color mode is in effect
+                01h     if mono mode is in effect
+        BL      00h     if 64k EGA memory
+                01h     if 128k EGA memory
+                02h     if 192k EGA memory
+                03h     if 256k EGA memory
+        CH      feature bits
+        CL      switch settings
+
+
+Function 13h    Write String, Don't Move Cursor              (AT, XT/286, PS/2)
+entry   AH      13h
+        AL      00h
+        BH      display page number
+        BL      attribute
+        CX      length of string
+        DX      starting cursor position
+        ES:BP   pointer to start of string
+return  none
+
+
+Function 13h    Write String, Move Cursor                    (AT, XT/286, PS/2)
+entry   AH      13h
+        AL      01h
+        BH      display page number
+        BL      attribute
+        DX      starting cursor position
+        CX      length of string
+        ES:BP   pointer to start of string
+return  none
+
+
+Function 13h    Write String of Alternating Characters and Attributes;
+                Don't Move Cursor                            (AT, XT/286, PS/2)
+entry   AH      13h
+        AL      02h
+                bit 0: set in order to move cursor after write
+                bit 1: set if string contains alternating chars and attributes
+        BH      display page number
+        BL      attribute if AL bit 1 clear
+        CX      length of string
+        DH      row of starting cursor position
+        DL      column of starting cursor position
+        ES:BP   pointer to start of string
+return  none
+
+
+Function 13h    Write String of Alternating Characters and Attributes;
+                Move Cursor                                  (AT, XT/286, PS/2)
+entry   AH      13h
+        AL      03h
+            bit 0: set in order to move cursor after write
+            bit 1: set if string contains alternating characters and attributes
+        BH      display page number
+        BL      attribute if AL bit 1 clear
+        CX      length of string
+        DH,DL   row,column of starting cursor position
+        ES:BP   pointer to start of string
+return  none
+note    Recognizes CR, LF, BS, and bell
+
+
+Function 14h    Load LCD Character Font                      (Convertible)
+entry   AH      14h
+        AL      00h     load user specified font
+
+        BH      number of bytes per character
+        BL      00h     load main font (block 0)
+                01h     load alternate font (block 1)
+
+        AL      01h     load system ROM default font
+        BL      00h     load main font (block 0)
+                01h     load alternate font (block 1)
+
+        AL      02h     set mapping of LCD high intensity attribute
+        BL      00h     ignore high intensity attribute
+                01h     map high intensity to underscore
+                02h     map high intensity to reverse video
+                03h     map high intensity to seleected alternate font
+        ES:DI   pointer to character font
+        CX      number of characters to store
+        DX      character offset into RAM font area
+
+
+Function 15h    Return Physical Display Parameters           (Convertible)
+return  AX      Alternate display adapter type
+        ES:DI   pointer to parameter table:
+                word #  information
+                01h     monitor model number
+                02h     vertical pixels per meter
+                03h     horizontal pixels per meter
+                04h     total number of vertical pixels
+                05h     total number of horizontal pixels
+                06h     horizontal pixel separation in micrometers
+                07h     vertical pixel separation in micrometers
+
+
+Function 1Ah    Display Combination Code                     (PS/2)
+                Using the compatibility BIOS of the PS/2 Models 50, 60, 80 there
+                is a way to determine which video controller and attached
+                display are on the system.  The Display Combination Code (DCC)
+                is a Video BIOS function that provides the capability.
+entry   AH      1Ah
+        AL      00h     read display combination code
+                01h     write display combination code
+return  AL      1Ah     indicates Compatibility BIOS is supported,
+                         any other value is invalid
+        BH      alternate display device
+                where:
+                00h     no display
+                01h     IBM monochrome display and printer adapter
+                02h     IBM color/graphics monitor adapter
+                03h     reserved
+                04h     IBM EGA (color display)
+                05h     IBM EGA (monochrome)
+                06h     IBM PGA
+                07h     VGA (analog monochrome display)
+                08h     VGA (analog color display)
+                09h     reserved
+                0Ah     reserved
+                0Bh     IBM PS/2 Model 30 (analog monochrome display)
+                0Ch     IBM PS/2 Model 30 (analog color display)
+        BL      active display device
+
+
+Function 1Bh    Functionality/State Information              (MCGA, VGA)
+entry   AH      1Bh
+return  unknown
+
+
+Function 1Ch    Save/Restore Video State                     (VGA)
+entry   AH      1Ch
+        AL      00h     return state buffer size
+                01h     save video state
+                02h     restore video state
+return  unknown
+note    VGA only
+
+
+Function 70h    Get Video RAM Address                        (Tandy 1000)
+entry   AH      70h
+return  AX      segment addresses of the following
+                BX      offset address of green plane
+                CX      segment address of green plane
+                DX      segment address of red/blue plane
+note    (red offset = 0, blue offset = 4000)
+
+
+Function 71h    Get INCRAM Addresses                         (Tandy 1000)
+entry   AH      71h
+return  AX      segment address of the following
+                BX = segment address of INCRAM
+                CX = offset address of INCRAM
+
+
+Function 72h    Scroll Screen Right                          (Tandy 1000)
+entry   AH      72h
+        AL      number of columns blanked at left of page
+                00h     blank window
+        BH      attributes to be used on blank columns
+        CH,CL   row, column address of upper left corner
+        DH,DL   row, column address of lower right corner
+
+
+Function 73h    Scroll Screen Left                           (Tandy 1000)
+entry   AH      73h
+        AL      number of columns blanked at right of page
+                00h     blank window
+        BH      attributes to be used on blank columns
+        CH,CL   row, column address of upper left corner
+        DH,DL   row, column address of lower right corner
+
+
+Function 81h    DESQview video - Get something?
+entry   AH      81h
+        DX      4456h ('DV')
+return  ES    segment of DESQview data structure for video buffer
+        byte ES:[0] = current window number
+note    This function is probably meant for internal use only, due to the
+        magic value required in DX
+
+
+Function 82h    DESQview - Get Current Window Info
+entry   AH      82h
+        DX      4456h ('DV')
+return  AH      unknown
+        AL      current window number
+        BH      unknown
+        BL      direct screen writes
+                0       program does not do direct writes
+                1       program does direct writes, so shadow buffer not usable
+        CH      unknown
+        CL      current video mode
+        DS      segment in DESQview for data structure
+                in DV 2.00,
+                  byte DS:[0] = window number
+                  word DS:[1] = segment of other data structure
+                  word DS:[3] = segment of window's object handle
+        ES      segment of DESQview data structure for video buffer
+note    This function is probably meant for internal use only, due to the magic
+        value required in DX
+
+
+Function 0F0h   Microsoft Mouse driver EGA support - Read One Register
+entry   AH      0F0h
+        BL      register number
+        DX      group index
+            Pointer/data chips
+               00h CRT Controller (25 reg) 3B4h mono modes, 3D4h color modes
+               08h Sequencer (5 registers) 3C4h
+               10h Graphics Controller (9 registers) 3CEh
+               18h Attribute Controller (20 registers) 3C0h
+            Single registers
+               20h Miscellaneous Output register 3C2h
+               28h Feature Control register (3BAh mono modes, 3DAh color modes)
+               30h Graphics 1 Position register 3CCh
+               38h Graphics 2 Position register 3CAh
+return  BL      data
+
+
+Function 0F1h   Microsoft Mouse driver EGA support - Write One Register
+entry   AH      0F1h
+        DX      group index (see function F0h)
+        BL      register number
+        BH      value to write
+return  BL      data
+
+
+Function 0F2h   Microsoft Mouse driver EGA support - Read Register Range
+entry   AH      0F2h
+        CH      starting register number
+        CL      number of registers (>1)
+        DX      group index
+                00h     CRTC (3B4h mono modes, 3D4h color modes)
+                08h     Sequencer 3C4h
+                10h     Graphics Controller 3CEh
+                18h     Attribute Controller 3C0h
+        ES:BX   pointer to buffer, CL bytes
+
+
+Function 0F3h   Microsoft Mouse driver EGA support - Write Register Range
+entry   AH      0F3h
+        CH      starting register
+        CL      number of registers (>1)
+        DX      group index
+                00h     CRTC (3B4h mono modes, 3D4h color modes)
+                08h     Sequencer 3C4h
+                10h     Graphics Controller 3CEh
+                18h     Attribute Controller 3C0h
+        ES:BX   pointer to buffer, CL bytes
+
+
+Function 0F4h   Microsoft Mouse driver EGA support - Read Register Set
+entry   AH      0F4h
+        CX      number of registers (>1)
+        ES:BX   pointer to table of records in this format:
+             bytes 1-2 group index
+                Pointer/data chips
+                   00h CRTC (3B4h mono modes, 3D4h color modes)
+                   08h Sequencer 3C4h
+                   10h Graphics Controller 3CEh
+                   18h Attribute Controller 3C0h
+                Single registers
+                   20h Miscellaneous Output register 3C2h
+                   28h Feature Control register (3BAh mono modes, 3DAh color)
+                   30h Graphics 1 Position register 3CCh
+                   38h Graphics 2 Position register 3CAh
+             byte 3 register number (0 for single registers)
+             byte 4 register value
+
+
+Function 0F5h   Microsoft Mouse driver EGA support - Read Register Set
+entry   AH      0F5h
+        CX      number of registers (>1)
+        ES:BX   pointer to table of records in this format:
+             bytes 1-2 port number
+                Pointer/data chips
+                   00h CRTC (3B4h mono modes, 3D4h color modes)
+                   08h Sequencer 3C4h
+                   10h Graphics Controller 3CEh
+                   18h Attribute Controller 3C0h
+                Single registers
+                   20h Miscellaneous Output register 3C2h
+                   28h Feature Control register (3BAh mono modes, 3DAh color)
+                   30h Graphics 1 Position register 3CCh
+                   38h Graphics 2 Position register 3CAh
+             byte 3 register number (0 for single registers)
+             byte 4 register value
+
+
+Function 0F6h   Microsoft Mouse driver EGA support
+                Revert to Default Registers
+entry   AH      0F6h
+return  unknown
+
+
+Function 0F7h   Microsoft Mouse driver EGA support
+                Define Default Register Table
+entry   AH      0F7h
+        DX      port number
+           Pointer/data chips
+              00h CRTC (3B4h mono modes, 3D4h color modes)
+              08h Sequencer 3C4h
+              10h Graphics Controller 3CEh
+              18h Attribute Controller 3C0h
+           Single registers
+              20h Miscellaneous Output register 3C2h
+              28h Feature Control register (3BAh mono modes, 3DAh color modes)
+              30h Graphics 1 Position register 3CCh
+              38h Graphics 2 Position register 3CAh
+        ES:BX address of table of one byte entries, one byte
+              to be written to each register
+
+
+Function 0FAh   Microsoft Mouse driver EGA support - Interrogate Driver
+entry   AH      0FAh
+        BX      00h
+return  BX      00h     if mouse driver not present
+        ES:BX   pointer to EGA Register Interface version number, if present:
+                byte 1  major release number
+                byte 2  minor release number
+
+
+Function 0FEh   Get Alternate Screen Buffer Address (text mode only)
+                                                    (Topview/DesQview/Taskview)
+entry   AH     0FEh
+        ES:DI  segment:offset of assumed video buffer
+return: ES:DI  segment:offset of actual video buffer
+note 1) This alternate video buffer can be written to directly, in the same
+        manner as writing to B:000 or B:800. The MT program will manage the
+        actual display.
+     2) There is no need to synchronize vertical retrace when writing to the
+        alternate buffer; this is managed by the MT program
+     3) If TopView or DESQview is not running, ES:DI is returned unchanged.
+     4) TopView requires that function 0FFh be called every time you write into
+        the buffer to tell TopView that something changed
+
+
+Function 0FFh   Update Real Display (text mode only)                  (TopView)
+                Update Video Buffer                 (Topview/DesQview/Taskview)
+entry   AH      0FFh
+        CX      number of sequential characters that have been modified
+        DI      offset of first character that has been modified
+        ES      segment of video buffer
+return  unknown
+note 1) DesQview supports this call, but does not require it
+     2) Avoid CX=0
+
+
+
+
+Interrupt 11h   Equipment Check
+(0:0044h)       fetch a code describing active peripherals.
+entry   AH      11h
+return  AX      Equipment listing word          Bits are:
+                0       number of floppy drives
+                        0       no drives
+                        1       bootable diskette installed
+                1       math chip
+                        0       no math coprocessor (80x87) present
+                        1       math coprocessor (80x87) present
+         (PS/2) 2       0       mouse not installed
+                        1       mouse installed
+          (PC)  2,3     system board RAM
+                        0,0     16k    (PC-0, PC-1)
+                        1,1     64k    (PC-2, XT)
+                        note 1) not commonly used. Set both bits to 1
+                             2) both bits always 1 in AT
+                4,5     initial video mode
+                        0,0     no video installed (use with dumb terminal)
+                        0,1     40x25 color      (CGA)
+                        1,0     80x25 color      (CGA)
+                        1,1     80x25 monochrome (MDA or Hercules)
+                6,7     number of diskette drives (only if bit 0  1)
+                        0,0     1 drives
+                        0,1     2 drives
+                        1,0     3 drives
+                        1,1     4 drives
+                8       0       DMA present
+                        1       no DMA on system (PCjr, some Tandy 1000s)
+                9,A,B   number of RS232 serial ports (0-3)
+                        0,0,0   none
+                        0,0,1   1
+                        0,1,0   2
+                        0,1,1   3
+                        1,0,0   4
+                C       0       no game I/O attached
+                        1       game I/O attached (default for PCjr)
+                D       serial accessory installation
+                        0       no serial accessories installed
+                        1       Convertible - internal modem installed
+                        1       PCjr - serial printer attached
+                E,F     number of parallel printers
+                        0,0     none
+                        0,1     one   (LPT1, PRN)
+                        1,0     two   (LPT2)
+                        1,1     three (LPT3)
+                        note    Models before PS/2 would allow a fourth
+                                parallel printer. Remapping of the BIOS in the
+                                PS/2s does not allow the use of LPT4.
+
+
+
+Interrupt 12h   Memory Size
+(0:0048h)       get system memory
+return  AX      number of contiguous 1K RAM blocks
+note 1) This service does not depend on the setting of the motherboard switches
+     2) This is the same value stored in absolute address 04:13h
+
+
+
+Interrupt 13h  Disk I/O - access the disk drives (floppy and hard disk)
+(0:004Ch)      does not try rereading disk if an error is returned
+
+
+Function 00h    Reset - reset the disk controller chip
+entry   AH      00h
+        DL      drive (if bit 7 is set both hard disks and floppy disks reset)
+return  AH      status
+note 1) Forces controller chip to recalibrate read/write heads
+     2) Some systems (Sanyo 55x) this resets all drives
+
+
+Function 01h    Get Status of disk system
+entry   AH      01h
+        DL      drive (hard disk if bit 7 set)
+return  AL      status of most recent operation
+                00h     successful completion
+                01h     bad command
+                02h     address mark not found
+                03h     tried to write on write-protected disk
+                04h     sector not found
+                05h     reset failed (hard disk)
+                06h     diskette removed or changed
+                07h     bad parameter table (hard disk)
+                08h     DMA overrun
+                09h     attempt to DMA across 64K boundary
+                0Ah     bad sector detected (hard disk)
+                0Bh     bad track detected (hard disk)
+                0Ch     unsupported track
+                0Dh     invalid number of sectors on format (hard disk)
+                0Eh     control data address mark detected (hard disk)
+                0Fh     DMA arbitration error (hard disk)
+                10h     bad CRC/EEC on read
+                11h     data ECC corrected
+                20h     controller failure
+                40h     seek failed
+                80h     timeout
+                0AAh    drive not ready (hard disk)
+                0BBh    undefined error (hard disk)
+                0CCh    write fault     (hard disk)
+                0E0h    status error    (hard disk)
+                0FFh    sense operation failed (hard disk)
+
+
+Function 02h    Read Sectors - read one or more sectors from diskette
+entry   AH      02h
+        AL      number of sectors to read
+        BX      address of buffer (ES=segment)
+        CH      track number (0-39 or 0-79 for floppies)
+                (for hard disk, bits 8,9 in high bits of CL)
+        CL      sector number (1 to 18, not value checked)
+        DH      head number (0 or 1)
+        DL      drive (0=A, 1=B, etc.) (bit 7=0)  (drive 0-7)
+        ES:BX   address to store/fetch data  (buffer to fill)
+       [0000:0078]  dword pointer to diskette parms
+return  CF      clear (0) for successful
+                set (1) failure
+                AH      status (00h, 02h, 03h, 04h, 08h, 09h, 10h, 0Ah, 20h,
+                        40h, 80h)
+        AL      number of sectors transferred
+note 1) Number of sectors begins with 1, not 0
+     2) Trying to read zero sectors is considered a programming error; results
+        are not defined
+
+
+Function 03h    Write Sectors - write from memory to disk
+entry   AH      03h
+        AL      number of sectors to write (1-8)
+        CH      track number (for hard disk, bits 8,9 in high bits of CL)
+        CL      beginning sector number
+                (if hard disk, high two bits are high bits of track #)
+        DH      head number
+        DL      drive number (0-7)
+        ES:BX   address of buffer for data
+return  CF      set if error
+                AH      status (see above)
+        AL      number of sectors written
+note 1) Number of sectors begins with 1, not 0
+     2) Trying to write zero sectors is considered a programming error; results
+        are not defined
+
+
+Function 04h    Verify - verify that a write operation was successful
+entry   AH      04h
+        AL      number of sectors to verify (1-8)
+        CH      track number  (for hard disk, bits 8,9 in high bits of CL)
+        CL      beginning sector number
+        DH      head number
+        DL      drive number (0-7)
+return  CF      set on error
+                AH      status (see above)
+        AL      number of sectors verified
+
+
+Function 05h    Format Track - write sector ID bytes for 1 track
+entry   AH      05h
+        AL      number of sectors to create on this track
+        CH      track (or cylinder) number
+        CL      sector number
+        DH      head number (0, 1)
+        DL      drive number (0-3)
+        ES:BX   pointer to 4-byte address field (C-H-R-N)
+                byte 1 = (C) cylinder or track
+                byte 2 = (H) head
+                byte 3 = (R) sector
+                byte 4 = (N) bytes/sector (0 = 128, 1 = 256, 2 = 512, 3 = 1024)
+return  CF      set if error occurred
+                AH      status code (see above)
+note    Not valid for ESDI hard disks on PS/2
+
+
+Function 06h    Hard Disk - format track and set bad sector flags
+                                                     (PC2, PC-XT, and Portable)
+entry   AH      06h
+        AL      interleave value (XT only)
+        CH      cylinder number (bits 8,9 in high bits of CL)
+        CL      sector number
+        DH      head
+        DL      drive
+        ES:BX   512 byte format buffer
+                the first 2*(sectors/track) bytes contain f,n for each sector
+                   f  00Fh for good sector
+                      80h for bad sector
+                   n  sector number
+return  AH      status code
+
+
+Function 07h    Hard Disk - format the drive starting at the desired track
+                                                      (PC2, PC-XT and Portable)
+entry   AH      07h
+        AL      interleave value (XT only) (01h-10h)
+        CH      cylinder number (bits 8,9 in high bits of CL) (00h-03FFh)
+        CL      sector number
+        DH      head number (0-7)
+        DL      drive number (80h-87h, 80h=C, 81h=D,...)
+        ES:BX   format buffer, size = 512 bytes
+                the first 2*(sectors/track) bytes contain f,n for each sector
+                f=00h for good sector
+                  80h for bad sector
+                n=sector number
+return  AH      status code (see above)
+
+
+Function 08h    Read Drive Parameters             (XT, CONV, AT, XT/286, PS/2)
+entry   AH      08h
+        DL      drive number (0-2)
+return  CF      set on error
+                AH      status code (see above)
+        BL      drive type (see AH=17h below) (AT/PS2 floppies only)
+        CH      maximum useable value for cylinder number
+        CL      maximum useable value for sector number or cylinder number
+        DH      maximum usable value for head number
+        DL      number of consecutive acknowledging drives (0-2)
+        ES:DI   drive parameter table
+
+
+Function 09h    Initialize Two Fixed Disk Base Tables    (XT, AT, XT/286, PS/2)
+                (install nonstandard drive)
+entry   AH      09h
+return  CF      set on error
+                AH      status code (see above)
+                data block definitions:
+                +0   maximum number of cylinders (dw)
+                +2   maximum number of heads (db)
+                +3   starting reduced write current cylinder  (dw - XT only)
+                +5   starting write precomp cylinder (dw)
+                +7   maximum ECC data burst length (db - XT only)
+                +8   control byte: Bits
+                     0,1,2 Ä drive option
+                     3,4,5 - always zero
+                         6 - disable ECC retries
+                         7 - disable access retries
+note 1) Int 41h points to table for drive 0
+     2) Int 46h points to table for drive 1
+     3) 41h used by XT, 41h and 46h used by AT
+
+
+Function 0Ah    Read Long   (Hard disk)                 (XT, AT, XT/286, PS/2)
+entry   AH      0Ah
+        CH      cylinder number (bits 8,9 in high bits of CL)
+        CL      sector number
+        DL      drive ID
+        DH      head number
+        ES:BX   pointer to buffer to fill
+return  CF      set on error
+                AH      status code (see above)
+        AL      number of sectors actually transferred
+note 1) A "long" sector includes a 4 byte EEC (Extended Error Correction) code
+     2) Used for diagnostics only on PS/2 systems
+
+
+Function 0Bh    Write Long                              (XT, AT, XT/286, PS/2)
+entry   AH      0Bh
+        CH      cylinder (bits 8,9 in high bits of CL)
+        CL      sector number
+        DH      head number
+        DL      drive ID
+        ES:BX   pointer to buffer containing data
+return  CF      set on error
+                AH      status code (see above)
+        AL      number of sectors actually transferred
+note 1) A "long" sector includes a 4 byte EEC (Extended Error Correction) code
+     2) Used for diagnostics only on PS/2 systems
+
+
+Function 0Ch    Seek To Cylinder                (except PC, PCjr)
+entry   AH      0Ch
+        CH      cylinder number (bits 8,9 in high bits of CL)
+        DH      head number
+        DL      drive ID
+return  CF      set on error
+                AH      status code (see above)
+note 1) Positions heads over a particular cylinder
+
+
+Function 0Dh    Alternate Disk Reset                    (except PC, PCjr)
+entry   AH      0Dh
+        DL      drive ID
+return  CF      set on error
+        AH      status code (see above)
+note    Not for PS/2 ESDI hard disks
+
+
+Function 0Eh    Read Sector Buffer                         (XT, Portable PS/2)
+entry   AH      0Eh
+        AL      number of sectors
+        CH      cylinder (bits 8,9 in top two bits of CL)
+        CL      sector number
+        DH      head number
+        DL      drive number
+        ES:BX   pointer to buffer
+return  CF      set on error
+                AH      status code (see above)
+        AL      number of sectors actually transferred
+note 1) Transfers controller's sector buffer.  No data is read from the drive
+     2) Used for diagnostics only on PS/2 systems
+
+
+Function 0Fh    Write sector buffer                          (XT, Portable)
+entry   AH      0Fh
+        AL      number of sectors
+        CH      cylinder (bits 8,9 in top two bits of CL)
+        CL      sector number
+        DH      head number
+        DL      drive number
+        ES:BX   pointer to buffer
+return  CF      set if error
+                AH      status code
+        AL      number of sectors actually transferred
+note 1) Should be called before formatting to initialize the controller's
+        sector buffer.
+     2) Used for diagnostics only on PS/2 systems
+
+
+Function 10h    Test For Drive Ready
+entry   AH      10h
+        DL      drive ID
+return  CF      set on error
+                AH      status code (see above)
+
+
+Function 11h    Recalibrate Drive
+entry   AH      11h
+        DL      drive ID
+return  CF      set on error
+                AH      status code (see above)
+
+
+Function 12h    Controller RAM Diagnostic                (XT, Portable, PS/2)
+entry   AH      12h
+return  CF      set on error
+                AH      status code (see AH=1 above)
+note    Used for diagnostics only on PS/2 systems
+
+
+Function 13h    Drive Diagnostic                             (XT, Portable)
+entry   AH      13h
+return  CF      set on error
+                AH      status code (see above)
+note    Used for diagnostics only on PS/2 systems
+
+
+Function 14h    Controller Internal Diagnostic               (AT, XT/286)
+entry   AH      14h
+return  CF      set on error
+        AH      status code (see above)
+note 1) OEM is Western Digital 1003-WA2 hard/floppy combination controller
+        in AT and XT/286.
+     2) Used for diagnostics only in PS/2 systems
+
+
+Function 15h    Get Disk Type                                (except PC and XT)
+entry   AH      15h
+        DL      drive ID
+return  AH      disk type
+                00h     no drive is present
+                01h     diskette, no change detection present
+                02h     diskette, change detection present
+                03h     fixed disk
+        CX:DX   number of 512-byte sectors when AH = 03h
+
+
+Function 16h    Change of Disk Status (diskette)             (except PC and XT)
+entry   AH      16h
+return  AH      disk change status
+                00h     no disk change
+                01h     disk changed
+        DL      drive that had disk change
+
+
+Function 17h    Set Disk Type for Format (diskette)          (except PC and XT)
+entry   AH      17h
+        AL      00h     no disk
+                01h     360kb diskette in 360Kb drive
+                02h     360kb diskette in 1.2M drive
+                03h     1.2M diskette in 1.2M drive
+                04h     720kb diskette in 720Kb drive
+        DL      drive number
+return  AH      status of operation
+note    This function is probably enhanced for the PS/2 series to detect
+        1.44 in 1.44 and 720k in 1.44.
+
+
+Function 18h    Set Media Type For Format  (diskette)        (AT, XT/286, PS/2)
+entry   AH      18h
+        CH      lower 8 bits of number of tracks
+        CL      high 2 bits of number of tracks (6,7) sectors per track
+                (bits 0-5)
+        DL      drive number
+return  AH      00h      if requested combination supported
+                01h      if function not available
+                0Ch      if not suppported or drive type unknown
+                80h      if there is no media in the drive
+        ES:DI   pointer to 11-byte parm table
+
+
+Function 19h    Park Hard Disk Heads                         (XT/286, PS/2)
+entry   AH      19h
+        DL      drive
+return  CF      set on error
+                AH      error code
+
+
+Function 1Ah    ESDI Hard Disk - Format                         (PS/2)
+entry   AH      1Ah
+        AL      defect table count
+        CL      format modifiers
+                bit 0:  ignore primary defect map
+                bit 1:  ignore secondary defect map
+                bit 2:  update secondary defect map
+                bit 3:  perform surface analysis
+                bit 4:  generate periodic interrupt
+        DL      drive
+        ES:BX   pointer to defect table
+return  CF      set on error
+                AH      status (see AH=1 above)
+note    If periodic interrupt selected, int 15h/AH=0Fh is called after each
+        cylinder is formatted
+
+
+
+
+
+Interrupt 14h   Initialize and Access Serial Port For Int 14
+(0:0050h)       the following status is defined:
+
+        serial status byte:
+        bits    0 delta clear to send
+                1 delta data set ready
+                2 trailing edge ring detector
+                3 delta receive line signal det.
+                4 clear to send
+                5 data set ready
+                6 ring indicator
+                7 receive line signal detect
+
+        line status byte:
+        bits    0 data ready
+                1 overrun error
+                2 parity error
+                3 framing error
+                4 break detect
+                5 transmit holding reg. empty
+                6 transmit shift register empty
+                7 time out  note: if bit 7 set then other bits are invalid
+
+ All routines have AH=function number and DX=RS232 card number (0 based).
+AL=character to send or received character on exit, unless otherwise noted.
+
+entry   AH      00h     Initialize And Access Serial Communications Port
+                        bit pattern: BBBPPSLL
+                        BBB = baud rate:   110,150,300,600,1200,2400,4800,9600
+                        PP  = parity:      01 = odd, 11 = even
+                        S   = stop bits:   0 = 1, 1 = 2
+                        LL  = word length: 10 = 7-bits, 11 = 8-bits
+        AL      parms for initialization:
+                bit pattern:
+                0       word length
+                1       word length
+                2       stop bits
+                3       parity
+                4       parity
+                5       baud rate
+                6       baud rate
+                7       baud rate
+                word length     10      7 bits
+                                11      8 bits
+                stop bits       0       1 stop bit
+                                1       2 stop bits
+                parity          00      none
+                                01      odd
+                                11      even
+                baud rate       000     110 baud
+                                001     150 baud
+                                010     300 baud
+                                011     600 baud
+                                100     1200 baud
+                                101     2400 baud
+                                110     4800 baud
+                                111     9600 baud  (4800 on PCjr)
+        DX      port number
+return  AH      line status
+        AL      modem status
+
+
+Function 01h    Send Character in AL to Comm Port DX (0 or 1)
+entry   AH      01h
+        AL      character
+        DX      port number (0 or 1)
+return  AH      RS232 status code
+                bit     0       data ready
+                        1       overrun error
+                        2       parity error
+                        3       framing error
+                        4       break detected
+                        5       transmission buffer register empty
+                        6       transmission shift register empty
+                        7       timeout
+        AL      modem status
+                bit
+                        0       delta clear-to-send
+                        1       delta data-set-ready
+                        2       trailing edge ring detected
+                        3       change, receive line signal detected
+                        4       clear-to-send
+                        5       data-set-ready
+                        6       ring received
+                        7       receive line signal detected
+
+
+Function 02h    Wait For A Character From Comm Port DX
+entry   AH      02h
+return  AL      character received
+        AH      error code (see above)(00h for no error)
+
+
+Function 03h    Fetch the Status of Comm Port DX (0 or 1)
+entry   AH      03h
+return  AH      set bits (01h) indicate comm-line status
+                bit     7       timeout
+                bit     6       empty transmit shift register
+                bit     5       empty transmit holding register
+                bit     4       break detected ("long-space")
+                bit     3       framing error
+                bit     2       parity error
+                bit     1       overrun error
+                bit     0       data ready
+        AL      set bits indicate modem status
+                bit     7       received line signal detect
+                bit     6       ring indicator
+                bit     5       data set ready
+                bit     4       clear to send
+                bit     3       delta receive line signal detect
+                bit     2       trailing edge ring detector
+                bit     1       delta data set ready
+                bit     0       delta clear to send
+
+
+Function 04h    Extended Initialize                             (PC Convertible)
+entry   AH      04h
+        AL      break status
+                01h     if break
+                00h     if no break
+        BH      parity
+                00h     no parity
+                01h     odd parity
+                02h     even parity
+                03h     stick parity odd
+                04h     stick parity even
+        BL      number of stop bits
+                00h     one stop bit
+                01h     2 stop bits (1« if 5 bit word length)
+        CH      word length
+                00h     5 bits
+                01h     6 bits
+                02h     7 bits
+                03h     8 bits
+        CL      baud rate
+                00h     110
+                01h     150
+                02h     300
+                03h     600
+                04h     1200
+                05h     2400
+                06h     4800
+                07h     9600
+                08h     19200
+return  AL      modem status
+        AH      line control status
+
+
+Function 05h    Extended Communication Port Control             (PS/2)
+entry   AH      05h
+        AL      00h     read modem control register
+                return  BL      modem control reg (see AL=1)
+        AL      01h     write modem control register
+        BL      modem control register: (for AL=00 and AL=01)  bits
+                0       data terminal ready
+                1       request to send
+                2       out1
+                3       out2
+                4       loop
+                5,6,7   reserved
+return  AH      status
+
+
+Interrupt 15h   Cassette I/O
+(0:0054h)       Renamed "System Services" on PS/2 line
+
+
+Function 00h    Turn Cassette Motor On                          (PC, PCjr only)
+entry   AH      00h
+return  AH      86h     no cassette present
+        CF      set on error
+note    NOP for systems where cassette not supported
+
+
+Function 01h    Turn Cassette Motor Off                         (PC, PCjr only)
+entry   AH      01h
+return  AH      86h     no cassette present
+        CF      set on error
+note    NOP for systems where cassette not supported
+
+
+Function 02h    Read Blocks From Cassette                       (PC, PCjr only)
+entry   AH      02h
+        CX      count of bytes to read
+        ES:BX   pointer to data buffer
+return  CF      set on error
+                AH      error code
+                        01h     CRC error
+                        02h     bad tape signals
+                        03h     no data found on tape
+                        04h     no data
+                        80h     invalid command
+                        86h     no cassette present
+        DX      count of bytes actually read
+        ES:BX   pointer past last byte written
+note 1) NOP for systems where cassette not supported
+     2) Cassette operations normally read 256 byte blocks
+
+
+Function 03h    Write Data Blocks to Cassette                   (PC, PCjr only)
+entry   AH      03h
+        CX      count of bytes to write
+        ES:BX   pointer to data buffer
+return  CF      set on error
+                AH      error code (see 02h)
+        CX      0
+        ES:BX   pointer to last byte written+1
+note 1) NOP for systems where cassette not supported
+     2) The last block is padded to 256 bytes with zeroes if needed
+     3) No errors are returned by this service
+
+
+Function 0Fh    ESDI Format Unit Periodic Interrupt          (PS/2 50, 60, 80)
+entry   AH      0Fh
+        AL      phase code
+                00h     reserved
+                01h     surface analysis
+                02h     formatting
+return  CF      clear   if formatting should continue
+                set     if it should terminate
+note    Called during ESDI drive formatting after each cylinder is completed
+
+
+Function 10h    TopView API Function Calls                      (TopView)
+entry   AX      00h     PAUSE   Give Up CPU Time
+                        return  00h     after other processes run
+                01h     GETMEM  allocate "system" memory
+                        BX      number of bytes to allocate
+                        return  ES:DI pointer to block of memory
+                02h     PUTMEM  deallocate "system" memory
+                        ES:DI   pointer to previously allocated block
+                        return  block freed
+                03h     PRINTC  display character/attribute on screen
+                        BH      attribute
+                        BL      character
+                        DX      segment of object handle for window
+                        note    BX=0 does not display anything, it only
+                                positions the hardware cursor
+                10h     unknown
+                        AL      04h thru 12h
+                        return  TopView - unimplemented in DV 2.0x
+                                pops up "Programming error" window in DV 2.0x
+                11h     unknown
+                12h     unknown
+                13h     GETBIT  define a 2nd-level interrupt handler
+                        ES:DI   pointer to FAR service routine
+                        return  BX      bit mask indicating which bit was
+                                        allocated
+                                        0 if no more bits available
+                14h     FREEBIT undefine a 2nd-level interrupt handler
+                        BX      bit mask from int 15/AH 13h
+                15h     SETBIT  schedule one or more 2nd-level interrupts
+                        BX      bit mask for interrupts to post
+                        return  indicated routines will be called at next ???
+                16h     ISOBJ   verify object handle
+                        ES:DI   possible object handle
+                        return   BX     -1 if ES:DI is a valid object handle
+                                         0 if ES:DI is not
+                17h     TopView - unimplemented in DV 2.00
+                        return  pops up "Programming Error" window in DV 2.00
+                18h     LOCATE  Find Window at a Given Screen Location
+                        BH      column
+                        BL      row
+                        ES      segment of object handle for ???
+                                (0 = use default)
+                        return  ES      segment of object handle for window
+                                        which is visible at the indicated
+                                        position
+                19h     SOUND   Make Tone
+                        BX      frequency in Hertz
+                        CX      duration in clock ticks (18.2 ticks/sec)
+                        return  immediately, tone continues to completion
+                        note    If another tone is already playing, the new tone
+                                does not start until completion of the previous
+                                one. In DV 2.00, it is possible to enqueue
+                                about 32 tones before the process is blocked
+                                until a note completes.
+                                In DV 2.00, the lowest tone allowed is 20 Hz
+                1Ah     OSTACK  Switch to Task's Internal Stack
+                        return  stack switched
+                1Bh     BEGINC  Begin Critical Region
+                        return  task-switching temporarily disabled
+                        note    Will not task-switch until END CRITICAL REGION
+                                (AH=1Ch) is called
+                1Ch     ENDC    End Critical Region
+                        return  task-switching enabled
+                1Dh     STOP    STOP TASK
+                        ES      segment of object handle for task to be stopped
+                                (== handle of main window for that task)
+                        return  indicated task will no longer get CPU time
+                        note    At least in DV 2.00, this function is ignored
+                                unless the indicated task is the current task.
+                1Eh     START   Start Task
+                        ES      segment of object handle for task to be started
+                                (== handle of main window for that task)
+                        return  Indicated task is started up again
+                1Fh     DISPEROR Pop-Up Error Window
+                        BX      bit fields:
+                                0-12    number of characters to display
+                                13,14   which mouse button may be pressed to
+                                        remove window
+                                        00      either
+                                        01      left
+                                        10      right
+                                        11      either
+                                15      beep if 1
+                        DS:DI   pointer to text of message
+                        CH      width of error window (0 = default)
+                        CL      height of error window (0 = default)
+                        DX      segment of object handle
+                        return  BX      status:
+                                        1       left button pressed
+                                        2       right button pressed
+                                        27      ESC key pressed
+                        note    Window remains on-screen until ESC or indicated
+                                mouse button is pressed
+                20h     TopView - unimplemented in DV 2.0x
+                        return  pops up "Programming Error" window in DV 2.0x
+                21h     PGMINT  Interrupt Another Task
+                        BX      segment of object handle for task to interrupt
+                        DX:CX   address of FAR routine to jump to next time
+                                task is run
+                        return  nothing?
+                        note    The current ES, DS, SI, DI, and BP are passed
+                                to the FAR routine
+                22h     GETVER  Get Version
+                        BX      00h
+                        return  BX      nonzero, TopView or compatible loaded
+                                BH      minor version
+                                BL      major version
+                        notes   TaskView returns BX = 0001h
+                                DESQview 2.0 returns BX = 0A01h
+                23h     POSWIN  Position Window
+                        BX      segment of object handle for parent window
+                                within which to position the window (0 = full
+                                screen)
+                        CH      # columns to offset from position in DL
+                        CL      # rows to offset from position in DL
+                        DL      bit flags
+                                0,1     horizontal position
+                                        00      current
+                                        01      center
+                                        10      left
+                                        11      right
+                                2,3     vertical position
+                                        00      current
+                                        01      center
+                                        10      top
+                                        11      bottom
+                                4       don't redraw screen if set
+                                5-7     not used
+                        ES      segment of object handle for window to be
+                                positioned
+                        return  nothing
+                24h     GETBUF  Get Virtual Screen Information
+                        BX      segment of object handle for window (0=default)
+                        return  CX      size of virtual screen in bytes
+                                DL      0 or 1, unknown
+                                ES:DI   address of virtual screen
+                25h     USTACK  Switch Back to User's Stack
+                        return  stack switched back
+                        note    Call only after int 15h,fn1Ah
+                26h
+           thru 2Ah     DesQview (TopView?) - unimplemented in DV 2.0x
+                        return  pops up "Programming Error" window in DV 2.0x
+                2Bh     POSTTASK  Awaken Task       DesQview 2.0 (TopView?)
+                        BX      segment of object handle for task
+                        return  nothing
+                2Ch     Start New Application in New Process
+                        DesQview 2.0 (TopView?)
+                        ES:DI   pointer to contents of .PIF/.DVP file
+                        BX      size of .PIF/.DVP info
+                        return  BX      segment of object handle for new task
+                2Dh     Keyboard Mouse Control       DesQview 2.0
+                        BL      subfunction
+                                00h     determine whether using keyboard mouse
+                                01h     turn keyboard mouse on
+                                02h     turn keyboard mouse off
+                        return  (calling BL was 00h)
+                                BL      0       using real mouse
+                                        1       using keyboard mouse
+
+
+
+
+
+Function 20h    PRINT.COM  (DOS internal)        (AT, XT-286, PS/2 50+)
+entry   AH      20h
+        AL      subfunction
+                00h     unknown (PRINT)
+                01h     unknown (PRINT)
+                10h     sets up SysReq routine on AT, XT/286, PS/2
+                11h     completion of SysReq routine (software only)
+note 1) AL=0 or 1 sets or resets some flags which affect what PRINT does when
+        it tries to access the disk
+
+
+Function 21h    Power-On Self Test (POST) Error Log             (PS/2 50+)
+entry   AH      21h
+        AL       00h    read POST log
+                 01h    write POST log
+                        BH      device ID
+                        BL      error code
+return  CF      set on error
+        AH      status
+                00h    OK
+                01h    list full
+                80h    invalid cmd
+                86h    unsupported
+        if function 00h:
+                BX      number of error codes stored
+                ES:DI   pointer to error log
+note:   The log is a series of words, the first byte of which identifies the
+        error code and the second the device.
+
+
+Function 40h    Read/Modify Profiles                            (Convertible)
+entry   AH      40h
+        AL      00h     read system profile in CX,BX
+                01h     write system profile from CX, BX
+                02h     read internal modem profile in BX
+                03h     write internal modem profile from BX
+        BX      profile info
+return  BX      internal modem profile (from 02h)
+        CX,BX   system profile (from 00h)
+
+
+Function 41h    Wait On External Event                          (Convertible)
+entry   AH      41h
+        AL      condition type
+                bits 0-2: condition to wait for
+                          0 any external event
+                          1 compare and return if equal
+                          2 compare and return if not equal
+                          3 test and return if not zero
+                          4 test and return if zero
+                bit 3:    reserved
+                bit 4:    1=port address, 0=user byte
+                bits 5-7: reserved
+        BH      condition compare or mask value
+                condition codes:
+                0       any external event
+                1       compare and return if equal
+                2       compare and return if not equal
+                3       test and return if not zero
+                4       test and return if zero
+        BL      timeout value times 55 milliseconds
+                0 if no time limit
+        DX      I/O port address (if AL bit 4 = 1)
+        ES:DI   pointer to user byte (if AL bit 4 = 0)
+
+
+Function 42h    Request System Power Off                        (Convertible)
+entry   AH      42h
+        AL      00h     to use system profile
+                01h     to force suspend regardless of profile
+
+
+Function 43h    Read System Status                              (Convertible)
+entry   AH      43h
+return  AL      status bits:
+                0       LCD detached
+                1       reserved
+                2       RS232/parallel powered on
+                3       internal modem powered on
+                4       power activated by alarm
+                5       standby power lost
+                6       external power in use
+                7       battery low
+
+
+Function 44h    (De)activate Internal Modem Power               (Convertible)
+entry   AH      44h
+        AL      00h      to power off
+                01h      to power on
+
+
+Function 4Fh    Keyboard Intercept                    (except PC, PCjr, and XT)
+entry   AH      4Fh
+        AL      scan code, CF set
+return  AL      scan code, CF set if processing desired
+note    Called by int 9 handler to translate scan codes
+
+
+Function 80h    Device Open                                  (AT, XT/286, PS/2)
+entry   AH      80h
+        BX      device ID
+        CX      process ID
+return  CF      set on error
+        AH      status
+
+
+Function 81h    Device Close                                 (AT, XT/286, PS/2)
+entry   AH      81h
+        BX      device ID
+        CX      process ID
+return  CF      set on error
+        AH      status
+
+
+Function 82h    Program Termination                          (AT, XT/286, PS/2)
+        AH      82h
+        BX      device ID
+return: CF      set on error
+        AH      status
+note    Closes all devices opened with function 80h
+
+
+Function 83h    Event Wait                       (AT, XT/286, Convertible, PS/2)
+entry   AH      83h
+        AL      00h     to set interval
+                10h     to cancel
+        CX,DX   number of microseconds to wait (granularity is 976 microseconds)
+        ES:BX   pointer to memory flag (bit 7 is set when interval expires)
+                (pointer is to caller's memory)
+return  CF      set (1) if function already busy
+
+
+Function 84h    Read Joystick Input Settings                 (AT, XT/286, PS/2)
+entry   AH      84h
+        DX      00h     to read the current switch settings  (return in AL)
+                01h     to read the resistive inputs
+return  AX      A(X) value
+        BX      A(Y) value
+        CX      B(X) value
+        DX      B(Y) value
+        AL      switch settings (bits 7-4)
+
+
+Function 85h    System Request (SysReq) Key Pressed        (except PC, PCjr, XT)
+entry   AH      85h
+return  AL      00h      key pressed
+                01h      key released
+note    Called by keyboard decode routine
+
+
+Function 86h    Elapsed Time Wait                          (except PC, PCjr, XT)
+        AH      86h
+        CX,DX   number of microseconds to wait
+return  CF      clear   after wait elapses
+        CF      set     immediately due to error
+note    Only accurate to 977 microseconds
+
+
+Function 87h    Extended Memory Block Move              (286/386 machines only)
+        AH      87h
+        CX      number of words to move
+        ES:SI   pointer to Global Descriptor Table (GDT)
+                offset 00h      null descriptor
+                       08h      uninitialized, will be made into GDT descriptor
+                       10h      descriptor for source of move
+                       18h      descriptor for destination of move
+                       20h      uninitialized, used by BIOS
+                       28h      uninitialized, will be made into SS descriptor
+return  CF      set on error
+        AH      status
+                00h     source copied into destination
+                01h     parity error
+                02h     interrupt error
+                03h     address line 20 gating failed
+
+
+Function 88h    Extended Memory Size Determine                (AT, XT/286, PS/2)
+entry   AH      88h
+return  AX      # of contiguous 1K blocks of memory starting at address 1024k
+
+
+Function 89h    Switch Processor to Protected Mode            (AT, XT/286, PS/2)
+entry   AH      89h
+        BH      interrupt number of IRQ 8 (IRQ 9Fh use next 7 interrupts)
+        BL      interrupt number of IRQ 0 (IRQ 17h use next 7 interrupts)
+        CX      offset into protected mode CS to jump to
+        DS:SI   pointer to Global Descriptor Table for protected mode
+                offset  00h     null descriptor
+                        08h     GDT descriptor
+                        10h     IDT descriptor
+                        18h     DS
+                        20h     ES
+                        28h     SS
+                        30h     CS
+                        38h     uninitialized, used to build descriptor for
+                                BIOS CS
+return  AH      0FFh  error enabling address line 20
+        CF      set on error
+
+
+Function 90h    Device Busy Loop                         (except PC, PCjr, XT)
+entry   AH      90h
+        AL      type code:
+                00h     disk
+                01h     diskette
+                02h     keyboard
+                03h     PS/2 pointing device
+                80h     network (ES:BX = ncb)
+                0FCh    disk reset
+                0FDh    diskette motor start
+                0FEh    printer
+        ES:BX   pointer to request block for type codes 80h through 0BFh
+return  CF      1 (set) if wait time satisfied
+                0 (clear) if driver must perform wait
+note    Used by NETBIOS
+        Type codes are allocated as follows:
+        00h-7Fh non-reentrant devices; OS must arbitrate access
+        80h-BFh reentrant devices; ES:BX points to a unique control block
+        C0h-FFh wait-only calls, no complementary int 15,fn91h call
+
+
+Function 91h    Set Flag and Complete Interrupt          (except PC, PCjr, XT)
+entry   AH      91h
+        AL      type code (see AH=90h above)
+        ES:BX    pointer to request block for type codes 80h through 0BFh
+return  AH       0
+note    Used by NETBIOS
+
+
+Function 0C0h   Get System Configuration      (XT after 1/10/86, PC Convertible,
+                                               XT/286, AT, PS/2)
+entry   AH      0C0h
+return  CF      1 if BIOS doesn't support call
+        ES:BX   pointer to ROM system descriptor table
+                dword   number of bytes following
+                byte    ID byte: PC    FF
+                                 XT    FE or FB
+                                 PCjr  FD
+                byte    secondary ID distingushes between AT and XT/286, etc.
+                byte    BIOS revision level, 0 for 1st release, 1 for 2nd, etc.
+                byte    feature information
+                        80h     DMA channel 3 used by hard disk BIOS
+                        40h     2nd 8259 installed
+                        20h     realtime clock installed
+                        10h     int 15h,fn 04h called upon int 09h
+                        08h     wait for external event supported
+                        04h     extended BIOS area allocated at 640k
+                        03h     reserved
+                        02h     bus is Micro Channel instead of PC
+                        01h     reserved
+                        00h     reserved
+                word    unknown (set to 0)
+                word    unknown (set to 0)
+note    Int 15h is also used for the Multitask Hook on PS/2 machines. No
+        register settings availible yet.
+        The 1/10/86 XT BIOS returns an incorrect value for the feature byte.
+
+
+
+Function 0C1h   System - Return Extended-BIOS Data-Area Segment Address (PS/2)
+entry   AH      0C1h
+return  CF      set on error
+        ES      segment of data area
+
+
+Function 0C2h   Pointing Device BIOS Interface      (DesQview 2.x)    (PS/2)
+entry   AH      0C2h
+        AL      00h     enable/disable
+                        BH      00h    disable
+                01h     reset
+                        return  BH     device ID
+                02h     set sampling rate
+                        BH      00h    10/second
+                                01h    20/second
+                                02h    40/second
+                                03h    60/second
+                                04h    80/second
+                                05h    100/second
+                                06h    200/second
+                03h set resolution
+                        BH     00h     one count per mm
+                               01h     two counts per mm
+                               02h     four counts per mm
+                               03h     eight counts per mm
+                04h     get type
+                        return  BH      device ID
+                05h     initialize
+                        BH      data package size (1 - 8 bytes)
+                06h     get/set scaling factor
+                        BH      00h return device status
+                                return  BL      status
+                                        bit 0: right button pressed
+                                        bit 1: reserved
+                                        bit 2: left button pressed
+                                        bit 3: reserved
+                                        bit 4: 0=1:1 scaling, 1=2:1 scaling
+                                        bit 5: device enabled
+                                        bit 6: 0=stream mode, 1=remote mode
+                                        bit 7: reserved
+                                        CL      resolution (see function 03h)
+                                        DL      sample rate, reports per second
+                                01h     set scaling at 1:1
+                                02h     set scaling at 2:1
+                07h     set device handler address
+                        ES:BX   user device handler
+                        return  AL      00h
+return  CF      set on error
+        AH      status
+                00h     successful
+                01h     invalid function
+                02h     invalid input
+                03h     interface error
+                04h     need to resend
+                05h     no device handler installed
+note    The values in BH for those functions that take it as input are stored
+        in different locations for each subfunction
+
+
+Function 0C3h   Enable/Disable Watchdog Timeout                 (PS/2 50+)
+entry   AH      0C3h
+        AL      00h     disable
+                01h     enable
+                        BX      timer counter
+return  CF      set on error
+note    The watchdog timer generates an NMI
+
+
+Function 0C4h   Programmable Option Select                      (PS/2 50+)
+entry   AH      04Ch
+        AL      00h     return base POS register address
+                01h     enable slot
+                        BL      slot number
+                02h     enable adapter
+return  CF      set on error
+        DX      base POS register address (if function 00h)
+
+
+Function 0DEh   DesQview Services                             (DesQview)
+entry   AH      0DEh
+        AL      00h     Get Program Name
+                        return  AX      offset into DESQVIEW.DVO of current
+                                        program's record:
+                                        byte    length of name
+                                        n bytes name
+                                        2 bytes keys to invoke program (second
+                                                = 00h if only one key used)
+                                        word    ? (I see 0 always)
+                                        byte    end flag: 00h for all but last
+                                                entry, which is 0FFh
+                01h     Update "Open Window" Menu
+                        return  none
+                        note    Reads DESQVIEW.DVO, disables Open menu if file
+                                not in current directory
+                02h     unimplemented in DV 2.0x
+                        return  nothing (NOP in DV 2.0x)
+                03h     unimplemented in DV 2.0x
+                        return  nothing (NOP in DV 2.0x)
+                04h     Get Available Common Memory
+                        return  BX      bytes of common memory available
+                                CX      largest block available
+                                DX      total common memory in bytes
+                05h     Get Available Conventional Memory
+                        return  BX      K of memory available
+                                CX      largest block available
+                                DX      total conventional memory in K
+                06h     Get Available Expanded Memory
+                        return  BX      K of expanded memory available
+                                CX      largest block available
+                                DX      total expanded memory in K
+                07h     APPNUM  Get Current Program's Number
+                        return  AX      number of program as it appears on the
+                                        "Switch Windows" menu
+                08h     GET (unknown)
+                        return  AX      0       unknown
+                                        1       unknown
+                09h     unimplemented in DV 2.00
+                        return  nothing (NOP in DV 2.00)
+                0Ah     DBGPOKE Display Character on Status Line
+                        BL      character
+                        return  character displayed, next call will display in
+                                next position (which wraps back to the start of
+                                the line if off the right edge of screen)
+                        note 1) Displays character on bottom line of *physical*
+                                screen, regardless of current size of window
+                                (even entirely hidden)
+                             2) Does not know about graphics display modes,
+                                just pokes the characters into display memory
+                0Bh     APILEVEL Define Minimum API Level Required
+                        BL      API level
+                                >2 pops up "You need a newer version" error
+                                window in DV 2.00
+                        BH      unknown
+                        return  AX      maximum API level?
+                0Ch     GETMEM  Allocate "System" Memory
+                        BX      number of bytes
+                        return  ES:DI   pointer to allocated block
+                0Dh     PUTMEM  Deallocate "System" Memory
+                        ES:DI   pointer to previously allocated block
+                        return  nothing
+                0Eh     Find Mailbox by Name    (DV 2.0+)
+                        ES:DI   pointer to name to find
+                        CX      length of name
+                        return  BX      0       not found
+                                        1       found
+                                DS:SI   object handle
+                0Fh     Enable DesQview Extensions      (DV 2.0+)
+                        return  AX and BX destroyed (seems to be bug, weren't
+                                saved & restored)
+                        note 1) Sends a manager stream with opcodes AEh, BDh,
+                                and BFh to task's window
+                             2) Enables an additional mouse mode
+                10h     PUSHKEY  PUT KEY INTO KEYBOARD INPUT STREAM  (DV 2.0+)
+                        BH      scan code
+                        BL      character
+                        return  BX      unknown (sometimes, but not always,
+                                        same as BX passed in)
+                        note    A later read will get the keystroke as if it
+                                had been typed by the user
+                11h     ENABLE/DISABLE AUTO JUSTIFICATION OF WINDOW (DV 2.0+)
+                        BL      0       viewport will not move automatically
+                                nonzero viewport will move to keep cursor
+                                        visible
+                        return  none
+                12h     unknown (DV 2.0+)
+                        BX      0       clear something?
+                                nonzero set something?
+                        return  none
+
+
+
+
+
+Interrupt 16h   Keyboard I/O
+(0:0058h)       access the keyboard
+
+
+Function  00h   Get Keyboard Input - read the next character in keyboard buffer,
+                if no key ready, wait for one.
+entry   AH      00h
+return  AH      scan code
+        AL      ASCII character
+
+
+Function  01h   Check Keystroke Buffer - Do Not Clear
+entry   AH      01h
+return  ZF      0 (clear) if character in buffer
+                1 (set)   if no character in buffer
+        AH      scan code of character (if ZF=0)
+        AL      ASCII character if applicable
+note    Keystroke is not removed from buffer
+
+
+Function  02h   Shift Status - fetch bit flags indicating shift status
+entry   AH      02h
+return  AL      bit codes (same as [0040:0017])
+                bit 7   Insert state
+                bit 6   CapsLock state
+                bit 5   NumLock state
+                bit 4   ScrollLock state
+                bit 3   Alt key
+                bit 2   Control key
+                bit 1   Left shift (left caps-shift key)
+                bit 0   Right shift (right caps-shift key)
+note    other codes found at [0040:0018]
+                bit 7   Insert shift (Ins key)
+                bit 6   Caps shift (CapsLock key)
+                bit 5   Num shift (NumLock key)
+                bit 4   Scroll shift (ScrollLock key)
+                bit 3   Hold state (Ctrl-NumLock is in effect)
+
+
+Function 03h    Keyboard - Set Repeat Rate            (PCjr, AT, XT/286, PS/2)
+entry   AH      03h
+        AL      00h     reset typematic             (PCjr)
+                01h     increase initial delay      (PCjr)
+                02h     increase continuing delay   (PCjr)
+                03h     increase both delays        (PCjr)
+                04h     turn off typematic          (PCjr)
+                05h     set typematic rate          (AT, PS/2)
+        BH      00h-03h for delays of 250ms, 500ms, 750ms, or 1s
+        BL      00h-1Fh for typematic rates of 30cps down to 2cps
+
+
+Function 04h    Keyboard Click Toggle                 (PCjr and Convertible)
+entry   AH      04h
+        AL      00h     for click off
+                01h     for click on
+
+
+Function 05h    Keyboard Buffer Write            (AT or PS/2 with enhanced kbd)
+                (XT/286, PS/2, AT with "Enhanced" keyboard)
+entry   AH      05h
+        CH      scan code
+        CL      ASCII character
+return  AL      01h if buffer full
+
+
+Function 10h    Get Enhanced Keystroke And Read      (F11, F12 Enhanced Keyb'd)
+                (XT/286, PS/2, AT with "Enhanced" keyboard)
+entry   AH      10h
+return  AH      scan code
+        AL      ASCII character if applicable
+
+
+Function 11h    Check Enhanced Keystroke         (F11-F12 on enhanced keyboard)
+                (XT/286, PS/2, AT with "Enhanced" keyboard)
+entry   AH      11h
+return  ZF      0       (clear) if key pressed
+                1       if buffer empty
+        AH      scan code (when ZF=0)
+        AL      ASCII character if applicable (when ZF=0)
+note    Keystroke is not removed from buffer
+
+
+Function 12h    Extended Get Shift Status         (F11, F12 Enhanced keyboard)
+entry    AH     12h
+return   AL     bit
+                0       right Shift key depressed
+                1       left Shift key depressed
+                2       Control key depressed
+                3       Alt key depressed
+                4       ScrollLock state active
+                5       NumLock state active
+                6       CapsLock state active
+                7       insert state is active
+        AH      0       left Control key pressed
+                1       left Alt key depressed
+                2       right Control key pressed
+                3       right Alt key depressed
+                4       Scroll Lock key depressed
+                5       NumLock key depressed
+                6       CapsLock key depressed
+                7       SysReq key depressed
+
+
+Function 0F0h   Set CPU speed (Compaq 386)
+entry   AH      0F0h     set speed
+return  unknown
+note    used by Compaq DOS MODE command.
+        parameters not availible
+
+
+
+
+Interrupt 17h   Printer
+(0:005Ch)       access the parallel printer(s)
+                AH is changed. All other registers left alone.
+
+Function  00h   Print Character/send AL to printer DX (0, 1, or 2)
+entry   AH      00h
+        AL      character
+        DX      printer to be used (0,1,2)
+return  AH      status byte
+                bit
+                0       time out
+                1       unused
+                2       unused
+                3       I/O error
+                4       selected
+                5       out of paper
+                6       acknowledge
+                7       not busy
+
+
+Function 01h    Initialize Printer - set init line low, send 0Ch to printer DX
+entry   AH      01h
+        DX      printer port to be initialized (0,1,2)
+return  status as below
+
+
+Function  02h   Printer Status - read status of printer DX into AH
+entry   AH      02h
+        DX      printer port to be used (0,1,2)
+return  AH      bit flags       bit 7   0 = printer is busy
+                                bit 6   ACKnowledge line state
+                                bit 5   out-of-paper line state
+                                bit 4   printer selected line state
+                                bit 3   I/O error
+                                bit 2   unused
+                                bit 1   unused
+                                bit 0   time-out error
+
+
+
+
+Interrupt 18h   ROM BASIC
+(0:0060h)       Execute ROM BASIC at address 0F600h:0000h
+note 1) Often reboots a compatible
+
+
+
+
+Interrupt 19h   Bootstrap Loader
+(0:0064h)       Reads track 0, sector 1 into address 0000h:7C00h, then transfers
+                control to that address. If no diskette drive available,
+                transfers to ROM-BASIC or displays loader error message.
+                Causes reboot of disk system if invoked while running.
+                (no memory test performed).
+
+
+
+
+Interrupt 1Ah   Time of Day
+(0:0068h)       access the PC internal clock
+
+Function 00h    Read System Time Counter
+entry   AH      00h
+return  CX      high word of clock count
+        DX      low word of clock count
+        AL      00h if clock was read or written (via AH=0,1) within the current
+                24-hour period. Otherwise, AL > 0
+
+
+Function 01h    Set Clock - set # of 55ms clock ticks in system time counter
+entry   AH      01h
+        CX:DX   high word/low word count of timer ticks
+return  none
+note 1) The clock ticks are incremented by timer interrupt at 18.2065 times
+        per second or 54.9254milliseconds/count. Therefore:
+                counts per second = 18      (12h)
+                counts per minute = 1092    (444h)
+                counts per hour   = 65543   (10011h)
+                counts per day    = 1573040 (1800B0h)
+     2) counter is zeroed when system is rebooted
+
+     2) IBM and Microsoft recommend using int 21 Fn 4Ch. Using int 20 is
+        officially frowned upon since the introduction of DOS 2.0
+
+
+Function 02h    Read Real Time Clock Time                       (AT and after)
+entry   AH      02h
+return  CH      hours in BCD
+        CL      minutes in BCD
+        DH      seconds in BCD
+        DL      1 (set) if daylight savings time option
+        CF      1 (set) if clock not operating
+
+
+Function 03h    Set Real Time Clock Time                        (AT and after)
+entry   AH      03h
+        CH      hours in BCD
+        CL      minutes in BCD
+        DH      seconds in BCD
+        DL      0 (clear) if standard time
+                1 (set) if daylight savings time option
+return  none
+
+
+Function 04h    Read Real Time Clock Date                       (AT and after)
+entry   AH      04h
+return  CH      century in BCD (19 or 20)
+        CL      year in BCD
+        DH      month in BCD
+        DL      day in BCD
+        CF      1 (set) if clock not operating
+
+
+Function 05h    Set Real Time Clock Date                        (AT and after)
+entry   AH      05h
+        CH      century in BCD (19 or 20)
+        CL      year in BCD
+        DH      month in BCD
+        DL      day in BCD
+return  none
+
+
+Function 06h    Set Real Time Clock Alarm                       (AT and after)
+entry   AH      06h
+        CH      hours in BCD
+        CL      minutes in BCD
+        DH      seconds in BCD
+return  CF      set if alarm already set or clock inoperable
+note    Int 4Ah occurs at specified alarm time every 24hrs until reset
+
+
+Function 07h    Reset Real Time Clock Alarm                     (AT and after)
+entry   AH      07h
+return  none
+
+
+Function 08h    Set Real Time Clock Activated Power On Mode     (Convertible)
+entry   AH      08h
+        CH      hours in BCD
+        CL      minutes in BCD
+        DH      seconds in BCD
+
+
+Function 09h    Read Real Time Clock Alarm Time and Status
+                                                (Convertible and PS/2 Model 30)
+entry   AH      09h
+return  CH      hours in BCD
+        CL      minutes in BCD
+        DH      seconds in BCD
+        DL      alarm status:
+                00h     if alarm not enabled
+                01h     if alarm enabled but will not power up system
+                02h     if alarm will power up system
+
+
+Function 0Ah    Read System-Timer Day Counter   (XT-2 [640k motherboard], PS/2)
+entry   AH      0Ah
+return  CF      set on error
+        CX      count of days since Jan 1,1980
+
+Function 0Bh    Set System-Timer Day Counter    (XT-2 [640k motherboard], PS/2)
+entry   AH      0Bh
+        CX      count of days since Jan 1,1980
+return  CF      set on error
+
+
+Function 80h    Set Up Sound Multiplexor                (PCjr) (Tandy 1000?)
+entry   AH      80h
+        AL      00h     source is 8253 channel 2
+                01h     source is cassette input
+                02h     source is I/O channel "audio in"
+                03h     source is TI sound generator chip
+
+
+
+
+Interrupt 1Bh   Control-Break
+(0:006Ch)       This interrupt is called when the keyboard scanner of the IBM
+                machines detects Ctrl and Break pressed at the same time.
+
+note 1) If the break occurred while processing an interrupt, one or more
+        end of interrupt commands must be send to the 8259 Programmable
+        Interrupt Controller.
+     2) All I/O devices should be reset in case an operation was underway at
+        the time.
+     3) It is normally pointed to an IRET during system initialization so that
+        it does nothing, but some programs change it to return a ctrl-C scan
+        code and thus invoke int 23h.
+
+
+
+
+Interrupt 1Ch   Timer Tick
+(0:0070h)
+note 1) Taken 18.2065 times per second
+     2) Normally vectors to dummy IRET unless PRINT.COM has been installed.
+     3) If an application moves the interrupt pointer, it is the responsibility
+        of that application to save and restore all registers that may be
+        modified.
+
+
+
+
+Interrupt 1Dh   Vector of Video Initialization Parameters.
+(0:0074h)       This doubleword address points to 3 sets of 16-bytes containing
+                data to initialize for video modes for video modes 0 & 1 (40
+                column), 2 & 3 (80 column), and 4, 5 & 6 (graphics) on the
+                Motorola 6845 CRT controller chip.
+ 6845 registers:
+        R0      horizontal total (horizontal sync in characters)
+        R1      horizontal displayed (characters per line)
+        R2      horizontal sync position (move display left or right)
+        R3      sync width (vertical and horizontal pulse: 4-bits each)
+        R4      vertical total (total character lines)
+        R5      vertical adjust (adjust for 50 or 60 Hz refresh)
+        R6      vertical displayed (lines of chars displayed)
+        R7      vertical sync position (lines shifted up or down)
+        R8      interlace (bits 4 and 5) and skew (bits 6 and 7)
+        R9      max scan line addr (scan lines per character row)
+        R10     cursor start (starting scan line of cursor)
+        R11     cursor stop (ending scan line of cursor)
+        R12     video memory start address high byte (6-bits)
+        R13     video memory start address low byte (8-bits)
+        R14     cursor address high byte (6-bits)
+        R15     cursor address low byte (8-bits)
+
+ 6845 Video Init Tables:
+        table for modes 0 and 1   \
+        table for modes 2 and 3    \ each table is 16 bytes long and
+        table for modes 4,5, and 6 / contains values for 6845 registers
+        table for mode 7          /
+        4 words:   size of video RAM for modes 0/1, 2/3, 4/5, and 6/7
+        8 bytes:   number of columns in each mode
+        8 bytes:   video controller mode byte for each mode
+note 1) There are 4 separate tables, and all 4 must be initialized if all
+        video modes will be used.
+     2) The power-on initialization code of the computer points this vector
+        to the ROM BIOS video routines.
+     3) IBM recommends that is this table needs to be modified, it should be
+        copied into RAM and only the nescessary changes made.
+
+
+
+
+Interrupt 1Eh   Vector of Diskette Controller Parameters
+(0:0078h)       Dword address points to data base table that is used by BIOS.
+                Default location is at 0F000:0EFC7h. 11-byte table format:
+                bytes:
+                00h     4-bit step rate, 4-bit head unload time
+                01h     7-bit head load time, 1-bit DMA flag
+                02h     54.9254 ms counts - delay till motor off (37-38 typ)
+                03h     sector size:
+                        00h     128 bytes
+                        01h     256 bytes
+                        02h     512 bytes
+                        03h     1024 bytes
+                04h     last sector on track (8 or 9 typical)
+                05h     gap between sectors on read/write (42 typical)
+                06h     data length for DMA transfers (0FFh typical)
+                07h     gap length between sectors for format (80 typical)
+                08h     sector fill byte for format (0F6h typical)
+                09h     head settle time (in milliseconds) (15 to 25 typical)
+                        DOS 1.0   0
+                        DOS 2.10  15
+                        DOS 3.1   1
+                10h     motor start time (in 1/8 second intervals) (2 to 4 typ.)
+                        DOS 2.10  2
+note 1) This vector is pointed to the ROM BIOS diskette tables on system
+        initialization
+     2) IBM recommends that is this table needs to be modified, it should be
+        copied into RAM and only the nescessary changes made.
+
+
+
+
+Interrupt 1Fh   Pointer to Graphics Character Extensions (Graphics Set 2)
+(0:007Ch)       This is the pointer to data used by the ROM video routines to
+                display characters above ASCII 127 while in CGA medium and high
+                res graphics modes.
+
+note 1) Doubleword address points to 1K table composed of 28 8-byte character
+        definition bit-patterns. First byte of each entry is top row, last byte
+        is bottom row.
+     2) The first 128 character patterns are located in system ROM.
+     3) This vector is set to 000:0 at system initialization
+     4) Used by DOS' external GRAFTABL command
+
+
+Interrupt 20h   PROGRAM TERMINATE
+(0:0080h)
+ Issue int 20h to exit from a program. This vector transfers to the logic in
+DOS to restore the terminate address, the Ctrl-Break address,and the critical
+error exit address to the values they had on entry to the program. All the file
+buffers are flushed and all handles are closed. You should close all files
+changed in length (see function calls 10h and 3Eh) before issuing this
+interrupt. If the changed file is not closed, its length, time, and date are
+not recorded correctly in the directory.
+ For a program to pass a completion code or an error code when terminating, it
+must use either function call 4Ch (Terminate a Process) or 31h (Terminate
+Process and Stay Resident). These two methods are preferred over using
+int 20h and the codes returned by them can be interrogated in batch processing.
+Important: Before you issue an interrupt 20h, your program must ensure that
+           the CS register contains the segment of its program segment prefix.
+
+Interrupt 20h   DOS - Terminate Program
+entry   no parameters
+return  none
+
+Interrupt 20h   Minix - Send/Receive Message
+entry   AX      process ID of other process
+        BX      pointer to message
+        CX      1       send
+                2       receive
+                3       send&receive
+note    The message contains the system call number (numbered as in V7 Unix)
+        and the call parameters
+
+

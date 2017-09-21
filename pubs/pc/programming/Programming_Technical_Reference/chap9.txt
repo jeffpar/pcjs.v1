@@ -1,0 +1,758 @@
+CHAPTER 9
+
+ Programming Technical Reference - IBM
+ Copyright 1988, Dave Williams
+
+
+                       INSTALLABLE DEVICE DRIVERS
+
+
+DEVICE DRIVER FORMAT
+
+ A device driver is a COM or EXE file that contains all of the code needed to
+control an add-in device. It has a special header to identify it as a device,
+define the strategy and interrupt entry points, and define its various
+attributes.
+
+NOTE: For device drivers the COM file must not use the ORG 100h. Since the
+      driver does not use the program segment prefix, it is simply loaded
+      without offset. Therefore the memory image file must have an origin of 0 
+      (ORG 0 or no ORG statement).
+
+
+TYPES OF DEVICES
+
+ There are two types of devices: Character devices and Block devices. Their 
+attributes are as follows:
+
+ Character devices are designed to do character I/O in a serial manner like 
+CON, AUX, and PRN. These devices have names like CON, AUX, CLOCK$, and you can 
+open channels (handles or FCBs) to do input and output with them. Because 
+character devices have only one name, they can only support one device.
+
+ Block devices are the fixed disk or diskette drives on a system. They can do 
+random I/O in peices called blocks, which are usually the physical sector 
+size of the disk. These devices are not named as character devices are, and 
+cannot be opened directly. Instead they are mapped by using the drive letters 
+A,B,C etc. Block devices can have units within them. In this way, a single block
+driver can be responsible for one or more disk drives. For example, the first
+block device driver can be responsible for drives A,B,C,and D. This means it has
+four units defined and therefore takes up four drive letters. The position of
+the driver in the chain of all drives determines the way in which the drive
+letters correspond. For example, if the device driver is the first block driver
+in the device chain, and it defines four units, then these devices are called
+A,B,C, and D. If the second device driver defines three units, then those units
+are E,F,and G. DOS 1.x allows 16 devices. DOS 2.x allows 63, and DOS 3.x allows
+26. It is recommended that drivers limit themselves to 26 devices for
+compatibility with DOS 3.x.
+
+ DOS doesn't care about the position of installed character devices versus 
+block devices. The installed character devices get put into the chain ahead of
+resident character devices so that you can override the system's default driver
+for CON etc.
+
+ Although it is sometimes beleived that installed block devices get linked into
+the chain BEHIND the resident block devices, if you look at the actual device
+chain, this is not true (though it is true in the sense that installed block
+devices get assigned drive letters in sequence, starting with the next letter
+after the last one assigned to a resident block device).
+
+
+
+DEVICE HEADER
+
+ A device driver requires a device header at the beginning of the file. This 
+is the format of the device header:
+
+                Field                           Length
+
+        Pointer to next device header field     dword
+        Attribute                               word
+        Pointer to device strategy routine      word
+        Pointer to device interrupt routine     word
+        Name/Unit field                         8 bytes
+
+
+POINTER TO NEXT DEVICE HEADER FIELD
+
+ The device header field is a pointer to the device header of the next device 
+driver. It is a doubleword field that is set by DOS at the time the device 
+driver is loaded. The first word is an offset and the second word is the 
+segment.
+ If you are loading only one device driver, set the device header field to -1 
+before loading the device. If you are loading more than one device driver, set 
+the first word of the device driver header to the offset of the next device 
+driver's header. Set the device driver header field of the last device driver 
+to -1.
+
+
+ATTRIBUTE FIELD
+
+ The attribute field is a word field that describes the attributes of the 
+device driver to the system. The attributes are:
+
+        word    bits (decimal)
+                15      1       character device
+                        0       block device
+                14      1       supports IOCTL
+                        0       doesn't support IOCTL
+                13      1       non-IBM format (block only)
+                        0       IBM format
+                12      not documented - unknown
+                11      1       supports removeable media
+                        0       doesn't support removeable media
+                10      reserved for DOS
+             through
+                4       reserved for DOS
+                3       1       current block device
+                        0       not current block device
+                2       1       current NUL device
+                        0       not current NUL device
+                1       1       current standard output device
+                        0       not current standard output device
+
+
+
+BIT 15  is the device type bit. Use it to tell the system the that driver is a
+        block or character device.
+
+BIT 14  is the IOCTL bit. It is used for both character and block devices. Use 
+        it to tell DOS whether the device driver can handle control strings
+        through the IOCTL function call 44h.
+         If a device driver cannot process control strings, it should set bit
+        14 to 0. This way DOS can return an error is an attempt is made through
+        the IOCTL function call to send or receive control strings to the
+        device. If a device can process control strings, it should set bit 14 
+        to 1. This way, DOS makes calls to the IOCTL input and output device 
+        function to send and receive IOCTL strings.
+         The IOCTL functions allow data to be sent to and from the device 
+        without actually doing a normal read or write. In this way, the device
+        driver can use the data for its own use, (for example, setting a baud
+        rate or stop bits, changing form lengths, etc.) It is up to the device
+        to interpret the information that is passed to it, but the information
+        must not be treated as a normal I/O request.
+
+
+BIT 13  is the non-IBM format bit. It is used for block devices only. It affects
+        the operation of the Get BPB (BIOS parameter block) device call.
+
+BIT 11  is the open/close removeable media bit. Use it to tell DOS if the 
+        device driver can handle removeable media. (DOS 3.x only)
+
+BIT 3   is the clock device bit. It is used for character devices only. Use it 
+        to tell DOS if your character device driver is the new CLOCK$ device.
+
+BIT 2   is the NUL attribute bit. It is used for character devices only. Use it
+        to tell DOS if your character device driver is a NUL device. Although
+        there is a NUL device attribute bit, you cannot reassign the NUL device.
+        This is an attribute that exists for DOS so that DOS can tell if the NUL
+        device is being used.
+
+BIT 0   are the standard input and output bits. They are used for character
+  &     devices only. Use these bits to tell DOS if your character device 
+BIT 1   driver is the new standard input device or standard output device.
+
+
+POINTER TO STRATEGY AND INTERRUPT ROUTINES
+
+ These two fields are pointers to the entry points of the strategy and input 
+routines. They are word values, so they must be in the same segment as the 
+device header.
+
+
+NAME/UNIT FIELD
+
+ This is an 8-byte field that contains the name of a character device or the 
+unit of a block device. For the character names, the name is left-justified and
+the space is filled to 8 bytes. For block devices, the number of units can be 
+placed in the first byte. This is optional because DOS fills in this location 
+with the value returned by the driver's INIT code.
+
+
+CREATING A DEVICE DRIVER
+
+ To create a device driver that DOS can install, perform the following:
+
+1) Create a memory image file or an EXE file with a device header at the start 
+   of the file.
+2) Originate the code (including the device header) at 0, not 100h.
+3) Set the next device header field. Refer to "Pointer to Next Device Header 
+   Attribute Field" for more information.
+4) Set the attribute field of the device header. Refer to "Attribute Field" for 
+   more information.
+5) Set the entry points for the interrupt and strategy routines.
+6) Fill in the name/unit field with the name of the character device or the unit
+   number of the block device.
+
+ DOS always processes installable character device drivers before handling the 
+default devices. So to install a new CON device, simply name the device CON. 
+Be sure to set the standard input device and standard output device bits in 
+the attribute field of a new CON device. The scan of the device list stops on 
+the first match so the installable device driver takes precedence.
+
+NOTE: Because DOS can install the device driver anywhere in memory, care 
+      must be taken in any FAR memory references. You should not expect that 
+      your driver will be loaded in the same place every time.
+
+
+
+INSTALLING DEVICE DRIVERS
+
+ DOS installs new device drivers dynamically at boot time by reading and 
+processing the DEVICE command in the config.sys file. For example, if you have 
+written a device driver called DRIVER1, to install it put this command in the 
+CONFIG.SYS file:
+                             DEVICE=DRIVER1
+
+ DOS calls a device driver at its strategy entry point first, passing in a 
+request header the information describing what DOS wants the device driver 
+to do.
+ This strategy routine does not perform the request but rather queues the 
+request or saves a pointer to the request header. The second entry point is 
+the interrupt routine and is called by DOS immediately after the strategy 
+routine returns. The interrupt routine is called with no parameters. Its 
+function is to perform the operation based on the queued request and set up 
+any return infromation.
+ DOS passes the pointer to the request header in ES:BX. This structure consists
+of a fixed length header (Request Header) followed by data pertinent to the 
+operation to be performed.
+
+NOTE: It is the responsibility of the device driver to preserve the machine 
+      state. For example, save all registers on entry and restore them on exit.
+
+ The stack used by DOS has enough room on it to save all the registers. If more
+stack space is needed, it is the device driver's responsibility to allocate and
+maintain another stack.
+ All calls to execute device drivers are FAR calls. FAR returns should be 
+executed to return to DOS.
+
+
+
+INSTALLING CHARACTER DEVICES
+
+ One of the functions defined for each device is INIT. This routine is called 
+only once when the device is installed and never again. The INIT routine returns
+the following:
+
+A) A location to the first free byte of memory after the device driver, like a
+   TSR that is stored in the terminating address field. This way, the 
+   initialization code can be used once and then thrown away to save space.
+B) After setting the address field, a character device driver can set the status
+   word and return.
+
+
+INSTALLING BLOCK DEVICES
+
+ Block devices are installed in the same way as character devices. The 
+difference is that block devices return additional information. Block devices 
+must also return:
+
+A) The number of units in the block device. This number determines the logical 
+   names the devices will have. For example, if the current logical device 
+   letter is F at the time of the install call, and the block device driver INIT
+   routine returns three logical units, the letters G, H, and I are assigned to 
+   the units. The mapping is determined by the position of the driver in the 
+   device list and the number of units in the device. The number of units 
+   returned by INIT overrides the value in the name/unit field of the device 
+   header.
+B) A pointer to a BPB (BIOS parameter block) pointer array. This is a pointer 
+   to an array of *n* word pointers there *n* is the number of units defined. 
+   These word pointers point to BPBs. This way, if all of the units are the 
+   same, the entire array can point to the same BPB to save space.
+    The BPB contains information pertinent to the devices such as the sector 
+   size, number of sectors per allocation unit, and so forth. The sector size of
+   the BPB cannot be greater than the maximum allotted size set at DOS 
+   initialization time.
+   NOTE: This array must be protected below the free pointer set by the return.
+C) The media descriptor byte. This byte is passed to devices so that they know 
+   what parameters DOS is currently using for a particular drive unit.
+
+ Block devices can take several approaches. They can be *dumb* or *smart*. A 
+dumb device would define a unit (and therefore a BPB) for each possible media 
+drive combination. Unit 0=drive 0;single side, unit 1=drive 0;double side, etc.
+ For this approach, the media descriptor bytes would mean nothing. A smart 
+device would allow multiple media per unit. In this case, the BPB table 
+returned at INIT must define space large enough to acommodate the largest 
+possible medias supported (sector size in BPB must be as large as maximum 
+sector size DOS is currently using). Smart drivers will use the media byte to 
+pass information about what media is currently in a unit.
+
+
+REQUEST HEADER
+
+ The request header passes the information describing what DOS wants the 
+device driver to do.
+
+ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+³  Length  ³                       F i e l d                                   ³
+ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³   BYTE   ³ Length in bytes of the request header plus any data at end        ³
+ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³   BYTE   ³ Unit code. The subunit the operation is for (minor device)        ³
+³          ³ Has no meaning for character devices.                             ³
+ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³   WORD   ³ Command code                                                      ³
+ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³ 8 BYTES  ³ Deserved for DOS                                                  ³
+ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³(variable)³ Data appropriate for the operation                                ³
+ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+
+UNIT CODE FIELD
+
+ The unit code field identifies which unit in a block device driver the request
+is for. For example, if a block device driver has three units defined, then the
+possible values of the unit code field would be 0,1,and 2.
+
+
+COMMAND CODE FIELD
+
+ The command code field in the request header can have the following values:
+
+      CODE         FUNCTION
+
+        0       INIT
+        1       MEDIA CHECK      (block only,NOP for character)
+        2       BUILD BPB        (block only, NOP for character)
+        3       IOCTL input      (called only if IOCTL bit is 1)
+        4       INPUT            (read)
+        5       NONDESTRUCTIVE INPUT NO WAIT (character devices only)
+        6       INPUT STATUS     (character devices only)
+        7       INPUT FLUSH      (character devices only)
+        8       OUTPUT           (write)
+        9       OUTPUT           (write with verify)
+        10      OUTPUT STATUS    (character devices only)
+        11      OUTPUT FLUSH     (character devices only)
+        12      IOCTL OUTPUT     (called only if IOCTL bit is 1)
+        13      DEVICE OPEN      (called only if OPEN/CLOSE/RM bit is set)
+        14      DEVICE CLOSE     (called only if OPEN/CLOSE/RM bit is set)
+        15      REMOVEABLE MEDIA (called only if OPEN/CLOSE/RM bit is set and
+                                  device is block)
+
+NOTE: Command codes 13,14,and 15 are for use with DOS versions 3.x.
+
+
+STATUS FIELD
+The status field in the request header contains:
+
+ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+³            D E V I C E    D R I V E R    S T A T U S    F I E L D            ³
+ÃÄÄÄÄÄÄÄÂÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³   B   ³ 0 ³                                                                  ³
+³       ³ 1 ³                                                                  ³
+³   Y   ³ 2 ³                                                                  ³
+³       ³ 3 ³   Error message return code                                      ³
+³   T   ³ 4 ³   (with bit 15=1)                                                ³
+³       ³ 5 ³                                                                  ³
+³   E   ³ 6 ³                                                                  ³
+³       ³ 7 ³                                                                  ³
+ÃÄÄÄÄÄÄÄÅÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³  bit  ³ 8 ³   DONE                                                           ³
+ÃÄÄÄÄÄÄÄÅÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³  bit  ³ 9 ³   BUSY                                                           ³
+ÃÄÄÄÄÄÄÄÅÄÄÄÁÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³  bits ³ 10 - 14 ³   Reserved                                                 ³
+ÃÄÄÄÄÄÄÄÅÄÄÄÄÂÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³  bit  ³ 15 ³   Error                                                         ³
+ÀÄÄÄÄÄÄÄÁÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+ The status word field is zero on entry and is set by the driver interrupt 
+routine on return.
+
+BIT 15  is the error bit. If this bit is set, the low 8 bits of the status word
+        (7-0) indicate the error code.
+
+BITS 14-10 are reserved.
+
+BIT 9   is the busy bit. It is only set by status calls and the removable media 
+        call. See "STATUS" and "REMOVABLE MEDIA" in this chapter for more 
+        information about the calls.
+
+BIT 8   is the done bit. If it is set, it means the operation is complete. The 
+        driver sets the bit to 1 when it exits.
+
+ The low 8 bits of the status word define an error message if bit 15 is set. 
+These errors are:
+
+        00h  Write protect violation   01h  Unknown unit
+        02h  Device not ready          03h  Unknown command
+        04h  CRC error                 05h  Bad drive request structure length
+        06h  seek error                07h  unknown media
+        08h  sector not found          09h  printer out of paper
+        0Ah  write fault               0Bh  read fault
+        0Ch  general failure           0Dh  reserved
+        0Eh  reserved                  0Fh  invalid disk change
+
+
+DEVICE DRIVER FUNCTIONS
+
+ All strategy routines are called with ES:BX pointing to the request header. 
+The interrupt routines get the pointers to the request header from the queue 
+the strategy routines store them in. The command code in the request header 
+tells the driver which function to perform.
+NOTE: all DWORD pointers are stored offset first, then segment.
+
+The following function call parameters are described:
+
+        INIT
+        MEDIA CHECK
+        BUILD BPB (BIOS PARAMETER BLOCK)
+        MEDIA DESCRIPTOR BYTE
+        INPUT OR OUTPUT
+        NONDESTRUCTIVE INPUT NO WAIT
+        STATUS
+        FLUSH
+        OPEN OR CLOSE
+        REMOVABLE MEDIA
+
+
+INIT
+Command code=0
+        ES:BX   pointer to request header. Format of header:
+                length           field
+                13 bytes  request header
+                 dword    number of units (not set by character devices)
+                 dword    Ending address of resident program code
+                 dword    Pointer to BPB array (not set by character devices)
+                          /pointer to remainder of arguments
+                  byte    Drive number (3x only)
+
+The driver must do the following:
+
+        A) set the number of units (block devices only)
+        B) set up the pointer to the BPB array (block devices only)
+        C) perform any initialization code (to modems, printers, etc)
+        D) Set the ending address of the resident program code
+        E) set the status word in the request header.
+
+ To obtain information obtained from CONFIG.SYS to a device driver at INIT 
+time, the BPB pointer field points to a buffer containing the information 
+passed from CONFIG.SYS following the =. The buffer that DOS passes to the 
+driver at INIT after the file specification contains an ASCII string for the 
+file OPEN. The ASCII string (ending in 0h) is terminated by a carriage return 
+(0Dh) and linefeed (0Ah). If there is no parameter information after the file 
+specification, the file specification is immediately followed by a linefeed 
+(0Ah). This information is read-only and only system calls 01h-0Ch and 30h can 
+be issued by the INIT code of the driver.
+ The last byte parameter contains the drive letter for the first unit of a 
+block driver. For example, 0=A, 1=B etc.
+ If an INIT routine determines that it cannot set up the device and wants to 
+abort without using any memory, follow this procedure:
+
+        A) set the number of units to 0
+        B) set the ending offset address at 0
+        C) set the ending offsret segment address to the code segment (CS)
+
+NOTE: If there are multiple device drivers in a single memory image file, the 
+      ending address returned by the last INIT called is the one DOS uses. It is
+      recommended that all device drivers in a single memory image file return
+      the same ending address.
+
+
+MEDIA CHECK
+command code=1
+        ES:BX   pointer to request header. Format of header:
+                length          field
+                13 bytes  request header
+                byte      media descriptor from DOS
+                byte      return
+                dword     returns a pointer to the previous volume ID (if bit
+                          11=1 and disk change is returned) (DOS 3.x)
+
+ When the command code field is 1, DOS calls MEDIA CHECK for a drive unit and 
+passes its current media descriptor byte. See "Media Descriptor Byte" later in 
+this chapter for more information about the byte. MEDIA CHECK returns one of 
+the following:
+
+        A) media not changed             C) not sure
+        B) media changed                 D) error code
+
+The driver must perform the following:
+        A) set the status word in the request header
+        B) set the return byte
+               -1       media has been changed
+                0       don't know if media has been changed
+                1       media has not been changed
+
+ DOS 3.x: If the driver has set the removable media bit 11 of the device header
+attribute word to 1 and the driver returns -1 (media changed), the driver must 
+set the DWORD pointer to the previous volume identification field. If DOS 
+determines that the media changed is an error, DOS generates an error 0Fh 
+(invalid disk change) on behalf of the device. If the driver does not implement
+volume identification support, but has bit 11 set to 1, the driver should set a
+pointer to the string "NO NAME",0.
+
+
+MEDIA DESCRIPTOR
+ Currently the media descriptor byte has been defined for a few media types. 
+This byte should be idetnical to the media byte if the device has the non-IBM 
+format bit off. These predetermined values are:
+
+media descriptor byte =>    1  1  1  1  1  0  0  0
+ (numerical order)          7  6  5  4  3  2  1  0
+
+       BIT                MEANING        
+
+        0       1=2 sided       0=not 2 sided
+        1       1=8 sector      0=not 8 sector
+        2       1=removeable    0=nonremoveable
+       3-7      must be set to 1
+
+
+Examples of current DOS media descriptor bytes:
+
+           media      sides   sectors  ID byte
+
+        hard disk       *       *       0F8h
+        5-1/4 floppy    2       15      0F9h
+        5-1/4 floppy    1       9       0FCh
+        5-1/4 floppy    2       9       0FDh
+        5-1/4 floppy    2       8       0FFh
+        5-1/4 floppy    1       8       0FEh
+        8" floppy       1       26      0FEh *
+        8" floppy       2       26      0FDh
+        8" floppy       2       8       0FEh *
+
+*NOTE: The two Media Descriptor Bytes that are the same for 8" diskettes (0FEh) 
+are not a misprint. To determine whether you are using a single sided or double
+sided diskette, attempt to read the second side, and if an error occurs you can
+assume the diskette is single sided.
+
+
+BUILD BPB (BIOS Parameter Block)
+command code =2
+        ES:BX   pointer to request header. Format:
+                length          field
+                13 bytes  request header
+                byte      media descriptor from DOS
+                dword     transfer address (buffer address)
+                dword     pointer to BPB table
+
+DOS calls BUILD BPB under the following two conditions:
+
+A) If "media changed" is returned
+B) If "not sure" is returned, there are no used buffers. Used buffers are 
+   buffers with changed data that has not yet been written to the disk.
+
+The driver must do the following:
+
+A) set the pointer to the BPB
+B) set the status word in the request header.
+
+ The driver must determine the correct media type currently in the unit to 
+return the pointer to the BPB table. The way the buffer is used (pointer 
+passed by DOS) is determined by the non-IBM format bit in the attribute field 
+of the device header. If bit 13=0 (device is IBM compatible), the buffer 
+contains the first sector of the FAT (most importantly the FAT ID byte). The 
+driver must not alter this buffer in this case. If bit 13=1 the buffer is a 
+one sector scratch area which can be used for anything.
+ For drivers that support volume identification and disk change, the call 
+should cause a new volume identification to be read off the disk. This call 
+indicates that the disk has been legally changed.
+ If the device is IBM compatible, it must be true that the first sector of the 
+first FAT is located at the same sector for all possible media. This is 
+because the FAT sector is read before the media is actually determined.
+ The information relating to the BPB for a particular media is kept in the boot
+sector for the media. In particular, the format of the boot sector is:
+
+ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+³ For DOS 2.x, 3 byte near jump (0E9h) For DOS 3.x, 2 byte near jump (0EBh)    ³
+³ followed by a NOP (90h)                                                      ³
+ÃÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³ 8 bytes  ³  OEM name and version                                             ³
+ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³   BYTE   ³     ³  sectors per allocation unit (must be a power of 2)         ³
+ÃÄÄÄÄÄÄÄÄÄÄ´     ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³   WORD   ³  B  ³  reserved sectors (strarting at logical sector 0)           ³
+ÃÄÄÄÄÄÄÄÄÄÄ´     ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³   BYTE   ³     ³  number of FATs                                             ³
+ÃÄÄÄÄÄÄÄÄÄÄ´     ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³   WORD   ³  P  ³  max number of root directory entries                       ³
+ÃÄÄÄÄÄÄÄÄÄÄ´     ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³   WORD   ³     ³  number of sectors in logical image (total number of        ³
+³          ³     ³  sectors in media, including boot sector directories, etc.) ³
+ÃÄÄÄÄÄÄÄÄÄÄ´  B  ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³   BYTE   ³     ³  media descriptor                                           ³
+ÃÄÄÄÄÄÄÄÄÄÄ´     ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³   WORD   ³     ³  number of sectors occupied by a single FAT                 ³
+ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³   WORD   ³  sectors per track                                                ³
+ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³   WORD   ³  number of heads                                                  ³
+ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³   WORD   ³  number of hidden sectors                                         ³
+ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+ The three words at the end return information about the media. The number of
+heads is useful for supporting different multihead drives that have the same
+storage capacity but a different number of surfaces. The number of hidden
+sectors is useful for drive partitioning schemes.
+
+
+INPUT / OUTPUT
+command codes=3,4,8,9,and 12
+        ES:BX   pointer to request header. Format:
+                length          field
+                13 bytes  request header
+                byte      media descriptor byte
+                dword     transfer address (buffer address)
+                word      byte/sector count
+                dword     (DOS 3.x) pointer to the volume ID if error code 0Fh
+                          is returned
+
+The driver must perform the following:
+        A) set the status word in the request header
+        B) perform the requested function
+        C) set the actual number of sectors or bytes tranferred
+
+NOTE: No error checking is performed on an IOCTL I/O call. However the driver 
+      must set the return sector or byte count to the actual number of bytes 
+      transferred.
+
+
+The following applies to block device drivers: 
+
+ Under certain circumstances the device driver may be asked to do a write 
+operation of 64k bytes that seems to be a *wrap around* of the transfer address
+in the device driver request packet. This arises due to an optimization added to
+write code in DOS. It will only happen in writes that are within a sector size
+of 64k on files that are being exetended past the current end of file. It is 
+allowable for the device driver to ignore the balance of the write that wraps 
+around, if it so chooses. For example, a write of 10000h bytes worth of sectors
+with a transfer address of XXXX:1 ignores the last two bytes.
+
+Remember: A program that uses DOS function calls can never request an input or 
+          output function of more than 0FFFFh bytes, therefore, a wrap around 
+          in the transfer (buffer) segment can never occur. It is for this 
+          reason you can ignore bytes that would have wrapped around in the 
+          tranfer segment.
+
+ If the driver returns an error code of 0Fh (invalid disk change) it must put 
+a DWORD pointer to an ASCIIZ string which is the correct volume ID to ask the 
+user to reinsert the disk.
+
+DOS 3.x:
+ The reference count of open files on the field (maintained by the OPEN and 
+CLOSE calls) allows the driver to determine when to return error 0Fh. If there 
+are no open files (reference count=0) and the disk has been changed, the I/O 
+is all right, and error 0Fh is not returned. If there are open files 
+(reference count > 0) and the disk has been changed, an error 0Fh condition 
+may exist.
+
+
+NONDESTRUCTIVE INPUT NO WAIT
+command code=5
+        ES:BX   pointer to request header. Format:
+                length          field
+                13 bytes  request header
+                byte      read from device
+
+The driver must do the following:
+        A) return a byte from the device
+        B) set the status word in the request header.
+
+ If the character device returns busy bit=0 (characters in the buffer), then 
+the next character that would be read is returned. This character is not removed
+form the buffer (hence the term nondestructive input). This call allows DOS to
+look ahead one character.
+
+
+STATUS
+command codes=8 and 10
+        ES:BX   pointer to a request header. Format:
+                length          field
+                13 bytes  request header
+
+This driver must perform the following:
+        A) perform the requested function
+        B) set the busy bit
+        C) set the status word in the request header.
+
+The busy bit is set as follows:
+
+ For input on character devices: if the busy bit is 1 on return, a write 
+request would wait for completion of a current request. If the busy bit is 0, 
+there is no current request. Therefore, a write request would start immediately.
+
+ For input on character devices with a buffer: if the busy bit is 1 on return, 
+a read request does to the physical device. If the busy bit is 0, there are 
+characters in the device buffer and a read returns quickly. It also indicates 
+that a user has typed something. DOS assumes all character devices have a type-
+ahead input buffer. Devices that do not have this buffer should always return 
+busy=0 so that DOS does not hang waiting for information to be put in a buffer
+that does not exist.
+
+
+FLUSH
+command codes=7 and 11
+        ES:BX   pointer
+                length          field
+                13 bytes  request header
+
+ This call tells the driver to flush (terminate) all pending requests that it 
+has knowledge of. Its primary use is to flush the input queue on character 
+devices.
+ The driver must set the status word in the request header upon return.
+
+
+OPEN or CLOSE (3.x)
+command codes=13 and 14
+        ES:BX   pointer
+                length          field
+                13 bytes  static request header
+
+ These calls are designed to give the device information about the current file
+activity on the device if bit 11 of the attribute word is set. On block 
+devices, these calls can be used to manage local buffering. The device can keep
+a reference count. Every OPEN causes the device to increment the reference
+count. Every CLOSE causes the device to decrement the reference count. When the
+reference count is 0, if means there are no open files in the device. Therefore,
+the device should flush buffers inside the device it has written to because now
+the user can change the media on a removeable media drive. If the media had been
+changed, it is advisable to reset the reference count to 0 without flushing the
+buffers. This can be thought of as "last close causes flush". These calls are 
+more useful on character devices. The OPEN call can be used to send a device 
+initialization string. On a printer, this could cause a string to be sent to set
+the font, page size, etc. so that the printer would always be in a known state
+in the I/O stream. Similarly, a CLOSE call can be used to send a post string 
+(like a form feed) at the end of an I/O stream. Using IOCTL to set these pre and
+post strings provides a flexible mechanism of serial I/O device stream control.
+
+NOTE: Since all processes have access to STDIN,STDOUT,STDERR,STDAUX, and STDPRN
+      (handles 0,1,2,3,and 4) the CON, AUX, and PRN devices are always open.
+
+
+REMOVABLE MEDIA (DOS 3.x)
+command code=15
+        ES:BX   pointer
+                length          field
+                13 bytes  status request header
+
+ To use this call, set bit 11 of the attribute field to 1. Block devices can 
+only use this call through a subfunction of the IOCTL function call (44h). 
+This call is useful because it allows a utility to know whether it is dealing 
+with a nonremovable media drive or with a removable media drive. For example, 
+the FORMAT utility needs to know whether a drive is removable or nonremovable 
+because it prints different versions of some prompts.
+
+ The information is returned in the BUSY bit of the status word. If the busy 
+bit is 1, the media is nonremovable. 
+
+NOTE: No error checking is performed. It is assumed that this call always 
+      succeeds.
+
+
+THE CLOCK$ DEVICE
+
+ To allow a clock board to be integrated into the system for TIME and DATE,
+the CLOCK$ device is used. This device defines and performs functions like any
+other character device (most functions will be reset done bit, reset error bit,
+and return). When a read or write to this device occurs, 6 bytes are
+transferred. The first 2 bytes are a word, which is the count of days since
+01-01-80. The third byte is minutes, the fourth is hours, the fifth is
+hundredths of a second, and the sixth is seconds. 
+Reading the CLOCK$ device gets the date and time, writing to it sets the date 
+and time.
+
+

@@ -1,0 +1,241 @@
+
+CHAPTER 1.
+                         DOS TECHNICAL INFORMATION
+ Programming Technical Reference - IBM
+ Copyright 1988, Dave Williams
+
+
+SOME HISTORY
+
+ Development of MSDOS/PCDOS began in October 1980, when IBM began searching 
+the market for an operating system for the yet-to-be-introduced IBM PC.
+Microsoft had no real operating system to sell, but after some research licensed
+Seattle Computer Products' 86-DOS, which had been written by a man named Tim 
+Paterson for use on the company's line of 8086, S100 bus micros. This was 
+hurriedly polished up and presented to IBM for evaluation. IBM had originally 
+intended to use Digital Research's CP/M operating system, which was the industry
+standard at the time. Folklore reports everything from obscure legal 
+entanglements to outright snubbing of the IBM representatives by Digital,
+irregardless, IBM found itself left with Microsoft's offering of "Microsoft Disk
+Operating System 1.0". An agreement was reached between the two, and "IBM PC-DOS
+1.0" was ready for the introduction of the IBM PC in October 1981. IBM subjected
+the operating system to an extensive quality-assurance program, found well over
+300 bugs, and decided to rewrite the programs. This is why PC-DOS is copyrighted
+by both IBM and Microsoft. 
+
+ It is sometimes amusing to reflect on the fact that the IBM PC was not
+originally intended to run MSDOS. The target operating system at the end of the
+development was for a (not yet in existence) 8086 version of CP/M. On the other
+hand, when DOS was originally written the IBM PC did not yet exist! Although
+PC-DOS was bundled with the computer, Digital Research's CP/M-86 would probably
+have been the main operating system for the PC except for two things - Digital
+Research wanted $495 for CP/M-86 (considering PC-DOS was essentially free) and
+many software developers found it easier to port existing CP/M software to DOS
+than to the new version of CP/M.
+
+ MSDOS and PC-DOS have been run on more than just the IBM-PC and clones. There 
+was an expansion board for the Apple ][ that allowed one to run (some) well - 
+behaved DOS programs. There are expansion boards for the Commodore Amiga 2000,
+the Apple MacIntosh II, and the IBM RT PC allowing them to run DOS, and the IBM
+3270 PC, which ran DOS on a 68000 microprocessor. The Atari STs can run an 
+emulator program and boot MSDOS.
+
+
+Specific Versions of MS/PC-DOS:
+
+ DOS version nomenclature: major.minor.minor.  The digit to the left of the 
+decimal point indicates a major DOS version change. 1.0 was the first version. 
+2.0 added subdirectories, etc. 3.0 added file handles and network support.
+ The first minor version indicates customization for a major application. For 
+example, 2.1 for the PCjr, 3.3 for the PS/2s. The second minor version does not 
+seem to have any particular meaning.
+
+ The main versions of DOS are:
+
+ PC-DOS 1.0   October  1981  original release
+ PC-DOS 1.1   June     1982  bugfix, double sided drive support
+ MS-DOS 1.25  June     1982  for early compatibles
+ PC-DOS 2.0   March    1983  for PC/XT, many UNIX-like functions
+ PC-DOS 2.1   October  1983  for PCjr, bugfixes for 2.0
+ MS-DOS 2.11  October  1983  compatible equivalent to 2.1
+ PC-DOS 3.0   August   1984  for PC/AT, network support
+ PC-DOS 3.1   November 1984  bugfix for 3.0
+ MS-DOS 2.25  October  1985  compatible; extended foreign language support
+ PC-DOS 3.2   July     1986  3.5 inch drive support for Convertible
+ PC-DOS 3.3   April    1987  for PS/2 series
+
+
+ Some versions of MS-DOS varied from PC-DOS in the availible external commands.
+Some OEMs only licensed the basic operating system code (the xxxDOS and xxxBIO
+programs, and COMMAND.COM) from Microsoft, and either wrote the rest themselves
+or contracted them from outside software houses like Phoenix. Most of the 
+external programs for DOS 3.x are written in "C" while the 1.x and 2.x utilities
+were written in assembly language. Other OEMs required customized versions of 
+DOS for their specific hardware configurations, such as Sanyo 55x and early 
+Tandy computers, which were unable to exchange their DOS with the IBM version.
+
+ At least two versions of DOS have been modified to be run entirely out of ROM.
+The Sharp PC5000 had MSDOS 1.25 in ROM, and the Toshiba 1100 and some Tandy 
+models have MSDOS 2.11 in ROM.
+
+
+ THE OPERATING SYSTEM HIERARCHY
+
+ The Disk Operating System (DOS) and the ROM BIOS serve as an insulating layer 
+between the application program and the machine, and as a source of services 
+to the application program.
+ The system heirarchy may be thought of as a tree, with the lowest level being 
+the actual hardware. The 8088 or V20 processor sees the computer's address 
+space as a ladder two bytes wide and one million bytes long. Parts of this 
+ladder are in ROM, parts in RAM, and parts are not assigned. There are also 
+256 "ports" that the processor can use to control devices. 
+ The hardware is normally addressed by the ROM BIOS, which will always know
+where everything is in its particular system. The chips may usually also be
+written to directly, by telling the processor to write to a specific address or
+port. This sometimes does not work as the chips may not always be at the same
+addresses or have the same functions from machine to machine.
+
+
+
+ DOS STRUCTURE
+
+DOS consists of four components:
+
+ * The boot record
+ * The ROM BIOS interface  (IBMBIO.COM or IO.SYS)
+ * The DOS program file    (IBMDOS.COM or MSDOS.SYS)
+ * The command processor   (COMMAND.COM or aftermarket replacement)
+
+
+* The Boot Record
+
+ The boot record begins on track 0, sector 1, side 0 of every diskette formatted
+by the DOS FORMAT command.  The boot record is placed on diskettes to produce an
+error message if you try to start up the system with a nonsystem diskette in 
+drive A.  For hard disks, the boot record resides on the first sector of the DOS
+partition.  All media supported by DOS use one sector for the boot record.
+
+
+* Read Only Memory (ROM) BIOS Interface
+
+ The file IBMBIO.COM or IO.SYS is the interface module to the ROM BIOS.
+This file provides a low-level interface to the ROM BIOS device routines and 
+may contain extensions or changes to the system board ROMs. Some compatibles do
+not have a ROM BIOS to extend, and load the entire BIOS from disk. (Sanyo 55x,
+Viasyn)
+
+
+* The DOS Program File
+
+ The actual DOS program is file IBMDOS.COM or MSDOS.SYS. It provides a high-
+level interface for user (application) programs. This program consists of file
+management routines, data blocking/deblocking for the disk routines, and a
+variety of built-in functions easily accessible by user programs.
+ When a user program calls these function routines, they accept high-level
+information by way of register and control block contents. For device 
+operations, the functions translate the requirement into one or more calls to 
+IBMBIO.COM or MSDOS.SYS to complete the request.
+    
+
+* The Command Interpreter
+  
+ The Command interpreter, COMMAND.COM, consists of these parts:
+    
+Resident Portion:
+
+ The resident portion resides in memory immediately following IBMDOS.COM and its
+data area. This portion contains routines to process interrupts 22h (Terminate 
+Address), 23h (Ctrl-Break Handler), and 24h (Critical Error Handler), as well as
+a routine to reload the transient portion if needed. For DOS 3.x, this portion 
+also contains a routine to load and execute external commands, such as files 
+with exensions of COM or EXE.
+
+ When a program terminates, a checksum is used to determine if the application 
+program overlaid the transient portion of COMMAND.COM. If so, the resident 
+portion will reload the transient portion from the area designated by COMSPEC= 
+in the DOS environment. If COMMAND.COM cannot be found, the system will halt.
+
+NOTE: DOS 3.3 checks for the presence of a hard disk, and will default to 
+      COMSPEC=C:\. Previous versions default to COMSPEC=A:\. Under some DOS
+      versions, if COMMAND.COM is not immediately availible for reloading
+      (i.e., swapping to a floppy with COMMAND.COM on it) DOS may crash.
+
+ All standard DOS error handling is done within the resident portion of 
+COMMAND.COM.  This includes displaying error messages and interpreting the 
+replies of Abort, Retry, Ignore, Fail.  
+
+  
+ An initialization routine is included in the resident portion and assumes
+control during startup. This routine contains the AUTOEXEC.BAT file handler and
+determines the segment address where user application programs may be loaded.
+The initialization routine is then no longer needed and is overlaid by the first
+program COMMAND.COM loads.
+
+ NOTE: AUTOEXEC.BAT may be a hidden file.
+
+ A transient portion is loaded at the high end of memory. This is the command 
+processor itself, containing all of the internal command processors and the 
+batch file processor. For DOS 2.x, this portion also contains a routine to load
+and execute external commands, such as files with extensions of COM or EXE.
+
+ This portion of COMMAND.COM also produces the DOS prompt (such as "A>"), reads
+the command from the standard input device (usually the keyboard or a batch 
+file), and executes the command. For external commands, it builds a command line
+and issues an EXEC function call to load and transfer control to the program.
+
+NOTE: COMMAND.COM may be a hidden file.
+    
+NOTE: For Dos 2.x, the transient portion of the command processor contains the
+      EXEC routine that loads and executes external commands. For DOS 3.x, the
+      resident portion of the command processor contains the EXEC routine. 
+
+
+
+  DOS Initialization
+
+ The system is initialized by a software reset (Ctrl-Alt-Del), a hardware reset
+(reset button), or by turning the computer on. The Intel 80x8x series processors
+always look for their first instruction at the end of their address space 
+(0FFFF0h) when powered up or reset. This address contains a jump to the first 
+instruction for the ROM BIOS.
+ Built-in ROM programs (Power-On Self-Test, or POST, in the IBM) check machine
+status and run inspection programs of various sorts. Some machines set up a
+reserved RAM area with bytes indicating installed equipment (AT and PCjr). 
+ The ROM routine looks for a disk drive at A: or an option ROM (usually a hard
+disk) at absolute address C:800h. If no floppy drive or option ROM is found, the
+BIOS calls int 19h (ROM BASIC if it is an IBM) or displays error message. 
+ If a bootable disk is found, the ROM BIOS loads the first sector of information
+from the disk and then jumps into the RAM location holding that code. This code
+normally is a routine to load the rest of the code off the disk, or to "boot"
+the system. 
+ The following actions occur after a system initialization:
+
+ 1.  The boot record is read into memory and given control.    
+
+ 2.  The boot record then checks the root directory to assure that the first 
+     two files are IBMBIO.COM and IBMDOS.COM. These two files must be the 
+     first two files, and they must be in that order (IBMBIO.COM first, with 
+     its sectors in contiguous order).
+     NOTE: IBMDOS.COM need not be contiguous in version 3.x.
+
+ 3.  The boot record loads IBMBIO.COM into memory.
+
+ 4.  The initialization code in IBMBIO.COM loads IBMDOS.COM, determines 
+     equipment status, resets the disk system, initializes the attached 
+     devices, sets the system parameters and loads any installable device 
+     drivers according to the CONFIG.SYS file in the root directory (if 
+     present), sets the low-numbered interrupt vectors, relocates IBMDOS.COM 
+     downward, and calls the first byte of DOS.
+     NOTE: CONFIG.SYS may be a hidden file.
+
+ 5.  DOS initializes its internal working tables, initializes the interrupt
+     vectors for interrupts 20h through 27h, and builds a Program Segment 
+     Prefix for COMMAND.COM at the lowest available segment. For DOS versions
+     3.10 up, DOS initializes interrupt vectors for interrupts 0Fh through 3Fh.
+
+ 6.  IBMBIO.COM uses the EXEC function call to load and start the top-level
+     command processor. The default command processor is COMMAND.COM.
+
+
+
+

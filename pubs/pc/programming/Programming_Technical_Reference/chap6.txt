@@ -1,0 +1,539 @@
+CHAPTER 6 
+
+ Programming Technical Reference - IBM
+ Copyright 1988, Dave Williams
+
+                     DOS CONTROL BLOCKS AND WORK AREAS
+
+When DOS loads a program, it first sets aside a section of memory for the 
+program called the program segment, or code segment. Then it constructs a 
+control block called the program segment prefix, or PSP, in the first 256 
+(100h) bytes. Usually, the program is loaded directly after the PSP at 
+100h.
+ The PSP contains various information used by DOS to help run the program.  
+The PSP is always located at offset 0 within the code segment. When a program 
+recieves control certain registers are set to point to the PSP. For a COM 
+file, all registers are set to point to the beginning of the PSP and the 
+program begins at 100h. For the more complex EXE file structures, only DS and 
+ES registers are set to point to the PSP. The linker passes the settings for 
+the DS, IP, SS, and SP registers and may set the starting location in CS:IP to 
+a location other than 100h.
+
+
+
+IBMBIO provides an IRET instruction at absolute address 847h for use as a 
+dummy routine for interrupts that are not used by DOS. This lets the 
+interrupts do nothing until their vectors are rerouted to ttheir appropriate 
+handlers.
+
+A storage block is used by DOS to record the amount and location of allocated 
+memory withion the machine's address spacd.
+ A storage block, a Program Segment Prefix, and an environment area are built 
+by FDOS for each program currently resident in the address space. The storage 
+block is used by DOS to record the address range of memory allocated to a 
+program. IOt us used by DOs to find th enext availible area to load  a program 
+and to determine if there is a\enough memory to run that porogram. When a 
+memory area is in use, it is said to be allocated. Then the program ends, or 
+releases memory, it is said to bne deallocated. 
+ A storage block contains a pointer ro rhe Program Segment Prefix assoiciated 
+with each program. This control block is constructed by IBMDOS for the purpose 
+opf providing stanfdardized areas for DOS/program communication., Within ghr 
+PSP are arsas which  are used to save interrupt vectors, pass parameters to 
+the program, record disk directory information, and to buffer disk reads and 
+writes. This control block is 100h bytes in lengrth and is followed by the 
+program mopdule loaded by DOS. 
+ The PSP contains a pointer to the environment area for that program. This 
+area contains a copy of the current DOS SET, PROMPT, COMSPEC, and PATH values 
+as well as any user-set variables. The program may examine and modify this 
+information as desired. 
+ Each storage block is 10h bytes long, although only 5 bytes are currently 
+used by DOS. The first byte contains 4Dh (a capital M) to indicate that it 
+contains a pointer to the next storage block. A 5Ah (a capital Z) in the 
+first byte of a storage block indicatres there are no more storage blocks 
+following this one (it is the end of the chain). The identifier byte is 
+followeed by a 2 byte segment number for the associated PSP for that program. 
+The next 2 bytes contain the number of segments what are allocated to the 
+program. If this is not the last storage block, then another storage block 
+follows the allocated memory area.
+ When thge storage block contains zero for the nuymber of allocated segments, 
+then no storage is allocated to thius block and the next storage block 
+immediately follows this one. This can ha-p[en whjen memory is allocated and 
+then deallocated repeatedly.
+ IBMDOS constructs a storage block and PSP before loading the command 
+interpreter (default is COMMAND.COM).
+
+
+If the copy of COMMAND.COM is a secondary copy, it will lack an environment 
+address as PSP+2Ch.
+ 
+
+
+ The Disk Transfer Area (DTA)
+
+ DOS uses an area in memory to contain the data for all file reads and writes 
+that are performed with FCB function calls. This are is known as the disk 
+transfer area. This disk transfer area (DTA) is sometimes called a buffer. 
+It can be located anywhere in the data area of your application program and 
+should be set by your program.
+
+ Only one DTA can be in effect at a time, so your program must tell DOS what 
+memory location to use before using any disk read or write functions. Use 
+function call 1Ah (Set Disk Transfer Address) to set the disk transfer address.
+Use function call 2Fh (Get Disk Transfer Address) to get the disk transfer 
+address. Once set, DOS continues to use that area for all disk operations until
+another function call 1Ah is issued to define a new DTA. When a program is given
+control by COMMAND.COM, a default DTA large enough to hold 128 bytes is 
+established at 80h into the program's Program Segment Prefix.
+
+ For file reads and writes that are performed with the extended function calls,
+there is no need to set a DTA address. Instead, specify a buffer address when 
+you issue the read or write call.
+
+
+DOS Program Segment
+
+ When you enter an external command or call a program through the EXEC function 
+call, DOS determines the lowest availible address space to use as the start of 
+available memory for the program being started. This area is called the Program
+Segment.
+ At offset 0 within the program segment, DOS builds the Program Segment Prefix 
+control block. EXEC loads the program after the Program Segment Prefix (at
+offset 100h) and gives it control.
+ The program returns from EXEC by a jump to offset 0 in the Program Segment 
+Prefix, by issuing an int 20h, or by issuing an int 21h with register AH=00h or 
+4Ch, or by calling location 50h in the PSP with AH=00h or 4Ch.
+ It is the responsibility of all programs to ensure that the CS register 
+contains the segment address of the Program Segment Prefix when terminating by
+any of these methods except call 4Ch.
+
+ All of these methods result in returning to the program that issued the EXEC. 
+During this returning process, interrupt vectors 22h, 23h, and 24h (Terminate, 
+Ctrl-Break, and Critical Error Exit addresses) are restored from the values 
+saved in the PSP of the terminating program. Control is then given to the 
+terminate address.
+
+
+When a program receives control, the following conditions are in effect:
+
+For all programs:
+
+1) The segment address of the passed environment is contained at offset 2Ch in 
+   the Program Segment Prefix.
+
+2) The environment is a series of ASCII strings totalling less than 32k bytes
+   in the form:       NAME=parameter      The default environment is 160 bytes.
+    Each string is terminated by a byte of zeroes, and the entire set of strings
+   is terminated by abother byte of zeroes. Following the byte of zeroes that 
+   terminates the set of environment string is a set of initial arguments passed
+   to a program that contains a word count followed by an ASCIIZ string. The 
+   ASCIIZ string contains the drive, path, and filename.ext of the executable 
+   program. Programs may use this area to determine where the program was loaded
+   from. The environment built by the command processor (and passed to all 
+   programs it invokes) contains a COMSPEC=string at a minimum (the parameter on
+   COMSPEC is the path used by DOS to locate COMMAND.COM on disk). The last PATH
+   and PROMPT commands issued will also be in the environment, along with any 
+   environment strings entered through the SET command. 
+    The environment that you are passed is actually a copy of the invoking 
+   process's environment. If your application terminates and stays resident 
+   through int 27h, you should be aware that the copy of the environment passed 
+   to you is static. That is, it will not change even if subsequent PATH,
+   PROMPT, or SET commands are issued.
+ 
+   The environment can be used to transfer information between processes or to
+   store strings for later use by application programs. The environment is
+   always located on a paragraph boundary. This is its format:
+        byte    ASCIIZ string 1
+        byte    ASCIIZ string 2
+            ....
+        byte    ASCIIZ string n
+        byte    of zeros (0)
+   Typically the environment strings have the form:
+        parameter = value
+   Following the byte of zeros in the environment, a WORD indicates the number 
+   of other strings following. 
+
+   If the environment is part of an EXECed command interpreter, it is followed 
+   by a copy of the DS:DX filename passed to the child process. A zero value 
+   causes the newly created process to inherit the parent's environment.
+
+3) Offset 80h in the PSP contains code to invoke the DOS function dispatcher.
+   Thus, by placing the desired function number in AH, a program can issue a
+   long call to PSP+50h to invoke a DOS function rather than issuing an int 21h.
+
+4) The disk transfer address (DTA) is set to 80h (default DTA in PSP).
+
+5) File Control Blocks 5Ch and 6Ch are formatted from the first two parameters 
+   entered when the command was invoked. Note that if either parameter contained
+   a path name, then the corresponding FCB will contain only a valid drive
+   number. The filename field will not be valid.
+
+6) An unformatted parameter area at 81h contains all the characters entered
+   after the command name (including leading and imbedded delimiters), with 80h
+   set to the number of characters. If the <, >, or | parameters were entered
+   on the command line, they (and the filenames associated with them) will not
+   appear in this area, because redirection of standard input and output is
+   transparent to applications.
+
+(For EXE files only)
+7) DS and ES registers are set to point to the PSP.
+
+8) CS, IP, SS, and SP registers are set to the values passed by the linker.
+
+(For COM files only)
+9) For COM files, offset 6 (one word) contains the number of bytes availible in 
+   the segment.
+
+10) Register AX reflects the validity of drive specifiers entered with the
+    first two parameters as follows:
+        AL=0FFh is the first parameter contained an invalid drive specifier,
+                otherwise AL=00h.
+        AL=0FFh if the second parameter contained an invalid drive specifier, 
+                otherwise AL=00h.
+
+11) All four segment registers contain the segment address of the inital 
+    allocation block, that starts within the PSP control block. All of user
+    memory is allocated to the program. If the program needs to invoke another
+    program through the EXEC function call (4Bh), it must first free some memory
+    through the SETBLOCK function call to provide space for the program being
+    invoked.
+
+12) The Instruction Pointer (IP) is set to 100h.
+
+13) The SP register is set to the end of the program's segment. The segment size
+    at offset 6 is rounded down to the paragraph size.
+
+14) A word of zeroes is placed on top of the stack.
+
+
+ The PSP (with offsets in hexadecimal) is formatted as follows:
+
+ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+³     P  R  O  G  R  A  M       S  E  G  M  E  N  T       P  R  E  F  I  X     ³
+ÃÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³ offset³   size   ³                     C O N T E N T S                       ³
+ÃÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³ 0000h ³ 2 bytes  ³ int 20h                                                   ³
+ÃÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³ 0002h ³ 2 bytes  ³ segment address, end of allocation block                  ³
+ÃÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³ 0004h ³ 1 byte   ³ reserved, normally 0                                      ³
+ÃÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³ 0005h ³ 5 bytes  ³ long call to MSDOS function dispatcher                    ³
+ÃÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³ 000Ah ³ 4 bytes  ³ previous termination handler interrupt vector (int 22h)   ³
+ÃÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³ 000Eh ³ 4 bytes  ³ previous contents of ctrl-C interrupt vector (int 23h)    ³
+ÃÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³ 0012h ³ 4 bytes  ³ prev. critical error handler interrupt vector (int 24h)   ³
+ÃÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³ 0016h ³ 22 bytes ³ reserved for DOS                                          ³
+ÃÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³ 002Ch ³ 2 bytes  ³ segment address of environment block                      ³
+ÃÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³ 002Eh ³ 34 bytes ³ reserved, DOS work area                                   ³
+ÀÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+        ³  4 bytes ³  stores the calling process's stack pointer when          ³
+        ³          ³  switching to DOS's internal stack.                       ³
+ÚÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³ 0050h ³  3 bytes ³ int 21h, RETF instructions                                ³
+ÃÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³ 0053h ³  2 bytes ³ reserved                                                  ³
+ÃÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³ 0055h ³  7 bytes ³ reserved, or FCB#1 extension                              ³
+ÃÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³ 005Ch ³          ³ default File Control Block #1                             ³
+ÃÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³ 006Ch ³          ³ default File Control Block #2 (overlaid if FCB #1 opened) ³
+ÃÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³ 0080h ³  1 byte  ³ parameter length                                          ³
+ÃÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³ 0081h ³          ³ parameters                                                ³
+ÃÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³ 00FFh ³ 128 bytes³ command tail and default Disk Transfer Area (DTA)         ³
+ÀÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+1. The first segment of availible memory is in segment (paragraph) form. For 
+   example, 1000h would respresent 64k.
+
+2. The word at offset 6 contains the number of bytes availible in the segment.
+
+3. Offset 2Ch contains the segment address of the environment.
+
+4. Programs must not alter any part of the PSP below offset 5Ch.
+
+offset 0 contains hex bytes CD 20, the int 20h opcode. A program can end
+       by making a jump to this location when the CS points to the PSP.
+       For normal cases, int 21, function 4Ch should be used.
+
+offset 2 contains the segment-paragraph address of the end of memory as 
+        reported by DOS. (which may not be the same as the real end of RAM).
+        Multiply this number by 10h or 16 to get the amount of memory availible.
+
+offset 4 reserved
+
+offset 05 contains a long call to the DOS function dispatcher. Programs may 
+       jump to this address instead of calling int 21 if they wish. 
+
+offsets 10, 14, 18  vectors
+
+offset 2C is the segment:offset address of the environment for the program 
+       using this particular PSP.
+
+offset 2E The DWORD at PSP+2EH is used by DOS to store the calling process's
+       stack pointer when switching to DOS's own private stack - at the end of
+       a DOS function call, SS:SP is restored from this address.
+
+offset 50h contains a long call to the DOS function dispatcher.
+
+offsets 5C, 65, 6C  contain FCB information for use with FCB function calls. 
+        The first FCB may overlay the second if it is an extended call; your
+        program should revector these areas to a safe place if you intend to
+        use them.
+
+offset 80h and 81h contain th elength and value of parameters passed on the 
+       command line. 
+
+offset FF contains the DTA
+
+
+
+
+STANDRD FILE CONTROL BLOCK
+
+ The standard file control block is defined as follows, with the offsets in 
+decimal:
+
+ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+³                 F I L E      C O N T R O L      B L O C K                    ³
+ÃÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³ Bytes ³                           Function                                   ³
+ÃÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³   0   ³ Drive number. For example:                                           ³
+³       ³ Before open:    00h = default drive                                  ³
+³       ³                 01h = drive A:                                       ³
+³       ³                 02h = drive B: etc.                                  ³
+³       ³ After open:     00h = drive C:                                       ³
+³       ³                 01h = drive A:                                       ³
+³       ³                 02h = drive B: etc.                                  ³
+³       ³ 0 is replaced by the actual drive number during open.                ³
+ÃÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³  1-8  ³ Filename, left justified with trailing blanks. If a reserved device  ³
+³       ³ name is placed here (such as PRN) do not include the optional colon. ³
+ÃÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³  9-11 ³ Filename extension, left justified with trailing blanks.             ³
+ÃÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³ 12-13 ³ Current block number relative to beginning of file, starting with 0  ³
+³       ³ (set to 0 by the open function call). A block consists of 128        ³
+³       ³ records, each of the size specified in the logical record size field.³
+³       ³ The current block number is used with the current record field       ³
+³       ³ (below) for sequential reads and writes.                             ³
+ÃÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³ 14-15 ³ Logical record size in bytes. Set to 80h by the OPEN function call.  ³
+³       ³ If this is not correct, you must set the value because DOS uses it   ³
+³       ³ to determine the proper locations in the file for all disk reads and ³
+³       ³ writes.                                                              ³
+ÃÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³ 16-19 ³ File size in bytes. In this 2 word field, the first word is the      ³
+³       ³ low-order part of the size.                                          ³
+ÃÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³ 20-21 ³ Date the file was created or last updated. The mm/dd/yy are mapped   ³
+³       ³ as follows:                                                          ³
+³       ³         15  14  13  12  11  10  9  8  7  6  5  4  3  2  1  0         ³
+³       ³         y   y   y   y   y   y   y  m  m  m  m  d  d  d  d  d         ³
+³       ³ where:            mm is 1-12                                         ³
+³       ³                   dd is 1-31                                         ³
+³       ³                   yy is 0-119 (1980-2099)                            ³
+ÃÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³ 22-31 ³ Reserved for system use.                                             ³
+ÃÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³  32   ³ Current relative record number (0-127) within the current block.     ³
+³       ³ (See above). You must set this field before doing sequential         ³
+³       ³ read/write operations to the diskette. This field is not initialized ³
+³       ³ by the open function call.                                           ³
+³       ³  If the record size is less than 64 bytes, both words are used.      ³
+³       ³ Otherwise, only the first 3 bytes are used. Note that if you use the ³
+³       ³ File Control Block at 5Ch in the program segment, the last byte of   ³
+³       ³ the FCB overlaps the first byte of the unformatted parameter area.   ³
+ÀÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+note 1) An unopened FCB consists of the FCB prefix (if used), drive number, and 
+        filename.ext properly filled in. An open FCB is one in which the 
+        remaining fields have been filled in by the CREAT or OPEN function 
+        calls.
+     2) Bytes 0-5 and 32-36 must be set by the user program. Bytes 16-31 are set
+        by DOS and must not be changed by user programs.
+     3) All word fields are stored with the least significant byte first. For 
+        example, a record length of 128 is stored as 80h at offset 14, and 00h 
+        at offset 15.
+
+
+
+EXTENDED FILE CONTROL BLOCK
+
+ The extended file control block is used to create or search for files in the 
+disk directory that have special attributes.
+
+It adds a 7 byte prefix to the FCB, formatted as follows:
+
+ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+³       E X T E N D E D     F I L E      C O N T R O L      B L O C K          ³
+ÃÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³ Bytes ³                           Function                                   ³
+ÃÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³   0   ³ Flag byte containing 0FFh to indicate an extended FCB.               ³
+ÃÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³  1-6  ³ Reserved                                                             ³
+ÃÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³  6-7  ³ Attribute byte. Refer to function call 11h (search first) for        ³
+³       ³ details on using the attribute bits during directory searches. This  ³
+³       ³ function is present to allow applications to define their own files  ³
+³       ³ as hidden (and thereby excluded from normal directory searches) and  ³
+³       ³ to allow selective directory searches.                               ³
+ÀÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+                                     
+ Any reference in the DOS function calls to an FCB, whether opened or unopened,
+may use either a normal or extended FCB. If you are using an extended FCB, the 
+appropriate register should be set to the first byte of the prefix, rather than
+the drive-number field.
+
+
+
+MEMORY CONTROL BLOCKS
+
+ DOS keeps track of allocated and availible memory blocks, and provides three 
+function calls for application programs to communicate their memory needs to 
+DOS. These calls are 48h to allocate a memory block, 49h to free a previously 
+allocated memory block, and 4Ah (SETBLOCK) to change the size of an allocated 
+memory block.
+
+
+CONTROL BLOCK
+
+DOS manages memory as follows:
+
+ DOS build a control block for each block of memory, whether free or allocated.
+For example, if a program issues an "allocate" (48h), DOS locates a block of
+free memory that satisfies the request, and then "carves" the requested memory 
+out of that block. The requesting program is passed the location of the first 
+byte of the block that was allocated for it - a memory management control block,
+describing the allocated block, has been built for the allocated block and a 
+second memory management control block describes the amount of space left in the
+original free block of memory. When you do a setblock to shrink an allocated 
+block, DOS builds a memory management control block for the area being freed and
+adds it to the chain of control blocks. Thus, any program that changed memory 
+that is not allocated to it stands a chance of destroying a DOS memory 
+management control block. This causes unpredictable results that don't show up 
+until an activity is performed where DOS uses its chain of control blocks. The 
+normal result is a memory allocation error, which means a system reset will be 
+required.
+
+ When a program (command or application program) is to be loaded, DOS uses the 
+EXEC function call 4Bh to perform the loading.
+
+ This is the same function call that is availible to applications programs for 
+loading other programs. This function call has two options:
+
+      Function 00h, to load and execute a program (this is what the command
+                    processor uses to load and execute external commands)
+
+      Function 03h, to load an overlay (program) without executing it.
+
+ Although both functions perform their loading in the same way (relocation is 
+performed for EXE files) their handling of memory management is different.
+
+
+FUNCTION 0: For function 0 to load and execute a program, EXEC first allocates 
+the largest availible block of memory (the new program's PSP will be at offset 
+0 in that block). Then EXEC loads the program. Thus, in most cases, the new 
+program owns all the memory from its PSP to the end of memory, including memory
+occupied by the transient parent of COMMAND.COM. If the program were to issue 
+its own EXEC function call to load and execute another program, the request 
+would fail because no availible memory exists to load the new program into.
+
+NOTE: For EXE programs, the amount of memory allocated is the size of the 
+      program's memory image plus the value in the MAX_ALLOC field of the file's
+      header (offset 0Ch, if that much memory is availible. If not, EXEC 
+      allocates the size of the program's memory image plus the value in the 
+      MIN_ALLOC field in the header (offset 0Ah). These fields are set by the 
+      Linker).
+
+ A well-behaved program uses the SETBLOCK function call when it receives 
+control, to shrink its allocated memory block down to the size it really needs.
+A COM program should remember to set up its own stack before doing the SETBLOCK,
+since it is likely that the default stack supplied by DOS lies in the area of 
+memory being used. This frees unneeded memory, which can be used for loading 
+other programs.
+
+ If the program requires additional memory during processing, it can obtain 
+the memory using the allocate function call and later free it using the free 
+memory function call.
+
+ When a program is loaded using EXEC function call 00h exits, its initial 
+allocation block (the block beginning with its PSP) is automatically freed 
+before the calling program regains control. It is the responsibility of all 
+programs to free any memory they allocate before exiting to the calling 
+program.
+
+
+ FUNCTION 3: For function 3, to load an overlay, no PSP is built and EXEC 
+assumes the calling program has already allocated memory to load the new program
+into - it will NOT allocate memory for it. Thus the calling program should 
+either allow for the loading of overlays when it determines the amount of memory
+to keep when issuing the SETBLOCK call, or should initially free as much memory 
+as possible. The calling program should then allocate a block (based on the size
+of the program to be loaded) to hold the program that will be loaded using the 
+"load overlay" call. Note that "load overlay" does not check to see if the 
+calling program actually owns the memory block it has been instructed to load 
+into - it assumes the calling program has followed the rules. If the calling 
+program does not own the memory into which the overlay is being loaded, there is
+a chance the program being loaded will overlay one of the control blocks that 
+DOS uses to keep track of memory blocks.
+
+ Programs loaded using function 3 should not issue any SETBLOCK calls since
+they don't own the memory they are operating in. (This memory is owned by the
+calling program)
+
+ Because programs loaded using function 3 are given control directly by (and 
+return contrrol directly to) the calling program, no memory is automatically 
+freed when the called program exits. It is up to the calling program to 
+determine the disposition of the memory that had been occupied by the exiting 
+program. Note that if the exiting program had itself allocated any memory, it 
+is responsible for freeing that memory before exiting.
+
+
+ MEMORY CONTROL BLOCKS
+
+ Only the first 5 bytes of the memory control block are used. The first byte 
+will always have the value of 4Dh or 5Ah. The value 5Ah indicates the block is 
+the last in a chain, all memory above it is unused. 4Dh means that the block is
+intermediate in a chain, the memory above it belongs to the next program or to 
+DOS.
+
+ The next two bytes hold the PSP segment address of the program that owns the 
+corresponding block of memory. A value of 0 means the block is free to be 
+claimed, any other value represents a segment address. Bytes 3 and 4 indicate 
+the size in paragraphs of the memory block. If you know the address of the first
+block, you can find the next block by adding the length of the memory block plus
+1 to the segment address of the control block. 
+
+ Finding the first block can be difficult, as this varies according to the DOS 
+version and the configuration. 
+
+ The remaining 11 bytes are not currently used by DOS, and may contain "trash" 
+characters left in memory from previous applications.
+
+  If DOS determines that the allocation chain of memory control blocks has been 
+corrupted, it will halt the system and display the message "Memory Allocation 
+Error", and the system will halt, requiring a reboot.
+
+ Each memory block consists of a signature byte (4Dh or 5Ah) then a word which
+is the PSP value of the owner of the block (which allocated it), followed by a 
+word which is the size in paragraphs of the block. The last block has a 
+signature of 5Ah. All others have 4Dh. If the owner is 0000 then the block is 
+free.
+
+ User memory is allocated from the lowest end of available memory that will 
+satisfy the request for memory.
+
+
+

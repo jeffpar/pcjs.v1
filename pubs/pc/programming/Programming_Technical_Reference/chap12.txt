@@ -1,0 +1,18 @@
+
+
+  This is a user-supported technical reference. If you find this information 
+to be of use, please mail your check or money order for $15 to:
+
+        Dave Williams
+        PO Box 181
+        Jacksonville, AR 72087-0181
+        USA
+
+ In return for your support you will receive the very latest edition of this 
+manual on a disk, plus one disk of appendixes and references and a third 
+disk with source code. That's about two megabytes of raw data when 
+uncompressed, or the equivalent of ten manuals the size of the technical 
+reference manuals from IBM or Microsoft.
+
+ In addition, supporting users may obtain updates by merely mailing a disk and 
+return postage whenever they feel like it. 

@@ -1,0 +1,1383 @@
+
+CHAPTER 10
+
+ Programming Technical Reference - IBM
+ Copyright 1988, Dave Williams
+
+           LOTUS-INTEL-MICROSOFT  EXPANDED MEMORY SPECIFICATION
+
+The Expanded Memory Manager ............................................ 10-
+        History ........................................................ 10-
+        Page Frames .................................................... 10-
+Expanded Memory Services ............................................... 10-
+AST/Quadram/Ashton-Tate Enhanced EMM ................................... 10-
+        Calling the Manager ............................................ 10-
+        Common EMS Functions (hex calls)
+                 1 (40h) Get Manager Status ............................ 10-
+                 2 (41h) Get Page Frame Segment ........................ 10-
+                 3 (42h) Get Number of Pages ........................... 10-
+                 4 (43h) Get Handle and Allocate Memory ................ 10-
+                 5 (44h) Map Memory .................................... 10-
+                 6 (45h) Release Handle and Memory ..................... 10-
+                 7 (46h) Get EMM Version ............................... 10-
+                 8 (47h) Save Mapping Context .......................... 10-
+                 9 (48h) Restore Mapping Context ....................... 10-
+                10 (49h) Reserved ...................................... 10-
+                11 (4Ah) Reserved ...................................... 10-
+                12 (4Bh) Get Number of EMM Handles ..................... 10-
+                12 (4Ch) Get Pages Owned By Handle ..................... 10-
+                14 (4Dh) Get Pages for All Handles ..................... 10-
+                15 (4Eh) Get Or Set Page Map ........................... 10-
+       new LIM 4.0 specification:
+                16 (4Fh) Get/Set Partial Page Map ...................... 10-
+                17 (50h) Map/Unmap Multiple Pages ...................... 10-
+                18 (51h) Reallocate Pages .............................. 10-
+                19 (52h) Handle Attribute Functions .................... 10-
+                20 (53h) Get Handle Name ............................... 10-
+                21 (54h) Get Handle Directory .......................... 10-
+                22 (55h) Alter Page Map & Jump ......................... 10-
+                23 (56h) Alter Page Map & Call ......................... 10-
+                24 (57h) Move Memory Region ............................ 10-
+                25 (58h) Get Mappable Physical Address Array ........... 10-
+                26 (59h) Get Expanded Memory Hardware .................. 10-
+                27 (5Ah) Allocate Raw Pages ............................ 10-
+                28 (5Bh) Get Alternate Map Register Set ................ 10-
+                29 (5Ch) Prepare Expanded Memory Hardware .............. 10-
+                30 (5Dh) Enable OS/E Function Set ...................... 10-
+                31 (5Eh) Unknown ....................................... 10-
+                32 (5Fh) Unknown ....................................... 10-
+                33 (60h) Unknown ....................................... 10-
+                34 (61h) AST Generic Accelerator Card Support .......... 10-
+Expanded Memory Manager Error Codes .................................... 10-
+
+
+
+THE EXPANDED MEMORY MANAGER
+
+History
+
+ The Lotus/Intel/Microsoft Expanded Memory Manager was originally a Lotus and
+Intel project and was announced as version 3.0 in the second quarter of 1985
+primarily as a means of running larger Lotus worksheets by transparently
+paging unused sections to bank-switched memory. Shortly afterward Microsoft
+announced support of the standard and version 3.2 was subsequently released
+with support for Microsoft Windows. LIM 3.2 supported up to 8 megabytes of
+paged memory. The LIM 4.0 supports up to 32 megabytes of paged memory.
+
+
+
+AST/QUADRAM/ASHTON-TATE ENHANCED EXPANDED MEMORY SPECIFICATION
+
+ The AQA EEMS maintains upward compatibility with the LIM, but is a superset
+of functions.
+
+ The AQA EEMS permits its pages to be scattered throughout the unused portion
+of the machine's address space.
+
+On August 19, 1987, the new version of the Expanded Memory Specification (EMS)
+was announced by Lotus, Intel and Microsoft. This new version of the
+specification includes many features of the Enhanced Expanded Memory
+Specification (EEMS) originally developed by AST Reserach, Quadram and Ashton-
+Tate, although the three original sponsoring companies elected not to make the
+new specification upward compatible with EEMS. AST Research says that they will
+endorse EMS 4.0 without reservation.
+
+ The definitive document for the LIM-EMS is Intel part number 300275-004,
+August, 1987.
+
+                                                       32M ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+                                                          /³              ³
+                                                           ³              ³
+                                                     /     ³              ³
+                                                           ³              ³
+                                                /          ³              ³
+                                                           ³              ³
+                                           /               ³              ³
+                                                           ³   Expanded   ³
+                                      /                    ³    Memory    ³
+          1024K ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿                           ³              ³
+                ³ / / / / / /  ³  /                        ³              ³
+           960K ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´                           ³              ³
+                ³  Page Frame  ³                           ³              ³
+                ³              ³                           ³              ³
+                ³ 12 16K-Byte  ³                           ³              ³
+                ³   Physical   ³                           ³              ³
+                ³    Pages     ³                           ³              ³
+           768K ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´                           ³ Divided into ³
+                ³ / / / / / /  ³ \                         ³   logical    ³
+           640K ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´                           ³    pages     ³
+                ³              ³   \                       ³              ³
+                ³              ³                           ³              ³
+                ³              ³     \                     ³              ³
+                ³              ³                           ³              ³
+                ³ 24 16K-Byte  ³       \                   ³              ³
+                ³   Physical   ³                           ³              ³
+                ³    Pages*    ³         \                 ³              ³
+                ³              ³                           ³              ³
+                ³              ³           \               ³              ³
+                ³              ³                           ³              ³
+                ³              ³             \             ³              ³
+           256K ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´                           ³              ³
+                ³              ³               \           ³              ³
+                ³ / / / / / /  ³                           ³              ³
+                ³              ³                 \         ³              ³
+                ³ / / / / / /  ³                           ³              ³
+                ³              ³                   \       ³              ³
+                ³ / / / / / /  ³                           ³              ³
+                ³              ³                     \     ³              ³
+              0 ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ                           ³              ³
+                                                       \   ³              ³
+                                                           ³              ³
+                                                         \ ³              ³
+                                                         0 ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+
+ The page frame is located above the 640k system RAM area, anywhere from
+0A000h to 0FFFFh. This area is used by the video adapters, network cards, and
+add-on ROMs (as in hard disk controllers). The page frames are mapped around
+areas that are in use.
+
+
+
+                 WRITING PROGRAMS THAT USE EXPANDED MEMORY
+
+ In order to use expanded memory, applications must perform these steps in the
+following order:
+
+1. Determine if EMM is installed.
+2. Determine if enough expanded memory pages exist for your application.
+   (Function 3)
+3. Allocate expanded memory pages. (Function 4 or 18)
+4. Get the page frame base address. (Function 2)
+5. Map in expanded memory pages. (Function 5 or 17)
+6. Read/write/execute data in expanded memory, just as if it were conventional
+   memory.
+7. Return expanded memory pages to expanded memory pool before exiting. Function
+   6 or 18)
+
+
+Programming Guidelines
+
+ The following section contains guidelines for programmers writing applications
+that use EMM.
+
+A) Do not put a program's stack in expanded memory.
+
+B) Do not replace interrupt 67h. This is the interrupt vector the EMM uses.
+   Replacing interrupt 67h could result in disabling the Expanded Memory
+   Manager.
+
+C) Do not map into conventional memory address space your application doesn't
+   own. Applications that use the EMM to swap into conventional memory space,
+   must first allocate this space from the operating system. If the operating
+   system is not aware that a region of memory it manages is in use, it will
+   think it is available. This could have disastrous results. EMM should not be
+   used to "allocate" conventional memory. DOS is the proper manager of
+   conventional memory space. EMM should only be used to swap data in
+   conventional memory space previously allocated from DOS.
+
+D) Applications that plan on using data aliasing in expanded memory must check
+   for the presence of expanded memory hardware. Data aliasing occurs when
+   mapping one logical page into two or more mappable segments. This makes one
+   16K-byte expanded memory page appear to be in more than one 16K-byte memory
+   address space. Data aliasing is legal and sometimes useful for applications.
+    Software-only expanded memory emulators cannot perform data aliasing. A
+   simple way to distinguish software emulators from actual expanded memory
+   hardware is to attempt data aliasing and check the results. For example, map
+   one logical page into four physical pages. Write to physical page 0. Read
+   physical pages 1-3 to see if the data is there as well. If the data appears
+   in all four physical pages, then expanded memory hardware is installed in the
+   system, and data aliasing is supported.
+
+E) Applications should always return expanded memory pages to the expanded
+   memory manager upon termination. These pages will be made available for other
+   applications. If unneeded pages are not returned to the expanded memory
+   manager, the system could run out of expanded memory pages or expanded
+   memory handles.
+
+F) Terminate and stay resident programs (TSRs) should always save the state of
+   the map registers before changing them. Since TSRs may interrupt other
+   programs which may be using expanded memory, they must not change the state
+   of the page mapping registers without first saving them. Before exiting, TSRs
+   must restore the state of the map registers.
+    The following sections describe the three ways to save and restore the state
+   of the map registers.
+   1) Save Page Map and Restore Page Map (Functions 8 and 9). This is the
+      simplest of the three methods. The EMM saves the map register contents in
+      its own data structures -- the application does not need to provide extra
+      storage locations for the mapping context. The last mapping context to be
+      saved, under a particular handle, will be restored when a call to Restore
+      Page Map is issued with the same handle. This method is limited to one
+      mapping context for each handle and saves the context for only LIM
+      standard 64K-byte page frames.
+   2) Get/Set Page Map (Function 15). This method requires the application to
+      allocate space for the storage array. The EMM saves the mapping context in
+      an array whose address is passed to the EMM. When restoring the mapping
+      context with this method, an application passes the address of an array
+      which contains a previously stored mapping context. This method is
+      preferable if an application needs to do more than one save before a
+      restore. It provides a mechanism for switching between more than one
+      mapping context.
+   3) Get/Set Partial Page Map (Function 16). This method provides a way for
+      saving a partial mapping context. It should be used when the application
+      does not need to save the context of all mappable memory. This function
+      also requires that the storage array be part of the application's data.
+
+G) All functions using pointers to data structures must have those data
+   structures in memory which will not be mapped out. Functions 22 and 23
+   (Alter Map & Call and Alter Map & Jump) are the only exceptions.
+
+
+
+EMS 4.0 SPECIFICATIONS
+
+Page Frames
+
+ The bank switched memory chunks are referred to as "page frames". These frame
+consist of four 16K memory blocks mapped into some of the normally unused
+system ROM address area, 0C0000-0EFFFF. Each 16K page is independent of the
+other and they can map to discrete or overlapping areas of the 8 megabyte
+expanded memory address area. Most cards allow selection of addresses to prevent
+conflict with other cards, such as hard disk controllers and other expanded
+memory boards.
+
+
+Calling the Manager
+
+ Applications programs communicate with the EMM device driver directly via user
+interrupt 67h. All communication between the application program and the driver
+bypasses DOS completely. To call the driver, register AH is loaded with the
+number of the EMM service requested; DX is loaded with the file handle; and
+interrupt 67h is called. ES:DI is used to pass the address of a buffer or array
+if needed.
+ On return AH contains 0 if the call was successful or an error code from 80h to
+8Fh if unsuccessful.
+
+
+
+          TESTING FOR THE PRESENCE OF THE EXPANDED MEMORY MANAGER
+
+ Before an application program can use the Expanded Memory Manager, it must
+determine whether the manager is present. The two recommended methods are the
+"open handle" technique and the "get interrupt vector" technique.
+
+ The majority of application programs can use either the "open handle" or the
+"get interrupt vector" method. However, if your program is a device driver or
+if it interrupts DOS during file system operations, you must use only the "get
+interrupt vector" method.
+
+ Device drivers execute from within DOS and can't access the DOS file functions;
+programs that interrupt DOS during file operations have a similar restriction.
+During their interrupt processing procedures, they can't access the DOS file
+functions because another program may be using the system. Since the "get
+interrupt vector" method doesn't require the DOS file functions, you must use
+it for programs of this type.
+
+
+ The "Open Handle" Method
+
+ Most application programs can use the DOS "Open Handle" method to test for
+the presence of the EMM. To use this method, follow these steps in order:
+
+1) Issue an "open handle" command (DOS function 3Dh) in "read only" access mode
+   (register AL = 0). This function requires your program to point to an ASCII
+   string which contains the path name of the file or device in which you're
+   interested (register set DS:DX contains the pointer). In this case the file
+   is actually the reserved name of the expanded memory manager.
+
+   you should format the ASCII string as follows:
+
+   ASCII_device_name  DB  'EMMXXXX0', 0
+
+   The ASCII codes for the capital letters EMMXXXX0 are terminated by a byte
+   containing a value of zero.
+
+2) If DOS returns no error code, skip Steps 3 and 4 and go to Step 5. If DOS
+   returns a "Too many open files" error code, go to Step 3. If DOS returns a
+   "File/Path not found" error code, skip Step 3 and go to Step 4.
+
+3) If DOS returns a "Too many open files" (not enough handles) status code, your
+   program should invoke the "open file" command before it opens any other
+   files. This will guarantee that at least one file handle will be available to
+   perform the function without causing this error.
+    After the program performs the "open file" command, it should perform the
+   test described in Step 6 and close the "file handle" (DOS function 3Eh).
+   Don't keep the manager "open" after this status test is performed since
+   "manager" functions are not available through DOS. Go to Step 6.
+
+4) If DOS returns a "File/Path not found," the memory manager is not installed.
+   If your application requires the memory manager, the user will have to reboot
+   the system with a disk containing the memory manager and the appropriate
+   CONFIG.SYS file before proceeding.
+
+5) If DOS doesn't return an error status code you can assume that either a
+   device with the name EMMXXXX0 is resident in the system, or a file with this
+   name is on disk in the current disk drive. Go to Step 6.
+
+6) Issue an "I/O Control for Devices" command (DOS function 44h) with a "get
+   device information" command (register AL = 0). DOS function 44h determines
+   whether EMMXXXX0 is a device or a file.
+    You must use the file handle (register BX) which you obtained in Step 1 to
+   access the "EMM" device.
+   This function returns the "device information" in a word (register DX).
+   Go to Step 7.
+
+7. If DOS returns any error code, you should assume that the memory manager
+   device driver is not installed. If your application requires the memory
+   manager, the user will have to reboot the system with a disk containing the
+   memory manager and the appropriate CONFIG.SYS file before proceeding.
+
+8) If DOS didn't return an error status, test the contents of bit 7 (counting
+   from 0) of the "device information" word (register DX) the function
+   returned. Go to Step 9.
+
+9) If bit 7 of the "device information" word contains a zero, then EMMXXXX0 is
+   a file, and the memory manager device driver is not present. If your
+   application requires the memory manager, the user will have to reboot the
+   system with a disk containing the memory manager and the appropriate
+   CONFIG.SYS file before proceeding.
+    If bit 7 contains a one, then EMMXXXX0 is a device. Go to Step 10.
+
+10) Issue an "I/O Control for Devices" command (DOS function 44h) with a "get
+    output status" command (register AL = 7). You must use the file handle you
+    obtained in Step 1 to access the "EMM" device (register BX). Go to Step 11.
+
+11) If the expanded memory device driver is ready, the memory manager passes
+    a status value of 0FFh in register AL. The status value is 00h if the device
+    driver is not ready.
+     If the memory manager device driver is "not ready" and your application
+    requires its presence, the user will have to reboot the system with a disk
+    containing the memory manager and the appropriate CONFIG.SYS file before
+    proceeding.
+     If the memory manager device driver is "ready," go to Step 12.
+
+12) Issue a "Close File Handle" command (DOS function 3Eh) to close the expanded
+    memory device driver. You must use the file handle you obtained in Step 1 to
+    close the "EMM" device (register BX).
+
+
+
+ The "Get Interrupt Vector" technique
+
+ Any type of program can use this method to test for the presence of the EMM.
+
+ Use this method (not the "Open Handle" method) if your program is a device
+driver or if it interrupts DOS during file system operations.
+
+ Follow these steps in order:
+
+1) Issue a "get vector" command (DOS function 35h) to obtain the contents of
+   interrupt vector array entry number 67h (addresses 0000:019Ch thru
+   0000:019Fh).
+    The memory manager uses this interrupt vector to perform all manager
+   functions. The offset portion of this interrupt service routine address is
+   stored in the word located at address 0000:019Ch; the segment portion is
+   stored in the word located at address 0000:019Eh.
+2) Compare the "device name field" with the contents of the ASCII string which
+   starts at the address specified by the segment portion of the contents of
+   interrupt vector address 67h and a fixed offset of 000Ah. If DOS loaded the
+   memory manager at boot time this name field will have the name of the device
+   in it.
+    Since the memory manager is implemented as a character device driver, its
+   program origin is 0000h. Device drivers are required to have a "device
+   header" located at the program origin. Within the "device header" is an 8
+   byte "device name field." For a character mode device driver this name field
+   is always located at offset 000Ah within the device header. The device name
+   field contains the name of the device which DOS uses when it references the
+   device.
+    If the result of the "string compare" in this technique is positive, the
+   memory manager is present.
+
+
+
+ Terminate and Stay Resident (TSR) Program Cooperation:
+ In order for TSR's to cooperate with each other and with other applications,
+TSRs must follow this rule: a program may only remap the DOS partition it lives
+in. This rule applies at all times, even when no expanded memory is present.
+
+
+
+
+EXPANDED MEMORY SERVICES
+
+FUNCTIONS DEFINED IN EMS 3.2 SPECIFICATION
+
+Interrupt 67h
+
+Function 40h Get Manager Status
+LIM Function Call 1
+             Returns a status code indicating whether the memory manager is
+             present and the hardware is working correctly.
+entry   AH      40h
+return  AH      error status: 00h, 80h, 81h, 84h
+note 1) upward and downward compatible with both EMS and EEMS 3.2.
+        this call can be used only after establishing that the EMS driver is in
+        fact present
+     2) uses register AX
+
+
+Function 41h Get Page Frame Segment
+LIM Function Call 2
+             Obtain segment address of the page frame used by the EMM.
+entry   AH      41h
+return  AH      error status: 00h, 80h, 81h, 84h
+        BX      page frame segment address (error code 0)
+note 1) upward and downward compatible with both EMS and EEMS 3.2.
+     2) uses registers AX & BX
+
+
+Function 42h Get Unallocated Page Count
+LIM Function Call 3
+             Obtain total number of logical expanded memory pages present in
+             the system and the number of those pages not already allocated.
+entry   AH      42h
+return  AH      error status: 00h, 80h, 81h, 84h
+        BX      number of unallocated pages currently availible
+        DX      total number of pages
+note 1) upward and downward compatible with both EMS and EEMS 3.2. Note that EMS
+        and EEMS 3.2 had no mechanism to return the maximum number of handles
+        that can be allocated by programs. This is handled by the EMS 4.0 new
+        function 54h/02h.
+     2) uses registers AX, BX, DX
+
+
+Function 43h Get Handle and Allocate Memory
+LIM Function Call 4
+             Notifies the EMM that a program will be using extended memory,
+             obtains a handle, and allocates a certain number of logical pages
+             of extended memory to be controlled by that handle
+entry   AH      43h
+        BX      number of 16k logical pages requested (zero OK)
+return  AH      error status: 00h, 80h, 81h, 84h, 85h, 87h, 88h, 89h
+        DX      unique EMM handle (see note 2)
+note 1) upward compatible with both EMS and EEMS 3.2; EMS and EEMS 3.2 do not
+        allow the allocation of zero pages (returns error status 89h). EMS 4.0
+        does allow zero pages to be requested for a handle, allocating pages
+        later using function 51h
+     2) your program must use this EMM handle as a parameter in any function
+        that requires it. You can use up to 255 handles. The uppermost byte of
+        the handle will be zero and cannot be used by the application.
+     3) regs AX & DX are used
+
+
+Function 44h Map Memory
+LIM Function Call 5
+             Maps one of the logical pages of expanded memory assigned to a
+             handle onto one of the four physical pages within the EMM's page
+             frame.
+entry   AH      44h
+        AL      physical page to be mapped (0-3)
+        BX      the logical page to be mapped (zero through [number of pages
+                allocated to the EMM handle - 1]). If the logical page number
+                is 0FFFFh, the physical page specified in AL will be unmapped
+                (made inaccessible for reading or writing).
+        DX      the EMM handle your program received from Function 4 (Allocate
+                Pages).
+return  AH      error status: 00h, 80h, 81h, 83h, 84h, 8Ah, 8Bh
+note 1) downward compatible with both EMS and EEMS 3.2; EMS and EEMS 3.2 do not
+        support unmap (logical page 0FFFFh) capability. Also, EEMS 3.2
+        specified there were precisely four physical pages; EMS 4.0 uses the
+        subfunctions of function 58h to return the permitted number of physical
+        pages. This incorporates the functionality of function 69h ("function
+        42") of EEMS.
+     2) uses register AX
+
+
+Function 45h Release Handle and Memory
+LIM Function Call 6
+             Deallocates the logical pages of expanded memory currently
+             assigned to a handle and then releases the handle itself.
+entry   AH      45h
+        DX      handle
+return  AH      error status: 00h, 80h, 81h, 83h, 84h, 86h
+note 1) upward and downward compatible with both EMS and EEMS 3.2.
+     2) uses register AX
+     3) when a handle is deallocated, its name is set to all ASCII nulls
+        (binary zeros).
+     4) a program must perform this function before it exits to DOS or no other
+        programs can use these pages or the EMM handle.
+
+
+Function 46h Get EMM Version
+LIM Function Call 7
+             Returns the version number of the Expanded Memory Manager software.
+entry   AH      46h
+return  AH      error status: 00h, 80h, 81h, 84h
+        AL      version number byte (if AL=00h)
+                binary coded decimal (BCD) format if version byte:
+                high nibble: integer digit of the version number
+                low nibble : fractional digit of version number
+                i.e., version 4.0 is represented like this:
+                          0100 0000
+                            /   \
+                           4  .  0
+note 1) upward and downward compatible with both EMS and EEMS 3.2. It appears
+        that the intended use for this function is to return the version of the
+        vendor implementation of the expanded memory manager instead of the
+        specification version.
+     2) uses register AX
+
+
+Function 47h Save Mapping Context
+LIM Function Call 8
+             Save the contents of the expanded memory page-mapping registers on
+             the expanded memory boards, associating those contents with a
+             specific EMM handle.
+entry   AH      47h
+        DX      caller's EMM handle (NOT current EMM handle)
+return  AH      error status:  00h, 80h, 81h, 83h, 84h, 8Ch, 8Dh
+note 1) upward and downward compatible with both EMS and EEMS 3.2.
+     2) This only saves the context saved in EMS 3.2 specification; if a driver,
+        interrupt routine or TSR needs to do more, functions 4Eh (Page Map
+        functions) or 4Fh (Partial Page Map functions) should be used.
+     3) no mention is made about the number of save contexts to provide. AST
+        recommends in their Rampage AT manual one save context for each handle
+        plus one per possible interrupt (5 + <handles>).
+     4) uses register AX
+     5) this function saves the state of the map registers for only the 64K page
+        frame defined in versions 3.x of the LIM. Since all applications written
+        to LIM versions 3.x require saving the map register state of only this
+        64K page frame, saving the entire mapping state for a large number of
+        mappable pages would be inefficient use of memory. Applications that use
+        a mappable memory region outside the LIM 3.x page frame should use
+        functions 15 or 16 to save and restore the state of the map registers.
+
+
+Function 48h Restore Page Map
+LIM Function Call 9
+             Restores the contents of all expanded memory hardwere page-mapping
+             registers to the values associated with the given handle by a
+             previous function 08h (Save Mapping Context).
+entry   AH      48h
+        DX      caller's EMM handle (NOT current EMM handle)
+return  AH      error status: 00h, 80h, 81h, 83h, 84h, 8Eh
+note 1) upward and downward compatible with both EMS and EEMS 3.2.
+     2) This only restores the context saved in EMS 3.2 specification; if a
+        driver, interrupt routine or TSR needs to do more, functions 4Eh (Page
+        Map functions) or 4Fh (Partial Page Map functions) should be used.
+     3) uses register AX
+     4) this function saves the state of the map registers for only the 64K page
+        frame defined in versions 3.x of the LIM. Since all applications written
+        to LIM versions 3.x require saving the map register state of only this
+        64K page frame, saving the entire mapping state for a large number of
+        mappable pages would be inefficient use of memory. Applications that use
+        a mappable memory region outside the LIM 3.x page frame should use
+        functions 15 or 16 to save and restore the state of the map registers.
+
+
+Function 49h Reserved
+LIM Function Call 10
+             This function was used in EMS 3.0, but was no longer documented in
+             EMS 3.2. It formerly returned the page mapping register I/O port
+             array. Use of this function is discouraged, and in EMS 4.0 may
+             conflict with the use of the new functions 16 through 30 (4Fh
+             through 5Dh) and functions 10 and 11. Functions 10 and 11 are
+             specific to the hardware on Intel expanded memory boards and may
+             not work correctly on all vendors' expanded memory boards.
+
+
+Function 4Ah Reserved
+LIM Function Call 11
+             This function was used in EMS 3.0, but was no longer documented in
+             EMS 3.2. It was formerly Get Page Translation Array. Use of this
+             function is discouraged, and in EMS 4.0 may conflict with the use
+             of the new functions (4Fh through 5Dh).
+
+
+Function 4Bh Get Number of EMM Handles
+LIM Function Call 12
+             The Get Handle Count function returns the number of open EMM
+             handles (including the operating system handle 0) in the system.
+entry   AH      4Bh
+return  AH      error status: 00h, 80h, 81h, 84h
+        BX      handle count (AH=00h) (including the operating system handle
+                [0]). max 255.
+note 1) upward and downward compatible with EMS and EEMS 3.2.
+     2) uses registers AX and BX
+
+
+Function 4Ch Get Pages Owned by Handle
+LIM Function Call 13
+             Returns number of logical expanded memory pages allocated to a
+             specific EMM handle.
+entry   AH      4Ch
+        DX      handle
+return  AH      error status: 00h, 80h, 81h, 83h, 84h
+        BX      pages allocated to handle, max 2048 because the EMM allows a
+                maximum of 2048 pages (32M bytes) of expanded memory.
+note 1) This function is upward compatible with EMS and EEMS 3.2.
+     2) programmers should compare the number returned in BX with the maximum
+        number of pages returned by function 42h register DX, total number of
+        EMM pages. This should be an UNSIGNED comparison, just in case the spec
+        writers decide to use 16 bit unsigned numbers (for a maximum space of
+        one gigabyte) instead of signed numbers (for a maximum space of 512
+        megabytes). Unsigned comparisons will work properly in either case
+     3) uses registers AX and BX
+
+
+Function 4Dh Get Pages for All Handles
+LIM Function Call 14
+             Returns an array containing all active handles and the number of
+             logical expanded memory pages associated with each handle.
+entry   AH      4Dh
+        ES:DI   pointer to 1020 byte array to receive information on an array of
+                structures where a copy of all open EMM handles and the number
+                of pages allocated to each will be stored.
+return  AH      error status: 00h, 80h, 81h, 84h
+        BX      number of active handles (1-255); array filled with 2-word
+                entries, consisting of a handle and the number of pages
+                allocated to that handle. (including the operating system handle
+                [0]). BX cannot be zero because the operating system handle is
+                always active and cannot be deallocated.
+note 1) NOT COMPATIBLE with EMS or EEMS 3.2, since the new special OS handle
+        0000h is returned as part of the array. Unless benign use of this
+        information is used (such as displaying the handle and count of pages
+        associated with the handle) code should be changed to only work with
+        handles between 01h and FFh and to specifically ignore handle 00h.
+     2) The array consists of an array of 255 elements. The first word of each
+        element is the handle number, the second word contains the number of
+        pages allocated.
+     3) There are two types of handles, "standard" and "raw". The specification
+        does not talk about how this function works when both raw and standard
+        handles exist in a given system. There is no currently known way to
+        differentiate between a standard handle and a raw handle in EMS 4.0.
+     4) uses registers AX and BX
+
+
+Function 4Eh Get or Set Page Map
+LIM Function Call 15
+             Gets or sets the contents of the EMS page-mapping registers on the
+             expanded memory boards.
+              This group of four subfunctions is provided for context switching
+             required by operating environments and systems. These functions are
+             upward and downward compatible with both EMS and EEMS 3.2; in
+             addition, these functions now include the functionality of EEMS
+             function 6Ah ("function 43") involving all pages.
+              The size and contents of the map register array will vary from
+             system to system based on hardware vendor, software vendor, number
+             of boards and the capacity of each board in the system. Note the
+             array size can be determined by function 4Eh/03h.
+              Use these functions (except for 03h) instead of Functions 8 and 9
+             if you need to save or restore the mapping context but don't want
+             (or have) to use a handle.
+
+        00h  Get Page Map
+             This call saves the mapping context for all mappable memory regions
+             (conventional and expanded) by copying the contents of the mapping
+             registers from each expanded memory board to a destination array.
+             The application must pass a pointer to the destination array.
+entry   AH      4Eh
+        AL      00h
+        ES:DI   pointer to target array
+return  AH      error status: 00h, 80h, 81h, 84h, 8Fh
+note 1) uses register AX
+     2) does not use an EMM handle
+
+
+         01h  Set Page Map
+             This call the mapping context for all mappable memory regions
+             (conventional and expanded) by copying the contents of a source
+             array into the mapping registers on each expanded memory board in
+             the system. The application must pass a pointer to the source array.
+entry   AH      4Eh
+        AL      01h
+        DS:SI   pointer to source array
+return  AH      error status: 00h, 80h, 81h, 84h, 8Fh, 0A3h
+note 1) uses register AX
+     2) does not use an EMM handle
+
+
+        02h  Get & Set Page Map
+             This call simultaneously saves the current mapping context and
+             restores a previous mapping context for all mappable memory regions
+             (both conventional and expanded). It first copies the contents of
+             the mapping registers from each expanded memory board in the system
+             into a destination array. Then the subfunction copies the contents
+             of a source array into the mapping registers on each of the
+             expanded memory boards.
+entry   AH      4Eh
+        AL      02h
+        DS:SI   pointer to source array
+        ES:DI   pointer to target array
+return  AH      error status: 00h, 80h, 81h, 84h, 8Fh, 0A3h
+note 1) uses register AX
+
+
+          03h  Get Size of Page Map Save Array
+entry   AH      4Eh
+        AL      03h
+return  AH      error status:  00h, 80h, 81h, 84h, 8Fh
+        AL      size in bytes of array
+note 1) this subfunction does not require an EMM handle
+     2) uses register AX
+
+
+
+FUNCTIONS NEW TO EMS 4.0
+
+Function 4Eh Get or Set Page Map
+LIM Function Call 16
+entry   AH      4Eh
+        AL      00h     if getting mapping registers
+                01h     if setting mapping registers
+                02h     if getting and setting mapping registers at once
+                03h     if getting size of page-mapping array
+        DS:SI   pointer to array holding information (AL=01/02)
+        ES:DI   pointer to array to receive information (AL=00/02)
+return  AH      error status: 00h, 80h, 81h, 84h, 8Fh, 0A3h
+note 1) this function was designed to be used by multitasking operating systems
+        and should not ordinarily be used by appplication software.
+
+
+Function 4Fh Get/Set Partial Page Map
+LIM Function Call 16
+             These four subfunctions are provided for context switching required
+             by interrupt routines, operating environments and systems. This set
+             of functions provides extended functionality over the EEMS function
+             6Ah (function 43) involving subsets of pages. In EEMS, a subset of
+             pages could be specified by starting position and number of pages;
+             in this function a list of pages is specified, which need not be
+             contiguous.
+              Interrupt routines can use this function in place of functions 47h
+             and 48h, especially if the interrupt routine wants to use more than
+             the standard four physical pages.
+        AH      4Fh
+        AL      subfunction
+                00h     get partial page map
+                        DS:SI   pointer to structure containing list of
+                                segments whose mapping contexts are to be saved
+                        ES:DI   pointer to array to receive page map
+                01h     set partial page map
+                        DS:SI   pointer to structure containing saved partial
+                                page map
+                02h     get size of partial page map
+                        BX      number of mappable segments in the partial map
+                                to be saved
+return  AH      error status (00h): 00h, 80h, 81h, 84h, 8Bh, 8Fh, 0A3h
+                error status (01h): 00h, 80h, 81h, 84h, 8Fh, 0A3h
+                error status (02h): 00h, 80h, 81h, 84h, 8Bh, 8Fh
+        AL      size of partial page map for subfunction 02h
+        DS:SI   (call 00h) pointer to array containing the partial mapping
+                context and any additional information necessary to restore this
+                context to its original state when the program invokes a Set
+                subfunction.
+note    uses register AX
+
+
+Function 50h Map/Unmap Multiple Pages
+LIM Function Call 17
+entry   AH      50h
+        AL      00h     (by physical page)
+                01h     (by segment number)
+        CX      contains the number of entries in the array. For example, if the
+                array contained four pages to map or unmap, then CX would
+                contain 4.
+        DX      handle
+        DS:SI   pointer to an array of structures that contains the information
+                necessary to map the desired pages.
+return  AH      error status: 00h, 80h, 81h, 83h, 84h, 8Ah, 8Bh, 8Fh
+note 1) New function permits multiple logical-to-physical assignments to be made
+        in a single call.(faster than mapping individual pages)
+     2) The source map array is an array of word pairs. The first word of a
+        pair contains the logical page to map (0FFFFh if the physical page is
+        to be totally unmapped) and the second word of a pair contains the
+        physical page number (subfunction 00h) or the segment selector
+        (subfunction 01h) of the physical page in which the logical page shall
+        be mapped.
+     3) A map of available physical pages (by physical page number and segment
+        selectors) can be obtained using function 58h/00h, Get Mappable
+        Physical Address Array.
+     4) uses register AX
+     5) Both mapping and unmapping pages can be done simultaneously.
+     6) If a request to map or unmap zero pages is made, nothing is done and no
+        error is returned.
+     7) Pages can be mapped or unmapped using one of two methods. Both methods
+        produce identical results.
+         A) A logical page and a physical page at which the logical page is to
+            be mapped. This method is an extension of Function 5 (Map Handle
+            Page).
+         B) Specifys both a logical page and a corresponding segment address at
+            which the logical page is to be mapped. While functionally the same
+            as the first method, it may be easier to use the actual segment
+            address of a physical page than to use a number which only
+            represents its location. The memory manager verifies whether the
+            specified segment address falls on the boundary of a mappable
+            physical page. The manager then translates the segment address
+            passed to it into the necessary internal representation to map the
+            pages.
+
+
+Function 51h Reallocate pages
+LIM Function Call 18
+             This function allows an application to change the number of logical
+             pages allocated to an EMM handle.
+entry   AH      51h
+        BX      number of pages desired at return
+        DX      handle
+return  AH      error status: 00h, 80h, 81h, 83h, 84h, 87h, 88h
+        BX      number of pages now associated with handle
+note 1) uses registers AX, BX
+     2) Logical pages which were originally allocated with Function 4 are called
+        pages and are 16K bytes long. Logical pages which were allocated with
+        Function 27 are called raw pages and might not be the same size as pages
+        allocated with Function 4.
+     3) If the status returned in BX is not zero, the value in BX is equal to
+        the number of pages allocated to the handle prior to calling this
+        function. This information can be used to verify that the request
+        generated the expected results.
+
+
+Function 52h Get/Set Handle Attributes
+LIM Function Call 19
+entry   AH      52h
+        AL      subfunction
+                00h     get handle attributes
+                01h     set handle attributes
+                        BL      new attribute
+                                00h     make handle volatile
+                                01h     make handle non-volatile
+                02h     get attribute capability
+        DX      handle
+return  AH      error status: (function 00h) 00h, 80h, 81h, 83h, 84h, 8Fh, 91h
+                error status: (function 01h) 00h, 80h, 81h, 83h, 84h, 8Fh, 90h,
+                                             91h
+                error status: (function 02h) 00h, 80h, 81h, 84h, 8Fh
+        AL      attribute (for subfunction 00h)
+                00h     handle is volatile
+                01h     handle is nonvolatile
+        AL      attribute capability (for subfunction 02h)
+                00h     only volatile handles supported
+                01h     both volatile and non-volatile supported
+note 1) uses register AX
+     2) A volatile handle attribute instructs the memory manager to deallocate
+        both the handle and the pages allocated to it after a warm boot. If all
+        handles have the volatile attribute (default) at warm boot the handle
+        directory will be empty and all expanded memory will be initialized to
+        zero immediately after a warm boot.
+     3) If the handle's attribute has been set to non-volatile, the handle, its
+        name (if it is assigned one), and the contents of the pages allocated to
+        the handle are all maintained after a warm boot.
+     4) Most PCs disable RAM refresh signals for a considerable period during a
+        warm boot. This can corrupt some of the data in memory boards. Non-
+        volatile handles should not be used unless it is definitely known that
+        the EMS board will retain proper function through a warm boot.
+     5) subfunction 02h can be used to determine whether the memory manager can
+        support the non-volatile attribute.
+     6) Currently the only attribute supported is non-volatile handles and
+        pages, indicated by the least significant bit.
+
+
+Function 53h Handle Name Functions
+LIM Function Call 20
+             EMS handles may be named. Each name may be any eight characters.
+             At installation, all handles have their name initialized to ASCII
+             nulls (binary zeros). There is no restriction on the characters
+             which may be used in the handle name (ASCII chars 00h through
+             0FFh). A name of eight nulls (zeroes) is special, and indicates a
+             handle has no name. Nulls have no special significance, and they
+             can appear in the middle of a name. The handle name is 64 bits of
+             binary information to the EMM.
+              Functions 53h and 54h provide a way of setting and reading the
+             names associated with a particular handle. Function 53h manipulates
+             names by number.
+              When a handle is assigned a name, at least one character in the
+             name must be a non-null character in order to distinguish it from
+             a handle without a name.
+
+        00h  Get Handle Name
+             This subfunction gets the eight character name currently
+             assigned to a handle.
+              The handle name is initialized to ASCII nulls (binary zeros)
+             three times:  when the memory manager is installed, when a handle
+             is allocated, and when a handle is deallocated.
+entry   AH      53h
+        AL      00h
+        DX      handle
+        ES:DI   pointer to 8-byte handle name array into which the name
+                currently assigned to the handle will be copied.
+return  AH      error status: 00h, 80h, 81h, 83h, 84h, 8Fh
+note    uses register AX
+
+        01h  Set Handle Name
+             This subfunction assigns an eight character name to a handle.
+             A handle can be renamed at any time by setting the handle's
+             name to a new value. When a handle is deallocated, its name is
+             removed (set to ASCII nulls).
+entry   AH      53h
+        AL      01h
+        DX      handle
+        DS:SI   pointer to 8-byte handle name array that is to be assigned to
+                the handle. The handle name must be padded with nulls if the
+                name is less than eight characters long.
+return  AH      error status: 00h, 80h, 81h, 83h, 84h, 8Fh, 0A1h
+note    uses register AX
+
+
+Function 54h Handle Directory Functions
+LIM Function Call 21
+             Function 54h manipulates handles by name.
+
+        00h  Get Handle Directory
+             Returns an array which contains all active handles and the names
+             associated with each.
+entry   AH      54h
+        AL      00h
+        ES:DI   pointer to 2550 byte target array
+return  AH      error status: 00h, 80h, 81h, 84h, 8Fh
+        AL      number of active handles
+note 1) The name array consists of 10 byte entries; each entry has a word
+        containing the handle number, followed by the eight byte (64 bit) name.
+     2) uses register AX
+     3) The number of bytes required by the target array is:
+                10 bytes * total number of handles
+     4) The maximum size of this array is:
+                (10 bytes/entry) * 255 entries = 2550 bytes.
+
+        01h  Search for Named Handle
+             Searches the handle name directory for a handle with a particular
+             name. If the named handle is found, this subfunction returns the
+             handle number associated with the name.
+entry   AH      54h
+        AL      01h
+        DS:SI   pointer to an 8-byte string that contains the name of the
+                handle being searched for
+return  AH      error status: 00h, 80h, 81h, 84h, 8Fh, A0h, 0A1h
+        DX      handle number
+note 1) uses registers AX and DX
+
+        02h  Get Total Handles
+             Returns the total number of handles the EMM supports, including
+             the operating system handle (handle value 0).
+entry   AH      54h
+        AL      02h
+return  AH      error status: 00h, 80h, 81h, 84h, 8Fh
+        BX      total number of handles availible
+note 1) This is NOT the current number of handles defined, but the maximum
+        number of handles that can be supported in the current environment.
+     2) uses registers AX and BX
+
+
+Function 55h Alter Page Map and Jump (cross page branch)
+LIM Function Call 22
+             Alters the memory mapping context and transfers control to the
+             specified address. Analogous to the FAR JUMP in the 8086 family
+             architecture. The memory mapping context which existed before
+             calling function is lost.
+entry   AH      55h
+        AL      00h     physical page numbers provided by caller
+                01h     segment addresses provided by caller
+        DX      handle
+        DS:SI   pointer to structure containing map and jump address
+return  AH      error status: 00h, 80h, 81h, 83h, 84h, 8Ah, 8Bh, 8Fh
+note 1) Flags and all registers except AX are preserved across the jump.
+     2) uses register AX
+     3) Values in registers which don't contain required parameters maintain the
+        values across the jump. The values in registers (with the exception of
+        AX) and the flag state at the beginning of the function are still in the
+        registers and flags when the target address is reached.
+     4) Mapping no pages and jumping is not considered an error. If a request to
+        map zero pages and jump is made, control is transferred to the target
+        address, and this function performs a far jump.
+
+
+Function 56h Alter Page Map and Call (cross page call)
+LIM Function Call 23
+        00h and 01h
+               This subfunction saves the current memory mapping context,
+               alters the specified memory mapping context, and transfers
+               control to the specified address.
+entry   AH      56h
+        AL      00h physical page numbers provided by caller
+                01h segment addresses provided by caller
+        DS:SI   pointer to structure containing page map and call address
+        DX      handle
+return  AH      error status: 00h, 80h, 81h, 83h, 84h, 8Ah, 8Bh, 8Fh
+note 1) Flags and all registers except AX are preserved to the called routine.
+        On return, flags and all registers except AX are preserved; AL is set to
+        zero and AX is undefined.
+     2) uses register AX
+     3) Values in registers which don't contain required parameters maintain
+        the values across the call. The values in registers (with the exception
+        of AX) and the flag state at the beginning of the function are still in
+        the registers and flags when the target address is reached.
+     4) Developers using this subfunction must make allowances for the
+        additional stack space this subfunction will use.
+
+        02h  Get Page Map Stack Space Size
+             Since the Alter Page Map & Call function pushes additional
+             information onto the stack, this subfunction returns the number of
+             bytes of stack space the function requires.
+entry   AH      56h
+        AL      02h
+return: BX      number of bytes of stack used per call
+        AH      error status: 00h, 80h, 81h, 84h, 8Fh
+note 1) if successful, the target address is called. Use a RETF to return and
+        restore mapping context
+     2) uses registers AX, BX
+
+
+Function 57h Move/Exchange Memory Region
+LIM Function Call 24
+        00h  Move Memory Region
+             Moves data between two memory areas. Includes moves between paged
+             and non-paged areas, or between two different paged areas.
+entry   AH      57h
+        AL      00h
+        SI      offset to request block
+        DS      segment selector to request block
+return  AH      error status: 00h, 80h, 81h, 83h, 84h, 8Ah, 8Fh, 92h, 93h, 94h,
+                95h, 96h, 98h, 0A2h
+note 1) uses register AX
+
+        01h  Exchange Memory Region
+             Exchanges data between two memory areas. Includes exchanges between
+             paged and non-paged areas, or between two different paged areas.
+entry   AH      57h
+        AL      01h
+        DS:SI   pointer to the data structure which contains the source and
+                destination information for the exchange.
+return  AH      error status: 00h, 80h, 81h, 83h, 84h, 8Ah, 8Fh, 93h, 94h, 95h,
+                96h, 97h, 98h, 0A2h
+note 1) The request block is a structure with the following format:
+        dword   region length in bytes
+        byte    0=source in conventional memory
+                1=source in expanded memory
+        word    source handle
+        word    source offset in page or selector
+        word    source logical page (expanded) or selector (conventional)
+        byte    0=target in conventional memory
+                1=target in expanded memory
+        word    target handle
+        word    target offset in page or selector
+        word    target logical page (expanded) or selector (conventional)
+     2) Expanded memory allocated to a handle is considered to be a linear
+        array, starting from logical page 0 and progressing through logical page
+        1, 2, ... n, n+1, ... up to the last logical page in the handle.
+     3) uses register AX
+
+
+Function 58h Mappable Physical Address Array
+LIM Function Call 25
+             These functions let you obtain a complete map of the way physical
+             memory is laid out in a vendor independent manner. This is a
+             functional equivalent of EEMS function 68h ("function 41"). EEMS
+             function 60h ("function 33") is a subset call of 68h.
+
+        00h  Get Array
+             Returns an array containing the segment address and physical page
+             number for each mappable physical page in a system. This array
+             provides a cross reference between physical page numbers and the
+             actual segment addresses for each mappable page in the system.
+entry   AH      58h
+        AL      00h
+        ES:DI   pointer to target array
+return  AH      error status: 00h, 80h, 81h, 84h, 8Fh
+        CX      entries in target array
+note 1) The information returned is in an array composed of word pairs. The
+        first word is the physical page's segment selector, the second word the
+        physical page number. Note that values are not necessarily returned in a
+        particular order, either ascending/decending segment selector values or
+        as ascending/decending physical page number.
+     2) For compatibility with earlier EMS specifications, physical page zero
+        contains the segment selector value returned by function 41h, and
+        physical pages 1, 2 and 3 return segment selector values that corrospond
+        to the physical 16 KB blocks immediately following physical page zero.
+     3) uses registers AX and CX
+     4) The array is sorted in ascending segment order. This does not mean that
+        the physical page numbers associated with the segment addresses are
+        also in ascending order.
+
+        01h   Get Physical Page Address Array Entries.
+              Returns a word which represents the number of entries in the
+              array returned by the previous subfunction. This number also
+              indicates the number of mappable physical pages in a system.
+entry   AH      58h
+        AL      01h
+return  AH      error status: 00h, 80h, 81h, 84h, 8Fh
+        CX      number of entries returned by 58h/00h
+note 1) multiply CX by 4 for the byte count.
+     2) uses registers AX and CX
+
+
+Function 59h Get Expanded Memory Hardware Information
+LIM Function Call 26
+             These functions return information specific to a given hardware
+             implementation and to use of raw pages as opposed to standard
+             pages. The intent is that only operating system code ever need use
+             these functions.
+        00h  Get EMS Hardware Info
+             Returns an array containing expanded memory hardware configuration
+             information for use by an operating system.
+entry   AH      59h
+        AL      00h
+        ES:DI   pointer to 10 byte target array
+                The target array has the following format:
+                word: raw page size in paragraphs (multiples of 16 bytes)
+                word: number of alternate register sets
+                word: size of page maps (function 4Eh [15])
+                word: number of alternate registers sets for DMA
+                word: DMA operation -- see full specification
+return  AH      error status: 00h, 80h, 81h, 84h, 8Fh, 0A4h
+note 1) uses register AX
+     2) This function is for use by operating systems only.
+     3) This function can be disabled at any time by the operating system.
+
+        01h  Get Unallocated Raw Page Count
+             Returns the number of unallocated non-standard length mappable
+             pages as well as the total number of non-standard length mappable
+             pages of expanded memory
+entry   AH      59h
+        AL      01h
+return  AH      error status: 00h, 80h, 81h, 84h, 8Fh
+        BX      unallocated raw pages availible for use
+        DX      total raw 16k pages of expanded memory
+note 1) uses registers AX, BX, CX
+     2) An expanded memory page which is a sub-multiple of 16K is termed a raw
+        page. An operating system may deal with mappable physical page sizes
+        which are sub-multiples of 16K bytes.
+     3) If the expanded memory board supplies pages in exact multiples of 16K
+        bytes, the number of pages this function returns is identical to the
+        number Function 3 (Get Unallocated Page Count) returns. In this case,
+        there is no difference between a page and a raw page.
+
+
+Function 5Ah Allocate Raw Pages
+LIM Function Call 27
+             Allocates the number of nonstandard size pages that the operating
+             system requests and assigns a unique EMM handle to these pages.
+entry   AH      5Ah
+        AL      00h     allocate standard pages
+                01h     allocate raw pages
+        BX      number of pages to allocate
+return  AH      error status: 00h, 80h, 81h, 84h, 85h, 87h, 88h
+        DX      unique raw EMM handle (1-255)
+note 1) it is intended this call be used only by operating systems
+     2) uses registers AX and DX
+     3) For all functions using the raw handle returned in DX, the length of
+        the physical and logical pages allocated to it are some nonstandard
+        length (that is, not 16K bytes).
+     4) this call is primarily for use by operating systems or EMM drivers
+        supporting hardware with a nonstandard EMS page size.
+
+
+Function 5Bh Alternate Map Register Set - DMA Registers
+LIM Function Call 28
+entry   AH      00h     Get Alternate Map Register Set
+                01h     Set Alternate Map Register Set
+                        BL      new alternate map register set number
+                        ES:DI   pointer to map register context save area if
+                                BL=0
+                02h     Get Alternate Map Save Array Size
+                03h     Allocate Alternate Map Register Set
+                04h     Deallocate Alternate Map Register Set
+                        BL      number of alternate map register set
+                05h     Allocate DMA Register Set
+                06h     Enable DMA on Alternate Map Register Set
+                        BL      DMA register set number
+                        DL      DMA channel number
+                07h     Disable DMA on Alternate Map Register Set
+                        BL      DMA register set number
+                08h     Deallocate DMA Register Set
+                        BL      DMA register set number
+return  AH      status: 00h, 02h   00h, 80h, 84h, 81h, 8Fh, 0A4h
+                        01h        00h, 80h, 81h, 84h, 8Fh, 9Ah, 9Ch, 9Dh,
+                                   0A3h, 0A4h
+                        03h, 05h   00h  80h  81h  84h, 8Fh, 9Bh, 0A4h
+                        04h        00h, 80h, 81h, 84h, 8Fh, 9Ch, 9Dh, 0A4h
+                        06h, 07h   00h, 80h, 81h, 84h, 8Fh, 9Ah, 9Ch, 9Dh, 9Eh,
+                                   9Fh, 0A4h
+        BL      current active alternate map register set number if nonzero
+                (AL=0)
+        BL      number of alternate map register set; zero if not supported
+                (AL=3)
+        DX      array size in bytes (subfunction 02h)
+        ES:DI   pointer to a map register context save area if BL=0 (AL=0)
+note 1) this call is for use by operating systems only, and can be enabled
+        or disabled at any time by the operating system
+     2) This set of functions performs the same functions at EEMS function 6Ah
+        subfunctions 04h and 05h ("function 43").
+     3) 00h uses registers AX, BX, ES:DI
+        01h uses register AX
+        02h uses registers AX and DX
+        03h uses registers AX and BX
+        04h uses register AX
+        05h uses registers AX, BX
+        06h uses register AX
+        07h uses register AX
+
+
+Function 5Ch Prepare EMS Hardware for Warm Boot
+LIM Function Call 29
+             Prepares the EMM hardware for a warm boot.
+entry   AH      5Ch
+return  AH      error status: 00h, 80h, 81h, 84h
+note 1) uses register AX
+     2) this function assumes that the next operation that the operating system
+        performs is a warm boot of the system.
+     3) in general, this function will affect the current mapping context, the
+        alternate register set in use, and any other expanded memory hardware
+        dependencies which need to be initialized at boot time.
+     4) if an application decides to map memory below 640K, the application must
+        trap all possible conditions leading to a warm boot and invoke this
+        function before performing the warm boot itself.
+
+
+Function 5Dh Enable/Disable OS Function Set Functions
+LIM Function Call 30
+             Lets the OS allow other programs or device drivers to use the OS
+             specific functions. This capability is provided only for an OS
+             which manages regions of mappable conventional memory and cannot
+             permit programs to use any of the functions which affect that
+             memory, but must be able to use these functions itself.
+entry   AH      5Dh
+        AL      00h     enable OS function set
+                01h     disable OS function set
+                02h     return access key (resets memory manager, returns access
+                        key at next invocation)
+        BX,CX   access key returned by first invocation
+return  BX,CX   access key, returned only on first invocation of function
+        AH      status  00h, 80h, 81h, 84h, 8Fh, 0A4h
+note 1) this function is for use by operating systems only. The operating system
+        can disable this function at any time.
+     2) 00h uses registers AX, BX, CX
+        01h uses registers AX, BX, CX
+        02h uses register AX
+     3) 00h, 01h: The OS/E (Operating System/Environment) functions these
+        subfunctions affect are:
+        Function 26. Get Expanded Memory Hardware Information.
+        Function 28. Alternate Map Register Sets.
+        Function 30. Enable/Disable Operating System Functions.
+
+
+Function 5Eh Unknown
+LIM Function call (not defined under LIM)
+
+
+Function 5Fh Unknown
+LIM Function call (not defined under LIM)
+
+
+Function 60h EEMS - Get Physical Window Array
+LIM Function call (not defined under LIM)
+entry   AH      60h
+        ES:DI   pointer to buffer
+return  AH      status
+        AL      number of entries
+        buffer at ES:DI filled
+
+
+Function 61h Generic Accelerator Card Support
+LIM Function Call 34
+             Contact AST Research for a copy of the Generic Accelerator Card
+             Driver (GACD) Specification
+note    Can be used by accelerator card manufacturer to flush RAM cache,
+        ensuring that the cache accurately reflects what the processor would
+        see without the cache.
+
+
+Function 68h EEMS - Get Addresses of All Page Frames in System
+LIM Function Call (not defined under LIM)
+entry   AH      68h
+        ES:DI   pointer to buffer
+return  AH      status
+        AL      number of entries
+        buffer at ES:DI filled
+note    Equivalent to LIM 4.0 function 58h
+
+
+Function 69h EEMS - Map Page Into Frame
+LIM Function Call (not defined under LIM)
+entry   AH      69h
+        AL      frame number
+        BX      page number
+        DX      handle
+return  AH      status
+note    Similar to EMS function 44h
+
+
+Function 6Ah  EEMS - Page Mapping
+LIM Function Call (not defined under LIM)
+entry   AH      6Ah
+        AL      00h save partial page map
+                        CH      first page frame
+                        CL      number of frames
+                        ES:DI   pointer to buffer which is to be filled
+                01h restore partial page map
+                        CH      first page frame
+                        CL      number of frames
+                        DI:SI   pointer to previously saved page map
+                02h save and restore partial page map
+                        CH      first page frame
+                        CL      number of frames
+                        ES:DI   buffer for current page map
+                        DI:SI   new page map
+                03h get size of save array
+                        CH      first page frame
+                        CL      number of frames
+                return  AL      size of array in bytes
+                04h switch to standard map register setting
+                05h switch to alternate map register setting
+                06h deallocate pages mapped to frames in conventional memory
+                        CH      first page frame
+                        CL      number of frames
+return  AH      status
+note    Similar to LIM function 4Eh, except that a subrange of pages can
+        be specified
+
+
+
+EXPANDED MEMORY MANAGER ERROR CODES
+
+ EMM error codes are returned in AH after a call to the EMM (int 67h).
+
+code    meaning
+
+00h     function successful
+80h     internal error in EMM software (possibly corrupted driver)
+81h     hardware malfunction
+82h     EMM busy (dropped in EEMS 3.2)
+83h     invalid EMM handle
+84h     function requested not defined - unknown function code in AH.
+85h     no more EMM handles availible
+86h     error in save or restore of mapping context
+87h     more pages requested than exist
+88h     allocation request specified more logical pages than currently
+        availible in system (request does not exceed actual physical number of
+        pages, but some are already allocated to other handles); no pages
+        allocated
+89h     zero pages; cannot be allocated (dropped in EMS 4.0)
+8Ah     logical page requested to be mapped outside range of logical pages
+        assigned to handle
+8Bh     illegal page number in mapping request (valid numbers are 0 to 3)
+8Ch     page-mapping hardware state save area full
+8Dh     save of mapping context failed; save area already contains context
+        associated with page handle
+8Eh     retore of mapping context failed; save area does not contain context
+        for requested handle
+8Fh     subfunction parameter not defined (unknown function)
+
+LIM 4.0 extended error codes:
+
+90h     attribute type undefined
+91h     warm boot data save not implemented
+92h     move overlaps memory
+93h     move/exchange larger than allocated region
+94h     conventional/expanded regions overlap
+95h     logical page offset outside of logical page
+96h     region larger than 1 MB
+97h     exchange source/destination overlap
+98h     source/destination undefined or not supported
+99h     (no status assigned)
+9Ah     alternate map register sets supported, specified set is not
+9Bh     all alternate map & DMA register sets allocated
+9Ch     alternate map & DMA register sets not supported
+9Dh     alternate map register or DMA set not defined, allocated or is currently
+        defined set
+9Eh     dedicated DMA channels not supported
+9Fh     dedicated DMA channels supported; specifed channel is not
+0A0h    named handle could not be found
+0A1h    handle name already exists
+0A2h    move/exchange wraps around 1 MB boundry
+0A3h    data structure contains corrupted data
+0A4h    access denied
+
