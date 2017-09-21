@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.37.0/manifest.xsl"?>
+<manifest type="software">
+	<title>IBM Pascal Compiler</title>
+	<version>1.00</version>
+	<type>Utility</type>
+	<category>Compiler</category>
+	<language>Pascal</language>
+	<author>IBM/Microsoft</author>
+	<releaseDate>1981-08</releaseDate>
+	<disk id="disk01" size="163840" chs="40:1:8" dir="archive/PAS1" href="/disks/pcx86/tools/ibm/pascal/1.00/PASCAL100-DISK1.json" md5="0928b1d381346edb65389035fdadf576" md5json="47444406efdc43fa0016af7e7b930a30">
+		<name>IBM Pascal 1.00 (Disk 1)</name>
+		<file size="8320" time="1981-08-31 12:00:00" attr="0x20" md5="948612930287deb5fd53edd701ea0c11">ENTX6S.ASM</file>
+		<file size="5347" time="1981-08-31 12:00:00" attr="0x20" md5="7dfc79d20d272dafe89050d496a964cf">FILKQQ.INC</file>
+		<file size="1513" time="1981-08-31 12:00:00" attr="0x20" md5="f2ccf10239ff715e0185f4fd6773f6bf">FILUQQ.INC</file>
+		<file size="81408" time="1981-08-31 12:00:00" attr="0x20" md5="2f5b2a5abb1ddc47b8878c4ddc85d659">PAS1.EXE</file>
+		<file size="2816" time="1981-08-31 12:00:00" attr="0x20" md5="158742abe72baea5f1c4de6e3541e578">PASKEY</file>
+	</disk>
+	<disk id="disk02" size="163840" chs="40:1:8" dir="archive/PAS2" href="/disks/pcx86/tools/ibm/pascal/1.00/PASCAL100-DISK2.json" md5="54c895c983236726d880a5c54fb6b76c" md5json="c8bf7b25a980110c2fd04e7a64cddf5c">
+		<name>IBM Pascal 1.00 (Disk 2)</name>
+		<file size="99200" time="1981-08-31 12:00:00" attr="0x20" md5="6fa0cf28313f5fd6672a87ab7734dec7">PAS2.EXE</file>
+	</disk>
+	<disk id="disk03" size="163840" chs="40:1:8" dir="archive/PAS3" href="/disks/pcx86/tools/ibm/pascal/1.00/PASCAL100-DISK3.json" md5="f9724e602d895e8ada7e4c7788130007" md5json="5d652b98c5ee4e3fb08aa4bc67b92354">
+		<name>IBM Pascal 1.00 (Disk 3)</name>
+		<file size="50" time="1981-08-31 12:00:00" attr="0x20" md5="0d20462b4a56654c357fd5b332b45f08">PASCAL</file>
+		<file size="83456" time="1981-08-31 12:00:00" attr="0x20" md5="fcb8631a5fba5c4b146cf253ca27773e">PASCAL.LIB</file>
+	</disk>
+</manifest>

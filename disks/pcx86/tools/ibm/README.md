@@ -8,3 +8,4 @@ IBM Languages and Utilities
 ---------------------------
 
 * [IBM BASIC Compilers](/disks/pcx86/tools/ibm/bascom/)
+* [IBM Pascal Compilers](/disks/pcx86/tools/ibm/pascal/)
