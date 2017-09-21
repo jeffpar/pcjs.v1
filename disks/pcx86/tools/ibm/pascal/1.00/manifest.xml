@@ -25,4 +25,16 @@
 		<file size="50" time="1981-08-31 12:00:00" attr="0x20" md5="0d20462b4a56654c357fd5b332b45f08">PASCAL</file>
 		<file size="83456" time="1981-08-31 12:00:00" attr="0x20" md5="fcb8631a5fba5c4b146cf253ca27773e">PASCAL.LIB</file>
 	</disk>
+	<disk id="disk04" size="368640" chs="40:2:9" href="/disks/pcx86/tools/ibm/pascal/1.00/PASCAL100-DISKS.json" md5="01cb202e441cc2d6fe4cad0b2771df0d" md5json="a2f35b82f2263007feba98c5682d9ee3">
+		<name>IBM Pascal 1.00 (Combined)</name>
+		<file size="81408" time="1981-08-31 12:00:00" attr="0x20" md5="2f5b2a5abb1ddc47b8878c4ddc85d659">PAS1.EXE</file>
+		<file size="2816" time="1981-08-31 12:00:00" attr="0x20" md5="158742abe72baea5f1c4de6e3541e578">PASKEY</file>
+		<file size="8320" time="1981-08-31 12:00:00" attr="0x20" md5="948612930287deb5fd53edd701ea0c11">ENTX6S.ASM</file>
+		<file size="5347" time="1981-08-31 12:00:00" attr="0x20" md5="7dfc79d20d272dafe89050d496a964cf">FILKQQ.INC</file>
+		<file size="1513" time="1981-08-31 12:00:00" attr="0x20" md5="f2ccf10239ff715e0185f4fd6773f6bf">FILUQQ.INC</file>
+		<file size="99200" time="1981-08-31 12:00:00" attr="0x20" md5="6fa0cf28313f5fd6672a87ab7734dec7">PAS2.EXE</file>
+		<file size="50" time="1981-08-31 12:00:00" attr="0x20" md5="0d20462b4a56654c357fd5b332b45f08">PASCAL</file>
+		<file size="83456" time="1981-08-31 12:00:00" attr="0x20" md5="fcb8631a5fba5c4b146cf253ca27773e">PASCAL.LIB</file>
+		<file size="43264" time="1981-08-04 00:00:00" attr="0x20" md5="2f11573f12d0bf5a60a62a50eef7e577">LINK.EXE</file>
+	</disk>
 </manifest>
