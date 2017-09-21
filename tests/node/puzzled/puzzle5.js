@@ -59,13 +59,11 @@ function run() {
         p[d] = Math.pow(d, power);
     }
     let n = start;
-    let m = (n / 10)|0;
     while (true) {
-        let sum = sumPowers(m);
+        let sum = sumPowers(n);
         for (let d = 0; d <= 9; d++) {
             if (sum + p[d] == n + d) console.log(n + d);
         }
-        m += 1;
         n += 10;
         if (n >= end) break;
     }
