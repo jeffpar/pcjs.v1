@@ -170,7 +170,7 @@ Now open a web browser and go to `http://localhost:4000/`.  You're done!
 Some useful Jekyll server options include:
 
 	bundle exec jekyll serve --host=0.0.0.0 --config _config.yml,_developer.yml
-	
+
 The *--host* option makes it possible to access the web server from other devices on your local network;
 for example, you may want to run PCjs on your iPhone, iPad, or other wireless device.  And by adding **_developer.yml**,
 you can override the Jekyll configuration defaults in **_config.yml**.  Using development (non-production) settings in

@@ -13,8 +13,8 @@ index.html
 .project
 .settings
 .sass-cache
-_site
 node_modules
+/docs
 /videos
 /web
 c64/
