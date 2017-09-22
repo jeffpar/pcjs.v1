@@ -95,7 +95,7 @@ The project includes:
 - Custom Node modules used by the web server ([HTMLOut](modules/htmlout/), [MarkOut](modules/markout/), [DiskDump](modules/diskdump/), [FileDump](modules/filedump/))
 - A variety of IBM PC and C1P configuration and resource files (see [/apps](apps/), [/devices](devices/) and [/disks](disks/))
 - The [PCx86](modules/pcx86/), [PC8080](modules/pc8080/), and [C1Pjs](modules/c1pjs/) client applications, along with "compiled" [versions](/versions/)
-- A smattering of [PCx86](docs/pcx86/) and [C1Pjs](docs/c1pjs/) documentation, along with [blog posts](https://github.com/jeffpar/pcjs/tree/gh-pages/_posts), related [publications](pubs/) and more
+- A smattering of [PCx86](docs/pcx86/) and [C1Pjs](docs/c1pjs/) documentation, along with [blog posts](_posts/), related [publications](pubs/) and more
 
 The bundled web server is not strictly required.  Any web server (Node, Apache, Nginx, etc) that can serve the necessary
 JavaScript files to your browser will work.  However, instructions for doing that are beyond the scope of this introduction.
@@ -149,7 +149,7 @@ quintessential "stuck in the past" project), but there's also no urgency to upda
 ### Installing PCjs with Jekyll
 
 PCjs can also be used with [Jekyll](http://jekyllrb.com) and the Ruby WEBrick web server, now that a
-*[gh-pages](https://github.com/jeffpar/pcjs/tree/gh-pages)* branch has been created to work with
+*[jekyll](https://github.com/jeffpar/pcjs/tree/jekyll)* branch has been created to work with
 [GitHub Pages](https://pages.github.com).  This is how the project is currently set up at [pcjs.org](http://www.pcjs.org/).
 
 This isn't going to be a Jekyll "How To" guide, because that would unnecessarily repeat all the information available
@@ -160,7 +160,7 @@ To install Jekyll for use with PCjs:
 
  1. Install Ruby (on OS X, it should already be installed)
  2. Install Bundler (on OS X, run `sudo gem install bundler`)
- 3. Checkout the *gh-pages* branch, since only that branch contains all the Jekyll-related files
+ 3. Checkout the *jekyll* branch, since only that branch contains all the Jekyll-related files
  4. Create a **Gemfile** containing `gem 'github-pages'` (this is already checked in)
  5. Run `bundle install` (GitHub Pages alternatively suggests: `bundle exec jekyll build --safe`)
  6. Run `bundle exec jekyll serve` to start the web server
@@ -182,9 +182,9 @@ more gems to **Gemfile** (eg, "jekyll-sitemap"), running `jekyll serve` may trig
 `bundle exec jekyll serve` should always work.
 
 Don't see any YML files in the root of your project?  You probably forgot to switch to the
-*[gh-pages](https://github.com/jeffpar/pcjs/tree/gh-pages)* branch:
+*[jekyll](https://github.com/jeffpar/pcjs/tree/jekyll)* branch:
 
-	git checkout gh-pages
+	git checkout jekyll
 
 Last but not least, run `bundle update` periodically to keep Jekyll up-to-date.
 
@@ -271,7 +271,7 @@ if the folder contains a machine XML file, that is embedded as well.
 
 To work well with both the Node and Jekyll web servers, all Markdown files containing one or more embedded machines
 should contain a Jekyll "Front Matter" header that describes the machines.  For example, here's the header from the
-pcjs.org home page ([index.md](https://github.com/jeffpar/pcjs/blob/gh-pages/index.md)):
+pcjs.org home page ([index.md](https://github.com/jeffpar/pcjs/blob/jekyll/index.md)):
 
 	---
 	layout: page
@@ -294,7 +294,7 @@ Then the following lines are inserted at the points where the machines should ap
 	{% include machine.html id="demoC1P" %}
 
 For more information on all the machine options supported in a Markdown file, see the project's Jekyll include file
-[machine-engines.html](https://github.com/jeffpar/pcjs/blob/gh-pages/_includes/machine-engines.html).
+[machine-engines.html](https://github.com/jeffpar/pcjs/blob/jekyll/_includes/machine-engines.html).
 
 ### From The Command-Line
 
@@ -420,7 +420,8 @@ Updating PCjs
 
 To start developing features for a new version of PCjs, here are the recommended steps:
  
-1. Change the version number in the root [package.json](package.json) (and [_config.yml](https://github.com/jeffpar/pcjs/blob/gh-pages/_config.yml))
+1. Change the version number in the root [package.json](package.json)
+(and [_config.yml](https://github.com/jeffpar/pcjs/blob/jekyll/_config.yml))
 2. Run the "grunt promote" task to bump the version in all the machine XML files
 3. Make changes
 4. Run "grunt" to build new versions of the apps (eg, "/versions/pcx86/1.x.x/pcx86.js")
