@@ -5,13 +5,13 @@ permalink: /modules/diskdump/
 ---
 
 DiskDump Module
-===
+---------------
 
-**DiskDump** is a Node module with both a command-line interface and a web server API for converting disk images
-to/from various formats (eg, JSON files, JSON files with comments, IMG disk images, etc). 
+DiskDump is a Node [module](lib/diskdump.js) with both a command-line [utility](bin/diskdump) and a web server API
+for converting disk images to/from various formats (eg, JSON files, JSON files with comments, IMG disk images, etc). 
 
-Building Disk Images from Folders/Files
----
+### Building Disk Images from Folders/Files
+
 In addition to converting disk images to/from JSON, DiskDump can also create disk images from the contents of local
 files/folders.
 
@@ -28,7 +28,8 @@ into that folder as well, so that you could then run:
 	node modules/diskdump/bin/diskdump --path="apps/pcx86/1981/visicalc/vc.com;README.md" --format=img --output=disk.img
 
 to produce a `disk.img` containing both "VC.COM" and "README.md".  In fact, this is exactly how the
-[disk.json](/apps/pcx86/1981/visicalc/disk.json) stored in the [VisiCalc](/apps/pcx86/1981/visicalc/) folder was generated.
+[VisiCalc Disk](/apps/pcx86/1981/visicalc/VISICALC1981.json) stored in the [VisiCalc](/apps/pcx86/1981/visicalc/)
+folder was generated.
 
 The equivalent web server API request would look like:
 

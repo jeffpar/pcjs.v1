@@ -1,0 +1,448 @@
+CHAPTER 7
+
+ Programming Technical Reference - IBM
+ Copyright 1988, Dave Williams
+
+                             DOS File Structure
+
+
+File Management Functions
+
+ Use DOS function calls to create, open, close, read, write, rename, find, and 
+erase files. There are two sets of function calls that DOS provides for support
+of file management. They are:
+
+* File Control Block function calls   (0Fh-24h)
+* Handle function calls               (39h-62h)
+
+ Handle function calls are easier to use and are more powerful than FCB calls.
+Microsoft recommends that the handle function calls be used when writing new
+programs. DOS 3.0 up have been curtailing use of FCB function calls; it is
+possible that future versions of DOS may not support FCB function calls.
+ The following table compares the use of FCB calls to Handle function calls:
+
+                FCB Calls                       Handle Calls
+
+        Access files in current         Access files in ANY directory
+        directory only.
+
+        Requires the application        Does not require use of an FCB.
+        program to maintain a file      Requires a string with the drive,
+        control block to open,          path, and filename to open, create,
+        create, rename or delete        rename, or delete a file. For file
+        a file. For I/O requests,       I/O requests, the application program
+        the application program         must maintain a 16 bit file handle
+        also needs an FCB               that is supplied by DOS.
+
+ The only reason an application should use FCB function calls is to maintain
+the ability to run under DOS 1.x. To to this, the program may use only function
+calls 00h-2Eh.
+
+
+FCB FUNCTION CALLS
+
+ FCB function calls require the use of one File Control Block per open file, 
+which is maintained by the application program and DOS. The application program
+supplies a pointer to the FCB and fills in ther appropriate fields required by 
+the specific function call. An FCB function call can perform file management on
+any valid drive, but only in the current logged directory. By using the current
+block, current record, and record length fields of the FCB, you can perform 
+sequential I/O by using the sequential read or write function calls. Random I/O
+can be performed by filling in the random record and record length fields. 
+
+ Several possible uses of FCB type calls are considered programming errors and 
+should not be done under any circumstances to avoid problems with file sharing
+and compatibility with later versions of DOS.
+ Some errors are:
+1) If program uses the same FCB structure to access more than one open file. By
+   opening a file using an FCB, doing I/O, and then replacing the filename field
+   in the file control block with a new filename, a program can open a second
+   file using the same FCB. This is invalid because DOS writes control info-
+   rmation about the file into the reserved fields of the FCB. If the program
+   then replaces the filename field with the original filename and then tries to
+   perform I/O on this file, DOS may become confused because the control info-
+   rmation has been changed. An FCB should never be used to open a second file
+   without closing the one that is currently open. If more than one File Control
+   Block is to be open concurrently, separate FCBs should be used.
+
+2) A program should never try to use the reserved fields in the FCB, as the
+   function of the fields changes with different versions of DOS.
+
+3) A delete or a rename on a file that is currently open is considered an error
+   and should not be attempted by an application program.
+
+ It is also good programming practice to close all files when I/O is done. This
+avoids potential file sharing problems that require a limit on the number of
+files concurrently open using FCB function calls.
+
+
+
+HANDLE FUNCTION CALLS
+
+ The recommended method of file management is by using the extended "handle" 
+set of function calls. These calls are not restricted to the current directory.
+Also, the handle calls allow the application program to define the type of 
+access that other processes can have concurrently with the same file if the file
+is being shared.
+
+ To create or open a file, the application supplies a pointer to an ASCIIZ 
+string giving the name and location of the file. The ASCIIZ string contains an 
+optional drive letter, optional path, mandatory file specification, and a 
+terminal byte of 00h. The following is an example of an ASCIIZ string:
+
+                  format [drive][path] filename.ext,0
+
+                      DB "A:\path\filename.ext",0
+
+ If the file is being created, the application program also supplies the 
+attribute of the file. This is a set of values that defines the file read 
+only, hidden, system, directory, or volume label.
+
+ If the file is being opened, the program can define the sharing and access 
+modes that the file is opened in. The access mode informs DOS what operations 
+your program will perform on this file (read-only, write-only, or read/write) 
+The sharing mode controls the type of operations other processes may perform 
+concurrently on the file. A program can also control if a child process inherits
+the open files of the parent. The sharing mode has meaning only if file sharing
+is loaded when the file is opened.
+
+ To rename or delete a file, the appplication program simply needs to provide 
+a pointer to the ASCIIZ string containing the name and location of the file 
+and another string with the neew name if the file is being renamed.
+
+ The open or create function calls return a 16-bit value referred to as the 
+file handle. To do any I/O to a file, the program uses the handle to reference
+the file. Once a file is opened, a program no longer needs to maintain the 
+ASCIIZ string pointing to the file, nor is there any need to stay in the same 
+directory. DOS keeps track of the location of the file regardless of what 
+directory is current.
+
+ Sequential I/O can be performed using the handle read (3Fh) or write (40h) 
+function calls. The offset in the file that IO is performed to is automatically
+moved to the end of what was just read or written. If random I/O is desired, the
+LSEEK (42h) function call can be used to set the offset into the file where I/O 
+is to be performed.
+
+
+SPECIAL FILE HANDLES
+
+ DOS reserves five special file handles for use by itself and applications 
+programs. They are:
+
+              0000h   STDIN   Standard Input Device
+              0001h   STDOUT  Standard Output Device
+              0002h   STDERR  Standard Error Output Device
+              0003h   STDAUX  Standard Auxiliary Device
+              0004h   STDPRN  Standard Printer Device
+
+ These handles are predefined by DOS and can be used by an application program.
+They do not need to be opened by a program, although a program can close these 
+handles. STDIN should be treated as a read-only file, and STDOUT and STDERR 
+should be treated as write-only files. STDIN and STDOUT can be redirected. All 
+handles inherited by a process can be redirected, but not at the command line.
+
+ These handles are very useful for doing I/O to and from the console device. 
+For example,  you could read input from the keyboard using the read (3Fh) 
+function call and file handle 0000h (STDIN), and write output to the console 
+screen with the write function call (40h) and file handle 0001h (STDOUT). If 
+you wanted an output that could not be redirected, you could output it using 
+file handle 0002h (STDERR). This is very useful for error messages that must 
+be seen by a user.
+
+ File handles 0003h (STDAUX) and 0004h (STDPRN) can be both read from and 
+written to. STDAUX is typically a serial device and STDPRN is usually a parallel
+device.
+
+
+ASCII and BINARY MODE
+
+ I/O to files is done in binary mode. This means that the data is read or 
+written without modification. However, DOS can also read or write to devices in
+ASCII mode. In ASCII mode, DOS does some string processing and modification to 
+the characters read and written. The predefined handles are in ASCII mode when 
+initialized by DOS. All other file handles that don't refer to devices are in 
+binary mode. A program, can use the IOCTL (44h) function call to set the mode 
+that I/O is to a device. The predefined file handles are all devices, so the 
+mode can be changed from ASCII to binary via IOCTL. Regular file handles that 
+are not devices are always in binary mode and cannot be changed to ASCII mode.
+
+ The ASCII/BINARY bit was called "raw" in DOS 2.x, but it is called ASCII/BINARY
+in DOS 3.x.
+
+ The predefined file handles STDIN (0000h) and STDOUT (0001h) and STDERR 
+(0002h) are all duplicate handles. If the IOCTL function call is used to change
+the mode of any of these three handles, the mode of all three handles is 
+changed. For example, if IOCTL was used to change STDOUT to binary mode, then 
+STDIN and STDERR would also be changed to binary mode.
+
+
+
+FILE I/O IN BINARY (RAW) MODE
+
+The following is true when a file is read in binary mode:
+
+1)  The characters ^S (scroll lock), ^P (print screen), ^C (control break) are 
+    not checked for during the read. Therefore, no printer echo occurs if ^S or
+    ^P are read.
+2)  There is no echo to STDOUT (0001h).
+3)  Read the number of specified bytes and returns immediately when the last 
+    byte is received or the end of file reached.
+4)  Allows no editing of the ine input using the function keys if the input is 
+    from STDIN (0000h).
+
+
+The following is true when a file is written to in binary mode:
+
+1)  The characters ^S (scroll lock), ^P (print screen), ^C (control break) are 
+    not checked for during the write. Therefore, no printer echo occurs.
+2)  There is no echo to STDOUT (0001h).
+3)  The exact number of bytes specified are written.
+4)  Does not caret (^) control characters. For example, ctrl-D is sent out as 
+    byte 04h instead of the two bytes ^ and D.
+5)  Does not expand tabs into spaces. 
+
+
+FILE I/O IN ASCII (COOKED) MODE
+
+The following is true when a file is read in ASCII mode:
+
+1)  Checks for the characters ^C,^S, and ^P.
+2)  Returns as many characters as there are in the device input buffer, or the 
+    number of characters requested, whichever is less. If the number of 
+    characters requested was less than the number of characters in the device 
+    buffer, then the next read will address the remaining characters in the 
+    buffer.
+3)  If there are no more bytes remaining in the device input buffer, read a 
+    line (terminated by ^M) into the buffer. This line may be edited with the 
+    function keys. The characters returned terminated with a sequence of 0Dh,
+    0Ah (^M,^J) if the number of characters requested is sufficient to include
+    them. For example, if 5 characters were requested, and only 3 were entered
+    before the carriage return (0Dh or ^M) was presented to DOS from the console
+    device, then the 3 characters entered and 0Dh and 0Ah would be returned. 
+    However, if 5 characters were requested and 7 were entered before the 
+    carriage return, only the first 5 characters would be returned. No 0Dh,0Ah 
+    sequence would be returned in this case. If less than the number of 
+    characters requested are entered when the carriage return is received, the
+    characters received and 0Dh,0Ah would be returned. The reason the 0Ah 
+    (linefeed or ^J) is added to the returned characters is to make the devices
+    look like text files.
+4)  If a 1Ah (^Z) is found, the input is terminated at that point. No 0Dh,0Ah 
+    (CR,LF) sequence is added to the string.
+5)  Echoing is performed.
+6)  Tabs are expanded.
+
+
+The following is true when a file is written to in ASCII mode:
+
+1)  The characters ^S,^P,and ^C are checked for during the write operation.
+2)  Expands tabs to 8-character boundaries and fills with spaces (20h).
+3)  Carets control characters, for example, ^D is written as two bytes, ^ and D.
+4)  Bytes are output until the number specified is output or a ^Z is 
+    encountered. The number actually output is returned to the user.
+
+
+NUMBER OF OPEN FILES ALLOWED
+
+ The number of files that can be open concurrently is restricted by DOS. This 
+number is determined by how the file is opened or created (FCB or handle 
+function call) and the number specified by the FCBS and FILES commands in the 
+CONFIG.SYS file. The number of files allowed open by FCB function calls and the
+number of files that can be opened by handle type calls are independent of one 
+another.
+
+
+RESTRICTIONS ON FCB USAGE
+
+ If file sharing is not loaded using the SHARE command, there are no 
+restrictions on the nuumber of files concurrently open using FCB function calls.
+
+ However, when file sharing is loaded, the maximum number of FCBs open is set
+by the the FCBS command in the CONFIG.SYS file.
+
+ The FCBS command has two values you can specify, 'm' and 'n'. The value for 
+'m' specifies the number of files that can be opened by FCBs, and the value 'n' 
+specifies the number of FCBs that are protected from being closed.
+
+ When the maximum number of FCB opens is exceeded, DOS automatically closes the
+least recently used file. Any attempt to access this file results in an int 24h
+critical error message "FCB not availible". If this occurs while an application
+program is running, the value specified for 'm' in the FCBS command should be
+increased.
+
+ When DOS determines the least recently used file to close, it does not include
+the first 'n' files opened, therefore the first 'n' files are protected from 
+being closed.
+
+
+RESTRICTIONS ON HANDLE USAGE
+
+ The number of files that can be open simultaneously by all processes is 
+determined by the FILES command in the CONFIG.SYS file. The number of files a 
+single process can open depends on the value specified for the FILES command. If
+FILES is greater than or equal to 20, a single process can open 20 files. If 
+FILES is less than 20, the process can open less than 20 files. This value 
+includes three predefined handles: STDIN, STDOUT, and STDERR. This means only
+17 additional handles can be added. DOS 3.3 includes a function to use more than
+20 files per application.
+
+ALLOCATING SPACE TO A FILE
+
+ Files are not nescessarily written sequentially on a disk. Space is allocated 
+as needed and the next location availible on the disk is allocated as space for
+the next file being written. Therefore, if considerable file generation has
+taken place, newly created files will not be written in sequential sectors.
+However, due to the mapping (chaining) of file space via the File Allocation
+Table (FAT) and the function calls availible, any file may be used in either a
+sequential or random manner.
+
+ Space is allocated in increments called clusters. Cluster size varies 
+according to the media type. An application program should not concern itself 
+with the way that DOS allocates space to a file. The size of a cluster is only 
+important in that it determines the smallest amount of space that can be 
+allocated to a file. A disk is considered full when all clusters have been 
+allocated to files.
+
+
+
+MSDOS / PCDOS DIFFERENCES
+
+ There is a problem of compatibility between MS-DOS and IBM PC-DOS having to 
+do with FCB Open and Create. The IBM 1.0, 1.1, and 2.0 documentation of OPEN
+(call 0Fh) contains the following statement:
+
+ "The current block field (FCB bytes C-D) is set to zero [when an FCB is 
+opened]."
+
+ This statement is NOT true of MS-DOS 1.25 or MS-DOS 2.00. The difference is
+intentional, and the reason is CP/M 1.4 compatibility. Zeroing that field is 
+not CP/M compatible. Some CP/M programs will not run when machine translated if
+that field is zeroed. The reason it is zeroed in the IBM versions is that IBM 
+specifically requested that it be zeroed. This is the reason for the complaints
+from some vendors about the fact that IBM MultiPlan will not run under MS-DOS.
+It is probably the reason that some other IBM programs don't run under MS-DOS.
+
+NOTE: Do what all MS/PC-DOS Systems programs do: Set every single FCB field you
+want to use regardless of what the documentation says is initialized.
+
+
+
+.EXE FILE STRUCTURE
+
+ The EXE files produced by the Linker program consist of two parts, control and
+relocation information and the load module itself.
+
+ The control and relocation information, which is described below, is at the 
+beginning of the file in an area known as the header. The load module 
+immediately follows the header. The load module begins in the memory image of 
+the module contructed by the Linker.
+
+ When you are loading a file with the name *.EXE, DOS does NOT assume that it
+is an EXE format file. It looks at the first two bytes for a signature telling
+it that it is an EXE file. If it has the proper signature, then the load 
+proceeds. Otherwise, it presumes the file to be a .COM format file.
+
+ If the file has the EXE signature, then the internal consistency is checked.
+Pre-2.0 versions of MSDOS did not check the signature byte for EXE files.
+
+ The .EXE format can support programs larger than 64K. It does this by 
+allowing separate segments to be defined for code, data, and the stack, each 
+of which can be up to 64K long. Programs in EXE format may contain explicit 
+references to segment addresses. A header in the EXE file has information for 
+DOS to resolve these references.
+
+
+The .EXE header is formatted as follows:
+ÚÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+³ Offset  ³                      C O N T E N T S                              ³
+ÃÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³   00h   ³ 4Dh ³ This is the Linker's signature to mark the file as a valid  ³ 
+ÃÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄ´ .EXE file  (The ASCII letters M and Z, for Mark Zbikowski,  ³
+³   01h   ³ 5Ah ³ one of the major designers of DOS at Microsoft)             ³
+ÃÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³ 02h-03h ³ Length of the image mod 512 (remainder after dividing the load    ³
+³         ³ module image by 512)                                              ³
+ÃÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³ 04h-05h ³ Size of the file in 512 byte pages including the header.          ³ 
+ÃÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³ 06h-07h ³ Number of relocation table items.                                 ³
+ÃÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³ 08h-09h ³ Size of the header in 16 byte increments (paragraphs). This is    ³
+³         ³ used to locate the beginning of the load module in the file.      ³
+ÃÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³ 0Ah-0Bh ³ Minimum number of 16 byte paragraphs required above the end of    ³
+³         ³ the loaded program.                                               ³
+ÃÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³ 0Ch-0Dh ³ Maximum number of 16 byte paragraphs required above the end of    ³
+³         ³ the loaded program.                                               ³
+ÃÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³ 0Eh-0Fh ³ Displacement in paragraphs of stack segment within load module.   ³
+ÃÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³ 10h-11h ³ Offset to be in SP register when the module is given control.     ³
+ÃÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³ 12h-13h ³ Word Checksum - negative sum of all the words in the file,        ³
+³         ³ ignoring overflow.                                                ³
+ÃÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³ 14h-15h ³ Offset to be in the IP register when the module is given control. ³
+ÃÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³ 16h-17h ³ Displacement in paragraphs of code segment within load module.    ³
+ÃÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³ 18h-19h ³ Displacement in bytes of the first relocation item in the file.   ³
+ÃÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³ 1Ah-1Bh ³ Overlay number (0 for the resident part of the program)           ³
+ÀÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+
+
+THE RELOCATION TABLE
+
+ The word at 18h locates the first entry in the relocation table. The 
+relocation table is made up of a variable number of relocation items. The number
+of items is contained at offset 06-07. The relocation item contains two fields
+- a 2 byte offset value, followed by a 2 byte segment value. These two fields 
+represent the displacement into the load module before the module is given 
+control. The process is called relocation and is accomplished as follows:
+
+1. A Program Segment Prefix is built following the resident portion of the 
+   program that is performing the load operation.
+
+2. The formatted part of the header is read into memory (its size is at 
+   offset 08-09)
+
+3. The load module size is determined by subtracting the header size from the 
+   file size. Offsets 04-05 and 08-09 can be used for this calculation. The 
+   actual size is downward adjusted based on the contents of offsets 02-03. 
+   Note that all files created by the Linker programs prior to version 1.10 
+   always placed a value of 4 at this location, regardless of the actual 
+   program size. Therefore, Microsoft recommends that this field be ignored if 
+   it contains a value of 4. Based on the setting of the high/low loader switch,
+   an appropriate segment is determined for loading the load module. This
+   segment is called the start segment.
+
+4. The load module is read into memory beginning at the start segment. The
+   relocation table is an ordered list of relocation items. The first relocation
+   item is the one that has the lowest offset in the file. 
+
+5. The relocation table items are read into a work area one or more at a time.
+
+6. Each relocation table item segment value is added to the start segment value.
+   The calculated segment, in conjunction with the relocation item offset value,
+   points to a word in the load module to which is added the start segment 
+   value. The result is placed back into the word in the load module.
+
+7. Once all the relocation items have been processed, the SS and SP registers 
+   are set from the values in the header and the start segment value is added 
+   to SS. The ES and DS registers are set to the segment address of the program 
+   segment prefix. The start segment value is added to the header CS register 
+   value. The result, along with the header IP value, is used to give the 
+   module control.
+
+
+"NEW" .EXE FORMAT (Microsoft Windows and OS/2)
+
+ The "old" EXE format is documented here. The "new" EXE format puts more 
+information into the header section and is currently used in applications that 
+run under Microsoft Windows. The linker that creates these files comes with the 
+Microsoft Windows Software Development Kit and is called LINK4. If you try to 
+run a Windows-linked program under DOS, you will get the error message "This 
+program requires Microsoft Windows".
+

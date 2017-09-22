@@ -1,0 +1,244 @@
+ Programming Technical Reference - IBM
+ Copyright 1988, Dave Williams
+
+
+                          I N T R O D U C T I O N
+
+ This manual is intended to replace the various (expensive) references needed to
+program for the DOS environment, that stack of magazines threatening to take
+over your work area, and those odd tables and charts you can never find when you
+need them.
+
+ The various Microsoft and IBM publications and references don't always have the
+same information. This has caused some consternation about the "undocumented"
+features to be found in DOS. In general use, if a call doesn't appear in the IBM
+DOS Technical Reference it is considered "undocumented" although it may be in
+common use.
+
+ Microsoft's offical policy toward DOS has been to put the burden of documenting
+and supporting their product to their vendors. Microsoft will not answer any
+questions concerning DOS directly since they don't officially support it. This
+leaves what information IBM and other OEMs (DEC, Zenith, et al) have chosen to
+publish, and the information obtained from programmers who've poked around
+inside it.
+
+ Now that Microsoft is selling MSDOS 3.2 and 3.3 as Microsoft products they seem
+to be dragging their feet over whether they will have to support the generic
+version since it doesn't have an OEM name on it anymore. In view of their push
+to OS/2 (OS/2! Just Say No!) further support of DOS seems unlikely.
+
+ The information here is valid for DOS 2.x and 3.x. Where there are differences
+between the two versions there are notes in the text. No effort was expended 
+on DOS 1.x or networking features.
+
+ As I write this there is still considerable furor over incompatibilities with 
+DOS 4.0. Since a Technical Reference for 4.0 isn't availible yet, I don't have 
+a whole lot of info on it.
+
+ When I started writing this book, it was originally for my own personal use. 
+Then I began expanding it with the idea of getting it published, since at that 
+time there was *nothing* in print like it. If I had managed to send it off to 
+the publishers early enough, I would have had it made. As it was I lost six 
+months having a nice steel rod put in my leg, and half a dozen similar books 
+were published by then, and nobody was interested in mine. Six months is a 
+long time in the PC world.
+
+ That's why I'm uploading this file as "user-supported." It gives me a chance 
+to recoup a few bucks for the year or so I've been working on this thing, and
+it gives some advantages that a printed book can't - first, you can load it on
+your hard disk and use Vern Buerg's LIST or SideKick to scan through text. You
+can grab a peice of something and paste it into a document, etc. If you help
+support the PC Programmer's Reference you will always have the latest version 
+availible; you can't "upgrade" printed books.
+
+ A project this size takes a LOT of time and effort. I've tried to verify all 
+the information I've received, but there's just too much for absolute certainty.
+If you find any typos, incorrect information, or want to see something else, 
+let me know. If you have any more detailed information on something, PLEASE let
+me know!
+
+                                                        Dave Williams
+
+
+
+                        D  I  S  C  L  A  I  M  E  R
+
+ The information presented here was gathered from megabytes of files found on 
+BBS systems, conversations on a dozen different BBS systems, correspondence,
+and every reference book I could get my hands on. On occaision, a number of
+prestigious references didn't agree with each other. Where this has happened, I
+have used the latest references. There is too much information here for me to 
+verify every fact personally. I have used my own judgement as to the 
+reliability of the sources.
+
+ This entire project was originally begun as a reference for myself, where I 
+put all the little bits of information I culled from various sources into a 
+whole and (hopefully) organized format so I could find them again when 
+nescessary. If you find anything that is incorrect, I would greatly appreciate
+a card or letter telling me.
+
+ As is common these days, I have to make a "Notice of Disclaimer". I take no 
+responsibility for anything, and if anything you do with this book ruins you 
+for life or makes your dog bite you, or anything else, that's just tough.
+
+ I hope you find much use for this reference. It was a trip to write, too.
+
+                                                        Dave Williams
+
+                                                       (C) Copyright 1988
+
+
+
+References used in preparing this book:
+
+IBM Technical Reference
+        Personal Computer
+        p/n 6322507 IBM Publications
+
+IBM Technical Reference 
+        Personal Computer - PCjr
+        p/n 1502293 IBM Publications
+
+IBM Technical Reference
+        Options and Adapters - Enhanced Graphics Adapter
+        p/n 6280131  IBM Publications Aug 1984
+
+IBM DOS Operations Manual Version 2.00
+
+MS-DOS Programmer's Reference
+        by Microsoft
+        p/n 135555-001 Intel Corp. 1984
+
+Lotus-Intel-Microsoft Expanded Memory Specification 4.0
+        Intel Corp.  1987
+
+Microsoft Extended Memory Specification v2.00
+        Microsoft Corporation,  1988
+
+X3.4-1977: American National Standard Code for Information Interchange
+        by American National Standards Institute (ANSI)
+        New York, NY  1977
+
+Microcomputer Products - 1987 Data Book
+        NEC Electronics, Inc.
+        p/n 500105      Aug 1987
+
+FastCard IV User Manual
+        Peripheral Marketing Inc
+        p/n 0527     Jan 1987
+
+Hercules Graphics Card User's Manual
+
+Programmer's Guide to the IBM PC
+        Peter Norton
+        Microsoft Press  1985
+
+Inside the IBM PC               
+        Peter Norton
+
+Exploring the IBM PCjr            
+        Peter Norton
+        Microsoft Press  1984
+
+Advanced MSDOS
+        Ray Duncan
+        Microsoft Press  1986
+
+The IBM Personal Computer from the Inside Out
+        Murray Sargent III and Richard L. Shoemaker
+        Addison-Wesley  1984
+
+DOS:The Complete Reference      
+        Kris Jamsa
+        Osborne/McGraw-Hill  1987
+
+Mapping the IBM PC
+        Russ Davies/Compute! Magazine
+        Compute! Books   1986
+
+Tricks of the MS-DOS Masters
+        Waite Group
+
+Supercharging MS-DOS
+        Van Volverton
+        Microsoft Press  1986
+
+DOS Power Tools
+        Paul Somerson
+        Bantam Books  1988
+
+Running MS-DOS
+        Van Wolverton
+        Microsoft Press
+
+Microcomputer Interfacing
+        Bruce A. Artwick
+        Prentice Hall   1980
+
+The 8080a Bugbook
+        Tony-Larsen-Titus
+        Howard W. Sams   1977
+
+S-286 User Manual, version 2
+        Link Computer, 1988
+
+MPC Operations Guide,  Manual #1023
+        Columbia Data Products, Inc.
+        CDP  1983
+
+Assembly Language Subroutines for MSDOS Computers
+        Leo J. Scanlon
+        TAB Books   1986
+
+The Serious Assembler
+        Charles A. Crayne and Dian Gerard
+        Baen Books   1985
+
+Assembly Language Programming for the IBM Personal Computer
+        David J. Bradley
+        Prentice-Hall   1984
+
+The 8086 Book
+        Russell Rector and George Alexy
+        Osborne/McGraw-Hill  1980
+
+Compute!'s Guide to Assembly Language Programming on the IBM PC
+
+Dr. Dobb's Journal
+
+PC Magazine
+
+PC Resource
+
+PC Tech Journal
+
+Computer Language
+
+Programmer's Journal
+
+Byte Magazine
+
+various computer bulletin board systems, including
+
+Byte Information Exchange (BIX)
+
+Compuserve IBM SIG
+
+GEnie IBM RT
+
+GT Net international network
+
+FIDO Net international network
+
+PCanada BBS system               (Toronto, Canada)
+
+Pecan Pi RBBS, (404) 454-8756    (Atlanta, Georgia)
+
+Night Modulator, (408) 728-5598  (San Jose, California)
+
+various text files downloaded from BBS systems - INTERRUP.ARC, BIOSDOS.ZOO,
+DOSINFO.ARC, DOSERROR.DOC, DOSTIPS.TXT, etc.
+
+and all the people who have been good enough to furnish information
+
+

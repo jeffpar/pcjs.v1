@@ -1,0 +1,611 @@
+CHAPTER 8
+
+ Programming Technical Reference - IBM
+ Copyright 1988, Dave Williams
+
+                          DOS DISK INFORMATION
+
+
+THE DOS AREA
+
+ All disks and diskettes formatted by DOS are created with a sector size of 512
+bytes. The DOS area (entire area for a diskette, DOS partition for hard disks)
+is formatted as follows:
+
+        Boot record - 1 sector
+        First copy of the FAT - variable size
+        Second copy of the FAT - same size as first copy
+        Root directory - variable size
+        Data area
+
+The following sections describe each of the allocated areas: 
+
+
+THE BOOT RECORD
+
+ The boot record resides on track 0, sector 1, side 0 of every diskette 
+formatted by the DOS FORMAT program. It is put on all disks to provide an error
+message is you try to start up with a nonsystem disk in drive A:. For hard disks
+the boot record resides on the first sector of the DOS partition.
+
+
+THE DOS FILE ALLOCATION TABLE (FAT)
+
+ This section explains how DOS uses the FAT to convert the clusters of a file 
+into logical sector numbers. We recommend that system utilities use the DOS 
+handle calls rather than interpreting the FAT.
+
+ The FAT is used by DOS to allocate disk space for files, one cluster at a time.
+
+ The FAT consists of a 12 bit entry (1.5 bytes) for each cluster on the disk or
+a 16 bit (2 bytes) entry when a hard disk has more than 20740 sectors as is the
+case with fixed disks larger than 10Mb.
+ The first two FAT entries map a portion of the directory; these FAT entries 
+contain indicators of the size and format of the disk. The FAT can be in a 12 
+or 16 bit format. DOS determines whether a disk has a 12 or 16 bit FAT by 
+looking at the total number of allocation units on a disk. For all diskettes 
+and hard disks with DOS partitions less than 20,740 sectors, the FAT uses a 12 
+bit value to map a cluster. For larger partitions, DOS uses a 16 bit value.
+ The second, third, and fourth bit applicable for 16 bit FAT bytes always 
+contains 0FFFFh. The first byte is used as follows:
+
+     hex value              meaning                     normally used
+
+       0F8h      hard disk                         bootable hard disk at C:800
+                 double sided  18 sector diskette   PS/2 1.44 meg DSQD
+       0F9h      double sided  15 sector diskette   AT 1.2 meg DSQD
+                 double sided  9  sector diskette   Convertible 720k DSHD
+       0FCh      single sided  9  sector diskette   DOS 2.0, 180k SSDD
+       0FDh      double sided  9  sector diskette   DOS 2.0, 360k DSDD
+       0FEh      single sided  8  sector diskette   DOS 1.0, 160k SSDD
+       0FFh      double sided  8  sector diskette   DOS 1.1, 320k SSDD
+
+
+The third FAT entry begins mapping the data area (cluster 002).
+
+NOTE: These values are provided as a reference. Therefore, programs should not 
+      make use of these values.
+
+ Each entry contains a hexadecimal character (or 4 for 16 bit FATs). () 
+indicates the high order four bit value in the case of 16 bit FAT entries. 
+They can be:
+
+            (0)000h  if the cluster is unused and availible
+
+(0F)FF8h - (0F)FFFh  to indicate the last cluster of a file
+
+            (X)XXXh  any other hexadecimal numbers that are the cluster number
+                     of the next cluster in the file. The cluster number is the
+                     first cluster in the file that is kept in the file's 
+                     directory entry.
+
+ The values (0F)FF0h - (0F)FF7h are used to indicate reserved clusters. 
+(0F)FF7h indicates a bad cluster if it is not part of the allocation chain. 
+(0F)FF8h - (0F)FFFh are used as end of file markers.
+
+ The file allocation table always occupies the sector or sectors immediately 
+following the boot record. If the FAT is larger than 1 sector, the sectors 
+occupy consecutive sector numbers. Two copies of the FAT are written, one 
+following the other, for integrity. The FAT is read into one of the DOS buffers
+whenever needed (open, allocate more space, etc).
+
+
+USE OF THE 12 BIT FILE ALLOCATION TABLE
+
+Obtain the starting cluster of the file from the directory entry.
+
+Now, to locate each subsequent sector of the file:
+
+1. Multiply the cluster number just used by 1.5 (each FAT entry is 1.5 
+   bytes long).
+2. The whole part of the product is offset into the FAT, pointing to the entry 
+   that maps the cluster just used. That entry contains the cluster number of 
+   the next cluster in the file.
+3. Use a MOV instruction to move the word at the calculated FAT into a register.
+4. If the last cluster used was an even number, keep the low order 12 bits of 
+   the register, otherwise, keep the high order 12 bits.
+5. If the resultant 12 bits are (0FF8h-0FFFh) no more clusters are in the file.
+   Otherwise, the next 12 bits contain the cluster number of the next cluster in
+   the file. 
+
+  To convert the cluster to a logical sector number (relative sector, such as 
+that used by int 25h and 26h and DEBUG):
+
+1. Subtract 2 from the cluster number
+2. Multiply the result by the number of sectors per cluster.
+3. Add the logical sector number of the beginning of the data area.
+
+
+USE OF THE 16 BIT FILE ALLOCATION TABLE
+
+ Obtain the starting cluster of the file from the directory entry. Now to 
+locate each subsequent cluster of the file:
+
+1.  Multiply the cluster number used by 2 (each FAT entry is 2 bytes long).
+2.  Use the MOV word instruction to move the word at the calculated FAT offset 
+    into a register.
+3.  If the resultant 16 bits are (0FF8h-0FFFFh) no more clusters are in the 
+    file. Otherwise, the 16 bits contain the cluster number of the next cluster 
+    in the file. 
+
+ Compaq DOS makes availible a new disk type (6) with 32 bit partition values, 
+allowing 512 megabytes per hard disk (Compaq DOS 3.3.1)
+
+
+
+DOS DISK DIRECTORY
+
+ The FORMAT command initially builds the root directory for all disks. Its 
+location (logical sector number) and the maximum number of entries are 
+availible through the device driver interfaces.
+
+
+
+DIRECTORY ENTRIES 
+
+ Since directories other than the root directory are actually files, there is 
+no limit to the number of entries that they may contain. 
+
+ All directory entries are 32 bytes long, and are in the following format (byte
+and offset are decimal). The following paragraphs describe the directory entry 
+bytes:
+
+*BYTES 0-7
+ Bytes 0-7 represent the filename. The first byte of the filename indicates the 
+status of the filename. The status of a filename can contain the following 
+values:
+
+   00h Filename never used. This is used to limit the length of directory 
+       searches, for performance reasons.
+   05h Indicates that the first character of the filename actually has an 0Edh 
+       character.
+  0E5h Filename has been used but the file has been erased.
+   2Eh This entry is for a directory. If the second byte is also 2Eh, the 
+       cluster field contains the cluster number of this directory's parent 
+       directory.  (0000h if the parent directory is the root directory).
+                                                 
+Any other character is the first character of a filename.
+
+*BYTES 8-10
+ These bytes indicate the filename extension.
+
+*BYTE 11
+ This byte indicates the file's attribute. The attribute byte is mapped as 
+ follows (values are in hexadecimal):
+
+NOTE: Attributes 08h and 10h cannot be changed using function call 43h (CHMOD).
+
+ The system files IBMBIO.COM and IBMDOS.COM (or customized equivalent) are 
+marked as read-only, hidden, and system files. Files can be marked hidden when 
+they are created. Also, the read-only, hidden, and system and archive attributes
+may be changed through the CHMOD function call.
+
+01h Indicates that the file is marked read-only. An attempt to open the file 
+    for output using function call 3Dh results in an error code being returned. 
+    This value can be used with other values below.
+
+02h Indicates a hidden file. The file is excluded from normal directory 
+    searches.
+
+04h Indicates a system file. This file is excluded from normal directory 
+    searches.
+
+08h Indicates that the entry contains the volume label in the first 11 bytes. 
+    The entry contains no other usable information and may exist only in the 
+    root directory.
+
+20h Indicates an archive bit. This bit is set on whenever the file is written 
+    to and closed. It is used by BACKUP and RESTORE.
+
+All other bits are reserved, and must be 0.
+
+*BYTES 12-21
+ reserved by DOS
+
+
+*BYTES 22-23
+ These bytes contain the time when the file was created or last updated. The 
+time is mapped in the bits as follows:
+      ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+      ³         B Y T E    23         ³         B Y T E    22         ³
+      ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+      ³ F   E   D   C   B   A   9   8 ³ 7   6   5   4   3   2   1   0 ³
+      ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+      ³ H   H   H   H   H ³ M   M   M   M   M   M ³ D   D   D   D   D ³
+      ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+      ³ binary # hrs 0-23 ³ binary # minutes 0-59 ³ bin. # 2-sec incr ³
+      ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+NOTE: The time is stored with the least significant byte first.
+
+
+*BYTES 24-25
+ This area contains the date when the file was created or last updated. The 
+mm/dd/yy are mapped in the bits as follows:
+
+      ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+      ³         B Y T E    25         ³         B Y T E    24         ³
+      ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+      ³ F   E   D   C   B   A   9   8 ³ 7   6   5   4   3   2   1   0 ³
+      ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+      ³ Y   Y   Y   Y   Y   Y   Y ³ M   M   M   M ³ D   D   D   D   D ³
+      ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+      ³      0-119 (1980-2099)    ³     1-12      ³       1-31        ³
+      ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+NOTE: The date is stored with the least significant byte first.
+
+
+*BYTES 26-27
+ This area contains the starting cluster number of the first cluster in the 
+file. The first cluster for data space on all fixed disks and floppy disks is 
+always cluster 002. The cluster number is stored with the least significant 
+byte first.
+
+
+*BYTES 28-31
+ This area contains the file size in bytes. The first word contains the low 
+order part of the size. Both words are stored with the least significant byte 
+first.
+
+
+                        File Allocation Table
+offset size                  description
+   3       8 bytes system id (such as IBM 3.3)
+  11      2 bytes number of bytes per sector, ie 512 bytes is 200h
+  13      1 byte  sectors per cluster (1 or 2)
+  14      2 bytes number of reserved sectors at beginning, 1 for floppies
+  16      1 byte  number of copies of FAT, 2 for floppies
+  17      2 bytes number of root directory entries (64, 112, 256,etc)
+  19      2 bytes total sectors per disk
+  21      1 byte  format ID (F8, F9, FC, FF, etc)
+  22      2 bytes number of sectors per FAT (1 or 2)
+  24      2 bytes number of sectors per track (8 or 9, 17)
+  26      2 bytes number of sides, heads, or cylinders (1 or 2 for floppy)
+  28      2 bytes number of special reserved sectors
+
+
+THE DATA AREA
+
+ Allocation of space for a file (in the data area) is done only when needed 
+(it is not preallocated). The space is allocated one cluser (unit allocation) 
+at a time. A cluster is always one or more consecutive sector numbers, and all 
+of the clusters in a file are "chained" together in the FAT. 
+
+ The clusters are arranged on disk to minimize head movement for multisided 
+media. All of the space on a track (or cylinder) is allocated before moving 
+on to the next track. This is accomplished by using the sequential sector 
+numbers on the lowest-numbered head, then all the sector numbers on the next 
+head, and so on until all sectors of all heads of the track are used. Then the 
+next sector used will be sector 1 of head 0 on the next track.
+
+ An interesting innovation that was introduced in MS-DOS 3.0: disk space that 
+is freed by erasing a file is not re-used immediately, unlike earlier versions 
+of DOS. Instead, free space is obtained from the area not yet used during the 
+current session, until all of it is used up. Only then will space that is freed
+during the current session be re-used.
+
+ This feature minimizes fragmentation of files, since never-before-used space
+is always contiguous. However, once any space has been freed by deleting a file,
+that advantage vanishes at the next system boot. The feature also greatly
+simplifies un-erasing files, provided that the need to do an un-erase is found
+during the same session and also provided that the file occupies contiguous 
+clusters.
+
+ However, when one is using programs which make extensive use of temporary
+files, each of which may be created and erased many times during a session,
+the feature becomes a nuisance; it forces the permanent files to move farther
+and farther into the inner tracks of the disk, thus increasing rather than
+decreasing the amount of fragmentation which occurs.
+
+ The feature is implemented in DOS by means of a single 16-bit "last cluster
+used" (LCU) pointer for each physical disk drive; this pointer is a part of
+the physical drive table maintained by DOS. At boot time, the LCU pointer is
+zeroed. Each time another cluster is obtained from the free-space pool (the
+FAT), its number is written into the LCU pointer. Each time a fresh cluster
+is required, the FAT is searched to locate a free one; in older versions of
+DOS this search always began at Cluster 0000, but in 3.x it begins at the
+cluster pointed to by the LCU pointer.
+
+ For hard disks, the size of the file allocation table and directory are 
+determined when FORMAT initializes it and are based on the size of the DOS 
+partition.
+
+The following table gives the specifications for floppy disk formats:
+
+               # of   sectors  FAT size    DIR        DIR     sectors  total
+disk  DOS ver  sides  /track   (sectors) (sectors) (entries) /cluster sectors
+
+(5-1/4 inch)
+160k (DOS 1.0)   1     8  (40)     1        4         64         1      320
+320k (DOS 1.1)   2     8  (40)     1        7         112        2      360
+180k (DOS 2.0)   1     9  (40)     2        4         64         1      640
+360k (DOS 2.0)   2     9  (40)     2        7         112        2      720
+1.2M (DOS 3.0)   2     15 (80)     7        14        224        1      2400
+
+(3-1/2 inch)                                                       
+720k (DOS 3.2)   2     9  (80)     3        7         112        2      1440
+1.44M(DOS 3.3)   2     18 (80)     9        14        224        1      2880
+
+ Files in the data area are not nescessarily written sequentially on the first.
+The data area space is allocated one cluster at a time, skipping over clusters 
+already allocated. The first free cluster found is the next cluster allocated, 
+regardless of its physical location on the disk. This permits the most efficient
+utilization of disk space because clusters freed by erasing files can be 
+allocated for new files. Refer back to the description of the DOS FAT in this 
+chapter for more information.
+
+
+Hard Disk Layout
+
+ The DOS hard disk routines perform the following services:
+
+1) Allow multiple operating systems to utilize the hard disk without the need 
+   to backup and restore files when changing operating systems.
+
+2) Allow a user-selected operating system to be started from the hard disk.
+   
+   I) In order to share the hard disk among operating systems, the disk may be 
+      logically divided into 1 to 4 partitions. The space within a given 
+      partition is contiguous, and can be dedicated to a specific operating 
+      system. Each operating system may "own" only one partition in DOS versions
+      2.0 through 3.2. PCDOS 3.3 introduced the "Extended DOS Partition" which 
+      allows multiple DOS partitions on the same hard disk. The FDISK.COM (or 
+      similar program from other DOS vendors) utility allows the user to select
+      the number, type, and size of each partition. The partition information is
+      kept in a partition table that is embedded in the master fixed disk boot 
+      record on the first sector of the disk. The format of this table varies 
+      from version to version of DOS.
+
+  II) An operating system must consider its partition to be the entire disk, 
+      and must ensure that its functions and utilities do not access other 
+      partitions on the disk. 
+
+ III) Each partition may contain a boot record on its first sector, and any 
+      other programs or data that you choose - including a copy of an operating 
+      system. For example, the DOS FORMAT command may be used to format and 
+      place a copy of DOS in the DOS partition in the same manner that a 
+      diskette is formatted. With the FDISK utility, you may designate a 
+      partition as "active" (bootable). The master hard disk boot record causes
+      that partition's boot record to receive control when the system is started
+      or reset. Additional disk partitions could be FORTH, UNIX, Pick, CP/M-86,
+      or the UCSD p-System.
+
+
+
+SYSTEM INITIALIZATION
+
+The boot sequence is as follows:
+
+1. System initialization first attempts to load an operating system from 
+   diskette drive A. If the drive is not ready or a read error occurs, it then 
+   attempts to read a master hard disk boot record on the first sector of the 
+   first hard disk in the system. If unsuccessful, or if no hard disk is 
+   present, it invokes ROM BASIC in an IBM PC or displays a disk error 
+   message on most compatibles.
+
+2. If initialization is successful, the master hard disk boot record is given 
+   control and it examines the partition table embedded within it. If one of 
+   the entries indicates an active (bootable) partition, its boot record is 
+   read from the partition's first sector and given control.
+
+3. If none of the partitions is bootable, ROM BASIC is invoked on an IBM PC or
+    a disk error on most compatibles.
+
+4. If any of the boot indicators are invalid, or if more than one indicator is 
+   marked as bootable, the message INVALID PARTITION TABLE is displayed and the 
+   system stops.
+
+5. If the partition's boot record cannot be successfully read within five 
+   retries due to read errors, the message ERROR LOADING OPERATING SYSTEM 
+   appears and the system stops.
+
+6. If the partition's boot record does not contain a valid "signature", the 
+   message MISSING OPERATING SYSTEM appears, and the system stops.
+
+NOTE: When changing the size or location of any partition, you must ensure that
+      all existing data on the disk has been backed up. The partitioning program
+      will destroy the data on the disk.
+
+
+
+BOOT RECORD/PARTITION TABLE
+
+ A boot record must be written on the first sector of all hard disks, and 
+must contain the following:
+
+1. Code to load and give control to the boot record for one of four possible 
+   operating systems.
+
+2. A partition table at the end of the boot record. Each table entry is 16 
+   bytes long, and contains the starting and ending cylinder, sector, and head 
+   for each of four possible partitions, as well as the number of sectors 
+   preceding the partition and the number of sectors occupied by the partition. 
+   The "boot indicator" byte is used by the boot record to determine if one of 
+   the partitions contains a loadable operating system. FDISK initialization 
+   utilities mark a user-selected partition as "bootable" by placing a value 
+   of 80h in the corresponding partition's boot indicator (setting all other 
+   partitions' indicators to 0 at the same time). The presence of the 80h tells 
+   the standard boot routine to load the sector whose location is contained in 
+   the following three bytes. That sector is the actual boot record for the 
+   selected operating system, and it is responsible for the remainder of the 
+   system's loading process (as it is from the diskette). All boot records are 
+   loaded at absolute address 0:7C00.
+
+The partition table with its offsets into the boot record is:
+(except for Wyse DOS 3.2 with 32 bit allocation table, and DOS 3.3-up)
+ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿
+³ Offset   /    Purpose            ³          ³   Head   ³  Sector  ³ Cylinder ³
+ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄ´
+³ 1BEh partition 1 begin           ³ boot ind ³    H     ³    S     ³   cyl    ³
+ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄ´
+³ 1C2h partition 1 end             ³ syst ind ³    H     ³    S     ³   cyl    ³
+ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´
+³ 1C6h partition 1 relative sector ³      low word       ³      high word      ³
+ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³ 1CAh partition 1 # sectors       ³      low word       ³      high word      ³
+ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ´
+³ 1CEh partition 2 begin           ³ boot ind ³    H     ³    S     ³   cyl    ³
+ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄ´
+³ 1D2h partition 2 end             ³ syst ind ³    H     ³    S     ³   cyl    ³
+ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´
+³ 1D6h partition 2 relative sector ³      low word       ³      high word      ³
+ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³ 1DAh partition 2 # sectors       ³      low word       ³      high word      ³
+ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ´
+³ 1DEh partition 3 begin           ³ boot ind ³    H     ³    S     ³   cyl    ³
+ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄ´
+³ 1E2h partition 3 end             ³ syst ind ³    H     ³    S     ³   cyl    ³
+ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´
+³ 1E6h partition 3 relative sector ³      low word       ³      high word      ³
+ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³ 1EAh partition 3 # sectors       ³      low word       ³      high word      ³
+ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ´
+³ 1EEh partition 4 begin           ³ boot ind ³    H     ³    S     ³   cyl    ³
+ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄ´
+³ 1F2h partition 4 end             ³ syst ind ³    H     ³    S     ³   cyl    ³
+ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´
+³ 1F6h partition 4 relative sector ³      low word       ³      high word      ³
+ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+³ 1FAh partition 4 # sectors       ³      low word       ³      high word      ³
+ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+³ 1FEh signature                   ³  hex 55  ³  hex AA  ³
+ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÙ
+
+
+
+HARD DISK TECHNICAL INFORMATION
+
+ Boot indicator (boot ind): The boot indicator byte must contain 0 for a non- 
+bootable partition or 80h for a bootable partition. Only one partition can be 
+marked as bootable at a time.
+
+ System Indicator (sys ind): The sys ind field contains an indicator of the 
+operating system that "owns" the partition.
+
+          The system indicators are:
+                       00h unknown (unspecified or non-DOS)
+                       01h DOS 12 bit FAT
+                       02h DOS 16 bit FAT
+
+ Cylinder (CYL) and Sector (S): The 1 byte fields labelled CYL contain the low 
+order 8 bits of the cylinder number - the high order 2 bits are in the high 
+order 2 bits of the sector (S) field. This corresponds with the ROM BIOS 
+interrupt 13h (disk I/O) requirements, to allow for a 10 bit cylinder number.
+
+ The fields are ordered in such a manner that only two MOV instructions are 
+required to properly set up the DX and CX registers for a ROM BIOS call to 
+load the appropriate boot record (hard disk booting is only possible from the 
+first hard disk in the system, where a BIOS drive number of 80h corresponds 
+to the boot indicator byte).
+
+ All partitions are allocated in cylinder multiples and begin on sector 1,
+head 0.
+
+ EXCEPTION: The partition that is allocated at the beginning of the disk starts 
+at sector 2, to account for the hard disk's master boot record.
+
+ Relative Sector (rel sect): The number of sectors preceding each partition 
+on the disk is kept in the 4 byte field labelled "rel sect". This value is 
+obtained by counting the sectors beginning with cylinder 0, sector 1, head 0 
+of the disk, and incrementing the sector, head, and then track values up to 
+the beginning of the partition. This, if the disk has 17 sectors per track and 
+4 heads, and the second partition begins at cylinder 1, sector 1, head 0,and 
+the partition's starting relative sector is 68 (decimal) - there were 17 
+sectors on each of 4 heads on 1 track allocated ahead of it. The field is stored
+with the least significant word first.
+
+ Number of sectors (#sects): The number of sectors allocated to the partition 
+is kept in the "# of sects" field. This is a 4 byte field stored least 
+significant word first.
+
+ Signature: The last 2 bytes of the boot record (55AAh) are used as a signature
+to identify a valid boot record. Both this record and the partition boot record 
+are required to contain the signature at offset 1FEh.
+
+ The master disk boot record invokes ROM BASIC if no indicator byte reflects a 
+bootable system.
+
+ When a partition's boot record is given control. It is passed its partition 
+table entry address in the DS:SI registers.
+
+
+
+DETERMINING FIXED DISK ALLOCATION
+
+DOS determines disk allocation using the following formula:
+              
+                                         D * BPD
+                            TS - RS -  ÄÄÄÄÄÄÄÄÄÄÄ
+                                           BPS
+                      SPF = ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+                                        BPS * SPC
+                                 CF + ÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+                                           BPC
+where:
+
+     TS      total sectors on disk
+     RS      the number of sectrs at the beginning of the disk that are reserved
+             for the boot record. DOS reserves 1 sector.
+     D       The number of directory entries in the root directory.
+     BPD     the number of bytes per directory entry. This is always 32.
+     BPS     the number of bytes per logical sector. Typically 512, but you can
+             specify a different number with VDISK.
+     CF      The number of FATS per disk. Usually 2. VDISK is 1.
+     SPF     the number of sectors per FAT. Maximum 64.
+     SPC     The number of sectors per allocation unit.
+     BPC     the number of bytes per FAT entry. BPC is 1.5 for 12 bit FATs.
+             2 for 16 bit FATS.
+
+
+To calculate the minimum partition size that will force a 16-bit FAT:
+
+        CYL = (max clusters * 8)/(HEADS * SPT)
+
+where:
+     CYL     number of cylinders on the disk
+     max clusters  4092 (maximum number of clusters for a 12 bit FAT)
+     HEADS   number of heads on the hard disk
+     SPT     sectors per track  (normally 17 on MFM)
+
+
+note: DOS 2.0 uses a "first fit" algorithm when allocating file space on the 
+hard disk. Each time an application requests disk space, it will scan from the 
+beginning of the FAT until it finds a contiguous peice of storage large enough 
+for the file.
+ DOS 3.0 keeps a pointer into the disk space, and begins its search from the 
+point it last left off. This pointer is lost when the system is rebooted. 
+This is called the "next fit" algorithm. It is faster than the first fit and 
+helps minimize fragmentation.
+ In either case, if the FCB function calls are used instead of the handle 
+function calls, the file will be broken into peices starting with the first 
+availible space on the disk.
+
+
+Comment to 826. Comment(s). 
+----------
+Better late than never...
+A partition table entry for the IBM AT is set up as follows:
+
+        DB      drive   ; 0 or 80H, 80H marks a bootable, active partition
+        DB      head1   ; starting heads
+        DW      trksec1 ; starting track/sector (CX value for INT 13)
+        DB      system  ; see below
+        DB      head2   ; ending head
+        DW      trksec2 ; ending track/sector
+        DD      sector1 ; absolute # of starting sector
+        DD      sector2 ; absolute # of last sector
+
+The system byte is different for different O/S entries:
+
+        1      DOS, 12-bit FAT entries
+        4      DOS, 16-bit FAT entries
+        DB     Concurrent DOS
+        F2     2nd partition for Sperry machines with large disks
+
+        And so on.  There are bytes for XENIX, Prologue and lots of other O/S. 
+Many manufacturers diddle with these system bytes to implement more than 1 DOS
+partition per disk.  The only one I know about who violates the rule that only
+one DOS partition (1 or 4) per disk may exist is Tandon. 
+ 
+

@@ -331,7 +331,7 @@ function DiskDump(sDiskPath, asExclude, sFormat, fComments, sSize, sServerRoot, 
      */
     this.sServerRoot = sServerRoot;
     this.sDiskPath = sDiskPath;
-    if (this.sServerRoot && !net.isRemote(sDiskPath)) {
+    if (this.sServerRoot && !net.isRemote(sDiskPath) && sDiskPath.indexOf(';') < 0) {
         this.sDiskPath = path.join(this.sServerRoot, sDiskPath);
     }
     this.asExclude = asExclude || DiskDump.asExclusions;
@@ -1786,25 +1786,24 @@ DiskDump.prototype.readPath = function(sPath, done)
         var sFileName = asFiles[iFile];
         var i = sFileName.lastIndexOf(path.sep);
         if (i >= 0) {
-            if (sFileName.indexOf("..") < 0) {
-                sDefaultPath = sFileName.substr(0, i);
-                /*
-                 * The DiskDump constructor joins the beginning of sPath with sServerRoot,
-                 * but if there are any intermediate paths, we have to join them ourselves.
-                 */
-                if (iFile > 0 && !net.isRemote(sDefaultPath)) {
-                    sDefaultPath = path.join(this.sServerRoot, sDefaultPath);
-                }
-                sFileName = sFileName.substr(i+1);
-            } else {
-                /*
-                 * TODO: We need to permit ".." without compromising the server...
-                 *
-                var err = new Error('invalid file "' + sFileName + '"');
-                done(err, null);
-                return;
-                 */
+            //
+            // We used to prevent paths with "..", to protect the web server from malicious requests,
+            // but we need to allow them for unfettered command-line support of the --path option.
+            //
+            // if (sFileName.indexOf("..") >= 0) {
+            //     var err = new Error('invalid file "' + sFileName + '"');
+            //     done(err, null);
+            //     return;
+            // }
+            sDefaultPath = sFileName.substr(0, i);
+            /*
+             * The DiskDump constructor joins the beginning of sPath with sServerRoot,
+             * but if there are any intermediate paths, we have to join them ourselves.
+             */
+            if (iFile > 0 && !net.isRemote(sDefaultPath)) {
+                sDefaultPath = path.join(this.sServerRoot, sDefaultPath);
             }
+            sFileName = sFileName.substr(i+1);
         }
         /*
          * Ordinarily, sFileName will already be the basename, except when it has a path element like "../"

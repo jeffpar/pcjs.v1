@@ -1,0 +1,1357 @@
+Chapter 5
+
+ Programming Technical Reference - IBM
+ Copyright 1988, Dave Williams
+
+                        Interrupts 22h Through 86h
+
+
+Interrupt 22h   Terminate Address
+(0:0088h)
+ This interrupt transfers control to the far (dword) address at this interrupt
+location when an application program terminates. The default address for this
+interrupt is 0:0088h through 0:008Bh. This address is copied into the program's
+Program Segment Prefix at bytes 0Ah through 0Dh at the time the segment is
+created and is restored from the PSP when the program terminates. The calling
+program is normally COMMAND.COM or an application. Do not issue this interrupt
+directly, as the EXEC function call does this for you. If an application
+spawns a child process, it must set the Terminate Address prior to issuing the
+EXEC function call, otherwise when the second program terminated it would
+return to the calling program's Terminate Address rather than its own. This
+address may be set with int 21, function 25h.
+
+
+
+Interrupt 23h   Ctrl-Break Exit Address
+(0:008Ch)
+ If the user enters a Ctrl-Break during STDIN, STDOUT, STDPRN, or STDAUX, int
+23h is executed. If BREAK is on, int 23h is checked on MOST function calls
+(notably 06h). If the user written Ctrl-Break routine saves all registers, it
+may end with a return-from-interrupt instruction (IRET) to continue program
+execution. If the user-written interrupt program returns with a long return, the
+carry flag is used to determine whether the program will be aborted. If the
+carry flag is set, the program is aborted, otherwise execution continues (as
+with a return by IRET). If the user-written Ctrl-Break interrupt uses function
+calls 09h or 0Ah, then ctrl-C/CR/LF are output. If execution is continued with
+an IRET, I/O continues from the start of the line. When the interrupt occurs,
+all registers are set to the value they had when the original function call to
+DOS was made. There are no restrictions on what the Ctrl-Break handler is
+allowed to do, including DOS function calls, as long as the registers are
+unchanged if an IRET is used. If the program creates a new segment and loads a
+second program which itself changes the Ctrl-Break address, the termination of
+the second program and return to the first causes the Ctrl-Break address to
+be restored from the PSP to the value it had before execution of the second
+program.
+
+
+
+Interrupt 24h   Critical Error Handler
+(0:0090h)
+ When a critical error occurs within DOS, control is transferred to an error
+handler with an int 24h. This may be the standard DOS error handler (ABORT,
+RETRY, IGNORE) or a user-written routine.
+ On entry to the error handler, AH will have its bit 7=0 (high order bit)
+if the error was a disk error (probably the most common error), bit 7=1 if
+not.
+ BP:SI contains the address of a Device Header Control Block from which
+additional information can be retrieved (see below).
+ The register is set up for a retry operation and an error code is in the
+lower half of the DI register with the upper half undefined. These are the
+error codes:
+
+ The user stack is in effect and contains the following from top to bottom:
+
+        IP      DOS registers from issuing int 24h
+        CS      int 24h
+        flags
+        AX      user registers at time of signal
+        BX      int 21h request
+        CX
+        DX
+        SI
+        DI
+        BP
+        DS
+        ES
+        IP      from original int 21h
+        CS
+        flags
+
+ To reroute the critical error handler to a user-writen critical error handler,
+the following should be done:
+
+Before an int 24h occurs:
+1) The user application initialization code should save the int 24h vector and
+   replace the vector with one pointing to the user error routine.
+
+When the int 24h occurs:
+2) When the user error routine received control it should push the flag
+   registers onto the stack and execute a far call to the original int 24h
+   vector saved in step 1.
+3) DOS gives the appropriate prompt, and waits for user input (Abort, Retry,
+   Ignore, Fail). After the user input, DOS returns control to the user error
+   routine instruction following the far call.
+4) The user error routine can now do any tasks nescessary. To return to the
+   original application at the point the error occurred, the error routine needs
+   to execute an IRET instruction. Otherwise, the user error routine should
+   remove the IP, CS, and flag registers from the stack. Control can then be
+   passed to the desired point.
+
+
+ Int 24h provides the following values in registers on entry to interrupt
+handler:
+
+entry   AH      status byte
+            bit 7       0       disk I/O hard error
+                        1       other error - if block device, bad FAT
+                                - if char device, code in DI
+                6       unused
+                5       0       if IGNORE is not allowed
+                        1       if IGNORE is allowed
+                4       0       if RETRY  is not allowed
+                        1       if RETRY  is allowed
+                3       0       if FAIL   is not allowed
+                        1       if FAIL   is allowed
+                2 \     disk area of error  00 = DOS area  01 = FAT
+                1 /                         10 = root dir  11 = data area
+                0       0       if read operation
+                        1       if write operation
+        AL      drive number if AH bit 7 = 1, otherwise undefined
+                If it is as hard error on disk (AH bit 7=0), register AL
+                contains the failing drive number (0=A:, 1=B:, etc.).
+        BP:SI   address of a Device Header Control Block for which error
+                occurred block device if high bit of BP:SI+4 = 1
+ low byte of DI: error code (note: high byte is undefined)
+               error code      description
+                00h             attempt to write on write-protected diskette
+                01h             unknown unit
+                02h             drive not ready
+                03h             unknown command
+                04h             data error (bad CRC)
+                05h             bad request structure length
+                06h             seek error
+                07h             unknown media type
+                08h             sector not found
+                09h             printer out of paper
+                0Ah             write fault
+                0Bh             read fault
+                0Ch             general failure
+                0Fh             invalid disk change (DOS 3.x)
+
+handler must return
+
+ The registers are set such that if an IRET is executed, DOS responds according
+to (AL) as follows:
+ AL     00h  ignore the error
+        01h  retry the operation
+        02h  terminate via int 22h
+        03h  fail the system call that is in progress (DOS 3.2+)
+note 1) Be careful when choosing to ignore a response because this causes DOS to
+        beleive that an operation has completed successfully when it may not
+        have.
+     2) If the error was a character device, the contents of AL are invalid.
+
+
+
+OTHER ERRORS
+
+ If AH bit 7=1, the error occurred on a character device, or was the result of
+a bad memory image of the FAT. The device header passed in BP:SI can be examined
+to determine which case exists. If the attribute byte high-order bit indicates
+a block device, then the error was a bad FAT. Otherwise, the error is on a
+character device.
+ If a character device is involved, the contents of AL are unpredictable, the
+error code is in DI as above.
+
+Notes:
+1.  Before giving this routine control for disk errors, DOS performs several
+    retries. The number of retries varies according to the DOS version.
+2.  For disk errors, this exit is taken only for errors occurring during an
+    int 21h function call. It is not used for errors during an int 25h or 26h.
+3.  This routine is entered in a disabled state.
+4.  All registers must be preserved.
+5.  This interrupt handler should refrain from using DOS function calls. If
+    necessary, it may use calls 01h through 12h. Use of any other call destroys
+    the DOS stack and leaves DOS in an unpredictable state.
+6.  The interrupt handler must not change the contents of the device header.
+7.  If the interrupt handler handles errors itself rather than returning to DOS,
+    it should restore the application program's registers from the stack,
+    remove all but the last three words on the stack, then issue an IRET. This
+    will return to the program immediately after the int 21h that experienced
+    the error. Note that if this is done DOS will be in an unstable state until
+    a function call higher than 12h is issued, therefore not recommended.
+8.  For DOS 3.x, IGNORE requests (AL=0) are converted to FAIL for critical
+    errors that occur on FAT or DIR sectors.
+9.  For DOS 3.10 up, IGNORE requests (AL=0) are converted to FAIL requests
+    for network critical errors (50-79).
+
+The device header pointed to by BP:SI is as follows:
+
+DWORD Pointer to next device (0FFFFh if last device)
+
+WORD Attributes:
+
+Bit     15      1       if character device.
+                        If bit 15 is 1:
+                        Bit 0 = 1 if current standard input
+                        Bit 1 = 1 if current standard output
+                        Bit 2 = 1 if current NULL device
+                        Bit 3 = 1 if current CLOCK device
+                0       if block device
+Bit 14 is the IOCTL bit
+WORD pointer to device driver strategy entry point
+WORD pointer to device driver interrupt entry point
+8-BYTE character device named field for block devices. The first byte is the
+number of units.
+ To tell if the error occurred on a block or character device, look at bit 15
+in the attribute field (WORD at BP:SI+4).
+ If the name of the character device is desired, look at the eight bytes
+starting at BP:SI+10.
+
+
+HANDLING OF INVALID RESPONSES (DOS 3.x)
+
+        A) If IGNORE (AL=0) is specified by the user and IGNORE is not allowed
+           (bit 5=0), make the response FAIL (AL=3).
+        B) If RETRY (AL=1) is specified by the user and RETRY is not allowed
+           (bit 4=0), make the response FAIL (AL=3).
+        C) If FAIL (AL=3) is specified by the user and FAIL is not allowed (bit
+           3=0), make the response ABORT. (AL=2)
+
+
+
+
+Interrupt 25h   Absolute Disk Read
+Interrupt 26h   Absolute Disk Write
+(0:0094h, 0:0098h)
+  These transfer control directly to the device driver. On return, the original
+flags are still on the stack (put there by the INT instruction). This is
+necessary because return information is passed back in the current flags.
+  The number of sectors specified is transferred between the given drive and the
+transfer address. Logical sector numbers are obtained by numbering each sector
+sequentially starting from track 0, head 0, sector 1 (logical sector 0) and
+continuing along the same head, then to the next head until the last sector on
+the last head of the track is counted.  Thus, logical sector 1 is track 0, head
+0, sector 2; logical sector 2 is track 0, head 0, sector 3; and so on. Numbering
+then continues wih sector 1 on head 0 of the next track. Note that although the
+sectors are sequentially numbered (for example, sectors 2 and 3 on track 0 in
+the example above), they may not be physically adjacent on disk, due to
+interleaving. Note that the mapping is different from that used by DOS 1.10 for
+dual-sided diskettes.
+
+The request is as follows:
+
+int 25 for Absolute Disk Read,
+int 26 for Absolute Disk Write
+entry   AL      drive number (0=A:, 1=B:, etc)
+        CX      number of sectors to read
+        DS:BX   disk transfer address (buffer)
+        DX      first relative sector to read - beginning logical sector number
+return  CF      set if error
+        AL      error code issued to int 24h in low half of DI
+        AH      01h     bad command
+                02h     bad address mark
+                03h     write-protected disk
+                04h     requested sector not found
+                08h     DMA failure
+                10h     data error (bad CRC)
+                20h     controller failed
+                40h     seek operation failed
+                80h     attachment failed to respond
+note 1) Original flags on stack! Be sure to pop the stack to prevent
+        uncontrolled growth
+     2) Ints 25 and 26 will try rereading a disk if they get an error the first
+        time.
+     3) All registers except the segment registers are destroyed by these calls
+
+
+
+Interrupt 27h   Terminate And Stay Resident
+(0:009Ch)       (obsolete)
+ This vector is used by programs that are to remain resident when COMMAND.COM
+regains control.
+ After initializing itself, the program must set DX to its last address plus
+one relative to the program's initial DS or ES value (the offset at which other
+programs can be loaded), then execute interrupt 27h. DOS then considers the
+program as an extension of itself, so the program is not overlaid when other
+programs are executed. This is useful for loading programs such as utilities
+and interrupt handlers that must remain resident.
+
+entry   CS      current program segment
+        DX      last program byte + 1
+return  none
+note 1) This interrupt must not be used by .EXE programs that are loaded into
+        the high end of memory.
+     2) This interrupt restores the interrupt 22h, 23h, and 24h vectors in the
+        same manner as interrupt 20h.  Therefore, it cannot be used to install
+        permanently resident Ctrl-Break or critical error handler routines.
+     3) The maximum size of memory that can be made resident by this method is
+        64K.
+     4) Memory can be more efficiently used if the block containing a copy of
+        the environment is deallocated before terminating. This can be done by
+        loading ES with the segment contained in 2Ch of the PSP, and issuing
+        function call 49h (Free Allocated Memory).
+     5) DOS function call 4Ch allows a program to pass a completion code to DOS,
+        which can be interpreted with processing (see function call 31h).
+     6) Terminate and stay resident programs do not close files.
+     7) Int 21, function 31h is the preferred method to cause a program to
+        remain resident because this allows return information to be passed and
+        allows a program larger than 64K to remain resident.
+
+
+
+Interrupt 28h   (not documented by Microsoft)
+           *    DOS Idle Interrupt
+ This interrupt is continuously called by DOS itself whenever it is in a wait
+state (i.e., when it is waiting for keyboard input) during a function call of
+01h through 0Ch. DOS uses 3 separate internal stacks: one for calls 01h through
+0Ch; another for calls 0Dh and above; and a third for calls 01h through 0Ch when
+a Critical Error is in progress. When int 28h is called, any calls above 0Ch can
+be executed without destroying the internal stack used by DOS at the time.
+ It is used primarily by the PRINT.COM routines, but any number of other
+routines can be chained to it by saving the original vector and calling it with
+a FAR call (or just JMPing to it) at the end of the new routine.
+ Int 28h is being issued it is usually safe to do DOS calls. You won't get int
+28hs if a program is running that doesn't do its keyboard input through DOS. You
+should rely on the timer interrupt for these.
+ Int 28h is not called at all when any non-trivial foreground task is running.
+As soon as a foreground program has a file open, INT28 no longer gets called.
+Could make a good driver for for abackground program that really works as long
+as there is nothing else going on in the machine.
+
+entry   no parameters availible
+return  none
+note 1) The int 28h handler may invoke any int 21h function except functions
+        00h through 0Ch (and 50h/51h under DOS 2.x).
+     2) Apparently int 28h is also called during screen writes
+     3) Until some program installs its own routine, this interrupt vector
+        simply points to an IRET opcode.
+     4) Supported in OS/2 1.0's DOS Compatibility Box
+
+
+Interrupt 29h   (not documented by Microsoft)
+           *    Internal - Quick Screen Output
+
+ This method is extremely fast (much faster than DOS 21h subfunctions 2 and 9,
+for example), and it is portable, even to "non-compatible" MS-DOS computers.
+
+entry   AL      character to output to screen
+return  unknown
+note 1) Documented by Digital Research's DOS Reference as provided with the
+        DEC Rainbow
+     2) If ANSI.SYS is installed, character output is filtered through it.
+     3) Works on the IBM PC and compatibles, Wang PC, HP-150 and Vectra, DEC
+        Rainbow, NEC APC, Texas Instruments PC and others
+     4) This interrupt is called from the DOS's output routines if output is
+        going to a device rather than a file, and the device driver's attribute
+        word has bit 3 (04h) set to "1".
+     5) This call has been tested with MSDOS 2.11, PCDOS 2.1, PCDOS 3.1, PCDOS
+        3.2, and PCDOS 3.3.
+     6) Used in IBMBIO.COM as a vector to int 10, function 0Eh (write TTY)
+        followed by an IRET.
+
+
+
+Interrupt 2Ah   Microsoft Networks - Session Layer Interrupt
+           *    (not documented by Microsoft)
+
+entry   AH      00h     check to see if network BIOS installed
+                        return: AH      <> 0 if installed
+                01h     execute NETBIOS request
+                02h     set net printer mode
+                03h     get shared-device status (check direct I/O)
+                        AL      00h
+                        DS:SI   pointer to ASCIIZ disk device name
+                        return  CF      0 if allowed
+                04h     execute NETBIOS
+                        AL      0 for error retry
+                                1 for no retry
+                        ES:BX   pointer to ncb
+                        return  AX      0 for no error
+                                AH      1 if error
+                                AL      error code
+                05h     get network resource information
+                        AL      00h
+                        return  AX      reserved
+                                BX      number of network names
+                                CX      number of commands
+                                DX      number of sessions
+                82h     unknown
+                        return  ??
+note    called by the int 21h function dispatcher in DOS 3.10
+
+
+Interrupt 2Bh   (not documented by Microsoft)
+           *    Unknown - Internal Routine for DOS (IRET)
+
+
+Interrupt 2Ch   (not documented by Microsoft)
+           *    Unknown - Internal Routine for DOS (IRET)
+
+
+Interrupt 2Dh   (not documented by Microsoft)
+           *    Unknown - Internal Routine for DOS (IRET)
+
+
+Interrupt 2Eh   (undocumented by Microsoft)
+           *    Internal Routine for DOS  (Alternate EXEC)
+
+  This interrupt passes a command line addressed by DS:SI to COMMAND.COM. The
+command line must be formatted just like the unformatted parameter area of a
+Program Segment Prefix. That is, the first byte must be a count of characters,
+and the second and subsequent bytes must be a command line with parameters,
+terminated by a carriage return character.
+  When executed, int 2Eh will reload the transient part of the command
+interpreter if it is not currently in memory. If called from a program that
+was called from a batch file, it will abort the batch file. If executed from a
+program which has been spawned by the EXEC function, it will abort the whole
+chain and probably lock up the computer. Int 2Eh also destroys all registers
+including the stack pointer.
+  Int 2Eh is called from the transient portion of the program to reset the DOS
+PSP pointers using the above Functions #81 & #80, and then reenters the
+resident program.
+  When called with a valid command line, the command will be carried out by
+COMMAND.COM just as though you had typed it in at the DOS prompt. Note that the
+count does not include the carriage return. This is an elegant way to perform a
+SET from an application program against the master environment block for
+example.
+
+entry   DS:SI   pointer to an ASCIIZ command line in the form:
+                        count byte
+                        ASCII string
+                        carriage return
+                        null byte
+note 1) Destroys all registers including stack pointer
+     2) Seems to work OK in both DOS 2.x and 3.x
+     3) It is reportedly not used by DOS.
+     4) As far as known, int 2Eh is not used by DOS 3.1, although it was called
+        by COMMAND.COM of PCDOS 3.0, so it appears to be in 3.1 only for the
+        sake of compatibility.
+
+
+
+Interrupt 2Fh   Multiplex Interrupt
+
+ Interrupt 2Fh is the multiplex interrupt. A general interface is defined
+between two processes. It is up to the specific application using interrupt
+2Fh to define specific functions and parameters.
+ Every multiplex interrupt handler is assigned a specific multiplex number.
+The multiplex number is specified in the AH register; the AH value tells which
+program your request is directed toward. The specific function that the handler
+is to perform is placed in the AL register. Other parameters are places in the
+other registers as needed. The handlers are chained into the 2Fh interrupt
+vector and the multiplex number is checked to see if any other application is
+using the same multiplex number. There is no predefined method for assigning a
+multiplex number to a handler. You must just pick one. To avoid a conflict if
+two applications choose the same multiplex number, the multiplex numbers used by
+an application should be patchable. In order to check for a previous
+installation of the current application, you can search memory for a unique
+string included in your program. If the value you wanted in AH is taken but
+you don't find the string, then another application has grabbed that location.
+ Int 2Fh was not documented under DOS 2.x. There is no reason not to use int 2Fh
+as the multiplex interrupt in DOS 2.x. The only problem is that DOS does not
+initialize the int 2Fh vector, so when you try to chain to it like you are
+supposed to, it will crash. But if your program checks the vector for being zero
+and doesn't chain in that case, it will work for you in 2.x just the same as
+3.x.
+ Int 2Fh doesn't require any support from DOS itself for it to be used in
+application programs. It's not handled by DOS, but by the programs themselves.
+The only support DOS has to provide is to initialize the vector to an IRET. DOS
+3.2 does itself contain some int 2Fh handlers - it uses values of 08h, 13h, and
+0F8h. There may be more.
+
+
+entry   AH      01h     PRINT.COM
+                AL      00h     PRINT  Get Installed State
+                        This call must be defined by all int 2Fh handlers. It
+                        is used by the caller of the handler to determine if
+                        the handler is present. On entry, AL=0. On return, AL
+                        contains the installed state as follows:
+                return  AL      0FFh    installed
+                                01h     not installed, not OK to install
+                                00h     not installed, OK to install
+
+
+                        01h     PRINT  Submit File
+                        DS:DX   pointer to submit packet
+                                format  BYTE    level
+                                        DWORD   pointer to ASCIIZ filename
+                return  CF      set if error
+                                AX      error code
+                note 1) A submit packet contains the level (BYTE) and a pointer
+                        to the ASCIIZ string (DWORD in offset:segment form).
+                        The ASCIIZ string must contain the drive, path, and
+                        filename of the file you want to print. The filename
+                        cannot contain global filename characters.
+                return  CF      set if error
+                                AX      error code
+
+                        02h     PRINT Cancel File
+                        On entry, AL=2 and DS:DX points to the ASCIIZ string for
+                        the print file you want to cancel. Global filename
+                        characters are allowed in the filename.
+                DS:DX   pointer to ASCIIZ file name to cancel (wildcards OK)
+                return  CF      set if error
+                                AX      error code
+
+                        03h     PRINT remove all files
+                return  CF      set if error
+                                AX      error code
+
+                        04h     PRINT hold queue/get status
+                        This call holds the jobs in the print queue so that you
+                        can scan the queue. Issuing any other code releases the
+                        jobs. On entry, AL=4. On return, DX contains the error
+                        count. DS:SI points to the print queue. The print queue
+                        consists of a series of filename entries. Each entry is
+                        64 bytes long. The first entry in the queue is the file
+                        currently being printed. The end of the queue is marked
+                        by the entry having a null as the first character.
+               return   DX      error count
+                        DS:SI   pointer to print queue (null-string terminated
+                                list of 64-byte ASCIIZ filenames)
+                        CF      set if error
+                               AX       error code
+                                        01h     function invalid
+                                        02h     file not found
+                                        03h     path not found
+                                        04h     too many open files
+                                        05h     access denied
+                                        08h     queue full
+                                        09h     spooler busy
+                                        0Ch     name too long
+                                        0Fh     drive invalid
+
+                        05h     PRINT restart queue
+                return  CF      set if error
+                                AX      error code
+
+        AH      05h     DOS 3.x critical error handler
+                AL      00h     installation check
+                        return  AL      00h not installed, OK to install
+                                        01h not installed, can't install
+                                        0FFh installed
+                        note    This set of functions allows a user program to
+                                partially or completely override the default
+                                critical error handler in COMMAND.COM
+                AL      01h     handle error - nonzero error code in AL
+                        return  CF      clear
+                                        ES:DI   pointer to ASCIIZ error message
+                                CF      set     use default error handler
+                                AL      (?)
+
+        AH      06h     ASSIGN
+                        00h     installation check
+                        return  AH <> 0 if installed
+
+                        01h     get memory segment
+                        return  ES      segment of ASSIGN work area
+
+        AH      10h     SHARE
+                        00h     installation check
+                        return  AL      00h    not installed, OK to install
+                                        01h    not installed, not OK to install
+                                        0FFh   installed
+
+        AH      11h     multiplex - network redirection
+                        00h     installation check
+                        return  AL      00h    not installed, OK to install
+                                        01h    not installed, not OK to install
+                                        0FFh   installed
+                        01h     unknown
+                        02h     unknown
+                        03h     unknown
+                        04h     unknown
+                        05h     unknown
+                        06h     close remote file
+                        07h     unknown
+                        08h     unknown
+                        09h     unknown
+                        0Ah     unknown
+                                STACK: WORD (?)
+                                return  CF      set on error
+                        0Bh     unknown
+                                STACK: WORD (?)
+                                return  CF      set on error(?)
+                        0Ch     unknown
+                        0Dh     unknown
+                        0Eh     unknown
+                                STACK: WORD (?)
+                                return  (?)
+                        0Fh     unknown
+                        11h     unknown
+                        13h     unknown
+                        16h     unknown
+                        17h     unknown
+                                STACK: WORD (?)
+                                return  (?)
+                        18h     unknown
+                                STACK: WORD (?)
+                                return  (?)
+                        19h     unknown
+                        1Bh     unknown
+                        1Ch     unknown
+                        1Dh     unknown
+                        1Eh     do redirection
+                                STACK: WORD function to execute
+                                return  CF      set on error
+                        1Fh     printer setup
+                                STACK: WORD function(?)
+                                return  CF      set on error(?)
+                        20h     unknown
+                        21h     unknown
+                        22h     unknown
+                        23h     unknown
+                        24h     unknown
+                        25h     unknown
+                                STACK: WORD (?)
+                        26h     unknown
+
+        AH      12h     multiplex, DOS 3.x internal services
+                        00h     installation check
+                        return  AL      0FFh    for compatibility with other
+                                                int 2Fh functions
+                        01h     close file (?)
+                                stack   word value - unknown
+                                return  BX      unknown
+                                        CX      unknown
+                                        ES:DI   pointer to unknown value
+                                note    Can be called only from within DOS
+                        02h     get interrupt address
+                                stack: word vector number
+                                return  ES:BX pointer to interrupt vector
+                                        Stack unchanged
+                        03h     get DOS data segment
+                                return  DS      segment of IBMDOS
+                        04h     normalize path separator
+                                stack: word character to normalize
+                                return  AL      normalized character (forward
+                                                slash turned to backslash)
+                                        Stack unchanged
+                        05h     output character
+                                stack: word character to output
+                                return  Stack unchanged
+                                note    Can be called only from within DOS
+                        06h     invoke critical error
+                                return  AL      0-3 for Abort, Retry, Ignore,
+                                                Fail
+                                note    Can be called only from within DOS
+                        07h     move disk buffer (?)
+                                DS:DI   pointer to disk buffer
+                                return  buffer moved to end of buffer list
+                                note    Can be called only from within DOS
+                        08h     decrement word
+                                ES:DI   pointer to word to decrement
+                                return  AX      new value of word
+                                note    Word pointed to by ES:DI decremented,
+                                        skipping zero
+                        09h     unknown
+                                DS:DI   pointer to disk buffer(?)
+                                return  (?)
+                                note    Can be called only from within DOS
+                        0Ah     unknown
+                                note    Can be called only from within DOS
+                        0Bh     unknown
+                                ES:DI   pointer to system file table entry(?)
+                                return  AX      (?)
+                                note    Can be called only from within DOS
+                        0Ch     unknown
+                                note    Can be called only from within DOS
+                        0Dh     get date and time
+                                return  AX      current date in packed format
+                                        DX      current time in packed format
+                                note    Can be called only from within DOS
+                        0Eh     do something to all disk buffers (?)
+                                return  DS:DI   pointer to first disk buffer
+                                note    can be called only from within DOS
+                        0Fh     unknown
+                                DS:DI   pointer to (?)
+                                return  DS:DI pointer to (?)
+                                note 1) Can be called only from within DOS
+                                     2) Calls on function 1207h
+                        10h     find dirty/clean(?) buffer
+                                DS:DI   pointer to first disk buffer
+                                return  DS:DI   pointer to first disk buffer
+                                                which has (?) flag clear
+                                        ZF      clear if found
+                                                set if not found
+                        11h     normalize ASCIIZ filename
+                                DS:SI   pointer to ASCIZ filename to normalize
+                                ES:DI   ptr to buffer for normalized filename
+                                return  destination buffer filled with upper-
+                                        case filename, with slashes turned to
+                                        backslashes
+                        12h     get length of ASCIIZ string
+                                ES:DI   pointer to ASCIZ string
+                                return  CX      length of string
+                        13h     uppercase character
+                                stack: word character to convert to uppercase
+                                return  AL      uppercase character
+                                        Stack unchanged
+                        14h     compare far pointers
+                                DS:SI   first pointer
+                                ES:DI   second pointer
+                                return  ZF      set if pointers are equal
+                                        ZF      clear if not equal
+                        15h     unknown
+                                DS:DI   pointer to disk buffer
+                                stack: word (?)
+                                return  Stack unchanged
+                                note    Can be called only from within DOS
+                        16h     get address of system FCB
+                                BX      system file table entry number
+                                return  ES:DI pointer to system file table entry
+                        17h     set default drive (?)
+                                stack: word drive (0 = A:, 1 = B:, etc)
+                                return  DS:SI   pointer to drive data block for
+                                                specified drive
+                                        Stack unchanged
+                                note    Can be called only from within DOS
+                        18h     get something (?)
+                                return  DS:SI pointer to (?)
+                        19h     unknown
+                                stack: word drive (0 = default, 1 = A:, etc)
+                                return  (?)
+                                        Stack unchanged
+                                note 1) Can be called only from within DOS
+                                     2) Calls function 1217h
+                        1Ah     get file's drive
+                                DS:SI   pointer to filename
+                                return  AL      drive
+                                        (0=default, 1=A:, etc, 0FFh=invalid)
+                        1Bh     set something (?)
+                                CL      unknown
+                                return  AL      (?)
+                                note    Can be called only from within DOS
+                        1Ch     checksum memory
+                                DS:SI   pointer to start of memory to checksum
+                                CX      number of bytes
+                                DX      initial checksum
+                                return  DX      checksum
+                                note    Can be called only from within DOS
+                        1Dh     unknown
+                                DS:SI   pointer to (?)
+                                CX      (?)
+                                DX      (?)
+                                return  AX      (?)
+                                        CX      (?)
+                                        DX    = (?)
+                        1Eh     compare filenames
+                                DS:SI   pointer to first ASCIIZ filename
+                                ES:DI   pointer to second ASCIIZ filename
+                                return  ZF      set     if filenames equivalent
+                                                clear   if not
+                        1Fh     build drive info block
+                                stack: word drive letter
+                                return  ES:DI pointer to drive info block
+                                              (will be overwritten by next call)
+                                        Stack unchanged
+                                note    Can be called only from within DOS
+                        20h     get system file table number
+                                BX      file handle
+                                return  CF set on error
+                                        AL      6 (invalid file handle)
+                                        CF      clear if successful
+                                        byte ES:[DI] = system file table entry
+                                            number for file handle
+                        21h     unknown
+                                DS:SI   pointer to (?)
+                                return  (?)
+                                note    Can be called only from within DOS
+                        22h     unknown
+                                SS:SI   pointer to (?)
+                                return  nothing(?)
+                                note    Can be called only from within DOS
+                        23h     check if character device (?)
+                                return  DS:SI   pointer to device driver with
+                                                same name as (?)
+                                note    Can be called only from within DOS
+                        24h     delay
+                                return  after delay of (?) ms
+                                note    Can be called only from within DOS
+                        25h     get length of ASCIIZ string
+                                DS:SI   pointer to ASCIIZ string
+                                return  CX      length of string
+
+        AH      43h     Microsoft Extended Memory Specification (XMS)
+
+        AH      64h     SCRNSAV2.COM
+                AL      00h     installation check
+                        return  AL      00h     not installed
+                                        0FFh    installed
+                        note    SCRNSAV2.COM is a screen saver for PS/2's with
+                                VGA by Alan Ballard
+
+        AH      7Ah     Novell NetWare
+                AL      00h     installation check
+                        note    Returns address of entry point for IPX and SPX
+
+        AH      0AAh    VIDCLOCK.COM
+                AL      00h     installation check
+                        return  AL      00h     not installed
+                                        0FFh    installed
+                        note    VIDCLOCK.COM is a memory-resident clock by
+                                Thomas G. Hanlin III
+
+        AH      0B7h    APPEND
+                AL      00h     APPEND installation check
+                                return  AH <> 0 if installed
+                        01h     APPEND - unknown
+                        02h     APPEND - version check
+
+        AH      0B8h    Microsoft Networks
+                AL      00h     network program installation check
+                        return  AH <> 0 if installed
+                                BX      installed component flags (test in this
+                                        order!)
+                                bit 6   server
+                                bit 2   messenger
+                                bit 7   receiver
+                                bit 3   redirector
+                        01h     unknown
+                        02h     unknown
+                        03h     get current POST address
+                        return  ES:BX   POST address
+                        04h     set new POST address
+                        ES:BX   new POST address
+                        09h     version check
+
+        AH      0BBh    Network functions
+                AL      00h     net command installation check
+                        03h     get server POST address
+                        04h     get server POST address
+
+        AH      0F7h    AUTOPARK.COM  (PD TSR hard disk parking utility)
+                AL      00h     installation check
+                        return  AL      00h     not installed
+                                        0FFh    installed
+                        note    AUTOPARK is a TSR HD parker by Alan D. Jones
+                        01h     set parking delay
+                        BX:CX   32 bit count of 55ms timer ticks
+
+return  AX      Error
+                Codes       Description
+                01h     invalid function number
+                02h     file not found
+                03h     path not found
+                04h     too many open files
+                05h     access denied
+                06h     invalid handle
+                08h     queue full
+                09h     busy
+                0Ch     name too long
+                0Fh     invalid drive was specified
+        CF      clear (0) if OK
+                set (1) if error - error returned in AX
+note 1) The multiplex numbers AH=0h through AH=7Fh are reserved for DOS.
+        Applications should use multiplex numbers 80h through 0FFh.
+     2) When in the chain for int 2Fh, if your code calls DOS or if you execute
+        with interrupts enabled, your code must be reentrant/recursive.
+
+
+
+Interrupt 30h   (not a vector!) far jump instruction for CP/M-style calls
+
+
+Interrupt 31h   Unknown
+note    The CALL 5 entry point does a FAR jump to here
+
+
+Interrupt 32h   Unknown
+
+
+
+
+Interrupt 33h   Used by Microsoft Mouse Driver
+                Function Calls
+
+        00h     Reset Driver and Read Status
+        entry   AH      00h
+        return  AH      status
+                        0  hardware/driver not installed
+                        -1 hardware/driver installed
+                BX      number of buttons
+                        -1      two buttons
+                        0       other than two
+                        3       Mouse Systems mouse
+
+        01h     Show Mouse Cursor
+        entry   AH      01h
+        return  unknown
+
+        02h     Hide Mouse Cursor
+        entry   AH      02h
+        return  unknown
+        note    multiple calls to hide the cursor will require multiple calls
+                to function 01h to unhide it.
+
+        03h     Return Position and Button Status
+        entry   AH      03h
+        return  BX      button status
+                        bit 0   left button pressed if 1
+                        bit 1   right button pressed if 1
+                        bit 2   middle button pressed if 1 (Mouse Systems mouse)
+                CX      column
+                DX      row
+
+        04h     Position Mouse Cursor
+        entry   AH      04h
+                CX      column
+                DX      row
+                return  unknown
+
+        05h     Return Button Press Data
+        entry   AH      05h
+                BX      button
+                        0 left
+                        1 right
+                        2 middle (Mouse Systems mouse)
+        return  AH      button states
+                        bit 0   left button pressed if 1
+                        bit 1   right button pressed if 1
+                        bit 2   middle button pressed if 1 (Mouse Systems mouse)
+                BX      no. of times specified button pressed since last call
+                CX      column at time specified button was last pressed
+                DX      row at time specified button was last pressed
+
+        06h     Return Button Release Data
+        entry   AH      06h
+                BX      button
+                        0       left
+                        1       right
+                        2       middle (Mouse Systems mouse)
+        return  AH      button states
+                        bit 0   left button pressed if 1
+                        bit 1   right button pressed if 1
+                        bit 2   middle button pressed if 1 (Mouse Systems mouse)
+                BX      no. of times specified button released since last call
+                CX      column at time specified button was last released
+                DX      row at time specified button was last released
+
+        07h     Define Horizontal Curos Range
+        entry   AH      0007h
+                CX      minimum column
+                DX      maximum column
+        return  unknown
+
+        08h     Define Vertical Cursor Range
+        entry   AH      08h
+                CX      minimum row
+                DX      maximum row
+                return  unknown
+
+        09h     Define Graphics Cursor
+        entry   AH      09h
+                BX      column of cursor hot spot in bitmap (-16 to 16)
+                CX      row of cursor hot spot  (-16 to 16)
+                ES:DX   pointer to bitmap
+                        16 words screen mask
+                        16 words cursor mask
+                return  unknown
+                note    Each word defines the sixteen pixels of a row, low bit
+                        rightmost
+
+        0Ah     Define Text Cursor
+        entry   AH      0Ah
+                BX      hardware/software text cursor
+                        00h     software
+                                CX      screen mask
+                                DX      cursor mask
+                        01h     hardware
+                                CX      start scan line
+                                DX      end scan line
+        return  unknown
+        note    When the software cursor is selected, the char/attribute data
+                at the current screen position is ANDed with the screen mask
+                and the with the cursor mask
+
+        0BH     Read Motion Counters
+        entry   AH      0Bh
+        return  CX      number of mickeys mouse moved horiz. since last call
+                DX      number of mickeys mouse moved vertically
+        note 1) A mickey is the smallest increment the mouse can sense.
+                Positive values indicate up/right
+
+        0Ch     Define Interrupt Subroutine Parameters
+        entry   AH      0Ch
+                CX      call mask bit
+                        bit 0   call if mouse moves
+                        bit 1   call if left button pressed
+                        bit 2   call if left button released
+                        bit 3   call if right button pressed
+                        bit 4   call if right button released
+                        bit 5   call if middle button pressed (Mouse Systems)
+                        bit 6   call if middle button released (Mouse Systems)
+                ES:DX  address of FAR routine
+        return  unknown
+        note    when the subroutine is called, it is passed these values:
+                AH      condition mask (same bit assignments as call mask)
+                BX      button state
+                CX      cursor column
+                DX      cursor row
+                DI      horizontal mickey count
+                SI      vertical mickey count
+
+        0Dh     Light Pen Emulation On
+        entry   AH      0Dh
+        return  unknown
+
+        0Eh     Light Pen Emulation Off
+        entry   AH      0Eh
+        return  unknown
+
+        0Fh     Define Mickey/Pixel Ratio
+        entry   AH      0Fh
+                CX      number of mickeys per 8 pixels horizontally
+                DX      number of mickeys per 8 pixels vertically
+        return  unknown
+
+        10h     Define Screen Region for Updating
+        entry   AH      10h
+                CX,DX   X,Y coordinates of upper left corner
+                SI,DI   X,Y coordinates of lower right corner
+        return  unknown
+        note    Mouse cursor is hidden during updating, and needs to be
+                explicitly turned on again
+
+        11h     not documented by Microsoft
+
+        12h     Set Large Graphics Cursor Block
+                AH      12h
+                BH      cursor width in words
+                CH      rows in cursor
+                BL      horizontal hot spot (-16 to 16)
+                CL      vertical hot spot (-16 to 16)
+                ES:DX   pointer to bit map of screen and cursor maps
+        return  AH      -1 if successful
+        note    PC Mouse. Not dodcumented by Microsoft
+
+        13h     Define Double-Speed Threshold
+        entry   AH      13h
+                DX      threshold speed in mickeys/second,
+                        0 = default of 64/second
+        return  unknown
+        note    If speed exceeds threshold, the cursor's on-screen motion
+                is doubled
+
+        14h     Exchange Interrupt Subroutines
+        entry   AH      14h
+        return  unknown
+
+        15h     Return Drive Storage Requirements
+        entry   AH      15h
+        return  BX      size of buffer needed to store driver state
+
+        16h     Save Driver State
+        entry   AH      16h
+                ES:DX   pointer to buffer
+        return  unknown
+
+        17h     Restore Driver State
+        entry   AH      17h
+                ES:DX   pointer to buffer containing saved state
+        return  unknown
+
+        18h     not documented by Microsoft
+
+        19h     not documented by Microsoft
+
+        1Ah     not documented by Microsoft
+
+        1Bh     not documented by Microsoft
+
+        1Ch     not documented by Microsoft
+
+        1Dh     Define Display Page Number
+        entry   AH      1Dh
+
+        1Eh     Return Display Page Number
+        entry   AH      1Eh
+        return  unknown
+
+        42h     PCMouse - Get MSmouse Storage Requirements
+                AH      42h
+                return  AX      0FFFFh successful
+                BX      buffer size in bytes for functions 50h and 52h
+                        00h     MSmouse not installed
+                        42h     functions 42h, 50h, and 52h not supported
+
+        52h     PCMouse - Save MSmouse State
+        entry   AH      50h
+                BX      buffer size
+                ES:DX   pointer to buffer
+                return  AX      0FFFFh if successful
+
+        52h     PCMouse - restore MSmouse state
+        entry   AH      52h
+                BX      buffer size
+                ES:DX   pointer to buffer
+                return  AX      0FFFFh if successful
+
+
+Int 33: In addition, the following functions are appended to BIOS int 10h and
+        implemented as the EGA Register Interface Library:
+
+        0F0h    read one register
+        0F1h    write one register
+        0F2h    read consecutive register range
+        0F3h    write consecutive register range
+        0F4h    read non-consecutive register set
+        0F5h    write non-consecutive register set
+        0F6h    revert to default register values
+        0F7h    define default register values
+        0FAh    get driver status
+
+
+
+Interrupt 34h   Turbo C/Microsoft languages - Floating Point emulation
+                This interrupt emulates opcode 0D8h
+
+Interrupt 35h   Turbo C/Microsoft languages - Floating Point emulation
+                This interrupt emulates opcode 0D9h
+
+Interrupt 36h   Turbo C/Microsoft languages - Floating Point emulation
+                This interrupt emulates opcode 0DAh
+
+Interrupt 37h   Turbo C/Microsoft languages - Floating Point emulation
+                This interrupt emulates opcode 0DBh
+
+Interrupt 38h   Turbo C/Microsoft languages - Floating Point emulation
+                This interrupt emulates opcode 0DCh
+
+Interrupt 39h   Turbo C/Microsoft languages - Floating Point emulation
+                This interrupt emulates opcode 0DDh
+
+Interrupt 3Ah   Turbo C/Microsoft languages - Floating Point emulation
+                This interrupt emulates opcode 0DEh
+
+Interrupt 3Bh   Turbo C/Microsoft languages - Floating Point emulation
+                This interrupt emulates opcode 0DFh
+
+Interrupt 3Ch   Turbo C/Microsoft languages - Floating Point emulation
+                This int emulates instructions with an ES segment override
+
+Interrupt 3Dh   Turbo C/Microsoft languages - Floating Point emulation
+                This interrupt emulates a standalone FWAIT instruction
+
+Interrupt 3Eh   Turbo C/Microsoft languages - Floating Point emulation
+
+Interrupt 3Fh   Overlay manager interrupt (Microsoft LINK.EXE)
+
+Interrupt 40h   Hard Disk BIOS
+                Pointer to disk BIOS entry when a hard disk controller is
+                installed. The BIOS routines use int 30h to revector the
+                diskette handler (original int 13h) here so int 40 may be used
+                for hard disk control
+
+Interrupt 41h   Hard Disk Parameters  (XT,AT,XT2,XT286,PS except ESDI disks)
+                Pointer to first Hard Disk Parameter Block, normally located
+                in the controller card's ROM. This table may be copied to RAM
+                and changed, and this pointer revectored to the new table.
+note 1) format of parameter table is:
+        dw      cylinders
+        db      heads
+        dw      starting reduced write current cylinder (XT only, 0 for others)
+        db      maximum ECC burst length
+        db      control byte
+                  bits 0-2 drive option (XT only, 0 for others)
+                  bit 3    set if more than 8 heads
+                  bit 4    always 0
+                  bit 5    set if manufacturer's defect map on max cylinder+1
+                  bit 6    disable ECC retries
+                  bit 7    disable access retries
+        db      standard timeout (XT only, 0 for others)
+        db      formatting timeout (XT only, 0 for others)
+        db      timeout for checking drive (XT only, 0 for others)
+        dw      landing zone    (AT, PS/2)
+        db      sectors/track   (AT, PS/2)
+        db      0
+     2) normally vectored to ROM table when system is initialized.
+
+
+Interrupt 42h   Pointer to screen BIOS entry  (EGA, VGA, PS/2)
+                Relocated (by EGA, etc.) video handler (original int 10h).
+                Revectors int 10 calls to EGA BIOS.
+
+
+Interrupt 43h   Pointer to EGA initialization parameter table. The POST
+                initializes this vector pointing to the default table located
+                in the EGA ROM BIOS. (PC-2 and up). Not initialized if EGA not
+                present.
+
+
+Interrupt 44h   Pointer to EGA graphics character table (also PCjr). This
+(0:0110h)       table contains the dot patterns for the first 128 characters
+                in video modes 4,5, and 6, and all 256 characters in all
+                additional graphics modes. Not initialized if EGA not present.
+             2) EGA/VGA/CONV/PS - EGA/PCjr fonts, characters 00h to 7Fh
+             3) Novell NetWare - High-Level Language API
+
+
+Interrupt 45h   Reserved by IBM  (not initialized)
+
+Interrupt 46h   Pointer to second hard disk, parameter block (AT, XT/286, PS/2)
+                (see int 41h) (except ESDI hard disks) (not initialized unless
+                specific user software calls for it)
+
+Interrupt 47h   Reserved by IBM  (not initialized)
+
+Interrupt 48h   Cordless Keyboard Translation (PCjr, XT [never delivered])
+(0:0120h)       This vector points to code to translate the cordless keyboard
+                scancodes into normal 83-key values. The translated scancodes
+                are then passed to int 9. (not initialized on PC or AT)
+
+Interrupt 49h   Non-keyboard Scan Code Translation Table Address (PCjr)
+(0:0124h)       This interrupt has the address of a table used to translate
+                non-keyboard scancodes (greater than 85 excepting 255). This
+                interrupt can be revectored by a user application. IBM
+                recommends that the default table be stored at the beginning
+                of an application that required revectoring this interrupt,
+                and that the default table be restored when the application
+                terminates. (not initialized on PC or AT)
+
+Interrupt 4Ah   Real-Time Clock Alarm (Convertible, PS/2)
+                (not initialized on PC or AT)
+                Invoked by BIOS when real-time clock alarm occurs
+
+Interrupt 4Bh   Reserved by IBM  (not initialized)
+
+Interrupt 4Ch   Reserved by IBM  (not initialized)
+
+Interrupt 4Dh   Reserved by IBM  (not initialized)
+
+Interrupt 4Eh   Reserved by IBM  (not initialized)
+
+Interrupt 4Fh   Reserved by IBM  (not initialized)
+
+Interrupt 50-57 IRQ0-IRQ7 relocated by DesQview
+                (normally not initialized)
+
+Interrupt 58h   Reserved by IBM  (not initialized)
+
+Interrupt 59h   Reserved by IBM  (not initialized)
+                GSS Computer Graphics Interface (GSS*CGI)
+                DS:DX   Pointer to block of 5 array pointers
+                return  CF      0
+                        AX      return code
+                        CF      1
+                        AX      error code
+                note 1) Int 59 is the means by which GSS*CGI language bindings
+                        communicate with GSS*CGI device drivers and the GSS*CGI
+                        device driver controller.
+                     2) Also used by the IBM Graphic Development Toolkit
+
+Interrupt 5Ah   Reserved by IBM  (not initialized)
+
+Interrupt 5Bh   Reserved by IBM  (not initialized)
+
+Interrupt 5Ah   Cluster Adapter BIOS entry address
+                (normally not initialized)
+
+Interrupt 5Bh   Reserved by IBM  (not initialized) (cluster adapter?)
+
+Interrupt 5Ch   NETBIOS interface entry port
+                ES:BX   pointer to network control block
+note 1) When the NETBIOS is installed, interrupts 13 and 17 are interrupted by
+        the NETBIOS; interrupt 18 is moved to int 86 and one of int 2 or 3 is
+        used by NETBIOS. Also, NETBIOS extends the int 15 function 90 and 91h
+        functions (scheduler functions)
+     2) Normally not initialized.
+     3) TOPS network card uses DMA 1, 3 or none.
+
+Interrupt 5Dh   Reserved by IBM  (not initialized)
+
+Interrupt 5Eh   Reserved by IBM  (not initialized)
+
+Interrupt 5Fh   Reserved by IBM  (not initialized)
+
+Interrupt 60h-67h  User Program Interrupts (availible for general use)
+
+Interrupt 67h   Used by Lotus-Intel-Microsoft Expanded Memory Specification
+        user    and Ashton-Tate/Quadram/AST Enhanced Expanded Memory
+                specification (See Chapter 10)
+
+Interrupt 68h   Not Used  (not initialized)
+
+Interrupt 69h   Not Used  (not initialized)
+
+Interrupt 6Ah   Not Used  (not initialized)
+
+Interrupt 6Bh   Not Used  (not initialized)
+
+Interrupt 6Ch   System Resume Vector (Convertible) (not initialized on PC)
+
+Interrupt 6Dh   Not Used  (not initialized)
+
+Interrupt 6Fh   Not Used  (not initialized)
+
+Interrupt 70h   IRQ 8, Real Time Clock Interrupt  (AT, XT/286, PS/2)
+
+Interrupt 71h   IRQ 9, Redirected to IRQ 8 (AT, XT/286, PS/2)
+                LAN Adapter 1 (rerouted to int 0Ah by BIOS)
+
+Interrupt 72h   IRQ 10  (AT, XT/286, PS/2)  Reserved
+
+Interrupt 73h   IRQ 11  (AT, XT/286, PS/2)  Reserved
+
+Interrupt 74h   IRQ 12  Mouse Interrupt (AT, XT/286, PS/2)
+
+Interrupt 75h   IRQ 13, Coprocessor Error, BIOS Redirect to int 2 (NMI) (AT)
+
+Interrupt 76h   IRQ 14, Hard Disk Controller (AT, XT/286, PS/2)
+
+Interrupt 77h   IRQ 15 (AT, XT/286, PS/2)  Reserved
+
+Interrupt 78h   Not Used
+
+Interrupt 79h   Not Used
+
+Interrupt 7Ah   Novell NetWare - LOW-LEVEL API
+
+Interrupt 7Bh-7Fh  Not Used
+
+Interrupt 80h-85h  Reserved by BASIC
+
+note    interrupts 80h through ECh are apparently unused and not initialized.
+
+Interrupt 86h   Relocated by NETBIOS int 18
+
+Interrupt 86h-0F0h  Used by BASIC when BASIC interpreter is running
+
+Intrerrupt 0E0h CP/M-86 function calls
+
+Interrupt 0E4h  Logitech Modula-2 v2.0   MONITOR
+entry   AX      05h     monitor entry
+                06h     monitor exit
+        BX      priority
+
+Interrupts 0F1h-0FFh  (absolute addresses 3C4-3FF)
+                      Location of Interprocess Communications Area
+
+Interrupt 0F8h  Set Shell Interrupt (OEM)
+                Set OEM handler for int 21h calls from 0F9h through 0FFh
+entry   AH      0F8h
+        DS:DX   pointer to handler for Functions 0F9h thru 0FFh
+note 1) To reset these calls, pass DS and DX with 0FFFFh. DOS is set up to
+        allow ONE handler for all 7 of these calls. Any call to these handlers
+        will result in the carry bit being set and AX will contain 1 if they are
+        not initialized. The handling routine is passed all registers just as
+        the user set them. The OEM handler routine should be exited through an
+        IRET.
+     2) 10 ms interval timer (Tandy?)
+
+Interrupt 0F9h  First of 8 SHELL service codes, reserved for OEM shell (WINDOW);
+                use like HP Vectra user interface?
+
+Interrupt 0FAh  USART ready (RS-232C)
+
+Interrupt 0FBh  USART RS ready (keyboard)
+
+Interrupt 0FCh  Unknown
+
+Interrupt 0FDh  reserved for user interrupt
+
+Interrupt 0FEh  AT/XT286/PS50+ - destroyed by return from protected mode
+
+Interrupt 0FFh  AT/XT286/PS50+ - destroyed by return from protected mode
+
