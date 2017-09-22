@@ -16,7 +16,7 @@ machines:
         name: None
 ---
 
-One of books I used to have a copy of (and perhaps still do, in the bowels of my storage unit) was "Puzzled Programmers"
+A book I used to have a copy of (and perhaps still do, in the bowels of my storage unit) was "Puzzled Programmers"
 by Michael Wiesenberg.  It was published by Microsoft Press in 1987, and I recently rediscovered an online copy in the
 [Internet Archive's](https://archive.org) [Open Library](https://openlibrary.org):
 
@@ -46,13 +46,13 @@ of the programs presented in the solution to Puzzle 5.
 	-------------------------------------------------------------------------------
 	*Apple Pascal
 
-This almost seemed like an invitation to try my hand at Puzzle #5, and to see how a PCjs "machine" fared.
+This almost seemed like an invitation to try my hand at Puzzle #5 and see how a PCjs "machine" compared.
 
 ### A Pleasant Fourthsum
 
 I skipped ahead to page 27, "Puzzle 5: A Pleasant Fourthsum", and started reading.  I have to admit that the story
 completely failed to interest me.  There were lots of irrelevant details about a delicious breakfast that this imaginary
-bunch of successful twenty-somethings were enjoying, when suddenly one of them says:
+bunch of successful twenty-somethings was enjoying, when suddenly one of them says:
 
 	"Before we get into the future of languages at I-Q, I've got a great computer puzzle for everyone."
 
@@ -143,10 +143,10 @@ main()
 {
   int pwr[10], /* the fourth power of each digit */
       h,    /* the digit in the thousands position */
-      h000,  /* h * 1000, that is, the value of the number
+      h000, /* h * 1000, that is, the value of the number
     in the thousands position */
       i,    /* the digit in the hundreds position */
-      i00,   /* i * 100, that is, the value of the number
+      i00,  /* i * 100, that is, the value of the number
     in the hundreds position */
       j,    /* the digit in the tens position */
       j0,   /* i * 10, that is, the value of the number
@@ -166,9 +166,8 @@ main()
           /* tens digit */
           partsum = h000 + i00 + j0;
           part4ths = pwr[h] + pwr[i] + pwr[j];
-          for (   k = 0; k <= 9; k++) {       /* ones digit */
-            sum = partsum + k; /* this produces the four-digit
-              number */
+          for (   k = 0; k <= 9; k++) { /* ones digit */
+            sum = partsum + k;          /* this produces the four-digit number */
             if (part4ths + pwr[k] == sum) {
               if (!l) printf("%d = %d^4 + %d^4 + %d^4 + %d^4\n",
                  sum, h, i, j, k);
