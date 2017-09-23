@@ -1,11 +1,11 @@
 ---
 layout: page
 title: Borland Turbo Pascal 3.00B
-permalink: /disks/pcx86/tools/borland/pascal/3.00b/
+permalink: /disks/pcx86/tools/borland/tpascal/3.00b/
 ---
 
 Borland Turbo Pascal 3.00B
----
+--------------------------
 
 ### Directory of Borland Turbo Pascal 3.00B
 
