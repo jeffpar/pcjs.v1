@@ -51,13 +51,13 @@ var defines  = require("./modules/shared/lib/defines");
 var proclib  = require("./modules/shared/lib/proclib");
 var args     = proclib.getArgs();
 
-var fCache   = (args.argv['cache']   === undefined? true  : args.argv['cache']);
-var fConsole = (args.argv['console'] === undefined? false : args.argv['console']);
-var fDebug   = (args.argv['debug']   === undefined? false : args.argv['debug']);
-var fLogging = (args.argv['logging'] === undefined? false : args.argv['logging']);
-var fPrivate = (args.argv['private'] === undefined? false : args.argv['private']);
-var fRebuild = (args.argv['rebuild'] === undefined? false : args.argv['rebuild']);
-var fSockets = (args.argv['sockets'] === undefined? false : args.argv['sockets']);
+var fCache   = args.argv['cache'];
+var fConsole = args.argv['console'];
+var fDebug   = args.argv['debug'];
+var fLogging = args.argv['logging'];
+var fPrivate = args.argv['private'];
+var fRebuild = args.argv['rebuild'];
+var fSockets = args.argv['sockets'];
 
 var HTMLOut  = require("./modules/htmlout");
 

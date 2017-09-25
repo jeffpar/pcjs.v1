@@ -62,8 +62,12 @@ var pkg = require("../../../package.json");
 /*
  * fCache controls "index.html" caching; it is true by default and can be overridden using the setOptions()
  * 'cache' property.
+ *
+ * NOTE: Even though we don't explicitly set fCache to true, that's the default, because we disable caching
+ * only when fCache is explicitly false; this is so we can detect when it has been explicitly set to true,
+ * ensuring that we cache files even when other settings (like fServerDebug) might suggest we shouldn't cache.
  */
-var fCache = true;
+var fCache;
 
 /*
  * fConsole controls console messages; it is false by default and can be overridden using the setOptions()
@@ -326,7 +330,7 @@ function HTMLOut(sPath, sFile, fRebuild, req, done)
      * Check the global cache setting, as well as the presence of ANY special commands
      * that we would never want to cache.
      */
-    if (!fCache || fServerDebug || net.hasParm(net.GORT_COMMAND, null, req) || net.hasParm(net.REVEAL_COMMAND, null, req)) {
+    if (fCache === false || fServerDebug && !fCache || net.hasParm(net.GORT_COMMAND, null, req) || net.hasParm(net.REVEAL_COMMAND, null, req)) {
         this.loadFile(this.sTemplateFile, true);
         return;
     }
