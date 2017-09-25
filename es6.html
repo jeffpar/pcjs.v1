@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html style="background-color: #1d1d1d">
+	<head>
+		<title>pcjs.org | PCjs Machines</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<meta charset="utf-8">
+		<meta name="viewport" content="initial-scale=1">
+		<link rel="apple-touch-icon" sizes="57x57" href="/versions/icons/current/pc-icon-57.png">
+		<link rel="apple-touch-icon" sizes="72x72" href="/versions/icons/current/pc-icon-72.png">
+		<link rel="apple-touch-icon" sizes="76x76" href="/versions/icons/current/pc-icon-76.png">
+		<link rel="apple-touch-icon" sizes="114x114" href="/versions/icons/current/pc-icon-114.png">
+		<link rel="apple-touch-icon" sizes="120x120" href="/versions/icons/current/pc-icon-120.png">
+		<link rel="apple-touch-icon" sizes="144x144" href="/versions/icons/current/pc-icon-144.png">
+		<link rel="apple-touch-icon" sizes="152x152" href="/versions/icons/current/pc-icon-152.png">
+		<link rel="apple-touch-icon" sizes="180x180" href="/versions/icons/current/pc-icon-180.png">
+		<link rel="apple-touch-icon" sizes="192x192" href="/versions/icons/current/pc-icon-192.png">
+		<link rel="apple-touch-icon" href="/versions/icons/current/apple-touch-icon.png">
+		<link rel="icon" type="image/png" sizes="192x192" href="/versions/icons/current/pc-icon-192.png">
+		<link rel="shortcut icon" type="image/x-icon" href="/versions/icons/current/favicon.ico">
+		<link rel="stylesheet" type="text/css" href="/modules/shared/templates/common.css">
+		<link rel="stylesheet" type="text/css" href="/modules/shared/templates/components.css">
+		<link rel="stylesheet" type="text/css" href="/modules/c1pjs/templates/components.css">
+		
+	</head>
+	<body>
+		<!-- index.html generated on Mon Sep 25 2017 15:28:59 GMT-0700 (PDT) -->
+		<div class="common">
+			<div class="common-top">
+				<div class="common-top-left">
+					<ul>
+						<li><a href="/">PCjs</a></li>
+						<li><a href="/blog/">Blog</a></li>
+						<li><a href="/apps/">Apps</a></li>
+						<li><a href="/devices/">Devices</a></li>
+						<li><a href="/disks/">Disks</a></li>
+						<li><a href="/pubs/docs/">Docs</a></li>
+						<li><a href="/pubs/docs/about/">About</a></li>
+					</ul>
+				</div>
+				<div class="common-top-right">
+					<p>Powered by <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript">JavaScript</a>, <a href="http://vanilla-js.com/" target="_blank">Vanilla JS</a>, and <a href="http://github.com/jeffpar/pcjs" target="_blank">GitHub</a></p>
+				</div>
+			</div>
+			<div class="common-middle">
+				<h4>Directory of C:\<a href="/">PCJS.ORG</a></h4>
+				<div class="common-sidebar">
+					<ul class="common-list">
+						<li><a href="/Gruntfile.js">\GRUNTFILE.JS</a></li>
+						<li><a href="/LICENSE">\LICENSE</a></li>
+						<li><a href="/README.md">\README.MD</a></li>
+						<li><a href="/_data/">\_DATA</a></li>
+						<li><a href="/_posts/">\_POSTS</a></li>
+						<li><a href="/api/">\API</a></li>
+						<li><a href="/apps/">\APPS</a></li>
+						<li><a href="/bin/">\BIN</a></li>
+						<li><a href="/blog/">\BLOG</a></li>
+						<li><a href="/devices/">\DEVICES</a></li>
+						<li><a href="/disks/">\DISKS</a></li>
+						<li><a href="/docs/">\DOCS</a></li>
+						<li><a href="/gulpfile.js">\GULPFILE.JS</a></li>
+						<li><a href="/logs/">\LOGS</a></li>
+						<li><a href="/modules/">\MODULES</a></li>
+						<li><a href="/node_modules/">\NODE_MODULES</a></li>
+						<li><a href="/notes.md">\NOTES.MD</a></li>
+						<li><a href="/package.json">\PACKAGE.JSON</a></li>
+						<li><a href="/projects/">\PROJECTS</a></li>
+						<li><a href="/pubs/">\PUBS</a></li>
+						<li><a href="/server.js">\SERVER.JS</a></li>
+						<li><a href="/src/">\SRC</a></li>
+						<li><a href="/tests/">\TESTS</a></li>
+						<li><a href="/tmp/">\TMP</a></li>
+						<li><a href="/versions/">\VERSIONS</a></li>
+						<li><a href="/videos/">\VIDEOS</a></li>
+						<li><a href="/web/">\WEB</a></li>
+					</ul>
+					
+				</div>
+				<div class="common-main">
+					<h1 id="pcjs-machines">PCjs Machines</h1>
+					<p>Welcome to PCjs, home of <a href="/docs/pcx86/">PCx86</a>, the original IBM PC simulation that runs in your web browser.  It is
+one of several JavaScript Machines in the <a href="https://github.com/jeffpar/pcjs">PCjs Project</a>, an open-source project that
+includes:</p>
+					<ul class="md-list md-list-none">
+					    <li><a href="/docs/pcx86/">PCx86</a>, an x86-based emulator of the <a href="/devices/pcx86/machine/">IBM PC and PC-compatibles</a></li>
+					    <li><a href="/modules/pc8080/">PC8080</a>, an 8080 machine emulator (see <a href="/devices/pc8080/machine/invaders/">Space Invaders</a> and the <a href="/devices/pc8080/machine/vt100/">VT100 Terminal</a>)</li>
+					    <li><a href="/docs/c1pjs/">C1Pjs</a>, an emulation of the 6502-based <a href="/devices/c1p/">Ohio Scientific Challenger 1P</a></li>
+					    <li><a href="/docs/pdpjs/">PDPjs</a>, a set of machine emulation modules supporting the DEC <a href="/devices/pdp10/machine/">PDP-10</a> and <a href="/devices/pdp11/machine/">PDP-11</a></li>
+					</ul>
+					<p>All PCjs machine simulations are written entirely in <a href="/modules/">JavaScript</a>.  No Flash, Java or other plugins are
+required.  Supported browsers include modern versions of Chrome, Safari, Firefox, Internet Explorer (v9.0 and up), Edge,
+and assorted mobile browsers.</p>
+					<div id="ibm5150" class="machine-placeholder"><p>"IBM PC (Model 5150) with Monochrome Display"</p><p class="machine-warning">Waiting for PCx86 to load</p></div>
+
+					<p>The <a href="/devices/pcx86/machine/5150/mda/64kb/">JavaScript Machine</a> above uses <a href="/docs/pcx86/">PCx86</a> configured with an Intel
+8088 running at 4.77Mhz, with 64Kb of RAM and an IBM Monochrome Display Adapter.  For more control, there are also
+<a href="/devices/pcx86/machine/5150/mda/64kb/debugger/">Control Panel</a> and <a href="/devices/pcx86/machine/5150/mda/64kb/softkbd/">Soft Keyboard</a>
+configurations, featuring the built-in PCx86 Debugger.  For even greater control, build your own PC. The
+<a href="/docs/pcx86/">PCx86 Documentation</a> will help you get started.</p>
+					<p>PCx86 has steadily evolved to support more classic x86-based machines, including the IBM PC XT, the 80286-based IBM PC AT,
+and the 80386-based COMPAQ DeskPro 386.  PCx86 fully supports the original machine ROMs, video cards, etc, and all
+machines run at their original speeds.</p>
+					<p>The goals of the <a href="/docs/about/">PCjs Project</a> are to create fast, full-featured simulations of classic
+computer hardware, help people understand how these early machines worked, make it easy to experiment with different
+machine configurations, and provide a platform for running and analyzing old computer software.</p>
+					<h2 id="demos">Demos</h2>
+					<p>Some pre-configured machines are shown below, ready to run BASIC, DOS, Windows, OS/2, and other assorted software.</p>
+					<div class="common-image-gallery">
+					    <div id="ibm-pc-running-visicalc" class="common-image-frame">
+					        <div class="common-image-link">
+					            <a href="/apps/pcx86/1981/visicalc/"><img src="/apps/pcx86/1981/visicalc/thumbnail.jpg" alt="IBM PC running VisiCalc" width="200" height="120"/></a>					        </div>
+					        <span class="common-image-label">IBM PC running VisiCalc</span>
+					    </div>
+					    <div id="ibm-pc-running-donkeybas" class="common-image-frame">
+					        <div class="common-image-link">
+					            <a href="/apps/pcx86/1981/donkey/"><img src="/apps/pcx86/1981/donkey/thumbnail.jpg" alt="IBM PC running DONKEY.BAS" width="200" height="120"/></a>					        </div>
+					        <span class="common-image-label">IBM PC running DONKEY.BAS</span>
+					    </div>
+					    <div id="ibm-pc-xt-wega-windows-10" class="common-image-frame">
+					        <div class="common-image-link">
+					            <a href="/disks/pcx86/windows/1.00/"><img src="/disks/pcx86/windows/1.00/thumbnail.jpg" alt="IBM PC XT w/EGA, Windows 1.0" width="200" height="120"/></a>					        </div>
+					        <span class="common-image-label">IBM PC XT w/EGA, Windows 1.0</span>
+					    </div>
+					    <div id="ibm-pc-xt-wcga-windows-101" class="common-image-frame">
+					        <div class="common-image-link">
+					            <a href="/disks/pcx86/windows/1.01/cga/"><img src="/disks/pcx86/windows/1.01/cga/thumbnail.jpg" alt="IBM PC XT w/CGA, Windows 1.01" width="200" height="120"/></a>					        </div>
+					        <span class="common-image-label">IBM PC XT w/CGA, Windows 1.01</span>
+					    </div>
+					    <div id="ibm-pc-xt-wega-windows-101" class="common-image-frame">
+					        <div class="common-image-link">
+					            <a href="/disks/pcx86/windows/1.01/"><img src="/disks/pcx86/windows/1.01/thumbnail.jpg" alt="IBM PC XT w/EGA, Windows 1.01" width="200" height="120"/></a>					        </div>
+					        <span class="common-image-label">IBM PC XT w/EGA, Windows 1.01</span>
+					    </div>
+					    <div id="ibm-pc-at-wega-os2-10" class="common-image-frame">
+					        <div class="common-image-link">
+					            <a href="/disks/pcx86/os2/ibm/1.0/"><img src="/disks/pcx86/os2/ibm/1.0/thumbnail.jpg" alt="IBM PC AT w/EGA, OS/2 1.0" width="200" height="120"/></a>					        </div>
+					        <span class="common-image-label">IBM PC AT w/EGA, OS/2 1.0</span>
+					    </div>
+					    <div id="compaq-deskpro-386-windows386" class="common-image-frame">
+					        <div class="common-image-link">
+					            <a href="/disks/pcx86/windows/2.0x/"><img src="/disks/pcx86/windows/2.0x/thumbnail.jpg" alt="COMPAQ DeskPro 386, Windows/386" width="200" height="120"/></a>					        </div>
+					        <span class="common-image-label">COMPAQ DeskPro 386, Windows/386</span>
+					    </div>
+					    <div id="ibm-pc-at-wega-windows-30" class="common-image-frame">
+					        <div class="common-image-link">
+					            <a href="/disks/pcx86/windows/3.00/"><img src="/disks/pcx86/windows/3.00/thumbnail.jpg" alt="IBM PC AT w/EGA, Windows 3.0" width="200" height="120"/></a>					        </div>
+					        <span class="common-image-label">IBM PC AT w/EGA, Windows 3.0</span>
+					    </div>
+					    <div id="ibm-pc-at-wvga-windows-31" class="common-image-frame">
+					        <div class="common-image-link">
+					            <a href="/disks/pcx86/windows/3.10/"><img src="/disks/pcx86/windows/3.10/thumbnail.jpg" alt="IBM PC AT w/VGA, Windows 3.1" width="200" height="120"/></a>					        </div>
+					        <span class="common-image-label">IBM PC AT w/VGA, Windows 3.1</span>
+					    </div>
+					    <div id="compaq-deskpro-386-windows-95" class="common-image-frame">
+					        <div class="common-image-link">
+					            <a href="/disks/pcx86/windows/win95/4.00.950/"><img src="/disks/pcx86/windows/win95/4.00.950/thumbnail.jpg" alt="COMPAQ DeskPro 386, Windows 95" width="200" height="120"/></a>					        </div>
+					        <span class="common-image-label">COMPAQ DeskPro 386, Windows 95</span>
+					    </div>
+					    <div id="ibm-pc-wmda-cpm-86" class="common-image-frame">
+					        <div class="common-image-link">
+					            <a href="/disks/pcx86/cpm/1.1b/"><img src="/disks/pcx86/cpm/1.1b/thumbnail.jpg" alt="IBM PC w/MDA, CP/M-86" width="200" height="120"/></a>					        </div>
+					        <span class="common-image-label">IBM PC w/MDA, CP/M-86</span>
+					    </div>
+					    <div id="microsoft-adventure-1981" class="common-image-frame">
+					        <div class="common-image-link">
+					            <a href="/disks/pcx86/games/microsoft/adventure/"><img src="/disks/pcx86/games/microsoft/adventure/thumbnail.jpg" alt="Microsoft Adventure (1981)" width="200" height="120"/></a>					        </div>
+					        <span class="common-image-label">Microsoft Adventure (1981)</span>
+					    </div>
+					    <div id="executive-suite-1982" class="common-image-frame">
+					        <div class="common-image-link">
+					            <a href="/apps/pcx86/1982/esuite/"><img src="/apps/pcx86/1982/esuite/thumbnail.jpg" alt="Executive Suite (1982)" width="200" height="120"/></a>					        </div>
+					        <span class="common-image-label">Executive Suite (1982)</span>
+					    </div>
+					    <div id="zork-i-1982" class="common-image-frame">
+					        <div class="common-image-link">
+					            <a href="/disks/pcx86/games/infocom/zork1/"><img src="/disks/pcx86/games/infocom/zork1/thumbnail.jpg" alt="Zork I (1982)" width="200" height="120"/></a>					        </div>
+					        <span class="common-image-label">Zork I (1982)</span>
+					    </div>
+					    <div id="adventures-in-math-1983" class="common-image-frame">
+					        <div class="common-image-link">
+					            <a href="/apps/pcx86/1983/adventmath/"><img src="/apps/pcx86/1983/adventmath/thumbnail.jpg" alt="Adventures in Math (1983)" width="200" height="120"/></a>					        </div>
+					        <span class="common-image-label">Adventures in Math (1983)</span>
+					    </div>
+					    <div id="rogue-1985" class="common-image-frame">
+					        <div class="common-image-link">
+					            <a href="/apps/pcx86/1985/rogue/"><img src="/apps/pcx86/1985/rogue/thumbnail.jpg" alt="Rogue (1985)" width="200" height="120"/></a>					        </div>
+					        <span class="common-image-label">Rogue (1985)</span>
+					    </div>
+					</div>
+					<p>There are many more <a href="/devices/pcx86/machine/#ready-to-run-app-demos">PCx86 Demos</a>, including an
+<a href="/devices/pcx86/machine/5150/dual/64kb/">IBM PC with Dual Displays</a> demonstrating early multi-monitor support,
+and multiple IBM PC XT machines running side-by-side with <a href="/devices/pcx86/machine/5160/cga/256kb/array/">CGA Displays</a>
+and <a href="/devices/pcx86/machine/5160/ega/640kb/array/">EGA Displays</a>.</p>
+					<h2 id="c1pjs">C1Pjs</h2>
+					<p>Below is the <a href="/docs/c1pjs/">OSI Challenger C1P</a>, another simulation in the PCjs Project.
+It simulates Ohio Scientific's 6502-based microcomputer, released in 1978.  More details about this simulation
+and the original machine are available in the <a href="/docs/c1pjs/">C1Pjs Documentation</a>.</p>
+					<div id="demoC1P" class="machine-placeholder"><p>Embedded PC</p><p class="machine-warning">Waiting for C1P to load</p></div>
+
+					<hr/>
+					<h2 id="developer-notes">Developer Notes</h2>
+					<p>The <a href="https://github.com/jeffpar/pcjs">PCjs repository</a> on GitHub contains everything needed to run PCjs
+computer simulations.  All the PCjs emulators run in any modern web browser, with or without a web server,
+and examples are provided for both <a href="/apps/pcx86/examples/">local</a> and <a href="http://www.pcjs.org/">remote</a> operation.</p>
+					<p>The project includes:</p>
+					<ul class="md-list md-list-compact">
+					    <li>A simple Node-based web server (<a href="server.js">server.js</a>)</li>
+					    <li>Custom Node modules used by the web server (<a href="modules/htmlout/">HTMLOut</a>, <a href="modules/markout/">MarkOut</a>, <a href="modules/diskdump/">DiskDump</a>, <a href="modules/filedump/">FileDump</a>)</li>
+					    <li>A variety of IBM PC and C1P configuration and resource files (see <a href="apps/">/apps</a>, <a href="devices/">/devices</a> and <a href="disks/">/disks</a>)</li>
+					    <li>The <a href="modules/pcx86/">PCx86</a>, <a href="modules/pc8080/">PC8080</a>, and <a href="modules/c1pjs/">C1Pjs</a> client applications, along with "compiled" <a href="/versions/">versions</a></li>
+					    <li>A smattering of <a href="docs/pcx86/">PCx86</a> and <a href="docs/c1pjs/">C1Pjs</a> documentation, along with <a href="%5Fposts/">blog posts</a>, related <a href="pubs/">publications</a> and more</li>
+					</ul>
+					<p>The bundled web server is not strictly required.  Any web server (Node, Apache, Nginx, etc) that can serve the necessary
+JavaScript files to your browser will work.  However, instructions for doing that are beyond the scope of this introduction.</p>
+					<p>In fact, you can run PCjs simulations without a web server at all, using the "file:" protocol instead of "http:".
+However, most of the machine configurations require additional resource files (ROMs, disk images, etc), which are
+included in the project, but unless all the resource files are moved into a single directory (as they are in these
+<a href="/apps/pcx86/examples/">Examples</a>), your browser will probably be unable to load all of them, due to security restrictions.
+Using the bundled web server is the preferred solution.</p>
+					<p>The project includes a large selection of disk images, and a powerful <a href="modules/diskdump/">DiskDump</a> utility that
+runs on both the client and server, featuring a command-line interface (CLI) and web server API.  Originally created to dump
+existing disk images as JSON, <strong>DiskDump</strong> has evolved into a full-featured disk image generator, capable of creating PC-compatible
+diskette <em>and</em> hard disk images from either lists <em>or</em> directories of files (including all subdirectories).</p>
+					<h3 id="installing-pcjs-with-node">Installing PCjs with Node</h3>
+					<p>The following instructions were originally written for OS X.  However, users of other operating systems should have
+no problem following along.  There are some prerequisites:</p>
+					<ul class="md-list md-list-compact">
+					    <li>Node with NPM (download an installation package for your OS from <a href="http://nodejs.org/download/">nodejs.org</a>)</li>
+					    <li>Git (included with OS X Developer Tools; separate download required for <a href="http://git-scm.com/download/win">Windows</a>)</li>
+					</ul>
+					<p>Some additional (optional) tools are also recommended:</p>
+					<ul class="md-list md-list-compact">
+					    <li>Python (included with OS X; separate download required for <a href="https://www.python.org/downloads/windows/">Windows</a>)</li>
+					    <li>GitHub (useful for getting Git set up on <a href="https://windows.github.com/">Windows</a>; also available for
+<a href="https://mac.github.com/">OS X</a>) </li>
+					</ul>
+					<p>Once you have the prerequisites, open a command-line window, <code>cd</code> to the directory where you'd like to install PCjs,
+and type the following commands:</p>
+					<pre><code>git clone git@github.com:jeffpar/pcjs.git pcjs
+cd pcjs
+npm install --production
+node server.js</code></pre>
+					<p>Now open a web browser and go to <code>http://localhost:8088/</code>.  You're done!</p>
+					<p>The current version of Node (<a href="http://nodejs.org/dist/v0.10.32/node-v0.10.32.pkg">0.10.32</a> at the time of this
+writing) should work fine, but version <a href="http://nodejs.org/dist/v0.10.26/node-v0.10.26.pkg">0.10.26</a>
+is what's been used to develop and test PCjs so far.</p>
+					<p>Also, <a href="server.js">server.js</a> was originally written using <a href="http://expressjs.com/">Express</a> v3.  Since then,
+Express v4 has been released, but the <code>npm install</code> command above will make sure that v3 is installed locally.</p>
+					<p>The plan is to eventually move development to a newer version of Node, and migrate the PCjs server to a newer
+version of Express; there's no desire to remain stuck in the past (well, ignoring the fact that PCjs is the
+quintessential "stuck in the past" project), but there's also no urgency to update.</p>
+					<h3 id="installing-pcjs-with-jekyll">Installing PCjs with Jekyll</h3>
+					<p>PCjs can also be used with <a href="http://jekyllrb.com">Jekyll</a> and the Ruby WEBrick web server, now that a
+<em><a href="https://github.com/jeffpar/pcjs/tree/jekyll">jekyll</a></em> branch has been created to work with
+<a href="https://pages.github.com">GitHub Pages</a>.  This is how the project is currently set up at <a href="http://www.pcjs.org/">pcjs.org</a>.</p>
+					<p>This isn't going to be a Jekyll "How To" guide, because that would unnecessarily repeat all the information available
+at <a href="https://pages.github.com">GitHub Pages</a>.  But we'll summarize the basic steps, which replace the <code>npm</code> and <code>node</code>
+steps above.</p>
+					<p>To install Jekyll for use with PCjs:</p>
+					<ol class="md-list">
+					    <li>Install Ruby (on OS X, it should already be installed)</li>
+					    <li>Install Bundler (on OS X, run <code>sudo gem install bundler</code>)</li>
+					    <li>Checkout the <em>jekyll</em> branch, since only that branch contains all the Jekyll-related files</li>
+					    <li>Create a <strong>Gemfile</strong> containing <code>gem &#039;github-pages&#039;</code> (this is already checked in)</li>
+					    <li>Run <code>bundle install</code> (GitHub Pages alternatively suggests: <code>bundle exec jekyll build --safe</code>)</li>
+					    <li>Run <code>bundle exec jekyll serve</code> to start the web server</li>
+					</ol>
+					<p>Now open a web browser and go to <code>http://localhost:4000/</code>.  You're done!</p>
+					<p>Some useful Jekyll server options include:</p>
+					<pre><code>bundle exec jekyll serve --host=0.0.0.0 --config _config.yml,_developer.yml</code></pre>
+					<p>The <em>--host</em> option makes it possible to access the web server from other devices on your local network;
+for example, you may want to run PCjs on your iPhone, iPad, or other wireless device.  And by adding <strong>_developer.yml</strong>,
+you can override the Jekyll configuration defaults in <strong>_config.yml</strong>.  Using development (non-production) settings in
+<strong>_developer.yml</strong> is analogous to running the Node web server with certain development options; see
+<a href="#debugging-pcjs">Debugging PCjs</a>.</p>
+					<p>GitHub Pages says you can run <code>jekyll serve</code> instead of <code>bundle exec jekyll serve</code>, but with the addition of
+more gems to <strong>Gemfile</strong> (eg, "jekyll-sitemap"), running <code>jekyll serve</code> may trigger dependency errors on some systems.
+<code>bundle exec jekyll serve</code> should always work.</p>
+					<p>Don't see any YML files in the root of your project?  You probably forgot to switch to the
+<em><a href="https://github.com/jeffpar/pcjs/tree/jekyll">jekyll</a></em> branch:</p>
+					<pre><code>git checkout jekyll</code></pre>
+					<p>Last but not least, run <code>bundle update</code> periodically to keep Jekyll up-to-date.</p>
+					<h3 id="building-pcjs">Building PCjs</h3>
+					<p>Unlike a typical project, where you have to <em>build</em> or <em>configure</em> or <em>make</em> something, PCjs is "ready to run".
+That's because both the compiled and uncompiled versions of PCjs emulation modules are checked into the project,
+making deployment to a web server easy.</p>
+					<p>However, in order to build and test PCjs modifications, you'll want to use <a href="http://gruntjs.com/">Grunt</a> and the
+Grunt tasks defined by <a href="Gruntfile.js">Gruntfile.js</a>.</p>
+					<p>Although Grunt was installed locally when you ran <code>npm install</code>, you'll also want to install the command-line
+interface to Grunt. You can install that locally as well, but it's recommended you install it globally with <em>-g</em>;
+OS X users may also need to preface this command with <code>sudo</code>:</p>
+					<pre><code>npm install grunt-cli -g</code></pre>
+					<p>Now you can run <code>grunt</code> anywhere within the PCjs project to build an updated version.  If no command-line arguments
+are specified, <code>grunt</code> runs the "default" task defined by the project's <a href="Gruntfile.js">Gruntfile</a>; that task runs
+Google's <a href="https://developers.google.com/closure/compiler/">Closure Compiler</a> if any of the target files (eg, pcx86.js
+or pcx86-dbg.js in the <a href="/versions/">versions</a> directory) are out-of date.</p>
+					<p>To ensure consistent compilation results, a copy of the Closure Compiler has been checked into the
+<a href="bin/">/bin</a> folder.  This version of Closure Compiler, in turn, requires Java v7 or later.  Use the following
+commands to confirm that everything is working properly:</p>
+					<pre><code>java -version</code></pre>
+					<p>which should report a version >= 1.7; eg:</p>
+					<pre><code>java version &quot;1.7.0_67&quot;
+Java(TM) SE Runtime Environment (build 1.7.0_67-b01)
+Java HotSpot(TM) 64-Bit Server VM (build 24.65-b04, mixed mode)</code></pre>
+					<p>Then run:</p>
+					<pre><code>java -jar bin/compiler.jar --version</code></pre>
+					<p>which should report:</p>
+					<pre><code>Closure Compiler (http://github.com/google/closure-compiler)
+Version: v20160911
+Built on: 2016-09-13 16:51</code></pre>
+					<p>If you don't have Java installed, it's recommended that you install the JDK (<em>not</em> the JRE), because the JRE may not
+update your command-line tools properly.  Note that Java is used <em>only</em> by the Closure Compiler; none of the PCjs
+client or server components use Java.</p>
+					<p>Newer versions of the Closure Compiler should work as well, and at some point, a newer version will be checked into the
+project.</p>
+					<h3 id="building-with-gulp-and-the-javascript-based-closure-compiler">Building with Gulp (and the JavaScript-based Closure Compiler)</h3>
+					<p>I've started dabbling with <a href="http://gulpjs.com/">Gulp</a>, but the current <a href="gulpfile.js">gulpfile</a> has a long way to
+go before it can replace the <a href="Gruntfile.js">Gruntfile</a>.  At the moment, all Gulp builds is a single emulation module with
+hard-coded settings, using Google's new <a href="https://github.com/google/closure-compiler-js">JavaScript-based Closure Compiler</a>.</p>
+					<p>Here's what I installed to get Gulp working:</p>
+					<pre><code>sudo npm install -g gulp
+npm install --save-dev gulp gulp-concat gulp-rename gulp-replace gulp-header gulp-foreach gulp-wrapper run-sequence
+npm install --save-dev google-closure-compiler-js</code></pre>
+					<p>Running <code>gulp</code> should build a new <strong>pcx86.js</strong> in the <a href="/versions/">versions</a> directory.  However,
+you should consider Gulp support (and anything built with Gulp) as <strong>experimental</strong> until further notice.
+The <a href="https://github.com/google/closure-compiler-js">JavaScript-based Closure Compiler</a> is in a state of
+flux as well; for example, <em>output_wrapper</em> support is documented in their
+<a href="https://developers.googleblog.com/2016/08/closure-compiler-in-javascript.html">blog</a> but hasn't been implemented yet.</p>
+					<h2 id="using-pcjs">Using PCjs</h2>
+					<h3 id="from-the-browser">From The Browser</h3>
+					<p>The PCjs Node web server is little more than a file/directory browser for the PCjs project, plus a collection of APIs.</p>
+					<p>If a URL corresponds to a PCjs project folder and no "index.html" exists in that folder, the Node web server loads
+an HTML template (<a href="modules/shared/templates/common.html">common.html</a>) and generates an "index.html" for that folder.</p>
+					<p>The contents of the "index.html" will vary depending on the contents of the folder; for example, if the folder
+contains a README.md, then that Markdown file is converted to HTML and embedded in the "index.html".  Similarly,
+if the folder contains a machine XML file, that is embedded as well.</p>
+					<p>To work well with both the Node and Jekyll web servers, all Markdown files containing one or more embedded machines
+should contain a Jekyll "Front Matter" header that describes the machines.  For example, here's the header from the
+pcjs.org home page (<a href="https://github.com/jeffpar/pcjs/blob/jekyll/index.md">index.md</a>):</p>
+					<pre><code>---
+layout: page
+permalink: /
+machines:
+  - id: ibm5150
+    type: pcx86
+    resume: 1
+    name: &quot;IBM PC (Model 5150) with Monochrome Display&quot;
+    config: /devices/pcx86/machine/5150/mda/64kb/machine.xml
+  - id: demoC1P
+    type: c1p
+    config: /devices/c1p/machine/8kb/large/machine.xml
+---</code></pre>
+					<p>Then the following lines are inserted at the points where the machines should appear:</p>
+					<pre><code>{% include machine.html id=&quot;ibm5150&quot; %}
+...
+{% include machine.html id=&quot;demoC1P&quot; %}</code></pre>
+					<p>For more information on all the machine options supported in a Markdown file, see the project's Jekyll include file
+<a href="https://github.com/jeffpar/pcjs/blob/jekyll/%5Fincludes/machine-engines.html">machine-engines.html</a>.</p>
+					<h3 id="from-the-command-line">From The Command-Line</h3>
+					<p>The PCx86 client app can also be run from the command-line mode using Node, making it possible to script the application,
+run a series of automated tests, etc:</p>
+					<pre><code>cd modules/pcx86/bin
+node pcx86</code></pre>
+					<p>The <a href="modules/pcx86/bin/pcx86">pcx86</a> script in <a href="modules/pcx86/bin">modules/pcx86/bin</a> loads
+all the PCx86 browser scripts listed in the root <a href="/package.json">package.json</a> and then starts a Node REPL
+("read-eval-print loop").  The REPL handles a few special commands (eg, "load", "quit") and passes anything else
+to the PCx86 Debugger component.  If no Debugger component has been created yet, or if the Debugger didn't recognize
+the command, then it's passed on to <em>eval()</em>, like a good little REPL.</p>
+					<p>Use the "load" command to load a JSON machine configuration file.  A sample
+<a href="modules/pcx86/bin/ibm5150.json">ibm5150.json</a> is provided in the <em>bin</em> directory, which is a "JSON-ified" version
+of the <a href="devices/pcx86/machine/5150/mda/64kb/machine.xml">machine.xml</a> displayed on the <a href="http://www.pcjs.org/">pcjs.org</a>
+home page.</p>
+					<p>The command-line loader creates all the JSON-defined machine components in the same order that the browser creates
+XML-defined components.  You can also issue the "load" command directly from the command-line:</p>
+					<pre><code>node pcx86 --cmd=&quot;load ibm5150.json&quot;</code></pre>
+					<p>In fact, any number of "--cmd" arguments can be included on the command-line.  A batch file syntax will eventually be
+added, too.</p>
+					<p>When a PCjs machine runs in a browser, an XML machine configuration file is transformed into HTML with a set of DIVs
+for each component: an "object" DIV whose <em>data-value</em> attribute provides the initialization parameters for the
+corresponding component, along with a set of optional "control" DIVs that the component can bind to (eg, a <strong>Run</strong> button,
+or a visual representation of DIP switches, or whatever).</p>
+					<p>When a PCjs machine is run from the command-line, there is no XML, HTML, or DIVs involved; this is basically a
+"headless" version of the machine, so there is no simple way to view its video display or interact with its keyboard,
+mouse, etc.  You have to use Debugger commands to dump the machine's video buffer.</p>
+					<p>Since I was not inclined to add XML support to my Node environment, this has created some divergence between client
+and server operation: PCjs machines on the client supports <em>only</em> XML machine configuration files, whereas PCjs machines
+on the server supports <em>only</em> JSON machine configuration files.</p>
+					<p>I haven't decided whether I'll add support for JSON configuration files to the client, or add some XML-to-JSON conversion
+to the server, or both.</p>
+					<h2 id="debugging-pcjs">Debugging PCjs</h2>
+					<p>NOTE: The following information assumes you're running Node as your local web server, not Jekyll.  You can certainly
+debug PCjs while running Jekyll (ideally with <code>--config _config.yml,_developer.yml</code>), using <code>http://localhost:4000/</code>
+and your favorite web browser's Developer Tools, but none of the special server or client features discussed below
+will be available.</p>
+					<h3 id="server-components">Server Components</h3>
+					<p>To help test/debug changes to PCjs server components (eg, <a href="modules/diskdump/">DiskDump</a>, <a href="modules/htmlout/">HTMLOut</a>),
+you can start the server with some additional options; eg:</p>
+					<pre><code>node server.js --logging --console --debug</code></pre>
+					<p>The <em>--logging</em> option will create a <a href="/logs/">node.log</a> that records all the HTTP requests, <em>--debug</em>
+will generate additional debug-only messages (which will also be logged if <em>--logging</em> is enabled), and <em>--console</em>
+will replicate any messages to your console as well.</p>
+					<p>If you want server.js to use a different port (the default is 8088), set PORT in your environment before starting
+the server:</p>
+					<pre><code>export PORT=80</code></pre>
+					<p>or add <em>--port</em> to your command-line:</p>
+					<pre><code>node server.js --logging --console --debug --port=80</code></pre>
+					<p>A complete list of command-line options can be found in <a href="server.js">server.js</a>.</p>
+					<h3 id="client-components">Client Components</h3>
+					<p>A special command parameter ("gort") can be appended to the URL to request uncompiled client source files, making the
+PCjs emulators much easier to debug, albeit much slower:</p>
+					<pre><code>http://localhost:8088/?gort=debug</code></pre>
+					<p>The "gort=debug" command is unnecessary if the server is started with <em>--debug</em>; the server always serves uncompiled
+files when running in debug mode.</p>
+					<p>Conversely, if the server is in debug mode but you want to test a compiled version of PCx86, use:</p>
+					<pre><code>http://localhost:8088/?gort=release</code></pre>
+					<p>and the server will serve compiled JavaScript files, regardless whether the server is running in debug mode or
+release mode.</p>
+					<p>Another useful gort command is "gort=nodebug", which is like "gort=debug" in that it serves uncompiled files, but
+it <em>also</em> sets the client-side <strong>DEBUG</strong> variable to <strong>false</strong>, disabling all debug-only runtime checks in the client
+and allowing the simulation to run much faster (although not as fast as compiled code):</p>
+					<pre><code>http://localhost:8088/?gort=nodebug</code></pre>
+					<p>Regrettably, the gort command "Klaatu barada nikto" is not yet recognized.  Fortunately, there are no (known) situations
+where PCjs could run amok and destroy the planet.</p>
+					<p>Other parameters that can be passed via the URL:</p>
+					<ul class="md-list md-list-compact">
+					    <li><em>autostart</em>: set it to "true" to allow all machines to start normally, "false" to prevent all machines from starting,
+or "no" to prevent all machines from starting <em>unless</em> they have no <strong>Run</strong> button; e.g.:</li>
+					</ul>
+					<pre><code>http://localhost:8088/?gort=debug&amp;autostart=false</code></pre>
+					<ul class="md-list md-list-compact">
+					    <li><em>aspect</em>: set it to a numeric value >= 0.3 and <= 3.33 to modify the default aspect ratio of a machine's screen on the
+specified page; e.g.:</li>
+					</ul>
+					<pre><code>http://localhost:8088/?aspect=2.0</code></pre>
+					<ul class="md-list md-list-compact">
+					    <li><em>resume</em>: set it to a numeric value (0-3) to override a machine's <em>resume</em> setting; e.g.:</li>
+					</ul>
+					<pre><code>http://localhost:8088/?resume=0</code></pre>
+					<p>More information about the <em>resume</em> attribute is available in the <a href="/docs/pcx86/computer/#attributes">documentation</a>.</p>
+					<h2 id="updating-pcjs">Updating PCjs</h2>
+					<h3 id="developing">Developing</h3>
+					<p>To start developing features for a new version of PCjs, here are the recommended steps:</p>
+					<ol class="md-list">
+					    <li>Change the version number in the root <a href="package.json">package.json</a>
+(and <a href="https://github.com/jeffpar/pcjs/blob/jekyll/%5Fconfig.yml">_config.yml</a>)</li>
+					    <li>Run the "grunt promote" task to bump the version in all the machine XML files</li>
+					    <li>Make changes</li>
+					    <li>Run "grunt" to build new versions of the apps (eg, "/versions/pcx86/1.x.x/pcx86.js")</li>
+					</ol>
+					<p>You might also want to check out the blog post on <a href="http://www.pcjs.org/blog/2014/09/30/">PCjs Coding Conventions</a>.</p>
+					<p>You may also want to skip step #2 until you're ready to start testing the new version.  Depending on the nature
+of your changes, it may be better to manually edit the version number in only a few machine XML files for testing,
+leaving the rest of the XML files pointing to the previous version.  Run "grunt promote" when the new version is much
+closer to being released.</p>
+					<h3 id="testing">Testing</h3>
+					<p>In the course of testing PCjs, there may be stale "index.html" files that prevent you from seeing application
+updates, changes to README.md files, etc.  So before running Node, you may want to "touch" the default HTML template:</p>
+					<pre><code>touch modules/shared/templates/common.html</code></pre>
+					<p>The <a href="modules/htmlout/">HTMLOut</a> module compares the timestamp of that template file to the timestamp of any
+"index.html" and will regenerate the latter if it's out-of-date.</p>
+					<p>There's a TODO to expand that check to include the timestamp of any local README.md file, but there are many other
+factors that can contribute to stale "index.html" files, so usually the safest thing to do is "touch" the
+<a href="modules/shared/templates/common.html">common.html</a> template, or delete all existing "index.html" files, either
+manually or with the Grunt "clean" task:</p>
+					<pre><code>grunt clean</code></pre>
+					<h2 id="license">License</h2>
+					<p>The <a href="https://github.com/jeffpar/pcjs">PCjs Project</a> is now an open-source project on <a href="http://github.com/">GitHub</a>.
+All published portions are free for redistribution and/or modification under the terms of the
+<a href="/LICENSE">GNU General Public License</a> as published by the Free Software Foundation, either version 3 of the License,
+or (at your option) any later version.</p>
+					<p>You are required to include the following copyright notice, with a link to <a href="http://www.pcjs.org/">pcjs.org</a>:</p>
+					<blockquote>
+					<p><a href="http://www.pcjs.org/">PCjs</a> © 2012-2017 by <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a> (<a href="http://twitter.com/jeffpar">@jeffpar</a>)</p>
+					</blockquote>
+					<p>in every source code file of every copy or modified version of this work, and to display that notice on every web page
+or computer that runs any version of this software.</p>
+					<p>See <a href="/LICENSE">LICENSE</a> for details.</p>
+					<h2 id="more-information">More Information</h2>
+					<p>Learn more about the <a href="/docs/about/">PCjs Project</a> and <a href="/docs/about/pcx86/">PCx86</a>.  To
+create your own PCx86 machines, see the <a href="/docs/pcx86/">PCx86 Documentation</a> for details.</p>
+					<p>If you have questions or run into any problems, feel free to <a href="http://twitter.com/jeffpar">tweet</a> or
+<a href="mailto:Jeff@pcjs.org">email</a>.</p>
+					<div class="common-bottom">
+						<p class="common-reference"></p>
+						<p class="common-copyright">
+							<span class="common-copyright"><a href="http://www.pcjs.org/">pcjs.org</a> © 2012-2017 by <a href="http://twitter.com/jeffpar">@jeffpar</a></span><br/>
+							<span class="common-copyright"><a href="http://github.com/jeffpar/pcjs">PCjs Project</a> released under <a href="http://gnu.org/licenses/gpl.html">GPLv3</a></span>
+						</p>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script type="text/javascript" src="/modules/shared/lib/defines.js"></script>
+		<script type="text/javascript" src="/modules/shared/lib/diskapi.js"></script>
+		<script type="text/javascript" src="/modules/shared/lib/dumpapi.js"></script>
+		<script type="text/javascript" src="/modules/shared/lib/reportapi.js"></script>
+		<script type="text/javascript" src="/modules/shared/lib/userapi.js"></script>
+		<script type="text/javascript" src="/modules/shared/lib/keys.js"></script>
+		<script type="text/javascript" src="/modules/shared/lib/strlib.js"></script>
+		<script type="text/javascript" src="/modules/shared/lib/usrlib.js"></script>
+		<script type="text/javascript" src="/modules/shared/lib/weblib.js"></script>
+		<script type="text/javascript" src="/modules/shared/lib/component.js"></script>
+		<script type="text/javascript" src="/modules/pcx86/lib/defines.js"></script>
+		<script type="text/javascript" src="/modules/pcx86/lib/x86.js"></script>
+		<script type="text/javascript" src="/modules/pcx86/lib/interrupts.js"></script>
+		<script type="text/javascript" src="/modules/pcx86/lib/messages.js"></script>
+		<script type="text/javascript" src="/modules/pcx86/lib/panel.js"></script>
+		<script type="text/javascript" src="/modules/pcx86/lib/bus.js"></script>
+		<script type="text/javascript" src="/modules/pcx86/lib/memory.js"></script>
+		<script type="text/javascript" src="/modules/pcx86/lib/cpu.js"></script>
+		<script type="text/javascript" src="/modules/pcx86/lib/x86seg.js"></script>
+		<script type="text/javascript" src="/modules/pcx86/lib/x86cpu.js"></script>
+		<script type="text/javascript" src="/modules/pcx86/lib/x86fpu.js"></script>
+		<script type="text/javascript" src="/modules/pcx86/lib/x86func.js"></script>
+		<script type="text/javascript" src="/modules/pcx86/lib/x86help.js"></script>
+		<script type="text/javascript" src="/modules/pcx86/lib/x86mods.js"></script>
+		<script type="text/javascript" src="/modules/pcx86/lib/x86ops.js"></script>
+		<script type="text/javascript" src="/modules/pcx86/lib/x86op0f.js"></script>
+		<script type="text/javascript" src="/modules/pcx86/lib/chipset.js"></script>
+		<script type="text/javascript" src="/modules/pcx86/lib/rom.js"></script>
+		<script type="text/javascript" src="/modules/pcx86/lib/ram.js"></script>
+		<script type="text/javascript" src="/modules/pcx86/lib/keyboard.js"></script>
+		<script type="text/javascript" src="/modules/pcx86/lib/video.js"></script>
+		<script type="text/javascript" src="/modules/pcx86/lib/parallel.js"></script>
+		<script type="text/javascript" src="/modules/pcx86/lib/serial.js"></script>
+		<script type="text/javascript" src="/modules/pcx86/lib/mouse.js"></script>
+		<script type="text/javascript" src="/modules/pcx86/lib/disk.js"></script>
+		<script type="text/javascript" src="/modules/pcx86/lib/fdc.js"></script>
+		<script type="text/javascript" src="/modules/pcx86/lib/hdc.js"></script>
+		<script type="text/javascript" src="/modules/pcx86/lib/computer.js"></script>
+		<script type="text/javascript" src="/modules/shared/lib/state.js"></script>
+		<script type="text/javascript" src="/modules/shared/lib/embed.js"></script>
+		<script type="text/javascript" src="/modules/shared/lib/save.js"></script>
+		<script type="text/javascript">window.embedPCx86('ibm5150','/devices/pcx86/machine/5150/mda/64kb/machine.xml','/modules/shared/templates/components.xsl','{resume:"1",autoMount:null,drives:null}');</script>
+		<script type="text/javascript" src="/modules/c1pjs/lib/defines.js"></script>
+		<script type="text/javascript" src="/modules/c1pjs/lib/nodebugger.js"></script>
+		<script type="text/javascript" src="/modules/c1pjs/lib/panel.js"></script>
+		<script type="text/javascript" src="/modules/c1pjs/lib/cpu.js"></script>
+		<script type="text/javascript" src="/modules/c1pjs/lib/rom.js"></script>
+		<script type="text/javascript" src="/modules/c1pjs/lib/ram.js"></script>
+		<script type="text/javascript" src="/modules/c1pjs/lib/keyboard.js"></script>
+		<script type="text/javascript" src="/modules/c1pjs/lib/video.js"></script>
+		<script type="text/javascript" src="/modules/c1pjs/lib/serial.js"></script>
+		<script type="text/javascript" src="/modules/c1pjs/lib/disk.js"></script>
+		<script type="text/javascript" src="/modules/c1pjs/lib/computer.js"></script>
+		<script type="text/javascript">window.embedC1P('demoC1P','/devices/c1p/machine/8kb/large/machine.xml','/modules/c1pjs/templates/components.xsl','{autoMount:null,drives:null}');</script>
+		
+	</body>
+</html>
