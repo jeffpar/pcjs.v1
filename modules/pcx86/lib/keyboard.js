@@ -138,10 +138,11 @@ class Keyboard extends Component {
          */
         this.aKeysActive = [];
 
-        this.msAutoRepeat   = 500;
-        this.msNextRepeat   = 100;
-        this.msAutoRelease  = 50;
-        this.msInjectDelay  = 150;          // number of milliseconds between injected keystrokes
+        this.msAutoRepeat    = 500;
+        this.msNextRepeat    = 100;
+        this.msAutoRelease   = 50;
+        this.msInjectDefault = 150;         // number of milliseconds between injected keystrokes
+        this.msInjectDelay   = 0;           // set by the initial injectKeys() call
 
         /*
          * autoType records the machine's specified autoType sequence, if any.  At the appropriate signal(s),
@@ -378,8 +379,15 @@ class Keyboard extends Component {
         this.bus = bus;
         this.cpu = cpu;
         this.dbg = dbg;
+
+        var kbd = this;
+        this.timerInject = this.cpu.addTimer(this.id + ".inject", function() {
+            kbd.injectKeysFromBuffer();
+        });
+
         this.chipset = cmp.getMachineComponent("ChipSet");
         this.autoType = cmp.getMachineParm('autoType') || this.autoType;
+
         cpu.addIntNotify(Interrupts.DOS, this.intDOS.bind(this));
     }
 
@@ -993,7 +1001,7 @@ class Keyboard extends Component {
      *
      * @this {Keyboard}
      * @param {string|undefined} sKeys
-     * @param {number} [msDelay] is an optional injection delay (default is msInjectDelay)
+     * @param {number} [msDelay] is an optional injection delay (default is msInjectDefault)
      * @return {boolean}
      */
     injectKeys(sKeys, msDelay)
@@ -1001,19 +1009,19 @@ class Keyboard extends Component {
         if (sKeys && !this.sInjectBuffer) {
             this.sInjectBuffer = this.parseKeys(sKeys);
             if (!COMPILED) this.log("injectKeys(\"" + this.sInjectBuffer.split("\n").join("\\n") + "\")");
-            this.injectKeysFromBuffer(msDelay || this.msInjectDelay);
+            this.msInjectDelay = msDelay || this.msInjectDefault;
+            this.injectKeysFromBuffer();
             return true;
         }
         return false;
     }
 
     /**
-     * injectKeysFromBuffer(msDelay)
+     * injectKeysFromBuffer()
      *
      * @this {Keyboard}
-     * @param {number} msDelay is the delay between injected keys
      */
-    injectKeysFromBuffer(msDelay)
+    injectKeysFromBuffer()
     {
         var charCode = 0;
         while (this.sInjectBuffer.length > 0 && !charCode) {
@@ -1031,7 +1039,7 @@ class Keyboard extends Component {
              * by "test;" and return.
              */
             if (charCode >= 0xF0) {
-                msDelay = ((charCode - 0xF0) * 100) || this.msInjectDelay;
+                this.msInjectDelay = ((charCode - 0xF0) * 100) || this.msInjectDefault;
                 charCode = 0;
                 break;
             }
@@ -1049,11 +1057,7 @@ class Keyboard extends Component {
                 this.fnInjectReady = null;
             }
         } else {
-            setTimeout(function(kbd) {
-                return function onInjectKeyTimeout() {
-                    kbd.injectKeysFromBuffer(msDelay);
-                };
-            }(this), msDelay);
+            this.cpu.setTimer(this.timerInject, this.msInjectDelay);
         }
     }
 

@@ -327,7 +327,7 @@ class Component {
     static notice(s, fPrintOnly, id)
     {
         if (!COMPILED) {
-            Component.println(s, Component.TYPE.NOTICE, id);
+            Component.println(s, Component.PRINT.NOTICE, id);
         }
         if (!fPrintOnly) Component.alertUser((id? (id + ": ") : "") + s);
         return true;
@@ -341,7 +341,7 @@ class Component {
     static warning(s)
     {
         if (!COMPILED) {
-            Component.println(s, Component.TYPE.WARNING);
+            Component.println(s, Component.PRINT.WARNING);
         }
         Component.alertUser(s);
     }
@@ -354,7 +354,7 @@ class Component {
     static error(s)
     {
         if (!COMPILED) {
-            Component.println(s, Component.TYPE.ERROR);
+            Component.println(s, Component.PRINT.ERROR);
         }
         Component.alertUser(s);
     }
@@ -632,7 +632,7 @@ class Component {
         var sParms = element.getAttribute("data-value");
         if (sParms) {
             try {
-                parms = eval("(" + sParms + ")");   // jshint ignore:line
+                parms = eval('(' + sParms + ')');   // jshint ignore:line
                 /*
                  * We can no longer invoke removeAttribute() because some components (eg, Panel) need
                  * to run their initXXX() code more than once, to avoid initialization-order dependencies.
@@ -808,7 +808,7 @@ class Component {
              * instead, but it's a bit too confusing mingling script output in a window that
              * already mingles Debugger and machine output.
              */
-            Component.println(aTokens.join(' '), Component.TYPE.SCRIPT);
+            Component.println(aTokens.join(' '), Component.PRINT.SCRIPT);
 
             var fnCallReady = null;
             if (Component.asyncCommands.indexOf(sCommand) >= 0) {
@@ -1001,7 +1001,7 @@ class Component {
                 this.println = function(component, control) {
                     return function printlnControl(s, type, id) {
                         if (!s) s = "";
-                        if (type != Component.TYPE.PROGRESS || s.slice(-3) != "...") {
+                        if (type != Component.PRINT.PROGRESS || s.slice(-3) != "...") {
                             if (type) s = type + ": " + s;
                             Component.appendControl(control, s + '\n');
                         } else {
@@ -1392,11 +1392,20 @@ class Component {
 }
 
 /*
- * These are the standard TYPE values you can pass as an optional argument to println(); in reality,
+ * Types recognized and supported by selected functions (eg, Computer.getMachineParm())
+ */
+Component.TYPE = {
+    NUMBER:     "number",
+    OBJECT:     "object",
+    STRING:     "string"
+};
+
+/*
+ * These are the standard PRINT values you can pass as an optional argument to println(); in reality,
  * you can pass anything you want, because they are simply prepended to the message, although PROGRESS
  * messages may also be merged with earlier similar messages to keep the output buffer under control.
  */
-Component.TYPE = {
+Component.PRINT = {
     ERROR:      "error",
     NOTICE:     "notice",
     PROGRESS:   "progress",

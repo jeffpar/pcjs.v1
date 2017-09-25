@@ -146,7 +146,7 @@ class ROM extends Component {
             Web.getResource(this.sFileURL, null, true, function(sURL, sResponse, nErrorCode) {
                 rom.doneLoad(sURL, sResponse, nErrorCode);
             }, function(nState) {
-                rom.println(sProgress, Component.TYPE.PROGRESS);
+                rom.println(sProgress, Component.PRINT.PROGRESS);
             });
         }
     }

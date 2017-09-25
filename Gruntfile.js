@@ -216,8 +216,8 @@ module.exports = function(grunt) {
                                .replace(/^[ \t]*var\s+\S+\s*=\s*require\((['"]).*?\1\);/gm, '')
                                .replace(/^[ \t]*(if\s+\(NODE\)\s*|)module\.exports\s*=\s*\S+;/gm, '')
                                .replace(/\/\*\*\s*\*\s*@fileoverview[\s\S]*?\*\/\s*/g, '')
-                               .replace(/[ \t]*if\s*\(NODE\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '')
-                               .replace(/[ \t]*if\s*\(typeof\s+module\s*!==\s*(['"])undefined\1\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '')
+                               .replace(/[ \t]*if\s*\(NODE\)\s*({[^}]*}|[^\n]*)(\n|$)/gm, '')
+                               .replace(/[ \t]*if\s*\(typeof\s+module\s*!==\s*(['"])undefined\1\)\s*({[^}]*}|[^\n]*)(\n|$)/gm, '')
                                .replace(/[ \t]*[A-Za-z_][A-Za-z0-9_.]*\.assert\([^\n]*\);[^\n]*/g, '');
                     }
                 }
@@ -234,8 +234,8 @@ module.exports = function(grunt) {
                                .replace(/^[ \t]*var\s+\S+\s*=\s*require\((['"]).*?\1\);/gm, '')
                                .replace(/^[ \t]*(if\s+\(NODE\)\s*|)module\.exports\s*=\s*\S+;/gm, '')
                                .replace(/\/\*\*\s*\*\s*@fileoverview[\s\S]*?\*\/\s*/g, '')
-                               .replace(/[ \t]*if\s*\(NODE\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '')
-                               .replace(/[ \t]*if\s*\(typeof\s+module\s*!==\s*(['"])undefined\1\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '')
+                               .replace(/[ \t]*if\s*\(NODE\)\s*({[^}]*}|[^\n]*)(\n|$)/gm, '')
+                               .replace(/[ \t]*if\s*\(typeof\s+module\s*!==\s*(['"])undefined\1\)\s*({[^}]*}|[^\n]*)(\n|$)/gm, '')
                                .replace(/[ \t]*[A-Za-z_][A-Za-z0-9_.]*\.assert\([^\n]*\);[^\n]*/g, '');
                     }
                 }
@@ -252,8 +252,8 @@ module.exports = function(grunt) {
                                .replace(/^[ \t]*var\s+\S+\s*=\s*require\((['"]).*?\1\);/gm, '')
                                .replace(/^[ \t]*(if\s+\(NODE\)\s*|)module\.exports\s*=\s*\S+;/gm, '')
                                .replace(/\/\*\*\s*\*\s*@fileoverview[\s\S]*?\*\/\s*/g, '')
-                               .replace(/[ \t]*if\s*\(NODE\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '')
-                               .replace(/[ \t]*if\s*\(typeof\s+module\s*!==\s*(['"])undefined\1\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '')
+                               .replace(/[ \t]*if\s*\(NODE\)\s*({[^}]*}|[^\n]*)(\n|$)/gm, '')
+                               .replace(/[ \t]*if\s*\(typeof\s+module\s*!==\s*(['"])undefined\1\)\s*({[^}]*}|[^\n]*)(\n|$)/gm, '')
                                .replace(/[ \t]*[A-Za-z_][A-Za-z0-9_.]*\.assert\([^\n]*\);[^\n]*/g, '');
                     }
                 }
@@ -270,8 +270,8 @@ module.exports = function(grunt) {
                                 .replace(/^[ \t]*var\s+\S+\s*=\s*require\((['"]).*?\1\);/gm, '')
                                 .replace(/^[ \t]*(if\s+\(NODE\)\s*|)module\.exports\s*=\s*\S+;/gm, '')
                                 .replace(/\/\*\*\s*\*\s*@fileoverview[\s\S]*?\*\/\s*/g, '')
-                                .replace(/[ \t]*if\s*\(NODE\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '')
-                                .replace(/[ \t]*if\s*\(typeof\s+module\s*!==\s*(['"])undefined\1\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '')
+                                .replace(/[ \t]*if\s*\(NODE\)\s*({[^}]*}|[^\n]*)(\n|$)/gm, '')
+                                .replace(/[ \t]*if\s*\(typeof\s+module\s*!==\s*(['"])undefined\1\)\s*({[^}]*}|[^\n]*)(\n|$)/gm, '')
                                 .replace(/[ \t]*[A-Za-z_][A-Za-z0-9_.]*\.assert\([^\n]*\);[^\n]*/g, '');
                     }
                 }
@@ -288,8 +288,8 @@ module.exports = function(grunt) {
                                .replace(/^[ \t]*var\s+\S+\s*=\s*require\((['"]).*?\1\);/gm, '')
                                .replace(/^[ \t]*(if\s+\(NODE\)\s*|)module\.exports\s*=\s*\S+;/gm, '')
                                .replace(/\/\*\*\s*\*\s*@fileoverview[\s\S]*?\*\/\s*/g, '')
-                               .replace(/[ \t]*if\s*\(NODE\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '')
-                               .replace(/[ \t]*if\s*\(typeof\s+module\s*!==\s*(['"])undefined\1\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '')
+                               .replace(/[ \t]*if\s*\(NODE\)\s*({[^}]*}|[^\n]*)(\n|$)/gm, '')
+                               .replace(/[ \t]*if\s*\(typeof\s+module\s*!==\s*(['"])undefined\1\)\s*({[^}]*}|[^\n]*)(\n|$)/gm, '')
                                .replace(/[ \t]*[A-Za-z_][A-Za-z0-9_.]*\.assert\([^\n]*\);[^\n]*/g, '');
                     }
                 }

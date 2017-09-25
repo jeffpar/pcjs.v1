@@ -2517,7 +2517,7 @@ class Video extends Component {
             Web.getResource(this.sFileURL, null, true, function(sURL, sResponse, nErrorCode) {
                 video.doneLoad(sURL, sResponse, nErrorCode);
             }, function(nState) {
-                video.println(sProgress, Component.TYPE.PROGRESS);
+                video.println(sProgress, Component.PRINT.PROGRESS);
             });
         }
 

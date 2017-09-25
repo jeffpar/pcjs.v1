@@ -1,11 +1,11 @@
 ---
 layout: page
 title: Borland Turbo Pascal 3.01A
-permalink: /disks/pcx86/tools/borland/pascal/3.01a/
+permalink: /disks/pcx86/tools/borland/tpascal/3.01a/
 ---
 
 Borland Turbo Pascal 3.01A
----
+--------------------------
 
 ### Directory of Borland Turbo Pascal 3.01A
 

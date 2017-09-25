@@ -213,9 +213,9 @@ To ensure consistent compilation results, a copy of the Closure Compiler has bee
 commands to confirm that everything is working properly:
 
 	java -version
-	
+
 which should report a version >= 1.7; eg:
-	
+
     java version "1.7.0_67"
     Java(TM) SE Runtime Environment (build 1.7.0_67-b01)
     Java HotSpot(TM) 64-Bit Server VM (build 24.65-b04, mixed mode)
@@ -223,7 +223,7 @@ which should report a version >= 1.7; eg:
 Then run:
 
 	java -jar bin/compiler.jar --version
-	
+
 which should report:
 
 	Closure Compiler (http://github.com/google/closure-compiler)

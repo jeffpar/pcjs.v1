@@ -114,3 +114,19 @@ the drive controller (or DMA controller, if used) to create a BackTrack object r
 adding that object to the global BackTrack object array, and then associating the corresponding BackTrack index with
 the first byte of RAM where the sector was loaded.  Subsequent bytes of RAM containing the rest of the sector will refer
 to the same BackTrack object, using BackTrack indexes containing offsets 1-511.
+
+Resources
+---------
+
+### Microsoft Bus Mouse
+
+See this [Microsoft Bus Mouse implementation](https://www.virtualbox.org/svn/vbox/trunk/src/VBox/ExtPacks/BusMouseSample/BusMouse.cpp),
+written by [Michal Necasek](http://www.os2museum.com) for Oracle's [VirtualBox](https://www.virtualbox.org).
+
+It references two Microsoft KnowledgeBase (KB) Articles of note:
+
+- Q12230 (regarding the Bus Mouse adapter's IRQ configuration jumpers)
+- Q46369 (regarding the Bus Mouse adapter's Intel 8255A compatible chip)
+
+Those articles are no longer available online, thanks to Microsoft's lack of interest in preserving the past, including
+its own past.  However, the PCjs Project is working on fixing that.  Stay tuned.

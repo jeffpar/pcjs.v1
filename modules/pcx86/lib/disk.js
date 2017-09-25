@@ -535,7 +535,7 @@ class Disk extends Component {
         return !!Web.getResource(sDiskURL, null, true, function loadDone(sURL, sResponse, nErrorCode) {
             disk.doneLoad(sURL, sResponse, nErrorCode);
         }, function(nState) {
-            disk.println(sProgress, Component.TYPE.PROGRESS);
+            disk.println(sProgress, Component.PRINT.PROGRESS);
         });
     }
 

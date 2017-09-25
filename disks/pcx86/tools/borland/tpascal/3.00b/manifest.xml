@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.37.0/manifest.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcx86/1.37.1/manifest.xsl"?>
 <manifest type="software">
 	<title>Borland Turbo Pascal</title>
-	<disk id="disk01" size="368640" chs="40:2:9" img="archive/TURBO-PASCAL-300B.img" href="/disks/pcx86/tools/borland/pascal/3.00b/TURBO-PASCAL-300B.json" md5="b1314fb4c9cc69fe5a6cd22c376acc1f" md5json="0873dd191eb20e2f1d4a92647d0979b8">
+	<disk id="disk01" size="368640" chs="40:2:9" img="archive/TURBO-PASCAL-300B.img" href="/disks/pcx86/tools/borland/tpascal/3.00b/TURBO-PASCAL-300B.json" md5="b1314fb4c9cc69fe5a6cd22c376acc1f" md5json="0873dd191eb20e2f1d4a92647d0979b8">
 		<name>Borland Turbo Pascal 3.00B</name>
 		<file size="10585" time="1980-01-01 00:53:04" attr="0x20">ACCESS.BOX</file>
 		<file size="10747" time="1985-03-18 14:34:30" attr="0x20">ACCESS3.BOX</file>
