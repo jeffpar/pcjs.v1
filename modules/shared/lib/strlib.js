@@ -600,6 +600,70 @@ class Str {
     }
 
     /**
+     * sprintf(format, ...)
+     *
+     * Copied from the CCjs project (/ccjs/lib/stdio.js) and extended.  Far from complete let alone sprintf-compatible,
+     * but it's a start.
+     *
+     * @param {string} format
+     * @param {...} args
+     * @return {string}
+     */
+    static sprintf(format, ...args)
+    {
+        var parts = format.split(/%([-+ 0#]?)([0-9]*)(\.?)([0-9]*)([hlL]?)([A-Za-z%])/);
+        var buffer = "";
+        var partIndex = 0;
+        for (var i = 0; i < args.length; i++) {
+
+            var arg = args[i], d, s;
+            buffer += parts[partIndex++];
+            var flags = parts[partIndex];
+            var minimum = +parts[partIndex+1] || 0;
+            var precision = +parts[partIndex+3] || 0;
+            var conversion = parts[partIndex+5];
+
+            switch(conversion) {
+            case 'd':
+            case 'f':
+                d = Math.trunc(arg);
+                s = d + "";
+                if (precision) {
+                    minimum -= (precision + 1);
+                }
+                if (s.length < minimum) {
+                    if (flags == '0') {
+                        if (d < 0) minimum--;
+                        s = ("0000000000" + Math.abs(d)).slice(-minimum);
+                        if (d < 0) s = '-' + s;
+                    } else {
+                        s = ("          " + s).slice(-minimum);
+                    }
+                }
+                if (precision) {
+                    d = Math.trunc((arg - Math.trunc(arg)) * Math.pow(10, precision));
+                    s += '.' + ("0000000000" + Math.abs(d)).slice(-precision);
+                }
+                buffer += s;
+                break;
+            case 's':
+                buffer += arg;
+                break;
+            default:
+                /*
+                 * The supported ANSI C set of conversions: "dioxXucsfeEgGpn%"
+                 */
+                buffer += "(unrecognized printf conversion %" + conversion + ")";
+                break;
+            }
+
+            partIndex += 6;
+        }
+        buffer += parts[partIndex];
+        return buffer;
+    }
+
+    /**
      * stripLeadingZeros(s, fPad)
      *
      * @param {string} s

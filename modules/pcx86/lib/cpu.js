@@ -84,6 +84,7 @@ class CPU extends Component {
 
         this.counts = {};
         this.counts.nBaseCyclesPerSecond = nCycles;
+        this.counts.msPerYield = Math.round(1000 / CPU.YIELDS_PER_SECOND);
 
         /*
          * nTargetMultiplier replaces the old "speed" variable (0, 1, 2) and eliminates the need for
@@ -92,7 +93,6 @@ class CPU extends Component {
          * at which point we reset the target back to the default.
          */
         this.counts.nBaseMultiplier = this.counts.nCurrentMultiplier = this.counts.nTargetMultiplier = nMultiplier;
-
         this.counts.mhzBase = Math.round(this.counts.nBaseCyclesPerSecond / 10000) / 100;
         this.counts.mhzCurrent = this.counts.mhzTarget = this.counts.mhzBase * this.counts.nTargetMultiplier;
 
@@ -129,6 +129,7 @@ class CPU extends Component {
          */
         this.aTimers = [];
 
+        this.idRunTimeout = 0;
         this.onRunTimeout = this.runCPU.bind(this); // function onRunTimeout() { cpu.runCPU(); };
     }
 
@@ -574,7 +575,6 @@ class CPU extends Component {
         if (!nMultiplier || nMultiplier > this.counts.nTargetMultiplier) {
             nMultiplier = this.counts.nTargetMultiplier;
         }
-        this.counts.msPerYield = Math.round(1000 / CPU.YIELDS_PER_SECOND);
         this.counts.nCyclesPerYield = Math.floor(this.counts.nBaseCyclesPerSecond / CPU.YIELDS_PER_SECOND * nMultiplier);
         this.counts.nCurrentMultiplier = nMultiplier;
     }
@@ -771,7 +771,9 @@ class CPU extends Component {
 
         this.counts.nCyclesThisRun = 0;
         this.counts.msStartThisRun = Usr.getTime();
-        if (!this.counts.msStartRun) this.counts.msStartRun = this.counts.msStartThisRun;
+        if (!this.counts.msStartRun) {
+            this.counts.msStartRun = this.counts.msStartThisRun;
+        }
 
         /*
          * Try to detect situations where the browser may have throttled us, such as when the user switches
@@ -795,13 +797,12 @@ class CPU extends Component {
          *
          * TODO: Consider calling yieldCPU() sooner from message(), so that it can arrange for the msEndThisRun
          * "snapshot" to occur sooner; it's unclear, however, whether that will really improve the CPU's ability
-         * to hit its target speed, since you would expect any instruction that displays a message to be an
-         * EXTREMELY slow instruction.
+         * to hit its target speed, since any instruction that displays a message is unavoidably slooooow.
          */
+        var msDelta = 0;
         if (this.counts.msEndThisRun) {
-            var msDelta = this.counts.msStartThisRun - this.counts.msEndThisRun;
+            msDelta = this.counts.msStartThisRun - this.counts.msEndThisRun;
             if (msDelta > this.counts.msPerYield) {
-                if (MAXDEBUG) this.println("large time delay: " + msDelta + "ms");
                 this.counts.msStartRun += msDelta;
                 /*
                  * Bumping msStartRun forward should NEVER cause it to exceed msStartThisRun; however, just
@@ -878,10 +879,23 @@ class CPU extends Component {
         }
 
         if (DEBUG && this.messageEnabled(Messages.CPU)) {
-            this.printMessage("calcRemainingTime: sleep " + msRemainsThisRun + "ms after " + (this.counts.msEndThisRun - this.counts.msStartThisRun) + "ms burst");
+            /*
+             * Every time the browser gives us another chance to run, we want to display our targets for that run
+             * here, followed by what we accomplished in that run.
+             */
+            this.printMessage(Str.sprintf("%3dms run  %3dms wait  %6dcy  %6.2fmhz  %6dms total  %8dcy total  %6.2fmhz total",
+                msElapsedThisRun,
+                msRemainsThisRun,
+                this.counts.nCyclesThisRun,
+                Math.round(this.counts.nCyclesThisRun / (msElapsedThisRun * 10)) / 100,
+                msElapsed,
+                nCycles,
+                this.counts.mhzCurrent
+            ));
         }
 
         this.counts.msEndThisRun += msRemainsThisRun;
+
         return msRemainsThisRun;
     }
 
@@ -1108,14 +1122,14 @@ class CPU extends Component {
             if (timer[1] < 0) continue;
             timer[1] -= nCycles;
             if (timer[1] <= 0) {
-                if (DEBUG && this.messageEnabled(Messages.CPU)) {
+                if (DEBUG && this.messageEnabled(Messages.CPU | Messages.TIMER)) {      // CPU TIMER message (as opposed to CHIPSET TIMER message)
                     this.printMessage("updateTimer(" + nCycles + "): firing " + timer[0] + " with only " + (timer[1] + nCycles) + " cycles left");
                 }
                 timer[1] = -1;      // zero is technically an "active" value, so ensure the timer is dormant now
                 timer[3]();         // safe to invoke the callback function now
                 if (timer[2] >= 0) {
                     this.setTimer(iTimer, timer[2]);
-                    if (DEBUG && this.messageEnabled(Messages.CPU)) {
+                    if (DEBUG && this.messageEnabled(Messages.CPU | Messages.TIMER)) {  // CPU TIMER message (as opposed to CHIPSET TIMER message)
                         this.printMessage("updateTimer(" + nCycles + "): rearming " + timer[0] + " for " + timer[2] + "ms (" + timer[1] + " cycles)");
                     }
                 }
@@ -1145,6 +1159,7 @@ class CPU extends Component {
      */
     runCPU()
     {
+        this.idRunTimeout = 0;
         if (!this.flags.running) return;
 
         /*
@@ -1208,7 +1223,10 @@ class CPU extends Component {
             return;
         }
 
-        if (this.flags.running) setTimeout(this.onRunTimeout, this.calcRemainingTime());
+        if (this.flags.running) {
+            this.assert(!this.idRunTimeout);
+            this.idRunTimeout = setTimeout(this.onRunTimeout, this.calcRemainingTime());
+        }
     }
 
     /**
@@ -1229,6 +1247,10 @@ class CPU extends Component {
             if (!fQuiet) this.println(this.toString() + " busy");
             return false;
         }
+        if (this.idRunTimeout) {
+            clearTimeout(this.idRunTimeout);
+            this.idRunTimeout = 0;
+        }
         /*
          *  setSpeed() without a speed parameter leaves the selected speed in place, but also resets the
          *  cycle counter and timestamp for the current series of runCPU() calls, and calculates the maximum number
@@ -1245,7 +1267,8 @@ class CPU extends Component {
             if (fUpdateFocus) this.cmp.updateFocus(true);
             this.cmp.start(this.counts.msStartRun, this.getCycles());
         }
-        setTimeout(this.onRunTimeout, 0);
+        this.assert(!this.idRunTimeout);
+        this.idRunTimeout = setTimeout(this.onRunTimeout, 0);
         return true;
     }
 

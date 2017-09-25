@@ -5,7 +5,7 @@ permalink: /apps/pcx86/1981/visicalc/
 machines:
   - id: ibm5150-visicalc
     type: pcx86
-    config: /devices/pcx86/machine/5150/mda/64kb/machine.xml
+    config: /devices/pcx86/machine/5150/mda/64kb/debugger/machine.xml
     resume: 1
     state: /apps/pcx86/1981/visicalc/state.json
     autoMount:
