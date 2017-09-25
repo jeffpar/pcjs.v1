@@ -173,7 +173,7 @@ class CPU extends Component {
 
         this.timerYield = cpu.addTimer(this.id, function() {
             cpu.flags.yield = true;
-        }, 1000 / CPU.YIELDS_PER_SECOND);
+        }, this.counts.msPerYield);
 
         this.setReady();
     }
@@ -1330,9 +1330,7 @@ class CPU extends Component {
      */
     updateCPU(fForce)
     {
-        if (this.cmp) {
-            this.cmp.updateStatus(fForce);
-        }
+        if (this.cmp) this.cmp.updateStatus(fForce);
     }
 
     /**

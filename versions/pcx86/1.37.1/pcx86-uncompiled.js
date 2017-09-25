@@ -3078,7 +3078,7 @@ class Component {
     static notice(s, fPrintOnly, id)
     {
         if (!COMPILED) {
-            Component.println(s, Component.TYPE.NOTICE, id);
+            Component.println(s, Component.PRINT.NOTICE, id);
         }
         if (!fPrintOnly) Component.alertUser((id? (id + ": ") : "") + s);
         return true;
@@ -3092,7 +3092,7 @@ class Component {
     static warning(s)
     {
         if (!COMPILED) {
-            Component.println(s, Component.TYPE.WARNING);
+            Component.println(s, Component.PRINT.WARNING);
         }
         Component.alertUser(s);
     }
@@ -3105,7 +3105,7 @@ class Component {
     static error(s)
     {
         if (!COMPILED) {
-            Component.println(s, Component.TYPE.ERROR);
+            Component.println(s, Component.PRINT.ERROR);
         }
         Component.alertUser(s);
     }
@@ -3383,7 +3383,7 @@ class Component {
         var sParms = element.getAttribute("data-value");
         if (sParms) {
             try {
-                parms = eval("(" + sParms + ")");   // jshint ignore:line
+                parms = eval('(' + sParms + ')');   // jshint ignore:line
                 /*
                  * We can no longer invoke removeAttribute() because some components (eg, Panel) need
                  * to run their initXXX() code more than once, to avoid initialization-order dependencies.
@@ -3559,7 +3559,7 @@ class Component {
              * instead, but it's a bit too confusing mingling script output in a window that
              * already mingles Debugger and machine output.
              */
-            Component.println(aTokens.join(' '), Component.TYPE.SCRIPT);
+            Component.println(aTokens.join(' '), Component.PRINT.SCRIPT);
 
             var fnCallReady = null;
             if (Component.asyncCommands.indexOf(sCommand) >= 0) {
@@ -3752,7 +3752,7 @@ class Component {
                 this.println = function(component, control) {
                     return function printlnControl(s, type, id) {
                         if (!s) s = "";
-                        if (type != Component.TYPE.PROGRESS || s.slice(-3) != "...") {
+                        if (type != Component.PRINT.PROGRESS || s.slice(-3) != "...") {
                             if (type) s = type + ": " + s;
                             Component.appendControl(control, s + '\n');
                         } else {
@@ -4143,11 +4143,20 @@ class Component {
 }
 
 /*
- * These are the standard TYPE values you can pass as an optional argument to println(); in reality,
+ * Types recognized and supported by selected functions (eg, Computer.getMachineParm())
+ */
+Component.TYPE = {
+    NUMBER:     "number",
+    OBJECT:     "object",
+    STRING:     "string"
+};
+
+/*
+ * These are the standard PRINT values you can pass as an optional argument to println(); in reality,
  * you can pass anything you want, because they are simply prepended to the message, although PROGRESS
  * messages may also be merged with earlier similar messages to keep the output buffer under control.
  */
-Component.TYPE = {
+Component.PRINT = {
     ERROR:      "error",
     NOTICE:     "notice",
     PROGRESS:   "progress",
@@ -11986,7 +11995,7 @@ class CPU extends Component {
 
         this.timerYield = cpu.addTimer(this.id, function() {
             cpu.flags.yield = true;
-        }, 1000 / CPU.YIELDS_PER_SECOND);
+        }, this.counts.msPerYield);
 
         this.setReady();
     }
@@ -13143,9 +13152,7 @@ class CPU extends Component {
      */
     updateCPU(fForce)
     {
-        if (this.cmp) {
-            this.cmp.updateStatus(fForce);
-        }
+        if (this.cmp) this.cmp.updateStatus(fForce);
     }
 
     /**
@@ -43701,7 +43708,7 @@ class ROM extends Component {
             Web.getResource(this.sFileURL, null, true, function(sURL, sResponse, nErrorCode) {
                 rom.doneLoad(sURL, sResponse, nErrorCode);
             }, function(nState) {
-                rom.println(sProgress, Component.TYPE.PROGRESS);
+                rom.println(sProgress, Component.PRINT.PROGRESS);
             });
         }
     }
@@ -49620,7 +49627,7 @@ class Video extends Component {
             Web.getResource(this.sFileURL, null, true, function(sURL, sResponse, nErrorCode) {
                 video.doneLoad(sURL, sResponse, nErrorCode);
             }, function(nState) {
-                video.println(sProgress, Component.TYPE.PROGRESS);
+                video.println(sProgress, Component.PRINT.PROGRESS);
             });
         }
 
@@ -57731,7 +57738,7 @@ class Disk extends Component {
         return !!Web.getResource(sDiskURL, null, true, function loadDone(sURL, sResponse, nErrorCode) {
             disk.doneLoad(sURL, sResponse, nErrorCode);
         }, function(nState) {
-            disk.println(sProgress, Component.TYPE.PROGRESS);
+            disk.println(sProgress, Component.PRINT.PROGRESS);
         });
     }
 
@@ -75385,7 +75392,9 @@ class Computer extends Component {
          * This timer replaces the CPU's old dedicated STATUS_UPDATES_PER_SECOND logic; periodic updateStatus()
          * calls are now our own responsibility.
          */
-        this.cpu.addTimer(this.id, function() { cmp.updateStatus(); }, 1000 / Computer.UPDATES_PER_SECOND);
+        this.cpu.addTimer(this.id, function() {
+            cmp.updateStatus(false);
+        }, 1000 / Computer.UPDATES_PER_SECOND);
 
         var sStatePath = null;
         var sResume = this.getMachineParm('resume');
@@ -75454,7 +75463,7 @@ class Computer extends Component {
             Web.getResource(this.sStateURL, null, true, function(sURL, sResource, nErrorCode) {
                 cmp.doneLoad(sURL, sResource, nErrorCode);
             }, function(nState) {
-                cmp.println(sProgress, Component.TYPE.PROGRESS);
+                cmp.println(sProgress, Component.PRINT.PROGRESS);
             });
         }
 
@@ -75563,7 +75572,7 @@ class Computer extends Component {
                 if (video) {
                     var control = video.getTextArea();
                     if (control) {
-                        if (sType != Component.TYPE.PROGRESS || sMessage.slice(-3) != "...") {
+                        if (sType != Component.PRINT.PROGRESS || sMessage.slice(-3) != "...") {
                             Component.appendControl(control, sMessage + '\n');
                         } else {
                             Component.replaceControl(control, sMessage, sMessage + '.');
@@ -75620,7 +75629,7 @@ class Computer extends Component {
             var sParms;
             if (typeof resources == 'object' && (sParms = resources['parms'])) {
                 try {
-                    parmsMachine = /** @type {Object} */ (eval("(" + sParms + ")"));
+                    parmsMachine = /** @type {Object} */ (eval("(" + sParms + ")"));    // jshint ignore:line
                 } catch(e) {
                     Component.error(e.message + " (" + sParms + ")");
                 }
@@ -75632,22 +75641,64 @@ class Computer extends Component {
     /**
      * getMachineParm(sParm, parmsComponent)
      *
-     * If the machine parameter doesn't exist, we check for a matching component parameter (if parmsComponent is provided),
-     * and failing that, we check the bundled resources (if any).
+     * If the machine parameter doesn't exist, we check for a matching component parameter (if parmsComponent
+     * is provided), and failing that, we check the bundled resources (if any).
      *
-     * At the moment, the only bundled resource request we expect to encounter is 'state'; if it exists, then we return
-     * 'state' back to the caller (ie, the name of the resource), so that the caller will then attempt to load the 'state'
-     * resource to obtain the actual state.
+     * At the moment, the only bundled resource request we expect to encounter is 'state'; if it exists, then
+     * we return 'state' back to the caller (ie, the name of the resource), so that the caller will then attempt
+     * to load the 'state' resource to obtain the actual state.
+     *
+     * TODO: This function could (and perhaps should) be modified to accept an optional type parameter (ie,
+     * one of the values in Component.TYPE), so that parms like autoMount could be eval'ed here rather than by
+     * the caller (eg, FDC.parseConfig()).  The downside is that this function would have to return multiple types,
+     * so every call would have to be cast to the expected type.
      *
      * @this {Computer}
      * @param {string} sParm
-     * @param {Object} [parmsComponent]
+     * @param {Object} [parmsComponent] (eg, this.parms)
      * @return {string|undefined}
      */
     getMachineParm(sParm, parmsComponent)
     {
         var value = Web.getURLParm(sParm);
-
+        if (value) {
+            try {
+                /*
+                 * Ideally, we could simply use strings as-is, but unfortunately, we need to convert all
+                 * supported escape sequences to their underlying characters, and using eval() is the simplest
+                 * way to deal with them; eg:
+                 *
+                 *      \', \", \r, \n, \t, and \xNN
+                 *
+                 * When a string containing the above sequences is passed as a machine or component parameter
+                 * (ie, as an embedPC() machine parameter or as XML component attribute), that conversion happens
+                 * automatically, either by virtue of implicit script evaluation, or by explicit eval() in
+                 * getComponentParms().  But when they're passed as a URL parameter, any backslashes are passed
+                 * through as-is.
+                 *
+                 * The complete list of backslash sequences supported by JavaScript:
+                 *
+                 *      \0  \'  \"  \\  \n  \r  \v  \t  \b  \f  \uXXXX \xXX
+                 *                      ^J  ^M  ^K  ^I  ^H  ^L
+                 *
+                 * and of course, eval() will convert them all, but there's no expectation of any but those I've
+                 * listed above, in part because of Jekyll limitations in some of our templates; eg:
+                 *
+                 *      https://github.com/jeffpar/pcjs/blob/jekyll/_includes/machine-engines.html
+                 *
+                 * which could be overcome, but there's really no need to support more, since \xNN can be used to
+                 * represent anything else.
+                 *
+                 * Finally, while the user should escape any quotation characters, just to be safe, we will try to
+                 * choose the safest quoting character for the overall string.
+                 */
+                var ch = value.indexOf("'") >= 0? '"' : "'";
+                value = /** @type {string} */ (eval(ch + value + ch));      // jshint ignore:line
+            } catch(e) {
+                Component.error(e.message + " (" + value + ")");
+                value = undefined;
+            }
+        }
         if (value === undefined && this.parmsMachine) {
             value = this.parmsMachine[sParm];
         }
@@ -76530,7 +76581,7 @@ class Computer extends Component {
         var sResponse = response[1];
         if (!nErrorCode && sResponse) {
             try {
-                response = eval("(" + sResponse + ")");
+                response = eval("(" + sResponse + ")"); // jshint ignore:line
                 if (response.code && response.code == UserAPI.CODE.OK) {
                     Web.setLocalStorageItem(Computer.STATE_USERID, response.data);
                     if (fMessages) this.printMessage(Computer.STATE_USERID + " updated: " + response.data);
@@ -76825,8 +76876,15 @@ class Computer extends Component {
          */
         if (this.cpu) this.cpu.updateStatus(fForce);
         if (this.panel) this.panel.updateStatus(fForce);
-        for (var i = 0; i < this.aVideo.length; i++) {
-            this.aVideo[i].updateScreen(fForce);
+        /*
+         * When called by our own timer for relatively infrequent DOM (see Computer.UPDATES_PER_SECOND), fForce is
+         * explicitly set to false, and in those cases, we should avoid performing screen updates, because it may
+         * subtly interfere with the Video component's normal refresh rate.
+         */
+        if (fForce !== false) {
+            for (var i = 0; i < this.aVideo.length; i++) {
+                this.aVideo[i].updateScreen(fForce);
+            }
         }
     }
 
