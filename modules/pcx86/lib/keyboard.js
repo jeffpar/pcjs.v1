@@ -141,7 +141,7 @@ class Keyboard extends Component {
         this.msAutoRepeat    = 500;
         this.msNextRepeat    = 100;
         this.msAutoRelease   = 50;
-        this.msInjectDefault = 1000;         // number of milliseconds between injected keystrokes
+        this.msInjectDefault = 150;         // number of milliseconds between injected keystrokes
         this.msInjectDelay   = 0;           // set by the initial injectKeys() call
 
         /*
