@@ -1,5 +1,5 @@
 /**
- * @fileoverview Compile-time definitions used by PCjs.
+ * @fileoverview Global definitions used by PCjs.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © Jeff Parsons 2012-2017
  *
@@ -26,45 +26,18 @@
  * as to their contents.
  */
 
-"use strict";
-
-/**
- * @define {string}
- */
-var APPVERSION = "1.x.x";       // this @define is overridden by the Closure Compiler with the version in package.json
-
-var XMLVERSION = null;          // this is set in non-COMPILED builds by embedMachine() if a version number was found in the machine XML
-
-var COPYRIGHT = "Copyright © 2012-2017 Jeff Parsons <Jeff@pcjs.org>";
-
-var LICENSE = "License: GPL version 3 or later <http://gnu.org/licenses/gpl.html>";
-
-var CSSCLASS = "pcjs";
-
-/**
- * @define {string}
- */
-var SITEHOST = "localhost:8088";// this @define is overridden by the Closure Compiler with "www.pcjs.org"
-
-/**
- * @define {boolean}
- */
-var COMPILED = false;           // this @define is overridden by the Closure Compiler (to true)
-
-/**
- * @define {boolean}
- */
-var DEBUG = true;               // this @define is overridden by the Closure Compiler (to false) to remove DEBUG-only code
-
-/**
- * @define {boolean}
- */
-var MAXDEBUG = false;           // this @define is overridden by the Closure Compiler (to false) to remove MAXDEBUG-only code
-
-/**
- * @define {boolean}
- */
-var PRIVATE = false;            // this @define is overridden by the Closure Compiler (to false) to enable PRIVATE code
+export const GLOBALS = {
+    APPVERSION: "1.x.x",                // overridden by the Closure Compiler with the version in package.json
+    XMLVERSION: null,                   // set in non-COMPILED builds by embedMachine() if a version number was found in the machine XML
+    COPYRIGHT:  "Copyright © 2012-2017 Jeff Parsons <Jeff@pcjs.org>",
+    LICENSE:    "License: GPL version 3 or later <http://gnu.org/licenses/gpl.html>",
+    CSSCLASS:   "pcjs",
+    SITEHOST:   "localhost:8088",       // overridden by the Closure Compiler with "www.pcjs.org"
+    COMPILED:   false,                  // overridden by the Closure Compiler (to true)
+    DEBUG:      true,                   // overridden by the Closure Compiler (to false) to remove DEBUG-only code
+    MAXDEBUG:   false,                  // overridden by the Closure Compiler (to false) to remove MAXDEBUG-only code
+    PRIVATE:    false                   // overridden by the Closure Compiler (to false) to enable PRIVATE code
+};
 
 /*
  * RS-232 DB-25 Pin Definitions, mapped to bits 1-25 in a 32-bit status value.
@@ -84,7 +57,7 @@ var PRIVATE = false;            // this @define is overridden by the Closure Com
  *
  * TODO: Move these definitions to a more appropriate shared file at some point.
  */
-var RS232 = {
+export const RS232 = {
     RTS: {
         PIN:  4,
         MASK: 0x00000010
@@ -110,30 +83,3 @@ var RS232 = {
         MASK: 0x00400000
     }
 };
-
-/*
- * NODE should be true if we're running under NodeJS (eg, command-line), false if not (eg, web browser)
- */
-var NODE = false;
-if (typeof module !== 'undefined') {
-    NODE = true;
-}
-
-if (NODE) {
-    global.window       = false;        // provides an alternative "if (typeof window === 'undefined')" (ie, "if (window) ...")
-    global.APPVERSION   = APPVERSION;
-    global.XMLVERSION   = XMLVERSION;
-    global.COPYRIGHT    = COPYRIGHT;
-    global.LICENSE      = LICENSE;
-    global.CSSCLASS     = CSSCLASS;
-    global.SITEHOST     = SITEHOST;
-    global.COMPILED     = COMPILED;
-    global.DEBUG        = DEBUG;
-    global.MAXDEBUG     = MAXDEBUG;
-    global.PRIVATE      = PRIVATE;
-    global.RS232        = RS232;
-    global.NODE         = NODE;
-    /*
-     * TODO: When we're "required" by Node, should we return anything via module.exports?
-     */
-}
