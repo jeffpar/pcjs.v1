@@ -44886,7 +44886,7 @@ class Keyboard extends Component {
                 if (simCode == Keys.SHIFTED_KEYCODES[code]) {
                     simCode = +code;
                     code = Keys.NONASCII_KEYCODES[code];
-                    if (code) simCode = code;
+                    if (code) simCode = +code;
                     break;
                 }
             }
