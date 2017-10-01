@@ -1038,7 +1038,10 @@ class Keyboard extends Component {
              * then a delay of 1500ms, then a reversion to the default delay (normally 150ms), followed
              * by "test;" and return.
              */
-            if (charCode >= 0xF0) {
+            if (charCode <= Keys.ASCII.CTRL_Z) {
+                charCode = charCode + Keys.KEYCODE.FAKE;
+            }
+            else if (charCode >= 0xF0) {
                 this.msInjectDelay = ((charCode - 0xF0) * 100) || this.msInjectDefault;
                 charCode = 0;
                 break;
@@ -1864,12 +1867,38 @@ Keyboard.SIMCODE = {
     CMD:          Keys.KEYCODE.CMD         + Keys.KEYCODE.ONDOWN,
     RCMD:         Keys.KEYCODE.RCMD        + Keys.KEYCODE.ONDOWN,
     FF_CMD:       Keys.KEYCODE.FF_CMD      + Keys.KEYCODE.ONDOWN,
-    SYSREQ:       Keys.KEYCODE.ESC         + Keys.KEYCODE.FAKE,
+    CTRL_A:       Keys.ASCII.CTRL_A        + Keys.KEYCODE.FAKE,
+    CTRL_B:       Keys.ASCII.CTRL_B        + Keys.KEYCODE.FAKE,
     CTRL_C:       Keys.ASCII.CTRL_C        + Keys.KEYCODE.FAKE,
-    CTRL_BREAK:   Keys.KEYCODE.BS          + Keys.KEYCODE.FAKE,
+    CTRL_D:       Keys.ASCII.CTRL_D        + Keys.KEYCODE.FAKE,
+    CTRL_E:       Keys.ASCII.CTRL_E        + Keys.KEYCODE.FAKE,
+    CTRL_F:       Keys.ASCII.CTRL_F        + Keys.KEYCODE.FAKE,
+    CTRL_G:       Keys.ASCII.CTRL_G        + Keys.KEYCODE.FAKE,
+    CTRL_H:       Keys.ASCII.CTRL_H        + Keys.KEYCODE.FAKE,
+    CTRL_I:       Keys.ASCII.CTRL_I        + Keys.KEYCODE.FAKE,
+    CTRL_J:       Keys.ASCII.CTRL_J        + Keys.KEYCODE.FAKE,
+    CTRL_K:       Keys.ASCII.CTRL_K        + Keys.KEYCODE.FAKE,
+    CTRL_L:       Keys.ASCII.CTRL_L        + Keys.KEYCODE.FAKE,
+    CTRL_M:       Keys.ASCII.CTRL_M        + Keys.KEYCODE.FAKE,
+    CTRL_N:       Keys.ASCII.CTRL_N        + Keys.KEYCODE.FAKE,
+    CTRL_O:       Keys.ASCII.CTRL_O        + Keys.KEYCODE.FAKE,
+    CTRL_P:       Keys.ASCII.CTRL_P        + Keys.KEYCODE.FAKE,
+    CTRL_Q:       Keys.ASCII.CTRL_Q        + Keys.KEYCODE.FAKE,
+    CTRL_R:       Keys.ASCII.CTRL_R        + Keys.KEYCODE.FAKE,
+    CTRL_S:       Keys.ASCII.CTRL_S        + Keys.KEYCODE.FAKE,
+    CTRL_T:       Keys.ASCII.CTRL_T        + Keys.KEYCODE.FAKE,
+    CTRL_U:       Keys.ASCII.CTRL_U        + Keys.KEYCODE.FAKE,
+    CTRL_V:       Keys.ASCII.CTRL_V        + Keys.KEYCODE.FAKE,
+    CTRL_W:       Keys.ASCII.CTRL_W        + Keys.KEYCODE.FAKE,
+    CTRL_X:       Keys.ASCII.CTRL_X        + Keys.KEYCODE.FAKE,
+    CTRL_Y:       Keys.ASCII.CTRL_Y        + Keys.KEYCODE.FAKE,
+    CTRL_Z:       Keys.ASCII.CTRL_Z        + Keys.KEYCODE.FAKE,
+    SYSREQ:       Keys.KEYCODE.ESC         + Keys.KEYCODE.FAKE,
+    CTRL_PAUSE:   Keys.KEYCODE.NUM_LOCK    + Keys.KEYCODE.FAKE,
+    CTRL_BREAK:   Keys.KEYCODE.SCROLL_LOCK + Keys.KEYCODE.FAKE,
     CTRL_ALT_DEL: Keys.KEYCODE.DEL         + Keys.KEYCODE.FAKE,
     CTRL_ALT_INS: Keys.KEYCODE.INS         + Keys.KEYCODE.FAKE,
-    CTRL_ALT_ENTER: Keys.KEYCODE.CR        + Keys.KEYCODE.FAKE
+    CTRL_ALT_ENTER: Keys.KEYCODE.NUM_CR    + Keys.KEYCODE.FAKE
 };
 
 /*
@@ -2402,7 +2431,32 @@ Keyboard.SIMCODES[Keyboard.SIMCODE.CMD]         = Keyboard.SCANCODE.WIN;
 Keyboard.SIMCODES[Keyboard.SIMCODE.RCMD]        = Keyboard.SCANCODE.MENU;
 Keyboard.SIMCODES[Keyboard.SIMCODE.FF_CMD]      = Keyboard.SCANCODE.WIN;
 
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_A]          = Keyboard.SCANCODE.A           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_B]          = Keyboard.SCANCODE.B           | (Keyboard.SCANCODE.CTRL << 8);
 Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_C]          = Keyboard.SCANCODE.C           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_D]          = Keyboard.SCANCODE.D           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_E]          = Keyboard.SCANCODE.E           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_F]          = Keyboard.SCANCODE.F           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_G]          = Keyboard.SCANCODE.G           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_H]          = Keyboard.SCANCODE.H           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_I]          = Keyboard.SCANCODE.I           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_J]          = Keyboard.SCANCODE.J           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_K]          = Keyboard.SCANCODE.K           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_L]          = Keyboard.SCANCODE.L           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_M]          = Keyboard.SCANCODE.M           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_N]          = Keyboard.SCANCODE.N           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_O]          = Keyboard.SCANCODE.O           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_P]          = Keyboard.SCANCODE.P           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_Q]          = Keyboard.SCANCODE.Q           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_R]          = Keyboard.SCANCODE.R           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_S]          = Keyboard.SCANCODE.S           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_T]          = Keyboard.SCANCODE.T           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_U]          = Keyboard.SCANCODE.U           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_V]          = Keyboard.SCANCODE.V           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_W]          = Keyboard.SCANCODE.W           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_X]          = Keyboard.SCANCODE.X           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_Y]          = Keyboard.SCANCODE.Y           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_Z]          = Keyboard.SCANCODE.Z           | (Keyboard.SCANCODE.CTRL << 8);
 Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_BREAK]      = Keyboard.SCANCODE.SCROLL_LOCK | (Keyboard.SCANCODE.CTRL << 8);
 Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_ALT_DEL]    = Keyboard.SCANCODE.NUM_DEL     | (Keyboard.SCANCODE.CTRL << 8) | (Keyboard.SCANCODE.ALT << 16);
 Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_ALT_INS]    = Keyboard.SCANCODE.NUM_INS     | (Keyboard.SCANCODE.CTRL << 8) | (Keyboard.SCANCODE.ALT << 16);
