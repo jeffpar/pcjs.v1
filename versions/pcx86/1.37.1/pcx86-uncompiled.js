@@ -8587,10 +8587,10 @@ class Bus extends Component {
      */
     initMemory()
     {
-        var block = new Memory();
+        let block = new Memory();
         block.copyBreakpoints(this.dbg);
         this.aMemBlocks = new Array(this.nBlockTotal);
-        for (var iBlock = 0; iBlock < this.nBlockTotal; iBlock++) {
+        for (let iBlock = 0; iBlock < this.nBlockTotal; iBlock++) {
             this.aMemBlocks[iBlock] = block;
         }
         this.cpu.initMemory(this.aMemBlocks, this.nBlockShift);
@@ -8664,15 +8664,15 @@ class Bus extends Component {
      */
     addMemory(addr, size, type, controller)
     {
-        var addrNext = addr;
-        var sizeLeft = size;
-        var iBlock = addrNext >>> this.nBlockShift;
+        let addrNext = addr;
+        let sizeLeft = size;
+        let iBlock = addrNext >>> this.nBlockShift;
 
         while (sizeLeft > 0 && iBlock < this.aMemBlocks.length) {
 
-            var block = this.aMemBlocks[iBlock];
-            var addrBlock = iBlock * this.nBlockSize;
-            var sizeBlock = this.nBlockSize - (addrNext - addrBlock);
+            let block = this.aMemBlocks[iBlock];
+            let addrBlock = iBlock * this.nBlockSize;
+            let sizeBlock = this.nBlockSize - (addrNext - addrBlock);
             if (sizeBlock > sizeLeft) sizeBlock = sizeLeft;
 
             if (block && block.size) {
@@ -8689,7 +8689,7 @@ class Bus extends Component {
                         return true;
                     }
                     if (addrNext >= block.addr + block.used) {
-                        var sizeAvail = block.size - (addrNext - addrBlock);
+                        let sizeAvail = block.size - (addrNext - addrBlock);
                         if (sizeAvail > sizeLeft) sizeAvail = sizeLeft;
                         block.used = addrNext - block.addr + sizeAvail;
                         addrNext = addrBlock + this.nBlockSize;
@@ -8701,7 +8701,7 @@ class Bus extends Component {
                 return this.reportError(Bus.ERROR.ADD_MEM_INUSE, addrNext, sizeLeft);
             }
 
-            var blockNew = new Memory(addrNext, sizeBlock, this.nBlockSize, type, controller);
+            let blockNew = new Memory(addrNext, sizeBlock, this.nBlockSize, type, controller);
             blockNew.copyBreakpoints(this.dbg, block);
             this.aMemBlocks[iBlock++] = blockNew;
 
@@ -8720,8 +8720,8 @@ class Bus extends Component {
              */
             this.cpu.flushPageBlocks();
             if (!this.cpu.isRunning()) {        // allocation messages at "run time" are bit too much
-                var kb = (size / 1024)|0;
-                var sb = kb? (kb + "Kb ") : (size + " bytes ");
+                let kb = (size / 1024)|0;
+                let sb = kb? (kb + "Kb ") : (size + " bytes ");
                 this.status(sb + Memory.TYPE.NAMES[type] + " at " + Str.toHex(addr));
             }
             return true;
@@ -8739,9 +8739,9 @@ class Bus extends Component {
      */
     cleanMemory(addr, size)
     {
-        var fClean = true;
-        var iBlock = addr >>> this.nBlockShift;
-        var sizeBlock = this.nBlockSize - (addr & this.nBlockLimit);
+        let fClean = true;
+        let iBlock = addr >>> this.nBlockShift;
+        let sizeBlock = this.nBlockSize - (addr & this.nBlockLimit);
         while (size > 0 && iBlock < this.aMemBlocks.length) {
             if (this.aMemBlocks[iBlock].fDirty) {
                 this.aMemBlocks[iBlock].fDirty = fClean = false;
@@ -8771,16 +8771,16 @@ class Bus extends Component {
         if (size == null) size = (this.addrTotal - addr) | 0;
         if (info == null) info = {cbTotal: 0, cBlocks: 0, aBlocks: []};
 
-        var iBlock = addr >>> this.nBlockShift;
-        var iBlockMax = ((addr + size - 1) >>> this.nBlockShift);
+        let iBlock = addr >>> this.nBlockShift;
+        let iBlockMax = ((addr + size - 1) >>> this.nBlockShift);
 
         info.cbTotal = 0;
         info.cBlocks = 0;
         while (iBlock <= iBlockMax) {
-            var block = this.aMemBlocks[iBlock];
+            let block = this.aMemBlocks[iBlock];
             info.cbTotal += block.size;
             if (block.size) {
-                var btmod = (BACKTRACK && block.modBackTrack(false)? 1 : 0);
+                let btmod = (BACKTRACK && block.modBackTrack(false)? 1 : 0);
                 info.aBlocks.push(Usr.initBitFields(Bus.BlockInfo, iBlock, 0, btmod, block.type));
                 info.cBlocks++
             }
@@ -8834,7 +8834,7 @@ class Bus extends Component {
             }
         }
         else if (this.nBusWidth > 20) {
-            var addrMask = (this.nBusMask & ~0x100000) | (fEnable? 0x100000 : 0);
+            let addrMask = (this.nBusMask & ~0x100000) | (fEnable? 0x100000 : 0);
             if (addrMask != this.nBusMask) {
                 this.nBusMask = addrMask;
                 if (this.cpu) this.cpu.setAddressMask(addrMask);
@@ -8870,9 +8870,9 @@ class Bus extends Component {
     setMemoryAccess(addr, size, afn, fQuiet)
     {
         if (!(addr & this.nBlockLimit) && size && !(size & this.nBlockLimit)) {
-            var iBlock = addr >>> this.nBlockShift;
+            let iBlock = addr >>> this.nBlockShift;
             while (size > 0) {
-                var block = this.aMemBlocks[iBlock];
+                let block = this.aMemBlocks[iBlock];
                 if (!block.controller) {
                     return this.reportError(Bus.ERROR.SET_MEM_NOCTRL, addr, size, fQuiet);
                 }
@@ -8900,10 +8900,10 @@ class Bus extends Component {
     removeMemory(addr, size)
     {
         if (!(addr & this.nBlockLimit) && size && !(size & this.nBlockLimit)) {
-            var iBlock = addr >>> this.nBlockShift;
+            let iBlock = addr >>> this.nBlockShift;
             while (size > 0) {
-                var blockOld = this.aMemBlocks[iBlock];
-                var blockNew = new Memory(addr);
+                let blockOld = this.aMemBlocks[iBlock];
+                let blockNew = new Memory(addr);
                 blockNew.copyBreakpoints(this.dbg, blockOld);
                 this.aMemBlocks[iBlock++] = blockNew;
                 addr = iBlock * this.nBlockSize;
@@ -8934,8 +8934,8 @@ class Bus extends Component {
      */
     getMemoryBlocks(addr, size)
     {
-        var aBlocks = [];
-        var iBlock = addr >>> this.nBlockShift;
+        let aBlocks = [];
+        let iBlock = addr >>> this.nBlockShift;
         while (size > 0 && iBlock < this.aMemBlocks.length) {
             aBlocks.push(this.aMemBlocks[iBlock++]);
             size -= this.nBlockSize;
@@ -8960,14 +8960,14 @@ class Bus extends Component {
      */
     setMemoryBlocks(addr, size, aBlocks, type)
     {
-        var i = 0;
-        var iBlock = addr >>> this.nBlockShift;
+        let i = 0;
+        let iBlock = addr >>> this.nBlockShift;
         while (size > 0 && iBlock < this.aMemBlocks.length) {
-            var block = aBlocks[i++];
+            let block = aBlocks[i++];
 
             if (!block) break;
             if (type !== undefined) {
-                var blockNew = new Memory(addr);
+                let blockNew = new Memory(addr);
                 blockNew.clone(block, type, this.dbg);
                 block = blockNew;
             }
@@ -9015,8 +9015,8 @@ class Bus extends Component {
      */
     getShort(addr)
     {
-        var off = addr & this.nBlockLimit;
-        var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
+        let off = addr & this.nBlockLimit;
+        let iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
         if (off != this.nBlockLimit) {
             return this.aMemBlocks[iBlock].readShort(off, addr);
         }
@@ -9034,8 +9034,8 @@ class Bus extends Component {
      */
     getShortDirect(addr)
     {
-        var off = addr & this.nBlockLimit;
-        var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
+        let off = addr & this.nBlockLimit;
+        let iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
         if (off != this.nBlockLimit) {
             return this.aMemBlocks[iBlock].readShortDirect(off, addr);
         }
@@ -9053,8 +9053,8 @@ class Bus extends Component {
      */
     getLong(addr)
     {
-        var off = addr & this.nBlockLimit;
-        var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
+        let off = addr & this.nBlockLimit;
+        let iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
         if (off < this.nBlockLimit - 2) {
             return this.aMemBlocks[iBlock].readLong(off, addr);
         }
@@ -9064,9 +9064,9 @@ class Bus extends Component {
          * which may have also created some undesirable side-effects for custom memory controllers.
          * This simpler (and probably more reliable) approach is to simply read the long as individual bytes.
          */
-        var l = 0;
-        var cb = 4, nShift = 0;
-        var cbBlock = 4 - (off & 0x3);    // (off & 0x3) will be 1, 2 or 3, so cbBlock will be 3, 2, or 1
+        let l = 0;
+        let cb = 4, nShift = 0;
+        let cbBlock = 4 - (off & 0x3);    // (off & 0x3) will be 1, 2 or 3, so cbBlock will be 3, 2, or 1
         while (cb--) {
             l |= (this.aMemBlocks[iBlock].readByte(off++, addr++) << nShift);
             if (!--cbBlock) {
@@ -9118,8 +9118,8 @@ class Bus extends Component {
      */
     setShort(addr, w)
     {
-        var off = addr & this.nBlockLimit;
-        var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
+        let off = addr & this.nBlockLimit;
+        let iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
         if (off != this.nBlockLimit) {
             this.aMemBlocks[iBlock].writeShort(off, w & 0xffff, addr);
             return;
@@ -9140,8 +9140,8 @@ class Bus extends Component {
      */
     setShortDirect(addr, w)
     {
-        var off = addr & this.nBlockLimit;
-        var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
+        let off = addr & this.nBlockLimit;
+        let iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
         if (off != this.nBlockLimit) {
             this.aMemBlocks[iBlock].writeShortDirect(off, w & 0xffff, addr);
             return;
@@ -9161,8 +9161,8 @@ class Bus extends Component {
      */
     setLong(addr, l)
     {
-        var off = addr & this.nBlockLimit;
-        var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
+        let off = addr & this.nBlockLimit;
+        let iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
         if (off < this.nBlockLimit - 2) {
             this.aMemBlocks[iBlock].writeLong(off, l);
             return;
@@ -9173,8 +9173,8 @@ class Bus extends Component {
          * block), which may have also created some undesirable side-effects for custom memory controllers.
          * This simpler (and probably more reliable) approach is to simply write the long as individual bytes.
          */
-        var cb = 4;
-        var cbBlock = 4 - (off & 0x3);    // (off & 0x3) will be 1, 2 or 3, so cbBlock will be 3, 2, or 1
+        let cb = 4;
+        let cbBlock = 4 - (off & 0x3);    // (off & 0x3) will be 1, 2 or 3, so cbBlock will be 3, 2, or 1
         while (cb--) {
             this.aMemBlocks[iBlock].writeByte(off++, l & 0xff, addr++);
             if (!--cbBlock) {
@@ -9202,7 +9202,7 @@ class Bus extends Component {
     addBackTrackObject(obj, bto, off)
     {
         if (BACKTRACK && obj) {
-            var cbtObjects = this.abtObjects.length;
+            let cbtObjects = this.abtObjects.length;
             if (!bto) {
                 /*
                  * Try the most recently created bto, on the off-chance it's what the caller needs
@@ -9213,12 +9213,12 @@ class Bus extends Component {
 
                 bto = {obj: obj, off: off, slot: 0, refs: 0};
 
-                var slot;
+                let slot;
                 if (!this.cbtDeletions) {
                     slot = cbtObjects;
                 } else {
                     for (slot = this.ibtLastDelete; slot < cbtObjects; slot++) {
-                        var btoTest = this.abtObjects[slot];
+                        let btoTest = this.abtObjects[slot];
                         if (!btoTest || !btoTest.refs && !this.isBackTrackWeak(slot << Bus.BTINFO.SLOT_SHIFT)) {
                             this.ibtLastDelete = slot + 1;
                             this.cbtDeletions--;
@@ -9275,7 +9275,7 @@ class Bus extends Component {
      */
     getBackTrackIndex(bto, off)
     {
-        var bti = 0;
+        let bti = 0;
         if (BACKTRACK && bto) {
             bti = (bto.slot << Bus.BTINFO.SLOT_SHIFT) | Bus.BTINFO.TYPE_DATA | (off - bto.off);
         }
@@ -9294,7 +9294,7 @@ class Bus extends Component {
     {
         if (BACKTRACK && bto) {
 
-            var bti = (bto.slot << Bus.BTINFO.SLOT_SHIFT) | Bus.BTINFO.TYPE_DATA | (off - bto.off);
+            let bti = (bto.slot << Bus.BTINFO.SLOT_SHIFT) | Bus.BTINFO.TYPE_DATA | (off - bto.off);
             this.writeBackTrack(addr, bti);
         }
     }
@@ -9324,14 +9324,14 @@ class Bus extends Component {
     writeBackTrack(addr, bti)
     {
         if (BACKTRACK) {
-            var slot = bti >>> Bus.BTINFO.SLOT_SHIFT;
-            var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
-            var btiPrev = this.aMemBlocks[iBlock].writeBackTrack(addr & this.nBlockLimit, bti);
-            var slotPrev = btiPrev >>> Bus.BTINFO.SLOT_SHIFT;
+            let slot = bti >>> Bus.BTINFO.SLOT_SHIFT;
+            let iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
+            let btiPrev = this.aMemBlocks[iBlock].writeBackTrack(addr & this.nBlockLimit, bti);
+            let slotPrev = btiPrev >>> Bus.BTINFO.SLOT_SHIFT;
             if (slot != slotPrev) {
                 this.aMemBlocks[iBlock].modBackTrack(true);
                 if (btiPrev && slotPrev) {
-                    var btoPrev = this.abtObjects[slotPrev-1];
+                    let btoPrev = this.abtObjects[slotPrev-1];
                     if (!btoPrev) {
                         if (DEBUGGER && this.dbg && this.dbg.messageEnabled(Messages.WARN)) {
                             this.dbg.message("writeBackTrack(%" + Str.toHex(addr) + ',' + Str.toHex(bti) + "): previous index (" + Str.toHex(btiPrev) + ") refers to empty slot (" + slotPrev + ")");
@@ -9373,7 +9373,7 @@ class Bus extends Component {
                     }
                 }
                 if (bti && slot) {
-                    var bto = this.abtObjects[slot-1];
+                    let bto = this.abtObjects[slot-1];
                     if (bto) {
 
                         bto.refs++;
@@ -9391,8 +9391,8 @@ class Bus extends Component {
      */
     isBackTrackWeak(bti)
     {
-        var bt = this.cpu.backTrack;
-        var slot = bti >> Bus.BTINFO.SLOT_SHIFT;
+        let bt = this.cpu.backTrack;
+        let slot = bti >> Bus.BTINFO.SLOT_SHIFT;
         return (bt.btiAL   >> Bus.BTINFO.SLOT_SHIFT == slot ||
                 bt.btiAH   >> Bus.BTINFO.SLOT_SHIFT == slot ||
                 bt.btiBL   >> Bus.BTINFO.SLOT_SHIFT == slot ||
@@ -9441,7 +9441,7 @@ class Bus extends Component {
     getBackTrackObject(bti)
     {
         if (BACKTRACK) {
-            var slot = bti >>> Bus.BTINFO.SLOT_SHIFT;
+            let slot = bti >>> Bus.BTINFO.SLOT_SHIFT;
             if (slot) return this.abtObjects[slot-1];
         }
         return null;
@@ -9459,10 +9459,10 @@ class Bus extends Component {
     getBackTrackInfo(bti, fSymbol, fNearest)
     {
         if (BACKTRACK) {
-            var bto = this.getBackTrackObject(bti);
+            let bto = this.getBackTrackObject(bti);
             if (bto) {
-                var off = bti & Bus.BTINFO.OFF_MASK;
-                var file = bto.obj.file;
+                let off = bti & Bus.BTINFO.OFF_MASK;
+                let file = bto.obj.file;
                 if (file) {
 
                     return file.getSymbol(bto.obj.offFile + off, fNearest);
@@ -9521,18 +9521,18 @@ class Bus extends Component {
      */
     saveMemory(fAll)
     {
-        var i = 0;
-        var a = [];
+        let i = 0;
+        let a = [];
 
         /*
          * A quick-and-dirty work-around for 32-bit bus machines, to ensure that all blocks in the 2nd Mb are
          * mapped in before we save.  We do this by forcing A20 on, and then turning it off again before we leave.
          */
-        var fA20 = this.getA20();
+        let fA20 = this.getA20();
         if (!fA20) this.setA20(true);
 
-        for (var iBlock = 0; iBlock < this.nBlockTotal; iBlock++) {
-            var block = this.aMemBlocks[iBlock];
+        for (let iBlock = 0; iBlock < this.nBlockTotal; iBlock++) {
+            let block = this.aMemBlocks[iBlock];
             /*
              * We have to check both fDirty and fDirtyEver, because we may have called cleanMemory() on some of
              * the memory blocks (eg, video memory), and while cleanMemory() will clear a dirty block's fDirty flag,
@@ -9569,14 +9569,14 @@ class Bus extends Component {
      */
     restoreMemory(a)
     {
-        var i;
+        let i;
         for (i = 0; i < a.length - 1; i += 2) {
-            var iBlock = a[i];
-            var adw = a[i+1];
+            let iBlock = a[i];
+            let adw = a[i+1];
             if (adw && adw.length < this.nBlockLen) {
                 adw = State.decompress(adw, this.nBlockLen);
             }
-            var block = this.aMemBlocks[iBlock];
+            let block = this.aMemBlocks[iBlock];
             if (!block || !block.restore(adw)) {
                 /*
                  * Either the block to restore hasn't been allocated, indicating a change in the machine
@@ -9624,7 +9624,7 @@ class Bus extends Component {
     addPortInputNotify(start, end, fn)
     {
         if (fn !== undefined) {
-            for (var port = start; port <= end; port++) {
+            for (let port = start; port <= end; port++) {
                 if (this.aPortInputNotify[port] !== undefined) {
                     Component.warning("Input port " + Str.toHexWord(port) + " already registered");
                     continue;
@@ -9648,7 +9648,7 @@ class Bus extends Component {
     addPortInputTable(component, table, offset)
     {
         if (offset === undefined) offset = 0;
-        for (var port in table) {
+        for (let port in table) {
             this.addPortInputNotify(+port + offset, +port + offset, table[port].bind(component));
         }
     }
@@ -9681,14 +9681,14 @@ class Bus extends Component {
      */
     checkPortInputNotify(port, size, addrLIP)
     {
-        var data = 0, shift = 0;
+        let data = 0, shift = 0;
 
         while (size > 0) {
 
-            var aNotify = this.aPortInputNotify[port];
-            var sizePort = this.aPortInputWidth[port] || 1;
-            var maskPort = (sizePort == 1? 0xff : (sizePort == 2? 0xffff : -1));
-            var dataPort = maskPort;
+            let aNotify = this.aPortInputNotify[port];
+            let sizePort = this.aPortInputWidth[port] || 1;
+            let maskPort = (sizePort == 1? 0xff : (sizePort == 2? 0xffff : -1));
+            let dataPort = maskPort;
 
             /*
              * TODO: We need to decide what to do about 8-bit I/O to a 16-bit port (ditto for 16-bit I/O
@@ -9766,7 +9766,7 @@ class Bus extends Component {
     addPortOutputNotify(start, end, fn)
     {
         if (fn !== undefined) {
-            for (var port = start; port <= end; port++) {
+            for (let port = start; port <= end; port++) {
                 if (this.aPortOutputNotify[port] !== undefined) {
                     Component.warning("Output port " + Str.toHexWord(port) + " already registered");
                     continue;
@@ -9790,7 +9790,7 @@ class Bus extends Component {
     addPortOutputTable(component, table, offset)
     {
         if (offset === undefined) offset = 0;
-        for (var port in table) {
+        for (let port in table) {
             this.addPortOutputNotify(+port + offset, +port + offset, table[port].bind(component));
         }
     }
@@ -9820,14 +9820,14 @@ class Bus extends Component {
      */
     checkPortOutputNotify(port, size, data, addrLIP)
     {
-        var shift = 0;
+        let shift = 0;
 
         while (size > 0) {
 
-            var aNotify = this.aPortOutputNotify[port];
-            var sizePort = this.aPortOutputWidth[port] || 1;
-            var maskPort = (sizePort == 1? 0xff : (sizePort == 2? 0xffff : -1));
-            var dataPort = (data >>>= shift) & maskPort;
+            let aNotify = this.aPortOutputNotify[port];
+            let sizePort = this.aPortOutputWidth[port] || 1;
+            let maskPort = (sizePort == 1? 0xff : (sizePort == 2? 0xffff : -1));
+            let dataPort = (data >>>= shift) & maskPort;
 
             /*
              * TODO: We need to decide what to do about 8-bit I/O to a 16-bit port (ditto for 16-bit I/O
@@ -9872,7 +9872,7 @@ class Bus extends Component {
      */
     reportError(op, addr, size, fQuiet)
     {
-        var sError = "Memory block error (" + op + ": " + Str.toHex(addr) + "," + Str.toHex(size) + ")";
+        let sError = "Memory block error (" + op + ": " + Str.toHex(addr) + "," + Str.toHex(size) + ")";
         if (fQuiet) {
             if (this.dbg) {
                 this.dbg.message(sError);
@@ -9896,8 +9896,8 @@ class Bus extends Component {
      *
      getLongDirect(addr)
      {
-         var off = addr & this.nBlockLimit;
-         var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
+         let off = addr & this.nBlockLimit;
+         let iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
          if (off < this.nBlockLimit - 2) {
              return this.aMemBlocks[iBlock].readLongDirect(off, addr);
          }
@@ -9907,9 +9907,9 @@ class Bus extends Component {
          // which may have also created some undesirable side-effects for custom memory controllers.
          // This simpler (and probably more reliable) approach is to simply read the long as individual bytes.
          //
-         var l = 0;
-         var cb = 4, nShift = 0;
-         var cbBlock = 4 - (off & 0x3);    // (off & 0x3) will be 1, 2 or 3, so cbBlock will be 3, 2, or 1
+         let l = 0;
+         let cb = 4, nShift = 0;
+         let cbBlock = 4 - (off & 0x3);    // (off & 0x3) will be 1, 2 or 3, so cbBlock will be 3, 2, or 1
          while (cb--) {
              l |= (this.aMemBlocks[iBlock].readByteDirect(off++, addr++) << nShift);
              if (!--cbBlock) {
@@ -9934,8 +9934,8 @@ class Bus extends Component {
      *
      setLongDirect(addr, l)
      {
-         var off = addr & this.nBlockLimit;
-         var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
+         let off = addr & this.nBlockLimit;
+         let iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
          if (off < this.nBlockLimit - 2) {
              this.aMemBlocks[iBlock].writeLongDirect(off, l, addr);
              return;
@@ -9946,8 +9946,8 @@ class Bus extends Component {
          // block), which may have also created some undesirable side-effects for custom memory controllers.
          // This simpler (and probably more reliable) approach is to simply write the long as individual bytes.
          //
-         var cb = 4;
-         var cbBlock = 4 - (off & 0x3);    // (off & 0x3) will be 1, 2 or 3, so cbBlock will be 3, 2, or 1
+         let cb = 4;
+         let cbBlock = 4 - (off & 0x3);    // (off & 0x3) will be 1, 2 or 3, so cbBlock will be 3, 2, or 1
          while (cb--) {
              this.aMemBlocks[iBlock].writeByteDirect(off++, l & 0xff, addr++);
              if (!--cbBlock) {
@@ -9996,7 +9996,7 @@ class Bus extends Component {
      *
      removePortInputNotify(start, end)
      {
-         for (var port = start; port < end; port++) {
+         for (let port = start; port < end; port++) {
              if (this.aPortInputNotify[port]) {
                  delete this.aPortInputNotify[port];
              }
@@ -10015,7 +10015,7 @@ class Bus extends Component {
      *
      removePortOutputNotify(start, end)
      {
-         for (var port = start; port < end; port++) {
+         for (let port = start; port < end; port++) {
              if (this.aPortOutputNotify[port]) {
                  delete this.aPortOutputNotify[port];
              }
@@ -45578,7 +45578,10 @@ class Keyboard extends Component {
              * then a delay of 1500ms, then a reversion to the default delay (normally 150ms), followed
              * by "test;" and return.
              */
-            if (charCode >= 0xF0) {
+            if (charCode <= 0x1A) {
+                charCode = charCode + Keys.KEYCODE.FAKE;
+            }
+            else if (charCode >= 0xF0) {
                 this.msInjectDelay = ((charCode - 0xF0) * 100) || this.msInjectDefault;
                 charCode = 0;
                 break;
@@ -46404,12 +46407,38 @@ Keyboard.SIMCODE = {
     CMD:          Keys.KEYCODE.CMD         + Keys.KEYCODE.ONDOWN,
     RCMD:         Keys.KEYCODE.RCMD        + Keys.KEYCODE.ONDOWN,
     FF_CMD:       Keys.KEYCODE.FF_CMD      + Keys.KEYCODE.ONDOWN,
-    SYSREQ:       Keys.KEYCODE.ESC         + Keys.KEYCODE.FAKE,
+    CTRL_A:       Keys.ASCII.CTRL_A        + Keys.KEYCODE.FAKE,
+    CTRL_B:       Keys.ASCII.CTRL_B        + Keys.KEYCODE.FAKE,
     CTRL_C:       Keys.ASCII.CTRL_C        + Keys.KEYCODE.FAKE,
-    CTRL_BREAK:   Keys.KEYCODE.BS          + Keys.KEYCODE.FAKE,
+    CTRL_D:       Keys.ASCII.CTRL_D        + Keys.KEYCODE.FAKE,
+    CTRL_E:       Keys.ASCII.CTRL_E        + Keys.KEYCODE.FAKE,
+    CTRL_F:       Keys.ASCII.CTRL_F        + Keys.KEYCODE.FAKE,
+    CTRL_G:       Keys.ASCII.CTRL_G        + Keys.KEYCODE.FAKE,
+    CTRL_H:       Keys.ASCII.CTRL_H        + Keys.KEYCODE.FAKE,
+    CTRL_I:       Keys.ASCII.CTRL_I        + Keys.KEYCODE.FAKE,
+    CTRL_J:       Keys.ASCII.CTRL_J        + Keys.KEYCODE.FAKE,
+    CTRL_K:       Keys.ASCII.CTRL_K        + Keys.KEYCODE.FAKE,
+    CTRL_L:       Keys.ASCII.CTRL_L        + Keys.KEYCODE.FAKE,
+    CTRL_M:       Keys.ASCII.CTRL_M        + Keys.KEYCODE.FAKE,
+    CTRL_N:       Keys.ASCII.CTRL_N        + Keys.KEYCODE.FAKE,
+    CTRL_O:       Keys.ASCII.CTRL_O        + Keys.KEYCODE.FAKE,
+    CTRL_P:       Keys.ASCII.CTRL_P        + Keys.KEYCODE.FAKE,
+    CTRL_Q:       Keys.ASCII.CTRL_Q        + Keys.KEYCODE.FAKE,
+    CTRL_R:       Keys.ASCII.CTRL_R        + Keys.KEYCODE.FAKE,
+    CTRL_S:       Keys.ASCII.CTRL_S        + Keys.KEYCODE.FAKE,
+    CTRL_T:       Keys.ASCII.CTRL_T        + Keys.KEYCODE.FAKE,
+    CTRL_U:       Keys.ASCII.CTRL_U        + Keys.KEYCODE.FAKE,
+    CTRL_V:       Keys.ASCII.CTRL_V        + Keys.KEYCODE.FAKE,
+    CTRL_W:       Keys.ASCII.CTRL_W        + Keys.KEYCODE.FAKE,
+    CTRL_X:       Keys.ASCII.CTRL_X        + Keys.KEYCODE.FAKE,
+    CTRL_Y:       Keys.ASCII.CTRL_Y        + Keys.KEYCODE.FAKE,
+    CTRL_Z:       Keys.ASCII.CTRL_Z        + Keys.KEYCODE.FAKE,
+    SYSREQ:       Keys.KEYCODE.ESC         + Keys.KEYCODE.FAKE,
+    CTRL_PAUSE:   Keys.KEYCODE.NUM_LOCK    + Keys.KEYCODE.FAKE,
+    CTRL_BREAK:   Keys.KEYCODE.SCROLL_LOCK + Keys.KEYCODE.FAKE,
     CTRL_ALT_DEL: Keys.KEYCODE.DEL         + Keys.KEYCODE.FAKE,
     CTRL_ALT_INS: Keys.KEYCODE.INS         + Keys.KEYCODE.FAKE,
-    CTRL_ALT_ENTER: Keys.KEYCODE.CR        + Keys.KEYCODE.FAKE
+    CTRL_ALT_ENTER: Keys.KEYCODE.NUM_CR    + Keys.KEYCODE.FAKE
 };
 
 /*
@@ -46942,7 +46971,32 @@ Keyboard.SIMCODES[Keyboard.SIMCODE.CMD]         = Keyboard.SCANCODE.WIN;
 Keyboard.SIMCODES[Keyboard.SIMCODE.RCMD]        = Keyboard.SCANCODE.MENU;
 Keyboard.SIMCODES[Keyboard.SIMCODE.FF_CMD]      = Keyboard.SCANCODE.WIN;
 
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_A]          = Keyboard.SCANCODE.A           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_B]          = Keyboard.SCANCODE.B           | (Keyboard.SCANCODE.CTRL << 8);
 Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_C]          = Keyboard.SCANCODE.C           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_D]          = Keyboard.SCANCODE.D           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_E]          = Keyboard.SCANCODE.E           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_F]          = Keyboard.SCANCODE.F           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_G]          = Keyboard.SCANCODE.G           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_H]          = Keyboard.SCANCODE.H           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_I]          = Keyboard.SCANCODE.I           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_J]          = Keyboard.SCANCODE.J           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_K]          = Keyboard.SCANCODE.K           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_L]          = Keyboard.SCANCODE.L           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_M]          = Keyboard.SCANCODE.M           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_N]          = Keyboard.SCANCODE.N           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_O]          = Keyboard.SCANCODE.O           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_P]          = Keyboard.SCANCODE.P           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_Q]          = Keyboard.SCANCODE.Q           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_R]          = Keyboard.SCANCODE.R           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_S]          = Keyboard.SCANCODE.S           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_T]          = Keyboard.SCANCODE.T           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_U]          = Keyboard.SCANCODE.U           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_V]          = Keyboard.SCANCODE.V           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_W]          = Keyboard.SCANCODE.W           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_X]          = Keyboard.SCANCODE.X           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_Y]          = Keyboard.SCANCODE.Y           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_Z]          = Keyboard.SCANCODE.Z           | (Keyboard.SCANCODE.CTRL << 8);
 Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_BREAK]      = Keyboard.SCANCODE.SCROLL_LOCK | (Keyboard.SCANCODE.CTRL << 8);
 Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_ALT_DEL]    = Keyboard.SCANCODE.NUM_DEL     | (Keyboard.SCANCODE.CTRL << 8) | (Keyboard.SCANCODE.ALT << 16);
 Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_ALT_INS]    = Keyboard.SCANCODE.NUM_INS     | (Keyboard.SCANCODE.CTRL << 8) | (Keyboard.SCANCODE.ALT << 16);
