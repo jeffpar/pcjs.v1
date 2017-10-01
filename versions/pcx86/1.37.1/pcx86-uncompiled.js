@@ -45569,6 +45569,9 @@ class Keyboard extends Component {
             this.sInjectBuffer = this.sInjectBuffer.substr(1);
             charCode = ch.charCodeAt(0);
             /*
+             * charCodes 0x01-0x1A correspond to key combinations CTRL-A through CTRL-Z, unless they
+             * are \t, \n, or \r; CTRL-I, CTRL-J, and CTRL-M must be specified using \x1C, \x1D, and \x1E.
+             *
              * charCodes 0xF1-0xFF establish a new delay of 100-1500ms between keys; 0xF0 reverts to
              * the default delay.  For example:
              *
@@ -45579,7 +45582,18 @@ class Keyboard extends Component {
              * by "test;" and return.
              */
             if (charCode <= Keys.ASCII.CTRL_Z) {
-                charCode = charCode + Keys.KEYCODE.FAKE;
+                if (charCode != Keys.ASCII.CTRL_I && charCode != Keys.ASCII.CTRL_J && charCode != Keys.ASCII.CTRL_M) {
+                    charCode = charCode + Keys.KEYCODE.FAKE;
+                }
+            }
+            else if (charCode == 0x1C) {
+                charCode = Keys.ASCII.CTRL_I + Keys.KEYCODE.FAKE;
+            }
+            else if (charCode == 0x1D) {
+                charCode = Keys.ASCII.CTRL_J + Keys.KEYCODE.FAKE;
+            }
+            else if (charCode == 0x1E) {
+                charCode = Keys.ASCII.CTRL_M + Keys.KEYCODE.FAKE;
             }
             else if (charCode >= 0xF0) {
                 this.msInjectDelay = ((charCode - 0xF0) * 100) || this.msInjectDefault;
