@@ -469,7 +469,7 @@ var Keys = {
           BREAK:  0, CTRL_A:  1, CTRL_B:  2, CTRL_C:  3, CTRL_D:  4, CTRL_E:  5, CTRL_F:  6, CTRL_G:  7,
          CTRL_H:  8, CTRL_I:  9, CTRL_J: 10, CTRL_K: 11, CTRL_L: 12, CTRL_M: 13, CTRL_N: 14, CTRL_O: 15,
          CTRL_P: 16, CTRL_Q: 17, CTRL_R: 18, CTRL_S: 19, CTRL_T: 20, CTRL_U: 21, CTRL_V: 22, CTRL_W: 23,
-         CTRL_X: 24, CTRL_Y: 25, CTRL_Z: 26,
+         CTRL_X: 24, CTRL_Y: 25, CTRL_Z: 26, ESC:    27,
             ' ': 32,    '!': 33,    '"': 34,    '#': 35,    '$': 36,    '%': 37,    '&': 38,    "'": 39,
             '(': 40,    ')': 41,    '*': 42,    '+': 43,    ',': 44,    '-': 45,    '.': 46,    '/': 47,
             '0': 48,    '1': 49,    '2': 50,    '3': 51,    '4': 52,    '5': 53,    '6': 54,    '7': 55,
@@ -496,7 +496,7 @@ var Keys = {
     KEYCODE: {
         /* 0x08 */ BS:          8,          // BACKSPACE        (ASCII.CTRL_H)
         /* 0x09 */ TAB:         9,          // TAB              (ASCII.CTRL_I)
-        /* 0x0A */ LF:          10,         // LINE FEED        (ASCII.CTRL_J) (TODO: Determine if any key actually generates this)
+        /* 0x0A */ LF:          10,         // LINE-FEED        (ASCII.CTRL_J) (Some Windows-based browsers used to generate this via CTRL-ENTER)
         /* 0x0D */ CR:          13,         // CARRIAGE RETURN  (ASCII.CTRL_M)
         /* 0x10 */ SHIFT:       16,
         /* 0x11 */ CTRL:        17,
@@ -45570,16 +45570,19 @@ class Keyboard extends Component {
             charCode = ch.charCodeAt(0);
             /*
              * charCodes 0x01-0x1A correspond to key combinations CTRL-A through CTRL-Z, unless they
-             * are \t, \n, or \r; CTRL-I, CTRL-J, and CTRL-M must be specified using \x1C, \x1D, and \x1E.
+             * are \t, \n, or \r, which are reserved for TAB, LINE-FEED, and RETURN, respectively, so if
+             * you need to simulate CTRL-I, CTRL-J, or CTRL-M, those must be specified using \x1C, \x1D,
+             * or \x1E, respectively.  Also, since PCs have no dedicated LINE-FEED key, and since \n is
+             * often used instead of \r, we map LINE-FEED (LF) to RETURN (CR) below.
              *
              * charCodes 0xF1-0xFF establish a new delay of 100-1500ms between keys; 0xF0 reverts to
              * the default delay.  For example:
              *
              *      \r\rb:\rrt\r\xff\xf0test;\r
              *
-             * performs two return key presses, then "b:" followed by return, "rt" followed by return,
+             * performs two RETURN key presses, then "b:" followed by RETURN, "rt" followed by RETURN,
              * then a delay of 1500ms, then a reversion to the default delay (normally 150ms), followed
-             * by "test;" and return.
+             * by "test;" and RETURN.
              */
             if (charCode <= Keys.ASCII.CTRL_Z) {
                 if (charCode != Keys.ASCII.CTRL_I && charCode != Keys.ASCII.CTRL_J && charCode != Keys.ASCII.CTRL_M) {
@@ -45603,7 +45606,8 @@ class Keyboard extends Component {
         }
         if (charCode) {
             /*
-             * I could require all callers to supply CRs instead of LFs, but this is friendlier.
+             * I could require all callers to supply CRs instead of LFs, but this is friendlier; besides, PCs
+             * don't have a dedicated LINE-FEED key, so the LF charCode is somewhat meaningless.
              */
             if (charCode == 0x0A) charCode = 0x0D;
             this.addActiveKey(charCode, true);

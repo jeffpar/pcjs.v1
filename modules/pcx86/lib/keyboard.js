@@ -1030,16 +1030,19 @@ class Keyboard extends Component {
             charCode = ch.charCodeAt(0);
             /*
              * charCodes 0x01-0x1A correspond to key combinations CTRL-A through CTRL-Z, unless they
-             * are \t, \n, or \r; CTRL-I, CTRL-J, and CTRL-M must be specified using \x1C, \x1D, and \x1E.
+             * are \t, \n, or \r, which are reserved for TAB, LINE-FEED, and RETURN, respectively, so if
+             * you need to simulate CTRL-I, CTRL-J, or CTRL-M, those must be specified using \x1C, \x1D,
+             * or \x1E, respectively.  Also, since PCs have no dedicated LINE-FEED key, and since \n is
+             * often used instead of \r, we map LINE-FEED (LF) to RETURN (CR) below.
              *
              * charCodes 0xF1-0xFF establish a new delay of 100-1500ms between keys; 0xF0 reverts to
              * the default delay.  For example:
              *
              *      \r\rb:\rrt\r\xff\xf0test;\r
              *
-             * performs two return key presses, then "b:" followed by return, "rt" followed by return,
+             * performs two RETURN key presses, then "b:" followed by RETURN, "rt" followed by RETURN,
              * then a delay of 1500ms, then a reversion to the default delay (normally 150ms), followed
-             * by "test;" and return.
+             * by "test;" and RETURN.
              */
             if (charCode <= Keys.ASCII.CTRL_Z) {
                 if (charCode != Keys.ASCII.CTRL_I && charCode != Keys.ASCII.CTRL_J && charCode != Keys.ASCII.CTRL_M) {
@@ -1063,7 +1066,8 @@ class Keyboard extends Component {
         }
         if (charCode) {
             /*
-             * I could require all callers to supply CRs instead of LFs, but this is friendlier.
+             * I could require all callers to supply CRs instead of LFs, but this is friendlier; besides, PCs
+             * don't have a dedicated LINE-FEED key, so the LF charCode is somewhat meaningless.
              */
             if (charCode == 0x0A) charCode = 0x0D;
             this.addActiveKey(charCode, true);
