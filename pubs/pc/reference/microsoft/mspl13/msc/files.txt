@@ -1,0 +1,14 @@
+mscadv		MS C 6.0 Advanced Programming Techniques
+pdsinst		MS C 6.0 Installing and Using the P.D.S.
+mscref		MS C 6.0 Reference
+mscrtme		MS C 6.0 Run-Time Library Reference
+msctlk		MS C 6.0 Developer's Toolkit Reference
+qctlk		QuickC 2.5 Tool Kit
+qc4you		QuickC 2.5 C for Yourself
+qcupr		QuickC 2.5 Up and Running
+qcupd		QuickC 2.5 Update
+proadv		MS Professional Advisor - Library Reference
+qcpgmr		MS QuickC Programming
+prftc		Proficient C
+mscsampl	C Sample Code
+mscknl		MS KnowledgeBase - C

@@ -1,0 +1,13 @@
+w3guide		MS Windows 3.0 SDK Guide to Programming
+w3sdkin		MS Windows 3.0 SDK Install. & Update Guide
+w3sdkr1		MS Windows 3.0 SDK Programmer's Reference Vol. 1
+w3sdkr2		MS Windows 3.0 SDK Programmer's Reference Vol. 2
+w3sdktl		MS Windows 3.0 SDK Tools
+w3sdkart	MS Windows 3.0 SDK Articles
+w3ddkins	MS Windows 3.0 DDK Install. & Update Guide
+w3ddkadp	MS Windows 3.0 DDK Adaptation Guide
+w3ddkvxd	MS Windows 3.0 DDK Virtual Device Adapt. Guide
+w3ddkprn	MS Windows 3.0 DDK Printer & Font Kit
+prgwin		Programming MS Windows
+w3sdksmp	MS Windows Sample Code
+w3knowl		MS KnowledgeBase - MS Windows

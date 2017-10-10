@@ -1,0 +1,1243 @@
+ Microsoft Operating System/2 Getting Started
+
+
+
+
+
+
+
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+               Microsoft(R) Operating System/2 Getting Started
+
+                                 Version 1.2
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+
+
+ Information in this document is subject to change without notice and does
+ not represent a commitment on the part of Microsoft Corporation. The
+ software and/or databases described in this document are furnished under a
+ license agreement or nondisclosure agreement. The software and/or databases
+ may be used or copied only in accordance with the terms of the
+ agreement. The purchaser may make one copy of the software for backup
+ purposes. No part of this manual and/or database may be reproduced or
+ transmitted in any form or by any means, electronic or mechanical,
+ including photocopying, recording, or information storage and retrieval
+ systems, for any purpose other than the purchaser's personal use, without
+ the written permission of Microsoft Corporation.
+
+ (C) Copyright Microsoft Corporation, 1990. All rights reserved.
+ Printed in the United States of America.
+
+ Patent #4,825,358
+
+ Patent #4,779,187
+
+ Microsoft(R), MS(R), MS-DOS(R), the Microsoft logo, and InPort(R)
+ are registered trademarks of Microsoft Corporation.
+ IBM(R) is a registered trademark of International Business Machines
+ Corporation.
+ SY13238-0490 OEMO786-1Z
+
+
+
+
+
+ Table of Contents
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+
+ Welcome
+
+
+ Chapter 1  Setting Up MS OS/2 and Using the Manuals
+
+
+ Chapter 2  A Visual Overview of MS OS/2
+
+
+ Chapter 3  Learning Basic MS OS/2 Skills
+
+
+
+
+ Welcome
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ Welcome to Microsoft(R) Operating System/2 (MS(R) OS/2), the operating
+ system that turns your computer into a powerful tool for your business or
+ personal use. In this guide, you will find instructions on how to set up MS
+ OS/2 on your computer and some information about each of the manuals
+ included with your MS OS/2 package. This guide also provides a visual
+ introduction to MS OS/2 as well as a brief tutorial that gives you practical
+ experience performing basic MS OS/2 tasks.
+
+ If you are new to MS OS/2, it is recommended that you first install MS OS/2
+ on your computer and then read Chapter 2, "A Visual Overview of MS OS/2" and
+ work through the exercises in Chapter 3, "Learning MS OS/2 Basic Skills."
+ These chapters will briefly acquaint you with the different operating
+ environments in MS OS/2 and will give you basic information about running
+ applications.
+
+ If you have used MS OS/2 before, you may want to read Chapter 2 and then
+ skim Chapter 3 for an introduction to the new and enhanced visual features
+ of Presentation Manager. Then go on to the Microsoft Operating System/2
+ User's Guide for details on these enhancements and the new features added to
+ the applications that come with your MS OS/2 package.
+
+
+
+
+
+
+ Chapter 1  Setting Up MS OS/2 and Using the Manuals
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+
+
+ Introduction
+
+ This chapter lists the hardware you need to run MS OS/2 and describes some
+ options that you should be familiar with before you install MS OS/2.
+ Following these options are step-by-step instructions for setting up and
+ starting MS OS/2 on your computer.
+
+
+ System Requirements
+
+ To install and use MS OS/2, you need the following:
+
+   ş   A personal computer with an 80286, 80386, or 80486 processor and at
+       least 2.5 megabytes of memory. (If you'll be running several
+       applications at once, at least 4 megabytes is highly recommended.) If
+       you have added extra memory to your computer, make sure that it is
+       extended memory and not expanded memory (which MS OS/2 does not
+       recognize). See your hardware manuals for more information.
+
+   ş   At least two disk drivesÄone hard-disk drive and one high-density
+       floppy-disk drive. (Since the Install disk and the program disks are
+       high-density disks, you must have a high-density floppy-disk drive to
+       set up MS OS/2.)
+
+   ş   A graphics display adapter supported by MS OS/2.
+
+   ş   A mouse (recommended).
+
+
+
+
+ Before You Install MS OS/2
+
+ While you are setting up MS OS/2, you will be asked to choose particular
+ options or answer questions about the kind of hardware you have. It may
+ speed up your installation if you take a moment now to familiarize yourself
+ with the following items:
+
+   ş   Which file system(s) you want to use on your primary partition. You
+       can choose to use the file allocation table (FAT) file system (used by
+       DOS) or the high-performance file system (HPFS). During installation,
+       you will be asked whether you want to reformat your hard disk. If you
+       want to use the FAT file system, you do not need to reformat your hard
+       disk. If you want to use HPFS, you must reformat your hard disk. Once
+       you choose to reformat, you will be given the option of using FAT or
+       HPFS. If you want to use both FAT and HPFS, see the following section,
+       "Installing Both FAT and HPFS." For more information about using the
+       HPFS, see Chapter 16, "Using the High-Performance File System," in the
+       Microsoft Operating System/2 User's Guide.
+
+   ş   The language supported by your keyboard (if you are working inside the
+       United States, it is highly probable that you have a U.S. English
+       keyboard).
+
+   ş   The amount of space available on your hard disk. You need 12 megabytes
+       to hold your MS OS/2 files and directories.
+
+   ş   The type of mouse you have. In the installation program, 099
+       represents a Microsoft(R) mouse with green buttons and 199 represents
+       a Microsoft mouse with gray buttons (or with white buttons if it is a
+       serial mouse). If you are not sure whether your mouse is an InPort,
+       Serial, or Bus (Parallel) mouse, see the manual that comes with the
+       mouse.
+
+   ş   The type of ports you are going to use (communications and/or
+       printer).
+
+
+
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ Note
+
+ In this manual, the term "DOS" refers to the MS-DOS(R) and IBM Personal
+ Computer DOS operating systems.
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+ In some cases, you will have the choice of setting up your computer to run
+ with both MS OS/2 1.2 and DOS. This is called the dual-boot option, and you
+ set it up from the installation program. This option is only available under
+ the following conditions:
+
+   ş   Your computer is set up for use with the FAT file system.
+
+   ş   MS-DOS version 3.2 or later is already set up on your computer, or the
+       dual-boot option for MS OS/2 1.1 is already set up on your computer.
+
+
+ For more information on using the dual-boot option, see Appendix B, "Using
+ MS OS/2 Dual Boot" in the Microsoft Operating System/2 User's Guide.
+
+
+ Installing Both FAT and HPFS
+
+ If you want to use both the high-performance file system (HPFS) and the file
+ allocation table (FAT) file system, read this section before you install MS
+ OS/2. If your computer's hard disk is already divided into two partitions or
+ if you are using more than one hard disk, you will not need the instructions
+ in this section. Go directly to the section, "Running the Installation
+ Program."
+
+ The following are instructions for three different hard-disk configurations.
+ Select the description that describes the current status of your hard disk
+ and follow those instructions to install MS OS/2.
+
+ If your computer's hard disk is unformatted, do the following:
+
+   1.  Complete the instructions in the section, "Running the Installation
+       Program." During installation, set up a primary partition that is
+       smaller than the total disk space (a minimum of 12 megabytes) and
+       format it as either FAT or HPFS.
+
+   2.  After installation, run the Presentation Manager Fixed Disk Utility,
+       set up a secondary partition and logical drive, and use the format
+       utility to format it as either FAT or HPFS. If you format your primary
+       partition as FAT, add the following lines to the beginning of your
+       CONFIG.SYS file before formatting your secondary partition as HPFS:
+
+ IFS=C:\OS2\HPFS.IFS /c:64
+ RUN=C:\OS2\CACHE
+
+
+
+
+
+ For more information, see the Microsoft Operating System/2 User's Guide,
+ Chapter 13, "Setting Up Your Hard Disk," and Chapter 16, "Using the
+ High-Performance File System," and the Microsoft Operating System/2 Command
+ Reference "Format" entry.
+
+ If your computer's hard disk is formatted as one partition, using all the
+ space on the disk, follow these steps:
+
+   1.  Back up any programs or data you want to save onto floppy disks.
+
+   2.  Use the fdisk /d utility to delete the partition (insert the MS OS/2
+       Install disk, restart your computer, press ESC, and type fdisk /d).
+
+   3.  Follow the instructions in the section, "Running the Installation
+       Program." During installation, set up a primary partition that is
+       smaller than the total disk space (a minimum of 12 megabytes) and
+       format it as either FAT or HPFS.
+
+   4.  After installation, run the Presentation Manager Fixed Disk Utility,
+       set up a secondary partition and logical drive, and use the format
+       utility to format it as either FAT or HPFS. If you format your primary
+       partition as FAT, add the following lines to the beginning of your
+       CONFIG.SYS file before formatting your secondary partition as HPFS:
+
+ IFS=C:\OS2\HPFS.IFS /c:64
+ RUN=C:\OS2\CACHE
+
+
+
+
+
+ For more information, see the Microsoft Operating System/2 User's Guide,
+ Chapter 13, "Setting Up Your Hard Disk," and and Chapter 16, "Using the
+ High-Performance File System," and then the Microsoft Operating System/2
+ Command Reference "Format" entry.
+
+ If you currently have DOS installed on a single partition that uses all the
+ space on the disk and you want to use MS OS/2 dual boot in addition to both
+ FAT and HPFS, you will need to do two things: First create a new, smaller
+ partition for DOS and the MS OS/2 system. Then install MS OS/2 and create a
+ second partition for your HPFS drive. Follow these steps:
+
+   1.  Start DOS from a floppy disk. If you do not have a DOS start-up disk,
+       you will need to create one. (See your DOS manual for instructions.)
+
+   2.  Back up any programs or data you want to save onto floppy disks.
+
+   3.  Use the DOS fdisk utility to delete the existing DOS partition and
+       then create a DOS partition that is smaller than the total disk (this
+       allows space for the HPFS drive). The partition must have at least 12
+       megabytes free after you reinstall DOS and the programs and/or data
+       files you saved on floppy disks. Make the new DOS partition active.
+       (See your DOS manual for instructions on using fdisk.)
+
+   4.  Reinstall DOS on your primary partition in a subdirectory C:\DOS. (If
+       the installation program does not allow you to choose C:\DOS, install
+       DOS in the root directory, then create C:\DOS and copy the DOS files
+       to that directory.) Copy your programs and/or files from the backup
+       floppy disks into C:\DOS. (See your DOS manual for instructions.)
+
+   5.  Restart DOS from the hard disk and verify that you have at least 12
+       megabytes of free space on the C drive.
+
+   6.  Check to see that you have the following line in your CONFIG.SYS file,
+       and if not, add it to the file:
+
+ SHELL=C:\DOS\COMMAND
+
+
+       Check to see that you have the following lines in your AUTOEXEC.BAT
+       file, and if not, add them to the file:
+
+ SET COMSPEC=C:\DOS\COMMANDCOPY C:\DOS\COMMAND
+
+
+
+
+   7.  Install MS OS/2 by following the instructions in the next section,
+       "Running the Installation Program." MS OS/2 dual boot will be
+       installed automatically. (Note: Do not choose to format the primary
+       partition during installation or you will lose your DOS files.)
+
+   8.  After installation, add the following lines to the beginning of your
+       CONFIG.SYS file by using a text editor (for example, System Editor):
+
+ IFS=C:\OS2\HPFS.IFS /c:64
+ RUN=C:\OS2\CACHE
+
+
+
+
+   9.  Run the Presentation Manager Fixed Disk Utility (in the Utilities
+       group), and set up a secondary partition and logical drive. (This will
+       be your HPFS drive.) Then restart your system.
+
+   10. Use the MS OS/2 format utility to format the drive in your secondary
+       partition as HPFS by typing the following at the command line:
+
+
+ format d: /fs:hpfs
+
+
+
+
+ Your system is now set up with dual boot and an HPFS drive. For more
+ information, see the Microsoft Operating System/2 User's Guide, Chapter 13,
+ "Setting Up Your Hard Disk," Chapter 16, "Using the High-Performance File
+ System," and then the Microsoft Operating System/2 Command Reference
+ "Format" entry.
+
+
+ Running the Installation Program
+
+
+
+ An installation disk, included with your MS OS/2 package, makes it easy for
+ you to install MS OS/2 on your computer by following these steps:
+
+   1.  Turn on your computer.
+
+   2.  Put the disk labeled Install in drive A (drive A must be a
+       high-density drive).
+
+   3.  Press and hold down the CTRL key. While holding down the CTRL key,
+       press and hold down the ALT key and then press the DEL key
+       (CTRL+ALT+DEL).
+
+   4.  Release all three keys and then wait for the first screen of
+       information to appear. Your computer may take a moment to read the
+       Install disk.
+
+   5.  Work through the installation program by following the instructions
+       you see on each screen.
+
+
+ After you have completed a screen, press the ENTER key to move to the next
+ screen. To move back to the previous screen, press the ESC key. If you made
+ a mistake, press the ESC key repeatedly until you return to the screen where
+ you made the mistake. When you have corrected your mistake, press the ENTER
+ key repeatedly until you return to the screen where you want to continue
+ working.
+
+
+ Getting Help
+
+ If you need help while setting up MS OS/2, press the F1 function key.
+ Pressing F1 displays Help information for your current screen.
+
+ For more general help with setting up MS OS/2, you can press F1, followed by
+ F5, to display a list of Help topics. You can then choose the topic you want
+ to learn more about.
+
+
+ Starting MS OS/2
+
+ To start MS OS/2, simply turn on your computer, or if your computer is
+ already turned on, press CTRL+ALT+DEL to restart it. Each time you turn on
+ your computer or restart it, MS OS/2 starts automatically.
+
+ Shortly after starting MS OS/2, messages will be displayed on your screen
+ while your computer loads MS OS/2 into memory. When the Desktop Manager and
+ the Main-group windows appear, you are in the Presentation Manager session.
+
+
+ Guide to the MS OS/2 Manuals
+
+ Your MS OS/2 package includes the following manuals:
+
+   ş   Microsoft Operating System/2 Getting Started (this book)ÄIncludes a
+       quick guide to installing MS OS/2 on your computer, a guide to using
+       the manuals, a visual introduction that identifies important parts of
+       the system, and a brief tutorial to demonstrate basic skills.
+
+   ş
+
+   ş   Microsoft Operating System/2 User's GuideÄA complete guide to using MS
+       OS/2 to do your work, organized into three parts:
+
+ Part 1 "Using Presentation Manager"ÄProcedures for using
+ the menus and commands in the Presentation Manager
+ windows. Includes basic skills; running applications;
+ managing files, directories, and disks; printing files; and
+ changing system settings.
+ Part 2 "Using Cmd and the DOS Session"ÄProcedures for
+ using the MS OS/2 full-screen option to type commands,
+ run programs, and create and run batch programs; also,
+ instructions for running your DOS programs.
+ Part 3 "Configuring and Maintaining Your System"ÄProcedures
+ for system-administration tasks, such as backing up and
+ configuring your system; also, instructions for using
+ high-performance file system and device drivers.
+
+   ş   Microsoft Operating System/2 Command ReferenceÄAn alphabetic reference
+       to all of the MS OS/2 and DOS commands you might use with the system;
+       includes syntax, options, and examples.
+
+
+
+
+ Where to Go from Here
+
+ The next chapter, "A Visual Overview of MS OS/2," contains a visual
+ reference to important parts of MS OS/2 1.2. If you are new to MS OS/2, the
+ overview will introduce you to some of the important parts of the interface.
+ For those who have used MS OS/2 1.1, the overview will quickly describe new
+ Presentation Manager features that you should become familiar with.
+
+ Chapter 3, "Learning Basic MS OS/2 Skills," is a brief, hands-on
+ introduction to MS OS/2. If you are a new user, the exercises in Chapter 3
+ will give you the basic skills you need to get started using MS OS/2. If you
+ are an experienced MS OS/2 user, the exercises will give you experience
+ working with the improved and expanded Presentation Manager interface.
+
+
+
+
+
+
+ Chapter 2  A Visual Overview of MS OS/2
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+
+
+ Introduction
+
+ Microsoft Operating System/2 (MS OS/2) gives you more computing power
+ through its enhanced and efficient use of your computer's memory and the
+ 80286, 80386, and 80486 processors. MS OS/2 has powerful multitasking
+ capabilities, which allow you to run several applications at the same time.
+
+ Not only is MS OS/2 powerful, it is also flexible, giving you several ways
+ to accomplish the same kind of tasks, such as starting applications,
+ configuring your system, and managing your files and directories. The MS
+ OS/2 Presentation Manager environment offers you a method based on pictures
+ and symbols for accomplishing your work, with windows in which you specify
+ information and menus from which you choose commands. Or, if you prefer to
+ type information and commands by using your keyboard, you can use the MS
+ OS/2 command interpreter, cmd.
+
+ This chapter provides you with a visually based overview of MS OS/2 and
+ explains how the different components fit together. It introduces you to the
+ Presentation Manager screen by using illustrations and definitions that
+ describe the different parts of a Presentation Manager window. This chapter
+ also briefly describes each application that comes with MS OS/2 and shows
+ you how they are arranged into program groups.
+
+
+ The Presentation Manager Screen
+
+
+
+ When you start MS OS/2, the Desktop Manager and Main-group windows appear on
+ your screen, running in the Presentation Manager session (a special
+ graphical environment). Here are some terms that describe the elements of
+ the Presentation Manager screen:
+
+ Art                               Term/Description
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ Pointer                           If you are using a mouse, an
+                                   arrow-shaped pointer shows your position
+                                   on the screen.
+
+ Scroll bar                        Scroll bars may appear in a window or
+                                   dialog box that contains more
+                                   information than can fit in the work
+                                   area. If you are using a mouse, you use
+                                   scroll bars to bring the information
+                                   that does not fit in the work area into
+                                   view.
+
+ System-menu box                   The System-menu box is used to display
+                                   the System menu, a list of commands
+                                   common to all groups and applications
+                                   that run in a window. It can be used to
+                                   move and size windows, to quit
+                                   applications, and to close groups.
+
+ Menu bar                          The menu bar displays the names of the
+                                   menus in a Presentation Manager
+                                   application or group.
+
+ Minimize box                      If you are using a mouse, you can use
+                                   the Minimize box to reduce a window to
+                                   an icon. If you are not using a mouse,
+                                   you can use the Minimize command on the
+                                   System menu to do this.
+
+ Maximize box                      If you are using a mouse, you can use
+                                   the Maximize box to enlarge a window to
+                                   fill the entire screen. If you are not
+                                   using a mouse, you can use the Maximize
+                                   command on the System menu to do this.
+
+ DOS and Print Manager icons       An icon represents a window that has
+                                   been reduced by using the Minimize
+                                   command or the Minimize box. When you
+                                   start MS OS/2, icons for Print Manager
+                                   and the DOS session (the environment
+                                   used to run DOS applications)
+                                   automatically appear in the icon area
+                                   located at the bottom of your screen.
+
+
+
+ Working with Presentation Manager Applications
+
+ To work with Presentation Manager applications, you use the application's
+ menus shown on the menu bar. Each menu contains a list of commands that you
+ can choose from to perform specific tasks. For example, by using the
+ commands on the Group menu in Desktop Manager, you can create your own
+ groups of applications, rename existing groups, and delete groups you no
+ longer want.
+
+
+ The Presentation Manager Applications in the Main Group
+
+ The applications that come with MS OS/2 are organized into two groupsÄthe
+ Main group and the Utilities group. These applications come as part of your
+ MS OS/2 package and are added to the Main and Utilities groups automatically
+ when you install MS OS/2 on your computer. When you first start MS OS/2, the
+ Main group appears in a window on your screen. The Presentation Manager
+ applications included in the Main group are described here.
+
+ With File Manager, you can look at the directory structure of a disk drive
+ and keep track of files and directories. You can perform several
+ file-management tasks with File Manager, such as creating directories and
+ copying, moving, and deleting files.
+
+ You can use the MS OS/2 System Editor to create or edit text files such as
+ your CONFIG.SYS file, other start-up files, and any batch files that you
+ create.
+
+ Command Reference allows you to view the contents of the Microsoft Operating
+ System/2 Command Reference. Command Reference includes information on
+ several topics and commands that you can view on-line while you work.
+
+
+ Other Types of MS OS/2 Applications
+
+ MS OS/2's flexibility allows you to start and use several kinds of
+ applications. In addition to the Presentation Manager applications you have
+ seen so far, you can also start full-screen applications and DOS
+ applications.
+
+ The MS OS/2 command interpreter, cmd, provides an alternative to
+ Presentation Manager's graphical interface. Instead of choosing commands
+ from menus, you type commands at a command prompt to perform tasks,
+ similarly to the way you use DOS. You can run the cmd program in a window or
+ in a full screen. When you run cmd in a full screen, the Presentation
+ Manager session temporarily disappears from your screen.
+
+ When you run cmd in a window, it runs in the Presentation Manager session,
+ together with your Presentation Manager applications. Because cmd is not a
+ Presentation Manager application, its window looks slightly different from a
+ Presentation Manager application windowÄit does not have a menu bar, and the
+ background is black.
+
+ The DOS session is a special environment where you can run DOS applications.
+ When you start MS OS/2, the DOS session appears as an icon in the lower-left
+ corner of the Presentation Manager screen, showing you that it is available
+ for your use at any time.
+
+ Print Manager helps you manage your printing tasks. When you start MS OS/2,
+ it appears as an icon at the bottom of your screen.
+
+ MS OS/2 includes multitasking capabilities, which allow you to run several
+ applications at the same time. The Task List displays a list of the
+ applications that are currently running and of the program groups that are
+ currently open. By using the Task List, you can switch from one application
+ or group to another. When you start MS OS/2, the Task List is hidden from
+ view. To display it, click the right mouse button or press CTRL+ESC.
+
+
+ The Applications in the Utilities Group
+
+ In addition to the Main group, Desktop Manager also includes the Utilities
+ group. When you open the Utilities group window, you see a list of the
+ Microsoft Utility programs that also come as part of your MS OS/2 package.
+
+ Control Panel is a Presentation Manager application that you can use to
+ change country settings, set up additional hardware, change the screen
+ colors in the Presentation Manager session, and perform other
+ system-configuration tasks.
+
+ Printer Installer is a Presentation Manager application that you can use to
+ install printers.
+
+ These MS OS/2 Utilities are programs that you can use to maintain your
+ disks:
+
+   ş   Copy Diskette makes an exact copy of a floppy disk.
+
+   ş   Compare Diskette compares the contents and the tracks of two floppy
+       disks.
+
+   ş   Label Diskette assigns a new volume label to a disk.
+
+   ş   Format Diskette formats floppy disks.
+
+   ş   Disk Information checks for errors and available storage space on your
+       disks.
+
+   ş   Fixed Disk Utility partitions your hard disk and sets up different
+       drives.
+
+   ş   Print Picture prints graphical documents on your printer.
+
+   ş   Display Picture displays graphical documents in Presentation Manager.
+
+   ş   Convert Picture converts files from picture-interchange format to
+       metafile format for use with Presentation Manager.
+
+
+
+
+
+
+
+
+
+ Chapter 3  Learning Basic MS OS/2 Skills
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+
+
+ Introduction
+
+ This chapter briefly introduces you to some basic techniques for using MS
+ OS/2 to run your applications. It contains nine exercises that will give you
+ hands-on experience performing the following skills:
+
+   ş   Selecting and starting applications
+
+   ş   Using Help information
+
+   ş   Switching among applications
+
+   ş   Opening groups
+
+   ş   Reducing and restoring application and group windows
+
+   ş   Quitting applications and closing windows
+
+
+ Before beginning the exercises, make sure you have installed and started MS
+ OS/2 on your computer. Also, you may want to read Chapter 2, "A Visual
+ Overview of MS OS/2," for an introduction to the screen elements in
+ Presentation Manager and to the applications that come with your MS OS/2
+ package. If you have not set up MS OS/2, or if you need a review on how to
+ start MS OS/2, see Chapter 1, "Setting Up MS OS/2 and Using the Manuals," in
+ this guide.
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ Note
+
+ All examples of file and directory names in this chapter are for the file
+ allocation table (FAT) file system, which is the one used by DOS and MS OS/2
+ versions 1.1 and earlier. For information on using high-performance file
+ system (HPFS) filenames and directory names, see the Microsoft Operating
+ System/2 User's Guide, Chapter 16, "Using the High-Performance File System."
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+
+
+ Exercise 1: Starting an Application
+
+ When you start MS OS/2, the first application to appear on your screen is
+ Desktop Manager. Desktop Manager is the Presentation Manager application you
+ use to open program groups. Each program group contains one or more
+ applications. When you start MS OS/2, the Main group is open, running in its
+ own window. The applications in the Main group are represented by icons,
+ followed by their titles.
+
+ To start an application from a group, point to the icon or title of the
+ application you want to start and then double-click the left mouse button.
+ If you are using your keyboard, use the UP or DOWN key to select it and then
+ press ENTER.
+
+ To practice starting an application, start File Manager by using either your
+ mouse or keyboard:
+
+ Mouse                             Keyboard
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ Point to File Manager in the      If File Manager is not already selected,
+ Main-group window, then           press the UP or DOWN key until it is
+ double-click the left mouse       highlighted, then press ENTER.
+ button.
+
+ If you have a mouse, the pointer becomes a small hourglass to let you know
+ that File Manager is being started. After a short pause, File Manager
+ appears in a window on your screen.
+
+ File Manager is a Presentation Manager application you can use to view and
+ manage your files and directories on any disk you choose. For more
+ information on using File Manager, see Chapter 3, "Using File Manager," in
+ the Microsoft Operating System/2 User's Guide.
+
+
+ Exercise 2: Getting Help
+
+ If you have questions at any time while working with a Presentation Manager
+ application, Help information about the task you are performing is
+ available.
+
+ To display Help information, use the F1 function key:
+
+   ş   Press F1.
+
+
+ Help information for File Manager appears in a window on your screen.
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ Note
+
+ Another way to display Help information is by using the commands on the Help
+ menu. The commands on the Help menu display specific types of Help
+ information, such as a Help Index or Keys Help, for the application you are
+ using. For more information on using the Help menu commands, see Chapter 1,
+ "Learning Basic Presentation Manager Skills," in the Microsoft Operating
+ System/2 User's Guide.
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+
+
+ Scrolling the Help Window
+
+ The scroll bar at the right of the window shows you that there is more Help
+ information available than can fit in the window. To display more Help
+ information, click the scroll arrows in the scroll bar. If you are using
+ your keyboard, use the UP or DOWN key.
+
+ To practice scrolling the Help text, use either your mouse or keyboard to
+ scroll the text down one screenful:
+
+ Mouse                             Keyboard
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ Point to the down scroll arrow    Press the DOWN key to scroll through the
+ in the scroll bar, then click     Help text.
+ the left mouse button to scroll
+ through the Help text, one line
+ at a time.
+
+ As you continue scrolling, the scroll box moves toward the bottom of the
+ scroll bar, indicating your position within the Help text. Practice
+ scrolling through the Help information by using your mouse or keyboard until
+ you have reached the end. You will know that you are at the end of the text
+ when the scroll box reaches the bottom of the scroll bar.
+
+
+ Closing the Help Window
+
+
+
+ You can close the Help window by using either your mouse or keyboard. To
+ close the Help window, do the following:
+
+ Mouse                             Keyboard
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ Point to the System-menu box,     Press ESC.
+ then double-click the left mouse
+ button.
+
+ The Help window disappears from your screen.
+
+
+ Exercise 3: Switching Among Applications and Groups
+
+ In MS OS/2, you can have several applications running or several groups open
+ at once, but you can work with only one application or group at a time. The
+ application or group you are currently working with is the active
+ application or group.
+
+ When a window becomes active, it appears in front of the other windows on
+ your screen and its borders and title bar change colors. For example, File
+ Manager, now at the front of your screen, is the active application.
+
+ If you want to use an application or group other than the one that is
+ currently active, you need to switch to it. The most direct way to switch to
+ another application or group is by using the Task List. The Task List
+ contains a list of the applications that are currently running and the
+ groups that are currently open.
+
+ To switch to another application or group, you first display the Task List
+ and then choose the application or group you want to switch to from those
+ listed in the Task List.
+
+
+ Displaying the Task List
+
+ To display the Task List, you use the right mouse button or the CTRL and ESC
+ keys.
+
+ Use your mouse or keyboard to practice displaying the Task List:
+
+ Mouse                             Keyboard
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ Move the pointer onto the screen  Press and hold down CTRL, then press ESC
+ background (outside a window),    (CTRL+ESC).
+ then click the right mouse
+ button.
+
+ The Task List appears, listing the applications that are currently running
+ and the groups that are currently open.
+
+
+ Switching to Desktop Manager
+
+ The way you switch to another application or group with the Task List is
+ similar to the way you start an application from a group windowÄyou point to
+ the application or group and then double-click the left mouse button. Or,
+ you can use the UP or DOWN key to select the application or group and then
+ press ENTER.
+
+ To practice switching to another application or group, you'll switch to
+ Desktop Manager.
+
+ Switch to Desktop Manager by using either your mouse or keyboard:
+
+ Mouse                             Keyboard
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ Point to Desktop Manager in the   Press the DOWN key until Desktop Manager
+ Task List, then double-click the  is selected, then press ENTER.
+ left mouse button.
+
+ The Desktop Manager window appears at the front of your screen.
+
+
+ Exercise 4: Opening a Group
+
+ Two groups are listed in the Desktop ManagerÄMain and Utilities. The Main
+ group opens automatically when you start MS OS/2. In this exercise,  you
+ will learn how to open a group from Desktop Manager by opening the Utilities
+ group. Once you have opened the Utilities group, you'll start Control Panel,
+ another Presentation Manager application.
+
+
+ Opening the Utilities Group
+
+ Opening a group is similar to starting or switching to an applicationÄyou
+ point to the group and then double-click the left mouse button. Or, you can
+ use the UP or DOWN key to select the group and then press ENTER.
+
+ Open the Utilities group by using either your mouse or keyboard:
+
+ Mouse                             Keyboard
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ Point to Utilities in the         Press the DOWN key to select Utilities,
+ Desktop Manager window, then      then press ENTER.
+ double-click the left mouse
+ button.
+
+ The Utilities-group window appears at the front of your screen, with the
+ applications and programs in the Utilities group displayed in the work area.
+
+
+
+ Starting Control Panel
+
+
+
+ Notice that Control Panel is listed in the Utilities group. To give yourself
+ more practice starting applications, start Control Panel by using either
+ your mouse or keyboard:
+
+ Mouse                             Keyboard
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ Point to Control Panel in the     If Control Panel is not already selected,
+ Utilities-group window, then      press the UP key to select it, then
+ double-click the left mouse       press ENTER.
+ button.
+
+ Control Panel appears in a window on your screen.
+
+ Control Panel is a Presentation Manager application that you can use to
+ customize MS OS/2 to your specific needs. Part 1, "Using Presentation
+ Manager," of the Microsoft Operating System/2 User's Guide, describes in
+ detail how to use Control Panel.
+
+
+ Exercise 5: Looking at the System Menu
+
+ All Presentation Manager windows have a System menu. The System menu
+ contains commands that let you size, move, reduce, enlarge, and close a
+ window. In the next exercise, you'll learn how to use the System menu to
+ reduce a window to an icon by using the keyboard. To display the System
+ menu, you click the System-menu box. Or, if you are using your keyboard, you
+ press SHIFT+ESC.
+
+ Display the System menu in Control Panel by using either your mouse or
+ keyboard:
+
+ Mouse                             Keyboard
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ Point to the System-menu box in   Press and hold down SHIFT, then press
+ the Control Panel window, then    ESC (SHIFT+ESC).
+ click the left mouse button.
+
+ The System menu appears in the Control Panel window.
+
+ In the next exercise, you'll learn how to reduce a window to an icon by
+ using the Minimize command on the System menu.
+
+
+ Exercise 6: Reducing and Restoring  Application or Group Window
+
+ Whenever you are not currently using an application or group, you can reduce
+ it to an icon without quitting the application or closing the group. You
+ reduce a window to an icon by using the Minimize box in the upper-right
+ corner of the window. Or, if you are using your keyboard, you can use the
+ Minimize command on the System menu.
+
+ To practice reducing a window to an icon, use your mouse or keyboard to
+ reduce the Control Panel window: .NE 30P
+
+ Mouse                             Keyboard
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ Point to the Minimize box in the  The System menu should be displayed on
+ upper-right corner of the window,  your screen. If it is not, press
+ then click the left mouse button.  SHIFT+ESC to display it, then press N to
+                                   choose the Minimize command.
+
+ Control Panel is reduced to an icon at the bottom of your screen, next to
+ the DOS and Print Manager icons. The Utilities-group window, now the active
+ window, appears at the front of your screen. Control Panel is still running,
+ but it occupies less space on your screen than before.
+
+
+ Restoring an Icon
+
+ If you want to work in an application or group that is running as an icon,
+ you first need to restore it. You restore an icon with your mouse by
+ double-clicking the icon. If you are using your keyboard, you can use the
+ Task List to switch to an application or group. Switching to an application
+ or group that is running as an icon automatically restores it.
+
+ To practice restoring an icon, restore the Control Panel icon to a window by
+ using either your mouse or keyboard:
+
+ Mouse                             Keyboard
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ Point to the Control Panel icon,  1 Press CTRL+ESC to display the Task
+ then double-click the left mouse  List.
+ button.
+
+                                   2 Press the DOWN key until Control Panel
+                                   is selected, then press ENTER.
+
+ Control Panel is restored to a window on your screen.
+
+ So far you have learned some basic techniques for starting applications,
+ reducing and restoring windows, and switching between them. While learning
+ these skills, you were briefly introduced to two applications, File Manager
+ and Control Panel, in the Presentation Manager environment. In the next two
+ exercises, you'll practice these skills while you learn how to work in two
+ other MS OS/2 environmentsÄin the DOS session and in a full screen.
+
+
+ Exercise 7: Looking at the DOS Command Interpreter
+
+ The DOS command interpreter, command, is the program you use to run
+ applications designed for MS-DOS or some other manufacturer's version of
+ DOS. Command runs only in the DOS session, a special environment for running
+ DOS applications.
+
+ To run DOS applications, you can either add the application to a program
+ group and start it from there, or you can switch to the DOS session and then
+ type the command that starts the application. In this exercise, you'll
+ practice switching to the DOS session. For information on adding
+ applications to program groups, see Part 1, "Using Presentation Manager," of
+ the Microsoft Operating System/2 User's Guide.
+
+ The DOS session is represented by the DOS icon in the lower-left corner of
+ your screen.
+
+ To switch to the DOS session, you can restore the DOS icon or you can use
+ the Task List. Use either your mouse or keyboard to switch to the DOS
+ session:
+
+ Mouse                             Keyboard
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ Point to the DOS icon, then       1 Press CTRL+ESC to display the Task
+ double-click the left mouse       List.
+ button.
+
+                                   2 Press the DOWN key until DOS is
+                                   selected, then press ENTER.
+
+ The Presentation Manager screen temporarily disappears and you are switched
+ to the DOS session. Switching to the DOS session automatically starts the
+ DOS command interpreter, command, as shown by the DOS prompt in the
+ upper-left corner of your screen. For more information about using command
+ and the DOS session, see Chapter 2, "Running Applications with MS OS/2," and
+ Part 2, "Using Cmd and the DOS Session," of the Microsoft Operating System/2
+ User's Guide.
+
+
+ Returning to Presentation Manager
+
+ When you are using a DOS application, you can quickly return to Presentation
+ Manager at any time by displaying the Task List.
+
+ To display the Task List, do the following:
+
+   ş   Press CTRL+ESC.
+
+
+ The Presentation Manager screen reappears, with the Task List displayed.
+
+
+ Exercise 8: Looking at the MS OS/2 Command Interpreter
+
+ The MS OS/2 command interpreter, cmd, is another program that you can use to
+ run full-screen applications (applications that do not use Presentation
+ Manager menus and commands). In addition to starting a full-screen
+ application from a program group, you can also start cmd and then type the
+ command that starts the application.
+
+ You can also use cmd commands and utilities to perform system-maintenance
+ and file-management tasks. The cmd program can run in two different waysÄin
+ a full screen or in a window.
+
+ In this exercise, you'll learn how to run cmd in a full screen. In order to
+ start cmd, you need to switch to the Main group where it is located.
+
+ Switch to the Main group by using either your mouse or keyboard:
+
+ Mouse                             Keyboard
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ Point to Group-Main in the Task   Press the DOWN key until Group-Main is
+ List, then double-click the left  selected, then press ENTER.
+ mouse button.
+
+ The Main group becomes active.
+
+ Now you can start cmd in a full screen by using either your mouse or
+ keyboard:
+
+ Mouse                             Keyboard
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ Point to OS/2 Full Screen, then   Press the DOWN key until OS/2 Full
+ double-click the left mouse       Screen is selected, then press ENTER.
+ button.
+
+ The Presentation Manager screen temporarily disappears and the cmd prompt
+ appears, indicating that cmd has been started.
+
+ In addition to running the cmd program in a full screen, you can also run
+ cmd in a window so that it shares the screen with your Presentation Manager
+ applications. For more information on running cmd in a full screen and in a
+ window, see Chapter 2, "Running Applications with MS OS/2," and Part 2,
+ "Using Cmd and the DOS Session," of the Microsoft Operating System/2 User's
+ Guide.
+
+ Now, return to Presentation Manager by doing the following:
+
+   ş   Press CTRL+ESC.
+
+
+ The Presentation Manager screen reappears, with the Task List displayed. The
+ cmd program is now running as an icon at the bottom of your screen.
+
+ Now that you have been introduced to two Presentation Manager applications
+ and three different ways of working with MS OS/2, the next exercise will
+ demonstrate how to quit Presentation Manager applications and close windows.
+
+
+
+ Exercise 9: Quitting Applications and Closing Windows
+
+ In Presentation Manager, you quit an application or close a group window by
+ double-clicking the System-menu box or by using the Close command on the
+ System menu. To see how this works, you'll quit Control Panel.
+
+
+ Quitting Control Panel
+
+
+
+ Before you can quit an application, you must switch to it. Switch to Control
+ Panel by using your mouse or keyboard:
+
+ Mouse                             Keyboard
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ Point to Control Panel in the     Press the DOWN key until Control Panel
+ Task List, then double-click the  is selected, then press ENTER.
+ left mouse button.
+
+ Control Panel becomes the active application.
+
+ You can now use either your mouse or keyboard to quit Control Panel:
+
+ Mouse                             Keyboard
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ Point to the System-menu box in   1 Press SHIFT+ESC to display the System
+ the Control Panel window, then    menu for Control Panel.
+ double-click the left mouse
+ button.
+
+                                   2 Press C to choose the Close command.
+
+ When you double-click the System-menu box or choose the Close command, the
+ Control Panel window disappears, showing you that Control Panel is no longer
+ running. If you have been working through these exercises in sequence, the
+ Utilities group window becomes active, moving to the front of your screen.
+
+
+ Quitting All Applications at Once
+
+ If you have several applications running at once, you can quit all of your
+ applications in one step by using the Close All command in Desktop Manager.
+
+ To use the Close All command, you first need to switch to Desktop Manager.
+ Do this by using either your mouse or keyboard:
+
+ Mouse                             Keyboard
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ 1 Move the mouse pointer onto     2 Press CTRL+ESC to display the Task
+ the screen background and click   List.
+ the right mouse button to
+ display the Task List.
+
+ 3 Point to Desktop Manager and    4 Press the UP or DOWN key to select
+ double-click the left mouse       Desktop Manager, then press ENTER.
+ button.
+
+ Desktop Manager becomes the active window.
+
+ To practice quitting several applications at once, use the Close All command
+ to quit File Manager and the cmd program:
+
+ Mouse                             Keyboard
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ 1 Point to the Desktop menu in    2 Press ALT, then D to display the
+ Desktop Manager, then click the   Desktop menu (ALT,D).
+ left mouse button.
+
+ 3 Point to the Close All command,  4 Press the A key to choose the Close
+ then click the left mouse button.  All command.
+
+ A message appears, asking you to confirm your decision to close all of your
+ applications.
+
+ Respond to the message by doing the following:
+
+ Mouse                             Keyboard
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ Point to the Close All button,    Press the LEFT key to select the Close
+ then click the left mouse button.  All button, then press ENTER.
+
+
+
+ A message appears, asking you to confirm your decision to quit cmd (OS/2
+ Full Screen).
+
+ Respond to the message by doing the following:
+
+ Mouse                             Keyboard
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ Point to the Yes button, then     Press the LEFT key to select the Yes
+ click the left mouse button.      button, then press ENTER.
+
+ The OS/2 icon disappears, indicating that the OS/2 command interpreter, cmd,
+ is no longer running. Another message appears, asking you to confirm your
+ decision to quit File Manager.
+
+ Respond to the message by doing the following:
+
+ Mouse                             Keyboard
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ Point to the Yes button, then     Press ENTER. (The Yes button is already
+ click the left mouse button.      selected, so you do not need to press
+                                   the LEFT key to select it.)
+
+ The File Manager window disappears, indicating that File Manager is no
+ longer running. The Utilities group becomes active.
+
+
+ Summary
+
+ This chapter has introduced you to some basic MS OS/2 skills so that you can
+ get started working with your OS/2 and DOS applications. By working through
+ the exercises, you learned how to start applications from a group, reduce
+ and restore applications and groups, and switch among them by using the Task
+ List. To learn how to perform additional Presentation Manager skills, such
+ as sizing and moving windows and using dialog boxes, see Chapter 1,
+ "Learning Basic Presentation Manager Skills," in the Microsoft Operating
+ System/2 User's Guide. For more detailed information on running
+ applications, see Chapter 2, "Running Applications with MS OS/2," in the
+ Microsoft Operating System/2 User's Guide. .EM
+

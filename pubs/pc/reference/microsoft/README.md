@@ -4,8 +4,13 @@ title: Microsoft Specifications
 permalink: /pubs/pc/reference/microsoft/
 ---
 
+Microsoft Programmer's Library
+------------------------------
+
+- [Microsoft Programmer's Library (v1.03)](mspl13/)
+
 Microsoft Specifications
----
+------------------------
 
 ### FAT (File Allocation Table) Documentation
 

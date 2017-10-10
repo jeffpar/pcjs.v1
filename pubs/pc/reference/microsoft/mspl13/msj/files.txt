@@ -1,0 +1,6 @@
+msj1		MS Systems Journal Volume #6
+msj2		MS Systems Journal Volume #5
+msj3		MS Systems Journal Volume #4
+msj4		MS Systems Journal Volume #3
+msj5		MS Systems Journal Volume #2
+msj6		MS Systems Journal Volume #1

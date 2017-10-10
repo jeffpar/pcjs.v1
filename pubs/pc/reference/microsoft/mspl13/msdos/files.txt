@@ -1,0 +1,6 @@
+dos33ref	MS-DOS 3.3 Programmer's Reference
+dos40ref	MS-DOS 4.0 Programmer's Reference
+dosencyc	The MS-DOS Encyclopedia
+dosadvnc	Advanced MS-DOS Programming
+petern		The New Peter Norton Programmer's Guide
+dossmpl		MS-DOS Sample Code

@@ -1,0 +1,2561 @@
+ \SAMPCODE
+ \SAMPCODE\FORTRAN
+ \SAMPCODE\FORTRAN\DEMO.FOR
+
+ C     Bubble Sort Demonstration Program
+ C     Microsoft FORTRAN77
+ C     4 October 1982
+ C
+ C     The main routine reads from the terminal an array
+ C     of ten real numbers in F8.0 format and calls the
+ C     subroutine BUBBLE to sort them.
+ C
+       REAL R(10)
+       INTEGER I
+       WRITE (*,001)
+   001 FORMAT(1X,'Bubble Sort Demonstration Program.')
+   100 DO 103 I=1,10
+       WRITE (*,101) I
+   101 FORMAT(1X,'Please input real number no. ',I2)
+       READ (*,102) R(I)
+   102 FORMAT(F8.0)
+   103 CONTINUE
+       CALL BUBBLE(R,10)
+       WRITE (*,002)
+   002 FORMAT(/1X,'The sorted ordering from lowest to highest is:')
+       WRITE (*,003) (R(I),I = 1,10)
+   003 FORMAT(2(1x,5F13.3/))
+       STOP
+       END
+ C
+ C     Subroutine    BUBBLE   performs   a   bubble   sort   on   a
+ C     one-dimensional real array of arbitrary  length.   It  sorts
+ C     the array in ascending order.
+       SUBROUTINE BUBBLE(X,J)
+       INTEGER J,A1,A2
+       REAL X(J),TEMP
+   100 IF (J .LE. 1) GOTO 101
+   200 DO 201 A1 = 1,J-1
+   300 DO 301 A2 = A1 + 1,J
+   400 IF (X(A1) .LE. X(A2)) GOTO 401
+       TEMP = X(A1)
+       X(A1) = X(A2)
+       X(A2) = TEMP
+   401 CONTINUE
+   301 CONTINUE
+   201 CONTINUE
+   101 CONTINUE
+       RETURN
+       END
+
+
+ \SAMPCODE\FORTRAN\DEMORAN.FOR
+
+         PROGRAM DEMORAN
+ c
+ c  This program demonstrates a uniform pseudo-random number
+ c  generator.
+ c
+ c  Portions of this program are based on ideas presented in the
+ c  the book "Numerical Recipes - The Art of Scientific Computing"
+ c  by William H. Press, Brian P. Flannery, Saul A. Teukolsky, and
+ c  William T. Vetterling, Cambridge University Press 1986
+ c
+ c  If 1000 numbers and 10 bins are requested, each bin should
+ c  (ideally) be filled with 100 numbers. The percentage error
+ c  is printed for each bin.
+ c
+ c  The following routines are provided:
+ c
+ c  REAL FUNCTION RAND ()
+ c    returns a real number in the range 0. to 1.0
+ c
+ c  INTEGER FUNCTION RANDLIM (ILO,IHI)
+ c    returns a random integer in the range ILO to IHI
+ c
+ c  REAL FUNCTION SRAND (SEED)
+ c    initializes either generator (seed = 0. to 259199.)
+ c
+ c  SUBROUTINE SECOND (TX)
+ c    returns the number of seconds and hundreths of seconds elapsed
+ c    since midnight
+ c
+ c
+ c  NOTE -- Both generators should produce identical results
+ c
+         INTEGER BINS(0:999), RANDLIM
+         ERR(I) = (I-FLOAT(NREP/NBINS))/(NREP/NBINS)*100.
+         WRITE (*,*) 'You will be asked to provide the following:'
+         WRITE (*,*) 'how many random numbers to generate'
+         WRITE (*,*) 'how many bins to use (1-1000)'
+         WRITE (*,*) 'which generator to use (1 or 2)'
+         WRITE (*,*)
+ 10      CONTINUE
+         WRITE (*,*) 'Input three numbers separated by blanks or commas'
+         WRITE (*,*) 'or CTRL-Z to end'
+         READ (*,*,END=999) NREP,NBINS,IGEN
+         SEED = SRAND(1.0)
+         CALL SECOND (T1)
+         DO 100 I=1,NREP
+           IF (IGEN .EQ. 1) THEN
+             IX = RANDLIM(0,NBINS-1)
+           ELSE
+             IX = NBINS*RAND()
+           ENDIF
+           BINS(IX) = BINS(IX)+1
+ 100     CONTINUE
+         CALL SECOND (T2)
+         WRITE (*,*) 'Time elapsed=',t2-t1
+         WRITE (*,*) 'Numbers generated per second=',nrep/(t2-t1)
+         WRITE (*,*)
+         WRITE (*,*) 'Bin    Count  % Error'
+         WRITE (*,*) '----  ------- -------'
+         DO 200 I=0,NBINS-1
+           WRITE (*,'(1x,i4,i9,f7.1,''%'')') i+1,bins(i),err(bins(i))
+           BINS(I) = 0
+ 200     CONTINUE
+         GO TO 10
+ 999     CONTINUE
+         END
+         FUNCTION RANDOM ()
+ c
+ c  If called, RANDOM just returns 0.0
+ c
+         INTEGER RANDLIM
+         PARAMETER (IA=7141, IC=54773, IM=259200)
+         RANDOM = 0.0
+         RETURN
+ c
+ c  REAL FUNCTION SRAND (SEED)
+ c    initializes either generator (seed = 0. to 259199.)
+ c
+         ENTRY SRAND (X)
+         SRAND = X
+         SEED = X
+         RETURN
+ c
+ c  INTEGER FUNCTION RANDLIM (ILO,IHI)
+ c    returns a random integer in the range ILO to IHI
+ c
+         ENTRY RANDLIM (ILO,IHI)
+         SEED = MOD (INT(SEED)*IA+IC,IM)
+         RANDLIM = ILO+(IHI-ILO+1)*SEED/IM
+         RETURN
+ c
+ c  REAL FUNCTION RAND ()
+ c    returns a real number in the range 0. to 1.0
+ c
+         ENTRY RAND ()
+         SEED = MOD (INT(SEED)*IA+IC,IM)
+         RAND = SEED/IM
+         END
+         SUBROUTINE SECOND (TX)
+ c
+ c  SUBROUTINE SECOND (TX)
+ c    returns the number of seconds and hundredths of seconds elapsed
+ c    since midnight
+ c
+         INTEGER*2 IH,IM,IS,IHU
+         CALL GETTIM (IH,IM,IS,IHU)
+         TX = IH*3600.+IM*60+IS+IHU/100.
+         END
+
+ \SAMPCODE\FORTRAN\DWHET.FOR
+
+ CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+ C
+ C       "WHETSTONE INSTRUCTIONS PER SECONDS" MEASURE OF FORTRAN
+ C       AND CPU PERFORMANCE.
+ C
+ C         References on Whetstones:    Computer Journal Feb 76
+ C                                      pg 43-49 vol 19 no 1.
+ C                                      Curnow and Wichman.
+ C
+ C                                      and Timing Studies using a
+ C                                      synthetic Whetstone Benchmark
+ C                                      S. Harbaugh & J. Forakris
+ C
+ C         References on FORTRAN Benchmarks:
+ C
+ C                                   -  Computer Languages, Jan 1986
+ C                                   -  EDN, Oct 3, 1985, Array Processors
+ C                                           for PCs
+ C                                   -  Byte, Feb 1984.
+ C
+ C       03/03/87
+ C          Seeing that Microsoft distributed this without
+ C          shipping the commented version, the timing loop
+ C          was reworked to eliminate all do loops and to put
+ C          in code to print the variation in the measurment to
+ C          make it more cook-book.  The 3 loop method described
+ C          below was eliminated because it caused confusion.
+ C          The printout was grouped and placed at the end of the test
+ C          so that the outputs could be checked.
+ C          although it is ugly code, it checks with the Ada version
+ C          and original article.
+ C          Because the Whetstones are printed as a reciprical,
+ C          you can not average Whetstones to reduce time errors,
+ C          you must run it multiple times and accumulate time.
+ C          (AKT)
+ C
+ C
+ C       01/01/87
+ C          fixed second subroutine to return seconds, not centi
+ C          seconds and used double precision variables. (AKT)
+ C
+ C       12/15/86
+ C          Modified by Microsoft, removed reading in loop
+ C          option, added timer routine, removed meta-commands
+ C          on large model.  Changed default looping from 100 to 10.
+ C
+ C       9/24/84
+ C
+ C          ADDED CODE TO THESE SO THAT IT HAS VARIABLE LOOPING
+ C
+ C          from DEC but DONE BY OUTSIDE CONTRACTOR, OLD STYLE CODING
+ C          not representative of DEC coding
+ C
+ C          A. TETEWSKY, c/o
+ C          555 TECH SQ MS 92
+ C          CAMBRIDGE MASS 02139           617/258-1287
+ C
+ C          benchmarking notes:   1)    insure that timer has
+ C                                      sufficient resolution and
+ C                                      uses elapsed CPU time
+ C
+ C                                2)    to be useful for mainframe
+ C                                      comparisons, measure
+ C                                      INTEGER*4 time and large
+ C                                      memory model or quote
+ C                                      both large and small model
+ C                                      times.  It may be necessary
+ C                                      to make the arrays in this
+ C                                      program large enough to span
+ C                                      a 64K byte boundary because
+ C                                      many micro compilers will
+ C                                      generate small model code
+ C                                      for small arrays even with
+ C                                      large models.
+ C
+ C                                 3)   Make sure that it loops
+ C                                      long enough to gain
+ C                                      stability, i.e. third-second
+ C                                      loop = first loop time.
+ C
+ C         research notes,
+ C         structure and definition:
+ C         I received this code as a black box and based on some
+ C         study, discovered the following background.
+ C
+ C            n1-n10 are loop counters for 10 tests, and tests
+ C            n1,n5, and n10 are skipped.
+ C            computed goto's are used to skip over tests that
+ C            are not wanted.
+ C
+ C
+ C            n1-n10 scale with I.   When I is set to 10,
+ C            kilo whets per second = 1000/ (time for doing n1-n10),
+ C            the definition found in the literature.
+ C
+ C            If I were 100, the scale factor would be 10,000.
+ C            which explains the 10,000 discovered in this code because
+ C            it was shipped with IMUCH wired to 100.
+ C
+ C            the original DEC version uses a do-loop,
+ C                  imuch=100
+ C                  do 200 loop=1,3
+ C                       i = loop*imuch
+ C                       n1-n10 scales by I
+ C                       ... whetstones here ...
+ C              200 continue
+ C
+ C            and it took me a while to figure out why it worked.
+ C
+ C            This code loops three times
+ C                 TIMES(1) is time for 1*I  whets
+ C                 TIMES(2) is time for 2*I
+ C                 TIMES(3) is time for 3*I
+ C            and TIMES(3)-TIMES(2) =  time for 1*I.
+ C            As long as TIMES(3)-TIMES(2) =  TIMES(1) to
+ C            4 digits, then the cycle counter is sufficiently
+ C            large enough for a given clock resolution.
+ C
+ C            By scaling whets * (IMUCH/10), you can alter IMUCH.
+ C            The default definition is IMUCH = 10, hence the factor
+ C            is unity.  IMUCH should be a factor of 10.
+ C
+ C
+ C            Problems I have found:
+ C            -  the SECONDS function is a single precision number
+ C               and as CPUs get faster, you need to loop longer
+ C               so that significant digits are not dropped.
+ C
+ C
+ C       WHETS.FOR       09/27/77     TDR
+ C       ...WHICH IS AN IMPROVED VERSION OF:
+ C       WHET2A.FTN      01/22/75     RBG
+ C
+         DOUBLE PRECISION X1,X2,X3,X4,X,Y,Z,T,T1,T2,E1
+         INTEGER   J,K,L,I, N1,N2,N3,N4,N5,N6,N7,N8,N9,N10,N11,ISAVE
+         COMMON    T,T1,T2,E1(4),J,K,L
+ C
+ C
+         REAL*8         BEGTIM, ENDTIM, DIFTIM
+         REAL*8         DT,  WHETS, WS, ERR, WERR, PERR
+         INTEGER*4      IO1, IO1L, KREP, MKREP
+ C
+         REAL*4         SECNDS
+         EXTERNAL       SECNDS
+
+ C
+ C****************************************************************
+ C
+ C
+         MKREP  =    2
+         KREP   =    0
+         WRITE(*,*) ' Suggest inner > 10, outer > 1 '
+         WRITE(*,*) ' ENTER the number of inner/outer loops  '
+         READ(*,*)  I  ,IO1
+  7020   CONTINUE
+         WRITE(*,*) ' Starting ',IO1,' loops, inner loop = ',I
+ C       ***** BEGININNING OF TIMED INTERVAL *****
+         IO1L   = 0
+         BEGTIM = DBLE(SECNDS(0.0E+00) )
+  7010   CONTINUE
+ C
+ C       ... the Whetstone code here ...
+         ISAVE=I
+         T=0.499975D00
+         T1=0.50025D00
+         T2=2.0D00
+         N1=0
+         N2=12*I
+         N3=14*I
+         N4=345*I
+         N5=0
+         N6=210*I
+         N7=32*I
+         N8=899*I
+         N9=616*I
+         N10=0
+         N11=93*I
+         N12=0
+         X1=1.0D0
+         X2=-1.0D0
+         X3=-1.0D0
+         X4=-1.0D0
+         IF(N1)19,19,11
+  11     DO 18 I=1,N1,1
+         X1=(X1+X2+X3-X4)*T
+         X2=(X1+X2-X3+X4)*T
+         X4=(-X1+X2+X3+X4)*T
+         X3=(X1-X2+X3+X4)*T
+  18     CONTINUE
+  19     CONTINUE
+         E1(1)=1.0D0
+         E1(2)=-1.0D0
+         E1(3)=-1.0D0
+         E1(4)=-1.0D0
+         IF(N2)29,29,21
+  21     DO 28 I=1,N2,1
+         E1(1)=(E1(1)+E1(2)+E1(3)-E1(4))*T
+         E1(2)=(E1(1)+E1(2)-E1(3)+E1(4))*T
+         E1(3)=(E1(1)-E1(2)+E1(3)+E1(4))*T
+         E1(4)=(-E1(1)+E1(2)+E1(3)+E1(4))*T
+  28     CONTINUE
+  29     CONTINUE
+         IF(N3)39,39,31
+  31     DO 38 I=1,N3,1
+  38     CALL PA(E1)
+  39     CONTINUE
+         J=1
+         IF(N4)49,49,41
+  41     DO 48 I=1,N4,1
+         IF(J-1)43,42,43
+  42     J=2
+         GOTO44
+  43     J=3
+  44     IF(J-2)46,46,45
+  45     J=0
+         GOTO47
+  46     J=1
+  47     IF(J-1)411,412,412
+  411    J=1
+         GOTO48
+  412    J=0
+  48     CONTINUE
+  49     CONTINUE
+         J=1
+         K=2
+         L=3
+         IF(N6)69,69,61
+  61     DO 68 I=1,N6,1
+         J=J*(K-J)*(L-K)
+         K=L*K-(L-J)*K
+         L=(L-K)*(K+J)
+         E1(L-1)=J+K+L
+         E1(K-1)=J*K*L
+  68     CONTINUE
+  69     CONTINUE
+         X=0.5D0
+         Y=0.5D0
+         IF(N7)79,79,71
+  71     DO 78 I=1,N7,1
+         X=T*DATAN(T2*DSIN(X)*DCOS(X)/(DCOS(X+Y)+DCOS(X-Y)-1.0D0))
+         Y=T*DATAN(T2*DSIN(Y)*DCOS(Y)/(DCOS(X+Y)+DCOS(X-Y)-1.0D0))
+  78     CONTINUE
+  79     CONTINUE
+         X=1.0D0
+         Y=1.0D0
+         Z=1.0D0
+         IF(N8)89,89,81
+  81     DO 88 I=1,N8,1
+  88     CALL P3(X,Y,Z)
+  89     CONTINUE
+         J=1
+         K=2
+         L=3
+         E1(1)=1.0D0
+         E1(2)=2.0D0
+         E1(3)=3.0D0
+         IF(N9)99,99,91
+  91     DO 98 I=1,N9,1
+  98     CALL P0
+  99     CONTINUE
+         J=2
+         K=3
+         IF(N10)109,109,101
+  101    DO 108 I=1,N10,1
+         J=J+K
+         K=J+K
+         J=J-K
+         K=K-J-J
+  108    CONTINUE
+  109    CONTINUE
+         X=0.75D0
+         IF(N11)119,119,111
+  111    DO 118 I=1,N11,1
+  118    X=DSQRT(DEXP(DLOG(X)/T1))
+  119    CONTINUE
+         I = ISAVE
+ C       ... the whetstone ends here
+ C
+ C         ... loop counter instead of do loop ...
+           IO1L = IO1L + 1
+           IF( IO1L .LT. IO1) GOTO 7010
+ C       ******* END of TIME INTERVALED ***********
+ C
+         ENDTIM = DBLE(SECNDS(0.0E+00))
+         DIFTIM = ENDTIM - BEGTIM
+ C       whets  = 1000/(TIME FOR 10 inner ITERATIONS OF PROGRAM LOOP)
+ C       or 100 for every 1 inner count
+         WHETS = (100.0D+00* DBLE( FLOAT(IO1*I  ))/DIFTIM)
+         WRITE(*,*) ' START TIME = ',BEGTIM
+         WRITE(*,*) ' END   TIME = ',ENDTIM
+         WRITE(*,*) ' DIF   TIME = ',DIFTIM
+ C
+         WRITE (*,201) WHETS
+   201   FORMAT(' SPEED IS: ',1PE10.3,' THOUSAND WHETSTONE',
+      2     ' DOUBLE PRECISION INSTRUCTIONS PER SECOND')
+         CALL POUT(N1,N1,N1,X1,X2,X3,X4)
+         CALL POUT(N2,N3,N2,E1(1),E1(2),E1(3),E1(4))
+         CALL POUT(N3,N2,N2,E1(1),E1(2),E1(3),E1(4))
+         CALL POUT(N4,J,J,X1,X2,X3,X4)
+         CALL POUT(N6,J,K,E1(1),E1(2),E1(3),E1(4))
+         CALL POUT(N7,J,K,X,X,Y,Y)
+         CALL POUT(N8,J,K,X,Y,Z,Z)
+         CALL POUT(N9,J,K,E1(1),E1(2),E1(3),E1(4))
+         CALL POUT(N10,J,K,X1,X2,X3,X4)
+         CALL POUT(N11,J,K,X,X,X,X)
+ C
+ C       ... repeat but double (MULTIPLY UP) inner count ...
+         KREP = KREP + 1
+         IF( KREP .LT. MKREP) THEN
+             DT     = DIFTIM
+             WT     = WHETS
+             I=I*MKREP
+             GOTO 7020
+         ENDIF
+ C
+ C       ... compute sensitivity
+ C
+         ERR =  DIFTIM - (DT*DBLE(FLOAT(MKREP)))
+         WERR=  WT-WHETS
+         PERR=  WERR*100.0D+00/WHETS
+         WRITE(*,*) ' Time ERR = ',ERR, ' seconds '
+         WRITE(*,*) ' Whet ERR = ',WERR,' kwhets/sec '
+         WRITE(*,*) ' %    ERR = ',PERR,' % whet error '
+         IF( DIFTIM .LT. 10.0D+00) THEN
+          WRITE(*,*)
+      1   ' TIME is less than 10 seconds, suggest larger inner loop '
+         ENDIF
+ C
+         STOP
+         END
+         SUBROUTINE PA(E)
+ CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+         DOUBLE PRECISION T,T1,T2,E
+         COMMON T,T1,T2
+         DIMENSION E(4)
+         J=0
+  1      E(1)=(E(1)+E(2)+E(3)-E(4))*T
+         E(2)=(E(1)+E(2)-E(3)+E(4))*T
+         E(3)=(E(1)-E(2)+E(3)+E(4))*T
+         E(4)=(-E(1)+E(2)+E(3)+E(4))/T2
+         J=J+1
+         IF(J-6)1,2,2
+  2      CONTINUE
+         RETURN
+         END
+         SUBROUTINE P0
+ CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+         DOUBLE PRECISION T,T1,T2,E1
+         COMMON T,T1,T2,E1(4),J,K,L
+         E1(J)=E1(K)
+         E1(K)=E1(L)
+         E1(L)=E1(J)
+         RETURN
+         END
+         SUBROUTINE P3(X,Y,Z)
+ CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+         DOUBLE PRECISION T,T1,T2,X1,Y1,X,Y,Z
+         COMMON T,T1,T2
+         X1=X
+         Y1=Y
+         X1=T*(X1+Y1)
+         Y1=T*(X1+Y1)
+         Z=(X1+Y1)/T2
+         RETURN
+         END
+         SUBROUTINE POUT(N,J,K,X1,X2,X3,X4)
+ CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+ C
+ C
+         DOUBLE PRECISION X1,X2,X3,X4
+         WRITE(*,1)N,J,K,X1,X2,X3,X4
+  1      FORMAT('  ',3(I7,1X),4(1PD12.4,1X))
+         RETURN
+         END
+
+ \SAMPCODE\FORTRAN\GRAPH.FOR
+
+         INTERFACE TO INTEGER[C] FUNCTION getmod[C]
+         END
+ C
+ C
+         INTERFACE TO SUBROUTINE init[C](num)
+         INTEGER[C] num
+         END
+ C
+ C
+         INTERFACE TO SUBROUTINE setbck[C](num)
+         INTEGER[C] num
+         END
+ C
+ C
+         INTERFACE TO SUBROUTINE palett[C](num)
+         INTEGER[C] num
+         END
+ C
+ C
+         INTERFACE TO SUBROUTINE circle[C](x, y, rad, col)
+         INTEGER[C] x, y, rad, col
+         END
+ C
+ C
+ C       Change "back" between 1 and 15 and "pal" between 0 and 1 to
+ C       get different results.
+ C
+         PROGRAM graph
+         INTEGER[C] back/0/,pal/1/, imode, mode/4/, getmod
+         INTEGER xmax/320/, ymax/200/, radmax/18/, xcenter/160/
+         INTEGER y, xoff, radius, color, bumps/2/
+         INTEGER xoffs(4)/0, 46, 92, 140/
+         REAL pi
+         PARAMETER (pi = 3.141569265)
+         imode = getmod()
+         CALL init(mode)
+         CALL setbck(back)
+         CALL palett(pal)
+         DO 30 i = 1, 3
+                 DO 20 y = 1, ymax
+                         r      = (REAL(y)/ymax)*pi*bumps
+                         x      = SIN(r)
+                         radius = radmax * ABS(x)
+                         DO 10 j = 1, 4
+                                         xoff  = xoffs(j) * x
+                                         color = MOD(j+i-1, 3)+1
+                                         CALL mirror(xcenter, xoff, y, radius,
+ 10                      CONTINUE
+ 20              CONTINUE
+ 30      CONTINUE
+         DO 40 j = 1,300000
+                 CALL timer
+ 40      CONTINUE
+         CALL init(imode)
+         END
+ C
+ C
+         SUBROUTINE mirror(xcenter, xoff, y, radius, color)
+         IMPLICIT INTEGER (a-z)
+         CALL circle(xcenter+xoff, y, radius, color)
+         CALL circle(xcenter-xoff, y, radius, color)
+         END
+ C
+ C
+         SUBROUTINE timer
+         END
+
+ \SAMPCODE\FORTRAN\SECNDS.FOR
+
+ C
+ C     INTERFACE ROUTINE FROM DEC TO PC FOR GETTING TIME
+ C
+       FUNCTION SECNDS(X)
+ CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+ C
+ C     RETURN CURRENT TIME - MIDNIGHT - X
+ C
+ C
+       REAL*4    SECNDS, X
+ C
+ C
+       INTEGER*2 IHOUR, IMINUT, ISECON, IHUND
+       REAL*4    RHOUR, RMINUT, RSECON, RHUND
+       REAL*4    X1
+ C
+       CALL GETTIM(IHOUR, IMINUT, ISECON, IHUND)
+       RHOUR     =  FLOAT( IHOUR )
+       RMINUT    =  FLOAT( IMINUT)
+       RSECON    =  FLOAT( ISECON)
+       RHUND     =  FLOAT( IHUND )
+       X1        =  RHOUR*3600.0 + RMINUT*60.0 + RSECON +
+      &             RHUND/100.0
+       SECNDS    =  X1 - X
+ C
+       RETURN
+       END
+ \SAMPCODE\FORTRAN\SIEVE.FOR
+
+         subroutine second (t1)
+ c
+ c  MS version of SECOND (timing routine)
+ c
+         integer*2 ih,im,is,ihu
+         integer*4 t1
+         call gettim (ih,im,is,ihu)
+         t1 = (ih*3600+im*60+is)*100+ihu
+         end
+ *     prime number sieve program (integer*4 version)
+
+       integer*4   i, niter, count, prime
+         integer*4 t1,t2
+ c     integer   t1 (4), t2 (4)
+
+ c     write  (*, '  ('' no. iterations: '' )   ')
+ c     read   (*, *) niter
+       niter = 10
+
+ c     call time (t1)
+       call second (t1)
+       do 30 i = 1, niter
+          call sieve (count, prime)
+ 30       continue
+
+ c     call etime (t2, t1, niter)
+       call second (t2)
+       write  (*, 40) count, prime
+ 40    format ('0 done', I6, ' primes, largest is ', I6)
+       write (*,*) 'Elapsed=',t2-t1,' sieve4 '
+       write (*,*) 'Average per iteration=',+(t2-t1)/niter
+       end
+
+       subroutine sieve (count, largest)
+       integer*4         count, largest
+
+       integer*4     size
+       parameter   (size = 8191)
+
+       integer*4   i, prime, k
+       logical     flags (size)
+
+       count = 0
+       do 10 i = 1, size
+          flags (i) = .true.
+ 10       continue
+
+       do 30 i = 1, size
+          if (flags (i)) then
+             prime = i + i + 1
+             do 20 k = i + prime, size, prime
+                flags (k) = .false.
+ 20             continue
+             count = count + 1
+             end if
+ 30       continue
+       largest = prime
+       return
+       end
+
+ \SAMPCODE\FORTRAN\STATS.FOR
+
+ C**********************************************************************
+ C
+ C  STATS.FOR
+ C
+ C        Calculates simple statistics (minimum, maximum, mean, median,
+ C        variance, and standard deviation) of up to 50 values.
+ C
+ C        Reads one value at a time from unit 5.  Echoes values and
+ C        writes results to unit 6.
+ C
+ C        All calculations are done in single precision.
+ C
+ C
+ C***********************************************************************
+
+
+
+       DIMENSION DAT(50)
+       OPEN(5,FILE=' ')
+
+       N=0
+       DO 10 I=1,50
+       READ(5,99999,END=20) DAT(I)
+       N=I
+  10   CONTINUE
+
+ C Too many values.  Write error message and die.
+
+       WRITE(6,99998) N
+       STOP
+
+ C Test to see if there's more than one value.  We don't want to divide
+ C by zero.
+
+ 20    IF(N.LE.1) THEN
+
+ C Too few values. Print message and die.
+
+          WRITE(6,99997)
+
+       ELSE
+
+ C Echo input values to output.
+
+          WRITE(6,99996)
+          WRITE(6,99995) (DAT(I),I=1,N)
+
+ C Calculate mean, standard deviation, and median.
+
+          CALL MEAN (DAT,N,DMEAN)
+          CALL STDEV (DAT,N,DMEAN,DSTDEV,DSTVAR)
+          CALL MEDIAN (DAT,N,DMEDN,DMIN,DMAX)
+
+          WRITE(6,99994) N,DMEAN,DMIN,DMAX,DMEDN,DSTVAR,DSTDEV
+
+       ENDIF
+
+       STOP
+
+ 99999 FORMAT(E14.6)
+ 99998 FORMAT('0 ********STAT: TOO MANY VALUES-- ',I5)
+ 99997 FORMAT('0 ********STAT: TOO FEW VALUES (1 OR LESS) ')
+ 99996 FORMAT(//,10X,
+      +' ******************SAMPLE DATA VALUES*****************'//)
+ 99995 FORMAT(5(1X,1PE14.6))
+ 99994 FORMAT(///,10X,
+      +' ******************SAMPLE STATISTICS******************',//,
+      +15X,'          Sample size = ',I5,/,
+      +15X,'          Mean        = ',1PE14.6,/,
+      +15X,'          Minimum     = ',E14.6,/,
+      +15X,'          Maximum     = ',E14.6,/
+      +15X,'          Median      = ',E14.6,/
+      +15X,'          Variance    = ',E14.6,/
+      +15X,'          St deviation= ',E14.6////)
+
+       END
+
+ C Calculate the mean (XMEAN) of the N values in array X.
+
+       SUBROUTINE  MEAN (X,N,XMEAN)
+       DIMENSION X(N)
+
+       SUM=0.0
+       DO 10 I=1,N
+          SUM=SUM+X(I)
+    10 CONTINUE
+
+       XMEAN=SUM/FLOAT(N)
+
+       RETURN
+       END
+
+ C Calculate the standard deviation (XSTDEV) and variance (XVAR)
+ C of the N values in X using the mean (XMEAN).
+ C This divides by zero when N = 1.
+
+       SUBROUTINE STDEV (X,N,XMEAN,XSTDEV,XVAR)
+       DIMENSION X(N)
+
+       SUMSQ=0.0
+       DO 10 I=1,N
+          XDIFF=X(I)-XMEAN
+          SUMSQ=SUMSQ+XDIFF*XDIFF
+    10 CONTINUE
+
+       XVAR=SUMSQ/FLOAT(N-1)
+       XSTDEV=SQRT(XVAR)
+
+       RETURN
+       END
+
+
+ C Calculate the median (XMEDN), minimum (XMIN), and maximum (XMAX) of
+ C the N values in X.
+ C MEDIAN sorts the array and then calculates the median value.
+
+       SUBROUTINE MEDIAN (X,N,XMEDN,XMIN,XMAX)
+       DIMENSION X(N)
+
+       CALL SORT (X,N)
+
+       IF(MOD(N,2).EQ.0) THEN
+          K=N/2
+          XMEDN=(X(K)+X(K+1))/2.0
+       ELSE
+          K=(N+1)/2
+          XMEDN=X(K)
+       ENDIF
+
+       XMIN=X(1)
+       XMAX=X(N)
+
+       END
+
+ C Sort the N values in array X.  SORT uses a bubble sort
+ C that quits when no values were exchanged on the last pass.
+ C Each pass goes from the first element to where the last
+ C exchange occurred on the previous pass.
+
+       SUBROUTINE SORT (X,N)
+       DIMENSION X(N)
+
+       IBND=N
+   20  IXCH=0
+
+       DO 100 J=1,IBND-1
+            IF(X(J).GT.X(J+1))THEN
+               TEMP=X(J)
+               X(J)=X(J+1)
+               X(J+1)=TEMP
+               IXCH=J
+            ENDIF
+  100  CONTINUE
+
+       IF (IXCH.EQ.0) RETURN
+       IBND=IXCH
+       GO TO 20
+
+       END
+
+
+ \SAMPCODE\FORTRAN\SWHET.FOR
+
+ CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+ C
+ C       "WHETSTONE INSTRUCTIONS PER SECONDS" MEASURE OF FORTRAN
+ C       AND CPU PERFORMANCE.
+ C
+ C         References on Whetstones:    Computer Journal Feb 76
+ C                                      pg 43-49 vol 19 no 1.
+ C                                      Curnow and Wichman.
+ C
+ C                                      and Timing Studies using a
+ C                                      synthetic Whetstone Benchmark
+ C                                      S. Harbaugh & J. Forakris
+ C
+ C         References on FORTRAN Benchmarks:
+ C
+ C                                   -  Computer Languages, Jan 1986
+ C                                   -  EDN, Oct 3, 1985, Array Processors
+ C                                           for PCs
+ C                                   -  Byte, Feb 1984.
+ C
+ C       03/03/87
+ C          Seeing that Microsoft distributed this without
+ C          shipping the commented version, the timing loop
+ C          was reworked to eliminate all do loops and to put
+ C          in code to print the variation in the measurment to
+ C          make it more cook-book.  The 3 loop method described
+ C          below was eliminated because it caused confusion.
+ C          The printout was grouped and placed at the end of the test
+ C          so that the outputs could be checked.
+ C          although it is ugly code, it checks with the Ada version
+ C          and original article.
+ C          Because the Whetstones are printed as a reciprical,
+ C          you can not average Whetstones to reduce time errors,
+ C          you must run it multiple times and accumulate time.
+ C          (AKT)
+ C
+ C
+ C       01/01/87
+ C          fixed second subroutine to return seconds, not centi
+ C          seconds and used double precision variables. (AKT)
+ C
+ C       12/15/86
+ C          Modified by Microsoft, removed reading in loop
+ C          option, added timer routine, removed meta-commands
+ C          on large model.  Changed default looping from 100 to 10.
+ C
+ C       9/24/84
+ C
+ C          ADDED CODE TO THESE SO THAT IT HAS VARIABLE LOOPING
+ C
+ C          from DEC but DONE BY OUTSIDE CONTRACTOR, OLD STYLE CODING
+ C          not representative of DEC coding
+ C
+ C          A. TETEWSKY, c/o
+ C          555 TECH SQ MS 92
+ C          CAMBRIDGE MASS 02139           617/258-1287
+ C
+ C          benchmarking notes:   1)    insure that timer has
+ C                                      sufficient resolution and
+ C                                      uses elapsed CPU time
+ C
+ C                                2)    to be useful for mainframe
+ C                                      comparisons, measure
+ C                                      INTEGER*4 time and large
+ C                                      memory model or quote
+ C                                      both large and small model
+ C                                      times.  It may be necessary
+ C                                      to make the arrays in this
+ C                                      program large enough to span
+ C                                      a 64K byte boundary because
+ C                                      many micro compilers will
+ C                                      generate small model code
+ C                                      for small arrays even with
+ C                                      large models.
+ C
+ C                                 3)   Make sure that it loops
+ C                                      long enough to gain
+ C                                      stability, i.e. third-second
+ C                                      loop = first loop time.
+ C
+ C         research notes,
+ C         structure and definition:
+ C         I received this code as a black box and based on some
+ C         study, discovered the following background.
+ C
+ C            n1-n10 are loop counters for 10 tests, and tests
+ C            n1,n5, and n10 are skipped.
+ C            computed goto's are used to skip over tests that
+ C            are not wanted.
+ C
+ C
+ C            n1-n10 scale with I.   When I is set to 10,
+ C            kilo whets per second = 1000/ (time for doing n1-n10),
+ C            the definition found in the literature.
+ C
+ C            If I were 100, the scale factor would be 10,000.
+ C            which explains the 10,000 discovered in this code because
+ C            it was shipped with IMUCH wired to 100.
+ C
+ C            the original DEC version uses a do-loop,
+ C                  imuch=100
+ C                  do 200 loop=1,3
+ C                       i = loop*imuch
+ C                       n1-n10 scales by I
+ C                       ... whetstones here ...
+ C              200 continue
+ C
+ C            and it took me a while to figure out why it worked.
+ C
+ C            This code loops three times
+ C                 TIMES(1) is time for 1*I  whets
+ C                 TIMES(2) is time for 2*I
+ C                 TIMES(3) is time for 3*I
+ C            and TIMES(3)-TIMES(2) =  time for 1*I.
+ C            As long as TIMES(3)-TIMES(2) =  TIMES(1) to
+ C            4 digits, then the cycle counter is sufficiently
+ C            large enough for a given clock resolution.
+ C
+ C            By scaling whets * (IMUCH/10), you can alter IMUCH.
+ C            The default definition is IMUCH = 10, hence the factor
+ C            is unity.  IMUCH should be a factor of 10.
+ C
+ C
+ C            Problems I have found:
+ C            -  the SECONDS function is a single precision number
+ C               and as CPUs get faster, you need to loop longer
+ C               so that significant digits are not dropped.
+ C
+ C
+ C       WHETS.FOR       09/27/77     TDR
+ C       ...WHICH IS AN IMPROVED VERSION OF:
+ C       WHET2A.FTN      01/22/75     RBG
+ C
+ CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+         REAL      X1,X2,X3,X4,X,Y,Z,T,T1,T2,E1
+         INTEGER   J,K,L,I, N1,N2,N3,N4,N5,N6,N7,N8,N9,N10,N11,ISAVE
+         COMMON    T,T1,T2,E1(4),J,K,L
+ C
+ C
+         REAL*8         BEGTIM, ENDTIM, DIFTIM
+         REAL*8         DT,  WHETS, WS, ERR, WERR, PERR
+         INTEGER*4      IO1, IO1L, KREP, MKREP
+ C
+         REAL*4         SECNDS
+         EXTERNAL       SECNDS
+ C
+ C****************************************************************
+ C
+ C
+         MKREP  =    2
+         KREP   =    0
+         WRITE(*,*) ' Suggest inner > 10, outer > 1 '
+         WRITE(*,*) ' ENTER the number of inner/outer loops  '
+         READ(*,*)  I  ,IO1
+  7020   CONTINUE
+         WRITE(*,*) ' Starting ',IO1,' loops, inner loop = ',I
+ C       ***** BEGININNING OF TIMED INTERVAL *****
+         IO1L   = 0
+         BEGTIM = DBLE(SECNDS(0.0E+00) )
+  7010   CONTINUE
+ C
+ C       ... the Whetstone code here ...
+ C
+         T=0.499975E00
+         T1=0.50025E00
+         T2=2.0E00
+ C
+         ISAVE=I
+         N1=0
+         N2=12*I
+         N3=14*I
+         N4=345*I
+         N5=0
+         N6=210*I
+         N7=32*I
+         N8=899*I
+         N9=616*I
+         N10=0
+         N11=93*I
+         N12=0
+         X1=1.0E0
+         X2=-1.0E0
+         X3=-1.0E0
+         X4=-1.0E0
+         IF(N1)19,19,11
+  11     DO 18 I=1,N1,1
+         X1=(X1+X2+X3-X4)*T
+         X2=(X1+X2-X3+X4)*T
+         X4=(-X1+X2+X3+X4)*T
+         X3=(X1-X2+X3+X4)*T
+  18     CONTINUE
+  19     CONTINUE
+         E1(1)=1.0E0
+         E1(2)=-1.0E0
+         E1(3)=-1.0E0
+         E1(4)=-1.0E0
+         IF(N2)29,29,21
+  21     DO 28 I=1,N2,1
+         E1(1)=(E1(1)+E1(2)+E1(3)-E1(4))*T
+         E1(2)=(E1(1)+E1(2)-E1(3)+E1(4))*T
+         E1(3)=(E1(1)-E1(2)+E1(3)+E1(4))*T
+         E1(4)=(-E1(1)+E1(2)+E1(3)+E1(4))*T
+  28     CONTINUE
+  29     CONTINUE
+         IF(N3)39,39,31
+  31     DO 38 I=1,N3,1
+  38     CALL PA(E1)
+  39     CONTINUE
+         J=1
+         IF(N4)49,49,41
+  41     DO 48 I=1,N4,1
+         IF(J-1)43,42,43
+  42     J=2
+         GOTO44
+  43     J=3
+  44     IF(J-2)46,46,45
+  45     J=0
+         GOTO47
+  46     J=1
+  47     IF(J-1)411,412,412
+  411    J=1
+         GOTO48
+  412    J=0
+  48     CONTINUE
+  49     CONTINUE
+         J=1
+         K=2
+         L=3
+         IF(N6)69,69,61
+  61     DO 68 I=1,N6,1
+         J=J*(K-J)*(L-K)
+         K=L*K-(L-J)*K
+         L=(L-K)*(K+J)
+         E1(L-1)=J+K+L
+         E1(K-1)=J*K*L
+  68     CONTINUE
+  69     CONTINUE
+         X=0.5E0
+         Y=0.5E0
+         IF(N7)79,79,71
+  71     DO 78 I=1,N7,1
+         X=T*ATAN(T2*SIN(X)*COS(X)/(COS(X+Y)+COS(X-Y)-1.0E0))
+         Y=T*ATAN(T2*SIN(Y)*COS(Y)/(COS(X+Y)+COS(X-Y)-1.0E0))
+  78     CONTINUE
+  79     CONTINUE
+         X=1.0E0
+         Y=1.0E0
+         Z=1.0E0
+         IF(N8)89,89,81
+  81     DO 88 I=1,N8,1
+  88     CALL P3(X,Y,Z)
+  89     CONTINUE
+         J=1
+         K=2
+         L=3
+         E1(1)=1.0E0
+         E1(2)=2.0E0
+         E1(3)=3.0E0
+         IF(N9)99,99,91
+  91     DO 98 I=1,N9,1
+  98     CALL P0
+  99     CONTINUE
+         J=2
+         K=3
+         IF(N10)109,109,101
+  101    DO 108 I=1,N10,1
+         J=J+K
+         K=J+K
+         J=J-K
+         K=K-J-J
+  108    CONTINUE
+  109    CONTINUE
+         X=0.75E0
+         IF(N11)119,119,111
+  111    DO 118 I=1,N11,1
+  118    X=SQRT(EXP(ALOG(X)/T1))
+  119    CONTINUE
+         I = ISAVE
+ C
+ C       ... the whetstone ends here
+ C
+ C         ... loop counter instead of do loop ...
+           IO1L = IO1L + 1
+           IF( IO1L .LT. IO1) GOTO 7010
+ C       ******* END of TIME INTERVALED ***********
+ C
+         ENDTIM = DBLE(SECNDS(0.0E+00))
+         DIFTIM = ENDTIM - BEGTIM
+ C       whets  = 1000/(TIME FOR 10 inner ITERATIONS OF PROGRAM LOOP)
+ C       or 100 for every 1 inner count
+         WHETS = (100.0D+00* DBLE( FLOAT(IO1*I  ))/DIFTIM)
+         WRITE(*,*) ' START TIME = ',BEGTIM
+         WRITE(*,*) ' END   TIME = ',ENDTIM
+         WRITE(*,*) ' DIF   TIME = ',DIFTIM
+ C
+         WRITE (*,201) WHETS
+   201   FORMAT(' SPEED IS: ',1PE10.3,' THOUSAND WHETSTONE',
+      2     ' SINGLE PRECISION INSTRUCTIONS PER SECOND')
+         CALL POUT(N1,N1,N1,X1,X2,X3,X4)
+         CALL POUT(N2,N3,N2,E1(1),E1(2),E1(3),E1(4))
+         CALL POUT(N3,N2,N2,E1(1),E1(2),E1(3),E1(4))
+         CALL POUT(N4,J,J,X1,X2,X3,X4)
+         CALL POUT(N6,J,K,E1(1),E1(2),E1(3),E1(4))
+         CALL POUT(N7,J,K,X,X,Y,Y)
+         CALL POUT(N8,J,K,X,Y,Z,Z)
+         CALL POUT(N9,J,K,E1(1),E1(2),E1(3),E1(4))
+         CALL POUT(N10,J,K,X1,X2,X3,X4)
+         CALL POUT(N11,J,K,X,X,X,X)
+ C
+ C
+ C       ... repeat but double (MULTIPLY UP) inner count ...
+         KREP = KREP + 1
+         IF( KREP .LT. MKREP) THEN
+             DT     = DIFTIM
+             WT     = WHETS
+             I=I*MKREP
+             GOTO 7020
+         ENDIF
+ C
+ C       ... compute sensitivity
+ C
+         ERR =  DIFTIM - (DT*DBLE(FLOAT(MKREP)))
+         WERR=  WT-WHETS
+         PERR=  WERR*100.0D+00/WHETS
+         WRITE(*,*) ' Time ERR = ',ERR, ' seconds '
+         WRITE(*,*) ' Whet ERR = ',WERR,' kwhets/sec '
+         WRITE(*,*) ' %    ERR = ',PERR,' % whet error '
+         IF( DIFTIM .LT. 10.0D+00) THEN
+          WRITE(*,*)
+      1   ' TIME is less than 10 seconds, suggest larger inner loop '
+         ENDIF
+ C
+         STOP
+         END
+ C
+         SUBROUTINE PA(E)
+ CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+ C
+         COMMON T,T1,T2
+         DIMENSION E(4)
+         J=0
+  1      E(1)=(E(1)+E(2)+E(3)-E(4))*T
+         E(2)=(E(1)+E(2)-E(3)+E(4))*T
+         E(3)=(E(1)-E(2)+E(3)+E(4))*T
+         E(4)=(-E(1)+E(2)+E(3)+E(4))/T2
+         J=J+1
+         IF(J-6)1,2,2
+  2      CONTINUE
+         RETURN
+         END
+         SUBROUTINE P0
+ CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+ C
+         COMMON T,T1,T2,E1(4),J,K,L
+         E1(J)=E1(K)
+         E1(K)=E1(L)
+         E1(L)=E1(J)
+         RETURN
+         END
+         SUBROUTINE P3(X,Y,Z)
+ CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+ C
+         COMMON T,T1,T2
+         X1=X
+         Y1=Y
+         X1=T*(X1+Y1)
+         Y1=T*(X1+Y1)
+         Z=(X1+Y1)/T2
+         RETURN
+         END
+         SUBROUTINE POUT(N,J,K,X1,X2,X3,X4)
+ CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+ C
+         WRITE(*,1)N,J,K,X1,X2,X3,X4
+  1      FORMAT(1H,3(I7,1X),4(1PE12.4,1X))
+         RETURN
+         END
+
+ \SAMPCODE\FORTRAN\WHETSTON.FOR
+
+
+         SUBROUTINE second (t1)
+ C
+ C  MS version of SECOND (timing routine)
+ C
+         INTEGER*2 ih,im,is,ihu
+         INTEGER*4 t1
+         CALL gettim(ih,im,is,ihu)
+         t1 = (ih*3600+im*60+is)*100+ihu
+         END
+ C       WHETS.FOR       09/27/77     TDR
+ C       ...WHICH IS AN IMPROVED VERSION OF:
+ C       WHET2A.FTN      01/22/75     RBG
+ C       DOUBLE-PRECISION VARIANT OF PROGRAM
+ C
+ C       "WHETSTONE INSTRUCTIONS PER SECONDS" MEASURE OF FORTRAN
+ C       AND CPU PERFORMANCE.
+ C
+ C       9/24/84
+ C
+ C          ADDED CODE TO THESE SO THAT IT HAS VARIABLE LOOPING
+ C
+ C          from DEC but DONE BY OUTSIDE CONTRACTOR, OLD STYLE CODING
+ C          not representative of DEC THIS PROGRAM IS THE
+ C
+ C          A. TETEWSKY, 555 TECH SQ MS 92
+ C          CAMBRIDGE MASS 02139           617/258-1487
+ C
+ C        ========= MICROSOFT OPT CODES ===========
+ C
+ C        COMPILE          LINK             COMMENT
+ C
+ C        FLOAT            MATH             GOOD FOR ON THE FLY
+ C                         8087             ONLY WITH 8087
+ C                         ALTLIB           BEST W/O 8087
+ C                                          IF NO 8087, FLOAT FASTER
+ C                                             THEN NOFLOAT
+ C
+ C        NOFLOAT          MATH             BEST ON THE FLY 8087
+ C                         8087             ONLY WITH 8087
+ C                         ALTLIB           CAN'T DO
+ C
+ C                                          IF 8087, NOFLOAT
+ C                                             IS BEST
+ C
+ C
+         DOUBLE PRECISION X1,X2,X3,X4,X,Y,Z,T,T1,T2,E1
+ C
+         DIMENSION TIMES(3)
+ C
+ C       ...       END = SECNDS(X) YIELDS TIME IN SECONDS
+ C                 END = TIME - MIDNITE - X
+ C                 INTERFRACE YOUR ROUTINE TO SECNDS
+ C
+ C
+ C
+ C
+ C       COMMON WHICH REFERENCES LOGICAL UNIT ASSIGNMENTS
+ C
+         INTEGER  IMUCH
+         INTEGER*4 temp
+ C
+         COMMON T,T1,T2,E1(4),J,K,L
+         COMMON /LUNS/ ICRD,ILPT,IKBD,ITTY
+ C
+         ITTY   =    0
+         IKBD   =    0
+         T      =    0.499975D00
+         T1     =    0.50025D00
+         T2     =    2.0D00
+
+ C
+         IMUCH = 10
+ C
+ C       ***** BEGININNING OF TIMED INTERVAL *****
+         DO 200 ILOOP = 1,3
+           I = ILOOP * IMUCH
+ C         times(ILOOP) = SECNDS(0.)
+           CALL second(temp)
+           times(iloop) = temp/100.
+ C       *******************************************
+ C
+ C       *****                               *****
+ C
+         ISAVE=I
+         N1=0
+         N2=12*I
+         N3=14*I
+         N4=345*I
+         N5=0
+         N6=210*I
+         N7=32*I
+         N8=899*I
+         N9=616*I
+         N10=0
+         N11=93*I
+         N12=0
+         X1=1.0D0
+         X2=-1.0D0
+         X3=-1.0D0
+         X4=-1.0D0
+         IF (N1) 19,19,11
+  11     DO 18 I=1,N1,1
+           X1=(X1+X2+X3-X4)*T
+           X2=(X1+X2-X3+X4)*T
+           X4=(-X1+X2+X3+X4)*T
+           X3=(X1-X2+X3+X4)*T
+  18     CONTINUE
+  19     CONTINUE
+         CALL POUT(N1,N1,N1,X1,X2,X3,X4)
+         E1(1)=1.0D0
+         E1(2)=-1.0D0
+         E1(3)=-1.0D0
+         E1(4)=-1.0D0
+         IF (N2) 29,29,21
+  21     DO 28 I=1,N2,1
+           E1(1)=(E1(1)+E1(2)+E1(3)-E1(4))*T
+           E1(2)=(E1(1)+E1(2)-E1(3)+E1(4))*T
+           E1(3)=(E1(1)-E1(2)+E1(3)+E1(4))*T
+           E1(4)=(-E1(1)+E1(2)+E1(3)+E1(4))*T
+  28     CONTINUE
+  29     CONTINUE
+         CALL POUT(N2,N3,N2,E1(1),E1(2),E1(3),E1(4))
+         IF (N3) 39,39,31
+  31     DO 39 I=1,N3,1
+  38       CALL PA(E1)
+  39     CONTINUE
+         CALL POUT(N3,N2,N2,E1(1),E1(2),E1(3),E1(4))
+         J=1
+         IF (N4) 49,49,41
+  41     DO 48 I=1,N4,1
+           IF (J-1) 43,42,43
+  42       J=2
+           GOTO 44
+  43       J=3
+  44       IF (J-2) 46,46,45
+  45       J=0
+           GOTO 47
+  46       J=1
+  47       IF (J-1) 411,412,412
+  411      J=1
+           GOTO 48
+  412      J=0
+  48     CONTINUE
+  49     CONTINUE
+         CALL POUT(N4,J,J,X1,X2,X3,X4)
+         J=1
+         K=2
+         L=3
+         IF (N6) 69,69,61
+  61     DO 68 I=1,N6,1
+           J=J*(K-J)*(L-K)
+           K=L*K-(L-J)*K
+           L=(L-K)*(K+J)
+           E1(L-1)=J+K+L
+           E1(K-1)=J*K*L
+  68     CONTINUE
+  69     CONTINUE
+         CALL POUT(N6,J,K,E1(1),E1(2),E1(3),E1(4))
+         X=0.5D0
+         Y=0.5D0
+         IF (N7) 79,79,71
+  71     DO 78 I=1,N7,1
+           X=T*DATAN(T2*DSIN(X)*DCOS(X)/(DCOS(X+Y)+DCOS(X-Y)-1.0D0))
+           Y=T*DATAN(T2*DSIN(Y)*DCOS(Y)/(DCOS(X+Y)+DCOS(X-Y)-1.0D0))
+  78     CONTINUE
+  79     CONTINUE
+         CALL POUT(N7,J,K,X,X,Y,Y)
+         X=1.0D0
+         Y=1.0D0
+         Z=1.0D0
+         IF (N8) 89,89,81
+  81     DO 89 I=1,N8,1
+  88       CALL P3(X,Y,Z)
+  89     CONTINUE
+         CALL POUT(N8,J,K,X,Y,Z,Z)
+         J=1
+         K=2
+         L=3
+         E1(1)=1.0D0
+         E1(2)=2.0D0
+         E1(3)=3.0D0
+         IF (N9) 99,99,91
+  91     DO 99 I=1,N9,1
+  98       CALL P0
+  99     CONTINUE
+         CALL POUT(N9,J,K,E1(1),E1(2),E1(3),E1(4))
+         J=2
+         K=3
+         IF (N10) 109,109,101
+  101    DO 108 I=1,N10,1
+           J=J+K
+           K=J+K
+           J=J-K
+           K=K-J-J
+  108    CONTINUE
+  109    CONTINUE
+         CALL POUT(N10,J,K,X1,X2,X3,X4)
+         X=0.75D0
+         IF (N11) 119,119,111
+  111    DO 119 I=1,N11,1
+  118      X=DSQRT(DEXP(DLOG(X)/T1))
+  119    CONTINUE
+         CALL POUT(N11,J,K,X,X,X,X)
+ C
+ C       ***** END OF TIMED INTERVAL         *****
+         CALL SECOND(TEMP)
+ 200     TIMES(ILOOP)=TEMP/100.-TIMES(ILOOP)
+ C
+ C       WHET. IPS = 1000/(TIME FOR 10 ITERATIONS OF PROGRAM LOOP)
+         WHETS = (10000.0 * FLOAT(IMUCH)/100.0)/(TIMES(3)-TIMES(2))
+         WRITE (*,201) WHETS
+ 201     FORMAT(' SPEED IS: ',1PE10.3,' THOUSAND WHETSTONE',
+      2     ' DOUBLE PRECISION INSTRUCTIONS PER SECOND')
+         WRITE (*,*) 'Elapsed=',INT((TIMES(3)-TIMES(1))*100),' whetd3h '
+ C
+ C
+         STOP
+         END
+         SUBROUTINE PA(E)
+         DOUBLE PRECISION T,T1,T2,E
+         COMMON T,T1,T2
+         DIMENSION E(4)
+         J=0
+  1      E(1)=(E(1)+E(2)+E(3)-E(4))*T
+         E(2)=(E(1)+E(2)-E(3)+E(4))*T
+         E(3)=(E(1)-E(2)+E(3)+E(4))*T
+         E(4)=(-E(1)+E(2)+E(3)+E(4))/T2
+         J=J+1
+         IF (J-6) 1,2,2
+  2      CONTINUE
+         RETURN
+         END
+
+
+         SUBROUTINE P0
+         DOUBLE PRECISION T,T1,T2,E1
+         COMMON T,T1,T2,E1(4),J,K,L
+         E1(J)=E1(K)
+         E1(K)=E1(L)
+         E1(L)=E1(J)
+         RETURN
+         END
+
+
+         SUBROUTINE P3(X,Y,Z)
+         DOUBLE PRECISION T,T1,T2,X1,Y1,X,Y,Z
+         COMMON T,T1,T2
+         X1=X
+         Y1=Y
+         X1=T*(X1+Y1)
+         Y1=T*(X1+Y1)
+         Z=(X1+Y1)/T2
+         RETURN
+         END
+
+
+         SUBROUTINE POUT(N,J,K,X1,X2,X3,X4)
+ C
+ C       WRITE STATEMENT COMMENTED OUT TO IMPROVE REPEATABILITY OF TIMINGS
+ C
+         DOUBLE PRECISION X1,X2,X3,X4
+  1      FORMAT('  ',3I7,4E12.4)
+         RETURN
+         END
+
+ \SAMPCODE\FORTRAN\SORTDEMO.FOR
+
+ $NOTRUNCATE
+ $STORAGE:2
+         INTERFACE TO INTEGER*2 FUNCTION KbdCharIn
+      +  [ALIAS: 'KBDCHARIN']
+      +  (CHARDATA,
+      +   IoWait [VALUE],
+      +   KbdHandle [VALUE])
+
+         INTEGER*2 CHARDATA(10)*1, IoWait, KbdHandle
+
+         END
+
+         INTERFACE TO INTEGER*2 FUNCTION DosBeep
+      +  [ALIAS: 'DOSBEEP']
+      +  (Frequency [VALUE],
+      +   Duration [VALUE])
+
+         INTEGER*2 Frequency, Duration
+
+         END
+
+         INTERFACE TO INTEGER*2 FUNCTION DosGetDateTime
+      +  [ALIAS: 'DOSGETDATETIME']
+      +  (DateTime)
+
+         INTEGER*1 DateTime(11)
+
+         END
+         INTERFACE TO INTEGER*2 FUNCTION DosSleep
+      +  [ALIAS: 'DOSSLEEP']
+      +  (TimeInterval [VALUE])
+
+         INTEGER*4 TimeInterval
+
+         END
+
+         INTERFACE TO INTEGER*2 FUNCTION VioScrollDn
+      +  [ALIAS: 'VIOSCROLLDN']
+      +  (TopRow [VALUE],
+      +   LeftCol [VALUE],
+      +   BotRow [VALUE],
+      +   RightCol [VALUE],
+      +   Lines [VALUE],
+      +   Cell,
+      +   VioHandle [VALUE])
+
+         INTEGER*2 TopRow, LeftCol, BotRow, RightCol
+         INTEGER*2 Lines, Cell, VioHandle
+
+         END
+
+         INTERFACE TO INTEGER*2 FUNCTION VioWrtCharStrAtt
+      +  [ALIAS: 'VIOWRTCHARSTRATT']
+      +  (CharString,
+      +   Length [VALUE],
+      +   Row [VALUE],
+      +   Column [VALUE],
+      +   Attr,
+      +   VioHandle [VALUE])
+
+         CHARACTER*80 CharString
+         INTEGER*2 Length, Row, Column, Attr*1, VioHandle
+
+         END
+
+         INTERFACE TO INTEGER*2 FUNCTION VioReadCellStr
+      +  [ALIAS: 'VIOREADCELLSTR']
+      +  (CellStr,
+      +   Length,
+      +   Row [VALUE],
+      +   Column [VALUE],
+      +   VioHandle [VALUE])
+
+         CHARACTER*8000 CellStr
+         INTEGER*2 Length, Row, Column, VioHandle
+
+         END
+
+         INTERFACE TO INTEGER*2 FUNCTION VioWrtCellStr
+      +  [ALIAS: 'VIOWRTCELLSTR']
+      +  (CellStr,
+      +   Length [VALUE],
+      +   Row [VALUE],
+      +   Column [VALUE],
+      +   VioHandle [VALUE])
+
+         CHARACTER*8000 CellStr
+         INTEGER*2 Length, Row, Column, VioHandle
+
+         END
+
+         INTERFACE TO INTEGER*2 FUNCTION VioWrtNCell
+      +  [ALIAS: 'VIOWRTNCELL']
+      +  (Cell,
+      +   Times [VALUE],
+      +   Row [VALUE],
+      +   Column [VALUE],
+      +   VioHandle [VALUE])
+
+         INTEGER*2 Cell, Times, Row, Column, VioHandle
+
+         END
+
+         INTERFACE TO INTEGER*2 FUNCTION VioGetCurPos
+      +  [ALIAS: 'VIOGETCURPOS']
+      +  (Row,
+      +   Column,
+      +   VioHandle [VALUE])
+
+         INTEGER*2 Row, Column, VioHandle
+
+         END
+
+         INTERFACE TO INTEGER*2 FUNCTION VioSetCurPos
+      +  [ALIAS: 'VIOSETCURPOS']
+      +  (Row [VALUE],
+      +   Column [VALUE],
+      +   VioHandle [VALUE])
+
+         INTEGER*2 Row, Column, VioHandle
+
+         END
+
+         INTERFACE TO INTEGER*2 FUNCTION VioGetMode
+      +  [ALIAS: 'VIOGETMODE']
+      +  (MODE,
+      +   VioHandle [VALUE])
+
+         INTEGER*2 MODE(6), VioHandle
+
+         END
+
+         INTERFACE TO INTEGER*2 FUNCTION VioSetMode
+      +  [ALIAS: 'VIOSETMODE']
+      +  (MODE,
+      +   VioHandle [VALUE])
+
+         INTEGER*2 MODE(6), VioHandle
+
+         END
+
+       PROGRAM SortDemo
+ C                                 SORTDEMO
+ C This program graphically demonstrates six common sorting algorithms.  It
+ C prints 25 or 43 horizontal bars, all of different lengths and all in random
+ C order, then sorts the bars from smallest to longest.
+ C
+ C The program also uses SOUND statements to generate different pitches,
+ C depending on the location of the bar being printed. Note that the SOUND
+ C statements delay the speed of each sorting algorithm so you can follow
+ C the progress of the sort. Therefore, the times shown are for comparison
+ C only. They are not an accurate measure of sort speed.
+ C
+ C If you use these sorting routines in your own programs, you may notice
+ C a difference in their relative speeds (for example, the exchange
+ C sort may be faster than the shell sort) depending on the number of
+ C elements to be sorted and how "scrambled" they are to begin with.
+ C
+       IMPLICIT INTEGER*2(a-z)
+       CHARACTER cellstr*8000
+       COMMON /misc/MaxBars,MaxColors,Sound,Pause
+       COMMON SortArray(2,43),SortBackup(2,43),BARLENGTH,BARCOLOR,Select
+       DIMENSION mode(6),wmode(6)
+       DATA length,mode(1)/8000,12/
+       gbg = VioGetCurPos(crow,ccol,0)
+       gbg = VioReadCellStr(cellstr,length,0,0,0)
+       gbg = VioGetMode(mode,0)
+       DO 100 i=1,6
+           mode(i)= mode(i)
+ 100   CONTINUE
+ C
+ C If monochrome or color burst disabled, use one color
+ C
+       IF((.not. btest(mode(2),0)).OR.(btest(mode(2),2))) MaxColors=1
+ C
+ C First try 43 lines on VGA, then EGA. If neither, use 25 lines.
+ C
+       IF(wmode(4).NE.43) THEN
+         wmode(4)=43
+         wmode(5)=640
+         wmode(6)=350
+         IF(VioSetMode(wmode,0).NE.0) THEN
+           wmode(5)=720
+           wmode(6)=400
+           IF(VioSetMode(wmode,0).NE.0) THEN
+             gbg=VioGetMode(wmode,0)
+             MaxBars=25
+             wmode(4)=25
+             gbg=VioSetMode(wmode,0)
+           ENDIF
+         ENDIF
+       ENDIF
+       CALL Initialize
+       CALL SortMenu
+       IF(mode(4).NE.MaxBars) gbg = VioSetMode(mode,0)
+       gbg = VioWrtCellStr(cellstr,length,0,0,0)
+       gbg = VioSetCurPos(crow,ccol,0)
+       END
+
+       BLOCK DATA
+       IMPLICIT INTEGER*2(a-z)
+       LOGICAL Sound
+       COMMON /misc/MaxBars,MaxColors,Sound,Pause
+       DATA MaxBars/43/,MaxColors/15/,Sound/.TRUE./,Pause/30/
+       END
+
+       SUBROUTINE BoxInit
+ C
+ C =============================== BoxInit ===================================
+ C    Calls the DrawFrame procedure to draw the frame around the sort menu,
+ C    then prints the different options stored in the OptionTitle array.
+ C ===========================================================================
+ C
+       IMPLICIT INTEGER*2(a-z)
+       INTEGER*1 COLOR
+       PARAMETER (COLOR=15,FIRSTMENU=1,LEFT=48,LINELENGTH=30,NLINES=18,
+      +           WIDTH=80-LEFT)
+       CHARACTER Factor*4,menu(NLINES)*30
+       LOGICAL Sound
+       COMMON /misc/MaxBars,MaxColors,Sound,Pause
+       COMMON SortArray(2,43),SortBackup(2,43),BARLENGTH,BARCOLOR,Select
+       DATA menu/
+      +      '     FORTRAN Sorting Demo',
+      +      ' ',
+      +      'Insertion',
+      +      'Bubble',
+      +      'Heap',
+      +      'Exchange',
+      +      'Shell',
+      +      'Quick',
+      +      ' ',
+      +      'Toggle Sound: ',
+      +      ' ',
+      +      'Pause Factor: ',
+      +      '<   (Slower)',
+      +      '>   (Faster)',
+      +      ' ',
+      +      'Type first character of',
+      +      'choice ( I B H E S Q T < > )',
+      +      'or ESC key to end program: '/
+ C
+       CALL DrawFrame (1,LEFT-3,WIDTH+3,22)
+ C
+       DO 100 i=1,NLINES
+         gbg = VioWrtCharStrAtt(menu(i),LINELENGTH,FIRSTMENU + i,
+      +                         LEFT,COLOR,0)
+ 100   CONTINUE
+       WRITE(Factor,'(I2.2)')Pause/30
+       gbg = VioWrtCharStrAtt(Factor,len(Factor),13,LEFT+14,COLOR,0)
+ C
+ C Erase the speed option if the length of the Pause is at a limit
+ C
+       IF(Pause.EQ.900) THEN
+         gbg = VioWrtCharStrAtt('            ',12,14,LEFT,COLOR,0)
+       ELSEIF(Pause.EQ.0) THEN
+         gbg = VioWrtCharStrAtt('            ',12,15,LEFT,COLOR,0)
+       ENDIF
+ C
+ C Print the current value for Sound:
+ C
+       IF(Sound) THEN
+         gbg = VioWrtCharStrAtt('ON ',3,11,LEFT+14,COLOR,0)
+       ELSE
+         gbg = VioWrtCharStrAtt('OFF',3,11,LEFT+14,COLOR,0)
+       ENDIF
+ C
+       RETURN
+       END
+
+       SUBROUTINE BubbleSort
+ C
+ C ============================== BubbleSort =================================
+ C    The BubbleSort algorithm cycles through SortArray, comparing adjacent
+ C    elements and swapping pairs that are out of order.  It continues to
+ C    do this until no pairs are swapped.
+ C ===========================================================================
+ C
+       IMPLICIT INTEGER*2(a-z)
+       COMMON /misc/MaxBars,MaxColors,Sound,Pause
+       COMMON SortArray(2,43),SortBackup(2,43),BARLENGTH,BARCOLOR,Select
+ C
+       limit = MaxBars
+ 1     CONTINUE
+       switch = 0
+       DO 100 row=1,limit-1
+ C
+ C Two adjacent elements are out of order, so swap their values
+ C and redraw those two bars:
+ C
+         IF(SortArray(BARLENGTH,row).GT.SortArray(BARLENGTH,row+1)) THEN
+           CALL SwapSortArray(row,row+1)
+           CALL SwapBars(row,row+1)
+           switch = row
+         ENDIF
+ 100   CONTINUE
+ C
+ C Sort on next pass only to where the last switch was made:
+ C
+       limit = switch
+       IF(switch.NE.0) GO TO 1
+       RETURN
+       END
+
+       SUBROUTINE DrawFrame(Top,Left,Width,Height)
+ C
+ C ============================== DrawFrame ==================================
+ C   Draws a rectangular frame using the high-order ASCII characters É (201) ,
+ C   » (187) , È (200) , ¼ (188) , º (186) , and Í (205).
+ C ===========================================================================
+ C
+       IMPLICIT INTEGER*2(a-z)
+ C
+       CHARACTER tempstr*80
+       INTEGER*1 Attr,COLOR
+       PARAMETER (ULEFT=201,URIGHT=187,LLEFT=200,LRIGHT=188,
+      +           VERTICAL=186,HORIZONTAL=205,SPACE=32,COLOR=15)
+ C
+       Attr=COLOR
+       CellAttr=ishl(COLOR,8)
+       bottom=Top+Height-1
+       right=Left+Width-1
+       gbg = VioWrtNCell(ior(CellAttr,ULEFT),1,Top,Left,0)
+       gbg = VioWrtNCell(ior(CellAttr,HORIZONTAL),
+      +                  Width-2,Top,Left+1,0)
+       gbg = VioWrtNCell(ior(CellAttr,URIGHT),1,Top,right,0)
+       tempstr(1:1)=char(VERTICAL)
+       DO 100 i=2,Width-1
+         tempstr(i:i)=char(SPACE)
+ 100   CONTINUE
+       tempstr(Width:Width)=char(VERTICAL)
+       DO 200 i=1,Height-2
+         gbg = VioWrtCharStrAtt(tempstr,Width,i+Top,Left,COLOR,0)
+ 200   CONTINUE
+       gbg = VioWrtNCell(ior(CellAttr,LLEFT),1,bottom,Left,0)
+       gbg = VioWrtNCell(ior(CellAttr,HORIZONTAL),
+      +                  Width-2,bottom,Left+1,0)
+       gbg = VioWrtNCell(ior(CellAttr,LRIGHT),1,bottom,right,0)
+       RETURN
+       END
+
+       SUBROUTINE ElapsedTime(CurrentRow)
+ C
+ C ============================= ElapsedTime =================================
+ C    Prints seconds elapsed since the given sorting routine started.
+ C    Note that this time includes both the time it takes to redraw the
+ C    bars plus the pause while the SOUND statement plays a note, and
+ C    thus is not an accurate indication of sorting speed.
+ C ===========================================================================
+ C
+       IMPLICIT INTEGER*2(a-z)
+       CHARACTER Timing*7
+       INTEGER*1 DateTime(12),COLOR
+       INTEGER*4 time0,time1
+       LOGICAL Sound
+       COMMON /misc/MaxBars,MaxColors,Sound,Pause
+       COMMON /time/time0
+       COMMON SortArray(2,43),SortBackup(2,43),BARLENGTH,BARCOLOR,Select
+       PARAMETER (COLOR=15,FIRSTMENU=1,LEFT=48)
+       gbg = DosGetDateTime(DateTime)
+       time1=DateTime(1)*360000+
+      +      DateTime(2)*6000+
+      +      DateTime(3)*100+
+      +      DateTime(4)
+       WRITE(Timing,'(F7.2)')float(time1-time0)/100.
+ C
+ C Print the number of seconds elapsed
+ C
+       gbg = VioWrtCharStrAtt(Timing,len(Timing),Select+FIRSTMENU+3,
+      +                       LEFT+15,COLOR,0)
+ C
+       IF(Sound) gbg = DosBeep(60*CurrentRow,32)
+       gbg = DosSleep(int4(Pause))
+       RETURN
+       END
+
+       SUBROUTINE ExchangeSort
+ C
+ C ============================= ExchangeSort ================================
+ C   The ExchangeSort compares each element in SortArray - starting with
+ C   the first element - with every following element.  If any of the
+ C   following elements is smaller than the current element, it is exchanged
+ C   with the current element and the process is repeated for the next
+ C   element in SortArray.
+ C ===========================================================================
+ C
+       IMPLICIT INTEGER*2(a-z)
+       COMMON /misc/MaxBars,MaxColors,Sound,Pause
+       COMMON SortArray(2,43),SortBackup(2,43),BARLENGTH,BARCOLOR,Select
+ C
+       DO 100 Row=1,MaxBars-1
+         SmallestRow = Row
+         DO 200 j=Row+1,MaxBars
+           IF(SortArray(BARLENGTH,j) .LT.
+      +       SortArray(BARLENGTH,SmallestRow)) THEN
+             SmallestRow = j
+             CALL ElapsedTime(j)
+           ENDIF
+ 200     CONTINUE
+         IF(SmallestRow.GT.Row) THEN
+ C
+ C       Found a row shorter than the current row, so swap those
+ C       two array elements:
+ C
+           CALL SwapSortArray(Row,SmallestRow)
+           CALL SwapBars(Row,SmallestRow)
+         ENDIF
+ 100   CONTINUE
+       RETURN
+       END
+
+       SUBROUTINE HeapSort
+ C
+ C =============================== HeapSort ==================================
+ C  The HeapSort procedure works by calling two other procedures - PercolateUp
+ C  and PercolateDown.  PercolateUp turns SortArray into a "heap," which has
+ C  the properties outlined in the diagram below:
+ C
+ C                               SortArray(1)
+ C                               /          \
+ C                    SortArray(2)           SortArray(3)
+ C                   /          \            /          \
+ C         SortArray(4)   SortArray(5)   SortArray(6)  SortArray(7)
+ C          /      \       /       \       /      \      /      \
+ C        ...      ...   ...       ...   ...      ...  ...      ...
+ C
+ C
+ C  where each "parent node" is greater than each of its "child nodes"; for
+ C  example, SortArray(1) is greater than SortArray(2) or SortArray(3),
+ C  SortArray(3) is greater than SortArray(6) or SortArray(7), and so forth.
+ C
+ C  Therefore, once the first FOR...NEXT loop in HeapSort is finished, the
+ C  largest element is in SortArray(1).
+ C
+ C  The second FOR...NEXT loop in HeapSort swaps the element in SortArray(1)
+ C  with the element in MaxRow, rebuilds the heap (with PercolateDown) for
+ C  MaxRow - 1, then swaps the element in SortArray(1) with the element in
+ C  MaxRow - 1, rebuilds the heap for MaxRow - 2, and continues in this way
+ C  until the array is sorted.
+ C ===========================================================================
+ C
+       IMPLICIT INTEGER*2(a-z)
+       COMMON /misc/MaxBars,MaxColors,Sound,Pause
+       COMMON SortArray(2,43),SortBackup(2,43),BARLENGTH,BARCOLOR,Select
+ C
+       DO 100 i=2,MaxBars
+         CALL PercolateUp(i)
+ 100   CONTINUE
+ C
+       DO 200 i=MaxBars,2,-1
+         CALL SwapSortArray(1,i)
+         CALL SwapBars(1,i)
+         CALL PercolateDown(i-1)
+ 200   CONTINUE
+       RETURN
+       END
+
+       SUBROUTINE Initialize
+ C
+ C ============================== Initialize =================================
+ C    Initializes the SortBackup and OptionTitle arrays.  It also calls the
+ C    BoxInit procedure.
+ C ===========================================================================
+ C
+       IMPLICIT INTEGER*2(a-z)
+       INTEGER*1 DateTime(11)
+       LOGICAL Sound
+       REAL Seed,SRand
+       COMMON /misc/MaxBars,MaxColors,Sound,Pause
+       COMMON SortArray(2,43),SortBackup(2,43),BARLENGTH,BARCOLOR,Select
+ C
+       DIMENSION temparray(43)
+       BARLENGTH = 1
+       BARCOLOR = 2
+       DO 100 i=1,MaxBars
+         temparray(i) = i
+ 100   CONTINUE
+ C
+ C Seed the random-number generator.
+ C
+       gbg = DosGetDateTime(DateTime)
+       Seed = DateTime(1)*3600+DateTime(2)*60+DateTime(3)
+       Seed = SRand(Seed/86400.*259199.)
+ C
+       MaxIndex = MaxBars
+       DO 200 i=1,MaxBars
+ C
+ C Find a random element in TempArray between 1 and MaxIndex,
+ C then assign the value in that element to LengthBar
+ C
+         index = RANDLIM(1,MaxIndex)
+         lengthbar = temparray(index)
+ C
+ C Overwrite the value in TempArray(Index) with the value in
+ C TempArray(MaxIndex) so the value in TempArray(Index) is
+ C chosen only once:
+ C
+         temparray(index) = temparray(MaxIndex)
+ C
+ C Decrease the value of MaxIndex so that TempArray(MaxIndex) can't
+ C be chosen on the next pass through the loop:
+ C
+         MaxIndex = MaxIndex - 1
+ C
+         SortBackup(BARLENGTH,i) = LengthBar
+         IF(MaxColors.EQ.1) THEN
+           SortBackup(BARCOLOR,i) = 7
+         ELSE
+           SortBackup(BARCOLOR,i) = mod(LengthBar,MaxColors) + 1
+         ENDIF
+ 200   CONTINUE
+       CALL cls
+ C Assign values in SortBackup to SortArray and draw unsorted bars on the scre
+       CALL Reinitialize
+ C Draw frame for the sort menu and print options.
+       CALL BoxInit
+       RETURN
+       END
+
+       SUBROUTINE InsertionSort
+ C
+ C ============================= InsertionSort ===============================
+ C   The InsertionSort procedure compares the length of each successive
+ C   element in SortArray with the lengths of all the preceding elements.
+ C   When the procedure finds the appropriate place for the new element, it
+ C   inserts the element in its new place, and moves all the other elements
+ C   down one place.
+ C ===========================================================================
+ C
+       IMPLICIT INTEGER*2(a-z)
+       COMMON /misc/MaxBars,MaxColors,Sound,Pause
+       COMMON SortArray(2,43),SortBackup(2,43),BARLENGTH,BARCOLOR,Select
+       DIMENSION TempArray(2)
+       DO 100 Row=2,MaxBars
+         TempArray(BARLENGTH) = SortArray(BARLENGTH,Row)
+         TempArray(BARCOLOR) = SortArray(BARCOLOR,Row)
+         DO 200 j=Row,2,-1
+ C
+ C As long as the length of the j-1st element is greater than the
+ C length of the original element in SortArray(Row), keep shifting
+ C the array elements down:
+ C
+           IF(SortArray(BARLENGTH,j - 1).GT.TempArray(BARLENGTH)) THEN
+             SortArray(BARLENGTH,j) = SortArray(BARLENGTH,j - 1)
+             SortArray(BARCOLOR,j) = SortArray(BARCOLOR,j - 1)
+             CALL PrintOneBar(j)
+             CALL ElapsedTime(j)
+           ELSE
+             GO TO 201
+           ENDIF
+ 200     CONTINUE
+ 201   CONTINUE
+ C
+ C Insert the original value of SortArray(Row) in SortArray(j):
+ C
+       SortArray(BARLENGTH,j) = TempArray(BARLENGTH)
+       SortArray(BARCOLOR,j) = TempArray(BARCOLOR)
+       CALL PrintOneBar(j)
+       CALL ElapsedTime(j)
+ 100   CONTINUE
+       RETURN
+       END
+
+ C
+ C ============================ PercolateDown ================================
+ C   The PercolateDown procedure restores the elements of SortArray from 1 to
+ C   MaxLevel to a "heap" (see the diagram with the HeapSort procedure).
+ C ===========================================================================
+ C
+       SUBROUTINE PercolateDown(MaxLevel)
+       IMPLICIT INTEGER*2(a-z)
+       COMMON SortArray(2,43),SortBackup(2,43),BARLENGTH,BARCOLOR,Select
+ C
+       i = 1
+ C
+ C Move the value in SortArray(1) down the heap until it has reached
+ C its proper node (that is, until it is less than its parent node
+ C or until it has reached MaxLevel, the bottom of the current heap):
+ C
+ 1     CONTINUE
+ C Get the subscript for the child node.
+       Child = 2 * i
+ C
+ C Reached the bottom of the heap, so exit this procedure:
+ C
+       IF(Child.GT.MaxLevel) RETURN
+ C
+ C If there are two child nodes, find out which one is bigger:
+ C
+       IF(Child+1.LE.MaxLevel) THEN
+         IF(SortArray(BARLENGTH,Child+1).GT.SortArray(BARLENGTH,Child))
+      +    Child=Child+1
+       ENDIF
+ C
+ C Move the value down if it is still not bigger than either one of
+ C its children:
+ C
+       IF(SortArray(BARLENGTH,i).LT.SortArray(BARLENGTH,Child)) THEN
+         CALL SwapSortArray(i,Child)
+         CALL SwapBars(i,Child)
+         i = Child
+       ELSE
+ C
+ C Otherwise, SortArray has been restored to a heap from 1 to
+ C MaxLevel, so exit:
+ C
+         RETURN
+       ENDIF
+       GO TO 1
+       END
+
+       SUBROUTINE PercolateUp(MaxLevel)
+ C
+ C ============================== PercolateUp ================================
+ C   The PercolateUp procedure converts the elements from 1 to MaxLevel in
+ C   SortArray into a "heap" (see the diagram with the HeapSort procedure).
+ C ===========================================================================
+ C
+       IMPLICIT INTEGER*2(a-z)
+       COMMON SortArray(2,43),SortBackup(2,43),BARLENGTH,BARCOLOR,Select
+ C
+       i = MaxLevel
+ C
+ C Move the value in SortArray(MaxLevel) up the heap until it has
+ C reached its proper node (that is, until it is greater than either
+ C of its child nodes, or until it has reached 1, the top of the heap):
+ C
+ 1     CONTINUE
+       IF(i.EQ.1) RETURN
+ C Get the subscript for the parent node.
+       Parent = i / 2
+ C
+ C The value at the current node is still bigger than the value at
+ C its parent node, so swap these two array elements:
+ C
+       IF(SortArray(BARLENGTH,i).GT.SortArray(BARLENGTH,Parent)) THEN
+         CALL SwapSortArray(Parent,i)
+         CALL SwapBars(Parent,i)
+         i = Parent
+         GO TO 1
+       ENDIF
+ C
+ C Otherwise, the element has reached its proper place in the heap,
+ C so exit this procedure:
+ C
+       RETURN
+       END
+
+       SUBROUTINE PrintOneBar(Row)
+ C
+ C ============================== PrintOneBar ================================
+ C  Prints SortArray(BARLENGTH,Row) at the row indicated by the Row
+ C  parameter, using the color in SortArray(BARCOLOR,Row)
+ C ===========================================================================
+ C
+       IMPLICIT INTEGER*2(a-z)
+       PARAMETER (BLOCK=223,SPACE=16#0720)
+       COMMON /misc/MaxBars,MaxColors,Sound,Pause
+       COMMON SortArray(2,43),SortBackup(2,43),BARLENGTH,BARCOLOR,Select
+ C
+       gbg = VioWrtNCell(ior(ishl(SortArray(BARCOLOR,ROW),8),BLOCK),
+      +                  SortArray(BARLENGTH,Row),Row,1,0)
+       blanks=MaxBars-SortArray(BARLENGTH,Row)
+       IF(blanks.GT.0)
+      +  gbg = VioWrtNCell(SPACE,blanks,Row,SortArray(BARLENGTH,Row)+1,0)
+       RETURN
+       END
+
+       SUBROUTINE QuickSort(Low,High)
+       IMPLICIT INTEGER*2(a-z)
+       PARAMETER (LOG2MAXBARS=6)
+       INTEGER*1 StackPtr,Upper(LOG2MAXBARS),Lower(LOG2MAXBARS)
+       COMMON SortArray(2,43),SortBackup(2,43),BARLENGTH,BARCOLOR,Select
+       Lower(1)=Low
+       Upper(1)=High
+       StackPtr=1
+ 100   CONTINUE
+       IF(Lower(StackPtr).GE.Upper(StackPtr)) THEN
+         StackPtr = StackPtr - 1
+       ELSE
+         i = Lower(StackPtr)
+         j = Upper(StackPtr)
+         Pivot = SortArray(BARLENGTH,j)
+ 200     CONTINUE
+ 300     IF(i.LT.j.AND.SortArray(BARLENGTH,i).LE.Pivot) THEN
+           i = i + 1
+           GO TO 300
+         ENDIF
+ 400     IF(j.GT.i.AND.SortArray(BARLENGTH,j).GE.Pivot) THEN
+           j = j - 1
+           GO TO 400
+         ENDIF
+         IF(i.LT.j)THEN
+           CALL SwapSortArray(i,j)
+           CALL SwapBars(i,j)
+        ENDIF
+         IF(i.LT.j) GO TO 200
+         j = Upper(StackPtr)
+         CALL SwapSortArray(i,j)
+         CALL SwapBars(i,j)
+         IF(i-Lower(StackPtr).LT.Upper(StackPtr)-i) THEN
+           Lower(StackPtr+1) = Lower(StackPtr)
+           Upper(StackPtr+1) = i - 1
+           Lower(StackPtr) = i + 1
+         ELSE
+           Lower(StackPtr+1) = i + 1
+           Upper(StackPtr+1) = Upper(StackPtr)
+           Upper(StackPtr) = i - 1
+         ENDIF
+         StackPtr = StackPtr + 1
+       ENDIF
+       IF(StackPtr.GT.0) GO TO 100
+       RETURN
+       END
+
+       INTEGER FUNCTION RandLim (Lo,Hi)
+       IMPLICIT INTEGER*2(a-z)
+       REAL Seed,SRand,X
+       Seed = mod(int(Seed)*7141+54773,259200)
+       RandLim = Lo+(Hi-Lo+1)*Seed/259200
+       RETURN
+ C
+ C    REAL FUNCTION SRand (Seed)
+ C    initializes either generator (Seed = 0. to 259199.)
+ C
+       ENTRY SRand (X)
+       SRand = X
+       Seed = X
+       RETURN
+       END
+
+       SUBROUTINE Reinitialize
+ C
+ C ============================== Reinitialize ===============================
+ C   Restores the array SortArray to its original unsorted state while
+ C   displaying the unsorted color bars.
+ C ===========================================================================
+ C
+       IMPLICIT INTEGER*2(a-z)
+       INTEGER*1 DateTime(11)
+       INTEGER*4 time0
+       COMMON /misc/MaxBars,MaxColors,Sound,Pause
+       COMMON /time/time0
+       COMMON SortArray(2,43),SortBackup(2,43),BARLENGTH,BARCOLOR,Select
+ C
+       DO 100 row=1,MaxBars
+         SortArray(BARLENGTH,row)=SortBackup(BARLENGTH,row)
+         SortArray(BARCOLOR,row)=SortBackup(BARCOLOR,row)
+         CALL PrintOneBar(row)
+ 100   CONTINUE
+       gbg = DosGetDateTime(DateTime)
+       time0=DateTime(1)*360000+
+      +      DateTime(2)*6000+
+      +      DateTime(3)*100+
+      +      DateTime(4)
+       RETURN
+       END
+
+       SUBROUTINE ShellSort
+ C
+ C =============================== ShellSort =================================
+ C  The ShellSort procedure is similar to the BubbleSort procedure.  However,
+ C  ShellSort begins by comparing elements that are far apart (separated by
+ C  the value of the Offset variable, which is initially half the distance
+ C  between the first and last element), then comparing elements that are
+ C  closer together (when Offset is one, the last iteration of this procedure
+ C  is merely a bubble sort).
+ C ===========================================================================
+ C
+       IMPLICIT INTEGER*2(a-z)
+       COMMON /misc/MaxBars,MaxColors,Sound,Pause
+       COMMON SortArray(2,43),SortBackup(2,43),BARLENGTH,BARCOLOR,Select
+ C
+ C Set comparison offset to half the number of records in SortArray:
+ C
+       Offset = MaxBars / 2
+ 1     CONTINUE
+       Limit = MaxBars - Offset
+ 2     CONTINUE
+ C Assume no switches at this offset.
+       Switch = 0
+ C
+ C Compare elements and switch ones out of order:
+       DO 100 Row=1,Limit
+         IF(SortArray(BARLENGTH,Row).GT.
+      +     SortArray(BARLENGTH,Row+Offset)) THEN
+           CALL SwapSortArray(Row,Row+Offset)
+           CALL SwapBars (Row, Row + Offset)
+           Switch = Row
+         ENDIF
+ 100   CONTINUE
+ C Sort on next pass only to where last switch was made:
+       Limit = Switch - Offset
+       IF(Switch.GT.0) GO TO 2
+ C
+ C No switches at last offset, try one half as big:
+ C
+       Offset = Offset / 2
+       IF(Offset.GT.0) GO TO 1
+       RETURN
+       END
+
+       SUBROUTINE SortMenu
+ C
+ C =============================== SortMenu ==================================
+ C   The SortMenu procedure first calls the Reinitialize procedure to make
+ C   sure the SortArray is in its unsorted form, then prompts the user to
+ C   make one of the following choices:
+ C
+ C               * One of the sorting algorithms
+ C               * Toggle sound on or off
+ C               * Increase or decrease speed
+ C               * End the program
+ C ===========================================================================
+ C
+       IMPLICIT INTEGER*2(a-z)
+       PARAMETER (FIRSTMENU=1,LEFT=48,NLINES=18,SPACE=32)
+       CHARACTER inkey*1
+       INTEGER*1 chardata(10)
+       LOGICAL Sound
+       COMMON /misc/MaxBars,MaxColors,Sound,Pause
+       COMMON SortArray(2,43),SortBackup(2,43),BARLENGTH,BARCOLOR,Select
+ C
+ C     Locate the cursor
+ C
+       gbg = VioSetCurPos(FIRSTMENU + NLINES, 75, 0)
+ C
+ 1     CONTINUE
+       gbg = KbdCharIn(chardata,0,0)
+       inkey=char(chardata(1))
+       IF(lge(inkey,'a').AND.lle(inkey,'z'))
+      +  inkey=char(ichar(inkey)-SPACE)
+ C
+ C        /* Branch to the appropriate procedure depending on the key typed: *
+ C
+       IF(inkey.EQ.'I') THEN
+         Select = 0
+         CALL Reinitialize
+         CALL InsertionSort
+         CALL ElapsedTime(0)
+       ELSEIF(inkey.EQ.'B') THEN
+         Select = 1
+         CALL Reinitialize
+         CALL BubbleSort
+         CALL ElapsedTime(0)
+       ELSEIF(inkey.EQ.'H') THEN
+         Select = 2
+         CALL Reinitialize
+         CALL HeapSort
+         CALL ElapsedTime(0)
+       ELSEIF(inkey.EQ.'E') THEN
+         Select = 3
+         CALL Reinitialize
+         CALL ExchangeSort
+         CALL ElapsedTime(0)
+       ELSEIF(inkey.EQ.'S') THEN
+         Select = 4
+         CALL Reinitialize
+         CALL ShellSort
+         CALL ElapsedTime(0)
+       ELSEIF(inkey.EQ.'Q') THEN
+         Select = 5
+         CALL Reinitialize
+         CALL QuickSort (1, MaxBars)
+         CALL ElapsedTime(0)
+       ELSEIF(inkey.EQ.'T') THEN
+ C
+ C       Toggle the sound, then redraw the menu to clear any timing
+ C       results (since they won't compare with future results):
+ C
+         Sound=.NOT.Sound
+         CALL Boxinit
+       ELSEIF(inkey.EQ.'<') THEN
+ C
+ C       Increase pause length to slow down sorting time, then redraw
+ C       the menu to clear any timing results (since they won't compare
+ C       with future results):
+ C
+         IF(Pause.NE.900) THEN
+           Pause = Pause + 30
+           CALL BoxInit
+         ENDIF
+       ELSEIF(inkey.EQ.'>') THEN
+ C
+ C       Decrease pause length to speed up sorting time, then redraw
+ C       the menu to clear any timing results (since they won't compare
+ C       with future results):
+ C
+         IF(Pause.NE.0) THEN
+           Pause = Pause - 30
+           CALL BoxInit
+         ENDIF
+       ELSEIF(inkey.EQ.char(27)) THEN
+ C
+ C       User pressed ESC, so return to main:
+ C
+         RETURN
+       ENDIF
+       GO TO 1
+       END
+
+       SUBROUTINE SwapBars(Row1,Row2)
+ C
+ C =============================== SwapBars ==================================
+ C   Calls PrintOneBar twice to switch the two bars in Row1 and Row2,
+ C   then calls the ElapsedTime procedure.
+ C ===========================================================================
+ C
+       IMPLICIT INTEGER*2(a-z)
+ C
+       CALL PrintOneBar(Row1)
+       CALL PrintOneBar (Row2)
+       CALL ElapsedTime (Row1)
+ C
+       RETURN
+       END
+
+       SUBROUTINE SwapSortArray(i,j)
+       IMPLICIT INTEGER*2(a-z)
+       COMMON SortArray(2,43),SortBackup(2,43),BARLENGTH,BARCOLOR,Select
+       temp=SortArray(1,i)
+       SortArray(1,i)=SortArray(1,j)
+       SortArray(1,j)=temp
+       temp=SortArray(2,i)
+       SortArray(2,i)=SortArray(2,j)
+       SortArray(2,j)=temp
+       RETURN
+       END
+
+       SUBROUTINE cls
+       IMPLICIT INTEGER*2(a-z)
+       gbg = VioScrollDn(0, 0, -1, -1, -1, 16#720, 0)
+       RETURN
+       END
+
+ \SAMPCODE\FORTRAN\FOREXEC.INC
+
+ $LIST
+ c       FOREXEC.INC - interface file for C library routines
+
+ c       This file has been included
+ c       with your FORTRAN 4.0 to show you how easy it is to call routines
+ c       written in Microsoft C (version 3.0 or higher).
+ c
+ c       The Microsoft FORTRAN 4.0, and C 4.0 releases
+ c       have been designed so that libraries or subprograms can be written
+ c       and used in either one of these languages.
+ c
+ c       Try compiling and running the demonstration program DEMOEXEC.FOR
+ c       to see some actual examples.
+
+ c       C function
+ c
+ c               int system(string)
+ c                       char *string;
+ c
+ c       The system() function passes the given C string (which ends with a
+ c       CHAR(0)) to the DOS command interpreter (COMMAND.COM), which interpre
+ c       and executes the string as an MS-DOS command.  This allows MS-DOS
+ c       commands (i.e., DIR or DEL), batch files, and programs to be executed
+ c
+ c       Example usage in FORTRAN
+ c
+ c       integer*2 system                (the return type must be declared)
+ c       ...
+ c       i = system('dir *.for'c)        (notice the C literal string '...'c)
+ c             OR
+ c       i = system('dir *.for'//char(0))
+ c
+ c       The interface to system is given below.  The [c] attribute is given
+ c       after the function name.  The argument string has the attribute
+ c       [reference] to indicate that the argument is passed by reference.
+ c       Normally, arguments are passed to C procedures by value.
+
+         INTERFACE TO FUNCTION SYSTEM[C]
+      +          (STRING)
+         INTEGER*2 SYSTEM
+         CHARACTER*1 STRING[REFERENCE]
+         END
+
+
+ c       C function
+ c
+ c       int spawnlp(mode,path,arg0,arg1,...,argn)
+ c               int mode;               /* spawn mode */
+ c               char *path;             /* pathname of program to execute */
+ c               char *arg0;             /* should be the same as path */
+ c               char *arg1,...,*argn;   /* command line arguments */
+ c                                       /* argn must be NULL */
+ c
+ c       The spawnlp (to be referenced in FORTRAN as spawn) creates and
+ c       executes a new child process.  There must be enough memory to load
+ c       and execute the child process.  The mode argument determines which
+ c       form of spawn is executed. When calling from FORTRAN, the mode
+ c       argument must be set to zero.
+ c
+ c           Value       Action
+ c
+ c             0         Suspend parent program and execute the child program.
+ c                       When the child program terminates, the parent program
+ c                       resumes execution.  The return value from spawn is -1
+ c                       if an error has occurred or if the child process has
+ c                       run, the return value is the child process'return
+ c                       code.
+ c
+ c       The path argument specifies the file to be executed as the child
+ c       process.  The path can specify a full path name (from the root
+ c       directory \), a partial path name (from the current working directory
+ c       or just a file name.  If the path argument does not have a filename
+ c       extension or end with a period (.), the spawn call first appends
+ c       the extension ".COM" and searches for the file; if unsuccessful, the
+ c       extension ".EXE" is tried.  The spawn routine will also search for
+ c       the file in any of the directories specified in the PATH environment
+ c       variable (using the same procedure as above).
+ c
+ c       Example usage in FORTRAN
+ c
+ c       integer*2 spawn                 (the return type must be declared)
+ c       ...
+ c       i = spawn(0, loc('exemod'c), loc('exemod'c),
+ c    +          loc('demoexec.exe'c), int4(0))          (execute as a child)
+ c
+ c       The interface to _spawnlp is given below.  The [c] attribute is given
+ c       after the function name.  The [varying] attribute indicates that a
+ c       variable number of arguments may be given to the function.  The
+ c       [alias] attribute has to be used because the C name for the function
+ c       _spawnlp has 8 characters.  By default, names in FORTRAN are only
+ c       significant to 6 characters, so we 'alias' the FORTRAN name spawn
+ c       to the actual C name _spawnlp.
+ c       When using the [alias] attribute, remember that the name is passed
+ c       EXACTLY as you type it. This means that if you call a C routine using
+ c       the [alias] attribute, you MUST add an underscore character before
+ c       the name of the function.
+
+ c       Notice in the example above that the C
+ c       strings are passed differently than those in the system function.  Th
+ c       is because the string arguments to spawn are undeclared in the
+ c       interface below and assumed to be passed by value.  The C spawnlp
+ c       function is expecting the addresses of the strings (not the actual
+ c       characters), so we use the LOC() function to pass the address
+ c       (remember that functions with the [c] attribute pass arguments by
+ c       value).  The last parameter to the spawn routine must be a C NULL
+ c       pointer which is a 32-bit integer 0, so we use the INT4(0) function
+ c       to pass this number by value as the last parameter.
+
+         interface to function spawn
+      +          [c,varying,alias:'_spawnlp']
+      +          (mode)
+         integer*2 mode,spawn
+         end

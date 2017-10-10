@@ -1,0 +1,14 @@
+os2getst	MS OS/2 Getting Started
+os2lrn		MS OS/2 Learning Guide
+os2usr		MS OS/2 User's Guide
+os2dskrf	MS OS/2 Desktop Reference
+prgmr1		MS OS/2 Programmer's Reference Vol. 1
+prgmr2		MS OS/2 Programmer's Reference Vol. 2
+prgmr3		MS OS/2 Programmer's Reference Vol. 3
+prgmr4		MS OS/2 Programmer's Reference Vol. 4
+os2dev		MS OS/2 Device Driver Reference
+os2insd		Inside OS/2
+os2pm		Programming The OS/2 Presentation Manager
+os2adv		Advanced OS/2 Programming
+os2smpl		OS/2 Sample Code
+os2kno		MS KnowledgeBase - OS/2

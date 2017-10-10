@@ -1,0 +1,2929 @@
+ Microsoft(R) Pascal Compiler - Version 4.0 Update
+
+
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+
+ Microsoft(R) Pascal Compiler
+
+ for MS(R) OS/2 and MS-DOS(R) Operating Systems
+
+ Version 4.0 Update
+
+
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+
+ Information in this document is subject to change without notice and
+ does not represent a commitment on the part of Microsoft Corporation. The
+ software described in this document is furnished under a license agreement
+ or nondisclosure agreement. The software may be used or copied only in
+ accordance with the terms of the agreement. The purchaser may make one copy
+ of the software for backup purposes. No part of this manual may be
+ reproduced or transmitted in any form or by any means, electronic or
+ mechanical, including photocopying and recording, for any purpose other
+ than the purchaser's personal use without the written permission of
+ Microsoft Corporation.
+
+
+
+ (C)Copyright Microsoft Corporation, 1987. All rights reserved.
+ Simultaneously published in the U.S. and Canada.
+
+
+
+ If you have comments about the software, complete the Product Assistance
+ Request card at the back of this manual and return it to Microsoft
+ Corporation.
+
+ If you have comments about the software documentation, complete the
+ Documentation Feedback card at the back of this manual and return it to
+ Microsoft Corporation.
+
+
+
+ Microsoft(R), MS(R), MS-DOS(R), and CodeView(R) are registered trademarks
+ and QuickC(TM) is a trademark of Microsoft Corporation.
+
+ IBM(R) is a registered trademark of International Business Machines
+ Corporation.
+
+ Texas Instruments(R) is a registered trademark of Texas Instruments, Inc.
+
+ Wang(R) is a registered trademark of Wang Laboratories, Inc.
+
+
+
+
+
+
+ Contents
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ Section 1  Overview
+   1.1  Using This Update
+   1.2  Summary of New Features
+   1.3  Unimplemented Features
+   1.4  Disk Contents
+   1.5  Setting Up Microsoft(R) Pascal
+         1.5.1  Running the SETUP Program
+         1.5.2  Directories Created by the SETUP Program
+         1.5.3  Environment Variable and Configuration Files
+         1.5.4  Building Libraries
+         1.5.5  Operating System Choice and Library Names
+
+ Section 2  Using the PL Driver
+   2.1  The PL Command Line
+   2.2  The PL Environment Variable
+   2.3  Specifying LIbraries
+   2.4  Overlays
+   2.5  Specifying .LIB and .DEF Files
+   2.6  PAS1 Options with the PL Driver
+   2.7  Other PL Options
+         2.7.1  Invoking the Compiler Only (/c)
+         2.7.2  Defining a Constant on the Command Line (/D)
+         2.7.3  Choosing a Floating-Point Library (/FPx)
+         2.7.4  Producing a Source-Listing File (/Fl)
+         2.7.5  Producing a Code-Listing File (/Fc)
+         2.7.6  Producing a Link-Map File (/Fm)
+         2.7.7  Naming the Executable File (/Fe)
+         2.7.8  Naming the Object File (/Fo)
+         2.7.9  Specifying Directories for Include Files (/I)
+         2.7.10 Passing Options and Libraries to LINK (/link)
+         2.7.11 Setting the Size of the Program Stack (/S)
+         2.7.12 Ignoring the INCLUDE Environment Variable (/X)
+         2.7.13 Producing Line-Numbering Information for the CodeView(R)
+                 Debugger (Zd)
+         2.7.14 Producing Full Information for the Codeview Debugger (Zi)
+         2.7.15 Producing Error Output for the Microsoft Editor (/Zz)
+
+
+ Section 3  OS/2 Systems Support
+   3.1  Compiling and Linking Under OS/2
+   3.2  Binding Programs To Run Under Both DOS and OS/2
+   3.3  OS/2 Protected-Mode Restrictions
+
+
+ Section 4  Other New Features
+   4.1  Symbol Table in Far Memory
+   4.2  Checking for a Math Coprocessor
+   4.3  INCLUDE Environment Variable
+   4.4  The $IFDECL Metacommand
+   4.5  CodeView Debugger Support
+         4.5.1  Overview of the CodeView Debugger
+         4.5.2  Pascal CodeView Support
+   4.6  New Versions of the Utilities
+   4.7  Mixed-Language Documentation
+
+
+ Section 5  Updating from Version 3.30 and Earlier
+   5.1  Increased Stack Size
+   5.2  The $INITCK Metacommand and FOR-Loop Variables
+   5.3  Determining Available Memory
+
+
+ Section 6  Updating from versions 3.20 and Earlier
+   6.1  Address Types
+         6.1.1  Using the ADS and ADR Operators with Expressions
+         6.1.2  Addressing Procedures and Functions (ADSPROC and ADSFUNC)
+   6.2  Using the SIZEOF Function
+   6.3  Mixed-Language Features
+         6.3.1  Using the C int Type (INTEGERC)
+         6.3.2  Using C Calling Conventions (C Attribute)
+         6.3.3  Using a Variable Number of Arguments (VARYING Attribute)
+   6.4  New Files Supplied with the Compiler
+         6.4.1  Using C System Functions with CEXEC.LIB
+         6.4.2  Customizing the 8087 Table with the EMOEM.ASM Program
+         6.4.3  Creating a Variable Stack with LVARSTK.OBJ
+   6.5  Using the ERR Device Name
+   6.6  File Sharing and Locking
+         6.6.1  File Sharing
+                 6.6.1.1  Sharemodes
+                 6.6.1.2  Accessmode
+         6.6.2  File Locking
+   6.7  Public Variables
+   6.8  The Pascal Memory Model
+   6.9  Compatibility with Version 3.20
+
+
+ Section 7  Writing Microsoft Windows Applications
+   7.1  Windows Interface
+   7.2  $WINDOWS Metacommand
+   7.3  Program Module
+   7.4  WinMain Function
+   7.5  Callback Functions
+         7.5.1  Windows and Pascal Libraries
+         7.5.2  Pascal Memory-Allocation Routines
+         7.5.3  Floating-Point Support
+                 7.5.3.1  Coprocessor/Emulator Math Option
+                 7.5.3.2  Alternate Math Option
+
+
+ Section 8     Error and Warning Messages
+   8.1  Error Messages
+   8.2  Warning Messages
+
+
+ Figures
+
+   Figure 5.1  Allocation of Memory in DGROUP
+
+
+ Tables
+   Table 2.1  PAS1 Options in Pascal
+
+
+
+ Section 1  Overview
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+
+ Welcome to the Microsoft(R) Pascal Compiler Version 4.0. With this latest
+ version of Pascal, you can develop programs for MS-DOS(R), Microsoft
+ Operating System/2 (MS(R) OS/2), or both operating systems.
+
+ This version of Pascal also helps you develop programs faster and more
+ accurately by providing support for the Microsoft CodeView(R) debugger. The
+ CodeView debugger is a powerful yet easy-to-learn tool for analyzing logic
+ errors in OS/2 or DOS programs. Version 4.0 of Pascal comes complete with
+ the debugger, which now evaluates Pascal variables and expressions.
+
+ Version 4.0 also improves the programming environment in several other
+ ways. During compilation, Version 4.0 is able to utilize all of available
+ memory. As a result, Pascal can compile larger modules than it could
+ before. This version also comes with the complete and current set of
+ Microsoft programming utilities and includes the new Pascal/Link (PL)
+ driver. The PL driver is briefly described in Section 1.2, "Summary of New
+ Features."
+
+ This document describes each new feature of Pascal. Section 1 provides an
+ overview of the new version. The purpose of each division within Section 1
+ is described below:
+
+   Section      Purpose
+   ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+   Section 1.1  Explains how to use this update
+
+   Section 1.2  Summarizes new features
+
+   Section 1.3  Lists features mentioned in the reference manual that
+                 are not yet implemented
+
+   Section 1.4  Discusses disk contents
+
+   Section 1.5  Describes the new SETUP program that automatically
+                 installs Pascal
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ Note
+      Microsoft documentation uses the term "OS/2" to refer to OS/2
+      systems--MS OS/2 and IBM(R) OS/2. Similarly, the term "DOS" refers
+      to both the MS-DOS and PC DOS operating systems. The name of a
+      specific operating system is used when it is necessary to note
+      features that are unique to that system.
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+ 1.1  Using This Update
+
+ To get started with Version 4.0, first finish reading Section 1 of this
+ update. This section describes some features you may need to know about
+ before using the compiler.
+
+ After reading this first section, you can read the rest of the
+ documentation in any order that seems most helpful. In particular, if
+ you are interested in debugging, program-library management, or the
+ details of linking, you may want to look at the Microsoft CodeView
+ and Utilities manual.
+
+ This update describes features introduced since the last version, Version
+ 3.32. It also consolidates all previous updates and README.DOC files since
+ Version 3.20. This update supersedes all previous documentation and on-line
+ information.
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ Note
+      If there is a README.DOC file on one of the Version 4.0 disks, it
+      contains even more recent information and therefore supersedes this
+      update in the case of conflict.
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ The remaining sections in this update describe new features or differences
+ between specific versions:
+
+      ş  Section 2, "Using the PL Driver," explains the purpose of the PL
+         driver and how to use it to automate the process of compiling and
+         linking.
+
+      ş  Section 3, "OS/2 Systems Support," describes how to compile and
+         link a program under OS/2. The section also describes how to bind a
+         program so it runs under either OS/2 or DOS. In addition, the
+         section includes information about limitations on using threads.
+
+      ş  Section 4, "Other New Features," describes additional features
+         introduced with Pascal 4.0. This section also contains abstracts of
+         the other new manuals.
+
+      ş  Section 5, "Updating from Version 3.30 and Earlier," is most
+         relevant to users updating from Version 3.30, Version 3.20, and
+         older versions, as well as to users who are new to Microsoft
+         Pascal.
+
+      ş  Section 6, "Updating from Version 3.20 and Earlier," is most
+         relevant to users updating from Version 3.20 or older, as well as
+         to users who are new to Microsoft Pascal.
+
+      ş  Section 7, "Writing Microsoft Windows Applications," explains how
+         to use Microsoft Pascal with the library routines provided in the
+         Microsoft Windows Software Development Kit. This section is of
+         interest to Windows developers who wish to write applications in
+         Pascal.
+
+      ş  Section 8, "Error Messages," describes new error messages for the
+         PL driver.
+
+ The list below summarizes which sections of this update you need to read,
+ depending on the version of Microsoft Pascal from which you are updating:
+
+   If Updating from:           Read These Sections:
+   ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+   3.31 or 3.32                1-4
+   3.30                        1-5
+   3.20 or older               1-6
+   New to MS Pascal            1-6
+
+
+ 1.2  Summary of New Features
+
+ The following features of Microsoft Pascal are introduced with Version 4.0:
+ OS/2 support, programming utilities, compiler enhancements, automatic
+ installation, and additional documentation.
+
+
+ ş  OS/2 Support
+
+ You can use Pascal Version 4.0 to produce programs for DOS, or the new OS/2
+ operating system. With the OS/2 tools and the PL driver, you can create
+ OS/2 programs as easily as DOS programs.
+
+
+ ş  Programming Utilities
+
+ Microsoft Pascal Version 4.0 has a programming environment with all the
+ support enjoyed by users of Microsoft C and FORTRAN: source-level
+ debugging, automated program development, and new copies of all the
+ utilities.
+
+      ş  The CodeView debugger is now fully supported by Pascal.
+
+         The debugger is a window-oriented, menu-driven tool for analyzing
+         programs. It is further described in Section 3.3, "Overview of the
+         CodeView Debugger." The debugger can be used effectively without
+         any knowledge of assembly language. Yet it also puts the full power
+         of the computer in the hands of an advanced programmer.
+
+      ş  The new PL driver makes it easy to invoke the compiler.
+
+         To use earlier versions of Pascal, you had to invoke each pass of
+         the compiler separately and then invoke the linker. This required a
+         minimum of three steps, and often four. The PL driver simplifies
+         this process by reducing the four steps to a single command line.
+         The PL driver accepts all the options that the compiler itself
+         accepts, plus a number of linker options and new options. In
+         addition, the PL driver accepts options specified in an environment
+         variable so you do not need to specify frequently used options and
+         files.
+
+      ş  The 87.EXE program checks for the presence of a coprocessor.
+
+         Version 4.0 includes the program 87.EXE, which tests for the
+         presence of a math coprocessor. If this program finds a coprocessor
+         present, it tells you whether the 8087, 80287, or 80387 chip is in
+         use.
+
+      ş  Version 4.0 includes new versions of all the utilities.
+
+         The LINK utility has been updated and includes a number of new
+         options. In addition to LINK and LIB, Version 4.0 includes MAKE, an
+         automated program-development utility; EXEPACK, a file-compression
+         utility; EXEMOD, a program for modifying executable files; SETENV,
+         a utility that adjusts the environment space; and ERROUT, a utility
+         that redirects output from standard error.
+
+         Each utility mentioned in the above paragraph is documented in the
+         Microsoft CodeView and Utilities manual.
+
+
+ ş  Compiler Enhancements
+
+ Although the language definition of Version 4.0 is essentially the same as
+ the language definition of Version 3.31, the new version does include a
+ couple of important enhancements that affect compiler operation:
+
+      ş  The compiler uses far memory for the symbol table.
+
+         As the compiler finds more and more symbols in your Pascal program,
+         it simply requests additional memory from the system. The compiler
+         no longer faces a 64K (kilobyte) limitation on the size of the
+         symbol table. As a result, you are less likely to run out of memory
+         when you have a large number of program symbols.
+
+      ş  The $INCLUDE metacommand now uses the INCLUDE environment variable.
+
+         This fact makes it easier to manage include files. If you move your
+         include files to a new directory, the only adjustment you need make
+         is to the environment variable INCLUDE. Whenever you compile a
+         program that uses the $INCLUDE metacommand, the Pascal compiler
+         automatically searches the proper directories.
+
+
+ ş  Automatic Installation
+
+ Version 4.0 includes a SETUP program, which copies the files on the Pascal
+ master disks to the directories you specify. The SETUP program is described
+ in Section 1.5, "Setting Up Microsoft Pascal." Section 1.5 also gives
+ instructions for use.
+
+
+ ş  Additional Documentation
+
+ As mentioned above, this version includes the Microsoft CodeView and
+ Utilities manual. Also in the same binder is the Microsoft Mixed-Language
+ Programming Guide. This guide supersedes the old documentation on calling
+ C, FORTRAN, and assembly language. It includes more examples than the old
+ documentation and gives special attention to topics such as passing
+ strings, arrays, and records.
+
+
+ 1.3  Unimplemented Features
+
+ The following list includes features mentioned in the reference manual
+ that are not yet implemented. (Because these features were not implemented
+ in earlier versions, Version 4.0 does not represent any loss of
+ functionality.)
+
+ You should look over this list carefully. When using Pascal 4.0, you should
+ refer to this list if you find a language feature that does not appear to
+ work.
+
+      1. The MARKAS and RELEAS procedures are not supported.
+
+      2. The $INITCHK metacommand does not check for the presence of
+         uninitialized REAL variables.
+
+      3. The OTHERWISE keyword is not accepted in RECORD declarations.
+
+      4. Code is generated for PURE functions, but no checking is done.
+
+      5. The extend-level operators SHL, SHR, and ISR are not available.
+
+      6. No checking is done for invalid GOTO statements.
+
+      7. READ, READLN, and DECODE cannot have M and N parameters.
+
+      8. Enumerated I/O, permitting reading and writing of enumerated
+         constants in their character-string form, is not available.
+
+      9. The metacommands $TAGCK, $STANDARD, $EXTEND, and $SYSTEM have no
+         effect.
+
+     10. The $INCONST metacommand does not accept string constants.
+
+
+ 1.4  Disk Contents
+
+ We recommend that you take the following steps as soon as you unwrap your
+ Pascal 4.0 disks:
+
+      1. First, make backups of the original disks. You can use either the
+         COPY or DISKCOPY commands supported by DOS. It is not necessary to
+         make backups in order to run the compiler, but this step helps
+         insure you against a loss of files.
+
+      2. Then run the SETUP program described in the next section. Running
+         SETUP is completely optional, but it may save you time in
+         installing the files that run the Pascal compiler and utilities.
+
+ To verify the disks in the package have all the correct files, consult the
+ PACKING.LST file on Disk 1 of the set. This file is an ordinary ASCII
+ (American Standard Code for Information Interchange) text file, which you
+ can send directly to the printer or view with the DOS TYPE command. The
+ PACKING.LST file specifies the files you can expect to find on the retail
+ distribution disks or backups you make. The PACKING.LST file also gives a
+ brief summary of the contents of each file.
+
+
+ 1.5  Setting Up Microsoft(R) Pascal
+
+ Version 4.0 includes a SETUP program that automatically copies files from
+ the Pascal master disks or backups, creates any necessary directories on
+ your fixed disk, and builds appropriate libraries.
+
+ The SETUP program also creates files for changing your PATH variable and
+ creating additional environment variables. You can use these files as they
+ are, or add their contents to your AUTOEXEC.BAT file. In addition, the
+ SETUP program also creates a file containing entries that allocate the
+ buffers and files needed to run the compiler. You should add the contents
+ of this file to your CONFIG.SYS file. See Section 1.5.3 below for a
+ description of these files.
+
+ The libraries that the SETUP program creates depend on the math option and
+ operating system choices you make during setup. See Section 1.5.5,
+ "Operating System Choice and Library Names," for more information about
+ the libraries the SETUP program creates.
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ Warning
+      It is possible to specify directories that have old Pascal or
+      utilities files in them. If you do, the SETUP program overwrites the
+      old files. In fact, the SETUP program overwrites any file that has the
+      same name as a file on the Pascal master disks or your backups.
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+ 1.5.1  Running the SETUP Program
+
+ To run the SETUP program, place the disk containing SETUP in drive A, make
+ A the default drive (type A: and press ENTER), and type one of these two
+ commands:
+
+ SETUP
+ SETUP /N
+
+ The /N option lets you run the SETUP program without actually installing
+ the software. You can use the option to see what the SETUP program would do
+ when you select certain options.
+
+ The SETUP program includes another option, /L, that lets you create
+ libraries without going through the entire setup procedure. See Section
+ 1.5.4, "Building Libraries," for more information.
+
+ The SETUP program displays a series of screens asking you questions about
+ how you would like to set up Pascal. Each question is followed by a default
+ answer in brackets ([]). Press ENTER if the default answer is correct. If
+ the default answer is incorrect, you can enter your choice and then press
+ ENTER. Use the BACKSPACE key to make any corrections before you press
+ ENTER. The SETUP program beeps and displays an error message if your entry
+ is not a valid choice.
+
+ When you have answered all of the questions, the SETUP program displays the
+ options you have selected and asks you if you would like to make any
+ changes. If you respond positively by pressing Y and ENTER, the SETUP
+ program takes you through the screens again, displaying your previous
+ answers to questions as the default values.
+
+ When you press N and ENTER in response to the question about making changes
+ to your choices, the SETUP program begins the setup process. The SETUP
+ program asks you to change disks in the A drive as necessary.
+
+
+ 1.5.2  Directories Created by the SETUP program
+
+ Depending on which options you select when you set up Pascal, the SETUP
+ program may create one or more default directories. The names of the
+ default directories and their contents are as follows:
+
+   Directory      Contents
+   ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+   \BINB          Bound versions of the compiler, linker, and utilities.
+                  Bound versions run under DOS and real-mode OS/2, as well
+                  as protected-mode OS/2.
+
+   \BINP          Utilities and run-time modules that run only under
+                  protected-mode OS/2.
+
+   \BIN           Utilities and run-time modules that run only under DOS or
+                  real-mode OS/2.
+
+   \LIB           Pascal libraries and object files.
+
+   \INCLUDE       Pascal include files.
+
+   \PWORK         Sample Pascal programs and include files.
+
+ If you specify directory names other than the default names, the SETUP
+ program uses the default directories.
+
+
+ 1.5.3  Environment Variable and Configuration Files
+
+ When you run the SETUP program, it creates files you can add to your
+ CONFIG.SYS and AUTOEXEC.BAT files. Commands in these files set environment
+ variables and system configuration to make it easier to use Pascal. The
+ following list describes the files, when they are created, and their
+ contents:
+
+   File            Contents
+   ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+   NEW-VARS.BAT    Commands to set environment variables for the locations
+                   of binary, library, and include files. This file is
+                   created when you choose to set up for DOS or real-mode
+                   OS/2. You may run this file as a batch file, or add its
+                   contents to your AUTOEXEC.BAT file so the commands are
+                   performed whenever you start your system.
+
+   NEW-PATH.CMD    Commands to set environment variables for binary,
+                   library, and include files. This file is created when
+                   you set up for protected-mode OS/2. You may run this
+                   file as a batch file, or add its contents to the file
+                   automatically executed by the /K command in the PROTSHELL
+                   line of your CONFIG.SYS file. See the Microsoft Operating
+                   System/2 User's Guide for more information.
+
+   NEWCONF.SYS     Commands to allocate the number of files and file buffers
+                   required by Pascal. This file is always created. Copy the
+                   commands in this file to your CONFIG.SYS file.
+
+ The SETUP program places these files in the root directory of the
+ destination drive.
+
+ The SETUP program creates all three files when you set up for both OS/2
+ protected mode, and DOS and OS/2 real mode.
+
+
+ 1.5.4  Building Libraries
+
+ You can run the SETUP program with the /L option when you want to create
+ additional libraries.
+
+ When you use the /L option, the SETUP program only takes you through the
+ questions required to create a library and it copies only the files it
+ needs to build the libraries.
+
+
+ 1.5.5  Operating System Choice and Library Names
+
+ Setting up for DOS creates libraries that can be used only under DOS or
+ under real-mode OS/2. The libraries cannot be used in protected-mode OS/2
+ programs. Specifying OS/2 for the operating system makes libraries that can
+ be used only under OS/2 in protected mode. In either case, the libraries
+ are the default libraries selected by the PL driver when you compile your
+ program.
+
+ Choosing to set up for both operating systems creates two sets of
+ libraries--one set for DOS and real-mode OS/2, the other for protected-mode
+ OS/2. When you compile your program, you must tell the PL driver which set
+ of libraries to use. See Section 2, "Using the PL Driver," for more
+ information.
+
+ The SETUP program creates libraries with names having the following form
+ when you set up for a single operating system:
+
+ LIBPASmath.LIB
+
+ The math argument is a single character indicating the type of math:
+
+   Argument       Math Option
+   ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+   A              Alternate math
+
+   D              Decimal math
+
+   E              Coprocessor emulation
+
+   7              Math coprocessor
+
+
+ For example, a default library using alternate math would be named
+ LIBPASA.LIB.
+
+ Selecting dual mode creates libraries with names in the form below:
+
+ LIBPAS<math><mode>.LIB
+
+ The math argument is the same as for the default libraries. The mode
+ argument is a single character representing the mode that the libraries can
+ be used in--R for real-mode libraries that can be used under DOS or in
+ real-mode OS/2, or P for protected-mode libraries that can be used only in
+ OS/2 protected mode. For example, a library for OS/2 protected mode using
+ alternate math would have LIBPASAP.LIB as a name.
+
+ The following table shows the libraries created for different operating
+ choices during set up(<math> is the letter representing the math option):
+
+   Operating System Choice        Library
+   ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+   MS-DOS or real-mode OS/2       LIBPAS<math>.LIB
+
+   Protected-mode OS/2            LIBPAS<math>.LIB
+
+   Dual mode (real- and           LIBPAS<math>P.LIB
+   protected-mode OS/2)
+
+                                  LIBPAS<math>R.LIB
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ Note
+      You can use protected-mode libraries to create applications that run
+      in real mode by creating a protected-mode application and using the
+      BIND utility. See Section 3.2, "Binding Programs to Run Under Both DOS
+      and OS/2," for more information.
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+
+ Section 2  Using the PL Driver
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+
+ The Pascal/Link (PL) driver program simplifies the use of the linker and
+ compiler. The Pascal compiler consists of three executable files--PAS1,
+ PAS2, and PAS3--each performing a different pass of the compiler. With the
+ PL driver, you need only enter one command to run each pass of the compiler
+ that you need to have executed. In addition, the PL driver will also run
+ the linker.
+
+ The PL driver is flexible. You can use it to link object files, compile
+ source files without linking, or invoke both the compiler and linker with a
+ single command. The PL driver handles command-line options more effectively
+ than a batch file could; it accepts a wide variety of options and passes
+ each option to the compiler or the linker, as appropriate.
+
+ This section presents directions for use of the PL driver and describes the
+ purpose of each option. Sectionÿ2.1 presents the PL command line; Section
+ 2.2 describes the PL environment variable; Section 2.3 tells you about
+ options to select libraries when compiling for both the OS/2 and DOS
+ operating systems; Section 2.4 explains how to specify overlays on the PL
+ command line; Section 2.5 describes how the driver handles .LIB and .DEF
+ files; Section 2.6 lists options that correspond to PAS1 options; and
+ Sectionÿ2.7 lists other PL options.
+
+
+ 2.1  The PL Command Line
+
+ ş  Syntax
+
+ PL [ option...] file...[/link linkoptions]
+
+ In the syntax display above, the position of options on the command line is
+ not significant, except where noted in this section. The position of files
+ on the command line is generally not significant, but the main module must
+ be listed first if you are going to produce an executable file. You can use
+ any number of files and options, and you can place them in any order. The
+ only syntactic requirements are that PL must appear at the beginning of the
+ command line and there must be at least one file.
+
+ In contrast to the PAS1 option, the PL driver has no separate fields and
+ does not accept commas and colons on the command line. To specify source-
+ list, object-list, and executable-file fields, use the options presented in
+ Sectionÿ2.3, "Specifying Libraries."
+
+ Options must be preceded either by a dash (-) or a forward slash (/).
+ Otherwise, the PL driver interprets an option as a file name. For the sake
+ of simplicity, only the slash (/) is used in the lists and examples of
+ Sectionÿ2. However, with respect to the PL driver, these two kinds of
+ punctuation are interchangeable.
+
+ Case is significant with options; for example, /FO cannot be used in place
+ of the /Fo option.
+
+ The PL driver uses the following rules to determine what to do with each
+ file on the command line:
+
+      1. If the file has a .PAS extension, the PL driver compiles it and
+         produces an object file. The PL driver then links this object file
+         unless you specify the /c option (described in Sectionÿ2.7.1,
+         "Invoking the Compiler Only (/c)").
+
+      2. If the file has a .OBJ extension, the PL driver invokes the linker.
+         However, the PL driver finishes compiling all files with a .PAS
+         extension before it proceeds to linking. By default, the executable
+         file that the linker produces has the same base name as the first
+         module (see the examples below).
+
+      3. If you give a file name with no extension, then the PL driver
+         assumes a .OBJ extension.
+
+
+ ş  Example
+
+ PL /Pa MYPROG.PAS
+
+ In the example above, the PL driver compiles MYPROG.PAS to produce the
+ object file MYPROG.OBJ. The PL driver then links the MYPROG.OBJ file,
+ together with any required language libraries, to produce the executable
+ file MYPROG.EXE. Note that the /Pa option (array-index checking, described
+ below in Sectionÿ2.6, "PAS1 Options with the PL Driver") is passed along to
+ the compiler.
+
+
+ ş  Example
+
+ PL PROG2
+
+ In the example above, the PL driver links the object file PROG2.OBJ with
+ any required libraries to produce the executable file PROG2.EXE. No
+ compiling is performed. If the PROG.OBJ file does not already exist, the PL
+ driver reports an error message.
+
+
+ ş  Example
+
+ PL PROG.PAS MOD1.OBJ /Pa MOD2 MOD3.PAS
+
+ In the example above, the PL driver first compiles the files PROG.PAS and
+ MOD3.PAS. It then invokes the linker to link the object files--PROG.OBJ,
+ MOD1.OBJ, MOD2.OBJ, and MOD3.OBJ--to produce the executable file PROG.EXE.
+ Note that the PL driver assumes a .OBJ extension for MOD2, and that the /Pa
+ option is passed along to the compiler.
+
+
+ 2.2  The PL Environment Variable
+
+ The PL environment variable provides a convenient way to specify frequently
+ used options and files without entering the options and files on the
+ command line. If the PL environment variable exists, the PL program adds
+ the options specified by the variable to the command line when you compile
+ your program. To set the variable, use the SET command. For example, the
+ following SET command sets the PL variable to compile and link programs for
+ use with the Microsoft CodeView debugger:
+
+ SET PL = /Zi /Pd
+
+ It is usually easiest to add the SET command to your AUTOEXEC file rather
+ than entering the command each time you start your machine.
+
+ Information specified in the PL variable is processed before options
+ specified in the command line. The /LINK options are an exception. The
+ /LINK options specified in the PL variable are processed after other
+ options, but before the /LINK options specified on the command line. For
+ example, if the PL environment variable is set to /Zi /Od /LINK /I, then
+ the following two commands are equivalent:
+
+ PL MAINPGM.PAS MODULE1.PAS /LINK /NOP
+
+ PL /Zi /Pd MAINPGM.PAS MODULE1.PAS /LINK /I /NOP
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ Note
+      Because an equal sign (=) is interpreted as part of the SET command,
+      you cannot use an equal sign in the /D option in the PL variable.
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+ 2.3  Specifying Libraries
+
+ If you set up the compiler to use either the OS/2 or the DOS operating
+ system, but not both, you do not need to specify a run-time library on the
+ PL command line--the PL program automatically selects the appropriate
+ default library.
+
+ If you choose to set up the compiler to create both OS/2 and DOS programs,
+ you must use one of the library options to tell the PL program whether to
+ use real-mode libraries for DOS or OS/2 real mode, or to use OS/2
+ protected-mode libraries. To compile an DOS or OS/2 real-mode application,
+ use the /Lr command-line option. To compile an OS/2 protected-mode program,
+ use the /Lp command-line option.  For example, the following command
+ compiles and links AVERAGES.PAS for use under DOS or real-mode OS/2:
+
+ @PROG=PL/Lr AVERAGES.PAS
+
+ To compile and link the same program to run in protected-mode OS/2, you
+ would use a command like the following:
+
+ PL /Lp AVERAGES.PAS
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ Note
+      You can also use the /Lc option to specify real-mode libraries.
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ A .DEF file can only be specified for OS/2 protected-mode programs. Using a
+ .DEF file on a command line including the /Lr (real-mode libraries) option
+ produces the following warning message: .DEF files supported in protect
+ mode only. See the Microsoft CodeView and Utilities Manual Update for more
+ information about .DEF files.
+
+ If you write most of your programs for one operating system, and only
+ occasionally write programs for the other, you can use the PL environment
+ variable to set the library option. For example, setting the PL environment
+ variable as follows lets you automatically compile and link using the real-
+ mode libraries:
+
+ SET PL = /Lr
+
+ With PL set as above, you could compile and link a protected-mode OS/2
+ program by specifying the protected-mode library option on the command line
+ (command line options override options specified by the PL environment
+ variable):
+
+ PL /Lp AVERAGES.PAS
+
+ You can also rename the libraries you use regularly so that they have the
+ corresponding default names. Then you can specify the other operating
+ system, when needed, by using the appropriate library option.
+
+
+ 2.4  Overlays
+
+ The PL driver included with Version 4.0 lets you specify program overlays
+ on the command line. Overlays let different modules use the same area of
+ memory. When modules are overlaid, only one module is in memory, although
+ copies of both are kept on the disk. When the program needs the other
+ module, the other module is read into memory from the disk. See Chapter 12,
+ "Linking Object Files with LINK," in the Microsoft CodeView and Utilities
+ manual for more information about overlays.
+
+ You specify an overlay on the PL command line by enclosing the modules to
+ be overlaid in parentheses. For example, the following command line tells
+ the PL driver that the modules OVER1.PAS and OVER2.PAS are to be overlaid:
+
+ PL MAIN.PAS (OVER1.PAS OVER2.PAS)
+
+
+ 2.5  Specifying .LIB and .DEF Files
+
+ You can mix .LIB and .DEF files on the PL command line with other options
+ and files. The PL driver sorts through the file names and sends them in the
+ correct order to the linker. For example, the following command compiles
+ the program and links it by using the indicated .LIB and .DEF files (the
+ MYDEF.DEF and MYLIB.LIB files are reversed from the LINK command order):
+
+ PL MAIN.PAS MYDEF.DEF MYLIB.LIB
+
+ The PL driver automatically changes the order of the .DEF and .LIB files
+ before invoking the linker.
+
+
+ 2.6  PAS1 Options with the PL Driver
+
+ When you use the PL driver instead of the PAS1 option, you do not lose any
+ functionality. You can specify any of the PAS1 options with the PL driver.
+ However, the PL driver accepts these options in a modified form, which is
+ presented below.
+
+ You can use any number of the options listed here, along with any number of
+ the options described in Sectionÿ2.3, "Specifying Libraries." As far as the
+ PL driver is concerned, there is no essential difference between the two
+ groups of options. This grouping is for the sake of convenience.
+
+
+ ş  Syntax
+
+ To specify a PAS1 option for use with the PL driver, use the following
+ syntax:
+
+ /Px
+
+ where x is the lowercase equivalent of a PAS1 option. For example, to use
+ the /A (array-index checking) option with the PL driver, enter it as /Pa.
+
+ Table 2.1 below summarizes the correspondence between PL options, PAS1
+ options, and metacommands, and describes the functions of these features.
+
+ On each row in the table, the PL option, PAS1 option, and metacommand all
+ perform the same function, but each is entered in a different way. You can
+ use a metacommand by entering it directly into the source file on its own
+ line. You can enter a PL option when you use the PL driver, and a PAS1
+ option when you invoke PAS1 directly.
+
+
+ Table 2.1
+ PAS1 Options in Pascal
+
+ÖÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ·
+                                     Metacommand
+ PL                PAS1              Equivalent     Description
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ /Dsymbol[=value]  /Xsymbol[=value]  None           Define a string or
+                                                    numeric constant
+ /Idirectory       /Odirectory       None           Specify directory to
+                                                    search for include files
+ /Pa               /A                $INDEXCK+      Check array indexing
+ /Pc               /C                $DECMATH+      Use decimal math
+ /Pd               /D                $DEBUG+        Enable debug options
+ /Pe               /E                $ENTRY+        Enable procedure
+                                                    entry/exit debugging
+ /Pf               /F                $FLOATCALLS-   Generate in-line
+                                     Metacommand
+ PL                PAS1              Equivalent     Description
+/Pf               /F                $FLOATCALLS-   Generate in-line
+                                                    floating-point
+                                                    instructions
+ /Pi               /I                $INITCK+       Check for uninitialized
+                                                    variables
+ /Pl               /L                $LINE+         Generate line-number
+                                                    information
+ /Pm               /M                $MATHCK+       Check for math errors
+ /Pn               /N                $NILCK+        Check for NIL pointer
+                                                    usage
+ /Pq               /Q                $DEBUG-        Disable debugging
+                                                    options
+ /Pr               /R                $RANGECK+      Check subranges
+ /Ps               /S                $STACKCK+      Check for stack
+                                                    overflows
+ /Pt               /T                $TAGCK+        Check tag fields
+ /Pw               /W                $WINDOWS+      Include WINDOWS
+                                                    prologue/epilogue
+ /X                /V                None           Ignore the INCLUDE
+                                     Metacommand
+ PL                PAS1              Equivalent     Description
+/X                /V                None           Ignore the INCLUDE
+                                                    environment variable
+ /Zd               /Y                               Produce line number
+                                                    information for the
+                                                    CodeView debugger
+ /Z:               /Z                None           Produce complete
+                                                    CodeView information
+
+
+ For more information on PAS1 options and metacommands, see Sectionÿ5.4,
+ "Pass One Compiler Switches," in the user's guide.
+
+
+ ş  Example
+
+ PL /Pa /Pi /Pn PROGRAMX.PAS
+
+ In the example above, the PL driver compiles and links the PROGRAMX.PAS
+ file and turns on checking for array indexes, uninitialized variables, and
+ NIL pointer usage. The PL command produces the same result as the following
+ series of commands:
+
+ PAS1 /A /I /N PROGRAMX;
+
+ PAS2 LINK PROGRAMX;
+
+ The PL driver does not invoke the PAS3.EXE file because no listing file is
+ specified, making a third pass unnecessary.
+
+
+ 2.7  Other PL Options
+
+ This section presents PL options that do not correspond to PAS1 or library
+ options. Some of these options correspond to fields of the PAS1 option;
+ these options can be useful because the PL driver does not have separate
+ fields and will not prompt you for file names.
+
+ Other options presented in this section represent input to the linker and
+ some new options. To ensure that all PL options work, you should use only
+ compiler files provided with Versionÿ4.0.
+
+ This section begins with a summary of the options and continues with a
+ section on each option.
+
+ÖÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ·
+   Option              Description
+   ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+   /c                  Directs the PL driver to run only the compiler, not
+                       the linker.
+
+   /Dsymbol[=value]    Defines a string or numeric constant. This constant
+                       can be one referred to in the Pascal source code.
+
+   /FPx                Chooses a floating-point math package.
+
+   /Fl[name]           Produces a listing file (PAS1 list-file field).
+
+   /Fc[name]           Produces a code-listing file (PAS1 object-listing
+                       field).
+
+   /Fm[name]           Produces a link-map file (input to the linker).
+   Option              Description
+  /Fm[name]           Produces a link-map file (input to the linker).
+
+   /Fename             Names the executable file (input to the linker).
+
+   /Foname             Names the object file (PAS1 object-file field).
+
+   /Idirectory         Specifies directory to be searched for include files.
+
+   /link [opt] [lib]   Passes options and libraries directly to the linker.
+
+   /Ssize              Sets the size of the program stack (2K default size
+                       assumed if no argument is given).
+
+   /X                  Directs Pascal to ignore the INCLUDE environment
+                       variable.
+
+   /Zd                 Produces line-number information for the CodeView
+                       debugger. This option affects both compiler and
+                       linker operation.
+
+   Option              Description
+
+   /Zi                 Produces complete CodeView information. This option
+                       affects both compiler and linker operation.
+
+   /Zz                 Produces Microsoft-Editor-style, error-message
+                       output.
+
+ Exact syntax for the use of each option is provided below. With the
+ exception of the /link option, no space should be typed between an option
+ and any argument that the option takes.
+
+
+ 2.7.1  Invoking the Compiler Only (/c)
+
+ ş  Syntax
+
+ /c
+
+ When you use this option with the PL driver, only the compiler is invoked.
+ However, you must still use the .PAS extension with all Pascal source files
+ you wish to compile. When /c is specified, the PL driver simply ignores any
+ object files you give on the command line.
+
+
+ 2.7.2  Defining a Constant on the Command Line (/D)
+
+ ş  Syntax
+
+ /Dsymbol[=value]
+
+ In the syntax display above, symbol is the name of a constant that appears
+ in a Pascal source file and value is a string or constant value. If value
+ is a string, you need to enclose it in single quotation marks ('). No space
+ should appear between /D and symbol; or between symbol, the equal sign (=),
+ and value.
+
+ The value argument is optional. Use the equal sign (=) if and only if you
+ include value. If you omit this argument, then the PL driver considers
+ symbol to be defined as an integer with a value of 1.
+
+ In the following example, the PL driver sets the constant MONITOR equal to
+ the string 'EGA'. The information is then used in compiling the program
+ SCREEN.PAS, which may refer to the constant MONITOR.
+
+
+ ş  Example
+
+ PL /DMONITOR='EGA' SCREEN.PAS
+
+ The /D option can be used in conjunction with the $IFDECL metacommand,
+ described in Section 4.4 of this update. By using the /D option with the
+ $IFDECL language feature, you can achieve more flexibility in how you
+ compile your programs.
+
+
+ 2.7.3  Choosing a Floating-Point Library (/FPx)
+
+ ş  Syntax
+
+ /FPx
+
+ By default, Pascal attempts to link in the library LIBPASE.LIB, which
+ contains floating-point routines from the emulator math package (see
+ Section 1.5, "Setting Up Microsoft Pascal," for more information). However,
+ you can use the /FP option to direct the PL driver to link to another
+ library. The list below shows the effect for each possible value for x:
+
+   PL option      Links with:
+   ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+   /FPa           LIBPASA.LIB  (altmath)
+
+   /FPd           LIBPASD.LIB  (decmath; also sets the /Pc option)
+
+   /FPe           LIBPASE.LIB  (emulator, the default)
+
+   /FPi           LIBPAS7.LIB  (87math; also sets the /Pf option)
+
+   /FP7           LIBPAS7.LIB  (87math)
+
+ The /Pc option (/C for PAS1) directs Pascal to link to a library supporting
+ decimal-math calculations. The /Pc option also affects compiler operation,
+ causing Pascal to store floating-point constants in decimal rather than
+ binary representation.
+
+ The /Pf switch (/F for PAS1) is an option specifying that calls to the 87
+ math coprocessor be made directly from the compiled Pascal code, rather
+ than indirectly through a call to an intermediate library routine. If you
+ have a coprocessor and your program calls floating-point math functions
+ repeatedly, this option can improve performance.
+
+
+ 2.7.4  Producing a Source-Listing File (/Fl)
+
+ ş  Syntax
+
+ /Fl[name]
+
+ When you want the compiler to produce a formatted source listing, use the
+ /Fl option. Such a listing is particularly useful as a record of compile-
+ time errors.
+
+ The /Fl option applies to the first Pascal source file that follows the
+ option (as positioned on the command line). Use this option once for each
+ source file you want listed. For example, the command
+
+ PL /FlONCE.LST ONE.PAS /FlTWICE.LST TWO.PAS THREE.PAS
+
+ produces two source listings: ONCE.LST, the source listing for the source
+ file ONE.PAS; and TWICE.LST, the source listing for the source file
+ TWO.PAS. Because the source file THREE.PAS was not immediately preceded by
+ the /Fl option, the PL driver produces no source listing for the source
+ file THREE.PAS.
+
+ If you omit name, then the PL driver  combines the base name of the
+ relevant source file with a .LST extension. If you give only a base name,
+ then the PL driver uses it and assumes a .LST extension.
+
+
+ 2.7.5  Producing a Code-Listing File (/Fc)
+
+ ş  Syntax
+
+ /Fc[name]
+
+ When you want the compiler to produce an object-code-listing file, use the
+ /Fc option. The object-code listing shows you the assembly code that the
+ compiler produces, in a readable ASCII format.
+
+ The /Fc option applies to the first Pascal source file that follows the
+ option (as positioned on the command line). Use this option once for each
+ source file for which you want an object-code listing. For example, the
+ command
+
+ PL /FcONCE.COD ONE.PAS /FcTWICE.COD TWO.PAS THREE.PAS
+
+ produces two object listings: ONCE.COD, the object-code-listing file for
+ the source file ONE.PAS; and TWICE.COD, the object-code-listing file for
+ the source file TWO.PAS. Because the PL driver produces no object-code-
+ listing file for the source file THREE.PAS, the source file THREE.PAS was
+ not immediately preceded by the /Fc option.
+
+ If you omit name, then the PL driver combines the base name of the relevant
+ source file with a .COD extension. If you give only a base name, then the
+ PL driver uses it and assumes a .COD extension.
+
+
+ 2.7.6  Producing a Link-Map File (/Fm)
+
+ ş  Syntax
+
+ /Fm[name]
+
+ The /Fm option corresponds to the map-file field of the linker. If you use
+ this option, the linker produces a map file containing a list of all
+ segments in the executable file. If you omit name, then the linker combines
+ a .MAP extension with the base name of the first module on the command
+ line, giving name to the map file. If you include name, but only give a
+ base name, then the linker assumes a .MAP extension. For example, the
+ command
+
+ PL /FmSTUFF MYPROG.PAS
+
+ results in the creation of the map file STUFF.MAP.
+
+
+ 2.7.7  Naming the Executable File (/Fe)
+
+ ş  Syntax
+
+ /Fename
+
+ The /Fe option corresponds to the executable-file field of the linker. The
+ PL driver attempts to create an executable file whether or not you use this
+ option (unless the /c option is in effect). Therefore, the /Fe option is
+ meaningful only if you provide some argument for name. If you include only
+ a base name, then the linker assumes a .EXE extension. For example, the
+ command
+
+ PL /FeRUNTHIS MYPROG.PAS
+
+ results in the creation of the executable file RUNTHIS.EXE. If the /Fe
+ option is not used in the above command, then the linker creates the file
+ MYPROG.EXE.
+
+
+ 2.7.8  Naming the Object File (/Fo)
+
+ ş  Syntax
+
+ /Foname
+
+ Use the /Fo option when you want to specify a particular name for an object
+ file that the PL driver produces. (Note: this file is distinct from an
+ object file you specify as input on the command line.) Normally, the
+ compiler names an object file by using the base name of the source file and
+ appending a .OBJ extension. For example, the compiler would produce
+ NEATPROG.OBJ when it compiles the NEATPROG.PAS source file. By using the
+ /Fo option, however, you can give the object file any name you want.
+
+ The /Fo option applies to the first Pascal source file that follows the
+ option (as positioned on the command line). Use this option once for each
+ source file you want to specify the object-file name for. For example, the
+ command
+
+ PL /FoONCE.OBJ ONE.PAS /FoTWICE.OBJ TWO.PAS THREE.PAS
+
+ produces three object files, two of which are specified directly by the
+ user and one of which is named implicitly. The PL driver produces ONCE.OBJ
+ from the source file ONE.PAS, TWICE.OBJ from the source file TWO.PAS, and
+ THREE.OBJ from the source file THREE.PAS. Because the source file THREE.PAS
+ was not preceded by the /Fo option, the PL driver assumes the base name
+ THREE and the .OBJ extension.
+
+ When the PL driver invokes the compiler, it always attempts to produce an
+ object file. For this reason, the /Fo option has no meaning unless you
+ supply a name. If you supply only a base name, then the PL driver assumes a
+ .OBJ extension.
+
+
+ 2.7.9  Specifying Directories for Include Files (/I)
+
+ ş  Syntax
+
+ /Idirectory
+
+ By using the /I option, you can add to the list of directories where the
+ compiler searches for include files. This option causes the compiler to
+ search the directory you specify before it searches the directories given
+ by the INCLUDE environment variable. You can add more than one include
+ directory by giving the /I command more than once in the PL command line.
+ The compiler searches the directories in order of their appearance on the
+ command line.
+
+ Directories are searched until the specified include file is found. If the
+ file is not found in the given directories, the current directory, or the
+ directories that are specified in the INCLUDE environment variable, then
+ the compiler prints an error message and stops compiling.
+
+
+ ş  Example
+
+ PL MYPROG.PAS /IA:\INCLUDE /IB:\PAS\INC
+
+ In the example above, the compiler looks for the include files requested by
+ the source file MYPROG.PAS in the following order: first in the directory
+ A:\INCLUDE, then in the directory B:\PAS\INC, and finally in the directory
+ or directories that are listed in the INCLUDE environment variable.
+
+
+ 2.7.10  Passing Options and Libraries to LINK (/link)
+
+ ş  Syntax
+
+ /link [options] [libraries]
+
+ When you use this option, all options and libraries that follow the /link
+ option on the command line are passed directly to the linker. The order of
+ the options and the libraries is not significant.
+
+ For example, with the command line
+
+ PL foo.pas /link /E grafx.lib
+
+ the PL driver compiles foo.pas, then invokes the linker, giving foo.pas and
+ grafx.lib as input. The linker is also passed the /E option.
+
+
+ 2.7.11  Setting the Size of the Program Stack (/S)
+
+ ş  Syntax
+
+ /Ssize
+
+ Use the /S option to set a specific size for your program stack (this will
+ affect the executable file that the PL driver produces). If you do not use
+ this option, a 2K stack is assumed. However, you can use this option to set
+ the stack size in bytes. This number is entered in decimal. You must enter
+ a number less than 65,535 decimal.
+
+ For more information on the program stack, refer to the /STACK switch in
+ the user's guide.
+
+
+ 2.7.12  Ignoring the INCLUDE Environment Variable (/X)
+
+ ş  Syntax
+
+ /X
+
+ When you use the /X option, the compiler does not search directories listed
+ in the INCLUDE environment variable in order to find include files.
+ However, the compiler still searches directories specified with the /I
+ option, as long as the /X option appears on the command line before the /I
+ option.
+
+ The /X option is often used, in conjunction with the /I option, to define
+ the location of include files that have the same name as include files
+ found in other directories, but that contain different definitions.
+
+
+ 2.7.13  Producing Line-Number Information for the CodeView(R) Debugger
+         (/Zd)
+
+ ş  Syntax
+
+ /Zd
+
+ Use this option to direct the PL driver to produce limited information for
+ the CodeView debugger. This information enables the debugger to trace
+ through your program at the source-line level. This option is similar to
+ the /Zi option, but results in smaller executable files. See the Microsoft
+ CodeView and Utilities manual for more information on the /Zi option.
+
+
+ 2.7.14  Producing Full Information for the CodeView Debugger (/Zi)
+
+ ş  Syntax
+
+ /Zi
+
+ Use this option to direct the PL driver to produce full line-number and
+ symbolic information for the CodeView debugger. This option enables the
+ debugger to understand both the global and local variables in your program,
+ and to evaluate these variables in expressions. See the Microsoft CodeView
+ and Utilities manual for more information on the /Zi option.
+
+
+ 2.7.15  Producing Error Output for the Microsoft Editor (/Zz)
+
+ ş  Syntax
+
+ /Zz
+
+ Use this option if you use the Microsoft Editor and want the PL driver to
+ produce error-message output in the proper format for the editor.
+
+
+
+ Section 3  OS/2 Systems Support
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+
+ This section briefly describes compiling and linking programs to run under
+ OS/2 as well as binding programs so that they run under either OS/2 or DOS.
+ The section also explains restrictions on using Pascal under OS/2. For
+ detailed information about developing programs for OS/2, see the Microsoft
+ Operating System/2 Programmer's Guide and the Microsoft CodeView and
+ Utilities Update.
+
+
+ 3.1  Compiling and Linking Under OS/2
+
+ If you have set up Pascal for programming only under OS/2, you do not need
+ to use any additional options to compile and link with the PL command. Use
+ the PL driver just as you would under the DOS operating system.
+
+ When you set up Pascal to compile under both the OS/2 and DOS operating
+ systems, you must use one of the library options when compiling and linking
+ with the PL driver. Specifying the /Lr switch selects the real-mode
+ libraries so your program runs under DOS or in real-mode OS/2. The /Lp
+ switch selects the OS/2 protected-mode versions of the libraries and
+ creates a program that runs only in protected mode under OS/2. For example,
+ to compile the BESSEL.PAS source file for OS/2 protected mode, you would
+ use the following command:
+
+ PL /Lp BESSEL.PAS
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ Note
+      You must use the OS/2 (protected mode) version of the CodeView
+      debugger, CVP.EXE, to debug OS/2 programs.
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+ 3.2  Binding Programs To Run Under Both DOS and OS/2
+
+ You can create programs that run under DOS or in real and protected modes
+ under OS/2 by compiling and linking your program for protected mode and
+ binding it.
+
+ Binding resolves references to OS/2 dynamic-link libraries so the program
+ runs in both modes and under either operating system.
+
+ To bind a program, use the BIND command. For example, the following command
+ binds the executable file BESSEL.EXE:
+
+ BIND BESSEL APILMR.OBJ C:\LIB\DOSCALLS.LIB C:\LIB\API.LIB
+
+ The APILMR.OBJ file is required. You must also include the full path to the
+ DOSCALLS.LIB and API.LIB files in the command line.
+
+ See the Microsoft CodeView and Utilities Update for complete information
+ about the BIND utility.
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ Note
+      Bound programs cannot be debugged using the CodeView debugger.
+      However, you can use the OS/2 version of CodeView, CVP.EXE, to debug a
+      protected-mode version of the program.
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+ 3.3  OS/2 Protected-Mode Restrictions
+
+ Code generated by the Pascal compiler cannot be used to build dynamic-link
+ libraries. Furthermore, functions and procedures in PASCAL.LIB--the
+ standard Pascal language library--and in the Pascal floating-point math
+ libraries are non-reentrant. Only one thread can call a non-reentrant
+ routine at a time. To ensure that a thread does not enter a non-reentrant
+ routine until the routine is free, use semaphores or other methods of
+ communication.
+
+ The INP and OUTP functions can be used with the OS/2 version of the Pascal
+ library only if the following two conditions are met:
+
+      1. The following statement is inserted into the CONFIG.SYS file for
+         the machine being booted up:
+
+         IOPL=YES
+
+      2. The following statement is added to the .DEF file when linking the
+         C library with the Pascal modules:
+
+         Segments
+
+         _IOSEG CLASS 'IOSEG_CODE' SHARED MOVABLE EXECUTEONLY IOPL
+
+
+
+ Section 4  Other New Features
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+
+ Version 4.0 of Pascal introduces a number of new features. Sections 1 and
+ 2 above described the new SETUP and PL programs; Section 3 described OS/2
+ support. This section describes the following other features:
+
+      ş  Symbol table in far memory
+
+      ş  Check for math coprocessor (87.EXE)
+
+      ş  INCLUDE environment variable
+
+      ş  $IFDECL metacommand
+
+      ş  CodeView debugger support
+
+      ş  New utilities
+
+ All the features listed above have been introduced since the last version,
+ Version 3.31. If you are updating from an earlier version of Microsoft
+ Pascal or are using Microsoft Pascal for the first time, you should also
+ see Sections 5 and 6.
+
+
+ 4.1  Symbol Table in Far Memory
+
+ With Version 4.0, you may be able to compile larger modules than you could
+ before. A major reason why previous versions of the compiler ran out of
+ memory was the limited size of the symbol table. Versionÿ4.0 solves this
+ problem by placing the symbol table in far memory, which is limited only by
+ the size of system memory.
+
+ You do not need to understand the details of compiler operation to make use
+ of this new feature. Nor do you need to use any special options or
+ statements. The greater capacity of the symbol table automatically helps
+ you compile larger source modules.
+
+ The rest of this section explains symbol-table operation in more detail.
+
+
+ ş  The Pascal Symbol Table
+
+ Like other compiled languages, Microsoft Pascal uses a symbol table to keep
+ track of each unique name in a source file. The table includes the names of
+ all variables, symbolic constants, procedures, and functions. It also
+ provides type information on each entry. This information is required for
+ the compiler to analyze Pascal statements.
+
+ The symbol table lists names in ASCII format. The more and the longer the
+ names that appear in the table, the more memory is required.
+
+
+ ş  Symbol Table in Previous Versions of Pascal
+
+ Earlier versions of Pascal limited the symbol table to an area of 64K
+ called the DGROUP area. This area also contains the compiler's stack and
+ internal data. The compiler's stack needs to be as large as possible in
+ order to handle deeply nested loops in a Pascal program. When compiling
+ large modules in earlier versions, a user sometimes had to reduce stack
+ size, use shorter names, or break up modules.
+
+
+ ş  Version 4.0 Symbol Table
+
+ Version 4.0 removes the symbol table from the DGROUP area. This leaves more
+ room for the stack. Furthermore, the symbol table is located in far memory
+ and consequently has no 64K limit. (Far memory is manipulated with 32-bit
+ addresses rather than 16-bit addresses, which can address only a range of
+ 64K.) The size of the Version 4.0 symbol table is limited only by the
+ amount of main memory you have in your system.
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ Note
+      Although the compiler's internal stack can now be larger, it is still
+      limited in size. Therefore, it is still possible to run out of
+      compiler memory when compiling exceptionally complicated modules.
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+ 4.2  Checking for a Math Coprocessor
+
+ If you work with floating-point libraries, it may be helpful to determine
+ which math coprocessor is available. The 87.EXE program, provided with this
+ version of Pascal, promptly reports coprocessor status.
+
+ If your system has a coprocessor that has been properly installed and is
+ available for use by programs, then the 87.EXE program reports one of the
+ following messages:
+
+ 8087 is ON
+
+ 80287 is ON
+
+ 80387 is ON
+
+ If there is no coprocessor or if the coprocessor is not installed, then the
+ 87.EXE program reports the following message:
+
+ Math Coprocessor is OFF
+
+ The 87.EXE program also checks the coprocessor-equipment flag, which is
+ located in main memory at address 40:10h. If a coprocessor is installed and
+ this switch is off, or if a coprocessor is not installed and the switch is
+ on, then the flag has been incorrectly set and the 87.EXE program displays
+ the message:
+
+ - equipment switch is set incorrectly
+
+ All of the messages above are written to standard output, and therefore may
+ be redirected to a file or device with the DOS redirection operator (>).
+
+
+ ş  87.EXE Return Codes
+
+ Upon completion, 87.EXE returns one of the following values:
+
+   Value          Meaning
+   ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+   0              8087/80287/80387 is OFF (or not present).
+
+   1              8087/80287/80387 is ON.
+
+   2              Coprocessor-equipment switch set incorrectly.
+
+ Return codes are useful when you invoke a program from a batch file.
+ Consult your DOS documentation for information about return codes.
+
+
+ 4.3  INCLUDE Environment Variable
+
+ By taking advantage of the INCLUDE environment variable, Version 4.0
+ provides greater flexibility in the use of include files. You do not need
+ to use include files with Version 4.0 of Pascal; but if you do, the INCLUDE
+ environment variable helps you manage files more easily.
+
+ The following discussion assumes that you are familiar with the $INCLUDE
+ metacommand. This metacommand directs the compiler to read in an additional
+ source file at compile time. The command is particularly useful if you have
+ a section of source code (for example, a set of variable definitions) that
+ you want to include in several modules or several programs. The $INCLUDE
+ metacommand is described in Section 18.3, "Source File Control," of the
+ reference manual.
+
+ When you use the $INCLUDE metacommand, the compiler looks for the specified
+ file in this order:
+
+      1. The specified directory, if you give a complete path name
+
+      2. The current working directory
+
+      3. Each directory listed in the INCLUDE environment variable
+
+ For example, suppose that your source file contains the following
+ metacommand:
+
+ $INCLUDE \PAS\IAS
+
+ In addition, the INCLUDE environment variable is set as below:
+
+ C:\INC;C:\PAS\INC
+
+ In this case, the compiler attempts to find the file IAS by searching
+ directories in this order:
+
+      1. The \PAS option on the current drive
+
+      2. The current working directory
+
+      3. The \INC option on drive C
+
+      4. The \PAS\INC option on drive C
+
+ By using the DOS SET command, you can easily set or change the directories
+ listed in the INCLUDE environment variable. For example, the following
+ command sets INCLUDE to its value in the last example:
+
+ SET INCLUDE=C:\INC;C:\PAS\INC
+
+ When you use this command, no spaces should be typed on either side of the
+ equal sign (=), and each directory should be separated by a semi-colon (;).
+
+
+ 4.4  The $IFDECL Metacommand
+
+ Pascal 4.0 has a new metacommand, $IFDECL, which provides you additional
+ flexibility in compiling your program.
+
+ This command can be used in conjunction with the /D option described in
+ Section 2, "Using the PL Driver," of this update. When you precede parts of
+ your program with the $IFDECL metacommand, you can control which portions
+ of your program will actually be compiled; using of the /D option then
+ specifies whether or not these portions of code are recognized or ignored
+ by the compiler.
+
+ The $IFDECL metacommand uses the same syntax as the $IF metacommand
+ described in Section 18.3, "Source File Control," of the reference manual.
+ The $IFDEF metacommand must appear at the beginning of a comment statement,
+ as in the following:
+
+ {$IFDECL constant $THEN}
+
+ When the Pascal compiler encounters the statement above, it checks whether
+ constant is currently defined. If it is, then Pascal compiles all lines of
+ code up to the next {$END} or {$ELSE} statement. If constant is not
+ currently defined, then all code up to the next {$END} or {$ELSE} is
+ skipped.
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ Note
+      Do not confuse the metacommands $END and $ELSE with the Pascal
+      keywords END and ELSE. To be recognized as metacommands, $END and
+      $ELSE must include the dollar sign ($) and they must appear within
+      comment statements enclosed by braces ({}).
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ ş  Example
+
+ The following example demonstrates the use of the $IFDECL metacommand in a
+ program that contains hardware-specific code. In this example, the program
+ executes one set of statements when compiled for color-graphics monitors,
+ and another set of statements when compiled for monochrome monitors.
+
+ {$IFDECL CGA $THEN}
+ .
+ .
+ .
+ (color graphics initialization)
+ .
+ .
+ .
+ {$ELSE}
+ .
+ .
+ .
+ (monochrome initialization)
+ .
+ .
+ .
+ {$END}
+
+ (rest of program)
+
+ To compile the program above with CGA (color graphics adapter)
+ initialization, you would type the following command line:
+
+ PL /DCGA screen.pas
+
+ To compile the program with monochrome initialization, you would type:
+
+ PL screen.pas
+
+
+ 4.5  CodeView Debugger Support
+
+ Support for the CodeView debugger is one of the major strengths of Version
+ 4.0 of Pascal. Using the CodeView debugger may save you hours of work in
+ trying to track down the source of an elusive error.
+
+ This section first gives an overview of the CodeView debugger with
+ explanations on how to start using it and how it helps you in locating
+ errors. This section then explains exactly how the CodeView debugger is
+ supported by Version 4.0.
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ Note
+      The distribution disks include two versions of CodeView--CV.EXE and
+      CVP.EXE. Use the protected-mode version, CVP.EXE, for debugging
+      protected-mode OS/2 programs. See the Microsoft CodeView and Utilities
+      Update for information about using the protected-mode CodeView
+      debugger.
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+ 4.5.1  Overview of the CodeView Debugger
+
+ The CodeView debugger is a tool for analyzing the behavior of programs as
+ they execute. Normally, you create a program and then let it run, giving
+ control of the computer to the program until the program is finished. When
+ you use the CodeView debugger, you have many ways of controlling a
+ program's execution. You can execute a single Pascal statement at a time.
+ Or you can let the program execute until it reaches a specified line, or
+ even let the program run until a Boolean condition (which you specify in
+ advance) becomes true.
+
+ In and of itself, controlling execution is only moderately useful. What
+ makes the debugger so powerful is that after having executed a certain
+ portion of the program, you can examine the value of any variable,
+ including local variables. Furthermore, you can examine the value of any
+ expression that combines program variables and Pascal syntax. If you need
+ to continually watch a variable or expression, you can place it in the
+ debugger's watch window. As variables change, the watch window updates and
+ displays current values.
+
+ The CodeView debugger is designed to benefit both new and advanced users.
+ The CodeView display consists of a series of windows and easy-to-use menus.
+ The menus can be manipulated equally well with either a Microsoft mouse or
+ the keyboard. For advanced users, the debugger provides the ability to
+ examine any area of memory, communicate with hardware ports, assemble code,
+ and view the machine instructions that correspond to each Pascal statement.
+
+ All of the features above are described in the Microsoft CodeView and
+ Utilities manual. To get a good feel for how to use the debugger, you may
+ first want to try running the sample session on the CodeView disk. To do
+ so, place this disk in drive A, make A the current drive, and type SAMPLE.
+
+
+ 4.5.2  Pascal CodeView Support
+
+ The CodeView debugger helps you debug programs that are written in
+ Microsoft C, FORTRAN, and the Macro Assembler. Version 4.0 of Pascal
+ contains the first version of the CodeView debugger that works with Pascal.
+ Pascal support consists of two enhancements:
+
+      1. Version 4.0 can produce executable files for use with the CodeView
+         debugger. (This requires a special executable file format that
+         previous versions do not support.)
+
+      2. The debugger itself has a built-in Pascal interpreter that
+         evaluates Pascal expressions you specify in CodeView commands.
+
+ In order to make best use of the CodeView debugger, make sure you use both
+ the new Pascal compiler and the current version of the CodeView debugger,
+ included with Version 4.0 of Pascal.
+
+ When you run the compiler with the PL driver, type the /Zi option on the
+ command line. (When you run the compiler with the PAS1 option, type the /Z
+ option on the command line.) This option causes creation of symbolic
+ information for the CodeView debugger. You can also use the /Zd option,
+ which provides less debugging information and smaller executable files. If
+ you link separately, use the current linker and specify the /CO option.
+
+ These options are further explained, with examples, in the Microsoft
+ CodeView and Utilities manual.
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ Warning
+      Programs with many procedures, functions, record fields, and symbols,
+      may get an "Out of memory" error when compiled with the /Zi option
+      because using the /Zi option requires twice as much symbol table
+      space. Break the program up into smaller modules to solve the problem.
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+ 4.6  New Versions of the Utilities
+
+ The Version 4.0 package includes the current versions of the linker (LINK)
+ and library manager (LIB). The linker includes several new options for code
+ optimization, CodeView support, and the creation of libraries for use with
+ Microsoft QuickBASIC and QuickC. See the Microsoft CodeView and Utilities
+ manual for complete documentation on LINK and LIB.
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ Note
+      There are many versions of LINK in circulation, including an old
+      version released with every DOS operating system. To take advantage of
+      LINK's new features or to use the CodeView debugger, make sure you
+      install the version included with this package.
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ Several new utilities are included with Version 4.0 of Pascal:
+
+      ş  MAKE, an automated program-development tool.
+
+         This utility compares the time and date of files to see which files
+         are out of date. It then runs the commands necessary to update
+         those files. You write customized scripts that direct MAKE to
+         execute the proper commands. Use MAKE to manage compiling and
+         linking in a multiple-module software-development project.
+
+      ş  EXEMOD, a utility that examines and modifies executable-file
+         headers.
+
+         You can use EXEMOD to adjust a program's minimum-memory request,
+         maximum-memory request, or stack size. You can also use EXEMOD to
+         view all the header information of an executable file.
+
+      ş  EXEPACK, a file-packing utility.
+
+         This utility packs an executable file into a special format, which
+         is automatically decoded by DOS when you execute the file. The file
+         is expanded back to its original size when you load it into memory,
+         but the file can be stored in less space on disk.
+
+      ş  SETENV, a utility to increase or decrease environment space under
+         most versions of MS-DOS and IBM(R) PC-DOS versions 2.0 to 3.10.
+
+      ş  ERROUT, a utility for redirecting standard-error output. Without
+         this utility, standard output and standard-error output always go
+         to the same file or device.
+
+ The use of all the utilities above is explained in the Microsoft CodeView
+ and Utilities manual.
+
+
+ 4.7  Mixed-Language Documentation
+
+ The Microsoft Mixed-Language Programming Guide is included in the same
+ binder as the Microsoft CodeView and Utilities manual. This new
+ documentation on mixed-language programming includes chapters on linking to
+ other high-level languages and to assembly language, and on special topics
+ such as passing strings, arrays, and common blocks. The Microsoft Mixed-
+ Language Programming Guide covers some of the same material as the old
+ documentation, but provides more examples, step-by-step instructions, and
+ diagrams. If you wish to write multiple-language programs, you should
+ consult this manual rather than the old documentation.
+
+ In addition, Chapter 6, "Assembly-to-High-Level Interface," in the
+ Microsoft Mixed-Language Programming Guide is helpful for learning how to
+ write standard procedure interfaces that can be understood by the CodeView
+ debugger.
+
+
+
+ Section 5  Updating from Version 3.30 and Earlier
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+
+ This section summarizes the differences between Versions 4.0 and 3.30 of
+ Pascal. Depending on which version you are updating from, you may or may
+ not need to read this section.
+
+ If you are updating from Versionÿ3.32 or Versionÿ3.31, then the information
+ in this section was included in a README.DOC file released with your last
+ version of Pascal. Except for review, you do not need to read this section.
+
+ If you are updating from Versionÿ3.30, you should note the changes
+ presented in this section.
+
+ If you are updating from Versionÿ3.20 or earlier, or if you are new to
+ Microsoft Pascal, you should read both this section and Section 6.
+
+ The differences between Versionÿ4.0 and 3.30 include the following:
+
+      ş  The stack size of the compiler has been increased to 40K.
+
+      ş  The $INITCK metacommand (which checks for initialization) no longer
+         affects FOR-loop control variables.
+
+      ş  Two functions, MEMAVL and FREECT, can be used to determine the
+         amount of available memory.
+
+
+ 5.1  Increased Stack Size
+
+ The Versionÿ4.0 compiler comes initially configured with a 40K stack.
+ Versionÿ3.30 had only a 20K stack.
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ Note
+      This section concerns the size of the compiler's internal stack, not
+      the stack size of a program produced by the compiler. You can change
+      the size of your program's stack without affecting the compiler
+      itself.
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ As noted in Section 4, the compiler's stack needs to be as large as
+ possible, particularly if you compile programs that use deeply nested loops
+ or IF-THEN structures. The large stack size of Version 4.0 may enable you
+ to compile more complicated Pascal code.
+
+ If the compiler fails with an "out of memory" error, the stack may be too
+ small for the program you are attempting to compile. You can use EXEMOD to
+ increase the stack size. (See the Microsoft CodeView and Utilities manual
+ for information on the use of the EXEMOD utility.) However, the stack is
+ restricted to the 64K area of memory called the DGROUP area. Because the
+ DGROUP area must also include the compiler's internal data, the stack
+ should always be substantially less than this 64K limit.
+
+ You should not need to reduce the stack size. The symbol table, which used
+ to compete with the stack for room in the DGROUP area, has now been removed
+ to far memory.
+
+
+ 5.2  The $INITCK Metacommand and FOR-Loop Variables
+
+ This section describes a modification to the function of the $INITCK
+ metacommand. See Sectionÿ18.2, "Debugging and Error Handling," in the
+ reference manual for a complete description of this metacommand.
+
+ The $INITCK metacommand no longer sets FOR-loop control variables to the
+ undefined value upon termination of a FOR loop. The $INITCK metacommand
+ uses a different reserved value for each numerical data type to represent
+ "undefined." These undefined values are then checked for at run time. The
+ assignment of an undefined value generates an error message.
+
+ The FOR-loop control variable is used to count the number of times a loop
+ is executed. In the following code, the variable i, is the loop control
+ variable:
+
+ for i := 1 to 3
+    begin
+       sum := sum + i;
+       product := product * i;
+    end;
+
+ In the example above, Pascal Versions 3.30 and earlier set the variable i
+ equal to the undefined value upon completion of the loop. Versionÿ4.0 sets
+ i equal to 4 upon completion. Because i is not set to an undefined value,
+ you may use the value of i later in your program without assigning it a new
+ value.
+
+
+ 5.3  Determining Available Memory
+
+ Two Microsoft Pascal library routines, MEMAVL and FREECT, can be used to
+ determine the amount of memory in the DGROUP area available to your program
+ at run time.
+
+ The MEMAVL routine returns the number of bytes from the top of the near
+ heap to the end of the DGROUP area. If the heap needs to grow, it uses this
+ space. It should be noted that the space allocated for the heap can only
+ grow; it can never shrink. Therefore, during the course of a program, the
+ value returned by the MEMAVL routine can only decrease (as the heap grows)
+ and never increase. Figure 5.1 below illustrates this concept:
+
+
+         ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿   DGROUP:MAX
+         ³ Free space not in heap                ³
+         ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+         ³ HEAP                                  ³
+         ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+         ³ Stack                                 ³
+         ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+         ³ Statically allocated part of DGROUP   ³
+         ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ   DGROUP:0
+
+         Figure 5.1  Allocation of Memory in DGROUP
+
+
+ FREECT(0)*2 returns the number of free bytes in the heap plus the value
+ returned by MEMAVL. [The expression FREECT(0) returns the number of
+ available words; multiply the result by 2 to determine the number of free
+ bytes.]
+
+ FREECT(0)*2-MEMAVL returns the number of free bytes in the heap itself.
+
+ In Versionÿ3.20, a Pascal program allocates all of free memory to itself.
+ In Versionÿ3.30 and later, a Pascal program returns space to DOS that it
+ doesn't need. DGROUP:MAX is at the top of the allocated space, and offset 2
+ in the DOS data area returns the segment paragraph for the top of the
+ DGROUP area. See also Appendix B, SectionÿB.1, "Implementation Additions,"
+ in the user's guide for further discussion of the upper memory limit.
+
+
+
+ Section 6  Updating from Versions 3.20 and Earlier
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+
+ This section presents the differences between Version 4.0 and Version 3.20
+ of Pascal. Read this section if you are updating from Versionÿ3.20 or
+ earlier, or if you have purchased Microsoft Pascal for the first time.
+
+ The following differences represent extensions to the Pascal language:
+
+      ş  Address types
+
+      ş  Enhanced SIZEOF function
+
+      ş  Mixed-language features
+
+ The rest of the differences, listed below, concern details of this latest
+ Pascal implementation:
+
+      ş  New files provided with compiler
+
+      ş  Using ERR device name
+
+      ş  File sharing and locking
+
+      ş  Public variables
+
+      ş  Memory model
+
+ Section 6 discusses each of these differences in the order above. The
+ section ends with a discussion of compatibility issues that concern
+ conversion to Version 4.0.
+
+
+ 6.1  Address Types
+
+ The address operators work differently in Version 4.0 from the way they
+ work in Version 3.20. Furthermore, you can now take the address of a
+ function or procedure as well as a variable.
+
+ Using address operators is similar to using pointers in standard Pascal.
+ Address types and operators are more flexible, however, because they are
+ not limited to dynamic memory allocation. One of the principal uses of the
+ address operators is in mixed-language programming.
+
+
+ 6.1.1  Using the ADS and ADR Operators with Expressions
+
+ The ADS operator gives the full address (segment and offset) of the
+ object to which it is applied. The ADR operator gives the offset only.
+ Versionÿ3.20 used an incorrect interpretation of precedence when these
+ operators were applied to address expressions. Versionÿ4.0 uses the correct
+ interpretation, which is described in the reference manual.
+
+ The ADS and ADR operators are of the same precedence as the NOT operator,
+ and are of higher precedence than the other Pascal operators.
+
+ If you have existing programs that use the incorrect precedence, as in
+ Versionÿ3.20, you must correct those programs if you want to compile them
+ with Versionÿ4.0. For example, in Versionÿ4.0,
+
+ ADS a + b
+
+ is interpreted as
+
+ (ADS a) + b
+
+ because the ADS operator is of higher precedence than the addition (+)
+ operator. This interpretation will not compile. You cannot add b to the
+ address of a.
+
+ Versionÿ3.20 incorrectly interpreted
+
+ ADS a + b
+
+ as
+
+ ADS (a + b)
+
+ giving the + operator higher precedence. This interpretation does compile.
+ You can take the address of (a + b).
+
+ If you have existing programs that take the address of an expression with
+ either the ADS or ADR operator, your program may not compile with
+ Versionÿ4.0. If that is the case, put parentheses around those expressions.
+
+ The expressions
+
+ ADS func(a)
+
+ and
+
+ ADS (func(a))
+
+ where func(a) is a function call, represent different values. The first
+ expression evaluates to the address of the function (see the new
+ predefined-type ADSFUNC in the next section), and the second expression
+ valuates to the address of the result of the expression--the address of the
+ temporary value returned when func is called.
+
+
+ 6.1.2  Addressing Procedures and Functions (ADSPROC and ADSFUNC)
+
+ The ADS operator can now be applied to procedures and functions, as well as
+ to variables. When the ADS operator is applied to a procedure, it produces
+ a value of the predefined-type ADSPROC. When it is applied to a function,
+ it produces a value of the predefined-type ADSFUNC. The ADSPROC and ADSFUNC
+ keywords are similar in concept to the ADSMEM type.
+
+ The ADSPROC and ADSFUNC keywords can be used to declare variables or formal
+ parameters. To call a procedure or function with these variables or
+ parameters, you must pass their value to an external, non-Pascal routine
+ and then call that routine. Note that ADSPROC and ADSFUNC parameters are
+ compatible with C function pointers; Pascal procedure parameters are not.
+
+ As with other address types, there is no type checking on assignments to
+ ADSPROC or ADSFUNC parameters or variables. The compiler does not make sure
+ that a function or procedure is being assigned or that the formal
+ parameters are appropriate. You can also freely assign to and from other
+ address types.
+
+
+ ş  Example
+
+ program p(output);
+ procedure cproc (ap: adsproc; af: adsfunc) [c]; extern;
+ procedure pproc (i: integer);
+ begin
+     writeln('C integer =', i);
+ end;
+ function pfunc: integer;
+ var
+     i: integer;
+ begin
+     readln(i);
+     pfunc := i;
+ end;
+
+ begin
+     cproc (ADS pproc, ADS pfunc);
+ end.
+
+ This example could be used to communicate with a C routine that calls the
+ routine af, then calls the routine ap with the result.
+
+
+ 6.2  Using the SIZEOF Function
+
+ The SIZEOF function has been enhanced. You are now permitted to omit the
+ second parameter if the variable is a pointer to a super array. Thus, the
+ function SIZEOF(P^), where P is a pointer to a super array, is now a valid
+ expression. Note, however, that if P^ has not been allocated with the
+ function NEW, the SIZEOF(P^) function is undefined. It is the programmer's
+ responsibility to check that P^ has actually been allocated before using
+ this form of the SIZEOF function.
+
+
+ 6.3  Mixed-Language Features
+
+ Versionÿ4.0 includes three enhancements to the Pascal language, which are
+ useful in calling Microsoft C:
+
+      ş  The INTEGERC type
+
+      ş  The C attribute
+
+      ş  The VARYING attribute
+
+ Each of these features is described briefly below, and they are used
+ extensively in examples in the Microsoft Mixed-Language Programming Guide.
+
+
+ 6.3.1  Using the C int Type (INTEGERC)
+
+ For a given processor and operating system, variables that have the type
+ INTEGERC are equivalent to variables with the C "int" type as defined by
+ the Microsoft C Optimizing Compiler for the same system. For the 8086
+ family of microprocessors, the INTEGERC type is equivalent to INTEGER2.
+
+
+ 6.3.2  Using C Calling Conventions (C Attribute)
+
+ You can use Microsoft C calling and external naming conventions for a
+ particular procedure by specifying the C attribute in the procedure
+ declaration. The C attribute has the same syntax as the PUBLIC attribute.
+ For example, in the statement
+
+ PROCEDURE myproc [PUBLIC, C]
+
+ myproc is a public procedure that uses C calling conventions. Calling
+ conventions are discussed in Chapter 1 of the Microsoft Mixed-Language
+ Programming Guide.
+
+
+ 6.3.3  Using a Variable Number of Arguments (VARYING Attribute)
+
+ When using the C attribute, you can also use the VARYING attribute. The C
+ attribute is a prerequisite to using the VARYING attribute because Pascal,
+ FORTRAN, and BASIC calling conventions cannot support a variable number of
+ parameters.
+
+ The VARYING attribute enables you to call a function or procedure with a
+ number of actual arguments that differs from the number of formal
+ arguments. For example, you may declare two arguments, but pass five when
+ you make the call. Actual arguments for which a formal argument is defined
+ must follow the type rules. Actual arguments for which there are no formal
+ arguments defined are assumed to be passed by value, with no type
+ coercions. Note that a subprogram written in Pascal can only access
+ formally defined arguments, so the later case does not apply.
+
+ For more information on the VARYING attribute, see Chapter 9, "Special Data
+ Types," in the Microsoft Mixed-Language Programming Guide.
+
+
+ 6.4  New Files Supplied with the Compiler
+
+ The following files are provided with Version 4.0, but are not completely
+ documented in the user's guide. All the information required to use these
+ files is provided in this document.
+
+   File           Description
+   ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+   CEXEC.LIB      Part of the Microsoft C library, providing routines to
+                  support the use of the DOS exec function
+
+   PASEXEC.INC    Interface declarations and documentation for routines in
+                  CEXEC.LIB
+
+   DEMOEXEC.PAS   An example program demonstrating how to use the routines
+                  provided in CEXEC.LIB
+
+   EMOEM.ASM      Customization for the 8087 processor
+
+   LVARSTK.OBJ    An object file that provides a variable stack
+
+
+ 6.4.1  Using C System Functions with CEXEC.LIB
+
+ The library file CEXEC.LIB contains the following routines extracted from
+ the Microsoft C run-time library (Versionÿ5.0):
+
+   Function       Description
+   ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+   system         Invokes COMMAND.COM with a user-specified command
+                  line
+
+   spawn          Loads and executes a specified .COM or .EXE file (i.e.,
+                  executes a child process)
+
+ The file PASEXEC.INC contains INTERFACE declarations allowing these
+ routines to be called from Pascal, and also contains extensive comments
+ explaining how to use them.
+
+ The file DEMOEXEC.PAS contains an example program demonstrating the use of
+ these routines.
+
+
+ 6.4.2  Customizing the 8087 Table with the EMOEM.ASM Program
+
+ If your machine has an 8087, 80287, or 80387 processor, you should read
+ this section to see if it pertains to your hardware configuration. All
+ Microsoft languages that support the 8087 need to intercept 8087 exceptions
+ in order to properly detect error conditions and provide reliable and
+ accurate results. The math libraries that contain the 8087 exception
+ handler and emulator (MATH.LIB and 8087.LIB) are designed to work without
+ modification with the following machines:
+
+      1. IBM PC family and compatibles, Wang(R) PC (any machine that uses
+         nonmaskable interrupt for 8087 exceptions), and Texas
+         Instruments(R) Professional Computer.
+
+      2. Any machine that sends the 8087 exception to an 8259 Priority
+         Interrupt Controller (master or master/slave) should be easily
+         supported by a simple table change to the EMOEM.ASM module. In the
+         file there are further instructions on how to modify the file and
+         patch libraries and executables.
+
+ If your computer is not listed and you need to modify the EMOEM.ASM
+ program, please contact your hardware manufacturer for the specific
+ information on the 8087 and modification specifics. If your hardware
+ manufacturer is not aware of the changes that need to be made, they should
+ contact the Microsoft OEM Group.
+
+ The Microsoft Retail Product Support Group is not equipped to help you out
+ in the customization of the EMOEM.ASM program.
+
+
+ 6.4.3  Creating a Variable Stack with LVARSTK.OBJ
+
+ By default, a program you create with Version 4.0 has a fixed stack area
+ and a fixed heap area. The program uses the heap whenever you allocate
+ dynamic memory, and when you open files. Because the size of each of these
+ areas is fixed, your program does not give unused stack space to the heap.
+ This may cause your program to run out of memory sooner.
+
+ If you want your program to use unused stack space for excess heap items,
+ link with the object module LVARSTK.OBJ. If you later use EXEMOD to change
+ the default stack size, your program will behave as if the stack and heap
+ sizes were fixed.
+
+ When you link with the module LVARSTK.OBJ, you should compile with the
+ stack-checking enabled, since unprotected collisions between the stack and
+ the heap can lead to unpredictable behavior.
+
+
+ 6.5  Using the ERR Device Name
+
+ Both the Pascal compiler and the run-time library associate the name "ERR"
+ with the DOS standard-error-device handle (abbreviated in C as stderr). The
+ stderr file handle is mapped to the physical console and--unlike stdin and
+ stdout--is not redirectable. Thus the command syntax
+
+ PAS1 ERR;
+
+ causes the Pascal compiler to expect source code from the keyboard rather
+ than a file named ERR.PAS. Similarly, the command syntax
+
+ PAS1 TEST,,ERR;
+
+ causes the source-listing output to be written to the console screen rather
+ than a file named ERR.LST. Finally, a file variable may be explicitly
+ attached to ERR with the ASSIGN procedure and thereby attached to stderr.
+
+
+ 6.6  File Sharing and Locking
+
+ File sharing and locking are features of MS-DOS 3.0 and later. Version 4.0
+ has features that facilitate the use of file sharing and locking from
+ within Pascal programs.
+
+
+ 6.6.1  File Sharing
+
+ In systems that use networking, more than one program can attempt to access
+ the same file at the same time. Two new fields in the file control block,
+ share and access, allow you to control access to files. These fields have
+ the new predefined enumerated types, sharemodes and accessmodes.
+
+ The value of access determines how the first process to open a file can use
+ that file. You can choose to gain permission to read the file, write to the
+ file, or do both. The value of share determines how subsequent processes
+ are allowed to access the file while the file is still open. You can choose
+ to allow subsequent processes to read the file, write to the file, do both,
+ or do neither. You can also choose not to allow any processes, including
+ the process that originally opened the file, to open the file again while
+ the file is still open.
+
+
+ 6.6.1.1  Sharemodes
+
+ To control how other processes may access a file that you are opening, set
+ the share field in the file control block. This field has the new
+ predefined enumerated type, sharemodes, as shown below:
+
+ .
+ .
+ .
+ share:sharemodes
+ .
+ .
+ .
+
+ The sharemodes type is defined as follows:
+
+ TYPE
+    sharemodes=(sm_COMPAT, {compatibility mode}
+                sm_DENYRW, {deny read/write mode}
+                sm_DENYWR, {deny write mode}
+                sm_DENYRD, {deny read mode}
+                sm_DENYNONE, {deny none mode}
+               );
+
+ The sharemode values are described in the list below:
+
+ÖÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ·
+   Mode           Description
+   ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+   sm_COMPAT      Compatibility mode (the default).
+
+                  When a file is open in compatibility mode, the original
+   Mode           Description
+                 When a file is open in compatibility mode, the original
+                  user (the process that opened the file) may open the file
+                  in compatibility mode any number of times. No other user
+                  may open the file.
+
+                  A file already opened in another mode cannot be opened in
+                  compatibility mode.
+
+   sm_DENYRW      Deny-read/write mode.
+
+                  While a file is open in deny-read/write mode, no process
+                  may open the file.
+
+   sm_DENYWR      Deny-write mode.
+
+                  While a file is open in deny-write mode, no process may
+                  open the file with write access. Other processes can open
+                  the file with read access.
+
+   sm_DENYRD      Deny-read mode.
+   Mode           Description
+  sm_DENYRD      Deny-read mode.
+
+                  While a file is open in deny-read mode, no process may
+                  open the file with read access. Other processes can open
+                  the file with write access.
+
+   sm_DENYNONE    Deny-none mode.
+
+                  While a file is open in deny-none mode, any process may
+                  open the file in any mode (except compatibility mode).
+
+ As with filename assignments, the share value must be set before the file
+ is opened with reset or rewrite, as shown below:
+
+ var
+ f:text;
+ .
+ .
+ .
+ f.share := sm_COMPAT;
+ assign(f...);
+ reset(f);
+
+ If you change share, you must reset or rewrite the file before accessing
+ the file again.
+
+
+ 6.6.1.2  Accessmode
+
+ The predefined-type accessmode specifies the type of access the original
+ process (the process that initially opened the file) makes to a file. You
+ specify accessmode by setting the value of the access field in the file
+ variable.
+
+ Accessmode is defined below:
+
+ TYPE
+    accessmode=(am_read, am_write, am_readwrite)
+
+ The accessmode values are as follows:
+
+   Accessmode     Description
+   ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+   am_read        The process can read the file.
+
+   am_write       The process can write to the file.
+
+   am_readwrite   The process can read and write to the file.
+
+ The example below opens a file with share equal to sm_DENYRW and access
+ equal to am_readwrite:
+
+
+ ş  Example
+
+ .
+ .
+ .
+ var f: test;
+ f.share := sm_DENYRW;
+ f.access := am_readwrite;
+ assign(f...);
+ rewrite(f);
+ .
+ .
+ .
+
+ If you open a file without assigning an access, the Pascal run-time system
+ always attempts to open with an access value am_readwrite. If the open
+ fails, the run-time system tries to open the file again, first using
+ am_write, then using the am_read value. This is not the same as specifying
+ access=am_readwrite. If you specify the access=am_readwrite value, and the
+ file cannot be opened with both read and write access, the opening fails.
+ The default behavior is more flexible.
+
+ While the am_readwrite value is an appropriate default for single-program
+ environments, it is not always the best choice when a file is shared. For
+ example, several processes may want to read a file and ensure that no
+ process updates the file while they are reading it. If the first process
+ opens the file with the share=denywr and access=am_read values, then any
+ number of other processes may also open the file with share=sm_denywr and
+ access=am_read values.
+
+
+ 6.6.2  File Locking
+
+ The previous two sections dealt with file sharing, a method for restricting
+ access to a file considered as a whole. This section describes file
+ locking, a method for restricting the access to specified records within a
+ file.
+
+ A new procedure and ordinal type have been defined that allow you to lock a
+ specific range of records in a DIRECT-mode file. The locked records cannot
+ be accessed by other processes within a networked system. The procedure is
+ defined as follows:
+
+ PROCEDURE locking (VAR f: FCBFQQ; MODE: lockmodes; M,N: INTEGER4);
+
+ The parameters are described below:
+
+   Parameter      Function
+   ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+   M              An integer expression that is the number of the first
+                  record to be locked. If M is zero (0), the next record
+                  (the one that a sequential read, such as GET, would read)
+                  is locked.
+
+   N              An integer expression that is the number of records to be
+                  locked. If N is zero (0), one record is locked.
+
+ The type "lockmodes" is defined as follows:
+
+ TYPE
+    lockmodes=(lm_unlck, lm_lock, lm_nblck, lm_rlck, lm_nbrlck);
+
+ The values of lockmodes are described below:
+
+ÖÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ·
+   Lockmode       Description
+   ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+   lm_unlck       Unlocks the specified region (N records, starting at
+                  record M).
+
+   lm_lock        Locks the specified region (N records, starting at record
+                  M). Waits for any part of the region locked by a different
+   Lockmode       Description
+                 M). Waits for any part of the region locked by a different
+                  process to become available.
+
+   lm_nblck       Nonblocking lock. Locks the specified region (N records,
+                  starting at record M). If any is already locked by a
+                  different process, gives an error. This is the default.
+
+   lm_rlck        Reads lock. This is the same as lm_lock, except locks for
+                  write access only.
+
+   lm_nbrlck      Nonblocking read lock. This is the same as lm_nblck,
+                  except locks for write access only.
+
+
+ ş  Example
+
+ The following example opens a DIRECT-access file with share equal to
+ sm_DENYNONE, locks two records, starting at record 1, and then unlocks the
+ records:
+
+ type info=record...end;
+ var f: file of info;
+ f.mode := DIRECT;
+ f.share := sm_DENYNONE;
+ assign(f...);
+ reset(f);
+ locking(f, lm_lock, 1, 2);
+ get(f);
+ locking(f, lm_unlck, 1, 2);
+
+
+ 6.7  Public Variables
+
+ The following public variables, defined in the ENTX61.ASM program in
+ earlier versions of Microsoft Pascal, no longer exist in Versionÿ4.0:
+
+ BEGHQQ
+ BEGMQQ
+ CURHQQ
+ ENDHQQ
+ ENDMQQ
+ MAXMQQ
+
+ The following public variables, defined in the ENTX61.ASM program in
+ earlier versions of Microsoft Pascal, still exist in Versionÿ4.0. Note,
+ however, that only the CESXQQ, CRBXQQ, CRCXQQ, CRDXQQ, CRDSQQ, and DOSEQQ
+ public variables are intended for direct access by the user:
+
+ÖÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ·
+   Variable       Description
+   ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+   CESXQQ         DOS-saved ES value (for command line)
+   CLNEQQ         Last line number encountered
+   CRBXQQ         Value of BX for DOS call
+   CRCXQQ         Value of CX for DOS call
+   CRDXQQ         Value of DX for DOS call
+   CRDSQQ         Value of DS for DOS call
+   CSXEQQ         Pointer to source of context list
+   DGRMQQ         Segment of DGROUP
+   DOSEQQ         DOS return code
+   HDRFQQ         Unit F open-file-list header
+   HDRVQQ         Unit V open-file-list header
+   Variable       Description
+  HDRVQQ         Unit V open-file-list header
+   CRUXQQ         Pointer to unit-initialization list
+   RECEQQ         Machine error context, program segment
+   REFEQQ         Machine error context, frame pointer
+   REPEQQ         Machine error context, program offset
+   RESEQQ         Machine error context, stack pointer
+   STKBQQ         Stack start, to fix long GOTO
+   STKHQQ         Stack limit, to check overflow
+   UPCX87         Offset address of 8087 error context
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ Note
+      These variables are available only in DOS and real-mode OS/2 programs.
+      The variables are not used in OS/2 protected-mode programs.
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+ 6.8  The Pascal Memory Model
+
+ This section describes the memory layout for a Pascal program, not the
+ Pascal compiler itself. The segment contents for a Pascal program in memory
+ are listed below, from the highest memory location to the lowest.
+
+ÖÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ·
+   Area              Description
+   ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+   Heap              The heap is the area of the default data segment
+                     (DGROUP) that is available for dynamic memory
+                     allocation at run time via the NEW procedure. It does
+                     not belong to a named segment and will not show up on a
+                     link map.
+
+   STACK             The STACK segment contains the user's stack, which is
+                     used for all local-data items.
+
+   _BSS              The _BSS segment contains all unitialized static data.
+
+   EEND, EDATA       These segments are defined and used by the run-time
+                     library.
+
+   CONST             The CONST segment contains all constants.
+   Area              Description
+  CONST             The CONST segment contains all constants.
+
+   P3CE, P3C, P3CB, These segments are defined and used by the run-time
+   P2CE, P2C, P2CB, library.
+   P1CE, P1C, P1CB,
+   P31E, P3I, P3IB,
+   P2IE, P1IE, P1I,
+   P1IB, XCE, XC,
+   XCB, XIE, XI, XIB
+
+   COMADS            The COMADS segment is not used; it is part of FORTRAN
+                     run-time support.
+
+   _DATA             The _DATA segment is the default data segment. All
+                     initialized global and static data reside in this
+                     segment.
+
+
+ 6.9  Compatibility with Versionÿ3.20
+
+ This section addresses users who, converting from Version 3.20 and earlier,
+ may be interested in using their old source files and object files with
+ Version 4.0 of Pascal.
+
+ Apart from the changes identified in the previous sections, programs that
+ compiled correctly with Versionÿ3.20 should compile correctly with
+ Versionÿ4.0 of Pascal.
+
+ Object modules compiled with Versionsÿ3.20 and 4.0 can be linked together.
+ However, your main program should be compiled with Version 4.0 of Pascal.
+ If you have existing assembly-language source files that rearrange memory
+ from the default, they may have to be modified because the memory model has
+ been changed.
+
+ The intermediate files produced by the first two passes of the compiler
+ (PASIBF.BIN, PASIBF.SYM, PASIBF.TMP, and PASIBF.OID) are about one-third
+ the size of those produced by Versionÿ3.20.
+
+
+
+ Section 7  Writing Microsoft Windows Applications
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+
+ 7.1  Windows Interface
+
+ All Pascal Windows applications must include the Windows interface in their
+ source files. The Windows interface contains definitions for the Windows
+ functions, data types, and constants. You can include the interface by
+ using the INTERFACE statement and the WINDOWS.INC file.
+
+ Each application should have its own .INC file that lists the names of the
+ Windows functions, data types, and constants it uses.
+
+
+ 7.2  $WINDOWS Metacommand
+
+ Pascal applications must be compiled by using the $WINDOWS metacomand.
+
+
+ 7.3  Program Module
+
+ Pascal applications must be defined as Pascal modules, not programs. A
+ program module can contain any number of Pascal procedure or function
+ definitions. At least one function, the WinMain function, is required for
+ any Windows application.
+
+
+ 7.4  WinMain Function
+
+ The WinMain function is the entry point (starting point) of the
+ application. This function contains statements and Windows function calls
+ that create windows, and read and dispatch input intended for the
+ application. The WinMain function, which must be declared with the PUBLIC
+ attribute, has the following form:
+
+ function WinMain( hInstance    : HANDLE;
+                   hPrevInstance: HANDLE;
+                   lpCmdLine  : LPSTR;
+                   nCmdShow      : INT ) : BOOL [ÿPUBLICÿ];
+
+
+ 7.5  Callback Functions
+
+ "Callback functions" are functions in an application that Windows calls to
+ carry out specific tasks. An example is a window function that processes
+ messages for an application's windows.
+
+ Windows expects callback functions to be public and to have the Windows
+ prologue and epilogue; therefore, you must declare the functions with both
+ the WINDOWS and PUBLIC attributes. The WINDOWS attribute ensures that the
+ Windows prologue and epilogue code is included and that the correct data
+ segment is used by the function when it executes. The following example
+ shows the correct definition for a callback function:
+
+ function About ( hDlg   : HWND;
+                  message: UNSIGNED;
+                  wParam : WORD;
+                  lParam : LONG ) : BOOL [ PUBLIC, Windows ];
+
+ All callback functions must be listed in the EXPORTS statement of the
+ application's module definition file (see Chapter 4, "Windows Development
+ Tools," in the Microsoft Windows Programmer's Learning Guide for an
+ explanation of the module-definition file). This identifies the function as
+ a callback and permits Windows to insert the proper data-segment address in
+ the function's prologue when it loads the application.
+
+ Local functions (functions used exclusively by the application and not
+ called by Windows) do not require the Windows prologue and epilogue and
+ can use the ordinary Pascal calling conventions.
+
+
+ 7.5.1  Windows and Pascal Libraries
+
+ If you write Windows applications in the Pascal language, you can link your
+ applications with the following libraries:
+
+ PASLIBW.LIB
+ LIBPASx.LIB
+
+ The PASLIBW.LIB library contains Windows entry points for Windows
+ applications. This library should be linked with all Pascal Windows
+ applications. In most cases, it should appear as the first library in the
+ LINK command line. The LIBPASx.LIB library is the standard run-time library
+ for Pascal. This library should be linked with all Pascal Windows
+ applications. It contains code for the procedures and functions implemented
+ by the Pascal language.
+
+
+ 7.5.2  Pascal Memory-Allocation Routines
+
+ The Pascal memory-allocation routines ALLHQQ and ALLMQQ, used in standard
+ Pascal applications, should not be used in Windows applications developed
+ in Pascal. In the current Pascal library LIBPASx.LIB, the ALLHQQ function
+ calls _nmalloc, which in turn calls the Windows LocalAlloc function to
+ create a fixed memory block in the application's local heap. Similarly,
+ ALLMQQ calls fmalloc, which calls the GlobalAlloc function to create a
+ fixed global-memory block.
+
+ Since the LocalAlloc and GlobalAlloc functions do not operate identically
+ to the ALLHQQ and ALLMQQ functions in standard Pascal applications, using
+ LocalAlloc and GlobalAlloc is not recommended. Use Windows memory-manager
+ functions for managing memory for Windows applications written in Pascal.
+
+
+ 7.5.3  Floating-Point Support
+
+ Applications written in Pascal have floating-point options similar to those
+ written in the C language (see the Microsoft Windows Programmer's Utility
+ Guide).
+
+ The following paragraphs contain a summary of the Pascal floating-point
+ options.
+
+
+ 7.5.3.1  Coprocessor/Emulator Math Option
+
+ You can choose the coprocessor/emulator math option by linking the Pascal
+ program with the WIN87EM.LIB and MATH.LIB libraries on the LINK command
+ line (along with the PASLIBW.LIB and PASCAL.LIB libraries).
+
+
+ ş  Example
+
+ Running a Windows application linked with the WIN87EM.LIB library is
+ possible with or without a coprocessor. The coprocessor is used if present;
+ otherwise, floating-point emulator software simulates the operation of the
+ coprocessor chip. The emulator math option does require the dynamic-link
+ library WIN87EM.EXE to be located in the current directory or in a
+ directory listed in the PATH environment variable at the time the
+ application is loaded. This option is flexible and fast if the coprocessor
+ is available. Developers of Windows applications using this floating-point
+ option should distribute the WIN87EM.EXE library along with their
+ application.
+
+
+ 7.5.3.2  Alternate Math Option
+
+ The alternate math option can be chosen by linking the Pascal program with
+ the library LIBPASA.LIB on the LINK command line.
+
+
+ ş  Example
+
+ PL /Pw /c SAMPLE.PAS
+ LINK SAMPLE,/ALIGN:16,/MAP,PASLIBW LIBPASA /NOE /NOD,SAMPLE.DEF;
+
+ This option does not use the coprocessor to perform floating-point
+ operations. It is faster than the emulator when no coprocessor is present,
+ but it is slower than the coprocesor/emulator math option when the
+ coprocessor is present.
+
+ You could also use the PL driver to compile and link the program:
+
+ PL /Pw /FPa /Fm /Lp SAMPLE.PAS /link /ALIGN:16 PASLIBW.LIB
+
+
+
+ Section 8  Error and Warning Messages
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+
+ This section describes additional error and warning messages not included
+ in Appendix F, "Error Messages," of the user's guide. Section 8.1 describes
+ error messages; Section 8.2 describes warning messages.
+
+
+ 8.1  Error Messages
+
+ The following list describes the new error messages:
+
+ Number           Error Message
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ PL1001           could not execute filename
+
+                  The PL driver did not have enough memory to run the
+                  indicated program. The PL driver halts.
+
+
+ PL2003           missing source file name
+
+                  You used the compile option (/c) on the PL command line,
+                  but did not provide a source-file name. The PL driver
+                  stops execution.
+
+
+ PL2009           unknown option op in switch sw
+
+                  You specified an unknown option, op, for the switch sw on
+                  the PL command line. For example, x is an invalid option
+                  for the /Z switch, so entering /Zx on the command line
+                  would generate this error message. The PL driver
+                  terminates.
+
+
+ 8.2  Warning Messages
+
+ The following list describes the new warning messages:
+
+ Number           Warning Message
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ PL4001           ignoring unknown switch sw
+
+                  The PL driver did not recognize an option in a compile
+                  directive switch (/P switch). For example, x is an invalid
+                  option, so /Px would generate this error. The PL driver
+                  ignores the switch and continues.
+
+
+ PL4002           name.DEF ignored for real mode
+
+                  You specified a linker definition file (.DEF) on the
+                  command line, but you are linking a real-mode application.
+                  The .DEF file is ignored and linking continues.
+
+

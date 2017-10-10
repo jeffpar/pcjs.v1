@@ -1,0 +1,3948 @@
+ Microsoft LAN Manager - Network Device Driver Guide
+
+
+
+
+
+
+
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+            Microsoft(R) LAN Manager - Network Device Driver Guide
+
+                                 VERSION 2.0
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+                            Microsoft Corporation
+
+
+
+
+
+
+
+ Information in this document is subject to change without notice and does
+ not represent a commitment on the part of Microsoft Corporation. The
+ software described in this document is furnished under a license agreement
+ or nondisclosure agreement. The software may be used or copied only in
+ accordance with the terms of the agreement. It is against the law to copy
+ the software on any medium except as specifically allowed in the license or
+ nondisclosure agreement. No part of this manual may be reproduced or
+ transmitted in any form or by any means, electronic or mechanical, including
+ photocopying and recording, for any purpose without the express written
+ permission of Microsoft Corporation.  The LAN Manager Remoteboot service
+ does not in any way amend nor supersede the provisions of the end user
+ license agreements for MS-DOS or MS OS/2 ("Microsoft Software"). Those end
+ user license agreements limit the use of a given copy of Microsoft Software
+ to a single terminal connected to a single computer. They also prohibit the
+ use of such Microsoft Software on a network or otherwise on more than one
+ computer or computer terminal at the same time. Accordingly, Microsoft
+ Software may not be remotely loaded to terminals or workstations unless you
+ have a valid Microsoft end user license for each such remoteboot
+ workstation.  U.S. Government Restricted Rights  The SOFTWARE and
+ Documentation are provided with RESTRICTED RIGHTS. Use, duplication, or
+ disclosure by the Government is subject to restrictions as set forth in
+ subparagraph (c) (1) (ii) of The Rights in Technical Data and Computer
+ Software clause at 252.227-7013 or paragraphs (c) (1) and (2) of Commercial
+ Computer DocumentationÄRestricted Rights at 48 CFR 52.227-19, as applicable.
+ Contractor/Manufacturer is Microsoft Corporation/One Microsoft Way/Redmond,
+ Washington 98052-6399.  (C)1990 Microsoft Corporation. All rights reserved.
+ Printed in the USA.  Microsoft, MS, MS-DOS, and the Microsoft logo are
+ registered
+ trademarks of Microsoft Corporation.
+
+
+ 3Com, EtherLink, and EtherLink Plus are registered trademarks
+ of 3Com Corporation. EtherLink/MC, EtherLink II, TokenLink, and TokenLink
+ Plus are trademarks of 3Com
+ Corporation.
+
+ DEC is a registered trademark of Digital Equipment Corporation.
+
+ IBM, AT, and PS/2 are registered trademarks of International
+ Business Machines
+ Corporation.
+
+ Intel is a registered trademark of Intel Corporation.
+
+ Ungermann-Bass is a registered trademark of Ungermann-Bass,
+ Inc.
+
+ Western Digital is a registered trademark of Western
+ Digital Corporation.
+
+ Xerox and EtherNet are registered trademarks of Xerox
+ Corporation.
+
+ Document Number: SY14406-0590
+  OEM-P787-2Z
+
+
+
+
+
+
+ Table of Contents
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+
+ Before You Begin
+      How To Use This Manual
+      Notational Conventions
+      Finding Further Information
+
+ Chapter 1  About Network Device Drivers
+
+      Types of Network Device Drivers
+      Protocol Manager
+      Network Device Driver Configuration Files
+             CONFIG.SYS
+             PROTOCOL.INI
+             LANMAN.INI
+      Configuration Examples
+
+ Chapter 2  Network Device Driver Options
+
+      Transport Drivers
+             Microsoft NetBEUI 2.0
+             Remoteboot (COMTOKR)
+      Media Access Control Drivers
+             3Com EtherLink
+             3Com EtherLink II
+             3Com EtherLink/MC
+             3Com TokenLink
+             IBM Token-Ring Cards
+             IBM PC Network II and Baseband
+             IBM PC Network II/A and Baseband/A
+             Interlan NI-5210
+             Interlan NI-9210
+             NCR Token-Ring
+             Ungermann-Bass UBMAC
+             Western Digital EtherCard Plus and EtherCard Plus/A
+             Western Digital TokenCard, TokenCard WS, and TokenCard PLUS16
+      Monolithic Drivers
+
+ Glossary
+
+
+ Index
+
+
+
+
+ Before You Begin
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ The Microsoft(R) LAN Manager Network Device Driver Guide provides
+ information about installing and using network device drivers (the software
+ that enables Microsoft LAN Manager to work with network adapter cards) on a
+ computer that runs Microsoft Operating System/2 (MS(R) OS/2) or MS-DOS(R).
+ It also explains how to change the options that control the network device
+ drivers. The LAN Manager installation program sets the driver configuration
+ (the options that enable the driver to work properly with your system), and
+ changes are not normally necessary. However, you may need to change the
+ configuration manually under some circumstances. For instance, you may need
+ to change an option to remedy a conflict with another device driver in your
+ computer, or to fine-tune your system for optimal performance.
+
+ This manual deals only with the function and installation of network device
+ drivers. The Microsoft/3Com(R) LAN Manager Network Driver Interface
+ Specification (NDIS), version 1.01, supplied with the Microsoft Network
+ Device Driver Kit, provides complete information about creating media access
+ control drivers for specific network adapter cards. It also gives more
+ information about the function of the Protocol Manager, the LAN Manager
+ module that controls interaction among network device drivers.
+
+ This manual assumes that you have a working knowledge of your computer's
+ operating system and are familiar with the concept of device drivers.
+
+
+ How To Use This Manual
+
+ Chapter 1, "About Network Device Drivers"
+   Chapter 1 presents the three types of LAN Manager network device drivers.
+   It also introduces the Protocol Manager. The chapter then describes the
+   files that control the configuration of network device drivers
+   (CONFIG.SYS, LANMAN.INI, and PROTOCOL.INI), explaining the syntax and
+   purpose of entries in these files. Some sample configurations are
+   included.
+
+ Chapter 2, "Network Device Driver Options"
+   Chapter 2 contains a list of the network device drivers shipped with LAN
+   Manager 2.0 and tables of options for these drivers.
+
+
+ Notational Conventions
+
+ This manual uses different type styles and special characters for different
+ purposes:
+
+ÖÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ Convention                        Use
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ Bold                              Represents commands, command options, and
+                                   file entries. Type the words exactly as
+                                   they appear, for example, net use.
+
+ Italic                            Introduces new terms and represents
+                                   variables. For example, the variable
+ Convention                        Use
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+                                  variables. For example, the variable
+                                   computername indicates that you supply the
+                                   name of a workstation or server.
+
+ Monospace                         Represents examples, screen displays,
+                                   program code, and error messages.
+
+ FULL CAPS                         Represent filenames and pathnames in text.
+                                   You can, however, type entries in
+                                   uppercase or lowercase letters.
+
+ [brackets]                        Enclose optional items in syntax
+                                   statements. For example, [password]
+                                   indicates a password may be needed with
+                                   the command. Type only the information
+                                   within the brackets, not the brackets
+                                   themselves.
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ Convention                        Use
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+
+
+ Finding Further Information
+
+ In addition to this manual, the LAN Manager manual set includes the
+ following:
+
+ Getting To Know Microsoft LAN Manager
+   Gives first-time network users an introduction to local-area networks and
+   to LAN Manager.
+
+ Microsoft LAN Manager User's Guide for MS OS/2
+   Provides guide and reference information about using LAN Manager on MS
+   OS/2 workstations.
+
+ Microsoft LAN Manager User's Guide for MS-DOS
+   Provides guide and reference information about using LAN Manager Enhanced
+   and Basic on MS-DOS workstations.
+
+ Microsoft LAN Manager Installation Guide
+   Provides information about installing LAN Manager software and using the
+   Setup program to configure workstations and servers.
+
+ Microsoft LAN Manager Administrator's Guide
+   Provides detailed information about administering a LAN Manager network.
+
+ Microsoft LAN Manager Administrator's Reference
+   Provides reference information about LAN Manager commands and utilities
+   for MS OS/2 computers, and the LAN Manager program directory and
+   initialization file.
+
+ Microsoft LAN Manager Programmer's Reference
+   Provides information about LAN Manager application program interfaces
+   (APIs). (This manual is optionally available.)
+
+ Quick references are also available for users and administrators.
+
+
+
+
+
+
+
+
+ Chapter 1  About Network Device Drivers
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ When you are installing LAN Manager with the installation program, or when
+ you are adding a new network adapter card, you must specify which network
+ device drivers your system will use. This chapter
+
+
+   ş   Describes the types of LAN Manager network device drivers
+
+   ş   Presents the Protocol Manager, which tells the network device drivers
+       how to work together
+
+   ş   Describes the files that control the configuration of network device
+       drivers, and states the syntax and purpose of entries in these files
+
+   ş   Provides some sample configurations
+
+
+
+ Types of Network Device Drivers
+
+ Figure 1.1 depicts the layers of network device drivers that work with LAN
+ Manager. Each layer processes data according to a protocol, which is a set
+ of rules and conventions for data exchange.
+
+ (This figure may be found in the printed book).
+
+ LAN Manager requires network device drivers for communication with network
+ adapter cards. The combination of drivers necessary to span the layers
+ between LAN Manager and an adapter card is referred to as a protocol stack.
+
+ LAN Manager supports network access through three types of network device
+ drivers. These are classified as follows:
+
+ Transport
+   Transport drivers (also known as protocols) transfer LAN Manager events
+   between computers on the local-area network, working as intermediaries
+   between LAN Manager and the media access control driver(s). Transport
+   drivers are hardware-independent; they are written to communicate with LAN
+   Manager through a network basic input/output system (NetBIOS) interface.
+
+ Media access control
+   Media access control drivers work directly with network adapter cards,
+   acting as intermediaries between the transport drivers and the hardware.
+   Media access control drivers are written to communicate with transport
+   drivers through the network driver interface, defined in the
+   Microsoft/3Com LAN Manager Network Driver Interface Specification (NDIS),
+   version 1.01 .
+
+ Monolithic
+   Monolithic drivers combine transport and media access control functions
+   into one package, but support only a particular manufacturer's network
+   adapter cards, because they are written to communicate directly with the
+   hardware. These drivers are not necessarily NDIS-conformant. The loopback
+   driver, which allows a computer with no network adapter card to run LAN
+   Manager for testing purposes, is a monolithic driver.
+
+ To communicate over a network, every LAN Manager server or workstation must
+ be configured with at least one protocol stack. That is, it must have at
+ least one transport driver and at least one media access control driver, or
+ one of the all-in-one monolithic drivers. The drivers you install depend on
+ the network adapter card(s), the transmission medium, and the protocol
+ stacks you want to use. A computer can have as many as 12 network adapter
+ cards (LAN Manager Basic for MS-DOS supports one network adapter card).
+
+ Each network device driver has a unique driver name, used to identify the
+ driver in the LANMAN.INI and PROTOCOL.INI files. The driver name typically
+ is formed by the base portion of the filename plus a dollar sign
+ (drivername$). For example, the driver name for the IBMTOK.OS2 driver is
+ IBMTOK$. If you install multiple network adapter cards of the same type, the
+ media access control driver for that type of card assigns the driver name
+ drivername$ to the first instance of the driver (as listed in CONFIG.SYS),
+ drivername2$ to the second, and so on. (Drivers for some adapter cards
+ support multiple adapter cards with a single image of the driver. For
+ details, see the driver manual(s).)
+
+ All network device drivers are located in the LANMAN\DRIVERS directory and
+ its subdirectories. (The LANMAN or LANMAN.DOS directory may have a different
+ name on your computer.)
+
+ LAN Manager 2.0 maintains compatibility with the architecture specified for
+ LAN Manager 1.0. (See the Microsoft/3Com LAN Manager Network Driver
+ Interface Specification (NDIS), version 1.01.) It therefore maintains
+ compatibility with existing media access control and transport drivers.
+
+ Chapter 2, "Network Device Driver Options," includes a list of all the
+ network device drivers shipped with LAN Manager 2.0. Some manufacturers may
+ ship network adapter cards with additional device drivers that work with LAN
+ Manager.
+
+
+ Protocol Manager
+
+ LAN Manager supports the use of multiple protocol stacks. The most practical
+ limit to the number of stacks is the memory capacity of your computer. Also,
+ your computer could be connected to as many as 12 networks, of which LAN
+ Manager can manage one, some, or all. LAN Manager's Protocol Manager module
+ coordinates communication among drivers and adapter cards.
+
+ The Protocol Manager driver (PROTMAN.OS2 or PROTMAN.DOS) is listed before
+ other network device drivers in CONFIG.SYS, so that it will load first. When
+ Protocol Manager loads, it reads the PROTOCOL.INI file, which contains
+ configuration data for all the transport and media access control drivers
+ installed on your computer. (The directory containing PROTOCOL.INI is
+ specified by the /i: option on the CONFIG.SYS device line that defines the
+ Protocol Manager driver.) The Protocol Manager uses the PROTOCOL.INI data to
+ bind (tie together) the device drivers so they can work together.
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ NOTE
+
+ If only a monolithicdriver is installed, the Protocol Manager is not used.
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ For more information about configuration options, see the "PROTOCOL.INI"
+ section, later in this chapter. For more information about binding, see the
+ Microsoft/3Com LAN Manager Network Driver Interface Specification (NDIS),
+ version 1.01.
+
+
+ Network Device Driver Configuration Files
+
+ When you install LAN Manager, the installation program normally adds
+ appropriate entries to the following files:
+
+
+   ş   CONFIG.SYS Ä the operating system configuration file
+
+   ş   PROTOCOL.INI Ä the Protocol Manager configuration file
+
+   ş   LANMAN.INI Ä the LAN Manager configuration file
+
+
+ These three files control the configuration of LAN Manager network device
+ drivers. If necessary, you can edit these files using a text editor. For
+ instance, you might want to move a network device driver to a different
+ directory from where it was installed, or you might need to change a network
+ adapter card option because it conflicts with another device in your
+ computer. If you change any entries in these files, you must restart your
+ computer for the changes to take effect.
+
+ The following sections describe these files as they relate to network device
+ drivers.
+
+
+ CONFIG.SYS
+
+ The CONFIG.SYS file contains device lines, which list the network device
+ drivers (as well as other device drivers) to be loaded by MS OS/2 or MS-DOS
+ when you start your computer. All LAN Manager device drivers must be listed
+ in CONFIG.SYS.
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ NOTE
+
+ This file may have a different name on your computer (for example,
+ CONFIG.OS2 for dual-boot systems).
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ When you use the Setup program to install LAN Manager, you are asked to
+ identify the network adapter card(s) in your computer. The Setup program
+ then adds lines of the following form to CONFIG.SYS:
+
+ DEVICE=[drive:][path]filename [options] IFS=[drive:][path]filename [options]
+
+
+ where
+
+ drive: and path
+   Specify the drive letter and directory containing the network device
+   driver software.
+
+ filename
+   Is the complete filename (including extension) of the network device
+   driver.
+
+ options
+   Vary depending on the particular driver installed. For example, options
+   might include a shared memory address, an interrupt level, or a path.
+
+ DEVICE
+   Signifies a device driver to be loaded.
+
+ IFS
+   Signifies an MS OS/2 1.2 installable file system (IFS) to be loaded.
+
+ If you manually install LAN Manager drivers, be sure they are listed in
+ CONFIG.SYS in the following order:
+
+
+   1.  The Protocol Manager driver, PROTMAN.OS2 or PROTMAN.DOS. Do not use
+       this driver if you use only monolithic network device drivers. The
+       CONFIG.SYS line that loads PROTMAN requires a /i: option to specify
+       the directory containing the PROTOCOL.INI file.
+
+   2.  All network device drivers installed on your computer. For an MS-DOS
+       computer using more than one network adapter card, list them in the
+       order of their local-area network adapter (LANA) numbers.
+
+   3.  (MS OS/2 only) The LAN Manager workstation driver, NETWKSTA.SYS, also
+       called the redirector. The redirector changes operating system
+       requests into network events and transmits them to the proper protocol
+       stacks. NETWKSTA.SYS is a device driver under MS OS/2 1.1; under MS
+       OS/2 1.2 it is an installable file system. The CONFIG.SYS line that
+       loads NETWKSTA.SYS (either a device or an ifs line) requires a /i:
+       option to specify the root of the LAN Manager directory tree.
+    A /nobind option loads the NETWKSTA.SYS IFS without performing the
+  netbind operation; this may be necessary if a special program must be run
+  prior to the netbind. For more information about binding, see the
+  Microsoft/3Com LAN Manager Network Driver Interface Specification (NDIS),
+  version 1.01.
+
+
+ If you install two or more network adapter cards that require the same media
+ access control driver, you may have to include a separate instance of the
+ driver for each adapter card installed.(Check the adapter manual(s) to see
+ if this is necessary.) Use the same driver specification each time; that is,
+ the lines in CONFIG.SYS should look exactly the same. For example, if you
+ have two 3Com EtherLink/MC(tm) cards on an MS OS/2 computer, lines similar
+ to the following would be added to CONFIG.SYS:
+
+ device=c:\lanman\drivers\ethernet\elnkmc\elnkmc.os2
+ device=c:\lanman\drivers\ethernet\elnkmc\elnkmc.os2
+
+ As mentioned in the "Types of Network Device Drivers" section, earlier in
+ this chapter, the media access control driver assigns a unique driver name
+ to each instance of the driver.
+
+
+ PROTOCOL.INI
+
+ Read by LAN Manager's Protocol Manager module, the PROTOCOL.INI file
+ describes all transport and media access control drivers and defines how to
+ bind them together. PROTOCOL.INI also contains media access control
+ information such as the input/output (I/O) address, direct memory access
+ (DMA), and interrupts. By editing PROTOCOL.INI, you can specify the drivers
+ that work together, and you can fine-tune the parameters they use when
+ exchanging data.
+
+ Monolithic drivers aren't included in PROTOCOL.INI, because they have no
+ configuration options in relation to other device drivers. Some may have
+ options defined on the device line in CONFIG.SYS; see the network adapter
+ card manual(s).
+
+ PROTOCOL.INI has the same general format as LANMAN.INI. Each section
+ contains a set of configuration options in this form:
+
+ [section-name]
+
+ name = value name = value [...]
+
+ The section-name must be in brackets and can be any alphanumeric name with
+ as many as 15 characters, including spaces, in a mixture of uppercase and
+ lowercase letters. Because these sections refer to specific drivers, you
+ should name them accordingly. For example, the section for an IBM(R)
+ Token-Ring driver could be named [tokenring].
+
+ The name = value entries vary according to the individual driver. (Spaces
+ around the equal sign are optional.) See Chapter 2, "Network Device Driver
+ Options," for the possible entries for each driver. Two entries are of
+ particular note here:
+
+ drivername
+   Each section must contain at least the drivername entry, which specifies
+   the name of the driver defined in the section.
+
+ bindings
+   Every section that defines a transport driver must also have a bindings
+   entry, showing the driver or drivers to which the driver must bind.
+   Bindings are specified in top-to-bottom order, with each driver having a
+   bindings entry for the driver(s) at the next lower level. Media access
+   control drivers, at the lowest level, have no bindings entry because they
+   are already configured to directly manipulate their respective network
+   adapters.
+
+ For more information about the PROTOCOL.INI file, see the Microsoft/3Com
+ Network Driver Interface Specification (NDIS), version 1.01.
+
+
+ LANMAN.INI
+
+ The LANMAN.INI file is different for LAN Manager for MS OS/2, and LAN
+ Manager Enhanced and Basic for MS-DOS. In all cases, when you use the Setup
+ program to install LAN Manager, it automatically edits LANMAN.INI,
+ specifying the transport or monolithic driver(s) you have installed.
+
+ For more information about the LANMAN.INI file, see the Microsoft LAN
+ Manager Installation Guide and the Microsoft LAN Manager Administrator's
+ Reference.
+
+
+ LAN Manager for MS OS/2
+
+ Under MS OS/2, the [networks] section of LANMAN.INI specifies the transport
+ or monolithic network device drivers LAN Manager can use. It does not refer
+ to media access control drivers.
+
+ Each [networks] entry has the following form:
+
+ netn = drivername,m,[options]
+
+ where
+
+ n
+   Is a unique number used to identify the driver in later LANMAN.INI
+   entries. The range is 1-12.
+
+ drivername
+   Is the name of the transport or monolithic driver. (See the "Transport
+   Drivers" section in Chapter 2.)
+
+ m
+   Is the LANA number. If the driver is set up to handle multiple network
+   adapter cards, m specifies which card to access. It is passed to the
+   proper protocol stack in network control blocks (NCBs) by the redirector.
+   In LANMAN.INI, m is 0 for the first driver, 1 for the next, and so on.
+
+ options
+   Can be added for transport or monolithic drivers provided by a third
+   party. The NetBIOS extended user interface (NetBEUI) and loopback drivers
+   do not have any options. See the transport or monolithic driver manual(s).
+
+ To manually install network device drivers on an MS OS/2 computer (whether
+ using transport or monolithic network device drivers), edit the LANMAN.INI
+ file as follows:
+
+
+   1.  In the [networks] section, add one netn line for each driver, where n
+       is an integer, different for each line. The order of entries in the
+       [networks] sectionÄnot the value of nÄdetermines the order in which
+       LAN Manager searches networks for resources.
+
+   2.  In the [workstation] section, add each netn to the wrknets entry. The
+       wrknets entry lists the networks on which the workstation is active.
+
+   3.  For a server, add each netn to the srvnets entry in the [server]
+       section. The srvnets entry lists the networks on which the computer
+       will act as a server. If your computer will act only as a workstation
+       on any of the networks, don't add that network to srvnets.
+
+
+ For each driver name specified in LANMAN.INI, there must be a corresponding
+ device line in CONFIG.SYS to start that driver.
+
+
+ LAN Manager Enhanced for MS-DOS
+
+ To manually install network device drivers on a LAN Manager Enhanced
+ (MS-DOS) workstation, edit the LANMAN.INI file as follows:
+
+
+   1.  In the [services] section, add the following line to describe the
+       Netbind service:
+
+       netbind = drivers\protman\netbind.exe
+
+       A monolithic driver may require entries in the [services] section; see
+       the network adapter card manual(s).
+
+   2.  In the [networks] section, add netbind to netservices (the list of LAN
+       Manager services). If you added services for a monolithic driver, add
+       these service names to netservices.
+
+   3.  In the wrknets entry of the [workstation] section, add an integer (the
+       LANA number) corresponding to each protocol stack or monolithic driver
+       loaded in CONFIG.SYS. The order of the integers in wrknets determines
+       the order in which LAN Manager searches the networks for resources.
+
+
+ You must also adjust the CONFIG.SYS and PROTOCOL.INI files as discussed in
+ the "CONFIG.SYS" and "PROTOCOL.INI" sections, earlier in this chapter.
+
+
+ LAN Manager Basic for MS-DOS
+
+ LAN Manager Basic for MS-DOS supports one network adapter card.
+
+ To manually install network device drivers on a LAN Manager Basic (MS-DOS)
+ workstation, edit the LANMAN.INI file as follows:
+
+
+   1.  In the "start workstation $1" section, add the following line to run
+       the netbind command:
+
+       lanroot\drivers\protman\netbind
+
+       where lanroot is the path of the LANMAN.DOS directory, usually
+       C:\LANMAN.DOS.
+
+       Put this line after the start rdr $1 line, and before the chknet line.
+       For example:
+
+       start rdr $1
+
+        c:\lanman.dos\drivers\protman\netbind
+
+        chknet
+
+   2.  A monolithic driver may require additional commands in the "start
+       workstation $1" section. Add any commands necessary to configure
+       network adapter cards or monolithic drivers before the redir command.
+
+
+ You must also adjust the CONFIG.SYS and PROTOCOL.INI files as discussed in
+ the "CONFIG.SYS" and "PROTOCOL.INI" sections, earlier in this chapter.
+
+
+ Configuration Examples
+
+ In the examples in this section, the pathname of the LAN Manager home
+ directory is C:\LANMAN for MS OS/2 and C:\LANMAN.DOS for MS-DOS. It may be
+ different on your machine. The file entries are not exhaustive. See Chapter
+ 2, "Network Device Driver Options," for PROTOCOL.INI options. See the
+ Microsoft LAN Manager Administrator's Reference for LANMAN.INI options.
+
+
+ Example 1
+
+ Computer: IBM AT(R) or compatible (workstation, on one network)
+
+ Operating system: MS-DOS
+
+ Transport driver: Microsoft NetBEUI 2.0
+
+ Media access control driver: 3Com EtherLink II(tm)
+
+ CONFIG.SYS entries:
+
+   DEVICE=C:\LANMAN.DOS\DRIVERS\PROTMAN\PROTMAN.DOS
+   DEVICE=C:\LANMAN.DOS\DRIVERS\PROTOCOL\NETBEUI\NETBEUI.DOS
+   DEVICE=C:\LANMAN.DOS\DRIVERS\ETHERNET\ELNKII\ELNKII.DOS
+
+ PROTOCOL.INI entries:
+
+   [protocol manager]
+       drivername = protman$
+
+   [netbeui]
+       drivername = netbeui$
+       bindings = etherlinkII
+
+   [etherlinkII]
+       drivername = elnkii$
+
+ LANMAN.INI entries:
+
+   [networks]
+       netservices = netbind,minses
+
+   [workstation]
+       wrknets = 0
+
+   [services]
+       netbind = drivers\protman\netbind.exe
+
+
+ Example 2
+
+ Computer: IBM PS/2(R) (server, on two networks)
+
+ Operating system: MS OS/2 1.2
+
+ Transport driver: Microsoft NetBEUI 2.0
+
+ Media access control drivers: 3Com EtherLink/MC, IBM Token-Ring A
+
+ CONFIG.SYS entries:
+
+   DEVICE=C:\LANMAN\DRIVERS\PROTMAN\PROTMAN.OS2
+   DEVICE=C:\LANMAN\DRIVERS\PROTOCOL\NETBEUI\NETBEUI.OS2
+   DEVICE=C:\LANMAN\DRIVERS\ETHERNET\ELNKMC\ELNKMC.OS2
+   DEVICE=C:\LANMAN\DRIVERS\TOKENRNG\IBMTOK\IBMTOK.OS2
+   IFS=C:\LANMAN\NETPROG\NETWKSTA.SYS /I:C:\LANMAN
+
+ PROTOCOL.INI entries:
+
+   [protocol manager]
+       drivername = protman$
+
+   [netbeui]
+       drivername = netbeui$
+       bindings = etherlinkmc, tokenringa
+
+   [etherlinkmc]
+       drivername = elnkmc$
+
+   [tokenringa]
+       drivername = ibmtok$
+
+ LANMAN.INI entries:
+
+   [networks]
+     net1 = netbeui$,0
+     net2 = netbeui$,1
+
+   [workstation]
+     wrknets = net1,net2
+
+   [server]
+     srvnets = net1,net2
+
+
+ Example 3
+
+ Computer: IBM AT or compatible (workstation, on three networks, two of which
+ use the same type of adapter card)
+
+ Operating system: MS-DOS
+
+ Transport drivers: Microsoft NetBEUI 2.0, TRANSPRT (a fictitious transport
+ not shipped with LAN Manager)
+
+ Media access control drivers: 3Com TokenLink(tm) (two), NetCard (a
+ fictitious media access control driver not shipped with LAN Manager)
+
+ CONFIG.SYS entries:
+
+   DEVICE=C:\LANMAN.DOS\DRIVERS\PROTMAN\PROTMAN.DOS
+   DEVICE=C:\LANMAN.DOS\DRIVERS\PROTOCOL\TRANSPRT\TRANSPRT.DOS
+   DEVICE=C:\LANMAN.DOS\DRIVERS\PROTOCOL\NETBEUI\NETBEUI.DOS
+   DEVICE=C:\LANMAN.DOS\DRIVERS\TOKENRNG\TLNK\TLNK.DOS
+   DEVICE=C:\LANMAN.DOS\DRIVERS\TOKENRNG\TLNK\TLNK.DOS
+   DEVICE=C:\LANMAN.DOS\DRIVERS\ETHERNET\NETCARD\NETCARD.DOS
+
+ PROTOCOL.INI entries:
+
+   [protocol manager]
+       drivername = protman$
+
+   [netbeui]
+       drivername = netbeui$
+       chainx5c = 1
+       lanabase = 1
+       bindings = tokenlink_one,tokenlink_two
+
+   [transprt]
+       drivername = transprt$
+       bindings = netcard
+
+   [netcard]
+       drivername = netcard$
+
+   [tokenlink_one]
+       drivername = tlnk$
+
+   [tokenlink_two]
+       drivername = tlnk2$
+
+ LANMAN.INI entries:
+
+   [networks]
+       netservices = netbind,minses
+
+   [workstation]
+       wrknets = 0,1,2
+
+   [services]
+       netbind = drivers\protman\netbind.exe
+
+
+ Example 4
+
+ Computer: IBM PS/2 (server, on two networks plus the loopback driver)
+
+ Operating system: MS OS/2 1.2
+
+ Transport driver: Microsoft NetBEUI 2.0
+
+ Media access control drivers: 3Com EtherLink/MC, IBM Token-Ring A
+
+ Monolithic driver: Loopback
+
+ CONFIG.SYS entries:
+
+   DEVICE=C:\LANMAN\DRIVERS\PROTMAN\PROTMAN.OS2
+   DEVICE=C:\LANMAN\DRIVERS\PROTOCOL\LOOPBACK\LOOPDRV.OS2
+   DEVICE=C:\LANMAN\DRIVERS\PROTOCOL\NETBEUI\NETBEUI.OS2
+   DEVICE=C:\LANMAN\DRIVERS\ETHERNET\ELNKMC\ELNKMC.OS2
+   DEVICE=C:\LANMAN\DRIVERS\TOKENRNG\IBMTOK\IBMTOK.OS2
+   IFS=C:\LANMAN\NETPROG\NETWKSTA.SYS /I:C:\LANMAN
+
+ PROTOCOL.INI entries:
+
+   [protocol manager]
+       drivername = protman$
+
+   [netbeui]
+       drivername = netbeui$
+       bindings = etherlinkmc, tokenringa
+
+   [etherlinkmc]
+       drivername = elnkmc$
+
+   [tokenringa]
+       drivername = ibmtok$
+
+ LANMAN.INI entries:
+
+   [networks]
+     net1 = netbeui$,0
+     net2 = netbeui$,1
+     net3 = loopdrv$,2
+
+   [workstation]
+     wrknets = net1,net2,net3
+
+   [server]
+     srvnets = net1,net2,net3
+
+
+
+
+
+
+ Chapter 2  Network Device Driver Options
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ The Setup program sets the configuration options for the network device
+ drivers you install, and you don't usually need to change them. However, you
+ may need to change options if the default settings conflict with other
+ devices in your computer or if an application program requires a different
+ device driver option. Also, some options can be fine-tuned for optimal
+ performance.
+
+ Change options by editing the appropriate section(s) of PROTOCOL.INI with a
+ text editor. Then restart your computer for the changes to take effect. If a
+ PROTOCOL.INI entry is missing, the device driver assumes the default value.
+
+ This chapter lists the network device drivers supplied with LAN Manager 2.0
+ and describes their PROTOCOL.INI options.
+
+
+ Transport Drivers
+
+ The transport drivers supplied with LAN Manager 2.0 are Microsoft NetBEUI
+ 2.0 and the remoteboot driver (COMTOKR) for the Remoteboot service. These
+ drivers include the functions performed at the data link layer, formerly
+ provided by a separate data link control (DLC) driver.
+
+ The Microsoft NetBEUI driver can bind to as many as eight media access
+ control drivers. Its filename is NETBEUI.OS2 under MS OS/2 and NETBEUI.DOS
+ under MS-DOS.
+
+ The remoteboot driver can bind to as many as eight Token-Ring drivers. It
+ can be installed only on a server. Its filename is COMTOKR.OS2.
+
+
+ Microsoft NetBEUI 2.0
+
+ Required entries:
+
+
+   ş   drivername
+
+   ş   bindings
+
+
+ The following table summarizes the possible entries and values in the
+ [netbeui] section.
+
+ÖÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ Entry                Units            Range              Default
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ adaptrate            milliseconds     0-65535            1000
+ Entry                Units            Range              Default
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ adaptrate            milliseconds     0-65535            1000
+
+ bindings             drivers          1-8                No default
+
+ chainx5c             binary           0-1                0
+  (MS-DOS only)
+
+ datagrampackets      packets          2-300              2
+
+ dlcretries           retries          1-65535            5
+
+ drivername           Ä                Ä                  netbeui$
+
+ lanabase             integer          0-255              0
+  (MS-DOS only)
+
+ looppackets          packets          1-250              1
+
+ maxin                packets          1-127              1
+ Entry                Units            Range              Default
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+maxin                packets          1-127              1
+
+ maxout               packets          1-127              1
+
+ maxtransmits         packets          1-10000            6
+
+ mintransmits         packets          0-9999             2
+
+ names                local names      2-254              17
+
+ ncbs                 NCB descriptors  7-255              85 for MS OS/2, 12
+                                                          for  MS-DOS
+
+ netbiosretries       retries          1-50               2
+
+ netbiostimeout       milliseconds     500-9890           500
+
+ packets              packets          1-580              350 for MS OS/2, 50
+                                                          for MS-DOS
+ Entry                Units            Range              Default
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+                                                         for MS-DOS
+
+ piggybackacks        binary           0-1                1
+
+ pipeline             packets          1-200              5 for MS OS/2,
+                                                          20 for MS-DOS
+
+ (continued)
+
+ selectors            GDT selectors    2-100              5
+ (MS OS/2 only)
+
+ sessions             sessions         3-254 for MS OS/2  40 for MS OS/2,
+                                       3-117 for MS-DOS   6 for MS-DOS
+
+ stacksize            bytes            512-4096           2048
+ (MS-DOS only)
+
+ t1                   milliseconds     50-65535           500
+ Entry                Units            Range              Default
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+t1                   milliseconds     50-65535           500
+
+ t2                   milliseconds     50-65535           200
+
+ ti                   milliseconds     1000-65535         30000
+
+ windowerrors         errors           0-10               0
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+
+ The entries you would most likely adjust are maxtransmits, mintransmits,
+ packets, and windowerrors. For a server, you might also adjust ncbs,
+ selectors, and sessions.
+
+ If you are using an MS OS/2 computer as a workstation, without ever using
+ the Server and Peer services, you can change the entry values to the default
+ MS-DOS values. This conserves memory and other system resources.
+
+ Entries in the [netbeui] section have the following meanings:
+
+ adaptrate
+   Specifies the time, in milliseconds, between runs of the adaptive window
+   algorithm. For each link, the NetBEUI driver uses the algorithm to tune
+   the maxin and maxout values to match the remote station's values as
+   closely as possible. The algorithm also considers the conditions of the
+   link (such as adapter receiver buffers, load, and so on).
+  When no dropped packets are detected, the adaptive window algorithm
+  increases the send window (see maxout). If dropped packets are detected
+  (more than the value of windowerrors), the algorithm decreases the send
+  window. Similarly, the algorithm adjusts the receive window based on
+  timeout expiration of the t2 timer.
+  Adaptrate should be large with respect to t1 and t2, usually above one
+  second, but it can be smaller than ti.
+  A value of 0 turns off the algorithm, meaning that the maxin and maxout
+  values never change.
+
+ bindings
+   Names the driver(s) that NetBEUI binds to. The NetBEUI driver can bind to
+   as many as eight media access control drivers. Use a comma to separate the
+   driver names.
+
+ chainx5c (MS-DOS only)
+   Indicates that another protocol stack will be chained by NetBEUI for INT
+   5C NCB processing. This must have the value 1 ("on") if there are multiple
+   protocol stacks under MS-DOS.
+    For more information about multiple protocol stacks under MS-DOS, see the
+  lanabase entry.
+
+ datagrampackets
+   Specifies the number of data descriptors to allocate for packetizing
+   NetBIOS datagrams (both broadcast and directed) into UI-frames. The
+   NetBEUI driver sends these UI-frames when performing SEND.DATAGRAM and
+   SEND.BROADCAST.DATAGRAM NCB functions.
+   Increase the value of this entry if the NetBEUI driver is sending a large
+  number of datagramsÄfor example, if this computer sends a lot of broadcast
+  messages. The most common use of the datagrampackets entry in LAN Manager
+  is the server announcement, which typically uses one data descriptor every
+  minute and returns it immediately.
+
+ dlcretries
+   Specifies the number of transmission retries that NetBEUI makes before
+   assuming that the receiver's DLC layer is not responding. You can lower
+   the value on a highly reliable network, where few packets are dropped.
+   Raise the value if the network is prone to dropping many packets.
+  The types of network adapters on the network affect reliability, as some
+  have limited buffering capabilities and may drop packets because of a
+  buffer resource problem.
+  For another limit on transmission attempts, see the netbiosretries entry.
+
+ drivername
+   Identifies the driver name of the network device driver. The base portion
+   of the driver's filename, plus a dollar sign, is the drivername . The
+   NetBEUI drivername is netbeui$.
+
+ lanabase (MS-DOS only)
+   Specifies the first LANA number serviced by the NetBEUI protocol. The
+   NetBEUI driver accepts an NCB when the NCB's LANA number is equal to or
+   higher than lanabase and lower than [lanabase plus the number of media
+   access control drivers bound to the NetBEUI driver].
+  For more information about multiple protocol stacks under MS-DOS, see the
+  chainx5c entry.
+
+ looppackets
+   Specifies the number of frames to be looped back at one time.
+
+ maxin
+   Specifies the number of NetBIOS message packets to be received before
+   sending an acknowledgment. This number is often called the "receive
+   window."   When the adaptrate entry is present and has a value of zero,
+   the maxin value is not dynamically adjusted. Otherwise, the NetBEUI driver
+   adjusts the maxin value as described under the adaptrate entry.
+  Set the maxin value to be near but not greater than maxout. If maxin is
+  greater than maxout, the t2 timer will time out frequently and waste link
+  bandwidth.
+
+ maxout
+   Specifies the number of NetBIOS message packets to send before expecting
+   an acknowledgment. This number is often called the "send window."  When
+   the adaptrate entry is present and has a value of zero, the maxout value
+   is not dynamically adjusted. Otherwise, the NetBEUI driver adjusts the
+   maxout value as described under the adaptrate entry.
+  Set the maxout value to be near but not less than maxin. If maxout is less
+  than maxin, the t2 timer will time out frequently and waste link bandwidth.
+
+ maxtransmits
+   Specifies the number of packets the NetBEUI driver can pass at once to a
+   media access control driver. If this number is small, the NetBEUI driver
+   queues the packets internally. If this number is large, the media access
+   control driver takes greater responsibility for queuing the packets.
+  The value of this entry depends entirely on the media access control
+  driver's capabilities. See the "Media Access Control Drivers" section,
+  later in this chapter; many have a maxtransmits entry.
+
+ mintransmits
+   Specifies the number of transmission confirmations the NetBEUI driver must
+   receive from a media access control driver before sending more packets,
+   after the media access control driver returns an "out-of-resource"
+   condition.
+ The value of this entry depends entirely on the media access control
+ driver's capabilities, but it should be smaller than maxtransmits.
+  The value 0 has the same effect as the value 1.
+
+ names
+   Sets the maximum number of NetBIOS names that can be defined. One name is
+   always reserved for defining the station address of the network adapter
+   card.
+
+   If the NetBEUI driver is bound to more than one media access control
+   driver, this entry specifies the number of names each driver's name table
+   can have.
+  For more information about adding names, see the sessions entry.
+
+ ncbs
+   Specifies the number of NCB descriptors to allocate for managing NCBs
+   submitted to the NetBEUI driver.
+
+ netbiosretries  Specifies the number of times the NetBEUI driver retries
+ transmissions at the NetBIOS level before assuming that the receiver is not
+ present. This is for name claims, session setups, and similar activities.
+  For another limit on transmission attempts, see the dlcretries entry.
+
+ netbiostimeout
+   Specifies the time, in milliseconds, that the NetBEUI driver waits between
+   retrying transmissions. See also the netbiosretries entry.
+
+ packets
+   Specifies the number of I-frame packet descriptors that the NetBEUI driver
+   can use to build DLC frames from NetBIOS messages.
+  A 63 kilobyte (K) message typically consumes 50 packets. Increase the value
+  of this entry for a server that sends to multiple clients simultaneously,
+  especially for bulk data transfer.
+
+ piggybackacks
+   Controls whether NetBEUI sends and requests data acknowledgments
+   "piggybacked" with incoming data. This increases network performance by
+   sending data and an acknowledgment of received data in the same frame. 1
+   means to send and request piggybacked acknowledgments; 0 means neither to
+   send nor to request them.
+   If piggybackacks=1 on your computer, and the other computer doesn't
+   support piggybacks, the other computer should ignore the request and send
+   a normal acknowledgment. You may want to set piggybackacks=0 when the
+   other computer may not be returning sufficient packets to send piggybacks
+   at a satisfactory rate.
+
+ pipeline
+   Specifies the number of NetBIOS message packets that are prebuilt and
+   waiting in a pipeline for each session. Increase this value if you usually
+   send long streams of packets. Decrease the value if you expect to send
+   short, occasional bursts of packets.
+
+ selectors (MS OS/2 only)
+   Specifies the number of internal data descriptors to allocate for global
+   descriptor table (GDT) selectors from MS OS/2.
+  GDT selectors are a precious resource in MS OS/2; if you allocate too many,
+  you affect the performance of other programs and drivers.
+  The NetBEUI driver uses GDT selectors to copy data into user buffers on
+  RECEIVE, RECEIVE-ANY, and RECEIVE-ANY-ANY NCB operations. Increase the
+  value if many concurrent receive-type NCBs will be in progress, especially
+  on a server.
+  Plan on one GDT selector for each concurrent active session. If a server
+  has 100 sessions, but only three are receiving at any given time,
+  specifying selectors=3 should be adequate.
+
+ sessions
+   Sets the maximum number of NetBIOS sessions that can be open at one time.
+   Each session uses approximately 300 bytes.
+  The NetBEUI driver uses a session each time it adds or finds a NetBIOS
+  name. Increase the sessions value if many ADD.NAME or FIND.NAME requests
+  will occur simultaneously. If a request fails due to lack of sessions, the
+  driver returns an "interface busy" error.
+
+ stacksize (MS-DOS only)
+   Sets the size, in bytes, of NetBEUI's internal stack.
+  The default value works well with all tested media access control drivers.
+  Other media access control drivers, however, may consume more stack and
+  cause a stack error, bringing down the workstation. If this happens,
+  increase the value of this entry.
+  Some media access control drivers, on the other hand, may not need much
+  stack, and you can decrease the value of this entry to free up memory for
+  other applications. You could try decreasing it for a lightly used network,
+  but a spike of activity could then cause a stack error.
+
+ t1
+   Sets the retransmission timer value, in milliseconds, for NetBIOS links.
+   This is the delay before retransmitting a link-level frame if no
+   acknowledgment is received.
+   The three timer entries must obey the following mathematical rule:   t2
+   FOO!ó t1 FOO!ó ti  The t1 entry should be several times larger than t2. On
+   an EtherNet(R) or Token-Ring network, a good value for t1 is 100-500.
+
+ t2
+   Sets the delayed acknowledgment timer value, in milliseconds. This timer
+   determines the delay before acknowledging a received frame when the
+   receive window has not been reached.
+  Ordinarily, the receiver of NetBIOS message packets collects the packets
+  until the receive window (maxin) is full. The receiver then sends an
+  acknowledgment to the sender. Often, however, the sender doesn't send
+  enough packets to fill the receive window and won't send any more until
+  getting the acknowledgment signal. The t2 timer sends that acknowledgment.
+  If you set t2 too high, there may be long delays between transmissions
+  (while the sender is waiting for acknowledgment). If you set t2 too low,
+  you might generate acknowledgments before the receive window fills up, thus
+  wasting time and lowering performance. In general, increase t2 when using a
+  heavily loaded network, and decrease it for a lightly loaded network.
+  For an explanation of the relationships among the three timer entries, see
+  the t1 entry.
+
+ ti
+   Sets the inactivity timer value, in milliseconds. This timer determines
+   how often the NetBEUI driver checks an inactive link to see if it is still
+   operational.
+  In general, keep the ti value between 10000-30000 milliseconds to minimize
+  unnecessary activity.
+  For an explanation of the relationships among the three timer entries, see
+  the t1 entry.
+
+ windowerrors
+   Specifies the number of dropped packets that the adaptive window algorithm
+   allows before it decreases the send window (see the adaptrate entry). For
+   example, if windowerrors has a value of 1, one packet can drop between
+   runs of the algorithm without having any effect; if two packets drop, the
+   algorithm decreases the send window.
+  Keep the value of windowerrors low on a lightly loaded network, and
+  increase it for a heavily loaded network.
+
+
+ Remoteboot (COMTOKR)
+
+ Required entries:
+
+
+   ş   drivername = comtokr$
+
+   ş   bindings = ibmtok[,ibmtok2,...]
+
+
+ The following table summarizes the possible entries and values in the
+ [comtokr] section.
+
+ÖÚÄÄÄÄÄÄÄÄÄÄÄÄÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÚÄÄÄÄÄÄÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ·
+ Entry        Units            Range  Default
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ bindings     drivers          1-8    No default
+
+ drivername   Ä                Ä      comtokr$
+
+ syspath      pathname         Ä      See explanation
+
+ t1_tick_one  40 milliseconds  1-255  5
+ Entry        Units            Range  Default
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+t1_tick_one  40 milliseconds  1-255  5
+
+ t1_tick_two  40 milliseconds  1-255  25
+
+ t2_tick_one  40 milliseconds  1-255  1
+
+ t2_tick_two  40 milliseconds  1-255  10
+
+ ti_tick_one  40 milliseconds  1-255  25
+
+ ti_tick_two  40 milliseconds  1-255  125
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+
+ Entries in the [comtokr] section have the following meanings:
+
+ bindings
+   Names the driver(s) that the remoteboot driver binds to. The remoteboot
+   driver can bind to as many as eight Token-Ring drivers. Use a comma to
+   separate the driver names.
+
+ drivername
+   Identifies the driver name of the network device driver. The base portion
+   of the driver's filename, plus a dollar sign, is the drivername. The
+   remoteboot drivername is comtokr$.
+
+ syspath
+   Identifies the pathname of the ACSTRSYS program, which is the COMTOKR
+   system process program.
+  The default is lanroot \DRIVERS\PROTOCOL\RPL\ACSTRSYS.EXE, where lanroot is
+  the path of the LANMAN directory (usually C:\LANMAN).
+
+   The Setup program adds a RUN line to CONFIG.SYS to start the ACSTRSYS
+   program. This PROTOCOL.INI entry is needed only if the CONFIG.SYS line is
+   missing.
+
+ t1_tick_one
+   Sets the retransmission timer "short tick" value, in units of 40
+   milliseconds. This is the delay before retransmitting a link-level frame
+   if no acknowledgment is received.
+  The remoteboot protocol uses three timers: T1 (retransmission), T2
+  (acknowledgement), and Ti (inactivity). Each timer has a "short tick" rate
+  and a "long tick" rate, which individual commands use in determining timer
+  values. A command such as DLC_OPEN_SAP specifies a timer value with a
+  number between 1-10.
+  When the number is in the range 1-5, the actual timer value is  (number
+  selected) * (short tick value) * 40 milliseconds  When the number is in the
+  range 6-10, the actual timer value is  (number selected -5) * (long tick
+  value) * 40 milliseconds  Some network application programs adjust these
+  timer entries automatically. You should only adjust these timer entries
+  manually if the server supports remoteboot workstations beyond several
+  Token-Ring bridges.
+
+ t1_tick_two
+   Sets the retransmission timer "long tick" value, in units of 40
+   milliseconds. This is the delay before retransmitting a link-level frame
+   if no acknowledgment is received.
+  For an explanation of the relationship of the timer entries, see the
+  t1_tick_one entry.
+
+ t2_tick_one
+   Sets the delayed acknowledgment timer "short tick" value, in units of 40
+   milliseconds. This timer determines the delay before acknowledging a
+   received frame when the receive window has not been reached.
+  For an explanation of the relationship of the timer entries, see the
+  t1_tick_one entry.
+
+ t2_tick_two
+   Sets the delayed acknowledgment timer "long tick" value, in units of 40
+   milliseconds. This timer determines the delay before acknowledging a
+   received frame when the receive window has not been reached.
+  For an explanation of the relationship of the timer entries, see the
+  t1_tick_one entry.
+
+ ti_tick_one
+   Sets the inactivity timer "short tick" value, in units of 40 milliseconds.
+   This timer determines how often the remoteboot driver checks an inactive
+   link to see if it is still operational.
+  For an explanation of the relationship of the timer entries, see the
+  t1_tick_one entry.
+
+ ti_tick_two
+   Sets the inactivity timer "long tick" value, in units of 40 milliseconds.
+   This timer determines how often the remoteboot driver checks an inactive
+   link to see if it is still operational.
+  For an explanation of the relationship of the timer entries, see the
+  t1_tick_one entry.
+
+
+ Media Access Control Drivers
+
+ The following table lists the media access control drivers shipped with LAN
+ Manager 2.0. Some manufacturers may ship network adapter cards with
+ additional device drivers that work with LAN Manager. The filename
+ extension, when indicated as .ext in the table, is .OS2 for MS OS/2 and .DOS
+ for MS-DOS.
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ NOTE
+
+ New and updated media access control drivers will be available periodically.
+ See the LANMAN\DRIVERS\README.TXT file for information about available
+ drivers.
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ÖÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ·
+ Filename                          Network Adapter Card(s) Supported
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ ELNK.ext                          3Com EtherLink(R)
+
+ ELNKII.ext                        3Com EtherLink II
+
+ ELNKMC.ext                        3Com EtherLink/MC
+
+ TLNK.ext                          3Com TokenLink
+
+ IBMTOK.ext                        IBM Token-Ring
+                                   IBM Token-Ring II
+                                   IBM Token-Ring A
+                                   IBM Token-Ring 16/4
+                                   IBM Token-Ring 16/4 A
+
+ Filename                          Network Adapter Card(s) Supported
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ IBMNET.ext                        IBM PC Network II
+                                   IBM PC Network Baseband
+
+
+ IBMNETA.ext                       IBM PC Network II/A
+                                   IBM PC Network Baseband /A
+
+ NI5210.OS2                        Interlan NI-5210
+
+ NI9210.OS2                        Interlan NI-9210
+
+ NCRTRN                            NCR Token-Ring
+
+ UBMAC                             Ungermann-Bass(R) NIUpc
+                                   Ungermann-Bass PCNIU
+                                   Ungermann-Bass PCNIUex
+                                   Ungermann-Bass NIUps
+                                   Ungermann-Bass NIUpcPlus
+ Filename                          Network Adapter Card(s) Supported
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+                                  Ungermann-Bass NIUpcPlus
+
+ MACWD.ext                         Western Digital(R) EtherCard Plus
+                                   Western Digital EtherCard Plus/A
+
+ TOKWD                             Western Digital TokenCard (WD8005)
+                                   Western Digital TokenCard WS (WD8005 WS)
+                                   Western Digital TokenCard PLUS 16
+                                   (WD8015)
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+
+
+ 3Com EtherLink
+
+ Required entry:
+
+
+   ş   drivername = elnk$ or elnkn$
+
+
+ The following table summarizes the possible entries and values in the [elnk]
+ section.
+
+ÖÚÄÄÄÄÄÄÄÄÄÄÄÄÄÚÄÄÄÄÄÄÄÄÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ Entry         Units    Range           Default
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ dmachannel    integer  none-3          1 for 8086 and 8088 computers;  none
+                                        for 80286 and 80386 computers
+
+ dmamode       Ä        byte, burst     burst
+
+ drivername    Ä        Ä               elnk$ or elnkn$
+
+ interrupt     integer  2-7             3
+
+ ioaddress     hex.     200-3F0         300
+
+ Entry         Units    Range           Default
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ maxrequests   integer  8-32            8
+
+ maxtransmits  integer  8-50            12
+
+ netaddress    hex.     12 hex. digits  Ä
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+
+ Entries in the [elnk] section have the following meanings:
+
+ dmachannel
+   Indicates the current DMA jumper configuration of the network adapter
+   card. The value can be none, 1, 2, or 3. When the value is none, the
+   driver uses program I/O instead of DMA for data transfers.
+
+ dmamode
+   Determines the DMA mode of the network adapter card. The adapter runs
+   faster in burst mode. The random access memory (RAM) refresh rate is
+   sometimes delayed, however, so byte mode is available in case the refresh
+   rate causes problems with applications or hardware.
+
+ drivername
+   Identifies the network device driver. The base portion of the filename,
+   plus a digit if more than one EtherLink adapter is installed, is the
+   drivername. The drivername is elnk$ for the first EtherLink adapter,
+   elnk2$ for the second, and so on.
+
+ interrupt
+   Indicates the interrupt level of the network adapter card.
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ NOTE
+
+ On an 80286 or 80386 computer, specifying interrupt level 2 will be
+ redirected to interrupt level 9 because the cascaded programmable interrupt
+ control (PIC) is already using interrupt level 2.
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ ioaddress
+   Indicates the current I/O address jumper configuration of the network
+   adapter card. The value selected on the adapter card must equal this
+   entry's value. If this entry does not match the adapter card's switch
+   settings, the driver reports an error.
+
+ maxrequests
+   Sets the number of general request queue entries. General requests are
+   SetPacketFilter, AddMulticastAddress, RequestInterrupt, and so forth.
+
+ maxtransmits
+   Specifies the number of transmit queue entries in this driver. On a
+   server, this number should be equal to the transmit window size times the
+   maximum number of sessions.
+
+ netaddress
+   Overrides the network address of the network adapter card. This entry
+   should only be used if, for some reason, there are duplicate addresses on
+   the network. The value of this entry is a hexadecimal string of 12 digits
+   enclosed in quotation marks, such as "02608C010001".
+
+
+ 3Com EtherLink II
+
+ Required entry:
+
+
+   ş   drivername = elnkii$ or elnkiin$
+
+
+ When an EtherLink II adapter runs in shared memory mode, the datatransfer
+ and dmachannel entries are ignored. The data transfer mode is
+ memory-to-memory string moves. The EtherLink II adapter occupies 8K of high
+ memory at C8000, CC000, D8000, or DC000, depending on a jumper selection on
+ the adapter card.
+
+ The following table summarizes the possible entries and values in the
+ [elnkii] section.
+
+ÖÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÚÄÄÄÄÄÄÄÄÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ·
+ Entry                   Units    Range           Default
+ Entry                   Units    Range           Default
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ datatransfer            Ä        Ä               demand_dma for 8086 and
+                                                  8088 computers;  pio_word
+                                                  for 80286 and 80386
+                                                  computers
+
+ dmachannel              integer  1-3             1
+  (8086 and 8088
+ computers only)
+
+ drivername              Ä        Ä               elnkii$ or elnkiin$
+
+ interrupt               integer  2-5             3
+
+ ioaddress               hex.     250-350         300
+
+ maxtransmits            integer  8-50            8
+
+ netaddress              hex.     12 hex. digits  Ä
+
+ Entry                   Units    Range           Default
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ transceiver             Ä        Ä               onboard
+
+ xmitbufs                integer  1-2             2
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+
+ Entries in the [elnkii] section have the following meanings:
+
+ datatransfer
+   Sets the data transfer mode for the network adapter card, according to the
+   following values:
+
+ÖÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ·
+ Value                             Compatible Computers
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ block_dma                         8086 and 8088 (fast)
+ Value                             Compatible Computers
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ block_dma                         8086 and 8088 (fast)
+
+ demand_dma                        8086 and 8088 (intermediate)
+
+ single_dma                        8086 and 8088 (slow)
+
+ pio_word                          80286 and 80386 (fast)
+
+ pio_byte                          80286 and 80386 (slow)
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+
+   This entry is ignored when the adapter card runs in shared memory mode.
+
+ dmachannel (8086 and 8088 computers only)
+   Indicates the current DMA jumper configuration of the network adapter
+   card. The value can be 1 or 3.
+
+   This entry is ignored when the adapter card runs in shared memory mode.
+
+ drivername
+   Identifies the network device driver. The base portion of the filename,
+   plus a number if more than one EtherLink II adapter is installed, is the
+   drivername. The drivername is elnkii$ for the first EtherLink II adapter,
+   elnkii2$ for the second, and so on.
+
+ interrupt
+   Indicates the interrupt level of the network adapter card.
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ NOTE
+
+ For an 80286 or 80386 computer, specifying interrupt level 2 will be
+ redirected to interrupt level 9 because the cascaded PIC is already using
+ interrupt level 2.
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ ioaddress
+   Indicates the current I/O address jumper configuration of the network
+   adapter card. You must select the same value on the adapter card. If this
+   entry does not match the adapter card's switch settings, the driver
+   reports an error.
+
+ maxtransmits
+   Specifies the number of transmit queue entries in this driver. For a
+   server, multiply the transmit window size by the maximum number of
+   sessions.
+
+ netaddress
+   Overrides the network address of the network adapter card. This entry
+   should only be used if, for some reason, there are duplicate addresses on
+   the network. The value of this entry is a hexadecimal string of 12 digits
+   enclosed in quotes, such as "02608C010001".
+
+ transceiver
+   Identifies the transceiver on the network adapter card. The value is
+   either onboard or external (for a DEC(R)/Intel(R)/Xerox(R) (DIX)
+   connection).
+
+ xmitbufs
+   Indicates the number of 146-byte transmit buffers to allocate on the
+   adapter card. Allocating a second transmit buffer may improve transmit
+   performance while reducing the amount of memory available for storing
+   received packets.
+
+
+ 3Com EtherLink/MC
+
+ Required entry:
+
+
+   ş   drivername = elnkmc$ or elnkmcn$
+
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ NOTE
+
+ Use the reference disk to set the transceiver type.
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ The following table summarizes the possible entries and values in the
+ [elnkmc] section.
+
+ÖÚÄÄÄÄÄÄÄÄÄÄÄÄÄÚÄÄÄÄÄÄÄÄÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ Entry         Units    Range           Default
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ drivername    Ä        Ä               elnkmc$ or elnkmcn$
+
+ maxtransmits  integer  8-50            8
+
+ netaddress    hex.     12 hex. digits  Ä
+
+ slotnumber    integer  1-8             See explanation
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+
+ Entries in the [elnkmc] section have the following meanings:
+
+ drivername
+   Identifies the network device driver. The base portion of the filename,
+   plus a number if more than one EtherLink/MC adapter is installed, is the
+   drivername. The drivername is elnkmc$ for the first EtherLink/MC adapter,
+   elnkmc2$ for the second, and so on.
+
+ maxtransmits
+   Specifies the number of transmit queue entries in this driver. For a
+   server, multiply the transmit window size by the maximum number of
+   sessions.
+
+ netaddress
+   Overrides the network address of the network adapter card. This entry
+   should only be used if, for some reason, there are duplicate addresses on
+   the network. The value of this entry is a hexadecimal string of 12 digits
+   enclosed in quotation marks, such as "02608C010001".
+
+ slotnumber
+   Specifies the number of the slot in the computer where the network adapter
+   card resides. The default is the lowest-numbered slot that contains an
+   EtherLink/MC card. If the computer has more than one EtherLink/MC card,
+   the card in the lowest-numbered slot can use the default; for any other
+   card(s), specify a slot number.
+
+
+ 3Com TokenLink
+
+ Required entry:
+
+
+   ş   drivername = tlnk$ or tlnkn$
+
+
+ The following table summarizes the possible entries and values in the [tlnk]
+ section.
+
+ÖÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÚÄÄÄÄÄÄÄÄÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ·
+ Entry                   Units    Range           Default
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ dmachannel              integer  0-7             1
+ (80286 and 80386
+ computers only)
+
+ Entry                   Units    Range           Default
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ drivername              Ä        Ä               tlnk$ or tlnkn$
+
+ interrupt               integer  2-14            3
+
+ ioaddress               hex.     300-350         300
+
+ maxtransmits            integer  8-40            8
+
+ netaddress              hex.     12 hex. digits  Ä
+
+ productid               hex.     36 hex. digits  See explanation
+
+ speed                   Ä        6-10            6
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+
+ Entries in the [tlnk] section have the following meanings:
+
+ dmachannel (80286 and 80386 computers only)
+   Sets the DMA channel on the network adapter card. This entry is ignored
+   when the adapter card is in an 8086 or 8088 computer, or in an 8-bit slot
+   of an 80286 or 80386 computer. Installing the card in a 16-bit slot
+   improves performance.
+  The value can be 0, 1, 3, 5, 6, or 7. When the value is 0, the driver uses
+  string I/O instead of DMA for data transfers. Channels 5, 6, and 7 are
+  available only if the adapter card is ASSY 3410-03 revision A or later.
+
+ drivername
+   Identifies the network device driver. The base portion of the filename,
+   plus a digit if more than one TokenLink adapter is installed, is the
+   drivername. The drivername is tlnk$ for the first TokenLink adapter,
+   tlnk2$ for the second, and so on.
+
+ interrupt
+   Indicates the interrupt level of the network adapter card.
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ NOTE
+
+ For an 80286 or 80386 computer, specifying interrupt level 2 will be
+ redirected to interrupt level 9 because the cascaded PIC is already using
+ interrupt level 2.
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+   These are the possible interrupt values:
+
+ÖÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ·
+ Value                Compatible Computers
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ 2, 3, 4, 5           8086 and 8088 computers.
+
+ 3, 4, 5, 9           80286 and 80386 computer, 8-bit slot.
+
+ 3, 4, 5, 9, 10, 11,  80286 and 80386 computer, 16-bit slot
+ 12, 14, 15           (Levels 10-14 are available only if the adapter card
+                      is ASSY 3410-03 revision A or later.)
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ Value                Compatible Computers
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+
+ ioaddress
+   Indicates the current I/O address jumper configuration of the network
+   adapter card. This entry must match the adapter card's switch settings.
+   Possible values are 300, 310, 330, and 350.
+
+ maxtransmits
+   Specifies the number of transmit queue entries in this driver. For a
+   server, multiply the transmit window size by the maximum number of
+   sessions.
+
+ netaddress
+   Overrides the network address of the network adapter card. This entry
+   should only be used if, for some reason, there are duplicate addresses on
+   the network. The value of this entry is a hexadecimal string of 12 digits
+   enclosed in quotation marks, such as "02608C010001".
+
+ productid
+   Identifies the specific adapter card. The value of this entry is a string
+   of up to 36 hexadecimal digits (must be an even number). Refer to the IBM
+   Token-Ring architecture manual for more details. The default value for
+   this entry is 0110F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0.
+
+ speed
+   Sets the computer's clock to maximize data transfer between the computer
+   and the TokenLink card. You may have to experiment with this entry to get
+   optimal performance. If you set the entry incorrectly, the TokenLink card
+   may not run. The value can be any of the following:
+
+ÖÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ Value                             Meaning
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ 6                                 Insert two wait states on the bus.
+
+ 8                                 Insert one wait state on the bus.
+
+ 10                                Don't insert any wait states on the bus.
+ Value                             Meaning
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+10                                Don't insert any wait states on the bus.
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+
+
+ IBM Token-Ring Cards
+
+ Required entry:
+
+
+   ş   drivername = ibmtok$ or ibmtokn$
+
+
+ This driver is for the following network adapter cards:
+
+
+   ş   IBM Token-Ring Adapter
+
+   ş   IBM Token-Ring Adapter II
+
+   ş   IBM Token-Ring Adapter/A
+
+   ş   IBM Token-Ring 16/4 Adapter
+
+   ş   IBM Token-Ring 16/4 Adapter/A
+
+
+ The following table summarizes the possible entries and values in the
+ [ibmtok] section.
+
+ÖÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÚÄÄÄÄÄÄÄÄÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ·
+ Entry                Units    Range           Default
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ drivername           Ä        Ä               ibmtok$ or ibmtokn$
+
+ earlyrelease         Ä        Ä               Ä
+
+ netaddress           hex.     12 hex. digits  See explanation
+ Entry                Units    Range           Default
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+netaddress           hex.     12 hex. digits  See explanation
+
+ maxtransmits         integer  6-50            6
+
+ primary              Ä        Ä               See explanation
+  or alternate
+
+ productid            hex.     36 hex. digits  See explanation
+
+ ram                  hex.     A000-F000       See explanation
+  (Adapter and
+ Adapter II only)
+
+ recvbufs             integer  2-60            2
+
+ recvbufsize          bytes    256-17952       256
+
+ xmitbufs             integer  1-2             1
+
+ Entry                Units    Range           Default
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ xmitbufsize          bytes    256-17952       See explanation
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+
+ Entries in the [ibmtok] section have the following meanings:
+
+ drivername
+   Identifies the network device driver. The base portion of the filename,
+   plus a digit if there is more than one Token-Ring driver, is the
+   drivername. The drivername is ibmtok$ for the first Token-Ring driver,
+   ibmtok2$ for the second, and so on.
+
+ earlyrelease
+   This entry specifies the "early token release" option for IBM Token-Ring
+   16/4 network adapter cards. This is a function that reduces the average
+   time another network adapter must wait to gain access to the network.
+   Cards that don't support early token release ignore this entry. This entry
+   is not followed by an equal sign.
+
+ netaddress
+   Overrides the network address of the network adapter card. This entry
+   should only be used if, for some reason, there are duplicate addresses on
+   the network. The value is a hexadecimal string of 12 digits enclosed in
+   quotation marks. The address must be in the range 400000000000 through
+   40007FFFFFFF. For strict IBM compatibility, use only decimal digits (0-9),
+   as in "400001020304".
+
+ maxtransmits
+   Sets the number of transmit queue entries in the driver. On a server, this
+   should be equal to the transmit window size times the maximum number of
+   sessions.
+
+ primary or alternate
+   Identifies driver assignments if more than one Token-Ring network adapter
+   card is installed. A primary entry denotes the first (primary) adapter
+   card; alternate denotes the second adapter card. If these entries are
+   missing, the ibmtok driver defaults to the first adapter it finds, trying
+   primary first. This entry is not followed by an equal sign.
+
+ productid
+   Identifies the specific adapter card. The value of this entry is a string
+   of up to 36 hexadecimal digits (must be an even number). Refer to the IBM
+   Token-Ring architecture manual for more details. The default value for
+   this entry is 0110F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0.
+
+ ram (Token-Ring Adapter and Token-Ring Adapter II only)
+   Specifies the physical RAM location on the adapter card if the default
+   location is not adequate. The value of ram is a hexadecimal number between
+   0xA000 and 0xF000, located on an 8K boundary (for the Token-Ring adapter)
+   or a 16K boundary (for the Token-Ring II adapter). The RAM location
+   defaults to a location immediately following the read only memory (ROM) on
+   the next appropriate boundary. For example, if the ROM is at its default
+   location of 0xCC00, the RAM defaults to 0xCE00 (for the Token-Ring
+   Adapter) and to 0xD000 (for the Token-Ring Adapter II).
+
+   For strict compatibility with IBM defaults, set ram equal to 0xD800 for
+   primary or 0xD400 for alternate. This parameter does not apply to the
+   Token-Ring Adapter/A. With the Token-Ring 16/4 Adapter and the Token-Ring
+   16/4 Adapter/A cards, the use of RAM paging is not supported, and the RAM
+   size is determined by the switch settings on the adapter.
+
+ recvbufs
+   Specifies the number of receive buffers to use. Any memory left on the
+   adapter card is configured as extra receive buffers.
+
+ recvbufsize
+   Specifies the size of the receive buffers, in bytes. The value must be a
+   multiple of 8. The maximum size of a receive buffer depends on the adapter
+   card you are using. The original Token-Ring Adapter, Token-Ring Adapter
+   II, and Token-Ring Adapter/A cards allow only 2040 bytes. The newer
+   Token-Ring 16/4 Adapter and Token-Ring 16/4 Adapter/A cards allow 4096
+   bytes at the 4-Mbits/sec. (MBPS) adapter setting and 17,952 bytes at the
+   16-MBPS setting. The minimum and default settings are both 256 bytes.
+   Since the incoming packet can span multiple receive buffers, it is not
+   usually necessary to change this entry. If the entry is set too high for
+   the adapter hardware, a configuration error occurs.
+
+ xmitbufs
+   Specifies the number of transmit buffers to allocate.
+
+ xmitbufsize
+   Specifies the size of the transmit buffers, in bytes. The value must be a
+   multiple of 8. The maximum size of a transmit buffer depends on the
+   adapter card you are using. The original Token-Ring Adapter, Token-Ring
+   Adapter II, and Token-Ring Adapter/A cards allow only 2040 bytes. The
+   newer Token-Ring 16/4 Adapter and Token-Ring 16/4 Adapter/A cards allow
+   4096 bytes at the 4-MBPS adapter setting and 17,952 bytes at the 16-MBPS
+   setting. The minimum value is 256 bytes. The default is either 25% of
+   available RAM on the adapter or the maximum transmit buffer size,
+   whichever is smaller.
+
+
+ IBM PC Network II and Baseband
+
+ Required entry:
+
+
+   ş   drivername = ibmnet$ or ibmnetn$
+
+
+ This driver is for the following network adapters:
+
+
+   ş   IBM PC Network II
+
+   ş   IBM Baseband
+
+
+ The following table summarizes the possible entries and values in the
+ [ibmnet] section.
+
+ÖÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÚÄÄÄÄÄÄÄÄÚÄÄÄÄÄÄÄÄÄÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ Entry           Units    Range     Default
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ drivername      Ä        Ä         ibmnet$ or ibmnetn$
+
+ maxmulticast    integer  1-1000    10
+
+ maxrequests     integer  1-400     6
+
+ maxtransmits    integer  1-142     6
+ Entry           Units    Range     Default
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+maxtransmits    integer  1-142     6
+
+ receivebuffers  integer  1-400     6
+
+ receivebufsize  bytes    128-2034  256
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+
+ Entries in the [ibmnet] section have the following meanings:
+
+ drivername
+   Identifies the network device driver. The base portion of the filename,
+   plus a digit if more than one PC Network II or Baseband adapter is
+   installed, is the drivername. The drivername is ibmnet$ for the first PC
+   Network II or Baseband adapter, ibmnet2$ for the second, and so on.
+
+ maxmulticast
+   Sets the maximum number of multicast addresses. This configures the size
+   of the multicast address table.
+
+ maxrequests
+   Sets the maximum number of outstanding general requests. This configures
+   the size of the general request queue.
+
+ maxtransmits
+   Sets the maximum number of outstanding transmit chain commands. This
+   configures the size of the transmit chain request queue.
+
+ receivebuffers
+   Configures the number of receive buffers in the receive buffer pool.
+
+ receivebufsize
+   Configures the size (in bytes) of receive buffers in the receive buffer
+   pool.
+
+
+ IBM PC Network II/A and Baseband/A
+
+ Required entry:
+
+
+   ş   drivername = ibmneta$ or ibmnetan$
+
+
+ This driver is for the following network adapters:
+
+
+   ş   IBM PC Network II/A
+
+   ş   IBM Baseband/A
+
+
+ The following table summarizes the possible entries and values in the
+ [ibmneta] section.
+
+ÖÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÚÄÄÄÄÄÄÄÄÚÄÄÄÄÄÄÄÄÄÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ Entry           Units    Range     Default
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ drivername      Ä        Ä         ibmneta$ or ibmnetan$
+ Entry           Units    Range     Default
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ drivername      Ä        Ä         ibmneta$ or ibmnetan$
+
+ maxmulticast    integer  1-1000    10
+
+ maxrequests     integer  1-400     6
+
+ maxtransmits    integer  1-142     6
+
+ receivebuffers  integer  1-400     6
+
+ receivebufsize  bytes    128-2034  256
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+
+ Entries in the [ibmneta] section have the following meanings:
+
+ drivername
+   Identifies the network device driver. The base portion of the filename,
+   plus a digit if more than one PC Network II/A or Baseband/A adapter is
+   installed, is the drivername. The drivername is ibmneta$ for the first PC
+   Network II/A or Baseband/A adapter, ibmneta2$ for the second, and so on.
+
+ maxmulticast
+   Sets the maximum number of multicast addresses. This configures the size
+   of the multicast address table.
+
+ maxrequests
+   Sets the maximum number of outstanding general requests. This configures
+   the size of the general request queue.
+
+ maxtransmits
+   Sets the maximum number of outstanding transmit chain commands. This
+   configures the size of the transmit chain request queue.
+
+ receivebuffers
+   Configures the number of receive buffers in the receive buffer pool.
+
+ receivebufsize
+   Configures the size (in bytes) of receive buffers in the receive buffer
+   pool.
+
+
+ Interlan NI-5210
+
+ This driver is for MS OS/2 only.
+
+ Required entry:
+
+
+   ş   drivername = ni5210$
+
+
+ The following table summarizes the possible entries and values in the
+ [ni5210] section.
+
+ÖÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÚÄÄÄÄÄÄÄÄÚÄÄÄÄÄÄÄÄÄÄÄÄÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ·
+ Entry          Units    Range        Default
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ basemem        hex.     C0000-EC000  C0000
+ Entry          Units    Range        Default
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ basemem        hex.     C0000-EC000  C0000
+
+ drivername     Ä        Ä            ni5210$
+
+ iobase         hex.     200-3F8      300
+
+ irq            integer  2-7          2
+
+ maxmulticasts  integer  1-16         10
+
+ maxreceives    integer  1-6          3
+
+ maxtransmits   integer  1-10         6
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+
+ Entries in the [ni5210] section have the following meanings:
+
+ basemem
+   Indicates the base address of the shared memory on the adapter card.
+
+ drivername
+   Identifies the network device driver.
+
+ iobase
+   Indicates the base I/O address for the network adapter card. If this entry
+   does not match the adapter card's I/O address jumper settings, the driver
+   reports an error.
+
+ irq
+   Indicates the interrupt level of the network adapter card.
+
+ maxmulticasts
+   Specifies the number of multicast addresses that the driver supports.
+
+ maxreceives
+   Specifies the number of receives that can be queued simultaneously.
+
+ maxtransmits
+   Specifies the number of transmit chain commands that can be queued
+   simultaneously.
+
+
+ Interlan NI-9210
+
+ This driver is for MS OS/2 only.
+
+ Required entry:
+
+
+   ş   drivername = ni9210$
+
+
+ The following table summarizes the possible entries and values in the
+ [ni9210] section.
+
+ÖÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÚÄÄÄÄÄÄÄÄÚÄÄÄÄÄÄÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ·
+ Entry          Units    Range  Default
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ Entry          Units    Range  Default
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ drivername     Ä        Ä      ni9210$
+
+ maxmulticasts  integer  1-16   10
+
+ maxreceives    integer  1-6    3
+
+ maxtransmits   integer  1-10   6
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+
+ Entries in the [ni9210] section have the following meanings:
+
+ drivername
+   Identifies the network device driver.
+
+ maxmulticasts
+   Specifies the number of multicast addresses that the driver supports.
+
+ maxreceives
+   Specifies the number of receives that can be queued simultaneously.
+
+ maxtransmits
+   Specifies the number of transmit chain commands that can be queued
+   simultaneously.
+
+
+ NCR Token-Ring
+
+ Required entry:
+
+
+   ş   drivername = ncrtrn$ or ncrtrnn$
+
+
+ The following table summarizes the possible entries and values in the
+ [ncrtrn] section.
+
+ÖÚÄÄÄÄÄÄÄÄÄÄÄÄÄÚÄÄÄÄÄÄÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ Entry         Units  Range             Default
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ drivername    Ä      Ä                 ncrtrn$ or ncrtrn2$
+
+ interrupt     Ä      2-7               2
+
+ max_xmt_size  bytes  64-4472           2040
+
+ node_address  hex.   12 hex. digits    See explanation
+
+ port_address  hex.   0A20-1A20         See explanation
+
+ product_id    hex.   0-36 hex. digits  See explanation
+
+ shared_ram    hex.   CA00-D600         See explanation
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+
+ Entries in the [ncrtrn] section have the following meanings:
+
+ drivername
+   Identifies the network device driver. The base portion of the filename,
+   plus a digit if there is more than one Token-Ring driver, is the
+   drivername. The drivername is ncrtrn$ for the first Token-Ring driver and
+   ncrtrn2$ for the second.
+
+ interrupt
+   Indicates the interrupt level of the network adapter card. The default
+   value for ncrtrn$ is 2, and the default value for ncrtrn2$ is 8. Values
+   for each ncrtrn driver must be unique.
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ NOTE
+
+ On an 80286 or 80386 computer, if you specify interrupt level 2, it is
+ redirected to interrupt level 9 because the cascaded programmable interrupt
+ control (PIC) is already using interrupt level 2.
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ max_xmt_size
+   Specifies the size of the transmit buffers, in bytes. The default is 2040.
+
+ node_address
+   Overrides the network address of the network adapter card. This entry
+   should only be used if, for some reason, there are duplicate addresses on
+   the network. The value is a hexadecimal string of 12 digits enclosed in
+   quotation marks. The address must be in the range 400000000000 through
+   40007FFFFFFF. For strict IBM compatibility, use only decimal digits (0-9),
+   as in "400001020304". The ncrtrn driver provides a unique default value
+   for each network adapter card.
+
+ port_address
+   Indicates the base I/O address for the network adapter card. This entry
+   must match the adapter card's I/O address jumper settings. The default is
+   0A20 for the first network adapter card and 1A20 for the second network
+   adapter card.
+
+ product_id
+   Identifies the specific network adapter card. The value of this entry is a
+   string of up to 36 hexadecimal digits (must be an even number). Refer to
+   the IBM Token-Ring architecture manual for more details. The default value
+   for this entry is 0910F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0.
+
+ shared_ram
+   Specifies the physical RAM location on the network adapter card if the
+   default location is not adequate. Values for each ncrtrn driver must be
+   unique. The default value for ncrtrn$ is 0xD000, and the default value for
+   ncrtrn2$ is 0xD200. Valid values depend on the adapter card model and
+   revision level. Check the documentation provided with the adapter card for
+   an accurate list.
+
+
+ Ungermann-Bass UBMAC
+
+ Required entries:
+
+
+   ş   adaptertype = NIUpc, NIUpcPlus, NIUps, PCNIU, or PCNIUex.
+
+   ş   drivername = ubmac$ or ubmacn$
+
+
+ The following table summarizes the possible entries and values in the
+ [ubmac] section.
+
+ÖÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÚÄÄÄÄÄÄÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ Entry           Units  Range           Default
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ adaptertype     Ä      Ä               See explanation
+
+ drivername      Ä      Ä               ubmac$ or ubmacn$
+
+ io_port         hex.   0A20-1A20       0A20
+
+ irq_level       Ä      2-7             2
+
+ maxmulticast    Ä      0-255           0
+
+ maxrequests     Ä      1-10            6
+
+ maxtransmits    Ä      1-400           6
+
+ memorywindow    hex.   Ä               See explanation
+ Entry           Units  Range           Default
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+memorywindow    hex.   Ä               See explanation
+
+ receivebuffers  Ä      16-512          64
+
+ receivebufsize  bytes  256-1514        600
+
+ receivemethod   Ä      Ä               ReceiveLookahead
+
+ permanentaddr   hex.   12 hex. digits  See explanation
+
+ slotnumber      Ä      1-8             See explanation
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+
+ Entries in the [ubmac] section have the following meanings:
+
+ adaptertype
+   Specifies the type of Ungermann-Bass network adapter card installed on the
+   system. This field must be set to NIUpc, NIUpcPlus, NIUps, PCNIU, or
+   PCNIUex.
+
+ drivername
+   Identifies the network device driver. The base portion of the filename,
+   plus a digit if there is more than one driver, is the drivername. The
+   drivername is ubmac$ for the first driver, ubmac2$ for the second, and so
+   on.
+
+ io_port
+   Indicates the base I/O address for the network adapter card. This entry
+   must match the adapter card's I/O address jumper settings. This entry is
+   ignored if adaptertype is NIUps.
+
+ irq_level
+   Indicates the interrupt level of the network adapter card. This entry must
+   match the adapter card's jumper settings. This entry is ignored if
+   adaptertype is NIUps.
+
+ maxmulticast
+   Sets the maximum number of multicast addresses.  This configures the size
+   of the multicast address table.
+
+ maxrequests
+   Specifies the number of request queue entries.
+
+ maxtransmits
+   Specifies the number of transmit queue entries.
+
+ memorywindow
+   Specifies the physical base address of the "window" through which the
+   network device driver will access the network adapter card's RAM. This
+   entry must match the adapter card's jumper settings. This entry is ignored
+   if adaptertype is NIUps.
+
+ receivebuffers
+   If receivemethod is set to ReceiveChain, HostBuffered, this entry
+   specifies the number of receive buffer queue entries.
+
+ receivebufsize
+   If receivemethod is set to ReceiveChain, HostBuffered, this entry
+   specifies the size, in bytes, of each receive buffer. This entry must
+   contain an even value.
+
+ receivemethod
+   Provided to allow you to maximize the network device driver's performance.
+   With most transport drivers, this entry's default value of
+   ReceiveLookahead will provide maximum performance. However, some transport
+   drivers can achieve slightly better performance with one of the two other
+   values.  This entry can be set to one of the three following values:
+
+     ReceiveLookahead
+       Tells the network device driver to send a small part of the frame to
+       the transport driver as "lookahead" data. This way, the transport
+       driver does not have to copy whole frames that aren't needed.
+
+     ReceiveChain, AdapterBuffered
+       Tells the network device driver to hold frames briefly in the network
+       adapter card's buffers until the transport driver can copy them.
+
+     ReceiveChain, HostBuffered
+       Tells the network device driver to copy frames into a separate buffer
+       in the computer's memory (not part of the network adapter card's RAM
+       or the transport driver's buffer) until the transport driver can copy
+       them. If you use this option, receivebuffers must contain the number
+       of buffers, and receivebufsize must contain the size of each buffer.
+
+ permanentaddr
+   Overrides the network address of the network adapter card. This entry
+   should only be used if, for some reason, there are duplicate addresses on
+   the network. The value is a hexadecimal string of 12 digits enclosed in
+   quotation marks. The address must be in the range 400000000000 through
+   40007FFFFFFF. For strict IBM compatibility, use only decimal digits (0-9),
+   as in "400001020304".
+
+ slotnumber
+   If there is more than one NIUps network adapter card installed, the
+   PROTOCOL.INI file contains more than one [ubmac] section. For each
+   section, this entry contains the slot number of the corresponding NIUps
+   network adapter card. This entry is ignored if adaptertype is not NIUps.
+
+
+ Western Digital EtherCard Plus and EtherCard Plus/A
+
+ Required entry:
+
+
+   ş   drivername = macwd$
+
+
+ The following table summarizes the possible entries and values in the
+ [macwd] section.
+
+ÖÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÚÄÄÄÄÄÄÄÄÚÄÄÄÄÄÄÄÄÄÄÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ·
+ Entry                   Units    Range      Default
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ drivername              Ä        Ä          macwd$
+
+ iobase                  hex.     200-3E0    280
+  (EtherCard Plus only)
+
+ irq                     Ä        2-15       3
+  (EtherCard Plus only)
+
+ Entry                   Units    Range      Default
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ maxrequests             integer  6-64       8
+
+ maxtransmits            integer  6-64       12
+
+ ramaddress              hex.     A000-EC00  D000
+  (EtherCard Plus only)
+
+ receivebuffers          integer  6-96       12
+
+ receivebufsize          bytes    256-1536   256
+
+ receivechains           integer  6-96       12
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+
+ Entries in the [macwd] section have the following meanings:
+
+ drivername
+   Identifies the network device driver.
+
+ iobase (EtherCard Plus only)
+   Indicates the base I/O address for the network adapter card. This entry
+   must match the adapter card's I/O address jumper settings.
+
+ irq (EtherCard Plus only)
+   Indicates the interrupt level of the network adapter card:
+
+ÖÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ Value                             Meaning
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ 2-7                               EtherCard Plus: interrupt levels 2-7
+
+ 3, 4, 10, 15                      EtherCard Plus/A (16-bit slot only):
+                                   interrupt levels 3, 4, 10, and 15
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ Value                             Meaning
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+
+ maxrequests
+   Specifies the number of request queue entries.
+
+ maxtransmits
+   Specifies the number of transmit queue entries.
+
+ ramaddress (EtherCard Plus only)
+   Indicates the base address of the shared memory on the adapter card.
+
+ receivebuffers
+   Specifies the number of receive buffer queue entries.
+
+ receivebufsize
+   Specifies the size, in bytes, of a receive buffer.
+
+ receivechains
+   Specifies the number of receive chain header queue entries.
+
+
+ Western Digital TokenCard, TokenCard WS, and TokenCard PLUS16
+
+ Required entry:
+
+
+   ş   drivername = tokwd$
+
+
+ This driver is for the following network adapter cards:
+
+
+   ş   Western Digital TokenCard (WD8005)
+
+   ş   Western Digital TokenCard WS (WD8005 WS)
+
+   ş   Western Digital TokenCard PLUS16 (WD8015)
+
+
+ The following table summarizes the possible entries and values in the
+ [tokwd] section.
+
+ÖÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÚÄÄÄÄÄÄÄÄÚÄÄÄÄÄÄÄÄÄÄÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ·
+ Entry            Units    Range      Default
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ dma              Ä        5-7        5
+  (TokenCard
+ PLUS16 only)
+
+ drivername       Ä        Ä          tokwd$
+
+ iobase           hex.     0A20-3A20  0x0A20
+
+ irq              Ä        2-15       3
+
+ maxrequests      integer  6-64       8
+
+ maxtransmits     integer  6-64       12
+
+ receivebuffers   integer  6-96       12
+ Entry            Units    Range      Default
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+receivebuffers   integer  6-96       12
+
+ receivebufsize   bytes    256-1536   256
+
+ receivechains    integer  6-96       12
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+
+ Entries in the [tokwd] section have the following meanings:
+
+ dma
+   Specifies the DMA channel used by the network adapter card. This entry
+   must match the adapter card's DMA jumper settings (two jumpers).
+
+ drivername
+   Identifies the network device driver.
+
+ iobase
+   Indicates the base I/O address for the network adapter card. This entry
+   must match the adapter card's I/O address jumper settings.
+
+   The value of this entry must be preceded with "0x" to show that it is a
+   hexidecimal number.
+
+ irq
+   Indicates the interrupt level of the network adapter card. Not all values
+   are available for all cards; for information about available interrupt
+   levels, see the manufacturer's documentation.
+
+ÖÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ Value                             Meaning
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ 2-7                               TokenCard: interrupt levels 2-7
+
+ 2-7                               TokenCard WS: interrupt levels 2-7
+
+ 3, 4, 5, 7, 9, 10, 11, 15         TokenCard PLUS 16: interrupt levels 3, 4,
+                                   5, 7, 9, 10, 11, 15
+ Value                             Meaning
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+                                  5, 7, 9, 10, 11, 15
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+
+ maxrequests
+   Specifies the number of request queue entries.
+
+ maxtransmits
+   Specifies the number of transmit queue entries.
+
+ receivebuffers
+   Specifies the number of receive buffer queue entries.
+
+ receivebufsize
+   Specifies the size, in bytes, of a receive buffer.
+
+ receivechains
+   Specifies the number of receive chain header queue entries.
+
+
+ Monolithic Drivers
+
+ The only monolithic driver supplied with LAN Manager 2.0 is a loopback
+ driver, for running LAN Manager without a network adapter card. Available
+ only under MS OS/2, this driver enables a single computer to emulate network
+ operation without actually being connected to a network. It allows network
+ requests to be sent to the local machine as if it were remote. This can be
+ done on a real network, but the operation is much faster with the loopback
+ driver, since it avoids the time required to actually send the message over
+ a network and receive it back.
+
+ An application will often route local data access through the LAN Manager
+ software, to allow the server to arbitrate data access and access
+ permissions. The loopback driver enables this to be done with the highest
+ performance. The loopback network is treated differently than other
+ networks: it is searched first when using remote resources and is ignored by
+ most messaging functions. This driver has no configuration options and does
+ not appear in PROTOCOL.INI. It does count toward LAN Manager's maximum of 12
+ networks. Its filename is LOOPDRV.OS2.
+
+
+
+
+
+
+
+ Glossary
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ 386 server with high-performance file system 386 (HPFS386)
+ An enhanced version of HPFS designed to work with a 386-based computer.
+ HPFS386 includes an enhanced disk cache for servers and implements local
+ security. See also High-performance file system (HPFS).
+
+ Adaptive window algorithm
+ An algorithm used by the NetBEUI driver to match the receive and send
+ windows of the remote station. See also NetBEUI.
+
+ Basic
+ See LAN Manager Basic.
+
+ CONFIG.SYS
+ A system configuration file for both MS OS/2 and MS-DOS. Use this file to
+ customize the way the operating system runs on the computer. See also
+ LANMAN.INI and PROTOCOL.INI.
+
+ Device driver
+ See Network device driver.
+
+ DIX
+ DEC/Intel/Xerox standard for network connection using EtherNet cable.
+
+ Driver
+ See Network device driver.
+
+ Driver name
+ A unique name, used in the LANMAN.INI and PROTOCOL.INI files, to identify
+ each local-area network device driver. Typically, the driver name is the
+ base portion of the network device driver filename plus a dollar sign (for
+ example, IBMTOK$).
+
+ Enhanced
+ See LAN Manager Enhanced.
+
+ FAT
+ See File allocation table (FAT).
+
+ File allocation table (FAT)
+ An MS OS/2 and MS-DOS file system that tracks the location of files in
+ directories. The file allocation table also allocates free space on disks to
+ ensure space is available for new files. MS OS/2 1.2 can replace the FAT
+ file system with an IFS, such as HPFS.
+
+ Filename
+ A unique name for a file. Under the FAT file system, a filename can have as
+ many as 8 characters followed by a filename extension. The filename
+ extension consists of a period (.) and 0-3 characters. Under the MS OS/2 1.2
+ HPFS, a filename can have as many as 254 characters.
+
+ High-performance file system (HPFS)
+ An MS OS/2 1.2 file system that has faster I/O than the FAT file system;
+ does not restrict file naming to eight characters with a three character
+ extension; and is compatible with the FAT file system. When you install LAN
+ Manager server software on a HPFS partition, it becomes an HPFS386
+ partition. See also File allocation table (FAT).
+
+ HPFS386
+ See 386 server with high-performance file system 386 (HPFS386).
+
+ IFS
+ See Installable file system (IFS).
+
+ Installable file system (IFS)
+ With MS OS/2 1.2, file systems in addition to the existing FAT file system,
+ can be installed. Any additional file system is known as an installable file
+ system (IFS). The LAN Manager redirector software is an IFS for MS OS/2 1.2.
+
+ LAN
+ See Local-area network (LAN).
+
+ LAN Manager
+ A software program that expands the features of MS OS/2 and MS-DOS to enable
+ computers to become part of a local-area network.
+
+ LAN Manager Basic
+ A version of LAN Manager that enables an MS-DOS computer to connect to
+ local-area network directories and printers, and print jobs over the
+ network. Using LAN Manager Basic, network tasks can be done from the command
+ line only.
+
+ LAN Manager Enhanced
+ A version of LAN Manager that enables an MS-DOS computer to connect to
+ local-area network directories and printers, print jobs over the network,
+ send and receive network messages, and use profiles to automatically connect
+ to network resources. Using LAN Manager Enhanced, network tasks can be done
+ from the command line and from the LAN Manager Screen.
+
+ LANA number
+ See Local-area network adapter (LANA) number.
+
+ LANMAN.INI
+ The initialization file for LAN Manager. The values in this file determine
+ the option settings for computers on the local-area network, though the net
+ start and net config command options can temporarily override LANMAN.INI
+ values. These values can be modified to suit the network requirements. See
+ also CONFIG.SYS and PROTOCOL.INI.
+
+ Local-area network (LAN)
+ A grouping of computers, connected by cable or other physical media, that
+ lets users share information and equipment.
+
+ Local-area network adapter (LANA) number
+   A unique integer assigned to each protocol stack. The LANA number
+ specifies which network adapter card to access, if the computer has multiple
+ network adapter cards.
+
+ Loopback driver
+ A monolithic driver that allows a computer with no network adapter card to
+ run LAN Manager for testing purposes.
+
+ Media access control driver
+ A local-area network device driver that works directly with the network
+ adapter cards, acting as an intermediary between the transport driver and
+ the hardware.
+
+ Monolithic driver
+ A local-area network device driver that combines transport and media access
+ control driver functions into one package.
+
+ MS OS/2
+ Microsoft Operating System/2. The operating system that supports LAN Manager
+ servers and some LAN Manager workstations.
+
+ MS-DOS
+ Microsoft Disk-Operating System. The operating system that supports some LAN
+ Manager workstations.
+
+ NetBEUI
+ The NetBIOS Extended User Interface network device driver. The NetBEUI
+ driver is the transport driver supplied with LAN Manager. The NetBEUI driver
+ can bind with as many as eight media access control drivers. For MS OS/2,
+ the filename for the NetBEUI driver is NETBEUI.OS2. For MS-DOS, the filename
+ for the NetBEUI driver is NETBEUI.DOS.
+
+ NDIS
+ See Network driver interface specification (NDIS).
+
+ NetBIOS
+ See Network basic input/output system (NetBIOS).
+
+ Network adapter card
+ A printed circuit board, installed in a computer, that enables the computer
+ to run LAN Manager software and join the local-area network.
+
+ Network basic input/output system (NetBIOS)
+  A software module that links the operating system with local-area network
+ hardware, and opens communications between workstations on the network.
+
+ Network driver interface specification (NDIS)
+  A Microsoft/3COM specification of an interface for local-area network
+ device drivers. All media access control and transport drivers shipped with
+ LAN Manager conform to the network driver interface specification (NDIS).
+
+ Network device driver
+ A program that enables the LAN Manager software to communicate with
+ local-area network adapter cards. See also Media access control driver,
+ Monolithic driver, and Transport driver.
+
+ Packet
+ A block of data sent over the local-area network.
+
+ Path
+ A set of directory names that define a directory's location, as in the path
+ REPORTS\ACCT\NORTH, which indicates that the NORTH directory is in the ACCT
+ subdirectory of the REPORTS directory. A backslash precedes each directory
+ name except the top-level one. An initial backslash indicates that the path
+ begins at the drive's root directory. When the path begins with a driver
+ letter, it is an absolute path.
+
+ Pathname
+ A path that ends in a filename. While a path specifies a directory, a
+ pathname specifies a file. A pathname, like a path, can be absolute,
+ containing a drive letter, or relative to the current drive and directory.
+
+ PIC
+ Programmable interrupt control. A module that controls interrupt levels for
+ cards and devices.
+
+ Protocol
+ A set of rules and conventions for data exchange. See also Transport driver.
+
+
+ Protocol Manager
+ A software module that coordinates communication among network device
+ drivers and network adapter cards.
+
+ Protocol stack
+ A combination of network device drivers used to span the layers between LAN
+ Manager and a network adapter card. A stack consists of one monolithic
+ driver, or a transport driver plus a media access control driver.
+
+ Protocol driver
+ See Transport driver.
+
+ PROTOCOL.INI
+ The Protocol Manager initialization file. This file, along with CONFIG.SYS
+ and LANMAN.INI, controls the configuration of LAN Manager network device
+ drivers. This file describes all transport and media access control drivers
+ and defines how to bind them together. See also CONFIG.SYS and LANMAN.INI.
+
+ Receive window
+ The number of NetBIOS message packets to be received before an
+ acknowledgment is sent to the sending station. See also Send window.
+
+ Redirector
+ A local-area network device driver that translates operating system requests
+ into network events and transmits them to the appropriate protocol stack.
+ For LAN Manager, the filename for the redirector is NETWKSTA.SYS. For MS
+ OS/2 1.1 and MS-DOS, NETWKSTA.SYS is a device driver; for MS OS/2 1.2,
+ NETWKSTA.SYS is an IFS.
+
+ Send window
+ The number of NetBIOS message packets to be sent before an acknowledgment
+ from the receiving station is expected. See also Receive window.
+
+ System configuration file
+ See CONFIG.SYS.
+
+ Transport driver
+ A network device driver that implements a protocol, communicating between
+ LAN Manager and one or more media access control drivers. The transport
+ driver transfers LAN Manager events between computers on the local-area
+ network.
+
+
+
+
+
+ INDEX
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+
+ 3Com EtherLink II
+    see also Drivers, media access control
+   configuration options
+   memory
+     modes
+     requirements
+ 3Com EtherLink
+ 3Com EtherLink/MC
+    see also Drivers, media access control
+   configuration options
+ 3Com EtherLink
+    see also Drivers, media access control
+   configuration options
+ 3Com TokenLink
+    see also Drivers, media access control
+ 80286 and 80386 computers
+   configuring 3Com EtherLink driver
+   configuring 3Com EtherLink II
+ 8086 and 8088 computers
+   configuring 3Com EtherLink II
+
+     A
+ ACSTRSYS entry (CONFIG.SYS)
+ Adapter card, network
+ Adaptertype entry (PROTOCOL.INI)
+   {ubmac} section
+     defined
+     values
+ Adaptive window algorithm
+   effects of dropped packets
+ Adaptrate entry (PROTOCOL.INI)
+   {netbeui} section
+     defined
+     values
+ ADD.NAME requests
+ AddMulticastAddress
+ Alternate (Token-Ring) network adapter card
+   setting RAM
+ Alternate entry (PROTOCOL.INI)
+   {ibmtok} section
+     defined
+ ASSY 3410-03 revision A
+
+     B
+ Baseband/A
+    see Drivers, media access control
+ Baseband
+    see Drivers, media access control
+ Basemem entry (PROTOCOL.INI)
+   {ni5210} section
+     defined
+     values
+ Binding
+   defined
+   for NetBEUI
+   PROTOCOL.INI role
+   specifying binding
+ Bindings entry (PROTOCOL.INI)
+   {netbeui} section
+     defined
+     values
+ Burst mode (network adapters)
+ Byte mode (network adapters)
+
+     C
+ Chainx5c entry (PROTOCOL.INI)
+   {netbeui} section
+     defined
+     values
+ COMTOKR.OS2
+    see Drivers, transport
+ CONFIG.OS2
+    see Configuration files
+ CONFIG.SYS
+    see Configuration files, CONFIG.SYS
+ Configuration files
+   CONFIG.OS2
+   CONFIG.SYS
+     and {Wrknets} entry (LANMAN.INI)
+     examples
+     MS OS/2
+   editing the files
+   LANMAN.INI
+     Basic for MS-DOS
+     Enhanced for MS-DOS
+     examples
+     MS OS/2
+   operating system
+   Protocol Manager
+   PROTOCOL.INI
+     changing driver options
+     examples
+     format
+     loopback drivers
+     options
+     {elnkii} section
+     {elnkmc} section
+     {elnk} section
+     {ibmneta} section
+     {ibmnet} section
+     {ibmtok} section
+     {macwd} section
+     {ncrtrn} section
+     {netbeui} section
+     {ni5210} section
+     {ni9210} section
+     {tlnk} section
+     {tokwd} section
+     {ubmac} section
+ Configuration options
+ Configuration
+   defined
+   driver
+   examples
+ Conventions
+   notational
+
+     D
+ Data Link Control (DLC) driver
+    see DLC
+ Data Link Control
+    see DLC
+ Data packets
+   for NetBIOS
+   guarding against dropped packets
+   limiting transmission size
+   setting acknowledgments
+ Data transmissions
+   for the NetBEUI driver
+   piggybacking
+ Datagrampackets entry (PROTOCOL.INI)
+   {netbeui} section
+     defined
+     values
+ Datagrams
+    see Data packets
+ Datatransfer entry (PROTOCOL.INI)
+   {elnkii} section
+     defined
+     values
+ Device entries (CONFIG.SYS)
+ Device line
+ Directory, LAN Manager home
+ DIX connections
+ DLC frames
+ DLC
+ Dlcretries entry (PROTOCOL.INI)
+   {netbeui} section
+     defined
+     values
+ DMA channel
+ DMA entry (PROTOCOL.INI)
+   {tokwd} section
+     defined
+     values
+ DMA jumper configuration
+ Dmachannel entry (PROTOCOL.INI)
+   {elnkii} section
+     defined
+     values
+   {elnk} section
+     defined
+     values
+   {tlnk} section
+     defined
+     values
+ Dmamode entry (PROTOCOL.INI)
+   {elnk} section
+     defined
+     values
+ Dosnetb driver
+ Driver configuration
+    see Configuration, driver
+ Drivername entry (PROTOCOL.INI)
+   {elnkii} section
+     defined
+     values
+   {elnkmc} section
+     defined
+     values
+   {elnk} section
+     defined
+     values
+   {ibmneta} section
+     defined
+     values
+   {ibmnet} section
+     defined
+     values
+   {ibmtok} section
+     defined
+     values
+   {macwd} section
+     defined
+     values
+   {ncrtrn} section
+     defined
+     values
+   {netbeui} section
+     defined
+     values
+   {ni5210} section
+     defined
+     values
+   {ni9210} section
+     defined
+     values
+   {tlnk} section
+     defined
+     values
+   {tokwd} section
+     defined
+     values
+   {ubmac} section
+     defined
+     values
+ Drivername
+   defined
+ DRIVERS directory
+    see LANMAN\DRIVERS directory
+ Drivers
+   loopback
+   media access control
+     3Com EtherLink II
+     3Com EtherLink
+     3Com EtherLink/MC
+     3Com TokenLink
+     IBM Baseband
+     IBM Baseband/A
+     IBM PC Network II/A
+     IBM PC Network
+     IBM Token-Ring
+     Interlan NI-5210
+     Interlan NI-9210
+     NCR Token-Ring
+     Ungermann-Bass UBMAC
+     updates
+     Western Digital EtherCard Plus
+     Western Digital EtherCard Plus/A
+     Western Digital TokenCard PLUS16
+     Western Digital TokenCard WS
+     Western Digital TokenCard
+   monolithic
+   network device
+   network device, configuration of
+   products
+     3Com EtherLink II
+     3Com EtherLink/MC
+     3Com TokenLink
+     IBM Token-Ring A
+     Microsoft NetBEUI 2.0
+   Protocol Manager
+   third party
+   transport
+     NetBEUI
+     remoteboot (COMTOKR)
+ Dual-boot systems
+
+     E
+ 80286 and 80386 computers
+   configuring 3Com EtherLink driver
+   configuring 3Com EtherLink II
+ 8086 and 8088 computers
+   configuring 3Com EtherLink II
+ Earlyrelease entry (PROTOCOL.INI)
+   {ibmtok} section
+     defined
+     values
+ Elnk$ drivers
+ ELNK
+ Elnkii$ drivers
+ ELNKII
+ Elnkmc$ drivers
+ ELNKMC
+ Emulating network behavior
+ EtherNet networks
+   retransmission timer values
+ Examples
+   configuration
+
+     F
+ Filename extensions
+   for drivers
+ FIND.NAME requests
+
+     G
+ General request queue entries
+ General request queue
+   for IBM network cards
+ Global descriptor table (GDT) selectors
+
+     I
+ I-frame packet descriptors
+ IBM AT computers
+ IBM Baseband
+ IBM Baseband/A
+ IBM PC Network Baseband /A
+ IBM PC Network Baseband
+ IBM PC Network II
+ IBM PC Network II/A
+ IBM PC Network II
+    see Drivers, media access control
+ IBM PS/2 computer
+ IBM Token-Ring 16/4 A
+ IBM Token-Ring 16/4 Adapter
+ IBM Token-Ring 16/4 Adapter/A
+ IBM Token-Ring 16/4 Adapter
+   RAM size
+ IBM Token-Ring 16/4
+ IBM Token-Ring A
+ IBM Token-Ring Adapter II
+ IBM Token-Ring Adapter
+ IBM Token-Ring Adapter/A
+   RAM size
+ IBM Token-Ring cards
+ IBM Token-Ring II
+ IBM Token-Ring
+    see also Drivers, media access control
+ Ibmnet$ drivers
+ IBMNET
+ IBMNETA
+ Ibmtok$ drivers
+ IBMTOK
+ IFS entry (CONFIG.SYS)
+ Installable file systems (IFS)
+ Installation program
+   and configuration options
+ INT 5C
+ Interface
+   NDIS
+   NetBIOS
+ Interlan NI-5210
+    see also Drivers, media access control
+ Interlan NI-9210
+    see also Drivers media access control
+ Internal stacks
+   adjusting their sizes
+ Interrupt entry (PROTOCOL.INI)
+   {elnkii} section
+     defined
+     values
+   {elnk} section
+     defined
+     values
+   {ncrtrn} section
+     defined
+     values
+   {tlnk} section
+     defined
+     values
+ Interrupt
+   3Com TokenLink
+ Interrupts
+   3Com EtherLink II
+ Ioaddress entry (PROTOCOL.INI)
+   {elnkii} section
+     defined
+     values
+   {elnk} section
+     defined
+     values
+   {tlnk} section
+     defined
+     values
+ Iobase entry (PROTOCOL.INI)
+   {macwd} section
+     defined
+     values
+   {ni5210} section
+     defined
+     values
+   {tokwd} section
+     defined
+     values
+ Io_port entry (PROTOCOL.INI)
+   {ubmac} section
+     defined
+     values
+ Irq entry (PROTOCOL.INI)
+   {macwd} section
+     defined
+     values
+   {ni5210} section
+     defined
+     values
+   {tokwd} section
+     defined
+     values
+ Irq_level entry (PROTOCOL.INI)
+   {ubmac} section
+     defined
+     values
+
+     L
+ LAN Manager
+   installing
+   loopback networks
+   media access control drivers
+   version 1.0
+   version 2.0
+     loopback driver
+     transport driver
+   workstation driver
+ LANA number
+    see Local-area network adapter (LANA) number
+ Lanabase entry (PROTOCOL.INI)
+   {netbeui} section
+     defined
+     values
+ LANMAN.DOS directory
+ LANMAN.INI
+    see Configuration files, LANMAN.INI
+ LANMAN\DRIVERS directory
+ Local-area network adapter (LANA) number
+ Loopback driver
+    see also Drivers, loopback
+   defined
+ Loopback networks
+ LOOPDRV.OS2
+    see also Loopback driver
+ Looppackets entry (PROTOCOL.INI)
+   {netbeui} section
+     defined
+     values
+
+     M
+ MACWD
+ Manual
+   contents
+   notational conventions
+ Maxin entry (PROTOCOL.INI)
+   {netbeui} section
+     defined
+     values
+ Maxmulticast entry (PROTOCOL.INI)
+   {ibmneta} section
+     defined
+     values
+   {ibmnet} section
+     defined
+     values
+   {ubmac} section
+     defined
+     values
+ Maxmulticasts entry (PROTOCOL.INI)
+   {ni5210} section
+     defined
+     values
+   {ni9210} section
+     defined
+     values
+ Maxout entry (PROTOCOL.INI)
+   {netbeui} section
+     defined
+     values
+ Maxreceives entry (PROTOCOL.INI)
+   {ni5210} section
+     defined
+     values
+   {ni9210} section
+     defined
+     values
+ Maxrequests entry (PROTOCOL.INI)
+   {elnk} section
+     defined
+     values
+   {ibmneta} section
+     defined
+     values
+   {ibmnet} section
+     defined
+     values
+   {macwd} section
+     defined
+     values
+   {tokwd} section
+     defined
+     values
+   {ubmac} section
+     defined
+     values
+ Maxtransmits entry (PROTOCOL.INI)
+   {elnkii} section
+     defined
+     values
+   {elnkmc} section
+     defined
+     values
+   {elnk} section
+     defined
+     values
+   {ibmneta} section
+     defined
+     values
+   {ibmnet} section
+     defined
+     values
+   {ibmtok} section
+     defined
+     values
+   {macwd} section
+     defined
+     values
+   {netbeui} section
+     defined
+     values
+   {ni5210} section
+     defined
+     values
+   {ni9210} section
+     defined
+     values
+   {tlnk} section
+     defined
+     values
+   {tokwd} section
+     defined
+     values
+   {ubmac} section
+     defined
+     values
+ Max_xmt_size entry (PROTOCOL.INI)
+   {ncrtrn} section
+     defined
+     values
+ Media access control drivers
+    see also Drivers, media access control
+   installing several
+   internal stack size
+   Microsoft NetBEUI 2.0
+   shipped with LAN Manager
+ Media access control
+   defined
+ Memorywindow entry (PROTOCOL.INI)
+   {ubmac} section
+     defined
+     values
+ Microsoft NetBEUI 2.0
+   description
+ Mintransmits entry (PROTOCOL.INI)
+   {netbeui} section
+     defined
+     values
+ Modems
+   setting retransmission times
+ Monolithic drivers
+ Monolithic Drivers
+ Monolithic drivers
+    see also Drivers, monolithic
+   defined
+   LAN Manager's
+   Protocol Manager
+ MS OS/2
+   LAN Manager transport drivers for
+   memory-saving configuration for workstations
+   netbeui$ driver
+   version 1.2
+   workstation driver
+ MS-DOS
+   dosnetb driver
+   editing LANMAN.INI
+      for Basic
+      for Enhanced
+   handling multiple protocol stacks
+   LAN Manager transport drivers for
+   operating system
+ Multicast address table
+   for IBM network cards
+ Multicast addresses
+   and Interlan MI-5210
+   and Interlan MI-9210
+ Multiple networks
+    see Networks, multiple
+
+     N
+ Name table
+ Names entry (PROTOCOL.INI)
+   {netbeui} section
+     defined
+     values
+ NCB
+ Ncbs entry (PROTOCOL.INI)
+   {netbeui} section
+     defined
+     values
+ NCR Token-Ring card
+ NCR Token-Ring
+    see also Drivers, media access control
+ Ncrtok$ driver
+ NCRTRN
+ Net line
+ Netaddress entry (PROTOCOL.INI)
+   {elnkii} section
+     defined
+     values
+   {elnkmc} section
+     defined
+     values
+   {elnk} section
+     defined
+     values
+   {ibmtok} section
+     defined
+     values
+   {tlnk} section
+     defined
+     values
+ Netbeui$ driver
+ NETBEUI.DOS
+    see also Microsoft NetBEUI 2.0
+ NETBEUI.OS2
+    see also Microsoft NetBEUI 2.0
+ NetBEUI
+    see also Drivers, transport
+   in LANMAN.INI
+   multiple drivers
+ Netbind entry (LANMAN.INI)
+ Netbind
+ NetBIOS
+   datagrams
+ Netbiosretries entry (PROTOCOL.INI)
+   {netbeui} section
+     defined
+     values
+ Netbiostimeout entry (PROTOCOL.INI)
+   {netbeui} section
+     defined
+     values
+ Netn entry (LANMAN.INI)
+ Netservices entry (LANMAN.INI)
+ NETWKSTA.SYS driver
+    see Redirector
+ NETWKSTA.SYS
+ Network adapter cards
+   3Com EtherLink II
+   3Com EtherLink
+   3Com EtherLink/MC
+   3Com TokenLink
+   DMA jumper configurations
+   emulating a network without a card
+   IBM PC Network Baseband /A
+   IBM PC Network Baseband
+   IBM PC Network II
+   IBM PC Network II/A
+   IBM Token-Ring 16/4 A
+   IBM Token-Ring 16/4
+   IBM Token-Ring A
+   IBM Token-Ring II
+   IBM Token-Ring
+   installing several
+   Interlan NI-5210
+   Interlan NI-9210
+   LANA numbers
+   NCR Token-Ring
+   Protocol Manager
+   reliability
+   Ungermann-Bass NIUpc
+   Ungermann-Bass NIUpcPlus
+   Ungermann-Bass NIUps
+   Ungermann-Bass PCNIU
+   Ungermann-Bass PCNIUex
+   using several
+   Western Digital EtherCard Plus
+   Western Digital EtherCard Plus/A
+   Western Digital Token Card PLUS 16
+   Western Digital TokenCard WS
+   Western Digital TokenCard
+ Network basic input/output system (NetBIOS)
+ Network control blocks (NCBs)
+    see also NCB
+   allocating descriptors
+   determinining protocol stacks
+   INT 5C NCB processing
+ Network device drivers
+    see also Drivers, network device
+   how they work
+     types of drivers
+   installing
+     manual installation
+   LAN Manager requirements
+   products
+     3Com EtherLink/MC
+     IBM Token-Ring
+ Network Driver Interface Specification (NDIS)
+   LAN Manager 2.0
+ Network
+   architecture
+   device driver
+   loopback
+ Networks
+   multiple
+ Ni5210$ driver
+ NI5210.OS2
+ NI9210.OS2
+ Node_address entry (PROTOCOL.INI)
+   {ncrtrn} section
+     defined
+     values
+ Notational conventions
+
+     O
+ Operating system
+   computer
+
+     P
+ Packets entry (PROTOCOL.INI)
+   {netbeui} section
+     defined
+     values
+ PC Network II/A
+    see Drivers, media access control
+ Peer service
+ Permanentaddr entry (PROTOCOL.INI)
+   {ubmac} section
+     defined
+     values
+ Piggybackacks entry (PROTOCOL.INI)
+   {netbeui} section
+     defined
+     values
+ Piggybacks
+   data transmission
+ Pipeline entry (PROTOCOL.INI)
+   {netbeui} section
+     defined
+     values
+ Port_address entry (PROTOCOL.INI)
+   {ncrtrn} section
+     values
+   {ncrtrn}
+ Primary (Token-Ring) network adapter card
+   setting RAM
+ Primary entry (PROTOCOL.INI)
+   {ibmtok} section
+     defined
+     values
+ Productid entry (PROTOCOL.INI)
+   {ibmtok} section
+     defined
+     values
+   {tlnk} section
+     defined
+     values
+ Product_id entry (PROTOCOL.INI)
+   {ncrtrn} section
+     defined
+     values
+ PROTMAN.DOS
+ PROTMAN.OS2
+ Protocol Manager
+   default options
+   defined
+   driver
+ Protocol stacks
+   chaining
+   defined
+   determining which handles an NCB
+   for multiple network adapter cards
+   limits
+ PROTOCOL.INI
+    see Configuration files, PROTOCOL.INI
+ Protocols
+   defined
+
+     R
+ Ram entry (PROTOCOL.INI)
+   {ibmtok} section
+     defined
+     values
+ Ramaddress entry (PROTOCOL.INI)
+   {macwd} section
+     defined
+     values
+ RECEIVE operations
+ Receive window
+   defined
+ RECEIVE-ANY operations
+ RECEIVE-ANY-ANY NCB operations
+ Receivebuffers entry (PROTOCOL.INI)
+   {ibmneta} section
+     defined
+     values
+   {ibmnet} section
+     defined
+     values
+   {macwd} section
+     defined
+     values
+   {tokwd} section
+     defined
+     values
+   {ubmac} section
+     defined
+     values
+ Receivebufsize entry (PROTOCOL.INI)
+   {ibmneta} section
+     defined
+     values
+   {ibmnet} section
+     defined
+     values
+   {macwd} section
+     defined
+     values
+   {tokwd} section
+     defined
+     values
+   {ubmac} section
+     defined
+     values
+ Receivechains entry (PROTOCOL.INI)
+   {macwd} section
+     defined
+     values
+   {tokwd} section
+     defined
+     values
+ Receivemethod entry (PROTOCOL.INI)
+   {ubmac} section
+     defined
+     values
+ Receiver adapter buffers
+ Receiver windows
+   and t2 value
+ Recvbufs entry (PROTOCOL.INI)
+   {ibmtok} section
+     defined
+     values
+ Recvbufsize entry (PROTOCOL.INI)
+   {ibmtok} section
+     defined
+     values
+ Redir command
+   use in LANMAN.INI
+ Redirector
+   defined
+ RequestInterrupt
+ Retransmission timer value
+   defined
+
+     S
+ Section names
+   requirements
+ Selectors entry (PROTOCOL.INI)
+   {netbeui} section
+     defined
+     values
+ Send window
+   defined
+ SEND.BROADCAST.DATAGRAM function (NCB)
+ SEND.DATAGRAM function (NCB)
+ Server announcements
+ Server service
+ Servers
+   adjusting GDT selectors
+   assigning a network
+   configuration example
+     two networks plus loopback driver
+     two networks
+   configuring
+     3Com EtherLink driver
+     3Com EtherLink II
+     3Com EtherLink/MC
+     3Com TokenLink
+   server announcements
+ Servnets entry (LANMAN.INI)
+ Sessions entry (PROTOCOL.INI)
+   {netbeui} section
+     defined
+     values
+ Sessions
+   GDT selector requirements
+   limiting NetBIOS sessions
+ SetPacketFilter
+ Setup program (LAN Manager)
+ Shared memory mode
+   effect on 3Com EtherLink II
+ Shared_ram entry (PROTOCOL.INI)
+   {ncrtrn} section
+     defined
+     values
+ Slotnumber entry (PROTOCOL.INI)
+   {elnkmc} section
+     defined
+     values
+   {ubmac} section
+     defined
+ slotnumber entry (PROTOCOL.INI)
+   {ubmac} section
+     values
+ Speed entry (PROTOCOL.INI)
+   {tlnk} section
+     defined
+     values
+ Stacksize entry (PROTOCOL.INI)
+   {netbeui} section
+     defined
+     values
+
+     T
+ 3Com EtherLink II
+    see also Drivers, media access control
+   configuration options
+   memory
+     modes
+     requirements
+ 3Com EtherLink
+ 3Com EtherLink/MC
+    see also Drivers, media access control
+   configuration options
+ 3Com EtherLink
+    see also Drivers, media access control
+   configuration options
+ 3Com TokenLink
+    see also Drivers, media access control
+ T1 entry (PROTOCOL.INI)
+   {netbeui} section
+     defined
+     values
+ T2 entry (PROTOCOL.INI)
+   {netbeui} section
+     defined
+     values
+ Term (PIC)
+ Ti entry (PROTOCOL.INI)
+   {netbeui} section
+     defined
+     values
+ Timer values
+   acknowledgement
+   inactivity
+   retransmission
+ TLNK
+ Token-Ring 16/4 A buffer size
+   receive
+   transmit
+ Token-Ring 16/4 buffer size
+   receive
+   transmit
+ Token-Ring Adapter II
+ Token-Ring Adapter
+ Token-Ring buffer size (NCR)
+   transmit
+ Token-Ring buffer size
+   receive
+   transmit
+ Token-Ring II buffer size
+   receive
+   transmit
+ Token-Ring networks
+   bridges
+   retransmission timer values
+ Token-Ring/A buffer size
+   receive
+   transmit
+ TOKWD
+ Transceiver entry (PROTOCOL.INI)
+   {elnkii} section
+     defined
+     values
+ Transmit buffers
+ Transmit chain request queue
+   for IBM network cards
+ Transmit queue entries
+   for 3Com EtherLink II
+   for 3Com EtherLink/MC
+   for 3Com TokenLink
+ Transmit windows
+ TransmitChain commands
+   and Interlan NI-5210
+   and Interlan NI-9210
+ Transport drivers
+    see also Drivers, transport
+   defined
+ Typographic conventions
+
+     U
+ Ubmac$ driver
+ UBMAC
+ UI-frames
+ Ungermann- Bass NIUpcPlus
+ Ungermann- Bass PCNIUex
+ Ungermann-Bass card
+ Ungermann-Bass NIUpc
+ Ungermann-Bass NIUpcPlus
+ Ungermann-Bass NIUps
+ Ungermann-Bass PCNIU
+ Ungermann-Bass PCNIUex
+ Ungermann-Bass UBMAC
+    see also Drivers, media access control
+
+     W
+ Wait states
+   for TokenLink
+ Western Digital EtherCard Plus
+ Western Digital EtherCard Plus/A
+    see also Drivers, media access control
+ Western Digital EtherCard Plus
+    see also Drivers, media access control
+ Western Digital TokenCard (WD8005)
+ Western Digital TokenCard PLUS 16 (WD8015)
+ Western Digital TokenCard PLUS16
+    see also Drivers, media access control
+ Western Digital TokenCard WS (WD8005 WS)
+ Western Digital TokenCard WS
+    see also Drivers, media access control
+ Western Digital TokenCard
+    see also Drivers, media access control
+ Windowerrors entry (PROTOCOL.INI)
+   {netbeui} section
+     defined
+     values
+ Workstation driver
+   redirector
+ Workstations
+   configuration example
+     multiple networks
+     one network
+   LAN Manager's workstation driver
+   specifying networks for
+ Wrknets entry (LANMAN.INI)
+ Wrknets
+
+     X
+ Xmitbufs entry (PROTOCOL.INI)
+   {elnkii} section
+     defined
+     values
+   {ibmtok} section
+     defined
+     values
+ Xmitbufsize entry (PROTOCOL.INI)
+   {ibmtok} section
+     defined
+     values
