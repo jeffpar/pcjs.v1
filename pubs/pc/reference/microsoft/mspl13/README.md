@@ -111,6 +111,5 @@ that index table should be easy to detect.
 So, here's a list of the first ten word offsets:
 
 	0x1804 0x180E 0x181D 0x182C 0x183B 0x184A 0x1859 0x1864 0x186E 0x187D
- 
 
 {% endcomment %}
