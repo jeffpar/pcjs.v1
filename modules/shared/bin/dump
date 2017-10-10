@@ -139,7 +139,7 @@ function searchFile(values)
     validate(buffer, "no file");
     let a = values.map(v => {
         let n = Str.parseInt(v, 16);
-        validate(n !== undefined, "bad value", v);
+        validate(n !== undefined || n < 0 || n > 255, "bad value", v);
         return n;
     });
     for (let offset = 0; offset < buffer.length; offset++) {
@@ -200,6 +200,10 @@ var onCommand = function (cmd, context, filename, callback)
     }
     callback(null, result);
 };
+
+if (process.argv.length > 2) {
+    openFile(process.argv[2]);
+}
 
 repl.start({
     prompt: "dump> ",
