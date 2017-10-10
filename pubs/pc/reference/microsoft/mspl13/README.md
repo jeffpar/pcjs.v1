@@ -98,7 +98,19 @@ Here are the entries for those words:
 	0x08346: other       39 96 04 00 52 00
 	0x0AC26: system      3B D4 05 00 C0 00
 	0x05CF8: functions   47 00 03 00 35 00
+	
+Here's the list of offsets:
 
-To be continued....
+	0x09617 0x0AC26 0x031A6 0x0761D 0x08346 0x0AC26 0x05CF8
+
+However, since all words are stored in alphabetical order, alongside their associated 6-byte value without any
+alignment padding, there must almost certainly be a separate table (index) containing nothing but offsets of all
+the words.  And since that table would almost certainly be used to perform binary searches of the word table,
+that index table should be easy to detect.
+
+So, here's a list of the first ten word offsets:
+
+	0x1804 0x180E 0x181D 0x182C 0x183B 0x184A 0x1859 0x1864 0x186E 0x187D
+ 
 
 {% endcomment %}

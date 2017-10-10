@@ -80,16 +80,20 @@ function closeFile()
 }
 
 /**
- * dumpFile(sOffset, length)
+ * dumpFile(sOffset, length, size, comment)
  *
  * @param {number} offset
  * @param {number} [length]
+ * @param {number} [size]
+ * @param {string} [comment]
  * @return {number}
  */
-function dumpFile(offset, length)
+function dumpFile(offset, length, size = 1, comment = "")
 {
+    validate(buffer, "no file");
+    validate(offset >= 0 && offset < buffer.length, "offset out of range", offset);
     let sDump = "";
-    let size = 1, cb = length;
+    let cb = length;
     let cLines = ((cb + 15) >> 4) || 1;
     let cbLine = 16;
     while (cLines-- && cb > 0) {
@@ -104,11 +108,11 @@ function dumpFile(offset, length)
                 sData += (size == 1? (i == 9? '-' : ' ') : "  ");
                 data = iByte = 0;
             }
-            sChars += (b >= 32 && b < 128? String.fromCharCode(b) : '.');
+            sChars += (b >= 32 && b < 127? String.fromCharCode(b) : '.');
             cb--;
         }
         if (sDump) sDump += '\n';
-        sDump += sAddr + "  " + sData + Str.pad(sChars, sChars.length + i * 3 + 1, true);
+        sDump += sAddr + "  " + sData + Str.pad(sChars, sChars.length + i * 3 + 1, true) + comment;
     }
     if (sDump) printf("%s\n", sDump);
     offsetPrev = offset;
@@ -139,10 +143,10 @@ function searchFile(values)
     validate(buffer, "no file");
     let a = values.map(v => {
         let n = Str.parseInt(v, 16);
-        validate(n !== undefined || n < 0 || n > 255, "bad value", v);
+        validate(n !== undefined || n < 0 || n > 0xff, "value out of range", v);
         return n;
     });
-    for (let offset = 0; offset < buffer.length; offset++) {
+    for (let offset = 0; offset <= buffer.length - a.length; offset++) {
         let i, cb = a.length;
         for (i = 0; i < cb; i++) {
             if (buffer[offset + i] != a[i]) break;
@@ -151,6 +155,48 @@ function searchFile(values)
             dumpFile(offset & ~0xf, 16);
             offset += a.length - 1;
             matches++;
+        }
+    }
+    return matches;
+}
+
+/**
+ * searchDeltas(values, maxSpread)
+ *
+ * @param {Array.<string>} values
+ * @param {number} [maxSpread]
+ * @return {number}
+ */
+function searchDeltas(values, maxSpread = 8)
+{
+    let matches = 0;
+    validate(buffer, "no file");
+    validate(values.length > 1, "not enough values");
+    let a = values.map(v => {
+        let n = Str.parseInt(v, 16);
+        validate(n !== undefined || n < 0 || n > 0xffff, "value out of range", v);
+        return n;
+    });
+    let deltas = [0];
+    for (let i = 1; i < a.length; i++) {
+        deltas.push(a[i] - a[i-1]);
+    }
+    for (let offset = 0; offset < buffer.length - deltas.length * 2; offset++) {
+        for (let spread = 0; spread <= maxSpread; spread++) {
+            let off = offset;
+            let i, n = deltas.length, wPrev = 0;
+            for (i = 0; i < n; i++) {
+                let w = buffer[off++] | (buffer[off++] << 8);
+                off += spread;
+                if (i && (w - wPrev) != deltas[i]) break;
+                wPrev = w;
+            }
+            if (i == n) {
+                dumpFile(offset, 16, 1, "  spread = " + spread);
+                offset += deltas.length - 2;
+                matches++;
+                break;
+            }
         }
     }
     return matches;
@@ -169,16 +215,18 @@ var onCommand = function (cmd, context, filename, callback)
     let result = false;
     let args = cmd.replace(/\s+/g, ' ').trim().split(' ');
     try {
-        switch (args[0]) {
+        let sCommand = args[0];
+        args.shift();
+        switch (sCommand) {
         case "close":
             result = closeFile();
             break;
         case "d":
         case "dump":
-            result = dumpFile(Str.parseInt(args[1], 16) || offsetPrev, Str.parseInt(args[2], 16) || 128);
+            result = dumpFile(Str.parseInt(args[0], 16) || offsetPrev, Str.parseInt(args[1], 16) || 128);
             break;
         case "open":
-            result = openFile(args[1]);
+            result = openFile(args[0]);
             break;
         case "q":
         case "quit":
@@ -187,11 +235,13 @@ var onCommand = function (cmd, context, filename, callback)
             break;
         case "s":
         case "search":
-            args.shift();
             result = searchFile(args);
             break;
+        case "sd":
+            result = searchDeltas(args);
+            break;
         default:
-            printf("unrecognized command: %s\n", args[0]);
+            printf("unrecognized command: %s\n", sCommand);
             break;
         }
     }

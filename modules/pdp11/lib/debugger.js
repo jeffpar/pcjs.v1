@@ -2944,7 +2944,7 @@ class DebuggerPDP11 extends Debugger {
                 i -= n; nBytes -= n;
                 while (size == 1 && n--) {
                     var c = v & 0xff;
-                    sChars += (c >= 32 && c < 128? String.fromCharCode(c) : '.');
+                    sChars += (c >= 32 && c < 127? String.fromCharCode(c) : '.');
                     v >>= 8;
                 }
             }
