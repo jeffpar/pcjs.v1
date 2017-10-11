@@ -73,32 +73,40 @@ var CP437ToUnicode = [
 ];
 
 /**
- * processFile(sPath)
+ * processFile(sInputFile, sOutputFile)
  *
- * @param {string} sPath
+ * @param {string} sInputFile
+ * @param {string} [sOutputFile]
  */
-function processFile(sPath)
+function processFile(sInputFile, sOutputFile)
 {
     try {
-        let sText = fs.readFileSync(sPath, "binary");
+        let sNew = "";
+        let sText = fs.readFileSync(sInputFile, "binary");
         let aLines = sText.split(/(?:^|\r?\n) ?/);
         for (let l = 0; l < aLines.length;) {
-            let sNew = "";
+            let sNewLine = "";
             let sLine = aLines[l++];
             for (let i = 0; i < sLine.length;) {
                 let chCode = sLine.charCodeAt(i++);
                 //
-                // 0x7F was used as a hyperlinking character; we simply remove it for now.
+                // 0x7F was used as a hyperlinking character; we simply remove it for now.  Ditto for 0x1E.
                 //
-                if (chCode == 0x7F) continue;
+                if (chCode == 0x7F || chCode == 0x1E) continue;
                 let chNew = CP437ToUnicode[chCode];
                 if (chCode == 0x09 || chNew === undefined) {
                     throw new Error("line " + l + ", pos " + i + ": unrecognized character (" + chCode + ")");
                 }
-                sNew += chNew;
+                sNewLine += chNew;
             }
-            // sNew = unescape(encodeURIComponent(sNew));
-            console.log('\t' + sNew);
+            if (!sOutputFile) {
+                console.log(sNewLine);
+            } else {
+                sNew += '\t' + sNewLine + '\n';
+            }
+        }
+        if (sOutputFile) {
+            fs.writeFileSync(sOutputFile, sNew);
         }
     }
     catch(err) {
@@ -107,8 +115,8 @@ function processFile(sPath)
 }
 
 if (process.argv.length <= 2) {
-    console.log("nothing to do");
+    console.log("usage: node txt2md [input filename[ [output filename]");
     process.exit();
 }
 
-processFile(process.argv[2]);
+processFile(process.argv[2], process.argv[3]);

@@ -6,6 +6,10 @@ permalink: /pubs/pc/reference/microsoft/mspl13/msdos/dosref33/
 
 MS-DOS Version 3.3 Programmer's Reference
 -----------------------------------------
+
+	TITLE PAGE
+	
+	
 	
 	───────────────────────────────────────────────────────────────────────────
 	
@@ -404,7 +408,7 @@ MS-DOS Version 3.3 Programmer's Reference
 	
 	     07H   Direct Console       Gets a character from standard input
 	     Code  Request              Description
-	▲     07H   Direct Console       Gets a character from standard input
+	     07H   Direct Console       Gets a character from standard input
 	           Input
 	
 	     08H   Read Keyboard        Gets a character from standard input
@@ -530,7 +534,7 @@ MS-DOS Version 3.3 Programmer's Reference
 	                                without executing it
 	
 	     Code    Request            Description
-	▲
+	
 	     4CH     End Process        Returns control to the
 	                                invoking process
 	
@@ -698,7 +702,7 @@ MS-DOS Version 3.3 Programmer's Reference
 	                                         handle
 	
 	     Code  Request                       Description
-	▲
+	
 	     46H   Force Duplicate File Handle   Makes an existing handle refer to
 	                                         the same file as another existing
 	                                         handle
@@ -740,7 +744,7 @@ MS-DOS Version 3.3 Programmer's Reference
 	     3DH     Open Handle   Opens a file by using one of the
 	                           file-sharing modes
 	     Code    Request       Description
-	▲                           file-sharing modes
+	                           file-sharing modes
 	
 	     440BH   IOCtl Retry   (before Interrupt 24 is issued)
 	                           Specifies how many times to retry
@@ -782,7 +786,7 @@ MS-DOS Version 3.3 Programmer's Reference
 	                                               contains removable medium
 	
 	     Code        Request                       Description
-	▲
+	
 	     440CH       Generic IOCtl (for handles)   Sets Generic IOCtl for
 	                                               handles and supports code
 	                                               pages for devices
@@ -824,7 +828,7 @@ MS-DOS Version 3.3 Programmer's Reference
 	     ──────────────────────────────────────────────────────────────────────
 	     39H   Create Directory                  Creates a subdirectory
 	     Code  Request                           Description
-	▲     39H   Create Directory                  Creates a subdirectory
+	     39H   Create Directory                  Creates a subdirectory
 	
 	     3AH   Remove Directory                  Deletes a subdirectory
 	
@@ -845,7 +849,7 @@ MS-DOS Version 3.3 Programmer's Reference
 	     4FH   Find Next File                    Searches a directory for the
 	                                             next entry that matches a
 	     Code  Request                           Description
-	▲                                             next entry that matches a
+	                                             next entry that matches a
 	                                             filename
 	
 	     56H   Change Directory Entry            Renames a file
@@ -929,7 +933,7 @@ MS-DOS Version 3.3 Programmer's Reference
 	                                 which the entry is reassigned
 	
 	     Code    Request             Description
-	▲
+	
 	     5F03H   Make Assign-List    Redirects a workstation drive or device
 	             Entry               to a server directory or device
 	
@@ -1013,7 +1017,7 @@ MS-DOS Version 3.3 Programmer's Reference
 	
 	     1BH   Get Default Drive       Returns disk-format data
 	     Code  Request                 Description
-	▲     1BH   Get Default Drive       Returns disk-format data
+	     1BH   Get Default Drive       Returns disk-format data
 	           Data
 	
 	     1CH   Get Drive Data          Returns disk-format data
@@ -1034,7 +1038,7 @@ MS-DOS Version 3.3 Programmer's Reference
 	
 	     2FH   Get Disk Transfer       Returns system-disk-I/O-buffer
 	     Code  Request                 Description
-	▲     2FH   Get Disk Transfer       Returns system-disk-I/O-buffer
+	     2FH   Get Disk Transfer       Returns system-disk-I/O-buffer
 	           Address                 address
 	
 	     30H   Get MS-DOS Version      Returns MS-DOS version number
@@ -1077,7 +1081,7 @@ MS-DOS Version 3.3 Programmer's Reference
 	     10H    Close File                    3EH    Close Handle
 	     Old System Call                      Has Been Superseded By
 	     Code   Function                      Code   Function
-	▲     10H    Close File                    3EH    Close Handle
+	     10H    Close File                    3EH    Close Handle
 	
 	     11H    Search for First Entry        4EH    Find First File
 	
@@ -1098,7 +1102,7 @@ MS-DOS Version 3.3 Programmer's Reference
 	     21H    Random Read                   3FH    Read Handle
 	     Old System Call                      Has Been Superseded By
 	     Code   Function                      Code   Function
-	▲     21H    Random Read                   3FH    Read Handle
+	     21H    Random Read                   3FH    Read Handle
 	
 	     22H    Random Write                  40H    Write Handle
 	
@@ -1119,7 +1123,7 @@ MS-DOS Version 3.3 Programmer's Reference
 	     20H    Program Terminate             4CH    End Process
 	     Old System Call                      Has Been Superseded By
 	     Code   Function                      Code   Function
-	▲     20H    Program Terminate             4CH    End Process
+	     20H    Program Terminate             4CH    End Process
 	
 	     27H    Terminate But Stay Resident   31H    Keep Process
 	
@@ -1161,7 +1165,7 @@ MS-DOS Version 3.3 Programmer's Reference
 	     18H     24     8      Reserved
 	     Offset
 	     Hex     Dec    Bytes  Field
-	▲     18H     24     8      Reserved
+	     18H     24     8      Reserved
 	     20H     32     1      Current Record
 	     21H     33     4      Relative Record
 	
@@ -1349,7 +1353,7 @@ MS-DOS Version 3.3 Programmer's Reference
 	     17      Not same device
 	     18      No more files
 	     Code    Meaning
-	▲     18      No more files
+	     18      No more files
 	     19      Disk is write-protected
 	
 	     20      Bad disk unit
@@ -1370,7 +1374,7 @@ MS-DOS Version 3.3 Programmer's Reference
 	     34      Wrong disk
 	     35      FCB unavailable
 	     Code    Meaning
-	▲     35      FCB unavailable
+	     35      FCB unavailable
 	     36-49   Reserved
 	
 	     50      Network request not supported
@@ -1391,7 +1395,7 @@ MS-DOS Version 3.3 Programmer's Reference
 	     64      Network name was deleted
 	     65      Access denied
 	     Code    Meaning
-	▲     65      Access denied
+	     65      Access denied
 	     66      Network device type incorrect
 	     67      Network name not found
 	     68      Network name limit exceeded
@@ -1412,7 +1416,7 @@ MS-DOS Version 3.3 Programmer's Reference
 	     87      Invalid parameter
 	     88      Net write fault
 	     Code    Meaning
-	▲     88      Net write fault
+	     88      Net write fault
 	
 	
 	To handle error conditions, put the following statement immediately after
@@ -1601,7 +1605,7 @@ MS-DOS Version 3.3 Programmer's Reference
 	     Absolute Disk Read               25H
 	     Absolute Disk Write              26H
 	     Description                      Interrupt
-	▲     Absolute Disk Write              26H
+	     Absolute Disk Write              26H
 	     CONTROL-C Handler Address        23H
 	     Critical-Error-Handler Address   24H
 	     Function Request                 21H
@@ -1622,7 +1626,7 @@ MS-DOS Version 3.3 Programmer's Reference
 	     02H           Display Character
 	     03H           Auxiliary Input
 	     Function      Description
-	▲     03H           Auxiliary Input
+	     03H           Auxiliary Input
 	     04H           Auxiliary Output
 	     05H           Print Character
 	     06H           Direct Console I/O
@@ -1643,7 +1647,7 @@ MS-DOS Version 3.3 Programmer's Reference
 	     15H           Sequential Write
 	     16H           Create File
 	     Function      Description
-	▲     16H           Create File
+	     16H           Create File
 	     17H           Rename File
 	     18H           Reserved
 	     19H           Get Current Disk
@@ -1664,7 +1668,7 @@ MS-DOS Version 3.3 Programmer's Reference
 	     2BH           Set Date
 	     2CH           Get Time
 	     Function      Description
-	▲     2CH           Get Time
+	     2CH           Get Time
 	     2DH           Set Time
 	     2EH           Set/Reset Verify Flag
 	     2FH           Get Disk Transfer Address
@@ -1685,7 +1689,7 @@ MS-DOS Version 3.3 Programmer's Reference
 	     3EH           Close Handle
 	     3FH           Read Handle
 	     Function      Description
-	▲     3FH           Read Handle
+	     3FH           Read Handle
 	     40H           Write Handle
 	     41H           Delete Directory Entry (Unlink)
 	     42H           Move File Pointer
@@ -1706,7 +1710,7 @@ MS-DOS Version 3.3 Programmer's Reference
 	     46H           Force Duplicate File Handle
 	     47H           Get Current Directory
 	     Function      Description
-	▲     47H           Get Current Directory
+	     47H           Get Current Directory
 	     48H           Allocate Memory
 	     49H           Free Allocated Memory
 	     4AH           Set Block
@@ -1727,7 +1731,7 @@ MS-DOS Version 3.3 Programmer's Reference
 	     5BH           Create New File
 	     5C00H         Lock
 	     Function      Description
-	▲     5C00H         Lock
+	     5C00H         Lock
 	     5C01H         Unlock
 	     5DH           Reserved
 	     5E00H         Get Machine Name
@@ -1769,7 +1773,7 @@ MS-DOS Version 3.3 Programmer's Reference
 	     Create New File                           5BH
 	     Create New PSP                            26H
 	     Description                               Interrupt
-	▲     Create New PSP                            26H
+	     Create New PSP                            26H
 	     Create Temporary File                     5AH
 	     Delete Directory Entry (Unlink)           41H
 	     Delete File                               13H
@@ -1790,7 +1794,7 @@ MS-DOS Version 3.3 Programmer's Reference
 	     Get Current Directory                     47H
 	     Get Current Disk                          19H
 	     Description                               Interrupt
-	▲     Get Current Disk                          19H
+	     Get Current Disk                          19H
 	     Get Date                                  2AH
 	     Get Default Drive Data                    1BH
 	     Get Disk Free Space                       36H
@@ -1811,7 +1815,7 @@ MS-DOS Version 3.3 Programmer's Reference
 	     Get/Set Country Data                      38H
 	     Get/Set Date/Time Of File                 57H
 	     Description                               Interrupt
-	▲     Get/Set Date/Time Of File                 57H
+	     Get/Set Date/Time Of File                 57H
 	     Get/Set File Attributes (Chmod)           43H
 	     Get/Set Global Code Page                  66H
 	     IOCtl Block                               4404H,4405H
@@ -1832,7 +1836,7 @@ MS-DOS Version 3.3 Programmer's Reference
 	     Open Handle                               3DH
 	     Parse File Name                           29H
 	     Description                               Interrupt
-	▲     Parse File Name                           29H
+	     Parse File Name                           29H
 	     Print Character                           05H
 	     Printer Setup                             5E02H
 	     Random Block Read                         27H
@@ -1853,7 +1857,7 @@ MS-DOS Version 3.3 Programmer's Reference
 	     Reserved                                  55H
 	     Reserved                                  5DH
 	     Description                               Interrupt
-	▲     Reserved                                  5DH
+	     Reserved                                  5DH
 	     Reserved                                  60H-61H
 	     Reserved                                  63H, 64H
 	     Reserved                                  69H-7FH
@@ -1874,7 +1878,7 @@ MS-DOS Version 3.3 Programmer's Reference
 	     Set/Reset Verify Flag                     2EH
 	     Terminate Program                         00H
 	     Description                               Interrupt
-	▲     Terminate Program                         00H
+	     Terminate Program                         00H
 	     Unlock                                    5C01H
 	     Write Handle                              40H
 	
@@ -5066,7 +5070,7 @@ MS-DOS Version 3.3 Programmer's Reference
 	     ────────────────────────────────────────────────────────────────────
 	     0     0       Stop parsing if a file separator is encountered.
 	     Bit   Value   Meaning
-	▲     0     0       Stop parsing if a file separator is encountered.
+	     0     0       Stop parsing if a file separator is encountered.
 	
 	           1       Ignore leading separators.
 	
@@ -5087,7 +5091,7 @@ MS-DOS Version 3.3 Programmer's Reference
 	                   string does not contain an extension.
 	
 	     Bit   Value   Meaning
-	▲
+	
 	           0       Set the extension in the FCB to three blanks if
 	                   the string does not contain an extension.
 	
@@ -6536,7 +6540,7 @@ MS-DOS Version 3.3 Programmer's Reference
 	     011        Deny read       Fails if the file has been
 	                                opened in compatibility mode or
 	     Bits 4-6   Sharing Mode    Description
-	▲                                opened in compatibility mode or
+	                                opened in compatibility mode or
 	                                for read access by any other
 	                                process.
 	
@@ -7250,7 +7254,7 @@ MS-DOS Version 3.3 Programmer's Reference
 	     11     1       Device understands open/close
 	
 	     Bit    Value   Meaning
-	▲
+	
 	     12             Reserved
 	
 	     13     1       Device supports output until busy
@@ -8048,7 +8052,7 @@ MS-DOS Version 3.3 Programmer's Reference
 	 2      0        The sectors in the track may not all
 	                 be the same size. (You should not use
 	Bit     Value    Meaning
-	▲                 be the same size. (You should not use
+	                 be the same size. (You should not use
 	                 this setting.)
 	
 	        1        The sectors in the track are all the
@@ -8931,7 +8935,7 @@ MS-DOS Version 3.3 Programmer's Reference
 	                          at offset 6CH of the new Program
 	     Offset   Length
 	     (Hex)    (Bytes)     Description
-	▲                          at offset 6CH of the new Program
+	                          at offset 6CH of the new Program
 	                          Segment Prefix
 	
 	
@@ -9749,7 +9753,7 @@ MS-DOS Version 3.3 Programmer's Reference
 	                         This is the default strategy.
 	
 	     Value   Name        Description
-	▲
+	
 	     1       Best fit    MS-DOS searches each available block
 	                         and allocates the smallest available
 	                         block that satisfies the request.
@@ -9875,7 +9879,7 @@ MS-DOS Version 3.3 Programmer's Reference
 	5      Hardware failure
 	
 	Class  Description
-	▲
+	
 	6      System software failure not the fault of the active process (could
 	       be caused by missing or incorrect configuration files, for example)
 	
@@ -12710,7 +12714,7 @@ MS-DOS Version 3.3 Programmer's Reference
 	
 	8       Output (Write)
 	Code    Function
-	▲8       Output (Write)
+	8       Output (Write)
 	
 	9       Output (Write) with Verify
 	
@@ -12731,7 +12735,7 @@ MS-DOS Version 3.3 Programmer's Reference
 	        devices)
 	
 	Code    Function
-	▲
+	
 	19      Generic IOCtl Request
 	
 	23      Get Logical Device
@@ -15062,7 +15066,7 @@ MS-DOS Version 3.3 Programmer's Reference
 	
 	        05H  The first character of the filename contains an E5H character.
 	Byte    Function
-	▲        05H  The first character of the filename contains an E5H character.
+	        05H  The first character of the filename contains an E5H character.
 	
 	        2EH  The entry is for a directory. If the second byte is also 2EH,
 	             the cluster field contains the cluster number of this
@@ -15083,7 +15087,7 @@ MS-DOS Version 3.3 Programmer's Reference
 	        Byte Contents
 	        ───────────────────────────────────────────────────────────────────
 	Byte    Function
-	▲        ───────────────────────────────────────────────────────────────────
+	        ───────────────────────────────────────────────────────────────────
 	        01H  File is marked read-only. An attempt to open the file for
 	             writing using Function 3DH (Open Handle) results in an error
 	             code being returned. This value can be used in programs along
@@ -15104,7 +15108,7 @@ MS-DOS Version 3.3 Programmer's Reference
 	
 	        10H  The entry defines a subdirectory, and is excluded from
 	Byte    Function
-	▲        10H  The entry defines a subdirectory, and is excluded from
+	        10H  The entry defines a subdirectory, and is excluded from
 	             normal directory searches.
 	
 	        20H  Archive bit. The bit is set to "on" whenever the file
@@ -15125,7 +15129,7 @@ MS-DOS Version 3.3 Programmer's Reference
 	        Offset 17H
 	        | H | H | H | H | H | M | M | M |
 	Byte    Function
-	▲        | H | H | H | H | H | M | M | M |
+	        | H | H | H | H | H | M | M | M |
 	
 	        Offset 16H
 	        | M | M | M | S | S | S | S | S |
@@ -15146,7 +15150,7 @@ MS-DOS Version 3.3 Programmer's Reference
 	        | M | M | M | D | D | D | D | D |
 	
 	Byte    Function
-	▲
+	
 	        where:
 	
 	        Y is the year, 0-119 (1980-2099).
@@ -15167,7 +15171,7 @@ MS-DOS Version 3.3 Programmer's Reference
 	1C-1F   File size in bytes. The first word of this four-byte field
 	        is the low-order part of the size.
 	Byte    Function
-	▲        is the low-order part of the size.
+	        is the low-order part of the size.
 	
 	
 	3.6  File Allocation Table (FAT)
@@ -15314,7 +15318,7 @@ MS-DOS Version 3.3 Programmer's Reference
 	BYTE media descriptor          FE    FC    FF    FD       FE☼1   FD   FE☼1
 	WORD sectors/FAT                1     2     1     2         6     6     2
 	Disk Size in inches                     5.25                     8
-	▲WORD sectors/FAT                1     2     1     2         6     6     2
+	WORD sectors/FAT                1     2     1     2         6     6     2
 	WORD no. hidden sectors         0     0     0     0         0     0     0
 	
 	
@@ -15335,7 +15339,7 @@ MS-DOS Version 3.3 Programmer's Reference
 	BYTE media descriptor☼1    FA    FC     FB     F9        F0        F9
 	WORD sectors/FAT            1     2      2      3         9         7
 	Disk Size in inches              3.5 or 5.25             3.5      5.25
-	▲WORD sectors/FAT            1     2      2      3         9         7
+	WORD sectors/FAT            1     2      2      3         9         7
 	WORD no. hidden sectors     0     0      0      0         0         0
 	
 	
@@ -15902,7 +15906,7 @@ MS-DOS Version 3.3 Programmer's Reference
 	
 	2-3     Number of bytes contained in last page; useful for reading
 	Offset  Contents
-	▲2-3     Number of bytes contained in last page; useful for reading
+	2-3     Number of bytes contained in last page; useful for reading
 	        overlays.
 	
 	4-5     Size of the file in 512-byte pages, including the header.
@@ -15923,7 +15927,7 @@ MS-DOS Version 3.3 Programmer's Reference
 	        program execution. Must be adjusted by relocation.
 	
 	Offset  Contents
-	▲
+	
 	10-11   Value to be loaded into the SP register before starting
 	        program execution.
 	
@@ -16511,7 +16515,7 @@ MS-DOS Version 3.3 Programmer's Reference
 	            are two cases:
 	
 	Method      Explanation
-	▲
+	
 	            Case        Explanation
 	            ───────────────────────────────────────────────────────────────
 	            (F2a)       The linker defines the symbol relative to some
@@ -16532,7 +16536,7 @@ MS-DOS Version 3.3 Programmer's Reference
 	            Case        Explanation
 	            ───────────────────────────────────────────────────────────────
 	Method      Explanation
-	▲            ───────────────────────────────────────────────────────────────
+	            ───────────────────────────────────────────────────────────────
 	            (F5a)       The target specifies a segment index: in this case,
 	                        the frame is determined as in (F0).
 	
@@ -17813,7 +17817,7 @@ MS-DOS Version 3.3 Programmer's Reference
 	                    HUGE, respectively. This Comment record is used
 	                    only by the Microsoft XENIX linker.
 	Value               Meaning
-	▲                    only by the Microsoft XENIX linker.
+	                    only by the Microsoft XENIX linker.
 	
 	158(9EH)            Force Segment Ordering
 	
@@ -17834,7 +17838,7 @@ MS-DOS Version 3.3 Programmer's Reference
 	                    The nodefaultlibrarysearch switch causes the linker
 	                    to ignore these comment records. The 159(9FH) class
 	Value               Meaning
-	▲                    to ignore these comment records. The 159(9FH) class
+	                    to ignore these comment records. The 159(9FH) class
 	                    record is ignored by XENIX versions of the
 	                    Microsoft linker.
 	

@@ -14,4 +14,3 @@ The following MS-DOS References were available in [Microsoft Programmer's Librar
 - [The MS-DOS Encyclopedia](encyc/)
 - [Advanced MS-DOS Programming](advdos/)
 - [The New Peter Norton Programmer's Guide](norton/)
-- [MS-DOS Sample Code](dossc/)
