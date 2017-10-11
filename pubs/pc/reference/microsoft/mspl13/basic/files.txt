@@ -1,9 +1,0 @@
-b71pgrmr	MS BASIC 7.1 Programming Guide
-b71lang		MS BASIC 7.1 Language Reference
-b71strt		MS BASIC 7.1 Getting Started
-qb45pgmr	MS QB 4.5 Programming in BASIC
-qblrn		Learning to Use MS QuickBASIC 4.5
-qb45lang	MS QB 4.5 Language Reference
-qbtbox		MS QB Programmer's Toolbox
-bassam		BASIC Sample Code
-basknow		MS KnowledgeBase - BASIC

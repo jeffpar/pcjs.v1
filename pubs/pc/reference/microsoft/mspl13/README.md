@@ -7,20 +7,20 @@ permalink: /pubs/pc/reference/microsoft/mspl13/
 Microsoft Programmer's Library 1.03
 -----------------------------------
 
-### Libraries
+The following reference collections are part of the Microsoft Programmer's Library 1.03 CD-ROM: 
 
-- [BASIC References](basic/)
-- [C References](msc/)
-- [Common References](common/)
-- [FORTRAN References](fortran/)
-- [Hardware References](intel/)
-- [MASM References](masm/)
+- BASIC References
+- C References
+- Common References
+- FORTRAN References
+- Hardware References
+- MASM References
 - [MS-DOS References](msdos/)
-- [MS Systems Journal](msj/)
-- [Network References](net/)
-- [OS/2 References](os2/)
-- [Pascal References](pas/)
-- [Windows References](win/)
+- MS Systems Journal
+- Network References
+- OS/2 References
+- Pascal References
+- Windows References
 
 {% comment %}
 

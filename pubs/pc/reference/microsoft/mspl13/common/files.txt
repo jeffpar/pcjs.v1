@@ -1,4 +1,0 @@
-mixlang		MS Mixed-Language Programming Guide
-codevw		CodeView/Utilities Manual
-msedit		MS Editor User's Guide
-msonline	MS OnLine User's Guide

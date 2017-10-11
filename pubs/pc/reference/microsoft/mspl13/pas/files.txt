@@ -1,6 +1,0 @@
-pasupd		MS Pascal 4.0 Update
-pasusrg		MS Pascal User's Guide
-pasref		MS Pascal Reference
-qpbyex		QuickPascal Pascal By Example
-passmpl		Pascal Sample Code
-pasknl		MS KnowledgeBase - PASCAL
