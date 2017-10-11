@@ -1,9 +1,3 @@
----
-layout: page
-title: IBM PC Application Demos
-permalink: /apps/pcx86/
----
-
 IBM PC Application Demos
 ------------------------
 
