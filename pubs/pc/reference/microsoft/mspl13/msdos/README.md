@@ -7,7 +7,7 @@ permalink: /pubs/pc/reference/microsoft/mspl13/msdos/
 MS-DOS References
 -----------------
 
-The following MS-DOS References are available on the [Microsoft Programmer's Library 1.03 CD-ROM](../):
+The following MS-DOS References are available on the [Microsoft Programmer's Library 1.03](../) CD-ROM:
 
 - [Advanced MS-DOS Programming](advdos/)
 - [MS-DOS 3.3 Programmer's Reference](dosref33/)
