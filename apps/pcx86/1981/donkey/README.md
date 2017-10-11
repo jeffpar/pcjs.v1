@@ -36,12 +36,6 @@ This particular machine has been configured to automatically save all your chang
 of your browser's local storage), so you can close the browser in the middle of a game of DONKEY, and
 the next time you load this page, your progress (and the donkey) should be perfectly restored.
 
-For more classic PC software experiences, see the PCjs collection of [IBM PC Application Demos](/apps/pcx86/).
-
-### DONKEY.BAS
-
-{% highlight basic %}
-{% include_relative ../basic/DONKEY.BAS %}
-{% endhighlight %}
-
-Browse all of the [BASIC Samples](../basic/) included with [PC-DOS 1.00](/disks/pcx86/dos/ibm/1.00/).
+Browse all the [BASIC Samples](../basic/) provided with [PC-DOS 1.00](/disks/pcx86/dos/ibm/1.00/), including
+[DONKEY.BAS](../basic/#donkeybas).  For more classic PC software experiences, see the PCjs collection of
+[IBM PC Application Demos](/apps/pcx86/).
