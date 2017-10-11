@@ -1,17 +1,17 @@
 ---
 layout: page
-title: Microsoft References
+title: Microsoft PC References
 permalink: /pubs/pc/reference/microsoft/
 ---
 
-Microsoft References
---------------------
+Microsoft PC References
+-----------------------
 
 ### Microsoft Programmer's Library
 
 - [Microsoft Programmer's Library (v1.03)](mspl13/)
 
-### Microsoft Specifications
+### Microsoft Software Specifications
 
 #### FAT (File Allocation Table) Documentation
 

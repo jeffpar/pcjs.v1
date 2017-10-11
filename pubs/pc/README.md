@@ -5,7 +5,7 @@ permalink: /pubs/pc/
 ---
 
 PC Publication Archive
----
+----------------------
 
 We have an assortment of PC-related resources:
 
@@ -13,7 +13,7 @@ We have an assortment of PC-related resources:
 * [Datasheets](/pubs/pc/datasheets/)
 * [Magazines](/pubs/pc/magazines/)
 * [Programming Guides](/pubs/pc/programming/)
-* [Reference Manuals](/pubs/pc/reference/)
+* [Reference Manuals](/pubs/pc/reference/) (eg, [Microsoft PC References](/pubs/pc/reference/microsoft/))
 * [Software User and Development Guides](/pubs/pc/software/) (eg, [DOS](/pubs/pc/software/dos/), [OS/2](/pubs/pc/software/os2/), [Windows](/pubs/pc/software/windows/))
 
 [<img src="https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/datasheets/thumbs/8088-CPU.jpg" width="200" height="260" alt= "8088 CPU"/>](datasheets/)

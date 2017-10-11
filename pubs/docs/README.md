@@ -31,7 +31,14 @@ listings and more:
 Publication Archive
 -------------------
 
-For general historical interest, the project includes a [Publication Archive](/pubs/).  Some highlights are shown below.
+For general historical interest, the project includes a [Publication Archive](/pubs/) that covers:
+
+* [IBM PCs and Compatibles](/pubs/pc/)
+* [Microsoft PC Reference Materials](/pubs/pc/reference/microsoft/)
+* [Digital Equipment Corporation (DEC)](/pubs/dec/)
+* [Ohio Scientific's 6502-based Challenger 1P](/pubs/c1p/)
+
+---
 
 [<img src="https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/datasheets/thumbs/8088-CPU.jpg" width="200" height="260" alt= "8088 CPU"/>](/pubs/pc/datasheets/)
 [<img src="https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/magazines/byte/BYTE-1975-11/thumbs/BYTE-1975-11 1.jpeg" width="200" height="260" alt= "Byte Magazine"/>](/pubs/pc/magazines/byte/)
