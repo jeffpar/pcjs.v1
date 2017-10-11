@@ -27,7 +27,7 @@ kramdown:
   input: GFM
   hard_wrap: false
 
-gems:
+plugins:
   - jekyll-sitemap
   - jekyll-redirect-from
 
