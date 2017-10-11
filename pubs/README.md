@@ -14,7 +14,7 @@ For general historical interest, the project includes a Publication Archive that
 	* [Datasheets](pc/datasheets/)
 	* [Magazines](pc/magazines/)
 	* [Programming Guides](pc/programming/)
-	* [Reference Manuals](pc/reference/)
+	* [Reference Manuals](pc/reference/) (eg, [Microsoft PC References](pc/reference/microsoft/))
 	* [Software User and Development Guides](pc/software/) (eg, [DOS](pc/software/dos/), [OS/2](pc/software/os2/), [Windows](pc/software/windows/))
 * [Digital Equipment Corporation (DEC)](dec/)
 	* [PDP-10](dec/pdp10/)

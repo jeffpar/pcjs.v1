@@ -11,4 +11,4 @@ An assortment of PC reference manuals, including:
 
 * [IBM PC Manuals](ibm/)
 * [Intel CPU Documents](intel/)
-* [Microsoft References](microsoft/)
+* [Microsoft PC References](microsoft/)
