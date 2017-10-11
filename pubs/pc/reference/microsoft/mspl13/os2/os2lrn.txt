@@ -1,0 +1,4692 @@
+ Microsoft Operating System/2: Learning Guide
+
+
+ ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+
+
+ Microsoft(R) Operating System/2: Learning Guide
+
+ Version 1.1
+
+
+ ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+
+
+   Information in this document is subject to change without notice and does
+   not represent a commitment on the part of Microsoft Corporation. The
+   software and/or databases described in this document are furnished under a
+   license agreement or nondisclosure agreement. The software and/or
+   databases may be used or copied only in accordance with the terms of the
+   agreement. The purchaser may make one copy of the software for backup
+   purposes. No part of this manual and/or database may be reproduced or
+   transmitted in any form or by any means, electronic or mechanical,
+   including photocopying, recording, or information storage and retrieval
+   systems, for any purpose other than the purchaser's personal use, without
+   the written permission of Microsoft Corporation.
+
+   (C) Copyright Microsoft Corporation, 1989. All rights reserved.
+   Simultaneously published in the United States and Canada.
+
+   Printed in the United States of America.
+
+   Microsoft(R), MS(R), MS-DOS(R), and the Microsoft logo are registered
+   trademarks of Microsoft Corporation.
+
+   Document No. SY0704-110-O00-1288
+
+
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ Contents
+
+   Welcome
+     About This Guide
+     Notational Conventions
+     Using a Mouse with MS OS/2
+     Going On
+
+   Chapter 1  Learning Presentation Manager Skills
+     Introduction
+     The MS OS/2 Presentation Manager Screen
+     Exercise 1: Getting Help
+       Scrolling the Help Window
+       Closing the Help Window
+     Exercise 2: Starting an Application
+     Exercise 3: Shrinking a Window to an Icon
+     Exercise 4: Changing Groups in Start Programs
+     Exercise 5: Starting and Shrinking Control Panel
+     Exercise 6: Switching Among Applications with Task Manager
+       Displaying Task Manager
+       Switching to the DOS Session
+       Returning to the Presentation Manager Session
+       Switching to File System
+       Switching to Control Panel
+     Exercise 7: Arranging Windows with Task Manager
+     Exercise 8: Moving and Sizing Windows
+       Moving Windows
+       Sizing Windows
+     Exercise 9: Quitting Applications
+       Quitting Control Panel
+       Quitting File System
+     Exercise 10: Shutting Down MS OS/2
+     Summary
+
+   Chapter 2  Using a Presentation Manager Application
+     Introduction
+     Exercise 1: Starting and Playing Bricks
+       Starting Bricks
+       Game Rules
+       Setting Options
+       Playing a Game Yourself
+       Stopping and Resuming a Game
+     Exercise 2: Opening Files
+       Using a Dialog Box
+     Exercise 3: Learning About Multitasking
+     Exercise 4: Creating New Files
+       Adding Bricks
+         Using the Add Bricks Dialog Box
+         Adding a Brick to Your Game
+         Correcting Mistakes
+       Removing Bricks
+       Completing Your Game
+     Exercise 5: Saving Files
+     Quitting Bricks
+       Shutting Down MS OS/2
+     Summary
+
+   Chapter 3  Learning File System
+     Introduction
+     Exercise 1: Starting File System
+       Looking at the Directory Tree Window
+     Exercise 2: Opening a Directory Window
+       Looking at the Directory Window
+       Changing the Display in a Directory Window
+     Exercise 3: Managing Files and Directories
+       Creating and Opening Subdirectories
+       Arranging File System Windows
+       Switching Between Directory Windows
+       Copying Files
+       Moving Files
+       Renaming Files
+       Deleting Files
+     Exercise 4: Closing Directory Windows
+     Exercise 5: Quitting File System
+       Shutting Down MS OS/2
+     Summary
+
+   Chapter 4  Learning the MS OS/2 and DOS Command Interpreters
+     Introduction
+       Typing Commands
+       Controlling the Screen's Contents
+       Using the Copy Command
+         Using Editing Keys
+       Starting an Application
+       Using the System Menu in Cmd
+         Changing the Font Size
+         Scrolling the Contents of the Screen
+       Quitting Cmd and Closing the Window
+     Exercise 2: Running Cmd in a Full-Screen OS/2 Session
+       Using Cmd in a Full-Screen OS/2 Session
+       Starting an Application
+       Quitting Cmd in a Full-Screen OS/2 Session
+     Exercise 3: Running the DOS Command Interpreter
+       Starting the DOS Command Interpreter
+       Typing Commands
+       Starting a DOS Application
+     Shutting Down MS OS/2
+     Going On
+
+   Appendix  Computer Basics
+
+
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ Welcome
+
+   About This Guide
+   Notational Conventions
+   Using a Mouse with MS OS/2
+   Going On
+
+
+   Microsoft(R) Operating System/2 is a powerful and flexible tool that
+   allows you to perform several tasks on your computer at the same time. The
+   way you work with MS(R) OS/2 is entirely up to you. Presentation Manager
+   offers you a graphical way of working with MS OS/2 by providing windows
+   you can work in and menus from which you can choose commands. In addition,
+   the MS OS/2 and DOS command interpreters offer you a way of working with
+   MS OS/2 that more closely resembles DOS.
+
+   This guide is designed as a tutorial (a series of exercises) to help you
+   learn about the different ways you can work with MS OS/2. It will give you
+   hands-on experience using Presentation Manager and the MS OS/2 and DOS
+   command interpreters to perform basic tasks, such as starting applications
+   and managing files and directories. Also, the appendix to this tutorial
+   provides an overview of basic computer terms and concepts, which you might
+   find helpful in working through the exercises.
+
+   If you would prefer to experiment with MS OS/2 on your own, you may find
+   Microsoft Operating System/2 Getting Started helpful. There you will find
+   information on setting up MS OS/2 on your computer, followed by a brief
+   tour of the system. If you want to start using MS OS/2 right away, see the
+   Microsoft Operating System/2 User's Guide for instructions on how to
+   perform specific tasks. For a complete reference to all of the commands,
+   applications, and programs that come with MS OS/2, see the Microsoft
+   Operating System/2 Desktop Reference.
+
+
+ About This Guide
+
+   This guide consists of four chapters. Each chapter presents exercises that
+   explain how to use a particular MS OS/2 operating environment or
+   application:
+
+   ş  Chapter 1, "Learning Presentation Manager Skills," teaches the basic
+      skills you need to use windows and to start and quit applications.
+
+   ş  Chapter 2, "Using a Presentation Manager Application," demonstrates a
+      sample game application called Bricks to teach basic techniques for
+      working with Presentation Manager applications.
+
+   ş  Chapter 3, "Learning File System," describes how to use File System to
+      create a subdirectory and to move, copy, and delete files.
+
+   ş  Chapter 4, "Learning the MS OS/2 and DOS Command Interpreters,"
+      describes some basic techniques for using the MS OS/2 and DOS command
+      interpreters, cmd and command. Here, you'll learn about typing commands
+      and about an alternate way to manage your files and directories.
+
+   If you've never used a personal computer before or are new to graphical
+   operating environments such as Microsoft Windows, it's a good idea to work
+   through the exercises in these chapters before you start using MS OS/2 to
+   do your work. When you finish the set of exercises in each chapter, you
+   can proceed to the next one or take a break.
+
+   It is highly recommended that you use a mouse while working through the
+   exercisesÄÄhaving a mouse makes Presentation Manager fast and easy to use.
+   (For more information about the mouse, see "Using a Mouse with MS OS/2"
+   in this chapter.)
+
+   Textured bars in the left margin point out procedures for performing a
+   particular task.
+
+   The procedures for performing a task by using a mouse are marked by a
+   mouse icon in the margin. If you don't have a mouse, you can still work
+   through the exercises by using your keyboard. Keyboard procedures
+   immediately follow the mouse procedures and are also marked by an icon in
+   the margin. If you have a mouse, feel free to try both methods. This will
+   give you an idea of the variety of ways you can accomplish tasks in the
+   Presentation Manager session and will help you discover the method that is
+   most comfortable for you.
+
+   When the procedure may be performed by using either a mouse or keyboard,
+   or by using both a mouse and keyboard in a combination of steps, the
+   textured bar appears by itself in the margin.
+
+
+ Notational Conventions
+
+   To help you locate and interpret information easily, this guide uses
+   specific typographic conventions and terminology. The following
+   typographic conventions are used in this guide:
+
+   Convention        Used for
+   ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+   bold              Bold letters indicate anything you must type exactly as
+                     it appears in this guide.
+
+   this type         Sample command lines, program code, program output, and
+                     examples.
+
+   ALL CAPITALS      Filenames, directory names, and acronyms.
+
+                     Names of keys on your keyboard.
+
+   Initial Capitals  Presentation Manager commands and menu names.
+   ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+   Key combinations and key sequences appear in the following format:
+
+   Notation        Meaning
+   ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+   KEY+KEY         A plus sign (+) between key names means you must press the
+                   keys at the same time; for example, "Press ALT+ESC" means
+                   that you press the ALT key and hold it down while you
+                   press the ESC key.
+
+   KEY, KEY        A comma (,) between key names means you must press the
+                   keys in sequence; for example, "Press ALT, SPACEBAR" means
+                   that you press the ALT key and release it, and then press
+                   the SPACEBAR and release it.
+
+   DIRECTION keys  Arrow keys on your computer keypad indicate DIRECTION
+                   keys. The names refer to the direction the key points: UP,
+                   DOWN, RIGHT, and LEFT.
+   ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+ Using a Mouse with MS OS/2
+
+   A mouse is a small pointing device that you can use with MS OS/2. Moving
+   the mouse across a flat surface, such as a table or a desktop, moves the
+   pointer, which appears as an arrow on the screen. With a mouse, there's no
+   need to memorize keystrokes or key sequences to perform common
+   Presentation Manager tasks. You can use it to choose commands, select
+   files and directories, and start applications by simply pointing on the
+   screen and clicking the mouse button. You can use either a single-button
+   or a multiple-button mouse with Presentation Manager applications. If you
+   have a mouse with more than one button, use the left button. Other
+   applications you use may respond to the other buttons, but the
+   applications that come with MS OS/2 recognize the left button. (You can
+   change which button Presentation Manager recognizes. See Part 1, "Using
+   Presentation Manager," of the Microsoft Operating System/2 User's Guide
+   for more information.)
+
+   If you run out of room while moving the mouse (for example, by running off
+   the edge of your desk), lift the mouse and put it back down where you have
+   more room. Lifting the mouse does not move the pointer on the screen.
+
+   The following list describes the mouse actions you will use in this guide:
+
+   Term                Action
+   ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+   Point               Move the mouse until the tip of the pointer rests on
+                       the object on the screen that you want to point to.
+
+   Click               Quickly press and release the mouse button. To click
+                       an object means to point to that object (for example,
+                       an icon or a menu name) and press the mouse button.
+
+   Double-click        Click the mouse button twice in rapid succession.
+
+   Drag                Press the mouse button and hold it down while moving
+                       the mouse.
+   ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+ Going On
+
+   When you are ready, go on to Chapter 1, "Learning Presentation Manager
+   Skills." Make sure you have installed and started MS OS/2 on your
+   computer. If you have not installed MS OS/2 yet, or if you need a reminder
+   on how to start it, see Microsoft Operating System/2 Getting Started
+   before beginning the exercises in Chapter 1.
+
+
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ Chapter 1  Learning Presentation Manager Skills
+
+   Introduction
+   The MS OS/2 Presentation Manager Screen
+   Exercise 1: Getting Help
+     Scrolling the Help Window
+     Closing the Help Window
+   Exercise 2: Starting an Application
+   Exercise 3: Shrinking a Window to an Icon
+   Exercise 4: Changing Groups in Start Programs
+   Exercise 5: Starting and Shrinking Control Panel
+   Exercise 6: Switching Among Applications with Task Manager
+     Displaying Task Manager
+     Switching to the DOS Session
+     Returning to the Presentation Manager Session
+     Switching to File System
+     Switching to Control Panel
+   Exercise 7: Arranging Windows with Task Manager
+   Exercise 8: Moving and Sizing Windows
+     Moving Windows
+     Sizing Windows
+   Exercise 9: Quitting Applications
+     Quitting Control Panel
+     Quitting File System
+   Exercise 10: Shutting Down MS OS/2
+   Summary
+
+
+ Introduction
+
+   Microsoft Operating System/2 includes several different applications and
+   programs that you can use to perform a variety of tasks. Presentation
+   Manager is the graphical environment that provides you with a visual way
+   of working with your computer, by displaying windows and menus on your
+   screen.
+
+   This chapter contains ten exercises that will give you hands-on experience
+   performing basic Presentation Manager tasks. While working through the
+   exercises, you will learn and practice the following skills:
+
+   ş  Using Help information
+
+   ş  Selecting and starting applications
+
+   ş  Shrinking application windows to icons
+
+   ş  Switching between applications
+
+   ş  Arranging windows
+
+   ş  Moving and sizing windows
+
+   ş  Quitting applications
+
+   ş  Shutting down MS OS/2
+
+   Before beginning the exercises, make sure you have set up and started MS
+   OS/2 on your computer. If you have not set up MS OS/2 or if you need a
+   review on how to start MS OS/2, see Microsoft Operating System/2 Getting
+   Started.
+
+
+ The MS OS/2 Presentation Manager Screen
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 10 of the printed manual.   ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   When you start MS OS/2, the Start Programs application appears on your
+   screen, running in the Presentation Manager session (a special graphical
+   environment). Here are some terms that describe the elements of the
+   Presentation Manager screen:
+
+   ş  The work area is where a list of applications, directories, or the
+      contents of a file are displayed. For example, in the Start Programs
+      work area, you can see a list of applications that you can start by
+      using Start Programs.
+
+   ş  An arrow-shaped pointer shows your position on the screen, if you are
+      using a mouse.
+
+   ş  Scroll bars may appear in a window when it contains more information
+      than can fit in the work area. If you are using a mouse, you use scroll
+      bars to bring the information that does not fit in the work area into
+      view. Clicking one of the scroll bars moves information in the work
+      area up or down one line.
+
+   ş  The border defines the boundaries of a window and determines its size.
+      You can change the size and location of a window on your screen by
+      adjusting the position of its borders.
+
+   ş  The title bar displays the name of the application that is currently
+      running in a window or, if you are using File System, the directory
+      path of an open directory.
+
+   ş  The System-menu box is used to display the System menu. The System menu
+      is common to all applications that run in a window, and it can be used
+      to move and size windows and to quit applications.
+
+   ş  The menu bar displays the names of the menus in a Presentation Manager
+      application.
+
+   ş  The Minimize box can shrink a window to an icon, if you are using a
+      mouse. If you are not using a mouse, you can use the Minimize command
+      on the System menu to do this.
+
+   ş  The Maximize box can enlarge a window, if you are using a mouse. If you
+      are not using a mouse, you can use the Maximize command on the System
+      menu to do this.
+
+   ş  An icon represents a window that has been shrunk by using the Minimize
+      command or the Minimize box. When you start MS OS/2, icons for Task
+      Manager, Spooler Queue Manager, and the DOS session (the environment
+      used to run DOS applications) automatically appear in the icon area
+      located at the bottom of your screen.
+
+   ş  The Help key reminds you that you can display Help information at any
+      time by pressing the F1 function key.
+
+
+ Exercise 1: Getting Help
+
+   If you get stuck at any time while working in the Presentation Manager
+   session, you can get help for the task you are performing. To display Help
+   information, use the F1 function key. Do this now:
+
+   1.  Press F1.
+
+   Help information for Start Programs appears in a window on your screen.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 12 of the printed manual.   ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   Scrolling the Help Window
+
+   The scroll bar at the right shows you that there's more Help information
+   available than can fit in the window. If you are using a mouse, you can
+   use the scroll bars to display more of the information:
+
+   1.  Point to the scroll box in the scroll bar.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 13 of the printed manual.   ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   2.  Press and hold down the left mouse button, then drag the scroll box
+       down towards the bottom of the scroll bar. More of the text appears in
+       the window as you drag the scroll box.
+
+   If you are using your keyboard, you can scroll the Help information one
+   window at a time by using the PAGE UP and PAGE DOWN keys. If you are using
+   your keyboard, try scrolling the text down one screen:
+
+   1.  Press the PAGE DOWN key to display more Help text.
+
+   Practice scrolling through the Help information by using your mouse or
+   keyboard until you've reached the end. You'll know that you're at the end
+   of the text when the scroll box reaches the bottom of the scroll bar.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 14 of the printed manual.   ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   Closing the Help Window
+
+   To close the Help window, do the following:
+
+   1.  Press the ESC key.
+
+   The Help window disappears from your screen. For more detailed information
+   on using Help, see Part 1, "Using Presentation Manager," of the Microsoft
+   Operating System/2 User's Guide.
+
+
+ Exercise 2: Starting an Application
+
+   When you start MS OS/2, the first application you see is Start Programs.
+   Start Programs is a Presentation Manager application that you can use to
+   start other applications. The applications you start are categorized into
+   different groups. When you start MS OS/2, the titles of the applications
+   in the Main Group are listed in the Start Programs window.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 15 of the printed manual.   ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   Starting an application is easy by using a mouse; you just point to the
+   title of the application you want to start and then double-click the left
+   mouse button. Start File System by using your mouse:
+
+   1.  Point to File System in the application list.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 15 of the printed manual.   ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   2.  Double-click the left mouse button to start File System.
+
+   When you start File System by using a mouse, the pointer becomes a small
+   hourglass to let you know that File System is being started. After a short
+   pause, File System appears in a window on your screen.
+   If you don't have a  mouse, select and start File System by using your
+   keyboard:
+
+   1.  If File System is not already selected, press the UP or DOWN key until
+       File System is highlighted.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 16 of the printed manual.   ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   2.  Press the ENTER key.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 17 of the printed manual.   ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+
+   File System is a Presentation Manager application you can use to manage
+   your files and directories on any disk you choose. You will learn some
+   basic techniques for using File System in Chapter 3, "Learning File
+   System."
+
+
+ Exercise 3: Shrinking a Window to an Icon
+
+   Whenever you're not currently using an application that is running in a
+   window, you can shrink the application window to an icon without having to
+   quit the application. Since you won't be using File System in this
+   chapter, you'll shrink the File System window to an icon.
+
+   You shrink a window to an icon with the mouse by using the Minimize
+   box in the upper-right corner of the window. If you have a mouse,
+   shrink the File System window to an icon:
+
+   1.  Point to the Minimize box in the upper-right corner of the File System
+       window.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 18 of the printed manual.   ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   2.  Click the left mouse button.
+
+   To shrink a window to an icon by using your keyboard, you use the Minimize
+   command on the System menu:
+
+   1.  Press and hold down the SHIFT key.
+
+   2.  While holding down the SHIFT key, press the ESC key to display the
+       System menu (SHIFT+ESC). The System menu appears on your screen with
+       the first command, Restore, highlighted to show that it is selected.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 19 of the printed manual.   ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+       The System menu contains commands that let you size, move, and close
+       windows. The Minimize command shrinks the File System window to an
+       icon.
+
+   3.  Press the N key to choose the Minimize command.
+
+   File System is now represented by an icon in the lower-left corner of your
+   screen. The Start Programs window appears at the front of your screen.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 20 of the printed manual.   ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   File System is still running, but it doesn't take up as much space on your
+   screen.
+
+   In this exercise, you've learned how to shrink a window to an icon. Next,
+   you will learn how to change groups in Start Programs so that you can
+   start other applications in other groups.
+
+
+ Exercise 4: Changing Groups in Start Programs
+
+   In addition to the applications listed in the Main Group, MS OS/2 includes
+   other applications listed in two other groupsÄÄthe Utility Programs group
+   and the Demonstration Programs group.
+
+   If you have a mouse, change to the Utility Programs group:
+
+   1.  Point to the Group menu.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 21 of the printed manual.   ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   2.  Click the left mouse button. The commands and groups on the Group menu
+       appear on your screen.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 21 of the printed manual.   ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+       The check mark next to the Main Group shows you that the applications
+       in the Main Group are those currently displayed in the Start Programs
+       window.
+
+   3.  Point to the second group, Utility Programs.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 22 of the printed manual.   ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   4.  Click the left mouse button.
+
+   If you don't have a mouse, you can change to the Utility Programs group by
+   using your keyboard:
+
+   1.  Press the ALT key. The Program-menu name is then highlighted, showing
+       you the menu is ready to use.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 22 of the printed manual.   ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   2.  Press the G key. The Group menu appears on your screen.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 23 of the printed manual.   ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+       The check mark next to the Main Group shows you that the applications
+       in the Main Group are those currently displayed in the Start Programs
+       window.
+
+   3.  Press the 2 key to change to the Utility Programs group.
+
+   When you change to the Utility Programs group, the titles of the
+   applications in the group appear in the Start Programs window.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 23 of the printed manual.   ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   Notice that the Utility Programs group includes Control Panel. Now that
+   Control Panel is selected in the Start Programs window, you can easily
+   start it.
+
+
+ Exercise 5: Starting and Shrinking Control Panel
+
+   If you have a mouse, follow these steps to start Control Panel:
+
+   1.  Point to Control Panel in the applications list.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 24 of the printed manual.   ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   2.  Double-click the left mouse button.
+
+   If you are using your keyboard, here's how to start Control Panel:
+
+   1.  If Control Panel is not already selected, press the UP or DOWN key to
+       select Control Panel.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 24 of the printed manual.   ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   2.  Press the ENTER key.
+
+   Control Panel appears in a window on your screen.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 25 of the printed manual.   ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   Control Panel is a Presentation Manager application you can use to
+   customize MS OS/2 to your specific needs. Part 1, "Using Presentation
+   Manager," of the Microsoft Operating System/2 User's Guide, describes in
+   detail how to use Control Panel.
+
+   Since you won't be using Control Panel in this chapter, you'll shrink
+   the Control Panel window to an icon. If you are using a mouse, the
+   following steps will shrink the Control Panel window:
+
+   1.  Point to the Minimize box in the upper-right corner of the window.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 26 of the printed manual.   ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   2.  Click the left mouse button.
+
+   If you are using your keyboard, shrink the Control Panel window by
+   choosing the Minimize command from the System menu:
+
+   1.  Press and hold down the SHIFT key.
+
+   2.  While holding down the SHIFT key, press the ESC key to display the
+       System menu.
+
+   3.  Press the N key to choose the Minimize command.
+
+   Control Panel appears as an icon in the lower-left corner of your screen,
+   next to the File System icon. Once again, the Start Programs window
+   appears at the front of your screen.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 27 of the printed manual.   ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   Just like File System, Control Panel is still running, but it occupies
+   less space on your screen than before.
+
+   You now have several application windows and the DOS session, Spooler
+   Queue Manager, and Task Manager icons displayed on your screen at once.
+   Start Programs is running in a window at the front of your screen; File
+   System and Control Panel are running in icons at the bottom of your
+   screen. In the next exercise, you'll learn how to use Task Manager to
+   switch between these applications.
+
+
+ Exercise 6: Switching Among Applications with Task Manager
+
+   In MS OS/2, you can have several applications running at once, but you can
+   work with only one application at a time. The application you are
+   currently working with is the active application.
+
+   When a Presentation Manager application becomes active, it appears at the
+   front of your screen and its window borders and title bar change colors.
+   For example, since Start Programs is now at the front of your screen and
+   its window borders and title bar have changed colors, it is the active
+   application.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 28 of the printed manual.   ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   If you want to use an application other than the one that is currently
+   active, you need to switch to it. The most direct way to switch to another
+   application is by using Task Manager. To switch to another application,
+   you first display Task Manager and then choose the application you want to
+   switch to from the list of applications displayed in the Task Manager
+   window.
+
+   Displaying Task Manager
+
+   Since Task Manager is currently running in an icon, you need to restore it
+   before you can switch to another application. Restoring Task Manager by
+   using the mouse is easy; point to the Task Manager icon in the lower-right
+   corner of your screen and then double-click the left mouse button.
+
+   If you are using a mouse, follow these steps to restore Task Manager:
+
+   1.  Point to the Task Manager icon.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 29 of the printed manual.   ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   2.  Double-click the left mouse button.
+
+   If you are using your keyboard, press CTRL+ESC to restore Task Manager. Do
+   this now:
+
+   1.  Press and hold down the CTRL key.
+
+   2.  Press the ESC key.
+
+   3.  Release both keys.
+
+   When you restore Task Manager, it appears at the front of your screen,
+   displaying a list of applications that are currently running.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 30 of the printed manual.   ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   Switching to the DOS Session
+
+   The way you switch to another application with Task Manager is similar to
+   the way you start an application with Start ProgramsÄÄyou point to the
+   application and then double-click the left mouse button. If you are using
+   the keyboard, use the UP or DOWN key to select the application and then
+   press the ENTER key.
+
+   To practice switching to another application, switch to the DOS session
+   (the environment used to run DOS applications). If you are using a mouse,
+   do the following:
+
+   1.  Point to DOS Command Prompt in the Task Manager window.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 31 of the printed manual.   ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   2.  Double-click the left mouse button.
+
+   If you are using your keyboard, do the following to switch to the DOS
+   session:
+
+   1.  Press the UP or DOWN key to select the DOS Command Prompt.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 31 of the printed manual.   ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   2.  Press the ENTER key.
+
+   The Presentation Manager screen temporarily disappears and you are
+   switched to the DOS session. Switching to the DOS session automatically
+   starts the DOS command interpreter, command, as shown by the DOS prompt in
+   the upper-left corner of your screen.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 32 of the printed manual.   ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   Command is the program you use to run your DOS applications.
+   You'll learn more about using command in Chapter 4, "Learning the MS OS/2
+   and DOS Command Interpreters."
+
+   Returning to the Presentation Manager Session
+
+   When you are using an application that is running in the DOS session or
+   in the full-screen OS/2 session, you can quickly return to the
+   Presentation Manager session and Task Manager at any time. Here's how:
+
+   1.  Press CTRL+ESC.
+
+   The Presentation Manager screen reappears, with Task Manager displayed.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 33 of the printed manual.   ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   Switching to File System
+
+   To give yourself more practice using Task Manager, switch to File System.
+   If you are using a mouse, do the following:
+
+   1.  Point to File System in the list of applications displayed in the Task
+       Manager window.
+
+   2.  Double-click the left mouse button.
+
+   If you are using your keyboard, you switch to File System in this way:
+
+   1.  Press the UP or DOWN key to select File System.
+
+   2.  Press the ENTER key.
+
+   When you switch to File System, the File System icon is automatically
+   restored to a window and appears at the front of your screen. The window
+   borders and title bar change colors, showing you that File System is now
+   active.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 34 of the printed manual.   ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   Switching to Control Panel
+
+   Next, you'll use Task Manager to switch to Control Panel. Before you can
+   switch to Control Panel, you need to make Task Manager active. You can
+   make Task Manager active at any timeÄÄhere's how:
+
+   1.  Press CTRL+ESC.
+
+   The Task Manager window appears at the front of your screen.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 35 of the printed manual.   ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   You can now switch to Control Panel. If you are using a mouse, follow
+   these steps:
+
+   1.  Point to Control Panel in the list of applications displayed in the
+       Task Manager window.
+
+   2.  Double-click the left mouse button.
+
+   If you are using your keyboard, follow these steps to switch to Control
+   Panel:
+
+   1.  Press the UP or DOWN key to select Control Panel.
+
+   2.  Press the ENTER key.
+
+   The Control Panel icon is automatically restored to a window on your
+   screen.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 36 of the printed manual.   ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   The Control Panel window appears in front of the File System window and
+   its title bar changes color, showing you that Control Panel is active.
+
+   You now have several application windows on your screen at the same timeÄÄ
+   the Start Programs window, the File System window, the Control Panel
+   window, and the Task Manager window. The Control Panel, File System, and
+   Task Manager windows are all partially visible. The Start Programs window
+   is hidden behind the File System window.
+
+
+ Exercise 7: Arranging Windows with Task Manager
+
+   When you have several windows on your screen at once, it's useful to be
+   able to arrange them so that each is at least partially visible. This
+   helps you to keep track of where your applications are and lets you view
+   several windows on your screen at the same time.
+
+   Task Manager provides you with a convenient way to arrange windows on your
+   screen by using the Cascade or the Tile command on the Arrange menu. The
+   Cascade command arranges your windows so that they overlap and so that
+   their title bars are visible. The Tile command arranges your windows so
+   that they appear side-by-side on your screen.
+
+   To see how this works, use the Cascade command to arrange the windows.
+   To do this, you need to make Task Manager active:
+
+   1.  Press CTRL+ESC.
+
+   Task Manager becomes the active application. You now can use the Cascade
+   command to arrange the windows on your screen. If you have a mouse, follow
+   these steps:
+
+   1.  Point to the Arrange menu in the Task Manager menu bar and click the
+       left mouse button. The Arrange menu appears on your screen.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 37 of the printed manual.   ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   2.  Point to the Cascade command and click the left mouse button.
+
+   If you are using your keyboard, follow these steps to arrange your
+   windows:
+
+   1.  Press the ALT key and then the A key to select the Arrange Menu.
+
+   2.  Press the C key to choose the Cascade command.
+
+   Presentation Manager arranges the windows so that they overlap and so that
+   their title bars are visible.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 38 of the printed manual.   ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   The Control Panel window is in front of the other application windows,
+   showing you that Control Panel is now active.
+
+
+ Exercise 8: Moving and Sizing Windows
+
+   In addition to using Task Manager to arrange your windows, you can also
+   move and size them. By sizing your windows, you can make them as small or
+   as large as you want. By moving them, you can place them anywhere on your
+   screen.
+
+   Moving Windows
+
+   To move a window by using a mouse, you point to its title bar and then
+   drag its borders to where you want it on your screen. To try this, move
+   the Task Manager window to the lower-right area of your screen.
+
+   Before you can move a window, you must first make it active. Make
+   Task Manager active:
+
+   1.  Press CTRL+ESC.
+
+   The Task Manager window, now active, moves to the front. If you have a
+   mouse, follow these steps to move the Task Manager window to the
+   lower-right area of your screen:
+
+   1.  Point to the title bar of the Task Manager window.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 39 of the printed manual.   ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   2.  Press and hold down the left mouse button. When you press the left
+       mouse button, the window borders turn gray.
+
+   3.  While holding down the left mouse button, drag the window borders to
+       the lower-right area of your screen.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 40 of the printed manual.   ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   4.  Release the mouse button.
+
+   If you are using your keyboard, you can move the Task Manager
+   window with the Move command on the System menu, together
+   with the DIRECTION keys. Do the following:
+
+   1.  Press SHIFT+ESC to display the System menu.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 41 of the printed manual.   ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   2.  Press the M key to choose the Move command. The borders around the
+       Task Manager window turn gray.
+
+   3.  Press the DOWN key several times until the bottom border rests just
+       above the DOS and Spool Queue Manager icons.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 42 of the printed manual.   ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   4.  Press and hold down the RIGHT key until the right border touches the
+       right edge of your screen.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 43 of the printed manual.   ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   5.  Release the RIGHT key.
+
+   6.  Press the ENTER key.
+
+   The Task Manager window now appears in the lower-right area of your
+   screen.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 44 of the printed manual.   ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   Sizing Windows
+
+   Besides being able to move application windows around on your screen, you
+   can also change their size. You change the size of a window by expanding
+   or contracting its borders.
+
+   To see how this works, try making the Task Manager window smaller. If
+   you have a mouse, try this now:
+
+   1.  Point to the left border of the Task Manager window. The pointer turns
+       into a two-headed arrow.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 45 of the printed manual.   ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   2.  Press and hold down the left mouse button. The window borders turn
+       gray.
+
+   3.  While holding down the left mouse button, drag the border to a
+       position about halfway inside the work area.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 46 of the printed manual.   ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   4.  Release the mouse button.
+
+   5.  Point to the bottom border. Once again, the pointer turns into
+       a two-headed arrow.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 47 of the printed manual.   ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   6.  Press and hold down the left mouse button. The window borders turn
+       gray.
+
+   7.  While holding down the left mouse button, drag the border upward to a
+       position just below the title of the last application displayed
+       in the work area.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 48 of the printed manual.   ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   8.  Release the mouse button.
+
+   If you are using your keyboard, you use the Size command on the
+   System menu, together with the DIRECTION keys, to size a window. Try
+   sizing the Task Manager window:
+
+   1.  Press SHIFT+ESC to display the System menu.
+
+   2.  Press the S key to choose the Size command. The borders around the
+       Task Manager window turn gray.
+
+   3.  Press the LEFT key to indicate that you want to move the left border.
+
+   4.  Press and hold down the RIGHT key until the left border is at a
+       position halfway inside the work area.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 49 of the printed manual.   ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   5.  Press the DOWN key to indicate that you now want to move the bottom
+       border.
+
+   6.  Press and hold down the UP key until the bottom border is at a
+       position just below the title of the last application listed in the
+       work area.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 50 of the printed manual.   ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   7.  Press the ENTER key.
+
+   The Task Manager window becomes smaller, occupying the new space defined
+   by its borders.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 51 of the printed manual.   ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   Now that you have had some practice starting applications, shrinking
+   application windows, switching between applications, and arranging,
+   moving, and sizing windows, the final steps are to quit each of the
+   applications you have started and then shut down MS OS/2.
+
+
+ Exercise 9: Quitting Applications
+
+   You quit a Presentation Manager application by double-clicking the
+   System-menu box or by using the Close command on the System menu. This
+   quits the application by closing the application window.
+
+   Quitting Control Panel
+
+   Before you can quit an application, you must make it active. If you have a
+   mouse, switch to Control Panel now:
+
+   1.  Point to Control Panel in the Task Manager window and double-click the
+       left mouse button.
+
+   If you are using your keyboard, here's how to switch to Control Panel:
+
+   1.  Use the UP or DOWN key to select Control Panel.
+
+   2.  Press the ENTER key.
+
+   Control Panel moves to the front of your screen and becomes the
+   active application.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 53 of the printed manual.   ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   You can now quit Control Panel. If you are using a mouse, do the
+   following:
+
+   1.  Point to the System-menu box in the Control Panel window and
+       double-click the left mouse button.
+
+   If you are using your keyboard, use the Close command in the System menu
+   to close Control Panel. Here's how:
+
+   1.  Press SHIFT+ESC to display the System menu for Control Panel.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 54 of the printed manual.   ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   2.  Press the C key to choose the Close command.
+
+   When you double-click the System-menu box or choose the Close
+   command, the Control Panel window disappears, showing you that
+   Control Panel is no longer running. Start Programs becomes the active
+   application.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 55 of the printed manual.   ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   Quitting File System
+
+   Now quit File System. Remember, before you can do anything with an
+   application, you need to switch to it first. Switch to File System:
+
+   1.  Press CTRL+ESC to make Task Manager active.
+
+   2.  Choose File System from the list of applications that is displayed
+       in the Task Manager window.
+
+       (Point to File System and double-click with the mouse or, if you are
+       using the keyboard, select File System with the UP or DOWN key and
+       press the ENTER key.)
+
+   The File System window moves to the front of your screen and is now
+   active.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 56 of the printed manual.   ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   If you are using a mouse, quit File System the same way as you quit
+   Control Panel:
+
+   1.  Point to the System-menu box and double-click the left mouse
+       button. A message appears, asking you to confirm your decision
+       to quit File System.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 56 of the printed manual.   ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   2.  Point to the Yes button and click the left mouse button.
+
+   If you are using your keyboard, use the Close command on the System menu.
+   Follow these steps:
+
+   1.  Press SHIFT+ESC to display the System menu.
+
+   2.  Press the C key. A message appears, asking you to confirm your
+       decision to quit File System.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 57 of the printed manual.   ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   3.  Press the ENTER key.
+
+   When you quit File System, Start Programs moves to the front of
+   your screen and becomes the active application.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 58 of the printed manual.   ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   Now, you are almost back to where you beganÄÄthe DOS session and Spooler
+   Queue Manager are represented by icons and Start Programs
+   is the active application. Task Manager is running in a window behind
+   Start Programs. Start Programs, Task Manager, Spooler Queue Manager, and
+   the DOS session are always present on your screen; you
+   can't close them and they won't go away. If you don't have any other
+   applications running in windows or in icons, it is safe to shut down
+   MS OS/2.
+
+
+ Exercise 10: Shutting Down MS OS/2
+
+   At this point, you either can begin the exercises in the next chapter,
+   or you can take a break and return to the next chapter later.
+
+   If you decide to take a break and will be away from your computer for a
+   while, it's a good idea to shut down MS OS/2 and turn off your computer.
+   You shut down MS OS/2 by using the Shutdown Now command in Task Manager.
+   When you shut down MS OS/2, each application that is still running
+   displays a message, asking you to confirm your decision to quit the
+   application and to continue the shutdown process.
+
+   Try shutting down MS OS/2:
+
+   1.  Switch to Task Manager (press CTRL+ESC).
+
+   2.  Select the Shutdown menu (point to it and then click the left mouse
+       button or press the ALT key and then the S key).
+
+       The Shutdown menu appears on your screen with the Shutdown Now command
+       highlighted, showing you that it is already selected.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 59 of the printed manual.   ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   3.  Press the ENTER key to carry out the Shutdown Now command.
+
+       A message appears, asking you to confirm your decision to quit
+       the applications that are still running and to continue shutting down
+       MS OS/2.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 60 of the printed manual.   ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   4.  Choose the Yes button (point to it and then click the left mouse
+       button or press the LEFT key and then the ENTER key).
+
+       A message appears to let you know that all your applications are
+       closed and that it is now safe to turn off your computer.
+
+   5.  If you will be leaving your computer for a while, turn it off. If you
+       decide to continue working and want to restart MS OS/2, press
+       the ENTER key.
+
+
+ Summary
+
+   The exercises in this chapter provided you with hands-on experience
+   performing basic Presentation Manager skills, such as starting
+   applications, shrinking windows to icons, switching between applications,
+   arranging, moving and sizing windows, and quitting applications. If you
+   want more detailed information about these features of the system before
+   going to the next chapter, see Part 1, "Using Presentation Manager," of
+   the Microsoft Operating System/2 User's Guide.
+
+   In the next chapter, you will use a sample application called Bricks
+   to learn how to use dialog boxes and to open, create, and save files.
+   The sample application is an entertaining way to learn new skills and
+   to sharpen some of the skills you've already learned in this chapter.
+   When you are ready, go on to Chapter 2, "Using a Presentation
+   Manager Application."
+
+
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ Chapter 2  Using a Presentation Manager Application
+
+   Introduction
+   Exercise 1: Starting and Playing Bricks
+     Starting Bricks
+     Game Rules
+     Setting Options
+     Playing a Game Yourself
+     Stopping and Resuming a Game
+   Exercise 2: Opening Files
+     Using a Dialog Box
+   Exercise 3: Learning About Multitasking
+   Exercise 4: Creating New Files
+     Adding Bricks
+       Using the Add Bricks Dialog Box
+       Adding a Brick to Your Game
+       Correcting Mistakes
+     Removing Bricks
+     Completing Your Game
+   Exercise 5: Saving Files
+   Quitting Bricks
+     Shutting Down MS OS/2
+   Summary
+
+
+ Introduction
+
+   In this chapter, you will use the sample applications, Bricks and Alarm
+   Clock, to learn some basic techniques for using all Presentation Manager
+   applications. Although each Presentation Manager application is unique,
+   all of them have several characteristics in common. For example, the way
+   you open, create, and save files is basically the same in all Presentation
+   Manager applications.
+
+   Bricks has been designed to incorporate features that are common to many
+   Presentation Manager applications. While playing Bricks and creating your
+   own customized bricks games, you will learn, review,
+   and practice the following skills:
+
+   ş  Starting applications
+
+   ş  Switching between applications
+
+   ş  Using multitasking
+
+   ş  Opening, creating, and saving files
+
+   ş  Using dialog boxes
+
+
+ Exercise 1: Starting and Playing Bricks
+
+   In this exercise, you will review how to start a Presentation Manager
+   application by starting Bricks. Then, you will play a game of Bricks to
+   familiarize yourself with the game rules and the way the Bricks
+   application works.
+
+   Starting Bricks
+
+   The Bricks game is located in the Demonstration Programs group,
+   so you need to change groups in Start Programs before starting Bricks. You
+   change groups in Start Programs by selecting the Group menu
+   and then choosing the group that you want to change to.
+
+   If you decided not to shut down MS OS/2 in the last chapter,
+   the first thing you need to do is switch to Start Programs.
+
+   1.  Choose Start Programs from the list of applications displayed in
+       the Task Manager window (point to Start Programs and double-click with
+       the mouse, or, if you are using your keyboard, select Start
+       Programs with the UP or DOWN key and then press the ENTER key).
+
+   Now, if you have a mouse, change to the Demonstration Programs group:
+
+   1.  Point to the Group menu in the Start Programs menu bar and then click
+       the left mouse button. The commands on the Group menu appear on your
+       screen.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 10 of the printed manual.   ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   2.  Point to Demonstration Programs and then click the left mouse
+       button.
+
+   If you are using the keyboard, change to the Demonstration Programs group:
+
+   1.  Press the ALT key and then the G key to select the Group menu.
+
+   2.  Press the 3 key.
+
+   A list of applications in the Demonstration Group appears in the Start
+   Programs window.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 12 of the printed manual.   ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   Now, you can start Bricks. If you are using the mouse, here's how:
+
+   1.  Point to Bricks and then double-click the left mouse button.
+
+   If you are using the keyboard, do this to start Bricks:
+
+   1.  Use the UP or DOWN key to select Bricks and then press
+       the ENTER key.
+
+   Bricks appears in a window on your screen, with the Paris game displayed
+   in the work area.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 13 of the printed manual.   ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   The title bar displays the name of the application (in this case, Bricks),
+   the name of the file that is currently open (in this case, PARIS.BRK), and
+   the score counter.
+
+   The Paris game, as well as the other Bricks games, is composed of numerous
+   rectangular objects, or "bricks," of different sizes and colors. The
+   object of the game is to clear the screen by knocking away all
+   of the bricks that compose the scene.
+
+   Before you play a game of Bricks, take a few minutes to read the next two
+   sections to learn the game rules and to familiarize yourself with how
+   Bricks works.
+
+   Game Rules
+
+   There are two options for playing BricksÄÄyou can use the Play command to
+   play a game yourself or you can use the Self Play command
+   to have Bricks play a game automatically. To get an idea of how Bricks
+   works, start a self-play game of Bricks and then watch what happens.
+
+   To start a self-play game of Bricks by using your mouse, follow these
+   steps:
+
+   1.  Point to the Game menu in the Bricks menu bar and then click
+       the left mouse button. The Game menu appears on your screen.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 14 of the printed manual.   ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   2.  Point to the Self Play command and then click the left mouse
+       button.
+
+   If you are using the keyboard, do this to start a self-play game:
+
+   1.  Press the ALT key and then the G key to select the Game menu.
+
+   2.  Press the DOWN key once to select Self Play and then press
+       the ENTER key.
+
+   A small white ball appears in the work area and starts moving toward the
+   bricks.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 15 of the printed manual.   ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   When the ball hits a brick, the brick is removed from the work area and
+   you are awarded points, which are displayed by the score counter. The red
+   paddle at the bottom of the window moves back and forth with the ball.
+   When the ball hits the paddle, the ball bounces back into play.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 15 of the printed manual.   ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   Setting Options
+
+   When you first start a game of Bricks, the paddle size is set to Medium
+   Paddle, the ball speed is set to Regular Ball, and the sound is turned on.
+   If, while you are playing a game, you want to make the game easier or more
+   challenging, you can adjust the paddle size and the ball speed yourself.
+
+   You can also turn off the sound so that your computer won't beep each time
+   the ball hits a brick. You adjust the ball speed, paddle size, and sound
+   by using the commands on the Options menu. Many Presentation Manager
+   applications have an Options menu that you can use to change the way your
+   application runs.
+
+   To see how this works, try making the ball move slower:
+
+   1.  Select the Options menu (point to it and then click the left mouse
+       button or press the ALT key and then the O key).
+
+       The commands on the Options menu appear on your screen.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 16 of the printed manual.   ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+       Notice the check marks next to the Medium Paddle, Regular Ball, and
+       Sound commands. A check mark next to a command shows you that it is
+       currently active.
+
+   2.  Choose the Slow Ball command to slow down the ball (point to it and
+       then click the left mouse button or use the DOWN key to select it and
+       then press the ENTER key).
+
+   The ball now moves slower in the Bricks window. If you were to select the
+   Options menu again, you would see a check mark next to the Slow Ball
+   command, since it is now active.
+
+   If you want to adjust the paddle size, just select the Options menu again
+   and choose the paddle size you want to use. To turn the Sound off, select
+   the Options menu one more time and then choose the Sound command.
+
+   Playing a Game Yourself
+
+   Now that you've seen how Bricks works, try playing a game yourself:
+
+   1.  Select the Game menu (click the menu or press ALT, G).
+
+       The commands on the Game menu appear on your screen.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 17 of the printed manual.   ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   2.  Choose the Play command (click the command or, since it is already
+       selected, press the ENTER key).
+
+       The first ball appears in the window and starts moving toward
+       the bricks.
+
+   3.  Use the RIGHT and LEFT keys to move the paddle and keep
+       the ball in play.
+
+   If the ball misses the paddle, it is taken out of play. Bricks gives you
+   three balls per game. When you've used up all three balls, a message
+   appears, letting you know that the game is over. The message displays how
+   many bricks you hit out of all the bricks possible.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 18 of the printed manual.   ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   To delete the message from your screen, do the following:
+
+   1.  Click the OK button or press the ENTER key.
+
+   Stopping and Resuming a Game
+
+   If you want to take a break in the middle of a game, you can stop it
+   any time and then resume it when you are ready. Just choose the Stop
+   command from the Game menu to stop the game. When you are ready
+   to resume the game, choose the Continue command. Now try stopping and
+   resuming your game:
+
+   1.  Select the Game menu (click the menu or press ALT, G).
+
+   2.  Choose the Stop command (click the command or press the S key).
+
+       The ball and the paddle stop moving and the game pauses.
+
+   3.  Select the Game menu again.
+
+   4.  Choose the Continue command.
+
+       The ball and the paddle start moving again.
+
+   To start a new game at any time, just choose the Play command from the
+   Game menu again. The Paris game will reappear in the window, with all its
+   bricks in place. When you are ready, go on to the next
+   exercise to learn how to open files.
+
+
+ Exercise 2: Opening Files
+
+   In this exercise, you'll learn how to open files and use dialog boxes
+   in Presentation Manager applications. Because you just played a game
+   of Bricks using the PARIS.BRK file, you'll open a different file called
+   SEATTLE.BRK.
+
+   You open files in most Presentation Manager applications with the Open
+   command on the File menu. Choose the Open command
+   by using either your mouse or your keyboard. The general procedure
+   is the same:
+
+   1.  Select the File menu (click the menu or press ALT, F).
+
+       The commands on the File menu appear on your screen.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 19 of the printed manual.   ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   2.  Choose the Open command (click the command or press
+       the O key).
+
+       The Open Brick File dialog box appears on your screen.
+
+   Using a Dialog Box
+
+   Some commands in Presentation Manager applications, such as
+   the Open command, require additional information from you before
+   the command can be carried out. If this is the case, the application
+   displays a dialog box on your screen. The dialog box prompts you
+   to select items, choose options, or type additional information needed
+   to carry out the command.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 20 of the printed manual.   ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   The Open Brick File dialog box includes three different types of areasÄÄa
+   text box, two list boxes, and two command buttons. The selection cursor
+   shows you which area of the dialog box is currently selected. To specify
+   the game file that you want to open, you can either select the filename
+   from the list of files displayed in the list box or you can type the name
+   of the file in the text box. The insertion point marks the place in the
+   text box where you start typing, and as you type, it moves to the right.
+   Once you've selected or typed the filename, choose the Open command button
+   to carry out the Open command.
+
+   If a file is already open (in this case, the PARIS.BRK file is open),
+   the name of that file appears in the text box. Now open the file
+   named SEATTLE.BRK by erasing PARIS.BRK and then typing SEATTLE.BRK in the
+   text box:
+
+   1.  Press the BACKSPACE key repeatedly to erase PARIS.BRK. The insertion
+       point moves to the left as you press the BACKSPACE key.
+
+   2.  Now type the following:
+
+       seattle.brk
+
+       The insertion point moves to the right as you type.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 21 of the printed manual.   ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+       If you make a mistake while typing, use the BACKSPACE key
+       to erase it, and then continue typing.
+
+   3.  When you've typed the filename correctly, point to the Open
+       command button and then click the left mouse button. If you don't
+       have a mouse, just press the ENTER key.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 21 of the printed manual.   ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+
+   The Seattle game appears in the work area of the Bricks window. Because
+   the Seattle game is larger than the Paris game, the Bricks
+   window expands to fill your entire screen.
+
+   Now play another game of Bricks, or go on to the next step to learn how to
+   use list boxes. Remember, you can stop and then resume
+   your game at any time by using the Stop and Continue commands
+   on the Game menu.
+
+   When you've finished playing, try opening another file. This time, open
+   the file that contains the Athens game by selecting it from the list
+   of files in the list box. Do the following:
+
+   1.  Select the File menu (click the menu or press ALT, F).
+
+   2.  Choose the Open command (click the command or press the
+       O key).
+
+   The Open Brick File dialog box appears on your screen.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 22 of the printed manual.   ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   If you are using a mouse, follow these steps to select the file:
+
+   1.  Point to the file named ATHENS.BRK in the Filenames list box
+       and then double-click the left mouse button.
+
+   If you are using your keyboard, you use the TAB key to move around
+   in a dialog box and the UP and DOWN keys to select items in an area. Move
+   to the Filenames list box and select the ATHENS.BRK file:
+
+   1.  Press the TAB key twice to move to the Filenames list box. The
+       selection cursor appears in the list box, showing you that the list
+       box is selected.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 22 of the printed manual.   ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   2.  Press the UP key repeatedly until the file named ATHENS.BRK is
+       selected.
+
+   3.  Press the ENTER key.
+
+   The Athens game appears in the window.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 23 of the printed manual.   ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   Now go on to the next exercise to learn about multitasking.
+
+
+ Exercise 3: Learning About Multitasking
+
+   In MS OS/2 you can perform several related tasks or even several
+   completely different tasks at the same time. This feature is called
+   multitasking.
+
+   To see how multitasking works in the Presentation Manager session, you'll
+   start another application called Alarm Clock and run it at the same time
+   you are running Bricks. Before you can start Alarm Clock, you need to
+   switch to Start Programs.
+
+   If you don't remember how to switch to another application with Task
+   Manager, here's a review:
+
+   1.  Press CTRL+ESC to make Task Manager active.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 23 of the printed manual.   ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   2.  Choose Start Programs from the list of applications in the Task
+       Manager window (double-click Start Programs or use the UP or DOWN key
+       to select it and then press the ENTER key).
+
+   Start Programs moves to the front of your screen, displaying the list
+   of applications in the Demonstration Programs group.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 24 of the printed manual.   ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   Now, you can start Alarm Clock:
+
+   1.  Choose Alarm Clock from the list of applications displayed
+       in the window.
+
+   Alarm Clock appears in a window on your screen, displaying the time.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 24 of the printed manual.   ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   You now have two application windows on your screen at the same time. Use
+   Task Manager to switch to the Bricks window and start
+   a self-play game:
+
+   1.  Press CTRL+ESC to make Task Manager active.
+
+   2.  Choose Bricks from the list of applications displayed in the Task
+       Manager window.
+
+   The Bricks window, with the Athens game displayed, moves to
+   the front of your screen, showing you that Bricks is now the active
+   application.
+
+   Now start a self-play game of Bricks:
+
+   1.  Select the Game menu.
+
+   2.  Choose the Self Play command.
+
+   The ball in the Bricks window starts moving.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 25 of the printed manual.   ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   You now have Alarm Clock and a game of Bricks going on at once,
+   illustrating the multitasking capabilities of MS OS/2.
+
+   Now use Task Manager to switch to the Alarm Clock window so that you
+   can quit Alarm Clock and close the window:
+
+   1.  Press CTRL+ESC to display Task Manager.
+
+   2.  Choose Alarm from the list of applications displayed in the Task
+       Manager window.
+
+   The Alarm Clock window becomes active, as shown by the colored
+   title bar.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 26 of the printed manual.   ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   Now quit Alarm Clock and close the window. If you are using a mouse, do
+   the following:
+
+   1.  Point to the System-menu box in the Alarm Clock window and
+       double-click the left mouse button.
+
+   If you are using your keyboard, here's how you quit Alarm Clock:
+
+   1.  Press SHIFT+ESC to display the System menu.
+
+   2.  Press the C key to choose the Close command.
+
+   The Alarm Clock window disappears and the Start Programs window
+   is now active.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 27 of the printed manual.   ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   Now switch to the Bricks window with Task Manager:
+
+   1.  Press CTRL+ESC to display Task Manager.
+
+   2.  Choose Bricks from the list of applications displayed in
+       the Task Manager window.
+
+   Bricks moves to the front of your screen and becomes the active
+   application.
+
+   Now go on to the next exercise to learn how to create new files.
+
+
+ Exercise 4: Creating New Files
+
+   This exercise demonstrates how you can create new files by creating your
+   own customized Bricks game.
+
+   To create your own game, the first thing you need to do is clear the
+   Athens game from the work area and create a new file for storing your
+   game.
+
+   In most Presentation Manager applications, you create new files by
+   using the New command on the File menu. Try it now, using either your
+   mouse or your keyboard. The general procedure is the same:
+
+   1.  Select the File menu (click the menu or press ALT, F).
+
+       The commands on the File menu appear on your screen.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 28 of the printed manual.   ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   2.  Choose the New command (click the command or, since it is already
+       selected, press the ENTER key).
+
+   The Athens game is cleared from the work area and the word
+   "untitled" appears in the title bar.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 29 of the printed manual.   ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   The word "untitled" in the title bar lets you know that the file displayed
+   in the window does not have a filename assigned to it. You'll learn how to
+   assign names to new files later on. Now, you can begin creating your new
+   game.
+
+   Adding Bricks
+
+   In Bricks, there are two ways that you can add bricks to create a new
+   gameÄÄby using either the Random Bricks or the Add Bricks commands on the
+   Bricks menu.
+
+   With the Random Bricks command, Bricks clears whatever is currently
+   displayed in the work area and replaces it with a stack of bricks of
+   different colors and sizes. This lets you create a basic Bricks game
+   quickly and easily. In this exercise, you won't be using the Random Bricks
+   command. Instead, you will create your own Bricks game by using any size
+   or color of bricks you'd like to make a scene or picture of your choice.
+
+   With the Add Bricks command, you can specify the color and size
+   of the bricks that you want to add to your game by selecting the brick
+   color, height, and width from the color and size options in the Add Bricks
+   dialog box.
+
+   Start creating your game by specifying the first kind of brick you want
+   to add to your game. To do this, choose the Add Bricks command:
+
+   1.  Select the Bricks menu.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 30 of the printed manual.   ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   2.  Choose the Add Bricks command.
+
+   The Add Bricks dialog box appears on your screen.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 31 of the printed manual.   ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   Using the Add Bricks Dialog Box
+
+   The Add Bricks dialog box is a different kind of dialog box from the Open
+   dialog box. Instead of a text box and list boxes, it contains three groups
+   of round option buttonsÄÄone group for the brick color, one for the brick
+   width, and one for the brick height. Like the Open dialog box, the Add
+   Bricks dialog box also includes a selection cursor and two command
+   buttonsÄÄEnter and Cancel.
+
+   To specify the type of brick you want to add, you select the option
+   button that corresponds to the color, width, and height of the brick.
+   In most Presentation Manager applications, you select an option button
+   by pointing to it and then clicking the left mouse button or, if you are
+   using your keyboard, by pressing the TAB key to move to the group of
+   options you want to use, and then using the UP and DOWN keys to select the
+   option. A round mark appears inside the option button when the
+   corresponding option is selected.
+
+   Use the Add Bricks dialog box to specify the kind of brick you want
+   to add. If you are using a mouse, do the following:
+
+   1.  Click the option button in the Brick Colors group that corresponds to
+       the brick color of your choice.
+
+   2.  Click the option button in the Brick Width group that corresponds to
+       the brick width of your choice.
+
+   3.  Click the option button in the Brick Height group that corresponds to
+       the brick height of your choice.
+
+       The brick in the lower-right corner of the dialog box shows what
+       the brick looks like with the options you've just selected.
+
+   4.  Click the Enter command button to activate your selections.
+
+   If you are using the keyboard, follow these steps to specify the brick you
+   want to add:
+
+   1.  Press the UP or DOWN key to select the option button that corresponds
+       to the brick color of your choice.
+
+   2.  Press the TAB key to move to the Brick Width group.
+
+       The selection cursor appears around the second option button
+       in the Brick Width group, showing you that the group is selected.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 31 of the printed manual.   ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   3.  Press the UP or DOWN key to select the option button that corresponds
+       to the brick width of your choice.
+
+   4.  Press the TAB key to move to the Brick Height group.
+
+       The selection cursor now appears around the first option in the
+       Brick Height group.
+
+   5.  Press the UP or DOWN key to select the option button that corresponds
+       to the brick height of your choice.
+
+       The brick in the lower-right corner of the dialog box shows what
+       the brick looks like with the options you've just selected.
+
+   6.  Press the ENTER key to activate your selections.
+
+   After you've specified the kind of brick you want to add, the pointer
+   turns into cross-hairs, showing you that you can now add the bricks
+   you specified to your game.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 32 of the printed manual.   ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   Adding a Brick to Your Game
+
+   Now add the brick you just specified to your game. If you have a
+   mouse, follow these steps:
+
+   1.  Point to the place in the work area where you want the bottom-left
+       corner of the brick to appear.
+
+   2.  Click the left mouse button.
+
+   If you are using your keyboard, follow these steps to add a brick:
+
+   1.  Use the DIRECTION keys to move the pointer to the place in
+       the work area where you want the bottom-left corner of the brick
+       to appear.
+
+   2.  Press the SPACEBAR to add the brick.
+
+   The brick appears in the work area.
+
+   If the brick you are about to add is on top of another brick, a message
+   box appears, asking if you want to overlap bricks.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 33 of the printed manual.   ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   If you want to create a solid mass of color by overlapping bricks, choose
+   the Yes button by pointing to it and then clicking the left mouse button
+   or press the LEFT key to select it and then press the ENTER key. If you
+   don't want to overlap bricks, just press the ENTER key.
+
+   You can now continue adding bricks of the same size and color to your new
+   game, or you can use the Add Bricks dialog box to specify a new kind of
+   brick.
+
+   To specify a new kind of brick, choose the Add Bricks command from the
+   Bricks menu and then select the color, width, and height for the new brick
+   you want to add. Continue to repeat these steps, specifying and placing as
+   many kinds of bricks as you want.
+
+   Correcting Mistakes
+
+   If you make a mistake and put a brick in the wrong place, you can clear it
+   from the work area by using the Undo command on the Edit menu. In most
+   Presentation Manager applications, choosing the Undo command cancels the
+   last action (such as adding or removing a brick) that you performed.
+
+   Here's how to cancel your last action:
+
+   1.  Select the Edit menu.
+
+   2.  Choose the Undo command.
+
+   The work area looks the same as it did before you performed your
+   last action. You can now add the brick again so that it appears in the
+   correct place.
+
+   Removing Bricks
+
+   You can remove bricks at any time from any game file. If you put
+   a brick in the wrong place while creating your game, or if you just
+   want to remove it, use the Remove Bricks command. Here's how:
+
+   1.  Select the Bricks menu.
+
+   2.  Choose the Remove Bricks command.
+
+   The pointer turns into a moving hammer with a nail underneath it,
+   your tool for removing unwanted bricks.
+
+   If you have a mouse, here's how to remove a brick:
+
+   1.  Point to the brick you want to remove so that the nail is on top
+       of it.
+
+   2.  Click the left mouse button.
+
+   If you are using your keyboard, follow these steps to remove a brick:
+
+   1.  Use the DIRECTION keys to move the nail over the brick you want
+       to remove.
+
+   2.  Press the SPACEBAR.
+
+   When you click the left mouse button or press the SPACEBAR, the brick
+   disappears.
+
+   If, directly after removing a brick, you decide that you want
+   to keep it after all, you can use the Undo command to restore it. Here's
+   how:
+
+   1.  Select the Edit menu and choose the Undo command.
+
+   The brick you removed reappears in its previous place in the work area.
+
+   Completing Your Game
+
+   To switch back to adding bricks, just choose the Add Bricks command from
+   the Bricks menu and then specify the type of brick you want
+   to add.
+
+   If you are using a mouse, here's a quick method for adding the rest
+   of the bricks to your game:
+
+   1.  Use the Add Bricks command to specify the color of brick you want to
+       add. (With this method, you don't need to specify the brick height or
+       width.)
+
+   2.  Point to the place where you want the brick to appear.
+
+   3.  Press and hold down the right mouse button.
+
+   4.  Drag the cross-hairs. As you drag the cross-hairs, the brick changes
+       size.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 34 of the printed manual.   ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   5.  When the brick is the size you want it, release the right mouse
+       button.
+
+   Using this method, you can add bricks of any size. If you put a brick in
+   the wrong place, use either the Undo command or the Remove Bricks command
+   to correct your mistake.
+
+   When you are finished creating your new game, go on to the next
+   exercise to learn how to save it.
+
+
+ Exercise 5: Saving Files
+
+   Once your game is complete, you can save it in a separate file by using
+   the Save or Save As command on the File menu.
+
+   If you've modified a game file that already exists, you can use the Save
+   command to save your modified file and overwrite the original file, or you
+   can use the Save As command to keep the original file and save
+   the modified file under a new filename.
+
+   For example, suppose you added some bricks to the Seattle game.
+   You could either use the Save command to overwrite the original
+   SEATTLE.BRK file, or you could use the Save As command to store the
+   modified Seattle game in a separate file with its own filename,
+   such as NEWFILE.BRK, leaving the original SEATTLE.BRK file unchanged.
+
+   If you are saving a new file that does not yet have a name assigned
+   to it (such as the new game file you just created), use the Save As
+   command. To save your new game, do the following:
+
+   1.  Select the File menu.
+
+   2.  Choose the Save As command.
+
+       A dialog box appears, prompting you for a name for the new file.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 35 of the printed manual.   ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   3.  In the text box, type a descriptive name for your new game file,
+       including the .BRK extension.
+
+       For example, suppose you have created a scene of your favorite city.
+       You might name the file MYCITY.BRK.
+
+   4.  Choose the Save button (click it or press the TAB key and then
+       the ENTER key).
+
+   Bricks stores your game in a file and assigns it the filename you typed.
+
+   You may want to play the game you just created, or you may want
+   to try your hand at the Tokyo or Atlantis game (TOKYO.BRK or
+   ATLANTIS.BRK).
+
+   You can play any of the Bricks games as they are, or you can modify them
+   by adding or removing bricks.
+
+   If you decide to modify an existing game, use the Save As command to save
+   your modified game in a separate file. Otherwise, you will lose the
+   original game by overwriting the existing file with the modified game.
+
+
+ Quitting Bricks
+
+   When you are finished using Bricks, quit Bricks and close the Bricks
+   window. Here's a reminder on how to quit an application and close
+   a window with the mouse:
+
+   1.  Double-click the System-menu box. If you modified the current game
+       file, a message appears, asking if you want to save your
+       changes.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 36 of the printed manual.   ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   2.  If you want to save your changes, double-click the Yes button.
+       Otherwise, press the ENTER key to choose the No button.
+
+   If you are using your keyboard, follow these steps to quit Bricks:
+
+   1.  Press SHIFT+ESC to select the System menu.
+
+   2.  Press the C key to choose the Close command. If you modified
+       the current game file, a message appears, asking if you want to
+       save your changes.
+
+   3.  If you want to save your changes, press the LEFT key to select
+       the Yes button and then press the ENTER key. Otherwise, just press
+       the ENTER key to choose the No button.
+
+   The Bricks window disappears.
+
+   Shutting Down MS OS/2
+
+   If you want to take a break before going on to the next chapter, you
+   might want to shut down MS OS/2 if you're going to be away from your
+   computer for a while.
+
+   Here's a review of how to shutdown MS OS/2:
+
+   1.  Switch to Task Manager (press CTRL+ESC).
+
+   2.  Choose the Shutdown Now command from the Shutdown menu.
+
+       A message appears, asking if you want to quit the applications
+       that are still running and continue shutting down MS OS/2.
+
+   3.  Choose the Yes button.
+
+       A message appears to let you know that it is now safe to turn off your
+       computer.
+
+   You can now safely turn off your computer or you can press the ENTER key
+   to restart MS OS/2.
+
+
+ Summary
+
+   This chapter has described some basic techniques for using Presentation
+   Manager applications and has introduced you to the multitasking feature of
+   MS OS/2. The methods for performing certain tasks, such as using dialog
+   boxes, and opening, creating, and saving files are similar, regardless of
+   the Presentation Manager application you are using.
+
+   Although Presentation Manager applications are similar in some ways, keep
+   in mind that each one is unique and is designed for performing specific
+   kinds of tasks. To learn how to best use a specific Presentation Manager
+   application, see the user's instructions that accompany it.
+
+   When you are ready, go on to Chapter 3, "Learning File System,"
+   to learn how you can use File System to help you manage your files
+   and directories.
+
+
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ Chapter 3  Learning File System
+
+   Introduction
+   Exercise 1: Starting File System
+     Looking at the Directory Tree Window
+   Exercise 2: Opening a Directory Window
+     Looking at the Directory Window
+     Changing the Display in a Directory Window
+   Exercise 3: Managing Files and Directories
+     Creating and Opening Subdirectories
+     Arranging File System Windows
+     Switching Between Directory Windows
+     Copying Files
+     Moving Files
+     Renaming Files
+     Deleting Files
+   Exercise 4: Closing Directory Windows
+   Exercise 5: Quitting File System
+     Shutting Down MS OS/2
+   Summary
+
+
+ Introduction
+
+   File System is a Presentation Manager application you can use to manage
+   your files and directories. With File System, you can view the directory
+   structure of any drive you choose and look at the contents of your
+   directories. To help you keep your files and directories organized and
+   up-to-date, File System provides you with easy ways to perform several
+   file-management tasks, such as copying, moving, renaming,
+   and deleting files and directories.
+
+   While working through the exercises in this chapter, you will use
+   the Bricks game files that you used in the previous chapter to learn
+   and practice these skills:
+
+   ş  Viewing the directory structure on your disk
+
+   ş  Opening directory windows
+
+   ş  Creating subdirectories
+
+   ş  Arranging File System windows
+
+   ş  Copying, moving, renaming, and deleting files
+
+   ş  Closing directory windows
+
+
+ Exercise 1: Starting File System
+
+   To begin learning File System, start File System from Start Programs.
+
+   If you decided not to shut down MS OS/2 in the last chapter, the first
+   thing you need to do is switch to Start Programs. Here's a reminder:
+
+   1.  Choose Start Programs from the list of applications displayed
+       in the Task Manager window.
+
+   To start File System, you need to be in the Main Group. If you are not in
+   the Main Group, change to it now:
+
+   1.  Choose Main Group from the Group menu.
+
+   Now, to start File System with the mouse, do the following:
+
+   1.  Double-click File System in the work area of the Start Programs
+       window.
+
+   To start File System by using your keyboard, follow these steps:
+
+   1.  If File System is not already selected, press the UP or DOWN key
+       to select it.
+
+   2.  Press the ENTER key.
+
+   The File System window appears on your screen, with the Directory Tree
+   window displayed in it.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 98 of the printed manual.   ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   Looking at the Directory Tree Window
+
+   The Directory Tree window makes it easy for you to view the layout,
+   or directory structure, of the directories and subdirectories on any disk
+   or drive you choose. The directory structure is arranged like a "tree"
+   in the Directory Tree window. The root directory appears at the top
+   of the tree, with the names of the other directories listed underneath
+   the root directory in alphabetical order. (For definitions of computer
+   terminology, see the appendix, "Computer Basics," in this manual.)
+
+   The root directory is automatically created when you format a disk.
+   All other directories you create are simply subdirectories of the root
+   directory. Note that the Directory Tree window displays only the
+   directory structure, and not the files in each directory.
+
+   The Directory Tree window looks similar to other Presentation Manager
+   windowsÄÄit has borders, a title bar, and a System-menu box. Below the
+   title bar are the drive icons. They represent the disk drives on your
+   computer. The current drive is the one that is highlighted. The structure
+   of your directories and subdirectories on the current drive is shown in
+   the work area.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 99 of the printed manual.   ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   Unlike a Presentation Manager application window, the Directory Tree
+   window does not have a menu bar and it does not have Minimize or Maximize
+   boxes. The size of the Directory Tree window is limited to the size of the
+   File System work area, so you cannot enlarge it to fill the entire screen,
+   nor can you shrink it to an icon.
+
+   Since the Directory Tree window has its own System menu, you can use the
+   Size and Move commands to size the Directory Tree window and move it
+   around within the File System work area. The Directory Tree does not have
+   its own menus and commands because it is not a separate application. These
+   characteristics apply to all windows that appear in the work area of an
+   application window.
+
+   From the Directory Tree window, you can open another window that lists the
+   contents (subdirectories and files) of the directory you want to view. You
+   can have several directory windows open at once, allowing you to view the
+   contents of several different directories at the same time and carry out
+   tasks that involve more than one directory.
+
+
+ Exercise 2: Opening a Directory Window
+
+   To practice opening a directory, open the OS2\INTRO directory, which
+   contains the Bricks game files you used in the previous chapter. If you
+   are using a mouse, do the following:
+
+   1.  Point to OS2\INTRO in the directory tree.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 100 of the printed manual.  ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   2.  Double-click the left mouse button.
+
+   If you are using your keyboard, you can open the OS2\INTRO directory by
+   using the UP and DOWN keys to select OS2\INTRO from
+   the Directory Tree. Here's how:
+
+   1.  Press the DOWN or UP key several times until OS2\INTRO is selected.
+
+   2.  Press the ENTER key.
+
+   Looking at the Directory Window
+
+   Like the Directory Tree window, the OS2\INTRO directory window is a window
+   within the File System windowÄÄit has a System-menu box, but no menu bar
+   and no Maximize or Minimize boxes. You can move and size the OS2\INTRO
+   directory window, but you cannot enlarge it to fill the entire screen and
+   you cannot shrink it to an icon.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 101 of the printed manual.  ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   The drive letter and the directory path for the OS2\INTRO directory appear
+   in the title bar. The directory path shows the OS2\INTRO directory's
+   location in relation to the root directory. The wildcard characters *.*
+   tell you that the entire contents of the OS2\INTRO directory are displayed
+   in the directory window. (When you are specifying filenames, the wildcard
+   characters can take the place of any other
+   characters, allowing you to find several related files at once.)
+
+   The files in the OS2\INTRO directory are marked with a file icon and the
+   program files (files you use to start applications) are marked with
+   a program icon. Both types of icons appear to the left of the filename.
+
+   Changing the Display in a Directory Window
+
+   You can view the contents of an open directory in several different ways.
+   For example, you can display full details about the files and
+   subdirectories, including their sizes in bytes and the dates and times
+   they were created or last modified.
+
+   To do this, use the Full File Details command on the Options menu:
+
+   1.  Select the Options menu (click the menu or press ALT, O).
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 102 of the printed manual.  ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   2.  Choose the Full File Details command (click the command or press the F
+       key).
+
+   The file information displayed in the OS2\INTRO directory window changes
+   to show the size of each file and the date and time it was created or last
+   modified.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 103 of the printed manual.  ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   If you select the Options menu again, you'll see a check mark next to the
+   Full File Details command. The check mark shows you that the command is
+   active.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 103 of the printed manual.  ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+
+ Exercise 3: Managing Files and Directories
+
+   Once you have opened a directory window, you can perform several tasks
+   with File System to organize and keep track of your files and
+   subdirectories. For example, you can easily rename and delete files, as
+   well as copy and move files within a directory or from one directory to
+   another. With File System, you can also create subdirectories in
+   the open directory.
+
+   In this exercise, you'll create a subdirectory in the OS2\INTRO directory,
+   and then you'll copy and move some of your Bricks game files to that
+   subdirectory. You'll also learn how to rename files, as well as how to
+   delete old files you no longer need.
+
+   Creating and Opening Subdirectories
+
+   With File System, you can create subdirectories in an open directory
+   window. To see how to do this, you'll create a subdirectory named OLDGAMES
+   in the OS2\INTRO directory. Follow these steps:
+
+   1.  Select the File menu.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 104 of the printed manual.  ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   2.  Choose the Create Directory command. The Create Directory
+       dialog box appears on your screen.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 105 of the printed manual.  ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   3.  In the text box, type the following:
+
+       oldgames
+
+       If you make a mistake while typing, use the BACKSPACE key
+       to erase it and then continue typing.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 105 of the printed manual.  ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   4.  Choose the Create button (click it or press the ENTER key).
+
+   OLDGAMES is added to the list of files and subdirectories shown in the
+   work area of the OS2\INTRO directory window. The directory icon appears to
+   the left of OLDGAMES. The directory icon lets you know that OLDGAMES is a
+   subdirectory of the OS2\INTRO directory.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 106 of the printed manual.  ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   Now, you'll open the OLDGAMES subdirectory from the OS2\INTRO directory
+   window. You open a subdirectory from a directory window
+   by using the mouse the same way as you open a directory from the
+   Directory Tree window:
+
+   1.  Point to OLDGAMES in the OS2\INTRO directory window and double-click
+       the left mouse button.
+
+   If you are using your keyboard, do the following to open the
+   OLDGAMES directory:
+
+   1.  If OLDGAMES is not already selected, press the UP or DOWN key to
+       select it.
+
+   2.  Press the ENTER key.
+
+   The OLDGAMES directory window appears in front of the OS2\INTRO directory
+   window with the path for OLDGAMES displayed in the title bar.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 107 of the printed manual.  ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   Note that, since there are no files or subdirectories in the OLDGAMES
+   subdirectory, nothing is listed in the work area
+   of the OLDGAMES directory window.
+
+   Arranging File System Windows
+
+   When you have several windows displayed on top of each other at the same
+   time, you can arrange them so that they do not overlap in the File System
+   work area. Arranging directory windows with File System is similar to
+   arranging application windows with Task ManagerÄÄyou use the commands on
+   the Arrange menu.
+
+   To see how this works, use the Tile command on the Arrange menu to arrange
+   the Directory Tree, OS2\INTRO, and OLDGAMES windows so that they do
+   not overlap:
+
+   1.  Select the Arrange menu and choose the Tile command.
+
+   File System arranges the windows in the work area so that they do not
+   overlap, making it easy for you to view the directory tree and the
+   contents of each open directory at the same time.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 108 of the printed manual.  ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   Switching Between Directory Windows
+
+   When you have several directory windows open at the same time, only one of
+   them is active. Right now the OLDGAMES directory window
+   is active, as you can see by its colored borders and title bar. Since you
+   will be performing tasks on files in the OS2\INTRO directory, you need to
+   switch to the OS2\INTRO directory window to make it active.
+
+   If you are using a mouse, make the OS2\INTRO directory window active:
+
+   1.  Point to a place anywhere in the background of the OS2\INTRO directory
+       window. (Make sure that the pointer is not touching
+       a filename, a directory name, or an icon.)
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 109 of the printed manual.  ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   2.  Click the left mouse button.
+
+   If you are using your keyboard, you can switch to the OS2\INTRO directory
+   window by using the Window menu. Do the following:
+
+   1.  Press ALT, W to select the Window menu. The list of directory
+       windows that are currently open appears on the Windows menu.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 110 of the printed manual.  ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+       The check mark next to the OLDGAMES directory tells you that the
+       OLDGAMES directory window is active.
+
+   2.  Press the 2 key to choose C:\OS2\INTRO.
+
+   When you switch to the OS2\INTRO directory window, the bor-
+   ders and title bar of the window change colors, showing you that
+   OS2\INTRO is now the active window.
+
+   Now that the OS2\INTRO directory window is active, you'll learn how to
+   perform a few basic file-management tasks by using some of the files in
+   the OS2\INTRO directory.
+
+   Copying Files
+
+   With File System, you can easily copy and move files from one
+   directory to another with your mouse. If you are using a mouse, try
+   copying the ATHENS.BRK file from the OS2\INTRO directory to
+   the OLDGAMES directory:
+
+   1.  Point to ATHENS.BRK in the OS2\INTRO directory window.
+
+   2.  Press and hold down the left mouse button.
+
+   3.  While holding down the mouse button, drag the pointer to a place
+       anywhere in the work area of the OLDGAMES directory window. When you
+       start dragging the mouse, the pointer changes to a file icon.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 111 of the printed manual.  ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   4.  When the pointer is in the work area of the OLDGAMES directory window,
+       release the mouse button.
+
+   If you are using your keyboard, you use the Copy command on the File menu
+   to copy a file from one directory to another. Here's how to copy the
+   ATHENS.BRK file with your keyboard:
+
+   1.  Press the UP or DOWN key to select ATHENS.BRK.
+
+   2.  Select the File menu.
+
+   3.  Choose the Copy command. The Copy dialog box appears, with the
+       name of the file you just selected displayed in the From text box.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 112 of the printed manual.  ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   4.  In the To text box, type the following:
+
+       c:\os2\intro\oldgames
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 112 of the printed manual.  ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   5.  Choose the Copy button (press the ENTER key).
+
+   The ATHENS.BRK file is now listed both in the OS2\INTRO directory window
+   and in the OLDGAMES directory window. This tells you that two copies of
+   ATHENS.BRK exist in two different directories. The borders and title bar
+   of the OS2\INTRO directory window are still colored, showing you that
+   OS2\INTRO is still the active directory window.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 113 of the printed manual.  ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   Moving Files
+
+   You may want to move a file into another directory without making
+   a copy of it. If you are using a mouse, try this method now to move
+   the file named APLTREE.BRK from the OS2\INTRO directory to
+   the OLDGAMES directory:
+
+   1.  Point to the file named APLTREE.BRK in the OS2\INTRO
+       directory window.
+
+   2.  Press and hold down the ALT key.
+
+   3.  While holding down the ALT key, press and hold down the left mouse
+       button.
+
+   4.  While holding down the left mouse button, release the ALT key and then
+       drag the pointer to a place anywhere within the work area of the
+       OLDGAMES directory window. When you begin dragging,
+       the pointer turns into a file icon.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 114 of the printed manual.  ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   5.  Release the left mouse button.
+
+   If you are using your keyboard, you use the Move command on the
+   File menu to move a file from one directory to another. Moving a file
+   with the keyboard is similar to copying a file. Try this method to move
+   the APLTREE.BRK file from the OS2\INTRO directory to the OLDGAMES
+   directory:
+
+   1.  Press the UP or DOWN key to select APLTREE.BRK from the list
+       of files in the OS2\INTRO directory window.
+
+   2.  Select the File menu.
+
+   3.  Choose the Move command. The Move dialog box appears,
+       with the name of the selected file in the From text box.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 115 of the printed manual.  ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   4.  In the To text box, type the following:
+
+       c:\os2\intro\oldgames
+
+       Because you won't be changing the name of the file, you do not need to
+       include a filename with the directory path.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 115 of the printed manual.  ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   5.  Choose the Move button (press the ENTER key).
+
+   The file APLTREE.BRK now appears in its alphabetical place in
+   the OLDGAMES directory window and is gone from the OS2\INTRO
+   directory window. The OS2\INTRO directory window is still active.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 116 of the printed manual.  ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   Renaming Files
+
+   The Rename command on the File menu makes it easy to change the name of a
+   file. The general procedure for renaming files is the same, regardless of
+   whether you are using the mouse or the keyboard.
+
+   Try giving the file named ATHENS.BRK in the OLDGAMES directory the new
+   name ATHENS.OLD. Remember, before you can
+   perform a task on a file, the directory window in which that file is
+   located must be active. Since you will be renaming the copy of
+   the ATHENS.BRK file that is located in the OLDGAMES directory,
+   you first need to switch to the OLDGAMES directory window.
+
+   If you are using a mouse, here's how:
+
+   1.  Click the OLDGAMES directory window.
+
+   If you are using your keyboard, do the following to switch to
+   the OLDGAMES directory window:
+
+   1.  Select the Window menu.
+
+   2.  Choose the OLDGAMES directory window.
+
+   The borders and title bar of the OLDGAMES directory window change colors,
+   showing you that the OLDGAMES directory window is active.
+
+   You now can rename the ATHENS.BRK file to ATHENS.OLD:
+
+   1.  Select ATHENS.BRK from the list of files in the OLDGAMES directory
+       window.
+
+   2.  Select the File menu.
+
+   3.  Choose the Rename command. The Rename dialog box appears, with
+       ATHENS.BRK displayed in the From text box.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 117 of the printed manual.  ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   4.  In the To text box, type the following:
+
+       athens.old
+
+   5.  Choose the Rename button.
+
+   File System changes the name of ATHENS.BRK to ATHENS.OLD.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 118 of the printed manual.  ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   Now practice renaming files by changing the name of the APLTREE.BRK file
+   to APLTREE.OLD. Follow these steps:
+
+   1.  Select APLTREE.BRK from the list of files in the OLDGAMES directory
+       window.
+
+   2.  Select the File menu.
+
+   3.  Choose the Rename command. The Rename dialog box appears, with
+       APLTREE.BRK displayed in the From text box.
+
+   4.  In the To text box, type the following:
+
+       apltree.old
+
+   5.  Choose the Rename button.
+
+   File System changes the name of APLTREE.BRK to the new name, APLTREE.OLD.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 119 of the printed manual.  ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   Deleting Files
+
+   It's a good idea to clean up your disk regularly by deleting files you no
+   longer need. Deleting unwanted files frees up storage space on your disk
+   so that you have more room for additional software and data files.
+
+   With File System, you can delete a single file or you can delete multiple
+   files at once. If you are deleting multiple files that are not related,
+   you can select all the files you want to delete from the directory window,
+   or you can type their filenames in the text box of the Delete dialog box.
+
+   If you are deleting multiple files that are related (for example, the
+   files have the same filename or extension), you can use wildcard
+   characters when specifying the files in the Delete dialog box.
+
+   Try using wildcard characters to delete the ATHENS.OLD and APLTREE.OLD
+   files from the OLDGAMES directory:
+
+   1.  Select the file ATHENS.OLD from the list of files in the
+       OLDGAMES directory window.
+
+   2.  Select the File menu.
+
+   3.  Choose the Delete command. The Delete dialog box appears,
+       with ATHENS.OLD displayed in the Delete text box.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 120 of the printed manual.  ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   4.  Select the Delete text box (point somewhere to the right of the
+       filename in the text box and then click the left mouse button or press
+       SHIFT+TAB).
+
+   5.  Use the BACKSPACE key to erase ATHENS.OLD, then type the
+       following:
+
+       *.old
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 120 of the printed manual.  ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   6.  Choose the Delete button.
+
+       A message appears, asking you to confirm your decision to delete the
+       ATHENS.OLD file.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 121 of the printed manual.  ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   7.  Choose the Yes button.
+
+       Another message appears, asking you to confirm your decision
+       to delete the APLTREE.OLD file.
+
+   8.  For each message you see, choose the Yes button.
+
+   The files with the extension .OLD no longer appear in the OLDGAMES
+   directory window, showing you that they have been deleted.
+
+   Now that you've deleted your old Bricks game files, you have almost
+   reached the end of this set of exercises. The last things you'll do are
+   close the OS2\INTRO and OLDGAMES directory windows and then quit File
+   System.
+
+
+ Exercise 4: Closing Directory Windows
+
+   When you are finished working in a directory, you can close the
+   directory window to make more room in the File System work area.
+   To close a directory window with the mouse, just double-click
+   the System-menu box.
+
+   If you are using a mouse, do the following:
+
+   1.  Point to the System-menu box in the OLDGAMES directory
+       window.
+
+       Make sure that you don't accidentally point to the System-menu box in
+       the File System window. Otherwise, you will close File System instead
+       of the OLDGAMES directory window.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 122 of the printed manual.  ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   2.  Double-click the left mouse button.
+
+   If you are using your keyboard, you can close a directory window easily by
+   using the Close command on the System menu.
+
+   You select the System menu in a directory window differently from the way
+   you select the System menu in an application window. Instead of pressing
+   SHIFT+ESC, you press CTRL+- (the CTRL key and the hyphen key). Pressing
+   SHIFT+ESC selects the System menu in the File System window, whereas
+   pressing CTRL+- selects the System menu in the active directory window.
+   This allows you to select either System menu and use its commands quickly
+   and easily.
+
+   If you are using your keyboard, close the OLDGAMES directory window:
+
+   1.  Press CTRL+- to display the System menu in the OLDGAMES directory
+       window.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 123 of the printed manual.  ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   2.  Press C to choose the Close command.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 124 of the printed manual.  ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+
+   The OLDGAMES directory window no longer appears in the work area of the
+   File System window. The OS2\INTRO directory window
+   is now active.
+
+   Now close the OS2\INTRO directory window the same way you closed the
+   OLDGAMES directory window. If you have a mouse, do the following:
+
+   1.  Double-click the System-menu box in the OS2\INTRO directory window.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 125 of the printed manual.  ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+
+   If you are using your keyboard, follow these steps to close the
+   OS2\INTRO directory window:
+
+   1.  Select the System menu in the OS2\INTRO directory window
+       (press CTRL+-).
+
+   2.  Choose the Close command.
+
+   The OS2\INTRO directory no longer appears in the File System
+   work area.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 126 of the printed manual.  ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+
+ Exercise 5: Quitting File System
+
+   Now that you have closed the directory windows, you are ready to quit File
+   System. If you are using a mouse, follow these steps:
+
+   1.  Double-click the System-menu box.
+
+       A message appears, asking you to confirm your decision to quit
+       File System.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 126 of the printed manual.  ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+       (The message dialog box also gives you an opportunity to save any
+       settings you have made on the Options menu, but you don't need
+       to change this now. For more information about changing and
+       saving settings, see Part 1, "Using Presentation Manager," of
+       the Microsoft Operating System/2 User's Guide.)
+
+   2.  Choose the Yes button.
+
+   Here's a review of how to quit File System by using your keyboard:
+
+   1.  Select the System menu (press SHIFT+ESC).
+
+   2.  Choose the Close command.
+
+       A message appears, asking you to confirm your decision to quit
+       File System.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 127 of the printed manual.  ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+       (The message dialog box also gives you an opportunity to save any
+       settings you have made on the Options menu, but you don't need
+       to change this now. For more information about changing and
+       saving settings, see Part 1, "Using Presentation Manager," of
+       the Microsoft Operating System/2 User's Guide.)
+
+   3.  Choose the Yes button.
+
+   The File System window disappears and Start Programs becomes
+   the active window.
+
+   Shutting Down MS OS/2
+
+   You can now go on to the exercises in Chapter 4 or, if you want to take a
+   break, you can shut down MS OS/2. If you want to shut down MS OS/2, switch
+   to Task Manager and then choose the Shutdown Now command from the Shutdown
+   menu, as described in Chapters 1 and 2 of this manual.
+
+
+ Summary
+
+   So far, you've learned some basic techniques for working with
+   Presentation Manager applications in the Presentation Manager
+   session. In Chapter 1, you learned how to start applications, shrink
+   application windows to icons, and arrange application windows on
+   your screen. In Chapter 2, you were introduced to multitasking and
+   several features that are common to most Presentation Manager
+   applications.
+
+   In this chapter, you've learned about using File System to view the
+   directory structure on any drive you choose and the contents of any
+   directory you choose. In addition, you've practiced some basic
+   file-management tasks, such as creating subdirectories and copying
+   and moving files.
+
+   If you've worked through the exercises up to this point, you should have
+   all the information you need to begin working in the Presentation Manager
+   session of MS OS/2 on your own. If, while working in the Presentation
+   Manager session, you need more detailed information
+   to perform a specific task, see Part 1, "Using Presentation Manager,"
+   of the Microsoft Operating System/2 User's Guide.
+
+   Chapter 4, "Learning the MS OS/2 and DOS Command Interpreters,"
+   introduces you to two other kinds of sessions in MS OS/2ÄÄthe full-screen
+   OS/2 session and the DOS session. Chapter 4 also describes some basic
+   techniques for using the MS OS/2 and DOS command interpretersÄÄcmd and
+   command. Cmd and command are the programs you use to perform some advanced
+   tasks with MS OS/2, such as configuring your system and running utilities
+   for maintaining your disks.
+
+   If you have never used DOS and are unfamiliar with typing commands, it is
+   recommended that you work through the exercises in Chapter 4. There you
+   will learn and practice some basic techniques of typing
+   commands by performing some of the same tasks you've performed in
+   the previous chapters. For example, you'll learn how to type commands
+   to start applications, view the contents of a directory, and copy files.
+
+   If you are familiar with DOS and know how to type commands and start DOS
+   applications, you may want to skip Chapter 4 and see Part 2, "Using Cmd
+   and the DOS Session," of the Microsoft Operating
+   System/2 User's Guide and the Microsoft Operating System/2 Desktop
+   Reference for instructions on how to perform specific tasks with cmd
+   and command.
+
+
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ Chapter 4  Learning the MS OS/2 and DOS Command Interpreters
+
+   Introduction
+     Typing Commands
+     Controlling the Screen's Contents
+     Using the Copy Command
+       Using Editing Keys
+     Starting an Application
+     Using the System Menu in Cmd
+       Changing the Font Size
+       Scrolling the Contents of the Screen
+     Quitting Cmd and Closing the Window
+   Exercise 2: Running Cmd in a Full-Screen OS/2 Session
+     Using Cmd in a Full-Screen OS/2 Session
+     Starting an Application
+     Quitting Cmd in a Full-Screen OS/2 Session
+   Exercise 3: Running the DOS Command Interpreter
+     Starting the DOS Command Interpreter
+     Typing Commands
+     Starting a DOS Application
+   Shutting Down MS OS/2
+   Going On
+
+
+ Introduction
+
+   The MS OS/2 command interpreter, cmd, is another program you can use to
+   perform the same kinds of tasks that you can perform with Start Programs
+   and File System. With cmd, you can start both Presentation
+   Manager and full-screen OS/2 applications, as well as manage your files
+   and directories.
+
+   The DOS command interpreter, command, is the program you use to run your
+   applications that were designed for MS-DOS or a computer manufacturer's
+   version of DOS. In addition to running your DOS
+   applications, you can also use command to perform some file- and
+   directory-management tasks. (If you are familiar with how to use DOS, you
+   may want to do only the exercises that demonstrate cmd.)
+
+   With cmd and command, instead of choosing commands from menus, you type
+   them in yourself by using your keyboard. In addition, cmd is the program
+   you use to run utilities for maintaining your disks and configuring your
+   system. (For more detailed information on using utilities, see the
+   Microsoft Operating System/2 User's Guide. Also, if you feel an overview
+   of computer terms and concepts would be helpful, see the appendix,
+   "Computer Basics," in this tutorial.)
+
+   The exercises in this chapter will give you hands-on experience using cmd
+   and command, while you learn and practice the following skills:
+
+   ş  Running cmd in both the Presentation Manager and the full-screen OS/2
+      sessions
+
+   ş  Running the DOS command interpreter in the DOS session
+
+   ş  Typing commands
+
+   ş  Using editing keys
+
+   ş  Starting applications
+
+   ş  Quitting cmd and command
+
+   When you run cmd in the Presentation Manager session, it runs in
+   a window that you can move, size, and shrink to an icon. This exercise
+   shows you how to run cmd in a window, how to type commands,
+   control the movement of text on the screen, and use the commands
+   on the System menu that are unique to full-screen OS/2 applications
+   that can run in the Presentation Manager session.
+
+   If you decided not to shut down MS OS/2 in the last chapter, the
+   first thing you need to do is switch to Start Programs:
+
+   1.  Choose Start Programs from the list of applications displayed
+       in the Task Manager window.
+
+   To start cmd, you need to be in the Main Group. If you are not in the Main
+   Group, change to it now:
+
+   1.  Choose Main Group from the Group menu.
+
+   Now start cmd so that it runs in the Presentation Manager session.
+   If you are using a mouse, do the following:
+
+   1.  Point to OS/2 Windowed Command Prompt in the Start Programs window.
+
+   2.  Double-click the left mouse button.
+
+   If you are using your keyboard, do the following to start cmd:
+
+   1.  Use the UP or DOWN key to select OS/2 Windowed Command Prompt from the
+       list of applications displayed in the Start Programs window.
+
+   2.  Press the ENTER key.
+
+   Cmd appears in a window on your screen.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 133 of the printed manual.  ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   The MS OS/2 prompt is located in the upper-left corner of the work area,
+   followed by a cursor. The cursor indicates where the command line is. The
+   command line is the place where you type information, such as commands or
+   text, for cmd to process.
+
+   Typing Commands
+
+   Cmd has its own commands that you can use to manage files and
+   directories, maintain disks, and customize MS OS/2 for your needs.
+   When you communicate with an application by using cmd, you type
+   commands instead of choosing them from menus.
+
+   To practice typing commands, you'll use the commands cd and dir to change
+   to the OS2\INTRO directory (the directory that contains your Bricks game
+   files) and then list its contents. When you type commands, make sure you
+   include one space between the command and the directory path or filename.
+   Also, it makes no difference whether you type the letters in uppercase or
+   lowercase; the system doesn't distinguish between them.
+
+   Here's how to change to the OS2\INTRO directory:
+
+   1.  Type the following:
+
+       cd \os2\intro
+
+       The cursor moves to the right as you type. If you make a mistake while
+       typing, use the BACKSPACE key to erase it, then continue
+       typing the command correctly.
+
+   2.  Press the ENTER key.
+
+   The command prompt changes to show you that OS2\INTRO is now the current
+   directory.
+
+   C:\OS2\INTRO
+
+   Now list the contents of the OS2\INTRO directory by using the dir
+   command:
+
+   1.  Type the following:
+
+       dir
+
+   2.  Press the ENTER key.
+
+   A list of the subdirectories and files in the OS2\INTRO directory appears
+   on your screen.
+
+
+    The volume label in drive C is RALPH.
+    Directory of C:\OS2\INTRO
+
+   .            <DIR>     10-31-88   2:32p
+   ..           <DIR>     10-31-88   2:32p
+   OLDGAMES     <DIR>     11-09-88  12:19p
+   ACLOCK   EXE    11264  10-27-88   6:53a
+   APLTREE  BRK      738  10-26-88   1:53a
+   ATHENS   BRK     6878  10-28-88   8:49a
+   ATLANTIS BRK    17098  10-26-88   1:54p
+   BRICKS   EXE    36864  11-02-88   4:25a
+   PARIS    BRK     8818  10-28-88   8:36a
+   SEATTLE  BRK    21578  10-26-88   1:55p
+   TOKYO    BRK     9058  10-26-88   1:55p
+        11 File(s)   7643136 bytes free
+
+
+   Controlling the Screen's Contents
+
+   Often, the list of files and subdirectories in a directory is too long to
+   fit on your screen. With the CTRL key and the S key, you can stop the list
+   from scrolling by pressing CTRL+S. To resume scrolling, press CTRL+S
+   again.
+
+   Now use the dir command again to redisplay the contents of the
+   OS2\INTRO directory, but this time practice controlling the contents of
+   the screen:
+
+   1.  Type the following:
+
+       dir
+
+   2.  Press the ENTER key.
+
+   3.  While the list is scrolling, quickly press CTRL+S.
+
+   If you reached the end of the list before you were able to press CTRL+S,
+   repeat the previous procedure and try again.
+
+   Now resume scrolling the list to display the rest of the files in
+   the directory:
+
+   1.  Press CTRL+S again.
+
+   The list continues scrolling until the entire contents of the OS2\INTRO
+   directory have been displayed. You can scroll and stop the contents of
+   your screen by pressing CTRL+S as many times as you like, until you reach
+   the end of the list.
+
+   Using the Copy Command
+
+   Just like the Copy command on the File menu in File System, the copy
+   command in cmd lets you copy files and directories to the same directory
+   or to other directories.
+
+   To practice using the copy command, copy the SEATTLE.BRK file
+   to a new file, which you'll name SEATTLE.OLD:
+
+   1.  Type the following:
+
+       copy seattle.brk seattle.old
+
+   2.  Press the ENTER key.
+
+   Cmd copies the SEATTLE.BRK file to a new file named SEATTLE.OLD and stores
+   it in the current directory (in this case,
+   the OS2\INTRO directory). When the copy operation is complete,
+   a message appears in the work area that tells you how many files have been
+   copied.
+
+   1 file(s) copied.
+
+   Using Editing Keys
+
+   If you want to carry out the same command on different files or want to
+   modify a command slightly, you don't have to type the entire command over
+   again. Cmd remembers the last command you typed, so you can use an editing
+   key to redisplay a command. With editing keys, you can redisplay the
+   entire command or only the part that you specify, in just one keystroke.
+
+   Next, you'll copy three more files, to practice using three of the MS OS/2
+   editing keys. With the F1 key, you can redisplay the previous
+   command, one character at a time:
+
+   1.  Press the F1 key once.
+
+   The "c" from "copy" appears on the command line. Now redisplay the
+   remaining characters in "copy":
+
+   1.  Press the F1 key three more times to redisplay the "o," the "p,"
+       and the "y."
+
+   Now copy the PARIS.BRK file to a new file named PARIS.OLD
+   by typing the filenames after the copy command:
+
+   1.  After the "y" in "copy," press the SPACEBAR once.
+
+   2.  Type the following:
+
+       paris.brk paris.old
+
+   3.  Press the ENTER key.
+
+   Cmd copies PARIS.BRK to a new file named PARIS.OLD and stores it in the
+   OS2\INTRO directory. When the copy operation is complete, the message that
+   the file has been copied appears in the work area.
+
+   Now use the F3 key to copy the TOKYO.BRK file to a new file named
+   TOKYO.OLD. The F3 key redisplays the entire previous command, including
+   the names of the files you typed. Try the following:
+
+   1.  Press the F3 key. The copy command and the names of the files
+       you previously specified reappear on the command line.
+
+       copy paris.brk paris.old
+
+   2.  Press the BACKSPACE key several times to erase the names of
+       the two files you specified, leaving a blank space after the "y"
+       in "copy."
+
+       copy
+
+   3.  Type the following:
+
+       tokyo.brk tokyo.old
+
+   4.  Press the ENTER key.
+
+   Cmd copies TOKYO.BRK to a new file named TOKYO.OLD and stores it in the
+   OS2\INTRO directory.
+
+   Now try using one more editing key to copy the ATHENS.BRK file. This time,
+   use the F2 key to redisplay the previous command up to the first letter you
+  specify. Follow these steps:
+
+   1.  Press the F2 key. Nothing appears on your screen until you specify
+       a character from the previous command.
+
+   2.  Type the following:
+
+       t
+
+       The letters and spaces in the previous command up to the "t"
+       in "tokyo" reappear on the command line.
+
+       copy
+
+   3.  Type the following:
+
+       athens.brk athens.old
+
+   4.  Press the ENTER key.
+
+   Cmd copies the file and displays a message when the copy is complete.
+
+   At this point, you have copied four files using the copy command and the
+   editing keys. Since you won't be using the copies you've just made, you'll
+   use the del command to delete them from your disk.
+
+   Delete the copy of the first file:
+
+   1.  Type the following:
+
+       del seattle.old
+
+       Since you cannot recover any files that you've deleted, make sure that
+       you type the filename exactly as shown. If you make a mistake, use the
+       BACKSPACE key to erase it and then type the del command and the
+       filename correctly.
+
+   2.  Press the ENTER key.
+
+   When you press the ENTER key, cmd deletes the file you specified. You can
+   use the dir command to see whether the file was deleted correctly. Try it
+   now:
+
+   1.  Type the following:
+
+       dir seattle.old
+
+   2.  Press the ENTER key.
+
+   If the file was deleted correctly, you'll see the message "The system
+   cannot find the file specified" on your screen.
+
+   With the del command, you can delete a single file or several files
+   at the same time. To see how this works, delete the three files PARIS.OLD,
+   TOKYO.OLD and ATHENS.OLD:
+
+   1.  Type the following:
+
+       del paris.old tokyo.old athens.old
+
+       Remember, once you delete a file you cannot restore it, so make sure
+       that you type the filenames exactly as they are shown.
+
+   2.  Press the ENTER key.
+
+   Now use the dir command to make sure that the files were deleted
+   correctly:
+
+   1.  Type the following:
+
+       dir paris.old tokyo.old athens.old
+
+   2.  Press the ENTER key.
+
+   If the files were deleted, you'll see the message "The system cannot find
+   the file specified" on your screen. If, instead of the message, you see
+   information for any of the files you just specified, then the files were
+   not deleted correctly. If this is the case, try repeating the procedure
+   with the undeleted files by using the del command.
+
+   Starting an Application
+
+   You start an application with cmd by typing the command that starts the
+   application you want to use. To practice starting an application, start
+   the Bricks application that you used in Chapter 2:
+
+   1.  At the MS OS/2 prompt, type the following:
+
+       bricks
+
+   2.  Press the ENTER key.
+
+   The Bricks game appears in a window on your screen. The window where cmd
+   is running shrinks to an icon.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 140 of the printed manual.  ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   You can start any kind of application with cmd, regardless of whether
+   it runs in the Presentation Manager session or in a full-screen OS/2
+   session. Your screen changes to reflect the type of application you start.
+   When you are ready to quit Bricks, do the following:
+
+   1.  Select the System menu.
+
+   2.  Choose the Close command.
+
+   Bricks disappears and cmd is automatically restored to a window
+   on your screen.
+
+   Using the System Menu in Cmd
+
+   The System menu for cmd running in a window differs slightly from
+   the System menu in Presentation Manager applicationsÄÄit contains
+   additional commands at the bottom of the menu.
+
+   You display the System menu for cmd running in a window the same way as
+   you display the System menu in Presentation Manager applications.
+
+   If you are using a mouse, display the System menu:
+
+   1.  Point to the System-menu box in the cmd window and click
+       the left mouse button.
+
+   If you are using your keyboard, do the following to display
+   the System menu:
+
+   1.  Press SHIFT+ESC.
+
+   The System menu appears on your screen, with four additional
+   commands listed at the bottom of the menu.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 142 of the printed manual.  ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   Choosing the Help command is similar to pressing the F1 keyÄÄa window of
+   Help information appears on your screen for the task you are performing.
+   The Next Window command makes another window active. The following
+   sections will show you how to use the Small Font command to adjust the
+   font size of the characters on your screen and how to use the Scroll
+   command to bring information not currently visible in the window into
+   view.
+
+   Changing the Font Size
+
+   Use the Small Font command to change the size of the characters displayed
+   in the work area of the cmd window. Here's how:
+
+   1.  With the System menu displayed, choose the Small Font command (click
+       Small Font by using your mouse or press the F key).
+
+   The font size of the characters in the work area becomes smaller.
+
+   Displaying information in a smaller font lets you fit more information
+   in the work area.
+
+   Now change the screen characters back to the larger font:
+
+   1.  Select the System menu (click the System-menu box or press SHIFT+ESC).
+
+       When the information in the work area is displayed in the smaller
+       font, the Small Font command changes to the Large Font
+       command.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 143 of the printed manual.  ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   2.  Choose the Large Font command (click Large Font or press
+       the F key).
+
+   The characters in the work area reappear in the larger font.
+
+   Scrolling the Contents of the Screen
+
+   If you are using a mouse, you can use the vertical and horizontal scroll
+   bars at the right and at the bottom of the cmd window to scroll the
+   contents of the screen.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 143 of the printed manual.  ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   See how this works by using the mouse and the horizontal scroll bar to
+   scroll the contents of the screen to the right:
+
+   1.  Click the right scroll arrow in the horizontal scroll bar.
+
+       ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+       ³                                    ³
+       ³   This screen can be viewed on     ³
+       ³   page 144 of the printed manual.  ³
+       ³                                    ³
+       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+       The contents move to the left.
+
+   2.  Click the left scroll arrow.
+
+       The contents move back to their original position.
+
+   If you are using your keyboard, you can scroll the contents of the screen
+   by using the Scroll command, together with the DIRECTION keys. Choose the
+   Scroll command:
+
+   1.  Press SHIFT+ESC to display the System menu.
+
+   2.  Press the L key to choose the Scroll command.
+
+   You now can scroll the contents of the screen by using the DIRECTION keys
+   on your keyboard. Press the RIGHT key to move the contents
+   to the left and then the LEFT key to move the contents to the right.
+   Here's how:
+
+   1.  Press the RIGHT key several times to move the contents of the screen
+       to the left. Notice that the scroll box in the horizontal scroll bar
+       also moves as you press the RIGHT key.
+
+   2.  Press the LEFT key several times to move the contents back to
+       its original position.
+
+   To scroll the contents of the screen by using the keyboard, the Scroll
+   command must be active. The Scroll command is active if there is
+   a small check mark next to the command on the System menu.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 145 of the printed manual.  ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   To make the Scroll command inactive, just choose it again
+   from the System menu. Do the following:
+
+   1.  Press SHIFT+ESC to display the System menu.
+
+   2.  Press the L key to choose the Scroll command.
+
+   Since the Scroll command is now inactive, pressing the DIRECTION keys will
+   not scroll the contents of the screen.
+
+   In this exercise, you've been introduced to two commands that appear on
+   the System menu when you run full-screen OS/2 applications in
+   a windowÄÄthe Small Font command and the Scroll command. Part 1, "Using
+   Presentation Manager," of the Microsoft Operating System/2 User's Guide,
+   describes the other commands in detail.
+
+   Quitting Cmd and Closing the Window
+
+   To quit cmd and close the window, you use the exit command.
+   Do this now:
+
+   1.  At the MS OS/2 prompt, type the following:
+
+       exit
+
+   2.  Press the ENTER key.
+
+   The cmd window disappears from your screen and Start Programs becomes the
+   active application.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 146 of the printed manual.  ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   In this exercise, you've learned and practiced some techniques for running
+   cmd in a window in the Presentation Manager session. In the next exercise,
+   you'll learn how to run cmd in a full-screen OS/2 session.
+
+
+ Exercise 2: Running Cmd in a Full-Screen OS/2 Session
+
+   Using cmd while it is running in a full-screen OS/2 session is easy. The
+   way you type commands, control the contents of the screen, use editing
+   keys, and start applications is identical to the way you perform these
+   tasks when cmd is running in the Presentation Manager session.
+
+   First, start cmd so that it runs in a full-screen OS/2 session.
+   If you are using a mouse, do the following:
+
+   1.  Point to OS/2 Full-Screen Command Prompt in the Start Programs window.
+
+   2.  Double-click the left mouse button.
+
+   If you are using the keyboard, do the following:
+
+   1.  Use the UP or DOWN key to select OS/2 Full-Screen Command Prompt.
+
+   2.  Press the ENTER key.
+
+   The Presentation Manager window disappears and cmd appears on your screen,
+   running in a full-screen OS/2 session. The MS OS/2 prompt appears in the
+   upper-left corner of your screen, with the cursor next
+   to it.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 147 of the printed manual.  ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   Using Cmd in a Full-Screen OS/2 Session
+
+   When you run cmd in a full-screen OS/2 session, it looks different from
+   when you run it in a window in the Presentation Manager session. In a
+   full-screen OS/2 session, cmd occupies your entire screen and there is no
+   System-menu box, no Maximize or Minimize boxes, no title bar,
+   and no borders.
+
+   Even though cmd looks different when it is running in a full-screen
+   session, it is the same program and you use it the same way as when
+   it is running in a window.
+
+   Now change to the OS2\INTRO directory, and then list its contents
+   the same way as you did in the previous exerciseÄÄby using the cd and
+   dir commands. Here's how:
+
+   1.  To change to the OS2\INTRO directory, type the following:
+
+       cd \os2\intro
+
+   2.  Press the ENTER key.
+
+       The name of the current directory appears as part of the MS OS/2
+       prompt.
+
+   3.  To list the contents of the OS2\INTRO directory, type
+       the following:
+
+       dir
+
+   4.  Press the ENTER key.
+
+   A list of the files and subdirectories in the current directory appears
+   on your screen.
+
+   Starting an Application
+
+   You start an application when cmd is running in a full-screen OS/2 session
+   the same way as when it is running in the Presentation Manager session.
+
+   To see how this works, start the Bricks game again:
+
+   1.  At the MS OS/2 prompt, type the following:
+
+       bricks
+
+   2.  Press the ENTER key.
+
+   Because Bricks is a Presentation Manager application, cmd automatically
+   switches to the Presentation Manager session, and Bricks appears in a
+   window on your screen.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 149 of the printed manual.  ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   To quit Bricks, do the following:
+
+   1.  Select the System menu.
+
+   2.  Choose the Close command.
+
+   Bricks disappears and cmd returns, running in a full-screen session, just
+   as cmd running in a window returned when you quit Bricks
+   in the previous exercise.
+
+   Quitting Cmd in a Full-Screen OS/2 Session
+
+   You use the exit command to quit cmd when it is running in a full-screen
+   OS/2 session, just as you did when it was running in a window. Try it now:
+
+   1.  At the MS OS/2 prompt, type the following:
+
+       exit
+
+   2.  Press the ENTER key.
+
+   Cmd disappears and Start Programs becomes the active application
+   in the Presentation Manager session.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 151 of the printed manual.  ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   In this exercise, you were introduced to cmd running in a full-screen OS/2
+   session. When using cmd, keep in mind that it is the same
+   program, whether you run it in the Presentation Manager session or
+   in a full-screen OS/2 session. There is no difference in the way you
+   type commands, use editing keys, control the movement of text on
+   the screen, or start applications.
+
+   The only difference, when you run cmd in the Presentation Manager session,
+   is that it is running in a window that you can move, size, and shrink to
+   an icon. You can also use the additional commands located
+   at the bottom of the System menu.
+
+   In the next exercise, you will run the DOS command interpreter,
+   command, in the DOS session. Then, you'll learn how to use it to start
+   your DOS applications and perform some file-management tasks.
+
+
+ Exercise 3: Running the DOS Command Interpreter
+
+   The DOS command interpreter, command, is the program that you
+   use to run applications that were designed for the MS-DOS operating
+   system, or a computer manufacturer's own version of DOS.
+
+   Starting the DOS Command Interpreter
+
+   When you start MS OS/2, the Presentation Manager session appears, with
+   Start Programs running in a window and command represented as a DOS icon
+   in the lower-left corner of your screen. The DOS icon lets you know that
+   command is available to use whenever you want to start a DOS application.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 152 of the printed manual.  ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   Unlike other applications that have been shrunk to icons, command doesn't
+   actually run until you restore it or until you switch to it by using Task
+   Manager. If you are using the mouse, do the following to run command:
+
+   1.  Click the DOS icon.
+
+   If you are using your keyboard, follow these steps to start command:
+
+   1.  Press CTRL+ESC to display Task Manager.
+
+   2.  Use the UP or DOWN key to select DOS Command Prompt from
+       the list of applications displayed in the Task Manager window.
+
+   3.  Press the ENTER key.
+
+   The Presentation Manager window disappears and command appears
+   as a darkened background on your screen. The DOS prompt appears in the
+   upper-left corner, followed by a cursor, indicating that you are now in
+   the DOS session.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 154 of the printed manual.  ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   Unlike cmd, command cannot run in the Presentation Manager or
+   full-screen OS/2 session. It can only run in the DOS session.
+
+   Typing Commands
+
+   Like cmd, command has its own set of commands that help you manage your
+   files and maintain your disks. Several of these commands are identical to
+   those in cmd. Some of these commands function a little differently from
+   the same commands in cmd, and others are unique
+   to command. For a list and a complete description of command commands, see
+   the Microsoft Operating System/2 Desktop Reference and, for more detailed
+   information on the DOS session, see Part 2, "Using Cmd and the DOS
+   Session," of the Microsoft Operating System/2
+   User's Guide.
+
+   The way you type commands, use editing keys, start applications, and
+   control the contents of the screen in command is exactly the same as the
+   way you perform these tasks in cmd. For example, you type the cd and dir
+   commands to change to a new directory and to display its
+   contents in the same way.
+
+   Starting a DOS Application
+
+   Starting a DOS application with command is exactly like starting
+   an MS OS/2 application with cmdÄÄyou type the command that starts
+   the application. (If the application you want is not in your current
+   directory, you may have to switch to the directory that contains
+   the application.)
+
+   For example, to start Microsoft Word, you do the following:
+
+   1.  At the DOS prompt, type the following:
+
+       word
+
+   2.  Press the ENTER key.
+
+   If you have Microsoft Word on your system, Word will appear on
+   your screen.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 155 of the printed manual.  ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   When you are using MS OS/2 to run applications, keep in mind that you must
+   use command to run DOS applications. DOS applications will not run with
+   cmd or in a Presentation Manager session. Similarly, applications designed
+   for MS OS/2 will run with Presentation Manager or cmd, but they will not
+   run with command.
+
+   Now quit command and switch to Task Manager:
+
+   1.  Press CTRL+ESC.
+
+   The Presentation Manager window reappears with Task Manager displayed.
+   Command is represented as an icon at the bottom of
+   your screen, just as it was when you first started MS OS/2.
+
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³                                    ³
+   ³   This screen can be viewed on     ³
+   ³   page 156 of the printed manual.  ³
+   ³                                    ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+
+ Shutting Down MS OS/2
+
+   You have now reached the end of the MS OS/2 tutorial. If you want to leave
+   your computer or turn it off for a while, it is recommended that you shut
+   down MS OS/2. To do this, switch to Task Manager and then choose the
+   Shutdown Now command from the Shutdown menu.
+
+
+ Going On
+
+   In this guide, you've been introduced to Presentation Manager and
+   the MS OS/2 and DOS command interpreters, cmd and command. For more
+   information and instructions on how to use Presentation Manager and the
+   Presentation Manager applications, Start Programs, Task Manager, Control
+   Panel, File Manager, and Spooler Queue Manager, see Part 1, "Using
+   Presentation Manager," of the Microsoft Operating System/2 User's Guide.
+
+   For more detailed information and instructions on how to use the MS OS/2
+   and DOS command interpreters, cmd and command, see Part 2, "Using Cmd and
+   the DOS Session," of the Microsoft Operating
+   System/2 User's Guide. For advanced information on customizing
+   MS OS/2 to your needs, see Part 3, "Configuring and Maintaining
+   Your System," of the Microsoft Operating System/2 User's Guide.
+
+
+
+ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ Appendix  Computer Basics
+
+   This section describes some of the basic computer terms you will need to
+   know in order to work with MS OS/2. In the descriptions, italicized words
+   are defined elsewhere in the appendix.
+
+ A
+
+   Application  A computer program that is used for a particular purpose,
+   such as word processing or data management. For example, if you want to
+   organize your company's financial records, you can work with a spreadsheet
+   application.
+
+ B
+
+   Byte  A unit of measure used to indicate an amount of information on a
+   computer. One byte usually represents one character; for example, one
+   letter or a single-digit number. See also Kilobyte.
+
+ C
+
+   Command  A word or phrase you choose from a menu listing that carries out
+   a certain action. For example, choosing the Copy command allows you to
+   copy a file, and the Rename command allows you to give the file a
+   different name. In some cases, rather than choosing a command from a menu,
+   you type it at the command prompt. For example, typing dir
+   gives you a list of the contents of your directory.
+
+   Command prompt  The drive letter and accompanying symbols that appear on
+   your screen when you switch to DOS in MS OS/2 or to the MS OS/2 command
+   interpreter. You type commands at the command prompt.
+
+   Cursor  Usually a blinking line or small box on the computer screen that
+   shows where the next character you type will appear. See also Selection
+   cursor.
+
+ D
+
+   Dialog box  A rectangular box that appears when MS OS/2 needs further
+   information from you before it can carry out a command, or when the
+   system is providing you with information.
+
+   Direction key  See Keyboard.
+
+   Directory  A single group of files that may be linked in a structure to
+   other groups of related files. A directory is similar to a file drawer
+   that contains a group of file folders. A directory can include both files
+   and subdirectories, and those subdirectories in turn may include
+   additional files (and subdirectories). The directory listing contains the
+   names of your files and subdirectories, and may also contain the sizes in
+   bytes, and the dates they were created or last modified.
+   To learn more about directories and directory structures, see "Exercise 1,
+   Starting File System" in Chapter 3 of this guide. See also Directory
+   name, File, Path, Root directory, and Subdirectory.
+
+   Directory name  A name, up to eight characters long, that identifies
+   a particular directory. For example, OLDGAMES and OS2\INTRO
+   are the names of two directories used in this guide. A directory may
+   also have an extensionÄÄup to three additional characters added to
+   the directory name and separated from the name by a period (.).
+
+   Directory path  See Path.
+
+   Disk  A disk is a permanent storage medium for computer information. Once
+   you save information to a disk, the information remains there until you
+   change or delete it. Information is stored on disks in files and
+   directories. The process of storing information is referred to as
+   "writing to a disk," while retrieving information is called "reading from
+   a disk." Disks are either hard disks (sometimes called fixed disks) or
+   floppy disks (sometimes called diskettes). The hard disk usually is
+   located inside your computer's system unit; you can't see the disk, only
+   the indicator light that goes on when the disk ".br is in use. A hard disk
+   can store much more information than a floppy disk, and you can write to
+   and read from a hard disk much faster than with a floppy disk. See also
+   Disk drive, Floppy disk, and Hard disk.
+
+   Disk drive  Disk drives come in two varietiesÄÄthe hard disk or
+   hard-disk drive and the so-called "floppy" drives. Disk drives are named
+   by letters of the alphabet, and the hard disk often is called drive C.
+   (In some cases, the hard disk is organized into additional drives,
+   named D, E, and so forth.)
+
+   Your computer may have more than one floppy-disk drive, and the drives may
+   or may not be located in the system unit. A floppy-disk
+   drive is a narrow slot into which you can slide a floppy disk. On most
+   5-1/4-inch drives, after you slide in the disk, you need to close a small
+   lever, locking the disk into the drive. There are two sizes of floppy
+   drives to accomodate the two sizes of disksÄÄ5-1/4-inch and 3-1/2-inch. You
+   computer may have either or both sizes of floppy-disk drives.
+
+   Floppy-disk drives have indicator lights just as do hard-disk drives, and
+   their purpose is the sameÄÄto show when activity is taking place on
+   the disk. Floppy-disk drives are usually named A or B. See also Disk,
+   Drive letter, Floppy disk, and Hard disk.
+
+   Drive letter  A letter representing a hard- or floppy-disk drive. For
+   example, "A" usually denotes a floppy-disk drive.
+
+ F
+
+   File  A collection of related information, stored on a disk. There are
+   different kinds of files, including program files and text or data files,
+   which are roughly equivalent to file folders containing papers of text
+   information. For example, a file might contain the text of a letter or
+   budgetary information on a particular project. See also Directory and
+   Filename.
+
+   Filename  A name, up to eight characters long, that identifies a
+   particular file. A filename may also have an extensionÄÄup to three
+   additional characters added to the base filename, and separated from the
+   name by a period (.). Extensions often give you information about the kind
+   of file; for example, the .TXT extension may be used for text files for a
+   particular word-processing application.
+
+   Format  To prepare a disk so that it can hold information. Formatting a
+   disk erases whatever information was previously on it.
+
+   Floppy disk  Floppy disks are removeable, flat disks, permanently encased
+   in a square protective cover. There are two common sizes of floppy disks:
+   5-1/4-inch and 3-1/2-inch. (The term "floppy" originated from the fact that
+   the disks, made of a thin plastic, first were encased in a flexible cover
+   and thus were "floppy." This is still the case with 5-1/4-inch disks.
+   However, the 3-1/2-inch disks are protected by a hard plastic cover and are
+   no longer flexible, though they are sometimes still referred to as
+   floppy disks.) Floppy disks are often packaged and stored in removeable
+   paper envelopes for further protection.
+
+   There are two types of floppy disksÄÄlow density and high density. As the
+   name implies, a high-density disk can store more information than
+   a low-density disk.
+
+   Floppy disks have a write-protection feature that you use to prevent their
+   contents from being overwritten or added to. On the 5-1/4-inch disks, there
+   is a small notch along the side of the protective cover. You cannot write
+   information to the disk if this notch is covered (usually with a piece of
+   tape or small adhesive tab). The 3-1/2-inch disks have
+   a built-in write-protect tab, which slides one direction to allow writing
+   and the other direction to protect the disk from being written to.
+   You can read the information on a floppy disk whether or not it is
+   write-protected.
+
+   Although they are protected by their covers, floppy disks must be
+   carefully handled.
+
+   To ensure the safety of your disks, follow these guidelines:
+
+   ş  Store floppy disks in their paper envelopes.
+
+   ş  Label disks by using a felt-tip pen (be sure to label all disks, so you
+      know what they contain).
+
+   ş  Hold the disk at the corner of the protective cover to avoid pressure
+      on the disk inside the cover.
+
+   To prevent damage to your disks, avoid these situations:
+
+   ş  Bending, cleaning, exposing to extreme heat, or touching the exposed
+      surface (inside the oblong hole in the protective cover)
+
+   ş  Writing on the disk with a ballpoint pen or pencil
+
+   ş  Placing the disk near a magnet
+
+   See also Disk, Disk drive, Format, and Hard disk.
+
+   Function key  See Keyboard.
+
+ H
+
+   Hard disk  A hard disk is a circular metallic plate on which computer
+   information is stored magnetically. Your computer generally has only one
+   hard disk, usually located out of sight in the system unit. An indicator
+   light comes on when information is being stored on or retrieved from the
+   disk. A hard disk has some advantages over a floppy disk. Besides being
+   able to store more information (usually many times more), it gives you
+   faster access to the information. See also Disk, Disk drive and Floppy
+   disk.
+
+   Hardware  Hardware is loosely defined as the parts of the computer you
+   can touch, including those you could touch if you opened up
+   the computer. Hardware includes the system unit (with all its parts),
+   the keyboard, modem, mouse, printer, and screen.
+
+   High density  See Floppy disk.
+
+ K
+
+   Keyboard  Probably the most familiar-looking part of the hardware
+   is the keyboard, which you use to type information into the computer.
+   Though the keys may have slightly different names, they are much
+   like the keys on a normal typewriter, with the letters of the alphabet,
+   the numbers, the SHIFT key, the SPACEBAR, and so forth.
+
+   The computer keys are, for the most part, not like any keys on a
+   typewriter. These are divided into four groupsÄÄnumeric keypad,
+   DIRECTION keys, function keys, and other special keys. For a description
+   of each group, read the following:
+
+   ş  Numeric keypadÄÄSimilar in appearance to a 10-key adding machine or
+      calculator keyboard, these keys are used for much the same purposeÄÄto
+      quickly type numbers. Notice that in addition to numbers, these keys
+      may also have characters on them; for example, "HOME," "END," and
+      arrows. Before using these keys to type numbers, you may have to press
+      the NUMLOCK key (just as you would need to press the CAPS LOCK or SHIFT
+      LOCK key on a typewriter to type in capital letters).
+
+   ş  DIRECTION keysÄÄThese keys move the cursor to locations you choose on
+      the screen. Each DIRECTION key has an arrow or a
+      word on it (such as "PAGE UP" or "PAGE DOWN"), to show which
+      direction the cursor will move. On the keyboard, you'll notice that
+      some keys are labeled to suggest a dual purpose, such as when a
+      DIRECTION key arrow and a numeric keypad number share the same keytop.
+
+   ş  Function keysÄÄThese are special keys (labeled F1, F2, and so forth)
+      whose purpose is defined by the software application. For example, in
+      some applications, pressing the F1 key displays Help information about
+      the subject you selected on the screen. To learn about the function
+      keys used by your application, see the manual for your application.
+
+   ş  Other keysÄÄSome additional keys don't fit into any particular
+      category, but you will use them often. These keys have various
+      functions, which you'll learn as you become more experienced with
+      MS OS/2. For example, the ENTER key generally is used to complete an
+      operation. And pressing the CTRL, ALT, and DEL keys at the same time
+      restarts your computer.
+
+   Kilobyte  A unit of measure for the amount of information that can be
+   processed or stored in a computerÄÄapproximately 1000 bytes. Storage
+   (disk space) and memory are often measured in kilobytes or megabytes
+   (approximately 1,000,000 bytes).
+
+ L
+
+   Low density  See Floppy disk.
+
+ M
+
+   Megabyte  See Kilobyte.
+
+   Memory  More properly called random-access memory or RAM, this is the
+   place where data and programs are stored temporarily while your computer
+   is turned on. If you want to preserve something you have in memory, you
+   must save it in storage, which usually means saving it on
+   a disk. For example, if you are using a word-processing application to
+   edit a text file, a copy of your text file is loaded from disk storage
+   into memory. Once you make changes to the memory copy (for example,
+   if you rewrite a paragraph), you need to save the revised version on
+   the disk. This is important because, when you turn off your computer,
+   the memory copy disappears.
+
+   Memory is measured in units called kilobytes (K) or megabytes. Your
+   applications require a minimum amount of memory to run; you can generally
+   find out how much by checking the application's manual or packaging.
+
+   Menu  A menu is a list of commands or tasks you can choose to have your
+   computer do. Each menu has a nameÄÄto look at the list of available
+   commands, you select the menu name. Menus appear in the menu bar of a
+   window.
+
+   Message  A sentence or short paragraph of information that may appear on
+   your screen, warning you about the consequence of some action you've taken
+   or asking for additional information or verification from you. For
+   example, when you attempt to shut down MS OS/2,
+   you will see a message, asking if you really want to quit all your
+   applications.
+
+   Modem  A modem is a piece of hardware that allows you to connect your
+   computer to telephone lines so that you can communicate with another
+   computer. Modems are commonly used to connect your computer to an
+   information service, such as a stock-quote service, but you also can use a
+   modem to send information to another computer.
+
+   Monitor  The monitor or display screen is similar to a television screen,
+   which in this case you use to see what you are typing or to read
+   information the computer is sending you. There are various types of
+   monitors. In general, monitors fall into two categories: monochrome and
+   color. Monochrome monitors produce one color (usually green, amber, or
+   white) on a black background. In addition, some can display graphics.
+   Color monitors may display a range of colors, as well as graphics.
+
+   Mouse  The mouse is a small device attached to your computer by a long
+   cord. You slide the mouse across a flat surface, such as a tabletop or a
+   book, and as you do, the mouse pointer moves across the screen
+   in the same direction. If you're using a word-processing application, you
+   might use the mouse to select a word you want to change on the screen by
+   pointing to it with the mouse pointer, then pressing and releasing a mouse
+   button. In other applications, you can move an item across
+   the screen by pointing to it, pressing a mouse button, and holding down
+   the button while you move the mouse. See also Mouse button and Mouse
+   pointer.
+
+   Mouse button  A mouse has one, two, or three small buttons that you press
+   with your fingertip. This transmits a signal to the mouse
+   pointer, which usually results in something happening on
+   the screen;
+   for example, an item is selected or moved.
+
+   Mouse pointer  The arrow or other shape on your screen that moves as you
+   slide the mouse across a flat surface.
+
+   Multitasking  Multitasking is the ability to run more than one
+   program at the same time. The multitasking feature of MS OS/2
+   allows you to do such things as start a program that is performing complex
+   calculations, while you switch to your word-processing application and
+   start typing. The first program continues to calculate, while you work on
+   your document.
+
+ N
+
+   Numeric keypad  See Keyboard.
+
+ O
+
+   On/Off switch  Both your system unit and monitor usually have on/off
+   switches that you will need to turn on before you can work with your
+   computer. Common locations for these switches are on the back, side, or
+   front of the system unit, and on the front, back, or side of the
+   monitor.
+
+   Operating system  The operating system is a collection of instructions
+   that tell your computer how to run programs and applications. Microsoft
+   Operating System/2 (this system) has a particularly important feature you
+   should be aware ofÄÄmultitasking. See also Multitasking.
+
+ P
+
+   Path  One or more directory names that specify the exact location
+   of a file or directory. In the path, also called the directory path,
+   each directory is separated from the next by a backslash (\). You could
+   also add a drive-letter designation to the path. The following is an
+   example of a path, preceded by a drive letter, with a filename added.
+
+   c:\customers\ecoast\nyc\berman.jkl
+
+   See also Directory and Drive letter.
+
+   Port  A port is a kind of electrical outlet in your system unit that you
+   can use to plug additional equipment into your computer, such as a modem,
+   a mouse, or a printer. Ports have names that relate to the type of
+   equipment that can be connected to them. For example, printer ports are
+   usually named LPT1, LPT2, and so forth (the LPT originates from "line
+   printer," which most printers used to be). Communication ports (where you
+   plug in a modem and some types of printers) are named COM1, COM2, COM3.
+   Ports often are located on the back of your system unit.
+
+   Printer  Printers come in many styles. They all print information from
+   your computer onto paper, but vary widely in printing speed, print
+   quality, and what they can print. For example, some dot-matrix and laser
+   printers print both text and graphics, while some letter-quality printers
+   are limited to text.
+
+   Processor  Also called the CPU or central processing unit, this is
+   the physical place your computer interprets and processes information.
+
+   Program  A set of instructions, written in computer language, that tell
+   the computer how to perform a task or set of tasks. See also Application.
+
+   Prompt  See Command prompt.
+
+ R
+
+   Root directory  The highest-level in the directory structure. All files
+   and directories are contained within the root directory. The root
+   directory is created automatically by the system, and it is indicated by a
+   backslash (\) that follows the drive letter. See also Directory.
+
+ S
+
+   Screen  See Monitor.
+
+   Selection cursor  In Presentation Manager, the mark, often a dark bar or
+   dotted box, that shows you where you are working in a window or dialog
+   box and what you have selected. The selection cursor varies, depending on
+   where you are working. For example, in File System,
+   a dark bar shows you which disk drive or file you have selected. In a
+   dialog box, a dotted box shows you which area of the dialog box you are
+   working in.
+
+   Software  Software is a set of computer instructions that make the
+   hardware perform the tasks the computer was designed to do, such as
+   displaying graphics on the screen, printing a text file, or calculating
+   mathematics. Software includes the operating system (MS OS/2) that
+   allows you to run applications, as well as the applications themselves,
+   and is supplied on floppy disks.
+
+   Storage  Storage is the saving of computer information on a permanent
+   medium. Usually, this refers to saving information on a disk, either hard
+   or floppy. Once saved to a disk, information will remain there until it is
+   changed or deleted, as opposed to information in your computer's memory,
+   which is deleted when the computer is turned off. See also Memory.
+
+   Subdirectory  A directory contained within another directory. In
+   actuality, all directories are subdirectories of the root directory.
+   See also Directory and Root directory.
+
+   System unit  The system unit is the main part of your computer,
+   the piece of hardware that integrates all the other pieces. It contains
+   several important parts of your computerÄÄthe disk drives, memory,
+   on/off switch, ports, and a processor.
+
+ W
+
+   Window  A window is a rectangular area on the screen in which an
+   application is displayed. A window has menus from which you choose
+   commands, in order to perform certain tasks. A window may also include a
+   title bar, menu bar, System menu, work area, scroll bars, and borders.
+   Your screen may have several windows displayed at one time, either
+   overlapping or side-by-side.
+

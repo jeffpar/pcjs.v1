@@ -1722,7 +1722,7 @@ class C1PDebugger extends Component {
                 var b = this.getByte(addr);
                 if (b === undefined) b = 0;
                 sBytes += Str.toHex(b, 2) + " ";
-                sChars += (b >= 32 && b < 128? String.fromCharCode(b) : ".");
+                sChars += (b >= 32 && b < 127? String.fromCharCode(b) : ".");
                 addr++;
             }
             this.println(Str.toHex(addrLine, 4) + " " + sBytes + sChars);

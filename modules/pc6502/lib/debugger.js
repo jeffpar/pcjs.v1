@@ -1446,7 +1446,7 @@ if (DEBUGGER) {
         while ((i = s.indexOf('#', i)) >= 0) {
             sChar = s.substr(i+1, 2);
             b = str.parseInt(sChar, 16);
-            if (b != null && b >= 32 && b < 128) {
+            if (b != null && b >= 32 && b < 127) {
                 sReplace = sChar + " '" + String.fromCharCode(b) + "'";
                 s = s.replace('#' + sChar, sReplace);
                 i += sReplace.length;
@@ -3169,7 +3169,7 @@ if (DEBUGGER) {
                     sData += (size == 1? (i == 9? '-' : ' ') : "  ");
                     data = iByte = 0;
                 }
-                sChars += (b >= 32 && b < 128? String.fromCharCode(b) : '.');
+                sChars += (b >= 32 && b < 127? String.fromCharCode(b) : '.');
                 cb--;
             }
             if (sDump) sDump += '\n';

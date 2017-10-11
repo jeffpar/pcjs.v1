@@ -469,7 +469,7 @@ var Keys = {
           BREAK:  0, CTRL_A:  1, CTRL_B:  2, CTRL_C:  3, CTRL_D:  4, CTRL_E:  5, CTRL_F:  6, CTRL_G:  7,
          CTRL_H:  8, CTRL_I:  9, CTRL_J: 10, CTRL_K: 11, CTRL_L: 12, CTRL_M: 13, CTRL_N: 14, CTRL_O: 15,
          CTRL_P: 16, CTRL_Q: 17, CTRL_R: 18, CTRL_S: 19, CTRL_T: 20, CTRL_U: 21, CTRL_V: 22, CTRL_W: 23,
-         CTRL_X: 24, CTRL_Y: 25, CTRL_Z: 26,
+         CTRL_X: 24, CTRL_Y: 25, CTRL_Z: 26, ESC:    27,
             ' ': 32,    '!': 33,    '"': 34,    '#': 35,    '$': 36,    '%': 37,    '&': 38,    "'": 39,
             '(': 40,    ')': 41,    '*': 42,    '+': 43,    ',': 44,    '-': 45,    '.': 46,    '/': 47,
             '0': 48,    '1': 49,    '2': 50,    '3': 51,    '4': 52,    '5': 53,    '6': 54,    '7': 55,
@@ -496,7 +496,7 @@ var Keys = {
     KEYCODE: {
         /* 0x08 */ BS:          8,          // BACKSPACE        (ASCII.CTRL_H)
         /* 0x09 */ TAB:         9,          // TAB              (ASCII.CTRL_I)
-        /* 0x0A */ LF:          10,         // LINE FEED        (ASCII.CTRL_J) (TODO: Determine if any key actually generates this)
+        /* 0x0A */ LF:          10,         // LINE-FEED        (ASCII.CTRL_J) (Some Windows-based browsers used to generate this via CTRL-ENTER)
         /* 0x0D */ CR:          13,         // CARRIAGE RETURN  (ASCII.CTRL_M)
         /* 0x10 */ SHIFT:       16,
         /* 0x11 */ CTRL:        17,
@@ -44886,7 +44886,7 @@ class Keyboard extends Component {
                 if (simCode == Keys.SHIFTED_KEYCODES[code]) {
                     simCode = +code;
                     code = Keys.NONASCII_KEYCODES[code];
-                    if (code) simCode = code;
+                    if (code) simCode = +code;
                     break;
                 }
             }
@@ -45569,16 +45569,36 @@ class Keyboard extends Component {
             this.sInjectBuffer = this.sInjectBuffer.substr(1);
             charCode = ch.charCodeAt(0);
             /*
+             * charCodes 0x01-0x1A correspond to key combinations CTRL-A through CTRL-Z, unless they
+             * are \t, \n, or \r, which are reserved for TAB, LINE-FEED, and RETURN, respectively, so if
+             * you need to simulate CTRL-I, CTRL-J, or CTRL-M, those must be specified using \x1C, \x1D,
+             * or \x1E, respectively.  Also, since PCs have no dedicated LINE-FEED key, and since \n is
+             * often used instead of \r, we map LINE-FEED (LF) to RETURN (CR) below.
+             *
              * charCodes 0xF1-0xFF establish a new delay of 100-1500ms between keys; 0xF0 reverts to
              * the default delay.  For example:
              *
              *      \r\rb:\rrt\r\xff\xf0test;\r
              *
-             * performs two return key presses, then "b:" followed by return, "rt" followed by return,
+             * performs two RETURN key presses, then "b:" followed by RETURN, "rt" followed by RETURN,
              * then a delay of 1500ms, then a reversion to the default delay (normally 150ms), followed
-             * by "test;" and return.
+             * by "test;" and RETURN.
              */
-            if (charCode >= 0xF0) {
+            if (charCode <= Keys.ASCII.CTRL_Z) {
+                if (charCode != Keys.ASCII.CTRL_I && charCode != Keys.ASCII.CTRL_J && charCode != Keys.ASCII.CTRL_M) {
+                    charCode = charCode + Keys.KEYCODE.FAKE;
+                }
+            }
+            else if (charCode == 0x1C) {
+                charCode = Keys.ASCII.CTRL_I + Keys.KEYCODE.FAKE;
+            }
+            else if (charCode == 0x1D) {
+                charCode = Keys.ASCII.CTRL_J + Keys.KEYCODE.FAKE;
+            }
+            else if (charCode == 0x1E) {
+                charCode = Keys.ASCII.CTRL_M + Keys.KEYCODE.FAKE;
+            }
+            else if (charCode >= 0xF0) {
                 this.msInjectDelay = ((charCode - 0xF0) * 100) || this.msInjectDefault;
                 charCode = 0;
                 break;
@@ -45586,7 +45606,8 @@ class Keyboard extends Component {
         }
         if (charCode) {
             /*
-             * I could require all callers to supply CRs instead of LFs, but this is friendlier.
+             * I could require all callers to supply CRs instead of LFs, but this is friendlier; besides, PCs
+             * don't have a dedicated LINE-FEED key, so the LF charCode is somewhat meaningless.
              */
             if (charCode == 0x0A) charCode = 0x0D;
             this.addActiveKey(charCode, true);
@@ -46404,12 +46425,38 @@ Keyboard.SIMCODE = {
     CMD:          Keys.KEYCODE.CMD         + Keys.KEYCODE.ONDOWN,
     RCMD:         Keys.KEYCODE.RCMD        + Keys.KEYCODE.ONDOWN,
     FF_CMD:       Keys.KEYCODE.FF_CMD      + Keys.KEYCODE.ONDOWN,
-    SYSREQ:       Keys.KEYCODE.ESC         + Keys.KEYCODE.FAKE,
+    CTRL_A:       Keys.ASCII.CTRL_A        + Keys.KEYCODE.FAKE,
+    CTRL_B:       Keys.ASCII.CTRL_B        + Keys.KEYCODE.FAKE,
     CTRL_C:       Keys.ASCII.CTRL_C        + Keys.KEYCODE.FAKE,
-    CTRL_BREAK:   Keys.KEYCODE.BS          + Keys.KEYCODE.FAKE,
+    CTRL_D:       Keys.ASCII.CTRL_D        + Keys.KEYCODE.FAKE,
+    CTRL_E:       Keys.ASCII.CTRL_E        + Keys.KEYCODE.FAKE,
+    CTRL_F:       Keys.ASCII.CTRL_F        + Keys.KEYCODE.FAKE,
+    CTRL_G:       Keys.ASCII.CTRL_G        + Keys.KEYCODE.FAKE,
+    CTRL_H:       Keys.ASCII.CTRL_H        + Keys.KEYCODE.FAKE,
+    CTRL_I:       Keys.ASCII.CTRL_I        + Keys.KEYCODE.FAKE,
+    CTRL_J:       Keys.ASCII.CTRL_J        + Keys.KEYCODE.FAKE,
+    CTRL_K:       Keys.ASCII.CTRL_K        + Keys.KEYCODE.FAKE,
+    CTRL_L:       Keys.ASCII.CTRL_L        + Keys.KEYCODE.FAKE,
+    CTRL_M:       Keys.ASCII.CTRL_M        + Keys.KEYCODE.FAKE,
+    CTRL_N:       Keys.ASCII.CTRL_N        + Keys.KEYCODE.FAKE,
+    CTRL_O:       Keys.ASCII.CTRL_O        + Keys.KEYCODE.FAKE,
+    CTRL_P:       Keys.ASCII.CTRL_P        + Keys.KEYCODE.FAKE,
+    CTRL_Q:       Keys.ASCII.CTRL_Q        + Keys.KEYCODE.FAKE,
+    CTRL_R:       Keys.ASCII.CTRL_R        + Keys.KEYCODE.FAKE,
+    CTRL_S:       Keys.ASCII.CTRL_S        + Keys.KEYCODE.FAKE,
+    CTRL_T:       Keys.ASCII.CTRL_T        + Keys.KEYCODE.FAKE,
+    CTRL_U:       Keys.ASCII.CTRL_U        + Keys.KEYCODE.FAKE,
+    CTRL_V:       Keys.ASCII.CTRL_V        + Keys.KEYCODE.FAKE,
+    CTRL_W:       Keys.ASCII.CTRL_W        + Keys.KEYCODE.FAKE,
+    CTRL_X:       Keys.ASCII.CTRL_X        + Keys.KEYCODE.FAKE,
+    CTRL_Y:       Keys.ASCII.CTRL_Y        + Keys.KEYCODE.FAKE,
+    CTRL_Z:       Keys.ASCII.CTRL_Z        + Keys.KEYCODE.FAKE,
+    SYSREQ:       Keys.KEYCODE.ESC         + Keys.KEYCODE.FAKE,
+    CTRL_PAUSE:   Keys.KEYCODE.NUM_LOCK    + Keys.KEYCODE.FAKE,
+    CTRL_BREAK:   Keys.KEYCODE.SCROLL_LOCK + Keys.KEYCODE.FAKE,
     CTRL_ALT_DEL: Keys.KEYCODE.DEL         + Keys.KEYCODE.FAKE,
     CTRL_ALT_INS: Keys.KEYCODE.INS         + Keys.KEYCODE.FAKE,
-    CTRL_ALT_ENTER: Keys.KEYCODE.CR        + Keys.KEYCODE.FAKE
+    CTRL_ALT_ENTER: Keys.KEYCODE.NUM_CR    + Keys.KEYCODE.FAKE
 };
 
 /*
@@ -46942,7 +46989,32 @@ Keyboard.SIMCODES[Keyboard.SIMCODE.CMD]         = Keyboard.SCANCODE.WIN;
 Keyboard.SIMCODES[Keyboard.SIMCODE.RCMD]        = Keyboard.SCANCODE.MENU;
 Keyboard.SIMCODES[Keyboard.SIMCODE.FF_CMD]      = Keyboard.SCANCODE.WIN;
 
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_A]          = Keyboard.SCANCODE.A           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_B]          = Keyboard.SCANCODE.B           | (Keyboard.SCANCODE.CTRL << 8);
 Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_C]          = Keyboard.SCANCODE.C           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_D]          = Keyboard.SCANCODE.D           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_E]          = Keyboard.SCANCODE.E           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_F]          = Keyboard.SCANCODE.F           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_G]          = Keyboard.SCANCODE.G           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_H]          = Keyboard.SCANCODE.H           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_I]          = Keyboard.SCANCODE.I           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_J]          = Keyboard.SCANCODE.J           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_K]          = Keyboard.SCANCODE.K           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_L]          = Keyboard.SCANCODE.L           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_M]          = Keyboard.SCANCODE.M           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_N]          = Keyboard.SCANCODE.N           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_O]          = Keyboard.SCANCODE.O           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_P]          = Keyboard.SCANCODE.P           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_Q]          = Keyboard.SCANCODE.Q           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_R]          = Keyboard.SCANCODE.R           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_S]          = Keyboard.SCANCODE.S           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_T]          = Keyboard.SCANCODE.T           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_U]          = Keyboard.SCANCODE.U           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_V]          = Keyboard.SCANCODE.V           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_W]          = Keyboard.SCANCODE.W           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_X]          = Keyboard.SCANCODE.X           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_Y]          = Keyboard.SCANCODE.Y           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_Z]          = Keyboard.SCANCODE.Z           | (Keyboard.SCANCODE.CTRL << 8);
 Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_BREAK]      = Keyboard.SCANCODE.SCROLL_LOCK | (Keyboard.SCANCODE.CTRL << 8);
 Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_ALT_DEL]    = Keyboard.SCANCODE.NUM_DEL     | (Keyboard.SCANCODE.CTRL << 8) | (Keyboard.SCANCODE.ALT << 16);
 Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_ALT_INS]    = Keyboard.SCANCODE.NUM_INS     | (Keyboard.SCANCODE.CTRL << 8) | (Keyboard.SCANCODE.ALT << 16);
@@ -69757,7 +69829,7 @@ class DebuggerX86 extends Debugger {
         while ((i = s.indexOf('#', i)) >= 0) {
             sChar = s.substr(i+1, 2);
             b = Str.parseInt(sChar, 16);
-            if (b != null && b >= 32 && b < 128) {
+            if (b != null && b >= 32 && b < 127) {
                 sReplace = sChar + " '" + String.fromCharCode(b) + "'";
                 s = s.replace('#' + sChar, sReplace);
                 i += sReplace.length;
@@ -72287,7 +72359,7 @@ class DebuggerX86 extends Debugger {
                     sData += (size == 1? (i == 9? '-' : ' ') : "  ");
                     data = iByte = 0;
                 }
-                sChars += (b >= 32 && b < 128? String.fromCharCode(b) : (fASCII? '' : '.'));
+                sChars += (b >= 32 && b < 127? String.fromCharCode(b) : (fASCII? '' : '.'));
                 cb--;
             }
             if (sDump) sDump += '\n';

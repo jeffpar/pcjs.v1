@@ -241,7 +241,7 @@ var Keys = {
           BREAK:  0, CTRL_A:  1, CTRL_B:  2, CTRL_C:  3, CTRL_D:  4, CTRL_E:  5, CTRL_F:  6, CTRL_G:  7,
          CTRL_H:  8, CTRL_I:  9, CTRL_J: 10, CTRL_K: 11, CTRL_L: 12, CTRL_M: 13, CTRL_N: 14, CTRL_O: 15,
          CTRL_P: 16, CTRL_Q: 17, CTRL_R: 18, CTRL_S: 19, CTRL_T: 20, CTRL_U: 21, CTRL_V: 22, CTRL_W: 23,
-         CTRL_X: 24, CTRL_Y: 25, CTRL_Z: 26,
+         CTRL_X: 24, CTRL_Y: 25, CTRL_Z: 26, ESC:    27,
             ' ': 32,    '!': 33,    '"': 34,    '#': 35,    '$': 36,    '%': 37,    '&': 38,    "'": 39,
             '(': 40,    ')': 41,    '*': 42,    '+': 43,    ',': 44,    '-': 45,    '.': 46,    '/': 47,
             '0': 48,    '1': 49,    '2': 50,    '3': 51,    '4': 52,    '5': 53,    '6': 54,    '7': 55,
@@ -268,7 +268,7 @@ var Keys = {
     KEYCODE: {
         /* 0x08 */ BS:          8,          // BACKSPACE        (ASCII.CTRL_H)
         /* 0x09 */ TAB:         9,          // TAB              (ASCII.CTRL_I)
-        /* 0x0A */ LF:          10,         // LINE FEED        (ASCII.CTRL_J) (TODO: Determine if any key actually generates this)
+        /* 0x0A */ LF:          10,         // LINE-FEED        (ASCII.CTRL_J) (Some Windows-based browsers used to generate this via CTRL-ENTER)
         /* 0x0D */ CR:          13,         // CARRIAGE RETURN  (ASCII.CTRL_M)
         /* 0x10 */ SHIFT:       16,
         /* 0x11 */ CTRL:        17,

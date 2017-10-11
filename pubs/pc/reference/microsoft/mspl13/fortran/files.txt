@@ -1,0 +1,4 @@
+frtlref		MS FORTRAN 5.0 Language Reference
+advfrt		MS FORTRAN 5.0 Advanced Topics
+frtsam		FORTRAN Sample Code
+frtkno		MS KnowledgeBase - FORTRAN
