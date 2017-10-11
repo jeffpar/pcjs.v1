@@ -1,9 +1,0 @@
-80386		Intel 386 Programmer's Reference
-80387		Intel 387 Programmer's Reference
-80286		Intel 286 Programmer's Reference
-80287		Intel 287 Programmer's Reference
-mouse		MS Mouse Programmer's Reference
-cdrom		MS CD-ROM Extensions
-ps2vga		Programmer's Guide to PC & PS/2 Video Systems
-limems		LIM 4.0 Expanded Memory Specification
-hwsamp		Sample Code

@@ -1,7 +1,0 @@
-masminst	Installing and Using MS MASM 6.0
-masmref		MS MASM 6.0 Reference
-masmpgmr	MS MASM 6.0 Programmer's Guide
-masmwhte	MS MASM 6.0 White Paper
-qapgrmg		QuickAssembler 2.01 Programmer's Guide
-masmsmpl	MASM Sample Code
-masmknwl	MS KnowledgeBase - MASM
