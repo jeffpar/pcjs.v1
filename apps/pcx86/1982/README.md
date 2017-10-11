@@ -7,4 +7,6 @@ permalink: /apps/pcx86/1982/
 IBM PC Applications (1982)
 --------------------------
 
-* [Executive Suite (1982)](esuite/)
+* [Executive Suite](esuite/)
+* [RatBas v2.13](ratbas/)
+* [Zork I](/disks/pcx86/games/infocom/zork1/)

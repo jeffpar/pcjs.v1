@@ -7,6 +7,7 @@ permalink: /apps/pcx86/1981/
 IBM PC Applications (1981)
 --------------------------
 
-* [DONKEY.BAS (1981)](donkey/)
+* [DONKEY.BAS](donkey/)
+* [Microsoft Adventure](/disks/pcx86/games/microsoft/adventure/)
 * [PC-DOS 1.00 BASIC Samples](basic/)
-* [VisiCalc (1981)](visicalc/)
+* [VisiCalc](visicalc/)
