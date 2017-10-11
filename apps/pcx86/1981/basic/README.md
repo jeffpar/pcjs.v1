@@ -17,10 +17,9 @@ machines:
 PC-DOS 1.00 BASIC Samples
 -------------------------
 
-Using the PCx86 machine below, all the BASIC samples distributed with PC-DOS 1.00 were captured and saved in
-this folder.
+Using the PCx86 machine below, all the BASIC samples distributed with PC-DOS 1.00 were captured and saved here.
 
-The procedure is simple.  For example, here's how to capture [MUSIC.BAS](#musicbas):
+The procedure is simple.  For example, to capture [MUSIC.BAS](#musicbas):
 
 - Run `BASIC` from the DOS prompt
 - Type `LOAD "MUSIC"`
@@ -28,6 +27,14 @@ The procedure is simple.  For example, here's how to capture [MUSIC.BAS](#musicb
 
 Since the machine's COM1 serial port is bound to the text window inside the machine's Control Panel, the program
 listing should appear in that window.
+
+Except for the [Music Samples](#music-samples), all the BASIC files were stored on the PC-DOS 1.00 diskette as *BINARY*
+files, to save space; if IBM had not done that, they would have had to remove at least one sample, because there was not
+enough room on the single-sided 160Kb diskette.
+
+NOTE: To save a BASIC program as an *ASCII* file, save it with the `,A` option; e.g.:
+
+	SAVE "MUSIC",A
 
 {% include machine.html id="ibm5150" %}
 
