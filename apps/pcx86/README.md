@@ -8,19 +8,19 @@ copy-protected, so we've been forced to use a "cracked" copy of the software ins
 
 A list of all the software available to PCx86 machines can be found in the [IBM PC Disk Library](/disks/pcx86/).
 
-### 1981
+### [1981](1981/)
 
 * [DONKEY.BAS](/apps/pcx86/1981/donkey/)
 * [Microsoft Adventure](/disks/pcx86/games/microsoft/adventure/)
 * [VisiCalc](/apps/pcx86/1981/visicalc/)
 
-### 1982
+### [1982](1982/)
 
 * [Executive Suite](/apps/pcx86/1982/esuite/)
 * [RatBas v2.13](/apps/pcx86/1982/ratbas/)
 * [Zork I](/disks/pcx86/games/infocom/zork1/)
 
-### 1983
+### [1983](1983/)
 
 * [1-2-3 Release 1A](/disks/pcx86/apps/lotus/123/)
 * [Adventures in Math v1.00](/apps/pcx86/1983/adventmath/)
@@ -30,23 +30,23 @@ A list of all the software available to PCx86 machines can be found in the [IBM 
 * [Zork II](/disks/pcx86/games/infocom/zork2/)
 * [Zork III](/disks/pcx86/games/infocom/zork3/)
 
-### 1984
+### [1984](1984/)
 
 * [Logitech Modula-2/86 Compiler v1.10](/apps/pcx86/1984/modula2/)
 * [The Hitchhiker's Guide to the Galaxy](/disks/pcx86/games/infocom/hhiker/)
 
-### 1985
+### [1985](1985/)
 
 * [Rogue](/apps/pcx86/1985/rogue/)
 
-### 1986
+### [1986](1986/)
 
 * [Leather Goddesses of Phobos](/disks/pcx86/games/infocom/phobos/)
 
-### 1987
+### [1987](1987/)
 
 * [ThinkTank v2.14](/apps/pcx86/1987/thinktank/)
 
-### 1992
+### [1992](1992/)
 
 * [The Dungeons of Moria v5.5](/apps/pcx86/1992/moria/)

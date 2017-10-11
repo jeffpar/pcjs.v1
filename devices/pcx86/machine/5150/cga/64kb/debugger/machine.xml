@@ -13,4 +13,5 @@
 	<debugger id="debugger"/>
 	<panel ref="/devices/pcx86/panel/wide.xml"/>
 	<chipset ref="/devices/pcx86/chipset/5150-cga-max.xml"/>
+	<serial id="com1" adapter="1" binding="print"/>
 </machine>
