@@ -728,6 +728,7 @@ class SerialPort extends Component {
      */
     outTHR(port, bOut, addrFrom)
     {
+        var serial = this;
         this.printMessageIO(port, bOut, addrFrom, (this.bLCR & SerialPort.LCR.DLAB) ? "DLL" : "THR");
         if (this.bLCR & SerialPort.LCR.DLAB) {
             this.wDL = (this.wDL & ~0xff) | bOut;
@@ -748,8 +749,10 @@ class SerialPort extends Component {
              *
              * TODO: Determine if we should also flush/zero bTHR after transmission.
              */
-            this.transmitByte(bOut);
-            if (this.cpu) this.cpu.setTimer(this.timerTransmitNext, this.getBaudTimeout());
+            this.cpu.nonCPU(function() {
+                return serial.transmitByte(bOut);
+            });
+            this.cpu.setTimer(this.timerTransmitNext, this.getBaudTimeout());
             this.updateIRR();
         }
     }

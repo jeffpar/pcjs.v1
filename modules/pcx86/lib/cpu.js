@@ -770,6 +770,7 @@ class CPU extends Component {
         this.calcCycles();
 
         this.counts.nCyclesThisRun = 0;
+        this.counts.msDiscount = 0;
         this.counts.msStartThisRun = Usr.getTime();
         if (!this.counts.msStartRun) {
             this.counts.msStartRun = this.counts.msStartThisRun;
@@ -826,6 +827,11 @@ class CPU extends Component {
     calcRemainingTime()
     {
         this.counts.msEndThisRun = Usr.getTime();
+
+        if (this.counts.msDiscount) {
+            this.counts.msStartRun += this.counts.msDiscount;
+            this.counts.msStartThisRun += this.counts.msDiscount;
+        }
 
         var msYield = this.counts.msPerYield;
         if (this.counts.nCyclesThisRun) {
@@ -1315,6 +1321,27 @@ class CPU extends Component {
         }
         this.flags.complete = fComplete;
         return fStopped;
+    }
+
+    /**
+     * nonCPU(fn)
+     *
+     * Use this function to perform any work outside the scope of the CPU (eg, DOM updates),
+     * to prevent that work from disrupting our speed calculations.
+     *
+     * @this {CPU}
+     * @param {function()} fn (should return true only if the function actually performed any work)
+     * @return {boolean}
+     */
+    nonCPU(fn)
+    {
+        var msStart = Usr.getTime();
+        if (fn()) {
+            var msStop = Usr.getTime();
+            this.counts.msDiscount += msStop - msStart;
+            return true;
+        }
+        return false;
     }
 
     /**

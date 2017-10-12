@@ -261,7 +261,7 @@ class ParallelPort extends Component {
     {
         var i = 0;
         if (data === undefined) {
-            data = [0, 0, 0];
+            data = [0, ParallelPort.STATUS.NERR, 0];
         }
         this.bData = data[i++];
         this.bStatus = data[i++];
@@ -343,12 +343,17 @@ class ParallelPort extends Component {
      */
     outData(port, bOut, addrFrom)
     {
+        var parallel = this;
         this.printMessageIO(port, bOut, addrFrom, "DATA");
         this.bData = bOut;
-        if (this.transmitByte(bOut)) {
-            this.bStatus |= ParallelPort.STATUS.BUSY;
-            this.bStatus &= ~ParallelPort.STATUS.NACK;
-        }
+        this.cpu.nonCPU(function() {
+            if (parallel.transmitByte(bOut)) {
+                parallel.bStatus |= ParallelPort.STATUS.BUSY | ParallelPort.STATUS.NERR;
+                parallel.bStatus &= ~ParallelPort.STATUS.NACK;
+                return true;
+            }
+            return false;
+        });
         this.updateIRR();
     }
 
@@ -404,13 +409,33 @@ class ParallelPort extends Component {
                 this.controlIOBuffer.value = this.controlIOBuffer.value.slice(0, -1);
             }
             else {
-                var s = Str.toASCIICode(b); // formerly: String.fromCharCode(b);
-                this.controlIOBuffer.value += s;
+                /*
+                 * If we assume that the printer being used was the original IBM 80 CPS Matrix Printer,
+                 * characters 0x80-0x9F mirror control codes 0x00-0x1F, and characters 0xA0-0xDF are various
+                 * block shapes, sort of in the spirit of the line-drawing characters 0xC0-0xDF defined by
+                 * IBM Code Page 437, but, no, completely different.  And apparently, characters 0xE0-0xFF
+                 * printed nothing at all (see Table 11 on page 2-78 of the original IBM PC 5150 TechRef).
+                 *
+                 * The only control character we care about is LINE-FEED; for all other control characters,
+                 * we'll display the ASCII mnemonic, to make it clear what the software intended.  And as for
+                 * any block characters, we'll print an asterisk and call it good, for now.  Beyond that,
+                 * we'll just print spaces.
+                 */
+                if (b >= 0x80) {
+                    if (b < 0xA0) {
+                        b -= 0x80;
+                    } else if (b < 0xE0) {
+                        b = 0x2A;       // ASCII code for an asterisk
+                    } else {
+                        b = 0x20;       // ASCII code for a space
+                    }
+                }
+                this.controlIOBuffer.value += Str.toASCIICode(b);
                 this.controlIOBuffer.scrollTop = this.controlIOBuffer.scrollHeight;
             }
             fTransmitted = true;
         }
-        if (this.consoleOutput != null) {
+        else if (this.consoleOutput != null) {
             if (b == 0x0A || this.consoleOutput.length >= 1024) {
                 this.println(this.consoleOutput);
                 this.consoleOutput = "";
@@ -420,6 +445,7 @@ class ParallelPort extends Component {
             }
             fTransmitted = true;
         }
+
         return fTransmitted;
     }
 
@@ -482,16 +508,19 @@ ParallelPort.DATA = {           // (read/write)
  *       0       -              // 0x01
  *       1       -              // 0x02
  *       2       -              // 0x04
- *       3       15             // 0x08 (not used)
- *       4       13             // 0x10 (printer is in the selected state)
- *       5       12             // 0x20 (out of paper)
- *       6       10             // 0x40 (printer acknowledged receipt of data)
- *       7       11             // 0x80 (printer busy; eg, printer off-line, or print operation in progress)
+ *       3       !15            // 0x08 (Error)
+ *       4       13             // 0x10 (Select)
+ *       5       12             // 0x20 (Out of Paper)
+ *       6       !10            // 0x40 (Acknowledged)
+ *       7       11             // 0x80 (Busy; eg, printer off-line or operation in progress)
  */
 ParallelPort.STATUS = {         // (read)
     REG:        1,
-    NACK:       0x40,           // when this bit goes clear, interrupt requested
-    BUSY:       0x80            // when this bit is set, printer is busy
+    NERR:       0x08,           // when this bit is cleared, I/O error
+    SELECT:     0x10,           // when this bit is set, printer selected
+    PAPER:      0x20,           // when this bit is set, out of paper
+    NACK:       0x40,           // when this bit is cleared, data acknowledged (and optionally, interrupt requested)
+    BUSY:       0x80            // when this bit is set, printer busy
 };
 
 /*
