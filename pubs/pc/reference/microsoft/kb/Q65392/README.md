@@ -28,7 +28,7 @@ permalink: /pubs/pc/reference/microsoft/kb/Q65392/
 	      int b;
 	   };            // Add a name here to allow initialization
 	   long c;
-	} x = {{ 0,0 }};
+	} x = { { 0,0 } };
 	
 	The only workarounds available are to either name the struct or to
 	leave the union uninitialized.

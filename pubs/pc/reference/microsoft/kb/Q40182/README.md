@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q40182: Use of Wrong Library Causes Unresolved External on __aDBused"
+title: "Q40182: Use of Wrong Library Causes Unresolved External on &#95;&#95;aDBused"
 permalink: /pubs/pc/reference/microsoft/kb/Q40182/
 ---
 

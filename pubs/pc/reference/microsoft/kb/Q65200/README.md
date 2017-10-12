@@ -17,7 +17,7 @@ permalink: /pubs/pc/reference/microsoft/kb/Q65200/
 	
 	#include <graph.h>
 	
-	struct xycoord pts[4] = {{0,0}, {55,55}, {83,25}, {0,0}};
+	struct xycoord pts[4] = { {0,0}, {55,55}, {83,25}, {0,0} };
 	
 	void main(void)
 	{

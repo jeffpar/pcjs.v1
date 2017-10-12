@@ -120,10 +120,10 @@ function processText(sID, sTitle, sProductName, sProductVersions, sOS, sFlags, s
                 }
                 sNewLine += chNew;
             }
-            sNew += '\t' + sNewLine + '\n';
+            sNew += '\t' + sNewLine.replace(/{{/g, "{ {").replace(/}}/g, "} }") + '\n';
         }
         var sDir = "kb/" + sID;
-        sTitle = sTitle.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/\\/g, "&#92;");
+        sTitle = sTitle.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/\\/g, "&#92;").replace(/__/g, "&#95;&#95;").replace(/{{/g, "{ {").replace(/}}/g, "} }");
         sNew = "---\nlayout: page\ntitle: \"" + sID + ": " + sTitle + "\"\npermalink: /pubs/pc/reference/microsoft/" + sDir + "/\n---\n\n" + sNew;
         if (!fs.existsSync(sDir)) {
             fs.mkdirSync(sDir);

@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q32891: __fac Unresolved at Link Time"
+title: "Q32891: &#95;&#95;fac Unresolved at Link Time"
 permalink: /pubs/pc/reference/microsoft/kb/Q32891/
 ---
 

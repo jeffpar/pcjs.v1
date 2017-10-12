@@ -42,7 +42,7 @@ permalink: /pubs/pc/reference/microsoft/kb/Q39910/
 	
 	char ch1[10], ch2[10], ch3[10],ch4[10] ;
 	
-	union TEST test ={{1,2,3},    /* initialize element #1*/
+	union TEST test ={ {1,2,3},    /* initialize element #1*/
 	                   {ch1,ch2,ch3,ch4} /* attempt to initialize #2 */
 	                   };
 	

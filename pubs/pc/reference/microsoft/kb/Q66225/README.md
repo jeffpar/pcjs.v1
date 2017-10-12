@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q66225: Possible Cause of L2029: '__aDBswpchk': Unresolved External"
+title: "Q66225: Possible Cause of L2029: '&#95;&#95;aDBswpchk': Unresolved External"
 permalink: /pubs/pc/reference/microsoft/kb/Q66225/
 ---
 

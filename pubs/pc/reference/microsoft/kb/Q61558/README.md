@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q61558: Unresolved External __CImin Caused by /Gh /Os Compile Options"
+title: "Q61558: Unresolved External &#95;&#95;CImin Caused by /Gh /Os Compile Options"
 permalink: /pubs/pc/reference/microsoft/kb/Q61558/
 ---
 

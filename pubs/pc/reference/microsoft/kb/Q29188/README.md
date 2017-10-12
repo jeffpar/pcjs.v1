@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q29188: Unresolved External on __Clpow with /Oi and /FPa in C 5.xx"
+title: "Q29188: Unresolved External on &#95;&#95;Clpow with /Oi and /FPa in C 5.xx"
 permalink: /pubs/pc/reference/microsoft/kb/Q29188/
 ---
 
