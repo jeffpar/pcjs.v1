@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q50711: "." on the LIBPATH Eases DLL Debugging, But Not for CVP 2.20"
+title: "Q50711: &quot;.&quot; on the LIBPATH Eases DLL Debugging, But Not for CVP 2.20"
 permalink: /pubs/pc/reference/microsoft/kb/Q50711/
 ---
 

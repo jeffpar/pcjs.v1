@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q46947: Type of Expression "&amp;arrayname" Changes under ANSI C"
+title: "Q46947: Type of Expression &quot;&amp;arrayname&quot; Changes under ANSI C"
 permalink: /pubs/pc/reference/microsoft/kb/Q46947/
 ---
 

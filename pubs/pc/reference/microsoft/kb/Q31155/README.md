@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q31155: "Unable to Read TOOLS.INI" Message Appears in OS/2 with MEP"
+title: "Q31155: &quot;Unable to Read TOOLS.INI&quot; Message Appears in OS/2 with MEP"
 permalink: /pubs/pc/reference/microsoft/kb/Q31155/
 ---
 

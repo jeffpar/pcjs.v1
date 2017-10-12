@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q58929: BIND Error "Import By Ordinal Not Defined: DOSCALLS.5""
+title: "Q58929: BIND Error &quot;Import By Ordinal Not Defined: DOSCALLS.5&quot;"
 permalink: /pubs/pc/reference/microsoft/kb/Q58929/
 ---
 

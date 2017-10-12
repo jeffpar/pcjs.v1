@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q42760: /Zg Misspells the Word "Interrupt" for Function Pointers"
+title: "Q42760: /Zg Misspells the Word &quot;Interrupt&quot; for Function Pointers"
 permalink: /pubs/pc/reference/microsoft/kb/Q42760/
 ---
 

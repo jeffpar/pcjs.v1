@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q51125: "C For Yourself" Documentation Error -- Long Double"
+title: "Q51125: &quot;C For Yourself&quot; Documentation Error -- Long Double"
 permalink: /pubs/pc/reference/microsoft/kb/Q51125/
 ---
 

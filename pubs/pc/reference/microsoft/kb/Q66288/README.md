@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q66288: "QuickC with QuickAssembler" Is 2.51, "QuickC" Alone Is 2.50"
+title: "Q66288: &quot;QuickC with QuickAssembler&quot; Is 2.51, &quot;QuickC&quot; Alone Is 2.50"
 permalink: /pubs/pc/reference/microsoft/kb/Q66288/
 ---
 

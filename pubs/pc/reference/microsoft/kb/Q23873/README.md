@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q23873: R6002 "Floating Point Not Loaded" May Result from printf() Use"
+title: "Q23873: R6002 &quot;Floating Point Not Loaded&quot; May Result from printf() Use"
 permalink: /pubs/pc/reference/microsoft/kb/Q23873/
 ---
 

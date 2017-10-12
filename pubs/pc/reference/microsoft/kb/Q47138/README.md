@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q47138: Driver "Removed from Memory" Versus "Disabled""
+title: "Q47138: Driver &quot;Removed from Memory&quot; Versus &quot;Disabled&quot;"
 permalink: /pubs/pc/reference/microsoft/kb/Q47138/
 ---
 

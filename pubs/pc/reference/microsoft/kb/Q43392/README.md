@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q43392: C: Clarification of the "g" Format Specifier"
+title: "Q43392: C: Clarification of the &quot;g&quot; Format Specifier"
 permalink: /pubs/pc/reference/microsoft/kb/Q43392/
 ---
 

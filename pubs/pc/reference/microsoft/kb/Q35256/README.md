@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q35256: "Softer" Should Be "Softcr" in M 1.0 User's Guide"
+title: "Q35256: &quot;Softer&quot; Should Be &quot;Softcr&quot; in M 1.0 User's Guide"
 permalink: /pubs/pc/reference/microsoft/kb/Q35256/
 ---
 

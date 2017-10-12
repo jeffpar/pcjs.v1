@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q41578: "st" Is the Floating Point Stack Register in In-Line Assembly"
+title: "Q41578: &quot;st&quot; Is the Floating Point Stack Register in In-Line Assembly"
 permalink: /pubs/pc/reference/microsoft/kb/Q41578/
 ---
 

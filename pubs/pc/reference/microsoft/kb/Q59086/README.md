@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q59086: Error C2094: Label "xxx" Was Undefined"
+title: "Q59086: Error C2094: Label &quot;xxx&quot; Was Undefined"
 permalink: /pubs/pc/reference/microsoft/kb/Q59086/
 ---
 

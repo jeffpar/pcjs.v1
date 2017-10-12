@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q47770: Possible Explanation for "Cannot Close This Window" Error"
+title: "Q47770: Possible Explanation for &quot;Cannot Close This Window&quot; Error"
 permalink: /pubs/pc/reference/microsoft/kb/Q47770/
 ---
 

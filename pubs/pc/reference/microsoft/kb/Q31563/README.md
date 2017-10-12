@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q31563: Linking FORTRAN and C, "L2044 _FF_MsgBanner Multiply Defined""
+title: "Q31563: Linking FORTRAN and C, &quot;L2044 _FF_MsgBanner Multiply Defined&quot;"
 permalink: /pubs/pc/reference/microsoft/kb/Q31563/
 ---
 

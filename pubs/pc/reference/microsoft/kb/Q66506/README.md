@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q66506: Error: Cannot Open Response File : ""
+title: "Q66506: Error: Cannot Open Response File : &quot;"
 permalink: /pubs/pc/reference/microsoft/kb/Q66506/
 ---
 

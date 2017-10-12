@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q27778: Program's First Command-Line Argument Is "C" Under DOS 2.x"
+title: "Q27778: Program's First Command-Line Argument Is &quot;C&quot; Under DOS 2.x"
 permalink: /pubs/pc/reference/microsoft/kb/Q27778/
 ---
 

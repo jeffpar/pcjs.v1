@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q39784: "D" Incorrectly Defined as a printf/scanf Format Specifier"
+title: "Q39784: &quot;D&quot; Incorrectly Defined as a printf/scanf Format Specifier"
 permalink: /pubs/pc/reference/microsoft/kb/Q39784/
 ---
 

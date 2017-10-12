@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q59439: C4071 Can Be Caused by Missing "void" in Function Prototype"
+title: "Q59439: C4071 Can Be Caused by Missing &quot;void&quot; in Function Prototype"
 permalink: /pubs/pc/reference/microsoft/kb/Q59439/
 ---
 

@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q64026: CodeView Crashes in DOS on "Drive Not Ready" Error"
+title: "Q64026: CodeView Crashes in DOS on &quot;Drive Not Ready&quot; Error"
 permalink: /pubs/pc/reference/microsoft/kb/Q64026/
 ---
 

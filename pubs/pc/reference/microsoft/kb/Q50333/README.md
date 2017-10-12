@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q50333: Specifying Link Options with "-" Causes L4046, L1083, or U1013"
+title: "Q50333: Specifying Link Options with &quot;-&quot; Causes L4046, L1083, or U1013"
 permalink: /pubs/pc/reference/microsoft/kb/Q50333/
 ---
 

@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q51835: "Error C2410: 'var' : Ambiguous Member Name Operand 2""
+title: "Q51835: &quot;Error C2410: 'var' : Ambiguous Member Name Operand 2&quot;"
 permalink: /pubs/pc/reference/microsoft/kb/Q51835/
 ---
 

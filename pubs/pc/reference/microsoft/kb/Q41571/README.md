@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q41571: QuickC 2.00 README.DOC: The "defined" Operator"
+title: "Q41571: QuickC 2.00 README.DOC: The &quot;defined&quot; Operator"
 permalink: /pubs/pc/reference/microsoft/kb/Q41571/
 ---
 

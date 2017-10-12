@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q46733: L1008: "Segment Limit Too High" May Be Caused by Missing Colon"
+title: "Q46733: L1008: &quot;Segment Limit Too High&quot; May Be Caused by Missing Colon"
 permalink: /pubs/pc/reference/microsoft/kb/Q46733/
 ---
 

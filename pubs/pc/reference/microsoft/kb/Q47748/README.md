@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q47748: "File Does Not Exist" Error in OS/2 DOS Box with Existing File"
+title: "Q47748: &quot;File Does Not Exist&quot; Error in OS/2 DOS Box with Existing File"
 permalink: /pubs/pc/reference/microsoft/kb/Q47748/
 ---
 

@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q31658: CVP Prompts "SYS0197 OS/2 Not Configured..." Error Message"
+title: "Q31658: CVP Prompts &quot;SYS0197 OS/2 Not Configured...&quot; Error Message"
 permalink: /pubs/pc/reference/microsoft/kb/Q31658/
 ---
 

@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q57513: Misspelling "mov" in _asm Creates C4405 and C2400"
+title: "Q57513: Misspelling &quot;mov&quot; in _asm Creates C4405 and C2400"
 permalink: /pubs/pc/reference/microsoft/kb/Q57513/
 ---
 

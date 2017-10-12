@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q42461: C Function _dos_setdrive Returns "5" Drives in the System"
+title: "Q42461: C Function _dos_setdrive Returns &quot;5&quot; Drives in the System"
 permalink: /pubs/pc/reference/microsoft/kb/Q42461/
 ---
 

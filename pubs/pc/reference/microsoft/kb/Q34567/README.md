@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q34567: "User's Guide" Index Reference for /F Is Page 122 Not Page 123"
+title: "Q34567: &quot;User's Guide&quot; Index Reference for /F Is Page 122 Not Page 123"
 permalink: /pubs/pc/reference/microsoft/kb/Q34567/
 ---
 

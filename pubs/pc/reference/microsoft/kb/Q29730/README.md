@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q29730: Editor "User's Guide" C-Extension Sample Generates Warnings"
+title: "Q29730: Editor &quot;User's Guide&quot; C-Extension Sample Generates Warnings"
 permalink: /pubs/pc/reference/microsoft/kb/Q29730/
 ---
 

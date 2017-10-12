@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q67736: "missing ':' in -&gt;" Caused by Control Character"
+title: "Q67736: &quot;missing ':' in -&gt;&quot; Caused by Control Character"
 permalink: /pubs/pc/reference/microsoft/kb/Q67736/
 ---
 

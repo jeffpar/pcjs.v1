@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q41370: The Meaning of "ILINK:Fatal Error L1266: Invalid .EXE File""
+title: "Q41370: The Meaning of &quot;ILINK:Fatal Error L1266: Invalid .EXE File&quot;"
 permalink: /pubs/pc/reference/microsoft/kb/Q41370/
 ---
 

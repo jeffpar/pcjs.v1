@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q67512: Documentation Error in QuickC "Up and Running" on /FPi87"
+title: "Q67512: Documentation Error in QuickC &quot;Up and Running&quot; on /FPi87"
 permalink: /pubs/pc/reference/microsoft/kb/Q67512/
 ---
 

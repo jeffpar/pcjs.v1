@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q47959: Description of a .MAP File's "Program Entry Point""
+title: "Q47959: Description of a .MAP File's &quot;Program Entry Point&quot;"
 permalink: /pubs/pc/reference/microsoft/kb/Q47959/
 ---
 

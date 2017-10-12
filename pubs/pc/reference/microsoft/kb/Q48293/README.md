@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q48293: QuickC Message: "Cannot Edit Binary File""
+title: "Q48293: QuickC Message: &quot;Cannot Edit Binary File&quot;"
 permalink: /pubs/pc/reference/microsoft/kb/Q48293/
 ---
 

@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q42019: Missing Closing ")" on Macro Causes C1004 Unexpected-EOF Error"
+title: "Q42019: Missing Closing &quot;)&quot; on Macro Causes C1004 Unexpected-EOF Error"
 permalink: /pubs/pc/reference/microsoft/kb/Q42019/
 ---
 

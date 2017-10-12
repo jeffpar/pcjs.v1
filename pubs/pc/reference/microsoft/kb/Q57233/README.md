@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q57233: C 5.1 Run-Time Reference Example for atan2() Is Missing ")""
+title: "Q57233: C 5.1 Run-Time Reference Example for atan2() Is Missing &quot;)&quot;"
 permalink: /pubs/pc/reference/microsoft/kb/Q57233/
 ---
 

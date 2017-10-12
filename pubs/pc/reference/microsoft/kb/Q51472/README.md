@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q51472: Shift Left Assignment Operator "&lt;&lt;=" Does Not Work Correctly"
+title: "Q51472: Shift Left Assignment Operator &quot;&lt;&lt;=&quot; Does Not Work Correctly"
 permalink: /pubs/pc/reference/microsoft/kb/Q51472/
 ---
 

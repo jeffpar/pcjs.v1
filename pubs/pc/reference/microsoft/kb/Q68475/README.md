@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q68475: "C2118: Negative Subscript" May Be Caused by int Expression"
+title: "Q68475: &quot;C2118: Negative Subscript&quot; May Be Caused by int Expression"
 permalink: /pubs/pc/reference/microsoft/kb/Q68475/
 ---
 

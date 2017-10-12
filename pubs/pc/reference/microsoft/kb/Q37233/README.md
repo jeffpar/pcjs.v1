@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q37233: Why "CDECL" Is Everywhere in Your Include Files"
+title: "Q37233: Why &quot;CDECL&quot; Is Everywhere in Your Include Files"
 permalink: /pubs/pc/reference/microsoft/kb/Q37233/
 ---
 

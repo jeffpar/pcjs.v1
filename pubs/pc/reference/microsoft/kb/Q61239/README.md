@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q61239: C 6.00 README: Notes on "C Reference""
+title: "Q61239: C 6.00 README: Notes on &quot;C Reference&quot;"
 permalink: /pubs/pc/reference/microsoft/kb/Q61239/
 ---
 

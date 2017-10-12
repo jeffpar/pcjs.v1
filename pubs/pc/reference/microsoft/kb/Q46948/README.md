@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q46948: MSJ 9/88: "Using MSC for TSRs" Omission/TSRs in C Information"
+title: "Q46948: MSJ 9/88: &quot;Using MSC for TSRs&quot; Omission/TSRs in C Information"
 permalink: /pubs/pc/reference/microsoft/kb/Q46948/
 ---
 

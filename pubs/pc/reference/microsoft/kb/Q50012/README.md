@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q50012: Undocumented Switch "Sethelp" for M Version 1.02"
+title: "Q50012: Undocumented Switch &quot;Sethelp&quot; for M Version 1.02"
 permalink: /pubs/pc/reference/microsoft/kb/Q50012/
 ---
 

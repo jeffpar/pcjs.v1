@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q48859: NMAKE Version 1.00 with "!" and User and Predefined Macros"
+title: "Q48859: NMAKE Version 1.00 with &quot;!&quot; and User and Predefined Macros"
 permalink: /pubs/pc/reference/microsoft/kb/Q48859/
 ---
 

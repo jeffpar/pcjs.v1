@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q42072: Incorrect Usage of /o Switch in "Peter Norton's Inside OS/2""
+title: "Q42072: Incorrect Usage of /o Switch in &quot;Peter Norton's Inside OS/2&quot;"
 permalink: /pubs/pc/reference/microsoft/kb/Q42072/
 ---
 

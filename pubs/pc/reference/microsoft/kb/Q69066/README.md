@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q69066: "Save Before Rebuild" Does Not Work Properly"
+title: "Q69066: &quot;Save Before Rebuild&quot; Does Not Work Properly"
 permalink: /pubs/pc/reference/microsoft/kb/Q69066/
 ---
 

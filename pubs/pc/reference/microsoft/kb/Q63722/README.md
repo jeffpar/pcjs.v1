@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q63722: "C For Yourself" Documentation Error"
+title: "Q63722: &quot;C For Yourself&quot; Documentation Error"
 permalink: /pubs/pc/reference/microsoft/kb/Q63722/
 ---
 

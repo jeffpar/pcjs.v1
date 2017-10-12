@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q58225: "Packed File Corrupt" Error"
+title: "Q58225: &quot;Packed File Corrupt&quot; Error"
 permalink: /pubs/pc/reference/microsoft/kb/Q58225/
 ---
 

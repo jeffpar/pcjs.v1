@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q58069: C 5.10 Prototypes Differ Between \INCLUDE and \INCLUDE\MT"
+title: "Q58069: C 5.10 Prototypes Differ Between &#92;INCLUDE and &#92;INCLUDE&#92;MT"
 permalink: /pubs/pc/reference/microsoft/kb/Q58069/
 ---
 

@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q44754: "longjmp" Incorrectly Spelled "longjump" in QC Advisor Help"
+title: "Q44754: &quot;longjmp&quot; Incorrectly Spelled &quot;longjump&quot; in QC Advisor Help"
 permalink: /pubs/pc/reference/microsoft/kb/Q44754/
 ---
 

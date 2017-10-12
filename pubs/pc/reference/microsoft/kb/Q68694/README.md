@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q68694: RTF Codes \fi&lt;n&gt; and \li&lt;n&gt; Use Twips Instead of Spaces"
+title: "Q68694: RTF Codes &#92;fi&lt;n&gt; and &#92;li&lt;n&gt; Use Twips Instead of Spaces"
 permalink: /pubs/pc/reference/microsoft/kb/Q68694/
 ---
 

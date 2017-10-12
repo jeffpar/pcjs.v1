@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q68907: Incorrect Code Generated for "FILD QWord Ptr""
+title: "Q68907: Incorrect Code Generated for &quot;FILD QWord Ptr&quot;"
 permalink: /pubs/pc/reference/microsoft/kb/Q68907/
 ---
 

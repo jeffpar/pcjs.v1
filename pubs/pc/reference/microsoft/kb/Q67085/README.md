@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q67085: NOF Is Default for LINK, Not /F as C "Reference" States"
+title: "Q67085: NOF Is Default for LINK, Not /F as C &quot;Reference&quot; States"
 permalink: /pubs/pc/reference/microsoft/kb/Q67085/
 ---
 

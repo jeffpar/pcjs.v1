@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q65302: Warning C4056: "Overflow in Constant Arithmetic" May Be Wrong"
+title: "Q65302: Warning C4056: &quot;Overflow in Constant Arithmetic&quot; May Be Wrong"
 permalink: /pubs/pc/reference/microsoft/kb/Q65302/
 ---
 

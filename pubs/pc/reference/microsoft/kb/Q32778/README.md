@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q32778: C4001 and C4074 "Function Given File Scope" Warnings"
+title: "Q32778: C4001 and C4074 &quot;Function Given File Scope&quot; Warnings"
 permalink: /pubs/pc/reference/microsoft/kb/Q32778/
 ---
 

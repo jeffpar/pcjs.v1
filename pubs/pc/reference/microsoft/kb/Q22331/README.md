@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q22331: "Invalid Object Module" Usually Caused by Old Version of LINK"
+title: "Q22331: &quot;Invalid Object Module&quot; Usually Caused by Old Version of LINK"
 permalink: /pubs/pc/reference/microsoft/kb/Q22331/
 ---
 

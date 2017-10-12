@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q35533: "Unable to Open Swapping File c:\temp\m-0029.vm""
+title: "Q35533: &quot;Unable to Open Swapping File c:&#92;temp&#92;m-0029.vm&quot;"
 permalink: /pubs/pc/reference/microsoft/kb/Q35533/
 ---
 
