@@ -264,7 +264,7 @@ class Macro10 {
         /*
          * This regular expression breaks each MACRO-10 line into the following elements:
          *
-         *      [1]: label (with trailing semicolon), if any
+         *      [1]: label (with trailing colon), if any
          *      [2]: operator (eg, opcode mnemonic or pseudo-op), if any
          *      [3]: operator/operand whitespace separator, if any
          *      [4]: operand(s), if any

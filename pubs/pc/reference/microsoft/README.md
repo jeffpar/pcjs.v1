@@ -7,6 +7,10 @@ permalink: /pubs/pc/reference/microsoft/
 Microsoft PC References
 -----------------------
 
+### Microsoft KnowledgeBase
+
+- [Early KnowledgeBase Articles](kb/)
+
 ### Microsoft Programmer's Library
 
 - [Microsoft Programmer's Library (v1.03)](mspl13/)

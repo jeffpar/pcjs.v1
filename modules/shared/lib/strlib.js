@@ -574,7 +574,7 @@ class Str {
              * escaped.  And in fact, if you ensure that the closing bracket is first, the caret is not first,
              * and the hyphen is last, you can avoid escaping those as well.
              */
-            k = k.replace(/([\\[\]*{}().+?])/g, "\\$1");
+            k = k.replace(/([\\[\]*{}().+?|])/g, "\\$1");
             sMatch += (sMatch? '|' : '') + k;
         }
         return s.replace(new RegExp('(' + sMatch + ')', "g"), function(m)
@@ -600,7 +600,7 @@ class Str {
     }
 
     /**
-     * sprintf(format, ...)
+     * sprintf(format, ...args)
      *
      * Copied from the CCjs project (/ccjs/lib/stdio.js) and extended.  Far from complete let alone sprintf-compatible,
      * but it's a start.
