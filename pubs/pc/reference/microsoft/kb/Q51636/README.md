@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q51636: C Extensions: Link Errors on __acrtused and _main Explained"
+title: "Q51636: C Extensions: Link Errors on &#95;&#95;acrtused and _main Explained"
 permalink: /pubs/pc/reference/microsoft/kb/Q51636/
 ---
 

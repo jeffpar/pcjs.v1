@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q60255: __STDC__ Is Undefined If Microsoft Extensions Are Allowed"
+title: "Q60255: &#95;&#95;STDC&#95;&#95; Is Undefined If Microsoft Extensions Are Allowed"
 permalink: /pubs/pc/reference/microsoft/kb/Q60255/
 ---
 

@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q58194: How to Write Your Own __chkstk Routine"
+title: "Q58194: How to Write Your Own &#95;&#95;chkstk Routine"
 permalink: /pubs/pc/reference/microsoft/kb/Q58194/
 ---
 

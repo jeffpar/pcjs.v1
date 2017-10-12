@@ -28,7 +28,7 @@ permalink: /pubs/pc/reference/microsoft/kb/Q65314/
 	
 	_segment myseg;
 	extern int _based(myseg) a[];
-	int _based(_segname("foo")) a[] = {{0}};
+	int _based(_segname("foo")) a[] = { {0} };
 	
 	To workaround the problem, use one of the following:
 	

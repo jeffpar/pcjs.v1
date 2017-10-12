@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q47990: Possible Causes of &quot;'__iob' : Unresolved External&quot;"
+title: "Q47990: Possible Causes of &quot;'&#95;&#95;iob' : Unresolved External&quot;"
 permalink: /pubs/pc/reference/microsoft/kb/Q47990/
 ---
 

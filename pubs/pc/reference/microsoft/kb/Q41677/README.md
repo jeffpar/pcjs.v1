@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q41677: QuickC 2.00 README.DOC: Spurious Error: __aDBused..."
+title: "Q41677: QuickC 2.00 README.DOC: Spurious Error: &#95;&#95;aDBused..."
 permalink: /pubs/pc/reference/microsoft/kb/Q41677/
 ---
 

@@ -30,15 +30,15 @@ permalink: /pubs/pc/reference/microsoft/kb/Q51654/
 	
 	#define ITEMS  5
 	#define SERIES 2
-	float far employees[SERIES][ITEMS] = {{235.0F, 423.0F, 596.0F,
+	float far employees[SERIES][ITEMS] = { {235.0F, 423.0F, 596.0F,
 	                                       729.0F, 963.0F},
 	                                      {285.0F, 392.0F, 634.0F,
-	                                       801.0F, 895.0F}};
+	                                       801.0F, 895.0F} };
 	
-	float far profits[SERIES][ITEMS] =   {{0.9F,  2.3F,  5.4F,
+	float far profits[SERIES][ITEMS] =   { {0.9F,  2.3F,  5.4F,
 	                                       8.0F,  9.3F},
 	                                      {4.2F,  3.4F,  3.6F,
-	                                       2.9F,  2.7F}};
+	                                       2.9F,  2.7F} };
 	
 	char far *companies[SERIES] = { "Goodstuff, Inc.", "Badjunk & Co."};
 	
