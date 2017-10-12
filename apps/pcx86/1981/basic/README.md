@@ -43,11 +43,15 @@ NOTE: To save a BASIC program as an *ASCII* file, save it with the `A` option; e
 
 ### ART.BAS
 
+[[Download](ART.BAS)]
+
 {% highlight basic %}
 {% include_relative ART.BAS %}
 {% endhighlight %}
 
 ### BALL.BAS
+
+[[Download](BALL.BAS)]
 
 {% highlight basic %}
 {% include_relative BALL.BAS %}
@@ -55,11 +59,15 @@ NOTE: To save a BASIC program as an *ASCII* file, save it with the `A` option; e
 
 ### CALENDAR.BAS
 
+[[Download](CALENDAR.BAS)]
+
 {% highlight basic %}
 {% include_relative CALENDAR.BAS %}
 {% endhighlight %}
 
 ### CIRCLE.BAS
+
+[[Download](CIRCLE.BAS)]
 
 {% highlight basic %}
 {% include_relative CIRCLE.BAS %}
@@ -67,11 +75,15 @@ NOTE: To save a BASIC program as an *ASCII* file, save it with the `A` option; e
 
 ### COMM.BAS
 
+[[Download](COMM.BAS)]
+
 {% highlight basic %}
 {% include_relative COMM.BAS %}
 {% endhighlight %}
 
 ### DONKEY.BAS
+
+[[Download](DONKEY.BAS)]
 
 {% highlight basic %}
 {% include_relative DONKEY.BAS %}
@@ -79,11 +91,15 @@ NOTE: To save a BASIC program as an *ASCII* file, save it with the `A` option; e
 
 ### MORTGAGE.BAS
 
+[[Download](MORTGAGE.BAS)]
+
 {% highlight basic %}
 {% include_relative MORTGAGE.BAS %}
 {% endhighlight %}
 
 ### MUSIC.BAS
+
+[[Download](MUSIC.BAS)]
 
 {% highlight basic %}
 {% include_relative MUSIC.BAS %}
@@ -91,17 +107,23 @@ NOTE: To save a BASIC program as an *ASCII* file, save it with the `A` option; e
 
 ### PIECHART.BAS
 
+[[Download](PIECHART.BAS)]
+
 {% highlight basic %}
 {% include_relative PIECHART.BAS %}
 {% endhighlight %}
 
 ### SAMPLES.BAS
 
+[[Download](SAMPLES.BAS)]
+
 {% highlight basic %}
 {% include_relative SAMPLES.BAS %}
 {% endhighlight %}
 
 ### SPACE.BAS
+
+[[Download](SPACE.BAS)]
 
 {% highlight basic %}
 {% include_relative SPACE.BAS %}
@@ -116,11 +138,15 @@ by [MUSIC.BAS](#musicbas) using the *CHAIN* command.
 
 #### BLUE.BAS
 
+[[Download](BLUE.BAS)]
+
 {% highlight basic %}
 {% include_relative BLUE.BAS %}
 {% endhighlight %}
 
 #### BUG.BAS
+
+[[Download](BUG.BAS)]
 
 {% highlight basic %}
 {% include_relative BUG.BAS %}
@@ -128,11 +154,15 @@ by [MUSIC.BAS](#musicbas) using the *CHAIN* command.
 
 #### DANDY.BAS
 
+[[Download](DANDY.BAS)]
+
 {% highlight basic %}
 {% include_relative DANDY.BAS %}
 {% endhighlight %}
 
 #### FORTY.BAS
+
+[[Download](FORTY.BAS)]
 
 {% highlight basic %}
 {% include_relative FORTY.BAS %}
@@ -140,11 +170,15 @@ by [MUSIC.BAS](#musicbas) using the *CHAIN* command.
 
 #### HAT.BAS
 
+[[Download](HAT.BAS)]
+
 {% highlight basic %}
 {% include_relative HAT.BAS %}
 {% endhighlight %}
 
 #### HUMOR.BAS
+
+[[Download](HUMOR.BAS)]
 
 {% highlight basic %}
 {% include_relative HUMOR.BAS %}
@@ -152,11 +186,15 @@ by [MUSIC.BAS](#musicbas) using the *CHAIN* command.
 
 #### MARCH.BAS
 
+[[Download](MARCH.BAS)]
+
 {% highlight basic %}
 {% include_relative MARCH.BAS %}
 {% endhighlight %}
 
 #### POP.BAS
+
+[[Download](POP.BAS)]
 
 {% highlight basic %}
 {% include_relative POP.BAS %}
@@ -164,17 +202,23 @@ by [MUSIC.BAS](#musicbas) using the *CHAIN* command.
 
 #### SAKURA.BAS
 
+[[Download](SAKURA.BAS)]
+
 {% highlight basic %}
 {% include_relative SAKURA.BAS %}
 {% endhighlight %}
 
 #### SCALES.BAS
 
+[[Download](SCALES.BAS)]
+
 {% highlight basic %}
 {% include_relative SCALES.BAS %}
 {% endhighlight %}
 
 #### STARS.BAS
+
+[[Download](STARS.BAS)]
 
 {% highlight basic %}
 {% include_relative STARS.BAS %}

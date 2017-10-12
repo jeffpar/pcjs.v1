@@ -55019,7 +55019,10 @@ class ParallelPort extends Component {
     inStatus(port, addrFrom)
     {
         var b = this.bStatus;
+        this.bStatus |= ParallelPort.STATUS.NACK;
+        this.bStatus &= ~ParallelPort.STATUS.BUSY;
         this.printMessageIO(port, null, addrFrom, "STAT", b);
+        this.updateIRR();
         return b;
     }
 
@@ -55050,9 +55053,9 @@ class ParallelPort extends Component {
     {
         this.printMessageIO(port, bOut, addrFrom, "DATA");
         this.bData = bOut;
-        this.bStatus |= ParallelPort.STATUS.NOTREADY;
         if (this.transmitByte(bOut)) {
-            this.bStatus &= ~ParallelPort.STATUS.NOTREADY;
+            this.bStatus |= ParallelPort.STATUS.BUSY;
+            this.bStatus &= ~ParallelPort.STATUS.NACK;
         }
         this.updateIRR();
     }
@@ -55080,7 +55083,7 @@ class ParallelPort extends Component {
     updateIRR()
     {
         if (this.chipset && this.nIRQ) {
-            if ((this.bControl & ParallelPort.CONTROL.IRQ_ENABLE) && !(this.bStatus & ParallelPort.STATUS.NOTREADY)) {
+            if ((this.bControl & ParallelPort.CONTROL.IRQ_ENABLE) && !(this.bStatus & ParallelPort.STATUS.NACK)) {
                 this.chipset.setIRR(this.nIRQ);
             } else {
                 this.chipset.clearIRR(this.nIRQ);
@@ -55102,11 +55105,15 @@ class ParallelPort extends Component {
         this.printMessage("transmitByte(" + Str.toHexByte(b) + ")");
 
         if (this.controlIOBuffer) {
-            if (b == 0x08) {
+            if (b == 0x0D) {
+                // this.iLogicalCol = 0;
+            }
+            else if (b == 0x08) {
                 this.controlIOBuffer.value = this.controlIOBuffer.value.slice(0, -1);
             }
             else {
-                this.controlIOBuffer.value += String.fromCharCode(b);
+                var s = Str.toASCIICode(b); // formerly: String.fromCharCode(b);
+                this.controlIOBuffer.value += s;
                 this.controlIOBuffer.scrollTop = this.controlIOBuffer.scrollHeight;
             }
             fTransmitted = true;
@@ -55121,7 +55128,6 @@ class ParallelPort extends Component {
             }
             fTransmitted = true;
         }
-
         return fTransmitted;
     }
 
@@ -55187,12 +55193,13 @@ ParallelPort.DATA = {           // (read/write)
  *       3       15             // 0x08 (not used)
  *       4       13             // 0x10 (printer is in the selected state)
  *       5       12             // 0x20 (out of paper)
- *       6       10             // 0x40 (printer not yet ready to accept another character)
- *       7       11             // 0x80 (printer cannot receive data; eg, printer off-line, or print operation in progress)
+ *       6       10             // 0x40 (printer acknowledged receipt of data)
+ *       7       11             // 0x80 (printer busy; eg, printer off-line, or print operation in progress)
  */
 ParallelPort.STATUS = {         // (read)
     REG:        1,
-    NOTREADY:   0x40            // when this bit goes clear, interrupt requested
+    NACK:       0x40,           // when this bit goes clear, interrupt requested
+    BUSY:       0x80            // when this bit is set, printer is busy
 };
 
 /*
