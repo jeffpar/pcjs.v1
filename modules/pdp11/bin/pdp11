@@ -452,7 +452,7 @@ function receiveData(b)
 {
     var s;
     if (b != Str.ASCII.CR && b != Str.ASCII.LF) {
-        s = Str.aASCIICodes[b];
+        s = Str.ASCIICodeMap[b];
     }
     if (s) {
         s = '<' + s + '>';

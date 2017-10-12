@@ -404,8 +404,28 @@ class ParallelPort extends Component {
                 this.controlIOBuffer.value = this.controlIOBuffer.value.slice(0, -1);
             }
             else {
-                var s = Str.toASCIICode(b); // formerly: String.fromCharCode(b);
-                this.controlIOBuffer.value += s;
+                /*
+                 * If we assume that the printer being used was the original IBM 80 CPS Matrix Printer,
+                 * characters 0x80-0x9F mirror control codes 0x00-0x1F, and characters 0xA0-0xDF are various
+                 * block shapes, sort of in the spirit of the line-drawing characters 0xC0-0xDF defined by
+                 * IBM Code Page 437, but, no, completely different.  And apparently, characters 0xE0-0xFF
+                 * printed nothing at all (see Table 11 on page 2-78 of the original IBM PC 5150 TechRef).
+                 *
+                 * The only control character we care about is LINE-FEED; for all other control characters,
+                 * we'll display the ASCII mnemonic, to make it clear what the software intended.  And as for
+                 * any block characters, we'll print an asterisk and call it good, for now.  Beyond that,
+                 * we'll just print spaces.
+                 */
+                if (b >= 0x80) {
+                    if (b < 0xA0) {
+                        b -= 0x80;
+                    } else if (b < 0xE0) {
+                        b = 0x2A;       // ASCII code for an asterisk
+                    } else {
+                        b = 0x20;       // ASCII code for a space
+                    }
+                }
+                this.controlIOBuffer.value += Str.toASCIICode(b);
                 this.controlIOBuffer.scrollTop = this.controlIOBuffer.scrollHeight;
             }
             fTransmitted = true;
