@@ -12634,6 +12634,7 @@ class CPU extends Component {
         this.calcCycles();
 
         this.counts.nCyclesThisRun = 0;
+        this.counts.msDiscount = 0;
         this.counts.msStartThisRun = Usr.getTime();
         if (!this.counts.msStartRun) {
             this.counts.msStartRun = this.counts.msStartThisRun;
@@ -12690,6 +12691,11 @@ class CPU extends Component {
     calcRemainingTime()
     {
         this.counts.msEndThisRun = Usr.getTime();
+
+        if (this.counts.msDiscount) {
+            this.counts.msStartRun += this.counts.msDiscount;
+            this.counts.msStartThisRun += this.counts.msDiscount;
+        }
 
         var msYield = this.counts.msPerYield;
         if (this.counts.nCyclesThisRun) {
@@ -13179,6 +13185,27 @@ class CPU extends Component {
         }
         this.flags.complete = fComplete;
         return fStopped;
+    }
+
+    /**
+     * nonCPU(fn)
+     *
+     * Use this function to perform any work outside the scope of the CPU (eg, DOM updates),
+     * to prevent that work from disrupting our speed calculations.
+     *
+     * @this {CPU}
+     * @param {function()} fn (should return true only if the function actually performed any work)
+     * @return {boolean}
+     */
+    nonCPU(fn)
+    {
+        var msStart = Usr.getTime();
+        if (fn()) {
+            var msStop = Usr.getTime();
+            this.counts.msDiscount += msStop - msStart;
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -55011,7 +55038,7 @@ class ParallelPort extends Component {
     {
         var i = 0;
         if (data === undefined) {
-            data = [0, 0, 0];
+            data = [0, ParallelPort.STATUS.NERR, 0];
         }
         this.bData = data[i++];
         this.bStatus = data[i++];
@@ -55093,12 +55120,17 @@ class ParallelPort extends Component {
      */
     outData(port, bOut, addrFrom)
     {
+        var parallel = this;
         this.printMessageIO(port, bOut, addrFrom, "DATA");
         this.bData = bOut;
-        if (this.transmitByte(bOut)) {
-            this.bStatus |= ParallelPort.STATUS.BUSY;
-            this.bStatus &= ~ParallelPort.STATUS.NACK;
-        }
+        this.cpu.nonCPU(function() {
+            if (parallel.transmitByte(bOut)) {
+                parallel.bStatus |= ParallelPort.STATUS.BUSY | ParallelPort.STATUS.NERR;
+                parallel.bStatus &= ~ParallelPort.STATUS.NACK;
+                return true;
+            }
+            return false;
+        });
         this.updateIRR();
     }
 
@@ -55180,7 +55212,7 @@ class ParallelPort extends Component {
             }
             fTransmitted = true;
         }
-        if (this.consoleOutput != null) {
+        else if (this.consoleOutput != null) {
             if (b == 0x0A || this.consoleOutput.length >= 1024) {
                 this.println(this.consoleOutput);
                 this.consoleOutput = "";
@@ -55190,6 +55222,7 @@ class ParallelPort extends Component {
             }
             fTransmitted = true;
         }
+
         return fTransmitted;
     }
 
@@ -55252,16 +55285,19 @@ ParallelPort.DATA = {           // (read/write)
  *       0       -              // 0x01
  *       1       -              // 0x02
  *       2       -              // 0x04
- *       3       15             // 0x08 (not used)
- *       4       13             // 0x10 (printer is in the selected state)
- *       5       12             // 0x20 (out of paper)
- *       6       10             // 0x40 (printer acknowledged receipt of data)
- *       7       11             // 0x80 (printer busy; eg, printer off-line, or print operation in progress)
+ *       3       !15            // 0x08 (Error)
+ *       4       13             // 0x10 (Select)
+ *       5       12             // 0x20 (Out of Paper)
+ *       6       !10            // 0x40 (Acknowledged)
+ *       7       11             // 0x80 (Busy; eg, printer off-line or operation in progress)
  */
 ParallelPort.STATUS = {         // (read)
     REG:        1,
-    NACK:       0x40,           // when this bit goes clear, interrupt requested
-    BUSY:       0x80            // when this bit is set, printer is busy
+    NERR:       0x08,           // when this bit is cleared, I/O error
+    SELECT:     0x10,           // when this bit is set, printer selected
+    PAPER:      0x20,           // when this bit is set, out of paper
+    NACK:       0x40,           // when this bit is cleared, data acknowledged (and optionally, interrupt requested)
+    BUSY:       0x80            // when this bit is set, printer busy
 };
 
 /*
@@ -56000,6 +56036,7 @@ class SerialPort extends Component {
      */
     outTHR(port, bOut, addrFrom)
     {
+        var serial = this;
         this.printMessageIO(port, bOut, addrFrom, (this.bLCR & SerialPort.LCR.DLAB) ? "DLL" : "THR");
         if (this.bLCR & SerialPort.LCR.DLAB) {
             this.wDL = (this.wDL & ~0xff) | bOut;
@@ -56020,8 +56057,10 @@ class SerialPort extends Component {
              *
              * TODO: Determine if we should also flush/zero bTHR after transmission.
              */
-            this.transmitByte(bOut);
-            if (this.cpu) this.cpu.setTimer(this.timerTransmitNext, this.getBaudTimeout());
+            this.cpu.nonCPU(function() {
+                return serial.transmitByte(bOut);
+            });
+            this.cpu.setTimer(this.timerTransmitNext, this.getBaudTimeout());
             this.updateIRR();
         }
     }
