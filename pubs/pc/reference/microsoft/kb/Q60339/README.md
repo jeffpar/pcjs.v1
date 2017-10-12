@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q60339: Reference to "Push" Function Incorrect Editor User's Guide"
+title: "Q60339: Reference to &quot;Push&quot; Function Incorrect Editor User's Guide"
 permalink: /pubs/pc/reference/microsoft/kb/Q60339/
 ---
 

@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q66213: \" Sequence Must Be Used to Define Strings with /D Switch"
+title: "Q66213: &#92;&quot; Sequence Must Be Used to Define Strings with /D Switch"
 permalink: /pubs/pc/reference/microsoft/kb/Q66213/
 ---
 

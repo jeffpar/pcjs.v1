@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q50793: Why After Edit, fopen with Mode "a" Doesn't Appear to Append"
+title: "Q50793: Why After Edit, fopen with Mode &quot;a&quot; Doesn't Appear to Append"
 permalink: /pubs/pc/reference/microsoft/kb/Q50793/
 ---
 

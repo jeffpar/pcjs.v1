@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q31498: "Unsupported Video Mode" When Loading Microsoft Editor"
+title: "Q31498: &quot;Unsupported Video Mode&quot; When Loading Microsoft Editor"
 permalink: /pubs/pc/reference/microsoft/kb/Q31498/
 ---
 

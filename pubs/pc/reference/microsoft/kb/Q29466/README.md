@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q29466: Leading Edge Model D Error "Unexpected SW Interrupt 33""
+title: "Q29466: Leading Edge Model D Error &quot;Unexpected SW Interrupt 33&quot;"
 permalink: /pubs/pc/reference/microsoft/kb/Q29466/
 ---
 

@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q37459: "pascal" Attribute for Multi-Thread Functions Returning Double"
+title: "Q37459: &quot;pascal&quot; Attribute for Multi-Thread Functions Returning Double"
 permalink: /pubs/pc/reference/microsoft/kb/Q37459/
 ---
 

@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q37020: QuickC Generates Warning Message "C4071" erroneously"
+title: "Q37020: QuickC Generates Warning Message &quot;C4071&quot; erroneously"
 permalink: /pubs/pc/reference/microsoft/kb/Q37020/
 ---
 

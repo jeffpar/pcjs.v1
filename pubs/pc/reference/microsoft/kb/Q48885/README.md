@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q48885: Newline Character (\n) Is Equivalent to ASCII Linefeed (0x0A)"
+title: "Q48885: Newline Character (&#92;n) Is Equivalent to ASCII Linefeed (0x0A)"
 permalink: /pubs/pc/reference/microsoft/kb/Q48885/
 ---
 

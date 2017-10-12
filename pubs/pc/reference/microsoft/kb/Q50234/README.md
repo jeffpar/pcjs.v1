@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q50234: Using Function Name Without "()" Produces No Code"
+title: "Q50234: Using Function Name Without &quot;()&quot; Produces No Code"
 permalink: /pubs/pc/reference/microsoft/kb/Q50234/
 ---
 

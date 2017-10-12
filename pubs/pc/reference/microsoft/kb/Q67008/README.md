@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q67008: Syntax Error When Watching Variables That Begin with "P""
+title: "Q67008: Syntax Error When Watching Variables That Begin with &quot;P&quot;"
 permalink: /pubs/pc/reference/microsoft/kb/Q67008/
 ---
 

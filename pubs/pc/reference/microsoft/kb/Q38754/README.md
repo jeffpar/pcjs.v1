@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q38754: "Interrupt Jumper Missing" Error Message"
+title: "Q38754: &quot;Interrupt Jumper Missing&quot; Error Message"
 permalink: /pubs/pc/reference/microsoft/kb/Q38754/
 ---
 

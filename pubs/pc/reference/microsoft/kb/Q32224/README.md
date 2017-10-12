@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q32224: Arg *.* Setfile: "Bad Command or Filename" Error"
+title: "Q32224: Arg *.* Setfile: &quot;Bad Command or Filename&quot; Error"
 permalink: /pubs/pc/reference/microsoft/kb/Q32224/
 ---
 

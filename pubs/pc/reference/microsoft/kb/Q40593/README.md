@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q40593: Misspelling "Default" Gives No Error"
+title: "Q40593: Misspelling &quot;Default&quot; Gives No Error"
 permalink: /pubs/pc/reference/microsoft/kb/Q40593/
 ---
 

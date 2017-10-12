@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q68146: QuickC Displays "Incompatible Operands" When Watching Arrays"
+title: "Q68146: QuickC Displays &quot;Incompatible Operands&quot; When Watching Arrays"
 permalink: /pubs/pc/reference/microsoft/kb/Q68146/
 ---
 

@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q37252: "Mouse Off" Hangs System: Samsung AT Compatible with J4 on 2"
+title: "Q37252: &quot;Mouse Off&quot; Hangs System: Samsung AT Compatible with J4 on 2"
 permalink: /pubs/pc/reference/microsoft/kb/Q37252/
 ---
 

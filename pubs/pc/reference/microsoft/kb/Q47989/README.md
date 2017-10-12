@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q47989: Resident Software May Cause "Internal Debugger Error 80""
+title: "Q47989: Resident Software May Cause &quot;Internal Debugger Error 80&quot;"
 permalink: /pubs/pc/reference/microsoft/kb/Q47989/
 ---
 

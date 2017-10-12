@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q47236: Documentation Error for "Mark" Functions in M User's Guide"
+title: "Q47236: Documentation Error for &quot;Mark&quot; Functions in M User's Guide"
 permalink: /pubs/pc/reference/microsoft/kb/Q47236/
 ---
 

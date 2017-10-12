@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q11876: C 5.00/5.10 Give "Constant Too Large" with Decimal Initializer"
+title: "Q11876: C 5.00/5.10 Give &quot;Constant Too Large&quot; with Decimal Initializer"
 permalink: /pubs/pc/reference/microsoft/kb/Q11876/
 ---
 

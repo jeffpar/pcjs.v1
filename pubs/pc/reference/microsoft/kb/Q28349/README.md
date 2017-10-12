@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q28349: Hexadecimal Unsigned Char Array Elements Missing "\""
+title: "Q28349: Hexadecimal Unsigned Char Array Elements Missing &quot;&#92;&quot;"
 permalink: /pubs/pc/reference/microsoft/kb/Q28349/
 ---
 

@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q40218: Shelling to DOS Produces "Out of Memory" Message"
+title: "Q40218: Shelling to DOS Produces &quot;Out of Memory&quot; Message"
 permalink: /pubs/pc/reference/microsoft/kb/Q40218/
 ---
 

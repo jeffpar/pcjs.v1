@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q64807: goto Label at End of Block Without ";" Invalid Syntax"
+title: "Q64807: goto Label at End of Block Without &quot;;&quot; Invalid Syntax"
 permalink: /pubs/pc/reference/microsoft/kb/Q64807/
 ---
 

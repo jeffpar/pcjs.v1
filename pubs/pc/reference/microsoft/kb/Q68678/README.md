@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q68678: Help Files for QuickC Require Special "Backtrace" Declaration"
+title: "Q68678: Help Files for QuickC Require Special &quot;Backtrace&quot; Declaration"
 permalink: /pubs/pc/reference/microsoft/kb/Q68678/
 ---
 

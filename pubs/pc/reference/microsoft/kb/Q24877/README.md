@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q24877: "?CANNOT DISPLAY" Error Not Documented in CodeView Documents"
+title: "Q24877: &quot;?CANNOT DISPLAY&quot; Error Not Documented in CodeView Documents"
 permalink: /pubs/pc/reference/microsoft/kb/Q24877/
 ---
 

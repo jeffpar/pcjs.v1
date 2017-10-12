@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q38317: CodeView Gives "Illegal Instruction" on Clone 386"
+title: "Q38317: CodeView Gives &quot;Illegal Instruction&quot; on Clone 386"
 permalink: /pubs/pc/reference/microsoft/kb/Q38317/
 ---
 

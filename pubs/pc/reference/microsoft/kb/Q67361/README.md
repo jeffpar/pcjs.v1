@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q67361: PWB Help Crashes When Using "Moving Through a File""
+title: "Q67361: PWB Help Crashes When Using &quot;Moving Through a File&quot;"
 permalink: /pubs/pc/reference/microsoft/kb/Q67361/
 ---
 

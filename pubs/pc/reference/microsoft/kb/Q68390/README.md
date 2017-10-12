@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q68390: "C1063: Stack Overflow" Caused by Taking Address of Constant"
+title: "Q68390: &quot;C1063: Stack Overflow&quot; Caused by Taking Address of Constant"
 permalink: /pubs/pc/reference/microsoft/kb/Q68390/
 ---
 

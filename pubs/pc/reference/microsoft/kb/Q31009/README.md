@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q31009: Protected-Mode C Extensions Fail with "Protection Fault""
+title: "Q31009: Protected-Mode C Extensions Fail with &quot;Protection Fault&quot;"
 permalink: /pubs/pc/reference/microsoft/kb/Q31009/
 ---
 

@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q39469: Process "exit" Values Must Lie Between 0 and 255 Inclusive"
+title: "Q39469: Process &quot;exit&quot; Values Must Lie Between 0 and 255 Inclusive"
 permalink: /pubs/pc/reference/microsoft/kb/Q39469/
 ---
 

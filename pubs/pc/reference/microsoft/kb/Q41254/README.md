@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q41254: Error in "C For Yourself," Page 294"
+title: "Q41254: Error in &quot;C For Yourself,&quot; Page 294"
 permalink: /pubs/pc/reference/microsoft/kb/Q41254/
 ---
 

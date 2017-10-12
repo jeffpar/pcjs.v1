@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q46272: Documentation Errors in "Configuring On-Line Help" for M 1.02"
+title: "Q46272: Documentation Errors in &quot;Configuring On-Line Help&quot; for M 1.02"
 permalink: /pubs/pc/reference/microsoft/kb/Q46272/
 ---
 

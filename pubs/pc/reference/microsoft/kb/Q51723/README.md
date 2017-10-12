@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q51723: Using "." for Path in Inference Rules Causes U1073"
+title: "Q51723: Using &quot;.&quot; for Path in Inference Rules Causes U1073"
 permalink: /pubs/pc/reference/microsoft/kb/Q51723/
 ---
 

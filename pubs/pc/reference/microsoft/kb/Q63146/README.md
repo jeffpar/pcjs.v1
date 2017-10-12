@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q63146: Expression in Brackets ""
+title: "Q63146: Expression in Brackets &quot;"
 permalink: /pubs/pc/reference/microsoft/kb/Q63146/
 ---
 

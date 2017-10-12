@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q31468: PATCH87 Gives "Cannot Open IO.SYS" Message"
+title: "Q31468: PATCH87 Gives &quot;Cannot Open IO.SYS&quot; Message"
 permalink: /pubs/pc/reference/microsoft/kb/Q31468/
 ---
 

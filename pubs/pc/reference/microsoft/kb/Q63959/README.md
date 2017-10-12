@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q63959: Using Unary "+" in QuickC Gives Incorrect Results"
+title: "Q63959: Using Unary &quot;+&quot; in QuickC Gives Incorrect Results"
 permalink: /pubs/pc/reference/microsoft/kb/Q63959/
 ---
 

@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q35140: Error C1015 "Can't Open Include File" with MEP"
+title: "Q35140: Error C1015 &quot;Can't Open Include File&quot; with MEP"
 permalink: /pubs/pc/reference/microsoft/kb/Q35140/
 ---
 

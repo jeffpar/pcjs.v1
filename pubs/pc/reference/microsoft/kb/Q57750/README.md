@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q57750: M "Keyboard" Switch Doesn't Work As Documented"
+title: "Q57750: M &quot;Keyboard&quot; Switch Doesn't Work As Documented"
 permalink: /pubs/pc/reference/microsoft/kb/Q57750/
 ---
 

@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q34669: L1087: "Unexpected End-of-File on Scratch File""
+title: "Q34669: L1087: &quot;Unexpected End-of-File on Scratch File&quot;"
 permalink: /pubs/pc/reference/microsoft/kb/Q34669/
 ---
 

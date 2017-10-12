@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q45679: "DPATH" Utility Causes ILINK Error and R6005 Error"
+title: "Q45679: &quot;DPATH&quot; Utility Causes ILINK Error and R6005 Error"
 permalink: /pubs/pc/reference/microsoft/kb/Q45679/
 ---
 

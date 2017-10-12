@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q29201: Serial Mouse: "Driver Not Installed--Mouse Not Found" Message"
+title: "Q29201: Serial Mouse: &quot;Driver Not Installed--Mouse Not Found&quot; Message"
 permalink: /pubs/pc/reference/microsoft/kb/Q29201/
 ---
 

@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q44003: QuickC 2.00 "Rebuild All" Doesn't Necessarily Relink"
+title: "Q44003: QuickC 2.00 &quot;Rebuild All&quot; Doesn't Necessarily Relink"
 permalink: /pubs/pc/reference/microsoft/kb/Q44003/
 ---
 

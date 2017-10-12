@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q62702: PWB Does Not Return from DOS Shell with ";" in TMP"
+title: "Q62702: PWB Does Not Return from DOS Shell with &quot;;&quot; in TMP"
 permalink: /pubs/pc/reference/microsoft/kb/Q62702/
 ---
 

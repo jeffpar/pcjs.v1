@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q32070: D1001 "Could Not Execute C2.EXE" with DOS Version 2.10"
+title: "Q32070: D1001 &quot;Could Not Execute C2.EXE&quot; with DOS Version 2.10"
 permalink: /pubs/pc/reference/microsoft/kb/Q32070/
 ---
 

@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q42771: HELPMAKE: "/A:" Must Be Used When Using Colon (:) Commands"
+title: "Q42771: HELPMAKE: &quot;/A:&quot; Must Be Used When Using Colon (:) Commands"
 permalink: /pubs/pc/reference/microsoft/kb/Q42771/
 ---
 

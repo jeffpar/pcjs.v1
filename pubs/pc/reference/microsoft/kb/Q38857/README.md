@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q38857: "Invalid Object Module" with Indirection Problem"
+title: "Q38857: &quot;Invalid Object Module&quot; with Indirection Problem"
 permalink: /pubs/pc/reference/microsoft/kb/Q38857/
 ---
 

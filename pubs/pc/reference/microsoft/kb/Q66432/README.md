@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q66432: "QC Is Already Running" Message Appears"
+title: "Q66432: &quot;QC Is Already Running&quot; Message Appears"
 permalink: /pubs/pc/reference/microsoft/kb/Q66432/
 ---
 

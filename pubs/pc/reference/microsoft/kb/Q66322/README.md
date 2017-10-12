@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q66322: D2030 Compiler Error in "P3" or Machine Hangs During Compile"
+title: "Q66322: D2030 Compiler Error in &quot;P3&quot; or Machine Hangs During Compile"
 permalink: /pubs/pc/reference/microsoft/kb/Q66322/
 ---
 

@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q68559: Bad Code Generated for "a+b == a" FP Comparison Expressions"
+title: "Q68559: Bad Code Generated for &quot;a+b == a&quot; FP Comparison Expressions"
 permalink: /pubs/pc/reference/microsoft/kb/Q68559/
 ---
 

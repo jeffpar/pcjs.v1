@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q44329: QuickC: Unresolved _main in dos\crt0.asm"
+title: "Q44329: QuickC: Unresolved _main in dos&#92;crt0.asm"
 permalink: /pubs/pc/reference/microsoft/kb/Q44329/
 ---
 

@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q57483: The Suffix "F" or "f" Causes a Syntax Error for Floats"
+title: "Q57483: The Suffix &quot;F&quot; or &quot;f&quot; Causes a Syntax Error for Floats"
 permalink: /pubs/pc/reference/microsoft/kb/Q57483/
 ---
 

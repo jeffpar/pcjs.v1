@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q44205: BIND: "Structure Error in .EXE File" Caused by Non-FAPI Call"
+title: "Q44205: BIND: &quot;Structure Error in .EXE File&quot; Caused by Non-FAPI Call"
 permalink: /pubs/pc/reference/microsoft/kb/Q44205/
 ---
 

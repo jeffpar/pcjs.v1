@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q41699: Filenames Starting with "-" Cause ILINK Errors"
+title: "Q41699: Filenames Starting with &quot;-&quot; Cause ILINK Errors"
 permalink: /pubs/pc/reference/microsoft/kb/Q41699/
 ---
 

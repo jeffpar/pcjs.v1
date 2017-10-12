@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q32263: "Microsoft Mouse Driver Not Found" Error Message"
+title: "Q32263: &quot;Microsoft Mouse Driver Not Found&quot; Error Message"
 permalink: /pubs/pc/reference/microsoft/kb/Q32263/
 ---
 

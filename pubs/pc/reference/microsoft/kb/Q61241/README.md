@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q61241: C 6.00 README: "Advanced Programming Techniques" Notes"
+title: "Q61241: C 6.00 README: &quot;Advanced Programming Techniques&quot; Notes"
 permalink: /pubs/pc/reference/microsoft/kb/Q61241/
 ---
 

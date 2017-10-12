@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q51834: "Internal Debugger Error: 0" When Watching Structure Members"
+title: "Q51834: &quot;Internal Debugger Error: 0&quot; When Watching Structure Members"
 permalink: /pubs/pc/reference/microsoft/kb/Q51834/
 ---
 

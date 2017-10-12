@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q36782: C2086 Error When Compiling with /Oi and #include &lt;mt\math.h&gt;"
+title: "Q36782: C2086 Error When Compiling with /Oi and #include &lt;mt&#92;math.h&gt;"
 permalink: /pubs/pc/reference/microsoft/kb/Q36782/
 ---
 

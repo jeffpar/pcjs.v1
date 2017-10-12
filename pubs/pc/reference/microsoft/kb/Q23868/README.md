@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q23868: How to Do "Peeks" and "Pokes" in a C Program"
+title: "Q23868: How to Do &quot;Peeks&quot; and &quot;Pokes&quot; in a C Program"
 permalink: /pubs/pc/reference/microsoft/kb/Q23868/
 ---
 

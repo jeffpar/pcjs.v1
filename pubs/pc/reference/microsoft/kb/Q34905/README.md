@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q34905: Array Reference Gives "C4046 '&amp;' on Function/Array, Ignored""
+title: "Q34905: Array Reference Gives &quot;C4046 '&amp;' on Function/Array, Ignored&quot;"
 permalink: /pubs/pc/reference/microsoft/kb/Q34905/
 ---
 

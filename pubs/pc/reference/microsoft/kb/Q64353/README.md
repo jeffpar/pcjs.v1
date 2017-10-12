@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q64353: With the "deflang" Switch PWB Prompts for Setting Program List"
+title: "Q64353: With the &quot;deflang&quot; Switch PWB Prompts for Setting Program List"
 permalink: /pubs/pc/reference/microsoft/kb/Q64353/
 ---
 

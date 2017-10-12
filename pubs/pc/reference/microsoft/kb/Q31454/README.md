@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q31454: README.DOC Refers to Undocumented "Link Options""
+title: "Q31454: README.DOC Refers to Undocumented &quot;Link Options&quot;"
 permalink: /pubs/pc/reference/microsoft/kb/Q31454/
 ---
 

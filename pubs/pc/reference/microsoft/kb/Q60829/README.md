@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q60829: /I Documented Incorrectly in "Advanced Programming Techniques""
+title: "Q60829: /I Documented Incorrectly in &quot;Advanced Programming Techniques&quot;"
 permalink: /pubs/pc/reference/microsoft/kb/Q60829/
 ---
 

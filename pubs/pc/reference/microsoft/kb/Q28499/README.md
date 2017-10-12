@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q28499: DOS 2.xx Does Not Recognize \Mouse1\Mouse"
+title: "Q28499: DOS 2.xx Does Not Recognize &#92;Mouse1&#92;Mouse"
 permalink: /pubs/pc/reference/microsoft/kb/Q28499/
 ---
 

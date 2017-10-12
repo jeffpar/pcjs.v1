@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q66778: Error Messages May Say "short" Instead of "enum""
+title: "Q66778: Error Messages May Say &quot;short&quot; Instead of &quot;enum&quot;"
 permalink: /pubs/pc/reference/microsoft/kb/Q66778/
 ---
 
