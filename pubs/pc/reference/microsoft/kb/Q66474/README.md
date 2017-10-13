@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q66474: Documentation Error: Extmake Syntax for %|partsF Incorrect"
+title: "Q66474: Documentation Error: Extmake Syntax for %&#124;partsF Incorrect"
 permalink: /pubs/pc/reference/microsoft/kb/Q66474/
 ---
 

@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q60254: Qccom Cannot Parse Combined /G* Options from Environment"
+title: "Q60254: Qccom Cannot Parse Combined /G&#42; Options from Environment"
 permalink: /pubs/pc/reference/microsoft/kb/Q60254/
 ---
 

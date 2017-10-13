@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q34921: The Proper Type for Pointer To jmp_buf Is void *"
+title: "Q34921: The Proper Type for Pointer To jmp_buf Is void &#42;"
 permalink: /pubs/pc/reference/microsoft/kb/Q34921/
 ---
 

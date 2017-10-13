@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q50336: Passing a Stream File Pointer (FILE *) Between DLLs"
+title: "Q50336: Passing a Stream File Pointer (FILE &#42;) Between DLLs"
 permalink: /pubs/pc/reference/microsoft/kb/Q50336/
 ---
 
