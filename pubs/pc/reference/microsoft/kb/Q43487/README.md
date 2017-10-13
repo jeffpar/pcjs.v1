@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q43487: QuickC: Cannot Watch Variable with Dollar Sign ($) in Debugger"
+title: "Q43487: QuickC: Cannot Watch Variable with Dollar Sign (&#36;) in Debugger"
 permalink: /pubs/pc/reference/microsoft/kb/Q43487/
 ---
 

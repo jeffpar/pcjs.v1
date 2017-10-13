@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q41656: QuickC 2.00 README.DOC: The $(MAKEFLAGS) Macro"
+title: "Q41656: QuickC 2.00 README.DOC: The &#36;(MAKEFLAGS) Macro"
 permalink: /pubs/pc/reference/microsoft/kb/Q41656/
 ---
 

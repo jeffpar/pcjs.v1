@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q68381: The D Modifier to $? Is Broken in NMAKE Version 1.11"
+title: "Q68381: The D Modifier to &#36;? Is Broken in NMAKE Version 1.11"
 permalink: /pubs/pc/reference/microsoft/kb/Q68381/
 ---
 

@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q43634: How to Get HELPMAKE to Understand $INCLUDE"
+title: "Q43634: How to Get HELPMAKE to Understand &#36;INCLUDE"
 permalink: /pubs/pc/reference/microsoft/kb/Q43634/
 ---
 
