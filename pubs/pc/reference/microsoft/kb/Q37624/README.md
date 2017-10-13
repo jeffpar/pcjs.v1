@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q37624: Using a Logical AND Operation &amp;&amp; and OR Operation ||"
+title: "Q37624: Using a Logical AND Operation &amp;&amp; and OR Operation &#124;&#124;"
 permalink: /pubs/pc/reference/microsoft/kb/Q37624/
 ---
 

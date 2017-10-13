@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q40196: &quot;*&#92;&quot; Viewed as Continuation Character in Comment"
+title: "Q40196: &quot;&#42;&#92;&quot; Viewed as Continuation Character in Comment"
 permalink: /pubs/pc/reference/microsoft/kb/Q40196/
 ---
 
