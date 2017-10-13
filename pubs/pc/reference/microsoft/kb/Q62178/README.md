@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q62178: L2025: B$VWINI, B$GRPRST, Symbols Multiply Defined"
+title: "Q62178: L2025: B&#36;VWINI, B&#36;GRPRST, Symbols Multiply Defined"
 permalink: /pubs/pc/reference/microsoft/kb/Q62178/
 ---
 

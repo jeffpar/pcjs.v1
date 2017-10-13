@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q59409: Trouble with Filenames Containing a Dollar Sign ($)"
+title: "Q59409: Trouble with Filenames Containing a Dollar Sign (&#36;)"
 permalink: /pubs/pc/reference/microsoft/kb/Q59409/
 ---
 

@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q64566: &quot;Cannot Open File current.$&quot; May Mean Incorrect INIT Variable"
+title: "Q64566: &quot;Cannot Open File current.&#36;&quot; May Mean Incorrect INIT Variable"
 permalink: /pubs/pc/reference/microsoft/kb/Q64566/
 ---
 

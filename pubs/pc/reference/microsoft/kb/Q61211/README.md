@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q61211: C 6.00 README: PWB Run Command Line Cannot Contain $ or ^"
+title: "Q61211: C 6.00 README: PWB Run Command Line Cannot Contain &#36; or ^"
 permalink: /pubs/pc/reference/microsoft/kb/Q61211/
 ---
 

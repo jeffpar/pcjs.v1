@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q68388: $$(@F) Macro Doesn't Work with NMAKE Version 1.01"
+title: "Q68388: &#36;&#36;(@F) Macro Doesn't Work with NMAKE Version 1.01"
 permalink: /pubs/pc/reference/microsoft/kb/Q68388/
 ---
 

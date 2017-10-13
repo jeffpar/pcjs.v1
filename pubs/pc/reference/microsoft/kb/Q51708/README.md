@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q51708: /Ot Generates Incorrect Code on JMP SHORT $+2"
+title: "Q51708: /Ot Generates Incorrect Code on JMP SHORT &#36;+2"
 permalink: /pubs/pc/reference/microsoft/kb/Q51708/
 ---
 

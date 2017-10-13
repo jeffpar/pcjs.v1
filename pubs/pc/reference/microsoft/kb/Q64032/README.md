@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Q64032: NMAKE Predefined Macro $(@D) Has Same Value As $@"
+title: "Q64032: NMAKE Predefined Macro &#36;(@D) Has Same Value As &#36;@"
 permalink: /pubs/pc/reference/microsoft/kb/Q64032/
 ---
 
