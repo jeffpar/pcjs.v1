@@ -1,7 +1,7 @@
 ---
 layout: page
 title: "MS-DOS Version 3.3 Programmer's Reference"
-permalink: /pubs/pc/reference/microsoft/mspl13/msdos/dosref33/
+permalink: /pubs/pc/reference/microsoft/mspl103/msdos/dosref33/
 ---
 
 MS-DOS Version 3.3 Programmer's Reference

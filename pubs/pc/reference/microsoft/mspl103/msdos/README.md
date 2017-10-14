@@ -1,7 +1,7 @@
 ---
 layout: page
 title: MS-DOS References
-permalink: /pubs/pc/reference/microsoft/mspl13/msdos/
+permalink: /pubs/pc/reference/microsoft/mspl103/msdos/
 ---
 
 MS-DOS References
