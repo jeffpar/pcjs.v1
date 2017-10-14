@@ -1,7 +1,7 @@
 ---
 layout: page
 title: "The New Peter Norton Programmer's Guide to the IBM PC and PS/2"
-permalink: /pubs/pc/reference/microsoft/mspl103/msdos/norton/
+permalink: /pubs/pc/reference/microsoft/mspl13/msdos/norton/
 ---
 
 The New Peter Norton Programmer's Guide to the IBM PC and PS/2

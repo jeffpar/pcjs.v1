@@ -1,13 +1,13 @@
 ---
 layout: page
-title: Microsoft Programmer's Library 1.03
-permalink: /pubs/pc/reference/microsoft/mspl103/
+title: Microsoft Programmer's Library 1.3
+permalink: /pubs/pc/reference/microsoft/mspl13/
 ---
 
-Microsoft Programmer's Library 1.03
------------------------------------
+Microsoft Programmer's Library 1.3
+----------------------------------
 
-The following reference collections are part of the Microsoft Programmer's Library 1.03 CD-ROM: 
+The following reference collections are part of the Microsoft Programmer's Library 1.3 CD-ROM: 
 
 - BASIC References
 - C References

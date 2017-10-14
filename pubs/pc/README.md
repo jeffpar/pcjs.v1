@@ -9,12 +9,12 @@ PC Publication Archive
 
 We have an assortment of PC-related resources:
 
-* [CPU Documents](/pubs/pc/reference/intel/)
-* [Datasheets](/pubs/pc/datasheets/)
-* [Magazines](/pubs/pc/magazines/)
-* [Programming Guides](/pubs/pc/programming/)
-* [Reference Manuals](/pubs/pc/reference/) (eg, [Microsoft PC References](/pubs/pc/reference/microsoft/))
-* [Software User and Development Guides](/pubs/pc/software/) (eg, [DOS](/pubs/pc/software/dos/), [OS/2](/pubs/pc/software/os2/), [Windows](/pubs/pc/software/windows/))
+* [CPU Documents](reference/intel/)
+* [Datasheets](datasheets/)
+* [Magazines](magazines/)
+* [Programming Guides](programming/)
+* [Reference Manuals](reference/) (eg, [IBM](reference/ibm/), [Intel](reference/intel/), [Microsoft](reference/microsoft/))
+* [Software User and Development Guides](software/) (eg, [DOS](software/dos/), [OS/2](software/os2/), [Windows](software/windows/))
 
 [<img src="https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/datasheets/thumbs/8088-CPU.jpg" width="200" height="260" alt= "8088 CPU"/>](datasheets/)
 [<img src="https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/magazines/byte/BYTE-1975-11/thumbs/BYTE-1975-11 1.jpeg" width="200" height="260" alt= "Byte Magazine"/>](magazines/byte/)

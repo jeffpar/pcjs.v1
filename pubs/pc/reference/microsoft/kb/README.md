@@ -4,7 +4,7 @@ title: Early Microsoft KB Articles
 permalink: /pubs/pc/reference/microsoft/kb/
 ---
 
-List of Microsoft KB articles from the [Microsoft Programmer's Library 1.03](/pubs/pc/reference/microsoft/mspl103/)
+List of Microsoft KB articles from the [Microsoft Programmer's Library 1.3](/pubs/pc/reference/microsoft/mspl13/)
 CD-ROM ("C References", "MS KnowledgeBase - C"):
 
 - [Q10826: Limitations on Writing Device Drivers in C](Q10826/)

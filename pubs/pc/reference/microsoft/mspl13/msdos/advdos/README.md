@@ -1,7 +1,7 @@
 ---
 layout: page
 title: "Advanced MS-DOS Programming"
-permalink: /pubs/pc/reference/microsoft/mspl103/msdos/advdos/
+permalink: /pubs/pc/reference/microsoft/mspl13/msdos/advdos/
 ---
 
 Advanced MS-DOS Programming

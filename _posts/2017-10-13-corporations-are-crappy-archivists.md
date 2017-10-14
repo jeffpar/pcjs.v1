@@ -88,12 +88,12 @@ theorized that the reason Q46369 had disappeared was because it was flagged (inc
 and Microsoft may have decided to expunge everything OS/2-related at some point.
 
 It wasn't until I tried some old Microsoft Programmer's Library CD-ROMs, circa 1991, that I finally had success.
-Using the "[Microsoft Programmer's Library 1.03](/pubs/pc/reference/microsoft/mspl103/)" CD-ROM and searching within
+Using the "[Microsoft Programmer's Library 1.3](/pubs/pc/reference/microsoft/mspl13/)" CD-ROM and searching within
 the "MS KnowledgeBase - C" section of the "C References" library did the trick.
 
-![Screenshot of Microsoft Programmer's Library 1.03: Q12230](/blog/images/mspl103-q12230.jpg)
+![Screenshot of Microsoft Programmer's Library 1.3: Q12230](/blog/images/mspl13-q12230.jpg)
 
-![Screenshot of Microsoft Programmer's Library 1.03: Q46369](/blog/images/mspl103-q46369.jpg)
+![Screenshot of Microsoft Programmer's Library 1.3: Q46369](/blog/images/mspl13-q46369.jpg)
 
 The organization of KB articles on that CD-ROM is somewhat haphazard.  For example, many of the articles filed
 under "MS KnowledgeBase - C" (including the two I was looking for) have nothing to do with C.  And other libraries
