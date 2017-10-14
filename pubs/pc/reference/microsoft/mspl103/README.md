@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Microsoft Programmer's Library 1.03
-permalink: /pubs/pc/reference/microsoft/mspl13/
+permalink: /pubs/pc/reference/microsoft/mspl103/
 ---
 
 Microsoft Programmer's Library 1.03
