@@ -1,7 +1,7 @@
 ---
 layout: page
 title: "The MS-DOS Encyclopedia"
-permalink: /pubs/pc/reference/microsoft/mspl103/msdos/encyc/
+permalink: /pubs/pc/reference/microsoft/mspl13/msdos/encyc/
 ---
 
 The MS-DOS Encyclopedia

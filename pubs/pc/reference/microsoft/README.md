@@ -13,7 +13,7 @@ Microsoft PC References
 
 ### Microsoft Programmer's Library
 
-- [Microsoft Programmer's Library (v1.03)](mspl103/)
+- [Microsoft Programmer's Library (v1.3)](mspl13/)
 
 ### Microsoft Software Specifications
 

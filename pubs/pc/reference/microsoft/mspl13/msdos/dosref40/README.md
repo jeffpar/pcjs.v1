@@ -1,7 +1,7 @@
 ---
 layout: page
 title: "MS-DOS Version 4.0 Programmer's Reference"
-permalink: /pubs/pc/reference/microsoft/mspl103/msdos/dosref40/
+permalink: /pubs/pc/reference/microsoft/mspl13/msdos/dosref40/
 ---
 
 MS-DOS Version 4.0 Programmer's Reference
