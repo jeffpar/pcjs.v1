@@ -22,6 +22,9 @@ The following reference collections are part of the Microsoft Programmer's Libra
 - Pascal References
 - Windows References
 
+We have also archived all the [KB Articles](/pubs/pc/reference/microsoft/kb/) from the "MS KnowledgeBase - C" section
+of the "C References" collection of this CD-ROM.
+
 {% comment %}
 
 Notes

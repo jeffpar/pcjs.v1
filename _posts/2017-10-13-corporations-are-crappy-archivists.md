@@ -9,12 +9,8 @@ In my all-too-brief but soon-to-be-revisited blog post "[Of Mice And When](/blog
 there seemed to be a lot of confusion on the Internet regarding the Microsoft Bus Mouse and the Microsoft InPort Mouse.
 I even found some [software](https://github.com/fr1tz/aimsgui/blob/master/aid/os/pc/devmouse.c) that claimed to emulate
 a "microsoft bus mouse" but was actually emulating an InPort mouse.
-{{ comment }} There's even some confusion about whether the InPort mouse is the same as a PS/2 mouse, since both mice
-use vaguely similar ("round") connectors.  Someone a long time ago should have decided that since keyboard connectors
-were round, mouse connectors should be square.  Then we wouldn't have people trying to put square pegs into round holes.
-{{ endcomment }}
 
-Thankfully, one decidedly [unconfused person](http://www.os2museum.com) sent me a link to his
+Thankfully, one decidedly unconfused person, [Michal Necasek](http://www.os2museum.com), sent me a link to his
 [Bus Mouse](https://www.virtualbox.org/svn/vbox/trunk/src/VBox/ExtPacks/BusMouseSample/BusMouse.cpp) emulation,
 which includes the following prologue that gets it exactly right:
 
@@ -85,6 +81,12 @@ articles, just not the ones I was interested in.
 And Visual Studio 2003's MSDN Library was no better.
 
 ![Screenshot of Microsoft Visual Studio 2003 MSDN Library](/blog/images/winxp-vs2003-msdn.jpg)
+
+I wasn't alone in my frustration either.  Even Michal, who had dug up the KB articles originally, couldn't find
+them again.  He did eventually find Q12230 in the MSDN Library, January 2000 (DVD edition), but only after much
+trial-and-error.  He had expected older MSDN libraries to contain the article as well, but they didn't.  He also
+theorized that the reason Q46369 had disappeared was because it was flagged (incorrectly) as an "OS/2" article,
+and Microsoft may have decided to expunge everything OS/2-related at some point.
 
 It wasn't until I tried some old Microsoft Programmer's Library CD-ROMs, circa 1991, that I finally had success.
 Using the "[Microsoft Programmer's Library 1.03](/pubs/pc/reference/microsoft/mspl13/)" CD-ROM and searching within

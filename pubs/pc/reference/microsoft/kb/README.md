@@ -4,7 +4,8 @@ title: Early Microsoft KB Articles
 permalink: /pubs/pc/reference/microsoft/kb/
 ---
 
-List of early Microsoft KB articles:
+List of Microsoft KB articles from the [Microsoft Programmer's Library 1.03](/pubs/pc/reference/microsoft/mspl13/)
+CD-ROM ("C References", "MS KnowledgeBase - C"):
 
 - [Q10826: Limitations on Writing Device Drivers in C](Q10826/)
 - [Q11085: Text Mode Problem with Mouse Version 3.00](Q11085/)
