@@ -80,7 +80,7 @@ I was wrong.
 For example, Microsoft Developer Studio, circa 1996, was a bust.  It definitely contained *some* KnowledgeBase
 articles, just not the ones I was interested in.
 
-![Screenshot of Microsoft Developer Studio circa 1996](/blog/images/winxp-vc42-msdn.jpg)
+![Screenshot of Microsoft Developer Studio circa 1996](/blog/images/win95-vc42-msdn.jpg)
 
 And Visual Studio 2003's MSDN Library was no better.
 
