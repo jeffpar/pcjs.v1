@@ -6,10 +6,10 @@ permalink: /blog/2017/10/13/
 ---
 
 In my all-too-brief but soon-to-be-revisited blog post "[Of Mice And When](/blog/2017/08/28/)", I mentioned that
-there seemed to be a lot of confusion on the Internet regarding the Microsoft Bus Mouse and the Microsoft Inport Mouse.
+there seemed to be a lot of confusion on the Internet regarding the Microsoft Bus Mouse and the Microsoft InPort Mouse.
 I even found some [software](https://github.com/fr1tz/aimsgui/blob/master/aid/os/pc/devmouse.c) that claimed to emulate
-a "microsoft bus mouse" but was actually emulating an Inport mouse.
-{{ comment }} There's even some confusion about whether the Inport mouse is the same as a PS/2 mouse, since both mice
+a "microsoft bus mouse" but was actually emulating an InPort mouse.
+{{ comment }} There's even some confusion about whether the InPort mouse is the same as a PS/2 mouse, since both mice
 use vaguely similar ("round") connectors.  Someone a long time ago should have decided that since keyboard connectors
 were round, mouse connectors should be square.  Then we wouldn't have people trying to put square pegs into round holes.
 {{ endcomment }}
