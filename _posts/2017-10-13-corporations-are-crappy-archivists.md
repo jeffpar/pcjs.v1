@@ -53,20 +53,19 @@ specifically:
 - Q12230
 - Q46369
 
-I thought this would be a trivial task ("OK Google").  Even the author of those comments seemed confident
-that merely citing the KB articles by their unique "Q" identifier was more than sufficient.  Surely anyone
-who cared to read those articles could simply pull up their nearest KnowledgeBase database and immediately
-access them.
+I thought this would be a trivial task ("OK Google").  Even Michal seemed confident at the time that merely
+citing the KB articles by their unique "Q" identifier was more than sufficient.  Surely anyone who cared to read
+those articles could simply pull up their nearest KnowledgeBase database and immediately access them.
 
 I was wrong.
 
 Long story short, Google was a bust.  But worse than that, Microsoft.com was a bust ("No results found for Q12230").
-Which is sad, given that Microsoft wrote all these articles.  Microsoft doesn't even appear to remember that they were
-called "KnowledgeBase" articles, *not* "[Knowledge Base](https://technet.microsoft.com/en-us/library/cc938660.aspx)",
-and they certainly weren't specific to Windows 2000.  Even so, clicking on [http://windows.microsoft.com/windows2000/reskit/webresources](http://windows.microsoft.com/windows2000/reskit/webresources)
-just took me to the "[Windows IT Pro Center](https://www.microsoft.com/en-us/itpro/windows)", which looked more like
-shopping page than a resource page.  If there was a link to KnowledgeBase articles anywhere on that page, it was well
-hidden.
+Which is sad, given that Microsoft wrote all these articles.  They also don't seem to remember that they were
+called KnowledgeBase articles, *not* "[Knowledge Base](https://technet.microsoft.com/en-us/library/cc938660.aspx)".
+And digging into their "Knowledge Base" [Web Resources](http://windows.microsoft.com/windows2000/reskit/webresources)
+just took me to a [Windows IT Pro Center](https://www.microsoft.com/en-us/itpro/windows), which looked more like a
+shopping page than a resource page.  If there were links to KnowledgeBase articles anywhere on that page, they
+were well-hidden.
 
 But, I figured that's OK, because I've got enough old MSDN Library CDs to create a tower that would rival any
 Jenga structure, and surely these articles would be on one of those.
@@ -90,7 +89,7 @@ and Microsoft may have decided to expunge everything OS/2-related at some point.
 
 It wasn't until I tried some old Microsoft Programmer's Library CD-ROMs, circa 1991, that I finally had success.
 Using the "[Microsoft Programmer's Library 1.03](/pubs/pc/reference/microsoft/mspl13/)" CD-ROM and searching within
-the "MS KnowledgeBase - C" section of the "C References Library" did the trick.
+the "MS KnowledgeBase - C" section of the "C References" library did the trick.
 
 ![Screenshot of Microsoft Programmer's Library 1.03: Q12230](/blog/images/mspl103-q12230.jpg)
 
@@ -113,9 +112,9 @@ public library.  It also seems rather presumptuous for Microsoft to determine, b
 what the "shelf life" of this information should be.  It's certainly their right, but it's not a right that should
 be encouraged.
 
-In an effort to unlock this data from an ancient CD-ROM that few people still have or even know what it contains,
-I've taken all the KB articles from the "MS KnowledgeBase - C" section and created a small archive within the PCjs
-Project.  We can now finally provide links to both of the KB articles referenced above:
+In an effort to unlock this data from an ancient CD-ROM that few people still have, let alone know what it contains,
+I've taken all the articles from the "MS KnowledgeBase - C" section and created a small [KB Article](/pubs/pc/reference/microsoft/kb/)
+archive within the PCjs Project.  We can now finally provide links to both of the KB articles referenced above:
 
 - [Q12230: IRQ Settings and Mouse Installation](/pubs/pc/reference/microsoft/kb/Q12230/)
 - [Q46369: InPort/Bus Mouse Comparison and Overview](/pubs/pc/reference/microsoft/kb/Q46369/)
