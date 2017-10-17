@@ -3718,8 +3718,6 @@ MS QB 4.5 Programming in BASIC
 	  $$$$$
 	  %%%%%
 	  &&&&&
-	  ""'
-	  {{{{{
 	  .
 	  .
 	  .
