@@ -9,7 +9,6 @@ BASIC References
 
 The following BASIC References are available on the [Microsoft Programmer's Library 1.3](../) CD-ROM:
 
-- [BASIC Sample Code](bassc/)
 - [Learning to Use MS QuickBASIC 4.5](qblearn/)
 - [MS BASIC 7.1 Getting Started](b7start/)
 - [MS BASIC 7.1 Language Reference](b7lang/)
