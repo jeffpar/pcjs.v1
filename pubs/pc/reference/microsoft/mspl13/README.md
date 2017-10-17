@@ -7,7 +7,8 @@ permalink: /pubs/pc/reference/microsoft/mspl13/
 Microsoft Programmer's Library 1.3
 ----------------------------------
 
-The following reference collections are part of the Microsoft Programmer's Library 1.3 CD-ROM: 
+The following reference collections, including a large number of [KB Articles](/pubs/pc/reference/microsoft/kb/),
+are part of the Microsoft Programmer's Library 1.3 CD-ROM. 
 
 - [BASIC References](basic/)
 	- [BASIC Sample Code](basic/bassc/)
@@ -48,8 +49,6 @@ The following reference collections are part of the Microsoft Programmer's Libra
 - OS/2 References
 - Pascal References
 - Windows References
-
-We have also archived many of the [KB Articles](/pubs/pc/reference/microsoft/kb/) from this CD-ROM.
 
 {% comment %}
 

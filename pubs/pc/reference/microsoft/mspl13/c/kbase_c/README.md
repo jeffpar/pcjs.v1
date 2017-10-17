@@ -1,7 +1,7 @@
 ---
 layout: page
 title: "C References: MS KnowledgeBase - C"
-permalink: /pubs/pc/reference/microsoft/kb/c/kbase_c/
+permalink: /pubs/pc/reference/microsoft/mspl13/c/kbase_c/
 ---
 
 List of Microsoft KB articles from the [Microsoft Programmer's Library 1.3](/pubs/pc/reference/microsoft/mspl13/)

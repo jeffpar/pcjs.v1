@@ -1,7 +1,7 @@
 ---
 layout: page
 title: "BASIC References: MS KnowledgeBase - BASIC"
-permalink: /pubs/pc/reference/microsoft/kb/basic/kbase_b/
+permalink: /pubs/pc/reference/microsoft/mspl13/basic/kbase_b/
 ---
 
 List of Microsoft KB articles from the [Microsoft Programmer's Library 1.3](/pubs/pc/reference/microsoft/mspl13/)
