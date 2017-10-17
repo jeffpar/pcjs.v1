@@ -4,8 +4,9 @@ title: "Q62305: _fastcall Register Argument Has Incorrect Value"
 permalink: /pubs/pc/reference/microsoft/kb/Q62305/
 ---
 
+## Q62305: _fastcall Register Argument Has Incorrect Value
+
 	Article: Q62305
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist6.00 fastcall

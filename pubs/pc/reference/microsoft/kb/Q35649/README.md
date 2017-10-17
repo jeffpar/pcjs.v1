@@ -4,8 +4,9 @@ title: "Q35649: Width Function Not implemented"
 permalink: /pubs/pc/reference/microsoft/kb/Q35649/
 ---
 
+## Q35649: Width Function Not implemented
+
 	Article: Q35649
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

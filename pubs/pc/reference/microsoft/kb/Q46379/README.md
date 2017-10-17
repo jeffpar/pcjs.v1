@@ -4,8 +4,9 @@ title: "Q46379: C 5.10 Internal Compiler Error C1001: pgoMD.c : 1.134 Line 146"
 permalink: /pubs/pc/reference/microsoft/kb/Q46379/
 ---
 
+## Q46379: C 5.10 Internal Compiler Error C1001: pgoMD.c : 1.134 Line 146
+
 	Article: Q46379
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

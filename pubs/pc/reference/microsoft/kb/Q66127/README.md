@@ -4,8 +4,9 @@ title: "Q66127: Using _psp for Pointer Checking"
 permalink: /pubs/pc/reference/microsoft/kb/Q66127/
 ---
 
+## Q66127: Using _psp for Pointer Checking
+
 	Article: Q66127
-	Product: Microsoft C
 	Version(s): 6.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QUICKC

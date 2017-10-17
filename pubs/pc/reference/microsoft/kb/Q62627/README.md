@@ -4,8 +4,9 @@ title: "Q62627: M6101 on PG Scatter Charts with Autoscaling Off"
 permalink: /pubs/pc/reference/microsoft/kb/Q62627/
 ---
 
+## Q62627: M6101 on PG Scatter Charts with Autoscaling Off
+
 	Article: Q62627
-	Product: Microsoft C
 	Version(s): 6.00 6.00a
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickc buglist6.00 buglist6.00a

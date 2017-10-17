@@ -4,8 +4,9 @@ title: "Q32225: Using the SHORTNAMES Switch"
 permalink: /pubs/pc/reference/microsoft/kb/Q32225/
 ---
 
+## Q32225: Using the SHORTNAMES Switch
+
 	Article: Q32225
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | tar78150

@@ -4,8 +4,9 @@ title: "Q41672: QuickC 2.00 README.DOC: Error Message U1051"
 permalink: /pubs/pc/reference/microsoft/kb/Q41672/
 ---
 
+## Q41672: QuickC 2.00 README.DOC: Error Message U1051
+
 	Article: Q41672
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q39812: Replacing Real Mode Family API Functions in Bound Applications"
 permalink: /pubs/pc/reference/microsoft/kb/Q39812/
 ---
 
+## Q39812: Replacing Real Mode Family API Functions in Bound Applications
+
 	Article: Q39812
-	Product: Microsoft C
 	Version(s): 1.00 1.10 1.30 | 1.00 1.10 1.30
 	Operating System: MS-DOS         | OS/2
 	Flags: ENDUSER | s_bind

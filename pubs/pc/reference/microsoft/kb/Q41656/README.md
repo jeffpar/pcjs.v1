@@ -4,8 +4,9 @@ title: "Q41656: QuickC 2.00 README.DOC: The &#36;(MAKEFLAGS) Macro"
 permalink: /pubs/pc/reference/microsoft/kb/Q41656/
 ---
 
+## Q41656: QuickC 2.00 README.DOC: The &#36;(MAKEFLAGS) Macro
+
 	Article: Q41656
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q34906: Run-Time Library Reference _getfillmask, _setfillmask docerrs"
 permalink: /pubs/pc/reference/microsoft/kb/Q34906/
 ---
 
+## Q34906: Run-Time Library Reference _getfillmask, _setfillmask docerrs
+
 	Article: Q34906
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | 5.10
 	Flags: ENDUSER | docerr

@@ -4,8 +4,9 @@ title: "Q38714: Shared and Instance Segments in a DLL"
 permalink: /pubs/pc/reference/microsoft/kb/Q38714/
 ---
 
+## Q38714: Shared and Instance Segments in a DLL
+
 	Article: Q38714
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: OS/2
 	Flags: ENDUSER | SR# G881019-4906 -ND SINGLE S_LINK

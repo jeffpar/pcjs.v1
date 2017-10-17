@@ -4,8 +4,9 @@ title: "Q48771: LIB.LIB: Cannot Find Library"
 permalink: /pubs/pc/reference/microsoft/kb/Q48771/
 ---
 
+## Q48771: LIB.LIB: Cannot Find Library
+
 	Article: Q48771
-	Product: Microsoft C
 	Version(s): 2.00 2.01
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QuickASM

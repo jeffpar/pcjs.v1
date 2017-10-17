@@ -4,8 +4,9 @@ title: "Q61976: -Gi with Certain Optimizations Creates No .MDT File"
 permalink: /pubs/pc/reference/microsoft/kb/Q61976/
 ---
 
+## Q61976: -Gi with Certain Optimizations Creates No .MDT File
+
 	Article: Q61976
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

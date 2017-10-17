@@ -4,8 +4,9 @@ title: "Q38201: Corrupted Library Causes Error L1102"
 permalink: /pubs/pc/reference/microsoft/kb/Q38201/
 ---
 
+## Q38201: Corrupted Library Causes Error L1102
+
 	Article: Q38201
-	Product: Microsoft C
 	Version(s): 3.61 3.64 3.65 | 5.01.20 5.01.21
 	Operating System: MS-DOS         | OS/2
 	Flags: ENDUSER |

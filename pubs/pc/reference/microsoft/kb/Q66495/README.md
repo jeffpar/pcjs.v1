@@ -4,8 +4,9 @@ title: "Q66495: Using /F Switch with No Argument May Disable Debug Switch"
 permalink: /pubs/pc/reference/microsoft/kb/Q66495/
 ---
 
+## Q66495: Using /F Switch with No Argument May Disable Debug Switch
+
 	Article: Q66495
-	Product: Microsoft C
 	Version(s): 2.50
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist2.50 s_c

@@ -4,8 +4,9 @@ title: "Q43993: How to Flush the Keyboard Typeahead Buffer"
 permalink: /pubs/pc/reference/microsoft/kb/Q43993/
 ---
 
+## Q43993: How to Flush the Keyboard Typeahead Buffer
+
 	Article: Q43993
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q43554: _outtext() Expects an Unsigned Character Pointer as Parameter"
 permalink: /pubs/pc/reference/microsoft/kb/Q43554/
 ---
 
+## Q43554: _outtext() Expects an Unsigned Character Pointer as Parameter
+
 	Article: Q43554
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr outtext

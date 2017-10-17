@@ -4,8 +4,9 @@ title: "Q42780: CodeView: Debugging Presentation Manager Printer Drivers"
 permalink: /pubs/pc/reference/microsoft/kb/Q42780/
 ---
 
+## Q42780: CodeView: Debugging Presentation Manager Printer Drivers
+
 	Article: Q42780
-	Product: Microsoft C
 	Version(s): 2.20 2.30
 	Operating System: OS/2
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q40103: QuickC 2.00's In-Line Assembler"
 permalink: /pubs/pc/reference/microsoft/kb/Q40103/
 ---
 
+## Q40103: QuickC 2.00's In-Line Assembler
+
 	Article: Q40103
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: enduser |

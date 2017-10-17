@@ -4,8 +4,9 @@ title: "Q62072: C1001: Internal Compiler Error: '@(#)regMD.c:1.100', Line 4634"
 permalink: /pubs/pc/reference/microsoft/kb/Q62072/
 ---
 
+## Q62072: C1001: Internal Compiler Error: '@(#)regMD.c:1.100', Line 4634
+
 	Article: Q62072
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist6.00

@@ -4,8 +4,9 @@ title: "Q32682: AT&amp;T 6300 Plus and Bus Mouse"
 permalink: /pubs/pc/reference/microsoft/kb/Q32682/
 ---
 
+## Q32682: AT&amp;T 6300 Plus and Bus Mouse
+
 	Article: Q32682
-	Product: Microsoft C
 	Version(s): 5.00 5.30 6.00 6.10 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

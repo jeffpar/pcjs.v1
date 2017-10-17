@@ -4,8 +4,9 @@ title: "Q65647: Warning C4035 When Compiling with /Zg and Either /W3 or /W4"
 permalink: /pubs/pc/reference/microsoft/kb/Q65647/
 ---
 
+## Q65647: Warning C4035 When Compiling with /Zg and Either /W3 or /W4
+
 	Article: Q65647
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist6.00

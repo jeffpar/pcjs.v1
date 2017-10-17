@@ -4,8 +4,9 @@ title: "Q64565: #if Uses Only Lower 2 Bytes of Expression for Test"
 permalink: /pubs/pc/reference/microsoft/kb/Q64565/
 ---
 
+## Q64565: #if Uses Only Lower 2 Bytes of Expression for Test
+
 	Article: Q64565
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist6.00

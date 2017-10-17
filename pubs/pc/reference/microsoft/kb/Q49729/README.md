@@ -4,8 +4,9 @@ title: "Q49729: Clock: C Function -- Documentation Supplement"
 permalink: /pubs/pc/reference/microsoft/kb/Q49729/
 ---
 
+## Q49729: Clock: C Function -- Documentation Supplement
+
 	Article: Q49729
-	Product: Microsoft C
 	Version(s): 5.10   |  5.10
 	Operating System: MS-DOS |  OS/2
 	Flags: ENDUSER | S_QuickC S_QuickAsm docsup

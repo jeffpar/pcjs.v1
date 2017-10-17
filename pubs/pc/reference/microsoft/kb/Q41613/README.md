@@ -4,8 +4,9 @@ title: "Q41613: Error L2003 When Linking with Wrong Libraries"
 permalink: /pubs/pc/reference/microsoft/kb/Q41613/
 ---
 
+## Q41613: Error L2003 When Linking with Wrong Libraries
+
 	Article: Q41613
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

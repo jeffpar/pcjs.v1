@@ -4,8 +4,9 @@ title: "Q40110: Copying Text from Display Window to Dialog Window"
 permalink: /pubs/pc/reference/microsoft/kb/Q40110/
 ---
 
+## Q40110: Copying Text from Display Window to Dialog Window
+
 	Article: Q40110
-	Product: Microsoft C
 	Version(s): 2.20   | 2.20
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

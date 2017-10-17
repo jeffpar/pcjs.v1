@@ -4,8 +4,9 @@ title: "Q39806: Quote Function and Typing in Graphic Characters in M"
 permalink: /pubs/pc/reference/microsoft/kb/Q39806/
 ---
 
+## Q39806: Quote Function and Typing in Graphic Characters in M
+
 	Article: Q39806
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

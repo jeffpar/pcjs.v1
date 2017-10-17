@@ -4,8 +4,9 @@ title: "Q38857: &quot;Invalid Object Module&quot; with Indirection Problem"
 permalink: /pubs/pc/reference/microsoft/kb/Q38857/
 ---
 
+## Q38857: &quot;Invalid Object Module&quot; with Indirection Problem
+
 	Article: Q38857
-	Product: Microsoft C
 	Version(s): 1.00 1.01
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist1.00 buglist1.01

@@ -4,8 +4,9 @@ title: "Q31149: Mouse-Cursor State and EGA Memory"
 permalink: /pubs/pc/reference/microsoft/kb/Q31149/
 ---
 
+## Q31149: Mouse-Cursor State and EGA Memory
+
 	Article: Q31149
-	Product: Microsoft C
 	Version(s): 6.x
 	Operating System: MS-DOS
 	Flags: ENDUSER |

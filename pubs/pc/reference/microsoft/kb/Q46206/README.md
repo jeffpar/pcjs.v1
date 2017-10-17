@@ -4,8 +4,9 @@ title: "Q46206: Internal Compiler Error: ctypes.c Line 474"
 permalink: /pubs/pc/reference/microsoft/kb/Q46206/
 ---
 
+## Q46206: Internal Compiler Error: ctypes.c Line 474
+
 	Article: Q46206
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

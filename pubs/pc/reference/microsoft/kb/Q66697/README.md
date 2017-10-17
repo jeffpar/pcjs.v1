@@ -4,8 +4,9 @@ title: "Q66697: Compiler Incorrectly Generates 80186+ Code"
 permalink: /pubs/pc/reference/microsoft/kb/Q66697/
 ---
 
+## Q66697: Compiler Incorrectly Generates 80186+ Code
+
 	Article: Q66697
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | buglist6.00 buglist6.00a

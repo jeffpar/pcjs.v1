@@ -4,8 +4,9 @@ title: "Q61209: C 6.00 README: PWB Starts on Boot Monitor Under OS/2 1.10"
 permalink: /pubs/pc/reference/microsoft/kb/Q61209/
 ---
 
+## Q61209: C 6.00 README: PWB Starts on Boot Monitor Under OS/2 1.10
+
 	Article: Q61209
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

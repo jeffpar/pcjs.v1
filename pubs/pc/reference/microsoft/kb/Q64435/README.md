@@ -4,8 +4,9 @@ title: "Q64435: PWB Hangs When Run with Some Communication Programs Under OS/2"
 permalink: /pubs/pc/reference/microsoft/kb/Q64435/
 ---
 
+## Q64435: PWB Hangs When Run with Some Communication Programs Under OS/2
+
 	Article: Q64435
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: OS/2
 	Flags: ENDUSER |

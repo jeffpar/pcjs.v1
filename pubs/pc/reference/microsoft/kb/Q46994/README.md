@@ -4,8 +4,9 @@ title: "Q46994: Internal Compiler Error: grammar.c:1.29, Line 108"
 permalink: /pubs/pc/reference/microsoft/kb/Q46994/
 ---
 
+## Q46994: Internal Compiler Error: grammar.c:1.29, Line 108
+
 	Article: Q46994
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

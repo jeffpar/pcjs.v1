@@ -4,8 +4,9 @@ title: "Q45497: How to Trap CTRL+C"
 permalink: /pubs/pc/reference/microsoft/kb/Q45497/
 ---
 
+## Q45497: How to Trap CTRL+C
+
 	Article: Q45497
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | appnote softlib CTRLC.ARC S12319.EXE

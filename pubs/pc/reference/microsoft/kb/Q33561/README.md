@@ -4,8 +4,9 @@ title: "Q33561: Glockenspiel Turbo Pascal to C Translator Source Code"
 permalink: /pubs/pc/reference/microsoft/kb/Q33561/
 ---
 
+## Q33561: Glockenspiel Turbo Pascal to C Translator Source Code
+
 	Article: Q33561
-	Product: Microsoft C
 	Version(s): 3.00 4.00 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER |

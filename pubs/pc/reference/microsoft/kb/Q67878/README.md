@@ -4,8 +4,9 @@ title: "Q67878: .EXE Header Must Be Marked for OS/2 Long Filename Support"
 permalink: /pubs/pc/reference/microsoft/kb/Q67878/
 ---
 
+## Q67878: .EXE Header Must Be Marked for OS/2 Long Filename Support
+
 	Article: Q67878
-	Product: Microsoft C
 	Version(s): 6.00 6.00a
 	Operating System: OS/2
 	Flags: ENDUSER | s_exehdr

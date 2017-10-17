@@ -4,8 +4,9 @@ title: "Q47104: Cannot Use Overlays in a Bound Application"
 permalink: /pubs/pc/reference/microsoft/kb/Q47104/
 ---
 
+## Q47104: Cannot Use Overlays in a Bound Application
+
 	Article: Q47104
-	Product: Microsoft C
 	Version(s): 5.01.21 5.03 | 5.01.21 5.03
 	Operating System: MS-DOS       | OS/2
 	Flags: ENDUSER |

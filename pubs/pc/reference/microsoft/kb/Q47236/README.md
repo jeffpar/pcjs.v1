@@ -4,8 +4,9 @@ title: "Q47236: Documentation Error for &quot;Mark&quot; Functions in M User's G
 permalink: /pubs/pc/reference/microsoft/kb/Q47236/
 ---
 
+## Q47236: Documentation Error for &quot;Mark&quot; Functions in M User's Guide
+
 	Article: Q47236
-	Product: Microsoft C
 	Version(s): 1.02   | 1.02
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | docerr

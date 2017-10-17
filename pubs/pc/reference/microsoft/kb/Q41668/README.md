@@ -4,8 +4,9 @@ title: "Q41668: QuickC 2.00 README.DOC: Error Message C2418"
 permalink: /pubs/pc/reference/microsoft/kb/Q41668/
 ---
 
+## Q41668: QuickC 2.00 README.DOC: Error Message C2418
+
 	Article: Q41668
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

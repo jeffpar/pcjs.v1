@@ -4,8 +4,9 @@ title: "Q41366: QuickC 2.00 README.DOC: Installing on a Floppy-Disk System"
 permalink: /pubs/pc/reference/microsoft/kb/Q41366/
 ---
 
+## Q41366: QuickC 2.00 README.DOC: Installing on a Floppy-Disk System
+
 	Article: Q41366
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr

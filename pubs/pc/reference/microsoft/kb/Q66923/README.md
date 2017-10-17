@@ -4,8 +4,9 @@ title: "Q66923: _fastcall Code Generation Error with Shifted Operands"
 permalink: /pubs/pc/reference/microsoft/kb/Q66923/
 ---
 
+## Q66923: _fastcall Code Generation Error with Shifted Operands
+
 	Article: Q66923
-	Product: Microsoft C
 	Version(s): 6.00 6.00a  | 6.00 6.00a
 	Operating System: MS-DOS      | OS/2
 	Flags: ENDUSER | buglist6.00 buglist6.00a fastcall

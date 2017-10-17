@@ -4,8 +4,9 @@ title: "Q47624: CodeView Cannot Trace into Single-Line Functions"
 permalink: /pubs/pc/reference/microsoft/kb/Q47624/
 ---
 
+## Q47624: CodeView Cannot Trace into Single-Line Functions
+
 	Article: Q47624
-	Product: Microsoft C
 	Version(s): 2.20 2.30 | 2.20 2.30
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER |

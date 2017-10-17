@@ -4,8 +4,9 @@ title: "Q28244: Using qsort() to Sort on Multiple Fields Within a Structure"
 permalink: /pubs/pc/reference/microsoft/kb/Q28244/
 ---
 
+## Q28244: Using qsort() to Sort on Multiple Fields Within a Structure
+
 	Article: Q28244
-	Product: Microsoft C
 	Version(s): 4.00 5.00 5.10 6.00 6.00a | 5.10 6.00 6.00a
 	Operating System: MS-DOS                    |
 	Flags: ENDUSER | s_quickc

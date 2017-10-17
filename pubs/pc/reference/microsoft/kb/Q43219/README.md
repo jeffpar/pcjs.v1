@@ -4,8 +4,9 @@ title: "Q43219: scanf, sscanf, fscanf Functions Fail When Scanning All Zeros"
 permalink: /pubs/pc/reference/microsoft/kb/Q43219/
 ---
 
+## Q43219: scanf, sscanf, fscanf Functions Fail When Scanning All Zeros
+
 	Article: Q43219
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist2.00

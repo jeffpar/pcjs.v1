@@ -4,8 +4,9 @@ title: "Q38221: /Au Switch Loads DS for Each Function, Not Module"
 permalink: /pubs/pc/reference/microsoft/kb/Q38221/
 ---
 
+## Q38221: /Au Switch Loads DS for Each Function, Not Module
+
 	Article: Q38221
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.00 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | docerr

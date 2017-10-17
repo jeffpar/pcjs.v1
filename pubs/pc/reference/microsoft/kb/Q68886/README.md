@@ -4,8 +4,9 @@ title: "Q68886: Accessing Interrupt Return Status in Zero Flag"
 permalink: /pubs/pc/reference/microsoft/kb/Q68886/
 ---
 
+## Q68886: Accessing Interrupt Return Status in Zero Flag
+
 	Article: Q68886
-	Product: Microsoft C
 	Version(s): 6.00 6.00a
 	Operating System: MS-DOS
 	Flags: ENDUSER |

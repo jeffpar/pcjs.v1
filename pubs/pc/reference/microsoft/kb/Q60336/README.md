@@ -4,8 +4,9 @@ title: "Q60336: fscanf() Fails to Read Consecutive Lines"
 permalink: /pubs/pc/reference/microsoft/kb/Q60336/
 ---
 
+## Q60336: fscanf() Fails to Read Consecutive Lines
+
 	Article: Q60336
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | s_quickc

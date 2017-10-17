@@ -4,8 +4,9 @@ title: "Q42925: Activating Hercules Card on a Dual-Monitor System"
 permalink: /pubs/pc/reference/microsoft/kb/Q42925/
 ---
 
+## Q42925: Activating Hercules Card on a Dual-Monitor System
+
 	Article: Q42925
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist5.10 S_QUICKC

@@ -4,8 +4,9 @@ title: "Q44897: system() Returns an Exit Code Under OS/2"
 permalink: /pubs/pc/reference/microsoft/kb/Q44897/
 ---
 
+## Q44897: system() Returns an Exit Code Under OS/2
+
 	Article: Q44897
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

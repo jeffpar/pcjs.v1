@@ -4,8 +4,9 @@ title: "Q67735: How Structures Are Packed with /Zp"
 permalink: /pubs/pc/reference/microsoft/kb/Q67735/
 ---
 
+## Q67735: How Structures Are Packed with /Zp
+
 	Article: Q67735
-	Product: Microsoft C
 	Version(s): 
 	Operating System: 6.00 6.00a | 6.00 6.00a
 	Flags: MS-DOS     | OS/2

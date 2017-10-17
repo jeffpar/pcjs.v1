@@ -4,8 +4,9 @@ title: "Q66457: VioWrtTTy should be VioWrtTTY in the APT"
 permalink: /pubs/pc/reference/microsoft/kb/Q66457/
 ---
 
+## Q66457: VioWrtTTy should be VioWrtTTY in the APT
+
 	Article: Q66457
-	Product: Microsoft C
 	Version(s): 6.00
 	Operating System: OS/2
 	Flags: ENDUSER | docerr

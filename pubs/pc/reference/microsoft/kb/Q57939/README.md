@@ -4,8 +4,9 @@ title: "Q57939: Writing Optimized Dynamic Link Libraries (DDLs)"
 permalink: /pubs/pc/reference/microsoft/kb/Q57939/
 ---
 
+## Q57939: Writing Optimized Dynamic Link Libraries (DDLs)
+
 	Article: Q57939
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: OS/2
 	Flags: ENDUSER |

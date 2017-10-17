@@ -4,8 +4,9 @@ title: "Q66216: Loop Optimizations May Generate Bad Code on Nested Loops"
 permalink: /pubs/pc/reference/microsoft/kb/Q66216/
 ---
 
+## Q66216: Loop Optimizations May Generate Bad Code on Nested Loops
+
 	Article: Q66216
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist6.00 buglist6.00a

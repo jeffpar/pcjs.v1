@@ -4,8 +4,9 @@ title: "Q51763: C1126 - &lt;Identifier&gt;: Automatic Allocation Exceeds &lt;Siz
 permalink: /pubs/pc/reference/microsoft/kb/Q51763/
 ---
 
+## Q51763: C1126 - &lt;Identifier&gt;: Automatic Allocation Exceeds &lt;Size&gt;
+
 	Article: Q51763
-	Product: Microsoft C
 	Version(s): 2.00 2.01
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QuickASM

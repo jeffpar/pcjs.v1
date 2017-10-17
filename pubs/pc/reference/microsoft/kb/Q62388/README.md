@@ -4,8 +4,9 @@ title: "Q62388: PWB Doesn't Update Mark Location If Mark Moves Up or Left"
 permalink: /pubs/pc/reference/microsoft/kb/Q62388/
 ---
 
+## Q62388: PWB Doesn't Update Mark Location If Mark Moves Up or Left
+
 	Article: Q62388
-	Product: Microsoft C
 	Version(s): 1.00 | 1.00
 	Operating System: OS/2 | 1.00
 	Flags: ENDUSER | buglist1.00

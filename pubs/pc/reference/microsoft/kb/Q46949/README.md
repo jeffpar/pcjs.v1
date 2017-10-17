@@ -4,8 +4,9 @@ title: "Q46949: Using CodeView /2 with Hercules Graphics Cards and Libraries"
 permalink: /pubs/pc/reference/microsoft/kb/Q46949/
 ---
 
+## Q46949: Using CodeView /2 with Hercules Graphics Cards and Libraries
+
 	Article: Q46949
-	Product: Microsoft C
 	Version(s): 2.20 2.30
 	Operating System: MS-DOS
 	Flags: ENDUSER |

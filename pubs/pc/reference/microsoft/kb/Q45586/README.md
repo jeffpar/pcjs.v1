@@ -4,8 +4,9 @@ title: "Q45586: Use _setfont to Specify Characteristics for Current Font"
 permalink: /pubs/pc/reference/microsoft/kb/Q45586/
 ---
 
+## Q45586: Use _setfont to Specify Characteristics for Current Font
+
 	Article: Q45586
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QuickPascal

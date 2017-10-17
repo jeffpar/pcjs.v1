@@ -4,8 +4,9 @@ title: "Q61872: DosDevIOCtl() Category 5 Subfunction 66H Fails with C 6.00 API"
 permalink: /pubs/pc/reference/microsoft/kb/Q61872/
 ---
 
+## Q61872: DosDevIOCtl() Category 5 Subfunction 66H Fails with C 6.00 API
+
 	Article: Q61872
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | buglist6.00 buglist6.00a

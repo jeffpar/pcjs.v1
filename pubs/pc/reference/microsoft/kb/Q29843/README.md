@@ -4,8 +4,9 @@ title: "Q29843: C 5.10 MTDYNA.DOC: Creating an MTDYNA Library"
 permalink: /pubs/pc/reference/microsoft/kb/Q29843/
 ---
 
+## Q29843: C 5.10 MTDYNA.DOC: Creating an MTDYNA Library
+
 	Article: Q29843
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

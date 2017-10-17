@@ -4,8 +4,9 @@ title: "Q42597: Using Near Addresses in Interrupt Handlers in C"
 permalink: /pubs/pc/reference/microsoft/kb/Q42597/
 ---
 
+## Q42597: Using Near Addresses in Interrupt Handlers in C
+
 	Article: Q42597
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER |

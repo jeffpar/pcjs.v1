@@ -4,8 +4,9 @@ title: "Q57653: U1013 Link: Error 2: Not Enough Memory for Exec in M"
 permalink: /pubs/pc/reference/microsoft/kb/Q57653/
 ---
 
+## Q57653: U1013 Link: Error 2: Not Enough Memory for Exec in M
+
 	Article: Q57653
-	Product: Microsoft C
 	Version(s): 1.00 1.02
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_nmake s_make

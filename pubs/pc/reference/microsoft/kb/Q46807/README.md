@@ -4,8 +4,9 @@ title: "Q46807: Unrecognized Switch /Z1 Is Caused by Wrong Linker"
 permalink: /pubs/pc/reference/microsoft/kb/Q46807/
 ---
 
+## Q46807: Unrecognized Switch /Z1 Is Caused by Wrong Linker
+
 	Article: Q46807
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QuickAsm

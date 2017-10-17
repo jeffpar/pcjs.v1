@@ -4,8 +4,9 @@ title: "Q39343: Sizeof an Undeclared Struct Causes Violation in OS/2"
 permalink: /pubs/pc/reference/microsoft/kb/Q39343/
 ---
 
+## Q39343: Sizeof an Undeclared Struct Causes Violation in OS/2
+
 	Article: Q39343
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: OS/2
 	Flags: ENDUSER |

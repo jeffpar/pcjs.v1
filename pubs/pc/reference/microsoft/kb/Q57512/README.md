@@ -4,8 +4,9 @@ title: "Q57512: Cannot Print Source Code If Notepad or Errors Window Active"
 permalink: /pubs/pc/reference/microsoft/kb/Q57512/
 ---
 
+## Q57512: Cannot Print Source Code If Notepad or Errors Window Active
+
 	Article: Q57512
-	Product: Microsoft C
 	Version(s): 2.00 2.01
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickasm buglist2.00

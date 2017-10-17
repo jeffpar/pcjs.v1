@@ -4,8 +4,9 @@ title: "Q46773: Using C Run-Time Library Functions in .DLLs"
 permalink: /pubs/pc/reference/microsoft/kb/Q46773/
 ---
 
+## Q46773: Using C Run-Time Library Functions in .DLLs
+
 	Article: Q46773
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: OS/2
 	Flags: ENDUSER | SR# G890705-21975

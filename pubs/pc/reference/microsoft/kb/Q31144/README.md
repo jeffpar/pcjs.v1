@@ -4,8 +4,9 @@ title: "Q31144: MEP Crashes OS/2 when Switching from Real-Mode Screen Group"
 permalink: /pubs/pc/reference/microsoft/kb/Q31144/
 ---
 
+## Q31144: MEP Crashes OS/2 when Switching from Real-Mode Screen Group
+
 	Article: Q31144
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |  TAR75546 TAR76522

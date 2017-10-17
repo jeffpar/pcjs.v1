@@ -4,8 +4,9 @@ title: "Q62663: CodeView 3.00 Hangs on gets() with Screen Swap Off"
 permalink: /pubs/pc/reference/microsoft/kb/Q62663/
 ---
 
+## Q62663: CodeView 3.00 Hangs on gets() with Screen Swap Off
+
 	Article: Q62663
-	Product: Microsoft C
 	Version(s): 3.00   | 3.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | s_c s_quickc s_quickasm

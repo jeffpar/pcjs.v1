@@ -4,8 +4,9 @@ title: "Q67780: PWB May Record Incorrect Paths for Dependencies in Makefile"
 permalink: /pubs/pc/reference/microsoft/kb/Q67780/
 ---
 
+## Q67780: PWB May Record Incorrect Paths for Dependencies in Makefile
+
 	Article: Q67780
-	Product: Microsoft C
 	Version(s): 1.00 1.10  | 1.00 1.10
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | buglist1.00 buglist1.10

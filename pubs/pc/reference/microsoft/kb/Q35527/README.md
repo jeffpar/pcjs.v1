@@ -4,8 +4,9 @@ title: "Q35527: Merging Two Files Together"
 permalink: /pubs/pc/reference/microsoft/kb/Q35527/
 ---
 
+## Q35527: Merging Two Files Together
+
 	Article: Q35527
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | appnote

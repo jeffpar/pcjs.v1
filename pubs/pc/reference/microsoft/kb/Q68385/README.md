@@ -4,8 +4,9 @@ title: "Q68385: Compiler Lacks Warnings for Options Incompatible with /u"
 permalink: /pubs/pc/reference/microsoft/kb/Q68385/
 ---
 
+## Q68385: Compiler Lacks Warnings for Options Incompatible with /u
+
 	Article: Q68385
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | buglist6.00 buglist6.00a

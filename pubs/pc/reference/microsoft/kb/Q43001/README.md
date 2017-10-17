@@ -4,8 +4,9 @@ title: "Q43001: Fopen() Description Is Incomplete in On-Line Help of QC 2.00"
 permalink: /pubs/pc/reference/microsoft/kb/Q43001/
 ---
 
+## Q43001: Fopen() Description Is Incomplete in On-Line Help of QC 2.00
+
 	Article: Q43001
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr

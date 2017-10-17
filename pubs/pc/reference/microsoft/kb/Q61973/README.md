@@ -4,8 +4,9 @@ title: "Q61973: Internal Compiler Error: gencode.c, Line 437"
 permalink: /pubs/pc/reference/microsoft/kb/Q61973/
 ---
 
+## Q61973: Internal Compiler Error: gencode.c, Line 437
+
 	Article: Q61973
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist6.00

@@ -4,8 +4,9 @@ title: "Q44926: Linker Error Message L4004: Possible Fixup Overflow..."
 permalink: /pubs/pc/reference/microsoft/kb/Q44926/
 ---
 
+## Q44926: Linker Error Message L4004: Possible Fixup Overflow...
+
 	Article: Q44926
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_LINK

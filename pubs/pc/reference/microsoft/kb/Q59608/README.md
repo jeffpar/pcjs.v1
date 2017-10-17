@@ -4,8 +4,9 @@ title: "Q59608: A2071 and A2006 with Assembly Code from a C Program"
 permalink: /pubs/pc/reference/microsoft/kb/Q59608/
 ---
 
+## Q59608: A2071 and A2006 with Assembly Code from a C Program
+
 	Article: Q59608
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | h_masm s_quickc s_quickasm fixlist6.00

@@ -4,8 +4,9 @@ title: "Q39974: Error C2177: Constant Too Big"
 permalink: /pubs/pc/reference/microsoft/kb/Q39974/
 ---
 
+## Q39974: Error C2177: Constant Too Big
+
 	Article: Q39974
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | s_quickc

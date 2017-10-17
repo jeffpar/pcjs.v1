@@ -4,8 +4,9 @@ title: "Q66231: How to Insert Spaces Before a Block of Text in PWB"
 permalink: /pubs/pc/reference/microsoft/kb/Q66231/
 ---
 
+## Q66231: How to Insert Spaces Before a Block of Text in PWB
+
 	Article: Q66231
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | S_EDITOR

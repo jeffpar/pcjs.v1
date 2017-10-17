@@ -4,8 +4,9 @@ title: "Q66217: Pascal Modifier Might Generate Bogus Warning C4059"
 permalink: /pubs/pc/reference/microsoft/kb/Q66217/
 ---
 
+## Q66217: Pascal Modifier Might Generate Bogus Warning C4059
+
 	Article: Q66217
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist6.00

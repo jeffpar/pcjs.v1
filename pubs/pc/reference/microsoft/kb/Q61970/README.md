@@ -4,8 +4,9 @@ title: "Q61970: CodeView 3.00 Fades with Monochrome VGA"
 permalink: /pubs/pc/reference/microsoft/kb/Q61970/
 ---
 
+## Q61970: CodeView 3.00 Fades with Monochrome VGA
+
 	Article: Q61970
-	Product: Microsoft C
 	Version(s): 3.00   | 3.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

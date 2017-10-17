@@ -4,8 +4,9 @@ title: "Q29839: C 5.10 MTDYNA.DOC: Component Files of a Single Thread DLL"
 permalink: /pubs/pc/reference/microsoft/kb/Q29839/
 ---
 
+## Q29839: C 5.10 MTDYNA.DOC: Component Files of a Single Thread DLL
+
 	Article: Q29839
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

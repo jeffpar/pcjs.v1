@@ -4,8 +4,9 @@ title: "Q44004: Error L2025 from BASIC Calls to QuickC 2.00 Routines"
 permalink: /pubs/pc/reference/microsoft/kb/Q44004/
 ---
 
+## Q44004: Error L2025 from BASIC Calls to QuickC 2.00 Routines
+
 	Article: Q44004
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_C B_QuickBAS

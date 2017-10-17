@@ -4,8 +4,9 @@ title: "Q58720: Quote Function (CTRL+P) Can Fail to Work Properly"
 permalink: /pubs/pc/reference/microsoft/kb/Q58720/
 ---
 
+## Q58720: Quote Function (CTRL+P) Can Fail to Work Properly
+
 	Article: Q58720
-	Product: Microsoft C
 	Version(s): 1.00 1.02 | 1.00 1.02
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | buglist1.00 buglist1.02

@@ -4,8 +4,9 @@ title: "Q47961: Extracting a Function ptr from a Variable arg List Function"
 permalink: /pubs/pc/reference/microsoft/kb/Q47961/
 ---
 
+## Q47961: Extracting a Function ptr from a Variable arg List Function
+
 	Article: Q47961
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | S_quickC S_QuickASM

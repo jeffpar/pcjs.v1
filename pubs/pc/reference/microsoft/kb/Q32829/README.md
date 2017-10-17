@@ -4,8 +4,9 @@ title: "Q32829: Link Error L1089"
 permalink: /pubs/pc/reference/microsoft/kb/Q32829/
 ---
 
+## Q32829: Link Error L1089
+
 	Article: Q32829
-	Product: Microsoft C
 	Version(s): 3.51 3.55 3.60 3.61 3.64 3.65 5.01.20 5.01.21
 	Operating System: MS-DOS
 	Flags: ENDUSER |

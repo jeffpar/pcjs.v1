@@ -4,8 +4,9 @@ title: "Q37619: Backslash Character Interpreted In /Ss and /St Options"
 permalink: /pubs/pc/reference/microsoft/kb/Q37619/
 ---
 
+## Q37619: Backslash Character Interpreted In /Ss and /St Options
+
 	Article: Q37619
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER |

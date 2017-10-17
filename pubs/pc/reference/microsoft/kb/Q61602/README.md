@@ -4,8 +4,9 @@ title: "Q61602: Assembler Options Passed to C Compiler If /MA Contains Space"
 permalink: /pubs/pc/reference/microsoft/kb/Q61602/
 ---
 
+## Q61602: Assembler Options Passed to C Compiler If /MA Contains Space
+
 	Article: Q61602
-	Product: Microsoft C
 	Version(s): 6.00    | 6.00
 	Operating System: MS-DOS  | OS/2
 	Flags: ENDUSER | s_pwb

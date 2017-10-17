@@ -4,8 +4,9 @@ title: "Q66925: _getfontinfo and Vector Mapped Fonts"
 permalink: /pubs/pc/reference/microsoft/kb/Q66925/
 ---
 
+## Q66925: _getfontinfo and Vector Mapped Fonts
+
 	Article: Q66925
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | docerr s_quickc

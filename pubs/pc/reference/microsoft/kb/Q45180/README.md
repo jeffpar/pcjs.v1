@@ -4,8 +4,9 @@ title: "Q45180: Initialization and Discarding of DLLs Built with C Run Time"
 permalink: /pubs/pc/reference/microsoft/kb/Q45180/
 ---
 
+## Q45180: Initialization and Discarding of DLLs Built with C Run Time
+
 	Article: Q45180
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: OS/2
 	Flags: ENDUSER | softlib CRTDLL.ARC S12104.EXE

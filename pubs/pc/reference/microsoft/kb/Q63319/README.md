@@ -4,8 +4,9 @@ title: "Q63319: Unknown Function psrch with Brief Emulation in PWB"
 permalink: /pubs/pc/reference/microsoft/kb/Q63319/
 ---
 
+## Q63319: Unknown Function psrch with Brief Emulation in PWB
+
 	Article: Q63319
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

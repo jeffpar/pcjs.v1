@@ -4,8 +4,9 @@ title: "Q28502: Windows 1.01 MOUSE.DRV File Included with Mouse 1.0"
 permalink: /pubs/pc/reference/microsoft/kb/Q28502/
 ---
 
+## Q28502: Windows 1.01 MOUSE.DRV File Included with Mouse 1.0
+
 	Article: Q28502
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

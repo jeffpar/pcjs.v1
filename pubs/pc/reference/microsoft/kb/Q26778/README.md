@@ -4,8 +4,9 @@ title: "Q26778: _amblksiz Not Declared"
 permalink: /pubs/pc/reference/microsoft/kb/Q26778/
 ---
 
+## Q26778: _amblksiz Not Declared
+
 	Article: Q26778
-	Product: Microsoft C
 	Version(s): 4.00 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr

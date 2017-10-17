@@ -4,8 +4,9 @@ title: "Q65646: /Zg Prototypes Unsigned Functions as Unsigned Short"
 permalink: /pubs/pc/reference/microsoft/kb/Q65646/
 ---
 
+## Q65646: /Zg Prototypes Unsigned Functions as Unsigned Short
+
 	Article: Q65646
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS |
 	Flags: ENDUSER |

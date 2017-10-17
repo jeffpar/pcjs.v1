@@ -4,8 +4,9 @@ title: "Q43600: MS123.COM May Not Work in Lotus 1-2-3 with Look &amp; Link Add-O
 permalink: /pubs/pc/reference/microsoft/kb/Q43600/
 ---
 
+## Q43600: MS123.COM May Not Work in Lotus 1-2-3 with Look &amp; Link Add-On
+
 	Article: Q43600
-	Product: Microsoft C
 	Version(s): 1.x
 	Operating System: MS-DOS
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q64788: How to Use the PWB with the Windows 3.00 SDK"
 permalink: /pubs/pc/reference/microsoft/kb/Q64788/
 ---
 
+## Q64788: How to Use the PWB with the Windows 3.00 SDK
+
 	Article: Q64788
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

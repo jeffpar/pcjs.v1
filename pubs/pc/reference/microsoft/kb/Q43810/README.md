@@ -4,8 +4,9 @@ title: "Q43810: C: PUSH CS Caused by Far Call Translation"
 permalink: /pubs/pc/reference/microsoft/kb/Q43810/
 ---
 
+## Q43810: C: PUSH CS Caused by Far Call Translation
+
 	Article: Q43810
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER |

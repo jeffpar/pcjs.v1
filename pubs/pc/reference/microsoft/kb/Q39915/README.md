@@ -4,8 +4,9 @@ title: "Q39915: Misleading Information about Linker Options with /link"
 permalink: /pubs/pc/reference/microsoft/kb/Q39915/
 ---
 
+## Q39915: Misleading Information about Linker Options with /link
+
 	Article: Q39915
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER |

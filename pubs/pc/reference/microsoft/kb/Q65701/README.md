@@ -4,8 +4,9 @@ title: "Q65701: CV May Come Up Only in Monochrome with 8514/A Display Adapter"
 permalink: /pubs/pc/reference/microsoft/kb/Q65701/
 ---
 
+## Q65701: CV May Come Up Only in Monochrome with 8514/A Display Adapter
+
 	Article: Q65701
-	Product: Microsoft C
 	Version(s): 3.00 3.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | appnote SV0337.ARC B_QuickBas

@@ -4,8 +4,9 @@ title: "Q64789: _outtext Can Produce Protection Violation Error"
 permalink: /pubs/pc/reference/microsoft/kb/Q64789/
 ---
 
+## Q64789: _outtext Can Produce Protection Violation Error
+
 	Article: Q64789
-	Product: Microsoft C
 	Version(s): 6.00
 	Operating System: OS/2
 	Flags: ENDUSER | buglist6.00

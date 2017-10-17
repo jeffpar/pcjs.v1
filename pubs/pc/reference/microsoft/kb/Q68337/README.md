@@ -4,8 +4,9 @@ title: "Q68337: ftell() May Return an Invalid Value with a Text File"
 permalink: /pubs/pc/reference/microsoft/kb/Q68337/
 ---
 
+## Q68337: ftell() May Return an Invalid Value with a Text File
+
 	Article: Q68337
-	Product: Microsoft C
 	Version(s): 5.10 6.00 6.00a | 5.10 6.00 6.00a
 	Operating System: MS-DOS          | OS/2
 	Flags: ENDUSER | s_quickc buglist5.10 buglist6.00 buglist6.00a

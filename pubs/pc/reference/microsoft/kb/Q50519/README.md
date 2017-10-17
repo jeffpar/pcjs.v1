@@ -4,8 +4,9 @@ title: "Q50519: Loader Uses Return Value from a DLL's Initialization Routine"
 permalink: /pubs/pc/reference/microsoft/kb/Q50519/
 ---
 
+## Q50519: Loader Uses Return Value from a DLL's Initialization Routine
+
 	Article: Q50519
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: OS/2
 	Flags: ENDUSER |

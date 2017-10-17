@@ -4,8 +4,9 @@ title: "Q50702: /PACKCODE Incompatible with IOPL Segments with LINK 5.01.21"
 permalink: /pubs/pc/reference/microsoft/kb/Q50702/
 ---
 
+## Q50702: /PACKCODE Incompatible with IOPL Segments with LINK 5.01.21
+
 	Article: Q50702
-	Product: Microsoft C
 	Version(s): 5.01.21
 	Operating System: OS/2
 	Flags: ENDUSER | S_C

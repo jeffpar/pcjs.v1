@@ -4,8 +4,9 @@ title: "Q47167: Cannot Access LINK.EXE: Retry Does Not Retry Another Floppy"
 permalink: /pubs/pc/reference/microsoft/kb/Q47167/
 ---
 
+## Q47167: Cannot Access LINK.EXE: Retry Does Not Retry Another Floppy
+
 	Article: Q47167
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QuickAsm ILINK buglist2.00 buglist2.01

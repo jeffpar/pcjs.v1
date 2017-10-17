@@ -4,8 +4,9 @@ title: "Q42848: TURTLE.C, MENU.C, TOOLS.C Not Stand-Alone Programs in QuickC"
 permalink: /pubs/pc/reference/microsoft/kb/Q42848/
 ---
 
+## Q42848: TURTLE.C, MENU.C, TOOLS.C Not Stand-Alone Programs in QuickC
+
 	Article: Q42848
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

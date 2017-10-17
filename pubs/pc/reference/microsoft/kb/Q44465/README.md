@@ -4,8 +4,9 @@ title: "Q44465: L2025 LINK Error May Be Caused by Conflicting Library Routines"
 permalink: /pubs/pc/reference/microsoft/kb/Q44465/
 ---
 
+## Q44465: L2025 LINK Error May Be Caused by Conflicting Library Routines
+
 	Article: Q44465
-	Product: Microsoft C
 	Version(s): 3.x 4.06 4.07 5.0x 5.10 5.13 | 5.01.21 5.02 5.03 5.10 5.1
 	Operating System: MS-DOS                       | OS/2
 	Flags: ENDUSER | s_lib

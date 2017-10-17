@@ -4,8 +4,9 @@ title: "Q64786: _pg_chartpie() Fails to Free Memory in QC 2.00 and QC 2.50"
 permalink: /pubs/pc/reference/microsoft/kb/Q64786/
 ---
 
+## Q64786: _pg_chartpie() Fails to Free Memory in QC 2.00 and QC 2.50
+
 	Article: Q64786
-	Product: Microsoft C
 	Version(s): 2.00 2.50
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist2.50

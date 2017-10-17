@@ -4,8 +4,9 @@ title: "Q66288: &quot;QuickC with QuickAssembler&quot; Is 2.51, &quot;QuickC&quo
 permalink: /pubs/pc/reference/microsoft/kb/Q66288/
 ---
 
+## Q66288: &quot;QuickC with QuickAssembler&quot; Is 2.51, &quot;QuickC&quot; Alone Is 2.50
+
 	Article: Q66288
-	Product: Microsoft C
 	Version(s): 2.00 2.50
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QuickASM C assembler Quick

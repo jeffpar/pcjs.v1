@@ -4,8 +4,9 @@ title: "Q43392: C: Clarification of the &quot;g&quot; Format Specifier"
 permalink: /pubs/pc/reference/microsoft/kb/Q43392/
 ---
 
+## Q43392: C: Clarification of the &quot;g&quot; Format Specifier
+
 	Article: Q43392
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.00 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | s_quickc

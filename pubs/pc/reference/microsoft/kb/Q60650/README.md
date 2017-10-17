@@ -4,8 +4,9 @@ title: "Q60650: C 6.00 SAMPLES.DOC: Note on Graphics Libraries"
 permalink: /pubs/pc/reference/microsoft/kb/Q60650/
 ---
 
+## Q60650: C 6.00 SAMPLES.DOC: Note on Graphics Libraries
+
 	Article: Q60650
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | README README.DOC

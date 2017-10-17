@@ -4,8 +4,9 @@ title: "Q43703: Casting a Pointer to a Type Equivalent to a Multidimensional"
 permalink: /pubs/pc/reference/microsoft/kb/Q43703/
 ---
 
+## Q43703: Casting a Pointer to a Type Equivalent to a Multidimensional
+
 	Article: Q43703
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | s_quickc

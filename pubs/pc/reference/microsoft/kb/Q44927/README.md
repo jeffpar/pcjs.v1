@@ -4,8 +4,9 @@ title: "Q44927: How Does _osmode Get Set?"
 permalink: /pubs/pc/reference/microsoft/kb/Q44927/
 ---
 
+## Q44927: How Does _osmode Get Set?
+
 	Article: Q44927
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | SR# G890523-18896

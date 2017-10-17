@@ -4,8 +4,9 @@ title: "Q61188: C 6.00 README: Functions Declared as Float Now Return Float"
 permalink: /pubs/pc/reference/microsoft/kb/Q61188/
 ---
 
+## Q61188: C 6.00 README: Functions Declared as Float Now Return Float
+
 	Article: Q61188
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q36992: Warning C4067 Unexpected Characters Following 'directive'"
 permalink: /pubs/pc/reference/microsoft/kb/Q36992/
 ---
 
+## Q36992: Warning C4067 Unexpected Characters Following 'directive'
+
 	Article: Q36992
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | S_QUICKC S_ERROR

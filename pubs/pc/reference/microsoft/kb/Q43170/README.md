@@ -4,8 +4,9 @@ title: "Q43170: CV: K Command in Secondary Module Sets Breakpoints in Main"
 permalink: /pubs/pc/reference/microsoft/kb/Q43170/
 ---
 
+## Q43170: CV: K Command in Secondary Module Sets Breakpoints in Main
+
 	Article: Q43170
-	Product: Microsoft C
 	Version(s): 2.20   | 2.20
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist2.20

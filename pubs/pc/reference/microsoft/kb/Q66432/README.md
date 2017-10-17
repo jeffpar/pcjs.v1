@@ -4,8 +4,9 @@ title: "Q66432: &quot;QC Is Already Running&quot; Message Appears"
 permalink: /pubs/pc/reference/microsoft/kb/Q66432/
 ---
 
+## Q66432: &quot;QC Is Already Running&quot; Message Appears
+
 	Article: Q66432
-	Product: Microsoft C
 	Version(s): 2.50 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QUICKASM

@@ -4,8 +4,9 @@ title: "Q68745: PGCHART: How to Draw a Line Chart with Lines Only"
 permalink: /pubs/pc/reference/microsoft/kb/Q68745/
 ---
 
+## Q68745: PGCHART: How to Draw a Line Chart with Lines Only
+
 	Article: Q68745
-	Product: Microsoft C
 	Version(s): 6.00 6.00a
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickc

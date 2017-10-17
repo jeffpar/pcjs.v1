@@ -4,8 +4,9 @@ title: "Q43538: NMAKE Example Incorrect in QuickC Manual; Should Be Lowercase"
 permalink: /pubs/pc/reference/microsoft/kb/Q43538/
 ---
 
+## Q43538: NMAKE Example Incorrect in QuickC Manual; Should Be Lowercase
+
 	Article: Q43538
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr

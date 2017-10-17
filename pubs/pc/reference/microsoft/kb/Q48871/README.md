@@ -4,8 +4,9 @@ title: "Q48871: Invalid Arg Filename Followed By F2 Causes Screen Error"
 permalink: /pubs/pc/reference/microsoft/kb/Q48871/
 ---
 
+## Q48871: Invalid Arg Filename Followed By F2 Causes Screen Error
+
 	Article: Q48871
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist1.00

@@ -4,8 +4,9 @@ title: "Q44449: QuickC 2.00 Debugger Does Not Support Huge Pointers/Model"
 permalink: /pubs/pc/reference/microsoft/kb/Q44449/
 ---
 
+## Q44449: QuickC 2.00 Debugger Does Not Support Huge Pointers/Model
+
 	Article: Q44449
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

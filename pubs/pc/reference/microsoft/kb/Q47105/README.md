@@ -4,8 +4,9 @@ title: "Q47105: Best to Avoid C Run-Time Library Routines in TSRs"
 permalink: /pubs/pc/reference/microsoft/kb/Q47105/
 ---
 
+## Q47105: Best to Avoid C Run-Time Library Routines in TSRs
+
 	Article: Q47105
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | SR# G890601-19569

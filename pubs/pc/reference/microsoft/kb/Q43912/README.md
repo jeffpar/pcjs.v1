@@ -4,8 +4,9 @@ title: "Q43912: C: /Oa Causes Changes in Variable Values to Be Ignored"
 permalink: /pubs/pc/reference/microsoft/kb/Q43912/
 ---
 
+## Q43912: C: /Oa Causes Changes in Variable Values to Be Ignored
+
 	Article: Q43912
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | SR# G890421-16911 alias buglist5.10

@@ -4,8 +4,9 @@ title: "Q36798: Microsoft System Journal M macros Fail"
 permalink: /pubs/pc/reference/microsoft/kb/Q36798/
 ---
 
+## Q36798: Microsoft System Journal M macros Fail
+
 	Article: Q36798
-	Product: Microsoft C
 	Version(s): 1.00 1.01 | 1.00 1.01
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER |

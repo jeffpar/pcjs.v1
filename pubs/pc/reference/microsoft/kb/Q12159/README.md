@@ -4,8 +4,9 @@ title: "Q12159: Questions and Answers About the Use of malloc() and _fmalloc()"
 permalink: /pubs/pc/reference/microsoft/kb/Q12159/
 ---
 
+## Q12159: Questions and Answers About the Use of malloc() and _fmalloc()
+
 	Article: Q12159
-	Product: Microsoft C
 	Version(s): 3.00 4.00 5.00 5.10 6.00 6.00a | 5.10 6.00 6.00a
 	Operating System: MS-DOS                         | OS/2
 	Flags: ENDUSER | s_quickc

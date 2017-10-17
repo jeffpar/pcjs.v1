@@ -4,8 +4,9 @@ title: "Q40580: You Cannot Trap CTRL+ALT+DEL in OS/2"
 permalink: /pubs/pc/reference/microsoft/kb/Q40580/
 ---
 
+## Q40580: You Cannot Trap CTRL+ALT+DEL in OS/2
+
 	Article: Q40580
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: OS/2
 	Flags: ENDUSER |

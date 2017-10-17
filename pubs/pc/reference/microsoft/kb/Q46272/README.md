@@ -4,8 +4,9 @@ title: "Q46272: Documentation Errors in &quot;Configuring On-Line Help&quot; for
 permalink: /pubs/pc/reference/microsoft/kb/Q46272/
 ---
 
+## Q46272: Documentation Errors in &quot;Configuring On-Line Help&quot; for M 1.02
+
 	Article: Q46272
-	Product: Microsoft C
 	Version(s): 1.02   | 1.02
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | docerr

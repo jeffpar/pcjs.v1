@@ -4,8 +4,9 @@ title: "Q57706: Linker Uses Library Sequence to Resolve External References"
 permalink: /pubs/pc/reference/microsoft/kb/Q57706/
 ---
 
+## Q57706: Linker Uses Library Sequence to Resolve External References
+
 	Article: Q57706
-	Product: Microsoft C
 	Version(s): 
 	Operating System: 1.x 2.x 3.x 4.06 4.07 5.01.21 5.02 5.03 | 5.01.21 5.02 5.
 	Flags: MS-DOS                                  | OS/2

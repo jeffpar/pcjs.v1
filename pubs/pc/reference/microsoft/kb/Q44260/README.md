@@ -4,8 +4,9 @@ title: "Q44260: Presentation Graphics Does Not Support 3-Dimensional Charts"
 permalink: /pubs/pc/reference/microsoft/kb/Q44260/
 ---
 
+## Q44260: Presentation Graphics Does Not Support 3-Dimensional Charts
+
 	Article: Q44260
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr

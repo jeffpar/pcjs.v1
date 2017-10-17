@@ -4,8 +4,9 @@ title: "Q64027: Adding Dependencies to QuickC 2.50 Make File Disrupts QuickC"
 permalink: /pubs/pc/reference/microsoft/kb/Q64027/
 ---
 
+## Q64027: Adding Dependencies to QuickC 2.50 Make File Disrupts QuickC
+
 	Article: Q64027
-	Product: Microsoft C
 	Version(s): 2.50 2.51
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist2.51 s_quickasm

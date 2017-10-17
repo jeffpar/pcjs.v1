@@ -4,8 +4,9 @@ title: "Q64640: Online Help Solution for C4139 Warning Is Incorrect"
 permalink: /pubs/pc/reference/microsoft/kb/Q64640/
 ---
 
+## Q64640: Online Help Solution for C4139 Warning Is Incorrect
+
 	Article: Q64640
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | s_quickc docerr

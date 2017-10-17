@@ -4,8 +4,9 @@ title: "Q40575: Norton's Guide Hangs QuickC Version 2.00"
 permalink: /pubs/pc/reference/microsoft/kb/Q40575/
 ---
 
+## Q40575: Norton's Guide Hangs QuickC Version 2.00
+
 	Article: Q40575
-	Product: Microsoft C
 	Version(s): 2.00   | 2.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist2.00

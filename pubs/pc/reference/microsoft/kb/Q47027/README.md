@@ -4,8 +4,9 @@ title: "Q47027: C2065: '_asm': Undefined"
 permalink: /pubs/pc/reference/microsoft/kb/Q47027/
 ---
 
+## Q47027: C2065: '_asm': Undefined
+
 	Article: Q47027
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

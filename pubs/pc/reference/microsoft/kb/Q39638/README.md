@@ -4,8 +4,9 @@ title: "Q39638: /Ss Fails under Environment Variable Setting"
 permalink: /pubs/pc/reference/microsoft/kb/Q39638/
 ---
 
+## Q39638: /Ss Fails under Environment Variable Setting
+
 	Article: Q39638
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist5.10

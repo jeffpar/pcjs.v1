@@ -4,8 +4,9 @@ title: "Q68959: NEC Mouse Port, Lotus 3.1, and Microsoft Serial Mouse"
 permalink: /pubs/pc/reference/microsoft/kb/Q68959/
 ---
 
+## Q68959: NEC Mouse Port, Lotus 3.1, and Microsoft Serial Mouse
+
 	Article: Q68959
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | NCR

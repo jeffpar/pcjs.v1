@@ -4,8 +4,9 @@ title: "Q51073: QuickC 2.00: C1007: Switches Not Recognized by QCCOM"
 permalink: /pubs/pc/reference/microsoft/kb/Q51073/
 ---
 
+## Q51073: QuickC 2.00: C1007: Switches Not Recognized by QCCOM
+
 	Article: Q51073
-	Product: Microsoft C
 	Version(s): 2.00 2.01
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickasm s_link

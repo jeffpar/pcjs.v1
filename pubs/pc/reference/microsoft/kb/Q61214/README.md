@@ -4,8 +4,9 @@ title: "Q61214: C 6.00 README: PWB: Use %s, Not %S, for Run.Customize Argument"
 permalink: /pubs/pc/reference/microsoft/kb/Q61214/
 ---
 
+## Q61214: C 6.00 README: PWB: Use %s, Not %S, for Run.Customize Argument
+
 	Article: Q61214
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

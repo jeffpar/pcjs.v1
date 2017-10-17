@@ -4,8 +4,9 @@ title: "Q67776: NMK.COM Will Execute PWB.SHL If it Exists"
 permalink: /pubs/pc/reference/microsoft/kb/Q67776/
 ---
 
+## Q67776: NMK.COM Will Execute PWB.SHL If it Exists
+
 	Article: Q67776
-	Product: Microsoft C
 	Version(s): 1.00 1.11
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_C S_PWB S_QUICKC S_NMK

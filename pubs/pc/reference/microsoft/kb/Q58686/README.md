@@ -4,8 +4,9 @@ title: "Q58686: C 6.00 and QuickC 2.50 Offer Additional Support for Bitfields"
 permalink: /pubs/pc/reference/microsoft/kb/Q58686/
 ---
 
+## Q58686: C 6.00 and QuickC 2.50 Offer Additional Support for Bitfields
+
 	Article: Q58686
-	Product: Microsoft C
 	Version(s): 6.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickc

@@ -4,8 +4,9 @@ title: "Q59069: Missing Right Parenthesis in Sample NMAKE File Hangs Machine"
 permalink: /pubs/pc/reference/microsoft/kb/Q59069/
 ---
 
+## Q59069: Missing Right Parenthesis in Sample NMAKE File Hangs Machine
+
 	Article: Q59069
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | h_fortran s_quickc s_quickasm buglist1.00

@@ -4,8 +4,9 @@ title: "Q52103: Casting Large Double to Float Gives Compile or Run-Time Error"
 permalink: /pubs/pc/reference/microsoft/kb/Q52103/
 ---
 
+## Q52103: Casting Large Double to Float Gives Compile or Run-Time Error
+
 	Article: Q52103
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | s_quickc

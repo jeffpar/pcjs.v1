@@ -4,8 +4,9 @@ title: "Q28682: No IBM DW4 or TopView Support for Bus Mouse with InPort"
 permalink: /pubs/pc/reference/microsoft/kb/Q28682/
 ---
 
+## Q28682: No IBM DW4 or TopView Support for Bus Mouse with InPort
+
 	Article: Q28682
-	Product: Microsoft C
 	Version(s): 6.00 6.02 6.10 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

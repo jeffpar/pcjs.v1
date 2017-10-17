@@ -4,8 +4,9 @@ title: "Q40357: Operation of scanf When Using the Width Option in the Format"
 permalink: /pubs/pc/reference/microsoft/kb/Q40357/
 ---
 
+## Q40357: Operation of scanf When Using the Width Option in the Format
+
 	Article: Q40357
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

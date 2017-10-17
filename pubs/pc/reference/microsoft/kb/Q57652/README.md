@@ -4,8 +4,9 @@ title: "Q57652: Example of Older FORTRAN Main to Newer C Procedure Call"
 permalink: /pubs/pc/reference/microsoft/kb/Q57652/
 ---
 
+## Q57652: Example of Older FORTRAN Main to Newer C Procedure Call
+
 	Article: Q57652
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | H_FORTRAN 4.00

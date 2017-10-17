@@ -4,8 +4,9 @@ title: "Q41444: QuickC 2.00 README.DOC: Closing Windows"
 permalink: /pubs/pc/reference/microsoft/kb/Q41444/
 ---
 
+## Q41444: QuickC 2.00 README.DOC: Closing Windows
+
 	Article: Q41444
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

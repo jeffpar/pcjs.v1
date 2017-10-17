@@ -4,8 +4,9 @@ title: "Q40225: The Assemble Command with ADD Instructions"
 permalink: /pubs/pc/reference/microsoft/kb/Q40225/
 ---
 
+## Q40225: The Assemble Command with ADD Instructions
+
 	Article: Q40225
-	Product: Microsoft C
 	Version(s): 2.20 2.30  | 2.20 2.30
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist2.20 buglist2.30

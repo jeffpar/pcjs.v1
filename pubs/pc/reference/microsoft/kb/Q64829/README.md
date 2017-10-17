@@ -4,8 +4,9 @@ title: "Q64829: Tips for Using the Microsoft Advisor Online Help"
 permalink: /pubs/pc/reference/microsoft/kb/Q64829/
 ---
 
+## Q64829: Tips for Using the Microsoft Advisor Online Help
+
 	Article: Q64829
-	Product: Microsoft C
 	Version(s): 1.00 1.10 | 1.00 1.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | s_quickc s_c s_qh

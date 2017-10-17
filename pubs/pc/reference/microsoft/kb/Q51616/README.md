@@ -4,8 +4,9 @@ title: "Q51616: Recursive CL Setting Can Cause D2002 Command-Line Error"
 permalink: /pubs/pc/reference/microsoft/kb/Q51616/
 ---
 
+## Q51616: Recursive CL Setting Can Cause D2002 Command-Line Error
+
 	Article: Q51616
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

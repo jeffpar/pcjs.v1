@@ -4,8 +4,9 @@ title: "Q42929: Limit of 40 Files with LLIBCMT.LIB and LLIBCDLL.LIB"
 permalink: /pubs/pc/reference/microsoft/kb/Q42929/
 ---
 
+## Q42929: Limit of 40 Files with LLIBCMT.LIB and LLIBCDLL.LIB
+
 	Article: Q42929
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: OS/2
 	Flags: ENDUSER |

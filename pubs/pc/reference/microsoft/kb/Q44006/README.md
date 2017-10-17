@@ -4,8 +4,9 @@ title: "Q44006: CodeView Requires PUBLIC to Trace MASM Program in Source Mode"
 permalink: /pubs/pc/reference/microsoft/kb/Q44006/
 ---
 
+## Q44006: CodeView Requires PUBLIC to Trace MASM Program in Source Mode
+
 	Article: Q44006
-	Product: Microsoft C
 	Version(s): 2.20
 	Operating System: MS-DOS
 	Flags: ENDUSER | H_MASM

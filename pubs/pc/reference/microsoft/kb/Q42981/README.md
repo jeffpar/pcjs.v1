@@ -4,8 +4,9 @@ title: "Q42981: Missing Semicolon in GRAPHIC.C"
 permalink: /pubs/pc/reference/microsoft/kb/Q42981/
 ---
 
+## Q42981: Missing Semicolon in GRAPHIC.C
+
 	Article: Q42981
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr

@@ -4,8 +4,9 @@ title: "Q60253: C4061 Long/Short Mismatch in Argument"
 permalink: /pubs/pc/reference/microsoft/kb/Q60253/
 ---
 
+## Q60253: C4061 Long/Short Mismatch in Argument
+
 	Article: Q60253
-	Product: Microsoft C
 	Version(s): 5.00 5.01 6.00 | 5.00 5.01 6.00
 	Operating System: MS-DOS         | OS/2
 	Flags: ENDUSER | s_quickc

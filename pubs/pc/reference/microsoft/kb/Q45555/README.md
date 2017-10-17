@@ -4,8 +4,9 @@ title: "Q45555: QuickC 2.00 Debugger Does Not Display Bit Fields."
 permalink: /pubs/pc/reference/microsoft/kb/Q45555/
 ---
 
+## Q45555: QuickC 2.00 Debugger Does Not Display Bit Fields.
+
 	Article: Q45555
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

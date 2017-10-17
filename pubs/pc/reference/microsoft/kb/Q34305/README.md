@@ -4,8 +4,9 @@ title: "Q34305: Path Strings Need Double Backslashes or fopen/open Fails"
 permalink: /pubs/pc/reference/microsoft/kb/Q34305/
 ---
 
+## Q34305: Path Strings Need Double Backslashes or fopen/open Fails
+
 	Article: Q34305
-	Product: Microsoft C
 	Version(s): 3.00 4.00 5.00 5.10 | 5.10
 	Operating System: MS-DOS              | OS/2
 	Flags: ENDUSER |

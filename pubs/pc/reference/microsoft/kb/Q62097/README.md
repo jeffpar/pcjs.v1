@@ -4,8 +4,9 @@ title: "Q62097: Line Continuation Evaluated Before Inline Comment in C 6.00"
 permalink: /pubs/pc/reference/microsoft/kb/Q62097/
 ---
 
+## Q62097: Line Continuation Evaluated Before Inline Comment in C 6.00
+
 	Article: Q62097
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | S_QUICKC

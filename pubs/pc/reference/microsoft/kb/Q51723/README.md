@@ -4,8 +4,9 @@ title: "Q51723: Using &quot;.&quot; for Path in Inference Rules Causes U1073"
 permalink: /pubs/pc/reference/microsoft/kb/Q51723/
 ---
 
+## Q51723: Using &quot;.&quot; for Path in Inference Rules Causes U1073
+
 	Article: Q51723
-	Product: Microsoft C
 	Version(s): 1.00 1.01 | 1.01
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | buglist1.01

@@ -4,8 +4,9 @@ title: "Q65702: Fatal Error C1002: Out of Heap Space in Pass 2"
 permalink: /pubs/pc/reference/microsoft/kb/Q65702/
 ---
 
+## Q65702: Fatal Error C1002: Out of Heap Space in Pass 2
+
 	Article: Q65702
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

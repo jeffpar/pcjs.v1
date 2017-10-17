@@ -4,8 +4,9 @@ title: "Q37666: Additional Causes of Error C2152"
 permalink: /pubs/pc/reference/microsoft/kb/Q37666/
 ---
 
+## Q37666: Additional Causes of Error C2152
+
 	Article: Q37666
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.00 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | S_QUICKC docerr

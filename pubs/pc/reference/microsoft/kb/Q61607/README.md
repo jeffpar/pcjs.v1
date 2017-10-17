@@ -4,8 +4,9 @@ title: "Q61607: U1355 Bad Command or File Name"
 permalink: /pubs/pc/reference/microsoft/kb/Q61607/
 ---
 
+## Q61607: U1355 Bad Command or File Name
+
 	Article: Q61607
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | docerr filename

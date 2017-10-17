@@ -4,8 +4,9 @@ title: "Q62179: NOGRAPH.OBJ Listed in Online Help Is Actually TXTONLY.OBJ"
 permalink: /pubs/pc/reference/microsoft/kb/Q62179/
 ---
 
+## Q62179: NOGRAPH.OBJ Listed in Online Help Is Actually TXTONLY.OBJ
+
 	Article: Q62179
-	Product: Microsoft C
 	Version(s): 6.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr

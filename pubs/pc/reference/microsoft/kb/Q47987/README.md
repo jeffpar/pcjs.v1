@@ -4,8 +4,9 @@ title: "Q47987: _bios_serialcom Sends and Receives Single Character Data"
 permalink: /pubs/pc/reference/microsoft/kb/Q47987/
 ---
 
+## Q47987: _bios_serialcom Sends and Receives Single Character Data
+
 	Article: Q47987
-	Product: Microsoft C
 	Version(s): 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr S_QuickC S_QuickASM

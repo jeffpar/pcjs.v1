@@ -4,8 +4,9 @@ title: "Q67860: The Microsoft Mouse with Lotus 1-2-3 Release 3.1"
 permalink: /pubs/pc/reference/microsoft/kb/Q67860/
 ---
 
+## Q67860: The Microsoft Mouse with Lotus 1-2-3 Release 3.1
+
 	Article: Q67860
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

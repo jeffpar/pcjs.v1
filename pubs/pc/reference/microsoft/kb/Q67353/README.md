@@ -4,8 +4,9 @@ title: "Q67353: Math Functions in LLIBCDLL May Not Return Zero on Domain Error"
 permalink: /pubs/pc/reference/microsoft/kb/Q67353/
 ---
 
+## Q67353: Math Functions in LLIBCDLL May Not Return Zero on Domain Error
+
 	Article: Q67353
-	Product: Microsoft C
 	Version(s): 6.00 6.00a
 	Operating System: OS/2
 	Flags: ENDUSER | buglist6.00 buglist6.00a

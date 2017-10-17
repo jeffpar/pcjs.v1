@@ -4,8 +4,9 @@ title: "Q48186: Compiling Incorrect or Incomplete C Syntax Can Hang Computer"
 permalink: /pubs/pc/reference/microsoft/kb/Q48186/
 ---
 
+## Q48186: Compiling Incorrect or Incomplete C Syntax Can Hang Computer
+
 	Article: Q48186
-	Product: Microsoft C
 	Version(s): 2.00 2.01
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist2.00 buglist2.01

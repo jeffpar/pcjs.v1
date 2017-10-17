@@ -4,8 +4,9 @@ title: "Q37621: Amount of Disk Space Needed for Minimum C 5.10 Setup for DOS"
 permalink: /pubs/pc/reference/microsoft/kb/Q37621/
 ---
 
+## Q37621: Amount of Disk Space Needed for Minimum C 5.10 Setup for DOS
+
 	Article: Q37621
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q63267: PWB menukey Switch Resets to ALT When Shelling Out to DOS"
 permalink: /pubs/pc/reference/microsoft/kb/Q63267/
 ---
 
+## Q63267: PWB menukey Switch Resets to ALT When Shelling Out to DOS
+
 	Article: Q63267
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist1.00

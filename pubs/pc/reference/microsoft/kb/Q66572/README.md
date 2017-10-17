@@ -4,8 +4,9 @@ title: "Q66572: NMAKE 1.11 Fails to Stop If Command Is Redirected"
 permalink: /pubs/pc/reference/microsoft/kb/Q66572/
 ---
 
+## Q66572: NMAKE 1.11 Fails to Stop If Command Is Redirected
+
 	Article: Q66572
-	Product: Microsoft C
 	Version(s): 1.11
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist1.11 fixlist1.12

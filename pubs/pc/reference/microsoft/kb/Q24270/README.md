@@ -4,8 +4,9 @@ title: "Q24270: Tracking Down a Null Pointer Assignment Error"
 permalink: /pubs/pc/reference/microsoft/kb/Q24270/
 ---
 
+## Q24270: Tracking Down a Null Pointer Assignment Error
+
 	Article: Q24270
-	Product: Microsoft C
 	Version(s): 1.00 1.10 2.00 2.10 2.20 2.30 | 2.20 2.30
 	Operating System: MS-DOS                        | OS/2
 	Flags: ENDUSER | S_C

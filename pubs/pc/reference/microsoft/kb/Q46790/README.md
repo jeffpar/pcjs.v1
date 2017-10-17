@@ -4,8 +4,9 @@ title: "Q46790: Curtime Function Pulls In Time Editor Was Invoked"
 permalink: /pubs/pc/reference/microsoft/kb/Q46790/
 ---
 
+## Q46790: Curtime Function Pulls In Time Editor Was Invoked
+
 	Article: Q46790
-	Product: Microsoft C
 	Version(s): 1.00 | 1.00
 	Operating System: OS/2 | MS-DOS
 	Flags: ENDUSER | buglist1.00 fixlist1.02

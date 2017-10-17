@@ -4,8 +4,9 @@ title: "Q34388: _getimage() Buffer Format is Proprietary"
 permalink: /pubs/pc/reference/microsoft/kb/Q34388/
 ---
 
+## Q34388: _getimage() Buffer Format is Proprietary
+
 	Article: Q34388
-	Product: Microsoft C
 	Version(s): 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER |

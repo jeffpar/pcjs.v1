@@ -4,8 +4,9 @@ title: "Q28494: NEC Multispeed Laptop Continues to Access Drive"
 permalink: /pubs/pc/reference/microsoft/kb/Q28494/
 ---
 
+## Q28494: NEC Multispeed Laptop Continues to Access Drive
+
 	Article: Q28494
-	Product: Microsoft C
 	Version(s): 6.0 6.02 6.10 1.0
 	Operating System: MS-DOS
 	Flags: ENDUSER |

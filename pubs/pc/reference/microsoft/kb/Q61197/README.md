@@ -4,8 +4,9 @@ title: "Q61197: C 6.00 README: Compiler Options Order-Dependant"
 permalink: /pubs/pc/reference/microsoft/kb/Q61197/
 ---
 
+## Q61197: C 6.00 README: Compiler Options Order-Dependant
+
 	Article: Q61197
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

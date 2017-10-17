@@ -4,8 +4,9 @@ title: "Q38267: Error C1033 Cannot Open Assembly-Language Output 'filename'"
 permalink: /pubs/pc/reference/microsoft/kb/Q38267/
 ---
 
+## Q38267: Error C1033 Cannot Open Assembly-Language Output 'filename'
+
 	Article: Q38267
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | s_quickc s_error

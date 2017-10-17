@@ -4,8 +4,9 @@ title: "Q45705: Why There's a 128K Limit on Some Huge Arrays and halloc()s"
 permalink: /pubs/pc/reference/microsoft/kb/Q45705/
 ---
 
+## Q45705: Why There's a 128K Limit on Some Huge Arrays and halloc()s
+
 	Article: Q45705
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | S_QuickC S_QuickASM

@@ -4,8 +4,9 @@ title: "Q19915: Windows Versions 1.01 and 1.02 and the Bus Mouse"
 permalink: /pubs/pc/reference/microsoft/kb/Q19915/
 ---
 
+## Q19915: Windows Versions 1.01 and 1.02 and the Bus Mouse
+
 	Article: Q19915
-	Product: Microsoft C
 	Version(s): 3.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | TAR59473

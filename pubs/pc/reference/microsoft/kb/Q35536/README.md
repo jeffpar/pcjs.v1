@@ -4,8 +4,9 @@ title: "Q35536: How to Write and Use C Extensions"
 permalink: /pubs/pc/reference/microsoft/kb/Q35536/
 ---
 
+## Q35536: How to Write and Use C Extensions
+
 	Article: Q35536
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | appnote

@@ -4,8 +4,9 @@ title: "Q30978: /2 and /O Switches Not Compatible"
 permalink: /pubs/pc/reference/microsoft/kb/Q30978/
 ---
 
+## Q30978: /2 and /O Switches Not Compatible
+
 	Article: Q30978
-	Product: Microsoft C
 	Version(s): 2.30
 	Operating System: OS/2
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q49936: Resizing QuickC and QuickPascal Windows Using Cursor Keys"
 permalink: /pubs/pc/reference/microsoft/kb/Q49936/
 ---
 
+## Q49936: Resizing QuickC and QuickPascal Windows Using Cursor Keys
+
 	Article: Q49936
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QuickAsm S_QuickPas Quick C

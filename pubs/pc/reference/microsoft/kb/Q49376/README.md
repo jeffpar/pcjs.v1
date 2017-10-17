@@ -4,8 +4,9 @@ title: "Q49376: COM Port Time-Out Halts Redirection of CVP to Remote Terminal"
 permalink: /pubs/pc/reference/microsoft/kb/Q49376/
 ---
 
+## Q49376: COM Port Time-Out Halts Redirection of CVP to Remote Terminal
+
 	Article: Q49376
-	Product: Microsoft C
 	Version(s): 2.20 2.30
 	Operating System: OS/2
 	Flags: ENDUSER |

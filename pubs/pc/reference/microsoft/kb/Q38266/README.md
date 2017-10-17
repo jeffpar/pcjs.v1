@@ -4,8 +4,9 @@ title: "Q38266: Error C1015 Cannot Open Include File 'filename'"
 permalink: /pubs/pc/reference/microsoft/kb/Q38266/
 ---
 
+## Q38266: Error C1015 Cannot Open Include File 'filename'
+
 	Article: Q38266
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | s_quickc s_error

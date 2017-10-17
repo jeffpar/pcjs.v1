@@ -4,8 +4,9 @@ title: "Q47990: Possible Causes of &quot;'&#95;&#95;iob' : Unresolved External&q
 permalink: /pubs/pc/reference/microsoft/kb/Q47990/
 ---
 
+## Q47990: Possible Causes of &quot;'&#95;&#95;iob' : Unresolved External&quot;
+
 	Article: Q47990
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: OS/2
 	Flags: ENDUSER | SR# G890807-24188 _iob iob

@@ -4,8 +4,9 @@ title: "Q43401: How to Test for an Error When Using _bios_serialcom Service"
 permalink: /pubs/pc/reference/microsoft/kb/Q43401/
 ---
 
+## Q43401: How to Test for an Error When Using _bios_serialcom Service
+
 	Article: Q43401
-	Product: Microsoft C
 	Version(s): 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickc docerr

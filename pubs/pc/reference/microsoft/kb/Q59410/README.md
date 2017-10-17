@@ -4,8 +4,9 @@ title: "Q59410: What Windows SDK Does to the C Run-Time Libraries"
 permalink: /pubs/pc/reference/microsoft/kb/Q59410/
 ---
 
+## Q59410: What Windows SDK Does to the C Run-Time Libraries
+
 	Article: Q59410
-	Product: Microsoft C
 	Version(s): 5.00 5.10 6.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | w_winsdk

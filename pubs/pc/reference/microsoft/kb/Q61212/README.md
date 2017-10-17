@@ -4,8 +4,9 @@ title: "Q61212: C 6.00 README: CL Environment Variable w/PWB May Cause Problem"
 permalink: /pubs/pc/reference/microsoft/kb/Q61212/
 ---
 
+## Q61212: C 6.00 README: CL Environment Variable w/PWB May Cause Problem
+
 	Article: Q61212
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

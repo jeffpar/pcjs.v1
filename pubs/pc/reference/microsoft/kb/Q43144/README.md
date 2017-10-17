@@ -4,8 +4,9 @@ title: "Q43144: C: Using the _dos_findfirst and _dosfindnext Functions"
 permalink: /pubs/pc/reference/microsoft/kb/Q43144/
 ---
 
+## Q43144: C: Using the _dos_findfirst and _dosfindnext Functions
+
 	Article: Q43144
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS_DOS    | OS/2
 	Flags: ENDUSER | s_quickc

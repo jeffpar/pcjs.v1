@@ -4,8 +4,9 @@ title: "Q29557: Precision of Floating Point Numbers with printf()"
 permalink: /pubs/pc/reference/microsoft/kb/Q29557/
 ---
 
+## Q29557: Precision of Floating Point Numbers with printf()
+
 	Article: Q29557
-	Product: Microsoft C
 	Version(s): 5.00 5.10 6.00 6.00a | 5.10 6.00 6.00a
 	Operating System: MS-DOS               | OS/2
 	Flags: ENDUSER | s_quickc

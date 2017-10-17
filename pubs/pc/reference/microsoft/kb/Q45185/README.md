@@ -4,8 +4,9 @@ title: "Q45185: /43 Starts CodeView with Screen Swapping Enabled"
 permalink: /pubs/pc/reference/microsoft/kb/Q45185/
 ---
 
+## Q45185: /43 Starts CodeView with Screen Swapping Enabled
+
 	Article: Q45185
-	Product: Microsoft C
 	Version(s): 2.20 2.30 | 2.20 2.30
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER |

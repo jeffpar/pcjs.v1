@@ -4,8 +4,9 @@ title: "Q43009: How /NOE (No Extended Dictionary) Is Used by the Linker"
 permalink: /pubs/pc/reference/microsoft/kb/Q43009/
 ---
 
+## Q43009: How /NOE (No Extended Dictionary) Is Used by the Linker
+
 	Article: Q43009
-	Product: Microsoft C
 	Version(s): 3.65 4.06 5.01 | 5.01
 	Operating System: MS-DOS         | OS/2
 	Flags: ENDUSER | S_C H_FORTRAN S_QUICKC

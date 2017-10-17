@@ -4,8 +4,9 @@ title: "Q40484: QuickC 2.00 Does Not Automatically Change Memory Models"
 permalink: /pubs/pc/reference/microsoft/kb/Q40484/
 ---
 
+## Q40484: QuickC 2.00 Does Not Automatically Change Memory Models
+
 	Article: Q40484
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q59437: fstat() Gets Different Results Under FAT and HPFS"
 permalink: /pubs/pc/reference/microsoft/kb/Q59437/
 ---
 
+## Q59437: fstat() Gets Different Results Under FAT and HPFS
+
 	Article: Q59437
-	Product: Microsoft C
 	Version(s): 5.10 6.00 | 5.10 6.00
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | docerr

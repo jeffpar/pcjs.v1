@@ -4,8 +4,9 @@ title: "Q41435: ESC Key Aborts Only the Compile Process in QC Environment"
 permalink: /pubs/pc/reference/microsoft/kb/Q41435/
 ---
 
+## Q41435: ESC Key Aborts Only the Compile Process in QC Environment
+
 	Article: Q41435
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist2.00 docerr

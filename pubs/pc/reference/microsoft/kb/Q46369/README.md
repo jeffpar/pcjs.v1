@@ -4,8 +4,9 @@ title: "Q46369: InPort/Bus Mouse Comparison and Overview"
 permalink: /pubs/pc/reference/microsoft/kb/Q46369/
 ---
 
+## Q46369: InPort/Bus Mouse Comparison and Overview
+
 	Article: Q46369
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: OS/2
 	Flags: ENDUSER | SR# G890626-21385

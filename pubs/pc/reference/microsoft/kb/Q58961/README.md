@@ -4,8 +4,9 @@ title: "Q58961: If .DLL Is Linked with CRTLIB, Then .EXE Must Be Linked, Too"
 permalink: /pubs/pc/reference/microsoft/kb/Q58961/
 ---
 
+## Q58961: If .DLL Is Linked with CRTLIB, Then .EXE Must Be Linked, Too
+
 	Article: Q58961
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: OS/2
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q60975: -Za and OS2.H Are Incompatible"
 permalink: /pubs/pc/reference/microsoft/kb/Q60975/
 ---
 
+## Q60975: -Za and OS2.H Are Incompatible
+
 	Article: Q60975
-	Product: Microsoft C
 	Version(s): 6.00 6.00a
 	Operating System: OS/2
 	Flags: ENDUSER | buglist6.00 buglist6.00a

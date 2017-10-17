@@ -4,8 +4,9 @@ title: "Q41573: QuickC 2.00 README.DOC: Floating-Point Values"
 permalink: /pubs/pc/reference/microsoft/kb/Q41573/
 ---
 
+## Q41573: QuickC 2.00 README.DOC: Floating-Point Values
+
 	Article: Q41573
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr

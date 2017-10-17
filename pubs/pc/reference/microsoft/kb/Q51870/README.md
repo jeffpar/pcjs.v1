@@ -4,8 +4,9 @@ title: "Q51870: Dual-Monitor Setup Requires 8-Bit Data Paths for Both Monitors"
 permalink: /pubs/pc/reference/microsoft/kb/Q51870/
 ---
 
+## Q51870: Dual-Monitor Setup Requires 8-Bit Data Paths for Both Monitors
+
 	Article: Q51870
-	Product: Microsoft C
 	Version(s): 1.00 2.00 2.10 2.20 2.30 | 2.20 2.30
 	Operating System: MS-DOS                   | OS/2
 	Flags: ENDUSER | s_c s_pascal h_fortran h_masm b_basiccom

@@ -4,8 +4,9 @@ title: "Q59933: Clarification of MTDYNA.DOC: Cooperation on Global Data"
 permalink: /pubs/pc/reference/microsoft/kb/Q59933/
 ---
 
+## Q59933: Clarification of MTDYNA.DOC: Cooperation on Global Data
+
 	Article: Q59933
-	Product: Microsoft C
 	Version(s): 5.10 6.00
 	Operating System: OS/2
 	Flags: ENDUSER |

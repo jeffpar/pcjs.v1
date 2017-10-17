@@ -4,8 +4,9 @@ title: "Q22317: matherr and Trapping Floating-Point Errors"
 permalink: /pubs/pc/reference/microsoft/kb/Q22317/
 ---
 
+## Q22317: matherr and Trapping Floating-Point Errors
+
 	Article: Q22317
-	Product: Microsoft C
 	Version(s): 4.00 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER |

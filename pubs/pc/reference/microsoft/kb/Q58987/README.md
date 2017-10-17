@@ -4,8 +4,9 @@ title: "Q58987: Pointer Arithmetic Wraps Around Segment Ends"
 permalink: /pubs/pc/reference/microsoft/kb/Q58987/
 ---
 
+## Q58987: Pointer Arithmetic Wraps Around Segment Ends
+
 	Article: Q58987
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q42078: QuickC 2.00 README.DOC: Example Program SORT.C"
 permalink: /pubs/pc/reference/microsoft/kb/Q42078/
 ---
 
+## Q42078: QuickC 2.00 README.DOC: Example Program SORT.C
+
 	Article: Q42078
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

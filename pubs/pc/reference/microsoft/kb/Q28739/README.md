@@ -4,8 +4,9 @@ title: "Q28739: Programming the Mouse Driver Versus Writing One"
 permalink: /pubs/pc/reference/microsoft/kb/Q28739/
 ---
 
+## Q28739: Programming the Mouse Driver Versus Writing One
+
 	Article: Q28739
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

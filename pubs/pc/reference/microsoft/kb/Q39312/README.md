@@ -4,8 +4,9 @@ title: "Q39312: Commenting Out Blocks of Code and Comments for Debugging"
 permalink: /pubs/pc/reference/microsoft/kb/Q39312/
 ---
 
+## Q39312: Commenting Out Blocks of Code and Comments for Debugging
+
 	Article: Q39312
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

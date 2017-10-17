@@ -4,8 +4,9 @@ title: "Q66307: Accessing Online Help for C and Assembly Topics with Same Name"
 permalink: /pubs/pc/reference/microsoft/kb/Q66307/
 ---
 
+## Q66307: Accessing Online Help for C and Assembly Topics with Same Name
+
 	Article: Q66307
-	Product: Microsoft C
 	Version(s): 2.01 2.51
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QUICKASM

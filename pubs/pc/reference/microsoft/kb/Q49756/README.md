@@ -4,8 +4,9 @@ title: "Q49756: Expressions in Switch Block Must Be Integral"
 permalink: /pubs/pc/reference/microsoft/kb/Q49756/
 ---
 
+## Q49756: Expressions in Switch Block Must Be Integral
+
 	Article: Q49756
-	Product: Microsoft C
 	Version(s): 1.00 1.01 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_C docerr

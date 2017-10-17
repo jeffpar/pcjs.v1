@@ -4,8 +4,9 @@ title: "Q32841: How Bitfields Are Stored in Memory"
 permalink: /pubs/pc/reference/microsoft/kb/Q32841/
 ---
 
+## Q32841: How Bitfields Are Stored in Memory
+
 	Article: Q32841
-	Product: Microsoft C
 	Version(s): 1.04 2.03 3.00 4.00 5.00 5.10 | 5.10
 	Operating System: MS-DOS                        | OS/2
 	Flags: ENDUSER |

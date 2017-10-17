@@ -4,8 +4,9 @@ title: "Q35533: &quot;Unable to Open Swapping File c:&#92;temp&#92;m-0029.vm&quo
 permalink: /pubs/pc/reference/microsoft/kb/Q35533/
 ---
 
+## Q35533: &quot;Unable to Open Swapping File c:&#92;temp&#92;m-0029.vm&quot;
+
 	Article: Q35533
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | appnote

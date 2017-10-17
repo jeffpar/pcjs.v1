@@ -4,8 +4,9 @@ title: "Q61313: malloc() Is Slower in Large and Compact Models"
 permalink: /pubs/pc/reference/microsoft/kb/Q61313/
 ---
 
+## Q61313: malloc() Is Slower in Large and Compact Models
+
 	Article: Q61313
-	Product: Microsoft C
 	Version(s): 5.00 5.10 6.00 | 5.10 6.00
 	Operating System: MS-DOS         | OS/2
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q47964: Contents of Microsoft Academic Edition Packages"
 permalink: /pubs/pc/reference/microsoft/kb/Q47964/
 ---
 
+## Q47964: Contents of Microsoft Academic Edition Packages
+
 	Article: Q47964
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | B_QuickBas

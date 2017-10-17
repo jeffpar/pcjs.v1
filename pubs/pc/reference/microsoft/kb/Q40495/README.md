@@ -4,8 +4,9 @@ title: "Q40495: QuickC 2.00 Lacks the Ability To Print Chart Screens"
 permalink: /pubs/pc/reference/microsoft/kb/Q40495/
 ---
 
+## Q40495: QuickC 2.00 Lacks the Ability To Print Chart Screens
+
 	Article: Q40495
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

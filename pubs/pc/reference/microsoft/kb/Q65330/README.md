@@ -4,8 +4,9 @@ title: "Q65330: C1001: Internal Compiler Error: '@(#)newcode.c:1.87', Line 535"
 permalink: /pubs/pc/reference/microsoft/kb/Q65330/
 ---
 
+## Q65330: C1001: Internal Compiler Error: '@(#)newcode.c:1.87', Line 535
+
 	Article: Q65330
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist6.00

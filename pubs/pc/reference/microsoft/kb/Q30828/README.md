@@ -4,8 +4,9 @@ title: "Q30828: Tags Let You Use the Same TOOLS.INI File for M and MEP"
 permalink: /pubs/pc/reference/microsoft/kb/Q30828/
 ---
 
+## Q30828: Tags Let You Use the Same TOOLS.INI File for M and MEP
+
 	Article: Q30828
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: OS/2
 	Flags: ENDUSER | TAR76127

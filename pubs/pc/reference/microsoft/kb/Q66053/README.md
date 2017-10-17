@@ -4,8 +4,9 @@ title: "Q66053: fputs() Fails with R6003 When Writing to STDAUX"
 permalink: /pubs/pc/reference/microsoft/kb/Q66053/
 ---
 
+## Q66053: fputs() Fails with R6003 When Writing to STDAUX
+
 	Article: Q66053
-	Product: Microsoft C
 	Version(s): 6.00 6.00a
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist6.00 buglist6.00a

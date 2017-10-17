@@ -4,8 +4,9 @@ title: "Q37201: System Memory Allocation Error after Using halloc or malloc"
 permalink: /pubs/pc/reference/microsoft/kb/Q37201/
 ---
 
+## Q37201: System Memory Allocation Error after Using halloc or malloc
+
 	Article: Q37201
-	Product: Microsoft C
 	Version(s): 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | SR# S880914-27

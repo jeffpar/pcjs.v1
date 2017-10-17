@@ -4,8 +4,9 @@ title: "Q57481: C Can Recognize up to 31 Characters of Any Name"
 permalink: /pubs/pc/reference/microsoft/kb/Q57481/
 ---
 
+## Q57481: C Can Recognize up to 31 Characters of Any Name
+
 	Article: Q57481
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | docerr

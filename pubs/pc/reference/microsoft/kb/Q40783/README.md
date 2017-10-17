@@ -4,8 +4,9 @@ title: "Q40783: Assembly Listing Doesn't Match Generated Code in C"
 permalink: /pubs/pc/reference/microsoft/kb/Q40783/
 ---
 
+## Q40783: Assembly Listing Doesn't Match Generated Code in C
+
 	Article: Q40783
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

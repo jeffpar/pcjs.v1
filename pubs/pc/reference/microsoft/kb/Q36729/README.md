@@ -4,8 +4,9 @@ title: "Q36729: Warning C4047 'operator': Different Levels of Indirection"
 permalink: /pubs/pc/reference/microsoft/kb/Q36729/
 ---
 
+## Q36729: Warning C4047 'operator': Different Levels of Indirection
+
 	Article: Q36729
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | s_quickc s_error

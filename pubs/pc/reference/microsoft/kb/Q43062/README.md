@@ -4,8 +4,9 @@ title: "Q43062: Incorrect Code Generated with Conditional Operator"
 permalink: /pubs/pc/reference/microsoft/kb/Q43062/
 ---
 
+## Q43062: Incorrect Code Generated with Conditional Operator
+
 	Article: Q43062
-	Product: Microsoft C
 	Version(s): 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist5.10

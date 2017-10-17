@@ -4,8 +4,9 @@ title: "Q51742: Spawned Process Runs Out of Environment Space"
 permalink: /pubs/pc/reference/microsoft/kb/Q51742/
 ---
 
+## Q51742: Spawned Process Runs Out of Environment Space
+
 	Article: Q51742
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickc s_quickasm

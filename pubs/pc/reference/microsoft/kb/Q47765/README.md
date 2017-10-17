@@ -4,8 +4,9 @@ title: "Q47765: CopyBox Function Doesn't Work Across Files"
 permalink: /pubs/pc/reference/microsoft/kb/Q47765/
 ---
 
+## Q47765: CopyBox Function Doesn't Work Across Files
+
 	Article: Q47765
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | S_C S_Pascal H_Fortran H_MASM

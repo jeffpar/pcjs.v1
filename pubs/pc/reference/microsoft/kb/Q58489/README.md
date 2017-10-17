@@ -4,8 +4,9 @@ title: "Q58489: Tips for Reducing Prolog/Epilog Code in Windows or PM Apps"
 permalink: /pubs/pc/reference/microsoft/kb/Q58489/
 ---
 
+## Q58489: Tips for Reducing Prolog/Epilog Code in Windows or PM Apps
+
 	Article: Q58489
-	Product: Microsoft C
 	Version(s): 6.00    | 6.00
 	Operating System: MS-DOS  | OS/2
 	Flags: ENDUSER |

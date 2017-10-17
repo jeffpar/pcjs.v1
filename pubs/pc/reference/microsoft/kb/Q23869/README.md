@@ -4,8 +4,9 @@ title: "Q23869: malloc() and free() Do Not Return Memory to DOS"
 permalink: /pubs/pc/reference/microsoft/kb/Q23869/
 ---
 
+## Q23869: malloc() and free() Do Not Return Memory to DOS
+
 	Article: Q23869
-	Product: Microsoft C
 	Version(s): 3.00 4.00 5.00 5.10 6.00 6.00a
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickc

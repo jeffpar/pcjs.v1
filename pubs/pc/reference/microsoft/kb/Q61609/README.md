@@ -4,8 +4,9 @@ title: "Q61609: Specific Status of Process ID and CWAIT"
 permalink: /pubs/pc/reference/microsoft/kb/Q61609/
 ---
 
+## Q61609: Specific Status of Process ID and CWAIT
+
 	Article: Q61609
-	Product: Microsoft C
 	Version(s): 5.10 6.00
 	Operating System: OS/2
 	Flags: ENDUSER |

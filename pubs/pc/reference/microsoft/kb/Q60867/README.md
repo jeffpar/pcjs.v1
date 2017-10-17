@@ -4,8 +4,9 @@ title: "Q60867: Looking for Files in Different Directories"
 permalink: /pubs/pc/reference/microsoft/kb/Q60867/
 ---
 
+## Q60867: Looking for Files in Different Directories
+
 	Article: Q60867
-	Product: Microsoft C
 	Version(s): 1.00 1.01 1.10 1.11 | 1.01 1.10 1.11
 	Operating System: MS-DOS              | OS/2
 	Flags: ENDUSER | s_c s_quickc s_quickasm h_fortran

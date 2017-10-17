@@ -4,8 +4,9 @@ title: "Q65648: Some Windows 3.00 Fonts Don't Work with QuickC"
 permalink: /pubs/pc/reference/microsoft/kb/Q65648/
 ---
 
+## Q65648: Some Windows 3.00 Fonts Don't Work with QuickC
+
 	Article: Q65648
-	Product: Microsoft C
 	Version(s): 2.00 2.01 2.50 2.51
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist2.50 buglist2.51 s_c docerr

@@ -4,8 +4,9 @@ title: "Q34922: CodeView Cannot Debug Source Code in Include Files"
 permalink: /pubs/pc/reference/microsoft/kb/Q34922/
 ---
 
+## Q34922: CodeView Cannot Debug Source Code in Include Files
+
 	Article: Q34922
-	Product: Microsoft C
 	Version(s): 1.00 1.10 1.11 2.00 2.02.02 2.10 2.20
 	Operating System: MS-DOS
 	Flags: ENDUSER |

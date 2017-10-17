@@ -4,8 +4,9 @@ title: "Q69064: Brown Screen Color Changes to Yellow After Running PWB"
 permalink: /pubs/pc/reference/microsoft/kb/Q69064/
 ---
 
+## Q69064: Brown Screen Color Changes to Yellow After Running PWB
+
 	Article: Q69064
-	Product: Microsoft C
 	Version(s): 1.00 1.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_c buglist1.00 buglist1.10 remapping

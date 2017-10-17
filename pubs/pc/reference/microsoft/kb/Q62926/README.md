@@ -4,8 +4,9 @@ title: "Q62926: Using C Compiler /Gs Switch in PM Environment"
 permalink: /pubs/pc/reference/microsoft/kb/Q62926/
 ---
 
+## Q62926: Using C Compiler /Gs Switch in PM Environment
+
 	Article: Q62926
-	Product: Microsoft C
 	Version(s): 5.10 6.00
 	Operating System: OS/2
 	Flags: ENDUSER | SR# G900501-110 P_PRESMAN O_OS2SDK

@@ -4,8 +4,9 @@ title: "Q51712: How to Use the Token Pasting Operator in Microsoft C"
 permalink: /pubs/pc/reference/microsoft/kb/Q51712/
 ---
 
+## Q51712: How to Use the Token Pasting Operator in Microsoft C
+
 	Article: Q51712
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | S_QUICKC S_QUICKASM 2.00 2.01

@@ -4,8 +4,9 @@ title: "Q28515: Cipher Data Tape Drive Conflicts with Bus Mouse"
 permalink: /pubs/pc/reference/microsoft/kb/Q28515/
 ---
 
+## Q28515: Cipher Data Tape Drive Conflicts with Bus Mouse
+
 	Article: Q28515
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

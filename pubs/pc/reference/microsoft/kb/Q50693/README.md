@@ -4,8 +4,9 @@ title: "Q50693: Special Macros Not Recognized in NMAKE Inline Files"
 permalink: /pubs/pc/reference/microsoft/kb/Q50693/
 ---
 
+## Q50693: Special Macros Not Recognized in NMAKE Inline Files
+
 	Article: Q50693
-	Product: Microsoft C
 	Version(s): 1.00 1.01 | 1.00 1.01
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER |

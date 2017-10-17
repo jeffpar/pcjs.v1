@@ -4,8 +4,9 @@ title: "Q47737: Filelength() Includes EOF Character in Return Value"
 permalink: /pubs/pc/reference/microsoft/kb/Q47737/
 ---
 
+## Q47737: Filelength() Includes EOF Character in Return Value
+
 	Article: Q47737
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | S_QuickC 2.00

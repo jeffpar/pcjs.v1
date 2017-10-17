@@ -4,8 +4,9 @@ title: "Q43634: How to Get HELPMAKE to Understand &#36;INCLUDE"
 permalink: /pubs/pc/reference/microsoft/kb/Q43634/
 ---
 
+## Q43634: How to Get HELPMAKE to Understand &#36;INCLUDE
+
 	Article: Q43634
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

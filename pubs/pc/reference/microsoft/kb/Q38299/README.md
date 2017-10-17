@@ -4,8 +4,9 @@ title: "Q38299: How CodeView Interprets Values (octal, decimal, hexadecimal)"
 permalink: /pubs/pc/reference/microsoft/kb/Q38299/
 ---
 
+## Q38299: How CodeView Interprets Values (octal, decimal, hexadecimal)
+
 	Article: Q38299
-	Product: Microsoft C
 	Version(s): 1.x 2.00 2.10 2.20 | 2.20
 	Operating System: MS-DOS             | OS/2
 	Flags: ENDUSER |

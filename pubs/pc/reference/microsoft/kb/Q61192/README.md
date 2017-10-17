@@ -4,8 +4,9 @@ title: "Q61192: C 6.00 README: The offsetof Macro"
 permalink: /pubs/pc/reference/microsoft/kb/Q61192/
 ---
 
+## Q61192: C 6.00 README: The offsetof Macro
+
 	Article: Q61192
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

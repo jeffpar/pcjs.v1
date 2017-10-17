@@ -4,8 +4,9 @@ title: "Q40785: Available Memory in C with More Than 20 Files and PC-DOS 3.30"
 permalink: /pubs/pc/reference/microsoft/kb/Q40785/
 ---
 
+## Q40785: Available Memory in C with More Than 20 Files and PC-DOS 3.30
+
 	Article: Q40785
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER |

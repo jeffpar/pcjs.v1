@@ -4,8 +4,9 @@ title: "Q37665: cl /Fs Filename Fails to Generate Symbol Table on Error"
 permalink: /pubs/pc/reference/microsoft/kb/Q37665/
 ---
 
+## Q37665: cl /Fs Filename Fails to Generate Symbol Table on Error
+
 	Article: Q37665
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | docerr

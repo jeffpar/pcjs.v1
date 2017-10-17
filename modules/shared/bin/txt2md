@@ -56,7 +56,7 @@ function processFile(sInputFile, sOutputFile)
                 //
                 if (chCode == 0x7F || chCode == 0x1E) continue;
                 let chNew = Str.CP437ToUnicode[chCode];
-                if (chCode == 0x09 || chNew === undefined) {
+                if (/* chCode == 0x09 || */ chNew === undefined) {
                     throw new Error("line " + l + ", pos " + i + ": unrecognized character (" + chCode + ")");
                 }
                 sNewLine += chNew;

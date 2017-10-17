@@ -4,8 +4,9 @@ title: "Q23609: File Size Limitations for the Microsoft Editor"
 permalink: /pubs/pc/reference/microsoft/kb/Q23609/
 ---
 
+## Q23609: File Size Limitations for the Microsoft Editor
+
 	Article: Q23609
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | TAR62237

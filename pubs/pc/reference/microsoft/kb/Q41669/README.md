@@ -4,8 +4,9 @@ title: "Q41669: QuickC 2.00 README.DOC: Error Message C2429"
 permalink: /pubs/pc/reference/microsoft/kb/Q41669/
 ---
 
+## Q41669: QuickC 2.00 README.DOC: Error Message C2429
+
 	Article: Q41669
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

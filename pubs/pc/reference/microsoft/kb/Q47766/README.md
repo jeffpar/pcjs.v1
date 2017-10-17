@@ -4,8 +4,9 @@ title: "Q47766: _amblksiz Affects Memory Allocation in Near and Far Heaps"
 permalink: /pubs/pc/reference/microsoft/kb/Q47766/
 ---
 
+## Q47766: _amblksiz Affects Memory Allocation in Near and Far Heaps
+
 	Article: Q47766
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | docerr

@@ -4,8 +4,9 @@ title: "Q60750: C Compiler and Linker Send Errors to Stdout Not Stderr"
 permalink: /pubs/pc/reference/microsoft/kb/Q60750/
 ---
 
+## Q60750: C Compiler and Linker Send Errors to Stdout Not Stderr
+
 	Article: Q60750
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_util s_pascal h_fortran h_masm docsup docerr

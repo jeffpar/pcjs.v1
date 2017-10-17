@@ -4,8 +4,9 @@ title: "Q35259: How to Read the Contents of the M Editor Clipboard"
 permalink: /pubs/pc/reference/microsoft/kb/Q35259/
 ---
 
+## Q35259: How to Read the Contents of the M Editor Clipboard
+
 	Article: Q35259
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

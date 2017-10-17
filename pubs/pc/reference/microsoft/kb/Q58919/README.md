@@ -4,8 +4,9 @@ title: "Q58919: How to Change the DOS Memory Allocation Strategy"
 permalink: /pubs/pc/reference/microsoft/kb/Q58919/
 ---
 
+## Q58919: How to Change the DOS Memory Allocation Strategy
+
 	Article: Q58919
-	Product: Microsoft C
 	Version(s): 3.x 4.x 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_c s_quickc s_quickasm h_masm o_msdos 1.00 1.01

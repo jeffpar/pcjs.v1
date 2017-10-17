@@ -4,8 +4,9 @@ title: "Q31485: Making Assignments to PLUS, MINUS and PRINT SCREEN Keys"
 permalink: /pubs/pc/reference/microsoft/kb/Q31485/
 ---
 
+## Q31485: Making Assignments to PLUS, MINUS and PRINT SCREEN Keys
+
 	Article: Q31485
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | tar66615

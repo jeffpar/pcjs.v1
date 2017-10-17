@@ -4,8 +4,9 @@ title: "Q66230: Running Out of Memory in CodeView with /X"
 permalink: /pubs/pc/reference/microsoft/kb/Q66230/
 ---
 
+## Q66230: Running Out of Memory in CodeView with /X
+
 	Article: Q66230
-	Product: Microsoft C
 	Version(s): 3.00 3.10 3.11
 	Operating System: MS-DOS
 	Flags: ENDUSER |

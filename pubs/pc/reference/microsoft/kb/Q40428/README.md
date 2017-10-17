@@ -4,8 +4,9 @@ title: "Q40428: You Cannot Display Past Column 71 in CodeView"
 permalink: /pubs/pc/reference/microsoft/kb/Q40428/
 ---
 
+## Q40428: You Cannot Display Past Column 71 in CodeView
+
 	Article: Q40428
-	Product: Microsoft C
 	Version(s): 2.20   | 2.20
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

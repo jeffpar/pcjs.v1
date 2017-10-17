@@ -4,8 +4,9 @@ title: "Q66575: Multithreaded Version of strtok() in C 6.00 Can Cause GP Fault"
 permalink: /pubs/pc/reference/microsoft/kb/Q66575/
 ---
 
+## Q66575: Multithreaded Version of strtok() in C 6.00 Can Cause GP Fault
+
 	Article: Q66575
-	Product: Microsoft C
 	Version(s): 6.00
 	Operating System: OS/2
 	Flags: ENDUSER | buglist6.00 fixlist6.00a

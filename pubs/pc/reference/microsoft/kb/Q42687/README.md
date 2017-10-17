@@ -4,8 +4,9 @@ title: "Q42687: QuickC 2.00 README.DOC: Type Quantifiers"
 permalink: /pubs/pc/reference/microsoft/kb/Q42687/
 ---
 
+## Q42687: QuickC 2.00 README.DOC: Type Quantifiers
+
 	Article: Q42687
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

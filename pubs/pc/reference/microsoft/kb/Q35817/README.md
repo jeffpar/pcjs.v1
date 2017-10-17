@@ -4,8 +4,9 @@ title: "Q35817: M on an AMDEK System 88 XT Clone"
 permalink: /pubs/pc/reference/microsoft/kb/Q35817/
 ---
 
+## Q35817: M on an AMDEK System 88 XT Clone
+
 	Article: Q35817
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

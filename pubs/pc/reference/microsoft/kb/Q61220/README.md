@@ -4,8 +4,9 @@ title: "Q61220: C 6.00 README: CV: New Statefileread Switch"
 permalink: /pubs/pc/reference/microsoft/kb/Q61220/
 ---
 
+## Q61220: C 6.00 README: CV: New Statefileread Switch
+
 	Article: Q61220
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

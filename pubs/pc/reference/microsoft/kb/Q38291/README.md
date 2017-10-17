@@ -4,8 +4,9 @@ title: "Q38291: Cannot Define Preprocessor Directives with #define"
 permalink: /pubs/pc/reference/microsoft/kb/Q38291/
 ---
 
+## Q38291: Cannot Define Preprocessor Directives with #define
+
 	Article: Q38291
-	Product: Microsoft C
 	Version(s): 4.00 5.00 5.10 | 5.10
 	Operating System: MS-DOS         | OS/2
 	Flags: ENDUSER | S_QUICKC

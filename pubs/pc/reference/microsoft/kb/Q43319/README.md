@@ -4,8 +4,9 @@ title: "Q43319: C: exec and spawn (P_OVERLAY) Will Fail When Bound"
 permalink: /pubs/pc/reference/microsoft/kb/Q43319/
 ---
 
+## Q43319: C: exec and spawn (P_OVERLAY) Will Fail When Bound
+
 	Article: Q43319
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | O_OS2SDK

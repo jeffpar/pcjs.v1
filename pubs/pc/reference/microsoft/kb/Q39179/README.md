@@ -4,8 +4,9 @@ title: "Q39179: Using a Debugging Terminal with CodeView"
 permalink: /pubs/pc/reference/microsoft/kb/Q39179/
 ---
 
+## Q39179: Using a Debugging Terminal with CodeView
+
 	Article: Q39179
-	Product: Microsoft C
 	Version(s): 2.20
 	Operating System: MS-DOS
 	Flags: ENDUSER |

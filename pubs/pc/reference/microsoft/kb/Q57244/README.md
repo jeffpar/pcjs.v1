@@ -4,8 +4,9 @@ title: "Q57244: Workaround for Converting a Float/Double to a String"
 permalink: /pubs/pc/reference/microsoft/kb/Q57244/
 ---
 
+## Q57244: Workaround for Converting a Float/Double to a String
+
 	Article: Q57244
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | s_quickc s_quickasm

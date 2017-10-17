@@ -4,8 +4,9 @@ title: "Q41197: QuickC 2.00 Sporadically Fails to Exec Linker in 3.x BOX"
 permalink: /pubs/pc/reference/microsoft/kb/Q41197/
 ---
 
+## Q41197: QuickC 2.00 Sporadically Fails to Exec Linker in 3.x BOX
+
 	Article: Q41197
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: 0S/2
 	Flags: ENDUSER | buglist2.00

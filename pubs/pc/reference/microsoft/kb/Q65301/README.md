@@ -4,8 +4,9 @@ title: "Q65301: C1001: Internal Compiler Error: '@(#)regMD.c:1.100', Line 929"
 permalink: /pubs/pc/reference/microsoft/kb/Q65301/
 ---
 
+## Q65301: C1001: Internal Compiler Error: '@(#)regMD.c:1.100', Line 929
+
 	Article: Q65301
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist6.00

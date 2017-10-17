@@ -4,8 +4,9 @@ title: "Q67854: Mouse Menu Key Sequences: Corrections and Additions"
 permalink: /pubs/pc/reference/microsoft/kb/Q67854/
 ---
 
+## Q67854: Mouse Menu Key Sequences: Corrections and Additions
+
 	Article: Q67854
-	Product: Microsoft C
 	Version(s): 1.x 2.x 3.x 4.x 5.x 6.x 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | key sequence mouse menu docerr

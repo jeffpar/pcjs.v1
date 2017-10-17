@@ -4,8 +4,9 @@ title: "Q58098: Calling Overlaid Functions Through Pointers Not Supported"
 permalink: /pubs/pc/reference/microsoft/kb/Q58098/
 ---
 
+## Q58098: Calling Overlaid Functions Through Pointers Not Supported
+
 	Article: Q58098
-	Product: Microsoft C
 	Version(s): 1.x 2.x 3.x 4.06 4.07 5.01.21 5.02 5.03
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_C S_QuickC

@@ -4,8 +4,9 @@ title: "Q38159: Mouse Cursor Disappears on Monochrome Displays"
 permalink: /pubs/pc/reference/microsoft/kb/Q38159/
 ---
 
+## Q38159: Mouse Cursor Disappears on Monochrome Displays
+
 	Article: Q38159
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

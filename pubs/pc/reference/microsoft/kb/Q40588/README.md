@@ -4,8 +4,9 @@ title: "Q40588: Search Order for Include Files When Using APPEND Command"
 permalink: /pubs/pc/reference/microsoft/kb/Q40588/
 ---
 
+## Q40588: Search Order for Include Files When Using APPEND Command
+
 	Article: Q40588
-	Product: Microsoft C
 	Version(s): 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | append include

@@ -4,8 +4,9 @@ title: "Q41704: QuickC 2.00, Watch Statement on Implicit Length Arrays"
 permalink: /pubs/pc/reference/microsoft/kb/Q41704/
 ---
 
+## Q41704: QuickC 2.00, Watch Statement on Implicit Length Arrays
+
 	Article: Q41704
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist2.00

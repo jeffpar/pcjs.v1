@@ -4,8 +4,9 @@ title: "Q30364: _remappalette() Does Not Work on Hercules or Olivetti Cards"
 permalink: /pubs/pc/reference/microsoft/kb/Q30364/
 ---
 
+## Q30364: _remappalette() Does Not Work on Hercules or Olivetti Cards
+
 	Article: Q30364
-	Product: Microsoft C
 	Version(s): 5.10 6.00 6.00a
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickc

@@ -4,8 +4,9 @@ title: "Q37199: Coordinates Incorrect in Run-Time Library Manual"
 permalink: /pubs/pc/reference/microsoft/kb/Q37199/
 ---
 
+## Q37199: Coordinates Incorrect in Run-Time Library Manual
+
 	Article: Q37199
-	Product: Microsoft C
 	Version(s): 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr

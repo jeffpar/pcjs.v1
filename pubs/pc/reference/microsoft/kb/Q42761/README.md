@@ -4,8 +4,9 @@ title: "Q42761: Use /Op to Avoid Floating-Point Optimization Problem"
 permalink: /pubs/pc/reference/microsoft/kb/Q42761/
 ---
 
+## Q42761: Use /Op to Avoid Floating-Point Optimization Problem
+
 	Article: Q42761
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | SR# G890216-12181

@@ -4,8 +4,9 @@ title: "Q29196: SORTDEMO.C/ BIND Use and Misuse"
 permalink: /pubs/pc/reference/microsoft/kb/Q29196/
 ---
 
+## Q29196: SORTDEMO.C/ BIND Use and Misuse
+
 	Article: Q29196
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

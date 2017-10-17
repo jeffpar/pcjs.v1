@@ -4,8 +4,9 @@ title: "Q59527: Using RIGHT ARROW on Dialog Line Locks Keyboard or GP Faults"
 permalink: /pubs/pc/reference/microsoft/kb/Q59527/
 ---
 
+## Q59527: Using RIGHT ARROW on Dialog Line Locks Keyboard or GP Faults
+
 	Article: Q59527
-	Product: Microsoft C
 	Version(s): 1.02   | 1.02
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist1.02

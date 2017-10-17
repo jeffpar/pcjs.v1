@@ -4,8 +4,9 @@ title: "Q48790: Potential Problems with Identifiers Over 31 Characters"
 permalink: /pubs/pc/reference/microsoft/kb/Q48790/
 ---
 
+## Q48790: Potential Problems with Identifiers Over 31 Characters
+
 	Article: Q48790
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | S_QuickC S_QuicKASM

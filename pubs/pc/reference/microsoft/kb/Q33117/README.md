@@ -4,8 +4,9 @@ title: "Q33117: Mouse and IBM Page Printer Hang System"
 permalink: /pubs/pc/reference/microsoft/kb/Q33117/
 ---
 
+## Q33117: Mouse and IBM Page Printer Hang System
+
 	Article: Q33117
-	Product: Microsoft C
 	Version(s): 6.x 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

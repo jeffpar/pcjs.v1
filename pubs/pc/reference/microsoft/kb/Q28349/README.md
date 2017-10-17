@@ -4,8 +4,9 @@ title: "Q28349: Hexadecimal Unsigned Char Array Elements Missing &quot;&#92;&quo
 permalink: /pubs/pc/reference/microsoft/kb/Q28349/
 ---
 
+## Q28349: Hexadecimal Unsigned Char Array Elements Missing &quot;&#92;&quot;
+
 	Article: Q28349
-	Product: Microsoft C
 	Version(s): 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr

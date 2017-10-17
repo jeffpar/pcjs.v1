@@ -4,8 +4,9 @@ title: "Q63634: Resolving C Compiler LINKer Response File Error"
 permalink: /pubs/pc/reference/microsoft/kb/Q63634/
 ---
 
+## Q63634: Resolving C Compiler LINKer Response File Error
+
 	Article: Q63634
-	Product: Microsoft C
 	Version(s): 6.00
 	Operating System: OS/2
 	Flags: ENDUSER | O_OS2SDK

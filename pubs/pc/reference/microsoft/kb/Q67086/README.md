@@ -4,8 +4,9 @@ title: "Q67086: va_arg() Fails on Odd-Size Structs Packed on 1-Byte Boundaries"
 permalink: /pubs/pc/reference/microsoft/kb/Q67086/
 ---
 
+## Q67086: va_arg() Fails on Odd-Size Structs Packed on 1-Byte Boundaries
+
 	Article: Q67086
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | s_quickc buglist5.10 buglist6.00 buglist6.00a

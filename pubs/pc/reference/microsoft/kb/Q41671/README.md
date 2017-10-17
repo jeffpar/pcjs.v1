@@ -4,8 +4,9 @@ title: "Q41671: QuickC 2.00 README.DOC: Warning Message C4407"
 permalink: /pubs/pc/reference/microsoft/kb/Q41671/
 ---
 
+## Q41671: QuickC 2.00 README.DOC: Warning Message C4407
+
 	Article: Q41671
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

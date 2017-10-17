@@ -4,8 +4,9 @@ title: "Q41713: Watching a Character Array in QuickC Version 2.00"
 permalink: /pubs/pc/reference/microsoft/kb/Q41713/
 ---
 
+## Q41713: Watching a Character Array in QuickC Version 2.00
+
 	Article: Q41713
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist2.00

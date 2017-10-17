@@ -4,8 +4,9 @@ title: "Q39998: Search and Replace Macro for M Editor"
 permalink: /pubs/pc/reference/microsoft/kb/Q39998/
 ---
 
+## Q39998: Search and Replace Macro for M Editor
+
 	Article: Q39998
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q30033: Microsoft Editor Macro Moves Text with TAB Key"
 permalink: /pubs/pc/reference/microsoft/kb/Q30033/
 ---
 
+## Q30033: Microsoft Editor Macro Moves Text with TAB Key
+
 	Article: Q30033
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

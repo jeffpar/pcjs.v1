@@ -4,8 +4,9 @@ title: "Q43720: Microsoft Mouse and the NEC Powermate"
 permalink: /pubs/pc/reference/microsoft/kb/Q43720/
 ---
 
+## Q43720: Microsoft Mouse and the NEC Powermate
+
 	Article: Q43720
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

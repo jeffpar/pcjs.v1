@@ -4,8 +4,9 @@ title: "Q48885: Newline Character (&#92;n) Is Equivalent to ASCII Linefeed (0x0A
 permalink: /pubs/pc/reference/microsoft/kb/Q48885/
 ---
 
+## Q48885: Newline Character (&#92;n) Is Equivalent to ASCII Linefeed (0x0A)
+
 	Article: Q48885
-	Product: Microsoft C
 	Version(s): 5.00 5.10  | 5.00 5.10
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | S_QuickC S_QuickAsm

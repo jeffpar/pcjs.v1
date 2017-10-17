@@ -4,8 +4,9 @@ title: "Q50793: Why After Edit, fopen with Mode &quot;a&quot; Doesn't Appear to 
 permalink: /pubs/pc/reference/microsoft/kb/Q50793/
 ---
 
+## Q50793: Why After Edit, fopen with Mode &quot;a&quot; Doesn't Appear to Append
+
 	Article: Q50793
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QuickC S_QuickASM

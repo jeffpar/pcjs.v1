@@ -4,8 +4,9 @@ title: "Q58069: C 5.10 Prototypes Differ Between &#92;INCLUDE and &#92;INCLUDE&#
 permalink: /pubs/pc/reference/microsoft/kb/Q58069/
 ---
 
+## Q58069: C 5.10 Prototypes Differ Between &#92;INCLUDE and &#92;INCLUDE&#92;MT
+
 	Article: Q58069
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: OS/2
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q57549: Displaying Only the Subdirectories with _A_SUBDIR"
 permalink: /pubs/pc/reference/microsoft/kb/Q57549/
 ---
 
+## Q57549: Displaying Only the Subdirectories with _A_SUBDIR
+
 	Article: Q57549
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickc

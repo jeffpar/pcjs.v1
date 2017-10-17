@@ -4,8 +4,9 @@ title: "Q64163: /Zp Default Values with and without Specifying the Switch"
 permalink: /pubs/pc/reference/microsoft/kb/Q64163/
 ---
 
+## Q64163: /Zp Default Values with and without Specifying the Switch
+
 	Article: Q64163
-	Product: Microsoft C
 	Version(s): 5.10 6.00 | 5.10 6.00
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER |

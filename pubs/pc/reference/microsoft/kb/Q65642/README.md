@@ -4,8 +4,9 @@ title: "Q65642: getcwd() and _getdcwd Return Backslash for Root Requests"
 permalink: /pubs/pc/reference/microsoft/kb/Q65642/
 ---
 
+## Q65642: getcwd() and _getdcwd Return Backslash for Root Requests
+
 	Article: Q65642
-	Product: Microsoft C
 	Version(s): 5.x 6.00 | 5.x 6.00
 	Operating System: MS-DOS   | OS/2
 	Flags: ENDUSER | buglist6.00 s_quickc

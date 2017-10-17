@@ -4,8 +4,9 @@ title: "Q35232: CPANEL Does Not Display in the OS/2 DOS 3.x Box"
 permalink: /pubs/pc/reference/microsoft/kb/Q35232/
 ---
 
+## Q35232: CPANEL Does Not Display in the OS/2 DOS 3.x Box
+
 	Article: Q35232
-	Product: Microsoft C
 	Version(s): 6.x 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

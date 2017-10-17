@@ -4,8 +4,9 @@ title: "Q45624: CodeView &quot;??&quot; Command Can't Show All of Large Structur
 permalink: /pubs/pc/reference/microsoft/kb/Q45624/
 ---
 
+## Q45624: CodeView &quot;??&quot; Command Can't Show All of Large Structures
+
 	Article: Q45624
-	Product: Microsoft C
 	Version(s): 2.20 2.30 | 2.20 2.30
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | SR# G890607-19918

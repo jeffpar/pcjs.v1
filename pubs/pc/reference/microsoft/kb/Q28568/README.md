@@ -4,8 +4,9 @@ title: "Q28568: Example of TSR Program"
 permalink: /pubs/pc/reference/microsoft/kb/Q28568/
 ---
 
+## Q28568: Example of TSR Program
+
 	Article: Q28568
-	Product: Microsoft C
 	Version(s): 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | APPNOTE

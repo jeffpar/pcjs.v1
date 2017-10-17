@@ -4,8 +4,9 @@ title: "Q45903: chdir() Description Incorrect in Manual and On-Line Help"
 permalink: /pubs/pc/reference/microsoft/kb/Q45903/
 ---
 
+## Q45903: chdir() Description Incorrect in Manual and On-Line Help
+
 	Article: Q45903
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr

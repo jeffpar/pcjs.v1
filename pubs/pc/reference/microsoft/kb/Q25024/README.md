@@ -4,8 +4,9 @@ title: "Q25024: Difference Between Minimum Load Size and Minimum Allocation"
 permalink: /pubs/pc/reference/microsoft/kb/Q25024/
 ---
 
+## Q25024: Difference Between Minimum Load Size and Minimum Allocation
+
 	Article: Q25024
-	Product: Microsoft C
 	Version(s): 3.00 4.00 5.00 5.10 6.00 6.00a
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickc s_link s_exehdr s_exemod

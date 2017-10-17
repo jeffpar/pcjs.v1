@@ -4,8 +4,9 @@ title: "Q38270: Error C1037 Cannot Open Object File 'filename'"
 permalink: /pubs/pc/reference/microsoft/kb/Q38270/
 ---
 
+## Q38270: Error C1037 Cannot Open Object File 'filename'
+
 	Article: Q38270
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | s_quickc s_error

@@ -4,8 +4,9 @@ title: "Q44126: Finding the COM1: Serial Port on a PC/XT/AT Machine"
 permalink: /pubs/pc/reference/microsoft/kb/Q44126/
 ---
 
+## Q44126: Finding the COM1: Serial Port on a PC/XT/AT Machine
+
 	Article: Q44126
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

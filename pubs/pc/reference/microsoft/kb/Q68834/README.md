@@ -4,8 +4,9 @@ title: "Q68834: When Compiling with /P, Errors Are Directed to STDERR"
 permalink: /pubs/pc/reference/microsoft/kb/Q68834/
 ---
 
+## Q68834: When Compiling with /P, Errors Are Directed to STDERR
+
 	Article: Q68834
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | buglist6.00 buglist6.00a

@@ -4,8 +4,9 @@ title: "Q61606: _setvideomoderows() with _VRES2COLOR or _VRES16COLOR Modes"
 permalink: /pubs/pc/reference/microsoft/kb/Q61606/
 ---
 
+## Q61606: _setvideomoderows() with _VRES2COLOR or _VRES16COLOR Modes
+
 	Article: Q61606
-	Product: Microsoft C
 	Version(s): 5.00 5.10 6.00 | 5.10 6.00
 	Operating System: MS-DOS         | OS/2
 	Flags: ENDUSER | s_quickc s_quickasm

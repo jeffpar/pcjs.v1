@@ -4,8 +4,9 @@ title: "Q37254: Excellerator Requires Ms-DOS Version 3.30 with AT&amp;T 6312"
 permalink: /pubs/pc/reference/microsoft/kb/Q37254/
 ---
 
+## Q37254: Excellerator Requires Ms-DOS Version 3.30 with AT&amp;T 6312
+
 	Article: Q37254
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

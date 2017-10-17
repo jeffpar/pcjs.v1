@@ -4,8 +4,9 @@ title: "Q31155: &quot;Unable to Read TOOLS.INI&quot; Message Appears in OS/2 wit
 permalink: /pubs/pc/reference/microsoft/kb/Q31155/
 ---
 
+## Q31155: &quot;Unable to Read TOOLS.INI&quot; Message Appears in OS/2 with MEP
+
 	Article: Q31155
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: OS/2
 	Flags: ENDUSER |

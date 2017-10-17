@@ -4,8 +4,9 @@ title: "Q61469: Bound Program Works Under OS/2, but Hangs Under DOS"
 permalink: /pubs/pc/reference/microsoft/kb/Q61469/
 ---
 
+## Q61469: Bound Program Works Under OS/2, but Hangs Under DOS
+
 	Article: Q61469
-	Product: Microsoft C
 	Version(s): 1.10   | 1.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | s_bind h_fortran s_link

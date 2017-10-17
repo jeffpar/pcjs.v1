@@ -4,8 +4,9 @@ title: "Q63959: Using Unary &quot;+&quot; in QuickC Gives Incorrect Results"
 permalink: /pubs/pc/reference/microsoft/kb/Q63959/
 ---
 
+## Q63959: Using Unary &quot;+&quot; in QuickC Gives Incorrect Results
+
 	Article: Q63959
-	Product: Microsoft C
 	Version(s): 2.50
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickasm buglist2.50 plus

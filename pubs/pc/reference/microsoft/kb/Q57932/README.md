@@ -4,8 +4,9 @@ title: "Q57932: Incorrect Message from &quot;searchall&quot; with Regular Expres
 permalink: /pubs/pc/reference/microsoft/kb/Q57932/
 ---
 
+## Q57932: Incorrect Message from &quot;searchall&quot; with Regular Expressions
+
 	Article: Q57932
-	Product: Microsoft C
 	Version(s): 1.02   | 1.02
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | M MEP buglist1.02

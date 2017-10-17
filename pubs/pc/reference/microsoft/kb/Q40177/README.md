@@ -4,8 +4,9 @@ title: "Q40177: Redirecting Errors to an Error File in M"
 permalink: /pubs/pc/reference/microsoft/kb/Q40177/
 ---
 
+## Q40177: Redirecting Errors to an Error File in M
+
 	Article: Q40177
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

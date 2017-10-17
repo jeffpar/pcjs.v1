@@ -4,8 +4,9 @@ title: "Q50212: C2205: Cannot Initialize Extern Block-Scoped Variables"
 permalink: /pubs/pc/reference/microsoft/kb/Q50212/
 ---
 
+## Q50212: C2205: Cannot Initialize Extern Block-Scoped Variables
+
 	Article: Q50212
-	Product: Microsoft C
 	Version(s): 2.00 2.01
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_C S_QuickASM

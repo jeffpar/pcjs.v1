@@ -4,8 +4,9 @@ title: "Q43335: cegal() Function in EGA.LIB May Not Work Properly"
 permalink: /pubs/pc/reference/microsoft/kb/Q43335/
 ---
 
+## Q43335: cegal() Function in EGA.LIB May Not Work Properly
+
 	Article: Q43335
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

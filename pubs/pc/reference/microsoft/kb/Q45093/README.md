@@ -4,8 +4,9 @@ title: "Q45093: QC Advisor Says That fabs() Prototyped in STDLIB.H"
 permalink: /pubs/pc/reference/microsoft/kb/Q45093/
 ---
 
+## Q45093: QC Advisor Says That fabs() Prototyped in STDLIB.H
+
 	Article: Q45093
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr

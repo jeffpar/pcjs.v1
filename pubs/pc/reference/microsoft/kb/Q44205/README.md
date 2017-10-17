@@ -4,8 +4,9 @@ title: "Q44205: BIND: &quot;Structure Error in .EXE File&quot; Caused by Non-FAP
 permalink: /pubs/pc/reference/microsoft/kb/Q44205/
 ---
 
+## Q44205: BIND: &quot;Structure Error in .EXE File&quot; Caused by Non-FAPI Call
+
 	Article: Q44205
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | SR# G890502-17544

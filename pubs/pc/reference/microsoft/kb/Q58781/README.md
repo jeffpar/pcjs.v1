@@ -4,8 +4,9 @@ title: "Q58781: /PAU Linker Option Doesn't Function in Some Versions of LINK"
 permalink: /pubs/pc/reference/microsoft/kb/Q58781/
 ---
 
+## Q58781: /PAU Linker Option Doesn't Function in Some Versions of LINK
+
 	Article: Q58781
-	Product: Microsoft C
 	Version(s): 3.61 3.65 3.69 5.01.20 5.05 | 5.01.20 5.05
 	Operating System: MS-DOS                      | OS/2
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q66506: Error: Cannot Open Response File : &quot;"
 permalink: /pubs/pc/reference/microsoft/kb/Q66506/
 ---
 
+## Q66506: Error: Cannot Open Response File : &quot;
+
 	Article: Q66506
-	Product: Microsoft C
 	Version(s): 6.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

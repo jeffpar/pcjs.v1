@@ -4,8 +4,9 @@ title: "Q59071: Changing a Compaq's CPU Speed"
 permalink: /pubs/pc/reference/microsoft/kb/Q59071/
 ---
 
+## Q59071: Changing a Compaq's CPU Speed
+
 	Article: Q59071
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickc s_quickasm

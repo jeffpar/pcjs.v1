@@ -4,8 +4,9 @@ title: "Q40573: Problems with Using the Digital Output of a VGA Adapter"
 permalink: /pubs/pc/reference/microsoft/kb/Q40573/
 ---
 
+## Q40573: Problems with Using the Digital Output of a VGA Adapter
+
 	Article: Q40573
-	Product: Microsoft C
 	Version(s): 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QUICKC

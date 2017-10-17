@@ -4,8 +4,9 @@ title: "Q29838: C 5.10 MTDYNA.DOC: Creating Dynamic-Link Libraries"
 permalink: /pubs/pc/reference/microsoft/kb/Q29838/
 ---
 
+## Q29838: C 5.10 MTDYNA.DOC: Creating Dynamic-Link Libraries
+
 	Article: Q29838
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

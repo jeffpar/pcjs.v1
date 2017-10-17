@@ -4,8 +4,9 @@ title: "Q48292: Helpmake Binary Format Is Proprietary"
 permalink: /pubs/pc/reference/microsoft/kb/Q48292/
 ---
 
+## Q48292: Helpmake Binary Format Is Proprietary
+
 	Article: Q48292
-	Product: Microsoft C
 	Version(s): 1.00 1.05 1.06 | 1.00 1.05 1.06
 	Operating System: MS-DOS         | OS/2
 	Flags: ENDUSER | s_helpmake

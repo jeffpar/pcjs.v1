@@ -4,8 +4,9 @@ title: "Q60335: Using Second _ellipse() Call to Erase Text Can Fail"
 permalink: /pubs/pc/reference/microsoft/kb/Q60335/
 ---
 
+## Q60335: Using Second _ellipse() Call to Erase Text Can Fail
+
 	Article: Q60335
-	Product: Microsoft C
 	Version(s): 2.00 2.01
 	Operating System: MS-DOS
 	Flags: ENDUSER |

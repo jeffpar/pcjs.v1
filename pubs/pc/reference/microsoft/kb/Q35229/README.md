@@ -4,8 +4,9 @@ title: "Q35229: CPANEL May Crash if /S Switch Used Previously"
 permalink: /pubs/pc/reference/microsoft/kb/Q35229/
 ---
 
+## Q35229: CPANEL May Crash if /S Switch Used Previously
+
 	Article: Q35229
-	Product: Microsoft C
 	Version(s): 6.x 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

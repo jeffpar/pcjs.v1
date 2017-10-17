@@ -4,8 +4,9 @@ title: "Q34669: L1087: &quot;Unexpected End-of-File on Scratch File&quot;"
 permalink: /pubs/pc/reference/microsoft/kb/Q34669/
 ---
 
+## Q34669: L1087: &quot;Unexpected End-of-File on Scratch File&quot;
+
 	Article: Q34669
-	Product: Microsoft C
 	Version(s): 3.x 5.x  | 5.10
 	Operating System: MS-DOS   | OS/2
 	Flags: ENDUSER |

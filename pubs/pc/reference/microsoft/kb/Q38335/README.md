@@ -4,8 +4,9 @@ title: "Q38335: sscanf Example Using a Comma (,) as Delimiter"
 permalink: /pubs/pc/reference/microsoft/kb/Q38335/
 ---
 
+## Q38335: sscanf Example Using a Comma (,) as Delimiter
+
 	Article: Q38335
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | s_quickc

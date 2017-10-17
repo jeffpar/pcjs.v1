@@ -4,8 +4,9 @@ title: "Q28428: Menu Problems with Leading Edge D2 in 43-Line Mode"
 permalink: /pubs/pc/reference/microsoft/kb/Q28428/
 ---
 
+## Q28428: Menu Problems with Leading Edge D2 in 43-Line Mode
+
 	Article: Q28428
-	Product: Microsoft C
 	Version(s): 1.0
 	Operating System: MS-DOS
 	Flags: ENDUSER |

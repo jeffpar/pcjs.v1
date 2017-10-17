@@ -4,8 +4,9 @@ title: "Q50698: CodeView 2.20 Does Not Allow Routine.Variable Specification"
 permalink: /pubs/pc/reference/microsoft/kb/Q50698/
 ---
 
+## Q50698: CodeView 2.20 Does Not Allow Routine.Variable Specification
+
 	Article: Q50698
-	Product: Microsoft C
 	Version(s): 2.20   | 2.20
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | S_PASCAL S_C H_FORTRAN H_MASM DOCERR

@@ -4,8 +4,9 @@ title: "Q44207: Example for freopen Is Incorrect in C, QuickC Manuals"
 permalink: /pubs/pc/reference/microsoft/kb/Q44207/
 ---
 
+## Q44207: Example for freopen Is Incorrect in C, QuickC Manuals
+
 	Article: Q44207
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | S_QuickC docerr

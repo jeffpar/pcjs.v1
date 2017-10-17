@@ -4,8 +4,9 @@ title: "Q51865: /Zp4 Does Not Work with Standard Stream Handles"
 permalink: /pubs/pc/reference/microsoft/kb/Q51865/
 ---
 
+## Q51865: /Zp4 Does Not Work with Standard Stream Handles
+
 	Article: Q51865
-	Product: Microsoft C
 	Version(s): 5.10 6.00 6.00a | 5.10 6.00 6.00a
 	Operating System: MS-DOS          | OS/2
 	Flags: ENDUSER | S_QUICKC buglist5.10 buglist6.00 buglist6.00a

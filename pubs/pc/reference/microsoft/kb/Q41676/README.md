@@ -4,8 +4,9 @@ title: "Q41676: QuickC 2.00 README.DOC: Linker Warning L4024"
 permalink: /pubs/pc/reference/microsoft/kb/Q41676/
 ---
 
+## Q41676: QuickC 2.00 README.DOC: Linker Warning L4024
+
 	Article: Q41676
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

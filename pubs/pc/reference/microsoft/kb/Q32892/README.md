@@ -4,8 +4,9 @@ title: "Q32892: Compiling with /Zi Causes Code Motion Optimization Suppression"
 permalink: /pubs/pc/reference/microsoft/kb/Q32892/
 ---
 
+## Q32892: Compiling with /Zi Causes Code Motion Optimization Suppression
+
 	Article: Q32892
-	Product: Microsoft C
 	Version(s): 4.00 5.00 5.10 | 5.10
 	Operating System: MS-DOS         | OS/2
 	Flags: ENDUSER |

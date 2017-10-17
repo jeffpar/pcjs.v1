@@ -4,8 +4,9 @@ title: "Q49006: DOS APPEND Is Not Utilized with access() Function"
 permalink: /pubs/pc/reference/microsoft/kb/Q49006/
 ---
 
+## Q49006: DOS APPEND Is Not Utilized with access() Function
+
 	Article: Q49006
-	Product: Microsoft C
 	Version(s): 4.00 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QuickC

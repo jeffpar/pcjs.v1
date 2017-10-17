@@ -4,8 +4,9 @@ title: "Q61210: C 6.00 README: Use Only Alpha Numeric Characters in PWB Build"
 permalink: /pubs/pc/reference/microsoft/kb/Q61210/
 ---
 
+## Q61210: C 6.00 README: Use Only Alpha Numeric Characters in PWB Build
+
 	Article: Q61210
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

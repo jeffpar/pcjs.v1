@@ -4,8 +4,9 @@ title: "Q41663: QuickC 2.00 README.DOC: Page 190 Example"
 permalink: /pubs/pc/reference/microsoft/kb/Q41663/
 ---
 
+## Q41663: QuickC 2.00 README.DOC: Page 190 Example
+
 	Article: Q41663
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

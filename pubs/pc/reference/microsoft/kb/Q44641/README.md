@@ -4,8 +4,9 @@ title: "Q44641: QuickC 2.00 Has Problems with BREAK Key on TANDY 1000 TX"
 permalink: /pubs/pc/reference/microsoft/kb/Q44641/
 ---
 
+## Q44641: QuickC 2.00 Has Problems with BREAK Key on TANDY 1000 TX
+
 	Article: Q44641
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist2.00 appnote

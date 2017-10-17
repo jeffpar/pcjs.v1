@@ -4,8 +4,9 @@ title: "Q41667: QuickC 2.00 README.DOC: Error Message C2177"
 permalink: /pubs/pc/reference/microsoft/kb/Q41667/
 ---
 
+## Q41667: QuickC 2.00 README.DOC: Error Message C2177
+
 	Article: Q41667
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q40503: Explanation of Linkers Shipped with QuickC Version 2.00"
 permalink: /pubs/pc/reference/microsoft/kb/Q40503/
 ---
 
+## Q40503: Explanation of Linkers Shipped with QuickC Version 2.00
+
 	Article: Q40503
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

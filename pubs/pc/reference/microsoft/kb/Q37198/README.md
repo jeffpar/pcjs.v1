@@ -4,8 +4,9 @@ title: "Q37198: Setup Won't Accept Drive on Novell Network"
 permalink: /pubs/pc/reference/microsoft/kb/Q37198/
 ---
 
+## Q37198: Setup Won't Accept Drive on Novell Network
+
 	Article: Q37198
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

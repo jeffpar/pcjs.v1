@@ -4,8 +4,9 @@ title: "Q32324: C 5.00 and 5.10 putenv() Example Program Missing Backslashes"
 permalink: /pubs/pc/reference/microsoft/kb/Q32324/
 ---
 
+## Q32324: C 5.00 and 5.10 putenv() Example Program Missing Backslashes
+
 	Article: Q32324
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | docerr

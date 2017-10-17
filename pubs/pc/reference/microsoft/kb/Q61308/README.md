@@ -4,8 +4,9 @@ title: "Q61308: /Fs Does Not Locate Error When #line Directive Is Specified"
 permalink: /pubs/pc/reference/microsoft/kb/Q61308/
 ---
 
+## Q61308: /Fs Does Not Locate Error When #line Directive Is Specified
+
 	Article: Q61308
-	Product: Microsoft C
 	Version(s): 5.10 6.00 | 5.10 6.00
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | buglist6.00

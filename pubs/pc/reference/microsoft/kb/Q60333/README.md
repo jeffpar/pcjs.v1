@@ -4,8 +4,9 @@ title: "Q60333: _bios_serialcom() May Not Work at 9600 and 4800"
 permalink: /pubs/pc/reference/microsoft/kb/Q60333/
 ---
 
+## Q60333: _bios_serialcom() May Not Work at 9600 and 4800
+
 	Article: Q60333
-	Product: Microsoft C
 	Version(s): 5.10 6.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QUICKC

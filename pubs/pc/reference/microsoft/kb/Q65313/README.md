@@ -4,8 +4,9 @@ title: "Q65313: Documentation for _strerror() Return Value Is Incorrect"
 permalink: /pubs/pc/reference/microsoft/kb/Q65313/
 ---
 
+## Q65313: Documentation for _strerror() Return Value Is Incorrect
+
 	Article: Q65313
-	Product: Microsoft C
 	Version(s): 5.10 6.00 6.00a | 5.10 6.00 6.00a
 	Operating System: MS-DOS          | OS/2
 	Flags: ENDUSER | docerr s_quickc

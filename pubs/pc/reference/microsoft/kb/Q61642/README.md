@@ -4,8 +4,9 @@ title: "Q61642: Programmer's WorkBench Edit Switch Is Unimplemented"
 permalink: /pubs/pc/reference/microsoft/kb/Q61642/
 ---
 
+## Q61642: Programmer's WorkBench Edit Switch Is Unimplemented
+
 	Article: Q61642
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | docerr

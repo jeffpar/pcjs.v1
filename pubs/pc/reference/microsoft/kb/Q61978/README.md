@@ -4,8 +4,9 @@ title: "Q61978: NMAKE U1001 Illegal Character Caused by Corrupted MAKEDIR"
 permalink: /pubs/pc/reference/microsoft/kb/Q61978/
 ---
 
+## Q61978: NMAKE U1001 Illegal Character Caused by Corrupted MAKEDIR
+
 	Article: Q61978
-	Product: Microsoft C
 	Version(s): 1.11
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist1.11

@@ -4,8 +4,9 @@ title: "Q48444: The Interrupt Attribute Pushes Registers on the Stack"
 permalink: /pubs/pc/reference/microsoft/kb/Q48444/
 ---
 
+## Q48444: The Interrupt Attribute Pushes Registers on the Stack
+
 	Article: Q48444
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QuickC  S_QuickASM

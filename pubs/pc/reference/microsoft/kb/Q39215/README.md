@@ -4,8 +4,9 @@ title: "Q39215: Pattern Format for _setfillmask"
 permalink: /pubs/pc/reference/microsoft/kb/Q39215/
 ---
 
+## Q39215: Pattern Format for _setfillmask
+
 	Article: Q39215
-	Product: Microsoft C
 	Version(s): 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | _getfillmask

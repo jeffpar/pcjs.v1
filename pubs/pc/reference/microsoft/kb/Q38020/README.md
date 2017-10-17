@@ -4,8 +4,9 @@ title: "Q38020: CVPACK /p Causes a More Complete Packing"
 permalink: /pubs/pc/reference/microsoft/kb/Q38020/
 ---
 
+## Q38020: CVPACK /p Causes a More Complete Packing
+
 	Article: Q38020
-	Product: Microsoft C
 	Version(s): 2.20
 	Operating System: MS-DOS
 	Flags: ENDUSER |

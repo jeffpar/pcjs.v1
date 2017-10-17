@@ -4,8 +4,9 @@ title: "Q67341: Trail of Multiple Cursors in Desqview 386"
 permalink: /pubs/pc/reference/microsoft/kb/Q67341/
 ---
 
+## Q67341: Trail of Multiple Cursors in Desqview 386
+
 	Article: Q67341
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | cursors trail mouse port setup

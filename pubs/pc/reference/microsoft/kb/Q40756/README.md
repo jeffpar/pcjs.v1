@@ -4,8 +4,9 @@ title: "Q40756: Bad Code for Expression Parameter of outp() with -Oi"
 permalink: /pubs/pc/reference/microsoft/kb/Q40756/
 ---
 
+## Q40756: Bad Code for Expression Parameter of outp() with -Oi
+
 	Article: Q40756
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | SR# G881205-7390

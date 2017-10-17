@@ -4,8 +4,9 @@ title: "Q44413: How to Spawn C 5.10 Compiler Passes without CL.EXE"
 permalink: /pubs/pc/reference/microsoft/kb/Q44413/
 ---
 
+## Q44413: How to Spawn C 5.10 Compiler Passes without CL.EXE
+
 	Article: Q44413
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | SR# G890503-17633 c1.exe c2.exe c3.exe

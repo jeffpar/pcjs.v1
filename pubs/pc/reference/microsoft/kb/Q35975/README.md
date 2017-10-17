@@ -4,8 +4,9 @@ title: "Q35975: Sluggish or Jerky Mouse Motion in PC DOS Version 4.00 Shell"
 permalink: /pubs/pc/reference/microsoft/kb/Q35975/
 ---
 
+## Q35975: Sluggish or Jerky Mouse Motion in PC DOS Version 4.00 Shell
+
 	Article: Q35975
-	Product: Microsoft C
 	Version(s): 4.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

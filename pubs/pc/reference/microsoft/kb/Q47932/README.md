@@ -4,8 +4,9 @@ title: "Q47932: C 5.10 Multi-Thread Library or DLL Limited to 32 Threads"
 permalink: /pubs/pc/reference/microsoft/kb/Q47932/
 ---
 
+## Q47932: C 5.10 Multi-Thread Library or DLL Limited to 32 Threads
+
 	Article: Q47932
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: OS/2
 	Flags: ENDUSER |

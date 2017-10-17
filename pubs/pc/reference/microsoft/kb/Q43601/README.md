@@ -4,8 +4,9 @@ title: "Q43601: CodeView May Single Step onto a Comment Line"
 permalink: /pubs/pc/reference/microsoft/kb/Q43601/
 ---
 
+## Q43601: CodeView May Single Step onto a Comment Line
+
 	Article: Q43601
-	Product: Microsoft C
 	Version(s): 2.20   | 2.20
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist2.20

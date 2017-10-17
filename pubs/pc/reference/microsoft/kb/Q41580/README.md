@@ -4,8 +4,9 @@ title: "Q41580: Graphics Lib. Ref. Incorrectly References Optimizing Compiler"
 permalink: /pubs/pc/reference/microsoft/kb/Q41580/
 ---
 
+## Q41580: Graphics Lib. Ref. Incorrectly References Optimizing Compiler
+
 	Article: Q41580
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr

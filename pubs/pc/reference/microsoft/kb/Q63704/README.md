@@ -4,8 +4,9 @@ title: "Q63704: Library Sizes for QuickC 2.50"
 permalink: /pubs/pc/reference/microsoft/kb/Q63704/
 ---
 
+## Q63704: Library Sizes for QuickC 2.50
+
 	Article: Q63704
-	Product: Microsoft C
 	Version(s): 2.50 2.51
 	Operating System: MS-DOS
 	Flags: ENDUSER |

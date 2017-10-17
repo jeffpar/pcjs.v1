@@ -4,8 +4,9 @@ title: "Q41578: &quot;st&quot; Is the Floating Point Stack Register in In-Line A
 permalink: /pubs/pc/reference/microsoft/kb/Q41578/
 ---
 
+## Q41578: &quot;st&quot; Is the Floating Point Stack Register in In-Line Assembly
+
 	Article: Q41578
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

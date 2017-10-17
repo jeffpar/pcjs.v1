@@ -4,8 +4,9 @@ title: "Q67031: C1001: '@(#)regMD.c:1.100', Line 3101"
 permalink: /pubs/pc/reference/microsoft/kb/Q67031/
 ---
 
+## Q67031: C1001: '@(#)regMD.c:1.100', Line 3101
+
 	Article: Q67031
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | buglist6.00 buglist6.00a

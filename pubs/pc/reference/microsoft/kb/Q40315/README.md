@@ -4,8 +4,9 @@ title: "Q40315: QC 2.00 SAMPLES.DOC: Sample Program Descriptions"
 permalink: /pubs/pc/reference/microsoft/kb/Q40315/
 ---
 
+## Q40315: QC 2.00 SAMPLES.DOC: Sample Program Descriptions
+
 	Article: Q40315
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: enduser |

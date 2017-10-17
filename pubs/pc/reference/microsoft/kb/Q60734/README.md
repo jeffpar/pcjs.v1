@@ -4,8 +4,9 @@ title: "Q60734: C4127 Is Generated When Subexpression Evaluates to a Constant"
 permalink: /pubs/pc/reference/microsoft/kb/Q60734/
 ---
 
+## Q60734: C4127 Is Generated When Subexpression Evaluates to a Constant
+
 	Article: Q60734
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

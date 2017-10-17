@@ -4,8 +4,9 @@ title: "Q68475: &quot;C2118: Negative Subscript&quot; May Be Caused by int Expre
 permalink: /pubs/pc/reference/microsoft/kb/Q68475/
 ---
 
+## Q68475: &quot;C2118: Negative Subscript&quot; May Be Caused by int Expression
+
 	Article: Q68475
-	Product: Microsoft C
 	Version(s): 5.10 6.00 6.00a | 5.10 6.00 6.00a
 	Operating System: MS-DOS          | OS/2
 	Flags: ENDUSER | s_quickc

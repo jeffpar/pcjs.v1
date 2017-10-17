@@ -4,8 +4,9 @@ title: "Q69347: PWB 1.10 Dialog Boxes May Blink After Dialog Help Is Obtained"
 permalink: /pubs/pc/reference/microsoft/kb/Q69347/
 ---
 
+## Q69347: PWB 1.10 Dialog Boxes May Blink After Dialog Help Is Obtained
+
 	Article: Q69347
-	Product: Microsoft C
 	Version(s): 1.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist1.10 flicker

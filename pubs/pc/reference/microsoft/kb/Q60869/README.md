@@ -4,8 +4,9 @@ title: "Q60869: How to Explicitly Reference Command-Line Tail"
 permalink: /pubs/pc/reference/microsoft/kb/Q60869/
 ---
 
+## Q60869: How to Explicitly Reference Command-Line Tail
+
 	Article: Q60869
-	Product: Microsoft C
 	Version(s): 5.x 6.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickc s_quickasm

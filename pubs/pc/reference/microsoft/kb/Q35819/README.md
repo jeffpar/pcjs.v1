@@ -4,8 +4,9 @@ title: "Q35819: Placing the NULL Character in a File with M/MEP"
 permalink: /pubs/pc/reference/microsoft/kb/Q35819/
 ---
 
+## Q35819: Placing the NULL Character in a File with M/MEP
+
 	Article: Q35819
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q65331: /G1 Switch Does Not Work As Expected"
 permalink: /pubs/pc/reference/microsoft/kb/Q65331/
 ---
 
+## Q65331: /G1 Switch Does Not Work As Expected
+
 	Article: Q65331
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist6.00

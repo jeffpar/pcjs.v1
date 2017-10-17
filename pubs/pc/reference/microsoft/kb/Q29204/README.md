@@ -4,8 +4,9 @@ title: "Q29204: Serial Mouse Pin-Outs"
 permalink: /pubs/pc/reference/microsoft/kb/Q29204/
 ---
 
+## Q29204: Serial Mouse Pin-Outs
+
 	Article: Q29204
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

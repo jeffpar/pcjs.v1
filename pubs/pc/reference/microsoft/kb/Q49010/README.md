@@ -4,8 +4,9 @@ title: "Q49010: How to Search and Replace Control Characters with M Editor"
 permalink: /pubs/pc/reference/microsoft/kb/Q49010/
 ---
 
+## Q49010: How to Search and Replace Control Characters with M Editor
+
 	Article: Q49010
-	Product: Microsoft C
 	Version(s): 1.00 1.01 1.02 | 1.00 1.01 1.02
 	Operating System: MS-DOS         | OS/2
 	Flags: ENDUSER |

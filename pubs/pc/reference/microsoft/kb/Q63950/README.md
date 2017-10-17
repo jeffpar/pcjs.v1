@@ -4,8 +4,9 @@ title: "Q63950: Creating a Compile Window Macro for the M Editor Version 1.02"
 permalink: /pubs/pc/reference/microsoft/kb/Q63950/
 ---
 
+## Q63950: Creating a Compile Window Macro for the M Editor Version 1.02
+
 	Article: Q63950
-	Product: Microsoft C
 	Version(s): 1.02   | 1.02
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q69350: CHRTDEMO Example Gives C2059 Error with ANSI Compatibility Set"
 permalink: /pubs/pc/reference/microsoft/kb/Q69350/
 ---
 
+## Q69350: CHRTDEMO Example Gives C2059 Error with ANSI Compatibility Set
+
 	Article: Q69350
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | s_quickc chartdemo pgchart

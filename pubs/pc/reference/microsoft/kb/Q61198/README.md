@@ -4,8 +4,9 @@ title: "Q61198: C 6.00 README: setjmp/longjmp with /Ox, /Oe, /Ol, or /Og"
 permalink: /pubs/pc/reference/microsoft/kb/Q61198/
 ---
 
+## Q61198: C 6.00 README: setjmp/longjmp with /Ox, /Oe, /Ol, or /Og
+
 	Article: Q61198
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

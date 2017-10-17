@@ -4,8 +4,9 @@ title: "Q67032: C1001: exphelp.c, Line 370 and regMD.c, Line 725"
 permalink: /pubs/pc/reference/microsoft/kb/Q67032/
 ---
 
+## Q67032: C1001: exphelp.c, Line 370 and regMD.c, Line 725
+
 	Article: Q67032
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | buglist6.00 buglist6.00a

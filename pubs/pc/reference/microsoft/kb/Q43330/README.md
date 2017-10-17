@@ -4,8 +4,9 @@ title: "Q43330: How to Use _remappalette in EGA Modes"
 permalink: /pubs/pc/reference/microsoft/kb/Q43330/
 ---
 
+## Q43330: How to Use _remappalette in EGA Modes
+
 	Article: Q43330
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickc

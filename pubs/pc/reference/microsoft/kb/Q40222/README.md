@@ -4,8 +4,9 @@ title: "Q40222: CTRL+INS Fails after Initial Use on Some Clones"
 permalink: /pubs/pc/reference/microsoft/kb/Q40222/
 ---
 
+## Q40222: CTRL+INS Fails after Initial Use on Some Clones
+
 	Article: Q40222
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist2.00

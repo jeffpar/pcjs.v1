@@ -4,8 +4,9 @@ title: "Q67781: C1001: Internal Compiler Error: grammar.c, Line 140"
 permalink: /pubs/pc/reference/microsoft/kb/Q67781/
 ---
 
+## Q67781: C1001: Internal Compiler Error: grammar.c, Line 140
+
 	Article: Q67781
-	Product: Microsoft C
 	Version(s): 6.00a  | 6.00a
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist6.00a

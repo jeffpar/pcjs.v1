@@ -4,8 +4,9 @@ title: "Q29559: Predefined File Handles in OS/2 Are Stdin, Stdout, and Stderr"
 permalink: /pubs/pc/reference/microsoft/kb/Q29559/
 ---
 
+## Q29559: Predefined File Handles in OS/2 Are Stdin, Stdout, and Stderr
+
 	Article: Q29559
-	Product: Microsoft C
 	Version(s): 5.10 6.00 6.00a | 5.10 6.00 6.00a
 	Operating System: MS-DOS          | OS/2
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q47931: Linker Error L1063 and Linking Over 1000 Object Modules"
 permalink: /pubs/pc/reference/microsoft/kb/Q47931/
 ---
 
+## Q47931: Linker Error L1063 and Linking Over 1000 Object Modules
+
 	Article: Q47931
-	Product: Microsoft C
 	Version(s): 5.01.21 5.03
 	Operating System: OS/2
 	Flags: ENDUSER | S_C S_CodeView

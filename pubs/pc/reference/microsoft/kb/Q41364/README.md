@@ -4,8 +4,9 @@ title: "Q41364: QuickC 2.00 README.DOC: Using QuickC on a Floppy System"
 permalink: /pubs/pc/reference/microsoft/kb/Q41364/
 ---
 
+## Q41364: QuickC 2.00 README.DOC: Using QuickC on a Floppy System
+
 	Article: Q41364
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

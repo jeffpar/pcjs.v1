@@ -4,8 +4,9 @@ title: "Q48869: Long TMP Environment Variable Causes L1089"
 permalink: /pubs/pc/reference/microsoft/kb/Q48869/
 ---
 
+## Q48869: Long TMP Environment Variable Causes L1089
+
 	Article: Q48869
-	Product: Microsoft C
 	Version(s): 5.03   | 5.03
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | h_fortran

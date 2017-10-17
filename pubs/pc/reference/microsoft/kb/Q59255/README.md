@@ -4,8 +4,9 @@ title: "Q59255: C 5.10 Has a Default Threshold of 32,767 Bytes"
 permalink: /pubs/pc/reference/microsoft/kb/Q59255/
 ---
 
+## Q59255: C 5.10 Has a Default Threshold of 32,767 Bytes
+
 	Article: Q59255
-	Product: Microsoft C
 	Version(s): 5.10 6.00 | 5.10 6.00
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q24910: Memory Not Freed by DOS 2.x for exec or spawn with P_OVERLAY"
 permalink: /pubs/pc/reference/microsoft/kb/Q24910/
 ---
 
+## Q24910: Memory Not Freed by DOS 2.x for exec or spawn with P_OVERLAY
+
 	Article: Q24910
-	Product: Microsoft C
 	Version(s): 4.00 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | tar57672

@@ -4,8 +4,9 @@ title: "Q59932: Which Mouse Menus Work with Which Version of Lotus"
 permalink: /pubs/pc/reference/microsoft/kb/Q59932/
 ---
 
+## Q59932: Which Mouse Menus Work with Which Version of Lotus
+
 	Article: Q59932
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

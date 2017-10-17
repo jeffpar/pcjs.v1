@@ -4,8 +4,9 @@ title: "Q66287: What _getvideoconfig() Returns for Non-Standard Adapters"
 permalink: /pubs/pc/reference/microsoft/kb/Q66287/
 ---
 
+## Q66287: What _getvideoconfig() Returns for Non-Standard Adapters
+
 	Article: Q66287
-	Product: Microsoft C
 	Version(s): 6.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickc s_quickasm 2.50 2.51

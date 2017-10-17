@@ -4,8 +4,9 @@ title: "Q50524: C Run-Time Routines Cannot Be Placed in an Overlay"
 permalink: /pubs/pc/reference/microsoft/kb/Q50524/
 ---
 
+## Q50524: C Run-Time Routines Cannot Be Placed in an Overlay
+
 	Article: Q50524
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QuickC S_QuickASM

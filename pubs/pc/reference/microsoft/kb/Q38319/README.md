@@ -4,8 +4,9 @@ title: "Q38319: C Setup Gives Error U2155 When Building Libraries"
 permalink: /pubs/pc/reference/microsoft/kb/Q38319/
 ---
 
+## Q38319: C Setup Gives Error U2155 When Building Libraries
+
 	Article: Q38319
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | S_LIB

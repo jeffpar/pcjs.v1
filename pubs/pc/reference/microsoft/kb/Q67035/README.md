@@ -4,8 +4,9 @@ title: "Q67035: DS Used Instead of Base Segment for Based Pointer Dereference"
 permalink: /pubs/pc/reference/microsoft/kb/Q67035/
 ---
 
+## Q67035: DS Used Instead of Base Segment for Based Pointer Dereference
+
 	Article: Q67035
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | S_QUICKC buglist6.00 buglist6.00a

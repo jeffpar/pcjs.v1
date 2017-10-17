@@ -4,8 +4,9 @@ title: "Q34502: /NOE Option for Redefinition Error L2044"
 permalink: /pubs/pc/reference/microsoft/kb/Q34502/
 ---
 
+## Q34502: /NOE Option for Redefinition Error L2044
+
 	Article: Q34502
-	Product: Microsoft C
 	Version(s): 3.x 5.x | 5.10
 	Operating System: MS-DOS  | OS/2
 	Flags: ENDUSER |

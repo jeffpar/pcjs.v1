@@ -4,8 +4,9 @@ title: "Q28495: Tests with the Compaq 386/20"
 permalink: /pubs/pc/reference/microsoft/kb/Q28495/
 ---
 
+## Q28495: Tests with the Compaq 386/20
+
 	Article: Q28495
-	Product: Microsoft C
 	Version(s): 1.0
 	Operating System: MS-DOS
 	Flags: ENDUSER |

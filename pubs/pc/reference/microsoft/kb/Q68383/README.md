@@ -4,8 +4,9 @@ title: "Q68383: TZ and tzset Only Use Whole Hours: How to Work Around"
 permalink: /pubs/pc/reference/microsoft/kb/Q68383/
 ---
 
+## Q68383: TZ and tzset Only Use Whole Hours: How to Work Around
+
 	Article: Q68383
-	Product: Microsoft C
 	Version(s): 5.10 6.00 6.00a | 5.10 6.00 6.00a
 	Operating System: MS-DOS          | OS/2
 	Flags: ENDUSER | s_quickc

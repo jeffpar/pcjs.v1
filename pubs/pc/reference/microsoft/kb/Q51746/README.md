@@ -4,8 +4,9 @@ title: "Q51746: Locals Can Be Viewed Only When Compiling with CodeView Info"
 permalink: /pubs/pc/reference/microsoft/kb/Q51746/
 ---
 
+## Q51746: Locals Can Be Viewed Only When Compiling with CodeView Info
+
 	Article: Q51746
-	Product: Microsoft C
 	Version(s): 2.00 2.01
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickasm

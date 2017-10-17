@@ -4,8 +4,9 @@ title: "Q61619: /MAKE Option Is Invalid with NMAKE"
 permalink: /pubs/pc/reference/microsoft/kb/Q61619/
 ---
 
+## Q61619: /MAKE Option Is Invalid with NMAKE
+
 	Article: Q61619
-	Product: Microsoft C
 	Version(s): 1.11   | 1.11
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | docerr

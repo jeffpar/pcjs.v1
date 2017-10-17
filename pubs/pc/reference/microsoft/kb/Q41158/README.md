@@ -4,8 +4,9 @@ title: "Q41158: C Versions 3.00, 4.00 Do Not Require Semicolon in Structure"
 permalink: /pubs/pc/reference/microsoft/kb/Q41158/
 ---
 
+## Q41158: C Versions 3.00, 4.00 Do Not Require Semicolon in Structure
+
 	Article: Q41158
-	Product: Microsoft C
 	Version(s): 3.00 4.00 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER |

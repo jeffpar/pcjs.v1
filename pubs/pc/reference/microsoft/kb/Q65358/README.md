@@ -4,8 +4,9 @@ title: "Q65358: C 6.00 Incorrectly Evaluates Pointer Arrays to Constant Data"
 permalink: /pubs/pc/reference/microsoft/kb/Q65358/
 ---
 
+## Q65358: C 6.00 Incorrectly Evaluates Pointer Arrays to Constant Data
+
 	Article: Q65358
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | s_quickc buglist6.00

@@ -4,8 +4,9 @@ title: "Q41661: QuickC 2.00 README.DOC: /K"
 permalink: /pubs/pc/reference/microsoft/kb/Q41661/
 ---
 
+## Q41661: QuickC 2.00 README.DOC: /K
+
 	Article: Q41661
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_helpmake

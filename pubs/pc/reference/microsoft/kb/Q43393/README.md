@@ -4,8 +4,9 @@ title: "Q43393: No Explicit Limit on Length of Literal Strings In QuickC 2.00"
 permalink: /pubs/pc/reference/microsoft/kb/Q43393/
 ---
 
+## Q43393: No Explicit Limit on Length of Literal Strings In QuickC 2.00
+
 	Article: Q43393
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_c

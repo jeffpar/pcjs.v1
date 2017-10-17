@@ -4,8 +4,9 @@ title: "Q61202: C 6.00 README: _setfont() Return Value Documented Incorrectly"
 permalink: /pubs/pc/reference/microsoft/kb/Q61202/
 ---
 
+## Q61202: C 6.00 README: _setfont() Return Value Documented Incorrectly
+
 	Article: Q61202
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | docerr

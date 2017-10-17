@@ -4,8 +4,9 @@ title: "Q51327: strtok(): C Function -- Documentation Supplement"
 permalink: /pubs/pc/reference/microsoft/kb/Q51327/
 ---
 
+## Q51327: strtok(): C Function -- Documentation Supplement
+
 	Article: Q51327
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | S_QuickC docsup

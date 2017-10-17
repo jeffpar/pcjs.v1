@@ -4,8 +4,9 @@ title: "Q24200: 3270 ERMA Emulator"
 permalink: /pubs/pc/reference/microsoft/kb/Q24200/
 ---
 
+## Q24200: 3270 ERMA Emulator
+
 	Article: Q24200
-	Product: Microsoft C
 	Version(s): 1.00 1.10 2.00 2.10 2.20 2.30
 	Operating System: MS-DOS
 	Flags: ENDUSER |

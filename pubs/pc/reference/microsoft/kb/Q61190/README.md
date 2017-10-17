@@ -4,8 +4,9 @@ title: "Q61190: C 6.00 README: Arithmetic Operations on Signed Short Values"
 permalink: /pubs/pc/reference/microsoft/kb/Q61190/
 ---
 
+## Q61190: C 6.00 README: Arithmetic Operations on Signed Short Values
+
 	Article: Q61190
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

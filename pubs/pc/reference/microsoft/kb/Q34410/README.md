@@ -4,8 +4,9 @@ title: "Q34410: Far Pointer Comparisons Don't Account for Aliases"
 permalink: /pubs/pc/reference/microsoft/kb/Q34410/
 ---
 
+## Q34410: Far Pointer Comparisons Don't Account for Aliases
+
 	Article: Q34410
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

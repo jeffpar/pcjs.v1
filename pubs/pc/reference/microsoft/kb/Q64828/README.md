@@ -4,8 +4,9 @@ title: "Q64828: Why Some Sample Programs Produce Compiler Warnings"
 permalink: /pubs/pc/reference/microsoft/kb/Q64828/
 ---
 
+## Q64828: Why Some Sample Programs Produce Compiler Warnings
+
 	Article: Q64828
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | s_quickc s_pascal

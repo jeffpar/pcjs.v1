@@ -4,8 +4,9 @@ title: "Q39501: Simple Example Using _bios_serialcom"
 permalink: /pubs/pc/reference/microsoft/kb/Q39501/
 ---
 
+## Q39501: Simple Example Using _bios_serialcom
+
 	Article: Q39501
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q22320: Internal Representation for NAN or INF Is Coprocessor Specific"
 permalink: /pubs/pc/reference/microsoft/kb/Q22320/
 ---
 
+## Q22320: Internal Representation for NAN or INF Is Coprocessor Specific
+
 	Article: Q22320
-	Product: Microsoft C
 	Version(s): 5.00 5.10 6.00 6.00a | 5.10 6.00 6.00a
 	Operating System: MS-DOS               | OS/2
 	Flags: ENDUSER | 8087 80x87 80287 80387

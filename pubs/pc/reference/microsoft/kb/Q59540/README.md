@@ -4,8 +4,9 @@ title: "Q59540: &quot;No Symbolic Information&quot; May Be Caused by Using Wrong
 permalink: /pubs/pc/reference/microsoft/kb/Q59540/
 ---
 
+## Q59540: &quot;No Symbolic Information&quot; May Be Caused by Using Wrong Linker
+
 	Article: Q59540
-	Product: Microsoft C
 	Version(s): 1.00 1.10 2.00 2.10 2.20 2.30 2.35 | 2.20 2.30 2.35
 	Operating System: MS-DOS                             | OS/2
 	Flags: ENDUSER | S_LINK

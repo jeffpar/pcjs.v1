@@ -4,8 +4,9 @@ title: "Q46735: Loop Optimization May Cause Improper Type Cast of int"
 permalink: /pubs/pc/reference/microsoft/kb/Q46735/
 ---
 
+## Q46735: Loop Optimization May Cause Improper Type Cast of int
+
 	Article: Q46735
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

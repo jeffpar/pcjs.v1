@@ -4,8 +4,9 @@ title: "Q29835: C 5.10 MTDYNA.DOC: Sample MT Program/Description of Operation"
 permalink: /pubs/pc/reference/microsoft/kb/Q29835/
 ---
 
+## Q29835: C 5.10 MTDYNA.DOC: Sample MT Program/Description of Operation
+
 	Article: Q29835
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

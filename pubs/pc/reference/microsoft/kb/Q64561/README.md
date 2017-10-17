@@ -4,8 +4,9 @@ title: "Q64561: _outtext() Corrupts String in C 6.00 Large and Compact Models"
 permalink: /pubs/pc/reference/microsoft/kb/Q64561/
 ---
 
+## Q64561: _outtext() Corrupts String in C 6.00 Large and Compact Models
+
 	Article: Q64561
-	Product: Microsoft C
 	Version(s): 6.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist6.00 s_quickc

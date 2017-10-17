@@ -4,8 +4,9 @@ title: "Q59860: Intermittent Installation on NEC 386 Machines"
 permalink: /pubs/pc/reference/microsoft/kb/Q59860/
 ---
 
+## Q59860: Intermittent Installation on NEC 386 Machines
+
 	Article: Q59860
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

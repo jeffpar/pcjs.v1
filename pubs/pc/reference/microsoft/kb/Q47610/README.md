@@ -4,8 +4,9 @@ title: "Q47610: Directory Listing for QuickC 2.00 Distribution Disks (5.25)"
 permalink: /pubs/pc/reference/microsoft/kb/Q47610/
 ---
 
+## Q47610: Directory Listing for QuickC 2.00 Distribution Disks (5.25)
+
 	Article: Q47610
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | QC

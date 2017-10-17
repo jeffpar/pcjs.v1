@@ -4,8 +4,9 @@ title: "Q38807: Error L1070 Segment Size Exceeds 64K"
 permalink: /pubs/pc/reference/microsoft/kb/Q38807/
 ---
 
+## Q38807: Error L1070 Segment Size Exceeds 64K
+
 	Article: Q38807
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | s_pascal h_fortran h_masm s_quickc s_link s_error

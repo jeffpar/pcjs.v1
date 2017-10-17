@@ -4,8 +4,9 @@ title: "Q42926: Use QuickC Environment and Compile with QCL or NMAKE"
 permalink: /pubs/pc/reference/microsoft/kb/Q42926/
 ---
 
+## Q42926: Use QuickC Environment and Compile with QCL or NMAKE
+
 	Article: Q42926
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

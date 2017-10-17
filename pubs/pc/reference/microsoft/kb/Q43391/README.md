@@ -4,8 +4,9 @@ title: "Q43391: Handling Floating-Point Errors in C"
 permalink: /pubs/pc/reference/microsoft/kb/Q43391/
 ---
 
+## Q43391: Handling Floating-Point Errors in C
+
 	Article: Q43391
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER |

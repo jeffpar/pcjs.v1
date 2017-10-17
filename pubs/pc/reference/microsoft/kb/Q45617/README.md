@@ -4,8 +4,9 @@ title: "Q45617: Mouse Disabled When Single-Stepping over Video Mode Change"
 permalink: /pubs/pc/reference/microsoft/kb/Q45617/
 ---
 
+## Q45617: Mouse Disabled When Single-Stepping over Video Mode Change
+
 	Article: Q45617
-	Product: Microsoft C
 	Version(s): 2.20 2.30
 	Operating System: OS/2
 	Flags: ENDUSER | buglist2.20 buglist2.30

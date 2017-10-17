@@ -4,8 +4,9 @@ title: "Q44925: Status Line Input with a Blinking Cursor"
 permalink: /pubs/pc/reference/microsoft/kb/Q44925/
 ---
 
+## Q44925: Status Line Input with a Blinking Cursor
+
 	Article: Q44925
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | GETINPUT.ARC S12311.EXE

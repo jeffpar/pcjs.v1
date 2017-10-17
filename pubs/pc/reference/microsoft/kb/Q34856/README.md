@@ -4,8 +4,9 @@ title: "Q34856: Run-Time Limits for C Version 5.10"
 permalink: /pubs/pc/reference/microsoft/kb/Q34856/
 ---
 
+## Q34856: Run-Time Limits for C Version 5.10
+
 	Article: Q34856
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

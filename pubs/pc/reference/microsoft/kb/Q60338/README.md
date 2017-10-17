@@ -4,8 +4,9 @@ title: "Q60338: Cannot Set Breakpoint on an Executable Line with CodeView 3.00"
 permalink: /pubs/pc/reference/microsoft/kb/Q60338/
 ---
 
+## Q60338: Cannot Set Breakpoint on an Executable Line with CodeView 3.00
+
 	Article: Q60338
-	Product: Microsoft C
 	Version(s): 3.00   | 3.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

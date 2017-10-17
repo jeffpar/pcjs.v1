@@ -4,8 +4,9 @@ title: "Q50335: DLLs Built with C 5.10's LLIBCDLL.LIB Limited to 20 Files"
 permalink: /pubs/pc/reference/microsoft/kb/Q50335/
 ---
 
+## Q50335: DLLs Built with C 5.10's LLIBCDLL.LIB Limited to 20 Files
+
 	Article: Q50335
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: OS/2
 	Flags: ENDUSER |

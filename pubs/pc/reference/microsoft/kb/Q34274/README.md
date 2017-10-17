@@ -4,8 +4,9 @@ title: "Q34274: How to Perform Spell Checking in M"
 permalink: /pubs/pc/reference/microsoft/kb/Q34274/
 ---
 
+## Q34274: How to Perform Spell Checking in M
+
 	Article: Q34274
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

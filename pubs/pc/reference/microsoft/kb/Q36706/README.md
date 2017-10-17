@@ -4,8 +4,9 @@ title: "Q36706: Warning C4017 Cast of int Expression to far Pointer"
 permalink: /pubs/pc/reference/microsoft/kb/Q36706/
 ---
 
+## Q36706: Warning C4017 Cast of int Expression to far Pointer
+
 	Article: Q36706
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | s_quickc s_error

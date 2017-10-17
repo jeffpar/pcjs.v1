@@ -4,8 +4,9 @@ title: "Q60607: On New Build with No Changes, QC Environment Changes Size"
 permalink: /pubs/pc/reference/microsoft/kb/Q60607/
 ---
 
+## Q60607: On New Build with No Changes, QC Environment Changes Size
+
 	Article: Q60607
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickasm

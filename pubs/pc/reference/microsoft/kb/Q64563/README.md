@@ -4,8 +4,9 @@ title: "Q64563: Command Line Error D2030: INTERNAL COMPILER ERROR IN 'QC'"
 permalink: /pubs/pc/reference/microsoft/kb/Q64563/
 ---
 
+## Q64563: Command Line Error D2030: INTERNAL COMPILER ERROR IN 'QC'
+
 	Article: Q64563
-	Product: Microsoft C
 	Version(s): 6.00
 	Operating System: OS/2
 	Flags: ENDUSER | buglist6.00

@@ -4,8 +4,9 @@ title: "Q43331: Changing System Time or Date Will Temporarily Pause Clock"
 permalink: /pubs/pc/reference/microsoft/kb/Q43331/
 ---
 
+## Q43331: Changing System Time or Date Will Temporarily Pause Clock
+
 	Article: Q43331
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickc

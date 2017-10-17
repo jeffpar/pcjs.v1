@@ -4,8 +4,9 @@ title: "Q28517: Choice of Three Software Bundles for New Mouse 1.00"
 permalink: /pubs/pc/reference/microsoft/kb/Q28517/
 ---
 
+## Q28517: Choice of Three Software Bundles for New Mouse 1.00
+
 	Article: Q28517
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q46734: Where to Find Information on Writing TSRs"
 permalink: /pubs/pc/reference/microsoft/kb/Q46734/
 ---
 
+## Q46734: Where to Find Information on Writing TSRs
+
 	Article: Q46734
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | SR# G890601-19569

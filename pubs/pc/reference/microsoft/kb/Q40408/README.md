@@ -4,8 +4,9 @@ title: "Q40408: Setting the Overlay Interrupt (/O) in LINK"
 permalink: /pubs/pc/reference/microsoft/kb/Q40408/
 ---
 
+## Q40408: Setting the Overlay Interrupt (/O) in LINK
+
 	Article: Q40408
-	Product: Microsoft C
 	Version(s): 3.61 3.65
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr

@@ -4,8 +4,9 @@ title: "Q43166: C: How Stack Checking Is Done"
 permalink: /pubs/pc/reference/microsoft/kb/Q43166/
 ---
 
+## Q43166: C: How Stack Checking Is Done
+
 	Article: Q43166
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

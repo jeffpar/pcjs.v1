@@ -4,8 +4,9 @@ title: "Q67252: Documentation Error in APT and Tiny Model Link Line Example"
 permalink: /pubs/pc/reference/microsoft/kb/Q67252/
 ---
 
+## Q67252: Documentation Error in APT and Tiny Model Link Line Example
+
 	Article: Q67252
-	Product: Microsoft C
 	Version(s): 6.00 6.00a
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr s_quickc

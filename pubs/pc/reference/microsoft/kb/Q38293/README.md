@@ -4,8 +4,9 @@ title: "Q38293: wait and cwait Are for Protected Mode"
 permalink: /pubs/pc/reference/microsoft/kb/Q38293/
 ---
 
+## Q38293: wait and cwait Are for Protected Mode
+
 	Article: Q38293
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

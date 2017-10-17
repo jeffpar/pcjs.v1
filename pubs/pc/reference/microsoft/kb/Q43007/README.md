@@ -4,8 +4,9 @@ title: "Q43007: Reading Extended Keyboard Characters with C"
 permalink: /pubs/pc/reference/microsoft/kb/Q43007/
 ---
 
+## Q43007: Reading Extended Keyboard Characters with C
+
 	Article: Q43007
-	Product: Microsoft C
 	Version(s): 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QUICKC

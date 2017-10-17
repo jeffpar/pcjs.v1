@@ -4,8 +4,9 @@ title: "Q41650: QuickC 2.00 README.DOC: /F (Set Stack Size)"
 permalink: /pubs/pc/reference/microsoft/kb/Q41650/
 ---
 
+## Q41650: QuickC 2.00 README.DOC: /F (Set Stack Size)
+
 	Article: Q41650
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

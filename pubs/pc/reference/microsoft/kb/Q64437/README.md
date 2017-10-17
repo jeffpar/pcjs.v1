@@ -4,8 +4,9 @@ title: "Q64437: A.P.T. Omits /NOI Requirement for Linking with C Run-Time DLL"
 permalink: /pubs/pc/reference/microsoft/kb/Q64437/
 ---
 
+## Q64437: A.P.T. Omits /NOI Requirement for Linking with C Run-Time DLL
+
 	Article: Q64437
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | docerr

@@ -4,8 +4,9 @@ title: "Q60751: Storage Types of Integer Constants Changed in C Version 6.00"
 permalink: /pubs/pc/reference/microsoft/kb/Q60751/
 ---
 
+## Q60751: Storage Types of Integer Constants Changed in C Version 6.00
+
 	Article: Q60751
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | s_quickc

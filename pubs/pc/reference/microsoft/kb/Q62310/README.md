@@ -4,8 +4,9 @@ title: "Q62310: Internal Compiler Error '@(#)newcode.c:1.87', Line 604"
 permalink: /pubs/pc/reference/microsoft/kb/Q62310/
 ---
 
+## Q62310: Internal Compiler Error '@(#)newcode.c:1.87', Line 604
+
 	Article: Q62310
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist6.00

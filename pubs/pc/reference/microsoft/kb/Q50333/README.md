@@ -4,8 +4,9 @@ title: "Q50333: Specifying Link Options with &quot;-&quot; Causes L4046, L1083, 
 permalink: /pubs/pc/reference/microsoft/kb/Q50333/
 ---
 
+## Q50333: Specifying Link Options with &quot;-&quot; Causes L4046, L1083, or U1013
+
 	Article: Q50333
-	Product: Microsoft C
 	Version(s): 5.01.21
 	Operating System: OS/2
 	Flags: ENDUSER |

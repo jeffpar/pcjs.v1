@@ -4,8 +4,9 @@ title: "Q59539: ICE Error When Casting Pointer Arithmetic Result"
 permalink: /pubs/pc/reference/microsoft/kb/Q59539/
 ---
 
+## Q59539: ICE Error When Casting Pointer Arithmetic Result
+
 	Article: Q59539
-	Product: Microsoft C
 	Version(s): 2.00 2.01
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist2.00 buglist2.01

@@ -4,8 +4,9 @@ title: "Q48686: How to Find the Total Stack Size from within a Program"
 permalink: /pubs/pc/reference/microsoft/kb/Q48686/
 ---
 
+## Q48686: How to Find the Total Stack Size from within a Program
+
 	Article: Q48686
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | SR# G890831-26299

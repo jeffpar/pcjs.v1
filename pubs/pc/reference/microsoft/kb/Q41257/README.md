@@ -4,8 +4,9 @@ title: "Q41257: What Is the Format of an .EXE File?"
 permalink: /pubs/pc/reference/microsoft/kb/Q41257/
 ---
 
+## Q41257: What Is the Format of an .EXE File?
+
 	Article: Q41257
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | SR# G890118-9899

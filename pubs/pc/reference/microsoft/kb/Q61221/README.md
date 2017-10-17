@@ -4,8 +4,9 @@ title: "Q61221: C 6.00 README: CV: Debugging Programs w/Code in Include Files"
 permalink: /pubs/pc/reference/microsoft/kb/Q61221/
 ---
 
+## Q61221: C 6.00 README: CV: Debugging Programs w/Code in Include Files
+
 	Article: Q61221
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

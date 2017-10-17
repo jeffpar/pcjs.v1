@@ -4,8 +4,9 @@ title: "Q43165: LINK: Creating and Accessing _edata and _end"
 permalink: /pubs/pc/reference/microsoft/kb/Q43165/
 ---
 
+## Q43165: LINK: Creating and Accessing _edata and _end
+
 	Article: Q43165
-	Product: Microsoft C
 	Version(s): 3.X 4.06 | 5.01.20 5.01.21
 	Operating System: MS-DOS   | OS/2
 	Flags: ENDUSER | s_c

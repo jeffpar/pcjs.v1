@@ -4,8 +4,9 @@ title: "Q40599: Modifying Existing Help Files with HELPMAKE (QuickC Example)"
 permalink: /pubs/pc/reference/microsoft/kb/Q40599/
 ---
 
+## Q40599: Modifying Existing Help Files with HELPMAKE (QuickC Example)
+
 	Article: Q40599
-	Product: Microsoft C
 	Version(s): 1.00 1.04 1.05 1.06 | 1.04 1.05 1.06
 	Operating System: MS-DOS              | OS/2
 	Flags: ENDUSER | s_helpmake s_qh

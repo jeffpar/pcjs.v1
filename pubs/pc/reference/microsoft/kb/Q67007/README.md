@@ -4,8 +4,9 @@ title: "Q67007: How to Execute a Function From the Command or Watch Window"
 permalink: /pubs/pc/reference/microsoft/kb/Q67007/
 ---
 
+## Q67007: How to Execute a Function From the Command or Watch Window
+
 	Article: Q67007
-	Product: Microsoft C
 	Version(s): 2.x 3.00 3.10 3.11 | 2.x 3.00 3.10 3.11
 	Operating System: MS-DOS             | OS/2
 	Flags: ENDUSER | docerr s_c 6.00 6.00a

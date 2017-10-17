@@ -4,8 +4,9 @@ title: "Q59409: Trouble with Filenames Containing a Dollar Sign (&#36;)"
 permalink: /pubs/pc/reference/microsoft/kb/Q59409/
 ---
 
+## Q59409: Trouble with Filenames Containing a Dollar Sign (&#36;)
+
 	Article: Q59409
-	Product: Microsoft C
 	Version(s): 1.01    | 1.01
 	Operating System: MS-DOS  | OS/2
 	Flags: ENDUSER | buglist1.01

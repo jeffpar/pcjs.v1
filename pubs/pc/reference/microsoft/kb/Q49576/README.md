@@ -4,8 +4,9 @@ title: "Q49576: Configuring On-Line Help for M 1.02"
 permalink: /pubs/pc/reference/microsoft/kb/Q49576/
 ---
 
+## Q49576: Configuring On-Line Help for M 1.02
+
 	Article: Q49576
-	Product: Microsoft C
 	Version(s): 1.02   | 1.02
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

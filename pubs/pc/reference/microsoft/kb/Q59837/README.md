@@ -4,8 +4,9 @@ title: "Q59837: How to Write Directly to Video Memory Under OS/2"
 permalink: /pubs/pc/reference/microsoft/kb/Q59837/
 ---
 
+## Q59837: How to Write Directly to Video Memory Under OS/2
+
 	Article: Q59837
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: OS/2
 	Flags: ENDUSER |

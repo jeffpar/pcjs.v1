@@ -4,8 +4,9 @@ title: "Q39916: Using _dos_findfirst to Get the Time and Date"
 permalink: /pubs/pc/reference/microsoft/kb/Q39916/
 ---
 
+## Q39916: Using _dos_findfirst to Get the Time and Date
+
 	Article: Q39916
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |  s_quickc

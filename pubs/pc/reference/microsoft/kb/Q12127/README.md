@@ -4,8 +4,9 @@ title: "Q12127: Use the signal() Function to Trap Floating-Point Exceptions"
 permalink: /pubs/pc/reference/microsoft/kb/Q12127/
 ---
 
+## Q12127: Use the signal() Function to Trap Floating-Point Exceptions
+
 	Article: Q12127
-	Product: Microsoft C
 	Version(s): 4.00 5.00 5.10 6.00 6.00a | 5.10 6.00 6.00a
 	Operating System: MS-DOS                    | OS/2
 	Flags: ENDUSER | s_quickc

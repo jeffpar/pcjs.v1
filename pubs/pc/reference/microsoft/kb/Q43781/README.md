@@ -4,8 +4,9 @@ title: "Q43781: MOUSE.COM Solves PS/2 Serial Problems with Ventura Publishing"
 permalink: /pubs/pc/reference/microsoft/kb/Q43781/
 ---
 
+## Q43781: MOUSE.COM Solves PS/2 Serial Problems with Ventura Publishing
+
 	Article: Q43781
-	Product: Microsoft C
 	Version(s): 1.01
 	Operating System: MS-DOS
 	Flags: ENDUSER |

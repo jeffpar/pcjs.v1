@@ -4,8 +4,9 @@ title: "Q29703: Mouse MREADME.DOC: Invoking the Control Panel in Word"
 permalink: /pubs/pc/reference/microsoft/kb/Q29703/
 ---
 
+## Q29703: Mouse MREADME.DOC: Invoking the Control Panel in Word
+
 	Article: Q29703
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

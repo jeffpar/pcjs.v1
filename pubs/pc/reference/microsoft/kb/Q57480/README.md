@@ -4,8 +4,9 @@ title: "Q57480: Intel Phone Number for Information About EMS Specifications"
 permalink: /pubs/pc/reference/microsoft/kb/Q57480/
 ---
 
+## Q57480: Intel Phone Number for Information About EMS Specifications
+
 	Article: Q57480
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER |

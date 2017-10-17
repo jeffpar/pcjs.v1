@@ -4,8 +4,9 @@ title: "Q60651: C 6.00 SAMPLES.DOC: Note on Naming Conventions"
 permalink: /pubs/pc/reference/microsoft/kb/Q60651/
 ---
 
+## Q60651: C 6.00 SAMPLES.DOC: Note on Naming Conventions
+
 	Article: Q60651
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | README README.DOC

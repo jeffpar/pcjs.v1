@@ -4,8 +4,9 @@ title: "Q47772: ECH.EXE Utility Is Used Internally by the Microsoft Editor"
 permalink: /pubs/pc/reference/microsoft/kb/Q47772/
 ---
 
+## Q47772: ECH.EXE Utility Is Used Internally by the Microsoft Editor
+
 	Article: Q47772
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

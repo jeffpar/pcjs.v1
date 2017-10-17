@@ -4,8 +4,9 @@ title: "Q28738: Types Of Mice Available: Serial, Bus, and InPort"
 permalink: /pubs/pc/reference/microsoft/kb/Q28738/
 ---
 
+## Q28738: Types Of Mice Available: Serial, Bus, and InPort
+
 	Article: Q28738
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

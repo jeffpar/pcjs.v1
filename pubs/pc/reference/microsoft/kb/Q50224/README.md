@@ -4,8 +4,9 @@ title: "Q50224: Watch Bytes (wb) Command Can Be Used to Watch a Buffer in HEX"
 permalink: /pubs/pc/reference/microsoft/kb/Q50224/
 ---
 
+## Q50224: Watch Bytes (wb) Command Can Be Used to Watch a Buffer in HEX
+
 	Article: Q50224
-	Product: Microsoft C
 	Version(s): 2.20 2.30 | 2.20 2.30
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER |

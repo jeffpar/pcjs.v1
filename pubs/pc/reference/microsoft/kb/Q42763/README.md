@@ -4,8 +4,9 @@ title: "Q42763: Copy Is a Reserved Word"
 permalink: /pubs/pc/reference/microsoft/kb/Q42763/
 ---
 
+## Q42763: Copy Is a Reserved Word
+
 	Article: Q42763
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

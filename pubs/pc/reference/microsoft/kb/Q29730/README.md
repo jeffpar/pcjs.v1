@@ -4,8 +4,9 @@ title: "Q29730: Editor &quot;User's Guide&quot; C-Extension Sample Generates War
 permalink: /pubs/pc/reference/microsoft/kb/Q29730/
 ---
 
+## Q29730: Editor &quot;User's Guide&quot; C-Extension Sample Generates Warnings
+
 	Article: Q29730
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

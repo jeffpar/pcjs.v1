@@ -4,8 +4,9 @@ title: "Q68390: &quot;C1063: Stack Overflow&quot; Caused by Taking Address of Co
 permalink: /pubs/pc/reference/microsoft/kb/Q68390/
 ---
 
+## Q68390: &quot;C1063: Stack Overflow&quot; Caused by Taking Address of Constant
+
 	Article: Q68390
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | buglist6.00 buglist6.00a

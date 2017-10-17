@@ -4,8 +4,9 @@ title: "Q28681: Serial Mouse May Fail with an Older AT&amp;T 6300"
 permalink: /pubs/pc/reference/microsoft/kb/Q28681/
 ---
 
+## Q28681: Serial Mouse May Fail with an Older AT&amp;T 6300
+
 	Article: Q28681
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

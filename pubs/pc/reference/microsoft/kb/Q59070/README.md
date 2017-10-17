@@ -4,8 +4,9 @@ title: "Q59070: Buffer Size for fcvt, ecvt Is 349 Bytes"
 permalink: /pubs/pc/reference/microsoft/kb/Q59070/
 ---
 
+## Q59070: Buffer Size for fcvt, ecvt Is 349 Bytes
+
 	Article: Q59070
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | s_quickc s_quickasm

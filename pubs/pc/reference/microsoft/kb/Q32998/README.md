@@ -4,8 +4,9 @@ title: "Q32998: malloc May Truncate Request More Than 64K"
 permalink: /pubs/pc/reference/microsoft/kb/Q32998/
 ---
 
+## Q32998: malloc May Truncate Request More Than 64K
+
 	Article: Q32998
-	Product: Microsoft C
 	Version(s): 4.00 5.00 5.10 | 5.10
 	Operating System: MS-DOS         | OS/2
 	Flags: ENDUSER |

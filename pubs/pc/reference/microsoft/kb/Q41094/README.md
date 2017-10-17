@@ -4,8 +4,9 @@ title: "Q41094: Huge Arrays Not Allowed in QuickC 2.00, But Huge Pointers Are"
 permalink: /pubs/pc/reference/microsoft/kb/Q41094/
 ---
 
+## Q41094: Huge Arrays Not Allowed in QuickC 2.00, But Huge Pointers Are
+
 	Article: Q41094
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | SR# G890209-11614 buglist2.00

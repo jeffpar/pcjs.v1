@@ -4,8 +4,9 @@ title: "Q47724: Network License Agreement for All Microsoft Language Products"
 permalink: /pubs/pc/reference/microsoft/kb/Q47724/
 ---
 
+## Q47724: Network License Agreement for All Microsoft Language Products
+
 	Article: Q47724
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | S_QuickC S_QuickASM S_PasCal S_QuickPas

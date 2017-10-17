@@ -4,8 +4,9 @@ title: "Q31045: 123.MNU Worked on Floppy But Not on Hard Drive"
 permalink: /pubs/pc/reference/microsoft/kb/Q31045/
 ---
 
+## Q31045: 123.MNU Worked on Floppy But Not on Hard Drive
+
 	Article: Q31045
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

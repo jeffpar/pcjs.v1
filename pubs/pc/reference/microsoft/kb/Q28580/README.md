@@ -4,8 +4,9 @@ title: "Q28580: How to Put Microsoft Editor (M or MEP) into 43-Line Mode"
 permalink: /pubs/pc/reference/microsoft/kb/Q28580/
 ---
 
+## Q28580: How to Put Microsoft Editor (M or MEP) into 43-Line Mode
+
 	Article: Q28580
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

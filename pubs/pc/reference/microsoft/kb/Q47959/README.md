@@ -4,8 +4,9 @@ title: "Q47959: Description of a .MAP File's &quot;Program Entry Point&quot;"
 permalink: /pubs/pc/reference/microsoft/kb/Q47959/
 ---
 
+## Q47959: Description of a .MAP File's &quot;Program Entry Point&quot;
+
 	Article: Q47959
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER |

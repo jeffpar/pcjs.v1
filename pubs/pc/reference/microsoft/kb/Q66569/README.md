@@ -4,8 +4,9 @@ title: "Q66569: LIB Version 3.17 Available for Increased Library Capacity"
 permalink: /pubs/pc/reference/microsoft/kb/Q66569/
 ---
 
+## Q66569: LIB Version 3.17 Available for Increased Library Capacity
+
 	Article: Q66569
-	Product: Microsoft C
 	Version(s): 3.17   | 3.17
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | appnote SS0329.ARC s_lib

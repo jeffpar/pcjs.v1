@@ -4,8 +4,9 @@ title: "Q45135: Cannot Open Source File Under CVP"
 permalink: /pubs/pc/reference/microsoft/kb/Q45135/
 ---
 
+## Q45135: Cannot Open Source File Under CVP
+
 	Article: Q45135
-	Product: Microsoft C
 	Version(s): 2.20
 	Operating System: OS/2
 	Flags: ENDUSER | buglist2.20 buglist2.30 buglist2.4.1

@@ -4,8 +4,9 @@ title: "Q36782: C2086 Error When Compiling with /Oi and #include &lt;mt&#92;math
 permalink: /pubs/pc/reference/microsoft/kb/Q36782/
 ---
 
+## Q36782: C2086 Error When Compiling with /Oi and #include &lt;mt&#92;math.h&gt;
+
 	Article: Q36782
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: OS/2
 	Flags: ENDUSER |

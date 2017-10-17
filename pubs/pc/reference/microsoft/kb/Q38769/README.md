@@ -4,8 +4,9 @@ title: "Q38769: Error L1006 Option : Stack Size Exceeds 65535 Bytes"
 permalink: /pubs/pc/reference/microsoft/kb/Q38769/
 ---
 
+## Q38769: Error L1006 Option : Stack Size Exceeds 65535 Bytes
+
 	Article: Q38769
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | s_pascal h_fortran h_masm s_quickc s_link s_error docerr

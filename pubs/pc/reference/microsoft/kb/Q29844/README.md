@@ -4,8 +4,9 @@ title: "Q29844: C 5.10 MTDYNA.DOC: Using an MTDYNA Library"
 permalink: /pubs/pc/reference/microsoft/kb/Q29844/
 ---
 
+## Q29844: C 5.10 MTDYNA.DOC: Using an MTDYNA Library
+
 	Article: Q29844
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

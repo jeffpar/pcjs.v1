@@ -4,8 +4,9 @@ title: "Q42581: Solutions to QuickC 2.00 Color Problems on Isolated Machines"
 permalink: /pubs/pc/reference/microsoft/kb/Q42581/
 ---
 
+## Q42581: Solutions to QuickC 2.00 Color Problems on Isolated Machines
+
 	Article: Q42581
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | appnote

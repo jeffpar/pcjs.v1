@@ -4,8 +4,9 @@ title: "Q47020: Don't Use #line While Debugging in QuickC or Using CodeView"
 permalink: /pubs/pc/reference/microsoft/kb/Q47020/
 ---
 
+## Q47020: Don't Use #line While Debugging in QuickC or Using CodeView
+
 	Article: Q47020
-	Product: Microsoft C
 	Version(s): 1.01 2.00 2.01
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_CodeView

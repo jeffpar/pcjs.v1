@@ -4,8 +4,9 @@ title: "Q12010: Directly Accessing Video Memory from a C Program"
 permalink: /pubs/pc/reference/microsoft/kb/Q12010/
 ---
 
+## Q12010: Directly Accessing Video Memory from a C Program
+
 	Article: Q12010
-	Product: Microsoft C
 	Version(s): 3.00 4.00 5.00 6.00 6.00a
 	Operating System: MS-DOS
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q67783: C1001: Internal Compiler Error: regMD.c, Lines 4634 and 4688"
 permalink: /pubs/pc/reference/microsoft/kb/Q67783/
 ---
 
+## Q67783: C1001: Internal Compiler Error: regMD.c, Lines 4634 and 4688
+
 	Article: Q67783
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | buglist6.00 buglist6.00a

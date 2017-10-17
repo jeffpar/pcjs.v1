@@ -4,8 +4,9 @@ title: "Q25407: Assigning Key Sequence to ENTER and BACKSPACE Keys"
 permalink: /pubs/pc/reference/microsoft/kb/Q25407/
 ---
 
+## Q25407: Assigning Key Sequence to ENTER and BACKSPACE Keys
+
 	Article: Q25407
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

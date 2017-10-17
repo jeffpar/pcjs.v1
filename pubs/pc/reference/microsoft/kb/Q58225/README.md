@@ -4,8 +4,9 @@ title: "Q58225: &quot;Packed File Corrupt&quot; Error"
 permalink: /pubs/pc/reference/microsoft/kb/Q58225/
 ---
 
+## Q58225: &quot;Packed File Corrupt&quot; Error
+
 	Article: Q58225
-	Product: Microsoft C
 	Version(s): 3.x 4.x
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_link s_c h_fortran s_pascal s_quickc h_masm b_basic

@@ -4,8 +4,9 @@ title: "Q61557: P70 Display Creates Problems Under CodeView and PWB"
 permalink: /pubs/pc/reference/microsoft/kb/Q61557/
 ---
 
+## Q61557: P70 Display Creates Problems Under CodeView and PWB
+
 	Article: Q61557
-	Product: Microsoft C
 	Version(s): 3.00
 	Operating System: OS/2
 	Flags: ENDUSER | buglist3.00 S_PWB S_Editor

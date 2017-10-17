@@ -4,8 +4,9 @@ title: "Q38027: Two's Complement"
 permalink: /pubs/pc/reference/microsoft/kb/Q38027/
 ---
 
+## Q38027: Two's Complement
+
 	Article: Q38027
-	Product: Microsoft C
 	Version(s): 4.00 5.00 5.10 | 5.10
 	Operating System: MS-DOS         | OS/2
 	Flags: ENDUSER |

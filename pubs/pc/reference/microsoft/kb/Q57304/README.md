@@ -4,8 +4,9 @@ title: "Q57304: Novell Network Software May Cause L1084 Error"
 permalink: /pubs/pc/reference/microsoft/kb/Q57304/
 ---
 
+## Q57304: Novell Network Software May Cause L1084 Error
+
 	Article: Q57304
-	Product: Microsoft C
 	Version(s): 5.03
 	Operating System: MS-DOS
 	Flags: ENDUSER | h_fortran h_masm s_c s_pascal

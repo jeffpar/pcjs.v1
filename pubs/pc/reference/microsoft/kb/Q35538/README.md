@@ -4,8 +4,9 @@ title: "Q35538: Saving without Exiting"
 permalink: /pubs/pc/reference/microsoft/kb/Q35538/
 ---
 
+## Q35538: Saving without Exiting
+
 	Article: Q35538
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | appnote

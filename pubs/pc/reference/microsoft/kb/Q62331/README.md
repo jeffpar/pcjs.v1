@@ -4,8 +4,9 @@ title: "Q62331: Attempting to Expand a Help Dialog Box Hangs DOS"
 permalink: /pubs/pc/reference/microsoft/kb/Q62331/
 ---
 
+## Q62331: Attempting to Expand a Help Dialog Box Hangs DOS
+
 	Article: Q62331
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist1.00

@@ -4,8 +4,9 @@ title: "Q65590: _Floodfill() Doesn't Completely Fill Areas with Patterns"
 permalink: /pubs/pc/reference/microsoft/kb/Q65590/
 ---
 
+## Q65590: _Floodfill() Doesn't Completely Fill Areas with Patterns
+
 	Article: Q65590
-	Product: Microsoft C
 	Version(s): 6.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickc

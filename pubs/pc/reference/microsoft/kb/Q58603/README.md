@@ -4,8 +4,9 @@ title: "Q58603: MHELP Driver Not Completely Compatible with QuickC Help Files"
 permalink: /pubs/pc/reference/microsoft/kb/Q58603/
 ---
 
+## Q58603: MHELP Driver Not Completely Compatible with QuickC Help Files
+
 	Article: Q58603
-	Product: Microsoft C
 	Version(s): 1.02   | 1.02
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | s_quickc buglist1.02

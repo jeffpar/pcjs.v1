@@ -4,8 +4,9 @@ title: "Q34905: Array Reference Gives &quot;C4046 '&amp;' on Function/Array, Ign
 permalink: /pubs/pc/reference/microsoft/kb/Q34905/
 ---
 
+## Q34905: Array Reference Gives &quot;C4046 '&amp;' on Function/Array, Ignored&quot;
+
 	Article: Q34905
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER |

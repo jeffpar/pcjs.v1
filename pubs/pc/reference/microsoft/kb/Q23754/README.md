@@ -4,8 +4,9 @@ title: "Q23754: Unassigning Predefined Keys"
 permalink: /pubs/pc/reference/microsoft/kb/Q23754/
 ---
 
+## Q23754: Unassigning Predefined Keys
+
 	Article: Q23754
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | TAR62300

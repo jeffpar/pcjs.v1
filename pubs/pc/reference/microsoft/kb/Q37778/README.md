@@ -4,8 +4,9 @@ title: "Q37778: Emulator Math Operations in My DLL that Uses LLIBCDLL"
 permalink: /pubs/pc/reference/microsoft/kb/Q37778/
 ---
 
+## Q37778: Emulator Math Operations in My DLL that Uses LLIBCDLL
+
 	Article: Q37778
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

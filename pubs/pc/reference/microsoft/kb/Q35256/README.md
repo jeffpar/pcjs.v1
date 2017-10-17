@@ -4,8 +4,9 @@ title: "Q35256: &quot;Softer&quot; Should Be &quot;Softcr&quot; in M 1.0 User's 
 permalink: /pubs/pc/reference/microsoft/kb/Q35256/
 ---
 
+## Q35256: &quot;Softer&quot; Should Be &quot;Softcr&quot; in M 1.0 User's Guide
+
 	Article: Q35256
-	Product: Microsoft C
 	Version(s): 
 	Operating System: 1.00   | 1.00
 	Flags: MS-DOS | OS/2

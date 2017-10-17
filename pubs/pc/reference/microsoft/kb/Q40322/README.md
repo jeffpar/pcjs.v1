@@ -4,8 +4,9 @@ title: "Q40322: Setting Up QuickC Version 2.00 on a Two-Floppy Machine"
 permalink: /pubs/pc/reference/microsoft/kb/Q40322/
 ---
 
+## Q40322: Setting Up QuickC Version 2.00 on a Two-Floppy Machine
+
 	Article: Q40322
-	Product: Microsoft C
 	Version(s): 2.00   | 2.00
 	Operating System: MS-DOS | OS/2
 	Flags: enduser |

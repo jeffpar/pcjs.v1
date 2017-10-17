@@ -4,8 +4,9 @@ title: "Q32442: _Heapchk() Performs Consistency Check on Heap"
 permalink: /pubs/pc/reference/microsoft/kb/Q32442/
 ---
 
+## Q32442: _Heapchk() Performs Consistency Check on Heap
+
 	Article: Q32442
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

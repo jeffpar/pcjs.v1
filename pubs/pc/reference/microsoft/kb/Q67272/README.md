@@ -4,8 +4,9 @@ title: "Q67272: C1001: Internal Compiler Error: codegen.x, Line 559"
 permalink: /pubs/pc/reference/microsoft/kb/Q67272/
 ---
 
+## Q67272: C1001: Internal Compiler Error: codegen.x, Line 559
+
 	Article: Q67272
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist6.00 fixlist6.00a

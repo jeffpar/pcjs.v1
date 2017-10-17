@@ -4,8 +4,9 @@ title: "Q52122: Calling a User-Written Function from an ISR"
 permalink: /pubs/pc/reference/microsoft/kb/Q52122/
 ---
 
+## Q52122: Calling a User-Written Function from an ISR
+
 	Article: Q52122
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickc

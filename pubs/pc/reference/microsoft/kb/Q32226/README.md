@@ -4,8 +4,9 @@ title: "Q32226: Cancel Clears the Type-Ahead Buffer"
 permalink: /pubs/pc/reference/microsoft/kb/Q32226/
 ---
 
+## Q32226: Cancel Clears the Type-Ahead Buffer
+
 	Article: Q32226
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | tar75933

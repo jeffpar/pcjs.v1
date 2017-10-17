@@ -4,8 +4,9 @@ title: "Q44608: UNLINK Does Not Work If the File Is Not Closed"
 permalink: /pubs/pc/reference/microsoft/kb/Q44608/
 ---
 
+## Q44608: UNLINK Does Not Work If the File Is Not Closed
+
 	Article: Q44608
-	Product: Microsoft C
 	Version(s): 4.00 5.00 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | S_QuickC

@@ -4,8 +4,9 @@ title: "Q57942: &quot;UNKNOWN WARNING&quot; May Result from Bad Error Message Fi
 permalink: /pubs/pc/reference/microsoft/kb/Q57942/
 ---
 
+## Q57942: &quot;UNKNOWN WARNING&quot; May Result from Bad Error Message File
+
 	Article: Q57942
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q61616: CL.EXE Command-Line Switches Are Order Dependent"
 permalink: /pubs/pc/reference/microsoft/kb/Q61616/
 ---
 
+## Q61616: CL.EXE Command-Line Switches Are Order Dependent
+
 	Article: Q61616
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

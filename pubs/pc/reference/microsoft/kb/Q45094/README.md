@@ -4,8 +4,9 @@ title: "Q45094: -FPc Generates Call to &#95;&#95;fld1 with ++ Operator"
 permalink: /pubs/pc/reference/microsoft/kb/Q45094/
 ---
 
+## Q45094: -FPc Generates Call to &#95;&#95;fld1 with ++ Operator
+
 	Article: Q45094
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist5.10

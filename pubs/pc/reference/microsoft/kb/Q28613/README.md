@@ -4,8 +4,9 @@ title: "Q28613: Object Module Format Extensions"
 permalink: /pubs/pc/reference/microsoft/kb/Q28613/
 ---
 
+## Q28613: Object Module Format Extensions
+
 	Article: Q28613
-	Product: Microsoft C
 	Version(s): 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER |

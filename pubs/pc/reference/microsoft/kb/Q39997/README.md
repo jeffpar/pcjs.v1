@@ -4,8 +4,9 @@ title: "Q39997: Optimizing C or QuickC 2.00 Required for Writing C Extensions"
 permalink: /pubs/pc/reference/microsoft/kb/Q39997/
 ---
 
+## Q39997: Optimizing C or QuickC 2.00 Required for Writing C Extensions
+
 	Article: Q39997
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | S_C S_QuickC

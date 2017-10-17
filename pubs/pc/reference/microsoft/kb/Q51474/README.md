@@ -4,8 +4,9 @@ title: "Q51474: Character Parameters May Be Prototyped As Integers"
 permalink: /pubs/pc/reference/microsoft/kb/Q51474/
 ---
 
+## Q51474: Character Parameters May Be Prototyped As Integers
+
 	Article: Q51474
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | S_QUICKC

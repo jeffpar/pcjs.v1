@@ -4,8 +4,9 @@ title: "Q61244: C 6.00 README: RAMDRIVE Documentation"
 permalink: /pubs/pc/reference/microsoft/kb/Q61244/
 ---
 
+## Q61244: C 6.00 README: RAMDRIVE Documentation
+
 	Article: Q61244
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

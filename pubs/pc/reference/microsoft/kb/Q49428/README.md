@@ -4,8 +4,9 @@ title: "Q49428: Error in Run-Time Reference to _getcursorposition"
 permalink: /pubs/pc/reference/microsoft/kb/Q49428/
 ---
 
+## Q49428: Error in Run-Time Reference to _getcursorposition
+
 	Article: Q49428
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr S_QuickC S_QuickASM

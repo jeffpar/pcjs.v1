@@ -4,8 +4,9 @@ title: "Q35730: Incorrect Function Declaration"
 permalink: /pubs/pc/reference/microsoft/kb/Q35730/
 ---
 
+## Q35730: Incorrect Function Declaration
+
 	Article: Q35730
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | docerr h_fortran h_masm s_pascal

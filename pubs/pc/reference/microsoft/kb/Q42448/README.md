@@ -4,8 +4,9 @@ title: "Q42448: Unwanted R6013: Illegal Far Pointer Use"
 permalink: /pubs/pc/reference/microsoft/kb/Q42448/
 ---
 
+## Q42448: Unwanted R6013: Illegal Far Pointer Use
+
 	Article: Q42448
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

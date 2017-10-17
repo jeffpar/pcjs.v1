@@ -4,8 +4,9 @@ title: "Q35535: Keeping the Editor from Saving Backup Files"
 permalink: /pubs/pc/reference/microsoft/kb/Q35535/
 ---
 
+## Q35535: Keeping the Editor from Saving Backup Files
+
 	Article: Q35535
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | appnote

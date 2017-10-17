@@ -4,8 +4,9 @@ title: "Q57867: system() Call May Cause CodeView to Terminate Process"
 permalink: /pubs/pc/reference/microsoft/kb/Q57867/
 ---
 
+## Q57867: system() Call May Cause CodeView to Terminate Process
+
 	Article: Q57867
-	Product: Microsoft C
 	Version(s): 2.20 2.30
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist2.20 buglist2.30

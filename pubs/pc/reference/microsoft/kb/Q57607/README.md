@@ -4,8 +4,9 @@ title: "Q57607: Exemod Shows Min Alloc Greater Than Max Alloc with Link /CP:1"
 permalink: /pubs/pc/reference/microsoft/kb/Q57607/
 ---
 
+## Q57607: Exemod Shows Min Alloc Greater Than Max Alloc with Link /CP:1
+
 	Article: Q57607
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | cvpack

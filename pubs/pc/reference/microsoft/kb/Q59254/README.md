@@ -4,8 +4,9 @@ title: "Q59254: NMAKE 1.01 Does Not Properly Expand Wildcard Arguments"
 permalink: /pubs/pc/reference/microsoft/kb/Q59254/
 ---
 
+## Q59254: NMAKE 1.01 Does Not Properly Expand Wildcard Arguments
+
 	Article: Q59254
-	Product: Microsoft C
 	Version(s): 1.01   | 1.01
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

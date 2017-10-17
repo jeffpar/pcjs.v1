@@ -4,8 +4,9 @@ title: "Q62422: C4047 Incorrectly Generated on Void Pointer Assignment"
 permalink: /pubs/pc/reference/microsoft/kb/Q62422/
 ---
 
+## Q62422: C4047 Incorrectly Generated on Void Pointer Assignment
+
 	Article: Q62422
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist6.00

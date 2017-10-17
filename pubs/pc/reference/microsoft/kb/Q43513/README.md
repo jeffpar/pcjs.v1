@@ -4,8 +4,9 @@ title: "Q43513: Assert Macro Causes Warning C4074 with /W3 in QuickC 2.00"
 permalink: /pubs/pc/reference/microsoft/kb/Q43513/
 ---
 
+## Q43513: Assert Macro Causes Warning C4074 with /W3 in QuickC 2.00
+
 	Article: Q43513
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_c

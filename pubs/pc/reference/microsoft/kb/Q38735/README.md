@@ -4,8 +4,9 @@ title: "Q38735: Viewing Array Elements in CodeView"
 permalink: /pubs/pc/reference/microsoft/kb/Q38735/
 ---
 
+## Q38735: Viewing Array Elements in CodeView
+
 	Article: Q38735
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER |

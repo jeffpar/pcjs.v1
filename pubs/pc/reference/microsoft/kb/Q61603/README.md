@@ -4,8 +4,9 @@ title: "Q61603: TEXT.C Can Cause a Protection Violation Under OS/2"
 permalink: /pubs/pc/reference/microsoft/kb/Q61603/
 ---
 
+## Q61603: TEXT.C Can Cause a Protection Violation Under OS/2
+
 	Article: Q61603
-	Product: Microsoft C
 	Version(s): 6.00
 	Operating System: OS/2
 	Flags: ENDUSER | buglist6.00

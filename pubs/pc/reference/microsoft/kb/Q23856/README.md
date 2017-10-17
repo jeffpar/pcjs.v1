@@ -4,8 +4,9 @@ title: "Q23856: Code that Will Hang IBM XTs or Compatibles"
 permalink: /pubs/pc/reference/microsoft/kb/Q23856/
 ---
 
+## Q23856: Code that Will Hang IBM XTs or Compatibles
+
 	Article: Q23856
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | TAR57675 buglist1.00

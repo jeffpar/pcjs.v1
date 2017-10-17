@@ -4,8 +4,9 @@ title: "Q30827: An Example Where a Protect Mode C Extension Will Not Load"
 permalink: /pubs/pc/reference/microsoft/kb/Q30827/
 ---
 
+## Q30827: An Example Where a Protect Mode C Extension Will Not Load
+
 	Article: Q30827
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: OS/2
 	Flags: ENDUSER | TAR76121 TAR76251

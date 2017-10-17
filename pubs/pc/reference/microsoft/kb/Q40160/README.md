@@ -4,8 +4,9 @@ title: "Q40160: Error C2001: Newline in Constant for a String on Multiple Line"
 permalink: /pubs/pc/reference/microsoft/kb/Q40160/
 ---
 
+## Q40160: Error C2001: Newline in Constant for a String on Multiple Line
+
 	Article: Q40160
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER |

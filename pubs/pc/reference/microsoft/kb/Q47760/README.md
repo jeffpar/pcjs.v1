@@ -4,8 +4,9 @@ title: "Q47760: The _QC Predefined Preprocessing Macro"
 permalink: /pubs/pc/reference/microsoft/kb/Q47760/
 ---
 
+## Q47760: The _QC Predefined Preprocessing Macro
+
 	Article: Q47760
-	Product: Microsoft C
 	Version(s): 1.00 1.01 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_C S_QuickASM

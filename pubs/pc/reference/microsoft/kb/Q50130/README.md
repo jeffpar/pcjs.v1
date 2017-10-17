@@ -4,8 +4,9 @@ title: "Q50130: L2041: Stack Plus Data Exceeds 64K -- Documentation Supplement"
 permalink: /pubs/pc/reference/microsoft/kb/Q50130/
 ---
 
+## Q50130: L2041: Stack Plus Data Exceeds 64K -- Documentation Supplement
+
 	Article: Q50130
-	Product: Microsoft C
 	Version(s): 3.65 4.06 | 5.01.21
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER  | s_pascal h_fortran h_masm s_c s_quickc s_quickasm s_error d

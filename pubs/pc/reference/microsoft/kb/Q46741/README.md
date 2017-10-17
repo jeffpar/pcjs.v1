@@ -4,8 +4,9 @@ title: "Q46741: Possible Cause for Slow Stream I/O"
 permalink: /pubs/pc/reference/microsoft/kb/Q46741/
 ---
 
+## Q46741: Possible Cause for Slow Stream I/O
+
 	Article: Q46741
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QuickC

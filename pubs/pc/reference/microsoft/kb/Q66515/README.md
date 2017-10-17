@@ -4,8 +4,9 @@ title: "Q66515: QuickC Quickwatch Has Three Help Pages"
 permalink: /pubs/pc/reference/microsoft/kb/Q66515/
 ---
 
+## Q66515: QuickC Quickwatch Has Three Help Pages
+
 	Article: Q66515
-	Product: Microsoft C
 	Version(s): 2.50 2.51
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr

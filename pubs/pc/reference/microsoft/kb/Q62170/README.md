@@ -4,8 +4,9 @@ title: "Q62170: Modifying TOOLS.INI May Have No Effect on PWB Environment"
 permalink: /pubs/pc/reference/microsoft/kb/Q62170/
 ---
 
+## Q62170: Modifying TOOLS.INI May Have No Effect on PWB Environment
+
 	Article: Q62170
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q32228: Loading a TAGGED Section Reinitializes the Editor"
 permalink: /pubs/pc/reference/microsoft/kb/Q32228/
 ---
 
+## Q32228: Loading a TAGGED Section Reinitializes the Editor
+
 	Article: Q32228
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist1.00 tar76973

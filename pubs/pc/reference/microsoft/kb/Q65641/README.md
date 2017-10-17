@@ -4,8 +4,9 @@ title: "Q65641: C1001: Internal Compiler Error: grammar.c:1.138, Line 164"
 permalink: /pubs/pc/reference/microsoft/kb/Q65641/
 ---
 
+## Q65641: C1001: Internal Compiler Error: grammar.c:1.138, Line 164
+
 	Article: Q65641
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist6.00 S_QuickC

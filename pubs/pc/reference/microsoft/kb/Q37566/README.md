@@ -4,8 +4,9 @@ title: "Q37566: CodeView Unexpectedly Exits to DOS"
 permalink: /pubs/pc/reference/microsoft/kb/Q37566/
 ---
 
+## Q37566: CodeView Unexpectedly Exits to DOS
+
 	Article: Q37566
-	Product: Microsoft C
 	Version(s): 2.10 2.20
 	Operating System: MS-DOS
 	Flags: ENDUSER |

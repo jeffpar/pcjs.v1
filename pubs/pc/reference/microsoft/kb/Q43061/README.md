@@ -4,8 +4,9 @@ title: "Q43061: Optimization Problem with SHIFTing and ANDing"
 permalink: /pubs/pc/reference/microsoft/kb/Q43061/
 ---
 
+## Q43061: Optimization Problem with SHIFTing and ANDing
+
 	Article: Q43061
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist5.10

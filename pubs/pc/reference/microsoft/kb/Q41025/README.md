@@ -4,8 +4,9 @@ title: "Q41025: Using _dos_setdrive and _searchenv to Open a File"
 permalink: /pubs/pc/reference/microsoft/kb/Q41025/
 ---
 
+## Q41025: Using _dos_setdrive and _searchenv to Open a File
+
 	Article: Q41025
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

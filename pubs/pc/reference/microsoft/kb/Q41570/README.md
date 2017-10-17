@@ -4,8 +4,9 @@ title: "Q41570: QuickC 2.00 README.DOC: Pragmas"
 permalink: /pubs/pc/reference/microsoft/kb/Q41570/
 ---
 
+## Q41570: QuickC 2.00 README.DOC: Pragmas
+
 	Article: Q41570
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr

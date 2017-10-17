@@ -4,8 +4,9 @@ title: "Q65308: Default Optimization Generates Bad Code in Switch Construct"
 permalink: /pubs/pc/reference/microsoft/kb/Q65308/
 ---
 
+## Q65308: Default Optimization Generates Bad Code in Switch Construct
+
 	Article: Q65308
-	Product: Microsoft C
 	Version(s): 6.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist6.00

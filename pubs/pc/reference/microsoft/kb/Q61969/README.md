@@ -4,8 +4,9 @@ title: "Q61969: Changes to malloc() and the Rover Pointer Behavior in C 6.00"
 permalink: /pubs/pc/reference/microsoft/kb/Q61969/
 ---
 
+## Q61969: Changes to malloc() and the Rover Pointer Behavior in C 6.00
+
 	Article: Q61969
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | s_quickc

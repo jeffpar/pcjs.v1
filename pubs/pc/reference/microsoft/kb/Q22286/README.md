@@ -4,8 +4,9 @@ title: "Q22286: No More Than 255 Modules May Be Placed in Overlays"
 permalink: /pubs/pc/reference/microsoft/kb/Q22286/
 ---
 
+## Q22286: No More Than 255 Modules May Be Placed in Overlays
+
 	Article: Q22286
-	Product: Microsoft C
 	Version(s): 4.00 5.00 5.10 6.00 6.00a
 	Operating System: MS-DOS
 	Flags: ENDUSER |  s_quickc s_link

@@ -4,8 +4,9 @@ title: "Q41550: QuickC 2.00 README.DOC: The LEARN.COM Program"
 permalink: /pubs/pc/reference/microsoft/kb/Q41550/
 ---
 
+## Q41550: QuickC 2.00 README.DOC: The LEARN.COM Program
+
 	Article: Q41550
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

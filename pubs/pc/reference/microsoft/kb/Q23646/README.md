@@ -4,8 +4,9 @@ title: "Q23646: CV Prior to 3.00 Needs /S for Mouse to Appear in OS/2 DOS Box"
 permalink: /pubs/pc/reference/microsoft/kb/Q23646/
 ---
 
+## Q23646: CV Prior to 3.00 Needs /S for Mouse to Appear in OS/2 DOS Box
+
 	Article: Q23646
-	Product: Microsoft C
 	Version(s): 1.00 1.10 1.11 2.00 2.10 2.20 2.30 2.35
 	Operating System: MS-DOS
 	Flags: ENDUSER |

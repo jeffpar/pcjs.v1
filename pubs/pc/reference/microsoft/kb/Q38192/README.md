@@ -4,8 +4,9 @@ title: "Q38192: Fatal Compile Time Error C1008 No Input File Specified"
 permalink: /pubs/pc/reference/microsoft/kb/Q38192/
 ---
 
+## Q38192: Fatal Compile Time Error C1008 No Input File Specified
+
 	Article: Q38192
-	Product: Microsoft C
 	Version(s): 1.00   | 1.01
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

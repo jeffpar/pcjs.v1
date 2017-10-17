@@ -4,8 +4,9 @@ title: "Q41670: QuickC 2.00 README.DOC: Warning Message C4118"
 permalink: /pubs/pc/reference/microsoft/kb/Q41670/
 ---
 
+## Q41670: QuickC 2.00 README.DOC: Warning Message C4118
+
 	Article: Q41670
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

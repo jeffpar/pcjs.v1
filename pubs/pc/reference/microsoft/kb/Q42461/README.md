@@ -4,8 +4,9 @@ title: "Q42461: C Function _dos_setdrive Returns &quot;5&quot; Drives in the Sys
 permalink: /pubs/pc/reference/microsoft/kb/Q42461/
 ---
 
+## Q42461: C Function _dos_setdrive Returns &quot;5&quot; Drives in the System
+
 	Article: Q42461
-	Product: Microsoft C
 	Version(s): 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | QuickC

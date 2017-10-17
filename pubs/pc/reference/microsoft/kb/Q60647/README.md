@@ -4,8 +4,9 @@ title: "Q60647: C 6.00 STARTUP.DOC: C Run-time Library Startup Sources"
 permalink: /pubs/pc/reference/microsoft/kb/Q60647/
 ---
 
+## Q60647: C 6.00 STARTUP.DOC: C Run-time Library Startup Sources
+
 	Article: Q60647
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | readme readme.doc start-up runtime

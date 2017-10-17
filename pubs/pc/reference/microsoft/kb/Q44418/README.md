@@ -4,8 +4,9 @@ title: "Q44418: Switching Out of PM Application Hangs System under Codeview"
 permalink: /pubs/pc/reference/microsoft/kb/Q44418/
 ---
 
+## Q44418: Switching Out of PM Application Hangs System under Codeview
+
 	Article: Q44418
-	Product: Microsoft C
 	Version(s): 2.20
 	Operating System: OS/2
 	Flags: ENDUSER |

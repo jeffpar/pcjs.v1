@@ -4,8 +4,9 @@ title: "Q37633: How errno Is Handled in Multi-Threaded Programs"
 permalink: /pubs/pc/reference/microsoft/kb/Q37633/
 ---
 
+## Q37633: How errno Is Handled in Multi-Threaded Programs
+
 	Article: Q37633
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: OS/2
 	Flags: ENDUSER | docerr

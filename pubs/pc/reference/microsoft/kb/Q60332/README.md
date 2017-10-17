@@ -4,8 +4,9 @@ title: "Q60332: C 6.00 sizeof() Function Returns unsigned Instead of int"
 permalink: /pubs/pc/reference/microsoft/kb/Q60332/
 ---
 
+## Q60332: C 6.00 sizeof() Function Returns unsigned Instead of int
+
 	Article: Q60332
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | s_quickc

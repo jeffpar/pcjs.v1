@@ -4,8 +4,9 @@ title: "Q44300: Internal Compiler Error: omf.c:1.70 Line 146"
 permalink: /pubs/pc/reference/microsoft/kb/Q44300/
 ---
 
+## Q44300: Internal Compiler Error: omf.c:1.70 Line 146
+
 	Article: Q44300
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: OS/2
 	Flags: ENDUSER | buglist5.10

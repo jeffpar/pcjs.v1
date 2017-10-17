@@ -4,8 +4,9 @@ title: "Q52140: PG Chart Legend Window Is Restricted to Default Coordinates"
 permalink: /pubs/pc/reference/microsoft/kb/Q52140/
 ---
 
+## Q52140: PG Chart Legend Window Is Restricted to Default Coordinates
+
 	Article: Q52140
-	Product: Microsoft C
 	Version(s): 2.00 2.01
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickasm buglist2.00 buglist2.01

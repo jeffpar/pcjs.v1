@@ -4,8 +4,9 @@ title: "Q50223: Printing Double Quotation Marks from within an M Editor Macro"
 permalink: /pubs/pc/reference/microsoft/kb/Q50223/
 ---
 
+## Q50223: Printing Double Quotation Marks from within an M Editor Macro
+
 	Article: Q50223
-	Product: Microsoft C
 	Version(s): 1.00 1.02 | 1.00 1.02
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER |

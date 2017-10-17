@@ -4,8 +4,9 @@ title: "Q41477: QuickC 2.00 README.DOC: Using Another Editor"
 permalink: /pubs/pc/reference/microsoft/kb/Q41477/
 ---
 
+## Q41477: QuickC 2.00 README.DOC: Using Another Editor
+
 	Article: Q41477
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

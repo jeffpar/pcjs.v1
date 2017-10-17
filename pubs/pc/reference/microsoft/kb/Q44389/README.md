@@ -4,8 +4,9 @@ title: "Q44389: Only Certain C Library Functions Have an Intrinsic Form"
 permalink: /pubs/pc/reference/microsoft/kb/Q44389/
 ---
 
+## Q44389: Only Certain C Library Functions Have an Intrinsic Form
+
 	Article: Q44389
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q49003: Operation of InPort Chip Versions 1.00 and 1.10 Versus 1.20"
 permalink: /pubs/pc/reference/microsoft/kb/Q49003/
 ---
 
+## Q49003: Operation of InPort Chip Versions 1.00 and 1.10 Versus 1.20
+
 	Article: Q49003
-	Product: Microsoft C
 	Version(s): 1.00 1.10 1.20
 	Operating System: MS-DOS
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q32448: Specifying .DEF Files on the CL Command Line"
 permalink: /pubs/pc/reference/microsoft/kb/Q32448/
 ---
 
+## Q32448: Specifying .DEF Files on the CL Command Line
+
 	Article: Q32448
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

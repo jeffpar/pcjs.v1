@@ -4,8 +4,9 @@ title: "Q31919: Using the T Command to Echo CodeView Output"
 permalink: /pubs/pc/reference/microsoft/kb/Q31919/
 ---
 
+## Q31919: Using the T Command to Echo CodeView Output
+
 	Article: Q31919
-	Product: Microsoft C
 	Version(s): 2.00 2.10 2.20
 	Operating System: MS-DOS
 	Flags: ENDUSER |

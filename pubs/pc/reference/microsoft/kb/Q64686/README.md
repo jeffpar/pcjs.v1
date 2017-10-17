@@ -4,8 +4,9 @@ title: "Q64686: Nested Nameless Structs Can Cause C2030 Error"
 permalink: /pubs/pc/reference/microsoft/kb/Q64686/
 ---
 
+## Q64686: Nested Nameless Structs Can Cause C2030 Error
+
 	Article: Q64686
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist6.00

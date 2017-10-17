@@ -4,8 +4,9 @@ title: "Q67483: PWB Hangs with Novell NetWare"
 permalink: /pubs/pc/reference/microsoft/kb/Q67483/
 ---
 
+## Q67483: PWB Hangs with Novell NetWare
+
 	Article: Q67483
-	Product: Microsoft C
 	Version(s): 1.00 1.11
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickc s_codeview s_c

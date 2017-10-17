@@ -4,8 +4,9 @@ title: "Q38311: Inserting a Line from Clipboard into File with Editor"
 permalink: /pubs/pc/reference/microsoft/kb/Q38311/
 ---
 
+## Q38311: Inserting a Line from Clipboard into File with Editor
+
 	Article: Q38311
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

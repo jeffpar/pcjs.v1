@@ -4,8 +4,9 @@ title: "Q61310: /Ot May Generate Incorrect Code with Nested Conditionals"
 permalink: /pubs/pc/reference/microsoft/kb/Q61310/
 ---
 
+## Q61310: /Ot May Generate Incorrect Code with Nested Conditionals
+
 	Article: Q61310
-	Product: Microsoft C
 	Version(s): 5.10 6.00 | 5.10 6.00
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | buglist6.00

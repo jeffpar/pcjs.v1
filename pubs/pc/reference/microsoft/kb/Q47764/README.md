@@ -4,8 +4,9 @@ title: "Q47764: Ambiguous Documentation of Enter ASCII (EA) Command"
 permalink: /pubs/pc/reference/microsoft/kb/Q47764/
 ---
 
+## Q47764: Ambiguous Documentation of Enter ASCII (EA) Command
+
 	Article: Q47764
-	Product: Microsoft C
 	Version(s): 2.10 2.20 | 2.10 2.20
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER |

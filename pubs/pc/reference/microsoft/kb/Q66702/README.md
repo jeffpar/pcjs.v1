@@ -4,8 +4,9 @@ title: "Q66702: CV2206 Warning: Corrupt OMF Detected in &lt;filename&gt;"
 permalink: /pubs/pc/reference/microsoft/kb/Q66702/
 ---
 
+## Q66702: CV2206 Warning: Corrupt OMF Detected in &lt;filename&gt;
+
 	Article: Q66702
-	Product: Microsoft C
 	Version(s): 2.x 3.00 3.10 | 2.x 3.00 3.10
 	Operating System: MS-DOS        | OS/2
 	Flags: ENDUSER | S_MASM H_MASM

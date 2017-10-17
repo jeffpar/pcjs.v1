@@ -4,8 +4,9 @@ title: "Q47958: Patching malloc() to Reuse Memory within an Allocated Block"
 permalink: /pubs/pc/reference/microsoft/kb/Q47958/
 ---
 
+## Q47958: Patching malloc() to Reuse Memory within an Allocated Block
+
 	Article: Q47958
-	Product: Microsoft C
 	Version(s): 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q31561: Time and Date from _dos_findfirst(), _dos_findnext()"
 permalink: /pubs/pc/reference/microsoft/kb/Q31561/
 ---
 
+## Q31561: Time and Date from _dos_findfirst(), _dos_findnext()
+
 	Article: Q31561
-	Product: Microsoft C
 	Version(s): 5.00 5.10 6.00 6.00a
 	Operating System: MS-DOS
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q44386: Determining the Memory Model for Conditional Compilation"
 permalink: /pubs/pc/reference/microsoft/kb/Q44386/
 ---
 
+## Q44386: Determining the Memory Model for Conditional Compilation
+
 	Article: Q44386
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | s_QuickC

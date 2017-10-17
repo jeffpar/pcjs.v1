@@ -4,8 +4,9 @@ title: "Q64028: Changing Directories in Make Files Not Supported by NMK.COM"
 permalink: /pubs/pc/reference/microsoft/kb/Q64028/
 ---
 
+## Q64028: Changing Directories in Make Files Not Supported by NMK.COM
+
 	Article: Q64028
-	Product: Microsoft C
 	Version(s): 1.11
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist1.11 S_QUICKC S_C

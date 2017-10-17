@@ -4,8 +4,9 @@ title: "Q37624: Using a Logical AND Operation &amp;&amp; and OR Operation &#124;
 permalink: /pubs/pc/reference/microsoft/kb/Q37624/
 ---
 
+## Q37624: Using a Logical AND Operation &amp;&amp; and OR Operation &#124;&#124;
+
 	Article: Q37624
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | S_QuickC

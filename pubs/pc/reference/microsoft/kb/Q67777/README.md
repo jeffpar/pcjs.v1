@@ -4,8 +4,9 @@ title: "Q67777: Inconsistent Error Attempting to Load Nonexistent Extension"
 permalink: /pubs/pc/reference/microsoft/kb/Q67777/
 ---
 
+## Q67777: Inconsistent Error Attempting to Load Nonexistent Extension
+
 	Article: Q67777
-	Product: Microsoft C
 	Version(s): 1.00 1.10
 	Operating System: OS/2
 	Flags: ENDUSER |

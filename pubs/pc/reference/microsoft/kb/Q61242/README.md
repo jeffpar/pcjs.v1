@@ -4,8 +4,9 @@ title: "Q61242: C 6.00 README: Patching MOUCALLS.DLL (OS/2 1.10 Only)"
 permalink: /pubs/pc/reference/microsoft/kb/Q61242/
 ---
 
+## Q61242: C 6.00 README: Patching MOUCALLS.DLL (OS/2 1.10 Only)
+
 	Article: Q61242
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

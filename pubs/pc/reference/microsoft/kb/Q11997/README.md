@@ -4,8 +4,9 @@ title: "Q11997: How to Modify the Environment for a Spawned Process"
 permalink: /pubs/pc/reference/microsoft/kb/Q11997/
 ---
 
+## Q11997: How to Modify the Environment for a Spawned Process
+
 	Article: Q11997
-	Product: Microsoft C
 	Version(s): 3.00 4.00 5.00 5.10 6.00 6.00a | 5.10 6.00 6.00a
 	Operating System: MS-DOS                         | OS/2
 	Flags: ENDUSER | s_quickc

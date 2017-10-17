@@ -4,8 +4,9 @@ title: "Q49381: CVP 2.30 Hangs When /O Is Specified, but Child Is Not Debugged"
 permalink: /pubs/pc/reference/microsoft/kb/Q49381/
 ---
 
+## Q49381: CVP 2.30 Hangs When /O Is Specified, but Child Is Not Debugged
+
 	Article: Q49381
-	Product: Microsoft C
 	Version(s): 2.30
 	Operating System: OS/2
 	Flags: ENDUSER | buglist2.30

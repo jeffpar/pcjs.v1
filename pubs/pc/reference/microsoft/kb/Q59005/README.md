@@ -4,8 +4,9 @@ title: "Q59005: Returning to QuickC from PM May Corrupt Screen"
 permalink: /pubs/pc/reference/microsoft/kb/Q59005/
 ---
 
+## Q59005: Returning to QuickC from PM May Corrupt Screen
+
 	Article: Q59005
-	Product: Microsoft C
 	Version(s): m2.00 2.01
 	Operating System: OS/2
 	Flags: ENDUSER | buglist2.00 buglist2.01

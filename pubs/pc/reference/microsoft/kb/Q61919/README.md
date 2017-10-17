@@ -4,8 +4,9 @@ title: "Q61919: CV 3.00 Gives R6000, Hangs When Accessing Help During Start-Up"
 permalink: /pubs/pc/reference/microsoft/kb/Q61919/
 ---
 
+## Q61919: CV 3.00 Gives R6000, Hangs When Accessing Help During Start-Up
+
 	Article: Q61919
-	Product: Microsoft C
 	Version(s): 3.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist3.00 fixlist3.10

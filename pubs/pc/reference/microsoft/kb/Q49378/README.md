@@ -4,8 +4,9 @@ title: "Q49378: Label Finding Command Does Whole Word Search, Not Text Search"
 permalink: /pubs/pc/reference/microsoft/kb/Q49378/
 ---
 
+## Q49378: Label Finding Command Does Whole Word Search, Not Text Search
+
 	Article: Q49378
-	Product: Microsoft C
 	Version(s): 2.20 2.30 | 2.20 2.30
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q61233: C 6.00 README: Getting Help on Start-Up Error Messages"
 permalink: /pubs/pc/reference/microsoft/kb/Q61233/
 ---
 
+## Q61233: C 6.00 README: Getting Help on Start-Up Error Messages
+
 	Article: Q61233
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | s_qh

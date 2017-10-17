@@ -4,8 +4,9 @@ title: "Q31487: Features Supported when Editing TextArgs in Microsoft Editor"
 permalink: /pubs/pc/reference/microsoft/kb/Q31487/
 ---
 
+## Q31487: Features Supported when Editing TextArgs in Microsoft Editor
+
 	Article: Q31487
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: OS/2
 	Flags: ENDUSER | tar69726

@@ -4,8 +4,9 @@ title: "Q58933: Cannot Allocate More Than 64K with Calloc()"
 permalink: /pubs/pc/reference/microsoft/kb/Q58933/
 ---
 
+## Q58933: Cannot Allocate More Than 64K with Calloc()
+
 	Article: Q58933
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | s_quickc s_quickasm

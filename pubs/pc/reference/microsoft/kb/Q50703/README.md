@@ -4,8 +4,9 @@ title: "Q50703: C and Pascal Mixed Language: Declare C Libraries First"
 permalink: /pubs/pc/reference/microsoft/kb/Q50703/
 ---
 
+## Q50703: C and Pascal Mixed Language: Declare C Libraries First
+
 	Article: Q50703
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | S_PASCAL S_LINK

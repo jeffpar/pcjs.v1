@@ -4,8 +4,9 @@ title: "Q58647: How to Successfully Debug VioPopUp() Code with CodeView"
 permalink: /pubs/pc/reference/microsoft/kb/Q58647/
 ---
 
+## Q58647: How to Successfully Debug VioPopUp() Code with CodeView
+
 	Article: Q58647
-	Product: Microsoft C
 	Version(s): 2.20 2.30 2.35
 	Operating System: OS/2
 	Flags: ENDUSER |

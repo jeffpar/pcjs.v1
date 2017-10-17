@@ -4,8 +4,9 @@ title: "Q40594: Accessing the COM3: or COM4: Port"
 permalink: /pubs/pc/reference/microsoft/kb/Q40594/
 ---
 
+## Q40594: Accessing the COM3: or COM4: Port
+
 	Article: Q40594
-	Product: Microsoft C
 	Version(s): 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER |

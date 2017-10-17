@@ -4,8 +4,9 @@ title: "Q61056: Why Zero-Length .SBR Files Are Left on the Disk by the PWB"
 permalink: /pubs/pc/reference/microsoft/kb/Q61056/
 ---
 
+## Q61056: Why Zero-Length .SBR Files Are Left on the Disk by the PWB
+
 	Article: Q61056
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

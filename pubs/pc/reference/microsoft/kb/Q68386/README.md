@@ -4,8 +4,9 @@ title: "Q68386: A Workaround for the MGREP Problem in M/MEP Version 1.02"
 permalink: /pubs/pc/reference/microsoft/kb/Q68386/
 ---
 
+## Q68386: A Workaround for the MGREP Problem in M/MEP Version 1.02
+
 	Article: Q68386
-	Product: Microsoft C
 	Version(s): 1.02   | 1.02
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

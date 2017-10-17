@@ -4,8 +4,9 @@ title: "Q61201: C 6.00 README: Use /Gh to Build Windows 2.x Applications"
 permalink: /pubs/pc/reference/microsoft/kb/Q61201/
 ---
 
+## Q61201: C 6.00 README: Use /Gh to Build Windows 2.x Applications
+
 	Article: Q61201
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

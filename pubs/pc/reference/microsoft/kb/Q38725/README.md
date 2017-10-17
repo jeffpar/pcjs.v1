@@ -4,8 +4,9 @@ title: "Q38725: Why Unitialized Global Variables Don't Appear in C 5.10"
 permalink: /pubs/pc/reference/microsoft/kb/Q38725/
 ---
 
+## Q38725: Why Unitialized Global Variables Don't Appear in C 5.10
+
 	Article: Q38725
-	Product: Microsoft C
 	Version(s): 3.65
 	Operating System: MS-DOS
 	Flags: ENDUSER | SR# G881021-5044

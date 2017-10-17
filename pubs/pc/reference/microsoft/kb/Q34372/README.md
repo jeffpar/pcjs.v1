@@ -4,8 +4,9 @@ title: "Q34372: Unresolved Externals Link Errors for OS/2 Calls"
 permalink: /pubs/pc/reference/microsoft/kb/Q34372/
 ---
 
+## Q34372: Unresolved Externals Link Errors for OS/2 Calls
+
 	Article: Q34372
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

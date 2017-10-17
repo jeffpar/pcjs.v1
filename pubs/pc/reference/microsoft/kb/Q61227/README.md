@@ -4,8 +4,9 @@ title: "Q61227: C 6.00 README: NMAKE: Avoiding Out-of-Memory Condition w/DOS"
 permalink: /pubs/pc/reference/microsoft/kb/Q61227/
 ---
 
+## Q61227: C 6.00 README: NMAKE: Avoiding Out-of-Memory Condition w/DOS
+
 	Article: Q61227
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

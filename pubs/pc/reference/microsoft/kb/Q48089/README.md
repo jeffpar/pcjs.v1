@@ -4,8 +4,9 @@ title: "Q48089: Description of the /Or Switch"
 permalink: /pubs/pc/reference/microsoft/kb/Q48089/
 ---
 
+## Q48089: Description of the /Or Switch
+
 	Article: Q48089
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER |

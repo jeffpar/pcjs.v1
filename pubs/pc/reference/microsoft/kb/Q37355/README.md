@@ -4,8 +4,9 @@ title: "Q37355: Loadtime DLL Initialization for C 5.10"
 permalink: /pubs/pc/reference/microsoft/kb/Q37355/
 ---
 
+## Q37355: Loadtime DLL Initialization for C 5.10
+
 	Article: Q37355
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | softlib CRTDLL.ARC S12104.EXE

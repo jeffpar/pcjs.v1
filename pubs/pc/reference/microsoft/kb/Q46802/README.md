@@ -4,8 +4,9 @@ title: "Q46802: QUICK.INI Needs Modification for Use with M 1.02 or MEP 1.02"
 permalink: /pubs/pc/reference/microsoft/kb/Q46802/
 ---
 
+## Q46802: QUICK.INI Needs Modification for Use with M 1.02 or MEP 1.02
+
 	Article: Q46802
-	Product: Microsoft C
 	Version(s): 1.02   | 1.02
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

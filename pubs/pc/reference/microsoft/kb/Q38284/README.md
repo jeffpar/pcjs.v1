@@ -4,8 +4,9 @@ title: "Q38284: 80386 and 80387 Instruction Set"
 permalink: /pubs/pc/reference/microsoft/kb/Q38284/
 ---
 
+## Q38284: 80386 and 80387 Instruction Set
+
 	Article: Q38284
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | h_fortran s_pascal s_quickc

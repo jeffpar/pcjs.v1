@@ -4,8 +4,9 @@ title: "Q44896: Page Size May Cause Big Size Increase When Combining Libraries"
 permalink: /pubs/pc/reference/microsoft/kb/Q44896/
 ---
 
+## Q44896: Page Size May Cause Big Size Increase When Combining Libraries
+
 	Article: Q44896
-	Product: Microsoft C
 	Version(s): 3.0x 3.11 3.14 3.17 | 3.11 3.14 3.17
 	Operating System: MS-DOS              | OS/2
 	Flags: ENDUSER | s_lib

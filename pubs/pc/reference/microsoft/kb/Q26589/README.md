@@ -4,8 +4,9 @@ title: "Q26589: Variables in C 5.00/5.10 splitpath() Example Declared Wrong"
 permalink: /pubs/pc/reference/microsoft/kb/Q26589/
 ---
 
+## Q26589: Variables in C 5.00/5.10 splitpath() Example Declared Wrong
+
 	Article: Q26589
-	Product: Microsoft C
 	Version(s): 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr

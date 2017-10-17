@@ -4,8 +4,9 @@ title: "Q49871: Mixing Case of LINK Option Causes Error L1093 or D4002"
 permalink: /pubs/pc/reference/microsoft/kb/Q49871/
 ---
 
+## Q49871: Mixing Case of LINK Option Causes Error L1093 or D4002
+
 	Article: Q49871
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | S_QuickC

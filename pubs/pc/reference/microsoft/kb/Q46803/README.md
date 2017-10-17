@@ -4,8 +4,9 @@ title: "Q46803: Presentation Graphics Allows Only One Color Per Data Series"
 permalink: /pubs/pc/reference/microsoft/kb/Q46803/
 ---
 
+## Q46803: Presentation Graphics Allows Only One Color Per Data Series
+
 	Article: Q46803
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

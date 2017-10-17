@@ -4,8 +4,9 @@ title: "Q25321: Using EXEHDR or EXEMOD to Change the Stack Size of an .EXE"
 permalink: /pubs/pc/reference/microsoft/kb/Q25321/
 ---
 
+## Q25321: Using EXEHDR or EXEMOD to Change the Stack Size of an .EXE
+
 	Article: Q25321
-	Product: Microsoft C
 	Version(s): 1.00 2.01 | 1.00 2.01
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | s_exehdr s_exemod

@@ -4,8 +4,9 @@ title: "Q42777: mkdir() Followed by chdir() Causes QuickC Debugging Problem"
 permalink: /pubs/pc/reference/microsoft/kb/Q42777/
 ---
 
+## Q42777: mkdir() Followed by chdir() Causes QuickC Debugging Problem
+
 	Article: Q42777
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist2.00

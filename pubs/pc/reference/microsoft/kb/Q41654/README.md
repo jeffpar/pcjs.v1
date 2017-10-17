@@ -4,8 +4,9 @@ title: "Q41654: QuickC 2.00 README.DOC: /Ze, /Za (Enable/Disable Extensions)"
 permalink: /pubs/pc/reference/microsoft/kb/Q41654/
 ---
 
+## Q41654: QuickC 2.00 README.DOC: /Ze, /Za (Enable/Disable Extensions)
+
 	Article: Q41654
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

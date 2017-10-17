@@ -4,8 +4,9 @@ title: "Q34068: Graphic Adapters Supported by the Graphics Routines"
 permalink: /pubs/pc/reference/microsoft/kb/Q34068/
 ---
 
+## Q34068: Graphic Adapters Supported by the Graphics Routines
+
 	Article: Q34068
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

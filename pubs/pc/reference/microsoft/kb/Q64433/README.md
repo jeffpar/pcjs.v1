@@ -4,8 +4,9 @@ title: "Q64433: Can't Resize a Window with a Macro in PWB"
 permalink: /pubs/pc/reference/microsoft/kb/Q64433/
 ---
 
+## Q64433: Can't Resize a Window with a Macro in PWB
+
 	Article: Q64433
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

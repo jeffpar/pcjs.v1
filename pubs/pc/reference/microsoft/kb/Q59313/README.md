@@ -4,8 +4,9 @@ title: "Q59313: Using the 400 PPI Mouse with GEM"
 permalink: /pubs/pc/reference/microsoft/kb/Q59313/
 ---
 
+## Q59313: Using the 400 PPI Mouse with GEM
+
 	Article: Q59313
-	Product: Microsoft C
 	Version(s): 7.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

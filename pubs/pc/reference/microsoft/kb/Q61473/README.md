@@ -4,8 +4,9 @@ title: "Q61473: Debugging Large DOS Applications in CodeView 3.0 with /X /E /D"
 permalink: /pubs/pc/reference/microsoft/kb/Q61473/
 ---
 
+## Q61473: Debugging Large DOS Applications in CodeView 3.0 with /X /E /D
+
 	Article: Q61473
-	Product: Microsoft C
 	Version(s): 3.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

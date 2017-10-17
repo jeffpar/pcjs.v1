@@ -4,8 +4,9 @@ title: "Q43071: QuickC 2.00 Editor Err Msg: Cannot Load Binary File"
 permalink: /pubs/pc/reference/microsoft/kb/Q43071/
 ---
 
+## Q43071: QuickC 2.00 Editor Err Msg: Cannot Load Binary File
+
 	Article: Q43071
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

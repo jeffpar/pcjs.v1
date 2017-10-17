@@ -4,8 +4,9 @@ title: "Q63318: PWB: Print Does Not Put CR/LF at EOL If Text Selected"
 permalink: /pubs/pc/reference/microsoft/kb/Q63318/
 ---
 
+## Q63318: PWB: Print Does Not Put CR/LF at EOL If Text Selected
+
 	Article: Q63318
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist1.00

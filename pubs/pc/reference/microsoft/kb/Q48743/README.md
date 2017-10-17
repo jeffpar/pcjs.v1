@@ -4,8 +4,9 @@ title: "Q48743: QuickC 2.00 Fails with Self-Relative PATH Variable"
 permalink: /pubs/pc/reference/microsoft/kb/Q48743/
 ---
 
+## Q48743: QuickC 2.00 Fails with Self-Relative PATH Variable
+
 	Article: Q48743
-	Product: Microsoft C
 	Version(s): 2.00 2.01
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QuickASM buglist2.00 buglist2.01

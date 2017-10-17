@@ -4,8 +4,9 @@ title: "Q45237: Unsigned Characters and Arithmetic Operators"
 permalink: /pubs/pc/reference/microsoft/kb/Q45237/
 ---
 
+## Q45237: Unsigned Characters and Arithmetic Operators
+
 	Article: Q45237
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | S_QuickC

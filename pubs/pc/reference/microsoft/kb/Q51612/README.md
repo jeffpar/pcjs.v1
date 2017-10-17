@@ -4,8 +4,9 @@ title: "Q51612: QuickC 1.0x and the CL= and LINK= Environment Settings"
 permalink: /pubs/pc/reference/microsoft/kb/Q51612/
 ---
 
+## Q51612: QuickC 1.0x and the CL= and LINK= Environment Settings
+
 	Article: Q51612
-	Product: Microsoft C
 	Version(s): 1.00 1.01
 	Operating System: MS-DOS
 	Flags: ENDUSER |

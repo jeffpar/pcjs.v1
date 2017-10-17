@@ -4,8 +4,9 @@ title: "Q66924: extern _based(_segname) May Define Segment of Class CODE"
 permalink: /pubs/pc/reference/microsoft/kb/Q66924/
 ---
 
+## Q66924: extern _based(_segname) May Define Segment of Class CODE
+
 	Article: Q66924
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | buglist6.00 buglist6.00a

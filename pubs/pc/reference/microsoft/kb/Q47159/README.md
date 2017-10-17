@@ -4,8 +4,9 @@ title: "Q47159: Scaletitle Does Not Display Category Axis"
 permalink: /pubs/pc/reference/microsoft/kb/Q47159/
 ---
 
+## Q47159: Scaletitle Does Not Display Category Axis
+
 	Article: Q47159
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

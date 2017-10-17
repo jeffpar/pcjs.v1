@@ -4,8 +4,9 @@ title: "Q50116: Fscanf() and White-Space Characters"
 permalink: /pubs/pc/reference/microsoft/kb/Q50116/
 ---
 
+## Q50116: Fscanf() and White-Space Characters
+
 	Article: Q50116
-	Product: Microsoft C
 	Version(s): 5.00 5.10  |  5.10
 	Operating System: MS-DOS     |  OS/2
 	Flags: ENDUSER |

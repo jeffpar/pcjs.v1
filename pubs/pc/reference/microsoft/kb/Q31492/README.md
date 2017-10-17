@@ -4,8 +4,9 @@ title: "Q31492: Editing Nonexisting Files with the Microsoft Editor"
 permalink: /pubs/pc/reference/microsoft/kb/Q31492/
 ---
 
+## Q31492: Editing Nonexisting Files with the Microsoft Editor
+
 	Article: Q31492
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: OS/2
 	Flags: ENDUSER | tar62913

@@ -4,8 +4,9 @@ title: "Q61808: Using &quot;!&quot; and &quot;&#36;?&quot; Do Not Work as Expect
 permalink: /pubs/pc/reference/microsoft/kb/Q61808/
 ---
 
+## Q61808: Using &quot;!&quot; and &quot;&#36;?&quot; Do Not Work as Expected with NMAKE 1.11
+
 	Article: Q61808
-	Product: Microsoft C
 	Version(s): 1.11   | 1.11
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist1.11

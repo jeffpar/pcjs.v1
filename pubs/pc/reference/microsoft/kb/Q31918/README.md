@@ -4,8 +4,9 @@ title: "Q31918: Problems with CodeView and Logitech Mouse with Older Drivers"
 permalink: /pubs/pc/reference/microsoft/kb/Q31918/
 ---
 
+## Q31918: Problems with CodeView and Logitech Mouse with Older Drivers
+
 	Article: Q31918
-	Product: Microsoft C
 	Version(s): 2.00 2.10 2.20
 	Operating System: MS-DOS
 	Flags: ENDUSER |

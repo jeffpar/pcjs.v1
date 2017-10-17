@@ -4,8 +4,9 @@ title: "Q49935: Link Error L2028 Caused by HEAPSIZE, STACKSIZE and DGROUP Size"
 permalink: /pubs/pc/reference/microsoft/kb/Q49935/
 ---
 
+## Q49935: Link Error L2028 Caused by HEAPSIZE, STACKSIZE and DGROUP Size
+
 	Article: Q49935
-	Product: Microsoft C
 	Version(s): 5.01.21 | 5.01.21
 	Operating System: MS-DOS  | OS/2
 	Flags: ENDUSER | docerr

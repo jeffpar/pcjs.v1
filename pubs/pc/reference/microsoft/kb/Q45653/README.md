@@ -4,8 +4,9 @@ title: "Q45653: Making Your Own Key File with the MKKEY.EXE Program"
 permalink: /pubs/pc/reference/microsoft/kb/Q45653/
 ---
 
+## Q45653: Making Your Own Key File with the MKKEY.EXE Program
+
 	Article: Q45653
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

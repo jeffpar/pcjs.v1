@@ -4,8 +4,9 @@ title: "Q35031: Unresolved Externals when Linking for Protected Mode"
 permalink: /pubs/pc/reference/microsoft/kb/Q35031/
 ---
 
+## Q35031: Unresolved Externals when Linking for Protected Mode
+
 	Article: Q35031
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q67740: Dividing Negative Integers May Give Positive Results"
 permalink: /pubs/pc/reference/microsoft/kb/Q67740/
 ---
 
+## Q67740: Dividing Negative Integers May Give Positive Results
+
 	Article: Q67740
-	Product: Microsoft C
 	Version(s): 5.10 6.00 6.00a | 5.10 6.00 6.00a
 	Operating System: MS-DOS          | OS/2
 	Flags: ENDUSER | buglist5.10 buglist6.00 buglist6.00a

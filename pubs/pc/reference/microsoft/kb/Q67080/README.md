@@ -4,8 +4,9 @@ title: "Q67080: Functions in Function Prototypes Cannot Have Typedef Arguments"
 permalink: /pubs/pc/reference/microsoft/kb/Q67080/
 ---
 
+## Q67080: Functions in Function Prototypes Cannot Have Typedef Arguments
+
 	Article: Q67080
-	Product: Microsoft C
 	Version(s): 5.10 6.00 6.00a | 5.10 6.00 6.00a
 	Operating System: MS-DOS          | OS/2
 	Flags: ENDUSER | S_QUICKC buglist5.10 buglist6.00 buglist6.00a

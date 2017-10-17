@@ -4,8 +4,9 @@ title: "Q43271: C: Cannot Bind Programs with Increased File Handles"
 permalink: /pubs/pc/reference/microsoft/kb/Q43271/
 ---
 
+## Q43271: C: Cannot Bind Programs with Increased File Handles
+
 	Article: Q43271
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

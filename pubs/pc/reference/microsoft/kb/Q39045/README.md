@@ -4,8 +4,9 @@ title: "Q39045: Error R6006 Bad Format on exec"
 permalink: /pubs/pc/reference/microsoft/kb/Q39045/
 ---
 
+## Q39045: Error R6006 Bad Format on exec
+
 	Article: Q39045
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | s_quickc s_error

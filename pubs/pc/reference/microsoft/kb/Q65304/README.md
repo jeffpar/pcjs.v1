@@ -4,8 +4,9 @@ title: "Q65304: C2059 and C2065 May Be Caused by Not Including stdio.h"
 permalink: /pubs/pc/reference/microsoft/kb/Q65304/
 ---
 
+## Q65304: C2059 and C2065 May Be Caused by Not Including stdio.h
+
 	Article: Q65304
-	Product: Microsoft C
 	Version(s): 5.x 6.00 | 5.x 6.00
 	Operating System: MS-DOS   | OS/2
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q11966: Using Two Monitors with CodeView"
 permalink: /pubs/pc/reference/microsoft/kb/Q11966/
 ---
 
+## Q11966: Using Two Monitors with CodeView
+
 	Article: Q11966
-	Product: Microsoft C
 	Version(s): 1.00 1.10 2.00 2.10 2.20 2.30 | 2.20 2.30
 	Operating System: MS-DOS                        | OS/2
 	Flags: ENDUSER | TAR56465

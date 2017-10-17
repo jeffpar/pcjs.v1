@@ -4,8 +4,9 @@ title: "Q41649: QuickC 2.00 README.DOC: Limits on _asm Identifiers"
 permalink: /pubs/pc/reference/microsoft/kb/Q41649/
 ---
 
+## Q41649: QuickC 2.00 README.DOC: Limits on _asm Identifiers
+
 	Article: Q41649
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

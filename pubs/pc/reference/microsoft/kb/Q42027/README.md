@@ -4,8 +4,9 @@ title: "Q42027: Ambiguous Switch /PAC with QuickC 2.00 Linker"
 permalink: /pubs/pc/reference/microsoft/kb/Q42027/
 ---
 
+## Q42027: Ambiguous Switch /PAC with QuickC 2.00 Linker
+
 	Article: Q42027
-	Product: Microsoft C
 	Version(s): 4.06
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickc b_quickbas docerr

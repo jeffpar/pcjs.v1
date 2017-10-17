@@ -4,8 +4,9 @@ title: "Q68688: Specifying Anchor Blocks in Help Files in RTF"
 permalink: /pubs/pc/reference/microsoft/kb/Q68688/
 ---
 
+## Q68688: Specifying Anchor Blocks in Help Files in RTF
+
 	Article: Q68688
-	Product: Microsoft C
 	Version(s): 1.05   | 1.05
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | docerr

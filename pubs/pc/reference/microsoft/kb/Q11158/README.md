@@ -4,8 +4,9 @@ title: "Q11158: tan(pi/2) Does Not Cause an Error Because of Precision"
 permalink: /pubs/pc/reference/microsoft/kb/Q11158/
 ---
 
+## Q11158: tan(pi/2) Does Not Cause an Error Because of Precision
+
 	Article: Q11158
-	Product: Microsoft C
 	Version(s): 3.00 4.00 5.00 5.10 6.00 6.00a | 5.10 6.00 6.00a
 	Operating System: MS-DOS                         | OS/2
 	Flags: ENDUSER | s_quickc

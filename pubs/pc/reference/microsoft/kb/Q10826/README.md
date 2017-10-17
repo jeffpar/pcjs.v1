@@ -4,8 +4,9 @@ title: "Q10826: Limitations on Writing Device Drivers in C"
 permalink: /pubs/pc/reference/microsoft/kb/Q10826/
 ---
 
+## Q10826: Limitations on Writing Device Drivers in C
+
 	Article: Q10826
-	Product: Microsoft C
 	Version(s): 4.00 5.00 5.10 6.00 6.00a
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickc

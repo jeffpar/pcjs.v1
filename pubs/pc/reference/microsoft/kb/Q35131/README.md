@@ -4,8 +4,9 @@ title: "Q35131: Supplemental Mouse Menus Disk (Expert and Basic Menus)"
 permalink: /pubs/pc/reference/microsoft/kb/Q35131/
 ---
 
+## Q35131: Supplemental Mouse Menus Disk (Expert and Basic Menus)
+
 	Article: Q35131
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

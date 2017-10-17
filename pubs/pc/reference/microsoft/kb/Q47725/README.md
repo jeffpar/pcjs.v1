@@ -4,8 +4,9 @@ title: "Q47725: QuickC: Tilde Erroneously Replaced by Minus Sign in Help"
 permalink: /pubs/pc/reference/microsoft/kb/Q47725/
 ---
 
+## Q47725: QuickC: Tilde Erroneously Replaced by Minus Sign in Help
+
 	Article: Q47725
-	Product: Microsoft C
 	Version(s): 2.00 2.01
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickc docerr

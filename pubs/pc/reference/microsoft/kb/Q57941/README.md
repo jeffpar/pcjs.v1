@@ -4,8 +4,9 @@ title: "Q57941: Methods for Debugging Large Programs within the 640K DOS Limit"
 permalink: /pubs/pc/reference/microsoft/kb/Q57941/
 ---
 
+## Q57941: Methods for Debugging Large Programs within the 640K DOS Limit
+
 	Article: Q57941
-	Product: Microsoft C
 	Version(s): 1.00 1.10 2.00 2.10 2.20 2.30
 	Operating System: MS-DOS
 	Flags: ENDUSER |

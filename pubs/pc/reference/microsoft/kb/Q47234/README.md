@@ -4,8 +4,9 @@ title: "Q47234: BSEARCH Does Not Find the First Occurrence of Key in the Array"
 permalink: /pubs/pc/reference/microsoft/kb/Q47234/
 ---
 
+## Q47234: BSEARCH Does Not Find the First Occurrence of Key in the Array
+
 	Article: Q47234
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | docerr S_QuickC

@@ -4,8 +4,9 @@ title: "Q48870: Difference between Huge Pointers Is Incorrect in QuickC 2.00"
 permalink: /pubs/pc/reference/microsoft/kb/Q48870/
 ---
 
+## Q48870: Difference between Huge Pointers Is Incorrect in QuickC 2.00
+
 	Article: Q48870
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QuickAsm 2.01 S_C buglist2.00

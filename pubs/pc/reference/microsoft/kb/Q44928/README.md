@@ -4,8 +4,9 @@ title: "Q44928: Linker Options /PADDATA and /PADCODE"
 permalink: /pubs/pc/reference/microsoft/kb/Q44928/
 ---
 
+## Q44928: Linker Options /PADDATA and /PADCODE
+
 	Article: Q44928
-	Product: Microsoft C
 	Version(s): 4.06
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QuickC docerr

@@ -4,8 +4,9 @@ title: "Q35303: Using PRINT SCREEN Key to Print CGA Graphics"
 permalink: /pubs/pc/reference/microsoft/kb/Q35303/
 ---
 
+## Q35303: Using PRINT SCREEN Key to Print CGA Graphics
+
 	Article: Q35303
-	Product: Microsoft C
 	Version(s): 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q42756: Not Including MALLOC.H in Compact, Large Model Causes Problems"
 permalink: /pubs/pc/reference/microsoft/kb/Q42756/
 ---
 
+## Q42756: Not Including MALLOC.H in Compact, Large Model Causes Problems
+
 	Article: Q42756
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | S_QuickC

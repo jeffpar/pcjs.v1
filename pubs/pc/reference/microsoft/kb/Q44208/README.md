@@ -4,8 +4,9 @@ title: "Q44208: Blink/Intensity Bit Not Restored by Environment in QuickC"
 permalink: /pubs/pc/reference/microsoft/kb/Q44208/
 ---
 
+## Q44208: Blink/Intensity Bit Not Restored by Environment in QuickC
+
 	Article: Q44208
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist2.00

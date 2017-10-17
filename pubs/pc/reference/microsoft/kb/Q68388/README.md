@@ -4,8 +4,9 @@ title: "Q68388: &#36;&#36;(@F) Macro Doesn't Work with NMAKE Version 1.01"
 permalink: /pubs/pc/reference/microsoft/kb/Q68388/
 ---
 
+## Q68388: &#36;&#36;(@F) Macro Doesn't Work with NMAKE Version 1.01
+
 	Article: Q68388
-	Product: Microsoft C
 	Version(s): 1.01   | 1.01
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist1.01 fixlist1.11

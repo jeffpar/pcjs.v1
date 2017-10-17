@@ -4,8 +4,9 @@ title: "Q35528: Placing Control Characters in Text of File"
 permalink: /pubs/pc/reference/microsoft/kb/Q35528/
 ---
 
+## Q35528: Placing Control Characters in Text of File
+
 	Article: Q35528
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | appnote

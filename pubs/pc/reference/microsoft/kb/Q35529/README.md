@@ -4,8 +4,9 @@ title: "Q35529: Compiling the Program Currently Loaded in Editor"
 permalink: /pubs/pc/reference/microsoft/kb/Q35529/
 ---
 
+## Q35529: Compiling the Program Currently Loaded in Editor
+
 	Article: Q35529
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | appnote

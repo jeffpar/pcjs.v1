@@ -4,8 +4,9 @@ title: "Q69223: Retrieving a Disk's Volume Serial Number from C"
 permalink: /pubs/pc/reference/microsoft/kb/Q69223/
 ---
 
+## Q69223: Retrieving a Disk's Volume Serial Number from C
+
 	Article: Q69223
-	Product: Microsoft C
 	Version(s): 5.10 6.00 6.00a
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickc

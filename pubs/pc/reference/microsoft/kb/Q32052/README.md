@@ -4,8 +4,9 @@ title: "Q32052: M Hangs on Tandy 2000 with MS-DOS Version 2.11"
 permalink: /pubs/pc/reference/microsoft/kb/Q32052/
 ---
 
+## Q32052: M Hangs on Tandy 2000 with MS-DOS Version 2.11
+
 	Article: Q32052
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

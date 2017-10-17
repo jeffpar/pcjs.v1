@@ -4,8 +4,9 @@ title: "Q66345: BSEDOS.H in C 6.00 Has Incorrect Prototypes"
 permalink: /pubs/pc/reference/microsoft/kb/Q66345/
 ---
 
+## Q66345: BSEDOS.H in C 6.00 Has Incorrect Prototypes
+
 	Article: Q66345
-	Product: Microsoft C
 	Version(s): 6.00 6.00a
 	Operating System: OS/2
 	Flags: ENDUSER | buglist6.00 buglist6.00a

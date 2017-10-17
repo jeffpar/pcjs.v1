@@ -4,8 +4,9 @@ title: "Q58653: CodeView Does Not Support Debugging Spawned Process"
 permalink: /pubs/pc/reference/microsoft/kb/Q58653/
 ---
 
+## Q58653: CodeView Does Not Support Debugging Spawned Process
+
 	Article: Q58653
-	Product: Microsoft C
 	Version(s): 2.20 2.30
 	Operating System: MS-DOS
 	Flags: ENDUSER |

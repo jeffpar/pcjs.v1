@@ -4,8 +4,9 @@ title: "Q37223: Domain Error"
 permalink: /pubs/pc/reference/microsoft/kb/Q37223/
 ---
 
+## Q37223: Domain Error
+
 	Article: Q37223
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | s_quickc h_fortran s_pascal

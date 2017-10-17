@@ -4,8 +4,9 @@ title: "Q36613: 43- and 50-Line Modes"
 permalink: /pubs/pc/reference/microsoft/kb/Q36613/
 ---
 
+## Q36613: 43- and 50-Line Modes
+
 	Article: Q36613
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

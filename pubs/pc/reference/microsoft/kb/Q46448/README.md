@@ -4,8 +4,9 @@ title: "Q46448: Capabilities and Limits of the /R switch on 80386 Machines"
 permalink: /pubs/pc/reference/microsoft/kb/Q46448/
 ---
 
+## Q46448: Capabilities and Limits of the /R switch on 80386 Machines
+
 	Article: Q46448
-	Product: Microsoft C
 	Version(s): 2.20 2.30 2.35 3.00 | 2.20 2.30 2.35 3.00
 	Operating System: MS-DOS              | OS/2
 	Flags: ENDUSER | 386

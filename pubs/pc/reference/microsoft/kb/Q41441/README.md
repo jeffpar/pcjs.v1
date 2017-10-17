@@ -4,8 +4,9 @@ title: "Q41441: Documentation Error Page 136 _bios_equiplist"
 permalink: /pubs/pc/reference/microsoft/kb/Q41441/
 ---
 
+## Q41441: Documentation Error Page 136 _bios_equiplist
+
 	Article: Q41441
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | s_quickc docerr

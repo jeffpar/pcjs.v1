@@ -4,8 +4,9 @@ title: "Q67078: Different Warnings May Appear Using Different Optimizations"
 permalink: /pubs/pc/reference/microsoft/kb/Q67078/
 ---
 
+## Q67078: Different Warnings May Appear Using Different Optimizations
+
 	Article: Q67078
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q49064: Declaring a Pointer to a Function: C4071"
 permalink: /pubs/pc/reference/microsoft/kb/Q49064/
 ---
 
+## Q49064: Declaring a Pointer to a Function: C4071
+
 	Article: Q49064
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QuickC S_QuickAsm

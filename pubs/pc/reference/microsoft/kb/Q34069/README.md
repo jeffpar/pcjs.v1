@@ -4,8 +4,9 @@ title: "Q34069: Putting Global Variables in the Default Data Segment"
 permalink: /pubs/pc/reference/microsoft/kb/Q34069/
 ---
 
+## Q34069: Putting Global Variables in the Default Data Segment
+
 	Article: Q34069
-	Product: Microsoft C
 	Version(s): 3.00 4.00 5.00 5.10 | 5.10
 	Operating System: MS-DOS              | OS/2
 	Flags: ENDUSER |

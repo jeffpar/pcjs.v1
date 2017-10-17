@@ -4,8 +4,9 @@ title: "Q40359: Turning the Scroll Lock On"
 permalink: /pubs/pc/reference/microsoft/kb/Q40359/
 ---
 
+## Q40359: Turning the Scroll Lock On
+
 	Article: Q40359
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | s_quickc

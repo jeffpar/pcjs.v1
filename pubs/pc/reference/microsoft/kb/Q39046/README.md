@@ -4,8 +4,9 @@ title: "Q39046: Error R6007 Bad Environment on exec"
 permalink: /pubs/pc/reference/microsoft/kb/Q39046/
 ---
 
+## Q39046: Error R6007 Bad Environment on exec
+
 	Article: Q39046
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | s_quickc s_error

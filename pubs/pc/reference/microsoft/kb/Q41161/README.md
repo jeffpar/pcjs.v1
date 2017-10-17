@@ -4,8 +4,9 @@ title: "Q41161: Mixing Memory Models with QuickC 2.00 and QCL 2.00"
 permalink: /pubs/pc/reference/microsoft/kb/Q41161/
 ---
 
+## Q41161: Mixing Memory Models with QuickC 2.00 and QCL 2.00
+
 	Article: Q41161
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist2.00

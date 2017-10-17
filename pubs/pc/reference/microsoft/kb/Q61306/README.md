@@ -4,8 +4,9 @@ title: "Q61306: Browse Options Unavailable Under Strange Circumstances"
 permalink: /pubs/pc/reference/microsoft/kb/Q61306/
 ---
 
+## Q61306: Browse Options Unavailable Under Strange Circumstances
+
 	Article: Q61306
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | hang stop halt

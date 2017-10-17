@@ -4,8 +4,9 @@ title: "Q11876: C 5.00/5.10 Give &quot;Constant Too Large&quot; with Decimal Ini
 permalink: /pubs/pc/reference/microsoft/kb/Q11876/
 ---
 
+## Q11876: C 5.00/5.10 Give &quot;Constant Too Large&quot; with Decimal Initializer
+
 	Article: Q11876
-	Product: Microsoft C
 	Version(s): 3.00 4.00 5.00 5.10 | 5.10
 	Operating System: MS-DOS              | OS/2
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q47937: /L Must Give Full Pathname to .DLL Unless in Current Directory"
 permalink: /pubs/pc/reference/microsoft/kb/Q47937/
 ---
 
+## Q47937: /L Must Give Full Pathname to .DLL Unless in Current Directory
+
 	Article: Q47937
-	Product: Microsoft C
 	Version(s): 2.20 2.30 | 2.20 2.30
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER |

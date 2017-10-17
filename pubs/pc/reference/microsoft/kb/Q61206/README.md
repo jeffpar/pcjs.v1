@@ -4,8 +4,9 @@ title: "Q61206: C 6.00 README: PWB Build Procedure"
 permalink: /pubs/pc/reference/microsoft/kb/Q61206/
 ---
 
+## Q61206: C 6.00 README: PWB Build Procedure
+
 	Article: Q61206
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

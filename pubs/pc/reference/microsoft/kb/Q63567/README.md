@@ -4,8 +4,9 @@ title: "Q63567: Behavior of Tabs in QuickC 2.50"
 permalink: /pubs/pc/reference/microsoft/kb/Q63567/
 ---
 
+## Q63567: Behavior of Tabs in QuickC 2.50
+
 	Article: Q63567
-	Product: Microsoft C
 	Version(s): 2.50
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QUICKASM

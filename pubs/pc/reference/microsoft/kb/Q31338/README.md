@@ -4,8 +4,9 @@ title: "Q31338: ATI Wondercard Graphics Adapter"
 permalink: /pubs/pc/reference/microsoft/kb/Q31338/
 ---
 
+## Q31338: ATI Wondercard Graphics Adapter
+
 	Article: Q31338
-	Product: Microsoft C
 	Version(s): 1.00 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

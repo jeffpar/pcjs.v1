@@ -4,8 +4,9 @@ title: "Q47748: &quot;File Does Not Exist&quot; Error in OS/2 DOS Box with Exist
 permalink: /pubs/pc/reference/microsoft/kb/Q47748/
 ---
 
+## Q47748: &quot;File Does Not Exist&quot; Error in OS/2 DOS Box with Existing File
+
 	Article: Q47748
-	Product: Microsoft C
 	Version(s): 1.01 2.00 2.01
 	Operating System: OS/2
 	Flags: ENDUSER | S_QuickASM

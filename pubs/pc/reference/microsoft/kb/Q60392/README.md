@@ -4,8 +4,9 @@ title: "Q60392: "
 permalink: /pubs/pc/reference/microsoft/kb/Q60392/
 ---
 
+## Q60392: 
+
 	Article: Q60392
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist1.00 fixlist1.10 s_c

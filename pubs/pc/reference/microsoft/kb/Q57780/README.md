@@ -4,8 +4,9 @@ title: "Q57780: Casting Pointer Subtraction May Yield Incorrect Code"
 permalink: /pubs/pc/reference/microsoft/kb/Q57780/
 ---
 
+## Q57780: Casting Pointer Subtraction May Yield Incorrect Code
+
 	Article: Q57780
-	Product: Microsoft C
 	Version(s): 2.00 2.01
 	Operating System: MS-DOS
 	Flags: ENDUSER |

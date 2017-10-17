@@ -4,8 +4,9 @@ title: "Q41647: QuickC 2.00 README.DOC: The _fontinfo Structure"
 permalink: /pubs/pc/reference/microsoft/kb/Q41647/
 ---
 
+## Q41647: QuickC 2.00 README.DOC: The _fontinfo Structure
+
 	Article: Q41647
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

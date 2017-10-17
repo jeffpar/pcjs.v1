@@ -4,8 +4,9 @@ title: "Q67879: Scanf() Format Specifications and Syntax"
 permalink: /pubs/pc/reference/microsoft/kb/Q67879/
 ---
 
+## Q67879: Scanf() Format Specifications and Syntax
+
 	Article: Q67879
-	Product: Microsoft C
 	Version(s): 6.00a 6.00 | 6.00a 6.00
 	Operating System: MS-DOS     |  OS/2
 	Flags: ENDUSER | s_quickc

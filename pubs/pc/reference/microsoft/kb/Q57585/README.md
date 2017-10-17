@@ -4,8 +4,9 @@ title: "Q57585: Background Color Greater Than Seven Causes Region to Blink"
 permalink: /pubs/pc/reference/microsoft/kb/Q57585/
 ---
 
+## Q57585: Background Color Greater Than Seven Causes Region to Blink
+
 	Article: Q57585
-	Product: Microsoft C
 	Version(s): 1.00 1.02 | 1.00 1.02
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER |

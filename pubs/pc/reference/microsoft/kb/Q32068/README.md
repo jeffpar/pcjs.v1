@@ -4,8 +4,9 @@ title: "Q32068: Compiler C2061 Syntax Error: Identifier 'dev_t' in stat.h"
 permalink: /pubs/pc/reference/microsoft/kb/Q32068/
 ---
 
+## Q32068: Compiler C2061 Syntax Error: Identifier 'dev_t' in stat.h
+
 	Article: Q32068
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |  s_quickc

@@ -4,8 +4,9 @@ title: "Q35805: Quick Reference Documentation Error with _setbkcolor"
 permalink: /pubs/pc/reference/microsoft/kb/Q35805/
 ---
 
+## Q35805: Quick Reference Documentation Error with _setbkcolor
+
 	Article: Q35805
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | docerr

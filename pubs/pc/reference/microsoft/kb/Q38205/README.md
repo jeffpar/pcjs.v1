@@ -4,8 +4,9 @@ title: "Q38205: Capabilities of Real Mode CodeView and the 386"
 permalink: /pubs/pc/reference/microsoft/kb/Q38205/
 ---
 
+## Q38205: Capabilities of Real Mode CodeView and the 386
+
 	Article: Q38205
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_c, h_masm, h_fortran, s_pascal

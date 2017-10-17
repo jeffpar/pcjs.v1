@@ -4,8 +4,9 @@ title: "Q46381: Compiler Options for Intel 80x86 Processors"
 permalink: /pubs/pc/reference/microsoft/kb/Q46381/
 ---
 
+## Q46381: Compiler Options for Intel 80x86 Processors
+
 	Article: Q46381
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.00 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER |

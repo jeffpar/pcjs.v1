@@ -4,8 +4,9 @@ title: "Q68155: Windows DLL Build Options Ignore .RC Files in PWB 1.10"
 permalink: /pubs/pc/reference/microsoft/kb/Q68155/
 ---
 
+## Q68155: Windows DLL Build Options Ignore .RC Files in PWB 1.10
+
 	Article: Q68155
-	Product: Microsoft C
 	Version(s): 1.10   | 1.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist1.10 S_C P_WINSDK

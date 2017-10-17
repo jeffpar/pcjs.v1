@@ -4,8 +4,9 @@ title: "Q60339: Reference to &quot;Push&quot; Function Incorrect Editor User's G
 permalink: /pubs/pc/reference/microsoft/kb/Q60339/
 ---
 
+## Q60339: Reference to &quot;Push&quot; Function Incorrect Editor User's Guide
+
 	Article: Q60339
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | docerr

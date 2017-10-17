@@ -4,8 +4,9 @@ title: "Q51764: Debugging DLLs with Codeview"
 permalink: /pubs/pc/reference/microsoft/kb/Q51764/
 ---
 
+## Q51764: Debugging DLLs with Codeview
+
 	Article: Q51764
-	Product: Microsoft C
 	Version(s): 2.20 2.30
 	Operating System: OS/2
 	Flags: ENDUSER |

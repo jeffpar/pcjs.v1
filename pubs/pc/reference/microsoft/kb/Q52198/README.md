@@ -4,8 +4,9 @@ title: "Q52198: Optimization Can Cause Integer Division to Always Return 1"
 permalink: /pubs/pc/reference/microsoft/kb/Q52198/
 ---
 
+## Q52198: Optimization Can Cause Integer Division to Always Return 1
+
 	Article: Q52198
-	Product: Microsoft C
 	Version(s): 2.00 2.01
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickasm buglist2.00 buglist2.01

@@ -4,8 +4,9 @@ title: "Q66578: Program Crashes If Run on a Machine Without an 80x87"
 permalink: /pubs/pc/reference/microsoft/kb/Q66578/
 ---
 
+## Q66578: Program Crashes If Run on a Machine Without an 80x87
+
 	Article: Q66578
-	Product: Microsoft C
 	Version(s): 6.00
 	Operating System: OS/2
 	Flags: ENDUSER |

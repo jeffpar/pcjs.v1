@@ -4,8 +4,9 @@ title: "Q45707: Problem Debugging StartSession from a Child Process"
 permalink: /pubs/pc/reference/microsoft/kb/Q45707/
 ---
 
+## Q45707: Problem Debugging StartSession from a Child Process
+
 	Article: Q45707
-	Product: Microsoft C
 	Version(s): 2.30
 	Operating System: OS/2
 	Flags: ENDUSER | buglist2.30

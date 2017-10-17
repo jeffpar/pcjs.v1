@@ -4,8 +4,9 @@ title: "Q41660: QuickC 2.00 README.DOC: Help File Formats"
 permalink: /pubs/pc/reference/microsoft/kb/Q41660/
 ---
 
+## Q41660: QuickC 2.00 README.DOC: Help File Formats
+
 	Article: Q41660
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

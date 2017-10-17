@@ -4,8 +4,9 @@ title: "Q66649: Cause of U4004 Error Message"
 permalink: /pubs/pc/reference/microsoft/kb/Q66649/
 ---
 
+## Q66649: Cause of U4004 Error Message
+
 	Article: Q66649
-	Product: Microsoft C
 	Version(s): 1.10   | 1.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

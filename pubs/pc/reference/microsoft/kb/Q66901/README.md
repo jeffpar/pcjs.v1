@@ -4,8 +4,9 @@ title: "Q66901: QuickC Version 2.50 Packing List (5.25-Inch Disk Set)"
 permalink: /pubs/pc/reference/microsoft/kb/Q66901/
 ---
 
+## Q66901: QuickC Version 2.50 Packing List (5.25-Inch Disk Set)
+
 	Article: Q66901
-	Product: Microsoft C
 	Version(s): 2.50
 	Operating System: MS-DOS
 	Flags: ENDUSER | packing.lst

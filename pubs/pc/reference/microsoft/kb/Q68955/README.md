@@ -4,8 +4,9 @@ title: "Q68955: Using a Bus Mouse on a Tandy 1000"
 permalink: /pubs/pc/reference/microsoft/kb/Q68955/
 ---
 
+## Q68955: Using a Bus Mouse on a Tandy 1000
+
 	Article: Q68955
-	Product: Microsoft C
 	Version(s): 1.x 6.x 7.x
 	Operating System: MS-DOS
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q43258: strspn() Function Not Directly Available in On-line Help"
 permalink: /pubs/pc/reference/microsoft/kb/Q43258/
 ---
 
+## Q43258: strspn() Function Not Directly Available in On-line Help
+
 	Article: Q43258
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist2.00 docerr

@@ -4,8 +4,9 @@ title: "Q38154: Graphic Routines Fail to Use Active Card when Two are Present"
 permalink: /pubs/pc/reference/microsoft/kb/Q38154/
 ---
 
+## Q38154: Graphic Routines Fail to Use Active Card when Two are Present
+
 	Article: Q38154
-	Product: Microsoft C
 	Version(s): 1.00 1.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_c

@@ -4,8 +4,9 @@ title: "Q67082: String Constants May Be Interpreted as Trigraphs in C 6.00"
 permalink: /pubs/pc/reference/microsoft/kb/Q67082/
 ---
 
+## Q67082: String Constants May Be Interpreted as Trigraphs in C 6.00
+
 	Article: Q67082
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | S_QUICKC

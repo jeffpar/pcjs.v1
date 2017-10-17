@@ -4,8 +4,9 @@ title: "Q24877: &quot;?CANNOT DISPLAY&quot; Error Not Documented in CodeView Doc
 permalink: /pubs/pc/reference/microsoft/kb/Q24877/
 ---
 
+## Q24877: &quot;?CANNOT DISPLAY&quot; Error Not Documented in CodeView Documents
+
 	Article: Q24877
-	Product: Microsoft C
 	Version(s): 2.00 2.10 2.20 2.30 | 2.20 2.30
 	Operating System: MS-DOS              | OS/2
 	Flags: ENDUSER | TAR64267 docerr

@@ -4,8 +4,9 @@ title: "Q42942: Dump Command on Arrays in FORTRAN Gives Syntax Error"
 permalink: /pubs/pc/reference/microsoft/kb/Q42942/
 ---
 
+## Q42942: Dump Command on Arrays in FORTRAN Gives Syntax Error
+
 	Article: Q42942
-	Product: Microsoft C
 	Version(s): 1.10 2.20 | 2.20
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | H_FORTRAN buglist2.20 buglist2.30

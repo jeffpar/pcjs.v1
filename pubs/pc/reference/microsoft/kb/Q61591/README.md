@@ -4,8 +4,9 @@ title: "Q61591: Intermittent Installation on the Packard-Bell PS/2 Port"
 permalink: /pubs/pc/reference/microsoft/kb/Q61591/
 ---
 
+## Q61591: Intermittent Installation on the Packard-Bell PS/2 Port
+
 	Article: Q61591
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

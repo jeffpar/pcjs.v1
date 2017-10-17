@@ -4,8 +4,9 @@ title: "Q68073: C1001: Internal Compiler Error: mactab.c:1.70, Line 482"
 permalink: /pubs/pc/reference/microsoft/kb/Q68073/
 ---
 
+## Q68073: C1001: Internal Compiler Error: mactab.c:1.70, Line 482
+
 	Article: Q68073
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | buglist6.00 buglist6.00a

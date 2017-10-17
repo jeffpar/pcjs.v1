@@ -4,8 +4,9 @@ title: "Q61614: Cannot Set Breakpoint Warning Due to Wrong Linker"
 permalink: /pubs/pc/reference/microsoft/kb/Q61614/
 ---
 
+## Q61614: Cannot Set Breakpoint Warning Due to Wrong Linker
+
 	Article: Q61614
-	Product: Microsoft C
 	Version(s): 2.00 2.01
 	Operating System: MS-DOS
 	Flags: ENDUSER |

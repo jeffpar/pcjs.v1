@@ -4,8 +4,9 @@ title: "Q67234: QuickHelp Duplicate Search Brings Up Wrong Help"
 permalink: /pubs/pc/reference/microsoft/kb/Q67234/
 ---
 
+## Q67234: QuickHelp Duplicate Search Brings Up Wrong Help
+
 	Article: Q67234
-	Product: Microsoft C
 	Version(s): 1.70   | 1.70
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | s_qh buglist1.70 SDK

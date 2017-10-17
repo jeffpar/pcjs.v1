@@ -4,8 +4,9 @@ title: "Q47194: QuickC Does Not Support Alternate Math Library"
 permalink: /pubs/pc/reference/microsoft/kb/Q47194/
 ---
 
+## Q47194: QuickC Does Not Support Alternate Math Library
+
 	Article: Q47194
-	Product: Microsoft C
 	Version(s): 1.01 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | SR# MS01691

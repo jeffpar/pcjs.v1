@@ -4,8 +4,9 @@ title: "Q31989: Object Modules Handled by LINK"
 permalink: /pubs/pc/reference/microsoft/kb/Q31989/
 ---
 
+## Q31989: Object Modules Handled by LINK
+
 	Article: Q31989
-	Product: Microsoft C
 	Version(s): 3.x 5.01.20 5.01.21
 	Operating System: MS-DOS
 	Flags: ENDUSER |

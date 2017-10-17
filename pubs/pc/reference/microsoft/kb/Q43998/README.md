@@ -4,8 +4,9 @@ title: "Q43998: QuickC Internal Compiler Error: gencode.c, line 389"
 permalink: /pubs/pc/reference/microsoft/kb/Q43998/
 ---
 
+## Q43998: QuickC Internal Compiler Error: gencode.c, line 389
+
 	Article: Q43998
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist2.00

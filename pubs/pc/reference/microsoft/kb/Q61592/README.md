@@ -4,8 +4,9 @@ title: "Q61592: Mouse Command-Line Switches for Mouse Driver Version 7.04"
 permalink: /pubs/pc/reference/microsoft/kb/Q61592/
 ---
 
+## Q61592: Mouse Command-Line Switches for Mouse Driver Version 7.04
+
 	Article: Q61592
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | Video 7 Video-7

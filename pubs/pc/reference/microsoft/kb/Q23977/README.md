@@ -4,8 +4,9 @@ title: "Q23977: Creating Pointers to Specific Addresses in Memory"
 permalink: /pubs/pc/reference/microsoft/kb/Q23977/
 ---
 
+## Q23977: Creating Pointers to Specific Addresses in Memory
+
 	Article: Q23977
-	Product: Microsoft C
 	Version(s): 3.00 4.00 5.00 5.10 6.00 6.00a
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickc

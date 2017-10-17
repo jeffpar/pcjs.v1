@@ -4,8 +4,9 @@ title: "Q46947: Type of Expression &quot;&amp;arrayname&quot; Changes under ANSI
 permalink: /pubs/pc/reference/microsoft/kb/Q46947/
 ---
 
+## Q46947: Type of Expression &quot;&amp;arrayname&quot; Changes under ANSI C
+
 	Article: Q46947
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | SR# G890706-22068

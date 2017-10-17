@@ -4,8 +4,9 @@ title: "Q30580: Declaring an Array of Pointers to Functions"
 permalink: /pubs/pc/reference/microsoft/kb/Q30580/
 ---
 
+## Q30580: Declaring an Array of Pointers to Functions
+
 	Article: Q30580
-	Product: Microsoft C
 	Version(s): 3.00 4.00 5.00 5.10 6.00 6.00a | 5.10 6.00 6.00a
 	Operating System: MS-DOS                         | OS/2
 	Flags: ENDUSER | s_quickc

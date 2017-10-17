@@ -4,8 +4,9 @@ title: "Q29731: Missing Semicolon on Line 17 of Example on Page 85 in Manual"
 permalink: /pubs/pc/reference/microsoft/kb/Q29731/
 ---
 
+## Q29731: Missing Semicolon on Line 17 of Example on Page 85 in Manual
+
 	Article: Q29731
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | docerr

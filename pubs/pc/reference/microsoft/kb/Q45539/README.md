@@ -4,8 +4,9 @@ title: "Q45539: Incorrect Prototypes for 'Window' Functions in QC Advisor"
 permalink: /pubs/pc/reference/microsoft/kb/Q45539/
 ---
 
+## Q45539: Incorrect Prototypes for 'Window' Functions in QC Advisor
+
 	Article: Q45539
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr

@@ -4,8 +4,9 @@ title: "Q44757: Multiple Targets in NMAKE Do Not Work"
 permalink: /pubs/pc/reference/microsoft/kb/Q44757/
 ---
 
+## Q44757: Multiple Targets in NMAKE Do Not Work
+
 	Article: Q44757
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist2.00 docerr S_QUICKC

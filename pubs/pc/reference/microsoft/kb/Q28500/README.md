@@ -4,8 +4,9 @@ title: "Q28500: Use MOUSE.SYS with Flight Simulator"
 permalink: /pubs/pc/reference/microsoft/kb/Q28500/
 ---
 
+## Q28500: Use MOUSE.SYS with Flight Simulator
+
 	Article: Q28500
-	Product: Microsoft C
 	Version(s): 1.0
 	Operating System: MS-DOS
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q41699: Filenames Starting with &quot;-&quot; Cause ILINK Errors"
 permalink: /pubs/pc/reference/microsoft/kb/Q41699/
 ---
 
+## Q41699: Filenames Starting with &quot;-&quot; Cause ILINK Errors
+
 	Article: Q41699
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

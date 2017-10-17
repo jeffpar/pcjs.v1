@@ -4,8 +4,9 @@ title: "Q66129: Use of the shflag with sopen()"
 permalink: /pubs/pc/reference/microsoft/kb/Q66129/
 ---
 
+## Q66129: Use of the shflag with sopen()
+
 	Article: Q66129
-	Product: Microsoft C
 	Version(s): 6.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QUICKC

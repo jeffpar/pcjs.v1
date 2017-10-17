@@ -4,8 +4,9 @@ title: "Q41087: Mouse and Lotus 1-2-3 Mouse Menu Under Windows/286"
 permalink: /pubs/pc/reference/microsoft/kb/Q41087/
 ---
 
+## Q41087: Mouse and Lotus 1-2-3 Mouse Menu Under Windows/286
+
 	Article: Q41087
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

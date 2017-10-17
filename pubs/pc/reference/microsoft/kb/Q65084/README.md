@@ -4,8 +4,9 @@ title: "Q65084: Spaces in Inference Rules Corrupt NMAKE Macro Expansion"
 permalink: /pubs/pc/reference/microsoft/kb/Q65084/
 ---
 
+## Q65084: Spaces in Inference Rules Corrupt NMAKE Macro Expansion
+
 	Article: Q65084
-	Product: Microsoft C
 	Version(s): 1.00 1.11 | 1.00 1.11
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | s_quickc

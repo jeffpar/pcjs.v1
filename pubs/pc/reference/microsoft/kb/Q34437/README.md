@@ -4,8 +4,9 @@ title: "Q34437: LINT_ARGS Is Predefined in C Versions 5.x"
 permalink: /pubs/pc/reference/microsoft/kb/Q34437/
 ---
 
+## Q34437: LINT_ARGS Is Predefined in C Versions 5.x
+
 	Article: Q34437
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER |

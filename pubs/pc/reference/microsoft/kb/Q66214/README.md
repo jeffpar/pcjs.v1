@@ -4,8 +4,9 @@ title: "Q66214: C 5.10 _setlogorg Is Replaced by _setvieworg in C 6.00"
 permalink: /pubs/pc/reference/microsoft/kb/Q66214/
 ---
 
+## Q66214: C 5.10 _setlogorg Is Replaced by _setvieworg in C 6.00
+
 	Article: Q66214
-	Product: Microsoft C
 	Version(s): 6.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

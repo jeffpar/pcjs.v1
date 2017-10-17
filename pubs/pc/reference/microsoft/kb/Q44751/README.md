@@ -4,8 +4,9 @@ title: "Q44751: QuickC 2.00 Debugger Does Not Debug Overlays"
 permalink: /pubs/pc/reference/microsoft/kb/Q44751/
 ---
 
+## Q44751: QuickC 2.00 Debugger Does Not Debug Overlays
+
 	Article: Q44751
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

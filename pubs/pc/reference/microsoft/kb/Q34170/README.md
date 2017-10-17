@@ -4,8 +4,9 @@ title: "Q34170: C4040 Occurs on Declaration of Huge Array"
 permalink: /pubs/pc/reference/microsoft/kb/Q34170/
 ---
 
+## Q34170: C4040 Occurs on Declaration of Huge Array
+
 	Article: Q34170
-	Product: Microsoft C
 	Version(s): 4.00 5.00 5.10 | 5.10
 	Operating System: MS-DOS         | 5.10
 	Flags: ENDUSER |

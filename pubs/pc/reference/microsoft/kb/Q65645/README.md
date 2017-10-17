@@ -4,8 +4,9 @@ title: "Q65645: Use of Ternary Conditional Operator with a Constant"
 permalink: /pubs/pc/reference/microsoft/kb/Q65645/
 ---
 
+## Q65645: Use of Ternary Conditional Operator with a Constant
+
 	Article: Q65645
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist6.00

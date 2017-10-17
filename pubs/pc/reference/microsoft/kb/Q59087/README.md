@@ -4,8 +4,9 @@ title: "Q59087: Determining Size of Memory Block Referenced by a Pointer"
 permalink: /pubs/pc/reference/microsoft/kb/Q59087/
 ---
 
+## Q59087: Determining Size of Memory Block Referenced by a Pointer
+
 	Article: Q59087
-	Product: Microsoft C
 	Version(s): 5.00   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | s_quickc s_quickasm

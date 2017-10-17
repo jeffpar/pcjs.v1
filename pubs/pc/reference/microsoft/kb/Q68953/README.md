@@ -4,8 +4,9 @@ title: "Q68953: Microsoft Mouse Incompatible with Commodore PC 40-III"
 permalink: /pubs/pc/reference/microsoft/kb/Q68953/
 ---
 
+## Q68953: Microsoft Mouse Incompatible with Commodore PC 40-III
+
 	Article: Q68953
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

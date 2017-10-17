@@ -4,8 +4,9 @@ title: "Q31986: Maximum Libraries LINK Can Handle"
 permalink: /pubs/pc/reference/microsoft/kb/Q31986/
 ---
 
+## Q31986: Maximum Libraries LINK Can Handle
+
 	Article: Q31986
-	Product: Microsoft C
 	Version(s): 3.x 5.01.20 5.01.21
 	Operating System: MS-DOS
 	Flags: ENDUSER |

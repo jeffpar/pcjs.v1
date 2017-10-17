@@ -4,8 +4,9 @@ title: "Q31547: Environment Variables Used by the Microsoft Editor"
 permalink: /pubs/pc/reference/microsoft/kb/Q31547/
 ---
 
+## Q31547: Environment Variables Used by the Microsoft Editor
+
 	Article: Q31547
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: OS/2
 	Flags: ENDUSER |

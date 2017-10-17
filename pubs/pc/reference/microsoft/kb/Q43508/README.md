@@ -4,8 +4,9 @@ title: "Q43508: CodeView: View Command Fails with Underscore in Filenames"
 permalink: /pubs/pc/reference/microsoft/kb/Q43508/
 ---
 
+## Q43508: CodeView: View Command Fails with Underscore in Filenames
+
 	Article: Q43508
-	Product: Microsoft C
 	Version(s): 2.20   | 2.20
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist2.20

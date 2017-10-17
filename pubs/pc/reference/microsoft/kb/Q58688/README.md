@@ -4,8 +4,9 @@ title: "Q58688: Why the First Module in the Code Segment Starts at Offset 16"
 permalink: /pubs/pc/reference/microsoft/kb/Q58688/
 ---
 
+## Q58688: Why the First Module in the Code Segment Starts at Offset 16
+
 	Article: Q58688
-	Product: Microsoft C
 	Version(s): 3.x 4.06 4.07 5.01.21 5.03 | 5.01.21 5.03
 	Operating System: MS-DOS                     | OS/2
 	Flags: ENDUSER | s_c s_quickc s_quickasm h_masm h_fortran

@@ -4,8 +4,9 @@ title: "Q67610: Accessing Help with the CodeView Upgrade for QuickC"
 permalink: /pubs/pc/reference/microsoft/kb/Q67610/
 ---
 
+## Q67610: Accessing Help with the CodeView Upgrade for QuickC
+
 	Article: Q67610
-	Product: Microsoft C
 	Version(s): 2.50
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_CODEVIEW

@@ -4,8 +4,9 @@ title: "Q59316: Evaluating Floating-Point Values to Zero"
 permalink: /pubs/pc/reference/microsoft/kb/Q59316/
 ---
 
+## Q59316: Evaluating Floating-Point Values to Zero
+
 	Article: Q59316
-	Product: Microsoft C
 	Version(s): 5.10 6.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickc s_quickasm

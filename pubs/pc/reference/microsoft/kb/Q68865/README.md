@@ -4,8 +4,9 @@ title: "Q68865: Setting _settextcolor() to 0 May Give Unexpected Results"
 permalink: /pubs/pc/reference/microsoft/kb/Q68865/
 ---
 
+## Q68865: Setting _settextcolor() to 0 May Give Unexpected Results
+
 	Article: Q68865
-	Product: Microsoft C
 	Version(s): 5.10 6.00 6.00a
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickc

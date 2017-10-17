@@ -4,8 +4,9 @@ title: "Q29702: Mouse MREADME.DOC: Single Drive PCs"
 permalink: /pubs/pc/reference/microsoft/kb/Q29702/
 ---
 
+## Q29702: Mouse MREADME.DOC: Single Drive PCs
+
 	Article: Q29702
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

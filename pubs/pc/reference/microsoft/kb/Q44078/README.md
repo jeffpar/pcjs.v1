@@ -4,8 +4,9 @@ title: "Q44078: Allocation of Variables within Blocks in C"
 permalink: /pubs/pc/reference/microsoft/kb/Q44078/
 ---
 
+## Q44078: Allocation of Variables within Blocks in C
+
 	Article: Q44078
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | S_QuickC

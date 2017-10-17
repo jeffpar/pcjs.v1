@@ -4,8 +4,9 @@ title: "Q43043: CodeView Protect: /43 Switch Doesn't Work on VGA Adapters"
 permalink: /pubs/pc/reference/microsoft/kb/Q43043/
 ---
 
+## Q43043: CodeView Protect: /43 Switch Doesn't Work on VGA Adapters
+
 	Article: Q43043
-	Product: Microsoft C
 	Version(s): 2.20
 	Operating System: OS/2
 	Flags: ENDUSER | buglist2.20

@@ -4,8 +4,9 @@ title: "Q41470: QuickC 2.00 README.DOC: Error Help"
 permalink: /pubs/pc/reference/microsoft/kb/Q41470/
 ---
 
+## Q41470: QuickC 2.00 README.DOC: Error Help
+
 	Article: Q41470
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr

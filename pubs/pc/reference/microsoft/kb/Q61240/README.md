@@ -4,8 +4,9 @@ title: "Q61240: C 6.00 README: C 6.00 and the ANSI C Specification"
 permalink: /pubs/pc/reference/microsoft/kb/Q61240/
 ---
 
+## Q61240: C 6.00 README: C 6.00 and the ANSI C Specification
+
 	Article: Q61240
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

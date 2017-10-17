@@ -4,8 +4,9 @@ title: "Q48744: int86x() and int86() Trap for Interrupts 25h, 26h"
 permalink: /pubs/pc/reference/microsoft/kb/Q48744/
 ---
 
+## Q48744: int86x() and int86() Trap for Interrupts 25h, 26h
+
 	Article: Q48744
-	Product: Microsoft C
 	Version(s): 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QuickC S_QuickASM

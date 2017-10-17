@@ -4,8 +4,9 @@ title: "Q47625: Trace Stops on Line Following a Loop Before Loop Is Done"
 permalink: /pubs/pc/reference/microsoft/kb/Q47625/
 ---
 
+## Q47625: Trace Stops on Line Following a Loop Before Loop Is Done
+
 	Article: Q47625
-	Product: Microsoft C
 	Version(s): 2.20 2.30 | 2.20 2.30
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | S_C

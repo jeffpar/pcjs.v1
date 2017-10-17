@@ -4,8 +4,9 @@ title: "Q30285: C Extension to Make Psearch Prompt for an Input in M.EXE"
 permalink: /pubs/pc/reference/microsoft/kb/Q30285/
 ---
 
+## Q30285: C Extension to Make Psearch Prompt for an Input in M.EXE
+
 	Article: Q30285
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: OS/2
 	Flags: ENDUSER |

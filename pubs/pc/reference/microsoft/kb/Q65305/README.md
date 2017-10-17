@@ -4,8 +4,9 @@ title: "Q65305: C1001: Internal Compiler Error: '@(#)regMD.c:1.100', Line 4634"
 permalink: /pubs/pc/reference/microsoft/kb/Q65305/
 ---
 
+## Q65305: C1001: Internal Compiler Error: '@(#)regMD.c:1.100', Line 4634
+
 	Article: Q65305
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist6.00

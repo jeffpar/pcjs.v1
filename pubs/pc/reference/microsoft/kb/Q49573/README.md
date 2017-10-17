@@ -4,8 +4,9 @@ title: "Q49573: sscanf with %i and a Leading 0 Gives Octal Conversion Results"
 permalink: /pubs/pc/reference/microsoft/kb/Q49573/
 ---
 
+## Q49573: sscanf with %i and a Leading 0 Gives Octal Conversion Results
+
 	Article: Q49573
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | S_QuickC S_QuickASM scanf sscanf fscanf

@@ -4,8 +4,9 @@ title: "Q47225: .DEF File Optional Internal Names Not Supported by Implib"
 permalink: /pubs/pc/reference/microsoft/kb/Q47225/
 ---
 
+## Q47225: .DEF File Optional Internal Names Not Supported by Implib
+
 	Article: Q47225
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | OPSYS PMWIN BUSLANG

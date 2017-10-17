@@ -4,8 +4,9 @@ title: "Q47770: Possible Explanation for &quot;Cannot Close This Window&quot; Er
 permalink: /pubs/pc/reference/microsoft/kb/Q47770/
 ---
 
+## Q47770: Possible Explanation for &quot;Cannot Close This Window&quot; Error
+
 	Article: Q47770
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

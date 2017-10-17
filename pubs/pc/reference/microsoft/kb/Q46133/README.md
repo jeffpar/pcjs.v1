@@ -4,8 +4,9 @@ title: "Q46133: Tecmar VGA Does Not Work in 43-Line Mode with QC2.00/QB4.50"
 permalink: /pubs/pc/reference/microsoft/kb/Q46133/
 ---
 
+## Q46133: Tecmar VGA Does Not Work in 43-Line Mode with QC2.00/QB4.50
+
 	Article: Q46133
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | B_QuickBas

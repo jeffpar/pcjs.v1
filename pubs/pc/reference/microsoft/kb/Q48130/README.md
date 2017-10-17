@@ -4,8 +4,9 @@ title: "Q48130: Microsoft Editor (M) Version 1.02: On-Line Help Not Loaded"
 permalink: /pubs/pc/reference/microsoft/kb/Q48130/
 ---
 
+## Q48130: Microsoft Editor (M) Version 1.02: On-Line Help Not Loaded
+
 	Article: Q48130
-	Product: Microsoft C
 	Version(s): 1.02
 	Operating System: MS-DOS
 	Flags: ENDUSER |

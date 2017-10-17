@@ -4,8 +4,9 @@ title: "Q66474: Documentation Error: Extmake Syntax for %&#124;partsF Incorrect"
 permalink: /pubs/pc/reference/microsoft/kb/Q66474/
 ---
 
+## Q66474: Documentation Error: Extmake Syntax for %&#124;partsF Incorrect
+
 	Article: Q66474
-	Product: Microsoft C
 	Version(s): 1.11   | 1.11
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | docerr

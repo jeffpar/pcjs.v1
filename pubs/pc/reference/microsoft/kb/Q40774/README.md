@@ -4,8 +4,9 @@ title: "Q40774: How to Pass a Far Pointer from Parent to Spawned Child in C"
 permalink: /pubs/pc/reference/microsoft/kb/Q40774/
 ---
 
+## Q40774: How to Pass a Far Pointer from Parent to Spawned Child in C
+
 	Article: Q40774
-	Product: Microsoft C
 	Version(s): 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | SR# G881208-7649

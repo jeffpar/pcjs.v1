@@ -4,8 +4,9 @@ title: "Q66738: Results Unpredictable with Multiple va_arg() in Parameter List"
 permalink: /pubs/pc/reference/microsoft/kb/Q66738/
 ---
 
+## Q66738: Results Unpredictable with Multiple va_arg() in Parameter List
+
 	Article: Q66738
-	Product: Microsoft C
 	Version(s): 5.10 6.00 6.00a | 5.10 6.00 6.00a
 	Operating System: MS-DOS          | OS/2
 	Flags: ENDUSER | S_QUICKC

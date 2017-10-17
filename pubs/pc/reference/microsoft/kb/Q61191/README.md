@@ -4,8 +4,9 @@ title: "Q61191: C 6.00 README: Hexadecimal Constants in Strings"
 permalink: /pubs/pc/reference/microsoft/kb/Q61191/
 ---
 
+## Q61191: C 6.00 README: Hexadecimal Constants in Strings
+
 	Article: Q61191
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

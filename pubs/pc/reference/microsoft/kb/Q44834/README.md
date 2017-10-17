@@ -4,8 +4,9 @@ title: "Q44834: Software/Hardware Required for Writing Windows Applications"
 permalink: /pubs/pc/reference/microsoft/kb/Q44834/
 ---
 
+## Q44834: Software/Hardware Required for Writing Windows Applications
+
 	Article: Q44834
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QuickC P_WinSDK

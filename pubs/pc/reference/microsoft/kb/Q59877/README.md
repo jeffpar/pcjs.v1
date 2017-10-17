@@ -4,8 +4,9 @@ title: "Q59877: Mouse Function 9 and Mouse Driver 7.00"
 permalink: /pubs/pc/reference/microsoft/kb/Q59877/
 ---
 
+## Q59877: Mouse Function 9 and Mouse Driver 7.00
+
 	Article: Q59877
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

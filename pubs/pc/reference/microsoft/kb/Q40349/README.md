@@ -4,8 +4,9 @@ title: "Q40349: Chmod() on an Open File"
 permalink: /pubs/pc/reference/microsoft/kb/Q40349/
 ---
 
+## Q40349: Chmod() on an Open File
+
 	Article: Q40349
-	Product: Microsoft C
 	Version(s): 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickc

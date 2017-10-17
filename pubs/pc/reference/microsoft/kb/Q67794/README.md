@@ -4,8 +4,9 @@ title: "Q67794: NMAKE Does Not Expand Wildcard Characters"
 permalink: /pubs/pc/reference/microsoft/kb/Q67794/
 ---
 
+## Q67794: NMAKE Does Not Expand Wildcard Characters
+
 	Article: Q67794
-	Product: Microsoft C
 	Version(s): 1.11   | 1.11
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | docerr

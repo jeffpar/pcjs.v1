@@ -4,8 +4,9 @@ title: "Q59279: /INC and Overlays Are Not Supported at the Same Time"
 permalink: /pubs/pc/reference/microsoft/kb/Q59279/
 ---
 
+## Q59279: /INC and Overlays Are Not Supported at the Same Time
+
 	Article: Q59279
-	Product: Microsoft C
 	Version(s): 5.01.20 5.01.21 5.02 5.03
 	Operating System: MS-DOS
 	Flags: ENDUSER | docsup

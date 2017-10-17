@@ -4,8 +4,9 @@ title: "Q39910: C4047 Error Message when Initializing Unions"
 permalink: /pubs/pc/reference/microsoft/kb/Q39910/
 ---
 
+## Q39910: C4047 Error Message when Initializing Unions
+
 	Article: Q39910
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER |

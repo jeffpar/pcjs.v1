@@ -4,8 +4,9 @@ title: "Q64562: View.Source Truncates Long Pathnames"
 permalink: /pubs/pc/reference/microsoft/kb/Q64562/
 ---
 
+## Q64562: View.Source Truncates Long Pathnames
+
 	Article: Q64562
-	Product: Microsoft C
 	Version(s): 2.50 2.51
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist2.50 buglist2.51

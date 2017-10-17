@@ -4,8 +4,9 @@ title: "Q48863: CodeView String Search Length Limited to 19 Characters"
 permalink: /pubs/pc/reference/microsoft/kb/Q48863/
 ---
 
+## Q48863: CodeView String Search Length Limited to 19 Characters
+
 	Article: Q48863
-	Product: Microsoft C
 	Version(s): 2.10 2.20 2.30 | 2.10 2.20 2.30
 	Operating System: MS-DOS         | OS/2
 	Flags: ENDUSER | SR# G890810-24574 P_WinSDK

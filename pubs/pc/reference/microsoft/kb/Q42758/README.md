@@ -4,8 +4,9 @@ title: "Q42758: Savecur and Restcur Save Relative Position in File, on Screen"
 permalink: /pubs/pc/reference/microsoft/kb/Q42758/
 ---
 
+## Q42758: Savecur and Restcur Save Relative Position in File, on Screen
+
 	Article: Q42758
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS2
 	Flags: ENDUSER |

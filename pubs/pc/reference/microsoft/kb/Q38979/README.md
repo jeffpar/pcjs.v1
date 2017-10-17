@@ -4,8 +4,9 @@ title: "Q38979: Error L1126, Error L2043"
 permalink: /pubs/pc/reference/microsoft/kb/Q38979/
 ---
 
+## Q38979: Error L1126, Error L2043
+
 	Article: Q38979
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | s_pascal h_fortran h_masm s_quickc s_link s_error

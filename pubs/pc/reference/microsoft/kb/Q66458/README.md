@@ -4,8 +4,9 @@ title: "Q66458: Pascal 4.00 and C 6.00 Mixed Language Considerations"
 permalink: /pubs/pc/reference/microsoft/kb/Q66458/
 ---
 
+## Q66458: Pascal 4.00 and C 6.00 Mixed Language Considerations
+
 	Article: Q66458
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | s_pascal

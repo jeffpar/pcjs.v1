@@ -4,8 +4,9 @@ title: "Q60829: /I Documented Incorrectly in &quot;Advanced Programming Techniqu
 permalink: /pubs/pc/reference/microsoft/kb/Q60829/
 ---
 
+## Q60829: /I Documented Incorrectly in &quot;Advanced Programming Techniques&quot;
+
 	Article: Q60829
-	Product: Microsoft C
 	Version(s): 3.00   | 3.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | docerr

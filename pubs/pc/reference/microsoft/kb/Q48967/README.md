@@ -4,8 +4,9 @@ title: "Q48967: Confusion Regarding the /Zs Switch"
 permalink: /pubs/pc/reference/microsoft/kb/Q48967/
 ---
 
+## Q48967: Confusion Regarding the /Zs Switch
+
 	Article: Q48967
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | S_QuickC S_QuickAsm

@@ -4,8 +4,9 @@ title: "Q48414: Selecting Communications Ports, Interrupts in COMPAQ SLT/286"
 permalink: /pubs/pc/reference/microsoft/kb/Q48414/
 ---
 
+## Q48414: Selecting Communications Ports, Interrupts in COMPAQ SLT/286
+
 	Article: Q48414
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | mouse

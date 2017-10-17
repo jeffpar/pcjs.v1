@@ -4,8 +4,9 @@ title: "Q66699: Linker Does Not Search Specified Drive for Libraries"
 permalink: /pubs/pc/reference/microsoft/kb/Q66699/
 ---
 
+## Q66699: Linker Does Not Search Specified Drive for Libraries
+
 	Article: Q66699
-	Product: Microsoft C
 	Version(s): 5.01.21 5.03 5.05 5.10 5.11  | 5.01.21 5.03 5.05 5.10 5.1
 	Operating System: MS-DOS                       | OS/2
 	Flags: ENDUSER | buglist5.01.21 buglist5.03 buglist5.05 buglist5.10 buglist5.

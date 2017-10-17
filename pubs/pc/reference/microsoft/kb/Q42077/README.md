@@ -4,8 +4,9 @@ title: "Q42077: QuickC 2.00 README.DOC: Example Program PARRAY1.C"
 permalink: /pubs/pc/reference/microsoft/kb/Q42077/
 ---
 
+## Q42077: QuickC 2.00 README.DOC: Example Program PARRAY1.C
+
 	Article: Q42077
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q46774: How Minimum Load Size Is Calculated"
 permalink: /pubs/pc/reference/microsoft/kb/Q46774/
 ---
 
+## Q46774: How Minimum Load Size Is Calculated
+
 	Article: Q46774
-	Product: Microsoft C
 	Version(s): 3.65
 	Operating System: MS-DOS
 	Flags: ENDUSER | SR# G890607-19979

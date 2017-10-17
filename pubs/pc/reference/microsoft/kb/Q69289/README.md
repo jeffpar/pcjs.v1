@@ -4,8 +4,9 @@ title: "Q69289: C1001: Internal Compiler Error: exphelp.c, Line 617"
 permalink: /pubs/pc/reference/microsoft/kb/Q69289/
 ---
 
+## Q69289: C1001: Internal Compiler Error: exphelp.c, Line 617
+
 	Article: Q69289
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | buglist6.00 buglist6.00a

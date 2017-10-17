@@ -4,8 +4,9 @@ title: "Q45183: Incorrect Handling of SP Can Cause CodeView to Corrupt Stack"
 permalink: /pubs/pc/reference/microsoft/kb/Q45183/
 ---
 
+## Q45183: Incorrect Handling of SP Can Cause CodeView to Corrupt Stack
+
 	Article: Q45183
-	Product: Microsoft C
 	Version(s): 2.20 2.30 | 2.20 2.30
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER |

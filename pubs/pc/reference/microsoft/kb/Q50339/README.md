@@ -4,8 +4,9 @@ title: "Q50339: Not All Extended ASCII Characters Are Mapped by QuickC Fonts"
 permalink: /pubs/pc/reference/microsoft/kb/Q50339/
 ---
 
+## Q50339: Not All Extended ASCII Characters Are Mapped by QuickC Fonts
+
 	Article: Q50339
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QuickASM

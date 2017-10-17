@@ -4,8 +4,9 @@ title: "Q50336: Passing a Stream File Pointer (FILE &#42;) Between DLLs"
 permalink: /pubs/pc/reference/microsoft/kb/Q50336/
 ---
 
+## Q50336: Passing a Stream File Pointer (FILE &#42;) Between DLLs
+
 	Article: Q50336
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: OS/2
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q44895: kbhit() Does Not Take Character Out of Buffer"
 permalink: /pubs/pc/reference/microsoft/kb/Q44895/
 ---
 
+## Q44895: kbhit() Does Not Take Character Out of Buffer
+
 	Article: Q44895
-	Product: Microsoft C
 	Version(s): 4.00 5.00 5.10 | 5.10
 	Operating System: MS-DOS         | OS/2
 	Flags: ENDUSER | S_QuickC

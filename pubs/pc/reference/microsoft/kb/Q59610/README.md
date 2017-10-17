@@ -4,8 +4,9 @@ title: "Q59610: OS/2 SDK Version of CVP 2.30 Won't Debug DosLoadModule DLLs"
 permalink: /pubs/pc/reference/microsoft/kb/Q59610/
 ---
 
+## Q59610: OS/2 SDK Version of CVP 2.30 Won't Debug DosLoadModule DLLs
+
 	Article: Q59610
-	Product: Microsoft C
 	Version(s): 2.30
 	Operating System: OS/2
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q60746: NMAKE May Invoke MASM Instead of the C Compiler"
 permalink: /pubs/pc/reference/microsoft/kb/Q60746/
 ---
 
+## Q60746: NMAKE May Invoke MASM Instead of the C Compiler
+
 	Article: Q60746
-	Product: Microsoft C
 	Version(s): 1.00 1.01 1.11 | 1.01 1.11
 	Operating System: MS-DOS         | OS/2
 	Flags: ENDUSER | docsup s_pwb h_fortran

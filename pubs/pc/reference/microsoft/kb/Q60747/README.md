@@ -4,8 +4,9 @@ title: "Q60747: Quick Compiler Incorrectly Zero-Extends Ones Complement"
 permalink: /pubs/pc/reference/microsoft/kb/Q60747/
 ---
 
+## Q60747: Quick Compiler Incorrectly Zero-Extends Ones Complement
+
 	Article: Q60747
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist6.00 s_quickc

@@ -4,8 +4,9 @@ title: "Q64687: Cannot View Some Include Files Inside the PWB Online Help"
 permalink: /pubs/pc/reference/microsoft/kb/Q64687/
 ---
 
+## Q64687: Cannot View Some Include Files Inside the PWB Online Help
+
 	Article: Q64687
-	Product: Microsoft C
 	Version(s): 6.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist1.00

@@ -4,8 +4,9 @@ title: "Q34623: _remappalette(8,_GRAY) Does Not Work Correctly"
 permalink: /pubs/pc/reference/microsoft/kb/Q34623/
 ---
 
+## Q34623: _remappalette(8,_GRAY) Does Not Work Correctly
+
 	Article: Q34623
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | bug

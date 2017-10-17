@@ -4,8 +4,9 @@ title: "Q31488: UTILITY.DOC: Filetab Switch Expands Tabs"
 permalink: /pubs/pc/reference/microsoft/kb/Q31488/
 ---
 
+## Q31488: UTILITY.DOC: Filetab Switch Expands Tabs
+
 	Article: Q31488
-	Product: Microsoft C
 	Version(s): 1.00 | 1.00
 	Operating System: OS/2 | MS-DOS
 	Flags: ENDUSER | tar71845

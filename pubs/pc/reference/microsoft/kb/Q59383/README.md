@@ -4,8 +4,9 @@ title: "Q59383: _setcliprgn Bad Definition in QC Graphics Library Reference"
 permalink: /pubs/pc/reference/microsoft/kb/Q59383/
 ---
 
+## Q59383: _setcliprgn Bad Definition in QC Graphics Library Reference
+
 	Article: Q59383
-	Product: Microsoft C
 	Version(s): 2.00 2.01
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr

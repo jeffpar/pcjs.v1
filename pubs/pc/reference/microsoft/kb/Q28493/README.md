@@ -4,8 +4,9 @@ title: "Q28493: Restricted Mouse Cursor Movement in Pro Design II"
 permalink: /pubs/pc/reference/microsoft/kb/Q28493/
 ---
 
+## Q28493: Restricted Mouse Cursor Movement in Pro Design II
+
 	Article: Q28493
-	Product: Microsoft C
 	Version(s): 1.0
 	Operating System: MS-DOS
 	Flags: ENDUSER |

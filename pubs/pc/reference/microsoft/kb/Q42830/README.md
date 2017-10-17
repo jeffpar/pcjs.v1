@@ -4,8 +4,9 @@ title: "Q42830: Exception #13 at xxxx:xxxx Error Code 0 Caused by QEMM"
 permalink: /pubs/pc/reference/microsoft/kb/Q42830/
 ---
 
+## Q42830: Exception #13 at xxxx:xxxx Error Code 0 Caused by QEMM
+
 	Article: Q42830
-	Product: Microsoft C
 	Version(s): 4.00 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QUICKC H_MASM B_QUICKBAS B_BASCOM

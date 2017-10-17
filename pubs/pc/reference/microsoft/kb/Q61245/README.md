@@ -4,8 +4,9 @@ title: "Q61245: C 6.00 README: SMARTDRV Documentation"
 permalink: /pubs/pc/reference/microsoft/kb/Q61245/
 ---
 
+## Q61245: C 6.00 README: SMARTDRV Documentation
+
 	Article: Q61245
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

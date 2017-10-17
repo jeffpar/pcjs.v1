@@ -4,8 +4,9 @@ title: "Q37726: Error C2143 Syntax Error : Missing 'token1' before 'token2'"
 permalink: /pubs/pc/reference/microsoft/kb/Q37726/
 ---
 
+## Q37726: Error C2143 Syntax Error : Missing 'token1' before 'token2'
+
 	Article: Q37726
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | s_quickc s_error

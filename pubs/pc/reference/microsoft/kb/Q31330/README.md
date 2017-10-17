@@ -4,8 +4,9 @@ title: "Q31330: Mouse Driver Conflict with Fixed-Disk Organizer"
 permalink: /pubs/pc/reference/microsoft/kb/Q31330/
 ---
 
+## Q31330: Mouse Driver Conflict with Fixed-Disk Organizer
+
 	Article: Q31330
-	Product: Microsoft C
 	Version(s): 6.x
 	Operating System: MS-DOS
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q39976: Dynamic Allocation for Two Dimensional Arrays"
 permalink: /pubs/pc/reference/microsoft/kb/Q39976/
 ---
 
+## Q39976: Dynamic Allocation for Two Dimensional Arrays
+
 	Article: Q39976
-	Product: Microsoft C
 	Version(s): 4.00 5.x | 5.10
 	Operating System: MS-DOS   | OS/2
 	Flags: ENDUSER | s_quickc

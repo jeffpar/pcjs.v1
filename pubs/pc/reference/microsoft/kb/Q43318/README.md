@@ -4,8 +4,9 @@ title: "Q43318: C: Spawned Program Accessing Parent's Functions"
 permalink: /pubs/pc/reference/microsoft/kb/Q43318/
 ---
 
+## Q43318: C: Spawned Program Accessing Parent's Functions
+
 	Article: Q43318
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

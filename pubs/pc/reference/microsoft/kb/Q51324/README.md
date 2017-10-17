@@ -4,8 +4,9 @@ title: "Q51324: Searching in the M Editor with Regular Expressions"
 permalink: /pubs/pc/reference/microsoft/kb/Q51324/
 ---
 
+## Q51324: Searching in the M Editor with Regular Expressions
+
 	Article: Q51324
-	Product: Microsoft C
 	Version(s): 1.00 1.02 | 1.00 1.02
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER |

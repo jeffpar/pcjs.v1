@@ -4,8 +4,9 @@ title: "Q58779: After Increasing Available File Handles, exec Hangs Machine"
 permalink: /pubs/pc/reference/microsoft/kb/Q58779/
 ---
 
+## Q58779: After Increasing Available File Handles, exec Hangs Machine
+
 	Article: Q58779
-	Product: Microsoft C
 	Version(s): 5.00 5.10 6.00 6.00a
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist5.00 buglist5.10 buglist6.00 buglist6.00a

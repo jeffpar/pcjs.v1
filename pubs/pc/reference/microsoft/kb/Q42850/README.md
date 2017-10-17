@@ -4,8 +4,9 @@ title: "Q42850: Near Const Data Placed in _DATA in C 5.10"
 permalink: /pubs/pc/reference/microsoft/kb/Q42850/
 ---
 
+## Q42850: Near Const Data Placed in _DATA in C 5.10
+
 	Article: Q42850
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER |

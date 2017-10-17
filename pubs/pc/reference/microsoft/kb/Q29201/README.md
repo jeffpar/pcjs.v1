@@ -4,8 +4,9 @@ title: "Q29201: Serial Mouse: &quot;Driver Not Installed--Mouse Not Found&quot; 
 permalink: /pubs/pc/reference/microsoft/kb/Q29201/
 ---
 
+## Q29201: Serial Mouse: &quot;Driver Not Installed--Mouse Not Found&quot; Message
+
 	Article: Q29201
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q57705: Mgrep Can Skip Occurrences of Pattern When Using Mgreplist"
 permalink: /pubs/pc/reference/microsoft/kb/Q57705/
 ---
 
+## Q57705: Mgrep Can Skip Occurrences of Pattern When Using Mgreplist
+
 	Article: Q57705
-	Product: Microsoft C
 	Version(s): 1.02   | 1.02
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist1.02

@@ -4,8 +4,9 @@ title: "Q33348: Loading Tagged Sections in OS/2 Version 1.10"
 permalink: /pubs/pc/reference/microsoft/kb/Q33348/
 ---
 
+## Q33348: Loading Tagged Sections in OS/2 Version 1.10
+
 	Article: Q33348
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: OS/2
 	Flags: ENDUSER | docerr

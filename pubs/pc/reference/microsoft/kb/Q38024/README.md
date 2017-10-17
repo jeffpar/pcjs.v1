@@ -4,8 +4,9 @@ title: "Q38024: A Case where BUFF"
 permalink: /pubs/pc/reference/microsoft/kb/Q38024/
 ---
 
+## Q38024: A Case where BUFF
+
 	Article: Q38024
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

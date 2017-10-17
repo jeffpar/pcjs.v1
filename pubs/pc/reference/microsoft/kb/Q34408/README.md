@@ -4,8 +4,9 @@ title: "Q34408: Far Pointer Comparisons Assume Same Segment"
 permalink: /pubs/pc/reference/microsoft/kb/Q34408/
 ---
 
+## Q34408: Far Pointer Comparisons Assume Same Segment
+
 	Article: Q34408
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

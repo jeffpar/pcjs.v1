@@ -4,8 +4,9 @@ title: "Q38023: Reading the ESC Key from the Keyboard with _gets"
 permalink: /pubs/pc/reference/microsoft/kb/Q38023/
 ---
 
+## Q38023: Reading the ESC Key from the Keyboard with _gets
+
 	Article: Q38023
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER |

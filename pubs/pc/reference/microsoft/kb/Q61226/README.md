@@ -4,8 +4,9 @@ title: "Q61226: C 6.00 README: LINK Error L1116 Text"
 permalink: /pubs/pc/reference/microsoft/kb/Q61226/
 ---
 
+## Q61226: C 6.00 README: LINK Error L1116 Text
+
 	Article: Q61226
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

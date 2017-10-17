@@ -4,8 +4,9 @@ title: "Q47016: Incorrect Response File Used with LIB Causes U1183 Error"
 permalink: /pubs/pc/reference/microsoft/kb/Q47016/
 ---
 
+## Q47016: Incorrect Response File Used with LIB Causes U1183 Error
+
 	Article: Q47016
-	Product: Microsoft C
 	Version(s): 3.1x   | 3.1x
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

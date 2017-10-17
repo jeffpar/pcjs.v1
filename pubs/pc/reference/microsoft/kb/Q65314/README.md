@@ -4,8 +4,9 @@ title: "Q65314: C1001: Internal Compiler Error: '@(#)omf.c: 1.88', Line 147"
 permalink: /pubs/pc/reference/microsoft/kb/Q65314/
 ---
 
+## Q65314: C1001: Internal Compiler Error: '@(#)omf.c: 1.88', Line 147
+
 	Article: Q65314
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist6.00

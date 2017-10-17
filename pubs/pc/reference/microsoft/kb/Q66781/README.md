@@ -4,8 +4,9 @@ title: "Q66781: Header Files Do Not Contain Prototypes for C_INIT and C_TERM"
 permalink: /pubs/pc/reference/microsoft/kb/Q66781/
 ---
 
+## Q66781: Header Files Do Not Contain Prototypes for C_INIT and C_TERM
+
 	Article: Q66781
-	Product: Microsoft C
 	Version(s): 5.10 6.00 6.00a
 	Operating System: OS/2
 	Flags: ENDUSER |

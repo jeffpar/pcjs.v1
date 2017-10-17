@@ -4,8 +4,9 @@ title: "Q43142: QuickC: The Inline Assembler Generates 3-Byte JMP Instructions"
 permalink: /pubs/pc/reference/microsoft/kb/Q43142/
 ---
 
+## Q43142: QuickC: The Inline Assembler Generates 3-Byte JMP Instructions
+
 	Article: Q43142
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

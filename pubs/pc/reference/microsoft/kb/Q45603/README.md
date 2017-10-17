@@ -4,8 +4,9 @@ title: "Q45603: Font Files Cannot Be Broken Apart"
 permalink: /pubs/pc/reference/microsoft/kb/Q45603/
 ---
 
+## Q45603: Font Files Cannot Be Broken Apart
+
 	Article: Q45603
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

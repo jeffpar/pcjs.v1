@@ -4,8 +4,9 @@ title: "Q49377: CVP 2.30 Does Not Allow Pathnames for DLLs Specified with /L"
 permalink: /pubs/pc/reference/microsoft/kb/Q49377/
 ---
 
+## Q49377: CVP 2.30 Does Not Allow Pathnames for DLLs Specified with /L
+
 	Article: Q49377
-	Product: Microsoft C
 	Version(s): 2.30
 	Operating System: OS/2
 	Flags: ENDUSER | buglist2.30

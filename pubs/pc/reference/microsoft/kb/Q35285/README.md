@@ -4,8 +4,9 @@ title: "Q35285: Monochrome Display Adapter Normal Text Example"
 permalink: /pubs/pc/reference/microsoft/kb/Q35285/
 ---
 
+## Q35285: Monochrome Display Adapter Normal Text Example
+
 	Article: Q35285
-	Product: Microsoft C
 	Version(s): 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER |

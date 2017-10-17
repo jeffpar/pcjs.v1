@@ -4,8 +4,9 @@ title: "Q67087: Spaces Between /Fe or /Fo and Filename Cause Unclear Warning"
 permalink: /pubs/pc/reference/microsoft/kb/Q67087/
 ---
 
+## Q67087: Spaces Between /Fe or /Fo and Filename Cause Unclear Warning
+
 	Article: Q67087
-	Product: Microsoft C
 	Version(s): 5.10 6.00 6.00a | 5.10 6.00 6.00a
 	Operating System: MS-DOS          | OS/2
 	Flags: ENDUSER | S_QUICKC docerr buglist5.10 buglist6.00 buglist6.00a

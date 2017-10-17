@@ -4,8 +4,9 @@ title: "Q61230: C 6.00 README: LINK: The /NOG"
 permalink: /pubs/pc/reference/microsoft/kb/Q61230/
 ---
 
+## Q61230: C 6.00 README: LINK: The /NOG
+
 	Article: Q61230
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

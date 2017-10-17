@@ -4,8 +4,9 @@ title: "Q66775: Global Unsized Array May Result in L2029: Unresolved External"
 permalink: /pubs/pc/reference/microsoft/kb/Q66775/
 ---
 
+## Q66775: Global Unsized Array May Result in L2029: Unresolved External
+
 	Article: Q66775
-	Product: Microsoft C
 	Version(s): 5.10 6.00 6.00a | 5.10 6.00 5.00a
 	Operating System: MS-DOS          | OS/2
 	Flags: ENDUSER | S_QUICKC S_LINK

@@ -4,8 +4,9 @@ title: "Q40236: LINK4 Is Not Included in C 5.10 or MASM 5.10 Packages"
 permalink: /pubs/pc/reference/microsoft/kb/Q40236/
 ---
 
+## Q40236: LINK4 Is Not Included in C 5.10 or MASM 5.10 Packages
+
 	Article: Q40236
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | h_masm PMWIN

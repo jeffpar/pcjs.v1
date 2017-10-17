@@ -4,8 +4,9 @@ title: "Q42802: DOS Redirection and QuickC Environment Command Line"
 permalink: /pubs/pc/reference/microsoft/kb/Q42802/
 ---
 
+## Q42802: DOS Redirection and QuickC Environment Command Line
+
 	Article: Q42802
-	Product: Microsoft C
 	Version(s): 1.00 1.01 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

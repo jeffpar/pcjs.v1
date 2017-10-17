@@ -4,8 +4,9 @@ title: "Q46382: _registerfonts, _setfont Return Values Incorrect in Manual"
 permalink: /pubs/pc/reference/microsoft/kb/Q46382/
 ---
 
+## Q46382: _registerfonts, _setfont Return Values Incorrect in Manual
+
 	Article: Q46382
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr

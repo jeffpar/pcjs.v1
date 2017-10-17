@@ -4,8 +4,9 @@ title: "Q41368: QuickC 2.00 README.DOC: Using QC 2.00 With C 5.10"
 permalink: /pubs/pc/reference/microsoft/kb/Q41368/
 ---
 
+## Q41368: QuickC 2.00 README.DOC: Using QC 2.00 With C 5.10
+
 	Article: Q41368
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

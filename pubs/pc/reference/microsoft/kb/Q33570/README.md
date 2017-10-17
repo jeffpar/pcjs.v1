@@ -4,8 +4,9 @@ title: "Q33570: Mouse Must be Removed to Run PS/2 Diagnostics"
 permalink: /pubs/pc/reference/microsoft/kb/Q33570/
 ---
 
+## Q33570: Mouse Must be Removed to Run PS/2 Diagnostics
+
 	Article: Q33570
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

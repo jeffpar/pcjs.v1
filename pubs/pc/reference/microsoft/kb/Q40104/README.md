@@ -4,8 +4,9 @@ title: "Q40104: Hardware Compatibility List for QuickC Version 2.00"
 permalink: /pubs/pc/reference/microsoft/kb/Q40104/
 ---
 
+## Q40104: Hardware Compatibility List for QuickC Version 2.00
+
 	Article: Q40104
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: enduser |

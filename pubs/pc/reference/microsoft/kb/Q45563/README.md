@@ -4,8 +4,9 @@ title: "Q45563: setbuf() Does Not Control Buffering of DOS or Keyboard Buffer"
 permalink: /pubs/pc/reference/microsoft/kb/Q45563/
 ---
 
+## Q45563: setbuf() Does Not Control Buffering of DOS or Keyboard Buffer
+
 	Article: Q45563
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QuickC

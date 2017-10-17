@@ -4,8 +4,9 @@ title: "Q50410: Entering Double Words at a Prompt Prevents Reloading Program"
 permalink: /pubs/pc/reference/microsoft/kb/Q50410/
 ---
 
+## Q50410: Entering Double Words at a Prompt Prevents Reloading Program
+
 	Article: Q50410
-	Product: Microsoft C
 	Version(s): 2.20 2.30
 	Operating System: MS-DOS
 	Flags: ENDUSER| | S_C S_PASCAL H_FORTRAN H_MASM buglist2.30

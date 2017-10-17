@@ -4,8 +4,9 @@ title: "Q40218: Shelling to DOS Produces &quot;Out of Memory&quot; Message"
 permalink: /pubs/pc/reference/microsoft/kb/Q40218/
 ---
 
+## Q40218: Shelling to DOS Produces &quot;Out of Memory&quot; Message
+
 	Article: Q40218
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: enduser |

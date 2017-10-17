@@ -4,8 +4,9 @@ title: "Q67354: putch() Displays Values 9 and 255 Differently in DOS and OS/2"
 permalink: /pubs/pc/reference/microsoft/kb/Q67354/
 ---
 
+## Q67354: putch() Displays Values 9 and 255 Differently in DOS and OS/2
+
 	Article: Q67354
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | buglist6.00 buglist6.00a

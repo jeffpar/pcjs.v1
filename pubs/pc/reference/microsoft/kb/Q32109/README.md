@@ -4,8 +4,9 @@ title: "Q32109: Two Syntaxes for Calling Functions with Pointers"
 permalink: /pubs/pc/reference/microsoft/kb/Q32109/
 ---
 
+## Q32109: Two Syntaxes for Calling Functions with Pointers
+
 	Article: Q32109
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER |

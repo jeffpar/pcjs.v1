@@ -4,8 +4,9 @@ title: "Q37719: Error C2170 Identifier : Intrinsic Not Declared as a Function"
 permalink: /pubs/pc/reference/microsoft/kb/Q37719/
 ---
 
+## Q37719: Error C2170 Identifier : Intrinsic Not Declared as a Function
+
 	Article: Q37719
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | s_quickc s_error docerr

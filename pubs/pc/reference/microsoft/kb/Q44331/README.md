@@ -4,8 +4,9 @@ title: "Q44331: QuickC tolower Macro Descriptions Contradictory"
 permalink: /pubs/pc/reference/microsoft/kb/Q44331/
 ---
 
+## Q44331: QuickC tolower Macro Descriptions Contradictory
+
 	Article: Q44331
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr

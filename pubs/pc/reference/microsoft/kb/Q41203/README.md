@@ -4,8 +4,9 @@ title: "Q41203: getch() Misbehaves on Keyboard Inputs ALT+Q, ALT+R"
 permalink: /pubs/pc/reference/microsoft/kb/Q41203/
 ---
 
+## Q41203: getch() Misbehaves on Keyboard Inputs ALT+Q, ALT+R
+
 	Article: Q41203
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER |

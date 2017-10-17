@@ -4,8 +4,9 @@ title: "Q66225: Possible Cause of L2029: '&#95;&#95;aDBswpchk': Unresolved Exter
 permalink: /pubs/pc/reference/microsoft/kb/Q66225/
 ---
 
+## Q66225: Possible Cause of L2029: '&#95;&#95;aDBswpchk': Unresolved External
+
 	Article: Q66225
-	Product: Microsoft C
 	Version(s): 6.00
 	Operating System: OS/2
 	Flags: ENDUSER |

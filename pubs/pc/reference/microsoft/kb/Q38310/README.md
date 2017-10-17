@@ -4,8 +4,9 @@ title: "Q38310: Moving to the Beginning of the Line with Microsoft Editor"
 permalink: /pubs/pc/reference/microsoft/kb/Q38310/
 ---
 
+## Q38310: Moving to the Beginning of the Line with Microsoft Editor
+
 	Article: Q38310
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

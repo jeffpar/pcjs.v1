@@ -4,8 +4,9 @@ title: "Q35290: MDA Blinking Normal Underlined Text Example"
 permalink: /pubs/pc/reference/microsoft/kb/Q35290/
 ---
 
+## Q35290: MDA Blinking Normal Underlined Text Example
+
 	Article: Q35290
-	Product: Microsoft C
 	Version(s): 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q28505: Mouse Installation with OS/2"
 permalink: /pubs/pc/reference/microsoft/kb/Q28505/
 ---
 
+## Q28505: Mouse Installation with OS/2
+
 	Article: Q28505
-	Product: Microsoft C
 	Version(s): 1.0
 	Operating System: MS-DOS
 	Flags: ENDUSER |

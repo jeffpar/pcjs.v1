@@ -4,8 +4,9 @@ title: "Q47781: QCL Default Compile Options"
 permalink: /pubs/pc/reference/microsoft/kb/Q47781/
 ---
 
+## Q47781: QCL Default Compile Options
+
 	Article: Q47781
-	Product: Microsoft C
 	Version(s): 2.00 2.01
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QuickASM

@@ -4,8 +4,9 @@ title: "Q25108: Using LIB to Combine Two Libraries"
 permalink: /pubs/pc/reference/microsoft/kb/Q25108/
 ---
 
+## Q25108: Using LIB to Combine Two Libraries
+
 	Article: Q25108
-	Product: Microsoft C
 	Version(s): 3.00 3.04 3.07 3.08 3.10 3.11 3.14 3.17 | 3.11 3.14 3.17
 	Operating System: MS-DOS                                  | OS/2
 	Flags: ENDUSER | s_lib

@@ -4,8 +4,9 @@ title: "Q66646: U4007 Error Can Be Caused By Not Using Quotation Marks"
 permalink: /pubs/pc/reference/microsoft/kb/Q66646/
 ---
 
+## Q66646: U4007 Error Can Be Caused By Not Using Quotation Marks
+
 	Article: Q66646
-	Product: Microsoft C
 	Version(s): 1.11 1.12
 	Operating System: OS/2
 	Flags: ENDUSER |

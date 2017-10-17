@@ -4,8 +4,9 @@ title: "Q60749: PWB Makefiles Are Read-Only When Set as Active Program List"
 permalink: /pubs/pc/reference/microsoft/kb/Q60749/
 ---
 
+## Q60749: PWB Makefiles Are Read-Only When Set as Active Program List
+
 	Article: Q60749
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

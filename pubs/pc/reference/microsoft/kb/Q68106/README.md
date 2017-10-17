@@ -4,8 +4,9 @@ title: "Q68106: Quattro Pro 2.0 Graphics Mode Needs /Y Switch"
 permalink: /pubs/pc/reference/microsoft/kb/Q68106/
 ---
 
+## Q68106: Quattro Pro 2.0 Graphics Mode Needs /Y Switch
+
 	Article: Q68106
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

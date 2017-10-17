@@ -4,8 +4,9 @@ title: "Q64521: Heap Management and Why malloc() May GP Fault in OS/2"
 permalink: /pubs/pc/reference/microsoft/kb/Q64521/
 ---
 
+## Q64521: Heap Management and Why malloc() May GP Fault in OS/2
+
 	Article: Q64521
-	Product: Microsoft C
 	Version(s): 5.10 6.00
 	Operating System: OS/2
 	Flags: ENDUSER | GPF

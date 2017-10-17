@@ -4,8 +4,9 @@ title: "Q66785: Extended ASCII Characters on CGA Card"
 permalink: /pubs/pc/reference/microsoft/kb/Q66785/
 ---
 
+## Q66785: Extended ASCII Characters on CGA Card
+
 	Article: Q66785
-	Product: Microsoft C
 	Version(s): 5.10 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | buglist5.10 buglist6.00 buglist6.00a s_quickc

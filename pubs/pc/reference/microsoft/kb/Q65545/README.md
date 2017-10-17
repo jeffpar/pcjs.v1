@@ -4,8 +4,9 @@ title: "Q65545: C1001: Internal Compiler Error: @(#)exphelp.c:1.115, Line 698"
 permalink: /pubs/pc/reference/microsoft/kb/Q65545/
 ---
 
+## Q65545: C1001: Internal Compiler Error: @(#)exphelp.c:1.115, Line 698
+
 	Article: Q65545
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist6.00

@@ -4,8 +4,9 @@ title: "Q35532: Saving Files Under a Different Name"
 permalink: /pubs/pc/reference/microsoft/kb/Q35532/
 ---
 
+## Q35532: Saving Files Under a Different Name
+
 	Article: Q35532
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | appnote

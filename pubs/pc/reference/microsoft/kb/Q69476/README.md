@@ -4,8 +4,9 @@ title: "Q69476: stdout/stderr Are Buffered When Stack Is Moved Out of DGROUP"
 permalink: /pubs/pc/reference/microsoft/kb/Q69476/
 ---
 
+## Q69476: stdout/stderr Are Buffered When Stack Is Moved Out of DGROUP
+
 	Article: Q69476
-	Product: Microsoft C
 	Version(s): 6.00 6.00a
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist6.00 buglist6.00a

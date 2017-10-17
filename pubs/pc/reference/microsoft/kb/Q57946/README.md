@@ -4,8 +4,9 @@ title: "Q57946: An Example of a delay() Function in C 5.10 or QuickC 2.00"
 permalink: /pubs/pc/reference/microsoft/kb/Q57946/
 ---
 
+## Q57946: An Example of a delay() Function in C 5.10 or QuickC 2.00
+
 	Article: Q57946
-	Product: Microsoft C
 	Version(s): 2.00 2.01
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_C

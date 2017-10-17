@@ -34,6 +34,8 @@ var fs = require("fs");
 var Defines = require("../lib/defines");
 var Str = require("../lib/strlib");
 
+var aIDs = [];
+
 /**
  * printf(format, ...args)
  *
@@ -74,7 +76,7 @@ function processFile(sFile) {
             let cchBody;
             if (i < aMatches.length - 1) cchBody = aMatches[i+1].index - iBody;
             let sBody = sText.substr(iBody, cchBody).trim();
-            processText(match[7], match[2], "Microsoft C", match[3], match[4], match[5], match[6], sBody);
+            processText(match[7], match[2], "Microsoft BASIC", match[3], match[4], match[5], match[6], sBody);
         }
     }
     catch (err) {
@@ -96,10 +98,15 @@ function processFile(sFile) {
  */
 function processText(sID, sTitle, sProductName, sProductVersions, sOS, sFlags, sDateModified, sText)
 {
+    if (aIDs.indexOf(sID) >= 0) {
+        printf("warning: duplicate ID: %s\n", sID);
+        process.exit();
+        return;
+    }
+    aIDs.push(sID);
     try {
         let sNew = "";
         sNew += "\tArticle: " + sID + "\n";
-        sNew += "\tProduct: " + sProductName + "\n";
         sNew += "\tVersion(s): " + sProductVersions + "\n";
         sNew += "\tOperating System: " + sOS + "\n";
         sNew += "\tFlags: " + sFlags + "\n";
@@ -124,11 +131,12 @@ function processText(sID, sTitle, sProductName, sProductVersions, sOS, sFlags, s
         }
         var sDir = "kb/" + sID;
         sTitle = sTitle.replace(/&/g, "&amp;").replace(/\|/g, "&#124;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/\\/g, "&#92;").replace(/\$/g, "&#36;").replace(/\*/g, "&#42;").replace(/__/g, "&#95;&#95;").replace(/{{/g, "{ {").replace(/}}/g, "} }");
-        sNew = "---\nlayout: page\ntitle: \"" + sID + ": " + sTitle + "\"\npermalink: /pubs/pc/reference/microsoft/" + sDir + "/\n---\n\n" + sNew;
+        sNew = "---\nlayout: page\ntitle: \"" + sID + ": " + sTitle + "\"\npermalink: /pubs/pc/reference/microsoft/" + sDir + "/\n---\n\n## " + sID + ": " + sTitle + "\n\n" + sNew;
         if (!fs.existsSync(sDir)) {
             fs.mkdirSync(sDir);
         }
-        fs.writeFileSync(sDir + "/README.md", sNew);
+        var sFile = sDir + "/README.md";
+        fs.writeFileSync(sFile, sNew);
         printf("- [%s: %s](%s/)\n", sID, sTitle, sID);
     }
     catch(err) {
@@ -137,7 +145,7 @@ function processText(sID, sTitle, sProductName, sProductVersions, sOS, sFlags, s
 }
 
 if (process.argv.length <= 2) {
-    console.log("usage: node txt2md [input filename] [output filename]");
+    console.log("usage: node kbgen [input filename]");
     process.exit();
 }
 

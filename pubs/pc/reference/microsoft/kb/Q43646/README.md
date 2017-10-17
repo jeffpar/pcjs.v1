@@ -4,8 +4,9 @@ title: "Q43646: C: _acrtused Must Be Defined When Not Including Start-Up Code"
 permalink: /pubs/pc/reference/microsoft/kb/Q43646/
 ---
 
+## Q43646: C: _acrtused Must Be Defined When Not Including Start-Up Code
+
 	Article: Q43646
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | s_quickc acrtused __acrtused ROM

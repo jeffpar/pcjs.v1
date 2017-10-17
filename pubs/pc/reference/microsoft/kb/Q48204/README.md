@@ -4,8 +4,9 @@ title: "Q48204: Linker Can Indiscriminately Bind Different Types"
 permalink: /pubs/pc/reference/microsoft/kb/Q48204/
 ---
 
+## Q48204: Linker Can Indiscriminately Bind Different Types
+
 	Article: Q48204
-	Product: Microsoft C
 	Version(s): 1.x 2.x 3.x 4.x 5.01 5.02 5.03 | 5.01
 	Operating System: MS-DOS                         | OS/2
 	Flags: ENDUSER | S_C S_QuickC S_QuickASM S_Pascal S_QuickPas

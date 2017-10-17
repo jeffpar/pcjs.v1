@@ -4,8 +4,9 @@ title: "Q40576: Compiling Windows Programs with QuickC Requires 640K"
 permalink: /pubs/pc/reference/microsoft/kb/Q40576/
 ---
 
+## Q40576: Compiling Windows Programs with QuickC Requires 640K
+
 	Article: Q40576
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

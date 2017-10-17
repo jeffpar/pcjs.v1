@@ -4,8 +4,9 @@ title: "Q57938: fread() Can Fail When Return Code for fseek() Is Ignored"
 permalink: /pubs/pc/reference/microsoft/kb/Q57938/
 ---
 
+## Q57938: fread() Can Fail When Return Code for fseek() Is Ignored
+
 	Article: Q57938
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist5.10

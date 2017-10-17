@@ -4,8 +4,9 @@ title: "Q23739: C and QuickC Compiler Options Should Be Placed Before .C File"
 permalink: /pubs/pc/reference/microsoft/kb/Q23739/
 ---
 
+## Q23739: C and QuickC Compiler Options Should Be Placed Before .C File
+
 	Article: Q23739
-	Product: Microsoft C
 	Version(s): 3.00 4.00 5.00 5.10 6.00 6.00a | 5.10 6.00 6.00a
 	Operating System: MS-DOS                         | OS/2
 	Flags: ENDUSER | s_quickc

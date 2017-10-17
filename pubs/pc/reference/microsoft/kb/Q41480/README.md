@@ -4,8 +4,9 @@ title: "Q41480: QuickC 2.00 README.DOC: Error Help"
 permalink: /pubs/pc/reference/microsoft/kb/Q41480/
 ---
 
+## Q41480: QuickC 2.00 README.DOC: Error Help
+
 	Article: Q41480
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q43556: Commands Invoked with &quot;?&quot; Command Must Be Compiled wit
 permalink: /pubs/pc/reference/microsoft/kb/Q43556/
 ---
 
+## Q43556: Commands Invoked with &quot;?&quot; Command Must Be Compiled with /Zi
+
 	Article: Q43556
-	Product: Microsoft C
 	Version(s): 2.20   | 2.20
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

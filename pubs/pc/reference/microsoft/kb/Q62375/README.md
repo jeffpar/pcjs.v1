@@ -4,8 +4,9 @@ title: "Q62375: Fatal /nologo and /e Switch Interaction"
 permalink: /pubs/pc/reference/microsoft/kb/Q62375/
 ---
 
+## Q62375: Fatal /nologo and /e Switch Interaction
+
 	Article: Q62375
-	Product: Microsoft C
 	Version(s): 1.20   | 1.20
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist1.20

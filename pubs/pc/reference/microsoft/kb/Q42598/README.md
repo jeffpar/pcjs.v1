@@ -4,8 +4,9 @@ title: "Q42598: RDFILE.C And WRFILE.C Are Incorrect in QuickC's On-Line Help"
 permalink: /pubs/pc/reference/microsoft/kb/Q42598/
 ---
 
+## Q42598: RDFILE.C And WRFILE.C Are Incorrect in QuickC's On-Line Help
+
 	Article: Q42598
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | langdoc docerr

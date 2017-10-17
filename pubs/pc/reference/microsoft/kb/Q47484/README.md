@@ -4,8 +4,9 @@ title: "Q47484: Determining the Number of Valid Drives in DOS"
 permalink: /pubs/pc/reference/microsoft/kb/Q47484/
 ---
 
+## Q47484: Determining the Number of Valid Drives in DOS
+
 	Article: Q47484
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QuickC S_QuickASM H_MASM O_MSDOS

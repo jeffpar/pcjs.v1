@@ -4,8 +4,9 @@ title: "Q58427: Changing STDIN Translation Mode from Text to Binary"
 permalink: /pubs/pc/reference/microsoft/kb/Q58427/
 ---
 
+## Q58427: Changing STDIN Translation Mode from Text to Binary
+
 	Article: Q58427
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | s_quickc s_quickasm

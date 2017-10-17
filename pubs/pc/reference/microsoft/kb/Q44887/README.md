@@ -4,8 +4,9 @@ title: "Q44887: MEP GP Faults After Consecutive Searches."
 permalink: /pubs/pc/reference/microsoft/kb/Q44887/
 ---
 
+## Q44887: MEP GP Faults After Consecutive Searches.
+
 	Article: Q44887
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: OS/2
 	Flags: ENDUSER | buglist1.00

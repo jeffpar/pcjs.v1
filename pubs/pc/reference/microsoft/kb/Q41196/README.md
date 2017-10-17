@@ -4,8 +4,9 @@ title: "Q41196: QCL 1.01 Can Bring Up QuickC 2.00 Integrated Environment"
 permalink: /pubs/pc/reference/microsoft/kb/Q41196/
 ---
 
+## Q41196: QCL 1.01 Can Bring Up QuickC 2.00 Integrated Environment
+
 	Article: Q41196
-	Product: Microsoft C
 	Version(s): 2.00   | 2.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

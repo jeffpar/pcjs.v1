@@ -4,8 +4,9 @@ title: "Q34009: Jumper Settings for Bus Mouse Used in an XT 286"
 permalink: /pubs/pc/reference/microsoft/kb/Q34009/
 ---
 
+## Q34009: Jumper Settings for Bus Mouse Used in an XT 286
+
 	Article: Q34009
-	Product: Microsoft C
 	Version(s): 1.x 2.x 3.x 4.x 5.x 6.x 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

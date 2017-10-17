@@ -4,8 +4,9 @@ title: "Q27778: Program's First Command-Line Argument Is &quot;C&quot; Under DOS
 permalink: /pubs/pc/reference/microsoft/kb/Q27778/
 ---
 
+## Q27778: Program's First Command-Line Argument Is &quot;C&quot; Under DOS 2.x
+
 	Article: Q27778
-	Product: Microsoft C
 	Version(s): 5.00 5.10 6.00 6.00a
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickc

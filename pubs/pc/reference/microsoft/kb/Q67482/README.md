@@ -4,8 +4,9 @@ title: "Q67482: Link Not Performed During Build or Make"
 permalink: /pubs/pc/reference/microsoft/kb/Q67482/
 ---
 
+## Q67482: Link Not Performed During Build or Make
+
 	Article: Q67482
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist1.00 fixlist1.10 fixlist1.11 s_c s_link s_pwb

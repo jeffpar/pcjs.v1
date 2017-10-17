@@ -4,8 +4,9 @@ title: "Q43487: QuickC: Cannot Watch Variable with Dollar Sign (&#36;) in Debugg
 permalink: /pubs/pc/reference/microsoft/kb/Q43487/
 ---
 
+## Q43487: QuickC: Cannot Watch Variable with Dollar Sign (&#36;) in Debugger
+
 	Article: Q43487
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist2.00

@@ -4,8 +4,9 @@ title: "Q44053: Regular Expression Replacements in QuickC 2.00 Editor"
 permalink: /pubs/pc/reference/microsoft/kb/Q44053/
 ---
 
+## Q44053: Regular Expression Replacements in QuickC 2.00 Editor
+
 	Article: Q44053
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

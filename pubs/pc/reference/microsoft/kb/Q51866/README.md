@@ -4,8 +4,9 @@ title: "Q51866: _PG_CHART Fails to Graph Some Y-Axis Categories"
 permalink: /pubs/pc/reference/microsoft/kb/Q51866/
 ---
 
+## Q51866: _PG_CHART Fails to Graph Some Y-Axis Categories
+
 	Article: Q51866
-	Product: Microsoft C
 	Version(s): 2.00 2.01
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickc

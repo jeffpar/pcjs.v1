@@ -4,8 +4,9 @@ title: "Q40681: M.TMP Reset When Window Closed"
 permalink: /pubs/pc/reference/microsoft/kb/Q40681/
 ---
 
+## Q40681: M.TMP Reset When Window Closed
+
 	Article: Q40681
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | mep buglist1.00

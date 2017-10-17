@@ -4,8 +4,9 @@ title: "Q61558: Unresolved External &#95;&#95;CImin Caused by /Gh /Os Compile Op
 permalink: /pubs/pc/reference/microsoft/kb/Q61558/
 ---
 
+## Q61558: Unresolved External &#95;&#95;CImin Caused by /Gh /Os Compile Options
+
 	Article: Q61558
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist6.00 buglist6.00a

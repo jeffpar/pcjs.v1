@@ -4,8 +4,9 @@ title: "Q42762: Patches of Floating-Point Instructions at Run Time Are Normal"
 permalink: /pubs/pc/reference/microsoft/kb/Q42762/
 ---
 
+## Q42762: Patches of Floating-Point Instructions at Run Time Are Normal
+
 	Article: Q42762
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | SR# G890217-12193

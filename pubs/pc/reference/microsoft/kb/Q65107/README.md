@@ -4,8 +4,9 @@ title: "Q65107: Modulus Yields Incorrect Result When Used with /Ot"
 permalink: /pubs/pc/reference/microsoft/kb/Q65107/
 ---
 
+## Q65107: Modulus Yields Incorrect Result When Used with /Ot
+
 	Article: Q65107
-	Product: Microsoft C
 	Version(s): 2.00 2.01
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist2.00 buglist2.01 fixlist2.50 fixlist2.51

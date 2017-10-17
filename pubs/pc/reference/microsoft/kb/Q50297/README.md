@@ -4,8 +4,9 @@ title: "Q50297: Calculating Available Memory in Large Model"
 permalink: /pubs/pc/reference/microsoft/kb/Q50297/
 ---
 
+## Q50297: Calculating Available Memory in Large Model
+
 	Article: Q50297
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QuickC S_QuickAsm

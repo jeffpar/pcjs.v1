@@ -4,8 +4,9 @@ title: "Q32539: fclose() on Unopened Files Causes Protection Violation"
 permalink: /pubs/pc/reference/microsoft/kb/Q32539/
 ---
 
+## Q32539: fclose() on Unopened Files Causes Protection Violation
+
 	Article: Q32539
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

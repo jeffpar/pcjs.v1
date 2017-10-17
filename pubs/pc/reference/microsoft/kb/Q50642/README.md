@@ -4,8 +4,9 @@ title: "Q50642: Mhelp Function Is Always Assigned to SHIFT+F1"
 permalink: /pubs/pc/reference/microsoft/kb/Q50642/
 ---
 
+## Q50642: Mhelp Function Is Always Assigned to SHIFT+F1
+
 	Article: Q50642
-	Product: Microsoft C
 	Version(s): 1.02   | 1.02
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

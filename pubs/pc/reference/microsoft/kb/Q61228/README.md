@@ -4,8 +4,9 @@ title: "Q61228: C 6.00 README: LINK/LIB/NMAKE/BIND: OS/2 1.20 Long Filenames"
 permalink: /pubs/pc/reference/microsoft/kb/Q61228/
 ---
 
+## Q61228: C 6.00 README: LINK/LIB/NMAKE/BIND: OS/2 1.20 Long Filenames
+
 	Article: Q61228
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

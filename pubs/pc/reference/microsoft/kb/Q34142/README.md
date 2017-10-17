@@ -4,8 +4,9 @@ title: "Q34142: Link Error L1073"
 permalink: /pubs/pc/reference/microsoft/kb/Q34142/
 ---
 
+## Q34142: Link Error L1073
+
 	Article: Q34142
-	Product: Microsoft C
 	Version(s): 5.01.21 5.01.20
 	Operating System: MS-DOS
 	Flags: ENDUSER |

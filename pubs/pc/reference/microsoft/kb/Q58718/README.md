@@ -4,8 +4,9 @@ title: "Q58718: CVPACK May Lose Type Information in Large Files"
 permalink: /pubs/pc/reference/microsoft/kb/Q58718/
 ---
 
+## Q58718: CVPACK May Lose Type Information in Large Files
+
 	Article: Q58718
-	Product: Microsoft C
 	Version(s): 2.01 3.01 | 2.01 3.01
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | s_cvpack s_codeview

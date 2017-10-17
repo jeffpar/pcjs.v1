@@ -4,8 +4,9 @@ title: "Q38189: SDK C Documentation Incorrect for memcpy"
 permalink: /pubs/pc/reference/microsoft/kb/Q38189/
 ---
 
+## Q38189: SDK C Documentation Incorrect for memcpy
+
 	Article: Q38189
-	Product: Microsoft C
 	Version(s): 4.50   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | docerr

@@ -4,8 +4,9 @@ title: "Q61327: C 6.00 Install Program May Create Empty Directories"
 permalink: /pubs/pc/reference/microsoft/kb/Q61327/
 ---
 
+## Q61327: C 6.00 Install Program May Create Empty Directories
+
 	Article: Q61327
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

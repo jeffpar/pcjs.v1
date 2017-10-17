@@ -4,8 +4,9 @@ title: "Q60252: Initializing Bitfields as Integers in C"
 permalink: /pubs/pc/reference/microsoft/kb/Q60252/
 ---
 
+## Q60252: Initializing Bitfields as Integers in C
+
 	Article: Q60252
-	Product: Microsoft C
 	Version(s): 4.x 5.00 5.10 6.00 | 5.10 6.00
 	Operating System: MS-DOS             | OS/2
 	Flags: ENDUSER | s_quickc

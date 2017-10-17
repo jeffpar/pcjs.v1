@@ -4,8 +4,9 @@ title: "Q41571: QuickC 2.00 README.DOC: The &quot;defined&quot; Operator"
 permalink: /pubs/pc/reference/microsoft/kb/Q41571/
 ---
 
+## Q41571: QuickC 2.00 README.DOC: The &quot;defined&quot; Operator
+
 	Article: Q41571
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr

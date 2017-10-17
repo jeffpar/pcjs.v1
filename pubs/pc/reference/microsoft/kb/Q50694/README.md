@@ -4,8 +4,9 @@ title: "Q50694: Evaluation Order of Expression and Function Args Undefined"
 permalink: /pubs/pc/reference/microsoft/kb/Q50694/
 ---
 
+## Q50694: Evaluation Order of Expression and Function Args Undefined
+
 	Article: Q50694
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS  | OS/2
 	Flags: ENDUSER | S_QUICKC S_QUICKASM

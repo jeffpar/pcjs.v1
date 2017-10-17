@@ -4,8 +4,9 @@ title: "Q66703: C 6.00/6.00a Online Help Example for _heapwalk() Is Incorrect"
 permalink: /pubs/pc/reference/microsoft/kb/Q66703/
 ---
 
+## Q66703: C 6.00/6.00a Online Help Example for _heapwalk() Is Incorrect
+
 	Article: Q66703
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | docerr _heapwalk

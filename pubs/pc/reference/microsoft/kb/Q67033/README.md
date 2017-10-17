@@ -4,8 +4,9 @@ title: "Q67033: C1001: Internal Compiler Error: @(#)grammer.c:1.138, Line 164"
 permalink: /pubs/pc/reference/microsoft/kb/Q67033/
 ---
 
+## Q67033: C1001: Internal Compiler Error: @(#)grammer.c:1.138, Line 164
+
 	Article: Q67033
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | s_quickc buglist6.00 buglist6.00a

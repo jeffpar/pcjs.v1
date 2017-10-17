@@ -4,8 +4,9 @@ title: "Q68989: Help Databases Not Properly Decoded by HELPMAKE.EXE"
 permalink: /pubs/pc/reference/microsoft/kb/Q68989/
 ---
 
+## Q68989: Help Databases Not Properly Decoded by HELPMAKE.EXE
+
 	Article: Q68989
-	Product: Microsoft C
 	Version(s): 1.03 1.05 1.06 | 1.03 1.05 1.06
 	Operating System: MS-DOS         | OS/2
 	Flags: ENDUSER | buglist1.03 buglist1.05 buglist1.06

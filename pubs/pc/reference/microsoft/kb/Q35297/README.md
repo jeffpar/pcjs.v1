@@ -4,8 +4,9 @@ title: "Q35297: Differences between C signal() Function and DosSetSigHandler"
 permalink: /pubs/pc/reference/microsoft/kb/Q35297/
 ---
 
+## Q35297: Differences between C signal() Function and DosSetSigHandler
+
 	Article: Q35297
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: OS/2
 	Flags: ENDUSER |

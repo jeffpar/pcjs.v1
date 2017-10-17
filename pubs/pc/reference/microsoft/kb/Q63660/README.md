@@ -4,8 +4,9 @@ title: "Q63660: Error D2030 May Hide Other Errors"
 permalink: /pubs/pc/reference/microsoft/kb/Q63660/
 ---
 
+## Q63660: Error D2030 May Hide Other Errors
+
 	Article: Q63660
-	Product: Microsoft C
 	Version(s): 6.00
 	Operating System: OS/2
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q68658: NMK Displays Only First of Multiple Commands"
 permalink: /pubs/pc/reference/microsoft/kb/Q68658/
 ---
 
+## Q68658: NMK Displays Only First of Multiple Commands
+
 	Article: Q68658
-	Product: Microsoft C
 	Version(s): 1.11
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist1.11 S_C S_NMK

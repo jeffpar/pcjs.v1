@@ -4,8 +4,9 @@ title: "Q69216: How to Change Attributes of Subdirectories in a C Program"
 permalink: /pubs/pc/reference/microsoft/kb/Q69216/
 ---
 
+## Q69216: How to Change Attributes of Subdirectories in a C Program
+
 	Article: Q69216
-	Product: Microsoft C
 	Version(s): 3.x 4.x 5.x 6.00 6.00a | 5.10 6.00 6.00a
 	Operating System: MS-DOS                 | OS/2
 	Flags: ENDUSER |

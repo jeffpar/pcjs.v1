@@ -4,8 +4,9 @@ title: "Q40270: How CodeView Handles DosExitList Routines"
 permalink: /pubs/pc/reference/microsoft/kb/Q40270/
 ---
 
+## Q40270: How CodeView Handles DosExitList Routines
+
 	Article: Q40270
-	Product: Microsoft C
 	Version(s): 2.20
 	Operating System: OS/2
 	Flags: ENDUSER |

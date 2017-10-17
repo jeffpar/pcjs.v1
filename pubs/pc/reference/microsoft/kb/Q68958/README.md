@@ -4,8 +4,9 @@ title: "Q68958: Using MSMENU.COM with ACT! version 2.0"
 permalink: /pubs/pc/reference/microsoft/kb/Q68958/
 ---
 
+## Q68958: Using MSMENU.COM with ACT! version 2.0
+
 	Article: Q68958
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

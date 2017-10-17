@@ -4,8 +4,9 @@ title: "Q65360: Cannot Enable A20! with Orchid 386s"
 permalink: /pubs/pc/reference/microsoft/kb/Q65360/
 ---
 
+## Q65360: Cannot Enable A20! with Orchid 386s
+
 	Article: Q65360
-	Product: Microsoft C
 	Version(s): 3.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

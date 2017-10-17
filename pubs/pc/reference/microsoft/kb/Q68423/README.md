@@ -4,8 +4,9 @@ title: "Q68423: The Use of a CTRL+Z Is Limited in Text Files"
 permalink: /pubs/pc/reference/microsoft/kb/Q68423/
 ---
 
+## Q68423: The Use of a CTRL+Z Is Limited in Text Files
+
 	Article: Q68423
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER |

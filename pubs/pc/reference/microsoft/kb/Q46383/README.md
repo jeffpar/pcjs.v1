@@ -4,8 +4,9 @@ title: "Q46383: Spawned Processes Do Not Always Handle Signals Properly"
 permalink: /pubs/pc/reference/microsoft/kb/Q46383/
 ---
 
+## Q46383: Spawned Processes Do Not Always Handle Signals Properly
+
 	Article: Q46383
-	Product: Microsoft C
 	Version(s): 4.x 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QuickC

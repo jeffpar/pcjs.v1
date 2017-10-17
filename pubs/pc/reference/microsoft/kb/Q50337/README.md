@@ -4,8 +4,9 @@ title: "Q50337: Internal Compiler Error: ctypes.c:1.107, Line 474"
 permalink: /pubs/pc/reference/microsoft/kb/Q50337/
 ---
 
+## Q50337: Internal Compiler Error: ctypes.c:1.107, Line 474
+
 	Article: Q50337
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

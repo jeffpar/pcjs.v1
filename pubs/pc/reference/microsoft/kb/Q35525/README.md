@@ -4,8 +4,9 @@ title: "Q35525: Loading a New File into the Editor"
 permalink: /pubs/pc/reference/microsoft/kb/Q35525/
 ---
 
+## Q35525: Loading a New File into the Editor
+
 	Article: Q35525
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | appnote

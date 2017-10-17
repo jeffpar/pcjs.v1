@@ -4,8 +4,9 @@ title: "Q40485: Error L2025: Symbol Defined More than Once"
 permalink: /pubs/pc/reference/microsoft/kb/Q40485/
 ---
 
+## Q40485: Error L2025: Symbol Defined More than Once
+
 	Article: Q40485
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

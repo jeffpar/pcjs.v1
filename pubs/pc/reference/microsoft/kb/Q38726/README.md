@@ -4,8 +4,9 @@ title: "Q38726: Finding Out what Video Adapters Are Installed and Active"
 permalink: /pubs/pc/reference/microsoft/kb/Q38726/
 ---
 
+## Q38726: Finding Out what Video Adapters Are Installed and Active
+
 	Article: Q38726
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | video display monitor color monochrome black white b/w mono

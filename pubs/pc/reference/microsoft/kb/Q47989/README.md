@@ -4,8 +4,9 @@ title: "Q47989: Resident Software May Cause &quot;Internal Debugger Error 80&quo
 permalink: /pubs/pc/reference/microsoft/kb/Q47989/
 ---
 
+## Q47989: Resident Software May Cause &quot;Internal Debugger Error 80&quot;
+
 	Article: Q47989
-	Product: Microsoft C
 	Version(s): 1.x 2.00 2.10 2.10 2.30
 	Operating System: MS-DOS
 	Flags: ENDUSER |

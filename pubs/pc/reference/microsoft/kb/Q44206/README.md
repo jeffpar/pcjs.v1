@@ -4,8 +4,9 @@ title: "Q44206: Explanation of the _fontinfo Structure"
 permalink: /pubs/pc/reference/microsoft/kb/Q44206/
 ---
 
+## Q44206: Explanation of the _fontinfo Structure
+
 	Article: Q44206
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

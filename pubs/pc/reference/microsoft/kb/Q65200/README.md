@@ -4,8 +4,9 @@ title: "Q65200: _polygon() with _GFILLINTERIOR Does Not Work When Clipped"
 permalink: /pubs/pc/reference/microsoft/kb/Q65200/
 ---
 
+## Q65200: _polygon() with _GFILLINTERIOR Does Not Work When Clipped
+
 	Article: Q65200
-	Product: Microsoft C
 	Version(s): 6.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist6.00 s_quickc setcliprgn

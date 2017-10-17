@@ -4,8 +4,9 @@ title: "Q43139: LINK: Renaming Overlayed Executables Will Cause Problems"
 permalink: /pubs/pc/reference/microsoft/kb/Q43139/
 ---
 
+## Q43139: LINK: Renaming Overlayed Executables Will Cause Problems
+
 	Article: Q43139
-	Product: Microsoft C
 	Version(s): 5.01.21
 	Operating System: DOS
 	Flags: ENDUSER | s_C s_Pascal h_FORTRAN

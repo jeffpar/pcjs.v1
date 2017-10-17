@@ -4,8 +4,9 @@ title: "Q45724: Link Error L1005: /PACKCODE: Packing Limit Exceeds 65,536"
 permalink: /pubs/pc/reference/microsoft/kb/Q45724/
 ---
 
+## Q45724: Link Error L1005: /PACKCODE: Packing Limit Exceeds 65,536
+
 	Article: Q45724
-	Product: Microsoft C
 	Version(s): 3.65
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr

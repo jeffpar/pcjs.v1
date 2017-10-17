@@ -4,8 +4,9 @@ title: "Q59408: Selecting Text for Use with Commands"
 permalink: /pubs/pc/reference/microsoft/kb/Q59408/
 ---
 
+## Q59408: Selecting Text for Use with Commands
+
 	Article: Q59408
-	Product: Microsoft C
 	Version(s): 2.20 2.30 | 2.20 2.30
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | docerr insert

@@ -4,8 +4,9 @@ title: "Q60748: If COMSPEC Is Invalid, Invoking DOS Shell May Hang Machine"
 permalink: /pubs/pc/reference/microsoft/kb/Q60748/
 ---
 
+## Q60748: If COMSPEC Is Invalid, Invoking DOS Shell May Hang Machine
+
 	Article: Q60748
-	Product: Microsoft C
 	Version(s): 2.x 3.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickc s_pwb s_quickasm s_editor

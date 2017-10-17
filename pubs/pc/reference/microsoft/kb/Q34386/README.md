@@ -4,8 +4,9 @@ title: "Q34386: Maximum of 40 File Handles in C 5.10 Multi-Thread Programs"
 permalink: /pubs/pc/reference/microsoft/kb/Q34386/
 ---
 
+## Q34386: Maximum of 40 File Handles in C 5.10 Multi-Thread Programs
+
 	Article: Q34386
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

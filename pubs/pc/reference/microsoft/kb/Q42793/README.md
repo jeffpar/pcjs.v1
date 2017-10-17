@@ -4,8 +4,9 @@ title: "Q42793: Fatal Error C1059: Out of Near Heap Space"
 permalink: /pubs/pc/reference/microsoft/kb/Q42793/
 ---
 
+## Q42793: Fatal Error C1059: Out of Near Heap Space
+
 	Article: Q42793
-	Product: Microsoft C
 	Version(s): 5.00   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

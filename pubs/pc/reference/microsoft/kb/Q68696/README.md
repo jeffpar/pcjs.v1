@@ -4,8 +4,9 @@ title: "Q68696: &quot;?CANNOT DISPLAY&quot; After Column 135 in Command Window"
 permalink: /pubs/pc/reference/microsoft/kb/Q68696/
 ---
 
+## Q68696: &quot;?CANNOT DISPLAY&quot; After Column 135 in Command Window
+
 	Article: Q68696
-	Product: Microsoft C
 	Version(s): 3.00 3.11 | 3.00 3.11 3.50
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER |

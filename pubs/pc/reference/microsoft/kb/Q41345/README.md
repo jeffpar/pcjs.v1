@@ -4,8 +4,9 @@ title: "Q41345: Calculating Available Memory in Large Model"
 permalink: /pubs/pc/reference/microsoft/kb/Q41345/
 ---
 
+## Q41345: Calculating Available Memory in Large Model
+
 	Article: Q41345
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | SR# G890215-12018

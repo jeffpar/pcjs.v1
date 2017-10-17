@@ -4,8 +4,9 @@ title: "Q38839: %TMP% in NEW_VARS.BAT Causes Fatal Error C1042"
 permalink: /pubs/pc/reference/microsoft/kb/Q38839/
 ---
 
+## Q38839: %TMP% in NEW_VARS.BAT Causes Fatal Error C1042
+
 	Article: Q38839
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | s_pascal h_fortran

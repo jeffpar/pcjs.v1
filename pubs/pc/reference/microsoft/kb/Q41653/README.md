@@ -4,8 +4,9 @@ title: "Q41653: QuickC 2.00 README.DOC: /Li Option and Expanded Memory"
 permalink: /pubs/pc/reference/microsoft/kb/Q41653/
 ---
 
+## Q41653: QuickC 2.00 README.DOC: /Li Option and Expanded Memory
+
 	Article: Q41653
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

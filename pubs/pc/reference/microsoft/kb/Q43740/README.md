@@ -4,8 +4,9 @@ title: "Q43740: Default Palette for Presentation Graphics in QuickC 2.00"
 permalink: /pubs/pc/reference/microsoft/kb/Q43740/
 ---
 
+## Q43740: Default Palette for Presentation Graphics in QuickC 2.00
+
 	Article: Q43740
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

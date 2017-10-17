@@ -4,8 +4,9 @@ title: "Q46384: Example Program RECORD2.C Is Incorrect"
 permalink: /pubs/pc/reference/microsoft/kb/Q46384/
 ---
 
+## Q46384: Example Program RECORD2.C Is Incorrect
+
 	Article: Q46384
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr

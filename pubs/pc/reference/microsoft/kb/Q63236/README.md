@@ -4,8 +4,9 @@ title: "Q63236: CV 3.00 Incorrectly Documents helpbuffer Switch as helpbuffers"
 permalink: /pubs/pc/reference/microsoft/kb/Q63236/
 ---
 
+## Q63236: CV 3.00 Incorrectly Documents helpbuffer Switch as helpbuffers
+
 	Article: Q63236
-	Product: Microsoft C
 	Version(s): 3.00   | 3.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | docerr

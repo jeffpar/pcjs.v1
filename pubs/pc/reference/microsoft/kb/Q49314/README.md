@@ -4,8 +4,9 @@ title: "Q49314: Library Compatibility between BASIC and C"
 permalink: /pubs/pc/reference/microsoft/kb/Q49314/
 ---
 
+## Q49314: Library Compatibility between BASIC and C
+
 	Article: Q49314
-	Product: Microsoft C
 	Version(s): 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QuickC appnote

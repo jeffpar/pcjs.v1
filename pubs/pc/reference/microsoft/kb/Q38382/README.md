@@ -4,8 +4,9 @@ title: "Q38382: CodeView Instruction Pointer Miscounts Very Long Lines"
 permalink: /pubs/pc/reference/microsoft/kb/Q38382/
 ---
 
+## Q38382: CodeView Instruction Pointer Miscounts Very Long Lines
+
 	Article: Q38382
-	Product: Microsoft C
 	Version(s): 2.20
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist2.20

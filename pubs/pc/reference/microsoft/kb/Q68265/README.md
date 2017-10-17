@@ -4,8 +4,9 @@ title: "Q68265: Signed Is Converted to unsigned in Comparison with unsigned"
 permalink: /pubs/pc/reference/microsoft/kb/Q68265/
 ---
 
+## Q68265: Signed Is Converted to unsigned in Comparison with unsigned
+
 	Article: Q68265
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | s_quickc

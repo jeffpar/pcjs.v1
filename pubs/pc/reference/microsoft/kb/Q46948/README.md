@@ -4,8 +4,9 @@ title: "Q46948: MSJ 9/88: &quot;Using MSC for TSRs&quot; Omission/TSRs in C Info
 permalink: /pubs/pc/reference/microsoft/kb/Q46948/
 ---
 
+## Q46948: MSJ 9/88: &quot;Using MSC for TSRs&quot; Omission/TSRs in C Information
+
 	Article: Q46948
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | SR# G890710-22224

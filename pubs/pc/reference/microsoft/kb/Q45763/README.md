@@ -4,8 +4,9 @@ title: "Q45763: Typographical Error in ALMUL.ASM of C Library Source"
 permalink: /pubs/pc/reference/microsoft/kb/Q45763/
 ---
 
+## Q45763: Typographical Error in ALMUL.ASM of C Library Source
+
 	Article: Q45763
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | H_MASM docerr

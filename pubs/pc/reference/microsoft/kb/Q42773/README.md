@@ -4,8 +4,9 @@ title: "Q42773: Opening a C File When Disk Is Write Protected"
 permalink: /pubs/pc/reference/microsoft/kb/Q42773/
 ---
 
+## Q42773: Opening a C File When Disk Is Write Protected
+
 	Article: Q42773
-	Product: Microsoft C
 	Version(s): 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickc

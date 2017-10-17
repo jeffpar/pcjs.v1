@@ -4,8 +4,9 @@ title: "Q12131: Use Timer Interrupt to Maintain Time Independent of CPU Speed"
 permalink: /pubs/pc/reference/microsoft/kb/Q12131/
 ---
 
+## Q12131: Use Timer Interrupt to Maintain Time Independent of CPU Speed
+
 	Article: Q12131
-	Product: Microsoft C
 	Version(s): 3.00 4.00 5.00 5.10 6.00 6.00a
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickc

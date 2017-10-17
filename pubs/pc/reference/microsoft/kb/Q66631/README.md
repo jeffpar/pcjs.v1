@@ -4,8 +4,9 @@ title: "Q66631: How to Add a Category in QuickHelp"
 permalink: /pubs/pc/reference/microsoft/kb/Q66631/
 ---
 
+## Q66631: How to Add a Category in QuickHelp
+
 	Article: Q66631
-	Product: Microsoft C
 	Version(s): 1.70   | 1.40 1.70
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | s_qh s_helpmake

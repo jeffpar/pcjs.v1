@@ -4,8 +4,9 @@ title: "Q24710: Erratic Cursor Movement Using 123 Mouse Menu"
 permalink: /pubs/pc/reference/microsoft/kb/Q24710/
 ---
 
+## Q24710: Erratic Cursor Movement Using 123 Mouse Menu
+
 	Article: Q24710
-	Product: Microsoft C
 	Version(s): 4.x 5.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q48687: Invoking M or MEP with the /D Switch Prevents Initialization"
 permalink: /pubs/pc/reference/microsoft/kb/Q48687/
 ---
 
+## Q48687: Invoking M or MEP with the /D Switch Prevents Initialization
+
 	Article: Q48687
-	Product: Microsoft C
 	Version(s): 1.00 1.02 | 1.00 1.02
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | reinitialize

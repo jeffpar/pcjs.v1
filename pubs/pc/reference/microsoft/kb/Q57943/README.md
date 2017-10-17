@@ -4,8 +4,9 @@ title: "Q57943: No Symbolic Information Generated for Pascal Units"
 permalink: /pubs/pc/reference/microsoft/kb/Q57943/
 ---
 
+## Q57943: No Symbolic Information Generated for Pascal Units
+
 	Article: Q57943
-	Product: Microsoft C
 	Version(s): 2.10 2.20 2.30 | 2.20 2.30
 	Operating System: MS-DOS         | OS/2
 	Flags: ENDUSER | s_pascal

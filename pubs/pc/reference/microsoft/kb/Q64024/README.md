@@ -4,8 +4,9 @@ title: "Q64024: C 6.00 UNDEL.EXE Is Not Compatible with the Microsoft Editor"
 permalink: /pubs/pc/reference/microsoft/kb/Q64024/
 ---
 
+## Q64024: C 6.00 UNDEL.EXE Is Not Compatible with the Microsoft Editor
+
 	Article: Q64024
-	Product: Microsoft C
 	Version(s): 1.00 1.02 | 1.00 1.02
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER |

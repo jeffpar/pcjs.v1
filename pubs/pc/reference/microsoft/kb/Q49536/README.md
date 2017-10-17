@@ -4,8 +4,9 @@ title: "Q49536: M Editor Version 1.00 Does Not Clear Compiler Error Buffer"
 permalink: /pubs/pc/reference/microsoft/kb/Q49536/
 ---
 
+## Q49536: M Editor Version 1.00 Does Not Clear Compiler Error Buffer
+
 	Article: Q49536
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER  | buglist1.00 fixlist1.02

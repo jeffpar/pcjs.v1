@@ -4,8 +4,9 @@ title: "Q41616: QuickC 2.00 README.DOC: Example Program FOR.C"
 permalink: /pubs/pc/reference/microsoft/kb/Q41616/
 ---
 
+## Q41616: QuickC 2.00 README.DOC: Example Program FOR.C
+
 	Article: Q41616
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

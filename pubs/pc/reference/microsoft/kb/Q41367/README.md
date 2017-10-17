@@ -4,8 +4,9 @@ title: "Q41367: QuickC 2.00 README.DOC: Changing AUTOEXEC.BAT"
 permalink: /pubs/pc/reference/microsoft/kb/Q41367/
 ---
 
+## Q41367: QuickC 2.00 README.DOC: Changing AUTOEXEC.BAT
+
 	Article: Q41367
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

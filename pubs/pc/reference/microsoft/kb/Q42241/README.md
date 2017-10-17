@@ -4,8 +4,9 @@ title: "Q42241: Minimum Requirements for Writing a M Extension"
 permalink: /pubs/pc/reference/microsoft/kb/Q42241/
 ---
 
+## Q42241: Minimum Requirements for Writing a M Extension
+
 	Article: Q42241
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

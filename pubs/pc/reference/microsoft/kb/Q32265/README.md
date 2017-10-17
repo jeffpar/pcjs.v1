@@ -4,8 +4,9 @@ title: "Q32265: CHAIN Statement in Compiled BASIC Not Supported by CodeView"
 permalink: /pubs/pc/reference/microsoft/kb/Q32265/
 ---
 
+## Q32265: CHAIN Statement in Compiled BASIC Not Supported by CodeView
+
 	Article: Q32265
-	Product: Microsoft C
 	Version(s): 2.20
 	Operating System: MS-DOS
 	Flags: ENDUSER | B_QuickBas B_BasicCom

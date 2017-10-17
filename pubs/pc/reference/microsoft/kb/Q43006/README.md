@@ -4,8 +4,9 @@ title: "Q43006: A C Extension to Select an Arbitrary Number of Lines of Text"
 permalink: /pubs/pc/reference/microsoft/kb/Q43006/
 ---
 
+## Q43006: A C Extension to Select an Arbitrary Number of Lines of Text
+
 	Article: Q43006
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | extension highlight select

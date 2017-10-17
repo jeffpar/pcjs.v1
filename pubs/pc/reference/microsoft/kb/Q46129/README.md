@@ -4,8 +4,9 @@ title: "Q46129: Problem with QuickC Inline Assembler INT Call and Typedefs"
 permalink: /pubs/pc/reference/microsoft/kb/Q46129/
 ---
 
+## Q46129: Problem with QuickC Inline Assembler INT Call and Typedefs
+
 	Article: Q46129
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QuickASM buglist2.00

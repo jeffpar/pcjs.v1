@@ -4,8 +4,9 @@ title: "Q51472: Shift Left Assignment Operator &quot;&lt;&lt;=&quot; Does Not Wo
 permalink: /pubs/pc/reference/microsoft/kb/Q51472/
 ---
 
+## Q51472: Shift Left Assignment Operator &quot;&lt;&lt;=&quot; Does Not Work Correctly
+
 	Article: Q51472
-	Product: Microsoft C
 	Version(s): 2.00 2.01
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QUICKC S_QUICKASM buglist2.00 buglist2.01

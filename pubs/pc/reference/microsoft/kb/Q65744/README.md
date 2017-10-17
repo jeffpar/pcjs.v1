@@ -4,8 +4,9 @@ title: "Q65744: C 6.00 Fails to Generate Symbolic Info for ELSE IF Statement"
 permalink: /pubs/pc/reference/microsoft/kb/Q65744/
 ---
 
+## Q65744: C 6.00 Fails to Generate Symbolic Info for ELSE IF Statement
+
 	Article: Q65744
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist6.00, S_CodeView

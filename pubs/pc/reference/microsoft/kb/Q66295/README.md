@@ -4,8 +4,9 @@ title: "Q66295: What Happens to Stack Memory When Thread Terminates?"
 permalink: /pubs/pc/reference/microsoft/kb/Q66295/
 ---
 
+## Q66295: What Happens to Stack Memory When Thread Terminates?
+
 	Article: Q66295
-	Product: Microsoft C
 	Version(s): 6.00
 	Operating System: OS/2
 	Flags: ENDUSER |

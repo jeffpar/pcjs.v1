@@ -4,8 +4,9 @@ title: "Q50695: .EXE Linked with LLIBCMT Cannot Call DLL Linked with CRTLIB"
 permalink: /pubs/pc/reference/microsoft/kb/Q50695/
 ---
 
+## Q50695: .EXE Linked with LLIBCMT Cannot Call DLL Linked with CRTLIB
+
 	Article: Q50695
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: OS/2
 	Flags: ENDUSER | CRTLIB DLL

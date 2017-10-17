@@ -4,8 +4,9 @@ title: "Q68930: CADKEY Requires Microsoft Mouse Driver Version 7.04"
 permalink: /pubs/pc/reference/microsoft/kb/Q68930/
 ---
 
+## Q68930: CADKEY Requires Microsoft Mouse Driver Version 7.04
+
 	Article: Q68930
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | AutoCAD EasyCAD FastCAD VersaCAD

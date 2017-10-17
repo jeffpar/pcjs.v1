@@ -4,8 +4,9 @@ title: "Q66213: &#92;&quot; Sequence Must Be Used to Define Strings with /D Swit
 permalink: /pubs/pc/reference/microsoft/kb/Q66213/
 ---
 
+## Q66213: &#92;&quot; Sequence Must Be Used to Define Strings with /D Switch
+
 	Article: Q66213
-	Product: Microsoft C
 	Version(s): 5.10 6.00 | 5.10 6.00
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | docerr

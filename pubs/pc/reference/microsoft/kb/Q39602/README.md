@@ -4,8 +4,9 @@ title: "Q39602: Wrong Syntax for fopen Mode Argument Gives NULL Return Value"
 permalink: /pubs/pc/reference/microsoft/kb/Q39602/
 ---
 
+## Q39602: Wrong Syntax for fopen Mode Argument Gives NULL Return Value
+
 	Article: Q39602
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER |

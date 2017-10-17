@@ -4,8 +4,9 @@ title: "Q67006: C1001: Internal Compiler Error: regMD.c:1.110, line 1017"
 permalink: /pubs/pc/reference/microsoft/kb/Q67006/
 ---
 
+## Q67006: C1001: Internal Compiler Error: regMD.c:1.110, line 1017
+
 	Article: Q67006
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | buglist6.00 buglist6.00a

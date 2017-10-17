@@ -4,8 +4,9 @@ title: "Q50759: Calling C Run-Time from a Single-Threaded DLL Init Routine"
 permalink: /pubs/pc/reference/microsoft/kb/Q50759/
 ---
 
+## Q50759: Calling C Run-Time from a Single-Threaded DLL Init Routine
+
 	Article: Q50759
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: OS/2
 	Flags: ENDUSER |

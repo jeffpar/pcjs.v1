@@ -4,8 +4,9 @@ title: "Q48724: Incorrect Evaluation When Type Casting in while and for Loops"
 permalink: /pubs/pc/reference/microsoft/kb/Q48724/
 ---
 
+## Q48724: Incorrect Evaluation When Type Casting in while and for Loops
+
 	Article: Q48724
-	Product: Microsoft C
 	Version(s): 1.01 2.00 2.01
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QuickASM buglist1.01 buglist2.00

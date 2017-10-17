@@ -4,8 +4,9 @@ title: "Q67037: Embedded Unnamed Structures and Unions Cannot Be Initialized"
 permalink: /pubs/pc/reference/microsoft/kb/Q67037/
 ---
 
+## Q67037: Embedded Unnamed Structures and Unions Cannot Be Initialized
+
 	Article: Q67037
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | buglist6.00 buglist6.00a

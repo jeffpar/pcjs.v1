@@ -4,8 +4,9 @@ title: "Q35252: M Does Not Respond to Changes in the Height Switch"
 permalink: /pubs/pc/reference/microsoft/kb/Q35252/
 ---
 
+## Q35252: M Does Not Respond to Changes in the Height Switch
+
 	Article: Q35252
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q34923: Corrections to the _setbkcolor Example"
 permalink: /pubs/pc/reference/microsoft/kb/Q34923/
 ---
 
+## Q34923: Corrections to the _setbkcolor Example
+
 	Article: Q34923
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | docerr

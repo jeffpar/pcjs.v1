@@ -4,8 +4,9 @@ title: "Q32263: &quot;Microsoft Mouse Driver Not Found&quot; Error Message"
 permalink: /pubs/pc/reference/microsoft/kb/Q32263/
 ---
 
+## Q32263: &quot;Microsoft Mouse Driver Not Found&quot; Error Message
+
 	Article: Q32263
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

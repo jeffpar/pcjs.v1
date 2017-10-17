@@ -4,8 +4,9 @@ title: "Q58783: Backing Up QuickC Files in the Editor"
 permalink: /pubs/pc/reference/microsoft/kb/Q58783/
 ---
 
+## Q58783: Backing Up QuickC Files in the Editor
+
 	Article: Q58783
-	Product: Microsoft C
 	Version(s): 2.00 2.01
 	Operating System: MS-DOS
 	Flags: ENDUSER |

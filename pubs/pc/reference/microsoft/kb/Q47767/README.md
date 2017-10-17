@@ -4,8 +4,9 @@ title: "Q47767: Getting SYS2070 While Using MEP"
 permalink: /pubs/pc/reference/microsoft/kb/Q47767/
 ---
 
+## Q47767: Getting SYS2070 While Using MEP
+
 	Article: Q47767
-	Product: Microsoft C
 	Version(s): 1.02
 	Operating System: OS/2
 	Flags: ENDUSER | MEP

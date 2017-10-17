@@ -4,8 +4,9 @@ title: "Q66309: PWB May Exit to DOS If TMP Not Set Correctly"
 permalink: /pubs/pc/reference/microsoft/kb/Q66309/
 ---
 
+## Q66309: PWB May Exit to DOS If TMP Not Set Correctly
+
 	Article: Q66309
-	Product: Microsoft C
 	Version(s): 1.00 1.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist1.00 buglist1.10

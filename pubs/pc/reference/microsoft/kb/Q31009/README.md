@@ -4,8 +4,9 @@ title: "Q31009: Protected-Mode C Extensions Fail with &quot;Protection Fault&quo
 permalink: /pubs/pc/reference/microsoft/kb/Q31009/
 ---
 
+## Q31009: Protected-Mode C Extensions Fail with &quot;Protection Fault&quot;
+
 	Article: Q31009
-	Product: Microsoft C
 	Version(s): 1.00 | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | docerr

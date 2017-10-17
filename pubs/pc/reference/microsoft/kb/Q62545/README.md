@@ -4,8 +4,9 @@ title: "Q62545: Information on RAMDRIVE.SYS and Error Messages"
 permalink: /pubs/pc/reference/microsoft/kb/Q62545/
 ---
 
+## Q62545: Information on RAMDRIVE.SYS and Error Messages
+
 	Article: Q62545
-	Product: Microsoft C
 	Version(s): 6.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | err msg

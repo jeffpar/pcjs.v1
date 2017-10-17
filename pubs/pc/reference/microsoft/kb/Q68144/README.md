@@ -4,8 +4,9 @@ title: "Q68144: C1001: Internal Compiler Error: regMD.c, Line 725"
 permalink: /pubs/pc/reference/microsoft/kb/Q68144/
 ---
 
+## Q68144: C1001: Internal Compiler Error: regMD.c, Line 725
+
 	Article: Q68144
-	Product: Microsoft C
 	Version(s): 6.00a  | 6.00a
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist6.00a

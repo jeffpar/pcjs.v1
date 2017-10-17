@@ -4,8 +4,9 @@ title: "Q68382: Multithreaded fcvt() and ecvt() in C 6.00 May Cause GP Fault"
 permalink: /pubs/pc/reference/microsoft/kb/Q68382/
 ---
 
+## Q68382: Multithreaded fcvt() and ecvt() in C 6.00 May Cause GP Fault
+
 	Article: Q68382
-	Product: Microsoft C
 	Version(s): 6.00
 	Operating System: OS/2
 	Flags: ENDUSER | buglist6.00 fixlist6.00a

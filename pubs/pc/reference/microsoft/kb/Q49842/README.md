@@ -4,8 +4,9 @@ title: "Q49842: Installing In-Line 80 x 87 Assembly Instructions"
 permalink: /pubs/pc/reference/microsoft/kb/Q49842/
 ---
 
+## Q49842: Installing In-Line 80 x 87 Assembly Instructions
+
 	Article: Q49842
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr appnote

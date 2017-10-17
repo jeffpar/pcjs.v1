@@ -4,8 +4,9 @@ title: "Q60708: Hardware Failure Possible Cause of C1001"
 permalink: /pubs/pc/reference/microsoft/kb/Q60708/
 ---
 
+## Q60708: Hardware Failure Possible Cause of C1001
+
 	Article: Q60708
-	Product: Microsoft C
 	Version(s): 5.10 6.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

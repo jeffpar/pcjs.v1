@@ -4,8 +4,9 @@ title: "Q35526: Exiting without Saving"
 permalink: /pubs/pc/reference/microsoft/kb/Q35526/
 ---
 
+## Q35526: Exiting without Saving
+
 	Article: Q35526
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | appnote

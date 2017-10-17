@@ -4,8 +4,9 @@ title: "Q46836: Q &amp; A on MS Recommendation of Glockenspiel C++ and CommonVie
 permalink: /pubs/pc/reference/microsoft/kb/Q46836/
 ---
 
+## Q46836: Q &amp; A on MS Recommendation of Glockenspiel C++ and CommonView
+
 	Article: Q46836
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | SR# G890705-21998 plus plus

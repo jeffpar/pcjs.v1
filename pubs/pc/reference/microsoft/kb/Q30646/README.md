@@ -4,8 +4,9 @@ title: "Q30646: Cannot Create .COM Files in C Compiler"
 permalink: /pubs/pc/reference/microsoft/kb/Q30646/
 ---
 
+## Q30646: Cannot Create .COM Files in C Compiler
+
 	Article: Q30646
-	Product: Microsoft C
 	Version(s): 3.00 4.00 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER |

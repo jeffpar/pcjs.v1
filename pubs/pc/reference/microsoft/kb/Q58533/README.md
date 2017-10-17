@@ -4,8 +4,9 @@ title: "Q58533: Offsetof() Macro Gives Incorrect Results or C1045"
 permalink: /pubs/pc/reference/microsoft/kb/Q58533/
 ---
 
+## Q58533: Offsetof() Macro Gives Incorrect Results or C1045
+
 	Article: Q58533
-	Product: Microsoft C
 	Version(s): 1.00 1.01 2.00 2.01
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickc s_quickasm

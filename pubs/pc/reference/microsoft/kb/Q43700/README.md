@@ -4,8 +4,9 @@ title: "Q43700: C: Loop Optimization Causes Internal Compiler Error"
 permalink: /pubs/pc/reference/microsoft/kb/Q43700/
 ---
 
+## Q43700: C: Loop Optimization Causes Internal Compiler Error
+
 	Article: Q43700
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

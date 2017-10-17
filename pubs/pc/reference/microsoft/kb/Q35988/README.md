@@ -4,8 +4,9 @@ title: "Q35988: Source Not Available for MS Binary to IEEE Conversion"
 permalink: /pubs/pc/reference/microsoft/kb/Q35988/
 ---
 
+## Q35988: Source Not Available for MS Binary to IEEE Conversion
+
 	Article: Q35988
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.00 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER   |

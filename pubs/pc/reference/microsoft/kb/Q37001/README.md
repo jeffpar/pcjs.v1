@@ -4,8 +4,9 @@ title: "Q37001: Warning C4077 Unknown check_stack Option"
 permalink: /pubs/pc/reference/microsoft/kb/Q37001/
 ---
 
+## Q37001: Warning C4077 Unknown check_stack Option
+
 	Article: Q37001
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | S_QUICKC S_ERROR

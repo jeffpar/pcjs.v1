@@ -4,8 +4,9 @@ title: "Q68691: Online Help Example of Rich Text Format (RTF) Is Incorrect"
 permalink: /pubs/pc/reference/microsoft/kb/Q68691/
 ---
 
+## Q68691: Online Help Example of Rich Text Format (RTF) Is Incorrect
+
 	Article: Q68691
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | docerr

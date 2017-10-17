@@ -4,8 +4,9 @@ title: "Q39088: C1004: Unexpected EOF"
 permalink: /pubs/pc/reference/microsoft/kb/Q39088/
 ---
 
+## Q39088: C1004: Unexpected EOF
+
 	Article: Q39088
-	Product: Microsoft C
 	Version(s): 4.00  5.00  5.10 | 5.10
 	Operating System: MS-DOS           | OS/2
 	Flags: ENDUSER | s_quickc

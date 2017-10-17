@@ -4,8 +4,9 @@ title: "Q43507: QuickC: Small and Medium Model Optimization Error"
 permalink: /pubs/pc/reference/microsoft/kb/Q43507/
 ---
 
+## Q43507: QuickC: Small and Medium Model Optimization Error
+
 	Article: Q43507
-	Product: Microsoft C
 	Version(s): 1.00 1.01 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist1.00 buglist1.01 buglist2.00

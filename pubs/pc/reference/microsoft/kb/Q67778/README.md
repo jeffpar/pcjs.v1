@@ -4,8 +4,9 @@ title: "Q67778: C1001: Internal Compiler Error: regMD.c, Line 1017"
 permalink: /pubs/pc/reference/microsoft/kb/Q67778/
 ---
 
+## Q67778: C1001: Internal Compiler Error: regMD.c, Line 1017
+
 	Article: Q67778
-	Product: Microsoft C
 	Version(s): 6.00a  | 6.00a
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist6.00a

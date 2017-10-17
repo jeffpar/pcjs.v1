@@ -4,8 +4,9 @@ title: "Q38163: /DOSSEG Link Switch Fails to Make CodeView .exe"
 permalink: /pubs/pc/reference/microsoft/kb/Q38163/
 ---
 
+## Q38163: /DOSSEG Link Switch Fails to Make CodeView .exe
+
 	Article: Q38163
-	Product: Microsoft C
 	Version(s): 2.20 2.30
 	Operating System: MS-DOS
 	Flags: ENDUSER |

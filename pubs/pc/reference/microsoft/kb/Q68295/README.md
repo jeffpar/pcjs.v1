@@ -4,8 +4,9 @@ title: "Q68295: QuickC 2.50 Environment Does Not Run on a Tandy 2000"
 permalink: /pubs/pc/reference/microsoft/kb/Q68295/
 ---
 
+## Q68295: QuickC 2.50 Environment Does Not Run on a Tandy 2000
+
 	Article: Q68295
-	Product: Microsoft C
 	Version(s): 2.51
 	Operating System: MS-DOS
 	Flags: ENDUSER |

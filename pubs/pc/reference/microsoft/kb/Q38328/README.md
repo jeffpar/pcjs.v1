@@ -4,8 +4,9 @@ title: "Q38328: C 5.10 Doesn't Implement Multibyte Integer Character Constants"
 permalink: /pubs/pc/reference/microsoft/kb/Q38328/
 ---
 
+## Q38328: C 5.10 Doesn't Implement Multibyte Integer Character Constants
+
 	Article: Q38328
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

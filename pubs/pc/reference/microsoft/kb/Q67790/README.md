@@ -4,8 +4,9 @@ title: "Q67790: %n Format Specifier May Be Ignored in C 6.00 sscanf()"
 permalink: /pubs/pc/reference/microsoft/kb/Q67790/
 ---
 
+## Q67790: %n Format Specifier May Be Ignored in C 6.00 sscanf()
+
 	Article: Q67790
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER |

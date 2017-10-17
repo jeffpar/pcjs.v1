@@ -4,8 +4,9 @@ title: "Q36870: Error C2106 when Assigning a String Literal to a char Array"
 permalink: /pubs/pc/reference/microsoft/kb/Q36870/
 ---
 
+## Q36870: Error C2106 when Assigning a String Literal to a char Array
+
 	Article: Q36870
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | S_QuickC

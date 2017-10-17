@@ -4,8 +4,9 @@ title: "Q29150: Using Full Pathnames to Compile Programs with M or MEP"
 permalink: /pubs/pc/reference/microsoft/kb/Q29150/
 ---
 
+## Q29150: Using Full Pathnames to Compile Programs with M or MEP
+
 	Article: Q29150
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | TAR75085

@@ -4,8 +4,9 @@ title: "Q68379: Extmake Switch Does Not Expand Macros"
 permalink: /pubs/pc/reference/microsoft/kb/Q68379/
 ---
 
+## Q68379: Extmake Switch Does Not Expand Macros
+
 	Article: Q68379
-	Product: Microsoft C
 	Version(s): 1.11   | 1.11
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist1.11

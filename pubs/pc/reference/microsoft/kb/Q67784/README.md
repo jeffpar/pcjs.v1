@@ -4,8 +4,9 @@ title: "Q67784: C 6.00/6.00a May Incorrectly Generate C4009 Warning with /Zg"
 permalink: /pubs/pc/reference/microsoft/kb/Q67784/
 ---
 
+## Q67784: C 6.00/6.00a May Incorrectly Generate C4009 Warning with /Zg
+
 	Article: Q67784
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | buglist6.00 buglist6.00a

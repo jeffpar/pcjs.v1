@@ -4,8 +4,9 @@ title: "Q33106: PS/2 Mouse on Mouse Port Initializes Slowly"
 permalink: /pubs/pc/reference/microsoft/kb/Q33106/
 ---
 
+## Q33106: PS/2 Mouse on Mouse Port Initializes Slowly
+
 	Article: Q33106
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

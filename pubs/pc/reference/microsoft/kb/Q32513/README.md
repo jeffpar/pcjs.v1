@@ -4,8 +4,9 @@ title: "Q32513: ANSI Constants Not in Stdio.h"
 permalink: /pubs/pc/reference/microsoft/kb/Q32513/
 ---
 
+## Q32513: ANSI Constants Not in Stdio.h
+
 	Article: Q32513
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

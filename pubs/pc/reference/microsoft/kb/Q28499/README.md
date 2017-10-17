@@ -4,8 +4,9 @@ title: "Q28499: DOS 2.xx Does Not Recognize &#92;Mouse1&#92;Mouse"
 permalink: /pubs/pc/reference/microsoft/kb/Q28499/
 ---
 
+## Q28499: DOS 2.xx Does Not Recognize &#92;Mouse1&#92;Mouse
+
 	Article: Q28499
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

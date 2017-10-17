@@ -4,8 +4,9 @@ title: "Q49824: Debugging PM Apps with Two Monitors Does Not Require /2 Switch"
 permalink: /pubs/pc/reference/microsoft/kb/Q49824/
 ---
 
+## Q49824: Debugging PM Apps with Two Monitors Does Not Require /2 Switch
+
 	Article: Q49824
-	Product: Microsoft C
 	Version(s): 2.20 2.30
 	Operating System: OS/2
 	Flags: ENDUSER |

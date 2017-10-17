@@ -4,8 +4,9 @@ title: "Q50234: Using Function Name Without &quot;()&quot; Produces No Code"
 permalink: /pubs/pc/reference/microsoft/kb/Q50234/
 ---
 
+## Q50234: Using Function Name Without &quot;()&quot; Produces No Code
+
 	Article: Q50234
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | S_QuickC

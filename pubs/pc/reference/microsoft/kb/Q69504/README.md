@@ -4,8 +4,9 @@ title: "Q69504: _bios_disk() May Require 3 Tries for Drive to Get Up to Speed"
 permalink: /pubs/pc/reference/microsoft/kb/Q69504/
 ---
 
+## Q69504: _bios_disk() May Require 3 Tries for Drive to Get Up to Speed
+
 	Article: Q69504
-	Product: Microsoft C
 	Version(s): 4.00 5.00 5.10 6.00 6.00a
 	Operating System: MS-DOS
 	Flags: ENDUSER |

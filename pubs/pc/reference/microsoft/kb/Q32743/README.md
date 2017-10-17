@@ -4,8 +4,9 @@ title: "Q32743: _fmalloc and halloc Run-Time Library Update"
 permalink: /pubs/pc/reference/microsoft/kb/Q32743/
 ---
 
+## Q32743: _fmalloc and halloc Run-Time Library Update
+
 	Article: Q32743
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | appnote softlib buglist5.10 c51lib.arc

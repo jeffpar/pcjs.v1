@@ -4,8 +4,9 @@ title: "Q51323: Using CodeView to Create Disassembled Program Listings"
 permalink: /pubs/pc/reference/microsoft/kb/Q51323/
 ---
 
+## Q51323: Using CodeView to Create Disassembled Program Listings
+
 	Article: Q51323
-	Product: Microsoft C
 	Version(s): 2.20 2.30 | 2.20 2.30
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER |

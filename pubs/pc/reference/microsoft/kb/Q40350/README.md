@@ -4,8 +4,9 @@ title: "Q40350: _getimage Buffer May Be Huge (Larger than 64K)"
 permalink: /pubs/pc/reference/microsoft/kb/Q40350/
 ---
 
+## Q40350: _getimage Buffer May Be Huge (Larger than 64K)
+
 	Article: Q40350
-	Product: Microsoft C
 	Version(s): 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QuickC

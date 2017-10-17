@@ -4,8 +4,9 @@ title: "Q36611: Share Problems Using sopen and Incorrect oflag"
 permalink: /pubs/pc/reference/microsoft/kb/Q36611/
 ---
 
+## Q36611: Share Problems Using sopen and Incorrect oflag
+
 	Article: Q36611
-	Product: Microsoft C
 	Version(s): 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr

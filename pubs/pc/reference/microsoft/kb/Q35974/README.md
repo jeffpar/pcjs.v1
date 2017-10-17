@@ -4,8 +4,9 @@ title: "Q35974: Sensitivity May Reset if a /R Switch Passed to the Driver"
 permalink: /pubs/pc/reference/microsoft/kb/Q35974/
 ---
 
+## Q35974: Sensitivity May Reset if a /R Switch Passed to the Driver
+
 	Article: Q35974
-	Product: Microsoft C
 	Version(s): 6.24
 	Operating System: MS-DOS
 	Flags: ENDUSER |  buglist6.24

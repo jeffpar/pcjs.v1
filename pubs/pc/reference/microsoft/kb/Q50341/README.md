@@ -4,8 +4,9 @@ title: "Q50341: Preprocessor Condenses Multi-Line Macro Invocations"
 permalink: /pubs/pc/reference/microsoft/kb/Q50341/
 ---
 
+## Q50341: Preprocessor Condenses Multi-Line Macro Invocations
+
 	Article: Q50341
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER |

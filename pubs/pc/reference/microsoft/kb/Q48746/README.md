@@ -4,8 +4,9 @@ title: "Q48746: Explanation of Manifest Constants Used By _putimage()"
 permalink: /pubs/pc/reference/microsoft/kb/Q48746/
 ---
 
+## Q48746: Explanation of Manifest Constants Used By _putimage()
+
 	Article: Q48746
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QuickASM docerr

@@ -4,8 +4,9 @@ title: "Q66508: -Aw/-Au Uses Wrong Segment When Passing Pascal Function Return"
 permalink: /pubs/pc/reference/microsoft/kb/Q66508/
 ---
 
+## Q66508: -Aw/-Au Uses Wrong Segment When Passing Pascal Function Return
+
 	Article: Q66508
-	Product: Microsoft C
 	Version(s): 6.00 6.00a  | 6.00 6.00a
 	Operating System: MS-DOS      | OS/2
 	Flags: ENDUSER | buglist6.00 buglist6.00a

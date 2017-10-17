@@ -4,8 +4,9 @@ title: "Q35648: None Assignment Must Be Lowercase"
 permalink: /pubs/pc/reference/microsoft/kb/Q35648/
 ---
 
+## Q35648: None Assignment Must Be Lowercase
+
 	Article: Q35648
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

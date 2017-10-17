@@ -4,8 +4,9 @@ title: "Q31493: Macro to Toggle HOME Key"
 permalink: /pubs/pc/reference/microsoft/kb/Q31493/
 ---
 
+## Q31493: Macro to Toggle HOME Key
+
 	Article: Q31493
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: OS/2
 	Flags: ENDUSER | tar66615

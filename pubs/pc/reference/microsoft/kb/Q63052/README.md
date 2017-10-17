@@ -4,8 +4,9 @@ title: "Q63052: PWB 1.00 Extensions Only Return True Under DOS"
 permalink: /pubs/pc/reference/microsoft/kb/Q63052/
 ---
 
+## Q63052: PWB 1.00 Extensions Only Return True Under DOS
+
 	Article: Q63052
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist1.00

@@ -4,8 +4,9 @@ title: "Q35289: MDA Blinking Bright Text Example"
 permalink: /pubs/pc/reference/microsoft/kb/Q35289/
 ---
 
+## Q35289: MDA Blinking Bright Text Example
+
 	Article: Q35289
-	Product: Microsoft C
 	Version(s): 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER |

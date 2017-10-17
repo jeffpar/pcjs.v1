@@ -4,8 +4,9 @@ title: "Q51486: Missing Semicolon in Sample Average() Function"
 permalink: /pubs/pc/reference/microsoft/kb/Q51486/
 ---
 
+## Q51486: Missing Semicolon in Sample Average() Function
+
 	Article: Q51486
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | docerr

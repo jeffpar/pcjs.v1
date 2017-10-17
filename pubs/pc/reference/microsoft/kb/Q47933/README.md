@@ -4,8 +4,9 @@ title: "Q47933: Effective Limit of 52 Threads Per Process with DosCreateThread"
 permalink: /pubs/pc/reference/microsoft/kb/Q47933/
 ---
 
+## Q47933: Effective Limit of 52 Threads Per Process with DosCreateThread
+
 	Article: Q47933
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: OS/2
 	Flags: ENDUSER | docerr OpSys PMWin

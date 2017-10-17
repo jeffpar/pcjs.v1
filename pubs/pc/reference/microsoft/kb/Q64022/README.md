@@ -4,8 +4,9 @@ title: "Q64022: Watch Value Can Display Incorrect Value of Far Memory"
 permalink: /pubs/pc/reference/microsoft/kb/Q64022/
 ---
 
+## Q64022: Watch Value Can Display Incorrect Value of Far Memory
+
 	Article: Q64022
-	Product: Microsoft C
 	Version(s): 2.50
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickasm

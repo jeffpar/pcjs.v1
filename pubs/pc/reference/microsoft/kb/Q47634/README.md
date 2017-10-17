@@ -4,8 +4,9 @@ title: "Q47634: How to Reboot Your Machine within a Pure C Application"
 permalink: /pubs/pc/reference/microsoft/kb/Q47634/
 ---
 
+## Q47634: How to Reboot Your Machine within a Pure C Application
+
 	Article: Q47634
-	Product: Microsoft C
 	Version(s): 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QuickC S_QuickASM

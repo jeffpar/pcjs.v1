@@ -4,8 +4,9 @@ title: "Q67485: Why locking() May Allow Only Twenty Regions to Be Locked"
 permalink: /pubs/pc/reference/microsoft/kb/Q67485/
 ---
 
+## Q67485: Why locking() May Allow Only Twenty Regions to Be Locked
+
 	Article: Q67485
-	Product: Microsoft C
 	Version(s): 4.x 5.x 6.00 6.00a
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickc

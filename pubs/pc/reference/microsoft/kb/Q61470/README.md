@@ -4,8 +4,9 @@ title: "Q61470: C 6.00 Command-Line Options /Li and /Gi Documented Incorrectly"
 permalink: /pubs/pc/reference/microsoft/kb/Q61470/
 ---
 
+## Q61470: C 6.00 Command-Line Options /Li and /Gi Documented Incorrectly
+
 	Article: Q61470
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | docerr

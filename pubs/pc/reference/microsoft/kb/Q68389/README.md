@@ -4,8 +4,9 @@ title: "Q68389: sizeof(char Expression) Same as sizeof(int)"
 permalink: /pubs/pc/reference/microsoft/kb/Q68389/
 ---
 
+## Q68389: sizeof(char Expression) Same as sizeof(int)
+
 	Article: Q68389
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

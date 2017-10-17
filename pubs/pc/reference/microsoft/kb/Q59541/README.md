@@ -4,8 +4,9 @@ title: "Q59541: How to Determine the Operating System Mode and Version"
 permalink: /pubs/pc/reference/microsoft/kb/Q59541/
 ---
 
+## Q59541: How to Determine the Operating System Mode and Version
+
 	Article: Q59541
-	Product: Microsoft C
 	Version(s): 4.x 5.00 5.10 6.00 | 5.10 6.00
 	Operating System: MS-DOS             | OS/2
 	Flags: ENDUSER | s_quickc s_quickasm

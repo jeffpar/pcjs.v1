@@ -4,8 +4,9 @@ title: "Q45904: Using DosExecPgm() After Changing PATH Environment Variable"
 permalink: /pubs/pc/reference/microsoft/kb/Q45904/
 ---
 
+## Q45904: Using DosExecPgm() After Changing PATH Environment Variable
+
 	Article: Q45904
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: OS/2
 	Flags: ENDUSER |

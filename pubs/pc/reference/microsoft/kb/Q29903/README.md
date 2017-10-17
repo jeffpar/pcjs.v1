@@ -4,8 +4,9 @@ title: "Q29903: C 5.10 UTILITY.DOC: Microsoft Pascal Programs"
 permalink: /pubs/pc/reference/microsoft/kb/Q29903/
 ---
 
+## Q29903: C 5.10 UTILITY.DOC: Microsoft Pascal Programs
+
 	Article: Q29903
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | docerr s_codeview

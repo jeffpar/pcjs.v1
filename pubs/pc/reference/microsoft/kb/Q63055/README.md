@@ -4,8 +4,9 @@ title: "Q63055: qsort() Compare Routine Must Have Equal Case Under C 6.00"
 permalink: /pubs/pc/reference/microsoft/kb/Q63055/
 ---
 
+## Q63055: qsort() Compare Routine Must Have Equal Case Under C 6.00
+
 	Article: Q63055
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | S_QUICKC

@@ -4,8 +4,9 @@ title: "Q28420: Availability of MENU.COM"
 permalink: /pubs/pc/reference/microsoft/kb/Q28420/
 ---
 
+## Q28420: Availability of MENU.COM
+
 	Article: Q28420
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

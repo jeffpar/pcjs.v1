@@ -4,8 +4,9 @@ title: "Q41373: _Setvideomode _ERESCOLOR Only Supports 16 Colors"
 permalink: /pubs/pc/reference/microsoft/kb/Q41373/
 ---
 
+## Q41373: _Setvideomode _ERESCOLOR Only Supports 16 Colors
+
 	Article: Q41373
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickc docerr langdoc

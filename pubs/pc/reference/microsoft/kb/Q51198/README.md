@@ -4,8 +4,9 @@ title: "Q51198: Formal Parameters Default to Type int"
 permalink: /pubs/pc/reference/microsoft/kb/Q51198/
 ---
 
+## Q51198: Formal Parameters Default to Type int
+
 	Article: Q51198
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | S_QUICKC

@@ -4,8 +4,9 @@ title: "Q32095: Exit Does Not Save Files when NoAutosave Is Set"
 permalink: /pubs/pc/reference/microsoft/kb/Q32095/
 ---
 
+## Q32095: Exit Does Not Save Files when NoAutosave Is Set
+
 	Article: Q32095
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

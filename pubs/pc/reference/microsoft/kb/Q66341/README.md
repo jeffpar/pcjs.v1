@@ -4,8 +4,9 @@ title: "Q66341: Problem with Switch List Usage Due to Problem in PMSHL.H"
 permalink: /pubs/pc/reference/microsoft/kb/Q66341/
 ---
 
+## Q66341: Problem with Switch List Usage Due to Problem in PMSHL.H
+
 	Article: Q66341
-	Product: Microsoft C
 	Version(s): 6.00
 	Operating System: OS/2
 	Flags: ENDUSER | buglist6.00 fixlist6.00a

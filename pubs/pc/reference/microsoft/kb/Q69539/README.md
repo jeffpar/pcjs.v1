@@ -4,8 +4,9 @@ title: "Q69539: _cexit() Does Not Close Files Correctly"
 permalink: /pubs/pc/reference/microsoft/kb/Q69539/
 ---
 
+## Q69539: _cexit() Does Not Close Files Correctly
+
 	Article: Q69539
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | s_quickc buglist6.00 buglist6.00a

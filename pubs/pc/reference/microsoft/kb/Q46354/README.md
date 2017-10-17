@@ -4,8 +4,9 @@ title: "Q46354: Placing a Target File in Different Directory Than Dependents"
 permalink: /pubs/pc/reference/microsoft/kb/Q46354/
 ---
 
+## Q46354: Placing a Target File in Different Directory Than Dependents
+
 	Article: Q46354
-	Product: Microsoft C
 	Version(s): 4.07   | 4.07
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | s_make

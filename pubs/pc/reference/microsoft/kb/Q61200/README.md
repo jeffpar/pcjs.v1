@@ -4,8 +4,9 @@ title: "Q61200: C 6.00 README: How to Get Fastest/Smallest Code"
 permalink: /pubs/pc/reference/microsoft/kb/Q61200/
 ---
 
+## Q61200: C 6.00 README: How to Get Fastest/Smallest Code
+
 	Article: Q61200
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |
