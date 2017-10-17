@@ -4,8 +4,9 @@ title: "Q48641: Linesize Pragma Not Supported in QuickC"
 permalink: /pubs/pc/reference/microsoft/kb/Q48641/
 ---
 
+## Q48641: Linesize Pragma Not Supported in QuickC
+
 	Article: Q48641
-	Product: Microsoft C
 	Version(s): 1.00 1.01 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_C

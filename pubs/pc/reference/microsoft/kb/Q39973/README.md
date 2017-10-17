@@ -4,8 +4,9 @@ title: "Q39973: Accessing I/O Ports under OS/2 Protected Mode"
 permalink: /pubs/pc/reference/microsoft/kb/Q39973/
 ---
 
+## Q39973: Accessing I/O Ports under OS/2 Protected Mode
+
 	Article: Q39973
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: OS/2
 	Flags: ENDUSER | COM1 COM2 serial communication

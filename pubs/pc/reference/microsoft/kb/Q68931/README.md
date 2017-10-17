@@ -4,8 +4,9 @@ title: "Q68931: Using the Microsoft Mouse with Open Access III"
 permalink: /pubs/pc/reference/microsoft/kb/Q68931/
 ---
 
+## Q68931: Using the Microsoft Mouse with Open Access III
+
 	Article: Q68931
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

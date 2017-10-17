@@ -4,8 +4,9 @@ title: "Q67513: Comments in .COD Listing Are Wrong When Using _fastcall"
 permalink: /pubs/pc/reference/microsoft/kb/Q67513/
 ---
 
+## Q67513: Comments in .COD Listing Are Wrong When Using _fastcall
+
 	Article: Q67513
-	Product: Microsoft C
 	Version(s): 6.00a  | 6.00a
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist6.00a fastcall

@@ -4,8 +4,9 @@ title: "Q46131: Modifying P_tmpdir Does Not Change the Operation of tmpnam()"
 permalink: /pubs/pc/reference/microsoft/kb/Q46131/
 ---
 
+## Q46131: Modifying P_tmpdir Does Not Change the Operation of tmpnam()
+
 	Article: Q46131
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QuickC

@@ -4,8 +4,9 @@ title: "Q42453: Clarification of fcvt() Function"
 permalink: /pubs/pc/reference/microsoft/kb/Q42453/
 ---
 
+## Q42453: Clarification of fcvt() Function
+
 	Article: Q42453
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | s_quickc

@@ -4,8 +4,9 @@ title: "Q66429: R6000 -- Stack Overflow at Compile Time with C Compiler"
 permalink: /pubs/pc/reference/microsoft/kb/Q66429/
 ---
 
+## Q66429: R6000 -- Stack Overflow at Compile Time with C Compiler
+
 	Article: Q66429
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | buglist6.00 buglist6.00a

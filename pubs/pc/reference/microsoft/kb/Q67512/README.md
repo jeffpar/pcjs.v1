@@ -4,8 +4,9 @@ title: "Q67512: Documentation Error in QuickC &quot;Up and Running&quot; on /FPi
 permalink: /pubs/pc/reference/microsoft/kb/Q67512/
 ---
 
+## Q67512: Documentation Error in QuickC &quot;Up and Running&quot; on /FPi87
+
 	Article: Q67512
-	Product: Microsoft C
 	Version(s): 2.50 2.51
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr

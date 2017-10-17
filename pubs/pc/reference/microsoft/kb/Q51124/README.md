@@ -4,8 +4,9 @@ title: "Q51124: _arc() Generates Run-Time Error R6003"
 permalink: /pubs/pc/reference/microsoft/kb/Q51124/
 ---
 
+## Q51124: _arc() Generates Run-Time Error R6003
+
 	Article: Q51124
-	Product: Microsoft C
 	Version(s): 2.00 2.01
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist5.10 buglist2.00 buglist2.01 s_c

@@ -4,8 +4,9 @@ title: "Q30371: printf() Does Not Display Text in the Current Text Color"
 permalink: /pubs/pc/reference/microsoft/kb/Q30371/
 ---
 
+## Q30371: printf() Does Not Display Text in the Current Text Color
+
 	Article: Q30371
-	Product: Microsoft C
 	Version(s): 5.00 5.10 6.00 6.00a
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickc

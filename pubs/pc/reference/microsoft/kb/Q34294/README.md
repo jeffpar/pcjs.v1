@@ -4,8 +4,9 @@ title: "Q34294: Cannot Overlay Small-Model Code"
 permalink: /pubs/pc/reference/microsoft/kb/Q34294/
 ---
 
+## Q34294: Cannot Overlay Small-Model Code
+
 	Article: Q34294
-	Product: Microsoft C
 	Version(s): 3.60 3.61 3.64 3.65 5.01.20 5.01.21
 	Operating System: MS-DOS
 	Flags: ENDUSER |

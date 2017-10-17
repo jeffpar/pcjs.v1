@@ -4,8 +4,9 @@ title: "Q29925: Wild-Card Expansion"
 permalink: /pubs/pc/reference/microsoft/kb/Q29925/
 ---
 
+## Q29925: Wild-Card Expansion
+
 	Article: Q29925
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | docerr

@@ -4,8 +4,9 @@ title: "Q43809: Changes in scanf() and printf() for Long Types in C"
 permalink: /pubs/pc/reference/microsoft/kb/Q43809/
 ---
 
+## Q43809: Changes in scanf() and printf() for Long Types in C
+
 	Article: Q43809
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | S_QuickC

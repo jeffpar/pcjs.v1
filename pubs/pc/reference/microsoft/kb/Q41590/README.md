@@ -4,8 +4,9 @@ title: "Q41590: QuickC 2.00 README.DOC: Example Program GRAPHIC.C"
 permalink: /pubs/pc/reference/microsoft/kb/Q41590/
 ---
 
+## Q41590: QuickC 2.00 README.DOC: Example Program GRAPHIC.C
+
 	Article: Q41590
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

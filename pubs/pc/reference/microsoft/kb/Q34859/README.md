@@ -4,8 +4,9 @@ title: "Q34859: C4047 Occurs when Function Prototype Is Omitted or Misnamed"
 permalink: /pubs/pc/reference/microsoft/kb/Q34859/
 ---
 
+## Q34859: C4047 Occurs when Function Prototype Is Omitted or Misnamed
+
 	Article: Q34859
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER |

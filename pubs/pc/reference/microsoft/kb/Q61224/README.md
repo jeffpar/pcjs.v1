@@ -4,8 +4,9 @@ title: "Q61224: C 6.00 README: Graphics and Dual-Monitor Debugging Requirement"
 permalink: /pubs/pc/reference/microsoft/kb/Q61224/
 ---
 
+## Q61224: C 6.00 README: Graphics and Dual-Monitor Debugging Requirement
+
 	Article: Q61224
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

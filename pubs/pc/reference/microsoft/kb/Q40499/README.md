@@ -4,8 +4,9 @@ title: "Q40499: Internal Compiler Error: regMD.c 1.117 Line 292"
 permalink: /pubs/pc/reference/microsoft/kb/Q40499/
 ---
 
+## Q40499: Internal Compiler Error: regMD.c 1.117 Line 292
+
 	Article: Q40499
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist5.10

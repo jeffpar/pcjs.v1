@@ -4,8 +4,9 @@ title: "Q61105: End User Made Mouse Menus Don't Run Under MS-DOS 4.00 or 4.01"
 permalink: /pubs/pc/reference/microsoft/kb/Q61105/
 ---
 
+## Q61105: End User Made Mouse Menus Don't Run Under MS-DOS 4.00 or 4.01
+
 	Article: Q61105
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

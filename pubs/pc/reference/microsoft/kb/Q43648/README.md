@@ -4,8 +4,9 @@ title: "Q43648: Returning Control to CodeView"
 permalink: /pubs/pc/reference/microsoft/kb/Q43648/
 ---
 
+## Q43648: Returning Control to CodeView
+
 	Article: Q43648
-	Product: Microsoft C
 	Version(s): 2.20
 	Operating System: MS-DOS
 	Flags: ENDUSER | CONTROL-C CONTROL+C CONTROL+BREAK CONTROL-BREAK ^C ^BREAK

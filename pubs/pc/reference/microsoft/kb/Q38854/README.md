@@ -4,8 +4,9 @@ title: "Q38854: Use of RMFIXUP.OBJ"
 permalink: /pubs/pc/reference/microsoft/kb/Q38854/
 ---
 
+## Q38854: Use of RMFIXUP.OBJ
+
 	Article: Q38854
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: enduser |

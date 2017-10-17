@@ -4,8 +4,9 @@ title: "Q38810: Error L1089 Filename : Cannot Open Response File"
 permalink: /pubs/pc/reference/microsoft/kb/Q38810/
 ---
 
+## Q38810: Error L1089 Filename : Cannot Open Response File
+
 	Article: Q38810
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | s_pascal h_fortran h_masm s_quickc s_link s_error

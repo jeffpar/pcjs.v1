@@ -4,8 +4,9 @@ title: "Q48857: Video Modes Available on Tandy 1000 Computers"
 permalink: /pubs/pc/reference/microsoft/kb/Q48857/
 ---
 
+## Q48857: Video Modes Available on Tandy 1000 Computers
+
 	Article: Q48857
-	Product: Microsoft C
 	Version(s): 2.00 2.01
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QuickASM

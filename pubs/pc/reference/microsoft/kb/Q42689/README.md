@@ -4,8 +4,9 @@ title: "Q42689: QuickC 2.00 README.DOC: Example Program IF.C"
 permalink: /pubs/pc/reference/microsoft/kb/Q42689/
 ---
 
+## Q42689: QuickC 2.00 README.DOC: Example Program IF.C
+
 	Article: Q42689
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

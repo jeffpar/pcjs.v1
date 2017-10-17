@@ -4,8 +4,9 @@ title: "Q37200: Redirection with spawn() or exec()"
 permalink: /pubs/pc/reference/microsoft/kb/Q37200/
 ---
 
+## Q37200: Redirection with spawn() or exec()
+
 	Article: Q37200
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | SR# S880925-1 s_quickc

@@ -4,8 +4,9 @@ title: "Q41551: QuickC 2.00 README.DOC: Passing By Value"
 permalink: /pubs/pc/reference/microsoft/kb/Q41551/
 ---
 
+## Q41551: QuickC 2.00 README.DOC: Passing By Value
+
 	Article: Q41551
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

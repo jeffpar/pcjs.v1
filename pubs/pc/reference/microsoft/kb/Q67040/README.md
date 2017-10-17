@@ -4,8 +4,9 @@ title: "Q67040: /Ol Causes register Variables to Be Allocated on the Stack"
 permalink: /pubs/pc/reference/microsoft/kb/Q67040/
 ---
 
+## Q67040: /Ol Causes register Variables to Be Allocated on the Stack
+
 	Article: Q67040
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | buglist6.00 buglist6.00a

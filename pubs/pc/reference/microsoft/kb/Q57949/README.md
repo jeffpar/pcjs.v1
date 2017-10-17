@@ -4,8 +4,9 @@ title: "Q57949: Use of the Stringizing Operator (#) in Macros"
 permalink: /pubs/pc/reference/microsoft/kb/Q57949/
 ---
 
+## Q57949: Use of the Stringizing Operator (#) in Macros
+
 	Article: Q57949
-	Product: Microsoft C
 	Version(s): 3.x 4.x 5.00 5.10 | 5.10
 	Operating System: MS-DOS            | OS/2
 	Flags: ENDUSER | s_quickc s_quickasm 1.x 2.00 2.01

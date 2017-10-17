@@ -4,8 +4,9 @@ title: "Q62329: Internal Compiler Error '@(#)regMD.c:1.100', Line 4634"
 permalink: /pubs/pc/reference/microsoft/kb/Q62329/
 ---
 
+## Q62329: Internal Compiler Error '@(#)regMD.c:1.100', Line 4634
+
 	Article: Q62329
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist6.00

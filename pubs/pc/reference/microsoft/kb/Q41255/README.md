@@ -4,8 +4,9 @@ title: "Q41255: Number of Serial Ports under OS/2"
 permalink: /pubs/pc/reference/microsoft/kb/Q41255/
 ---
 
+## Q41255: Number of Serial Ports under OS/2
+
 	Article: Q41255
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: OS/2
 	Flags: ENDUSER | SR# G890121-10245

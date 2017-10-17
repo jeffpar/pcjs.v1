@@ -4,8 +4,9 @@ title: "Q40317: QC 2.00 SAMPLES.DOC: Note on Name Convention"
 permalink: /pubs/pc/reference/microsoft/kb/Q40317/
 ---
 
+## Q40317: QC 2.00 SAMPLES.DOC: Note on Name Convention
+
 	Article: Q40317
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: enduser |

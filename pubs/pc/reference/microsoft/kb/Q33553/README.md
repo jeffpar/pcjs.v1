@@ -4,8 +4,9 @@ title: "Q33553: Cursor Freezes when Using Old Mouse Driver on AT-Type Machine"
 permalink: /pubs/pc/reference/microsoft/kb/Q33553/
 ---
 
+## Q33553: Cursor Freezes when Using Old Mouse Driver on AT-Type Machine
+
 	Article: Q33553
-	Product: Microsoft C
 	Version(s): 5.03
 	Operating System: MS-DOS
 	Flags: ENDUSER |

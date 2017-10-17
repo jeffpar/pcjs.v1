@@ -4,8 +4,9 @@ title: "Q28504: STB VGA Extra Using Mouse"
 permalink: /pubs/pc/reference/microsoft/kb/Q28504/
 ---
 
+## Q28504: STB VGA Extra Using Mouse
+
 	Article: Q28504
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

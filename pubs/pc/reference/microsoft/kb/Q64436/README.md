@@ -4,8 +4,9 @@ title: "Q64436: mktime() Function Does Not Flag Invalid Dates Before 1970"
 permalink: /pubs/pc/reference/microsoft/kb/Q64436/
 ---
 
+## Q64436: mktime() Function Does Not Flag Invalid Dates Before 1970
+
 	Article: Q64436
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | s_quickc buglist6.00 buglist2.50 buglist2.51

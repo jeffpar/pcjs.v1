@@ -4,8 +4,9 @@ title: "Q67273: Error in Installation Manual for bounds-error() Routine"
 permalink: /pubs/pc/reference/microsoft/kb/Q67273/
 ---
 
+## Q67273: Error in Installation Manual for bounds-error() Routine
+
 	Article: Q67273
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | docerr

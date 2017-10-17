@@ -4,8 +4,9 @@ title: "Q62182: C4058 Error with /qc Compile Option"
 permalink: /pubs/pc/reference/microsoft/kb/Q62182/
 ---
 
+## Q62182: C4058 Error with /qc Compile Option
+
 	Article: Q62182
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist6.00

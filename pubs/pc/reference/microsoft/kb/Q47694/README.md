@@ -4,8 +4,9 @@ title: "Q47694: Structures Declared with Near, Far, Pascal, and Fortran"
 permalink: /pubs/pc/reference/microsoft/kb/Q47694/
 ---
 
+## Q47694: Structures Declared with Near, Far, Pascal, and Fortran
+
 	Article: Q47694
-	Product: Microsoft C
 	Version(s): 2.20 2.30 | 2.20 2.30
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | S_C S_QuickC buglist2.20 buglist2.30

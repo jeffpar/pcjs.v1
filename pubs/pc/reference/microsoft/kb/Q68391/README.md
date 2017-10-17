@@ -4,8 +4,9 @@ title: "Q68391: C 6.00/6.00a Do Not Give Warning That /Gm Is Not Functioning"
 permalink: /pubs/pc/reference/microsoft/kb/Q68391/
 ---
 
+## Q68391: C 6.00/6.00a Do Not Give Warning That /Gm Is Not Functioning
+
 	Article: Q68391
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | buglist6.00 buglist6.00a docerr

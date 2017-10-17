@@ -4,8 +4,9 @@ title: "Q43999: NMAKE Is Case Sensitive"
 permalink: /pubs/pc/reference/microsoft/kb/Q43999/
 ---
 
+## Q43999: NMAKE Is Case Sensitive
+
 	Article: Q43999
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

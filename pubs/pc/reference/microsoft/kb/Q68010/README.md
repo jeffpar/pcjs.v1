@@ -4,8 +4,9 @@ title: "Q68010: Quickwatch Seems to Hang When Expanding Very Large Arrays"
 permalink: /pubs/pc/reference/microsoft/kb/Q68010/
 ---
 
+## Q68010: Quickwatch Seems to Hang When Expanding Very Large Arrays
+
 	Article: Q68010
-	Product: Microsoft C
 	Version(s): 3.00 3.10 3.11 | 3.00 3.10 3.11
 	Operating System: MS-DOS         | OS/2
 	Flags: ENDUSER | s_quickc

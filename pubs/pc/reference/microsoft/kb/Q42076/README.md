@@ -4,8 +4,9 @@ title: "Q42076: Errors C1059, C1060, D2027 Can Be Caused by Not Enough Memory"
 permalink: /pubs/pc/reference/microsoft/kb/Q42076/
 ---
 
+## Q42076: Errors C1059, C1060, D2027 Can Be Caused by Not Enough Memory
+
 	Article: Q42076
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

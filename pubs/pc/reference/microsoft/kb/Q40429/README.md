@@ -4,8 +4,9 @@ title: "Q40429: Example of Using a Response File with LINK"
 permalink: /pubs/pc/reference/microsoft/kb/Q40429/
 ---
 
+## Q40429: Example of Using a Response File with LINK
+
 	Article: Q40429
-	Product: Microsoft C
 	Version(s): 3.65   | 5.01.20
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

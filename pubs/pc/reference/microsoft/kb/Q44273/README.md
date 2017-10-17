@@ -4,8 +4,9 @@ title: "Q44273: Facts About MSHERC.COM; Why Hercules Support Must Be TSR"
 permalink: /pubs/pc/reference/microsoft/kb/Q44273/
 ---
 
+## Q44273: Facts About MSHERC.COM; Why Hercules Support Must Be TSR
+
 	Article: Q44273
-	Product: Microsoft C
 	Version(s): 1.00 1.01 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_c

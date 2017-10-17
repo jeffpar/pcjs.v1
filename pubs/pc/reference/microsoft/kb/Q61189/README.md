@@ -4,8 +4,9 @@ title: "Q61189: C 6.00 README: The sizeof Operator Return Value"
 permalink: /pubs/pc/reference/microsoft/kb/Q61189/
 ---
 
+## Q61189: C 6.00 README: The sizeof Operator Return Value
+
 	Article: Q61189
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

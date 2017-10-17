@@ -4,8 +4,9 @@ title: "Q41217: Alleged Problems with Listing Options (/Fc, /Fl, /Fa)"
 permalink: /pubs/pc/reference/microsoft/kb/Q41217/
 ---
 
+## Q41217: Alleged Problems with Listing Options (/Fc, /Fl, /Fa)
+
 	Article: Q41217
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | SR# S881208-32 errors

@@ -4,8 +4,9 @@ title: "Q42073: Initialized Local Arrays"
 permalink: /pubs/pc/reference/microsoft/kb/Q42073/
 ---
 
+## Q42073: Initialized Local Arrays
+
 	Article: Q42073
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

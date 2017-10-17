@@ -4,8 +4,9 @@ title: "Q44424: sizeof() Returns 0 for Dereferenced Pointers to Arrays"
 permalink: /pubs/pc/reference/microsoft/kb/Q44424/
 ---
 
+## Q44424: sizeof() Returns 0 for Dereferenced Pointers to Arrays
+
 	Article: Q44424
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist2.00

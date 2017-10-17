@@ -4,8 +4,9 @@ title: "Q46793: Bus Mouse and Cipher Tape Drive Card"
 permalink: /pubs/pc/reference/microsoft/kb/Q46793/
 ---
 
+## Q46793: Bus Mouse and Cipher Tape Drive Card
+
 	Article: Q46793
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

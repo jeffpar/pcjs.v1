@@ -4,8 +4,9 @@ title: "Q37625: MKTEMP() Function Example Clarification"
 permalink: /pubs/pc/reference/microsoft/kb/Q37625/
 ---
 
+## Q37625: MKTEMP() Function Example Clarification
+
 	Article: Q37625
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | s_quickc

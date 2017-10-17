@@ -4,8 +4,9 @@ title: "Q63053: Operands Reversed in C 6.00 Divide Operation"
 permalink: /pubs/pc/reference/microsoft/kb/Q63053/
 ---
 
+## Q63053: Operands Reversed in C 6.00 Divide Operation
+
 	Article: Q63053
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist6.00

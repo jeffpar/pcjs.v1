@@ -4,8 +4,9 @@ title: "Q59385: Incomplete EXPORTS List May Cause L2022 and L2029"
 permalink: /pubs/pc/reference/microsoft/kb/Q59385/
 ---
 
+## Q59385: Incomplete EXPORTS List May Cause L2022 and L2029
+
 	Article: Q59385
-	Product: Microsoft C
 	Version(s): 3.65
 	Operating System: MS-DOS
 	Flags: ENDUSER |

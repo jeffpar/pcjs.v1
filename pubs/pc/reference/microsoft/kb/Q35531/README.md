@@ -4,8 +4,9 @@ title: "Q35531: Making the Editor Default to Insert Mode"
 permalink: /pubs/pc/reference/microsoft/kb/Q35531/
 ---
 
+## Q35531: Making the Editor Default to Insert Mode
+
 	Article: Q35531
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | appnote

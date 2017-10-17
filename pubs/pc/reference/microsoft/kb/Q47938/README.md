@@ -4,8 +4,9 @@ title: "Q47938: Debugging of DLLs That Do Not Have the .DLL Extension"
 permalink: /pubs/pc/reference/microsoft/kb/Q47938/
 ---
 
+## Q47938: Debugging of DLLs That Do Not Have the .DLL Extension
+
 	Article: Q47938
-	Product: Microsoft C
 	Version(s): 2.30   | 2.30
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q40182: Use of Wrong Library Causes Unresolved External on &#95;&#95;aDB
 permalink: /pubs/pc/reference/microsoft/kb/Q40182/
 ---
 
+## Q40182: Use of Wrong Library Causes Unresolved External on &#95;&#95;aDBused
+
 	Article: Q40182
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

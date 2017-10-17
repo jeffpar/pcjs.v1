@@ -4,8 +4,9 @@ title: "Q38269: Error C1036 Cannot Open Source Listing File 'filename'"
 permalink: /pubs/pc/reference/microsoft/kb/Q38269/
 ---
 
+## Q38269: Error C1036 Cannot Open Source Listing File 'filename'
+
 	Article: Q38269
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | s_quickc s_error

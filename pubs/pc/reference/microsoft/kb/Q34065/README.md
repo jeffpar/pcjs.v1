@@ -4,8 +4,9 @@ title: "Q34065: setvbuf with Buffer Greater than 32K Causes fwrite Failure"
 permalink: /pubs/pc/reference/microsoft/kb/Q34065/
 ---
 
+## Q34065: setvbuf with Buffer Greater than 32K Causes fwrite Failure
+
 	Article: Q34065
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER |

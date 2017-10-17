@@ -4,8 +4,9 @@ title: "Q67779: C1001: Internal Compiler Error: regMD.c, Lines 3047 and 3020"
 permalink: /pubs/pc/reference/microsoft/kb/Q67779/
 ---
 
+## Q67779: C1001: Internal Compiler Error: regMD.c, Lines 3047 and 3020
+
 	Article: Q67779
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | buglist6.00 buglist6.00a

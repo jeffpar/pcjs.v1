@@ -4,8 +4,9 @@ title: "Q41254: Error in &quot;C For Yourself,&quot; Page 294"
 permalink: /pubs/pc/reference/microsoft/kb/Q41254/
 ---
 
+## Q41254: Error in &quot;C For Yourself,&quot; Page 294
+
 	Article: Q41254
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | SR# G890208-11455 docerr

@@ -4,8 +4,9 @@ title: "Q47036: /CP:X Is Not Valid When Linking Protected-Mode Programs"
 permalink: /pubs/pc/reference/microsoft/kb/Q47036/
 ---
 
+## Q47036: /CP:X Is Not Valid When Linking Protected-Mode Programs
+
 	Article: Q47036
-	Product: Microsoft C
 	Version(s): 5.01.21 | 5.01.21
 	Operating System: MS-DOS  | OS/2
 	Flags: ENDUSER | docerr

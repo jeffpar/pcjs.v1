@@ -4,8 +4,9 @@ title: "Q63224: Ventura Publisher 2.0 and Mouse Driver 6.24b"
 permalink: /pubs/pc/reference/microsoft/kb/Q63224/
 ---
 
+## Q63224: Ventura Publisher 2.0 and Mouse Driver 6.24b
+
 	Article: Q63224
-	Product: Microsoft C
 	Version(s): 1.x 2.x 3.x 4.x 5.x 6.x 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

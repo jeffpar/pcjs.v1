@@ -4,8 +4,9 @@ title: "Q47692: errno Values Not Used under MS-DOS Indicate Other Problem"
 permalink: /pubs/pc/reference/microsoft/kb/Q47692/
 ---
 
+## Q47692: errno Values Not Used under MS-DOS Indicate Other Problem
+
 	Article: Q47692
-	Product: Microsoft C
 	Version(s): 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QuickC

@@ -4,8 +4,9 @@ title: "Q38015: MASM m.exe Is Different than FORTRAN m.exe when Using DOS Comp"
 permalink: /pubs/pc/reference/microsoft/kb/Q38015/
 ---
 
+## Q38015: MASM m.exe Is Different than FORTRAN m.exe when Using DOS Comp
+
 	Article: Q38015
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | h_fortran

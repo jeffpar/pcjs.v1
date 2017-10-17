@@ -4,8 +4,9 @@ title: "Q33104: SH_COMPAT Share Flag for SOPEN()"
 permalink: /pubs/pc/reference/microsoft/kb/Q33104/
 ---
 
+## Q33104: SH_COMPAT Share Flag for SOPEN()
+
 	Article: Q33104
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | docerr

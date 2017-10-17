@@ -4,8 +4,9 @@ title: "Q41160: Getpid under DOS Is Not Functional"
 permalink: /pubs/pc/reference/microsoft/kb/Q41160/
 ---
 
+## Q41160: Getpid under DOS Is Not Functional
+
 	Article: Q41160
-	Product: Microsoft C
 	Version(s): 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER |

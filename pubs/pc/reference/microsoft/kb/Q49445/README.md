@@ -4,8 +4,9 @@ title: "Q49445: LINK 5.03 and Later Require EXETYPE WINDOWS in .DEF File"
 permalink: /pubs/pc/reference/microsoft/kb/Q49445/
 ---
 
+## Q49445: LINK 5.03 and Later Require EXETYPE WINDOWS in .DEF File
+
 	Article: Q49445
-	Product: Microsoft C
 	Version(s): 5.03
 	Operating System: MS-DOS
 	Flags: ENDUSER |

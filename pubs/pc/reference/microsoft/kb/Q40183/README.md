@@ -4,8 +4,9 @@ title: "Q40183: Open() Will Not Ignore Append Path"
 permalink: /pubs/pc/reference/microsoft/kb/Q40183/
 ---
 
+## Q40183: Open() Will Not Ignore Append Path
+
 	Article: Q40183
-	Product: Microsoft C
 	Version(s): 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickc

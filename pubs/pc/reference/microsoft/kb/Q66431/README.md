@@ -4,8 +4,9 @@ title: "Q66431: How to Read Internal Floating-Point Function Names"
 permalink: /pubs/pc/reference/microsoft/kb/Q66431/
 ---
 
+## Q66431: How to Read Internal Floating-Point Function Names
+
 	Article: Q66431
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

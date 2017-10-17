@@ -4,8 +4,9 @@ title: "Q67862: Running MSETUP from Drive B"
 permalink: /pubs/pc/reference/microsoft/kb/Q67862/
 ---
 
+## Q67862: Running MSETUP from Drive B
+
 	Article: Q67862
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | driver mouse install b: msetup

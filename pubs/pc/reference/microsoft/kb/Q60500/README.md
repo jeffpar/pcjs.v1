@@ -4,8 +4,9 @@ title: "Q60500: How to Abort Compilation When Using PWB"
 permalink: /pubs/pc/reference/microsoft/kb/Q60500/
 ---
 
+## Q60500: How to Abort Compilation When Using PWB
+
 	Article: Q60500
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | s_c

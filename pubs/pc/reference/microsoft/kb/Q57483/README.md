@@ -4,8 +4,9 @@ title: "Q57483: The Suffix &quot;F&quot; or &quot;f&quot; Causes a Syntax Error 
 permalink: /pubs/pc/reference/microsoft/kb/Q57483/
 ---
 
+## Q57483: The Suffix &quot;F&quot; or &quot;f&quot; Causes a Syntax Error for Floats
+
 	Article: Q57483
-	Product: Microsoft C
 	Version(s): 2.00 2.01
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr s_quickasm

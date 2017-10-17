@@ -4,8 +4,9 @@ title: "Q62180: Internal Compiler Error: @(#)main.c:1.176, Line 807"
 permalink: /pubs/pc/reference/microsoft/kb/Q62180/
 ---
 
+## Q62180: Internal Compiler Error: @(#)main.c:1.176, Line 807
+
 	Article: Q62180
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist6.00

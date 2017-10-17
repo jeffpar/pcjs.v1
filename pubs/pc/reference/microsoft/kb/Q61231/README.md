@@ -4,8 +4,9 @@ title: "Q61231: C 6.00 README: CV: Blank Screen Debugging Under Earlier OS/2"
 permalink: /pubs/pc/reference/microsoft/kb/Q61231/
 ---
 
+## Q61231: C 6.00 README: CV: Blank Screen Debugging Under Earlier OS/2
+
 	Article: Q61231
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

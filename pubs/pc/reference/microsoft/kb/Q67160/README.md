@@ -4,8 +4,9 @@ title: "Q67160: CV1017: Syntax Error Can Be Caused by a Leading Zero"
 permalink: /pubs/pc/reference/microsoft/kb/Q67160/
 ---
 
+## Q67160: CV1017: Syntax Error Can Be Caused by a Leading Zero
+
 	Article: Q67160
-	Product: Microsoft C
 	Version(s): 3.00 3.10 3.11 | 3.00 3.10 3.11
 	Operating System: MS-DOS         | OS/2
 	Flags: ENDUSER |

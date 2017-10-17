@@ -4,8 +4,9 @@ title: "Q47497: FP_SEG(), FP_OFF() Need Pointer Rather Than Address"
 permalink: /pubs/pc/reference/microsoft/kb/Q47497/
 ---
 
+## Q47497: FP_SEG(), FP_OFF() Need Pointer Rather Than Address
+
 	Article: Q47497
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.00 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | S_QuickC

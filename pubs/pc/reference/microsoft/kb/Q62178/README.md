@@ -4,8 +4,9 @@ title: "Q62178: L2025: B&#36;VWINI, B&#36;GRPRST, Symbols Multiply Defined"
 permalink: /pubs/pc/reference/microsoft/kb/Q62178/
 ---
 
+## Q62178: L2025: B&#36;VWINI, B&#36;GRPRST, Symbols Multiply Defined
+
 	Article: Q62178
-	Product: Microsoft C
 	Version(s): 6.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist6.00 fixlist6.00a

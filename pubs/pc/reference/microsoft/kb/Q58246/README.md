@@ -4,8 +4,9 @@ title: "Q58246: The Amount of Memory That Is Required for Registered Fonts"
 permalink: /pubs/pc/reference/microsoft/kb/Q58246/
 ---
 
+## Q58246: The Amount of Memory That Is Required for Registered Fonts
+
 	Article: Q58246
-	Product: Microsoft C
 	Version(s): 2.00 2.01
 	Operating System: MS-DOS
 	Flags: ENDUSER | graphics

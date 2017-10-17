@@ -4,8 +4,9 @@ title: "Q67393: Error in C and QuickC Example Program: BESSEL.C"
 permalink: /pubs/pc/reference/microsoft/kb/Q67393/
 ---
 
+## Q67393: Error in C and QuickC Example Program: BESSEL.C
+
 	Article: Q67393
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | docerr s_quickc

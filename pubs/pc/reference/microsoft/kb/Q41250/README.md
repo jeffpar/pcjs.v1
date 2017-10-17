@@ -4,8 +4,9 @@ title: "Q41250: How to Manually Setup QuickC Version 2.00 on a Hard Drive"
 permalink: /pubs/pc/reference/microsoft/kb/Q41250/
 ---
 
+## Q41250: How to Manually Setup QuickC Version 2.00 on a Hard Drive
+
 	Article: Q41250
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

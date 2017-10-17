@@ -4,8 +4,9 @@ title: "Q38654: Problem with Mouse and PS/2 Model 70A21"
 permalink: /pubs/pc/reference/microsoft/kb/Q38654/
 ---
 
+## Q38654: Problem with Mouse and PS/2 Model 70A21
+
 	Article: Q38654
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

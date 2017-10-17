@@ -4,8 +4,9 @@ title: "Q49571: typedefs Not Allowed for Function Definitions"
 permalink: /pubs/pc/reference/microsoft/kb/Q49571/
 ---
 
+## Q49571: typedefs Not Allowed for Function Definitions
+
 	Article: Q49571
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | buglist5.10

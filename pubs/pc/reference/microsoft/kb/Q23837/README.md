@@ -4,8 +4,9 @@ title: "Q23837: Expert and Standard Mouse Menus"
 permalink: /pubs/pc/reference/microsoft/kb/Q23837/
 ---
 
+## Q23837: Expert and Standard Mouse Menus
+
 	Article: Q23837
-	Product: Microsoft C
 	Version(s): 4.x 5.x 6.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

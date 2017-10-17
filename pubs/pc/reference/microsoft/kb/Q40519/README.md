@@ -4,8 +4,9 @@ title: "Q40519: Compaq ADAPT.COM TSR Is Not Compatible with QC 2.00"
 permalink: /pubs/pc/reference/microsoft/kb/Q40519/
 ---
 
+## Q40519: Compaq ADAPT.COM TSR Is Not Compatible with QC 2.00
+
 	Article: Q40519
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

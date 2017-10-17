@@ -4,8 +4,9 @@ title: "Q38308: Spawn Will Not Pass Redirection to Child"
 permalink: /pubs/pc/reference/microsoft/kb/Q38308/
 ---
 
+## Q38308: Spawn Will Not Pass Redirection to Child
+
 	Article: Q38308
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | SR# S880925-1

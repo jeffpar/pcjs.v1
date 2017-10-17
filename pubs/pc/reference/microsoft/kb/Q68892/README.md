@@ -4,8 +4,9 @@ title: "Q68892: Object Files Are Not Created in the Proper Directory"
 permalink: /pubs/pc/reference/microsoft/kb/Q68892/
 ---
 
+## Q68892: Object Files Are Not Created in the Proper Directory
+
 	Article: Q68892
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | buglist6.00 buglist6.00a

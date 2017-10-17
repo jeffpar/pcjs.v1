@@ -4,8 +4,9 @@ title: "Q68943: calloc() Can Return a Pointer to a Zero Length Block of Memory"
 permalink: /pubs/pc/reference/microsoft/kb/Q68943/
 ---
 
+## Q68943: calloc() Can Return a Pointer to a Zero Length Block of Memory
+
 	Article: Q68943
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | docerr

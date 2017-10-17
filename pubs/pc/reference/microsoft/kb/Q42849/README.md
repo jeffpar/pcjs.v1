@@ -4,8 +4,9 @@ title: "Q42849: Unimplemented Switch /BI with QuickC 2.00 Linker"
 permalink: /pubs/pc/reference/microsoft/kb/Q42849/
 ---
 
+## Q42849: Unimplemented Switch /BI with QuickC 2.00 Linker
+
 	Article: Q42849
-	Product: Microsoft C
 	Version(s): 4.06
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QUICKC

@@ -4,8 +4,9 @@ title: "Q35530: Differences between the vscroll and hike Numeric Switches"
 permalink: /pubs/pc/reference/microsoft/kb/Q35530/
 ---
 
+## Q35530: Differences between the vscroll and hike Numeric Switches
+
 	Article: Q35530
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | appnote

@@ -4,8 +4,9 @@ title: "Q49285: Losing Data When Mouse and Data Transfer Are Involved"
 permalink: /pubs/pc/reference/microsoft/kb/Q49285/
 ---
 
+## Q49285: Losing Data When Mouse and Data Transfer Are Involved
+
 	Article: Q49285
-	Product: Microsoft C
 	Version(s): 6.00 6.11 6.14 6.24 6.24b
 	Operating System: DOS
 	Flags: ENDUSER |

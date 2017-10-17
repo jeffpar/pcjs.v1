@@ -4,8 +4,9 @@ title: "Q57870: I/O Redirection Under CV Not Supported Prior to Version 2.30"
 permalink: /pubs/pc/reference/microsoft/kb/Q57870/
 ---
 
+## Q57870: I/O Redirection Under CV Not Supported Prior to Version 2.30
+
 	Article: Q57870
-	Product: Microsoft C
 	Version(s): 1.x 2.10 2.20 2.30 | 2.20 2.30
 	Operating System: MS-DOS             | OS/2
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q59380: How to Do a Print Screen within a Program"
 permalink: /pubs/pc/reference/microsoft/kb/Q59380/
 ---
 
+## Q59380: How to Do a Print Screen within a Program
+
 	Article: Q59380
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER |

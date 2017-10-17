@@ -4,8 +4,9 @@ title: "Q44133: Modifying a QuickC 2.00 Make File to Run MAKE"
 permalink: /pubs/pc/reference/microsoft/kb/Q44133/
 ---
 
+## Q44133: Modifying a QuickC 2.00 Make File to Run MAKE
+
 	Article: Q44133
-	Product: Microsoft C
 	Version(s): 1.00   | 1.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | s_quickc  s_c  h_FORTRAN

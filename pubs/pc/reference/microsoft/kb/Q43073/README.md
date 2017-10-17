@@ -4,8 +4,9 @@ title: "Q43073: The Function fopen Accepts Filenames with Embedded Spaces"
 permalink: /pubs/pc/reference/microsoft/kb/Q43073/
 ---
 
+## Q43073: The Function fopen Accepts Filenames with Embedded Spaces
+
 	Article: Q43073
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | s_quickc

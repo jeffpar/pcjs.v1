@@ -4,8 +4,9 @@ title: "Q61235: C 6.00 README: Using a Large Number of Help Files"
 permalink: /pubs/pc/reference/microsoft/kb/Q61235/
 ---
 
+## Q61235: C 6.00 README: Using a Large Number of Help Files
+
 	Article: Q61235
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

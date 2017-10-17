@@ -4,8 +4,9 @@ title: "Q31486: NOSOFTCR Parameter in TOOLS.INI Disables Auto Indentation"
 permalink: /pubs/pc/reference/microsoft/kb/Q31486/
 ---
 
+## Q31486: NOSOFTCR Parameter in TOOLS.INI Disables Auto Indentation
+
 	Article: Q31486
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: OS/2
 	Flags: ENDUSER | tar69375

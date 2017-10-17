@@ -4,8 +4,9 @@ title: "Q36955: C2086, C2061 on CFLOW.C when Language Extentions Not Enabled"
 permalink: /pubs/pc/reference/microsoft/kb/Q36955/
 ---
 
+## Q36955: C2086, C2061 on CFLOW.C when Language Extentions Not Enabled
+
 	Article: Q36955
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER |

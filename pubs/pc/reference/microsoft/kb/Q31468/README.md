@@ -4,8 +4,9 @@ title: "Q31468: PATCH87 Gives &quot;Cannot Open IO.SYS&quot; Message"
 permalink: /pubs/pc/reference/microsoft/kb/Q31468/
 ---
 
+## Q31468: PATCH87 Gives &quot;Cannot Open IO.SYS&quot; Message
+
 	Article: Q31468
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q63624: Parenthesis in Filename May Cause L1027: Unmatched Parenthesis"
 permalink: /pubs/pc/reference/microsoft/kb/Q63624/
 ---
 
+## Q63624: Parenthesis in Filename May Cause L1027: Unmatched Parenthesis
+
 	Article: Q63624
-	Product: Microsoft C
 	Version(s): 3.x 4.06 4.07 5.01.21 5.03 5.05 5.10 | 5.01.21 5.03 5.05
 	Operating System: MS-DOS                               | OS/2
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q68234: Recursively Calling NMAKE Using the MAKEFLAGS Macro"
 permalink: /pubs/pc/reference/microsoft/kb/Q68234/
 ---
 
+## Q68234: Recursively Calling NMAKE Using the MAKEFLAGS Macro
+
 	Article: Q68234
-	Product: Microsoft C
 	Version(s): 1.11   | 1.11
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | docerr

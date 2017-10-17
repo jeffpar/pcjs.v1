@@ -4,8 +4,9 @@ title: "Q32033: Preventing Generation of Tabs in the Edited Disk Files"
 permalink: /pubs/pc/reference/microsoft/kb/Q32033/
 ---
 
+## Q32033: Preventing Generation of Tabs in the Edited Disk Files
+
 	Article: Q32033
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

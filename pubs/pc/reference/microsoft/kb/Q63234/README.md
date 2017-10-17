@@ -4,8 +4,9 @@ title: "Q63234: PWB BACKUP.BAK Does Not Create Backup of Source File Correctly"
 permalink: /pubs/pc/reference/microsoft/kb/Q63234/
 ---
 
+## Q63234: PWB BACKUP.BAK Does Not Create Backup of Source File Correctly
+
 	Article: Q63234
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER| buglist1.00

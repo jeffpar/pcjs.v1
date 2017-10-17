@@ -4,8 +4,9 @@ title: "Q35524: Separating TOOLS.INI Entries for M"
 permalink: /pubs/pc/reference/microsoft/kb/Q35524/
 ---
 
+## Q35524: Separating TOOLS.INI Entries for M
+
 	Article: Q35524
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | appnote

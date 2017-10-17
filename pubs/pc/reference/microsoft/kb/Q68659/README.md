@@ -4,8 +4,9 @@ title: "Q68659: Patches Available for Running Utilities Under Novell NetWare"
 permalink: /pubs/pc/reference/microsoft/kb/Q68659/
 ---
 
+## Q68659: Patches Available for Running Utilities Under Novell NetWare
+
 	Article: Q68659
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | appnote SC0381.ARC s_codeview s_pwb s_c

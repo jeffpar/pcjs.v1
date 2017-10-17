@@ -4,8 +4,9 @@ title: "Q35539: Libraries Created by IMPLIB Are Different than those from LIB"
 permalink: /pubs/pc/reference/microsoft/kb/Q35539/
 ---
 
+## Q35539: Libraries Created by IMPLIB Are Different than those from LIB
+
 	Article: Q35539
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | SR# S880908-4

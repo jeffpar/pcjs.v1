@@ -4,8 +4,9 @@ title: "Q48839: Warning L4014: /PACKDATA: Option Ignored for Real Mode"
 permalink: /pubs/pc/reference/microsoft/kb/Q48839/
 ---
 
+## Q48839: Warning L4014: /PACKDATA: Option Ignored for Real Mode
+
 	Article: Q48839
-	Product: Microsoft C
 	Version(s): 4.06 4.07 5.02 5.03 | 5.02 5.03
 	Operating System: MS-DOS              | OS/2
 	Flags: ENDUSER |

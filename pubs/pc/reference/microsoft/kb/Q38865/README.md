@@ -4,8 +4,9 @@ title: "Q38865: Cannot Use /2 Switch on IBM PS/2 in CodeView"
 permalink: /pubs/pc/reference/microsoft/kb/Q38865/
 ---
 
+## Q38865: Cannot Use /2 Switch on IBM PS/2 in CodeView
+
 	Article: Q38865
-	Product: Microsoft C
 	Version(s): 2.10 2.20  2.30 | 2.20 2.30
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | SR# G881031-5515

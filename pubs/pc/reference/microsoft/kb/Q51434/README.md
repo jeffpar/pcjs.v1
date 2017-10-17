@@ -4,8 +4,9 @@ title: "Q51434: How to Calculate Available File Handles at Run Time"
 permalink: /pubs/pc/reference/microsoft/kb/Q51434/
 ---
 
+## Q51434: How to Calculate Available File Handles at Run Time
+
 	Article: Q51434
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | S_QUICKC

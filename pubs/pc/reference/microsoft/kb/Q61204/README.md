@@ -4,8 +4,9 @@ title: "Q61204: C 6.00 README: Nested Anonymous Structs/Unions"
 permalink: /pubs/pc/reference/microsoft/kb/Q61204/
 ---
 
+## Q61204: C 6.00 README: Nested Anonymous Structs/Unions
+
 	Article: Q61204
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

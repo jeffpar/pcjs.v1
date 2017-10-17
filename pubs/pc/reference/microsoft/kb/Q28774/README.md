@@ -4,8 +4,9 @@ title: "Q28774: Building C 5.10 Combined Libraries with the LIB Utility"
 permalink: /pubs/pc/reference/microsoft/kb/Q28774/
 ---
 
+## Q28774: Building C 5.10 Combined Libraries with the LIB Utility
+
 	Article: Q28774
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER |

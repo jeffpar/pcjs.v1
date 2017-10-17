@@ -4,8 +4,9 @@ title: "Q37664: EMULATOR_TEXT and EMULATOR_DATA Segments in Small Model"
 permalink: /pubs/pc/reference/microsoft/kb/Q37664/
 ---
 
+## Q37664: EMULATOR_TEXT and EMULATOR_DATA Segments in Small Model
+
 	Article: Q37664
-	Product: Microsoft C
 	Version(s): 4.00 5.00 5.10 | 5.10
 	Operating System: MS-DOS         | OS/2
 	Flags: ENDUSER | S_QUICKC

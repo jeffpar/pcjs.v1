@@ -4,8 +4,9 @@ title: "Q44417: CALLTREE Ignores Conditional Compilation Statements in Editor"
 permalink: /pubs/pc/reference/microsoft/kb/Q44417/
 ---
 
+## Q44417: CALLTREE Ignores Conditional Compilation Statements in Editor
+
 	Article: Q44417
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | S_C H_MASM

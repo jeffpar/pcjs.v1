@@ -4,8 +4,9 @@ title: "Q32816: The Cause of Run-Time Error R6000 Stack Overflow"
 permalink: /pubs/pc/reference/microsoft/kb/Q32816/
 ---
 
+## Q32816: The Cause of Run-Time Error R6000 Stack Overflow
+
 	Article: Q32816
-	Product: Microsoft C
 	Version(s): 4.00 5.00 5.10 | 5.10
 	Operating System: MS-DOS         | OS/2
 	Flags: ENDUSER |

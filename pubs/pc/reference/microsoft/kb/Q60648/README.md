@@ -4,8 +4,9 @@ title: "Q60648: C 6.00 STARTUP.DOC: Placing the Stack Outside of DGROUP"
 permalink: /pubs/pc/reference/microsoft/kb/Q60648/
 ---
 
+## Q60648: C 6.00 STARTUP.DOC: Placing the Stack Outside of DGROUP
+
 	Article: Q60648
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | readme readme.doc start-up

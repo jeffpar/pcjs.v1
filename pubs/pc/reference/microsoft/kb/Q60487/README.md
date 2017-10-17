@@ -4,8 +4,9 @@ title: "Q60487: Prototype in User's Guide for tglcase() Is Incorrect"
 permalink: /pubs/pc/reference/microsoft/kb/Q60487/
 ---
 
+## Q60487: Prototype in User's Guide for tglcase() Is Incorrect
+
 	Article: Q60487
-	Product: Microsoft C
 	Version(s): 1.02    | 1.02
 	Operating System: MS-DOS  | OS/2
 	Flags: ENDUSER | docerr

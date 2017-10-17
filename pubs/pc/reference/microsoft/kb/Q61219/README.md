@@ -4,8 +4,9 @@ title: "Q61219: C 6.00 README: Disabled Keyboard in OS/2 1.10 Release 88300"
 permalink: /pubs/pc/reference/microsoft/kb/Q61219/
 ---
 
+## Q61219: C 6.00 README: Disabled Keyboard in OS/2 1.10 Release 88300
+
 	Article: Q61219
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q33085: DOS Append Interacts with /Fo /Fe"
 permalink: /pubs/pc/reference/microsoft/kb/Q33085/
 ---
 
+## Q33085: DOS Append Interacts with /Fo /Fe
+
 	Article: Q33085
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

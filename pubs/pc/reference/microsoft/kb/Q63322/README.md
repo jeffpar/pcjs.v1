@@ -4,8 +4,9 @@ title: "Q63322: C 5.00/5.10 and 6.00 Regard Right Arrow Character (1Ah) as EOF"
 permalink: /pubs/pc/reference/microsoft/kb/Q63322/
 ---
 
+## Q63322: C 5.00/5.10 and 6.00 Regard Right Arrow Character (1Ah) as EOF
+
 	Article: Q63322
-	Product: Microsoft C
 	Version(s): 5.00 5.10 6.00 | 5.10 6.00
 	Operating System: MS-DOS         | OS/2
 	Flags: ENDUSER |

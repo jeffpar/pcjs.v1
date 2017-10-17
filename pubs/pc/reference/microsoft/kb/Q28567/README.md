@@ -4,8 +4,9 @@ title: "Q28567: Reference Page 75 Example 9 Causes Error C2147"
 permalink: /pubs/pc/reference/microsoft/kb/Q28567/
 ---
 
+## Q28567: Reference Page 75 Example 9 Causes Error C2147
+
 	Article: Q28567
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | docerr

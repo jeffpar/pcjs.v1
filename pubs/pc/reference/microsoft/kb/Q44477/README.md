@@ -4,8 +4,9 @@ title: "Q44477: Use /ND Instead of #pragma data_seg"
 permalink: /pubs/pc/reference/microsoft/kb/Q44477/
 ---
 
+## Q44477: Use /ND Instead of #pragma data_seg
+
 	Article: Q44477
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

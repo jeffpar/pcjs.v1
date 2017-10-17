@@ -4,8 +4,9 @@ title: "Q38218: Why pointer1++ = pointer2 Is Illegal"
 permalink: /pubs/pc/reference/microsoft/kb/Q38218/
 ---
 
+## Q38218: Why pointer1++ = pointer2 Is Illegal
+
 	Article: Q38218
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER |

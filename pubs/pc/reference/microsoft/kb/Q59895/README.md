@@ -4,8 +4,9 @@ title: "Q59895: Why Can't a Stand-Alone DLL Use the Emulator Math Library?"
 permalink: /pubs/pc/reference/microsoft/kb/Q59895/
 ---
 
+## Q59895: Why Can't a Stand-Alone DLL Use the Emulator Math Library?
+
 	Article: Q59895
-	Product: Microsoft C
 	Version(s): 5.10 6.00
 	Operating System: OS/2
 	Flags: ENDUSER |

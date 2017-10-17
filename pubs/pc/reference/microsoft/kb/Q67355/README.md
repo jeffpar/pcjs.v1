@@ -4,8 +4,9 @@ title: "Q67355: Compiler May Hang Under DOS When Using /qc and Memory Runs Out"
 permalink: /pubs/pc/reference/microsoft/kb/Q67355/
 ---
 
+## Q67355: Compiler May Hang Under DOS When Using /qc and Memory Runs Out
+
 	Article: Q67355
-	Product: Microsoft C
 	Version(s): 6.00 6.00a
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist6.00 buglist6.00a

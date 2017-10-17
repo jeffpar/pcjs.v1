@@ -4,8 +4,9 @@ title: "Q36947: _Settexwindow() and Scrolling"
 permalink: /pubs/pc/reference/microsoft/kb/Q36947/
 ---
 
+## Q36947: _Settexwindow() and Scrolling
+
 	Article: Q36947
-	Product: Microsoft C
 	Version(s): 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr

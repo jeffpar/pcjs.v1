@@ -4,8 +4,9 @@ title: "Q44287: Problem Deleting a Line that Is a Breakpoint in QuickC"
 permalink: /pubs/pc/reference/microsoft/kb/Q44287/
 ---
 
+## Q44287: Problem Deleting a Line that Is a Breakpoint in QuickC
+
 	Article: Q44287
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

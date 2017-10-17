@@ -4,8 +4,9 @@ title: "Q49313: Files, Environment Inaccessible Only While Running under CVP"
 permalink: /pubs/pc/reference/microsoft/kb/Q49313/
 ---
 
+## Q49313: Files, Environment Inaccessible Only While Running under CVP
+
 	Article: Q49313
-	Product: Microsoft C
 	Version(s): 2.20
 	Operating System: OS/2
 	Flags: ENDUSER |

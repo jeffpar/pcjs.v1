@@ -4,8 +4,9 @@ title: "Q45761: How to Reboot Your Machine within a QuickC 2.00 Application"
 permalink: /pubs/pc/reference/microsoft/kb/Q45761/
 ---
 
+## Q45761: How to Reboot Your Machine within a QuickC 2.00 Application
+
 	Article: Q45761
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_C H_MASM S_QuickASM

@@ -4,8 +4,9 @@ title: "Q65302: Warning C4056: &quot;Overflow in Constant Arithmetic&quot; May B
 permalink: /pubs/pc/reference/microsoft/kb/Q65302/
 ---
 
+## Q65302: Warning C4056: &quot;Overflow in Constant Arithmetic&quot; May Be Wrong
+
 	Article: Q65302
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | buglist6.00 buglist6.00a

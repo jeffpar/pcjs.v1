@@ -4,8 +4,9 @@ title: "Q59253: Help on ungetch Not Available from Help Topics List"
 permalink: /pubs/pc/reference/microsoft/kb/Q59253/
 ---
 
+## Q59253: Help on ungetch Not Available from Help Topics List
+
 	Article: Q59253
-	Product: Microsoft C
 	Version(s): 2.00 2.01
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr

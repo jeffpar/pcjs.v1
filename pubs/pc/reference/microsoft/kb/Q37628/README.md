@@ -4,8 +4,9 @@ title: "Q37628: Toggling Display Modes: 25-, 43-, and 50-Row Modes"
 permalink: /pubs/pc/reference/microsoft/kb/Q37628/
 ---
 
+## Q37628: Toggling Display Modes: 25-, 43-, and 50-Row Modes
+
 	Article: Q37628
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | MS-DOS
 	Flags: ENDUSER |

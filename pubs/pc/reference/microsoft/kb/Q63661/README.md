@@ -4,8 +4,9 @@ title: "Q63661: Problems Viewing README.DOC Inside PWB Online Help and QH"
 permalink: /pubs/pc/reference/microsoft/kb/Q63661/
 ---
 
+## Q63661: Problems Viewing README.DOC Inside PWB Online Help and QH
+
 	Article: Q63661
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER  |

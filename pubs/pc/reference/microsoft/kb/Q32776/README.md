@@ -4,8 +4,9 @@ title: "Q32776: C2085 Error May Be the Result of a Missing Semicolon"
 permalink: /pubs/pc/reference/microsoft/kb/Q32776/
 ---
 
+## Q32776: C2085 Error May Be the Result of a Missing Semicolon
+
 	Article: Q32776
-	Product: Microsoft C
 	Version(s): 5.00 5.10 6.00 6.00a | 5.10 6.00 6.00a
 	Operating System: MS-DOS               | OS/2
 	Flags: ENDUSER | s_quickc

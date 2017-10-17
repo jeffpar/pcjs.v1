@@ -4,8 +4,9 @@ title: "Q58490: Variable Arguments of Type CHAR Incorrectly Retrieved"
 permalink: /pubs/pc/reference/microsoft/kb/Q58490/
 ---
 
+## Q58490: Variable Arguments of Type CHAR Incorrectly Retrieved
+
 	Article: Q58490
-	Product: Microsoft C
 	Version(s): 5.10 6.00 6.00a | 5.10 6.00 6.00a
 	Operating System: MS-DOS          | OS/2
 	Flags: ENDUSER | s_quickc buglist5.10 buglist6.00 buglist6.00a

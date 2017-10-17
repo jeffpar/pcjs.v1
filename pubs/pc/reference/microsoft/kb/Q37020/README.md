@@ -4,8 +4,9 @@ title: "Q37020: QuickC Generates Warning Message &quot;C4071&quot; erroneously"
 permalink: /pubs/pc/reference/microsoft/kb/Q37020/
 ---
 
+## Q37020: QuickC Generates Warning Message &quot;C4071&quot; erroneously
+
 	Article: Q37020
-	Product: Microsoft C
 	Version(s): 1.01
 	Operating System: MS-DOS
 	Flags: ENDUSER | BUGLISTQC

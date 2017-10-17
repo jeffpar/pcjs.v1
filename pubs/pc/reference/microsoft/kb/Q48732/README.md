@@ -4,8 +4,9 @@ title: "Q48732: Format Specifier %p Not Found in Documentation"
 permalink: /pubs/pc/reference/microsoft/kb/Q48732/
 ---
 
+## Q48732: Format Specifier %p Not Found in Documentation
+
 	Article: Q48732
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr

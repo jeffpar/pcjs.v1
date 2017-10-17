@@ -4,8 +4,9 @@ title: "Q41249: QuickC 2.00 README.DOC: ESC Key Does Not Stop Linker"
 permalink: /pubs/pc/reference/microsoft/kb/Q41249/
 ---
 
+## Q41249: QuickC 2.00 README.DOC: ESC Key Does Not Stop Linker
+
 	Article: Q41249
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr

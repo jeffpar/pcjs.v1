@@ -4,8 +4,9 @@ title: "Q68800: Use of the HELPFILES Environment Variable by QuickC"
 permalink: /pubs/pc/reference/microsoft/kb/Q68800/
 ---
 
+## Q68800: Use of the HELPFILES Environment Variable by QuickC
+
 	Article: Q68800
-	Product: Microsoft C
 	Version(s): 2.00 2.50
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickasm Quick C

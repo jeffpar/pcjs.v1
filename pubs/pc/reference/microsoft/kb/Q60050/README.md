@@ -4,8 +4,9 @@ title: "Q60050: Using the Features of PWB to Build a Program with Overlays"
 permalink: /pubs/pc/reference/microsoft/kb/Q60050/
 ---
 
+## Q60050: Using the Features of PWB to Build a Program with Overlays
+
 	Article: Q60050
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q46016: C2018: Unknown Characters During Compile"
 permalink: /pubs/pc/reference/microsoft/kb/Q46016/
 ---
 
+## Q46016: C2018: Unknown Characters During Compile
+
 	Article: Q46016
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

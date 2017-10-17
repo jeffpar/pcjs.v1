@@ -4,8 +4,9 @@ title: "Q41665: QuickC 2.00 README.DOC: Error Message C1025"
 permalink: /pubs/pc/reference/microsoft/kb/Q41665/
 ---
 
+## Q41665: QuickC 2.00 README.DOC: Error Message C1025
+
 	Article: Q41665
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

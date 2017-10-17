@@ -4,8 +4,9 @@ title: "Q68626: /Gm Option Can Be Emulated with a Preprocessor"
 permalink: /pubs/pc/reference/microsoft/kb/Q68626/
 ---
 
+## Q68626: /Gm Option Can Be Emulated with a Preprocessor
+
 	Article: Q68626
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q11877: Debugging Routines That Are in Libraries"
 permalink: /pubs/pc/reference/microsoft/kb/Q11877/
 ---
 
+## Q11877: Debugging Routines That Are in Libraries
+
 	Article: Q11877
-	Product: Microsoft C
 	Version(s): 1.00 1.10 2.00 2.10 2.20 2.30 | 2.20 2.30
 	Operating System: MS-DOS                        | OS/2
 	Flags: ENDUSER | TAR55321

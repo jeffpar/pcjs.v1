@@ -4,8 +4,9 @@ title: "Q31495: Macro to Enter Form Feed or Control Characters in Editor"
 permalink: /pubs/pc/reference/microsoft/kb/Q31495/
 ---
 
+## Q31495: Macro to Enter Form Feed or Control Characters in Editor
+
 	Article: Q31495
-	Product: Microsoft C
 	Version(s): 1.00 | 1.00
 	Operating System: DOS  | OS/2
 	Flags: ENDUSER | tar62237

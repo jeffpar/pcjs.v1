@@ -4,8 +4,9 @@ title: "Q45946: Unresolved Externals Using OS/2 Functions and INCL_NOCOMMON"
 permalink: /pubs/pc/reference/microsoft/kb/Q45946/
 ---
 
+## Q45946: Unresolved Externals Using OS/2 Functions and INCL_NOCOMMON
+
 	Article: Q45946
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: OS/2
 	Flags: ENDUSER |

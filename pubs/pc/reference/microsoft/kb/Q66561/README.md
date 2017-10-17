@@ -4,8 +4,9 @@ title: "Q66561: 386MAX.SYS with MOUSE.COM 7.0 Can Hang Sprite Video Cards"
 permalink: /pubs/pc/reference/microsoft/kb/Q66561/
 ---
 
+## Q66561: 386MAX.SYS with MOUSE.COM 7.0 Can Hang Sprite Video Cards
+
 	Article: Q66561
-	Product: Microsoft C
 	Version(s): 7.00 7.03 7.04
 	Operating System: MS-DOS
 	Flags: ENDUSER | SR# S901024-6 B_BasicCom

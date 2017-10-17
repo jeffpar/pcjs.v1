@@ -4,8 +4,9 @@ title: "Q43975: QuickC: Increasing Maximum Number of Open Files and Streams"
 permalink: /pubs/pc/reference/microsoft/kb/Q43975/
 ---
 
+## Q43975: QuickC: Increasing Maximum Number of Open Files and Streams
+
 	Article: Q43975
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

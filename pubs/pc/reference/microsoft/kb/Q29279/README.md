@@ -4,8 +4,9 @@ title: "Q29279: Bus Mouse May Not Work on IRQ 2 on a 386 with OS/2"
 permalink: /pubs/pc/reference/microsoft/kb/Q29279/
 ---
 
+## Q29279: Bus Mouse May Not Work on IRQ 2 on a 386 with OS/2
+
 	Article: Q29279
-	Product: Microsoft C
 	Version(s): 6.x 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q67004: L2002 When Creating a Dynamic Link Library"
 permalink: /pubs/pc/reference/microsoft/kb/Q67004/
 ---
 
+## Q67004: L2002 When Creating a Dynamic Link Library
+
 	Article: Q67004
-	Product: Microsoft C
 	Version(s): 5.10 5.11
 	Operating System: OS/2
 	Flags: ENDUSER | buglist5.10 buglist5.11

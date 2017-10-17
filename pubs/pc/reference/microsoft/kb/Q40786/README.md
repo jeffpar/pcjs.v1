@@ -4,8 +4,9 @@ title: "Q40786: C Compiler Error: (compiler file '@(#)code.c1.46, line 393)"
 permalink: /pubs/pc/reference/microsoft/kb/Q40786/
 ---
 
+## Q40786: C Compiler Error: (compiler file '@(#)code.c1.46, line 393)
+
 	Article: Q40786
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

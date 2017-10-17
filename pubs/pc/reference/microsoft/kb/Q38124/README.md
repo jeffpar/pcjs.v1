@@ -4,8 +4,9 @@ title: "Q38124: Turning Off Cursor in Text Mode"
 permalink: /pubs/pc/reference/microsoft/kb/Q38124/
 ---
 
+## Q38124: Turning Off Cursor in Text Mode
+
 	Article: Q38124
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_c

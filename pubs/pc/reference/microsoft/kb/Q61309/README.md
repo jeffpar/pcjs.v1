@@ -4,8 +4,9 @@ title: "Q61309: Steps Needed to Make Source Browser Usable"
 permalink: /pubs/pc/reference/microsoft/kb/Q61309/
 ---
 
+## Q61309: Steps Needed to Make Source Browser Usable
+
 	Article: Q61309
-	Product: Microsoft C
 	Version(s): 1.00    | 1.00
 	Operating System: MS-DOS  | OS/2
 	Flags: ENDUSER |

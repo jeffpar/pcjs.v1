@@ -4,8 +4,9 @@ title: "Q49004: Some Toshibas Cannot Highlight Text for Edit with QuickC 2.00"
 permalink: /pubs/pc/reference/microsoft/kb/Q49004/
 ---
 
+## Q49004: Some Toshibas Cannot Highlight Text for Edit with QuickC 2.00
+
 	Article: Q49004
-	Product: Microsoft C
 	Version(s): 2.00 2.01
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist2.00 buglist2.01 QC

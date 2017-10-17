@@ -4,8 +4,9 @@ title: "Q61057: C6 /Gh Switch for Windows 2.x and C 5.10 Library Compatability"
 permalink: /pubs/pc/reference/microsoft/kb/Q61057/
 ---
 
+## Q61057: C6 /Gh Switch for Windows 2.x and C 5.10 Library Compatability
+
 	Article: Q61057
-	Product: Microsoft C
 	Version(s): 6.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

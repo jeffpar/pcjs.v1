@@ -4,8 +4,9 @@ title: "Q51636: C Extensions: Link Errors on &#95;&#95;acrtused and _main Explai
 permalink: /pubs/pc/reference/microsoft/kb/Q51636/
 ---
 
+## Q51636: C Extensions: Link Errors on &#95;&#95;acrtused and _main Explained
+
 	Article: Q51636
-	Product: Microsoft C
 	Version(s): 1.00    | 1.02
 	Operating System: MS-DOS  | OS/2
 	Flags: ENDUSER |

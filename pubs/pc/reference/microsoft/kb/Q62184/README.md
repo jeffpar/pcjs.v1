@@ -4,8 +4,9 @@ title: "Q62184: L2025: &#95;&#95;fltin with Mixed-Language FORTRAN 5.00 and C 6.
 permalink: /pubs/pc/reference/microsoft/kb/Q62184/
 ---
 
+## Q62184: L2025: &#95;&#95;fltin with Mixed-Language FORTRAN 5.00 and C 6.00
+
 	Article: Q62184
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | buglist6.00 buglist6.00a h_fortran

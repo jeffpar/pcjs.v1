@@ -4,8 +4,9 @@ title: "Q64068: 8087 Registers Not Viewable in QuickC"
 permalink: /pubs/pc/reference/microsoft/kb/Q64068/
 ---
 
+## Q64068: 8087 Registers Not Viewable in QuickC
+
 	Article: Q64068
-	Product: Microsoft C
 	Version(s): 2.50 2.51
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickasm buglist2.50

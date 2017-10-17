@@ -4,8 +4,9 @@ title: "Q66303: Errors in Chapter 16 of Advanced Programming Techniques"
 permalink: /pubs/pc/reference/microsoft/kb/Q66303/
 ---
 
+## Q66303: Errors in Chapter 16 of Advanced Programming Techniques
+
 	Article: Q66303
-	Product: Microsoft C
 	Version(s): 6.00 6.00a
 	Operating System: OS/2
 	Flags: ENDUSER | docerr

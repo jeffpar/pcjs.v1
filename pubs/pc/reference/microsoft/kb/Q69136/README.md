@@ -4,8 +4,9 @@ title: "Q69136: fread() May Cause Protection Violation Under OS/2"
 permalink: /pubs/pc/reference/microsoft/kb/Q69136/
 ---
 
+## Q69136: fread() May Cause Protection Violation Under OS/2
+
 	Article: Q69136
-	Product: Microsoft C
 	Version(s): 6.00 6.00a
 	Operating System: OS/2
 	Flags: ENDUSER | buglist6.00 buglist 6.00a

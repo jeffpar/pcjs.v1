@@ -4,8 +4,9 @@ title: "Q61218: C 6.00 README: PWB: OS/2 Long Filename Support"
 permalink: /pubs/pc/reference/microsoft/kb/Q61218/
 ---
 
+## Q61218: C 6.00 README: PWB: OS/2 Long Filename Support
+
 	Article: Q61218
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | file name

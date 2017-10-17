@@ -4,8 +4,9 @@ title: "Q43971: qsort(): Parameters to the Compare Function"
 permalink: /pubs/pc/reference/microsoft/kb/Q43971/
 ---
 
+## Q43971: qsort(): Parameters to the Compare Function
+
 	Article: Q43971
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | s_quickc

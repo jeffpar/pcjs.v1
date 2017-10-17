@@ -4,8 +4,9 @@ title: "Q34172: Splitpath Document Error in readme.doc"
 permalink: /pubs/pc/reference/microsoft/kb/Q34172/
 ---
 
+## Q34172: Splitpath Document Error in readme.doc
+
 	Article: Q34172
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | docerr

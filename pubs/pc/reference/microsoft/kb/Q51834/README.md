@@ -4,8 +4,9 @@ title: "Q51834: &quot;Internal Debugger Error: 0&quot; When Watching Structure M
 permalink: /pubs/pc/reference/microsoft/kb/Q51834/
 ---
 
+## Q51834: &quot;Internal Debugger Error: 0&quot; When Watching Structure Members
+
 	Article: Q51834
-	Product: Microsoft C
 	Version(s): 2.20 2.30 | 2.20 2.30
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | buglist2.30 cv

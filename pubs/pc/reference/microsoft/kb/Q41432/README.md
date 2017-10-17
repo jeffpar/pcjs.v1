@@ -4,8 +4,9 @@ title: "Q41432: QuickC 2.00 README.DOC: Creating Your Own Key File"
 permalink: /pubs/pc/reference/microsoft/kb/Q41432/
 ---
 
+## Q41432: QuickC 2.00 README.DOC: Creating Your Own Key File
+
 	Article: Q41432
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

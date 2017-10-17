@@ -4,8 +4,9 @@ title: "Q45218: APPEND Command in DOS 4.x Incompatible with QuickC 2.00"
 permalink: /pubs/pc/reference/microsoft/kb/Q45218/
 ---
 
+## Q45218: APPEND Command in DOS 4.x Incompatible with QuickC 2.00
+
 	Article: Q45218
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

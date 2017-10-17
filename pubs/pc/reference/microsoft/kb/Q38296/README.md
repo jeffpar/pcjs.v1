@@ -4,8 +4,9 @@ title: "Q38296: How the Null Character Is Handled by Printf Functions."
 permalink: /pubs/pc/reference/microsoft/kb/Q38296/
 ---
 
+## Q38296: How the Null Character Is Handled by Printf Functions.
+
 	Article: Q38296
-	Product: Microsoft C
 	Version(s): 4.00 5.00 5.10 | 4.00 5.00 5.10
 	Operating System: MS-DOS         | OS/2
 	Flags: ENDUSER | S_QuickC

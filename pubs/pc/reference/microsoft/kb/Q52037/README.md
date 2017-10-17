@@ -4,8 +4,9 @@ title: "Q52037: File Not Found: line#.c While Viewing Errors"
 permalink: /pubs/pc/reference/microsoft/kb/Q52037/
 ---
 
+## Q52037: File Not Found: line#.c While Viewing Errors
+
 	Article: Q52037
-	Product: Microsoft C
 	Version(s): 2.00 2.01
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QuickASM buglist2.00 buglist2.01

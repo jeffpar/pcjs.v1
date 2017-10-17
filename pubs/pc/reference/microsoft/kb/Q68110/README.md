@@ -4,8 +4,9 @@ title: "Q68110: I/O Addresses for the Microsoft Mouse"
 permalink: /pubs/pc/reference/microsoft/kb/Q68110/
 ---
 
+## Q68110: I/O Addresses for the Microsoft Mouse
+
 	Article: Q68110
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

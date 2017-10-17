@@ -4,8 +4,9 @@ title: "Q61222: C 6.00 README: CodeView Can't Call _fastcall Functions"
 permalink: /pubs/pc/reference/microsoft/kb/Q61222/
 ---
 
+## Q61222: C 6.00 README: CodeView Can't Call _fastcall Functions
+
 	Article: Q61222
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | s_codeview fastcall

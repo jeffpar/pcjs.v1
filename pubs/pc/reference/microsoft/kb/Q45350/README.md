@@ -4,8 +4,9 @@ title: "Q45350: Casting Pointer to Char in the Watch Window Will Hang Machine"
 permalink: /pubs/pc/reference/microsoft/kb/Q45350/
 ---
 
+## Q45350: Casting Pointer to Char in the Watch Window Will Hang Machine
+
 	Article: Q45350
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist2.00

@@ -4,8 +4,9 @@ title: "Q46733: L1008: &quot;Segment Limit Too High&quot; May Be Caused by Missi
 permalink: /pubs/pc/reference/microsoft/kb/Q46733/
 ---
 
+## Q46733: L1008: &quot;Segment Limit Too High&quot; May Be Caused by Missing Colon
+
 	Article: Q46733
-	Product: Microsoft C
 	Version(s): 3.x 4.06 4.07 5.01.21 5.03 5.05 5.10 | 5.01.21 5.03 5.05
 	Operating System: MS-DOS                               | OS/2
 	Flags: ENDUSER |

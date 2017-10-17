@@ -4,8 +4,9 @@ title: "Q50714: R6009 Not Enough Space for Environment -- Possible Workarounds"
 permalink: /pubs/pc/reference/microsoft/kb/Q50714/
 ---
 
+## Q50714: R6009 Not Enough Space for Environment -- Possible Workarounds
+
 	Article: Q50714
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickasm s_quickc

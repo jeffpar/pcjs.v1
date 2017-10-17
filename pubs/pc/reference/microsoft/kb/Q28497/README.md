@@ -4,8 +4,9 @@ title: "Q28497: Interrupt Setting for the IBM PS/2 Model 30"
 permalink: /pubs/pc/reference/microsoft/kb/Q28497/
 ---
 
+## Q28497: Interrupt Setting for the IBM PS/2 Model 30
+
 	Article: Q28497
-	Product: Microsoft C
 	Version(s): 1.0
 	Operating System: MS-DOS
 	Flags: ENDUSER |

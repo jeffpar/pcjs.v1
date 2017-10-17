@@ -4,8 +4,9 @@ title: "Q37617: Scan Codes for IBM and Compatible Keyboards"
 permalink: /pubs/pc/reference/microsoft/kb/Q37617/
 ---
 
+## Q37617: Scan Codes for IBM and Compatible Keyboards
+
 	Article: Q37617
-	Product: Microsoft C
 	Version(s): 4.00 5.00 5.10 | 5.10
 	Operating System: MS-DOS         | OS/2
 	Flags: ENDUSER |

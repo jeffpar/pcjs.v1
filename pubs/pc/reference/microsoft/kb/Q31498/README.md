@@ -4,8 +4,9 @@ title: "Q31498: &quot;Unsupported Video Mode&quot; When Loading Microsoft Editor
 permalink: /pubs/pc/reference/microsoft/kb/Q31498/
 ---
 
+## Q31498: &quot;Unsupported Video Mode&quot; When Loading Microsoft Editor
+
 	Article: Q31498
-	Product: Microsoft C
 	Version(s): 1.00 1.02 | 1.00 1.02
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER |

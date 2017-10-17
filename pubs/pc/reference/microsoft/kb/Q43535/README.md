@@ -4,8 +4,9 @@ title: "Q43535: 'strerror' Example in QuickC Manual May Yield Error"
 permalink: /pubs/pc/reference/microsoft/kb/Q43535/
 ---
 
+## Q43535: 'strerror' Example in QuickC Manual May Yield Error
+
 	Article: Q43535
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr

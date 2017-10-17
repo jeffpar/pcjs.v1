@@ -4,8 +4,9 @@ title: "Q61232: C 6.00 README: CV Extended Memory Option with Northgate"
 permalink: /pubs/pc/reference/microsoft/kb/Q61232/
 ---
 
+## Q61232: C 6.00 README: CV Extended Memory Option with Northgate
+
 	Article: Q61232
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

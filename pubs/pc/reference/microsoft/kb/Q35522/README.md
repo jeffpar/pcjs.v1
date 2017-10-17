@@ -4,8 +4,9 @@ title: "Q35522: The Difference between M and MEP"
 permalink: /pubs/pc/reference/microsoft/kb/Q35522/
 ---
 
+## Q35522: The Difference between M and MEP
+
 	Article: Q35522
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | appnote

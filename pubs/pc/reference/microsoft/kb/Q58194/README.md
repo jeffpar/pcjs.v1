@@ -4,8 +4,9 @@ title: "Q58194: How to Write Your Own &#95;&#95;chkstk Routine"
 permalink: /pubs/pc/reference/microsoft/kb/Q58194/
 ---
 
+## Q58194: How to Write Your Own &#95;&#95;chkstk Routine
+
 	Article: Q58194
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickasm s_quickc

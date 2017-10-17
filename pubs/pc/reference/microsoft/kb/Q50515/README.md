@@ -4,8 +4,9 @@ title: "Q50515: QuickC .FON Files Identical to Windows .FON Files, Not .FNT"
 permalink: /pubs/pc/reference/microsoft/kb/Q50515/
 ---
 
+## Q50515: QuickC .FON Files Identical to Windows .FON Files, Not .FNT
+
 	Article: Q50515
-	Product: Microsoft C
 	Version(s): 2.00 2.01
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickasm docerr QC

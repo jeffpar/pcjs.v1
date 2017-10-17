@@ -4,8 +4,9 @@ title: "Q61316: C 6.00 Installation Defaults to x87 Libraries Under OS/2 2.00"
 permalink: /pubs/pc/reference/microsoft/kb/Q61316/
 ---
 
+## Q61316: C 6.00 Installation Defaults to x87 Libraries Under OS/2 2.00
+
 	Article: Q61316
-	Product: Microsoft C
 	Version(s): 6.00    | 6.00
 	Operating System: MS-DOS  | OS/2
 	Flags: ENDUSER |

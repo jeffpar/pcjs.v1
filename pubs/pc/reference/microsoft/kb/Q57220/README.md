@@ -4,8 +4,9 @@ title: "Q57220: Inline Assembly May Cause Debugger to Skip Lines"
 permalink: /pubs/pc/reference/microsoft/kb/Q57220/
 ---
 
+## Q57220: Inline Assembly May Cause Debugger to Skip Lines
+
 	Article: Q57220
-	Product: Microsoft C
 	Version(s): 2.00 2.01
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist2.00 buglist2.01

@@ -4,8 +4,9 @@ title: "Q35235: Creating Windows in M and MEP"
 permalink: /pubs/pc/reference/microsoft/kb/Q35235/
 ---
 
+## Q35235: Creating Windows in M and MEP
+
 	Article: Q35235
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

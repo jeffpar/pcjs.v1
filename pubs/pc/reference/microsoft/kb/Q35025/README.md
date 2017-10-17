@@ -4,8 +4,9 @@ title: "Q35025: Accessing Switch Values in C Extensions"
 permalink: /pubs/pc/reference/microsoft/kb/Q35025/
 ---
 
+## Q35025: Accessing Switch Values in C Extensions
+
 	Article: Q35025
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

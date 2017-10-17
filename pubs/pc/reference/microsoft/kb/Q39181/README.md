@@ -4,8 +4,9 @@ title: "Q39181: Pascal Version of CodeView Version 2.20"
 permalink: /pubs/pc/reference/microsoft/kb/Q39181/
 ---
 
+## Q39181: Pascal Version of CodeView Version 2.20
+
 	Article: Q39181
-	Product: Microsoft C
 	Version(s): 2.20   | 2.20
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | S_PasCal

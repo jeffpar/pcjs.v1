@@ -4,8 +4,9 @@ title: "Q62183: C2404 Error with /qc Compile Option and fidiv Instruction"
 permalink: /pubs/pc/reference/microsoft/kb/Q62183/
 ---
 
+## Q62183: C2404 Error with /qc Compile Option and fidiv Instruction
+
 	Article: Q62183
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | s_quickc s_quickasm buglist6.00

@@ -4,8 +4,9 @@ title: "Q42760: /Zg Misspells the Word &quot;Interrupt&quot; for Function Pointe
 permalink: /pubs/pc/reference/microsoft/kb/Q42760/
 ---
 
+## Q42760: /Zg Misspells the Word &quot;Interrupt&quot; for Function Pointers
+
 	Article: Q42760
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist5.10

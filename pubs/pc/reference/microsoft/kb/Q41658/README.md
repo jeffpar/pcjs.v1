@@ -4,8 +4,9 @@ title: "Q41658: QuickC 2.00 README.DOC: /Li (Link Incrementally)"
 permalink: /pubs/pc/reference/microsoft/kb/Q41658/
 ---
 
+## Q41658: QuickC 2.00 README.DOC: /Li (Link Incrementally)
+
 	Article: Q41658
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q37252: &quot;Mouse Off&quot; Hangs System: Samsung AT Compatible with J
 permalink: /pubs/pc/reference/microsoft/kb/Q37252/
 ---
 
+## Q37252: &quot;Mouse Off&quot; Hangs System: Samsung AT Compatible with J4 on 2
+
 	Article: Q37252
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

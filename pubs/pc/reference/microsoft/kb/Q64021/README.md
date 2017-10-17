@@ -4,8 +4,9 @@ title: "Q64021: C1001: Internal Compiler Error: '../grammar.c', Line 140"
 permalink: /pubs/pc/reference/microsoft/kb/Q64021/
 ---
 
+## Q64021: C1001: Internal Compiler Error: '../grammar.c', Line 140
+
 	Article: Q64021
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

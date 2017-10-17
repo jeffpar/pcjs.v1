@@ -4,8 +4,9 @@ title: "Q62308: Internal Compiler Error '@(#)newcode.c:1.87', Line 697"
 permalink: /pubs/pc/reference/microsoft/kb/Q62308/
 ---
 
+## Q62308: Internal Compiler Error '@(#)newcode.c:1.87', Line 697
+
 	Article: Q62308
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist6.00

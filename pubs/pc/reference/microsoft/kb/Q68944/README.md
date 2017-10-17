@@ -4,8 +4,9 @@ title: "Q68944: Output to stdprn Is in Binary (Untranslated) Mode"
 permalink: /pubs/pc/reference/microsoft/kb/Q68944/
 ---
 
+## Q68944: Output to stdprn Is in Binary (Untranslated) Mode
+
 	Article: Q68944
-	Product: Microsoft C
 	Version(s): 3.x 4.x 5.x 6.00a 6.00 | 5.10 6.00 6.00a
 	Operating System: MS-DOS                 | OS/2
 	Flags: ENDUSER |

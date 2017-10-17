@@ -4,8 +4,9 @@ title: "Q49063: Changing Default Character in QC 2.00 Presentation Graphics"
 permalink: /pubs/pc/reference/microsoft/kb/Q49063/
 ---
 
+## Q49063: Changing Default Character in QC 2.00 Presentation Graphics
+
 	Article: Q49063
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QuickAsm

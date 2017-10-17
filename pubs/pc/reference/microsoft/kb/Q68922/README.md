@@ -4,8 +4,9 @@ title: "Q68922: C 6.00 Library Source SETUP /copy May Fail for Some Files"
 permalink: /pubs/pc/reference/microsoft/kb/Q68922/
 ---
 
+## Q68922: C 6.00 Library Source SETUP /copy May Fail for Some Files
+
 	Article: Q68922
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | buglist6.00 buglist6.00a

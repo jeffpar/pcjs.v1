@@ -4,8 +4,9 @@ title: "Q65312: Label/Function Search Command Fails Under Codeview 3.00/3.10"
 permalink: /pubs/pc/reference/microsoft/kb/Q65312/
 ---
 
+## Q65312: Label/Function Search Command Fails Under Codeview 3.00/3.10
+
 	Article: Q65312
-	Product: Microsoft C
 	Version(s): 3.00 3.10 | 3.00 3.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | buglist3.00 buglist3.10

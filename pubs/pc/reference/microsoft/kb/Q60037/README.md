@@ -4,8 +4,9 @@ title: "Q60037: Floating-Point Differences Between the 8086 and MC68000"
 permalink: /pubs/pc/reference/microsoft/kb/Q60037/
 ---
 
+## Q60037: Floating-Point Differences Between the 8086 and MC68000
+
 	Article: Q60037
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | s_quickc s_quickasm h_masm endian

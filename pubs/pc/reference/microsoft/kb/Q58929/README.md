@@ -4,8 +4,9 @@ title: "Q58929: BIND Error &quot;Import By Ordinal Not Defined: DOSCALLS.5&quot;
 permalink: /pubs/pc/reference/microsoft/kb/Q58929/
 ---
 
+## Q58929: BIND Error &quot;Import By Ordinal Not Defined: DOSCALLS.5&quot;
+
 	Article: Q58929
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | s_bind

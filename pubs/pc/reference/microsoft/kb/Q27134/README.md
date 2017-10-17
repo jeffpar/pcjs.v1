@@ -4,8 +4,9 @@ title: "Q27134: The Purpose of Module Definition Files"
 permalink: /pubs/pc/reference/microsoft/kb/Q27134/
 ---
 
+## Q27134: The Purpose of Module Definition Files
+
 	Article: Q27134
-	Product: Microsoft C
 	Version(s): 5.01.21 5.02 5.03 5.05 5.10 5.13 | 5.01.21 5.02 5.03 5.05
 	Operating System: MS-DOS                           | OS/2
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q50514: Flip/Swap Setting Crucial to Debugging PM Apps with Children"
 permalink: /pubs/pc/reference/microsoft/kb/Q50514/
 ---
 
+## Q50514: Flip/Swap Setting Crucial to Debugging PM Apps with Children
+
 	Article: Q50514
-	Product: Microsoft C
 	Version(s): 2.30
 	Operating System: OS/2
 	Flags: ENDUSER |

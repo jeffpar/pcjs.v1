@@ -4,8 +4,9 @@ title: "Q43647: Why Syntax Errors Might Not Display While Compiling in M"
 permalink: /pubs/pc/reference/microsoft/kb/Q43647/
 ---
 
+## Q43647: Why Syntax Errors Might Not Display While Compiling in M
+
 	Article: Q43647
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

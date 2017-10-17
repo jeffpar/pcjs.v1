@@ -4,8 +4,9 @@ title: "Q38855: Use of CRLF.EXE"
 permalink: /pubs/pc/reference/microsoft/kb/Q38855/
 ---
 
+## Q38855: Use of CRLF.EXE
+
 	Article: Q38855
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: enduser |

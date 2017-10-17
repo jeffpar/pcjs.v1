@@ -4,8 +4,9 @@ title: "Q39309: Example of C Calling a MASM Procedure"
 permalink: /pubs/pc/reference/microsoft/kb/Q39309/
 ---
 
+## Q39309: Example of C Calling a MASM Procedure
+
 	Article: Q39309
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | h_masm

@@ -4,8 +4,9 @@ title: "Q68146: QuickC Displays &quot;Incompatible Operands&quot; When Watching 
 permalink: /pubs/pc/reference/microsoft/kb/Q68146/
 ---
 
+## Q68146: QuickC Displays &quot;Incompatible Operands&quot; When Watching Arrays
+
 	Article: Q68146
-	Product: Microsoft C
 	Version(s): 2.00 2.01
 	Operating System: MS-DOS
 	Flags: ENDUSER | fixlist2.50

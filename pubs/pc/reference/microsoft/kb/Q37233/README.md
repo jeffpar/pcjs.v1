@@ -4,8 +4,9 @@ title: "Q37233: Why &quot;CDECL&quot; Is Everywhere in Your Include Files"
 permalink: /pubs/pc/reference/microsoft/kb/Q37233/
 ---
 
+## Q37233: Why &quot;CDECL&quot; Is Everywhere in Your Include Files
+
 	Article: Q37233
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | s_quickc

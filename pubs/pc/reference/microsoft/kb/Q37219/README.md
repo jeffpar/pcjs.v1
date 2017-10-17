@@ -4,8 +4,9 @@ title: "Q37219: No Such Thing as a static auto Variable."
 permalink: /pubs/pc/reference/microsoft/kb/Q37219/
 ---
 
+## Q37219: No Such Thing as a static auto Variable.
+
 	Article: Q37219
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.00 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER   | S_QUICKC docerr

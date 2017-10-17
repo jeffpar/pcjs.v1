@@ -4,8 +4,9 @@ title: "Q60830: Always Use Latest Version of HIMEM and Other Memory Utilities"
 permalink: /pubs/pc/reference/microsoft/kb/Q60830/
 ---
 
+## Q60830: Always Use Latest Version of HIMEM and Other Memory Utilities
+
 	Article: Q60830
-	Product: Microsoft C
 	Version(s): 2.50 2.60
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_codeview s_himem s_ramdrive s_smartdrv

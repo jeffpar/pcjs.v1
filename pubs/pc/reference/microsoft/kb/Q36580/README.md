@@ -4,8 +4,9 @@ title: "Q36580: How Tabs Are Treated in the Microsoft Editor"
 permalink: /pubs/pc/reference/microsoft/kb/Q36580/
 ---
 
+## Q36580: How Tabs Are Treated in the Microsoft Editor
+
 	Article: Q36580
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

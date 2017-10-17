@@ -4,8 +4,9 @@ title: "Q32714: DEFAULT.COM Included with Mouse"
 permalink: /pubs/pc/reference/microsoft/kb/Q32714/
 ---
 
+## Q32714: DEFAULT.COM Included with Mouse
+
 	Article: Q32714
-	Product: Microsoft C
 	Version(s): 1.x 2.x 3.x 4.x 5.x 6.x 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

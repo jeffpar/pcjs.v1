@@ -4,8 +4,9 @@ title: "Q62578: PWB 1.00 &quot;Set Dependencies&quot; Fails with Spaces in #incl
 permalink: /pubs/pc/reference/microsoft/kb/Q62578/
 ---
 
+## Q62578: PWB 1.00 &quot;Set Dependencies&quot; Fails with Spaces in #include Line
+
 	Article: Q62578
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist1.00 fixlist1.10 s_c

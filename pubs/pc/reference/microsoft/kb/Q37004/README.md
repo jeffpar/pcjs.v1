@@ -4,8 +4,9 @@ title: "Q37004: Warning C4086 Expected"
 permalink: /pubs/pc/reference/microsoft/kb/Q37004/
 ---
 
+## Q37004: Warning C4086 Expected
+
 	Article: Q37004
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | S_QUICKC S_ERROR

@@ -4,8 +4,9 @@ title: "Q40224: Rare Problem with /Exepack Linker Option Can Hang QuickC"
 permalink: /pubs/pc/reference/microsoft/kb/Q40224/
 ---
 
+## Q40224: Rare Problem with /Exepack Linker Option Can Hang QuickC
+
 	Article: Q40224
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: enduser | s_link buglist2.00

@@ -4,8 +4,9 @@ title: "Q40738: C memcpy and Large Model"
 permalink: /pubs/pc/reference/microsoft/kb/Q40738/
 ---
 
+## Q40738: C memcpy and Large Model
+
 	Article: Q40738
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | SR# G881031-5486

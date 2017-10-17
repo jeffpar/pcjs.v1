@@ -4,8 +4,9 @@ title: "Q38730: Changing Default int to 32 Bits"
 permalink: /pubs/pc/reference/microsoft/kb/Q38730/
 ---
 
+## Q38730: Changing Default int to 32 Bits
+
 	Article: Q38730
-	Product: Microsoft C
 	Version(s): 4.00 5.00 5.10 | 5.10
 	Operating System: MS-DOS         | OS/2
 	Flags: END-USER | SR# G881110-6126

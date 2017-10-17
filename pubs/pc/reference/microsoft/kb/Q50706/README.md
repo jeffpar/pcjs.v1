@@ -4,8 +4,9 @@ title: "Q50706: Default Optimization for QuickC Compiler Is /Od (None), Not /O"
 permalink: /pubs/pc/reference/microsoft/kb/Q50706/
 ---
 
+## Q50706: Default Optimization for QuickC Compiler Is /Od (None), Not /O
+
 	Article: Q50706
-	Product: Microsoft C
 	Version(s): 2.00 2.01
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QUICKASM docerr

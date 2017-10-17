@@ -4,8 +4,9 @@ title: "Q42943: Problem with Floats in While Loop"
 permalink: /pubs/pc/reference/microsoft/kb/Q42943/
 ---
 
+## Q42943: Problem with Floats in While Loop
+
 	Article: Q42943
-	Product: Microsoft C
 	Version(s): 1.00 1.01 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist1.00 buglist1.01 buglist2.00

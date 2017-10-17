@@ -4,8 +4,9 @@ title: "Q44057: MS123 Mouse Menu Not Correctly Positioning Cursor"
 permalink: /pubs/pc/reference/microsoft/kb/Q44057/
 ---
 
+## Q44057: MS123 Mouse Menu Not Correctly Positioning Cursor
+
 	Article: Q44057
-	Product: Microsoft C
 	Version(s): 1.x 2.x 3.x 4.x 5.x 6.x 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

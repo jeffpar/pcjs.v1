@@ -4,8 +4,9 @@ title: "Q41553: scanf, sscanf, fscanf Fail on the Regular Expression"
 permalink: /pubs/pc/reference/microsoft/kb/Q41553/
 ---
 
+## Q41553: scanf, sscanf, fscanf Fail on the Regular Expression
+
 	Article: Q41553
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist2.00

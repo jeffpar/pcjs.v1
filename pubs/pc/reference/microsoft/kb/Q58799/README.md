@@ -4,8 +4,9 @@ title: "Q58799: Microsoft GRAPHICS.LIB Does Not Support Extended VGA"
 permalink: /pubs/pc/reference/microsoft/kb/Q58799/
 ---
 
+## Q58799: Microsoft GRAPHICS.LIB Does Not Support Extended VGA
+
 	Article: Q58799
-	Product: Microsoft C
 	Version(s): 5.00 5.10 6.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickc 2.00 s_quickasm 2.01

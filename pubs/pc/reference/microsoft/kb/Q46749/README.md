@@ -4,8 +4,9 @@ title: "Q46749: Some Causes of Differences in Floating-Point Results"
 permalink: /pubs/pc/reference/microsoft/kb/Q46749/
 ---
 
+## Q46749: Some Causes of Differences in Floating-Point Results
+
 	Article: Q46749
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | SR# G890124-10419

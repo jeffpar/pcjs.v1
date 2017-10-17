@@ -4,8 +4,9 @@ title: "Q38225: Error C1053 Compiler Limit : Struct/union Nesting"
 permalink: /pubs/pc/reference/microsoft/kb/Q38225/
 ---
 
+## Q38225: Error C1053 Compiler Limit : Struct/union Nesting
+
 	Article: Q38225
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | s_quickc s_error docerr

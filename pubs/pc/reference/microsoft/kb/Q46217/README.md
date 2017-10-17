@@ -4,8 +4,9 @@ title: "Q46217: QuickC Does Not Always Deallocate Memory Given to Video Buffer"
 permalink: /pubs/pc/reference/microsoft/kb/Q46217/
 ---
 
+## Q46217: QuickC Does Not Always Deallocate Memory Given to Video Buffer
+
 	Article: Q46217
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QuickAsm

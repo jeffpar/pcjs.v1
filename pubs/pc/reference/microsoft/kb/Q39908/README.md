@@ -4,8 +4,9 @@ title: "Q39908: Time Functions Calculate for Daylight Savings Time"
 permalink: /pubs/pc/reference/microsoft/kb/Q39908/
 ---
 
+## Q39908: Time Functions Calculate for Daylight Savings Time
+
 	Article: Q39908
-	Product: Microsoft C
 	Version(s): 5.00   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

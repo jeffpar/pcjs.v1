@@ -4,8 +4,9 @@ title: "Q44522: Regular Expressions in QuickC 2.00"
 permalink: /pubs/pc/reference/microsoft/kb/Q44522/
 ---
 
+## Q44522: Regular Expressions in QuickC 2.00
+
 	Article: Q44522
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

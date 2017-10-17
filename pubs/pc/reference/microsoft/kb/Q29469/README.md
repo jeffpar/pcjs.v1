@@ -4,8 +4,9 @@ title: "Q29469: Mouse Compatibility with IBM PCjr"
 permalink: /pubs/pc/reference/microsoft/kb/Q29469/
 ---
 
+## Q29469: Mouse Compatibility with IBM PCjr
+
 	Article: Q29469
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

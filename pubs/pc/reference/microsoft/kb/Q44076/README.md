@@ -4,8 +4,9 @@ title: "Q44076: Using Presentation Graphics/Fonts with C 5.00 and C 5.10"
 permalink: /pubs/pc/reference/microsoft/kb/Q44076/
 ---
 
+## Q44076: Using Presentation Graphics/Fonts with C 5.00 and C 5.10
+
 	Article: Q44076
-	Product: Microsoft C
 	Version(s): 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QuickC

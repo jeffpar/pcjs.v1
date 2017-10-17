@@ -4,8 +4,9 @@ title: "Q59384: NMAKE /D /C Switches Suppress Modification Date"
 permalink: /pubs/pc/reference/microsoft/kb/Q59384/
 ---
 
+## Q59384: NMAKE /D /C Switches Suppress Modification Date
+
 	Article: Q59384
-	Product: Microsoft C
 	Version(s): 1.00 1.01 1.10 1.11
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist1.00 buglist1.01 buglist1.10 buglist1.11

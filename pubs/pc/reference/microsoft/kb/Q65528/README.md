@@ -4,8 +4,9 @@ title: "Q65528: Mouse Cursor on Wrong Monitor During Dual-Monitor Debugging"
 permalink: /pubs/pc/reference/microsoft/kb/Q65528/
 ---
 
+## Q65528: Mouse Cursor on Wrong Monitor During Dual-Monitor Debugging
+
 	Article: Q65528
-	Product: Microsoft C
 	Version(s): 3.00 3.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | H_MOUSE

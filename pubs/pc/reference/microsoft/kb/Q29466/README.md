@@ -4,8 +4,9 @@ title: "Q29466: Leading Edge Model D Error &quot;Unexpected SW Interrupt 33&quot
 permalink: /pubs/pc/reference/microsoft/kb/Q29466/
 ---
 
+## Q29466: Leading Edge Model D Error &quot;Unexpected SW Interrupt 33&quot;
+
 	Article: Q29466
-	Product: Microsoft C
 	Version(s): 6.x 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

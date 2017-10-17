@@ -4,8 +4,9 @@ title: "Q57948: Escape Character Erases First Characters in gets() String"
 permalink: /pubs/pc/reference/microsoft/kb/Q57948/
 ---
 
+## Q57948: Escape Character Erases First Characters in gets() String
+
 	Article: Q57948
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | s_quickc s_quickasm 1.00 1.01 2.00 2.01

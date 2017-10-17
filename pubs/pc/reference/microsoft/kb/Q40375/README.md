@@ -4,8 +4,9 @@ title: "Q40375: Incomplete Memory Model Switch in User's Guide Example"
 permalink: /pubs/pc/reference/microsoft/kb/Q40375/
 ---
 
+## Q40375: Incomplete Memory Model Switch in User's Guide Example
+
 	Article: Q40375
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | docerr

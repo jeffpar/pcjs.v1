@@ -4,8 +4,9 @@ title: "Q48689: CodeView Version 2.20 Is Called CVPCK.EXE by DOS Version 2.10"
 permalink: /pubs/pc/reference/microsoft/kb/Q48689/
 ---
 
+## Q48689: CodeView Version 2.20 Is Called CVPCK.EXE by DOS Version 2.10
+
 	Article: Q48689
-	Product: Microsoft C
 	Version(s): 2.20
 	Operating System: MS-DOS
 	Flags: ENDUSER | CV CVPCK CVPACK 2.x

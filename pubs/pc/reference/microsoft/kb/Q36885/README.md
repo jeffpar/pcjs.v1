@@ -4,8 +4,9 @@ title: "Q36885: CVP Accessing I/O Ports"
 permalink: /pubs/pc/reference/microsoft/kb/Q36885/
 ---
 
+## Q36885: CVP Accessing I/O Ports
+
 	Article: Q36885
-	Product: Microsoft C
 	Version(s): 2.20 2.30
 	Operating System: OS/2
 	Flags: ENDUSER | buglist2.20 buglist2.30

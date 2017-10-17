@@ -4,8 +4,9 @@ title: "Q51728: Manual Correction for MASM Returning Single or Double to BASIC"
 permalink: /pubs/pc/reference/microsoft/kb/Q51728/
 ---
 
+## Q51728: Manual Correction for MASM Returning Single or Double to BASIC
+
 	Article: Q51728
-	Product: Microsoft C
 	Version(s): 5.00   | 5.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | docerr B_BasicCom H_MASM B_QuickBas

@@ -4,8 +4,9 @@ title: "Q66784: Nesting for-loops Too Deep Gives C1026: Parser Stack OverFlow"
 permalink: /pubs/pc/reference/microsoft/kb/Q66784/
 ---
 
+## Q66784: Nesting for-loops Too Deep Gives C1026: Parser Stack OverFlow
+
 	Article: Q66784
-	Product: Microsoft C
 	Version(s): 5.10 6.00 6.00a | 5.10 6.00 6.00a
 	Operating System: MS-DOS          | OS/2
 	Flags: ENDUSER | buglist5.10 buglist6.00 buglist6.00a

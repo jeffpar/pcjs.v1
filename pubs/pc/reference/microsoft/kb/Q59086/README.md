@@ -4,8 +4,9 @@ title: "Q59086: Error C2094: Label &quot;xxx&quot; Was Undefined"
 permalink: /pubs/pc/reference/microsoft/kb/Q59086/
 ---
 
+## Q59086: Error C2094: Label &quot;xxx&quot; Was Undefined
+
 	Article: Q59086
-	Product: Microsoft C
 	Version(s): 2.00 2.01 2.50 2.51
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickasm S_C

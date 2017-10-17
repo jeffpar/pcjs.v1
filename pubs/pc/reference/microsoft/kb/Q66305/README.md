@@ -4,8 +4,9 @@ title: "Q66305: _setcliprgn Does Not Work Inside a _setviewport"
 permalink: /pubs/pc/reference/microsoft/kb/Q66305/
 ---
 
+## Q66305: _setcliprgn Does Not Work Inside a _setviewport
+
 	Article: Q66305
-	Product: Microsoft C
 	Version(s): 6.00 6.00a
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickc buglist6.00 buglist6.00a

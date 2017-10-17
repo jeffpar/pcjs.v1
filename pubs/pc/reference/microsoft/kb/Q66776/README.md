@@ -4,8 +4,9 @@ title: "Q66776: No Warning for Redeclared Parameter on Old-Style Declarations"
 permalink: /pubs/pc/reference/microsoft/kb/Q66776/
 ---
 
+## Q66776: No Warning for Redeclared Parameter on Old-Style Declarations
+
 	Article: Q66776
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | S_QUICKC

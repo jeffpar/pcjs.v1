@@ -4,8 +4,9 @@ title: "Q42365: 43- and 50-Line Modes with the IBM 8514 Monitor"
 permalink: /pubs/pc/reference/microsoft/kb/Q42365/
 ---
 
+## Q42365: 43- and 50-Line Modes with the IBM 8514 Monitor
+
 	Article: Q42365
-	Product: Microsoft C
 	Version(s): 1.00 1.02
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist1.00 fixlist1.02

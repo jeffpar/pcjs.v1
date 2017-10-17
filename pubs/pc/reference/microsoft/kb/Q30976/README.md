@@ -4,8 +4,9 @@ title: "Q30976: OS2PATCH for CVP Not Needed in OS/2 Version 1.10."
 permalink: /pubs/pc/reference/microsoft/kb/Q30976/
 ---
 
+## Q30976: OS2PATCH for CVP Not Needed in OS/2 Version 1.10.
+
 	Article: Q30976
-	Product: Microsoft C
 	Version(s): 2.20 2.30
 	Operating System: OS/2
 	Flags: ENDUSER |

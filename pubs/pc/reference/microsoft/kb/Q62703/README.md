@@ -4,8 +4,9 @@ title: "Q62703: Use of K&amp;R Style Function Definitions May Generate Bad Code"
 permalink: /pubs/pc/reference/microsoft/kb/Q62703/
 ---
 
+## Q62703: Use of K&amp;R Style Function Definitions May Generate Bad Code
+
 	Article: Q62703
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist6.00

@@ -4,8 +4,9 @@ title: "Q44388: How to Use the ERROUT Utility"
 permalink: /pubs/pc/reference/microsoft/kb/Q44388/
 ---
 
+## Q44388: How to Use the ERROUT Utility
+
 	Article: Q44388
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | H_FORTRAN H_MASM docerr

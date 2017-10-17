@@ -4,8 +4,9 @@ title: "Q34374: LINK /CO /DO in OS/2 Gives Protection Violation"
 permalink: /pubs/pc/reference/microsoft/kb/Q34374/
 ---
 
+## Q34374: LINK /CO /DO in OS/2 Gives Protection Violation
+
 	Article: Q34374
-	Product: Microsoft C
 	Version(s): 5.01.21 | 5.01.21
 	Operating System: MS-DOS  | OS/2
 	Flags: ENDUSER | buglist5.01.21

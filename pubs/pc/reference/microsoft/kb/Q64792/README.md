@@ -4,8 +4,9 @@ title: "Q64792: Helpmake Version 1.05 May Not Decode All Formatting"
 permalink: /pubs/pc/reference/microsoft/kb/Q64792/
 ---
 
+## Q64792: Helpmake Version 1.05 May Not Decode All Formatting
+
 	Article: Q64792
-	Product: Microsoft C
 	Version(s): 1.05   | 1.05
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | s_helpmake buglist1.05 fixlist1.06

@@ -4,8 +4,9 @@ title: "Q32129: Earlier Versions of Generic Cad May Not Work with InPort"
 permalink: /pubs/pc/reference/microsoft/kb/Q32129/
 ---
 
+## Q32129: Earlier Versions of Generic Cad May Not Work with InPort
+
 	Article: Q32129
-	Product: Microsoft C
 	Version(s): 1.00 5.03 6.00 6.02 6.10
 	Operating System: MS-DOS
 	Flags: ENDUSER |

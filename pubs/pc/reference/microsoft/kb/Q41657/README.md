@@ -4,8 +4,9 @@ title: "Q41657: QuickC 2.00 README.DOC: /Gi (Use Incremental Compilation)"
 permalink: /pubs/pc/reference/microsoft/kb/Q41657/
 ---
 
+## Q41657: QuickC 2.00 README.DOC: /Gi (Use Incremental Compilation)
+
 	Article: Q41657
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

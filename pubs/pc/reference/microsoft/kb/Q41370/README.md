@@ -4,8 +4,9 @@ title: "Q41370: The Meaning of &quot;ILINK:Fatal Error L1266: Invalid .EXE File&
 permalink: /pubs/pc/reference/microsoft/kb/Q41370/
 ---
 
+## Q41370: The Meaning of &quot;ILINK:Fatal Error L1266: Invalid .EXE File&quot;
+
 	Article: Q41370
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

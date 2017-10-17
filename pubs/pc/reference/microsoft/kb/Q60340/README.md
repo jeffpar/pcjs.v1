@@ -4,8 +4,9 @@ title: "Q60340: A Complete Example of Utilizing Paths in NMAKE"
 permalink: /pubs/pc/reference/microsoft/kb/Q60340/
 ---
 
+## Q60340: A Complete Example of Utilizing Paths in NMAKE
+
 	Article: Q60340
-	Product: Microsoft C
 	Version(s): 1.00 1.01 1.11
 	Operating System: MS-DOS
 	Flags: ENDUSER |

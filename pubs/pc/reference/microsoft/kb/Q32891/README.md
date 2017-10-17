@@ -4,8 +4,9 @@ title: "Q32891: &#95;&#95;fac Unresolved at Link Time"
 permalink: /pubs/pc/reference/microsoft/kb/Q32891/
 ---
 
+## Q32891: &#95;&#95;fac Unresolved at Link Time
+
 	Article: Q32891
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

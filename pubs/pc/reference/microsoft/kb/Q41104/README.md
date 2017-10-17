@@ -4,8 +4,9 @@ title: "Q41104: Libraries Added by the Comment pragma Appear After Default"
 permalink: /pubs/pc/reference/microsoft/kb/Q41104/
 ---
 
+## Q41104: Libraries Added by the Comment pragma Appear After Default
+
 	Article: Q41104
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | docerr

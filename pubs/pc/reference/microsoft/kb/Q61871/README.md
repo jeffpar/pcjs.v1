@@ -4,8 +4,9 @@ title: "Q61871: PWB 1.00 Requires Decimal Value for Stack Size in LINK Options"
 permalink: /pubs/pc/reference/microsoft/kb/Q61871/
 ---
 
+## Q61871: PWB 1.00 Requires Decimal Value for Stack Size in LINK Options
+
 	Article: Q61871
-	Product: Microsoft C
 	Version(s): 1.00    | 1.00
 	Operating System: MS-DOS  | OS/2
 	Flags: ENDUSER | buglist1.00 fixlist1.10

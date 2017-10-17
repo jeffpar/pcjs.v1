@@ -4,8 +4,9 @@ title: "Q32094: Installing M with Msetup"
 permalink: /pubs/pc/reference/microsoft/kb/Q32094/
 ---
 
+## Q32094: Installing M with Msetup
+
 	Article: Q32094
-	Product: Microsoft C
 	Version(s): 1.00    | 1.00
 	Operating System: MS-DOS  | OS/2
 	Flags: ENDUSER | h_fortran

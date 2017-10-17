@@ -4,8 +4,9 @@ title: "Q40316: QC 2.00 SAMPLES.DOC: Note on Graphics Libraries"
 permalink: /pubs/pc/reference/microsoft/kb/Q40316/
 ---
 
+## Q40316: QC 2.00 SAMPLES.DOC: Note on Graphics Libraries
+
 	Article: Q40316
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: enduser |

@@ -4,8 +4,9 @@ title: "Q43173: Using printf with %p in Small or Medium Model"
 permalink: /pubs/pc/reference/microsoft/kb/Q43173/
 ---
 
+## Q43173: Using printf with %p in Small or Medium Model
+
 	Article: Q43173
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

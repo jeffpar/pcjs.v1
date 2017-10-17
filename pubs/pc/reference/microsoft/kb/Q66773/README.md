@@ -4,8 +4,9 @@ title: "Q66773: Based Variable EXTRN Directive Wrongly Located in ASM Listing"
 permalink: /pubs/pc/reference/microsoft/kb/Q66773/
 ---
 
+## Q66773: Based Variable EXTRN Directive Wrongly Located in ASM Listing
+
 	Article: Q66773
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | buglist6.00 buglist6.00a _based

@@ -4,8 +4,9 @@ title: "Q43536: Using _getvideoconfig for Analog Monitors"
 permalink: /pubs/pc/reference/microsoft/kb/Q43536/
 ---
 
+## Q43536: Using _getvideoconfig for Analog Monitors
+
 	Article: Q43536
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickc

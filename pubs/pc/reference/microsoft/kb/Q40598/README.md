@@ -4,8 +4,9 @@ title: "Q40598: HELPMAKE Interprets Backslashes as Formatting Flags"
 permalink: /pubs/pc/reference/microsoft/kb/Q40598/
 ---
 
+## Q40598: HELPMAKE Interprets Backslashes as Formatting Flags
+
 	Article: Q40598
-	Product: Microsoft C
 	Version(s): 1.00 1.04 1.05 1.06 | 1.04 1.05 1.06
 	Operating System: MS-DOS              | OS/2
 	Flags: ENDUSER | s_helpmake

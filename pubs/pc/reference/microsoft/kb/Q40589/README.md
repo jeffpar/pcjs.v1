@@ -4,8 +4,9 @@ title: "Q40589: The Definition of Reentrancy"
 permalink: /pubs/pc/reference/microsoft/kb/Q40589/
 ---
 
+## Q40589: The Definition of Reentrancy
+
 	Article: Q40589
-	Product: Microsoft C
 	Version(s): 4.00 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | re-entrant reentrant

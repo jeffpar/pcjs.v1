@@ -4,8 +4,9 @@ title: "Q42363: Memory Model Stored in Both QC.INI and .MAK Files"
 permalink: /pubs/pc/reference/microsoft/kb/Q42363/
 ---
 
+## Q42363: Memory Model Stored in Both QC.INI and .MAK Files
+
 	Article: Q42363
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

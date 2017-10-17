@@ -4,8 +4,9 @@ title: "Q32893: Difference between Huge Pointers"
 permalink: /pubs/pc/reference/microsoft/kb/Q32893/
 ---
 
+## Q32893: Difference between Huge Pointers
+
 	Article: Q32893
-	Product: Microsoft C
 	Version(s): 4.00 5.00 5.10 | 5.10
 	Operating System: MS-DOS         | OS/2
 	Flags: ENDUSER |

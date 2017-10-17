@@ -4,8 +4,9 @@ title: "Q65568: How to Add Other Language Compilers to PWB's Build Options"
 permalink: /pubs/pc/reference/microsoft/kb/Q65568/
 ---
 
+## Q65568: How to Add Other Language Compilers to PWB's Build Options
+
 	Article: Q65568
-	Product: Microsoft C
 	Version(s): 1.00 1.10 | 1.00 1.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | s_pascal b_basiccom s_c h_masm h_fortran b_cobol

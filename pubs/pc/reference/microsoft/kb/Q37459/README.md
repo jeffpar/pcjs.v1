@@ -4,8 +4,9 @@ title: "Q37459: &quot;pascal&quot; Attribute for Multi-Thread Functions Returnin
 permalink: /pubs/pc/reference/microsoft/kb/Q37459/
 ---
 
+## Q37459: &quot;pascal&quot; Attribute for Multi-Thread Functions Returning Double
+
 	Article: Q37459
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: OS/2
 	Flags: ENDUSER |

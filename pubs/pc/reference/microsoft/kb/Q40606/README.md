@@ -4,8 +4,9 @@ title: "Q40606: Internal Compiler Error getattrib.c from typedef"
 permalink: /pubs/pc/reference/microsoft/kb/Q40606/
 ---
 
+## Q40606: Internal Compiler Error getattrib.c from typedef
+
 	Article: Q40606
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | s_quickc

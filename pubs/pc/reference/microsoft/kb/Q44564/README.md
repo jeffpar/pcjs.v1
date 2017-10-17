@@ -4,8 +4,9 @@ title: "Q44564: Short Jump to 80 Bytes Forward Generated with C 5.10"
 permalink: /pubs/pc/reference/microsoft/kb/Q44564/
 ---
 
+## Q44564: Short Jump to 80 Bytes Forward Generated with C 5.10
+
 	Article: Q44564
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist5.10

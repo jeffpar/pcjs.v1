@@ -4,8 +4,9 @@ title: "Q29840: C 5.10 MTDYNA.DOC: Creating a Single Thread DLL"
 permalink: /pubs/pc/reference/microsoft/kb/Q29840/
 ---
 
+## Q29840: C 5.10 MTDYNA.DOC: Creating a Single Thread DLL
+
 	Article: Q29840
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

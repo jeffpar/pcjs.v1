@@ -4,8 +4,9 @@ title: "Q33795: Multiple Calls to ctime before Printing Results"
 permalink: /pubs/pc/reference/microsoft/kb/Q33795/
 ---
 
+## Q33795: Multiple Calls to ctime before Printing Results
+
 	Article: Q33795
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

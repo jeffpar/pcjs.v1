@@ -4,8 +4,9 @@ title: "Q68921: Using float/double Function as Subscript May Cause Bad Code"
 permalink: /pubs/pc/reference/microsoft/kb/Q68921/
 ---
 
+## Q68921: Using float/double Function as Subscript May Cause Bad Code
+
 	Article: Q68921
-	Product: Microsoft C
 	Version(s): 6.00a  | 6.00a
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist6.00 buglist6.00a

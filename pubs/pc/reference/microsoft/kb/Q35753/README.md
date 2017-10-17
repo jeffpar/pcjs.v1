@@ -4,8 +4,9 @@ title: "Q35753: Directory Listing for C 5.10 Distribution Disks (3.5-Inch)"
 permalink: /pubs/pc/reference/microsoft/kb/Q35753/
 ---
 
+## Q35753: Directory Listing for C 5.10 Distribution Disks (3.5-Inch)
+
 	Article: Q35753
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q42600: _imagesize Formula Documented Incorrectly for Some Video Modes"
 permalink: /pubs/pc/reference/microsoft/kb/Q42600/
 ---
 
+## Q42600: _imagesize Formula Documented Incorrectly for Some Video Modes
+
 	Article: Q42600
-	Product: Microsoft C
 	Version(s): 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickc docerr

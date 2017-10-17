@@ -4,8 +4,9 @@ title: "Q68384: First _pg_chartscatter() Call May Not Use Specified plotchar"
 permalink: /pubs/pc/reference/microsoft/kb/Q68384/
 ---
 
+## Q68384: First _pg_chartscatter() Call May Not Use Specified plotchar
+
 	Article: Q68384
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | s_quickc buglist6.00 buglist6.00a pgchart

@@ -4,8 +4,9 @@ title: "Q59314: Mouse Driver Conflicts with Novell Network Software"
 permalink: /pubs/pc/reference/microsoft/kb/Q59314/
 ---
 
+## Q59314: Mouse Driver Conflicts with Novell Network Software
+
 	Article: Q59314
-	Product: Microsoft C
 	Version(s): 7.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

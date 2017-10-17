@@ -4,8 +4,9 @@ title: "Q28684: Mouse Driver Command Line Switches"
 permalink: /pubs/pc/reference/microsoft/kb/Q28684/
 ---
 
+## Q28684: Mouse Driver Command Line Switches
+
 	Article: Q28684
-	Product: Microsoft C
 	Version(s): 6.00 6.02 6.10 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q67339: Serial Mouse with Timeline"
 permalink: /pubs/pc/reference/microsoft/kb/Q67339/
 ---
 
+## Q67339: Serial Mouse with Timeline
+
 	Article: Q67339
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

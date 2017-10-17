@@ -4,8 +4,9 @@ title: "Q39909: _scanf and _cscanf always Echo to the Screen"
 permalink: /pubs/pc/reference/microsoft/kb/Q39909/
 ---
 
+## Q39909: _scanf and _cscanf always Echo to the Screen
+
 	Article: Q39909
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER |

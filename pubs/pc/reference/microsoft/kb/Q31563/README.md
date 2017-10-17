@@ -4,8 +4,9 @@ title: "Q31563: Linking FORTRAN and C, &quot;L2044 _FF_MsgBanner Multiply Define
 permalink: /pubs/pc/reference/microsoft/kb/Q31563/
 ---
 
+## Q31563: Linking FORTRAN and C, &quot;L2044 _FF_MsgBanner Multiply Defined&quot;
+
 	Article: Q31563
-	Product: Microsoft C
 	Version(s): 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | h_fortran 4.00 4.01

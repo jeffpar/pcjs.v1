@@ -4,8 +4,9 @@ title: "Q66290: Reference to _pgmptr in CRTEXE.OBJ Is Invalid"
 permalink: /pubs/pc/reference/microsoft/kb/Q66290/
 ---
 
+## Q66290: Reference to _pgmptr in CRTEXE.OBJ Is Invalid
+
 	Article: Q66290
-	Product: Microsoft C
 	Version(s): 6.00 6.00a
 	Operating System: OS/2
 	Flags: ENDUSER | buglist6.00

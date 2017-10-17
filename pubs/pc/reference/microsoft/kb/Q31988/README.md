@@ -4,8 +4,9 @@ title: "Q31988: The Meaning of an Invalid Object Module"
 permalink: /pubs/pc/reference/microsoft/kb/Q31988/
 ---
 
+## Q31988: The Meaning of an Invalid Object Module
+
 	Article: Q31988
-	Product: Microsoft C
 	Version(s): 3.x 5.01.20 5.01.21
 	Operating System: MS-DOS
 	Flags: ENDUSER |

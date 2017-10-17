@@ -4,8 +4,9 @@ title: "Q45584: Can't Take Address of Frame Variable in DLL (SS!=DS)"
 permalink: /pubs/pc/reference/microsoft/kb/Q45584/
 ---
 
+## Q45584: Can't Take Address of Frame Variable in DLL (SS!=DS)
+
 	Article: Q45584
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: OS/2
 	Flags: ENDUSER | SR# G890605-19757

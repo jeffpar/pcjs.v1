@@ -4,8 +4,9 @@ title: "Q47226: _makepath() and _splitpath Examples Are Incomplete"
 permalink: /pubs/pc/reference/microsoft/kb/Q47226/
 ---
 
+## Q47226: _makepath() and _splitpath Examples Are Incomplete
+
 	Article: Q47226
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.00 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | docerr S_QuickC

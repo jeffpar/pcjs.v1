@@ -4,8 +4,9 @@ title: "Q34920: Mixed Expressions Can Cause Unsigned Division"
 permalink: /pubs/pc/reference/microsoft/kb/Q34920/
 ---
 
+## Q34920: Mixed Expressions Can Cause Unsigned Division
+
 	Article: Q34920
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q51489: Error in SIMPLE Mouse Menu in Programmer's Reference"
 permalink: /pubs/pc/reference/microsoft/kb/Q51489/
 ---
 
+## Q51489: Error in SIMPLE Mouse Menu in Programmer's Reference
+
 	Article: Q51489
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr

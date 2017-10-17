@@ -4,8 +4,9 @@ title: "Q69067: Even and Align Directives Are Ignored in Inline Assembly"
 permalink: /pubs/pc/reference/microsoft/kb/Q69067/
 ---
 
+## Q69067: Even and Align Directives Are Ignored in Inline Assembly
+
 	Article: Q69067
-	Product: Microsoft C
 	Version(s): 2.00 2.01 2.50 2.51
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_c buglist2.00 buglist 2.01 buglist2.50 buglist2.51

@@ -4,8 +4,9 @@ title: "Q59085: Replacing Normal String Takes Longer Than Regular Expression"
 permalink: /pubs/pc/reference/microsoft/kb/Q59085/
 ---
 
+## Q59085: Replacing Normal String Takes Longer Than Regular Expression
+
 	Article: Q59085
-	Product: Microsoft C
 	Version(s): 1.00 1.02 | 1.00 1.02
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | buglist1.00 buglist1.02

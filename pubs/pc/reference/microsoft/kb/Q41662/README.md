@@ -4,8 +4,9 @@ title: "Q41662: QuickC 2.00 README.DOC: Creating a Help Database"
 permalink: /pubs/pc/reference/microsoft/kb/Q41662/
 ---
 
+## Q41662: QuickC 2.00 README.DOC: Creating a Help Database
+
 	Article: Q41662
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

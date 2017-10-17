@@ -4,8 +4,9 @@ title: "Q57748: Converting PL/M-386 Code to MSC"
 permalink: /pubs/pc/reference/microsoft/kb/Q57748/
 ---
 
+## Q57748: Converting PL/M-386 Code to MSC
+
 	Article: Q57748
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q41159: rewind(stdin) Clears Keyboard Buffer"
 permalink: /pubs/pc/reference/microsoft/kb/Q41159/
 ---
 
+## Q41159: rewind(stdin) Clears Keyboard Buffer
+
 	Article: Q41159
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | s_quickc

@@ -4,8 +4,9 @@ title: "Q49631: /Zr Switch Causes Incorrect Code Generation"
 permalink: /pubs/pc/reference/microsoft/kb/Q49631/
 ---
 
+## Q49631: /Zr Switch Causes Incorrect Code Generation
+
 	Article: Q49631
-	Product: Microsoft C
 	Version(s): 2.00 2.01
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_C buglist2.00 buglist2.01 S_QuickASM

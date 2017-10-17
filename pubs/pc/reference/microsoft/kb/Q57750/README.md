@@ -4,8 +4,9 @@ title: "Q57750: M &quot;Keyboard&quot; Switch Doesn't Work As Documented"
 permalink: /pubs/pc/reference/microsoft/kb/Q57750/
 ---
 
+## Q57750: M &quot;Keyboard&quot; Switch Doesn't Work As Documented
+
 	Article: Q57750
-	Product: Microsoft C
 	Version(s): 1.02
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_FORTRAN buglist1.02

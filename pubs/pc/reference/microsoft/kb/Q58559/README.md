@@ -4,8 +4,9 @@ title: "Q58559: C2144 May Be Caused by Executable Code Between Declarations"
 permalink: /pubs/pc/reference/microsoft/kb/Q58559/
 ---
 
+## Q58559: C2144 May Be Caused by Executable Code Between Declarations
+
 	Article: Q58559
-	Product: Microsoft C
 	Version(s): 3.00 4.00 5.00 5.10 | 5.10
 	Operating System: MS-DOS              | OS/2
 	Flags: ENDUSER | s_quickc s_quickasm

@@ -4,8 +4,9 @@ title: "Q44816: printf Appears to Print Incorrect Results for Floats"
 permalink: /pubs/pc/reference/microsoft/kb/Q44816/
 ---
 
+## Q44816: printf Appears to Print Incorrect Results for Floats
+
 	Article: Q44816
-	Product: Microsoft C
 	Version(s): 5.10 | 5.10
 	Operating System: DOS  | OS/2
 	Flags: ENDUSER |

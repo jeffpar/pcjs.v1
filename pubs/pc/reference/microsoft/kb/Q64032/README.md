@@ -4,8 +4,9 @@ title: "Q64032: NMAKE Predefined Macro &#36;(@D) Has Same Value As &#36;@"
 permalink: /pubs/pc/reference/microsoft/kb/Q64032/
 ---
 
+## Q64032: NMAKE Predefined Macro &#36;(@D) Has Same Value As &#36;@
+
 	Article: Q64032
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | docerr

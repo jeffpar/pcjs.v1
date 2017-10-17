@@ -4,8 +4,9 @@ title: "Q66828: Unexpected Behavior with the /Gt Switch and the PWB"
 permalink: /pubs/pc/reference/microsoft/kb/Q66828/
 ---
 
+## Q66828: Unexpected Behavior with the /Gt Switch and the PWB
+
 	Article: Q66828
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | S_C

@@ -4,8 +4,9 @@ title: "Q38191: P_NOWAIT Is Not Implemented in DOS Version 4.00"
 permalink: /pubs/pc/reference/microsoft/kb/Q38191/
 ---
 
+## Q38191: P_NOWAIT Is Not Implemented in DOS Version 4.00
+
 	Article: Q38191
-	Product: Microsoft C
 	Version(s): 5.00   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

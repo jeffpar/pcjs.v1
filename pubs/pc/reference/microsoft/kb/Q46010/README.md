@@ -4,8 +4,9 @@ title: "Q46010: CodeView Skips Over a Line of Source Code"
 permalink: /pubs/pc/reference/microsoft/kb/Q46010/
 ---
 
+## Q46010: CodeView Skips Over a Line of Source Code
+
 	Article: Q46010
-	Product: Microsoft C
 	Version(s): 2.20 2.30 | 2.20 2.30
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | S_QuickC

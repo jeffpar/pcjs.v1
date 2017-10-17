@@ -4,8 +4,9 @@ title: "Q64566: &quot;Cannot Open File current.&#36;&quot; May Mean Incorrect IN
 permalink: /pubs/pc/reference/microsoft/kb/Q64566/
 ---
 
+## Q64566: &quot;Cannot Open File current.&#36;&quot; May Mean Incorrect INIT Variable
+
 	Article: Q64566
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

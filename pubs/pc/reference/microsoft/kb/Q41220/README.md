@@ -4,8 +4,9 @@ title: "Q41220: Program Hangs the Second Time It Is Run Using an 80287"
 permalink: /pubs/pc/reference/microsoft/kb/Q41220/
 ---
 
+## Q41220: Program Hangs the Second Time It Is Run Using an 80287
+
 	Article: Q41220
-	Product: Microsoft C
 	Version(s): 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER |

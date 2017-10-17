@@ -4,8 +4,9 @@ title: "Q41469: QuickC 2.00 Does Not Debug KBHIT() Correctly"
 permalink: /pubs/pc/reference/microsoft/kb/Q41469/
 ---
 
+## Q41469: QuickC 2.00 Does Not Debug KBHIT() Correctly
+
 	Article: Q41469
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist2.00

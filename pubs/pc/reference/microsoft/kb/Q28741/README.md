@@ -4,8 +4,9 @@ title: "Q28741: How to Deallocate or Disable the Mouse Driver"
 permalink: /pubs/pc/reference/microsoft/kb/Q28741/
 ---
 
+## Q28741: How to Deallocate or Disable the Mouse Driver
+
 	Article: Q28741
-	Product: Microsoft C
 	Version(s): 6.0 6.02 6.10 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

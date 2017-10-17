@@ -4,8 +4,9 @@ title: "Q32805: Reference to Section 2.11 Should Be 2.12 in User's Guide"
 permalink: /pubs/pc/reference/microsoft/kb/Q32805/
 ---
 
+## Q32805: Reference to Section 2.11 Should Be 2.12 in User's Guide
+
 	Article: Q32805
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | docerr

@@ -4,8 +4,9 @@ title: "Q51125: &quot;C For Yourself&quot; Documentation Error -- Long Double"
 permalink: /pubs/pc/reference/microsoft/kb/Q51125/
 ---
 
+## Q51125: &quot;C For Yourself&quot; Documentation Error -- Long Double
+
 	Article: Q51125
-	Product: Microsoft C
 	Version(s): 2.00 2.01
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr s_quickasm

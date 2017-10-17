@@ -4,8 +4,9 @@ title: "Q29837: C 5.10 MTDYNA.DOC: Sample MT Program/Possible Problem Areas"
 permalink: /pubs/pc/reference/microsoft/kb/Q29837/
 ---
 
+## Q29837: C 5.10 MTDYNA.DOC: Sample MT Program/Possible Problem Areas
+
 	Article: Q29837
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

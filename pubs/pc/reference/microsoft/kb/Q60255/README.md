@@ -4,8 +4,9 @@ title: "Q60255: &#95;&#95;STDC&#95;&#95; Is Undefined If Microsoft Extensions Ar
 permalink: /pubs/pc/reference/microsoft/kb/Q60255/
 ---
 
+## Q60255: &#95;&#95;STDC&#95;&#95; Is Undefined If Microsoft Extensions Are Allowed
+
 	Article: Q60255
-	Product: Microsoft C
 	Version(s): 2.50 2.51
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickasm s_c

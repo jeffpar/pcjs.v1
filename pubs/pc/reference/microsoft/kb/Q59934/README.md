@@ -4,8 +4,9 @@ title: "Q59934: Multimate Menu Will Work with Multimate Advantage 4.0"
 permalink: /pubs/pc/reference/microsoft/kb/Q59934/
 ---
 
+## Q59934: Multimate Menu Will Work with Multimate Advantage 4.0
+
 	Article: Q59934
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

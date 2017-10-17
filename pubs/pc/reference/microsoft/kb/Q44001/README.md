@@ -4,8 +4,9 @@ title: "Q44001: SETUP /L Does Not Create SETARGV.OBJ in C"
 permalink: /pubs/pc/reference/microsoft/kb/Q44001/
 ---
 
+## Q44001: SETUP /L Does Not Create SETARGV.OBJ in C
+
 	Article: Q44001
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

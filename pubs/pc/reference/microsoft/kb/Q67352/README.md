@@ -4,8 +4,9 @@ title: "Q67352: Typedef and Struct Member with Same Name Give Bad C2062 Error"
 permalink: /pubs/pc/reference/microsoft/kb/Q67352/
 ---
 
+## Q67352: Typedef and Struct Member with Same Name Give Bad C2062 Error
+
 	Article: Q67352
-	Product: Microsoft C
 	Version(s): 5.10 6.00 6.00a | 5.10 6.00 6.00a
 	Operating System: MS-DOS          | OS/2
 	Flags: ENDUSER | S_QUICKC buglist5.10 buglist6.00 buglist6.00a

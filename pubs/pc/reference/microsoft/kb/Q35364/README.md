@@ -4,8 +4,9 @@ title: "Q35364: Bus Mouse with InPort Not Supported in IBM PC-DOS 4.00"
 permalink: /pubs/pc/reference/microsoft/kb/Q35364/
 ---
 
+## Q35364: Bus Mouse with InPort Not Supported in IBM PC-DOS 4.00
+
 	Article: Q35364
-	Product: Microsoft C
 	Version(s): 6.x 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

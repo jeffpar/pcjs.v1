@@ -4,8 +4,9 @@ title: "Q32831: Link Error 4051"
 permalink: /pubs/pc/reference/microsoft/kb/Q32831/
 ---
 
+## Q32831: Link Error 4051
+
 	Article: Q32831
-	Product: Microsoft C
 	Version(s): 3.60 3.61 3.64 3.65 5.01.20 5.01.21
 	Operating System: MS-DOS
 	Flags: ENDUSER |

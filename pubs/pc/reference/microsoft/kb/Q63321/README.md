@@ -4,8 +4,9 @@ title: "Q63321: C 6.00 STARTUP.DOC Requests Wrong MASM Version"
 permalink: /pubs/pc/reference/microsoft/kb/Q63321/
 ---
 
+## Q63321: C 6.00 STARTUP.DOC Requests Wrong MASM Version
+
 	Article: Q63321
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | docerr

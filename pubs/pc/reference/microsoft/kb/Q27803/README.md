@@ -4,8 +4,9 @@ title: "Q27803: _remapallpalette Example Causes C4049 Warning"
 permalink: /pubs/pc/reference/microsoft/kb/Q27803/
 ---
 
+## Q27803: _remapallpalette Example Causes C4049 Warning
+
 	Article: Q27803
-	Product: Microsoft C
 	Version(s): 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr

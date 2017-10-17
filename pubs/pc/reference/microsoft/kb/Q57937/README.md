@@ -4,8 +4,9 @@ title: "Q57937: _pg_chartpie Fails on { 1.0, 0.0 } Set Elements"
 permalink: /pubs/pc/reference/microsoft/kb/Q57937/
 ---
 
+## Q57937: _pg_chartpie Fails on { 1.0, 0.0 } Set Elements
+
 	Article: Q57937
-	Product: Microsoft C
 	Version(s): 2.00 2.01
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickasm buglist2.00 buglist2.01 100% 0%

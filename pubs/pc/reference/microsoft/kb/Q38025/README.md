@@ -4,8 +4,9 @@ title: "Q38025: Signed char Type Converted to int Type at Function Call"
 permalink: /pubs/pc/reference/microsoft/kb/Q38025/
 ---
 
+## Q38025: Signed char Type Converted to int Type at Function Call
+
 	Article: Q38025
-	Product: Microsoft C
 	Version(s): 4.00 5.00 5.10 | 5.10
 	Operating System: MS-DOS         | OS/2
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q65490: Building Windows 3.00 Applications with QuickC"
 permalink: /pubs/pc/reference/microsoft/kb/Q65490/
 ---
 
+## Q65490: Building Windows 3.00 Applications with QuickC
+
 	Article: Q65490
-	Product: Microsoft C
 	Version(s): 2.00 2.01 2.50 2.51
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickasm

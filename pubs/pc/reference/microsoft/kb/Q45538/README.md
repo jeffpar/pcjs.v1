@@ -4,8 +4,9 @@ title: "Q45538: fcvt() Incorrectly Prototyped in QuickC Advisor"
 permalink: /pubs/pc/reference/microsoft/kb/Q45538/
 ---
 
+## Q45538: fcvt() Incorrectly Prototyped in QuickC Advisor
+
 	Article: Q45538
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr

@@ -4,8 +4,9 @@ title: "Q31510: Bitwise Complement Operator Appears to Fail on Comparison"
 permalink: /pubs/pc/reference/microsoft/kb/Q31510/
 ---
 
+## Q31510: Bitwise Complement Operator Appears to Fail on Comparison
+
 	Article: Q31510
-	Product: Microsoft C
 	Version(s): 4.00 5.10 5.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

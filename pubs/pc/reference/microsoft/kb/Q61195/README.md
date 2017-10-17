@@ -4,8 +4,9 @@ title: "Q61195: C 6.00 README: .DEF Files Allowed on Command Line"
 permalink: /pubs/pc/reference/microsoft/kb/Q61195/
 ---
 
+## Q61195: C 6.00 README: .DEF Files Allowed on Command Line
+
 	Article: Q61195
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

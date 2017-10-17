@@ -4,8 +4,9 @@ title: "Q67795: EXE Checksum Incorrect If linked with /CO or /E"
 permalink: /pubs/pc/reference/microsoft/kb/Q67795/
 ---
 
+## Q67795: EXE Checksum Incorrect If linked with /CO or /E
+
 	Article: Q67795
-	Product: Microsoft C
 	Version(s): 3.xx 4.0x 4.10 5.0x 5.10 5.13 | 5.0x 5.10 5.13
 	Operating System: MS-DOS                        | OS/2
 	Flags: ENDUSER |

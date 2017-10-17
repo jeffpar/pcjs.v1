@@ -4,8 +4,9 @@ title: "Q51724: Clarification of the /H Identifier Length Option"
 permalink: /pubs/pc/reference/microsoft/kb/Q51724/
 ---
 
+## Q51724: Clarification of the /H Identifier Length Option
+
 	Article: Q51724
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | S_QUICKC docerr

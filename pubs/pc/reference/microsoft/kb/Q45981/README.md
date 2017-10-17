@@ -4,8 +4,9 @@ title: "Q45981: How to Search Multiple Files in QuickC Advisor"
 permalink: /pubs/pc/reference/microsoft/kb/Q45981/
 ---
 
+## Q45981: How to Search Multiple Files in QuickC Advisor
+
 	Article: Q45981
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

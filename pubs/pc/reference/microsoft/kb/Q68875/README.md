@@ -4,8 +4,9 @@ title: "Q68875: Error L2029 May Be Caused by Improperly Renaming Libraries"
 permalink: /pubs/pc/reference/microsoft/kb/Q68875/
 ---
 
+## Q68875: Error L2029 May Be Caused by Improperly Renaming Libraries
+
 	Article: Q68875
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | s_link s_quickc

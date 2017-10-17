@@ -4,8 +4,9 @@ title: "Q34251: C.TMP Files in Current Directory"
 permalink: /pubs/pc/reference/microsoft/kb/Q34251/
 ---
 
+## Q34251: C.TMP Files in Current Directory
+
 	Article: Q34251
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

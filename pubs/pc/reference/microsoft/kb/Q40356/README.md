@@ -4,8 +4,9 @@ title: "Q40356: FileWrite() Function Fails to Write Back Out to the File"
 permalink: /pubs/pc/reference/microsoft/kb/Q40356/
 ---
 
+## Q40356: FileWrite() Function Fails to Write Back Out to the File
+
 	Article: Q40356
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

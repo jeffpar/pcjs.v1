@@ -4,8 +4,9 @@ title: "Q41597: QuickC 2.00 README.DOC: Vector-Mapped Fonts"
 permalink: /pubs/pc/reference/microsoft/kb/Q41597/
 ---
 
+## Q41597: QuickC 2.00 README.DOC: Vector-Mapped Fonts
+
 	Article: Q41597
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

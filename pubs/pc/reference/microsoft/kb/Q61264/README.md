@@ -4,8 +4,9 @@ title: "Q61264: Mouse Will Not Work with PC Tools Deluxe 5.5 and 6.0"
 permalink: /pubs/pc/reference/microsoft/kb/Q61264/
 ---
 
+## Q61264: Mouse Will Not Work with PC Tools Deluxe 5.5 and 6.0
+
 	Article: Q61264
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q40223: Logitech Mouse  Driver May Fail in 43/50...Line Mode"
 permalink: /pubs/pc/reference/microsoft/kb/Q40223/
 ---
 
+## Q40223: Logitech Mouse  Driver May Fail in 43/50...Line Mode
+
 	Article: Q40223
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

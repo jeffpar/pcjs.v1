@@ -4,8 +4,9 @@ title: "Q40231: Error in Run-Time Library Examples for Font Functions"
 permalink: /pubs/pc/reference/microsoft/kb/Q40231/
 ---
 
+## Q40231: Error in Run-Time Library Examples for Font Functions
+
 	Article: Q40231
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: enduser |  fonts.c

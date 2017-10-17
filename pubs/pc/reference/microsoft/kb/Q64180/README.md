@@ -4,8 +4,9 @@ title: "Q64180: L1089 Caused by Wrong Linker in OS/2"
 permalink: /pubs/pc/reference/microsoft/kb/Q64180/
 ---
 
+## Q64180: L1089 Caused by Wrong Linker in OS/2
+
 	Article: Q64180
-	Product: Microsoft C
 	Version(s): 6.00
 	Operating System: OS/2
 	Flags: ENDUSER | S_LINK

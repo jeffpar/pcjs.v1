@@ -4,8 +4,9 @@ title: "Q35250: MSETUP Installs on Drive Specified"
 permalink: /pubs/pc/reference/microsoft/kb/Q35250/
 ---
 
+## Q35250: MSETUP Installs on Drive Specified
+
 	Article: Q35250
-	Product: Microsoft C
 	Version(s): 6.x 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

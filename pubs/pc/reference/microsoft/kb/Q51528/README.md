@@ -4,8 +4,9 @@ title: "Q51528: Run-Time Function fabs() Is Prototyped in MATH.H"
 permalink: /pubs/pc/reference/microsoft/kb/Q51528/
 ---
 
+## Q51528: Run-Time Function fabs() Is Prototyped in MATH.H
+
 	Article: Q51528
-	Product: Microsoft C
 	Version(s): 2.00 2.01
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr S_QUICKASM

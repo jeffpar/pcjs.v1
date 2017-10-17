@@ -4,8 +4,9 @@ title: "Q41674: QuickC 2.00 README.DOC: QCL Command-Line Options for OS/2"
 permalink: /pubs/pc/reference/microsoft/kb/Q41674/
 ---
 
+## Q41674: QuickC 2.00 README.DOC: QCL Command-Line Options for OS/2
+
 	Article: Q41674
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

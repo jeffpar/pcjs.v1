@@ -4,8 +4,9 @@ title: "Q65241: CV Limits Input of Period Character (2Eh) into Memory Window"
 permalink: /pubs/pc/reference/microsoft/kb/Q65241/
 ---
 
+## Q65241: CV Limits Input of Period Character (2Eh) into Memory Window
+
 	Article: Q65241
-	Product: Microsoft C
 	Version(s): 3.00 3.10 | 3.00 3.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | buglist3.00 buglist3.10 decimal point dot

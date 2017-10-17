@@ -4,8 +4,9 @@ title: "Q61967: Using /help Option with RM.EXE Displays EXP.EXE Online Help"
 permalink: /pubs/pc/reference/microsoft/kb/Q61967/
 ---
 
+## Q61967: Using /help Option with RM.EXE Displays EXP.EXE Online Help
+
 	Article: Q61967
-	Product: Microsoft C
 	Version(s): 1.01   | 1.01
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | s_rm s_pwb s_editor docerr

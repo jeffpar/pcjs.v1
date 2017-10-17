@@ -4,8 +4,9 @@ title: "Q32285: EXEC Problem with the Novell Network"
 permalink: /pubs/pc/reference/microsoft/kb/Q32285/
 ---
 
+## Q32285: EXEC Problem with the Novell Network
+
 	Article: Q32285
-	Product: Microsoft C
 	Version(s): 4.00 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER |

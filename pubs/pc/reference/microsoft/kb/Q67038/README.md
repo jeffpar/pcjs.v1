@@ -4,8 +4,9 @@ title: "Q67038: Inline Assembly Won't Allow Expressions for the TYPE Operator"
 permalink: /pubs/pc/reference/microsoft/kb/Q67038/
 ---
 
+## Q67038: Inline Assembly Won't Allow Expressions for the TYPE Operator
+
 	Article: Q67038
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | S_QUICKC

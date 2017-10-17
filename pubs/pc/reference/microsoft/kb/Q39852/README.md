@@ -4,8 +4,9 @@ title: "Q39852: Error C2086: Redefinition Caused by Forward Reference"
 permalink: /pubs/pc/reference/microsoft/kb/Q39852/
 ---
 
+## Q39852: Error C2086: Redefinition Caused by Forward Reference
+
 	Article: Q39852
-	Product: Microsoft C
 	Version(s): 1.00 1.01 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q41675: QuickC 2.00 README.DOC: Searching for OS/2 Include Files"
 permalink: /pubs/pc/reference/microsoft/kb/Q41675/
 ---
 
+## Q41675: QuickC 2.00 README.DOC: Searching for OS/2 Include Files
+
 	Article: Q41675
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

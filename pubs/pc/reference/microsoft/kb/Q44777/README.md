@@ -4,8 +4,9 @@ title: "Q44777: NMAKE Uses &quot;makefile &quot; Ignoring File Name on Command L
 permalink: /pubs/pc/reference/microsoft/kb/Q44777/
 ---
 
+## Q44777: NMAKE Uses &quot;makefile &quot; Ignoring File Name on Command Line
+
 	Article: Q44777
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QuickC

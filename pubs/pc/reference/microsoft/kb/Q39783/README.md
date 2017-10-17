@@ -4,8 +4,9 @@ title: "Q39783: Example of Using Formatting with _outtext"
 permalink: /pubs/pc/reference/microsoft/kb/Q39783/
 ---
 
+## Q39783: Example of Using Formatting with _outtext
+
 	Article: Q39783
-	Product: Microsoft C
 	Version(s): 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QUICKC

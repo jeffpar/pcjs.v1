@@ -4,8 +4,9 @@ title: "Q66430: C1001: Internal Compiler Error: @(#)exphelp.c:1.115, Line 391"
 permalink: /pubs/pc/reference/microsoft/kb/Q66430/
 ---
 
+## Q66430: C1001: Internal Compiler Error: @(#)exphelp.c:1.115, Line 391
+
 	Article: Q66430
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist6.00 fixlist6.00a

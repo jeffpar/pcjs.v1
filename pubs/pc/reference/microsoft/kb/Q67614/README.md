@@ -4,8 +4,9 @@ title: "Q67614: PWB Menu Hyperlink in PWB.HLP is Inconsistent in Version 1.10"
 permalink: /pubs/pc/reference/microsoft/kb/Q67614/
 ---
 
+## Q67614: PWB Menu Hyperlink in PWB.HLP is Inconsistent in Version 1.10
+
 	Article: Q67614
-	Product: Microsoft C
 	Version(s): 1.10   | 1.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

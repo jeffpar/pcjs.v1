@@ -4,8 +4,9 @@ title: "Q43587: Why _setvideomode() May Fail to Set Some Modes"
 permalink: /pubs/pc/reference/microsoft/kb/Q43587/
 ---
 
+## Q43587: Why _setvideomode() May Fail to Set Some Modes
+
 	Article: Q43587
-	Product: Microsoft C
 	Version(s): 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QUICKC setvideomode _setvideomode

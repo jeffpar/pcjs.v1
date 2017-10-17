@@ -4,8 +4,9 @@ title: "Q23903: Too Much Data or Mixing Memory Models Causes &quot;Fixup Overflo
 permalink: /pubs/pc/reference/microsoft/kb/Q23903/
 ---
 
+## Q23903: Too Much Data or Mixing Memory Models Causes &quot;Fixup Overflow&quot;
+
 	Article: Q23903
-	Product: Microsoft C
 	Version(s): 3.00 4.00 5.00 5.10 6.00 6.00a | 5.10 6.00 6.00a
 	Operating System: MS-DOS                         | OS/2
 	Flags: ENDUSER | s_quickc

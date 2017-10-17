@@ -4,8 +4,9 @@ title: "Q59893: Multithreaded Run-Time Libraries Require 40 File Handles"
 permalink: /pubs/pc/reference/microsoft/kb/Q59893/
 ---
 
+## Q59893: Multithreaded Run-Time Libraries Require 40 File Handles
+
 	Article: Q59893
-	Product: Microsoft C
 	Version(s): 5.10 6.00
 	Operating System: OS/2
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q30368: Linking .OBJ Files from Compilers Prior to 5.00 May Give L4051"
 permalink: /pubs/pc/reference/microsoft/kb/Q30368/
 ---
 
+## Q30368: Linking .OBJ Files from Compilers Prior to 5.00 May Give L4051
+
 	Article: Q30368
-	Product: Microsoft C
 	Version(s): 5.00 5.10 6.00 6.00a
 	Operating System: MS-DOS
 	Flags: ENDUSER |

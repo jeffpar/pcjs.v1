@@ -4,8 +4,9 @@ title: "Q67736: &quot;missing ':' in -&gt;&quot; Caused by Control Character"
 permalink: /pubs/pc/reference/microsoft/kb/Q67736/
 ---
 
+## Q67736: &quot;missing ':' in -&gt;&quot; Caused by Control Character
+
 	Article: Q67736
-	Product: Microsoft C
 	Version(s): 1.00 1.10 | 1.00 1.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER |

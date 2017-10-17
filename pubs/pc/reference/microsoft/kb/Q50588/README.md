@@ -4,8 +4,9 @@ title: "Q50588: Controlling the Use of Tabs in the Microsoft Editor"
 permalink: /pubs/pc/reference/microsoft/kb/Q50588/
 ---
 
+## Q50588: Controlling the Use of Tabs in the Microsoft Editor
+
 	Article: Q50588
-	Product: Microsoft C
 	Version(s): 1.00 1.02 | 1.00 1.02
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER |

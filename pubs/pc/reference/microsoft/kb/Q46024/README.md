@@ -4,8 +4,9 @@ title: "Q46024: fopen Will Set errno Values"
 permalink: /pubs/pc/reference/microsoft/kb/Q46024/
 ---
 
+## Q46024: fopen Will Set errno Values
+
 	Article: Q46024
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | docerr

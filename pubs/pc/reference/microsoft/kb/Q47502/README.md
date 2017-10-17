@@ -4,8 +4,9 @@ title: "Q47502: QuickC Can Dimension Arrays Only Up to 0xFFFF Bytes"
 permalink: /pubs/pc/reference/microsoft/kb/Q47502/
 ---
 
+## Q47502: QuickC Can Dimension Arrays Only Up to 0xFFFF Bytes
+
 	Article: Q47502
-	Product: Microsoft C
 	Version(s): 2.00 2.01
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QuickASM

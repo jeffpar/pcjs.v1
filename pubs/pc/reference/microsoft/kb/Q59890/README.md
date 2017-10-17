@@ -4,8 +4,9 @@ title: "Q59890: Minimum Extended Memory (384K) Causes CV 3.00 to Use Extra RAM"
 permalink: /pubs/pc/reference/microsoft/kb/Q59890/
 ---
 
+## Q59890: Minimum Extended Memory (384K) Causes CV 3.00 to Use Extra RAM
+
 	Article: Q59890
-	Product: Microsoft C
 	Version(s): 3.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr HIMEM

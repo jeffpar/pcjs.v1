@@ -4,8 +4,9 @@ title: "Q40680: Why #ifdef and #ifndef Are Used in PGCHART.H"
 permalink: /pubs/pc/reference/microsoft/kb/Q40680/
 ---
 
+## Q40680: Why #ifdef and #ifndef Are Used in PGCHART.H
+
 	Article: Q40680
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q41702: #define Source-Code Line Error in Manual"
 permalink: /pubs/pc/reference/microsoft/kb/Q41702/
 ---
 
+## Q41702: #define Source-Code Line Error in Manual
+
 	Article: Q41702
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr

@@ -4,8 +4,9 @@ title: "Q66051: C 6.00 Optimization Pops Too Much Off Stack in Some Situations"
 permalink: /pubs/pc/reference/microsoft/kb/Q66051/
 ---
 
+## Q66051: C 6.00 Optimization Pops Too Much Off Stack in Some Situations
+
 	Article: Q66051
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist6.00

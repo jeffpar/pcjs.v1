@@ -4,8 +4,9 @@ title: "Q68956: WordPerfect 5.1 and WordStar 6.0 Mouse Support"
 permalink: /pubs/pc/reference/microsoft/kb/Q68956/
 ---
 
+## Q68956: WordPerfect 5.1 and WordStar 6.0 Mouse Support
+
 	Article: Q68956
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | word processor

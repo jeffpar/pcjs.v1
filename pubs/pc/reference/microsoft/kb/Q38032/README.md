@@ -4,8 +4,9 @@ title: "Q38032: Differences among QuickC Versions 2.00, 1.00, and 1.01"
 permalink: /pubs/pc/reference/microsoft/kb/Q38032/
 ---
 
+## Q38032: Differences among QuickC Versions 2.00, 1.00, and 1.01
+
 	Article: Q38032
-	Product: Microsoft C
 	Version(s): 1.00 1.01 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q29825: Structure Packing: /Zp4 or #pragma pack(4), and /Zp2"
 permalink: /pubs/pc/reference/microsoft/kb/Q29825/
 ---
 
+## Q29825: Structure Packing: /Zp4 or #pragma pack(4), and /Zp2
+
 	Article: Q29825
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | docerr

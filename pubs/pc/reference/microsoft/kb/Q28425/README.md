@@ -4,8 +4,9 @@ title: "Q28425: Symphony Mouse Menu Works in Text Mode Only"
 permalink: /pubs/pc/reference/microsoft/kb/Q28425/
 ---
 
+## Q28425: Symphony Mouse Menu Works in Text Mode Only
+
 	Article: Q28425
-	Product: Microsoft C
 	Version(s): 1.0
 	Operating System: MS-DOS
 	Flags: ENDUSER |

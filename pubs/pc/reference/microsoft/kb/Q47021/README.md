@@ -4,8 +4,9 @@ title: "Q47021: VRES Video Modes Have 30 Lines Using Graphics Text Functions"
 permalink: /pubs/pc/reference/microsoft/kb/Q47021/
 ---
 
+## Q47021: VRES Video Modes Have 30 Lines Using Graphics Text Functions
+
 	Article: Q47021
-	Product: Microsoft C
 	Version(s): 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QuickC

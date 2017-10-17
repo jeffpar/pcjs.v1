@@ -4,8 +4,9 @@ title: "Q61236: C 6.00 README: Increasing the Maximum Number of Open Files"
 permalink: /pubs/pc/reference/microsoft/kb/Q61236/
 ---
 
+## Q61236: C 6.00 README: Increasing the Maximum Number of Open Files
+
 	Article: Q61236
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

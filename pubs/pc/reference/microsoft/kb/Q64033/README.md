@@ -4,8 +4,9 @@ title: "Q64033: D2030 Caused by Undefined Identifier in Parameter List"
 permalink: /pubs/pc/reference/microsoft/kb/Q64033/
 ---
 
+## Q64033: D2030 Caused by Undefined Identifier in Parameter List
+
 	Article: Q64033
-	Product: Microsoft C
 	Version(s): 6.00
 	Operating System: OS/2
 	Flags: ENDUSER | buglist6.00

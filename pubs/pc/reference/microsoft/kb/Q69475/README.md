@@ -4,8 +4,9 @@ title: "Q69475: How to Increase the Size of the PWB Build Status Box Under DOS"
 permalink: /pubs/pc/reference/microsoft/kb/Q69475/
 ---
 
+## Q69475: How to Increase the Size of the PWB Build Status Box Under DOS
+
 	Article: Q69475
-	Product: Microsoft C
 	Version(s): 1.00 1.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | window dialog

@@ -4,8 +4,9 @@ title: "Q35142: Weitek WTL 1167 Math Coprocessor Support"
 permalink: /pubs/pc/reference/microsoft/kb/Q35142/
 ---
 
+## Q35142: Weitek WTL 1167 Math Coprocessor Support
+
 	Article: Q35142
-	Product: Microsoft C
 	Version(s): 5.x    | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

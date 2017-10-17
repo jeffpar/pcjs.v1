@@ -4,8 +4,9 @@ title: "Q41479: QuickC 2.00 README.DOC: About Directories"
 permalink: /pubs/pc/reference/microsoft/kb/Q41479/
 ---
 
+## Q41479: QuickC 2.00 README.DOC: About Directories
+
 	Article: Q41479
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

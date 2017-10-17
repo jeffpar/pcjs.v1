@@ -4,8 +4,9 @@ title: "Q31491: Parentheses Matching in Microsoft Editor; Arg Meta PBal"
 permalink: /pubs/pc/reference/microsoft/kb/Q31491/
 ---
 
+## Q31491: Parentheses Matching in Microsoft Editor; Arg Meta PBal
+
 	Article: Q31491
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: OS/2
 	Flags: ENDUSER | tar63957

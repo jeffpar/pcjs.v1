@@ -4,8 +4,9 @@ title: "Q51768: spawn Ignores arg0 with DOS 3.00 and Later"
 permalink: /pubs/pc/reference/microsoft/kb/Q51768/
 ---
 
+## Q51768: spawn Ignores arg0 with DOS 3.00 and Later
+
 	Article: Q51768
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QuickC S_QuickASM

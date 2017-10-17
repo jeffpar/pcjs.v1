@@ -4,8 +4,9 @@ title: "Q67356: C4127 Warning Message May Be Generated with Loop Optimization"
 permalink: /pubs/pc/reference/microsoft/kb/Q67356/
 ---
 
+## Q67356: C4127 Warning Message May Be Generated with Loop Optimization
+
 	Article: Q67356
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER |

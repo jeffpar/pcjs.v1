@@ -4,8 +4,9 @@ title: "Q28740: Obtaining Hosiden Connectors Used with the Bus Mouse"
 permalink: /pubs/pc/reference/microsoft/kb/Q28740/
 ---
 
+## Q28740: Obtaining Hosiden Connectors Used with the Bus Mouse
+
 	Article: Q28740
-	Product: Microsoft C
 	Version(s): 6.0 6.02 6.10 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

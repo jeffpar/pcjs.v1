@@ -4,8 +4,9 @@ title: "Q38283: Example Incorrect on Page 373 of C Run-Time Library Reference"
 permalink: /pubs/pc/reference/microsoft/kb/Q38283/
 ---
 
+## Q38283: Example Incorrect on Page 373 of C Run-Time Library Reference
+
 	Article: Q38283
-	Product: Microsoft C
 	Version(s): 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr

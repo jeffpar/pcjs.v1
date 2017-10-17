@@ -4,8 +4,9 @@ title: "Q41478: Library Sizes for QuickC 2.00"
 permalink: /pubs/pc/reference/microsoft/kb/Q41478/
 ---
 
+## Q41478: Library Sizes for QuickC 2.00
+
 	Article: Q41478
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | SLIBCE MLIBCE CLIBCE LLIBCE SLIBC7 MLIBC7 CLIBC7 LLIBC7

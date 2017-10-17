@@ -4,8 +4,9 @@ title: "Q43008: Debug Does Not Display Changes Made by _dos_setvect()"
 permalink: /pubs/pc/reference/microsoft/kb/Q43008/
 ---
 
+## Q43008: Debug Does Not Display Changes Made by _dos_setvect()
+
 	Article: Q43008
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |  buglist2.00

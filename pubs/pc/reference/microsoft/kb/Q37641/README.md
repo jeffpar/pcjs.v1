@@ -4,8 +4,9 @@ title: "Q37641: Different OS/2 Libraries: DOSCALLS.LIB OS2.LIB API.LIB"
 permalink: /pubs/pc/reference/microsoft/kb/Q37641/
 ---
 
+## Q37641: Different OS/2 Libraries: DOSCALLS.LIB OS2.LIB API.LIB
+
 	Article: Q37641
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q33364: Small-Memory Model and Far Routines"
 permalink: /pubs/pc/reference/microsoft/kb/Q33364/
 ---
 
+## Q33364: Small-Memory Model and Far Routines
+
 	Article: Q33364
-	Product: Microsoft C
 	Version(s): 4.00 5.00 5.10 | 5.10
 	Operating System: MS-DOS         | 5.10
 	Flags: ENDUSER |

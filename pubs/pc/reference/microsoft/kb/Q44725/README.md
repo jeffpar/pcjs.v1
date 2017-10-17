@@ -4,8 +4,9 @@ title: "Q44725: printf() and 512-Byte I/O Buffer"
 permalink: /pubs/pc/reference/microsoft/kb/Q44725/
 ---
 
+## Q44725: printf() and 512-Byte I/O Buffer
+
 	Article: Q44725
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | S_QuickC

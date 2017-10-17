@@ -4,8 +4,9 @@ title: "Q63235: L4050 Incorrectly Documented in Online Help"
 permalink: /pubs/pc/reference/microsoft/kb/Q63235/
 ---
 
+## Q63235: L4050 Incorrectly Documented in Online Help
+
 	Article: Q63235
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | docerr buglist5.10 S_PWB

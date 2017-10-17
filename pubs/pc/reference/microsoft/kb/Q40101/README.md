@@ -4,8 +4,9 @@ title: "Q40101: Using C within _asm Blocks of Assembly Code"
 permalink: /pubs/pc/reference/microsoft/kb/Q40101/
 ---
 
+## Q40101: Using C within _asm Blocks of Assembly Code
+
 	Article: Q40101
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

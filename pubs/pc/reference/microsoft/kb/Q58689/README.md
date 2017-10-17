@@ -4,8 +4,9 @@ title: "Q58689: Linking Method May Result in Unexpected Increase in .EXE Size"
 permalink: /pubs/pc/reference/microsoft/kb/Q58689/
 ---
 
+## Q58689: Linking Method May Result in Unexpected Increase in .EXE Size
+
 	Article: Q58689
-	Product: Microsoft C
 	Version(s): 3.x 4.06 4.07 5.01.21 5.03 | 5.01.21 5.03
 	Operating System: MS-DOS                     | OS/2
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q66310: C4093 Can Be Caused by MASM-Style Comments in _asm Code"
 permalink: /pubs/pc/reference/microsoft/kb/Q66310/
 ---
 
+## Q66310: C4093 Can Be Caused by MASM-Style Comments in _asm Code
+
 	Article: Q66310
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist6.00

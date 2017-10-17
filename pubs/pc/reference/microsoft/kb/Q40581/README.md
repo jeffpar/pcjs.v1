@@ -4,8 +4,9 @@ title: "Q40581: Overlays and BINDing Are Not Compatible"
 permalink: /pubs/pc/reference/microsoft/kb/Q40581/
 ---
 
+## Q40581: Overlays and BINDing Are Not Compatible
+
 	Article: Q40581
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

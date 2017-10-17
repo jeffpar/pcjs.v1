@@ -4,8 +4,9 @@ title: "Q61194: C 6.00 README: CL, LINK Environment Variables Work As Before"
 permalink: /pubs/pc/reference/microsoft/kb/Q61194/
 ---
 
+## Q61194: C 6.00 README: CL, LINK Environment Variables Work As Before
+
 	Article: Q61194
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

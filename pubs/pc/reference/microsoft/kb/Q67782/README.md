@@ -4,8 +4,9 @@ title: "Q67782: /MT Cannot Be Mixed with /FPa As Shown on Page 370 of APT"
 permalink: /pubs/pc/reference/microsoft/kb/Q67782/
 ---
 
+## Q67782: /MT Cannot Be Mixed with /FPa As Shown on Page 370 of APT
+
 	Article: Q67782
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | docerr

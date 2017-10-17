@@ -4,8 +4,9 @@ title: "Q30826: How to Load a C Extension that Is Not in Current Directory"
 permalink: /pubs/pc/reference/microsoft/kb/Q30826/
 ---
 
+## Q30826: How to Load a C Extension that Is Not in Current Directory
+
 	Article: Q30826
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: OS/2
 	Flags: ENDUSER | TAR75933 docerr

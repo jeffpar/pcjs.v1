@@ -4,8 +4,9 @@ title: "Q44009: C2097 Attempt to Initialize Short Address with Long Address"
 permalink: /pubs/pc/reference/microsoft/kb/Q44009/
 ---
 
+## Q44009: C2097 Attempt to Initialize Short Address with Long Address
+
 	Article: Q44009
-	Product: Microsoft C
 	Version(s): 1.01 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

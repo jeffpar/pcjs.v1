@@ -4,8 +4,9 @@ title: "Q50644: Adding helpwindow in TOOLS.INI as a Switch"
 permalink: /pubs/pc/reference/microsoft/kb/Q50644/
 ---
 
+## Q50644: Adding helpwindow in TOOLS.INI as a Switch
+
 	Article: Q50644
-	Product: Microsoft C
 	Version(s): 1.02   | 1.02
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

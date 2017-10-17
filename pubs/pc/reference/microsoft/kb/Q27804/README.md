@@ -4,8 +4,9 @@ title: "Q27804: The struct videoconfig Declaration"
 permalink: /pubs/pc/reference/microsoft/kb/Q27804/
 ---
 
+## Q27804: The struct videoconfig Declaration
+
 	Article: Q27804
-	Product: Microsoft C
 	Version(s): 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr

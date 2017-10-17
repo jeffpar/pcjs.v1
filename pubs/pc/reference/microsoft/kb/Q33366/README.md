@@ -4,8 +4,9 @@ title: "Q33366: How _fheapwalk() Checks the Heap"
 permalink: /pubs/pc/reference/microsoft/kb/Q33366/
 ---
 
+## Q33366: How _fheapwalk() Checks the Heap
+
 	Article: Q33366
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER |

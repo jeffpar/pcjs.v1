@@ -4,8 +4,9 @@ title: "Q50712: Run-Time Routines Assume That Direction Flag Is Clear in C"
 permalink: /pubs/pc/reference/microsoft/kb/Q50712/
 ---
 
+## Q50712: Run-Time Routines Assume That Direction Flag Is Clear in C
+
 	Article: Q50712
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | DOCERR S_QUICKC S_QUICKASM

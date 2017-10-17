@@ -4,8 +4,9 @@ title: "Q12230: IRQ Settings and Mouse Installation"
 permalink: /pubs/pc/reference/microsoft/kb/Q12230/
 ---
 
+## Q12230: IRQ Settings and Mouse Installation
+
 	Article: Q12230
-	Product: Microsoft C
 	Version(s): 1.x 2.x 3.x 4.x 5.x 6.x 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

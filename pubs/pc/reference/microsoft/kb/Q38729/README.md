@@ -4,8 +4,9 @@ title: "Q38729: Mixing Old Declarations with Prototypes Causes Passing Errors"
 permalink: /pubs/pc/reference/microsoft/kb/Q38729/
 ---
 
+## Q38729: Mixing Old Declarations with Prototypes Causes Passing Errors
+
 	Article: Q38729
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | SR# G881107-5854

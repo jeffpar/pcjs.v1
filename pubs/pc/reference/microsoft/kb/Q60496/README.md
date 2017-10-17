@@ -4,8 +4,9 @@ title: "Q60496: FORTRAN 5.00 and C 6.00 Mixed-Language Considerations"
 permalink: /pubs/pc/reference/microsoft/kb/Q60496/
 ---
 
+## Q60496: FORTRAN 5.00 and C 6.00 Mixed-Language Considerations
+
 	Article: Q60496
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | h_fortran

@@ -4,8 +4,9 @@ title: "Q61572: SYS2070 Issued When Executing PWB.EXE for the First Time"
 permalink: /pubs/pc/reference/microsoft/kb/Q61572/
 ---
 
+## Q61572: SYS2070 Issued When Executing PWB.EXE for the First Time
+
 	Article: Q61572
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: OS/2
 	Flags: ENDUSER |

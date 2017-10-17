@@ -4,8 +4,9 @@ title: "Q60488: Apparent Failure of _memavl() Caused by printf() Allocation"
 permalink: /pubs/pc/reference/microsoft/kb/Q60488/
 ---
 
+## Q60488: Apparent Failure of _memavl() Caused by printf() Allocation
+
 	Article: Q60488
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER|

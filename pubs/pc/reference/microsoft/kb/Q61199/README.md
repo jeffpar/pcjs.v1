@@ -4,8 +4,9 @@ title: "Q61199: C 6.00 README: New /BATCH Option"
 permalink: /pubs/pc/reference/microsoft/kb/Q61199/
 ---
 
+## Q61199: C 6.00 README: New /BATCH Option
+
 	Article: Q61199
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

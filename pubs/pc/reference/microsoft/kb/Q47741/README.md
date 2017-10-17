@@ -4,8 +4,9 @@ title: "Q47741: Closing stdprn and stdaux May Not Increase Available Handles"
 permalink: /pubs/pc/reference/microsoft/kb/Q47741/
 ---
 
+## Q47741: Closing stdprn and stdaux May Not Increase Available Handles
+
 	Article: Q47741
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | SR# G890728-23559

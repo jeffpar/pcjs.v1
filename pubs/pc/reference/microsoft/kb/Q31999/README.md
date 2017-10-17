@@ -4,8 +4,9 @@ title: "Q31999: Linker Outputs Information with Invalid Object Module"
 permalink: /pubs/pc/reference/microsoft/kb/Q31999/
 ---
 
+## Q31999: Linker Outputs Information with Invalid Object Module
+
 	Article: Q31999
-	Product: Microsoft C
 	Version(s): 3.x 5.01.20 5.01.21
 	Operating System: MS-DOS
 	Flags: ENDUSER |

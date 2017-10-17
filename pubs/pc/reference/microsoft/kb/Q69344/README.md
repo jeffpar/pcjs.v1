@@ -4,8 +4,9 @@ title: "Q69344: Promotion of char to int May Add Two Hex Digits in printf()"
 permalink: /pubs/pc/reference/microsoft/kb/Q69344/
 ---
 
+## Q69344: Promotion of char to int May Add Two Hex Digits in printf()
+
 	Article: Q69344
-	Product: Microsoft C
 	Version(s): 5.00 5.10 6.00 6.00a | 5.10 6.00 6.00a
 	Operating System: MS-DOS               | OS/2
 	Flags: ENDUSER | s_quickc hexidecimal conversion

@@ -4,8 +4,9 @@ title: "Q64874: Use Supplied Batch Files to Recompile Start-Up Code"
 permalink: /pubs/pc/reference/microsoft/kb/Q64874/
 ---
 
+## Q64874: Use Supplied Batch Files to Recompile Start-Up Code
+
 	Article: Q64874
-	Product: Microsoft C
 	Version(s): 6.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | SR# S900710-95

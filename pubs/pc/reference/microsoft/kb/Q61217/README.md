@@ -4,8 +4,9 @@ title: "Q61217: C 6.00 README: Customizing PWB Program Lists"
 permalink: /pubs/pc/reference/microsoft/kb/Q61217/
 ---
 
+## Q61217: C 6.00 README: Customizing PWB Program Lists
+
 	Article: Q61217
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

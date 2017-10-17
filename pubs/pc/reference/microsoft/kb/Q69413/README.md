@@ -4,8 +4,9 @@ title: "Q69413: C1001: Internal Compiler Error: regMD.c, Lines 3101 and 3074"
 permalink: /pubs/pc/reference/microsoft/kb/Q69413/
 ---
 
+## Q69413: C1001: Internal Compiler Error: regMD.c, Lines 3101 and 3074
+
 	Article: Q69413
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | buglist6.00 buglist6.00a

@@ -4,8 +4,9 @@ title: "Q51225: How to Define, Display Graphics Mouse Cursor in FORTRAN 5.00"
 permalink: /pubs/pc/reference/microsoft/kb/Q51225/
 ---
 
+## Q51225: How to Define, Display Graphics Mouse Cursor in FORTRAN 5.00
+
 	Article: Q51225
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | H_fortran

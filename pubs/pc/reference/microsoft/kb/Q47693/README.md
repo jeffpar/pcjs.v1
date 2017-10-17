@@ -4,8 +4,9 @@ title: "Q47693: Initializing Unions Initializes the First Member of the Union"
 permalink: /pubs/pc/reference/microsoft/kb/Q47693/
 ---
 
+## Q47693: Initializing Unions Initializes the First Member of the Union
+
 	Article: Q47693
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | S_QuickC S_QuickASM

@@ -4,8 +4,9 @@ title: "Q41655: QuickC 2.00 README.DOC: Creating a .COM File (/BI)"
 permalink: /pubs/pc/reference/microsoft/kb/Q41655/
 ---
 
+## Q41655: QuickC 2.00 README.DOC: Creating a .COM File (/BI)
+
 	Article: Q41655
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

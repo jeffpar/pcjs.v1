@@ -4,8 +4,9 @@ title: "Q47035: QC 2.00: Watch Values on Float Pointers Show char String"
 permalink: /pubs/pc/reference/microsoft/kb/Q47035/
 ---
 
+## Q47035: QC 2.00: Watch Values on Float Pointers Show char String
+
 	Article: Q47035
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist2.00

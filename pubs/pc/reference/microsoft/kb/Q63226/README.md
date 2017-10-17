@@ -4,8 +4,9 @@ title: "Q63226: Internal Processing Error and OS2MOUSE.V12 with Mouse"
 permalink: /pubs/pc/reference/microsoft/kb/Q63226/
 ---
 
+## Q63226: Internal Processing Error and OS2MOUSE.V12 with Mouse
+
 	Article: Q63226
-	Product: Microsoft C
 	Version(s): 1.20
 	Operating System: OS/2
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q50334: atexit() Returns Zero if Successful"
 permalink: /pubs/pc/reference/microsoft/kb/Q50334/
 ---
 
+## Q50334: atexit() Returns Zero if Successful
+
 	Article: Q50334
-	Product: Microsoft C
 	Version(s): 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER| | docerr S_QuickC

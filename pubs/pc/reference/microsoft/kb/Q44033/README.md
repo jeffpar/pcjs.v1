@@ -4,8 +4,9 @@ title: "Q44033: DOS Append Interfaces with execvp() in C"
 permalink: /pubs/pc/reference/microsoft/kb/Q44033/
 ---
 
+## Q44033: DOS Append Interfaces with execvp() in C
+
 	Article: Q44033
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER |

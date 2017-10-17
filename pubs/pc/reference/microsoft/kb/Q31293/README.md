@@ -4,8 +4,9 @@ title: "Q31293: Using Mouse Menus with WordPerfect Version 5.00"
 permalink: /pubs/pc/reference/microsoft/kb/Q31293/
 ---
 
+## Q31293: Using Mouse Menus with WordPerfect Version 5.00
+
 	Article: Q31293
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q45219: _ERESNOCOLOR Is a Monochrome/Graphics Mode"
 permalink: /pubs/pc/reference/microsoft/kb/Q45219/
 ---
 
+## Q45219: _ERESNOCOLOR Is a Monochrome/Graphics Mode
+
 	Article: Q45219
-	Product: Microsoft C
 	Version(s): 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr

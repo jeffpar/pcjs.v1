@@ -4,8 +4,9 @@ title: "Q44130: Modifications for an Existing Make File Used with MAKE"
 permalink: /pubs/pc/reference/microsoft/kb/Q44130/
 ---
 
+## Q44130: Modifications for an Existing Make File Used with MAKE
+
 	Article: Q44130
-	Product: Microsoft C
 	Version(s): 1.00   | 1.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | s_quickc  s_c  h_FORTRAN

@@ -4,8 +4,9 @@ title: "Q19972: Jumping into the Middle of a For Loop Is Not Recommended"
 permalink: /pubs/pc/reference/microsoft/kb/Q19972/
 ---
 
+## Q19972: Jumping into the Middle of a For Loop Is Not Recommended
+
 	Article: Q19972
-	Product: Microsoft C
 	Version(s): 3.00 4.00 5.00 5.10 6.00 6.00a | 5.10 6.00 6.00a
 	Operating System: MS-DOS                         | OS/2
 	Flags: ENDUSER | s_quickc

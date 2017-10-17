@@ -4,8 +4,9 @@ title: "Q44793: Using Third-Party Libraries Produced for C Version 4.00"
 permalink: /pubs/pc/reference/microsoft/kb/Q44793/
 ---
 
+## Q44793: Using Third-Party Libraries Produced for C Version 4.00
+
 	Article: Q44793
-	Product: Microsoft C
 	Version(s): 4.00 5.00 5.10 | 5.10
 	Operating System: MS-DOS         | OS/2
 	Flags: ENDUSER | S_QuickC

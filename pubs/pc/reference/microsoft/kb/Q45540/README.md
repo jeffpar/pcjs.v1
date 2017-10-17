@@ -4,8 +4,9 @@ title: "Q45540: Bad Library Environment Field Can Cause L1002"
 permalink: /pubs/pc/reference/microsoft/kb/Q45540/
 ---
 
+## Q45540: Bad Library Environment Field Can Cause L1002
+
 	Article: Q45540
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

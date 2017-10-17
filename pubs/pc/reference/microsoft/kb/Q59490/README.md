@@ -4,8 +4,9 @@ title: "Q59490: Errors When Space Exists Between Macro Name and Parameters"
 permalink: /pubs/pc/reference/microsoft/kb/Q59490/
 ---
 
+## Q59490: Errors When Space Exists Between Macro Name and Parameters
+
 	Article: Q59490
-	Product: Microsoft C
 	Version(s): 4.x 5.00 5.10 | 5.10
 	Operating System: MS-DOS        | OS/2
 	Flags: ENDUSER | s_quickc s_quickasm

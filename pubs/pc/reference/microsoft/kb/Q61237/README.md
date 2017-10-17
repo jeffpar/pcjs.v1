@@ -4,8 +4,9 @@ title: "Q61237: C 6.00 README: Multithread (MT) and Dynamic-Link Library (DLL)"
 permalink: /pubs/pc/reference/microsoft/kb/Q61237/
 ---
 
+## Q61237: C 6.00 README: Multithread (MT) and Dynamic-Link Library (DLL)
+
 	Article: Q61237
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

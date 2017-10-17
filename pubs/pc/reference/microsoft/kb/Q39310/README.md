@@ -4,8 +4,9 @@ title: "Q39310: Selective Initialization of Array Elements Not Allowed"
 permalink: /pubs/pc/reference/microsoft/kb/Q39310/
 ---
 
+## Q39310: Selective Initialization of Array Elements Not Allowed
+
 	Article: Q39310
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

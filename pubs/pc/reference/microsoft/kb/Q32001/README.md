@@ -4,8 +4,9 @@ title: "Q32001: Explanation of a MAP File"
 permalink: /pubs/pc/reference/microsoft/kb/Q32001/
 ---
 
+## Q32001: Explanation of a MAP File
+
 	Article: Q32001
-	Product: Microsoft C
 	Version(s): 3.x 5.01.20 5.01.21
 	Operating System: MS-DOS
 	Flags: ENDUSER |

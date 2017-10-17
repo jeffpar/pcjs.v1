@@ -4,8 +4,9 @@ title: "Q43488: QuickC: GRDEMO Sample Program Gives Run-Time Error R6003"
 permalink: /pubs/pc/reference/microsoft/kb/Q43488/
 ---
 
+## Q43488: QuickC: GRDEMO Sample Program Gives Run-Time Error R6003
+
 	Article: Q43488
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr

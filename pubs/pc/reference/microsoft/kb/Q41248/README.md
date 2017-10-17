@@ -4,8 +4,9 @@ title: "Q41248: Floppy Setup Only Installs the Libraries"
 permalink: /pubs/pc/reference/microsoft/kb/Q41248/
 ---
 
+## Q41248: Floppy Setup Only Installs the Libraries
+
 	Article: Q41248
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr

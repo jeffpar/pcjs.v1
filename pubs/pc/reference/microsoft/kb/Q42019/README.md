@@ -4,8 +4,9 @@ title: "Q42019: Missing Closing &quot;)&quot; on Macro Causes C1004 Unexpected-E
 permalink: /pubs/pc/reference/microsoft/kb/Q42019/
 ---
 
+## Q42019: Missing Closing &quot;)&quot; on Macro Causes C1004 Unexpected-EOF Error
+
 	Article: Q42019
-	Product: Microsoft C
 	Version(s): 5.10    | 5.10
 	Operating System: MS-DOS  | OS/2
 	Flags: ENDUSER | s_quickc

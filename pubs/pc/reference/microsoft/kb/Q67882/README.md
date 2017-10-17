@@ -4,8 +4,9 @@ title: "Q67882: Error C2213 Occurs When Base Is an Expression"
 permalink: /pubs/pc/reference/microsoft/kb/Q67882/
 ---
 
+## Q67882: Error C2213 Occurs When Base Is an Expression
+
 	Article: Q67882
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | docerr

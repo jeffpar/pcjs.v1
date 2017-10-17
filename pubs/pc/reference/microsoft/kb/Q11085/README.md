@@ -4,8 +4,9 @@ title: "Q11085: Text Mode Problem with Mouse Version 3.00"
 permalink: /pubs/pc/reference/microsoft/kb/Q11085/
 ---
 
+## Q11085: Text Mode Problem with Mouse Version 3.00
+
 	Article: Q11085
-	Product: Microsoft C
 	Version(s): 3.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist3.00 fixlist4.00

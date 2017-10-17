@@ -4,8 +4,9 @@ title: "Q51613: The /Gm Switch Really Does Move Constants to _CONST"
 permalink: /pubs/pc/reference/microsoft/kb/Q51613/
 ---
 
+## Q51613: The /Gm Switch Really Does Move Constants to _CONST
+
 	Article: Q51613
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

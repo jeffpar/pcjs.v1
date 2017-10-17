@@ -4,8 +4,9 @@ title: "Q29842: C 5.10 MTDYNA.DOC: Component Files of MTDYNA Libraries"
 permalink: /pubs/pc/reference/microsoft/kb/Q29842/
 ---
 
+## Q29842: C 5.10 MTDYNA.DOC: Component Files of MTDYNA Libraries
+
 	Article: Q29842
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

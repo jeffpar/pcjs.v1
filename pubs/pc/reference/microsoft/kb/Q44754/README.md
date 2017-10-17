@@ -4,8 +4,9 @@ title: "Q44754: &quot;longjmp&quot; Incorrectly Spelled &quot;longjump&quot; in 
 permalink: /pubs/pc/reference/microsoft/kb/Q44754/
 ---
 
+## Q44754: &quot;longjmp&quot; Incorrectly Spelled &quot;longjump&quot; in QC Advisor Help
+
 	Article: Q44754
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr

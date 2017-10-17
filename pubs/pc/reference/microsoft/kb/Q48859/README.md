@@ -4,8 +4,9 @@ title: "Q48859: NMAKE Version 1.00 with &quot;!&quot; and User and Predefined Ma
 permalink: /pubs/pc/reference/microsoft/kb/Q48859/
 ---
 
+## Q48859: NMAKE Version 1.00 with &quot;!&quot; and User and Predefined Macros
+
 	Article: Q48859
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QuickC buglist1.00 fixlist1.01

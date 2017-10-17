@@ -4,8 +4,9 @@ title: "Q32303: Assert Macro Anomaly; Generating Syntax Errors"
 permalink: /pubs/pc/reference/microsoft/kb/Q32303/
 ---
 
+## Q32303: Assert Macro Anomaly; Generating Syntax Errors
+
 	Article: Q32303
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

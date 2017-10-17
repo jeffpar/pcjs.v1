@@ -4,8 +4,9 @@ title: "Q32064: Mouse, Windows, Desqview, and HP Drawing Gallery"
 permalink: /pubs/pc/reference/microsoft/kb/Q32064/
 ---
 
+## Q32064: Mouse, Windows, Desqview, and HP Drawing Gallery
+
 	Article: Q32064
-	Product: Microsoft C
 	Version(s): 6.00 6.10 6.14
 	Operating System: MS-DOS
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q35523: Reassigning Default Keystrokes for Editor Functions"
 permalink: /pubs/pc/reference/microsoft/kb/Q35523/
 ---
 
+## Q35523: Reassigning Default Keystrokes for Editor Functions
+
 	Article: Q35523
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | appnote

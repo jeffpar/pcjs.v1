@@ -4,8 +4,9 @@ title: "Q43125: Select Whole Word Search to Find Linker Errors"
 permalink: /pubs/pc/reference/microsoft/kb/Q43125/
 ---
 
+## Q43125: Select Whole Word Search to Find Linker Errors
+
 	Article: Q43125
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

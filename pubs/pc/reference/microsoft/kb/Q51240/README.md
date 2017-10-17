@@ -4,8 +4,9 @@ title: "Q51240: Mouse and Renaissance Legacy II Switch Graphics Adapter"
 permalink: /pubs/pc/reference/microsoft/kb/Q51240/
 ---
 
+## Q51240: Mouse and Renaissance Legacy II Switch Graphics Adapter
+
 	Article: Q51240
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

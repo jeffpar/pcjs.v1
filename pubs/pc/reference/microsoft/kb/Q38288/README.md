@@ -4,8 +4,9 @@ title: "Q38288: Can't Debug .COM Files in Source Mode"
 permalink: /pubs/pc/reference/microsoft/kb/Q38288/
 ---
 
+## Q38288: Can't Debug .COM Files in Source Mode
+
 	Article: Q38288
-	Product: Microsoft C
 	Version(s): 2.00 2.10 2.20 2.30
 	Operating System: MS-DOS
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q69012: Use of OFFSET and SEG on Local Variables in Inline Assembly"
 permalink: /pubs/pc/reference/microsoft/kb/Q69012/
 ---
 
+## Q69012: Use of OFFSET and SEG on Local Variables in Inline Assembly
+
 	Article: Q69012
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | s_quickc

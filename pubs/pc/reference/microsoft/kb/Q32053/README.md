@@ -4,8 +4,9 @@ title: "Q32053: Scrolling One Line at a Time"
 permalink: /pubs/pc/reference/microsoft/kb/Q32053/
 ---
 
+## Q32053: Scrolling One Line at a Time
+
 	Article: Q32053
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |  buglist1.00

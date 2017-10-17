@@ -4,8 +4,9 @@ title: "Q39811: No Symbolic Information Generated for Pascal Units"
 permalink: /pubs/pc/reference/microsoft/kb/Q39811/
 ---
 
+## Q39811: No Symbolic Information Generated for Pascal Units
+
 	Article: Q39811
-	Product: Microsoft C
 	Version(s): 2.20   | 2.20
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | s_pascal

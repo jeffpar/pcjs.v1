@@ -4,8 +4,9 @@ title: "Q68445: C1001: Internal Compiler Error: regMD.c, Line 1017"
 permalink: /pubs/pc/reference/microsoft/kb/Q68445/
 ---
 
+## Q68445: C1001: Internal Compiler Error: regMD.c, Line 1017
+
 	Article: Q68445
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | buglist6.00 buglist6.00a

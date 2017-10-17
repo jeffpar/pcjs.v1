@@ -4,8 +4,9 @@ title: "Q42561: SAMPLE.TXT Not Distributed with QuickC 2.00"
 permalink: /pubs/pc/reference/microsoft/kb/Q42561/
 ---
 
+## Q42561: SAMPLE.TXT Not Distributed with QuickC 2.00
+
 	Article: Q42561
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr

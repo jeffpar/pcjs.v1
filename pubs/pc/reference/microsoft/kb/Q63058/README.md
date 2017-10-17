@@ -4,8 +4,9 @@ title: "Q63058: Function Prototype with Undefined Structure Causes Error"
 permalink: /pubs/pc/reference/microsoft/kb/Q63058/
 ---
 
+## Q63058: Function Prototype with Undefined Structure Causes Error
+
 	Article: Q63058
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

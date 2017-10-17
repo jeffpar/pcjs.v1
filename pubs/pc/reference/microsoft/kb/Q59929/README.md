@@ -4,8 +4,9 @@ title: "Q59929: MSETUP Deletes Reference to MOUSE.SYS in CONFIG.SYS"
 permalink: /pubs/pc/reference/microsoft/kb/Q59929/
 ---
 
+## Q59929: MSETUP Deletes Reference to MOUSE.SYS in CONFIG.SYS
+
 	Article: Q59929
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

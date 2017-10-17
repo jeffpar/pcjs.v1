@@ -4,8 +4,9 @@ title: "Q61968: Enabling of Source Browser Menu Related to .BSC and .MAK Files"
 permalink: /pubs/pc/reference/microsoft/kb/Q61968/
 ---
 
+## Q61968: Enabling of Source Browser Menu Related to .BSC and .MAK Files
+
 	Article: Q61968
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

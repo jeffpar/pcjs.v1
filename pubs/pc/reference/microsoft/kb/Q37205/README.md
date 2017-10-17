@@ -4,8 +4,9 @@ title: "Q37205: Operator sizeof Returns Type size_t, Defined as unsigned int"
 permalink: /pubs/pc/reference/microsoft/kb/Q37205/
 ---
 
+## Q37205: Operator sizeof Returns Type size_t, Defined as unsigned int
+
 	Article: Q37205
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | docerr

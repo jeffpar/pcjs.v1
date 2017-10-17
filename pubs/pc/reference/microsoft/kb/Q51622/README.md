@@ -4,8 +4,9 @@ title: "Q51622: mgreplist Incorrectly Documented As megreplist in Example"
 permalink: /pubs/pc/reference/microsoft/kb/Q51622/
 ---
 
+## Q51622: mgreplist Incorrectly Documented As megreplist in Example
+
 	Article: Q51622
-	Product: Microsoft C
 	Version(s): 1.02
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr

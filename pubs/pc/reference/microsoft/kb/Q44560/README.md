@@ -4,8 +4,9 @@ title: "Q44560: More Information on Using _setfont in QuickC"
 permalink: /pubs/pc/reference/microsoft/kb/Q44560/
 ---
 
+## Q44560: More Information on Using _setfont in QuickC
+
 	Article: Q44560
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | FYI

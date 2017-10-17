@@ -4,8 +4,9 @@ title: "Q44640: QuickC Incorrectly Complains Struct/Union Undefined"
 permalink: /pubs/pc/reference/microsoft/kb/Q44640/
 ---
 
+## Q44640: QuickC Incorrectly Complains Struct/Union Undefined
+
 	Article: Q44640
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist2.00

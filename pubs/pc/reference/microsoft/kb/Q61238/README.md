@@ -4,8 +4,9 @@ title: "Q61238: C 6.00 README: 43-Line Mode with DOS 4.01 ANSI.SYS"
 permalink: /pubs/pc/reference/microsoft/kb/Q61238/
 ---
 
+## Q61238: C 6.00 README: 43-Line Mode with DOS 4.01 ANSI.SYS
+
 	Article: Q61238
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

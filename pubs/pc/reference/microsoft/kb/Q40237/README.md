@@ -4,8 +4,9 @@ title: "Q40237: Elaboration of Debug History in QuickC Version 2.00"
 permalink: /pubs/pc/reference/microsoft/kb/Q40237/
 ---
 
+## Q40237: Elaboration of Debug History in QuickC Version 2.00
+
 	Article: Q40237
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: enduser |

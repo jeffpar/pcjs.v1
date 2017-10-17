@@ -4,8 +4,9 @@ title: "Q49315: Parameter Order Incorrect for _pg_chartms, _pg_charscatterms"
 permalink: /pubs/pc/reference/microsoft/kb/Q49315/
 ---
 
+## Q49315: Parameter Order Incorrect for _pg_chartms, _pg_charscatterms
+
 	Article: Q49315
-	Product: Microsoft C
 	Version(s): 2.00 2.01
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr S_QuickAsm

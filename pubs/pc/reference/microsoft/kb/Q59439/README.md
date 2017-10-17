@@ -4,8 +4,9 @@ title: "Q59439: C4071 Can Be Caused by Missing &quot;void&quot; in Function Prot
 permalink: /pubs/pc/reference/microsoft/kb/Q59439/
 ---
 
+## Q59439: C4071 Can Be Caused by Missing &quot;void&quot; in Function Prototype
+
 	Article: Q59439
-	Product: Microsoft C
 	Version(s): 5.00 5.10 6.00 | 5.00 5.10 6.00
 	Operating System: MS-DOS         | OS/2
 	Flags: ENDUSER | s_quickc

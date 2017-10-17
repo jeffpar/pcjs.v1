@@ -4,8 +4,9 @@ title: "Q50950: How and When to Specify Stack Size (Clarification)"
 permalink: /pubs/pc/reference/microsoft/kb/Q50950/
 ---
 
+## Q50950: How and When to Specify Stack Size (Clarification)
+
 	Article: Q50950
-	Product: Microsoft C
 	Version(s): 3.65 4.06 4.07 | 5.01.21
 	Operating System: MS-DOS         | OS/2
 	Flags: ENDUSER |

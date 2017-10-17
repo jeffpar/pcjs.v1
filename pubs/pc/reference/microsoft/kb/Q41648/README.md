@@ -4,8 +4,9 @@ title: "Q41648: QuickC 2.00 README.DOC: Using Braces in _asm Blocks"
 permalink: /pubs/pc/reference/microsoft/kb/Q41648/
 ---
 
+## Q41648: QuickC 2.00 README.DOC: Using Braces in _asm Blocks
+
 	Article: Q41648
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

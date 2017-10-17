@@ -4,8 +4,9 @@ title: "Q42796: Background Colors Limited to 0 Through 7 in Text Mode"
 permalink: /pubs/pc/reference/microsoft/kb/Q42796/
 ---
 
+## Q42796: Background Colors Limited to 0 Through 7 in Text Mode
+
 	Article: Q42796
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickc

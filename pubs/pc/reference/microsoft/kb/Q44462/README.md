@@ -4,8 +4,9 @@ title: "Q44462: Using ILINK in the Development Process in C"
 permalink: /pubs/pc/reference/microsoft/kb/Q44462/
 ---
 
+## Q44462: Using ILINK in the Development Process in C
+
 	Article: Q44462
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | docerr S_QuickC

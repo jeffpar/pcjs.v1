@@ -4,8 +4,9 @@ title: "Q31801: Editor Utilities DOS Version 2.x and 8086/8 Corrections"
 permalink: /pubs/pc/reference/microsoft/kb/Q31801/
 ---
 
+## Q31801: Editor Utilities DOS Version 2.x and 8086/8 Corrections
+
 	Article: Q31801
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: OS/2
 	Flags: ENDUSER | appnote

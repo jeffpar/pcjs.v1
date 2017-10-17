@@ -4,8 +4,9 @@ title: "Q61315: Mixing Prototype Styles Generates C2059 Syntax Error in C 6.00"
 permalink: /pubs/pc/reference/microsoft/kb/Q61315/
 ---
 
+## Q61315: Mixing Prototype Styles Generates C2059 Syntax Error in C 6.00
+
 	Article: Q61315
-	Product: Microsoft C
 	Version(s): 5.10 6.00 | 5.10 6.00
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | buglist6.00

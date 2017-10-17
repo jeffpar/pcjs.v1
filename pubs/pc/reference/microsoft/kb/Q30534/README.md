@@ -4,8 +4,9 @@ title: "Q30534: M.EXE C Extensions Documented in UTILITY.DOC, Not README.DOC"
 permalink: /pubs/pc/reference/microsoft/kb/Q30534/
 ---
 
+## Q30534: M.EXE C Extensions Documented in UTILITY.DOC, Not README.DOC
+
 	Article: Q30534
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: OS/2
 	Flags: ENDUSER | docerr

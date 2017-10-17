@@ -4,8 +4,9 @@ title: "Q60786: DOSCALLS.LIB Is Not Shipped with C 6.00"
 permalink: /pubs/pc/reference/microsoft/kb/Q60786/
 ---
 
+## Q60786: DOSCALLS.LIB Is Not Shipped with C 6.00
+
 	Article: Q60786
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

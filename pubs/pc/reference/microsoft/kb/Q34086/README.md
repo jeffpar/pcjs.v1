@@ -4,8 +4,9 @@ title: "Q34086: Mouse Menu for Quattro"
 permalink: /pubs/pc/reference/microsoft/kb/Q34086/
 ---
 
+## Q34086: Mouse Menu for Quattro
+
 	Article: Q34086
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q32057: _beginthread()/_endthread() Coding Multi-Threaded Applications"
 permalink: /pubs/pc/reference/microsoft/kb/Q32057/
 ---
 
+## Q32057: _beginthread()/_endthread() Coding Multi-Threaded Applications
+
 	Article: Q32057
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: OS/2
 	Flags: ENDUSER |

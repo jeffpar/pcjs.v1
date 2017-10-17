@@ -4,8 +4,9 @@ title: "Q51833: QuickC Environment Does Not Control Output Scrolling"
 permalink: /pubs/pc/reference/microsoft/kb/Q51833/
 ---
 
+## Q51833: QuickC Environment Does Not Control Output Scrolling
+
 	Article: Q51833
-	Product: Microsoft C
 	Version(s): 1.00 1.01 2.00 2.01
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QUICKASM

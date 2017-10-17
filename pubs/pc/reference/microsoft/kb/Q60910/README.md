@@ -4,8 +4,9 @@ title: "Q60910: _ERESNOCOLOR Should Be Typed M/G, Not M/T"
 permalink: /pubs/pc/reference/microsoft/kb/Q60910/
 ---
 
+## Q60910: _ERESNOCOLOR Should Be Typed M/G, Not M/T
+
 	Article: Q60910
-	Product: Microsoft C
 	Version(s): 5.10 6.00 | 5.10 6.00
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | s_quickc docerr

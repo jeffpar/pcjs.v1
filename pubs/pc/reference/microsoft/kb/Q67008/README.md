@@ -4,8 +4,9 @@ title: "Q67008: Syntax Error When Watching Variables That Begin with &quot;P&quo
 permalink: /pubs/pc/reference/microsoft/kb/Q67008/
 ---
 
+## Q67008: Syntax Error When Watching Variables That Begin with &quot;P&quot;
+
 	Article: Q67008
-	Product: Microsoft C
 	Version(s): 2.20 2.30 | 2.20 2.30
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | buglist2.10 buglist2.20 fixlist3.00

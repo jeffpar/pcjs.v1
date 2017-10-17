@@ -4,8 +4,9 @@ title: "Q51638: QuickC Err Msg: Cannot Load Binary File"
 permalink: /pubs/pc/reference/microsoft/kb/Q51638/
 ---
 
+## Q51638: QuickC Err Msg: Cannot Load Binary File
+
 	Article: Q51638
-	Product: Microsoft C
 	Version(s): 1.00 1.01 2.00 2.01
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickasm buglist1.00 buglist1.01 buglist2.00 buglist2.01

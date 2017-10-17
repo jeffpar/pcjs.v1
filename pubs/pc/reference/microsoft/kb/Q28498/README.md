@@ -4,8 +4,9 @@ title: "Q28498: Installing Windows when Using the PS/2 Mouse Port"
 permalink: /pubs/pc/reference/microsoft/kb/Q28498/
 ---
 
+## Q28498: Installing Windows when Using the PS/2 Mouse Port
+
 	Article: Q28498
-	Product: Microsoft C
 	Version(s): 6.10 1.0
 	Operating System: MS-DOS
 	Flags: ENDUSER |

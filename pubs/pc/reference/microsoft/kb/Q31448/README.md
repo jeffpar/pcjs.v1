@@ -4,8 +4,9 @@ title: "Q31448: Array Index Multiplication with Integers Causes Link Error"
 permalink: /pubs/pc/reference/microsoft/kb/Q31448/
 ---
 
+## Q31448: Array Index Multiplication with Integers Causes Link Error
+
 	Article: Q31448
-	Product: Microsoft C
 	Version(s): 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | TAR77788

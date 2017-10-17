@@ -4,8 +4,9 @@ title: "Q44077: Internal Compiler Error: grammar.c:1.29, Line 108"
 permalink: /pubs/pc/reference/microsoft/kb/Q44077/
 ---
 
+## Q44077: Internal Compiler Error: grammar.c:1.29, Line 108
+
 	Article: Q44077
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist5.10 s_quickc

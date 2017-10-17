@@ -4,8 +4,9 @@ title: "Q38808: Error L1072 Common Area Longer than 65536 Bytes"
 permalink: /pubs/pc/reference/microsoft/kb/Q38808/
 ---
 
+## Q38808: Error L1072 Common Area Longer than 65536 Bytes
+
 	Article: Q38808
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | s_pascal h_fortran h_masm s_quickc s_link s_error

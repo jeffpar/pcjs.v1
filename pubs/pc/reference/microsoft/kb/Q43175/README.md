@@ -4,8 +4,9 @@ title: "Q43175: Bad Code Produced for specific source when optimizations used"
 permalink: /pubs/pc/reference/microsoft/kb/Q43175/
 ---
 
+## Q43175: Bad Code Produced for specific source when optimizations used
+
 	Article: Q43175
-	Product: Microsoft C
 	Version(s): 1.00 1.01 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist1.00 buglist1.01 buglist2.00

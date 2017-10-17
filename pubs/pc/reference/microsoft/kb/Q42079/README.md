@@ -4,8 +4,9 @@ title: "Q42079: Getting 43-line Mode for C and QuickC Graphics"
 permalink: /pubs/pc/reference/microsoft/kb/Q42079/
 ---
 
+## Q42079: Getting 43-line Mode for C and QuickC Graphics
+
 	Article: Q42079
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickc

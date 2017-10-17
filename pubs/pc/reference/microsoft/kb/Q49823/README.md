@@ -4,8 +4,9 @@ title: "Q49823: Inconsistent Use of fscanf %x.xf Formatting May Produce Errors"
 permalink: /pubs/pc/reference/microsoft/kb/Q49823/
 ---
 
+## Q49823: Inconsistent Use of fscanf %x.xf Formatting May Produce Errors
+
 	Article: Q49823
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | S_C S_QuickC

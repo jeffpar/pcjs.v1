@@ -4,8 +4,9 @@ title: "Q35286: MDA Bright Underlined Text Example"
 permalink: /pubs/pc/reference/microsoft/kb/Q35286/
 ---
 
+## Q35286: MDA Bright Underlined Text Example
+
 	Article: Q35286
-	Product: Microsoft C
 	Version(s): 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER |

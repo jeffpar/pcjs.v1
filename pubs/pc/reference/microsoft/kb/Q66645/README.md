@@ -4,8 +4,9 @@ title: "Q66645: C4059 Warning May Be Caused by Errors in OS2DEF.H and PMWIN.H"
 permalink: /pubs/pc/reference/microsoft/kb/Q66645/
 ---
 
+## Q66645: C4059 Warning May Be Caused by Errors in OS2DEF.H and PMWIN.H
+
 	Article: Q66645
-	Product: Microsoft C
 	Version(s): 6.00 6.00a
 	Operating System: OS/2
 	Flags: ENDUSER | buglist6.00 buglist6.00a

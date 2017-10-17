@@ -4,8 +4,9 @@ title: "Q44000: The Editor Can Be Very Slow When MEP Memory Limit Is Pushed"
 permalink: /pubs/pc/reference/microsoft/kb/Q44000/
 ---
 
+## Q44000: The Editor Can Be Very Slow When MEP Memory Limit Is Pushed
+
 	Article: Q44000
-	Product: Microsoft C
 	Version(s): 1.00 1.02
 	Operating System: OS/2
 	Flags: ENDUSER |

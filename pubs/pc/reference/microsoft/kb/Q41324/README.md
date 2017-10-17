@@ -4,8 +4,9 @@ title: "Q41324: QHMEP.DLL Remaps Two Keys in MEP Version 1.00"
 permalink: /pubs/pc/reference/microsoft/kb/Q41324/
 ---
 
+## Q41324: QHMEP.DLL Remaps Two Keys in MEP Version 1.00
+
 	Article: Q41324
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: OS/2
 	Flags: ENDUSER | buglist1.00

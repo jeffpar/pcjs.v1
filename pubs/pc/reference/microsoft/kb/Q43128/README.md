@@ -4,8 +4,9 @@ title: "Q43128: Producing an _TEXT Segment for Multiple Object Modules"
 permalink: /pubs/pc/reference/microsoft/kb/Q43128/
 ---
 
+## Q43128: Producing an _TEXT Segment for Multiple Object Modules
+
 	Article: Q43128
-	Product: Microsoft C
 	Version(s): 3.x 4.06 | 5.01.20 5.01.21
 	Operating System: MS-DOS   | OS/2
 	Flags: ENDUSER | S_C

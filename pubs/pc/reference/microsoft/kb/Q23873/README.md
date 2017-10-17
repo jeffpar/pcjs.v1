@@ -4,8 +4,9 @@ title: "Q23873: R6002 &quot;Floating Point Not Loaded&quot; May Result from prin
 permalink: /pubs/pc/reference/microsoft/kb/Q23873/
 ---
 
+## Q23873: R6002 &quot;Floating Point Not Loaded&quot; May Result from printf() Use
+
 	Article: Q23873
-	Product: Microsoft C
 	Version(s): 3.00 4.00 5.00 5.10 6.00 6.00a | 5.10 6.00 6.00a
 	Operating System: MS-DOS                         | OS/2
 	Flags: ENDUSER | s_quickc

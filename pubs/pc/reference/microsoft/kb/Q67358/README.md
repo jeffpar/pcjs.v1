@@ -4,8 +4,9 @@ title: "Q67358: C1001: Internal Compiler Error: regMD.c, Line 4688"
 permalink: /pubs/pc/reference/microsoft/kb/Q67358/
 ---
 
+## Q67358: C1001: Internal Compiler Error: regMD.c, Line 4688
+
 	Article: Q67358
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | buglist6.00 buglist6.00a

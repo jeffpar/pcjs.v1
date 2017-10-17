@@ -4,8 +4,9 @@ title: "Q37494: Differences in MAKE Files among QuickC 1.00, 1.01, and 2.00"
 permalink: /pubs/pc/reference/microsoft/kb/Q37494/
 ---
 
+## Q37494: Differences in MAKE Files among QuickC 1.00, 1.01, and 2.00
+
 	Article: Q37494
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

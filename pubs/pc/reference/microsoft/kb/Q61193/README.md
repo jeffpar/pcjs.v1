@@ -4,8 +4,9 @@ title: "Q61193: C 6.00 README: Loop Optimization (/Ol) Option Changed"
 permalink: /pubs/pc/reference/microsoft/kb/Q61193/
 ---
 
+## Q61193: C 6.00 README: Loop Optimization (/Ol) Option Changed
+
 	Article: Q61193
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

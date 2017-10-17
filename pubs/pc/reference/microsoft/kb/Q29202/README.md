@@ -4,8 +4,9 @@ title: "Q29202: Mouse Driver Installs but Mouse Does Not Work"
 permalink: /pubs/pc/reference/microsoft/kb/Q29202/
 ---
 
+## Q29202: Mouse Driver Installs but Mouse Does Not Work
+
 	Article: Q29202
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

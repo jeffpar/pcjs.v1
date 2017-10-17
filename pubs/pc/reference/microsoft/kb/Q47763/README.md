@@ -4,8 +4,9 @@ title: "Q47763: CMD.EXE Shell Fails with Incorrect COMSPEC"
 permalink: /pubs/pc/reference/microsoft/kb/Q47763/
 ---
 
+## Q47763: CMD.EXE Shell Fails with Incorrect COMSPEC
+
 	Article: Q47763
-	Product: Microsoft C
 	Version(s): 1.00 1.02
 	Operating System: OS/2
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q37548: Using CodeView to Examine FORTRAN Arrays"
 permalink: /pubs/pc/reference/microsoft/kb/Q37548/
 ---
 
+## Q37548: Using CodeView to Examine FORTRAN Arrays
+
 	Article: Q37548
-	Product: Microsoft C
 	Version(s): 2.20 2.30 | 2.20 2.30
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER |

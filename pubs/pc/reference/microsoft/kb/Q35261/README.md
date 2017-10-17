@@ -4,8 +4,9 @@ title: "Q35261: Macro to Print Part or All of a File from within M"
 permalink: /pubs/pc/reference/microsoft/kb/Q35261/
 ---
 
+## Q35261: Macro to Print Part or All of a File from within M
+
 	Article: Q35261
-	Product: Microsoft C
 	Version(s): 1.00  1.02 | 1.00 1.02
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER |

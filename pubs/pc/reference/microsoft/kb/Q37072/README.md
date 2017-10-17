@@ -4,8 +4,9 @@ title: "Q37072: meta Anomalous Behavior"
 permalink: /pubs/pc/reference/microsoft/kb/Q37072/
 ---
 
+## Q37072: meta Anomalous Behavior
+
 	Article: Q37072
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist1.00

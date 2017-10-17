@@ -4,8 +4,9 @@ title: "Q23051: Creating Macros for the Microsoft Editor"
 permalink: /pubs/pc/reference/microsoft/kb/Q23051/
 ---
 
+## Q23051: Creating Macros for the Microsoft Editor
+
 	Article: Q23051
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

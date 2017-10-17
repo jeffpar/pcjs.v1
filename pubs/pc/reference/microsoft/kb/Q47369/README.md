@@ -4,8 +4,9 @@ title: "Q47369: scanf Unable to Match Extended Characters in Format String"
 permalink: /pubs/pc/reference/microsoft/kb/Q47369/
 ---
 
+## Q47369: scanf Unable to Match Extended Characters in Format String
+
 	Article: Q47369
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | S_QuickC

@@ -4,8 +4,9 @@ title: "Q50496: The 37th Call Added to the Calls Menu Corrupts CodeView Screen"
 permalink: /pubs/pc/reference/microsoft/kb/Q50496/
 ---
 
+## Q50496: The 37th Call Added to the Calls Menu Corrupts CodeView Screen
+
 	Article: Q50496
-	Product: Microsoft C
 	Version(s): 2.20   | 2.20
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist2.20 fixlist2.30

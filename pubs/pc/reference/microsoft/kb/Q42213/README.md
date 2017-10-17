@@ -4,8 +4,9 @@ title: "Q42213: Error in Adding Longs Returned by Reference"
 permalink: /pubs/pc/reference/microsoft/kb/Q42213/
 ---
 
+## Q42213: Error in Adding Longs Returned by Reference
+
 	Article: Q42213
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist1.01 fixlist2.00 buglist5.10

@@ -4,8 +4,9 @@ title: "Q28538: Bus Mouse Jumper Settings J2, J3, and J4"
 permalink: /pubs/pc/reference/microsoft/kb/Q28538/
 ---
 
+## Q28538: Bus Mouse Jumper Settings J2, J3, and J4
+
 	Article: Q28538
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

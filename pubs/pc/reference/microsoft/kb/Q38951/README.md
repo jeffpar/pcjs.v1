@@ -4,8 +4,9 @@ title: "Q38951: QuickC Version 2.00 Supports CodeView Information"
 permalink: /pubs/pc/reference/microsoft/kb/Q38951/
 ---
 
+## Q38951: QuickC Version 2.00 Supports CodeView Information
+
 	Article: Q38951
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: enduser |  s_codeview

@@ -4,8 +4,9 @@ title: "Q35258: Why Compiling after Editing in M Shows Old Errors"
 permalink: /pubs/pc/reference/microsoft/kb/Q35258/
 ---
 
+## Q35258: Why Compiling after Editing in M Shows Old Errors
+
 	Article: Q35258
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

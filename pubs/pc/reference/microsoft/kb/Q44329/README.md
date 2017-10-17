@@ -4,8 +4,9 @@ title: "Q44329: QuickC: Unresolved _main in dos&#92;crt0.asm"
 permalink: /pubs/pc/reference/microsoft/kb/Q44329/
 ---
 
+## Q44329: QuickC: Unresolved _main in dos&#92;crt0.asm
+
 	Article: Q44329
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

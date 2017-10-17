@@ -4,8 +4,9 @@ title: "Q43045: CL Environment Variable in QuickC Err Msg: Object Not Found"
 permalink: /pubs/pc/reference/microsoft/kb/Q43045/
 ---
 
+## Q43045: CL Environment Variable in QuickC Err Msg: Object Not Found
+
 	Article: Q43045
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

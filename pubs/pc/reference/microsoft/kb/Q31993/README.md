@@ -4,8 +4,9 @@ title: "Q31993: Temporary Files Created at Link Time"
 permalink: /pubs/pc/reference/microsoft/kb/Q31993/
 ---
 
+## Q31993: Temporary Files Created at Link Time
+
 	Article: Q31993
-	Product: Microsoft C
 	Version(s): 3.x 5.01.20 5.01.21
 	Operating System: MS-DOS
 	Flags: ENDUSER |

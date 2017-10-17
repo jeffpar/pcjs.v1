@@ -4,8 +4,9 @@ title: "Q23868: How to Do &quot;Peeks&quot; and &quot;Pokes&quot; in a C Program
 permalink: /pubs/pc/reference/microsoft/kb/Q23868/
 ---
 
+## Q23868: How to Do &quot;Peeks&quot; and &quot;Pokes&quot; in a C Program
+
 	Article: Q23868
-	Product: Microsoft C
 	Version(s): 3.00 4.00 5.00 5.10 6.00 6.00a
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickc

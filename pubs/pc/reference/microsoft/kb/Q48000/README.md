@@ -4,8 +4,9 @@ title: "Q48000: CVP Restart Command (Dialog Version) Doesn't Properly Set argc"
 permalink: /pubs/pc/reference/microsoft/kb/Q48000/
 ---
 
+## Q48000: CVP Restart Command (Dialog Version) Doesn't Properly Set argc
+
 	Article: Q48000
-	Product: Microsoft C
 	Version(s): 2.20 2.30 | 2.20 2.30
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | buglist2.20 buglist2.30

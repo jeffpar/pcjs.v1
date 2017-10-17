@@ -4,8 +4,9 @@ title: "Q60254: Qccom Cannot Parse Combined /G&#42; Options from Environment"
 permalink: /pubs/pc/reference/microsoft/kb/Q60254/
 ---
 
+## Q60254: Qccom Cannot Parse Combined /G&#42; Options from Environment
+
 	Article: Q60254
-	Product: Microsoft C
 	Version(s): 2.00 2.01 2.50 2.51
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickasm buglist2.00 buglist2.01 fixlist2.50 fixlist2.51

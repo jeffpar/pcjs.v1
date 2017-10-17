@@ -4,8 +4,9 @@ title: "Q66052: fflush() and flushall() Do Not Write Data Directly to Disk"
 permalink: /pubs/pc/reference/microsoft/kb/Q66052/
 ---
 
+## Q66052: fflush() and flushall() Do Not Write Data Directly to Disk
+
 	Article: Q66052
-	Product: Microsoft C
 	Version(s): 5.00 5.10 6.00 6.00a | 5.00 5.10 6.00 6.00a
 	Operating System: MS-DOS               | OS/2
 	Flags: ENDUSER |

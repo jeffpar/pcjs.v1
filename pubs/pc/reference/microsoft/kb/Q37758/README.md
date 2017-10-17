@@ -4,8 +4,9 @@ title: "Q37758: Share Problems Documentation Error for open"
 permalink: /pubs/pc/reference/microsoft/kb/Q37758/
 ---
 
+## Q37758: Share Problems Documentation Error for open
+
 	Article: Q37758
-	Product: Microsoft C
 	Version(s): 5.00   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | docerr

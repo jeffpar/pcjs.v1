@@ -4,8 +4,9 @@ title: "Q58001: Can't Supress References to ILINK in NMAKE File"
 permalink: /pubs/pc/reference/microsoft/kb/Q58001/
 ---
 
+## Q58001: Can't Supress References to ILINK in NMAKE File
+
 	Article: Q58001
-	Product: Microsoft C
 	Version(s): 2.00 2.01
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QUICKASM S_NMAKE buglist2.00

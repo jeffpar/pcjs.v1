@@ -4,8 +4,9 @@ title: "Q67041: Structure Tags Visible Outside of Function Prototype Scope"
 permalink: /pubs/pc/reference/microsoft/kb/Q67041/
 ---
 
+## Q67041: Structure Tags Visible Outside of Function Prototype Scope
+
 	Article: Q67041
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | S_QUICKC buglist6.00 buglist6.00a

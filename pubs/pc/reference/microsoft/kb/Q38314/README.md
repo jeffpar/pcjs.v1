@@ -4,8 +4,9 @@ title: "Q38314: Interrupt Conflict with Greenleaf Libraries"
 permalink: /pubs/pc/reference/microsoft/kb/Q38314/
 ---
 
+## Q38314: Interrupt Conflict with Greenleaf Libraries
+
 	Article: Q38314
-	Product: Microsoft C
 	Version(s): 2.20    | 2.20
 	Operating System: MS-DOS  | OS/2
 	Flags: ENDUSER | CV CVP

@@ -4,8 +4,9 @@ title: "Q40184: NMAKE Default Is to Build Only the First Target in a Makefile"
 permalink: /pubs/pc/reference/microsoft/kb/Q40184/
 ---
 
+## Q40184: NMAKE Default Is to Build Only the First Target in a Makefile
+
 	Article: Q40184
-	Product: Microsoft C
 	Version(s): 1.00 1.01 1.11 1.12 | 1.01 1.11 1.12
 	Operating System: MS-DOS              | OS/2
 	Flags: ENDUSER |

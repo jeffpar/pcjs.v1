@@ -4,8 +4,9 @@ title: "Q40494: Watching Pointers in QuickC Debugger"
 permalink: /pubs/pc/reference/microsoft/kb/Q40494/
 ---
 
+## Q40494: Watching Pointers in QuickC Debugger
+
 	Article: Q40494
-	Product: Microsoft C
 	Version(s): 1.00 1.01 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

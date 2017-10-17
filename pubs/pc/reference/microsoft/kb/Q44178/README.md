@@ -4,8 +4,9 @@ title: "Q44178: File Buffers Are Not Allocated until First Accessed"
 permalink: /pubs/pc/reference/microsoft/kb/Q44178/
 ---
 
+## Q44178: File Buffers Are Not Allocated until First Accessed
+
 	Article: Q44178
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | s_quickc

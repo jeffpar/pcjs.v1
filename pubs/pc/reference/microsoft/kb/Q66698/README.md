@@ -4,8 +4,9 @@ title: "Q66698: Response Filename Cannot Exceed 32 Characters"
 permalink: /pubs/pc/reference/microsoft/kb/Q66698/
 ---
 
+## Q66698: Response Filename Cannot Exceed 32 Characters
+
 	Article: Q66698
-	Product: Microsoft C
 	Version(s): 5.01.21 5.03 5.05 | 5.01.21 5.03 5.05
 	Operating System: MS-DOS            | OS/2
 	Flags: ENDUSER | buglist5.01.21 buglist5.03 buglist5.05 fixlist5.10

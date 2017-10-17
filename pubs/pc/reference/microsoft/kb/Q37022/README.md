@@ -4,8 +4,9 @@ title: "Q37022: How to Determine the Amount of Available DOS Memory"
 permalink: /pubs/pc/reference/microsoft/kb/Q37022/
 ---
 
+## Q37022: How to Determine the Amount of Available DOS Memory
+
 	Article: Q37022
-	Product: Microsoft C
 	Version(s): 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER |

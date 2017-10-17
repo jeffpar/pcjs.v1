@@ -4,8 +4,9 @@ title: "Q38867: Specifying Both /T and /W Disables Mouse"
 permalink: /pubs/pc/reference/microsoft/kb/Q38867/
 ---
 
+## Q38867: Specifying Both /T and /W Disables Mouse
+
 	Article: Q38867
-	Product: Microsoft C
 	Version(s): 2.20    | 2.20
 	Operating System: MS-DOS  | OS/2
 	Flags: ENDUSER |

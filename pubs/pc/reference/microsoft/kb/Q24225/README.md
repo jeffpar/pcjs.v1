@@ -4,8 +4,9 @@ title: "Q24225: The Difference Among Watch, Watchpoint, and Tracepoint"
 permalink: /pubs/pc/reference/microsoft/kb/Q24225/
 ---
 
+## Q24225: The Difference Among Watch, Watchpoint, and Tracepoint
+
 	Article: Q24225
-	Product: Microsoft C
 	Version(s): 1.00 1.10 2.00 2.10 2.20 2.30 | 2.20 2.30
 	Operating System: MS-DOS                        | OS/2
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q48792: Include Filenames More Than Eight Characters Are Truncated"
 permalink: /pubs/pc/reference/microsoft/kb/Q48792/
 ---
 
+## Q48792: Include Filenames More Than Eight Characters Are Truncated
+
 	Article: Q48792
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | S_QuickC S_QuickASM

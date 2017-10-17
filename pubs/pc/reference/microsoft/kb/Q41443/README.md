@@ -4,8 +4,9 @@ title: "Q41443: QuickC 2.00 README.DOC: Using the Mouse and the Keyboard"
 permalink: /pubs/pc/reference/microsoft/kb/Q41443/
 ---
 
+## Q41443: QuickC 2.00 README.DOC: Using the Mouse and the Keyboard
+
 	Article: Q41443
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

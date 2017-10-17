@@ -4,8 +4,9 @@ title: "Q42212: /CO before /DO Causes Problems in LINK"
 permalink: /pubs/pc/reference/microsoft/kb/Q42212/
 ---
 
+## Q42212: /CO before /DO Causes Problems in LINK
+
 	Article: Q42212
-	Product: Microsoft C
 	Version(s): 3.65 4.06 5.01
 	Operating System: MS-DOS
 	Flags: ENDUSER | h_masm s_pascal h_fortran buglist3.65 buglist5.01

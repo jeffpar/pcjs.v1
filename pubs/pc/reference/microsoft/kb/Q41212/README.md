@@ -4,8 +4,9 @@ title: "Q41212: Prototypes Must Be Used Before Intrinsic or Function Pragmas"
 permalink: /pubs/pc/reference/microsoft/kb/Q41212/
 ---
 
+## Q41212: Prototypes Must Be Used Before Intrinsic or Function Pragmas
+
 	Article: Q41212
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | SR# G881031-5486

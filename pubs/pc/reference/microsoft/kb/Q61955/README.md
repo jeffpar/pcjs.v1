@@ -4,8 +4,9 @@ title: "Q61955: SYS0002 Produced If MSHELP.DLL Not Installed"
 permalink: /pubs/pc/reference/microsoft/kb/Q61955/
 ---
 
+## Q61955: SYS0002 Produced If MSHELP.DLL Not Installed
+
 	Article: Q61955
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: OS/2
 	Flags: ENDUSER | pwbhelp

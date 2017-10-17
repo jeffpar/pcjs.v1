@@ -4,8 +4,9 @@ title: "Q43537: Critical Error during Spawn Will Lose Parent"
 permalink: /pubs/pc/reference/microsoft/kb/Q43537/
 ---
 
+## Q43537: Critical Error during Spawn Will Lose Parent
+
 	Article: Q43537
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickc

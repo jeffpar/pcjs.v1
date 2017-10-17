@@ -4,8 +4,9 @@ title: "Q50351: mktemp() Creates a Maximum of 27 Unique Filenames"
 permalink: /pubs/pc/reference/microsoft/kb/Q50351/
 ---
 
+## Q50351: mktemp() Creates a Maximum of 27 Unique Filenames
+
 	Article: Q50351
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | S_QuickC docerr

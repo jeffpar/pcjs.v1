@@ -4,8 +4,9 @@ title: "Q68392: Re-entrant Function List for C 5.10 and 6.00"
 permalink: /pubs/pc/reference/microsoft/kb/Q68392/
 ---
 
+## Q68392: Re-entrant Function List for C 5.10 and 6.00
+
 	Article: Q68392
-	Product: Microsoft C
 	Version(s): 5.10 6.00 6.00a
 	Operating System: OS/2
 	Flags: ENDUSER |

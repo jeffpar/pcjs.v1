@@ -4,8 +4,9 @@ title: "Q61211: C 6.00 README: PWB Run Command Line Cannot Contain &#36; or ^"
 permalink: /pubs/pc/reference/microsoft/kb/Q61211/
 ---
 
+## Q61211: C 6.00 README: PWB Run Command Line Cannot Contain &#36; or ^
+
 	Article: Q61211
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

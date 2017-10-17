@@ -4,8 +4,9 @@ title: "Q41442: QuickC 2.00 README.DOC: Command-Line Options"
 permalink: /pubs/pc/reference/microsoft/kb/Q41442/
 ---
 
+## Q41442: QuickC 2.00 README.DOC: Command-Line Options
+
 	Article: Q41442
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

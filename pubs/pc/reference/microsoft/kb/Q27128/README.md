@@ -4,8 +4,9 @@ title: "Q27128: Cannot Debug Code in Overlays in Small or Compact Model"
 permalink: /pubs/pc/reference/microsoft/kb/Q27128/
 ---
 
+## Q27128: Cannot Debug Code in Overlays in Small or Compact Model
+
 	Article: Q27128
-	Product: Microsoft C
 	Version(s): 2.10 2.20 2.30
 	Operating System: MS-DOS
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q66774: _wrapon() Function Will Prevent Text Windows From Scrolling"
 permalink: /pubs/pc/reference/microsoft/kb/Q66774/
 ---
 
+## Q66774: _wrapon() Function Will Prevent Text Windows From Scrolling
+
 	Article: Q66774
-	Product: Microsoft C
 	Version(s): 5.10 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS          | OS/2
 	Flags: ENDUSER | S_QUICKC

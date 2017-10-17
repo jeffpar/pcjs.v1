@@ -4,8 +4,9 @@ title: "Q65329: QC 2.0x Incorrectly Stores Uninitialized Global Data in DGROUP"
 permalink: /pubs/pc/reference/microsoft/kb/Q65329/
 ---
 
+## Q65329: QC 2.0x Incorrectly Stores Uninitialized Global Data in DGROUP
+
 	Article: Q65329
-	Product: Microsoft C
 	Version(s): 2.00 2.01
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist2.00 fixlist2.50

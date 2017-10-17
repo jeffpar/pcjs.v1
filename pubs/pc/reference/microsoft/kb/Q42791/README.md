@@ -4,8 +4,9 @@ title: "Q42791: QuickC: Tracking Down Null Pointer Assignments"
 permalink: /pubs/pc/reference/microsoft/kb/Q42791/
 ---
 
+## Q42791: QuickC: Tracking Down Null Pointer Assignments
+
 	Article: Q42791
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

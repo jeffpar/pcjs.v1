@@ -4,8 +4,9 @@ title: "Q58680: C and QC Now Allow Large Unsigned Long Constants in Decimal"
 permalink: /pubs/pc/reference/microsoft/kb/Q58680/
 ---
 
+## Q58680: C and QC Now Allow Large Unsigned Long Constants in Decimal
+
 	Article: Q58680
-	Product: Microsoft C
 	Version(s): 6.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QUICKC

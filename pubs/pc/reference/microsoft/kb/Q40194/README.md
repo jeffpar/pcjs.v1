@@ -4,8 +4,9 @@ title: "Q40194: QuickC 2.00 Libraries Incompatible with Windows SDK 2.10"
 permalink: /pubs/pc/reference/microsoft/kb/Q40194/
 ---
 
+## Q40194: QuickC 2.00 Libraries Incompatible with Windows SDK 2.10
+
 	Article: Q40194
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | appnote

@@ -4,8 +4,9 @@ title: "Q47450: Chart Location for Scaletitle Documented Incorrectly"
 permalink: /pubs/pc/reference/microsoft/kb/Q47450/
 ---
 
+## Q47450: Chart Location for Scaletitle Documented Incorrectly
+
 	Article: Q47450
-	Product: Microsoft C
 	Version(s): 2.00 2.01
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr

@@ -4,8 +4,9 @@ title: "Q66169: Internal Compiler Error: '@(#)regMD.c:1.100', Line 3837"
 permalink: /pubs/pc/reference/microsoft/kb/Q66169/
 ---
 
+## Q66169: Internal Compiler Error: '@(#)regMD.c:1.100', Line 3837
+
 	Article: Q66169
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist6.00 fixlist6.00a

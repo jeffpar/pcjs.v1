@@ -4,8 +4,9 @@ title: "Q22331: &quot;Invalid Object Module&quot; Usually Caused by Old Version 
 permalink: /pubs/pc/reference/microsoft/kb/Q22331/
 ---
 
+## Q22331: &quot;Invalid Object Module&quot; Usually Caused by Old Version of LINK
+
 	Article: Q22331
-	Product: Microsoft C
 	Version(s): 3.00 4.00 5.00 5.10 6.00 6.00a
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickc

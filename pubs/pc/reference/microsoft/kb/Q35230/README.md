@@ -4,8 +4,9 @@ title: "Q35230: CPANEL Defaults to Display Page 0"
 permalink: /pubs/pc/reference/microsoft/kb/Q35230/
 ---
 
+## Q35230: CPANEL Defaults to Display Page 0
+
 	Article: Q35230
-	Product: Microsoft C
 	Version(s): 6.x 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

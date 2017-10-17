@@ -4,8 +4,9 @@ title: "Q67039: /qc Option Cannot Be Combined with /Ol and register Variables"
 permalink: /pubs/pc/reference/microsoft/kb/Q67039/
 ---
 
+## Q67039: /qc Option Cannot Be Combined with /Ol and register Variables
+
 	Article: Q67039
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | S_QUICKC buglist6.00 buglist6.00a

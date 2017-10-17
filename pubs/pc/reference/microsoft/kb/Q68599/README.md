@@ -4,8 +4,9 @@ title: "Q68599: Integer Divide by 0 Only on 8088/86 Machine"
 permalink: /pubs/pc/reference/microsoft/kb/Q68599/
 ---
 
+## Q68599: Integer Divide by 0 Only on 8088/86 Machine
+
 	Article: Q68599
-	Product: Microsoft C
 	Version(s): 6.00 6.00a
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickc

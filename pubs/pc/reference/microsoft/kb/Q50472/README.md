@@ -4,8 +4,9 @@ title: "Q50472: With /CP:1, _memavl() Still Shows Memory Available"
 permalink: /pubs/pc/reference/microsoft/kb/Q50472/
 ---
 
+## Q50472: With /CP:1, _memavl() Still Shows Memory Available
+
 	Article: Q50472
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | S_QuickC S_LINK

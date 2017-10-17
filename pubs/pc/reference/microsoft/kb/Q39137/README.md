@@ -4,8 +4,9 @@ title: "Q39137: Unresolved External _main in crt0.asm when Compiling with /P"
 permalink: /pubs/pc/reference/microsoft/kb/Q39137/
 ---
 
+## Q39137: Unresolved External _main in crt0.asm when Compiling with /P
+
 	Article: Q39137
-	Product: Microsoft C
 	Version(s): 1.00 1.01
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist1.00 buglist1.01 docerr

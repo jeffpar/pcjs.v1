@@ -4,8 +4,9 @@ title: "Q50523: Floating-Point Initialization Occurs at Link Time"
 permalink: /pubs/pc/reference/microsoft/kb/Q50523/
 ---
 
+## Q50523: Floating-Point Initialization Occurs at Link Time
+
 	Article: Q50523
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | S_QuickC S_QuickASM

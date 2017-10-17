@@ -4,8 +4,9 @@ title: "Q32813: The fopen Function Fails to Open Printer in Bound Application"
 permalink: /pubs/pc/reference/microsoft/kb/Q32813/
 ---
 
+## Q32813: The fopen Function Fails to Open Printer in Bound Application
+
 	Article: Q32813
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

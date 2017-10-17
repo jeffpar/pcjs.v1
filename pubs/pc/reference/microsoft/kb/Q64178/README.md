@@ -4,8 +4,9 @@ title: "Q64178: Bus Mouse Port on Leading Edge 386 SX"
 permalink: /pubs/pc/reference/microsoft/kb/Q64178/
 ---
 
+## Q64178: Bus Mouse Port on Leading Edge 386 SX
+
 	Article: Q64178
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

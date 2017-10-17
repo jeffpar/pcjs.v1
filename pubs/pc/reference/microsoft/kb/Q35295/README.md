@@ -4,8 +4,9 @@ title: "Q35295: Getting the Address of a Function with FP_SEG and FP_OFF"
 permalink: /pubs/pc/reference/microsoft/kb/Q35295/
 ---
 
+## Q35295: Getting the Address of a Function with FP_SEG and FP_OFF
+
 	Article: Q35295
-	Product: Microsoft C
 	Version(s): 3.00 4.00 5.00 5.10 | 5.10
 	Operating System: MS-DOS              | OS/2
 	Flags: ENDUSER |

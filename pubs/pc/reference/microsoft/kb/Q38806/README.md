@@ -4,8 +4,9 @@ title: "Q38806: Error L2002 Fixup Overflow Near Number..."
 permalink: /pubs/pc/reference/microsoft/kb/Q38806/
 ---
 
+## Q38806: Error L2002 Fixup Overflow Near Number...
+
 	Article: Q38806
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | s_pascal h_fortran h_masm s_quickc s_link s_error

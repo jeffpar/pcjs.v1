@@ -4,8 +4,9 @@ title: "Q34411: Changing Height Switch Not Sufficient to Change Video Modes"
 permalink: /pubs/pc/reference/microsoft/kb/Q34411/
 ---
 
+## Q34411: Changing Height Switch Not Sufficient to Change Video Modes
+
 	Article: Q34411
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

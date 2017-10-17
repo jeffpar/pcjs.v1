@@ -4,8 +4,9 @@ title: "Q12012: Getting to the Mouse from a Real-Mode C Program"
 permalink: /pubs/pc/reference/microsoft/kb/Q12012/
 ---
 
+## Q12012: Getting to the Mouse from a Real-Mode C Program
+
 	Article: Q12012
-	Product: Microsoft C
 	Version(s): 3.00 4.00 5.00 6.00 6.00a
 	Operating System: MS-DOS
 	Flags: ENDUSER |

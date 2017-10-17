@@ -4,8 +4,9 @@ title: "Q32000: Incremental Linking"
 permalink: /pubs/pc/reference/microsoft/kb/Q32000/
 ---
 
+## Q32000: Incremental Linking
+
 	Article: Q32000
-	Product: Microsoft C
 	Version(s): 3.x 5.01.20 5.01.21
 	Operating System: MS-DOS
 	Flags: ENDUSER |

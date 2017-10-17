@@ -4,8 +4,9 @@ title: "Q37023: Link Error No Stack Segment after Using Windows SDK Install"
 permalink: /pubs/pc/reference/microsoft/kb/Q37023/
 ---
 
+## Q37023: Link Error No Stack Segment after Using Windows SDK Install
+
 	Article: Q37023
-	Product: Microsoft C
 	Version(s): 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER |

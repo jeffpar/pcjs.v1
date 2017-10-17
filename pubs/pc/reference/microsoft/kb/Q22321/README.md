@@ -4,8 +4,9 @@ title: "Q22321: The Most Common C Programming Errors"
 permalink: /pubs/pc/reference/microsoft/kb/Q22321/
 ---
 
+## Q22321: The Most Common C Programming Errors
+
 	Article: Q22321
-	Product: Microsoft C
 	Version(s): 3.00 4.00 5.00 5.10 6.00 6.00a | 5.10 6.00 6.00a
 	Operating System: MS-DOS                         | OS/2
 	Flags: ENDUSER | s_quickc

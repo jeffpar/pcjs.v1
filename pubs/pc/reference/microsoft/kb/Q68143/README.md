@@ -4,8 +4,9 @@ title: "Q68143: Stringize Operator Fails to Insert Backslashes"
 permalink: /pubs/pc/reference/microsoft/kb/Q68143/
 ---
 
+## Q68143: Stringize Operator Fails to Insert Backslashes
+
 	Article: Q68143
-	Product: Microsoft C
 	Version(s): 5.10 6.00 6.00a | 5.10 6.00 6.00a
 	Operating System: MS-DOS          | OS/2
 	Flags: ENDUSER | buglist 5.10 buglist6.00 buglist6.00a s_quickc

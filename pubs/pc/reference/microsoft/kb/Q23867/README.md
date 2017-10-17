@@ -4,8 +4,9 @@ title: "Q23867: Sending 1Ah to a Printer Requires Setting &quot;Raw&quot; Mode"
 permalink: /pubs/pc/reference/microsoft/kb/Q23867/
 ---
 
+## Q23867: Sending 1Ah to a Printer Requires Setting &quot;Raw&quot; Mode
+
 	Article: Q23867
-	Product: Microsoft C
 	Version(s): 3.00 4.00 5.00 5.10 6.00 6.00a
 	Operating System: MS-DOS
 	Flags: ENDUSER |

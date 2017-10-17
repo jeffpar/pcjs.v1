@@ -4,8 +4,9 @@ title: "Q38285: Detecting Presence of 80x87 Math Coprocessor"
 permalink: /pubs/pc/reference/microsoft/kb/Q38285/
 ---
 
+## Q38285: Detecting Presence of 80x87 Math Coprocessor
+
 	Article: Q38285
-	Product: Microsoft C
 	Version(s): 3.00 4.00 5.00 5.10 | 5.10
 	Operating System: MS-DOS              | OS/2
 	Flags: ENDUSER | SR# G881027-5369 8087 80287 80387 87 /FPc

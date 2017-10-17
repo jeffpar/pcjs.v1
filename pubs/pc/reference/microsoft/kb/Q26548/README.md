@@ -4,8 +4,9 @@ title: "Q26548: Cannot Load CTRL+Z-Terminated Files with Less than 129 Bytes"
 permalink: /pubs/pc/reference/microsoft/kb/Q26548/
 ---
 
+## Q26548: Cannot Load CTRL+Z-Terminated Files with Less than 129 Bytes
+
 	Article: Q26548
-	Product: Microsoft C
 	Version(s): 1.00 1.10 2.00 2.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist1.00 buglist1.10 buglist2.00 buglist2.10 qfbv

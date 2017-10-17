@@ -4,8 +4,9 @@ title: "Q23753: fseek() Function Requires a long for the Offset into a File"
 permalink: /pubs/pc/reference/microsoft/kb/Q23753/
 ---
 
+## Q23753: fseek() Function Requires a long for the Offset into a File
+
 	Article: Q23753
-	Product: Microsoft C
 	Version(s): 3.00 4.00 5.00 5.10 6.00 6.00a | 5.10 6.00 6.00a
 	Operating System: MS-DOS                         | OS/2
 	Flags: ENDUSER |

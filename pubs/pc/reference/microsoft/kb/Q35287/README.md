@@ -4,8 +4,9 @@ title: "Q35287: MDA Normal Inverse Text Example"
 permalink: /pubs/pc/reference/microsoft/kb/Q35287/
 ---
 
+## Q35287: MDA Normal Inverse Text Example
+
 	Article: Q35287
-	Product: Microsoft C
 	Version(s): 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q36068: IEEE Floating-Point Representation and MS languages"
 permalink: /pubs/pc/reference/microsoft/kb/Q36068/
 ---
 
+## Q36068: IEEE Floating-Point Representation and MS languages
+
 	Article: Q36068
-	Product: Microsoft C
 	Version(s): 3.00 4.00 5.00 5.10 | 5.10
 	Operating System: MS-DOS              | OS/2
 	Flags: ENDUSER | s_pascal h_fortran h_masm b_quickbas

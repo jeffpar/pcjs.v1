@@ -4,8 +4,9 @@ title: "Q46993: C Version 5.10 Does Not Handle const Keyword Like ANSI"
 permalink: /pubs/pc/reference/microsoft/kb/Q46993/
 ---
 
+## Q46993: C Version 5.10 Does Not Handle const Keyword Like ANSI
+
 	Article: Q46993
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | SR# G890706-22068

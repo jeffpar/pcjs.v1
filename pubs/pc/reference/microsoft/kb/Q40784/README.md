@@ -4,8 +4,9 @@ title: "Q40784: CodeView Does Not Work with Grouped Code Segments"
 permalink: /pubs/pc/reference/microsoft/kb/Q40784/
 ---
 
+## Q40784: CodeView Does Not Work with Grouped Code Segments
+
 	Article: Q40784
-	Product: Microsoft C
 	Version(s): 2.20   | 2.20
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | H_MASM

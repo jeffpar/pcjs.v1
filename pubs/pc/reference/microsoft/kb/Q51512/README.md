@@ -4,8 +4,9 @@ title: "Q51512: OS/2 1.1 EXE May Fail under 1.2 Due to Small Thread Stack Size"
 permalink: /pubs/pc/reference/microsoft/kb/Q51512/
 ---
 
+## Q51512: OS/2 1.1 EXE May Fail under 1.2 Due to Small Thread Stack Size
+
 	Article: Q51512
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: OS/2
 	Flags: ENDUSER |

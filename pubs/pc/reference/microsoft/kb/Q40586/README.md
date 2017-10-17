@@ -4,8 +4,9 @@ title: "Q40586: Display Command Returns Incorrect Result for FORTRAN Function"
 permalink: /pubs/pc/reference/microsoft/kb/Q40586/
 ---
 
+## Q40586: Display Command Returns Incorrect Result for FORTRAN Function
+
 	Article: Q40586
-	Product: Microsoft C
 	Version(s): 2.20 2.30 | 2.20 2.30
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | buglist2.20 buglist2.30

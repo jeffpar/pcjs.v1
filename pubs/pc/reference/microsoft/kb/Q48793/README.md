@@ -4,8 +4,9 @@ title: "Q48793: exec() and spawn() with P_OVERLAY Ignore Maximum Allocation"
 permalink: /pubs/pc/reference/microsoft/kb/Q48793/
 ---
 
+## Q48793: exec() and spawn() with P_OVERLAY Ignore Maximum Allocation
+
 	Article: Q48793
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QuickC S_QuickASM

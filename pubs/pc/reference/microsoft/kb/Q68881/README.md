@@ -4,8 +4,9 @@ title: "Q68881: Pascal Example in Programmer's Guide Won't Compile"
 permalink: /pubs/pc/reference/microsoft/kb/Q68881/
 ---
 
+## Q68881: Pascal Example in Programmer's Guide Won't Compile
+
 	Article: Q68881
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | Pascal Mouse Programming Borland Turbo

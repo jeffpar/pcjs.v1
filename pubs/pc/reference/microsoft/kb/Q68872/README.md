@@ -4,8 +4,9 @@ title: "Q68872: Ternary Operator Generates Incorrect Code for Bit Fields"
 permalink: /pubs/pc/reference/microsoft/kb/Q68872/
 ---
 
+## Q68872: Ternary Operator Generates Incorrect Code for Bit Fields
+
 	Article: Q68872
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist6.00 fixlist6.00a

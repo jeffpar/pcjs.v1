@@ -4,8 +4,9 @@ title: "Q40810: _edata and _end Are Defined by LINK"
 permalink: /pubs/pc/reference/microsoft/kb/Q40810/
 ---
 
+## Q40810: _edata and _end Are Defined by LINK
+
 	Article: Q40810
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | S_LINK

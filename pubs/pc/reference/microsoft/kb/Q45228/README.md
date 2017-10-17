@@ -4,8 +4,9 @@ title: "Q45228: Tzset Sample Program Redefinition Errors in Large Model"
 permalink: /pubs/pc/reference/microsoft/kb/Q45228/
 ---
 
+## Q45228: Tzset Sample Program Redefinition Errors in Large Model
+
 	Article: Q45228
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | S_QuickC docerr

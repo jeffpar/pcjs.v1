@@ -4,8 +4,9 @@ title: "Q37620: EOH Is Not a Defined Constant for getch or getche"
 permalink: /pubs/pc/reference/microsoft/kb/Q37620/
 ---
 
+## Q37620: EOH Is Not a Defined Constant for getch or getche
+
 	Article: Q37620
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER |

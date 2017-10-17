@@ -4,8 +4,9 @@ title: "Q43000: Passing Two-Dimensional Arrays between C and FORTRAN"
 permalink: /pubs/pc/reference/microsoft/kb/Q43000/
 ---
 
+## Q43000: Passing Two-Dimensional Arrays between C and FORTRAN
+
 	Article: Q43000
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | H_FORTRAN

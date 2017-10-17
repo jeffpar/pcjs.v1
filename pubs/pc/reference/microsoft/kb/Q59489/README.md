@@ -4,8 +4,9 @@ title: "Q59489: L2022, L2029 on PM Functions Not Prototyped As EXPENTRY"
 permalink: /pubs/pc/reference/microsoft/kb/Q59489/
 ---
 
+## Q59489: L2022, L2029 on PM Functions Not Prototyped As EXPENTRY
+
 	Article: Q59489
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: OS/2
 	Flags: ENDUSER | o_os2sdk

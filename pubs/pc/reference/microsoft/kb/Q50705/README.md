@@ -4,8 +4,9 @@ title: "Q50705: LINK : Warning L4011 Caused By Invalid /PACKCODE Group Size"
 permalink: /pubs/pc/reference/microsoft/kb/Q50705/
 ---
 
+## Q50705: LINK : Warning L4011 Caused By Invalid /PACKCODE Group Size
+
 	Article: Q50705
-	Product: Microsoft C
 	Version(s): 3.65 4.06 4.07 5.01.21 5.03 | 5.01.21 5.03
 	Operating System: MS-DOS                      | OS/2
 	Flags: ENDUSER | S_C S_QUICKC S_QUICKASM S_PASCAL DOCERR

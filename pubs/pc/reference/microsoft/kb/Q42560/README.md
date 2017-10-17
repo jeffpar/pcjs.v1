@@ -4,8 +4,9 @@ title: "Q42560: QuickC Tool Kit Manual: Document Transfer Formatting Error"
 permalink: /pubs/pc/reference/microsoft/kb/Q42560/
 ---
 
+## Q42560: QuickC Tool Kit Manual: Document Transfer Formatting Error
+
 	Article: Q42560
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr

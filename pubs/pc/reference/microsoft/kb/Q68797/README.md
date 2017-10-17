@@ -4,8 +4,9 @@ title: "Q68797: _dos_setftime() Fails to Set Date and Time for File on Network"
 permalink: /pubs/pc/reference/microsoft/kb/Q68797/
 ---
 
+## Q68797: _dos_setftime() Fails to Set Date and Time for File on Network
+
 	Article: Q68797
-	Product: Microsoft C
 	Version(s): 5.10 6.00 6.00a | 5.10 6.00 6.00a
 	Operating System: MS-DOS          | OS/2
 	Flags: ENDUSER | buglist5.10 buglist6.00 buglist6.00a

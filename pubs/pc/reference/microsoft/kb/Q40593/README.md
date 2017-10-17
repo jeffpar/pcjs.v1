@@ -4,8 +4,9 @@ title: "Q40593: Misspelling &quot;Default&quot; Gives No Error"
 permalink: /pubs/pc/reference/microsoft/kb/Q40593/
 ---
 
+## Q40593: Misspelling &quot;Default&quot; Gives No Error
+
 	Article: Q40593
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER |

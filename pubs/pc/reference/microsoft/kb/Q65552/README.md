@@ -4,8 +4,9 @@ title: "Q65552: Text/Graphic Mode Determines _setbkcolor() Parameters to Use"
 permalink: /pubs/pc/reference/microsoft/kb/Q65552/
 ---
 
+## Q65552: Text/Graphic Mode Determines _setbkcolor() Parameters to Use
+
 	Article: Q65552
-	Product: Microsoft C
 	Version(s): 6.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

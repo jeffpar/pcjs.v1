@@ -4,8 +4,9 @@ title: "Q61660: Certain Key Sequences Cause R6003 or SYS1943 in PWB 1.00"
 permalink: /pubs/pc/reference/microsoft/kb/Q61660/
 ---
 
+## Q61660: Certain Key Sequences Cause R6003 or SYS1943 in PWB 1.00
+
 	Article: Q61660
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist1.00 fixlist1.10

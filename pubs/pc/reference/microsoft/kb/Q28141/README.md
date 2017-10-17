@@ -4,8 +4,9 @@ title: "Q28141: Beginner's Concerns for Writing Non-PM Graphic Applications"
 permalink: /pubs/pc/reference/microsoft/kb/Q28141/
 ---
 
+## Q28141: Beginner's Concerns for Writing Non-PM Graphic Applications
+
 	Article: Q28141
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: OS/2
 	Flags: ENDUSER | TAR73919

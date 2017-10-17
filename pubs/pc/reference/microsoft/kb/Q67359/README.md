@@ -4,8 +4,9 @@ title: "Q67359: Incorrect Definition Given for the Time Zone Variable"
 permalink: /pubs/pc/reference/microsoft/kb/Q67359/
 ---
 
+## Q67359: Incorrect Definition Given for the Time Zone Variable
+
 	Article: Q67359
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | docerr

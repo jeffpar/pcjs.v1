@@ -4,8 +4,9 @@ title: "Q36567: Intitialize function is Shift+F8"
 permalink: /pubs/pc/reference/microsoft/kb/Q36567/
 ---
 
+## Q36567: Intitialize function is Shift+F8
+
 	Article: Q36567
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | docerr

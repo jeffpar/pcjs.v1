@@ -4,8 +4,9 @@ title: "Q59494: Unassigning Help Keystrokes Must Be Done Under"
 permalink: /pubs/pc/reference/microsoft/kb/Q59494/
 ---
 
+## Q59494: Unassigning Help Keystrokes Must Be Done Under
+
 	Article: Q59494
-	Product: Microsoft C
 	Version(s): 1.02   | 1.02
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

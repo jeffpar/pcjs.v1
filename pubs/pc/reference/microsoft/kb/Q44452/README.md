@@ -4,8 +4,9 @@ title: "Q44452: -Zg Won't Handle Untagged Aggregate typedef Parameters"
 permalink: /pubs/pc/reference/microsoft/kb/Q44452/
 ---
 
+## Q44452: -Zg Won't Handle Untagged Aggregate typedef Parameters
+
 	Article: Q44452
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER |

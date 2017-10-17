@@ -4,8 +4,9 @@ title: "Q61215: C 6.00 README: SHIFT+ALT, SHIFT+CTRL Different in DOS and OS/2"
 permalink: /pubs/pc/reference/microsoft/kb/Q61215/
 ---
 
+## Q61215: C 6.00 README: SHIFT+ALT, SHIFT+CTRL Different in DOS and OS/2
+
 	Article: Q61215
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

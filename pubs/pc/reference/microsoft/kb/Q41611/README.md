@@ -4,8 +4,9 @@ title: "Q41611: No Default Extension for a Linker Response File"
 permalink: /pubs/pc/reference/microsoft/kb/Q41611/
 ---
 
+## Q41611: No Default Extension for a Linker Response File
+
 	Article: Q41611
-	Product: Microsoft C
 	Version(s): 3.55 3.60 3.61 3.64 3.65  | 5.01.21 5.01.21
 	Operating System: MS-DOS                    | OS/2
 	Flags: ENDUSER |

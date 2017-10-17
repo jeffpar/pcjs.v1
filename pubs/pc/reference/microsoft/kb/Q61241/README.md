@@ -4,8 +4,9 @@ title: "Q61241: C 6.00 README: &quot;Advanced Programming Techniques&quot; Notes
 permalink: /pubs/pc/reference/microsoft/kb/Q61241/
 ---
 
+## Q61241: C 6.00 README: &quot;Advanced Programming Techniques&quot; Notes
+
 	Article: Q61241
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | docerr fastcall

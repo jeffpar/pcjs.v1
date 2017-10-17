@@ -4,8 +4,9 @@ title: "Q50733: Huge Indirection May not Cross Segment Boundaries"
 permalink: /pubs/pc/reference/microsoft/kb/Q50733/
 ---
 
+## Q50733: Huge Indirection May not Cross Segment Boundaries
+
 	Article: Q50733
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | S_QuickC

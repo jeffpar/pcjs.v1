@@ -4,8 +4,9 @@ title: "Q68911: Sample Program SAMPLER.C Does Not Work Correctly"
 permalink: /pubs/pc/reference/microsoft/kb/Q68911/
 ---
 
+## Q68911: Sample Program SAMPLER.C Does Not Work Correctly
+
 	Article: Q68911
-	Product: Microsoft C
 	Version(s): 2.50 2.51
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr s_c

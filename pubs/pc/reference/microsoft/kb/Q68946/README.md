@@ -4,8 +4,9 @@ title: "Q68946: NMK Macros Do Not Override Environment Variables"
 permalink: /pubs/pc/reference/microsoft/kb/Q68946/
 ---
 
+## Q68946: NMK Macros Do Not Override Environment Variables
+
 	Article: Q68946
-	Product: Microsoft C
 	Version(s): 1.11
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist1.11

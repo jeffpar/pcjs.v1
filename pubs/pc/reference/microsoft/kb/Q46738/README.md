@@ -4,8 +4,9 @@ title: "Q46738: Mixed-Model Programming and long int Helper Library Routines"
 permalink: /pubs/pc/reference/microsoft/kb/Q46738/
 ---
 
+## Q46738: Mixed-Model Programming and long int Helper Library Routines
+
 	Article: Q46738
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | SR# G890606-19866

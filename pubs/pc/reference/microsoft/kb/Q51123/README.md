@@ -4,8 +4,9 @@ title: "Q51123: Time and Date Are Written When File Is Flushed"
 permalink: /pubs/pc/reference/microsoft/kb/Q51123/
 ---
 
+## Q51123: Time and Date Are Written When File Is Flushed
+
 	Article: Q51123
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickc

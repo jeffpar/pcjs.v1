@@ -4,8 +4,9 @@ title: "Q31991: How LINK Orders and Combines Segments"
 permalink: /pubs/pc/reference/microsoft/kb/Q31991/
 ---
 
+## Q31991: How LINK Orders and Combines Segments
+
 	Article: Q31991
-	Product: Microsoft C
 	Version(s): 3.x 5.01.20 5.01.21
 	Operating System: MS-DOS
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q40196: &quot;&#42;&#92;&quot; Viewed as Continuation Character in Comme
 permalink: /pubs/pc/reference/microsoft/kb/Q40196/
 ---
 
+## Q40196: &quot;&#42;&#92;&quot; Viewed as Continuation Character in Comment
+
 	Article: Q40196
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: enduser |

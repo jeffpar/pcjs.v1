@@ -4,8 +4,9 @@ title: "Q41569: QuickC 2.00 README.DOC: Example Program PARRAY.C"
 permalink: /pubs/pc/reference/microsoft/kb/Q41569/
 ---
 
+## Q41569: QuickC 2.00 README.DOC: Example Program PARRAY.C
+
 	Article: Q41569
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr

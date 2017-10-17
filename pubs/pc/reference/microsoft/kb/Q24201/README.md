@@ -4,8 +4,9 @@ title: "Q24201: Flipping and Swapping Screens"
 permalink: /pubs/pc/reference/microsoft/kb/Q24201/
 ---
 
+## Q24201: Flipping and Swapping Screens
+
 	Article: Q24201
-	Product: Microsoft C
 	Version(s): 1.00 1.10 2.00 2.10 2.20 2.30
 	Operating System: MS-DOS
 	Flags: ENDUSER |

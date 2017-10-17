@@ -4,8 +4,9 @@ title: "Q62702: PWB Does Not Return from DOS Shell with &quot;;&quot; in TMP"
 permalink: /pubs/pc/reference/microsoft/kb/Q62702/
 ---
 
+## Q62702: PWB Does Not Return from DOS Shell with &quot;;&quot; in TMP
+
 	Article: Q62702
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

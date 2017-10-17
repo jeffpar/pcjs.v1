@@ -4,8 +4,9 @@ title: "Q47004: Overlaying Charts and Displaying Multiple Charts on the Screen"
 permalink: /pubs/pc/reference/microsoft/kb/Q47004/
 ---
 
+## Q47004: Overlaying Charts and Displaying Multiple Charts on the Screen
+
 	Article: Q47004
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QuickAsm

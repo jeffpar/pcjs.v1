@@ -4,8 +4,9 @@ title: "Q61216: C 6.00 README: PWB: Keep System Files Out of Build"
 permalink: /pubs/pc/reference/microsoft/kb/Q61216/
 ---
 
+## Q61216: C 6.00 README: PWB: Keep System Files Out of Build
+
 	Article: Q61216
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

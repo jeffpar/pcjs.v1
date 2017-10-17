@@ -4,8 +4,9 @@ title: "Q48431: Macros ceil and floor Incorrectly Listed As Functions"
 permalink: /pubs/pc/reference/microsoft/kb/Q48431/
 ---
 
+## Q48431: Macros ceil and floor Incorrectly Listed As Functions
+
 	Article: Q48431
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | docerr

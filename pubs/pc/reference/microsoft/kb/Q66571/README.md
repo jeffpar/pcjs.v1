@@ -4,8 +4,9 @@ title: "Q66571: Problem in NMAKE 1.11 with Multiple Dependency Blocks"
 permalink: /pubs/pc/reference/microsoft/kb/Q66571/
 ---
 
+## Q66571: Problem in NMAKE 1.11 with Multiple Dependency Blocks
+
 	Article: Q66571
-	Product: Microsoft C
 	Version(s): 1.11   | 1.11
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist1.11 fixlist1.12 s_c

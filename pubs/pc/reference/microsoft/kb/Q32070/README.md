@@ -4,8 +4,9 @@ title: "Q32070: D1001 &quot;Could Not Execute C2.EXE&quot; with DOS Version 2.10
 permalink: /pubs/pc/reference/microsoft/kb/Q32070/
 ---
 
+## Q32070: D1001 &quot;Could Not Execute C2.EXE&quot; with DOS Version 2.10
+
 	Article: Q32070
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER |

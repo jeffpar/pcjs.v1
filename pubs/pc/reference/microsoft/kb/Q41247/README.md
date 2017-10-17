@@ -4,8 +4,9 @@ title: "Q41247: Use Huge Pointers If Object Is Larger Than 64K Boundary"
 permalink: /pubs/pc/reference/microsoft/kb/Q41247/
 ---
 
+## Q41247: Use Huge Pointers If Object Is Larger Than 64K Boundary
+
 	Article: Q41247
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: OS/2
 	Flags: ENDUSER | SR# G890201-11081

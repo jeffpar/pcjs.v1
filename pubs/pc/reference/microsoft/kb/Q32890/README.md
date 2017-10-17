@@ -4,8 +4,9 @@ title: "Q32890: extern int i = 10; Compiles without Error"
 permalink: /pubs/pc/reference/microsoft/kb/Q32890/
 ---
 
+## Q32890: extern int i = 10; Compiles without Error
+
 	Article: Q32890
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | docerr

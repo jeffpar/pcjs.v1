@@ -4,8 +4,9 @@ title: "Q61304: CL: Error Output Not Redirected in Certain Cases"
 permalink: /pubs/pc/reference/microsoft/kb/Q61304/
 ---
 
+## Q61304: CL: Error Output Not Redirected in Certain Cases
+
 	Article: Q61304
-	Product: Microsoft C
 	Version(s): 6.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist6.00

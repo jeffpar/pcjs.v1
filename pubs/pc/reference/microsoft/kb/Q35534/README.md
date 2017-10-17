@@ -4,8 +4,9 @@ title: "Q35534: Why the Editor Cannot Find or Load TOOLS.INI"
 permalink: /pubs/pc/reference/microsoft/kb/Q35534/
 ---
 
+## Q35534: Why the Editor Cannot Find or Load TOOLS.INI
+
 	Article: Q35534
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | appnote

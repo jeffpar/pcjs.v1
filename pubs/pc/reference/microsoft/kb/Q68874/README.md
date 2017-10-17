@@ -4,8 +4,9 @@ title: "Q68874: Using ANSI.SYS Escape Codes with printf() for Screen Control"
 permalink: /pubs/pc/reference/microsoft/kb/Q68874/
 ---
 
+## Q68874: Using ANSI.SYS Escape Codes with printf() for Screen Control
+
 	Article: Q68874
-	Product: Microsoft C
 	Version(s): 3.x 4.x 5.x 6.00 6.00a | 5.10 6.00 6.00a
 	Operating System: MS-DOS                 | OS/2
 	Flags: ENDUSER | s_quickc

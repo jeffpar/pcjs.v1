@@ -4,8 +4,9 @@ title: "Q28421: Network and Mouse Conflicts"
 permalink: /pubs/pc/reference/microsoft/kb/Q28421/
 ---
 
+## Q28421: Network and Mouse Conflicts
+
 	Article: Q28421
-	Product: Microsoft C
 	Version(s): 6.x 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

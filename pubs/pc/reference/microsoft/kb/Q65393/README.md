@@ -4,8 +4,9 @@ title: "Q65393: Missing Semicolon Can Cause Internal Compiler Errors"
 permalink: /pubs/pc/reference/microsoft/kb/Q65393/
 ---
 
+## Q65393: Missing Semicolon Can Cause Internal Compiler Errors
+
 	Article: Q65393
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | s_quickc buglist6.00

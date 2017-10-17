@@ -4,8 +4,9 @@ title: "Q45537: Only 20 Locals May Be Viewed Simultaneously"
 permalink: /pubs/pc/reference/microsoft/kb/Q45537/
 ---
 
+## Q45537: Only 20 Locals May Be Viewed Simultaneously
+
 	Article: Q45537
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

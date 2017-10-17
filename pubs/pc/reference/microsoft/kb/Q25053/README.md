@@ -4,8 +4,9 @@ title: "Q25053: Unable to Activate the Mouse in Chart"
 permalink: /pubs/pc/reference/microsoft/kb/Q25053/
 ---
 
+## Q25053: Unable to Activate the Mouse in Chart
+
 	Article: Q25053
-	Product: Microsoft C
 	Version(s): 6.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | TAR64094

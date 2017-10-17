@@ -4,8 +4,9 @@ title: "Q68835: Compiler Prints Filename but Does Not Compile the Program"
 permalink: /pubs/pc/reference/microsoft/kb/Q68835/
 ---
 
+## Q68835: Compiler Prints Filename but Does Not Compile the Program
+
 	Article: Q68835
-	Product: Microsoft C
 	Version(s): 5.10 6.00 6.00a | 5.10 6.00 6.00a
 	Operating System: MS-DOS          | OS/2
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q38021: Mouse Cursor Disappears After Right Click"
 permalink: /pubs/pc/reference/microsoft/kb/Q38021/
 ---
 
+## Q38021: Mouse Cursor Disappears After Right Click
+
 	Article: Q38021
-	Product: Microsoft C
 	Version(s): 2.20 2.30 | 2.20 2.30
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER |

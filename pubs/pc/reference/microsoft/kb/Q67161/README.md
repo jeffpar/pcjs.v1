@@ -4,8 +4,9 @@ title: "Q67161: STARTUP.BAT Gives Error U1073: Don't Know How to Make stdio.h"
 permalink: /pubs/pc/reference/microsoft/kb/Q67161/
 ---
 
+## Q67161: STARTUP.BAT Gives Error U1073: Don't Know How to Make stdio.h
+
 	Article: Q67161
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | buglist6.00 buglist6.00a

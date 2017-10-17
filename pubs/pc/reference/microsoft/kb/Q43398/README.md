@@ -4,8 +4,9 @@ title: "Q43398: Incorrect Reference to Preprocessor Directives in User's Guide"
 permalink: /pubs/pc/reference/microsoft/kb/Q43398/
 ---
 
+## Q43398: Incorrect Reference to Preprocessor Directives in User's Guide
+
 	Article: Q43398
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | docerr

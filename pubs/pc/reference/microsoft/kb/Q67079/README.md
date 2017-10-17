@@ -4,8 +4,9 @@ title: "Q67079: Error C2141 When Initializing enum Constant to -32768"
 permalink: /pubs/pc/reference/microsoft/kb/Q67079/
 ---
 
+## Q67079: Error C2141 When Initializing enum Constant to -32768
+
 	Article: Q67079
-	Product: Microsoft C
 	Version(s): 5.10 6.00 6.00a | 5.10 6.00 6.00a
 	Operating System: MS-DOS          | OS/2
 	Flags: ENDUSER | S_QUICKC buglist5.10 buglist6.00 buglist6.00a

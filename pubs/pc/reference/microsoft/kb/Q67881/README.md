@@ -4,8 +4,9 @@ title: "Q67881: C 6.00 Pragmas Supported by QuickC"
 permalink: /pubs/pc/reference/microsoft/kb/Q67881/
 ---
 
+## Q67881: C 6.00 Pragmas Supported by QuickC
+
 	Article: Q67881
-	Product: Microsoft C
 	Version(s): 2.50 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

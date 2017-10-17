@@ -4,8 +4,9 @@ title: "Q67034: Compiler Hangs Under DOS with Long Relative Path for #include"
 permalink: /pubs/pc/reference/microsoft/kb/Q67034/
 ---
 
+## Q67034: Compiler Hangs Under DOS with Long Relative Path for #include
+
 	Article: Q67034
-	Product: Microsoft C
 	Version(s): 6.00 6.00a
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist6.00 buglist6.00a

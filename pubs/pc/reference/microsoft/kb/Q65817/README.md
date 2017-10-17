@@ -4,8 +4,9 @@ title: "Q65817: ILINK 1.20 and 1.21 Are Not Backwards Compatible"
 permalink: /pubs/pc/reference/microsoft/kb/Q65817/
 ---
 
+## Q65817: ILINK 1.20 and 1.21 Are Not Backwards Compatible
+
 	Article: Q65817
-	Product: Microsoft C
 	Version(s): 1.20 1.21 | 1.20 1.21
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER |

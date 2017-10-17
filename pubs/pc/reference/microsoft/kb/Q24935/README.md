@@ -4,8 +4,9 @@ title: "Q24935: Effects of Min and Max Memory Allocation During C Program Load"
 permalink: /pubs/pc/reference/microsoft/kb/Q24935/
 ---
 
+## Q24935: Effects of Min and Max Memory Allocation During C Program Load
+
 	Article: Q24935
-	Product: Microsoft C
 	Version(s): 4.00 5.00 5.10 6.00 6.00a
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickc s_link s_exemod s_exehdr

@@ -4,8 +4,9 @@ title: "Q35032: Don't Place Communal Data in Libraries"
 permalink: /pubs/pc/reference/microsoft/kb/Q35032/
 ---
 
+## Q35032: Don't Place Communal Data in Libraries
+
 	Article: Q35032
-	Product: Microsoft C
 	Version(s): 3.00 4.00 5.00 5.10 | 5.10
 	Operating System: MS-DOS              | OS/2
 	Flags: ENDUSER | S_LIB S_LINK  lib link

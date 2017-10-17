@@ -4,8 +4,9 @@ title: "Q41445: QuickC 2.00 README.DOC: The DOS Shell Command"
 permalink: /pubs/pc/reference/microsoft/kb/Q41445/
 ---
 
+## Q41445: QuickC 2.00 README.DOC: The DOS Shell Command
+
 	Article: Q41445
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

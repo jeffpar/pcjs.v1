@@ -4,8 +4,9 @@ title: "Q39911: C 5.10 Setup Gives U1203 Error under DOS Versions 2.x"
 permalink: /pubs/pc/reference/microsoft/kb/Q39911/
 ---
 
+## Q39911: C 5.10 Setup Gives U1203 Error under DOS Versions 2.x
+
 	Article: Q39911
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER |

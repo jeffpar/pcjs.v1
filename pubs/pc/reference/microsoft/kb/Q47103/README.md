@@ -4,8 +4,9 @@ title: "Q47103: DEF File Entry of EXECUTEONLY Causes Problems with CVP"
 permalink: /pubs/pc/reference/microsoft/kb/Q47103/
 ---
 
+## Q47103: DEF File Entry of EXECUTEONLY Causes Problems with CVP
+
 	Article: Q47103
-	Product: Microsoft C
 	Version(s): 2.20 2.30
 	Operating System: OS/2
 	Flags: ENDUSER |

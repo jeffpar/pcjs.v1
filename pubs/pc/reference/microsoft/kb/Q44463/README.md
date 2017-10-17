@@ -4,8 +4,9 @@ title: "Q44463: Difference between Arrays and Pointers in C"
 permalink: /pubs/pc/reference/microsoft/kb/Q44463/
 ---
 
+## Q44463: Difference between Arrays and Pointers in C
+
 	Article: Q44463
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | SR# G890510-18105 S_QuickC

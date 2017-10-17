@@ -4,8 +4,9 @@ title: "Q69349: File Component Constants Increased Beginning with C 6.00"
 permalink: /pubs/pc/reference/microsoft/kb/Q69349/
 ---
 
+## Q69349: File Component Constants Increased Beginning with C 6.00
+
 	Article: Q69349
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | s_quickc

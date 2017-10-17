@@ -4,8 +4,9 @@ title: "Q29852: Appending to CTRL+Z Terminated File with Fopen()"
 permalink: /pubs/pc/reference/microsoft/kb/Q29852/
 ---
 
+## Q29852: Appending to CTRL+Z Terminated File with Fopen()
+
 	Article: Q29852
-	Product: Microsoft C
 	Version(s): 4.00 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER |

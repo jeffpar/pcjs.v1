@@ -4,8 +4,9 @@ title: "Q61593: Pin-Outs of the 9-Pin Hosiden Socket"
 permalink: /pubs/pc/reference/microsoft/kb/Q61593/
 ---
 
+## Q61593: Pin-Outs of the 9-Pin Hosiden Socket
+
 	Article: Q61593
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

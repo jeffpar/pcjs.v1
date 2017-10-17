@@ -4,8 +4,9 @@ title: "Q44469: _clearscreen Does Not Clear the Entire Screen in _ERESCOLOR"
 permalink: /pubs/pc/reference/microsoft/kb/Q44469/
 ---
 
+## Q44469: _clearscreen Does Not Clear the Entire Screen in _ERESCOLOR
+
 	Article: Q44469
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist2.00

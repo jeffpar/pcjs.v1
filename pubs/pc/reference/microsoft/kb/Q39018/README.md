@@ -4,8 +4,9 @@ title: "Q39018: Error U1188 Cannot Write to VM"
 permalink: /pubs/pc/reference/microsoft/kb/Q39018/
 ---
 
+## Q39018: Error U1188 Cannot Write to VM
+
 	Article: Q39018
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | s_pascal h_fortran h_masm s_quickc s_util s_error

@@ -4,8 +4,9 @@ title: "Q40587: Floating-Point Routines Are Not Reentrant"
 permalink: /pubs/pc/reference/microsoft/kb/Q40587/
 ---
 
+## Q40587: Floating-Point Routines Are Not Reentrant
+
 	Article: Q40587
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER |

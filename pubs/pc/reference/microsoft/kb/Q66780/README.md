@@ -4,8 +4,9 @@ title: "Q66780: _fullpath() Changes Some Arguments to Uppercase"
 permalink: /pubs/pc/reference/microsoft/kb/Q66780/
 ---
 
+## Q66780: _fullpath() Changes Some Arguments to Uppercase
+
 	Article: Q66780
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | S_QUICKC buglist6.00 buglist6.00a

@@ -4,8 +4,9 @@ title: "Q50704: Compiling isatty() Sample Program Gives C2146: Syntax Error"
 permalink: /pubs/pc/reference/microsoft/kb/Q50704/
 ---
 
+## Q50704: Compiling isatty() Sample Program Gives C2146: Syntax Error
+
 	Article: Q50704
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.00 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | DOCERR

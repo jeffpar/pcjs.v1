@@ -4,8 +4,9 @@ title: "Q33476: Mouse and AutoCAD"
 permalink: /pubs/pc/reference/microsoft/kb/Q33476/
 ---
 
+## Q33476: Mouse and AutoCAD
+
 	Article: Q33476
-	Product: Microsoft C
 	Version(s): 1.x 2.x 3.x 4.x 5.x 6.x
 	Operating System: MS-DOS
 	Flags: ENDUSER |

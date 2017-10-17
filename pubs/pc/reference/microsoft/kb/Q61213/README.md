@@ -4,8 +4,9 @@ title: "Q61213: C 6.00 README: Use Run.Customize to Install Your Editor"
 permalink: /pubs/pc/reference/microsoft/kb/Q61213/
 ---
 
+## Q61213: C 6.00 README: Use Run.Customize to Install Your Editor
+
 	Article: Q61213
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

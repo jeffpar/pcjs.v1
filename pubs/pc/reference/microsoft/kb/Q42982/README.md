@@ -4,8 +4,9 @@ title: "Q42982: Altering BP Register in In-Line Assembly Block"
 permalink: /pubs/pc/reference/microsoft/kb/Q42982/
 ---
 
+## Q42982: Altering BP Register in In-Line Assembly Block
+
 	Article: Q42982
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | inline

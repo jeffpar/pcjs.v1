@@ -4,8 +4,9 @@ title: "Q66459: In-line File in Inference Rule Causes Bad Macro Substitution"
 permalink: /pubs/pc/reference/microsoft/kb/Q66459/
 ---
 
+## Q66459: In-line File in Inference Rule Causes Bad Macro Substitution
+
 	Article: Q66459
-	Product: Microsoft C
 	Version(s): 1.11   | 1.11
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist1.11

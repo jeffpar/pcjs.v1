@@ -4,8 +4,9 @@ title: "Q41195: QuickC Version 2.00 Supports Coprocessor Libraries"
 permalink: /pubs/pc/reference/microsoft/kb/Q41195/
 ---
 
+## Q41195: QuickC Version 2.00 Supports Coprocessor Libraries
+
 	Article: Q41195
-	Product: Microsoft C
 	Version(s): 1.x 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

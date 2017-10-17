@@ -4,8 +4,9 @@ title: "Q29467: Mouse EGA Register Interface"
 permalink: /pubs/pc/reference/microsoft/kb/Q29467/
 ---
 
+## Q29467: Mouse EGA Register Interface
+
 	Article: Q29467
-	Product: Microsoft C
 	Version(s): 6.x 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q25365: Incorrect Error Generated for Very Small COM Files"
 permalink: /pubs/pc/reference/microsoft/kb/Q25365/
 ---
 
+## Q25365: Incorrect Error Generated for Very Small COM Files
+
 	Article: Q25365
-	Product: Microsoft C
 	Version(s): 2.00 2.10 2.20 2.30
 	Operating System: MS-DOS
 	Flags: ENDUSER | TAR65183 buglist2.00

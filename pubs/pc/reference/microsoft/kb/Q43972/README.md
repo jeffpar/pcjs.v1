@@ -4,8 +4,9 @@ title: "Q43972: QuickC: Bad Symbolic Information for Char Array in Structure"
 permalink: /pubs/pc/reference/microsoft/kb/Q43972/
 ---
 
+## Q43972: QuickC: Bad Symbolic Information for Char Array in Structure
+
 	Article: Q43972
-	Product: Microsoft C
 	Version(s): 1.00 1.01
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist1.00 buglist1.01

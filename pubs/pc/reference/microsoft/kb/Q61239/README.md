@@ -4,8 +4,9 @@ title: "Q61239: C 6.00 README: Notes on &quot;C Reference&quot;"
 permalink: /pubs/pc/reference/microsoft/kb/Q61239/
 ---
 
+## Q61239: C 6.00 README: Notes on &quot;C Reference&quot;
+
 	Article: Q61239
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | docerr

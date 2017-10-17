@@ -4,8 +4,9 @@ title: "Q29845: C 5.10 MTDYNA.DOC: Matrix of Components"
 permalink: /pubs/pc/reference/microsoft/kb/Q29845/
 ---
 
+## Q29845: C 5.10 MTDYNA.DOC: Matrix of Components
+
 	Article: Q29845
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

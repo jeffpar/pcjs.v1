@@ -4,8 +4,9 @@ title: "Q59892: LIB.EXE Failure When Trying to Build Large Libraries"
 permalink: /pubs/pc/reference/microsoft/kb/Q59892/
 ---
 
+## Q59892: LIB.EXE Failure When Trying to Build Large Libraries
+
 	Article: Q59892
-	Product: Microsoft C
 	Version(s): 3.11   | 3.11
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | s_lib appnote

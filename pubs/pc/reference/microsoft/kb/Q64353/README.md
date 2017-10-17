@@ -4,8 +4,9 @@ title: "Q64353: With the &quot;deflang&quot; Switch PWB Prompts for Setting Prog
 permalink: /pubs/pc/reference/microsoft/kb/Q64353/
 ---
 
+## Q64353: With the &quot;deflang&quot; Switch PWB Prompts for Setting Program List
+
 	Article: Q64353
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | docerr

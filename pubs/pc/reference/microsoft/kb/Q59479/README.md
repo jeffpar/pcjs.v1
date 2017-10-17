@@ -4,8 +4,9 @@ title: "Q59479: Cannot Open Compiler Intermediate File"
 permalink: /pubs/pc/reference/microsoft/kb/Q59479/
 ---
 
+## Q59479: Cannot Open Compiler Intermediate File
+
 	Article: Q59479
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

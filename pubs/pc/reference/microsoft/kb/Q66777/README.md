@@ -4,8 +4,9 @@ title: "Q66777: Formal Parameter Cannot Be Based on Previous Formal Parameter"
 permalink: /pubs/pc/reference/microsoft/kb/Q66777/
 ---
 
+## Q66777: Formal Parameter Cannot Be Based on Previous Formal Parameter
+
 	Article: Q66777
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | S_QUICKC buglist6.00 buglist6.00a

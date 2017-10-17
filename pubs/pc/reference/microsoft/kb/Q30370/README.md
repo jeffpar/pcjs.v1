@@ -4,8 +4,9 @@ title: "Q30370: Reading F11 and F12 Keys on Extended Keyboard"
 permalink: /pubs/pc/reference/microsoft/kb/Q30370/
 ---
 
+## Q30370: Reading F11 and F12 Keys on Extended Keyboard
+
 	Article: Q30370
-	Product: Microsoft C
 	Version(s): 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER |

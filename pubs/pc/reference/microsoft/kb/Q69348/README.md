@@ -4,8 +4,9 @@ title: "Q69348: CVP May Generate a Trap B with Large Programs Under OS/2 1.30"
 permalink: /pubs/pc/reference/microsoft/kb/Q69348/
 ---
 
+## Q69348: CVP May Generate a Trap B with Large Programs Under OS/2 1.30
+
 	Article: Q69348
-	Product: Microsoft C
 	Version(s): 2.20 2.30 3.00 3.10 3.11
 	Operating System: OS/2
 	Flags: ENDUSER | gp fault protection violation

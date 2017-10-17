@@ -4,8 +4,9 @@ title: "Q29188: Unresolved External on &#95;&#95;Clpow with /Oi and /FPa in C 5.
 permalink: /pubs/pc/reference/microsoft/kb/Q29188/
 ---
 
+## Q29188: Unresolved External on &#95;&#95;Clpow with /Oi and /FPa in C 5.xx
+
 	Article: Q29188
-	Product: Microsoft C
 	Version(s): 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER |

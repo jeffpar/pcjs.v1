@@ -4,8 +4,9 @@ title: "Q41579: C2073 When Porting Code from QuickC 2.00 to C 5.10"
 permalink: /pubs/pc/reference/microsoft/kb/Q41579/
 ---
 
+## Q41579: C2073 When Porting Code from QuickC 2.00 to C 5.10
+
 	Article: Q41579
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_c

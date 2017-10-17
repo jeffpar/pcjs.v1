@@ -4,8 +4,9 @@ title: "Q46461: Mouse Performance between Serial and Bus Mouse"
 permalink: /pubs/pc/reference/microsoft/kb/Q46461/
 ---
 
+## Q46461: Mouse Performance between Serial and Bus Mouse
+
 	Article: Q46461
-	Product: Microsoft C
 	Version(s): 1.x 2.x 3.x 4.x 5.x 6.x 1.00 1.01
 	Operating System: MS-DOS
 	Flags: ENDUSER |

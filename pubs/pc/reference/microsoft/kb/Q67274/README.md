@@ -4,8 +4,9 @@ title: "Q67274: REsearch() Function Prototype Not Found in EXT.H Header File"
 permalink: /pubs/pc/reference/microsoft/kb/Q67274/
 ---
 
+## Q67274: REsearch() Function Prototype Not Found in EXT.H Header File
+
 	Article: Q67274
-	Product: Microsoft C
 	Version(s): 1.00 1.10 | 1.00 1.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | buglist1.00 buglist1.10

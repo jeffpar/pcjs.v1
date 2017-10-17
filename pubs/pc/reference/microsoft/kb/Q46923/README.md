@@ -4,8 +4,9 @@ title: "Q46923: Some ASCII Control Characters Incorrect in Programmer's Manual"
 permalink: /pubs/pc/reference/microsoft/kb/Q46923/
 ---
 
+## Q46923: Some ASCII Control Characters Incorrect in Programmer's Manual
+
 	Article: Q46923
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | mouse menu

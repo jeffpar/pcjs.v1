@@ -4,8 +4,9 @@ title: "Q59088: _setactivepage() and _setvisualpage() May Corrupt Display"
 permalink: /pubs/pc/reference/microsoft/kb/Q59088/
 ---
 
+## Q59088: _setactivepage() and _setvisualpage() May Corrupt Display
+
 	Article: Q59088
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickasm

@@ -4,8 +4,9 @@ title: "Q40176: Inserting Time and Date into Files"
 permalink: /pubs/pc/reference/microsoft/kb/Q40176/
 ---
 
+## Q40176: Inserting Time and Date into Files
+
 	Article: Q40176
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

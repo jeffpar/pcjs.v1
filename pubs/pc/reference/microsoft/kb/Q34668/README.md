@@ -4,8 +4,9 @@ title: "Q34668: Initialization of auto Arrays, Structs, Unions Not Allowed"
 permalink: /pubs/pc/reference/microsoft/kb/Q34668/
 ---
 
+## Q34668: Initialization of auto Arrays, Structs, Unions Not Allowed
+
 	Article: Q34668
-	Product: Microsoft C
 	Version(s): 4.00 5.00 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER |

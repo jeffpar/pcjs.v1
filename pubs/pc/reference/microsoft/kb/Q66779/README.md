@@ -4,8 +4,9 @@ title: "Q66779: PG Chart Displays May Have Uneven Spacing Between Bars"
 permalink: /pubs/pc/reference/microsoft/kb/Q66779/
 ---
 
+## Q66779: PG Chart Displays May Have Uneven Spacing Between Bars
+
 	Article: Q66779
-	Product: Microsoft C
 	Version(s): 6.00 6.00a
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QUICKC buglist6.00 buglist6.00a

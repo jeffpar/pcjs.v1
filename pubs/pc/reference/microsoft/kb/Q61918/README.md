@@ -4,8 +4,9 @@ title: "Q61918: Internal Compiler Error: C1001, regMD.c, Line 1017"
 permalink: /pubs/pc/reference/microsoft/kb/Q61918/
 ---
 
+## Q61918: Internal Compiler Error: C1001, regMD.c, Line 1017
+
 	Article: Q61918
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist6.00

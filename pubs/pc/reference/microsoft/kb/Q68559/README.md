@@ -4,8 +4,9 @@ title: "Q68559: Bad Code Generated for &quot;a+b == a&quot; FP Comparison Expres
 permalink: /pubs/pc/reference/microsoft/kb/Q68559/
 ---
 
+## Q68559: Bad Code Generated for &quot;a+b == a&quot; FP Comparison Expressions
+
 	Article: Q68559
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | buglist6.00 buglist6.00a conditional equals codegen

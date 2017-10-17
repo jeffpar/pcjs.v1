@@ -4,8 +4,9 @@ title: "Q30515: /I Linker Option Should Read /INF"
 permalink: /pubs/pc/reference/microsoft/kb/Q30515/
 ---
 
+## Q30515: /I Linker Option Should Read /INF
+
 	Article: Q30515
-	Product: Microsoft C
 	Version(s): 3.61 3.65
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr

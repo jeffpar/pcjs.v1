@@ -4,8 +4,9 @@ title: "Q67761: GRAPHICS.LIB Cannot Be Used with Tiny Model"
 permalink: /pubs/pc/reference/microsoft/kb/Q67761/
 ---
 
+## Q67761: GRAPHICS.LIB Cannot Be Used with Tiny Model
+
 	Article: Q67761
-	Product: Microsoft C
 	Version(s): 6.00 6.00a
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickc s_quickasm

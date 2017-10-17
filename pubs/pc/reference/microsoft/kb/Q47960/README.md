@@ -4,8 +4,9 @@ title: "Q47960: Description of a Linker .MAP File"
 permalink: /pubs/pc/reference/microsoft/kb/Q47960/
 ---
 
+## Q47960: Description of a Linker .MAP File
+
 	Article: Q47960
-	Product: Microsoft C
 	Version(s): 3.60 3.61 3.64 3.65 5.01.20 5.01.21 5.03  | 5.01.20 5.01.
 	Operating System: MS-DOS                                    | OS/2
 	Flags: ENDUSER | S_C S_PasCal H_FORTRAN

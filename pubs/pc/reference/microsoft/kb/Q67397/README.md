@@ -4,8 +4,9 @@ title: "Q67397: Hyperlink for MakeProcInstance in SDKADV.HLP Incorrect"
 permalink: /pubs/pc/reference/microsoft/kb/Q67397/
 ---
 
+## Q67397: Hyperlink for MakeProcInstance in SDKADV.HLP Incorrect
+
 	Article: Q67397
-	Product: Microsoft C
 	Version(s): 1.70   | 1.70
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | s_qh docerr

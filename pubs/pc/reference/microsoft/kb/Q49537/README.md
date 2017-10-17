@@ -4,8 +4,9 @@ title: "Q49537: The CodeView Port Input Command Example Is Unclear"
 permalink: /pubs/pc/reference/microsoft/kb/Q49537/
 ---
 
+## Q49537: The CodeView Port Input Command Example Is Unclear
+
 	Article: Q49537
-	Product: Microsoft C
 	Version(s): 2.20 2.30 | 2.20 2.30
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | H_MASM H_FORTRAN S_Pascal

@@ -4,8 +4,9 @@ title: "Q43396: C: _bios_timeofday Documentation Error"
 permalink: /pubs/pc/reference/microsoft/kb/Q43396/
 ---
 
+## Q43396: C: _bios_timeofday Documentation Error
+
 	Article: Q43396
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.00 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | docerr

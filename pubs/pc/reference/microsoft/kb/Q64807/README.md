@@ -4,8 +4,9 @@ title: "Q64807: goto Label at End of Block Without &quot;;&quot; Invalid Syntax"
 permalink: /pubs/pc/reference/microsoft/kb/Q64807/
 ---
 
+## Q64807: goto Label at End of Block Without &quot;;&quot; Invalid Syntax
+
 	Article: Q64807
-	Product: Microsoft C
 	Version(s): 4.x 5.x 6.00 | 5.10 6.00
 	Operating System: MS-DOS       | OS/2
 	Flags: ENDUSER | s_quickc 1.x 2.00 2.50 s_quickasm 2.01 2.51

@@ -4,8 +4,9 @@ title: "Q27212: Older Vega VGAs Hang CodeView When in VGA Mode"
 permalink: /pubs/pc/reference/microsoft/kb/Q27212/
 ---
 
+## Q27212: Older Vega VGAs Hang CodeView When in VGA Mode
+
 	Article: Q27212
-	Product: Microsoft C
 	Version(s): 2.10 2.20 2.30 | 2.20 2.30
 	Operating System: MS-DOS         | OS/2
 	Flags: ENDUSER |

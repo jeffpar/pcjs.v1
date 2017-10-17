@@ -4,8 +4,9 @@ title: "Q38728: Initializing Large Character Arrays"
 permalink: /pubs/pc/reference/microsoft/kb/Q38728/
 ---
 
+## Q38728: Initializing Large Character Arrays
+
 	Article: Q38728
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | SR# G881128-6987

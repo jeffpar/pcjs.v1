@@ -4,8 +4,9 @@ title: "Q67036: ANSI Spec Says Taking Address of register Array is Not Allowed"
 permalink: /pubs/pc/reference/microsoft/kb/Q67036/
 ---
 
+## Q67036: ANSI Spec Says Taking Address of register Array is Not Allowed
+
 	Article: Q67036
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | S_QUICKC buglist6.00 buglist6.00a

@@ -4,8 +4,9 @@ title: "Q34029: C Version 5.10 LINK and Windows LINK4"
 permalink: /pubs/pc/reference/microsoft/kb/Q34029/
 ---
 
+## Q34029: C Version 5.10 LINK and Windows LINK4
+
 	Article: Q34029
-	Product: Microsoft C
 	Version(s): 5.10    | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | SR# G880603-1453

@@ -4,8 +4,9 @@ title: "Q38375: Thirty-Two-Bit Register Not Visible under OS/2"
 permalink: /pubs/pc/reference/microsoft/kb/Q38375/
 ---
 
+## Q38375: Thirty-Two-Bit Register Not Visible under OS/2
+
 	Article: Q38375
-	Product: Microsoft C
 	Version(s): 2.20
 	Operating System: OS/2
 	Flags: ENDUSER |

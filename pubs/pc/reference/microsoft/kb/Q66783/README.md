@@ -4,8 +4,9 @@ title: "Q66783: _floodfill() May Not Stop at the Correct Boundary Color"
 permalink: /pubs/pc/reference/microsoft/kb/Q66783/
 ---
 
+## Q66783: _floodfill() May Not Stop at the Correct Boundary Color
+
 	Article: Q66783
-	Product: Microsoft C
 	Version(s): 6.00 6.00a
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QUICKC buglist6.00 buglist6.00a

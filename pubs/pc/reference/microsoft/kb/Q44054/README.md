@@ -4,8 +4,9 @@ title: "Q44054: QuickC: _floodfill May Fail When Filling Color 0"
 permalink: /pubs/pc/reference/microsoft/kb/Q44054/
 ---
 
+## Q44054: QuickC: _floodfill May Fail When Filling Color 0
+
 	Article: Q44054
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist2.00

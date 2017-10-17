@@ -4,8 +4,9 @@ title: "Q43914: C: Text Modes Don't Return Pixel Information"
 permalink: /pubs/pc/reference/microsoft/kb/Q43914/
 ---
 
+## Q43914: C: Text Modes Don't Return Pixel Information
+
 	Article: Q43914
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickc

@@ -4,8 +4,9 @@ title: "Q44755: Long Arithmetic Incorrect in Certain Circumstances in QuickC"
 permalink: /pubs/pc/reference/microsoft/kb/Q44755/
 ---
 
+## Q44755: Long Arithmetic Incorrect in Certain Circumstances in QuickC
+
 	Article: Q44755
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist2.00

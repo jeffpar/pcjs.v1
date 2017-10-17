@@ -4,8 +4,9 @@ title: "Q65913: PWB Err Msg: Out of Local Memory. Unable to Recover."
 permalink: /pubs/pc/reference/microsoft/kb/Q65913/
 ---
 
+## Q65913: PWB Err Msg: Out of Local Memory. Unable to Recover.
+
 	Article: Q65913
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

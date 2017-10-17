@@ -4,8 +4,9 @@ title: "Q45195: Run-Time Library FP Signal Handler Assumes SS=DS"
 permalink: /pubs/pc/reference/microsoft/kb/Q45195/
 ---
 
+## Q45195: Run-Time Library FP Signal Handler Assumes SS=DS
+
 	Article: Q45195
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | softlib CFPLIBS.ARC S12318.EXE

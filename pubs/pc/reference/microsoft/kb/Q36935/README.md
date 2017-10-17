@@ -4,8 +4,9 @@ title: "Q36935: Writing to Video Memory in the QuickC Environment"
 permalink: /pubs/pc/reference/microsoft/kb/Q36935/
 ---
 
+## Q36935: Writing to Video Memory in the QuickC Environment
+
 	Article: Q36935
-	Product: Microsoft C
 	Version(s): 1.00 1.01
 	Operating System: MS-DOS
 	Flags: ENDUSER |

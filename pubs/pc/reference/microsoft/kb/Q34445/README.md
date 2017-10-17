@@ -4,8 +4,9 @@ title: "Q34445: Installing C on a Network Violates License Agreement"
 permalink: /pubs/pc/reference/microsoft/kb/Q34445/
 ---
 
+## Q34445: Installing C on a Network Violates License Agreement
+
 	Article: Q34445
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

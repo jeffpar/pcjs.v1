@@ -4,8 +4,9 @@ title: "Q49501: Ftime: C Function -- Documentation Supplement"
 permalink: /pubs/pc/reference/microsoft/kb/Q49501/
 ---
 
+## Q49501: Ftime: C Function -- Documentation Supplement
+
 	Article: Q49501
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QuickC S_QuickASM docsup

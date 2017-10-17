@@ -4,8 +4,9 @@ title: "Q41101: CodeView and Video Pages"
 permalink: /pubs/pc/reference/microsoft/kb/Q41101/
 ---
 
+## Q41101: CodeView and Video Pages
+
 	Article: Q41101
-	Product: Microsoft C
 	Version(s): 2.00 2.10 2.20 | 2.20
 	Operating System: MS-DOS         | OS/2
 	Flags: ENDUSER |

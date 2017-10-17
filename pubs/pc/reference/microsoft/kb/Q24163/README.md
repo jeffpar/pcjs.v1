@@ -4,8 +4,9 @@ title: "Q24163: Earlier Versions with Mouse Menu Software"
 permalink: /pubs/pc/reference/microsoft/kb/Q24163/
 ---
 
+## Q24163: Earlier Versions with Mouse Menu Software
+
 	Article: Q24163
-	Product: Microsoft C
 	Version(s): 4.x 5.x 6.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

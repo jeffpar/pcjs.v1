@@ -4,8 +4,9 @@ title: "Q67880: Hyphen in File or Directory Name Causes LIB Error U2155"
 permalink: /pubs/pc/reference/microsoft/kb/Q67880/
 ---
 
+## Q67880: Hyphen in File or Directory Name Causes LIB Error U2155
+
 	Article: Q67880
-	Product: Microsoft C
 	Version(s): 3.00 3.04 3.07 3.08 3.10 3.11 3.14 3.17 | 3.10 3.11 3.14
 	Operating System: MS-DOS                                  | OS/2
 	Flags: ENDUSER | s_lib dash minus sign

@@ -4,8 +4,9 @@ title: "Q60866: OS/2 1.20 Requirements for Dual-Monitor Debugging"
 permalink: /pubs/pc/reference/microsoft/kb/Q60866/
 ---
 
+## Q60866: OS/2 1.20 Requirements for Dual-Monitor Debugging
+
 	Article: Q60866
-	Product: Microsoft C
 	Version(s): 2.x 3.00
 	Operating System: OS/2
 	Flags: ENDUSER | PM

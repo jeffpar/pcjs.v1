@@ -4,8 +4,9 @@ title: "Q43272: Printing ASCII Characters Greater Than 127 Fails in CGA Mode"
 permalink: /pubs/pc/reference/microsoft/kb/Q43272/
 ---
 
+## Q43272: Printing ASCII Characters Greater Than 127 Fails in CGA Mode
+
 	Article: Q43272
-	Product: Microsoft C
 	Version(s): 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickc

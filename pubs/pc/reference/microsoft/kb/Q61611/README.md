@@ -4,8 +4,9 @@ title: "Q61611: CodeView Does Not Reset Initial Graphics Mode on Exit"
 permalink: /pubs/pc/reference/microsoft/kb/Q61611/
 ---
 
+## Q61611: CodeView Does Not Reset Initial Graphics Mode on Exit
+
 	Article: Q61611
-	Product: Microsoft C
 	Version(s): 2.x 3.00    | 2.x 3.00
 	Operating System: MS-DOS      | OS/2
 	Flags: ENDUSER |

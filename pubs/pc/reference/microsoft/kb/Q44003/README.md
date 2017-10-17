@@ -4,8 +4,9 @@ title: "Q44003: QuickC 2.00 &quot;Rebuild All&quot; Doesn't Necessarily Relink"
 permalink: /pubs/pc/reference/microsoft/kb/Q44003/
 ---
 
+## Q44003: QuickC 2.00 &quot;Rebuild All&quot; Doesn't Necessarily Relink
+
 	Article: Q44003
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

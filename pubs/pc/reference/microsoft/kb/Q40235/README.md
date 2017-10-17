@@ -4,8 +4,9 @@ title: "Q40235: M Hangs if the textarg Given to ArgCompile Is Incomplete"
 permalink: /pubs/pc/reference/microsoft/kb/Q40235/
 ---
 
+## Q40235: M Hangs if the textarg Given to ArgCompile Is Incomplete
+
 	Article: Q40235
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

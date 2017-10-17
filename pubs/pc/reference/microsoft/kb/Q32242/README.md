@@ -4,8 +4,9 @@ title: "Q32242: The extmake Compile Switch Is Case Sensitive"
 permalink: /pubs/pc/reference/microsoft/kb/Q32242/
 ---
 
+## Q32242: The extmake Compile Switch Is Case Sensitive
+
 	Article: Q32242
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist1.00

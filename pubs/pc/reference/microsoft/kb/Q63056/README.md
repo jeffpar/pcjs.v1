@@ -4,8 +4,9 @@ title: "Q63056: Fatal Error C1043 When Compiling with C1L.EXE"
 permalink: /pubs/pc/reference/microsoft/kb/Q63056/
 ---
 
+## Q63056: Fatal Error C1043 When Compiling with C1L.EXE
+
 	Article: Q63056
-	Product: Microsoft C
 	Version(s): 6.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist6.00

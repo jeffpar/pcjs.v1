@@ -4,8 +4,9 @@ title: "Q58487: C 6.00 Utility Support for OS/2 Long Filenames"
 permalink: /pubs/pc/reference/microsoft/kb/Q58487/
 ---
 
+## Q58487: C 6.00 Utility Support for OS/2 Long Filenames
+
 	Article: Q58487
-	Product: Microsoft C
 	Version(s): 6.00
 	Operating System: OS/2
 	Flags: ENDUSER | s_link s_nmake s_c

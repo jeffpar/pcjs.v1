@@ -4,8 +4,9 @@ title: "Q43344: Deallocating Memory When Using Compaq and IBM Mouse Ports"
 permalink: /pubs/pc/reference/microsoft/kb/Q43344/
 ---
 
+## Q43344: Deallocating Memory When Using Compaq and IBM Mouse Ports
+
 	Article: Q43344
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

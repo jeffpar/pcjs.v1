@@ -4,8 +4,9 @@ title: "Q39020: Error U2155 Modulename : Module Not In Library; Ignored"
 permalink: /pubs/pc/reference/microsoft/kb/Q39020/
 ---
 
+## Q39020: Error U2155 Modulename : Module Not In Library; Ignored
+
 	Article: Q39020
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | s_pascal h_fortran h_masm s_quickc s_util s_error

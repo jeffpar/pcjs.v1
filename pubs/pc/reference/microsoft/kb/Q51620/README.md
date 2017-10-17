@@ -4,8 +4,9 @@ title: "Q51620: No Warning When Passing Long to Int Prototyped Function"
 permalink: /pubs/pc/reference/microsoft/kb/Q51620/
 ---
 
+## Q51620: No Warning When Passing Long to Int Prototyped Function
+
 	Article: Q51620
-	Product: Microsoft C
 	Version(s): 5.10   | 5.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | s_quickc s_quickasm

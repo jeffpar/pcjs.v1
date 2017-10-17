@@ -4,8 +4,9 @@ title: "Q59420: In What Order Does NMAKE Build Files?"
 permalink: /pubs/pc/reference/microsoft/kb/Q59420/
 ---
 
+## Q59420: In What Order Does NMAKE Build Files?
+
 	Article: Q59420
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

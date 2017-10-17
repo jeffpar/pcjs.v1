@@ -4,8 +4,9 @@ title: "Q32311: L1063 Error Not Documented in C Versions 5.00 or 5.10"
 permalink: /pubs/pc/reference/microsoft/kb/Q32311/
 ---
 
+## Q32311: L1063 Error Not Documented in C Versions 5.00 or 5.10
+
 	Article: Q32311
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | docerr

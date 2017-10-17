@@ -4,8 +4,9 @@ title: "Q69065: Sequential Mode Not Available in CodeView Version 3.00"
 permalink: /pubs/pc/reference/microsoft/kb/Q69065/
 ---
 
+## Q69065: Sequential Mode Not Available in CodeView Version 3.00
+
 	Article: Q69065
-	Product: Microsoft C
 	Version(s): 3.00 3.01 3.11  | 3.00 3.01 3.11
 	Operating System: MS-DOS          | OS/2
 	Flags: ENDUSER |

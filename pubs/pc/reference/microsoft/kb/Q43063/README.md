@@ -4,8 +4,9 @@ title: "Q43063: Calls Stack Is Sometimes Incomplete"
 permalink: /pubs/pc/reference/microsoft/kb/Q43063/
 ---
 
+## Q43063: Calls Stack Is Sometimes Incomplete
+
 	Article: Q43063
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist2.00

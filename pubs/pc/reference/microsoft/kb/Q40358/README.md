@@ -4,8 +4,9 @@ title: "Q40358: Bit-Shift Function in C"
 permalink: /pubs/pc/reference/microsoft/kb/Q40358/
 ---
 
+## Q40358: Bit-Shift Function in C
+
 	Article: Q40358
-	Product: Microsoft C
 	Version(s): 5.10    | 5.10
 	Operating System: MS-DOS  | OS/2
 	Flags: ENDUSER | s_quickc

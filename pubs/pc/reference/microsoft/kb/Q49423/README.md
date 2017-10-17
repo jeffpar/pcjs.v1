@@ -4,8 +4,9 @@ title: "Q49423: WINDOWCOMPAT Directs CodeView to Create a Window"
 permalink: /pubs/pc/reference/microsoft/kb/Q49423/
 ---
 
+## Q49423: WINDOWCOMPAT Directs CodeView to Create a Window
+
 	Article: Q49423
-	Product: Microsoft C
 	Version(s): 2.20 2.30
 	Operating System: OS/2
 	Flags: ENDUSER | S_C

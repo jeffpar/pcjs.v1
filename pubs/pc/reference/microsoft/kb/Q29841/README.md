@@ -4,8 +4,9 @@ title: "Q29841: C 5.10 MTDYNA.DOC: Multiple Thread Dynamic-Link libraries"
 permalink: /pubs/pc/reference/microsoft/kb/Q29841/
 ---
 
+## Q29841: C 5.10 MTDYNA.DOC: Multiple Thread Dynamic-Link libraries
+
 	Article: Q29841
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

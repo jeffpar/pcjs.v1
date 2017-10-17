@@ -4,8 +4,9 @@ title: "Q61314: The Limit of Macro Expansion"
 permalink: /pubs/pc/reference/microsoft/kb/Q61314/
 ---
 
+## Q61314: The Limit of Macro Expansion
+
 	Article: Q61314
-	Product: Microsoft C
 	Version(s): 5.00 5.10 6.00| 5.10 6.00
 	Operating System: MS-DOS        | OS/2
 	Flags: ENDUSER |

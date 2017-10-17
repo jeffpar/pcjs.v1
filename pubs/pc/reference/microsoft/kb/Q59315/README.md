@@ -4,8 +4,9 @@ title: "Q59315: CodeView Trace Skips Statement Following Switch Statement"
 permalink: /pubs/pc/reference/microsoft/kb/Q59315/
 ---
 
+## Q59315: CodeView Trace Skips Statement Following Switch Statement
+
 	Article: Q59315
-	Product: Microsoft C
 	Version(s): 2.20 2.30 | 2.20 2.30
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | buglist2.20 buglist2.30

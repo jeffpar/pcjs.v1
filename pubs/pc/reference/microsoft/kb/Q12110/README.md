@@ -4,8 +4,9 @@ title: "Q12110: Call ROM BIOS Routines to Check the Printer Status"
 permalink: /pubs/pc/reference/microsoft/kb/Q12110/
 ---
 
+## Q12110: Call ROM BIOS Routines to Check the Printer Status
+
 	Article: Q12110
-	Product: Microsoft C
 	Version(s): 5.00 5.10 6.00 6.00a
 	Operating System: MS-DOS
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q45241: Setting a Breakpoint Highlights More Than One Line"
 permalink: /pubs/pc/reference/microsoft/kb/Q45241/
 ---
 
+## Q45241: Setting a Breakpoint Highlights More Than One Line
+
 	Article: Q45241
-	Product: Microsoft C
 	Version(s): 2.20
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist2.20

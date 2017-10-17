@@ -4,8 +4,9 @@ title: "Q23827: Standard Mouse Menus Do Not Deallocate"
 permalink: /pubs/pc/reference/microsoft/kb/Q23827/
 ---
 
+## Q23827: Standard Mouse Menus Do Not Deallocate
+
 	Article: Q23827
-	Product: Microsoft C
 	Version(s): 4.x 5.x 6.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

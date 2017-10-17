@@ -4,8 +4,9 @@ title: "Q68496: C1001: Internal Compiler Error: grammar.c, Line 140"
 permalink: /pubs/pc/reference/microsoft/kb/Q68496/
 ---
 
+## Q68496: C1001: Internal Compiler Error: grammar.c, Line 140
+
 	Article: Q68496
-	Product: Microsoft C
 	Version(s): 6.00a  | 6.00a
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist6.00a

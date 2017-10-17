@@ -4,8 +4,9 @@ title: "Q66514: Unable to Create a File Larger Than 32MB with DOS 4.x"
 permalink: /pubs/pc/reference/microsoft/kb/Q66514/
 ---
 
+## Q66514: Unable to Create a File Larger Than 32MB with DOS 4.x
+
 	Article: Q66514
-	Product: Microsoft C
 	Version(s): 6.00 6.00a
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QuickC S_MASM appnote PATCH32M.ARC

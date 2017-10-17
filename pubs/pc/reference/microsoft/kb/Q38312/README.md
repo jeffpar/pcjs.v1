@@ -4,8 +4,9 @@ title: "Q38312: Attributes in Hercules Graphics Mode"
 permalink: /pubs/pc/reference/microsoft/kb/Q38312/
 ---
 
+## Q38312: Attributes in Hercules Graphics Mode
+
 	Article: Q38312
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickc

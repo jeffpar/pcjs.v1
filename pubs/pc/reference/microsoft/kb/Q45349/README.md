@@ -4,8 +4,9 @@ title: "Q45349: A Problem with Division Always Returning 1"
 permalink: /pubs/pc/reference/microsoft/kb/Q45349/
 ---
 
+## Q45349: A Problem with Division Always Returning 1
+
 	Article: Q45349
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist2.00

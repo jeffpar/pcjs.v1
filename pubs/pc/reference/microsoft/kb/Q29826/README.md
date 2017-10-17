@@ -4,8 +4,9 @@ title: "Q29826: C 5.10 MTDYNA.DOC File: Single-Thread Dynamic-Link Libraries"
 permalink: /pubs/pc/reference/microsoft/kb/Q29826/
 ---
 
+## Q29826: C 5.10 MTDYNA.DOC File: Single-Thread Dynamic-Link Libraries
+
 	Article: Q29826
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

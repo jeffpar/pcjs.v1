@@ -4,8 +4,9 @@ title: "Q28590: Microsoft Editor Fails to Find TOOLS.INI Using DOS Version 2.x"
 permalink: /pubs/pc/reference/microsoft/kb/Q28590/
 ---
 
+## Q28590: Microsoft Editor Fails to Find TOOLS.INI Using DOS Version 2.x
+
 	Article: Q28590
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

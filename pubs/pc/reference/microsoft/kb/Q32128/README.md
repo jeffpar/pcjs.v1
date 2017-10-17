@@ -4,8 +4,9 @@ title: "Q32128: Extension Cables for Microsoft Mice"
 permalink: /pubs/pc/reference/microsoft/kb/Q32128/
 ---
 
+## Q32128: Extension Cables for Microsoft Mice
+
 	Article: Q32128
-	Product: Microsoft C
 	Version(s): 5.x 6.x 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

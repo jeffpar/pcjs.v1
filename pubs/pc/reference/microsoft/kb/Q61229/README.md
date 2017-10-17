@@ -4,8 +4,9 @@ title: "Q61229: C 6.00 README: NMAKE: Source Objects in Different Directories"
 permalink: /pubs/pc/reference/microsoft/kb/Q61229/
 ---
 
+## Q61229: C 6.00 README: NMAKE: Source Objects in Different Directories
+
 	Article: Q61229
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

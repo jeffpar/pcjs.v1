@@ -4,8 +4,9 @@ title: "Q32069: No Error Message Text"
 permalink: /pubs/pc/reference/microsoft/kb/Q32069/
 ---
 
+## Q32069: No Error Message Text
+
 	Article: Q32069
-	Product: Microsoft C
 	Version(s): 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER |

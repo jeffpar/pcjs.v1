@@ -4,8 +4,9 @@ title: "Q47037: Using _pgmptr to Get the Full Path of the Executing Program"
 permalink: /pubs/pc/reference/microsoft/kb/Q47037/
 ---
 
+## Q47037: Using _pgmptr to Get the Full Path of the Executing Program
+
 	Article: Q47037
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

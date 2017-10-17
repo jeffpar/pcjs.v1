@@ -4,8 +4,9 @@ title: "Q59891: li, lu, and ld Replace I, U, and D as Format Specifiers"
 permalink: /pubs/pc/reference/microsoft/kb/Q59891/
 ---
 
+## Q59891: li, lu, and ld Replace I, U, and D as Format Specifiers
+
 	Article: Q59891
-	Product: Microsoft C
 	Version(s): 2.00 2.01 2.50 2.51
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickasm s_c docsup

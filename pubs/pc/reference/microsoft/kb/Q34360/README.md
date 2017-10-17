@@ -4,8 +4,9 @@ title: "Q34360: Documentation Error Regarding Precedence Operators"
 permalink: /pubs/pc/reference/microsoft/kb/Q34360/
 ---
 
+## Q34360: Documentation Error Regarding Precedence Operators
+
 	Article: Q34360
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | docerr

@@ -4,8 +4,9 @@ title: "Q45710: L2002 When Linking Small Model Main with Other Memory Models"
 permalink: /pubs/pc/reference/microsoft/kb/Q45710/
 ---
 
+## Q45710: L2002 When Linking Small Model Main with Other Memory Models
+
 	Article: Q45710
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | S_QuickC

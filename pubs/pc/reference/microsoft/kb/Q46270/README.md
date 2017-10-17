@@ -4,8 +4,9 @@ title: "Q46270: Typedef of Function Pointer with _loadds Fails"
 permalink: /pubs/pc/reference/microsoft/kb/Q46270/
 ---
 
+## Q46270: Typedef of Function Pointer with _loadds Fails
+
 	Article: Q46270
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | SR# G890616-20706

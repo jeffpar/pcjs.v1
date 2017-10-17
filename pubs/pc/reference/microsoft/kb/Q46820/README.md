@@ -4,8 +4,9 @@ title: "Q46820: Library Support for Near, Far, and Huge Keywords"
 permalink: /pubs/pc/reference/microsoft/kb/Q46820/
 ---
 
+## Q46820: Library Support for Near, Far, and Huge Keywords
+
 	Article: Q46820
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.00 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | mixed memory model S_QuickC

@@ -4,8 +4,9 @@ title: "Q64177: Hot Spot Not Displaced Along Horizontal Axis with Driver 7.04"
 permalink: /pubs/pc/reference/microsoft/kb/Q64177/
 ---
 
+## Q64177: Hot Spot Not Displaced Along Horizontal Axis with Driver 7.04
+
 	Article: Q64177
-	Product: Microsoft C
 	Version(s): 7.04
 	Operating System: MS-DOS
 	Flags: ENDUSER |  h_menupr menu programming INT33 MF9

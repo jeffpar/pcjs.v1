@@ -4,8 +4,9 @@ title: "Q43064: NMAKE and the Backslash &quot;&#92;&quot; Character"
 permalink: /pubs/pc/reference/microsoft/kb/Q43064/
 ---
 
+## Q43064: NMAKE and the Backslash &quot;&#92;&quot; Character
+
 	Article: Q43064
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q43808: C: srand() Sample Program Does Not Print Out the Array Values"
 permalink: /pubs/pc/reference/microsoft/kb/Q43808/
 ---
 
+## Q43808: C: srand() Sample Program Does Not Print Out the Array Values
+
 	Article: Q43808
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | DOCERR S_QuickC

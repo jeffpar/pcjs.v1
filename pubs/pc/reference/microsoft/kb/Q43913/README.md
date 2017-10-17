@@ -4,8 +4,9 @@ title: "Q43913: C: Finding the Length of Double Precision Decimals"
 permalink: /pubs/pc/reference/microsoft/kb/Q43913/
 ---
 
+## Q43913: C: Finding the Length of Double Precision Decimals
+
 	Article: Q43913
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | SR# G890424-17022 s_quickc

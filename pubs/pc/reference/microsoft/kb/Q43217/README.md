@@ -4,8 +4,9 @@ title: "Q43217: QuickC: MATH.C Sample Program Contains Incorrect Expressions"
 permalink: /pubs/pc/reference/microsoft/kb/Q43217/
 ---
 
+## Q43217: QuickC: MATH.C Sample Program Contains Incorrect Expressions
+
 	Article: Q43217
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_c docerr

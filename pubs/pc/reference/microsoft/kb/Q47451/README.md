@@ -4,8 +4,9 @@ title: "Q47451: Black and White Text Modes Display in Color on Color System"
 permalink: /pubs/pc/reference/microsoft/kb/Q47451/
 ---
 
+## Q47451: Black and White Text Modes Display in Color on Color System
+
 	Article: Q47451
-	Product: Microsoft C
 	Version(s): 2.00 2.01
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_C docerr

@@ -4,8 +4,9 @@ title: "Q62666: DosSetMaxFH Between 0-39 Fails Under CodeView 3.00"
 permalink: /pubs/pc/reference/microsoft/kb/Q62666/
 ---
 
+## Q62666: DosSetMaxFH Between 0-39 Fails Under CodeView 3.00
+
 	Article: Q62666
-	Product: Microsoft C
 	Version(s): 3.00
 	Operating System: OS/2
 	Flags: ENDUSER | buglist3.00

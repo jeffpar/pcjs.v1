@@ -4,8 +4,9 @@ title: "Q36791: Microsoft OS/2 Languages Use Virtual Memory"
 permalink: /pubs/pc/reference/microsoft/kb/Q36791/
 ---
 
+## Q36791: Microsoft OS/2 Languages Use Virtual Memory
+
 	Article: Q36791
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: OS/2
 	Flags: ENDUSER | h_fortran 4.10 h_masm 5.10 S_PASCAL 4.00

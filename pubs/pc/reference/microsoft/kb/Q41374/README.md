@@ -4,8 +4,9 @@ title: "Q41374: Assignment of Void Pointer Does Not Give Warning Message"
 permalink: /pubs/pc/reference/microsoft/kb/Q41374/
 ---
 
+## Q41374: Assignment of Void Pointer Does Not Give Warning Message
+
 	Article: Q41374
-	Product: Microsoft C
 	Version(s): 5.10 | 5.00 5.10
 	Operating System: OS/2 | MS-DOS
 	Flags: ENDUSER | s_quickc

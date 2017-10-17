@@ -4,8 +4,9 @@ title: "Q29830: C 5.10 MTDYNA.DOC: Threads"
 permalink: /pubs/pc/reference/microsoft/kb/Q29830/
 ---
 
+## Q29830: C 5.10 MTDYNA.DOC: Threads
+
 	Article: Q29830
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

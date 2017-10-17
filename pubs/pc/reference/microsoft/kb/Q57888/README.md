@@ -4,8 +4,9 @@ title: "Q57888: Return Value for getch() on Extended Characters"
 permalink: /pubs/pc/reference/microsoft/kb/Q57888/
 ---
 
+## Q57888: Return Value for getch() on Extended Characters
+
 	Article: Q57888
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

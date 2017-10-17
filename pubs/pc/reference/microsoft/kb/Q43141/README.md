@@ -4,8 +4,9 @@ title: "Q43141: QuickC: Locating a Corresponding Brace"
 permalink: /pubs/pc/reference/microsoft/kb/Q43141/
 ---
 
+## Q43141: QuickC: Locating a Corresponding Brace
+
 	Article: Q43141
-	Product: Microsoft C
 	Version(s): 1.00 1.01 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

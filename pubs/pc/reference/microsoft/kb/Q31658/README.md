@@ -4,8 +4,9 @@ title: "Q31658: CVP Prompts &quot;SYS0197 OS/2 Not Configured...&quot; Error Mes
 permalink: /pubs/pc/reference/microsoft/kb/Q31658/
 ---
 
+## Q31658: CVP Prompts &quot;SYS0197 OS/2 Not Configured...&quot; Error Message
+
 	Article: Q31658
-	Product: Microsoft C
 	Version(s): 2.20
 	Operating System: OS/2
 	Flags: ENDUSER |

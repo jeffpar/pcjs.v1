@@ -4,8 +4,9 @@ title: "Q61613: /Lp, /Lr, and /Lc Functions Are Documented Incorrectly"
 permalink: /pubs/pc/reference/microsoft/kb/Q61613/
 ---
 
+## Q61613: /Lp, /Lr, and /Lc Functions Are Documented Incorrectly
+
 	Article: Q61613
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | docerr

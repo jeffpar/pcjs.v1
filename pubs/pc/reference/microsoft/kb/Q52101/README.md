@@ -4,8 +4,9 @@ title: "Q52101: /Zr Generates Error When Assigning to Video Memory"
 permalink: /pubs/pc/reference/microsoft/kb/Q52101/
 ---
 
+## Q52101: /Zr Generates Error When Assigning to Video Memory
+
 	Article: Q52101
-	Product: Microsoft C
 	Version(s): 2.00 2.01
 	Operating System: MS-DOS
 	Flags: ENDUSER |

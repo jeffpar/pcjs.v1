@@ -4,8 +4,9 @@ title: "Q38754: &quot;Interrupt Jumper Missing&quot; Error Message"
 permalink: /pubs/pc/reference/microsoft/kb/Q38754/
 ---
 
+## Q38754: &quot;Interrupt Jumper Missing&quot; Error Message
+
 	Article: Q38754
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

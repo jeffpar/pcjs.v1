@@ -4,8 +4,9 @@ title: "Q62309: Internal Compiler Error '@(#)regMD.c:1.100', Line 3074"
 permalink: /pubs/pc/reference/microsoft/kb/Q62309/
 ---
 
+## Q62309: Internal Compiler Error '@(#)regMD.c:1.100', Line 3074
+
 	Article: Q62309
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist6.00

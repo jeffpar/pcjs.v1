@@ -4,8 +4,9 @@ title: "Q67793: The Syntax for STACK Is Incorrect in EXEHDR Usage Statement"
 permalink: /pubs/pc/reference/microsoft/kb/Q67793/
 ---
 
+## Q67793: The Syntax for STACK Is Incorrect in EXEHDR Usage Statement
+
 	Article: Q67793
-	Product: Microsoft C
 	Version(s): 2.01   | 2.01
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | docerr s_exehdr

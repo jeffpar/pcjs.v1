@@ -4,8 +4,9 @@ title: "Q63059: PWB Text Highlight with Mouse Acts Strange After Search"
 permalink: /pubs/pc/reference/microsoft/kb/Q63059/
 ---
 
+## Q63059: PWB Text Highlight with Mouse Acts Strange After Search
+
 	Article: Q63059
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

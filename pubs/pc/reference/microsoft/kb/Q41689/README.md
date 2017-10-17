@@ -4,8 +4,9 @@ title: "Q41689: Documentation on Global Variable _osversion Is Incomplete"
 permalink: /pubs/pc/reference/microsoft/kb/Q41689/
 ---
 
+## Q41689: Documentation on Global Variable _osversion Is Incomplete
+
 	Article: Q41689
-	Product: Microsoft C
 	Version(s): 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickc

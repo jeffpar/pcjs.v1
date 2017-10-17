@@ -4,8 +4,9 @@ title: "Q51642: QuickC 2.00: /Ot Code Generation Error"
 permalink: /pubs/pc/reference/microsoft/kb/Q51642/
 ---
 
+## Q51642: QuickC 2.00: /Ot Code Generation Error
+
 	Article: Q51642
-	Product: Microsoft C
 	Version(s): 2.00 2.01
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickasm buglist2.00 buglist2.01

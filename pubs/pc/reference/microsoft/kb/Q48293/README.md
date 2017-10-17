@@ -4,8 +4,9 @@ title: "Q48293: QuickC Message: &quot;Cannot Edit Binary File&quot;"
 permalink: /pubs/pc/reference/microsoft/kb/Q48293/
 ---
 
+## Q48293: QuickC Message: &quot;Cannot Edit Binary File&quot;
+
 	Article: Q48293
-	Product: Microsoft C
 	Version(s): 1.00 1.01 2.00 2.01
 	Operating System: MS-DOS
 	Flags: ENDUSER |

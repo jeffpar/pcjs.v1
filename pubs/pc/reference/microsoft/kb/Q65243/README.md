@@ -4,8 +4,9 @@ title: "Q65243: _memavl() Returns 0 If Not Bound with APILMR.OBJ"
 permalink: /pubs/pc/reference/microsoft/kb/Q65243/
 ---
 
+## Q65243: _memavl() Returns 0 If Not Bound with APILMR.OBJ
+
 	Article: Q65243
-	Product: Microsoft C
 	Version(s): 6.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

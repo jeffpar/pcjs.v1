@@ -4,8 +4,9 @@ title: "Q61636: Saving Compiler Results File in the PWB"
 permalink: /pubs/pc/reference/microsoft/kb/Q61636/
 ---
 
+## Q61636: Saving Compiler Results File in the PWB
+
 	Article: Q61636
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

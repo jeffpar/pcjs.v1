@@ -4,8 +4,9 @@ title: "Q61328: Why C 6.00 Doesn't Contain DOS Versions of C2L and C3L"
 permalink: /pubs/pc/reference/microsoft/kb/Q61328/
 ---
 
+## Q61328: Why C 6.00 Doesn't Contain DOS Versions of C2L and C3L
+
 	Article: Q61328
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q23905: Initial Memory Allocation of C Programs"
 permalink: /pubs/pc/reference/microsoft/kb/Q23905/
 ---
 
+## Q23905: Initial Memory Allocation of C Programs
+
 	Article: Q23905
-	Product: Microsoft C
 	Version(s): 4.00 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | DGROUP 64K

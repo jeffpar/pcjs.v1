@@ -4,8 +4,9 @@ title: "Q51227: BOA Demo Program Does Not Work on AT&amp;T 6300 Computer"
 permalink: /pubs/pc/reference/microsoft/kb/Q51227/
 ---
 
+## Q51227: BOA Demo Program Does Not Work on AT&amp;T 6300 Computer
+
 	Article: Q51227
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | att

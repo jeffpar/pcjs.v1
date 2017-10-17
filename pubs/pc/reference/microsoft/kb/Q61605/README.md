@@ -4,8 +4,9 @@ title: "Q61605: NODATA and pwords Parameters Reversed in EXPORT Statement Docs"
 permalink: /pubs/pc/reference/microsoft/kb/Q61605/
 ---
 
+## Q61605: NODATA and pwords Parameters Reversed in EXPORT Statement Docs
+
 	Article: Q61605
-	Product: Microsoft C
 	Version(s): 5.01.21 5.02 5.03 5.05 5.10 | 5.01.21 5.02 5.03 5.05 5.10
 	Operating System: MS-DOS                      | OS/2
 	Flags: ENDUSER | docerr

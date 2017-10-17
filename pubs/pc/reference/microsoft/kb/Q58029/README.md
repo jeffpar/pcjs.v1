@@ -4,8 +4,9 @@ title: "Q58029: Two Toned Colors in &lt;assign&gt; Pseudo File Can Occur"
 permalink: /pubs/pc/reference/microsoft/kb/Q58029/
 ---
 
+## Q58029: Two Toned Colors in &lt;assign&gt; Pseudo File Can Occur
+
 	Article: Q58029
-	Product: Microsoft C
 	Version(s): 1.02    | 1.02
 	Operating System: MS-DOS  | OS/2
 	Flags: ENDUSER | buglist1.02

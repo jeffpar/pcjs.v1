@@ -4,8 +4,9 @@ title: "Q50732: No Compiler Errors Produced When Assigning to Missing struct"
 permalink: /pubs/pc/reference/microsoft/kb/Q50732/
 ---
 
+## Q50732: No Compiler Errors Produced When Assigning to Missing struct
+
 	Article: Q50732
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

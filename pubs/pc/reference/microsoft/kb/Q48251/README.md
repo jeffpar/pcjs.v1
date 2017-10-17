@@ -4,8 +4,9 @@ title: "Q48251: Mixed-Language Examples for Calling Pascal Are Incorrect"
 permalink: /pubs/pc/reference/microsoft/kb/Q48251/
 ---
 
+## Q48251: Mixed-Language Examples for Calling Pascal Are Incorrect
+
 	Article: Q48251
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | docerr H_MASM S_PasCal

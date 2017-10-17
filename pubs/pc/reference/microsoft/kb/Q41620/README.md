@@ -4,8 +4,9 @@ title: "Q41620: QuickC 2.00 README.DOC: Example Program INPUT.C"
 permalink: /pubs/pc/reference/microsoft/kb/Q41620/
 ---
 
+## Q41620: QuickC 2.00 README.DOC: Example Program INPUT.C
+
 	Article: Q41620
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

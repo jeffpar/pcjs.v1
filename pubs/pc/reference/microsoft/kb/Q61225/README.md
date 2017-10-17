@@ -4,8 +4,9 @@ title: "Q61225: C 6.00 README: CodeView: New Start-Up Switches"
 permalink: /pubs/pc/reference/microsoft/kb/Q61225/
 ---
 
+## Q61225: C 6.00 README: CodeView: New Start-Up Switches
+
 	Article: Q61225
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

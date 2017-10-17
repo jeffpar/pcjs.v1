@@ -4,8 +4,9 @@ title: "Q58522: Err Msg: C1064 Too Many _text Segments"
 permalink: /pubs/pc/reference/microsoft/kb/Q58522/
 ---
 
+## Q58522: Err Msg: C1064 Too Many _text Segments
+
 	Article: Q58522
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

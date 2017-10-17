@@ -4,8 +4,9 @@ title: "Q36953: Warning C1015 May be Caused by Lack of Available File Handles"
 permalink: /pubs/pc/reference/microsoft/kb/Q36953/
 ---
 
+## Q36953: Warning C1015 May be Caused by Lack of Available File Handles
+
 	Article: Q36953
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

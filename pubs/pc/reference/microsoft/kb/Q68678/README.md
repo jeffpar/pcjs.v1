@@ -4,8 +4,9 @@ title: "Q68678: Help Files for QuickC Require Special &quot;Backtrace&quot; Decl
 permalink: /pubs/pc/reference/microsoft/kb/Q68678/
 ---
 
+## Q68678: Help Files for QuickC Require Special &quot;Backtrace&quot; Declaration
+
 	Article: Q68678
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | docerr s_quickc s_helpmake

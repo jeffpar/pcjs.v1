@@ -4,8 +4,9 @@ title: "Q63550: Forward Slashes Appear in Paths of Some Error Messages"
 permalink: /pubs/pc/reference/microsoft/kb/Q63550/
 ---
 
+## Q63550: Forward Slashes Appear in Paths of Some Error Messages
+
 	Article: Q63550
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | s_quickc

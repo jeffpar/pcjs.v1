@@ -4,8 +4,9 @@ title: "Q66536: Practical Peripherals and Serial Mouse Configuration"
 permalink: /pubs/pc/reference/microsoft/kb/Q66536/
 ---
 
+## Q66536: Practical Peripherals and Serial Mouse Configuration
+
 	Article: Q66536
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | mouse modem practical peripherals

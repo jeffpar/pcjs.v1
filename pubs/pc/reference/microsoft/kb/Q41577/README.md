@@ -4,8 +4,9 @@ title: "Q41577: QuickC 2.00 README.DOC: Declaring and Initializing Arrays"
 permalink: /pubs/pc/reference/microsoft/kb/Q41577/
 ---
 
+## Q41577: QuickC 2.00 README.DOC: Declaring and Initializing Arrays
+
 	Article: Q41577
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q66700: Redirecting Standard Input Does Not Affect getch() Under OS/2"
 permalink: /pubs/pc/reference/microsoft/kb/Q66700/
 ---
 
+## Q66700: Redirecting Standard Input Does Not Affect getch() Under OS/2
+
 	Article: Q66700
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER |

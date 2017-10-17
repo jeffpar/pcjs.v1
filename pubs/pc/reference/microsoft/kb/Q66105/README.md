@@ -4,8 +4,9 @@ title: "Q66105: Code Generation Error with /Gs"
 permalink: /pubs/pc/reference/microsoft/kb/Q66105/
 ---
 
+## Q66105: Code Generation Error with /Gs
+
 	Article: Q66105
-	Product: Microsoft C
 	Version(s): 6.00  6.00a | 6.00 6.00a
 	Operating System: MS-DOS      | OS/2
 	Flags: ENDUSER | buglist6.00 buglist6.00a

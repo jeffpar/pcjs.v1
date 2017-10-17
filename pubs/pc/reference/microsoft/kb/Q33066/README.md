@@ -4,8 +4,9 @@ title: "Q33066: Resolution, Mickeys, or Points Per Inch of the Mouse"
 permalink: /pubs/pc/reference/microsoft/kb/Q33066/
 ---
 
+## Q33066: Resolution, Mickeys, or Points Per Inch of the Mouse
+
 	Article: Q33066
-	Product: Microsoft C
 	Version(s): 1.x 2.x 3.x 4.x 5.x 6.x 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

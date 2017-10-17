@@ -4,8 +4,9 @@ title: "Q32348: Incorrect Comment Pragma Example"
 permalink: /pubs/pc/reference/microsoft/kb/Q32348/
 ---
 
+## Q32348: Incorrect Comment Pragma Example
+
 	Article: Q32348
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | docerr

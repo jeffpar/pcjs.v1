@@ -4,8 +4,9 @@ title: "Q47018: Presentation Graphics Charting Function: Error Codes"
 permalink: /pubs/pc/reference/microsoft/kb/Q47018/
 ---
 
+## Q47018: Presentation Graphics Charting Function: Error Codes
+
 	Article: Q47018
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

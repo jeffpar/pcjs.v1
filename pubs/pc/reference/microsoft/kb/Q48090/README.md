@@ -4,8 +4,9 @@ title: "Q48090: Using a Wildcard Argument with the remove() Function"
 permalink: /pubs/pc/reference/microsoft/kb/Q48090/
 ---
 
+## Q48090: Using a Wildcard Argument with the remove() Function
+
 	Article: Q48090
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | S_QuickC S_QuickASM

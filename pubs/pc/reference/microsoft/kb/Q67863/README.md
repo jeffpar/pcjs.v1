@@ -4,8 +4,9 @@ title: "Q67863: 400 DPI Serial Mouse and Epson Equity LT 386/SX"
 permalink: /pubs/pc/reference/microsoft/kb/Q67863/
 ---
 
+## Q67863: 400 DPI Serial Mouse and Epson Equity LT 386/SX
+
 	Article: Q67863
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

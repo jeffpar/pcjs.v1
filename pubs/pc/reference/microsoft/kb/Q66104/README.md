@@ -4,8 +4,9 @@ title: "Q66104: Use of _far Keyword in Tiny Programs"
 permalink: /pubs/pc/reference/microsoft/kb/Q66104/
 ---
 
+## Q66104: Use of _far Keyword in Tiny Programs
+
 	Article: Q66104
-	Product: Microsoft C
 	Version(s): 6.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr

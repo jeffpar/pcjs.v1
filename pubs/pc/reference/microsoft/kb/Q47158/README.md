@@ -4,8 +4,9 @@ title: "Q47158: Warning C4051: Data Conversion from Constant to float"
 permalink: /pubs/pc/reference/microsoft/kb/Q47158/
 ---
 
+## Q47158: Warning C4051: Data Conversion from Constant to float
+
 	Article: Q47158
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

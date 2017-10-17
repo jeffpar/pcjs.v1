@@ -4,8 +4,9 @@ title: "Q67785: Bit Operations on Char May Produce Unexpected Results"
 permalink: /pubs/pc/reference/microsoft/kb/Q67785/
 ---
 
+## Q67785: Bit Operations on Char May Produce Unexpected Results
+
 	Article: Q67785
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | buglist6.00

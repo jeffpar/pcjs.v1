@@ -4,8 +4,9 @@ title: "Q61813: Graphics Functions Available for OS/2 Protected Mode"
 permalink: /pubs/pc/reference/microsoft/kb/Q61813/
 ---
 
+## Q61813: Graphics Functions Available for OS/2 Protected Mode
+
 	Article: Q61813
-	Product: Microsoft C
 	Version(s): 5.10 6.00 | 5.10 6.00
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER |

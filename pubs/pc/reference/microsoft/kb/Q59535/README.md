@@ -4,8 +4,9 @@ title: "Q59535: Why the /HIGH Switch Is Not Used with High-Level Languages"
 permalink: /pubs/pc/reference/microsoft/kb/Q59535/
 ---
 
+## Q59535: Why the /HIGH Switch Is Not Used with High-Level Languages
+
 	Article: Q59535
-	Product: Microsoft C
 	Version(s): 3.65
 	Operating System: MS-DOS
 	Flags: ENDUSER |

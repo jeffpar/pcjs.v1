@@ -4,8 +4,9 @@ title: "Q47780: Blinking Text May Be Eliminated with BIOS Call"
 permalink: /pubs/pc/reference/microsoft/kb/Q47780/
 ---
 
+## Q47780: Blinking Text May Be Eliminated with BIOS Call
+
 	Article: Q47780
-	Product: Microsoft C
 	Version(s): 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QuickC S_QuickASM EGA

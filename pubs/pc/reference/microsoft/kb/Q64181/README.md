@@ -4,8 +4,9 @@ title: "Q64181: _getlogcoord() Now _getviewcoord() in Microsoft C 6.00"
 permalink: /pubs/pc/reference/microsoft/kb/Q64181/
 ---
 
+## Q64181: _getlogcoord() Now _getviewcoord() in Microsoft C 6.00
+
 	Article: Q64181
-	Product: Microsoft C
 	Version(s): 6.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickc

@@ -4,8 +4,9 @@ title: "Q30030: M.EXE Editor Macro to Join Current Line with Next Line"
 permalink: /pubs/pc/reference/microsoft/kb/Q30030/
 ---
 
+## Q30030: M.EXE Editor Macro to Join Current Line with Next Line
+
 	Article: Q30030
-	Product: Microsoft C
 	Version(s): 1.00    | 1.00
 	Operating System: MS-DOS  | OS/2
 	Flags: ENDUSER |

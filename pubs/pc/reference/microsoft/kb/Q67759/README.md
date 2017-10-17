@@ -4,8 +4,9 @@ title: "Q67759: _getpixel() Return Value is Not Changed by _setbkcolor() Call"
 permalink: /pubs/pc/reference/microsoft/kb/Q67759/
 ---
 
+## Q67759: _getpixel() Return Value is Not Changed by _setbkcolor() Call
+
 	Article: Q67759
-	Product: Microsoft C
 	Version(s): 5.10 6.00 6.00a
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickc

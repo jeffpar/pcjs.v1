@@ -4,8 +4,9 @@ title: "Q44160: How to Debug Large QuickC 2.00 Program Inside the Environment"
 permalink: /pubs/pc/reference/microsoft/kb/Q44160/
 ---
 
+## Q44160: How to Debug Large QuickC 2.00 Program Inside the Environment
+
 	Article: Q44160
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

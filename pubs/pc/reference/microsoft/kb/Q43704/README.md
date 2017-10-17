@@ -4,8 +4,9 @@ title: "Q43704: C 5.10 Won't Compile QuickC 2.00 GRDEMO.C and TURTLE.C"
 permalink: /pubs/pc/reference/microsoft/kb/Q43704/
 ---
 
+## Q43704: C 5.10 Won't Compile QuickC 2.00 GRDEMO.C and TURTLE.C
+
 	Article: Q43704
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

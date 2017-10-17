@@ -4,8 +4,9 @@ title: "Q65303: Quick Help Does Not Work on Some CGA Video Adapters"
 permalink: /pubs/pc/reference/microsoft/kb/Q65303/
 ---
 
+## Q65303: Quick Help Does Not Work on Some CGA Video Adapters
+
 	Article: Q65303
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist6.00

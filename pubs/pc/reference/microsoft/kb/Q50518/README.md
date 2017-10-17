@@ -4,8 +4,9 @@ title: "Q50518: BX Register Is Popped Twice for a C Interrupt Function"
 permalink: /pubs/pc/reference/microsoft/kb/Q50518/
 ---
 
+## Q50518: BX Register Is Popped Twice for a C Interrupt Function
+
 	Article: Q50518
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | S_QuickC S_QuickAsm 2.00 2.01

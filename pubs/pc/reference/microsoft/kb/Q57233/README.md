@@ -4,8 +4,9 @@ title: "Q57233: C 5.1 Run-Time Reference Example for atan2() Is Missing &quot;)&
 permalink: /pubs/pc/reference/microsoft/kb/Q57233/
 ---
 
+## Q57233: C 5.1 Run-Time Reference Example for atan2() Is Missing &quot;)&quot;
+
 	Article: Q57233
-	Product: Microsoft C
 	Version(s): 5.10    | 5.10
 	Operating System: MS-DOS  | OS/2
 	Flags: ENDUSER | docerr

@@ -4,8 +4,9 @@ title: "Q41471: QuickC 2.00 README.DOC: Help On Help and TSRs"
 permalink: /pubs/pc/reference/microsoft/kb/Q41471/
 ---
 
+## Q41471: QuickC 2.00 README.DOC: Help On Help and TSRs
+
 	Article: Q41471
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

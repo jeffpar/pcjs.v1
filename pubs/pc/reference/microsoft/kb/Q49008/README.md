@@ -4,8 +4,9 @@ title: "Q49008: /NOI Switch May Cause L2022 and L2029 in PM Programs"
 permalink: /pubs/pc/reference/microsoft/kb/Q49008/
 ---
 
+## Q49008: /NOI Switch May Cause L2022 and L2029 in PM Programs
+
 	Article: Q49008
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

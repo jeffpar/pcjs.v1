@@ -4,8 +4,9 @@ title: "Q68145: C1001: Internal Compiler Error: grammar.c, Line 164"
 permalink: /pubs/pc/reference/microsoft/kb/Q68145/
 ---
 
+## Q68145: C1001: Internal Compiler Error: grammar.c, Line 164
+
 	Article: Q68145
-	Product: Microsoft C
 	Version(s): 6.00a  | 6.00a
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist6.00a fastcall

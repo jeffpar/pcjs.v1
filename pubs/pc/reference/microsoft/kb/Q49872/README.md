@@ -4,8 +4,9 @@ title: "Q49872: Fread() Can Read More Than 64K at a Time"
 permalink: /pubs/pc/reference/microsoft/kb/Q49872/
 ---
 
+## Q49872: Fread() Can Read More Than 64K at a Time
+
 	Article: Q49872
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | S_QuickC

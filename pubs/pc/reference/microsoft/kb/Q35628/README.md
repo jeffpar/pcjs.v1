@@ -4,8 +4,9 @@ title: "Q35628: The Total Bytes in MAP File Differs from Load Size in EXEMOD"
 permalink: /pubs/pc/reference/microsoft/kb/Q35628/
 ---
 
+## Q35628: The Total Bytes in MAP File Differs from Load Size in EXEMOD
+
 	Article: Q35628
-	Product: Microsoft C
 	Version(s): 4.00 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | SR# S880908-4

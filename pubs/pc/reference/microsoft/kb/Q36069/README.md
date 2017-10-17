@@ -4,8 +4,9 @@ title: "Q36069: Different Results between Alternate and Coprocessor/Emulator Mat
 permalink: /pubs/pc/reference/microsoft/kb/Q36069/
 ---
 
+## Q36069: Different Results between Alternate and Coprocessor/Emulator Math
+
 	Article: Q36069
-	Product: Microsoft C
 	Version(s): 3.00 4.00 5.00 5.10 | 5.10
 	Operating System: MS-DOS              | OS/2
 	Flags: ENDUSER | s_pascal h_fortran h_masm

@@ -4,8 +4,9 @@ title: "Q29833: C 5.10 MTDYNA.DOC: Multiple-Thread Programs"
 permalink: /pubs/pc/reference/microsoft/kb/Q29833/
 ---
 
+## Q29833: C 5.10 MTDYNA.DOC: Multiple-Thread Programs
+
 	Article: Q29833
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

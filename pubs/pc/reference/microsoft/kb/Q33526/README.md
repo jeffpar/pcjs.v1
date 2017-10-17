@@ -4,8 +4,9 @@ title: "Q33526: Deeply Nested Blocks Cause C4073 Warning"
 permalink: /pubs/pc/reference/microsoft/kb/Q33526/
 ---
 
+## Q33526: Deeply Nested Blocks Cause C4073 Warning
+
 	Article: Q33526
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

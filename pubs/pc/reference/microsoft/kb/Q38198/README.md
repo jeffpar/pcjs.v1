@@ -4,8 +4,9 @@ title: "Q38198: Run-Time Functions remove and unlink both Delete a File"
 permalink: /pubs/pc/reference/microsoft/kb/Q38198/
 ---
 
+## Q38198: Run-Time Functions remove and unlink both Delete a File
+
 	Article: Q38198
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER |

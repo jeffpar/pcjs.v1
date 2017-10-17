@@ -4,8 +4,9 @@ title: "Q47779: Linking without /NOI Causes SYS2070 in Program Calling CRTLIB"
 permalink: /pubs/pc/reference/microsoft/kb/Q47779/
 ---
 
+## Q47779: Linking without /NOI Causes SYS2070 in Program Calling CRTLIB
+
 	Article: Q47779
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: OS/2
 	Flags: ENDUSER | SR# G890807-24188

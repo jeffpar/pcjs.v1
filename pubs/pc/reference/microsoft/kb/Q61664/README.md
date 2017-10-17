@@ -4,8 +4,9 @@ title: "Q61664: Changes in OS/2 Multithreaded and DLL Support in C 6.00"
 permalink: /pubs/pc/reference/microsoft/kb/Q61664/
 ---
 
+## Q61664: Changes in OS/2 Multithreaded and DLL Support in C 6.00
+
 	Article: Q61664
-	Product: Microsoft C
 	Version(s): 6.00
 	Operating System: OS/2
 	Flags: ENDUSER |

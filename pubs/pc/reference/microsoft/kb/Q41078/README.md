@@ -4,8 +4,9 @@ title: "Q41078: Failure to Set Video to Text Mode When Swapping to Environment"
 permalink: /pubs/pc/reference/microsoft/kb/Q41078/
 ---
 
+## Q41078: Failure to Set Video to Text Mode When Swapping to Environment
+
 	Article: Q41078
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist2.00 apnote buglist2.01 s_quickasm

@@ -4,8 +4,9 @@ title: "Q42074: ESC Key Aborts Only the Compile Process in QC Environment"
 permalink: /pubs/pc/reference/microsoft/kb/Q42074/
 ---
 
+## Q42074: ESC Key Aborts Only the Compile Process in QC Environment
+
 	Article: Q42074
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr

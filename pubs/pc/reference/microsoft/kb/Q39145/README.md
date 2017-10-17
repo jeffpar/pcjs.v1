@@ -4,8 +4,9 @@ title: "Q39145: QuickC Incorrectly Issues a C4051 Data Conversion Warning"
 permalink: /pubs/pc/reference/microsoft/kb/Q39145/
 ---
 
+## Q39145: QuickC Incorrectly Issues a C4051 Data Conversion Warning
+
 	Article: Q39145
-	Product: Microsoft C
 	Version(s): 1.00 1.01
 	Operating System: MS-DOS
 	Flags: ENDUSER |

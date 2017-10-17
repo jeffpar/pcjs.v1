@@ -4,8 +4,9 @@ title: "Q68625: Increasing the Automatic Repeat Rate of the Keyboard"
 permalink: /pubs/pc/reference/microsoft/kb/Q68625/
 ---
 
+## Q68625: Increasing the Automatic Repeat Rate of the Keyboard
+
 	Article: Q68625
-	Product: Microsoft C
 	Version(s): 2.50 2.51
 	Operating System: MS-DOS
 	Flags: ENDUSER |

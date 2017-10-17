@@ -4,8 +4,9 @@ title: "Q59768: How to Find the Load Size Required for a Program"
 permalink: /pubs/pc/reference/microsoft/kb/Q59768/
 ---
 
+## Q59768: How to Find the Load Size Required for a Program
+
 	Article: Q59768
-	Product: Microsoft C
 	Version(s): 4.00 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickc s_quickasm

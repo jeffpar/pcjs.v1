@@ -4,8 +4,9 @@ title: "Q45464: Lack of Memory Can Cause pg_chartscatter to Fail"
 permalink: /pubs/pc/reference/microsoft/kb/Q45464/
 ---
 
+## Q45464: Lack of Memory Can Cause pg_chartscatter to Fail
+
 	Article: Q45464
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

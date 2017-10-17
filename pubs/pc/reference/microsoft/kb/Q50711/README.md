@@ -4,8 +4,9 @@ title: "Q50711: &quot;.&quot; on the LIBPATH Eases DLL Debugging, But Not for CV
 permalink: /pubs/pc/reference/microsoft/kb/Q50711/
 ---
 
+## Q50711: &quot;.&quot; on the LIBPATH Eases DLL Debugging, But Not for CVP 2.20
+
 	Article: Q50711
-	Product: Microsoft C
 	Version(s): 2.20 2.30
 	Operating System: OS/2
 	Flags: ENDUSER |

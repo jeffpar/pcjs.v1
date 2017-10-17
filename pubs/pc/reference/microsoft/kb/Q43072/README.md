@@ -4,8 +4,9 @@ title: "Q43072: Switching from Reading to Writing Files Can Garble Data"
 permalink: /pubs/pc/reference/microsoft/kb/Q43072/
 ---
 
+## Q43072: Switching from Reading to Writing Files Can Garble Data
+
 	Article: Q43072
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | s_quickc sequence locate position

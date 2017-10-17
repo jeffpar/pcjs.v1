@@ -4,8 +4,9 @@ title: "Q62912: Bad Code Generated for Difference Between Huge Pointers"
 permalink: /pubs/pc/reference/microsoft/kb/Q62912/
 ---
 
+## Q62912: Bad Code Generated for Difference Between Huge Pointers
+
 	Article: Q62912
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist6.00

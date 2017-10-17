@@ -4,8 +4,9 @@ title: "Q58687: Version 1.02 of M and MEP Incorrectly Reports Version As 1.2"
 permalink: /pubs/pc/reference/microsoft/kb/Q58687/
 ---
 
+## Q58687: Version 1.02 of M and MEP Incorrectly Reports Version As 1.2
+
 	Article: Q58687
-	Product: Microsoft C
 	Version(s): 1.02   | 1.02
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | docerr

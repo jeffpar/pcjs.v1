@@ -4,8 +4,9 @@ title: "Q65306: toupper() Gives C4135 Warning"
 permalink: /pubs/pc/reference/microsoft/kb/Q65306/
 ---
 
+## Q65306: toupper() Gives C4135 Warning
+
 	Article: Q65306
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | s_quickc s_quickasm

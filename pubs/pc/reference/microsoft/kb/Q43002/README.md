@@ -4,8 +4,9 @@ title: "Q43002: Return Values for _remapallpalette and _remappalette"
 permalink: /pubs/pc/reference/microsoft/kb/Q43002/
 ---
 
+## Q43002: Return Values for _remapallpalette and _remappalette
+
 	Article: Q43002
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QuickC docerr

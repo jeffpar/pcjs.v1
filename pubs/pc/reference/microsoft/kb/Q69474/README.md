@@ -4,8 +4,9 @@ title: "Q69474: Old Compiler Pass May Cause C1007: Unrecognized Flag -Bm in P2"
 permalink: /pubs/pc/reference/microsoft/kb/Q69474/
 ---
 
+## Q69474: Old Compiler Pass May Cause C1007: Unrecognized Flag -Bm in P2
+
 	Article: Q69474
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER |

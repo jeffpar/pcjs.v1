@@ -4,8 +4,9 @@ title: "Q57961: Why External References Are Created When They're Not Needed"
 permalink: /pubs/pc/reference/microsoft/kb/Q57961/
 ---
 
+## Q57961: Why External References Are Created When They're Not Needed
+
 	Article: Q57961
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER |

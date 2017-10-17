@@ -4,8 +4,9 @@ title: "Q42767: QuickC: Local Contexts Fail in HELPMAKE"
 permalink: /pubs/pc/reference/microsoft/kb/Q42767/
 ---
 
+## Q42767: QuickC: Local Contexts Fail in HELPMAKE
+
 	Article: Q42767
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist2.00

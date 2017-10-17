@@ -4,8 +4,9 @@ title: "Q38818: Error L2029 Unresolved Externals"
 permalink: /pubs/pc/reference/microsoft/kb/Q38818/
 ---
 
+## Q38818: Error L2029 Unresolved Externals
+
 	Article: Q38818
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | s_pascal h_fortran h_masm s_quickc s_link s_error

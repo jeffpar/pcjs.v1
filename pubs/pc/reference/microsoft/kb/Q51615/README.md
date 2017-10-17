@@ -4,8 +4,9 @@ title: "Q51615: C4056: Overflow in Constant Arithmetic"
 permalink: /pubs/pc/reference/microsoft/kb/Q51615/
 ---
 
+## Q51615: C4056: Overflow in Constant Arithmetic
+
 	Article: Q51615
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q32889: Toggling the Sign Bit on a Float or Double"
 permalink: /pubs/pc/reference/microsoft/kb/Q32889/
 ---
 
+## Q32889: Toggling the Sign Bit on a Float or Double
+
 	Article: Q32889
-	Product: Microsoft C
 	Version(s): 3.00 4.00 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER |

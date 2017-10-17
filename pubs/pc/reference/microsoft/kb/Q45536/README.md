@@ -4,8 +4,9 @@ title: "Q45536: LINK 5.02 Should Not Be Used with ILINK 1.10"
 permalink: /pubs/pc/reference/microsoft/kb/Q45536/
 ---
 
+## Q45536: LINK 5.02 Should Not Be Used with ILINK 1.10
+
 	Article: Q45536
-	Product: Microsoft C
 	Version(s): 5.02
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QuickC

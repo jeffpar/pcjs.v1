@@ -4,8 +4,9 @@ title: "Q61205: C 6.00 README: Signal() Function Limited in Multithread Usage"
 permalink: /pubs/pc/reference/microsoft/kb/Q61205/
 ---
 
+## Q61205: C 6.00 README: Signal() Function Limited in Multithread Usage
+
 	Article: Q61205
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

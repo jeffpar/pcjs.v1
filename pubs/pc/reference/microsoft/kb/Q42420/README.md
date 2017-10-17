@@ -4,8 +4,9 @@ title: "Q42420: How to Get Help on Errors in QuickC"
 permalink: /pubs/pc/reference/microsoft/kb/Q42420/
 ---
 
+## Q42420: How to Get Help on Errors in QuickC
+
 	Article: Q42420
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

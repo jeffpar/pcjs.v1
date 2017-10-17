@@ -4,8 +4,9 @@ title: "Q28503: Compaq Portable 3 Compatibility"
 permalink: /pubs/pc/reference/microsoft/kb/Q28503/
 ---
 
+## Q28503: Compaq Portable 3 Compatibility
+
 	Article: Q28503
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

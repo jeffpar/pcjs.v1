@@ -4,8 +4,9 @@ title: "Q32778: C4001 and C4074 &quot;Function Given File Scope&quot; Warnings"
 permalink: /pubs/pc/reference/microsoft/kb/Q32778/
 ---
 
+## Q32778: C4001 and C4074 &quot;Function Given File Scope&quot; Warnings
+
 	Article: Q32778
-	Product: Microsoft C
 	Version(s): 5.00 5.10 6.00 6.00a | 5.10 6.00 6.00a
 	Operating System: MS-DOS               | OS/2
 	Flags: ENDUSER |

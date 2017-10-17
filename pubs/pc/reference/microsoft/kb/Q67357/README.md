@@ -4,8 +4,9 @@ title: "Q67357: Void _saveregs Function Does Not Preserve AX Register"
 permalink: /pubs/pc/reference/microsoft/kb/Q67357/
 ---
 
+## Q67357: Void _saveregs Function Does Not Preserve AX Register
+
 	Article: Q67357
-	Product: Microsoft C
 	Version(s): 
 	Operating System: 6.00 6.00a | 6.00 6.00a
 	Flags: MS-DOS     | OS/2

@@ -4,8 +4,9 @@ title: "Q29281: Using printf() with Far Pointers in Small Model Programs"
 permalink: /pubs/pc/reference/microsoft/kb/Q29281/
 ---
 
+## Q29281: Using printf() with Far Pointers in Small Model Programs
+
 	Article: Q29281
-	Product: Microsoft C
 	Version(s): 3.00 4.00 5.00 5.10 6.00 6.00a | 5.10 6.00 6.00a
 	Operating System: MS-DOS                         | OS/2
 	Flags: ENDUSER | s_quickc

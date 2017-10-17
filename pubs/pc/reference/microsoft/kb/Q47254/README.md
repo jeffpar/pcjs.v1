@@ -4,8 +4,9 @@ title: "Q47254: SideKick 1.56x Causes Problems with Keyboard Input"
 permalink: /pubs/pc/reference/microsoft/kb/Q47254/
 ---
 
+## Q47254: SideKick 1.56x Causes Problems with Keyboard Input
+
 	Article: Q47254
-	Product: Microsoft C
 	Version(s): 2.01
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QuickASM

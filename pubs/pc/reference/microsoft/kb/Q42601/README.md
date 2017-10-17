@@ -4,8 +4,9 @@ title: "Q42601: CodeView: Watchpoints and Tracepoints with Enumerated Types"
 permalink: /pubs/pc/reference/microsoft/kb/Q42601/
 ---
 
+## Q42601: CodeView: Watchpoints and Tracepoints with Enumerated Types
+
 	Article: Q42601
-	Product: Microsoft C
 	Version(s): 2.20   | 2.20
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | s_c

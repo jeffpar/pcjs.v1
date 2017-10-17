@@ -4,8 +4,9 @@ title: "Q39469: Process &quot;exit&quot; Values Must Lie Between 0 and 255 Inclu
 permalink: /pubs/pc/reference/microsoft/kb/Q39469/
 ---
 
+## Q39469: Process &quot;exit&quot; Values Must Lie Between 0 and 255 Inclusive
+
 	Article: Q39469
-	Product: Microsoft C
 	Version(s): 4.00 5.00 5.10 | 4.00 5.00 5.10
 	Operating System: MS-DOS         | OS/2
 	Flags: ENDUSER | S_QUICKC

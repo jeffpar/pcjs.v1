@@ -4,8 +4,9 @@ title: "Q58436: Setting Size and Number of Internal Stacks"
 permalink: /pubs/pc/reference/microsoft/kb/Q58436/
 ---
 
+## Q58436: Setting Size and Number of Internal Stacks
+
 	Article: Q58436
-	Product: Microsoft C
 	Version(s): 3.x 4.x 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickc s_quickasm s_quickpas s_pascal

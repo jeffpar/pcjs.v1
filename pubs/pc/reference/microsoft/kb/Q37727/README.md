@@ -4,8 +4,9 @@ title: "Q37727: Error C2152 Identifier : Pointers to Functions..."
 permalink: /pubs/pc/reference/microsoft/kb/Q37727/
 ---
 
+## Q37727: Error C2152 Identifier : Pointers to Functions...
+
 	Article: Q37727
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | s_quickc s_error

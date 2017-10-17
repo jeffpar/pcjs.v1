@@ -4,8 +4,9 @@ title: "Q59936: Linker Error L4047 May Be Benign"
 permalink: /pubs/pc/reference/microsoft/kb/Q59936/
 ---
 
+## Q59936: Linker Error L4047 May Be Benign
+
 	Article: Q59936
-	Product: Microsoft C
 	Version(s): 5.10    | 5.10
 	Operating System: MS-DOS  | OS/2
 	Flags: ENDUSER |

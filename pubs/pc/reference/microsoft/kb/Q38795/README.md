@@ -4,8 +4,9 @@ title: "Q38795: Error L1087 Unexpected End-of-File on Scratch File"
 permalink: /pubs/pc/reference/microsoft/kb/Q38795/
 ---
 
+## Q38795: Error L1087 Unexpected End-of-File on Scratch File
+
 	Article: Q38795
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | s_pascal h_fortran h_masm s_quickc s_link s_error

@@ -4,8 +4,9 @@ title: "Q27764: CODEVIEW.DOC File Error: Mouse Works with the /2 Option"
 permalink: /pubs/pc/reference/microsoft/kb/Q27764/
 ---
 
+## Q27764: CODEVIEW.DOC File Error: Mouse Works with the /2 Option
+
 	Article: Q27764
-	Product: Microsoft C
 	Version(s): 2.20
 	Operating System: MS-DOS
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q42075: Second fscanf Is Skipped During Run Time"
 permalink: /pubs/pc/reference/microsoft/kb/Q42075/
 ---
 
+## Q42075: Second fscanf Is Skipped During Run Time
+
 	Article: Q42075
-	Product: Microsoft C
 	Version(s): 5.00   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | S_QuickC

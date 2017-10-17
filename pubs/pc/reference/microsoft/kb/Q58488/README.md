@@ -4,8 +4,9 @@ title: "Q58488: Change in Hex Literal Interpretation with C 6.00"
 permalink: /pubs/pc/reference/microsoft/kb/Q58488/
 ---
 
+## Q58488: Change in Hex Literal Interpretation with C 6.00
+
 	Article: Q58488
-	Product: Microsoft C
 	Version(s): 6.00    | 6.00
 	Operating System: MS-DOS  | OS/2
 	Flags: ENDUSER | s_quickc s_quickasm

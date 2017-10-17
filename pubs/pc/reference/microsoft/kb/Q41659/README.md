@@ -4,8 +4,9 @@ title: "Q41659: QuickC 2.00 README.DOC: Differences Between NMAKE and MAKE"
 permalink: /pubs/pc/reference/microsoft/kb/Q41659/
 ---
 
+## Q41659: QuickC 2.00 README.DOC: Differences Between NMAKE and MAKE
+
 	Article: Q41659
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

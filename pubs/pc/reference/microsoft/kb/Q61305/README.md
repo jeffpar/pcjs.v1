@@ -4,8 +4,9 @@ title: "Q61305: Warning C4018: signed/unsigned Mismatch Not in QuickHelp"
 permalink: /pubs/pc/reference/microsoft/kb/Q61305/
 ---
 
+## Q61305: Warning C4018: signed/unsigned Mismatch Not in QuickHelp
+
 	Article: Q61305
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | docerr

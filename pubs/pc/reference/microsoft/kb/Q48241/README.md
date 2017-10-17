@@ -4,8 +4,9 @@ title: "Q48241: Relationship between Map File Addresses and Location in Memory"
 permalink: /pubs/pc/reference/microsoft/kb/Q48241/
 ---
 
+## Q48241: Relationship between Map File Addresses and Location in Memory
+
 	Article: Q48241
-	Product: Microsoft C
 	Version(s): 3.61 3.65
 	Operating System: MS-DOS
 	Flags: ENDUSER |

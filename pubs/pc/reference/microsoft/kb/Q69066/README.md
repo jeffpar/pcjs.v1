@@ -4,8 +4,9 @@ title: "Q69066: &quot;Save Before Rebuild&quot; Does Not Work Properly"
 permalink: /pubs/pc/reference/microsoft/kb/Q69066/
 ---
 
+## Q69066: &quot;Save Before Rebuild&quot; Does Not Work Properly
+
 	Article: Q69066
-	Product: Microsoft C
 	Version(s): 2.50 2.51
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist2.50 buglist2.51

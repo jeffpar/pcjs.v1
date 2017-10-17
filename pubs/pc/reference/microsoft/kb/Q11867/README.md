@@ -4,8 +4,9 @@ title: "Q11867: C_FILE_INFO in Environment of Child Process"
 permalink: /pubs/pc/reference/microsoft/kb/Q11867/
 ---
 
+## Q11867: C_FILE_INFO in Environment of Child Process
+
 	Article: Q11867
-	Product: Microsoft C
 	Version(s): 3.00 4.00 5.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | TAR55563

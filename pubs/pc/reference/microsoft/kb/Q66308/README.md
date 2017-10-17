@@ -4,8 +4,9 @@ title: "Q66308: PWB's Use of Expanded Memory"
 permalink: /pubs/pc/reference/microsoft/kb/Q66308/
 ---
 
+## Q66308: PWB's Use of Expanded Memory
+
 	Article: Q66308
-	Product: Microsoft C
 	Version(s): 1.00 1.10
 	Operating System: MS-DOS
 	Flags: ENDUSER |

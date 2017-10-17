@@ -4,8 +4,9 @@ title: "Q62332: Can't Use Multiple Description Blocks with NMAKE Version 1.10"
 permalink: /pubs/pc/reference/microsoft/kb/Q62332/
 ---
 
+## Q62332: Can't Use Multiple Description Blocks with NMAKE Version 1.10
+
 	Article: Q62332
-	Product: Microsoft C
 	Version(s): 1.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist1.10 fixlist1.11 b_basiccom

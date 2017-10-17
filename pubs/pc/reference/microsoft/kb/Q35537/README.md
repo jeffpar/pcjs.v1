@@ -4,8 +4,9 @@ title: "Q35537: Developing Macros"
 permalink: /pubs/pc/reference/microsoft/kb/Q35537/
 ---
 
+## Q35537: Developing Macros
+
 	Article: Q35537
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | appnote

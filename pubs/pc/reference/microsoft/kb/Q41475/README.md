@@ -4,8 +4,9 @@ title: "Q41475: Using Brief Emulation and Tags in TOOLS.INI"
 permalink: /pubs/pc/reference/microsoft/kb/Q41475/
 ---
 
+## Q41475: Using Brief Emulation and Tags in TOOLS.INI
+
 	Article: Q41475
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist1.00

@@ -4,8 +4,9 @@ title: "Q44131: How to Specify Paths in Inference Rules in NMAKE"
 permalink: /pubs/pc/reference/microsoft/kb/Q44131/
 ---
 
+## Q44131: How to Specify Paths in Inference Rules in NMAKE
+
 	Article: Q44131
-	Product: Microsoft C
 	Version(s): 1.00   | 1.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | s_quickc  s_c  h_FORTRAN

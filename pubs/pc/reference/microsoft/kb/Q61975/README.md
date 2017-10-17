@@ -4,8 +4,9 @@ title: "Q61975: Odd Size Structures &gt; 10 Bytes Passed Incorrectly If Packed"
 permalink: /pubs/pc/reference/microsoft/kb/Q61975/
 ---
 
+## Q61975: Odd Size Structures &gt; 10 Bytes Passed Incorrectly If Packed
+
 	Article: Q61975
-	Product: Microsoft C
 	Version(s): 6.00    | 6.00
 	Operating System: MS-DOS  | OS/2
 	Flags: ENDUSER |

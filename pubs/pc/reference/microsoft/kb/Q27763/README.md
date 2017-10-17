@@ -4,8 +4,9 @@ title: "Q27763: CODEVIEW.DOC Incorrectly States /E Uses Extended Memory"
 permalink: /pubs/pc/reference/microsoft/kb/Q27763/
 ---
 
+## Q27763: CODEVIEW.DOC Incorrectly States /E Uses Extended Memory
+
 	Article: Q27763
-	Product: Microsoft C
 	Version(s): 2.20
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr

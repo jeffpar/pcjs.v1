@@ -4,8 +4,9 @@ title: "Q61055: C1001: Internal Compiler Error: regMD.c: 1.100 Line 1017"
 permalink: /pubs/pc/reference/microsoft/kb/Q61055/
 ---
 
+## Q61055: C1001: Internal Compiler Error: regMD.c: 1.100 Line 1017
+
 	Article: Q61055
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist6.00

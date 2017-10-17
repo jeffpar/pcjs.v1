@@ -4,8 +4,9 @@ title: "Q47985: Calling Order Undefined -- Function Calls in Single Expression"
 permalink: /pubs/pc/reference/microsoft/kb/Q47985/
 ---
 
+## Q47985: Calling Order Undefined -- Function Calls in Single Expression
+
 	Article: Q47985
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.00 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | S_QuickC S_QuickASM

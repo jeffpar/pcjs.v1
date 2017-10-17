@@ -4,8 +4,9 @@ title: "Q38327: _Fheapwalk Does Not Check the Near Heap"
 permalink: /pubs/pc/reference/microsoft/kb/Q38327/
 ---
 
+## Q38327: _Fheapwalk Does Not Check the Near Heap
+
 	Article: Q38327
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | S_QuickC

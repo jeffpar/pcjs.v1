@@ -4,8 +4,9 @@ title: "Q41673: QuickC 2.00 README.DOC: Linking QC 2.00 Programs for Windows"
 permalink: /pubs/pc/reference/microsoft/kb/Q41673/
 ---
 
+## Q41673: QuickC 2.00 README.DOC: Linking QC 2.00 Programs for Windows
+
 	Article: Q41673
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER| |

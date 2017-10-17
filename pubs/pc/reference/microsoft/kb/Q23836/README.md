@@ -4,8 +4,9 @@ title: "Q23836: Available Mouse Menus"
 permalink: /pubs/pc/reference/microsoft/kb/Q23836/
 ---
 
+## Q23836: Available Mouse Menus
+
 	Article: Q23836
-	Product: Microsoft C
 	Version(s): 4.x 5.x 6.x
 	Operating System: MS-DOS
 	Flags: ENDUSER |

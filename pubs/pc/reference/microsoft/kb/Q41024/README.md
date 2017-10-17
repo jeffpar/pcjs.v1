@@ -4,8 +4,9 @@ title: "Q41024: FATAL: Internal Stack Failure, System Halted"
 permalink: /pubs/pc/reference/microsoft/kb/Q41024/
 ---
 
+## Q41024: FATAL: Internal Stack Failure, System Halted
+
 	Article: Q41024
-	Product: Microsoft C
 	Version(s): 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QUICKC S_PASCAL H_FORTRAN H_MASM

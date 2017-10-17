@@ -4,8 +4,9 @@ title: "Q39216: Opening Files Using Command Line Arguments."
 permalink: /pubs/pc/reference/microsoft/kb/Q39216/
 ---
 
+## Q39216: Opening Files Using Command Line Arguments.
+
 	Article: Q39216
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | s_quickc

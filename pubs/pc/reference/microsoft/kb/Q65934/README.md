@@ -4,8 +4,9 @@ title: "Q65934: CV /E Avoids Windows 3.00 386 Enhanced Mode Protection Error"
 permalink: /pubs/pc/reference/microsoft/kb/Q65934/
 ---
 
+## Q65934: CV /E Avoids Windows 3.00 386 Enhanced Mode Protection Error
+
 	Article: Q65934
-	Product: Microsoft C
 	Version(s): 2.35 3.00 3.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | SR# S900919-57 B_QuickBas B_BasicCom W_Win3

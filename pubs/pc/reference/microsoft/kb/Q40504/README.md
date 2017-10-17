@@ -4,8 +4,9 @@ title: "Q40504: Types And Variations of Charts That Can Be Produced by QC 2.00"
 permalink: /pubs/pc/reference/microsoft/kb/Q40504/
 ---
 
+## Q40504: Types And Variations of Charts That Can Be Produced by QC 2.00
+
 	Article: Q40504
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

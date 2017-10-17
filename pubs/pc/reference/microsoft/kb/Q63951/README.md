@@ -4,8 +4,9 @@ title: "Q63951: PWB Command-Line Option /DP Is Documented But Not Implemented"
 permalink: /pubs/pc/reference/microsoft/kb/Q63951/
 ---
 
+## Q63951: PWB Command-Line Option /DP Is Documented But Not Implemented
+
 	Article: Q63951
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | docerr

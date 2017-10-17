@@ -4,8 +4,9 @@ title: "Q61262: argv"
 permalink: /pubs/pc/reference/microsoft/kb/Q61262/
 ---
 
+## Q61262: argv
+
 	Article: Q61262
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

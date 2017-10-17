@@ -4,8 +4,9 @@ title: "Q40351: Call _setvideomode before Calling _imagesize"
 permalink: /pubs/pc/reference/microsoft/kb/Q40351/
 ---
 
+## Q40351: Call _setvideomode before Calling _imagesize
+
 	Article: Q40351
-	Product: Microsoft C
 	Version(s): 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QuickC

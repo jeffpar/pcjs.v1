@@ -4,8 +4,9 @@ title: "Q46745: What the /HIGH and /DS Linker Options Do"
 permalink: /pubs/pc/reference/microsoft/kb/Q46745/
 ---
 
+## Q46745: What the /HIGH and /DS Linker Options Do
+
 	Article: Q46745
-	Product: Microsoft C
 	Version(s): 3.65
 	Operating System: MS-DOS
 	Flags: ENDUSER | SR# G890607-19979

@@ -4,8 +4,9 @@ title: "Q66648: Compiler Hangs If Array of Voids Is Initialized"
 permalink: /pubs/pc/reference/microsoft/kb/Q66648/
 ---
 
+## Q66648: Compiler Hangs If Array of Voids Is Initialized
+
 	Article: Q66648
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist6.00 fixlist6.00a

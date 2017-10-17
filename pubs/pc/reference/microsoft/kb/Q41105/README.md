@@ -4,8 +4,9 @@ title: "Q41105: The Steps Required to Create a Chart in QuickC Version 2.00"
 permalink: /pubs/pc/reference/microsoft/kb/Q41105/
 ---
 
+## Q41105: The Steps Required to Create a Chart in QuickC Version 2.00
+
 	Article: Q41105
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

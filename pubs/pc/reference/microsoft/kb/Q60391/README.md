@@ -4,8 +4,9 @@ title: "Q60391: Operator Missing in C 6.00 A.P.T. Manual's /Oz Example"
 permalink: /pubs/pc/reference/microsoft/kb/Q60391/
 ---
 
+## Q60391: Operator Missing in C 6.00 A.P.T. Manual's /Oz Example
+
 	Article: Q60391
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | docerr

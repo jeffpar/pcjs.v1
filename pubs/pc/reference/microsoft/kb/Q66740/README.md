@@ -4,8 +4,9 @@ title: "Q66740: CTRL+NUM/ May be Read as CTRL+/ in DOS with NUM LOCK On"
 permalink: /pubs/pc/reference/microsoft/kb/Q66740/
 ---
 
+## Q66740: CTRL+NUM/ May be Read as CTRL+/ in DOS with NUM LOCK On
+
 	Article: Q66740
-	Product: Microsoft C
 	Version(s): 1.00 1.10 | 1.00 1.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | buglist1.10

@@ -4,8 +4,9 @@ title: "Q35293: Directory Listing of C 5.10 for OS/2 Distribution Disks"
 permalink: /pubs/pc/reference/microsoft/kb/Q35293/
 ---
 
+## Q35293: Directory Listing of C 5.10 for OS/2 Distribution Disks
+
 	Article: Q35293
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

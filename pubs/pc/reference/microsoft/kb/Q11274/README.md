@@ -4,8 +4,9 @@ title: "Q11274: Italics (and Other Fonts) on a Monochrome Monitor"
 permalink: /pubs/pc/reference/microsoft/kb/Q11274/
 ---
 
+## Q11274: Italics (and Other Fonts) on a Monochrome Monitor
+
 	Article: Q11274
-	Product: Microsoft C
 	Version(s): 3.00 4.00 5.00 5.10 6.00 6.00a
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickc

@@ -4,8 +4,9 @@ title: "Q35251: Mouse Menus May Hang in the OS/2 DOS 3.x Box"
 permalink: /pubs/pc/reference/microsoft/kb/Q35251/
 ---
 
+## Q35251: Mouse Menus May Hang in the OS/2 DOS 3.x Box
+
 	Article: Q35251
-	Product: Microsoft C
 	Version(s): 6.x 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

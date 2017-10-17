@@ -4,8 +4,9 @@ title: "Q45718: Working Around Link Error &quot;L1064: Out of Memory&quot;"
 permalink: /pubs/pc/reference/microsoft/kb/Q45718/
 ---
 
+## Q45718: Working Around Link Error &quot;L1064: Out of Memory&quot;
+
 	Article: Q45718
-	Product: Microsoft C
 	Version(s): 5.03 5.05 5.10 5.13 | 5.03 5.05 5.10 5.13
 	Operating System: MS-DOS              | OS/2
 	Flags: ENDUSER |

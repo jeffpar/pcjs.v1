@@ -4,8 +4,9 @@ title: "Q61307: Do Not Start Programmer's WorkBench by Typing PWBED"
 permalink: /pubs/pc/reference/microsoft/kb/Q61307/
 ---
 
+## Q61307: Do Not Start Programmer's WorkBench by Typing PWBED
+
 	Article: Q61307
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q59256: Incorrect Version Numbers Cause Tagged Sections to Be Ignored"
 permalink: /pubs/pc/reference/microsoft/kb/Q59256/
 ---
 
+## Q59256: Incorrect Version Numbers Cause Tagged Sections to Be Ignored
+
 	Article: Q59256
-	Product: Microsoft C
 	Version(s): 1.00 1.02 | 1.00 1.02
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | pwb

@@ -4,8 +4,9 @@ title: "Q51654: Use _pg_setpalette() to Modify the Plot Characters"
 permalink: /pubs/pc/reference/microsoft/kb/Q51654/
 ---
 
+## Q51654: Use _pg_setpalette() to Modify the Plot Characters
+
 	Article: Q51654
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | presentation graphics pgchart

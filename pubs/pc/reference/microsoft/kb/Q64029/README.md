@@ -4,8 +4,9 @@ title: "Q64029: MS-DOS 3.20 Patch Is Missing from C Version 6.00"
 permalink: /pubs/pc/reference/microsoft/kb/Q64029/
 ---
 
+## Q64029: MS-DOS 3.20 Patch Is Missing from C Version 6.00
+
 	Article: Q64029
-	Product: Microsoft C
 	Version(s): 6.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr

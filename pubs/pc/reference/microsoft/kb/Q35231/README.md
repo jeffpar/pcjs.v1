@@ -4,8 +4,9 @@ title: "Q35231: /S1 or /S2 Yields Same Result as /S0"
 permalink: /pubs/pc/reference/microsoft/kb/Q35231/
 ---
 
+## Q35231: /S1 or /S2 Yields Same Result as /S0
+
 	Article: Q35231
-	Product: Microsoft C
 	Version(s): 6.x 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

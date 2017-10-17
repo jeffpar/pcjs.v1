@@ -4,8 +4,9 @@ title: "Q30829: Setting TMPSAV in TOOLS.INI file; M.TMP Cannot Be Suppressed"
 permalink: /pubs/pc/reference/microsoft/kb/Q30829/
 ---
 
+## Q30829: Setting TMPSAV in TOOLS.INI file; M.TMP Cannot Be Suppressed
+
 	Article: Q30829
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: OS/2
 	Flags: ENDUSER | TAR76606

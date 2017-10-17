@@ -4,8 +4,9 @@ title: "Q66841: Does /ND Override /Aw?"
 permalink: /pubs/pc/reference/microsoft/kb/Q66841/
 ---
 
+## Q66841: Does /ND Override /Aw?
+
 	Article: Q66841
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

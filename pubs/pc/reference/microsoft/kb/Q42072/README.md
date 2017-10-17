@@ -4,8 +4,9 @@ title: "Q42072: Incorrect Usage of /o Switch in &quot;Peter Norton's Inside OS/2
 permalink: /pubs/pc/reference/microsoft/kb/Q42072/
 ---
 
+## Q42072: Incorrect Usage of /o Switch in &quot;Peter Norton's Inside OS/2&quot;
+
 	Article: Q42072
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: OS/2
 	Flags: ENDUSER | docerr

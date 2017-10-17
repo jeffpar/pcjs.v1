@@ -4,8 +4,9 @@ title: "Q59536: OS/2 Module Definition File Syntax"
 permalink: /pubs/pc/reference/microsoft/kb/Q59536/
 ---
 
+## Q59536: OS/2 Module Definition File Syntax
+
 	Article: Q59536
-	Product: Microsoft C
 	Version(s): 5.01.21 5.02 5.03 5.05
 	Operating System: OS/2
 	Flags: ENDUSER | S_C

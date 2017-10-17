@@ -4,8 +4,9 @@ title: "Q66778: Error Messages May Say &quot;short&quot; Instead of &quot;enum&q
 permalink: /pubs/pc/reference/microsoft/kb/Q66778/
 ---
 
+## Q66778: Error Messages May Say &quot;short&quot; Instead of &quot;enum&quot;
+
 	Article: Q66778
-	Product: Microsoft C
 	Version(s): 5.10 6.00 6.00a | 5.10 6.00 6.00a
 	Operating System: MS-DOS          | OS/2
 	Flags: ENDUSER | S_QUICKC buglist5.10 buglist6.00 buglist6.00a

@@ -4,8 +4,9 @@ title: "Q42772: QuickC 2.00 Editor Function: ResetState"
 permalink: /pubs/pc/reference/microsoft/kb/Q42772/
 ---
 
+## Q42772: QuickC 2.00 Editor Function: ResetState
+
 	Article: Q42772
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | editor

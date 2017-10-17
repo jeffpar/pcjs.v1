@@ -4,8 +4,9 @@ title: "Q45679: &quot;DPATH&quot; Utility Causes ILINK Error and R6005 Error"
 permalink: /pubs/pc/reference/microsoft/kb/Q45679/
 ---
 
+## Q45679: &quot;DPATH&quot; Utility Causes ILINK Error and R6005 Error
+
 	Article: Q45679
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QuickASM

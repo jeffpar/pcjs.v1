@@ -4,8 +4,9 @@ title: "Q46918: Keyboard Styles for IBM and IBM Compatibles"
 permalink: /pubs/pc/reference/microsoft/kb/Q46918/
 ---
 
+## Q46918: Keyboard Styles for IBM and IBM Compatibles
+
 	Article: Q46918
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | non-numeric

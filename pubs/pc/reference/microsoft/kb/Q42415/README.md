@@ -4,8 +4,9 @@ title: "Q42415: Eliminating Extra QC.INI Files"
 permalink: /pubs/pc/reference/microsoft/kb/Q42415/
 ---
 
+## Q42415: Eliminating Extra QC.INI Files
+
 	Article: Q42415
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

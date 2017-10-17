@@ -4,8 +4,9 @@ title: "Q62668: R6000 Stack Overflow After Deleting Current Makefile"
 permalink: /pubs/pc/reference/microsoft/kb/Q62668/
 ---
 
+## Q62668: R6000 Stack Overflow After Deleting Current Makefile
+
 	Article: Q62668
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

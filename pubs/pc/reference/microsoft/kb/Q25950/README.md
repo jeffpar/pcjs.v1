@@ -4,8 +4,9 @@ title: "Q25950: CodeView Versions 2.10 to 2.30 Use Four Extra File Handles"
 permalink: /pubs/pc/reference/microsoft/kb/Q25950/
 ---
 
+## Q25950: CodeView Versions 2.10 to 2.30 Use Four Extra File Handles
+
 	Article: Q25950
-	Product: Microsoft C
 	Version(s): 2.30 2.20 2.10 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q28492: Using PS/2 Serial Mice with Laptop Computers"
 permalink: /pubs/pc/reference/microsoft/kb/Q28492/
 ---
 
+## Q28492: Using PS/2 Serial Mice with Laptop Computers
+
 	Article: Q28492
-	Product: Microsoft C
 	Version(s): 1.0
 	Operating System: MS-DOS
 	Flags: ENDUSER |

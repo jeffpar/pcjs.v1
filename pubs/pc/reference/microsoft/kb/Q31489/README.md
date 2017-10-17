@@ -4,8 +4,9 @@ title: "Q31489: Tabs Expanded to Eight Spaces; Filetab Switch Changes Spacing"
 permalink: /pubs/pc/reference/microsoft/kb/Q31489/
 ---
 
+## Q31489: Tabs Expanded to Eight Spaces; Filetab Switch Changes Spacing
+
 	Article: Q31489
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | Tar70793

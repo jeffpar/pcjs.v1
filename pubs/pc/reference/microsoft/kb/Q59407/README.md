@@ -4,8 +4,9 @@ title: "Q59407: Inaccurate Representation of Large Double Values"
 permalink: /pubs/pc/reference/microsoft/kb/Q59407/
 ---
 
+## Q59407: Inaccurate Representation of Large Double Values
+
 	Article: Q59407
-	Product: Microsoft C
 	Version(s): 5.10 6.00 | 5.10 6.00
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | s_quickc s_quickasm

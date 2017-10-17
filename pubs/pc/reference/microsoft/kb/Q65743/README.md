@@ -4,8 +4,9 @@ title: "Q65743: Invalid Offset Generated for jmp After In-Line Assembly"
 permalink: /pubs/pc/reference/microsoft/kb/Q65743/
 ---
 
+## Q65743: Invalid Offset Generated for jmp After In-Line Assembly
+
 	Article: Q65743
-	Product: Microsoft C
 	Version(s): 6.00    | 6.00
 	Operating System: MS-DOS  | OS/2
 	Flags: ENDUSER | buglist6.00 fixlist6.00a

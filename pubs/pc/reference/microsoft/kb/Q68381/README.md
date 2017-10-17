@@ -4,8 +4,9 @@ title: "Q68381: The D Modifier to &#36;? Is Broken in NMAKE Version 1.11"
 permalink: /pubs/pc/reference/microsoft/kb/Q68381/
 ---
 
+## Q68381: The D Modifier to &#36;? Is Broken in NMAKE Version 1.11
+
 	Article: Q68381
-	Product: Microsoft C
 	Version(s): 1.11   | 1.11
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist1.11 fixlist1.12

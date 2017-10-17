@@ -4,8 +4,9 @@ title: "Q41256: ROMable Code Using Microsoft C"
 permalink: /pubs/pc/reference/microsoft/kb/Q41256/
 ---
 
+## Q41256: ROMable Code Using Microsoft C
+
 	Article: Q41256
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | SR# G890121-10245 appnote

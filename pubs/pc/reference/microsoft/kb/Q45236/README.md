@@ -4,8 +4,9 @@ title: "Q45236: wait() and cwait() Prototyped in QuickC 2.00 Include Files"
 permalink: /pubs/pc/reference/microsoft/kb/Q45236/
 ---
 
+## Q45236: wait() and cwait() Prototyped in QuickC 2.00 Include Files
+
 	Article: Q45236
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: DOS
 	Flags: ENDUSER | S_C

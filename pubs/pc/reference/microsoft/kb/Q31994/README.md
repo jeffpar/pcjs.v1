@@ -4,8 +4,9 @@ title: "Q31994: How Overlays Are Set Up By the Linker"
 permalink: /pubs/pc/reference/microsoft/kb/Q31994/
 ---
 
+## Q31994: How Overlays Are Set Up By the Linker
+
 	Article: Q31994
-	Product: Microsoft C
 	Version(s): 3.x 4.06 4.07 5.01.20 5.01.21 5.03
 	Operating System: MS-DOS
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q45145: Installing C 5.10 to Compile Both DOS and OS/2 Programs"
 permalink: /pubs/pc/reference/microsoft/kb/Q45145/
 ---
 
+## Q45145: Installing C 5.10 to Compile Both DOS and OS/2 Programs
+
 	Article: Q45145
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | SR# G890523-18896

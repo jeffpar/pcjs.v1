@@ -4,8 +4,9 @@ title: "Q41701: Using ANSI Escape Sequences in Microsoft C"
 permalink: /pubs/pc/reference/microsoft/kb/Q41701/
 ---
 
+## Q41701: Using ANSI Escape Sequences in Microsoft C
+
 	Article: Q41701
-	Product: Microsoft C
 	Version(s): 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QuickC

@@ -4,8 +4,9 @@ title: "Q38271: Error C1059 Out of Near Heap Space"
 permalink: /pubs/pc/reference/microsoft/kb/Q38271/
 ---
 
+## Q38271: Error C1059 Out of Near Heap Space
+
 	Article: Q38271
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | s_quickc s_error

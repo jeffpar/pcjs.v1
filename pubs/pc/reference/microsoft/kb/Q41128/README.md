@@ -4,8 +4,9 @@ title: "Q41128: Meaning Of &quot;ILINK: ERROR: Invalid Flag Z&quot;"
 permalink: /pubs/pc/reference/microsoft/kb/Q41128/
 ---
 
+## Q41128: Meaning Of &quot;ILINK: ERROR: Invalid Flag Z&quot;
+
 	Article: Q41128
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

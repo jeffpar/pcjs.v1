@@ -4,8 +4,9 @@ title: "Q47501: Libraries Only Found When Linking in Environment"
 permalink: /pubs/pc/reference/microsoft/kb/Q47501/
 ---
 
+## Q47501: Libraries Only Found When Linking in Environment
+
 	Article: Q47501
-	Product: Microsoft C
 	Version(s): 1.01 2.00 2.01
 	Operating System: MS-DOS
 	Flags: ENDUSER |

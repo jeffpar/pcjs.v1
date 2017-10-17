@@ -4,8 +4,9 @@ title: "Q48729: Absolute Coordinate of Top Left Corner for _settextwindow"
 permalink: /pubs/pc/reference/microsoft/kb/Q48729/
 ---
 
+## Q48729: Absolute Coordinate of Top Left Corner for _settextwindow
+
 	Article: Q48729
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_C S_QuickASM 2.01

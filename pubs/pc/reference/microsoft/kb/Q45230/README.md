@@ -4,8 +4,9 @@ title: "Q45230: Conflict between Global and Local Variables When Debugging"
 permalink: /pubs/pc/reference/microsoft/kb/Q45230/
 ---
 
+## Q45230: Conflict between Global and Local Variables When Debugging
+
 	Article: Q45230
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist2.00

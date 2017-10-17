@@ -4,8 +4,9 @@ title: "Q68070: Not Enough Core Message Caused by Lack of Memory"
 permalink: /pubs/pc/reference/microsoft/kb/Q68070/
 ---
 
+## Q68070: Not Enough Core Message Caused by Lack of Memory
+
 	Article: Q68070
-	Product: Microsoft C
 	Version(s): 1.00 1.10
 	Operating System: MS-DOS
 	Flags: ENDUSER |

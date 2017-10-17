@@ -4,8 +4,9 @@ title: "Q61203: C 6.00 README: fstat() Return Value Improved Under HPFS"
 permalink: /pubs/pc/reference/microsoft/kb/Q61203/
 ---
 
+## Q61203: C 6.00 README: fstat() Return Value Improved Under HPFS
+
 	Article: Q61203
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q50700: C Run Time Can't Be Used in DLL Initialization with CRTLIB.DLL"
 permalink: /pubs/pc/reference/microsoft/kb/Q50700/
 ---
 
+## Q50700: C Run Time Can't Be Used in DLL Initialization with CRTLIB.DLL
+
 	Article: Q50700
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: OS/2
 	Flags: ENDUSER | SR# G891005-116

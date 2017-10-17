@@ -4,8 +4,9 @@ title: "Q62664: C1001: Internal Compiler Error: '../grammar.c', Line 140"
 permalink: /pubs/pc/reference/microsoft/kb/Q62664/
 ---
 
+## Q62664: C1001: Internal Compiler Error: '../grammar.c', Line 140
+
 	Article: Q62664
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

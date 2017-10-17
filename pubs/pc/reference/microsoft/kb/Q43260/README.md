@@ -4,8 +4,9 @@ title: "Q43260: Vertical Scroll Inactive with MODE CO40 and Dual Monitors"
 permalink: /pubs/pc/reference/microsoft/kb/Q43260/
 ---
 
+## Q43260: Vertical Scroll Inactive with MODE CO40 and Dual Monitors
+
 	Article: Q43260
-	Product: Microsoft C
 	Version(s): 2.x
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_C buglist2.20

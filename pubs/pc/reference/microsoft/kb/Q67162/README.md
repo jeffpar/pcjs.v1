@@ -4,8 +4,9 @@ title: "Q67162: C 6.00a Setup with Monochrome Monitor"
 permalink: /pubs/pc/reference/microsoft/kb/Q67162/
 ---
 
+## Q67162: C 6.00a Setup with Monochrome Monitor
+
 	Article: Q67162
-	Product: Microsoft C
 	Version(s): 6.00a   | 6.00a
 	Operating System: MS-DOS  | OS/2
 	Flags: ENDUSER | docerr buglist6.00 buglist6.00a

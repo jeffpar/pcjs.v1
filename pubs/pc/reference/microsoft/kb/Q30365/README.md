@@ -4,8 +4,9 @@ title: "Q30365: Debug Shown on M.EXE Help Screen Is Not a Supported Switch"
 permalink: /pubs/pc/reference/microsoft/kb/Q30365/
 ---
 
+## Q30365: Debug Shown on M.EXE Help Screen Is Not a Supported Switch
+
 	Article: Q30365
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | docerr

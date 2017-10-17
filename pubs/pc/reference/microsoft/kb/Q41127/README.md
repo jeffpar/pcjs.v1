@@ -4,8 +4,9 @@ title: "Q41127: No Registration Card Included in Upgraded Products"
 permalink: /pubs/pc/reference/microsoft/kb/Q41127/
 ---
 
+## Q41127: No Registration Card Included in Upgraded Products
+
 	Article: Q41127
-	Product: Microsoft C
 	Version(s): 1.01 1.00 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | update s_pascal s_c

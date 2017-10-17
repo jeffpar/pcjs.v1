@@ -4,8 +4,9 @@ title: "Q68627: C1001: Internal Compiler Error: omfMD.c, Line 446"
 permalink: /pubs/pc/reference/microsoft/kb/Q68627/
 ---
 
+## Q68627: C1001: Internal Compiler Error: omfMD.c, Line 446
+
 	Article: Q68627
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | buglist6.00 buglist6.00a

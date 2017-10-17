@@ -4,8 +4,9 @@ title: "Q44523: Ellipse Not Bounded Correctly"
 permalink: /pubs/pc/reference/microsoft/kb/Q44523/
 ---
 
+## Q44523: Ellipse Not Bounded Correctly
+
 	Article: Q44523
-	Product: Microsoft C
 	Version(s): 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QuickC

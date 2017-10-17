@@ -4,8 +4,9 @@ title: "Q68907: Incorrect Code Generated for &quot;FILD QWord Ptr&quot;"
 permalink: /pubs/pc/reference/microsoft/kb/Q68907/
 ---
 
+## Q68907: Incorrect Code Generated for &quot;FILD QWord Ptr&quot;
+
 	Article: Q68907
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | buglist6.00 buglist6.00a

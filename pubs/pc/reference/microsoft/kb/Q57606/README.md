@@ -4,8 +4,9 @@ title: "Q57606: Mouse and Token Ring Conflict"
 permalink: /pubs/pc/reference/microsoft/kb/Q57606/
 ---
 
+## Q57606: Mouse and Token Ring Conflict
+
 	Article: Q57606
-	Product: Microsoft C
 	Version(s): 7.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

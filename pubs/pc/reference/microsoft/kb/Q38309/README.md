@@ -4,8 +4,9 @@ title: "Q38309: Selecting Large Text Blocks with Microsoft Editor"
 permalink: /pubs/pc/reference/microsoft/kb/Q38309/
 ---
 
+## Q38309: Selecting Large Text Blocks with Microsoft Editor
+
 	Article: Q38309
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

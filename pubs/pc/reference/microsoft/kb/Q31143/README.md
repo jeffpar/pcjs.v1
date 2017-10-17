@@ -4,8 +4,9 @@ title: "Q31143: Return Type for ReadCmd Is PSWI, Not PCMD"
 permalink: /pubs/pc/reference/microsoft/kb/Q31143/
 ---
 
+## Q31143: Return Type for ReadCmd Is PSWI, Not PCMD
+
 	Article: Q31143
-	Product: Microsoft C
 	Version(s): 1.00 | 1.00
 	Operating System: OS/2 | MS-DOS
 	Flags: ENDUSER | docerr

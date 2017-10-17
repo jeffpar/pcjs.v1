@@ -4,8 +4,9 @@ title: "Q58802: _asm Needed for Each Line of Inline Assembly Macros"
 permalink: /pubs/pc/reference/microsoft/kb/Q58802/
 ---
 
+## Q58802: _asm Needed for Each Line of Inline Assembly Macros
+
 	Article: Q58802
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QUICKASM

@@ -4,8 +4,9 @@ title: "Q65818: Inline Assembly Incorrectly Accesses Far Labels"
 permalink: /pubs/pc/reference/microsoft/kb/Q65818/
 ---
 
+## Q65818: Inline Assembly Incorrectly Accesses Far Labels
+
 	Article: Q65818
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | s_quickc

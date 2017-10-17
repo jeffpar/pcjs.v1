@@ -4,8 +4,9 @@ title: "Q61223: C 6.00 README: Don't Use CTRL+BREAK When Debug History On"
 permalink: /pubs/pc/reference/microsoft/kb/Q61223/
 ---
 
+## Q61223: C 6.00 README: Don't Use CTRL+BREAK When Debug History On
+
 	Article: Q61223
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

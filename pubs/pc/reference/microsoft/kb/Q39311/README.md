@@ -4,8 +4,9 @@ title: "Q39311: Use 0x80 to Access Drive C when Calling _bios_disk"
 permalink: /pubs/pc/reference/microsoft/kb/Q39311/
 ---
 
+## Q39311: Use 0x80 to Access Drive C when Calling _bios_disk
+
 	Article: Q39311
-	Product: Microsoft C
 	Version(s): 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QUICKC

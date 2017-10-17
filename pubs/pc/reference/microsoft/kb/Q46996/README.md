@@ -4,8 +4,9 @@ title: "Q46996: L1074 Name: Group Larger Than 64K Bytes"
 permalink: /pubs/pc/reference/microsoft/kb/Q46996/
 ---
 
+## Q46996: L1074 Name: Group Larger Than 64K Bytes
+
 	Article: Q46996
-	Product: Microsoft C
 	Version(s): 4.06
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_C S_QuickC

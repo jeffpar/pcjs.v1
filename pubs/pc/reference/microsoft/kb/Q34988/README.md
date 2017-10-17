@@ -4,8 +4,9 @@ title: "Q34988: Errors R6012 to R6015 Documented in QuickC 1.01 Guide"
 permalink: /pubs/pc/reference/microsoft/kb/Q34988/
 ---
 
+## Q34988: Errors R6012 to R6015 Documented in QuickC 1.01 Guide
+
 	Article: Q34988
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | docerr

@@ -4,8 +4,9 @@ title: "Q61234: C 6.00 README: Getting Help on Files in the Packing List"
 permalink: /pubs/pc/reference/microsoft/kb/Q61234/
 ---
 
+## Q61234: C 6.00 README: Getting Help on Files in the Packing List
+
 	Article: Q61234
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | s_qh

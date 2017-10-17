@@ -4,8 +4,9 @@ title: "Q43486: C: Automatic Casting from Near Pointer to Far Pointer"
 permalink: /pubs/pc/reference/microsoft/kb/Q43486/
 ---
 
+## Q43486: C: Automatic Casting from Near Pointer to Far Pointer
+
 	Article: Q43486
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

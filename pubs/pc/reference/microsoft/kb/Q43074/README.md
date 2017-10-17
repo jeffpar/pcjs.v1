@@ -4,8 +4,9 @@ title: "Q43074: Cannot Use Standard Device Names as Filenames"
 permalink: /pubs/pc/reference/microsoft/kb/Q43074/
 ---
 
+## Q43074: Cannot Use Standard Device Names as Filenames
+
 	Article: Q43074
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

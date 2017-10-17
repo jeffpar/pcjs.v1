@@ -4,8 +4,9 @@ title: "Q61207: C 6.00 README: Building PM Applications in PWB"
 permalink: /pubs/pc/reference/microsoft/kb/Q61207/
 ---
 
+## Q61207: C 6.00 README: Building PM Applications in PWB
+
 	Article: Q61207
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

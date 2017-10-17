@@ -4,8 +4,9 @@ title: "Q48805: Tabs from QuickC Get Expanded"
 permalink: /pubs/pc/reference/microsoft/kb/Q48805/
 ---
 
+## Q48805: Tabs from QuickC Get Expanded
+
 	Article: Q48805
-	Product: Microsoft C
 	Version(s): 2.00 2.01
 	Operating System: MS-DOS
 	Flags: ENDUSER |

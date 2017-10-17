@@ -4,8 +4,9 @@ title: "Q58672: Using INT with _asm Does Not Output Text in Debugger"
 permalink: /pubs/pc/reference/microsoft/kb/Q58672/
 ---
 
+## Q58672: Using INT with _asm Does Not Output Text in Debugger
+
 	Article: Q58672
-	Product: Microsoft C
 	Version(s): 2.00 2.01
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickasm buglist2.00

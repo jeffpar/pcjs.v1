@@ -4,8 +4,9 @@ title: "Q47879: Using the Spawn, Exec, and System Routines to Call Batch Files"
 permalink: /pubs/pc/reference/microsoft/kb/Q47879/
 ---
 
+## Q47879: Using the Spawn, Exec, and System Routines to Call Batch Files
+
 	Article: Q47879
-	Product: Microsoft C
 	Version(s): 2.00 2.01
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_C S_QuickASM

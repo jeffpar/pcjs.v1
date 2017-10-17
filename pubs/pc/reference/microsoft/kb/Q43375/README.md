@@ -4,8 +4,9 @@ title: "Q43375: QuickC: Version 2.00 Search and Replace Problem"
 permalink: /pubs/pc/reference/microsoft/kb/Q43375/
 ---
 
+## Q43375: QuickC: Version 2.00 Search and Replace Problem
+
 	Article: Q43375
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist2.00

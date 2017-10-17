@@ -4,8 +4,9 @@ title: "Q47002: How to Change the Size of a Presentation Graphics Chart"
 permalink: /pubs/pc/reference/microsoft/kb/Q47002/
 ---
 
+## Q47002: How to Change the Size of a Presentation Graphics Chart
+
 	Article: Q47002
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | S_QuickAsm

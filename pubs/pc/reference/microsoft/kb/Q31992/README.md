@@ -4,8 +4,9 @@ title: "Q31992: Link Error L1053 Symbol Table Overflow"
 permalink: /pubs/pc/reference/microsoft/kb/Q31992/
 ---
 
+## Q31992: Link Error L1053 Symbol Table Overflow
+
 	Article: Q31992
-	Product: Microsoft C
 	Version(s): 3.x 5.01.20 5.01.21
 	Operating System: MS-DOS
 	Flags: ENDUSER |

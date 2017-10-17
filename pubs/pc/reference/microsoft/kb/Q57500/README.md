@@ -4,8 +4,9 @@ title: "Q57500: Redirecting NMAKE 1.00/1.01 Output with -p Gives False Errors"
 permalink: /pubs/pc/reference/microsoft/kb/Q57500/
 ---
 
+## Q57500: Redirecting NMAKE 1.00/1.01 Output with -p Gives False Errors
+
 	Article: Q57500
-	Product: Microsoft C
 	Version(s): 1.00 1.01
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist1.00 buglist1.01 fixlist 1.11

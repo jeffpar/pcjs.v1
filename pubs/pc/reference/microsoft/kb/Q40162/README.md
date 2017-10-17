@@ -4,8 +4,9 @@ title: "Q40162: Serial Mouse May Hang on ATT 6300"
 permalink: /pubs/pc/reference/microsoft/kb/Q40162/
 ---
 
+## Q40162: Serial Mouse May Hang on ATT 6300
+
 	Article: Q40162
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q47026: Second sscanf Fails After sscanf Using %i Format"
 permalink: /pubs/pc/reference/microsoft/kb/Q47026/
 ---
 
+## Q47026: Second sscanf Fails After sscanf Using %i Format
+
 	Article: Q47026
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

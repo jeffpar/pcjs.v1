@@ -4,8 +4,9 @@ title: "Q51297: C 5.00 and C 5.10 Compiler Exit Codes"
 permalink: /pubs/pc/reference/microsoft/kb/Q51297/
 ---
 
+## Q51297: C 5.00 and C 5.10 Compiler Exit Codes
+
 	Article: Q51297
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | S_EDITOR

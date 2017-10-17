@@ -4,8 +4,9 @@ title: "Q49840: Use of the /Gt Switch in C"
 permalink: /pubs/pc/reference/microsoft/kb/Q49840/
 ---
 
+## Q49840: Use of the /Gt Switch in C
+
 	Article: Q49840
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

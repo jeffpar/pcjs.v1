@@ -4,8 +4,9 @@ title: "Q65392: Cannot Initialize Union Containing Nameless Struct Member"
 permalink: /pubs/pc/reference/microsoft/kb/Q65392/
 ---
 
+## Q65392: Cannot Initialize Union Containing Nameless Struct Member
+
 	Article: Q65392
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist6.00

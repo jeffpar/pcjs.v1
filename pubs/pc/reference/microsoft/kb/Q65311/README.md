@@ -4,8 +4,9 @@ title: "Q65311: Compiling C 5.10 Code with C 6.00 Can Cause Stack Overflow"
 permalink: /pubs/pc/reference/microsoft/kb/Q65311/
 ---
 
+## Q65311: Compiling C 5.10 Code with C 6.00 Can Cause Stack Overflow
+
 	Article: Q65311
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

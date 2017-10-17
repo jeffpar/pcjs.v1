@@ -4,8 +4,9 @@ title: "Q47826: Default for NODATA When Using the _export Keyword"
 permalink: /pubs/pc/reference/microsoft/kb/Q47826/
 ---
 
+## Q47826: Default for NODATA When Using the _export Keyword
+
 	Article: Q47826
-	Product: Microsoft C
 	Version(s): 5.01.21 | 5.01.21
 	Operating System: MS-DOS  | OS/2
 	Flags: ENDUSER | buglist5.10.21 buglist5.02 fixlist5.03

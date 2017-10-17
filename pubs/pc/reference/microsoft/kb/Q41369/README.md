@@ -4,8 +4,9 @@ title: "Q41369: Run-Time Library Reference vfprintf Documentation Error"
 permalink: /pubs/pc/reference/microsoft/kb/Q41369/
 ---
 
+## Q41369: Run-Time Library Reference vfprintf Documentation Error
+
 	Article: Q41369
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | docerr s_quickc

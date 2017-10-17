@@ -4,8 +4,9 @@ title: "Q42562: Inconsistent Warnings: C4049 and C4024 in C and QuickC"
 permalink: /pubs/pc/reference/microsoft/kb/Q42562/
 ---
 
+## Q42562: Inconsistent Warnings: C4049 and C4024 in C and QuickC
+
 	Article: Q42562
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | s_QuickC

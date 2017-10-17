@@ -4,8 +4,9 @@ title: "Q29197: Why Pointer Subtraction Gives Signed Results"
 permalink: /pubs/pc/reference/microsoft/kb/Q29197/
 ---
 
+## Q29197: Why Pointer Subtraction Gives Signed Results
+
 	Article: Q29197
-	Product: Microsoft C
 	Version(s): 3.00 4.00 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER |

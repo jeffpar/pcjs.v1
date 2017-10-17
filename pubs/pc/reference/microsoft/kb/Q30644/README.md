@@ -4,8 +4,9 @@ title: "Q30644: Trapping FP Execptions with In-Line 8087 Code"
 permalink: /pubs/pc/reference/microsoft/kb/Q30644/
 ---
 
+## Q30644: Trapping FP Execptions with In-Line 8087 Code
+
 	Article: Q30644
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | docerr

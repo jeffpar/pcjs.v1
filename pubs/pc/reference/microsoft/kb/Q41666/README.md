@@ -4,8 +4,9 @@ title: "Q41666: QuickC 2.00 README.DOC: Error Message C2176"
 permalink: /pubs/pc/reference/microsoft/kb/Q41666/
 ---
 
+## Q41666: QuickC 2.00 README.DOC: Error Message C2176
+
 	Article: Q41666
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

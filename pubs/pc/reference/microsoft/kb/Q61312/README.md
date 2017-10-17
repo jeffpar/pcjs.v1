@@ -4,8 +4,9 @@ title: "Q61312: Internal Compiler Error: '@(#)regMD.c:1.100', Line 3074"
 permalink: /pubs/pc/reference/microsoft/kb/Q61312/
 ---
 
+## Q61312: Internal Compiler Error: '@(#)regMD.c:1.100', Line 3074
+
 	Article: Q61312
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist6.00

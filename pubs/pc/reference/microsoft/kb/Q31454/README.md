@@ -4,8 +4,9 @@ title: "Q31454: README.DOC Refers to Undocumented &quot;Link Options&quot;"
 permalink: /pubs/pc/reference/microsoft/kb/Q31454/
 ---
 
+## Q31454: README.DOC Refers to Undocumented &quot;Link Options&quot;
+
 	Article: Q31454
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr

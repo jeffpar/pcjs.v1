@@ -9,21 +9,47 @@ Microsoft Programmer's Library 1.3
 
 The following reference collections are part of the Microsoft Programmer's Library 1.3 CD-ROM: 
 
-- BASIC References
-- C References
+- [BASIC References](basic/)
+	- [BASIC Sample Code](basic/bassc/)
+	- [Learning to Use MS QuickBASIC 4.5](basic/qblearn/)
+	- [MS BASIC 7.1 Getting Started](basic/b7start/)
+	- [MS BASIC 7.1 Language Reference](basic/b7lang/)
+	- [MS BASIC 7.1 Programming Guide](basic/b7prog/)
+	- [MS KnowledgeBase - BASIC](basic/kbase_b/)
+	- [MS QB 4.5 Language Reference](basic/qblang/)
+	- [MS QB 4.5 Programming in BASIC](basic/qbprog/)
+	- [MS QB Programmer's Toolbox](basic/qbtools/)
+- [C References](c/)
+	- [MS C 6.0 Advanced Programming Techniques](c/cadvprg/)
+	- [MS C 6.0 Developer's Toolkit Reference](c/ctoolkit/)
+	- [MS C 6.0 Installing and Using the Professional Development System](c/cinstall/)
+	- [MS C 6.0 Reference](c/cref/)
+	- [MS C 6.0 Run-Time Library Reference](c/clibref/)
+	- [MS KnowledgeBase - C](c/kbase_c/)
+	- [MS Professional Advisor - Library Reference](c/cadvisor/)
+	- [MS QuickC Programming](c/mspqc/)
+	- [Proficient C](c/profc/)
+	- [QuickC 2.5 C for Yourself](c/c4yrself/)
+	- [QuickC 2.5 Tool Kit](c/qctools/)
+	- [QuickC 2.5 Up and Running](c/qcuprun/)
+	- [QuickC 2.5 Update](c/qcupdate/)
 - Common References
 - FORTRAN References
 - Hardware References
 - MASM References
 - [MS-DOS References](msdos/)
+	- [Advanced MS-DOS Programming](msdos/advdos/)
+	- [MS-DOS 3.3 Programmer's Reference](msdos/dosref33/)
+	- [MS-DOS 4.0 Programmer's Reference](msdos/dosref40/)
+	- [The MS-DOS Encyclopedia](msdos/encyc/)
+	- [The New Peter Norton Programmer's Guide](msdos/norton/)
 - MS Systems Journal
 - Network References
 - OS/2 References
 - Pascal References
 - Windows References
 
-We have also archived all the [KB Articles](/pubs/pc/reference/microsoft/kb/) from the "MS KnowledgeBase - C" section
-of the "C References" collection of this CD-ROM.
+We have also archived many of the [KB Articles](/pubs/pc/reference/microsoft/kb/) from this CD-ROM.
 
 {% comment %}
 

@@ -4,8 +4,9 @@ title: "Q38026: Minimum Range Values in the Include File limits.h"
 permalink: /pubs/pc/reference/microsoft/kb/Q38026/
 ---
 
+## Q38026: Minimum Range Values in the Include File limits.h
+
 	Article: Q38026
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | S_QUICKC

@@ -4,8 +4,9 @@ title: "Q68111: No Mouse with GRDEMO.EXE Sample Program May Cause M6111"
 permalink: /pubs/pc/reference/microsoft/kb/Q68111/
 ---
 
+## Q68111: No Mouse with GRDEMO.EXE Sample Program May Cause M6111
+
 	Article: Q68111
-	Product: Microsoft C
 	Version(s): 2.50 2.51
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist2.50 s_quickasm

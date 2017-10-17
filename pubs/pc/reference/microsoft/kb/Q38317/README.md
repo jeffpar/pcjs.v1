@@ -4,8 +4,9 @@ title: "Q38317: CodeView Gives &quot;Illegal Instruction&quot; on Clone 386"
 permalink: /pubs/pc/reference/microsoft/kb/Q38317/
 ---
 
+## Q38317: CodeView Gives &quot;Illegal Instruction&quot; on Clone 386
+
 	Article: Q38317
-	Product: Microsoft C
 	Version(s): 2.20
 	Operating System: MS-DOS
 	Flags: ENDUSER | CV

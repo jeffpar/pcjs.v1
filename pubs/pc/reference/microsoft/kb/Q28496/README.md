@@ -4,8 +4,9 @@ title: "Q28496: FCC Class B Approval"
 permalink: /pubs/pc/reference/microsoft/kb/Q28496/
 ---
 
+## Q28496: FCC Class B Approval
+
 	Article: Q28496
-	Product: Microsoft C
 	Version(s): 1.0
 	Operating System: MS-DOS
 	Flags: ENDUSER |

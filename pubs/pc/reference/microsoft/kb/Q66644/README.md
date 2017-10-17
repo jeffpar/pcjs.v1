@@ -4,8 +4,9 @@ title: "Q66644: NMAKE /N Doesn't Work Across Multiple Dependency Blocks"
 permalink: /pubs/pc/reference/microsoft/kb/Q66644/
 ---
 
+## Q66644: NMAKE /N Doesn't Work Across Multiple Dependency Blocks
+
 	Article: Q66644
-	Product: Microsoft C
 	Version(s): 1.11 1.12 | 1.11 1.12
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | buglist1.11 buglist1.12

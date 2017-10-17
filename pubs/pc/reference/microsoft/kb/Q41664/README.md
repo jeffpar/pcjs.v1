@@ -4,8 +4,9 @@ title: "Q41664: QuickC 2.00 README.DOC: Appendix D, Error-Message Reference"
 permalink: /pubs/pc/reference/microsoft/kb/Q41664/
 ---
 
+## Q41664: QuickC 2.00 README.DOC: Appendix D, Error-Message Reference
+
 	Article: Q41664
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

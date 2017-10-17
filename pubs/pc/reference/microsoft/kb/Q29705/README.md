@@ -4,8 +4,9 @@ title: "Q29705: MREADME.DOC: Using the Default Expert Mouse Menu"
 permalink: /pubs/pc/reference/microsoft/kb/Q29705/
 ---
 
+## Q29705: MREADME.DOC: Using the Default Expert Mouse Menu
+
 	Article: Q29705
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

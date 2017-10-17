@@ -4,8 +4,9 @@ title: "Q35260: How to Write Selected Text to a File in M Editor"
 permalink: /pubs/pc/reference/microsoft/kb/Q35260/
 ---
 
+## Q35260: How to Write Selected Text to a File in M Editor
+
 	Article: Q35260
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

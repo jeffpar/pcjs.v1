@@ -4,8 +4,9 @@ title: "Q43702: QuickC: Dual Floppy Compile/Link Procedure"
 permalink: /pubs/pc/reference/microsoft/kb/Q43702/
 ---
 
+## Q43702: QuickC: Dual Floppy Compile/Link Procedure
+
 	Article: Q43702
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr

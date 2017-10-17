@@ -4,8 +4,9 @@ title: "Q23829: Standard Mouse Menus Are Not in .COM Format"
 permalink: /pubs/pc/reference/microsoft/kb/Q23829/
 ---
 
+## Q23829: Standard Mouse Menus Are Not in .COM Format
+
 	Article: Q23829
-	Product: Microsoft C
 	Version(s): 6.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

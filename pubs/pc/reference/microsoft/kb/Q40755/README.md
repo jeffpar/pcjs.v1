@@ -4,8 +4,9 @@ title: "Q40755: Useful Macros for the Microsoft Editor"
 permalink: /pubs/pc/reference/microsoft/kb/Q40755/
 ---
 
+## Q40755: Useful Macros for the Microsoft Editor
+
 	Article: Q40755
-	Product: Microsoft C
 	Version(s): 1.00    |  1.00
 	Operating System: MS-DOS  | OS/2
 	Flags: ENDUSER |

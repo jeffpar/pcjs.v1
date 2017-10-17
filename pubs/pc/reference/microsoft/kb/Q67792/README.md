@@ -4,8 +4,9 @@ title: "Q67792: PWB Extensions in DOS Cannot Shell to DOS"
 permalink: /pubs/pc/reference/microsoft/kb/Q67792/
 ---
 
+## Q67792: PWB Extensions in DOS Cannot Shell to DOS
+
 	Article: Q67792
-	Product: Microsoft C
 	Version(s): 1.00 1.10
 	Operating System: MS-DOS
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q35812: Sample Pascal Program Documentation Error: function Fact"
 permalink: /pubs/pc/reference/microsoft/kb/Q35812/
 ---
 
+## Q35812: Sample Pascal Program Documentation Error: function Fact
+
 	Article: Q35812
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | h_masm S_PASCAL h_fortran

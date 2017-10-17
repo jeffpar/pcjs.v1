@@ -4,8 +4,9 @@ title: "Q67360: CodeView Does Not Debug kbhit() Correctly"
 permalink: /pubs/pc/reference/microsoft/kb/Q67360/
 ---
 
+## Q67360: CodeView Does Not Debug kbhit() Correctly
+
 	Article: Q67360
-	Product: Microsoft C
 	Version(s): 3.00 3.10 3.11  | 3.00 3.10 3.11
 	Operating System: MS-DOS          | OS/2
 	Flags: ENDUSER | buglist3.00 buglist3.10 buglist3.11

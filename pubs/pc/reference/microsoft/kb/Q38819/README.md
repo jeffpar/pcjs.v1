@@ -4,8 +4,9 @@ title: "Q38819: Error L2041 Stack Plus Data Exceeds 64K"
 permalink: /pubs/pc/reference/microsoft/kb/Q38819/
 ---
 
+## Q38819: Error L2041 Stack Plus Data Exceeds 64K
+
 	Article: Q38819
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | s_pascal h_fortran h_masm s_quickc s_link s_error

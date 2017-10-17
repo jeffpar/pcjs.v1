@@ -4,8 +4,9 @@ title: "Q65307: M6110: MATH Floating-Point Error: Stack Overflow"
 permalink: /pubs/pc/reference/microsoft/kb/Q65307/
 ---
 
+## Q65307: M6110: MATH Floating-Point Error: Stack Overflow
+
 	Article: Q65307
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist6.00

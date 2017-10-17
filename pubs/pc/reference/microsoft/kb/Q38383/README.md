@@ -4,8 +4,9 @@ title: "Q38383: Include Directories Not Searched as Expected"
 permalink: /pubs/pc/reference/microsoft/kb/Q38383/
 ---
 
+## Q38383: Include Directories Not Searched as Expected
+
 	Article: Q38383
-	Product: Microsoft C
 	Version(s): 5.10   | 5.10
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

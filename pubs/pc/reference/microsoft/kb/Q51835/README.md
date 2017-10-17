@@ -4,8 +4,9 @@ title: "Q51835: &quot;Error C2410: 'var' : Ambiguous Member Name Operand 2&quot;
 permalink: /pubs/pc/reference/microsoft/kb/Q51835/
 ---
 
+## Q51835: &quot;Error C2410: 'var' : Ambiguous Member Name Operand 2&quot;
+
 	Article: Q51835
-	Product: Microsoft C
 	Version(s): 2.00 2.01
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist2.01

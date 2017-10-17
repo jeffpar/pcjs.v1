@@ -4,8 +4,9 @@ title: "Q57971: Unresolved Externals from GRAPHICS.LIB"
 permalink: /pubs/pc/reference/microsoft/kb/Q57971/
 ---
 
+## Q57971: Unresolved Externals from GRAPHICS.LIB
+
 	Article: Q57971
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickc s_quickasm

@@ -4,8 +4,9 @@ title: "Q36570: Percent (%) Character in Filenames"
 permalink: /pubs/pc/reference/microsoft/kb/Q36570/
 ---
 
+## Q36570: Percent (%) Character in Filenames
+
 	Article: Q36570
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist1.00

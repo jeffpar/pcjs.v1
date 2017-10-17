@@ -4,8 +4,9 @@ title: "Q66507: CodeView Fails to Return Value in ES"
 permalink: /pubs/pc/reference/microsoft/kb/Q66507/
 ---
 
+## Q66507: CodeView Fails to Return Value in ES
+
 	Article: Q66507
-	Product: Microsoft C
 	Version(s): 3.00 3.10 3.11
 	Operating System: MS-DOS
 	Flags: ENDUSER | buglist3.00 buglist3.10 buglist3.11

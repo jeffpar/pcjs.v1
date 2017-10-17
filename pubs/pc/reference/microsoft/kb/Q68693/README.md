@@ -4,8 +4,9 @@ title: "Q68693: charttype Constants Are Documented with Wrong Names in C 6.00"
 permalink: /pubs/pc/reference/microsoft/kb/Q68693/
 ---
 
+## Q68693: charttype Constants Are Documented with Wrong Names in C 6.00
+
 	Article: Q68693
-	Product: Microsoft C
 	Version(s): 6.00 6.00a
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr s_quickc

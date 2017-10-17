@@ -4,8 +4,9 @@ title: "Q59884: Determining If Your TSR Has Already Been Installed"
 permalink: /pubs/pc/reference/microsoft/kb/Q59884/
 ---
 
+## Q59884: Determining If Your TSR Has Already Been Installed
+
 	Article: Q59884
-	Product: Microsoft C
 	Version(s): 4.00 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickc s_quickasm appnote

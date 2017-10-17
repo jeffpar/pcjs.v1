@@ -4,8 +4,9 @@ title: "Q66513: Memory Requirements for Real-Mode CodeView (CV.EXE)"
 permalink: /pubs/pc/reference/microsoft/kb/Q66513/
 ---
 
+## Q66513: Memory Requirements for Real-Mode CodeView (CV.EXE)
+
 	Article: Q66513
-	Product: Microsoft C
 	Version(s): 3.00 3.10 3.11 | 3.00 3.10 3.11
 	Operating System: MS-DOS         | OS/2
 	Flags: ENDUSER |

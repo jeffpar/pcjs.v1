@@ -4,8 +4,9 @@ title: "Q58800: Using _dos_findfirst() Function to Retrieve Disk Volume"
 permalink: /pubs/pc/reference/microsoft/kb/Q58800/
 ---
 
+## Q58800: Using _dos_findfirst() Function to Retrieve Disk Volume
+
 	Article: Q58800
-	Product: Microsoft C
 	Version(s): 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickc 2.00 s_quickasm 2.01

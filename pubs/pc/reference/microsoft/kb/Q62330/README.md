@@ -4,8 +4,9 @@ title: "Q62330: Reversing Mouse Buttons in the PWB Cannot Be Done"
 permalink: /pubs/pc/reference/microsoft/kb/Q62330/
 ---
 
+## Q62330: Reversing Mouse Buttons in the PWB Cannot Be Done
+
 	Article: Q62330
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

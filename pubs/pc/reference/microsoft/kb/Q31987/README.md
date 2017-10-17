@@ -4,8 +4,9 @@ title: "Q31987: Maximum Number of Object Modules LINK Allows"
 permalink: /pubs/pc/reference/microsoft/kb/Q31987/
 ---
 
+## Q31987: Maximum Number of Object Modules LINK Allows
+
 	Article: Q31987
-	Product: Microsoft C
 	Version(s): 3.x 5.01.20 5.01.21
 	Operating System: MS-DOS
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q41677: QuickC 2.00 README.DOC: Spurious Error: &#95;&#95;aDBused..."
 permalink: /pubs/pc/reference/microsoft/kb/Q41677/
 ---
 
+## Q41677: QuickC 2.00 README.DOC: Spurious Error: &#95;&#95;aDBused...
+
 	Article: Q41677
-	Product: Microsoft C
 	Version(s): 2.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

@@ -4,8 +4,9 @@ title: "Q24164: Applications That Do Not Use the Mouse"
 permalink: /pubs/pc/reference/microsoft/kb/Q24164/
 ---
 
+## Q24164: Applications That Do Not Use the Mouse
+
 	Article: Q24164
-	Product: Microsoft C
 	Version(s): 4.x 5.x 6.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

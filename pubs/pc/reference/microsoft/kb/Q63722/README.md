@@ -4,8 +4,9 @@ title: "Q63722: &quot;C For Yourself&quot; Documentation Error"
 permalink: /pubs/pc/reference/microsoft/kb/Q63722/
 ---
 
+## Q63722: &quot;C For Yourself&quot; Documentation Error
+
 	Article: Q63722
-	Product: Microsoft C
 	Version(s): 2.50
 	Operating System: MS-DOS
 	Flags: ENDUSER | docerr

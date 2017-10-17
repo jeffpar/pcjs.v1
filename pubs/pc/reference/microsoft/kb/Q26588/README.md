@@ -4,8 +4,9 @@ title: "Q26588: FPSEG() and FP_OFF() Require DOS.H to Avoid C2106 Error"
 permalink: /pubs/pc/reference/microsoft/kb/Q26588/
 ---
 
+## Q26588: FPSEG() and FP_OFF() Require DOS.H to Avoid C2106 Error
+
 	Article: Q26588
-	Product: Microsoft C
 	Version(s): 5.00 5.10 6.00 6.00a | 5.00 5.10 6.00 6.00a
 	Operating System: MS-DOS               | OS/2
 	Flags: ENDUSER | s_quickc

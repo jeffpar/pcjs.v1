@@ -4,8 +4,9 @@ title: "Q68821: Documentation Errors on Page 315 of APT Manual"
 permalink: /pubs/pc/reference/microsoft/kb/Q68821/
 ---
 
+## Q68821: Documentation Errors on Page 315 of APT Manual
+
 	Article: Q68821
-	Product: Microsoft C
 	Version(s): 6.00 6.00a | 6.00 6.00a
 	Operating System: MS-DOS     | OS/2
 	Flags: ENDUSER | docerr

@@ -4,8 +4,9 @@ title: "Q35028: Passing Textargs to M with the /E Switch"
 permalink: /pubs/pc/reference/microsoft/kb/Q35028/
 ---
 
+## Q35028: Passing Textargs to M with the /E Switch
+
 	Article: Q35028
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

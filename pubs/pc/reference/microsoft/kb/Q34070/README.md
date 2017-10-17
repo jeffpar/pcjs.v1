@@ -4,8 +4,9 @@ title: "Q34070: Converting from IEEE to MS binary format"
 permalink: /pubs/pc/reference/microsoft/kb/Q34070/
 ---
 
+## Q34070: Converting from IEEE to MS binary format
+
 	Article: Q34070
-	Product: Microsoft C
 	Version(s): 4.00 5.00 5.10 | 5.10
 	Operating System: MS-DOS         | OS/2
 	Flags: ENDUSER |

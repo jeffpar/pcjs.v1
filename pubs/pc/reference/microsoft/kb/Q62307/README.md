@@ -4,8 +4,9 @@ title: "Q62307: Internal Compiler Error '@(#)p3symtab.c:1.39', Line 450"
 permalink: /pubs/pc/reference/microsoft/kb/Q62307/
 ---
 
+## Q62307: Internal Compiler Error '@(#)p3symtab.c:1.39', Line 450
+
 	Article: Q62307
-	Product: Microsoft C
 	Version(s): 6.00 5.10 | 6.00 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | buglist6.00 buglist5.10

@@ -4,8 +4,9 @@ title: "Q67340: Correct Mouse Drivers for Express Publisher"
 permalink: /pubs/pc/reference/microsoft/kb/Q67340/
 ---
 
+## Q67340: Correct Mouse Drivers for Express Publisher
+
 	Article: Q67340
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | driver mouse express publisher

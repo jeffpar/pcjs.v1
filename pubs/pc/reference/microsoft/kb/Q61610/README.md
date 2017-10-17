@@ -4,8 +4,9 @@ title: "Q61610: Behavior of /Oa and /Ow Safer in C 6.00"
 permalink: /pubs/pc/reference/microsoft/kb/Q61610/
 ---
 
+## Q61610: Behavior of /Oa and /Ow Safer in C 6.00
+
 	Article: Q61610
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

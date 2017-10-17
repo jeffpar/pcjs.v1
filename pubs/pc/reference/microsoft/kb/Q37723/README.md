@@ -4,8 +4,9 @@ title: "Q37723: Error C2174 Function : Actual Has Type Void : Parameter..."
 permalink: /pubs/pc/reference/microsoft/kb/Q37723/
 ---
 
+## Q37723: Error C2174 Function : Actual Has Type Void : Parameter...
+
 	Article: Q37723
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | s_quickc s_error

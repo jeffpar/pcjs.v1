@@ -4,8 +4,9 @@ title: "Q59861: 400 DPI Serial Mouse and Northgate Computers"
 permalink: /pubs/pc/reference/microsoft/kb/Q59861/
 ---
 
+## Q59861: 400 DPI Serial Mouse and Northgate Computers
+
 	Article: Q59861
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

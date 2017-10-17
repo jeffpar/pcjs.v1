@@ -4,8 +4,9 @@ title: "Q24178: MENU.COM Needed to Load .MNU Files"
 permalink: /pubs/pc/reference/microsoft/kb/Q24178/
 ---
 
+## Q24178: MENU.COM Needed to Load .MNU Files
+
 	Article: Q24178
-	Product: Microsoft C
 	Version(s): 4.x 5.x 6.00
 	Operating System: MS-DOS
 	Flags: ENDUSER |

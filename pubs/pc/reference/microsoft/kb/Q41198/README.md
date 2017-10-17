@@ -4,8 +4,9 @@ title: "Q41198: How ungetch() Works with getch() and getche()"
 permalink: /pubs/pc/reference/microsoft/kb/Q41198/
 ---
 
+## Q41198: How ungetch() Works with getch() and getche()
+
 	Article: Q41198
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | s_quickc

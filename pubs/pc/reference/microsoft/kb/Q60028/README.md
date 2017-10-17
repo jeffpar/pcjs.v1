@@ -4,8 +4,9 @@ title: "Q60028: Changing Directory Name with rename() May Not Work As Expected"
 permalink: /pubs/pc/reference/microsoft/kb/Q60028/
 ---
 
+## Q60028: Changing Directory Name with rename() May Not Work As Expected
+
 	Article: Q60028
-	Product: Microsoft C
 	Version(s): 5.00 5.10 6.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_quickc s_quickasm

@@ -4,8 +4,9 @@ title: "Q32871: Write Function Will Not Work Correctly with SS!=DS"
 permalink: /pubs/pc/reference/microsoft/kb/Q32871/
 ---
 
+## Q32871: Write Function Will Not Work Correctly with SS!=DS
+
 	Article: Q32871
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER |

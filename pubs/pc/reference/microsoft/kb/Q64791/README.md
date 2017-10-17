@@ -4,8 +4,9 @@ title: "Q64791: Intrinsic Form of memcpy() Can Produce Incorrect Code"
 permalink: /pubs/pc/reference/microsoft/kb/Q64791/
 ---
 
+## Q64791: Intrinsic Form of memcpy() Can Produce Incorrect Code
+
 	Article: Q64791
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | buglist6.00

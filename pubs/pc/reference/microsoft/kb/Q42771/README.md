@@ -4,8 +4,9 @@ title: "Q42771: HELPMAKE: &quot;/A:&quot; Must Be Used When Using Colon (:) Comm
 permalink: /pubs/pc/reference/microsoft/kb/Q42771/
 ---
 
+## Q42771: HELPMAKE: &quot;/A:&quot; Must Be Used When Using Colon (:) Commands
+
 	Article: Q42771
-	Product: Microsoft C
 	Version(s): 1.00
 	Operating System: MS-DOS
 	Flags: ENDUSER | s_helpmake s_quickc docerr

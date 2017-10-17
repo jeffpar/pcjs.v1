@@ -4,8 +4,9 @@ title: "Q11817: How Interrupts Are Handled in CodeView"
 permalink: /pubs/pc/reference/microsoft/kb/Q11817/
 ---
 
+## Q11817: How Interrupts Are Handled in CodeView
+
 	Article: Q11817
-	Product: Microsoft C
 	Version(s): 1.00 1.10 2.00 2.10 2.20 2.30
 	Operating System: MS-DOS
 	Flags: ENDUSER | TAR55548

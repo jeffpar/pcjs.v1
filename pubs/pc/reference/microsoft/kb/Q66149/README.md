@@ -4,8 +4,9 @@ title: "Q66149: Must Use Parentheses with _fpreset()"
 permalink: /pubs/pc/reference/microsoft/kb/Q66149/
 ---
 
+## Q66149: Must Use Parentheses with _fpreset()
+
 	Article: Q66149
-	Product: Microsoft C
 	Version(s): 6.00   | 6.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER |

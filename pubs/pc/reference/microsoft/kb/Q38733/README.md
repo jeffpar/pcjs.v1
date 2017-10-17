@@ -4,8 +4,9 @@ title: "Q38733: Overflow in Integer Math Expressions Not Checked"
 permalink: /pubs/pc/reference/microsoft/kb/Q38733/
 ---
 
+## Q38733: Overflow in Integer Math Expressions Not Checked
+
 	Article: Q38733
-	Product: Microsoft C
 	Version(s): 4.00 5.00 5.10  | 5.10
 	Operating System: MS-DOS          | OS/2
 	Flags: ENDUSER | S_QUICKC

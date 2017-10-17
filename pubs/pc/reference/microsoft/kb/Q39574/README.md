@@ -4,8 +4,9 @@ title: "Q39574: Use a Colon when Assigning a Macro to a Keystroke"
 permalink: /pubs/pc/reference/microsoft/kb/Q39574/
 ---
 
+## Q39574: Use a Colon when Assigning a Macro to a Keystroke
+
 	Article: Q39574
-	Product: Microsoft C
 	Version(s): 1.00   | 1.00
 	Operating System: MS-DOS | OS/2
 	Flags: ENDUSER | docerr

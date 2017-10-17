@@ -4,8 +4,9 @@ title: "Q38820: Error L2025 Name : Symbol Defined More than Once"
 permalink: /pubs/pc/reference/microsoft/kb/Q38820/
 ---
 
+## Q38820: Error L2025 Name : Symbol Defined More than Once
+
 	Article: Q38820
-	Product: Microsoft C
 	Version(s): 5.00 5.10 | 5.10
 	Operating System: MS-DOS    | OS/2
 	Flags: ENDUSER | s_pascal h_fortran h_masm s_quickc s_link s_error

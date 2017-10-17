@@ -4,8 +4,9 @@ title: "Q35292: MDA Blinking Normal Inverse Text Example"
 permalink: /pubs/pc/reference/microsoft/kb/Q35292/
 ---
 
+## Q35292: MDA Blinking Normal Inverse Text Example
+
 	Article: Q35292
-	Product: Microsoft C
 	Version(s): 5.00 5.10
 	Operating System: MS-DOS
 	Flags: ENDUSER |
