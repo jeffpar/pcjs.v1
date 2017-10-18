@@ -4,7 +4,7 @@ title: PC Tech Journal, August 1985
 permalink: /pubs/pc/magazines/pctj/PCTJ-1985-08/
 ---
 
-[PC Tech Journal, August 1985](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/magazines/pctj/PCTJ-1985-08/PCTJ-1985-08.pdf)
+PC Tech Journal, August 1985
 ---
 
 [<img id="page-1" src="https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/magazines/pctj/PCTJ-1985-08/thumbs/PCTJ-1985-08 1.jpeg" width="200" height="260" alt="Page 1"/>](/modules/shared/templates/pdf.html?url=/pubs/pc/magazines/pctj/PCTJ-1985-08/pages/PCTJ-1985-08 1.pdf&page=1&total=200)

@@ -4,7 +4,7 @@ title: PC Tech Journal, October 1986
 permalink: /pubs/pc/magazines/pctj/PCTJ-1986-10/
 ---
 
-[PC Tech Journal, October 1986](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/magazines/pctj/PCTJ-1986-10/PCTJ-1986-10.pdf)
+PC Tech Journal, October 1986
 ---
 
 [<img id="page-1" src="https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/magazines/pctj/PCTJ-1986-10/thumbs/PCTJ-1986-10 1.jpeg" width="200" height="260" alt="Page 1"/>](/modules/shared/templates/pdf.html?url=/pubs/pc/magazines/pctj/PCTJ-1986-10/pages/PCTJ-1986-10%201.pdf&page=1&total=228)
