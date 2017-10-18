@@ -9,9 +9,9 @@ C References
 
 The following C References are available on the [Microsoft Programmer's Library 1.3](../) CD-ROM:
 
+- [Installing and Using MS C 6.0](cinstall/)
 - [MS C 6.0 Advanced Programming Techniques](cadvprg/)
 - [MS C 6.0 Developer's Toolkit Reference](ctoolkit/)
-- [MS C 6.0 Installing and Using the Professional Development System](cinstall/)
 - [MS C 6.0 Reference](cref/)
 - [MS C 6.0 Run-Time Library Reference](clibref/)
 - [MS KnowledgeBase - C](kbase_c/)
