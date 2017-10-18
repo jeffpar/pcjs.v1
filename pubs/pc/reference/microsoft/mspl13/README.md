@@ -37,7 +37,13 @@ are part of the Microsoft Programmer's Library 1.3 CD-ROM.
 - Common References
 - FORTRAN References
 - Hardware References
-- MASM References
+- [MASM References](masm/)
+	- [Installing and Using MS MASM 6.0](masm/minstall/)
+	- [MS KnowledgeBase - MASM](masm/kbase_m/)
+	- [MS MASM 6.0 Programmer's Guide](masm/mpguide/)
+	- [MS MASM 6.0 Reference](masm/mref/)
+	- [MS MASM 6.0 White Paper](masm/mwhite/)
+	- [QuickAssembler 2.01 Programmer's Guide](masm/qaprog/)
 - [MS-DOS References](msdos/)
 	- [Advanced MS-DOS Programming](msdos/advdos/)
 	- [MS-DOS 3.3 Programmer's Reference](msdos/dosref33/)

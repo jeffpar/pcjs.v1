@@ -136,7 +136,11 @@ function processText(sID, sTitle, sProductName, sProductVersions, sOS, sFlags, s
             fs.mkdirSync(sDir);
         }
         var sFile = sDir + "/README.md";
-        fs.writeFileSync(sFile, sNew);
+        if (!fs.existsSync(sFile)) {
+            fs.writeFileSync(sFile, sNew);
+        } else {
+            // printf("warning: file already exists: %s\n", sFile);
+        }
         printf("- [%s: %s](%s/)\n", sID, sTitle, sID);
     }
     catch(err) {

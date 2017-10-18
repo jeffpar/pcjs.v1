@@ -9,3 +9,4 @@ Microsoft KB articles have been archived from these sections of the
 
 - [BASIC References](../mspl13/basic/kbase_b/)
 - [C References](../mspl13/c/kbase_c/)
+- [MASM References](../mspl13/masm/kbase_m/)
