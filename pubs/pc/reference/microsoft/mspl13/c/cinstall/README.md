@@ -1,11 +1,11 @@
 ---
 layout: page
-title: "MS C 6.0 Installing and Using the Professional Development System"
+title: "Installing and Using MS C 6.0"
 permalink: /pubs/pc/reference/microsoft/mspl13/c/cinstall/
 ---
 
-MS C 6.0 Installing and Using the Professional Development System
------------------------------------------------------------------
+Installing and Using MS C 6.0
+-----------------------------
 
 	
 	Microsoft  C - Installing and Using the Professional Development System
