@@ -4,7 +4,7 @@ title: PC Tech Journal, July-August 1983
 permalink: /pubs/pc/magazines/pctj/PCTJ-1983-07/
 ---
 
-[PC Tech Journal, July-August 1983](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/magazines/pctj/PCTJ-1983-07/PCTJ-1983-07.pdf)
+PC Tech Journal, July-August 1983
 ---
 
 [<img id="page-1" src="https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/magazines/pctj/PCTJ-1983-07/thumbs/PCTJ-1983-07 1.jpeg" width="200" height="260" alt="Page 1"/>](/modules/shared/templates/pdf.html?url=/pubs/pc/magazines/pctj/PCTJ-1983-07/pages/PCTJ-1983-07 1.pdf&page=1&total=210)

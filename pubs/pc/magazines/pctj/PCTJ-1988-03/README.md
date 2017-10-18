@@ -4,7 +4,7 @@ title: PC Tech Journal, March 1988
 permalink: /pubs/pc/magazines/pctj/PCTJ-1988-03/
 ---
 
-[PC Tech Journal, March 1988](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/magazines/pctj/PCTJ-1988-03/PCTJ-1988-03.pdf)
+PC Tech Journal, March 1988
 ---
 
 [<img id="page-1" src="https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/magazines/pctj/PCTJ-1988-03/thumbs/PCTJ-1988-03 1.jpeg" width="200" height="260" alt="Page 1"/>](/modules/shared/templates/pdf.html?url=/pubs/pc/magazines/pctj/PCTJ-1988-03/pages/PCTJ-1988-03 1.pdf&page=1&total=182)

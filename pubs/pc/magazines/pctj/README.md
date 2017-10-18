@@ -68,6 +68,7 @@ published source code listings and more!
 [<img src="https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/magazines/pctj/PCTJ-1988-01/thumbs/PCTJ-1988-01 1.jpeg" width="200" height="260" alt="PC Tech Journal, Jan 1988"/>](PCTJ-1988-01/)
 [<img src="https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/magazines/pctj/PCTJ-1988-02/thumbs/PCTJ-1988-02 1.jpeg" width="200" height="260" alt="PC Tech Journal, Feb 1988"/>](PCTJ-1988-02/)
 [<img src="https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/magazines/pctj/PCTJ-1988-03/thumbs/PCTJ-1988-03 1.jpeg" width="200" height="260" alt="PC Tech Journal, Mar 1988"/>](PCTJ-1988-03/)
+[<img src="https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/magazines/pctj/PCTJ-1988-04/thumbs/PCTJ-1988-04 1.jpeg" width="200" height="260" alt="PC Tech Journal, Apr 1988"/>](PCTJ-1988-04/)
 [<img src="https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/magazines/pctj/PCTJ-1988-05/thumbs/PCTJ-1988-05 1.jpeg" width="200" height="260" alt="PC Tech Journal, May 1988"/>](PCTJ-1988-05/)
 [<img src="https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/magazines/pctj/PCTJ-1988-06/thumbs/PCTJ-1988-06 1.jpeg" width="200" height="260" alt="PC Tech Journal, Jun 1988"/>](PCTJ-1988-06/)
 [<img src="https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/magazines/pctj/PCTJ-1988-07/thumbs/PCTJ-1988-07 1.jpeg" width="200" height="260" alt="PC Tech Journal, Jul 1988"/>](PCTJ-1988-07/)

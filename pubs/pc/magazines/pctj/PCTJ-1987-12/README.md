@@ -4,7 +4,7 @@ title: PC Tech Journal, December 1987
 permalink: /pubs/pc/magazines/pctj/PCTJ-1987-12/
 ---
 
-[PC Tech Journal, December 1987](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/magazines/pctj/PCTJ-1987-12/PCTJ-1987-12.pdf)
+PC Tech Journal, December 1987
 ---
 
 [<img id="page-1" src="https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/magazines/pctj/PCTJ-1987-12/thumbs/PCTJ-1987-12 1.jpeg" width="200" height="260" alt="Page 1"/>](/modules/shared/templates/pdf.html?url=/pubs/pc/magazines/pctj/PCTJ-1987-12/pages/PCTJ-1987-12%201.pdf&page=1&total=242)

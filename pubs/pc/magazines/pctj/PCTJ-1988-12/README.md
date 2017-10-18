@@ -4,7 +4,7 @@ title: PC Tech Journal, December 1988
 permalink: /pubs/pc/magazines/pctj/PCTJ-1988-12/
 ---
 
-[PC Tech Journal, December 1988](https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/magazines/pctj/PCTJ-1988-12/PCTJ-1988-12.pdf)
+PC Tech Journal, December 1988
 ---
 
 [<img id="page-1" src="https://s3-us-west-2.amazonaws.com/archive.pcjs.org/pubs/pc/magazines/pctj/PCTJ-1988-12/thumbs/PCTJ-1988-12 1.jpeg" width="200" height="260" alt="Page 1"/>](/modules/shared/templates/pdf.html?url=/pubs/pc/magazines/pctj/PCTJ-1988-12/pages/PCTJ-1988-12 1.pdf&page=1&total=168)
