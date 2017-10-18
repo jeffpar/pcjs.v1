@@ -11,7 +11,6 @@ The following reference collections, including a large number of [KB Articles](/
 are part of the Microsoft Programmer's Library 1.3 CD-ROM. 
 
 - [BASIC References](basic/)
-	- [BASIC Sample Code](basic/bassc/)
 	- [Learning to Use MS QuickBASIC 4.5](basic/qblearn/)
 	- [MS BASIC 7.1 Getting Started](basic/b7start/)
 	- [MS BASIC 7.1 Language Reference](basic/b7lang/)
@@ -21,9 +20,9 @@ are part of the Microsoft Programmer's Library 1.3 CD-ROM.
 	- [MS QB 4.5 Programming in BASIC](basic/qbprog/)
 	- [MS QB Programmer's Toolbox](basic/qbtools/)
 - [C References](c/)
+	- [Installing and Using MS C 6.0](c/cinstall/)
 	- [MS C 6.0 Advanced Programming Techniques](c/cadvprg/)
 	- [MS C 6.0 Developer's Toolkit Reference](c/ctoolkit/)
-	- [MS C 6.0 Installing and Using the Professional Development System](c/cinstall/)
 	- [MS C 6.0 Reference](c/cref/)
 	- [MS C 6.0 Run-Time Library Reference](c/clibref/)
 	- [MS KnowledgeBase - C](c/kbase_c/)
