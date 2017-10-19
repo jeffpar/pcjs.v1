@@ -125,8 +125,9 @@ written by [Michal Necasek](http://www.os2museum.com) for Oracle's [VirtualBox](
 
 It references two Microsoft KnowledgeBase (KB) Articles of note:
 
-- Q12230 (regarding the Bus Mouse adapter's IRQ configuration jumpers)
-- Q46369 (regarding the Bus Mouse adapter's Intel 8255A compatible chip)
+- [Q12230: IRQ Settings and Mouse Installation](/pubs/pc/reference/microsoft/kb/Q12230/)
+- [Q46369: InPort/Bus Mouse Comparison and Overview](/pubs/pc/reference/microsoft/kb/Q46369/)
 
-Those articles are no longer available online, thanks to Microsoft's lack of interest in preserving the past, including
-its own past.  However, the PCjs Project is working on fixing that.  Stay tuned.
+Over the years, Microsoft has sporadically published and then deleted those and many other KnowledgeBase articles,
+for reasons known only to itself.  See the blog post [Corporations Are Crappy Archivists](/blog/2017/10/13/) for further
+discussion.

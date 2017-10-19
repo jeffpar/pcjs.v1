@@ -10,7 +10,7 @@ permalink: /docs/about/
 
 The [PCjs Project](https://github.com/jeffpar/pcjs) is a collection of computer simulations written in
 [JavaScript](/modules/).  It is an open-source project maintained and hosted on [GitHub](https://github.com/) as
-[{{ site.pcjs.domain }}]({{ site.url }}/) (formerly [jsmachines.net](http://jsmachines.net/)).
+[{{ site.pcjs.domain }}]({{ site.url }}/).
 
 The goals of the project are to create fast, full-featured simulations of classic computer hardware,
 help people understand how these early machines worked, make it easy to experiment with different machine
@@ -44,9 +44,9 @@ Read [About PCx86](/docs/about/pcx86/) to learn more about its history, features
 
 ### Migrating to Node
 
-The PCjs web server was originally written in PHP and hosted by [DreamHost](https://www.dreamhost.com/) as
-[jsmachines.net](http://jsmachines.net/), but in 2014, it was migrated to a [Node.js](http://nodejs.org) web server and
-hosted by [Amazon Web Services](https://aws.amazon.com/elasticbeanstalk/) as [{{ site.pcjs.domain }}]({{ site.url }}/).
+The PCjs web server was originally written in PHP and hosted by [DreamHost](https://www.dreamhost.com/), but in 2014,
+it was migrated to a [Node.js](http://nodejs.org) web server and hosted by [Amazon Web Services](https://aws.amazon.com/elasticbeanstalk/)
+as [{{ site.pcjs.domain }}]({{ site.url }}/).
 
 The goals included:
 
@@ -55,7 +55,7 @@ The goals included:
 - Improving overall website design, including structure, appearance and responsiveness
 
 The PCjs Node web server includes a number of custom Node modules that provide many of the same server-side features
-found on [jsmachines.net](http://jsmachines.net/), including new ROM and disk image conversion APIs, and a
+found on the older PHP-based server, including new ROM and disk image conversion APIs, and a
 Markdown module that supports a subset of the [Markdown syntax](http://daringfireball.net/projects/markdown/syntax),
 including extensions to the link syntax that make it easy to embed PCjs machines in Markdown documents.
 
