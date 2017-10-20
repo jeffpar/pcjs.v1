@@ -37,6 +37,7 @@ var Defines = require("../lib/defines");
 var Str = require("../lib/strlib");
 
 var aIDs = [];
+var tmpDir = "tmp/";
 
 /**
  * printf(format, ...args)
@@ -78,7 +79,15 @@ function processFile(sFile) {
             let cchBody;
             if (i < aMatches.length - 1) cchBody = aMatches[i+1].index - iBody;
             let sBody = sText.substr(iBody, cchBody).trim();
-            processText(match[7], match[2], "mspl13_masm", "", match[3], match[4], match[5], match[6], sBody);
+            let id = "";
+            if (sFile.indexOf("basknow") >= 0) {
+                id = "mspl13_basic";
+            } else if (sFile.indexOf("mscknl") >= 0) {
+                id = "mspl13_c";
+            } else if (sFile.indexOf("masmknwl") >= 0) {
+                id = "mspl13_masm";
+            }
+            processText(match[7], match[2], id, "", match[3], match[4], match[5], match[6], sBody);
         }
     }
     catch (err) {
@@ -108,7 +117,7 @@ function processText(sID, sTitle, sProductID, sProductName, sProductVersions, sO
     }
     aIDs.push(sID);
     try {
-        let sNew = "";
+        let sNew = "{% raw %}\n\n";
         sNew += "\tArticle: " + sID + "\n";
         sNew += "\tProduct(s): " + (sProductName || "See article") + "\n";
         sNew += "\tVersion(s): " + sProductVersions + "\n";
@@ -131,12 +140,12 @@ function processText(sID, sTitle, sProductID, sProductName, sProductVersions, sO
                 }
                 sNewLine += chNew;
             }
-            sNew += '\t' + sNewLine.replace(/{{/g, "{ {").replace(/}}/g, "} }") + '\n';
+            sNew += '\t' + sNewLine + '\n';
         }
-
-        var sDir = "kb/0" + sID[1] + sID[2] + "/" + sID;
+        sNew += "\n{% endraw %}\n";
+        var sDir = tmpDir + "kb/0" + sID[1] + sID[2] + "/" + sID;
         sTitle = sTitle.replace(/&/g, "&amp;").replace(/\|/g, "&#124;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/\$/g, "&#36;").replace(/\*/g, "&#42;").replace(/\[/g, "&#91;").replace(/\\/g, "&#92;").replace(/]/g, "&#93;").replace(/__/g, "&#95;&#95;").replace(/{{/g, "{ {").replace(/}}/g, "} }");
-        sNew = "---\nlayout: page\ntitle: \"" + sID + ": " + sTitle + "\"\npermalink: /" + sDir + "/\n---\n\n## " + sID + ": " + sTitle + "\n\n" + sNew;
+        sNew = "---\nlayout: page\ntitle: \"" + sID + ": " + sTitle + "\"\npermalink: /" + sDir.replace(tmpDir, "") + "/\n---\n\n## " + sID + ": " + sTitle + "\n\n" + sNew;
         if (!fs.existsSync(sDir)) {
             mkdirp.sync(sDir);
         }
@@ -149,14 +158,28 @@ function processText(sID, sTitle, sProductID, sProductName, sProductVersions, sO
         /*
          * We also want to update listings by product ID...
          */
-        var sNewDir = "id/" + sProductID;
+        var sNewDir = tmpDir + "id/" + sProductID;
         if (!fs.existsSync(sNewDir)) {
             mkdirp.sync(sNewDir);
         }
         var sNewFile = sNewDir + "/README.md";
-        sNew = "- [" + sID + ": " + sTitle + "](/" + sDir + "/)\n";
+        sNew = "- [" + sID + ": " + sTitle + "](/" + sDir.replace(tmpDir, "") + "/)\n";
         if (!fs.existsSync(sNewFile)) {
-            sNew = "---\nlayout: page\ntitle: \"" + sProductName + "\"\npermalink: /" + sNewDir + "/\n---\n\n## KB Articles for " + (sProductName || sProductID) + "\n\n" + sNew;
+            sTitle = (sProductName || sProductID);
+            let sHeading = "KB Articles for " + sTitle;
+            if (sTitle == "mspl13_basic") {
+                sTitle = "Microsoft Programmer's Library 1.3: BASIC";
+                sHeading = "KB Articles from " + sTitle;
+            }
+            else if (sTitle == "mspl13_c") {
+                sTitle = "Microsoft Programmer's Library 1.3: C";
+                sHeading = "KB Articles from " + sTitle;
+            }
+            else if (sTitle == "mspl13_masm") {
+                sTitle = "Microsoft Programmer's Library 1.3: MASM";
+                sHeading = "KB Articles from " + sTitle;
+            }
+            sNew = "---\nlayout: page\ntitle: \"" + sTitle + "\"\npermalink: /" + sNewDir.replace(tmpDir, "") + "/\n---\n\n## " + sHeading + "\n\n" + sNew;
         }
         fs.appendFileSync(sNewFile, sNew);
     }
