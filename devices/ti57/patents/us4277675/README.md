@@ -1,3 +1,9 @@
+---
+layout: page
+title: Texas Instruments TI-57 U.S. Patent No. 4,277,675
+permalink: /devices/ti57/rom/
+---
+
 ## [US4277675](https://patents.google.com/patent/US4277675A/en)
 
 Description
@@ -392,4 +398,3 @@ What is claimed is:
 (a) a four stage shift register for storing four bits of data;
 (b) means responsive to said incrementing signal for causing bits stored in said shift register to shift; and
 (c) feedback logic means responsive to a binary 0, 1, 3, 7, 14, 13, 12 and 2 in said counter for inserting a logical one bit corresponding to the least significant bit of the next state to be generated into a first stage of said register and responsive to a binary 4, 5, 6, 8, 9, 10, 11 and 15 for inserting a logical zero bit corresponding to the least significant bit of the next state to be genrated into the first stage of said register.
-
