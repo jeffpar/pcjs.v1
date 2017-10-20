@@ -31,6 +31,8 @@
 "use strict";
 
 var fs = require("fs");
+let mkdirp = require("mkdirp");
+
 var Defines = require("../lib/defines");
 var Str = require("../lib/strlib");
 
@@ -76,7 +78,7 @@ function processFile(sFile) {
             let cchBody;
             if (i < aMatches.length - 1) cchBody = aMatches[i+1].index - iBody;
             let sBody = sText.substr(iBody, cchBody).trim();
-            processText(match[7], match[2], "Microsoft BASIC", match[3], match[4], match[5], match[6], sBody);
+            processText(match[7], match[2], "mspl13_masm", "", match[3], match[4], match[5], match[6], sBody);
         }
     }
     catch (err) {
@@ -85,10 +87,11 @@ function processFile(sFile) {
 }
 
 /**
- * processText(sID, sTitle, sProductName, sProductVersions, sOS, sFlags, sDateModified, sText)
+ * processText(sID, sTitle, sProductID, sProductName, sProductVersions, sOS, sFlags, sDateModified, sText)
  *
  * @param {string} sID
  * @param {string} sTitle
+ * @param {string} sProductID
  * @param {string} sProductName
  * @param {string} sProductVersions
  * @param {string} sOS
@@ -96,7 +99,7 @@ function processFile(sFile) {
  * @param {string} sDateModified
  * @param {string} sText
  */
-function processText(sID, sTitle, sProductName, sProductVersions, sOS, sFlags, sDateModified, sText)
+function processText(sID, sTitle, sProductID, sProductName, sProductVersions, sOS, sFlags, sDateModified, sText)
 {
     if (aIDs.indexOf(sID) >= 0) {
         printf("warning: duplicate ID: %s\n", sID);
@@ -107,9 +110,10 @@ function processText(sID, sTitle, sProductName, sProductVersions, sOS, sFlags, s
     try {
         let sNew = "";
         sNew += "\tArticle: " + sID + "\n";
+        sNew += "\tProduct(s): " + (sProductName || "See article") + "\n";
         sNew += "\tVersion(s): " + sProductVersions + "\n";
-        sNew += "\tOperating System: " + sOS + "\n";
-        sNew += "\tFlags: " + sFlags + "\n";
+        sNew += "\tOperating System(s): " + sOS.replace(/\s+/g, " ").trim() + "\n";
+        sNew += "\tKeyword(s): " + sFlags.replace(/\s+/g, " ").trim() + " | " + sProductID + "\n";
         sNew += "\tLast Modified: " + sDateModified + "\n\t\n";
         let aLines = sText.split(/(?:^|\r?\n) ?/);
         for (let l = 0; l < aLines.length;) {
@@ -129,19 +133,32 @@ function processText(sID, sTitle, sProductName, sProductVersions, sOS, sFlags, s
             }
             sNew += '\t' + sNewLine.replace(/{{/g, "{ {").replace(/}}/g, "} }") + '\n';
         }
-        var sDir = "kb/" + sID;
-        sTitle = sTitle.replace(/&/g, "&amp;").replace(/\|/g, "&#124;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/\\/g, "&#92;").replace(/\$/g, "&#36;").replace(/\*/g, "&#42;").replace(/__/g, "&#95;&#95;").replace(/{{/g, "{ {").replace(/}}/g, "} }");
-        sNew = "---\nlayout: page\ntitle: \"" + sID + ": " + sTitle + "\"\npermalink: /pubs/pc/reference/microsoft/" + sDir + "/\n---\n\n## " + sID + ": " + sTitle + "\n\n" + sNew;
+
+        var sDir = "kb/0" + sID[1] + sID[2] + "/" + sID;
+        sTitle = sTitle.replace(/&/g, "&amp;").replace(/\|/g, "&#124;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/\$/g, "&#36;").replace(/\*/g, "&#42;").replace(/\[/g, "&#91;").replace(/\\/g, "&#92;").replace(/]/g, "&#93;").replace(/__/g, "&#95;&#95;").replace(/{{/g, "{ {").replace(/}}/g, "} }");
+        sNew = "---\nlayout: page\ntitle: \"" + sID + ": " + sTitle + "\"\npermalink: /" + sDir + "/\n---\n\n## " + sID + ": " + sTitle + "\n\n" + sNew;
         if (!fs.existsSync(sDir)) {
-            fs.mkdirSync(sDir);
+            mkdirp.sync(sDir);
         }
         var sFile = sDir + "/README.md";
         if (!fs.existsSync(sFile)) {
             fs.writeFileSync(sFile, sNew);
         } else {
-            // printf("warning: file already exists: %s\n", sFile);
+            printf("warning: file already exists: %s\n", sFile);
         }
-        printf("- [%s: %s](%s/)\n", sID, sTitle, sID);
+        /*
+         * We also want to update listings by product ID...
+         */
+        var sNewDir = "id/" + sProductID;
+        if (!fs.existsSync(sNewDir)) {
+            mkdirp.sync(sNewDir);
+        }
+        var sNewFile = sNewDir + "/README.md";
+        sNew = "- [" + sID + ": " + sTitle + "](/" + sDir + "/)\n";
+        if (!fs.existsSync(sNewFile)) {
+            sNew = "---\nlayout: page\ntitle: \"" + sProductName + "\"\npermalink: /" + sNewDir + "/\n---\n\n## KB Articles for " + (sProductName || sProductID) + "\n\n" + sNew;
+        }
+        fs.appendFileSync(sNewFile, sNew);
     }
     catch(err) {
         console.log(err.message);
