@@ -68,7 +68,7 @@ that reads the raw 13-bit data and stores it as 16-bit little-endian words:
 
 	node raw2le.js ti57raw.bin ti57le.bin
 
-For accuracy, I also temporarily modified the script to output the data big-endian and confirmed that the result
+For accuracy, I also temporarily modified the script to output big-endian data, and I confirmed that the result
 was identical to `ti57be.bin`.
 
 Here's a dump of [ti57le.bin](ti57le.bin), using `hexdump -x ti57le.bin`:
