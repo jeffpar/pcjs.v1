@@ -11,7 +11,7 @@ Thanks to work by [Sean Riddle](http://seanriddle.com/tms1500.html) and [John Mc
 we have multiple TI-57 ROM dumps to start with:
 
 - [Raw ROM dump](ti57raw.bin) (from [siliconpr0n](http://siliconpr0n.org) [photo](http://siliconpr0n.org/archive/doku.php?id=mcmaster:ti:tmc1501nc))
-- [Big-endian ROM dump](ti57big.bin)
+- [Big-endian ROM dump](ti57be.bin)
 - [ROM dump transcribed from patents](ti57pat.bin) (ie, [4,078,251](../patents/us4078251), [4,079,459](../patents/us4079459), [4,100,600](../patents/us4100600), [4,107,781](../patents/us4107781), [4,125,901](../patents/us4125901), [4,164,037](../patents/us4164037))
 
 Regarding the "transcribed" version, I should add that there are ROM listings in these patents as well:
@@ -20,7 +20,7 @@ Regarding the "transcribed" version, I should add that there are ROM listings in
 - [4,146,928](../patents/us4146928) (readable)
 - [4,277,675](../patents/us4277675) (not very readable)
 
-Looking at [ti57rombits.jpg](http://seanriddle.com/ti57rombits.jpg), I counted 215 columns and 128 rows,
+Looking at Sean's [ROM array image](http://seanriddle.com/ti57rombits.jpg), I counted 215 columns and 128 rows,
 for a total of 27520 bits.  Divide that by 13 and you get 2116 13-bit words -- just enough room for 2K words.
 
 The TI-57 patents describe the operation of the ROM to some extent:
@@ -31,8 +31,8 @@ The TI-57 patents describe the operation of the ROM to some extent:
 	appearing on address lines A0-A10.  The false logic instruction word is clocked out of
 	ROM 30 at S29.02 by gates 111 and inverted to true logic by inverters 110.
 
-So 7 bits (A0-A6) form an "X address" and 4 bits (A7-A10) form a "Y address".  Looking more closely at the ROM's
-columns, I noticed the following pattern:
+So 7 bits (A0-A6) form an "X address" and 4 bits (A7-A10) form a "Y address".  Looking more closely at the columns
+of the ROM array image, I noticed the following pattern:
 
 	1 empty column, 16 data columns, [1 empty column, 32 data columns] * 6
 
@@ -60,13 +60,16 @@ More information about the ROM dumps above was [posted in a forum](http://forums
 	I'll get a TI57 eventually and try to dump the ROM electronically to compare. I picked up a TI55, which uses
 	the same chip, and I'll dump it, too.
 
-Regarding the `ti57.bin` file, each 13-bit word was also padded to a 16-bit word and then stored big-endian, so
-I decided to save that binary here as [ti57big.bin](ti57big.bin).
+Regarding the `ti57.bin` file, each 13-bit word was also padded to a 16-bit word and then stored big-endian, which
+is why I decided to save that binary here as [ti57be.bin](ti57be.bin).
 
 Finally, to make sure I understood the format of the raw data, I created a small script, [raw2le.js](raw2le.js),
 that reads the raw 13-bit data and stores it as 16-bit little-endian words:
 
 	node raw2le.js ti57raw.bin ti57le.bin
+
+For accuracy, I also temporarily modified the script to output the data big-endian and confirmed that the result
+was identical to `ti57be.bin`.
 
 Here's a dump of [ti57le.bin](ti57le.bin), using `hexdump -x ti57le.bin`:
 
