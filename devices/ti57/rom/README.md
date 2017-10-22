@@ -75,7 +75,7 @@ was identical to `ti57be.bin`.
 Here's a dump of [ti57le.bin](ti57le.bin), using `hexdump -x ti57le.bin`, with the byte offsets changed to
 ROM addresses:
 
-	        0     1     2     3     4     5     6     7      8     9     a     b     c     d     e     f
+	Addr    0     1     2     3     4     5     6     7      8     9     a     b     c     d     e     f
 	----------------------------------------------------------------------------------------------------   
 	000  120f  1122  13f2  1b8b  0cae  1808  16b5  15fc - 16ad  1b8b  1122  0cae  1ee7  140c  071e  1a8e
 	010  0a28  05d9  198b  1947  19f2  193e  1af3  1b1b - 1a04  0cae  1da3  1124  19f8  1122  1602  1b8b
