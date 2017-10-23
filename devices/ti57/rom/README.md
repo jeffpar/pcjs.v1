@@ -96,7 +96,7 @@ I wrote [raw2le.js](raw2le.js):
 
 I also verified that if the script was modified to output big-endian data, the result was identical to `ti57be.bin`.
 
-Here's a dump of [ti57le.bin](ti57le.bin), included all the corrections mentioned above, using `hexdump -x ti57le.bin`,
+Here's a dump of [ti57le.bin](ti57le.bin), including all the corrections mentioned above, using `hexdump -x ti57le.bin`,
 with the byte offsets changed to ROM addresses:
 
 	Addr    0     1     2     3     4     5     6     7      8     9     a     b     c     d     e     f
@@ -271,4 +271,3 @@ points out some potentially noteworthy differences between the ROM listing(s) in
 The **037** values in the above table are the values listed in [4,164,037](../patents/us4164037), while
 the **901** values are from [4,125,901](../patents/us4125901).  The **901** values are less "buggy" and more
 in agreement with the **TI57E** values, except for those marked by `*`.
-
