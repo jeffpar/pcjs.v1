@@ -62,7 +62,7 @@ function processFile(sFileIn, sFileOut) {
             let iCol = (addr >> 7) & 0xf;
             let ibRow = iRow * 26;
             let wOut = 0;
-            for (let iBit = 12; iBit >= 0; iBit--) {
+            for (let iBit = 0; iBit < 13; iBit++) {
                 /*
                  * Each row of raw data contains 13 16-bit groups, with the groups arranged such that the
                  * group for the least significant bit (iBit 0) of the desired 13-bit word is on the left
