@@ -95,7 +95,7 @@ function processFile(sFileIn, sFileOut) {
 }
 
 if (process.argv.length <= 2) {
-    console.log("usage: node raw16le.js [input filename] [output filename]");
+    console.log("usage: node raw2le.js [input filename] [output filename]");
     process.exit();
 }
 
