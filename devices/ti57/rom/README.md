@@ -46,8 +46,11 @@ visible bits in the [ROM array image](http://seanriddle.com/ti57rombits.jpg), le
 
 Since that raw dump was the starting point for creating a usable ROM listing, I wanted to make absolutely
 sure it was accurate, so I decided to make my own "transcript" of the data in the image.  The result was
-[ti57jp.txt](ti57jp.txt).  I then wrote a [script](txt2raw.js) to convert that text file to a binary file,
-diff'ed it with `ti57.bin`, and found 4 bits that were incorrect:
+[ti57rombits.txt](ti57rombits.txt).  I then wrote a [script](txt2raw.js) to convert that text file to a binary file:
+
+	node txt2raw.js ti57rombits.txt myraw.bin
+	
+diff'ed the hexdumps of `ti57raw.bin` and `myraw.bin`, and found 4 bits that were incorrect:
 
 	59c59
 	< 00003a0 e2 22 4f ec 17 07 f3 08 4d ec ef 64 55 ef cd 69       (4d should be 49, ec should be ed)
