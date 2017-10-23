@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * @fileoverview Tool for converting hand-transcribed ti57bin.txt to ti57raw.bin
+ * @fileoverview Tool for converting hand-transcribed ti57rombits.txt to ti57raw.bin
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © Jeff Parsons 2012-2017
  * @suppress {missingProperties}
