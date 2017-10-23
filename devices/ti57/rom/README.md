@@ -41,12 +41,13 @@ so even though there are 215 visible columns inside the ROM, 7 of them aren't us
 columns, which are divided into 13 16-bit groups.  So it seems clear that A0-A6 lines select one of 128 rows,
 and that the other four address bits, A7-A10, select a column from each of those 13 16-bit groups.
 
-Examination of the [Raw ROM dump] revealed that it was a straight-forward byte-by-byte transcription of the
-visible bits in the [ROM array image](http://seanriddle.com/ti57rombits.jpg), left-to-right and top-to-bottom.
+Examination of the 3328-byte [Raw ROM dump](ti57raw.bin) revealed that it was a straight-forward byte-by-byte
+transcription of the visible bits in the [ROM array image](http://seanriddle.com/ti57rombits.jpg), left-to-right
+and top-to-bottom.
 
 Since that raw dump was the starting point for creating a usable ROM listing, I wanted to make absolutely
-sure it was accurate, so I decided to make my own "transcript" of the data in the image.  The result was
-[ti57rombits.txt](ti57rombits.txt).  I then wrote a [script](txt2raw.js) to convert that text file to a binary file:
+sure it was accurate, so I decided to make my own "[transcript](ti57rombits.txt)" of the data in the image.
+Then I wrote a [script](txt2raw.js) to convert that text file to a binary file:
 
 	node txt2raw.js ti57rombits.txt myraw.bin
 	
@@ -89,11 +90,11 @@ Turning our attention to the *interpretation* of the raw data, let's review some
 	I'll get a TI57 eventually and try to dump the ROM electronically to compare. I picked up a TI55, which uses
 	the same chip, and I'll dump it, too.
 
-It's also important to note that in `ti57.bin`, each 13-bit word was padded to a 16-bit word and then stored
-big-endian, so for clarity, I saved that binary here as [ti57be.bin](ti57be.bin).
+It's also important to note that the 4096-byte `ti57.bin` pads each 13-bit word to a 16-bit word and stores them
+in big-endian format, so for clarity, I saved that binary here as [ti57be.bin](ti57be.bin).
 
-Next, to make sure I understood Sean's interpretation of the raw data, and to produce a 16-bit little-endian version,
-I wrote [raw2le.js](raw2le.js):
+Next, to make sure I understood the above interpretation of the raw data, and to produce a 16-bit little-endian
+version, I wrote [raw2le.js](raw2le.js):
 
 	node raw2le.js ti57raw.bin ti57le.bin
 
