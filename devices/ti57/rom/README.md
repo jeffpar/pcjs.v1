@@ -8,13 +8,14 @@ TI-57 ROM
 ---------
 
 Thanks to work by [Sean Riddle](http://seanriddle.com/tms1500.html) and [John McMaster](http://uvicrec.blogspot.com),
-we have multiple TI-57 ROM dumps to start with:
+Sean's [TMS-1500](http://seanriddle.com/tms1500.html) page provides multiple TI-57 ROM resources to start with:
 
 - [Raw ROM dump](ti57raw.bin) (from [siliconpr0n](http://siliconpr0n.org) [photo](http://siliconpr0n.org/archive/doku.php?id=mcmaster:ti:tmc1501nc))
 - [Big-endian ROM dump](ti57be.bin)
 - [ROM dump transcribed from patents](ti57pat.bin) (ie, [4,078,251](../patents/us4078251), [4,079,459](../patents/us4079459), [4,100,600](../patents/us4100600), [4,107,781](../patents/us4107781), [4,125,901](../patents/us4125901), [4,164,037](../patents/us4164037))
 
-Regarding the "transcribed" version, I should add that there are ROM listings in these patents as well:
+Regarding the "transcribed" version, I should add that there are ROM listings in these patents as well, but
+it's unlikely they add much new information:
  
 - [4,125,867](../patents/us4125867) (somewhat readable)
 - [4,146,928](../patents/us4146928) (readable)
@@ -37,11 +38,35 @@ of the ROM array image, I noticed the following pattern:
 	1 empty column, 16 data columns, [1 empty column, 32 data columns] * 6
 
 so even though there are 215 visible columns inside the ROM, 7 of them aren't used for data, leaving 208
-columns, which are divided into 13 16-bit groups.  So it becomes clear that A0-A6 lines select one of 128 rows,
+columns, which are divided into 13 16-bit groups.  So it seems clear that A0-A6 lines select one of 128 rows,
 and that the other four address bits, A7-A10, select a column from each of those 13 16-bit groups.
 
-More information about the ROM dumps above was
-[posted in a forum](http://forums.bannister.org//ubbthreads.php?ubb=showflat&Number=98011#Post98011) by Sean:
+Examination of the [Raw ROM dump] revealed that it was a straight-forward byte-by-byte transcription of the
+visible bits in the [ROM array image](http://seanriddle.com/ti57rombits.jpg), left-to-right and top-to-bottom.
+
+Since that raw dump was the starting point for creating a usable ROM listing, I wanted to make absolutely
+sure it was accurate, so I decided to make my own "transcript" of the data in the image.  The result was
+[ti57jp.txt](ti57jp.txt).  I then wrote a [script](txt2raw.js) to convert that text file to a binary file,
+diff'ed it with `ti57.bin`, and found 4 bits that were incorrect:
+
+	59c59
+	< 00003a0 e2 22 4f ec 17 07 f3 08 4d ec ef 64 55 ef cd 69       (4d should be 49, ec should be ed)
+	---
+	> 00003a0 e2 22 4f ec 17 07 f3 08 49 ed ef 64 55 ef cd 69
+	135c135
+	< 0000860 18 3d a9 48 24 bf f0 35 57 45 4f 5b 09 b7 40 3a       83rd row, 13th 16-bit group (09 is wrong, 89 is correct)
+	---
+	> 0000860 18 3d a9 48 24 bf f0 35 57 45 4f 5b 89 b7 40 3a
+	163c163
+	< 0000a20 c0 e2 e0 dc 6f 69 1d 7a 24 fe 70 96 3c 2a 48 b8       100th row, 11th 16-bit group (e0 is wrong, e1 is correct)
+	---
+	> 0000a20 c0 e2 e1 dc 6f 69 1d 7a 24 fe 70 96 3c 2a 48 b8
+
+Sean had already found the first two corrections himself, and after making the other corrections, he updated
+the raw dump on his website; it has been updated here as well.
+
+Turning our attention to the *interpretation* of the raw data, let's review some additional information that Sean
+[posted in a forum](http://forums.bannister.org//ubbthreads.php?ubb=showflat&Number=98011#Post98011):
 
 	For future use, I uploaded my transcription of the siliconpr0n TI57 die shot: www.seanriddle.com/ti57raw.bin
 	
@@ -61,16 +86,15 @@ More information about the ROM dumps above was
 	I'll get a TI57 eventually and try to dump the ROM electronically to compare. I picked up a TI55, which uses
 	the same chip, and I'll dump it, too.
 
-Regarding the `ti57.bin` file, each 13-bit word was also padded to a 16-bit word and then stored big-endian, which
-is why I decided to save that binary here as [ti57be.bin](ti57be.bin).
+It's also important to note that in `ti57.bin`, each 13-bit word was padded to a 16-bit word and then stored
+big-endian, so for clarity, I saved that binary here as [ti57be.bin](ti57be.bin).
 
-Finally, to make sure I understood the format of the raw data, I created a small script, [raw2le.js](raw2le.js),
-that reads the raw 13-bit data and stores it as 16-bit little-endian words:
+Next, to make sure I understood Sean's interpretation of the raw data, and to produce a 16-bit little-endian version,
+I wrote [raw2le.js](raw2le.js):
 
 	node raw2le.js ti57raw.bin ti57le.bin
 
-For accuracy, I also temporarily modified the script to output big-endian data, and I confirmed that the result
-was identical to `ti57be.bin`.
+I also verified that if the script was modified to output big-endian data, the result was identical to `ti57be.bin`.
 
 Here's a dump of [ti57le.bin](ti57le.bin), using `hexdump -x ti57le.bin`, with the byte offsets changed to
 ROM addresses:
@@ -244,6 +268,6 @@ points out some potentially noteworthy differences between the ROM listing(s) in
 	638 0x27E:  1abf   1a8f   1a8f
 	697 0x2B9:  0bc7   08c7   08c7
 
-The **037** values in the above table are the values listed in [4,164,037](../patents/us4164037), whereas
-the **901** values from [4,125,901](../patents/us4125901) are more in agreement with the **TI57E** values,
-except for those marked by `*`.
+The **037** values in the above table are the values listed in [4,164,037](../patents/us4164037), while
+the **901** values are from [4,125,901](../patents/us4125901).  The **901** values are less "buggy" and more
+in agreement with the **TI57E** values, except for those marked by `*`.
