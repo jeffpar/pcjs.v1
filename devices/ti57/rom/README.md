@@ -96,8 +96,8 @@ I wrote [raw2le.js](raw2le.js):
 
 I also verified that if the script was modified to output big-endian data, the result was identical to `ti57be.bin`.
 
-Here's a dump of [ti57le.bin](ti57le.bin), using `hexdump -x ti57le.bin`, with the byte offsets changed to
-ROM addresses:
+Here's a dump of [ti57le.bin](ti57le.bin), included all the corrections mentioned above, using `hexdump -x ti57le.bin`,
+with the byte offsets changed to ROM addresses:
 
 	Addr    0     1     2     3     4     5     6     7      8     9     a     b     c     d     e     f
 	----------------------------------------------------------------------------------------------------   
@@ -106,7 +106,7 @@ ROM addresses:
 	020  1122  163c  1b8b  180a  18f8  0cae  1d0a  1124 - 0c72  0c7d  1e4b  0c7a  1f8a  0da7  0c70  1a4b
 	030  0fe1  1a77  189c  1aed  18b7  0cae  1c69  1122 - 1a70  1124  0cae  1fb6  0c72  1e27  0f27  1a1e
 	040  0827  185c  187a  1aea  18b8  1122  0cae  1c95 - 1840  1124  0cae  1fcc  0c72  1e51  0c93  1a57
-	050  0cbd  1a8f  0a17  1af0  1a63  0cd8  1860  0cd8 - 18a7  1122  0cae  1fcd  0ca6  1a91  0c74  1a7e
+	050  0cbd  1a8f  1a17  1af0  1a63  0cd8  1860  0cd8 - 18a7  1122  0cae  1fcd  0ca6  1a91  0c74  1a7e
 	060  0c28  0cae  1a6a  0cda  0ce0  18aa  1122  0c91 - 1b8a  0cb2  186d  0c7a  19a5  1122  18f9  081f
 	070  08c1  140d  081f  0757  0e04  070e  1b8b  13e2 - 0d01  1b8b  1124  0cae  1c84  0c75  0c72  1e1e
 	080  0cb2  0ca5  1b8f  0e03  140c  0701  0c7a  18b5 - 13f8  08e0  08e0  0cee  1890  0e00  0701  0e06
@@ -143,7 +143,7 @@ ROM addresses:
 	270  1407  0ca4  0f20  0c3e  1a79  0c36  1a79  0c74 - 1b8a  1472  1b8e  1604  081f  1783  0fe1  1a91
 	280  0fd9  0e0a  0821  0825  0a01  1e87  081f  0717 - 0e04  1b8e  0f25  1ea3  0f21  08e5  0e04  011f
 	290  1b8b  1407  0867  0f25  0825  1a97  0847  0865 - 1e9f  085d  1a8a  0fe0  0e0a  0cfa  1c30  011f
-	2a0  0f01  0c21  1a88  075f  070f  0c5a  1aa8  0c38 - 0848  1eae  0848  1e7b  15d1  1a7c  081f  0e04
+	2a0  0f01  0c21  1a88  075f  070e  0c5a  1aa8  0c38 - 0848  1eae  0848  1e7b  15d1  1a7c  081f  0e04
 	2b0  07cf  070e  0225  1ebe  15a1  1668  070e  0e05 - 1604  16ad  145d  07cf  08c7  1a7c  0c52  1ac1
 	2c0  17ec  0265  1aba  17f9  15b0  15a1  1aba  140c - 0f4f  0c12  08ff  1acd  0ca0  075f  1603  13f8
 	2d0  0c75  15fc  071e  15fc  163b  0c76  1ad8  0ce4 - 13f8  0f01  16e1  0747  140d  0265  1ee4  15fc
@@ -163,7 +163,7 @@ ROM addresses:
 	3b0  0c7a  1bb3  15c6  1465  0d30  1b8b  1122  0ce4 - 140c  15fb  0e31  145d  146a  0e61  1467  13f2
 	3c0  0e71  1467  140d  0ce6  0ce7  1fbd  15b0  0e41 - 1467  0e51  1467  1b8a  0ce0  1122  0c7a  1fd1
 	3d0  0ce4  0e61  1412  1410  0ce2  1ca5  07c7  070f - 15fc  070e  1603  0e71  0747  1412  15d3  070e
-	3e0  18a5  0787  0301  13cd  17ca  17d3  17d8  17e0 - 17ca  179d  17d7  17d5  16c2  03c7  0300  0347
+	3e0  18a5  0787  0301  17cd  17ca  17d3  17d8  17e0 - 17ca  179d  17d7  17d5  16c2  03c7  0300  0347
 	3f0  0300  0e03  07c7  15fb  0749  0067  0807  0e03 - 145d  0e04  070f  0e03  0000  0000  0000  0000
 	400  0a67  0f60  1bfc  1410  0a47  0701  0e03  0f1f - 0e0a  01c7  0e05  0e03  07c7  0e41  180a  07c7
 	410  0e51  180a  0ce6  1c5e  0e00  185f  0cdd  1824 - 0cde  1821  0a1f  0d65  182b  0e06  024f  0a7f
@@ -223,7 +223,7 @@ ROM addresses:
 	770  0d01  0757  15d4  17aa  1b4b  0291  03a8  0390 - 02a5  1dad  0c16  19ad  0c7a  1f65  0c32  1b4b
 	780  07c7  15b0  1b4b  0c19  0cda  19ad  0c18  19ad - 0301  080f  0821  1f95  0821  1f9f  0027  0821
 	790  1ba4  17dc  17e0  17cf  1bcd  17df  17cf  17ca - 17d0  17d3  17da  17d5  17e0  0328  1be9  17dd
-	7a0  17cf  17cf  1b9c  0317  080e  032d  0821  1ba5 - 0820  0e03  1570  087f  140c  092d  080e  0a28
+	7a0  17cf  17cf  1b9c  0317  080f  032d  0821  1ba5 - 0820  0e03  1570  087f  140c  092d  080e  0a28
 	7b0  0c6e  1fc1  0c6a  1c73  17d3  17cd  17da  17d2 - 17cc  17d2  179d  17d8  0d01  0328  179d  0757
 	7c0  1a04  17d7  17cf  179d  17e0  17cc  17da  17d8 - 17cd  1bbc  0328  1be2  17cd  0328  1be3  17d0
 	7d0  0328  1be4  17e0  0328  1be5  0328  1be6  17d0 - 0328  1be7  0328  1be8  17e0  17e0  17e0  17e0
@@ -271,3 +271,4 @@ points out some potentially noteworthy differences between the ROM listing(s) in
 The **037** values in the above table are the values listed in [4,164,037](../patents/us4164037), while
 the **901** values are from [4,125,901](../patents/us4125901).  The **901** values are less "buggy" and more
 in agreement with the **TI57E** values, except for those marked by `*`.
+
