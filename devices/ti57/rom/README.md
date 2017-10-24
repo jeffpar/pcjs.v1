@@ -825,7 +825,8 @@ albeit somewhat hard to read.
 To produce the listing below, I started with the OCR'ed text of [4,125,901](../patents/us4125901), and then
 reviewed every entry, making corrections as needed.  There were a few places where it was hard to distinguish
 between, say, `8` and `B`, and in those cases, my inclination was to leave the value from patent 4,125,901
-in place. 
+in place.  The data below has also been saved as a 4096-byte 16-bit-word little-endian binary file:
+[ti57pat867.bin](ti57pat867.bin).
   
 	Addr    0     1     2     3     4     5     6     7      8     9     a     b     c     d     e     f
 	----------------------------------------------------------------------------------------------------
