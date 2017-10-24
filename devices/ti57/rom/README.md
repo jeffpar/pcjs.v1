@@ -90,17 +90,18 @@ Turning our attention to the *interpretation* of the raw data, let's review some
 	I'll get a TI57 eventually and try to dump the ROM electronically to compare. I picked up a TI55, which uses
 	the same chip, and I'll dump it, too.
 
-It's also important to note that the 4096-byte `ti57.bin` pads each 13-bit word to a 16-bit word and stores them
-in big-endian format, so for clarity, I saved that binary here as [ti57be.bin](ti57be.bin).
+The reordered data that he saved as `ti57.bin` is what I call the [Big-endian ROM](ti57be.bin).
+It is a 4096-byte file that pads each 13-bit word to a 16-bit word and stores them in big-endian format.
 
-Next, to make sure I understood the above interpretation of the raw data, and to produce a 16-bit little-endian
-version, I wrote [raw2le.js](raw2le.js):
+To make sure I understood the above interpretation of the raw data, and to produce a corresponding
+[Little-endian ROM](ti57le.bin), I wrote [raw2le.js](raw2le.js):
 
 	node raw2le.js ti57raw.bin ti57le.bin
 
-I also verified that if the script was modified to output big-endian data, the result was identical to `ti57be.bin`.
+I also verified that if the script was modified to output big-endian data, the result was identical
+to the original [Big-endian ROM](ti57be.bin).
 
-Here's a dump of my [Little-endian ROM](ti57le.bin), including all the corrections mentioned above,
+Here's a dump of the [Little-endian ROM](ti57le.bin), including all the corrections mentioned above,
 using `hexdump -x ti57le.bin`, with the byte offsets changed to ROM addresses:
 
 	Addr    0     1     2     3     4     5     6     7      8     9     a     b     c     d     e     f
@@ -414,8 +415,8 @@ A dump of the "Hrast ROM" is shown below.
 	7e0  0320  0320  0320  0320  0320  0320  0520  19c3 - 0c16  0301  1fee  0321  0c15  1ff4  0521  1ff3
 	7f0  0265  0d0f  1be9  0027  0c74  19a1  0c3a  0c12 - 1bfa  0c74  0e03  0000  0000  0000  0000  0000
 
-And since the "Hrast ROM" was generated from object code dumps in the various TI-57 patents, I also generated
-a little-endian version of Sean's [Patent ROM](ti57pat.bin):
+And since the "Hrast ROM" was initially generated from object code dumps in the various TI-57 patents,
+I generated a little-endian version of Sean's [Patent ROM](ti57pat.bin):
 
 	node be2le.js ti57pat.bin ti57patle.bin
 
