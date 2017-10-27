@@ -239,5 +239,10 @@
     "./modules/pdp11/lib/computer.js",
     "./modules/shared/lib/state.js",
     "./modules/shared/lib/embed.js"
+  ],
+  "machineFiles": [
+    "./modules/devices/control.js",
+    "./modules/devices/time.js",
+    "./modules/devices/machine.js"
   ]
 }

@@ -171,7 +171,8 @@ var aMachineFiles = {
     'PCx86':    pkg.pcCSSFiles.concat(pkg.pcX86Files),
     'PC8080':   pkg.pcCSSFiles.concat(pkg.pc8080Files),
     'PDP10':    pkg.pcCSSFiles.concat(pkg.pdp10Files),
-    'PDP11':    pkg.pcCSSFiles.concat(pkg.pdp11Files)
+    'PDP11':    pkg.pcCSSFiles.concat(pkg.pdp11Files),
+    'Machine':  pkg.pcCSSFiles.concat(pkg.machineFiles)
 };
 var aMachineFileTypes = {
     'head': [".css"],           // put BOTH ".css" and ".js" here if convertMDMachineLinks() embeds its own scripts
@@ -1922,15 +1923,22 @@ HTMLOut.prototype.processMachines = function(aMachines, buildOptions, done)
         }
 
         var sScriptEmbed = "";
-        if (infoMachine['func']) {
-            sScriptEmbed = '<' + 'script type="text/javascript">window.' + infoMachine['func'];
-            sScriptEmbed += "('" + infoMachine['id'] + "','" + infoMachine['xml'] + "'";
-            sScriptEmbed += (infoMachine['xsl']? (",'" + infoMachine['xsl'] + "'") : ",''");
-            sScriptEmbed += (infoMachine['parms']? (",'" + infoMachine['parms'] + "'") : '') + ');</script>';
+        var sFunction = infoMachine['func'];
+        if (sFunction) {
+            sScriptEmbed = '<script type="text/javascript">';
+            if (sFunction.indexOf("embed") < 0) {
+                sScriptEmbed += sFunction + "('" + infoMachine['id'] + "','" + infoMachine['config'].replace(/\n/g, '\\n') + "');"
+            } else {
+                sScriptEmbed += 'window.' + sFunction;
+                sScriptEmbed += "('" + infoMachine['id'] + "','" + infoMachine['xml'] + "'";
+                sScriptEmbed += (infoMachine['xsl']? (",'" + infoMachine['xsl'] + "'") : ",''");
+                sScriptEmbed += (infoMachine['parms']? (",'" + infoMachine['parms'] + "'") : '') + ');';
+            }
+            sScriptEmbed += '</script>';
         }
 
         var asFiles = [];
-        if (fCompiled) {
+        if (fCompiled && sType != "Machine") {
             var sScriptName = sType.toLowerCase();
             var sScriptFile = sScriptName + (fDebugger? "-dbg" : "") + ".js";
             var sScriptFolder = sScriptName == "c1p"? "c1pjs" : (sScriptName.substr(0, 3) == "pdp"? "pdpjs" : sScriptName);

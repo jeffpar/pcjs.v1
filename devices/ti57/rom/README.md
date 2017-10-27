@@ -17,7 +17,7 @@ Sean's [TMS-1500](http://seanriddle.com/tms1500.html) page provides multiple TI-
 Regarding the "patent" version, I should add that there are ROM object code dumps in these patents as well,
 but it's unlikely they add much new information:
  
-- [4,125,867](../patents/us4125867) (somewhat readable)
+- [4,125,867](../patents/us4125867) (see [Unique ROM Listing](#unique-rom-listing) below)
 - [4,146,928](../patents/us4146928) (readable)
 - [4,277,675](../patents/us4277675) (not very readable)
 
@@ -255,7 +255,7 @@ which displays the first 10 16-bit groups of raw ROM data:
 
 ### Additional Notes
 
-This post on [hpmuseum.org](http://www.hpmuseum.org/cgi-sys/cgiwrap/hpmuseum/archv021.cgi?read=248085)
+A post on [hpmuseum.org](http://www.hpmuseum.org/cgi-sys/cgiwrap/hpmuseum/archv021.cgi?read=248085)
 points out some potentially noteworthy differences between the ROM dump(s) in the patent(s) and the ROM used in
 [HrastProgrammer's](http://www.hrastprogrammer.com/) Windows-based [TI-57 emulator](http://www.hrastprogrammer.com/ti57e/):
 
@@ -819,15 +819,18 @@ Ditto for [4,164,037](../patents/us4164037/):
 	7e0  0320  0320  0320  0320  0320  0320  0520  19c3 - 0c16  0301  1fee  0321  0c15  1ff4  0521  1ff3
 	7f0  0265  0d0f  1be9  0027  0c74  19a1  0c3a  0c12 - 1bfa  0c74  0e03  0000  0000  0000  0000  0000
 
-Lastly, I'm interested in the object listing in [4,125,867](../patents/us4125867/) because it *may* have
+### Unique ROM Listing
+
+I was also interested in the object listing in [4,125,867](../patents/us4125867/) because it *may* have
 been computer-generated rather than human-generated.  It's certainly unique among all the TI-57 patent listings,
 albeit somewhat hard to read.
 
 To produce the listing below, I started with the OCR'ed text of [4,125,901](../patents/us4125901), and then
-reviewed every entry, making corrections as needed.  There were a few places where it was hard to distinguish
-between, say, `8` and `B`, and in those cases, my inclination was to leave the value from patent 4,125,901
-in place.  The data below has also been saved as a 4096-byte 16-bit-word little-endian binary file:
-[ti57pat867.bin](ti57pat867.bin).
+reviewed every entry, making corrections as needed.  There were a few places where it was difficult to
+distinguish between, say, `8` and `B`, and in those cases, my tendency was to leave the value from the listing
+in patent 4,125,901 in place.
+
+The data below has also been saved as a 4096-byte 16-bit-word little-endian binary file: [ti57pat867.bin](ti57pat867.bin).
   
 	Addr    0     1     2     3     4     5     6     7      8     9     a     b     c     d     e     f
 	----------------------------------------------------------------------------------------------------

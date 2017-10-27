@@ -468,6 +468,20 @@ MarkOut.prototype.convertMD = function(sIndent)
                     if (!asMachines[iMachine]) continue;
                     var id = null, iProp, sProp, sValue;
                     var aOptions, aaOptions = [], machine = {};
+                    /*
+                     * Before we look for simple name/value pairs, let's look for any multi-line sequences,
+                     * extract them, and then remove them, to avoid any confusion later.
+                     */
+                    var reMulti = /([ \t]*)([^\s]+): \|\n((?:\1 +[^\n]*\n?)*)/g;
+                    while (aOptions = reMulti.exec(asMachines[iMachine])) {
+                        /*
+                         * I would also like to "auto-quote" any unquoted property name at the start of any line.
+                         */
+                        aOptions[3] = aOptions[3].replace(/^(\s+)([^":\s]+):/gm, '$1"$2":');
+                        aaOptions.push(aOptions);
+                        asMachines[iMachine] = asMachines[iMachine].replace(aOptions[0], "");
+                        reMulti.lastIndex = 0;
+                    }
                     var reOption = /([ \t]*)([^\s]+):[ \t]*([^\n]*)/g;
                     while (aOptions = reOption.exec(asMachines[iMachine])) {
                         aaOptions.push(aOptions);
@@ -1222,6 +1236,10 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
             machine = this.aMachineDefs[sMachineID];
             sMachineType = machine['type'] || "PCx86";
             sMachineXMLFile = machine['config'] || this.sMachineFile || "machine.xml";
+            if (sMachineXMLFile.match(/^\s*{/)) {
+                sMachineXMLFile = "{}";
+                machine['parms'] = "";
+            }
             if (sMachineXMLFile.indexOf("debugger") >= 0) machine['debugger'] = "true";
             sMachineOptions = ((sMachineType.indexOf("-dbg") > 0 || machine['debugger'] == "true")? "debugger" : "");
             if (machine['sticky']) sMachineOptions += (sMachineOptions? "," : "") + "sticky";
@@ -1245,15 +1263,22 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
      * Start looking for Markdown-style machine links now...
      */
     var cMatches = 0;
-    var reMachines = /\[(.*?)]\((.*?)\s*"(PC|C1P|PDP)([^:!|]*)([:!|])(.*?)"\)/gi;
+    var reMachines = /\[(.*?)]\((.*?)\s*"(PC|C1P|PDP|Machine)([^:!|]*)([:!|])(.*?)"\)/gi;
 
     while ((aMatch = reMachines.exec(sBlock))) {
 
+        var sMachineFunc;
         sMachineXMLFile = aMatch[2];
         if (sMachineXMLFile.slice(-1) == "/") sMachineXMLFile += "machine.xml";
 
-        sMachineType = aMatch[3].toUpperCase() + (aMatch[4] != "js"? aMatch[4] : "");
-        var sMachineFunc = "embed" + sMachineType;
+        sMachineType = aMatch[3];
+        if (sMachineType == "Machine") {
+            sMachineFunc = "new " + sMachineType;
+        } else {
+            sMachineFunc = "embed" + sMachineType;
+            sMachineType += (aMatch[4] != "js"? aMatch[4] : "");
+        }
+
         var aMachineParms = aMatch[6].split(aMatch[5]);
         var sMachineMessage = "Waiting for " + sMachineType + " to load";
 
@@ -1280,7 +1305,7 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
          * "production" version.
          */
         if (!sMachineXSLFile || sMachineXSLFile.indexOf("components.xsl") >= 0) {
-            if (this.fDebug) {
+            if (this.fDebug && sMachineXMLFile != "{}") {
                 if (sMachineType == "C1P") {
                     sMachineXSLFile = "/modules/c1pjs/templates/components.xsl";
                 } else {
@@ -1304,6 +1329,7 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
             'type':     sMachineType,   // eg, a machine type, such as "PCx86" or "C1P"
             'func':     sMachineFunc,
             'id':       sMachineID,
+            'config':   this.aMachineDefs[sMachineID] && this.aMachineDefs[sMachineID]['config'],
             'xml':      sMachineXMLFile,
             'xsl':      sMachineXSLFile,
             'version':  sMachineVersion,// eg, "1.10", "*" to select the current version, or "uncompiled"; "*" is the default
