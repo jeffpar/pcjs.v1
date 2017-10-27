@@ -821,9 +821,10 @@ Ditto for [4,164,037](../patents/us4164037/):
 
 ### Unique ROM Listing
 
-I was also interested in the object listing in [4,125,867](../patents/us4125867/) because it *may* have
-been computer-generated rather than human-generated.  It's certainly unique among all the TI-57 patent listings,
-albeit somewhat hard to read.
+I was also interested in the object listing in U.S. Patent No.
+[4,125,867](https://docs.google.com/viewer?url=patentimages.storage.googleapis.com/pdfs/US4125867.pdf)
+that starts on page 54, because it *may* have been computer-generated rather than human-generated.
+It's certainly unique among all the TI-57 patent listings, albeit a little hard to read.
 
 To produce the listing below, I started with the OCR'ed text of [4,125,901](../patents/us4125901), and then
 reviewed every entry, making corrections as needed.  There were a few places where it was difficult to
