@@ -125,10 +125,16 @@ which displays the first 10 16-bit groups of raw ROM data:
 
 ### Dump of the "Hrast ROM"
  
-In the interests of completeness, I've archived another TI-57 ROM that we'll call the [Hrast ROM](ti57hrast.bin),
-this time from the [PockEmul](https://github.com/pockemul/PockEmul) project on GitHub.  I assumed both the ROM
-and the source code originally came from [HrastProgrammer](http://www.hrastprogrammer.com/) based on some
+In the interests of completeness, I've archived another TI-57 ROM that I'll call the "[Hrast ROM](ti57hrast.bin)",
+obtained from the [PockEmul](https://github.com/pockemul/PockEmul) project on GitHub.  I assume both the ROM
+and the source code originally came from [HrastProgrammer](http://www.hrastprogrammer.com/), based on an
 attribution in the PockEmul [source code](https://github.com/pockemul/PockEmul/blob/master/src/cpu/ti57cpu.cpp).
+
+However, the current version of [HrastProgrammer's](http://www.hrastprogrammer.com/)
+Windows-based [TI-57 emulator](http://www.hrastprogrammer.com/ti57e/) appears to instead be
+using a slightly modified version of the **Cooked ROM** that Sean originally generated from the
+[ROM Array Image](http://seanriddle.com/ti57rombits.jpg), whereas this "Hrast ROM" is actually closer to the
+[Dump of ROM Generated from U.S. Pat. No. 4,125,867](#dump-of-rom-generated-from-us-pat-no-4125867).
 
 {% include_relative ti57hrast.txt %}
 
