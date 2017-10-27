@@ -1275,8 +1275,9 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
         if (sMachineType == "Machine") {
             sMachineFunc = "new " + sMachineType;
         } else {
-            sMachineFunc = "embed" + sMachineType;
+            sMachineType = sMachineType.toUpperCase();
             sMachineType += (aMatch[4] != "js"? aMatch[4] : "");
+            sMachineFunc = "embed" + sMachineType;
         }
 
         var aMachineParms = aMatch[6].split(aMatch[5]);
