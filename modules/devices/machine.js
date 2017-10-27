@@ -32,13 +32,24 @@
  * Instantiating a machine requires a config object that contains all the other required configs; eg:
  *
  *      {
- *        clock: {
- *          class: "Time",
- *          cyclesPerSecond: 1600000
- *          bindings: {
- *            run: "runTI57",
- *            print: "printTI57"
+ *        "clock": {
+ *          "class": "Time",
+ *          "cyclesPerSecond": 1600000
+ *          "bindings": {
+ *            "run": "runTI57",
+ *            "print": "printTI57"
  *          }
+ *        },
+ *        "rom": {
+ *          "class": "ROM",
+ *          "wordSize": 13,
+ *          "valueSize": 16,
+ *          "valueTotal": 2048,
+ *          "littleEndian": true,
+ *          "file": "ti57le.bin",
+ *          "reference": "",
+ *          "values": [
+ *          ]
  *        }
  *      }
  */
