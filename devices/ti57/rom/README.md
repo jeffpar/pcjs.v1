@@ -123,37 +123,13 @@ which displays the first 10 16-bit groups of raw ROM data:
 	0001010000110001
 	1000010100100101
 
-### Additional Notes
-
-A post on [hpmuseum.org](http://www.hpmuseum.org/cgi-sys/cgiwrap/hpmuseum/archv021.cgi?read=248085)
-points out some potentially noteworthy differences between the ROM dump(s) in the patent(s) and the ROM used in
-[HrastProgrammer's](http://www.hrastprogrammer.com/) Windows-based [TI-57 emulator](http://www.hrastprogrammer.com/ti57e/):
-
-	Dec Hex     037    901   TI57E
-	------------------------------
-	015 0x00F:  1abc   1a8c   1a8c
-	081 0x051:  1aSd   1a8d   1a8d
-	477 0x1DD:  19822  1982   1982
-	511 0x1FF:  0e07   0e07*  0eff
-	512 0x200:  0e07   0e07*  0e0d
-	526 0x20E:  0cbd   0cbd*  0eff
-	581 0x245:  07eb   07b8*  07e8
-	631 0x277:  1abc   1a8c   1a8c
-	636 0x27C:  17b0   1780   1780
-	638 0x27E:  1abf   1a8f   1a8f
-	697 0x2B9:  0bc7   08c7   08c7
-
-The **037** values in the above table are the values listed in [4,164,037](../patents/us4164037), while
-the **901** values are from [4,125,901](../patents/us4125901).  The **901** values are less error-ridden and more
-in agreement with the **TI57E** values, except for those marked by `*`.
-
+### Dump of the "Hrast ROM"
+ 
 In the interests of completeness, I've archived another TI-57 ROM that we'll call the [Hrast ROM](ti57hrast.bin),
 this time from the [PockEmul](https://github.com/pockemul/PockEmul) project on GitHub.  I assumed both the ROM
 and the source code originally came from [HrastProgrammer](http://www.hrastprogrammer.com/) based on some
 attribution in the PockEmul [source code](https://github.com/pockemul/PockEmul/blob/master/src/cpu/ti57cpu.cpp).
 
-### Dump of the "Hrast ROM"
- 
 {% include_relative ti57hrast.txt %}
 
 ### Dump of Sean Riddle's "Patent ROM"
@@ -168,13 +144,17 @@ for comparison purposes:
 
 ### Dump of ROM Generated from U.S. Pat. No. 4,125,901
  
-Here's the OCR'ed object code dump from [4,125,901](../patents/us4125901), also for comparison purposes:
+Here's the OCR'ed object code dump from [4,125,901](../patents/us4125901), also for comparison purposes.
 
 {% include_relative ti57pat901.txt %}
 
 ### Dump of ROM Generated from U.S. Pat. No. 4,164,037
  
-Here's the OCR'ed object code dump from [4,164,037](../patents/us4164037/), also for comparison purposes:
+Here's the OCR'ed object code dump from [4,164,037](../patents/us4164037/), also for comparison purposes.
+
+NOTE: This listing is actually missing data on one of the lines; comparing the listing to [4,125,901](../patents/us4125901)
+makes it fairly clear that a value in the middle of the row (`0E07`) was omitted.  The listing in [4,146,928](.../patents/us4146928)
+is even worse, with four lines of missing data.
 
 {% include_relative ti57pat037.txt %}
 
