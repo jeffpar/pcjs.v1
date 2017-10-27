@@ -162,3 +162,5 @@ TI-57 Test Page
 ---------------
 
 {% include machine.html id="ti57" %}
+
+<div id="ti57">Calculator image goes here....</div>

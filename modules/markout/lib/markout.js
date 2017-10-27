@@ -1292,10 +1292,20 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
         var fDebugger = (aMachineOptions.indexOf("debugger") >= 0);
         var fSticky = (aMachineOptions.indexOf("sticky") >= 0);
 
-        /*
-         * TODO: Consider validating the existence of this XML file and generating a more meaningful error if not found
-         */
-        sReplacement = '<div id="' + sMachineID + '" class="machine-placeholder"><p>' + aMatch[1] + '</p><p class="machine-warning">' + sMachineMessage + '</p></div>\n';
+        if (sMachineType == "Machine") {
+            /*
+             * For generic machines, we are using JSON configurations rather than XML files;
+             * XML files were handy because they are easily transformed into XHTML which can then be
+             * inserted into the <div> below, but since JSON isn't well-suited for that, it will be
+             * up to the page to supply its own HTML layout for the machine's visual elements.
+             */
+            sReplacement = "";
+        } else {
+            /*
+             * TODO: Consider validating the existence of this XML file and generating a more meaningful error if not found
+             */
+            sReplacement = '<div id="' + sMachineID + '" class="machine-placeholder"><p>' + aMatch[1] + '</p><p class="machine-warning">' + sMachineMessage + '</p></div>\n';
+        }
 
         /*
          * The embedXXX() functions take an XSL file as the 3rd parameter, which defaults to:
