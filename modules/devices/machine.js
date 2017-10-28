@@ -28,44 +28,48 @@
 
 "use strict";
 
+/**
+ * @class {Machine}
+ * @unrestricted
+ */
 class Machine extends Control {
     /**
      * Machine(idMachine, sConfig)
      *
      * Sample config:
      *
-     *      {
-     *        "clock": {
-     *          "class": "Time",
-     *          "cyclesPerSecond": 1600000
-     *          "bindings": {
-     *            "run": "runTI57",
-     *            "print": "printTI57"
-     *          }
-     *        },
-     *        "display": {
-     *          "class": "LED",
-     *          "type": 3,
-     *          "xSize": 96,
-     *          "ySize": 128,
-     *          "xTotal": 12,
-     *          "yTotal": 1,
-     *          "bindings": {
-     *            "screen": "screenTI57"
-     *          }
-     *        },
-     *        "rom": {
-     *          "class": "ROM",
-     *          "wordSize": 13,
-     *          "valueSize": 16,
-     *          "valueTotal": 2048,
-     *          "littleEndian": true,
-     *          "file": "ti57le.bin",
-     *          "reference": "",
-     *          "values": [
-     *          ]
+     *    {
+     *      "clock": {
+     *        "class": "Time",
+     *        "cyclesPerSecond": 1600000
+     *        "bindings": {
+     *          "run": "runTI57",
+     *          "print": "printTI57"
      *        }
+     *      },
+     *      "display": {
+     *        "class": "LED",
+     *        "type": 3,
+     *        "width": 96,
+     *        "height": 128,
+     *        "cols": 12,
+     *        "rows": 1,
+     *        "bindings": {
+     *          "screen": "screenTI57"
+     *        }
+     *      },
+     *      "rom": {
+     *        "class": "ROM",
+     *        "wordSize": 13,
+     *        "valueSize": 16,
+     *        "valueTotal": 2048,
+     *        "littleEndian": true,
+     *        "file": "ti57le.bin",
+     *        "reference": "",
+     *        "values": [
+     *        ]
      *      }
+     *    }
      *
      * @this {Machine}
      * @param {string} idMachine (of both the machine AND the <div> to contain it)

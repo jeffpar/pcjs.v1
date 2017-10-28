@@ -29,20 +29,20 @@
 "use strict";
 
 /**
- * @typedef {{
- *  class:              string,
- *  type:               number,
- *  xSize:              number,
- *  ySize:              number,
- *  xTotal:             number,
- *  yTotal:             number,
- *  color:              string,
- *  backgroundColor:    string,
- *  bindings:           Object
- * }} LEDConfig
+ * @typedef {Object} LEDConfig
+ * @property {string} class
+ * @property {number} type
+ * @property {number} width
+ * @property {number} height
+ * @property {number} cols
+ * @property {number} rows
+ * @property {string} color
+ * @property {string} backgroundColor
+ * @property {string} fixedSize
+ * @property {Object} bindings
  */
 
-/*
+/**
  * Provides support for a variety of LED types:
  *
  * 1) LED Light (single light)
@@ -52,12 +52,30 @@
  * To prototype this, I want to be able to include "led.js" and call an interface with a JSON object
  * that describes the type, style (eg, round or square), color, and size.
  *
- * The initial goal is to generate a 12-element array of 7-segment LED digits.
+ * The initial goal is to generate a 12-element array of 7-segment LED digits.  The default width and height
+ * of 96 and 128 yield an aspect ratio of 0.75.
  *
  * We will need to create a canvas element inside the specified container element.  There must be interfaces
  * for enabling/disabling/toggling power to any combination of xSelect and ySelect.  There must also be a time
  * interface to indicate the passage of time, which should be called a minimum of every 1/60th of a second;
  * any addressable LED segment that was last toggled more than 1/60th second earlier will be blanked.
+ *
+ * @class {LED}
+ * @unrestricted
+ * @property {number} width (default is 96)
+ * @property {number} height (default is 128)
+ * @property {number} cols (default is 1)
+ * @property {number} rows (default is 1)
+ * @property {number} widthView (computed)
+ * @property {number} heightView (computed)
+ * @property {number} widthGrid (computed)
+ * @property {number} heightGrid (computed)
+ * @property {string} color (default is "red")
+ * @property {string} backgroundColor (default is "black")
+ * @property {HTMLCanvasElement} canvasView
+ * @property {CanvasRenderingContext2D} contextView
+ * @property {HTMLCanvasElement} canvasGrid
+ * @property {CanvasRenderingContext2D} contextGrid
  */
 class LED extends Control {
     /**
@@ -68,10 +86,10 @@ class LED extends Control {
      *      "display": {
      *        "class": "LED",
      *        "type": 3,
-     *        "xSize": 96,
-     *        "ySize": 128,
-     *        "xTotal": 12,
-     *        "yTotal": 1,
+     *        "width": 96,
+     *        "height": 128,
+     *        "cols": 12,
+     *        "rows": 1,
      *        "bindings": {
      *          "screen": "screenTI57"
      *        }
@@ -87,31 +105,100 @@ class LED extends Control {
         super(idMachine, idControl, config);
         let container = this.bindings.screen;
         if (container) {
-            let canvas = /** @type {HTMLCanvasElement} */ (document.createElement("canvas"));
-            if (canvas === undefined || !canvas.getContext) {
+            let canvasView = /** @type {HTMLCanvasElement} */ (document.createElement("canvas"));
+            if (canvasView == undefined || !canvasView.getContext) {
                 container.innerHTML = "Browser missing HTML5 canvas support";
             } else {
-                let width = this.config.xSize;
-                let height = this.config.ySize;
+                this.canvasView = canvasView;
+                this.width = this.config.width || 96;
+                this.height = this.config.height || 128;
+                this.cols = this.config.cols || 1;
+                this.rows = this.config.rows || 1;
+                this.widthView = this.width * this.cols;
+                this.heightView = this.height * this.rows;
+                this.color = (this.config.color || "red");
+                this.backgroundColor = (this.config.backgroundColor || "black");
                 switch(this.config.type) {
                 case LED.TYPE.SINGLE:
                     break;
                 case LED.TYPE.ARRAY:
                     break;
                 case LED.TYPE.DIGITS:
-                    width *= this.config.xTotal;
-                    height *= this.config.yTotal;
                     break;
                 }
-                canvas.setAttribute("class", "pcjs-canvas");
-                canvas.setAttribute("width", width.toString());
-                canvas.setAttribute("height", height.toString());
-                canvas.style.height = "auto";
-                canvas.style.backgroundColor = this.config.backgroundColor;
-                container.appendChild(canvas);
-                let context = /** @type {CanvasRenderingContext2D} */ (canvas.getContext("2d"));
+                if (!config.fixedSize) {
+                    canvasView.setAttribute("class", "pcjs-canvas");
+                }
+                canvasView.setAttribute("width", this.widthView.toString());
+                canvasView.setAttribute("height", this.heightView.toString());
+                canvasView.style.backgroundColor = this.backgroundColor;
+                container.appendChild(canvasView);
+                this.contextView = /** @type {CanvasRenderingContext2D} */ (canvasView.getContext("2d"));
+                /*
+                 * canvasGrid is where all LED segments are composited; then they're drawn onto canvasView.
+                 */
+                this.canvasGrid = /** @type {HTMLCanvasElement} */ (document.createElement("canvas"));
+                if (this.canvasGrid) {
+                    this.canvasGrid.width = this.widthGrid = LED.CELL.WIDTH * this.cols;
+                    this.canvasGrid.height = this.heightGrid = LED.CELL.HEIGHT * this.rows;
+                    this.contextGrid = this.canvasGrid.getContext("2d");
+                }
+                /*
+                 * Test code
+                 */
+                this.clearGrid();
+                for (let idSeg in LED.SEGMENT) {
+                    this.drawGridSegment(0, 0, idSeg);
+                }
+                this.renderGrid();
             }
         }
+    }
+
+    /**
+     * clearGrid()
+     *
+     * @this {LED}
+     */
+    clearGrid()
+    {
+        this.contextGrid.clearRect(0, 0, this.widthGrid, this.heightGrid);
+    }
+
+    /**
+     * drawGridSegment(col, row, idSeg)
+     *
+     * @this {LED}
+     * @param {number} col
+     * @param {number} row
+     * @param {string} idSeg (eg, "SA")
+     */
+    drawGridSegment(col, row, idSeg)
+    {
+        let points = LED.SEGMENT[idSeg];
+        if (points) {
+            this.contextGrid.fillStyle = this.color;
+            this.contextGrid.beginPath();
+            for (let i = 0; i < points.length; i += 2) {
+                if (!i) {
+                    this.contextGrid.moveTo(points[i], points[i+1]);
+                } else {
+                    this.contextGrid.lineTo(points[i], points[i+1]);
+                }
+            }
+            this.contextGrid.closePath();
+            this.contextGrid.fill();
+        }
+    }
+
+    /**
+     * renderGrid()
+     *
+     * @this {LED}
+     */
+    renderGrid()
+    {
+        this.contextView.drawImage(this.canvasGrid, 0, 0, this.widthGrid, this.heightGrid, 0, 0, this.widthView, this.heightView);
     }
 }
 
@@ -119,4 +206,21 @@ LED.TYPE = {
     SINGLE: 1,
     ARRAY:  2,
     DIGITS: 3
+};
+
+/*
+ * Each segment is an array containing an initial moveTo() point followed by one or more lineTo() points.
+ */
+LED.CELL = {
+    WIDTH:      96,
+    HEIGHT:     128
+};
+LED.SEGMENT = {
+    "SA":       [ 28,   8,  84,   8,  70,  20,  37,  20],
+    "SB":       [ 88,  12,  82,  58,  70,  52,  74,  24],
+    "SC":       [ 81,  65,  75, 111,  64,  98,  67,  71],
+    "SD":       [ 28, 101,  61, 101,  72, 116,  12, 116],
+    "SE":       [ 15,  64,  27,  71,  24,  99,   9, 111],
+    "SF":       [ 23,  10,  34,  23,  30,  51,  16,  58],
+    "SG":       [ 35,  55,  63,  55,  75,  61,  63,  68,  33,  68,  22,  61]
 };

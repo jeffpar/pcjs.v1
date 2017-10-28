@@ -28,6 +28,10 @@
 
 "use strict";
 
+/**
+ * @class {ROM}
+ * @unrestricted
+ */
 class ROM extends Control {
     /**
      * ROM(idMachine, idControl, config)

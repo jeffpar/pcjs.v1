@@ -30,6 +30,15 @@
 
 var DEBUG = true;
 
+/**
+ * @class {Control}
+ * @unrestricted
+ * @property {string} idMachine
+ * @property {string} idControl
+ * @property {Object} config
+ * @property {string} printCategory
+ * @property {Object} bindings [added by addBindings()]
+ */
 class Control {
     /**
      * Control()
@@ -98,6 +107,8 @@ class Control {
             let element = document.getElementById(id);
             if (element) {
                 this.addBinding(binding, element);
+            } else {
+                this.println("unable to find control ID: " + id);
             }
         }
     }

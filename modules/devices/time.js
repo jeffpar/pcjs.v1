@@ -28,6 +28,11 @@
 
 "use strict";
 
+/**
+ * @class {Time}
+ * @unrestricted
+ * @property {number} nCyclesPerSecond
+ */
 class Time extends Control {
     /**
      * Time(idMachine, idControl, config)

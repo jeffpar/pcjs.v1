@@ -19,10 +19,8 @@ machines:
         "display": {
           "class": "LED",
           "type": 3,
-          "xSize": 96,
-          "ySize": 128,
-          "xTotal": 12,
-          "yTotal": 1,
+          "cols": 12,
+          "rows": 1,
           "color": "red",
           "backgroundColor": "black",
           "bindings": {
