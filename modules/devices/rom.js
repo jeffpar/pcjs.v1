@@ -1,5 +1,5 @@
 /**
- * @fileoverview Simulates LEDs
+ * @fileoverview Simulates ROMs
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © Jeff Parsons 2012-2017
  *
@@ -28,42 +28,25 @@
 
 "use strict";
 
-/*
- * Provides support for a variety of LED types:
- *
- * 1) LED Light (single light)
- * 2) LED Array (two-dimensional)
- * 3) LED Digits (1 or more 7-segment digits)
- *
- * To prototype this, I want to be able to include "led.js" and call an interface with a JSON object
- * that describes the type, style (eg, round or square), color, and size.
- *
- * The initial goal is to generate a 12-element array of 7-segment LED digits.
- *
- * We will need to create a canvas element inside the specified container element.  There must be interfaces
- * for enabling/disabling/toggling power to any combination of xSelect and ySelect.  There must also be a time
- * interface to indicate the passage of time, which should be called a minimum of every 1/60th of a second;
- * any addressable LED segment that was last toggled more than 1/60th second earlier will be blanked.
- */
-class LED extends Control {
+class ROM extends Control {
     /**
-     * LED(idMachine, idControl, config)
+     * ROM(idMachine, idControl, config)
      *
      * Sample config:
      *
-     *      "display": {
-     *        "class": "LED",
-     *        "type": 3,
-     *        "xSize": 96,
-     *        "ySize": 128,
-     *        "xTotal": 12,
-     *        "yTotal": 1,
-     *        "bindings": {
-     *          "screen": "screenTI57"
-     *        }
+     *      "rom": {
+     *        "class": "ROM",
+     *        "wordSize": 13,
+     *        "valueSize": 16,
+     *        "valueTotal": 2048,
+     *        "littleEndian": true,
+     *        "file": "ti57le.bin",
+     *        "reference": "",
+     *        "values": [
+     *        ]
      *      }
      *
-     * @this {LED}
+     * @this {ROM}
      * @param {string} idMachine
      * @param {string} [idControl]
      * @param {Object} [config]

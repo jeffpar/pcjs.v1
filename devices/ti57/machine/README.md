@@ -3,7 +3,7 @@ layout: page
 title: TI-57 Test Page
 permalink: /devices/ti57/machine/
 machines:
-  - id: ti57
+  - id: TI57
     type: Machine
     name: TI-57 Programmable Calculator
     config: |
@@ -14,6 +14,17 @@ machines:
           "bindings": {
             "run": "runTI57",
             "print": "printTI57"
+          }
+        },
+        "display": {
+          "class": "LED",
+          "type": 3,
+          "xSize": 96,
+          "ySize": 128,
+          "xTotal": 12,
+          "yTotal": 1,
+          "bindings": {
+            "screen": "screenTI57"
           }
         },
         "rom": {
@@ -161,6 +172,9 @@ machines:
 TI-57 Test Page
 ---------------
 
-{% include machine.html id="ti57" %}
+{% include machine.html id="TI57" %}
 
-<div id="ti57">Calculator image goes here....</div>
+<div id="TI57" style="position:relative;display:inline-block">
+  <img src="../images/TI-57-640.png"/>
+  <div id="screenTI57" style="position:absolute;top:8%;left:24%;width:53%;height:4%;background-color:green;opacity:0.5"></div>
+</div>

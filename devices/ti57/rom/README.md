@@ -100,7 +100,7 @@ To make sure I understood the above interpretation of the raw data, and to produ
 I also verified that if the script was modified to output big-endian data, the result was identical
 to the original [Cooked ROM (Big-endian)](ti57be.bin).
 
-Here's a dump of the [Little-endian ROM](ti57le.bin), including all the corrections mentioned above,
+Here's a [dump](ti57le.txt) of the [Little-endian ROM](ti57le.bin), including all the corrections mentioned above,
 using `hexdump -x ti57le.bin`, with the byte offsets changed to ROM addresses:
 
 {% include_relative ti57le.txt %}
@@ -133,8 +133,8 @@ attribution in the PockEmul [source code](https://github.com/pockemul/PockEmul/b
 However, the current version of [HrastProgrammer's](http://www.hrastprogrammer.com/)
 Windows-based [TI-57 emulator](http://www.hrastprogrammer.com/ti57e/) appears to instead be
 using a slightly modified version of the **Cooked ROM** that Sean originally generated from the
-[ROM Array Image](http://seanriddle.com/ti57rombits.jpg), whereas this "Hrast ROM" is actually closer to the
-[Dump of ROM Generated from U.S. Pat. No. 4,125,867](#dump-of-rom-generated-from-us-pat-no-4125867).
+[ROM Array Image](http://seanriddle.com/ti57rombits.jpg), whereas the "Hrast ROM" [dump](ti57hrast.txt) is actually
+closer to the [Dump of ROM Generated from U.S. Pat. No. 4,125,867](#dump-of-rom-generated-from-us-pat-no-4125867).
 
 {% include_relative ti57hrast.txt %}
 
@@ -142,7 +142,7 @@ using a slightly modified version of the **Cooked ROM** that Sean originally gen
  
 Since the "Hrast ROM" was initially generated from object code dumps in the various TI-57 patents,
 I generated [Patent ROM (Little-endian)](ti57patle.bin) from Sean's [Patent ROM (Big-endian)](ti57patbe.bin)
-for comparison purposes:
+for comparison purposes and generated a [dump](ti57patle.txt) below.
 
 	node be2le.js ti57patbe.bin ti57patle.bin
 
@@ -150,13 +150,13 @@ for comparison purposes:
 
 ### Dump of ROM Generated from U.S. Pat. No. 4,125,901
  
-Here's the OCR'ed object code dump from [4,125,901](../patents/us4125901), also for comparison purposes.
+Here's the OCR'ed object code [dump](ti57pat901.txt) from [4,125,901](../patents/us4125901), also for comparison purposes.
 
 {% include_relative ti57pat901.txt %}
 
 ### Dump of ROM Generated from U.S. Pat. No. 4,164,037
  
-Here's the OCR'ed object code dump from [4,164,037](../patents/us4164037/), also for comparison purposes.
+Here's the OCR'ed object code [dump](ti57pat037.txt) from [4,164,037](../patents/us4164037/), also for comparison purposes.
 
 NOTE: This listing is actually missing data on one of the lines; comparing the listing to [4,125,901](../patents/us4125901)
 makes it fairly clear that a value in the middle of the row (`0E07`) was omitted.  The listing in [4,146,928](.../patents/us4146928)
@@ -171,8 +171,8 @@ I was also interested in the object listing in U.S. Patent No.
 that starts on page 54, because it *may* have been computer-generated rather than human-generated.
 It's certainly unique among all the TI-57 patent listings, albeit a little hard to read.
 
-To produce the listing below, I started with the OCR'ed text of [4,125,901](../patents/us4125901), and then
-reviewed every entry, making corrections as needed.  There were a few places where it was difficult to
+To produce the [dump](ti57pat867.txt) below, I started with the OCR'ed text of [4,125,901](../patents/us4125901),
+and then reviewed every entry, making corrections as needed.  There were a few places where it was difficult to
 distinguish between, say, `8` and `B`, and in those cases, my tendency was to leave the value from the listing
 in patent 4,125,901 in place.
 

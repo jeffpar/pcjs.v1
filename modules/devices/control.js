@@ -54,8 +54,6 @@ class Control {
         this.idMachine = idMachine;
         this.idControl = idControl || idMachine;
         this.printCategory = "";
-        this.fReady = false;
-        this.afnReady = [];
         this.addControl();
         this.addBindings();
     }
@@ -217,43 +215,6 @@ class Control {
     printf(format, ...args)
     {
         this.print(this.sprintf(format, args));
-    }
-
-    /**
-     * onReady(fn)
-     *
-     * Calls the specified function as soon as the control is in the "ready" state.
-     *
-     * @this {Control}
-     * @param {function()} fn
-     */
-    onReady(fn)
-    {
-        if (this.fReady) {
-            fn();
-        } else {
-            this.afnReady.push(fn);
-        }
-    }
-
-    /**
-     * setReady(fReady)
-     *
-     * Sets the "ready" state of the component, and calls any queued notification functions
-     * if fReady is true.
-     *
-     * @this {Control}
-     * @param {boolean} [fReady] (default is true)
-     */
-    setReady(fReady = true)
-    {
-        this.fReady = fReady;
-        if (this.fReady) {
-            let fn;
-            while (fn = this.afnReady.shift()) {
-                fn();
-            }
-        }
     }
 
     /**

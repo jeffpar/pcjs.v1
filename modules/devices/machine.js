@@ -28,45 +28,69 @@
 
 "use strict";
 
-/*
- * Instantiating a machine requires a config object that contains all the other required configs; eg:
- *
- *      {
- *        "clock": {
- *          "class": "Time",
- *          "cyclesPerSecond": 1600000
- *          "bindings": {
- *            "run": "runTI57",
- *            "print": "printTI57"
- *          }
- *        },
- *        "rom": {
- *          "class": "ROM",
- *          "wordSize": 13,
- *          "valueSize": 16,
- *          "valueTotal": 2048,
- *          "littleEndian": true,
- *          "file": "ti57le.bin",
- *          "reference": "",
- *          "values": [
- *          ]
- *        }
- *      }
- */
-
 class Machine extends Control {
     /**
-     * Machine(id, sConfig)
+     * Machine(idMachine, sConfig)
+     *
+     * Sample config:
+     *
+     *      {
+     *        "clock": {
+     *          "class": "Time",
+     *          "cyclesPerSecond": 1600000
+     *          "bindings": {
+     *            "run": "runTI57",
+     *            "print": "printTI57"
+     *          }
+     *        },
+     *        "display": {
+     *          "class": "LED",
+     *          "type": 3,
+     *          "xSize": 96,
+     *          "ySize": 128,
+     *          "xTotal": 12,
+     *          "yTotal": 1,
+     *          "bindings": {
+     *            "screen": "screenTI57"
+     *          }
+     *        },
+     *        "rom": {
+     *          "class": "ROM",
+     *          "wordSize": 13,
+     *          "valueSize": 16,
+     *          "valueTotal": 2048,
+     *          "littleEndian": true,
+     *          "file": "ti57le.bin",
+     *          "reference": "",
+     *          "values": [
+     *          ]
+     *        }
+     *      }
      *
      * @this {Machine}
-     * @param {string} id (of both the machine AND the <div> to contain it)
+     * @param {string} idMachine (of both the machine AND the <div> to contain it)
      * @param {string} sConfig (JSON configuration for entire machine, including any static resources)
      */
-    constructor(id, sConfig)
+    constructor(idMachine, sConfig)
     {
-        super(id);
+        super(idMachine);
         try {
             this.config = JSON.parse(sConfig);
+            for (let idControl in this.config) {
+                let config = this.config[idControl];
+                let sClass = config['class'], control;
+                switch(sClass) {
+                case Machine.CLASS.LED:
+                    control = new LED(idMachine, idControl, config);
+                    break;
+                case Machine.CLASS.ROM:
+                    control = new ROM(idMachine, idControl, config);
+                    break;
+                case Machine.CLASS.TIME:
+                    control = new Time(idMachine, idControl, config);
+                    break;
+                }
+            }
         } catch(err) {
             let sError = err.message;
             let match = sError.match(/position ([0-9]+)/);
@@ -75,6 +99,11 @@ class Machine extends Control {
             }
             this.println("error: " + sError);
         }
-        this.setReady();
     }
 }
+
+Machine.CLASS = {
+    LED:    "LED",
+    ROM:    "ROM",
+    TIME:   "Time"
+};

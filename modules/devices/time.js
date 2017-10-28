@@ -30,11 +30,18 @@
 
 class Time extends Control {
     /**
-     * Time(config)
+     * Time(idMachine, idControl, config)
      *
-     * Supported config properties:
+     * Sample config:
      *
-     *      "cyclesPerSecond": number of cycles per second
+     *      "clock": {
+     *        "class": "Time",
+     *        "cyclesPerSecond": 1600000,       // number of cycles per second
+     *        "bindings": {
+     *          "run": "runTI57",
+     *          "print": "printTI57"
+     *        }
+     *      }
      *
      * Example: The TI-57 has a standard cycle time of 0.625us.  Every set of four cycles
      * is designated a "state time".  Within a single state time (2.5us), the four cycles are
@@ -57,11 +64,13 @@ class Time extends Control {
      * function is called.
      *
      * @this {Time}
-     * @param {Object} config
+     * @param {string} idMachine
+     * @param {string} [idControl]
+     * @param {Object} [config]
      */
-    constructor(config)
+    constructor(idMachine, idControl, config)
     {
-        super(config);
+        super(idMachine, idControl, config);
         let time = this;
         this.nCyclesPerSecond = config['cyclesPerSecond'] || 1600000;
         this.msYield = Math.round(1000 / Time.YIELDS_PER_SECOND);
@@ -72,7 +81,6 @@ class Time extends Control {
         this.timerYield = this.addTimer(function() {
             time.fYield = true;
         }, this.msYield);
-        this.setReady();
     }
 
     /**
