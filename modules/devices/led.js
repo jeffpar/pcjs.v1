@@ -53,7 +53,7 @@
  * that describes the type, style (eg, round or square), color, and size.
  *
  * The initial goal is to generate a 12-element array of 7-segment LED digits.  The default width and height
- * of 96 and 128 yield an aspect ratio of 0.75.
+ * of 96 and 128 match our internal cell size and yield an aspect ratio of 0.75.
  *
  * We will need to create a canvas element inside the specified container element.  There must be interfaces
  * for enabling/disabling/toggling power to any combination of xSelect and ySelect.  There must also be a time
@@ -110,6 +110,7 @@ class LED extends Control {
                 container.innerHTML = "Browser missing HTML5 canvas support";
             } else {
                 this.canvasView = canvasView;
+
                 this.width = this.config.width || 96;
                 this.height = this.config.height || 128;
                 this.cols = this.config.cols || 1;
@@ -118,14 +119,7 @@ class LED extends Control {
                 this.heightView = this.height * this.rows;
                 this.color = (this.config.color || "red");
                 this.backgroundColor = (this.config.backgroundColor || "black");
-                switch(this.config.type) {
-                case LED.TYPE.SINGLE:
-                    break;
-                case LED.TYPE.ARRAY:
-                    break;
-                case LED.TYPE.DIGITS:
-                    break;
-                }
+
                 if (!config.fixedSize) {
                     canvasView.setAttribute("class", "pcjs-canvas");
                 }
@@ -134,6 +128,7 @@ class LED extends Control {
                 canvasView.style.backgroundColor = this.backgroundColor;
                 container.appendChild(canvasView);
                 this.contextView = /** @type {CanvasRenderingContext2D} */ (canvasView.getContext("2d"));
+
                 /*
                  * canvasGrid is where all LED segments are composited; then they're drawn onto canvasView.
                  */
@@ -143,14 +138,17 @@ class LED extends Control {
                     this.canvasGrid.height = this.heightGrid = LED.CELL.HEIGHT * this.rows;
                     this.contextGrid = this.canvasGrid.getContext("2d");
                 }
+
                 /*
                  * Test code
                  */
                 this.clearGrid();
-                for (let idSeg in LED.SEGMENT) {
-                    this.drawGridSegment(0, 0, idSeg);
+                for (let iCol = 0; iCol < this.cols; iCol++) {
+                    for (let idSeg in LED.SEGMENT) {
+                        this.drawGridSegment(idSeg, iCol, 0);
+                    }
                 }
-                this.renderGrid();
+                this.drawGrid();
             }
         }
     }
@@ -166,39 +164,45 @@ class LED extends Control {
     }
 
     /**
-     * drawGridSegment(col, row, idSeg)
+     * drawGrid()
      *
      * @this {LED}
-     * @param {number} col
-     * @param {number} row
-     * @param {string} idSeg (eg, "SA")
      */
-    drawGridSegment(col, row, idSeg)
+    drawGrid()
     {
-        let points = LED.SEGMENT[idSeg];
-        if (points) {
+        this.contextView.drawImage(this.canvasGrid, 0, 0, this.widthGrid, this.heightGrid, 0, 0, this.widthView, this.heightView);
+    }
+
+    /**
+     * drawGridSegment(idSeg, col, row)
+     *
+     * @this {LED}
+     * @param {string} idSeg (eg, "SA")
+     * @param {number} [col] (default is zero)
+     * @param {number} [row] (default is zero)
+     */
+    drawGridSegment(idSeg, col, row)
+    {
+        let coords = LED.SEGMENT[idSeg];
+        if (coords) {
+            let xBias = col * LED.CELL.WIDTH;
+            let yBias = row * LED.CELL.HEIGHT;
             this.contextGrid.fillStyle = this.color;
             this.contextGrid.beginPath();
-            for (let i = 0; i < points.length; i += 2) {
-                if (!i) {
-                    this.contextGrid.moveTo(points[i], points[i+1]);
-                } else {
-                    this.contextGrid.lineTo(points[i], points[i+1]);
+            if (coords.length == 3) {
+                this.contextGrid.arc(coords[0] + xBias, coords[1] + yBias, coords[2], 0, 2 * Math.PI);
+            } else {
+                for (let i = 0; i < coords.length; i += 2) {
+                    if (!i) {
+                        this.contextGrid.moveTo(coords[i] + xBias, coords[i + 1] + yBias);
+                    } else {
+                        this.contextGrid.lineTo(coords[i] + xBias, coords[i + 1] + yBias);
+                    }
                 }
             }
             this.contextGrid.closePath();
             this.contextGrid.fill();
         }
-    }
-
-    /**
-     * renderGrid()
-     *
-     * @this {LED}
-     */
-    renderGrid()
-    {
-        this.contextView.drawImage(this.canvasGrid, 0, 0, this.widthGrid, this.heightGrid, 0, 0, this.widthView, this.heightView);
     }
 }
 
@@ -209,18 +213,19 @@ LED.TYPE = {
 };
 
 /*
- * Each segment is an array containing an initial moveTo() point followed by one or more lineTo() points.
+ * Each segment is an array containing an initial moveTo() point followed by one or more lineTo() coords.
  */
 LED.CELL = {
     WIDTH:      96,
     HEIGHT:     128
 };
 LED.SEGMENT = {
-    "SA":       [ 28,   8,  84,   8,  70,  20,  37,  20],
-    "SB":       [ 88,  12,  82,  58,  70,  52,  74,  24],
-    "SC":       [ 81,  65,  75, 111,  64,  98,  67,  71],
-    "SD":       [ 28, 101,  61, 101,  72, 116,  12, 116],
-    "SE":       [ 15,  64,  27,  71,  24,  99,   9, 111],
-    "SF":       [ 23,  10,  34,  23,  30,  51,  16,  58],
-    "SG":       [ 35,  55,  63,  55,  75,  61,  63,  68,  33,  68,  22,  61]
+    "SA":       [30,  8, 79,  8, 67, 19, 37, 19],
+    "SB":       [83, 10, 77, 52, 67, 46, 70, 22],
+    "SC":       [77, 59, 71,100, 61, 89, 64, 64],
+    "SD":       [28, 91, 58, 91, 69,104, 15,104],
+    "SE":       [18, 59, 28, 64, 25, 88, 12,100],
+    "SF":       [24, 10, 34, 21, 31, 47, 18, 52],
+    "SG":       [24, 56, 34, 50, 60, 50, 71, 56, 61, 61, 33, 61],
+    "SP":       [80,102, 8]
 };
