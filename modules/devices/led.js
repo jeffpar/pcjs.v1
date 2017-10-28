@@ -28,6 +28,20 @@
 
 "use strict";
 
+/**
+ * @typedef {{
+ *  class:              string,
+ *  type:               number,
+ *  xSize:              number,
+ *  ySize:              number,
+ *  xTotal:             number,
+ *  yTotal:             number,
+ *  color:              string,
+ *  backgroundColor:    string,
+ *  bindings:           Object
+ * }} LEDConfig
+ */
+
 /*
  * Provides support for a variety of LED types:
  *
@@ -66,10 +80,43 @@ class LED extends Control {
      * @this {LED}
      * @param {string} idMachine
      * @param {string} [idControl]
-     * @param {Object} [config]
+     * @param {LEDConfig} [config]
      */
     constructor(idMachine, idControl, config)
     {
         super(idMachine, idControl, config);
+        let container = this.bindings.screen;
+        if (container) {
+            let canvas = /** @type {HTMLCanvasElement} */ (document.createElement("canvas"));
+            if (canvas === undefined || !canvas.getContext) {
+                container.innerHTML = "Browser missing HTML5 canvas support";
+            } else {
+                let width = this.config.xSize;
+                let height = this.config.ySize;
+                switch(this.config.type) {
+                case LED.TYPE.SINGLE:
+                    break;
+                case LED.TYPE.ARRAY:
+                    break;
+                case LED.TYPE.DIGITS:
+                    width *= this.config.xTotal;
+                    height *= this.config.yTotal;
+                    break;
+                }
+                canvas.setAttribute("class", "pcjs-canvas");
+                canvas.setAttribute("width", width.toString());
+                canvas.setAttribute("height", height.toString());
+                canvas.style.height = "auto";
+                canvas.style.backgroundColor = this.config.backgroundColor;
+                container.appendChild(canvas);
+                let context = /** @type {CanvasRenderingContext2D} */ (canvas.getContext("2d"));
+            }
+        }
     }
 }
+
+LED.TYPE = {
+    SINGLE: 1,
+    ARRAY:  2,
+    DIGITS: 3
+};

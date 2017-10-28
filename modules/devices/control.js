@@ -78,6 +78,9 @@ class Control {
                 elementTextArea.value = "";
             }
             break;
+        default:
+            if (!this.bindings[binding]) this.bindings[binding] = element;
+            break;
         }
     }
 
@@ -89,7 +92,7 @@ class Control {
     addBindings()
     {
         this.bindings = {};
-        let bindings = this.config['bindings'];
+        let bindings = this.config.bindings;
         for (let binding in bindings) {
             let id = bindings[binding];
             let element = document.getElementById(id);

@@ -134,7 +134,7 @@ class Time extends Control {
      */
     calcCycles()
     {
-        var nMultiplier = this.mhzCurrent / this.mhzBase;
+        let nMultiplier = this.mhzCurrent / this.mhzBase;
         if (!nMultiplier || nMultiplier > this.nTargetMultiplier) {
             nMultiplier = this.nTargetMultiplier;
         }
@@ -161,7 +161,7 @@ class Time extends Control {
      */
     getCycles(fScaled)
     {
-        var nCycles = this.nCyclesTotal + this.nCyclesRun + this.nCyclesBurst - this.nCyclesRemain;
+        let nCycles = this.nCyclesTotal + this.nCyclesRun + this.nCyclesBurst - this.nCyclesRemain;
         if (fScaled && this.nTargetMultiplier > 1 && this.mhzCurrent > this.mhzBase) {
             /*
              * We could scale the current cycle count by the current speed (this.mhzCurrent); eg:
@@ -262,7 +262,7 @@ class Time extends Control {
      */
     setSpeed(nMultiplier)
     {
-        var fSuccess = true;
+        let fSuccess = true;
         if (nMultiplier !== undefined) {
             /*
              * If we haven't reached 90% (0.9) of the current target speed, revert to the default multiplier.
@@ -273,7 +273,7 @@ class Time extends Control {
             }
             this.mhzCurrent = 0;
             this.nTargetMultiplier = nMultiplier;
-            var mhzTarget = this.mhzBase * this.nTargetMultiplier;
+            let mhzTarget = this.mhzBase * this.nTargetMultiplier;
             if (this.mhzTarget != mhzTarget) {
                 this.mhzTarget = mhzTarget;
                 this.updateBindingText(Time.BINDING.SETSPEED, this.getSpeedTarget());
@@ -336,7 +336,7 @@ class Time extends Control {
          * This shouldn't be triggered when the Debugger stops time, because setSpeed() -- which is called
          * whenever the time starts again -- zeroes msEndThisRun.
          */
-        var msDelta = 0;
+        let msDelta = 0;
         if (this.msEndThisRun) {
             msDelta = this.msStartThisRun - this.msEndThisRun;
             if (msDelta > this.msYield) {
@@ -369,7 +369,7 @@ class Time extends Control {
             this.msStartThisRun += this.msOutsideThisRun;
         }
 
-        var msYield = this.msYield;
+        let msYield = this.msYield;
         if (this.nCyclesThisRun) {
             /*
              * Normally, we assume we executed a full quota of work over msYield.  If nCyclesThisRun is correct,
@@ -379,8 +379,8 @@ class Time extends Control {
             msYield = Math.round(msYield * this.nCyclesThisRun / this.nCyclesPerYield);
         }
 
-        var msElapsedThisRun = this.msEndThisRun - this.msStartThisRun;
-        var msRemainsThisRun = msYield - msElapsedThisRun;
+        let msElapsedThisRun = this.msEndThisRun - this.msStartThisRun;
+        let msRemainsThisRun = msYield - msElapsedThisRun;
 
         /*
          * We could pass only "this run" results to calcSpeed():
@@ -390,8 +390,8 @@ class Time extends Control {
          *
          * but it seems preferable to use longer time periods and hopefully get a more accurate speed.
          */
-        var nCycles = this.nCyclesRun;
-        var msElapsed = this.msEndThisRun - this.msStartRun;
+        let nCycles = this.nCyclesRun;
+        let msElapsed = this.msEndThisRun - this.msStartRun;
 
         if (MAXDEBUG && msRemainsThisRun < 0 && this.nTargetMultiplier > 1) {
             this.println("warning: updates @" + msElapsedThisRun + "ms (prefer " + Math.round(msYield) + "ms)");
@@ -450,7 +450,7 @@ class Time extends Control {
      */
     addTimer(callBack, ms = -1)
     {
-        var iTimer = this.aTimers.length;
+        let iTimer = this.aTimers.length;
         this.aTimers.push([callBack, ms, -1]);
         if (ms >= 0) this.setTimer(iTimer, ms);
         return iTimer;
@@ -479,9 +479,9 @@ class Time extends Control {
      */
     setTimer(iTimer, ms, fReset)
     {
-        var nCycles = -1;
+        let nCycles = -1;
         if (iTimer >= 0 && iTimer < this.aTimers.length) {
-            var timer = this.aTimers[iTimer];
+            let timer = this.aTimers[iTimer];
             if (fReset || timer[2] < 0) {
                 nCycles = this.getMSCycles(ms);
                 /*
@@ -512,7 +512,7 @@ class Time extends Control {
     setTimerCycles(iTimer, nCycles)
     {
         if (iTimer >= 0 && iTimer < this.aTimers.length) {
-            var timer = this.aTimers[iTimer];
+            let timer = this.aTimers[iTimer];
             /*
              * If we're currently executing a burst of cycles, the number of cycles it has executed in
              * that burst so far must NOT be charged against the cycle timeout we're about to set.  The simplest
@@ -552,8 +552,8 @@ class Time extends Control {
     getBurstCycles()
     {
         let nCycles = this.getCurrentCyclesPerSecond();
-        for (var iTimer = this.aTimers.length - 1; iTimer >= 0; iTimer--) {
-            var timer = this.aTimers[iTimer];
+        for (let iTimer = this.aTimers.length - 1; iTimer >= 0; iTimer--) {
+            let timer = this.aTimers[iTimer];
             this.assert(!isNaN(timer[2]));
             if (timer[2] < 0) continue;
             if (nCycles > timer[2]) {
@@ -574,8 +574,8 @@ class Time extends Control {
      */
     resetTimers()
     {
-        for (var iTimer = this.aTimers.length - 1; iTimer >= 0; iTimer--) {
-            var timer = this.aTimers[iTimer];
+        for (let iTimer = this.aTimers.length - 1; iTimer >= 0; iTimer--) {
+            let timer = this.aTimers[iTimer];
             if (timer[1] >= 0) this.setTimer(iTimer, timer[1], true);
         }
     }
@@ -592,8 +592,8 @@ class Time extends Control {
      */
     updateTimers(nCycles)
     {
-        for (var iTimer = this.aTimers.length - 1; iTimer >= 0; iTimer--) {
-            var timer = this.aTimers[iTimer];
+        for (let iTimer = this.aTimers.length - 1; iTimer >= 0; iTimer--) {
+            let timer = this.aTimers[iTimer];
             this.assert(!isNaN(timer[2]));
             if (timer[2] < 0) continue;
             timer[2] -= nCycles;
@@ -634,7 +634,7 @@ class Time extends Control {
      */
     endBurst()
     {
-        var nCycles = this.nCyclesBurst - this.nCyclesRemain;
+        let nCycles = this.nCyclesBurst - this.nCyclesRemain;
         this.nCyclesBurst = this.nCyclesRemain = 0;
         this.nCyclesThisRun += nCycles;
         this.nCyclesRun += nCycles;
@@ -712,7 +712,7 @@ class Time extends Control {
      */
     stop()
     {
-        var fStopped = false;
+        let fStopped = false;
         if (this.fRunning) {
             this.fRunning = false;
             this.endBurst();
@@ -734,9 +734,9 @@ class Time extends Control {
      */
     outside(fn)
     {
-        var msStart = Date.now();
+        let msStart = Date.now();
         if (fn()) {
-            var msStop = Date.now();
+            let msStop = Date.now();
             this.msOutsideThisRun += msStop - msStart;
             return true;
         }

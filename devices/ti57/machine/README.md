@@ -23,6 +23,8 @@ machines:
           "ySize": 128,
           "xTotal": 12,
           "yTotal": 1,
+          "color": "red",
+          "backgroundColor": "black",
           "bindings": {
             "screen": "screenTI57"
           }
@@ -174,7 +176,7 @@ TI-57 Test Page
 
 {% include machine.html id="TI57" %}
 
-<div id="TI57" style="position:relative;display:inline-block">
+<div id="TI57" style="position:relative;display:inline-block;">
   <img src="../images/TI-57-640.png"/>
-  <div id="screenTI57" style="position:absolute;top:8%;left:24%;width:53%;height:4%;background-color:green;opacity:0.5"></div>
+  <div id="screenTI57" style="position:absolute;top:8%;left:24%;width:53%;height:4%;"></div>
 </div>
