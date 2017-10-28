@@ -174,12 +174,11 @@ It's certainly unique among all the TI-57 patent listings, albeit a little hard 
 To produce the [dump](ti57pat867.txt) below, I started with the OCR'ed text of [4,125,901](../patents/us4125901),
 and then reviewed every entry, making corrections as needed.  There were a few places where it was difficult to
 distinguish between, say, `8` and `B`, and in those cases, my tendency was to leave the value from the listing
-in patent 4,125,901 in place.
+in patent 4,125,901 in place.  The result is [ti57pat867.bin](ti57pat867.bin), a 4096-byte 16-bit-word little-endian
+binary file.
 
 Interestingly, the final result of my very careful transcription of U.S. Patent No.
 [4,125,867](https://docs.google.com/viewer?url=patentimages.storage.googleapis.com/pdfs/US4125867.pdf) yields
 a ROM that, of all the patent ROM listings available, is *closest* to the [Dump of the "Hrast ROM"](#dump-of-the-hrast-rom).   
 
-The data below has also been saved as a 4096-byte 16-bit-word little-endian binary file: [ti57pat867.bin](ti57pat867.bin).
-  
 {% include_relative ti57pat867.txt %}
