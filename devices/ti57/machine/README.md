@@ -30,16 +30,16 @@ machines:
         "input": {
           "class": "Input",
           "map": [
-            ["2nd", "inv",  "lnx", "ce",   "clr"],
-            ["lrn", "xchg", "sq",  "sqrt", "rcp"],
-            ["sst", "sto",  "rcl", "sum",  "exp"],
-            ["bst", "ee",   "(",   ")",    "div"],
-            ["gto", "7",    "8",   "9",    "mul"],
-            ["sbr", "4",    "5",   "6",    "sub"],
-            ["rst", "1",    "2",   "3",    "add"],
-            ["r/s", "0",    ".",   "+/-",  "equ"]
+            ["2nd",  "inv",  "lnx",  "ce",   "clr"],
+            ["lrn",  "xchg", "sq",   "sqrt", "rcp"],
+            ["sst",  "sto",  "rcl",  "sum",  "exp"],
+            ["bst",  "ee",   "(",    ")",    "div"],
+            ["gto",  "7",    "8",    "9",    "mul"],
+            ["sbr",  "4",    "5",    "6",    "sub"],
+            ["rst",  "1",    "2",    "3",    "add"],
+            ["r/s",  "0",    ".",    "+/-",  "equ"]
           ],
-          "location": [136, 322, 459, 808],
+          "location": [139, 325, 368, 478, 0.34, 0.5, 640, 853],
           "bindings": {
             "surface": "imageTI57"
           }

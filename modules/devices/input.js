@@ -54,16 +54,16 @@ class Input extends Control {
      *      "input": {
      *        "class": "Input",
      *        "map": [
-     *          ["2nd", "inv",  "lnx", "ce",   "clr"],
-     *          ["lrn", "xchg", "sq",  "sqrt", "rcp"],
-     *          ["sst", "sto",  "rcl", "sum",  "exp"],
-     *          ["bst", "ee",   "(",   ")",    "div"],
-     *          ["gto", "7",    "8",   "9",    "mul"],
-     *          ["sbr", "4",    "5",   "6",    "sub"],
-     *          ["rst", "1",    "2",   "3",    "add"],
-     *          ["r/s", "0",    ".",   "+/-",  "equ"],
+     *          ["2nd",  "inv",  "lnx",  "ce",   "clr"],
+     *          ["lrn",  "xchg", "sq",   "sqrt", "rcp"],
+     *          ["sst",  "sto",  "rcl",  "sum",  "exp"],
+     *          ["bst",  "ee",   "(",    ")",    "div"],
+     *          ["gto",  "7",    "8",    "9",    "mul"],
+     *          ["sbr",  "4",    "5",    "6",    "sub"],
+     *          ["rst",  "1",    "2",    "3",    "add"],
+     *          ["r/s",  "0",    ".",    "+/-",  "equ"]
      *        ],
-     *        "location": [136, 322, 459, 808],
+     *        "location": [139, 325, 368, 478, 0.34, 0.5, 640, 853],
      *        "bindings": {
      *          "surface": "imageTI57"
      *        }
@@ -79,6 +79,50 @@ class Input extends Control {
         super(idMachine, idControl, config);
         let element = this.bindings.surface;
         if (element) {
+            /*
+             * The location array, eg:
+             *
+             *      "location": [139, 325, 368, 478, 0.34, 0.5, 640, 853],
+             *
+             * contains the top left corner (xInput, yInput) and dimensions (cxInput, cyInput)
+             * of the input rectangle where the buttons described in the map are located, relative
+             * to the surface image.  It also describes the amount of horizontal and vertical space
+             * between buttons, as fractions of the average button width and height (hGap, vGap).
+             * And finally, we store the dimensions of the surface image (cxSurface, cySurface).
+             * With all that, we can now calculate the center lines for each column and row.
+             *
+             * NOTE: While element.naturalWidth and element.naturalHeight should, for all modern
+             * browsers, contain the surface image's dimensions as well, those values still might not
+             * be available until the image's onload event fires, so we allow them to be stored in
+             * the location array, too.
+             */
+            this.xInput = this.config.location[0];
+            this.yInput = this.config.location[1];
+            this.cxInput = this.config.location[2];
+            this.cyInput = this.config.location[3];
+            this.hGap = this.config.location[4] || 1.0;
+            this.vGap = this.config.location[5] || 1.0;
+            this.cxSurface = this.config.location[6] || element.naturalWidth;
+            this.cySurface = this.config.location[7] || element.naturalHeight;
+            this.nRows = this.config.map.length;
+            this.nCols = this.config.map[0].length;
+
+            /*
+             * To calculate the button width (cxButton), we know that the overall width must equal
+             * the sum of all the button widths + the sum of all the button gaps:
+             *
+             *      cxInput = nCols * cxButton + nCols * (cxButton * hGap)
+             *
+             * The number of gaps would normally be (nCols - 1), but we require that cxInput include
+             * 1/2 the gap at the edges, too.  Solving for cxButton:
+             *
+             *      cxButton = cxInput / (nCols + nCols * hGap)
+             */
+            this.cxButton = (this.cxInput / (this.nCols + this.nCols * this.hGap))|0;
+            this.cyButton = (this.cyInput / (this.nRows + this.nRows * this.vGap))|0;
+            this.cxGap = (this.cxButton * this.hGap)|0;
+            this.cyGap = (this.cyButton * this.vGap)|0;
+
             /*
              * xStart and yStart record the last 'touchstart' or 'mousedown' position on the surface
              * image; they will be reset to -1 when movement has ended (eg, 'touchend' or 'mouseup').
@@ -181,7 +225,7 @@ class Input extends Control {
      */
     processEvent(element, action, event)
     {
-        let x, y;
+        let x = -1, y = -1, col = -1, row = -1;
 
         if (action < Input.ACTION.RELEASE) {
             /**
@@ -221,8 +265,28 @@ class Input extends Control {
              * Due to the responsive nature of our pages, the displayed size of the surface image may be smaller than
              * the original size, and the coordinates we receive from events are based on the currently displayed size.
              */
-            x = (x - xOffset) * (element.naturalWidth / element.offsetWidth)|0;
-            y = (y - yOffset) * (element.naturalHeight / element.offsetHeight)|0;
+            x = ((x - xOffset) * (this.cxSurface / element.offsetWidth))|0;
+            y = ((y - yOffset) * (this.cySurface / element.offsetHeight))|0;
+
+            let xInput = x - this.xInput;
+            let yInput = y - this.yInput;
+            if (xInput >= 0 && xInput < this.cxInput && yInput >= 0 && yInput < this.cyInput) {
+                let xInc = this.cxGap + this.cxButton;
+                let yInc = this.cyGap + this.cyButton;
+                let colInput = (xInput / xInc)|0;
+                let rowInput = (yInput / yInc)|0;
+                let xCol = colInput * xInc + this.cxGap;
+                let yCol = rowInput * yInc + this.cyGap;
+                /*
+                 * (xCol,yCol) is the top left corner of the button closest to the point of input.
+                 */
+                xInput -= xCol;
+                yInput -= yCol;
+                if (xInput >= 0 && xInput < this.cxButton && yInput >= 0 && yInput < this.cyButton) {
+                    col = colInput;
+                    row = rowInput;
+                }
+            }
         }
 
         event.preventDefault();
@@ -235,7 +299,7 @@ class Input extends Control {
             this.xStart = x;
             this.yStart = y;
             this.msStart = Date.now();
-            if (DEBUG) this.println("press action: (" + this.xStart + "," + this.yStart + ")");
+            if (DEBUG) this.println("press action: (" + this.xStart + "," + this.yStart + ") col=" + col + ", row=" + row);
         }
         else if (action == Input.ACTION.MOVE) {
             /*

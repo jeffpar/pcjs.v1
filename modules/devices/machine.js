@@ -50,12 +50,12 @@ class Machine extends Control {
      *      "display": {
      *        "class": "LED",
      *        "type": 3,
-     *        "width": 96,
-     *        "height": 128,
      *        "cols": 12,
      *        "rows": 1,
+     *        "color": "red",
+     *        "backgroundColor": "black",
      *        "bindings": {
-     *          "screen": "screenTI57"
+     *          "container": "displayTI57"
      *        }
      *      },
      *      "rom": {
