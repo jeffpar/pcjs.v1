@@ -275,8 +275,8 @@ class Input extends Control {
                 let yInc = this.cyGap + this.cyButton;
                 let colInput = (xInput / xInc)|0;
                 let rowInput = (yInput / yInc)|0;
-                let xCol = colInput * xInc + this.cxGap;
-                let yCol = rowInput * yInc + this.cyGap;
+                let xCol = colInput * xInc + (this.cxGap >> 1);
+                let yCol = rowInput * yInc + (this.cyGap >> 1);
                 /*
                  * (xCol,yCol) is the top left corner of the button closest to the point of input.
                  */
