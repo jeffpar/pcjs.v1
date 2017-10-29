@@ -62,20 +62,24 @@
  *
  * @class {LED}
  * @unrestricted
+ * @property {number} type (one of the LED.TYPE values)
  * @property {number} width (default is 96)
  * @property {number} height (default is 128)
  * @property {number} cols (default is 1)
  * @property {number} rows (default is 1)
+ * @property {string} color (default is "red")
+ * @property {string} backgroundColor (default is "black")
  * @property {number} widthView (computed)
  * @property {number} heightView (computed)
  * @property {number} widthGrid (computed)
  * @property {number} heightGrid (computed)
- * @property {string} color (default is "red")
- * @property {string} backgroundColor (default is "black")
  * @property {HTMLCanvasElement} canvasView
  * @property {CanvasRenderingContext2D} contextView
  * @property {HTMLCanvasElement} canvasGrid
  * @property {CanvasRenderingContext2D} contextGrid
+ * @property {{
+ *  container: HTMLElement|undefined
+ * }} bindings
  */
 class LED extends Control {
     /**
@@ -86,12 +90,12 @@ class LED extends Control {
      *      "display": {
      *        "class": "LED",
      *        "type": 3,
-     *        "width": 96,
-     *        "height": 128,
      *        "cols": 12,
      *        "rows": 1,
+     *        "color": "red",
+     *        "backgroundColor": "black",
      *        "bindings": {
-     *          "screen": "screenTI57"
+     *          "container": "displayTI57"
      *        }
      *      }
      *
@@ -103,7 +107,7 @@ class LED extends Control {
     constructor(idMachine, idControl, config)
     {
         super(idMachine, idControl, config);
-        let container = this.bindings.screen;
+        let container = this.bindings.container;
         if (container) {
             let canvasView = /** @type {HTMLCanvasElement} */ (document.createElement("canvas"));
             if (canvasView == undefined || !canvasView.getContext) {
@@ -111,6 +115,7 @@ class LED extends Control {
             } else {
                 this.canvasView = canvasView;
 
+                this.type = this.config.type;
                 this.width = this.config.width || 96;
                 this.height = this.config.height || 128;
                 this.cols = this.config.cols || 1;

@@ -24,7 +24,24 @@ machines:
           "color": "red",
           "backgroundColor": "black",
           "bindings": {
-            "screen": "screenTI57"
+            "container": "displayTI57"
+          }
+        },
+        "input": {
+          "class": "Input",
+          "map": [
+            ["2nd", "inv",  "lnx", "ce",   "clr"],
+            ["lrn", "xchg", "sq",  "sqrt", "rcp"],
+            ["sst", "sto",  "rcl", "sum",  "exp"],
+            ["bst", "ee",   "(",   ")",    "div"],
+            ["gto", "7",    "8",   "9",    "mul"],
+            ["sbr", "4",    "5",   "6",    "sub"],
+            ["rst", "1",    "2",   "3",    "add"],
+            ["r/s", "0",    ".",   "+/-",  "equ"]
+          ],
+          "location": [136, 322, 459, 808],
+          "bindings": {
+            "surface": "imageTI57"
           }
         },
         "rom": {
@@ -175,6 +192,6 @@ TI-57 Test Page
 {% include machine.html id="TI57" %}
 
 <div id="TI57" style="position:relative;display:inline-block;">
-  <img src="../images/TI-57-640.png"/>
-  <div id="screenTI57" style="position:absolute;top:8%;left:24%;width:53%;height:4%;"></div>
+  <img id="imageTI57" src="../images/TI-57-640.png"/>
+  <div id="displayTI57" style="position:absolute;top:8%;left:24%;width:53%;height:4%;"></div>
 </div>

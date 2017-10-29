@@ -242,6 +242,7 @@
   ],
   "machineFiles": [
     "./modules/devices/control.js",
+    "./modules/devices/input.js",
     "./modules/devices/led.js",
     "./modules/devices/rom.js",
     "./modules/devices/time.js",

@@ -84,6 +84,9 @@ class Machine extends Control {
                 let config = this.config[idControl];
                 let sClass = config['class'], control;
                 switch(sClass) {
+                case Machine.CLASS.INPUT:
+                    control = new Input(idMachine, idControl, config);
+                    break;
                 case Machine.CLASS.LED:
                     control = new LED(idMachine, idControl, config);
                     break;
@@ -99,7 +102,7 @@ class Machine extends Control {
             let sError = err.message;
             let match = sError.match(/position ([0-9]+)/);
             if (match) {
-                sError += " (" + sConfig.substr(+match[1], 40).replace(/\s+/g, ' ') + "...)";
+                sError += " ('" + sConfig.substr(+match[1], 40).replace(/\s+/g, ' ') + "...')";
             }
             this.println("error: " + sError);
         }
@@ -107,6 +110,7 @@ class Machine extends Control {
 }
 
 Machine.CLASS = {
+    INPUT:  "Input",
     LED:    "LED",
     ROM:    "ROM",
     TIME:   "Time"
