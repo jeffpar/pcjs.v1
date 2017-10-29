@@ -173,6 +173,28 @@ class Control {
     }
 
     /**
+     * findControl(idControl)
+     *
+     * @this {Control}
+     * @param {string} idControl
+     * @return {Control|undefined}
+     */
+    findControl(idControl)
+    {
+        let control;
+        let controls = Control.machines[this.idMachine];
+        if (controls) {
+            for (let i in controls) {
+                if (controls[i].idControl == idControl) {
+                    control = controls[i];
+                    break;
+                }
+            }
+        }
+        return control;
+    }
+
+    /**
      * print(s, category)
      *
      * Both print() and println() support an optional category parameter, which if set, should be one

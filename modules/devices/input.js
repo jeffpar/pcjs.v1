@@ -299,7 +299,16 @@ class Input extends Control {
             this.xStart = x;
             this.yStart = y;
             this.msStart = Date.now();
-            if (DEBUG) this.println("press action: (" + this.xStart + "," + this.yStart + ") col=" + col + ", row=" + row);
+            if (DEBUG) {
+                this.println("press action: (" + this.xStart + "," + this.yStart + ") col=" + col + ", row=" + row);
+                let led = /** @type {LED} */ (this.findControl("display"));
+                if (led) {
+                    led.clearGrid();
+                    led.drawSymbol(col < 0? "-" : col.toString(), 9, 0);
+                    led.drawSymbol(row < 0? "-" : row.toString(), 11, 0);
+                    led.drawGrid();
+                }
+            }
         }
         else if (action == Input.ACTION.MOVE) {
             /*

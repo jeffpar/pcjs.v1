@@ -165,7 +165,8 @@ class LED extends Control {
      */
     clearGrid()
     {
-        this.contextGrid.clearRect(0, 0, this.widthGrid, this.heightGrid);
+        this.contextGrid.fillStyle = this.backgroundColor;
+        this.contextGrid.fillRect(0, 0, this.widthGrid, this.heightGrid);
     }
 
     /**
@@ -186,7 +187,7 @@ class LED extends Control {
      * @param {number} [col] (default is zero)
      * @param {number} [row] (default is zero)
      */
-    drawGridSegment(idSeg, col, row)
+    drawGridSegment(idSeg, col = 0, row = 0)
     {
         let coords = LED.SEGMENT[idSeg];
         if (coords) {
@@ -209,6 +210,24 @@ class LED extends Control {
             this.contextGrid.fill();
         }
     }
+
+    /**
+     * drawSymbol(symbol, col, row)
+     *
+     * @this {LED}
+     * @param {string} symbol (must exist in LED.SYMBOLS)
+     * @param {number} [col] (default is zero)
+     * @param {number} [row] (default is zero)
+     */
+    drawSymbol(symbol, col = 0, row = 0)
+    {
+        let segments = LED.SYMBOLS[symbol];
+        if (segments) {
+            for (let i = 0; i < segments.length; i++) {
+                this.drawGridSegment(segments[i], col, row)
+            }
+        }
+    }
 }
 
 LED.TYPE = {
@@ -224,6 +243,7 @@ LED.CELL = {
     WIDTH:      96,
     HEIGHT:     128
 };
+
 LED.SEGMENT = {
     "SA":       [30,  8, 79,  8, 67, 19, 37, 19],
     "SB":       [83, 10, 77, 52, 67, 46, 70, 22],
@@ -233,4 +253,22 @@ LED.SEGMENT = {
     "SF":       [24, 10, 34, 21, 31, 47, 18, 52],
     "SG":       [24, 56, 34, 50, 60, 50, 71, 56, 61, 61, 33, 61],
     "SP":       [80,102, 8]
+};
+
+/*
+ * Normally, the construction of digits (or any other symbol) will be determined by the machine itself, but
+ * for diagnostic purposes, it's handy to have our own symbol to segment map.
+ */
+LED.SYMBOLS = {
+    "0":        ["SA","SB","SC","SD","SE","SF"],
+    "1":        ["SB","SC"],
+    "2":        ["SA","SB","SD","SE","SG"],
+    "3":        ["SA","SB","SC","SD","SG"],
+    "4":        ["SB","SC","SF","SG"],
+    "5":        ["SA","SC","SD","SF","SG"],
+    "6":        ["SA","SC","SD","SE","SF","SG"],
+    "7":        ["SA","SB","SC"],
+    "8":        ["SA","SB","SC","SD","SE","SF","SG"],
+    "9":        ["SA","SB","SC","SD","SF","SG"],
+    "-":        ["SG"]
 };
