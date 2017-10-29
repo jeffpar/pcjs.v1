@@ -57,11 +57,11 @@ class Input extends Control {
      *          ["2nd",  "inv",  "lnx",  "ce",   "clr"],
      *          ["lrn",  "xchg", "sq",   "sqrt", "rcp"],
      *          ["sst",  "sto",  "rcl",  "sum",  "exp"],
-     *          ["bst",  "ee",   "(",    ")",    "div"],
-     *          ["gto",  "7",    "8",    "9",    "mul"],
-     *          ["sbr",  "4",    "5",    "6",    "sub"],
-     *          ["rst",  "1",    "2",    "3",    "add"],
-     *          ["r/s",  "0",    ".",    "+/-",  "equ"]
+     *          ["bst",  "ee",   "(",    ")",    "/"],
+     *          ["gto",  "7",    "8",    "9",    "*"],
+     *          ["sbr",  "4",    "5",    "6",    "-"],
+     *          ["rst",  "1",    "2",    "3",    "+"],
+     *          ["r/s",  "0",    ".",    "+/-",  "="]
      *        ],
      *        "location": [139, 325, 368, 478, 0.34, 0.5, 640, 853],
      *        "bindings": {
@@ -86,8 +86,8 @@ class Input extends Control {
              *
              * contains the top left corner (xInput, yInput) and dimensions (cxInput, cyInput)
              * of the input rectangle where the buttons described in the map are located, relative
-             * to the surface image.  It also describes the amount of horizontal and vertical space
-             * between buttons, as fractions of the average button width and height (hGap, vGap).
+             * to the surface image.  It also describes the average amount of horizontal and vertical
+             * space between buttons, as fractions of the average button width and height (hGap, vGap).
              * And finally, we store the dimensions of the surface image (cxSurface, cySurface).
              * With all that, we can now calculate the center lines for each column and row.
              *
@@ -108,13 +108,13 @@ class Input extends Control {
             this.nCols = this.config.map[0].length;
 
             /*
-             * To calculate the button width (cxButton), we know that the overall width must equal
-             * the sum of all the button widths + the sum of all the button gaps:
+             * To calculate the average button width (cxButton), we know that the overall width
+             * must equal the sum of all the button widths + the sum of all the button gaps:
              *
              *      cxInput = nCols * cxButton + nCols * (cxButton * hGap)
              *
              * The number of gaps would normally be (nCols - 1), but we require that cxInput include
-             * 1/2 the gap at the edges, too.  Solving for cxButton:
+             * only 1/2 the gap at the edges, too.  Solving for cxButton:
              *
              *      cxButton = cxInput / (nCols + nCols * hGap)
              */
@@ -128,9 +128,45 @@ class Input extends Control {
              * image; they will be reset to -1 when movement has ended (eg, 'touchend' or 'mouseup').
              */
             this.xStart = this.yStart = -1;
+            this.captureKbd(document);
             this.captureMouse(element);
             this.captureTouch(element);
+
+            /*
+             * Finally, the active input state.  If there is no active input, col and row are -1.  After
+             * this point, these variables will be updated by setInput().
+             */
+            this.col = this.row = -1;
         }
+    }
+
+    /**
+     * captureKbd(element)
+     *
+     * @this {Input}
+     * @param {HTMLDocument|HTMLElement} element
+     */
+    captureKbd(element) {
+        let input = this;
+        element.addEventListener(
+            'keypress',
+            function onKeyPress(event) {
+                event = event || window.event;
+                let keyCode = event.which || event.keyCode;
+                if (keyCode) {
+                    let ch = String.fromCharCode(keyCode);
+                    for (let row = 0; row < input.config.map.length; row++) {
+                        let rowMap = input.config.map[row];
+                        for (let col = 0; col < rowMap.length; col++) {
+                            if (ch == rowMap[col]) {
+                                input.setInput(col, row);
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+        );
     }
 
     /**
@@ -225,7 +261,7 @@ class Input extends Control {
      */
     processEvent(element, action, event)
     {
-        let x = -1, y = -1, col = -1, row = -1;
+        let x, y, xInput, yInput, col, row, fInput;
 
         if (action < Input.ACTION.RELEASE) {
             /**
@@ -268,46 +304,56 @@ class Input extends Control {
             x = ((x - xOffset) * (this.cxSurface / element.offsetWidth))|0;
             y = ((y - yOffset) * (this.cySurface / element.offsetHeight))|0;
 
-            let xInput = x - this.xInput;
-            let yInput = y - this.yInput;
+            xInput = x - this.xInput;
+            yInput = y - this.yInput;
             if (xInput >= 0 && xInput < this.cxInput && yInput >= 0 && yInput < this.cyInput) {
-                let xInc = this.cxGap + this.cxButton;
-                let yInc = this.cyGap + this.cyButton;
-                let colInput = (xInput / xInc)|0;
-                let rowInput = (yInput / yInc)|0;
-                let xCol = colInput * xInc + (this.cxGap >> 1);
-                let yCol = rowInput * yInc + (this.cyGap >> 1);
+                fInput = true;
                 /*
-                 * (xCol,yCol) is the top left corner of the button closest to the point of input.
+                 * The width and height of each column and row could be determined by computing cxGap + cxButton
+                 * and cyGap + cyButton, respectively, but those gap and button sizes are merely estimates, and should
+                 * only be used to help with the final button coordinate checks farther down.
                  */
+                let cxCol = (this.cxInput / this.nCols)|0;
+                let cyCol = (this.cyInput / this.nRows)|0;
+                let colInput = (xInput / cxCol)|0;
+                let rowInput = (yInput / cyCol)|0;
+
+                /*
+                 * (xCol,yCol) will be the top left corner of the button closest to the point of input.  However, that's
+                 * based on our gap estimate.  If things seem "too tight", shrink the gap estimates, which will automatically
+                 * increase the button size estimates.
+                 */
+                let xCol = colInput * cxCol + (this.cxGap >> 1);
+                let yCol = rowInput * cyCol + (this.cyGap >> 1);
+
                 xInput -= xCol;
                 yInput -= yCol;
+                col = row = -1;
                 if (xInput >= 0 && xInput < this.cxButton && yInput >= 0 && yInput < this.cyButton) {
                     col = colInput;
                     row = rowInput;
                 }
+                /*
+                 * If we allow touch events to be processed, they will generate mouse events as well, causing
+                 * confusion and delays.  We can sidestep that problem by preventing default actions on any event
+                 * that occurs within the input region.  One downside is that you can no longer scroll the image
+                 * using touch, but that may be just as well, because you probably don't want a sloppy touch moving
+                 * your device around (or worse, a rapid double-tap zooming the device).  Besides, if you really
+                 * want to move or zoom the device, the solution is simple: touch *outside* the input region.
+                 */
+                event.preventDefault();
             }
         }
 
-        event.preventDefault();
-
         if (action == Input.ACTION.PRESS) {
             /*
-             * All we do is record the grid position of that event, transitioning xStart and yStart
-             * from negative to non-negative values (grid positions cannot be negative).
+             * All we do is record the position of the event, transitioning xStart and yStart
+             * from negative to non-negative values.
              */
             this.xStart = x;
             this.yStart = y;
-            this.msStart = Date.now();
-            if (DEBUG) {
-                this.println("press action: (" + this.xStart + "," + this.yStart + ") col=" + col + ", row=" + row);
-                let led = /** @type {LED} */ (this.findControl("display"));
-                if (led) {
-                    led.clearGrid();
-                    led.drawSymbol(col < 0? "-" : col.toString(), 9, 0);
-                    led.drawSymbol(row < 0? "-" : row.toString(), 11, 0);
-                    led.drawGrid();
-                }
+            if (fInput) {
+                this.setInput(col, row);
             }
         }
         else if (action == Input.ACTION.MOVE) {
@@ -317,10 +363,33 @@ class Input extends Control {
              */
         }
         else if (action == Input.ACTION.RELEASE) {
+            this.setInput(-1, -1);
             this.xStart = this.yStart = -1;
         }
         else {
             this.println("unrecognized action: " + action);
+        }
+    }
+
+    /**
+     * setInput(col, row)
+     *
+     * @param {number} col
+     * @param {number} row
+     */
+    setInput(col, row)
+    {
+        this.row = row;
+        this.col = col;
+        if (DEBUG) {
+            this.println("new input: col=" + col + ", row=" + row);
+            let led = /** @type {LED} */ (this.findControl("display"));
+            if (led) {
+                led.clearGrid();
+                led.drawSymbol(col < 0? "-" : col.toString(), 9, 0);
+                led.drawSymbol(row < 0? "-" : row.toString(), 11, 0);
+                led.drawGrid();
+            }
         }
     }
 }
