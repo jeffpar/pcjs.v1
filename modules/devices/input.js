@@ -379,16 +379,18 @@ class Input extends Control {
      */
     setInput(col, row)
     {
-        this.row = row;
-        this.col = col;
-        if (DEBUG) {
-            this.println("new input: col=" + col + ", row=" + row);
-            let led = /** @type {LED} */ (this.findControl("display"));
-            if (led) {
-                led.clearGrid();
-                led.drawSymbol(col < 0? "-" : col.toString(), 9, 0);
-                led.drawSymbol(row < 0? "-" : row.toString(), 11, 0);
-                led.drawGrid();
+        if (col != this.col || row != this.row) {
+            this.row = row;
+            this.col = col;
+            if (DEBUG) {
+                this.println("new input: col=" + col + ", row=" + row);
+                let led = /** @type {LED} */ (this.findControl("display"));
+                if (led) {
+                    led.clearGrid();
+                    led.drawSymbol(col < 0? "-" : col.toString(), 9, 0);
+                    led.drawSymbol(row < 0? "-" : row.toString(), 11, 0);
+                    led.drawGrid();
+                }
             }
         }
     }
