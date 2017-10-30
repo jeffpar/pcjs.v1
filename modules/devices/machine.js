@@ -89,47 +89,58 @@ class Machine extends Control {
             this.println("error: " + sError);
         }
         /*
+         * Device initialization is now deferred until after the page is fully loaded, for the benefit
+         * of devices (eg, Input) that may be dependent on page resources.
+         *
          * Strangely, for 'load' events, I must use the window object (not document).
          */
         let machine = this;
         window.addEventListener('load', function onLoad(event) {
-            machine.loadDevices();
+            machine.initDevices();
         });
     }
 
     /**
-     * loadDevices()
+     * initDevices()
      *
-     * Factored out of the constructor in case some devices (eg, Input) are dependent on page resources.
+     * Initializes devices in the proper order.  For example, any Time devices should be initialized first,
+     * to ensure that timer services are available.
      *
      * @this {Machine}
      */
-    loadDevices()
+    initDevices()
     {
-        for (let idControl in this.config) {
-            let config = this.config[idControl];
-            let sClass = config['class'], control;
-            switch(sClass) {
-            case Machine.CLASS.INPUT:
-                control = new Input(this.idMachine, idControl, config);
-                break;
-            case Machine.CLASS.LED:
-                control = new LED(this.idMachine, idControl, config);
-                break;
-            case Machine.CLASS.ROM:
-                control = new ROM(this.idMachine, idControl, config);
-                break;
-            case Machine.CLASS.TIME:
-                control = new Time(this.idMachine, idControl, config);
-                break;
+        for (let iClass = 0; iClass < Machine.CLASSORDER.length; iClass++) {
+            for (let idControl in this.config) {
+                let config = this.config[idControl];
+                let sClass = config['class'], control;
+                if (sClass != Machine.CLASSORDER[iClass]) continue;
+                switch (sClass) {
+                case Machine.CLASS.INPUT:
+                    control = new Input(this.idMachine, idControl, config);
+                    break;
+                case Machine.CLASS.LED:
+                    control = new LED(this.idMachine, idControl, config);
+                    break;
+                case Machine.CLASS.ROM:
+                    control = new ROM(this.idMachine, idControl, config);
+                    break;
+                case Machine.CLASS.TIME:
+                    control = new Time(this.idMachine, idControl, config);
+                    break;
+                }
             }
         }
     }
 }
 
 Machine.CLASS = {
-    INPUT:  "Input",
-    LED:    "LED",
-    ROM:    "ROM",
-    TIME:   "Time"
+    INPUT:      "Input",
+    LED:        "LED",
+    ROM:        "ROM",
+    TIME:       "Time"
 };
+
+Machine.CLASSORDER = [
+    "Time", "LED", "Input", "ROM"
+];

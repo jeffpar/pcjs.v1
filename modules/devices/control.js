@@ -31,11 +31,21 @@
 var DEBUG = true;
 
 /**
+ *
+ * The following properties are the minimum set of properties we expect a Control's config object to
+ * contain.  Classes will generally define their own extended version (eg, LEDConfig, InputConfig, etc).
+ *
+ * @typedef {Object} Config
+ * @property {string} class
+ * @property {Object} bindings
+ */
+
+/**
  * @class {Control}
  * @unrestricted
  * @property {string} idMachine
  * @property {string} idControl
- * @property {Object} config
+ * @property {Config} config
  * @property {string} printCategory
  * @property {Object} bindings [added by addBindings()]
  */
@@ -186,6 +196,28 @@ class Control {
         if (controls) {
             for (let i in controls) {
                 if (controls[i].idControl == idControl) {
+                    control = controls[i];
+                    break;
+                }
+            }
+        }
+        return control;
+    }
+
+    /**
+     * findControlByClass(idClass)
+     *
+     * @this {Control}
+     * @param {string} idClass
+     * @return {Control|undefined}
+     */
+    findControlByClass(idClass)
+    {
+        let control;
+        let controls = Control.Machines[this.idMachine];
+        if (controls) {
+            for (let i in controls) {
+                if (controls[i].config.class == idClass) {
                     control = controls[i];
                     break;
                 }

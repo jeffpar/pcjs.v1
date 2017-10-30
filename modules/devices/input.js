@@ -128,11 +128,21 @@ class Input extends Control {
              * image; they will be reset to -1 when movement has ended (eg, 'touchend' or 'mouseup').
              */
             this.xStart = this.yStart = -1;
-            /*
-             * For 'keypress' events, I must use the document object, since image elements are not a
-             * traditional keyboard input source.
-             */
-            this.captureKbd(document);
+
+            let input = this;
+            this.time = this.findControlByClass("Time");
+            if (this.time) {
+                this.timerKeyRelease = this.time.addTimer(function() {
+                    input.onKeyRelease();
+                });
+                this.keyPressed = null;
+                /*
+                 * For 'keypress' events, I must use the document object, since image elements are not
+                 * a traditional keyboard input source.
+                 */
+                this.captureKbd(document);
+            }
+
             this.captureMouse(element);
             this.captureTouch(element);
 
@@ -158,19 +168,49 @@ class Input extends Control {
                 event = event || window.event;
                 let keyCode = event.which || event.keyCode;
                 if (keyCode) {
-                    let ch = String.fromCharCode(keyCode);
-                    for (let row = 0; row < input.config.map.length; row++) {
-                        let rowMap = input.config.map[row];
-                        for (let col = 0; col < rowMap.length; col++) {
-                            if (ch == rowMap[col]) {
-                                input.setInput(col, row);
-                                return;
-                            }
-                        }
-                    }
+                    input.onKeyPress(String.fromCharCode(keyCode));
                 }
             }
         );
+    }
+
+    /**
+     * onKeyPress(ch)
+     *
+     * @this {Input}
+     * @param {string} ch
+     */
+    onKeyPress(ch)
+    {
+        if (!this.keyPressed) {
+            for (let row = 0; row < this.config.map.length; row++) {
+                let rowMap = this.config.map[row];
+                for (let col = 0; col < rowMap.length; col++) {
+                    if (ch == rowMap[col]) {
+                        this.keyPressed = ch;
+                        this.setInput(col, row);
+                        this.time.setTimer(this.timerKeyRelease, 200);
+                        return;
+                    }
+                }
+            }
+            this.println("key not recognized: " + ch);
+            return;
+        }
+        this.println("too many keys pressed, ignoring key: " + ch);
+    }
+
+    /**
+     * onKeyRelease()
+     *
+     * @this {Input}
+     */
+    onKeyRelease()
+    {
+        if (this.keyPressed) {
+            this.keyPressed = null;
+            this.setInput(-1, -1);
+        }
     }
 
     /**
@@ -387,7 +427,7 @@ class Input extends Control {
             this.row = row;
             this.col = col;
             if (DEBUG) {
-                this.println("new input: col=" + col + ", row=" + row);
+                this.println("input: col=" + col + ", row=" + row);
                 let led = /** @type {LED} */ (this.findControl("display"));
                 if (led) {
                     led.clearGrid();
