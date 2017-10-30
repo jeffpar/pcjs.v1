@@ -398,7 +398,7 @@ class Time extends Control {
         let nCycles = this.nCyclesRun;
         let msElapsed = this.msEndThisRun - this.msStartRun;
 
-        if (MAXDEBUG && msRemainsThisRun < 0 && this.nTargetMultiplier > 1) {
+        if (DEBUG && msRemainsThisRun < 0 && this.nTargetMultiplier > 1) {
             this.println("warning: updates @" + msElapsedThisRun + "ms (prefer " + Math.round(msYield) + "ms)");
         }
 

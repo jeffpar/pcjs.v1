@@ -191,7 +191,14 @@ TI-57 Test Page
 
 {% include machine.html id="TI57" %}
 
-<div id="TI57" style="position:relative;display:inline-block;">
+<div id="TI57" style="position:relative;display:inline-block;float:left;">
   <img id="imageTI57" src="../images/TI-57-640.png"/>
   <div id="displayTI57" style="position:absolute;top:8%;left:24%;width:53%;height:4%;"></div>
+</div>
+<div style="float:left;">
+  <div style="width:100%;">
+    <p>Status Window</p>
+    <textarea id="printTI57" cols="80" rows="10" style="font-family:Monaco,'Lucida Console',monospace;"></textarea>
+  </div>
+  <button id="runTI57">Run</button>
 </div>
