@@ -120,8 +120,8 @@ class Control {
      */
     addControl()
     {
-        if (!Control.machines[this.idMachine]) Control.machines[this.idMachine] = [];
-        Control.machines[this.idMachine].push(this);
+        if (!Control.Machines[this.idMachine]) Control.Machines[this.idMachine] = [];
+        Control.Machines[this.idMachine].push(this);
     }
 
     /**
@@ -161,7 +161,7 @@ class Control {
     {
         let element = this.bindings[name];
         if (element === undefined && fAll) {
-            let controls = Control.machines[this.idMachine];
+            let controls = Control.Machines[this.idMachine];
             for (let i in controls) {
                 element = controls[i].bindings[name];
                 if (element) break;
@@ -182,7 +182,7 @@ class Control {
     findControl(idControl)
     {
         let control;
-        let controls = Control.machines[this.idMachine];
+        let controls = Control.Machines[this.idMachine];
         if (controls) {
             for (let i in controls) {
                 if (controls[i].idControl == idControl) {
@@ -220,11 +220,11 @@ class Control {
             else {
                 let i = s.lastIndexOf('\n');
                 if (i >= 0) {
-                    console.log(Control.printBuffer + s.substr(0, i));
-                    Control.printBuffer = "";
+                    console.log(Control.PrintBuffer + s.substr(0, i));
+                    Control.PrintBuffer = "";
                     s = s.substr(i + 1);
                 }
-                Control.printBuffer += s;
+                Control.PrintBuffer += s;
             }
         }
     }
@@ -341,13 +341,15 @@ Control.CATEGORY = {
 };
 
 /**
- * machines is an Object whose properties are machine IDs and whose values are arrays of Controls.
+ * Machines is a global object whose properties are machine IDs and whose values are arrays of Controls.
  *
  * @type {Object}
  */
-Control.machines = {};
+Control.Machines = {};
 
 /**
+ * PrintBuffer is a global string that buffers partial lines for our print services when using console.log().
+ *
  * @type {string}
  */
-Control.printBuffer = "";
+Control.PrintBuffer = "";

@@ -93,8 +93,8 @@ class Input extends Control {
              *
              * NOTE: While element.naturalWidth and element.naturalHeight should, for all modern
              * browsers, contain the surface image's dimensions as well, those values still might not
-             * be available until the image's onload event fires, so we allow them to be stored in
-             * the location array, too.
+             * be available if our constructor is called before the page's onload event has fired,
+             * so we allow them to be stored in the location array, too.
              */
             this.xInput = this.config.location[0];
             this.yInput = this.config.location[1];
@@ -128,6 +128,10 @@ class Input extends Control {
              * image; they will be reset to -1 when movement has ended (eg, 'touchend' or 'mouseup').
              */
             this.xStart = this.yStart = -1;
+            /*
+             * For 'keypress' events, I must use the document object, since image elements are not a
+             * traditional keyboard input source.
+             */
             this.captureKbd(document);
             this.captureMouse(element);
             this.captureTouch(element);

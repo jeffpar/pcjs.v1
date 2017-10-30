@@ -80,24 +80,6 @@ class Machine extends Control {
         super(idMachine);
         try {
             this.config = JSON.parse(sConfig);
-            for (let idControl in this.config) {
-                let config = this.config[idControl];
-                let sClass = config['class'], control;
-                switch(sClass) {
-                case Machine.CLASS.INPUT:
-                    control = new Input(idMachine, idControl, config);
-                    break;
-                case Machine.CLASS.LED:
-                    control = new LED(idMachine, idControl, config);
-                    break;
-                case Machine.CLASS.ROM:
-                    control = new ROM(idMachine, idControl, config);
-                    break;
-                case Machine.CLASS.TIME:
-                    control = new Time(idMachine, idControl, config);
-                    break;
-                }
-            }
         } catch(err) {
             let sError = err.message;
             let match = sError.match(/position ([0-9]+)/);
@@ -105,6 +87,42 @@ class Machine extends Control {
                 sError += " ('" + sConfig.substr(+match[1], 40).replace(/\s+/g, ' ') + "...')";
             }
             this.println("error: " + sError);
+        }
+        /*
+         * Strangely, for 'load' events, I must use the window object (not document).
+         */
+        let machine = this;
+        window.addEventListener('load', function onLoad(event) {
+            machine.loadDevices();
+        });
+    }
+
+    /**
+     * loadDevices()
+     *
+     * Factored out of the constructor in case some devices (eg, Input) are dependent on page resources.
+     *
+     * @this {Machine}
+     */
+    loadDevices()
+    {
+        for (let idControl in this.config) {
+            let config = this.config[idControl];
+            let sClass = config['class'], control;
+            switch(sClass) {
+            case Machine.CLASS.INPUT:
+                control = new Input(this.idMachine, idControl, config);
+                break;
+            case Machine.CLASS.LED:
+                control = new LED(this.idMachine, idControl, config);
+                break;
+            case Machine.CLASS.ROM:
+                control = new ROM(this.idMachine, idControl, config);
+                break;
+            case Machine.CLASS.TIME:
+                control = new Time(this.idMachine, idControl, config);
+                break;
+            }
         }
     }
 }
