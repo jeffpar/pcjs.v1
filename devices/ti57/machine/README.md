@@ -3,11 +3,15 @@ layout: page
 title: TI-57 Test Page
 permalink: /devices/ti57/machine/
 machines:
-  - id: TI57
-    type: Machine
+  - id: ti57
+    type: TI57
     name: TI-57 Programmable Calculator
     config: |
       {
+        "chip": {
+          "class": "Chip",
+          "type": "TMS-1500"
+        },
         "clock": {
           "class": "Time",
           "cyclesPerSecond": 1600000,
@@ -185,21 +189,34 @@ machines:
           ]
         }
       }
+styles:
+  ti57:
+    position: relative;
+    display: inline-block;
+    float: left;
+  displayTI57:
+    position: absolute;
+    top: 8%;
+    left: 24%;
+    width: 53%;
+    height: 4%;
+  printTI57:
+    font-family: Monaco,"Lucida Console",monospace;
 ---
 
 TI-57 Test Page
 ---------------
 
-{% include machine.html id="TI57" %}
+{% include machine.html id="ti57" %}
 
-<div id="TI57" style="position:relative;display:inline-block;float:left;">
+<div id="ti57"">
   <img id="imageTI57" src="../images/TI-57-640.png"/>
-  <div id="displayTI57" style="position:absolute;top:8%;left:24%;width:53%;height:4%;"></div>
+  <div id="displayTI57"></div>
 </div>
 <div style="float:left;">
   <div style="width:100%;">
     <p>Status Window</p>
-    <textarea id="printTI57" cols="80" rows="10" style="font-family:Monaco,'Lucida Console',monospace;"></textarea>
+    <textarea id="printTI57" cols="80" rows="10"></textarea>
   </div>
   <button id="runTI57">Run</button><span id="speedTI57">Stopped</span>
 </div>

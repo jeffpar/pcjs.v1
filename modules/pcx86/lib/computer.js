@@ -30,7 +30,7 @@
  * BUILD INSTRUCTIONS
  *
  * To build PCx86 (pcx86.js), run Google's Closure Compiler, replacing "*.js" with the input file sequence defined
- * by the "pcX86Files" property in package.json:
+ * by the "PCx86Files" property in package.json:
  *
  *      java -jar compiler.jar
  *          --compilation_level ADVANCED_OPTIMIZATIONS

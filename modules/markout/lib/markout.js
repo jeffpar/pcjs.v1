@@ -114,7 +114,8 @@ function MarkOut(sMD, sIndent, req, aParms, fDebug, sMachineFile, fAutoHeading)
     this.aMachines = [];    // this keeps track of embedded machines on the page
     this.buildOptions = {}; // this keeps track of any build options specified on the page
     this.aMachineDefs = {}; // this keeps track of any machine definitions at the top of the file (as part of any Jekyll "Front Matter")
-    this.aScriptDefs = {};  // this keeps track of any script definitions at the top of the file (as part of any Jekyll "Front Matter")
+    this.aScriptDefs = {};  // ditto for any script definitions
+    this.aStyleDefs = {};   // ditto for any style definitions
 }
 
 /*
@@ -261,6 +262,17 @@ MarkOut.prototype.addMachine = function(infoMachine)
 MarkOut.prototype.getMachines = function()
 {
     return this.aMachines;
+};
+
+/**
+ * getStyles()
+ *
+ * @this {MarkOut}
+ * @return {Object}
+ */
+MarkOut.prototype.getStyles = function()
+{
+    return this.aStyleDefs;
 };
 
 /**
@@ -438,6 +450,22 @@ MarkOut.prototype.convertMD = function(sIndent)
              * Remove the Front Matter.
              */
             sMD = sMD.replace(aMatch[0], "");
+
+            /*
+             * Extract style definitions, if any, from the Front Matter.
+             */
+            var aStyleDefs = aMatch[1].match(/\nstyles:([\s\S]*?)\n([^\s]|$)/);
+            if (aStyleDefs) {
+                var reStyle = /\n  ([a-z][a-z0-9-]*):\n/gi;
+                var aStyles = aStyleDefs[1].split(reStyle);
+                /*
+                 * Since the preceding RegExp contains a capture group (representing the ID for the style),
+                 * it will be "spliced" into the split results.
+                 */
+                for (var iStyle = 1; iStyle < aStyles.length; iStyle += 2) {
+                    this.aStyleDefs[aStyles[iStyle]] = aStyles[iStyle+1];
+                }
+            }
 
             /*
              * Extract script definitions first, if any, from the Front Matter.
@@ -1263,7 +1291,7 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
      * Start looking for Markdown-style machine links now...
      */
     var cMatches = 0;
-    var reMachines = /\[(.*?)]\((.*?)\s*"(PC|C1P|PDP|Machine)([^:!|]*)([:!|])(.*?)"\)/gi;
+    var reMachines = /\[(.*?)]\((.*?)\s*"(PC|C1P|PDP|TI57)([^:!|]*)([:!|])(.*?)"\)/gi;
 
     while ((aMatch = reMachines.exec(sBlock))) {
 
@@ -1272,8 +1300,8 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
         if (sMachineXMLFile.slice(-1) == "/") sMachineXMLFile += "machine.xml";
 
         sMachineType = aMatch[3];
-        if (sMachineType == "Machine") {
-            sMachineFunc = "new " + sMachineType;
+        if (sMachineXMLFile == "{}") {
+            sMachineFunc = "new Machine";
         } else {
             sMachineType = sMachineType.toUpperCase();
             sMachineType += (aMatch[4] != "js"? aMatch[4] : "");
@@ -1292,12 +1320,12 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
         var fDebugger = (aMachineOptions.indexOf("debugger") >= 0);
         var fSticky = (aMachineOptions.indexOf("sticky") >= 0);
 
-        if (sMachineType == "Machine") {
+        if (sMachineXMLFile == "{}") {
             /*
-             * For generic machines, we are using JSON configurations rather than XML files;
-             * XML files were handy because they are easily transformed into XHTML which can then be
-             * inserted into the <div> below, but since JSON isn't well-suited for that, it will be
-             * up to the page to supply its own HTML layout for the machine's visual elements.
+             * For machines using JSON configurations rather than XML files; XML files were handy
+             * because they are easily transformed into XHTML which can then be inserted into the <div> below,
+             * but since JSON isn't well-suited for that, it will be up to the page to supply its own HTML layout
+             * for the machine's visual elements.
              */
             sReplacement = "";
         } else {

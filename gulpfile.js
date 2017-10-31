@@ -83,7 +83,7 @@ if (pkg.homepage) {
 }
 
 gulp.task('mktmp', function() {
-    return gulp.src(pkg.pdp11ES6Files)
+    return gulp.src(pkg.PDP11Files)
         .pipe(foreach(function(stream, file){
               return stream
                 .pipe(header('/**\n * @copyright ' + file.path.replace(/.*\/(modules\/.*)/, "http://pcjs.org/$1") + ' (C) Jeff Parsons 2012-2017\n */\n\n'))

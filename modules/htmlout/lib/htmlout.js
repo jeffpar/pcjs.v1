@@ -49,13 +49,14 @@ var usr     = require("../../shared/lib/usrlib");
  * @class exports
  * @property {string} name
  * @property {string} version
- * @property {Array.<string>} c1pCSSFiles
- * @property {Array.<string>} c1pJSFiles
- * @property {Array.<string>} pcCSSFiles
- * @property {Array.<string>} pcX86Files
- * @property {Array.<string>} pc8080Files
- * @property {Array.<string>} pdp10Files
- * @property {Array.<string>} pdp11Files
+ * @property {Array.<string>} C1PCSSFiles
+ * @property {Array.<string>} C1PFiles
+ * @property {Array.<string>} PCCSSFiles
+ * @property {Array.<string>} PCx86Files
+ * @property {Array.<string>} PC8080Files
+ * @property {Array.<string>} PDP10Files
+ * @property {Array.<string>} PDP11Files
+ * @property {Array.<string>} TI57Files
  */
 var pkg = require("../../../package.json");
 
@@ -166,13 +167,13 @@ var sManifestXMLFile = "manifest.xml";
  * the closing </head> tag, and JS files are added just before the closing </body> tag.
  */
 var aMachineFiles = {
-    'C1P':      pkg.c1pCSSFiles.concat(pkg.c1pJSFiles),     // will be deprecated when PC6502 becomes available
-    'PC':       pkg.pcCSSFiles.concat(pkg.pcX86Files),      // deprecated (same as PCx86)
-    'PCx86':    pkg.pcCSSFiles.concat(pkg.pcX86Files),
-    'PC8080':   pkg.pcCSSFiles.concat(pkg.pc8080Files),
-    'PDP10':    pkg.pcCSSFiles.concat(pkg.pdp10Files),
-    'PDP11':    pkg.pcCSSFiles.concat(pkg.pdp11Files),
-    'Machine':  pkg.pcCSSFiles.concat(pkg.machineFiles)
+    'C1P':      pkg.C1PCSS.concat(pkg.C1PFiles),        // will be deprecated when PC6502 becomes available
+    'PC':       pkg.PCCSS.concat(pkg.PCx86Files),       // deprecated (same as PCx86)
+    'PCx86':    pkg.PCCSS.concat(pkg.PCx86Files),
+    'PC8080':   pkg.PCCSS.concat(pkg.PC8080Files),
+    'PDP10':    pkg.PCCSS.concat(pkg.PDP10Files),
+    'PDP11':    pkg.PCCSS.concat(pkg.PDP11Files),
+    'TI57':     pkg.PCCSS.concat(pkg.TI57Files)
 };
 var aMachineFileTypes = {
     'head': [".css"],           // put BOTH ".css" and ".js" here if convertMDMachineLinks() embeds its own scripts
@@ -1505,7 +1506,6 @@ HTMLOut.prototype.getMachineXML = function(sToken, sIndent, aParms, sXMLFile, sS
                     s = '[Embedded ' + sMachineType + '](' + sXMLFile + ' "' + sMachineDef + '")';
                     var m = new MarkOut(s, sIndent, obj.req, null, obj.fDebug);
                     s = m.convertMD("    ").trim();
-
                     obj.processMachines(m.getMachines(), m.getBuildOptions(), function doneProcessXMLMachines() {
                         obj.getMarkdownFile(obj.sFile, sToken, sIndent, aParms, s, sXMLFile);
                     });
@@ -1807,6 +1807,20 @@ HTMLOut.prototype.getMarkdownFile = function(sFile, sToken, sIndent, aParms, sPr
                 if (match) sTitle = match[1];
                 obj.sHTML = obj.sHTML.replace(/(<title[^>]*>)([^|]*)\|[^<]*(<\/title>)/, "$1$2| " + sTitle + "$3");
             }
+
+            /*
+             * Similarly, if the Markdown document contains any style definitions, we "paste" them in now.
+             */
+            var aStyleDefs = m.getStyles();
+            if (aStyleDefs) {
+                var sStyles = '<style type="text/css">\n';
+                for (var id in aStyleDefs) {
+                    sStyles += '#' + id + ' {\n' + aStyleDefs[id] + '\n}\n';
+                }
+                sStyles += '</style>\n';
+                obj.sHTML = obj.sHTML.replace(/([ \t]*<\/head>)/, sStyles + "$1");
+            }
+
             /*
              * We need to query the MarkOut object for any machine definitions that the current Markdown
              * document contained and give them to processMachines(), so that any associated scripts can
@@ -1938,7 +1952,7 @@ HTMLOut.prototype.processMachines = function(aMachines, buildOptions, done)
         }
 
         var asFiles = [];
-        if (fCompiled && sType != "Machine") {
+        if (fCompiled && infoMachine['xml'] != "{}") {
             var sScriptName = sType.toLowerCase();
             var sScriptFile = sScriptName + (fDebugger? "-dbg" : "") + ".js";
             var sScriptFolder = sScriptName == "c1p"? "c1pjs" : (sScriptName.substr(0, 3) == "pdp"? "pdpjs" : sScriptName);

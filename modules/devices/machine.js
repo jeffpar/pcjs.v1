@@ -39,6 +39,10 @@ class Machine extends Control {
      * Sample config:
      *
      *    {
+     *      "chip": {
+     *        "class": "Chip",
+     *        "type": "TMS-1500"
+     *      },
      *      "clock": {
      *        "class": "Time",
      *        "cyclesPerSecond": 1600000
@@ -116,6 +120,9 @@ class Machine extends Control {
                 let sClass = config['class'], control;
                 if (sClass != Machine.CLASSORDER[iClass]) continue;
                 switch (sClass) {
+                case Machine.CLASS.CHIP:
+                    control = new Chip(this.idMachine, idControl, config);
+                    break;
                 case Machine.CLASS.INPUT:
                     control = new Input(this.idMachine, idControl, config);
                     break;
@@ -135,6 +142,7 @@ class Machine extends Control {
 }
 
 Machine.CLASS = {
+    CHIP:       "Chip",
     INPUT:      "Input",
     LED:        "LED",
     ROM:        "ROM",
@@ -142,5 +150,9 @@ Machine.CLASS = {
 };
 
 Machine.CLASSORDER = [
-    "Time", "LED", "Input", "ROM"
+    Machine.CLASS.TIME,
+    Machine.CLASS.LED,
+    Machine.CLASS.INPUT,
+    Machine.CLASS.ROM,
+    Machine.CLASS.CHIP
 ];

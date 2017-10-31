@@ -657,11 +657,7 @@ class Time extends Control {
     {
         this.idRunTimeout = 0;
         if (!this.fRunning) return;
-        /*
-         *  calcStartTime() initializes the cycle counter and timestamp for this run() invocation.
-         */
         this.calcStartTime();
-
         try {
             this.fYield = false;
             do {
