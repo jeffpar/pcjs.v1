@@ -76,16 +76,25 @@ class Time extends Control {
     constructor(idMachine, idControl, config)
     {
         super(idMachine, idControl, config);
-        let time = this;
         this.nCyclesPerSecond = config['cyclesPerSecond'] || 1600000;
+        this.nBaseMultiplier = this.nCurrentMultiplier = this.nTargetMultiplier = 1;
+        this.mhzBase = Math.round(this.nCyclesPerSecond / 10000) / 100;
+        this.mhzCurrent = this.mhzTarget = this.mhzBase * this.nTargetMultiplier;
+        this.nYields = 0;
         this.msYield = Math.round(1000 / Time.YIELDS_PER_SECOND);
         this.aTimers = [];
         this.fRunning = this.fYield = false;
         this.idRunTimeout = 0;
         this.onRunTimeout = this.run.bind(this);
+        let time = this;
         this.timerYield = this.addTimer(function() {
             time.fYield = true;
+            if (++time.nYields == Time.YIELDS_PER_SECOND) {
+                time.nYields = 0;
+                time.updateStatus();
+            }
         }, this.msYield);
+        this.resetSpeed();
     }
 
     /**
@@ -143,7 +152,7 @@ class Time extends Control {
         if (!nMultiplier || nMultiplier > this.nTargetMultiplier) {
             nMultiplier = this.nTargetMultiplier;
         }
-        this.nCyclesPerYield = Math.floor(this.nCycles / Time.YIELDS_PER_SECOND * nMultiplier);
+        this.nCyclesPerYield = Math.floor(this.nCyclesPerSecond / Time.YIELDS_PER_SECOND * nMultiplier);
         this.nCurrentMultiplier = nMultiplier;
     }
 
@@ -204,22 +213,6 @@ class Time extends Control {
     }
 
     /**
-     * resetCycles()
-     *
-     * Resets speed and cycle information as part of any reset() or restore(); this typically occurs during powerUp().
-     * It's important that this be called BEFORE the actual restore() call, because restore() may want to call setSpeed(),
-     * which in turn assumes that all the cycle counts have been initialized to sensible values.
-     *
-     * @this {Time}
-     */
-    resetCycles()
-    {
-        this.nCyclesTotal = this.nCyclesRun = this.nCyclesBurst = this.nCyclesRemain = 0;
-        this.resetChecksum();
-        this.setSpeed(this.nBaseMultiplier);
-    }
-
-    /**
      * getSpeed()
      *
      * @this {Time}
@@ -276,7 +269,7 @@ class Time extends Control {
                 nMultiplier = this.nBaseMultiplier;
                 fSuccess = false;
             }
-            this.mhzCurrent = 0;
+            // this.mhzCurrent = 0;
             this.nTargetMultiplier = nMultiplier;
             let mhzTarget = this.mhzBase * this.nTargetMultiplier;
             if (this.mhzTarget != mhzTarget) {
@@ -285,10 +278,25 @@ class Time extends Control {
             }
         }
         this.nCyclesRun = 0;
-        this.msStartRun = this.msEndThisRun = 0;
+        this.msStartRun = this.msEndRun = 0;
         this.calcCycles();      // calculate a new value for the current cycle multiplier
         this.resetTimers();     // and then update all the fixed-period timers using the new cycle multiplier
         return fSuccess;
+    }
+
+    /**
+     * resetSpeed()
+     *
+     * Resets speed and cycle information as part of any reset() or restore(); this typically occurs during powerUp().
+     * It's important that this be called BEFORE the actual restore() call, because restore() may want to call setSpeed(),
+     * which in turn assumes that all the cycle counts have been initialized to sensible values.
+     *
+     * @this {Time}
+     */
+    resetSpeed()
+    {
+        this.nCyclesTotal = this.nCyclesRun = this.nCyclesBurst = this.nCyclesRemain = 0;
+        this.setSpeed(this.nBaseMultiplier);
     }
 
     /**
@@ -321,9 +329,7 @@ class Time extends Control {
         this.nCyclesThisRun = 0;
         this.msOutsideThisRun = 0;
         this.msStartThisRun = Date.now();
-        if (!this.msStartRun) {
-            this.msStartRun = this.msStartThisRun;
-        }
+        if (!this.msStartRun) this.msStartRun = this.msStartThisRun;
 
         /*
          * Try to detect situations where the browser may have throttled us, such as when the user switches
@@ -334,16 +340,16 @@ class Time extends Control {
          * but there can still be enough of a lag between the callbacks that speed will be noticeably
          * erratic if we don't compensate for it here.
          *
-         * We can detect throttling/lagging by verifying that msEndThisRun (which was set at the end of the
+         * We can detect throttling/lagging by verifying that msEndRun (which was set at the end of the
          * previous run and includes any requested sleep time) is comparable to the current msStartThisRun;
          * if the delta is significant, we compensate by bumping msStartRun forward by that delta.
          *
          * This shouldn't be triggered when the Debugger stops time, because setSpeed() -- which is called
-         * whenever the time starts again -- zeroes msEndThisRun.
+         * whenever the time starts again -- zeroes msEndRun.
          */
         let msDelta = 0;
-        if (this.msEndThisRun) {
-            msDelta = this.msStartThisRun - this.msEndThisRun;
+        if (this.msEndRun) {
+            msDelta = this.msStartThisRun - this.msEndRun;
             if (msDelta > this.msYield) {
                 this.msStartRun += msDelta;
                 /*
@@ -367,7 +373,7 @@ class Time extends Control {
      */
     calcRemainingTime()
     {
-        this.msEndThisRun = Date.now();
+        this.msEndRun = Date.now();
 
         if (this.msOutsideThisRun) {
             this.msStartRun += this.msOutsideThisRun;
@@ -384,19 +390,11 @@ class Time extends Control {
             msYield = Math.round(msYield * this.nCyclesThisRun / this.nCyclesPerYield);
         }
 
-        let msElapsedThisRun = this.msEndThisRun - this.msStartThisRun;
+        let msElapsedThisRun = this.msEndRun - this.msStartThisRun;
         let msRemainsThisRun = msYield - msElapsedThisRun;
 
-        /*
-         * We could pass only "this run" results to calcSpeed():
-         *
-         *      nCycles = this.nCyclesThisRun;
-         *      msElapsed = msElapsedThisRun;
-         *
-         * but it seems preferable to use longer time periods and hopefully get a more accurate speed.
-         */
         let nCycles = this.nCyclesRun;
-        let msElapsed = this.msEndThisRun - this.msStartRun;
+        let msElapsed = this.msEndRun - this.msStartRun;
 
         if (DEBUG && msRemainsThisRun < 0 && this.nTargetMultiplier > 1) {
             this.println("warning: updates @" + msElapsedThisRun + "ms (prefer " + Math.round(msYield) + "ms)");
@@ -415,8 +413,8 @@ class Time extends Control {
             }
             /*
              * If the last burst took MORE time than we allotted (ie, it's taking more than 1 second to simulate
-             * nBaseCyclesPerSecond), all we can do is yield for as little time as possible (ie, 0ms) and hope
-             * that the simulation is at least usable.
+             * nCyclesPerSecond), all we can do is yield for as little time as possible (ie, 0ms) and hope that the
+             * simulation is at least usable.
              */
             msRemainsThisRun = 0;
         }
@@ -424,7 +422,7 @@ class Time extends Control {
             msRemainsThisRun = 0;
         }
 
-        this.msEndThisRun += msRemainsThisRun;
+        this.msEndRun += msRemainsThisRun;
 
         return msRemainsThisRun;
     }
@@ -542,7 +540,7 @@ class Time extends Control {
      */
     getMSCycles(ms)
     {
-        return ((this.nCycles * this.nCurrentMultiplier) / 1000 * ms)|0;
+        return ((this.nCyclesPerSecond * this.nCurrentMultiplier) / 1000 * ms)|0;
     }
 
     /**
@@ -626,7 +624,7 @@ class Time extends Control {
         /*
          * Work happens here...
          */
-        this.nCyclyesRemain = 0;
+        this.nCyclesRemain = 0;
 
         return this.nCyclesBurst - this.nCyclesRemain;
     }
@@ -677,7 +675,6 @@ class Time extends Control {
         }
         catch (e) {
             this.stop();
-            // this.update();
             return;
         }
         if (this.fRunning) {
@@ -703,7 +700,8 @@ class Time extends Control {
             this.idRunTimeout = 0;
         }
         this.fRunning = true;
-        this.updateBindingText(Time.BINDING.RUN, "Halt");
+        this.msStartRun = this.msEndRun = 0;
+        this.updateStatus();
         this.assert(!this.idRunTimeout);
         this.idRunTimeout = setTimeout(this.onRunTimeout, 0);
         return true;
@@ -721,7 +719,7 @@ class Time extends Control {
         if (this.fRunning) {
             this.fRunning = false;
             this.endBurst();
-            this.updateBindingText(Time.BINDING.RUN, "Run");
+            this.updateStatus();
             fStopped = true;
         }
         return fStopped;
@@ -746,6 +744,19 @@ class Time extends Control {
             return true;
         }
         return false;
+    }
+
+    /**
+     * updateStatus()
+     *
+     * Used for both periodic status updates and forced updates (eg, on start() and stop() calls)
+     *
+     * @this {Time}
+     */
+    updateStatus()
+    {
+        this.updateBindingText(Time.BINDING.RUN, this.fRunning? "Halt" : "Run");
+        this.updateBindingText(Time.BINDING.SPEED, this.getSpeedCurrent());
     }
 }
 

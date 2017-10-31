@@ -13,7 +13,8 @@ machines:
           "cyclesPerSecond": 1600000,
           "bindings": {
             "run": "runTI57",
-            "print": "printTI57"
+            "print": "printTI57",
+            "speed": "speedTI57"
           }
         },
         "display": {
@@ -200,5 +201,5 @@ TI-57 Test Page
     <p>Status Window</p>
     <textarea id="printTI57" cols="80" rows="10" style="font-family:Monaco,'Lucida Console',monospace;"></textarea>
   </div>
-  <button id="runTI57">Run</button>
+  <button id="runTI57">Run</button><span id="speedTI57">Stopped</span>
 </div>

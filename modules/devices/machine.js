@@ -104,7 +104,7 @@ class Machine extends Control {
      * initDevices()
      *
      * Initializes devices in the proper order.  For example, any Time devices should be initialized first,
-     * to ensure that timer services are available.
+     * to ensure that their timer services are available to other devices.
      *
      * @this {Machine}
      */

@@ -182,22 +182,19 @@ class Input extends Control {
      */
     onKeyPress(ch)
     {
-        if (!this.keyPressed) {
-            for (let row = 0; row < this.config.map.length; row++) {
-                let rowMap = this.config.map[row];
-                for (let col = 0; col < rowMap.length; col++) {
-                    if (ch == rowMap[col]) {
-                        this.keyPressed = ch;
-                        this.setInput(col, row);
-                        this.time.setTimer(this.timerKeyRelease, 200);
-                        return;
-                    }
+        this.onKeyRelease();
+        for (let row = 0; row < this.config.map.length; row++) {
+            let rowMap = this.config.map[row];
+            for (let col = 0; col < rowMap.length; col++) {
+                if (ch == rowMap[col]) {
+                    this.keyPressed = ch;
+                    this.setInput(col, row);
+                    this.time.setTimer(this.timerKeyRelease, 200);
+                    return;
                 }
             }
-            this.println("key not recognized: " + ch);
-            return;
         }
-        this.println("too many keys pressed, ignoring key: " + ch);
+        this.println("key not recognized: " + ch);
     }
 
     /**
