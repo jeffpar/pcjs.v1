@@ -220,8 +220,7 @@ class Time extends Device {
         this.nCyclesBurst = this.nCyclesRemain = nCycles;
         while (this.nCyclesRemain > 0) {
             for (let i = 0; i < this.aClockers.length; i++) {
-                let nCycles = this.aClockers[i]() || 1;
-                this.nCyclesRemain -= nCycles;
+                this.nCyclesRemain -= (this.aClockers[i]() || 1);
             }
         }
         return this.nCyclesBurst - this.nCyclesRemain;
@@ -328,9 +327,7 @@ class Time extends Device {
      */
     getSpeedTarget()
     {
-        let sSpeed = this.mhzTarget.toFixed(2) + "Mhz";
-        this.println("target speed: " + sSpeed);
-        return sSpeed;
+        return this.mhzTarget.toFixed(2) + "Mhz";
     }
 
     /**
@@ -596,7 +593,7 @@ class Time extends Device {
         }
         this.fRunning = true;
         this.msStartRun = this.msEndRun = 0;
-        this.updateStatus();
+        this.updateStatus(true);
         this.assert(!this.idRunTimeout);
         this.idRunTimeout = setTimeout(this.onRunTimeout, 0);
         return true;
@@ -614,21 +611,23 @@ class Time extends Device {
         if (this.fRunning) {
             this.fRunning = false;
             this.endBurst();
-            this.updateStatus();
+            this.updateStatus(true);
             fStopped = true;
         }
         return fStopped;
     }
 
     /**
-     * updateStatus()
+     * updateStatus(fForced)
      *
      * Used for both periodic status updates and forced updates (eg, on start() and stop() calls)
      *
      * @this {Time}
+     * @param {boolean} fForced
      */
-    updateStatus()
+    updateStatus(fForced)
     {
+        if (fForced) this.println(this.fRunning? ("starting (target speed: " + this.getSpeedTarget() + ")") : "stopping");
         this.updateBindingText(Time.BINDING.RUN, this.fRunning? "Halt" : "Run");
         this.updateBindingText(Time.BINDING.SPEED, this.getSpeedCurrent());
     }

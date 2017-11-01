@@ -39,6 +39,14 @@ class Machine extends Device {
      * Sample config:
      *
      *    {
+     *      "ti57": {
+     *        "class": "Machine",
+     *        "type": "TI57",
+     *        "name": "TI-57 Programmable Calculator Simulation",
+     *        "bindings": {
+     *          "print": "printTI57"
+     *        }
+     *      },
      *      "chip": {
      *        "class": "Chip",
      *        "type": "TMS-1500"
@@ -48,7 +56,7 @@ class Machine extends Device {
      *        "cyclesPerSecond": 1600000
      *        "bindings": {
      *          "run": "runTI57",
-     *          "print": "printTI57"
+     *          "speed": "speedTI57"
      *        }
      *      },
      *      "display": {
@@ -84,6 +92,7 @@ class Machine extends Device {
         super(idMachine);
         try {
             this.config = JSON.parse(sConfig);
+            this.addBindings(this.config[idMachine].bindings);
         } catch(err) {
             let sError = err.message;
             let match = sError.match(/position ([0-9]+)/);
@@ -135,7 +144,16 @@ class Machine extends Device {
                 case Machine.CLASS.TIME:
                     device = new Time(this.idMachine, idDevice, config);
                     break;
+                case Machine.CLASS.MACHINE:
+                    this.println(config.name);
+                    this.println(Machine.COPYRIGHT);
+                    this.println(Machine.LICENSE);
+                    continue;
+                default:
+                    this.println("unrecognized device class: " + sClass);
+                    continue;
                 }
+                this.println(sClass + " device initialized");
             }
         }
     }
@@ -145,14 +163,19 @@ Machine.CLASS = {
     CHIP:       "Chip",
     INPUT:      "Input",
     LED:        "LED",
+    MACHINE:    "Machine",
     ROM:        "ROM",
     TIME:       "Time"
 };
 
 Machine.CLASSORDER = [
+    Machine.CLASS.MACHINE,
     Machine.CLASS.TIME,
     Machine.CLASS.LED,
     Machine.CLASS.INPUT,
     Machine.CLASS.ROM,
     Machine.CLASS.CHIP
 ];
+
+Machine.COPYRIGHT = "Copyright © 2012-2017 Jeff Parsons <Jeff@pcjs.org>";
+Machine.LICENSE = "License: GPL version 3 or later <http://gnu.org/licenses/gpl.html>";

@@ -103,14 +103,15 @@ class Device {
     }
 
     /**
-     * addBindings()
+     * addBindings(bindings)
      *
      * @this {Device}
+     * @param {Object} [bindings]
      */
-    addBindings()
+    addBindings(bindings)
     {
         this.bindings = {};
-        let bindings = this.config.bindings;
+        bindings = bindings || this.config.bindings;
         for (let binding in bindings) {
             let id = bindings[binding];
             let element = document.getElementById(id);

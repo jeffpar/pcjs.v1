@@ -424,7 +424,7 @@ class Input extends Device {
             this.row = row;
             this.col = col;
             if (DEBUG) {
-                this.println("input: col=" + col + ", row=" + row);
+                // this.println("input: col=" + col + ", row=" + row);
                 let led = /** @type {LED} */ (this.findDeviceByClass(Machine.CLASS.LED));
                 if (led) {
                     led.clearGrid();

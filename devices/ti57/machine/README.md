@@ -8,6 +8,14 @@ machines:
     name: TI-57 Programmable Calculator
     config: |
       {
+        "ti57": {
+          "class": "Machine",
+          "type": "TI57",
+          "name": "TI-57 Programmable Calculator Simulation",
+          "bindings": {
+            "print": "printTI57"
+          }
+        },
         "chip": {
           "class": "Chip",
           "type": "TMS-1500"
@@ -17,7 +25,6 @@ machines:
           "cyclesPerSecond": 1600000,
           "bindings": {
             "run": "runTI57",
-            "print": "printTI57",
             "speed": "speedTI57"
           }
         },
