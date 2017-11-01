@@ -69,17 +69,6 @@ class Time extends Device {
      *        }
      *      }
      *
-     * Example: The TI-57 has a standard cycle time of 0.625us.  Every set of four cycles is designated a
-     * "state time".  Within a single state time (2.5us), the four cycles are designated O1, P1, O2, and P2.
-     * Moreover, one state time is required to transfer 2 bits from a data word register.  Since a data word
-     * consists of 16 BCD digits, that's 64 bits, or 32 state times, or 80us.  That being the longest operation
-     * an instruction may perform, one instruction is typically 80us.  Exceptions include display instructions,
-     * which slow the delivery of cycles, such that one state time is 10us instead of 2.5us, and therefore the
-     * instruction takes 320us instead of 80us.
-     *
-     * All that being said, the smallest division of time we must be concerned with is the 0.625us cycle time,
-     * which means there are 1,600,000 cycles per second.
-     *
      * @this {Time}
      * @param {string} idMachine
      * @param {string} [idDevice]
@@ -231,8 +220,7 @@ class Time extends Device {
         this.nCyclesBurst = this.nCyclesRemain = nCycles;
         while (this.nCyclesRemain > 0) {
             for (let i = 0; i < this.aClockers.length; i++) {
-                let nCycles = this.aClockers[i]();
-                this.assert(nCycles);
+                let nCycles = this.aClockers[i]() || 1;
                 this.nCyclesRemain -= nCycles;
             }
         }

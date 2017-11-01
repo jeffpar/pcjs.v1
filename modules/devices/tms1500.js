@@ -197,12 +197,22 @@ class Chip extends Device {
     /**
      * clocker()
      *
+     * The TI-57 has a standard cycle time of 0.625us, which translates to 1,600,000 cycles per second.
      *
+     * Every set of four cycles is designated a "state time".  Within a single state time (2.5us), the four cycles
+     * are designated O1, P1, O2, and P2.  Moreover, one state time is required to transfer 2 bits from a data word
+     * register.  Since a data word consists of 16 BCD digits, that's 64 bits, or 32 state times, or 80us.  That being
+     * the longest operation an instruction may perform, one instruction is typically 80us.  Exceptions include display
+     * instructions, which slow the delivery of cycles, such that one state time is 10us instead of 2.5us, and
+     * therefore the instruction takes 320us instead of 80us.
+     *
+     * I'll start with the assumption that simulating a full 32 "state times", or 128 cycles, per call makes the most
+     * sense.  So that's what we'll do.
      *
      * @returns {number}
      */
     clocker()
     {
-        return 4;
+        return 128;
     }
 }
