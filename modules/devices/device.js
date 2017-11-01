@@ -142,6 +142,7 @@ class Device {
      * The Closure Compiler should automatically remove all references to assert() in non-DEBUG builds.
      * TODO: Add a task to the build process that "asserts" there are no instances of "assertion failure" in RELEASE builds.
      *
+     * @this {Device}
      * @param {boolean} f is the expression we are asserting to be true
      * @param {string} [s] is description of the assertion on failure
      */
@@ -165,7 +166,7 @@ class Device {
      * @this {Device}
      * @param {string} name
      * @param {boolean} [fAll]
-     * @return {HTMLElement|null|undefined}
+     * @returns {HTMLElement|null|undefined}
      */
     findBinding(name, fAll = false)
     {
@@ -187,7 +188,7 @@ class Device {
      *
      * @this {Device}
      * @param {string} idDevice
-     * @return {Device|undefined}
+     * @returns {Device|undefined}
      */
     findDevice(idDevice)
     {
@@ -209,7 +210,7 @@ class Device {
      *
      * @this {Device}
      * @param {string} idClass
-     * @return {Device|undefined}
+     * @returns {Device|undefined}
      */
     findDeviceByClass(idClass)
     {
@@ -295,7 +296,7 @@ class Device {
      * @this {Device}
      * @param {string} format
      * @param {...} args
-     * @return {string}
+     * @returns {string}
      */
     sprintf(format, ...args)
     {

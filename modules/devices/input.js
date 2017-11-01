@@ -415,6 +415,7 @@ class Input extends Device {
     /**
      * setInput(col, row)
      *
+     * @this {Input}
      * @param {number} col
      * @param {number} row
      */
