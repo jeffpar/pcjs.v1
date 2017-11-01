@@ -1,5 +1,5 @@
 /**
- * @fileoverview Base class for all generic controls
+ * @fileoverview Base class for all generic devices
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © Jeff Parsons 2012-2017
  *
@@ -32,7 +32,7 @@ var DEBUG = true;
 
 /**
  *
- * The following properties are the minimum set of properties we expect a Control's config object to
+ * The following properties are the minimum set of properties we expect a Device's config object to
  * contain.  Classes will generally define their own extended version (eg, LEDConfig, InputConfig, etc).
  *
  * @typedef {Object} Config
@@ -41,17 +41,17 @@ var DEBUG = true;
  */
 
 /**
- * @class {Control}
+ * @class {Device}
  * @unrestricted
  * @property {string} idMachine
- * @property {string} idControl
+ * @property {string} idDevice
  * @property {Config} config
  * @property {string} printCategory
  * @property {Object} bindings [added by addBindings()]
  */
-class Control {
+class Device {
     /**
-     * Control()
+     * Device()
      *
      * Supported config properties:
      *
@@ -62,32 +62,32 @@ class Control {
      * but only for DOM elements that actually exist, and it is the elements themselves (rather than their IDs)
      * that we store.
      *
-     * @this {Control}
+     * @this {Device}
      * @param {string} idMachine
-     * @param {string} [idControl]
+     * @param {string} [idDevice]
      * @param {Object} [config]
      */
-    constructor(idMachine, idControl, config)
+    constructor(idMachine, idDevice, config)
     {
         this.config = config || {};
         this.idMachine = idMachine;
-        this.idControl = idControl || idMachine;
+        this.idDevice = idDevice || idMachine;
         this.printCategory = "";
-        this.addControl();
+        this.addDevice();
         this.addBindings();
     }
 
     /**
      * addBinding(binding, element)
      *
-     * @this {Control}
+     * @this {Device}
      * @param {string} binding
      * @param {HTMLElement} element
      */
     addBinding(binding, element)
     {
         switch(binding) {
-        case Control.BINDING.PRINT:
+        case Device.BINDING.PRINT:
             if (!this.bindings[binding]) {
                 let elementTextArea = /** @type {HTMLTextAreaElement} */ (element);
                 this.bindings[binding] = elementTextArea;
@@ -106,7 +106,7 @@ class Control {
     /**
      * addBindings()
      *
-     * @this {Control}
+     * @this {Device}
      */
     addBindings()
     {
@@ -118,20 +118,20 @@ class Control {
             if (element) {
                 this.addBinding(binding, element);
             } else {
-                this.println("unable to find control ID: " + id);
+                this.println("unable to find device ID: " + id);
             }
         }
     }
 
     /**
-     * addControl()
+     * addDevice()
      *
-     * @this {Control}
+     * @this {Device}
      */
-    addControl()
+    addDevice()
     {
-        if (!Control.Machines[this.idMachine]) Control.Machines[this.idMachine] = [];
-        Control.Machines[this.idMachine].push(this);
+        if (!Device.Machines[this.idMachine]) Device.Machines[this.idMachine] = [];
+        Device.Machines[this.idMachine].push(this);
     }
 
     /**
@@ -159,10 +159,10 @@ class Control {
     /**
      * findBinding(name, fAll)
      *
-     * This will search the current control's bindings, and optionally all the control bindings within the
-     * machine.  If the binding is found in another control, that binding is recorded in this control as well.
+     * This will search the current device's bindings, and optionally all the device bindings within the
+     * machine.  If the binding is found in another device, that binding is recorded in this device as well.
      *
-     * @this {Control}
+     * @this {Device}
      * @param {string} name
      * @param {boolean} [fAll]
      * @return {HTMLElement|null|undefined}
@@ -171,9 +171,9 @@ class Control {
     {
         let element = this.bindings[name];
         if (element === undefined && fAll) {
-            let controls = Control.Machines[this.idMachine];
-            for (let i in controls) {
-                element = controls[i].bindings[name];
+            let devices = Device.Machines[this.idMachine];
+            for (let i in devices) {
+                element = devices[i].bindings[name];
                 if (element) break;
             }
             if (!element) element = null;
@@ -183,64 +183,64 @@ class Control {
     }
 
     /**
-     * findControl(idControl)
+     * findDevice(idDevice)
      *
-     * @this {Control}
-     * @param {string} idControl
-     * @return {Control|undefined}
+     * @this {Device}
+     * @param {string} idDevice
+     * @return {Device|undefined}
      */
-    findControl(idControl)
+    findDevice(idDevice)
     {
-        let control;
-        let controls = Control.Machines[this.idMachine];
-        if (controls) {
-            for (let i in controls) {
-                if (controls[i].idControl == idControl) {
-                    control = controls[i];
+        let device;
+        let devices = Device.Machines[this.idMachine];
+        if (devices) {
+            for (let i in devices) {
+                if (devices[i].idDevice == idDevice) {
+                    device = devices[i];
                     break;
                 }
             }
         }
-        return control;
+        return device;
     }
 
     /**
-     * findControlByClass(idClass)
+     * findDeviceByClass(idClass)
      *
-     * @this {Control}
+     * @this {Device}
      * @param {string} idClass
-     * @return {Control|undefined}
+     * @return {Device|undefined}
      */
-    findControlByClass(idClass)
+    findDeviceByClass(idClass)
     {
-        let control;
-        let controls = Control.Machines[this.idMachine];
-        if (controls) {
-            for (let i in controls) {
-                if (controls[i].config.class == idClass) {
-                    control = controls[i];
+        let device;
+        let devices = Device.Machines[this.idMachine];
+        if (devices) {
+            for (let i in devices) {
+                if (devices[i].config.class == idClass) {
+                    device = devices[i];
                     break;
                 }
             }
         }
-        return control;
+        return device;
     }
 
     /**
      * print(s, category)
      *
      * Both print() and println() support an optional category parameter, which if set, should be one
-     * of the values defined in Control.CATEGORY, and will suppress the print operation if the specified
+     * of the values defined in Device.CATEGORY, and will suppress the print operation if the specified
      * category isn't an active category.
      *
-     * @this {Control}
+     * @this {Device}
      * @param {string} s
      * @param {string} [category]
      */
     print(s, category)
     {
         if (!category || !this.printCategory || this.printCategory.indexOf(category) >= 0) {
-            let element = this.findBinding(Control.BINDING.PRINT, true);
+            let element = this.findBinding(Device.BINDING.PRINT, true);
             if (element) {
                 element.value += s;
                 /*
@@ -252,11 +252,11 @@ class Control {
             else {
                 let i = s.lastIndexOf('\n');
                 if (i >= 0) {
-                    console.log(Control.PrintBuffer + s.substr(0, i));
-                    Control.PrintBuffer = "";
+                    console.log(Device.PrintBuffer + s.substr(0, i));
+                    Device.PrintBuffer = "";
                     s = s.substr(i + 1);
                 }
-                Control.PrintBuffer += s;
+                Device.PrintBuffer += s;
             }
         }
     }
@@ -264,7 +264,7 @@ class Control {
     /**
      * println(s, category)
      *
-     * @this {Control}
+     * @this {Device}
      * @param {string} s
      * @param {string} [category]
      */
@@ -276,7 +276,7 @@ class Control {
     /**
      * printf(format, ...args)
      *
-     * @this {Control}
+     * @this {Device}
      * @param {string} format
      * @param {...} args
      */
@@ -291,7 +291,7 @@ class Control {
      * Copied from the CCjs project (/ccjs/lib/stdio.js) and extended.  Far from complete let alone sprintf-compatible,
      * but it's a start.
      *
-     * @this {Control}
+     * @this {Device}
      * @param {string} format
      * @param {...} args
      * @return {string}
@@ -353,7 +353,7 @@ class Control {
     /**
      * updateBindingText(name, text)
      *
-     * @this {Control}
+     * @this {Device}
      * @param {string} name
      * @param {string} text
      */
@@ -364,24 +364,24 @@ class Control {
     }
 }
 
-Control.BINDING = {
+Device.BINDING = {
     PRINT:  "print"
 };
 
-Control.CATEGORY = {
+Device.CATEGORY = {
     TIME:   "time"
 };
 
 /**
- * Machines is a global object whose properties are machine IDs and whose values are arrays of Controls.
+ * Machines is a global object whose properties are machine IDs and whose values are arrays of Devices.
  *
  * @type {Object}
  */
-Control.Machines = {};
+Device.Machines = {};
 
 /**
  * PrintBuffer is a global string that buffers partial lines for our print services when using console.log().
  *
  * @type {string}
  */
-Control.PrintBuffer = "";
+Device.PrintBuffer = "";

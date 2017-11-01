@@ -33,9 +33,9 @@
  * @unrestricted
  * @property {number} nCyclesPerSecond
  */
-class Time extends Control {
+class Time extends Device {
     /**
-     * Time(idMachine, idControl, config)
+     * Time(idMachine, idDevice, config)
      *
      * Sample config:
      *
@@ -70,12 +70,12 @@ class Time extends Control {
      *
      * @this {Time}
      * @param {string} idMachine
-     * @param {string} [idControl]
+     * @param {string} [idDevice]
      * @param {Object} [config]
      */
-    constructor(idMachine, idControl, config)
+    constructor(idMachine, idDevice, config)
     {
-        super(idMachine, idControl, config);
+        super(idMachine, idDevice, config);
         this.nCyclesPerSecond = config['cyclesPerSecond'] || 1600000;
         this.nBaseMultiplier = this.nCurrentMultiplier = this.nTargetMultiplier = 1;
         this.mhzBase = Math.round(this.nCyclesPerSecond / 10000) / 100;

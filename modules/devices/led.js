@@ -81,9 +81,9 @@
  *  container: HTMLElement|undefined
  * }} bindings
  */
-class LED extends Control {
+class LED extends Device {
     /**
-     * LED(idMachine, idControl, config)
+     * LED(idMachine, idDevice, config)
      *
      * Sample config:
      *
@@ -101,12 +101,12 @@ class LED extends Control {
      *
      * @this {LED}
      * @param {string} idMachine
-     * @param {string} [idControl]
+     * @param {string} [idDevice]
      * @param {LEDConfig} [config]
      */
-    constructor(idMachine, idControl, config)
+    constructor(idMachine, idDevice, config)
     {
-        super(idMachine, idControl, config);
+        super(idMachine, idDevice, config);
         let container = this.bindings.container;
         if (container) {
             let canvasView = /** @type {HTMLCanvasElement} */ (document.createElement("canvas"));

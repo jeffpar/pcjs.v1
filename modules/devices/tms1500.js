@@ -1,5 +1,5 @@
 /**
- * @fileoverview Simulates a TMS-1500
+ * @fileoverview Simulates a TMS-1500 Chip
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © Jeff Parsons 2012-2017
  *
@@ -34,17 +34,17 @@
  * @class {Reg64}
  * @unrestricted
  */
-class Reg64 extends Control {
+class Reg64 extends Device {
     /**
-     * Reg64(idMachine, idControl, config)
+     * Reg64(idMachine, idDevice, config)
      *
      * @this {Reg64}
      * @param {string} idMachine
-     * @param {string} [idControl]
+     * @param {string} [idDevice]
      * @param {Object} [config]
      */
-    constructor(idMachine, idControl, config) {
-        super(idMachine, idControl, config);
+    constructor(idMachine, idDevice, config) {
+        super(idMachine, idDevice, config);
         /*
          * Each Reg64 register contains 16 BCD/Hex digits, which we store as 16 independent 4-bit numbers.
          */
@@ -55,23 +55,31 @@ class Reg64 extends Control {
 /**
  * TMS-1500 Calculator Chip
  *
+ * This chip contains lots of small discrete devices, most of which will be emulated either within this
+ * class or within another small container class in the same file, because most of them are either very simple
+ * or have unique quirks, so it's not clear there's much reusability.
+ *
+ * One exception is the ROM, since ROMs are a very common device with very similar characteristics.  Since
+ * the Machine class guarantees that the Chip class is initialized after the ROM class, we can look it up in
+ * the constructor.
+ *
  * @class {Chip}
  * @unrestricted
  */
-class Chip extends Control {
+class Chip extends Device {
     /**
-     * Chip(idMachine, idControl, config)
+     * Chip(idMachine, idDevice, config)
      *
-     * Defines the basic components of the TMS-1500 chip, as illustrated by U.S. Patent No. 4,125,901, Fig. 3 (p. 4)
+     * Defines the basic devices of the TMS-1500 chip, as illustrated by U.S. Patent No. 4,125,901, Fig. 3 (p. 4)
      *
      * @this {Chip}
      * @param {string} idMachine
-     * @param {string} [idControl]
+     * @param {string} [idDevice]
      * @param {Object} [config]
      */
-    constructor(idMachine, idControl, config)
+    constructor(idMachine, idDevice, config)
     {
-        super(idMachine, idControl, config);
+        super(idMachine, idDevice, config);
         /*
          * Four (4) Operational Registers: A-D
          */
@@ -115,7 +123,7 @@ class Chip extends Control {
         this.regOut = 0;
         /*
          * The "Scan Generator Counter" is a 3-bit register.  It is updated once each instruction cycle.
-         * "[It] does not "count" sequentially, but during eight instruction cycle provides the three bit binary
+         * It "does not count sequentially, but during eight instruction cycle provides the three bit binary
          * representations of zero through seven."  Here's the sequence from "Reference A" of Fig. 11e:
          *
          *                 DECODE    DISP     KBD
@@ -147,7 +155,8 @@ class Chip extends Control {
          */
         this.regSegKbdScan = 0xff;
         /*
-         * The "Program Counter"
+         * The "Program Counter" is an 11-bit register that automatically increments unless a HOLD signal is
+         * applied, effectively locking execution on a single instruction.
          */
         this.regPC = 0;
         /*
@@ -159,5 +168,7 @@ class Chip extends Control {
          * Refer to patent Fig. 7a (p. 9)
          */
         this.regPCStack = [0,0,0];
+
+        this.rom = /** @type {ROM} */ (this.findDeviceByClass(Machine.CLASS.ROM));
     }
 }

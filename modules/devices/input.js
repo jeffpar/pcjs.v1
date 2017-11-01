@@ -45,9 +45,9 @@
  *  surface: HTMLImageElement|undefined
  * }} bindings
  */
-class Input extends Control {
+class Input extends Device {
     /**
-     * Input(idMachine, idControl, config)
+     * Input(idMachine, idDevice, config)
      *
      * Sample config:
      *
@@ -71,12 +71,12 @@ class Input extends Control {
      *
      * @this {Input}
      * @param {string} idMachine
-     * @param {string} [idControl]
+     * @param {string} [idDevice]
      * @param {LEDConfig} [config]
      */
-    constructor(idMachine, idControl, config)
+    constructor(idMachine, idDevice, config)
     {
-        super(idMachine, idControl, config);
+        super(idMachine, idDevice, config);
         let element = this.bindings.surface;
         if (element) {
             /*
@@ -130,7 +130,7 @@ class Input extends Control {
             this.xStart = this.yStart = -1;
 
             let input = this;
-            this.time = this.findControlByClass("Time");
+            this.time = this.findDeviceByClass(Machine.CLASS.TIME);
             if (this.time) {
                 this.timerKeyRelease = this.time.addTimer(function() {
                     input.onKeyRelease();
@@ -425,7 +425,7 @@ class Input extends Control {
             this.col = col;
             if (DEBUG) {
                 this.println("input: col=" + col + ", row=" + row);
-                let led = /** @type {LED} */ (this.findControl("display"));
+                let led = /** @type {LED} */ (this.findDeviceByClass(Machine.CLASS.LED));
                 if (led) {
                     led.clearGrid();
                     led.drawSymbol(col < 0? "-" : col.toString(), 9, 0);

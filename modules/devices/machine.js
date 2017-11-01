@@ -32,7 +32,7 @@
  * @class {Machine}
  * @unrestricted
  */
-class Machine extends Control {
+class Machine extends Device {
     /**
      * Machine(idMachine, sConfig)
      *
@@ -115,25 +115,25 @@ class Machine extends Control {
     initDevices()
     {
         for (let iClass = 0; iClass < Machine.CLASSORDER.length; iClass++) {
-            for (let idControl in this.config) {
-                let config = this.config[idControl];
-                let sClass = config['class'], control;
+            for (let idDevice in this.config) {
+                let config = this.config[idDevice];
+                let sClass = config['class'], device;
                 if (sClass != Machine.CLASSORDER[iClass]) continue;
                 switch (sClass) {
                 case Machine.CLASS.CHIP:
-                    control = new Chip(this.idMachine, idControl, config);
+                    device = new Chip(this.idMachine, idDevice, config);
                     break;
                 case Machine.CLASS.INPUT:
-                    control = new Input(this.idMachine, idControl, config);
+                    device = new Input(this.idMachine, idDevice, config);
                     break;
                 case Machine.CLASS.LED:
-                    control = new LED(this.idMachine, idControl, config);
+                    device = new LED(this.idMachine, idDevice, config);
                     break;
                 case Machine.CLASS.ROM:
-                    control = new ROM(this.idMachine, idControl, config);
+                    device = new ROM(this.idMachine, idDevice, config);
                     break;
                 case Machine.CLASS.TIME:
-                    control = new Time(this.idMachine, idControl, config);
+                    device = new Time(this.idMachine, idDevice, config);
                     break;
                 }
             }

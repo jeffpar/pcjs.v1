@@ -241,7 +241,7 @@
     "./modules/shared/lib/embed.js"
   ],
   "TI57Files": [
-    "./modules/devices/control.js",
+    "./modules/devices/device.js",
     "./modules/devices/input.js",
     "./modules/devices/led.js",
     "./modules/devices/rom.js",

@@ -32,9 +32,9 @@
  * @class {ROM}
  * @unrestricted
  */
-class ROM extends Control {
+class ROM extends Device {
     /**
-     * ROM(idMachine, idControl, config)
+     * ROM(idMachine, idDevice, config)
      *
      * Sample config:
      *
@@ -52,11 +52,11 @@ class ROM extends Control {
      *
      * @this {ROM}
      * @param {string} idMachine
-     * @param {string} [idControl]
+     * @param {string} [idDevice]
      * @param {Object} [config]
      */
-    constructor(idMachine, idControl, config)
+    constructor(idMachine, idDevice, config)
     {
-        super(idMachine, idControl, config);
+        super(idMachine, idDevice, config);
     }
 }
