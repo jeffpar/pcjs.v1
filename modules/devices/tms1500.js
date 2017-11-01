@@ -43,7 +43,8 @@ class Reg64 extends Device {
      * @param {string} [idDevice]
      * @param {Object} [config]
      */
-    constructor(idMachine, idDevice, config) {
+    constructor(idMachine, idDevice, config)
+    {
         super(idMachine, idDevice, config);
         /*
          * Each Reg64 register contains 16 BCD/Hex digits, which we store as 16 independent 4-bit numbers.
@@ -80,6 +81,7 @@ class Chip extends Device {
     constructor(idMachine, idDevice, config)
     {
         super(idMachine, idDevice, config);
+
         /*
          * Four (4) Operational Registers: A-D
          */
@@ -87,6 +89,7 @@ class Chip extends Device {
         for (let i = 0; i < 4; i++) {
             this.regsO[i] = new Reg64(idMachine, "Register " + String.fromCharCode(0x41+i));
         }
+
         /*
          * Eight (8) Storage Registers: X0-X7
          */
@@ -94,6 +97,7 @@ class Chip extends Device {
         for (let i = 0; i < 8; i++) {
             this.regsX[i] = new Reg64(idMachine, "Register X" + String.fromCharCode(0x30+i));
         }
+
         /*
          * Eight (8) Storage Registers: Y0-Y7
          */
@@ -101,12 +105,14 @@ class Chip extends Device {
         for (let i = 0; i < 8; i++) {
             this.regsY[i] = new Reg64(idMachine, "Register Y" + String.fromCharCode(0x30+i));
         }
+
         /*
          * RAB (Register Address Buffer) is a 3-bit register "selectively loadable by the I4-I6 bits of an
          * instruction word" and "also selectively loadable from the three least significant bits of the number
          * stored in R5 register".
          */
         this.regRAB = 0;
+
         /*
          * R5 is "an eight bit shift register which may be selectively loaded from either the serial output from
          * arithmetic unit" or "may be loaded on lines KR1-3 and KR5-7 via gates from keyboard logic (at which
@@ -114,6 +120,7 @@ class Chip extends Device {
          * code indicated in Table II)".
          */
         this.regR5 = 0;
+
         /*
          * The "Output Register" is twelve bit register, one bit for each digit of the display.  This essentially
          * provides column information for the LED display, while the next register (regSGC) provides row information.
@@ -121,6 +128,7 @@ class Chip extends Device {
          * Refer to patent Fig. 11c (p. 28)
          */
         this.regOut = 0;
+
         /*
          * The "Scan Generator Counter" is a 3-bit register.  It is updated once each instruction cycle.
          * It "does not count sequentially, but during eight instruction cycle provides the three bit binary
@@ -145,6 +153,7 @@ class Chip extends Device {
          * Refer to patent Fig. 11e (p. 30)
          */
         this.regScanGenCount = 0;
+
         /*
          * The "Segment/Keyboard Scan" is an 8-bit register "arranged as a ring counter for shifting a logical zero
          * to a different stage during each instruction cycle....  [It is] further interconnected with the RESET signal
@@ -154,11 +163,13 @@ class Chip extends Device {
          * Refer to patent Fig. 11b (p. 27)
          */
         this.regSegKbdScan = 0xff;
+
         /*
          * The "Program Counter" is an 11-bit register that automatically increments unless a HOLD signal is
          * applied, effectively locking execution on a single instruction.
          */
         this.regPC = 0;
+
         /*
          * The "Subroutine Stack".  "When an unconditional branch instruction is decoded by branch logic 32b, the
          * CALL signal goes to zero permitting the present ROM address plus one to be loaded into subroutine stack
@@ -169,6 +180,29 @@ class Chip extends Device {
          */
         this.regPCStack = [0,0,0];
 
+        /*
+         * Get access to the ROM device.
+         */
         this.rom = /** @type {ROM} */ (this.findDeviceByClass(Machine.CLASS.ROM));
+
+        /*
+         * Get access to the Time device, so we can give it our clocker() function.
+         */
+        this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
+        if (this.time) {
+            this.time.addClocker(this.clocker);
+        }
+    }
+
+    /**
+     * clocker()
+     *
+     *
+     *
+     * @returns {number}
+     */
+    clocker()
+    {
+        return 4;
     }
 }

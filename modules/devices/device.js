@@ -31,7 +31,6 @@
 var DEBUG = true;
 
 /**
- *
  * The following properties are the minimum set of properties we expect a Device's config object to
  * contain.  Classes will generally define their own extended version (eg, LEDConfig, InputConfig, etc).
  *
@@ -288,8 +287,9 @@ class Device {
     /**
      * sprintf(format, ...args)
      *
-     * Copied from the CCjs project (/ccjs/lib/stdio.js) and extended.  Far from complete let alone sprintf-compatible,
-     * but it's a start.
+     * Copied from the CCjs project (https://github.com/jeffpar/ccjs/blob/master/lib/stdio.js) and extended.
+     *
+     * Far from complete let alone sprintf-compatible, but it's a start.
      *
      * @this {Device}
      * @param {string} format

@@ -132,7 +132,7 @@ class Input extends Device {
             let input = this;
             this.time = this.findDeviceByClass(Machine.CLASS.TIME);
             if (this.time) {
-                this.timerKeyRelease = this.time.addTimer(function() {
+                this.timerKeyRelease = this.time.addTimer("timerKeyRelease", function() {
                     input.onKeyRelease();
                 });
                 this.keyPressed = null;
@@ -189,7 +189,7 @@ class Input extends Device {
                 if (ch == rowMap[col]) {
                     this.keyPressed = ch;
                     this.setInput(col, row);
-                    this.time.setTimer(this.timerKeyRelease, 200);
+                    this.time.setTimer(this.timerKeyRelease, Input.AUTORELEASE);
                     return;
                 }
             }
@@ -438,7 +438,9 @@ class Input extends Device {
 }
 
 Input.ACTION = {
-    PRESS:      1,      // eg, an action triggered by a 'mousedown' or 'touchstart' event
-    MOVE:       2,      // eg, an action triggered by a 'mousemove' or 'touchmove' event
-    RELEASE:    3       // eg, an action triggered by a 'mouseup' (or 'mouseout') or 'touchend' event
+    PRESS:      1,              // eg, an action triggered by a 'mousedown' or 'touchstart' event
+    MOVE:       2,              // eg, an action triggered by a 'mousemove' or 'touchmove' event
+    RELEASE:    3               // eg, an action triggered by a 'mouseup' (or 'mouseout') or 'touchend' event
 };
+
+Input.AUTORELEASE = 200;        // number of milliseconds to simulate the automatic release of a keyPress

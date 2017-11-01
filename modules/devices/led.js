@@ -43,14 +43,11 @@
  */
 
 /**
- * Provides support for a variety of LED types:
+ * The ultimate goal is to provide support for a variety of LED types, such as:
  *
  * 1) LED Light (single light)
  * 2) LED Array (two-dimensional)
  * 3) LED Digits (1 or more 7-segment digits)
- *
- * To prototype this, I want to be able to include "led.js" and call an interface with a JSON object
- * that describes the type, style (eg, round or square), color, and size.
  *
  * The initial goal is to generate a 12-element array of 7-segment LED digits.  The default width and height
  * of 96 and 128 match our internal cell size and yield an aspect ratio of 0.75.
@@ -58,7 +55,7 @@
  * We will need to create a canvas element inside the specified container element.  There must be interfaces
  * for enabling/disabling/toggling power to any combination of xSelect and ySelect.  There must also be a time
  * interface to indicate the passage of time, which should be called a minimum of every 1/60th of a second;
- * any addressable LED segment that was last toggled more than 1/60th second earlier will be blanked.
+ * any addressable LED segment that was last toggled more than 1/60th second earlier should be blanked.
  *
  * @class {LED}
  * @unrestricted
@@ -147,13 +144,15 @@ class LED extends Device {
                 /*
                  * Test code
                  */
-                this.clearGrid();
-                for (let iCol = 0; iCol < this.cols; iCol++) {
-                    for (let idSeg in LED.SEGMENT) {
-                        this.drawGridSegment(idSeg, iCol, 0);
+                if (DEBUG) {
+                    this.clearGrid();
+                    for (let iCol = 0; iCol < this.cols; iCol++) {
+                        for (let idSeg in LED.SEGMENT) {
+                            this.drawGridSegment(idSeg, iCol, 0);
+                        }
                     }
+                    this.drawGrid();
                 }
-                this.drawGrid();
             }
         }
     }

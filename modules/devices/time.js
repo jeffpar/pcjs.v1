@@ -29,6 +29,27 @@
 "use strict";
 
 /**
+ * Timer objects
+ *
+ * Operations that are cycle-driven (ie, that need to be "clocked") should define a clocker() function
+ * and install it with addClocker(); that's not what Timers are for.  Timers are used for operations that
+ * are supposed to occur after a certain amount of "real time" has elapsed (eg, key/button events that
+ * need to be timed-out after a predefined period, display refreshes that need to occur every 60hz, periodic
+ * yields to ensure that the browser remains responsive, etc).
+ *
+ * setTimer() is preferred over JavaScript's setTimeout(), because all our timers convert "real time" into
+ * cycle countdowns, which are effectively paused whenever cycle generation is paused (eg, when the Debugger
+ * halts execution).  Moreover, setTimeout() handlers only run after run() yields, which is far too granular
+ * for some devices (eg, when a serial port tries to simulate interrupts at 9600 baud).
+ *
+ * @typedef {Object} Timer
+ * @property {string} id
+ * @property {function()} callBack
+ * @property {number} msAuto
+ * @property {number} nCyclesLeft
+ */
+
+/**
  * @class {Time}
  * @unrestricted
  * @property {number} nCyclesPerSecond
@@ -48,25 +69,16 @@ class Time extends Device {
      *        }
      *      }
      *
-     * Example: The TI-57 has a standard cycle time of 0.625us.  Every set of four cycles
-     * is designated a "state time".  Within a single state time (2.5us), the four cycles are
-     * designated O1, P1, O2, and P2.  Moreover, one state time is required to transfer 2 bits
-     * from a data word register.  Since a data word consists of 16 BCD digits, that's 64 bits,
-     * or 32 state times, or 80us.  That being the longest operation an instruction may perform,
-     * one instruction is typically 80us.  Exceptions include display instructions, which slow
-     * the delivery of cycles, such that one state time is 10us instead of 2.5us, and therefore
-     * the instruction takes 320us instead of 80us.
+     * Example: The TI-57 has a standard cycle time of 0.625us.  Every set of four cycles is designated a
+     * "state time".  Within a single state time (2.5us), the four cycles are designated O1, P1, O2, and P2.
+     * Moreover, one state time is required to transfer 2 bits from a data word register.  Since a data word
+     * consists of 16 BCD digits, that's 64 bits, or 32 state times, or 80us.  That being the longest operation
+     * an instruction may perform, one instruction is typically 80us.  Exceptions include display instructions,
+     * which slow the delivery of cycles, such that one state time is 10us instead of 2.5us, and therefore the
+     * instruction takes 320us instead of 80us.
      *
-     * All that being said, the smallest division of time we must be concerned with is the 0.625us
-     * cycle time, which means there are 1,600,000 cycles per second.
-     *
-     * Other components that need to be aware of the passage of time can register a "refresh"
-     * function via addRefresh() (called with frequency REFRESHES_PER_SECOND), as well as a "timer"
-     * function via addTimer().  Timers can either be manually or automatically set to fire after
-     * a predetermined number of microseconds; at the point a timer is armed, the requested number
-     * of microseconds is converted to the number of cycles the machine is expected to process
-     * during that number of microseconds, and when that cycle count is exhausted, the timer
-     * function is called.
+     * All that being said, the smallest division of time we must be concerned with is the 0.625us cycle time,
+     * which means there are 1,600,000 cycles per second.
      *
      * @this {Time}
      * @param {string} idMachine
@@ -83,11 +95,12 @@ class Time extends Device {
         this.nYields = 0;
         this.msYield = Math.round(1000 / Time.YIELDS_PER_SECOND);
         this.aTimers = [];
+        this.aClockers = [];
         this.fRunning = this.fYield = false;
         this.idRunTimeout = 0;
         this.onRunTimeout = this.run.bind(this);
         let time = this;
-        this.timerYield = this.addTimer(function() {
+        this.timerYield = this.addTimer("timerYield", function() {
             time.fYield = true;
             if (++time.nYields == Time.YIELDS_PER_SECOND) {
                 time.nYields = 0;
@@ -140,6 +153,42 @@ class Time extends Device {
     }
 
     /**
+     * addClocker(clocker)
+     *
+     * @param {function()} clocker
+     */
+    addClocker(clocker)
+    {
+        this.aClockers.push(clocker);
+    }
+
+    /**
+     * addTimer(id, callBack, msAuto)
+     *
+     * Devices that want to have timers that fire after some number of milliseconds call addTimer() to create
+     * the timer, and then setTimer() when they want to arm it.  Alternatively, they can specify an automatic
+     * timeout value (in milliseconds) to have the timer fire automatically at regular intervals.  There is
+     * currently no removeTimer() because these are generally used for the entire lifetime of a device.
+     *
+     * A timer is initially dormant; dormant timers have a cycle count of -1 (although any negative number will
+     * suffice) and active timers have a non-negative cycle count.
+     *
+     * @this {Time}
+     * @param {string} id
+     * @param {function()} callBack
+     * @param {number} [msAuto] (if set, enables automatic setTimer calls)
+     * @return {number} timer index (1-based)
+     */
+    addTimer(id, callBack, msAuto = -1)
+    {
+        let nCyclesLeft = -1;
+        let iTimer = this.aTimers.length + 1;
+        this.aTimers.push({id, callBack, msAuto, nCyclesLeft});
+        if (msAuto >= 0) this.setTimer(iTimer, msAuto);
+        return iTimer;
+    }
+
+    /**
      * calcCycles()
      *
      * Calculate the maximum number of cycles we should attempt to process before the next yield.
@@ -157,16 +206,108 @@ class Time extends Device {
     }
 
     /**
-     * getCurrentCyclesPerSecond()
-     *
-     * This returns the current speed (ie, the actual cycles per second, according the current multiplier)
+     * calcSpeed(nCycles, msElapsed)
      *
      * @this {Time}
-     * @return {number}
+     * @param {number} nCycles
+     * @param {number} msElapsed
      */
-    getCurrentCyclesPerSecond()
+    calcSpeed(nCycles, msElapsed)
     {
-        return (this.nCyclesPerSecond * this.nCurrentMultiplier)|0;
+        if (msElapsed) {
+            this.mhzCurrent = Math.round(nCycles / (msElapsed * 10)) / 100;
+        }
+    }
+
+    /**
+     * doBurst()
+     *
+     * @this {Time}
+     * @param {number} nCycles
+     * @return {number} (number of cycles actually executed)
+     */
+    doBurst(nCycles)
+    {
+        this.nCyclesBurst = this.nCyclesRemain = nCycles;
+        while (this.nCyclesRemain > 0) {
+            for (let i = 0; i < this.aClockers.length; i++) {
+                let nCycles = this.aClockers[i]();
+                this.assert(nCycles);
+                this.nCyclesRemain -= nCycles;
+            }
+        }
+        return this.nCyclesBurst - this.nCyclesRemain;
+    }
+
+    /**
+     * doOutside(fn)
+     *
+     * Use this function to perform any work outside of normal time (eg, DOM updates),
+     * to prevent that work from disrupting our speed calculations.
+     *
+     * @this {Time}
+     * @param {function()} fn (should return true only if the function actually performed any work)
+     * @return {boolean}
+     */
+    doOutside(fn)
+    {
+        let msStart = Date.now();
+        if (fn()) {
+            let msStop = Date.now();
+            this.msOutsideThisRun += msStop - msStart;
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * endBurst()
+     *
+     * @this {Time}
+     * @return {number} (number of cycles executed in burst)
+     */
+    endBurst()
+    {
+        let nCycles = this.nCyclesBurst - this.nCyclesRemain;
+        this.nCyclesBurst = this.nCyclesRemain = 0;
+        this.nCyclesThisRun += nCycles;
+        this.nCyclesRun += nCycles;
+        if (!this.fRunning) this.nCyclesRun = 0;
+        return nCycles;
+    }
+
+    /**
+     * getCycles(ms)
+     *
+     * @this {Time}
+     * @param {number} ms
+     * @return {number} number of corresponding cycles
+     */
+    getCycles(ms)
+    {
+        return ((this.nCyclesPerSecond * this.nCurrentMultiplier) / 1000 * ms)|0;
+    }
+
+    /**
+     * getCyclesPerBurst()
+     *
+     * This tells us how many cycles to execute as a burst.
+     *
+     * @this {Time}
+     * @return {number} (the maximum number of cycles we should execute in the next burst)
+     */
+    getCyclesPerBurst()
+    {
+        let nCycles = this.getCycles(this.msYield);
+        for (let iTimer = this.aTimers.length; iTimer > 0; iTimer--) {
+            let timer = this.aTimers[iTimer-1];
+            this.assert(!isNaN(timer.nCyclesLeft));
+            if (timer.nCyclesLeft < 0) continue;
+            if (nCycles > timer.nCyclesLeft) {
+                nCycles = timer.nCyclesLeft;
+            }
+        }
+        return nCycles;
     }
 
     /**
@@ -202,6 +343,70 @@ class Time extends Device {
         let sSpeed = this.mhzTarget.toFixed(2) + "Mhz";
         this.println("target speed: " + sSpeed);
         return sSpeed;
+    }
+
+    /**
+     * resetSpeed()
+     *
+     * Resets speed and cycle information as part of any reset() or restore(); this typically occurs during powerUp().
+     * It's important that this be called BEFORE the actual restore() call, because restore() may want to call setSpeed(),
+     * which in turn assumes that all the cycle counts have been initialized to sensible values.
+     *
+     * @this {Time}
+     */
+    resetSpeed()
+    {
+        this.nCyclesRun = this.nCyclesBurst = this.nCyclesRemain = 0;
+        this.setSpeed(this.nBaseMultiplier);
+    }
+
+    /**
+     * resetTimers()
+     *
+     * When the target speed multiplier is altered, it's a good idea to run through all the timers that
+     * have a fixed millisecond period and re-arm them, because the timers are using cycle counts that were based
+     * on a previous multiplier.
+     *
+     * @this {Time}
+     */
+    resetTimers()
+    {
+        for (let iTimer = this.aTimers.length; iTimer > 0; iTimer--) {
+            let timer = this.aTimers[iTimer-1];
+            if (timer.msAuto >= 0) this.setTimer(iTimer, timer.msAuto, true);
+        }
+    }
+
+    /**
+     * run()
+     *
+     * @this {Time}
+     */
+    run()
+    {
+        this.idRunTimeout = 0;
+        if (!this.fRunning) return;
+        this.snapStart();
+        try {
+            this.fYield = false;
+            do {
+                /*
+                 * Execute the burst and then update all timers.
+                 */
+                this.doBurst(this.getCyclesPerBurst());
+                this.updateTimers(this.endBurst());
+
+            } while (this.fRunning && !this.fYield);
+        }
+        catch(err) {
+            this.println(err.message);
+            this.stop();
+            return;
+        }
+        if (this.fRunning) {
+            this.assert(!this.idRunTimeout);
+            this.idRunTimeout = setTimeout(this.onRunTimeout, this.snapStop());
+        }
     }
 
     /**
@@ -242,40 +447,45 @@ class Time extends Device {
     }
 
     /**
-     * resetSpeed()
+     * setTimer(iTimer, ms, fReset)
      *
-     * Resets speed and cycle information as part of any reset() or restore(); this typically occurs during powerUp().
-     * It's important that this be called BEFORE the actual restore() call, because restore() may want to call setSpeed(),
-     * which in turn assumes that all the cycle counts have been initialized to sensible values.
-     *
-     * @this {Time}
-     */
-    resetSpeed()
-    {
-        this.nCyclesRun = this.nCyclesBurst = this.nCyclesRemain = 0;
-        this.setSpeed(this.nBaseMultiplier);
-    }
-
-    /**
-     * calcSpeed(nCycles, msElapsed)
+     * Using the timer index from a previous addTimer() call, this sets that timer to fire after the
+     * specified number of milliseconds.
      *
      * @this {Time}
-     * @param {number} nCycles
-     * @param {number} msElapsed
+     * @param {number} iTimer
+     * @param {number} ms (converted into a cycle countdown internally)
+     * @param {boolean} [fReset] (true if the timer should be reset even if already armed)
+     * @return {number} (number of cycles used to arm timer, or -1 if error)
      */
-    calcSpeed(nCycles, msElapsed)
+    setTimer(iTimer, ms, fReset)
     {
-        if (msElapsed) {
-            this.mhzCurrent = Math.round(nCycles / (msElapsed * 10)) / 100;
+        let nCycles = -1;
+        if (iTimer > 0 && iTimer <= this.aTimers.length) {
+            let timer = this.aTimers[iTimer-1];
+            if (fReset || timer.nCyclesLeft < 0) {
+                nCycles = this.getCycles(ms);
+                /*
+                 * If we're currently executing a burst of cycles, the number of cycles it has executed in
+                 * that burst so far must NOT be charged against the cycle timeout we're about to set.  The simplest
+                 * way to resolve that is to immediately call endBurst() and bias the cycle timeout by the number
+                 * of cycles that the burst executed.
+                 */
+                if (this.fRunning) {
+                    nCycles += this.endBurst();
+                }
+                timer.nCyclesLeft = nCycles;
+            }
         }
+        return nCycles;
     }
 
     /**
-     * calcStartTime()
+     * snapStart()
      *
      * @this {Time}
      */
-    calcStartTime()
+    snapStart()
     {
         this.calcCycles();
 
@@ -319,12 +529,12 @@ class Time extends Device {
     }
 
     /**
-     * calcRemainingTime()
+     * snapStop()
      *
      * @this {Time}
      * @return {number}
      */
-    calcRemainingTime()
+    snapStop()
     {
         this.msEndRun = Date.now();
 
@@ -381,255 +591,6 @@ class Time extends Device {
     }
 
     /**
-     * addTimer(callBack, ms)
-     *
-     * Components that want to have timers that fire after some number of milliseconds call addTimer() to create
-     * the timer, and then setTimer() when they want to arm it.  Alternatively, they can specify an automatic timeout
-     * value (in milliseconds) to have the timer fire automatically at regular intervals.  There is currently
-     * no removeTimer() because these are generally used for the entire lifetime of a component.
-     *
-     * Internally, each timer entry is a preallocated Array with the following entries:
-     *
-     *      [0]: callback function
-     *      [1]: automatic setTimer value, if any, in milliseconds
-     *      [2]: countdown value, in cycles
-     *
-     * A timer is initially dormant; dormant timers have a countdown value of -1 (although any negative number
-     * will suffice) and active timers have a non-negative value.
-     *
-     * Why not use JavaScript's setTimeout() instead?  Good question.  For a good answer, see setTimer() below.
-     *
-     * @this {Time}
-     * @param {function()} callBack
-     * @param {number} [ms] (if set, enables automatic setTimer calls)
-     * @return {number} timer index
-     */
-    addTimer(callBack, ms = -1)
-    {
-        let iTimer = this.aTimers.length;
-        this.aTimers.push([callBack, ms, -1]);
-        if (ms >= 0) this.setTimer(iTimer, ms);
-        return iTimer;
-    }
-
-    /**
-     * setTimer(iTimer, ms, fReset)
-     *
-     * Using the timer index from a previous addTimer() call, this sets that timer to fire after the
-     * specified number of milliseconds.
-     *
-     * This is preferred over JavaScript's setTimeout(), because all our timers are effectively paused when
-     * time is paused (eg, when the Debugger halts execution).  Moreover, setTimeout() handlers only run after
-     * run() yields, which is far too granular for some components (eg, when the SerialPort tries to simulate
-     * interrupts at 9600 baud).
-     *
-     * Ideally, the only function that would use setTimeout() is run(), while the rest of the components
-     * use setTimer(); however, due to legacy code (ie, code that predates these functions) and/or laziness,
-     * that may not be the case.
-     *
-     * @this {Time}
-     * @param {number} iTimer
-     * @param {number} ms (converted into a cycle countdown internally)
-     * @param {boolean} [fReset] (true if the timer should be reset even if already armed)
-     * @return {number} (number of cycles used to arm timer, or -1 if error)
-     */
-    setTimer(iTimer, ms, fReset)
-    {
-        let nCycles = -1;
-        if (iTimer >= 0 && iTimer < this.aTimers.length) {
-            let timer = this.aTimers[iTimer];
-            if (fReset || timer[2] < 0) {
-                nCycles = this.getMSCycles(ms);
-                /*
-                 * If we're currently executing a burst of cycles, the number of cycles it has executed in
-                 * that burst so far must NOT be charged against the cycle timeout we're about to set.  The simplest
-                 * way to resolve that is to immediately call endBurst() and bias the cycle timeout by the number
-                 * of cycles that the burst executed.
-                 */
-                if (this.fRunning) {
-                    nCycles += this.endBurst();
-                }
-                timer[2] = nCycles;
-            }
-        }
-        return nCycles;
-    }
-
-    /**
-     * setTimerCycles(iTimer, nCycles)
-     *
-     * A cycle-based version of setTimer(), used to help wean components off of functions like setBurstCycles().
-     *
-     * @this {Time}
-     * @param {number} iTimer
-     * @param {number} nCycles
-     * @return {boolean}
-     */
-    setTimerCycles(iTimer, nCycles)
-    {
-        if (iTimer >= 0 && iTimer < this.aTimers.length) {
-            let timer = this.aTimers[iTimer];
-            /*
-             * If we're currently executing a burst of cycles, the number of cycles it has executed in
-             * that burst so far must NOT be charged against the cycle timeout we're about to set.  The simplest
-             * way to resolve that is to immediately call endBurst() and bias the cycle timeout by the number
-             * of cycles that the burst executed.
-             */
-            if (this.fRunning) {
-                nCycles += this.endBurst();
-            }
-            timer[2] = nCycles;
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * getMSCycles(ms)
-     *
-     * @this {Time}
-     * @param {number} ms
-     * @return {number} number of corresponding cycles
-     */
-    getMSCycles(ms)
-    {
-        return ((this.nCyclesPerSecond * this.nCurrentMultiplier) / 1000 * ms)|0;
-    }
-
-    /**
-     * getBurstCycles()
-     *
-     * This tells us how many cycles to execute as a burst.  The answer will always be less than
-     * getCurrentCyclesPerSecond(), because at the very least, our own timer fires more than once per second.
-     *
-     * @this {Time}
-     * @return {number} (the maximum number of cycles we should execute in the next burst)
-     */
-    getBurstCycles()
-    {
-        let nCycles = this.getCurrentCyclesPerSecond();
-        for (let iTimer = this.aTimers.length - 1; iTimer >= 0; iTimer--) {
-            let timer = this.aTimers[iTimer];
-            this.assert(!isNaN(timer[2]));
-            if (timer[2] < 0) continue;
-            if (nCycles > timer[2]) {
-                nCycles = timer[2];
-            }
-        }
-        return nCycles;
-    }
-
-    /**
-     * resetTimers()
-     *
-     * When the target speed multiplier is altered, it's a good idea to run through all the timers that
-     * have a fixed millisecond period and re-arm them, because the timers are using cycle counts that were based
-     * on a previous multiplier.
-     *
-     * @this {Time}
-     */
-    resetTimers()
-    {
-        for (let iTimer = this.aTimers.length - 1; iTimer >= 0; iTimer--) {
-            let timer = this.aTimers[iTimer];
-            if (timer[1] >= 0) this.setTimer(iTimer, timer[1], true);
-        }
-    }
-
-    /**
-     * updateTimers(nCycles)
-     *
-     * Used by run() to reduce all active timer countdown values by the number of cycles just executed;
-     * this is the function that actually "fires" any timer(s) whose countdown has reached (or dropped below)
-     * zero, invoking their callback function.
-     *
-     * @this {Time}
-     * @param {number} nCycles (number of cycles actually executed)
-     */
-    updateTimers(nCycles)
-    {
-        for (let iTimer = this.aTimers.length - 1; iTimer >= 0; iTimer--) {
-            let timer = this.aTimers[iTimer];
-            this.assert(!isNaN(timer[2]));
-            if (timer[2] < 0) continue;
-            timer[2] -= nCycles;
-            if (timer[2] <= 0) {
-                timer[2] = -1;      // zero is technically an "active" value, so ensure the timer is dormant now
-                timer[0]();         // safe to invoke the callback function now
-                if (timer[1] >= 0) {
-                    this.setTimer(iTimer, timer[1]);
-                }
-            }
-        }
-    }
-
-    /**
-     * doBurst()
-     *
-     * @this {Time}
-     * @param {number} nCycles
-     * @return {number} (number of cycles actually executed)
-     */
-    doBurst(nCycles)
-    {
-        this.nCyclesBurst = this.nCyclesRemain = nCycles;
-
-        /*
-         * Work happens here...
-         */
-        this.nCyclesRemain = 0;
-
-        return this.nCyclesBurst - this.nCyclesRemain;
-    }
-
-    /**
-     * endBurst()
-     *
-     * @this {Time}
-     * @return {number} (number of cycles executed in burst)
-     */
-    endBurst()
-    {
-        let nCycles = this.nCyclesBurst - this.nCyclesRemain;
-        this.nCyclesBurst = this.nCyclesRemain = 0;
-        this.nCyclesThisRun += nCycles;
-        this.nCyclesRun += nCycles;
-        if (!this.fRunning) this.nCyclesRun = 0;
-        return nCycles;
-    }
-
-    /**
-     * run()
-     *
-     * @this {Time}
-     */
-    run()
-    {
-        this.idRunTimeout = 0;
-        if (!this.fRunning) return;
-        this.calcStartTime();
-        try {
-            this.fYield = false;
-            do {
-                /*
-                 * Execute the burst and then update all timers.
-                 */
-                this.doBurst(this.getBurstCycles());
-                this.updateTimers(this.endBurst());
-
-            } while (this.fRunning && !this.fYield);
-        }
-        catch (e) {
-            this.stop();
-            return;
-        }
-        if (this.fRunning) {
-            this.assert(!this.idRunTimeout);
-            this.idRunTimeout = setTimeout(this.onRunTimeout, this.calcRemainingTime());
-        }
-    }
-
-    /**
      * start()
      *
      * @this {Time}
@@ -672,27 +633,6 @@ class Time extends Device {
     }
 
     /**
-     * outside(fn)
-     *
-     * Use this function to perform any work outside of normal time (eg, DOM updates),
-     * to prevent that work from disrupting our speed calculations.
-     *
-     * @this {Time}
-     * @param {function()} fn (should return true only if the function actually performed any work)
-     * @return {boolean}
-     */
-    outside(fn)
-    {
-        let msStart = Date.now();
-        if (fn()) {
-            let msStop = Date.now();
-            this.msOutsideThisRun += msStop - msStart;
-            return true;
-        }
-        return false;
-    }
-
-    /**
      * updateStatus()
      *
      * Used for both periodic status updates and forced updates (eg, on start() and stop() calls)
@@ -703,6 +643,33 @@ class Time extends Device {
     {
         this.updateBindingText(Time.BINDING.RUN, this.fRunning? "Halt" : "Run");
         this.updateBindingText(Time.BINDING.SPEED, this.getSpeedCurrent());
+    }
+
+    /**
+     * updateTimers(nCycles)
+     *
+     * Used by run() to reduce all active timer countdown values by the number of cycles just executed;
+     * this is the function that actually "fires" any timer(s) whose countdown has reached (or dropped below)
+     * zero, invoking their callback function.
+     *
+     * @this {Time}
+     * @param {number} nCycles (number of cycles actually executed)
+     */
+    updateTimers(nCycles)
+    {
+        for (let iTimer = this.aTimers.length; iTimer > 0; iTimer--) {
+            let timer = this.aTimers[iTimer-1];
+            this.assert(!isNaN(timer.nCyclesLeft));
+            if (timer.nCyclesLeft < 0) continue;
+            timer.nCyclesLeft -= nCycles;
+            if (timer.nCyclesLeft <= 0) {
+                timer.nCyclesLeft = -1; // zero is technically an "active" value, so ensure the timer is dormant now
+                timer.callBack();       // safe to invoke the callback function now
+                if (timer.msAuto >= 0) {
+                    this.setTimer(iTimer, timer.msAuto);
+                }
+            }
+        }
     }
 }
 

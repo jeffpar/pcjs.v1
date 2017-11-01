@@ -90,7 +90,7 @@ class Machine extends Device {
             if (match) {
                 sError += " ('" + sConfig.substr(+match[1], 40).replace(/\s+/g, ' ') + "...')";
             }
-            this.println("error: " + sError);
+            this.println(sError);
         }
         /*
          * Device initialization is now deferred until after the page is fully loaded, for the benefit
